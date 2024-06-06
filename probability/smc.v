@@ -184,71 +184,23 @@ Qed.
 
 End lemma_3_4.
 
-Section fdist_cond_prop_try.
-Variables (A B C D: finType) (P : R.-fdist A) (X: {RV P -> B}) (Y: {RV P -> C}) (Z: {RV P -> D}) (c : C) (d : D).
-                                                     
-Let E := finset (Y @^-1 c).
-
-Hypothesis E0 : Pr P E != 0.
-
-Let f : {ffun A -> R} := [ffun a : A => if a \in E then P a / Pr P E else 0 ].
-
-Let f0 a : 0 <= f a.
-Proof.
-rewrite ffunE.
-case: ifP.
-  rewrite divr_ge0 //.
-  by apply/RleP/Pr_ge0.
-done.
-Qed.
-
-Let f1 : \sum_(a in A) f a = 1.
-Proof.
-Admitted.
-
-
-Definition fdist_restricted : fdist R A := locked (FDist.make f0 f1).
-
-Variable (X': {RV (fdist_cond E0) -> B}).
-Variable (Z': {RV (fdist_cond E0) -> D}).
-
-Hypothesis EX' : X' = X.
-Check X'.
-Hypothesis EZ' : Z' = Z.
-
-Lemma fdist_restrictedE a : fdist_restricted a = if a \in E then P a / Pr P E else 0.
-Proof. by rewrite /fdist_restricted; unlock => /=; rewrite /f ffunE. Qed.
-
-Lemma Pr_fdist_cond_RV a : `Pr[ X' = a ] = `Pr[ X = a | Y = c ].
-Proof. by rewrite pr_eqE Pr_fdist_cond cpr_eqE' EX'.
-Qed.
-
-Lemma Pr_fdist_cond_cond x z : `Pr[ X' = x | Z' = z ] = `Pr[ X = x | [% Z', Y] = (z, c) ].
-Proof.
-Abort.
-
-(*
-Lemma fdist_restricted_condE a : fdist_cond E0 a = Pr fdist_restricted [set a].
-Proof. by rewrite /fdist_cond; unlock; rewrite ffunE. Qed.
-Abort.
-
-Lemma Pr_fdist_cond G : Pr (fdist_cond E0) G = `Pr_P [ G | E ].
-Proof.
-Abort.
-
-*)
-End fdist_cond_prop_try.
-
-Section fdist_cond_indep.
+Section fdist_cond_prop.
 Variables T TX TY TZ : finType.
 Variables (P : R.-fdist T) (y : TY).
 Variables (X : {RV P -> TX}) (Y : {RV P -> TY}) (Z : {RV P -> TZ}).
-Variable Z_XY_indep : inde_rv Z [%X, Y].
-
+                                                     
 Let E := finset (Y @^-1 y).
-Hypothesis Y0 : Pr P E != 0.
+Hypothesis E0 : Pr P E != 0.
 
-Lemma fdist_cond_indep : fdist_cond Y0 |= X _|_ Z.
+Variable (X': {RV (fdist_cond E0) -> TX}).
+Hypothesis EX' : X' = X.
+
+Lemma Pr_fdist_cond_RV x : `Pr[ X' = x ] = `Pr[ X = x | Y = y ].
+Proof. by rewrite pr_eqE Pr_fdist_cond cpr_eqE' EX'. Qed.
+
+Hypothesis Z_XY_indep : inde_rv Z [%X, Y].
+
+Lemma fdist_cond_indep : fdist_cond E0 |= X _|_ Z.
 Proof.
 move: Z_XY_indep => /cinde_rv_unit /weak_union.
 rewrite /cinde_rv /= => H.
@@ -259,7 +211,7 @@ rewrite !pr_eqE !Pr_fdist_cond !cpr_eqE'.
 have -> // : finset (preim [% unit_RV P, Y] (pred1 (tt, y))) = E.
 by apply/setP => e; rewrite !inE.
 Qed.
-End fdist_cond_indep.
+End fdist_cond_prop.
 
 Section lemma_3_5.
   
