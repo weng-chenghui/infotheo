@@ -273,9 +273,11 @@ Variables (X Y Z: {RV P -> 'I_p}).
 Variable pZ_unif : `p_ Z = fdist_uniform (card_ord p).
 Variable Z_XY_indep : inde_rv Z [%X, Y].
 
-(* TODO: in graphoid there is a decomposition lemma from Z_XY_indep to Z_X indep and Z_Y_indep. *)
-Variable Z_X_indep : inde_rv Z X.
-Variable Z_Y_indep : inde_rv Z Y.
+Let Z_X_indep : inde_rv Z X.
+Proof. exact/cinde_rv_unit/decomposition/cinde_rv_unit/Z_XY_indep. Qed.
+Let Z_Y_indep : inde_rv Z Y.
+Proof. exact/cinde_rv_unit/decomposition/cinde_drv_2C/cinde_rv_unit/Z_XY_indep.
+Qed.
 
 Let E := finset (Y @^-1 y).
 Hypothesis Y0 : Pr P E != 0.
