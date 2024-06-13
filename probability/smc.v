@@ -92,12 +92,7 @@ move/weak_union /cinde_rv_sym.
 by apply cpr_prd_unit_RV.
 Qed.
 
-End more_independent_rv_lemmas.
-
-Section lemma_3_4.
-
-Lemma cpr_eqE_mul (U : finType) (P : {fdist U}) (TA TB : finType)
-  (X : {RV P -> TA}) (Y : {RV P -> TB}) a b :
+Lemma cpr_eqE_mul a b :
   `Pr[ X = a | Y = b ] * `Pr[Y = b] = `Pr[ [% X, Y] = (a, b) ].
 Proof.
 rewrite cpr_eqE.
@@ -112,6 +107,28 @@ have [|?] := eqVneq `Pr[ Y = b ] 0.
 rewrite mulVr //.
 by rewrite mulr1.
 Qed.
+
+Lemma inde_rv_cprP : P |= X _|_ Y <-> forall x y, `Pr[ Y = y ] != 0 -> `Pr[ X = x | Y = y] = `Pr[ X = x].
+Proof.
+rewrite /inde_rv.
+split.
+  move => H x y Hy.
+  move/(_ x y):H. (* bring back H and apply it with x and y*)
+  rewrite -cpr_eqE_mul.
+  rewrite coqRE.
+  by move /mulIf => ->.
+move => H x y0.
+rewrite -cpr_eqE_mul.
+case /boolP: (`Pr[ Y = y0 ] == 0) => Hy.
+  rewrite (eqP Hy).
+  by rewrite mulR0 mulr0.
+by rewrite H.
+Qed.
+
+End more_independent_rv_lemmas.
+
+Section lemma_3_4.
+
 
 Variable T : finType.
 Variable P : R.-fdist T.
@@ -215,12 +232,13 @@ End fdist_cond_prop.
 
 Section lemma_3_5.
   
-Variable T : finType.
+Variable (T TY : finType).
 Variable P : R.-fdist T.
 Variable n : nat.
 Notation p := n.+1.
-Variable i y : 'I_p.
-Variables (X Y Z: {RV P -> 'I_p}).
+
+Variables (X Z: {RV P -> 'I_p}) (Y : {RV P -> TY} ).
+Let XZ : {RV P -> 'I_p} := X \+ Z.
 
 Variable pZ_unif : `p_ Z = fdist_uniform (card_ord p).
 Variable Z_XY_indep : inde_rv Z [%X, Y].
@@ -231,18 +249,17 @@ Let Z_Y_indep : inde_rv Z Y.
 Proof. exact/cinde_rv_unit/decomposition/cinde_drv_2C/cinde_rv_unit/Z_XY_indep.
 Qed.
 
+
+Section iy.
+Variables (i : 'I_p) (y : TY).
 Let E := finset (Y @^-1 y).
 Hypothesis Y0 : Pr P E != 0.
 
 Let X': {RV (fdist_cond Y0) -> 'I_p} := X.
 Let Z': {RV (fdist_cond Y0) -> 'I_p} := Z.
 
-Let XZ : {RV P -> 'I_p} := X \+ Z.
+
 Let XZ': {RV (fdist_cond Y0) -> 'I_p} := X' \+ Z'.
-
-(* TODO: I cannot directly put X\+Z in lemma because it compains about:
-
-   Cannot infer the implicit parameter P of pr_eq whose type is "R.-fdistT" in:.... *)
 
 
 Lemma lemma_3_5 : `Pr[ XZ = i | Y = y] = `Pr[ XZ = i].  (* The paper way to prove P |= X\+Z _|_ Y *)
@@ -266,4 +283,46 @@ rewrite pr_eqE' (@add_RV_unif _ _ _ X Z) //.
   exact: Z_X_indep.
 Qed.
 
+End iy.
+
+Lemma lemma_3_5' : P |= XZ _|_ Y.
+Proof.
+apply/inde_rv_cprP.
+move => /= x y0 Hy.
+rewrite lemma_3_5 //.
+by rewrite -pr_eqE.
+Qed.
+
 End lemma_3_5.
+
+Section lemma_3_6.
+
+Variables (T TY TX : finType).
+Variable P : R.-fdist T.
+Variable n : nat.
+Notation p := n.+1.
+Variables (i : 'I_p) (x1 : TX) (y : TY).
+Variables (X2toXn_1 : {RV P -> TY}) (X1 : {RV P -> TX}) (Xn Z : {RV P -> 'I_p}).
+
+
+Variable pZ_unif : `p_ Z = fdist_uniform (card_ord p).
+Variable Z_X1toXn_indep : inde_rv Z [%X1, X2toXn_1, Xn].
+Let Xn_Z := add_RV' Xn Z.
+
+(*inde_RV2_cinde : P |= [% X, Z] _|_ Y -> X _|_ Y | Z.*)
+
+Lemma lemma_3_6 : `Pr[ X1 = x1 | [% X2toXn_1, Xn_Z] = (y , i)] = `Pr[ X1 = x1 | X2toXn_1 = y].
+Proof.
+have:= inde_RV2_cinde (X:=X1) (Z:=X2toXn_1) (Y:=Xn_Z).
+  (* sym then lemma_3_5'*)
+rewrite /cinde_rv. 
+
+rewrite cpr_eq_product_rule.
+
+
+
+Let Z_X_indep : inde_rv Z X.
+Proof. exact/cinde_rv_unit/decomposition/cinde_rv_unit/Z_XY_indep. Qed.
+  
+
+End lemma_3_6.
