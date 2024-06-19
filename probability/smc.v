@@ -116,7 +116,7 @@ split.
   move/(_ x y):H. (* bring back H and apply it with x and y*)
   rewrite -cpr_eqE_mul.
   rewrite coqRE.
-  by move /mulIf => ->.
+  by apply /mulIf.
 move => H x y0.
 rewrite -cpr_eqE_mul.
 case /boolP: (`Pr[ Y = y0 ] == 0) => Hy.
@@ -125,10 +125,34 @@ case /boolP: (`Pr[ Y = y0 ] == 0) => Hy.
 by rewrite H.
 Qed.
 
+
 End more_independent_rv_lemmas.
 
-Section lemma_3_4.
+Section XY.
 
+Variables (A : finType) (P : R.-fdist A) (TA TB: finType).
+Variables (X : {RV P -> TA}) (Y : {RV P -> TB}).
+
+Lemma inde_rv_sym:  P|= X _|_ Y = P|= Y _|_ X.
+Proof.
+Fail rewrite cinde_rv_unit.
+Admitted.
+
+End XY.
+
+Section XYZ.
+
+Variables (A : finType) (P : R.-fdist A) (TA TB TC: finType).
+Variables (X : {RV P -> TA}) (Y : {RV P -> TB}) (Z : {RV P -> TC}).
+
+Lemma inde_RV2_sym : P|=[%X, Y] _|_ Z = P|=[%Y, X] _|_ Z.
+Proof.
+Fail apply/cinde_rv_unit.
+Admitted.
+
+End XYZ.
+
+Section lemma_3_4.
 
 Variable T : finType.
 Variable P : R.-fdist T.
@@ -307,22 +331,22 @@ Variables (X2toXn_1 : {RV P -> TY}) (X1 : {RV P -> TX}) (Xn Z : {RV P -> 'I_p}).
 
 Variable pZ_unif : `p_ Z = fdist_uniform (card_ord p).
 Variable Z_X1toXn_indep : inde_rv Z [%X1, X2toXn_1, Xn].
-Let Xn_Z := add_RV' Xn Z.
+Variable Z_X1toXn_1_indep : inde_rv Z [%X1, X2toXn_1].
+Let XnZ := add_RV' Xn Z.
 
-(*inde_RV2_cinde : P |= [% X, Z] _|_ Y -> X _|_ Y | Z.*)
-
-Lemma lemma_3_6 : `Pr[ X1 = x1 | [% X2toXn_1, Xn_Z] = (y , i)] = `Pr[ X1 = x1 | X2toXn_1 = y].
+Lemma lemma_3_6 : `Pr[ X1 = x1 | [% X2toXn_1, XnZ] = (y , i)] = `Pr[ X1 = x1 | X2toXn_1 = y].
 Proof.
-have:= inde_RV2_cinde (X:=X1) (Z:=X2toXn_1) (Y:=Xn_Z).
-  (* sym then lemma_3_5'*)
-rewrite /cinde_rv. 
-
-rewrite cpr_eq_product_rule.
-
-
-
-Let Z_X_indep : inde_rv Z X.
-Proof. exact/cinde_rv_unit/decomposition/cinde_rv_unit/Z_XY_indep. Qed.
-  
+have:= inde_RV2_cinde (X:=X1) (Z:=X2toXn_1) (Y:=XnZ).
+move => H.
+rewrite cpr_eq_pairCr.
+apply cinde_alt.
+rewrite (inde_RV2_sym X1 X2toXn_1 XnZ) in H.
+apply: H.
+rewrite inde_RV2_sym. 
+rewrite inde_rv_sym.
+About lemma_3_5'.
+Fail rewrite (@lemma_3_5' T (TY) P n Xn Z [% X1, X2toXn_1] pZ_unif Z_X1toXn_1_indep).
+Search RV2.
+Abort.
 
 End lemma_3_6.
