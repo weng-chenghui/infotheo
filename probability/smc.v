@@ -133,9 +133,9 @@ Section XY.
 Variables (A : finType) (P : R.-fdist A) (TA TB: finType).
 Variables (X : {RV P -> TA}) (Y : {RV P -> TB}).
 
+(* TODO: do this in graphoid *)
 Lemma inde_rv_sym:  P|= X _|_ Y = P|= Y _|_ X.
 Proof.
-Fail rewrite cinde_rv_unit.
 Admitted.
 
 End XY.
@@ -166,11 +166,11 @@ Variable XY_indep : P |= X _|_ Y.
 
 (* Add two random variables = add results from two functions. *)
 (* We use this because add_RV is in coqR *)
-Definition add_RV' : {RV P -> 'I_p} := X \+ Y.
+Definition add_RV : {RV P -> 'I_p} := X \+ Y.
 
-Lemma add_RV_mul i : `p_ add_RV' i = (\sum_(k <- fin_img X) `Pr[ X = k ] * `Pr[ Y = (i - k)%mcR ]).
+Lemma add_RV_mul i : `p_ add_RV i = (\sum_(k <- fin_img X) `Pr[ X = k ] * `Pr[ Y = (i - k)%mcR ]).
 Proof.
-transitivity (`Pr[add_RV' \in [set i]]).
+transitivity (`Pr[add_RV \in [set i]]).
   by rewrite pr_inE' /Pr big_set1.
 rewrite (reasoning_by_cases _ X).
 transitivity (\sum_(k <- fin_img X) `Pr[ [% X, Y] \in ([set k] `* [set i-k]%mcR) ]).
@@ -180,7 +180,7 @@ transitivity (\sum_(k <- fin_img X) `Pr[ [% X, Y] \in ([set k] `* [set i-k]%mcR)
   apply: eq_bigl.
   move=>r /=.
   rewrite !inE /=.
-  rewrite /add_RV'.
+  rewrite /add_RV.
   rewrite andbC; apply: andb_id2l.
   rewrite /=.
   move /eqP ->.
@@ -207,7 +207,7 @@ done.
 Qed.
 
 (* Lemma 3.4 *)
-Lemma add_RV_unif : `p_ add_RV' = fdist_uniform (card_ord p).
+Lemma add_RV_unif : `p_ add_RV = fdist_uniform (card_ord p).
 (* TODO: I cannot directly put X \+ Y in this lemma because the implicit P cannot be inferred. *)
 Proof.
 apply: fdist_ext=> /= i.
@@ -222,8 +222,9 @@ by rewrite cPr_1 ?mul1r // pr_eq_unit oner_neq0.
 Qed.
 
 
-
 End lemma_3_4.
+
+Notation "X `+ Y" := (add_RV X Y) : proba_scope.
 
 Section fdist_cond_prop.
 Variables T TX TY TZ : finType.
@@ -332,21 +333,61 @@ Variables (X2toXn_1 : {RV P -> TY}) (X1 : {RV P -> TX}) (Xn Z : {RV P -> 'I_p}).
 Variable pZ_unif : `p_ Z = fdist_uniform (card_ord p).
 Variable Z_X1toXn_indep : inde_rv Z [%X1, X2toXn_1, Xn].
 Variable Z_X1toXn_1_indep : inde_rv Z [%X1, X2toXn_1].
-Let XnZ := add_RV' Xn Z.
+Let XnZ := Xn `+ Z.
+
+Hypothesis X0 : `Pr[ [% XnZ, X2toXn_1] = (i, y) ] != 0.
 
 Lemma lemma_3_6 : `Pr[ X1 = x1 | [% X2toXn_1, XnZ] = (y , i)] = `Pr[ X1 = x1 | X2toXn_1 = y].
 Proof.
 have:= inde_RV2_cinde (X:=X1) (Z:=X2toXn_1) (Y:=XnZ).
 move => H.
 rewrite cpr_eq_pairCr.
-apply cinde_alt.
+apply: cinde_alt.
 rewrite (inde_RV2_sym X1 X2toXn_1 XnZ) in H.
 apply: H.
 rewrite inde_RV2_sym. 
 rewrite inde_rv_sym.
-About lemma_3_5'.
-Fail rewrite (@lemma_3_5' T (TY) P n Xn Z [% X1, X2toXn_1] pZ_unif Z_X1toXn_1_indep).
-Search RV2.
-Abort.
+have:= (@lemma_3_5' _ _ P n Xn Z [% X1, X2toXn_1] pZ_unif).
+apply.
+apply/cinde_rv_unit.
+apply: cinde_drv_2C.
+by apply/cinde_rv_unit.
+exact: X0.
+Qed.
 
 End lemma_3_6.
+
+Section theorem_3_7.
+
+Variables (T TX TY1 TY2: finType).
+Variable P : R.-fdist T.
+Variable n : nat.
+Notation p := n.+1.
+Variables (X: {RV P -> TX}) (Z : {RV P -> 'I_p}).
+Variables (f1 : TX -> TY1) (f2 : TX -> TY2) (fm : TX -> 'I_p). 
+Variable pZ_unif : `p_ Z = fdist_uniform (card_ord p).
+Variable Z_X_indep : inde_rv Z X.
+
+Let Y1 := f1 `o X.
+Let Y2 := f2 `o X.  (* y2...ym-1*)
+Let Ym := fm `o X.
+Let YmZ := Ym `+ Z.
+Let f x := (f1 x, f2 x, fm x).
+Let Y := f `o X.
+
+(* inde_rv_comp : inde_rv X Y -> inde_rv (f `o X) (g `o Y). *)
+
+Theorem theorem_3_7 y1 y2 ymz: `Pr[ [% Ym `+ Z, Y2] = (ymz, y2) ] != 0 ->
+  `Pr[Y1 = y1|[%Y2, YmZ] = (y2, ymz)] = `Pr[Y1 = y1 | Y2 = y2].
+Proof.
+apply: lemma_3_6.
+apply: pZ_unif.
+rewrite (_:[%_ , _] = Y) //.
+rewrite (_:Z = idfun `o Z) //. (* id vs. idfun*)
+exact: inde_rv_comp.
+Qed.
+(*TODO: the Entropy part *)
+
+
+End theorem_3_7.
+
