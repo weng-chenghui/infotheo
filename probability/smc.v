@@ -375,9 +375,8 @@ Let YmZ := Ym `+ Z.
 Let f x := (f1 x, f2 x, fm x).
 Let Y := f `o X.
 
-(* inde_rv_comp : inde_rv X Y -> inde_rv (f `o X) (g `o Y). *)
-
-Theorem theorem_3_7 y1 y2 ymz: `Pr[ [% Ym `+ Z, Y2] = (ymz, y2) ] != 0 ->
+(* Theorem 3.7:  masked_condition_removal *)
+Theorem mc_removal_pr y1 y2 ymz: `Pr[ [% Ym `+ Z, Y2] = (ymz, y2) ] != 0 ->
   `Pr[Y1 = y1|[%Y2, YmZ] = (y2, ymz)] = `Pr[Y1 = y1 | Y2 = y2].
 Proof.
 apply: lemma_3_6.
@@ -386,7 +385,8 @@ rewrite (_:[%_ , _] = Y) //.
 rewrite (_:Z = idfun `o Z) //. (* id vs. idfun*)
 exact: inde_rv_comp.
 Qed.
-(*TODO: the Entropy part *)
+
+(*TODO: the Entropy part needs to be done in another file, not inside the probability directory. *)
 
 
 End theorem_3_7.
