@@ -327,33 +327,35 @@ Variable P : R.-fdist T.
 Variable n : nat.
 Notation p := n.+1.
 Variables (i : 'I_p) (x1 : TX) (y : TY).
-Variables (X2toXn_1 : {RV P -> TY}) (X1 : {RV P -> TX}) (Xn Z : {RV P -> 'I_p}).
-
+(* X2 means X2 to Xn-1 *)
+Variables (X2 : {RV P -> TY}) (X1 : {RV P -> TX}) (Xn Z : {RV P -> 'I_p}).
 
 Variable pZ_unif : `p_ Z = fdist_uniform (card_ord p).
-Variable Z_X1toXn_indep : inde_rv Z [%X1, X2toXn_1, Xn].
-Variable Z_X1toXn_1_indep : inde_rv Z [%X1, X2toXn_1].
+Variable Z_Xs_indep : inde_rv Z [%X1, X2, Xn].
+Variable Z_X1X2_indep : inde_rv Z [%X1, X2].
 Let XnZ := Xn `+ Z.
 
-Hypothesis X0 : `Pr[ [% XnZ, X2toXn_1] = (i, y) ] != 0.
+Hypothesis X0 : `Pr[ [% XnZ, X2] = (i, y) ] != 0.
 
-Lemma lemma_3_6 : `Pr[ X1 = x1 | [% X2toXn_1, XnZ] = (y , i)] = `Pr[ X1 = x1 | X2toXn_1 = y].
+Lemma lemma_3_6 : `Pr[ X1 = x1 | [% X2, XnZ] = (y , i)] = `Pr[ X1 = x1 | X2 = y].
 Proof.
-have:= inde_RV2_cinde (X:=X1) (Z:=X2toXn_1) (Y:=XnZ).
+have:= inde_RV2_cinde (X:=X1) (Z:=X2) (Y:=XnZ).
 move => H.
 rewrite cpr_eq_pairCr.
 apply: cinde_alt.
-rewrite (inde_RV2_sym X1 X2toXn_1 XnZ) in H.
+rewrite (inde_RV2_sym X1 X2 XnZ) in H.
 apply: H.
 rewrite inde_RV2_sym. 
 rewrite inde_rv_sym.
-have:= (@lemma_3_5' _ _ P n Xn Z [% X1, X2toXn_1] pZ_unif).
+have:= (@lemma_3_5' _ _ P n Xn Z [% X1, X2] pZ_unif).
 apply.
 apply/cinde_rv_unit.
 apply: cinde_drv_2C.
 by apply/cinde_rv_unit.
 exact: X0.
 Qed.
+
+Lemma lemma_3_6' : P |= X1 _|_ XnZ 
 
 End lemma_3_6.
 
