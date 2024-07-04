@@ -59,7 +59,15 @@ which I need to find a way to pack it back to the random variable form so this s
 (* TODO: need the relation between jdist_cond and dist_of_RV *)
 Search jfdist_cond.
 Search ({RV (_) -> (_)} -> R.-fdist_).
+Abort.
 
+Lemma eq_cpr_cond_entropy1_RV w1 w2 v1 v2:
+  `Pr[ W1 = w1 | V1 = v1 ] = `Pr[ W2 = w2 | V2 = v2 ] <->
+  cond_entropy1_RV V1 W1 v1 = cond_entropy1_RV V2 W2 v2. 
+Proof.
+split.
+move => H.
+apply (f_equal log) in H.
  
 End pr_entropy.
 
