@@ -248,7 +248,7 @@ rewrite cond_entropy1_RVE; last first.
   rewrite !pr_eqE'.
   rewrite mulR_neq0'.
   rewrite Hy2 /=.
-  rewrite pY3_unif.
+  rewrite pY3_unif.  (* TODO: check here for why eqn8 cannot be proved: it cannot provide pY3_unif*)
   rewrite fdist_uniformE /=.
   rewrite card_Y3.
   rewrite invr_eq0.
