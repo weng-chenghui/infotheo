@@ -205,6 +205,7 @@ Variables (Y1: {RV P -> TY1}) (Y2: {RV P -> TY2}) (Y3: {RV P -> TY3}).
 
 Hypothesis card_Y3 : #|TY3| = n.+1.
 Hypothesis pY3_unif : `p_ Y3 = fdist_uniform card_Y3.
+Hypothesis prY3_neq0 : forall y3, `p_ Y3 y3 != 0.
 Hypothesis Y2Y3indep : P|= Y2 _|_ Y3.
 
 Lemma cpr_cond_entropy1_RV y2 y3:
@@ -248,11 +249,7 @@ rewrite cond_entropy1_RVE; last first.
   rewrite !pr_eqE'.
   rewrite mulR_neq0'.
   rewrite Hy2 /=.
-  rewrite pY3_unif.  (* TODO: check here for why eqn8 cannot be proved: it cannot provide pY3_unif*)
-  rewrite fdist_uniformE /=.
-  rewrite card_Y3.
-  rewrite invr_eq0.
-  by rewrite pnatr_eq0.
+  exact: prY3_neq0.
 
 rewrite /cond_entropy1.
 rewrite /entropy.
@@ -303,8 +300,8 @@ Section cpr_cond_entropy_proof.
 Variables (T TY1 TY2 : finType)(TY3 : finZmodType)(P : R.-fdist T).
 Variables (Y1 : {RV (P) -> (TY1)})(Y2 : {RV (P) -> (TY2)})(Y3 : {RV (P) -> (TY3)}).
 
-Lemma cpr_cond_entropy (n: nat)(card_TY3 : #|TY3| = n.+1):
-  `p_ Y3 = fdist_uniform card_TY3 ->
+Lemma cpr_cond_entropy (n: nat):
+  (forall y3, `p_ Y3 y3 != 0) ->
   P |= Y2 _|_ Y3 ->
   (forall (y1 : TY1) (y2 : TY2) (y3 : TY3),
    `Pr[ [% Y2, Y3] = (y2, y3) ] != 0 ->
@@ -313,7 +310,7 @@ Lemma cpr_cond_entropy (n: nat)(card_TY3 : #|TY3| = n.+1):
   ) ->
   `H( Y1 | [% Y2, Y3]) = `H( Y1 | Y2).
 Proof.
-move => Hunif Hinde Hremoval.
+move => HprY3_neq0 Hinde Hremoval.
 rewrite /cond_entropy /=.
 under eq_bigl do rewrite inE /=.
 set f : TY2 -> TY3 -> R := fun y2 y3 =>
@@ -329,7 +326,7 @@ transitivity (\sum_a f a.1 a.2).
     rewrite -pr_eqE' in Ha.
     by rewrite Hy3 mulr0 eqxx in Ha.
   have H' := fun w => Pr_neq0_cond_removal Hinde Hremoval w a.1 Hy3.
-  rewrite -(cpr_cond_entropy1_RV Hunif Hinde) //.
+  rewrite -(cpr_cond_entropy1_RV HprY3_neq0 Hinde) //.
   rewrite cond_entropy1_RVE ?coqRE //.
   by apply: contra Ha; rewrite mulf_eq0 -fdistX1 fdistX_RV2 => ->.
 rewrite -pair_bigA /=.
@@ -694,11 +691,21 @@ have H := add_RV_unif Wm Z card_TX pZ_unif H_ZWM.
 by exact H.
 Qed.
 
+Let prWmZ_neq0 wmz:
+  `p_ WmZ wmz != 0.
+Proof.
+rewrite pWmZ_unif.
+rewrite fdist_uniformE.
+rewrite card_TX.
+rewrite invr_eq0.
+rewrite pnatr_eq0 //.
+Qed.
+
 Lemma eqn3_proof:
   `H(x2|[%x1, s1, r1, x2', t]) = `H(x2|[%x1, s1, r1, x2']).
 Proof.
 rewrite -eq_W1_RV -eq_W2_RV -eq_WmZ_RV eq_Wm_RV.
-have Ha := cpr_cond_entropy pWmZ_unif W2_WmZ_indep.
+have Ha := cpr_cond_entropy m.+1 prWmZ_neq0 W2_WmZ_indep.
 apply Ha => w w2 wmz Hneq0.
 rewrite pr_eq_pairC in Hneq0.
 by have := mc_removal_pr f1 Z_O_indep pZ_unif w Hneq0.
