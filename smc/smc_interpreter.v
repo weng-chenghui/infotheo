@@ -39,39 +39,33 @@ Inductive proc : Type :=
   | Finish : proc
   | Fail : proc.
 
-Definition step (ps : seq proc) (trace : seq data) (i : nat) :=
-  let ps := nth Fail ps in
-  let p := ps i in
+Definition step (ps : seq (proc * seq data)) (i : nat) :=
+  let ps := nth (Fail, [::]) ps in
+  let (p, trace) := ps i in
   let nop := (p, trace, false) in
   match p with
   | Recv frm f =>
-      if ps frm is Send dst v _ then
-        if dst == i then (f v, v::trace, true) else nop
+      if (ps frm).1 is Send dst v _ then
+        if dst == i then (f v, v :: trace, true) else nop
       else nop
   | Send dst w next =>
-      if ps dst is Recv frm _ then
+      if (ps dst).1 is Recv frm _ then
         if frm == i then (next, trace, true) else nop
       else nop
-  | Init d next =>
-      (next, d::trace, true)
-  | Ret d =>
-      (Finish, d :: trace, true)
-  | Finish | Fail =>
-      nop
+  | Init d next   => (next, d :: trace, true)
+  | Ret d         => (Finish, d :: trace, true)
+  | Finish | Fail => nop
   end.
 
-Fixpoint interp h (ps : seq proc) (traces : seq (seq data)) :=
+Fixpoint interp h (ps : seq (proc * seq data)) :=
   if h is h.+1 then
-    let ps_trs' := [seq step ps (nth [::] traces i) i
-                   | i <- iota 0 (size ps)] in
-    if has snd ps_trs' then
-      let ps' := unzip1 (unzip1 ps_trs') in
-      let trs' := unzip2 (unzip1 ps_trs') in
-      interp h ps' trs'
-    else (ps, traces)
-  else (ps, traces).
+    let ps' := [seq step ps i | i <- iota 0 (size ps)] in
+    if has snd ps' then
+      interp h (unzip1 ps')
+    else ps
+  else ps.
 
-Definition run_interp h procs := interp h procs (nseq (size procs) [::]).
+Definition run_interp h procs := interp h [seq (p, [::]) | p <- procs].
 End interp.
 
 Arguments Finish {data}.
@@ -82,16 +76,16 @@ Variable data : eqType.
 Local Open Scope nat_scope.
 
 Lemma size_traces h (procs : seq (proc data)) :
-  forall s, s \in (run_interp h procs).2 -> size s <= h.
+  forall s, s \in unzip2 (run_interp h procs) -> size s <= h.
 Proof.
 clear.
 pose k := h.
 rewrite -{2}/k /run_interp.
-set traces := nseq _ _ => /=.
-have Htr : {in traces, forall s, size s <= k - h}.
-  move=> s. by rewrite mem_nseq => /andP[] _ /eqP ->.
+set ps := map _ _.
+have Htr : {in unzip2 ps, forall s, size s <= k - h}.
+  by apply/allP; rewrite all_map; apply/all_mapT.
 have : h <= k by [].
-elim: h k procs traces Htr => [| h IH] k procs traces Htr hk /=.
+elim: h k ps Htr => [| h IH] k {procs} ps Htr hk /=.
   move=> s /Htr. by rewrite subn0.
 move=> s.
 case: ifP => H; last by move/Htr/leq_trans; apply; rewrite leq_subr.
@@ -100,56 +94,52 @@ move=> /= {}s.
 rewrite /unzip2 -2!map_comp.
 case/mapP => i.
 rewrite mem_iota add0n /step => /andP[] _ Hi /=.
-have Hsz : size (nth [::] traces i) < k - h.
-  case/boolP: (i < size traces) => Hi'.
-    apply/(leq_ltn_trans (Htr _ _)).
-      by rewrite mem_nth.
-    by rewrite subnS prednK // leq_subRL // ?addn1 // ltnW.
-  rewrite nth_default. by rewrite leq_subRL ?addn1 // ltnW.
-  by rewrite leqNgt.
-case: nth => /=[d p|n d p|n p|d||] -> //=; try exact/ltnW.
-- case: nth => /=[{}d {}p|n1 {}d {}p| n1 _|{}d||] /=; try exact/ltnW.
+have : size (nth [::] (unzip2 ps) i) < k - h.
+  apply/(leq_ltn_trans (Htr _ _)).
+    by rewrite mem_nth // size_map.
+  by rewrite subnS prednK // leq_subRL // ?addn1 // ltnW.
+rewrite (nth_map (Fail,[::])) //.
+case: nth => p trace /= Hsz.
+case: p => /= [d p|n d p|n p|d||] -> //=; try exact/ltnW.
+- case: (nth _ _ _).1 => /=[{}d {}p|n1 {}d {}p| n1 _|{}d||] /=; try exact/ltnW.
   case: ifP => _ /=; exact/ltnW.
-- case: nth => /=[{}d p1|n1 {}d p1| n1 p1|{}d||] /=; try exact/ltnW.
+- case: (nth _ _ _).1 => /=[{}d p1|n1 {}d p1| n1 p1|{}d||] /=; try exact/ltnW.
   case: ifP => _ //=; exact/ltnW.
 Qed.
 
-Lemma size_interp h (procs : seq (proc data)) (traces : seq (seq data)) :
-  size procs = size traces ->
-  size (interp h procs traces).1 = size procs /\
-  size (interp h procs traces).2 = size procs.
+Lemma size_interp h (procs : seq (proc data * seq data)) :
+  size (interp h procs) = size procs.
 Proof.
-elim: h procs traces => // h IH procs traces Hsz /=.
+elim: h procs => // h IH procs /=.
 case: ifP => _ //.
 rewrite /unzip1 /unzip2 -!map_comp.
 set map1 := map _ _.
-set map2 := map _ _.
-case: (IH map1 map2).
-  by rewrite !size_map.
-move=> -> ->.
+case: (IH map1).
 by rewrite !size_map size_iota.
 Qed.
 
 Lemma size_traces_nth h (procs : seq (proc data)) (i : 'I_(size procs)) :
-  (size (nth [::] (run_interp h procs).2 i) <= h)%N.
+  (size (nth (Fail,[::]) (run_interp h procs) i).2 <= h)%N.
 Proof.
-by apply/size_traces/mem_nth; rewrite (size_interp _ _).2 // size_nseq.
+apply/(@size_traces _ procs).
+rewrite -(nth_map _ [::]) ?(size_interp,size_map) //.
+by apply/mem_nth; rewrite size_map size_interp size_map.
 Qed.
 
 Definition interp_traces h procs : (size procs).-tuple (h.-bseq data) :=
   [tuple Bseq (size_traces_nth h i) | i < size procs].
 
 Lemma interp_traces_ok h procs :
- map val (interp_traces h procs) = (run_interp h procs).2.
+ map val (interp_traces h procs) = unzip2 (run_interp h procs).
 Proof.
 apply (eq_from_nth (x0:=[::])).
-  rewrite size_map /= size_map size_enum_ord.
-  by rewrite (size_interp _ _).2 ?size_nseq.
+  by rewrite size_map /= size_map size_enum_ord size_map size_interp size_map.
 move=> i Hi.
 rewrite size_map in Hi.
 rewrite (nth_map [bseq]) // /interp_traces.
 rewrite size_tuple in Hi.
-by rewrite (_ : i = Ordinal Hi) // nth_mktuple.
+rewrite (_ : i = Ordinal Hi) // nth_mktuple.
+by rewrite (nth_map (Fail,[::])) // size_interp size_map.
 Qed.
 End traces.
 
@@ -203,12 +193,12 @@ Definition pbob (xb : VX) (yb : TX) : proc data :=
 
 Variables (sa sb: VX) (ra yb: TX) (xa xb: VX).
 Definition smc_scalar_product h :=
-  (interp h [:: palice xa; pbob xb yb; pcoserv sa sb ra] [::[::];[::];[::]]).
+  (run_interp h [:: palice xa; pbob xb yb; pcoserv sa sb ra]).
 
-Goal (smc_scalar_product 11).2 = ([::]).
+Goal unzip2 (smc_scalar_product 11) = ([::]).
 cbv -[GRing.add GRing.opp GRing.Ring.sort (*Equality.eqtype_hasDecEq_mixin*) ].
 Undo 1.
-rewrite /smc_scalar_product.
+rewrite /smc_scalar_product /run_interp.
 rewrite (lock (11 : nat)) /=.
 rewrite -lock (lock (10 : nat)) /=.
 rewrite -lock (lock (9 : nat)) /=.
@@ -231,22 +221,24 @@ Let ya := t - xb' *d sa + ra.
 
 Lemma smc_scalar_product_ok :
   smc_scalar_product 11 =
-  ([:: Finish; Finish; Finish],
-   [:: [:: one ya;
+  ([:: (Finish,
+        [:: one ya;
            one t;
            vec xb';
            one ra;
            vec sa; 
-           vec xa];
+           vec xa]);
+      (Finish,
        [:: one yb;
            vec xa';
            one rb;
            vec sb;
            one yb;
-           vec xb];
+           vec xb]);
+      (Finish,
        [:: one ra;
            vec sb;
-           vec sa]
+           vec sa])
    ]).
 Proof. reflexivity. Qed.
 
