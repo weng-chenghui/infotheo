@@ -39,6 +39,28 @@ Variable msg : finComRingType.  (* TODO message must be modulo M *)
 Inductive enc : Type :=
   | E : nat -> msg -> enc.
 
+Definition enc_eq (e1 e2 : enc) : bool :=
+  match e1, e2 with
+  | E i1 m1, E i2 m2 => (i1 == i2) && (m1 == m2)
+  end.
+
+Lemma enc_eqP : Equality.axiom enc_eq.
+Proof.
+move => e1 e2.
+rewrite /enc_eq.
+case e1 => n1 s1.
+case e2 => n2 s2.
+apply: (iffP idP).
+  move/andP => [/eqP Ha /eqP Hb].
+  by rewrite Ha Hb.
+move => H.
+injection H => Hs Hn. (* Note: get n, s assumptions from from E n1 s1 = E n2 s2*)
+rewrite Hs Hn.
+apply/andP => //=.
+Qed.
+
+HB.instance Definition _ := hasDecEq.Build enc enc_eqP.
+
 Definition D (p : nat) (e : enc) : msg :=
   match e with
   | E i m => if i == p then m else 0
@@ -111,8 +133,6 @@ Definition dsdp h :=
 
 (* Different from SMC scalar product: has much less calculations *)
 Goal (dsdp 15).2 = ([::]).
-cbv -[GRing.add GRing.opp GRing.Ring.sort].
-Undo 1.
 rewrite /dsdp.
 rewrite (lock (15 : nat)) /=.
 rewrite -lock (lock (14 : nat)) /=.
@@ -129,7 +149,25 @@ rewrite -lock (lock (4 : nat)) /=.
 rewrite -lock (lock (3 : nat)) /=.
 rewrite -lock (lock (2 : nat)) /=.
 rewrite -lock (lock (1 : nat)) /=.
+rewrite !/Emul /=.
 Abort.
+
+Lemma dsdp_ok :
+  dsdp 15 = 
+  ([:: Finish; Finish; Finish],
+   [:: [:: d (v3 * u3 + r3 + (v2 * u2 + r2) - r2 - r3 + u1 * v1);
+           e (E alice (v3 * u3 + r3 + (v2 * u2 + r2)));
+           e (E charlie v3);
+           e (E bob v2);
+           d r3; d r2; d u3; d u2; d u1; d v1];
+       [:: e (E charlie (v3 * u3 + r3));
+           e (E bob (v2 * u2 + r2)); d v2];
+       [:: e (E charlie (v3 * u3 + r3 + (v2 * u2 + r2))); d v3]
+  ]).
+Proof. reflexivity. Qed.
+
+Definition dsdp_traces :=
+  interp_traces 15 [:: palice v1 u1 u2 u3 r2 r3; pbob v2; pcharlie v3].
   
 
 End dsdp.
