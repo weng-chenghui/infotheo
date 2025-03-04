@@ -156,18 +156,49 @@ Lemma dsdp_ok :
   dsdp 15 = 
   ([:: Finish; Finish; Finish],
    [:: [:: d (v3 * u3 + r3 + (v2 * u2 + r2) - r2 - r3 + u1 * v1);
-           e (E alice (v3 * u3 + r3 + (v2 * u2 + r2)));
+           e (E alice (v3 * u3 + r3 + (v2 * u2 + r2))); 
            e (E charlie v3);
            e (E bob v2);
            d r3; d r2; d u3; d u2; d u1; d v1];
        [:: e (E charlie (v3 * u3 + r3));
-           e (E bob (v2 * u2 + r2)); d v2];
+           e (E bob (v2 * u2 + r2)); d v2];  (* Eventually will be recorded in Recv or Ret*)
        [:: e (E charlie (v3 * u3 + r3 + (v2 * u2 + r2))); d v3]
   ]).
 Proof. reflexivity. Qed.
 
 Definition dsdp_traces :=
   interp_traces 15 [:: palice v1 u1 u2 u3 r2 r3; pbob v2; pcharlie v3].
-  
+
+Definition is_dsdp (trs : 3.-tuple (15.-bseq data)) :=
+  let '(s, u3, u2, u1, v1) :=
+    if tnth trs 0 is Bseq [:: inl s; _; _; _; _; _; inl u3; inl u2; inl u1; inl v1] _
+    then (s, u3, u2, u1, v1) else (0, 0, 0, 0, 0) in
+  let '(v2) :=
+    if tnth trs 1 is Bseq [:: _; _; inl v2] _
+    then (v2) else (0) in
+  let '(_v3) :=
+    if tnth trs 2 is Bseq [:: _; inl v3] _
+    then (v3) else (0) in
+  s = v3 * u3 + v2 * u2 + v1 * u1.
+
+Lemma dsdp_traces_ok :
+  dsdp_traces =
+    [tuple
+       [bseq d (v3 * u3 + r3 + (v2 * u2 + r2) - r2 - r3 + u1 * v1);
+             e (E alice (v3 * u3 + r3 + (v2 * u2 + r2)));
+             e (E charlie v3);
+             e (E bob v2);
+             d r3; d r2; d u3; d u2; d u1; d v1];
+       [bseq e (E charlie (v3 * u3 + r3));
+             e (E bob (v2 * u2 + r2)); d v2];
+       [bseq e (E charlie (v3 * u3 + r3 + (v2 * u2 + r2))); d v3]].
+Proof. by apply/val_inj/(inj_map val_inj); rewrite interp_traces_ok. Qed.
+
+Lemma dsdp_is_correct:
+  is_dsdp dsdp_traces.
+Proof. rewrite dsdp_traces_ok /is_dsdp /=.
+ring.
+Qed.
+
 
 End dsdp.
