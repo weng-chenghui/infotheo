@@ -33,15 +33,20 @@ Reserved Notation "u *h w" (at level 40).
 Reserved Notation "u ^h w" (at level 40).
 
 Section he.
+  
+(* TRY: define enc as a tuple instead of an inductive type *)
 
 Variable msg : finComRingType.  (* TODO message must be modulo M *)
 
-Inductive enc : Type :=
-  | E : nat -> msg -> enc.
+Definition enc := (nat * msg)%type.
+
+Definition E i m : enc := (i, m).
+
+Check E 1 2.
 
 Definition enc_eq (e1 e2 : enc) : bool :=
   match e1, e2 with
-  | E i1 m1, E i2 m2 => (i1 == i2) && (m1 == m2)
+  | (i1, m1), (i2, m2) => (i1 == i2) && (m1 == m2)
   end.
 
 Lemma enc_eqP : Equality.axiom enc_eq.
@@ -63,7 +68,7 @@ HB.instance Definition _ := hasDecEq.Build enc enc_eqP.
 
 Definition D (p : nat) (e : enc) : msg :=
   match e with
-  | E i m => if i == p then m else 0
+  | (i, m) => if i == p then m else 0
   (* TODO: returning 0 instead of making it an option because it is
      troublesome when mixing with Send, Recv, etc.
   *)
@@ -71,12 +76,12 @@ Definition D (p : nat) (e : enc) : msg :=
 
 Definition Emul (e1 e2 : enc) : enc := 
   match (e1, e2) with
-  | (E i1 m1, E i2 m2) => if i1 == i2 then E i1 (m1 + m2) else E 0 0 (* TODO: mod M?*)
+  | ((i1, m1), (i2, m2)) => if i1 == i2 then E i1 (m1 + m2) else E 0 0 (* TODO: mod M?*)
   end.
 
 Definition Epow (e : enc) (m2 : msg) : enc :=
   match e with
-  | E i m1 => E i (m1 * m2) (* TODO: mod M?*)
+  | (i, m1) => E i (m1 * m2) (* TODO: mod M?*)
   end.
 
 End he.
@@ -326,6 +331,14 @@ vs. Expected:
 Refer to https://math-comp.github.io/htmldoc/mathcomp.ssreflect.tuple.html#bseq_tagged_tuple
 to define a finType.
 
+----
+
+Refer to another one:
+
+Finite.copy foo (pcan_type foo_natK) where foo_natK will be some proof of cancelation of some ffunctions foo -> nat and nat -> foo (for instance).
+
+https://coq.gitlab.io/zulip-archive/stream/237664-math-comp-users/topic/.27Declaring.27.20a.20type.20to.20be.20finite.html
+
 Learned:
 
 1. No need to map to nat; just need to map to another finType (ordinal in the reference)
@@ -337,7 +350,7 @@ Learned:
 Let imsg := (nat * msg)%type.
 
 Definition enc_to_imsg (e : enc) : imsg :=
-  match e with E i m => (i, m) end.
+  match e with (i, m) => E i m end.
 
 Definition imsg_to_enc (im : imsg) : enc :=
   let '(i, m) := im in E i m.
