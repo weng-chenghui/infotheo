@@ -224,11 +224,21 @@ Let enc := enc msg.
 Notation "u *h w" := (Emul u w).
 Notation "u ^h w" := (Epow u w).
 
+(*
+
+BUG: v1, is in a defined syntax. So cannot use it in (...) (need a space before the comma)
+Print Grammar constr.
+
+    LEVEL "200"; "]"
+  | "<hidden"; term LEVEL "0"; ">"
+  | "[find"; "v1,"; "..,"; term LEVEL "200"; "|"; term LEVEL "200"; "∼";
+
+*)
 
 Definition dsdp_uncurry (o: msg * msg * msg * msg * msg * msg * msg * msg)
   : dsdp_tracesT msg :=
-  let '(_v1, v2, v3, u1, u2, u3, r2, r3) := o in
-  (dsdp_traces _v1 v2 v3 u1 u2 u3 r2 r3).
+  let '( v1 , v2 , v3, u1, u2, u3, r2, r3) := o in
+  (dsdp_traces v1 v2 v3 u1 u2 u3 r2 r3).
 
 Record dsdp_random_inputs :=
   DSDPRandomInputs {
@@ -256,8 +266,7 @@ Definition dsdp_RV (inputs : dsdp_random_inputs) :
 Let alice_traces : RV (dsdp_traceT msg) P :=
       (fun t => tnth t 0) `o dsdp_RV inputs.
 
-Let _v1 := v1 inputs.
-(* BUG: v1 in a RV2 list or in let '(...) will cause syntax error *)
+Let v1 := v1 inputs.
 Let v2 := v2 inputs.
 Let v3 := v3 inputs.
 Let u1 := u1 inputs.
@@ -269,30 +278,41 @@ Let vu2 : {RV P -> msg} := v2 \* u2.
 Let vu3 : {RV P -> msg} := v3 \* u3.
 Let d2  : {RV P -> msg} := vu2 \+ r2.
 Let vu3r : {RV P -> msg} := vu3 \+ r3.
-Let d3 : {RV P -> msg} := d2 \+ vu3r.
-Let s : {RV P -> msg} := d3 \- r2 \- r3 \+ u1 \* _v1.
+Let d3 : {RV P -> msg} := vu3r \+ d2.
+Let s : {RV P -> msg} := d3 \- r2 \- r3 \+ u1 \* v1.
+Let E_alice_d3 : {RV P -> enc} := E alice `o d3.
+Let E_charlie_v3 : {RV P -> enc} := E charlie `o v3.
+Let E_bob_v2 : {RV P -> enc} := E bob `o v2.
+
 Let data := (msg + enc)%type.
 Let d x : data := inl x.
 Let e x : data := inr x.
 
-Check (E alice) `o d3.
-
 Let alice_traces_from_view v : 15.-bseq _ :=
-    let '(s, _v1, u1, u2, u3, r2, r3, E_alice_d3, E_charlie_v3, E_bob_v2) := v in
+    let '(s, v1 , u1, u2, u3, r2, r3, E_alice_d3, E_charlie_v3, E_bob_v2) := v in
     [bseq d s;
             e (E_alice_d3);
             e (E_charlie_v3);
             e (E_bob_v2);
-            d r3; d r2; d u3; d u2; d u1; d _v1].
+            d r3; d r2; d u3; d u2; d u1; d v1].
 
 Lemma alice_traces_ok :
   alice_traces = alice_traces_from_view `o
-                   [%s, _v1, u1, u2, u3, r2, r3,
-                     (E alice) `o d3, (E charlie) `o v3, (E bob) `o v2 ].
+                   [%s, v1 , u1, u2, u3, r2, r3,
+                     E_alice_d3, E_charlie_v3, E_bob_v2 ].
 Proof.
 apply: boolp.funext => x /=.
 rewrite /alice_traces /dsdp_RV /comp_RV /=.
-Fail by rewrite dsdp_traces_ok.
-Abort.
+by rewrite dsdp_traces_ok.
+Qed.
+
+Check alice_traces.
+(* RV (dsdp_traceT msg) P *)
+
+Fail Check `H(v2 | E_alice_d3).
+Lemma alice_traces_entropy_v2 :
+  `H(v2 | alice_traces) = `H(v2 | [%s, _v1, u1, u2, u3, r2, r3,
+      (E alice) `o d3, (E charlie) `o v3, (E bob) `o v2 ]).
+Proof.
 
 End dsdp_information_leakage_proof.
