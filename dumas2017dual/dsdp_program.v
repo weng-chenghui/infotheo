@@ -334,13 +334,10 @@ Learned:
 
 *)
 
-Notation "m $ i " := (i : nat, m : msg)
-  (at level 20).
-
-Definition imsg := (nat * msg)%type.
+Let imsg := (nat * msg)%type.
 
 Definition enc_to_imsg (e : enc) : imsg :=
-  match e with E i m => m $ i end.
+  match e with E i m => (i, m) end.
 
 Definition imsg_to_enc (im : imsg) : enc :=
   let '(i, m) := im in E i m.
@@ -354,13 +351,15 @@ Qed.
 
 HB.instance Definition _ : isCountable enc := CanIsCountable enc_imsgK.
 
-Definition enc_enum (m : imsg) := [:: E i m].
+Definition enc_enum (im : imsg) :=
+  let '(i, m) := im in [:: E i m].
 
-Lemma enc_enumP (i : nat) (m : msg) : Finite.axiom (enc_enum i m).
+Lemma enc_enumP (im : imsg) : Finite.axiom (enc_enum im).
 Proof.
 case.
 move => n s0.
 rewrite /enc_enum /=.
+Abort.
 
 Fail Check `H(v2 | E_alice_d3).
 Fail Lemma alice_traces_entropy_v2 :
