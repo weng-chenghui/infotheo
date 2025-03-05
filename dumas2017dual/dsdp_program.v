@@ -1,5 +1,5 @@
 From HB Require Import structures.
-From mathcomp Require Import all_ssreflect all_algebra fingroup finalg matrix Rstruct ring.
+From mathcomp Require Import all_ssreflect all_algebra fingroup finalg matrix Rstruct ring boolp.
 Require Import realType_ext realType_ln ssr_ext ssralg_ext bigop_ext fdist.
 Require Import proba jfdist_cond entropy graphoid smc_interpreter.
 
@@ -35,9 +35,10 @@ Reserved Notation "u ^h w" (at level 40).
 Section he.
 
 Variable msg : finComRingType.  (* TODO message must be modulo M *)
+Notation imsg := (nat * msg)%type. (* Need this when making `enc` as a finType.*)
 
 Inductive enc : Type :=
-  | E : nat -> msg -> enc.
+  | E : nat -> imsg -> enc.
 
 Definition enc_eq (e1 e2 : enc) : bool :=
   match e1, e2 with
@@ -61,47 +62,59 @@ Qed.
 
 HB.instance Definition _ := hasDecEq.Build enc enc_eqP.
 
-Definition D (p : nat) (e : enc) : msg :=
+Definition D (p : nat) (e : enc) : imsg :=
   match e with
-  | E i m => if i == p then m else 0
-  (* TODO: returning 0 instead of making it an option because it is
-     troublesome when mixing with Send, Recv, etc.
+  | E i m => if i == p then m else (0, 0)
+  (* TODO: returning 0 if it cannot be decryped instead of making it an Nothing
+     because Option is troublesome when mixing with Send, Recv, etc.
   *)
   end.
 
 Definition Emul (e1 e2 : enc) : enc := 
   match (e1, e2) with
-  | (E i1 m1, E i2 m2) => if i1 == i2 then E i1 (m1 + m2) else E 0 0 (* TODO: mod M?*)
+  | (E i1 m1, E i2 m2) => if i1 == i2 then E i1 (m1 + m2) else E 0 (0, 0) (* TODO: mod M?*)
   end.
 
-Definition Epow (e : enc) (m2 : msg) : enc :=
-  match e with
-  | E i m1 => E i (m1 * m2) (* TODO: mod M?*)
+Definition Epow (e : enc) (im2 : imsg) : enc :=
+  match (e, im2) with
+  | (E i (_, m1), (_, m2)) => E i (i, m1 * m2) (* TODO: mod M?*)
   end.
+
+(*
+Definition Mop op (im1 im2 : imsg) : imsg :=
+  (im1.1 + im2.1, op im1.2 im2.2).
+
+*)
+(* TODO: we don't use im.i, but if we want,
+   smc_interpreter.v must be extended to not use iota for #proc,
+   because if we use nat as #proc id,
+   id must be 1,2,4,8 ... so that addition is meaningful to track.
+*)
 
 End he.
 
 Section dsdp.
 
 Variable msg : finComRingType.
-
+Notation imsg := (nat * msg)%type.
 Let enc := enc msg.
 
 Notation "u *h w" := (Emul u w).
 Notation "u ^h w" := (Epow u w).
 
+
 Definition alice : nat := 0.
 Definition bob : nat := 1.
 Definition charlie : nat := 2.
 
-Definition data := (msg + enc)%type.
+Definition data := (imsg + enc)%type.
 Definition d x : data := inl x.
 Definition e x : data := inr x.
 
 Definition Recv_enc frm f : proc data :=
   Recv frm (fun x => if x is inr v then f v else Fail).
 
-Definition pbob (v2 : msg) : proc data :=
+Definition pbob (v2 : imsg) : proc data :=
   Init (d v2) (
   Send alice (e (E bob v2)) (
   Recv_enc alice (fun a2 =>
@@ -110,7 +123,7 @@ Definition pbob (v2 : msg) : proc data :=
     Send charlie (e (a3 *h (E charlie d2))) (
   Finish))))).
 
-Definition pcharlie (v3 : msg) : proc data :=
+Definition pcharlie (v3 : imsg) : proc data :=
   Init (d v3) (
   Send alice (e (E charlie v3)) (
   Recv_enc bob (fun b3 => (
@@ -118,7 +131,9 @@ Definition pcharlie (v3 : msg) : proc data :=
     Send alice (e (E alice d3))
   Finish)))).
 
-Definition palice (v1 u1 u2 u3 r2 r3: msg) : proc data :=
+Variable (a b : imsg).
+
+Definition palice (v1 u1 u2 u3 r2 r3 : imsg) : proc data :=
   Init (d v1) (
   Init (d u1) (
   Init (d u2) (
@@ -134,7 +149,7 @@ Definition palice (v1 u1 u2 u3 r2 r3: msg) : proc data :=
     Recv_enc charlie (fun g =>
     Ret (d ((D alice g) - r2 - r3 + u1 * v1))))))))))))).
   
-Variables (v1 v2 v3 u1 u2 u3 r2 r3 : msg).
+Variables (v1 v2 v3 u1 u2 u3 r2 r3 : imsg).
 Definition dsdp h :=
   (interp h [:: palice v1 u1 u2 u3 r2 r3; pbob v2; pcharlie v3] [::[::];[::];[::]]).
 
@@ -163,14 +178,14 @@ Abort.
 Lemma dsdp_ok :
   dsdp 15 = 
   ([:: Finish; Finish; Finish],
-   [:: [:: d (v3 * u3 + r3 + (v2 * u2 + r2) - r2 - r3 + u1 * v1);
-           e (E alice (v3 * u3 + r3 + (v2 * u2 + r2))); 
+   [:: [:: d (v3 *o u3 +o r3 +o (v2 *o u2 +o r2) -o r2 -o r3 + u1 *o v1);
+           e (E alice (v3 *o u3 +o r3 +o (v2 *o u2 +o r2))); 
            e (E charlie v3);
            e (E bob v2);
            d r3; d r2; d u3; d u2; d u1; d v1];
-       [:: e (E charlie (v3 * u3 + r3));
-           e (E bob (v2 * u2 + r2)); d v2];  (* Eventually will be recorded in Recv or Ret*)
-       [:: e (E charlie (v3 * u3 + r3 + (v2 * u2 + r2))); d v3]
+       [:: e (E charlie (v3 *o u3 +o r3));
+           e (E bob (v2 *o u2 +o r2)); d v2];  (* Eventually will be recorded in Recv or Ret*)
+       [:: e (E charlie (v3 *o u3 +o r3 +o (v2 *o u2 +o r2))); d v3]
   ]).
 Proof. reflexivity. Qed.
 
@@ -321,7 +336,46 @@ vs. Expected:
 
 (Phant (Finite.sort ?A0))
 
+----
+
+Refer to https://math-comp.github.io/htmldoc/mathcomp.ssreflect.tuple.html#bseq_tagged_tuple
+to define a finType.
+
+Learned:
+
+1. No need to map to nat; just need to map to another finType (ordinal in the reference)
+2. Extra parameters in the constructor cause problems (need to be implicit).
+3. One reason for why defined libraries have so many implicit parameters.
+
 *)
+
+Notation "m $ i " := (i : nat, m : msg)
+  (at level 20).
+
+Definition imsg := (nat * msg)%type.
+
+Definition enc_to_imsg (e : enc) : imsg :=
+  match e with E i m => m $ i end.
+
+Definition imsg_to_enc (im : imsg) : enc :=
+  let '(i, m) := im in E i m.
+
+Lemma enc_imsgK : cancel enc_to_imsg imsg_to_enc.
+Proof.
+case.
+move => n s0.
+rewrite /imsg_to_enc /enc_to_imsg //.
+Qed.
+
+HB.instance Definition _ : isCountable enc := CanIsCountable enc_imsgK.
+
+Definition enc_enum (m : imsg) := [:: E i m].
+
+Lemma enc_enumP (i : nat) (m : msg) : Finite.axiom (enc_enum i m).
+Proof.
+case.
+move => n s0.
+rewrite /enc_enum /=.
 
 Fail Check `H(v2 | E_alice_d3).
 Fail Lemma alice_traces_entropy_v2 :
