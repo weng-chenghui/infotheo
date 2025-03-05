@@ -35,10 +35,9 @@ Reserved Notation "u ^h w" (at level 40).
 Section he.
 
 Variable msg : finComRingType.  (* TODO message must be modulo M *)
-Notation imsg := (nat * msg)%type. (* Need this when making `enc` as a finType.*)
 
 Inductive enc : Type :=
-  | E : nat -> imsg -> enc.
+  | E : nat -> msg -> enc.
 
 Definition enc_eq (e1 e2 : enc) : bool :=
   match e1, e2 with
@@ -62,59 +61,47 @@ Qed.
 
 HB.instance Definition _ := hasDecEq.Build enc enc_eqP.
 
-Definition D (p : nat) (e : enc) : imsg :=
+Definition D (p : nat) (e : enc) : msg :=
   match e with
-  | E i m => if i == p then m else (0, 0)
-  (* TODO: returning 0 if it cannot be decryped instead of making it an Nothing
-     because Option is troublesome when mixing with Send, Recv, etc.
+  | E i m => if i == p then m else 0
+  (* TODO: returning 0 instead of making it an option because it is
+     troublesome when mixing with Send, Recv, etc.
   *)
   end.
 
 Definition Emul (e1 e2 : enc) : enc := 
   match (e1, e2) with
-  | (E i1 m1, E i2 m2) => if i1 == i2 then E i1 (m1 + m2) else E 0 (0, 0) (* TODO: mod M?*)
+  | (E i1 m1, E i2 m2) => if i1 == i2 then E i1 (m1 + m2) else E 0 0 (* TODO: mod M?*)
   end.
 
-Definition Epow (e : enc) (im2 : imsg) : enc :=
-  match (e, im2) with
-  | (E i (_, m1), (_, m2)) => E i (i, m1 * m2) (* TODO: mod M?*)
+Definition Epow (e : enc) (m2 : msg) : enc :=
+  match e with
+  | E i m1 => E i (m1 * m2) (* TODO: mod M?*)
   end.
-
-(*
-Definition Mop op (im1 im2 : imsg) : imsg :=
-  (im1.1 + im2.1, op im1.2 im2.2).
-
-*)
-(* TODO: we don't use im.i, but if we want,
-   smc_interpreter.v must be extended to not use iota for #proc,
-   because if we use nat as #proc id,
-   id must be 1,2,4,8 ... so that addition is meaningful to track.
-*)
 
 End he.
 
 Section dsdp.
 
 Variable msg : finComRingType.
-Notation imsg := (nat * msg)%type.
+
 Let enc := enc msg.
 
 Notation "u *h w" := (Emul u w).
 Notation "u ^h w" := (Epow u w).
 
-
 Definition alice : nat := 0.
 Definition bob : nat := 1.
 Definition charlie : nat := 2.
 
-Definition data := (imsg + enc)%type.
+Definition data := (msg + enc)%type.
 Definition d x : data := inl x.
 Definition e x : data := inr x.
 
 Definition Recv_enc frm f : proc data :=
   Recv frm (fun x => if x is inr v then f v else Fail).
 
-Definition pbob (v2 : imsg) : proc data :=
+Definition pbob (v2 : msg) : proc data :=
   Init (d v2) (
   Send alice (e (E bob v2)) (
   Recv_enc alice (fun a2 =>
@@ -123,7 +110,7 @@ Definition pbob (v2 : imsg) : proc data :=
     Send charlie (e (a3 *h (E charlie d2))) (
   Finish))))).
 
-Definition pcharlie (v3 : imsg) : proc data :=
+Definition pcharlie (v3 : msg) : proc data :=
   Init (d v3) (
   Send alice (e (E charlie v3)) (
   Recv_enc bob (fun b3 => (
@@ -131,9 +118,7 @@ Definition pcharlie (v3 : imsg) : proc data :=
     Send alice (e (E alice d3))
   Finish)))).
 
-Variable (a b : imsg).
-
-Definition palice (v1 u1 u2 u3 r2 r3 : imsg) : proc data :=
+Definition palice (v1 u1 u2 u3 r2 r3: msg) : proc data :=
   Init (d v1) (
   Init (d u1) (
   Init (d u2) (
@@ -149,7 +134,7 @@ Definition palice (v1 u1 u2 u3 r2 r3 : imsg) : proc data :=
     Recv_enc charlie (fun g =>
     Ret (d ((D alice g) - r2 - r3 + u1 * v1))))))))))))).
   
-Variables (v1 v2 v3 u1 u2 u3 r2 r3 : imsg).
+Variables (v1 v2 v3 u1 u2 u3 r2 r3 : msg).
 Definition dsdp h :=
   (interp h [:: palice v1 u1 u2 u3 r2 r3; pbob v2; pcharlie v3] [::[::];[::];[::]]).
 
@@ -178,14 +163,14 @@ Abort.
 Lemma dsdp_ok :
   dsdp 15 = 
   ([:: Finish; Finish; Finish],
-   [:: [:: d (v3 *o u3 +o r3 +o (v2 *o u2 +o r2) -o r2 -o r3 + u1 *o v1);
-           e (E alice (v3 *o u3 +o r3 +o (v2 *o u2 +o r2))); 
+   [:: [:: d (v3 * u3 + r3 + (v2 * u2 + r2) - r2 - r3 + u1 * v1);
+           e (E alice (v3 * u3 + r3 + (v2 * u2 + r2))); 
            e (E charlie v3);
            e (E bob v2);
            d r3; d r2; d u3; d u2; d u1; d v1];
-       [:: e (E charlie (v3 *o u3 +o r3));
-           e (E bob (v2 *o u2 +o r2)); d v2];  (* Eventually will be recorded in Recv or Ret*)
-       [:: e (E charlie (v3 *o u3 +o r3 +o (v2 *o u2 +o r2))); d v3]
+       [:: e (E charlie (v3 * u3 + r3));
+           e (E bob (v2 * u2 + r2)); d v2];  (* Eventually will be recorded in Recv or Ret*)
+       [:: e (E charlie (v3 * u3 + r3 + (v2 * u2 + r2))); d v3]
   ]).
 Proof. reflexivity. Qed.
 
