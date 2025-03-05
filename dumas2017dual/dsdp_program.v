@@ -42,8 +42,6 @@ Definition enc := (nat * msg)%type.
 
 Definition E i m : enc := (i, m).
 
-Check E 1 2.
-
 Definition enc_eq (e1 e2 : enc) : bool :=
   match e1, e2 with
   | (i1, m1), (i2, m2) => (i1 == i2) && (m1 == m2)
@@ -339,40 +337,21 @@ Finite.copy foo (pcan_type foo_natK) where foo_natK will be some proof of cancel
 
 https://coq.gitlab.io/zulip-archive/stream/237664-math-comp-users/topic/.27Declaring.27.20a.20type.20to.20be.20finite.html
 
-Learned:
-
-1. No need to map to nat; just need to map to another finType (ordinal in the reference)
-2. Extra parameters in the constructor cause problems (need to be implicit).
-3. One reason for why defined libraries have so many implicit parameters.
-
 *)
 
-Let imsg := (nat * msg)%type.
+Definition enc_to_msg (e : enc) : msg :=
+  match e with (i, m) => m end.
 
-Definition enc_to_imsg (e : enc) : imsg :=
-  match e with (i, m) => E i m end.
+Definition msg_to_enc (m : msg) : enc :=
+  E 0 m.
 
-Definition imsg_to_enc (im : imsg) : enc :=
-  let '(i, m) := im in E i m.
-
-Lemma enc_imsgK : cancel enc_to_imsg imsg_to_enc.
+Lemma enc_imsgK : cancel enc_to_msg msg_to_enc.
 Proof.
 case.
 move => n s0.
-rewrite /imsg_to_enc /enc_to_imsg //.
-Qed.
-
-HB.instance Definition _ : isCountable enc := CanIsCountable enc_imsgK.
-
-Definition enc_enum (im : imsg) :=
-  let '(i, m) := im in [:: E i m].
-
-Lemma enc_enumP (im : imsg) : Finite.axiom (enc_enum im).
-Proof.
-case.
-move => n s0.
-rewrite /enc_enum /=.
+rewrite /msg_to_enc /enc_to_msg //.
 Abort.
+
 
 Fail Check `H(v2 | E_alice_d3).
 Fail Lemma alice_traces_entropy_v2 :
