@@ -306,8 +306,22 @@ rewrite /alice_traces /dsdp_RV /comp_RV /=.
 by rewrite dsdp_traces_ok.
 Qed.
 
-Check alice_traces.
-(* RV (dsdp_traceT msg) P *)
+Variables (A : {RV P -> enc}) (B : {RV P -> msg}).
+
+Fail Check `H(B | A).
+(* Possible issue: enc should be finType?
+   msg : finComRingType so it is finType already.
+   enc ?
+
+(Phant
+       (prod (Equality.sort (FinRing_ComRing__to__eqtype_Equality msg))
+          (Equality.sort (dsdp_program_enc__canonical__eqtype_Equality msg))))"
+
+vs. Expected:
+
+(Phant (Finite.sort ?A0))
+
+*)
 
 Fail Check `H(v2 | E_alice_d3).
 Lemma alice_traces_entropy_v2 :
