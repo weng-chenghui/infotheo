@@ -324,9 +324,8 @@ vs. Expected:
 *)
 
 Fail Check `H(v2 | E_alice_d3).
-Lemma alice_traces_entropy_v2 :
-  `H(v2 | alice_traces) = `H(v2 | [%s, _v1, u1, u2, u3, r2, r3,
+Fail Lemma alice_traces_entropy_v2 :
+  `H(v2 | alice_traces) = `H(v2 | [%s, v1 , u1, u2, u3, r2, r3,
       (E alice) `o d3, (E charlie) `o v3, (E bob) `o v2 ]).
-Proof.
 
 End dsdp_information_leakage_proof.
