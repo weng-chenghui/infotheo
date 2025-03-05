@@ -337,21 +337,33 @@ Finite.copy foo (pcan_type foo_natK) where foo_natK will be some proof of cancel
 
 https://coq.gitlab.io/zulip-archive/stream/237664-math-comp-users/topic/.27Declaring.27.20a.20type.20to.20be.20finite.html
 
+----
+
+In mathcomp, when proving Option is finType:
+
+    Variable T : finType.
+    Definition option_enum := None :: map some (enumF T).
+
+So that map `some` to each member of T to get a fin seq of options.
+
+    Lemma option_enumP : Finite.axiom option_enum.
+    Proof. by case=> [x|]; rewrite /= count_map (count_pred0, enumP). Qed.
+
+Note that `rewrite (count_pred0, enumP)` means trying these tactics one by one.
+The term `case=> [x|]` generates one goal for each constructor.
+The term `count_map` converts a seq to a preim set.
+The term `count_pred0` turns a pred0 seq to 0.
+The term `enumP` is  `Finite.axiom (Finite.enum T)`
+
+So if T of Option T is finType, Option T is also a finType.
+Indeed Option can contain nat and other types not finType,
+but since T is a type variable, Coq can judge when it is finType.
+
+
+This is to say, if `enc` can accept a finType party index, like an ordinal,
+we can prove it as a finType. But if we give it an nat, then no.
+
 *)
-
-Definition enc_to_msg (e : enc) : msg :=
-  match e with (i, m) => m end.
-
-Definition msg_to_enc (m : msg) : enc :=
-  E 0 m.
-
-Lemma enc_imsgK : cancel enc_to_msg msg_to_enc.
-Proof.
-case.
-move => n s0.
-rewrite /msg_to_enc /enc_to_msg //.
-Abort.
-
 
 Fail Check `H(v2 | E_alice_d3).
 Fail Lemma alice_traces_entropy_v2 :
