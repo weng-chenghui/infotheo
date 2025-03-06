@@ -318,7 +318,7 @@ Fail Check `H(B | A).
 
 (Phant
        (prod (Equality.sort (FinRing_ComRing__to__eqtype_Equality msg))
-          (Equality.sort (dsdp_program_enc__canonical__eqtype_Equality msg))))"
+          (Equality.sort (dsdp_program_enc__canonical__eqtype_Equality msg))))
 
 vs. Expected:
 
