@@ -408,10 +408,16 @@ Section eqn1.
 
 Check scp.cpr_cond_entropy.
 
+Let w := (#|(party:finType)| * m).-1.
 Let Y1 := v2.
 Let Y2 := alice_view.
 Let Y3 := E_bob_v2.
-Fail Let Y3_unif : `p_ Y3 = fdist_uniform (n:=w.-1) card_enc.
+Let card_Y3 : #|(enc:finType)| = w.+1.
+Proof.
+rewrite /enc /dsdp_program.enc /w.
+Abort.
+
+Fail Let Y3_unif : `p_ Y3 = fdist_uniform (n:=w) card_enc.
 
 
 Lemma eqn1P :
