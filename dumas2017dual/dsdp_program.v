@@ -259,12 +259,8 @@ Let card_msg : #|msg| = m.
 Proof. by rewrite card_ord. Qed.
 
 Let enc := enc party msg.
-Let card_enc : #|(enc : finType)| = (m^(#|(party : finType)|))%nat.
-Proof.
-rewrite !cardT.
-rewrite /enc /dsdp_program.enc.
-Search "enum" "tuple".
-Abort.
+Let card_enc : #|(enc : finType)| = (#|(party : finType)| * m).
+Proof. by rewrite /enc /dsdp_program.enc card_prod card_ord //=. Qed.
 
 Let enc0 := E NoParty (0 : msg).
 
@@ -415,8 +411,7 @@ Check scp.cpr_cond_entropy.
 Let Y1 := v2.
 Let Y2 := alice_view.
 Let Y3 := E_bob_v2.
-Fail Let card_TY3 : #|enc| = m.
-Fail Let Y3_unif : `p_ Y3 = fdist_uniform card_TY3.
+Fail Let Y3_unif : `p_ Y3 = fdist_uniform (n:=w.-1) card_enc.
 
 
 Lemma eqn1P :
