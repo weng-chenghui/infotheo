@@ -416,7 +416,7 @@ transitivity (`H(x2 | [% alice_traces, [%x1, s1, r1, x2', t, y1]])).
   have -> : [% x1, s1, r1, x2', t, y1] = f `o alice_traces.
     by apply: boolp.funext => x /=; rewrite alice_traces_ok /comp_RV fK.
   by rewrite scp.fun_cond_removal.
-by rewrite alice_traces_ok cond_entropyC scp.fun_cond_removal.
+by rewrite alice_traces_ok scp.cond_entropyC scp.fun_cond_removal.
 Qed.
 
 Let bob_traces_from_view xs : 11.-bseq _ :=
@@ -444,7 +444,7 @@ transitivity (`H(x1 | [% bob_traces, [%x2, s2, x1', r2, y2]])).
   have -> : [%x2, s2, x1', r2, y2] = f `o bob_traces.
     by apply: boolp.funext => x; rewrite bob_traces_ok /comp_RV fK.
   by rewrite scp.fun_cond_removal.
-by rewrite bob_traces_ok cond_entropyC scp.fun_cond_removal.
+by rewrite bob_traces_ok scp.cond_entropyC scp.fun_cond_removal.
 Qed.
 
 Let pnegy2_unif :
