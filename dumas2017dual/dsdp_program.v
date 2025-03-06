@@ -36,9 +36,10 @@ Section he.
   
 (* TRY: define enc as a tuple instead of an inductive type *)
 
+Variable party : finType.
 Variable msg : finComRingType.  (* TODO message must be modulo M *)
 
-Definition enc := (nat * msg)%type.
+Definition enc := (party * msg)%type.
 
 Definition E i m : enc := (i, m).
 
@@ -64,7 +65,7 @@ Qed.
 
 HB.instance Definition _ := hasDecEq.Build enc enc_eqP.
 
-Definition D (p : nat) (e : enc) : msg :=
+Definition D (p : party) (e : enc) : msg :=
   match e with
   | (i, m) => if i == p then m else 0
   (* TODO: returning 0 instead of making it an option because it is
@@ -74,7 +75,7 @@ Definition D (p : nat) (e : enc) : msg :=
 
 Definition Emul (e1 e2 : enc) : enc := 
   match (e1, e2) with
-  | ((i1, m1), (i2, m2)) => if i1 == i2 then E i1 (m1 + m2) else E 0 0 (* TODO: mod M?*)
+  | ((i1, m1), (i2, m2)) => if i1 == i2 then E i1 (m1 + m2) else E i1 0 (* TODO: mod M?*)
   end.
 
 Definition Epow (e : enc) (m2 : msg) : enc :=
@@ -86,39 +87,77 @@ End he.
 
 Section dsdp.
 
-Variable msg : finComRingType.
+Inductive party := Alice | Bob | Charlie | NoParty.
 
-Let enc := enc msg.
+Definition party_eqb_subproof (p1 p2: party) : { p1 = p2 } + { p1 <> p2 }.
+Proof. decide equality. Defined.
+
+Definition party_eqb (p1 p2: party) : bool :=
+  if party_eqb_subproof p1 p2 then true else false. 
+
+Lemma party_eqP : Equality.axiom party_eqb.
+Proof.
+move=> p1 p2.
+rewrite /party_eqb.
+by case: party_eqb_subproof => /= H;constructor.
+Qed.
+
+HB.instance Definition _ := hasDecEq.Build party party_eqP.
+
+Definition party_to_nat (a : party) : nat :=
+  match a with Alice => 0 | Bob => 1 | Charlie => 2 | NoParty => 3 end.
+
+Definition nat_to_party (a : nat) : party :=
+  match a with 0 => Alice | 1 => Bob | 2 => Charlie | _ => NoParty end.
+
+Lemma party_natK : cancel party_to_nat nat_to_party.
+Proof. by case. Qed.
+
+HB.instance Definition _ : isCountable party := CanIsCountable party_natK.
+
+Definition party_enum := [:: Alice; Bob; Charlie; NoParty].
+
+Lemma party_enumP : Finite.axiom party_enum.
+Proof. by case. Qed.
+
+HB.instance Definition _ := isFinite.Build party party_enumP.
+
+Variable msg : finComRingType.
+Let enc := enc party msg.
 
 Notation "u *h w" := (Emul u w).
 Notation "u ^h w" := (Epow u w).
 
-Definition alice : nat := 0.
-Definition bob : nat := 1.
-Definition charlie : nat := 2.
+Definition alice : party := Alice.
+Definition bob : party := Bob.
+Definition charlie : party := Charlie.
 
 Definition data := (msg + enc)%type.
 Definition d x : data := inl x.
 Definition e x : data := inr x.
+
+Notation "'n(' w ')' " := (party_to_nat w).
+
+Check n(alice).
 
 Definition Recv_enc frm f : proc data :=
   Recv frm (fun x => if x is inr v then f v else Fail).
 
 Definition pbob (v2 : msg) : proc data :=
   Init (d v2) (
-  Send alice (e (E bob v2)) (
-  Recv_enc alice (fun a2 =>
-  Recv_enc alice (fun a3 =>
+  Send n(alice) (e (E bob v2)) (
+  Recv_enc n(alice) (fun a2 =>
+  Recv_enc n(alice) (fun a3 =>
   let d2 := D bob a2 in  
-    Send charlie (e (a3 *h (E charlie d2))) (
+    Send n(charlie) (e (a3 *h (E charlie d2))) (
   Finish))))).
 
 Definition pcharlie (v3 : msg) : proc data :=
   Init (d v3) (
-  Send alice (e (E charlie v3)) (
-  Recv_enc bob (fun b3 => (
+  Send n(alice) (e (E charlie v3)) (
+  Recv_enc n(bob) (fun b3 => (
   let d3 := D charlie b3 in
-    Send alice (e (E alice d3))
+    Send n(alice) (e (E alice d3))
   Finish)))).
 
 Definition palice (v1 u1 u2 u3 r2 r3: msg) : proc data :=
@@ -128,13 +167,13 @@ Definition palice (v1 u1 u2 u3 r2 r3: msg) : proc data :=
   Init (d u3) (
   Init (d r2) (
   Init (d r3) (
-  Recv_enc bob (fun c2 =>
-  Recv_enc charlie (fun c3 =>
+  Recv_enc n(bob) (fun c2 =>
+  Recv_enc n(charlie) (fun c3 =>
   let a2 := (c2 ^h u2 *h (E bob r2)) in
   let a3 := (c3 ^h u3 *h (E charlie r3)) in
-    Send bob (e a2) (
-    Send bob (e a3) (
-    Recv_enc charlie (fun g =>
+    Send n(bob) (e a2) (
+    Send n(bob) (e a3) (
+    Recv_enc n(charlie) (fun g =>
     Ret (d ((D alice g) - r2 - r3 + u1 * v1))))))))))))).
   
 Variables (v1 v2 v3 u1 u2 u3 r2 r3 : msg).
@@ -222,7 +261,7 @@ Variable T : finType.
 Variable P : R.-fdist T.
 Variable msg : finComRingType.
 
-Let enc := enc msg.
+Let enc := enc party msg.
 
 Notation "u *h w" := (Emul u w).
 Notation "u ^h w" := (Epow u w).
@@ -311,7 +350,7 @@ Qed.
 
 Variables (A : {RV P -> enc}) (B : {RV P -> msg}).
 
-Fail Check `H(B | A).
+Check `H(B | A).
 (* Possible issue: enc should be finType?
    msg : finComRingType so it is finType already.
    enc ?
