@@ -34,10 +34,8 @@ Reserved Notation "u ^h w" (at level 40).
 
 Section he.
   
-(* TRY: define enc as a tuple instead of an inductive type *)
-
 Variable party : finType.
-Variable msg : finComRingType.  (* TODO message must be modulo M *)
+Variable msg : finComRingType.
 
 Definition enc := (party * msg)%type.
 
@@ -67,22 +65,20 @@ Qed.
 HB.instance Definition _ := hasDecEq.Build enc enc_eqP.
 *)
 
-Definition D (p : party) (e : enc) : msg :=
+Definition D (p : party) (e : enc) : option msg :=
   match e with
-  | (i, m) => if i == p then m else 0
-  (* TODO: returning 0 instead of making it an option because it is
-     troublesome when mixing with Send, Recv, etc.
-  *)
+  | (i, m) => if i == p then Some m else None
   end.
 
+(* TODO: use option? *)
 Definition Emul (e1 e2 : enc) : enc := 
   match (e1, e2) with
-  | ((i1, m1), (i2, m2)) => if i1 == i2 then E i1 (m1 + m2) else E i1 0 (* TODO: mod M?*)
+  | ((i1, m1), (i2, m2)) => if i1 == i2 then E i1 (m1 + m2) else E i1 0
   end.
 
 Definition Epow (e : enc) (m2 : msg) : enc :=
   match e with
-  | (i, m1) => E i (m1 * m2) (* TODO: mod M?*)
+  | (i, m1) => E i (m1 * m2)
   end.
 
 End he.
@@ -147,25 +143,32 @@ Definition e x : data := inr x.
 
 Notation "'n(' w ')' " := (party_to_nat w).
 
-Check n(alice).
+(* Should receive something the party can decrypt *)
+Definition Recv_dec frm i f : proc data :=
+  Recv frm (fun x => if x is inr v then
+                       if D i v is Some v' then f v' else Fail
+                     else Fail).
 
-Definition Recv_enc frm f : proc data :=
-  Recv frm (fun x => if x is inr v then f v else Fail).
+(* Should receive something the party cannot decrypt,
+   but can do HE computation over it.
+*)
+Definition Recv_enc frm i f : proc data :=
+  Recv frm (fun x => if x is inr v then
+                       if D i v is Some v' then Fail else f v
+                     else Fail).
 
 Definition pbob (v2 : msg) : proc data :=
   Init (d v2) (
   Send n(alice) (e (E bob v2)) (
-  Recv_enc n(alice) (fun a2 =>
-  Recv_enc n(alice) (fun a3 =>
-  let d2 := D bob a2 in  
+  Recv_dec n(alice) bob (fun d2 =>
+  Recv_enc n(alice) bob (fun a3 =>
     Send n(charlie) (e (a3 *h (E charlie d2))) (
   Finish))))).
 
 Definition pcharlie (v3 : msg) : proc data :=
   Init (d v3) (
   Send n(alice) (e (E charlie v3)) (
-  Recv_enc n(bob) (fun b3 => (
-  let d3 := D charlie b3 in
+  Recv_dec n(bob) charlie (fun d3 => (
     Send n(alice) (e (E alice d3))
   Finish)))).
 
@@ -176,14 +179,14 @@ Definition palice (v1 u1 u2 u3 r2 r3: msg) : proc data :=
   Init (d u3) (
   Init (d r2) (
   Init (d r3) (
-  Recv_enc n(bob) (fun c2 =>
-  Recv_enc n(charlie) (fun c3 =>
+  Recv_enc n(bob) alice (fun c2 =>
+  Recv_enc n(charlie) alice (fun c3 =>
   let a2 := (c2 ^h u2 *h (E bob r2)) in
   let a3 := (c3 ^h u3 *h (E charlie r3)) in
     Send n(bob) (e a2) (
     Send n(bob) (e a3) (
-    Recv_enc n(charlie) (fun g =>
-    Ret (d ((D alice g) - r2 - r3 + u1 * v1))))))))))))).
+    Recv_dec n(charlie) alice (fun g =>
+    Ret (d ((g - r2 - r3 + u1 * v1)))))))))))))).
   
 Variables (v1 v2 v3 u1 u2 u3 r2 r3 : msg).
 Definition dsdp h :=
@@ -360,61 +363,9 @@ Qed.
 Variables (A : {RV P -> enc}) (B : {RV P -> msg}).
 
 Check `H(B | A).
-(* Possible issue: enc should be finType?
-   msg : finComRingType so it is finType already.
-   enc ?
 
-(Phant
-       (prod (Equality.sort (FinRing_ComRing__to__eqtype_Equality msg))
-          (Equality.sort (dsdp_program_enc__canonical__eqtype_Equality msg))))
-
-vs. Expected:
-
-(Phant (Finite.sort ?A0))
-
-----
-
-Refer to https://math-comp.github.io/htmldoc/mathcomp.ssreflect.tuple.html#bseq_tagged_tuple
-to define a finType.
-
-----
-
-Refer to another one:
-
-Finite.copy foo (pcan_type foo_natK) where foo_natK will be some proof of cancelation of some ffunctions foo -> nat and nat -> foo (for instance).
-
-https://coq.gitlab.io/zulip-archive/stream/237664-math-comp-users/topic/.27Declaring.27.20a.20type.20to.20be.20finite.html
-
-----
-
-In mathcomp, when proving Option is finType:
-
-    Variable T : finType.
-    Definition option_enum := None :: map some (enumF T).
-
-So that map `some` to each member of T to get a fin seq of options.
-
-    Lemma option_enumP : Finite.axiom option_enum.
-    Proof. by case=> [x|]; rewrite /= count_map (count_pred0, enumP). Qed.
-
-Note that `rewrite (count_pred0, enumP)` means trying these tactics one by one.
-The term `case=> [x|]` generates one goal for each constructor.
-The term `count_map` converts a seq to a preim set.
-The term `count_pred0` turns a pred0 seq to 0.
-The term `enumP` is  `Finite.axiom (Finite.enum T)`
-
-So if T of Option T is finType, Option T is also a finType.
-Indeed Option can contain nat and other types not finType,
-but since T is a type variable, Coq can judge when it is finType.
-
-
-This is to say, if `enc` can accept a finType party index, like an ordinal,
-we can prove it as a finType. But if we give it an nat, then no.
-
-*)
-
-Fail Check `H(v2 | E_alice_d3).
-Fail Lemma alice_traces_entropy_v2 :
+Check `H(v2 | E_alice_d3).
+Lemma alice_traces_entropy_v2 :
   `H(v2 | alice_traces) = `H(v2 | [%s, v1 , u1, u2, u3, r2, r3,
       (E alice) `o d3, (E charlie) `o v3, (E bob) `o v2 ]).
 
