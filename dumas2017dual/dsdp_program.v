@@ -43,6 +43,7 @@ Definition enc := (party * msg)%type.
 
 Definition E i m : enc := (i, m).
 
+(*
 Definition enc_eq (e1 e2 : enc) : bool :=
   match e1, e2 with
   | (i1, m1), (i2, m2) => (i1 == i2) && (m1 == m2)
@@ -64,6 +65,7 @@ apply/andP => //=.
 Qed.
 
 HB.instance Definition _ := hasDecEq.Build enc enc_eqP.
+*)
 
 Definition D (p : party) (e : enc) : msg :=
   match e with
@@ -85,7 +87,7 @@ Definition Epow (e : enc) (m2 : msg) : enc :=
 
 End he.
 
-Section dsdp.
+Section party_def.
 
 Inductive party := Alice | Bob | Charlie | NoParty.
 
@@ -122,7 +124,14 @@ Proof. by case. Qed.
 
 HB.instance Definition _ := isFinite.Build party party_enumP.
 
-Variable msg : finComRingType.
+End party_def.
+
+Section dsdp.
+
+Variable m_minus_2 : nat.
+Local Notation m := m_minus_2.+2.
+Let msg := 'I_m.  (* = Z/mZ *)
+
 Let enc := enc party msg.
 
 Notation "u *h w" := (Emul u w).
