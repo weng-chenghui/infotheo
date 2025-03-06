@@ -325,6 +325,8 @@ Let s : {RV P -> msg} := d3 \- r2 \- r3 \+ u1 \* v1.
 Let E_alice_d3 : {RV P -> enc} := E alice `o d3.
 Let E_charlie_v3 : {RV P -> enc} := E charlie `o v3.
 Let E_bob_v2 : {RV P -> enc} := E bob `o v2.
+Let alice_view := [%s, v1 , u1, u2, u3, r2, r3,
+      E_alice_d3, E_charlie_v3, E_bob_v2].
 
 Let alice_traces_from_view v : 15.-bseq _ :=
     let '(s, v1 , u1, u2, u3, r2, r3, E_alice_d3, E_charlie_v3, E_bob_v2) := v in
@@ -334,7 +336,7 @@ Let alice_traces_from_view v : 15.-bseq _ :=
             e (E_bob_v2);
             d r3; d r2; d u3; d u2; d u1; d v1].
 
-Lemma alice_traces_ok :
+Lemma alice_traces_from_viewP :
   alice_traces = alice_traces_from_view `o
                    [%s, v1 , u1, u2, u3, r2, r3,
                      E_alice_d3, E_charlie_v3, E_bob_v2 ].
@@ -344,13 +346,10 @@ rewrite /alice_traces /dsdp_RV /comp_RV /=.
 by rewrite dsdp_traces_ok.
 Qed.
 
-Lemma ce_v2_alice_traces:
-  let alice_view := [%s, v1 , u1, u2, u3, r2, r3,
-      (E alice) `o d3, (E charlie) `o v3, (E bob) `o v2 ] in
-  `H(v2 | alice_traces ) = `H(v2 | alice_view ).
+Lemma ce_alice_traces_view (w : finType) (v : {RV P -> w}) :
+  `H(v | alice_traces ) = `H(v | alice_view ).
 Proof.
-move => alice_view.
-transitivity (`H(v2 | [%alice_traces, alice_view])).
+transitivity (`H(v | [%alice_traces, alice_view])).
   pose f (xs : dsdp_traceT) :=
     if xs is Bseq [:: inl s;
            inr E_alice_d3; 
@@ -362,12 +361,32 @@ transitivity (`H(v2 | [%alice_traces, alice_view])).
   have fK : cancel alice_traces_from_view f.
     by move => [] [] [] [] [] [] [] [] [] [].
   have -> : alice_view = f `o alice_traces.
-    by apply: boolp.funext => x /= ; rewrite alice_traces_ok /comp_RV fK.
+    by apply: boolp.funext => x /= ; rewrite alice_traces_from_viewP /comp_RV fK.
   by rewrite scp.fun_cond_removal.
-by rewrite alice_traces_ok scp.cond_entropyC scp.fun_cond_removal.
+by rewrite alice_traces_from_viewP scp.cond_entropyC scp.fun_cond_removal.
 Qed.
 
-
+Lemma alice_is_leakage_free :
+  `H(v2 | alice_view ) = `H `p_v2.
+Proof.
+transitivity (`H(v2| [%s, v1 , u1, u2, u3, r2, r3, E_alice_d3, E_charlie_v3] )).
+admit.
+transitivity (`H(v2| [%s, v1 , u1, u2, u3, r2, r3, E_alice_d3] )).
+admit.
+transitivity (`H(v2| [%s, v1 , u1, u2, u3, r2, r3] )).
+admit.
+transitivity (`H(v2| [%s, v1 , u1, u2, u3, r2] )).
+admit.
+transitivity (`H(v2| [%s, v1 , u1, u2, u3] )).
+admit.
+transitivity (`H(v2| [%s, v1 , u1, u2] )).
+admit.
+transitivity (`H(v2| [%s, v1 , u1] )).
+admit.
+transitivity (`H(v2| [%s, v1] )).
+admit.
+transitivity (`H(v2| s )).
+admit.
 Abort.
 
 End dsdp_information_leakage_proof.
