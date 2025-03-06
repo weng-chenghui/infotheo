@@ -325,9 +325,33 @@ Let E_alice_d3 : {RV P -> enc} := E alice `o d3.
 Let E_charlie_v3 : {RV P -> enc} := E charlie `o v3.
 Let E_bob_v2 : {RV P -> enc} := E bob `o v2.
 
+Local Open Scope fset_scope.
+
+(* E_charlie_v3 means it is encrypted (so generated) by the key of charlie.
+   So it is counted as "generated" on party charlie.
+   Therefore, encrypted RVs should be independent of other parties.
+   Even other parties can add messages by HE properties, but addition to a RV
+   means the independence keeps after the addition.
+*)
+Let rmp : rngmap data := [fset
+  (E_alice_d3, [::true]);
+  (E_bob_v2, [::false; true]);
+  (E_charlie_v3, [::false; false; true])
+].
+
 (* Use these two and apply_inde_RV_comp to prove trivial indeps*)
-Let alice_inputsT := (msg * msg * msg * msg * msg * msg)%type.
 Let alice_inputs_RV := [% v1 , u1, u2, u3, r2, r3].
+Let alice_inputsT := (msg * msg * msg * msg * msg * msg)%type.
+
+Goal P |= [% v1 , u1] _|_ v2.
+Proof.
+have := alice_indep inputs.
+pose f := fun (ls : alice_inputsT) =>
+  let '(v1 , u1, _, _, _, _) := ls in (v1 , u1).
+pose g := fun (rs : (msg * msg)) =>
+  let '(v2 , v3) := rs in v2.
+by apply_inde_rv_comp f g.
+Qed.
 
 Let alice_view := [%s, v1 , u1, u2, u3, r2, r3,
       E_alice_d3, E_charlie_v3, E_bob_v2].
@@ -378,6 +402,17 @@ Proof.
 transitivity (`H(v2| [%s, v1 , u1, u2, u3, r2, r3, E_alice_d3, E_charlie_v3] )).
   have H : P |= E_bob_v2 _|_ [%s, v1 , u1, u2, u3, r2, r3, E_alice_d3, E_charlie_v3].
     rewrite /E_bob_v2.
+    have := alice_indep inputs.
+    pose f := fun (ls : alice_inputsT) =>
+    let '(v1 , u1, u2, u3, r2, r3) := ls in
+         (v1 , u1, u2, u3, r2, r3,
+          E alice (v3 * u3 + r3 + v2 * u2 + r2),
+          E charlie v3,
+          E bob v2).
+    pose g := fun (rs : (msg * msg)) =>
+    let '(v2 , v3) := rs in v2.
+    by apply_inde_rv_comp f g.
+    
 admit.
 transitivity (`H(v2| [%s, v1 , u1, u2, u3, r2, r3, E_alice_d3] )).
 admit.
