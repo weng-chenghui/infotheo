@@ -41,30 +41,6 @@ Definition enc := (party * msg)%type.
 
 Definition E i m : enc := (i, m).
 
-(*
-Definition enc_eq (e1 e2 : enc) : bool :=
-  match e1, e2 with
-  | (i1, m1), (i2, m2) => (i1 == i2) && (m1 == m2)
-  end.
-
-Lemma enc_eqP : Equality.axiom enc_eq.
-Proof.
-move => e1 e2.
-rewrite /enc_eq.
-case e1 => n1 s1.
-case e2 => n2 s2.
-apply: (iffP idP).
-  move/andP => [/eqP Ha /eqP Hb].
-  by rewrite Ha Hb.
-move => H.
-injection H => Hs Hn. (* Note: get n, s assumptions from from E n1 s1 = E n2 s2*)
-rewrite Hs Hn.
-apply/andP => //=.
-Qed.
-
-HB.instance Definition _ := hasDecEq.Build enc enc_eqP.
-*)
-
 Definition D (p : party) (e : enc) : option msg :=
   match e with
   | (i, m) => if i == p then Some m else None
@@ -127,7 +103,6 @@ Section dsdp.
 Variable m_minus_2 : nat.
 Local Notation m := m_minus_2.+2.
 Let msg := 'I_m.  (* = Z/mZ *)
-
 Let enc := enc party msg.
 
 Notation "u *h w" := (Emul u w).
@@ -231,7 +206,7 @@ Proof. reflexivity. Qed.
 Definition dsdp_traceT := (15.-bseq data).
 Definition dsdp_tracesT := 3.-tuple dsdp_traceT.
 
-Definition dsdp_traces :=
+Definition dsdp_traces : dsdp_tracesT :=
   interp_traces 15 [:: palice v1 u1 u2 u3 r2 r3; pbob v2; pcharlie v3].
 
 Definition is_dsdp (trs : dsdp_tracesT) :=
@@ -268,12 +243,16 @@ Qed.
 End dsdp.
 
 Section dsdp_information_leakage_proof.
-
+  
 Variable T : finType.
 Variable P : R.-fdist T.
-Variable msg : finComRingType.
 
+Variable m_minus_2 : nat.
+Local Notation m := m_minus_2.+2.
+Let msg := 'I_m.  (* = Z/mZ *)
 Let enc := enc party msg.
+Let dsdp_traceT := dsdp_traceT m_minus_2.
+Let dsdp_tracesT := dsdp_tracesT m_minus_2.
 
 Notation "u *h w" := (Emul u w).
 Notation "u ^h w" := (Epow u w).
@@ -290,7 +269,7 @@ Print Grammar constr.
 *)
 
 Definition dsdp_uncurry (o: msg * msg * msg * msg * msg * msg * msg * msg)
-  : dsdp_tracesT msg :=
+  : dsdp_tracesT :=
   let '( v1 , v2 , v3, u1, u2, u3, r2, r3) := o in
   (dsdp_traces v1 v2 v3 u1 u2 u3 r2 r3).
 
@@ -312,12 +291,12 @@ Record dsdp_random_inputs :=
 Variable inputs : dsdp_random_inputs.
 
 Definition dsdp_RV (inputs : dsdp_random_inputs) :
-  {RV P -> dsdp_tracesT msg} :=
+  {RV P -> dsdp_tracesT} :=
     dsdp_uncurry `o
     [%v1 inputs, v2 inputs, v3 inputs,
       u1 inputs, u2 inputs, u3 inputs, r2 inputs, r3 inputs].
 
-Let alice_traces : RV (dsdp_traceT msg) P :=
+Let alice_traces : RV dsdp_traceT P :=
       (fun t => tnth t 0) `o dsdp_RV inputs.
 
 Let v1 := v1 inputs.
@@ -362,11 +341,9 @@ Qed.
 
 Variables (A : {RV P -> enc}) (B : {RV P -> msg}).
 
-Check `H(B | A).
-
-Check `H(v2 | E_alice_d3).
 Lemma alice_traces_entropy_v2 :
   `H(v2 | alice_traces) = `H(v2 | [%s, v1 , u1, u2, u3, r2, r3,
       (E alice) `o d3, (E charlie) `o v3, (E bob) `o v2 ]).
+Abort.
 
 End dsdp_information_leakage_proof.
