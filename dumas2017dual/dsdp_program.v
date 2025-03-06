@@ -5,6 +5,7 @@ Require Import proba jfdist_cond entropy graphoid smc_interpreter.
 
 Import GRing.Theory.
 Import Num.Theory.
+Module scp := smc_entropy.smc_entropy_proofs.
 
 (*******************************************************************************************)
 (*                                                                                         *)
@@ -203,8 +204,11 @@ Lemma dsdp_ok :
   ]).
 Proof. reflexivity. Qed.
 
-Definition dsdp_traceT := (15.-bseq data).
-Definition dsdp_tracesT := 3.-tuple dsdp_traceT.
+(* Fuel for the interpreter != size of tuple we need
+   But it must be sized as the number of fuel.
+*)
+Notation dsdp_traceT := (15.-bseq data).
+Notation dsdp_tracesT := (3.-tuple dsdp_traceT).
 
 Definition dsdp_traces : dsdp_tracesT :=
   interp_traces 15 [:: palice v1 u1 u2 u3 r2 r3; pbob v2; pcharlie v3].
@@ -251,9 +255,14 @@ Variable m_minus_2 : nat.
 Local Notation m := m_minus_2.+2.
 Let msg := 'I_m.  (* = Z/mZ *)
 Let enc := enc party msg.
-Let dsdp_traceT := dsdp_traceT m_minus_2.
-Let dsdp_tracesT := dsdp_tracesT m_minus_2.
+Let enc0 := E NoParty (0 : msg).
 
+Let data := (msg + enc)%type.
+Let d x : data := inl x.
+Let e x : data := inr x.
+
+Notation dsdp_traceT := (15.-bseq data).
+Notation dsdp_tracesT := (3.-tuple dsdp_traceT).
 Notation "u *h w" := (Emul u w).
 Notation "u ^h w" := (Epow u w).
 
@@ -317,10 +326,6 @@ Let E_alice_d3 : {RV P -> enc} := E alice `o d3.
 Let E_charlie_v3 : {RV P -> enc} := E charlie `o v3.
 Let E_bob_v2 : {RV P -> enc} := E bob `o v2.
 
-Let data := (msg + enc)%type.
-Let d x : data := inl x.
-Let e x : data := inr x.
-
 Let alice_traces_from_view v : 15.-bseq _ :=
     let '(s, v1 , u1, u2, u3, r2, r3, E_alice_d3, E_charlie_v3, E_bob_v2) := v in
     [bseq d s;
@@ -339,11 +344,30 @@ rewrite /alice_traces /dsdp_RV /comp_RV /=.
 by rewrite dsdp_traces_ok.
 Qed.
 
-Variables (A : {RV P -> enc}) (B : {RV P -> msg}).
+Lemma ce_v2_alice_traces:
+  let alice_view := [%s, v1 , u1, u2, u3, r2, r3,
+      (E alice) `o d3, (E charlie) `o v3, (E bob) `o v2 ] in
+  `H(v2 | alice_traces ) = `H(v2 | alice_view ).
+Proof.
+move => alice_view.
+transitivity (`H(v2 | [%alice_traces, alice_view])).
+  pose f (xs : dsdp_traceT) :=
+    if xs is Bseq [:: inl s;
+           inr E_alice_d3; 
+           inr E_charlie_v3;
+           inr E_bob_v2;
+           inl r3; inl r2; inl u3; inl u2; inl u1; inl v1] _
+    then (s, v1 , u1, u2, u3, r2, r3, E_alice_d3, E_charlie_v3, E_bob_v2)
+    else (0, 0, 0, 0, 0, 0, 0, enc0, enc0, enc0).
+  have fK : cancel alice_traces_from_view f.
+    by move => [] [] [] [] [] [] [] [] [] [].
+  have -> : alice_view = f `o alice_traces.
+    by apply: boolp.funext => x /= ; rewrite alice_traces_ok /comp_RV fK.
+  by rewrite scp.fun_cond_removal.
+by rewrite alice_traces_ok scp.cond_entropyC scp.fun_cond_removal.
+Qed.
 
-Lemma alice_traces_entropy_v2 :
-  `H(v2 | alice_traces) = `H(v2 | [%s, v1 , u1, u2, u3, r2, r3,
-      (E alice) `o d3, (E charlie) `o v3, (E bob) `o v2 ]).
+
 Abort.
 
 End dsdp_information_leakage_proof.
