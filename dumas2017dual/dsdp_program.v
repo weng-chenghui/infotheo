@@ -259,8 +259,14 @@ Let card_msg : #|msg| = m.
 Proof. by rewrite card_ord. Qed.
 
 Let enc := enc party msg.
-Let card_enc : #|(enc : finType)| = (#|(party : finType)| * m).
-Proof. by rewrite /enc /dsdp_program.enc card_prod card_ord //=. Qed.
+
+(* Proving .-1+1 because we want to use it in fdist_uniform *)
+Let card_enc : #|(enc : finType)| = (#|(party : finType)| * m).-1.+1.
+Proof. rewrite /enc /dsdp_program.enc card_prod card_ord.
+rewrite prednK // muln_gt0 /= ltn0Sn andbT.
+apply/card_gt0P.
+by exists Alice. (* Note: when goal has `exist...`, this solves it. *)
+Qed.
 
 Let enc0 := E NoParty (0 : msg).
 
@@ -406,18 +412,14 @@ Qed.
 
 Section eqn1.
 
-Check scp.cpr_cond_entropy.
-
-Let w := (#|(party:finType)| * m).-1.
 Let Y1 := v2.
 Let Y2 := alice_view.
 Let Y3 := E_bob_v2.
-Let card_Y3 : #|(enc:finType)| = w.+1.
-Proof.
-rewrite /enc /dsdp_program.enc /w.
-Abort.
 
-Fail Let Y3_unif : `p_ Y3 = fdist_uniform (n:=w) card_enc.
+Let Y3_unif : `p_ Y3 = fdist_uniform card_enc.
+Proof.
+rewrite /Y3 /E_bob_v2.  (* Memo: need to show unif assumption keeps after compoisition *)
+Abort.
 
 
 Lemma eqn1P :
