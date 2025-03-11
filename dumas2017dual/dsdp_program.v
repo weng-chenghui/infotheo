@@ -72,24 +72,8 @@ HB.instance Definition _ := isFinite.Build party party_enumP.
 
 End party_def.
 
-Section enc_def.
-
-(* Because: {RV P -> enc} means output (different parties x different msgs);
-   but actually it is always (a fixed party x different msgs).
-   Need a type-level definition like {RV P -> alice.-enc} to express it.
-*)
-Variable msg : finComRingType.
-
-Record enc_for (p : party) :=
-  EncFor { eval : msg; pval : party; _ : p == pval }.
-
-Notation "p .-enc" := (enc_for p)
-  (at level 2, format "p .-enc") : type_scope.
-
-End enc_def.
-
 Section he.
-  
+
 Variable party : finType.
 Variable msg : finComRingType.
 
@@ -346,6 +330,10 @@ Definition dsdp_RV (inputs : dsdp_random_inputs) :
     dsdp_uncurry `o
     [%v1, v2, v3, u1, u2, u3, r2, r3].
 
+
+(* TODO: wrong type: need something like {RV P -> enc Alice}
+   because one RV will always output (one fixed party, different messages).
+*)
 Let E_alice_d3 : {RV P -> enc} := E alice `o d3.
 Let E_charlie_v3 : {RV P -> enc} := E charlie `o v3.
 Let E_bob_v2 : {RV P -> enc} := E bob `o v2.
