@@ -33,33 +33,6 @@ Local Definition R := Rdefinitions.R.
 Reserved Notation "u *h w" (at level 40).
 Reserved Notation "u ^h w" (at level 40).
 
-Section he.
-  
-Variable party : finType.
-Variable msg : finComRingType.
-
-Definition enc := (party * msg)%type.
-
-Definition E i m : enc := (i, m).
-
-Definition D (p : party) (e : enc) : option msg :=
-  match e with
-  | (i, m) => if i == p then Some m else None
-  end.
-
-(* TODO: use option? *)
-Definition Emul (e1 e2 : enc) : enc := 
-  match (e1, e2) with
-  | ((i1, m1), (i2, m2)) => if i1 == i2 then E i1 (m1 + m2) else E i1 0
-  end.
-
-Definition Epow (e : enc) (m2 : msg) : enc :=
-  match e with
-  | (i, m1) => E i (m1 * m2)
-  end.
-
-End he.
-
 Section party_def.
 
 Inductive party := Alice | Bob | Charlie | NoParty.
@@ -99,6 +72,49 @@ HB.instance Definition _ := isFinite.Build party party_enumP.
 
 End party_def.
 
+Section enc_def.
+
+(* Because: {RV P -> enc} means output (different parties x different msgs);
+   but actually it is always (a fixed party x different msgs).
+   Need a type-level definition like {RV P -> alice.-enc} to express it.
+*)
+Variable msg : finComRingType.
+
+Record enc_for (p : party) :=
+  EncFor { eval : msg; pval : party; _ : p == pval }.
+
+Notation "p .-enc" := (enc_for p)
+  (at level 2, format "p .-enc") : type_scope.
+
+End enc_def.
+
+Section he.
+  
+Variable party : finType.
+Variable msg : finComRingType.
+
+Definition enc := (party * msg)%type.
+
+Definition E i m : enc := (i, m).
+
+Definition D (p : party) (e : enc) : option msg :=
+  match e with
+  | (i, m) => if i == p then Some m else None
+  end.
+
+(* TODO: use option? *)
+Definition Emul (e1 e2 : enc) : enc := 
+  match (e1, e2) with
+  | ((i1, m1), (i2, m2)) => if i1 == i2 then E i1 (m1 + m2) else E i1 0
+  end.
+
+Definition Epow (e : enc) (m2 : msg) : enc :=
+  match e with
+  | (i, m1) => E i (m1 * m2)
+  end.
+
+End he.
+
 Section dsdp.
   
 Variable m_minus_2 : nat.
@@ -117,6 +133,7 @@ Definition data := (msg + enc)%type.
 Definition d x : data := inl x.
 Definition e x : data := inr x.
 
+(* Because the interpreter expects parties are nat in lots of places. *)
 Notation "'n(' w ')' " := (party_to_nat w).
 
 (* Should receive something the party can decrypt *)
@@ -279,20 +296,10 @@ Notation dsdp_tracesT := (3.-tuple dsdp_traceT).
 Notation "u *h w" := (Emul u w).
 Notation "u ^h w" := (Epow u w).
 
-(*
-
-BUG: v1, is in a defined syntax. So cannot use it in (...) (need a space before the comma)
-Print Grammar constr.
-
-    LEVEL "200"; "]"
-  | "<hidden"; term LEVEL "0"; ">"
-  | "[find"; "v1,"; "..,"; term LEVEL "200"; "|"; term LEVEL "200"; "∼";
-
-*)
 
 Definition dsdp_uncurry (o: msg * msg * msg * msg * msg * msg * msg * msg)
   : dsdp_tracesT :=
-  let '( v1 , v2 , v3, u1, u2, u3, r2, r3) := o in
+  let '( v1, v2 , v3, u1, u2, u3, r2, r3) := o in
   (dsdp_traces v1 v2 v3 u1 u2 u3 r2 r3).
 
 Record dsdp_random_inputs :=
@@ -319,12 +326,6 @@ Record dsdp_random_inputs :=
 
 Variable inputs : dsdp_random_inputs.
 
-Definition dsdp_RV (inputs : dsdp_random_inputs) :
-  {RV P -> dsdp_tracesT} :=
-    dsdp_uncurry `o
-    [%v1 inputs, v2 inputs, v3 inputs,
-      u1 inputs, u2 inputs, u3 inputs, r2 inputs, r3 inputs].
-
 Let v1 := v1 inputs.
 Let v2 := v2 inputs.
 Let v3 := v3 inputs.
@@ -339,9 +340,18 @@ Let d2  : {RV P -> msg} := vu2 \+ r2.
 Let vu3r : {RV P -> msg} := vu3 \+ r3.
 Let d3 : {RV P -> msg} := vu3r \+ d2.
 Let s : {RV P -> msg} := d3 \- r2 \- r3 \+ u1 \* v1.
+
+Definition dsdp_RV (inputs : dsdp_random_inputs) :
+  {RV P -> dsdp_tracesT} :=
+    dsdp_uncurry `o
+    [%v1, v2, v3, u1, u2, u3, r2, r3].
+
 Let E_alice_d3 : {RV P -> enc} := E alice `o d3.
 Let E_charlie_v3 : {RV P -> enc} := E charlie `o v3.
 Let E_bob_v2 : {RV P -> enc} := E bob `o v2.
+
+Check E alice `o d3.
+Check E alice.
 
 Axiom E_enc_unif : forall (X : {RV P -> msg}) (party : party),
   `p_ X = fdist_uniform card_msg -> `p_ (E party `o X) = fdist_uniform card_enc.
