@@ -307,6 +307,14 @@ Record dsdp_random_inputs :=
     r3 : {RV P -> msg};
 
     alice_indep : P |= [% v1 , u1, u2, u3, r2, r3] _|_ [% v2, v3];
+
+    pv1_unif : `p_ v1 = fdist_uniform card_msg;
+    pv2_unif : `p_ v2 = fdist_uniform card_msg;
+    pv3_unif : `p_ v3 = fdist_uniform card_msg;
+    pu2_unif : `p_ u2 = fdist_uniform card_msg;
+    pu3_unif : `p_ u3 = fdist_uniform card_msg;
+    pr2_unif : `p_ r2 = fdist_uniform card_msg;
+    pr3_unif : `p_ r3 = fdist_uniform card_msg;
 }.
 
 Variable inputs : dsdp_random_inputs.
@@ -334,6 +342,13 @@ Let s : {RV P -> msg} := d3 \- r2 \- r3 \+ u1 \* v1.
 Let E_alice_d3 : {RV P -> enc} := E alice `o d3.
 Let E_charlie_v3 : {RV P -> enc} := E charlie `o v3.
 Let E_bob_v2 : {RV P -> enc} := E bob `o v2.
+
+Axiom E_enc_unif : forall (X : {RV P -> msg}) (party : party),
+  `p_ X = fdist_uniform card_msg -> `p_ (E party `o X) = fdist_uniform card_enc.
+(* TODO: prove this after the bij_RV_unif is merged *)
+
+Axiom E_enc_inde_msg : forall (X : {RV P -> enc}) (Y : {RV P -> msg}),
+  P |= X _|_ Y.
 
 Section alice_is_leakage_free.
 
@@ -417,14 +432,11 @@ Let Y2 := alice_view.
 Let Y3 := E_bob_v2.
 
 Let Y3_unif : `p_ Y3 = fdist_uniform card_enc.
-Proof.
-rewrite /Y3 /E_bob_v2.  (* Memo: need to show unif assumption keeps after compoisition *)
-Abort.
-
+Proof. by rewrite /Y3 /E_bob_v2 E_enc_unif // (pv2_unif inputs). Qed.
 
 Lemma eqn1P :
   `H(v2 | alice_view ) = `H(v2| [%s, v1 , u1, u2, u3, r2, r3, E_alice_d3, E_bob_v2]).
-Proof.
+Proof. rewrite /alice_view.
 Abort.
 
 End eqn1.
