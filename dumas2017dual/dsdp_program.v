@@ -162,11 +162,20 @@ Lemma enum_enc_forP : Finite.axiom enum_enc_for.
 Proof.
 case=> /= ev Hp1.
 rewrite -(count_map _ (pred1 ev)).
+(* ^^ From constructor to a named instance `ev` + seq of elements of the type *)
 rewrite (pmap_filter (insubK _)).
+(* ^^ Unfold enum_enc_for by rephrase pmap + insub a list from codom the pairing function *)
 rewrite count_filter.
+(* ^^ From counting a element in a list comprehension to
+   a counter + filter (predI (pred1 ev) (insub x) *)
 rewrite -(@eq_count _ (pred1 ev)) => [|s /=]; last first.
+(* ^^ pred1 ev =1 predI (pred1 ev) (fun x : party * T => insub x) 
+   Force it to assume `predI (pred1 ev) (fun x : party * T => insub x)` in the goal is a2
+   and it funext equal to an a1 `pred1 ev`; a1 can be anything assigned here.
+   By this, replace the long a2 to a simpler a1.
+*)
   by rewrite isSome_insub; case: eqP=> // ->.
-elim: p ev Hp1.
+elim: p ev Hp1. (* to split count_mem to every party *)
 Abort.
 
 
