@@ -72,6 +72,9 @@ HB.instance Definition _ := isFinite.Build party party_enumP.
 
 End party_def.
 
+(* Because the interpreter expects parties are nat in lots of places. *)
+Notation "'n(' w ')' " := (party_to_nat w).
+
 Section he.
 
 Variable party : finType.
@@ -86,7 +89,8 @@ Definition D (p : party) (e : enc) : option msg :=
   | (i, m) => if i == p then Some m else None
   end.
 
-(* TODO: use option? *)
+(* TODO: use option? But to lift a None in embedded computation
+   to an interpreter Fail is distant. *)
 Definition Emul (e1 e2 : enc) : enc := 
   match (e1, e2) with
   | ((i1, m1), (i2, m2)) => if i1 == i2 then E i1 (m1 + m2) else E i1 0
@@ -99,11 +103,90 @@ Definition Epow (e : enc) (m2 : msg) : enc :=
 
 End he.
 
+Section enc_type_def.
+(*
+  Because {RV P -> enc} is wrong:
+  we have no random variables that output (different parties x different messages),
+  but only (one fixed party x different messages).
+  
+  So we need to define a type level label like: {RV P -> Alice.-enc}.
+*)
+
+Variable (p : party) (T : Type).
+Record enc_for : Type :=
+  EncFor { ev : (party * T); _ : ev.1 == p }.
+
+Implicit Type e : enc_for.
+
+Definition enc_ e mkT : enc_for :=
+  mkT (let: EncFor pr eP := e return (ev e).1 == p in eP).
+
+Lemma enc_E e : enc_ (fun eP => @EncFor (ev e) eP) = e.
+Proof. by case: e. Qed.
+
+HB.instance Definition _ := [isSub for ev].
+
+End enc_type_def.
+
+Notation "p .-enc" := (enc_for p)
+  (at level 2, format "p .-enc") : type_scope.
+
+Notation "{ 'enc_for' p 'of' T }" := (p.-enc T : predArgType)
+  (at level 0, only parsing) : type_scope.
+
+Coercion tuple_of_enc_for p T (e : p.-enc T) : (party * T) :=
+  ev e.
+
+Section enc_types.
+
+HB.instance Definition _ p (T : eqType) : hasDecEq (p.-enc T) :=
+  [Equality of p.-enc T by <:].
+HB.instance Definition _ p (T : choiceType) :=
+  [Choice of p.-enc T by <:].
+HB.instance Definition _ p (T : countType) :=
+  [Countable of p.-enc T by <:].
+
+Lemma p1_eq (T : Type) (p : party) (t : T):
+  (p, t).1 == p.
+Proof. by []. Qed.
+
+Variable (p : party) (T : finType).
+
+Definition enum_enc_for : seq (p.-enc T) :=
+  let px := codom (fun t : T => (p, t)) in
+  pmap insub px.
+
+About enum_enc_for.
+
+Lemma enum_enc_forP : Finite.axiom enum_enc_for.
+Proof.
+case=> /= ev Hp1.
+rewrite -(count_map _ (pred1 ev)).
+rewrite (pmap_filter (insubK _)).
+rewrite count_filter.
+rewrite -(@eq_count _ (pred1 ev)) => [|s /=]; last first.
+  by rewrite isSome_insub; case: eqP=> // ->.
+elim: p ev Hp1.
+Abort.
+
+
+End enc_types.
+
+Section eq_enc_type.
+
+Variables (p : party) (T : eqType).
+  
+HB.instance Definition _ : hasDecEq (p.-enc T) :=
+  [Equality of p.-enc T by <:].
+
+End eq_enc_type.
+
 Section dsdp.
   
 Variable m_minus_2 : nat.
 Local Notation m := m_minus_2.+2.
 Let msg := 'I_m.  (* = Z/mZ *)
+
 Let enc := enc party msg.
 
 Notation "u *h w" := (Emul u w).
@@ -117,8 +200,6 @@ Definition data := (msg + enc)%type.
 Definition d x : data := inl x.
 Definition e x : data := inr x.
 
-(* Because the interpreter expects parties are nat in lots of places. *)
-Notation "'n(' w ')' " := (party_to_nat w).
 
 (* Should receive something the party can decrypt *)
 Definition Recv_dec frm i f : proc data :=
@@ -261,7 +342,7 @@ Proof. by rewrite card_ord. Qed.
 
 Let enc := enc party msg.
 
-(* Proving .-1+1 because we want to use it in fdist_uniform *)
+(* This is for {RV P -> (different parties x different messages} *)
 Let card_enc : #|(enc : finType)| = (#|(party : finType)| * m).-1.+1.
 Proof. rewrite /enc /dsdp_program.enc card_prod card_ord.
 rewrite prednK // muln_gt0 /= ltn0Sn andbT.
@@ -330,10 +411,10 @@ Definition dsdp_RV (inputs : dsdp_random_inputs) :
     dsdp_uncurry `o
     [%v1, v2, v3, u1, u2, u3, r2, r3].
 
-
 (* TODO: wrong type: need something like {RV P -> enc Alice}
    because one RV will always output (one fixed party, different messages).
 *)
+Check {RV P -> EncFor Alice (msg : finType)}.
 Let E_alice_d3 : {RV P -> enc} := E alice `o d3.
 Let E_charlie_v3 : {RV P -> enc} := E charlie `o v3.
 Let E_bob_v2 : {RV P -> enc} := E bob `o v2.
