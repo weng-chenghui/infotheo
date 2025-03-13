@@ -156,8 +156,6 @@ Definition enum_enc_for : seq (p.-enc T) :=
   let px := codom (fun t : T => (p, t)) in
   pmap insub px.
 
-About enum_enc_for.
-
 Lemma enum_enc_forP : Finite.axiom enum_enc_for.
 Proof.
 case=> /= ev Hp1.
@@ -249,16 +247,9 @@ rewrite -enumT.
 by rewrite count_predT.
 Qed.
 
+HB.instance Definition _ := isFinite.Build (p.-enc T) (enum_enc_forP).
+
 End enc_types.
-
-Section eq_enc_type.
-
-Variables (p : party) (T : eqType).
-  
-HB.instance Definition _ : hasDecEq (p.-enc T) :=
-  [Equality of p.-enc T by <:].
-
-End eq_enc_type.
 
 Section dsdp.
   
