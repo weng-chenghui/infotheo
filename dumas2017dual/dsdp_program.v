@@ -178,10 +178,10 @@ rewrite -(@eq_count _ (pred1 ev)) => [|s /=]; last first.
    By this, replacing the long a2 to a simpler a1.
 *)
   by rewrite isSome_insub; case: eqP=> // ->.
-elim: p ev Hp1 => e He; rewrite codomE;
-transitivity (e.2 \in T : nat); rewrite // -mem_enum.
+elim: ev Hp1 => ep t He; rewrite codomE.
+transitivity (t \in T : nat); rewrite // -mem_enum.
 elim: (fintype.enum T) (enum_uniq T) => //= aT lT Huniq /andP[/negPf IHaTlT].
-(* ^^ elim T because we already elim parties
+(* ^^ elim T
    enunm_uniq because count is for a set, size of a set could be smaller than a seq,
    unless each element in the seq is uniq;
    by this, we generate a hypothesis with uniqueness premise, and use it to
@@ -198,37 +198,13 @@ move/Huniq->.
    After the rewriting by -> there is no count_mem in the goal.
 *)
 rewrite He.
-have [HaT|IHaT] := eqVneq aT e.2.
+have [HaT|IHaT] := eqVneq aT t.
 (* ^^ different from case: eqP -- eqVneq can generate Prop so it is easier to use
    the hypotheses in the proof; boolean hypotheses need to be convereted first.
 
    A note of boolean and Prop eq:
    https://github.com/suharahiromichi/coq/blob/master/pearl/ssr_ltac_1.v
 *)
-  rewrite HaT in IHaTlT.
-  by rewrite IHaTlT.
-by [].
-
-(* Bob *)
-elim: (fintype.enum T) (enum_uniq T) => //= aT lT Huniq /andP[/negPf IHaTlT].
-rewrite inE [in LHS]/eq_op /= eq_sym. move /Huniq->. rewrite He.
-have [HaT|IHaT] := eqVneq aT e.2.
-  rewrite HaT in IHaTlT.
-  by rewrite IHaTlT.
-by [].
-
-(* Charlie *)
-elim: (fintype.enum T) (enum_uniq T) => //= aT lT Huniq /andP[/negPf IHaTlT].
-rewrite inE [in LHS]/eq_op /= eq_sym. move /Huniq->. rewrite He.
-have [HaT|IHaT] := eqVneq aT e.2.
-  rewrite HaT in IHaTlT.
-  by rewrite IHaTlT.
-by [].
-
-(* NoParty *)
-elim: (fintype.enum T) (enum_uniq T) => //= aT lT Huniq /andP[/negPf IHaTlT].
-rewrite inE [in LHS]/eq_op /= eq_sym. move /Huniq->. rewrite He.
-have [HaT|IHaT] := eqVneq aT e.2.
   rewrite HaT in IHaTlT.
   by rewrite IHaTlT.
 by [].
