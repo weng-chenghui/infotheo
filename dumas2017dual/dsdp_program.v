@@ -150,6 +150,10 @@ Lemma p1_eq (T : Type) (p : party) (t : T):
   (p, t).1 == p.
 Proof. by []. Qed.
 
+Definition E' (T : Type) (p : party) (t : T) : p.-enc T :=
+  let pt := (p, t) in
+  EncFor (p1_eq p t).
+
 Variable (p : party) (T : finType).
 
 Definition enum_enc_for : seq (p.-enc T) :=
@@ -224,6 +228,9 @@ by rewrite count_predT.
 Qed.
 
 HB.instance Definition _ := isFinite.Build (p.-enc T) (enum_enc_forP).
+
+Lemma card_enc_for : #|{:p.-enc T}| = #|T|.
+Proof. by rewrite [#|_|] cardT enumT unlock size_enum_enc_for. Qed.
 
 End enc_types.
 
@@ -396,6 +403,9 @@ apply/card_gt0P.
 by exists Alice. (* Note: when goal has `exist...`, this solves it. *)
 Qed.
 
+Let card_enc_forE p : #|(p.-enc msg : finType)| = m.-1.+1.
+Proof. by rewrite card_enc_for. Qed.
+
 Let enc0 := E NoParty (0 : msg).
 
 Let data := (msg + enc)%type.
@@ -452,28 +462,44 @@ Let vu3r : {RV P -> msg} := vu3 \+ r3.
 Let d3 : {RV P -> msg} := vu3r \+ d2.
 Let s : {RV P -> msg} := d3 \- r2 \- r3 \+ u1 \* v1.
 
+Let E' p (m : msg) := E' p m.
+Let E_alice_d3 : {RV P -> Alice.-enc msg} := E' alice `o d3.
+Let E_charlie_v3 : {RV P -> Charlie.-enc msg} := E' charlie `o v3.
+Let E_bob_v2 : {RV P -> Bob.-enc msg} := E' bob `o v2.
+
+(* TODO: problem is that if we have an `enc` in a trace,
+   we need to dispatch it to different (p.-enc T) before liftintg it to different {RV -> p.-enc T};
+   otherwise all enc values will be {RV -> enc}, which is incorrect since we don't have any
+   random variable outputs (different parties x different msgs); instead, our RVs should all
+   output (one fixed party x different msgs).
+
+   This dispatching function, however, will output value with multiple possible types:
+   (Alice.-enc msg + Bob.-enc msg + Charlie.-enc msg). I don't know how to design this function yet.
+   I need a two-layer sum type, or there is a more general sum type.
+   And even if we have such "sum type", this dispatching will be a plug-in to the comp_RV,
+   since such dispatching should only happen when converting traces to views of RVs.
+*)
+ 
+Definition dsdp_RV_T :=
+  {RV P -> ((msg * msg * msg * msg * msg * msg * msg * Alice.-enc msg * Bob.-enc msg * Charlie.-enc msg) *
+            (Charlie.-enc msg * Bob.-enc msg * msg) *
+            (Charlie.-enc msg * msg)
+           )}.
+
+(* Because trace has msg or enc; we need turn enc to `p.-enc msg` for {RV P -> p.-enc msg} *)
+
 Definition dsdp_RV (inputs : dsdp_random_inputs) :
-  {RV P -> dsdp_tracesT} :=
+  {RV P -> dsdp_RV_T} :=
     dsdp_uncurry `o
     [%v1, v2, v3, u1, u2, u3, r2, r3].
 
-(* TODO: wrong type: need something like {RV P -> enc Alice}
-   because one RV will always output (one fixed party, different messages).
-*)
-Check {RV P -> EncFor Alice (msg : finType)}.
-Let E_alice_d3 : {RV P -> enc} := E alice `o d3.
-Let E_charlie_v3 : {RV P -> enc} := E charlie `o v3.
-Let E_bob_v2 : {RV P -> enc} := E bob `o v2.
-
-Check E alice `o d3.
-Check E alice.
-
-Axiom E_enc_unif : forall (X : {RV P -> msg}) (party : party),
-  `p_ X = fdist_uniform card_msg -> `p_ (E party `o X) = fdist_uniform card_enc.
+Axiom E_enc_unif : forall (X : {RV P -> msg}) (p : party),
+  `p_ X = fdist_uniform card_msg -> `p_ (E' p `o X) = fdist_uniform (card_enc_forE p).
 (* TODO: prove this after the bij_RV_unif is merged *)
 
-Axiom E_enc_inde_msg : forall (X : {RV P -> enc}) (Y : {RV P -> msg}),
+Axiom E_enc_inde_msg : forall (A B : finType) (p : party) (X : {RV P -> p.-enc A}) (Y : {RV P -> B}),
   P |= X _|_ Y.
+(* TODO: what if B is p.-enc A? Need a way to judge if B is p.-enc A ?*)
 
 Section alice_is_leakage_free.
 
@@ -521,9 +547,7 @@ Let alice_traces_from_view v : 15.-bseq _ :=
             d r3; d r2; d u3; d u2; d u1; d v1].
 
 Lemma alice_traces_from_viewP :
-  alice_traces = alice_traces_from_view `o
-                   [%s, v1 , u1, u2, u3, r2, r3,
-                     E_alice_d3, E_charlie_v3, E_bob_v2 ].
+  alice_traces = alice_traces_from_view `o alice_view.
 Proof.
 apply: boolp.funext => x /=.
 rewrite /alice_traces /dsdp_RV /comp_RV /=.
