@@ -462,34 +462,12 @@ Let vu3r : {RV P -> msg} := vu3 \+ r3.
 Let d3 : {RV P -> msg} := vu3r \+ d2.
 Let s : {RV P -> msg} := d3 \- r2 \- r3 \+ u1 \* v1.
 
-Let E' p (m : msg) := E' p m.
 Let E_alice_d3 : {RV P -> Alice.-enc msg} := E' alice `o d3.
 Let E_charlie_v3 : {RV P -> Charlie.-enc msg} := E' charlie `o v3.
 Let E_bob_v2 : {RV P -> Bob.-enc msg} := E' bob `o v2.
 
-(* TODO: problem is that if we have an `enc` in a trace,
-   we need to dispatch it to different (p.-enc T) before liftintg it to different {RV -> p.-enc T};
-   otherwise all enc values will be {RV -> enc}, which is incorrect since we don't have any
-   random variable outputs (different parties x different msgs); instead, our RVs should all
-   output (one fixed party x different msgs).
-
-   This dispatching function, however, will output value with multiple possible types:
-   (Alice.-enc msg + Bob.-enc msg + Charlie.-enc msg). I don't know how to design this function yet.
-   I need a two-layer sum type, or there is a more general sum type.
-   And even if we have such "sum type", this dispatching will be a plug-in to the comp_RV,
-   since such dispatching should only happen when converting traces to views of RVs.
-*)
- 
-Definition dsdp_RV_T :=
-  {RV P -> ((msg * msg * msg * msg * msg * msg * msg * Alice.-enc msg * Bob.-enc msg * Charlie.-enc msg) *
-            (Charlie.-enc msg * Bob.-enc msg * msg) *
-            (Charlie.-enc msg * msg)
-           )}.
-
-(* Because trace has msg or enc; we need turn enc to `p.-enc msg` for {RV P -> p.-enc msg} *)
-
 Definition dsdp_RV (inputs : dsdp_random_inputs) :
-  {RV P -> dsdp_RV_T} :=
+  {RV P -> dsdp_tracesT} :=
     dsdp_uncurry `o
     [%v1, v2, v3, u1, u2, u3, r2, r3].
 
@@ -499,7 +477,7 @@ Axiom E_enc_unif : forall (X : {RV P -> msg}) (p : party),
 
 Axiom E_enc_inde_msg : forall (A B : finType) (p : party) (X : {RV P -> p.-enc A}) (Y : {RV P -> B}),
   P |= X _|_ Y.
-(* TODO: what if B is p.-enc A? Need a way to judge if B is p.-enc A ?*)
+(* TODO: what if B is (p.-enc A) ? Whether we need a way to judge if B is (p.-enc A) or not?*)
 
 Section alice_is_leakage_free.
 
@@ -538,12 +516,13 @@ Hypothesis inde_Ebob : P |= alice_inputs_RV _|_ E_bob_v2.
 Let alice_view := [%s, v1 , u1, u2, u3, r2, r3,
       E_alice_d3, E_charlie_v3, E_bob_v2].
 
-Let alice_traces_from_view v : 15.-bseq _ :=
+Let alice_traces_from_view
+  (v :msg * msg * msg * msg * msg * msg * msg * Alice.-enc msg * Charlie.-enc msg * Bob.-enc msg) : 15.-bseq _ :=
     let '(s, v1 , u1, u2, u3, r2, r3, E_alice_d3, E_charlie_v3, E_bob_v2) := v in
     [bseq d s;
-            e (E_alice_d3);
-            e (E_charlie_v3);
-            e (E_bob_v2);
+            e (E_alice_d3 : enc);
+            e (E_charlie_v3 : enc);
+            e (E_bob_v2 : enc);
             d r3; d r2; d u3; d u2; d u1; d v1].
 
 Lemma alice_traces_from_viewP :
@@ -564,10 +543,11 @@ transitivity (`H(v | [%alice_traces, alice_view])).
            inr E_charlie_v3;
            inr E_bob_v2;
            inl r3; inl r2; inl u3; inl u2; inl u1; inl v1] _
-    then (s, v1 , u1, u2, u3, r2, r3, E_alice_d3, E_charlie_v3, E_bob_v2)
-    else (0, 0, 0, 0, 0, 0, 0, enc0, enc0, enc0).
+    then (s, v1 , u1, u2, u3, r2, r3,
+          E' Alice E_alice_d3.2, E' Charlie E_charlie_v3.2, E' Bob E_bob_v2.2)
+    else (0, 0, 0, 0, 0, 0, 0, E' Alice 0, E' Charlie 0, E' Bob 0).
   have fK : cancel alice_traces_from_view f.
-    by move => [] [] [] [] [] [] [] [] [] [].
+    move => [] [] [] [] [] [] [] [] [] [] ? ? ? ? ? ? ? ? a c b //=.
   have -> : alice_view = f `o alice_traces.
     by apply: boolp.funext => x /= ; rewrite alice_traces_from_viewP /comp_RV fK.
   by rewrite scp.fun_cond_removal.
