@@ -513,11 +513,14 @@ Qed.
 Hypothesis inde_Echarlie : P |= alice_inputs_RV _|_ E_charlie_v3.
 Hypothesis inde_Ebob : P |= alice_inputs_RV _|_ E_bob_v2.
 
+Let alice_view_valuesT := (msg * msg * msg * msg * msg * msg * msg *
+  Alice.-enc msg * Charlie.-enc msg * Bob.-enc msg)%type.
+
 Let alice_view := [%s, v1 , u1, u2, u3, r2, r3,
       E_alice_d3, E_charlie_v3, E_bob_v2].
 
 Let alice_traces_from_view
-  (v :msg * msg * msg * msg * msg * msg * msg * Alice.-enc msg * Charlie.-enc msg * Bob.-enc msg) : 15.-bseq _ :=
+  (v : alice_view_valuesT) : 15.-bseq _ :=
     let '(s, v1 , u1, u2, u3, r2, r3, E_alice_d3, E_charlie_v3, E_bob_v2) := v in
     [bseq d s;
             e (E_alice_d3 : enc);
@@ -533,23 +536,33 @@ rewrite /alice_traces /dsdp_RV /comp_RV /=.
 by rewrite dsdp_traces_ok.
 Qed.
 
+Let alice_view_values_from_trace (xs : dsdp_traceT) : alice_view_valuesT :=
+    let failtrace := (0, 0, 0, 0, 0, 0, 0, E' Alice 0, E' Charlie 0, E' Bob 0) in
+    if xs is Bseq [:: inl s;
+           inr E_alice_d3;
+           inr E_charlie_v3;
+           inr E_bob_v2;
+           inl r3; inl r2; inl u3; inl u2; inl u1; inl v1] _
+    then 
+         if (E_alice_d3, E_charlie_v3, E_bob_v2) is
+              ((Alice, d3), (Charlie, v3), (Bob, v2)) then
+            (s, v1 , u1, u2, u3, r2, r3,
+               E' Alice d3, E' Charlie v3, E' Bob v2)
+         else failtrace
+    else failtrace.
+
+Lemma alice_view_values_from_traceP:
+   cancel alice_traces_from_view alice_view_values_from_trace.
+Proof.
+move => [] [] [] [] [] [] [] [] [] [] ? ? ? ? ? ? ? ? a c b //=.
+Admitted.
+  
 Lemma ce_alice_traces_view (w : finType) (v : {RV P -> w}) :
   `H(v | alice_traces ) = `H(v | alice_view ).
 Proof.
 transitivity (`H(v | [%alice_traces, alice_view])).
-  pose f (xs : dsdp_traceT) :=
-    if xs is Bseq [:: inl s;
-           inr E_alice_d3; 
-           inr E_charlie_v3;
-           inr E_bob_v2;
-           inl r3; inl r2; inl u3; inl u2; inl u1; inl v1] _
-    then (s, v1 , u1, u2, u3, r2, r3,
-          E' Alice E_alice_d3.2, E' Charlie E_charlie_v3.2, E' Bob E_bob_v2.2)
-    else (0, 0, 0, 0, 0, 0, 0, E' Alice 0, E' Charlie 0, E' Bob 0).
-  have fK : cancel alice_traces_from_view f.
-    move => [] [] [] [] [] [] [] [] [] [] ? ? ? ? ? ? ? ? a c b //=.
-  have -> : alice_view = f `o alice_traces.
-    by apply: boolp.funext => x /= ; rewrite alice_traces_from_viewP /comp_RV fK.
+  have -> : alice_view = alice_view_values_from_trace `o alice_traces.
+    by apply: boolp.funext => x /= ; rewrite alice_traces_from_viewP /comp_RV alice_view_values_from_traceP.
   by rewrite scp.fun_cond_removal.
 by rewrite alice_traces_from_viewP scp.cond_entropyC scp.fun_cond_removal.
 Qed.
