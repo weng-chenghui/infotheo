@@ -103,7 +103,91 @@ Definition Epow (e : enc) (m2 : msg) : enc :=
 
 End he.
 
+
+Section key_def.
+  
+Inductive key := Dec | Enc.
+
+Definition key_eqb_subproof (k1 k2: key) : { k1 = k2 } + { k1 <> k2 }.
+Proof. decide equality. Defined.
+
+Definition key_eqb (k1 k2: key) : bool :=
+  if key_eqb_subproof k1 k2 then true else false. 
+
+Lemma key_eqP : Equality.axiom key_eqb.
+Proof.
+move=> k1 k2.
+rewrite /key_eqb.
+by case: key_eqb_subproof => /= H;constructor.
+Qed.
+
+HB.instance Definition _ := hasDecEq.Build key key_eqP.
+
+Definition key_to_nat (a : key) : nat :=
+  match a with Dec => 0 | Enc => 1 end.
+
+Definition nat_to_key (a : nat) : key :=
+  match a with 0 => Dec | _ => Enc end.
+
+Lemma key_natK : cancel key_to_nat nat_to_key.
+Proof. by case. Qed.
+
+HB.instance Definition _ : isCountable key := CanIsCountable key_natK.
+
+Definition key_enum := [:: Dec; Enc].
+
+Lemma key_enumP : Finite.axiom key_enum.
+Proof. by case. Qed.
+
+End key_def.
+
+Section party_key_def.
+  
+
+(* Need something like {RV P -> Alice.-key Dec T} in view;
+   `T` means any type of the key's value.
+*)
+
+Variant party_key (p : party) (k : key) (T : Type) : Type :=
+  PartyKey of T.
+
+Definition party_key_v p k T (pk : party_key p k T) : T :=
+  let 'PartyKey v := pk in v.
+
+Variable (p : party) (k : key)(T : Type).
+
+HB.instance Definition _ := [isNew for @party_key_v p k T].
+
+End party_key_def.
+
+Notation "p .-key k" := (party_key p k)
+  (at level 2, format "p .-key k") : type_scope.
+
+Section party_key_types.
+
+HB.instance Definition _ p k (T : eqType) : hasDecEq (p.-key k T) :=
+  [Equality of p.-key k T by <:].
+HB.instance Definition _ p k (T : choiceType) :=
+  [Choice of p.-key k T by <:].
+HB.instance Definition _ p k (T : countType) :=
+  [Countable of p.-key k T by <:].
+HB.instance Definition _ p k (T : finType) :=
+  [Finite of p.-key k T by <:].
+
+Variable (p : party)(k : key)(T : finType).
+
+Lemma card_enc_for : #|{:p.-key k T}| = #|T|.
+Proof.
+apply (bij_eq_card (f:=@party_key_v p k T)).
+exists (@PartyKey p k T).
+by case.
+by [].
+Qed.
+
+End party_key_types.
+
 Section enc_type_def.
+
 (*
   Because {RV P -> enc} is wrong:
   we have no random variables that output (different parties x different messages),
@@ -123,7 +207,6 @@ Definition enc_for_v p T (e : enc_for p T) : T :=
 HB.instance Definition _ := [isNew for @enc_for_v p T].
 
 End enc_type_def.
-
 
 Notation "p .-enc" := (enc_for p)
   (at level 2, format "p .-enc") : type_scope.
@@ -160,6 +243,10 @@ Qed.
 
 End enc_types.
 
+Section enc_axioms.
+
+End enc_axioms.
+
 Section dsdp.
   
 Variable m_minus_2 : nat.
@@ -178,7 +265,6 @@ Definition charlie : party := Charlie.
 Definition data := (msg + enc)%type.
 Definition d x : data := inl x.
 Definition e x : data := inr x.
-
 
 (* Should receive something the party can decrypt *)
 Definition Recv_dec frm i f : proc data :=
@@ -329,7 +415,7 @@ apply/card_gt0P.
 by exists Alice. (* Note: when goal has `exist...`, this solves it. *)
 Qed.
 
-Let card_enc_forE p : #|(p.-enc msg : finType)| = m.-1.+1.
+Let card_enc_for p : #|(p.-enc msg : finType)| = m.-1.+1.
 Proof. by rewrite card_enc_for. Qed.
 
 Let enc0 := E NoParty (0 : msg).
@@ -397,15 +483,24 @@ Definition dsdp_RV (inputs : dsdp_random_inputs) :
     dsdp_uncurry `o
     [%v1, v2, v3, u1, u2, u3, r2, r3].
 
-Axiom E_enc_unif : forall (X : {RV P -> msg}) (p : party),
-  `p_ X = fdist_uniform card_msg -> `p_ (E' p `o X) = fdist_uniform (card_enc_forE p).
-(* TODO: prove this after the bij_RV_unif is merged *)
+Section enc_axioms.
+  
 
-Axiom E_enc_inde_msg : forall (A B : finType) (p : party) (X : {RV P -> p.-enc A}) (Y : {RV P -> B}),
+Axiom E_enc_unif : forall (X : {RV P -> msg}) (p : party),
+  `p_ X = fdist_uniform card_msg -> `p_ (E' p `o X) = fdist_uniform (card_enc_for p).
+
+Axiom E_enc_inde : forall (A B : finType) (p : party) (X : {RV P -> p.-enc A}) (Y : {RV P -> B}),
   P |= X _|_ Y.
 (* TODO: what if B is (p.-enc A) ? Whether we need a way to judge if B is (p.-enc A) or not?*)
 
+Axiom E_enc_ce : forall (A B : finType)  (p q : party) (X : {RV P -> p.-enc A}) (Y : {RV P -> B}),
+  `H(Y | X) = `H `p_  X .
+
+End enc_axioms.
+
 Section alice_is_leakage_free.
+
+Let / key_a := const_RV P alice.
 
 Local Notation m := m_minus_2.+2.
 
@@ -438,6 +533,8 @@ Qed.
 
 Hypothesis inde_Echarlie : P |= alice_inputs_RV _|_ E_charlie_v3.
 Hypothesis inde_Ebob : P |= alice_inputs_RV _|_ E_bob_v2.
+
+
 
 Let alice_view_valuesT := (msg * msg * msg * msg * msg * msg * msg *
   Alice.-enc msg * Charlie.-enc msg * Bob.-enc msg)%type.
@@ -481,7 +578,7 @@ Lemma alice_view_values_from_traceP:
    cancel alice_traces_from_view alice_view_values_from_trace.
 Proof.
 move => [] [] [] [] [] [] [] [] [] [] ? ? ? ? ? ? ? ? a c b //=.
-case: a => -[a ma] /=.
+case: a => -[a ma] /=.  (* msg from `case: a` can be case again to get 1. nat a 2. nat a < m*)
 case: c => -[c mc] /=.
 case: b => -[b mb] /=.
 by [].
@@ -499,16 +596,70 @@ Qed.
 
 Section eqn1.
 
-Let Y1 := v2.
-Let Y2 := alice_view.
-Let Y3 := E_bob_v2.
+(* List of RVs that one party can receive, no matter whether it
+   receives composed result or not.
+   For example: if Alice will receive (E' bob v2), or (u1 * v1),
+   its list here can have v2, u1 and v1 as before they are composed.
+*)
+Let O := [%v2, s, v1, u1, u2, u3, r2, r3, d3, v3].
 
-Let Y3_unif : `p_ Y3 = fdist_uniform card_enc.
+Let OT := (msg * msg * msg * msg * msg * msg * msg * msg * msg * msg)%type.
+
+Let f1 : OT -> msg := fun z =>
+  let '(v2, _, _, _, _, _, _, _, _, _) := z in v2.
+
+Let f2 : OT -> alice_view_valuesT := fun z =>
+  let '(v2, s, v1, u1, u2, u3, r2, r3,
+      d3, v3) := z in
+      (s, v1, u1, u2, u3, r2, r3,
+      E' alice d3, E' charlie v3, E' bob v2).
+
+Let f3 : OT -> Bob.-enc msg := fun z =>
+  let '(v2, _, _, _, _, _, _, _, _, _) := z in E' bob v2.
+
+
+
+Let Y1 := f1 `o O. (* v2 *)
+Let Y2 := f2 `o O. (* alice_view *)
+Let Y3 := f3 `o O.
+(* Problem: after encryption it cannot be added or substracted reasonably. 
+   But lemma cpr_cond_entropy need an addition (or any bin op).
+
+   So maybe we need to define a reasonable E bin op.
+   Also: add_RV requires a value Real but we only need it is a ring.
+   Need to rebase the new infotheo with bij lemmas and generalized bin ops.
+
+   If we have bij lemmas, just a bij op for encrypted RV, we don't need to
+   have it really added.
+
+
+   TODO: we should put k_a, k_b, and k_c RVs in views.
+   These are keys of parties.
+   E_a_x, E_b_y, E_c_z = k_a `+ x, k_b `+ y, k_c `+ z.
+
+   The `+ is not the accurate op so we can invent another bin op.
+   Like (k_a `e+ x) denotes x encrypted by key k_a.
+   It is different from `E because `E is just a constructor for buidling a value
+   represents it is already encrypted. While `e+ describes how it is encrypted briefly -- with what key.
+
+   Why it must be addition in the original lemma is because addition preserve the uniform distribution.
+   But by the bij lemmas we can see other operations should preserve it as well. Need a detailed check
+   for if "encryption" also preserve this and other properties, if any.
+*)
+
+Let Y3M := Y3 `+ (const_RV P (0 : msg)). (* E_bob_v2 *)
+
+Let Y3_O_indep : P|= Y3 _|_ O.
+Proof.
+
+Let Y3_unif : `p_ Y3 = fdist_uniform (card_enc_for Bob).
 Proof. by rewrite /Y3 /E_bob_v2 E_enc_unif // (pv2_unif inputs). Qed.
 
 Lemma eqn1P :
-  `H(v2 | alice_view ) = `H(v2| [%s, v1 , u1, u2, u3, r2, r3, E_alice_d3, E_bob_v2]).
-Proof. rewrite /alice_view.
+  `H(v2 | alice_view ) = `H(v2| [%s, v1 , u1, u2, u3, r2, r3, E_alice_d3, E_charlie_v3]).
+Proof.
+rewrite /alice_view.
+have Ha := scp.cpr_cond_entropy Y3_unif Y2_Y3_indep.
 Abort.
 
 End eqn1.
