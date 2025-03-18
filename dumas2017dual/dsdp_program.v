@@ -164,6 +164,9 @@ End party_key_def.
 Notation "p .-key k" := (party_key p k)
   (at level 2, format "p .-key k") : type_scope.
 
+Coercion tuple_of_party_key p k T (pk : p.-key k T) : (party * key * T) :=
+  let 'PartyKey v := pk in (p, k, v).
+
 Section party_key_types.
 
 HB.instance Definition _ p k (T : eqType) : hasDecEq (p.-key k T) :=
@@ -244,10 +247,6 @@ Qed.
 
 End enc_types.
 
-Section enc_axioms.
-
-End enc_axioms.
-
 Section dsdp.
   
 Variable m_minus_2 : nat.
@@ -265,7 +264,6 @@ Definition bob : party := Bob.
 Definition charlie : party := Charlie.
 
 Definition data := (msg + enc + pkey)%type.
-
 Definition d x : data := inl (inl x).
 Definition e x : data := inl (inr x).
 Definition k x : data := inr x.
@@ -317,9 +315,12 @@ Definition palice (dk : pkey)(v1 u1 u2 u3 r2 r3: msg) : proc data :=
     Ret (d ((g - r2 - r3 + u1 * v1))))))))))))))).
   
 Variables (k_a k_b k_c v1 v2 v3 u1 u2 u3 r2 r3 : msg).
+
+(* Note: must be with concrete values otherwise computation won't go *)
 Let dk_a : pkey := (Alice, Dec, k_a). 
 Let dk_b : pkey := (Bob, Dec, k_b). 
 Let dk_c : pkey := (Charlie, Dec, k_c). 
+
 Definition dsdp h :=
   (interp h [:: palice dk_a v1 u1 u2 u3 r2 r3; pbob dk_b v2; pcharlie dk_c v3] [::[::];[::];[::]]).
 
@@ -368,17 +369,18 @@ Notation dsdp_traceT := (15.-bseq data).
 Notation dsdp_tracesT := (3.-tuple dsdp_traceT).
 
 Definition dsdp_traces : dsdp_tracesT :=
-  interp_traces 15 [:: palice v1 u1 u2 u3 r2 r3; pbob v2; pcharlie v3].
+  interp_traces 15 [:: palice dk_a v1 u1 u2 u3 r2 r3; pbob dk_b v2; pcharlie dk_c v3].
 
 Definition is_dsdp (trs : dsdp_tracesT) :=
   let '(s, u3, u2, u1, v1) :=
-    if tnth trs 0 is Bseq [:: inl s; _; _; _; _; _; inl u3; inl u2; inl u1; inl v1] _
+    if tnth trs 0 is Bseq [:: inl (inl s); _; _; _; _; _;
+                           inl (inl u3); inl (inl u2); inl (inl u1); inl (inl v1); _] _
     then (s, u3, u2, u1, v1) else (0, 0, 0, 0, 0) in
   let '(v2) :=
-    if tnth trs 1 is Bseq [:: _; _; inl v2] _
+    if tnth trs 1 is Bseq [:: _; _; inl (inl v2); _] _
     then (v2) else (0) in
   let '(_v3) :=
-    if tnth trs 2 is Bseq [:: _; inl v3] _
+    if tnth trs 2 is Bseq [:: _; inl (inl v3); _] _
     then (v3) else (0) in
   s = v3 * u3 + v2 * u2 + v1 * u1.
 
@@ -389,10 +391,10 @@ Lemma dsdp_traces_ok :
              e (E alice (v3 * u3 + r3 + (v2 * u2 + r2)));
              e (E charlie v3);
              e (E bob v2);
-             d r3; d r2; d u3; d u2; d u1; d v1];
+             d r3; d r2; d u3; d u2; d u1; d v1; k dk_a];
        [bseq e (E charlie (v3 * u3 + r3));
-             e (E bob (v2 * u2 + r2)); d v2];
-       [bseq e (E charlie (v3 * u3 + r3 + (v2 * u2 + r2))); d v3]].
+             e (E bob (v2 * u2 + r2)); d v2; k dk_b];
+       [bseq e (E charlie (v3 * u3 + r3 + (v2 * u2 + r2))); d v3; k dk_c]].
 Proof. by apply/val_inj/(inj_map val_inj); rewrite interp_traces_ok. Qed.
 
 Lemma dsdp_is_correct:
@@ -416,6 +418,7 @@ Let card_msg : #|msg| = m.
 Proof. by rewrite card_ord. Qed.
 
 Let enc := enc party msg.
+Let pkey := pkey party msg.
 
 (* This is for {RV P -> (different parties x different messages} *)
 Let card_enc : #|(enc : finType)| = (#|(party : finType)| * m).-1.+1.
@@ -430,23 +433,30 @@ Proof. by rewrite card_enc_for. Qed.
 
 Let enc0 := E NoParty (0 : msg).
 
-Let data := (msg + enc)%type.
-Let d x : data := inl x.
-Let e x : data := inr x.
+Let data := (msg + enc + pkey)%type.
+Let d x : data := inl (inl x).
+Let e x : data := inl (inr x).
+Let k x : data := inr x.
 
 Notation dsdp_traceT := (15.-bseq data).
 Notation dsdp_tracesT := (3.-tuple dsdp_traceT).
 Notation "u *h w" := (Emul u w).
 Notation "u ^h w" := (Epow u w).
 
-
-Definition dsdp_uncurry (o: msg * msg * msg * msg * msg * msg * msg * msg)
+(* The 3 keys are defined in the previous section and they only need the `msg` type
+   extracted from them to be fulfilled.
+*)
+Definition dsdp_uncurry (o: Alice.-key Dec msg * Bob.-key Dec msg * Charlie.-key Dec msg * msg * msg * msg * msg * msg * msg * msg * msg)
   : dsdp_tracesT :=
-  let '( v1, v2 , v3, u1, u2, u3, r2, r3) := o in
-  (dsdp_traces v1 v2 v3 u1 u2 u3 r2 r3).
+  let '(dk_a, dk_b, dk_c, v1, v2 , v3, u1, u2, u3, r2, r3) := o in
+  (dsdp_traces dk_a.2 dk_b.2 dk_c.2 v1 v2 v3 u1 u2 u3 r2 r3).
 
 Record dsdp_random_inputs :=
   DSDPRandomInputs {
+    dk_a : {RV P -> Alice.-key Dec msg};
+    dk_b : {RV P -> Bob.-key Dec msg};
+    dk_c : {RV P -> Charlie.-key Dec msg};
+
     v1 : {RV P -> msg};
     v2 : {RV P -> msg};
     v3 : {RV P -> msg};
@@ -469,6 +479,9 @@ Record dsdp_random_inputs :=
 
 Variable inputs : dsdp_random_inputs.
 
+Let dk_a := dk_a inputs.
+Let dk_b := dk_b inputs.
+Let dk_c := dk_c inputs.
 Let v1 := v1 inputs.
 Let v2 := v2 inputs.
 Let v3 := v3 inputs.
@@ -491,10 +504,11 @@ Let E_bob_v2 : {RV P -> Bob.-enc msg} := E' bob `o v2.
 Definition dsdp_RV (inputs : dsdp_random_inputs) :
   {RV P -> dsdp_tracesT} :=
     dsdp_uncurry `o
-    [%v1, v2, v3, u1, u2, u3, r2, r3].
+    [% dk_a,
+       dk_b,
+       dk_c, v1, v2, v3, u1, u2, u3, r2, r3].
 
 Section enc_axioms.
-  
 
 Axiom E_enc_unif : forall (X : {RV P -> msg}) (p : party),
   `p_ X = fdist_uniform card_msg -> `p_ (E' p `o X) = fdist_uniform (card_enc_for p).
@@ -503,8 +517,9 @@ Axiom E_enc_inde : forall (A B : finType) (p : party) (X : {RV P -> p.-enc A}) (
   P |= X _|_ Y.
 (* TODO: what if B is (p.-enc A) ? Whether we need a way to judge if B is (p.-enc A) or not?*)
 
-Axiom E_enc_ce : forall (A B : finType)  (p q : party) (X : {RV P -> p.-enc A}) (Y : {RV P -> B}),
-  `H(Y | X) = `H `p_  X .
+Axiom E_enc_ce : forall (A B C: finType) (p : party)
+  (X : {RV P -> A})(Y : {RV P -> p.-enc B})(Z : {RV P -> C}),
+  `H(Z | [%X, Y]) = `H(Z | X).
 
 End enc_axioms.
 
@@ -542,42 +557,47 @@ Qed.
 Hypothesis inde_Echarlie : P |= alice_inputs_RV _|_ E_charlie_v3.
 Hypothesis inde_Ebob : P |= alice_inputs_RV _|_ E_bob_v2.
 
-
-
-Let alice_view_valuesT := (msg * msg * msg * msg * msg * msg * msg *
+Let alice_view_valuesT := (Alice.-key Dec msg * msg * msg * msg * msg * msg * msg * msg *
   Alice.-enc msg * Charlie.-enc msg * Bob.-enc msg)%type.
 
-Let alice_view := [%s, v1 , u1, u2, u3, r2, r3,
+Let alice_view := [% dk_a, s, v1 , u1, u2, u3, r2, r3,
       E_alice_d3, E_charlie_v3, E_bob_v2].
 
 Let alice_traces_from_view
   (v : alice_view_valuesT) : 15.-bseq _ :=
-    let '(s, v1 , u1, u2, u3, r2, r3, E_alice_d3, E_charlie_v3, E_bob_v2) := v in
+    let '(dk_a, s, v1 , u1, u2, u3, r2, r3, E_alice_d3, E_charlie_v3, E_bob_v2) := v in
     [bseq d s;
             e (E_alice_d3 : enc);
             e (E_charlie_v3 : enc);
             e (E_bob_v2 : enc);
-            d r3; d r2; d u3; d u2; d u1; d v1].
+            d r3; d r2; d u3; d u2; d u1; d v1; k (dk_a : pkey)].
 
 Lemma alice_traces_from_viewP :
   alice_traces = alice_traces_from_view `o alice_view.
 Proof.
 apply: boolp.funext => x /=.
 rewrite /alice_traces /dsdp_RV /comp_RV /=.
-by rewrite dsdp_traces_ok.
+rewrite dsdp_traces_ok //=.
+have Ha : dsdp_program.k (Alice, Dec, (dk_a x).2) = k (dk_a x).
+  (* Coq doesn't know this is the only case, and it makes both sides equal*)
+  by case: dk_a => t. 
+rewrite  -[in RHS]Ha //=.
 Qed.
 
 Let alice_view_values_from_trace (xs : dsdp_traceT) : alice_view_valuesT :=
-    let failtrace := (0, 0, 0, 0, 0, 0, 0, E' Alice 0, E' Charlie 0, E' Bob 0) in
-    if xs is Bseq [:: inl s;
-           inr E_alice_d3;
-           inr E_charlie_v3;
-           inr E_bob_v2;
-           inl r3; inl r2; inl u3; inl u2; inl u1; inl v1] _
+    let failtrace := (PartyKey Alice Dec 0,
+                        0, 0, 0, 0, 0, 0, 0,
+                        E' Alice 0, E' Charlie 0, E' Bob 0) in
+    if xs is Bseq [:: inl (inl s);
+           inl (inr E_alice_d3);
+           inl (inr E_charlie_v3);
+           inl (inr E_bob_v2);
+           inl (inl r3); inl (inl r2); inl (inl u3);
+           inl (inl u2); inl (inl u1); inl (inl v1); inr dk_a] _
     then 
-         if (E_alice_d3, E_charlie_v3, E_bob_v2) is
-              ((Alice, d3), (Charlie, v3), (Bob, v2)) then
-            (s, v1 , u1, u2, u3, r2, r3,
+         if (E_alice_d3, E_charlie_v3, E_bob_v2, dk_a) is
+              ((Alice, d3), (Charlie, v3), (Bob, v2), (Alice, Dec, k_a)) then
+            (PartyKey Alice Dec k_a, s, v1 , u1, u2, u3, r2, r3,
                E' Alice d3, E' Charlie v3, E' Bob v2)
          else failtrace
     else failtrace.
@@ -585,12 +605,17 @@ Let alice_view_values_from_trace (xs : dsdp_traceT) : alice_view_valuesT :=
 Lemma alice_view_values_from_traceP:
    cancel alice_traces_from_view alice_view_values_from_trace.
 Proof.
-move => [] [] [] [] [] [] [] [] [] [] ? ? ? ? ? ? ? ? a c b //=.
+move => [] [] [] [] [] [] [] [] [] [] dk ? ? ? ? ? ? ? a c b //=.
 case: a => -[a ma] /=.  (* msg from `case: a` can be case again to get 1. nat a 2. nat a < m*)
 case: c => -[c mc] /=.
 case: b => -[b mb] /=.
+case: dk => -[dk mdk] /=.
 by [].
 Qed.
+
+Variable (w : finType)(v : {RV P -> w}).
+Check [%v, alice_traces].
+Check `H(v | alice_traces).
   
 Lemma ce_alice_traces_view (w : finType) (v : {RV P -> w}) :
   `H(v | alice_traces ) = `H(v | alice_view ).
