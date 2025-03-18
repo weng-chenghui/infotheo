@@ -75,35 +75,6 @@ End party_def.
 (* Because the interpreter expects parties are nat in lots of places. *)
 Notation "'n(' w ')' " := (party_to_nat w).
 
-Section he.
-
-Variable party : finType.
-Variable msg : finComRingType.
-
-Definition enc := (party * msg)%type.
-
-Definition E i m : enc := (i, m).
-
-Definition D (p : party) (e : enc) : option msg :=
-  match e with
-  | (i, m) => if i == p then Some m else None
-  end.
-
-(* TODO: use option? But to lift a None in embedded computation
-   to an interpreter Fail is distant. *)
-Definition Emul (e1 e2 : enc) : enc := 
-  match (e1, e2) with
-  | ((i1, m1), (i2, m2)) => if i1 == i2 then E i1 (m1 + m2) else E i1 0
-  end.
-
-Definition Epow (e : enc) (m2 : msg) : enc :=
-  match e with
-  | (i, m1) => E i (m1 * m2)
-  end.
-
-End he.
-
-
 Section key_def.
   
 Inductive key := Dec | Enc.
@@ -141,6 +112,36 @@ Proof. by case. Qed.
 
 End key_def.
 
+Section he.
+
+Variable party : finType.
+Variable msg : finComRingType.
+
+Definition enc := (party * msg)%type.
+Definition pkey := (party * key * msg)%type.
+
+Definition E i m : enc := (i, m).
+Definition K i k m : pkey := (i, k, m).
+
+Definition D (k : pkey) (e : enc) : option msg :=
+  match k, e with
+  | (i, k, _), (j, m) => if (i == j) && (k == Dec) then Some m else None
+  end.
+
+(* TODO: use option? But to lift a None in embedded computation
+   to an interpreter Fail is distant. *)
+Definition Emul (e1 e2 : enc) : enc := 
+  match (e1, e2) with
+  | ((i1, m1), (i2, m2)) => if i1 == i2 then E i1 (m1 + m2) else E i1 0
+  end.
+
+Definition Epow (e : enc) (m2 : msg) : enc :=
+  match e with
+  | (i, m1) => E i (m1 * m2)
+  end.
+
+End he.
+
 Section party_key_def.
   
 
@@ -176,7 +177,7 @@ HB.instance Definition _ p k (T : finType) :=
 
 Variable (p : party)(k : key)(T : finType).
 
-Lemma card_enc_for : #|{:p.-key k T}| = #|T|.
+Lemma card_party_key : #|{:p.-key k T}| = #|T|.
 Proof.
 apply (bij_eq_card (f:=@party_key_v p k T)).
 exists (@PartyKey p k T).
@@ -254,6 +255,7 @@ Local Notation m := m_minus_2.+2.
 Let msg := 'I_m.  (* = Z/mZ *)
 
 Let enc := enc party msg.
+Let pkey := pkey party msg.
 
 Notation "u *h w" := (Emul u w).
 Notation "u ^h w" := (Epow u w).
@@ -262,62 +264,67 @@ Definition alice : party := Alice.
 Definition bob : party := Bob.
 Definition charlie : party := Charlie.
 
-Definition data := (msg + enc)%type.
-Definition d x : data := inl x.
-Definition e x : data := inr x.
+Definition data := (msg + enc + pkey)%type.
+
+Definition d x : data := inl (inl x).
+Definition e x : data := inl (inr x).
+Definition k x : data := inr x.
 
 (* Should receive something the party can decrypt *)
-Definition Recv_dec frm i f : proc data :=
-  Recv frm (fun x => if x is inr v then
-                       if D i v is Some v' then f v' else Fail
+Definition Recv_dec frm pkey f : proc data :=
+  Recv frm (fun x => if x is inl (inr v) then
+                       if D pkey v is Some v' then f v' else Fail
                      else Fail).
 
 (* Should receive something the party cannot decrypt,
    but can do HE computation over it.
 *)
-Definition Recv_enc frm i f : proc data :=
-  Recv frm (fun x => if x is inr v then
-                       if D i v is Some v' then Fail else f v
-                     else Fail).
+Definition Recv_enc frm f : proc data :=
+  Recv frm (fun x => if x is inl (inr v) then f v else Fail).
 
-Definition pbob (v2 : msg) : proc data :=
+Definition pbob (dk : pkey)(v2 : msg) : proc data :=
+  Init (k dk) (
   Init (d v2) (
   Send n(alice) (e (E bob v2)) (
-  Recv_dec n(alice) bob (fun d2 =>
-  Recv_enc n(alice) bob (fun a3 =>
+  Recv_dec n(alice) dk (fun d2 =>
+  Recv_enc n(alice) (fun a3 =>
     Send n(charlie) (e (a3 *h (E charlie d2))) (
-  Finish))))).
+  Finish)))))).
 
-Definition pcharlie (v3 : msg) : proc data :=
+Definition pcharlie (dk : pkey)(v3 : msg) : proc data :=
+  Init (k dk) (
   Init (d v3) (
   Send n(alice) (e (E charlie v3)) (
-  Recv_dec n(bob) charlie (fun d3 => (
+  Recv_dec n(bob) dk (fun d3 => (
     Send n(alice) (e (E alice d3))
-  Finish)))).
+  Finish))))).
 
-Definition palice (v1 u1 u2 u3 r2 r3: msg) : proc data :=
+Definition palice (dk : pkey)(v1 u1 u2 u3 r2 r3: msg) : proc data :=
+  Init (k dk) (
   Init (d v1) (
   Init (d u1) (
   Init (d u2) (
   Init (d u3) (
   Init (d r2) (
   Init (d r3) (
-  Recv_enc n(bob) alice (fun c2 =>
-  Recv_enc n(charlie) alice (fun c3 =>
+  Recv_enc n(bob) (fun c2 =>
+  Recv_enc n(charlie) (fun c3 =>
   let a2 := (c2 ^h u2 *h (E bob r2)) in
   let a3 := (c3 ^h u3 *h (E charlie r3)) in
     Send n(bob) (e a2) (
     Send n(bob) (e a3) (
-    Recv_dec n(charlie) alice (fun g =>
-    Ret (d ((g - r2 - r3 + u1 * v1)))))))))))))).
+    Recv_dec n(charlie) dk (fun g =>
+    Ret (d ((g - r2 - r3 + u1 * v1))))))))))))))).
   
-Variables (v1 v2 v3 u1 u2 u3 r2 r3 : msg).
+Variables (k_a k_b k_c v1 v2 v3 u1 u2 u3 r2 r3 : msg).
+Let dk_a : pkey := (Alice, Dec, k_a). 
+Let dk_b : pkey := (Bob, Dec, k_b). 
+Let dk_c : pkey := (Charlie, Dec, k_c). 
 Definition dsdp h :=
-  (interp h [:: palice v1 u1 u2 u3 r2 r3; pbob v2; pcharlie v3] [::[::];[::];[::]]).
-
+  (interp h [:: palice dk_a v1 u1 u2 u3 r2 r3; pbob dk_b v2; pcharlie dk_c v3] [::[::];[::];[::]]).
 
 (* Different from SMC scalar product: has much less calculations *)
-Goal (dsdp 15).2 = ([::]).
+Goal (dsdp 15) = ([::],[::]).
 rewrite /dsdp.
 rewrite (lock (15 : nat)) /=.
 rewrite -lock (lock (14 : nat)) /=.
@@ -332,9 +339,12 @@ rewrite -lock (lock (6 : nat)) /=.
 rewrite -lock (lock (5 : nat)) /=.
 rewrite -lock (lock (4 : nat)) /=.
 rewrite -lock (lock (3 : nat)) /=.
+vm_compute.
+(*
 rewrite -lock (lock (2 : nat)) /=.
 rewrite -lock (lock (1 : nat)) /=.
-rewrite !/Emul /=.
+rewrite -lock (lock (0 : nat)) /=.
+*)
 Abort.
 
 Lemma dsdp_ok :
@@ -344,10 +354,10 @@ Lemma dsdp_ok :
            e (E alice (v3 * u3 + r3 + (v2 * u2 + r2))); 
            e (E charlie v3);
            e (E bob v2);
-           d r3; d r2; d u3; d u2; d u1; d v1];
+           d r3; d r2; d u3; d u2; d u1; d v1; k dk_a];
        [:: e (E charlie (v3 * u3 + r3));
-           e (E bob (v2 * u2 + r2)); d v2];  (* Eventually will be recorded in Recv or Ret*)
-       [:: e (E charlie (v3 * u3 + r3 + (v2 * u2 + r2))); d v3]
+           e (E bob (v2 * u2 + r2)); d v2; k dk_b];
+       [:: e (E charlie (v3 * u3 + r3 + (v2 * u2 + r2))); d v3; k dk_c]
   ]).
 Proof. reflexivity. Qed.
 
@@ -499,8 +509,6 @@ Axiom E_enc_ce : forall (A B : finType)  (p q : party) (X : {RV P -> p.-enc A}) 
 End enc_axioms.
 
 Section alice_is_leakage_free.
-
-Let / key_a := const_RV P alice.
 
 Local Notation m := m_minus_2.+2.
 
