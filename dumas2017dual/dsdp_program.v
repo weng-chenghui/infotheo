@@ -152,10 +152,10 @@ Section party_key_def.
 *)
 
 Variant party_key (p : party) (k : key) (T : Type) : Type :=
-  PartyKey of T.
+  KeyOf of T.
 
 Definition party_key_v p k T (pk : party_key p k T) : T :=
-  let 'PartyKey v := pk in v.
+  let 'KeyOf v := pk in v.
 
 Variable (p : party) (k : key)(T : Type).
 
@@ -167,7 +167,7 @@ Notation "p .-key k" := (party_key p k)
   (at level 2, format "p .-key k") : type_scope.
 
 Coercion tuple_of_party_key p k T (pk : p.-key k T) : (party * key * T) :=
-  let 'PartyKey v := pk in (p, k, v).
+  let 'KeyOf v := pk in (p, k, v).
 
 Section party_key_types.
 
@@ -185,7 +185,7 @@ Variable (p : party)(k : key)(T : finType).
 Lemma card_party_key : #|{:p.-key k T}| = #|T|.
 Proof.
 apply (bij_eq_card (f:=@party_key_v p k T)).
-exists (@PartyKey p k T).
+exists (@KeyOf p k T).
 by case.
 by [].
 Qed.
@@ -240,7 +240,8 @@ Definition E' (T : Type) (p : party) (t : T) : p.-enc T :=
 
 Variable (p : party) (T : finType).
 
-Lemma card_enc_for : #|{:p.-enc T}| = #|T|.
+Lemma card_enc_for :
+  #|{:p.-enc T}| = #|T|.
 Proof.
 apply (bij_eq_card (f:=@enc_for_v p T)).
 exists (@EncFor p T).
@@ -248,7 +249,51 @@ by case.
 by [].
 Qed.
 
+Lemma card_enc_for' : forall (n : nat),
+  #|T| = n.+1 -> #|{:p.-enc T}| = n.+1.
+Proof. by rewrite card_enc_for. Qed.
+
 End enc_types.
+
+Section enc_lemmas.
+
+Variables (T : finType)(P : R.-fdist T).
+
+Section unif.
+
+Variables (A : finType)(p : party)(X : {RV P -> p.-enc A})(n : nat).
+Hypothesis card_A : #|A| = n.+1.
+
+Axiom E_enc_unif :
+  `p_X = fdist_uniform (card_enc_for' p card_A).
+
+End unif.
+
+Axiom E_enc_inde : forall (A B : finType) (p : party) (X : {RV P -> p.-enc A}) (Y : {RV P -> B}),
+  P |= X _|_ Y.
+(* TODO: what if B is (p.-enc A) ? Whether we need a way to judge if B is (p.-enc A) or not?*)
+
+Section lemma_E_enc_ce.
+
+Variables (A C: finType) (B : finZmodType) (p : party).
+Variables (X : {RV P -> A})(E : {RV P -> p.-enc B})(Z : {RV P -> C})(n : nat).
+Hypothesis card_B : #|B| = n.+1.
+
+Lemma E_enc_ce :
+  `H(Z | [%X, E]) = `H(Z | X).
+Proof.
+About scp.cpr_cond_entropy.
+have Hinde : P |= X _|_ E.
+  rewrite smc_proba.inde_rv_sym.
+  exact: (E_enc_inde E X).
+have Hunif : `p_ E = fdist_uniform (card_enc_for' p card_B).
+  exact: (E_enc_unif E card_B).
+Search (`Pr[ _ = _ | [%_, _] = (_, _)]).
+have H := scp.cpr_cond_entropy unif_E (.
+
+End lemma_E_enc_ce.
+
+End enc_lemmas.
 
 Section dsdp.
   
@@ -511,21 +556,6 @@ Definition dsdp_RV (inputs : dsdp_random_inputs) :
        dk_b,
        dk_c, v1, v2, v3, u1, u2, u3, r2, r3].
 
-Section enc_axioms.
-
-Axiom E_enc_unif : forall (X : {RV P -> msg}) (p : party),
-  `p_ X = fdist_uniform card_msg -> `p_ (E' p `o X) = fdist_uniform (card_enc_for p).
-
-Axiom E_enc_inde : forall (A B : finType) (p : party) (X : {RV P -> p.-enc A}) (Y : {RV P -> B}),
-  P |= X _|_ Y.
-(* TODO: what if B is (p.-enc A) ? Whether we need a way to judge if B is (p.-enc A) or not?*)
-
-Axiom E_enc_ce : forall (A B C: finType) (p : party)
-  (X : {RV P -> A})(Y : {RV P -> p.-enc B})(Z : {RV P -> C}),
-  `H(Z | [%X, Y]) = `H(Z | X).
-
-End enc_axioms.
-
 Section alice_is_leakage_free.
 
 Local Notation m := m_minus_2.+2.
@@ -588,7 +618,7 @@ rewrite  -[in RHS]Ha //=.
 Qed.
 
 Let alice_view_values_from_trace (xs : dsdp_traceT) : alice_view_valuesT :=
-    let failtrace := (PartyKey Alice Dec 0,
+    let failtrace := (KeyOf Alice Dec 0,
                         0, 0, 0, 0, 0, 0, 0,
                         E' Alice 0, E' Charlie 0, E' Bob 0) in
     if xs is Bseq [:: inl (inl s);
@@ -600,7 +630,7 @@ Let alice_view_values_from_trace (xs : dsdp_traceT) : alice_view_valuesT :=
     then 
          if (E_alice_d3, E_charlie_v3, E_bob_v2, dk_a) is
               ((Alice, d3), (Charlie, v3), (Bob, v2), (Alice, Dec, k_a)) then
-            (PartyKey Alice Dec k_a, s, v1 , u1, u2, u3, r2, r3,
+            (KeyOf Alice Dec k_a, s, v1 , u1, u2, u3, r2, r3,
                E' Alice d3, E' Charlie v3, E' Bob v2)
          else failtrace
     else failtrace.
@@ -628,10 +658,39 @@ Qed.
 
 Section eqn1.
 
-(* List of RVs that one party can receive, no matter whether it
-   receives composed result or not.
+Definition eqn1_view := [%dk_a, s, v1 , u1, u2, u3, r2, r3, E_alice_d3, E_charlie_v3].
+
+Lemma eqn1P :
+  `H(v2 | alice_view ) =
+  `H(v2| eqn1_view).
+Proof. exact: E_enc_ce. Qed.
+
+End eqn1.
+
+Section eqn2.
+  
+Definition eqn2_view := [%dk_a, s, v1 , u1, u2, u3, r2, r3, E_alice_d3].
+
+Lemma eqn2P :
+  `H(v2 | eqn1_view ) = `H(v2| eqn2_view ).
+Proof. exact: E_enc_ce. Qed.
+
+End eqn2.
+
+Section eqn3.
+  
+Definition eqn3_view := [%dk_a, s, v1 , u1, u2, u3, r2, r3].
+
+Lemma eqn2P :
+  `H(v2 | eqn2_view ) = `H(v2| eqn3_view ).
+Proof. exact: E_enc_ce. Qed.
+
+End eqn3.
+
+(* List of RVs that one party can receive, no matter whether they are
+   received as composed results or not.
    For example: if Alice will receive (E' bob v2), or (u1 * v1),
-   its list here can have v2, u1 and v1 as before they are composed.
+   the view list Alice has here should have v2, u1 and v1 as before they are composed.
 *)
 Let O := [%v2, s, v1, u1, u2, u3, r2, r3, d3, v3].
 
