@@ -110,10 +110,12 @@ Definition key_enum := [:: Dec; Enc].
 Lemma key_enumP : Finite.axiom key_enum.
 Proof. by case. Qed.
 
+HB.instance Definition _ := isFinite.Build key key_enumP.
+
 End key_def.
 
 Section he.
-
+  
 Variable party : finType.
 Variable msg : finComRingType.
 
@@ -189,6 +191,7 @@ by [].
 Qed.
 
 End party_key_types.
+
 
 Section enc_type_def.
 
@@ -613,10 +616,6 @@ case: dk => -[dk mdk] /=.
 by [].
 Qed.
 
-Variable (w : finType)(v : {RV P -> w}).
-Check [%v, alice_traces].
-Check `H(v | alice_traces).
-  
 Lemma ce_alice_traces_view (w : finType) (v : {RV P -> w}) :
   `H(v | alice_traces ) = `H(v | alice_view ).
 Proof.
