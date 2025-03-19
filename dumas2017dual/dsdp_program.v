@@ -530,7 +530,7 @@ Record dsdp_random_inputs :=
     r2 : {RV P -> msg};
     r3 : {RV P -> msg};
 
-    alice_indep : P |= [% v1 , u1, u2, u3, r2, r3] _|_ [% v2, v3];
+    alice_indep : P |= [% dk_a, v1, u1, u2, u3, r2, r3] _|_ [% v2, v3];
 
     pv1_unif : `p_ v1 = fdist_uniform card_msg;
     pv2_unif : `p_ v2 = fdist_uniform card_msg;
@@ -581,13 +581,13 @@ Let alice_traces : RV dsdp_traceT P :=
 
 (* Use these two and apply_inde_RV_comp to prove trivial indeps*)
 Let alice_inputs_RV := [% v1 , u1, u2, u3, r2, r3].
-Let alice_inputsT := (msg * msg * msg * msg * msg * msg)%type.
+Let alice_inputsT := (Alice.-key Dec msg * msg * msg * msg * msg * msg * msg)%type.
 
 Goal P |= [% v1 , u1] _|_ v2.
 Proof.
 have := alice_indep inputs.
 pose f := fun (ls : alice_inputsT) =>
-  let '(v1 , u1, _, _, _, _) := ls in (v1 , u1).
+  let '(_, v1 , u1, _, _, _, _) := ls in (v1 , u1).
 pose g := fun (rs : (msg * msg)) =>
   let '(v2 , v3) := rs in v2.
 by apply_inde_rv_comp f g.
@@ -672,10 +672,37 @@ transitivity (`H(v | [%alice_traces, alice_view])).
 by rewrite alice_traces_from_viewP scp.cond_entropyC scp.fun_cond_removal.
 Qed.
 
-Definition dec_view := [%dk_a, s, v1 , u1, u2, u3, r2, r3].
-Definition eqn1_view := [% dec_view, E_alice_d3, E_charlie_v3].
-Definition eqn2_view := [% dec_view, E_alice_d3].
+Let alice_input_view := [%dk_a, v1, u1, u2, u3, r2, r3].
 
+Check scp.s1Ms2_r_indep.
+
+About scp.cpr_cond_entropy.
+
+Section ce_v2_s_removal.
+  
+(*
+  S := v3 \* u3 \+ r3 \+ (v2 \* u2 \+ r2) \- r2 \- r3 \+ u1 \* v1
+     = v3 \* u3 + v2 \* u2 + v1 \* u1
+
+
+  By `s1Ms2_r_indep` we can prove that:
+      P |= (v3 \* u3) + (v2 \* v2) _|_ (u1 \* v1).
+
+  But our goal is to prove:
+*)
+
+Lemma ce_v2_s_removalP:
+  `H(v2 | [% alice_input_view, s]) = `H(v2 | alice_input_view ).
+Proof.
+rewrite /s /d3 /vu3r /d2 /vu3 /vu2.
+Admitted.
+
+End ce_v2_s_removal.
+
+Let dec_view := [%dk_a, s, v1 , u1, u2, u3, r2, r3].
+Let eqn1_view := [% dec_view, E_alice_d3, E_charlie_v3].
+Let eqn2_view := [% dec_view, E_alice_d3].
+ 
 Hypothesis alice_view_neq0:
   forall x e, `Pr[ [% dec_view, E_alice_d3, E_charlie_v3, E_bob_v2] =
         (x, e) ] != 0.
@@ -693,22 +720,19 @@ Lemma alice_is_leakage_freeP :
 Proof.
 transitivity (`H(v2| dec_view )).
   by rewrite !(E_enc_ce_removal v2 card_msg).
-transitivity (`H(v2| [%dk_a, s, v1 , u1, u2, u3, r2] )).
-  rewrite /dec_view.
+transitivity (`H(v2| alice_input_view )).
 admit.
-transitivity (`H(v2| [%dk_a, s, v1 , u1, u2, u3, r2] )).
+transitivity (`H(v2| [%dk_a, v1 , u1, u2, u3, r2] )).
 admit.
-transitivity (`H(v2| [%dk_a, s, v1 , u1, u2, u3] )).
+transitivity (`H(v2| [%dk_a, v1 , u1, u2, u3] )).
 admit.
-transitivity (`H(v2| [%dk_a, s, v1 , u1, u2] )).
+transitivity (`H(v2| [%dk_a, v1 , u1, u2] )).
 admit.
-transitivity (`H(v2| [%dk_a, s, v1 , u1] )).
+transitivity (`H(v2| [%dk_a, v1 , u1] )).
 admit.
-transitivity (`H(v2| [%dk_a, s, v1] )).
+transitivity (`H(v2| [%dk_a, v1] )).
 admit.
-transitivity (`H(v2| [%dk_a, s] )).
-admit.
-transitivity (`H(v2| dk_a )).
+transitivity (`H(v2| %dk_a )).
 Abort.
 
 End alice_is_leakage_free.
