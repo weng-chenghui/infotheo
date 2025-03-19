@@ -280,7 +280,7 @@ Variables (X : {RV P -> A})(E : {RV P -> p.-enc B})(Z : {RV P -> C})(n : nat).
 Hypothesis card_B : #|B| = n.+1.
 Hypothesis XE_neq0 : forall x e, `Pr[ [%X, E] = (x, e)] != 0.
 
-Lemma E_enc_ce :
+Lemma E_enc_ce_removal :
   `H(Z | [%X, E]) = `H(Z | X).
 Proof.
 have HindeX_E : P |= X _|_ E.
@@ -672,131 +672,43 @@ transitivity (`H(v | [%alice_traces, alice_view])).
 by rewrite alice_traces_from_viewP scp.cond_entropyC scp.fun_cond_removal.
 Qed.
 
-Section eqn1.
+Definition dec_view := [%dk_a, s, v1 , u1, u2, u3, r2, r3].
+Definition eqn1_view := [% dec_view, E_alice_d3, E_charlie_v3].
+Definition eqn2_view := [% dec_view, E_alice_d3].
 
-Definition eqn1_view := [%dk_a, s, v1 , u1, u2, u3, r2, r3, E_alice_d3, E_charlie_v3].
+Hypothesis alice_view_neq0:
+  forall x e, `Pr[ [% dec_view, E_alice_d3, E_charlie_v3, E_bob_v2] =
+        (x, e) ] != 0.
 
-Lemma eqn1P :
-  `H(v2 | alice_view ) =
-  `H(v2| eqn1_view).
-Proof. exact: E_enc_ce. Qed.
+Hypothesis eqn1_view_neq0 :
+  forall x e, `Pr[ [% dec_view, E_alice_d3, E_charlie_v3] =
+        (x, e) ] != 0.
 
-End eqn1.
-
-Section eqn2.
-  
-Definition eqn2_view := [%dk_a, s, v1 , u1, u2, u3, r2, r3, E_alice_d3].
-
-Lemma eqn2P :
-  `H(v2 | eqn1_view ) = `H(v2| eqn2_view ).
-Proof. exact: E_enc_ce. Qed.
-
-End eqn2.
-
-Section eqn3.
-  
-Definition eqn3_view := [%dk_a, s, v1 , u1, u2, u3, r2, r3].
-
-Lemma eqn2P :
-  `H(v2 | eqn2_view ) = `H(v2| eqn3_view ).
-Proof. exact: E_enc_ce. Qed.
-
-End eqn3.
-
-(* List of RVs that one party can receive, no matter whether they are
-   received as composed results or not.
-   For example: if Alice will receive (E' bob v2), or (u1 * v1),
-   the view list Alice has here should have v2, u1 and v1 as before they are composed.
-*)
-Let O := [%v2, s, v1, u1, u2, u3, r2, r3, d3, v3].
-
-Let OT := (msg * msg * msg * msg * msg * msg * msg * msg * msg * msg)%type.
-
-Let f1 : OT -> msg := fun z =>
-  let '(v2, _, _, _, _, _, _, _, _, _) := z in v2.
-
-Let f2 : OT -> alice_view_valuesT := fun z =>
-  let '(v2, s, v1, u1, u2, u3, r2, r3,
-      d3, v3) := z in
-      (s, v1, u1, u2, u3, r2, r3,
-      E' alice d3, E' charlie v3, E' bob v2).
-
-Let f3 : OT -> Bob.-enc msg := fun z =>
-  let '(v2, _, _, _, _, _, _, _, _, _) := z in E' bob v2.
-
-
-
-Let Y1 := f1 `o O. (* v2 *)
-Let Y2 := f2 `o O. (* alice_view *)
-Let Y3 := f3 `o O.
-(* Problem: after encryption it cannot be added or substracted reasonably. 
-   But lemma cpr_cond_entropy need an addition (or any bin op).
-
-   So maybe we need to define a reasonable E bin op.
-   Also: add_RV requires a value Real but we only need it is a ring.
-   Need to rebase the new infotheo with bij lemmas and generalized bin ops.
-
-   If we have bij lemmas, just a bij op for encrypted RV, we don't need to
-   have it really added.
-
-
-   TODO: we should put k_a, k_b, and k_c RVs in views.
-   These are keys of parties.
-   E_a_x, E_b_y, E_c_z = k_a `+ x, k_b `+ y, k_c `+ z.
-
-   The `+ is not the accurate op so we can invent another bin op.
-   Like (k_a `e+ x) denotes x encrypted by key k_a.
-   It is different from `E because `E is just a constructor for buidling a value
-   represents it is already encrypted. While `e+ describes how it is encrypted briefly -- with what key.
-
-   Why it must be addition in the original lemma is because addition preserve the uniform distribution.
-   But by the bij lemmas we can see other operations should preserve it as well. Need a detailed check
-   for if "encryption" also preserve this and other properties, if any.
-*)
-
-Let Y3M := Y3 `+ (const_RV P (0 : msg)). (* E_bob_v2 *)
-
-Let Y3_O_indep : P|= Y3 _|_ O.
-Proof.
-
-Let Y3_unif : `p_ Y3 = fdist_uniform (card_enc_for Bob).
-Proof. by rewrite /Y3 /E_bob_v2 E_enc_unif // (pv2_unif inputs). Qed.
-
-Lemma eqn1P :
-  `H(v2 | alice_view ) = `H(v2| [%s, v1 , u1, u2, u3, r2, r3, E_alice_d3, E_charlie_v3]).
-Proof.
-rewrite /alice_view.
-have Ha := scp.cpr_cond_entropy Y3_unif Y2_Y3_indep.
-Abort.
-
-End eqn1.
+Hypothesis eqn2_view_neq0 :
+  forall x e, `Pr[ [% dec_view, E_alice_d3] =
+        (x, e) ] != 0.
 
 Lemma alice_is_leakage_freeP :
   `H(v2 | alice_view ) = `H `p_v2.
 Proof.
-transitivity (`H(v2| [%s, v1 , u1, u2, u3, r2, r3, E_alice_d3] )).
-  have Hb : P |= E_bob_v2 _|_ [%s, v1 , u1, u2, u3, r2, r3, E_alice_d3].
-  admit.
-  have Hc : P |= E_charlie_v3 _|_ [%s, v1 , u1, u2, u3, r2, r3, E_alice_d3].
-  admit.
-    
+transitivity (`H(v2| dec_view )).
+  by rewrite !(E_enc_ce_removal v2 card_msg).
+transitivity (`H(v2| [%dk_a, s, v1 , u1, u2, u3, r2] )).
+  rewrite /dec_view.
 admit.
-transitivity (`H(v2| [%s, v1 , u1, u2, u3, r2, r3, E_alice_d3] )).
+transitivity (`H(v2| [%dk_a, s, v1 , u1, u2, u3, r2] )).
 admit.
-transitivity (`H(v2| [%s, v1 , u1, u2, u3, r2, r3] )).
+transitivity (`H(v2| [%dk_a, s, v1 , u1, u2, u3] )).
 admit.
-transitivity (`H(v2| [%s, v1 , u1, u2, u3, r2] )).
+transitivity (`H(v2| [%dk_a, s, v1 , u1, u2] )).
 admit.
-transitivity (`H(v2| [%s, v1 , u1, u2, u3] )).
+transitivity (`H(v2| [%dk_a, s, v1 , u1] )).
 admit.
-transitivity (`H(v2| [%s, v1 , u1, u2] )).
+transitivity (`H(v2| [%dk_a, s, v1] )).
 admit.
-transitivity (`H(v2| [%s, v1 , u1] )).
+transitivity (`H(v2| [%dk_a, s] )).
 admit.
-transitivity (`H(v2| [%s, v1] )).
-admit.
-transitivity (`H(v2| s )).
-admit.
+transitivity (`H(v2| dk_a )).
 Abort.
 
 End alice_is_leakage_free.
