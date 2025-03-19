@@ -230,7 +230,7 @@ End joint_entropyA.
 Section pr_entropy.
   
 
-Variables (T TY1 TY2: finType) (TY3: finZmodType) (P : R.-fdist T).
+Variables (T TY1 TY2 TY3: finType)(P : R.-fdist T).
 Variable n : nat.
 Notation p := n.+2.
 Variables (Y1: {RV P -> TY1}) (Y2: {RV P -> TY2}) (Y3: {RV P -> TY3}).
@@ -332,7 +332,7 @@ End pr_entropy.
 
 Section cpr_cond_entropy_proof.
 
-Variables (T TY1 TY2 : finType)(TY3 : finZmodType)(P : R.-fdist T).
+Variables (T TY1 TY2 TY3: finType)(P : R.-fdist T).
 Variables (Y1 : {RV (P) -> (TY1)})(Y2 : {RV (P) -> (TY2)})(Y3 : {RV (P) -> (TY3)}).
 
 Lemma cpr_cond_entropy (n: nat)(card_TY3 : #|TY3| = n.+1):

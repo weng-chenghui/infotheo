@@ -1,7 +1,7 @@
 From HB Require Import structures.
 From mathcomp Require Import all_ssreflect all_algebra fingroup finalg matrix Rstruct ring boolp finmap.
 Require Import realType_ext realType_ln ssr_ext ssralg_ext bigop_ext fdist.
-Require Import proba jfdist_cond entropy graphoid smc_interpreter smc_indep smc_tactics.
+Require Import proba jfdist_cond entropy graphoid smc_interpreter smc_tactics.
 
 Import GRing.Theory.
 Import Num.Theory.
@@ -274,22 +274,38 @@ Axiom E_enc_inde : forall (A B : finType) (p : party) (X : {RV P -> p.-enc A}) (
 (* TODO: what if B is (p.-enc A) ? Whether we need a way to judge if B is (p.-enc A) or not?*)
 
 Section lemma_E_enc_ce.
-
-Variables (A C: finType) (B : finZmodType) (p : party).
+  
+Variables (A B C: finType) (p : party).
 Variables (X : {RV P -> A})(E : {RV P -> p.-enc B})(Z : {RV P -> C})(n : nat).
 Hypothesis card_B : #|B| = n.+1.
+Hypothesis XE_neq0 : forall x e, `Pr[ [%X, E] = (x, e)] != 0.
 
 Lemma E_enc_ce :
   `H(Z | [%X, E]) = `H(Z | X).
 Proof.
-About scp.cpr_cond_entropy.
-have Hinde : P |= X _|_ E.
+have HindeX_E : P |= X _|_ E.
   rewrite smc_proba.inde_rv_sym.
   exact: (E_enc_inde E X).
 have Hunif : `p_ E = fdist_uniform (card_enc_for' p card_B).
   exact: (E_enc_unif E card_B).
-Search (`Pr[ _ = _ | [%_, _] = (_, _)]).
-have H := scp.cpr_cond_entropy unif_E (.
+have HindeXZ_E : P |= [%X, Z] _|_ E.
+  rewrite smc_proba.inde_rv_sym.
+  exact: (E_enc_inde E [%X, Z]).
+apply (scp.cpr_cond_entropy (Y1:=Z)(Y2:=X)(Y3:=E) Hunif HindeX_E) => c a b.
+have Hpr : `Pr[ Z = c | [%X, E] = (a, b)] = `Pr[ Z = c | X = a].
+  have HindeZ_X : P |= E _|_ [%Z, X].
+    exact: (E_enc_inde E [%Z, X]).
+  rewrite smc_proba.inde_rv_sym in HindeZ_X.
+  have H:=(smc_proba.inde_RV2_cinde (X:=Z)(Y:=E)(Z:=X) HindeZ_X).
+  pose proof XE_neq0 as EX_neq0.
+  move/(_ a b) in EX_neq0. (* Specialize forall...*)
+  rewrite pr_eq_pairC in EX_neq0.
+  have H2:= (cinde_alt c H EX_neq0).
+  rewrite cpr_eq_pairCr.
+  exact: H2.
+move => ?.
+exact: Hpr.
+Qed.
 
 End lemma_E_enc_ce.
 
