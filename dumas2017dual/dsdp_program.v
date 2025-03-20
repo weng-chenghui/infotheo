@@ -707,22 +707,49 @@ apply: boolp.funext => i //=.
 ring.
 Qed.
 
-Lemma s_aiv_indep:
-  P |= s _|_ alice_input_view.
-Proof.
-rewrite s_alt.
-(* Cannot have a lemma like Lemma 3.5 in SMC because dotproduct has no inverse operation
-   like addition vs. substraction.
-   So we cannot have the critical step in Lemma 3.5 to split X and Y:
+(*
+    If v2 _|_ alice_input_view? Yes, can be proved by lemma 3.1 +  alice_indep hypothesis.
 
-    Lemma add_RV_mul i : `p_ add_RV i = (\sum_(k <- fin_img X) `Pr[ X = k ] * `Pr[ Y = (i - k)%R ]).
+    If v2 _|_ s ?
+
+    s = dotp2_rv (f `o alice_input_view) vs \+ (g `o alice_input_view).
+      = dotp2_rv us vs \+ r
+      = dotp2_rv [%u2, u3] [%v2, v3] \+ (v1 \* u1)
+      = dotp2_rv [%u2, u3] [%v2, v3] \+ h `o [%v1, u1]
+
+    If we can prove that [%u2, u3, v2, v3] _|_ [v1, u1],
+    by SMC lemma 3.5 we can prove that S _|_ v2.
+
+    The relation between alice_input_view and [%u2, u3, v2, v3] is:  
+
+                       :|: vs
+    alice_input_view ----------> alice_input_view :|: vs
+          |                               |
+       f' |                             f |
+          |                               |
+          v                               v
+      [% u2, u3 ]    ----------> [% u2, u3, v2, v3]
+                       :|: vs
+
+
+    While the relation between alice_input_view and [%v1, u1] is:
+
+                        g
+    alice_input_view ------> [% v1, u1]
+
+
+    Another idea is that maybe there is a theory like:
+
+    "If the new base cannot be spanned from the old base,
+    the new base is independent of the old base."
+
+    Not sure if it is true or provable in Coq.
+    But every time, proving independence again after "base" partitioning + mixing
+    without a rule of independence-preserving transition is very time-costly.
 *)
-Abort.
-
 Lemma ce_v2_s_removalP:
   `H(v2 | [% alice_input_view, s]) = `H(v2 | alice_input_view ).
 Proof.
-rewrite /s /d3 /vu3r /d2 /vu3 /vu2.
 Abort.
 
 End ce_v2_s_removal.
@@ -748,19 +775,11 @@ Lemma alice_is_leakage_freeP :
 Proof.
 transitivity (`H(v2| dec_view )).
   by rewrite !(E_enc_ce_removal v2 card_msg).
+transitivity (`H(v2| [% alice_input_view, s] )).
+  rewrite /dec_view /alice_input_view.
+admit.
 transitivity (`H(v2| alice_input_view )).
 admit.
-transitivity (`H(v2| [%dk_a, v1 , u1, u2, u3, r2] )).
-admit.
-transitivity (`H(v2| [%dk_a, v1 , u1, u2, u3] )).
-admit.
-transitivity (`H(v2| [%dk_a, v1 , u1, u2] )).
-admit.
-transitivity (`H(v2| [%dk_a, v1 , u1] )).
-admit.
-transitivity (`H(v2| [%dk_a, v1] )).
-admit.
-transitivity (`H(v2| dk_a )).
 Abort.
 
 End alice_is_leakage_free.
