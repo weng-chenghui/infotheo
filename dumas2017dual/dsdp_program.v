@@ -580,7 +580,7 @@ Let alice_traces : RV dsdp_traceT P :=
       (fun t => tnth t 0) `o dsdp_RV inputs.
 
 (* Use these two and apply_inde_RV_comp to prove trivial indeps*)
-Let alice_inputs_RV := [% v1 , u1, u2, u3, r2, r3].
+Let alice_inputs_RV := [% dk_a, v1, u1, u2, u3, r2, r3].
 Let alice_inputsT := (Alice.-key Dec msg * msg * msg * msg * msg * msg * msg)%type.
 
 Goal P |= [% v1 , u1] _|_ v2.
@@ -673,29 +673,57 @@ by rewrite alice_traces_from_viewP scp.cond_entropyC scp.fun_cond_removal.
 Qed.
 
 Let alice_input_view := [%dk_a, v1, u1, u2, u3, r2, r3].
-
-Check scp.s1Ms2_r_indep.
-
-About scp.cpr_cond_entropy.
+Notation alice_input_view_valT :=
+  (Alice.-key Dec msg * msg * msg * msg * msg * msg * msg)%type.
 
 Section ce_v2_s_removal.
-  
-(*
-  S := v3 \* u3 \+ r3 \+ (v2 \* u2 \+ r2) \- r2 \- r3 \+ u1 \* v1
-     = v3 \* u3 + v2 \* u2 + v1 \* u1
 
+Let dotp2 (x y: (msg * msg)) := x.1 * y.1 + x.2 * y.2.
+Let dotp2_rv (X Y : {RV P -> (msg * msg)}) :=
+  fun p => dotp2 (X p) (Y p).
 
-  By `s1Ms2_r_indep` we can prove that:
-      P |= (v3 \* u3) + (v2 \* v2) _|_ (u1 \* v1).
+Let us := [%u2, u3].
+Let vs := [%v2, v3].
+Let r := v1 \* u1.
 
-  But our goal is to prove:
+Let f (a : alice_input_view_valT) :=
+  let '(_, _, _, u2, u3, _, _) := a in
+  (u2, u3).
+
+Let g (a : alice_input_view_valT) :=
+  let '(_, v1, u1, _, _, _, _) := a in
+  v1 * u1.
+
+Let s_alt :
+  s = dotp2_rv (f `o alice_input_view) vs \+ (g `o alice_input_view).
+Proof.
+have ->: f `o alice_input_view = us.
+  by apply: boolp.funext => {}.
+have ->:  g `o alice_input_view = r.
+  by apply: boolp.funext => {}.
+rewrite /dotp2_rv /dotp2 //=.
+rewrite /s /d3 /vu3r /d2 /vu3 /vu2 /r.
+apply: boolp.funext => i //=.
+ring.
+Qed.
+
+Lemma s_aiv_indep:
+  P |= s _|_ alice_input_view.
+Proof.
+rewrite s_alt.
+(* Cannot have a lemma like Lemma 3.5 in SMC because dotproduct has no inverse operation
+   like addition vs. substraction.
+   So we cannot have the critical step in Lemma 3.5 to split X and Y:
+
+    Lemma add_RV_mul i : `p_ add_RV i = (\sum_(k <- fin_img X) `Pr[ X = k ] * `Pr[ Y = (i - k)%R ]).
 *)
+Abort.
 
 Lemma ce_v2_s_removalP:
   `H(v2 | [% alice_input_view, s]) = `H(v2 | alice_input_view ).
 Proof.
 rewrite /s /d3 /vu3r /d2 /vu3 /vu2.
-Admitted.
+Abort.
 
 End ce_v2_s_removal.
 
@@ -732,7 +760,7 @@ transitivity (`H(v2| [%dk_a, v1 , u1] )).
 admit.
 transitivity (`H(v2| [%dk_a, v1] )).
 admit.
-transitivity (`H(v2| %dk_a )).
+transitivity (`H(v2| dk_a )).
 Abort.
 
 End alice_is_leakage_free.

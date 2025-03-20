@@ -645,7 +645,6 @@ End inde_ex.
 
 Arguments s1Ms2_r_indep [_ _ _ _ _] s1 s2 r.
 
-
 Section neg_RV_lemmas.
 
 Variables (T: finType)(m n: nat)(P : R.-fdist T).
