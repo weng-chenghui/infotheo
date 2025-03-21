@@ -708,9 +708,9 @@ ring.
 Qed.
 
 (*
-    If v2 _|_ alice_input_view? Yes, can be proved by lemma 3.1 +  alice_indep hypothesis.
+    Whether v2 _|_ alice_input_view? Yes, can be proved by lemma 3.1 +  alice_indep hypothesis.
 
-    If v2 _|_ s ?
+    Whether v2 _|_ s ?
 
     s = dotp2_rv (f `o alice_input_view) vs \+ (g `o alice_input_view).
       = dotp2_rv us vs \+ r
@@ -719,6 +719,34 @@ Qed.
 
     If we can prove that [%u2, u3, v2, v3] _|_ [v1, u1],
     by SMC lemma 3.5 we can prove that S _|_ v2.
+
+    Details:
+
+    1. v2 is in vs:(v2, v3) and s uses vs:
+         s = dotp2_rv [%u2, u3] [%v2, v3] \+ (v1 \* u1)
+
+    2. Dot product along with a RV (u2, u3) indepdent of v2
+       cannot guarantee the result is also indepdent of v2;
+       according to the current lemmas we have, this is because
+       dot product has no inverse operation like addition
+       in lemma 3.5.
+
+       So v2 _|_ s cannot be proved by s has a dot product
+       over v2, v3 and u2, u3.
+
+    3. Therefore, the only possible operation to guarantee
+       v2 _|_ s is the addition with r:(v1, u1).
+       This is the Y _|_ X + R conclusion from SMC lemma 3.5.
+
+       In order to apply lemma 3.5, (u2, u3, v2, v3) for the
+       dot product must be independent of (v1, u1),
+       while former is mixed with alice_input_view and (v2, v3),
+       latter is a cropped alice_input_view.
+       
+       Because (u2, u3, v2, v3) and (v1, u1) come from the same
+       base alice_input_view, it is interesting about
+       how they become indepedent or not, and why.
+       
 
     The relation between alice_input_view and [%u2, u3, v2, v3] is:  
 
@@ -738,7 +766,7 @@ Qed.
     alice_input_view ------> [% v1, u1]
 
 
-    Another idea is that maybe there is a theory like:
+    So the idea is that maybe there is a theory like:
 
     "If the new base cannot be spanned from the old base,
     the new base is independent of the old base."
@@ -750,6 +778,7 @@ Qed.
 Lemma ce_v2_s_removalP:
   `H(v2 | [% alice_input_view, s]) = `H(v2 | alice_input_view ).
 Proof.
+
 Abort.
 
 End ce_v2_s_removal.
