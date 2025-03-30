@@ -677,13 +677,15 @@ Notation alice_input_view_valT :=
 
 Section ce_v2_s_removal.
 
+Notation "x \+ y" := (smc_proba.add_RV x y).  
+
 Let dotp2 (x y: (msg * msg)) := x.1 * y.1 + x.2 * y.2.
-Let dotp2_rv (X Y : {RV P -> (msg * msg)}) :=
+Let dotp2_rv (X Y : {RV P -> (msg * msg)}) : {RV P -> msg} :=
   fun p => dotp2 (X p) (Y p).
 
 Let us := [%u2, u3].
 Let vs := [%v2, v3].
-Let r := v1 \* u1.
+Let r : {RV P -> msg} := v1 \* u1.
 
 Let f (a : alice_input_view_valT) :=
   let '(_, _, _, u2, u3, _, _) := a in
@@ -698,17 +700,31 @@ Let s_alt :
 Proof.
 rewrite /s /us /vs /d3 /vu3r /d2 /vu3 /vu2 /r.
 rewrite /dotp2_rv /dotp2 //=.
+rewrite /smc_proba.add_RV.
 apply: boolp.funext => i //=.
 ring.
 Qed.
 
-Lemma neg_cpr_v2_s_removalP:
-  ~ forall v a x, `Pr[v2 = v | [% alice_input_view, s] = (a, x) ] = `Pr[v2 = v | alice_input_view = a ].
+Lemma neg_r_aiv_indep :
+  ~ P |= r _|_ alice_input_view.
 Proof.
-(* TODO: simplify the equation until the counterexample of dotp2 (0,1) become the key *)
-move => H.
-(* TODO: prove by feeding the *)
-(*specialize (H ? ?).*) 
+rewrite (_:alice_input_view = idfun `o alice_input_view); last first.
+  apply: boolp.funext => i //=.
+pose w (ws : alice_input_view_valT) := let '(_, v1, u1, _, _, _, _) := ws in v1 * u1.
+have -> : r = w `o alice_input_view.
+  apply: boolp.funext => i //=.
+rewrite (smc_proba.inde_rv_comp w idfun).
+  
+Search inde_rv.
+About inde_rv_eqE.
+
+Hypothesis r_unif : `p_ r = fdist_uniform card_msg.
+Lemma neg_cpr_v2_s_removalP v a x:
+  `Pr[v2 = v | [% alice_input_view, s] = (a, x) ] = `Pr[v2 = v | alice_input_view = a ].
+Proof.
+rewrite s_alt.
+apply: (smc_proba.lemma_3_6 v r_unif).
+(* TODO: show that r = v1 \* u1 so it is not indepdent of alice_input_view *)
 Abort.
 
 Lemma neg_ce_v2_s_removalP:
