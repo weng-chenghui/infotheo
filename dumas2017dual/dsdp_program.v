@@ -705,18 +705,18 @@ apply: boolp.funext => i //=.
 ring.
 Qed.
 
+Hypothesis neg_self_indep : forall (TA : finType)(A : {RV P -> TA}), ~ P |= A _|_ A.
+
 Lemma neg_r_aiv_indep :
-  ~ P |= r _|_ alice_input_view.
+  P |= r _|_ alice_input_view.
 Proof.
 rewrite (_:alice_input_view = idfun `o alice_input_view); last first.
-  apply: boolp.funext => i //=.
-pose w (ws : alice_input_view_valT) := let '(_, v1, u1, _, _, _, _) := ws in v1 * u1.
-have -> : r = w `o alice_input_view.
-  apply: boolp.funext => i //=.
-rewrite (smc_proba.inde_rv_comp w idfun).
-  
-Search inde_rv.
-About inde_rv_eqE.
+  by apply: boolp.funext => i.
+have -> : r = g `o alice_input_view.
+  by apply: boolp.funext => i.
+apply (smc_proba.inde_rv_comp (X:=alice_input_view) (Y':=alice_input_view) g idfun).
+have Hn := (neg_self_indep (A := alice_input_view)).
+Abort.
 
 Hypothesis r_unif : `p_ r = fdist_uniform card_msg.
 Lemma neg_cpr_v2_s_removalP v a x:
