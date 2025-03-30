@@ -404,12 +404,10 @@ rewrite -lock (lock (6 : nat)) /=.
 rewrite -lock (lock (5 : nat)) /=.
 rewrite -lock (lock (4 : nat)) /=.
 rewrite -lock (lock (3 : nat)) /=.
-vm_compute.
-(*
-rewrite -lock (lock (2 : nat)) /=.
+(* Because we use nat as party ID as well -- it confuses with what we are going to compute *)
+rewrite -lock [X in interp X.+1](lock (2 : nat)) /=.
 rewrite -lock (lock (1 : nat)) /=.
 rewrite -lock (lock (0 : nat)) /=.
-*)
 Abort.
 
 Lemma dsdp_ok :
@@ -661,6 +659,7 @@ case: b => -[b mb] /=.
 case: dk => -[dk mdk] /=.
 by [].
 Qed.
+(* Automation: break until the end of the seq *)
 
 Lemma ce_alice_traces_view (w : finType) (v : {RV P -> w}) :
   `H(v | alice_traces ) = `H(v | alice_view ).
@@ -695,90 +694,28 @@ Let g (a : alice_input_view_valT) :=
   v1 * u1.
 
 Let s_alt :
-  s = dotp2_rv (f `o alice_input_view) vs \+ (g `o alice_input_view).
+  s = dotp2_rv us vs \+ r.
 Proof.
-have ->: f `o alice_input_view = us.
-  by apply: boolp.funext => {}.
-have ->:  g `o alice_input_view = r.
-  by apply: boolp.funext => {}.
+rewrite /s /us /vs /d3 /vu3r /d2 /vu3 /vu2 /r.
 rewrite /dotp2_rv /dotp2 //=.
-rewrite /s /d3 /vu3r /d2 /vu3 /vu2 /r.
 apply: boolp.funext => i //=.
 ring.
 Qed.
 
-(*
-    Whether v2 _|_ alice_input_view? Yes, can be proved by lemma 3.1 +  alice_indep hypothesis.
-
-    Whether v2 _|_ s ?
-
-    s = dotp2_rv (f `o alice_input_view) vs \+ (g `o alice_input_view).
-      = dotp2_rv us vs \+ r
-      = dotp2_rv [%u2, u3] [%v2, v3] \+ (v1 \* u1)
-      = dotp2_rv [%u2, u3] [%v2, v3] \+ h `o [%v1, u1]
-
-    If we can prove that [%u2, u3, v2, v3] _|_ [v1, u1],
-    by SMC lemma 3.5 we can prove that S _|_ v2.
-
-    Details:
-
-    1. v2 is in vs:(v2, v3) and s uses vs:
-         s = dotp2_rv [%u2, u3] [%v2, v3] \+ (v1 \* u1)
-
-    2. Dot product along with a RV (u2, u3) indepdent of v2
-       cannot guarantee the result is also indepdent of v2;
-       according to the current lemmas we have, this is because
-       dot product has no inverse operation like addition
-       in lemma 3.5.
-
-       So v2 _|_ s cannot be proved by s has a dot product
-       over v2, v3 and u2, u3.
-
-    3. Therefore, the only possible operation to guarantee
-       v2 _|_ s is the addition with r:(v1, u1).
-       This is the Y _|_ X + R conclusion from SMC lemma 3.5.
-
-       In order to apply lemma 3.5, (u2, u3, v2, v3) for the
-       dot product must be independent of (v1, u1),
-       while former is mixed with alice_input_view and (v2, v3),
-       latter is a cropped alice_input_view.
-       
-       Because (u2, u3, v2, v3) and (v1, u1) come from the same
-       base alice_input_view, it is interesting about
-       how they become indepedent or not, and why.
-       
-
-    The relation between alice_input_view and [%u2, u3, v2, v3] is:  
-
-                       :|: vs
-    alice_input_view ----------> alice_input_view :|: vs
-          |                               |
-       f' |                             f |
-          |                               |
-          v                               v
-      [% u2, u3 ]    ----------> [% u2, u3, v2, v3]
-                       :|: vs
-
-
-    While the relation between alice_input_view and [%v1, u1] is:
-
-                        g
-    alice_input_view ------> [% v1, u1]
-
-
-    So the idea is that maybe there is a theory like:
-
-    "If the new base cannot be spanned from the old base,
-    the new base is independent of the old base."
-
-    Not sure if it is true or provable in Coq.
-    But every time, proving independence again after "base" partitioning + mixing
-    without a rule of independence-preserving transition is very time-costly.
-*)
-Lemma ce_v2_s_removalP:
-  `H(v2 | [% alice_input_view, s]) = `H(v2 | alice_input_view ).
+Lemma neg_cpr_v2_s_removalP:
+  ~ forall v a x, `Pr[v2 = v | [% alice_input_view, s] = (a, x) ] = `Pr[v2 = v | alice_input_view = a ].
 Proof.
+(* TODO: simplify the equation until the counterexample of dotp2 (0,1) become the key *)
+move => H.
+(* TODO: prove by feeding the *)
+(*specialize (H ? ?).*) 
+Abort.
 
+Lemma neg_ce_v2_s_removalP:
+  `H(v2 | [% alice_input_view, s]) != `H(v2 | alice_input_view ).
+Proof.
+rewrite s_alt.
+rewrite /dotp2_rv /dotp2.
 Abort.
 
 End ce_v2_s_removal.
@@ -799,6 +736,24 @@ Hypothesis eqn2_view_neq0 :
   forall x e, `Pr[ [% dec_view, E_alice_d3] =
         (x, e) ] != 0.
 
+(*
+
+Note: maybe: because the nature of this algorithm allows Alice holds all
+results, the result of scalar product anyway will cause Alice knows more bits
+about v2 after the computation. Plus that like \+ v1 \* u1, Alice can easiy subtract them
+from every result. So the increased bits come from the dotp2 results, which
+is NOT uniformly distributed. After many rounds of the protocol,
+Alice can have more info about all v2's distribution or range or etc.
+
+But it may not harm because even if Alice can knows range or other properties about v2.
+The problem of conditional entropy is that it doesn't disringuish what are critical
+bits about the variable, and what are harmless -- this is why it is useful when proving
+a protocol can resist side-channel attack, but also makes it full of false positive results
+when the protocol is not "perfect". If it is possible, owning a tech to split and
+pin down parts of random variables to understand what kinds of bits increased by
+what relations, will make the method more useful.
+
+*)
 Lemma alice_is_leakage_freeP :
   `H(v2 | alice_view ) = `H `p_v2.
 Proof.

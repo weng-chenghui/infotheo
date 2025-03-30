@@ -440,7 +440,7 @@ Qed.
 End lemma_3_5.
 
 Section lemma_3_6.
-
+ 
 Variables (T TY TX : finType)(TZ : finZmodType).
 Variable P : R.-fdist T.
 Variable n : nat.

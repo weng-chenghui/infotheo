@@ -627,6 +627,11 @@ move => Heq1 _ Heq2 Heq3.
 by rewrite -Heq3 -Heq2 -Heq1 eqxx in Hneq.
 Qed.
 
+(* Different from lemma 3.5: latter doesn't require s1 _|_ s2 yet
+   "brings" independence to s1+s2
+
+   (X, Y) _|_ R -> X + R _|_ Y.
+*)
 Lemma s1Ms2_r_indep : P|= (rv_op s1 s2) _|_ r.
 Proof.
 rewrite /inde_rv.
