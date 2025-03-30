@@ -707,15 +707,45 @@ Qed.
 
 Hypothesis neg_self_indep : forall (TA : finType)(A : {RV P -> TA}), ~ P |= A _|_ A.
 
-Lemma neg_r_aiv_indep :
-  P |= r _|_ alice_input_view.
+Lemma neg_r_aiv_indep (a : msg) (b : alice_input_view_valT) :
+  P |= r _|_ alice_input_view -> False.
 Proof.
+have IH := (neg_self_indep (A := alice_input_view)).
 rewrite (_:alice_input_view = idfun `o alice_input_view); last first.
   by apply: boolp.funext => i.
 have -> : r = g `o alice_input_view.
   by apply: boolp.funext => i.
-apply (smc_proba.inde_rv_comp (X:=alice_input_view) (Y':=alice_input_view) g idfun).
-have Hn := (neg_self_indep (A := alice_input_view)).
+move => H. 
+have H2 := (smc_proba.inde_rv_comp (X:=alice_input_view) (Y':=alice_input_view) g idfun).
+Abort.
+(*
+1. `P |= r _|_ alice_input_view` can be rewritten as
+   `P |= (g `o alice_input_view) _|_ (idfun `o alice_input_view)`.
+
+2. Assume that P |= (g `o alice_input_view) _|_ (idfun `o alice_input_view) holds true,
+   meaning that the conclusion of `smc_proba.inde_rv_comp` holds true:
+   
+   inde_rv_comp: P |= A _|_ B -> P |= (f `o A) _|_ (g `o B).
+
+   (Specialized in this case):   
+
+   P |= alice_input_view _|_ alice_input_view ->
+   P |= (g `o alice_input_view) _|_ (idfun `o alice_input_view)
+
+   Because the conclusion holds true, in the current context,
+   only this lemma relates, therefore the premise
+   `P |= alice_input_view _|_ alice_input_view` must be true.
+
+3. However, `IH: ~ P |= alice_input_view _|_ alice_input_view` shows that
+   this is impossible. So we have a contradiction, which implies that the assumption
+   P |= (g `o alice_input_view) _|_ (idfun `o alice_input_view) is not true.
+   Therefore, ~ P |= r _|_ alice_input_view.
+
+*)
+apply IH in H.
+About contra_not.
+Search "contra_".
+
 Abort.
 
 Hypothesis r_unif : `p_ r = fdist_uniform card_msg.
