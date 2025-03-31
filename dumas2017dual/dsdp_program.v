@@ -705,55 +705,62 @@ apply: boolp.funext => i //=.
 ring.
 Qed.
 
+(* If A is const-RV actually P |= A _|_ A.
+   But in protocol views we don't have such RVs.
+*)
 Hypothesis neg_self_indep : forall (TA : finType)(A : {RV P -> TA}), ~ P |= A _|_ A.
 
-Lemma neg_r_aiv_indep (a : msg) (b : alice_input_view_valT) :
-  P |= r _|_ alice_input_view -> False.
+Lemma neg_r_aiv_indep:
+  ~ P |= r _|_ alice_input_view.
 Proof.
-have IH := (neg_self_indep (A := alice_input_view)).
-rewrite (_:alice_input_view = idfun `o alice_input_view); last first.
-  by apply: boolp.funext => i.
-have -> : r = g `o alice_input_view.
-  by apply: boolp.funext => i.
-move => H. 
-have H2 := (smc_proba.inde_rv_comp (X:=alice_input_view) (Y':=alice_input_view) g idfun).
-Abort.
-(*
-1. `P |= r _|_ alice_input_view` can be rewritten as
-   `P |= (g `o alice_input_view) _|_ (idfun `o alice_input_view)`.
+(* r is the result of composition;
+   showing that how alice_input_view is composed to become r,
+   by the assumption P |= r _|_ alice_input_view.
 
-2. Assume that P |= (g `o alice_input_view) _|_ (idfun `o alice_input_view) holds true,
-   meaning that the conclusion of `smc_proba.inde_rv_comp` holds true:
-   
-   inde_rv_comp: P |= A _|_ B -> P |= (f `o A) _|_ (g `o B).
-
-   (Specialized in this case):   
-
-   P |= alice_input_view _|_ alice_input_view ->
-   P |= (g `o alice_input_view) _|_ (idfun `o alice_input_view)
-
-   Because the conclusion holds true, in the current context,
-   only this lemma relates, therefore the premise
-   `P |= alice_input_view _|_ alice_input_view` must be true.
-
-3. However, `IH: ~ P |= alice_input_view _|_ alice_input_view` shows that
-   this is impossible. So we have a contradiction, which implies that the assumption
-   P |= (g `o alice_input_view) _|_ (idfun `o alice_input_view) is not true.
-   Therefore, ~ P |= r _|_ alice_input_view.
-
+   (~ A is just A -> False)
 *)
-apply IH in H.
-About contra_not.
-Search "contra_".
+move/(smc_proba.inde_rv_comp idfun g).
+have -> : g `o alice_input_view = r.
+  by apply: boolp.funext => i.
+have -> : idfun `o r = r.
+  by apply: boolp.funext => i.
+(* Showing that by assuming P |= r _|_ alice_input_view true,
+   what will become false.
+*)
+exact: neg_self_indep.
+Qed.
 
-Abort.
+(* Example of how to raise counter example:
+   Only when goal is ~ for all, we can have it.
+*)
+Goal ~ forall x : nat, x = 0.
+Search (~ forall _, _).
+rewrite -existsNP.
+exists (1 : nat).
+by [].
+Qed.
 
 Hypothesis r_unif : `p_ r = fdist_uniform card_msg.
+Hypothesis s_aiv_neg0 : forall x a, `Pr[ [% s, alice_input_view] = (x, a) ] != 0.
+Lemma neg_r_v2aivdotp_indep (v x : msg) (a : alice_input_view_valT):
+  ~ P |= r _|_ [% v2, alice_input_view, dotp2_rv us vs].
+Proof.
+pose h := (fun o : (msg * alice_input_view_valT * msg) => let '(_, aiv, _) := o in (g aiv):msg).
+move/(smc_proba.inde_rv_comp idfun h).
+have -> : h `o [%v2, alice_input_view, dotp2_rv us vs] = r.
+  by apply: boolp.funext => i.
+have -> : idfun `o r = r.
+  by apply: boolp.funext => i.
+exact: neg_self_indep.
+Qed.
+
 Lemma neg_cpr_v2_s_removalP v a x:
-  `Pr[v2 = v | [% alice_input_view, s] = (a, x) ] = `Pr[v2 = v | alice_input_view = a ].
+  ~ `Pr[v2 = v | [% alice_input_view, s] = (a, x) ] = `Pr[v2 = v | alice_input_view = a ].
 Proof.
 rewrite s_alt.
-apply: (smc_proba.lemma_3_6 v r_unif).
+have NH:= neg_r_aiv_indep.
+rewrite (smc_proba.lemma_3_6 v r_unif).
+move/(smc_proba.lemma_3_6 (Z:=r)(X2:=alice_input_view)).
 (* TODO: show that r = v1 \* u1 so it is not indepdent of alice_input_view *)
 Abort.
 
