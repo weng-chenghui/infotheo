@@ -760,7 +760,6 @@ Proof.
 rewrite s_alt.
 have NH:= neg_r_aiv_indep.
 rewrite (smc_proba.lemma_3_6 v r_unif).
-move/(smc_proba.lemma_3_6 (Z:=r)(X2:=alice_input_view)).
 (* TODO: show that r = v1 \* u1 so it is not indepdent of alice_input_view *)
 Abort.
 
