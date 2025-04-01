@@ -757,10 +757,10 @@ Qed.
 Lemma neg_cpr_v2_s_removalP v a x:
   ~ `Pr[v2 = v | [% alice_input_view, s] = (a, x) ] = `Pr[v2 = v | alice_input_view = a ].
 Proof.
+About smc_proba.cpr_eqE_mul.
+rewrite -smc_proba.cpr_eqE_mul.
 rewrite s_alt.
 have NH:= neg_r_aiv_indep.
-rewrite (smc_proba.lemma_3_6 v r_unif).
-(* TODO: show that r = v1 \* u1 so it is not indepdent of alice_input_view *)
 Abort.
 
 Lemma neg_ce_v2_s_removalP:
