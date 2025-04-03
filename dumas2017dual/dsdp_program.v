@@ -695,7 +695,7 @@ Let g (a : alice_input_view_valT) :=
   let '(_, v1, u1, _, _, _, _) := a in
   v1 * u1.
 
-Let s_alt :
+Lemma s_alt :
   s = dotp2_rv us vs \+ r.
 Proof.
 rewrite /s /us /vs /d3 /vu3r /d2 /vu3 /vu2 /r.
@@ -704,6 +704,63 @@ rewrite /smc_proba.add_RV.
 apply: boolp.funext => i //=.
 ring.
 Qed.
+
+Lemma ext_v2_discloser:
+  exists a b: msg,
+    dotp2_rv [% (fun _ => a):{RV P -> msg}, (fun _ => b):{RV P -> msg}] vs = v2.  
+Proof.
+rewrite /dotp2_rv.
+exists 1.
+exists 0.
+rewrite /vs /dotp2 /fst /snd /comp_RV.
+apply: boolp.funext => i //=.
+ring.
+Qed.
+(* It is saying that `us` outputs an pair of encoded values (1, 0),
+   _as two const RVs_ do that, v2 will be disclosed.
+
+   So it is saying that at a prob `k`, `us` may output the same values
+   as these two special const RVs do. Therefore, it is saying we need to
+   prove that at a prob `k`, `us` 's outputs equal to the special two RVs.
+*)
+
+Lemma ext_v2_discloser':
+  exists a b: msg,
+    dotp2_rv us vs = v2.  
+Proof.
+
+Lemma neg_v2_dotp2_indep (v : msg):
+  ~ P |= v2 _|_ dotp2_rv us vs.
+Proof.
+rewrite scp.inde_rv_alt.
+rewrite -existsNP.
+exists v.
+rewrite -existsNP.
+exists v.
+move => H.
+
+rewrite [X in _ * X]pr_eqE'.
+rewrite /dist_of_RV fdistbindE /dotp2_rv /dotp2.
+
+(* Need to unwrap until dotp2_rv with forall inputs exposed. *)
+rewrite pr_eqE'.
+apply/inde_rv_events.
+rewrite -existsNP.
+exists v.
+rewrite -existsNP.
+exists v.
+Search (`Pr[[%_,_]=(_,_)]).
+About scp.pr_eq_diag.
+move => H.
+About inde_rv_events.
+rewrite !pr_eqE'.
+
+Definition v2_from_s_aiv (aiv : alice_input_view_valT) :=
+  let '(_, v1, u1, u2, u3, r2, r3) := aiv in
+  let k := (fun s := s - v1 * u1 
+
+Lemma v2_from_s (aiv : alice_input_view_valT) :
+  v2 = s
 
 (* If A is const-RV actually P |= A _|_ A.
    But in protocol views we don't have such RVs.
@@ -754,22 +811,6 @@ have -> : idfun `o r = r.
 exact: neg_self_indep.
 Qed.
 
-Lemma neg_cpr_v2_s_removalP v a x:
-  ~ `Pr[v2 = v | [% alice_input_view, s] = (a, x) ] = `Pr[v2 = v | alice_input_view = a ].
-Proof.
-About smc_proba.cpr_eqE_mul.
-rewrite -smc_proba.cpr_eqE_mul.
-rewrite s_alt.
-have NH:= neg_r_aiv_indep.
-Abort.
-
-Lemma neg_ce_v2_s_removalP:
-  `H(v2 | [% alice_input_view, s]) != `H(v2 | alice_input_view ).
-Proof.
-rewrite s_alt.
-rewrite /dotp2_rv /dotp2.
-Abort.
-
 End ce_v2_s_removal.
 
 Let dec_view := [%dk_a, s, v1 , u1, u2, u3, r2, r3].
@@ -787,6 +828,38 @@ Hypothesis eqn1_view_neq0 :
 Hypothesis eqn2_view_neq0 :
   forall x e, `Pr[ [% dec_view, E_alice_d3] =
         (x, e) ] != 0.
+
+Lemma alice_is_not_leakage_freeP :
+  ~ `H(v2 | alice_view ) = `H `p_v2.
+Proof.
+(* From alice_view to [% alice_input_view, s] *)
+rewrite !(E_enc_ce_removal v2 card_msg).
+pose h := (fun o : (Alice.-key Dec msg * msg * msg * msg * msg * msg * msg * msg) =>
+  let '(dk_a, s, v1, u1, u2, u3, r2, r3) := o in (dk_a, v1, u1, u2, u3, r2, r3, s)).
+pose h' := (fun o : (Alice.-key Dec msg * msg * msg * msg * msg * msg * msg * msg) =>
+  let '(dk_a, v1, u1, u2, u3, r2, r3, s) := o in (dk_a, s, v1, u1, u2, u3, r2, r3)).
+rewrite -(scp.fun_cond_removal _ _ h).
+have ->: `H( v2 | [% dk_a, s, v1, u1, u2, u3, r2, r3, h `o [% dk_a, s, v1, u1, u2, u3, r2, r3]]) = `H( v2 | [% dk_a, s, v1, u1, u2, u3, r2, r3, [% dk_a, v1, u1, u2, u3, r2, r3, s]]).
+  by [].
+rewrite scp.cond_entropyC (scp.fun_cond_removal _ _ h') -/alice_input_view.
+(* From the cond_entropy to the independence goal via mutual info *)
+move => H.
+have: `I(v2;[%alice_input_view, s]) = 0.
+  by rewrite mutual_info_RVE H subrr.
+move/mutual_info0_indep.
+(* Show the independence is impossible *)
+rewrite s_alt //=.
+pose z := (fun o : (alice_input_view_valT * 
+
+pose h := (fun o : (alice_input_view_valT * msg) => let '(_, v, _) := o in (g aiv):msg).
+move/(smc_proba.inde_rv_comp idfun h).
+have -> : h `o [%v2, alice_input_view, dotp2_rv us vs] = r.
+  by apply: boolp.funext => i.
+have -> : idfun `o r = r.
+  by apply: boolp.funext => i.
+exact: neg_self_indep.
+
+
 
 (*
 
@@ -817,6 +890,12 @@ admit.
 transitivity (`H(v2| alice_input_view )).
 admit.
 Abort.
+
+(* NOTE: the way that Bob checks ZKP to decide if Alice is cheating with the values or not,
+   is an implementation of the idea of "security with abort" in those abstract
+   information-theoretic papers.
+
+*)
 
 End alice_is_leakage_free.
 
