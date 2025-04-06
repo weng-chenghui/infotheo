@@ -468,9 +468,14 @@ Qed.
 End dsdp.
 
 Section dsdp_information_leakage_proof.
-  
+
 Variable T : finType.
 Variable P : R.-fdist T.
+
+(* If A is const-RV actually P |= A _|_ A.
+   But in protocol views we don't have such RVs.
+*)
+Hypothesis neg_self_indep : forall (TA : finType)(A : {RV P -> TA}), ~ P |= A _|_ A.
 
 Variable m_minus_2 : nat.
 Local Notation m := m_minus_2.+2.
@@ -570,7 +575,7 @@ Definition dsdp_RV (inputs : dsdp_random_inputs) :
        dk_b,
        dk_c, v1, v2, v3, u1, u2, u3, r2, r3].
 
-Section alice_is_leakage_free.
+Section alice_is_leakage_free_or_not.
 
 Local Notation m := m_minus_2.+2.
 
@@ -675,17 +680,18 @@ Let alice_input_view := [%dk_a, v1, u1, u2, u3, r2, r3].
 Notation alice_input_view_valT :=
   (Alice.-key Dec msg * msg * msg * msg * msg * msg * msg)%type.
 
-Section ce_v2_s_removal.
+Section cond_entropy_v2_s_removal.
 
 Notation "x \+ y" := (smc_proba.add_RV x y).  
 
-Let dotp2 (x y: (msg * msg)) := x.1 * y.1 + x.2 * y.2.
-Let dotp2_rv (X Y : {RV P -> (msg * msg)}) : {RV P -> msg} :=
+Definition dotp2 (x y: (msg * msg)) := x.1 * y.1 + x.2 * y.2.
+Definition dotp2_rv (X Y : {RV P -> (msg * msg)}) : {RV P -> msg} :=
   fun p => dotp2 (X p) (Y p).
 
-Let us := [%u2, u3].
-Let vs := [%v2, v3].
-Let r : {RV P -> msg} := v1 \* u1.
+Definition us := [%u2, u3].
+Definition vs := [%v2, v3].
+Definition const_us := [% (fun _ => 1):{RV P -> msg}, (fun _ => 0):{RV P -> msg}].
+Definition r : {RV P -> msg} := v1 \* u1.
 
 Let f (a : alice_input_view_valT) :=
   let '(_, _, _, u2, u3, _, _) := a in
@@ -705,6 +711,34 @@ apply: boolp.funext => i //=.
 ring.
 Qed.
 
+(* So if a set of events is sized one (from an intersection, for example);
+   the probability of it is the probability of the only event inside it,
+   decided by the distribution.
+
+   "the probability of random variables A and B are not independent",
+   is equal to a new random variable outputs 1 for the only k events in K
+   makes them not independent, while outputs 0 for other p events in ~K.
+   The total number of events are k+p, and it is the size of (K :|: ~K).
+
+   "events make A and B are not independent" means there are some events
+   in A :&: B. In the DSDP case, it means all events that `v2` encodes them as `v`,
+   while `dotp2_rv us vs` also encodes them as `v`. If we unfold it more,
+   the probability of such an event must be related to the probability that
+   another random variable `us` outputs `(1, 0)`. But how possible it is,
+   depends on the distribution of `us`: if an active adversary controls Alice,
+   force `us` always output `(1, 0)`, then `v2 _|_ dotp2_rv us vs` is impossible.
+   In contrast, if Alice is an fair player, the probability that `us` outputs that
+   specific value is 1/m^2. Finally, if Bob enforce ZPK check to abort the protocol
+   when that value is generated, `v2 _|_ dotp2_rv us vs` is a sure thing, and the protocol
+   is secure with that mitigation ("security with abort").
+
+   Anyway, I need to show that `us = (1, 0) -> ~ v2 _|_ dotp2_rv us vs` and
+   `us != (1, 0) ->  v2 _|_ dotp2_rv us vs`.
+*)
+
+(* It is saying that `us` outputs an pair of encoded values (1, 0),
+   _as two const RVs_ do that, v2 will be disclosed.
+*)
 Lemma ext_v2_discloser:
   exists a b: msg,
     dotp2_rv [% (fun _ => a):{RV P -> msg}, (fun _ => b):{RV P -> msg}] vs = v2.  
@@ -716,56 +750,16 @@ rewrite /vs /dotp2 /fst /snd /comp_RV.
 apply: boolp.funext => i //=.
 ring.
 Qed.
-(* It is saying that `us` outputs an pair of encoded values (1, 0),
-   _as two const RVs_ do that, v2 will be disclosed.
 
-   So it is saying that at a prob `k`, `us` may output the same values
-   as these two special const RVs do. Therefore, it is saying we need to
-   prove that at a prob `k`, `us` 's outputs equal to the special two RVs.
-*)
-
-Lemma ext_v2_discloser':
-  exists a b: msg,
-    dotp2_rv us vs = v2.  
+Lemma const_us_is_v2_discloser:
+  us = const_us -> dotp2_rv us vs = v2.
 Proof.
-
-Lemma neg_v2_dotp2_indep (v : msg):
-  ~ P |= v2 _|_ dotp2_rv us vs.
-Proof.
-rewrite scp.inde_rv_alt.
-rewrite -existsNP.
-exists v.
-rewrite -existsNP.
-exists v.
 move => H.
-
-rewrite [X in _ * X]pr_eqE'.
-rewrite /dist_of_RV fdistbindE /dotp2_rv /dotp2.
-
-(* Need to unwrap until dotp2_rv with forall inputs exposed. *)
-rewrite pr_eqE'.
-apply/inde_rv_events.
-rewrite -existsNP.
-exists v.
-rewrite -existsNP.
-exists v.
-Search (`Pr[[%_,_]=(_,_)]).
-About scp.pr_eq_diag.
-move => H.
-About inde_rv_events.
-rewrite !pr_eqE'.
-
-Definition v2_from_s_aiv (aiv : alice_input_view_valT) :=
-  let '(_, v1, u1, u2, u3, r2, r3) := aiv in
-  let k := (fun s := s - v1 * u1 
-
-Lemma v2_from_s (aiv : alice_input_view_valT) :
-  v2 = s
-
-(* If A is const-RV actually P |= A _|_ A.
-   But in protocol views we don't have such RVs.
-*)
-Hypothesis neg_self_indep : forall (TA : finType)(A : {RV P -> TA}), ~ P |= A _|_ A.
+rewrite H.
+rewrite /const_us /vs /dotp2_rv /dotp2 /fst /snd /comp_RV.
+apply: boolp.funext => i //=.
+ring.
+Qed.
 
 Lemma neg_r_aiv_indep:
   ~ P |= r _|_ alice_input_view.
@@ -811,7 +805,7 @@ have -> : idfun `o r = r.
 exact: neg_self_indep.
 Qed.
 
-End ce_v2_s_removal.
+End cond_entropy_v2_s_removal.
 
 Let dec_view := [%dk_a, s, v1 , u1, u2, u3, r2, r3].
 Let eqn1_view := [% dec_view, E_alice_d3, E_charlie_v3].
@@ -829,9 +823,21 @@ Hypothesis eqn2_view_neq0 :
   forall x e, `Pr[ [% dec_view, E_alice_d3] =
         (x, e) ] != 0.
 
-Lemma alice_is_not_leakage_freeP :
-  ~ `H(v2 | alice_view ) = `H `p_v2.
+(* This lemma shows that if an active adversary controls Alice,
+   it can set u1 and u2 as a special combination (1, 0),
+   which allows revealing `v2` from the result that Alice receives.
+
+   A related discussion is in the Sect~5.2 in the original paper.
+
+   NOTE: the mitigation that Bob checks ZKP to decide if Alice is
+   cheating with the values or not,
+   is an implementation of the idea of "security with abort" in those abstract
+   information-theoretic papers.
+*)
+Lemma if_u1u2_are_compromised_alice_is_not_leakage_freeP :
+  us = const_us -> ~ `H(v2 | alice_view ) = `H `p_v2.
 Proof.
+move => H.
 (* From alice_view to [% alice_input_view, s] *)
 rewrite !(E_enc_ce_removal v2 card_msg).
 pose h := (fun o : (Alice.-key Dec msg * msg * msg * msg * msg * msg * msg * msg) =>
@@ -843,60 +849,31 @@ have ->: `H( v2 | [% dk_a, s, v1, u1, u2, u3, r2, r3, h `o [% dk_a, s, v1, u1, u
   by [].
 rewrite scp.cond_entropyC (scp.fun_cond_removal _ _ h') -/alice_input_view.
 (* From the cond_entropy to the independence goal via mutual info *)
-move => H.
+move => H2.
 have: `I(v2;[%alice_input_view, s]) = 0.
-  by rewrite mutual_info_RVE H subrr.
+  by rewrite mutual_info_RVE H2 subrr.
 move/mutual_info0_indep.
-(* Show the independence is impossible *)
-rewrite s_alt //=.
-pose z := (fun o : (alice_input_view_valT * 
-
-pose h := (fun o : (alice_input_view_valT * msg) => let '(_, v, _) := o in (g aiv):msg).
-move/(smc_proba.inde_rv_comp idfun h).
-have -> : h `o [%v2, alice_input_view, dotp2_rv us vs] = r.
-  by apply: boolp.funext => i.
-have -> : idfun `o r = r.
+(* Show the independence is impossible if Alice is being controlled
+   and cheat with the specific `us`*)
+rewrite s_alt.
+rewrite /smc_proba.add_RV //=.
+rewrite (const_us_is_v2_discloser H).
+pose z := (fun o : (alice_input_view_valT * msg) =>
+  let '(_, v1, u1, _, _, _, _, v2_r) := o in v2_r - v1 * u1).
+move/(smc_proba.inde_rv_comp idfun z).
+have -> : z `o [% alice_input_view, v2 \+ r] = v2.
+  rewrite /z /r /comp_RV.
+  apply: boolp.funext => i //=.
+  by ring.
+have -> : idfun `o v2 = v2.
   by apply: boolp.funext => i.
 exact: neg_self_indep.
+exact: eqn2_view_neq0.
+exact: eqn1_view_neq0.
+exact: alice_view_neq0.
+Qed.
 
 
-
-(*
-
-Note: maybe: because the nature of this algorithm allows Alice holds all
-results, the result of scalar product anyway will cause Alice knows more bits
-about v2 after the computation. Plus that like \+ v1 \* u1, Alice can easiy subtract them
-from every result. So the increased bits come from the dotp2 results, which
-is NOT uniformly distributed. After many rounds of the protocol,
-Alice can have more info about all v2's distribution or range or etc.
-
-But it may not harm because even if Alice can knows range or other properties about v2.
-The problem of conditional entropy is that it doesn't disringuish what are critical
-bits about the variable, and what are harmless -- this is why it is useful when proving
-a protocol can resist side-channel attack, but also makes it full of false positive results
-when the protocol is not "perfect". If it is possible, owning a tech to split and
-pin down parts of random variables to understand what kinds of bits increased by
-what relations, will make the method more useful.
-
-*)
-Lemma alice_is_leakage_freeP :
-  `H(v2 | alice_view ) = `H `p_v2.
-Proof.
-transitivity (`H(v2| dec_view )).
-  by rewrite !(E_enc_ce_removal v2 card_msg).
-transitivity (`H(v2| [% alice_input_view, s] )).
-  rewrite /dec_view /alice_input_view.
-admit.
-transitivity (`H(v2| alice_input_view )).
-admit.
-Abort.
-
-(* NOTE: the way that Bob checks ZKP to decide if Alice is cheating with the values or not,
-   is an implementation of the idea of "security with abort" in those abstract
-   information-theoretic papers.
-
-*)
-
-End alice_is_leakage_free.
+End alice_is_leakage_free_or_not.
 
 End dsdp_information_leakage_proof.
