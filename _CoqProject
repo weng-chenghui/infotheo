@@ -99,5 +99,6 @@ smc/smc_indep.v
 dumas2017dual/dsdp_program.v
 smc/scalar_product_program.v
 smc/scalar_product_proof.v
+shen2008/znto_program.v
 
 -R . infotheo
