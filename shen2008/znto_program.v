@@ -3,7 +3,7 @@ From mathcomp Require Import all_ssreflect all_algebra fingroup finalg ring.
 From mathcomp Require Import Rstruct reals.
 Require Import realType_ext realType_ln ssr_ext ssralg_ext bigop_ext fdist.
 Require Import proba jfdist_cond entropy graphoid smc_proba smc_entropy.
-Require Import smc_entropy smc_interpreter.
+Require Import smc_interpreter smc_entropy.
 Require Import scalar_product_program scalar_product_proof.
 Require Import scalar_product_interpreter.
 
@@ -28,7 +28,7 @@ Import Prenex Implicits.
 Local Open Scope ring_scope.
 
 Section znto_program.
-  
+
 Variable n m : nat.
 Let TX := [the finComRingType of 'I_m.+2].
 Let VX := 'rV[TX]_n.
@@ -51,18 +51,18 @@ Definition pbob (xb : VX) :=
   Finish))).
 
 Variables (xa xb : VX) (sa1 sa2 sb1 sb2 : VX)(ra1 ra2 yb1 yb2 : TX).
-Let smc_program := interp sa1 sa2 sb1 sb2 ra1 ra2 yb1 yb2 11 [:: palice xa; pbob xb] [::[::]].
+(* From an unclear dependent type error we can guess it has to be 15 steps,
+   more than the original scalar product's 11 steps;
+   change it back to 11 and watch how the error's "pattern value .+3"
+   decrease while this number increase from 11 to 15.
+*)
+Let smc_program := interp sa1 sa2 sb1 sb2 ra1 ra2 yb1 yb2 15
+  [:: palice xa; pbob xb] [::[::]].
 
 Goal smc_program = ([::Finish; Finish], [::]).
 rewrite /smc_program.
 rewrite (lock (11 : nat)) /=.
-rewrite -lock (lock (10 : nat)) /=.
-rewrite -lock (lock (9 : nat)) /=.
-rewrite -lock (lock (8 : nat)) /=.
-rewrite -lock (lock (7 : nat)) /=.
-rewrite /sp.
-rewrite !{1}smc_scalar_product_traces_ok.
-rewrite /results /=.
+rewrite !{1}smc_scalar_product_traces_ok //=.
 Abort.
 
 Definition sig_smc_program : {trace | smc_program =
@@ -71,45 +71,22 @@ Proof.
 eexists.
 rewrite /smc_program.
 rewrite (lock (11 : nat)) /=.
-rewrite -lock (lock (10 : nat)) /=.
-rewrite -lock (lock (9 : nat)) /=.
-rewrite -lock (lock (8 : nat)) /=.
-rewrite -lock (lock (7 : nat)) /=.
-rewrite /sp.
-rewrite !{1}smc_scalar_product_traces_ok.
-rewrite /results [LHS]/=.
-abstract reflexivity.
+rewrite !{1}smc_scalar_product_traces_ok //=.
 Defined.
 
 Eval simpl in sval sig_smc_program.
 
 Lemma smc_program_ok : smc_program = 
   ([:: Finish; Finish],
-   [::
-       [:: out ((xa + xa + sa1) *d (xa + xa) + (sa1 *d sb1 - ra1) -
-                 yb1 - (xa + xa + sb1) *d sa1 + ra1,
-               yb1);
-           out ((xa + sa1) *d xb + (sa1 *d sb1 - ra1) -
-                 yb1 - (xb + sb1) *d sa1 + ra1,
-               yb1); 
-           inp xa];
-       [:: out ((xa + xa + sa2) *d (xa + xa) + (sa2 *d sb2 - ra2) -
-                 yb2 - (xa + xa + sb2) *d sa2 + ra2,
-               yb2);
-           out ((xa + sa2) *d xb + (sa2 *d sb2 - ra2) -
-                 yb2 - (xb + sb2) *d sa2 + ra2,
-               yb2); 
-           inp xb]]).
+   [:: [:: inl yb1;
+           inl ((xa + sa1) *d xb + (sa1 *d sb1 - ra1) -
+                yb1 - (xb + sb1) *d sa1 + ra1);
+           inr xa];
+       [:: inl yb2; inl yb2; inr xb]]).
 Proof.
 rewrite /smc_program.
 rewrite (lock (11 : nat)) /=.
-rewrite -lock (lock (10 : nat)) /=.
-rewrite -lock (lock (9 : nat)) /=.
-rewrite -lock (lock (8 : nat)) /=.
-rewrite -lock (lock (7 : nat)) /=.
-rewrite /sp.
-rewrite !{1}smc_scalar_product_traces_ok.
-rewrite /results [LHS]/=.
-reflexivity. Qed.
+rewrite !{1}smc_scalar_product_traces_ok //=.
+Qed.
 
 End znto_program.

@@ -76,6 +76,7 @@ Variable (sa1 sa2 sb1 sb2 : VX) (ra1 ra2 yb1 yb2 : TX).
 *)
 Let rand_values := [:: (sa1, sb1, ra1, yb1); (sa2, sb2, ra2, yb2)].
 
+(* Get the underlying scalar product results from the underlying traces. *)
 Let results (trs :  smc_scalar_product_party_tracesT VX) :=
   let 'ya :=
     if tnth trs 0 is Bseq [:: inl ya; _; _; _; _; _] _ then ya
@@ -115,3 +116,4 @@ End def.
 
 Arguments Finish {n m}.
 Arguments Fail {n m}.
+
