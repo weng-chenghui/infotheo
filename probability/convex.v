@@ -3,8 +3,8 @@
 From HB Require Import structures.
 From mathcomp Require Import all_ssreflect ssralg fingroup perm matrix.
 From mathcomp Require Import mathcomp_extra boolp classical_sets.
-From mathcomp Require Import ssrnum archimedean ereal signed.
-From mathcomp Require Import lra reals.
+From mathcomp Require Import ssrnum archimedean ereal interval_inference.
+From mathcomp Require Import ring lra reals.
 Require Import ssr_ext ssralg_ext realType_ext realType_ln fdist.
 From mathcomp Require vector.
 
@@ -145,7 +145,7 @@ Import Prenex Implicits.
 Local Open Scope reals_ext_scope.
 Local Open Scope fdist_scope.
 
-Import Order.POrderTheory GRing.Theory Num.Theory.
+Import Order.POrderTheory Order.TotalTheory GRing.Theory Num.Theory.
 
 Local Notation "{ 'fdist' T }" := (_ .-fdist T) : fdist_scope.
 
@@ -532,57 +532,8 @@ End barycenter_fdist_convn.
 
 End real_cone_theory.
 
-From mathcomp Require Import ring.
-
-(* TODO: move *)
-Lemma oprob_divrposxxy {R : realType} (x y : {posnum R}%R) :
-  (0 < x%:num / (x%:num + y%:num) < 1)%R.
-Proof.
-rewrite divr_gt0//=.
-by rewrite ltr_pdivrMr// mul1r ltrDl.
-Qed.
-
-Lemma prob_divrposxxy {R : realType} (x y : {posnum R}%R) :
-  (0 <= x%:num / (x%:num + y%:num) <= 1)%R.
-Proof.
-have /andP[] := oprob_divrposxxy x y.
-by move/ltW => -> /ltW ->.
-Qed.
-
-Canonical divrposxxy {R : realType} (x y : {posnum R}%R) :=
-  Eval hnf in Prob.mk (prob_divrposxxy x y).
-
-Lemma s_of_rpos_probA {R : realType} (p q r : {posnum R}%R) :
-  [s_of divrposxxy p ((q%:num + r%:num)%E%:pos)%R, divrposxxy q r] =
-  divrposxxy (p%:num + q%:num)%:pos%R r.
-Proof.
-apply val_inj; rewrite /= s_of_pqE.
-rewrite onemM !onemK/=.
-field.
-by apply/andP; split => //.
-Qed.
-
-Lemma r_of_rpos_probA {R : realType} (p q r : {posnum R}%R) :
-  [r_of divrposxxy p (q%:num + r%:num)%:pos%R, divrposxxy q r] =
-  divrposxxy p q%R.
-Proof.
-apply/val_inj; rewrite /= r_of_pqE s_of_pqE /onem /=.
-field.
-apply/and4P; split => //.
-rewrite (addrC p%:num (q%:num + r%:num)%:pos%:num)%R addrK {4}[in (q%:num + r%:num)%R]addrC addrK.
-by rewrite mulrC -mulrBr (addrC _ p%:num%R) addrA addrK mulf_neq0//.
-Qed.
-
-Lemma onem_divrxxy {R : realType} (r q : {posnum R}%R) :
-  (r%:num / (r%:num + q%:num)).~ = (q%:num / (q%:num + r%:num))%R.
-Proof.
-rewrite /onem; apply/eqP; rewrite subr_eq.
-by rewrite (addrC (r%:num%R : R)) -mulrDl divff.
-Qed.
-
 Section real_cone_instance.
 Context {R : realType}.
-Import Order.TotalTheory.
 
 Variable A : convType R.
 Local Open Scope convex_scope.
@@ -605,7 +556,8 @@ Qed.
 
 Let addptA' : associative addpt.
 Proof.
-move=> [p x|] [q y|] [r z|] //=; congr (_ *: _); first by apply val_inj; rewrite /= addrA.
+move=> [p x|] [q y|] [r z|] //=; congr (_ *: _).
+  by apply val_inj; rewrite /= addrA.
 rewrite convA; congr (_<| _ |> _).
   by rewrite s_of_rpos_probA.
 congr (_ <| _ |> _).
@@ -702,10 +654,7 @@ Let convpt1 a b : convpt (1%:pr) a b = a.
 Proof. by rewrite /convpt onem1 scale1pt scale0pt addpt0. Qed.
 
 Let convptmm (p : {prob R}) a : convpt p a a = a.
-Proof.
-rewrite /convpt -scaleptDl//.
-by rewrite onemKC scale1pt //.
-Qed.
+Proof. by rewrite /convpt -scaleptDl// add_onemK scale1pt. Qed.
 
 Let convptC (p : {prob R}) a b : convpt p a b = convpt ((Prob.p p).~)%:pr b a.
 Proof. by rewrite [RHS]addptC onemK. Qed.
@@ -798,8 +747,7 @@ have := prob_le1 p; rewrite le_eqVlt => /predU1P[p1|p1].
 rewrite convptE (scalept_gt0 _ _ p0) (@scalept_gt0 (Prob.p p).~).
   exact/onem_gt0.
 move=> mp0; congr (_ *: _) => /=.
-  apply/val_inj => /=; rewrite !mulr1.
-  by rewrite onemKC.
+  by apply/val_inj => /=; rewrite !mulr1 add_onemK.
 by congr (_ <| _ |> _); apply val_inj; rewrite /= !mulr1 addrC subrK divr1.
 Qed.
 
@@ -1295,11 +1243,6 @@ Qed.
 
 End hull_prop.
 
-(* TODO: move *)
-Lemma r_of_p0_oprob {R : realType} (p : {oprob R}) :
-  [r_of OProb.p p, 0%:pr] = 1%:pr.
-Proof. by apply/r_of_p0/oprob_neq0. Qed.
-
 Module ErealConvex.
 Section ereal_convex.
 Context {R : realType}.
@@ -1328,7 +1271,7 @@ Qed.
 Let conv_ereal_convC p a b : conv_ereal p a b = conv_ereal ((Prob.p p).~)%:pr b a.
 Proof. by rewrite [in RHS]/conv_ereal onemK addeC. Qed.
 
-Lemma oprob_sg1 (p : {oprob R}) : Num.sg (oprob_to_real p) = 1%mcR.
+Lemma oprob_sg1 (p : {oprob R}) : Num.sg (oprob_to_real p) = 1%R.
 Proof.
 have /andP[] := OProb.O1 p; move=> /[swap] _. rewrite -sgr_cp0.
 by move/eqP.
@@ -1783,10 +1726,7 @@ Let avg1 a b : avg 1%:pr a b = a.
 Proof. by rewrite /avg /= scale1r onem1 scale0r addr0. Qed.
 
 Let avgI p x : avg p x x = x.
-Proof.
-rewrite /avg -scalerDl.
-by rewrite onemKC scale1r.
-Qed.
+Proof. by rewrite /avg -scalerDl add_onemK scale1r. Qed.
 
 Let avgC p x y : avg p x y = avg (Prob.p p).~%:pr y x.
 Proof. by rewrite /avg onemK addrC. Qed.
@@ -1949,9 +1889,6 @@ Variable E : vectType R.
 Local Open Scope ring_scope.
 Local Open Scope classical_set_scope.
 Import LmoduleConvex.
-
-(* TODO: move? *)
-Import Order.TotalTheory.
 
 Lemma caratheodory (A : set (E : lmodType R)) x : x \in hull A ->
   exists (n : nat) (g : 'I_n -> (E : lmodType R)) (d : {fdist 'I_n}),
@@ -2298,7 +2235,7 @@ Qed.
 
 Lemma scalept_addRnng (T : convType R) (x : scaled T) :
   {morph (fun (r : {nonneg R}%R) => scalept r%:num x) : r s / (r%:num + s%:num)%:nng%R >-> addpt r s}.
-Proof. by move=> -[] r /= Hr [] s /= Hs; exact: scaleptDl. Qed.
+Proof. by move=> r s/=; rewrite scaleptDl. Qed.
 
 Definition big_scaleptl (T : convType R) (x : scaled T) :=
   @big_morph
@@ -2663,18 +2600,6 @@ Qed.
  *)
 End definition.
 
-(* TODO: move *)
-Lemma prob_invn {R : realType} (m : nat) :
-  (0 <= ((1 + m)%:R^-1 : R) <= 1)%mcR.
-Proof.
-apply/andP; split.
-  by rewrite invr_ge0.
-by rewrite invf_le1// natrD lerDl.
-Qed.
-
-Canonical probinvn {R : realType} (n : nat) :=
-  Eval hnf in @Prob.mk _ ((1 + n)%:R^-1) (@prob_invn R n).
-
 Section counterexample.
 Import RConvex.
 
@@ -2694,10 +2619,10 @@ move/convex_in_bothP/(_ (-1)%R 1%R 1%R (-1)%R).
 move=> /(_ (probinvn 1)).
 rewrite /probinvn /= 3!avgRE /=.
 set a := (1 + 1)%:R^-1%R.
-rewrite !(mul1r,mulr1,mulrN1) -opprD onemKC.
+rewrite !(mul1r,mulr1,mulrN1) -opprD add_onemK.
 rewrite (_ : - a + a.~ = 0)%R; last first.
-  by rewrite /a/onem addrCA -opprD -div1r -splitr subrr.
-by rewrite mul0r lerNr oppr0 Order.TotalTheory.leNgt ltr01.
+  by rewrite /a /onem addrCA -opprD -div1r -splitr subrr.
+by rewrite mul0r lerNr oppr0 leNgt ltr01.
 Qed.
 End counterexample.
 
@@ -3051,12 +2976,12 @@ have [->/=|t0] := eqVneq t 0%:pr.
 have [->|t1] := eqVneq t 1%:pr.
   by rewrite conv1 xa.
 apply/andP; split.
-- rewrite -[X in (X < Prob.p t * x + (Prob.p t).~ * y)%R]mul1r -(onemKC (Prob.p t)).
+- rewrite -[X in (X < Prob.p t * x + (Prob.p t).~ * y)%R]mul1r -(add_onemK (Prob.p t)).
   rewrite (mulrDl _ _ a).
   by rewrite ltrD// ltr_pM2l//; [exact/prob_gt0 | exact/onem_gt0/prob_lt1].
 - (*rewrite -[X in (_ + _ < X)%coqR]mul1R -(onemKC t) mulRDl.*)
-rewrite -[X in (_ + _ < X)%R]mul1r.
-rewrite -(onemKC (Prob.p t)).
+rewrite -[ltRHS]mul1r.
+rewrite -(add_onemK (Prob.p t)).
 by rewrite mulrDl ltrD// ltr_pM2l//; [exact/prob_gt0 | exact/onem_gt0/prob_lt1].
 Qed.
 

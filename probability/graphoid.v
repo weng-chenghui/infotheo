@@ -1,8 +1,8 @@
 (* infotheo: information theory and error-correcting codes in Coq             *)
 (* Copyright (C) 2020 infotheo authors, license: LGPL-2.1-or-later            *)
 From mathcomp Require Import all_ssreflect ssralg ssrnum matrix.
-From mathcomp Require Import reals.
-Require Import ssr_ext ssralg_ext bigop_ext  realType_ext fdist.
+From mathcomp Require Import mathcomp_extra reals.
+Require Import ssr_ext ssralg_ext bigop_ext realType_ext fdist.
 Require Import proba jfdist_cond.
 
 (**md**************************************************************************)
@@ -11,6 +11,11 @@ Require Import proba jfdist_cond.
 (* This file provides a formalization of the graphoid axioms (symmetry,       *)
 (* decomposition, weak_union, contraction, and intersection) and derived      *)
 (* rules.                                                                     *)
+(*                                                                            *)
+(* Reference:                                                                 *)
+(* - R. Affeldt, J. Garrigue, T. Saikawa. Reasoning with Conditional          *)
+(*   Probabilities and Joint Distributions in Coq. Computer Software 37(3)    *)
+(*                                                                            *)
 (******************************************************************************)
 
 Set Implicit Arguments.
@@ -23,8 +28,7 @@ Local Open Scope fdist_scope.
 
 Import GRing.Theory.
 
-(* TODO: rename, mv *)
-Module Proj124.
+(*Module Proj124.
 Section proj124.
 Context {R : realType}.
 Variables (A B D C : finType) (P : R.-fdist (A * B * D * C)).
@@ -42,10 +46,9 @@ End Proj124.
 
 Definition Proj14d {R : realType} (A B C D : finType) (d : R.-fdist (A * B * D * C)) :
   R.-fdist (A * C) :=
-  fdist_proj13 (Proj124.d d).
+  fdist_proj13 (Proj124.d d).*)
 
-(* TODO: rename, mv *)
-Module QuadA23.
+(*Module QuadA23.
 Section def.
 Context {R : realType}.
 Variables (A B C D : finType) (P : R.-fdist (A * B * D * C)).
@@ -66,7 +69,7 @@ Variables (A B C D : finType) (P : R.-fdist (A * B * D * C)).
 Lemma snd : (QuadA23.d P)`2 = P`2.
 Proof. by rewrite /fdist_snd /d fdistmap_comp. Qed.
 End prop.
-End QuadA23.
+End QuadA23.*)
 
 Section cinde_rv_prop.
 Context {R : realType}.
@@ -94,18 +97,11 @@ Variable (U : finType) (P : R.-fdist U).
 Variables (A B C : finType) (X : {RV P -> A}) (Y : {RV P -> B}) (Z : {RV P -> C}).
 
 Lemma symmetry : P |= X _|_ Y | Z -> P |= Y _|_ X | Z.
-Proof.
-move=> H b a c.
-rewrite /cinde_rv in H.
-rewrite cpr_eq_pairC.
-rewrite H.
-by rewrite mulrC.
-Qed.
+Proof. by move=> H b a c; rewrite cpr_eq_pairC H mulrC. Qed.
 
 End symmetry.
 
 Section decomposition.
-
 Context {R : realType}.
 Variables (U : finType) (P : R.-fdist U) (A B C D : finType).
 Variables (X : {RV P -> A}) (Y : {RV P -> B}) (Z : {RV P -> C}) (W : {RV P -> D}).
@@ -114,21 +110,19 @@ Lemma decomposition : P |= X _|_ [% Y, W] | Z -> P |= X _|_ Y | Z.
 Proof.
 move=> H a b c.
 transitivity (\sum_(d <- fin_img W) `Pr[ [% X, [% Y, W]] = (a, (b, d)) | Z = c]).
-  rewrite -cpr_eq_set1.
-  rewrite (creasoning_by_cases _ W); apply eq_bigr => /= d _.
-  by rewrite setX1 cpr_eq_set1 cpr_eq_pairA.
+  rewrite -cpr_in1 (creasoning_by_cases _ W); apply eq_bigr => /= d _.
+  by rewrite setX1 cpr_in1 cpr_eq_pairA.
 transitivity (\sum_(d <- fin_img W)
   `Pr[ X = a | Z = c] * `Pr[ [% Y, W] = (b, d) | Z = c]).
   by apply eq_bigr => d _; rewrite H.
 rewrite -big_distrr /=; congr (_ * _).
-rewrite -cpr_eq_set1 (creasoning_by_cases _ W); apply eq_bigr => d _.
-by rewrite setX1 cpr_eq_set1.
+rewrite -cpr_in1 (creasoning_by_cases _ W); apply eq_bigr => d _.
+by rewrite setX1 cpr_in1.
 Qed.
 
 End decomposition.
 
 Section weak_union.
-
 Context {R : realType}.
 Variables (U : finType) (P : R.-fdist U) (A B C D : finType).
 Variables (X : {RV P -> A}) (Y : {RV P -> B}) (Z : {RV P -> C}) (W : {RV P -> D}).
@@ -153,7 +147,6 @@ Qed.
 End weak_union.
 
 Section contraction.
-
 Context {R : realType}.
 Variables (U : finType) (P : R.-fdist U) (A B C D : finType).
 Variables (X : {RV P -> A}) (Y : {RV P -> B}) (Z : {RV P -> C}) (W : {RV P -> D}).
@@ -178,7 +171,6 @@ End contraction.
 
 (* Probabilistic Reasoning in Intelligent Systems: Networks of Plausible Inference, Pearl, p.88 *)
 Section derived_rules.
-
 Context {R : realType}.
 Variables (U : finType) (P : R.-fdist U) (A B C D : finType).
 Variables (X : {RV P -> A}) (Y : {RV P -> B}) (Z : {RV P -> C}) (W : {RV P -> D}).
@@ -201,7 +193,6 @@ Qed.
 End derived_rules.
 
 Section intersection.
-
 Context {R : realType}.
 Variables (U : finType) (P : R.-fdist U) (A B C D : finType).
 Variables (X : {RV P -> A}) (Y : {RV P -> B}) (Z : {RV P -> C}) (W : {RV P -> D}).
@@ -209,14 +200,15 @@ Variables (X : {RV P -> A}) (Y : {RV P -> B}) (Z : {RV P -> C}) (W : {RV P -> D}
 Hypothesis P0 : forall b c d, `Pr[ [% Y, Z, W] = (b, c, d) ] != 0.
 Hypothesis D_not_empty : D.
 
-Lemma intersection : P |= X _|_ Y | [% Z, W] -> P |= X _|_ W | [% Z, Y] -> P |= X _|_ [% Y, W] | Z.
+Lemma intersection :
+  P |= X _|_ Y | [% Z, W] -> P |= X _|_ W | [% Z, Y] -> P |= X _|_ [% Y, W] | Z.
 Proof.
 move=> H1 H2.
 suff : P |= X _|_ Y | Z by apply contraction.
 move=> a b c; apply/esym.
-rewrite -[in X in X * _ = _]cpr_eq_set1 [in X in X * _ = _](creasoning_by_cases _ W).
+rewrite -[in X in X * _ = _]cpr_in1 [in X in X * _ = _](creasoning_by_cases _ W).
 under eq_bigr do rewrite setX1.
-under eq_bigr do rewrite cpr_eq_set1.
+under eq_bigr do rewrite cpr_in1.
 rewrite big_distrl /=.
 have <- : \sum_(d <- fin_img W)
            `Pr[ [% X, Y] = (a, b) | Z = c] * `Pr[ W = d | Z = c] =
@@ -225,7 +217,7 @@ have <- : \sum_(d <- fin_img W)
   suff H : forall d, `Pr[ [% X, Y] = (a, b) | Z = c] / `Pr[ Y = b | Z = c ] =
                 `Pr[ [% X, W] = (a, d) | Z = c] / `Pr[ W = d | Z = c ].
     apply eq_bigr => d _.
-    rewrite -eqr_divr_mulr; last first.
+    rewrite -eqr_divrMr; last first.
       rewrite cpr_eqE mulf_neq0 //.
       - by move: (P0 b c d); apply: contra => /eqP/(pr_eq_domin_RV2 W d) ->.
       - move: (P0 b c d); apply: contra.
@@ -258,14 +250,14 @@ have <- : \sum_(d <- fin_img W)
     rewrite cpr_eq_product_rule.
     have H0 : `Pr[ W = d | [% Z, Y] = (c, b)] != 0.
       rewrite cpr_eqE pr_eq_pairA pr_eq_pairAC -pr_eq_pairA.
-      rewrite pr_eq_pairC mulf_eq0 negb_or invr_eq0.
-      apply/andP; split; first by rewrite pr_eq_pairC.
-      by move: (P0 b c d); apply: contra => /eqP/(pr_eq_domin_RV2 W d) ->.
+      rewrite pr_eq_pairC mulf_eq0 negb_or invr_eq0 P0/=.
+      move: (P0 b c d); apply: contra => /eqP.
+      by rewrite pr_eq_pairC/= => /(pr_eq_domin_RV2 W d) ->.
     move/mulIf => /(_ H0){H0}/esym.
     by rewrite (cpr_eq_pairCr X Z) cpr_eq_pairAr.
-  have {}H1 : forall d, `Pr[ X = a | [% W, Z] = (d, c)] =
-                     `Pr[ X = a | [% Y, W, Z] = (b, d, c)].
-    move=> d; move: {H1}(H1 a b (c, d)).
+  have {}H1 d : `Pr[ X = a | [% W, Z] = (d, c)] =
+                `Pr[ X = a | [% Y, W, Z] = (b, d, c)].
+    move: {H1}(H1 a b (c, d)).
     rewrite cpr_eq_product_rule.
     have H0 : `Pr[ Y = b | [% Z, W] = (c, d)] != 0.
       rewrite cpr_eqE pr_eq_pairA mulf_eq0 negb_or invr_eq0 P0 /=.

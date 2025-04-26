@@ -296,7 +296,7 @@ Notation "`H( W | P )" := (cond_entropy_chan W P) : channel_scope.
 Section condentropychan_prop.
 Variables (A B : finType) (W : `Ch(A, B)) (P : {fdist A}).
 
-Lemma cond_entropy_chanE : (`H(W | P) = cond_entropy (fdistX (P `X W)))%channel.
+Lemma cond_entropy_chanE : (`H(W | P) = centropy (fdistX (P `X W)))%channel.
 Proof.
 rewrite /cond_entropy_chan.
 have := chain_rule (P `X W); rewrite /joint_entropy => ->.
@@ -305,7 +305,7 @@ Qed.
 
 Lemma cond_entropy_chanE2 : (`H(W | P) = \sum_(a in A) P a * `H (W a))%channel.
 Proof.
-rewrite cond_entropy_chanE cond_entropyE big_morph_oppr; apply: eq_bigr => a _.
+rewrite cond_entropy_chanE centropyE big_morph_oppr; apply: eq_bigr => a _.
 rewrite big_morph_oppr /entropy mulrN -mulNr big_distrr/=; apply: eq_bigr => b _.
 rewrite fdistXI fdist_prodE /= mulNr (mulrA (P a)); congr (- _).
 have [->|Pa0] := eqVneq (P a) 0; first by rewrite !(mulr0,mul0r).

@@ -93,7 +93,7 @@ case/orP.
 - by rewrite H1.
 Qed.
 
-Hypothesis HM : (0 < #|M|)%nat.
+Hypothesis HM : (0 < #|M|)%N.
 
 Lemma good_code_sufficient_condition P W epsilon
   (phi : encT A M n -> decT B M n) :
@@ -255,11 +255,9 @@ Variables (B A : finType) (W : `Ch(A, B)) (P : {fdist A}).
 Definition epsilon0_condition r epsilon epsilon0 :=
   0 < epsilon0 /\ epsilon0 < epsilon / 2 /\ epsilon0 < (`I(P, W) - r) / 4.
 
-(* TODO: move, doc *)
-Definition frac_part (x : R) := x - (Num.floor x)%:~R.
 Definition n_condition r epsilon0 n :=
-  (O < n)%nat /\ - log epsilon0 / epsilon0 < n%:R /\
-  frac_part (2 `^ (r *+ n)) = 0 /\ (JTS_1_bound P W epsilon0 <= n)%nat.
+  (O < n)%N /\ - log epsilon0 / epsilon0 < n%:R /\
+  frac_part (2 `^ (r *+ n)) = 0 :> R /\ (JTS_1_bound P W epsilon0 <= n)%N.
 
 Definition cal_E M n epsilon (f : encT A M n) m :=
   [set vb | prod_rV (f m, vb) \in `JTS P W n epsilon].
@@ -432,9 +430,9 @@ by apply eq_bigl; case=> /= ? ?; rewrite !inE.
 Qed.
 
 (* TODO: move? *)
-Lemma big_cat_tuple {C : finType} m n (F : (m + n)%nat.-tuple C -> R) :
+Lemma big_cat_tuple {C : finType} m n (F : (m + n).-tuple C -> R) :
   (\sum_(i in {:m.-tuple C}) \sum_(j in {: n.-tuple C})
-  F [tuple of (i ++ j)] = \sum_(p in {: (m + n)%nat.-tuple C}) (F p)).
+  F [tuple of (i ++ j)] = \sum_(p in {: (m + n).-tuple C}) (F p)).
 Proof.
 elim: m n F => [m2 F /=|m IH n F].
 - transitivity (\sum_(i <- [tuple] :: [::])
@@ -463,9 +461,9 @@ Qed.
 (* TODO: move? *)
 Lemma big_cat_tuple_seq {C : finType} m n (F : seq C -> R) :
   \sum_(i in {:m.-tuple C} ) \sum_(j in {: n.-tuple C}) (F (i ++ j)) =
-  \sum_(p in {: (m + n)%nat.-tuple C}) (F p).
+  \sum_(p in {: (m + n).-tuple C}) (F p).
 Proof.
-move: (@big_cat_tuple _ m n (fun l => if size l == (m + n)%nat then F l else 0)).
+move: (@big_cat_tuple _ m n (fun l => if size l == (m + n)%N then F l else 0)).
 set lhs := (\sum_(i in _) _) => H.
 apply trans_eq with lhs.
   apply eq_bigr => /= t _; apply eq_bigr => /= t' _.
@@ -513,18 +511,18 @@ transitivity (
     rewrite (big_tcast (card_ord k.+1)).
     rewrite -(big_tuple_cons_behead _ xpredT xpredT).
     apply eq_bigr => i0 _.
-    have [Hq i_q] : (i.-1 + (k - i.-1) = k /\ i <= k)%nat.
+    have [Hq i_q] : (i.-1 + (k - i.-1) = k /\ i <= k)%N.
       split.
         by rewrite subnKC // -(leq_add2r 1) !addn1 (leq_ltn_trans _ (ltn_ord i)) // leq_pred.
       by rewrite -(leq_add2r 1) !addn1 ltn_ord.
     rewrite (big_tcast (esym Hq)) esymK.
     rewrite -big_cat_tuple /=.
     apply eq_bigr => /= i1 _.
-    have Hs : (k - i.-1 = (k - i).+1)%nat.
+    have Hs : (k - i.-1 = (k - i).+1)%N.
       by rewrite -subn1 subnBA ?lt0n // addnC -addnBA.
     rewrite (big_tcast Hs) -(big_tuple_cons_behead _ xpredT xpredT).
     apply eq_bigr => i2 _.
-    have Ht : (#|'I_k.+1| - i.+1 = k - i)%nat by rewrite card_ord /= subSS.
+    have Ht : (#|'I_k.+1| - i.+1 = k - i)%N by rewrite card_ord /= subSS.
     rewrite (big_tcast Ht) //; apply eq_bigr => /= i3 _; congr (_ * _).
     - rewrite 2!Wght.dE /Wght.f 2!ffunE /=.
       rewrite (reindex_onto enum_rank enum_val); last by move=> *; rewrite enum_valK.
@@ -670,18 +668,11 @@ apply/idP/idP.
     by case/andP : Hm2 => _ /forallP /(_ m); rewrite !inE m_tb m20 Hm implyTb.
 Qed.
 
-(* TODO: move *)
-Lemma ExpK (R' : realType) n x : (1 < n)%N -> Log n (n%:R `^ x) = x :> R'.
-Proof.
-move=> n1; rewrite /Log prednK// 1?ltnW// ln_powR mulrK //.
-by apply/unitf_gt0/ln_gt0; rewrite ltr1n.
-Qed.
-
 Lemma random_coding_good_code epsilon : 0 <= epsilon ->
   forall (r : CodeRateType),
     forall epsilon0, epsilon0_condition r epsilon epsilon0 ->
     forall n, n_condition r epsilon0 n ->
-  exists M : finType, (0 < #|M|)%nat /\ #|M| = `| Num.floor (2 `^ (rate r *+ n)) |%N /\
+  exists M : finType, (0 < #|M|)%N /\ #|M| = `| Num.floor (2 `^ (rate r *+ n)) |%N /\
   let Jtdec := jtdec P W epsilon0 in
   (\sum_(f : encT A M n) Wght.d P f * echa(W , mkCode f (Jtdec f))) < epsilon.
 Proof.
@@ -693,10 +684,10 @@ have [k Hk] : exists k, log k.+1%:R / n%:R = r :> R.
     rewrite absz_gt0; apply/eqP => Habs.
     rewrite /frac_part Habs subr0 in Hn2.
     by move/eqP : Hn2; apply/negP; rewrite gt_eqF// powR_gt0.
-  rewrite eqr_divr_mulr; last by rewrite (eqr_nat R n 0) -lt0n.
+  rewrite eqr_divrMr; last by rewrite (eqr_nat R n 0) -lt0n.
   rewrite -[in LHS]mulrz_nat natz gez0_abs.
     move/subr0_eq: Hn2 => <-.
-    by rewrite /log ExpK // mulr_natr.
+    by rewrite /log powRK // mulr_natr.
   by rewrite floor_ge0 powR_ge0.
 set M : finType := 'I_k.+1.
 exists M.
@@ -806,25 +797,6 @@ Qed.
 
 End random_coding_good_code_existence.
 
-(* TODO: move to realType_logb *)
-Lemma exists_frac_part (P : nat -> Prop) : (exists n, P n) ->
-  forall num den, (0 < num)%nat -> (0 < den)%nat ->
-  (forall n m, (n <= m)%nat -> P n -> P m) ->
-  exists n, P n /\
-    frac_part (2 `^ (n%:R * (log num%:R / den%:R))) = 0.
-Proof.
-case=> n Pn num den Hden HP.
-exists (n * den)%nat.
-split.
-  apply H with n => //.
-  by rewrite -{1}(muln1 n) leq_mul2l HP orbC.
-rewrite natrM -mulrA (mulrCA den%:R) mulrV // ?mulr1; last first.
-  by rewrite unitfE lt0r_neq0 // (ltr_nat R 0).
-rewrite /frac_part mulrC powRrM.
-rewrite (LogK (n:=2)) // ?ltr0n // powR_mulrn ?ler0n // -natrX.
-by rewrite floorK ?subrr // intr_nat.
-Qed.
-
 Section channel_coding_theorem.
 Variables (A B : finType) (W : `Ch(A, B)).
 Hypothesis set_of_I_nonempty :
@@ -878,7 +850,7 @@ have [n Hn] : exists n, n_condition W P r epsilon0 n.
       by rewrite ler_nat /supermax 2!leq_max leqnn orbT.
     by rewrite [X in (_ <= X)%nat]maxnA leq_maxr.
   rewrite /n_condition.
-  lapply (exists_frac_part Hn Hnum Hden); last move=> n1 n2 n1_n2 Pn1.
+  lapply (exists_frac_part (R := R) Hn Hnum Hden); last move=> n1 n2 n1_n2 Pn1.
     case=> n [[Hn1 [Hn3 Hn4]] Hn2].
     exists n => /=.
     rewrite /n_condition.
@@ -889,7 +861,7 @@ have [n Hn] : exists n, n_condition W P r epsilon0 n.
   split.
     by apply: (@lt_le_trans _ _ n1%:R); [tauto | rewrite ler_nat].
   by apply leq_trans with n1 => //; tauto.
-have He : (0 <= epsilon) by apply ltW.
+have He : 0 <= epsilon by apply ltW.
 case: (random_coding_good_code He Hepsilon0 Hn) =>
   M [HM [M_k H]].
 case: (good_code_sufficient_condition H) => f Hf.
@@ -898,7 +870,7 @@ rewrite /CodeRate M_k -mulrz_nat natz gez0_abs; last first.
   by rewrite floor_ge0 powR_ge0.
 case: Hn => Hn [_] [].
 rewrite /frac_part => /subr0_eq <- _.
-rewrite /log ExpK // -(mulr_natr (rate r)) mulrK //.
+rewrite /log powRK // -(mulr_natr (rate r)) mulrK //.
 by apply/unitf_gt0; rewrite ltr0n.
 Qed.
 

@@ -1,6 +1,7 @@
 (* infotheo: information theory and error-correcting codes in Coq             *)
 (* Copyright (C) 2020 infotheo authors, license: LGPL-2.1-or-later            *)
 From mathcomp Require Import all_ssreflect fingroup perm.
+From mathcomp Require Import mathcomp_extra.
 Import Coq.NArith.BinNatDef.
 
 (**md**************************************************************************)
@@ -17,6 +18,8 @@ Reserved Notation "A :+: B" (at level 52, left associativity).
 Set Implicit Arguments.
 Unset Strict Implicit.
 Import Prenex Implicits.
+
+Lemma compfid A B (f : A -> B) : f \o idfun = f. Proof. by []. Qed.
 
 Section ssrbool_ext.
 
@@ -168,7 +171,7 @@ Variables A B : Type.
 Implicit Types l : seq A.
 
 Lemma zip_swap : forall l (k : seq B),
-  zip l k = map (fun x => (x.2, x.1)) (zip k l).
+  zip l k = map swap (zip k l).
 Proof. elim => [ [] // | h t IH [|hd tl] //=]; by rewrite IH. Qed.
 
 Lemma sumn_big_addn s : sumn s = \sum_ ( i <- s ) i.
@@ -213,9 +216,6 @@ elim=> // h t IH [|a1 a2] [|b1 b2] //=.
 - destruct h => /=; by rewrite IH.
 Qed.
 
-Lemma nseq_add n (a : A) m : nseq (n + m) a = nseq n a ++ nseq m a.
-Proof. rewrite cat_nseq; elim: n => // n ih; by rewrite addSn /= ih. Qed.
-
 Variable a : A.
 
 Lemma map_nth_iota_id l : map (nth a l) (iota 0 (size l)) = l.
@@ -235,7 +235,7 @@ Lemma nseq_cat l l' n : l ++ l' = nseq n a -> l' = nseq (n - size l) a.
 Proof.
 move=> ll'na; move/(congr1 (drop (size l))) : (ll'na).
 rewrite drop_cat ltnn subnn drop0 => ->.
-move: (nseq_add (size l) a (n - size l)).
+have := nseqD (size l) (n - size l) a.
 rewrite subnKC; last by rewrite -(size_nseq n a) -ll'na size_cat leq_addr.
 by move=> ->; rewrite drop_cat size_nseq ltnn subnn drop0.
 Qed.
@@ -288,13 +288,6 @@ Lemma take_index (a : A) s : a \notin take (index a s) s.
 Proof.
 elim: s => // h t IH /=; case: ifPn => //.
 by rewrite inE negb_or eq_sym IH andbT.
-Qed.
-
-Lemma uniq_take i (s : seq A) :  i < size s -> uniq s -> uniq (take i s).
-Proof.
-elim: i s => [l _ _ |i IH [| h t] //=]; first by rewrite take0.
-rewrite ltnS => nt /andP[ht ut].
-rewrite (IH _ nt ut) andbT; apply: contra ht; exact: mem_take.
 Qed.
 
 Lemma sorted_of_nth (r : rel A) s (r_trans : transitive r) (r_sorted : sorted r s) :
@@ -478,10 +471,12 @@ Proof. move=> Hf; by rewrite -(@card_imset _ _ f) // max_card. Qed.
 
 End finfun_ext.
 
+Lemma bij_swap A B : bijective (@swap A B).
+Proof. apply Bijective with swap; by case. Qed.
+Arguments bij_swap {A B}.
+
 Section finset_ext.
 Implicit Types A B : finType.
-
-Definition swap {A B : Type} (ab : A * B) := (ab.2, ab.1).
 
 Lemma injective_swap (A B : finType) (E : {set A * B}) : {in E &, injective swap}.
 Proof. by case=> a b [a0 b0] /= _ _ [-> ->]. Qed.
@@ -656,6 +651,40 @@ apply/setP/subset_eqP/andP. (* or, apply/eqP; rewrite eqEsubset; apply/andP. *)
 split; apply/subsetP => x; first by case/imsetP => i; rewrite inE => H ->.
 move=> xB; case/(B_covered x)/imsetP: (xB) => y yI xhy.
 by apply/imsetP; exists y => //; rewrite inE -xhy.
+Qed.
+
+Section more_preimset.
+Context {R : Type}.
+Variables (aT1 aT2 aT3 rT1 rT2 rT3 : finType).
+Variables (f : aT1 -> rT1)  (g : aT2 -> rT2) (h : aT3 -> rT3).
+Variables (A : {set rT1}) (B : {set rT2}) (C : {set rT3}).
+
+Local Notation "f × g" :=
+  (fun xy => (f xy.1, g xy.2)) (at level 10).
+
+Lemma preimsetX : f × g @^-1: (A `* B) = f @^-1: A `* g @^-1: B.
+Proof. by apply/setP=> -[] a b /=; rewrite !inE. Qed.
+
+Lemma preimsetX2 :
+  h × (f × g) @^-1: (C `* (A `* B)) = h @^-1: C `* (f @^-1: A `* g @^-1: B).
+Proof. by apply/setP=> -[] a b /=; rewrite !inE. Qed.
+
+Lemma in_preimset x (Y : {set rT1}) : (x \in f @^-1: Y) = (f x \in Y).
+Proof. by rewrite !inE. Qed.
+
+Lemma in_preimset1 x y : (x \in f @^-1: [set y]) = (f x == y).
+Proof. by rewrite !inE. Qed.
+
+End more_preimset.
+
+Lemma imsetPn {aT rT : finType} {f : aT -> rT} {D : mem_pred aT} {y : rT} :
+  reflect (forall x : aT, in_mem x D -> y != f x) (y \notin imset f D).
+Proof.
+apply: (iffP idP).
+  move/imsetP=> H x xD; apply/eqP=> yfx; apply: H.
+  by exists x.
+move=> H; apply/imsetP=> -[] x xD yfx.
+by have:= H x xD; rewrite yfx eqxx.
 Qed.
 
 Lemma big_set2 (R : Type) (idx : R) (op : Monoid.com_law idx) (I : finType)

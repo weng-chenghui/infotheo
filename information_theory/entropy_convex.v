@@ -53,26 +53,6 @@ Import numFieldNormedType.Exports.
 
 Local Notation "{ 'fdist' T }" := (_ .-fdist T) : fdist_scope.
 
-(* TODO: rm *)
-Section analysis_ext.
-Import boolp classical_sets.
-
-(*
-Lemma near_eq_cvg_to (U : nbhsType) (T : Type) (F : set_system T)
-  (f g : T -> U) (x : U) :
-  Filter F ->
-  (\near F, f F = g F) ->
-  (fmap f F --> x)%classic = (fmap g F --> x)%classic.
-Proof.
-move=> FF nfg.
-suff-> : (f x @[x --> F] = g x @[x --> F])%classic. by [].
-rewrite eqEsubset; split; apply: near_eq_cvg=> //.
-by move/filterS: nfg; apply=> ?; exact: fsym.
-Qed.
-Arguments near_eq_cvg_to [U T F].
-*)
-End analysis_ext.
-
 Section entropy_log_div.
 Variable R : realType.
 Variables (A : finType) (p : R.-fdist A) (n : nat) (An1 : #|A| = n.+1).
@@ -331,7 +311,7 @@ Lemma mutual_information_concave :
   concave_function (fun P : {fdist A} => mutual_info (P `X W)).
 Proof.
 suff : concave_function
-  (fun P : {fdist A} => let PQ := fdistX (P `X W) in `H PQ`1 - cond_entropy PQ).
+  (fun P : {fdist A} => let PQ := fdistX (P `X W) in `H PQ`1 - centropy PQ).
   set f := fun _ => _. set g := fun _ => _.
   suff -> : f = g by [].
   by rewrite boolp.funeqE => d; rewrite {}/f {}/g /= -mutual_infoE -mutual_info_sym.
@@ -342,10 +322,10 @@ apply: R_concave_functionB.
   apply: le_trans (concave_H (p `X W)`2 (q `X W)`2 t).
   under eq_bigr do rewrite fdist_prod2_conv.
   by rewrite lexx.
-suff : affine (fun x : {fdist A} => cond_entropy (fdistX (x `X W))).
+suff : affine (fun x : {fdist A} => centropy (fdistX (x `X W))).
   by case/affine_functionP.
 move=> t p q.
-rewrite /= avgRE /cond_entropy /cond_entropy1.
+rewrite /= avgRE /centropy /centropy1.
 rewrite 2!big_distrr -big_split /=; apply eq_bigr => a _.
 rewrite !fdistX2 !fdist_fstE !mulrN -opprD; congr (- _).
 rewrite !big_distrr -big_split /=; apply eq_bigr => b _.
