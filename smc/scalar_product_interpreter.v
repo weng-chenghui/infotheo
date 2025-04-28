@@ -27,7 +27,7 @@ Local Open Scope ring_scope.
 
 Section def.
 
-Variable n m : nat.
+Variable n m k : nat.
 Let TX := [the finComRingType of 'I_m.+2].
 Let VX := 'rV[TX]_n.
 Let data := (TX + VX)%type.
@@ -36,31 +36,53 @@ Let vec x : data := inr x.
 Local Notation "u *d w" := (scp.dotproduct u w).
 
 Inductive proc : Type :=
-  | Init : VX -> proc -> proc
   | ScalarProduct : nat -> nat -> VX -> (TX -> proc) -> proc
+  | Init : VX -> proc -> proc
   | Finish : proc
-  | Fail : proc.
+  | Fail : proc
+   (* Wait partial result from a specific fuel and id round 
+
+      fuel -> id -> f
+   *)
+  | _WaitRecv : nat -> nat ->  (TX -> proc) -> proc
+   (* Use proc as mbox to store the 2nd partial result.
+      This term blocks the following proc until the result TX is fetched.
+
+      fuel -> id -> result -> next
+    *)
+  | _WantSend : nat -> nat -> TX -> proc -> proc.
 
 Definition SMC := VX -> VX -> (TX * TX).
 
-Definition step (sps : seq SMC) (A : Type) (ps : seq proc)
-  (trace : seq data)
-  (yes no : (proc * seq data -> A)) (i : nat) : A :=
+Definition step (h : nat) (sp : SMC) (A : Type) (ps : seq proc)
+  (trace : seq data) (yes no : (proc * seq data -> A)) (i : nat) : A :=
   let ps := nth Fail ps in
   let p := ps i in
   let nop := no (p, trace) in
-  let '(sp) := nth (fun a _ => (0, 0)) sps i in
   match p with
   | ScalarProduct id1 id2 x1 f1 =>
       match ps id2 with
-      |  ScalarProduct id2 id1 x2 f2 =>
-           if (id1, id2) == (alice, bob) then
-                yes (f1 (sp x1 x2).1, one (sp x1 x2).1 :: trace)
-           else
-             if (id1, id2) == (bob, alice) then
-                yes (f2 (sp x2 x1).2, one (sp x2 x1).2 :: trace)
-             else
-               nop
+      | ScalarProduct id2 id1 x2 _ =>
+          if (id1, id2) == (alice, bob) then
+            yes (_WantSend h id2 (sp x1 x2).2 (f1 (sp x1 x2).1),
+                 one (sp x1 x2).1 :: trace)
+          else nop
+      | _WantSend fuel id r _ => (* ScalarProduct has no fuel mark so mark it *)
+          if id == id1 then yes (_WaitRecv h id1 f1, trace) else nop
+      | _ => nop
+      end
+  | _WantSend fuel id r next =>
+      match ps id with
+      | _WaitRecv fuel' id' f =>
+          if (fuel == fuel') && (id == id') then
+            yes (next, trace) else nop
+      | _ => nop
+      end
+  | _WaitRecv fuel id f =>
+      match ps id with
+      | _WantSend fuel' id' r _ =>
+          if (fuel == fuel') && (id == id') then
+            yes (f r, one r :: trace) else nop 
       | _ => nop
       end
   | Init d next =>
@@ -69,12 +91,15 @@ Definition step (sps : seq SMC) (A : Type) (ps : seq proc)
       nop
   end.
 
-Variable (sa1 sa2 sb1 sb2 : VX) (ra1 ra2 yb1 yb2 : TX).
-
 (* Because we haven't built-in RNG into our language,
    all random values are pre-generated.
+
+   TODO: when proving randomness we need a hypothesis
+   states that
+
+   h (fuel of the interpreter) > k >= times of scalar product in the program.
 *)
-Let rand_values := [:: (sa1, sb1, ra1, yb1); (sa2, sb2, ra2, yb2)].
+Variable rand_values : k.-tuple (VX * VX * TX * TX).
 
 (* Get the underlying scalar product results from the underlying traces. *)
 Let results (trs :  smc_scalar_product_party_tracesT VX) :=
@@ -93,22 +118,29 @@ Let scalar_product sa sb ra yb xa xb :=
 (* Scalar products which are pre-filled with random values.
    So only secret inputs are needed during the protocol executions.
 *)
-Let sps := map (fun r => let '(sa, sb, ra, yb) := r in
+Let sps : k.-tuple SMC := map (fun r => let '(sa, sb, ra, yb) := r in
     scalar_product sa sb ra yb) rand_values.
 
 (* For each step needs scalar product, the interpreter fetch one
    from the pre-filled scalar products, and interpret the step
    with that scalar product.
+
+   Need h: fuel for interpretation, and v: index of pre-filled scalar products;
+   tried to use h as v but the type difference is difficult to remove.
+   And ord_pred causes that Coq cannot guess the decrease of v for the
+   fixpoint definition if replacing h with v.
 *)
-Fixpoint interp h (ps : seq proc) (traces : seq (seq data)) :=
-  if h is h.+1 then
-    if has (fun i => step sps ps [::] (fun=>true) (fun=>false) i)
+Fixpoint interp (h : nat)(v : 'I_k) (ps : seq proc) (traces : seq (seq data)) :=
+  let v' := ord_pred v in
+  let sp := tnth sps v in
+  if h is h'.+1 then
+    if has (fun i => step h sp ps [::] (fun=>true) (fun=>false) i)
         (iota 0 (size ps)) then
-      let ps_trs' := [seq step sps ps (nth [::] traces i) idfun idfun i
+      let ps_trs' := [seq step h sp ps (nth [::] traces i) idfun idfun i
                      | i <- iota 0 (size ps)] in
       let ps' := unzip1 ps_trs' in
       let trs' := unzip2 ps_trs' in
-        interp h ps' trs'
+        interp h' v' ps' trs'
     else (ps, traces)
   else (ps, traces).
 
