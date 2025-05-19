@@ -87,11 +87,6 @@ Hypothesis card_K' : #|'rV[TX]_k'| = k.+1.
 Hypothesis pR_K'_unif : `p_ R_K' = fdist_uniform card_K'.
 Hypothesis indep_R_K'_S : P |= R_K' _|_ S.
 
-Let H_VC_RK_eq0:
-  `H `p_ V_C - `H `p_ R_K' = 0.
-Proof.
-Abort.
-
 (* --- Two lemmans for a simpler way to prove joint_entropy_RV_indepE *)
 About mutual_info0P.
 About mutual_infoE3.
@@ -148,6 +143,19 @@ rewrite -big_distrr -big_distrl FDist.f1 /=.
 by rewrite mul1r.
 Qed.
 
+(* Note: the so-called "Cardinality bound" property in
+   Iwamoto2024 Proposition 2.1.1 is "entropy_max" in Infotheo.
+*)
+Let HVC_le_HRK':
+  `H `p_ V_C <= `H `p_ R_K' .
+Proof.
+have Ha := entropy_max `p_ V_C.
+have Hb := (entropy_uniform R card_K').
+rewrite -pR_K'_unif in Hb.
+rewrite Hb.
+exact: Ha.
+Qed.
+
 Let mutual_info_S_R_K'_eq0 :
   `I(S; R_K') = 0.
 Proof.
@@ -162,7 +170,7 @@ rewrite joint_entropy_RV_indepE; last by exact indep_R_K'_S.
 by rewrite addrKA subrr.
 Qed.
 
-Lemma I_VC_S_E:
+Let I_VCS_E:
   `I(V_C; S) = `H `p_ V_C - `H `p_ R_K'.
 Proof.
 rewrite mutual_info_RVX.
@@ -185,7 +193,24 @@ have ->: \sum_(a in matrix_matrix__canonical__fintype_Finite TX 1 k')
 by rewrite addrA addrAC addrK mutual_info_S_R_K'_eq0 addrAC addr0.
 Qed.
 
+(* Definitely there is a lemma but I cannot find it. *)
+Let le_ge_eq (x y : R):
+  x >= y -> x <= y -> x = y.
+Admitted.
 
+Lemma eqn10:
+  `I(V_C; S) = 0.
+Proof.
+rewrite I_VCS_E.
+have H := HVC_le_HRK'.
+rewrite -subr_le0 in H.
+have [-> | Hb] := eqVneq (`H `p_ V_C - `H `p_ R_K') 0.
+  by [].
+rewrite -I_VCS_E.
+rewrite -I_VCS_E in H.
+apply: le_ge_eq; last first. by exact: H.
+exact: mutual_info_ge0.
+Qed.
 
 
 End shamirss.
