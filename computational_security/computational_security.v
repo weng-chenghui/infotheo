@@ -24,30 +24,6 @@ Local Open Scope fdist_scope.
 Local Open Scope entropy_scope.
 Local Open Scope vec_ext_scope.
 
-Section definitions.
-Context {R : realType}.
-Variables (T : finType) (P : R.-fdist T).
-Variables (n m k: nat).
-
-(* Commonly the "computational indistinguishability" is defined as:
-
-  "Let X and Y be two distribution ensembles indexed by a security parameter n
-    (which usually refers to the length of the input)... "
-
-   Here we use random variables with a co-domain of an n-sized vector as the
-   distribution ensembles, instead of using sets of n random variables as the
-   distribution ensembles.
-
-  (I guess that the original motivation to have a ensembles is as a collection
-   of all sampling functions in the probalistic program. So if the Real and
-   Simulated both have N sampling functions in each program, the differences
-   among them one by one must be indistinguishable).
-*)
-Let TX := [the finComNzRingType of 'I_m.+2].
-Let VX := 'rV[TX]_n.
-
-Variables (X : {RV P -> VX}) (Y : {RV P -> VX}).
-
 (* "...we say they are computationally indistinguishable if for any non-uniform
    probabilistic polynomial time algorithm A..."
 
@@ -64,7 +40,58 @@ Variables (X : {RV P -> VX}) (Y : {RV P -> VX}).
 
   Since we use `T` as event type, we can define our polydist as follows:
 *)
-Variable polydist : R ->  k.-bseq (R.-fdist T -> R.-fdist bool).
+Module Distinguisher.
+Section distinguisher.
+Variables (R : numDomainType) (T : finType) (P : R.-fdist T).
+
+(* Define it as a record or `d \in {set (d :  R.-fdist T -> R.-fdist bool)}`
+   causes an error since `k.-bseq (R.-fdist T -> R.-fdist bool)` is not a
+   `pred_sort`.
+*)
+Record t : Type := mk {
+  f :> {ffun T -> (R.-fdist T -> R.-fdist bool)} }.
+  (* Cannot be {ffun R.-fdist T -> R.-fdist bool} because:
+
+     The term "Phant (R.-fdist T -> R.-fdist bool)" has type
+     "phant (R.-fdist T -> R.-fdist bool)" while it is expected to have type
+     "phant (forall x : ?aT, ?rT x)".
+  *)
+
+End distinguisher.
+Module Exports.
+Notation distinguisher := t.
+End Exports.
+End Distinguisher.
+Export Distinguisher.Exports.
+Coercion Distinguisher.f : distinguisher >-> finfun_of.
+
+About Distinguisher.f.
+About FDist.f.
+
+HB.instance Definition _ R T := [isSub for @Distinguisher.f R T].
+(* FAIL: "Error: Destructing let on this type expects 1 variables." *)
+HB.instance Definition _ R T := [Choice of fdist R T by <:].
+
+Section definitions.
+Context {R : realType}.
+Variables (T : finType) (P : R.-fdist T).
+Variables (n m k: nat).
+
+(* Commonly the "computational indistinguishability" is defined as:
+
+  "Let X and Y be two distribution ensembles indexed by a security parameter n
+    (which usually refers to the length of the input)... "
+
+  (I guess that the original motivation to have a ensembles is as a collection
+   of all sampling functions in the probalistic program. So if the Real and
+   Simulated both have N sampling functions in each program, the differences
+   among them one by one must be indistinguishable).
+*)
+Let TX := [the finComNzRingType of 'I_m.+2].
+Variables (X Y : n.-bseq {RV P -> TX}).
+
+Variable polydist : R -> k.-bseq (@distinguisher R T).
+
 
 (*
   Compare to the Isabelle work \cite[\S3]{Butler2017}:
@@ -91,10 +118,10 @@ Definition is_negfn (f : R -> R) (x : R):=
     (x > Nc) -> 0 <= f x -> x ^ c * f x < 1.
 
 Definition comp_indist :=
-  forall (a b : R) (d : R.-fdist T -> R.-fdist bool),
-    exists e : R -> R, is_negfn e b -> d \in polydist b.
-
-
+  forall (a : TX)(b : R) (d : distinguisher T),
+    exists e : R -> R, is_negfn e b -> d \in polydist b
+      (* d(The RV indexed by a and b) is equal to True*)
+      .
 
   
 End definitions.
