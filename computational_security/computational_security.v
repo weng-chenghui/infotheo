@@ -43,7 +43,7 @@ Variables (T : finType) (P : R.-fdist T) (k : nat).
 
         type synonym (α, ν) ensemble = α ⇒ nat ⇒ ν spmf"
 *)
-Definition ensembleT := R -> R.-fdist T.
+Definition ensembleT := nat -> R.-fdist T.
 
 (* "...we say they are computationally indistinguishable if for any non-uniform
    probabilistic polynomial time algorithm A..."
@@ -67,7 +67,7 @@ Definition dingT := (R.-fdist T * R.-fdist bool)%type.
    that "k.-bseq (R.-fdist T -> R.-fdist bool) is not a pred_sort".
 *)
 
-Variable polydist : R ->  k.-bseq dingT.
+Variable polydist : nat ->  k.-bseq dingT.
 (*
   Compare to the Isabelle work \cite[\S3]{Butler2017}:
 
@@ -87,9 +87,9 @@ Variable polydist : R ->  k.-bseq dingT.
    there exists N_c ∈ N such that for all x > N_c we have |e(x)| < 1/x^c"
    \cite[\S3]{Butler2017}
 *)
-Definition is_negfn (f : R -> R) (x : R):=
-  forall (c : int), exists Nc : R,
-    (x > Nc) -> 0 <= f x -> x ^ c * f x < 1.
+Definition is_negfn (e : nat -> R) (x : nat) :=
+  forall (c : nat), exists Nc : int,
+    (x > Nc) -> 0 <= e x -> ((x ^ c)%:R * e x) < 1.
 
 Variable (X Y : ensembleT).
 
@@ -104,10 +104,13 @@ where comp indist X Y ≡
       (D ∈ polydist n) -> |spmf (D (X a n)) True − spmf (D (Y a n)) True| ≤ ǫ n))
 *)
 Definition comp_indist :=
-  forall (n : R) (d : dingT),
-    exists e : R -> R, is_negfn e n -> d \in polydist n ->
-      ((if d.1 == X n then d.2 else dist_false) true -
-        (if d.1 == Y n then d.2 else dist_false) true) <= e n.
+  forall (n : nat) (d : dingT),
+    exists e : nat -> R, is_negfn e n -> d \in polydist n ->
+      let prX := (if d.1 == X n then d.2 else dist_false) true in
+      let prY := (if d.1 == Y n then d.2 else dist_false) true in
+      let diff := prX - prY in
+      if diff > 0 then diff <= e n else prY - prX <= e n.
+      (* Because I cannot find absolute value for type R *)
   
 End definitions.
 
