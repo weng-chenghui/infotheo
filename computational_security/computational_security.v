@@ -118,8 +118,11 @@ Definition is_negfn (e : nat -> R) (x : nat) :=
 
 Variable (X Y : ensembleT).
 
-(* TODO: define a dist give prob 1.0 to "false" and 0.0 to "true" *)
-Variable (dist_false : R.-fdist bool).
+(* A fallback dist give prob 1.0 to "false" and 0.0 to "true".
+   It is used for `nth` because we use a seq of pairs instead of a mapping
+   function to define polydist.
+*)
+Let dist_false := @fdist1 R bool false.
 
 (*
 comp indist :: (α, ν) ensemble ⇒ (α, ν) ensemble ⇒ bool
@@ -148,11 +151,16 @@ About comp_indist.
 Hypothesis cardTX : #|TX| = m.+1.
 Hypothesis cardTY : #|TY| = n.+1.
 
+(* Dummy ensembles. Real ones are from the probalistic program of the protocol*)
 Let distX := @fdist_uniform R TX m cardTX.
 Let distY := @fdist_uniform R TY n cardTY.
 Let X : @ensembleT R TX A := fun (a : A)(n : nat) => distX.
 Let Y : @ensembleT R TY A := fun (a : A)(n : nat) => distY.
 Let distB := @fdist_uniform R bool 1 card_bool.
-Let dist_false := @fdist1 R bool false.
+
+(* TODO: even for a dummy example each t : T still needs a pair of dingT
+   to complete the polydist. So I need a concrete T to make an example.
+*)
+
 
 End example.
