@@ -26,7 +26,7 @@ Local Open Scope vec_ext_scope.
 
 Section definitions.
 Context {R : realType}.
-Variables (T : finType) (P : R.-fdist T) (k : nat).
+Variables (T A : finType) (P : R.-fdist T) (k : nat).
 
 (* Commonly the "computational indistinguishability" is defined as:
 
@@ -43,7 +43,7 @@ Variables (T : finType) (P : R.-fdist T) (k : nat).
 
         type synonym (α, ν) ensemble = α ⇒ nat ⇒ ν spmf"
 *)
-Definition ensembleT := nat -> R.-fdist T.
+Definition ensembleT := A -> nat -> R.-fdist T.
 
 (* "...we say they are computationally indistinguishable if for any non-uniform
    probabilistic polynomial time algorithm A..."
@@ -60,18 +60,43 @@ Definition ensembleT := nat -> R.-fdist T.
 
   Since we use `T` as event type, we can define our polydist as follows:
 *)
-Definition dingT := (size (enum T)).-bseq (R.-fdist T * R.-fdist bool)%type.
+Definition dingT := (size (enum T)).-tuple (R.-fdist T * R.-fdist bool)%type.
 (* Because we already have "dist", ChatGPT suggested to use `ding`...*)
 (* Using a pair instead of `R.-fdist T -> R.-fdist bool` because
    a \in k.-bseq (R.-fdist T -> R.-fdist bool) will cause an error about
    that "k.-bseq (R.-fdist T -> R.-fdist bool) is not a pred_sort".
 *)
 
-Variable polydist : nat ->  k.-bseq dingT.
+Variable polydist : nat -> seq dingT.
+(* The nat is a size parameter\cite[\S3]{Butler2017}
+
+   While in "How to Simulate It – A Tutorial on the Simulation Proof Technique"
+   \cite[\S2]{Lindell2017}, it explains a bit more:
+
+   "In the context of secure computation, the value `a` will represent the
+   parties’ inputs and `n` will represent the security parameter."
+
+  "All parties are assumed to run in time that is polynomial in the security
+  parameter. (Formally, every party considered has a security parameter tape
+  upon which the value 1^n is written. Then the party is polynomial in the input
+  on this tape. We note that this means that a party may not even be able to
+  read its entire input, as would occur in the case where its input is longer
+  than its overall running time.)"
+
+  The "security parameter" looks like the "128" in AES-128: a key length
+  or something like that. It is not the length of the input. Therefore,
+  since the "size" here is also used to index random variable in the ensemble,
+  why it should be here is that for all security parameters, there must be
+  a set of distinguishers, that can distinguish the random variable indexed by
+  it. And since the ensembles are infinite sequence, computational
+  indistinguishability holds regardless `n`.
+*)
 (*
   Compare to the Isabelle work \cite[\S3]{Butler2017}:
 
-  "A polynomial-time distinguisher “characterises” an arbitrary spmf.
+  "...Instead, we will assume a family of constants giving us the set of all
+   polynomial-time distinguishers for every type ν, indexed by a size parameter.
+   A polynomial-time distinguisher “characterises” an arbitrary spmf.
 
         consts polydist :: nat ⇒ (ν spmf ⇒ bool spmf ) set
 
@@ -104,19 +129,19 @@ where comp indist X Y ≡
       (D ∈ polydist n) -> |spmf (D (X a n)) True − spmf (D (Y a n)) True| ≤ ǫ n))
 *)
 Definition comp_indist :=
-  forall (n : nat) (d : dingT),
+  forall (a : A)(n : nat) (d : dingT),
     exists e : nat -> R, is_negfn e n -> d \in polydist n ->
-      let dingX := nth (X n, dist_false) d (find (fun p => p.1 == X n) d) in
-      let dingY := nth (Y n, dist_false) d (find (fun p => p.1 == Y n) d) in
+      let dingX := nth (X a n, dist_false) d (find (fun p => p.1 == X a n) d) in
+      let dingY := nth (Y a n, dist_false) d (find (fun p => p.1 == Y a n) d) in
       let diff := dingX.2 true - dingY.2 true in
       if diff > 0 then diff <= e n else dingY.2 true - dingX.2 true <= e n.
-      (* Because I cannot find absolute value for type R *)
+      (* Because I cannot find absolute value definition for type R *)
   
 End definitions.
 
 Section example.
 Context {R : realType}.
-Variable (T TX TY : finType) (m n : nat).
+Variable (A T TX TY : finType) (m n k : nat).
   
 About comp_indist.
 
@@ -125,9 +150,9 @@ Hypothesis cardTY : #|TY| = n.+1.
 
 Let distX := @fdist_uniform R TX m cardTX.
 Let distY := @fdist_uniform R TY n cardTY.
-Let X : @ensembleT R TX := fun (a : nat) => distX.
-Let Y : @ensembleT R TY := fun (b : nat) => distY.
-
+Let X : @ensembleT R TX A := fun (a : A)(n : nat) => distX.
+Let Y : @ensembleT R TY A := fun (a : A)(n : nat) => distY.
 Let distB := @fdist_uniform R bool 1 card_bool.
+Let dist_false := @fdist1 R bool false.
 
 End example.
