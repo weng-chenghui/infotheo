@@ -60,7 +60,7 @@ Definition ensembleT := nat -> R.-fdist T.
 
   Since we use `T` as event type, we can define our polydist as follows:
 *)
-Definition dingT := (R.-fdist T * R.-fdist bool)%type.
+Definition dingT := (size (enum T)).-bseq (R.-fdist T * R.-fdist bool)%type.
 (* Because we already have "dist", ChatGPT suggested to use `ding`...*)
 (* Using a pair instead of `R.-fdist T -> R.-fdist bool` because
    a \in k.-bseq (R.-fdist T -> R.-fdist bool) will cause an error about
@@ -106,11 +106,28 @@ where comp indist X Y ≡
 Definition comp_indist :=
   forall (n : nat) (d : dingT),
     exists e : nat -> R, is_negfn e n -> d \in polydist n ->
-      let prX := (if d.1 == X n then d.2 else dist_false) true in
-      let prY := (if d.1 == Y n then d.2 else dist_false) true in
-      let diff := prX - prY in
-      if diff > 0 then diff <= e n else prY - prX <= e n.
+      let dingX := nth (X n, dist_false) d (find (fun p => p.1 == X n) d) in
+      let dingY := nth (Y n, dist_false) d (find (fun p => p.1 == Y n) d) in
+      let diff := dingX.2 true - dingY.2 true in
+      if diff > 0 then diff <= e n else dingY.2 true - dingX.2 true <= e n.
       (* Because I cannot find absolute value for type R *)
   
 End definitions.
 
+Section example.
+Context {R : realType}.
+Variable (T TX TY : finType) (m n : nat).
+  
+About comp_indist.
+
+Hypothesis cardTX : #|TX| = m.+1.
+Hypothesis cardTY : #|TY| = n.+1.
+
+Let distX := @fdist_uniform R TX m cardTX.
+Let distY := @fdist_uniform R TY n cardTY.
+Let X : @ensembleT R TX := fun (a : nat) => distX.
+Let Y : @ensembleT R TY := fun (b : nat) => distY.
+
+Let distB := @fdist_uniform R bool 1 card_bool.
+
+End example.
