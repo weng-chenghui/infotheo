@@ -11,11 +11,11 @@ Require Import fdist proba entropy divergence log_sum source_code.
 (* # Source coding theorem (variable length, converse part)                   *)
 (*                                                                            *)
 (* Documented in:                                                             *)
-(* - Ryosuke Obi. In MI Lecture Note Workshop on Theorem proving and provers  *)
+(* - [Anonymous]. In MI Lecture Note Workshop on Theorem proving and provers  *)
 (*   for reliable theory and implementations (TPP2014), Kyushu University,    *)
 (*   December 3--5, 2014, volume 61, pages 76--78, Dec 2014                   *)
 (*                                                                            *)
-(* Original source file from R. Obi, quickly patched to compile with InfoTheo *)
+(* Original source file, quickly patched to compile with InfoTheo *)
 (* [2019-08-19] and simplified afterwards.                                    *)
 (******************************************************************************)
 

@@ -21,9 +21,8 @@ Require Import ssr_ext ssralg_ext realType_ext realType_ln fdist proba entropy a
 (*                       lower-bounded by (1 - e) * 2 ^ (k * (H P - e))       *)
 (*                       for k big enough                                     *)
 (*                                                                            *)
-(* For details, see Reynald Affeldt, Manabu Hagiwara, and Jonas Sénizergues.  *)
-(* Formalization of Shannon's theorems. Journal of Automated Reasoning,       *)
-(* 53(1):63--103, 2014                                                        *)
+(* For details, see [Anonymous]. Formalization of Shannon's theorems.          *)
+(* Journal of Automated Reasoning, 53(1):63--103, 2014                        *)
 (******************************************************************************)
 
 Declare Scope typ_seq_scope.

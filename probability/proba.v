@@ -28,7 +28,7 @@ Require Import ssr_ext ssralg_ext bigop_ext realType_ext realType_ln fdist.
 (* - Boole's equality (`Boole_eq`)                                            *)
 (* - laws of total probability (`total_prob`, `total_prob_cond`)              *)
 (* - Bayes' theorems (`Bayes`, `Bayes_extended`)                              *)
-(* - an algebraic proof (by Erik Martin-Dorel) of the formula of              *)
+(* - an algebraic proof (by [Anonymous]) of the formula of              *)
 (*   inclusion-exclusion (`Pr_bigcup_incl_excl`)                              *)
 (* - reasoning by cases (`reasoning_by_cases`, `creasoning_by_cases`)         *)
 (* - Markov' inequality (`markov`)                                            *)
@@ -1461,7 +1461,7 @@ Qed.
 End Ind_RV.
 
 (** This section gathers a proof of the formula of inclusion-exclusion
-    contributed by Erik Martin-Dorel: the corresponding theorem is named
+    contributed by [Anonymous]: the corresponding theorem is named
     [Pr_bigcup_incl_excl] and is more general than lemma [Pr_bigcup]. *)
 Section probability_inclusion_exclusion.
 Context {R : realType}.

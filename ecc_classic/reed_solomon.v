@@ -14,7 +14,7 @@ Require Import hamming dft poly_decoding euclid grs cyclic_code.
 (* Main references:                                                           *)
 (* - Robert McEliece, The Theory of Information and Coding,  Cambridge        *)
 (*   University Press, 2002                                                   *)
-(* - Manabu Hagiwara, Coding Theory: Mathematics for Digital Communication,   *)
+(* - [Anonymous], Coding Theory: Mathematics for Digital Communication,   *)
 (*   Nippon Hyoron Sha, 2012 (in Japanese)                                    *)
 (******************************************************************************)
 

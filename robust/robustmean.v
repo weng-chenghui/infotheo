@@ -36,7 +36,7 @@ Import numFieldNormedType.Exports.
 (******************************************************************************)
 
 Section conj_intro_pattern.
-(* /[conj] by Cyril Cohen : *)
+(* /[conj] by [Anonymous] : *)
 (*    https://coq.zulipchat.com/#narrow/stream/237664-math-comp-users/topic/how.20to.20combine.20two.20top.20assumptions.20with.20.60conj.60 *)
 Lemma and_curry (A B C : Prop) : (A /\ B -> C) -> A -> B -> C.
 Proof. move=> + a b; exact. Qed.

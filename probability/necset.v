@@ -550,7 +550,7 @@ rewrite eqEsubset; split=> [u [v]|u].
   by rewrite -affine_conv; apply/imageP/conv_in_conv_set.
 Qed.
 
-(* (saikawa) I am aware that ssreflect/order.v has definitions of porder and
+(* (anonymous) I am aware that ssreflect/order.v has definitions of porder and
    lattice. For now, I write down the following definition of semilattice
    independently of the two, as it seems hard to insert a new layer in the
    mathcomp hierarchy. *)

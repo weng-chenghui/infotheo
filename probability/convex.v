@@ -20,7 +20,7 @@ From mathcomp.analysis Require Import (canonicals)convex.
 (* probability distributions form convex spaces, and to define convex         *)
 (* functions.                                                                 *)
 (*                                                                            *)
-(* Main reference: R. Affeldt, J. Garrigue, T. Saikawa. Formal adventures in  *)
+(* Main reference: [Anonymous]. Formal adventures in  *)
 (* convex and conical spaces. CICM 2020                                       *)
 (*                                                                            *)
 (* Convex spaces:                                                             *)

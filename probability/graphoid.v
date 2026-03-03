@@ -13,7 +13,7 @@ Require Import proba jfdist_cond.
 (* rules.                                                                     *)
 (*                                                                            *)
 (* Reference:                                                                 *)
-(* - R. Affeldt, J. Garrigue, T. Saikawa. Reasoning with Conditional          *)
+(* - [Anonymous]. Reasoning with Conditional          *)
 (*   Probabilities and Joint Distributions in Coq. Computer Software 37(3)    *)
 (*                                                                            *)
 (******************************************************************************)

@@ -11,9 +11,8 @@ Require Import typ_seq source_code.
 (* The main lemma is `source_coding_converse`.                                *)
 (*                                                                            *)
 (* Documented in:                                                             *)
-(* - Reynald Affeldt, Manabu Hagiwara, and Jonas Sénizergues. Formalization   *)
-(*   of Shannon's theorems. Journal of Automated Reasoning, 53(1):63--103,    *)
-(*   2014                                                                     *)
+(* - [Anonymous]. Formalization of Shannon's theorems. Journal of Automated   *)
+(*   Reasoning, 53(1):63--103, 2014                                           *)
 (*                                                                            *)
 (******************************************************************************)
 

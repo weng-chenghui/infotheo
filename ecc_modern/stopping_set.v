@@ -19,7 +19,7 @@ Require Import num_occ hamming ldpc_erasure tanner linearcode.
 (* see Section                                                                *)
 (* combinatorial_characterization_of_iterative_decoder_performance            *)
 (*                                                                            *)
-(* For details, see Obata, N.: Formalization of theorems about stopping sets  *)
+(* For details, see [Anonymous]: Formalization of theorems about stopping sets  *)
 (* and the decoding performance of LDPC codes. Department of Communications   *)
 (* and Computer Engineering, Graduate School of Science and Engineering,      *)
 (* Tokyo Institute of Technology, Master’s thesis (2015). (in Japanese).      *)

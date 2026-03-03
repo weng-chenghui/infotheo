@@ -14,7 +14,7 @@ From Stdlib Require Bool.
 (* ecc_classic directory.                                                     *)
 (*                                                                            *)
 (* The formalization is explained Sect. 5.2 of:                               *)
-(* - R. Affeldt, J. Garrigue, T. Saikawa, A Library for Formalization of      *)
+(* - [Anonymous], A Library for Formalization of      *)
 (* Linear Error-correcting Codes, Journal of Automated Reasoning 67(3):28     *)
 (*                                                                            *)
 (******************************************************************************)

@@ -10,7 +10,7 @@ Require Import ssr_ext ssralg_ext fdist.
 (* Work in progress about LDPC codes                                          *)
 (*                                                                            *)
 (* Documented in:                                                             *)
-(* - Reynald Affeldt, Jacques Garrigue, and Takafumi Saikawa. Formalization   *)
+(* - [Anonymous]. Formalization   *)
 (*   of Reed-Solomon codes and progress report on formalization of LDPC       *)
 (*   codes. International Symposium on Information Theory and its             *)
 (*   Applications (ISITA  2016), Monterey, California, USA, October           *)
