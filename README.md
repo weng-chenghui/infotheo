@@ -44,15 +44,7 @@ information theory, and linear error-correcting codes.
 ## Meta
 
 - Author(s):
-  - Reynald Affeldt, AIST (initial)
-  - Manabu Hagiwara, Chiba U. (previously AIST) (initial)
-  - Jonas Senizergues, ENS Cachan (internship at AIST) (initial)
-  - Jacques Garrigue, Nagoya U.
-  - Kazuhiko Sakaguchi, Tsukuba U.
-  - Taku Asai, Nagoya U. (M2)
-  - Takafumi Saikawa, Nagoya U.
-  - Naruomi Obata, Titech (M2)
-  - Alessandro Bruni, IT-University of Copenhagen
+  - Anonymous
 - License: [LGPL-2.1-or-later](LICENSE)
 - Additional dependencies:
   - [MathComp ssreflect](https://math-comp.github.io)
@@ -74,9 +66,9 @@ information theory, and linear error-correcting codes.
   - [Formal Adventures in Convex and Conical Spaces](https://arxiv.org/abs/2004.12713) doi:[10.1007/978-3-030-53518-6_2](https://doi.org/10.1007/978-3-030-53518-6_2)
   - [A Library for Formalization of Linear Error-Correcting Codes](https://link.springer.com/article/10.1007/s10817-019-09538-8) doi:[10.1007/s10817-019-09538-8](https://doi.org/10.1007/s10817-019-09538-8)
   - [Reasoning with Conditional Probabilities and Joint Distributions in Coq](https://www.jstage.jst.go.jp/article/jssst/37/3/37_3_79/_article/-char/en) doi:[10.11309/jssst.37.3_79](https://doi.org/10.11309/jssst.37.3_79)
-  - [Examples of formal proofs about data compression](http://staff.aist.go.jp/reynald.affeldt/documents/compression-isita2018.pdf) doi:[10.23919/ISITA.2018.8664276](https://doi.org/10.23919/ISITA.2018.8664276)
-  - [Formalization of Reed-Solomon codes and progress report on formalization of LDPC codes](http://staff.aist.go.jp/reynald.affeldt/documents/rs_isita2016_author_version.pdf) 
-  - [Formalization of error-correcting codes---from Hamming to modern coding theory](http://staff.aist.go.jp/reynald.affeldt/documents/eccITP2015_authorsversion.pdf) doi:[10.1007/978-3-319-22102-1_2](https://doi.org/10.1007/978-3-319-22102-1_2)
+  - Examples of formal proofs about data compression, doi:[10.23919/ISITA.2018.8664276](https://doi.org/10.23919/ISITA.2018.8664276)
+  - Formalization of Reed-Solomon codes and progress report on formalization of LDPC codes
+  - Formalization of error-correcting codes---from Hamming to modern coding theory, doi:[10.1007/978-3-319-22102-1_2](https://doi.org/10.1007/978-3-319-22102-1_2)
   - [Formalization of Shannon’s Theorems](https://link.springer.com/article/10.1007%2Fs10817-013-9298-1) doi:[10.1007/s10817-013-9298-1](https://doi.org/10.1007/s10817-013-9298-1)
 
 ## Building and installation instructions
@@ -102,34 +94,21 @@ make install
 
 ## Acknowledgments
 
-Many thanks to several [contributors](https://github.com/affeldt-aist/infotheo/graphs/contributors).
+Removed for anonymous review.
 
-The principle of inclusion-exclusion is a contribution by
-Erik Martin-Dorel (University Toulouse III Paul Sabatier, IRIT research laboratory)
-(main theorem: `Pr_bigcup_incl_excl`; commit 956096859ed89325b2bb74033690ac882bbcd64e)
+## Documentation
 
-The variable-length source coding theorems are a contribution by
-Ryosuke Obi (Chiba U.) (commit a67da5e24eaaabb345d225a5bd0f5e86d35413a8)
-(with Manabu Hagiwara and Mitsuharu Yamamoto)
+Each file is documented in its header.
 
-Commit 64814f529c1819684c4b8060d0779c24c6339041 was originally by Karl Palmskog.
-
-The formalization of modern coding theory is a collaboration with
-Y. Takahashi collaborated to the formalization of linear error-correcting codes.
-
-This work was partially supported by a JSPS Grant-in-Aid for Scientific Research
-(Project Number: 25289118), a JSPS Grand-in-Aid for Scientific Research
-(Project Number: 18H03204).
-
-Each file is documented in its header. Changes are (lightly) documented
-in [changelog.txt](changelog.txt).
+Changes are (lightly) documented in [changelog.txt](changelog.txt).
 
 ## Installation with Windows 10 & 11
 
 Installation of infotheo on Windows is less simple.
 See [this page](https://github.com/affeldt-aist/mathcomp-install/blob/master/install-windows-en.org)
 for instructions to install MathComp on Windows 10 & 11
-(or [this page](https://staff.aist.go.jp/reynald.affeldt/ssrcoq/install.html) for
-instructions in Japanese).
+(or this page for instructions in Japanese).
+
+
 Once MathComp is installed (with opam), do
 `opam install coq-infotheo` or `git clone git@github.com:affeldt-aist/infotheo.git; opam install .`

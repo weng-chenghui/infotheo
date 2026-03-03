@@ -8,7 +8,7 @@ Require Import ssr_ext.
 (* # Kraft's inequality                                                       *)
 (*                                                                            *)
 (* Documented in:                                                             *)
-(* - Reynald Affeldt, Jacques Garrigue, and Takafumi Saikawa. Examples of     *)
+(* - [Anonymous]. Examples of     *)
 (*   formal proofs about data compression. International Symposium on         *)
 (*   Information Theory and Its Applications (ISITA 2018), Singapore,         *)
 (*   October 28--31, 2018, pages 633--637. IEEE, Oct 2018                     *)

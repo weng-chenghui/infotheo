@@ -37,9 +37,9 @@ Related publications, if any, are listed below.
 - [Formal Adventures in Convex and Conical Spaces](https://arxiv.org/abs/2004.12713) doi:[10.1007/978-3-030-53518-6_2](https://doi.org/10.1007/978-3-030-53518-6_2)
 - [A Library for Formalization of Linear Error-Correcting Codes](https://link.springer.com/article/10.1007/s10817-019-09538-8) doi:[10.1007/s10817-019-09538-8](https://doi.org/10.1007/s10817-019-09538-8)
 - [Reasoning with Conditional Probabilities and Joint Distributions in Coq](https://www.jstage.jst.go.jp/article/jssst/37/3/37_3_79/_article/-char/en) doi:[10.11309/jssst.37.3_79](https://doi.org/10.11309/jssst.37.3_79)
-- [Examples of formal proofs about data compression](http://staff.aist.go.jp/reynald.affeldt/documents/compression-isita2018.pdf) doi:[10.23919/ISITA.2018.8664276](https://doi.org/10.23919/ISITA.2018.8664276)
-- [Formalization of Reed-Solomon codes and progress report on formalization of LDPC codes](http://staff.aist.go.jp/reynald.affeldt/documents/rs_isita2016_author_version.pdf) 
-- [Formalization of error-correcting codes---from Hamming to modern coding theory](http://staff.aist.go.jp/reynald.affeldt/documents/eccITP2015_authorsversion.pdf) doi:[10.1007/978-3-319-22102-1_2](https://doi.org/10.1007/978-3-319-22102-1_2)
+- Examples of formal proofs about data compression, doi:[10.23919/ISITA.2018.8664276](https://doi.org/10.23919/ISITA.2018.8664276)
+- Formalization of Reed-Solomon codes and progress report on formalization of LDPC codes
+- Formalization of error-correcting codes---from Hamming to modern coding theory, doi:[10.1007/978-3-319-22102-1_2](https://doi.org/10.1007/978-3-319-22102-1_2)
 - [Formalization of Shannon’s Theorems](https://link.springer.com/article/10.1007%2Fs10817-013-9298-1) doi:[10.1007/s10817-013-9298-1](https://doi.org/10.1007/s10817-013-9298-1)
 
 ## Help and contact
@@ -48,12 +48,5 @@ Related publications, if any, are listed below.
 
 ## Authors and contributors
 
-- Reynald Affeldt, AIST
-- Manabu Hagiwara, Chiba U. (previously AIST)
-- Jonas Senizergues, ENS Cachan (internship at AIST)
-- Jacques Garrigue, Nagoya U.
-- Kazuhiko Sakaguchi, Tsukuba U.
-- Taku Asai, Nagoya U. (M2)
-- Takafumi Saikawa, Nagoya U.
-- Naruomi Obata, Titech (M2)
+- Anonymous
 

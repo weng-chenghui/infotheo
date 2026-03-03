@@ -11,9 +11,8 @@ Require Import proba entropy aep typ_seq source_code.
 (*                                                                            *)
 (* The main theorem is `source_coding_direct`.                                *)
 (*                                                                            *)
-(* For details, see Reynald Affeldt, Manabu Hagiwara, and Jonas Sénizergues.  *)
-(* Formalization of Shannon's theorems. Journal of Automated Reasoning,       *)
-(* 53(1):63--103, 2014                                                        *)
+(* For details, see [Anonymous]. Formalization of Shannon's theorems.          *)
+(* Journal of Automated Reasoning, 53(1):63--103, 2014                        *)
 (******************************************************************************)
 
 Set Implicit Arguments.

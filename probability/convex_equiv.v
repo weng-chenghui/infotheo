@@ -18,7 +18,7 @@ Require Import ssr_ext ssralg_ext realType_ext fdist jfdist_cond fsdist convex.
 (* # Equivalence of Convexity Definitions                                     *)
 (*                                                                            *)
 (* Documented in:                                                             *)
-(* - R. Affeldt, J. Garrigue, T. Saikawa. Formal adventures in convex and     *)
+(* - [Anonymous]. Formal adventures in convex and     *)
 (*   conical spaces. CICM 2020                                                *)
 (*                                                                            *)
 (* In this file, we prove equivalences between various axiomatizations of     *)

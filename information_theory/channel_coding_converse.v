@@ -12,9 +12,8 @@ Require Import error_exponent channel_code channel success_decode_bound.
 (* The main theorem is `channel_coding_converse`.                             *)
 (*                                                                            *)
 (* Documented in:                                                             *)
-(* - Reynald Affeldt, Manabu Hagiwara, and Jonas Sénizergues. Formalization   *)
-(*   of Shannon's theorems. Journal of Automated Reasoning, 53(1):63--103,    *)
-(*   2014                                                                     *)
+(* - [Anonymous]. Formalization of Shannon's theorems. Journal of Automated   *)
+(*   Reasoning, 53(1):63--103, 2014                                           *)
 (******************************************************************************)
 
 Set Implicit Arguments.
