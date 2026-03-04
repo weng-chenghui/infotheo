@@ -20,6 +20,14 @@ From pgg_smc Require Import pgg_interface.
 (*                                                                           *)
 (* Key properties:                                                           *)
 (*   cyclic_G_abelian : abelian <[sigma]>                                    *)
+(*   ncycle_order : #[ncycle n] = N                                          *)
+(*   ncycle_iter : (ncycle n ^+ k) x = (x + k) mod N                        *)
+(*                                                                           *)
+(* The abelian setting causes security collapse (paper sections 10-12):      *)
+(* sigma_P depends only on the frequency vector of generator indices, so     *)
+(* one evaluation of the resulting translation determines sigma_P.           *)
+(* Formalizing the collapse needs: orbit-regularity + frequency-vector       *)
+(* counting — not yet done.                                                  *)
 (******************************************************************************)
 
 Set Implicit Arguments.
@@ -56,6 +64,36 @@ Definition ncycle : {perm 'I_N} := perm shift_fun_inj.
 Lemma ncycleE (i : 'I_N) :
   ncycle i = Ordinal (ltn_pmod (i.+1) (isT : (0 < N)%N)).
 Proof. by rewrite /ncycle permE. Qed.
+
+(* Iterated application of the N-cycle *)
+Lemma ncycle_iter (k : nat) (x : 'I_N) :
+  ((ncycle ^+ k)%g : {perm 'I_N}) x =
+  Ordinal (ltn_pmod (x + k) (isT : (0 < N)%N)).
+Proof.
+elim: k => [|k IHk].
+  rewrite expg0 perm1; apply val_inj => /=.
+  by rewrite addn0 modn_small.
+rewrite expgSr permM IHk ncycleE; apply val_inj => /=.
+by rewrite addnS -addn1 modnDml addn1.
+Qed.
+
+Lemma ncycle_expN : (ncycle ^+ N = 1 :> {perm 'I_N})%g.
+Proof.
+apply/permP => x; rewrite ncycle_iter perm1; apply val_inj => /=.
+by rewrite modnDr modn_small.
+Qed.
+
+(* Full order of the canonical N-cycle *)
+Lemma ncycle_order : #[ncycle]%g = N.
+Proof.
+apply/eqP; rewrite eqn_dvd.
+apply/andP; split.
+  by rewrite order_dvdn; apply/eqP; exact ncycle_expN.
+rewrite /dvdn.
+have /permP /(_ ord0) := expg_order ncycle.
+rewrite ncycle_iter perm1 => /eqP.
+by rewrite -val_eqE /= add0n.
+Qed.
 
 End ncycle_def.
 
