@@ -66,6 +66,13 @@ Definition Gen_PGGTypes := @MkPGG gT N.-1 G.
 HB.instance Definition Gen_isMonodromyRepr :=
   @isMonodromyRepr.Build Gen_PGGTypes gen_incl_morph.
 
+Lemma gen_sigmas_gen :
+  <<[set tnth sigmas i | i : 'I_T]>>%G = G.
+Proof. by []. Qed.
+
+HB.instance Definition Gen_hasGenerators :=
+  @hasGenerators.Build Gen_PGGTypes m sigmas gen_sigmas_gen.
+
 Let M : MonodromyReprType := Gen_PGGTypes.
 
 Definition gen_starts_2 : 2.-tuple 'I_N :=

@@ -122,6 +122,23 @@ Definition Cyclic_PGGTypes := @MkPGG gT N.-1 G.
 HB.instance Definition Cyclic_isMonodromyRepr :=
   @isMonodromyRepr.Build Cyclic_PGGTypes incl_morph.
 
+Definition cyclic_sigmas : 1.-tuple gT := [tuple sigma].
+
+Lemma tnth_cyclic_sigmas (i : 'I_1) : tnth cyclic_sigmas i = sigma.
+Proof. by rewrite (tnth_nth sigma) /=; case: i => [[|]]. Qed.
+
+Lemma cyclic_sigmas_gen :
+  <<[set tnth cyclic_sigmas i | i : 'I_1]>>%G = G.
+Proof.
+have -> : [set tnth cyclic_sigmas i | i : 'I_1] = [set sigma]; last by [].
+apply/setP => x; rewrite in_set1; apply/idP/idP.
+  by move/imsetP => [i _ ->]; rewrite tnth_cyclic_sigmas.
+by move/eqP => ->; apply/imsetP; exists ord0 => //; rewrite tnth_cyclic_sigmas.
+Qed.
+
+HB.instance Definition Cyclic_hasGenerators :=
+  @hasGenerators.Build Cyclic_PGGTypes 0 cyclic_sigmas cyclic_sigmas_gen.
+
 (* Key property: cyclic groups are abelian *)
 Lemma cyclic_G_abelian : abelian G.
 Proof. exact: cycle_abelian. Qed.

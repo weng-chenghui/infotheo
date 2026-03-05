@@ -1,7 +1,7 @@
 (* infotheo (c) AIST and Tohoku University. License: GPL-3.0-or-later. *)
 From HB Require Import structures.
 From mathcomp Require Import ssreflect ssrbool ssrfun eqtype ssrnat seq.
-From mathcomp Require Import fintype tuple finfun finset fingroup perm morphism.
+From mathcomp Require Import fintype tuple finfun finset fingroup perm morphism bigop.
 
 (******************************************************************************)
 (* PGG-SMC: Monodromy Representation Interface                               *)
@@ -45,6 +45,16 @@ HB.mixin Record isMonodromyRepr (T : PGGTypes) := {
 #[short(type=MonodromyReprType)]
 HB.structure Definition MonodromyRepr := { T of isMonodromyRepr T }.
 
+HB.mixin Record hasGenerators (T : PGGTypes) := {
+  pgg_ngens' : nat ;
+  pgg_sigmas : pgg_ngens'.+1.-tuple (pgg_gT T) ;
+  pgg_sigmas_gen : <<[set tnth pgg_sigmas i | i : 'I_pgg_ngens'.+1]>>%G = pgg_G T ;
+}.
+
+#[short(type=GeneratedMonodromyReprType)]
+HB.structure Definition GeneratedMonodromyRepr :=
+  { T of isMonodromyRepr T & hasGenerators T }.
+
 (* ========================================================================== *)
 (* Derived operations from monodromy representation                           *)
 (* ========================================================================== *)
@@ -81,6 +91,67 @@ Qed.
 End monodromy_ops.
 
 Arguments endpoint {M}.
+
+(* ========================================================================== *)
+(* Search space definitions from generators                                   *)
+(* ========================================================================== *)
+
+Section search_space_ops.
+
+Variable M : GeneratedMonodromyReprType.
+
+Let gT := pgg_gT M.
+Let G := pgg_G M.
+Let Tg := (@pgg_ngens' M).+1.
+Let sigmas := @pgg_sigmas M.
+
+(* A word of length L: sequence of generator indices *)
+Definition pgg_word (L : nat) := L.-tuple 'I_Tg.
+
+(* Evaluate a word by folding group multiplication *)
+Definition word_eval (L : nat) (w : pgg_word L) : gT :=
+  (\prod_(i < L) tnth sigmas (tnth w i))%g.
+
+(* Set of achievable group elements from words of length L *)
+Definition achievable (L : nat) : {set gT} :=
+  [set word_eval w | w : pgg_word L].
+
+(* Search space size *)
+Definition search_space (L : nat) : nat :=
+  #|achievable L|.
+
+(* Upper bound: achievable ⊆ G *)
+Lemma sigmas_in_G (i : 'I_Tg) : tnth sigmas i \in G.
+Proof.
+have HgenG := @pgg_sigmas_gen M.
+suff : tnth sigmas i \in <<[set tnth sigmas j | j : 'I_Tg]>>%G.
+  by rewrite HgenG.
+by apply: mem_gen; apply/imsetP; exists i.
+Qed.
+
+Lemma achievable_sub (L : nat) : achievable L \subset G.
+Proof.
+apply/subsetP => g /imsetP [w _ ->].
+rewrite /word_eval; apply: group_prod => i _ /=.
+exact: sigmas_in_G.
+Qed.
+
+(* Upper bound: search space ≤ |G| *)
+Lemma search_space_leG (L : nat) : search_space L <= #|G|.
+Proof.
+rewrite /search_space.
+exact: (subset_leq_card (achievable_sub L)).
+Qed.
+
+(* Upper bound: search space ≤ T^L (number of words) *)
+Lemma search_space_le_words (L : nat) : search_space L <= Tg ^ L.
+Proof.
+rewrite /search_space /achievable.
+apply: leq_trans (leq_imset_card _ _) _.
+by rewrite card_tuple card_ord.
+Qed.
+
+End search_space_ops.
 
 (* ========================================================================== *)
 (* Session Data Type Kind                                                     *)
