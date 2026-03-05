@@ -735,6 +735,136 @@ have Hs2' : sorted oleq (val sw2) by rewrite -sorted_map.
 by apply: val_inj; exact: (sorted_eq oleq_trans oleq_anti Hs1' Hs2' Hpe).
 Qed.
 
+Lemma full_comm_trace_iff_perm L (w1 w2 : pgg_word M L) :
+  (forall i j : 'I_Tg, i != j -> comm i j) ->
+  trace_equiv w1 w2 <-> perm_eq (val w1) (val w2).
+Proof.
+move=> Hfull; split; first exact: trace_perm.
+move=> Hpe.
+pose oleq := (fun x y : 'I_Tg => val x <= val y).
+have oleq_trans : transitive oleq by move=> x y z; exact: leq_trans.
+have oleq_anti : antisymmetric oleq by move=> x y /anti_leq /val_inj.
+have [sw1 [Hs1 Hc1]] := full_comm_connect_sorted Hfull w1.
+have [sw2 [Hs2 Hc2]] := full_comm_connect_sorted Hfull w2.
+have Hpe1 := trace_perm Hc1.
+have Hpe2 := trace_perm Hc2.
+have Hpe12 : perm_eq (val sw1) (val sw2).
+  apply: (perm_trans (y:=val w1)); first by rewrite perm_sym.
+  exact: (perm_trans (y:=val w2) Hpe Hpe2).
+have Hs1' : sorted oleq (val sw1) by rewrite -sorted_map.
+have Hs2' : sorted oleq (val sw2) by rewrite -sorted_map.
+have Heqsw : sw1 = sw2.
+  apply: val_inj; exact: (sorted_eq oleq_trans oleq_anti Hs1' Hs2' Hpe12).
+rewrite Heqsw in Hc1.
+apply: (connect_trans Hc1).
+by rewrite (sym_connect_sym (@adj_swap_sym_sym L)); exact Hc2.
+Qed.
+
+(* Independent set lower bound on traces *)
+
+Lemma indep_adj_swap_false (I : {set 'I_Tg}) L (w1 w2 : pgg_word M L) :
+  (forall i j : 'I_Tg, i \in I -> j \in I -> i != j -> ~~ comm i j) ->
+  (forall k : 'I_L, tnth w1 k \in I) ->
+  adj_swap w1 w2 = false.
+Proof.
+move=> Hindep HI.
+case: L w1 w2 HI => [|L'] w1 w2 HI //=.
+apply/negbTE/negP.
+move/existsP => [k /andP [Hc _]].
+set ik : 'I_L'.+1 := Ordinal (ltn_trans (ltn_ord k) (ltnSn L')).
+set ik1 : 'I_L'.+1 := @Ordinal L'.+1 (val k).+1 (ltn_ord k).
+have Hi : tnth w1 ik \in I := HI ik.
+have Hj : tnth w1 ik1 \in I := HI ik1.
+case/boolP: (tnth w1 ik == tnth w1 ik1) => Heq.
+  by move/eqP in Heq; rewrite Heq comm_irrefl in Hc.
+by move: (Hindep _ _ Hi Hj Heq); rewrite Hc.
+Qed.
+
+Lemma indep_set_traces_lb (I : {set 'I_Tg}) (L : nat) :
+  (forall i j : 'I_Tg, i \in I -> j \in I -> i != j -> ~~ comm i j) ->
+  #|I| ^ L <= n_traces L.
+Proof.
+move=> Hindep.
+rewrite /n_traces.
+set e := adj_swap_sym (L:=L).
+have Hsym := sym_connect_sym (@adj_swap_sym_sym L).
+(* I-word: a word where all entries are in I *)
+set Iword := fun w : pgg_word M L =>
+  [forall k : 'I_L, tnth w k \in I].
+(* adj_swap is false from any I-word *)
+have Hadj_false : forall (w1 w2 : pgg_word M L),
+  Iword w1 -> adj_swap w1 w2 = false.
+  move=> w1 w2 H1.
+  have H1' : forall k : 'I_L, tnth w1 k \in I.
+    by move/forallP: H1.
+  exact: indep_adj_swap_false Hindep H1'.
+(* adj_swap_sym is false between I-words *)
+have Hno : forall w1 w2 : pgg_word M L,
+  Iword w1 -> Iword w2 -> e w1 w2 = false.
+  move=> w1 w2 H1 H2.
+  by rewrite /e /adj_swap_sym !(Hadj_false _ _ H1) !(Hadj_false _ _ H2).
+(* No word connects to an I-word via e unless it's equal *)
+have Hconn_eq : forall w1 w2 : pgg_word M L,
+  Iword w1 -> connect e w1 w2 -> w1 = w2.
+  move=> w1 w2 H1 /connectP [p].
+  elim: p w1 H1 => [w1 _ _ -> // | w' p IHp w1 H1 /= /andP [Hstep Hpath] Hlast].
+  exfalso.
+  have : e w1 w' = false.
+    rewrite /e /adj_swap_sym (Hadj_false _ _ H1) /=.
+    apply/negbTE/negP => Hadj.
+    have H2 : Iword w'.
+      apply/forallP => k.
+      have Hpe := adj_swap_perm Hadj.
+      have Hmem : tnth w' k \in val w' := mem_tnth k w'.
+      have : tnth w' k \in val w1.
+        by rewrite -(perm_mem Hpe).
+      by move/tnthP => [j Hj]; rewrite Hj; exact: (forallP H1).
+    by rewrite (Hadj_false _ _ H2) in Hadj.
+  by rewrite Hstep.
+(* Each I-word is its own root *)
+have Hconn_I : forall w1 w2 : pgg_word M L,
+  Iword w1 -> connect e w1 w2 = (w1 == w2).
+  move=> w1 w2 H1.
+  apply/idP/idP.
+    by move=> Hc; apply/eqP; exact: Hconn_eq.
+  by move/eqP => ->; exact: connect0.
+have Hroot_self : forall w : pgg_word M L,
+  Iword w -> root e w = w.
+  move=> w Hw; rewrite /root /=.
+  case: pickP => [w' /= Hw' | /= H].
+    by rewrite Hconn_I // in Hw'; move/eqP in Hw'.
+  by move: (H w); rewrite /= connect0.
+(* Inject I-words into roots *)
+pose IT := {x : 'I_Tg | x \in I}.
+pose valI := (fun x : IT => sval x : 'I_Tg).
+set f := fun (t : L.-tuple IT) => map_tuple valI t : pgg_word M L.
+have valI_inj : injective valI.
+  by move=> x y /val_inj.
+have Hf_inj : injective f.
+  move=> t1 t2 Heq.
+  apply: eq_from_tnth => i.
+  have := congr1 (fun w => tnth w i) Heq.
+  rewrite /f !tnth_map.
+  by move/valI_inj.
+have Hf_Iword : forall t, Iword (f t).
+  move=> t; apply/forallP => k.
+  rewrite /f tnth_map /valI.
+  exact: valP (tnth t k).
+(* #|I|^L = #|{: L.-tuple IT}| <= #{roots} = n_traces *)
+have HcardIT : #|{: IT}| = #|I|.
+  rewrite card_sig; apply: eq_card => x.
+  by rewrite !inE.
+rewrite -HcardIT -card_tuple.
+set S := [set f t | t : L.-tuple IT].
+have HS_card : #|S| = #|{: L.-tuple IT}|.
+  by rewrite card_imset.
+rewrite -HS_card.
+apply: subset_leq_card.
+apply/subsetP => _ /imsetP [t _ ->].
+rewrite !inE andbT /roots /=.
+by rewrite Hroot_self ?eqxx //; exact: Hf_Iword.
+Qed.
+
 End raag_theory.
 
 (* ========================================================================== *)

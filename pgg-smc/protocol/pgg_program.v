@@ -1,6 +1,7 @@
 (* infotheo (c) AIST and Tohoku University. License: GPL-3.0-or-later. *)
 From mathcomp Require Import ssreflect ssrbool ssrfun eqtype ssrnat seq.
 From mathcomp Require Import fintype tuple finfun finset fingroup perm morphism.
+From mathcomp Require Import bigop div.
 
 (******************************************************************************)
 (* PGG-SMC: Protocol Specification                                            *)
@@ -64,5 +65,25 @@ Qed.
 Lemma endpointsE (P : gT) (i : 'I_T) :
   tnth (endpoints P) i = rho P (tnth starts i).
 Proof. by rewrite tnth_mktuple. Qed.
+
+(* Auxiliary: the sum-mod-N value is bounded *)
+Lemma sum_mod_N_lt (P : gT) :
+  (\sum_(i < T) val (compute P i)) %% N < N.
+Proof. apply ltn_pmod. reflexivity. Qed.
+
+(* The secret: sum of endpoint values mod N *)
+Definition secret (P : gT) : 'I_N :=
+  Ordinal (sum_mod_N_lt P).
+
+(* Secret value characterization *)
+Lemma secretE (P : gT) :
+  val (secret P) = (\sum_(i < T) val (compute P i)) %% N.
+Proof. reflexivity. Qed.
+
+(* Anonymous broadcast: sum is invariant under party permutation *)
+Lemma secret_perm (P : gT) (sigma : {perm 'I_T}) :
+  \sum_(i < T) val (compute P i) =
+  \sum_(i < T) val (compute P (sigma i)).
+Proof. rewrite (reindex_perm sigma). reflexivity. Qed.
 
 End pgg_protocol.
