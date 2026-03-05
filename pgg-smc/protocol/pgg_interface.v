@@ -151,6 +151,25 @@ apply: leq_trans (leq_imset_card _ _) _.
 by rewrite card_tuple card_ord.
 Qed.
 
+(* L-freeness: word evaluation is injective on L-words *)
+Definition lfree (L : nat) : Prop :=
+  injective (word_eval (L:=L)).
+
+(* L-free generators achieve the maximal search space T^L *)
+Lemma lfree_search_space (L : nat) :
+  lfree L -> search_space L = Tg ^ L.
+Proof.
+move=> Hinj; rewrite /search_space /achievable.
+rewrite card_imset; last exact: Hinj.
+by rewrite card_tuple card_ord.
+Qed.
+
+Definition lfreeB (L : nat) : bool :=
+  injectiveb (word_eval (L:=L)).
+
+Lemma lfreeP (L : nat) : reflect (lfree L) (lfreeB L).
+Proof. exact: injectiveP. Qed.
+
 End search_space_ops.
 
 (* ========================================================================== *)
