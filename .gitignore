@@ -26,3 +26,6 @@ extraction/sumprod.mli
 
 # Cache
 .nra.cache
+
+# Notes
+pgg-smc/notes/

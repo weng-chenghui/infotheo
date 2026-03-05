@@ -2,7 +2,7 @@
 From HB Require Import structures.
 From mathcomp Require Import ssreflect ssrbool ssrfun eqtype ssrnat seq.
 From mathcomp Require Import div fintype tuple finfun finset fingroup perm.
-From mathcomp Require Import morphism action.
+From mathcomp Require Import morphism action bigop.
 From pgg_smc Require Import pgg_interface.
 
 (******************************************************************************)
@@ -154,6 +154,15 @@ have /centP /(_ _ gj_in) := Hsub _ gi_in.
 by move=> Hcomm; move/negP: (nonab_gen_noncommute hij); apply; apply/eqP.
 Qed.
 
+(* Star transpositions are injective *)
+Lemma nonab_gen_inj : injective nonab_gen.
+Proof.
+move=> i j eq_ij.
+have := congr1 (fun p : gT => p ord0) eq_ij.
+rewrite /nonab_gen !tpermL.
+exact: lift_inj.
+Qed.
+
 (* Concrete MonodromyReprType and PGG_Interface *)
 Definition Nonab_PGGTypes := @Gen_PGGTypes m m nonab_gen_tuple.
 
@@ -161,5 +170,31 @@ Let M : MonodromyReprType := Nonab_PGGTypes.
 
 Definition Nonab_PGG_2 : PGG_Interface M :=
   @Gen_PGG_2 m m nonab_gen_tuple.
+
+(* For L=1, the search space equals T (all generators are distinct) *)
+Lemma nonab_search_space_1 :
+  @search_space Nonab_PGGTypes 1 = T.
+Proof.
+rewrite /search_space /achievable.
+suff -> : [set @word_eval Nonab_PGGTypes 1 w | w : @pgg_word Nonab_PGGTypes 1]
+          = [set tnth nonab_gen_tuple i | i : 'I_T].
+  rewrite card_imset ?card_ord //.
+  by move=> i j; rewrite !nonab_gen_tupleE; exact: nonab_gen_inj.
+apply/setP => x; apply/imsetP/imsetP.
+  move=> [w _ ->]; rewrite /word_eval big_ord1.
+  by exists (tnth w ord0).
+move=> [i _ ->]; exists [tuple i] => //.
+by rewrite /word_eval big_ord1.
+Qed.
+
+(* Star transpositions are 1-free: all generators are distinct *)
+Lemma nonab_lfree1 : @lfree Nonab_PGGTypes 1.
+Proof.
+move=> w1 w2; rewrite /word_eval !big_ord1 => Heq.
+apply: eq_from_tnth => i; rewrite (ord1 i).
+have := congr1 (fun p : gT => p ord0) Heq.
+rewrite !nonab_gen_tupleE /nonab_gen !tpermL.
+exact: lift_inj.
+Qed.
 
 End star_transpositions.

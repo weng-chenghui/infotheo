@@ -2,7 +2,7 @@
 From HB Require Import structures.
 From mathcomp Require Import ssreflect ssrbool ssrfun eqtype ssrnat seq.
 From mathcomp Require Import div fintype tuple finfun finset fingroup perm.
-From mathcomp Require Import morphism action cyclic.
+From mathcomp Require Import morphism action cyclic bigop.
 From pgg_smc Require Import pgg_interface.
 
 (******************************************************************************)
@@ -142,6 +142,22 @@ HB.instance Definition Cyclic_hasGenerators :=
 (* Key property: cyclic groups are abelian *)
 Lemma cyclic_G_abelian : abelian G.
 Proof. exact: cycle_abelian. Qed.
+
+(* Word evaluation in the cyclic (1-generator) instance *)
+Lemma cyclic_word_eval (L : nat) (w : @pgg_word Cyclic_PGGTypes L) :
+  @word_eval Cyclic_PGGTypes L w = (sigma ^+ L)%g.
+Proof.
+rewrite /word_eval; under eq_bigr do rewrite tnth_cyclic_sigmas.
+by rewrite big_const card_ord iter_mulg_1.
+Qed.
+
+(* Search space collapse: at most #[sigma] distinct elements reachable *)
+Lemma cyclic_search_space_le (L : nat) :
+  @search_space Cyclic_PGGTypes L <= #[sigma]%g.
+Proof.
+apply: leq_trans (@search_space_leG Cyclic_PGGTypes L) _.
+by rewrite /= orderE.
+Qed.
 
 (* 2-party interface: starts = [0, 1] *)
 Let M : MonodromyReprType := Cyclic_PGGTypes.
