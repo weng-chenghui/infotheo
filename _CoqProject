@@ -136,11 +136,19 @@ pgg-smc/protocol/pgg_session_types.v
 pgg-smc/protocol/pgg_pismc.v
 pgg-smc/protocol/pgg_correctness.v
 pgg-smc/groups/pgg_abelian.v
-pgg-smc/groups/pgg_nonabelian.v
+pgg-smc/groups/abelian_word_collapse.v
+pgg-smc/groups/pgg_raag_star.v
+pgg-smc/groups/pgg_raag_path.v
 pgg-smc/groups/pgg_lfree.v
 pgg-smc/groups/pgg_raag.v
+pgg-smc/groups/free_group_ball.v
 pgg-smc/protocol/pgg_program.v
+pgg-smc/security/pgg_collusion_bound.v
+pgg-smc/security/pgg_abelian_collapse.v
+pgg-smc/security/pgg_security.v
 
 -R . infotheo
+-R pgg-smc/lib pgg_smc
 -R pgg-smc/protocol pgg_smc
 -R pgg-smc/groups pgg_smc
+-R pgg-smc/security pgg_smc
