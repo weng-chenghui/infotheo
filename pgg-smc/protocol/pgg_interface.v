@@ -173,6 +173,36 @@ Proof. exact: injectiveP. Qed.
 End search_space_ops.
 
 (* ========================================================================== *)
+(* Generic results from generator injectivity                                 *)
+(* ========================================================================== *)
+
+Section gen_inj_theory.
+
+Variable M : GeneratedMonodromyReprType.
+
+Let gT := pgg_gT M.
+Let Tg := (@pgg_ngens' M).+1.
+Let sigmas := @pgg_sigmas M.
+
+Lemma gen_inj_lfree1 :
+  injective (fun i : 'I_Tg => tnth sigmas i) ->
+  @lfree M 1.
+Proof.
+move=> Hinj w1 w2 Heval.
+apply: eq_from_tnth => i.
+have -> : i = ord0 by apply: val_inj; case: i => -[].
+apply: Hinj.
+by move: Heval; rewrite /word_eval !big_ord_recl !big_ord0 !mulg1.
+Qed.
+
+Lemma gen_inj_search_space_1 :
+  injective (fun i : 'I_Tg => tnth sigmas i) ->
+  @search_space M 1 = Tg.
+Proof. by move/gen_inj_lfree1/lfree_search_space. Qed.
+
+End gen_inj_theory.
+
+(* ========================================================================== *)
 (* Session Data Type Kind                                                     *)
 (* ========================================================================== *)
 
@@ -321,3 +351,121 @@ Arguments start_sheets {M} PI.
 Arguments share {M} PI.
 Arguments compute {M} PI.
 Arguments endpoints {M} PI.
+
+(* ========================================================================== *)
+(* Parameterized multi-generator instance                                     *)
+(* ========================================================================== *)
+
+Section generated_instance.
+
+Variable m : nat.
+Variable n : nat.
+Let T := m.+1.
+Let N := n.+2.
+Let gT : finGroupType := {perm 'I_N}.
+
+Variable sigmas : T.-tuple gT.
+
+Let gen_set : {set gT} := [set tnth sigmas i | i : 'I_T].
+Let G : {group gT} := <<gen_set>>%G.
+
+(* Inclusion morphism: identity on the subgroup *)
+Lemma gen_incl_morphM : {in G &, {morph (@id gT) : x y / (x * y)%g}}.
+Proof. by []. Qed.
+
+Definition gen_incl_morph : {morphism G >-> {perm 'I_N}} :=
+  Morphism gen_incl_morphM.
+
+Definition Gen_PGGTypes := @MkPGG gT N.-1 G.
+
+HB.instance Definition Gen_isMonodromyRepr :=
+  @isMonodromyRepr.Build Gen_PGGTypes gen_incl_morph.
+
+Lemma gen_sigmas_gen :
+  <<[set tnth sigmas i | i : 'I_T]>>%G = G.
+Proof. by []. Qed.
+
+HB.instance Definition Gen_hasGenerators :=
+  @hasGenerators.Build Gen_PGGTypes m sigmas gen_sigmas_gen.
+
+Let M : MonodromyReprType := Gen_PGGTypes.
+
+Definition gen_starts_2 : 2.-tuple 'I_N :=
+  [tuple @Ordinal N 0 isT; @Ordinal N 1 isT].
+
+Lemma gen_starts_2_uniq : uniq gen_starts_2.
+Proof. by vm_compute. Qed.
+
+Definition Gen_PGG_2 : PGG_Interface M :=
+  @MkPGGI M 1 gen_starts_2 gen_starts_2_uniq.
+
+End generated_instance.
+
+(* ========================================================================== *)
+(* Generic tuple construction from a generator function                       *)
+(* ========================================================================== *)
+
+Section gen_tuple_construction.
+
+Variable T : nat.
+Variable gT : finGroupType.
+Variable gen : 'I_T.+1 -> gT.
+
+Lemma gen_map_size : size (map gen (enum 'I_T.+1)) == T.+1.
+Proof. by rewrite size_map size_enum_ord. Qed.
+
+Definition gen_tuple_of : T.+1.-tuple gT := Tuple gen_map_size.
+
+Lemma gen_tuple_ofE (i : 'I_T.+1) : tnth gen_tuple_of i = gen i.
+Proof.
+rewrite (tnth_nth (gen ord0)) /= (nth_map ord0) ?size_enum_ord //.
+by congr gen; rewrite nth_ord_enum.
+Qed.
+
+End gen_tuple_construction.
+
+(* ========================================================================== *)
+(* Permutation utilities for RAAG instances                                   *)
+(* ========================================================================== *)
+
+Local Lemma neqS {fT : eqType} {a b : fT} : a != b -> b != a.
+Proof. by rewrite eq_sym. Qed.
+
+Lemma tperm_disjoint_comm (fT : finType) (a b c d : fT) :
+  a != c -> a != d -> b != c -> b != d ->
+  (tperm a b * tperm c d = tperm c d * tperm a b)%g.
+Proof.
+move=> Hac Had Hbc Hbd.
+have Hca := neqS Hac; have Hda := neqS Had.
+have Hcb := neqS Hbc; have Hdb := neqS Hbd.
+apply/permP => x; rewrite !permM.
+have [->|Hxa] := eqVneq x a.
+  by rewrite tpermL (tpermD Hca Hda) (tpermD Hcb Hdb) tpermL.
+have [->|Hxb] := eqVneq x b.
+  by rewrite tpermR (tpermD Hca Hda) (tpermD Hcb Hdb) tpermR.
+have [->|Hxc] := eqVneq x c.
+  by rewrite (tpermD Hac Hbc) !tpermL (tpermD Had Hbd).
+have [->|Hxd] := eqVneq x d.
+  by rewrite (tpermD Had Hbd) !tpermR (tpermD Hac Hbc).
+by rewrite !(tpermD _ _) // 1?eq_sym.
+Qed.
+
+(* Non-abelianity from a non-commuting generator pair *)
+Lemma gen_nonabelian (M : GeneratedMonodromyReprType)
+    (i j : 'I_(@pgg_ngens' M).+1) :
+  i != j ->
+  (tnth (@pgg_sigmas M) i * tnth (@pgg_sigmas M) j !=
+   tnth (@pgg_sigmas M) j * tnth (@pgg_sigmas M) i)%g ->
+  ~~ abelian (pgg_G M).
+Proof.
+move=> Hij Hnc.
+rewrite -(pgg_sigmas_gen (s:=M)) abelian_gen.
+apply/negP => /centsP Habel.
+have Hi : tnth (@pgg_sigmas M) i \in
+          [set tnth (@pgg_sigmas M) k | k : 'I_(@pgg_ngens' M).+1]
+  by apply/imsetP; exists i.
+have Hj : tnth (@pgg_sigmas M) j \in
+          [set tnth (@pgg_sigmas M) k | k : 'I_(@pgg_ngens' M).+1]
+  by apply/imsetP; exists j.
+by move: Hnc; rewrite (Habel _ Hi _ Hj) eqxx.
+Qed.

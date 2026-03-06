@@ -347,4 +347,24 @@ rewrite Hvi card_ord.
 by move/(f_equal (subn^~ k)); rewrite addKn.
 Qed.
 
+Lemma collusion_uniform (s_new : 'I_N) (v_new : 'I_N) :
+  s_new \notin s @: setT ->
+  v_new \in remaining_values ->
+  let target := [set sigma : {perm 'I_N} | sigma s_new == v_new] in
+  `Pr_perm_fdist[ target | obs_set ] = ((N - k)%:R^-1)%R.
+Proof.
+move=> Hs Hv; apply: perm_cond_uniform => //.
+by move: Hv; rewrite inE.
+Qed.
+
+Lemma collusion_zero (s_new : 'I_N) (v_new : 'I_N) :
+  s_new \notin s @: setT ->
+  v_new \notin remaining_values ->
+  let target := [set sigma : {perm 'I_N} | sigma s_new == v_new] in
+  `Pr_perm_fdist[ target | obs_set ] = (0 : R)%R.
+Proof.
+move=> Hs Hv; apply: perm_cond_zero => //.
+by move: Hv; rewrite inE negbK.
+Qed.
+
 End perm_uniform_prob.

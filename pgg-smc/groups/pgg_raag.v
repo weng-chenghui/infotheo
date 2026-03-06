@@ -4,7 +4,7 @@ From mathcomp Require Import ssreflect ssrbool ssrfun eqtype ssrnat seq.
 From mathcomp Require Import div fintype tuple finfun finset fingroup perm.
 From mathcomp Require Import morphism bigop fingraph path binomial.
 From Stdlib Require Import Wf_nat.
-From pgg_smc Require Import pgg_interface pgg_nonabelian pgg_lfree.
+From pgg_smc Require Import pgg_interface pgg_lfree.
 
 (******************************************************************************)
 (* PGG-SMC: RAAG (Right-Angled Artin Group) Search Space Theory              *)
@@ -96,22 +96,59 @@ Definition n_traces_natB (Tg L : nat) (comm : nat -> nat -> bool) : nat :=
   size (undup (map (trace_norm comm) (all_words Tg L))).
 
 (* ========================================================================== *)
+(* RAAG mixin + structure                                                     *)
+(* ========================================================================== *)
+
+HB.mixin Record isRAAG0 (T : PGGTypes) of GeneratedMonodromyRepr T := {
+  raag_comm : rel 'I_(@pgg_ngens' T).+1 ;
+  raag_comm_sym : symmetric raag_comm ;
+  raag_comm_irrefl : irreflexive raag_comm ;
+  raag_Hcomm : forall i j : 'I_(@pgg_ngens' T).+1,
+    raag_comm i j ->
+    (tnth (@pgg_sigmas T) i * tnth (@pgg_sigmas T) j =
+     tnth (@pgg_sigmas T) j * tnth (@pgg_sigmas T) i)%g ;
+  raag_gen_inj :
+    injective (fun i : 'I_(@pgg_ngens' T).+1 => tnth (@pgg_sigmas T) i) ;
+}.
+
+#[short(type=RAAGType)]
+HB.structure Definition RAAG :=
+  { T of isMonodromyRepr T & hasGenerators T & isRAAG0 T }.
+
+HB.factory Record isRAAG (T : PGGTypes) of GeneratedMonodromyRepr T := {
+  raag_comm : rel 'I_(@pgg_ngens' T).+1 ;
+  raag_comm_sym : symmetric raag_comm ;
+  raag_comm_irrefl : irreflexive raag_comm ;
+  raag_Hcomm : forall i j : 'I_(@pgg_ngens' T).+1,
+    raag_comm i j ->
+    (tnth (@pgg_sigmas T) i * tnth (@pgg_sigmas T) j =
+     tnth (@pgg_sigmas T) j * tnth (@pgg_sigmas T) i)%g ;
+  raag_gen_inj :
+    injective (fun i : 'I_(@pgg_ngens' T).+1 => tnth (@pgg_sigmas T) i) ;
+}.
+
+HB.builders Context T of isRAAG T.
+  HB.instance Definition _ := @isRAAG0.Build T
+    raag_comm raag_comm_sym raag_comm_irrefl raag_Hcomm raag_gen_inj.
+HB.end.
+
+(* ========================================================================== *)
 (* Part 2: Abstract trace equivalence                                         *)
 (* ========================================================================== *)
 
 Section raag_theory.
 
-Variable M : GeneratedMonodromyReprType.
-Let gT := pgg_gT M.
-Let Tg := (@pgg_ngens' M).+1.
-Let sigmas := @pgg_sigmas M.
-
-Variable comm : rel 'I_Tg.
-Hypothesis comm_sym : symmetric comm.
-Hypothesis comm_irrefl : irreflexive comm.
-
-Hypothesis Hcomm : forall i j : 'I_Tg,
-  comm i j -> (tnth sigmas i * tnth sigmas j = tnth sigmas j * tnth sigmas i)%g.
+Variable R : RAAGType.
+Let gT := pgg_gT R.
+Let M : GeneratedMonodromyReprType := R.
+Let Tg := (@pgg_ngens' R).+1.
+Let sigmas := @pgg_sigmas R.
+Let comm : rel 'I_Tg := @raag_comm R.
+Let comm_sym : symmetric comm := @raag_comm_sym R.
+Let comm_irrefl : irreflexive comm := @raag_comm_irrefl R.
+Let Hcomm : forall i j : 'I_Tg,
+  comm i j -> (tnth sigmas i * tnth sigmas j = tnth sigmas j * tnth sigmas i)%g
+  := @raag_Hcomm R.
 
 (* --- swap_word: swap positions k and k+1 in a word --- *)
 
@@ -865,7 +902,31 @@ rewrite !inE andbT /roots /=.
 by rewrite Hroot_self ?eqxx //; exact: Hf_Iword.
 Qed.
 
+Lemma word_eval_perm_eq L (w1 w2 : pgg_word M L) :
+  (forall i j : 'I_Tg, i != j -> comm i j) ->
+  perm_eq (val w1) (val w2) -> word_eval w1 = word_eval w2.
+Proof.
+move=> Hfull Hperm.
+apply: word_eval_trace.
+by apply/(full_comm_trace_iff_perm _ _ Hfull).
+Qed.
+
 End raag_theory.
+
+(* ========================================================================== *)
+(* Derived results for any RAAGType                                           *)
+(* ========================================================================== *)
+
+Section raag_derived.
+Variable R : RAAGType.
+Let Tg := (@pgg_ngens' R).+1.
+
+Lemma raag_lfree1 : @lfree R 1.
+Proof. exact: gen_inj_lfree1 (@raag_gen_inj R). Qed.
+
+Lemma raag_search_space_1 : @search_space R 1 = Tg.
+Proof. exact: lfree_search_space raag_lfree1. Qed.
+End raag_derived.
 
 (* ========================================================================== *)
 (* Part 5: Nat-level reflection                                               *)
@@ -873,24 +934,18 @@ End raag_theory.
 
 Section raag_gen_reflect.
 
-Variable m n : nat.
-Let Tg := m.+1.
-Let N := n.+2.
-
-Variable sigmas : Tg.-tuple {perm 'I_N}.
-Let M := Gen_PGGTypes sigmas.
+Variable R : RAAGType.
+Let Tg := (@pgg_ngens' R).+1.
 
 Variable comm_nat : nat -> nat -> bool.
 
+Hypothesis Hcomm_nat : forall i j : 'I_Tg,
+  @raag_comm R i j = comm_nat (val i) (val j).
+
 Definition comm_ord : rel 'I_Tg := fun i j => comm_nat (val i) (val j).
 
-Variable gens_nat : nat -> nat -> nat.
-
-Hypothesis Hgens : forall (i : 'I_Tg) (x : 'I_N),
-  gens_nat (val i) (val x) = val (tnth sigmas i x).
-
 Lemma n_traces_of_natB (L : nat) :
-  n_traces_natB Tg L comm_nat = @n_traces M comm_ord L.
+  n_traces_natB Tg L comm_nat = @n_traces R L.
 Proof.
 (* Requires proving that trace_norm produces canonical representatives of
    trace equivalence classes, i.e., two words are trace-equivalent iff they
