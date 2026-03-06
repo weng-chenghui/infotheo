@@ -1,4 +1,5 @@
-(* infotheo (c) AIST and Tohoku University. License: GPL-3.0-or-later. *)
+(* infotheo: information theory and error-correcting codes in Rocq            *)
+(* Copyright (C) 2025 infotheo authors, license: LGPL-2.1-or-later            *)
 (* PGG-SMC: Security-Storage Tradeoff (Theorems 11, 12) *)
 From mathcomp Require Import ssreflect ssrbool ssrfun eqtype ssrnat seq.
 From mathcomp Require Import fintype bigop div.

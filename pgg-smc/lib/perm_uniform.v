@@ -1,3 +1,5 @@
+(* infotheo: information theory and error-correcting codes in Rocq            *)
+(* Copyright (C) 2025 infotheo authors, license: LGPL-2.1-or-later            *)
 (* Uniform Permutation Conditioning (Proposition 4)
 
    If σ ~ Uniform(S_N) and s_1,...,s_T are distinct in 'I_N, then:

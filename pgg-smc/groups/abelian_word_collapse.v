@@ -1,4 +1,5 @@
-(* infotheo (c) AIST and Tohoku University. License: GPL-3.0-or-later. *)
+(* infotheo: information theory and error-correcting codes in Rocq            *)
+(* Copyright (C) 2025 infotheo authors, license: LGPL-2.1-or-later            *)
 From HB Require Import structures.
 From mathcomp Require Import ssreflect ssrbool ssrfun eqtype ssrnat seq.
 From mathcomp Require Import div fintype tuple finfun finset fingroup perm.
@@ -7,6 +8,7 @@ From pgg_smc Require Import pgg_interface.
 
 (******************************************************************************)
 (* PGG-SMC: Abelian Word Collapse (Theorem 8, items (1)-(2))                 *)
+(* Group presentation: <s_1,...,s_Tg | s_i s_j = s_j s_i for all i,j> (abelian) *)
 (*                                                                           *)
 (* In an abelian group with r generators, any word of length L evaluates to  *)
 (* a product that depends only on the frequency vector (c_1,...,c_r) where   *)
@@ -18,7 +20,7 @@ From pgg_smc Require Import pgg_interface.
 (*   abelian_word_eval  == word evaluation depends only on frequency vector  *)
 (*   freq_vec_sum       == sum of frequencies equals word length             *)
 (*   abelian_search_space_le == search_space L <= #|freq_vecs L|            *)
-(*   card_freq_vecs == #|freq_vecs L| = 'C(L + Tg.-1, Tg.-1)   [axiom]    *)
+(*   card_freq_vecs == #|freq_vecs L| = 'C(L + Tg.-1, Tg.-1)              *)
 (******************************************************************************)
 
 Set Implicit Arguments.

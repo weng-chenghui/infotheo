@@ -1,4 +1,5 @@
-(* infotheo (c) AIST and Tohoku University. License: GPL-3.0-or-later. *)
+(* infotheo: information theory and error-correcting codes in Rocq            *)
+(* Copyright (C) 2025 infotheo authors, license: LGPL-2.1-or-later            *)
 From HB Require Import structures.
 From mathcomp Require Import ssreflect ssrbool ssrfun eqtype ssrnat seq.
 From mathcomp Require Import div fintype tuple finfun finset fingroup perm.
@@ -8,6 +9,7 @@ From pgg_smc Require Import pgg_interface pgg_lfree.
 
 (******************************************************************************)
 (* PGG-SMC: RAAG (Right-Angled Artin Group) Search Space Theory              *)
+(* Group presentation: <s_1,...,s_Tg | s_i s_j = s_j s_i for (i,j) in E(Gamma)>  *)
 (*                                                                            *)
 (* A commutation graph on Tg generators determines which pairs of generators  *)
 (* commute.  Two words are trace-equivalent if one can be obtained from the   *)

@@ -1,10 +1,12 @@
-(* infotheo (c) AIST and Tohoku University. License: GPL-3.0-or-later. *)
+(* infotheo: information theory and error-correcting codes in Rocq            *)
+(* Copyright (C) 2025 infotheo authors, license: LGPL-2.1-or-later            *)
 From mathcomp Require Import ssreflect ssrbool ssrfun eqtype ssrnat seq.
 From mathcomp Require Import fintype bigop div.
 From mathcomp Require Import zify.
 
 (******************************************************************************)
 (* Free Group Ball-Size Formula (Combinatorial)                               *)
+(* Group presentation: <a_1,...,a_r | > (free group, no relations)            *)
 (*                                                                            *)
 (* Pure nat-level counting of reduced words in a free group with r generators *)
 (* (2r letters total: each generator and its inverse).                        *)
