@@ -10,15 +10,97 @@ Unset Strict Implicit.
 Import Prenex Implicits.
 
 (* ========================================================================== *)
-(* Grover's algorithm: axiomatized integer square root                         *)
+(* Grover's algorithm: constructive integer square root                        *)
 (* ========================================================================== *)
 
 (* Integer square root: isqrt n = floor(sqrt(n)).
-   We axiomatize its existence and key properties. *)
-Axiom isqrt : nat -> nat.
-Axiom isqrt_lower : forall n : nat, isqrt n ^ 2 <= n.
-Axiom isqrt_monotone : forall m n : nat, m <= n -> isqrt m <= isqrt n.
-Axiom isqrt_expn : forall k : nat, k <= isqrt (k ^ 2).
+   Computed by linear scan from 0 up to n. *)
+Fixpoint isqrt_aux (fuel k n : nat) : nat :=
+  match fuel with
+  | 0 => k
+  | fuel'.+1 => if k.+1 ^ 2 <= n then isqrt_aux fuel' k.+1 n else k
+  end.
+
+Definition isqrt (n : nat) : nat := isqrt_aux n 0 n.
+
+(* --- auxiliary lemmas on isqrt_aux --- *)
+
+Lemma isqrt_aux_lower fuel k n :
+  k ^ 2 <= n -> (isqrt_aux fuel k n) ^ 2 <= n.
+Proof.
+elim: fuel k => [|fuel IH] k Hk //=.
+case: ifP => H; [exact: IH | exact: Hk].
+Qed.
+
+Lemma isqrt_aux_ge fuel k n : k <= isqrt_aux fuel k n.
+Proof.
+elim: fuel k => [|fuel IH] k //=.
+case: ifP => _ //.
+apply: (leq_trans _ (IH k.+1)). exact: leqnSn.
+Qed.
+
+Lemma isqrt_aux_upper fuel k n :
+  k ^ 2 <= n -> k + fuel >= n ->
+  n < (isqrt_aux fuel k n).+1 ^ 2.
+Proof.
+elim: fuel k => [|fuel IH] k Hk Hfuel /=.
+- rewrite addn0 in Hfuel.
+  rewrite !expnS !expn0 !muln1 in Hk *. lia.
+- case Hif: (k.+1 ^ 2 <= n).
+  + apply: IH => //. lia.
+  + move/negbT: Hif. by rewrite -leqNgt.
+Qed.
+
+Lemma isqrt_aux_largest fuel k n m :
+  k ^ 2 <= n -> m <= k + fuel -> k <= m -> m ^ 2 <= n ->
+  m <= isqrt_aux fuel k n.
+Proof.
+elim: fuel k => [|fuel IH] k Hk Hm Hkm Hmsq /=.
+- rewrite addn0 in Hm.
+  by have ->: m = k by apply/eqP; rewrite eqn_leq Hkm Hm.
+- case Hif: (k.+1 ^ 2 <= n).
+  + case: (leqP k.+1 m) => Hkm'.
+    * apply: IH => //. lia.
+    * have ->: m = k by apply/eqP; rewrite eqn_leq Hkm; lia.
+      apply: (leq_trans _ (isqrt_aux_ge _ _ _)). exact: leqnSn.
+  + move/negbT: Hif. rewrite -leqNgt => Hlt.
+    suff ->: m = k by done.
+    apply/eqP. rewrite eqn_leq Hkm andbT.
+    apply/negP => /negP. rewrite -ltnNge => Hmk.
+    have Hk1m: k.+1 <= m by exact: Hmk.
+    have H1: k.+1 ^ 2 <= m ^ 2 by rewrite leq_exp2r.
+    have: k.+1 ^ 2 <= n by apply: (leq_trans H1 Hmsq).
+    move=> H3. move: Hlt. rewrite leqNgt. by move/negP.
+Qed.
+
+(* --- main properties of isqrt --- *)
+
+Lemma isqrt_lower n : isqrt n ^ 2 <= n.
+Proof. exact: isqrt_aux_lower. Qed.
+
+Lemma isqrt_upper n : n < (isqrt n).+1 ^ 2.
+Proof. apply: isqrt_aux_upper => //. Qed.
+
+Lemma isqrt_monotone m n : m <= n -> isqrt m <= isqrt n.
+Proof.
+move=> Hmn.
+have Hsq: (isqrt m) ^ 2 <= n := leq_trans (isqrt_lower m) Hmn.
+have Hle: isqrt m <= n.
+{ have H1: isqrt m ^ 2 <= m := isqrt_lower m.
+  have H2: isqrt m <= isqrt m ^ 2.
+  { case: (isqrt m) => // j.
+    rewrite expnS expn1 -{1}[j.+1]muln1. exact: leq_mul. }
+  exact: (leq_trans (leq_trans H2 H1) Hmn). }
+apply: (@isqrt_aux_largest n 0 n (isqrt m)) => //.
+Qed.
+
+Lemma isqrt_expn k : k <= isqrt (k ^ 2).
+Proof.
+have Hk2: k <= k ^ 2.
+{ case: k => // k.
+  rewrite expnS expn1 -{1}[k.+1]muln1. exact: leq_mul. }
+apply: (@isqrt_aux_largest (k^2) 0 (k^2)) => //.
+Qed.
 
 (* Grover's search cost: sqrt of the search space *)
 Definition grover_search_cost (M : nat) : nat := isqrt M.

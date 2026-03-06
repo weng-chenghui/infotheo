@@ -54,17 +54,110 @@ transitivity (\sum_(j < Tg) \sum_(i < L | tnth w i == j) 1).
 symmetry; exact: partition_big.
 Qed.
 
+(* -- Helper lemmas for abelian group bigop manipulation --------------- *)
+(* MathComp's bigID / partition_big require Monoid.com_law but mulg is   *)
+(* only Monoid.law.  We reprove them under a runtime abelian hypothesis. *)
+
+Lemma abelian_prod_in (Habel : abelian G)
+    (I : Type) (r : seq I) (P : pred I) (F : I -> gT) :
+  (forall i, P i -> F i \in G) ->
+  (\prod_(i <- r | P i) F i)%g \in G.
+Proof.
+move=> HF; elim: r => [|a s IHs]; first by rewrite big_nil; exact: group1.
+rewrite big_cons; case HPa: (P a) => //.
+by apply: groupM; [exact: HF|exact: IHs].
+Qed.
+
+Lemma abelian_bigID (Habel : abelian G)
+    (I : Type) (r : seq I) (P Q : pred I) (F : I -> gT) :
+  (forall i, P i -> F i \in G) ->
+  (\prod_(i <- r | P i) F i =
+   \prod_(i <- r | P i && Q i) F i * \prod_(i <- r | P i && ~~ Q i) F i)%g.
+Proof.
+move=> HF.
+elim: r => [|a s IHs]; first by rewrite !big_nil mulg1.
+rewrite !big_cons /=.
+case HPa: (P a) => //=.
+case HQa: (Q a) => /=.
+- by rewrite IHs mulgA.
+- rewrite IHs !mulgA; congr (_ * _)%g.
+  apply: (centP (subsetP Habel _ (HF _ HPa))).
+  apply: (abelian_prod_in Habel) => i /andP [HPi _]; exact: HF.
+Qed.
+
+Lemma abelian_big_union (Habel : abelian G)
+    (I : finType) (A B : pred I) (F : I -> gT) :
+  (forall i, A i || B i -> F i \in G) ->
+  (forall i, A i -> B i -> false) ->
+  (\prod_(i | A i || B i) F i =
+   \prod_(i | A i) F i * \prod_(i | B i) F i)%g.
+Proof.
+move=> HF Hdisj.
+have := @abelian_bigID Habel _ (index_enum I) (fun i => A i || B i) A F HF.
+rewrite /= => ->.
+congr (_ * _)%g; apply: eq_bigl => i.
+- case HAi: (A i) => //=; by case: (B i).
+- case HAi: (A i) => /=.
+  + by case HBi: (B i) => //=; move: (Hdisj i HAi HBi).
+  + by case: (B i).
+Qed.
+
+Lemma abelian_partition_big (Habel : abelian G)
+    (I J : finType) (P : pred I) (p : I -> J) (F : I -> gT) :
+  (forall i, P i -> F i \in G) ->
+  (\prod_(i | P i) F i = \prod_(j : J) \prod_(i | P i && (p i == j)) F i)%g.
+Proof.
+move=> HF.
+suff Hind : forall sJ : seq J, uniq sJ ->
+  (\prod_(i | P i && (p i \in sJ)) F i =
+   \prod_(j <- sJ) \prod_(i | P i && (p i == j)) F i)%g.
+  rewrite -Hind; last exact: index_enum_uniq.
+  apply: eq_bigl => i; case: (P i) => //=.
+  by rewrite mem_index_enum.
+elim=> [|j sJ IHsJ].
+  move=> _; rewrite big_nil.
+  by apply: big1 => i; rewrite in_nil andbF.
+move=> /andP [Hjnin HsJuniq].
+rewrite big_cons -IHsJ //.
+have Hin : forall i, P i && (p i \in j :: sJ) -> F i \in G.
+  by move=> i /andP [HPi _]; exact: HF.
+have := @abelian_bigID Habel _ (index_enum I)
+  (fun i => P i && (p i \in j :: sJ)) (fun i => p i == j) F Hin.
+rewrite /= => ->.
+congr (_ * _)%g; apply: eq_bigl => i;
+  rewrite in_cons; case: (P i) => //=.
+- by case: (p i == j); rewrite /= ?andbF.
+- by case: eqP => [->|_]; rewrite /= ?(negbTE Hjnin) ?andbT.
+Qed.
+
+Lemma big_const_expg (n : nat) (P : pred 'I_n) (g : gT) :
+  (\prod_(i < n | P i) g = g ^+ #|[set i : 'I_n | P i]|)%g.
+Proof.
+rewrite -sum1_card.
+elim: (index_enum _) => [|a s IHs]; first by rewrite !big_nil expg0.
+rewrite !big_cons inE.
+by case HPa: (P a) => /=; rewrite ?add1n ?expgS IHs.
+Qed.
+
 (* Main theorem: abelian word evaluation depends only on frequency vector.
    In an abelian group, the product \prod_i sigma_{w_i} can be rearranged
-   by collecting equal generators: sigma_j^{count of j in w}.
-   MathComp's partition_big requires Monoid.com_law (type-level
-   commutativity), but mulg only has Monoid.Law; abelian G is a runtime
-   property. A full proof requires custom permutation lemmas for abelian
-   groups. We axiomatize the rearrangement step. *)
+   by collecting equal generators: sigma_j^{count of j in w}.             *)
 Lemma abelian_word_eval (w : pgg_word M L) :
   abelian G ->
   word_eval w = (\prod_(j < Tg) tnth sigmas j ^+ freq_vec w j)%g.
-Proof. move=> Habel. Admitted.
+Proof.
+move=> Habel.
+rewrite /word_eval /freq_vec.
+have Hpart := @abelian_partition_big Habel _ _ predT
+  (fun i : 'I_L => tnth w i)
+  (fun i : 'I_L => tnth sigmas (tnth w i))
+  (fun i (_ : predT i) => sigmas_in_G (tnth w i)).
+rewrite /= in Hpart; rewrite Hpart; clear Hpart.
+apply: eq_bigr => j _.
+transitivity (\prod_(i < L | tnth w i == j) tnth sigmas j)%g.
+  by apply: eq_bigr => i /eqP ->.
+exact: big_const_expg.
+Qed.
 
 (* Two words with the same frequency vector give the same group element *)
 Lemma freq_vec_det (w1 w2 : pgg_word M L) :
@@ -165,11 +258,9 @@ End freq_counting.
 (* Stars-and-bars theorem: the number of ways to write L as an ordered sum   *)
 (* of Tg non-negative integers is 'C(L + Tg - 1, Tg - 1).                   *)
 (*                                                                           *)
-(* This is a classical combinatorial identity. A direct MathComp proof       *)
-(* requires constructing a bijection between frequency vectors and           *)
-(* (Tg-1)-element subsets of {0,...,L+Tg-2}, which is substantial.           *)
-(* We axiomatize it here and note it can be replaced by a proof via          *)
-(* the multiset coefficient or a direct bijection.                           *)
+(* This is a classical combinatorial identity. The proof transports          *)
+(* MathComp's card_ord_partitions (on tuples) to finite functions via        *)
+(* a bijection between {ffun 'I_r.+1 -> 'I_L.+1} and r.+1.-tuple 'I_L.+1.  *)
 
 Section stars_and_bars.
 
@@ -179,9 +270,41 @@ Variable L : nat.  (* total sum *)
 Definition compositions : {set {ffun 'I_r.+1 -> 'I_L.+1}} :=
   [set f : {ffun 'I_r.+1 -> 'I_L.+1} | \sum_(j < r.+1) val (f j) == L].
 
-(* Stars-and-bars: axiomatized *)
-Axiom card_compositions :
+Definition ffun_to_tuple (f : {ffun 'I_r.+1 -> 'I_L.+1}) : r.+1.-tuple 'I_L.+1 :=
+  [tuple f i | i < r.+1].
+
+Definition tuple_to_ffun (t : r.+1.-tuple 'I_L.+1) : {ffun 'I_r.+1 -> 'I_L.+1} :=
+  [ffun i => tnth t i].
+
+Lemma ffun_to_tupleK : cancel ffun_to_tuple tuple_to_ffun.
+Proof. move=> f; apply/ffunP => i; by rewrite ffunE tnth_mktuple. Qed.
+
+Lemma tuple_to_ffunK : cancel tuple_to_ffun ffun_to_tuple.
+Proof. move=> t; apply: eq_from_tnth => i; by rewrite tnth_mktuple ffunE. Qed.
+
+Lemma sum_ffun_to_tuple (f : {ffun 'I_r.+1 -> 'I_L.+1}) :
+  \sum_(i <- ffun_to_tuple f) val i = \sum_(j < r.+1) val (f j).
+Proof.
+rewrite /ffun_to_tuple big_tuple.
+by apply: eq_bigr => i _; rewrite tnth_mktuple.
+Qed.
+
+Lemma card_compositions :
   #|compositions| = 'C(L + r, r).
+Proof.
+have Hinj : injective ffun_to_tuple by exact: can_inj ffun_to_tupleK.
+rewrite -(card_imset _ Hinj).
+suff -> : [set ffun_to_tuple f | f in compositions] =
+          [set t : r.+1.-tuple 'I_L.+1 | \sum_(i <- t) i == L].
+  by rewrite card_ord_partitions addnC.
+apply/setP => t; rewrite inE.
+apply/imsetP/idP.
+- move=> [f]; rewrite inE => /eqP Hf ->.
+  by rewrite sum_ffun_to_tuple Hf.
+- move=> /eqP Ht.
+  exists (tuple_to_ffun t); last by rewrite tuple_to_ffunK.
+  by rewrite inE -sum_ffun_to_tuple tuple_to_ffunK Ht.
+Qed.
 
 End stars_and_bars.
 
