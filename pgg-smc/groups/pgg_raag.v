@@ -913,6 +913,56 @@ apply: word_eval_trace.
 by apply/(full_comm_trace_iff_perm _ _ Hfull).
 Qed.
 
+(* Independent set generators have singleton trace classes:
+   no two distinct I-words are trace-equivalent. *)
+
+Lemma indep_set_singleton_traces (I : {set 'I_Tg}) (L : nat)
+    (w1 w2 : pgg_word M L) :
+  (forall i j : 'I_Tg, i \in I -> j \in I -> i != j -> ~~ comm i j) ->
+  (forall k : 'I_L, tnth w1 k \in I) ->
+  (forall k : 'I_L, tnth w2 k \in I) ->
+  trace_equiv w1 w2 -> w1 = w2.
+Proof.
+move=> Hindep H1 H2 Hte.
+set e := adj_swap_sym (L:=L).
+have Hadj_false : forall (wa wb : pgg_word M L),
+  (forall k : 'I_L, tnth wa k \in I) -> adj_swap wa wb = false.
+  move=> wa wb HI.
+  exact: indep_adj_swap_false Hindep HI.
+suff Hsuff : forall wa wb : pgg_word M L,
+  (forall k : 'I_L, tnth wa k \in I) -> connect e wa wb -> wa = wb.
+  by exact: Hsuff.
+move=> wa wb HI /connectP [p].
+elim: p wa HI => [wa _ _ -> // | w' p IHp wa HI /= /andP [Hstep Hpath] Hlast].
+exfalso.
+have : e wa w' = false.
+  rewrite /e /adj_swap_sym (Hadj_false _ _ HI) /=.
+  apply/negbTE/negP => Hadj.
+  have HI' : forall k : 'I_L, tnth w' k \in I.
+    move=> k.
+    have Hpe := adj_swap_perm Hadj.
+    have Hmem : tnth w' k \in val w' := mem_tnth k w'.
+    have : tnth w' k \in val wa by rewrite -(perm_mem Hpe).
+    by move/tnthP => [j Hj]; rewrite Hj; exact: HI.
+  by rewrite (Hadj_false _ _ HI') in Hadj.
+by rewrite Hstep.
+Qed.
+
+(* Charney's theorem (finite analog): independent set generators
+   with raag_lfree give word_eval injectivity on I-words *)
+Lemma indep_set_word_eval_inj (I : {set 'I_Tg}) (L : nat) :
+  (forall i j : 'I_Tg, i \in I -> j \in I -> i != j -> ~~ comm i j) ->
+  raag_lfree L ->
+  forall (w1 w2 : pgg_word M L),
+    (forall k : 'I_L, tnth w1 k \in I) ->
+    (forall k : 'I_L, tnth w2 k \in I) ->
+    word_eval w1 = word_eval w2 -> w1 = w2.
+Proof.
+move=> Hindep Hrl w1 w2 H1 H2 Heval.
+apply: (indep_set_singleton_traces Hindep H1 H2).
+exact: Hrl.
+Qed.
+
 End raag_theory.
 
 (* ========================================================================== *)

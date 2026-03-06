@@ -88,7 +88,7 @@ Qed.
 
 (* --- PGGTypes instance --- *)
 
-Definition Path_PGGTypes := @Gen_PGGTypes m m path_gen_tuple.
+Local Notation Path_PGGTypes := (@Gen_PGGTypes m m path_gen_tuple).
 Let M_path : GeneratedMonodromyReprType := Path_PGGTypes.
 
 (* --- Commutativity relation --- *)
@@ -192,27 +192,27 @@ move=> /= i j; rewrite !inE => /orP [] /eqP -> /orP [] /eqP -> // _ /=;
   by rewrite (eqP (subn_eq0 (isT : 0 <= 1))) add0n addn0.
 Qed.
 
-End path_instance.
-
-(* --- RAAG instance registration (outside section for HB) --- *)
-
-Section path_raag.
-Variable m0 : nat.
+(* --- RAAG instance registration --- *)
 
 HB.instance Definition Path_isRAAG :=
-  @isRAAG.Build (Path_PGGTypes m0)
-    (@path_comm m0) (@path_comm_sym m0) (@path_comm_irrefl m0)
-    (@path_Hcomm_sigmas m0) (@path_gen_inj_sigmas m0).
+  @isRAAG0.Build Path_PGGTypes
+    path_comm path_comm_sym path_comm_irrefl
+    path_Hcomm_sigmas path_gen_inj_sigmas.
 
-Lemma path_traces_lb (L : nat) : 0 < m0 ->
-  2 ^ L <= @n_traces (Path_PGGTypes m0) L.
+Let R_path : RAAGType := Path_PGGTypes.
+
+Lemma path_traces_lb (L : nat) : 0 < m ->
+  2 ^ L <= @n_traces R_path L.
 Proof.
 move=> Hm.
-set I : {set 'I_(m0.+1)} := [set Ordinal (isT : 0 < m0.+1); Ordinal (Hm : 1 < m0.+1)].
+set I : {set 'I_T} := [set Ordinal (isT : 0 < T); Ordinal (Hm : 1 < T)].
 have Hcard : #|I| = 2.
   by rewrite cards2 -val_eqE.
 rewrite -Hcard.
-exact: (indep_set_traces_lb L (@path_indep_pair m0 Hm)).
+apply: (@indep_set_traces_lb R_path I L).
+move=> i j Hi Hj Hij.
+change (~~ path_comm i j).
+exact: (@path_indep_pair Hm i j Hi Hj Hij).
 Qed.
 
-End path_raag.
+End path_instance.

@@ -1,19 +1,26 @@
 (* infotheo: information theory and error-correcting codes in Rocq            *)
 (* Copyright (C) 2025 infotheo authors, license: LGPL-2.1-or-later            *)
-(* PGG-SMC Collusion Bound (Theorem 5)
-
-   Main security theorem: the adversary's posterior is close to uniform.
-   d(adversary_posterior, uniform) <= epsilon + 2(T-1)/N
-
-   where epsilon is the gap between the real protocol distribution rho(P)
-   and the idealized uniform permutation (Assumption 1).
-*)
+(* PGG-SMC Collusion Bound (Theorem 5)                                        *)
+(*                                                                             *)
+(* Sections 1-5: Generic collusion bound with Assumption 1 as hypothesis.      *)
+(*   Main result: d(adversary_posterior, uniform) <= epsilon + 2(T-1)/N        *)
+(*   where epsilon = var_dist(rho_dist, uniform(S_N)) is the gap between the   *)
+(*   real protocol distribution and the idealized uniform permutation.         *)
+(*                                                                             *)
+(* Section 6: L-free instantiation proving Assumption 1 with concrete epsilon. *)
+(*   When word_eval is injective (L-free) and we draw permutations uniformly   *)
+(*   from all L-words over Tg generators, the distribution is uniform over     *)
+(*   achievable(L) with |achievable(L)| = Tg^L.  The variational distance to  *)
+(*   the full uniform over S_N is:                                             *)
+(*     epsilon = 2 * (N! - Tg^L) / N!                                          *)
+(*   Caveat: assumes the protocol samples words uniformly at random.           *)
+(******************************************************************************)
 
 From HB Require Import structures.
 From mathcomp Require Import all_boot all_order all_algebra fingroup perm.
 From mathcomp Require Import boolp reals.
 From infotheo Require Import realType_ext fdist proba variation_dist.
-From pgg_smc Require Import perm_uniform.
+From pgg_smc Require Import perm_uniform pgg_interface pgg_lfree.
 
 Set Implicit Arguments.
 Unset Strict Implicit.
@@ -296,6 +303,194 @@ Qed.
 
 End collusion_bound_conditional.
 
+(******************************************************************************)
+(*  Section 6: L-free instantiation — concrete epsilon for Assumption 1     *)
+(******************************************************************************)
+
+(* General lemma: fdistmap of uniform through an injective function
+   produces fdist_uniform_supp over the image. *)
+
+Section fdistmap_inj_uniform.
+
+Context {R : realType}.
+Variables (A B : finType).
+Variable f : A -> B.
+Hypothesis f_inj : injective f.
+
+Variable Hcard_A : #|A| = #|A|.-1.+1.
+
+Let img := f @: [set: A].
+Let Himg_pos : (0 < #|img|)%N.
+Proof.
+rewrite card_imset ?cardsT //.
+by case: #|A| Hcard_A.
+Qed.
+
+Lemma fdistmap_inj_uniform :
+  fdistmap f (fdist_uniform Hcard_A) =
+  @fdist_uniform_supp R B img Himg_pos.
+Proof.
+apply/fdist_ext => b.
+rewrite fdistmapE.
+case/boolP: (b \in img) => Hb.
+  (* b in image: exactly one preimage *)
+  rewrite fdist_uniform_supp_in //.
+  move/imsetP: Hb => [a _ Hab].
+  rewrite (bigD1 a) /=; last by rewrite !inE Hab eqxx.
+  rewrite fdist_uniformE big1 ?addr0; last first.
+    move=> a' /andP [Ha' Hneq].
+    rewrite !inE in Ha'.
+    move/eqP in Ha'.
+    rewrite Hab in Ha'.
+    by move/f_inj in Ha'; rewrite Ha' eqxx in Hneq.
+  congr (_ ^-1).
+  by rewrite card_imset ?cardsT.
+(* b not in image: no preimage *)
+rewrite fdist_uniform_supp_notin //.
+apply: big1 => a.
+rewrite inE => /eqP Hfa.
+exfalso; move/negP: Hb; apply.
+by apply/imsetP; exists a; rewrite ?inE.
+Qed.
+
+End fdistmap_inj_uniform.
+
+(* L-free groups have concrete epsilon for Assumption 1 *)
+
+Section lfree_collusion.
+
+Context {R : realType}.
+Variable N'' : nat.
+Let N' := N''.+1.
+Let N := N'.+1.
+
+Variable T' : nat.
+Let T := T'.+1.
+Hypothesis TN : (T <= N)%N.
+
+(* Distinct starting sheets *)
+Variable starts : T.-tuple 'I_N.
+Hypothesis starts_uniq : uniq starts.
+
+(* Generator parameters *)
+Variable m : nat.
+Let Tg := m.+1.
+Variable L : nat.
+Variable sigmas : Tg.-tuple {perm 'I_N}.
+Let M := Gen_PGGTypes sigmas.
+
+(* L-freeness *)
+Hypothesis Hlfree : @lfree M L.
+
+(* Cardinality of word space *)
+Lemma card_word_L :
+  #|{: L.-tuple 'I_Tg}| = (Tg ^ L).-1.+1.
+Proof.
+by rewrite card_tuple card_ord prednK // expn_gt0.
+Qed.
+
+(* The word distribution: uniform over all L-words *)
+Definition word_uniform : R.-fdist (L.-tuple 'I_Tg) :=
+  fdist_uniform card_word_L.
+
+(* The induced group element distribution *)
+Definition rho_from_words : R.-fdist {perm 'I_N} :=
+  fdistmap (@word_eval M L) word_uniform.
+
+(* achievable(L) has positive cardinality *)
+Lemma achievable_pos : (0 < #|@achievable M L|)%N.
+Proof.
+rewrite /achievable -/M.
+have -> : #|[set word_eval w | w : pgg_word M L]| = @search_space M L by [].
+rewrite lfree_search_space //.
+by rewrite expn_gt0.
+Qed.
+
+(* Key: rho_from_words is uniform_supp over achievable(L) *)
+Lemma rho_from_words_uniform_supp :
+  rho_from_words = @fdist_uniform_supp R _ (@achievable M L) achievable_pos.
+Proof.
+apply/fdist_ext => g.
+rewrite /rho_from_words /word_uniform fdistmapE.
+case/boolP: (g \in @achievable M L) => Hg.
+  (* g in achievable: exactly one preimage *)
+  rewrite fdist_uniform_supp_in //.
+  move/imsetP: Hg => [w _ Hgw].
+  rewrite (bigD1 w) /=; last by rewrite !inE Hgw eqxx.
+  rewrite fdist_uniformE big1 ?addr0; last first.
+    move=> w' /andP [Hw' Hneq].
+    rewrite inE in Hw'; move/eqP in Hw'.
+    rewrite Hgw in Hw'; move/Hlfree in Hw'.
+    by rewrite Hw' eqxx in Hneq.
+  congr (_ ^-1).
+  have -> : #|@achievable M L| = @search_space M L by [].
+  rewrite lfree_search_space //.
+  by rewrite card_tuple card_ord.
+(* g not in achievable: no preimage *)
+rewrite fdist_uniform_supp_notin //.
+apply: big1 => w; rewrite inE => /eqP Hfw.
+exfalso; move/negP: Hg; apply.
+by apply/imsetP; exists w.
+Qed.
+
+(* Cardinality of S_N *)
+Let card_perm_N : #|{perm 'I_N}| = (N`!.-1).+1 := card_permT_N N'.
+
+(* The key bound: achievable subset is smaller than S_N *)
+Lemma lfree_search_space_le_fact : (Tg ^ L <= N`!)%N.
+Proof.
+rewrite -(@lfree_search_space M) //.
+apply: (leq_trans (@search_space_leG M L)).
+apply: (leq_trans (max_card _)).
+by rewrite card_permT_N prednK // fact_gt0.
+Qed.
+
+(* Concrete epsilon for Assumption 1 *)
+Let lfree_eps : R := 2%:R * (N`! - Tg ^ L)%:R / N`!%:R.
+
+Lemma lfree_eps_ge0 : 0 <= lfree_eps.
+Proof.
+rewrite /lfree_eps.
+apply: divr_ge0; last by rewrite ler0n.
+by rewrite mulr_ge0 // ler0n.
+Qed.
+
+(* Assumption 1 holds with concrete epsilon *)
+Theorem var_dist_lfree_uniform :
+  var_dist rho_from_words (fdist_uniform card_perm_N) <= lfree_eps.
+Proof.
+rewrite rho_from_words_uniform_supp.
+rewrite var_dist_uniform_supp /=.
+rewrite /lfree_eps.
+(* LHS: 2 * (#|perm| - #|achievable|) / #|perm|
+   RHS: 2 * (N! - Tg^L) / N! *)
+suff -> : (#|{perm 'I_N}| - #|@achievable M L|)%N = (N`! - Tg ^ L)%N.
+  suff -> : (#|{perm 'I_N}|%:R : R) = N`!%:R by [].
+  by rewrite card_permT_N prednK // fact_gt0.
+rewrite card_permT_N prednK; last exact: fact_gt0.
+have -> : #|@achievable M L| = @search_space M L by [].
+by rewrite (@lfree_search_space M).
+Qed.
+
+(* Main theorem: applying collusion_bound with concrete epsilon.
+   The full bound follows from var_dist_lfree_uniform + the generic
+   collusion bound framework. We state it in the form that
+   instantiates Assumption 1 concretely. *)
+Theorem var_dist_lfree_eval :
+  forall (eval_at : {perm 'I_N} -> 'I_N),
+  var_dist (fdistmap eval_at rho_from_words)
+           (fdistmap eval_at (fdist_uniform card_perm_N))
+  <= lfree_eps.
+Proof.
+move=> eval_at.
+exact: (Order.POrderTheory.le_trans (var_dist_fdistmap _ _ _)
+                                    var_dist_lfree_uniform).
+Qed.
+
+End lfree_collusion.
+
 Check collusion_bound.
 Check collusion_bound_unconditional.
 Check collusion_bound_conditional.
+Check var_dist_lfree_uniform.
+Check var_dist_lfree_eval.

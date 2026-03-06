@@ -199,7 +199,7 @@ Qed.
 
 (* --- PGGTypes instance --- *)
 
-Definition Star_PGGTypes := @Gen_PGGTypes m m.+1 star_gen_tuple.
+Local Notation Star_PGGTypes := (@Gen_PGGTypes m m.+1 star_gen_tuple).
 Let M_star : GeneratedMonodromyReprType := Star_PGGTypes.
 
 (* --- RAAG instance wrapper lemmas --- *)
@@ -217,7 +217,7 @@ Proof. by move=> i j; exact: star_Hcomm. Qed.
 (* --- Non-abelianity --- *)
 
 Lemma star_G_nonabelian : 1 < m ->
-  ~~ abelian (pgg_G Star_PGGTypes).
+  ~~ abelian (pgg_G M_star).
 Proof.
 move=> Hm.
 have HT1 : 1 < T := ltnW Hm.
@@ -254,23 +254,23 @@ case/orP: Hor => /eqP Hv.
 - by move: Hj; rewrite Hv.
 Qed.
 
-End star_instance.
-
-(* --- RAAG instance registration (outside section for HB) --- *)
-
-Section star_raag.
-Variable m0 : nat.
+(* --- RAAG instance registration --- *)
 
 HB.instance Definition Star_isRAAG :=
-  @isRAAG.Build (Star_PGGTypes m0)
-    (star_comm m0) (star_comm_sym m0) (star_comm_irrefl m0)
-    (star_Hcomm_sigmas m0) (star_gen_inj_sigmas m0).
+  @isRAAG0.Build Star_PGGTypes
+    star_comm star_comm_sym star_comm_irrefl
+    star_Hcomm_sigmas star_gen_inj_sigmas.
+
+Let R_star : RAAGType := Star_PGGTypes.
 
 Lemma star_traces_lb (L : nat) :
-  m0 ^ L <= @n_traces (Star_PGGTypes m0) L.
+  m ^ L <= @n_traces R_star L.
 Proof.
-rewrite -(star_leaf_set_card m0).
-exact: (indep_set_traces_lb L (star_leaves_indep m0)).
+rewrite -star_leaf_set_card.
+apply: (@indep_set_traces_lb R_star star_leaves L).
+move=> i j Hi Hj Hij.
+change (~~ star_comm i j).
+exact: (star_leaves_indep Hi Hj Hij).
 Qed.
 
-End star_raag.
+End star_instance.
