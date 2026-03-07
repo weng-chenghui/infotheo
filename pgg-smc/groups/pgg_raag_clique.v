@@ -461,12 +461,365 @@ Qed.
 (* For complete graph: c_k = C(Tg,k), P(z) = (1-z)^Tg.
    1/P(z) = Sum C(L+Tg-1,Tg-1) z^L. *)
 
+(* All distinct pairs commute in a complete graph *)
+Lemma all_pairs_complete (s : seq nat) :
+  uniq s -> all_pairs_comm_sorted complete_comm_nat s.
+Proof.
+move=> Huniq.
+apply/allP => i Hi; apply/allP => j Hj; apply/orP.
+case Heq: (i == j); first by left.
+by right; rewrite /complete_comm_nat Heq.
+Qed.
+
+Lemma size_subseqs_k k s :
+  uniq s -> size (subseqs_k k s) = 'C(size s, k).
+Proof.
+elim: s k => [|a s IHs] k //=.
+  by case: k => [|k] //=; rewrite bin_small.
+case/andP => _ Hu; case: k => [|k] //=.
+by rewrite size_cat size_map IHs // IHs // addnC -binS.
+Qed.
+
+Lemma complete_clique_count Tg k :
+  clique_count Tg k complete_comm_nat = 'C(Tg, k).
+Proof.
+rewrite /clique_count /cliques_of_size.
+rewrite (eq_in_filter (a2 := predT)).
+  rewrite filter_predT size_subseqs_k ?iota_uniq // size_iota //.
+move=> s Hs /=.
+apply: all_pairs_complete.
+exact: subseq_uniq (subseqs_k_subseq Hs) (iota_uniq 0 Tg).
+Qed.
+
+(* Alternating-sum decomposition of the binomial inversion identity.
+   spos n r L = Sum_{k even, 0<=k<=L} C(n,k) * C(L-k+r, r)
+   sneg n r L = Sum_{k odd,  0<=k<=L} C(n,k) * C(L-k+r, r)
+   The key identity: spos n.+1 n L.+1 = sneg n.+1 n L.+1
+   which implies the clique recurrence with c_k = C(Tg,k). *)
+
+Definition spos (n r L : nat) : nat :=
+  sumn [seq 'C(n, k) * 'C(L - k + r, r)
+       | k <- [seq k <- iota 0 L.+1 | ~~ odd k]].
+
+Definition sneg (n r L : nat) : nat :=
+  sumn [seq 'C(n, k) * 'C(L - k + r, r)
+       | k <- [seq k <- iota 0 L.+1 | odd k]].
+
+Arguments spos : simpl never.
+Arguments sneg : simpl never.
+
+Lemma filter_iota_head_even L :
+  [seq k <- iota 0 L.+1 | ~~ odd k] = 0 :: [seq k <- iota 1 L | ~~ odd k].
+Proof. by case: L. Qed.
+
+Lemma filter_iota_head_odd L :
+  [seq k <- iota 0 L.+1 | odd k] = [seq k <- iota 1 L | odd k].
+Proof. by case: L. Qed.
+
+Lemma sumn_filter_map {A : eqType} (p : pred A) (f : A -> nat) (s : seq A) :
+  sumn [seq f x | x <- [seq x <- s | p x]] =
+  sumn [seq (if p x then f x else 0) | x <- s].
+Proof. by elim: s => [|a s IH] //=; case: (p a) => /=; rewrite IH. Qed.
+
+Lemma spos_unfold n r L :
+  spos n r L = sumn [seq (if ~~ odd k then 'C(n, k) * 'C(L - k + r, r) else 0)
+                     | k <- iota 0 L.+1].
+Proof. by rewrite /spos sumn_filter_map. Qed.
+
+Lemma sneg_unfold n r L :
+  sneg n r L = sumn [seq (if odd k then 'C(n, k) * 'C(L - k + r, r) else 0)
+                     | k <- iota 0 L.+1].
+Proof. by rewrite /sneg sumn_filter_map. Qed.
+
+Lemma spos_split n r L :
+  spos n r L =
+  'C(L + r, r) +
+  sumn [seq (if ~~ odd k then 'C(n, k) * 'C(L - k + r, r) else 0)
+       | k <- iota 1 L].
+Proof.
+by rewrite spos_unfold /sumn /= -/(sumn _) bin0 mul1n subn0.
+Qed.
+
+Lemma sneg_eq_tail n r L :
+  sneg n r L =
+  sumn [seq (if odd k then 'C(n, k) * 'C(L - k + r, r) else 0)
+       | k <- iota 1 L].
+Proof.
+by rewrite sneg_unfold /sumn /= -/(sumn _).
+Qed.
+
+Arguments sumn : simpl never.
+
+Lemma sumn_map_add {A : Type} (f g : A -> nat) (s : seq A) :
+  sumn [seq f x + g x | x <- s] =
+  sumn [seq f x | x <- s] + sumn [seq g x | x <- s].
+Proof. by elim: s => [|a s IH] //; rewrite /sumn /= -/(sumn _) IH addnACA. Qed.
+
+Lemma sumn_map_split (f g h : nat -> nat) m M :
+  (forall k, m <= k -> f k = g k + h k) ->
+  sumn [seq f k | k <- iota m M] =
+  sumn [seq g k | k <- iota m M] + sumn [seq h k | k <- iota m M].
+Proof.
+move=> H; elim: M m H => [|M IH] m H //.
+rewrite /sumn /= -/(sumn _) -/(sumn _) -/(sumn _).
+by rewrite H // (IH _ (fun k Hk => H k (ltnW Hk))) addnACA.
+Qed.
+
+Lemma sumn_map_eq (f g : nat -> nat) m M :
+  (forall k, m <= k -> f k = g k) ->
+  sumn [seq f k | k <- iota m M] = sumn [seq g k | k <- iota m M].
+Proof.
+move=> H; elim: M m H => [|M IH] m H //.
+rewrite /sumn /= -/(sumn _) -/(sumn _).
+by rewrite H // IH // => k /ltnW /H.
+Qed.
+
+Lemma sumn_shift_even_to_odd_gen (g : nat -> nat) m M :
+  sumn [seq (if ~~ odd k then g k.-1 else 0) | k <- iota m.+1 M] =
+  sumn [seq (if odd j then g j else 0) | j <- iota m M].
+Proof.
+by elim: M m => [|M IH] m //;
+  rewrite /sumn /= -/(sumn _) -/(sumn _) (IH m.+1) negbK.
+Qed.
+
+Lemma sumn_shift_odd_to_even_gen (g : nat -> nat) m M :
+  sumn [seq (if odd k then g k.-1 else 0) | k <- iota m.+1 M] =
+  sumn [seq (if ~~ odd j then g j else 0) | j <- iota m M].
+Proof.
+by elim: M m => [|M IH] m //;
+  rewrite /sumn /= -/(sumn _) -/(sumn _) (IH m.+1).
+Qed.
+
+Lemma sumn_iota_map0 (f : nat -> nat) m M :
+  (forall k, m <= k -> f k = 0) -> sumn [seq f k | k <- iota m M] = 0.
+Proof.
+move=> Hf; elim: M m Hf => [|M IH] m Hf //.
+rewrite /sumn /= -/(sumn _).
+rewrite Hf // IH // => k Hk.
+by apply: Hf; exact: ltnW.
+Qed.
+
+Lemma spos_L0 n r : spos n r 0 = 'C(r, r).
+Proof. by rewrite /spos /sumn /= bin0 mul1n subn0 add0n addn0. Qed.
+
+Lemma sneg_L0 n r : sneg n r 0 = 0.
+Proof. by rewrite /sneg /sumn. Qed.
+
+Lemma spos0 r L : spos 0 r L = 'C(L + r, r).
+Proof.
+rewrite spos_unfold /sumn /= -/(sumn _) mul1n subn0.
+suff -> : sumn [seq (if ~~ odd k then 'C(0, k) * 'C(L - k + r, r) else 0)
+               | k <- iota 1 L] = 0 by rewrite addn0.
+apply: sumn_iota_map0 => k Hk.
+by case: (~~ odd k) => //=; rewrite (bin_small Hk) mul0n.
+Qed.
+
+Lemma sneg0 r L : sneg 0 r L = 0.
+Proof.
+rewrite sneg_unfold /=.
+apply: sumn_iota_map0 => k Hk.
+by case: (odd k) => //=; rewrite (bin_small Hk) mul0n.
+Qed.
+
+Lemma binSn n k : 0 < k ->
+  'C(n.+1, k) = 'C(n, k) + 'C(n, k.-1).
+Proof. by case: k => // k _; rewrite binS addnC. Qed.
+
+(* Core identity for spos_pascal: decomposes even-parity sum using
+   Pascal's rule C(n+1,k) = C(n,k) + C(n,k-1) and reindexing. *)
+Lemma spos_pascal_core n r L :
+  sumn [seq (if ~~ odd k then 'C(n.+1, k) * 'C(L.+1 - k + r, r) else 0)
+       | k <- iota 1 L.+1] =
+  sumn [seq (if ~~ odd k then 'C(n, k) * 'C(L.+1 - k + r, r) else 0)
+       | k <- iota 1 L.+1] +
+  sumn [seq (if odd k then 'C(n, k) * 'C(L - k + r, r) else 0)
+       | k <- iota 0 L.+1].
+Proof.
+transitivity (
+  sumn [seq (if ~~ odd k then 'C(n, k) * 'C(L.+1 - k + r, r) else 0)
+       | k <- iota 1 L.+1] +
+  sumn [seq (if ~~ odd k then 'C(n, k.-1) * 'C(L.+1 - k + r, r) else 0)
+       | k <- iota 1 L.+1]).
+  apply: sumn_map_split => k Hk /=.
+  case: (~~ odd k) => //=.
+  by rewrite binSn // -mulnDl.
+set X := sumn [seq (if ~~ odd k then 'C(n, k) * 'C(L.+1 - k + r, r) else 0)
+              | k <- iota 1 L.+1].
+suff -> : sumn [seq (if ~~ odd k then 'C(n, k.-1) * 'C(L.+1 - k + r, r) else 0)
+               | k <- iota 1 L.+1] =
+          sumn [seq (if odd k then 'C(n, k) * 'C(L - k + r, r) else 0)
+               | k <- iota 0 L.+1] by [].
+rewrite -(sumn_shift_even_to_odd_gen
+            (fun j => 'C(n, j) * 'C(L - j + r, r)) 0 L.+1).
+apply: sumn_map_eq => k Hk /=.
+case: (~~ odd k) => //=.
+congr (_ * _).
+by case: k Hk => // k _; rewrite subSS.
+Qed.
+
+(* Core identity for sneg_pascal: decomposes odd-parity sum using
+   Pascal's rule and reindexing. *)
+Lemma sneg_pascal_core n r L :
+  sumn [seq (if odd k then 'C(n.+1, k) * 'C(L.+1 - k + r, r) else 0)
+       | k <- iota 1 L.+1] =
+  sumn [seq (if odd k then 'C(n, k) * 'C(L.+1 - k + r, r) else 0)
+       | k <- iota 1 L.+1] +
+  sumn [seq (if ~~ odd k then 'C(n, k) * 'C(L - k + r, r) else 0)
+       | k <- iota 0 L.+1].
+Proof.
+transitivity (
+  sumn [seq (if odd k then 'C(n, k) * 'C(L.+1 - k + r, r) else 0)
+       | k <- iota 1 L.+1] +
+  sumn [seq (if odd k then 'C(n, k.-1) * 'C(L.+1 - k + r, r) else 0)
+       | k <- iota 1 L.+1]).
+  apply: sumn_map_split => k Hk /=.
+  case: (odd k) => //=.
+  by rewrite binSn // -mulnDl.
+set X := sumn [seq (if odd k then 'C(n, k) * 'C(L.+1 - k + r, r) else 0)
+              | k <- iota 1 L.+1].
+suff -> : sumn [seq (if odd k then 'C(n, k.-1) * 'C(L.+1 - k + r, r) else 0)
+               | k <- iota 1 L.+1] =
+          sumn [seq (if ~~ odd k then 'C(n, k) * 'C(L - k + r, r) else 0)
+               | k <- iota 0 L.+1] by [].
+rewrite -(sumn_shift_odd_to_even_gen
+            (fun j => 'C(n, j) * 'C(L - j + r, r)) 0 L.+1).
+apply: sumn_map_eq => k Hk /=.
+case: (odd k) => //=.
+congr (_ * _).
+by case: k Hk => // k _; rewrite subSS.
+Qed.
+
+Lemma spos_pascal n r L :
+  spos n.+1 r L.+1 = spos n r L.+1 + sneg n r L.
+Proof.
+rewrite (spos_split n.+1) (spos_split n r L.+1) (sneg_unfold n r L).
+by rewrite spos_pascal_core addnA.
+Qed.
+
+Lemma sneg_pascal n r L :
+  sneg n.+1 r L.+1 = sneg n r L.+1 + spos n r L.
+Proof.
+rewrite (sneg_eq_tail n.+1 r L.+1) (sneg_eq_tail n r L.+1) (spos_unfold n r L).
+by rewrite sneg_pascal_core addnA.
+Qed.
+
+Lemma spos_inv n r L : n <= r ->
+  spos n r L = 'C(L + r - n, r - n) + sneg n r L.
+Proof.
+elim: n r L => [|n IHn] r L Hrn.
+  by rewrite spos0 sneg0 addn0 subn0 subn0.
+case: L => [|L].
+  by rewrite spos_L0 sneg_L0 addn0 add0n binn binn.
+rewrite spos_pascal sneg_pascal.
+rewrite (IHn r L.+1 (ltnW Hrn)) (IHn r L (ltnW Hrn)).
+(* Goal: 'C(L.+1+r-n, r-n) + sneg n r L.+1 + sneg n r L =
+         'C(L.+1+r-n.+1, r-n.+1) + (sneg n r L.+1 + ('C(L+r-n, r-n) + sneg n r L)) *)
+set a := 'C(L.+1 + r - n, r - n).
+set b := sneg n r L.+1.
+set c := sneg n r L.
+set d := 'C(L.+1 + r - n.+1, r - n.+1).
+set e := 'C(L + r - n, r - n).
+(* Goal: a + b + c = d + (b + (e + c)) *)
+suff -> : a = d + e.
+  (* d + e + b + c = d + (b + (e + c)) *)
+  by rewrite [d + e + b]addnAC addnA addnA.
+subst a d e.
+(* Goal: 'C(L.+1+r-n, r-n) = 'C(L.+1+r-n.+1, r-n.+1) + 'C(L+r-n, r-n) *)
+have Hrn' : n <= L + r by apply: (leq_trans (ltnW Hrn)); exact: leq_addl.
+have Heq1 : L.+1 + r - n.+1 = L + r - n by rewrite addSn subSS.
+have Heq2 : r - n = (r - n.+1).+1 by rewrite subnS prednK // subn_gt0.
+have Heq3 : L.+1 + r - n = (L + r - n).+1 by rewrite addSn (subSn Hrn').
+by rewrite Heq1 Heq2 Heq3 binS addnC.
+Qed.
+
+Lemma spos_eq_sneg n L :
+  spos n.+1 n L.+1 = sneg n.+1 n L.+1.
+Proof.
+rewrite spos_pascal sneg_pascal.
+rewrite (@spos_inv n n L.+1 (leqnn n)) (@spos_inv n n L (leqnn n)).
+by rewrite (subnn n) addnK addnK bin0 bin0 addnCA.
+Qed.
+
+Lemma pos_eq_sneg_range Tg r L :
+  sumn [seq 'C(Tg, k) * 'C(L - k + r, r)
+       | k <- [seq k <- iota 1 L | odd k]] =
+  sneg Tg r L.
+Proof. by rewrite sneg_eq_tail sumn_filter_map. Qed.
+
+Lemma neg_eq_spos_sub Tg r L :
+  sumn [seq 'C(Tg, k) * 'C(L - k + r, r)
+       | k <- [seq k <- iota 1 L | ~~ odd k]] =
+  spos Tg r L - 'C(L + r, r).
+Proof. by rewrite spos_split sumn_filter_map addKn. Qed.
+
+Lemma clique_step_abelian Tg memo :
+  0 < Tg -> 0 < size memo ->
+  (forall i, i < size memo -> nth 0 memo i = 'C(i + Tg.-1, Tg.-1)) ->
+  clique_step Tg complete_comm_nat memo = 'C(size memo + Tg.-1, Tg.-1).
+Proof.
+move=> HTg Hpos Hmemo.
+rewrite /clique_step.
+set L := size memo.
+set r := Tg.-1.
+have Hmap_eq : forall (p : pred nat),
+  [seq clique_count Tg k complete_comm_nat * nth 0 memo (L - k)
+      | k <- [seq k <- iota 1 L | p k]] =
+  [seq 'C(Tg, k) * 'C(L - k + r, r)
+      | k <- [seq k <- iota 1 L | p k]].
+  move=> p; apply/eq_in_map => k Hk.
+  rewrite complete_clique_count.
+  suff -> : nth 0 memo (L - k) = 'C(L - k + r, r) by [].
+  apply: Hmemo.
+  rewrite mem_filter mem_iota in Hk.
+  case/andP: Hk => _ /andP [Hk1 Hk2].
+  by rewrite /L ltn_subrL Hk1 Hpos.
+have Hpos_eq := congr1 sumn (Hmap_eq odd).
+have Hneg_eq := congr1 sumn (Hmap_eq (fun k => ~~ odd k)).
+rewrite Hpos_eq Hneg_eq pos_eq_sneg_range neg_eq_spos_sub.
+subst r; case: Tg HTg {Hpos_eq Hneg_eq Hmap_eq Hmemo} => // Tg _ /=.
+rewrite /L; case: (size memo) Hpos => [|L'] // _.
+by rewrite spos_eq_sneg subKn // -spos_eq_sneg spos_split leq_addr.
+Qed.
+
+Lemma clique_traces_aux_inv_abelian Tg n memo :
+  0 < Tg -> 0 < size memo ->
+  (forall i, i < size memo -> nth 0 memo i = 'C(i + Tg.-1, Tg.-1)) ->
+  clique_traces_aux Tg complete_comm_nat n memo =
+  memo ++ [seq 'C(size memo + i + Tg.-1, Tg.-1) | i <- iota 0 n].
+Proof.
+elim: n memo => [|n IH] memo HTg Hpos Hmemo /=.
+  by rewrite cats0.
+rewrite IH.
+- rewrite size_rcons -cats1 -catA /=.
+  congr (memo ++ _); congr cons.
+  + by rewrite clique_step_abelian // addn0.
+  + rewrite -[1]addn0 iotaDl -map_comp /=.
+    by apply: eq_map => i /=; rewrite addSn addnS.
+- done.
+- by rewrite size_rcons.
+- move=> i; rewrite size_rcons nth_rcons ltnS.
+  case: (ltnP i (size memo)) => Hi Hi2.
+    exact: Hmemo.
+  have -> : i = size memo by apply/anti_leq/andP; split.
+  by rewrite eqxx clique_step_abelian // addn0.
+Qed.
+
 Lemma clique_traces_abelian Tg L :
+  0 < Tg ->
   clique_traces Tg L complete_comm_nat = 'C(L + Tg.-1, Tg.-1).
 Proof.
-(* Requires the Vandermonde-Chu identity to show that the clique recurrence
-   with c_k = C(Tg,k) produces the multiset coefficient C(L+Tg-1, Tg-1). *)
-Admitted.
+move=> HTg.
+rewrite /clique_traces.
+rewrite clique_traces_aux_inv_abelian //; last first.
+  move=> [|i] _ //=.
+  by rewrite add0n binn.
+case: L => [|L].
+  by rewrite /= add0n binn.
+have -> : nth 0 ([:: 1] ++ [seq 'C(1 + i + Tg.-1, Tg.-1)
+            | i <- iota 0 L.+1]) L.+1 =
+          nth 0 [seq 'C(1 + i + Tg.-1, Tg.-1) | i <- iota 0 L.+1] L by [].
+by rewrite (nth_map 0) ?size_iota // nth_iota // add0n addnC addnA.
+Qed.
 
 (* --- vm_compute verification of growth rate formulas --- *)
 

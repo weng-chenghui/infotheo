@@ -352,6 +352,88 @@ Lemma card_pgg_word_succ (L : nat) :
   #|{: pgg_word M L}| = (Tg ^ L).-1.+1.
 Proof. by rewrite card_pgg_word prednK // expn_gt0. Qed.
 
+(* --- Uniform fiber counting for tuples --- *)
+
+(* For two distinct positions i, j in an (m.+2)-tuple over T, the number
+   of tuples with prescribed values at i and j is #|T|^m. *)
+
+Section fiber_count.
+Variable T : finType.
+Variable m : nat.
+Variables (fi fj : 'I_m.+2).
+Hypothesis Hfij : fi != fj.
+
+Let fib (a b : T) :=
+  [set w : m.+2.-tuple T | (tnth w fi == a) && (tnth w fj == b)].
+
+Let tsp (w : m.+2.-tuple T) (a b : T) : m.+2.-tuple T :=
+  [tuple if k == fi then a
+         else if k == fj then b
+         else tnth w k | k < m.+2].
+
+Let tnth_tsp (w : m.+2.-tuple T) (a b : T) (k : 'I_m.+2) :
+  tnth (tsp w a b) k =
+  if k == fi then a else if k == fj then b else tnth w k.
+Proof. by rewrite /tsp tnth_mktuple. Qed.
+
+Let tsp_id (w : m.+2.-tuple T) :
+  tsp w (tnth w fi) (tnth w fj) = w.
+Proof.
+apply: eq_from_tnth => k; rewrite tnth_tsp.
+by case: (k =P fi) => [-> | _] //; case: (k =P fj) => [-> | _].
+Qed.
+
+Let tsp_compose (w : m.+2.-tuple T) (a b a' b' : T) :
+  tsp (tsp w a b) a' b' = tsp w a' b'.
+Proof.
+apply: eq_from_tnth => k; rewrite !tnth_tsp.
+by case: (k =P fi) => // _; case: (k =P fj).
+Qed.
+
+Let tsp_in_fib (w : m.+2.-tuple T) (a b : T) :
+  tsp w a b \in fib a b.
+Proof.
+rewrite inE !tnth_tsp eqxx /=.
+by rewrite ifN ?eqxx //; rewrite eq_sym.
+Qed.
+
+Let fib_leq (a b a' b' : T) : #|fib a b| <= #|fib a' b'|.
+Proof.
+have Hinj : {in fib a b &, injective (fun w => tsp w a' b')}.
+  move=> w1 w2 Hw1 Hw2 Heq.
+  have Hsp1 : tsp w1 a b = w1.
+    by move: Hw1; rewrite inE => /andP [/eqP Hi /eqP Hj]; rewrite -Hi -Hj tsp_id.
+  have Hsp2 : tsp w2 a b = w2.
+    by move: Hw2; rewrite inE => /andP [/eqP Hi /eqP Hj]; rewrite -Hi -Hj tsp_id.
+  have := congr1 (fun w => tsp w a b) Heq.
+  by rewrite !tsp_compose Hsp1 Hsp2.
+rewrite -(card_in_imset Hinj).
+apply: subset_leq_card.
+by apply/subsetP => w /imsetP [w' Hw' ->]; exact: tsp_in_fib.
+Qed.
+
+Lemma fiber_count_card (a b : T) :
+  #|fib a b| = #|T| ^ m.
+Proof.
+have fib_eq : forall a0 b0 a1 b1 : T, #|fib a0 b0| = #|fib a1 b1|
+  by move=> *; apply/eqP; rewrite eqn_leq !fib_leq.
+have Htotal : \sum_(p : (T * T)%type) #|fib p.1 p.2| = #|{: m.+2.-tuple T}|.
+  rewrite -sum1_card
+    (partition_big (fun w : m.+2.-tuple T => (tnth w fi, tnth w fj))
+      xpredT) //=.
+  apply: eq_bigr => [[a0 b0]] _.
+  rewrite -sum1_card; apply: eq_bigl => w.
+  by rewrite inE xpair_eqE.
+rewrite (eq_bigr (fun _ => #|fib a b|)) in Htotal;
+  last by move=> [a' b'] _; exact: fib_eq.
+rewrite sum_nat_const card_tuple card_prod in Htotal.
+have Hpos : 0 < #|T| by apply/card_gt0P; exists a.
+rewrite !expnS mulnA in Htotal.
+by move/eqP: Htotal; rewrite eqn_pmul2l ?muln_gt0 ?Hpos // => /eqP.
+Qed.
+
+End fiber_count.
+
 (* --- Counting: total commuting pairs across all words --- *)
 
 (* The total number of (word, commuting-position) pairs.
@@ -373,15 +455,60 @@ Lemma total_comm_pairs (L : nat) :
   | L''.+2 => L''.+1 * edge_count * Tg ^ L''
   end.
 Proof.
-(* The key idea: exchange the order of summation.
-   sum_w sum_{k < L-1} [comm w_k w_{k+1}]
-   = sum_{k < L-1} sum_w [comm w_k w_{k+1}]
-   = sum_{k < L-1} edge_count * Tg^(L-2)
-   = (L-1) * edge_count * Tg^(L-2)
-
-   Each inner sum counts words where positions k and k+1 form a
-   commuting pair, with Tg^(L-2) free choices for the other positions. *)
-Admitted.
+case: L => [|[|L'']].
+- by rewrite big1.
+- rewrite big1 // => w _.
+  rewrite /comm_pair_count /=.
+  by rewrite (_ : #|_| = 0) //; apply: eq_card0 => -[].
+- (* L = L''.+2: exchange summation, partition by pair, count fibers *)
+  (* Step 1: Rewrite comm_pair_count as a sum over positions *)
+  transitivity (\sum_(w : pgg_word M L''.+2) \sum_(k < L''.+1)
+    (comm (tnth w (@Ordinal L''.+2 (val k)
+                    (ltn_trans (ltn_ord k) (ltnSn L''.+1))))
+          (tnth w (@Ordinal L''.+2 (val k).+1 (ltn_ord k))) : nat)).
+  { apply: eq_bigr => w _ /=.
+    rewrite -sum1_card big_mkcond /=.
+    apply: eq_bigr => k _.
+    by rewrite inE; case: (comm _ _). }
+  (* Step 2: Exchange order of summation *)
+  rewrite exchange_big /=.
+  (* Step 3: For each position k, partition by the pair at k,k+1 *)
+  transitivity (\sum_(k < L''.+1) (edge_count * Tg ^ L'')).
+  { apply: eq_bigr => k _.
+    set k0 : 'I_L''.+2 := @Ordinal L''.+2 (val k)
+      (ltn_trans (ltn_ord k) (ltnSn L''.+1)).
+    set k1 : 'I_L''.+2 := @Ordinal L''.+2 (val k).+1 (ltn_ord k).
+    have Hk01 : k0 != k1.
+      by apply/eqP => Heq; have := congr1 val Heq => /= /n_Sn.
+    rewrite (partition_big (fun w : L''.+2.-tuple 'I_Tg =>
+      (tnth w k0, tnth w k1)) xpredT) //=.
+    (* Replace inner sums with (comm p.1 p.2) * fiber_size *)
+    transitivity (\sum_(p : ('I_Tg * 'I_Tg)%type)
+      (comm p.1 p.2 : nat) *
+      #|[set w : L''.+2.-tuple 'I_Tg |
+          (tnth w k0 == p.1) && (tnth w k1 == p.2)]|).
+    { apply: eq_bigr => [[a b]] _.
+      case Hab : (comm a b).
+      - rewrite mul1n -sum1_card.
+        apply: eq_big => w.
+          by rewrite inE xpair_eqE.
+        by rewrite xpair_eqE => /andP [/eqP -> /eqP ->]; rewrite Hab.
+      - rewrite mul0n big1 // => w.
+        by rewrite xpair_eqE => /andP [/eqP -> /eqP ->]; rewrite Hab. }
+    (* Each fiber has size Tg^L'' *)
+    transitivity (\sum_(p : ('I_Tg * 'I_Tg)%type)
+      (comm p.1 p.2 : nat) * Tg ^ L'').
+    { apply: eq_bigr => [[a b]] _.
+      congr (_ * _).
+      rewrite (@fiber_count_card _ _ _ _ Hk01).
+      by rewrite card_ord. }
+    (* Factor out Tg^L'' and identify edge_count *)
+    rewrite -big_distrl /=; congr (_ * _).
+    symmetry; rewrite /edge_count -sum1_card big_mkcond /=.
+    by apply: eq_bigr => -[a b] _; rewrite inE; case: (comm a b). }
+  (* Step 4: L''.+1 copies of edge_count * Tg^L'' *)
+  by rewrite big_const_ord iter_addn_0 mulnC -mulnA.
+Qed.
 
 (* Average number of commuting pairs per word *)
 (* E[comm_pair_count] = L.-1 * edge_count / Tg^2 *)
