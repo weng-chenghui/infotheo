@@ -20,7 +20,7 @@
 (*                                                                            *)
 (* Section partial_reconstruction:                                            *)
 (*   partial_sum  == partial sum over a coalition C of parties                 *)
-(*   partial_sum_no_info == partial sums don't reveal m (stated as axiom)     *)
+(*   partial_sum_no_info == partial sums don't reveal m                      *)
 (******************************************************************************)
 
 From mathcomp Require Import ssreflect ssrbool ssrfun eqtype ssrnat seq.
@@ -254,10 +254,7 @@ Qed.
    Informally: knowing sum_{i in C} e_i mod N does not reveal m
    when |C| < T, because the remaining T - |C| unknown sheets
    can sum to any residue mod N. *)
-(* This is stated as an axiom for now; a full proof would require
-   showing that for any target value, there exist valid completions
-   of the unknown shares. *)
-Axiom partial_sum_no_info :
+Lemma partial_sum_no_info :
   forall (m1 m2 : 'I_N),
     #|C| < T ->
     sum_mod_valid sheets m1 ->
@@ -266,6 +263,42 @@ Axiom partial_sum_no_info :
       sum_mod_valid sheets' m2 /\
       (forall i : 'I_T, i \in C -> tnth sheets' i = tnth sheets i) /\
       (\sum_(i in C) (sigma (tnth sheets' i) : nat)) %% N = partial_sum.
+Proof.
+move=> m1 m2 HC Hvalid.
+have HCT : ~~ (setT \subset C).
+  apply/negP => /subset_leqif_cards [].
+  by rewrite cardsT card_ord leqNgt HC.
+have [j _ HjC] : exists2 j, j \in [set: 'I_T] & j \notin C.
+  exact/subsetPn.
+set rest := \sum_(i < T | i != j) (tnth sheets i : nat).
+set new_j_val := (val m2 + N * rest.+1 - rest) %% N.
+have Hnew_j_lt : new_j_val < N by exact: ltn_pmod.
+set new_j := Ordinal Hnew_j_lt : 'I_N.
+set sheets' := [tuple if i == j then new_j else tnth sheets i | i < T].
+exists sheets'.
+have Hsheet_other : forall i : 'I_T, i != j -> tnth sheets' i = tnth sheets i.
+  by move=> i Hi; rewrite /sheets' tnth_mktuple (negbTE Hi).
+have Hj_notin : forall i : 'I_T, i \in C -> i != j.
+  move=> i HiC; apply/negP => /eqP Hij.
+  by move: HjC; rewrite -Hij HiC.
+split; [|split].
+- rewrite /sum_mod_valid /sheets_sum.
+  have -> : \sum_(i < T) (tnth sheets' i : nat) = new_j_val + rest.
+    rewrite /rest (bigD1 j) //=.
+    congr (_ + _).
+    + by rewrite /sheets' tnth_mktuple eqxx.
+    + by apply: eq_bigr => i Hi; rewrite Hsheet_other.
+  rewrite /new_j_val modnDml subnK; last first.
+    have H1 : rest <= rest.+1 := leqnSn rest.
+    have H2 : rest.+1 <= N * rest.+1 := leq_pmull rest.+1 (isT : 0 < N).
+    exact: leq_trans H1 (leq_trans H2 (leq_addl _ _)).
+  rewrite mulnC addnC modnMDl.
+  apply: modn_small.
+  exact: (valP m2).
+- by move=> i HiC; rewrite Hsheet_other // Hj_notin.
+- rewrite /partial_sum; congr (_ %% N).
+  by apply: eq_bigr => i HiC; rewrite Hsheet_other // Hj_notin.
+Qed.
 
 End partial_reconstruction.
 
