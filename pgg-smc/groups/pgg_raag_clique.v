@@ -335,28 +335,127 @@ rewrite (eq_in_filter (a2 := predT)); first by rewrite filter_predT size_map siz
 by move=> s /mapP [x _ ->]; rewrite /all_pairs_comm_sorted /= eqxx.
 Qed.
 
+Lemma subseqs_k_subseq k s t : t \in subseqs_k k s -> subseq t s.
+Proof.
+elim: s k t => [|a s IHs] [|k] t //=.
+- by rewrite mem_seq1 => /eqP ->.
+- by rewrite mem_seq1 => /eqP ->.
+- rewrite mem_cat => /orP [/mapP [t' Ht' ->] | Ht].
+  + by rewrite /= eqxx; exact: IHs Ht'.
+  + exact: subseq_trans (IHs _ _ Ht) (subseq_cons _ _).
+Qed.
+
+Lemma all_pairs_false_neq (s : seq nat) (a b : nat) :
+  a \in s -> b \in s -> a != b ->
+  all_pairs_comm_sorted (fun _ _ => false) s = false.
+Proof.
+move=> Ha Hb Hab.
+apply/negbTE/negP.
+rewrite /all_pairs_comm_sorted => /allP /(_ a Ha) /allP /(_ b Hb).
+by rewrite (negbTE Hab).
+Qed.
+
 Lemma empty_clique_countk Tg k :
   2 <= k -> clique_count Tg k (fun _ _ => false) = 0.
 Proof.
-(* For k >= 2, no k-subset can be a clique when comm is always false,
-   because any two distinct elements a, b have comm a b = false.
-   Elements of subseqs_k k (iota 0 Tg) have size k >= 2 and are
-   subsequences of the strictly increasing iota, hence have distinct
-   elements. Verified by vm_compute for concrete Tg. *)
-Admitted.
+move=> Hk.
+rewrite /clique_count /cliques_of_size.
+rewrite (eq_in_filter (a2 := pred0)); first by rewrite filter_pred0.
+move=> s Hs /=.
+have Hsz := subseqs_k_size Hs.
+have Huniq := subseq_uniq (subseqs_k_subseq Hs) (iota_uniq 0 Tg).
+have Hsz2 : 2 <= size s by rewrite Hsz.
+suff [a [b [Ha [Hb Hab]]]] : exists a b, a \in s /\ b \in s /\ a != b.
+  exact: all_pairs_false_neq Ha Hb Hab.
+case: s {Hs Hsz} Hsz2 Huniq => [|a [|b s]] // _ /andP [Ha Huniq'].
+exists a, b; split; first by exact: mem_head.
+split; first by rewrite in_cons mem_head orbT.
+by move: Ha; rewrite in_cons negb_or => /andP [].
+Qed.
 
 (* --- Free case: clique_traces Tg L (fun _ _ => false) = Tg^L --- *)
 (* For empty graph: c_0=1, c_1=Tg, c_k=0 for k>=2.
    Recurrence: m_L = Tg * m_{L-1}, m_0 = 1, so m_L = Tg^L. *)
 
+(* Helper: sumn of all-zero map is 0 *)
+Lemma sumn_map_0 {A : eqType} (f : A -> nat) (s : seq A) :
+  (forall x, x \in s -> f x = 0) -> sumn [seq f x | x <- s] = 0.
+Proof.
+elim: s => [|a s IH] //= Hf.
+rewrite Hf ?IH // ?mem_head //.
+by move=> x Hx; apply: Hf; rewrite in_cons Hx orbT.
+Qed.
+
+(* clique_step for empty graph = Tg * previous element *)
+Lemma clique_step_free Tg memo :
+  0 < size memo ->
+  clique_step Tg (fun _ _ => false) memo = Tg * nth 0 memo (size memo - 1).
+Proof.
+move=> Hpos.
+rewrite /clique_step.
+have Hneg : sumn [seq clique_count Tg k (fun _ _ => false) *
+                       nth 0 memo (size memo - k)
+                  | k <- [seq k <- iota 1 (size memo) | ~~ odd k]] = 0.
+  apply: sumn_map_0 => k.
+  rewrite mem_filter => /andP [Heven Hk_iota].
+  have Hk2 : 2 <= k.
+    rewrite mem_iota in Hk_iota.
+    by case: k Heven Hk_iota => [|[|k']] //=.
+  by rewrite empty_clique_countk // mul0n.
+rewrite Hneg subn0.
+case: (size memo) Hpos => [|n] // _.
+rewrite //=.
+rewrite empty_clique_count1.
+have Hrest : sumn [seq clique_count Tg k (fun _ _ => false) *
+                        nth 0 memo (n.+1 - k)
+                   | k <- [seq k <- iota 2 n | odd k]] = 0.
+  apply: sumn_map_0 => k.
+  rewrite mem_filter => /andP [_ Hk_iota].
+  have Hk2 : 2 <= k.
+    by rewrite mem_iota in Hk_iota; case/andP: Hk_iota.
+  by rewrite empty_clique_countk // mul0n.
+by rewrite Hrest addn0.
+Qed.
+
+(* Invariant: clique_traces_aux extends memo with powers of Tg *)
+Lemma clique_traces_aux_inv Tg n memo :
+  0 < size memo ->
+  (forall i, i < size memo -> nth 0 memo i = Tg ^ i) ->
+  clique_traces_aux Tg (fun _ _ => false) n memo =
+  memo ++ [seq Tg ^ (size memo + i) | i <- iota 0 n].
+Proof.
+elim: n memo => [|n IH] memo Hpos Hmemo /=.
+  by rewrite cats0.
+rewrite IH.
+- rewrite size_rcons -cats1 -catA /=.
+  congr (memo ++ _); congr cons.
+  + rewrite clique_step_free // Hmemo;
+      last by rewrite ltn_subrL Hpos.
+    by rewrite addn0 -expnS subn1 (prednK Hpos).
+  + rewrite -[1]addn0 iotaDl -map_comp /=.
+    by apply: eq_map => i /=; rewrite addSn addnS.
+- by rewrite size_rcons.
+- move=> i.
+  rewrite size_rcons nth_rcons ltnS.
+  case: (ltnP i (size memo)) => Hi Hi2.
+    exact: Hmemo.
+  have -> : i = size memo by apply/anti_leq/andP; split.
+  rewrite eqxx.
+  rewrite clique_step_free // Hmemo;
+    last by rewrite ltn_subrL Hpos.
+  by rewrite -expnS subn1 prednK.
+Qed.
+
 Lemma clique_traces_free Tg L :
   clique_traces Tg L (fun _ _ => false) = Tg ^ L.
 Proof.
-(* Inductive proof that memo after n steps is [1, Tg, Tg^2, ..., Tg^n].
-   The recurrence specializes to m_L = Tg * m_{L-1} since only c_1 = Tg
-   contributes.  The formal proof of this requires showing that
-   clique_step reduces to Tg * last 0 memo. *)
-Admitted.
+rewrite /clique_traces.
+rewrite clique_traces_aux_inv //; last by move=> [|i].
+case: L => [|L] //.
+have -> : nth 0 ([:: 1] ++ [seq Tg ^ (1 + i) | i <- iota 0 L.+1]) L.+1 =
+          nth 0 [seq Tg ^ (1 + i) | i <- iota 0 L.+1] L by [].
+by rewrite (nth_map 0) ?size_iota // nth_iota ?add1n.
+Qed.
 
 (* --- Abelian case: clique_traces Tg L (i != j) = C(L+Tg-1, Tg-1) --- *)
 (* For complete graph: c_k = C(Tg,k), P(z) = (1-z)^Tg.

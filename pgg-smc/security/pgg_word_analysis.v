@@ -88,9 +88,37 @@ Qed.
    partitions into pairs. *)
 Lemma edge_count_even : 2 %| edge_count.
 Proof.
-(* The combinatorial argument is standard but requires an involution
-   lemma not currently in the MathComp library. *)
-Admitted.
+rewrite /edge_count.
+pose swap_pair := fun (p : 'I_Tg * 'I_Tg) => (p.2, p.1).
+have Hinj : injective swap_pair by move=> [a1 a2] [b1 b2] /= [-> ->].
+set S_lt := [set p : 'I_Tg * 'I_Tg | comm p.1 p.2 && (val p.1 < val p.2)].
+set S_gt := [set p : 'I_Tg * 'I_Tg | comm p.1 p.2 && (val p.2 < val p.1)].
+have Hunion : [set p : 'I_Tg * 'I_Tg | comm p.1 p.2] = S_lt :|: S_gt.
+  apply/setP => -[i j]; rewrite !inE /=.
+  case Hc : (comm i j) => //=.
+  have Hij : val i != val j.
+    apply/negP => /eqP Heq.
+    have : i = j by apply/val_inj. move=> ?; subst.
+    by rewrite comm_irrefl in Hc.
+  by case: (ltngtP (val i) (val j)) Hij.
+have Hdisj : [disjoint S_lt & S_gt].
+  apply/pred0P => -[i j] /=; rewrite !inE /=.
+  case: (comm i j) => //=.
+  case: (ltngtP (val i) (val j)) => //= _;
+  by rewrite ?andbF.
+have Hcard_eq : #|S_gt| = #|S_lt|.
+  rewrite -(card_imset _ Hinj).
+  apply: eq_card => -[i j].
+  rewrite !inE /=.
+  apply/imsetP/andP.
+  - move=> [[j' i']] /=; rewrite inE /= => /andP [Hc Hlt] [-> ->].
+    by rewrite comm_sym Hc.
+  - move=> [Hc Hlt].
+    exists (j, i) => //=.
+    by rewrite inE /= comm_sym Hc Hlt.
+rewrite Hunion cardsU disjoint_setI0 // cards0 subn0 Hcard_eq addnn.
+by rewrite dvdn2 odd_double.
+Qed.
 
 (* ========================================================================== *)
 (* Section 2: Zero commuting pairs => singleton trace class                   *)
@@ -234,11 +262,78 @@ Lemma adj_swap_comm_pair_diff (L : nat) (w1 w2 : pgg_word M L) :
   (comm_pair_count w1 <= comm_pair_count w2 + 2) /\
   (comm_pair_count w2 <= comm_pair_count w1 + 2).
 Proof.
-(* The proof requires detailed case analysis on which positions change.
-   An adjacent swap at position k only affects the generators at positions
-   k-1, k, k+1, k+2, so only the commuting-pair status at positions
-   k-1, k, k+1 can change. *)
-Admitted.
+case: L w1 w2 => [|L'] w1 w2 //=.
+move/existsP => [k /andP [Hcomm_k /eqP Hw2]]; subst w2.
+set sw := @swap_word R L'.+1 k w1.
+set S1 := [set j : 'I_L' |
+  comm (tnth w1 (@Ordinal L'.+1 (val j) (ltn_trans (ltn_ord j) (ltnSn L'))))
+       (tnth w1 (@Ordinal L'.+1 (val j).+1 (ltn_ord j)))].
+set S2 := [set j : 'I_L' |
+  comm (tnth sw (@Ordinal L'.+1 (val j) (ltn_trans (ltn_ord j) (ltnSn L'))))
+       (tnth sw (@Ordinal L'.+1 (val j).+1 (ltn_ord j)))].
+have Hdiff : forall j : 'I_L', (j \in S1) != (j \in S2) ->
+  (val j == (val k).-1) || (val j == (val k).+1).
+  move=> j Hne.
+  case Hj1 : (val j == (val k).-1) => //=.
+  case Hj2 : (val j == (val k).+1) => //=.
+  exfalso; move: Hne; apply/negP; rewrite negbK.
+  case Hj3 : (val j == val k).
+  - have -> : j = k by apply: val_inj; exact: eqP Hj3.
+    rewrite !inE /sw !swap_word_tnth /= eqxx.
+    have -> : ((val k).+1 == val k) = false
+      by rewrite eq_sym -[X in X == _]addn0 -addn1 eqn_add2l.
+    rewrite eqxx.
+    by rewrite comm_sym.
+  - rewrite !inE /sw !swap_word_tnth /=.
+    rewrite Hj3 Hj2.
+    have Hj1k : (val j).+1 == val k = false.
+      apply/eqP => Heq.
+      by move: Hj1; rewrite -Heq -pred_Sn eqxx.
+    rewrite Hj1k.
+    by rewrite eqSS Hj3.
+set D := [set j : 'I_L' | (val j == (val k).-1) || (val j == (val k).+1)].
+have Hcard_val_eq : forall c : nat, #|[set j : 'I_L' | val j == c]| <= 1.
+  move=> c; case: (ltnP c L') => Hc.
+    rewrite (_ : [set _ | _] = [set Ordinal Hc]); first by rewrite cards1.
+    apply/setP => j; rewrite !inE.
+    by apply/eqP/eqP => [Hval | ->] //; apply/val_inj.
+  rewrite (_ : [set _ | _] = set0); first by rewrite cards0.
+  apply/setP => j; rewrite !inE.
+  by apply/negbTE/negP => /eqP Hval; move: (ltn_ord j); rewrite Hval ltnNge Hc.
+have HcardD : #|D| <= 2.
+  apply: (@leq_trans
+    (#|[set j : 'I_L' | val j == (val k).-1]| +
+     #|[set j : 'I_L' | val j == (val k).+1]|));
+    last by move: (Hcard_val_eq (val k).-1) (Hcard_val_eq (val k).+1);
+            case: #|_| => [|[|//]] _; case: #|_| => [|[|//]].
+  apply: (@leq_trans
+    (#|[set j : 'I_L' | val j == (val k).-1] :|:
+      [set j : 'I_L' | val j == (val k).+1]|)).
+    apply: subset_leq_card; apply/subsetP => j; rewrite !inE.
+    by case/orP => ->; [| rewrite orbT].
+  by rewrite cardsU; apply: leq_subr.
+have Hsub12 : S1 :\: S2 \subset D.
+  apply/subsetP => j /setDP [HjS1 HjnS2].
+  by rewrite inE; apply: Hdiff; rewrite HjS1 (negbTE HjnS2).
+have Hsub21 : S2 :\: S1 \subset D.
+  apply/subsetP => j /setDP [HjS2 HjnS1].
+  by rewrite inE; apply: Hdiff; rewrite (negbTE HjnS1) HjS2.
+split.
+- have H2 := leq_trans (subset_leq_card Hsub12) HcardD.
+  have Hinter : #|S1 :&: S2| <= #|S2|
+    by apply: subset_leq_card; exact: subsetIr.
+  rewrite -[X in X <= _](cardsID S2 S1).
+  apply: (@leq_trans (#|S2| + #|S1 :\: S2|)).
+    by rewrite leq_add2r.
+  by rewrite leq_add2l.
+- have H2 := leq_trans (subset_leq_card Hsub21) HcardD.
+  have Hinter : #|S2 :&: S1| <= #|S1|
+    by apply: subset_leq_card; exact: subsetIr.
+  rewrite -[X in X <= _](cardsID S1 S2).
+  apply: (@leq_trans (#|S1| + #|S2 :\: S1|)).
+    by rewrite leq_add2r.
+  by rewrite leq_add2l.
+Qed.
 
 (* ========================================================================== *)
 (* Section 5: Word cardinality and counting                                   *)
@@ -300,14 +395,12 @@ Lemma zero_comm_pair_traces (L : nat) :
   #|[set w : pgg_word M L | comm_pair_count w == 0]| <=
   @n_traces R L.
 Proof.
-(* Each zero-count word is its own trace class (singleton), so
-   the number of such words <= number of trace classes. *)
-apply: (@leq_trans (@n_traces R L)) => //.
-(* n_traces = n_comp adj_swap_sym *)
-(* Each zero-count word is a root, and distinct zero-count words
-   are in distinct components (since their trace class is {w}).
-   So #{zero-count words} <= #{roots} = n_traces. *)
-Admitted.
+rewrite /n_traces /n_comp_mem.
+apply: subset_leq_card.
+apply/subsetP => w.
+rewrite !inE => /eqP H0.
+by rewrite andbT; apply/eqP; exact: comm_pair_count_zero_root H0.
+Qed.
 
 (* Lower bound: words with no commuting adjacent pairs contribute
    directly to trace count *)
