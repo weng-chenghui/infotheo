@@ -489,8 +489,66 @@ Qed.
 
 End lfree_collusion.
 
+(******************************************************************************)
+(*   Section 7: Generalized collusion bound for arbitrary coalition size k  *)
+(******************************************************************************)
+
+(* Generalization of the collusion bound to arbitrary coalition size k.
+   Instead of observing T-1 out of T endpoints (with 1 unobserved),
+   the adversary observes k out of N endpoints. The key insight is the
+   same: DPI (data processing inequality via var_dist_fdistmap) gives
+   the bound for ANY number of observed points. *)
+
+Section collusion_bound_k.
+
+Context {R : realType}.
+Variable N' : nat.
+Let N := N'.+1.
+
+(* Coalition size k (the number of parties the adversary controls) *)
+Variable k : nat.
+Hypothesis k_pos : (0 < k)%N.
+Hypothesis kN : (k <= N)%N.
+
+(* k distinct starting sheets observed by the coalition *)
+Variable obs_starts : k.-tuple 'I_N.
+Hypothesis obs_starts_uniq : uniq obs_starts.
+
+(* Assumption 1: distribution of rho(P) over S_N *)
+Variable rho_dist : R.-fdist {perm 'I_N}.
+Variable epsilon : R.
+Hypothesis epsilon_ge0 : 0 <= epsilon.
+
+Let card_perm_N : #|{perm 'I_N}| = (N`!.-1).+1 := card_permT_N N'.
+
+Hypothesis assumption1 :
+  var_dist rho_dist (fdist_uniform card_perm_N) <= epsilon.
+
+(* The joint observation function: sigma |-> (sigma(s_1), ..., sigma(s_k)) *)
+Definition joint_observation (sigma : {perm 'I_N}) : k.-tuple 'I_N :=
+  [tuple sigma (tnth obs_starts i) | i < k].
+
+(* The adversary's joint marginal *)
+Definition adversary_joint : R.-fdist (k.-tuple 'I_N) :=
+  fdistmap joint_observation rho_dist.
+
+(* The ideal joint distribution *)
+Definition ideal_joint : R.-fdist (k.-tuple 'I_N) :=
+  fdistmap joint_observation (fdist_uniform card_perm_N).
+
+(* Main theorem: DPI gives the bound for joint observations *)
+Theorem collusion_bound_k :
+  var_dist adversary_joint ideal_joint <= epsilon.
+Proof.
+rewrite /adversary_joint /ideal_joint.
+exact: (Order.POrderTheory.le_trans (var_dist_fdistmap _ _ _) assumption1).
+Qed.
+
+End collusion_bound_k.
+
 Check collusion_bound.
 Check collusion_bound_unconditional.
 Check collusion_bound_conditional.
 Check var_dist_lfree_uniform.
 Check var_dist_lfree_eval.
+Check collusion_bound_k.

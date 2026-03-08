@@ -148,9 +148,14 @@ pgg-smc/security/pgg_collusion_bound.v
 pgg-smc/security/pgg_word_analysis.v
 pgg-smc/security/pgg_abelian_collapse.v
 pgg-smc/security/pgg_security.v
+pgg-smc/reconstruct/pgg_sum_mod.v
+pgg-smc/reconstruct/pgg_assignment.v
+pgg-smc/reconstruct/pgg_deck_pairing.v
+pgg-smc/reconstruct/pgg_threshold.v
 
 -R . infotheo
 -R pgg-smc/lib pgg_smc
 -R pgg-smc/protocol pgg_smc
 -R pgg-smc/groups pgg_smc
 -R pgg-smc/security pgg_smc
+-R pgg-smc/reconstruct pgg_reconstruct

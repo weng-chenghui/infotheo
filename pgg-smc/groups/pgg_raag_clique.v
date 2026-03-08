@@ -861,9 +861,10 @@ Proof. by vm_compute. Qed.
 Lemma clique_traces_eq_natB (Tg L : nat) (comm : nat -> nat -> bool) :
   clique_traces Tg L comm = n_traces_natB Tg L comm.
 Proof.
-(* Requires a combinatorial proof of the Cartier-Foata identity relating
-   the independence polynomial (= reciprocal of clique polynomial) to the
-   trace-counting generating function.  Verified computationally for all
+(* Requires showing that n_traces_natB (using foata_nf) satisfies the same
+   clique polynomial recurrence as clique_traces.  This is the Cartier-Foata
+   identity: the first Foata layer is a sorted clique, decomposing NFs by
+   their first layer gives the recurrence.  Verified computationally for all
    concrete instances in this file. *)
 Admitted.
 
