@@ -90,6 +90,56 @@ Definition foata_nf (comm : nat -> nat -> bool) (w : seq nat) : seq nat :=
 Definition n_traces_natB (Tg L : nat) (comm : nat -> nat -> bool) : nat :=
   size (undup (map (foata_nf comm) (all_words Tg L))).
 
+(* Extensionality: foata_nf depends only on crel values at word elements *)
+Lemma foata_depth_at_ext comm1 comm2 prev x :
+  (forall a, a \in [seq p.2 | p <- prev] -> comm1 a x = comm2 a x) ->
+  foata_depth_at comm1 prev x = foata_depth_at comm2 prev x.
+Proof.
+rewrite /foata_depth_at.
+elim: prev 0 => [|[d v] prev IH] acc //= Heq.
+rewrite Heq; last by rewrite mem_head.
+apply: IH => a Ha.
+by apply: Heq; rewrite /= inE Ha orbT.
+Qed.
+
+Lemma foata_pairs_ext comm1 comm2 prev w :
+  (forall a b, a \in [seq p.2 | p <- prev] ++ w ->
+               b \in [seq p.2 | p <- prev] ++ w ->
+               comm1 a b = comm2 a b) ->
+  foata_pairs comm1 prev w = foata_pairs comm2 prev w.
+Proof.
+elim: w prev => [|x w IH] prev //= Heq.
+have Hdepth : foata_depth_at comm1 prev x = foata_depth_at comm2 prev x.
+  apply: foata_depth_at_ext => a Ha.
+  apply: Heq.
+  - by rewrite mem_cat Ha.
+  - by rewrite mem_cat inE eqxx orbT.
+rewrite Hdepth.
+apply: IH => a b.
+rewrite map_rcons cat_rcons => Ha' Hb'.
+exact: Heq.
+Qed.
+
+Lemma foata_nf_ext comm1 comm2 w :
+  (forall a b, a \in w -> b \in w -> comm1 a b = comm2 a b) ->
+  foata_nf comm1 w = foata_nf comm2 w.
+Proof.
+move=> Heq; rewrite /foata_nf.
+congr (map _ (sort _ _)).
+by apply: foata_pairs_ext => a b /=; exact: Heq.
+Qed.
+
+Lemma leq_sum_sub (I : finType) (P Q : pred I) (f : I -> nat) :
+  (forall i, P i -> Q i) ->
+  \sum_(i | P i) f i <= \sum_(i | Q i) f i.
+Proof.
+move=> HPQ.
+rewrite big_mkcond [X in _ <= X]big_mkcond.
+apply: leq_sum => i _.
+case HP : (P i) => //=.
+by rewrite (HPQ i HP).
+Qed.
+
 (* ========================================================================== *)
 (* RAAG mixin + structure                                                     *)
 (* ========================================================================== *)
@@ -1427,9 +1477,7 @@ Let foata_inv_swap_lt (crel : nat -> nat -> bool) w k :
              (nth (0, 0) (foata_pairs crel [::] w) k.+1) ->
   foata_inv crel (take k w ++ nth 0 w k.+1 :: nth 0 w k :: drop k.+2 w) <
   foata_inv crel w.
-Proof. admit. Admitted.
-(* TEMPORARILY COMMENTED OUT FOR TESTING
-Proof_disabled.
+Proof.
 move=> Hcsym Hk Hc Hdesc.
 set sw := take k w ++ _ :: _ :: _.
 have [Hnth Hsz] := foata_pairs_swap_nth Hcsym Hk Hc.
@@ -1466,18 +1514,11 @@ have Hk1 : k.+1 < size w := Hk.
 (* Strategy: show f'(i,j) <= f(tp i, tp j) for all i<j,
    with strict inequality at (k,k+1) *)
 (* Actually let me use a different approach: rewrite f' in terms of f *)
-suff Heq_sum : \sum_(i < size w) \sum_(j < size w | i < j)
-  (~~ dv_leq (nth (0, 0) ps' i) (nth (0, 0) ps' j)) =
-  (\sum_(i < size w) \sum_(j < size w | i < j)
-    (~~ dv_leq (nth (0, 0) ps i) (nth (0, 0) ps j))) - 1.
-  rewrite Heq_sum subn1 ltn_predL.
-  (* Need: 0 < \sum_i \sum_(j | i < j) (~~ dv_leq ...) *)
-  (* The term at (k, k+1) is nonzero by Hdesc *)
-  rewrite (bigD1 (Ordinal Hk')) //=.
-  apply: leq_trans; last exact: leq_addr.
-  rewrite (bigD1 (Ordinal Hk)) //=.
-  apply: leq_trans; last exact: leq_addr.
-  by rewrite Hdesc.
+suff Hlt_sum : \sum_(i < size w) \sum_(j < size w | i < j)
+  (~~ dv_leq (nth (0, 0) ps' i) (nth (0, 0) ps' j)) <
+  \sum_(i < size w) \sum_(j < size w | i < j)
+    (~~ dv_leq (nth (0, 0) ps i) (nth (0, 0) ps j)).
+  exact: Hlt_sum.
 (* Rewrite ps' using Hnth *)
 have Hnth_eq : forall i : 'I_(size w),
   nth (0, 0) ps' i =
@@ -1496,19 +1537,14 @@ have Htp_inv : forall i, tp (tp i) = i.
   by rewrite Hi Hi1.
 have Htp_inj : injective tp.
   by move=> i j Hij; rewrite -(Htp_inv i) -(Htp_inv j) Hij.
-(* sum_i sum_{j>i} f'(i,j) = sum_i sum_{j>i} f(tp i, tp j) *)
-transitivity (\sum_(i < size w) \sum_(j < size w | i < j)
-  (~~ dv_leq (nth (0, 0) ps (tp i)) (nth (0, 0) ps (tp j)))).
+(* Step A: LHS = sum with f(tp i, tp j) *)
+have Heq_tp : \sum_(i < size w) \sum_(j < size w | i < j)
+  (~~ dv_leq (nth (0, 0) ps' i) (nth (0, 0) ps' j)) =
+  \sum_(i < size w) \sum_(j < size w | i < j)
+  (~~ dv_leq (nth (0, 0) ps (tp i)) (nth (0, 0) ps (tp j))).
   apply: eq_bigr => i _; apply: eq_bigr => j _.
   by rewrite !Hnth_eq.
-(* Now show this equals the original sum minus 1 *)
-(* Split: isolate the (k, k+1) term *)
-(* Original sum has f(k,k+1) = 1 *)
-(* New sum has f(tp k, tp k+1) = f(k+1, k).
-   Since k < k+1, this is counted with i=k, j=k+1 in the new sum,
-   giving f(k+1, k) = ~~ dv_leq (ps k+1) (ps k) *)
-(* By totality: dv_leq total, so dv_leq (ps k) (ps k+1) || dv_leq (ps k+1) (ps k) *)
-(* Hdesc says ~~ dv_leq (ps k) (ps k+1), so dv_leq (ps k+1) (ps k) is true *)
+rewrite Heq_tp.
 have Hfix : dv_leq (nth (0, 0) ps k.+1) (nth (0, 0) ps k).
   by move: (dv_leq_total (nth (0, 0) ps k) (nth (0, 0) ps k.+1));
      rewrite (negbTE Hdesc).
@@ -1537,108 +1573,103 @@ have Hval_ik : forall j : 'I_(size w), val j = k -> j = ik.
   by move=> j' /= Hj'; apply: ord_inj.
 have Hval_ik1 : forall j : 'I_(size w), val j = k.+1 -> j = ik1.
   by move=> j' /= Hj'; apply: ord_inj.
-(* suff: LHS = reindexed sum *)
-suff -> : \sum_(i < size w) \sum_(j < size w | i < j)
+(* Step B: Reindex to get reindexed_sum *)
+have Hreindex : \sum_(i < size w) \sum_(j < size w | i < j)
   (~~ dv_leq (nth (0, 0) ps (tp i)) (nth (0, 0) ps (tp j))) =
-  \sum_(i < size w) \sum_(j < size w | val (tp_ord i) < val (tp_ord j))
+  \sum_(i < size w) \sum_(j < size w | tp (val i) < tp (val j))
     (~~ dv_leq (nth (0, 0) ps i) (nth (0, 0) ps j)).
-  (* Now use bigD1 to isolate ik in the outer sum *)
-  rewrite [X in X = _](bigD1 ik) //= [X in _ = X](bigD1 ik) //=.
-  apply: (@leq_ltn_trans
-    (\sum_(j < size w | val (tp_ord ik) < val (tp_ord j))
-      (~~ dv_leq (nth (0, 0) ps ik) (nth (0, 0) ps j)) +
-     \sum_(i < size w | i != ik)
-      \sum_(j < size w | val i < val j)
-        (~~ dv_leq (nth (0, 0) ps i) (nth (0, 0) ps j)))).
-  + rewrite leq_add2l.
-    apply: leq_sum => i Hine.
-    case Hine1 : (i == ik1).
-    * (* i = ik1: tp_ord ik1 = ik, so condition becomes val ik < val (tp_ord j) *)
-      rewrite (eqP Hine1).
-      rewrite (bigD1 ik) /=; last by rewrite Htp_ik1.
-      (* At j = ik, dv_leq (ps ik1) (ps ik) = Hfix, so ~~ dv_leq = false *)
-      rewrite Hfix /=.
-      apply: eq_leq; apply: eq_bigl => j.
-      case Hj_ik : (j == ik).
-        rewrite (eqP Hj_ik) andbF.
-        suff -> : (val ik1 < val ik) = false by [].
-        by rewrite /= ltnNge leqnSn.
-      case Hj_ik1 : (j == ik1).
-        by rewrite (eqP Hj_ik1) /= !ltnn.
-      rewrite andbT.
-      have Hjtpd : tp_ord j = j.
-        apply: ord_inj; rewrite Htp_ord_val /tp.
-        case Hjk : (val j == k).
-          by move: Hj_ik; rewrite (Hval_ik j (eqP Hjk)) eqxx.
-        case Hjk1 : (val j == k.+1).
-          by move: Hj_ik1; rewrite (Hval_ik1 j (eqP Hjk1)) eqxx.
-        done.
-      rewrite Htp_ik1 Hjtpd /=.
-      symmetry; rewrite ltn_neqAle eq_sym.
-      suff -> : (j != ik1 :> 'I_(size w)) = true by [].
-      by rewrite Hj_ik1.
-    * (* i != ik, i != ik1: tp_ord i = i, so conditions match *)
-      apply: eq_leq; apply: eq_bigl => j.
-      have Hnik : ik != i by rewrite eq_sym.
-      have Hnik1 : ik1 != i.
-        by apply/eqP => Habs; move: Hine1; rewrite -Habs eqxx.
-      have Hitpd : tp_ord i = i.
-        apply: ord_inj; rewrite Htp_ord_val /tp.
-        case Hiv : (val i == k).
-          by move: Hine; rewrite (Hval_ik i (eqP Hiv)) eqxx.
-        case Hiv1 : (val i == k.+1).
-          by move: Hine1; rewrite (Hval_ik1 i (eqP Hiv1)) eqxx.
-        done.
-      case Hj_ik : (j == ik).
-        rewrite (eqP Hj_ik) Htp_ik Hitpd /=.
-        change (val i < val ik1) = (val i < val ik).
-        rewrite /= ltnS leq_eqVlt.
-        by have -> : (val i == k) = (i == ik) by []; rewrite (negbTE Hine).
-      case Hj_ik1 : (j == ik1).
-        rewrite (eqP Hj_ik1) Htp_ik1 Hitpd /=.
-        change (val i < val ik) = (val i < val ik1).
-        symmetry; rewrite /= ltnS leq_eqVlt.
-        by have -> : (val i == k) = (i == ik) by []; rewrite (negbTE Hine).
-      have Hjtpd : tp_ord j = j.
-        apply: ord_inj; rewrite Htp_ord_val /tp.
-        case Hjk : (val j == k).
-          by move: Hj_ik; rewrite (Hval_ik j (eqP Hjk)) eqxx.
-        case Hjk1 : (val j == k.+1).
-          by move: Hj_ik1; rewrite (Hval_ik1 j (eqP Hjk1)) eqxx.
-        done.
-      by rewrite Hitpd Hjtpd.
-  + rewrite ltn_add2r Htp_ik.
-    rewrite [X in _ < X](bigD1 ik1) //=.
-    rewrite Hdesc /= add1n.
-    apply: leq_ltn_trans; last exact: ltnSn.
-    apply: eq_leq; apply: eq_bigl => j.
-    case Hj_ik : (j == ik).
-      by rewrite (eqP Hj_ik) Htp_ik /= ltnn ltnn.
-    case Hj_ik1 : (j == ik1).
-      by rewrite (eqP Hj_ik1) Htp_ik1 /= andbF ltnNge leqnSn.
-    have Hjtpd : tp_ord j = j.
-      apply: ord_inj; rewrite Htp_ord_val /tp.
-      case Hjk : (val j == k).
-        by move: Hj_ik; rewrite (Hval_ik j (eqP Hjk)) eqxx.
-      case Hjk1 : (val j == k.+1).
-        by move: Hj_ik1; rewrite (Hval_ik1 j (eqP Hjk1)) eqxx.
-      done.
-    rewrite Hjtpd /= andbT ltn_neqAle.
-    suff -> : (ik1 != j) = true by [].
-    apply/eqP => Habs.
-    by move: Hj_ik1; rewrite -Habs eqxx.
-(* Remaining: show the tp-composed sum = reindexed sum *)
-(* LHS: \sum_i \sum_(j | i < j) f(tp i, tp j)
-   RHS: \sum_i \sum_(j | tp_ord i < tp_ord j) f(i, j)
-   By reindexing both i and j with tp_ord (self-inverse bijection) *)
-have Htp_tp_ord : forall i : 'I_(size w),
-  tp (val (tp_ord i)) = val i.
-  by move=> i0; rewrite Htp_ord_val Htp_inv.
-rewrite (reindex_inj Htp_ord_inj).
-apply: eq_bigr => i _.
-rewrite (reindex_inj Htp_ord_inj).
-apply: eq_bigr => j _ /=.
-by rewrite !Htp_tp_ord.
+  have Htp_tp_ord : forall i : 'I_(size w),
+    tp (val (tp_ord i)) = val i.
+    by move=> i0; rewrite Htp_ord_val Htp_inv.
+  rewrite (reindex_inj Htp_ord_inj).
+  apply: eq_bigr => i _.
+  rewrite (reindex_inj Htp_ord_inj).
+  apply: eq_bigr => j _.
+  congr (~~ dv_leq (nth _ ps _) (nth _ ps _)); exact: Htp_tp_ord.
+rewrite Hreindex.
+(* Step C: Show reindexed_sum < orig_sum *)
+(* Strategy: big_mkcond + ltn_sum (pointwise <= with strict < at (ik,ik1)).
+   The only pair where tp reverses ordering is (ik1, ik),
+   but f(ik1, ik) = ~~ dv_leq ps[k+1] ps[k] = 0 (by Hfix), so the term is 0. *)
+(* Helper: ltn_sum - strict inequality from pointwise *)
+have ltn_sum_aux : forall (I : finType) (f0 g0 : I -> nat) (i0 : I),
+    (forall i, f0 i <= g0 i) -> f0 i0 < g0 i0 ->
+    \sum_i f0 i < \sum_i g0 i.
+  move=> I f0 g0 i0 Hle Hlt.
+  rewrite (bigD1 i0) // [X in _ < X](bigD1 i0) //.
+  have Hle_rest : \sum_(i | i != i0) f0 i <= \sum_(i | i != i0) g0 i.
+    by apply: leq_sum => i _; exact: Hle.
+  apply: (@leq_ltn_trans (f0 i0 + \sum_(i | i != i0) g0 i)).
+    by rewrite leq_add2l.
+  by rewrite ltn_add2r.
+(* Helper: tp computation lemmas *)
+have tpk : tp k = k.+1 by rewrite /tp eqxx.
+have tpk1 : tp k.+1 = k by rewrite /tp (gtn_eqF (ltnSn k)) eqxx.
+have tp_oth : forall m, m != k -> m != k.+1 -> tp m = m.
+  by move=> m /negbTE Hm /negbTE Hm1; rewrite /tp Hm Hm1.
+(* Helper: the only pair where tp reverses ordering is (k+1, k) *)
+have tp_swap_only : forall i j : nat,
+    tp i < tp j -> ~~ (i < j) -> i = k.+1 /\ j = k.
+  move=> i0 j0 Htp0 Horig0.
+  have [Hik0|Hik0] := boolP (i0 == k); have [Hjk0|Hjk0] := boolP (j0 == k).
+  - by move: Htp0; rewrite (eqP Hik0) (eqP Hjk0) tpk ltnn.
+  - have [Hjk1|Hjk1] := boolP (j0 == k.+1).
+    + by move: Htp0; rewrite (eqP Hik0) (eqP Hjk1) tpk tpk1 ltnNge leqnSn.
+    + exfalso; move/negP: Horig0; apply.
+      rewrite (eqP Hik0).
+      move: Htp0; rewrite (eqP Hik0) tpk (@tp_oth j0 Hjk0 Hjk1) => Hlt0.
+      exact: ltn_trans (ltnSn k) Hlt0.
+  - have [Hik10|Hik10] := boolP (i0 == k.+1).
+    + by rewrite (eqP Hik10) (eqP Hjk0).
+    + exfalso; move/negP: Horig0; apply.
+      rewrite (eqP Hjk0).
+      move: Htp0; rewrite (eqP Hjk0) tpk (@tp_oth i0 Hik0 Hik10) => Hlt0.
+      by rewrite ltn_neqAle Hik0 -ltnS.
+  - have [Hik10|Hik10] := boolP (i0 == k.+1); have [Hjk1|Hjk1] := boolP (j0 == k.+1).
+    + by move: Htp0; rewrite (eqP Hik10) (eqP Hjk1) tpk1 ltnn.
+    + exfalso; move/negP: Horig0; apply.
+      rewrite (eqP Hik10).
+      move: Htp0; rewrite (eqP Hik10) tpk1 (@tp_oth j0 Hjk0 Hjk1) => Hlt0.
+      rewrite ltn_neqAle eq_sym Hjk1 /=.
+      exact: Hlt0.
+    + exfalso; move/negP: Horig0; apply.
+      rewrite (eqP Hjk1).
+      move: Htp0; rewrite (eqP Hjk1) tpk1 (@tp_oth i0 Hik0 Hik10) => Hlt0.
+      exact: ltn_trans Hlt0 (ltnSn k).
+    + exfalso; move/negP: Horig0; apply.
+      by move: Htp0; rewrite (@tp_oth i0 Hik0 Hik10) (@tp_oth j0 Hjk0 Hjk1).
+(* Pointwise: [tp i < tp j] * f(i,j) <= [i < j] * f(i,j) *)
+have Hpw : forall i j : 'I_(size w),
+  (if tp (val i) < tp (val j)
+   then ~~ dv_leq (nth (0, 0) ps i) (nth (0, 0) ps j) : nat else 0) <=
+  (if val i < val j
+   then ~~ dv_leq (nth (0, 0) ps i) (nth (0, 0) ps j) : nat else 0).
+  move=> i0 j0.
+  case Horig0 : (val i0 < val j0) => /=.
+    by case : (tp (val i0) < tp (val j0)).
+  have [Htp0|Htp0] := boolP (tp (val i0) < tp (val j0)) => //.
+  have [Hi0 Hj0] := @tp_swap_only (val i0) (val j0) Htp0 (negbT Horig0).
+  have -> : i0 = ik1 by apply: ord_inj.
+  have -> : j0 = ik by apply: ord_inj.
+  by rewrite /= Hfix.
+(* Strict at (ik, ik1) *)
+have Hstrict : (if tp (val ik) < tp (val ik1)
+    then ~~ dv_leq (nth (0, 0) ps ik) (nth (0, 0) ps ik1) : nat else 0) <
+  (if val ik < val ik1
+    then ~~ dv_leq (nth (0, 0) ps ik) (nth (0, 0) ps ik1) : nat else 0).
+  rewrite /= tpk tpk1 ltnSn (negbTE Hdesc) /=.
+  by have -> : k.+1 < k = false by rewrite ltnNge leqnSn.
+(* Final: big_mkcond + ltn_sum twice *)
+rewrite [X in X < _]big_mkcond [X in _ < X]big_mkcond.
+apply: (@ltn_sum_aux _ _ _ ik).
+  move=> i0.
+  rewrite [X in X <= _]big_mkcond [X in _ <= X]big_mkcond.
+  exact: leq_sum (fun j0 _ => Hpw i0 j0).
+rewrite [X in X < _]big_mkcond [X in _ < X]big_mkcond.
+apply: (@ltn_sum_aux _ _ _ ik1).
+  move=> j0.
+  exact: Hpw ik j0.
+exact: Hstrict.
 Qed.
 
 (* ------------------------------------------------------------------ *)
@@ -1748,58 +1779,74 @@ pose mk_ord := fun x =>
   end.
 have Hmk_val : forall x, x < Tg -> val (mk_ord x) = x.
   move=> x Hx; rewrite /mk_ord.
-  by case: (Sumbool.sumbool_of_bool _) => // pf;
-    rewrite (bool_irrelevance pf Hx).
+  by case: (Sumbool.sumbool_of_bool _) => pf //=; rewrite pf in Hx.
 pose w1_seq := map mk_ord w1 : seq 'I_Tg.
 have Hsz_w1_seq : size w1_seq = L by rewrite /w1_seq size_map.
-pose w1_ord : @pgg_word M L := Tuple Hsz_w1_seq.
+pose w1_ord : @pgg_word M L := Tuple (introT eqP Hsz_w1_seq).
 have Hval_eq : map val (tval w1_ord) = w1.
   rewrite /w1_ord /= /w1_seq -map_comp.
-  rewrite -(map_id w1); apply: eq_in_map => x Hx /=.
-  apply: Hmk_val; exact: (allP Hbd1).
+  suff H : forall s, all (fun j => j < Tg) s ->
+    map (val \o mk_ord) s = s.
+    exact: H.
+  elim => //= x xs IH' /andP [Hx Hxs].
+  by rewrite /= Hmk_val // IH'.
 (* Step 2: Apply IH to go from w1_ord to wf *)
 have Hk_bound : k < L.-1.
   have Hsz0 : size (map val (tval w0)) = L
     by rewrite size_map size_tuple.
-  by rewrite -Hsz0 -ltnS in Hk.
+  by move: Hk; rewrite /= Hsz0 -ltn_predRL.
 suff Hconn : trace_equiv w0 w1_ord.
   apply: connect_trans Hconn _.
   apply: (IH w1_ord) => //.
-  - move=> i Hi; have := Hbd i.+1 Hi.
-    by rewrite /= Hval_eq.
-  - move=> i Hi; have := Hstep i.+1 (ltnS Hi).
-    by rewrite /= Hval_eq.
+  - move=> [|i'] Hi /=.
+    + (* i = 0: goal has map val (tval w1_ord), hyp has w1 *)
+      have /= := Hbd 1 (ltn0Sn _).
+      by rewrite Hval_eq.
+    + (* i > 0: both access ws[i'] *)
+      have Hi2 : i'.+2 <= size (w1 :: ws) by rewrite /= ltnS.
+      have /= := Hbd i'.+2 Hi2.
+      rewrite (set_nth_default (map val (tval w1_ord)) _ Hi).
+      by rewrite (set_nth_default (map val (tval w0)) _ Hi).
+  - move=> [|i'] Hi /=.
+    + (* i = 0 *)
+      have /= := Hstep 1 Hi.
+      by rewrite Hval_eq.
+    + (* i > 0: both access ws *)
+      exact: Hstep i'.+2 Hi.
   - by rewrite /= Hval_eq.
 (* Step 3: Prove trace_equiv w0 w1_ord via one adj_swap step *)
 apply: connect1; rewrite /adj_swap_sym; apply/orP; left.
 (* Need L = L'.+1 for adj_swap to be nontrivial *)
-case: L w0 w1_ord Hbd Hstep Hlast Hk Hc1 Hc2 Hw1 Hsz1 Hbd1
-      Hval_eq Hk_bound Hsz_w1_seq
-  => [|L'] w0 w1_ord Hbd Hstep Hlast Hk Hc1 Hc2 Hw1 Hsz1 Hbd1
-      Hval_eq Hk_bound Hsz_w1_seq;
-  first by rewrite /= in Hk.
+clear wf Hlast IH.
+destruct L as [|L']; first by rewrite /= in Hk.
 (* adj_swap on L'.+1 *)
 apply/existsP; exists (Ordinal Hk_bound).
 apply/andP; split.
   (* Commutativity: raag_comm (tnth w0 k) (tnth w0 k.+1) *)
-  rewrite /comm Hcomm_nat /=.
-  set ik := Ordinal (ltn_trans (ltn_ord (Ordinal Hk_bound)) (ltnSn L')).
-  set ik1 := @Ordinal L'.+1 k.+1 (ltn_ord (Ordinal Hk_bound)).
-  have -> : val ik = k by [].
-  have -> : val ik1 = k.+1 by [].
-  rewrite !(tnth_nth ord0) /=.
-  rewrite !(nth_map ord0) ?size_tuple //.
-    simpl in Hc1; exact: Hc1.
-  by rewrite ltnS ltnW.
+  (* Goal: raag_comm (tnth w0 k_ord) (tnth w0 k1_ord) *)
+  rewrite Hcomm_nat !(tnth_nth ord0).
+  (* Now goal: comm_nat (val (nth ord0 w0 k')) (val (nth ord0 w0 k1')) *)
+  simpl.
+  have -> : val (nth ord0 (tval w0) k) = nth 0 (map val (tval w0)) k.
+    rewrite (nth_map ord0) ?size_tuple //.
+    by rewrite ltnS ltnW.
+  have -> : val (nth ord0 (tval w0) k.+1) = nth 0 (map val (tval w0)) k.+1.
+    by rewrite (nth_map ord0) ?size_tuple.
+  simpl in Hc1; exact: Hc1.
 (* Equality: w1_ord = swap_word k w0 *)
 apply/eqP; apply: eq_from_tnth => i.
 rewrite swap_word_tnth; apply: val_inj.
 (* Key facts about tnth and nth *)
 have Hw1_tnth : forall j : 'I_L'.+1,
   val (tnth w1_ord j) = nth 0 w1 (val j).
-  move=> j; rewrite -Hval_eq.
-  rewrite (tnth_nth (tnth w1_ord j)) /=.
-  by rewrite (nth_map (tnth w1_ord j)) ?size_tuple.
+  move=> j.
+  have Hj : val j < size (tval w1_ord).
+    by rewrite size_tuple; exact: ltn_ord.
+  transitivity (nth 0 (map val (tval w1_ord)) (val j)).
+    rewrite (nth_map ord0 _ _ Hj).
+    congr (val _).
+    by rewrite (tnth_nth ord0).
+  by rewrite Hval_eq.
 have Hw0_tnth : forall j : 'I_L'.+1,
   val (tnth w0 j) = nth 0 (map val (tval w0)) (val j).
   move=> j; rewrite (tnth_nth (tnth w0 j)) /=.
@@ -1821,23 +1868,20 @@ case: ifP => [/eqP Hi_k1 | Hne2].
   rewrite ltnNge leqnSn /= subSn // subnn /=.
   by rewrite Hw0_tnth.
 (* i != k and i != k.+1 *)
+(* Hne1 : (val i == val k) = false, Hne2 : (val i == (val k).+1) = false *)
 rewrite nth_cat size_take Hsz_mw0 Hk_lt.
 case: (ltnP (val i) k) => Hik.
   (* i < k *)
   by rewrite nth_take // Hw0_tnth.
-(* i >= k *)
-rewrite ltnNge Hik /=.
-have Hine : val i <> k
-  by move=> Heq; move/eqP: Hne1; rewrite Heq eqxx.
-have Hine2 : val i <> k.+1
-  by move=> Heq; move/eqP: Hne2; rewrite Heq eqxx.
+(* i >= k, ltnP already resolved val i < k to false *)
+have Hik_strict : k < val i.
+  by rewrite ltn_neqAle Hik andbT eq_sym Hne1.
 have Hik_ge2 : k.+1 < val i.
-  rewrite ltn_neqAle; apply/andP; split.
-    by apply/eqP => Heq; apply: Hine2; exact: esym.
-  by rewrite -ltnS ltn_neqAle; apply/andP; split; [apply/eqP|].
+  by rewrite ltn_neqAle Hik_strict andbT eq_sym Hne2.
 have Hsub : val i - k = (val i - k.+2).+2.
-  rewrite -subSn; last by exact: ltnW.
-  by rewrite -subSn // subnS subnS.
+  set d := val i - k.+2.
+  have Hvi : val i = d + k.+2 by rewrite /d subnK.
+  by rewrite Hvi -addSnnS -addSnnS addnK.
 rewrite /= Hsub /= nth_drop addnC subnK //.
 by rewrite Hw0_tnth.
 Qed.
@@ -1955,30 +1999,148 @@ Let fnf_sep L (w1 w2 : @pgg_word M L) :
   fnf w1 = fnf w2 -> @trace_equiv R L w1 w2.
 Proof.
 move=> Hnf_eq.
-(* Use soundness: w1 connects to foata_nf(map val w1) = fnf w1,
-   and w2 connects to fnf w2 = fnf w1.
-   So w1 ~ fnf(w1) = fnf(w2) ~ w2, hence w1 ~ w2. *)
-(* Get the swap chain for w1 *)
-have Hcsym : forall a b, comm_nat a b -> comm_nat b a.
-  move=> a b Hab.
-  case: (ltnP a Tg) => Ha; case: (ltnP b Tg) => Hb.
-  - exact: comm_nat_sym Ha Hb Hab.
-  - (* b >= Tg: comm_nat a b should be false since b is out of range *)
-    (* Actually comm_nat is arbitrary on out-of-range values.
-       But for words coming from ordinal tuples, all values are < Tg *)
-    admit.
-  - admit.
-  - admit.
-have [ws1 [Hlast1 Hsteps1]] := foata_nf_sound (map val (tval w1)) Hcsym.
-have [ws2 [Hlast2 Hsteps2]] := foata_nf_sound (map val (tval w2)) Hcsym.
-(* w1 connects to foata_nf(map val w1) via swap chain ws1 *)
-(* w2 connects to foata_nf(map val w2) via swap chain ws2 *)
-(* foata_nf(map val w1) = fnf w1 = fnf w2 = foata_nf(map val w2) *)
-(* So the last element of ws1 = last element of ws2 *)
-(* ... but we need to lift these nat-level chains to ordinal-level trace_equiv *)
-(* This requires nat_swap_chain_to_trace_equiv which is admitted *)
-admit.
-Admitted.
+(* Define symmetric bounded wrapper for comm_nat *)
+set comm_b := fun a b : nat => [&& a < Tg, b < Tg & comm_nat a b].
+have Hcb_sym : forall a b, comm_b a b -> comm_b b a.
+  move=> a b; rewrite /comm_b => /and3P [Ha Hb Hab].
+  by rewrite Ha Hb comm_nat_sym.
+(* comm_b agrees with comm_nat on in-range values *)
+have Hcb_eq : forall a b, a < Tg -> b < Tg -> comm_b a b = comm_nat a b.
+  by move=> a b Ha Hb; rewrite /comm_b Ha Hb.
+(* foata_nf comm_b = foata_nf comm_nat on ordinal words *)
+have Hword_bd : forall (w : @pgg_word M L),
+  all (fun x => x < Tg) (map val (tval w)).
+  move=> w; apply/allP => x /mapP [o _ ->]; exact: ltn_ord.
+have Hfnf_b : forall (w : @pgg_word M L),
+  foata_nf comm_b (map val (tval w)) = fnf w.
+  move=> w; rewrite /fnf; apply: foata_nf_ext => a b Ha Hb.
+  have Ha' : a < Tg by move: (allP (Hword_bd w) _ Ha).
+  have Hb' : b < Tg by move: (allP (Hword_bd w) _ Hb).
+  exact: Hcb_eq.
+(* Get swap chains using comm_b (which is symmetric) *)
+have [ws1 [Hlast1 Hsteps1]] :=
+  foata_nf_sound (map val (tval w1)) Hcb_sym.
+have [ws2 [Hlast2 Hsteps2]] :=
+  foata_nf_sound (map val (tval w2)) Hcb_sym.
+(* Adjacent swaps preserve size and bounds *)
+have Hswap_sz : forall s k, k.+1 < size s ->
+  size (take k s ++ nth 0 s k.+1 :: nth 0 s k :: drop k.+2 s) = size s.
+  move=> s k0 Hk0.
+  rewrite size_cat size_take (ltn_trans (ltnSn k0) Hk0) /=.
+  rewrite size_drop.
+  have Hk0' : k0.+2 <= size s by [].
+  by rewrite -addSnnS -addSnnS subnKC.
+have Hswap_bd : forall s k, k.+1 < size s ->
+  all (fun x => x < Tg) s ->
+  all (fun x => x < Tg) (take k s ++ nth 0 s k.+1 :: nth 0 s k :: drop k.+2 s).
+  move=> s k0 Hk0 Hall.
+  rewrite all_cat /=; apply/andP; split.
+    by apply/allP => x Hx; apply (allP Hall); exact: mem_take Hx.
+  rewrite (allP Hall (nth 0 s k0.+1)); last exact: mem_nth.
+  rewrite (allP Hall (nth 0 s k0)) /=; last exact: mem_nth (ltn_trans (ltnSn k0) Hk0).
+  by apply/allP => x Hx; apply (allP Hall); exact: mem_drop Hx.
+(* Chain invariant: each word has size L and all values < Tg *)
+(* Helper to bridge nth default values *)
+have nth_def_cons : forall (x0 : seq nat) ws w i,
+  i < size ws -> nth x0 (w :: ws) i.+1 = nth [::] (w :: ws) i.+1.
+  move=> x0 ws' w' i' Hi'; apply: set_nth_default; rewrite /= ltnS; exact: Hi'.
+have nth_def_cons0 : forall (x0 : seq nat) ws w i,
+  i <= size ws -> nth x0 (w :: ws) i = nth [::] (w :: ws) i.
+  move=> x0 ws' w' [|i'] Hi' //.
+  apply: set_nth_default; rewrite /= ltnS; exact: Hi'.
+have Hchain_inv1 : forall i, i <= size ws1 ->
+  let wi := nth (map val (tval w1)) (map val (tval w1) :: ws1) i in
+  size wi = L /\ all (fun j => j < Tg) wi.
+  elim => [|i IH] Hi.
+    by rewrite /= size_map size_tuple.
+  have Hi' : i < size ws1 := Hi.
+  have [Hszi Hbdi] := IH (ltnW Hi').
+  have [k0 [Hk0 [_ [_ Heqw]]]] := Hsteps1 i Hi'.
+  rewrite (nth_def_cons _ _ _ _ Hi') (nth_def_cons0 _ _ _ _ (ltnW Hi')) in Hszi Hbdi |- *.
+  rewrite Heqw; split.
+  - by rewrite Hswap_sz.
+  - by exact: Hswap_bd.
+have Hchain_inv2 : forall i, i <= size ws2 ->
+  let wi := nth (map val (tval w2)) (map val (tval w2) :: ws2) i in
+  size wi = L /\ all (fun j => j < Tg) wi.
+  elim => [|i IH] Hi.
+    by rewrite /= size_map size_tuple.
+  have Hi' : i < size ws2 := Hi.
+  have [Hszi Hbdi] := IH (ltnW Hi').
+  have [k0 [Hk0 [_ [_ Heqw]]]] := Hsteps2 i Hi'.
+  rewrite (nth_def_cons _ _ _ _ Hi') (nth_def_cons0 _ _ _ _ (ltnW Hi')) in Hszi Hbdi |- *.
+  rewrite Heqw; split.
+  - by rewrite Hswap_sz.
+  - by exact: Hswap_bd.
+(* comm_b swaps are also comm_nat swaps *)
+have Hsteps1_nat : forall i, i < size ws1 ->
+  let wi := nth [::] (map val (tval w1) :: ws1) i in
+  let wi1 := nth [::] (map val (tval w1) :: ws1) i.+1 in
+  exists k, k.+1 < size wi /\
+    comm_nat (nth 0 wi k) (nth 0 wi k.+1) /\
+    comm_nat (nth 0 wi k.+1) (nth 0 wi k) /\
+    wi1 = take k wi ++ nth 0 wi k.+1 :: nth 0 wi k :: drop k.+2 wi.
+  move=> i Hi.
+  have [k0 [Hk0 [Hc1 [Hc2 Hw]]]] := Hsteps1 i Hi.
+  exists k0; repeat split => //.
+  - by move: Hc1; rewrite /comm_b => /and3P [_ _ ?].
+  - by move: Hc2; rewrite /comm_b => /and3P [_ _ ?].
+have Hsteps2_nat : forall i, i < size ws2 ->
+  let wi := nth [::] (map val (tval w2) :: ws2) i in
+  let wi1 := nth [::] (map val (tval w2) :: ws2) i.+1 in
+  exists k, k.+1 < size wi /\
+    comm_nat (nth 0 wi k) (nth 0 wi k.+1) /\
+    comm_nat (nth 0 wi k.+1) (nth 0 wi k) /\
+    wi1 = take k wi ++ nth 0 wi k.+1 :: nth 0 wi k :: drop k.+2 wi.
+  move=> i Hi.
+  have [k0 [Hk0 [Hc1 [Hc2 Hw]]]] := Hsteps2 i Hi.
+  exists k0; repeat split => //.
+  - by move: Hc1; rewrite /comm_b => /and3P [_ _ ?].
+  - by move: Hc2; rewrite /comm_b => /and3P [_ _ ?].
+(* Build ordinal word for the common normal form *)
+(* last ws1 = foata_nf comm_b (map val w1) = fnf w1 = fnf w2
+                                            = foata_nf comm_b (map val w2) = last ws2 *)
+have Hcommon : last (map val (tval w1)) ws1 = last (map val (tval w2)) ws2.
+  by rewrite Hlast1 Hlast2 Hfnf_b Hfnf_b Hnf_eq.
+(* Build ordinal word for the normal form *)
+have [Hsznf Hbdnf] := Hchain_inv1 (size ws1) (leqnn _).
+rewrite nth_last /= in Hsznf Hbdnf.
+set nf_list := last (map val (tval w1)) ws1 in Hsznf Hbdnf.
+pose mk_ord := fun x =>
+  match Sumbool.sumbool_of_bool (x < Tg) with
+  | left pf => @Ordinal Tg x pf
+  | right _ => @Ordinal Tg 0 (ltn0Sn _)
+  end.
+have Hmk_val : forall x, x < Tg -> val (mk_ord x) = x.
+  move=> x Hx; rewrite /mk_ord.
+  by case: (Sumbool.sumbool_of_bool _) => pf //=; rewrite pf in Hx.
+pose nf_seq := map mk_ord nf_list : seq 'I_Tg.
+have Hsz_nf : size nf_seq = L by rewrite /nf_seq size_map.
+pose wf : @pgg_word M L := Tuple (introT eqP Hsz_nf).
+have Hval_wf : map val (tval wf) = nf_list.
+  rewrite /wf /= /nf_seq -map_comp.
+  suff H : forall s, all (fun j => j < Tg) s ->
+    map (val \o mk_ord) s = s.
+    exact: H.
+  elim => //= x xs IH /andP [Hx Hxs].
+  by rewrite /= Hmk_val // IH.
+(* w1 ~ wf via ws1 chain *)
+have Hte1 : @trace_equiv R L w1 wf.
+  apply: (nat_swap_chain_to_trace_equiv Hchain_inv1 Hsteps1_nat).
+  exact: Hval_wf.
+(* w2 ~ wf via ws2 chain *)
+have Hte2 : @trace_equiv R L w2 wf.
+  have Hchain_inv2' : forall i, i <= size ws2 ->
+    let wi := nth (map val (tval w2)) (map val (tval w2) :: ws2) i in
+    size wi = L /\ all (fun j => j < Tg) wi.
+    exact: Hchain_inv2.
+  apply: (nat_swap_chain_to_trace_equiv Hchain_inv2' Hsteps2_nat).
+  by rewrite -Hcommon.
+(* Compose: w1 ~ wf ~ w2 *)
+apply: connect_trans Hte1 _.
+rewrite (sym_connect_sym (@adj_swap_sym_sym R L)).
+exact: Hte2.
+Qed.
 
 (* ------------------------------------------------------------------ *)
 (* all_words <-> enum tuples bijection                                 *)
@@ -2098,13 +2260,22 @@ rewrite /n_traces_natB.
 (* Step 1: replace all_words with map to_nat (enum tuples) *)
 have Hstep1 : size (undup (map (foata_nf comm_nat) (all_words Tg L))) =
   size (undup (map (fnf (L:=L)) (enum {: @pgg_word M L}))).
-  admit.
+  apply: size_undup_perm_eq.
+  have Hpe := all_words_perm_tuples L.
+  have Hpe' := perm_map (foata_nf comm_nat) Hpe.
+  suff -> : map (fnf (L:=L)) (enum {: @pgg_word M L}) =
+    map (foata_nf comm_nat)
+      (map (fun w : @pgg_word M L => map val (tval w))
+           (enum {: @pgg_word M L}))
+    by exact: Hpe'.
+  rewrite -map_comp; apply: eq_map => w /=.
+  by rewrite /fnf.
 rewrite Hstep1.
 (* Step 2: apply canonical form counting *)
 symmetry; apply: n_comp_canonical.
 - exact: sym_connect_sym (@adj_swap_sym_sym R L).
 - exact: fnf_trace.
 - exact: fnf_sep.
-Admitted.
+Qed.
 
 End raag_gen_reflect.
