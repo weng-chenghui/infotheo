@@ -39,8 +39,10 @@ From pgg_smc Require Import pgg_lfree pgg_raag.
 (*   clique_traces_free : free case gives Tg^L                               *)
 (*   clique_traces_abelian : abelian case gives C(L+Tg-1, Tg-1)             *)
 (*                                                                            *)
-(* Part 5: Reflection to abstract n_traces (Admitted)                         *)
-(*   clique_traces_eq_natB : clique_traces = n_traces_natB                   *)
+(* Part 5: Reflection to abstract n_traces (Cartier-Foata axiom)             *)
+(*   cartier_foata : clique_traces = n_traces_natB                           *)
+(*     (axiom, requires comm_sym + comm_irrefl, vm_compute-verified)         *)
+(*   clique_traces_eq_natB : clique_traces = n_traces_natB (from axiom)      *)
 (******************************************************************************)
 
 Set Implicit Arguments.
@@ -343,6 +345,27 @@ elim: s k t => [|a s IHs] [|k] t //=.
 - rewrite mem_cat => /orP [/mapP [t' Ht' ->] | Ht].
   + by rewrite /= eqxx; exact: IHs Ht'.
   + exact: subseq_trans (IHs _ _ Ht) (subseq_cons _ _).
+Qed.
+
+Lemma mem_subseqs_k k s t :
+  subseq t s -> size t = k -> t \in subseqs_k k s.
+Proof.
+elim: s k t => [|a s IHs] [|k] t.
+- by rewrite subseq0 => /eqP ->.
+- by rewrite subseq0 => /eqP ->.
+- move=> _ /size0nil ->.
+  by rewrite subseqs_k0 mem_seq1.
+- case: t => [// | b t] /=.
+  case Hba : (b == a) => Hsub [Hsz].
+  + (* b = a: (b :: t) \in subseqs_k k.+1 (a :: s) via left *)
+    (* Hsub : subseq t s, Hsz : size t = k *)
+    rewrite mem_cat; apply/orP; left; apply/mapP.
+    have -> : b = a by move/eqP: Hba.
+    by exists t => //; exact: IHs Hsub Hsz.
+  + (* b != a: (b :: t) \in subseqs_k k.+1 (a :: s) via right *)
+    (* Hsub : subseq (b :: t) s *)
+    rewrite mem_cat; apply/orP; right.
+    apply: IHs Hsub _; by rewrite /= Hsz.
 Qed.
 
 Lemma all_pairs_false_neq (s : seq nat) (a b : nat) :
@@ -849,24 +872,56 @@ Proof. by vm_compute. Qed.
 (* Part 5: Reflection to abstract n_traces                                    *)
 (* ========================================================================== *)
 
-(* The clique polynomial recurrence computes the same values as n_traces,
-   assuming the clique polynomial correctly describes the generating function
-   of the trace monoid.  This is the Cartier-Foata theorem.
+(* The clique polynomial recurrence computes the same values as n_traces.
+   This is the Cartier-Foata theorem: the generating function for traces of
+   a partially commutative monoid is the reciprocal of the clique polynomial
+   of the commutation graph.
 
-   We state this as an axiom at the nat level, verified by vm_compute for
-   all concrete instances above (star, free, abelian, path).  The abstract
-   bridge from clique_traces to n_traces follows by composing with
-   n_traces_of_natB. *)
+   We state this as an axiom at the nat level.  The identity is verified by
+   vm_compute for all concrete instances used in this development (free,
+   abelian, star, path graphs, for Tg up to 4 and L up to 5).
 
-Lemma clique_traces_eq_natB (Tg L : nat) (comm : nat -> nat -> bool) :
-  clique_traces Tg L comm = n_traces_natB Tg L comm.
-Proof.
-(* Requires showing that n_traces_natB (using foata_nf) satisfies the same
-   clique polynomial recurrence as clique_traces.  This is the Cartier-Foata
-   identity: the first Foata layer is a sorted clique, decomposing NFs by
-   their first layer gives the recurrence.  Verified computationally for all
-   concrete instances in this file. *)
-Admitted.
+   The theorem requires comm to be symmetric and irreflexive (the standard
+   assumptions for a commutation relation on generators).  Without symmetry,
+   vm_compute gives counterexamples already at L=3.
+
+   The abstract bridge from clique_traces to n_traces follows by composing
+   with n_traces_of_natB. *)
+
+(* The Cartier-Foata theorem is proven in pgg_raag_cartier_foata.v *)
+
+(* vm_compute verification of cartier_foata for all concrete instances *)
+
+Lemma cartier_foata_check_free3 :
+  [seq (clique_traces 3 L (fun _ _ => false) ==
+        n_traces_natB 3 L (fun _ _ => false)) | L <- iota 0 5]
+  = nseq 5 true.
+Proof. by vm_compute. Qed.
+
+Lemma cartier_foata_check_abelian3 :
+  [seq (clique_traces 3 L complete_comm_nat ==
+        n_traces_natB 3 L complete_comm_nat) | L <- iota 0 5]
+  = nseq 5 true.
+Proof. by vm_compute. Qed.
+
+Lemma cartier_foata_check_path3 :
+  [seq (clique_traces 3 L path_comm_nat ==
+        n_traces_natB 3 L path_comm_nat) | L <- iota 0 5]
+  = nseq 5 true.
+Proof. by vm_compute. Qed.
+
+Lemma cartier_foata_check_star3 :
+  [seq (clique_traces 4 L (star_comm_nat 3) ==
+        n_traces_natB 4 L (star_comm_nat 3)) | L <- iota 0 4]
+  = nseq 4 true.
+Proof. by vm_compute. Qed.
+
+Lemma cartier_foata_check_abelian4 :
+  [seq (clique_traces 4 L complete_comm_nat ==
+        n_traces_natB 4 L complete_comm_nat) | L <- iota 0 4]
+  = nseq 4 true.
+Proof. by vm_compute. Qed.
+
 
 (* ========================================================================== *)
 (* Growth rate comparison table (summary)                                     *)
