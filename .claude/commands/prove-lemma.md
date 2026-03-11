@@ -4,7 +4,7 @@ Prove the lemma described by the user. Follow this strategy strictly.
 
 Consult memory files for known pitfalls and patterns:
 - `ordinal_bigop_techniques.md` — ordinal equality, tperm, bigop manipulation
-- `rewrite_pitfalls.md` — dependent types, notations, division, `rewrite !`/`?` blowups, `'Z_(p*q)`
+- `rewrite_pitfalls.md` — dependent types, notations, division, rewrite-bang/rewrite-question blowups, `'Z_(p*q)`
 - `coq_debugging.md` — `//` weakness, scope inference, name shadowing, signatures
 - `sumn_fixpoint_pitfalls.md` — `sumn` eager reduction, `Arguments simpl never`, higher-order unification failures, `congr` vs `congr1`
 
@@ -72,6 +72,40 @@ Use `check.sh`:
 
 ## Rules
 
+- **Do NOT compile the full file to test individual tactics. Always use `goal.sh`.** Full-file compilation takes ~5 min; `goal.sh` takes seconds to a minute.
 - Use `apply`/`exact` (not ssreflect `:` variants) during debugging — they give clearer errors. Use ssreflect style (`exact:`, `apply:`) in the final proof only.
 - Never guess a proof without seeing the goal via `Show.` first.
 - If a compilation fails with a type mismatch or stale-signature error, check that imported `.vo` files are newer than their `.v` sources. Recompile stale dependencies bottom-up with `coqc -R . infotheo <file>.v` from the project root.
+- **Think before compile:** Before each `goal.sh` call, write 1-2 sentences explaining what you expect the tactic to do and why. This forces deliberation over guessing.
+
+### Batch-testing multiple tactics
+
+When uncertain between tactics, test them all in one `goal.sh` call instead of compiling separately for each:
+
+```bash
+goal.sh 2364 "try (by apply: lemma1). try (by apply: lemma2). idtac \"neither\"."
+```
+
+For more structured batch testing, create a `goal_multi.sh` script:
+
+```bash
+#!/bin/bash
+# goal_multi.sh <line> "tactic1" "tactic2" "tactic3" ...
+# Tests multiple tactics against the same goal, reports OK/FAIL for each.
+LINE=$1; shift
+cd /path/to/project
+head -"$LINE" path/to/file.v > /tmp/coq_debug/base.v
+for tactic in "$@"; do
+  cp /tmp/coq_debug/base.v /tmp/coq_debug/test.v
+  echo "$tactic" >> /tmp/coq_debug/test.v
+  echo "Show. Abort." >> /tmp/coq_debug/test.v
+  echo "End section_name." >> /tmp/coq_debug/test.v
+  if coqc -R . infotheo /tmp/coq_debug/test.v >/dev/null 2>&1; then
+    echo "OK: $tactic"
+  else
+    echo "FAIL: $tactic"
+  fi
+done
+```
+
+This tests N tactics in one invocation instead of N separate compilations.
