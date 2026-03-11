@@ -19,10 +19,10 @@ From mathcomp Require Import fintype tuple finfun finset fingroup perm morphism 
 (*   compute PI P i == endpoint for party i under word P                      *)
 (*   endpoints PI P == T-tuple of all party endpoints                         *)
 (*                                                                            *)
-(* Layer 2 -- PGG_Interface record (like DSDP_Interface):                     *)
+(* Layer 2 -- PGGInterface record (like DSDP_Interface):                     *)
 (*   pgg_dtype  == session data type kind (DT_Sheet | DT_Share | DT_Idx)      *)
 (*   pgg_data N == protocol data: sheet index, share, or word index           *)
-(*   PGG_Interface M == protocol configuration (T parties, starting sheets)   *)
+(*   PGGInterface M == protocol configuration (T parties, starting sheets)   *)
 (******************************************************************************)
 
 Set Implicit Arguments.
@@ -264,10 +264,10 @@ Lemma from_idx_PGG_idx {N} (n : nat) :
 Proof. by []. Qed.
 
 (* ========================================================================== *)
-(* Layer 2: PGG_Interface -- Protocol Configuration                           *)
+(* Layer 2: PGGInterface -- Protocol Configuration                           *)
 (* ========================================================================== *)
 
-Record PGG_Interface (M : MonodromyReprType) := MkPGGI {
+Record PGGInterface (M : MonodromyReprType) := MkPGGI {
   pi_T' : nat ;
   pi_starts : pi_T'.+1.-tuple 'I_(pgg_N' M).+1 ;
   pi_starts_uniq : uniq pi_starts ;
@@ -284,7 +284,7 @@ Arguments pi_starts_uniq {M} _.
 Section pgg_protocol_ops.
 
 Variable M : MonodromyReprType.
-Variable PI : PGG_Interface M.
+Variable PI : PGGInterface M.
 
 Let gT := pgg_gT M.
 Let N := (pgg_N' M).+1.
@@ -397,7 +397,7 @@ Definition gen_starts_2 : 2.-tuple 'I_N :=
 Lemma gen_starts_2_uniq : uniq gen_starts_2.
 Proof. by vm_compute. Qed.
 
-Definition Gen_PGG_2 : PGG_Interface M :=
+Definition Gen_PGG_2 : PGGInterface M :=
   @MkPGGI M 1 gen_starts_2 gen_starts_2_uniq.
 
 End generated_instance.

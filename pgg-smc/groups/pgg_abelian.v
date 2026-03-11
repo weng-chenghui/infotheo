@@ -16,9 +16,9 @@ From pgg_smc Require Import pgg_interface.
 (*   ncycle n == the canonical N-cycle (0 1 2 ... N-1) on 'I_(n.+2)         *)
 (*   Cyclic_PGGTypes n sigma == PGGTypes record for G = <[sigma]>            *)
 (*   Cyclic_isMonodromyRepr == HB instance registering the inclusion morphism *)
-(*   Cyclic_PGG_2 n sigma == 2-party PGG_Interface for the cyclic instance   *)
+(*   Cyclic_PGG_2 n sigma == 2-party PGGInterface for the cyclic instance   *)
 (*   NCycle_PGGTypes n == PGGTypes using the canonical N-cycle               *)
-(*   NCycle_PGG_2 n == 2-party PGG_Interface using the canonical N-cycle     *)
+(*   NCycle_PGG_2 n == 2-party PGGInterface using the canonical N-cycle     *)
 (*                                                                           *)
 (* Key properties:                                                           *)
 (*   cyclic_G_abelian : abelian <[sigma]>                                    *)
@@ -167,7 +167,7 @@ Definition cyclic_starts_2 : 2.-tuple 'I_N :=
 Lemma cyclic_starts_2_uniq : uniq cyclic_starts_2.
 Proof. by vm_compute. Qed.
 
-Definition Cyclic_PGG_2 : PGG_Interface M :=
+Definition Cyclic_PGG_2 : PGGInterface M :=
   @MkPGGI M 1 cyclic_starts_2 cyclic_starts_2_uniq.
 
 End cyclic_instance.
@@ -185,7 +185,7 @@ Definition NCycle_PGGTypes := @Cyclic_PGGTypes n (ncycle n).
 
 Let M : MonodromyReprType := NCycle_PGGTypes.
 
-Definition NCycle_PGG_2 : PGG_Interface M :=
+Definition NCycle_PGG_2 : PGGInterface M :=
   @Cyclic_PGG_2 n (ncycle n).
 
 End ncycle_instance.

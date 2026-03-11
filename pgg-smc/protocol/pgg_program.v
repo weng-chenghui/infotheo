@@ -2,7 +2,7 @@
 (* Copyright (C) 2025 infotheo authors, license: LGPL-2.1-or-later            *)
 From mathcomp Require Import ssreflect ssrbool ssrfun eqtype ssrnat seq.
 From mathcomp Require Import fintype tuple finfun finset fingroup perm morphism.
-From mathcomp Require Import bigop div.
+From mathcomp Require Import bigop.
 
 (******************************************************************************)
 (* PGG-SMC: Protocol Specification                                            *)
@@ -11,7 +11,7 @@ From mathcomp Require Import bigop div.
 (*   split rho W starts == for each word w in W, compute permutation table    *)
 (*                         columns: party i gets {rho(w)(s_i) | w in W}       *)
 (*   compute share P    == party looks up rho(P)(s_i) in their share          *)
-(*   reconstruct eps    == combine T endpoints into result                    *)
+(*   secret recon P     == apply reconstruction function to T endpoints       *)
 (******************************************************************************)
 
 Set Implicit Arguments.
@@ -67,24 +67,11 @@ Lemma endpointsE (P : gT) (i : 'I_T) :
   tnth (endpoints P) i = rho P (tnth starts i).
 Proof. by rewrite tnth_mktuple. Qed.
 
-(* Auxiliary: the sum-mod-N value is bounded *)
-Lemma sum_mod_N_lt (P : gT) :
-  (\sum_(i < T) val (compute P i)) %% N < N.
-Proof. apply ltn_pmod. reflexivity. Qed.
+(* Reconstruction: parametric over an arbitrary reconstruction function *)
+Variable recon : T.-tuple 'I_N -> 'I_N.
 
-(* The secret: sum of endpoint values mod N *)
+(* The secret: apply reconstruction to endpoints *)
 Definition secret (P : gT) : 'I_N :=
-  Ordinal (sum_mod_N_lt P).
-
-(* Secret value characterization *)
-Lemma secretE (P : gT) :
-  val (secret P) = (\sum_(i < T) val (compute P i)) %% N.
-Proof. reflexivity. Qed.
-
-(* Anonymous broadcast: sum is invariant under party permutation *)
-Lemma secret_perm (P : gT) (sigma : {perm 'I_T}) :
-  \sum_(i < T) val (compute P i) =
-  \sum_(i < T) val (compute P (sigma i)).
-Proof. rewrite (reindex_perm sigma). reflexivity. Qed.
+  recon (endpoints P).
 
 End pgg_protocol.

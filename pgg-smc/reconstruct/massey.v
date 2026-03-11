@@ -16,7 +16,7 @@
 (*   massey_reconstruct shares == recover secret from all shares (via pick)   *)
 (*   massey_secret_unique == d >= 2 implies secret is determined by shares    *)
 (*   massey_valid_tuple == validity predicate (full vector is a codeword)     *)
-(*   massey_scheme == SharingScheme instance parameterized by dual distance   *)
+(*   massey_scheme == ThresholdScheme instance parameterized by dual distance  *)
 (*   privacy_surj == surjectivity hypothesis (from dual distance d_perp)     *)
 (******************************************************************************)
 
@@ -246,7 +246,7 @@ exists shares'; split.
 Qed.
 
 (******************************************************************************)
-(*     Section 4: SharingScheme Instance                                      *)
+(*     Section 4: ThresholdScheme Instance                                    *)
 (******************************************************************************)
 
 Definition massey_valid_tuple (s : F) (shares : n'.+1.-tuple F) : Prop :=
@@ -277,8 +277,8 @@ exists (rV_to_tuple shares_rV); split.
   exact: Hagree.
 Qed.
 
-Definition massey_scheme : SharingScheme F F :=
-  @MkSharingScheme F F n' d_perp'
+Definition massey_scheme : ThresholdScheme F F :=
+  @MkThresholdScheme F F n' d_perp'
     massey_valid_tuple
     massey_recon_tuple
     massey_correct_tuple

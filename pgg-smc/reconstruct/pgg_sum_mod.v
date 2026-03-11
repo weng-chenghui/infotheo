@@ -173,7 +173,7 @@ Arguments endpoint_sum {N' T'}.
 Section pgg_reconstruction.
 
 Variable M : MonodromyReprType.
-Variable PI : PGG_Interface M.
+Variable PI : PGGInterface M.
 
 Let gT := pgg_gT M.
 Let N := (pgg_N' M).+1.

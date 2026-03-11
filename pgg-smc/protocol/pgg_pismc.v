@@ -33,7 +33,7 @@ Local Open Scope pismc_scope.
 Section pgg_pismc.
 
 Variable M : MonodromyReprType.
-Variable PI : PGG_Interface M.
+Variable PI : PGGInterface M.
 
 Let N := (pgg_N' M).+1.
 Let T := (pi_T' PI).+1.
@@ -186,7 +186,7 @@ Definition test_starts_2 : 2.-tuple 'I_N :=
 Lemma test_starts_2_uniq : uniq test_starts_2.
 Proof. by native_compute. Qed.
 
-Definition Test_PGG_2 : PGG_Interface M :=
+Definition Test_PGG_2 : PGGInterface M :=
   @MkPGGI M 1 test_starts_2 test_starts_2_uniq.
 
 Let PI := Test_PGG_2.
