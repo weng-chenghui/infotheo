@@ -41,8 +41,10 @@ Let n := n'.+1.
 Variable d : nat.
 
 Hypothesis dn : RS.redundancy_ub d n.
-Hypothesis a_neq0 : a != 0.
-Hypothesis a_not_uroot_on : not_uroot_on a n.
+Hypothesis a_prim : n.-primitive_root a.
+
+Let a_neq0 : a != 0 := primitive_uroot_neq0 a_prim.
+Let a_not_uroot_on : not_uroot_on a n := prim_root_not_uroot_on a_prim.
 
 Let C := RS.code a n d.
 
@@ -55,7 +57,36 @@ Lemma poly_eval_in_code (p : {poly F}) :
   size p <= n - d ->
   poly_eval_rV p \in C.
 Proof.
-Admitted.
+move=> Hsize.
+(* Decompose p into monomials and use linearity *)
+have Hdecomp : poly_eval_rV p =
+  \sum_(k < size p) p`_k *: poly_eval_rV ('X^(k : nat) : {poly F}).
+  apply/rowP => j; rewrite mxE summxE.
+  rewrite horner_coef; apply: eq_bigr => k _.
+  by rewrite mxE /poly_eval_rV mxE hornerXn.
+rewrite Hdecomp.
+apply: rpred_sum => /= k _.
+apply: rpredZ.
+(* Show poly_eval_rV ('X^k) \in C for k < size p <= n - d *)
+rewrite mem_kernel_syndrome0 -RS.codebook_syndrome //.
+rewrite inE; apply/forallP => /= t; apply/implyP => Ht.
+apply/eqP.
+have Htn : (t : nat) < n := leq_trans (ltn_ord t) dn.
+rewrite fdcoorE.
+rewrite (eq_bigr (fun j : 'I_n => a ^+ (j * ((k : nat) + (t : nat))))); last first.
+  move=> j _; rewrite mxE hornerXn mxE inordK //.
+  rewrite -exprM -exprM -exprD.
+  by congr (a ^+ _); rewrite (mulnC (t : nat) j) -mulnDr.
+rewrite (primitive_is_principal a_prim); first by [].
+apply/andP; split.
+- by rewrite addn_gt0 Ht orbT.
+- have Hk_lt : (k : nat) < n - d := leq_trans (ltn_ord k) Hsize.
+  have Hkd : (k : nat) + d < n.
+    by move: Hk_lt; rewrite -(ltn_add2r d) subnK // ltnW.
+  have Htd : (t : nat) <= d.
+    by move: (ltn_ord t); rewrite ltnS.
+  exact: leq_ltn_trans (leq_add (leqnn _) Htd) Hkd.
+Qed.
 
 End rs_eval.
 
@@ -100,7 +131,37 @@ Lemma rs_privacy_surj :
     #|S| < (n - d).+1 ->
     exists c : 'rV[F]_n, c \in C /\ vproj c S = vproj target S.
 Proof.
-Admitted.
+move=> S target HS.
+set sS := #|S|.
+(* Build tuples via mktuple for clean tnth access *)
+pose pts : sS.-tuple F :=
+  mktuple (fun j : 'I_sS => a ^+ (enum_val j : nat) : F).
+pose vals : sS.-tuple F :=
+  mktuple (fun j : 'I_sS => target ord0 (enum_val j)).
+(* Show points are distinct *)
+have Huniq : uniq pts.
+  rewrite /pts /= map_inj_uniq ?enum_uniq //.
+  move=> x y Heq; apply: enum_val_inj.
+  apply: (rVexp_inj a_neq0 a_nuroot).
+  by rewrite !ffunE !mxE.
+(* Interpolate *)
+pose p := lagrange_interp pts vals.
+(* Degree bound *)
+have Hsize : size p <= n - d.
+  apply: (leq_trans (lagrange_interp_size pts vals)).
+  by rewrite -ltnS.
+(* Build the codeword *)
+exists (poly_eval_rV a n' p).
+split.
+- exact: (@poly_eval_in_code _ a n' d dn an p Hsize).
+- apply/rowP => i; rewrite !mxE.
+  case: ifPn => Hi; last by [].
+  set j := enum_rank_in Hi i.
+  have Hj : enum_val j = i by rewrite enum_rankK_in.
+  have -> : a ^+ (i : nat) = tnth pts j by rewrite tnth_mktuple Hj.
+  rewrite lagrange_interp_eval //.
+  by rewrite tnth_mktuple Hj.
+Qed.
 
 (* Corollary: instantiate massey_scheme for RS codes *)
 Lemma rs_privacy_surj_massey (Hd2 : 1 < min_dist C_nt) :

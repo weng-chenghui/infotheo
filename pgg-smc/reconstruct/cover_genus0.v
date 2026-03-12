@@ -7,6 +7,14 @@
 (* corresponding to Shamir's secret sharing / Reed-Solomon codes.             *)
 (* The key result: genus 0 implies exact threshold (gap = 0).                 *)
 (*                                                                            *)
+(* Axiomatization scope: The Riemann-Hurwitz verification (genus0_hurwitz)    *)
+(* and geometric consequences are fully proved. The ThresholdScheme ts0 is    *)
+(* axiomatized because genus0_secret_invariant and shamir_exact only need     *)
+(* ts_correct, ts_private, and ts_compatible — standard properties of any     *)
+(* Reed-Solomon / Shamir scheme. Lagrange interpolation (lagrange.v) and      *)
+(* RS privacy surjectivity (rs_privacy.v) provide the concrete witness;       *)
+(* connecting them via Massey's construction (massey.v) is in progress.       *)
+(*                                                                            *)
 (*   genus0_data       == CoveringData with genus 0, base P^1                *)
 (*   genus0_covering   == CoveringScheme with exact (k,k)-threshold          *)
 (*   shamir_exact      == ts_T = ts_k for genus-0 covering                   *)
@@ -51,7 +59,12 @@ Let ramif0 := (2 * #|G| - 2)%N.
 
 Lemma genus0_hurwitz :
   2 * 0 + 2 * #|G| = #|G| * (2 * 0) + ramif0 + 2.
-Proof. Admitted.
+Proof.
+rewrite mulr0 mulr0 add0r add0r /ramif0.
+suff : (2 * #|G| = (2 * #|G| - 2) + 2)%N by [].
+rewrite subnK //.
+by rewrite -[X in X <= _]muln1 leq_mul2l (ltnW HG).
+Qed.
 
 Definition genus0_data : CoveringData M := {|
   cd_base_genus := 0 ;

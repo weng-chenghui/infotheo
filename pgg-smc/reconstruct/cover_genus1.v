@@ -4,8 +4,13 @@
 (* Genus-1 Covering: Elliptic Curve AG Code via CoveringScheme                *)
 (*                                                                            *)
 (* Demonstrates how a higher-genus covering (elliptic curve -> P^1) produces *)
-(* a wider threshold gap. The AG code on the elliptic curve is axiomatized;  *)
-(* only the covering geometry and gap bound are proved.                       *)
+(* a wider threshold gap. The Riemann-Hurwitz verification (genus1_hurwitz)   *)
+(* is fully proved. The AG code (ts1) is axiomatized because elliptic_gap    *)
+(* and the tradeoff theorem only require ts_gap and ts_compatible — standard  *)
+(* consequences of the Goppa bound d + d_perp >= n + 2 - 2g for any curve.  *)
+(* Concretizing the elliptic curve (defining the group law, point counting,  *)
+(* Riemann-Roch space basis) would witness existence of ts1 but would not    *)
+(* strengthen any downstream theorem.                                         *)
 (*                                                                            *)
 (*   genus1_data       == CoveringData with genus 1, base P^1                *)
 (*   genus1_covering   == CoveringScheme with (k, k+2)-threshold             *)
@@ -45,7 +50,9 @@ Let ramif1 := (2 * #|G|)%N.
 
 Lemma genus1_hurwitz :
   2 * 1 + 2 * #|G| = #|G| * (2 * 0) + ramif1 + 2.
-Proof. Admitted.
+Proof.
+by rewrite muln1 [2 * 0]muln0 muln0 add0n /ramif1 addnC.
+Qed.
 
 Definition genus1_data : CoveringData M := {|
   cd_base_genus := 0 ;

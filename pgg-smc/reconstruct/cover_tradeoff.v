@@ -8,6 +8,12 @@
 (*                                                                            *)
 (* The chain: G -> genus (Riemann-Hurwitz) -> gap (AG code bounds)           *)
 (*                                                                            *)
+(* The only hypothesis is genus0_pgl: genus 0 implies |G| <= |PGL(2,N)|.     *)
+(* This is a classical result in algebraic curve theory (automorphisms of    *)
+(* P^1 are Moebius transformations). Proving it would require formalizing    *)
+(* PGL(2,F_q) as a matrix group — orthogonal to the security argument.       *)
+(* All other results are fully proved from CoveringScheme axioms.             *)
+(*                                                                            *)
 (* Key results:                                                               *)
 (*   genus0_ramif_exact      == genus 0 forces R = 2|G|-2                    *)
 (*   genus0_search_bound     == genus 0 bounds search space via |G|          *)
@@ -45,7 +51,10 @@ Lemma genus0_forces_ramif (cd : CoveringData M) :
   cd_base_genus cd = 0 ->
   cd_genus cd = 0 ->
   cd_ramif cd + 2 = 2 * #|G|.
-Proof. Admitted.
+Proof.
+move=> Hb0 Hg0; have := cd_hurwitz cd.
+by rewrite Hb0 Hg0 !muln0 !add0n.
+Qed.
 
 (* More ramification -> higher genus *)
 Lemma more_ramif_more_genus (cd1 cd2 : CoveringData M) :
@@ -53,7 +62,12 @@ Lemma more_ramif_more_genus (cd1 cd2 : CoveringData M) :
   cd_base_genus cd2 = 0 ->
   cd_ramif cd1 < cd_ramif cd2 ->
   cd_genus cd1 < cd_genus cd2.
-Proof. Admitted.
+Proof.
+move=> Hb1 Hb2 HR.
+have H1 := hurwitz_base0 Hb1; have H2 := hurwitz_base0 Hb2.
+rewrite -(ltn_pmul2l (isT : 0 < 2)) -(ltn_add2r (2 * #|G|)).
+by rewrite /G H1 H2 ltn_add2r.
+Qed.
 
 End riemann_hurwitz_consequences.
 
@@ -70,7 +84,7 @@ Let N := (pgg_N' M).+1.
 (* Search space is bounded by |G| *)
 Lemma search_space_le_group (L : nat) :
   @search_space M L <= #|G|.
-Proof. Admitted.
+Proof. exact: search_space_leG. Qed.
 
 (* For genus-0 covers, |G| embeds into Aut(P^1).
    Over a field with N elements, Aut(P^1) = PGL(2,N).
@@ -139,7 +153,12 @@ Lemma group_genus_monotone (cd1 cd2 : CoveringData M) :
   cd_base_genus cd2 = 0 ->
   cd_ramif cd1 = cd_ramif cd2 ->
   cd_genus cd1 = cd_genus cd2.
-Proof. Admitted.
+Proof.
+move=> Hb1 Hb2 HR.
+have H1 := hurwitz_base0 Hb1; have H2 := hurwitz_base0 Hb2.
+apply/eqP; rewrite -(eqn_pmul2l (isT : 0 < 2)) -(eqn_add2r (2 * #|G|)).
+by rewrite /G H1 H2 eqn_add2r HR.
+Qed.
 
 (* Combined statement: search space vs threshold gap *)
 Theorem search_gap_tradeoff (cs : CoveringScheme M) (L : nat) :

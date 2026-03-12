@@ -7,6 +7,15 @@
 (* group G to the covering curve's genus (via Riemann-Hurwitz) and to the    *)
 (* threshold of the secret sharing scheme (via AG codes).                     *)
 (*                                                                            *)
+(* Design rationale — why axiomatize the AG code:                             *)
+(*   CoveringScheme axiomatizes cs_compatible and cs_gap because the          *)
+(*   security-threshold tradeoff theorem only needs: (1) Riemann-Hurwitz     *)
+(*   (proved here from cd_hurwitz) to link |G| to genus, and (2) the gap     *)
+(*   bound ts_T <= ts_k + 2*genus to link genus to threshold. Both facts     *)
+(*   hold for any AG code on any curve (Goppa bound), so concretizing the    *)
+(*   curve (Hermitian, elliptic, Garcia-Stichtenoth tower) would only show   *)
+(*   that a CoveringScheme instance exists — not change any downstream proof. *)
+(*                                                                            *)
 (*   CoveringData M == covering geometry parameterized by MonodromyReprType  *)
 (*     cd_base_genus == genus of base curve B                                *)
 (*     cd_n_branch   == number of branch points                              *)
@@ -130,7 +139,7 @@ Proof. by move=> Hle; rewrite leq_add2l leq_mul2l Hle orbT. Qed.
 (* The threshold gap is bounded by twice the genus *)
 Lemma gap_bound (cs : CoveringScheme M) :
   ts_T (cs_scheme cs) - ts_k (cs_scheme cs) <= 2 * cd_genus (cs_data cs).
-Proof. Admitted.
+Proof. by have := cs_gap cs; rewrite -leq_subLR. Qed.
 
 End covering_consequences.
 
@@ -159,7 +168,11 @@ Lemma genus0_ramif (cd : CoveringData M) :
   cd_base_genus cd = 0 ->
   cd_genus cd = 0 ->
   cd_ramif cd = 2 * #|G| - 2.
-Proof. Admitted.
+Proof.
+move=> Hb0 Hg0; have := hurwitz_base0 Hb0.
+rewrite Hg0 muln0 add0n => Heq.
+by rewrite -(addnK 2 (cd_ramif cd)) Heq addnK.
+Qed.
 
 (* Ramification exceeding 2|G|-2 forces positive genus *)
 Lemma ramif_forces_genus (cd : CoveringData M) :
@@ -171,6 +184,9 @@ move=> Hb0 Hramif.
 (* From hurwitz_base0: 2*g + 2|G| = R + 2.
    If g = 0: 2|G| = R + 2, so R = 2|G| - 2.
    But R > 2|G| - 2, contradiction. So g > 0. *)
-Admitted.
+rewrite lt0n; apply/negP => /eqP Hg0.
+have := genus0_ramif Hb0 Hg0.
+by move=> HR; rewrite HR ltnn in Hramif.
+Qed.
 
 End ramif_base0.

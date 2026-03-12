@@ -60,9 +60,8 @@ rewrite /lagrange_denom.
 apply/prodf_neq0 => j ji.
 rewrite subr_eq0; apply/negP => /eqP Heq.
 suff : i = j by move=> ij; rewrite ij eqxx in ji.
-apply: val_inj.
-(* The points are distinct, so equal tnth values imply equal indices *)
-Admitted.
+by apply/eqP; rewrite -(@tnth_uniq _ _ pts) // Heq eqxx.
+Qed.
 
 (* Numerator evaluated at pts_j when j != i contains a zero factor *)
 Lemma lagrange_numer_eval_neq (i j : 'I_n) :
@@ -70,15 +69,15 @@ Lemma lagrange_numer_eval_neq (i j : 'I_n) :
 Proof.
 move=> Hneq.
 rewrite /lagrange_numer horner_prod.
-rewrite (bigD1 j) //= !hornerE subrr mul0r.
-Admitted.
+by rewrite (bigD1 j) //= hornerD hornerN hornerX hornerC subrr mul0r.
+Qed.
 
 (* Numerator evaluated at pts_i equals the denominator *)
 Lemma lagrange_numer_eval_eq (i : 'I_n) :
   (lagrange_numer i).[tnth pts i] = lagrange_denom i.
 Proof.
 rewrite /lagrange_numer /lagrange_denom horner_prod.
-by apply: eq_bigr => j Hj; rewrite !hornerE.
+by apply: eq_bigr => j Hj; rewrite hornerD hornerN hornerX hornerC.
 Qed.
 
 (* KEY LEMMA: Lagrange basis evaluation *)
@@ -97,7 +96,16 @@ Qed.
 (* Size of the numerator polynomial *)
 Lemma size_lagrange_numer (i : 'I_n) :
   size (lagrange_numer i) = n.
-Proof. Admitted.
+Proof.
+rewrite /lagrange_numer.
+rewrite size_prod; last by move=> j ji; rewrite polyXsubC_eq0.
+rewrite (eq_bigr (fun=> 2)); last first.
+  by move=> j ji; rewrite size_XsubC.
+rewrite sum_nat_const.
+have -> : #|predC1 i| = n.-1 by rewrite cardC1 card_ord.
+rewrite mulnS muln1 -addSn addnK.
+by case: n i => [[]|].
+Qed.
 
 (* Size of Lagrange basis polynomial *)
 Lemma size_lagrange_basis (i : 'I_n) :
@@ -169,7 +177,19 @@ Lemma lagrange_interp_unique (f : {poly F}) (vals : n.-tuple F) :
   (forall i : 'I_n, f.[tnth pts i] = tnth vals i) ->
   f = lagrange_interp pts vals.
 Proof.
-(* Proof: f - interp has n roots but degree < n, so it must be 0 *)
-Admitted.
+move=> Hsz Heval.
+apply/eqP; rewrite -subr_eq0; apply/eqP.
+set g := f - lagrange_interp pts vals.
+apply: (roots_geq_poly_eq0 (rs := [seq tnth pts i | i <- enum 'I_n])).
+- apply/allP => x /mapP [j _ ->].
+  rewrite rootE hornerD hornerN Heval lagrange_interp_eval // subrr eqxx.
+- done.
+- rewrite (map_tnth_enum pts).
+  exact: pts_uniq.
+- rewrite size_map size_enum_ord /g.
+  apply: (leq_trans (size_polyD _ _)).
+  rewrite size_polyN geq_max Hsz /=.
+  exact: lagrange_interp_size.
+Qed.
 
 End lagrange_unique.
