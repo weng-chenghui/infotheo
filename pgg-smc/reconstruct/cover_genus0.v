@@ -7,13 +7,10 @@
 (* corresponding to Shamir's secret sharing / Reed-Solomon codes.             *)
 (* The key result: genus 0 implies exact threshold (gap = 0).                 *)
 (*                                                                            *)
-(* Axiomatization scope: The Riemann-Hurwitz verification (genus0_hurwitz)    *)
-(* and geometric consequences are fully proved. The ThresholdScheme ts0 is    *)
-(* axiomatized because genus0_secret_invariant and shamir_exact only need     *)
-(* ts_correct, ts_private, and ts_compatible — standard properties of any     *)
-(* Reed-Solomon / Shamir scheme. Lagrange interpolation (lagrange.v) and      *)
-(* RS privacy surjectivity (rs_privacy.v) provide the concrete witness;       *)
-(* connecting them via Massey's construction (massey.v) is in progress.       *)
+(* The ThresholdScheme is now concrete (from RS codes via Massey's            *)
+(* construction in rs_massey_bridge.v). Exactness (ts_T = ts_k) is proved.   *)
+(* Only ts_compatible remains axiomatized: it requires showing that the      *)
+(* monodromy group acts as code automorphisms (Issue #39).                    *)
 (*                                                                            *)
 (*   genus0_data       == CoveringData with genus 0, base P^1                *)
 (*   genus0_covering   == CoveringScheme with exact (k,k)-threshold          *)
@@ -22,11 +19,13 @@
 
 From mathcomp Require Import ssreflect ssrbool ssrfun eqtype ssrnat seq.
 From mathcomp Require Import fintype tuple finfun finset fingroup perm.
-From mathcomp Require Import morphism bigop div ssralg finalg.
-From mathcomp Require Import matrix mxalgebra vector zmodp.
+From mathcomp Require Import morphism bigop prime div ssralg finalg.
+From mathcomp Require Import matrix mxalgebra vector zmodp poly cyclic.
+Require Import ssralg_ext.
 From pgg_smc Require Import pgg_interface.
 From pgg_reconstruct Require Import pgg_sharing_framework.
 From pgg_reconstruct Require Import covering_scheme.
+From pgg_reconstruct Require Import rs_massey_bridge.
 
 Set Implicit Arguments.
 Unset Strict Implicit.
@@ -75,20 +74,31 @@ Definition genus0_data : CoveringData M := {|
 |}.
 
 (******************************************************************************)
-(*     Section 2: Genus-0 Threshold Scheme (Axiomatized)                      *)
+(*     Section 2: Concrete RS-based Threshold Scheme                          *)
 (******************************************************************************)
 
-(* The threshold scheme is axiomatized here.
-   In a complete development, it would come from rs_privacy.v via massey.v.
-   For now, we assume the existence of a compatible ThresholdScheme
-   with exact threshold. *)
+(* Field parameters for the RS code underlying Shamir's scheme *)
+Variables (q m' : nat).
+Hypothesis primeq : prime q.
+Let F := GF m' primeq.
 
-Variable ts0 : ThresholdScheme 'I_N 'I_N.
+Variable n'' : nat.
+Variable a : F.
 
-(* Exact threshold: reconstruction threshold = privacy threshold *)
-Hypothesis ts0_exact : ts_T ts0 = ts_k ts0.
+Hypothesis qn : ~~ (q %| n''.+3)%nat.
+Hypothesis an : (n''.+3).-primitive_root a.
+Hypothesis HN : N = #|F|.
 
-(* Monodromy preserves reconstruction *)
+(* Concrete threshold scheme from RS codes via Massey (rs_massey_bridge.v) *)
+Let ts0 : ThresholdScheme 'I_N 'I_N := rs_genus0_scheme primeq a qn an HN.
+
+(* Exactness: proved from RS min_dist + Massey construction *)
+Let ts0_exact : ts_T ts0 = ts_k ts0 := rs_genus0_exact primeq a qn an HN.
+
+(* Compatibility: monodromy preserves reconstruction.
+   This requires showing that the monodromy group acts as RS code
+   automorphisms — a geometric fact about covering automorphisms
+   preserving the AG code structure (Issue #39: covering bridge). *)
 Hypothesis ts0_compatible :
   @ts_compatible _ G _ _ ts0 (fun g x => rho g x).
 

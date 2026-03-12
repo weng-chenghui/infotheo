@@ -155,6 +155,7 @@ pgg-smc/reconstruct/massey.v
 pgg-smc/reconstruct/lagrange.v
 pgg-smc/reconstruct/covering_scheme.v
 pgg-smc/reconstruct/rs_privacy.v
+pgg-smc/reconstruct/rs_massey_bridge.v
 pgg-smc/reconstruct/cover_genus0.v
 pgg-smc/reconstruct/cover_genus1.v
 pgg-smc/reconstruct/cover_tradeoff.v
