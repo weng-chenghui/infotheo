@@ -1,0 +1,279 @@
+# SMC-PGG vs General MPC: An Honest Expert Analysis
+
+*Date: 2026-03-13*
+*Companion notes*: `20260313_word_computation_mpc_landscape.md` (complexity landscape), `20260313_smc_pgg_computation_examples.md` (concrete examples), `20260312_words_as_computation_formal_languages.md` (formal language theory)
+
+---
+
+## 1. What SMC-PGG Offers: Algebraic Structure as Protocol Design
+
+SMC-PGG is not trying to compete with garbled circuits on computational power. It offers something different: **algebraic structure that makes security proofs simpler, round complexity formally characterizable, and protocol design compositional**. The computational boundary is real (NC^1, not P), but the algebraic architecture provides guarantees that circuit-based MPC cannot.
+
+<!-- REVIEW-FIX: W1 Add contributions taxonomy after preamble distinguishing established results, protocol extensions, and conjectural claims. -->
+**Contributions taxonomy.** The claims in this section span three epistemic levels:
+
+- *Established (formal or mathematical)*: Barrington-Thérien classification (§1.1, §5 Claim 1), Foata-depth round characterization (§1.2, §5 Claim 2), fiber security reformulation (§5 Claim 3), Krohn-Rhodes decomposition existence (§1.3).
+- *Protocol extensions (demonstrated but not formalized)*: NC^1 function evaluation via Barrington branching programs (Python demos; see §2), RAAG-structured multi-party evaluation (§5 Claim 2 concrete demo).
+- *Conjectural/proposed*: Covering space → AG code → threshold parameter chain (§1.4); end-to-end security proofs for the function-evaluation extension; deployment-scale efficiency claims.
+
+Readers should weight claims accordingly. The note is honest about these distinctions throughout.
+
+Four concrete offerings:
+
+### 1.1 Algebraic security proofs
+
+Security follows from group-theoretic properties — fiber uniformity, group action transitivity — rather than ad hoc simulation arguments. The fiber L_g = eval^{-1}(g) gives a combinatorial anonymity set whose size is computable from the group's Cayley graph. This makes security proofs simpler and more modular. <!-- REVIEW-FIX: S1 composability downgraded to conjecture — no UC or hybrid proof exists --> It also suggests a potential path toward composable security: if sub-protocol security reduces to an algebraic property of the sub-group, composing two sub-protocols by composing their algebraic structures *might* yield security for the composed protocol — potentially without constructing a new simulator from scratch. Whether this can be made rigorous (e.g., in a UC or hybrid-argument framework) remains an open question requiring formal proof.
+
+### 1.2 The RAAG parallelism–power trade-off
+
+The independence graph I is a formal, algebraic knob trading round complexity for computational expressiveness. No other MPC framework has this. In garbled circuits, rounds and computational power are decoupled: Yao gives O(1) rounds for anything in P. In GMW and SPDZ, round complexity scales with circuit depth but is not algebraically characterized. In SMC-PGG, the trade-off is intrinsic and formally characterized by Foata depth — the number of layers in the Cartier-Foata normal form of the trace. Full commutativity (I = Σ × Σ) gives non-interactive evaluation (Foata depth 1). No commutativity (I = ∅) requires fully sequential execution (Foata depth = word length). Partial commutativity (RAAG) interpolates, with the independence graph as the tuning parameter for round complexity. The computational class is determined independently by the group G (non-solvable G gives NC^1, solvable non-abelian G gives ACC^0, etc.) and is not affected by the choice of I. <!-- REVIEW-FIX: F8 Fixed §1.2 to separate I (round structure) from G (computational class). -->
+
+### 1.3 Compositional protocol design via Krohn-Rhodes
+
+The Krohn-Rhodes decomposition theorem factors any finite automaton into simple group components and aperiodic (counter-free) components. This suggests a principled protocol architecture: group layers are handled by monodromy walks (SMC-PGG), and we conjecture that aperiodic layers can be handled by threshold broadcast (a simpler primitive). <!-- REVIEW-FIX: S3 Downgraded aperiodic-layer mapping from assertion to conjecture; the threshold broadcast correspondence is not yet established. --> The target computation decomposes into algebraically characterized layers, each handled by the appropriate protocol primitive. This is a decomposition *theorem*, not ad hoc circuit compilation — the algebraic theory guarantees that the decomposition exists and characterizes its components.
+
+### 1.4 Natural connection to algebraic geometry
+
+<!-- REVIEW-FIX: S4 Each step in the covering→AG-code→threshold chain is a distinct construction; the end-to-end chain is conjectural/proposed, not an established result. -->
+The covering space → AG code → threshold chain is a *proposed* connection, not an established pipeline: each arrow is a distinct construction, and the end-to-end chain has not been formalized or proven to compose correctly. First, the monodromy group of the protocol is the Galois group of a covering of algebraic curves — this connection is established by monodromy theory. Second, *separately*, AG codes on algebraic curves yield threshold secret sharing schemes whose parameters (threshold, share size, reconstruction complexity) are determined by the curve's geometry — this is also established (Goppa, Tsfasman-Vlăduț-Zink). Third, *conjecturally*, these two constructions can be linked so that the monodromy covering of a protocol directly determines an AG code whose parameters govern the threshold sharing embedded in that protocol. This third step is the novel claim, and it remains a research conjecture. If it can be established, it would potentially yield better threshold parameters than generic constructions.
+
+**The rest of this note provides the honest technical context for these claims.**
+
+---
+
+## 2. The Computational Boundary: NC^1 < P
+
+General MPC frameworks — garbled circuits (Yao 1986), GMW (Goldreich-Micali-Wigderson 1987), SPDZ (Damgård et al. 2012) — evaluate arbitrary Boolean circuits, which means they compute all of P (and beyond, with appropriate complexity assumptions).
+
+SMC-PGG's monodromy walk, when extended to function evaluation via Barrington's theorem, is a width-5 branching program over S_5. By Barrington (1989), this captures exactly NC^1: the class of functions computable by polynomial-size, logarithmic-depth Boolean circuits.
+
+NC^1 is strictly contained in P under standard complexity-theoretic assumptions (and unconditionally, NC^1 ⊆ L ⊆ NL ⊆ P with at least one strict containment). Functions in P \ NC^1 (assuming NC^1 ≠ P) include iterated matrix multiplication (P-complete), linear programming (P-complete), and directed graph reachability (NL-complete, hence outside NC^1 if L ≠ NL). <!-- REVIEW-FIX: F1 Removed integer multiplication (it is in TC^0 ⊆ NC^1); replaced with correct examples of functions believed outside NC^1. -->
+
+**Even the NC^1 claim is conditional.** The current SMC-PGG formalization implements secret sharing only — the monodromy word encodes the secret, not a computation on private inputs. The NC^1 function evaluation described in the landscape note (§7.2) requires a protocol extension where each party selects their monodromy permutation based on a private input bit, implementing a Barrington branching program instruction. This extension has been demonstrated in Python (Example 2: Barrington AND gate; Example 6: Barrington adder) but has not been formalized or security-analyzed.
+
+---
+
+## 3. What NC^1 Includes (and What It Doesn't)
+
+### In NC^1
+
+| Function class | Examples |
+|---------------|----------|
+| Integer comparison | a < b, a = b, a ≤ b |
+| Integer addition | a + b (carry-lookahead is O(log n) depth) |
+| Parity / majority | XOR, MAJ, any symmetric Boolean function |
+| Sorting networks | AKS sorting network (O(log n) depth) |
+| Regular language recognition | Pattern matching, DFA simulation |
+| Boolean formula evaluation | Any formula (not circuit) of polynomial size |
+| Barrington-constructible | Any function expressible as commutator nesting over S_5 |
+
+### Not in NC^1 (under standard assumptions)
+
+| Function class | Why |
+|---------------|-----|
+| Iterated matrix multiplication | P-complete |
+| General polynomial evaluation | Over large fields, requires multiplication depth |
+| Graph reachability | NL-complete (s-t connectivity in directed graphs); outside NC^1 if L ≠ NL |
+| Linear programming | P-complete |
+| ML inference | Matrix multiplications, non-linear activations |
+| General SQL queries | Arbitrary joins, aggregations, subqueries |
+
+<!-- REVIEW-FIX: F1 Removed integer multiplication from "Not in NC^1" — it is in TC^0 ⊆ NC^1. Changed "Matrix multiplication" to "Iterated matrix multiplication" (single matrix multiply is in NC^2; iterated product is P-complete). Fixed graph reachability classification (NL-complete, not P-complete). -->
+
+**Practical interpretation.** SMC-PGG handles "lightweight" secure computation — comparisons, threshold checks, voting, pattern matching, sorting, parity tests. It does not handle "heavyweight" computation — ML training/inference, database queries with joins, arbitrary arithmetic circuits. For applications where the target function is naturally in NC^1 (and many practical MPC applications are), the computational restriction is not binding.
+
+---
+
+## 4. Concrete Comparison Table
+
+<!-- REVIEW-FIX: S8 GMW and BGW are separate protocols with different security models; BGW row added. Original "GMW" row conflated them. -->
+| | SMC-PGG | Yao GC | GMW | BGW | SPDZ |
+|---|---|---|---|---|---|
+| **Computational power** | NC^1 (conditional) | P | P | P | P |
+| **Security model** | Information-theoretic | Computational (OT) | Computational (OT-based) | IT (honest majority) | Computational offline / IT online |
+| **Round complexity** | Foata depth (algebraically characterized) | O(1) | O(depth) | O(depth) | O(depth) |
+| **Adversary model** | Semi-honest | Semi-honest (+ cut-and-choose for malicious) | Semi-honest or malicious | Passive (t < n/2) or active (t < n/3) | Malicious |
+| **Setup assumptions** | None | Oblivious transfer | OT | None | Preprocessing (Beaver triples) |
+| **Communication** | O(ℓ · log N) per word step | O(n · |C|) | O(n² · |C|) | O(n² · |C|) | O(n · |C|) |
+| **Algebraic structure** | Explicit (group, RAAG, variety) | None (generic circuit) | None (generic circuit) | None (generic circuit) | Algebraic (over rings), but no structural classification |
+| **Formal verification** | Partial (Coq: sharing, fiber, RAAG) | None at protocol level | None at protocol level | None at protocol level | None at protocol level |
+| **Maturity** | Research prototype (formalized sharing) | Deployed (EMP, ABY, ...) | Deployed (ABY) | Foundational (textbook) | Deployed (MP-SPDZ, SCALE-MAMBA) |
+
+**Key observations:**
+
+- **Yao wins on rounds**: O(1) rounds for any function in P. SMC-PGG's Foata depth is always ≥ 1 and can be much larger. The advantage of SMC-PGG is not fewer rounds — it's that the round complexity is *algebraically characterized* and *tunable* via the independence graph.
+
+<!-- REVIEW-FIX: S9+W2 "SMC-PGG wins on security model" qualified: BGW provides IT security for all of P; SPDZ preprocessing is computational. The actual advantage is algebraic structure, not IT security per se. -->
+- **SMC-PGG's security model: partial advantage only**: SMC-PGG provides fully information-theoretic security without setup assumptions, versus Yao (computational, requires OT) and SPDZ (computational offline / IT online). However, BGW already provides IT security for all of P in the honest-majority setting. SMC-PGG's IT security is therefore not a win over the entire MPC landscape — it is a win over Yao and SPDZ specifically, and a tie (on security model alone) with BGW. The genuine advantage over BGW is not the security model but the algebraic structure: formal computational classification, tunable RAAG parallelism, and composable algebraic proofs.
+
+- **SMC-PGG wins on algebraic structure**: The Barrington-Thérien classification tells you exactly what's computable; the RAAG independence graph tells you exactly what parallelizes. No circuit-based framework provides this.
+
+---
+
+## 5. The Three "Design Knob" Claims — Assessed Honestly
+
+### Claim 1: Group variety G determines computational class
+
+**Status: True (Barrington-Thérien, 1988).**
+
+Choosing the monodromy group G from different algebraic varieties determines the computational power of the protocol:
+
+| G variety | Complexity class |
+|-----------|-----------------|
+| Non-solvable (e.g., S_5, A_5) | NC^1 |
+| Solvable, non-abelian | ACC^0 (modular counting) |
+| Abelian (e.g., Z/nZ) | ACC^0 (modular counting) | <!-- REVIEW-FIX: F3 abelian groups characterize ACC^0 per Barrington-Thérien; "ACC^0 ∩ commutative" is not a standard class -->
+| Trivial | Nothing |
+
+This is a classification result. It tells you what SMC-PGG *cannot* do above NC^1 — there is no choice of G that reaches P. But it also tells you what SMC-PGG *can* do within NC^1, and the algebraic characterization means you know exactly where you stand. In circuit-based MPC, there is no analogous algebraic constraint on capabilities — you just build a bigger circuit. The SMC-PGG designer gets a formal guarantee: "with this G, I can compute exactly this complexity class, no more, no less."
+
+**Honest caveat:** The classification applies to bounded-width branching programs. Width at most 5 suffices for NC^1 (any non-solvable group of width ≤ 5 works; width exactly 5 is not required). <!-- REVIEW-FIX: F4 width 5 is sufficient, not required; corrected to "at most 5 suffices" --> Increasing width to polynomial gives P, but that's no longer "bounded-width" and doesn't fit the SMC-PGG monodromy walk model.
+
+### Claim 2: Independence graph I determines round complexity
+
+**Status: True. The Foata depth of the trace equals the number of protocol rounds.**
+
+The Cartier-Foata normal form partitions a word into maximal layers of pairwise-independent generators. The number of layers (Foata depth) equals the minimum number of sequential rounds needed to execute the word, with independent generators executing in parallel within each round.
+
+This is novel: **the trade-off between parallelism and computational power has no circuit analogue.**
+
+- Full commutativity (I = Σ × Σ): Foata depth 1 (non-interactive). All generators can execute in a single parallel round.
+- No commutativity (I = ∅): Foata depth = word length (fully sequential). Every generator must execute in its own round.
+- Partial commutativity (RAAG): intermediate Foata depth, with the independence graph determining which generators can execute concurrently.
+
+**Important distinction:** The independence relation I controls only round structure (parallelism), NOT computational class. The computational class is determined solely by the group G (Barrington-Thérien): non-solvable G gives NC^1, solvable non-abelian G gives ACC^0, etc., regardless of I. Making I fully commutative does not force G to be abelian — one can have I = Σ × Σ with G = S_5, achieving Foata depth 1 and NC^1. The trade-off is that full commutativity imposes constraints on how the word can encode computation (since generator order is lost), which may limit which NC^1 functions are realizable for a given word length — but this is a protocol-design constraint, not a complexity-theoretic one. <!-- REVIEW-FIX: F8 Separated I (round structure) from G (computational class); the original text incorrectly implied that full commutativity forces abelian G and thus ACC^0. -->
+
+**Honest caveat:** Yao's garbled circuits achieve O(1) rounds for *any* function in P. SMC-PGG's round complexity is NOT better in absolute terms — in fact, it's often worse. What IS unique is the *formal, algebraic trade-off* between parallelism and power. The independence graph I is a design parameter that the protocol designer controls, with algebraically characterized consequences. No other MPC framework exposes this knob.
+
+**Concrete demonstration** (from Examples note, Ex. 3 §5): A function over S_5 with generators s1 = (0 1), s2 = (1 2), s4 = (3 4) and independence {s1↔s4, s2↔s4}. Swapping the order of parties 1 and 2 changes the result — full commutativity computes the *wrong function*. But party 3 (using s4) can execute concurrently with party 1 — the RAAG parallelism is valid. Foata depth 2 instead of 3: the only correct-and-efficient evaluation strategy is the RAAG structure.
+
+### Claim 3: Fiber L_g gives covering-space security
+
+**Status: True as a mathematical fact; reformulation rather than strengthening of standard security.**
+
+The fiber L_g = eval^{-1}(g) = {w ∈ Σ^ℓ : eval(w) = g} is the set of all words that evaluate to the group element g. This is the preimage of g under the evaluation morphism — equivalently, the set of paths in the Cayley graph from identity to g using exactly ℓ steps. The fiber size |L_g| is a concrete, computable anonymity set: an adversary who sees the full word length ℓ but not the word itself faces |L_g| equally likely candidates.
+
+**Honest caveat:** Standard simulation-based security already guarantees that the adversary learns nothing beyond the output. The fiber security is a *reformulation*, not a *strengthening*. A protocol proven secure via simulation is also fiber-secure; the converse may not hold (fiber security is potentially weaker than simulation security).
+
+**But it's a useful reformulation.** Three reasons:
+
+1. **Concrete security bounds without full simulation.** The entropy of the adversary's uncertainty is log₂|L_g|, computable from the group's Cayley graph. You don't need to construct a simulator — just count fiber elements.
+
+2. **Compositional analysis.** When composing sub-protocols, fiber sizes compose via the convolution formula |L_g| = Σ_{h} |L_h^{(1)}| · |L_{h⁻¹g}^{(2)}|. This gives concrete entropy bounds for composed protocols from the sub-protocol fiber sizes.
+
+3. **Connection to topology.** The fiber L_g corresponds to the set of loops in the base space that lift to paths ending at sheet g in the covering space. This connects protocol security to covering space topology — a rich mathematical structure with its own set of tools (fundamental group, deck transformations, Galois correspondence).
+
+**Concrete demonstration** (from Examples note, Ex. 1 §7): For S_5 with 4 generators, all 256 words of length 4 partition into fibers. The identity fiber has 34 words; other elements have smaller fibers. The uniform conditional property holds: given eval(w₁) for the first half, the number of completions w₂ reaching any target g is the same regardless of which specific w₁ was chosen. Shamir sharing has an exact analogue of this property: conditioned on the secret, any t shares are uniformly distributed (this follows from the polynomial interpolation argument). What distinguishes the SMC-PGG version is not the uniformity itself but its *topological interpretation*: the fiber corresponds to loops in the base space lifting to paths in the covering space, connecting the combinatorial uniformity to deck transformations and the Galois correspondence of covering spaces. This topological structure provides additional tools (fundamental group actions, monodromy representations) that have no counterpart in the linear-algebraic setting of Shamir sharing. <!-- REVIEW-FIX: F9 Replaced false claim that Shamir has "no analogue"; acknowledged the Shamir analogue while clarifying what is genuinely different (topological structure). -->
+
+---
+
+## 6. The Correct Framing
+
+SMC-PGG is not a competitor to garbled circuits or SPDZ. The right analogy: **lattice-based cryptography vs RSA**.
+
+Lattice-based crypto is not "better" at encrypting than RSA. It doesn't encrypt more data or encrypt faster (it's often slower). What it offers is a *different algebraic foundation* that gives *structural* benefits: worst-case hardness guarantees, post-quantum security, fully homomorphic encryption. These are architectural advantages, not performance advantages.
+
+Similarly, SMC-PGG's algebraic foundation gives:
+
+| Structural benefit | What the algebra provides | Circuit-MPC equivalent |
+|---|---|---|
+| Formal computational characterization | Barrington-Thérien: G-variety → complexity class | None — circuit-MPC computes "whatever circuit you build" |
+| Formal round-complexity/power trade-off | RAAG Foata depth, tunable via independence graph I | Absent — rounds and power are decoupled |
+| Algebraic security proofs | Fiber uniformity, group transitivity, covering space topology | Protocol-specific simulation proofs | <!-- REVIEW-FIX: S19 replaced "Ad hoc simulation arguments per protocol" with neutral "Protocol-specific simulation proofs" -->
+| Compositional protocol design | Krohn-Rhodes decomposition: group + aperiodic layers | Manual circuit composition |
+| Formal verification feasibility | Small algebraic structures amenable to Coq proofs | Circuit-level verification intractable for large circuits |
+
+The selling point is that **the math does more of the work**. The protocol designer gets formal guarantees from the algebraic structure instead of engineering them case by case. When you choose G = S_5 and I = {(σ₁,σ₃), (σ₁,σ₄), (σ₂,σ₄)}, you know:
+- Computational power: NC^1 (because S_5 is non-solvable)
+- Round complexity: Foata depth of the trace monoid M(Σ, I) (computable)
+- Security: fiber sizes |L_g| (computable from Cayley graph)
+- What you can't compute with bounded-width branching programs: anything outside NC^1 (this is a provable upper bound on the model, though whether NC^1 ≠ P remains open) <!-- REVIEW-FIX: S18 Clarified that the NC^1 upper bound on the model is provable, but the existence of functions in P \ NC^1 is an open problem. -->
+
+In circuit-based MPC, you know none of these things from the algebraic structure — because there is no algebraic structure. You build a circuit, prove it secure with a custom simulation argument, optimize it by hand, and hope for the best.
+
+---
+
+## 7. What Remains Honest
+
+Three things this note does NOT claim:
+
+### 7.1 SMC-PGG is NOT more powerful than general MPC
+
+It is strictly less powerful: NC^1 ⊊ P (under standard assumptions). Any function computable by SMC-PGG is also computable by garbled circuits, GMW, or SPDZ — in O(1) rounds (Yao) or O(depth) rounds. The advantage is structural, not computational.
+
+### 7.2 SMC-PGG is NOT more efficient
+
+There are no benchmarks. The word-product encoding — representing a Boolean function as a polynomial-length sequence of S_5 permutations via commutator nesting — has inherent blowup: depth d requires 4^d permutation factors. Since NC^1 circuits have depth O(log n) for input size n, this gives 4^{O(log n)} = n^{O(1)} permutation factors — polynomial, not exponential, in the input size. The encoding is therefore polynomial-size as required by Barrington's theorem. However, the constant matters in practice: for a circuit of depth c·log₂(n), the encoding has 4^{c·log₂ n} = n^{2c} factors, and the constant c in the depth bound can make this polynomial impractically large. Optimized garbled circuits (half-gates, free-XOR) evaluate the same circuit with communication proportional to the circuit size (linear in the number of gates), so even though both are polynomial, the Barrington encoding has a substantially worse polynomial degree. <!-- REVIEW-FIX: F10 Fixed misleading "depth-20 → 10^12" example; clarified that 4^d is polynomial for NC^1 (d = O(log n)) and the practical concern is the polynomial constant, not exponential blowup. -->
+
+For the current regime (secret sharing), the comparison is moot: SMC-PGG shares a group element while Shamir sharing shares a field element, and the communication costs are comparable. The efficiency question becomes relevant only when evaluating functions, and there the Barrington encoding is likely less efficient than optimized circuit garbling.
+
+### 7.3 SMC-PGG is NOT ready for deployment
+
+The comparison in maturity is stark:
+
+| Framework | Status |
+|-----------|--------|
+| MP-SPDZ | Open-source, actively maintained, supports 30+ MPC protocols, benchmarked on real applications |
+| EMP-toolkit | High-performance garbled circuits, used in academic benchmarks, sub-second evaluation of AES |
+| ABY / ABY3 | Mixed arithmetic-Boolean-Yao, optimized for ML inference |
+| SMC-PGG | Coq formalization of secret sharing and fiber security; Python demos of Barrington gates; no implementation, no benchmarks, no deployment |
+
+This gap is real and should not be minimized. SMC-PGG is a theoretical framework with partial formal verification, not a practical system. Its value is in the algebraic architecture, not in competing with deployed systems on performance or features.
+
+---
+
+## 8. Where SMC-PGG Has Genuine Advantage
+
+Despite the caveats above, there are settings where SMC-PGG's algebraic structure provides genuine advantages over circuit-based MPC:
+
+### 8.1 When the target function is naturally in NC^1
+
+<!-- REVIEW-FIX: S26 Ishai-Kushilevitz (2002) gives constant-round IT-secure protocols for NC^1 via randomizing polynomials; this is prior work in the same design space and should be acknowledged. -->
+Many practical MPC applications — private voting, threshold comparisons, pattern matching on sensitive data, sorting under encryption — involve functions that are naturally in NC^1. For these, the computational restriction is not binding, and the algebraic structure provides benefits (formal round complexity, algebraic security proofs) without computational cost.
+
+**Prior work in this space.** Ishai and Kushilevitz (2002) give *perfect constant-round* IT-secure protocols for NC^1 using randomizing polynomials, achieving O(1) rounds without computational assumptions. This is a significant prior result: it shows that the NC^1 + IT-security combination is not novel to SMC-PGG. The distinctive contribution of SMC-PGG relative to Ishai-Kushilevitz is the explicit algebraic structure — the group variety classification, the RAAG parallelism-power trade-off, and the Krohn-Rhodes compositional architecture — none of which appear in the randomizing-polynomial framework.
+
+### 8.2 When information-theoretic security is required
+
+<!-- REVIEW-FIX: S22 BGW already provides IT security for all of P; IT security alone is not a differentiator for SMC-PGG. The genuine advantage is algebraic structure on top of IT security. -->
+SMC-PGG provides information-theoretic security without setup assumptions. Yao's garbled circuits require computational assumptions (OT). SPDZ's overall security is not purely IT (the preprocessing phase uses computational primitives). However, **BGW (Ben-Or-Goldwasser-Wigderson 1988) already achieves IT security for all of P** in the honest-majority setting (passive t < n/2, active t < n/3) without setup assumptions. IT security per se is therefore not a differentiator for SMC-PGG — BGW already delivers it for a strictly larger computational class.
+
+The genuine advantage of SMC-PGG in IT-security settings is **algebraic structure on top of IT security**: the formal Barrington-Thérien computational characterization, the tunable RAAG parallelism-power trade-off, and the fiber-based security proofs. These properties do not follow from BGW's IT security alone. For applications where unconditional security is required *and* the formal algebraic structure provides value (formal verification, composable proofs, round-complexity analysis), SMC-PGG offers something BGW does not — but the entry bar is algebraic structure, not IT security itself.
+
+### 8.3 When formal verification matters
+
+The algebraic structure of SMC-PGG makes it amenable to formal verification in proof assistants (Coq/Rocq). The current formalization covers secret sharing, fiber uniformity, RAAG trace equivalence, and Foata normal forms. Verifying a garbled circuit protocol in Coq would require formalizing Boolean circuit semantics, oblivious transfer, and simulation-based security for arbitrary circuits — a much larger undertaking. The algebraic approach reduces the verification target to group-theoretic properties that are well-suited to proof assistants.
+
+### 8.4 When the protocol designer needs guarantees, not just capabilities
+
+A protocol designer using garbled circuits knows they *can* compute anything in P, but the guarantees are circuit-level rather than algebraic: the designer knows circuit size and depth, but not the algebraic complexity class of what was built, whether the construction is optimal with respect to the underlying function's structure, what security margin they have, or how the protocol composes with other protocols. <!-- REVIEW-FIX: F6 removed "how many rounds are needed" (Yao's O(1) rounds are well-known); reframed as circuit-level vs algebraic guarantees --> A designer using SMC-PGG knows all of these things from the algebraic parameters (G, I, ℓ). The trade-off is narrower computational power for richer structural guarantees.
+
+---
+
+## 9. The Broader Lesson
+
+The history of cryptography shows that different algebraic foundations coexist productively:
+
+- **RSA** (number theory) and **ECC** (elliptic curves) and **lattices** (geometry of numbers / algebraic number theory) all do public-key encryption. <!-- REVIEW-FIX: F7 lattice crypto is geometry of numbers and algebraic number theory, not algebraic geometry --> None has "won" — each offers different trade-offs in key size, speed, security assumptions, and algebraic structure.
+
+- **Garbled circuits** (Boolean circuits) and **secret sharing** (linear algebra) and **homomorphic encryption** (lattices/groups) all do secure computation. Each occupies a different point in the design space.
+
+<!-- REVIEW-FIX: S24 Barrington (1989) already uses algebraic automata theory (branching programs over S_5) to characterize NC^1; the novelty of SMC-PGG is not algebraic automata theory per se but its use as an *MPC protocol design framework*. -->
+SMC-PGG adds a new point: **algebraic automata theory as a framework for MPC protocol design**. Barrington (1989) already established the connection between algebraic automata (branching programs over non-solvable groups) and computational complexity. What SMC-PGG contributes is lifting that connection into a *secure multi-party computation architecture*: the monodromy group becomes a security parameter, the RAAG independence graph becomes a round-complexity knob, the Barrington-Thérien classification becomes a protocol capability certificate, and the Krohn-Rhodes decomposition becomes a compositional protocol design principle. The algebraic automata toolkit is not new; its systematic application to MPC protocol design is.
+
+The right question is not "is SMC-PGG better than garbled circuits?" but "what does the algebraic automata perspective reveal about secure computation that the circuit perspective misses?" The answer, as this note has argued, is: formal computational characterization, an intrinsic parallelism-power trade-off, algebraic security proofs, and compositional protocol design. These are contributions to the theory of MPC, not a replacement for its practice.
+
+---
+
+## References
+
+1. Barrington, D.A.M. (1989). "Bounded-Width Polynomial-Size Branching Programs Recognize Exactly Those Languages in NC^1." *JCSS* 38(1):150–164.
+2. Barrington, D.A.M. and Thérien, D. (1988). "Finite Monoids and the Fine Structure of NC^1." *JACM* 35(4):941–952.
+3. Yao, A.C. (1986). "How to Generate and Exchange Secrets." *FOCS 1986*, pp. 162–167.
+4. Goldreich, O., Micali, S., and Wigderson, A. (1987). "How to Play Any Mental Game." *STOC 1987*, pp. 218–229.
+5. Damgård, I., Pastro, V., Smart, N., and Zakarias, S. (2012). "Multiparty Computation from Somewhat Homomorphic Encryption." *CRYPTO 2012*, LNCS 7417:643–662. <!-- REVIEW-FIX: F11 corrected "Warinschi" to "Zakarias"; SPDZ = Damgård, Pastro, Smart, Zakarias -->
+6. Agarwal, S., Anand, A., and Prabhakaran, M. (2019). "Cryptographic Complexity of Multi-Party Computation Problems: Classifications and Separations." *EUROCRYPT 2019*, LNCS 11477:489–520.
+7. Ishai, Y. and Kushilevitz, E. (2002). "Perfect Constant-Round Secure Computation via Perfect Randomizing Polynomials." *ICALP 2002*, LNCS 2380:244–256.
+8. Ben-Or, M., Goldwasser, S., and Wigderson, A. (1988). "Completeness Theorems for Non-Cryptographic Fault-Tolerant Distributed Computation." *STOC 1988*, pp. 1–10. <!-- REVIEW-FIX: S8/S22 Added BGW reference for IT-secure MPC comparison -->
+9. Krohn, K. and Rhodes, J. (1965). "Algebraic Theory of Machines. I. Prime Decomposition Theorem for Finite Semigroups and Machines." *Trans. AMS* 116:450–464.
+10. Cartier, P. and Foata, D. (1969). *Problèmes combinatoires de commutation et réarrangements*. LNM 85, Springer.
