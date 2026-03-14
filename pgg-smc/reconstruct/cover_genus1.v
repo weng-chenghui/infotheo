@@ -177,10 +177,7 @@ Let ag_ec_priv_surj :
       c \in ag_code ev_ec /\ vproj c S = vproj target S.
 Proof.
 move=> S target HS.
-exact: (@hyp_priv_surj F_ec g_ec curve_poly_ec curve_deg_ec curve_sep_ec
-  m_deg_ec n''_ec pts_x_ec pts_y_ec pts_on_curve_ec pts_distinct_ec
-  pts_x_uniq_ec Hdeg_f_le_ec k_ec ev_ec ev_ec_encode (erefl _)
-  ev_ec_rank Hk_ec Hkn_ec Hkgn_ec ec_dual_min_dist S target HS).
+exact: (hyp_priv_surj Hkg_ec ec_dual_min_dist target HS).
 Qed.
 
 (* Concrete ThresholdScheme from AG code via Massey *)
@@ -363,10 +360,7 @@ Let ag_g_priv_surj :
       c \in ag_code ev_g /\ vproj c S = vproj target S.
 Proof.
 move=> S target HS.
-exact: (@hyp_priv_surj F_g g curve_poly_g curve_deg_g curve_sep_g
-  m_deg_g n''_g pts_x_g pts_y_g pts_on_curve_g pts_distinct_g
-  pts_x_uniq_g Hdeg_f_le_g k_g ev_g ev_g_encode (erefl _)
-  ev_g_rank Hk_g Hkn_g Hkgn_g g_dual_min_dist S target HS).
+exact: (hyp_priv_surj Hkg_g g_dual_min_dist target HS).
 Qed.
 
 (* Concrete ThresholdScheme from AG code via Massey *)

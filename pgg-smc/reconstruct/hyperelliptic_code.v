@@ -26,7 +26,7 @@ From mathcomp Require Import all_ssreflect ssralg finalg zmodp.
 From mathcomp Require Import fingroup matrix mxalgebra vector.
 From mathcomp Require Import poly polydiv.
 From mathcomp Require Import separable.
-Require Import ssr_ext ssralg_ext hamming linearcode.
+Require Import ssr_ext ssralg_ext hamming linearcode rouche_capelli.
 From pgg_reconstruct Require Import ag_code.
 
 Set Implicit Arguments.
@@ -322,6 +322,7 @@ Hypothesis ev_rank : \rank ev = k.
 Hypothesis Hk : 0 < k.
 Hypothesis Hkn : k <= n.
 Hypothesis Hkgn : k + g < n.
+Hypothesis Hkg : g < k.
 
 (* Dual minimum distance: nonzero words orthogonal to C have weight >= k-g+1.
    Here "orthogonal to C" means: for all c in ag_code ev, w *m c^T = 0. *)
@@ -337,10 +338,90 @@ Theorem hyp_priv_surj :
     exists c : 'rV[F]_n,
       c \in ag_code ev /\ vproj c S = vproj target S.
 Proof.
-(* Standard argument: if rank(ev_S) < |S|, there exists a nonzero
-   word w supported on S in C^perp. Then wH(w) <= |S| < (k-g)+1,
-   contradicting dual_min_dist. So rank(ev_S) = |S|, giving surjectivity. *)
-Admitted.
+move=> S target HS.
+set s := #|S| in HS *.
+case: (posnP s) => [Hs0|Hspos].
+{ (* Boundary case: |S| = 0 *)
+  have Sempty : S = set0 by apply/eqP; rewrite -cards_eq0; apply/eqP.
+  exists (0 *m ev); split; first exact: ag_code_eval.
+  rewrite mul0mx; apply/rowP => i; rewrite !mxE Sempty !inE //. }
+(* Main case: 0 < |S| *)
+pose ev_S : 'M[F]_(k, s) := \matrix_(i, j) ev i (enum_val j).
+(* Step 2: rank ev_S = s by contradiction using dual_min_dist *)
+have Hrank_ev_S : \rank ev_S = s.
+{ apply/eqP; rewrite eqn_leq rank_leq_col /=.
+  case: (leqP s (\rank ev_S)) => // Hlt.
+  have Hlt' : \rank ev_S^T < s by rewrite mxrank_tr.
+  have [y [Hy0 Hyne0]] := exists_nonzero_kernel Hlt'.
+  pose P : 'M[F]_(s, n) := \matrix_(j, i) (i == enum_val j)%:R.
+  set w : 'rV[F]_n := y *m P.
+  have HPev : P *m ev^T = ev_S^T.
+  { apply/matrixP => j l; rewrite !mxE.
+    rewrite (bigD1 (enum_val j)) //= !mxE eqxx mul1r.
+    rewrite big1 ?addr0 // => i Hi; rewrite !mxE.
+    by rewrite (negbTE Hi) mul0r. }
+  have Hwev : w *m ev^T = 0 by rewrite /w -mulmxA HPev Hy0.
+  have Horth : forall c : 'rV[F]_n, c \in ag_code ev -> w *m c^T = 0.
+  { move=> c /ag_code_memP [v ->].
+    by rewrite trmx_mul mulmxA Hwev mul0mx. }
+  have Hw_out : forall i0 : 'I_n, i0 \notin S -> w ord0 i0 = 0.
+  { move=> i0 Hi0S; rewrite /w mxE.
+    apply: big1 => j0 _; rewrite /P mxE.
+    suff : (i0 == @enum_val _ (mem S) j0) = false by move=> ->; rewrite mulr0.
+    apply/negbTE/negP => /eqP Heq.
+    by move/negP: Hi0S; apply; rewrite Heq enum_valP. }
+  have Hw_in : forall j0 : 'I_s,
+    w ord0 (@enum_val _ (mem S) j0) = y ord0 j0.
+  { move=> j0; rewrite /w mxE.
+    rewrite (bigD1 j0) //= /P mxE eqxx mulr1.
+    rewrite big1 ?addr0 // => j1 Hj1; rewrite /P mxE.
+    suff : (@enum_val _ (mem S) j0 == @enum_val _ (mem S) j1) = false
+      by move=> ->; rewrite mulr0.
+    apply/negbTE/negP => /eqP /enum_val_inj Habs.
+    by rewrite Habs eqxx in Hj1. }
+  have Hwne0 : w != 0.
+  { apply/negP => /eqP/rowP Hw0.
+    move/negP: Hyne0; apply; apply/eqP/rowP => j0.
+    have := Hw0 (enum_val j0); rewrite Hw_in !mxE //. }
+  have HwH_le : wH w <= s.
+  { rewrite -(card_wH_supp w) -/s.
+    apply: subset_leq_card.
+    apply/subsetP => i0; rewrite inE => /negP Hi0.
+    apply/negPn/negP => Hi0S.
+    by apply: Hi0; apply/eqP; exact: Hw_out. }
+  have Hdual := dual_min_dist Hwne0 Horth.
+  have H1 : (k - g).+1 <= s := leq_trans Hdual HwH_le.
+  have H2 := leq_ltn_trans H1 HS.
+  have Hkg0 : 0 < k - g by rewrite subn_gt0.
+  by rewrite (prednK Hkg0) ltnn in H2. }
+(* Step 3: Surjectivity via Rouche-Capelli *)
+pose target_S : 'rV[F]_s := \row_j target ord0 (@enum_val _ (mem S) j).
+have Hrank_eq : \rank ev_S = \rank (col_mx ev_S target_S).
+{ have /eqmxP/eqmx_rank Heq := addsmxE ev_S target_S.
+  rewrite -Heq.
+  apply/eqP; rewrite eqn_leq.
+  apply/andP; split.
+  - exact: mxrankS (addsmxSl ev_S target_S).
+  - by rewrite Hrank_ev_S rank_leq_col. }
+have /rouche1 [v Hv] := Hrank_eq.
+set c := v *m ev.
+exists c; split; first exact: ag_code_eval.
+(* Show vproj c S = vproj target S *)
+have Hagree : forall i : 'I_n, i \in S -> c ord0 i = target ord0 i.
+{ move=> i HiS.
+  set j := enum_rank_in HiS i.
+  have Hci : c ord0 i = (v *m ev_S) ord0 j.
+  { rewrite /c /ev_S !mxE.
+    apply: eq_bigr => l _; rewrite mxE; congr (_ * _).
+    by rewrite /j enum_rankK_in. }
+  have Hti : target ord0 i = target_S ord0 j.
+  { by rewrite /target_S mxE /j enum_rankK_in. }
+  by rewrite Hci Hv Hti. }
+apply/rowP => i; rewrite /vproj !mxE.
+case: (boolP (i \in S)) => [HiS|//].
+have /= := Hagree i HiS; rewrite /c mxE => ->.
+by [].
+Qed.
 
 End hyperelliptic.
 
