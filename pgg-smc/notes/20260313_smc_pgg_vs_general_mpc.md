@@ -15,7 +15,9 @@ The following terms are used throughout. A **trace monoid** M(Σ, I) is the free
 
 ## 1. What SMC-PGG Offers: Algebraic Structure as Protocol Design
 
-SMC-PGG is not trying to compete with garbled circuits on computational power. It offers something different: **algebraic structure that makes security proofs simpler, round complexity formally characterizable, and protocol design compositional**. The computational boundary is real (NC^1, not P), but the algebraic architecture provides guarantees that circuit-based MPC cannot.
+In conventional MPC (BGW, SPDZ), protocol parameters are independent choices: the circuit determines computation, polynomial degree determines threshold, circuit depth determines rounds, simulation determines security. No single algebraic parameter connects them. In SMC-PGG, **one algebraic choice (G, I) determines four protocol parameters**: the group variety determines the complexity class (Barrington-Thérien), the independence graph determines round complexity (Foata depth), the group size determines anonymity entropy (fiber |L_g| ≤ |G|), and the group size constrains the threshold gap (|G| → genus via Riemann-Hurwitz → T ≤ k + 2·genus).
+
+The computational boundary is real (NC^1, not P), but the algebraic architecture provides guarantees that circuit-based MPC cannot.
 
 <!-- REVIEW-FIX: W1 Add contributions taxonomy after preamble distinguishing established results, protocol extensions, and conjectural claims. -->
 **Contributions taxonomy.** The claims in this section span three epistemic levels:
@@ -108,7 +110,7 @@ NC^1 is strictly contained in P under standard complexity-theoretic assumptions 
 | **Adversary model** | Semi-honest (passive, t < n/2, static) | Semi-honest (+ cut-and-choose for malicious) | Semi-honest or malicious | Passive (t < n/2) or active (t < n/3) | Malicious |
 | **Setup assumptions** | None | Oblivious transfer | OT | None | Preprocessing (Beaver triples) |
 | **Communication** | O(ℓ · log N) per word step | O(n · |C|) | O(n² · |C|) | O(n² · |C|) | O(n · |C|) |
-| **Algebraic structure** | Explicit (group, RAAG, variety) | None (generic circuit) | None (generic circuit) | None (generic circuit) | Algebraic (over rings), but no structural classification |
+| **Algebraic structure** | Noncommutative (group variety, RAAG, complexity classification) | None (generic circuit) | Linear algebraic (field operations, no complexity classification) | Linear algebraic (polynomial sharing, no complexity classification) | Algebraic (over rings), but no complexity classification |
 | **Formal verification** | Partial (Coq: sharing, fiber, RAAG) | None at protocol level | None at protocol level | None at protocol level | None at protocol level |
 | **Maturity** | Research prototype (formalized sharing) | Deployed (EMP, ABY, ...) | Deployed (ABY) | Foundational (textbook) | Deployed (MP-SPDZ, SCALE-MAMBA) |
 
@@ -208,7 +210,7 @@ Similarly, SMC-PGG's algebraic foundation gives:
 | Structural benefit | What the algebra provides | Circuit-MPC equivalent |
 |---|---|---|
 <!-- REVIEW-FIX: S14 expand Barrington citation to include year and Barrington-Thérien co-reference -->
-| Formal computational characterization | Barrington (1989) + Barrington-Thérien (1988): G-variety → complexity class | None — circuit-MPC computes "whatever circuit you build" |
+| Formal computational characterization | Barrington (1989) + Barrington-Thérien (1988): G-variety → complexity class | No complexity classification — circuit-MPC computes "whatever circuit you build" (BGW/SPDZ have rich linear algebra but no theorem connecting algebraic parameters to complexity classes) |
 | Formal round-complexity/power trade-off | RAAG Foata depth, tunable via independence graph I | Absent — rounds and power are decoupled |
 | Algebraic security proofs | Fiber uniformity, group transitivity, covering space topology | Protocol-specific simulation proofs | <!-- REVIEW-FIX: S19 replaced "Ad hoc simulation arguments per protocol" with neutral "Protocol-specific simulation proofs" -->
 | Compositional protocol design | Krohn-Rhodes decomposition: group + aperiodic layers | Manual circuit composition |

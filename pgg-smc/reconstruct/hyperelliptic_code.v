@@ -331,13 +331,36 @@ Hypothesis Hkg : g < k.
 Variable m_deg_dual : nat.
 Hypothesis Hm_dual_eq : m_deg_dual = (n + g - k - 1)%N.
 
-Hypothesis dual_root_poly :
+(* Dual evaluation encoding: orthogonal words admit A(x)+y*B(x) representation.
+   Dual analog of ev_encode. The resultant degree bound is given directly
+   (not derived from A/B degree bounds) because deg_f > m_deg_dual when n=k+g+1. *)
+Hypothesis dual_ev_encode :
+  forall w : 'rV[F]_n, w != 0 ->
+  (forall c : 'rV[F]_n, c \in ag_code ev -> w *m c^T = 0) ->
+  exists A B : {poly F},
+    ((A != 0) || (B != 0)) /\
+    size (hyp_resultant A B) <= m_deg_dual.+1 /\
+    forall i : 'I_n,
+      w 0 i = A.[tnth pts_x i] + tnth pts_y i * B.[tnth pts_x i].
+
+(* Proved from dual_ev_encode using resultant machinery *)
+Theorem dual_root_poly :
   forall w : 'rV[F]_n, w != 0 ->
   (forall c : 'rV[F]_n, c \in ag_code ev -> w *m c^T = 0) ->
   exists R : {poly F},
     R != 0 /\
     size R <= m_deg_dual.+1 /\
     forall i : 'I_n, w 0 i = 0 -> root R (tnth pts_x i).
+Proof.
+move=> w Hw Horth.
+have [A [B [HAB [HsR Heval]]]] := dual_ev_encode Hw Horth.
+exists (hyp_resultant A B); split; [|split].
+- exact: hyp_resultant_neq0 HAB.
+- exact: HsR.
+- move=> i Hwi.
+  apply: (hyp_zero_to_root (i := i)).
+  by have := Heval i; rewrite Hwi.
+Qed.
 
 Theorem dual_min_dist :
   forall (w : 'rV[F]_n), w != 0 ->
@@ -510,6 +533,6 @@ End genus2.
 
    For cover_genus1.v integration:
    - goppa_wt is hyp_goppa_wt (proved modulo routine lemmas)
-   - ag_priv_surj is hyp_priv_surj (derived from dual_root_poly)
-   - dual_min_dist is now PROVED from dual_root_poly
-   - Remaining axioms: dual_root_poly + share_compatible (2 instead of 4) *)
+   - ag_priv_surj is hyp_priv_surj (derived from dual_ev_encode)
+   - dual_min_dist is now PROVED from dual_root_poly (proved from dual_ev_encode)
+   - Remaining axioms: dual_ev_encode + share_compatible (2 instead of 4) *)

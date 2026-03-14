@@ -1,10 +1,11 @@
 (* infotheo: information theory and error-correcting codes in Rocq            *)
 (* Copyright (C) 2025 infotheo authors, license: LGPL-2.1-or-later            *)
 (******************************************************************************)
-(* Security vs Threshold Gap Tradeoff                                         *)
+(* Anonymity Entropy vs Threshold Gap Tradeoff                                *)
 (*                                                                            *)
-(* Formalizes the central novelty: stronger computation security (larger G)   *)
-(* forces higher genus (wider threshold gap).                                 *)
+(* Formalizes the central novelty: larger anonymity set (larger G, hence      *)
+(* higher fiber entropy) forces higher genus (wider threshold gap).           *)
+(* Both sides are information-theoretic — no computational assumptions.       *)
 (*                                                                            *)
 (* The chain: G -> genus (Riemann-Hurwitz) -> gap (AG code bounds)           *)
 (*                                                                            *)
@@ -113,8 +114,9 @@ Hypothesis genus0_pgl :
     cd_genus cd = 0 -> #|G| <= pgl_bound M.
 
 (* THE MAIN TRADEOFF THEOREM:
-   Either the computation security is bounded (genus 0, small group)
-   or the threshold has a gap (genus > 0). *)
+   Either the anonymity entropy is bounded (genus 0, |G| <= PGL bound)
+   or the threshold has a gap (genus > 0).
+   Both regimes are information-theoretically secure. *)
 Theorem security_threshold_tradeoff (cs : CoveringScheme M) :
   (* Either genus 0 with bounded group ... *)
   (cd_genus (cs_data cs) = 0 /\
@@ -160,7 +162,7 @@ apply/eqP; rewrite -(eqn_pmul2l (isT : 0 < 2)) -(eqn_add2r (2 * #|G|)).
 by rewrite /G H1 H2 eqn_add2r HR.
 Qed.
 
-(* Combined statement: search space vs threshold gap *)
+(* Combined statement: anonymity set size vs threshold gap *)
 Theorem search_gap_tradeoff (cs : CoveringScheme M) (L : nat) :
   (* Either search space is bounded by PGL(2,N) ... *)
   (@search_space M L <= pgl_bound M /\

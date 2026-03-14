@@ -12,7 +12,7 @@
 (* resultant argument (hyperelliptic_code.v), reducing the axiomatization    *)
 (* boundary from 4 code-level axioms to:                                      *)
 (*   1. ev_encode — evaluation structure (function space representation)     *)
-(*   2. dual_root_poly — dual root polynomial bound (proves dual_min_dist)  *)
+(*   2. dual_ev_encode — dual evaluation encoding (proves dual_min_dist)    *)
 (*   3. share_compatible — monodromy preserves code (Issue #39)              *)
 (*                                                                            *)
 (*   genus1_data       == CoveringData with genus 1, base P^1                *)
@@ -86,7 +86,7 @@ Definition genus1_data : CoveringData M := {|
    Axiomatized (curve-level facts):
    1. ev_ec_rank: generator matrix has full row rank (Riemann-Roch)
    2. ev_ec_encode: evaluation structure (A(x)+y*B(x) representation)
-   3. ec_dual_root_poly: dual root polynomial bound (proves dual_min_dist)
+   3. ec_dual_ev_encode: dual evaluation encoding (proves dual_min_dist)
    4. ag_ec_share_compat: monodromy preserves codewords (Issue #39)
 
    Proved (via hyperelliptic_code.v):
@@ -151,16 +151,17 @@ Hypothesis ev_ec_encode :
     forall i : 'I_n_ec,
       (v *m ev_ec) ord0 i = A.[tnth pts_x_ec i] + tnth pts_y_ec i * B.[tnth pts_x_ec i].
 
-(* Dual root polynomial bound (replaces dual_min_dist axiom) *)
+(* Dual evaluation encoding (replaces dual_min_dist axiom) *)
 Let m_deg_dual_ec := (n_ec + g_ec - k_ec - 1)%N.
 
-Hypothesis ec_dual_root_poly :
+Hypothesis ec_dual_ev_encode :
   forall w : 'rV[F_ec]_n_ec, w != 0 ->
   (forall c : 'rV[F_ec]_n_ec, c \in ag_code ev_ec -> w *m c^T = 0) ->
-  exists R : {poly F_ec},
-    R != 0 /\
-    size R <= m_deg_dual_ec.+1 /\
-    forall i : 'I_n_ec, w ord0 i = 0 -> root R (tnth pts_x_ec i).
+  exists A B : {poly F_ec},
+    ((A != 0) || (B != 0)) /\
+    size (hyp_resultant curve_poly_ec A B) <= m_deg_dual_ec.+1 /\
+    forall i : 'I_n_ec,
+      w ord0 i = A.[tnth pts_x_ec i] + tnth pts_y_ec i * B.[tnth pts_x_ec i].
 
 Hypothesis Hparam_ec : n_ec <= k_ec + g_ec + 1. (* n <= k + 2 *)
 
@@ -182,7 +183,7 @@ Let ag_ec_priv_surj :
       c \in ag_code ev_ec /\ vproj c S = vproj target S.
 Proof.
 move=> S target HS.
-exact: (hyp_priv_surj pts_x_uniq_ec Hkgn_ec Hkg_ec erefl ec_dual_root_poly target HS).
+exact: (hyp_priv_surj curve_deg_ec pts_on_curve_ec pts_x_uniq_ec Hkgn_ec Hkg_ec erefl ec_dual_ev_encode target HS).
 Qed.
 
 (* Concrete ThresholdScheme from AG code via Massey *)
@@ -282,7 +283,7 @@ Definition higher_genus_data : CoveringData M := {|
    Axiomatized (curve-level facts):
    1. ev_g_rank: generator matrix has full row rank (Riemann-Roch)
    2. ev_g_encode: evaluation structure (A(x)+y*B(x) representation)
-   3. g_dual_root_poly: dual root polynomial bound (proves dual_min_dist)
+   3. g_dual_ev_encode: dual evaluation encoding (proves dual_min_dist)
    4. ag_g_share_compat: monodromy preserves code (Issue #39)
 
    Proved (via hyperelliptic_code.v):
@@ -342,13 +343,14 @@ Hypothesis ev_g_encode :
 (* Dual root polynomial bound (replaces g_dual_min_dist axiom) *)
 Let m_deg_dual_g := (n_g + g - k_g - 1)%N.
 
-Hypothesis g_dual_root_poly :
+Hypothesis g_dual_ev_encode :
   forall w : 'rV[F_g]_n_g, w != 0 ->
   (forall c : 'rV[F_g]_n_g, c \in ag_code ev_g -> w *m c^T = 0) ->
-  exists R : {poly F_g},
-    R != 0 /\
-    size R <= m_deg_dual_g.+1 /\
-    forall i : 'I_n_g, w ord0 i = 0 -> root R (tnth pts_x_g i).
+  exists A B : {poly F_g},
+    ((A != 0) || (B != 0)) /\
+    size (hyp_resultant curve_poly_g A B) <= m_deg_dual_g.+1 /\
+    forall i : 'I_n_g,
+      w ord0 i = A.[tnth pts_x_g i] + tnth pts_y_g i * B.[tnth pts_x_g i].
 
 Hypothesis Hparam_g : n_g <= k_g + g + 1.
 
@@ -370,7 +372,7 @@ Let ag_g_priv_surj :
       c \in ag_code ev_g /\ vproj c S = vproj target S.
 Proof.
 move=> S target HS.
-exact: (hyp_priv_surj pts_x_uniq_g Hkgn_g Hkg_g erefl g_dual_root_poly target HS).
+exact: (hyp_priv_surj curve_deg_g pts_on_curve_g pts_x_uniq_g Hkgn_g Hkg_g erefl g_dual_ev_encode target HS).
 Qed.
 
 (* Concrete ThresholdScheme from AG code via Massey *)
