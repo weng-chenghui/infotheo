@@ -324,12 +324,59 @@ Hypothesis Hkn : k <= n.
 Hypothesis Hkgn : k + g < n.
 Hypothesis Hkg : g < k.
 
-(* Dual minimum distance: nonzero words orthogonal to C have weight >= k-g+1.
-   Here "orthogonal to C" means: for all c in ag_code ev, w *m c^T = 0. *)
-Hypothesis dual_min_dist :
+(* Dual minimum distance: proved from a polynomial root bound.
+   For any nonzero word w orthogonal to the AG code, there exists a nonzero
+   polynomial R of degree <= m_deg_dual whose roots include all zero positions
+   of w (mapped via pts_x). Root counting then gives wH w >= (k-g)+1. *)
+Variable m_deg_dual : nat.
+Hypothesis Hm_dual_eq : m_deg_dual = (n + g - k - 1)%N.
+
+Hypothesis dual_root_poly :
+  forall w : 'rV[F]_n, w != 0 ->
+  (forall c : 'rV[F]_n, c \in ag_code ev -> w *m c^T = 0) ->
+  exists R : {poly F},
+    R != 0 /\
+    size R <= m_deg_dual.+1 /\
+    forall i : 'I_n, w 0 i = 0 -> root R (tnth pts_x i).
+
+Theorem dual_min_dist :
   forall (w : 'rV[F]_n), w != 0 ->
   (forall c : 'rV[F]_n, c \in ag_code ev -> w *m c^T = 0) ->
   (k - g).+1 <= wH w.
+Proof.
+move=> w Hw0 Horth.
+have [R [HR [HsR Hroots]]] := dual_root_poly Hw0 Horth.
+(* Root counting — same structure as hyp_goppa_wt_mdeg *)
+set zeros := [seq tnth pts_x i | i <- enum 'I_n & (w 0 i == 0)].
+have Hall : all (root R) zeros.
+  apply/allP => x /mapP [i].
+  rewrite mem_filter => /andP [/eqP Hwi _] ->.
+  exact: Hroots.
+have Htnth_inj : injective (tnth pts_x) by move/tuple_uniqP: pts_x_uniq.
+have Huniq : uniq zeros.
+  rewrite /zeros map_inj_uniq //.
+  exact: filter_uniq (enum_uniq _).
+have Hsz_zeros : size zeros <= m_deg_dual.
+  rewrite -ltnS; exact: leq_trans (max_poly_roots HR Hall Huniq) HsR.
+have HwH : wH w = count (fun i : 'I_n => w 0 i != 0) (enum 'I_n).
+  by rewrite /wH /= count_map.
+have Hcompl : (wH w + size zeros)%N = n.
+  rewrite HwH /zeros size_map size_filter.
+  have := count_predC (fun i : 'I_n => w 0 i != 0) (enum 'I_n).
+  rewrite [count (predC _) _](eq_count (a2 := fun i => w 0 i == 0)); last first.
+    by move=> i /=; rewrite negbK.
+  by rewrite size_enum_ord.
+have HwH_bound : n - m_deg_dual <= wH w.
+  set wt := wH w in Hcompl *.
+  rewrite leq_subLR addnC -Hcompl leq_add2l //.
+apply: leq_trans _ HwH_bound.
+rewrite Hm_dual_eq.
+suff -> : (n - (n + g - k - 1))%N = (k - g).+1 by [].
+have Hgk := ltnW Hkg.
+have Hk1n := leq_ltn_trans (leq_addr g k) Hkgn.
+have Hngk1 : k.+1 <= n + g := leq_trans Hk1n (leq_addr g n).
+by rewrite -subnDA addn1 (subnBA _ Hngk1) subnDl (subSn Hgk).
+Qed.
 
 (* Privacy: for small coalitions S, the projection is surjective *)
 Theorem hyp_priv_surj :
@@ -463,5 +510,6 @@ End genus2.
 
    For cover_genus1.v integration:
    - goppa_wt is hyp_goppa_wt (proved modulo routine lemmas)
-   - ag_priv_surj is hyp_priv_surj (derived from dual_min_dist)
-   - Remaining axioms: dual_min_dist + share_compatible (2 instead of 4) *)
+   - ag_priv_surj is hyp_priv_surj (derived from dual_root_poly)
+   - dual_min_dist is now PROVED from dual_root_poly
+   - Remaining axioms: dual_root_poly + share_compatible (2 instead of 4) *)
