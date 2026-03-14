@@ -163,6 +163,7 @@ pgg-smc/reconstruct/code_compatibility.v
 pgg-smc/reconstruct/ag_multiplicative.v
 pgg-smc/reconstruct/cover_genus0.v
 pgg-smc/reconstruct/cover_genus1.v
+pgg-smc/reconstruct/cover_genus2.v
 pgg-smc/reconstruct/cover_tradeoff.v
 pgg-smc/reconstruct/pgg_covering_correctness.v
 pgg-smc/reconstruct/pgg_assignment.v
