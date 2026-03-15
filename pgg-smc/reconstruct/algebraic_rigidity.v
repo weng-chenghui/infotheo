@@ -3,15 +3,14 @@
 (******************************************************************************)
 (* Algebraic Rigidity: One Algebraic Choice Determines Four Parameters        *)
 (*                                                                            *)
-(* Given a RAAG-type monodromy representation M, the algebraic structure      *)
-(* determines:                                                                *)
-(*   1. Complexity — search_space L <= |G| (from pgg_raag.v)                 *)
-(*   2. Rounds — n_traces L via Foata normal forms (from pgg_raag.v)         *)
-(*   3. Security — var_dist(rho_dist, uniform) <= epsilon (collusion_bound)  *)
-(*   4. Threshold — gap <= 2*genus, with genus-0 -> gap=0 (covering_scheme)  *)
+(* Given a monodromy representation with generators M, the algebraic          *)
+(* structure determines:                                                      *)
+(*   1. Complexity — search_space L <= |G| (from pgg_interface.v)            *)
+(*   2. Security — var_dist(rho_dist, uniform) <= epsilon (collusion_bound)  *)
+(*   3. Threshold — gap <= 2*genus, with genus-0 -> gap=0 (covering_scheme)  *)
 (*                                                                            *)
-(* The key insight: all four are consequences of the single algebraic         *)
-(* choice (G, rho, sigmas, comm). No further degrees of freedom exist.       *)
+(* The key insight: all three are consequences of the single algebraic        *)
+(* choice (G, rho, sigmas). No further degrees of freedom exist.             *)
 (*                                                                            *)
 (* Records:                                                                   *)
 (*   SecurityWitness R M == packages the security guarantee                   *)
@@ -20,12 +19,14 @@
 (*                                                                            *)
 (* Derived properties:                                                        *)
 (*   ar_complexity      == search space bounded by |G|                        *)
-(*   ar_search_space_chain == search_space <= n_traces <= Tg^L               *)
 (*   ar_tradeoff        == genus-0/bounded or genus>0/gap tradeoff           *)
 (*   ar_search_gap_tradeoff == search space vs threshold gap                 *)
 (*   ar_large_group_forces_gap == |G| > PGL -> genus > 0                    *)
 (*   ar_gap_bound       == threshold gap <= 2*genus                          *)
 (*   ar_protocol_correct == end-to-end protocol correctness                  *)
+(*                                                                            *)
+(* RAAG-specific derived properties:                                          *)
+(*   ar_search_space_chain == search_space <= n_traces <= Tg^L               *)
 (******************************************************************************)
 
 From HB Require Import structures.
@@ -52,7 +53,7 @@ Local Open Scope fdist_scope.
 Section algebraic_rigidity_records.
 
 Variable R : realType.
-Variable M : RAAGType.
+Variable M : GeneratedMonodromyReprType.
 Let N' := pgg_N' M.
 Let G := pgg_G M.
 
@@ -90,21 +91,15 @@ Arguments AlgebraicRigidity R M : clear implicits.
 Section derived_properties.
 
 Variable R : realType.
-Variable M : RAAGType.
+Variable M : GeneratedMonodromyReprType.
 Variable ar : AlgebraicRigidity R M.
 
 Let G := pgg_G M.
 Let N := (pgg_N' M).+1.
-Let Tg := (@pgg_ngens' M).+1.
 
 (** Complexity: search space is bounded by |G| *)
 Lemma ar_complexity (L : nat) : @search_space M L <= #|G|.
 Proof. exact: search_space_leG. Qed.
-
-(** Search space chain: search_space <= n_traces <= Tg^L *)
-Lemma ar_search_space_chain (L : nat) :
-  (@search_space M L <= @n_traces M L) && (@n_traces M L <= Tg ^ L).
-Proof. exact: search_space_chain. Qed.
 
 (** Tradeoff: either genus-0 with bounded |G|, or positive genus with gap *)
 Lemma ar_tradeoff :
@@ -164,3 +159,22 @@ by apply: pgg_secret_invariant; [exact PG | exact Hvalid |
 Qed.
 
 End derived_properties.
+
+(******************************************************************************)
+(*     RAAG-Specific Derived Properties                                       *)
+(******************************************************************************)
+
+Section raag_derived_properties.
+
+Variable R : realType.
+Variable M : RAAGType.
+Variable ar : AlgebraicRigidity R M.
+
+Let Tg := (@pgg_ngens' M).+1.
+
+(** Search space chain: search_space <= n_traces <= Tg^L (RAAG-specific) *)
+Lemma ar_search_space_chain (L : nat) :
+  (@search_space M L <= @n_traces M L) && (@n_traces M L <= Tg ^ L).
+Proof. exact: search_space_chain. Qed.
+
+End raag_derived_properties.

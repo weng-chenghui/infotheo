@@ -74,7 +74,7 @@ Variable R : realType.
 Variable m : nat.
 
 Let M_star := @Gen_PGGTypes m m.+1 (star_gen_tuple m).
-Let R_star : RAAGType := M_star.
+Let R_star : GeneratedMonodromyReprType := M_star.
 Let N := m.+3.
 Let Tg := m.+1.
 
@@ -103,7 +103,8 @@ Section star_rigidity.
 Variable R : realType.
 Variable m : nat.
 
-Let R_star : RAAGType := @Gen_PGGTypes m m.+1 (star_gen_tuple m).
+Let R_star : GeneratedMonodromyReprType :=
+  @Gen_PGGTypes m m.+1 (star_gen_tuple m).
 
 (* Axiom: the star graph admits a genus-0 covering scheme.
    This requires constructing a Reed-Solomon code over a prime field
@@ -132,9 +133,12 @@ Lemma star_complexity (L : nat) :
   (@search_space R_star L <= #|pgg_G R_star|)%N.
 Proof. exact: search_space_leG. Qed.
 
+(* Search chain needs RAAGType *)
+Let R_star_raag : RAAGType := @Gen_PGGTypes m m.+1 (star_gen_tuple m).
+
 Lemma star_search_chain (L : nat) :
-  ((@search_space R_star L <= @n_traces R_star L) &&
-   (@n_traces R_star L <= m.+1 ^ L))%N.
+  ((@search_space R_star_raag L <= @n_traces R_star_raag L) &&
+   (@n_traces R_star_raag L <= m.+1 ^ L))%N.
 Proof. exact: search_space_chain. Qed.
 
 Lemma star_tradeoff :
