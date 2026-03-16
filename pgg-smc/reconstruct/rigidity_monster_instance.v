@@ -43,7 +43,8 @@
 (*                                                                            *)
 (* Proved (not axiomatized):                                                  *)
 (*   monster_security_witness_1 : SecurityWitness (via var_dist_lfree_uniform)*)
-(*   monster_rigidity : AlgebraicRigidity (combines security + threshold)     *)
+(*   monster_round_complexity : RoundComplexityWitness (L=1, depth=1)        *)
+(*   monster_rigidity : AlgebraicRigidity (security + threshold + rounds)    *)
 (*   monster_complexity : search space <= |G|                                 *)
 (*   monster_tradeoff : genus-0/bounded or genus>0/gap dichotomy             *)
 (******************************************************************************)
@@ -125,10 +126,15 @@ Axiom monster_genus0_pgl :
 Definition monster_threshold_witness : ThresholdWitness R_monster :=
   @MkThresholdWitness R_monster monster_covering monster_genus0_pgl.
 
+(* Round complexity at L=1: depth = 1, trivial bound *)
+Definition monster_round_complexity : RoundComplexityWitness :=
+  @MkRoundComplexityWitness 1 1 (leqnn 1).
+
 Definition monster_rigidity : AlgebraicRigidity R R_monster :=
   @MkAlgebraicRigidity R R_monster
     (monster_security_witness_1 R)
-    monster_threshold_witness.
+    monster_threshold_witness
+    monster_round_complexity.
 
 (* Derived properties — all PROVED from the axioms *)
 

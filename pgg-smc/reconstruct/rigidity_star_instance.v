@@ -122,10 +122,15 @@ Axiom star_genus0_pgl :
 Definition star_threshold_witness : ThresholdWitness R_star :=
   @MkThresholdWitness R_star star_covering star_genus0_pgl.
 
+(* Round complexity at L=1: depth = 1 (trivially, depth <= L) *)
+Definition star_round_complexity : RoundComplexityWitness :=
+  @MkRoundComplexityWitness 1 1 (leqnn 1).
+
 Definition star_rigidity : AlgebraicRigidity R R_star :=
   @MkAlgebraicRigidity R R_star
     (star_security_witness_1 R m)
-    star_threshold_witness.
+    star_threshold_witness
+    star_round_complexity.
 
 (* Verify that derived properties instantiate correctly *)
 
