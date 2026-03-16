@@ -196,17 +196,15 @@ Then party $i$ sending $\rho(g)(\text{starts}_i)$ is the same as party $\text{pe
 
 Tier 2 is **sound in principle** — the mathematics works. But it requires formalizing the algebraic geometry of evaluation codes on covering spaces, which is the "deep algebraic geometry" this project deliberately axiomatized away. It is a research contribution in its own right, not a routine refactoring.
 
-## 7. Recommendation — Tier 1 DONE (2026-03-16)
+## 7. Implementation History
 
-**Tier 1 implemented**: All `share_compatible` hypotheses replaced with direct `ts_compatible` hypotheses in `cover_genus0.v`, `cover_genus1.v`, `cover_genus2.v`. Impossibility remark added to `code_compatibility.v`. All files compile, including downstream `rigidity_star_instance.v` and `rigidity_monster_instance.v`.
+### Tier 1 (2026-03-16, commit `ed5fda8`)
 
-1. ~~Implement Tier 1 now~~: **DONE**. Each genus file now has a direct `Hypothesis tsX_compatible : @ts_compatible _ G _ _ tsX (fun g x => rho g x)` instead of the broken `share_compatible` bridge chain. Import of `code_compatibility` removed from all three cover files.
+All `share_compatible` hypotheses replaced with direct `ts_compatible` hypotheses. Impossibility remark added to `code_compatibility.v`.
 
-2. ~~Document the impossibility~~: **DONE**. Added remark at top of `code_compatibility.v`.
+### Tier 2 (2026-03-16, commit `3d3be45`)
 
-3. **Preserve infrastructure**: `share_compatible` and bridge lemmas retained in `code_compatibility.v` — they ARE correct for scenarios where an action genuinely transforms values, just not for monodromy.
-
-4. **Defer Tier 2**: When algebraic geometry infrastructure is mature (fixed-point theory, algebraic bijections, code automorphisms), the `ts_compatible` hypotheses can be proved from coordinate-permutation arguments. The Tier 1 axiom boundary is designed to be compatible with this future work.
+Replaced unsatisfiable `ts_compatible` (value transformation) with satisfiable `ts_perm_compatible` (coordinate permutation). Created `coord_perm_compatible.v` with the full bridge from code automorphisms to scheme-level compatibility. Deleted all dead `share_compatible` infrastructure (`code_compatibility.v`, bridge lemmas in `ag_massey_bridge.v`, old `ts_compatible` definition and proofs). See "The interface point" above for Before/After architecture.
 
 ## 8. The Protocol Is Not Broken — Security and Reconstruction Are Orthogonal
 
@@ -234,16 +232,87 @@ Only these components are affected:
 
 ### The interface point
 
-The two sides connect at exactly one point: the `CoveringScheme` record, which bundles a `ThresholdScheme` (reconstruction) with `cs_compatible` (compatibility with monodromy). The `share_compatible` impossibility only affects how `cs_compatible` is proved. The security side never looks inside that proof.
+The two sides connect at exactly one point: the `CoveringScheme` record, which bundles a `ThresholdScheme` (reconstruction) with compatibility (how monodromy interacts with share structure). The security side never looks inside the compatibility proof.
+
+#### BEFORE (Tier 1 — unsatisfiable axiom)
 
 ```
-Security:  G, RAAG, words, fibers  ──→  collusion bounds
-                                              │
-                                              ╰──→  AlgebraicRigidity
-                                              │
-Reconstruction: code, Massey, ts_compatible ──╯
-                          ↑
-                   The impossibility is here only
+CoveringScheme record:
+  cs_data       : CoveringData         ← Riemann-Hurwitz (proved)
+  cs_scheme     : ThresholdScheme      ← from AG code via Massey (proved)
+  cs_compatible : ts_compatible        ← AXIOM (unsatisfiable for non-trivial G)
+  cs_gap        : ts_T ≤ ts_k + 2g    ← from code parameters (proved)
+
+ts_compatible (act : gT → shareT → shareT) :=
+  ∀ g s shares, g ∈ G → valid s shares →
+    recon [tuple act g (tnth shares i) | i < T] = s
+                  ↑
+                  applies rho g to each share VALUE independently
+                  ← WRONG: monodromy permutes COORDINATES, not values
+
+Protocol correctness:
+  pgg_secret_invariant :
+    ts_compatible ts (fun g x => rho g x) →        ← hypothesis from cs_compatible
+    recon(endpoints) = secret
+
+Axiom chain per genus file:
+  Hypothesis tsX_compatible :                       ← UNSATISFIABLE
+    @ts_compatible _ G _ _ tsX (fun g x => rho g x)
+```
+
+#### AFTER (Tier 2 — satisfiable axioms, implemented 2026-03-16)
+
+```
+CoveringScheme record:
+  cs_data            : CoveringData         ← Riemann-Hurwitz (proved)
+  cs_scheme          : ThresholdScheme      ← from AG code via Massey (proved)
+  cs_perm            : gT → {perm 'I_T}    ← NEW: monodromy-induced share reordering
+  cs_perm_compatible : ts_perm_compatible   ← AXIOM (satisfiable from code automorphism)
+  cs_gap             : ts_T ≤ ts_k + 2g    ← from code parameters (proved)
+
+ts_perm_compatible (perm : gT → {perm 'I_T}) :=
+  ∀ g s shares, g ∈ G → valid s shares →
+    recon [tuple tnth shares (perm g i) | i < T] = s
+                                ↑
+                                REORDERS shares by coordinate permutation
+                                ← CORRECT: matches what monodromy actually does
+
+Protocol correctness:
+  pgg_secret_invariant_perm :
+    G_stable_starts →                              ← NEW explicit hypothesis
+    ts_perm_compatible ts perm →                   ← from cs_perm_compatible
+    recon(endpoints) = secret
+
+  G_stable_starts :=
+    ∀ g ∈ G, ∀ i, rho g (starts_i) = starts_{perm g i}
+    "monodromy maps starting sheets to starting sheets via the same perm"
+
+Axiom chain per genus file (2 satisfiable axioms):
+  Variable tsX_perm : gT → {perm 'I_T}
+  Hypothesis tsX_perm_compatible :
+    @ts_perm_compatible _ G _ _ tsX tsX_perm       ← SATISFIABLE
+
+New infrastructure (coord_perm_compatible.v, ~260 LOC):
+  coord_perm_compatible C σ   : col_perm σ preserves code membership
+  restrict_perm0_val σ Hfix   : restricts σ fixing pos 0 to share indices
+  massey_codeword_col_perm    : col_perm σ (codeword s shares) = codeword s (col_perm σ_sh shares)
+  massey_perm_compatible      : code_auto + fix_0 ⟹ ts_perm_compatible for massey_scheme
+  transport_perm_compatible   : ts_perm_compatible lifts through transport_scheme
+
+Deleted dead code:
+  code_compatibility.v        : share_compatible, share_compat_massey_compat, transport_ts_compatible
+  ag_massey_bridge.v §2       : ag_massey_share_compat, ag_genus_share_compat
+  pgg_sharing_framework.v     : ts_compatible, ts_compatible_id, pgg_secret_invariant (old)
+```
+
+#### Architecture comparison
+
+```
+BEFORE:  code auto ──(impossible)──→ share_compatible ──→ ts_compatible ──→ protocol correct
+                                         ↑ value transformation (WRONG)
+
+AFTER:   code auto ──(satisfiable)──→ coord_perm_compatible ──→ ts_perm_compatible ──→ protocol correct
+                                         ↑ coordinate permutation (CORRECT)    + G_stable_starts
 ```
 
 ### How Tier 2 saves the Massey scheme
@@ -284,8 +353,8 @@ For genus 0, sum-mod-N is simpler and has a clean compatibility condition. For g
 The `share_compatible` impossibility does NOT weaken the formalization's claims:
 
 - **SecurityWitness**: Fully proved (no `share_compatible` involved)
-- **ThresholdWitness**: Axiomatized at the `ts_compatible` level (Tier 1 makes this explicit)
-- **AlgebraicRigidity**: Still bundles all four properties; the axiom boundary is at covering scheme existence + compatibility
-- **Tradeoff theorem**: Still proved from `ts_compatible` — the genus-0/gap dichotomy holds
+- **ThresholdWitness**: Axiomatized at the `ts_perm_compatible` level (Tier 2 makes this satisfiable)
+- **AlgebraicRigidity**: Still bundles all four properties; the axiom boundary is at covering scheme existence + code automorphism + G-stable starts
+- **Tradeoff theorem**: Unaffected — uses only `cs_gap` and `cs_data`, never compatibility
 
-The paper should state: "The covering scheme compatibility (`ts_compatible`) is axiomatized, as its proof requires formalizing the relationship between monodromy coordinate permutation and evaluation code automorphisms — algebraic geometry beyond the scope of this formalization."
+The paper should state: "The covering scheme coordinate-permutation compatibility (`ts_perm_compatible`) is axiomatized from code automorphism hypotheses. Proving these hypotheses for specific AG codes requires formalizing curve automorphisms — algebraic geometry beyond the scope of this formalization."
