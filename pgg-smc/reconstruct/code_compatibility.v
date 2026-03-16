@@ -32,6 +32,14 @@ Import Prenex Implicits.
 Import GRing.Theory.
 Open Scope ring_scope.
 
+(* IMPORTANT: share_compatible is the wrong abstraction for monodromy
+   compatibility. Monodromy permutes sheet coordinates (evaluation points),
+   but share_compatible transforms codeword values. For d=1 RS codes, the
+   only sigma satisfying share_compatible is the identity. See
+   notes/20260316_share_compatible_analysis.md for the full impossibility
+   analysis. The bridge lemmas below are retained for potential future use
+   with genuine value-transformation actions. *)
+
 (******************************************************************************)
 (*     Section 1: Share Compatibility Definition                              *)
 (******************************************************************************)

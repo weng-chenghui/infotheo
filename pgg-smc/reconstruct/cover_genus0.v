@@ -9,8 +9,7 @@
 (*                                                                            *)
 (* The ThresholdScheme is now concrete (from RS codes via Massey's            *)
 (* construction in rs_massey_bridge.v). Exactness (ts_T = ts_k) is proved.   *)
-(* ts_compatible is derived from share_compatible (code-level axiom,          *)
-(* Issue #39) via the share_compat_massey_compat + transport bridge.          *)
+(* ts_compatible is axiomatized directly (Issue #39).                        *)
 (*                                                                            *)
 (*   genus0_data       == CoveringData with genus 0, base P^1                *)
 (*   genus0_covering   == CoveringScheme with exact (k,k)-threshold          *)
@@ -25,7 +24,7 @@ Require Import ssralg_ext hamming linearcode reed_solomon.
 From pgg_smc Require Import pgg_interface.
 From pgg_reconstruct Require Import pgg_sharing_framework.
 From pgg_reconstruct Require Import covering_scheme.
-From pgg_reconstruct Require Import rs_massey_bridge code_compatibility.
+From pgg_reconstruct Require Import rs_massey_bridge.
 
 Set Implicit Arguments.
 Unset Strict Implicit.
@@ -95,27 +94,11 @@ Let ts0 : ThresholdScheme 'I_N 'I_N := rs_genus0_scheme primeq a qn an HN.
 (* Exactness: proved from RS min_dist + Massey construction *)
 Let ts0_exact : ts_T ts0 = ts_k ts0 := rs_genus0_exact primeq a qn an HN.
 
-(* Field-level action induced by monodromy via bijection.
-   Uses toF/ofF from rs_massey_bridge for consistency with rs_genus0_scheme. *)
-Let sigma0 (h : pgg_gT M) (x : F) : F :=
-  @toF _ _ primeq _ HN (rho h (@ofF _ _ primeq _ HN x)).
-
-(* Monodromy preserves the RS code — axiomatized at code level (Issue #39).
-   Lowered from ts_compatible (ThresholdScheme level) to share_compatible
-   (linear code level). The RS code here is RS.code a n''.+3 1.
-   Derived: ts_compatible via share_compat_massey_compat + transport bridge. *)
-Hypothesis rs_share_compat :
-  forall h, h \in G -> share_compatible (RS.code a n''.+3 1) (sigma0 h).
-
-(* Derive ts_compatible from share_compatible via bridge *)
-Let ts0_compatible : @ts_compatible _ G _ _ ts0 (fun g x => rho g x).
-Proof.
-rewrite /ts0 /rs_genus0_scheme.
-apply: (transport_ts_compatible _ _ sigma0 (fun h x => rho h x)).
-- move=> h hG x.
-  by rewrite /sigma0 /toF /ofF enum_valK cast_ordK.
-- exact: share_compat_massey_compat rs_share_compat.
-Qed.
+(* Monodromy-compatible threshold scheme — axiomatized directly (Issue #39).
+   The previous share_compatible bridge was unsatisfiable for non-trivial G
+   (see notes/20260316_share_compatible_analysis.md). *)
+Hypothesis ts0_compatible :
+  @ts_compatible _ G _ _ ts0 (fun g x => rho g x).
 
 (* The CoveringScheme instance *)
 Definition genus0_covering : CoveringScheme M := {|

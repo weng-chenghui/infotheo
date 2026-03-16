@@ -13,7 +13,7 @@
 (* boundary from 4 code-level axioms to:                                      *)
 (*   1. ev_encode — evaluation structure (function space representation)     *)
 (*   2. dual_ev_encode — dual evaluation encoding (proves dual_min_dist)    *)
-(*   3. share_compatible — monodromy preserves code (Issue #39)              *)
+(*   3. ts_compatible — monodromy-compatible threshold (Issue #39)           *)
 (*                                                                            *)
 (*   genus1_data       == CoveringData with genus 1, base P^1                *)
 (*   genus1_covering   == CoveringScheme with (k, k+2)-threshold             *)
@@ -31,7 +31,7 @@ Require Import ssr_ext ssralg_ext hamming linearcode.
 From pgg_smc Require Import pgg_interface.
 From pgg_reconstruct Require Import pgg_sharing_framework.
 From pgg_reconstruct Require Import covering_scheme.
-From pgg_reconstruct Require Import ag_code ag_massey_bridge code_compatibility.
+From pgg_reconstruct Require Import ag_code ag_massey_bridge.
 From pgg_reconstruct Require Import hyperelliptic_code.
 
 Set Implicit Arguments.
@@ -87,14 +87,13 @@ Definition genus1_data : CoveringData M := {|
    1. ev_ec_rank: generator matrix has full row rank (Riemann-Roch)
    2. ev_ec_encode: evaluation structure (A(x)+y*B(x) representation)
    3. ec_dual_ev_encode: dual evaluation encoding (proves dual_min_dist)
-   4. ag_ec_share_compat: monodromy preserves codewords (Issue #39)
+   4. ts1_compatible: monodromy-compatible threshold (Issue #39)
 
    Proved (via hyperelliptic_code.v):
    - goppa_ec_wt: Goppa weight bound (from resultant parity argument)
    - ag_ec_priv_surj: privacy (from dual minimum distance)
    - ThresholdScheme construction (via Massey)
-   - Gap bound ts_T <= ts_k + 2 (from code parameters with g = 1)
-   - ts_compatible derived from share_compatible via ag_genus_share_compat    *)
+   - Gap bound ts_T <= ts_k + 2 (from code parameters with g = 1)            *)
 
 (* Field over which the elliptic curve is defined *)
 Variable F_ec : finFieldType.
@@ -202,28 +201,11 @@ Let ts1_gap : ts_T ts1 <= ts_k ts1 + 2 * g_ec :=
 Let ts1_gap2 : ts_T ts1 <= ts_k ts1 + 2.
 Proof. exact: ts1_gap. Qed.
 
-(* Field-level action induced by monodromy via bijection *)
-Let ec_toF (x : 'I_N) : F_ec := enum_val (cast_ord HN_ec x).
-Let ec_ofF (x : F_ec) : 'I_N := cast_ord (esym HN_ec) (enum_rank x).
-
-Let sigma_ec (h : pgg_gT M) (x : F_ec) : F_ec :=
-  ec_toF (rho h (ec_ofF x)).
-
-(* Monodromy preserves the AG code — axiomatized at code level (Issue #39).
-   Lowered from ts_compatible (ThresholdScheme level) to share_compatible
-   (linear code level) via ag_genus_share_compat bridge. *)
-Hypothesis ag_ec_share_compat :
-  forall h, h \in G -> share_compatible (ag_code ev_ec) (sigma_ec h).
-
-(* Derive ts_compatible from share_compatible via bridge *)
-Let ts1_compatible : @ts_compatible _ G _ _ ts1 (fun g x => rho g x).
-Proof.
-apply: (ag_genus_share_compat (sigma_F := sigma_ec)
-  (sigma_N := fun h x => rho h x)).
-- move=> h hG x.
-  by rewrite /sigma_ec /ec_toF /ec_ofF enum_valK cast_ordK.
-- exact: ag_ec_share_compat.
-Qed.
+(* Monodromy-compatible threshold scheme — axiomatized directly (Issue #39).
+   The previous share_compatible bridge was unsatisfiable for non-trivial G
+   (see notes/20260316_share_compatible_analysis.md). *)
+Hypothesis ts1_compatible :
+  @ts_compatible _ G _ _ ts1 (fun g x => rho g x).
 
 Definition genus1_covering : CoveringScheme M := {|
   cs_data       := genus1_data ;
@@ -284,7 +266,7 @@ Definition higher_genus_data : CoveringData M := {|
    1. ev_g_rank: generator matrix has full row rank (Riemann-Roch)
    2. ev_g_encode: evaluation structure (A(x)+y*B(x) representation)
    3. g_dual_ev_encode: dual evaluation encoding (proves dual_min_dist)
-   4. ag_g_share_compat: monodromy preserves code (Issue #39)
+   4. ts_g_compatible: monodromy-compatible threshold (Issue #39)
 
    Proved (via hyperelliptic_code.v):
    - goppa_g_wt: Goppa weight bound (from resultant parity argument)
@@ -387,26 +369,11 @@ Let ts_g_gap : ts_T ts_g <= ts_k ts_g + 2 * g :=
     ev_g_rank Hk_g Hkn_g Hkg_g Hkgn_g goppa_g_wt ag_g_priv_surj
     Hparam_g N HN_g.
 
-(* Field-level action induced by monodromy via bijection *)
-Let g_toF (x : 'I_N) : F_g := enum_val (cast_ord HN_g x).
-Let g_ofF (x : F_g) : 'I_N := cast_ord (esym HN_g) (enum_rank x).
-
-Let sigma_g (h : pgg_gT M) (x : F_g) : F_g :=
-  g_toF (rho h (g_ofF x)).
-
-(* Monodromy preserves the AG code — axiomatized at code level (Issue #39) *)
-Hypothesis ag_g_share_compat :
-  forall h, h \in G -> share_compatible (ag_code ev_g) (sigma_g h).
-
-(* Derive ts_compatible from share_compatible via bridge *)
-Let ts_g_compatible : @ts_compatible _ G _ _ ts_g (fun g x => rho g x).
-Proof.
-apply: (ag_genus_share_compat (sigma_F := sigma_g)
-  (sigma_N := fun h x => rho h x)).
-- move=> h hG x.
-  by rewrite /sigma_g /g_toF /g_ofF enum_valK cast_ordK.
-- exact: ag_g_share_compat.
-Qed.
+(* Monodromy-compatible threshold scheme — axiomatized directly (Issue #39).
+   The previous share_compatible bridge was unsatisfiable for non-trivial G
+   (see notes/20260316_share_compatible_analysis.md). *)
+Hypothesis ts_g_compatible :
+  @ts_compatible _ G _ _ ts_g (fun g x => rho g x).
 
 Definition higher_genus_covering : CoveringScheme M := {|
   cs_data       := higher_genus_data ;
