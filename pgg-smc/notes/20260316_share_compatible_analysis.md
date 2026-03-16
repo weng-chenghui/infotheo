@@ -308,11 +308,30 @@ Deleted dead code:
 #### Architecture comparison
 
 ```
-BEFORE:  code auto ──(impossible)──→ share_compatible ──→ ts_compatible ──→ protocol correct
-                                         ↑ value transformation (WRONG)
+BEFORE (Tier 1):
 
-AFTER:   code auto ──(satisfiable)──→ coord_perm_compatible ──→ ts_perm_compatible ──→ protocol correct
-                                         ↑ coordinate permutation (CORRECT)    + G_stable_starts
+Security:  G, RAAG, words, fibers  ──→  collusion bounds, SecurityWitness
+                                                        │
+                                                        ╰──→  AlgebraicRigidity
+                                                        │
+Reconstruction: code, Massey, ts_compatible  ──→  ThresholdWitness
+                                    ↑
+                             UNSATISFIABLE for non-trivial G
+                             (value transformation ≠ monodromy)
+
+
+AFTER (Tier 2):
+
+Security:  G, RAAG, words, fibers  ──→  collusion bounds, SecurityWitness
+                                                        │
+                                                        ╰──→  AlgebraicRigidity
+                                                        │
+Reconstruction: code auto ──→ coord_perm_compatible     │
+                   + fix_0       ──→ ts_perm_compatible  ──→  ThresholdWitness
+                                     + G_stable_starts
+                                            ↑
+                                     SATISFIABLE from code automorphism
+                                     (coordinate permutation = monodromy)
 ```
 
 ### How Tier 2 saves the Massey scheme
