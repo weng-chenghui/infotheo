@@ -8,9 +8,9 @@
 (* The SecurityWitness is fully proved using var_dist_lfree_uniform:          *)
 (*   epsilon = 2 * (N! - Tg^L) / N!  for any L with lfree(L)                *)
 (*                                                                            *)
-(* The ThresholdWitness axiomatizes the covering scheme and PGL bound,        *)
-(* as their construction requires algebraic geometry (Reed-Solomon codes      *)
-(* over genus-0 curves) beyond the scope of this formalization.              *)
+(* The ThresholdWitness uses a genus-0 covering scheme constructed from       *)
+(* Reed-Solomon codes (via genus0_covering from cover_genus0.v).              *)
+(* The PGL bound remains as a hypothesis (algebraic geometry).               *)
 (*                                                                            *)
 (* vm_compute demonstrations:                                                 *)
 (*   star_nt_m2_L1 : n_traces_natB 3 1 (star_comm_nat 2) = 3                *)
@@ -25,10 +25,13 @@ From mathcomp Require Import div fintype tuple finfun finset fingroup perm.
 From mathcomp Require Import morphism action bigop order ssrnum.
 From mathcomp Require Import boolp reals.
 From infotheo Require Import realType_ext fdist proba variation_dist.
+From mathcomp Require Import prime ssralg finalg zmodp poly cyclic.
+Require Import ssralg_ext reed_solomon.
 From pgg_smc Require Import perm_uniform pgg_interface pgg_lfree pgg_raag.
 From pgg_smc Require Import pgg_raag_star pgg_raag_clique pgg_collusion_bound.
 From pgg_reconstruct Require Import pgg_sharing_framework covering_scheme
                                     cover_tradeoff algebraic_rigidity.
+From pgg_reconstruct Require Import cover_genus0 coord_perm_compatible.
 
 Set Implicit Arguments.
 Unset Strict Implicit.
@@ -91,11 +94,11 @@ Definition star_security_witness_1 : SecurityWitness R R_star :=
 End star_security.
 
 (******************************************************************************)
-(*     ThresholdWitness (Axiomatized)                                         *)
+(*     ThresholdWitness (genus-0 covering from RS codes)                      *)
 (******************************************************************************)
 
 (******************************************************************************)
-(*     AlgebraicRigidity Instance (with axiomatized threshold)                *)
+(*     AlgebraicRigidity Instance                                             *)
 (******************************************************************************)
 
 Section star_rigidity.
@@ -106,22 +109,38 @@ Variable m : nat.
 Let R_star : GeneratedMonodromyReprType :=
   @Gen_PGGTypes m m.+1 (star_gen_tuple m).
 
-(* Axiom: the star graph admits a genus-0 covering scheme.
-   This requires constructing a Reed-Solomon code over a prime field
-   of characteristic N = m+3 and proving share compatibility with the
-   monodromy action — algebraic geometry beyond this formalization. *)
-Axiom star_covering : CoveringScheme R_star.
+(* Group nontriviality *)
+Hypothesis HG_star : (1 < #|pgg_G R_star|)%N.
 
-(* Axiom: for the star covering, genus 0 implies |G| <= PGL(2,N).
-   This is about the SPECIFIC covering scheme, not universal.
-   Each instance provides its own proof — either by computation
-   (small groups) or vacuously (large groups whose coverings have genus > 0). *)
-Axiom star_genus0_pgl :
-  cd_genus (cs_data star_covering) = 0 ->
+(* Field parameters for RS code: F = GF(q^m') with |F| = N = m+3 *)
+Variables (q m' : nat).
+Hypothesis primeq : prime q.
+Variable n'' : nat.
+Variable a : GF m' primeq.
+Hypothesis qn : ~~ (q %| n''.+3)%nat.
+Hypothesis an : (n''.+3).-primitive_root a.
+Hypothesis HN : (pgg_N' R_star).+1 = #|GF m' primeq|.
+
+(* Code automorphism: monodromy action on RS code coordinates *)
+Variable sigma_code : pgg_gT R_star -> {perm 'I_n''.+3}.
+Hypothesis sigma_fix0 :
+  forall g, g \in pgg_G R_star -> sigma_code g ord0 = ord0.
+Hypothesis code_auto :
+  forall g, g \in pgg_G R_star ->
+  coord_perm_compatible (RS.code a n''.+3 1) (sigma_code g).
+
+(* Genus-0 covering scheme constructed from RS codes *)
+Definition star_covering : CoveringScheme R_star :=
+  genus0_covering HG_star qn an HN sigma_fix0 code_auto.
+
+(* PGL bound hypothesis: |G| <= PGL(2,N).
+   With star_covering concrete, cd_genus = 0 is trivially true,
+   so we drop the genus=0 premise and keep only the bound. *)
+Hypothesis star_genus0_pgl :
   (#|pgg_G R_star| <= pgl_bound R_star)%N.
 
 Definition star_threshold_witness : ThresholdWitness R_star :=
-  @MkThresholdWitness R_star star_covering star_genus0_pgl.
+  @MkThresholdWitness R_star star_covering (fun _ => star_genus0_pgl).
 
 (* Round complexity at L=1: depth = 1 (trivially, depth <= L) *)
 Definition star_round_complexity : RoundComplexityWitness :=
@@ -157,7 +176,7 @@ Lemma star_tradeoff :
    (ts_T (cs_scheme cs) <= ts_k (cs_scheme cs) + 2 * cd_genus (cs_data cs))%N).
 Proof.
 move=> /=.
-exact: (@security_threshold_tradeoff R_star star_covering star_genus0_pgl).
+exact: (@security_threshold_tradeoff R_star star_covering (fun _ => star_genus0_pgl)).
 Qed.
 
 End star_rigidity.
