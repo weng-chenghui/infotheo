@@ -9,14 +9,12 @@
 (* links it to the monodromy representation.                                  *)
 (*                                                                            *)
 (* Design rationale — why axiomatize:                                         *)
-(*   The reconstruction correctness theorem (pgg_secret_invariant) and the    *)
-(*   security-threshold tradeoff (in cover_tradeoff.v) depend only on three   *)
-(*   properties of the sharing scheme: correctness (ts_correct), privacy      *)
-(*   (ts_private), and compatibility with monodromy (ts_compatible). These    *)
-(*   properties hold for any AG code on any curve of any genus, so the proofs *)
-(*   are parametric in ThresholdScheme. Concrete curve arithmetic (Hermitian  *)
-(*   curves, elliptic curves, Riemann-Roch) is unnecessary: it would only    *)
-(*   witness that such a ThresholdScheme exists, not strengthen the theorems. *)
+(*   The reconstruction correctness theorem and the security-threshold        *)
+(*   tradeoff (in cover_tradeoff.v) depend only on three properties of the   *)
+(*   sharing scheme: correctness (ts_correct), privacy (ts_private), and     *)
+(*   compatibility with monodromy (ts_perm_compatible). These properties     *)
+(*   hold for any AG code on any curve of any genus, so the proofs are       *)
+(*   parametric in ThresholdScheme. Concrete curve arithmetic is unnecessary.*)
 (*                                                                            *)
 (* Section 1 -- Abstract interface:                                           *)
 (*   ThresholdScheme secretT shareT == record bundling:                       *)
@@ -25,12 +23,11 @@
 (*     - correctness and privacy axioms                                        *)
 (*                                                                            *)
 (* Section 2 -- Compatibility:                                                *)
-(*   ts_compatible act ts == a group action on shares is compatible with      *)
-(*     sharing scheme: acting on shares preserves reconstruction              *)
+(*   ts_perm_compatible perm ts == reordering shares by perm g preserves     *)
+(*     reconstruction. Satisfiable for monodromy groups (coordinate perm).   *)
 (*                                                                            *)
 (* Section 3 -- Sum-mod-N instance:                                           *)
 (*   sum_mod_scheme N' T' == ThresholdScheme wrapping existing sum-mod-N      *)
-(*   sum_mod_compatible == preserves_sum_mod implies compatibility            *)
 (******************************************************************************)
 
 From mathcomp Require Import ssreflect ssrbool ssrfun eqtype ssrnat seq.
@@ -78,7 +75,7 @@ Definition ts_k {sT shT : Type} (ts : ThresholdScheme sT shT) : nat :=
   (ts_k' ts).+1.
 
 (******************************************************************************)
-(*     Section 2: Compatibility with a Group Action                           *)
+(*     Section 2: Coordinate-Permutation Compatibility                        *)
 (******************************************************************************)
 
 Section compatibility.
@@ -89,29 +86,18 @@ Variable ts : ThresholdScheme secretT shareT.
 
 Let T := (ts_T' ts).+1.
 
-(* A group action on shares is compatible with the sharing scheme if
-   applying any g in G to each share preserves reconstruction. *)
-Definition ts_compatible (act : gT -> shareT -> shareT) : Prop :=
+(* Coordinate-permutation compatibility: reordering shares by perm g
+   preserves reconstruction. This IS satisfiable for monodromy groups,
+   unlike value-transformation compatibility (which is not). *)
+Definition ts_perm_compatible (perm : gT -> {perm 'I_T}) : Prop :=
   forall (g : gT) (s : secretT) (shares : T.-tuple shareT),
     g \in G ->
     ts_valid ts s shares ->
-    ts_recon ts
-      [tuple act g (tnth shares i) | i < T] = s.
-
-(* Compatibility with identity action is trivially satisfied *)
-Lemma ts_compatible_id :
-  ts_compatible (fun _ x => x).
-Proof.
-move=> g s shares gG Hvalid.
-have -> : [tuple (fun (_ : gT) (x : shareT) => x) g (tnth shares i) | i < T] = shares.
-  apply: eq_from_tnth => i.
-  by rewrite tnth_mktuple.
-exact: ts_correct Hvalid.
-Qed.
+    ts_recon ts [tuple tnth shares (perm g i) | i < T] = s.
 
 End compatibility.
 
-Arguments ts_compatible {gT G secretT shareT}.
+Arguments ts_perm_compatible {gT G secretT shareT}.
 
 (******************************************************************************)
 (*     Section 3: Sum-mod-N Instance                                          *)
@@ -169,78 +155,7 @@ End sum_mod_instance.
 Arguments sum_mod_scheme {N' T'}.
 
 (******************************************************************************)
-(*     Section 4: Sum-mod-N Compatibility                                     *)
-(******************************************************************************)
-
-Section sum_mod_compatibility.
-
-Variable N' : nat.
-Let N := N'.+2.
-
-Variable T' : nat.
-Let T := T'.+1.
-
-(* If a permutation preserves sum mod N, then applying it to shares
-   is compatible with the sum-mod-N scheme *)
-Lemma sum_mod_compatible (gT : finGroupType) (G : {group gT})
-    (act : gT -> 'I_N -> 'I_N) :
-  (forall g : gT, g \in G ->
-    forall (s : T.-tuple 'I_N),
-      (\sum_(i < T) (act g (tnth s i) : nat)) %% N =
-      (\sum_(i < T) (tnth s i : nat)) %% N) ->
-  @ts_compatible gT G _ _ (@sum_mod_scheme N' T') act.
-Proof.
-move=> Hpres g s shares gG Hvalid.
-rewrite /= /sum_mod_recon.
-apply: val_inj => /=.
-have -> : \sum_(i < T) (tnth [tuple act g (tnth shares i) | i < T] i : nat) =
-          \sum_(i < T) (act g (tnth shares i) : nat).
-  by apply: eq_bigr => i _; rewrite tnth_mktuple.
-by rewrite Hpres.
-Qed.
-
-End sum_mod_compatibility.
-
-(******************************************************************************)
-(*     Section 5: Integration with PGG Monodromy                              *)
-(******************************************************************************)
-
-Section pgg_compatibility.
-
-Variable N' : nat.
-Let N := N'.+2.
-
-Variable T' : nat.
-Let T := T'.+1.
-
-Variable M : MonodromyReprType.
-Hypothesis HN : (pgg_N' M).+1 = N.
-
-Let gT := pgg_gT M.
-Let G := pgg_G M.
-Let rho := @pgg_rho M.
-
-(* The monodromy action on 'I_N, cast from 'I_(pgg_N' M).+1 *)
-Definition rho_act (g : gT) (x : 'I_N) : 'I_N :=
-  cast_ord HN (rho g (cast_ord (esym HN) x)).
-
-Lemma rho_act_val (g : gT) (x : 'I_N) :
-  val (rho_act g x) = val (rho g (cast_ord (esym HN) x)).
-Proof. by []. Qed.
-
-(* If rho preserves sum mod N, the sum-mod-N scheme is compatible *)
-Lemma pgg_sum_mod_compatible :
-  (forall g : gT, g \in G ->
-    forall (s : T.-tuple 'I_N),
-      (\sum_(i < T) (rho_act g (tnth s i) : nat)) %% N =
-      (\sum_(i < T) (tnth s i : nat)) %% N) ->
-  @ts_compatible gT G _ _ (@sum_mod_scheme N' T') rho_act.
-Proof. exact: sum_mod_compatible. Qed.
-
-End pgg_compatibility.
-
-(******************************************************************************)
-(*     Section 6: Protocol Integration                                        *)
+(*     Section 4: Protocol Integration                                        *)
 (******************************************************************************)
 
 (* Helper: cast a tuple when the size index changes *)
@@ -280,44 +195,29 @@ Definition pgg_recon (eps : T.-tuple 'I_N) : 'I_N :=
 Definition pgg_recon_endpoints (P : gT) : 'I_N :=
   pgg_recon [tuple rho P (tnth starts i) | i < T].
 
-(* Main theorem: compatible scheme + valid starting shares ⟹
-   reconstruction of endpoints recovers the secret *)
-Lemma pgg_secret_invariant (s : 'I_N) (P : gT) :
+(* Main theorem: coordinate-permutation compatible scheme + G-stable starts
+   + valid starting shares ⟹ reconstruction of endpoints recovers the secret *)
+Lemma pgg_secret_invariant_perm (s : 'I_N) (P : gT)
+    (perm : gT -> {perm 'I_sT})
+    (G_stable : forall g, g \in pgg_G M ->
+       forall i : 'I_sT, rho g (tnth (cast_tuple (esym (congr1 S HT)) starts) i) =
+                          tnth (cast_tuple (esym (congr1 S HT)) starts) (perm g i)) :
   P \in pgg_G M ->
   ts_valid ts s (cast_tuple (esym (congr1 S HT)) starts) ->
-  @ts_compatible gT (pgg_G M) _ _ ts (fun (g : gT) (x : 'I_N) => rho g x) ->
+  @ts_perm_compatible gT (pgg_G M) _ _ ts perm ->
   pgg_recon_endpoints P = s.
 Proof.
-move=> PG Hvalid Hcompat.
+move=> PG Hvalid Hperm.
 rewrite /pgg_recon_endpoints /pgg_recon.
 have -> : cast_tuple (esym (congr1 S HT))
             [tuple rho P (tnth starts i) | i < T] =
-          [tuple (fun (g : gT) (x : 'I_N) => rho g x) P
-                 (tnth (cast_tuple (esym (congr1 S HT)) starts) i) | i < sT].
+          [tuple tnth (cast_tuple (esym (congr1 S HT)) starts) (perm P i) | i < sT].
   apply: eq_from_tnth => i.
-  by rewrite tnth_cast_tuple !tnth_mktuple tnth_cast_tuple.
-exact: Hcompat PG Hvalid.
+  rewrite tnth_cast_tuple !tnth_mktuple.
+  rewrite -(G_stable P PG i).
+  congr (rho P _).
+  by rewrite tnth_cast_tuple.
+exact: Hperm PG Hvalid.
 Qed.
 
 End pgg_protocol_secret.
-
-(******************************************************************************)
-(*     Section 7: Sum-mod-N Backward Compatibility                            *)
-(******************************************************************************)
-
-Section sum_mod_backward_compat.
-
-Variable N' : nat.
-Let N := N'.+2.
-
-Variable T' : nat.
-Let T := T'.+1.
-
-(* The sum-mod-N reconstruction function extracted from the scheme *)
-Lemma sum_mod_recon_eq (eps : T.-tuple 'I_N) :
-  ts_recon (@sum_mod_scheme N' T')
-    (cast_tuple (esym (congr1 S (erefl T'))) eps) =
-  sum_mod_recon eps.
-Proof. by rewrite /cast_tuple /=. Qed.
-
-End sum_mod_backward_compat.

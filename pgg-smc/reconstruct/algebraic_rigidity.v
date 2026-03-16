@@ -160,18 +160,23 @@ Lemma ar_depth_bound :
   rc_depth (ar_round_complexity ar) <= rc_L (ar_round_complexity ar).
 Proof. exact: rc_bound. Qed.
 
-(** Protocol correctness: compatible scheme + valid shares -> reconstruction *)
+(** Protocol correctness: perm-compatible scheme + valid shares + G-stable starts *)
 Lemma ar_protocol_correct (PI : PGGInterface M)
     (HT : ts_T' (cs_scheme (tw_covering (ar_threshold ar))) = pi_T' PI)
-    (s : 'I_N) (P : pgg_gT M) :
+    (s : 'I_N) (P : pgg_gT M)
+    (G_stable : forall g, g \in G ->
+       forall i : 'I_(ts_T' (cs_scheme (tw_covering (ar_threshold ar)))).+1,
+         @pgg_rho M g (tnth (cast_tuple (esym (congr1 S HT)) (pi_starts PI)) i) =
+         tnth (cast_tuple (esym (congr1 S HT)) (pi_starts PI))
+              (cs_perm (tw_covering (ar_threshold ar)) g i)) :
   P \in G ->
   ts_valid (cs_scheme (tw_covering (ar_threshold ar))) s
           (cast_tuple (esym (congr1 S HT)) (pi_starts PI)) ->
   pgg_recon_endpoints HT P = s.
 Proof.
 move=> PG Hvalid.
-by apply: pgg_secret_invariant; [exact PG | exact Hvalid |
-    exact: cs_compatible].
+apply: (pgg_secret_invariant_perm (perm := cs_perm (tw_covering (ar_threshold ar)))) => //.
+exact: cs_perm_compatible.
 Qed.
 
 End derived_properties.

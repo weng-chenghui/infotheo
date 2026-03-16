@@ -9,7 +9,7 @@
 (*                                                                            *)
 (* The ThresholdScheme is now concrete (from RS codes via Massey's            *)
 (* construction in rs_massey_bridge.v). Exactness (ts_T = ts_k) is proved.   *)
-(* ts_compatible is axiomatized directly (Issue #39).                        *)
+(* ts_perm_compatible is axiomatized via coordinate permutation (Tier 2).   *)
 (*                                                                            *)
 (*   genus0_data       == CoveringData with genus 0, base P^1                *)
 (*   genus0_covering   == CoveringScheme with exact (k,k)-threshold          *)
@@ -94,11 +94,13 @@ Let ts0 : ThresholdScheme 'I_N 'I_N := rs_genus0_scheme primeq a qn an HN.
 (* Exactness: proved from RS min_dist + Massey construction *)
 Let ts0_exact : ts_T ts0 = ts_k ts0 := rs_genus0_exact primeq a qn an HN.
 
-(* Monodromy-compatible threshold scheme — axiomatized directly (Issue #39).
-   The previous share_compatible bridge was unsatisfiable for non-trivial G
-   (see notes/20260316_share_compatible_analysis.md). *)
-Hypothesis ts0_compatible :
-  @ts_compatible _ G _ _ ts0 (fun g x => rho g x).
+(* Coordinate-permutation compatibility (Tier 2).
+   Instead of axiomatizing ts_compatible (value transformation, unsatisfiable),
+   we axiomatize ts_perm_compatible (coordinate permutation, satisfiable). *)
+Variable ts0_perm : pgg_gT M -> {perm 'I_(ts_T' ts0).+1}.
+
+Hypothesis ts0_perm_compatible :
+  @ts_perm_compatible _ G _ _ ts0 ts0_perm.
 
 (* The CoveringScheme instance *)
 Definition genus0_covering : CoveringScheme M := {|
@@ -106,7 +108,8 @@ Definition genus0_covering : CoveringScheme M := {|
   cs_T'         := ts_T' ts0 ;
   cs_scheme     := ts0 ;
   cs_scheme_T   := erefl ;
-  cs_compatible := ts0_compatible ;
+  cs_perm       := ts0_perm ;
+  cs_perm_compatible := ts0_perm_compatible ;
   cs_gap        := leq_trans (leqnn _)
                      (leq_trans (eq_leq ts0_exact) (leq_addr _ _)) ;
 |}.
@@ -116,15 +119,20 @@ Lemma shamir_exact :
   ts_T (cs_scheme genus0_covering) = ts_k (cs_scheme genus0_covering).
 Proof. exact: ts0_exact. Qed.
 
-(* Protocol integration: reconstruction recovers the secret *)
+(* Protocol integration: reconstruction recovers the secret
+   (requires G-stable starts hypothesis) *)
 Lemma genus0_secret_invariant (PI : PGGInterface M)
-    (HT : ts_T' ts0 = pi_T' PI) (s : 'I_N) (P : pgg_gT M) :
+    (HT : ts_T' ts0 = pi_T' PI) (s : 'I_N) (P : pgg_gT M)
+    (G_stable : forall g, g \in G ->
+       forall i : 'I_(ts_T' ts0).+1,
+         rho g (tnth (cast_tuple (esym (congr1 S HT)) (pi_starts PI)) i) =
+         tnth (cast_tuple (esym (congr1 S HT)) (pi_starts PI)) (ts0_perm g i)) :
   P \in G ->
   ts_valid ts0 s (cast_tuple (esym (congr1 S HT)) (pi_starts PI)) ->
   pgg_recon_endpoints HT P = s.
 Proof.
 move=> PG Hvalid.
-exact: pgg_secret_invariant PG Hvalid ts0_compatible.
+exact: pgg_secret_invariant_perm G_stable PG Hvalid ts0_perm_compatible.
 Qed.
 
 End genus0.

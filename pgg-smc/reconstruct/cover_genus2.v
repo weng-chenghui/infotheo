@@ -89,7 +89,7 @@ Definition genus2_data : CoveringData M := {|
    1. ev_g2_rank: generator matrix has full row rank (Riemann-Roch)
    2. ev_g2_encode: evaluation structure (A(x)+y*B(x) representation)
    3. g2_dual_ev_encode: dual evaluation encoding (proves dual_min_dist)
-   4. ts2_compatible: monodromy-compatible threshold (Issue #39)
+   4. ts2_perm_compatible: coord-permutation compatibility (Tier 2)
 
    Proved (via hyperelliptic_code.v):
    - goppa_g2_wt: Goppa weight bound (from resultant parity argument)
@@ -203,18 +203,19 @@ Let ts2_gap : ts_T ts2 <= ts_k ts2 + 2 * g_g2 :=
 Let ts2_gap4 : ts_T ts2 <= ts_k ts2 + 4.
 Proof. exact: ts2_gap. Qed.
 
-(* Monodromy-compatible threshold scheme — axiomatized directly (Issue #39).
-   The previous share_compatible bridge was unsatisfiable for non-trivial G
-   (see notes/20260316_share_compatible_analysis.md). *)
-Hypothesis ts2_compatible :
-  @ts_compatible _ G _ _ ts2 (fun g x => rho g x).
+(* Coordinate-permutation compatibility (Tier 2). *)
+Variable ts2_perm : pgg_gT M -> {perm 'I_(ts_T' ts2).+1}.
+
+Hypothesis ts2_perm_compatible :
+  @ts_perm_compatible _ G _ _ ts2 ts2_perm.
 
 Definition genus2_covering : CoveringScheme M := {|
   cs_data       := genus2_data ;
   cs_T'         := ts_T' ts2 ;
   cs_scheme     := ts2 ;
   cs_scheme_T   := erefl ;
-  cs_compatible := ts2_compatible ;
+  cs_perm       := ts2_perm ;
+  cs_perm_compatible := ts2_perm_compatible ;
   cs_gap        := ts2_gap4 ;
 |}.
 

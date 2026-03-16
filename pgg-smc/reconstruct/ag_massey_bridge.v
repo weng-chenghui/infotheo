@@ -11,8 +11,6 @@
 (*   ag_genus_scheme   == ThresholdScheme 'I_N 'I_N via transport            *)
 (*   ag_massey_gap     == ts_T ag_massey <= ts_k ag_massey + 2 * g           *)
 (*   ag_genus_gap      == gap bound transported to 'I_N                      *)
-(*   ag_massey_share_compat  == share_compatible -> ts_compatible ag_massey   *)
-(*   ag_genus_share_compat   == share_compatible -> ts_compatible ag_genus    *)
 (******************************************************************************)
 
 From HB Require Import structures.
@@ -20,7 +18,7 @@ From mathcomp Require Import all_ssreflect ssralg finalg zmodp.
 From mathcomp Require Import fingroup matrix mxalgebra vector.
 Require Import ssr_ext ssralg_ext hamming linearcode.
 From pgg_reconstruct Require Import pgg_sharing_framework massey
-  rs_massey_bridge ag_code code_compatibility.
+  rs_massey_bridge ag_code.
 
 Set Implicit Arguments.
 Unset Strict Implicit.
@@ -99,29 +97,5 @@ Definition ag_genus_scheme : ThresholdScheme 'I_N 'I_N :=
 Lemma ag_genus_gap :
   ts_T ag_genus_scheme <= ts_k ag_genus_scheme + 2 * g.
 Proof. exact: ag_massey_gap. Qed.
-
-(******************************************************************************)
-(*     Section 2: Bridge from share_compatible to ts_compatible              *)
-(******************************************************************************)
-
-(* Bridge: share_compatible at code level -> ts_compatible for ag_massey *)
-Lemma ag_massey_share_compat (gT : finGroupType) (G : {group gT})
-    (sigma : gT -> F -> F) :
-  (forall h, h \in G -> share_compatible (ag_code ev) (sigma h)) ->
-  @ts_compatible gT G _ _ ag_massey (fun h x => sigma h x).
-Proof. exact: share_compat_massey_compat. Qed.
-
-(* Bridge: share_compatible -> ts_compatible for ag_genus_scheme (transported) *)
-Lemma ag_genus_share_compat (gT : finGroupType) (G : {group gT})
-    (sigma_F : gT -> F -> F) (sigma_N : gT -> 'I_N -> 'I_N) :
-  (forall h, h \in G -> forall x : F,
-     sigma_N h (ag_ofF x) = ag_ofF (sigma_F h x)) ->
-  (forall h, h \in G -> share_compatible (ag_code ev) (sigma_F h)) ->
-  @ts_compatible gT G _ _ ag_genus_scheme (fun h x => sigma_N h x).
-Proof.
-move=> Hintertwine Hsc.
-apply: (transport_ts_compatible ag_toFK ag_ofFK sigma_F sigma_N Hintertwine).
-exact: ag_massey_share_compat Hsc.
-Qed.
 
 End ag_massey_sect.

@@ -8,7 +8,7 @@
 (* threshold of the secret sharing scheme (via AG codes).                     *)
 (*                                                                            *)
 (* Design rationale — why axiomatize the AG code:                             *)
-(*   CoveringScheme axiomatizes cs_compatible and cs_gap because the          *)
+(*   CoveringScheme axiomatizes cs_perm_compatible and cs_gap because the    *)
 (*   security-threshold tradeoff theorem only needs: (1) Riemann-Hurwitz     *)
 (*   (proved here from cd_hurwitz) to link |G| to genus, and (2) the gap     *)
 (*   bound ts_T <= ts_k + 2*genus to link genus to threshold. Both facts     *)
@@ -27,7 +27,8 @@
 (*   CoveringScheme M == a ThresholdScheme built from a covering of M        *)
 (*     cs_data       == covering geometry (connects G to genus)              *)
 (*     cs_scheme     == the ThresholdScheme instance                         *)
-(*     cs_compatible == monodromy action preserves reconstruction            *)
+(*     cs_perm       == monodromy-induced permutation on share indices       *)
+(*     cs_perm_compatible == coord permutation preserves reconstruction     *)
 (*     cs_gap        == genus determines threshold gap:                      *)
 (*                      ts_T scheme <= ts_k scheme + 2 * genus               *)
 (*                                                                            *)
@@ -94,15 +95,17 @@ Let rho := @pgg_rho M.
 (* A CoveringScheme bundles:
    1. Covering geometry (CoveringData) — connects G to genus via Riemann-Hurwitz
    2. A ThresholdScheme — the actual secret sharing scheme
-   3. Compatibility — monodromy action preserves reconstruction
-   4. Gap bound — genus determines the threshold gap *)
+   3. Coordinate permutation — monodromy-induced share reordering
+   4. Compatibility — permuting shares preserves reconstruction
+   5. Gap bound — genus determines the threshold gap *)
 Record CoveringScheme := MkCoveringScheme {
   cs_data   : CoveringData M ;
   cs_T'     : nat ;
   cs_scheme : ThresholdScheme 'I_N 'I_N ;
   cs_scheme_T : ts_T' cs_scheme = cs_T' ;
-  cs_compatible :
-    @ts_compatible _ (pgg_G M) _ _ cs_scheme (fun g x => rho g x) ;
+  cs_perm   : pgg_gT M -> {perm 'I_(ts_T' cs_scheme).+1} ;
+  cs_perm_compatible :
+    @ts_perm_compatible _ (pgg_G M) _ _ cs_scheme cs_perm ;
   cs_gap :
     ts_T cs_scheme <= ts_k cs_scheme + 2 * cd_genus (cs_data) ;
 }.
