@@ -72,8 +72,7 @@ Record SecurityWitness := MkSecurityWitness {
 Record ThresholdWitness := MkThresholdWitness {
   tw_covering : CoveringScheme M;
   tw_genus0_pgl :
-    forall cd : CoveringData M,
-      cd_genus cd = 0 -> #|G| <= pgl_bound M
+    cd_genus (cs_data tw_covering) = 0 -> #|G| <= pgl_bound M
 }.
 
 Record RoundComplexityWitness := MkRoundComplexityWitness {
@@ -123,7 +122,9 @@ Lemma ar_tradeoff :
    ts_T (cs_scheme cs) <= ts_k (cs_scheme cs) + 2 * cd_genus (cs_data cs)).
 Proof.
 move=> /=.
-apply: (@security_threshold_tradeoff M (tw_genus0_pgl (ar_threshold ar))).
+exact (@security_threshold_tradeoff M
+  (tw_covering (ar_threshold ar))
+  (@tw_genus0_pgl M (ar_threshold ar))).
 Qed.
 
 (** Search-gap tradeoff: search space bounded or threshold has gap *)
@@ -136,7 +137,9 @@ Lemma ar_search_gap_tradeoff (L : nat) :
    ts_T (cs_scheme cs) <= ts_k (cs_scheme cs) + 2 * cd_genus (cs_data cs)).
 Proof.
 move=> /=.
-apply: (@search_gap_tradeoff M (tw_genus0_pgl (ar_threshold ar))).
+exact (@search_gap_tradeoff M
+  (tw_covering (ar_threshold ar))
+  (@tw_genus0_pgl M (ar_threshold ar)) L).
 Qed.
 
 (** Large groups force positive genus *)
@@ -146,7 +149,9 @@ Lemma ar_large_group_forces_gap :
   0 < cd_genus (cs_data cs).
 Proof.
 move=> /=.
-apply: (@large_group_forces_gap M (tw_genus0_pgl (ar_threshold ar))).
+exact (@large_group_forces_gap M
+  (tw_covering (ar_threshold ar))
+  (@tw_genus0_pgl M (ar_threshold ar))).
 Qed.
 
 (** Gap bound: threshold gap is bounded by twice the genus *)

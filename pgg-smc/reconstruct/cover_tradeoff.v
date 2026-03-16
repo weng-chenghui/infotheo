@@ -108,16 +108,14 @@ Variable M : GeneratedMonodromyReprType.
 Let G := pgg_G M.
 Let N := (pgg_N' M).+1.
 
-(* Genus-0 covering forces |G| to be bounded (embeds in PGL(2,N)) *)
-Hypothesis genus0_pgl :
-  forall (cd : CoveringData M),
-    cd_genus cd = 0 -> #|G| <= pgl_bound M.
-
 (* THE MAIN TRADEOFF THEOREM:
    Either the anonymity entropy is bounded (genus 0, |G| <= PGL bound)
    or the threshold has a gap (genus > 0).
-   Both regimes are information-theoretically secure. *)
-Theorem security_threshold_tradeoff (cs : CoveringScheme M) :
+   Both regimes are information-theoretically secure.
+   The genus0_pgl hypothesis is about the SPECIFIC covering scheme cs,
+   not universal over all coverings — each instance provides its own proof. *)
+Theorem security_threshold_tradeoff (cs : CoveringScheme M)
+    (genus0_pgl : cd_genus (cs_data cs) = 0 -> #|G| <= pgl_bound M) :
   (* Either genus 0 with bounded group ... *)
   (cd_genus (cs_data cs) = 0 /\
    #|G| <= pgl_bound M /\
@@ -138,7 +136,8 @@ case Hg : (cd_genus (cs_data cs) == 0).
 Qed.
 
 (* Contrapositive: large group forces threshold gap *)
-Lemma large_group_forces_gap (cs : CoveringScheme M) :
+Lemma large_group_forces_gap (cs : CoveringScheme M)
+    (genus0_pgl : cd_genus (cs_data cs) = 0 -> #|G| <= pgl_bound M) :
   pgl_bound M < #|G| ->
   0 < cd_genus (cs_data cs).
 Proof.
@@ -163,7 +162,9 @@ by rewrite /G H1 H2 eqn_add2r HR.
 Qed.
 
 (* Combined statement: anonymity set size vs threshold gap *)
-Theorem search_gap_tradeoff (cs : CoveringScheme M) (L : nat) :
+Theorem search_gap_tradeoff (cs : CoveringScheme M)
+    (genus0_pgl : cd_genus (cs_data cs) = 0 -> #|G| <= pgl_bound M)
+    (L : nat) :
   (* Either search space is bounded by PGL(2,N) ... *)
   (@search_space M L <= pgl_bound M /\
    ts_T (cs_scheme cs) <= ts_k (cs_scheme cs))

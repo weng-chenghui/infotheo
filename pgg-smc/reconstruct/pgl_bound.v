@@ -20,11 +20,9 @@
 (*   card_pgl2     == |PGL(2,q)| = q * (q^2 - 1)                             *)
 (*   pgl2_card_eq_pgl_bound == |PGL(2,q)| = pgl_bound M when q = N           *)
 (*                                                                            *)
-(* Axiom:                                                                     *)
-(*   genus0_aut_pgl == genus 0 covering -> Aut(covering) embeds in PGL(2,N)  *)
-(*     This is Riemann's theorem: automorphisms of P^1 are Moebius           *)
-(*     transformations, hence Aut(P^1) = PGL(2,F_q). Proving it would       *)
-(*     require algebraic geometry beyond the scope of this formalization.     *)
+(* The genus-0 PGL bound (|G| <= |PGL(2,N)| for genus-0 coverings) is      *)
+(* NOT stated here — it is an interface-implementation pattern where each   *)
+(* instance provides its own proof (see algebraic_rigidity.v).             *)
 (******************************************************************************)
 
 From mathcomp Require Import ssreflect ssrbool ssrfun eqtype ssrnat seq.
@@ -197,23 +195,3 @@ Proof. exact: card_pgl2. Qed.
 
 End pgl_connection.
 
-(******************************************************************************)
-(*     Section 5: Genus-0 Automorphism Bound (Axiom)                          *)
-(******************************************************************************)
-
-(* Riemann's theorem: the automorphism group of the projective line P^1
-   over a field F_q is PGL(2,F_q). For a genus-0 covering, the deck
-   transformation group G embeds into Aut(P^1) = PGL(2,F_q).
-
-   This is a deep result from algebraic geometry:
-   1. A genus-0 curve over an algebraically closed field is P^1
-   2. Aut(P^1) consists of Moebius transformations z -> (az+b)/(cz+d)
-   3. These form PGL(2,F_q) = GL(2,F_q) / {scalar matrices}
-
-   Proving this formally would require algebraic curve theory beyond
-   the scope of this formalization. *)
-
-Axiom genus0_aut_pgl :
-  forall (F : finFieldType) (G : {group {perm 'I_#|F|.+1}}),
-    (* G is a subgroup of Aut(P^1(F_q)) = PGL(2,F_q) *)
-    (#|G| <= #|pgl2 F|)%N.

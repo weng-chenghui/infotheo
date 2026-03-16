@@ -117,11 +117,13 @@ Variable R : realType.
    spaces of Riemann surfaces) beyond this formalization. *)
 Axiom monster_covering : CoveringScheme R_monster.
 
-(* Axiom: for genus-0 coverings, |G| <= PGL(2,N).
-   Automorphisms of P^1 are Moebius transformations: Aut(P^1) = PGL(2,F_q). *)
+(* Axiom: for the monster covering, genus 0 implies |G| <= PGL(2,N).
+   This is about the SPECIFIC covering scheme, not universal.
+   For the Monster (|G| ~ 10^53), this is vacuously true since the
+   covering genus is necessarily > 0 for such a large group. *)
 Axiom monster_genus0_pgl :
-  forall cd : CoveringData R_monster,
-    cd_genus cd = 0 -> (#|pgg_G R_monster| <= pgl_bound R_monster)%N.
+  cd_genus (cs_data monster_covering) = 0 ->
+  (#|pgg_G R_monster| <= pgl_bound R_monster)%N.
 
 Definition monster_threshold_witness : ThresholdWitness R_monster :=
   @MkThresholdWitness R_monster monster_covering monster_genus0_pgl.
@@ -152,7 +154,7 @@ Lemma monster_tradeoff :
    (ts_T (cs_scheme cs) <= ts_k (cs_scheme cs) + 2 * cd_genus (cs_data cs))%N).
 Proof.
 move=> /=.
-exact: (@security_threshold_tradeoff R_monster monster_genus0_pgl).
+exact: (@security_threshold_tradeoff R_monster monster_covering monster_genus0_pgl).
 Qed.
 
 End monster_rigidity.

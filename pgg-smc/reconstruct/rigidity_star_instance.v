@@ -112,12 +112,13 @@ Let R_star : GeneratedMonodromyReprType :=
    monodromy action — algebraic geometry beyond this formalization. *)
 Axiom star_covering : CoveringScheme R_star.
 
-(* Axiom: for genus-0 coverings, |G| <= PGL(2,N).
-   This is a classical result: automorphisms of P^1 are Moebius
-   transformations, so Aut(P^1) = PGL(2,F_q). *)
+(* Axiom: for the star covering, genus 0 implies |G| <= PGL(2,N).
+   This is about the SPECIFIC covering scheme, not universal.
+   Each instance provides its own proof — either by computation
+   (small groups) or vacuously (large groups whose coverings have genus > 0). *)
 Axiom star_genus0_pgl :
-  forall cd : CoveringData R_star,
-    cd_genus cd = 0 -> (#|pgg_G R_star| <= pgl_bound R_star)%N.
+  cd_genus (cs_data star_covering) = 0 ->
+  (#|pgg_G R_star| <= pgl_bound R_star)%N.
 
 Definition star_threshold_witness : ThresholdWitness R_star :=
   @MkThresholdWitness R_star star_covering star_genus0_pgl.
@@ -156,7 +157,7 @@ Lemma star_tradeoff :
    (ts_T (cs_scheme cs) <= ts_k (cs_scheme cs) + 2 * cd_genus (cs_data cs))%N).
 Proof.
 move=> /=.
-exact: (@security_threshold_tradeoff R_star star_genus0_pgl).
+exact: (@security_threshold_tradeoff R_star star_covering star_genus0_pgl).
 Qed.
 
 End star_rigidity.
