@@ -37,7 +37,7 @@
 (* Axioms (5):                                                                *)
 (*   monster_n      : number of sheets (abstract, known to be ~ 10^20)       *)
 (*   monster_sigmas : two generators (exist by Steinberg's theorem)           *)
-(*   monster_lfree1 : L-freeness at L=1 (trivial for distinct perms)         *)
+(*   monster_sigmas_distinct : generators are distinct permutations          *)
 (*   monster_covering : existence of a covering scheme                        *)
 (*   monster_genus0_pgl : genus-0 coverings have |G| <= PGL(2,N)             *)
 (*                                                                            *)
@@ -80,9 +80,13 @@ Axiom monster_sigmas : 2.-tuple {perm 'I_monster_n.+2}.
 Definition M_monster := @Gen_PGGTypes 1 monster_n monster_sigmas.
 Definition R_monster : GeneratedMonodromyReprType := M_monster.
 
-(* L-freeness at L=1: two distinct permutations on ~ 10^20 points are
-   trivially L-free at L=1. Axiomatized because the generators are abstract. *)
-Axiom monster_lfree1 : @lfree M_monster 1.
+(* Generators are distinct: weaker than L-freeness, implies it via
+   gen_inj_lfree1. Axiomatized because the generators are abstract. *)
+Axiom monster_sigmas_distinct :
+  injective (fun i : 'I_2 => tnth monster_sigmas i).
+
+Lemma monster_lfree1 : @lfree M_monster 1.
+Proof. exact: gen_inj_lfree1 monster_sigmas_distinct. Qed.
 
 (******************************************************************************)
 (*     SecurityWitness Construction                                           *)

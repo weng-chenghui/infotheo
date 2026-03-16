@@ -9,7 +9,7 @@
 (*                                                                            *)
 (* The ThresholdScheme is now concrete (from RS codes via Massey's            *)
 (* construction in rs_massey_bridge.v). Exactness (ts_T = ts_k) is proved.   *)
-(* ts_perm_compatible is axiomatized via coordinate permutation (Tier 2).   *)
+(* ts_perm_compatible is derived from code automorphism hypotheses.          *)
 (*                                                                            *)
 (*   genus0_data       == CoveringData with genus 0, base P^1                *)
 (*   genus0_covering   == CoveringScheme with exact (k,k)-threshold          *)
@@ -25,6 +25,7 @@ From pgg_smc Require Import pgg_interface.
 From pgg_reconstruct Require Import pgg_sharing_framework.
 From pgg_reconstruct Require Import covering_scheme.
 From pgg_reconstruct Require Import rs_massey_bridge.
+From pgg_reconstruct Require Import coord_perm_compatible.
 
 Set Implicit Arguments.
 Unset Strict Implicit.
@@ -94,13 +95,29 @@ Let ts0 : ThresholdScheme 'I_N 'I_N := rs_genus0_scheme primeq a qn an HN.
 (* Exactness: proved from RS min_dist + Massey construction *)
 Let ts0_exact : ts_T ts0 = ts_k ts0 := rs_genus0_exact primeq a qn an HN.
 
-(* Coordinate-permutation compatibility (Tier 2).
-   Instead of axiomatizing ts_compatible (value transformation, unsatisfiable),
-   we axiomatize ts_perm_compatible (coordinate permutation, satisfiable). *)
-Variable ts0_perm : pgg_gT M -> {perm 'I_(ts_T' ts0).+1}.
+(* Coordinate-permutation compatibility: derived from code automorphisms.
+   sigma_code maps monodromy elements to column permutations of the RS code
+   that fix position 0 (the secret). massey_perm_compatible +
+   transport_perm_compatible derive ts_perm_compatible from these. *)
+Variable sigma_code : pgg_gT M -> {perm 'I_n''.+3}.
 
-Hypothesis ts0_perm_compatible :
+Hypothesis sigma_fix0 :
+  forall g, g \in G -> sigma_code g ord0 = ord0.
+
+Hypothesis code_auto :
+  forall g, g \in G ->
+  coord_perm_compatible (RS.code a n''.+3 1) (sigma_code g).
+
+Let ts0_perm : pgg_gT M -> {perm 'I_(ts_T' ts0).+1} :=
+  massey_share_perm (G:=G) sigma_fix0.
+
+Lemma ts0_perm_compatible :
   @ts_perm_compatible _ G _ _ ts0 ts0_perm.
+Proof.
+rewrite /ts0 /= /rs_genus0_scheme /rs_massey.
+apply: transport_perm_compatible.
+exact: massey_perm_compatible.
+Qed.
 
 (* The CoveringScheme instance *)
 Definition genus0_covering : CoveringScheme M := {|
