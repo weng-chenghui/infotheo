@@ -167,6 +167,7 @@ pgg-smc/reconstruct/cover_genus2.v
 pgg-smc/reconstruct/cover_tradeoff.v
 pgg-smc/reconstruct/algebraic_rigidity.v
 pgg-smc/reconstruct/rigidity_star_instance.v
+pgg-smc/reconstruct/rigidity_monster_instance.v
 pgg-smc/reconstruct/pgl_bound.v
 pgg-smc/reconstruct/pgg_covering_correctness.v
 pgg-smc/reconstruct/pgg_assignment.v
