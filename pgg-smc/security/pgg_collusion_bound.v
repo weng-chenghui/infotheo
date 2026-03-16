@@ -490,14 +490,81 @@ Qed.
 End lfree_collusion.
 
 (******************************************************************************)
-(*   Section 7: Generalized collusion bound for arbitrary coalition size k  *)
+(*   Section 7: Fiber equidistribution                                       *)
+(*                                                                            *)
+(*   Defines fibers (preimages of word_eval) and proves that under uniform   *)
+(*   word distribution, the probability of each achievable group element is  *)
+(*   proportional to its fiber size. Under L-freeness, fibers are singletons *)
+(*   and the induced distribution is uniform over achievable(L).             *)
+(******************************************************************************)
+
+Section fiber_equidistribution.
+
+Context {R : realType}.
+Variable N'' : nat.
+Let N' := N''.+1.
+Let N := N'.+1.
+
+Variable m : nat.
+Let Tg := m.+1.
+Variable L : nat.
+Variable sigmas : Tg.-tuple {perm 'I_N}.
+Let M := Gen_PGGTypes sigmas.
+
+Lemma card_word_L' :
+  #|{: L.-tuple 'I_Tg}| = (Tg ^ L).-1.+1.
+Proof.
+by rewrite card_tuple card_ord prednK // expn_gt0.
+Qed.
+
+Let word_unif : R.-fdist (L.-tuple 'I_Tg) := fdist_uniform card_word_L'.
+
+(* Fiber: set of words evaluating to a given group element *)
+Definition fiber (g : {perm 'I_N}) : {set L.-tuple 'I_Tg} :=
+  [set w | @word_eval M L w == g].
+
+(* The probability of g under rho_from_words equals |fiber g| / Tg^L *)
+Lemma fiber_prob (g : {perm 'I_N}) :
+  fdistmap (@word_eval M L) word_unif g =
+  #|fiber g|%:R / (Tg ^ L)%:R.
+Proof.
+rewrite fdistmapE.
+rewrite (eq_bigl (fun a => a \in fiber g)); last first.
+  by move=> w; rewrite !inE.
+rewrite (eq_bigr (fun _ => (Tg ^ L)%:R^-1)); last first.
+  by move=> w _; rewrite fdist_uniformE card_tuple card_ord.
+by rewrite big_const iter_addr addr0 -mulr_natr mulrC mulr1 mulrC mulr_natr.
+Qed.
+
+(* Under L-freeness, each fiber has at most one element *)
+Lemma lfree_fiber_le1 (Hlfree : @lfree M L) (g : {perm 'I_N}) :
+  (#|fiber g| <= 1)%N.
+Proof.
+apply/card_le1_eqP => w1 w2.
+rewrite !inE => /eqP Hw1 /eqP Hw2.
+by apply: Hlfree; rewrite Hw1 Hw2.
+Qed.
+
+(* Under L-freeness, fibers of achievable elements are singletons *)
+Lemma lfree_fiber_card1 (Hlfree : @lfree M L) (g : {perm 'I_N}) :
+  g \in @achievable M L -> #|fiber g| = 1%N.
+Proof.
+move=> /imsetP [w _ Hw].
+apply/eqP; rewrite eqn_leq lfree_fiber_le1 //=.
+apply/card_gt0P; exists w.
+by rewrite inE Hw.
+Qed.
+
+End fiber_equidistribution.
+
+(******************************************************************************)
+(*   Section 8: Generalized collusion bound for arbitrary coalition size k  *)
 (******************************************************************************)
 
 (* Generalization of the collusion bound to arbitrary coalition size k.
    Instead of observing T-1 out of T endpoints (with 1 unobserved),
-   the adversary observes k out of N endpoints. The key insight is the
-   same: DPI (data processing inequality via var_dist_fdistmap) gives
-   the bound for ANY number of observed points. *)
+   the adversary observes k out of N endpoints. DPI (var_dist_fdistmap)
+   gives the bound for ANY number of observed points. *)
 
 Section collusion_bound_k.
 
