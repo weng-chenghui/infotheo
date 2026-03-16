@@ -10,7 +10,8 @@
 (* Axiomatized (curve-level facts, same boundary as genus-1):                *)
 (*   1. ev_g2_encode — evaluation structure (A(x)+y*B(x) representation)   *)
 (*   2. g2_dual_ev_encode — dual evaluation encoding                        *)
-(*   3. ts2_compatible — monodromy-compatible threshold (Issue #39)         *)
+(*   3. sigma_code_g2 + sigma_fix0_g2 + code_auto_g2 — code automorphisms *)
+(*      (ts2_perm_compatible is now DERIVED via massey_perm_compatible)    *)
 (*                                                                            *)
 (* Proved (via hyperelliptic_code.v):                                        *)
 (*   - Goppa weight bound (resultant parity argument)                        *)
@@ -35,6 +36,7 @@ From pgg_reconstruct Require Import pgg_sharing_framework.
 From pgg_reconstruct Require Import covering_scheme.
 From pgg_reconstruct Require Import ag_code ag_massey_bridge.
 From pgg_reconstruct Require Import hyperelliptic_code.
+From pgg_reconstruct Require Import coord_perm_compatible.
 
 Set Implicit Arguments.
 Unset Strict Implicit.
@@ -89,7 +91,8 @@ Definition genus2_data : CoveringData M := {|
    1. ev_g2_rank: generator matrix has full row rank (Riemann-Roch)
    2. ev_g2_encode: evaluation structure (A(x)+y*B(x) representation)
    3. g2_dual_ev_encode: dual evaluation encoding (proves dual_min_dist)
-   4. ts2_perm_compatible: coord-permutation compatibility (Tier 2)
+   4. sigma_code_g2/sigma_fix0_g2/code_auto_g2: code automorphisms
+      (ts2_perm_compatible is now DERIVED via massey_perm_compatible)
 
    Proved (via hyperelliptic_code.v):
    - goppa_g2_wt: Goppa weight bound (from resultant parity argument)
@@ -203,11 +206,29 @@ Let ts2_gap : ts_T ts2 <= ts_k ts2 + 2 * g_g2 :=
 Let ts2_gap4 : ts_T ts2 <= ts_k ts2 + 4.
 Proof. exact: ts2_gap. Qed.
 
-(* Coordinate-permutation compatibility (Tier 2). *)
-Variable ts2_perm : pgg_gT M -> {perm 'I_(ts_T' ts2).+1}.
+(* Coordinate-permutation compatibility: derived from code automorphisms.
+   sigma_code_g2 maps monodromy elements to column permutations of the AG code
+   that fix position 0 (the secret). massey_perm_compatible +
+   transport_perm_compatible derive ts_perm_compatible from these. *)
+Variable sigma_code_g2 : pgg_gT M -> {perm 'I_n_g2}.
 
-Hypothesis ts2_perm_compatible :
+Hypothesis sigma_fix0_g2 :
+  forall g, g \in G -> sigma_code_g2 g ord0 = ord0.
+
+Hypothesis code_auto_g2 :
+  forall g, g \in G ->
+  coord_perm_compatible (ag_code ev_g2) (sigma_code_g2 g).
+
+Let ts2_perm : pgg_gT M -> {perm 'I_(ts_T' ts2).+1} :=
+  massey_share_perm (G:=G) sigma_fix0_g2.
+
+Lemma ts2_perm_compatible :
   @ts_perm_compatible _ G _ _ ts2 ts2_perm.
+Proof.
+rewrite /ts2 /= /ag_genus_scheme /ag_massey.
+apply: transport_perm_compatible.
+exact: massey_perm_compatible.
+Qed.
 
 Definition genus2_covering : CoveringScheme M := {|
   cs_data       := genus2_data ;

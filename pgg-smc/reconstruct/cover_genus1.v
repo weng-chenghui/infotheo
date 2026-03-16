@@ -13,7 +13,8 @@
 (* boundary from 4 code-level axioms to:                                      *)
 (*   1. ev_encode — evaluation structure (function space representation)     *)
 (*   2. dual_ev_encode — dual evaluation encoding (proves dual_min_dist)    *)
-(*   3. ts_perm_compatible — coordinate-permutation compatibility (Tier 2)  *)
+(*   3. sigma_code + sigma_fix0 + code_auto — code automorphisms (Tier 2) *)
+(*      (ts_perm_compatible is now DERIVED via massey_perm_compatible)      *)
 (*                                                                            *)
 (*   genus1_data       == CoveringData with genus 1, base P^1                *)
 (*   genus1_covering   == CoveringScheme with (k, k+2)-threshold             *)
@@ -33,6 +34,7 @@ From pgg_reconstruct Require Import pgg_sharing_framework.
 From pgg_reconstruct Require Import covering_scheme.
 From pgg_reconstruct Require Import ag_code ag_massey_bridge.
 From pgg_reconstruct Require Import hyperelliptic_code.
+From pgg_reconstruct Require Import coord_perm_compatible.
 
 Set Implicit Arguments.
 Unset Strict Implicit.
@@ -87,7 +89,8 @@ Definition genus1_data : CoveringData M := {|
    1. ev_ec_rank: generator matrix has full row rank (Riemann-Roch)
    2. ev_ec_encode: evaluation structure (A(x)+y*B(x) representation)
    3. ec_dual_ev_encode: dual evaluation encoding (proves dual_min_dist)
-   4. ts1_perm_compatible: coord-permutation compatibility (Tier 2)
+   4. sigma_code_ec/sigma_fix0_ec/code_auto_ec: code automorphisms
+      (ts1_perm_compatible is now DERIVED via massey_perm_compatible)
 
    Proved (via hyperelliptic_code.v):
    - goppa_ec_wt: Goppa weight bound (from resultant parity argument)
@@ -201,11 +204,29 @@ Let ts1_gap : ts_T ts1 <= ts_k ts1 + 2 * g_ec :=
 Let ts1_gap2 : ts_T ts1 <= ts_k ts1 + 2.
 Proof. exact: ts1_gap. Qed.
 
-(* Coordinate-permutation compatibility (Tier 2). *)
-Variable ts1_perm : pgg_gT M -> {perm 'I_(ts_T' ts1).+1}.
+(* Coordinate-permutation compatibility: derived from code automorphisms.
+   sigma_code_ec maps monodromy elements to column permutations of the AG code
+   that fix position 0 (the secret). massey_perm_compatible +
+   transport_perm_compatible derive ts_perm_compatible from these. *)
+Variable sigma_code_ec : pgg_gT M -> {perm 'I_n_ec}.
 
-Hypothesis ts1_perm_compatible :
+Hypothesis sigma_fix0_ec :
+  forall g, g \in G -> sigma_code_ec g ord0 = ord0.
+
+Hypothesis code_auto_ec :
+  forall g, g \in G ->
+  coord_perm_compatible (ag_code ev_ec) (sigma_code_ec g).
+
+Let ts1_perm : pgg_gT M -> {perm 'I_(ts_T' ts1).+1} :=
+  massey_share_perm (G:=G) sigma_fix0_ec.
+
+Lemma ts1_perm_compatible :
   @ts_perm_compatible _ G _ _ ts1 ts1_perm.
+Proof.
+rewrite /ts1 /= /ag_genus_scheme /ag_massey.
+apply: transport_perm_compatible.
+exact: massey_perm_compatible.
+Qed.
 
 Definition genus1_covering : CoveringScheme M := {|
   cs_data       := genus1_data ;
@@ -267,7 +288,8 @@ Definition higher_genus_data : CoveringData M := {|
    1. ev_g_rank: generator matrix has full row rank (Riemann-Roch)
    2. ev_g_encode: evaluation structure (A(x)+y*B(x) representation)
    3. g_dual_ev_encode: dual evaluation encoding (proves dual_min_dist)
-   4. ts_g_perm_compatible: coord-permutation compatibility (Tier 2)
+   4. sigma_code_g/sigma_fix0_g/code_auto_g: code automorphisms
+      (ts_g_perm_compatible is now DERIVED via massey_perm_compatible)
 
    Proved (via hyperelliptic_code.v):
    - goppa_g_wt: Goppa weight bound (from resultant parity argument)
@@ -370,11 +392,26 @@ Let ts_g_gap : ts_T ts_g <= ts_k ts_g + 2 * g :=
     ev_g_rank Hk_g Hkn_g Hkg_g Hkgn_g goppa_g_wt ag_g_priv_surj
     Hparam_g N HN_g.
 
-(* Coordinate-permutation compatibility (Tier 2). *)
-Variable ts_g_perm : pgg_gT M -> {perm 'I_(ts_T' ts_g).+1}.
+(* Coordinate-permutation compatibility: derived from code automorphisms. *)
+Variable sigma_code_g : pgg_gT M -> {perm 'I_n_g}.
 
-Hypothesis ts_g_perm_compatible :
+Hypothesis sigma_fix0_g :
+  forall g0, g0 \in G -> sigma_code_g g0 ord0 = ord0.
+
+Hypothesis code_auto_g :
+  forall g0, g0 \in G ->
+  coord_perm_compatible (ag_code ev_g) (sigma_code_g g0).
+
+Let ts_g_perm : pgg_gT M -> {perm 'I_(ts_T' ts_g).+1} :=
+  massey_share_perm (G:=G) sigma_fix0_g.
+
+Lemma ts_g_perm_compatible :
   @ts_perm_compatible _ G _ _ ts_g ts_g_perm.
+Proof.
+rewrite /ts_g /= /ag_genus_scheme /ag_massey.
+apply: transport_perm_compatible.
+exact: massey_perm_compatible.
+Qed.
 
 Definition higher_genus_covering : CoveringScheme M := {|
   cs_data       := higher_genus_data ;
