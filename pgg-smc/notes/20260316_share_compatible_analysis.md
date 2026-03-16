@@ -310,28 +310,23 @@ Deleted dead code:
 ```
 BEFORE (Tier 1):
 
-Security:  G, RAAG, words, fibers  ──→  collusion bounds, SecurityWitness
-                                                        │
-                                                        ╰──→  AlgebraicRigidity
-                                                        │
-Reconstruction: code, Massey, ts_compatible  ──→  ThresholdWitness
-                                    ↑
-                             UNSATISFIABLE for non-trivial G
-                             (value transformation ≠ monodromy)
+Security:       G, RAAG, words, fibers  ──→  SecurityWitness ──╮
+                                                                ╰──→ AlgebraicRigidity
+Reconstruction: code, Massey ──→ ts_compatible ──→ ThresholdWitness ──╯
+                                       ↑
+                                UNSATISFIABLE for non-trivial G
+                                (value transformation ≠ monodromy)
 
 
 AFTER (Tier 2):
 
-Security:  G, RAAG, words, fibers  ──→  collusion bounds, SecurityWitness
-                                                        │
-                                                        ╰──→  AlgebraicRigidity
-                                                        │
-Reconstruction: code auto ──→ coord_perm_compatible     │
-                   + fix_0       ──→ ts_perm_compatible  ──→  ThresholdWitness
-                                     + G_stable_starts
-                                            ↑
-                                     SATISFIABLE from code automorphism
-                                     (coordinate permutation = monodromy)
+Security:       G, RAAG, words, fibers  ──→  SecurityWitness ──╮
+                                                                ╰──→ AlgebraicRigidity
+Reconstruction: code auto + fix_0 ──→ ts_perm_compatible ──→ ThresholdWitness ──╯
+                                       + G_stable_starts
+                                              ↑
+                                       SATISFIABLE from code automorphism
+                                       (coordinate permutation = monodromy)
 ```
 
 ### How Tier 2 saves the Massey scheme
