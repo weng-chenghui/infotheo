@@ -27,7 +27,7 @@ From mathcomp Require Import boolp reals.
 From infotheo Require Import realType_ext fdist proba variation_dist.
 From mathcomp Require Import prime ssralg finalg zmodp poly cyclic.
 Require Import ssralg_ext reed_solomon.
-From pgg_smc Require Import perm_uniform pgg_interface pgg_lfree pgg_raag.
+From pgg_smc Require Import perm_uniform pgg_interface pgg_weval_inj pgg_raag.
 From pgg_smc Require Import pgg_raag_path pgg_raag_s5 pgg_collusion_bound.
 From pgg_reconstruct Require Import pgg_sharing_framework covering_scheme
                                     cover_tradeoff algebraic_rigidity.
@@ -51,11 +51,11 @@ Variable R : realType.
 Let M_s5 := @Gen_PGGTypes 3 3 (path_gen_tuple 3).
 Let R_s5 : GeneratedMonodromyReprType := M_s5.
 
-(* SecurityWitness at L=1 (the smallest L with lfree for S_5).
-   Epsilon = 2*(5!-4)/5!. Any larger L with lfree gives a tighter bound;
-   see security_witness_any_L for the generic constructor. *)
+(* SecurityWitness at L=1 (the smallest L with weval_inj for S_5).
+   Epsilon = 2*(5!-4)/5!. Any larger L with weval_inj gives a tighter
+   bound; see security_witness_any_L for the generic constructor. *)
 Definition s5_security_witness_1 : SecurityWitness R R_s5 :=
-  security_witness_any_L R s5_lfree1.
+  security_witness_any_L R s5_weval_inj1.
 
 End s5_security.
 

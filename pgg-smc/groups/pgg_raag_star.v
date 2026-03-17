@@ -4,7 +4,7 @@ From HB Require Import structures.
 From mathcomp Require Import ssreflect ssrbool ssrfun eqtype ssrnat seq.
 From mathcomp Require Import div fintype tuple finfun finset fingroup perm.
 From mathcomp Require Import morphism action bigop.
-From pgg_smc Require Import pgg_interface pgg_lfree pgg_raag.
+From pgg_smc Require Import pgg_interface pgg_weval_inj pgg_raag.
 
 (******************************************************************************)
 (* PGG-SMC: Star-Graph RAAG Instance                                         *)
@@ -24,7 +24,7 @@ From pgg_smc Require Import pgg_interface pgg_lfree pgg_raag.
 (*   star_G_nonabelian == the generated group is non-abelian (m >= 2)         *)
 (*   star_gen_inj == generators are injective                                 *)
 (*   star_search_space_1 == search_space 1 = T                                *)
-(*   star_lfree1 == 1-freeness                                                *)
+(*   star_weval_inj1 == word-eval injectivity at L=1                          *)
 (*   star_traces_lb == m^L <= n_traces (via indep_set_traces_lb)              *)
 (******************************************************************************)
 

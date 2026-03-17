@@ -4,7 +4,7 @@ From HB Require Import structures.
 From mathcomp Require Import ssreflect ssrbool ssrfun eqtype ssrnat seq.
 From mathcomp Require Import div fintype tuple finfun finset fingroup perm.
 From mathcomp Require Import morphism action bigop.
-From pgg_smc Require Import pgg_interface pgg_lfree pgg_raag.
+From pgg_smc Require Import pgg_interface pgg_weval_inj pgg_raag.
 
 (******************************************************************************)
 (* PGG-SMC: Path-Graph RAAG Instance                                         *)
@@ -16,7 +16,7 @@ From pgg_smc Require Import pgg_interface pgg_lfree pgg_raag.
 (*   path_gen i == tperm (ordinal i) (ordinal (i+1))                          *)
 (*   path_comm i j == |i-j| >= 2                                              *)
 (*   path_gen_inj == generators are injective                                 *)
-(*   path_lfree1 == 1-freeness (via gen_inj_lfree1)                           *)
+(*   path_weval_inj1 == word-eval injectivity at L=1 (via gen_inj_weval_inj1) *)
 (*   path_G_nonabelian == non-abelian for m >= 1 (via gen_nonabelian)         *)
 (*   path_traces_lb == 2^L <= n_traces (adjacent pair forms indep set)        *)
 (******************************************************************************)

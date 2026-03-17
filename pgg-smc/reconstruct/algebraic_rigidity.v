@@ -20,20 +20,21 @@
 (*   AlgebraicRigidity R M == combines all three into a unified witness       *)
 (*                                                                            *)
 (* Generic constructor:                                                       *)
-(*   security_witness_any_L == SecurityWitness for ANY L with lfree(L)        *)
+(*   security_witness_any_L == SecurityWitness for ANY L with weval_inj(L)    *)
 (*                                                                            *)
 (* Note on SecurityWitness and L:                                             *)
 (*   The security bound epsilon = 2*(N! - Tg^L)/N! is parametric in L:       *)
-(*   var_dist_lfree_uniform proves it for any L where lfree(L) holds.         *)
+(*   var_dist_weval_inj_uniform proves it for any L where weval_inj(L) holds. *)
 (*   Since Tg^L is monotonically increasing in L, epsilon DECREASES with L:  *)
 (*   larger L means more distinct group elements are reachable, bringing the  *)
 (*   word distribution closer to uniform over S_N. Therefore:                 *)
-(*     - The SMALLEST L with lfree(L) gives the WORST-CASE (largest) epsilon  *)
+(*     - The SMALLEST L with weval_inj(L) gives the WORST-CASE (largest)     *)
+(*       epsilon                                                              *)
 (*     - Concrete instances (S_5 at L=1, OC at L=2) pick this smallest L     *)
 (*       because it represents the most conservative security guarantee       *)
-(*     - All larger L with lfree(L) automatically have tighter bounds         *)
+(*     - All larger L with weval_inj(L) automatically have tighter bounds    *)
 (*   The generic constructor security_witness_any_L makes this explicit:      *)
-(*   given ANY (G, sigmas) and ANY L with lfree(L), it produces a valid      *)
+(*   given ANY (G, sigmas) and ANY L with weval_inj(L), it produces a valid  *)
 (*   SecurityWitness.                                                         *)
 (*                                                                            *)
 (* Derived properties:                                                        *)
@@ -55,7 +56,7 @@ From mathcomp Require Import fintype tuple finfun finset fingroup perm.
 From mathcomp Require Import morphism bigop div order ssrnum.
 From mathcomp Require Import boolp reals.
 From infotheo Require Import realType_ext fdist proba variation_dist.
-From pgg_smc Require Import perm_uniform pgg_interface pgg_lfree pgg_raag.
+From pgg_smc Require Import perm_uniform pgg_interface pgg_weval_inj pgg_raag.
 From pgg_smc Require Import pgg_collusion_bound.
 From pgg_reconstruct Require Import pgg_sharing_framework covering_scheme
                                     cover_tradeoff.
@@ -115,12 +116,13 @@ Arguments AlgebraicRigidity R M : clear implicits.
 (*     Generic SecurityWitness Constructor                                    *)
 (*                                                                            *)
 (* The security bound var_dist(rho_L, uniform) <= 2*(N! - Tg^L)/N! holds     *)
-(* for ANY L where lfree(L) is satisfied (see var_dist_lfree_uniform in       *)
-(* pgg_collusion_bound.v). This constructor makes the generality explicit:    *)
-(* given any generated monodromy representation and any L with lfree(L),      *)
-(* it produces a SecurityWitness. Concrete instances (S_5, OC, etc.) pick     *)
-(* specific L values — typically the smallest L with lfree(L), which gives    *)
-(* the worst-case (largest) epsilon and thus the most conservative bound.     *)
+(* for ANY L where weval_inj(L) is satisfied (see                             *)
+(* var_dist_weval_inj_uniform in pgg_collusion_bound.v). This constructor     *)
+(* makes the generality explicit: given any generated monodromy               *)
+(* representation and any L with weval_inj(L), it produces a                  *)
+(* SecurityWitness. Concrete instances (S_5, OC, etc.) pick specific L        *)
+(* values — typically the smallest L with weval_inj(L), which gives the       *)
+(* worst-case (largest) epsilon and thus the most conservative bound.         *)
 (******************************************************************************)
 
 Section generic_security.
@@ -130,12 +132,12 @@ Variable m n' : nat.
 Variable sigmas : m.+1.-tuple {perm 'I_n'.+2}.
 Let M := Gen_PGGTypes sigmas.
 
-(* For any L where lfree holds, we get a SecurityWitness *)
-Definition security_witness_any_L (L : nat) (Hlfree : @lfree M L) :
+(* For any L where weval_inj holds, we get a SecurityWitness *)
+Definition security_witness_any_L (L : nat) (Hlfree : @weval_inj M L) :
     SecurityWitness R M :=
   @MkSecurityWitness R M L _
     (rho_from_words L sigmas)
-    (@var_dist_lfree_uniform R _ m L sigmas Hlfree).
+    (@var_dist_weval_inj_uniform R _ m L sigmas Hlfree).
 
 End generic_security.
 

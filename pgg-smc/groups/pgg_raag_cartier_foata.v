@@ -4,7 +4,7 @@ From mathcomp Require Import ssreflect ssrbool ssrfun eqtype ssrnat seq.
 From mathcomp Require Import div fintype tuple finfun finset fingroup perm.
 From mathcomp Require Import morphism bigop path binomial.
 From Stdlib Require Import Wf_nat.
-From pgg_smc Require Import pgg_lfree pgg_raag pgg_raag_clique.
+From pgg_smc Require Import pgg_weval_inj pgg_raag pgg_raag_clique.
 
 (******************************************************************************)
 (* PGG-SMC: Cartier-Foata Theorem Infrastructure                             *)

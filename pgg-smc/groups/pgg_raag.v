@@ -5,7 +5,7 @@ From mathcomp Require Import ssreflect ssrbool ssrfun eqtype ssrnat seq.
 From mathcomp Require Import div fintype tuple finfun finset fingroup perm.
 From mathcomp Require Import morphism bigop fingraph path binomial.
 From Stdlib Require Import Wf_nat.
-From pgg_smc Require Import pgg_interface pgg_lfree.
+From pgg_smc Require Import pgg_interface pgg_weval_inj.
 
 (******************************************************************************)
 (* PGG-SMC: RAAG (Right-Angled Artin Group) Search Space Theory              *)
@@ -38,8 +38,8 @@ From pgg_smc Require Import pgg_interface pgg_lfree.
 (*   word_eval_adj_swap : adjacent commuting swap preserves word_eval         *)
 (*   word_eval_trace : trace-equivalent words evaluate equally                *)
 (*   search_space_le_traces : search_space L <= n_traces L                    *)
-(*   raag_lfree : word_eval injective on trace classes                        *)
-(*   raag_lfree_search_space : raag_lfree -> search_space = n_traces          *)
+(*   raag_weval_inj : word_eval injective on trace classes                    *)
+(*   raag_weval_inj_search_space : raag_weval_inj -> search_space = n_traces  *)
 (*   search_space_chain : search_space L <= n_traces L <= Tg^L                *)
 (*                                                                            *)
 (* Part 4: Extreme cases                                                      *)
@@ -382,12 +382,12 @@ apply/imsetP; exists (root e x).
 exact: word_eval_trace (connect_root _ x).
 Qed.
 
-(* RAAG L-freeness: word_eval injective on trace classes *)
-Definition raag_lfree (L : nat) : Prop :=
+(* RAAG word-eval injectivity: word_eval injective on trace classes *)
+Definition raag_weval_inj (L : nat) : Prop :=
   forall w1 w2 : pgg_word M L, word_eval w1 = word_eval w2 -> trace_equiv w1 w2.
 
-Lemma raag_lfree_search_space L :
-  raag_lfree L -> @search_space M L = n_traces L.
+Lemma raag_weval_inj_search_space L :
+  raag_weval_inj L -> @search_space M L = n_traces L.
 Proof.
 move=> Hraag.
 apply/eqP; rewrite eqn_leq; apply/andP; split.
@@ -992,10 +992,10 @@ by rewrite Hstep.
 Qed.
 
 (* Charney's theorem (finite analog): independent set generators
-   with raag_lfree give word_eval injectivity on I-words *)
+   with raag_weval_inj give word_eval injectivity on I-words *)
 Lemma indep_set_word_eval_inj (I : {set 'I_Tg}) (L : nat) :
   (forall i j : 'I_Tg, i \in I -> j \in I -> i != j -> ~~ comm i j) ->
-  raag_lfree L ->
+  raag_weval_inj L ->
   forall (w1 w2 : pgg_word M L),
     (forall k : 'I_L, tnth w1 k \in I) ->
     (forall k : 'I_L, tnth w2 k \in I) ->
@@ -1016,11 +1016,11 @@ Section raag_derived.
 Variable R : RAAGType.
 Let Tg := (@pgg_ngens' R).+1.
 
-Lemma raag_lfree1 : @lfree R 1.
-Proof. exact: gen_inj_lfree1 (@raag_gen_inj R). Qed.
+Lemma raag_weval_inj1 : @weval_inj R 1.
+Proof. exact: gen_inj_weval_inj1 (@raag_gen_inj R). Qed.
 
 Lemma raag_search_space_1 : @search_space R 1 = Tg.
-Proof. exact: lfree_search_space raag_lfree1. Qed.
+Proof. exact: weval_inj_search_space raag_weval_inj1. Qed.
 End raag_derived.
 
 (* ========================================================================== *)

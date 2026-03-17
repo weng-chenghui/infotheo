@@ -140,7 +140,7 @@ pgg-smc/groups/abelian_word_collapse.v
 pgg-smc/groups/pgg_raag_star.v
 pgg-smc/groups/pgg_raag_path.v
 pgg-smc/groups/pgg_raag_s5.v
-pgg-smc/groups/pgg_lfree.v
+pgg-smc/groups/pgg_weval_inj.v
 pgg-smc/groups/pgg_raag.v
 pgg-smc/groups/free_group_ball.v
 pgg-smc/groups/pgg_raag_clique.v

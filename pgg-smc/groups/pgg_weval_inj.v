@@ -7,15 +7,16 @@ From mathcomp Require Import morphism bigop.
 From pgg_smc Require Import pgg_interface.
 
 (******************************************************************************)
-(* PGG-SMC: L-free Generators and Optimal Search Space                        *)
+(* PGG-SMC: Word-Eval Injective Generators and Optimal Search Space           *)
 (*                                                                            *)
 (* MathComp's finGroupType cannot represent the infinite free group needed    *)
-(* for maximal PGG search spaces.  L-freeness approximates it on demand:     *)
-(* given a word length L, we ask only that word_eval be injective on L-words *)
-(* (i.e., the group "looks free" up to depth L).  This suffices to achieve   *)
-(* search_space(L) = Tg^L, matching the free group for all protocol uses.    *)
+(* for maximal PGG search spaces.  Word evaluation injectivity at length L    *)
+(* approximates it on demand: given a word length L, we ask only that         *)
+(* word_eval be injective on L-words (i.e., the group "looks free" up to     *)
+(* depth L).  This suffices to achieve search_space(L) = Tg^L, matching the  *)
+(* free group for all protocol uses.                                          *)
 (*                                                                            *)
-(* Parameters for an L-free PGG instance:                                     *)
+(* Parameters for a word-eval injective PGG instance:                         *)
 (*   L  -- word length (security/search space depth)                          *)
 (*   Tg -- number of generators (branching factor), search space = Tg^L      *)
 (*   N  -- number of sheets (permutation domain), must satisfy N! >= Tg^L    *)
@@ -24,21 +25,23 @@ From pgg_smc Require Import pgg_interface.
 (* so N >= 7 (since 7!=5040 >= 1024). Pick two sigma_i in S_7 generating a   *)
 (* subgroup of order >= 1024 with no word collisions at length 10.            *)
 (*                                                                            *)
-(* Section 1 -- Nat-level computable L-freeness check:                        *)
-(*   lfree_natB N Tg L gens == boolean check via uniq of word fingerprints    *)
-(*   lfree_of_natB == reflection: lfree_natB true -> lfree L                  *)
+(* Section 1 -- Nat-level computable word-eval injectivity check:             *)
+(*   weval_inj_natB N Tg L gens == boolean check via uniq of word fingerprints*)
+(*   weval_inj_of_natB == reflection: weval_inj_natB true -> weval_inj L     *)
 (*   Usage: define a nat-level gens_nat mirroring the permutations, prove     *)
-(*   gens_agree, then discharge lfree by vm_compute on lfree_natB.            *)
+(*   gens_agree, then discharge weval_inj by vm_compute on weval_inj_natB.   *)
 (*                                                                            *)
-(* Section 2 -- Parameterized L-free theory:                                  *)
-(*   Given generators with hypothesis lfree L, derives search_space = Tg^L.  *)
+(* Section 2 -- Parameterized word-eval injective theory:                     *)
+(*   Given generators with hypothesis weval_inj L, derives                    *)
+(*   search_space = Tg^L.                                                     *)
 (*                                                                            *)
 (* Section 3 -- Concrete instance: overlapping 3-cycles in S_4:              *)
 (*   < s0, s1 | s0^3 = s1^3 = (s0*s1)^2 = 1 >  (A_4, order 12)            *)
 (*   sigma_0 = (0 1 2), sigma_1 = (1 2 3) -- two 3-cycles sharing (1,2).    *)
 (*   Tg=2, N=4, L=2: search_space = 4.  L >= 3 fails (s0^3 = s1^3 = 1      *)
 (*   so words [0,0,0] and [1,1,1] both map to the identity).                *)
-(*   oc_lfree2 == 2-freeness via lfree_of_natB + vm_compute                  *)
+(*   oc_weval_inj2 == word-eval injectivity at L=2 via weval_inj_of_natB    *)
+(*                    + vm_compute                                            *)
 (*   oc_search_space_2 == search_space 2 = 4                                 *)
 (*   oc_noncommute == the generators do not commute                          *)
 (******************************************************************************)
@@ -48,7 +51,7 @@ Unset Strict Implicit.
 Import Prenex Implicits.
 
 (* ========================================================================== *)
-(* Section 1: Nat-level computable L-freeness check                           *)
+(* Section 1: Nat-level computable word-eval injectivity check                 *)
 (* ========================================================================== *)
 
 Fixpoint all_words (Tg L : nat) : seq (seq nat) :=
@@ -67,7 +70,7 @@ Definition eval_word_nat (gens : nat -> nat -> nat) (w : seq nat) (x : nat) : na
 Definition word_fp (N : nat) (gens : nat -> nat -> nat) (w : seq nat) : seq nat :=
   map (eval_word_nat gens w) (iota 0 N).
 
-Definition lfree_natB (N Tg L : nat) (gens : nat -> nat -> nat) : bool :=
+Definition weval_inj_natB (N Tg L : nat) (gens : nat -> nat -> nat) : bool :=
   uniq (map (word_fp N gens) (all_words Tg L)).
 
 Lemma map_uniq_injective (T1 T2 : eqType) (f : T1 -> T2) (xs : seq T1) (a b : T1) :
@@ -101,7 +104,7 @@ Qed.
 (* Reflection for Gen_PGGTypes instances                                      *)
 (* ========================================================================== *)
 
-Section lfree_gen_reflect.
+Section weval_inj_gen_reflect.
 
 Variable m n : nat.
 Let Tg := m.+1.
@@ -169,10 +172,10 @@ by apply/allP => k /mapP [i _ ->]; case: i.
 Qed.
 
 (* Main reflection lemma *)
-Lemma lfree_of_natB (L : nat) :
-  lfree_natB N Tg L gens_nat -> @lfree M L.
+Lemma weval_inj_of_natB (L : nat) :
+  weval_inj_natB N Tg L gens_nat -> @weval_inj M L.
 Proof.
-rewrite /lfree_natB /lfree => Huniq w1 w2 Heval.
+rewrite /weval_inj_natB /weval_inj => Huniq w1 w2 Heval.
 apply: map_val_tuple_inj.
 apply: (map_uniq_injective Huniq (map_val_in_all_words w1) (map_val_in_all_words w2)).
 rewrite /word_fp.
@@ -183,26 +186,27 @@ have -> : j = val (Ordinal Hj) by [].
 by rewrite (eval_word_agree w1) (eval_word_agree w2) Heval.
 Qed.
 
-End lfree_gen_reflect.
+End weval_inj_gen_reflect.
 
 (* ========================================================================== *)
-(* Section 2: Parameterized L-free theory                                     *)
+(* Section 2: Parameterized word-eval injective theory                        *)
 (* ========================================================================== *)
 
-Section lfree_instance.
+Section weval_inj_instance.
 
 Variable L m n : nat.
 Variable sigmas : m.+1.-tuple {perm 'I_n.+2}.
 Let M := Gen_PGGTypes sigmas.
-Hypothesis Hlfree : @lfree M L.
+Hypothesis Hlfree : @weval_inj M L.
 
-Lemma lfree_inst_search_space : @search_space M L = m.+1 ^ L.
-Proof. exact: lfree_search_space Hlfree. Qed.
+Lemma weval_inj_inst_search_space : @search_space M L = m.+1 ^ L.
+Proof. exact: weval_inj_search_space Hlfree. Qed.
 
-End lfree_instance.
+End weval_inj_instance.
 
 (* ========================================================================== *)
-(* Section 3: Concrete 2-free instance — overlapping 3-cycles in S_4          *)
+(* Section 3: Concrete word-eval injective instance — overlapping 3-cycles    *)
+(*            in S_4                                                           *)
 (* ========================================================================== *)
 
 Section overlapping_3cycles.
@@ -285,15 +289,15 @@ apply/negP => /eqP/permP /(_ (Ordinal (isT : 0 < oc_N))).
 by rewrite !permM !oc_s0E !oc_s1E.
 Qed.
 
-(* L-freeness via nat-level boolean decision + vm_compute *)
-Lemma oc_lfree2 : @lfree OC_PGGTypes 2.
+(* Word-eval injectivity via nat-level boolean decision + vm_compute *)
+Lemma oc_weval_inj2 : @weval_inj OC_PGGTypes 2.
 Proof.
-apply: (lfree_of_natB oc_gens_agree).
+apply: (weval_inj_of_natB oc_gens_agree).
 by vm_compute.
 Qed.
 
 (* Search space instantiation *)
 Lemma oc_search_space_2 : @search_space OC_PGGTypes 2 = 4.
-Proof. exact: lfree_inst_search_space oc_lfree2. Qed.
+Proof. exact: weval_inj_inst_search_space oc_weval_inj2. Qed.
 
 End overlapping_3cycles.

@@ -3,7 +3,7 @@
 From mathcomp Require Import ssreflect ssrbool ssrfun eqtype ssrnat seq.
 From mathcomp Require Import div fintype tuple finfun finset fingroup perm.
 From mathcomp Require Import morphism bigop binomial.
-From pgg_smc Require Import pgg_lfree pgg_raag.
+From pgg_smc Require Import pgg_weval_inj pgg_raag.
 
 (******************************************************************************)
 (* PGG-SMC: Clique Polynomial of the RAAG Commutation Graph                  *)

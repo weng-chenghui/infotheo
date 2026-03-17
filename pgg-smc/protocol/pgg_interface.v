@@ -152,23 +152,23 @@ apply: leq_trans (leq_imset_card _ _) _.
 by rewrite card_tuple card_ord.
 Qed.
 
-(* L-freeness: word evaluation is injective on L-words *)
-Definition lfree (L : nat) : Prop :=
+(* Word-eval injectivity: word evaluation is injective on L-words *)
+Definition weval_inj (L : nat) : Prop :=
   injective (word_eval (L:=L)).
 
-(* L-free generators achieve the maximal search space T^L *)
-Lemma lfree_search_space (L : nat) :
-  lfree L -> search_space L = Tg ^ L.
+(* Word-eval injective generators achieve the maximal search space T^L *)
+Lemma weval_inj_search_space (L : nat) :
+  weval_inj L -> search_space L = Tg ^ L.
 Proof.
 move=> Hinj; rewrite /search_space /achievable.
 rewrite card_imset; last exact: Hinj.
 by rewrite card_tuple card_ord.
 Qed.
 
-Definition lfreeB (L : nat) : bool :=
+Definition weval_injB (L : nat) : bool :=
   injectiveb (word_eval (L:=L)).
 
-Lemma lfreeP (L : nat) : reflect (lfree L) (lfreeB L).
+Lemma weval_injP (L : nat) : reflect (weval_inj L) (weval_injB L).
 Proof. exact: injectiveP. Qed.
 
 End search_space_ops.
@@ -185,9 +185,9 @@ Let gT := pgg_gT M.
 Let Tg := (@pgg_ngens' M).+1.
 Let sigmas := @pgg_sigmas M.
 
-Lemma gen_inj_lfree1 :
+Lemma gen_inj_weval_inj1 :
   injective (fun i : 'I_Tg => tnth sigmas i) ->
-  @lfree M 1.
+  @weval_inj M 1.
 Proof.
 move=> Hinj w1 w2 Heval.
 apply: eq_from_tnth => i.
@@ -196,10 +196,10 @@ apply: Hinj.
 by move: Heval; rewrite /word_eval !big_ord_recl !big_ord0 !mulg1.
 Qed.
 
-Lemma gen_inj_search_space_1 :
+Lemma gen_inj_weval_inj1_search_space :
   injective (fun i : 'I_Tg => tnth sigmas i) ->
   @search_space M 1 = Tg.
-Proof. by move/gen_inj_lfree1/lfree_search_space. Qed.
+Proof. by move/gen_inj_weval_inj1/weval_inj_search_space. Qed.
 
 End gen_inj_theory.
 

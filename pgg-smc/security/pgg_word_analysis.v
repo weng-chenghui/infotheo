@@ -4,7 +4,7 @@ From HB Require Import structures.
 From mathcomp Require Import ssreflect ssrbool ssrfun eqtype ssrnat seq.
 From mathcomp Require Import fintype tuple finfun finset fingroup perm.
 From mathcomp Require Import morphism bigop div binomial fingraph path.
-From pgg_smc Require Import pgg_interface pgg_lfree pgg_raag.
+From pgg_smc Require Import pgg_interface pgg_weval_inj pgg_raag.
 
 (******************************************************************************)
 (* PGG-SMC: Commuting Pair Analysis for RAAG Words                           *)

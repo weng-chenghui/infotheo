@@ -4,7 +4,7 @@ From HB Require Import structures.
 From mathcomp Require Import ssreflect ssrbool ssrfun eqtype ssrnat seq.
 From mathcomp Require Import div fintype tuple finfun finset fingroup perm.
 From mathcomp Require Import morphism action bigop.
-From pgg_smc Require Import pgg_interface pgg_lfree pgg_raag.
+From pgg_smc Require Import pgg_interface pgg_weval_inj pgg_raag.
 From pgg_smc Require Import pgg_raag_path pgg_raag_clique.
 
 (******************************************************************************)
@@ -21,7 +21,7 @@ From pgg_smc Require Import pgg_raag_path pgg_raag_clique.
 (* Contents:                                                                  *)
 (*   s5_gens_nat == nat-level generator function for vm_compute               *)
 (*   s5_gens_agree == agreement with path_gen at m=3                          *)
-(*   s5_lfree1 == 1-freeness (via vm_compute)                                 *)
+(*   s5_weval_inj1 == word-eval injectivity at L=1 (via vm_compute)           *)
 (*   s5_nt_L* == vm_compute trace counts                                      *)
 (******************************************************************************)
 
@@ -47,11 +47,11 @@ by case: i => [[|[|[|[|?]]]] Hi];
   rewrite ?gen_tuple_ofE /path_gen /path_lo /path_hi ?permE.
 Qed.
 
-(* L-freeness via nat-level boolean check + vm_compute *)
-Lemma s5_lfree1 : @lfree (@Gen_PGGTypes 3 3 (path_gen_tuple 3)) 1.
-Proof. apply: (lfree_of_natB s5_gens_agree). by vm_compute. Qed.
+(* Word-eval injectivity via nat-level boolean check + vm_compute *)
+Lemma s5_weval_inj1 : @weval_inj (@Gen_PGGTypes 3 3 (path_gen_tuple 3)) 1.
+Proof. apply: (weval_inj_of_natB s5_gens_agree). by vm_compute. Qed.
 
-(* Note: 2-freeness fails because adjacent transpositions are involutions
+(* Note: word-eval injectivity at L=2 fails because adjacent transpositions are involutions
    (s_i^2 = 1 for all i), so words [i,i] all evaluate to the identity. *)
 
 (* vm_compute trace count demonstrations *)

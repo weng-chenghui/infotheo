@@ -7,11 +7,12 @@
 (*   where epsilon = var_dist(rho_dist, uniform(S_N)) is the gap between the   *)
 (*   real protocol distribution and the idealized uniform permutation.         *)
 (*                                                                             *)
-(* Section 6: L-free instantiation proving Assumption 1 with concrete epsilon. *)
-(*   When word_eval is injective (L-free) and we draw permutations uniformly   *)
-(*   from all L-words over Tg generators, the distribution is uniform over     *)
-(*   achievable(L) with |achievable(L)| = Tg^L.  The variational distance to  *)
-(*   the full uniform over S_N is:                                             *)
+(* Section 6: Word-eval injective instantiation proving Assumption 1 with     *)
+(*   concrete epsilon.                                                         *)
+(*   When word_eval is injective (word-eval injective at length L) and we draw *)
+(*   permutations uniformly from all L-words over Tg generators, the           *)
+(*   distribution is uniform over achievable(L) with |achievable(L)| = Tg^L.  *)
+(*   The variational distance to the full uniform over S_N is:                 *)
 (*     epsilon = 2 * (N! - Tg^L) / N!                                          *)
 (*   Caveat: assumes the protocol samples words uniformly at random.           *)
 (******************************************************************************)
@@ -20,7 +21,7 @@ From HB Require Import structures.
 From mathcomp Require Import all_boot all_order all_algebra fingroup perm.
 From mathcomp Require Import boolp reals.
 From infotheo Require Import realType_ext fdist proba variation_dist.
-From pgg_smc Require Import perm_uniform pgg_interface pgg_lfree.
+From pgg_smc Require Import perm_uniform pgg_interface pgg_weval_inj.
 
 Set Implicit Arguments.
 Unset Strict Implicit.
@@ -304,7 +305,8 @@ Qed.
 End collusion_bound_conditional.
 
 (******************************************************************************)
-(*  Section 6: L-free instantiation — concrete epsilon for Assumption 1     *)
+(*  Section 6: Word-eval injective instantiation — concrete epsilon for     *)
+(*  Assumption 1                                                             *)
 (******************************************************************************)
 
 (* General lemma: fdistmap of uniform through an injective function
@@ -355,9 +357,9 @@ Qed.
 
 End fdistmap_inj_uniform.
 
-(* L-free groups have concrete epsilon for Assumption 1 *)
+(* Word-eval injective groups have concrete epsilon for Assumption 1 *)
 
-Section lfree_collusion.
+Section weval_inj_collusion.
 
 Context {R : realType}.
 Variable N'' : nat.
@@ -379,8 +381,8 @@ Variable L : nat.
 Variable sigmas : Tg.-tuple {perm 'I_N}.
 Let M := Gen_PGGTypes sigmas.
 
-(* L-freeness *)
-Hypothesis Hlfree : @lfree M L.
+(* Word-eval injectivity *)
+Hypothesis Hlfree : @weval_inj M L.
 
 (* Cardinality of word space *)
 Lemma card_word_L :
@@ -402,7 +404,7 @@ Lemma achievable_pos : (0 < #|@achievable M L|)%N.
 Proof.
 rewrite /achievable -/M.
 have -> : #|[set word_eval w | w : pgg_word M L]| = @search_space M L by [].
-rewrite lfree_search_space //.
+rewrite weval_inj_search_space //.
 by rewrite expn_gt0.
 Qed.
 
@@ -424,7 +426,7 @@ case/boolP: (g \in @achievable M L) => Hg.
     by rewrite Hw' eqxx in Hneq.
   congr (_ ^-1).
   have -> : #|@achievable M L| = @search_space M L by [].
-  rewrite lfree_search_space //.
+  rewrite weval_inj_search_space //.
   by rewrite card_tuple card_ord.
 (* g not in achievable: no preimage *)
 rewrite fdist_uniform_supp_notin //.
@@ -437,31 +439,31 @@ Qed.
 Let card_perm_N : #|{perm 'I_N}| = (N`!.-1).+1 := card_permT_N N'.
 
 (* The key bound: achievable subset is smaller than S_N *)
-Lemma lfree_search_space_le_fact : (Tg ^ L <= N`!)%N.
+Lemma weval_inj_search_space_le_fact : (Tg ^ L <= N`!)%N.
 Proof.
-rewrite -(@lfree_search_space M) //.
+rewrite -(@weval_inj_search_space M) //.
 apply: (leq_trans (@search_space_leG M L)).
 apply: (leq_trans (max_card _)).
 by rewrite card_permT_N prednK // fact_gt0.
 Qed.
 
 (* Concrete epsilon for Assumption 1 *)
-Let lfree_eps : R := 2%:R * (N`! - Tg ^ L)%:R / N`!%:R.
+Let weval_inj_eps : R := 2%:R * (N`! - Tg ^ L)%:R / N`!%:R.
 
-Lemma lfree_eps_ge0 : 0 <= lfree_eps.
+Lemma weval_inj_eps_ge0 : 0 <= weval_inj_eps.
 Proof.
-rewrite /lfree_eps.
+rewrite /weval_inj_eps.
 apply: divr_ge0; last by rewrite ler0n.
 by rewrite mulr_ge0 // ler0n.
 Qed.
 
 (* Assumption 1 holds with concrete epsilon *)
-Theorem var_dist_lfree_uniform :
-  var_dist rho_from_words (fdist_uniform card_perm_N) <= lfree_eps.
+Theorem var_dist_weval_inj_uniform :
+  var_dist rho_from_words (fdist_uniform card_perm_N) <= weval_inj_eps.
 Proof.
 rewrite rho_from_words_uniform_supp.
 rewrite var_dist_uniform_supp /=.
-rewrite /lfree_eps.
+rewrite /weval_inj_eps.
 (* LHS: 2 * (#|perm| - #|achievable|) / #|perm|
    RHS: 2 * (N! - Tg^L) / N! *)
 suff -> : (#|{perm 'I_N}| - #|@achievable M L|)%N = (N`! - Tg ^ L)%N.
@@ -469,32 +471,33 @@ suff -> : (#|{perm 'I_N}| - #|@achievable M L|)%N = (N`! - Tg ^ L)%N.
   by rewrite card_permT_N prednK // fact_gt0.
 rewrite card_permT_N prednK; last exact: fact_gt0.
 have -> : #|@achievable M L| = @search_space M L by [].
-by rewrite (@lfree_search_space M).
+by rewrite (@weval_inj_search_space M).
 Qed.
 
 (* Main theorem: applying collusion_bound with concrete epsilon.
-   The full bound follows from var_dist_lfree_uniform + the generic
+   The full bound follows from var_dist_weval_inj_uniform + the generic
    collusion bound framework. We state it in the form that
    instantiates Assumption 1 concretely. *)
-Theorem var_dist_lfree_eval :
+Theorem var_dist_weval_inj_eval :
   forall (eval_at : {perm 'I_N} -> 'I_N),
   var_dist (fdistmap eval_at rho_from_words)
            (fdistmap eval_at (fdist_uniform card_perm_N))
-  <= lfree_eps.
+  <= weval_inj_eps.
 Proof.
 move=> eval_at.
 exact: (Order.POrderTheory.le_trans (var_dist_fdistmap _ _ _)
-                                    var_dist_lfree_uniform).
+                                    var_dist_weval_inj_uniform).
 Qed.
 
-End lfree_collusion.
+End weval_inj_collusion.
 
 (******************************************************************************)
 (*   Section 7: Fiber equidistribution                                       *)
 (*                                                                            *)
 (*   Defines fibers (preimages of word_eval) and proves that under uniform   *)
 (*   word distribution, the probability of each achievable group element is  *)
-(*   proportional to its fiber size. Under L-freeness, fibers are singletons *)
+(*   proportional to its fiber size. Under word-eval injectivity, fibers    *)
+(*   are singletons                                                         *)
 (*   and the induced distribution is uniform over achievable(L).             *)
 (******************************************************************************)
 
@@ -536,8 +539,8 @@ rewrite (eq_bigr (fun _ => (Tg ^ L)%:R^-1)); last first.
 by rewrite big_const iter_addr addr0 -mulr_natr mulrC mulr1 mulrC mulr_natr.
 Qed.
 
-(* Under L-freeness, each fiber has at most one element *)
-Lemma lfree_fiber_le1 (Hlfree : @lfree M L) (g : {perm 'I_N}) :
+(* Under word-eval injectivity, each fiber has at most one element *)
+Lemma weval_inj_fiber_le1 (Hlfree : @weval_inj M L) (g : {perm 'I_N}) :
   (#|fiber g| <= 1)%N.
 Proof.
 apply/card_le1_eqP => w1 w2.
@@ -545,12 +548,12 @@ rewrite !inE => /eqP Hw1 /eqP Hw2.
 by apply: Hlfree; rewrite Hw1 Hw2.
 Qed.
 
-(* Under L-freeness, fibers of achievable elements are singletons *)
-Lemma lfree_fiber_card1 (Hlfree : @lfree M L) (g : {perm 'I_N}) :
+(* Under word-eval injectivity, fibers of achievable elements are singletons *)
+Lemma weval_inj_fiber_card1 (Hlfree : @weval_inj M L) (g : {perm 'I_N}) :
   g \in @achievable M L -> #|fiber g| = 1%N.
 Proof.
 move=> /imsetP [w _ Hw].
-apply/eqP; rewrite eqn_leq lfree_fiber_le1 //=.
+apply/eqP; rewrite eqn_leq weval_inj_fiber_le1 //=.
 apply/card_gt0P; exists w.
 by rewrite inE Hw.
 Qed.
@@ -616,6 +619,6 @@ End collusion_bound_k.
 Check collusion_bound.
 Check collusion_bound_unconditional.
 Check collusion_bound_conditional.
-Check var_dist_lfree_uniform.
-Check var_dist_lfree_eval.
+Check var_dist_weval_inj_uniform.
+Check var_dist_weval_inj_eval.
 Check collusion_bound_k.

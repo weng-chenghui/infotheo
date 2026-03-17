@@ -243,17 +243,18 @@ Qed.
 End ball_size_formula.
 
 (* ========================================================================== *)
-(* Section 5: Connection to L-freeness search space                           *)
+(* Section 5: Connection to word-eval injectivity search space                *)
 (* ========================================================================== *)
 
-Section lfree_ball_connection.
+Section weval_inj_ball_connection.
 
-(* For L-free generators with branching factor Tg = 2r,
-   the search space is Tg^L by lfree_search_space.
+(* For word-eval injective generators with branching factor Tg = 2r,
+   the search space is Tg^L by weval_inj_search_space.
    The ball_size gives the size when restricted to reduced words.
 
-   Key insight: L-freeness gives search_space = Tg^L (all words distinct),
-   which is always >= ball_size (reduced words only).
+   Key insight: word evaluation injectivity at length L gives
+   search_space = Tg^L (all words distinct), which is always >= ball_size
+   (reduced words only).
 
    For free groups specifically, ALL reduced words give distinct elements,
    and non-reduced words collapse. So the ball size counts the distinct
@@ -269,4 +270,4 @@ have := @ball_size_lower r Hr L.
 by rewrite ball_size_sum.
 Qed.
 
-End lfree_ball_connection.
+End weval_inj_ball_connection.

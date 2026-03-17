@@ -7,7 +7,8 @@
 (* 3-cycles group OC = <(0 1 2), (1 2 3)> in S_4.                            *)
 (*                                                                            *)
 (* This is the FIRST instance with L > 1 (L = 2), demonstrating the          *)
-(* L-freeness hardness tradeoff: higher L means a larger search space         *)
+(* word-eval injectivity hardness tradeoff: higher L means a larger search    *)
+(* space                                                                      *)
 (* (search_space 2 = 4) but also stronger security guarantees.               *)
 (*                                                                            *)
 (* Parameters:                                                                *)
@@ -15,7 +16,8 @@
 (*   epsilon = 2 * (4! - 4) / 4! = 40/24                                    *)
 (*                                                                            *)
 (* Proved (not axiomatized):                                                  *)
-(*   oc_security_witness_2 : SecurityWitness (via var_dist_lfree_uniform)    *)
+(*   oc_security_witness_2 : SecurityWitness                                *)
+(*     (via var_dist_weval_inj_uniform)                                      *)
 (*   oc_round_complexity : RoundComplexityWitness (L=2, depth=2)             *)
 (*   oc_rigidity : AlgebraicRigidity (security + threshold + rounds)         *)
 (******************************************************************************)
@@ -28,7 +30,7 @@ From mathcomp Require Import boolp reals.
 From infotheo Require Import realType_ext fdist proba variation_dist.
 From mathcomp Require Import prime ssralg finalg zmodp poly cyclic.
 Require Import ssralg_ext reed_solomon.
-From pgg_smc Require Import perm_uniform pgg_interface pgg_lfree
+From pgg_smc Require Import perm_uniform pgg_interface pgg_weval_inj
                             pgg_collusion_bound.
 From pgg_reconstruct Require Import pgg_sharing_framework covering_scheme
                                     cover_tradeoff algebraic_rigidity.
@@ -52,11 +54,11 @@ Variable R : realType.
 Let M_oc := @Gen_PGGTypes 1 2 oc_sigmas.
 Let R_oc : GeneratedMonodromyReprType := M_oc.
 
-(* SecurityWitness at L=2 (the smallest L with lfree for OC).
-   Epsilon = 2*(4!-4)/4!. Any larger L with lfree gives a tighter bound;
-   see security_witness_any_L for the generic constructor. *)
+(* SecurityWitness at L=2 (the smallest L with weval_inj for OC).
+   Epsilon = 2*(4!-4)/4!. Any larger L with weval_inj gives a tighter
+   bound; see security_witness_any_L for the generic constructor. *)
 Definition oc_security_witness_2 : SecurityWitness R R_oc :=
-  security_witness_any_L R oc_lfree2.
+  security_witness_any_L R oc_weval_inj2.
 
 End oc_security.
 

@@ -5,8 +5,8 @@
 (*                                                                            *)
 (* Constructs a concrete AlgebraicRigidity instance for the star-graph RAAG.  *)
 (*                                                                            *)
-(* The SecurityWitness is fully proved using var_dist_lfree_uniform:          *)
-(*   epsilon = 2 * (N! - Tg^L) / N!  for any L with lfree(L)                *)
+(* The SecurityWitness is fully proved using var_dist_weval_inj_uniform:      *)
+(*   epsilon = 2 * (N! - Tg^L) / N!  for any L with weval_inj(L)            *)
 (*                                                                            *)
 (* The ThresholdWitness uses a genus-0 covering scheme constructed from       *)
 (* Reed-Solomon codes (via genus0_covering from cover_genus0.v).              *)
@@ -27,7 +27,7 @@ From mathcomp Require Import boolp reals.
 From infotheo Require Import realType_ext fdist proba variation_dist.
 From mathcomp Require Import prime ssralg finalg zmodp poly cyclic.
 Require Import ssralg_ext reed_solomon.
-From pgg_smc Require Import perm_uniform pgg_interface pgg_lfree pgg_raag.
+From pgg_smc Require Import perm_uniform pgg_interface pgg_weval_inj pgg_raag.
 From pgg_smc Require Import pgg_raag_star pgg_raag_clique pgg_collusion_bound.
 From pgg_reconstruct Require Import pgg_sharing_framework covering_scheme
                                     cover_tradeoff algebraic_rigidity.
@@ -81,15 +81,15 @@ Let R_star : GeneratedMonodromyReprType := M_star.
 Let N := m.+3.
 Let Tg := m.+1.
 
-(* L-freeness at L=1 *)
-Lemma star_lfree1 : @lfree M_star 1.
-Proof. exact: raag_lfree1. Qed.
+(* Word-eval injectivity at L=1 *)
+Lemma star_weval_inj1 : @weval_inj M_star 1.
+Proof. exact: raag_weval_inj1. Qed.
 
-(* SecurityWitness at L=1 (the smallest L with lfree for star graphs).
-   Epsilon = 2*(N!-Tg)/N!. Any larger L with lfree gives a tighter bound;
-   see security_witness_any_L for the generic constructor. *)
+(* SecurityWitness at L=1 (the smallest L with weval_inj for star graphs).
+   Epsilon = 2*(N!-Tg)/N!. Any larger L with weval_inj gives a tighter
+   bound; see security_witness_any_L for the generic constructor. *)
 Definition star_security_witness_1 : SecurityWitness R R_star :=
-  security_witness_any_L R star_lfree1.
+  security_witness_any_L R star_weval_inj1.
 
 End star_security.
 

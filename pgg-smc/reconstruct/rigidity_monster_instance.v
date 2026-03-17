@@ -28,7 +28,8 @@
 (* - This illustrates the security/threshold coupling in AlgebraicRigidity:   *)
 (*   large groups give strong security but poor threshold, and conversely     *)
 (*                                                                            *)
-(* All group-level data (generators, L-freeness) is axiomatized since the     *)
+(* All group-level data (generators, word-eval injectivity) is axiomatized    *)
+(* since the                                                                  *)
 (* Monster is not computationally enumerable in Rocq. The algebraic           *)
 (* properties (SecurityWitness, derived theorems) are proved, showing that    *)
 (* protocol correctness depends only on algebraic structure, not on           *)
@@ -42,7 +43,8 @@
 (*   monster_genus0_pgl : genus-0 coverings have |G| <= PGL(2,N)             *)
 (*                                                                            *)
 (* Proved (not axiomatized):                                                  *)
-(*   monster_security_witness_1 : SecurityWitness (via var_dist_lfree_uniform)*)
+(*   monster_security_witness_1 : SecurityWitness                            *)
+(*     (via var_dist_weval_inj_uniform)                                      *)
 (*   monster_round_complexity : RoundComplexityWitness (L=1, depth=1)        *)
 (*   monster_rigidity : AlgebraicRigidity (security + threshold + rounds)    *)
 (*   monster_complexity : search space <= |G|                                 *)
@@ -80,13 +82,13 @@ Axiom monster_sigmas : 2.-tuple {perm 'I_monster_n.+2}.
 Definition M_monster := @Gen_PGGTypes 1 monster_n monster_sigmas.
 Definition R_monster : GeneratedMonodromyReprType := M_monster.
 
-(* Generators are distinct: weaker than L-freeness, implies it via
-   gen_inj_lfree1. Axiomatized because the generators are abstract. *)
+(* Generators are distinct: weaker than word-eval injectivity, implies it via
+   gen_inj_weval_inj1. Axiomatized because the generators are abstract. *)
 Axiom monster_sigmas_distinct :
   injective (fun i : 'I_2 => tnth monster_sigmas i).
 
-Lemma monster_lfree1 : @lfree M_monster 1.
-Proof. exact: gen_inj_lfree1 monster_sigmas_distinct. Qed.
+Lemma monster_weval_inj1 : @weval_inj M_monster 1.
+Proof. exact: gen_inj_weval_inj1 monster_sigmas_distinct. Qed.
 
 (******************************************************************************)
 (*     SecurityWitness Construction                                           *)
@@ -96,11 +98,11 @@ Section monster_security.
 
 Variable R : realType.
 
-(* SecurityWitness at L=1 (the smallest L with lfree for Monster).
-   Epsilon = 2*(N!-Tg)/N!. Any larger L with lfree gives a tighter bound;
-   see security_witness_any_L for the generic constructor. *)
+(* SecurityWitness at L=1 (the smallest L with weval_inj for Monster).
+   Epsilon = 2*(N!-Tg)/N!. Any larger L with weval_inj gives a tighter
+   bound; see security_witness_any_L for the generic constructor. *)
 Definition monster_security_witness_1 : SecurityWitness R R_monster :=
-  security_witness_any_L R monster_lfree1.
+  security_witness_any_L R monster_weval_inj1.
 
 End monster_security.
 
