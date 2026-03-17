@@ -96,11 +96,11 @@ Section monster_security.
 
 Variable R : realType.
 
-(* SecurityWitness at L=1, with epsilon = 2*(N!-Tg)/N! *)
+(* SecurityWitness at L=1 (the smallest L with lfree for Monster).
+   Epsilon = 2*(N!-Tg)/N!. Any larger L with lfree gives a tighter bound;
+   see lfree_security_witness for the generic constructor. *)
 Definition monster_security_witness_1 : SecurityWitness R R_monster :=
-  @MkSecurityWitness R R_monster 1 _
-    (rho_from_words 1 monster_sigmas)
-    (@var_dist_lfree_uniform R monster_n 1 1 monster_sigmas monster_lfree1).
+  lfree_security_witness R monster_lfree1.
 
 End monster_security.
 

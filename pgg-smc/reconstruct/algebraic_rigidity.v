@@ -19,6 +19,23 @@
 (*   RoundComplexityWitness == packages word length, round depth, and bound   *)
 (*   AlgebraicRigidity R M == combines all three into a unified witness       *)
 (*                                                                            *)
+(* Generic constructor:                                                       *)
+(*   lfree_security_witness == SecurityWitness for ANY L with lfree(L)        *)
+(*                                                                            *)
+(* Note on SecurityWitness and L:                                             *)
+(*   The security bound epsilon = 2*(N! - Tg^L)/N! is parametric in L:       *)
+(*   var_dist_lfree_uniform proves it for any L where lfree(L) holds.         *)
+(*   Since Tg^L is monotonically increasing in L, epsilon DECREASES with L:  *)
+(*   larger L means more distinct group elements are reachable, bringing the  *)
+(*   word distribution closer to uniform over S_N. Therefore:                 *)
+(*     - The SMALLEST L with lfree(L) gives the WORST-CASE (largest) epsilon  *)
+(*     - Concrete instances (S_5 at L=1, OC at L=2) pick this smallest L     *)
+(*       because it represents the most conservative security guarantee       *)
+(*     - All larger L with lfree(L) automatically have tighter bounds         *)
+(*   The generic constructor lfree_security_witness makes this explicit:      *)
+(*   given ANY (G, sigmas) and ANY L with lfree(L), it produces a valid      *)
+(*   SecurityWitness.                                                         *)
+(*                                                                            *)
 (* Derived properties:                                                        *)
 (*   ar_complexity      == search space bounded by |G|                        *)
 (*   ar_tradeoff        == genus-0/bounded or genus>0/gap tradeoff           *)
@@ -93,6 +110,34 @@ Arguments SecurityWitness R M : clear implicits.
 Arguments ThresholdWitness M : clear implicits.
 Arguments RoundComplexityWitness : clear implicits.
 Arguments AlgebraicRigidity R M : clear implicits.
+
+(******************************************************************************)
+(*     Generic SecurityWitness Constructor                                    *)
+(*                                                                            *)
+(* The security bound var_dist(rho_L, uniform) <= 2*(N! - Tg^L)/N! holds     *)
+(* for ANY L where lfree(L) is satisfied (see var_dist_lfree_uniform in       *)
+(* pgg_collusion_bound.v). This constructor makes the generality explicit:    *)
+(* given any generated monodromy representation and any L with lfree(L),      *)
+(* it produces a SecurityWitness. Concrete instances (S_5, OC, etc.) pick     *)
+(* specific L values — typically the smallest L with lfree(L), which gives    *)
+(* the worst-case (largest) epsilon and thus the most conservative bound.     *)
+(******************************************************************************)
+
+Section generic_security.
+
+Variable R : realType.
+Variable m n' : nat.
+Variable sigmas : m.+1.-tuple {perm 'I_n'.+2}.
+Let M := Gen_PGGTypes sigmas.
+
+(* For any L where lfree holds, we get a SecurityWitness *)
+Definition lfree_security_witness (L : nat) (Hlfree : @lfree M L) :
+    SecurityWitness R M :=
+  @MkSecurityWitness R M L _
+    (rho_from_words L sigmas)
+    (@var_dist_lfree_uniform R _ m L sigmas Hlfree).
+
+End generic_security.
 
 (******************************************************************************)
 (*     Derived Properties                                                     *)

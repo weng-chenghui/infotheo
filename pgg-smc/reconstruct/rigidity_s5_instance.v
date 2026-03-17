@@ -51,11 +51,11 @@ Variable R : realType.
 Let M_s5 := @Gen_PGGTypes 3 3 (path_gen_tuple 3).
 Let R_s5 : GeneratedMonodromyReprType := M_s5.
 
-(* SecurityWitness at L=1, with epsilon = 2*(5!-4)/5! *)
+(* SecurityWitness at L=1 (the smallest L with lfree for S_5).
+   Epsilon = 2*(5!-4)/5!. Any larger L with lfree gives a tighter bound;
+   see lfree_security_witness for the generic constructor. *)
 Definition s5_security_witness_1 : SecurityWitness R R_s5 :=
-  @MkSecurityWitness R R_s5 1 _
-    (rho_from_words 1 (path_gen_tuple 3))
-    (@var_dist_lfree_uniform R _ 3 1 (path_gen_tuple 3) s5_lfree1).
+  lfree_security_witness R s5_lfree1.
 
 End s5_security.
 
