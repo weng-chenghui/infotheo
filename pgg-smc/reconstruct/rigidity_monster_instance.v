@@ -98,9 +98,9 @@ Variable R : realType.
 
 (* SecurityWitness at L=1 (the smallest L with lfree for Monster).
    Epsilon = 2*(N!-Tg)/N!. Any larger L with lfree gives a tighter bound;
-   see lfree_security_witness for the generic constructor. *)
+   see security_witness_any_L for the generic constructor. *)
 Definition monster_security_witness_1 : SecurityWitness R R_monster :=
-  lfree_security_witness R monster_lfree1.
+  security_witness_any_L R monster_lfree1.
 
 End monster_security.
 

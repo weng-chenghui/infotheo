@@ -54,9 +54,9 @@ Let R_oc : GeneratedMonodromyReprType := M_oc.
 
 (* SecurityWitness at L=2 (the smallest L with lfree for OC).
    Epsilon = 2*(4!-4)/4!. Any larger L with lfree gives a tighter bound;
-   see lfree_security_witness for the generic constructor. *)
+   see security_witness_any_L for the generic constructor. *)
 Definition oc_security_witness_2 : SecurityWitness R R_oc :=
-  lfree_security_witness R oc_lfree2.
+  security_witness_any_L R oc_lfree2.
 
 End oc_security.
 

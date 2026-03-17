@@ -20,7 +20,7 @@
 (*   AlgebraicRigidity R M == combines all three into a unified witness       *)
 (*                                                                            *)
 (* Generic constructor:                                                       *)
-(*   lfree_security_witness == SecurityWitness for ANY L with lfree(L)        *)
+(*   security_witness_any_L == SecurityWitness for ANY L with lfree(L)        *)
 (*                                                                            *)
 (* Note on SecurityWitness and L:                                             *)
 (*   The security bound epsilon = 2*(N! - Tg^L)/N! is parametric in L:       *)
@@ -32,7 +32,7 @@
 (*     - Concrete instances (S_5 at L=1, OC at L=2) pick this smallest L     *)
 (*       because it represents the most conservative security guarantee       *)
 (*     - All larger L with lfree(L) automatically have tighter bounds         *)
-(*   The generic constructor lfree_security_witness makes this explicit:      *)
+(*   The generic constructor security_witness_any_L makes this explicit:      *)
 (*   given ANY (G, sigmas) and ANY L with lfree(L), it produces a valid      *)
 (*   SecurityWitness.                                                         *)
 (*                                                                            *)
@@ -131,7 +131,7 @@ Variable sigmas : m.+1.-tuple {perm 'I_n'.+2}.
 Let M := Gen_PGGTypes sigmas.
 
 (* For any L where lfree holds, we get a SecurityWitness *)
-Definition lfree_security_witness (L : nat) (Hlfree : @lfree M L) :
+Definition security_witness_any_L (L : nat) (Hlfree : @lfree M L) :
     SecurityWitness R M :=
   @MkSecurityWitness R M L _
     (rho_from_words L sigmas)

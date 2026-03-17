@@ -53,9 +53,9 @@ Let R_s5 : GeneratedMonodromyReprType := M_s5.
 
 (* SecurityWitness at L=1 (the smallest L with lfree for S_5).
    Epsilon = 2*(5!-4)/5!. Any larger L with lfree gives a tighter bound;
-   see lfree_security_witness for the generic constructor. *)
+   see security_witness_any_L for the generic constructor. *)
 Definition s5_security_witness_1 : SecurityWitness R R_s5 :=
-  lfree_security_witness R s5_lfree1.
+  security_witness_any_L R s5_lfree1.
 
 End s5_security.
 

@@ -87,9 +87,9 @@ Proof. exact: raag_lfree1. Qed.
 
 (* SecurityWitness at L=1 (the smallest L with lfree for star graphs).
    Epsilon = 2*(N!-Tg)/N!. Any larger L with lfree gives a tighter bound;
-   see lfree_security_witness for the generic constructor. *)
+   see security_witness_any_L for the generic constructor. *)
 Definition star_security_witness_1 : SecurityWitness R R_star :=
-  lfree_security_witness R star_lfree1.
+  security_witness_any_L R star_lfree1.
 
 End star_security.
 
