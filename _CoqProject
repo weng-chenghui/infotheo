@@ -143,7 +143,6 @@ pgg-smc/groups/pgg_raag_s5.v
 pgg-smc/groups/pgg_lfree.v
 pgg-smc/groups/pgg_raag.v
 pgg-smc/groups/free_group_ball.v
-pgg-smc/protocol/pgg_program.v
 pgg-smc/groups/pgg_raag_clique.v
 pgg-smc/groups/pgg_raag_cartier_foata.v
 pgg-smc/security/pgg_collusion_bound.v
