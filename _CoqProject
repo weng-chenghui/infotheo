@@ -139,6 +139,7 @@ pgg-smc/groups/pgg_abelian.v
 pgg-smc/groups/abelian_word_collapse.v
 pgg-smc/groups/pgg_raag_star.v
 pgg-smc/groups/pgg_raag_path.v
+pgg-smc/groups/pgg_raag_s5.v
 pgg-smc/groups/pgg_lfree.v
 pgg-smc/groups/pgg_raag.v
 pgg-smc/groups/free_group_ball.v
@@ -167,6 +168,7 @@ pgg-smc/reconstruct/cover_genus2.v
 pgg-smc/reconstruct/cover_tradeoff.v
 pgg-smc/reconstruct/algebraic_rigidity.v
 pgg-smc/reconstruct/rigidity_star_instance.v
+pgg-smc/reconstruct/rigidity_s5_instance.v
 pgg-smc/reconstruct/rigidity_monster_instance.v
 pgg-smc/reconstruct/pgl_bound.v
 pgg-smc/reconstruct/pgg_covering_correctness.v
