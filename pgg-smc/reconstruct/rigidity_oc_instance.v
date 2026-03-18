@@ -13,11 +13,10 @@
 (*                                                                            *)
 (* Parameters:                                                                *)
 (*   Tg = 2 (generators), N = 4 (sheets), L = 2, depth = 2                  *)
-(*   epsilon = 2 * (4! - 4) / 4! = 40/24                                    *)
+(*   epsilon = 1 (fiber-counted, worst-case sheet s=1)                       *)
 (*                                                                            *)
 (* Proved (not axiomatized):                                                  *)
-(*   oc_security_witness_2 : SecurityWitness                                *)
-(*     (via var_dist_weval_inj_uniform)                                      *)
+(*   oc_security_witness_2 : SecurityWitness (fiber-counted eps=1)           *)
 (*   oc_round_complexity : RoundComplexityWitness (L=2, depth=2)             *)
 (*   oc_rigidity : AlgebraicRigidity (security + threshold + rounds)         *)
 (******************************************************************************)
@@ -54,11 +53,62 @@ Variable R : realType.
 Let M_oc := @Gen_PGGTypes 1 2 oc_sigmas.
 Let R_oc : GeneratedMonodromyReprType := M_oc.
 
-(* SecurityWitness at L=2 (the smallest L with weval_inj for OC).
-   Epsilon = 2*(4!-4)/4!. Any larger L with weval_inj gives a tighter
-   bound; see security_witness_any_L for the generic constructor. *)
+Local Open Scope ring_scope.
+
+(* Fiber-counted endpoint bound: for each sheet s in 'I_4,
+   var_dist(fdistmap eval_s (rho_from_words 2 oc_sigmas), uniform) <= 1.
+   Achievable(2) = {s0^2, s0*s1, s1*s0, s1^2} (4 permutations).
+   Worst-case sheet s=1: fiber distribution P=(2/4,0,0,2/4), var_dist=1.
+   Other sheets s=0,2,3 have var_dist=1/2. *)
+Lemma oc_endpoint_bound_fiber :
+  forall s : 'I_4,
+  (var_dist (fdistmap (fun sigma : {perm 'I_4} => sigma s)
+                     (@rho_from_words R _ _ 2 oc_sigmas))
+           (fdist_uniform (card_ord 4)) <= 1)%O.
+Proof.
+move=> s.
+apply: (Order.POrderTheory.le_trans
+  (@var_dist_endpoint_image_bound R 2 1 2 oc_sigmas oc_weval_inj2
+    (erefl _) 2 s _)); last first.
+  by rewrite /= subn2 /= -GRing.Theory.natrM /=
+     GRing.Theory.divrr // GRing.Theory.unitfE Num.Theory.pnatr_eq0.
+have Hmem : forall (w : pgg_word (Gen_PGGTypes oc_sigmas) 2),
+    word_eval w s \in
+      (fun sigma : {perm 'I_4} => sigma s) @:
+        achievable (Gen_PGGTypes oc_sigmas) 2.
+  by move=> w; apply: imset_f; apply: imset_f.
+pose w00 : pgg_word (Gen_PGGTypes oc_sigmas) 2 := [tuple ord0; ord0].
+pose w11 : pgg_word (Gen_PGGTypes oc_sigmas) 2 := [tuple ord_max; ord_max].
+pose w01 : pgg_word (Gen_PGGTypes oc_sigmas) 2 := [tuple ord0; ord_max].
+have Hw00 : @word_eval (Gen_PGGTypes oc_sigmas) 2 w00 = (oc_s0 * oc_s0)%g.
+  rewrite /word_eval /w00 big_ord_recr /= big_ord_recr /= big_ord0 mul1g.
+  congr (_ * _)%g; apply: oc_sigmasE.
+have Hw11 : @word_eval (Gen_PGGTypes oc_sigmas) 2 w11 = (oc_s1 * oc_s1)%g.
+  rewrite /word_eval /w11 big_ord_recr /= big_ord_recr /= big_ord0 mul1g.
+  congr (_ * _)%g; apply: oc_sigmasE.
+have Hw01 : @word_eval (Gen_PGGTypes oc_sigmas) 2 w01 = (oc_s0 * oc_s1)%g.
+  rewrite /word_eval /w01 big_ord_recr /= big_ord_recr /= big_ord0 mul1g.
+  congr (_ * _)%g; apply: oc_sigmasE.
+apply/card_gt1P.
+case: s Hmem => [[|[|[|[|s]]]] Hs] //= Hmem.
+- exists (word_eval w00 (Ordinal Hs)), (word_eval w11 (Ordinal Hs)).
+  by split; [exact: Hmem | exact: Hmem |
+    rewrite Hw00 Hw11 !permM !oc_s0E !oc_s1E].
+- exists (word_eval w00 (Ordinal Hs)), (word_eval w11 (Ordinal Hs)).
+  by split; [exact: Hmem | exact: Hmem |
+    rewrite Hw00 Hw11 !permM !oc_s0E !oc_s1E].
+- exists (word_eval w00 (Ordinal Hs)), (word_eval w01 (Ordinal Hs)).
+  by split; [exact: Hmem | exact: Hmem |
+    rewrite Hw00 Hw01 !permM !oc_s0E !oc_s1E].
+- exists (word_eval w00 (Ordinal Hs)), (word_eval w11 (Ordinal Hs)).
+  by split; [exact: Hmem | exact: Hmem |
+    rewrite Hw00 Hw11 !permM !oc_s0E !oc_s1E].
+Qed.
+
+(* SecurityWitness at L=2 via fiber counting.
+   Epsilon = 1, tighter than DPI bound 40/24 ≈ 1.67. *)
 Definition oc_security_witness_2 : SecurityWitness R R_oc :=
-  security_witness_any_L R oc_weval_inj2.
+  security_witness_fiber oc_weval_inj2 oc_endpoint_bound_fiber.
 
 End oc_security.
 

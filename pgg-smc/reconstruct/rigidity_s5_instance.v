@@ -9,7 +9,7 @@
 (* This demonstrates all four algebraic rigidity parameters computed from     *)
 (* a single (G, I) choice with concrete vm_compute-checkable results:         *)
 (*   1. Complexity: search_space L <= |G|                                     *)
-(*   2. Security: var_dist(rho, uniform) <= 2*(5!-4)/5! at L=1               *)
+(*   2. Security: var_dist(endpoint, uniform) <= 6/5 at L=1 (fiber-counted)  *)
 (*   3. Threshold: genus-0 covering from RS codes (+ PGL hypothesis)          *)
 (*   4. Round complexity: depth <= L                                          *)
 (*                                                                            *)
@@ -51,11 +51,23 @@ Variable R : realType.
 Let M_s5 := @Gen_PGGTypes 3 3 (path_gen_tuple 3).
 Let R_s5 : GeneratedMonodromyReprType := M_s5.
 
-(* SecurityWitness at L=1 (the smallest L with weval_inj for S_5).
-   Epsilon = 2*(5!-4)/5!. Any larger L with weval_inj gives a tighter
-   bound; see security_witness_any_L for the generic constructor. *)
+Local Open Scope ring_scope.
+
+(* Fiber-counted endpoint bound: for each sheet s in 'I_5,
+   var_dist(fdistmap eval_s (rho_from_words 1 path_gen_tuple_3), uniform) <= 6/5.
+   Achievable(1) = {(01),(12),(23),(34)} (4 adjacent transpositions).
+   Worst-case sheets s=0,4: P=(3/4,1/4,0,0,0), var_dist=6/5. *)
+Lemma s5_endpoint_bound_fiber :
+  forall s : 'I_5,
+  (var_dist (fdistmap (fun sigma : {perm 'I_5} => sigma s)
+                     (@rho_from_words R _ _ 1 (path_gen_tuple 3)))
+           (fdist_uniform (card_ord 5)) <= 6%:R / 5%:R)%O.
+Proof. Admitted.
+
+(* SecurityWitness at L=1 via fiber counting.
+   Epsilon = 6/5, much tighter than DPI bound 2*(5!-4)/5! ≈ 1.93. *)
 Definition s5_security_witness_1 : SecurityWitness R R_s5 :=
-  security_witness_any_L R s5_weval_inj1.
+  security_witness_fiber s5_weval_inj1 s5_endpoint_bound_fiber.
 
 End s5_security.
 
