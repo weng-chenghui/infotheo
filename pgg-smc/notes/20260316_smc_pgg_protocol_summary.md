@@ -331,6 +331,16 @@ PGG achieves **statistical information-theoretic security** with concrete parame
 
 Each party computes their endpoint by simple table lookup. The reconstructor collects T endpoints and recovers the secret via the threshold scheme (the framework is parametric over `ThresholdScheme`; AG codes are one instance).
 
+### Setup/online split (formalized)
+
+**Setup phase (offline, not session-typed):** The dealer runs `dealer_solve` to get `SecurityParams` with word length L. It then uniformly samples `w : L.-tuple 'I_Tg` and evaluates `word_eval w` to get a group element P. The share for party j is computed locally as `share PI [:: P] j = [:: rho(P)(starts[j])]`. This is formalized by `dealer_from_words` in `pgg_pismc.v`.
+
+**Online phase (session-typed):** `pdealer` distributes pre-computed shares via secret channels and broadcasts P_idx. This is the session-typed protocol with channel duality proofs.
+
+**Security guarantee:** `dealer_words_correct` in `pgg_dealer_bridge.v` proves that any word of solver-determined length L produces a correct protocol execution, connecting `AlgebraicRigidity` to `pdealer` end-to-end.
+
+This setup/online split is standard in MPC formalizations (EasyCrypt Maurer, CryptHOL 2-party). The piSMC framework is deterministic — randomness is an external parameter, exactly as DSDP handles encryption keys and random blinding factors.
+
 ## Axiom boundary status (from git log)
 
 ### Fully proved

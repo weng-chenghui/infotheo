@@ -27,7 +27,8 @@ From mathcomp Require Import boolp reals.
 From infotheo Require Import realType_ext fdist proba variation_dist.
 From mathcomp Require Import prime ssralg finalg zmodp poly cyclic.
 Require Import ssralg_ext reed_solomon.
-From pgg_smc Require Import perm_uniform pgg_interface pgg_weval_inj pgg_raag.
+From pgg_smc Require Import perm_uniform pgg_interface pgg_weval_inj pgg_raag
+                             pgg_pismc.
 From pgg_smc Require Import pgg_raag_star pgg_raag_clique pgg_collusion_bound.
 From pgg_reconstruct Require Import pgg_sharing_framework covering_scheme
                                     cover_tradeoff algebraic_rigidity.
@@ -245,5 +246,13 @@ Lemma star_protocol_correct (s : 'I_(pgg_N' R_star).+1) (P : pgg_gT R_star) :
 Proof.
 exact: (@ar_protocol_correct R R_star star_rigidity star_PI star_HT s P star_G_stable).
 Qed.
+
+(* Demonstration: solver-determined word length feeds into protocol.
+   star_certified_1 has sp_L = 1, so w : 1.-tuple 'I_(m.+1). *)
+Definition star_dealer
+    (parties : seq 'I_(pi_T' star_PI).+1)
+    (w : 1.-tuple 'I_m.+1)
+    (P_idx : nat) :=
+  dealer_from_words (M := R_star) star_PI 1 parties w P_idx.
 
 End star_rigidity.

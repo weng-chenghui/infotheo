@@ -145,6 +145,30 @@ Arguments pparty {M} PI.
 Arguments precon {M} PI.
 
 (******************************************************************************)
+(** * Dealer from Words: Type-Safe Word-to-Protocol Bridge                    *)
+(*                                                                            *)
+(* dealer_from_words wraps pdealer with word evaluation. The dealer samples   *)
+(* w : L.-tuple 'I_Tg uniformly (offline/setup phase), evaluates word_eval w *)
+(* to get a group element, and feeds it to pdealer for distribution.          *)
+(******************************************************************************)
+
+Section dealer_from_words.
+
+Variable M : GeneratedMonodromyReprType.
+Variable PI : PGGInterface M.
+
+Let T := (pi_T' PI).+1.
+Let Tg := (@pgg_ngens' M).+1.
+
+Definition dealer_from_words (L : nat)
+    (parties : seq 'I_T) (w : L.-tuple 'I_Tg) (P_idx : nat) :=
+  pdealer PI parties [:: @word_eval M L w] P_idx.
+
+End dealer_from_words.
+
+Arguments dealer_from_words {M} PI.
+
+(******************************************************************************)
 (** * Session Type Duality Verification (Idealized, 2-party)                  *)
 (******************************************************************************)
 

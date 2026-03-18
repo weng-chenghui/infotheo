@@ -168,6 +168,7 @@ pgg-smc/reconstruct/cover_genus1.v
 pgg-smc/reconstruct/cover_genus2.v
 pgg-smc/reconstruct/cover_tradeoff.v
 pgg-smc/reconstruct/algebraic_rigidity.v
+pgg-smc/reconstruct/pgg_dealer_bridge.v
 pgg-smc/reconstruct/rigidity_star_instance.v
 pgg-smc/reconstruct/rigidity_s5_instance.v
 pgg-smc/reconstruct/rigidity_monster_instance.v
