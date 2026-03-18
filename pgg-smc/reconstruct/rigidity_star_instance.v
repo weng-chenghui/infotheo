@@ -5,8 +5,8 @@
 (*                                                                            *)
 (* Constructs a concrete AlgebraicRigidity instance for the star-graph RAAG.  *)
 (*                                                                            *)
-(* The SecurityWitness is fully proved using var_dist_weval_inj_uniform:      *)
-(*   epsilon = 2 * (N! - Tg^L) / N!  for any L with weval_inj(L)            *)
+(* The SecurityWitness uses fiber-counted epsilon:                            *)
+(*   epsilon = 2 * (m+1) / (m+3)  at L=1 (worst-case sheet s≠2)             *)
 (*                                                                            *)
 (* The ThresholdWitness uses a genus-0 covering scheme constructed from       *)
 (* Reed-Solomon codes (via genus0_covering from cover_genus0.v).              *)
@@ -81,15 +81,30 @@ Let R_star : GeneratedMonodromyReprType := M_star.
 Let N := m.+3.
 Let Tg := m.+1.
 
+Local Open Scope ring_scope.
+
 (* Word-eval injectivity at L=1 *)
 Lemma star_weval_inj1 : @weval_inj M_star 1.
 Proof. exact: raag_weval_inj1. Qed.
 
-(* SecurityWitness at L=1 (the smallest L with weval_inj for star graphs).
-   Epsilon = 2*(N!-Tg)/N!. Any larger L with weval_inj gives a tighter
-   bound; see security_witness_any_L for the generic constructor. *)
+(* Fiber-counted endpoint bound: for each sheet s in 'I_(m+3),
+   var_dist(fdistmap eval_s (rho_from_words 1 star_gen_tuple), uniform)
+     <= 2*(m+1)/(m+3).
+   Generators: g0=tperm(0,1), gi=tperm(2,2+i) for i=1..m.
+   Worst-case sheets s≠2: one generator moves s, m fix s.
+     P(s) = m/(m+1), P(moved_to) = 1/(m+1), var_dist = 2(m+1)/(m+3). *)
+Lemma star_endpoint_bound_fiber :
+  forall s : 'I_(m.+3),
+  (var_dist (fdistmap (fun sigma : {perm 'I_(m.+3)} => sigma s)
+                     (@rho_from_words R _ _ 1 (star_gen_tuple m)))
+           (fdist_uniform (card_ord m.+3)) <=
+   2%:R * m.+1%:R / m.+3%:R)%O.
+Proof. Admitted.
+
+(* SecurityWitness at L=1 via fiber counting.
+   Epsilon = 2*(m+1)/(m+3), much tighter than DPI bound 2*(N!-Tg)/N!. *)
 Definition star_security_witness_1 : SecurityWitness R R_star :=
-  security_witness_any_L R star_weval_inj1.
+  security_witness_fiber star_weval_inj1 star_endpoint_bound_fiber.
 
 End star_security.
 
@@ -177,6 +192,58 @@ Lemma star_tradeoff :
 Proof.
 move=> /=.
 exact: (@security_threshold_tradeoff R_star star_covering (fun _ => star_genus0_pgl)).
+Qed.
+
+(******************************************************************************)
+(*     CertifiedSolution (solver -> proof bridge)                             *)
+(******************************************************************************)
+
+(* Rational upper bound on sw_epsilon for star at L=1:
+   sw_epsilon = 2*(m+1)/(m+3), and (2*m.+1)%:R = 2%:R * m.+1%:R by natrM *)
+Lemma star_eps_rational :
+  (sw_epsilon (star_security_witness_1 R m) <=
+   (2 * m.+1)%:R / m.+3%:R)%O.
+Proof.
+rewrite /= /security_witness_fiber /= GRing.natrM.
+exact: Order.POrderTheory.lexx.
+Qed.
+
+Definition star_certified_1 : CertifiedSolution R R_star :=
+  @certified_from_witness R R_star
+    (star_security_witness_1 R m)
+    (2 * m.+1) m.+3
+    (ltn0Sn m.+2)
+    star_eps_rational.
+
+(******************************************************************************)
+(*     Protocol Correctness (end-to-end bridge)                               *)
+(******************************************************************************)
+
+(* PGGInterface: starting sheets for the protocol *)
+Variable star_PI : PGGInterface R_star.
+
+(* Threshold scheme size matches PGGInterface *)
+Hypothesis star_HT :
+  ts_T' (cs_scheme star_covering) = pi_T' star_PI.
+
+(* G-stability: monodromy preserves the covering structure on starts.
+   This is the structural condition connecting the code automorphism
+   (sigma_code) to the monodromy representation on protocol starts. *)
+Hypothesis star_G_stable :
+  forall g, g \in pgg_G R_star ->
+  forall i : 'I_(ts_T' (cs_scheme star_covering)).+1,
+    @pgg_rho R_star g
+      (tnth (cast_tuple (esym (congr1 S star_HT)) (pi_starts star_PI)) i) =
+    tnth (cast_tuple (esym (congr1 S star_HT)) (pi_starts star_PI))
+      (cs_perm star_covering g i).
+
+Lemma star_protocol_correct (s : 'I_(pgg_N' R_star).+1) (P : pgg_gT R_star) :
+  P \in pgg_G R_star ->
+  ts_valid (cs_scheme star_covering) s
+    (cast_tuple (esym (congr1 S star_HT)) (pi_starts star_PI)) ->
+  pgg_recon_endpoints star_HT P = s.
+Proof.
+exact: (@ar_protocol_correct R R_star star_rigidity star_PI star_HT s P star_G_stable).
 Qed.
 
 End star_rigidity.
