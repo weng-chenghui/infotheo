@@ -7,14 +7,10 @@
 (*   where epsilon = var_dist(rho_dist, uniform(S_N)) is the gap between the   *)
 (*   real protocol distribution and the idealized uniform permutation.         *)
 (*                                                                             *)
-(* Section 6: Word-eval injective instantiation proving Assumption 1 with     *)
-(*   concrete epsilon.                                                         *)
-(*   When word_eval is injective (word-eval injective at length L) and we draw *)
-(*   permutations uniformly from all L-words over Tg generators, the           *)
-(*   distribution is uniform over achievable(L) with |achievable(L)| = Tg^L.  *)
-(*   The variational distance to the full uniform over S_N is:                 *)
-(*     epsilon = 2 * (N! - Tg^L) / N!                                          *)
-(*   Caveat: assumes the protocol samples words uniformly at random.           *)
+(* Section 6: Word-eval injective instantiation — rho_from_words is           *)
+(*   uniform over achievable(L) when word_eval is injective.                   *)
+(*   Provides rho_from_words, rho_from_words_uniform_supp, fiber counting.     *)
+(*   Concrete epsilon is computed per-instance (not here).                     *)
 (******************************************************************************)
 
 From HB Require Import structures.
@@ -305,6 +301,60 @@ Qed.
 End collusion_bound_conditional.
 
 (******************************************************************************)
+(*  Section 5b: Pushforward of uniform(S_N) through evaluation = uniform(I_N)*)
+(*                                                                            *)
+(*  Standalone version of ideal_marginal_uniform (Section 4), extracted from  *)
+(*  the collusion bound section to make it usable in other contexts.          *)
+(******************************************************************************)
+
+Section fdistmap_eval_uniform_section.
+
+Variable R : realType.
+Variable N' : nat.
+Let N := N'.+1.
+
+Let card_perm_N : #|{perm 'I_N}| = (N`!.-1).+1 := card_permT_N N'.
+
+Lemma fdistmap_eval_uniform (s : 'I_N) :
+  fdistmap (fun sigma : {perm 'I_N} => sigma s)
+           (fdist_uniform card_perm_N : R.-fdist _) =
+  (fdist_uniform (card_ord N) : R.-fdist _).
+Proof.
+apply/fdist_ext => a.
+rewrite /fdistmap fdistbindE fdist_uniformE.
+under eq_bigr do rewrite fdist_uniformE fdist1E.
+rewrite -big_distrr /=.
+have Hcount : #|[set sigma : {perm 'I_N} | sigma s == a]| = N'`!.
+  set s1 := fun _ : 'I_1 => s.
+  set v1 := fun _ : 'I_1 => a.
+  have -> : [set sigma : {perm 'I_N} | sigma s == a] =
+    prescribed s1 v1.
+    apply/setP => sigma.
+    rewrite /prescribed inE inE.
+    apply/eqP/forallP.
+      by move=> H i; apply/eqP; rewrite /s1 /v1.
+    by move=> /(_ ord0) /eqP.
+  have s1_inj : injective s1.
+    by move=> i j _; rewrite (ord1 i); rewrite (ord1 j).
+  have v1_inj : injective v1.
+    by move=> i j _; rewrite (ord1 i); rewrite (ord1 j).
+  by rewrite card_prescribed //; rewrite subn1.
+have -> : \sum_(i0 : {perm 'I_N}) (a == i0 s)%:R = N'`!%:R :> R.
+  under eq_bigr do rewrite eq_sym.
+  rewrite (bigID (fun sigma : {perm 'I_N} => sigma s == a)) /=.
+  rewrite [X in _ + X]big1; last by move=> sigma /negbTE ->.
+  rewrite addr0 (eq_bigr (fun _ => 1)); last by move=> sigma ->.
+  rewrite sumr_const; congr (_%:R).
+  transitivity #|[set sigma : {perm 'I_N} | sigma s == a]|.
+    by apply: eq_card => sigma; rewrite !inE.
+  exact: Hcount.
+rewrite card_permT_N prednK; last exact: fact_gt0.
+by rewrite card_ord factS natrM invfM divfK // pnatr_eq0 -lt0n fact_gt0.
+Qed.
+
+End fdistmap_eval_uniform_section.
+
+(******************************************************************************)
 (*  Section 6: Word-eval injective instantiation — concrete epsilon for     *)
 (*  Assumption 1                                                             *)
 (******************************************************************************)
@@ -435,59 +485,6 @@ exfalso; move/negP: Hg; apply.
 by apply/imsetP; exists w.
 Qed.
 
-(* Cardinality of S_N *)
-Let card_perm_N : #|{perm 'I_N}| = (N`!.-1).+1 := card_permT_N N'.
-
-(* The key bound: achievable subset is smaller than S_N *)
-Lemma weval_inj_search_space_le_fact : (Tg ^ L <= N`!)%N.
-Proof.
-rewrite -(@weval_inj_search_space M) //.
-apply: (leq_trans (@search_space_leG M L)).
-apply: (leq_trans (max_card _)).
-by rewrite card_permT_N prednK // fact_gt0.
-Qed.
-
-(* Concrete epsilon for Assumption 1 *)
-Let weval_inj_eps : R := 2%:R * (N`! - Tg ^ L)%:R / N`!%:R.
-
-Lemma weval_inj_eps_ge0 : 0 <= weval_inj_eps.
-Proof.
-rewrite /weval_inj_eps.
-apply: divr_ge0; last by rewrite ler0n.
-by rewrite mulr_ge0 // ler0n.
-Qed.
-
-(* Assumption 1 holds with concrete epsilon *)
-Theorem var_dist_weval_inj_uniform :
-  var_dist rho_from_words (fdist_uniform card_perm_N) <= weval_inj_eps.
-Proof.
-rewrite rho_from_words_uniform_supp.
-rewrite var_dist_uniform_supp /=.
-rewrite /weval_inj_eps.
-(* LHS: 2 * (#|perm| - #|achievable|) / #|perm|
-   RHS: 2 * (N! - Tg^L) / N! *)
-suff -> : (#|{perm 'I_N}| - #|@achievable M L|)%N = (N`! - Tg ^ L)%N.
-  suff -> : (#|{perm 'I_N}|%:R : R) = N`!%:R by [].
-  by rewrite card_permT_N prednK // fact_gt0.
-rewrite card_permT_N prednK; last exact: fact_gt0.
-have -> : #|@achievable M L| = @search_space M L by [].
-by rewrite (@weval_inj_search_space M).
-Qed.
-
-(* Main theorem: applying collusion_bound with concrete epsilon.
-   The full bound follows from var_dist_weval_inj_uniform + the generic
-   collusion bound framework. We state it in the form that
-   instantiates Assumption 1 concretely. *)
-Theorem var_dist_weval_inj_eval :
-  forall (eval_at : {perm 'I_N} -> 'I_N),
-  var_dist (fdistmap eval_at rho_from_words)
-           (fdistmap eval_at (fdist_uniform card_perm_N))
-  <= weval_inj_eps.
-Proof.
-move=> eval_at.
-exact: (Order.POrderTheory.le_trans (var_dist_fdistmap _ _ _)
-                                    var_dist_weval_inj_uniform).
-Qed.
 
 End weval_inj_collusion.
 
@@ -616,9 +613,456 @@ Qed.
 
 End collusion_bound_k.
 
+(******************************************************************************)
+(*   Section 9: Pushforward of uniform_supp through support-injective f     *)
+(*                                                                            *)
+(*   When f is injective on C, fdistmap f (uniform_supp C) = uniform_supp   *)
+(*   (f @: C). Combined with var_dist_uniform_supp, this gives a direct     *)
+(*   endpoint epsilon = 2*(N - |f @: C|)/N without going through the DPI.   *)
+(******************************************************************************)
+
+Section fdistmap_uniform_supp_inj.
+
+Context {R : realType}.
+Variables (A B : finType).
+Variable C : {set A}.
+Hypothesis HC : (0 < #|C|)%N.
+Variable f : A -> B.
+Hypothesis f_inj : {in C &, injective f}.
+
+Let img := f @: C.
+Let Himg_pos : (0 < #|img|)%N.
+Proof. by rewrite card_in_imset. Qed.
+
+(* When f is injective on C, the pushforward of uniform_supp(C) through f
+   is uniform_supp(f(C)). This is the key lemma for direct endpoint epsilon. *)
+Lemma fdistmap_uniform_supp_inj :
+  fdistmap f (@fdist_uniform_supp R A C HC) =
+  @fdist_uniform_supp R B img Himg_pos.
+Proof.
+apply/fdist_ext => b.
+rewrite fdistmapE.
+case/boolP: (b \in img) => Hb.
+  (* b in image: exactly one preimage in C *)
+  rewrite fdist_uniform_supp_in //.
+  move/imsetP: Hb => [a Ha Hab].
+  rewrite (bigD1 a) /=; last by rewrite !inE Hab eqxx.
+  rewrite fdist_uniform_supp_in // big1 ?addr0; last first.
+    move=> a' /andP [/eqP Ha' Hneq].
+    case/boolP: (a' \in C) => Ha'C; last by rewrite fdist_uniform_supp_notin.
+    have Habs : a' = a by apply: f_inj Ha'C Ha _; rewrite Ha' Hab.
+    by rewrite Habs eqxx in Hneq.
+  congr (_ ^-1).
+  by rewrite card_in_imset.
+(* b not in image: no preimage in C *)
+rewrite fdist_uniform_supp_notin //.
+apply: big1 => a /eqP Hfa.
+case/boolP: (a \in C) => HaC.
+  exfalso; move/negP: Hb; apply.
+  by rewrite -Hfa; apply/imsetP; exists a.
+by rewrite fdist_uniform_supp_notin.
+Qed.
+
+End fdistmap_uniform_supp_inj.
+
+(******************************************************************************)
+(*  Section 10: Direct endpoint epsilon for groups with injective eval_s     *)
+(*                                                                            *)
+(*  When word_eval is injective (weval_inj L) AND eval_s is injective on    *)
+(*  achievable(L), the endpoint distribution is uniform_supp over            *)
+(*  eval_s(achievable(L)), giving epsilon = 2*(N - Tg^L)/N.                 *)
+(*  This is tighter than the DPI bound 2*(N! - Tg^L)/N!.                    *)
+(******************************************************************************)
+
+Section direct_endpoint_epsilon.
+
+Context {R : realType}.
+Variable N'' : nat.
+Let N' := N''.+1.
+Let N := N'.+1.
+
+Variable m : nat.
+Let Tg := m.+1.
+Variable L : nat.
+Variable sigmas : Tg.-tuple {perm 'I_N}.
+Let M := Gen_PGGTypes sigmas.
+
+Hypothesis Hlfree : @weval_inj M L.
+
+(* The endpoint evaluation function *)
+Let eval_at (s : 'I_N) : {perm 'I_N} -> 'I_N :=
+  fun sigma => sigma s.
+
+(* eval_at s is injective on achievable(L) for each starting sheet s *)
+Hypothesis Hinj_s :
+  forall s : 'I_N,
+  {in @achievable M L &, injective (eval_at s)}.
+
+(* The key bound: epsilon = 2*(N - Tg^L)/N with denominator N, not N! *)
+Let direct_eps : R := 2%:R * (N - Tg ^ L)%:R / N%:R.
+
+Lemma direct_eps_ge0 : 0 <= direct_eps.
+Proof.
+rewrite /direct_eps.
+apply: divr_ge0; last by rewrite ler0n.
+by rewrite mulr_ge0 // ler0n.
+Qed.
+
+Lemma achievable_card_TgL : #|@achievable M L| = (Tg ^ L)%N.
+Proof.
+have -> : #|@achievable M L| = @search_space M L by [].
+by rewrite weval_inj_search_space.
+Qed.
+
+Lemma achievable_pos' : (0 < #|@achievable M L|)%N.
+Proof. by rewrite achievable_card_TgL expn_gt0. Qed.
+
+(* The image of achievable through eval_at s has cardinality Tg^L *)
+Lemma eval_s_image_card (s : 'I_N) :
+  #|(eval_at s) @: @achievable M L| = (Tg ^ L)%N.
+Proof.
+rewrite card_in_imset; last first.
+  have Hs : {in @achievable M L &, injective (eval_at s)}.
+    exact: Hinj_s.
+  exact: Hs.
+exact: achievable_card_TgL.
+Qed.
+
+Lemma eval_s_image_pos (s : 'I_N) :
+  (0 < #|(eval_at s) @: @achievable M L|)%N.
+Proof. by rewrite eval_s_image_card expn_gt0. Qed.
+
+Lemma TgL_leq_N : (Tg ^ L <= N)%N.
+Proof.
+rewrite -(eval_s_image_card ord0).
+apply: (leq_trans (max_card _)).
+by rewrite card_ord.
+Qed.
+
+(* Direct endpoint bound: for each sheet s, the marginal endpoint
+   distribution is at distance 2*(N-Tg^L)/N from uniform.
+   This is TIGHTER than the DPI bound 2*(N!-Tg^L)/N!. *)
+Theorem var_dist_endpoint_direct (s : 'I_N) :
+  var_dist (fdistmap (eval_at s) (rho_from_words L sigmas))
+           (fdist_uniform (card_ord N)) <= direct_eps.
+Proof.
+rewrite (rho_from_words_uniform_supp Hlfree).
+have Hs : {in @achievable M L &, injective (eval_at s)}.
+  exact: Hinj_s.
+rewrite (fdistmap_uniform_supp_inj _ Hs).
+rewrite var_dist_uniform_supp.
+rewrite eval_s_image_card card_ord /direct_eps.
+exact: Order.POrderTheory.lexx.
+Qed.
+
+End direct_endpoint_epsilon.
+
+(******************************************************************************)
+(*  Section 11: Balanced-case var_dist for non-injective eval_s              *)
+(*                                                                            *)
+(*  When |achievable(L)| = N (balanced case, i.e., Tg^L = N), the var_dist  *)
+(*  of fdistmap eval_s (uniform_supp achievable) against uniform depends     *)
+(*  ONLY on the image size, not the fiber distribution. Specifically:         *)
+(*    var_dist = 2*(N - |image_s|)/N                                         *)
+(*  This equals the var_dist that uniform_supp(image_s) has from uniform.    *)
+(*                                                                            *)
+(*  Applicable to: OC (Tg^L = 2^2 = 4 = N)                                  *)
+(******************************************************************************)
+
+Section balanced_var_dist.
+
+Context {R : realType}.
+Variables (A B : finType).
+Variable C : {set A}.
+Hypothesis HC : (0 < #|C|)%N.
+Variable f : A -> B.
+Variable n : nat.
+Hypothesis Hn : #|B| = n.+1.
+Hypothesis Hbal : #|C| = n.+1.
+
+Let img := f @: C.
+
+Let Himg_pos : (0 < #|img|)%N.
+Proof.
+rewrite card_gt0; apply/set0Pn.
+have /card_gt0P [a Ha] := HC.
+by exists (f a); apply/imsetP; exists a.
+Qed.
+
+(* The balanced-case var_dist formula.
+   When |C| = |B|, fibers partition C into |B| groups summing to |C| = |B|.
+   The var_dist only depends on how many groups are empty (= |B| - |image|). *)
+Lemma var_dist_fdistmap_balanced :
+  var_dist (fdistmap f (@fdist_uniform_supp R _ C HC))
+           (fdist_uniform Hn) =
+  2%:R * (#|B| - #|img|)%:R / #|B|%:R.
+Proof.
+rewrite /var_dist.
+have HBnz : (#|B|%:R : R) != 0 by rewrite pnatr_eq0 Hn.
+have HCnz : (#|C|%:R : R) != 0 by rewrite pnatr_eq0 -lt0n.
+have HCB : #|C| = #|B| by rewrite Hbal Hn.
+rewrite (bigID (fun b => b \in img)) /=.
+(* For b not in image, fdistmap = 0 *)
+have Hnoimg : forall b0 : B, b0 \notin img -> @fdistmap R _ _ f (`U HC) b0 = 0.
+  move=> b0 Hb0.
+  rewrite fdistmapE big1 //.
+  move=> a; rewrite inE => /eqP Hfa.
+  apply: fdist_uniform_supp_notin; apply/negP => HaC.
+  move/negP: Hb0; apply; apply/imsetP; exists a => //.
+(* Sum over b not in img: |0 - 1/|B|| = 1/|B|, count = |B| - |img| *)
+have HS2 : \sum_(i | i \notin img)
+    `|@fdistmap R _ _ f (`U HC) i - fdist_uniform Hn i| =
+  (#|B| - #|img|)%:R / #|B|%:R.
+  under eq_bigr => b0 Hb0.
+    rewrite Hnoimg // sub0r normrN ger0_norm ?FDist.ge0 // fdist_uniformE.
+    over.
+  rewrite sumr_const mulr_natl.
+  suff -> : #|[pred i | i \notin img]| = (#|B| - #|img|)%N by [].
+  have -> : #|[pred i | i \notin img]| = #|~: img|.
+    by apply: eq_card => b0; rewrite inE inE.
+  by rewrite cardsCs setCK.
+rewrite HS2.
+(* Reduce to showing the img-sum also equals (|B|-|img|)/|B| *)
+suff HS1 : \sum_(i in img)
+    `|@fdistmap R _ _ f (`U HC) i - fdist_uniform Hn i| =
+  (#|B| - #|img|)%:R / #|B|%:R.
+  by rewrite HS1 -mulrDl -mulr2n mulr_natl.
+(* Use: Σ_b P(b) = 1 = Σ_b Q(b), so Σ_b (P(b)-Q(b)) = 0 *)
+have Hsum0 : \sum_(i : B)
+    (@fdistmap R _ _ f (`U HC) i - fdist_uniform Hn i) = 0.
+  by rewrite sumrB !FDist.f1 subrr.
+(* Signed sum over b not in img *)
+have Hnoimg_signed : \sum_(i | i \notin img)
+    (@fdistmap R _ _ f (`U HC) i - fdist_uniform Hn i) =
+  - ((#|B| - #|img|)%:R / #|B|%:R).
+  rewrite (eq_bigr (fun b0 => - fdist_uniform Hn b0)); last first.
+    by move=> b0 Hb0; rewrite Hnoimg // sub0r.
+  rewrite sumrN (eq_bigr (fun _ => #|B|%:R^-1)); last first.
+    by move=> b0 _; rewrite fdist_uniformE.
+  rewrite sumr_const mulr_natl.
+  have -> : #|[pred i | i \notin img]| = (#|B| - #|img|)%N.
+    have -> : #|[pred i | i \notin img]| = #|~: img|.
+      by apply: eq_card => b0; rewrite inE inE.
+    by rewrite cardsCs setCK.
+  by [].
+(* Signed sum over img = (|B|-|img|)/|B| (from Σ=0 and complement) *)
+have Hdiff : \sum_(i in img)
+    (@fdistmap R _ _ f (`U HC) i - fdist_uniform Hn i) =
+  (#|B| - #|img|)%:R / #|B|%:R.
+  move: Hsum0.
+  rewrite (bigID (fun b => b \in img)) /= Hnoimg_signed.
+  by move/eqP; rewrite addr_eq0 => /eqP ->; rewrite opprK.
+(* Each term in img-sum is non-negative (fiber >= 1 implies P(b) >= Q(b)),
+   so |P(b)-Q(b)| = P(b)-Q(b) and the abs-sum equals the signed sum *)
+rewrite -Hdiff.
+apply: eq_bigr => b0 Hb0.
+rewrite ger0_norm //; rewrite subr_ge0.
+rewrite fdist_uniformE fdistmapE.
+have [a0 Ha0C Hfa0] : exists2 a0, a0 \in C & f a0 = b0.
+  by move/imsetP: Hb0 => [a0 Ha0C Hfa0]; exists a0.
+rewrite (bigD1 a0) /=; last first.
+  by rewrite inE; apply/eqP.
+apply: ler_wpDr; first by apply: sumr_ge0 => a _; exact: FDist.ge0.
+by rewrite fdist_uniform_supp_in // HCB.
+Qed.
+
+End balanced_var_dist.
+
+(* Unbalanced case: when |C| <= |B|, the var_dist formula still holds.
+   This applies e.g. to S_5 where |achievable(1)| = 4 < 5 = N. *)
+Section unbalanced_var_dist.
+
+Context {R : realType}.
+Variables (A B : finType).
+Variable C : {set A}.
+Hypothesis HC : (0 < #|C|)%N.
+Variable f : A -> B.
+Variable n : nat.
+Hypothesis Hn : #|B| = n.+1.
+Hypothesis HCleB : (#|C| <= #|B|)%N.
+
+Let img := f @: C.
+
+Lemma var_dist_fdistmap_unbalanced :
+  var_dist (fdistmap f (@fdist_uniform_supp R _ C HC))
+           (fdist_uniform Hn) =
+  2%:R * (#|B| - #|img|)%:R / #|B|%:R.
+Proof.
+rewrite /var_dist.
+have HBnz : (#|B|%:R : R) != 0 by rewrite pnatr_eq0 Hn.
+have HCnz : (#|C|%:R : R) != 0 by rewrite pnatr_eq0 -lt0n.
+rewrite (bigID (fun b => b \in img)) /=.
+(* For b not in image, fdistmap = 0 *)
+have Hnoimg : forall b0 : B, b0 \notin img -> @fdistmap R _ _ f (`U HC) b0 = 0.
+  move=> b0 Hb0.
+  rewrite fdistmapE big1 //.
+  move=> a; rewrite inE => /eqP Hfa.
+  apply: fdist_uniform_supp_notin; apply/negP => HaC.
+  move/negP: Hb0; apply; apply/imsetP; exists a => //.
+(* Sum over b not in img: |0 - 1/|B|| = 1/|B|, count = |B| - |img| *)
+have HS2 : \sum_(i | i \notin img)
+    `|@fdistmap R _ _ f (`U HC) i - fdist_uniform Hn i| =
+  (#|B| - #|img|)%:R / #|B|%:R.
+  under eq_bigr => b0 Hb0.
+    rewrite Hnoimg // sub0r normrN ger0_norm ?FDist.ge0 // fdist_uniformE.
+    over.
+  rewrite sumr_const mulr_natl.
+  suff -> : #|[pred i | i \notin img]| = (#|B| - #|img|)%N by [].
+  have -> : #|[pred i | i \notin img]| = #|~: img|.
+    by apply: eq_card => b0; rewrite inE inE.
+  by rewrite cardsCs setCK.
+rewrite HS2.
+(* Reduce to showing the img-sum also equals (|B|-|img|)/|B| *)
+suff HS1 : \sum_(i in img)
+    `|@fdistmap R _ _ f (`U HC) i - fdist_uniform Hn i| =
+  (#|B| - #|img|)%:R / #|B|%:R.
+  by rewrite HS1 -mulrDl -mulr2n mulr_natl.
+(* Use: Σ_b P(b) = 1 = Σ_b Q(b), so Σ_b (P(b)-Q(b)) = 0 *)
+have Hsum0 : \sum_(i : B)
+    (@fdistmap R _ _ f (`U HC) i - fdist_uniform Hn i) = 0.
+  by rewrite sumrB !FDist.f1 subrr.
+(* Signed sum over b not in img *)
+have Hnoimg_signed : \sum_(i | i \notin img)
+    (@fdistmap R _ _ f (`U HC) i - fdist_uniform Hn i) =
+  - ((#|B| - #|img|)%:R / #|B|%:R).
+  rewrite (eq_bigr (fun b0 => - fdist_uniform Hn b0)); last first.
+    by move=> b0 Hb0; rewrite Hnoimg // sub0r.
+  rewrite sumrN (eq_bigr (fun _ => #|B|%:R^-1)); last first.
+    by move=> b0 _; rewrite fdist_uniformE.
+  rewrite sumr_const mulr_natl.
+  have -> : #|[pred i | i \notin img]| = (#|B| - #|img|)%N.
+    have -> : #|[pred i | i \notin img]| = #|~: img|.
+      by apply: eq_card => b0; rewrite inE inE.
+    by rewrite cardsCs setCK.
+  by [].
+(* Signed sum over img = (|B|-|img|)/|B| (from Σ=0 and complement) *)
+have Hdiff : \sum_(i in img)
+    (@fdistmap R _ _ f (`U HC) i - fdist_uniform Hn i) =
+  (#|B| - #|img|)%:R / #|B|%:R.
+  move: Hsum0.
+  rewrite (bigID (fun b => b \in img)) /= Hnoimg_signed.
+  by move/eqP; rewrite addr_eq0 => /eqP ->; rewrite opprK.
+(* Each term in img-sum is non-negative (fiber >= 1, |C| <= |B| implies
+   P(b) = fiber/|C| >= 1/|C| >= 1/|B| = Q(b)) *)
+rewrite -Hdiff.
+apply: eq_bigr => b0 Hb0.
+rewrite ger0_norm //; rewrite subr_ge0.
+rewrite fdist_uniformE fdistmapE.
+have [a0 Ha0C Hfa0] : exists2 a0, a0 \in C & f a0 = b0.
+  by move/imsetP: Hb0 => [a0 Ha0C Hfa0]; exists a0.
+rewrite (bigD1 a0) /=; last first.
+  by rewrite inE; apply/eqP.
+apply: ler_wpDr; first by apply: sumr_ge0 => a _; exact: FDist.ge0.
+rewrite fdist_uniform_supp_in //.
+rewrite -div1r -[_^-1 in X in _ <= X]div1r.
+rewrite ler_pdivlMr ?ltr0n -?lt0n //.
+by rewrite mul1r ler_pdivrMr ?ltr0n ?Hn // mul1r ler_nat.
+Qed.
+
+End unbalanced_var_dist.
+
+(* Unbalanced endpoint image bound: when |C| <= N (e.g., Tg^L < N),
+   the bound 2*(N - img_min)/N still holds. *)
+Section endpoint_image_bound_unbalanced.
+
+Context {R : realType}.
+Variable N'' : nat.
+Let N' := N''.+1.
+Let N := N'.+1.
+
+Variable m : nat.
+Let Tg := m.+1.
+Variable L : nat.
+Variable sigmas : Tg.-tuple {perm 'I_N}.
+Let M := Gen_PGGTypes sigmas.
+
+Hypothesis Hlfree : @weval_inj M L.
+
+Lemma var_dist_endpoint_unbalanced
+    (HCleN : (Tg ^ L <= N)%N) (s : 'I_N) :
+  var_dist (fdistmap (fun sigma : {perm 'I_N} => sigma s)
+                     (@rho_from_words R N'' m L sigmas))
+           (fdist_uniform (card_ord N)) =
+  2%:R * (N - #|(fun sigma : {perm 'I_N} => sigma s) @: @achievable M L|)%:R / N%:R.
+Proof.
+rewrite (rho_from_words_uniform_supp Hlfree).
+rewrite (@var_dist_fdistmap_unbalanced R _ _ _ _ _ N' (card_ord N)) //.
+have -> : #|@achievable M L| = @search_space M L by [].
+by rewrite weval_inj_search_space.
+Qed.
+
+Lemma var_dist_endpoint_image_bound_unbalanced
+    (HCleN : (Tg ^ L <= N)%N) (img_min : nat) (s : 'I_N)
+    (Himg : (img_min <= #|(fun sigma : {perm 'I_N} => sigma s) @: @achievable M L|)%N) :
+  (var_dist (fdistmap (fun sigma : {perm 'I_N} => sigma s)
+                     (@rho_from_words R N'' m L sigmas))
+           (fdist_uniform (card_ord N)) <= 2%:R * (N - img_min)%:R / N%:R)%O.
+Proof.
+rewrite var_dist_endpoint_unbalanced //.
+apply: ler_wpM2r; first by rewrite invr_ge0 ler0n.
+apply: ler_wpM2l; first by rewrite ler0n.
+by rewrite ler_nat leq_sub2l.
+Qed.
+
+End endpoint_image_bound_unbalanced.
+
+(******************************************************************************)
+(*  Section 12: Image size bound via nat-level computation                   *)
+(*                                                                            *)
+(*  For concrete instances, |eval_s @: achievable| can be computed at the    *)
+(*  nat level using eval_word_nat, then reflected to the type level.          *)
+(******************************************************************************)
+
+Section endpoint_image_bound.
+
+Context {R : realType}.
+Variable N'' : nat.
+Let N' := N''.+1.
+Let N := N'.+1.
+
+Variable m : nat.
+Let Tg := m.+1.
+Variable L : nat.
+Variable sigmas : Tg.-tuple {perm 'I_N}.
+Let M := Gen_PGGTypes sigmas.
+
+Hypothesis Hlfree : @weval_inj M L.
+
+(* When Tg^L = N (balanced), the fiber-counted var_dist reduces to
+   the image-size formula 2*(N - |image_s|)/N. *)
+Lemma var_dist_endpoint_balanced
+    (Hbal : (Tg ^ L = N)%N) (s : 'I_N) :
+  var_dist (fdistmap (fun sigma : {perm 'I_N} => sigma s)
+                     (@rho_from_words R N'' m L sigmas))
+           (fdist_uniform (card_ord N)) =
+  2%:R * (N - #|(fun sigma : {perm 'I_N} => sigma s) @: @achievable M L|)%:R / N%:R.
+Proof.
+rewrite (rho_from_words_uniform_supp Hlfree).
+rewrite (@var_dist_fdistmap_balanced R _ _ _ _ _ N' (card_ord N)).
+  by rewrite card_ord /M.
+have -> : #|@achievable M L| = @search_space M L by [].
+by rewrite weval_inj_search_space // Hbal.
+Qed.
+
+(* The key corollary: bound var_dist by bounding |image_s| from below *)
+Lemma var_dist_endpoint_image_bound
+    (Hbal : (Tg ^ L = N)%N) (img_min : nat) (s : 'I_N)
+    (Himg : (img_min <= #|(fun sigma : {perm 'I_N} => sigma s) @: @achievable M L|)%N) :
+  (var_dist (fdistmap (fun sigma : {perm 'I_N} => sigma s)
+                     (@rho_from_words R N'' m L sigmas))
+           (fdist_uniform (card_ord N)) <= 2%:R * (N - img_min)%:R / N%:R)%O.
+Proof.
+rewrite var_dist_endpoint_balanced //.
+apply: ler_wpM2r; first by rewrite invr_ge0 ler0n.
+apply: ler_wpM2l; first by rewrite ler0n.
+by rewrite ler_nat leq_sub2l.
+Qed.
+
+End endpoint_image_bound.
+
 Check collusion_bound.
 Check collusion_bound_unconditional.
 Check collusion_bound_conditional.
-Check var_dist_weval_inj_uniform.
-Check var_dist_weval_inj_eval.
 Check collusion_bound_k.
+Check fdistmap_uniform_supp_inj.
+Check var_dist_endpoint_direct.
