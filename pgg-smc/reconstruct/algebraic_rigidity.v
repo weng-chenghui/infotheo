@@ -6,7 +6,7 @@
 (* Given a monodromy representation with generators M, the algebraic          *)
 (* structure determines:                                                      *)
 (*   1. Complexity — search_space L <= |G| (from pgg_interface.v)            *)
-(*   2. Security — var_dist(rho_dist, uniform) <= epsilon (collusion_bound)  *)
+(*   2. Security — var_dist(endpoint, uniform) <= epsilon (endpoint bound)   *)
 (*   3. Threshold — gap <= 2*genus, with genus-0 -> gap=0 (covering_scheme)  *)
 (*   4. Round complexity — depth <= L (trivial), refined for RAAG via Foata  *)
 (*                                                                            *)
@@ -14,28 +14,17 @@
 (* choice (G, rho, sigmas). No further degrees of freedom exist.             *)
 (*                                                                            *)
 (* Records:                                                                   *)
-(*   SecurityWitness R M == packages the security guarantee                   *)
+(*   SecurityWitness R M == packages the endpoint-level security guarantee    *)
 (*   ThresholdWitness M  == packages the covering scheme + PGL hypothesis     *)
 (*   RoundComplexityWitness == packages word length, round depth, and bound   *)
 (*   AlgebraicRigidity R M == combines all three into a unified witness       *)
 (*                                                                            *)
-(* Generic constructor:                                                       *)
-(*   security_witness_any_L == SecurityWitness for ANY L with weval_inj(L)    *)
-(*                                                                            *)
-(* Note on SecurityWitness and L:                                             *)
-(*   The security bound epsilon = 2*(N! - Tg^L)/N! is parametric in L:       *)
-(*   var_dist_weval_inj_uniform proves it for any L where weval_inj(L) holds. *)
-(*   Since Tg^L is monotonically increasing in L, epsilon DECREASES with L:  *)
-(*   larger L means more distinct group elements are reachable, bringing the  *)
-(*   word distribution closer to uniform over S_N. Therefore:                 *)
-(*     - The SMALLEST L with weval_inj(L) gives the WORST-CASE (largest)     *)
-(*       epsilon                                                              *)
-(*     - Concrete instances (S_5 at L=1, OC at L=2) pick this smallest L     *)
-(*       because it represents the most conservative security guarantee       *)
-(*     - All larger L with weval_inj(L) automatically have tighter bounds    *)
-(*   The generic constructor security_witness_any_L makes this explicit:      *)
-(*   given ANY (G, sigmas) and ANY L with weval_inj(L), it produces a valid  *)
-(*   SecurityWitness.                                                         *)
+(* Constructors:                                                              *)
+(*   security_witness_fiber == SecurityWitness from fiber-counted epsilon      *)
+(*     Accepts any epsilon + proof; instances use vm_compute/case analysis.   *)
+(*     Applicable to: OC (eps=1), S5 (eps=6/5), Star (eps=2(m+1)/(m+3))   *)
+(*   security_witness_endpoint_inj == for eval_s-injective groups             *)
+(*     Epsilon = 2*(N - Tg^L)/N. Applicable to: NCycle, Abelian, Monster     *)
 (*                                                                            *)
 (* Derived properties:                                                        *)
 (*   ar_complexity      == search space bounded by |G|                        *)
@@ -53,11 +42,11 @@
 From HB Require Import structures.
 From mathcomp Require Import ssreflect ssrbool ssrfun eqtype ssrnat seq.
 From mathcomp Require Import fintype tuple finfun finset fingroup perm.
-From mathcomp Require Import morphism bigop div order ssrnum.
+From mathcomp Require Import morphism bigop div order ssrnum ssralg.
 From mathcomp Require Import boolp reals.
 From infotheo Require Import realType_ext fdist proba variation_dist.
 From pgg_smc Require Import perm_uniform pgg_interface pgg_weval_inj pgg_raag.
-From pgg_smc Require Import pgg_collusion_bound.
+From pgg_smc Require Import pgg_collusion_bound pgg_security_solver.
 From pgg_reconstruct Require Import pgg_sharing_framework covering_scheme
                                     cover_tradeoff.
 
@@ -82,9 +71,10 @@ Record SecurityWitness := MkSecurityWitness {
   sw_L : nat;
   sw_epsilon : R;
   sw_rho_dist : R.-fdist {perm 'I_N'.+1};
-  sw_assumption1 :
-    (var_dist sw_rho_dist
-             (fdist_uniform (card_permT_N N')) <= sw_epsilon)%O
+  sw_endpoint_bound :
+    forall (s : 'I_N'.+1),
+    (var_dist (fdistmap (fun sigma : {perm 'I_N'.+1} => sigma s) sw_rho_dist)
+              (fdist_uniform (card_ord N'.+1)) <= sw_epsilon)%O
 }.
 
 Record ThresholdWitness := MkThresholdWitness {
@@ -113,33 +103,67 @@ Arguments RoundComplexityWitness : clear implicits.
 Arguments AlgebraicRigidity R M : clear implicits.
 
 (******************************************************************************)
-(*     Generic SecurityWitness Constructor                                    *)
+(*     Fiber-Counted SecurityWitness Constructor                              *)
 (*                                                                            *)
-(* The security bound var_dist(rho_L, uniform) <= 2*(N! - Tg^L)/N! holds     *)
-(* for ANY L where weval_inj(L) is satisfied (see                             *)
-(* var_dist_weval_inj_uniform in pgg_collusion_bound.v). This constructor     *)
-(* makes the generality explicit: given any generated monodromy               *)
-(* representation and any L with weval_inj(L), it produces a                  *)
-(* SecurityWitness. Concrete instances (S_5, OC, etc.) pick specific L        *)
-(* values — typically the smallest L with weval_inj(L), which gives the       *)
-(* worst-case (largest) epsilon and thus the most conservative bound.         *)
+(* For groups where eval_s is NOT injective on achievable(L), the direct      *)
+(* endpoint bound is invalid. Instead, each instance proves its own           *)
+(* var_dist bound by fiber counting (case analysis, vm_compute, or            *)
+(* parametric algebra). The constructor accepts epsilon + proof directly.      *)
+(*                                                                            *)
+(* Applicable to: OC (eps=1), S5 (eps=6/5), Star (eps=2(m+1)/(m+3))       *)
 (******************************************************************************)
 
-Section generic_security.
+Section fiber_security.
 
 Variable R : realType.
 Variable m n' : nat.
 Variable sigmas : m.+1.-tuple {perm 'I_n'.+2}.
 Let M := Gen_PGGTypes sigmas.
 
-(* For any L where weval_inj holds, we get a SecurityWitness *)
-Definition security_witness_any_L (L : nat) (Hlfree : @weval_inj M L) :
-    SecurityWitness R M :=
+Definition security_witness_fiber (L : nat)
+    (Hlfree : @weval_inj M L)
+    (epsilon : R)
+    (Hbound : forall s : 'I_n'.+2,
+      (var_dist (fdistmap (fun sigma : {perm 'I_n'.+2} => sigma s)
+                         (rho_from_words L sigmas))
+               (fdist_uniform (card_ord n'.+2)) <= epsilon)%O)
+    : SecurityWitness R M :=
+  @MkSecurityWitness R M L epsilon
+    (rho_from_words L sigmas) Hbound.
+
+End fiber_security.
+
+(******************************************************************************)
+(*     Direct Endpoint SecurityWitness Constructor                            *)
+(*                                                                            *)
+(* When eval_s is injective on achievable(L) for each starting sheet s,       *)
+(* the endpoint distribution is closer to uniform than the DPI bound gives.  *)
+(* Epsilon = 2*(N - Tg^L)/N (denominator N, not N!).                         *)
+(*                                                                            *)
+(* Applicable to: Cyclic (Tg=1, eval_s trivially injective),                 *)
+(*                Abelian (Tg=2, N=4, eval_s injective on achievable(1))     *)
+(* NOT applicable to: Star, S5, OC, Monster (eval_s not injective on         *)
+(*                    achievable for all sheets)                              *)
+(******************************************************************************)
+
+Section direct_endpoint_security.
+
+Variable R : realType.
+Variable m n' : nat.
+Variable sigmas : m.+1.-tuple {perm 'I_n'.+2}.
+Let M := Gen_PGGTypes sigmas.
+
+Definition security_witness_endpoint_inj (L : nat)
+    (Hlfree : @weval_inj M L)
+    (Hinj_s : forall s : 'I_n'.+2,
+      {in @achievable M L &,
+       injective (fun sigma : {perm 'I_n'.+2} => sigma s)})
+    : SecurityWitness R M :=
   @MkSecurityWitness R M L _
     (rho_from_words L sigmas)
-    (@var_dist_weval_inj_uniform R _ m L sigmas Hlfree).
+    (var_dist_endpoint_direct Hlfree Hinj_s).
 
-End generic_security.
+End direct_endpoint_security.
 
 (******************************************************************************)
 (*     Derived Properties                                                     *)
@@ -251,3 +275,113 @@ Lemma ar_search_space_chain (L : nat) :
 Proof. exact: search_space_chain. Qed.
 
 End raag_derived_properties.
+
+(******************************************************************************)
+(*     SecurityProfile: SecurityWitness + L* + nontriviality                  *)
+(*                                                                            *)
+(* A SecurityProfile bundles a SecurityWitness with:                          *)
+(*   - sp_Lstar: the specific word length (turning point)                     *)
+(*   - sp_nontrivial: epsilon < 2 (strictly better than trivial bound)        *)
+(*                                                                            *)
+(* Why < 2: The DPI epsilon is always < 2 when Tg^L >= 1 (trivially true).   *)
+(* The threshold < 1 requires the direct endpoint bound which only some       *)
+(* instances can provide. Using < 2 means ALL existing instances can build    *)
+(* a SecurityProfile immediately.                                             *)
+(*                                                                            *)
+(* Why no monotonicity: weval_inj(L) does NOT imply weval_inj(L+1).          *)
+(* OC has weval_inj(2) but not weval_inj(3) (generator cubes collide).       *)
+(* So SecurityProfile only requires weval_inj at L*, not everywhere.          *)
+(******************************************************************************)
+
+Section security_profile.
+
+Variable R : realType.
+Variable M : GeneratedMonodromyReprType.
+
+Local Open Scope ring_scope.
+
+Let eps_bound := (2%:R : R).
+
+Record SecurityProfile := MkSecurityProfile {
+  sp_Lstar : nat ;
+  sp_witness : SecurityWitness R M ;
+  sp_at_Lstar : sw_L sp_witness = sp_Lstar ;
+  sp_nontrivial : is_true (Num.lt (sw_epsilon sp_witness) eps_bound)
+}.
+
+(* Constructor from AlgebraicRigidity, when epsilon < 2 can be proved *)
+Definition ar_security_profile (ar : AlgebraicRigidity R M)
+    (Hlt2 : is_true (Num.lt (sw_epsilon (ar_security ar)) eps_bound))
+    : SecurityProfile :=
+  @MkSecurityProfile
+    (sw_L (ar_security ar))
+    (ar_security ar)
+    erefl
+    Hlt2.
+
+End security_profile.
+
+Arguments SecurityProfile R M : clear implicits.
+
+(******************************************************************************)
+(*     CertifiedSolution: Bridge from computable solver to proof witness     *)
+(*                                                                           *)
+(*     Connects the nat-level SecurityParams (from dealer_solve/raag_template *)
+(*     via vm_compute) to the proof-level SecurityWitness.                   *)
+(*                                                                           *)
+(*     Since the solver uses raag_fiber_eps_nat (same formula as the witness *)
+(*     fiber counting), cs_eps_le is typically lexx (reflexivity) for all    *)
+(*     RAAG instances.                                                       *)
+(******************************************************************************)
+
+Section certified_solution.
+
+Variable R : realType.
+Variable M : GeneratedMonodromyReprType.
+
+Local Open Scope ring_scope.
+
+Record CertifiedSolution := MkCertifiedSolution {
+  cs_params    : SecurityParams ;
+  cs_witness   : SecurityWitness R M ;
+  cs_L_eq      : sw_L cs_witness = sp_L cs_params ;
+  cs_denom_pos : (0 < (sp_eps cs_params).2)%N ;
+  cs_eps_le    : (sw_epsilon cs_witness <=
+                  (sp_eps cs_params).1%:R / (sp_eps cs_params).2%:R)%O
+}.
+
+End certified_solution.
+
+Arguments CertifiedSolution R M : clear implicits.
+
+(******************************************************************************)
+(*     Generic CertifiedSolution Constructor                                  *)
+(*                                                                            *)
+(* Any SecurityWitness with known rational epsilon gives a CertifiedSolution. *)
+(* Works for ALL groups — RAAG and non-RAAG alike (Monster, Star, S5, etc.). *)
+(*                                                                            *)
+(* Architecture layers:                                                       *)
+(*   Layer 1 (Computable — RAAG only):                                       *)
+(*     RAAGDesc -> dealer_solve -> SecurityParams (uses vm_compute)           *)
+(*   Layer 2 (Proof-level — ANY GeneratedMonodromyReprType):                  *)
+(*     SecurityWitness -> certified_from_witness -> CertifiedSolution         *)
+(*     AlgebraicRigidity + PGGInterface + G_stable -> ar_protocol_correct     *)
+(******************************************************************************)
+
+Section certified_from_witness.
+
+Variable R : realType.
+Variable M : GeneratedMonodromyReprType.
+
+Local Open Scope ring_scope.
+
+Definition certified_from_witness
+    (sw : SecurityWitness R M)
+    (eps_n eps_d : nat) (Hd : (0 < eps_d)%N)
+    (Hle : (sw_epsilon sw <= eps_n%:R / eps_d%:R)%O)
+    : CertifiedSolution R M :=
+  @MkCertifiedSolution R M
+    (MkSP (@pgg_ngens' M).+1 (pgg_N' M).+1 (sw_L sw) (eps_n, eps_d))
+    sw erefl Hd Hle.
+
+End certified_from_witness.
