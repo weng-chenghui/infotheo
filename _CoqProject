@@ -147,6 +147,7 @@ pgg-smc/groups/pgg_raag_clique.v
 pgg-smc/groups/pgg_raag_cartier_foata.v
 pgg-smc/security/pgg_collusion_bound.v
 pgg-smc/security/pgg_security_solver.v
+pgg-smc/security/pgg_entropy_security.v
 pgg-smc/security/pgg_security_demo.v
 pgg-smc/security/pgg_word_analysis.v
 pgg-smc/security/pgg_abelian_collapse.v
