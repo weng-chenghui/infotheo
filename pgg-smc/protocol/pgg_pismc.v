@@ -3,24 +3,88 @@
 From HB Require Import structures.
 From mathcomp Require Import ssreflect ssrbool ssrfun eqtype ssrnat seq.
 From mathcomp Require Import fintype tuple finfun finset fingroup perm morphism.
+From mathcomp Require Import boolp reals.
 Require Import smc_interpreter pismc smc_session_types.
 Require Import pgg_interface pgg_session_types.
+Require Import pgg_weval_inj.
+Require Import pgg_raag_star.
+Require Import pgg_oc_param.
+Require Import pgg_abelian.
+From pgg_smc Require Import pgg_security_solver.
+From pgg_reconstruct Require Import algebraic_rigidity.
 From pgg_reconstruct Require Import rigidity_monster_instance.
+From pgg_reconstruct Require Import rigidity_abelian_instance.
 
 (******************************************************************************)
 (* PGG-SMC: piSMC Protocol Programs                                          *)
 (*                                                                            *)
-(* The SMC-PGG protocol computes a secret-shared function via covering        *)
-(* spaces.  A dealer who knows a group element g in G (the "secret path")     *)
-(* distributes to each party i the column of the permutation table            *)
-(* [rho(g)(s_0), ..., rho(g)(s_{T-1})].  To evaluate a public word           *)
-(* w = sigma_{j_1} ... sigma_{j_L}, each party looks up position j in        *)
-(* their share and sends the endpoint rho(w)(s_i) to the reconstructor.      *)
+(* Types involved:                                                            *)
+(*   generator index ('I_Tg) -- a "letter": picks one of Tg generators      *)
+(*   word (L.-tuple 'I_Tg)  -- a sequence of L letters                      *)
+(*   group element (gT)      -- word_eval(w) = sigma_{w_0} * ... * sigma_{w_{L-1}} *)
+(*                              a permutation in G <= S_N                    *)
+(*   sheet ID ('I_N)         -- a position in {0,..,N-1} that perms act on   *)
+(*   endpoint : 'I_N         -- rho(g)(s), the image of sheet s under g     *)
+(*   secret                  -- ts_recon(endpoints), recovered by threshold  *)
+(*                              scheme from k collected coordinates          *)
+(*                                                                            *)
+(* The dealer samples a random word w uniformly from Tg^L choices,          *)
+(* evaluates word_eval(w) to get a permutation (the randomness), and        *)
+(* distributes each party's endpoint (a coordinate). The reconstructor      *)
+(* collects k endpoints and applies ts_recon to recover the secret.         *)
+(* What the secret is depends on the threshold scheme:                       *)
+(*   - Genus 0 (Shamir/RS): a field element via polynomial interpolation    *)
+(*   - Genus g (AG codes): determined by AG code decoding                    *)
+(*   - Sum-mod-N: (sum of endpoints) mod N                                   *)
+(*                                                                            *)
+(* How the secret is determined:                                             *)
+(* 1. The dealer encodes secret s as starting sheets: ts_encode(s).        *)
+(* 2. The word w scrambles these sheets: word_eval(w) applies a coordinate *)
+(*    permutation (invisible to reconstruction by ts_perm_compatible).     *)
+(* 3. The reconstructor collects endpoints and recovers s via ts_recon.    *)
+(* The secret is fixed by the starting sheets, not by the word.            *)
+(* ts_encode_valid guarantees ts_valid(s, ts_encode(s)), so the dealer     *)
+(* always produces a valid configuration. dealer_encode_correct             *)
+(* (pgg_dealer_bridge.v) is the end-to-end theorem.                        *)
+(*                                                                            *)
+(* Example: recovering the number 39 with the Monster group (N ~ 10^20).    *)
+(* The starting sheets [s_0, ..., s_{T-1}] are chosen so that              *)
+(* ts_valid(39, starts) holds for the threshold scheme. The dealer samples  *)
+(* w : 67.-tuple 'I_2 (67 binary generator choices). word_eval(w) is a     *)
+(* permutation on ~10^20 sheets, e.g.,                                      *)
+(*   {0 -> 47283..., 1 -> 91847..., 2 -> 39, ...}                          *)
+(* Each party i observes rho(word_eval(w))(s_i) — a scrambled coordinate.  *)
+(* The reconstructor collects k scrambled coordinates and recovers 39:      *)
+(*   - Shamir/RS (genus 0): interpolate a polynomial through k points       *)
+(*     (s_i, endpoint_i), evaluate at a secret point -> 39                  *)
+(*   - AG code (genus g): decode the AG codeword from k coordinates -> 39   *)
+(*   - Sum-mod-N: (endpoint_0 + ... + endpoint_{T-1}) mod N = 39           *)
+(* The word w determines WHICH scrambling is applied, but not the secret.   *)
+(*                                                                            *)
+(* The dealer evaluates words into group elements, producing a lookup table  *)
+(* W : seq gT = [g_0, ..., g_{|W|-1}], and picks a selection index P_idx.   *)
+(* For each party i (starting at sheet s_i), the dealer sends the share      *)
+(* [rho(g_0)(s_i), ..., rho(g_{|W|-1})(s_i)] -- a list of sheet IDs, one   *)
+(* per table entry -- together with P_idx.  Party i looks up entry P_idx    *)
+(* to get the sheet ID rho(g_{P_idx})(s_i) and sends it to the             *)
+(* reconstructor, who collects T sheet IDs (coordinates).                    *)
+(*                                                                            *)
+(* Security (pgg_collusion_bound.v, pgg_entropy_security.v,                  *)
+(*           pgg_schreier.v):                                                 *)
+(*   - Information-theoretic, no computational assumptions.                  *)
+(*   - Collusion bound: d_TV(adversary, uniform) <= eps + 2(T-1)/N.         *)
+(*   - eps measures how far the endpoint distribution is from uniform.       *)
+(*   - Spectral bound: eps(L) <= sqrt(N) * (1-gap)^L (monotone envelope).   *)
+(*   - The exact eps(L) is NOT monotonic (identity enters achievable at L=2  *)
+(*     for transposition generators, causing a spike). See pgg_schreier.v.   *)
+(*   - Requires non-abelian G (abelian => eps floor, see Section D below).   *)
+(*   - Transitive actions drive eps -> 0 as L grows; non-transitive (Star)   *)
+(*     have permanent eps floors on some orbits.                             *)
 (*                                                                            *)
 (* Protocol phases:                                                           *)
 (*   1. Dealer: for each party i, send share(W, i) and word index P_idx     *)
 (*   2. Party i: receive share, look up entry P_idx, send endpoint to recon  *)
-(*   3. Reconstructor: collect T endpoints, reconstruct secret               *)
+(*   3. Reconstructor: collect T endpoints (coordinates), apply ts_recon     *)
 (*                                                                            *)
 (* Session-typed protocol programs using \pi{...} notation:                   *)
 (*   pdealer parties W P_idx == dealer distributes shares and word index      *)
@@ -368,3 +432,122 @@ Definition party1_recon_dual_mon :=
   @party1_recon_dual_gen 1 monster_n monster_sigmas.
 
 End pgg_monster_duality.
+
+(******************************************************************************)
+(** * Concrete Group Instances, T=4 Parties via CertifiedSolution             *)
+(*                                                                            *)
+(*   Star(m)    : N=m+3,       Tg=m+1,  RAAG with commuting leaves          *)
+(*   OC(k,p)    : N=k+p+3,    Tg=k+1,  overlapping (p+3)-cycles            *)
+(*   Monster    : N~10^20,    Tg=2,    axiomatized 2-generated              *)
+(*   Abelian(m) : N=2*(m+1),  Tg=m+1,  disjoint transpositions (insecure)  *)
+(* Each parameterized by CertifiedSolution cs: solver determines L, eps.    *)
+(******************************************************************************)
+
+(* --- Section A: Star(m) — RAAG, N=m+3, T=4 --- *)
+
+Section pgg_star_protocol.
+
+Variable R : realType.
+Variable m : nat.
+Hypothesis Hm : (1 <= m)%N.
+
+Let R_star : GeneratedMonodromyReprType := Gen_PGGTypes (star_gen_tuple m).
+Variable cs : CertifiedSolution R R_star.
+Let L := sp_L (cs_params cs).
+
+Lemma star_4_le_N : 4 <= m.+3.
+Proof. by rewrite -[4]/(1).+3 ltnS. Qed.
+
+Let star_PI := @Gen_PGG_T R_star 3 star_4_le_N.
+Let parties := enum 'I_4.
+Variable P_idx : nat.
+
+Definition star4_dealer (w : L.-tuple 'I_m.+1) :=
+  dealer_from_words star_PI L parties w P_idx.
+Definition star4_party (i : 'I_4) := pparty star_PI i.
+Definition star4_recon := precon star_PI parties.
+
+End pgg_star_protocol.
+
+(* --- Section B: OC(k,p) — parametric overlapping cycles, N=k+p+3, T=4 --- *)
+
+Section pgg_oc_protocol.
+
+Variable R : realType.
+Variable k p : nat.
+Hypothesis Hkp : (1 <= k + p)%N.
+
+(* OC tuple cast: k + p.+3 = (k+p).+3 = ((k+p).+1).+2 to match Gen_PGGTypes *)
+Let oc_param_tuple' : k.+1.-tuple {perm 'I_(k+p).+3}.
+Proof. by rewrite -addnS -addnS -addnS; exact: oc_param_tuple k p. Defined.
+
+Let R_oc : GeneratedMonodromyReprType :=
+  @Gen_PGGTypes k (k + p).+1 oc_param_tuple'.
+Variable cs : CertifiedSolution R R_oc.
+Let L := sp_L (cs_params cs).
+
+Lemma oc_4_le_N : 4 <= (k + p).+3.
+Proof. by []. Qed.
+
+Let oc_PI := @Gen_PGG_T R_oc 3 oc_4_le_N.
+Let parties := enum 'I_4.
+Variable P_idx : nat.
+
+Definition oc4_dealer (w : L.-tuple 'I_k.+1) :=
+  dealer_from_words oc_PI L parties w P_idx.
+Definition oc4_party (i : 'I_4) := pparty oc_PI i.
+Definition oc4_recon := precon oc_PI parties.
+
+End pgg_oc_protocol.
+
+(* --- Section C: Monster — N ~ 10^20, T=4 --- *)
+
+Section pgg_monster_protocol.
+
+Variable R : realType.
+Hypothesis Hmon : (4 <= monster_n.+2)%N.
+
+Let R_mon : GeneratedMonodromyReprType := Gen_PGGTypes monster_sigmas.
+Variable cs : CertifiedSolution R R_mon.
+Let L := sp_L (cs_params cs).
+
+Let mon_PI := @Gen_PGG_T R_mon 3 Hmon.
+Let parties := enum 'I_4.
+Variable P_idx : nat.
+
+Definition mon4_dealer (w : L.-tuple 'I_2) :=
+  dealer_from_words mon_PI L parties w P_idx.
+Definition mon4_party (i : 'I_4) := pparty mon_PI i.
+Definition mon4_recon := precon mon_PI parties.
+
+End pgg_monster_protocol.
+
+(* --- Section D: Abelian(m) — disjoint transpositions, insecure --- *)
+
+Section pgg_abelian_protocol.
+(* Abelian instance: m+1 disjoint transpositions, N = 2*(m+1), T = 4.
+   Demonstrates protocol-level INSECURITY: abelian groups have
+   linear trace growth (n_traces ~ 2L+1), so epsilon stays large
+   regardless of word length L. *)
+
+Variable R : realType.
+Variable m : nat.
+Hypothesis Hm : (1 <= m)%N.
+
+Let R_abel : GeneratedMonodromyReprType := Gen_PGGTypes (dt_gen_tuple m).
+Variable cs : CertifiedSolution R R_abel.
+Let L := sp_L (cs_params cs).
+
+Lemma abel_4_le_N : 4 <= m.+1.*2.
+Proof. by rewrite -[4]/(1.+1.*2) leq_double. Qed.
+
+Let abel_PI := @Gen_PGG_T R_abel 3 abel_4_le_N.
+Let parties := enum 'I_4.
+Variable P_idx : nat.
+
+Definition abel4_dealer (w : L.-tuple 'I_m.+1) :=
+  dealer_from_words abel_PI L parties w P_idx.
+Definition abel4_party (i : 'I_4) := pparty abel_PI i.
+Definition abel4_recon := precon abel_PI parties.
+
+End pgg_abelian_protocol.

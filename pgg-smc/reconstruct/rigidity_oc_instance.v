@@ -56,7 +56,7 @@ Let R_oc : GeneratedMonodromyReprType := M_oc.
 Local Open Scope ring_scope.
 
 (* Fiber-counted endpoint bound: for each sheet s in 'I_4,
-   var_dist(fdistmap eval_s (rho_from_words 2 oc_sigmas), uniform) <= 1.
+   var_dist(fdistmap perm_endpoint (rho_from_words 2 oc_sigmas), uniform) <= 1.
    Achievable(2) = {s0^2, s0*s1, s1*s0, s1^2} (4 permutations).
    Worst-case sheet s=1: fiber distribution P=(2/4,0,0,2/4), var_dist=1.
    Other sheets s=0,2,3 have var_dist=1/2. *)

@@ -7,8 +7,9 @@
 \usepackage{amssymb}
 
 \title{Inverting the Formalization Workflow:\\
-  Prototyping an MPC Protocol in Rocq with an LLM}
-\author{Cheng-Hui Weng}
+  Prototyping an MPC Protocol in Rocq with an LLM Agent}
+\author{Cheng-Hui Weng\\
+Nagoya University}
 \date{}
 
 \begin{document}
@@ -16,83 +17,38 @@
 \vspace{-1em}
 \thispagestyle{empty}
 
-\paragraph{The timeline problem.}
-Formalization traditionally comes last.
-A researcher studies the relevant mathematics, designs a construction informally, and only then translates the result into a proof assistant as a final verification step.
-This ordering makes sense when the researcher already knows the mathematical landscape, but it imposes a high barrier when the construction requires unfamiliar domains.
-What if formalization comes first---not as polished verification, but as a prototyping medium?
-% REVIEW-FIX: [M5] footnote naming specific LLM on first body mention
-An LLM\footnote{All LLM-assisted work reported here used Claude (Anthropic), specifically the Claude 3.5 Sonnet and Claude 3.5 Opus models.} can draft formal models from natural-language direction.
-% REVIEW-FIX: [m1] "verdicts" as a verb is nonstandard; replace with "checks"
-A dependent type checker checks each draft within minutes.
-The human learns the domain from the structured output of each attempt: definitions that type-check reveal the right abstractions, and % REVIEW-FIX: [m2a] remove rhetorical "exactly"
-failed proof obligations reveal which assumptions are missing.
+\begin{abstract}
+Formalization traditionally comes last, and this creates a high barrier when a construction depends on unfamiliar mathematics. We instead use formalization as the first step and treat it as a prototyping medium. In this workflow, an LLM agent drafts formal models, a theorem prover checks whether they stand on solid logical ground, and the human steers the process while learning from the output. We report on an ongoing 42-file Rocq formalization of SMC-PGG, a covering-space-based MPC protocol that spans five mathematical domains learned through formalization itself. The paper closes with observations about human judgment, LLM breadth, and prover-backed certainty.
+\end{abstract}
 
-\paragraph{The inverted workflow.}
-The starting point was a hypothesis from separate ongoing work on generalizing secure multi-party computation (MPC): any surjective relation can serve as a secret-sharing mechanism if legitimate parties possess a trapdoor for reconstruction.
-Covering spaces in algebraic topology match this pattern---the fiber over a basepoint is the secret, the monodromy action is the computation, and the covering map is the reconstruction.
-Rather than studying group theory, algebraic geometry, and coding theory before attempting a protocol design, the author used formalization in Rocq/MathComp to test whether this connection holds.
+\noindent\textbf{Keywords.} LLM-assisted formalization, Rocq, interactive theorem proving, secure multi-party computation, covering spaces.
 
-From this seed, formalization becomes exploration.
-The human does not need to master the required mathematical domains before starting.
-The LLM contributes mathematical knowledge---definitions, lemma statements, proof strategies---that the human has never studied.
-The type checker ensures each step is logically sound.
-When a proof attempt fails, the failure is informative: % REVIEW-FIX: [m2b] remove rhetorical "exactly" (both occurrences)
-a dependent-type mismatch reveals which mathematical structure is needed, and a universe inconsistency reveals which abstraction is wrong.
-The human learns the domain from these failures and successes, iteration after iteration, with the type checker guaranteeing that each successful iteration stands on solid ground.
+\noindent\textbf{Introduction.}
+Formalization traditionally comes last. A researcher studies the relevant mathematics, designs a construction informally, and only then translates the result into a proof assistant as a final verification step. This ordering works well when the mathematical landscape is already familiar, but it becomes a serious obstacle when the construction draws on several domains that the researcher has not yet studied. In this work, we reverse the order and use formalization as a prototyping medium. An LLM agent\footnote{All LLM-assisted work reported here used Claude (Anthropic), specifically Claude Opus 4.6.} drafts formal models from natural-language direction, and a theorem prover checks whether each draft stands on solid logical ground. In this setting, the human learns from the structured output of each iteration. Definitions that type-check reveal useful abstractions, and failed proof obligations reveal missing assumptions.
 
-Three roles emerge.
-The human provides judgment: which direction to explore, which abstractions to introduce, where to draw axiomatization boundaries, and when to abandon a dead end.
-The LLM provides mathematical breadth: connecting group theory to combinatorics to algebraic geometry within a single proof development, contributing domain knowledge the human never formally studied.
-% REVIEW-FIX: [M2] clarify that certainty is relative to stated axioms
-% REVIEW-FIX: [M2] clarify certainty relative to axioms; [M4] inline contribution statement
-The type checker provides certainty: if it compiles with zero \texttt{Admitted} lemmas, the logical structure holds relative to stated axioms.
-This paper reports on this inverted workflow and the resulting SMC-PGG formalization (42 Rocq files, five mathematical domains, zero \texttt{Admitted}), with observations on the distinct roles of human judgment, LLM breadth, and type-checker certainty.
+This extended abstract makes three case-study contributions. First, it presents an inverted workflow in which formalization precedes domain mastery, following the pattern idea $\to$ formalize $\to$ learn, so that unfamiliar mathematical ideas can be tested early on solid logical ground. Second, it reports on an ongoing 42-file Rocq formalization of SMC-PGG, a covering-space-based MPC protocol. Third, it draws methodological observations about the distinct roles of human judgment, LLM breadth, and prover-backed certainty.
 
-\paragraph{Case study: SMC-PGG.}
-The seed idea grew into a four-layer formalization called SMC-PGG (Secure Multi-party Computation via Permutation-Group Graphs).
+\noindent\textbf{Inverted Workflow.}
+The starting point was a hypothesis from separate ongoing work on generalizing secure multi-party computation (MPC). The hypothesis was that any surjective relation can serve as a secret-sharing mechanism if legitimate parties possess a trapdoor for reconstruction. Covering spaces in algebraic topology fit this pattern. The fiber over a basepoint can represent the secret, the monodromy action can represent the computation, and the covering map can represent reconstruction. However, even formulating such connections informally already requires time to understand each contributing domain, and developing them to the level of a publishable pen-and-paper argument takes much longer. Rather than waiting to master group theory, algebraic geometry, and coding theory in advance, we used formalization in Rocq/MathComp to test whether this connection makes sense on solid logical ground.
 
-The \emph{protocol layer} formalizes a monodromy representation $\rho : G \to S_N$ mapping group elements to permutations on $N$ sheets, hiding a secret in the fiber structure of a covering space.
-This is packaged as an HB mixin (\texttt{MonodromyReprType}) with session-typed programs for dealing, computing, and reconstructing.
+From that point on, formalization became a form of exploration. The human did not need to master every required domain before starting. Instead, the LLM contributed definitions, lemma statements, and proof strategies, while the theorem prover determined which attempts could stand as part of a coherent development. Three roles then became clear. The human provided judgment about direction, abstraction, and axiomatization boundaries. The LLM provided breadth across domains. The theorem prover provided certainty. When the development compiled without \texttt{Admitted}, its logical structure held relative to the stated axioms.
 
-The \emph{search-space layer} characterizes the adversary's view via Right-Angled Artin Group (RAAG) trace equivalence.
-The Cartier-Foata theorem---proved axiom-free in Rocq---gives exact trace counts via a clique polynomial recurrence.
-This was a domain the author had never encountered; its relevance was discovered through formalization when the proof required counting distinct computation histories that yield the same observable output.
+\noindent\textbf{Case Study.}
+To test this workflow, we applied it to SMC-PGG (Secure Multi-party Computation via Parametric Geometry Group). At the protocol level, a monodromy representation $\rho : G \to S_N$ maps group elements to permutations on $N$ sheets and hides a secret in the fiber structure of a covering space. This layer is packaged as an HB mixin (\texttt{MonodromyReprType}) together with session-typed programs for dealing, computing, and reconstructing. The next question concerned the adversary's search space. Here the key point is that computation histories that differ only by reordering commuting actions should be indistinguishable to the adversary. Right-Angled Artin Group (RAAG) trace equivalence provides the natural formal language for identifying such histories. The Cartier-Foata theorem, proved from MathComp primitives alone, then supplied exact trace counts through a clique polynomial recurrence. This illustrates learning through formalization, since the LLM introduced Cartier-Foata when the proof required counting distinct computation histories.
 
-The \emph{reconstruction layer} provides a threshold scheme interface instantiated by Massey's secret sharing from linear codes.
-Hyperelliptic algebraic-geometry codes provide parametric $(k,T)$-thresholds via polynomial resultant computation, avoiding Riemann-Roch.
-% REVIEW-FIX: [M1] "determines" overstates rigidity; ε is user-supplied, so use "constrains"
-An algebraic rigidity framework (\texttt{AlgebraicRigidity} record) shows that one algebraic choice (a graph and its genus) constrains four protocol parameters, with $\varepsilon$ remaining user-supplied. A concrete star-graph instance and $\mathrm{PGL}(2,\mathbb{F}_q)$ bound are provided.
+The reconstruction layer instantiated a threshold-scheme interface using Massey's secret sharing from linear codes. Hyperelliptic algebraic-geometry codes provided parametric $(k,T)$-thresholds through resultant computations. An \texttt{AlgebraicRigidity} record then related one algebraic choice to four quantities: search-space complexity, the number of admissible traces, the security bound, and the threshold gap. Finally, the security layer established a collusion bound, namely total variation distance $\leq \varepsilon + 2(T{-}1)/N$, where $\varepsilon$ is a privacy parameter, $T$ is the reconstruction threshold, and $N$ is the number of sheets. It also established Grover mitigation and an abelian collapse theorem, showing that in the regular abelian setting, non-abelian groups are necessary for non-trivial security.
 
-The \emph{security layer} establishes a collusion bound (% REVIEW-FIX: [C1] correct metric name to total variation distance
-total variation distance $\leq \varepsilon + 2(T{-}1)/N$), Grover mitigation via ball-size enumeration, and an abelian collapse theorem showing that non-abelian groups are necessary for non-trivial security.
+The formalization spans 42 Rocq files and touches five domains: group theory, combinatorics, algebraic geometry, coding theory, and information theory. We entered the project with experience in protocol design, but the other four domains were learned during the formalization process. The remaining axioms are concentrated at the algebraic-geometry interface. They concern evaluation-map rank and encoding assumptions, monodromy/code compatibility, multiplicative structure, and the genus-0 PGL automorphism bound.
 
-The formalization spans 42 Rocq files with zero \texttt{Admitted} lemmas, touching five mathematical domains: group theory, combinatorics, algebraic geometry, coding theory, and information theory.
-The author entered the project knowing cryptographic protocol design.
-The other four domains were learned through the formalization process, not before it.
-Five properties of AG codes are axiomatized (Goppa weight bound, privacy surjectivity, monodromy compatibility, multiplicative closure, PGL automorphism bound), corresponding to classical algebraic geometry results that require Riemann-Roch machinery not yet available in any proof assistant.
-This boundary is deliberate and principled---the protocol-algebraic layer is fully verified, and the axioms are standard textbook facts whose mathematical truth is not in question.
+\noindent\textbf{Observations.}
+This case study yields three methodological lessons. The workflow succeeded because the feedback loop was tight. The LLM produced drafts, the theorem prover accepted or rejected them, and the human used those results both to steer the next step and to learn domain knowledge on demand. The workflow also had clear limits. Architectural decisions and axiomatization boundaries required human judgment, and dependent-type unification failures required human-level diagnosis. Even so, the balance was productive because the human could focus on judgment rather than tactic syntax.
 
-\paragraph{Observations.}
-The workflow succeeded through a tight feedback loop: LLM drafts, type checker compiles or rejects within minutes, human steers.
-Compilation success gave confidence in the mathematical structure; failure pointed precisely to missing invariants.
-Limits remain: architectural decisions (\texttt{Record} vs \texttt{Section}, axiomatization boundaries) required human judgment, and dependent-type unification failures (e.g., rewriting under $\mathbb{Z}/(pq)\mathbb{Z}$) required human-level diagnosis.
-The balance was productive: the human spent time on judgment and direction, not on tactic syntax or mathematical prerequisites.
+\noindent\textbf{Related Work.}
+Related work on LLM-assisted proving includes whole-proof generation \cite{first2023baldur}, informal-to-formal translation \cite{jiang2023dsp}, and retrieval-augmented search \cite{yang2023leandojo}. It also includes IDE integration \cite{song2024leancopilot} and reinforcement-learning-based training \cite{alphaproof2024}. Here, by contrast, the LLM primarily serves as a mechanism for domain-knowledge transfer in a human-directed exploratory workflow.
 
-% REVIEW-FIX: [M3] related-work paragraph with verified citations
-\paragraph{Related work.}
-LLM-assisted proving spans whole-proof generation \cite{first2023baldur}, informal-to-formal translation \cite{jiang2023dsp}, retrieval-augmented tactic search \cite{yang2023leandojo}, IDE integration \cite{song2024leancopilot}, and RL-based training with proof-checker reward \cite{alphaproof2024}.
-On the cryptography side, EasyCrypt \cite{barthe2011easycrypt} provides machine-checked security proofs via probabilistic relational Hoare logic.
-The present work differs in that the LLM is not optimized for proof search but serves as a domain-knowledge transfer mechanism for human-directed exploration.
+\noindent\textbf{Conclusion.}
+This case study suggests a methodological claim about AI-assisted formalization. An LLM agent can be useful not only for proof search, but also for cross-domain exploration in an ongoing research project. In that setting, formalization need not be the final verification step. It can instead serve as a prototyping medium that tests whether a mathematical idea survives contact with a theorem prover while simultaneously teaching the surrounding domain. The traditional order of learn $\to$ design $\to$ formalize can therefore be inverted into idea $\to$ formalize $\to$ learn.
 
-\paragraph{Broader implication.}
-This workflow makes mathematical applications more like software engineering, where developers learn libraries project by project, trusting type systems to catch misuse.
-The LLM plays an analogous role: it surfaces relevant mathematical ingredients, while the type checker filters errors.
-Formalization need not be the final step.
-When an LLM serves as proof engineer and the type checker serves as quality gate, formalization becomes the first step, a prototyping medium that simultaneously validates ideas and teaches the domain.
-The traditional order (learn $\to$ design $\to$ formalize) can be inverted (idea $\to$ formalize $\to$ learn) because the prover accepts no shortcuts.
-
-% REVIEW-FIX: [M3] bibliography with all cited entries
 \begingroup\footnotesize
 \begin{thebibliography}{9}
 \setlength{\itemsep}{0pt}\setlength{\parsep}{0pt}\setlength{\parskip}{0pt}

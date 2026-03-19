@@ -49,6 +49,7 @@ Record ThresholdScheme (secretT shareT : Type) := MkThresholdScheme {
   ts_k' : nat ;
   ts_valid : secretT -> ts_T'.+1.-tuple shareT -> Prop ;
   ts_recon : ts_T'.+1.-tuple shareT -> secretT ;
+  ts_encode : secretT -> ts_T'.+1.-tuple shareT ;
   ts_correct : forall (s : secretT) (shares : ts_T'.+1.-tuple shareT),
     ts_valid s shares ->
     ts_recon shares = s ;
@@ -59,14 +60,21 @@ Record ThresholdScheme (secretT shareT : Type) := MkThresholdScheme {
     exists shares' : ts_T'.+1.-tuple shareT,
       ts_valid s2 shares' /\
       (forall i : 'I_ts_T'.+1, i \in C -> tnth shares' i = tnth shares i) ;
+  ts_encode_valid : forall s, ts_valid s (ts_encode s) ;
 }.
 
 Arguments ts_T' {secretT shareT}.
 Arguments ts_k' {secretT shareT}.
 Arguments ts_valid {secretT shareT}.
 Arguments ts_recon {secretT shareT}.
+Arguments ts_encode {secretT shareT}.
 Arguments ts_correct {secretT shareT}.
 Arguments ts_private {secretT shareT}.
+Arguments ts_encode_valid {secretT shareT}.
+
+Lemma ts_recon_encode {sT shT : Type} (ts : ThresholdScheme sT shT) (s : sT) :
+  ts_recon ts (ts_encode ts s) = s.
+Proof. exact: ts_correct (ts_encode_valid ts s). Qed.
 
 Definition ts_T {sT shT : Type} (ts : ThresholdScheme sT shT) : nat :=
   (ts_T' ts).+1.
@@ -143,12 +151,31 @@ exists shares'; split; last exact: Hagree.
 by rewrite /sum_mod_valid_pred /sheets_sum.
 Qed.
 
+(* Encoding: [0, 0, ..., 0, s] — sum = s mod N *)
+Definition sum_mod_encode (s : 'I_N) : T.-tuple 'I_N :=
+  mktuple (fun i : 'I_T => if i == ord_max then s else ord0).
+
+Lemma sum_mod_encode_valid (s : 'I_N) :
+  sum_mod_valid_pred s (sum_mod_encode s).
+Proof.
+rewrite /sum_mod_valid_pred /sum_mod_encode.
+under eq_bigr do rewrite tnth_mktuple.
+rewrite big_ord_recr /= eqxx.
+have Hwiden : forall i : 'I_T', widen_ord (leqnSn T') i == (ord_max : 'I_T) = false.
+  move=> i; apply/negbTE.
+  by rewrite -val_eqE /=; move: (ltn_ord i); rewrite ltn_neqAle => /andP[].
+under eq_bigr do rewrite Hwiden.
+by rewrite big1 // add0n modn_small //; exact: ltn_ord.
+Qed.
+
 Definition sum_mod_scheme : ThresholdScheme 'I_N 'I_N :=
   @MkThresholdScheme 'I_N 'I_N T' T'
     sum_mod_valid_pred
     sum_mod_recon
+    sum_mod_encode
     sum_mod_scheme_correct
-    sum_mod_scheme_private.
+    sum_mod_scheme_private
+    sum_mod_encode_valid.
 
 End sum_mod_instance.
 

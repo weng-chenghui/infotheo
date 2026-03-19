@@ -59,6 +59,13 @@ Section var_dist_dpi.
 Context {R : realType}.
 Variables (A B : finType).
 
+(* WARNING: DPI is too loose for spectral convergence analysis.           *)
+(* For the spectral path to SecurityWitness, use SchreierCertificate      *)
+(* (pgg_schreier.v) which bounds var_dist on 'I_N directly with          *)
+(* prefactor sqrt(N), avoiding the sqrt(|G|) blowup from projecting      *)
+(* through G. DPI remains valid for collusion_bound_unconditional        *)
+(* (different proof structure) but should NOT be used to derive           *)
+(* endpoint bounds from group-level spectral analysis.                    *)
 Lemma var_dist_fdistmap (f : A -> B) (P Q : R.-fdist A) :
   var_dist (fdistmap f P) (fdistmap f Q) <= var_dist P Q.
 Proof.
@@ -666,11 +673,11 @@ Qed.
 End fdistmap_uniform_supp_inj.
 
 (******************************************************************************)
-(*  Section 10: Direct endpoint epsilon for groups with injective eval_s     *)
+(*  Section 10: Direct endpoint epsilon for groups with injective perm_endpoint     *)
 (*                                                                            *)
-(*  When word_eval is injective (weval_inj L) AND eval_s is injective on    *)
+(*  When word_eval is injective (weval_inj L) AND perm_endpoint is injective on    *)
 (*  achievable(L), the endpoint distribution is uniform_supp over            *)
-(*  eval_s(achievable(L)), giving epsilon = 2*(N - Tg^L)/N.                 *)
+(*  perm_endpoint(achievable(L)), giving epsilon = 2*(N - Tg^L)/N.                 *)
 (*  This is tighter than the DPI bound 2*(N! - Tg^L)/N!.                    *)
 (******************************************************************************)
 
@@ -718,7 +725,7 @@ Lemma achievable_pos' : (0 < #|@achievable M L|)%N.
 Proof. by rewrite achievable_card_TgL expn_gt0. Qed.
 
 (* The image of achievable through eval_at s has cardinality Tg^L *)
-Lemma eval_s_image_card (s : 'I_N) :
+Lemma perm_endpoint_image_card (s : 'I_N) :
   #|(eval_at s) @: @achievable M L| = (Tg ^ L)%N.
 Proof.
 rewrite card_in_imset; last first.
@@ -728,13 +735,13 @@ rewrite card_in_imset; last first.
 exact: achievable_card_TgL.
 Qed.
 
-Lemma eval_s_image_pos (s : 'I_N) :
+Lemma perm_endpoint_image_pos (s : 'I_N) :
   (0 < #|(eval_at s) @: @achievable M L|)%N.
-Proof. by rewrite eval_s_image_card expn_gt0. Qed.
+Proof. by rewrite perm_endpoint_image_card expn_gt0. Qed.
 
 Lemma TgL_leq_N : (Tg ^ L <= N)%N.
 Proof.
-rewrite -(eval_s_image_card ord0).
+rewrite -(perm_endpoint_image_card ord0).
 apply: (leq_trans (max_card _)).
 by rewrite card_ord.
 Qed.
@@ -751,17 +758,17 @@ have Hs : {in @achievable M L &, injective (eval_at s)}.
   exact: Hinj_s.
 rewrite (fdistmap_uniform_supp_inj _ Hs).
 rewrite var_dist_uniform_supp.
-rewrite eval_s_image_card card_ord /direct_eps.
+rewrite perm_endpoint_image_card card_ord /direct_eps.
 exact: Order.POrderTheory.lexx.
 Qed.
 
 End direct_endpoint_epsilon.
 
 (******************************************************************************)
-(*  Section 11: Balanced-case var_dist for non-injective eval_s              *)
+(*  Section 11: Balanced-case var_dist for non-injective perm_endpoint              *)
 (*                                                                            *)
 (*  When |achievable(L)| = N (balanced case, i.e., Tg^L = N), the var_dist  *)
-(*  of fdistmap eval_s (uniform_supp achievable) against uniform depends     *)
+(*  of fdistmap perm_endpoint (uniform_supp achievable) against uniform depends     *)
 (*  ONLY on the image size, not the fiber distribution. Specifically:         *)
 (*    var_dist = 2*(N - |image_s|)/N                                         *)
 (*  This equals the var_dist that uniform_supp(image_s) has from uniform.    *)
@@ -956,7 +963,7 @@ apply: ler_wpDr; first by apply: sumr_ge0 => a _; exact: FDist.ge0.
 rewrite fdist_uniform_supp_in //.
 rewrite -div1r -[_^-1 in X in _ <= X]div1r.
 rewrite ler_pdivlMr ?ltr0n -?lt0n //.
-by rewrite mul1r ler_pdivrMr ?ltr0n ?Hn // mul1r ler_nat.
+by rewrite mulrC div1r ler_pdivrMr ?mul1r ?ler_nat // ltr0n Hn.
 Qed.
 
 End unbalanced_var_dist.
@@ -987,6 +994,8 @@ Lemma var_dist_endpoint_unbalanced
 Proof.
 rewrite (rho_from_words_uniform_supp Hlfree).
 rewrite (@var_dist_fdistmap_unbalanced R _ _ _ _ _ N' (card_ord N)) //.
+  by rewrite !card_ord.
+rewrite card_ord.
 have -> : #|@achievable M L| = @search_space M L by [].
 by rewrite weval_inj_search_space.
 Qed.
@@ -1009,7 +1018,7 @@ End endpoint_image_bound_unbalanced.
 (******************************************************************************)
 (*  Section 12: Image size bound via nat-level computation                   *)
 (*                                                                            *)
-(*  For concrete instances, |eval_s @: achievable| can be computed at the    *)
+(*  For concrete instances, |perm_endpoint @: achievable| can be computed at the    *)
 (*  nat level using eval_word_nat, then reflected to the type level.          *)
 (******************************************************************************)
 

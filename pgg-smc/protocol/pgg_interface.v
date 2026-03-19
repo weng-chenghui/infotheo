@@ -93,6 +93,20 @@ End monodromy_ops.
 
 Arguments endpoint {M}.
 
+(* The endpoint at sheet s under permutation sigma.
+   Analogous to endpoint g s = rho g s but takes a permutation
+   directly, bypassing the monodromy morphism rho.
+   Used in fiber counting and security analysis. *)
+Section perm_endpoint_def.
+
+Variable N' : nat.
+Let N := N'.+1.
+
+Definition perm_endpoint (sigma : {perm 'I_N}) (s : 'I_N) : 'I_N :=
+  sigma s.
+
+End perm_endpoint_def.
+
 (* ========================================================================== *)
 (* Search space definitions from generators                                   *)
 (* ========================================================================== *)
@@ -401,6 +415,34 @@ Definition Gen_PGG_2 : PGGInterface M :=
   @MkPGGI M 1 gen_starts_2 gen_starts_2_uniq.
 
 End generated_instance.
+
+(* ========================================================================== *)
+(* T-party interface for any T <= N                                           *)
+(* ========================================================================== *)
+
+Section gen_pgg_T.
+
+Variable M : MonodromyReprType.
+Variable T' : nat.
+Let T := T'.+1.
+Let N := (pgg_N' M).+1.
+Hypothesis HT : T <= N.
+
+Lemma gen_starts_T_size : size (map (widen_ord HT) (enum 'I_T)) == T.
+Proof. by rewrite size_map size_enum_ord. Qed.
+
+Definition gen_starts_T : T.-tuple 'I_N := Tuple gen_starts_T_size.
+
+Lemma gen_starts_T_uniq : uniq gen_starts_T.
+Proof.
+rewrite /gen_starts_T /= map_inj_uniq ?enum_uniq //.
+by move=> x y Heq; apply: val_inj; have := congr1 val Heq.
+Qed.
+
+Definition Gen_PGG_T : PGGInterface M :=
+  @MkPGGI M T' gen_starts_T gen_starts_T_uniq.
+
+End gen_pgg_T.
 
 (* ========================================================================== *)
 (* Generic tuple construction from a generator function                       *)

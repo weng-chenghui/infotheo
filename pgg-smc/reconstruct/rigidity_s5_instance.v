@@ -54,7 +54,7 @@ Let R_s5 : GeneratedMonodromyReprType := M_s5.
 Local Open Scope ring_scope.
 
 (* Fiber-counted endpoint bound: for each sheet s in 'I_5,
-   var_dist(fdistmap eval_s (rho_from_words 1 path_gen_tuple_3), uniform) <= 6/5.
+   var_dist(fdistmap perm_endpoint (rho_from_words 1 path_gen_tuple_3), uniform) <= 6/5.
    Achievable(1) = {(01),(12),(23),(34)} (4 adjacent transpositions).
    Worst-case sheets s=0,4: P=(3/4,1/4,0,0,0), var_dist=6/5. *)
 Lemma s5_endpoint_bound_fiber :

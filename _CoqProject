@@ -140,6 +140,7 @@ pgg-smc/groups/abelian_word_collapse.v
 pgg-smc/groups/pgg_raag_star.v
 pgg-smc/groups/pgg_raag_path.v
 pgg-smc/groups/pgg_raag_s5.v
+pgg-smc/groups/pgg_oc_param.v
 pgg-smc/groups/pgg_weval_inj.v
 pgg-smc/groups/pgg_raag.v
 pgg-smc/groups/free_group_ball.v
@@ -147,6 +148,7 @@ pgg-smc/groups/pgg_raag_clique.v
 pgg-smc/groups/pgg_raag_cartier_foata.v
 pgg-smc/security/pgg_collusion_bound.v
 pgg-smc/security/pgg_security_solver.v
+pgg-smc/security/pgg_schreier.v
 pgg-smc/security/pgg_entropy_security.v
 pgg-smc/security/pgg_security_demo.v
 pgg-smc/security/pgg_word_analysis.v

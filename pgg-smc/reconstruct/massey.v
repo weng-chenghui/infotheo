@@ -245,6 +245,34 @@ exists shares'; split.
   by rewrite /target massey_codewordS.
 Qed.
 
+(* First coordinate projection is surjective: for every s, there exists
+   c in C with c_0 = s. By privacy_surj with S = {ord0}, since |S| = 1 < d_perp. *)
+Lemma first_coord_surj (s : F) :
+  exists c : 'rV[F]_n, (c \in C) && (c ord0 ord0 == s).
+Proof.
+set target : 'rV[F]_n := \row_(i < n) if (i : nat) == 0%N then s else 0.
+have HS : #|[set ord0 : 'I_n]| < d_perp by rewrite cards1.
+have [c [HcC Hvproj]] := privacy_surj target HS.
+exists c; apply/andP; split => //.
+have Hord0 : (ord0 : 'I_n) \in [set ord0 : 'I_n] by rewrite inE.
+rewrite (vproj_coord_eq Hvproj Hord0) mxE /=.
+exact: eqxx.
+Qed.
+
+Definition massey_encode (s : F) : 'rV[F]_n'.+1 :=
+  let c := xchoose (first_coord_surj s) in
+  \row_(j < n'.+1) c ord0 (lift ord0 j).
+
+Lemma massey_encode_codeword (s : F) :
+  massey_codeword s (massey_encode s) \in C.
+Proof.
+have /andP[HcC /eqP Hc0] := xchooseP (first_coord_surj s).
+set c := xchoose _ in HcC Hc0 *.
+suff -> : massey_codeword s (massey_encode s) = c by [].
+rewrite {1}(massey_codeword_decompose c) Hc0 /massey_encode.
+by rewrite /c.
+Qed.
+
 (******************************************************************************)
 (*     Section 4: ThresholdScheme Instance                                    *)
 (******************************************************************************)
@@ -277,12 +305,24 @@ exists (rV_to_tuple shares_rV); split.
   exact: Hagree.
 Qed.
 
+Definition massey_encode_tuple (s : F) : n'.+1.-tuple F :=
+  rV_to_tuple (massey_encode s).
+
+Lemma massey_encode_valid (s : F) :
+  massey_valid_tuple s (massey_encode_tuple s).
+Proof.
+rewrite /massey_valid_tuple /massey_encode_tuple rV_to_tupleK.
+exact: massey_encode_codeword.
+Qed.
+
 Definition massey_scheme : ThresholdScheme F F :=
   @MkThresholdScheme F F n' d_perp'
     massey_valid_tuple
     massey_recon_tuple
+    massey_encode_tuple
     massey_correct_tuple
-    massey_private_tuple.
+    massey_private_tuple
+    massey_encode_valid.
 
 End massey_privacy.
 

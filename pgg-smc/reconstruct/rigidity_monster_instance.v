@@ -40,7 +40,7 @@
 (*   monster_sigmas_distinct : generators are distinct permutations          *)
 (*   monster_Lstar  : turning point L* (= 67, first L with 2^L >= N)        *)
 (*   monster_weval_inj_Lstar : word-eval injectivity at L*                   *)
-(*   monster_eval_s_inj_Lstar : endpoint eval injective on achievable(L_s)  *)
+(*   monster_perm_endpoint_inj_Lstar : endpoint eval injective on achievable(L_s)  *)
 (*   monster_covering : existence of a covering scheme                        *)
 (*   monster_genus0_pgl : genus-0 coverings have |G| <= PGL(2,N)             *)
 (*                                                                            *)
@@ -56,11 +56,11 @@
 From HB Require Import structures.
 From mathcomp Require Import ssreflect ssrbool ssrfun eqtype ssrnat seq.
 From mathcomp Require Import div fintype tuple finfun finset fingroup perm.
-From mathcomp Require Import morphism action bigop order ssrnum.
+From mathcomp Require Import morphism action bigop order ssrnum ssralg.
 From mathcomp Require Import boolp reals.
 From infotheo Require Import realType_ext fdist proba variation_dist.
 From pgg_smc Require Import perm_uniform pgg_interface pgg_weval_inj
-                            pgg_collusion_bound.
+                            pgg_collusion_bound pgg_schreier.
 From pgg_reconstruct Require Import pgg_sharing_framework covering_scheme
                                     cover_tradeoff algebraic_rigidity.
 
@@ -70,6 +70,8 @@ Import Prenex Implicits.
 
 Local Open Scope ring_scope.
 Local Open Scope fdist_scope.
+
+Import GRing.Theory Num.Theory.
 
 (******************************************************************************)
 (*     Group Axioms                                                           *)
@@ -102,7 +104,7 @@ Proof. exact: gen_inj_weval_inj1 monster_sigmas_distinct. Qed.
 (* So L* = 67 is the first length where the search space saturates N.        *)
 (*                                                                            *)
 (* At L* = 67, every sheet maps to a distinct endpoint under each            *)
-(* achievable permutation (eval_s injective on achievable(67)).              *)
+(* achievable permutation (perm_endpoint injective on achievable(67)).              *)
 (* The direct endpoint epsilon = 2*(N - 2^67)/N = 0 since 2^67 > N.         *)
 (******************************************************************************)
 
@@ -115,7 +117,7 @@ Axiom monster_weval_inj_Lstar : @weval_inj M_monster monster_Lstar.
    the map sigma |-> sigma(s) is injective on the set of achievable
    permutations at L*. This is a group-theoretic fact about the Monster's
    faithful permutation action. *)
-Axiom monster_eval_s_inj_Lstar :
+Axiom monster_perm_endpoint_inj_Lstar :
   forall s : 'I_monster_n.+2,
   {in @achievable M_monster monster_Lstar &,
    injective (fun sigma : {perm 'I_monster_n.+2} => sigma s)}.
@@ -137,7 +139,7 @@ Variable R : realType.
 Definition monster_security_witness_Lstar : SecurityWitness R R_monster :=
   security_witness_endpoint_inj R
     monster_weval_inj_Lstar
-    monster_eval_s_inj_Lstar.
+    monster_perm_endpoint_inj_Lstar.
 
 
 End monster_security.
@@ -200,3 +202,78 @@ exact: (@security_threshold_tradeoff R_monster monster_covering monster_genus0_p
 Qed.
 
 End monster_rigidity.
+
+(******************************************************************************)
+(*     Schreier Certificate (Axiomatized)                                     *)
+(*                                                                            *)
+(* The Monster group, as a finite simple group, has a Schreier graph with     *)
+(* spectral gap bounded away from 0 for any transitive action.               *)
+(*                                                                            *)
+(* Source: Kassabov-Lubotzky-Nikolov 2006, Finite simple groups as expanders. *)
+(* They prove that every non-abelian finite simple group has generators       *)
+(* making it an epsilon-expander with epsilon bounded away from 0. The        *)
+(* expander property transfers to ALL transitive actions (Schreier graphs),   *)
+(* not just the regular representation (Cayley graph).                        *)
+(*                                                                            *)
+(* For the specific Monster generators (axiomatized), the spectral gap is     *)
+(* abstract but positive. The convergence bound uses the Schreier graph       *)
+(* directly on 'I_N (N sheets), giving prefactor sqrt(N) instead of          *)
+(* sqrt(|G|). For the Monster: sqrt(N) ~ 10^10 vs sqrt(|G|) ~ 10^26.        *)
+(*                                                                            *)
+(* Mathematical source:                                                       *)
+(*   Diaconis 1988, Ch. 3B Proposition 2 (upper bound lemma)                 *)
+(*   Applied to the Schreier graph (N vertices) instead of Cayley (|G|)      *)
+(*   Ceccherini-Silberstein et al. 2008, Thm 5.5.3 (eigenvalue subset)      *)
+(*   Kassabov-Lubotzky-Nikolov 2006 (expander transfers to transitive)       *)
+(******************************************************************************)
+
+
+(* Spectral gap of the Monster Schreier graph -- positive by
+   Kassabov-Lubotzky-Nikolov 2006, Finite simple groups as expanders.
+   The expander property of finite simple groups transfers to all
+   transitive Schreier graphs (Lubotzky 2012, Theorem 4.2).
+   Convergence bound from Diaconis 1988, Ch. 3B Proposition 2,
+   applied to the Schreier graph on N = monster_n.+2 sheets.
+
+   Prefactor is sqrt(N), not sqrt(|G|) -- a major improvement for
+   the Monster (sqrt(N) ~ 10^10 vs sqrt(|G|) ~ 10^26).
+
+   We use Variable/Hypothesis (not Axiom) because Axiom inside a Section
+   is NOT abstracted over section variables. Hypothesis becomes a parameter
+   of all definitions that use it when the section closes. *)
+
+Section monster_spectral.
+
+Variable R : realType.
+Variable monster_lambda_gap : R.
+Hypothesis monster_lambda_gap_pos : 0 < monster_lambda_gap.
+Hypothesis monster_lambda_gap_le1 : monster_lambda_gap <= 1.
+
+(* NOTE: no weval_inj hypothesis. The Schreier walk convergence is a
+   property of the Markov chain on 'I_N, independent of word-eval
+   injectivity. Prefactor is sqrt(N), not sqrt(|G|). *)
+Hypothesis monster_spectral_convergence :
+  forall (L : nat) (s : 'I_monster_n.+2),
+  var_dist (fdistmap (fun sigma : {perm 'I_monster_n.+2} => sigma s)
+                     (rho_from_words L monster_sigmas))
+           (fdist_uniform (card_ord monster_n.+2))
+  <= Num.sqrt (monster_n.+2%:R) *
+     (1 - monster_lambda_gap) ^+ L.
+
+Definition monster_schreier_certificate :
+    SchreierCertificate R 1 monster_n monster_sigmas :=
+  @MkSchreierCertificate R 1 monster_n monster_sigmas
+    monster_lambda_gap
+    monster_lambda_gap_pos
+    monster_lambda_gap_le1
+    monster_spectral_convergence.
+
+(* Derived: SecurityWitness at any L from Schreier certificate.
+   NOTE: weval_inj IS needed here for the SecurityWitness construction
+   (rho_from_words must be a valid distribution), even though the
+   Schreier spectral bound itself doesn't require it. *)
+Definition monster_security_witness_schreier (L : nat)
+    (Hlfree : @weval_inj M_monster L) : SecurityWitness R R_monster :=
+  security_witness_schreier monster_schreier_certificate Hlfree.
+
+End monster_spectral.

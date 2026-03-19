@@ -68,4 +68,23 @@ Lemma dealer_words_epsilon_bound (s : 'I_N) :
    <= sw_epsilon (ar_security ar))%O.
 Proof. exact: sw_endpoint_bound. Qed.
 
+(* When the dealer uses ts_encode to produce the starting shares,
+   the ts_valid hypothesis is automatically satisfied. *)
+Theorem dealer_encode_correct
+    (w : L.-tuple 'I_Tg) (s : 'I_N) :
+  let P := @word_eval M L w in
+  P \in G ->
+  pi_starts PI = cast_tuple (congr1 S HT)
+    (ts_encode (cs_scheme (tw_covering (ar_threshold ar))) s) ->
+  pgg_recon_endpoints HT P = s.
+Proof.
+move=> /= PG Hstarts.
+apply: dealer_words_correct => //.
+rewrite Hstarts.
+have cast_tupleK : forall (A : Type) (n m : nat) (H : n = m)
+    (t : n.-tuple A), cast_tuple (esym H) (cast_tuple H t) = t.
+  by move=> A' n' m' H'; subst m'.
+by rewrite cast_tupleK; exact: ts_encode_valid.
+Qed.
+
 End dealer_bridge.

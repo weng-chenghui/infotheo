@@ -40,29 +40,38 @@ Group choice (G, σ₁...σ_Tg)
 
 **(i) Concrete group instances formalized:**
 
-| Instance | Group | N | Tg | Graph | Transitive? | Genus | Gap | eps (L=1) | eps limit | CertifiedSolution | File |
-|----------|-------|---|-----|-------|------------|-------|-----|-----------|-----------|-------------------|------|
-| **Star** | `star_gen_tuple m` ≤ S_{m+3} | m+3 | m+1 | Star | No | 0 | 0 | 2(m+1)/(m+3) | stuck | `star_certified_1` | `rigidity_star_instance.v` |
-| **S_5** | `path_gen_tuple 3` = S_5 | 5 | 4 | Path | Yes | 0 | 0 | 6/5 | → 0 | — | `rigidity_s5_instance.v` |
-| **OC** | `oc_sigmas` (3-cycles) ≤ S_4 | 4 | 2 | — | Yes | 0 | 0 | 1 | → 0 | — | `rigidity_oc_instance.v` |
-| **NCycle** | Z/NZ (N-cycle) | n+2 | 1 | — | Yes | 0 | 0 | 2(N-1)/N | → 0 | — | `rigidity_cyclic_instance.v` |
-| **Abelian** | Z/2Z × Z/2Z (disjoint tperms) | 4 | 2 | Clique | No | 0 | 0 | 1 | stuck | — | `rigidity_abelian_instance.v` |
-| **Monster** | M (largest sporadic) | ~10^20 | 2 | — | (axiomatic) | >0 (forced) | >0 | ~2 | (axiomatic) | via `certified_from_witness` | `rigidity_monster_instance.v` |
+The "Threshold" column refers to the covering scheme's genus and threshold gap. **PGL(2,N)** is the **projective general linear group** — the group of Möbius transformations of the projective line P^1, with |PGL(2,N)| = N(N²−1). Genus 0 (ideal threshold, gap = 0) requires |G| ≤ |PGL(2,N)|; groups exceeding this bound are forced to higher genus.
+
+| Instance | Group | N | Tg | Threshold (genus → gap) | Best security eps (via `vm_compute`) | File |
+|----------|-------|---|-----|------------------------|--------------------------------------|------|
+| **Monster** | M (largest sporadic) | ~10^20 | 2 | genus >0, gap >0 (\|G\| >> PGL) | **0** at L\*=67 (2^67 > N, perfect); ~2 at L=1 | `rigidity_monster_instance.v` |
+| **OC(2,3)** | `oc_sigmas` (3-cycles) ≤ S_4 | 4 | 2 | genus 0, gap 0 (\|G\| ≤ PGL) | **0** at L=2 (achievable = \|G\| = 12, perfect) | `rigidity_oc_instance.v` |
+| **NCycle** | Z/NZ (N-cycle) | n+2 | 1 | genus 0, gap 0 (\|G\| ≤ PGL) | **0** at L=\|G\| (e.g. L=5 for N=5; perfect) | `rigidity_cyclic_instance.v` |
+| **S_5** | `path_gen_tuple 3` = S_5 | 5 | 4 | genus 0, gap 0 (\|G\| ≤ PGL) | **8/295 ≈ 0.03** at L=8, → 0 (transitive) | `rigidity_s5_instance.v` |
+| **Star** | `star_gen_tuple m` ≤ S_{m+3} | m+3 | m+1 | genus 0, gap 0 (\|G\| ≤ PGL) | 2(m+1)/(m+3) floor (non-transitive) | `rigidity_star_instance.v` |
+| **Abelian** | Z/2Z × Z/2Z (disjoint tperms) | 4 | 2 | genus 0, gap 0 (\|G\| ≤ PGL) | 1 floor (non-transitive) | `rigidity_abelian_instance.v` |
+
+The eps values are computed by **fiber counting** — enumerating all Tg^L words, grouping by endpoint (the "fiber" of each sheet value), and measuring the worst-case variational distance from uniform. This is generic for any group with generators, not RAAG-specific: the proof-level constructor `security_witness_fiber` (`algebraic_rigidity.v`) works for any `GeneratedMonodromyReprType`; the computable function `raag_fiber_eps_nat` (`pgg_security_solver.v`) takes an `RAAGDesc` for `vm_compute` but does not use RAAG commutation — the `raag_` prefix is a naming artifact. For transitive groups where the achievable set saturates to |G|, the direct endpoint bound (`security_witness_endpoint_inj`) gives eps = 0 — **perfect** information-theoretic security. OC(2,3) at L=2 and NCycle at L=|G| achieve this.
 
 Key observations:
 - **Transitive** groups (S_5, OC, NCycle) have eps → 0 as L grows: the achievable set eventually covers all of S_N, making the endpoint distribution uniform. **Non-transitive** groups (Star, Abelian) are stuck at a positive eps floor — orbit partitions force a constant variational distance regardless of L.
-- Star, S_5, OC, NCycle, and Abelian are genus-0 (ideal threshold, gap = 0) but with |G| ≤ PGL(2,N). Monster has |G| >> PGL(2,N), so genus > 0 and gap > 0.
-- The **CertifiedSolution** column shows which instances have an end-to-end bridge from the computable solver (`SecurityParams`) to the proof-level `SecurityWitness`. Star has `star_certified_1` (concrete). Monster can use `certified_from_witness` (generic). Other instances can be bridged similarly.
-- All instances except Monster have **0 global Axioms** (only Section Hypotheses). Star additionally has `star_protocol_correct` — end-to-end protocol correctness via `ar_protocol_correct`.
+- **CertifiedSolution** bridges: Star has `star_certified_1` (concrete). Monster can use `certified_from_witness` (generic). Other instances can be bridged similarly.
+- All instances except Monster have **0 global Axioms** (only Section Hypotheses). Star additionally has `star_protocol_correct` (end-to-end protocol correctness via `ar_protocol_correct`) and `star_dealer` (type-safe word→protocol demo via `dealer_from_words`).
 
-**(ii) Genus-specific covering constructions:**
+**(ii) Covering scheme constructors (plug-able):**
 
-| Genus | Curve | Gap | Branch pts | Key file | Status |
-|-------|-------|-----|------------|----------|--------|
-| 0 | P^1 (= Shamir/RS) | 0 | 2 | `cover_genus0.v` | Proved (`shamir_exact`) |
-| 1 | Elliptic y²=f(x), deg(f)=3 | ≤2 | 3 | `cover_genus1.v` | Proved (`elliptic_gap`) |
-| 2 | Hyperelliptic y²=f(x), deg(f)=5 | ≤4 | 5 | `cover_genus2.v` | Proved (`genus2_gap`) |
-| g | Generic higher genus | ≤2g | variable | `cover_genus1.v` (Section `higher_genus`) | Proved (generic) |
+The covering scheme determines the threshold — it is a **plug-able choice**, independent of the security bound. Four constructors are available, each producing a `CoveringScheme M`:
+
+| Constructor | Genus | Gap | Curve | Fault tolerance | PGL constraint | Key file |
+|-------------|-------|-----|-------|-----------------|----------------|----------|
+| `genus0_covering` | 0 | 0 | P^1 (= Shamir/RS) | 0 | \|G\| ≤ PGL(2,N) required | `cover_genus0.v` |
+| `genus1_covering` | 1 | ≤ 2 | Elliptic y²=f(x), deg(f)=3 | up to 2 | None | `cover_genus1.v` |
+| `genus2_covering` | 2 | ≤ 4 | Hyperelliptic y²=f(x), deg(f)=5 | up to 4 | None | `cover_genus2.v` |
+| `higher_genus_covering` | g | ≤ 2g | Generic | up to 2g | None | `cover_genus1.v` |
+
+All five small instances currently use `genus0_covering` because they all satisfy |G| ≤ PGL(2,N), making genus 0 optimal (gap = 0, no wasted shares). But any instance could **switch** to a higher-genus constructor to gain fault tolerance at the cost of threshold gap — the security bound (eps) is unaffected by this choice. For example, OC(2,3) with `genus1_covering` would get (2,4)-threshold tolerating 2 party failures while keeping eps = 0.
+
+Monster has |G| >> |PGL(2,N)|, so `genus0_covering` is unavailable — genus > 0 is forced by the tradeoff theorem. Its covering is axiomatized (`monster_covering`).
 
 **(iii) The security/threshold tradeoff** (`cover_tradeoff.v`):
 - Either genus = 0, |G| ≤ PGL(2,N), gap = 0
@@ -103,7 +112,7 @@ The adversary is a **passive (semi-honest) coalition** of k parties out of N tot
 ```
 var_dist(adversary_marginal, uniform) ≤ ε + 2(T-1)/N
 ```
-where `adversary_marginal` is the distribution of `rho(g)(s_target)` induced by the protocol's word sampling, and ε measures how far the protocol's permutation distribution is from truly uniform over S_N.
+where `adversary_marginal` is the distribution of `rho(g)(s_target)` induced by the protocol's word sampling, and ε is the endpoint-level variational distance bound: `∀ s, var_dist(fdistmap eval_s rho_dist, uniform(I_N)) ≤ ε`. (Before commit 41be0f0, ε measured the permutation-level distance from uniform over S_N; the refactoring moved to the tighter endpoint-level bound directly.)
 
 **DPI vs. Direct endpoint epsilon** (`pgg_collusion_bound.v`, Sections 6 and 10):
 
@@ -134,7 +143,6 @@ The endpoint epsilon's long-run behavior is determined by whether the group acts
 | Abelian (disjoint) | No | {0,1}, {2,3} | 1 | stuck at 1 |
 | Path(3) = S_5 | Yes | {0,...,4} | 6/5 | → 0 |
 | OC(2,3) | Yes | {0,...,3} | 1 | → 0 |
-| OC(2,5) | Yes | {0,...,5} | — | → 0 |
 | NCycle(N) | Yes | {0,...,N-1} | 2(N-1)/N | → 0 |
 | Monster | (axiomatic) | — | ~2 | (axiomatic) |
 
@@ -142,15 +150,16 @@ The endpoint epsilon's long-run behavior is determined by whether the group acts
 
 **Best secure instances** (combining low eps with fault-tolerant threshold):
 
-| Instance | L | eps | |achievable| | Genus | Threshold | Fault tolerance |
-|----------|---|-----|-------------|-------|-----------|-----------------|
-| Path(3), L≥5 | 5+ | → 0 | → 120 (=|S_5|) | 0 | (5,5) | 0 |
-| Path(3), genus=1 | 5+ | → 0 | → 120 | 1 | (3,5) | 2 |
-| OC(2,5), L≥6 | 6+ | → 0 | → |G| | 0 | (6,6) | 0 |
-| OC(2,5), genus=1 | 6+ | → 0 | → |G| | 1 | (4,6) | 2 |
-| OC(2,3), L=2 | 2 | 0 | 12 | 0 | (4,4) | 0 |
+| Instance | L | eps | |achievable| | Genus | Threshold (k,T) | Fault tolerance |
+|----------|---|-----|-------------|-------|-----------------|-----------------|
+| **OC(2,3), genus=1** | **2** | **0** | **12 = \|G\|** | **1** | **(2, 4)** | **2** |
+| OC(2,3), genus=0 | 2 | 0 | 12 = \|G\| | 0 | (4, 4) | 0 |
+| Path(3), genus=1 | 5+ | → 0 | → 120 (=\|S_5\|) | 1 | (3, 5) | 2 |
+| Path(3), genus=0 | 5+ | → 0 | → 120 | 0 | (5, 5) | 0 |
 
-Path(3) at genus=1 with L≥5 is notable: eps ≈ 0, with (3,5)-threshold tolerating 2 party failures. This demonstrates that the framework CAN achieve meaningful security with fault tolerance.
+**OC(2,3) at genus=1** is the standout: **perfect security** (eps = 0) at just L=2 rounds, with (2,4)-threshold tolerating 2 party failures. This is the best combination of security and fault tolerance in the framework — achieved by a small group (\|G\|=12) with overlapping 3-cycles that saturate all permutations in 2 steps.
+
+More generally, any transitive group achieving eps ≈ 0 can trade genus 0 (ideal threshold, no fault tolerance) for genus 1 ((k, k+2)-threshold with 2 fault tolerance) by choosing a higher-genus covering. The security bound is independent of the covering choice — only the threshold changes.
 
 ### Search space (adversary's brute-force cost)
 
@@ -215,18 +224,19 @@ The formalization has three pipelines that are now connected end-to-end:
 
 ```
 Pipeline 1 — Protocol:
-  pdealer / pparty / precon  ──→  channel duality proofs
-                                       │
-Pipeline 2 — Solver:                   │ ar_protocol_correct
-  RAAGDesc ──→ dealer_solve ──→ SecurityParams ──╮       │
-                                                  │       │
-Pipeline 3 — Security proofs:                     │       │
-  SecurityWitness ──→ certified_from_witness ─────╯       │
-       │                    │                             │
-       │              CertifiedSolution                   │
-       │                                                  │
-       ╰──→ AlgebraicRigidity ──→ ar_protocol_correct ────╯
-                  │
+  w : L.-tuple 'I_Tg ──→ dealer_from_words ──→ pdealer / pparty / precon
+  (external randomness)    (pgg_pismc.v)         ──→ channel duality proofs
+                                                           │
+Pipeline 2 — Solver:                                       │
+  RAAGDesc ──→ dealer_solve ──→ SecurityParams ──╮         │
+                                                  │         │
+Pipeline 3 — Security proofs:                     │         │
+  SecurityWitness ──→ certified_from_witness ─────╯         │
+       │                    │                               │
+       │              CertifiedSolution                     │
+       │                                                    │
+       ╰──→ AlgebraicRigidity ──→ dealer_words_correct ─────╯
+                  │                (pgg_dealer_bridge.v)
   ThresholdWitness ──╯
 ```
 
@@ -236,6 +246,8 @@ Pipeline 3 — Security proofs:                     │       │
 |--------|----------|-------------------|------|
 | `certified_from_witness` | Yes — any `GeneratedMonodromyReprType` | `star_certified_1` | `algebraic_rigidity.v` |
 | `ar_protocol_correct` | Yes — any `GeneratedMonodromyReprType` | `star_protocol_correct` | `rigidity_star_instance.v` |
+| `dealer_words_correct` | Yes — any `GeneratedMonodromyReprType` | `star_dealer` | `pgg_dealer_bridge.v` |
+| `dealer_from_words` | Yes — any `GeneratedMonodromyReprType` | `star_dealer` | `pgg_pismc.v` |
 | `G_stable` | No — instance-specific (relates code automorphism to monodromy) | Section Hypothesis in star | `rigidity_star_instance.v` |
 
 **Layer 1 (Computable — RAAG only):**
@@ -354,15 +366,21 @@ This setup/online split is standard in MPC formalizations (EasyCrypt Maurer, Cry
 - **`certified_from_witness`**: generic bridge from `SecurityWitness` to `CertifiedSolution`, works for any `GeneratedMonodromyReprType`
 - **`star_certified_1`**: concrete `CertifiedSolution` for star at L=1, eps = 2(m+1)/(m+3)
 - **`star_protocol_correct`**: end-to-end protocol correctness for star via `ar_protocol_correct` (conditional on `G_stable` Section Hypothesis)
+- **`dealer_from_words`**: type-safe word-to-protocol wrapper (`pgg_pismc.v`)
+- **`dealer_words_correct`**: end-to-end word→protocol correctness via `ar_protocol_correct` (`pgg_dealer_bridge.v`)
+- **`dealer_words_epsilon_bound`**: endpoint security bound from `AlgebraicRigidity` (`pgg_dealer_bridge.v`)
 
-### Axiom declarations (5 total, all in `rigidity_monster_instance.v`)
+### Axiom declarations (8 total, all in `rigidity_monster_instance.v`)
 
-**Monster instance** (5):
+**Monster instance** (8):
 1. `monster_n` — number of sheets (abstract, known to be ~ 10^20)
 2. `monster_sigmas` — two generators (exist by 2-generation of finite simple groups, CFSG)
 3. `monster_sigmas_distinct` — generators are distinct (injectivity; weakened from former `monster_lfree1` in commit b13f1ec, which is now a derived lemma via `gen_inj_lfree1`)
-4. `monster_covering` — existence of a CoveringScheme
-5. `monster_genus0_pgl` — genus-0 PGL bound (vacuously true since |M| >> PGL(2,N))
+4. `monster_Lstar` — turning point word length L* for optimal security
+5. `monster_weval_inj_Lstar` — word evaluation is injective at L*
+6. `monster_eval_s_inj_Lstar` — eval_s is injective on achievable(L*) for each sheet s
+7. `monster_covering` — existence of a CoveringScheme
+8. `monster_genus0_pgl` — genus-0 PGL bound (vacuously true since |M| >> PGL(2,N))
 
 **Eliminated axioms** (recent commits):
 - `genus0_aut_pgl` (was framework-level) — deleted in commit aba8e96; replaced by interface-implementation pattern (`ThresholdWitness.tw_genus0_pgl`)
@@ -523,9 +541,9 @@ Axiom monster_covering : CoveringScheme R_monster.
 Axiom monster_genus0_pgl : ...
 ```
 
-**Axiom count**: 5 (`monster_n`, `monster_sigmas`, `monster_sigmas_distinct`, `monster_covering`, `monster_genus0_pgl`)
+**Axiom count**: 8 (`monster_n`, `monster_sigmas`, `monster_sigmas_distinct`, `monster_Lstar`, `monster_weval_inj_Lstar`, `monster_eval_s_inj_Lstar`, `monster_covering`, `monster_genus0_pgl`)
 
-The extra 3 axioms vs star are because the group data itself is abstract (star has concrete generators). The Monster illustrates the security/threshold tradeoff at an extreme scale:
+The axioms are needed because the group data is abstract (star has concrete generators): 3 for group data (`monster_n`, `monster_sigmas`, `monster_sigmas_distinct`), 3 for the security turning point (`monster_Lstar`, `monster_weval_inj_Lstar`, `monster_eval_s_inj_Lstar`), and 2 for the covering scheme (`monster_covering`, `monster_genus0_pgl`). The Monster illustrates the security/threshold tradeoff at an extreme scale:
 - Security: astronomically strong (|G| ~ 10^53, so search space upper bound ~ 10^53)
 - Threshold: |G| vastly exceeds PGL(2,N), so genus > 0 by the contrapositive. Gap ≤ 2 × genus; the exact genus depends on ramification data via Riemann-Hurwitz, not on |G| alone
 
@@ -575,7 +593,7 @@ Hypotheses: identical structure to star instance (RS code parameters + coord aut
 | **Security model** | Info-theoretic, semi-honest, passive | Perfect, semi-honest | Perfect, passive | Perfect | Computational (DDH) or info-theoretic |
 | **Security quantification** | var_dist bound: eps + 2(T-1)/N, computable from rho | Simulation-based | Simulation-based (completeness proof) | Perfect reconstruction | Simulation-based |
 | **Round complexity** | L rounds (general); RAAG -> Foata depth (upper bound) | Linear in branching program length | 1 round (given correlations) | N/A | 1 round (online) |
-| **Formal verification** | 44 Rocq files, 5 Axiom declarations (all in monster instance) | None | None | None | None |
+| **Formal verification** | 50 Rocq files, 8 Axiom declarations (all in monster instance) | None | None | None | None |
 
 ### Key structural differences
 
@@ -617,7 +635,7 @@ SMC-PGG gives a concrete, computable variational distance bound (eps + 2(T-1)/N)
 
 2. **Coupled parameter framework**: The `AlgebraicRigidity` record formalizes that one algebraic choice (G + generators) determines search space, security, and threshold gap. Round complexity (trivially L; refined to Foata depth when RAAG commutation is specified) and computational power (NC^1 for non-solvable G) are derived separately. Other protocols treat these as independent design decisions.
 
-3. **Machine-checked proofs**: 44 Rocq files. EasyCrypt has formalized Maurer's MPC (abelian/linear, active security); Isabelle/CryptHOL has 2-party multiplication. No non-abelian group MPC has formal verification.
+3. **Machine-checked proofs**: 50 Rocq files. EasyCrypt has formalized Maurer's MPC (abelian/linear, active security); Isabelle/CryptHOL has 2-party multiplication. No non-abelian group MPC has formal verification.
 
 ### What SMC-PGG does NOT contribute
 

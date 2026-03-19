@@ -84,9 +84,24 @@ exists [tuple f (tnth shares_a i) | i < T'.+1]; split.
   by rewrite Hgf.
 Qed.
 
+Definition transport_encode (s : B) : T'.+1.-tuple B :=
+  [tuple f (tnth (ts_encode ts (g s)) i) | i < T'.+1].
+
+Lemma transport_encode_valid (s : B) :
+  transport_valid s (transport_encode s).
+Proof.
+rewrite /transport_valid /transport_encode.
+have -> : [tuple g (tnth [tuple f (tnth (ts_encode ts (g s)) i0)
+          | i0 < T'.+1] i) | i < T'.+1] = ts_encode ts (g s).
+  apply: eq_from_tnth => i.
+  by rewrite !tnth_mktuple Hfg.
+exact: ts_encode_valid.
+Qed.
+
 Definition transport_scheme : ThresholdScheme B B :=
   @MkThresholdScheme B B T' k'
-    transport_valid transport_recon transport_correct transport_private.
+    transport_valid transport_recon transport_encode
+    transport_correct transport_private transport_encode_valid.
 
 Lemma transport_exact :
   ts_T ts = ts_k ts -> ts_T transport_scheme = ts_k transport_scheme.

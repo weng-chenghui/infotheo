@@ -89,7 +89,7 @@ Lemma star_weval_inj1 : @weval_inj M_star 1.
 Proof. exact: raag_weval_inj1. Qed.
 
 (* Fiber-counted endpoint bound: for each sheet s in 'I_(m+3),
-   var_dist(fdistmap eval_s (rho_from_words 1 star_gen_tuple), uniform)
+   var_dist(fdistmap perm_endpoint (rho_from_words 1 star_gen_tuple), uniform)
      <= 2*(m+1)/(m+3).
    Generators: g0=tperm(0,1), gi=tperm(2,2+i) for i=1..m.
    Worst-case sheets s≠2: one generator moves s, m fix s.

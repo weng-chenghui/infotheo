@@ -189,3 +189,34 @@ Definition NCycle_PGG_2 : PGGInterface M :=
   @Cyclic_PGG_2 n (ncycle n).
 
 End ncycle_instance.
+
+(* ========================================================================== *)
+(* Parametric Abelian Instance: m+1 Disjoint Transpositions                   *)
+(*                                                                            *)
+(* sigma_i = tperm(2*i, 2*i+1) for i = 0, ..., m on N = 2*(m+1) sheets.    *)
+(* All generators commute (disjoint support).                                 *)
+(* Existing abel_sigmas (in rigidity_abelian_instance.v) is the special case *)
+(* m=1 giving N=4.                                                           *)
+(* ========================================================================== *)
+
+Section disjoint_transpositions.
+
+Variable m : nat.
+Let Tg := m.+1.
+Let N := Tg.*2.
+
+Lemma dt_even_lt (i : 'I_Tg) : (val i).*2 < N.
+Proof. have := valP i; rewrite /N /Tg ltn_double; exact id. Qed.
+
+Lemma dt_odd_lt (i : 'I_Tg) : (val i).*2.+1 < N.
+Proof. have := valP i; rewrite /N /Tg ltn_Sdouble; exact id. Qed.
+
+Definition dt_gen (i : 'I_Tg) : {perm 'I_N} :=
+  tperm (Ordinal (dt_even_lt i)) (Ordinal (dt_odd_lt i)).
+
+Definition dt_gen_tuple : Tg.-tuple {perm 'I_N} := gen_tuple_of dt_gen.
+
+Lemma dt_gen_tupleE (i : 'I_Tg) : tnth dt_gen_tuple i = dt_gen i.
+Proof. exact: gen_tuple_ofE. Qed.
+
+End disjoint_transpositions.

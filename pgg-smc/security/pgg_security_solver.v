@@ -210,7 +210,7 @@ Eval vm_compute in star_solve (Star_FixML 10 1).
 (*     Fiber-counted epsilon (TRUE endpoint epsilon for non-injective groups) *)
 (******************************************************************************)
 
-(* For groups where eval_s is NOT injective on achievable(L), the formula
+(* For groups where perm_endpoint is NOT injective on achievable(L), the formula
    2*(N-Tg^L)/N is WRONG (underestimates). The true epsilon comes from
    the worst-case fiber distribution over all starting sheets. *)
 
@@ -563,7 +563,7 @@ Eval vm_compute in fiber_eps_nat (star_desc 10) 1.  (* m=10: Tg=11, N=13 *)
 (*                                                                            *)
 (*     Computes an integer proxy for entropy deficit:                         *)
 (*       entropy_deficit_num = Σ_{c_x > 0} c_x * (c_x - 1)                  *)
-(*     which is 0 iff all nonempty fibers have size 1 (= injective eval_s).  *)
+(*     which is 0 iff all nonempty fibers have size 1 (= injective perm_endpoint).  *)
 (*     This is NOT the true entropy but a computable nat-level indicator of   *)
 (*     fiber unevenness: 0 means all fibers are singletons (max entropy).    *)
 (*                                                                            *)
@@ -573,7 +573,7 @@ Eval vm_compute in fiber_eps_nat (star_desc 10) 1.  (* m=10: Tg=11, N=13 *)
 
 (* Fiber unevenness indicator for sheet s:
    Σ_{x} c_x * (c_x - 1) where c_x = endpoint_count fps s x.
-   This is 0 iff all fibers are singletons (eval_s injective). *)
+   This is 0 iff all fibers are singletons (perm_endpoint injective). *)
 Definition fiber_unevenness (fps : seq (seq nat)) (N s : nat) : nat :=
   sumn [seq let c := endpoint_count fps s x in c * (c - 1)
        | x <- iota 0 N].
@@ -582,14 +582,14 @@ Definition fiber_unevenness (fps : seq (seq nat)) (N s : nat) : nat :=
 Definition worst_unevenness (fps : seq (seq nat)) (N : nat) : nat :=
   foldr maxn 0 [seq fiber_unevenness fps N s | s <- iota 0 N].
 
-(* Is eval_s injective on achievable(L)? (all fibers are singletons) *)
-Definition check_eval_s_inj (desc : GroupDesc) (L : nat) : bool :=
+(* Is perm_endpoint injective on achievable(L)? (all fibers are singletons) *)
+Definition check_perm_endpoint_inj (desc : GroupDesc) (L : nat) : bool :=
   let fps := achievable_fps desc L in
   worst_unevenness fps (rd_N desc) == 0.
 
 (* Fiber entropy summary: (total, worst_unevenness, is_injective)
    - total = |achievable(L)| = Tg^L when weval_inj
-   - worst_unevenness = 0 iff eval_s injective → H = log(total)
+   - worst_unevenness = 0 iff perm_endpoint injective → H = log(total)
    - For exact H when unevenness > 0, use type-level fiber_entropy *)
 Definition fiber_entropy_summary (desc : GroupDesc) (L : nat)
     : nat * nat * bool :=
@@ -602,7 +602,7 @@ Definition fiber_entropy_summary (desc : GroupDesc) (L : nat)
 (*     vm_compute demonstrations: fiber entropy                              *)
 (******************************************************************************)
 
-(* Star m=2, L=1: unevenness > 0 (non-injective eval_s) *)
+(* Star m=2, L=1: unevenness > 0 (non-injective perm_endpoint) *)
 Eval vm_compute in fiber_entropy_summary (star_desc 2) 1.
 
 (* Path n=3 (= S5), L=1: unevenness > 0 *)
@@ -611,13 +611,13 @@ Eval vm_compute in fiber_entropy_summary (path_desc 3) 1.
 (* OC(2,3), L=2: unevenness > 0 *)
 Eval vm_compute in fiber_entropy_summary (oc_desc 2 3) 2.
 
-(* Disjoint k=2 (= Abelian), L=1: check if eval_s injective *)
+(* Disjoint k=2 (= Abelian), L=1: check if perm_endpoint injective *)
 Eval vm_compute in fiber_entropy_summary (disjoint_desc 2) 1.
 
 (* Cyclic n=5, L=1: single generator *)
 Eval vm_compute in fiber_entropy_summary (cyclic_desc 5) 1.
 
 (* Cross-family comparison *)
-Eval vm_compute in check_eval_s_inj (star_desc 2) 1.
-Eval vm_compute in check_eval_s_inj (disjoint_desc 2) 1.
-Eval vm_compute in check_eval_s_inj (cyclic_desc 5) 1.
+Eval vm_compute in check_perm_endpoint_inj (star_desc 2) 1.
+Eval vm_compute in check_perm_endpoint_inj (disjoint_desc 2) 1.
+Eval vm_compute in check_perm_endpoint_inj (cyclic_desc 5) 1.
