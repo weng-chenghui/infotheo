@@ -7,7 +7,7 @@ From mathcomp Require Import morphism bigop div binomial fingraph path.
 From pgg_smc Require Import pgg_interface pgg_weval_inj pgg_raag.
 
 (******************************************************************************)
-(* PGG-SMC: Commuting Pair Analysis for RAAG Words                           *)
+(* PGG: Commuting Pair Analysis for RAAG Words                               *)
 (*                                                                            *)
 (* Formalizes the number of adjacent commuting pairs in a word as a           *)
 (* combinatorial quantity, and connects it to trace equivalence.              *)

@@ -8,7 +8,7 @@ From Stdlib Require Import Wf_nat.
 From pgg_smc Require Import pgg_interface pgg_weval_inj.
 
 (******************************************************************************)
-(* PGG-SMC: RAAG (Right-Angled Artin Group) Search Space Theory              *)
+(* PGG: RAAG (Right-Angled Artin Group) Search Space Theory                  *)
 (* Group presentation: <s_1,...,s_Tg | s_i s_j = s_j s_i for (i,j) in E(Gamma)>  *)
 (*                                                                            *)
 (* A commutation graph on Tg generators determines which pairs of generators  *)

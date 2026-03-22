@@ -4,16 +4,16 @@ From mathcomp Require Import ssreflect ssrbool ssrfun eqtype ssrnat seq.
 From mathcomp Require Import fintype tuple finfun finset fingroup perm morphism.
 
 (******************************************************************************)
-(* PGG-SMC: Correctness Theorems                                              *)
+(* PGG: Correctness Theorems                                                  *)
 (*                                                                            *)
 (*   Theorem 1 (Correctness): rho(g*h)(s) = rho(h)(rho(g)(s))               *)
 (*     The monodromy representation composes correctly.                       *)
 (*                                                                            *)
-(*   Theorem 2 (Bijectivity/UPLP): rho(P) is a bijection on sheets.          *)
+(*   Theorem 2 (Bijectivity/UPLP): rho(P) is a bijection on card positions.  *)
 (*     Trivially true since rho(P) : {perm 'I_N}.                            *)
 (*                                                                            *)
-(*   Proposition 3 (Distinctness): Endpoints of distinct starting sheets      *)
-(*     remain distinct under any monodromy evaluation.                        *)
+(*   Proposition 3 (Distinctness): Endpoints of distinct starting card        *)
+(*     positions remain distinct under any monodromy evaluation.              *)
 (******************************************************************************)
 
 Set Implicit Arguments.

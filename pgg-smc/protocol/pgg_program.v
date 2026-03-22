@@ -5,7 +5,7 @@ From mathcomp Require Import fintype tuple finfun finset fingroup perm morphism.
 From mathcomp Require Import bigop.
 
 (******************************************************************************)
-(* PGG Card Protocol: Protocol Specification                                  *)
+(* PGG: Protocol Specification                                                *)
 (*                                                                            *)
 (* Defines the three phases of the card protocol:                             *)
 (*   split rho W starts == for each shuffle w in W, compute permutation       *)

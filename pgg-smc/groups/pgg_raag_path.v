@@ -7,7 +7,7 @@ From mathcomp Require Import morphism action bigop.
 From pgg_smc Require Import pgg_interface pgg_weval_inj pgg_raag.
 
 (******************************************************************************)
-(* PGG-SMC: Path-Graph RAAG Instance                                         *)
+(* PGG: Path-Graph RAAG Instance                                             *)
 (* Group presentation: <g_0,...,g_m | g_i g_j = g_j g_i for |i-j| >= 2>     *)
 (*                                                                            *)
 (* T = m+1 generators on N = m+2 sheets.  Generator i = tperm i (i+1).       *)

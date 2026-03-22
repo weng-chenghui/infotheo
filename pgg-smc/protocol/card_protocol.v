@@ -1,7 +1,7 @@
 (* infotheo: information theory and error-correcting codes in Rocq            *)
 (* Copyright (C) 2025 infotheo authors, license: LGPL-2.1-or-later            *)
 (******************************************************************************)
-(* Card Protocol Model for PGG-SMC                                            *)
+(* Card Protocol Model for PGG                                                *)
 (*                                                                            *)
 (* Defines card-based cryptographic protocols as instances of the PGG          *)
 (* framework, connecting card-game shuffling to Schreier spectral analysis     *)

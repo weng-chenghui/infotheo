@@ -13,7 +13,7 @@ From mathcomp Require Import zify.
 (*                                                                            *)
 (* No free group type is constructed — only sequences with a "no adjacent     *)
 (* inverses" constraint. This suffices for the ball-size formula needed by     *)
-(* PGG-SMC search space analysis.                                             *)
+(* PGG search space analysis.                                                 *)
 (*                                                                            *)
 (* Section 1 — Reduced words and sphere counting:                             *)
 (*   letter_inv r i == inverse of letter i in alphabet {0,...,2r-1}           *)

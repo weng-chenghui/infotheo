@@ -392,7 +392,7 @@ Definition cyclic_desc (n : nat) : GroupDesc :=
 (*     Fiber-counted epsilon computation (fiber_eps_nat)                *)
 (*                                                                           *)
 (*     Computes worst-case var_dist(endpoint distribution, uniform)          *)
-(*     over all starting sheets, using achievable set fingerprints.          *)
+(*     over all starting card positions, using achievable set fingerprints.          *)
 (*     var_dist convention: sum |P(x) - Q(x)| (range 0..2, no 1/2 factor). *)
 (*                                                                           *)
 (*     This single function replaces per-instance epsilon formulas           *)

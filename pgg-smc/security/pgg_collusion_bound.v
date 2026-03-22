@@ -1,6 +1,6 @@
 (* infotheo: information theory and error-correcting codes in Rocq            *)
 (* Copyright (C) 2025 infotheo authors, license: LGPL-2.1-or-later            *)
-(* PGG-SMC Collusion Bound (Theorem 5)                                        *)
+(* PGG Collusion Bound (Theorem 5)                                            *)
 (*                                                                             *)
 (* Sections 1-5: Generic collusion bound with Assumption 1 as hypothesis.      *)
 (*   Main result: d(adversary_posterior, uniform) <= epsilon + 2(T-1)/N        *)

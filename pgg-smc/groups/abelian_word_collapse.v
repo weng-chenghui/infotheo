@@ -7,7 +7,7 @@ From mathcomp Require Import morphism action bigop binomial.
 From pgg_smc Require Import pgg_interface.
 
 (******************************************************************************)
-(* PGG-SMC: Abelian Word Collapse (Theorem 8, items (1)-(2))                 *)
+(* PGG: Abelian Word Collapse (Theorem 8, items (1)-(2))                     *)
 (* Group presentation: <s_1,...,s_Tg | s_i s_j = s_j s_i for all i,j> (abelian) *)
 (*                                                                           *)
 (* In an abelian group with r generators, any word of length L evaluates to  *)

@@ -16,7 +16,7 @@ From pgg_reconstruct Require Import rigidity_monster_instance.
 From pgg_reconstruct Require Import rigidity_abelian_instance.
 
 (******************************************************************************)
-(* PGG Card Protocol: piSMC Protocol Programs                                 *)
+(* PGG: piSMC Protocol Programs                                               *)
 (*                                                                            *)
 (* Types involved:                                                            *)
 (*   generator index ('I_Tg) -- a "shuffle type": picks one of Tg shuffles   *)
@@ -38,17 +38,17 @@ From pgg_reconstruct Require Import rigidity_abelian_instance.
 (*   - Sum-mod-N: (sum of card positions) mod N                               *)
 (*                                                                            *)
 (* How the hidden value is determined:                                        *)
-(* 1. The dealer encodes hidden value s as starting sheets: ts_encode(s).    *)
+(* 1. The dealer encodes hidden value s as starting card positions: ts_encode(s).    *)
 (* 2. The word w scrambles these sheets: word_eval(w) applies a coordinate   *)
 (*    permutation (invisible to reconstruction by ts_perm_compatible).       *)
 (* 3. The verifier collects card positions and recovers s via ts_recon.      *)
-(* The hidden value is fixed by the starting sheets, not by the shuffle.     *)
+(* The hidden value is fixed by the starting card positions, not by the shuffle.     *)
 (* ts_encode_valid guarantees ts_valid(s, ts_encode(s)), so the dealer       *)
 (* always produces a valid configuration. dealer_encode_correct              *)
 (* (pgg_dealer_bridge.v) is the end-to-end theorem.                          *)
 (*                                                                            *)
 (* Example: recovering the number 39 with the Monster group (N ~ 10^20).     *)
-(* The starting sheets [s_0, ..., s_{T-1}] are chosen so that               *)
+(* The starting card positions [s_0, ..., s_{T-1}] are chosen so that               *)
 (* ts_valid(39, starts) holds for the threshold scheme. The dealer samples   *)
 (* w : 67.-tuple 'I_2 (67 binary shuffle choices). word_eval(w) is a        *)
 (* permutation on ~10^20 card positions, e.g.,                                *)
@@ -408,7 +408,7 @@ Section pgg_monster_duality.
 (* Monster group M: N ~ 10^20 card positions — large encoding space.
    Instantiates generic duality with axiomatized generators.
    No native_compute needed — the generic proof already covers this case.
-   Shows PGG card protocol scales to arbitrarily large card decks. *)
+   Shows PGG scales to arbitrarily large card decks. *)
 
 Variables (W : seq {perm 'I_monster_n.+2}) (P_idx : nat).
 

@@ -3,9 +3,9 @@
 From mathcomp Require Import all_boot all_order all_algebra fingroup perm.
 
 (******************************************************************************)
-(*                     Deck-Pairing Bit Encoding for PGG-SMC                  *)
+(*                     Deck-Pairing Bit Encoding for PGG                      *)
 (*                                                                            *)
-(* This file formalizes the deck-pairing bit encoding used in PGG-SMC         *)
+(* This file formalizes the deck-pairing bit encoding used in PGG             *)
 (* protocols. A "deck" is a set of N cards indexed by 'I_N. A pairing is      *)
 (* an involution (a permutation g with g * g = 1) that pairs cards together.  *)
 (* Bits are encoded by whether two cards form a matched pair under g, and      *)

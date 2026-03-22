@@ -8,7 +8,7 @@ From pgg_smc Require Import pgg_interface pgg_weval_inj pgg_raag.
 From pgg_smc Require Import pgg_raag_path pgg_raag_clique.
 
 (******************************************************************************)
-(* PGG-SMC: Concrete S_5 RAAG Instance (Adjacent Transpositions)              *)
+(* PGG: Concrete S_5 RAAG Instance (Adjacent Transpositions)                  *)
 (*                                                                            *)
 (* Specialization of the path-graph RAAG at m=3, giving:                      *)
 (*   T = 4 generators: s0=(01), s1=(12), s2=(23), s3=(34)                    *)

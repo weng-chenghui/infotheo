@@ -7,7 +7,7 @@ From mathcomp Require Import morphism action cyclic bigop.
 From pgg_smc Require Import pgg_interface.
 
 (******************************************************************************)
-(* PGG-SMC: Abelian (Cyclic) Group Instance for MonodromyRepr Mixin          *)
+(* PGG: Abelian (Cyclic) Group Instance for MonodromyRepr Mixin              *)
 (* Group presentation: <sigma>  (cyclic, abelian)                            *)
 (*                                                                           *)
 (* Constructs a MonodromyReprType instance where G = <[sigma]> is a cyclic   *)

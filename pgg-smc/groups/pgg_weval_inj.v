@@ -7,7 +7,7 @@ From mathcomp Require Import morphism bigop.
 From pgg_smc Require Import pgg_interface.
 
 (******************************************************************************)
-(* PGG-SMC: Word-Eval Injective Generators and Optimal Search Space           *)
+(* PGG: Word-Eval Injective Generators and Optimal Search Space               *)
 (*                                                                            *)
 (* MathComp's finGroupType cannot represent the infinite free group needed    *)
 (* for maximal PGG search spaces.  Word evaluation injectivity at length L    *)
@@ -19,7 +19,7 @@ From pgg_smc Require Import pgg_interface.
 (* Parameters for a word-eval injective PGG instance:                         *)
 (*   L  -- word length (security/search space depth)                          *)
 (*   Tg -- number of generators (branching factor), search space = Tg^L      *)
-(*   N  -- number of sheets (permutation domain), must satisfy N! >= Tg^L    *)
+(*   N  -- number of card positions (permutation domain), N! >= Tg^L         *)
 (*   sigmas -- Tg permutations in S_N generating a group of order >= Tg^L    *)
 (* Example: for L=10 with Tg=2, need 2^10=1024 distinct group elements,     *)
 (* so N >= 7 (since 7!=5040 >= 1024). Pick two sigma_i in S_7 generating a   *)

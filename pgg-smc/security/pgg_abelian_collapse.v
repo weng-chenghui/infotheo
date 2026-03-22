@@ -7,7 +7,7 @@ From mathcomp Require Import morphism action bigop binomial.
 From pgg_smc Require Import pgg_interface abelian_word_collapse.
 
 (******************************************************************************)
-(* PGG-SMC: Abelian Security Collapse (Theorem 8, items (3)-(4))             *)
+(* PGG: Abelian Security Collapse (Theorem 8, items (3)-(4))                 *)
 (*                                                                           *)
 (* Item 3: In a regular (free + transitive) monodromy action, knowing the    *)
 (* endpoint rho(g)(s) at a single sheet s determines g uniquely.             *)

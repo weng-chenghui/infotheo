@@ -6,9 +6,9 @@ From mathcomp Require Import fintype tuple finfun finset fingroup perm morphism.
 Require Import smc_session_types pgg_interface.
 
 (******************************************************************************)
-(* PGG Card Protocol: Session-Typed Wrappers                                  *)
+(* PGG: Session-Typed Wrappers                                                *)
 (*                                                                            *)
-(* Session-typed wrappers for the PGG card protocol, following the pattern    *)
+(* Session-typed wrappers for the PGG protocol, following the pattern         *)
 (* of dsdp_session_types.v. Each action variant has a fixed dtype.            *)
 (*                                                                            *)
 (*   PGGReveal_pos dst i p    == reveal card position i (DT_Sheet)             *)

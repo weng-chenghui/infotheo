@@ -7,7 +7,7 @@ From Stdlib Require Import Wf_nat.
 From pgg_smc Require Import pgg_weval_inj pgg_raag pgg_raag_clique.
 
 (******************************************************************************)
-(* PGG-SMC: Cartier-Foata Theorem Infrastructure                             *)
+(* PGG: Cartier-Foata Theorem Infrastructure                                 *)
 (*                                                                            *)
 (* Re-proves infrastructure lemmas about foata_pairs/foata_nf that are        *)
 (* section-local in pgg_raag.v, plus new NF properties:                       *)

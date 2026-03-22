@@ -7,7 +7,7 @@ From mathcomp Require Import morphism action bigop.
 From pgg_smc Require Import pgg_interface pgg_weval_inj pgg_raag.
 
 (******************************************************************************)
-(* PGG-SMC: Star-Graph RAAG Instance                                         *)
+(* PGG: Star-Graph RAAG Instance                                             *)
 (* Group presentation: <g_0,...,g_m | g_0 g_i = g_i g_0 for i=1..m>         *)
 (*                                                                            *)
 (* Constructs a concrete PGG instance based on a star commutation graph:      *)

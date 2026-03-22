@@ -7,9 +7,9 @@ From mathcomp Require Import morphism action bigop.
 From pgg_smc Require Import pgg_interface.
 
 (******************************************************************************)
-(* PGG-SMC: Parametric Overlapping Cycles OC(k,p)                            *)
+(* PGG: Parametric Overlapping Cycles OC(k,p)                                *)
 (*                                                                            *)
-(* OC(k,p): k+1 overlapping (p+3)-cycles on N = k + p + 3 sheets.           *)
+(* OC(k,p): k+1 overlapping (p+3)-cycles on N = k + p + 3 card positions.   *)
 (*   sigma_i rotates positions [i, i+1, ..., i+p+2], fixing everything else. *)
 (*   Existing OC(2,3) (pgg_weval_inj.v) is the special case k=1, p=0, N=4.  *)
 (*                                                                            *)

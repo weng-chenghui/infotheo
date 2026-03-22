@@ -3,7 +3,7 @@
 (******************************************************************************)
 (* PGG Security Demo: Eps Progression, Transitivity, and Threshold Tradeoff   *)
 (*                                                                            *)
-(* Demonstrates that PGG-SMC CAN achieve low epsilon with meaningful (k,T)    *)
+(* Demonstrates that PGG CAN achieve low epsilon with meaningful (k,T)        *)
 (* threshold, by contrasting transitive vs non-transitive RAAG groups.        *)
 (*                                                                            *)
 (* Mathematical context:                                                      *)

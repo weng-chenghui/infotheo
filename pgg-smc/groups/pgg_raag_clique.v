@@ -6,7 +6,7 @@ From mathcomp Require Import morphism bigop binomial.
 From pgg_smc Require Import pgg_weval_inj pgg_raag.
 
 (******************************************************************************)
-(* PGG-SMC: Clique Polynomial of the RAAG Commutation Graph                  *)
+(* PGG: Clique Polynomial of the RAAG Commutation Graph                      *)
 (*                                                                            *)
 (* In trace monoid theory (Cartier-Foata), the number of traces of length L   *)
 (* is determined by the clique polynomial of the commutation graph:           *)
