@@ -6,17 +6,20 @@
 (* Constructs a concrete AlgebraicRigidity instance for the S_5 adjacent      *)
 (* transposition RAAG (Coxeter type A_4, path graph with 4 generators).       *)
 (*                                                                            *)
-(* This demonstrates all four algebraic rigidity parameters computed from     *)
+(* This demonstrates all algebraic rigidity parameters computed from          *)
 (* a single (G, I) choice with concrete vm_compute-checkable results:         *)
 (*   1. Complexity: search_space L <= |G|                                     *)
 (*   2. Security: var_dist(endpoint, uniform) <= 6/5 at L=1 (fiber-counted)  *)
 (*   3. Threshold: genus-0 covering from RS codes (+ PGL hypothesis)          *)
-(*   4. Round complexity: depth <= L                                          *)
 (*                                                                            *)
 (* vm_compute demonstrations:                                                 *)
 (*   s5_nt_L1 : n_traces_natB 4 1 path_comm_nat = 4                          *)
 (*   s5_nt_L2 : n_traces_natB 4 2 path_comm_nat = 13                         *)
 (*   s5_nt_L3 : n_traces_natB 4 3 path_comm_nat = 40                         *)
+(*                                                                            *)
+(* Proved (not axiomatized):                                                  *)
+(*   s5_security_witness_1 : SecurityWitness (fiber-counted eps=6/5)         *)
+(*   s5_rigidity : AlgebraicRigidity (security + threshold)                  *)
 (******************************************************************************)
 
 From HB Require Import structures.
@@ -62,7 +65,70 @@ Lemma s5_endpoint_bound_fiber :
   (var_dist (fdistmap (fun sigma : {perm 'I_5} => sigma s)
                      (@rho_from_words R _ _ 1 (path_gen_tuple 3)))
            (fdist_uniform (card_ord 5)) <= 6%:R / 5%:R)%O.
-Proof. Admitted.
+Proof.
+move=> s.
+apply: (Order.POrderTheory.le_trans
+  (@var_dist_endpoint_image_bound_unbalanced R 3 3 1 (path_gen_tuple 3)
+    s5_weval_inj1 (erefl true) 2 s _)); last first.
+  by rewrite /= -GRing.Theory.natrM.
+have Hmem : forall (w : pgg_word (Gen_PGGTypes (path_gen_tuple 3)) 1),
+    word_eval w s \in
+      (fun sigma : {perm 'I_5} => sigma s) @:
+        achievable (Gen_PGGTypes (path_gen_tuple 3)) 1.
+  by move=> w; apply: imset_f; apply: imset_f.
+pose w0 : pgg_word (Gen_PGGTypes (path_gen_tuple 3)) 1 := [tuple ord0].
+pose w3 : pgg_word (Gen_PGGTypes (path_gen_tuple 3)) 1 := [tuple ord_max].
+pose w1 : pgg_word (Gen_PGGTypes (path_gen_tuple 3)) 1 :=
+  [tuple (Ordinal (n:=4) (m:=1) (erefl true))].
+have Hw0 : @word_eval (Gen_PGGTypes (path_gen_tuple 3)) 1 w0 =
+           @path_gen 3 ord0.
+  rewrite /word_eval /w0 big_ord_recr /= big_ord0 mul1g.
+  by rewrite (@path_gen_tupleE 3).
+have Hw3 : @word_eval (Gen_PGGTypes (path_gen_tuple 3)) 1 w3 =
+           @path_gen 3 ord_max.
+  rewrite /word_eval /w3 big_ord_recr /= big_ord0 mul1g.
+  by rewrite (@path_gen_tupleE 3).
+have Hw1 : @word_eval (Gen_PGGTypes (path_gen_tuple 3)) 1 w1 =
+           @path_gen 3 (Ordinal (n:=4) (m:=1) (erefl true)).
+  rewrite /word_eval /w1 big_ord_recr /= big_ord0 mul1g.
+  by rewrite (@path_gen_tupleE 3).
+apply/card_gt1P.
+case: s Hmem => [[|[|[|[|[|s]]]]] Hs] //= Hmem.
+(* s=0: tperm(0,1)(0)=1 vs tperm(3,4)(0)=0 *)
+- exists (word_eval w0 (Ordinal Hs)), (word_eval w3 (Ordinal Hs)).
+  split; [exact: Hmem | exact: Hmem |].
+  rewrite Hw0 Hw3 /path_gen.
+  have -> : Ordinal Hs = @path_lo 3 ord0 by apply: val_inj.
+  rewrite tpermL tpermD; rewrite -?val_eqE //.
+(* s=1: tperm(0,1)(1)=0 vs tperm(3,4)(1)=1 *)
+- exists (word_eval w0 (Ordinal Hs)), (word_eval w3 (Ordinal Hs)).
+  split; [exact: Hmem | exact: Hmem |].
+  rewrite Hw0 Hw3 /path_gen.
+  have -> : Ordinal Hs = @path_hi 3 ord0 by apply: val_inj.
+  rewrite tpermR tpermD; rewrite -?val_eqE //.
+(* s=2: tperm(0,1)(2)=2 vs tperm(1,2)(2)=1 *)
+- exists (word_eval w0 (Ordinal Hs)), (word_eval w1 (Ordinal Hs)).
+  split; [exact: Hmem | exact: Hmem |].
+  rewrite Hw0 Hw1 /path_gen.
+  have -> : Ordinal Hs = @path_hi 3 (Ordinal (n:=4) (m:=1) (erefl true))
+    by apply: val_inj.
+  rewrite tpermD; [| rewrite -?val_eqE //..].
+  rewrite tpermR; rewrite -?val_eqE //.
+(* s=3: tperm(0,1)(3)=3 vs tperm(3,4)(3)=4 *)
+- exists (word_eval w0 (Ordinal Hs)), (word_eval w3 (Ordinal Hs)).
+  split; [exact: Hmem | exact: Hmem |].
+  rewrite Hw0 Hw3 /path_gen.
+  have -> : Ordinal Hs = @path_lo 3 ord_max by apply: val_inj.
+  rewrite tpermD; [| rewrite -?val_eqE //..].
+  rewrite tpermL; rewrite -?val_eqE //.
+(* s=4: tperm(0,1)(4)=4 vs tperm(3,4)(4)=3 *)
+- exists (word_eval w0 (Ordinal Hs)), (word_eval w3 (Ordinal Hs)).
+  split; [exact: Hmem | exact: Hmem |].
+  rewrite Hw0 Hw3 /path_gen.
+  have -> : Ordinal Hs = @path_hi 3 ord_max by apply: val_inj.
+  rewrite tpermD; [| rewrite -?val_eqE //..].
+  rewrite tpermR; rewrite -?val_eqE //.
+Qed.
 
 (* SecurityWitness at L=1 via fiber counting.
    Epsilon = 6/5, much tighter than DPI bound 2*(5!-4)/5! ≈ 1.93. *)
@@ -113,15 +179,10 @@ Hypothesis s5_genus0_pgl :
 Definition s5_threshold_witness : ThresholdWitness R_s5 :=
   @MkThresholdWitness R_s5 s5_covering (fun _ => s5_genus0_pgl).
 
-(* Round complexity at L=1: depth = 1 *)
-Definition s5_round_complexity : RoundComplexityWitness :=
-  @MkRoundComplexityWitness 1 1 (leqnn 1).
-
 Definition s5_rigidity : AlgebraicRigidity R R_s5 :=
   @MkAlgebraicRigidity R R_s5
     (s5_security_witness_1 R)
-    s5_threshold_witness
-    s5_round_complexity.
+    s5_threshold_witness.
 
 (* Derived properties *)
 

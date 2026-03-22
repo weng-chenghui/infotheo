@@ -13,95 +13,97 @@
 (*                                                                            *)
 (* All definitions are generic over GeneratedMonodromyReprType.               *)
 (*                                                                            *)
-(* Key insight: var_dist and entropy are BOTH functions of the same fiber      *)
-(* distribution. Given fiber counts c_x = |{s in achievable : s(s) = x}|:    *)
-(*   var_dist = 2*(N - |{x : c_x > 0}|) / N    [image coverage]             *)
-(*   H(P_s)   = log(Tg^L) - (1/Tg^L) sum c_x log(c_x)  [fiber unevenness]  *)
-(* When perm_endpoint is injective: all c_x in {0,1}, both simplify.         *)
-(*                                                                            *)
-(* How PGG security works:                                                    *)
+(* Security model:                                                            *)
 (*   The dealer samples word w uniformly from Tg^L possible L-tuples.        *)
-(*   Each party i observes one coordinate: endpoint sigma_w(s_i), where      *)
-(*   sigma_w = word_eval(w). The secret is ts_recon(coordinates) -- a value  *)
-(*   computed from k endpoints by the threshold scheme (field element for     *)
-(*   Shamir/RS, codeword for AG codes). Fewer than k coordinates reveal      *)
-(*   nothing about the secret (privacy).                                     *)
+(*   Each party i observes endpoint sigma_w(s_i), where sigma_w =           *)
+(*   word_eval(w). The secret is ts_recon(endpoints) -- a value computed     *)
+(*   from k endpoints by the threshold scheme. Fewer than k endpoints        *)
+(*   reveal nothing about the secret (privacy).                              *)
 (*                                                                            *)
-(*   Security guarantee (collusion_bound, pgg_collusion_bound.v):            *)
+(*   Security = endpoint distribution P_s close to uniform over 'I_N.       *)
+(*   collusion_bound (pgg_collusion_bound.v) gives:                          *)
 (*     var_dist(adversary_marginal, uniform) <= eps + 2(T-1)/N               *)
-(*   where adversary_marginal is the MARGINAL distribution of the            *)
-(*   unobserved party's endpoint (the +2(T-1)/N covers conditioning).        *)
-(*   eps measures how far the per-sheet endpoint distribution is from        *)
-(*   uniform. When eps ~ 0, each endpoint is nearly uniform over 'I_N.      *)
+(*   eps measures how far P_s is from uniform. When eps ~ 0, each           *)
+(*   endpoint is nearly uniform, so observing it reveals little about        *)
+(*   the secret.                                                             *)
 (*                                                                            *)
-(*   Entropy measures MARGINAL closeness to uniform, not conditional:        *)
-(*     H(P_s) = entropy of one party's endpoint, ignoring other parties      *)
-(*     D(P_s || U_N) = log N - H(P_s) = marginal leakage in bits            *)
-(*     var_dist <= sqrt(2*D) (Pinsker, probability/pinsker.v)                *)
-(*   A full conditional analysis H(s_target | s_0,..,s_{T-2}) -- how much    *)
-(*   the last party's endpoint leaks given the other T-1 parties'            *)
-(*   endpoints -- would be tighter. The +2(T-1)/N slack in collusion_bound   *)
-(*   covers this gap between marginal and conditional.                       *)
+(* Entropy approach:                                                          *)
+(*   The word distribution is uniform by construction. The endpoint          *)
+(*   distribution P_s is its pushforward through w |-> word_eval(w)(s).     *)
+(*   entropy_fdistmap_uniform_supp gives a closed-form entropy formula:     *)
+(*     H(P_s) = log(Tg^L) - (1/Tg^L) sum c_x log(c_x)                     *)
+(*   where c_x = |{w in Tg^L : word_eval(w)(s) = x}| are word fibers.     *)
+(*   D(P_s || U_N) = log N - H(P_s) measures leakage in bits.              *)
+(*   Pinsker's inequality gives var_dist <= sqrt(2*D).                      *)
 (*                                                                            *)
-(* Abbreviations:                                                             *)
-(*   weval_inj = word-eval injective: distinct length-L words produce        *)
-(*     distinct group elements (the group is L-free).                        *)
-(*   pe_inj = perm_endpoint injective on achievable(L): sigma |-> sigma(s)   *)
-(*     is injective, meaning every achievable perm maps s to a distinct      *)
-(*     endpoint. All fibers have size 1.                                     *)
+(* Full pipeline:                                                             *)
+(*   entropy_fdistmap_uniform_supp -> H(P_s) from word fibers               *)
+(*   -> EntropyWitness (entropy_witness_from_rho)                             *)
+(*   -> SecurityWitness (security_witness_from_entropy, via Pinsker)          *)
+(*   -> collusion_bound (pgg_collusion_bound.v)                               *)
 (*                                                                            *)
-(* Example A -- Monster at L* = 67 (secure, pe_inj):                         *)
-(*   Tg=2, N~10^20. weval_inj + pe_inj (axioms). Tg^L = 2^67 >= N.         *)
-(*   fiber_entropy_injective -> H = log(Tg^L) = 67 log 2.                   *)
-(*   fiber_entropy_perfect (Tg^L = N) -> H = log N. D = 0.                  *)
+(* Specializations (stronger hypotheses, simpler formulas):                   *)
+(*   weval_inj: word fibers factor as achievable fibers                      *)
+(*     c_x = |{sigma in achievable : sigma(s) = x}|                          *)
+(*     (fiber_entropy_general)                                                *)
+(*   weval_inj + pe_inj: all c_x in {0,1}, H = log(Tg^L)                   *)
+(*     (fiber_entropy_injective)                                              *)
+(*   weval_inj + pe_inj + Tg^L = N: H = log N, perfect security             *)
+(*     (fiber_entropy_perfect)                                                *)
+(*                                                                            *)
+(* Marginal vs conditional:                                                   *)
+(*   H(P_s) measures marginal entropy of one party's endpoint.               *)
+(*   A conditional analysis H(s_target | s_0,..,s_{T-2}) would be tighter.  *)
+(*   The +2(T-1)/N slack in collusion_bound covers the gap.                  *)
+(*                                                                            *)
+(* Example A -- Monster at L* = 67 (perfect security):                       *)
+(*   Tg=2, N~10^20. Tg^L = 2^67 = N.                                        *)
+(*   P_s is uniform over 'I_N (each endpoint equally likely).               *)
+(*   H = log N. D = 0. eps = 0.                                              *)
 (*   (rigidity_monster_instance.v: monster_security_witness_Lstar)           *)
 (*                                                                            *)
-(* Example B -- Monster at L = 10 (quantified, pe_inj):                      *)
-(*   Same axioms, but Tg^L = 2^10 = 1024 << N ~ 10^20.                      *)
-(*   fiber_entropy_injective -> H = log 1024 = 10 log 2.                    *)
-(*   fiber_entropy_gap -> D = log N - 10 log 2 ~ 56 bits.                   *)
-(*   Endpoint narrows ~10^20 sheets to 1024 possibilities.                   *)
+(* Example B -- Monster at L = 10 (quantified leakage):                      *)
+(*   Tg=2, N~10^20. Tg^L = 1024 << N.                                       *)
+(*   P_s is concentrated on 1024 of ~10^20 endpoints.                       *)
+(*   H = 10 log 2. D ~ 56 bits. eps <= sqrt(112) ~ 10.6.                   *)
+(*   Pinsker bound exceeds 1: L is too short. Combinatorial eps or          *)
+(*   larger L needed.                                                        *)
 (*                                                                            *)
-(* Example C -- OC(2,3) at L=2 (quantified, non-pe_inj):                    *)
-(*   Tg=2, N=4, Tg^L=4=N. weval_inj (proved). pe_inj fails at s=1.        *)
-(*   Sheets 0,2,3: fibers (1,1,1,1), pe_inj -> H = log 4 = log N. D = 0.  *)
-(*   Sheet 1: fibers (2,0,0,2). fiber_entropy_general ->                     *)
-(*     H = log 4 - (1/4)(2 log 2 + 2 log 2) = log 2. D = log 2 ~ 1 bit.  *)
-(*   var_dist: eps = 2(4-2)/4 = 1 (rigidity_oc_instance.v).                 *)
+(* Example C -- OC(2,3) at L=2 (uneven fibers):                              *)
+(*   Tg=2, N=4, Tg^L=4. Sheet s=1 has uneven word fibers (2,0,0,2).        *)
+(*   P_s concentrates on 2 of 4 endpoints. H = log 2. D = log 2.           *)
+(*   eps <= sqrt(2 log 2) ~ 1.18. Combinatorial eps = 1 is tighter.         *)
 (*                                                                            *)
-(* Example D -- OC(2,N-1) at large L (secure, convergence):                  *)
-(*   OC is transitive, so eps -> 0 as L grows (protocol summary Table 1).   *)
-(*   For ANY N: Tg=2, take L such that 2^L >> N.                             *)
-(*   weval_inj gives 2^L distinct achievable permutations on N sheets.       *)
-(*   Each sheet has ~2^L/N achievable perms mapping to it (average).         *)
-(*   fiber_entropy_general -> H ~ log N (correction term -> 0).              *)
-(*   e.g., OC(2,2^64+1) at L=128: Tg^L=2^128 >> N~2^64. Secure.            *)
-(*   pe_inj failure is a small-L phenomenon; transitive groups converge.    *)
-(*   (Non-transitive groups like Star are stuck at eps floor regardless.)   *)
+(* Example D -- OC(2,N-1) at large L (asymptotic security):                  *)
+(*   OC is transitive: the group acts on all N sheets.                       *)
+(*   As L grows, the achievable permutations cover 'I_N more evenly,        *)
+(*   so P_s converges to uniform. H -> log N, D -> 0, eps -> 0.             *)
+(*   e.g., OC(2,2^64+1) at L=128: 2^128 >> 2^64. Secure.                   *)
+(*   Transitive groups always converge; non-transitive groups (Star)         *)
+(*   have an eps floor regardless of L.                                      *)
 (*                                                                            *)
 (* Security metric comparison:                                                *)
-(*   var_dist (eps) : always computable, eps = 2(N-|img_s|)/N upper bound.  *)
+(*   var_dist (eps): statistical distance, eps = 2(N-|img_s|)/N upper bound *)
 (*     Star(m) L=1: eps = 2(m+1)/(m+3) (rigidity_star_instance.v)           *)
 (*     S5 L=1:      eps = 6/5          (rigidity_s5_instance.v)              *)
 (*     OC(2,3) L=2: eps = 1            (rigidity_oc_instance.v)              *)
-(*   entropy (H) : always computable via fiber_entropy_general.              *)
-(*     H = log(Tg^L) - (1/Tg^L) sum c_x log c_x.                           *)
-(*     Leakage in bits: D = log N - H.                                      *)
-(*   Both compute from the same fiber sizes c_x. var_dist gives             *)
-(*   statistical distance; entropy gives information-theoretic bits.        *)
+(*   entropy (H): information-theoretic leakage in bits                     *)
+(*     H = log(Tg^L) - (1/Tg^L) sum c_x log c_x                            *)
+(*     D = log N - H (leakage). var_dist <= sqrt(2*D) (Pinsker).            *)
+(*   Both metrics derive from the same word fiber counts c_x.               *)
 (*                                                                            *)
 (* Theorems:                                                                  *)
 (*   entropy_fdistmap_uniform_supp                                            *)
 (*     H(fdistmap f (uniform_supp C)) = log|C| - (1/|C|) sum c log c        *)
-(*     General formula for pushforward entropy. No injectivity needed.       *)
+(*     Closed-form entropy for pushforward of uniform distribution.          *)
 (*   fiber_entropy_general    H = log|C| - (1/|C|) sum c log c  [weval_inj] *)
-(*     General formula for arbitrary fibers. Subsumes injective case.        *)
+(*     Specialization to achievable fibers when word_eval is injective.      *)
 (*   fiber_entropy_injective  H(P_s) = log(Tg^L)  [weval_inj + pe_inj]      *)
-(*     Pins entropy to log of search space. No fiber collisions.             *)
+(*     All fibers have size 1. H = log of search space.                     *)
 (*   fiber_entropy_perfect    H(P_s) = log N       [above + Tg^L = N]       *)
 (*     Maximum entropy -- zero leakage.                                      *)
 (*   fiber_entropy_gap        D(P_s || U_N) = log N - H(P_s)                *)
-(*     Converts entropy deficit to KL divergence (leakage in bits).          *)
+(*     Entropy deficit equals KL divergence.                                 *)
 (*   var_dist_from_fiber_entropy                                              *)
 (*     var_dist <= sqrt(2 * (log N - H))  [Pinsker bridge]                   *)
 (*   security_witness_from_entropy                                            *)
@@ -115,7 +117,9 @@
 (*   4b. entropy_var_dist_bridge -- Pinsker bridge: H -> var_dist            *)
 (*   5. protocol_rvs -- Endpoint_RV random variable                          *)
 (*   6. entropy_witness -- EntropyWitness record                              *)
-(*   7. entropy_witness_injective -- constructor for pe_inj groups           *)
+(*   7. security_from_entropy -- EntropyWitness -> SecurityWitness            *)
+(*   8. entropy_witness_injective -- constructor for pe_inj groups           *)
+(*   9. joint_entropy -- T-party joint endpoint entropy + bounds             *)
 (******************************************************************************)
 
 From HB Require Import structures.
@@ -614,3 +618,160 @@ exact: Order.POrderTheory.lexx.
 Defined.
 
 End entropy_witness_injective.
+
+(******************************************************************************)
+(*  Section 9: Joint Entropy — Multi-Party Collusion Analysis                *)
+(*                                                                            *)
+(*  Extends single-party fiber_entropy to T-party joint entropy.              *)
+(*  The joint endpoint distribution maps a word w to the T-tuple of          *)
+(*  endpoints (σ_w(s_0), ..., σ_w(s_{T-1})).                                *)
+(*                                                                            *)
+(*  Key results:                                                               *)
+(*    joint_endpoint_dist   : the T-fold joint distribution                   *)
+(*    joint_fiber_entropy   : H of the joint distribution                     *)
+(*    joint_entropy_le_log_words : H ≤ log(Tg^L) — at most Tg^L outcomes   *)
+(*    joint_entropy_le_T_logN : H ≤ T * log N — trivial product bound       *)
+(*    joint_entropy_single  : T=1 recovers fiber_entropy                     *)
+(*    joint_entropy_full    : H = log(Tg^L) when weval_inj AND              *)
+(*                            T-fold endpoint injectivity (both required)    *)
+(*                                                                            *)
+(*  Mathematical context:                                                     *)
+(*    The joint entropy measures how much information T colluding parties    *)
+(*    can extract from their combined observations. The bound H ≤ log(Tg^L) *)
+(*    says the joint observation cannot extract more information than the    *)
+(*    word itself contains. The bound H ≤ T * log N is the independence     *)
+(*    upper bound (each party sees at most log N bits).                      *)
+(*    When weval_inj holds AND the T-fold endpoint map is injective, the    *)
+(*    joint distribution is uniform on Tg^L outcomes, giving maximum        *)
+(*    entropy. Both conditions are required: weval_inj alone does not        *)
+(*    guarantee joint injectivity (multiple words can produce the same       *)
+(*    T-tuple of endpoints even if they produce distinct permutations).     *)
+(******************************************************************************)
+
+Section joint_entropy.
+
+Context {R : realType}.
+Variable N'' : nat.
+Let N' := N''.+1.
+Let N := N'.+1.
+
+Variable m : nat.
+Let Tg := m.+1.
+Variable L : nat.
+Variable sigmas : Tg.-tuple {perm 'I_N}.
+Let M := Gen_PGGTypes sigmas.
+
+Variable T' : nat.
+Let T := T'.+1.
+Variable parties : T.-tuple 'I_N.
+
+(* Joint endpoint extraction: given a permutation sigma, extract the
+   T-tuple of endpoints at the party sheets. *)
+Definition joint_endpoint (sigma : {perm 'I_N}) : T.-tuple 'I_N :=
+  [tuple sigma (tnth parties i) | i < T].
+
+(* Joint endpoint distribution: pushforward of rho_from_words through
+   the joint endpoint extraction map. *)
+Definition joint_endpoint_dist : R.-fdist (T.-tuple 'I_N) :=
+  fdistmap joint_endpoint (rho_from_words (R:=R) L sigmas).
+
+(* Joint fiber entropy: Shannon entropy of the joint distribution. *)
+Definition joint_fiber_entropy : R := `H joint_endpoint_dist.
+
+(* Upper bound: H(joint) <= log(Tg^L).
+   The joint distribution is a pushforward of a distribution on Tg^L words,
+   so its support has at most Tg^L elements. *)
+Lemma joint_entropy_le_log_words :
+  joint_fiber_entropy <= log (Tg ^ L)%:R.
+Proof.
+rewrite /joint_fiber_entropy /joint_endpoint_dist /rho_from_words fdistmap_comp.
+rewrite /word_uniform.
+have HC : (0 < #|[set: L.-tuple 'I_Tg]|)%N by rewrite cardsT card_word_L.
+have Hbridge : fdist_uniform (card_word_L m L) = @fdist_uniform_supp R _ _ HC.
+  by apply: fdist_ext => x;
+     rewrite fdist_uniformE fdist_uniform_supp_in ?inE // cardsT.
+rewrite Hbridge entropy_fdistmap_uniform_supp.
+rewrite cardsT card_word_L prednK ?expn_gt0 //.
+change pgg_ngens'.+1 with Tg.
+rewrite gerBl.
+apply: mulr_ge0.
+  by rewrite invr_ge0; exact: ler0n.
+apply: sumr_ge0 => b /imsetP [a _ ->].
+have Hfib_pos :
+  (0 < #|[set a0 in [set: L.-tuple 'I_Tg]
+        | (joint_endpoint \o @word_eval M L) a0
+          == (joint_endpoint \o @word_eval M L) a]|)%N.
+  by apply/card_gt0P; exists a; rewrite !inE eqxx.
+apply: mulr_ge0; first exact: ler0n.
+rewrite -[0]log1 ler_log; first by rewrite ler1n.
+  by rewrite posrE ltr01.
+by rewrite posrE ltr0n.
+Qed.
+
+(* Trivial upper bound: H(joint) <= T * log N.
+   Each coordinate has entropy at most log N, and H(X_1,...,X_T) <= sum H(X_i)
+   by subadditivity. *)
+Lemma joint_entropy_le_T_logN :
+  joint_fiber_entropy <= T%:R * log N%:R.
+Proof.
+rewrite /joint_fiber_entropy /joint_endpoint_dist.
+have H1 := @entropy_max R _ (fdistmap joint_endpoint (rho_from_words (R:=R) L sigmas)).
+apply: (Order.POrderTheory.le_trans H1).
+by rewrite card_tuple card_ord -log_pow_natmul.
+Qed.
+
+(* Single-party consistency: when T = 1, joint_fiber_entropy reduces to
+   fiber_entropy at the single party's sheet. *)
+Lemma joint_entropy_single (HT1 : T' = 0) :
+  joint_fiber_entropy =
+  fiber_entropy (R:=R) L sigmas (tnth parties (Ordinal (ltn0Sn T'))).
+Proof.
+rewrite /joint_fiber_entropy /joint_endpoint_dist /fiber_entropy.
+suff : forall (T' : nat) (parties : T'.+1.-tuple 'I_N), T' = 0 ->
+  `H (fdistmap (fun sigma : {perm 'I_N} =>
+    [tuple sigma (tnth parties i) | i < T'.+1])
+    (rho_from_words (R:=R) L sigmas)) =
+  `H (fdistmap (fun sigma : {perm 'I_N} =>
+    sigma (tnth parties (Ordinal (ltn0Sn T'))))
+    (rho_from_words (R:=R) L sigmas)).
+  by move=> H; exact: H.
+case=> // parties0 _.
+set P := rho_from_words _ _.
+set s := tnth parties0 ord0.
+have -> : (fun sigma : {perm 'I_N} =>
+  [tuple sigma (tnth parties0 i) | i < 1]) =
+  (fun x : 'I_N => mktuple (fun _ : 'I_1 => x)) \o
+  (fun sigma : {perm 'I_N} => sigma s).
+  apply: boolp.funext => sigma /=.
+  apply: eq_from_tnth => i.
+  by rewrite tnth_mktuple tnth_mktuple (ord1 i).
+rewrite -fdistmap_comp.
+apply: entropy_fdistmap.
+move=> x y Hxy.
+have := congr1 (fun t => tnth t ord0) Hxy.
+by rewrite tnth_mktuple tnth_mktuple.
+Qed.
+
+(* Maximum entropy: H = log(Tg^L) when weval_inj AND T-fold endpoint
+   injectivity both hold.
+   - weval_inj ensures rho_from_words = uniform on achievable (Tg^L elements)
+   - T-fold injectivity ensures joint_endpoint is injective on achievable
+   Both are required. Without T-fold injectivity, multiple achievable
+   permutations can produce the same T-tuple of endpoints. *)
+Lemma joint_entropy_full
+    (Hlfree : @weval_inj M L)
+    (Hjoint_inj : {in @achievable M L &,
+                   injective joint_endpoint}) :
+  joint_fiber_entropy = log (Tg ^ L)%:R.
+Proof.
+rewrite /joint_fiber_entropy /joint_endpoint_dist.
+rewrite (rho_from_words_uniform_supp Hlfree).
+rewrite (fdistmap_uniform_supp_inj _ Hjoint_inj).
+rewrite entropy_uniform_supp.
+congr (log _%:R).
+rewrite card_in_imset //.
+have -> : #|@achievable M L| = @search_space M L by [].
+by rewrite weval_inj_search_space.
+Qed.
+
+End joint_entropy.

@@ -17,8 +17,7 @@
 (*                                                                            *)
 (* Proved (not axiomatized):                                                  *)
 (*   oc_security_witness_2 : SecurityWitness (fiber-counted eps=1)           *)
-(*   oc_round_complexity : RoundComplexityWitness (L=2, depth=2)             *)
-(*   oc_rigidity : AlgebraicRigidity (security + threshold + rounds)         *)
+(*   oc_rigidity : AlgebraicRigidity (security + threshold)                  *)
 (******************************************************************************)
 
 From HB Require Import structures.
@@ -154,15 +153,10 @@ Hypothesis oc_genus0_pgl :
 Definition oc_threshold_witness : ThresholdWitness R_oc :=
   @MkThresholdWitness R_oc oc_covering (fun _ => oc_genus0_pgl).
 
-(* Round complexity at L=2: depth = 2 (fully sequential, non-commuting) *)
-Definition oc_round_complexity : RoundComplexityWitness :=
-  @MkRoundComplexityWitness 2 2 (leqnn 2).
-
 Definition oc_rigidity : AlgebraicRigidity R R_oc :=
   @MkAlgebraicRigidity R R_oc
     (oc_security_witness_2 R)
-    oc_threshold_witness
-    oc_round_complexity.
+    oc_threshold_witness.
 
 (* Derived properties *)
 

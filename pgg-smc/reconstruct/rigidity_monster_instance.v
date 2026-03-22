@@ -47,8 +47,7 @@
 (* Proved (not axiomatized):                                                  *)
 (*   monster_security_witness_Lstar : SecurityWitness                        *)
 (*     (via security_witness_endpoint_inj, eps = 2(N-2^Ls)/N ~ 0)           *)
-(*   monster_round_complexity : RoundComplexityWitness (L=Ls, depth=Ls)     *)
-(*   monster_rigidity : AlgebraicRigidity (security + threshold + rounds)    *)
+(*   monster_rigidity : AlgebraicRigidity (security + threshold)             *)
 (*   monster_complexity : search space <= |G|                                 *)
 (*   monster_tradeoff : genus-0/bounded or genus>0/gap dichotomy             *)
 (******************************************************************************)
@@ -145,10 +144,6 @@ Definition monster_security_witness_Lstar : SecurityWitness R R_monster :=
 End monster_security.
 
 (******************************************************************************)
-(*     ThresholdWitness (Axiomatized)                                         *)
-(******************************************************************************)
-
-(******************************************************************************)
 (*     AlgebraicRigidity Instance (with axiomatized threshold)                *)
 (******************************************************************************)
 
@@ -172,15 +167,10 @@ Axiom monster_genus0_pgl :
 Definition monster_threshold_witness : ThresholdWitness R_monster :=
   @MkThresholdWitness R_monster monster_covering monster_genus0_pgl.
 
-(* Round complexity at L*: depth = L* (upper bound, fully sequential) *)
-Definition monster_round_complexity : RoundComplexityWitness :=
-  @MkRoundComplexityWitness monster_Lstar monster_Lstar (leqnn _).
-
 Definition monster_rigidity : AlgebraicRigidity R R_monster :=
   @MkAlgebraicRigidity R R_monster
     (monster_security_witness_Lstar R)
-    monster_threshold_witness
-    monster_round_complexity.
+    monster_threshold_witness.
 
 (* Derived properties — all PROVED from the axioms *)
 

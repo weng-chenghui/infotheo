@@ -454,3 +454,60 @@ exact: (Pinsker_inequality_weak (dom_by_uniform (P_s s) (card_ord N))).
 Qed.
 
 End entropy_view.
+
+(******************************************************************************)
+(*     Section 9: Covering Decomposition — Orthogonal Security + Threshold   *)
+(*                                                                            *)
+(* The covering choice determines two orthogonal guarantees:                  *)
+(*   1. Security (sw_endpoint_bound): var_dist(P_s, U_N) <= epsilon          *)
+(*   2. Threshold (cs_gap): T - k <= 2*genus                                *)
+(* These come from independent aspects of the algebraic choice:              *)
+(*   - Security from monodromy mixing (word length L, generator count Tg)    *)
+(*   - Threshold from covering geometry (genus of the covering curve)        *)
+(*                                                                            *)
+(* Galois-theoretic remark:                                                   *)
+(*   The covering C→X is a function field extension K(C)/K(X). The          *)
+(*   monodromy group G is the Galois group of the Galois closure.            *)
+(*   Genus 0 (P^1→P^1) specializes to Shamir: the RS code evaluates        *)
+(*   polynomials at fiber points (= roots), recovering Lagrange              *)
+(*   interpolation. See cover_genus0.v for the formal genus-0 instance.     *)
+(*                                                                            *)
+(*   Source: Chen-Cramer, CRYPTO 2006 (AG secret sharing over small fields) *)
+(******************************************************************************)
+
+Section covering_decomposition.
+
+Variable R : realType.
+Variable M : GeneratedMonodromyReprType.
+Variable ar : AlgebraicRigidity R M.
+
+Let N := (pgg_N' M).+1.
+Let cs := tw_covering (ar_threshold ar).
+Let sw := ar_security ar.
+
+(* The covering decomposition: security and threshold from one algebraic
+   choice. The SecurityWitness gives the endpoint bound (security side),
+   and the CoveringScheme gives the gap bound (threshold side). *)
+Lemma ar_covering_decomposition :
+  (forall s : 'I_N,
+    (var_dist (fdistmap (fun sigma : {perm 'I_N} => sigma s) (sw_rho_dist sw))
+              (fdist_uniform (card_ord N)) <= sw_epsilon sw)%O) /\
+  (ts_T (cs_scheme cs) - ts_k (cs_scheme cs) <=
+   2 * cd_genus (cs_data cs))%N.
+Proof. split; [exact: sw_endpoint_bound | exact: gap_bound]. Qed.
+
+(* Genus-0 specialization: when the covering has genus 0, the threshold
+   is exact (T <= k), recovering Shamir's (k,k)-threshold. *)
+Lemma ar_genus0_shamir :
+  cd_genus (cs_data cs) = 0 ->
+  (forall s : 'I_N,
+    (var_dist (fdistmap (fun sigma : {perm 'I_N} => sigma s) (sw_rho_dist sw))
+              (fdist_uniform (card_ord N)) <= sw_epsilon sw)%O) /\
+  (ts_T (cs_scheme cs) <= ts_k (cs_scheme cs))%N.
+Proof.
+move=> Hg0; split.
+- exact: sw_endpoint_bound.
+- exact: genus0_exact Hg0.
+Qed.
+
+End covering_decomposition.

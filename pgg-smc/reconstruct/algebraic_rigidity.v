@@ -1,23 +1,30 @@
 (* infotheo: information theory and error-correcting codes in Rocq            *)
 (* Copyright (C) 2025 infotheo authors, license: LGPL-2.1-or-later            *)
 (******************************************************************************)
-(* Algebraic Rigidity: One Algebraic Choice Determines Four Parameters        *)
+(* Algebraic Rigidity: One Algebraic Choice Determines Security + Threshold  *)
 (*                                                                            *)
 (* Given a monodromy representation with generators M, the algebraic          *)
 (* structure determines:                                                      *)
 (*   1. Complexity — search_space L <= |G| (from pgg_interface.v)            *)
 (*   2. Security — var_dist(endpoint, uniform) <= epsilon (endpoint bound)   *)
 (*   3. Threshold — gap <= 2*genus, with genus-0 -> gap=0 (covering_scheme)  *)
-(*   4. Round complexity — depth <= L (trivial), refined for RAAG via Foata  *)
 (*                                                                            *)
-(* The key insight: all four are consequences of the single algebraic         *)
+(* The key insight: all three are consequences of the single algebraic        *)
 (* choice (G, rho, sigmas). No further degrees of freedom exist.             *)
+(*                                                                            *)
+(* Galois-theoretic interpretation:                                           *)
+(*   The fiber at a branch point consists of roots of the minimal polynomial *)
+(*   of K(C) over K(X). The monodromy group G permutes these roots,         *)
+(*   making G the Galois group of the Galois closure. This connects PGG     *)
+(*   to Galois theory of function fields: the algebraic choice (G, rho,     *)
+(*   sigmas) determines the field extension K(C)/K(X) up to isomorphism.    *)
+(*   Note: this is conceptual — field arithmetic on roots is irrelevant     *)
+(*   to the permutation action that PGG uses.                                *)
 (*                                                                            *)
 (* Records:                                                                   *)
 (*   SecurityWitness R M == packages the endpoint-level security guarantee    *)
 (*   ThresholdWitness M  == packages the covering scheme + PGL hypothesis     *)
-(*   RoundComplexityWitness == packages word length, round depth, and bound   *)
-(*   AlgebraicRigidity R M == combines all three into a unified witness       *)
+(*   AlgebraicRigidity R M == combines both into a unified witness            *)
 (*                                                                            *)
 (* Constructors:                                                              *)
 (*   security_witness_fiber == SecurityWitness from fiber-counted epsilon      *)
@@ -33,7 +40,6 @@
 (*   ar_large_group_forces_gap == |G| > PGL -> genus > 0                    *)
 (*   ar_gap_bound       == threshold gap <= 2*genus                          *)
 (*   ar_protocol_correct == end-to-end protocol correctness                  *)
-(*   ar_depth_bound     == round depth <= word length                        *)
 (*                                                                            *)
 (* RAAG-specific derived properties:                                          *)
 (*   ar_search_space_chain == search_space <= n_traces <= Tg^L               *)
@@ -83,23 +89,15 @@ Record ThresholdWitness := MkThresholdWitness {
     cd_genus (cs_data tw_covering) = 0 -> #|G| <= pgl_bound M
 }.
 
-Record RoundComplexityWitness := MkRoundComplexityWitness {
-  rc_L : nat;        (* word length *)
-  rc_depth : nat;    (* round count (= L for general, Foata depth for RAAG) *)
-  rc_bound : rc_depth <= rc_L  (* depth never exceeds word length *)
-}.
-
 Record AlgebraicRigidity := MkAlgebraicRigidity {
   ar_security : SecurityWitness;
-  ar_threshold : ThresholdWitness;
-  ar_round_complexity : RoundComplexityWitness
+  ar_threshold : ThresholdWitness
 }.
 
 End algebraic_rigidity_records.
 
 Arguments SecurityWitness R M : clear implicits.
 Arguments ThresholdWitness M : clear implicits.
-Arguments RoundComplexityWitness : clear implicits.
 Arguments AlgebraicRigidity R M : clear implicits.
 
 (******************************************************************************)
@@ -230,11 +228,6 @@ Lemma ar_gap_bound :
   let cs := tw_covering (ar_threshold ar) in
   ts_T (cs_scheme cs) - ts_k (cs_scheme cs) <= 2 * cd_genus (cs_data cs).
 Proof. move=> /=. exact: gap_bound. Qed.
-
-(** Round complexity: depth is bounded by word length *)
-Lemma ar_depth_bound :
-  rc_depth (ar_round_complexity ar) <= rc_L (ar_round_complexity ar).
-Proof. exact: rc_bound. Qed.
 
 (** Protocol correctness: perm-compatible scheme + valid shares + G-stable starts *)
 Lemma ar_protocol_correct (PI : PGGInterface M)
