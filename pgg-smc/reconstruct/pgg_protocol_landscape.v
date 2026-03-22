@@ -42,7 +42,7 @@
 (*                                       v                                    *)
 (*                   LANDSCAPE (this file, from ar)                           *)
 (*                   Security side:                                           *)
-(*                   +-- ar_security_per_sheet  (var_dist <= eps)              *)
+(*                   +-- ar_security_per_position  (var_dist <= eps)              *)
 (*                   +-- ar_entropy             (H(P_s) from sw_rho_dist)     *)
 (*                   +-- ar_entropy_gap         (D = log N - H)              *)
 (*                   +-- ar_var_dist_from_entropy (Pinsker bridge)            *)
@@ -116,7 +116,7 @@ Variable M : GeneratedMonodromyReprType.
 Let G := pgg_G M.
 Let N := (pgg_N' M).+1.
 
-Lemma security_per_sheet (sw : SecurityWitness R M) (s : 'I_N) :
+Lemma security_per_position (sw : SecurityWitness R M) (s : 'I_N) :
   (var_dist (fdistmap (fun sigma : {perm 'I_N} => sigma s) (sw_rho_dist sw))
             (fdist_uniform (card_ord N)) <= sw_epsilon sw)%O.
 Proof. exact: sw_endpoint_bound. Qed.
@@ -268,7 +268,7 @@ Lemma protocol_correct_unbundled
   pgg_recon_endpoints HT P = s.
 Proof.
 move=> PG Hvalid.
-apply: (pgg_secret_invariant_perm (perm := cs_perm cs)) => //.
+apply: (pgg_hidden_invariant_perm (perm := cs_perm cs)) => //.
 exact: cs_perm_compatible.
 Qed.
 
@@ -277,7 +277,7 @@ End protocol_correctness.
 (******************************************************************************)
 (*     Section 6: Landscape from AlgebraicRigidity                           *)
 (*                                                                            *)
-(*   ar_security_per_sheet == epsilon bound for each sheet                    *)
+(*   ar_security_per_position == epsilon bound for each sheet                    *)
 (*   ar_genus0_exact       == genus 0 -> exact threshold (T <= k)            *)
 (*   ar_genus1_gap2        == genus 1 -> gap <= 2 (T <= k + 2)              *)
 (*   ar_hurwitz            == genus >= 2 -> gap <= 2g AND |G| <= 84(g-1)    *)
@@ -293,7 +293,7 @@ Let G := pgg_G M.
 Let N := (pgg_N' M).+1.
 Let cs := tw_covering (ar_threshold ar).
 
-Lemma ar_security_per_sheet (s : 'I_N) :
+Lemma ar_security_per_position (s : 'I_N) :
   (var_dist (fdistmap (fun sigma : {perm 'I_N} => sigma s)
                       (sw_rho_dist (ar_security ar)))
             (fdist_uniform (card_ord N))

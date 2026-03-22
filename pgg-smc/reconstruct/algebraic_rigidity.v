@@ -244,7 +244,7 @@ Lemma ar_protocol_correct (PI : PGGInterface M)
   pgg_recon_endpoints HT P = s.
 Proof.
 move=> PG Hvalid.
-apply: (pgg_secret_invariant_perm (perm := cs_perm (tw_covering (ar_threshold ar)))) => //.
+apply: (pgg_hidden_invariant_perm (perm := cs_perm (tw_covering (ar_threshold ar)))) => //.
 exact: cs_perm_compatible.
 Qed.
 

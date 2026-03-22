@@ -47,7 +47,7 @@ Let ts := cs_scheme cs.
 Hypothesis HT : ts_T' ts = pi_T' PI.
 
 (* Main correctness theorem: CoveringScheme + PGGInterface + G-stable starts
-   -> reconstruction recovers the secret. Uses pgg_secret_invariant_perm
+   -> reconstruction recovers the hidden value. Uses pgg_hidden_invariant_perm
    with cs_perm_compatible. *)
 Theorem pgg_covering_correct (s : 'I_N) (P : pgg_gT M)
     (G_stable : forall g, g \in G ->
@@ -59,7 +59,7 @@ Theorem pgg_covering_correct (s : 'I_N) (P : pgg_gT M)
   pgg_recon_endpoints HT P = s.
 Proof.
 move=> PG Hvalid.
-apply: (pgg_secret_invariant_perm (perm := cs_perm cs)) => //.
+apply: (pgg_hidden_invariant_perm (perm := cs_perm cs)) => //.
 exact: cs_perm_compatible.
 Qed.
 
@@ -94,7 +94,7 @@ Theorem pgg_covering_tradeoff (cs : CoveringScheme M) :
   \/
   (0 < cd_genus (cs_data cs) /\
    ts_T (cs_scheme cs) <= ts_k (cs_scheme cs) + 2 * cd_genus (cs_data cs)).
-Proof. exact: security_threshold_tradeoff. Qed.
+Proof. exact: (@security_threshold_tradeoff M cs (@genus0_pgl (cs_data cs))). Qed.
 
 End covering_tradeoff.
 

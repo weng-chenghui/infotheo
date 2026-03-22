@@ -15,13 +15,13 @@ From mathcomp Require Import fintype tuple finfun finset fingroup perm morphism 
 (* Derived operations:                                                        *)
 (*   endpoint M g s == rho(g)(s), monodromy evaluation                        *)
 (*   start_sheet PI i == starting sheet of party i                            *)
-(*   share PI W i == party i's column of the permutation table                *)
+(*   dealt_hand PI W i == player i's column of the permutation table          *)
 (*   compute PI P i == endpoint for party i under word P                      *)
 (*   endpoints PI P == T-tuple of all party endpoints                         *)
 (*                                                                            *)
 (* Layer 2 -- PGGInterface record (like DSDP_Interface):                     *)
-(*   pgg_dtype  == session data type kind (DT_Sheet | DT_Share | DT_Idx)      *)
-(*   pgg_data N == protocol data: sheet index, share, or word index           *)
+(*   pgg_dtype  == session data type kind (DT_Sheet | DT_Hand | DT_Idx)       *)
+(*   pgg_data N == protocol data: sheet index, dealt hand, or word index      *)
 (*   PGGInterface M == protocol configuration (T parties, starting sheets)   *)
 (******************************************************************************)
 
@@ -221,12 +221,12 @@ End gen_inj_theory.
 (* Session Data Type Kind                                                     *)
 (* ========================================================================== *)
 
-Inductive pgg_dtype : Type := DT_Sheet | DT_Share | DT_Idx.
+Inductive pgg_dtype : Type := DT_Sheet | DT_Hand | DT_Idx.
 
 Definition pgg_dtype_eqb (d1 d2 : pgg_dtype) : bool :=
   match d1, d2 with
   | DT_Sheet, DT_Sheet => true
-  | DT_Share, DT_Share => true
+  | DT_Hand, DT_Hand => true
   | DT_Idx, DT_Idx => true
   | _, _ => false
   end.
@@ -242,25 +242,25 @@ HB.instance Definition _ := hasDecEq.Build pgg_dtype pgg_dtype_eqP.
 
 Inductive pgg_data (N : nat) : Type :=
   | PGG_sheet (i : 'I_N)
-  | PGG_share (s : seq ('I_N))
+  | PGG_hand (s : seq ('I_N))
   | PGG_idx (n : nat).
 
 Arguments PGG_sheet {N}.
-Arguments PGG_share {N}.
+Arguments PGG_hand {N}.
 Arguments PGG_idx {N}.
 
 Definition pgg_data_dtype {N} (d : pgg_data N) : pgg_dtype :=
   match d with
   | PGG_sheet _ => DT_Sheet
-  | PGG_share _ => DT_Share
+  | PGG_hand _ => DT_Hand
   | PGG_idx _ => DT_Idx
   end.
 
 Definition from_sheet {N} (d : pgg_data N) : option ('I_N) :=
   if d is PGG_sheet i then Some i else None.
 
-Definition from_share {N} (d : pgg_data N) : option (seq ('I_N)) :=
-  if d is PGG_share s then Some s else None.
+Definition from_hand {N} (d : pgg_data N) : option (seq ('I_N)) :=
+  if d is PGG_hand s then Some s else None.
 
 Definition from_idx {N} (d : pgg_data N) : option nat :=
   if d is PGG_idx n then Some n else None.
@@ -269,8 +269,8 @@ Lemma from_sheet_PGG_sheet {N} (i : 'I_N) :
   from_sheet (PGG_sheet i) = Some i.
 Proof. by []. Qed.
 
-Lemma from_share_PGG_share {N} (s : seq ('I_N)) :
-  from_share (PGG_share s) = Some s.
+Lemma from_hand_PGG_hand {N} (s : seq ('I_N)) :
+  from_hand (PGG_hand s) = Some s.
 Proof. by []. Qed.
 
 Lemma from_idx_PGG_idx {N} (n : nat) :
@@ -333,7 +333,7 @@ Qed.
 Definition perm_table (W : seq gT) : seq {perm 'I_N} :=
   [seq rho w | w <- W].
 
-Definition share (W : seq gT) (i : 'I_T) : seq ('I_N) :=
+Definition dealt_hand (W : seq gT) (i : 'I_T) : seq ('I_N) :=
   [seq rho w (tnth starts i) | w <- W].
 
 Definition compute (P : gT) (i : 'I_T) : 'I_N :=
@@ -342,10 +342,10 @@ Definition compute (P : gT) (i : 'I_T) : 'I_N :=
 Definition endpoints (P : gT) : T.-tuple 'I_N :=
   [tuple compute P i | i < T].
 
-Lemma compute_in_share (W : seq gT) (P : gT) (i : 'I_T) :
-  P \in W -> compute P i \in share W i.
+Lemma compute_in_dealt_hand (W : seq gT) (P : gT) (i : 'I_T) :
+  P \in W -> compute P i \in dealt_hand W i.
 Proof.
-move=> PW; rewrite /share /compute.
+move=> PW; rewrite /dealt_hand /compute.
 by apply/mapP; exists P.
 Qed.
 
@@ -363,7 +363,7 @@ End pgg_protocol_ops.
 
 Arguments start_sheet {M} PI.
 Arguments start_sheets {M} PI.
-Arguments share {M} PI.
+Arguments dealt_hand {M} PI.
 Arguments compute {M} PI.
 Arguments endpoints {M} PI.
 

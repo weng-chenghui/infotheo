@@ -224,7 +224,7 @@ Definition pgg_recon_endpoints (P : gT) : 'I_N :=
 
 (* Main theorem: coordinate-permutation compatible scheme + G-stable starts
    + valid starting shares ⟹ reconstruction of endpoints recovers the secret *)
-Lemma pgg_secret_invariant_perm (s : 'I_N) (P : gT)
+Lemma pgg_hidden_invariant_perm (s : 'I_N) (P : gT)
     (perm : gT -> {perm 'I_sT})
     (G_stable : forall g, g \in pgg_G M ->
        forall i : 'I_sT, rho g (tnth (cast_tuple (esym (congr1 S HT)) starts) i) =

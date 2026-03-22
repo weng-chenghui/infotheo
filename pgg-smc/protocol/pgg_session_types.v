@@ -6,20 +6,20 @@ From mathcomp Require Import fintype tuple finfun finset fingroup perm morphism.
 Require Import smc_session_types pgg_interface.
 
 (******************************************************************************)
-(* PGG-SMC: Session-Typed Wrappers                                            *)
+(* PGG Card Protocol: Session-Typed Wrappers                                  *)
 (*                                                                            *)
-(* Session-typed wrappers for the PGG protocol, following the pattern of      *)
-(* dsdp_session_types.v. Each Send/Recv variant has a fixed dtype.            *)
+(* Session-typed wrappers for the PGG card protocol, following the pattern    *)
+(* of dsdp_session_types.v. Each action variant has a fixed dtype.            *)
 (*                                                                            *)
-(*   PGGSend_sheet dst i p == send sheet index i as DT_Sheet                  *)
-(*   PGGSend_share dst s p == send share s as DT_Share                        *)
-(*   PGGSend_idx dst k p   == send word index k as DT_Idx                     *)
-(*   PGGRecv_sheet src f   == receive DT_Sheet, extract 'I_N, apply f         *)
-(*   PGGRecv_share src f   == receive DT_Share, extract seq ('I_N), apply f   *)
-(*   PGGRecv_idx src f     == receive DT_Idx, extract nat, apply f            *)
-(*   PGGInit x p           == store local data x, continue with p            *)
-(*   PGGRet x              == return data x                                   *)
-(*   PGGFinish             == terminal state                                  *)
+(*   PGGReveal_pos dst i p    == reveal card position i (DT_Sheet)             *)
+(*   PGGDeal_hand dst s p     == deal hand s to player (DT_Hand)               *)
+(*   PGGAnnounce_idx dst k p  == announce selection index k (DT_Idx)           *)
+(*   PGGObserve_pos src f     == observe card position, extract 'I_N, apply f  *)
+(*   PGGReceive_hand src f    == receive dealt hand, extract seq 'I_N, apply f *)
+(*   PGGReceive_idx src f     == receive announcement, extract nat, apply f    *)
+(*   PGGInit x p              == store local data x, continue with p           *)
+(*   PGGRet x                 == return data x                                 *)
+(*   PGGFinish                == terminal state                                *)
 (******************************************************************************)
 
 Set Implicit Arguments.
@@ -33,26 +33,26 @@ Variable M : MonodromyReprType.
 Let N := (pgg_N' M).+1.
 Let data := pgg_data N.
 
-(* Send a sheet index *)
-Definition PGGSend_sheet {party n env} (dst : nat) (i : 'I_N)
+(* Reveal a card position *)
+Definition PGGReveal_pos {party n env} (dst : nat) (i : 'I_N)
     (p : @sproc pgg_dtype data party n env)
     : @sproc pgg_dtype data party n.+1 (senv_send env dst DT_Sheet) :=
   SSend dst DT_Sheet (PGG_sheet i) p.
 
-(* Send a share *)
-Definition PGGSend_share {party n env} (dst : nat) (s : seq ('I_N))
+(* Deal a hand to a player *)
+Definition PGGDeal_hand {party n env} (dst : nat) (s : seq ('I_N))
     (p : @sproc pgg_dtype data party n env)
-    : @sproc pgg_dtype data party n.+1 (senv_send env dst DT_Share) :=
-  SSend dst DT_Share (PGG_share s) p.
+    : @sproc pgg_dtype data party n.+1 (senv_send env dst DT_Hand) :=
+  SSend dst DT_Hand (PGG_hand s) p.
 
-(* Send a word index *)
-Definition PGGSend_idx {party n env} (dst : nat) (k : nat)
+(* Announce shuffle selection *)
+Definition PGGAnnounce_idx {party n env} (dst : nat) (k : nat)
     (p : @sproc pgg_dtype data party n env)
     : @sproc pgg_dtype data party n.+1 (senv_send env dst DT_Idx) :=
   SSend dst DT_Idx (@PGG_idx N k) p.
 
-(* Receive a sheet index *)
-Definition PGGRecv_sheet {party n env} (src : nat)
+(* Observe a card position *)
+Definition PGGObserve_pos {party n env} (src : nat)
     (f : 'I_N -> @sproc pgg_dtype data party n env)
     : @sproc pgg_dtype data party n.+1 (senv_recv env src DT_Sheet) :=
   SRecv src DT_Sheet (fun d =>
@@ -61,18 +61,18 @@ Definition PGGRecv_sheet {party n env} (src : nat)
     | None => SFail
     end).
 
-(* Receive a share *)
-Definition PGGRecv_share {party n env} (src : nat)
+(* Receive a dealt hand *)
+Definition PGGReceive_hand {party n env} (src : nat)
     (f : seq ('I_N) -> @sproc pgg_dtype data party n env)
-    : @sproc pgg_dtype data party n.+1 (senv_recv env src DT_Share) :=
-  SRecv src DT_Share (fun d =>
-    match from_share d with
+    : @sproc pgg_dtype data party n.+1 (senv_recv env src DT_Hand) :=
+  SRecv src DT_Hand (fun d =>
+    match from_hand d with
     | Some s => f s
     | None => SFail
     end).
 
-(* Receive a word index *)
-Definition PGGRecv_idx {party n env} (src : nat)
+(* Receive shuffle announcement *)
+Definition PGGReceive_idx {party n env} (src : nat)
     (f : nat -> @sproc pgg_dtype data party n env)
     : @sproc pgg_dtype data party n.+1 (senv_recv env src DT_Idx) :=
   SRecv src DT_Idx (fun d =>
@@ -96,12 +96,12 @@ Definition PGGFinish {party : nat}
 
 End pgg_session_wrappers.
 
-Arguments PGGSend_sheet {M party n env}.
-Arguments PGGSend_share {M party n env}.
-Arguments PGGSend_idx {M party n env}.
-Arguments PGGRecv_sheet {M party n env}.
-Arguments PGGRecv_share {M party n env}.
-Arguments PGGRecv_idx {M party n env}.
+Arguments PGGReveal_pos {M party n env}.
+Arguments PGGDeal_hand {M party n env}.
+Arguments PGGAnnounce_idx {M party n env}.
+Arguments PGGObserve_pos {M party n env}.
+Arguments PGGReceive_hand {M party n env}.
+Arguments PGGReceive_idx {M party n env}.
 Arguments PGGInit {M party n env}.
 Arguments PGGRet {M party}.
 Arguments PGGFinish {M party}.

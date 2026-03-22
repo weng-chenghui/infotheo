@@ -160,7 +160,7 @@ Lemma genus0_secret_invariant (PI : PGGInterface M)
   pgg_recon_endpoints HT P = s.
 Proof.
 move=> PG Hvalid.
-exact: pgg_secret_invariant_perm G_stable PG Hvalid ts0_perm_compatible.
+exact: pgg_hidden_invariant_perm G_stable PG Hvalid ts0_perm_compatible.
 Qed.
 
 End genus0.

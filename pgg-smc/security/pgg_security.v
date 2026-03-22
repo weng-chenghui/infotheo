@@ -137,7 +137,7 @@ Qed.
 (* ========================================================================== *)
 (* Theorem 12: Security-Storage Tradeoff                                      *)
 (* Security: adversary must search >= kappa^L elements                        *)
-(* Storage: each share has ball_size entries                                   *)
+(* Storage: each dealt hand has ball_size entries                               *)
 (* Online computation: L permutation lookups                                  *)
 (* ========================================================================== *)
 
@@ -145,13 +145,13 @@ Theorem security_exponential (L : nat) :
   kappa ^ L <= ball_size r L.
 Proof. exact: ball_size_lower. Qed.
 
-Definition share_storage (L : nat) := ball_size r L.
+Definition hand_storage (L : nat) := ball_size r L.
 
 Definition online_computation (L : nat) := L.
 
 (* Combined: security and storage grow as Theta(kappa^L) *)
 Theorem security_storage_match (L : nat) :
-  kappa ^ L <= share_storage L.
+  kappa ^ L <= hand_storage L.
 Proof. exact: security_exponential. Qed.
 
 End security_tradeoff.

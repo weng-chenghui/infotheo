@@ -83,7 +83,7 @@ Lemma monster_security_demo (s : 'I_monster_n.+2) :
                       (sw_rho_dist (ar_security ar)))
             (fdist_uniform (card_ord monster_n.+2))
    <= sw_epsilon (ar_security ar))%O.
-Proof. exact: ar_security_per_sheet ar s. Qed.
+Proof. exact: ar_security_per_position ar s. Qed.
 
 (* --- Threshold side --- *)
 
@@ -213,7 +213,7 @@ Lemma oc_security_demo (s : 'I_4) :
                       (sw_rho_dist (ar_security ar)))
             (fdist_uniform (card_ord 4))
    <= sw_epsilon (ar_security ar))%O.
-Proof. exact: ar_security_per_sheet ar s. Qed.
+Proof. exact: ar_security_per_position ar s. Qed.
 
 (* Q: What is the entropy bound? *)
 (* A: H(P_s) <= log 4 = 2 bits. *)
