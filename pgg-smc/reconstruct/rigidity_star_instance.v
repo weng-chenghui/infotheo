@@ -1,12 +1,12 @@
 (* infotheo: information theory and error-correcting codes in Rocq            *)
 (* Copyright (C) 2025 infotheo authors, license: LGPL-2.1-or-later            *)
 (******************************************************************************)
-(* Star-Graph Algebraic Rigidity Instance                                     *)
+(* PGG — Star-Graph Algebraic Rigidity Instance                               *)
 (*                                                                            *)
 (* Constructs a concrete AlgebraicRigidity instance for the star-graph RAAG.  *)
 (*                                                                            *)
 (* The SecurityWitness uses fiber-counted epsilon:                            *)
-(*   epsilon = 2 * (m+1) / (m+3)  at L=1 (worst-case sheet s≠2)             *)
+(*   epsilon = 2 * (m+1) / (m+3)  at L=1 (worst-case card position s≠2)     *)
 (*                                                                            *)
 (* The ThresholdWitness uses a genus-0 covering scheme constructed from       *)
 (* Reed-Solomon codes (via genus0_covering from cover_genus0.v).              *)
@@ -88,11 +88,11 @@ Local Open Scope ring_scope.
 Lemma star_weval_inj1 : @weval_inj M_star 1.
 Proof. exact: raag_weval_inj1. Qed.
 
-(* Fiber-counted endpoint bound: for each sheet s in 'I_(m+3),
+(* Fiber-counted endpoint bound: for each card position s in 'I_(m+3),
    var_dist(fdistmap perm_endpoint (rho_from_words 1 star_gen_tuple), uniform)
      <= 2*(m+1)/(m+3).
    Generators: g0=tperm(0,1), gi=tperm(2,2+i) for i=1..m.
-   Worst-case sheets s≠2: one generator moves s, m fix s.
+   Worst-case card positions s≠2: one generator moves s, m fix s.
      P(s) = m/(m+1), P(moved_to) = 1/(m+1), var_dist = 2(m+1)/(m+3). *)
 Lemma star_endpoint_bound_fiber :
   forall s : 'I_(m.+3),
@@ -220,7 +220,7 @@ Definition star_certified_1 : CertifiedSolution R R_star :=
 (*     Protocol Correctness (end-to-end bridge)                               *)
 (******************************************************************************)
 
-(* PGGInterface: starting sheets for the protocol *)
+(* PGGInterface: starting card positions for the protocol *)
 Variable star_PI : PGGInterface R_star.
 
 (* Threshold scheme size matches PGGInterface *)
