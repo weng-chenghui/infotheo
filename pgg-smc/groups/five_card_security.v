@@ -33,34 +33,18 @@ Let G := pgg_G FiveCard_M.
 Let sigma := fc_sigma.
 
 (******************************************************************************)
-(** * Auxiliary: fc_sigma powers compute correctly                            *)
+(** * Auxiliary: fc_sigma computes as expected                                *)
 (******************************************************************************)
-
-(** Each power of sigma maps each sheet to a known value.
-    We verify this by case analysis + permutation computation. *)
 
 Lemma fc_sigma_perm (x : 'I_5) : sigma x = fc_sigma_fun x.
 Proof. by rewrite /sigma permE. Qed.
 
-Lemma fc_sigma_iter (k : nat) (x : 'I_5) :
-  (sigma ^+ k) x = iter k sigma x.
+(** sigma^5 = 1 by direct computation *)
+Lemma fc_sigma5 : sigma ^+ 5 = 1 :> {perm 'I_5}.
 Proof.
-elim: k => [|k IH]; first by rewrite expg0 perm1.
-by rewrite expgSr permM IH.
-Qed.
-
-(** Concrete values of sigma^k applied to each sheet *)
-Lemma fc_sigma_pow_val (k : nat) (x : 'I_5) :
-  val ((sigma ^+ k) x) = ((val x + k) %% 5)%N.
-Proof.
-elim: k => [|k IH].
-  by rewrite expg0 perm1 addn0 modn_small // ltn_ord.
-rewrite expgSr permM fc_sigma_perm /fc_sigma_fun IH addnS.
-have Hlt : ((val x + k) %% 5 < 5)%N by exact: ltn_pmod.
-have Hmod : ((val x + k).+1 %% 5 = ((val x + k) %% 5).+1 %% 5)%N.
-  by rewrite -addn1 -modnDml addn1.
-rewrite Hmod {Hmod}.
-by case: ((val x + k) %% 5)%N Hlt => [|[|[|[|[|n]]]]] //=.
+apply/permP => x; rewrite perm1.
+by case: x => [[|[|[|[|[|x]]]]] hx];
+  rewrite !expgSr expg0 !permM !permE //=; apply/val_inj.
 Qed.
 
 (** sigma is in G *)
@@ -76,6 +60,38 @@ Lemma fc_sigma_pow_in_G (k : nat) : sigma ^+ k \in G.
 Proof. by apply: groupX; exact: fc_sigma_in_G. Qed.
 
 (******************************************************************************)
+(** * Concrete evaluation of sigma^k at each sheet                            *)
+(******************************************************************************)
+
+(** We compute sigma^k(s) for k=0..4 and all s by direct expansion. *)
+
+Lemma fc_pow0 (s : 'I_5) : (sigma ^+ 0) s = s.
+Proof. by rewrite expg0 perm1. Qed.
+
+Lemma fc_pow1 (s : 'I_5) : val ((sigma ^+ 1) s) = (val s).+1 %% 5.
+Proof.
+rewrite expg1 fc_sigma_perm /fc_sigma_fun.
+by case: s => [[|[|[|[|[|s]]]]] hs].
+Qed.
+
+(** For each target x, we exhibit the power of sigma that maps s to x. *)
+Lemma fc_reach (s x : 'I_5) :
+  exists k : 'I_5, (sigma ^+ val k) s = x.
+Proof.
+case: s => [[|[|[|[|[|s]]]]] hs];
+case: x => [[|[|[|[|[|x]]]]] hx] //;
+  try (by exists (Ordinal (isT : (0 < 5)%N)); rewrite expg0 perm1; apply/val_inj);
+  try (by exists (Ordinal (isT : (1 < 5)%N));
+    rewrite expg1 permE /fc_sigma_fun /=; apply/val_inj);
+  try (by exists (Ordinal (isT : (2 < 5)%N));
+    rewrite expgSr expg1 permM !permE /fc_sigma_fun /=; apply/val_inj);
+  try (by exists (Ordinal (isT : (3 < 5)%N));
+    rewrite !expgSr expg0 !permM perm1 !permE /fc_sigma_fun /=; apply/val_inj);
+  try (by exists (Ordinal (isT : (4 < 5)%N));
+    rewrite !expgSr expg0 !permM perm1 !permE /fc_sigma_fun /=; apply/val_inj).
+Qed.
+
+(******************************************************************************)
 (** * Non-triviality of G                                                     *)
 (******************************************************************************)
 
@@ -86,108 +102,60 @@ Proof. exact: cardG_gt0. Qed.
 (** * Transitivity: the orbit of any sheet s under G is all of 'I_5          *)
 (******************************************************************************)
 
-(** For any s and x, sigma^((x - s) mod 5) maps s to x. *)
-
-Lemma fc_sigma_reaches (s x : 'I_5) :
-  (sigma ^+ ((5 + val x - val s) %% 5)%N) s = x.
-Proof.
-apply/val_inj.
-rewrite fc_sigma_pow_val.
-by case: s => [[|[|[|[|[|s]]]]] hs];
-   case: x => [[|[|[|[|[|x]]]]] hx].
-Qed.
-
 Lemma fc_orbit_full (s : 'I_5) :
   [set (g : {perm 'I_5}) s | g in G] = [set: 'I_5].
 Proof.
-apply/setP => x; rewrite inE; apply/imsetP.
-exists (sigma ^+ ((5 + val x - val s) %% 5)%N).
-  exact: fc_sigma_pow_in_G.
-exact/esym/fc_sigma_reaches.
+have H : forall x : 'I_5, x \in [set (g : {perm 'I_5}) s | g in G] = (x \in [set: 'I_5]).
+  move=> x; rewrite inE; apply/imsetP.
+  have [k Hk] := fc_reach s x.
+  exists (sigma ^+ val k); first exact: fc_sigma_pow_in_G.
+  exact/esym/Hk.
+apply/setP => x; exact: H.
 Qed.
 
 (******************************************************************************)
 (** * Regularity: eval_at s is injective on G                                *)
 (******************************************************************************)
 
-(** Key lemma: if sigma^k fixes any sheet, then sigma^k = 1. *)
-Lemma fc_sigma_pow_fix (k : nat) (s : 'I_5) :
-  (sigma ^+ k) s = s -> (sigma ^+ k = 1 :> {perm 'I_5}).
+(** Helper: sigma^k fixes any sheet s implies k is a multiple of 5. *)
+Lemma fc_pow_fix_zero (k : nat) (s : 'I_5) :
+  (sigma ^+ k) s = s -> k %% 5 = 0%N.
 Proof.
-move=> Hfix.
-apply/permP => y; rewrite perm1.
-have Hk : ((val s + k) %% 5 = val s)%N.
-  by have := congr1 val Hfix; rewrite fc_sigma_pow_val.
-(* From (s + k) %% 5 = s, we get k %% 5 = 0 *)
-have Hk5 : (k %% 5 = 0)%N.
-  move: Hk.
-  by case: s Hfix => [[|[|[|[|[|s]]]]] hs] _ //= Hmod;
-    move: Hmod; rewrite ?(addn0, addnC) //; move/modn_eq.
-(* Now sigma^k(y) = (y + k) %% 5 = (y + 0) %% 5 = y *)
-apply/val_inj; rewrite fc_sigma_pow_val.
-rewrite -(modnDml (val y) k 5) Hk5 addn0 modn_small //.
-exact: ltn_ord.
+rewrite -(expg_mod k fc_sigma5).
+have Hlt : k %% 5 < 5 by exact: ltn_pmod.
+case: s => [[|[|[|[|[|s]]]]] hs];
+  case: (k %% 5) Hlt => [|[|[|[|[|j]]]]] //= Hlt;
+  rewrite ?expgSr ?expg0 ?permM ?perm1 ?permE /fc_sigma_fun //=;
+  move=> /val_inj //=.
 Qed.
 
-(** G = <sigma> is a cyclic group, so G = <<{sigma}>> *)
-Lemma fc_G_is_cycle : <<[set tnth fc_sigmas i | i : 'I_1]>>%G = <[sigma]>%G.
+(** Key: any element of G that fixes a sheet must be the identity. *)
+Lemma fc_fix_imp_id (g : {perm 'I_5}) (s : 'I_5) :
+  g \in G -> g s = s -> g = 1.
 Proof.
-congr (generated _).
-apply/setP => x; apply/imsetP/idP.
-  by case=> i _ ->; rewrite tnth_ord_tuple /sigma inE.
-rewrite /sigma inE => /eqP ->.
-by exists (Ordinal (ltn0Sn 0)); rewrite // tnth_ord_tuple.
-Qed.
-
-Lemma fc_sigma_order : #[sigma]%g = 5.
-Proof.
-apply/eqP; rewrite eqn_leq; apply/andP; split.
-- (* order <= 5: sigma^5 = 1 *)
-  rewrite order_dvdn.
-  apply/eqP/permP => x; rewrite perm1 fc_sigma_pow_val.
-  by case: x => [[|[|[|[|[|x]]]]] hx].
-- (* 5 <= order: sigma ≠ 1 so order > 1, and order | 5 (prime), so order = 5 *)
-  rewrite -dvdn_prime // ?prime_iff_card //; last first.
-    apply/eqP => /(congr1 (fun p : {perm 'I_5} => p (Ordinal (isT : (0 < 5)%N)))).
-    by rewrite perm1 expg1 fc_sigma_perm.
-  by rewrite order_dvdn; apply/eqP/permP => x;
-     rewrite perm1 fc_sigma_pow_val;
-     case: x => [[|[|[|[|[|x]]]]] hx].
-Qed.
-
-Lemma fc_G_card : #|G| = 5.
-Proof.
-rewrite /G /FiveCard_M /=.
-have -> : <<[set tnth fc_sigmas i | i : 'I_1]>>%G = <[sigma]>%G.
-  exact: fc_G_is_cycle.
-by rewrite order_cycle fc_sigma_order.
-Qed.
-
-(** Every element of G = <sigma> is a power of sigma *)
-Lemma fc_in_G_is_power (g : {perm 'I_5}) :
-  g \in G -> exists k, g = sigma ^+ k.
-Proof.
-rewrite /G /FiveCard_M /= fc_G_is_cycle => gInCycle.
-have gInTraj : g \in traject (mulg sigma) 1 #[sigma]%g.
-  by rewrite -enum_cycle // mem_enum.
-move/trajectP: gInTraj => [i Hi Hgi].
-exists i; rewrite -Hgi.
-by elim: i {Hi} => [|i IH] //=; rewrite expgSr IH.
+move=> gG gfix.
+have Gcyc : G = <[sigma]>.
+  rewrite /G /FiveCard_M /=.
+  congr (<<_>>%G).
+  apply/setP => x; apply/imsetP/set1P.
+    by move=> [i _ ->]; rewrite fc_sigmasE.
+  by move=> ->; exists ord0; rewrite // fc_sigmasE.
+rewrite Gcyc in gG.
+have /cycleP [k gk] := gG.
+rewrite gk in gfix *.
+rewrite -(expg_mod k fc_sigma5).
+by rewrite (fc_pow_fix_zero gfix) expg0.
 Qed.
 
 Lemma fc_eval_inj (s : 'I_5) :
-  {in G &, injective (fun sigma0 : {perm 'I_5} => sigma0 s)}.
+  {in G &, injective (fun g : {perm 'I_5} => g s)}.
 Proof.
 move=> g1 g2 g1G g2G Heq.
-(* g1 s = g2 s => g2^-1 * g1 fixes s => g2^-1 * g1 = 1 => g1 = g2 *)
-suff Hcycle : forall g, g \in G -> g s = s -> g = 1.
-  apply: (mulgI g2^-1).
-  rewrite mulgV.
-  apply: Hcycle; first by rewrite groupM ?groupV.
-  by rewrite permM permE /= Heq -permE -permM mulgV perm1.
-move=> g gG gfix.
-have [k ->] := fc_in_G_is_power gG.
-exact: fc_sigma_pow_fix gfix.
+apply: (mulIg g2^-1).
+rewrite mulgV.
+apply: (fc_fix_imp_id (s:=s)).
+  by rewrite groupM ?groupV.
+by rewrite permM Heq permK.
 Qed.
 
 End five_card_security.
