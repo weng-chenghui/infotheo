@@ -95,7 +95,8 @@ Let N := N'.+1.
 Let G := pgg_G M.
 
 (* The image of G under rho in {perm 'I_N} *)
-Let rhoG : {set {perm 'I_N}} := pgg_rho @: G.
+Let rho := morphism.mfun (@pgg_rho M).
+Let rhoG : {set {perm 'I_N}} := [set rho x | x in G].
 
 Hypothesis HrhoG_pos : (0 < #|rhoG|)%N.
 
@@ -107,7 +108,7 @@ Hypothesis Hregular :
 (* Transitivity: the orbit of every sheet s under rhoG is all of 'I_N *)
 Hypothesis Htrans :
   forall s : 'I_N,
-  [set sigma s | sigma in rhoG] = [set: 'I_N].
+  [set (sigma : {perm 'I_N}) s | sigma in rhoG] = [set: 'I_N].
 
 (* The distribution: uniform over rhoG *)
 Let rho_uniform : R.-fdist {perm 'I_N} :=
@@ -136,7 +137,8 @@ Lemma eval_pushforward (s : 'I_N) :
   fdistmap (eval_at s) rho_uniform =
   @fdist_uniform_supp R _ (img s) (img_pos s).
 Proof.
-exact: (fdistmap_uniform_supp_inj _ (Hregular s)).
+rewrite (@fdistmap_uniform_supp_inj R _ _ rhoG HrhoG_pos (eval_at s) (@Hregular s)).
+f_equal. exact: eq_irrelevance.
 Qed.
 
 (* The pushforward equals fdist_uniform *)
@@ -144,13 +146,9 @@ Lemma eval_pushforward_uniform (s : 'I_N) :
   fdistmap (eval_at s) rho_uniform = fdist_uniform (card_ord N).
 Proof.
 rewrite eval_pushforward.
-(* img s = setT, so uniform_supp (img s) = fdist_uniform *)
-(* We need to bridge the proof terms for img_pos and the setT version *)
-suff Hsuff : @fdist_uniform_supp R _ (img s) (img_pos s) =
-             fdist_uniform (card_ord N).
-  exact: Hsuff.
-rewrite img_setT.
-exact: fdist_uniform_supp_setT.
+apply/fdist_ext => a.
+rewrite fdist_uniform_supp_in; last by rewrite img_setT inE.
+by rewrite fdist_uniformE img_setT cardsT.
 Qed.
 
 (* The endpoint bound: var_dist = 0 <= 0 *)
@@ -164,7 +162,7 @@ Qed.
 
 (* The SecurityWitness with epsilon = 0 *)
 Definition uniform_security_witness : SecurityWitness R M :=
-  @MkSecurityWitness R M 0 0 rho_uniform endpoint_bound.
+  @MkSecurityWitness R M 0 (0 : R) rho_uniform endpoint_bound.
 
 End uniform_security.
 

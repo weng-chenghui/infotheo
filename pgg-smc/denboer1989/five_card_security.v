@@ -17,8 +17,12 @@
 
 From mathcomp Require Import ssreflect ssrbool ssrfun eqtype ssrnat seq.
 From mathcomp Require Import div fintype tuple finfun finset fingroup perm action.
+From mathcomp Require Import morphism ssralg boolp reals.
+From infotheo Require Import realType_ext fdist proba variation_dist.
 Require Import pgg_interface.
-From pgg_smc Require Import five_card_group.
+From pgg_smc Require Import five_card_group pgg_collusion_bound
+                            pgg_uniform_security.
+From pgg_reconstruct Require Import algebraic_rigidity.
 
 Set Implicit Arguments.
 Unset Strict Implicit.
@@ -157,5 +161,55 @@ apply: (fc_fix_imp_id (s:=s)).
   by rewrite groupM ?groupV.
 by rewrite permM Heq permK.
 Qed.
+
+(******************************************************************************)
+(** * Bridge: pgg_rho is the identity for Gen_PGGTypes                       *)
+(******************************************************************************)
+
+(** For Gen_PGGTypes, pgg_rho = gen_incl_morph = id on {perm 'I_5}.
+    So the image rhoG = G, and all G-level properties lift to rhoG. *)
+Lemma fc_rho_id (g : {perm 'I_5}) : g \in G -> @pgg_rho FiveCard_M g = g.
+Proof. by []. Qed.
+
+Let rho := morphism.mfun (@pgg_rho FiveCard_M).
+
+Lemma fc_rhoG_eq : [set rho x | x in G] = G.
+Proof.
+apply/setP => x; apply/imsetP/idP.
+- by move=> [g gG ->].
+- by move=> xG; exists x.
+Qed.
+
+(******************************************************************************)
+(** * SecurityWitness: dealing-phase security with eps = 0                    *)
+(******************************************************************************)
+
+Lemma fc_rhoG_pos : (0 < #|[set rho x | x in G]|)%N.
+Proof. by rewrite fc_rhoG_eq; exact: fc_G_pos. Qed.
+
+Lemma fc_rhoG_regular (s : 'I_5) :
+  {in [set rho x | x in G] &,
+   injective (fun sigma0 : {perm 'I_5} => sigma0 s)}.
+Proof.
+by move=> g1 g2; rewrite fc_rhoG_eq => g1G g2G; exact: (fc_eval_inj g1G g2G).
+Qed.
+
+Lemma fc_rhoG_trans (s : 'I_5) :
+  [set (sigma0 : {perm 'I_5}) s | sigma0 in [set rho x | x in G]] =
+  [set: 'I_5].
+Proof.
+rewrite fc_rhoG_eq; exact: fc_orbit_full.
+Qed.
+
+Section fc_dealing_security.
+Variable R : realType.
+
+Definition fc_security_uniform : SecurityWitness R FiveCard_M :=
+  uniform_security_witness fc_rhoG_pos fc_rhoG_regular fc_rhoG_trans.
+
+Lemma fc_eps_zero : sw_epsilon fc_security_uniform = GRing.zero.
+Proof. reflexivity. Qed.
+
+End fc_dealing_security.
 
 End five_card_security.

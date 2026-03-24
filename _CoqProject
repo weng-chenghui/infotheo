@@ -195,5 +195,6 @@ pgg-smc/reconstruct/pgg_threshold.v
 -R pgg-smc/lib pgg_smc
 -R pgg-smc/protocol pgg_smc
 -R pgg-smc/groups pgg_smc
+-R pgg-smc/denboer1989 pgg_smc
 -R pgg-smc/security pgg_smc
 -R pgg-smc/reconstruct pgg_reconstruct
