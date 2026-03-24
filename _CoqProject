@@ -143,6 +143,7 @@ pgg-smc/groups/pgg_raag_s5.v
 pgg-smc/groups/pgg_oc_param.v
 pgg-smc/groups/pgg_weval_inj.v
 pgg-smc/groups/five_card.v
+pgg-smc/groups/five_card_security.v
 pgg-smc/protocol/card_protocol.v
 pgg-smc/groups/pgg_raag.v
 pgg-smc/groups/free_group_ball.v
@@ -157,6 +158,7 @@ pgg-smc/security/pgg_security_demo.v
 pgg-smc/security/pgg_word_analysis.v
 pgg-smc/security/pgg_abelian_collapse.v
 pgg-smc/security/pgg_security.v
+pgg-smc/security/pgg_uniform_security.v
 pgg-smc/reconstruct/pgg_sum_mod.v
 pgg-smc/reconstruct/pgg_sharing_framework.v
 pgg-smc/reconstruct/massey.v
