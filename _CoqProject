@@ -133,7 +133,7 @@ dumas2017dual/dsdp/dsdp_pismc.v
 pgg-smc/lib/perm_uniform.v
 pgg-smc/protocol/pgg_interface.v
 pgg-smc/protocol/pgg_session_types.v
-pgg-smc/protocol/pgg_pismc.v
+pgg-smc/protocol/card_exchange_pismc.v
 pgg-smc/protocol/pgg_correctness.v
 pgg-smc/groups/pgg_abelian.v
 pgg-smc/groups/abelian_word_collapse.v
@@ -142,8 +142,8 @@ pgg-smc/groups/pgg_raag_path.v
 pgg-smc/groups/pgg_raag_s5.v
 pgg-smc/groups/pgg_oc_param.v
 pgg-smc/groups/pgg_weval_inj.v
-pgg-smc/groups/five_card.v
-pgg-smc/groups/five_card_security.v
+pgg-smc/denboer1989/five_card_group.v
+pgg-smc/denboer1989/five_card_security.v
 pgg-smc/protocol/card_protocol.v
 pgg-smc/groups/pgg_raag.v
 pgg-smc/groups/free_group_ball.v

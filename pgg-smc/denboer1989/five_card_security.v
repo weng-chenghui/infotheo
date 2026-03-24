@@ -18,7 +18,7 @@
 From mathcomp Require Import ssreflect ssrbool ssrfun eqtype ssrnat seq.
 From mathcomp Require Import div fintype tuple finfun finset fingroup perm action.
 Require Import pgg_interface.
-From pgg_smc Require Import five_card.
+From pgg_smc Require Import five_card_group.
 
 Set Implicit Arguments.
 Unset Strict Implicit.

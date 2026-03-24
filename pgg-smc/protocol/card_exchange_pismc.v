@@ -16,15 +16,25 @@ From pgg_reconstruct Require Import rigidity_monster_instance.
 From pgg_reconstruct Require Import rigidity_abelian_instance.
 
 (******************************************************************************)
-(* PGG: piSMC Protocol Programs                                               *)
+(* Card Exchange Phase Protocol                                               *)
+(*                                                                            *)
+(* Based on: Weng, Affeldt, Garrigue, Saikawa,                               *)
+(*   "An Approach to Formalize Information-Theoretic Security of              *)
+(*    Multiparty Computation Protocols," FORTE 2025.                          *)
+(*                                                                            *)
+(* In the exchange phase, the dealer applies a sequence of card exchanges.    *)
+(* In each round, one of Tg exchange operations (generators) is selected     *)
+(* and applied to all card positions simultaneously. After L rounds, the     *)
+(* composition sigma_{w_0} * sigma_{w_1} * ... * sigma_{w_{L-1}} determines  *)
+(* the final card positions. Security converges as L grows, controlled by    *)
+(* the spectral gap of the Schreier graph on the generators.                 *)
 (*                                                                            *)
 (* Types involved:                                                            *)
-(*   generator index ('I_Tg) -- a "shuffle type": picks one of Tg shuffles   *)
-(*   word (L.-tuple 'I_Tg)  -- a sequence of L shuffle selections            *)
-(*   group element (gT)      -- word_eval(w) = sigma_{w_0} * ... * sigma_{w_{L-1}} *)
-(*                              a permutation in G <= S_N                    *)
-(*   card position ('I_N)    -- a position in {0,..,N-1} that perms act on   *)
-(*   endpoint : 'I_N         -- rho(g)(s), the card position after shuffle g *)
+(*   generator index ('I_Tg) -- selects one of Tg exchange operations        *)
+(*   word (L.-tuple 'I_Tg)  -- a sequence of L exchange selections           *)
+(*   group element (gT)      -- word_eval(w), the composed exchange           *)
+(*   card position ('I_N)    -- a position in {0,..,N-1}                     *)
+(*   endpoint : 'I_N         -- rho(g)(s), the card position after exchange  *)
 (*   outcome                 -- ts_recon(endpoints), recovered by threshold  *)
 (*                              scheme from k collected card positions        *)
 (*                                                                            *)
@@ -87,9 +97,9 @@ From pgg_reconstruct Require Import rigidity_abelian_instance.
 (*   3. Verifier: observe T card positions, apply ts_recon                   *)
 (*                                                                            *)
 (* Session-typed protocol programs using \pi{...} notation:                   *)
-(*   pdealer players W P_idx == dealer deals hands and announces selection   *)
-(*   pplayer i               == player i computes and reveals card position  *)
-(*   pverifier players       == verifier observes card positions             *)
+(*   exchange_dealer players W P_idx == dealer deals hands and announces selection   *)
+(*   exchange_player i               == player i computes and reveals card position  *)
+(*   exchange_verifier players       == verifier observes card positions             *)
 (*                                                                            *)
 (* Action notation markers (inside custom pismc):                             *)
 (*   Deal<p> #x      deals hand x as DT_Hand                                *)
@@ -193,7 +203,7 @@ Let verifier_env_step (j : 'I_T) (env : senv pgg_dtype) :=
    Phase 2 (ForList): announce selection index P_idx to all players.
    The two ForList loops separate hand dealing (DT_Hand) from
    index announcement (DT_Idx) to keep session types uniform per loop. *)
-Definition pdealer (players : seq 'I_T) (W : seq gT) (P_idx : nat)
+Definition exchange_dealer (players : seq 'I_T) (W : seq gT) (P_idx : nat)
     : sproc pgg_dtype data dealer_idx :=
   \pi{ Init (@PGG_idx N P_idx) ;
      ForList players step S enstep dealer_hand_env as j cont k =>
@@ -210,7 +220,7 @@ Definition pdealer (players : seq 'I_T) (W : seq gT) (P_idx : nat)
    Look up entry P_idx in hand to get card position rho(w_{P_idx})(s_i).
    Reveal this single card position to the verifier.
    nth ord0 is the default for out-of-bounds (never hit if P_idx < |W|). *)
-Definition pplayer (i : 'I_T)
+Definition exchange_player (i : 'I_T)
     : sproc pgg_dtype data (player_idx i) :=
   \pi{ Receive<dealer_idx> #my_hand =>
      Receive<dealer_idx> $shuffle_idx =>
@@ -220,7 +230,7 @@ Definition pplayer (i : 'I_T)
 (* Verifier: observe card position from each player into the Init buffer.
    After the loop, the buffer contains [rho(w)(s_0), ..., rho(w)(s_{T-1})].
    Reconstruction (applying recon to these T values) happens outside piSMC. *)
-Definition pverifier (players : seq 'I_T)
+Definition exchange_verifier (players : seq 'I_T)
     : sproc pgg_dtype data verifier_idx :=
   \pi{ ForList players step (fun k => k.+2) enstep verifier_env_step as j cont k =>
        Observe<(player_idx j)> &ep =>
@@ -231,19 +241,19 @@ Definition pverifier (players : seq 'I_T)
 
 End pgg_pismc.
 
-Arguments pdealer {M} PI.
-Arguments pplayer {M} PI.
-Arguments pverifier {M} PI.
+Arguments exchange_dealer {M} PI.
+Arguments exchange_player {M} PI.
+Arguments exchange_verifier {M} PI.
 
 (******************************************************************************)
 (** * Dealer from Words: Type-Safe Word-to-Protocol Bridge                    *)
 (*                                                                            *)
-(* dealer_from_words wraps pdealer with word evaluation. The dealer samples   *)
+(* exchange_dealer_from_words wraps exchange_dealer with word evaluation. The dealer samples   *)
 (* w : L.-tuple 'I_Tg uniformly (offline/setup phase), evaluates word_eval w *)
-(* to get a shuffle permutation, and feeds it to pdealer for dealing.         *)
+(* to get a shuffle permutation, and feeds it to exchange_dealer for dealing.         *)
 (******************************************************************************)
 
-Section dealer_from_words.
+Section exchange_dealer_from_words.
 
 Variable M : GeneratedMonodromyReprType.
 Variable PI : PGGInterface M.
@@ -251,13 +261,13 @@ Variable PI : PGGInterface M.
 Let T := (pi_T' PI).+1.
 Let Tg := (@pgg_ngens' M).+1.
 
-Definition dealer_from_words (L : nat)
+Definition exchange_dealer_from_words (L : nat)
     (players : seq 'I_T) (w : L.-tuple 'I_Tg) (P_idx : nat) :=
-  pdealer PI players [:: @word_eval M L w] P_idx.
+  exchange_dealer PI players [:: @word_eval M L w] P_idx.
 
-End dealer_from_words.
+End exchange_dealer_from_words.
 
-Arguments dealer_from_words {M} PI.
+Arguments exchange_dealer_from_words {M} PI.
 
 (******************************************************************************)
 (** * Session Type Duality Verification (Idealized, 2-party)                  *)
@@ -320,13 +330,13 @@ Local Open Scope sproc_scope.
 
 (* Wrap as aprocs for duality checking *)
 Definition ap_dealer_2 :=
-  mk_aproc (pdealer PI players_2 W P_idx).
+  mk_aproc (exchange_dealer PI players_2 W P_idx).
 Definition ap_player0_2 :=
-  mk_aproc (pplayer PI (@Ordinal 2 0 isT)).
+  mk_aproc (exchange_player PI (@Ordinal 2 0 isT)).
 Definition ap_player1_2 :=
-  mk_aproc (pplayer PI (@Ordinal 2 1 isT)).
+  mk_aproc (exchange_player PI (@Ordinal 2 1 isT)).
 Definition ap_verifier_2 :=
-  mk_aproc (pverifier PI players_2).
+  mk_aproc (exchange_verifier PI players_2).
 
 (* 4-process duality: all 6 pairs *)
 Lemma dealer_player0_dual_2 : channels_dual ap_dealer_2 ap_player0_2.
@@ -375,10 +385,10 @@ Let players_2 : seq 'I_2 := [:: @Ordinal 2 0 isT; @Ordinal 2 1 isT].
 
 Local Open Scope sproc_scope.
 
-Definition ap_dealer_gen := mk_aproc (pdealer PI_gen players_2 W P_idx).
-Definition ap_player0_gen := mk_aproc (pplayer PI_gen (@Ordinal 2 0 isT)).
-Definition ap_player1_gen := mk_aproc (pplayer PI_gen (@Ordinal 2 1 isT)).
-Definition ap_verifier_gen := mk_aproc (pverifier PI_gen players_2).
+Definition ap_dealer_gen := mk_aproc (exchange_dealer PI_gen players_2 W P_idx).
+Definition ap_player0_gen := mk_aproc (exchange_player PI_gen (@Ordinal 2 0 isT)).
+Definition ap_player1_gen := mk_aproc (exchange_player PI_gen (@Ordinal 2 1 isT)).
+Definition ap_verifier_gen := mk_aproc (exchange_verifier PI_gen players_2).
 
 Lemma dealer_player0_dual_gen : channels_dual ap_dealer_gen ap_player0_gen.
 Proof. by native_compute. Qed.
@@ -461,10 +471,10 @@ Let star_PI := @Gen_PGG_T R_star 3 star_4_le_N.
 Let players := enum 'I_4.
 Variable P_idx : nat.
 
-Definition star4_dealer (w : L.-tuple 'I_m.+1) :=
-  dealer_from_words star_PI L players w P_idx.
-Definition star4_player (i : 'I_4) := pplayer star_PI i.
-Definition star4_verifier := pverifier star_PI players.
+Definition star4_exchange_dealer (w : L.-tuple 'I_m.+1) :=
+  exchange_dealer_from_words star_PI L players w P_idx.
+Definition star4_exchange_player (i : 'I_4) := exchange_player star_PI i.
+Definition star4_exchange_verifier := exchange_verifier star_PI players.
 
 End pgg_star_protocol.
 
@@ -492,10 +502,10 @@ Let oc_PI := @Gen_PGG_T R_oc 3 oc_4_le_N.
 Let players := enum 'I_4.
 Variable P_idx : nat.
 
-Definition oc4_dealer (w : L.-tuple 'I_k.+1) :=
-  dealer_from_words oc_PI L players w P_idx.
-Definition oc4_player (i : 'I_4) := pplayer oc_PI i.
-Definition oc4_verifier := pverifier oc_PI players.
+Definition oc4_exchange_dealer (w : L.-tuple 'I_k.+1) :=
+  exchange_dealer_from_words oc_PI L players w P_idx.
+Definition oc4_exchange_player (i : 'I_4) := exchange_player oc_PI i.
+Definition oc4_exchange_verifier := exchange_verifier oc_PI players.
 
 End pgg_oc_protocol.
 
@@ -514,10 +524,10 @@ Let mon_PI := @Gen_PGG_T R_mon 3 Hmon.
 Let players := enum 'I_4.
 Variable P_idx : nat.
 
-Definition mon4_dealer (w : L.-tuple 'I_2) :=
-  dealer_from_words mon_PI L players w P_idx.
-Definition mon4_player (i : 'I_4) := pplayer mon_PI i.
-Definition mon4_verifier := pverifier mon_PI players.
+Definition mon4_exchange_dealer (w : L.-tuple 'I_2) :=
+  exchange_dealer_from_words mon_PI L players w P_idx.
+Definition mon4_exchange_player (i : 'I_4) := exchange_player mon_PI i.
+Definition mon4_exchange_verifier := exchange_verifier mon_PI players.
 
 End pgg_monster_protocol.
 
@@ -544,9 +554,9 @@ Let abel_PI := @Gen_PGG_T R_abel 3 abel_4_le_N.
 Let players := enum 'I_4.
 Variable P_idx : nat.
 
-Definition abel4_dealer (w : L.-tuple 'I_m.+1) :=
-  dealer_from_words abel_PI L players w P_idx.
-Definition abel4_player (i : 'I_4) := pplayer abel_PI i.
-Definition abel4_verifier := pverifier abel_PI players.
+Definition abel4_exchange_dealer (w : L.-tuple 'I_m.+1) :=
+  exchange_dealer_from_words abel_PI L players w P_idx.
+Definition abel4_exchange_player (i : 'I_4) := exchange_player abel_PI i.
+Definition abel4_exchange_verifier := exchange_verifier abel_PI players.
 
 End pgg_abelian_protocol.

@@ -4,7 +4,7 @@
 (* Dealer Bridge: Solver Output to Protocol Correctness                       *)
 (*                                                                            *)
 (* Connects the solver-determined word length (from SecurityWitness) to the   *)
-(* session-typed protocol (dealer_from_words) via AlgebraicRigidity.          *)
+(* session-typed protocol (exchange_dealer_from_words) via AlgebraicRigidity.  *)
 (*                                                                            *)
 (*   dealer_words_correct == end-to-end: word of solver-determined length L   *)
 (*     produces a correct protocol execution                                  *)
@@ -18,7 +18,7 @@ From mathcomp Require Import fintype tuple finfun finset fingroup perm.
 From mathcomp Require Import morphism bigop order ssrnum ssralg.
 From mathcomp Require Import boolp reals.
 From infotheo Require Import realType_ext fdist proba variation_dist.
-From pgg_smc Require Import pgg_interface pgg_pismc.
+From pgg_smc Require Import pgg_interface card_exchange_pismc.
 From pgg_reconstruct Require Import algebraic_rigidity pgg_sharing_framework
                                     covering_scheme.
 
