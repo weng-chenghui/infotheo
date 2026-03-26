@@ -142,7 +142,10 @@ pgg-smc/groups/pgg_raag_path.v
 pgg-smc/groups/pgg_raag_s5.v
 pgg-smc/groups/pgg_oc_param.v
 pgg-smc/groups/pgg_weval_inj.v
+pgg-smc/denboer1989/five_card_session_types.v
 pgg-smc/denboer1989/five_card_group.v
+pgg-smc/denboer1989/five_card_program.v
+pgg-smc/denboer1989/five_card_pismc.v
 pgg-smc/denboer1989/five_card_security.v
 pgg-smc/protocol/card_protocol.v
 pgg-smc/groups/pgg_raag.v
