@@ -156,6 +156,7 @@ pgg-smc/security/pgg_collusion_bound.v
 pgg-smc/security/pgg_security_solver.v
 pgg-smc/security/pgg_schreier.v
 pgg-smc/security/pgg_entropy_security.v
+pgg-smc/security/pgg_weighted_entropy.v
 pgg-smc/security/pgg_entropy_security_demo.v
 pgg-smc/security/pgg_security_demo.v
 pgg-smc/security/pgg_word_analysis.v
@@ -163,6 +164,7 @@ pgg-smc/security/pgg_abelian_collapse.v
 pgg-smc/security/pgg_security.v
 pgg-smc/security/pgg_uniform_security.v
 pgg-smc/security/pgg_weighted_words.v
+pgg-smc/security/pgg_schreier_weighted.v
 pgg-smc/reconstruct/pgg_sum_mod.v
 pgg-smc/reconstruct/pgg_sharing_framework.v
 pgg-smc/reconstruct/massey.v
