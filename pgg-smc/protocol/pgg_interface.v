@@ -3,6 +3,8 @@
 From HB Require Import structures.
 From mathcomp Require Import ssreflect ssrbool ssrfun eqtype ssrnat seq.
 From mathcomp Require Import fintype tuple finfun finset fingroup perm morphism bigop.
+From mathcomp Require Import boolp reals.
+From infotheo Require Import fdist.
 
 (******************************************************************************)
 (* PGG: Monodromy Representation Interface                                    *)
@@ -512,3 +514,18 @@ have Hj : tnth (@pgg_sigmas M) j \in
   by apply/imsetP; exists j.
 by move: Hnc; rewrite (Habel _ Hi _ Hj) eqxx.
 Qed.
+
+(******************************************************************************)
+(*  Weighted generator distribution                                           *)
+(******************************************************************************)
+
+Local Open Scope fdist_scope.
+
+HB.mixin Record hasWeights (R : realType) (T : PGGTypes)
+    of GeneratedMonodromyRepr T := {
+  pgg_gen_weights : R.-fdist 'I_(@pgg_ngens' T).+1 ;
+}.
+
+#[short(type=WeightedPGGType)]
+HB.structure Definition WeightedPGG (R : realType) :=
+  { T of isMonodromyRepr T & hasGenerators T & hasWeights R T }.
