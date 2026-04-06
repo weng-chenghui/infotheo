@@ -378,3 +378,84 @@ Definition certified_from_witness
     sw erefl Hd Hle.
 
 End certified_from_witness.
+
+(******************************************************************************)
+(*     SecurityWitnessEx: Extended SecurityWitness with exact + bound         *)
+(*                                                                            *)
+(* The original SecurityWitness only stores an upper bound on var_dist.       *)
+(* SecurityWitnessEx stores both the exact value and a (possibly looser)      *)
+(* upper bound, with a consistency proof that exact <= bound.                 *)
+(*                                                                            *)
+(* A coercion swe_to_sw lets SecurityWitnessEx be used wherever               *)
+(* SecurityWitness is expected, ensuring backward compatibility.              *)
+(*                                                                            *)
+(* Constructors:                                                              *)
+(*   security_witness_exact == from exact computation (bound = exact)         *)
+(*   security_witness_from_bound == from separate exact and bound proofs      *)
+(******************************************************************************)
+
+Section security_witness_extended.
+
+Variable R : realType.
+Variable M : GeneratedMonodromyReprType.
+Let N' := pgg_N' M.
+
+Record SecurityWitnessEx := MkSecurityWitnessEx {
+  swe_L : nat ;
+  swe_rho_dist : R.-fdist {perm 'I_N'.+1} ;
+
+  (* Exact security value *)
+  swe_exact_eps : R ;
+  swe_exact :
+    forall s : 'I_N'.+1,
+    var_dist (fdistmap (fun sigma : {perm 'I_N'.+1} => sigma s) swe_rho_dist)
+             (fdist_uniform (card_ord N'.+1)) = swe_exact_eps ;
+
+  (* Upper bound (may be looser — e.g., spectral/Pinsker) *)
+  swe_bound_eps : R ;
+  swe_bound :
+    forall s : 'I_N'.+1,
+    (var_dist (fdistmap (fun sigma : {perm 'I_N'.+1} => sigma s) swe_rho_dist)
+              (fdist_uniform (card_ord N'.+1)) <= swe_bound_eps)%O ;
+
+  (* Consistency *)
+  swe_consistent : (swe_exact_eps <= swe_bound_eps)%O ;
+}.
+
+Definition swe_to_sw (swe : SecurityWitnessEx) : SecurityWitness R M :=
+  @MkSecurityWitness R M (swe_L swe) (swe_bound_eps swe)
+    (swe_rho_dist swe) (swe_bound swe).
+
+Coercion swe_to_sw : SecurityWitnessEx >-> SecurityWitness.
+
+(** Constructor from exact computation — fills both exact and bound *)
+Definition security_witness_exact (L : nat)
+    (rho_dist : R.-fdist {perm 'I_N'.+1})
+    (eps : R)
+    (Hexact : forall s : 'I_N'.+1,
+      var_dist (fdistmap (fun sigma : {perm 'I_N'.+1} => sigma s) rho_dist)
+               (fdist_uniform (card_ord N'.+1)) = eps)
+    : SecurityWitnessEx :=
+  @MkSecurityWitnessEx L rho_dist eps Hexact eps
+    (fun s => eq_ind_r (fun v => (v <= eps)%O)
+                        (Order.POrderTheory.lexx eps) (Hexact s))
+    (Order.POrderTheory.lexx eps).
+
+(** Constructor from separate exact and bound proofs *)
+Definition security_witness_from_bound (L : nat)
+    (rho_dist : R.-fdist {perm 'I_N'.+1})
+    (exact_eps bound_eps : R)
+    (Hexact : forall s : 'I_N'.+1,
+      var_dist (fdistmap (fun sigma : {perm 'I_N'.+1} => sigma s) rho_dist)
+               (fdist_uniform (card_ord N'.+1)) = exact_eps)
+    (Hbound : forall s : 'I_N'.+1,
+      (var_dist (fdistmap (fun sigma : {perm 'I_N'.+1} => sigma s) rho_dist)
+                (fdist_uniform (card_ord N'.+1)) <= bound_eps)%O)
+    (Hconsist : (exact_eps <= bound_eps)%O)
+    : SecurityWitnessEx :=
+  @MkSecurityWitnessEx L rho_dist exact_eps Hexact bound_eps Hbound Hconsist.
+
+End security_witness_extended.
+
+Arguments SecurityWitnessEx R M : clear implicits.
+Arguments swe_to_sw {R M} swe.
