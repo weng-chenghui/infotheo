@@ -264,6 +264,22 @@ apply/eqP/eqP.
 - by move=> ->; rewrite permKV.
 Qed.
 
+(** Off-diagonal entries: Q(x,y) = W(y-x mod 5) = 1/5 + eps/4 for x != y *)
+Lemma fc_kim_schreier_offdiag (x y : 'I_5) :
+  x != y -> Q x y = 5%:R^-1 + eps / 4%:R.
+Proof.
+rewrite /Q /schreier_transition_weighted mxE /fc_kim_sigmas.
+case: x => [[|[|[|[|[|?]]]]] Hx] //=;
+case: y => [[|[|[|[|[|?]]]]] Hy] //= _;
+rewrite big_mkcond /=;
+rewrite big_ord_recr /= big_ord_recr /= big_ord_recr /=
+        big_ord_recr /= big_ord_recr /= big_ord0 add0r;
+rewrite !(tnth_nth 1%g) /=;
+rewrite perm1 !permE /= !permE /= !permE /= !permE /=;
+rewrite ?addr0 ?add0r ffunE /=;
+reflexivity.
+Qed.
+
 (** Doubly stochastic *)
 Lemma fc_kim_doubly_stochastic :
   forall y, \sum_x Q x y = 1.
@@ -325,14 +341,40 @@ Proof. by rewrite /kim_spectral_gap subr_gt0; exact: kim_slev_lt1. Qed.
 Lemma kim_spectral_gap_le1 : kim_spectral_gap <= 1.
 Proof. by rewrite /kim_spectral_gap lerBlDr lerDl; exact: kim_slev_ge0. Qed.
 
-(** Axiomatized spectral convergence bound.
-    This is the standard Diaconis upper bound lemma for doubly stochastic
-    random walks. A full proof would require eigendecomposition of circulant
-    matrices, which is future work. *)
-Axiom kim_spectral_convergence : forall (L : nat) (s : 'I_5),
+(** Spectral convergence bound.
+    Proved via the uniform-off-diagonal convergence theorem
+    (unif_offdiag_convergence from pgg_schreier_weighted.v):
+    Kim's circulant Schreier matrix has constant diagonal a = 1/5 - eps
+    and constant off-diagonal b = 1/5 + eps/4, so the general theorem
+    gives var_dist = 8/5 * |a-b|^L <= sqrt(5) * |a-b|^L. *)
+Lemma kim_spectral_convergence : forall (L : nat) (s : 'I_5),
   var_dist (@endpoint_dist_weighted R 3 4 L fc_kim_sigmas W s)
            (fdist_uniform (card_ord 5))
   <= Num.sqrt 5%:R * kim_slev ^+ L.
+Proof.
+move=> L s.
+(* Rewrite var_dist using bridge: endpoint_dist = matrix power entry *)
+rewrite /var_dist.
+under eq_bigr => x _ do
+  rewrite (@schreier_weighted_bridge R 4 3) fdist_uniformE card_ord.
+(* Apply the general convergence bound *)
+have := @unif_offdiag_convergence R 3
+  (schreier_transition_weighted fc_kim_sigmas W)
+  (5%:R^-1 - eps) (5%:R^-1 + eps / 4%:R)
+  (fc_kim_schreier_diag eps_lt eps_gt)
+  (fc_kim_schreier_offdiag eps_lt eps_gt)
+  (fc_kim_doubly_stochastic eps_lt eps_gt) L s.
+(* |a - b| = |(1/5 - eps) - (1/5 + eps/4)| = |-(5/4)*eps| = kim_slev *)
+rewrite /kim_slev.
+have -> : 5%:R^-1 - eps - (5%:R^-1 + eps / 4%:R) = - (5%:R / 4%:R * eps) :> R.
+  rewrite opprD addrA [5%:R^-1 - eps - 5%:R^-1]addrAC subrr add0r.
+  rewrite -opprD; congr (- _).
+  rewrite [eps / _]mulrC -{1}[eps]mul1r -mulrDl.
+  congr (_ * eps); apply: (mulIf (x := 4%:R)); rewrite ?unitfE ?pnatr_eq0 //.
+  rewrite divfK ?unitfE ?pnatr_eq0 //.
+  by rewrite mulrDl mul1r mulVf ?pnatr_eq0 // -[1]/(1%:R) -natrD.
+by rewrite normrN normrM ger0_norm // divr_ge0.
+Qed.
 
 (** Weighted Schreier Certificate *)
 Definition fc_kim_wsc : WeightedSchreierCertificate R 4 3 fc_kim_sigmas W.

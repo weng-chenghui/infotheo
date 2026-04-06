@@ -322,3 +322,185 @@ exact: Hinner.
 Qed.
 
 End schreier_weighted_bridge.
+
+(******************************************************************************)
+(*     Section 4: Convergence for Uniform-Off-Diagonal Matrices               *)
+(*                                                                            *)
+(* An N x N matrix Q is "uniform-off-diagonal" if Q(x,x) = a for all x and  *)
+(* Q(x,y) = b for all x != y, for some constants a, b.  When Q is also      *)
+(* doubly stochastic (column sums = 1), we have a + (N-1)*b = 1.            *)
+(*                                                                            *)
+(* Main results:                                                              *)
+(*   unif_offdiag_power_entry == Q^L(s,x) = (a-b)^L * (d(s,x) - 1/N) + 1/N *)
+(*   unif_offdiag_var_dist    == exact variation distance formula:            *)
+(*     sum_x |Q^L(s,x) - 1/N| = 2*(N-1)/N * |a-b|^L                        *)
+(*   unif_offdiag_convergence == convergence bound:                           *)
+(*     sum_x |Q^L(s,x) - 1/N| <= sqrt(N) * |a-b|^L                          *)
+(*                                                                            *)
+(* Comparison with the standard Diaconis spectral framework:                  *)
+(*                                                                            *)
+(*              Diaconis spectral         Uniform-off-diagonal                *)
+(*   Scope      Any doubly stochastic     Constant diagonal a,                *)
+(*              matrix                    constant off-diagonal b             *)
+(*   Requires   Eigendecomposition        Column-stochasticity + induction    *)
+(*   Result     Upper bound               Exact closed-form formula           *)
+(*              (tight in worst case)     var_dist = 2(N-1)/N * |a-b|^L       *)
+(*   Bound      sqrt(N) * rho^L           2(N-1)/N * |a-b|^L <= sqrt(N)*..   *)
+(*                                                                            *)
+(* The uniform-off-diagonal class arises naturally when the Schreier action   *)
+(* is transitive and the weight distribution is symmetric across generators.  *)
+(* Kim's Z_5 cyclic shuffle protocol (arXiv:2511.05111) falls in this class: *)
+(*   - Z_5 acts transitively on 5 card positions by cyclic rotation           *)
+(*   - The biased weight W(0) = 1/5 - eps, W(k) = 1/5 + eps/4 for k>0       *)
+(*     produces a circulant Schreier matrix with a = 1/5 - eps, b = 1/5+e/4  *)
+(*   - Exact result: var_dist = 8/5 * ((5/4)*|eps|)^L                        *)
+(*   - This is tighter than the Diaconis bound sqrt(5) * ((5/4)*|eps|)^L     *)
+(*     by a factor of sqrt(5)/(8/5) = 1.398                                  *)
+(*                                                                            *)
+(* The Diaconis bound remains necessary for protocols whose Schreier matrix   *)
+(* does not have the uniform-off-diagonal structure (e.g., non-transitive     *)
+(* actions or asymmetric weight distributions).                               *)
+(******************************************************************************)
+
+Section unif_offdiag_convergence.
+
+Variable R : realType.
+Variable n' : nat.
+Let N := n'.+2.
+
+Variable Q : 'M[R]_(N, N).
+Variables a b : R.
+
+Hypothesis Hdiag : forall x : 'I_N, Q x x = a.
+Hypothesis Hoffdiag : forall x y : 'I_N, x != y -> Q x y = b.
+Hypothesis Hcol : forall y : 'I_N, \sum_x Q x y = 1.
+
+(** Row stochastic follows from column stochastic + uniform-off-diagonal:
+    a + (N-1)*b = 1. We derive this rather than assuming it. *)
+Lemma unif_offdiag_row_sum : a + (N.-1)%:R * b = 1.
+Proof.
+rewrite mulr_natl.
+have := Hcol ord0.
+rewrite (bigD1 ord0) //= Hdiag.
+rewrite (eq_bigr (fun=> b)); last by move=> i Hi; rewrite Hoffdiag // eq_sym.
+by rewrite sumr_const cardC1 card_ord.
+Qed.
+
+(** a - b = 1 - N * b *)
+Lemma unif_offdiag_ab : a - b = 1 - N%:R * b.
+Proof.
+have Hab := unif_offdiag_row_sum.
+apply/eqP. rewrite subr_eq. apply/eqP.
+have HN1: N%:R = N.-1%:R + 1 :> R by rewrite -[1]/(1%:R) -natrD addn1 prednK.
+rewrite HN1 mulrDl mul1r -addrA opprD addrA -addrA subrK.
+by rewrite -[LHS]addr0 -{1}(subrr (N.-1%:R * b)) addrA Hab.
+Qed.
+
+(** Key identity: (a - b) / N + b = 1/N *)
+Lemma unif_offdiag_key_identity : (a - b) / N%:R + b = N%:R^-1.
+Proof.
+have HN : N%:R != 0 :> R by rewrite pnatr_eq0.
+rewrite unif_offdiag_ab mulrDl mul1r mulNr -mulrA.
+by rewrite mulrCA mulfV // mulr1 subrK.
+Qed.
+
+(** Column sums of Q^L are 1 (doubly stochastic is preserved under powers) *)
+Lemma doubly_stochastic_power (L : nat) (x : 'I_N) :
+  \sum_y (Q ^+ L) y x = 1.
+Proof.
+elim: L x => [|L IH] x.
+  rewrite expr0.
+  rewrite (bigD1 x) //= mxE eqxx.
+  rewrite (eq_bigr (fun=> 0)); last by move=> i Hi; rewrite mxE (negbTE Hi).
+  by rewrite sumr_const mul0rn addr0.
+rewrite exprSr.
+under eq_bigr do rewrite mxE.
+rewrite exchange_big /=.
+under eq_bigr => j _ do rewrite -mulr_suml IH mul1r.
+exact: Hcol.
+Qed.
+
+(** Q^L entries for uniform-off-diagonal matrices *)
+Lemma unif_offdiag_power_entry (L : nat) (s x : 'I_N) :
+  (Q ^+ L) s x = (a - b) ^+ L * ((s == x)%:R - N%:R^-1) + N%:R^-1.
+Proof.
+elim: L => [|L IH].
+  by rewrite !expr0 mxE mul1r subrK.
+rewrite exprS mxE.
+rewrite (bigD1 s) //= Hdiag.
+have -> : \sum_(i < N | i != s) Q s i * (Q ^+ L) i x =
+          b * \sum_(i < N | i != s) (Q ^+ L) i x.
+  rewrite mulr_sumr; apply: eq_bigr => i Hi.
+  by rewrite Hoffdiag // eq_sym.
+have -> : \sum_(i < N | i != s) (Q ^+ L) i x = 1 - (Q ^+ L) s x.
+  have := doubly_stochastic_power L x.
+  rewrite (bigD1 s) //=.
+  by move=> /(f_equal (fun z => z - (Q ^+ L) s x)); rewrite addrC addrK.
+rewrite IH.
+set c := a - b; set d := (s == x)%:R - N%:R^-1.
+set E := c ^+ L * d + N%:R^-1.
+rewrite mulrBr mulr1.
+rewrite addrCA -mulrBl -/c addrC.
+rewrite /E mulrDr mulrA -exprS -addrA.
+congr (_ + _).
+rewrite /c.
+exact: unif_offdiag_key_identity.
+Qed.
+
+(** Exact variation distance formula *)
+Lemma unif_offdiag_var_dist (L : nat) (s : 'I_N) :
+  \sum_(x : 'I_N) `| (Q ^+ L) s x - N%:R^-1 | =
+  2%:R * (N.-1)%:R / N%:R * `|a - b| ^+ L.
+Proof.
+under eq_bigr do rewrite unif_offdiag_power_entry addrK normrM normrX.
+rewrite -mulr_sumr mulrC.
+congr (_ * _).
+rewrite (bigD1 s) //= eqxx /= ger0_norm; last first.
+  rewrite subr_ge0. rewrite invf_le1 //. by rewrite ler1n.
+under [in LHS]eq_bigr => i Hi do
+  rewrite eq_sym (negbTE Hi) /= add0r normrN ger0_norm ?invr_ge0 ?ler0n //.
+rewrite sumr_const cardC1 card_ord.
+rewrite -[_ *+ N.-1]mulr_natr [N%:R^-1 * _]mulrC.
+have HN: N%:R != 0 :> R by rewrite pnatr_eq0.
+apply: (mulIf HN).
+rewrite divfK //.
+rewrite mulrDl mulrBl mul1r.
+rewrite mulVf // divfK //.
+rewrite /N -addn1 natrD.
+by rewrite [_ + 1 - 1]addrK addn1 /= mulrDl mul1r.
+Qed.
+
+(** The prefactor 2*(N-1)/N is at most sqrt(N) for N >= 2 *)
+Lemma two_Nm1_div_N_le_sqrtN : 2%:R * (N.-1)%:R / N%:R <= Num.sqrt N%:R :> R.
+Proof.
+have HN0 : (0 : R) < N%:R by rewrite ltr0n.
+have HNne : N%:R != 0 :> R by rewrite pnatr_eq0.
+have Hge0 : 0 <= 2 * N.-1%:R / N%:R :> R.
+  by rewrite mulr_ge0 ?divr_ge0 ?ler0n // mulr_ge0 // ler0n.
+rewrite -[X in X <= _]ger0_norm //.
+rewrite -sqrtr_sqr.
+apply: ler_wsqrtr.
+(* (2*(N-1)/N)^2 <= N *)
+rewrite exprMn exprVn.
+rewrite ler_pdivrMr; last by rewrite exprn_gt0.
+rewrite -exprS exprMn -!natrX -natrM ler_nat.
+(* Pure nat: 4*(N-1)^2 <= N^3. Case split: n'=0,1 by compute, n'>=2 by monotonicity *)
+rewrite /N /=.
+case: n' => [//|[//|n]].
+(* n >= 2, N = n+4: 4*(n+3)^2 <= (n+4)^3 *)
+(* Split: 4*(n+3)^2 <= 4*(n+4)^2 <= (n+4)^3 *)
+apply: (leq_trans (n := 2 ^ 2 * n.+4 ^ 2)).
+  by rewrite leq_mul2l /= leq_sqr.
+by rewrite expnS leq_pmul2r.
+Qed.
+
+(** Convergence bound *)
+Lemma unif_offdiag_convergence (L : nat) (s : 'I_N) :
+  \sum_(x : 'I_N) `| (Q ^+ L) s x - N%:R^-1 |
+  <= Num.sqrt N%:R * `|a - b| ^+ L.
+Proof.
+rewrite unif_offdiag_var_dist.
+by rewrite ler_wpM2r // ?exprn_ge0 // ?normr_ge0 // two_Nm1_div_N_le_sqrtN.
+Qed.
+
+End unif_offdiag_convergence.
