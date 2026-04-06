@@ -223,3 +223,102 @@ End weighted_schreier_certificate.
 
 Arguments WeightedSchreierCertificate R m n' sigmas W : clear implicits.
 Arguments MkWeightedSchreierCertificate {R m n' sigmas W}.
+
+(******************************************************************************)
+(*     Section 3: Weighted Schreier Bridge Lemma                              *)
+(*                                                                            *)
+(* Connects the L-step weighted Schreier walk (matrix power) to the actual    *)
+(* endpoint distribution from weighted word sampling.                         *)
+(*                                                                            *)
+(*   schreier_weighted_bridge :                                               *)
+(*     endpoint_dist_weighted sigmas L W s x                                  *)
+(*     = (schreier_transition_weighted sigmas W ^+ L) s x                     *)
+(*                                                                            *)
+(* Proof by induction on L, analogous to schreier_walk_eq_endpoint from       *)
+(* pgg_schreier.v but with arbitrary weights instead of uniform 1/Tg.        *)
+(******************************************************************************)
+
+Section schreier_weighted_bridge.
+
+Variable R : realType.
+Variable m n' : nat.
+Let Tg := m.+1.
+Let N := n'.+2.
+
+Variable sigmas : Tg.-tuple {perm 'I_N}.
+
+Local Notation M := (Gen_PGGTypes sigmas).
+
+Variable W : R.-fdist 'I_Tg.
+
+Lemma schreier_weighted_bridge : forall (L : nat) (s x : 'I_N),
+  @endpoint_dist_weighted R n' m L sigmas W s x =
+  (schreier_transition_weighted sigmas W ^+ L) s x.
+Proof.
+elim => [|L IH] s x.
+(* Base case: L = 0 — both sides are (s == x)%:R *)
+  rewrite expr0 mxE.
+  rewrite /endpoint_dist_weighted /rho_from_words_weighted fdistmap_comp
+    fdistmapE.
+  rewrite big_mkcond /=.
+  rewrite (big_pred1 [tuple]); first last.
+    by move=> t; apply/esym/eqP; exact: tuple0.
+  rewrite inE /= /word_eval big_ord0 perm1.
+  rewrite word_weightedE big_ord0.
+  by case: eqP.
+(* Inductive step: L.+1 *)
+(* RHS: Q^{L+1} s x = \sum_y Q s y * (Q^L) y x *)
+rewrite exprS mxE.
+under eq_bigr do rewrite -IH.
+(* LHS: unfold endpoint_dist_weighted, reindex as (head, tail) pairs *)
+rewrite /endpoint_dist_weighted /rho_from_words_weighted fdistmap_comp
+  fdistmapE big_mkcond /=.
+under [LHS]eq_bigr do rewrite inE /=.
+rewrite (reindex (fun p : 'I_Tg * L.-tuple 'I_Tg => [tuple of p.1 :: p.2]));
+  last first.
+  exists (fun t => (thead t, [tuple of behead t])) => [[i w] | t] _ /=.
+    by rewrite theadE; congr pair; exact: val_inj.
+  exact/esym/tuple_eta.
+(* Decompose word_eval and word_weighted for cons tuples *)
+under eq_bigr do rewrite word_eval_cons_endpoint.
+under eq_bigr do rewrite word_weightedE big_ord_recl.
+under eq_bigr do rewrite tnth0 /=.
+have Htail : forall (h : 'I_Tg) (t : L.-tuple 'I_Tg),
+  \prod_(i0 < L) W (tnth [tuple of h :: t] (lift ord0 i0)) =
+  \prod_(i0 < L) W (tnth t i0).
+  move=> h t; apply: eq_bigr => i0 _; by rewrite tnthS.
+under eq_bigr do rewrite Htail -word_weightedE.
+(* Split into double sum and partition by y = sigma_i(s) *)
+rewrite -(pair_big xpredT xpredT
+  (fun i (w : L.-tuple 'I_Tg) =>
+    if word_eval w (tnth sigmas i s) == x
+    then W i * word_weighted L W w
+    else 0)).
+rewrite (partition_big (fun i : 'I_Tg => tnth sigmas i s) xpredT) //=.
+apply: eq_bigr => y _.
+(* Replace sigma_i(s) with y in the inner sum *)
+under eq_bigr => i /eqP Hi do under eq_bigr do rewrite Hi.
+(* Factor W(i) out of the if-then-else *)
+under eq_bigr => i Hi do
+  (rewrite (eq_bigr (fun w : L.-tuple 'I_Tg =>
+    W i * if @word_eval (Gen_PGGTypes sigmas) L w y == x
+    then word_weighted L W w else 0)); first last;
+   first by move=> w _; case: ifP => //; rewrite mulr0).
+(* Factor W(i) out of the inner sum *)
+under eq_bigr => i Hi do rewrite -mulr_sumr.
+(* The inner sum is endpoint_dist_weighted L ... y x *)
+have Hinner :
+  \sum_w (if @word_eval (Gen_PGGTypes sigmas) L w y == x
+    then word_weighted L W w else 0) =
+  fdistmap ((fun_of_perm (T:='I_N))^~ y)
+    (fdistmap (@word_eval (Gen_PGGTypes sigmas) L) (word_weighted L W)) x.
+  rewrite fdistmap_comp fdistmapE big_mkcond /=.
+  rewrite -big_mkcond /=; apply: eq_bigl => w; by rewrite inE.
+(* Factor out the common inner sum *)
+rewrite -mulr_suml.
+congr (_ * _).
+  by rewrite /schreier_transition_weighted mxE.
+exact: Hinner.
+Qed.
+
+End schreier_weighted_bridge.

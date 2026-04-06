@@ -15,7 +15,10 @@
 (******************************************************************************)
 
 From HB Require Import structures.
-From mathcomp Require Import all_boot all_order all_algebra fingroup perm.
+From mathcomp Require Import ssreflect ssrbool ssrfun eqtype ssrnat seq.
+From mathcomp Require Import div fintype tuple finfun finset fingroup perm.
+From mathcomp Require Import morphism action bigop order ssrnum ssralg.
+From mathcomp Require Import matrix.
 From mathcomp Require Import boolp reals.
 From infotheo Require Import ssralg_ext realType_ext fdist proba variation_dist.
 From pgg_smc Require Import perm_uniform pgg_interface pgg_weval_inj
