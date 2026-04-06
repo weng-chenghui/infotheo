@@ -97,3 +97,47 @@ Definition endpoint_dist_weighted (s : 'I_N) : R.-fdist 'I_N :=
   fdistmap (fun sigma : {perm 'I_N} => sigma s) rho_from_words_weighted.
 
 End weighted_words.
+
+(******************************************************************************)
+(*   Section 2: Uniform recovery                                              *)
+(*                                                                            *)
+(*   When W = fdist_uniform (all generators equally likely), the weighted     *)
+(*   word distribution coincides with the uniform word distribution from      *)
+(*   pgg_collusion_bound.v.                                                  *)
+(******************************************************************************)
+
+Section uniform_recovery.
+
+Context {R : realType}.
+Variable N'' : nat.
+Let N' := N''.+1.
+Let N := N'.+1.
+
+Variable m : nat.
+Let Tg := m.+1.
+Variable L : nat.
+Variable sigmas : Tg.-tuple {perm 'I_N}.
+Let M := Gen_PGGTypes sigmas.
+
+Let card_Tg : #|'I_Tg| = Tg.-1.+1 := card_ord Tg.
+
+(* When W is uniform, each word gets probability (1/Tg)^L = 1/Tg^L,
+   which is the uniform distribution on L-tuples. *)
+Lemma word_weighted_is_uniform :
+  @word_weighted R m L (fdist_uniform card_Tg) =
+  fdist_uniform (card_word_L m L).
+Proof.
+apply/fdist_ext => w.
+rewrite word_weightedE fdist_uniformE card_tuple card_ord.
+under eq_bigr do rewrite fdist_uniformE card_ord.
+by rewrite prodr_const card_ord natrX exprVn.
+Qed.
+
+Lemma rho_weighted_is_uniform :
+  @rho_from_words_weighted R N'' m L sigmas (fdist_uniform card_Tg) =
+  @rho_from_words R N'' m L sigmas.
+Proof.
+by rewrite /rho_from_words_weighted /rho_from_words word_weighted_is_uniform.
+Qed.
+
+End uniform_recovery.
