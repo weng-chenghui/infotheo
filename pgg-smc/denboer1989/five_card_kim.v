@@ -154,11 +154,34 @@ Proof.
 rewrite big_ord_recr /= big_ord_recr /= big_ord_recr /=
         big_ord_recr /= big_ord_recr /= big_ord0 add0r.
 rewrite !ffunE /=.
-(* After expansion: 5 terms with 5^-1 and eps/4.
-   We prove by rewriting to 5*5^-1 + (4*eps/4 - eps). *)
-(* Helper lemmas *)
-(* Algebraic identity: (1/5-e) + 4*(1/5+e/4) = 5/5 + (e-e) = 1 *)
-Admitted.
+(* Goal: 5^-1 - eps + 4*(5^-1 + eps/4) = 1.
+   Strategy: flatten, separate 5^-1 terms from eps terms via addrCA,
+   then cancel 4*(eps/4) = eps with -eps, and show 5*5^-1 = 1. *)
+(* Flatten and sort: bubble -eps and eps/4 right, 5^-1 left *)
+rewrite -!addrA
+  [- eps + _]addrCA [- eps + _]addrCA [- eps + _]addrCA
+  [- eps + _]addrCA [- eps + _]addrCA [- eps + _]addrCA
+  [- eps + _]addrCA
+  [eps / 4%:R + (5^-1 + _)]addrCA [eps / 4%:R + (5^-1 + _)]addrCA
+  [eps / 4%:R + (5^-1 + _)]addrCA
+  [5^-1 + (- eps + _)]addrCA
+  [eps / 4%:R + (- eps + _)]addrCA [eps / 4%:R + (- eps + _)]addrCA
+  [eps / 4%:R + (- eps + _)]addrCA
+  [eps / 4%:R + (5^-1 + _)]addrCA [eps / 4%:R + (5^-1 + _)]addrCA
+  [eps / 4%:R + (5^-1 + _)]addrCA
+  [- eps + (5^-1 + _)]addrCA
+  !addrA -addrA -mulrDl -addrA -mulrDl -addrA -mulrDl.
+(* Cancel 4*(eps/4) = eps, then -eps + eps = 0 *)
+have -> : (eps + (eps + (eps + eps))) = eps *+ 4 by [].
+rewrite -[eps *+ 4]mulr_natl [4%:R * eps]mulrC.
+rewrite mulfK; last by rewrite pnatr_eq0.
+rewrite subrK.
+(* Show 5 * 5^-1 = 1 *)
+rewrite -!addrA.
+have -> : 5%:R^-1 + (5%:R^-1 + (5%:R^-1 + (5%:R^-1 + 5%:R^-1))) =
+          5%:R^-1 *+ 5 by [].
+by rewrite -[5%:R^-1 *+ 5]mulr_natl divff // pnatr_eq0.
+Qed.
 
 Definition kim_weight_dist : R.-fdist 'I_5 :=
   FDist.make kim_weight_ge0 kim_weight_sum1.
@@ -337,11 +360,14 @@ Lemma kim_slev_at_zero : eps = 0 -> kim_slev = 0.
 Proof. by move=> H0; rewrite /kim_slev H0 normr0 mulr0. Qed.
 
 Lemma kim_bound_at_zero (L : nat) :
-  eps = 0 -> Num.sqrt 5%:R * kim_slev ^+ L = 0.
+  eps = 0 -> kim_slev ^+ L.+1 = 0.
 Proof.
-(* NB: This statement is false when L = 0: sqrt(5) * 0^0 = sqrt(5) != 0.
-   Needs L > 0 hypothesis or reformulation. *)
-Admitted.
+by move=> H0; rewrite kim_slev_at_zero // expr0n.
+Qed.
+
+Lemma kim_security_at_zero (L : nat) :
+  eps = 0 -> Num.sqrt 5%:R * kim_slev ^+ L.+1 = 0.
+Proof. by move=> H0; rewrite kim_bound_at_zero // mulr0. Qed.
 
 End kim_security.
 
