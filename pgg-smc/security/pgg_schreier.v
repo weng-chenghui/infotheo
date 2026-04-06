@@ -412,25 +412,78 @@ Let N := n'.+2.
 
 Variable sigmas : Tg.-tuple {perm 'I_N}.
 
-(* Bridge: the Schreier matrix power Q^L starting at sheet s gives the
-   same distribution as the endpoint distribution from rho_from_words.
+Local Notation M := (Gen_PGGTypes sigmas).
 
-   Formally: for all sheets s, x in 'I_N,
-     (schreier_transition^+L)_{s, x} = fdistmap (sigma |-> sigma(s)) (rho_from_words L) (x)
+Lemma word_eval_cons (L : nat) (i : 'I_Tg) (w : L.-tuple 'I_Tg) :
+  @word_eval M L.+1 [tuple of i :: w] =
+  (tnth sigmas i * @word_eval M L w)%g.
+Proof.
+rewrite /word_eval big_ord_recl tnth0.
+congr (_ * _)%g.
+apply: eq_bigr => j _.
+by rewrite tnthS.
+Qed.
 
-   Both sides operate on the same state space 'I_N, so no projection
-   through G is needed (unlike a Cayley-graph approach which would
-   require DPI to go from |G| vertices down to N).
+Lemma word_eval_cons_endpoint (L : nat) (i : 'I_Tg) (w : L.-tuple 'I_Tg)
+    (s : 'I_N) :
+  @word_eval M L.+1 [tuple of i :: w] s =
+  @word_eval M L w (tnth sigmas i s).
+Proof. by rewrite word_eval_cons permM. Qed.
 
-   Axiomatized because the proof requires matrix-distribution
-   correspondence infrastructure (matrix power = convolution power of
-   the step distribution, then induction on L). Standard result;
-   see Diaconis 1988, Chapter 3A. *)
-Axiom schreier_walk_eq_endpoint : forall (L : nat)
+Lemma schreier_walk_eq_endpoint : forall (L : nat)
     (s x : 'I_N),
   (schreier_transition R sigmas ^+ L) s x =
   fdistmap (fun sigma : {perm 'I_N} => sigma s)
            (@rho_from_words R _ m L sigmas) x.
+Proof.
+elim => [|L IH] s x.
+(* Base case: L = 0 *)
+  rewrite expr0 mxE.
+  rewrite fdistmap_comp fdistmapE.
+  rewrite big_mkcond /=.
+  rewrite (big_pred1 [tuple]); first last.
+    by move=> t; apply/esym/eqP; exact: tuple0.
+  rewrite inE /= /word_eval big_ord0 perm1.
+  rewrite /word_uniform fdist_uniformE card_tuple card_ord expn0 invr1.
+  by case: eqP.
+(* Inductive step: L.+1 *)
+rewrite exprS mxE; apply/esym; rewrite fdistmap_comp fdistmapE.
+rewrite big_mkcond /=.
+under eq_bigr do rewrite inE /= /word_uniform fdist_uniformE card_tuple card_ord.
+(* Reindex (L+1)-tuples as (head, tail) pairs *)
+rewrite (reindex (fun p : 'I_Tg * L.-tuple 'I_Tg => [tuple of p.1 :: p.2]));
+  last first.
+  exists (fun t => (thead t, [tuple of behead t])) => [[i w] | t] _ /=.
+    by rewrite theadE; congr pair; exact: val_inj.
+  exact/esym/tuple_eta.
+(* Apply word_eval_cons_endpoint and split into double sum *)
+under eq_bigr do rewrite word_eval_cons_endpoint.
+rewrite -(pair_big xpredT xpredT
+  (fun i (j : L.-tuple 'I_Tg) =>
+    if @word_eval M L j (tnth sigmas i s) == x
+    then (pgg_ngens'.+1 ^ L.+1)%:R^-1 else 0)).
+(* Factor Tg^{L+1} = Tg * Tg^L *)
+under [LHS]eq_bigr do under eq_bigr do rewrite expnS natrM invfM.
+(* Partition by y = sigma_i(s) *)
+rewrite (partition_big (fun i : 'I_Tg => tnth sigmas i s) xpredT) //=.
+apply: eq_bigr => y _.
+(* Since sigma_i(s) == y, replace sigma_i(s) with y *)
+under eq_bigr => i /eqP Hi do under eq_bigr do rewrite Hi.
+(* The inner sum no longer depends on i; collapse outer sum to count *)
+rewrite big_const_seq iter_addr addr0.
+have Hcount : count (fun i : 'I_Tg => tnth sigmas i s == y)
+  (index_enum (fintype_ordinal__canonical__fintype_Finite Tg)) =
+  schreier_gen_count sigmas s y.
+  rewrite /schreier_gen_count -sum1dep_card -sum1_count //.
+rewrite Hcount /schreier_transition mxE IH.
+rewrite fdistmap_comp fdistmapE.
+(* Convert *+ to * and use associativity *)
+rewrite -[LHS]mulr_natl -mulrA.
+congr ((schreier_gen_count sigmas s y)%:R * _).
+rewrite big_mkcond [in RHS]big_mkcond /= mulr_sumr; apply: eq_bigr => w _.
+rewrite inE /= /word_uniform fdist_uniformE card_tuple card_ord.
+by case: ifP => //; rewrite mulr0.
+Qed.
 
 End schreier_endpoint_bridge.
 
