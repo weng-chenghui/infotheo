@@ -147,6 +147,7 @@ pgg-smc/denboer1989/five_card_group.v
 pgg-smc/denboer1989/five_card_program.v
 pgg-smc/denboer1989/five_card_pismc.v
 pgg-smc/denboer1989/five_card_security.v
+pgg-smc/denboer1989/five_card_kim.v
 pgg-smc/protocol/card_protocol.v
 pgg-smc/protocol/card_protocol_posterior.v
 pgg-smc/groups/pgg_raag.v
