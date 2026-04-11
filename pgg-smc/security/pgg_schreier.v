@@ -326,7 +326,8 @@ Definition security_witness_schreier (sc : SchreierCertificate)
   @MkSecurityWitness R M L
     (Num.sqrt (N%:R) * (1 - sc_lambda_gap sc) ^+ L)
     (rho_from_words L sigmas)
-    (sc_convergence sc L).
+    (sc_convergence sc L)
+    None.
 
 (* Epsilon from Schreier certificate *)
 Definition schreier_epsilon (sc : SchreierCertificate) (L : nat) : R :=

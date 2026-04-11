@@ -66,7 +66,7 @@ Definition monster_security_from_entropy : SecurityWitness R R_monster :=
 
 (* eps = 0 under saturation *)
 Lemma monster_entropy_eps_perfect :
-  sw_epsilon monster_security_from_entropy = 0.
+  sw_bound_eps monster_security_from_entropy = 0.
 Proof.
 rewrite /monster_security_from_entropy /security_witness_from_entropy /=.
 rewrite /monster_entropy_witness_Lstar /entropy_witness_inj /=.
@@ -155,10 +155,10 @@ Lemma oc_one_le_two_log2 (R : realType) :
   (1 <= 2%:R * (log 4%:R - log 2%:R) :> R)%O.
 Proof. by rewrite log4 log2 mulrBr mulr1 -natrM /= -natrB //= ler1n. Qed.
 
-(* sw_epsilon(oc_security_witness_2) = 1 by definition of
+(* sw_bound_eps(oc_security_witness_2) = 1 by definition of
    security_witness_fiber applied to oc_endpoint_bound_fiber (eps=1). *)
 Lemma oc_combinatorial_eps (R : realType) :
-  sw_epsilon (oc_security_witness_2 R) = 1 :> R.
+  sw_bound_eps (oc_security_witness_2 R) = 1 :> R.
 Proof. by []. Qed.
 
 (******************************************************************************)
@@ -197,8 +197,8 @@ Definition oc_security_from_entropy : SecurityWitness R R_oc :=
    eps_combinatorial = 1, eps_entropy = sqrt(2*(log 4 - log 2)) = sqrt 2.
    Since 1 <= sqrt 2, the combinatorial bound is tighter. *)
 Lemma oc_entropy_vs_combinatorial :
-  (sw_epsilon (oc_security_witness_2 R) <=
-   sw_epsilon oc_security_from_entropy)%O.
+  (sw_bound_eps (oc_security_witness_2 R) <=
+   sw_bound_eps oc_security_from_entropy)%O.
 Proof.
 rewrite oc_combinatorial_eps.
 rewrite /oc_security_from_entropy /security_witness_from_entropy /=.
@@ -238,7 +238,7 @@ Definition oc_security_from_entropy_L : SecurityWitness R R_oc :=
 (* When H_min reaches log N = log 4, perfect security *)
 Lemma oc_convergence_perfect :
   H_min = log 4%:R ->
-  sw_epsilon oc_security_from_entropy_L = 0.
+  sw_bound_eps oc_security_from_entropy_L = 0.
 Proof.
 move=> Hperf.
 rewrite /oc_security_from_entropy_L /security_witness_from_entropy /=.
@@ -261,21 +261,21 @@ Variable ew : EntropyWitness R M.
 
 (* Extract the epsilon formula *)
 Lemma entropy_security_eps :
-  sw_epsilon (security_witness_from_entropy ew) =
+  sw_bound_eps (security_witness_from_entropy ew) =
   Num.sqrt (2%:R * (log N'.+1%:R - ew_min_entropy ew)).
 Proof. by []. Qed.
 
 (* Perfect security when H = log N *)
 Lemma entropy_security_perfect :
   ew_min_entropy ew = log N'.+1%:R ->
-  sw_epsilon (security_witness_from_entropy ew) = 0.
+  sw_bound_eps (security_witness_from_entropy ew) = 0.
 Proof. by move=> Hlog; rewrite entropy_security_eps Hlog subrr mulr0 sqrtr0. Qed.
 
 (* Monotonicity: larger H_min -> smaller eps *)
 Lemma entropy_security_monotone (ew1 ew2 : EntropyWitness R M) :
   ew_min_entropy ew1 <= ew_min_entropy ew2 ->
-  sw_epsilon (security_witness_from_entropy ew2) <=
-  sw_epsilon (security_witness_from_entropy ew1).
+  sw_bound_eps (security_witness_from_entropy ew2) <=
+  sw_bound_eps (security_witness_from_entropy ew1).
 Proof.
 by move=> Hle; rewrite /security_witness_from_entropy /=;
    apply: ler_wsqrtr; rewrite ler_pM2l // lerD2l lerNl opprK.

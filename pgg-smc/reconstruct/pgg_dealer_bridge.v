@@ -65,8 +65,8 @@ Lemma dealer_words_epsilon_bound (s : 'I_N) :
   (var_dist (fdistmap (fun sigma : {perm 'I_N} => sigma s)
                       (sw_rho_dist (ar_security ar)))
             (fdist_uniform (card_ord N))
-   <= sw_epsilon (ar_security ar))%O.
-Proof. exact: sw_endpoint_bound. Qed.
+   <= sw_bound_eps (ar_security ar))%O.
+Proof. exact: sw_bound. Qed.
 
 (* When the dealer uses ts_encode to produce the starting shares,
    the ts_valid hypothesis is automatically satisfied. *)

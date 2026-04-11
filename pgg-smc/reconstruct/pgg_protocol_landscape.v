@@ -118,8 +118,8 @@ Let N := (pgg_N' M).+1.
 
 Lemma security_per_position (sw : SecurityWitness R M) (s : 'I_N) :
   (var_dist (fdistmap (fun sigma : {perm 'I_N} => sigma s) (sw_rho_dist sw))
-            (fdist_uniform (card_ord N)) <= sw_epsilon sw)%O.
-Proof. exact: sw_endpoint_bound. Qed.
+            (fdist_uniform (card_ord N)) <= sw_bound_eps sw)%O.
+Proof. exact: sw_bound. Qed.
 
 Lemma complexity_from_group (L : nat) : (@search_space M L <= #|G|)%N.
 Proof. exact: search_space_leG. Qed.
@@ -297,8 +297,8 @@ Lemma ar_security_per_position (s : 'I_N) :
   (var_dist (fdistmap (fun sigma : {perm 'I_N} => sigma s)
                       (sw_rho_dist (ar_security ar)))
             (fdist_uniform (card_ord N))
-   <= sw_epsilon (ar_security ar))%O.
-Proof. exact: sw_endpoint_bound. Qed.
+   <= sw_bound_eps (ar_security ar))%O.
+Proof. exact: sw_bound. Qed.
 
 Lemma ar_genus0_exact :
   cd_genus (cs_data cs) = 0 ->
@@ -459,7 +459,7 @@ End entropy_view.
 (*     Section 9: Covering Decomposition — Orthogonal Security + Threshold   *)
 (*                                                                            *)
 (* The covering choice determines two orthogonal guarantees:                  *)
-(*   1. Security (sw_endpoint_bound): var_dist(P_s, U_N) <= epsilon          *)
+(*   1. Security (sw_bound): var_dist(P_s, U_N) <= epsilon          *)
 (*   2. Threshold (cs_gap): T - k <= 2*genus                                *)
 (* These come from independent aspects of the algebraic choice:              *)
 (*   - Security from monodromy mixing (word length L, generator count Tg)    *)
@@ -491,10 +491,10 @@ Let sw := ar_security ar.
 Lemma ar_covering_decomposition :
   (forall s : 'I_N,
     (var_dist (fdistmap (fun sigma : {perm 'I_N} => sigma s) (sw_rho_dist sw))
-              (fdist_uniform (card_ord N)) <= sw_epsilon sw)%O) /\
+              (fdist_uniform (card_ord N)) <= sw_bound_eps sw)%O) /\
   (ts_T (cs_scheme cs) - ts_k (cs_scheme cs) <=
    2 * cd_genus (cs_data cs))%N.
-Proof. split; [exact: sw_endpoint_bound | exact: gap_bound]. Qed.
+Proof. split; [exact: sw_bound | exact: gap_bound]. Qed.
 
 (* Genus-0 specialization: when the covering has genus 0, the threshold
    is exact (T <= k), recovering Shamir's (k,k)-threshold. *)
@@ -502,11 +502,11 @@ Lemma ar_genus0_shamir :
   cd_genus (cs_data cs) = 0 ->
   (forall s : 'I_N,
     (var_dist (fdistmap (fun sigma : {perm 'I_N} => sigma s) (sw_rho_dist sw))
-              (fdist_uniform (card_ord N)) <= sw_epsilon sw)%O) /\
+              (fdist_uniform (card_ord N)) <= sw_bound_eps sw)%O) /\
   (ts_T (cs_scheme cs) <= ts_k (cs_scheme cs))%N.
 Proof.
 move=> Hg0; split.
-- exact: sw_endpoint_bound.
+- exact: sw_bound.
 - exact: genus0_exact Hg0.
 Qed.
 

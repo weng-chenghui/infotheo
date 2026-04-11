@@ -22,7 +22,12 @@
 (*   to the permutation action that PGG uses.                                *)
 (*                                                                            *)
 (* Records:                                                                   *)
+(*   SecurityExact rho == optional exact-equality carrier:                   *)
+(*                         var_dist(rho, uniform) = se_eps                   *)
 (*   SecurityWitness R M == packages the endpoint-level security guarantee    *)
+(*                          as a (bound, optional-exact) pair:                *)
+(*                            sw_bound : var_dist ... <= sw_bound_eps         *)
+(*                            sw_exact : option (SecurityExact sw_rho_dist)   *)
 (*   ThresholdWitness M  == packages the covering scheme + PGL hypothesis     *)
 (*   AlgebraicRigidity R M == combines both into a unified witness            *)
 (*                                                                            *)
@@ -32,6 +37,8 @@
 (*     Applicable to: OC (eps=1), S5 (eps=6/5), Star (eps=2(m+1)/(m+3))   *)
 (*   security_witness_endpoint_inj == for perm_endpoint-injective groups             *)
 (*     Epsilon = 2*(N - Tg^L)/N. Applicable to: NCycle, Abelian, Monster     *)
+(*   security_witness_from_bound == new helper: bound-only (sw_exact=None)    *)
+(*   security_witness_with_exact == new helper: bound + exact equality        *)
 (*                                                                            *)
 (* Derived properties:                                                        *)
 (*   ar_complexity      == search space bounded by |G|                        *)
@@ -73,14 +80,32 @@ Variable M : GeneratedMonodromyReprType.
 Let N' := pgg_N' M.
 Let G := pgg_G M.
 
+(** SecurityExact: an optional exact-equality carrier.                         *)
+(* Parameterised by the distribution [rho] so that the exact-value proof is    *)
+(* tied to the same distribution used for the bound in a SecurityWitness.      *)
+(* Constructed via MkSecurityExact; used via Some in sw_exact.                 *)
+Record SecurityExact (rho : R.-fdist {perm 'I_N'.+1}) := MkSecurityExact {
+  se_eps : R;
+  se_exact :
+    forall s : 'I_N'.+1,
+    var_dist (fdistmap (fun sigma : {perm 'I_N'.+1} => sigma s) rho)
+             (fdist_uniform (card_ord N'.+1)) = se_eps
+}.
+
+(** SecurityWitness: unified record carrying an always-present bound and an    *)
+(* optional exact-equality slot.                                               *)
+(*                                                                             *)
+(* Field order matches the previous SecurityWitness with a trailing sw_exact   *)
+(* so that positional @MkSecurityWitness call sites migrate by appending None. *)
 Record SecurityWitness := MkSecurityWitness {
   sw_L : nat;
-  sw_epsilon : R;
+  sw_bound_eps : R;
   sw_rho_dist : R.-fdist {perm 'I_N'.+1};
-  sw_endpoint_bound :
+  sw_bound :
     forall (s : 'I_N'.+1),
     (var_dist (fdistmap (fun sigma : {perm 'I_N'.+1} => sigma s) sw_rho_dist)
-              (fdist_uniform (card_ord N'.+1)) <= sw_epsilon)%O
+              (fdist_uniform (card_ord N'.+1)) <= sw_bound_eps)%O;
+  sw_exact : option (SecurityExact sw_rho_dist)
 }.
 
 Record ThresholdWitness := MkThresholdWitness {
@@ -96,6 +121,7 @@ Record AlgebraicRigidity := MkAlgebraicRigidity {
 
 End algebraic_rigidity_records.
 
+Arguments SecurityExact {R} {M} rho.
 Arguments SecurityWitness R M : clear implicits.
 Arguments ThresholdWitness M : clear implicits.
 Arguments AlgebraicRigidity R M : clear implicits.
@@ -127,7 +153,7 @@ Definition security_witness_fiber (L : nat)
                (fdist_uniform (card_ord n'.+2)) <= epsilon)%O)
     : SecurityWitness R M :=
   @MkSecurityWitness R M L epsilon
-    (rho_from_words L sigmas) Hbound.
+    (rho_from_words L sigmas) Hbound None.
 
 End fiber_security.
 
@@ -159,9 +185,53 @@ Definition security_witness_endpoint_inj (L : nat)
     : SecurityWitness R M :=
   @MkSecurityWitness R M L _
     (rho_from_words L sigmas)
-    (var_dist_endpoint_direct Hlfree Hinj_s).
+    (var_dist_endpoint_direct Hlfree Hinj_s)
+    None.
 
 End direct_endpoint_security.
+
+(******************************************************************************)
+(*     Convenience Constructors                                               *)
+(*                                                                            *)
+(* security_witness_from_bound: build a SecurityWitness from only a bound     *)
+(*   (sw_exact := None). Use this when only an upper bound on var_dist is     *)
+(*   available (e.g., spectral / Pinsker / DPI estimates).                    *)
+(*                                                                            *)
+(* security_witness_with_exact: build a SecurityWitness from a bound and an   *)
+(*   exact-equality proof (sw_exact := Some ...). Use this when a closed-form *)
+(*   var_dist equality is known alongside the spectral bound.                 *)
+(******************************************************************************)
+
+Section security_witness_constructors.
+
+Variable R : realType.
+Variable M : GeneratedMonodromyReprType.
+Let N' := pgg_N' M.
+
+Definition security_witness_from_bound (L : nat)
+    (eps : R)
+    (rho_dist : R.-fdist {perm 'I_N'.+1})
+    (Hbound : forall s : 'I_N'.+1,
+      (var_dist (fdistmap (fun sigma : {perm 'I_N'.+1} => sigma s) rho_dist)
+                (fdist_uniform (card_ord N'.+1)) <= eps)%O)
+    : SecurityWitness R M :=
+  @MkSecurityWitness R M L eps rho_dist Hbound None.
+
+Definition security_witness_with_exact (L : nat)
+    (bound_eps : R)
+    (rho_dist : R.-fdist {perm 'I_N'.+1})
+    (Hbound : forall s : 'I_N'.+1,
+      (var_dist (fdistmap (fun sigma : {perm 'I_N'.+1} => sigma s) rho_dist)
+                (fdist_uniform (card_ord N'.+1)) <= bound_eps)%O)
+    (exact_eps : R)
+    (Hexact : forall s : 'I_N'.+1,
+      var_dist (fdistmap (fun sigma : {perm 'I_N'.+1} => sigma s) rho_dist)
+               (fdist_uniform (card_ord N'.+1)) = exact_eps)
+    : SecurityWitness R M :=
+  @MkSecurityWitness R M L bound_eps rho_dist Hbound
+    (Some (@MkSecurityExact R M rho_dist exact_eps Hexact)).
+
+End security_witness_constructors.
 
 (******************************************************************************)
 (*     Derived Properties                                                     *)
@@ -299,12 +369,12 @@ Record SecurityProfile := MkSecurityProfile {
   sp_Lstar : nat ;
   sp_witness : SecurityWitness R M ;
   sp_at_Lstar : sw_L sp_witness = sp_Lstar ;
-  sp_nontrivial : is_true (Num.lt (sw_epsilon sp_witness) eps_bound)
+  sp_nontrivial : is_true (Num.lt (sw_bound_eps sp_witness) eps_bound)
 }.
 
 (* Constructor from AlgebraicRigidity, when epsilon < 2 can be proved *)
 Definition ar_security_profile (ar : AlgebraicRigidity R M)
-    (Hlt2 : is_true (Num.lt (sw_epsilon (ar_security ar)) eps_bound))
+    (Hlt2 : is_true (Num.lt (sw_bound_eps (ar_security ar)) eps_bound))
     : SecurityProfile :=
   @MkSecurityProfile
     (sw_L (ar_security ar))
@@ -339,7 +409,7 @@ Record CertifiedSolution := MkCertifiedSolution {
   cs_witness   : SecurityWitness R M ;
   cs_L_eq      : sw_L cs_witness = sp_L cs_params ;
   cs_denom_pos : (0 < (sp_eps cs_params).2)%N ;
-  cs_eps_le    : (sw_epsilon cs_witness <=
+  cs_eps_le    : (sw_bound_eps cs_witness <=
                   (sp_eps cs_params).1%:R / (sp_eps cs_params).2%:R)%O
 }.
 
@@ -371,7 +441,7 @@ Local Open Scope ring_scope.
 Definition certified_from_witness
     (sw : SecurityWitness R M)
     (eps_n eps_d : nat) (Hd : (0 < eps_d)%N)
-    (Hle : (sw_epsilon sw <= eps_n%:R / eps_d%:R)%O)
+    (Hle : (sw_bound_eps sw <= eps_n%:R / eps_d%:R)%O)
     : CertifiedSolution R M :=
   @MkCertifiedSolution R M
     (MkSP (@pgg_ngens' M).+1 (pgg_N' M).+1 (sw_L sw) (eps_n, eps_d))
@@ -379,83 +449,9 @@ Definition certified_from_witness
 
 End certified_from_witness.
 
-(******************************************************************************)
-(*     SecurityWitnessEx: Extended SecurityWitness with exact + bound         *)
-(*                                                                            *)
-(* The original SecurityWitness only stores an upper bound on var_dist.       *)
-(* SecurityWitnessEx stores both the exact value and a (possibly looser)      *)
-(* upper bound, with a consistency proof that exact <= bound.                 *)
-(*                                                                            *)
-(* A coercion swe_to_sw lets SecurityWitnessEx be used wherever               *)
-(* SecurityWitness is expected, ensuring backward compatibility.              *)
-(*                                                                            *)
-(* Constructors:                                                              *)
-(*   security_witness_exact == from exact computation (bound = exact)         *)
-(*   security_witness_from_bound == from separate exact and bound proofs      *)
-(******************************************************************************)
-
-Section security_witness_extended.
-
-Variable R : realType.
-Variable M : GeneratedMonodromyReprType.
-Let N' := pgg_N' M.
-
-Record SecurityWitnessEx := MkSecurityWitnessEx {
-  swe_L : nat ;
-  swe_rho_dist : R.-fdist {perm 'I_N'.+1} ;
-
-  (* Exact security value *)
-  swe_exact_eps : R ;
-  swe_exact :
-    forall s : 'I_N'.+1,
-    var_dist (fdistmap (fun sigma : {perm 'I_N'.+1} => sigma s) swe_rho_dist)
-             (fdist_uniform (card_ord N'.+1)) = swe_exact_eps ;
-
-  (* Upper bound (may be looser — e.g., spectral/Pinsker) *)
-  swe_bound_eps : R ;
-  swe_bound :
-    forall s : 'I_N'.+1,
-    (var_dist (fdistmap (fun sigma : {perm 'I_N'.+1} => sigma s) swe_rho_dist)
-              (fdist_uniform (card_ord N'.+1)) <= swe_bound_eps)%O ;
-
-  (* Consistency *)
-  swe_consistent : (swe_exact_eps <= swe_bound_eps)%O ;
-}.
-
-Definition swe_to_sw (swe : SecurityWitnessEx) : SecurityWitness R M :=
-  @MkSecurityWitness R M (swe_L swe) (swe_bound_eps swe)
-    (swe_rho_dist swe) (swe_bound swe).
-
-Coercion swe_to_sw : SecurityWitnessEx >-> SecurityWitness.
-
-(** Constructor from exact computation — fills both exact and bound *)
-Definition security_witness_exact (L : nat)
-    (rho_dist : R.-fdist {perm 'I_N'.+1})
-    (eps : R)
-    (Hexact : forall s : 'I_N'.+1,
-      var_dist (fdistmap (fun sigma : {perm 'I_N'.+1} => sigma s) rho_dist)
-               (fdist_uniform (card_ord N'.+1)) = eps)
-    : SecurityWitnessEx :=
-  @MkSecurityWitnessEx L rho_dist eps Hexact eps
-    (fun s => eq_ind_r (fun v => (v <= eps)%O)
-                        (Order.POrderTheory.lexx eps) (Hexact s))
-    (Order.POrderTheory.lexx eps).
-
-(** Constructor from separate exact and bound proofs *)
-Definition security_witness_from_bound (L : nat)
-    (rho_dist : R.-fdist {perm 'I_N'.+1})
-    (exact_eps bound_eps : R)
-    (Hexact : forall s : 'I_N'.+1,
-      var_dist (fdistmap (fun sigma : {perm 'I_N'.+1} => sigma s) rho_dist)
-               (fdist_uniform (card_ord N'.+1)) = exact_eps)
-    (Hbound : forall s : 'I_N'.+1,
-      (var_dist (fdistmap (fun sigma : {perm 'I_N'.+1} => sigma s) rho_dist)
-                (fdist_uniform (card_ord N'.+1)) <= bound_eps)%O)
-    (Hconsist : (exact_eps <= bound_eps)%O)
-    : SecurityWitnessEx :=
-  @MkSecurityWitnessEx L rho_dist exact_eps Hexact bound_eps Hbound Hconsist.
-
-End security_witness_extended.
-
-Arguments SecurityWitnessEx R M : clear implicits.
-Arguments swe_to_sw {R M} swe.
+(* Note: the old SecurityWitnessEx section has been deleted.                  *)
+(* Its functionality was folded into SecurityWitness above, which now         *)
+(* carries an optional `sw_exact : option (SecurityExact sw_rho_dist)` field. *)
+(* Clients that previously built SecurityWitnessEx should now build a         *)
+(* SecurityWitness via `security_witness_from_bound` (bound-only) or          *)
+(* `security_witness_with_exact` (bound + exact equality).                    *)

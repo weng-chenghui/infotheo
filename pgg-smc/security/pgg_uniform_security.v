@@ -9,7 +9,7 @@
 (*                                                                            *)
 (* Main result:                                                               *)
 (*   uniform_security_witness : SecurityWitness R M                           *)
-(*     with sw_epsilon = 0                                                    *)
+(*     with sw_bound_eps = 0                                                  *)
 (*                                                                            *)
 (* Hypotheses:                                                                *)
 (*   - pgg_rho is injective on pgg_G M (faithfulness)                         *)
@@ -162,7 +162,7 @@ Qed.
 
 (* The SecurityWitness with epsilon = 0 *)
 Definition uniform_security_witness : SecurityWitness R M :=
-  @MkSecurityWitness R M 0 (0 : R) rho_uniform endpoint_bound.
+  @MkSecurityWitness R M 0 (0 : R) rho_uniform endpoint_bound None.
 
 End uniform_security.
 

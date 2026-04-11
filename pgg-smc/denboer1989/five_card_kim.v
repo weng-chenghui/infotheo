@@ -35,11 +35,20 @@
 (*   kim_weight_dist   == FDist from kim_weight_fun (needs positivity hyps)   *)
 (*   fc_kim_schreier_circulant == Schreier matrix is circulant                *)
 (*   fc_kim_doubly_stochastic  == column sums = 1                             *)
-(*   fc_kim_security   == SecurityWitnessEx via WeightedSchreierCertificate   *)
+(*   fc_kim_security_witness == SecurityWitness from kim_spectral_convergence *)
+(*   fc_kim_wsc        == WeightedSchreierCertificate (sibling packaging)     *)
 (*                                                                            *)
 (* References:                                                                *)
 (*   Kim & Cetinkaya (2025), arXiv:2511.05111                                 *)
 (*   den Boer (1989), EUROCRYPT, LNCS 434                                     *)
+(*                                                                            *)
+(* TODO (future work): prove `kim_var_dist_exact`:                            *)
+(*     var_dist (...) = (4/5) * ((5/4) * |eps|)^L                             *)
+(* by circulant matrix-power closed form (exact eigenvalue decomposition of  *)
+(* the 5x5 circulant gives P^L entries in closed form), and populate         *)
+(* `sw_exact` of `fc_kim_security_witness` via `security_witness_with_exact`.*)
+(* The exact value is 5*sqrt(5)/4 ~= 2.8x tighter than the current spectral  *)
+(* bound `sqrt(5) * kim_slev^L` delivered by `kim_spectral_convergence`.     *)
 (******************************************************************************)
 
 From HB Require Import structures.
@@ -288,7 +297,7 @@ Proof. exact: fc_kim_col_stochastic. Qed.
 End kim_schreier.
 
 (******************************************************************************)
-(** * Section 5: SecurityWitnessEx via Weighted Schreier Certificate          *)
+(** * Section 5: SecurityWitness via Weighted Schreier Certificate            *)
 (*                                                                            *)
 (* Kim's circulant matrix has eigenvalues:                                    *)
 (*   lambda_0 = 1 (Perron eigenvector = uniform)                              *)
@@ -301,7 +310,7 @@ End kim_schreier.
 (*            = sqrt(5) * ((5/4)*|eps|)^T                                     *)
 (*                                                                            *)
 (* For this initial formalization, we axiomatize the spectral convergence     *)
-(* bound and construct the WeightedSchreierCertificate + SecurityWitnessEx.   *)
+(* bound and construct the WeightedSchreierCertificate + SecurityWitness.     *)
 (******************************************************************************)
 
 Section kim_security.
@@ -395,7 +404,8 @@ Definition fc_kim_security_witness (L : nat) :
   @MkSecurityWitness R FiveCardKim_M L
     (Num.sqrt 5%:R * kim_slev ^+ L)
     (@rho_from_words_weighted R 3 4 L fc_kim_sigmas W)
-    (fun s => kim_spectral_convergence L s).
+    (fun s => kim_spectral_convergence L s)
+    None.
 
 (** When eps = 0, the bias disappears and we recover the uniform case *)
 Lemma kim_slev_at_zero : eps = 0 -> kim_slev = 0.

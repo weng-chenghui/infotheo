@@ -13,6 +13,11 @@
 (*                     (since |G| = |'I_5| = 5)                               *)
 (*                                                                            *)
 (* These properties are prerequisites for the SecurityWitness instantiation.  *)
+(*                                                                            *)
+(* TODO (future work): populate `sw_exact` of fc_security_uniform with the   *)
+(* exact var_dist = 0 equality for the uniform case. This is a one-step      *)
+(* follow-up via `security_witness_with_exact`. See five_card_kim.v header   *)
+(* for the Kim biased case.                                                   *)
 (******************************************************************************)
 
 From mathcomp Require Import ssreflect ssrbool ssrfun eqtype ssrnat seq.
@@ -207,7 +212,7 @@ Variable R : realType.
 Definition fc_security_uniform : SecurityWitness R FiveCard_M :=
   uniform_security_witness fc_rhoG_pos fc_rhoG_regular fc_rhoG_trans.
 
-Lemma fc_eps_zero : sw_epsilon fc_security_uniform = GRing.zero.
+Lemma fc_eps_zero : sw_bound_eps fc_security_uniform = GRing.zero.
 Proof. reflexivity. Qed.
 
 End fc_dealing_security.

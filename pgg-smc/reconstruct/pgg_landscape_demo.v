@@ -82,7 +82,7 @@ Lemma monster_security_demo (s : 'I_monster_n.+2) :
   (var_dist (fdistmap (fun sigma : {perm 'I_monster_n.+2} => sigma s)
                       (sw_rho_dist (ar_security ar)))
             (fdist_uniform (card_ord monster_n.+2))
-   <= sw_epsilon (ar_security ar))%O.
+   <= sw_bound_eps (ar_security ar))%O.
 Proof. exact: ar_security_per_position ar s. Qed.
 
 (* --- Threshold side --- *)
@@ -212,7 +212,7 @@ Lemma oc_security_demo (s : 'I_4) :
   (var_dist (fdistmap (fun sigma : {perm 'I_4} => sigma s)
                       (sw_rho_dist (ar_security ar)))
             (fdist_uniform (card_ord 4))
-   <= sw_epsilon (ar_security ar))%O.
+   <= sw_bound_eps (ar_security ar))%O.
 Proof. exact: ar_security_per_position ar s. Qed.
 
 (* Q: What is the entropy bound? *)

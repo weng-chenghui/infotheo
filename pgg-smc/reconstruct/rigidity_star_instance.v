@@ -158,15 +158,10 @@ Hypothesis star_genus0_pgl :
 Definition star_threshold_witness : ThresholdWitness R_star :=
   @MkThresholdWitness R_star star_covering (fun _ => star_genus0_pgl).
 
-(* Round complexity at L=1: depth = 1 (trivially, depth <= L) *)
-Definition star_round_complexity : RoundComplexityWitness :=
-  @MkRoundComplexityWitness 1 1 (leqnn 1).
-
 Definition star_rigidity : AlgebraicRigidity R R_star :=
   @MkAlgebraicRigidity R R_star
     (star_security_witness_1 R m)
-    star_threshold_witness
-    star_round_complexity.
+    star_threshold_witness.
 
 (* Verify that derived properties instantiate correctly *)
 
@@ -199,10 +194,10 @@ Qed.
 (*     CertifiedSolution (solver -> proof bridge)                             *)
 (******************************************************************************)
 
-(* Rational upper bound on sw_epsilon for star at L=1:
-   sw_epsilon = 2*(m+1)/(m+3), and (2*m.+1)%:R = 2%:R * m.+1%:R by natrM *)
+(* Rational upper bound on sw_bound_eps for star at L=1:
+   sw_bound_eps = 2*(m+1)/(m+3), and (2*m.+1)%:R = 2%:R * m.+1%:R by natrM *)
 Lemma star_eps_rational :
-  (sw_epsilon (star_security_witness_1 R m) <=
+  (sw_bound_eps (star_security_witness_1 R m) <=
    (2 * m.+1)%:R / m.+3%:R)%O.
 Proof.
 rewrite /= /security_witness_fiber /= GRing.natrM.
