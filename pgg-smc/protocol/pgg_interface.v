@@ -41,6 +41,18 @@ Record PGGTypes := MkPGG {
   pgg_G  : {group pgg_gT} ;
 }.
 
+(* [pgg_rho] is the permutation representation realising the abstract
+   group [pgg_G] on a deck of [pgg_N'.+1] physical card positions.
+   In MathComp, [{perm 'I_n}] is the symmetric group S_n on the finite
+   type 'I_n = {0,...,n-1}, so [pgg_rho] is literally a morphism
+   G -> S_n. The target S_n is not a restriction but a mathematical
+   necessity: any action on n fixed card positions is by definition a
+   homomorphism into S_n. The generality of the framework instead
+   lives in the source [pgg_gT : finGroupType], which is an arbitrary
+   finite group type -- instantiated in this development as cyclic,
+   abelian, Coxeter A_4 (RAAG for S_5), star, or monster groups, each
+   specified by its own presentation rather than as a pre-chosen
+   subgroup of S_n. *)
 HB.mixin Record isMonodromyRepr (T : PGGTypes) := {
   pgg_rho : {morphism (pgg_G T) >-> {perm 'I_(pgg_N' T).+1}} ;
 }.
