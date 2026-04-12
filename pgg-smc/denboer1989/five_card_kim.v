@@ -35,20 +35,39 @@
 (*   kim_weight_dist   == FDist from kim_weight_fun (needs positivity hyps)   *)
 (*   fc_kim_schreier_circulant == Schreier matrix is circulant                *)
 (*   fc_kim_doubly_stochastic  == column sums = 1                             *)
-(*   fc_kim_security_witness == SecurityWitness from kim_spectral_convergence *)
+(*   kim_var_dist_exact      == exact var_dist = 8/5 * kim_slev^L            *)
+(*   fc_kim_security_witness == SecurityWitness with sw_exact populated      *)
 (*   fc_kim_wsc        == WeightedSchreierCertificate (sibling packaging)     *)
 (*                                                                            *)
 (* References:                                                                *)
 (*   Kim & Cetinkaya (2025), arXiv:2511.05111                                 *)
 (*   den Boer (1989), EUROCRYPT, LNCS 434                                     *)
 (*                                                                            *)
-(* TODO (future work): prove `kim_var_dist_exact`:                            *)
-(*     var_dist (...) = (4/5) * ((5/4) * |eps|)^L                             *)
-(* by circulant matrix-power closed form (exact eigenvalue decomposition of  *)
-(* the 5x5 circulant gives P^L entries in closed form), and populate         *)
-(* `sw_exact` of `fc_kim_security_witness` via `security_witness_with_exact`.*)
-(* The exact value is 5*sqrt(5)/4 ~= 2.8x tighter than the current spectral  *)
-(* bound `sqrt(5) * kim_slev^L` delivered by `kim_spectral_convergence`.     *)
+(* Exact variation distance (via unif_offdiag_var_dist, NOT eigenvalue        *)
+(* decomposition): since Kim's Schreier matrix is uniform-off-diagonal,      *)
+(* the general identity from pgg_schreier_weighted.v gives the exact         *)
+(* value for all card positions s simultaneously.                             *)
+(*                                                                            *)
+(* Comparison with Kim & Cetinkaya (arXiv:2511.05111):                       *)
+(*                                                                            *)
+(*   Convention: Kim uses d_TV = (1/2) sum |P - Q| (standard total           *)
+(*   variation). Infotheo uses var_dist = sum |P - Q| (full L1 norm),       *)
+(*   so var_dist = 2 * d_TV.  The table below normalises to Kim's d_TV      *)
+(*   convention for an apples-to-apples comparison.                          *)
+(*                                                                            *)
+(*   Writing s = (5/4)*|eps| for the second-largest eigenvalue magnitude:    *)
+(*                                                                            *)
+(*     Quantity         Kim (pen-and-paper)  Ours (machine-checked)  Match?  *)
+(*     --------         ------------------  ----------------------  ------  *)
+(*     Spectral bound   sqrt(5)/2 * s^L     sqrt(5)/2 * s^L         Yes     *)
+(*     Exact distance   (4/5) * s^L         (4/5) * s^L             Yes     *)
+(*     At eps = 0       0                   0                        Yes     *)
+(*     Bound / exact    5*sqrt(5)/8 ~ 1.40  5*sqrt(5)/8 ~ 1.40      Yes     *)
+(*                                                                            *)
+(*   In the code, the proved values are stored as var_dist (= 2 * d_TV):    *)
+(*     kim_spectral_convergence : var_dist <= sqrt(5) * s^L                  *)
+(*     kim_var_dist_exact       : var_dist  = (8/5) * s^L                    *)
+(*   The sw_exact field of fc_kim_security_witness is populated below.       *)
 (******************************************************************************)
 
 From HB Require Import structures.
@@ -398,14 +417,46 @@ apply: (@MkWeightedSchreierCertificate R 4 3 fc_kim_sigmas W).
   exact: kim_spectral_convergence.
 Defined.
 
-(** SecurityWitness for a given word length L *)
+(** Exact variation distance via the uniform-off-diagonal identity.
+    The proof mirrors kim_spectral_convergence but calls
+    unif_offdiag_var_dist (equality) instead of
+    unif_offdiag_convergence (inequality). *)
+Lemma kim_var_dist_exact (L : nat) (s : 'I_5) :
+  var_dist (@endpoint_dist_weighted R 3 4 L fc_kim_sigmas W s)
+           (fdist_uniform (card_ord 5))
+  = 2%:R * 4%:R / 5%:R * kim_slev ^+ L.
+Proof.
+rewrite /var_dist.
+under eq_bigr => x _ do
+  rewrite (@schreier_weighted_bridge R 4 3) fdist_uniformE card_ord.
+have := @unif_offdiag_var_dist R 3
+  (schreier_transition_weighted fc_kim_sigmas W)
+  (5%:R^-1 - eps) (5%:R^-1 + eps / 4%:R)
+  (fc_kim_schreier_diag eps_lt eps_gt)
+  (fc_kim_schreier_offdiag eps_lt eps_gt)
+  (fc_kim_doubly_stochastic eps_lt eps_gt) L s.
+rewrite /kim_slev.
+have -> : 5%:R^-1 - eps - (5%:R^-1 + eps / 4%:R) = - (5%:R / 4%:R * eps) :> R.
+  rewrite opprD addrA [5%:R^-1 - eps - 5%:R^-1]addrAC subrr add0r.
+  rewrite -opprD; congr (- _).
+  rewrite [eps / _]mulrC -{1}[eps]mul1r -mulrDl.
+  congr (_ * eps); apply: (mulIf (x := 4%:R)); rewrite ?unitfE ?pnatr_eq0 //.
+  rewrite divfK ?unitfE ?pnatr_eq0 //.
+  by rewrite mulrDl mul1r mulVf ?pnatr_eq0 // -[1]/(1%:R) -natrD.
+by rewrite normrN normrM ger0_norm // divr_ge0.
+Qed.
+
+(** SecurityWitness for a given word length L, with exact equality *)
 Definition fc_kim_security_witness (L : nat) :
   SecurityWitness R FiveCardKim_M :=
   @MkSecurityWitness R FiveCardKim_M L
     (Num.sqrt 5%:R * kim_slev ^+ L)
     (@rho_from_words_weighted R 3 4 L fc_kim_sigmas W)
     (fun s => kim_spectral_convergence L s)
-    None.
+    (Some (@MkSecurityExact R FiveCardKim_M
+      (@rho_from_words_weighted R 3 4 L fc_kim_sigmas W)
+      (2%:R * 4%:R / 5%:R * kim_slev ^+ L)
+      (kim_var_dist_exact L))).
 
 (** When eps = 0, the bias disappears and we recover the uniform case *)
 Lemma kim_slev_at_zero : eps = 0 -> kim_slev = 0.
@@ -441,7 +492,8 @@ Variable R : realType.
     2. Schreier matrix (schreier_transition_weighted fc_kim_sigmas W)
     3. Doubly stochastic proof (fc_kim_doubly_stochastic)
     4. Spectral convergence bound (kim_spectral_convergence)
-    5. SecurityWitness (fc_kim_security_witness) *)
+    5. Exact variation distance (kim_var_dist_exact)
+    6. SecurityWitness with sw_exact (fc_kim_security_witness) *)
 
 (** The security bound for L shuffles:
     var_dist <= sqrt(5) * ((5/4)*|eps|)^L *)
@@ -457,3 +509,7 @@ Lemma fc_kim_security_bound (eps : R)
 Proof. exact: kim_spectral_convergence. Qed.
 
 End kim_concrete.
+
+(* AlgebraicRigidity for Kim's instance is in
+   pgg-smc/reconstruct/rigidity_kim_instance.v, following the standard
+   pattern of a separate rigidity file per group family. *)

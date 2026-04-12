@@ -9,7 +9,7 @@
 (*                                                                            *)
 (* Main result:                                                               *)
 (*   uniform_security_witness : SecurityWitness R M                           *)
-(*     with sw_bound_eps = 0                                                  *)
+(*     with sw_bound_eps = 0 and sw_exact = Some (se_eps = 0)                *)
 (*                                                                            *)
 (* Hypotheses:                                                                *)
 (*   - pgg_rho is injective on pgg_G M (faithfulness)                         *)
@@ -160,9 +160,16 @@ rewrite eval_pushforward_uniform var_dist_self.
 exact: Order.POrderTheory.lexx.
 Qed.
 
-(* The SecurityWitness with epsilon = 0 *)
+(* The exact endpoint equality: var_dist = 0 *)
+Lemma endpoint_exact (s : 'I_N) :
+  var_dist (fdistmap (eval_at s) rho_uniform)
+           (fdist_uniform (card_ord N)) = 0.
+Proof. by rewrite eval_pushforward_uniform var_dist_self. Qed.
+
+(* The SecurityWitness with epsilon = 0 and exact equality *)
 Definition uniform_security_witness : SecurityWitness R M :=
-  @MkSecurityWitness R M 0 (0 : R) rho_uniform endpoint_bound None.
+  @MkSecurityWitness R M 0 (0 : R) rho_uniform endpoint_bound
+    (Some (@MkSecurityExact R M rho_uniform 0 endpoint_exact)).
 
 End uniform_security.
 

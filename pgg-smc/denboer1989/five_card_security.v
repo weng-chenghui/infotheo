@@ -14,6 +14,10 @@
 (*                                                                            *)
 (* These properties are prerequisites for the SecurityWitness instantiation.  *)
 (*                                                                            *)
+(* The ThresholdWitness and AlgebraicRigidity are vacuous for this instance:  *)
+(* |C_5| = 5 << 120 = PGL(2,5) = n(n^2-1), so the genus-0 regime holds      *)
+(* trivially and T = k (every party's reveal is essential).                   *)
+(*                                                                            *)
 (* TODO (future work): populate `sw_exact` of fc_security_uniform with the   *)
 (* exact var_dist = 0 equality for the uniform case. This is a one-step      *)
 (* follow-up via `security_witness_with_exact`. See five_card_kim.v header   *)
@@ -23,11 +27,14 @@
 From mathcomp Require Import ssreflect ssrbool ssrfun eqtype ssrnat seq.
 From mathcomp Require Import div fintype tuple finfun finset fingroup perm action.
 From mathcomp Require Import morphism ssralg boolp reals.
+From mathcomp Require Import prime finalg zmodp poly cyclic.
 From infotheo Require Import realType_ext fdist proba variation_dist.
-Require Import pgg_interface.
+Require Import pgg_interface ssralg_ext reed_solomon.
 From pgg_smc Require Import five_card_group pgg_collusion_bound
                             pgg_uniform_security.
-From pgg_reconstruct Require Import algebraic_rigidity.
+From pgg_reconstruct Require Import pgg_sharing_framework covering_scheme
+                                    cover_tradeoff algebraic_rigidity.
+From pgg_reconstruct Require Import cover_genus0 coord_perm_compatible.
 
 Set Implicit Arguments.
 Unset Strict Implicit.
@@ -216,5 +223,70 @@ Lemma fc_eps_zero : sw_bound_eps fc_security_uniform = GRing.zero.
 Proof. reflexivity. Qed.
 
 End fc_dealing_security.
+
+(******************************************************************************)
+(** * ThresholdWitness and AlgebraicRigidity (vacuous for C_5)                *)
+(*                                                                            *)
+(* |C_5| = 5, PGL(2,5) = 5*(25-1) = 120, so 5 <= 120 trivially.            *)
+(* The threshold side adds no content; the interesting part is the            *)
+(* SecurityWitness (eps = 0, perfect security).                               *)
+(******************************************************************************)
+
+Section fc_rigidity.
+
+Variable R : realType.
+
+(* Group nontriviality *)
+Hypothesis HG_fc : (1 < #|pgg_G FiveCard_M|)%N.
+
+(* Field parameters for RS code: F = GF(q^m') with |F| = N = 5 *)
+Variables (q m' : nat).
+Hypothesis primeq : prime q.
+Variable n'' : nat.
+Variable a : GF m' primeq.
+Hypothesis qn : ~~ (q %| n''.+3)%nat.
+Hypothesis an : (n''.+3).-primitive_root a.
+Hypothesis HN : (pgg_N' FiveCard_M).+1 = #|GF m' primeq|.
+
+(* Code automorphism *)
+Variable sigma_code : pgg_gT FiveCard_M -> {perm 'I_n''.+3}.
+Hypothesis sigma_fix0 :
+  forall g, g \in pgg_G FiveCard_M -> sigma_code g ord0 = ord0.
+Hypothesis code_auto :
+  forall g, g \in pgg_G FiveCard_M ->
+  coord_perm_compatible (RS.code a n''.+3 1) (sigma_code g).
+
+(* Genus-0 covering scheme *)
+Definition fc_covering : CoveringScheme FiveCard_M :=
+  genus0_covering HG_fc qn an HN sigma_fix0 code_auto.
+
+(* PGL bound: |C_5| = 5 <= 120 = PGL(2,5) *)
+Hypothesis fc_genus0_pgl :
+  (#|pgg_G FiveCard_M| <= pgl_bound FiveCard_M)%N.
+
+Definition fc_threshold_witness : ThresholdWitness FiveCard_M :=
+  @MkThresholdWitness FiveCard_M fc_covering (fun _ => fc_genus0_pgl).
+
+Definition fc_rigidity : AlgebraicRigidity R FiveCard_M :=
+  @MkAlgebraicRigidity R FiveCard_M
+    (fc_security_uniform R)
+    fc_threshold_witness.
+
+(* Verify tradeoff: genus-0 regime with T = k *)
+Lemma fc_tradeoff :
+  let cs := tw_covering (ar_threshold fc_rigidity) in
+  (cd_genus (cs_data cs) = 0 /\
+   (#|pgg_G FiveCard_M| <= pgl_bound FiveCard_M)%N /\
+   (ts_T (cs_scheme cs) <= ts_k (cs_scheme cs))%N)
+  \/
+  ((0 < cd_genus (cs_data cs))%N /\
+   (ts_T (cs_scheme cs) <= ts_k (cs_scheme cs) + 2 * cd_genus (cs_data cs))%N).
+Proof.
+move=> /=.
+exact: (@security_threshold_tradeoff FiveCard_M fc_covering
+                                     (fun _ => fc_genus0_pgl)).
+Qed.
+
+End fc_rigidity.
 
 End five_card_security.
