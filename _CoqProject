@@ -192,6 +192,7 @@ pgg-smc/reconstruct/rigidity_oc_instance.v
 pgg-smc/reconstruct/rigidity_cyclic_instance.v
 pgg-smc/reconstruct/rigidity_abelian_instance.v
 pgg-smc/reconstruct/rigidity_star_instance.v
+pgg-smc/reconstruct/rigidity_kim_instance.v
 pgg-smc/reconstruct/pgg_landscape_demo.v
 pgg-smc/reconstruct/pgl_bound.v
 pgg-smc/reconstruct/pgg_covering_correctness.v
