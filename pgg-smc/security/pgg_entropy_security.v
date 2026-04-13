@@ -561,7 +561,7 @@ Definition security_witness_from_entropy
 Proof.
 refine (@MkSecurityWitness R M (ew_L ew)
   (Num.sqrt (2%:R * (log N'.+1%:R - ew_min_entropy ew)))
-  (ew_rho_dist ew) _ None).
+  (ew_rho_dist ew) _ None None).
 move=> s.
 set P := fdistmap _ _.
 apply: (Order.POrderTheory.le_trans

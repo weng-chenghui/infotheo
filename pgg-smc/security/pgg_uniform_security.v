@@ -169,7 +169,8 @@ Proof. by rewrite eval_pushforward_uniform var_dist_self. Qed.
 (* The SecurityWitness with epsilon = 0 and exact equality *)
 Definition uniform_security_witness : SecurityWitness R M :=
   @MkSecurityWitness R M 0 (0 : R) rho_uniform endpoint_bound
-    (Some (@MkSecurityExact R M rho_uniform 0 endpoint_exact)).
+    (Some (@MkSecurityExact R M rho_uniform 0 endpoint_exact))
+    None.
 
 End uniform_security.
 

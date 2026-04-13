@@ -92,11 +92,46 @@ Record SecurityExact (rho : R.-fdist {perm 'I_N'.+1}) := MkSecurityExact {
              (fdist_uniform (card_ord N'.+1)) = se_eps
 }.
 
-(** SecurityWitness: unified record carrying an always-present bound and an    *)
-(* optional exact-equality slot.                                               *)
+(** SecurityAsymptotic: optional asymptotic convergence certificate.           *)
+(* For group settings with a valid random walk (connected Schreier graph),     *)
+(* the variational distance converges to 0 geometrically in L.                *)
 (*                                                                             *)
-(* Field order matches the previous SecurityWitness with a trailing sw_exact   *)
-(* so that positional @MkSecurityWitness call sites migrate by appending None. *)
+(* This is None for:                                                           *)
+(*   - Uniform dealing (no random walk, e.g., den Boer five-card)             *)
+(*   - Disconnected Schreier graphs (e.g., cyclic/1-gen, abelian/disjoint)    *)
+(*   - Instances where the spectral gap has not yet been formalized           *)
+(*                                                                             *)
+(* Mirrors SchreierCertificate (pgg_schreier.v) at the SecurityWitness level. *)
+(* Cannot reuse SchreierCertificate directly due to circular dependency:       *)
+(*   pgg_schreier.v imports algebraic_rigidity.v.                              *)
+(*                                                                             *)
+(* sa_rho_L maps word length L to the endpoint distribution — typically        *)
+(* instantiated as rho_from_words L sigmas, but kept abstract here to          *)
+(* avoid requiring {perm 'I_N} typed generators (which Gen_PGGTypes has        *)
+(* but general MonodromyReprType may not).                                     *)
+Record SecurityAsymptotic := MkSecurityAsymptotic {
+  sa_spectral_gap : R;
+  sa_gap_pos : (0 < sa_spectral_gap)%R;
+  sa_gap_le1 : (sa_spectral_gap <= 1)%R;
+  sa_rho_L : nat -> R.-fdist {perm 'I_N'.+1};
+  sa_convergence : forall (L : nat) (s : 'I_N'.+1),
+    (var_dist (fdistmap (fun sigma : {perm 'I_N'.+1} => sigma s)
+                       (sa_rho_L L))
+             (fdist_uniform (card_ord N'.+1))
+    <= Num.sqrt N'.+1%:R * (1 - sa_spectral_gap) ^+ L)%R
+}.
+
+(** SecurityWitness: unified record carrying an always-present bound,          *)
+(* an optional exact-equality slot, and an optional asymptotic convergence     *)
+(* certificate.                                                                *)
+(*                                                                             *)
+(* The three optional slots encode the security proof mechanism:               *)
+(*   sw_exact = Some, sw_asymptotic = Some:                                   *)
+(*     Random walk with exact counting (e.g., Kim's biased five-card)         *)
+(*   sw_exact = Some, sw_asymptotic = None:                                   *)
+(*     Uniform dealing, perfect security (e.g., den Boer five-card)           *)
+(*   sw_exact = None, sw_asymptotic = None:                                   *)
+(*     Fiber-counted bound only, convergence not yet formalized               *)
 Record SecurityWitness := MkSecurityWitness {
   sw_L : nat;
   sw_bound_eps : R;
@@ -105,7 +140,8 @@ Record SecurityWitness := MkSecurityWitness {
     forall (s : 'I_N'.+1),
     (var_dist (fdistmap (fun sigma : {perm 'I_N'.+1} => sigma s) sw_rho_dist)
               (fdist_uniform (card_ord N'.+1)) <= sw_bound_eps)%O;
-  sw_exact : option (SecurityExact sw_rho_dist)
+  sw_exact : option (SecurityExact sw_rho_dist);
+  sw_asymptotic : option SecurityAsymptotic
 }.
 
 Record ThresholdWitness := MkThresholdWitness {
@@ -122,6 +158,7 @@ Record AlgebraicRigidity := MkAlgebraicRigidity {
 End algebraic_rigidity_records.
 
 Arguments SecurityExact {R} {M} rho.
+Arguments SecurityAsymptotic {R} {M}.
 Arguments SecurityWitness R M : clear implicits.
 Arguments ThresholdWitness M : clear implicits.
 Arguments AlgebraicRigidity R M : clear implicits.
@@ -153,7 +190,7 @@ Definition security_witness_fiber (L : nat)
                (fdist_uniform (card_ord n'.+2)) <= epsilon)%O)
     : SecurityWitness R M :=
   @MkSecurityWitness R M L epsilon
-    (rho_from_words L sigmas) Hbound None.
+    (rho_from_words L sigmas) Hbound None None.
 
 End fiber_security.
 
@@ -186,7 +223,7 @@ Definition security_witness_endpoint_inj (L : nat)
   @MkSecurityWitness R M L _
     (rho_from_words L sigmas)
     (var_dist_endpoint_direct Hlfree Hinj_s)
-    None.
+    None None.
 
 End direct_endpoint_security.
 
@@ -215,7 +252,7 @@ Definition security_witness_from_bound (L : nat)
       (var_dist (fdistmap (fun sigma : {perm 'I_N'.+1} => sigma s) rho_dist)
                 (fdist_uniform (card_ord N'.+1)) <= eps)%O)
     : SecurityWitness R M :=
-  @MkSecurityWitness R M L eps rho_dist Hbound None.
+  @MkSecurityWitness R M L eps rho_dist Hbound None None.
 
 Definition security_witness_with_exact (L : nat)
     (bound_eps : R)
@@ -229,7 +266,8 @@ Definition security_witness_with_exact (L : nat)
                (fdist_uniform (card_ord N'.+1)) = exact_eps)
     : SecurityWitness R M :=
   @MkSecurityWitness R M L bound_eps rho_dist Hbound
-    (Some (@MkSecurityExact R M rho_dist exact_eps Hexact)).
+    (Some (@MkSecurityExact R M rho_dist exact_eps Hexact))
+    None.
 
 End security_witness_constructors.
 

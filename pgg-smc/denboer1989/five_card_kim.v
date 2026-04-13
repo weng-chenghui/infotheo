@@ -446,6 +446,17 @@ have -> : 5%:R^-1 - eps - (5%:R^-1 + eps / 4%:R) = - (5%:R / 4%:R * eps) :> R.
 by rewrite normrN normrM ger0_norm // divr_ge0.
 Qed.
 
+(** Asymptotic convergence certificate for Kim's trick *)
+Definition fc_kim_asymptotic : @SecurityAsymptotic R FiveCardKim_M.
+Proof.
+apply: (@MkSecurityAsymptotic R FiveCardKim_M
+  kim_spectral_gap kim_spectral_gap_pos kim_spectral_gap_le1
+  (fun L' => @rho_from_words_weighted R 3 4 L' fc_kim_sigmas W)).
+move=> L' s.
+rewrite /kim_spectral_gap /kim_slev opprB addrC subrK.
+exact: kim_spectral_convergence.
+Defined.
+
 (** SecurityWitness for a given word length L, with exact equality *)
 Definition fc_kim_security_witness (L : nat) :
   SecurityWitness R FiveCardKim_M :=
@@ -456,7 +467,8 @@ Definition fc_kim_security_witness (L : nat) :
     (Some (@MkSecurityExact R FiveCardKim_M
       (@rho_from_words_weighted R 3 4 L fc_kim_sigmas W)
       (2%:R * 4%:R / 5%:R * kim_slev ^+ L)
-      (kim_var_dist_exact L))).
+      (kim_var_dist_exact L)))
+    (Some fc_kim_asymptotic).
 
 (** When eps = 0, the bias disappears and we recover the uniform case *)
 Lemma kim_slev_at_zero : eps = 0 -> kim_slev = 0.

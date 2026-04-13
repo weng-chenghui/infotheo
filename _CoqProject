@@ -140,6 +140,7 @@ pgg-smc/groups/abelian_word_collapse.v
 pgg-smc/groups/pgg_raag_star.v
 pgg-smc/groups/pgg_raag_path.v
 pgg-smc/groups/pgg_raag_s5.v
+pgg-smc/groups/pgg_s5x5.v
 pgg-smc/groups/pgg_oc_param.v
 pgg-smc/groups/pgg_weval_inj.v
 pgg-smc/denboer1989/five_card_session_types.v
@@ -186,7 +187,9 @@ pgg-smc/reconstruct/cover_tradeoff.v
 pgg-smc/reconstruct/algebraic_rigidity.v
 pgg-smc/reconstruct/pgg_dealer_bridge.v
 pgg-smc/reconstruct/pgg_protocol_landscape.v
+pgg-smc/reconstruct/product_threshold.v
 pgg-smc/reconstruct/rigidity_s5_instance.v
+pgg-smc/reconstruct/rigidity_s5x5_instance.v
 pgg-smc/reconstruct/rigidity_monster_instance.v
 pgg-smc/reconstruct/rigidity_oc_instance.v
 pgg-smc/reconstruct/rigidity_cyclic_instance.v

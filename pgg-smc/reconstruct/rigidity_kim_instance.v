@@ -53,6 +53,7 @@ Variable R : realType.
 Variable eps : R.
 Hypothesis eps_lt : eps < 5%:R^-1.
 Hypothesis eps_gt : - (4%:R * 5%:R^-1) < eps.
+Hypothesis eps_spectral : (`|eps| < 4%:R / 5%:R)%R.
 Let M_kim : GeneratedMonodromyReprType :=
   @Gen_PGGTypes 4 3 fc_kim_sigmas.
 
@@ -89,7 +90,7 @@ Definition kim_threshold_witness : ThresholdWitness M_kim :=
 
 Definition kim_rigidity (L : nat) : AlgebraicRigidity R M_kim :=
   @MkAlgebraicRigidity R M_kim
-    (@fc_kim_security_witness R eps eps_lt eps_gt L)
+    (@fc_kim_security_witness R eps eps_lt eps_gt eps_spectral L)
     kim_threshold_witness.
 
 (* Derived properties *)
