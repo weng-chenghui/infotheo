@@ -371,7 +371,7 @@ End s5x5_rigidity.
 (* For 128-bit security, use L=1838 instead.                                 *)
 (******************************************************************************)
 
-Section s5x5_rigidity_spectral.
+Section s5x5_rigidity_cryptographically_secure.
 
 Variable R : realType.
 
@@ -392,10 +392,10 @@ Hypothesis s5x5_spectral_convergence :
 
 (* 40-bit security: L=591 gives sqrt(10)*(1-gap)^591 < 2^{-40}
    when gap = (1-cos(pi/5))/4 ~ 0.0477 *)
-Definition s5x5_rigidity_spectral : AlgebraicRigidity R R_s5x5 :=
+Definition s5x5_rigidity_cryptographically_secure : AlgebraicRigidity R R_s5x5 :=
   @MkAlgebraicRigidity R R_s5x5
     (@s5x5_security_witness_schreier R s5x5_spectral_gap s5x5_gap_pos
        s5x5_gap_le1 s5x5_schreier_rho s5x5_spectral_convergence 591)
     s5x5_threshold_witness.
 
-End s5x5_rigidity_spectral.
+End s5x5_rigidity_cryptographically_secure.
