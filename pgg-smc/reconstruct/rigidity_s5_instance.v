@@ -9,8 +9,24 @@
 (* This demonstrates all algebraic rigidity parameters computed from          *)
 (* a single (G, I) choice with concrete vm_compute-checkable results:         *)
 (*   1. Complexity: search_space L <= |G|                                     *)
-(*   2. Security: var_dist(endpoint, uniform) <= 6/5 at L=1 (fiber-counted)  *)
-(*   3. Threshold: genus-0 covering from RS codes (+ PGL hypothesis)          *)
+(*   2. Security (fiber): var_dist <= 6/5 at L=1 (fiber-counted, proved)     *)
+(*   3. Security (spectral): L=285, eps = sqrt(5)*(1-gap)^285               *)
+(*      40-bit security from axiomatized spectral gap                        *)
+(*   4. Threshold: genus-0 covering from RS codes (+ PGL hypothesis)          *)
+(*                                                                            *)
+(* Spectral gap of the Schreier walk on 'I_5:                                *)
+(*   The 5x5 Schreier matrix with 4 adjacent transpositions is               *)
+(*     A = I - (1/4)*L(P_5)                                                   *)
+(*   where L(P_5) is the graph Laplacian of the 5-vertex path.               *)
+(*   Smallest nonzero Laplacian eigenvalue: 2*(1-cos(pi/5)).                  *)
+(*   Spectral gap = (1 - cos(pi/5)) / 2 ~ 0.0955.                           *)
+(*     L = 285 gives var_dist < 2^{-40}  (40-bit security)                   *)
+(*     L = 893 gives var_dist < 2^{-128} (128-bit security)                  *)
+(*                                                                            *)
+(*   Brouwer-Haemers (2012), Spectra of Graphs, Springer.                    *)
+(*   Chung (1997), Spectral Graph Theory, AMS.                               *)
+(*   Wilson (2004), Ann. Appl. Probab. 14(1):274-325.                        *)
+(*   Bacher (1994), J. Algebra 167:460-472.                                  *)
 (*                                                                            *)
 (* vm_compute demonstrations:                                                 *)
 (*   s5_nt_L1 : n_traces_natB 4 1 path_comm_nat = 4                          *)
@@ -136,6 +152,103 @@ Definition s5_security_witness_1 : SecurityWitness R R_s5 :=
   security_witness_fiber s5_weval_inj1 s5_endpoint_bound_fiber.
 
 End s5_security.
+
+(******************************************************************************)
+(*     Spectral Gap Convergence (Axiomatized)                                 *)
+(*                                                                            *)
+(* The Schreier graph of S_5 on 'I_5 with 4 adjacent transpositions is       *)
+(* the path graph P_5. The transition matrix is:                              *)
+(*   A = I - (1/4) * L(P_5)                                                   *)
+(* where L(P_5) is the graph Laplacian of the 5-vertex path.                  *)
+(*                                                                            *)
+(* Eigenvalues of A: 1 - (1/4)*2*(1-cos(k*pi/5)) for k=0,...,4.              *)
+(* Second largest: 1 - (1-cos(pi/5))/2 ~ 0.9045.                             *)
+(* Spectral gap = (1 - cos(pi/5)) / 2 ~ 0.0955.                             *)
+(*                                                                            *)
+(* References:                                                                *)
+(*   Brouwer-Haemers (2012), Spectra of Graphs, Springer.                    *)
+(*   Wilson (2004), Ann. Appl. Probab. 14(1):274-325.                        *)
+(******************************************************************************)
+
+Section s5_spectral.
+
+Variable R : realType.
+
+Let M_s5 := @Gen_PGGTypes 3 3 (path_gen_tuple 3).
+Let R_s5 : GeneratedMonodromyReprType := M_s5.
+
+(* Spectral gap of the Schreier walk: (1 - cos(pi/5)) / 2 ~ 0.0955 *)
+Variable s5_spectral_gap : R.
+Hypothesis s5_gap_pos : (0 < s5_spectral_gap)%R.
+Hypothesis s5_gap_le1 : (s5_spectral_gap <= 1)%R.
+
+(* Schreier walk distribution family *)
+Variable s5_schreier_rho : nat -> R.-fdist {perm 'I_5}.
+
+(* Spectral convergence: var_dist <= sqrt(5) * (1 - gap)^L *)
+Hypothesis s5_spectral_convergence :
+  forall (L : nat) (s : 'I_5),
+  (var_dist (fdistmap (fun sigma : {perm 'I_5} => sigma s)
+                     (s5_schreier_rho L))
+           (fdist_uniform (card_ord 5))
+  <= Num.sqrt 5%:R * (1 - s5_spectral_gap) ^+ L)%O.
+
+Definition s5_asymptotic : @SecurityAsymptotic R R_s5.
+Proof.
+apply: (@MkSecurityAsymptotic R R_s5
+  s5_spectral_gap s5_gap_pos s5_gap_le1
+  s5_schreier_rho).
+exact: s5_spectral_convergence.
+Defined.
+
+Definition s5_security_witness_schreier (L : nat) :
+    SecurityWitness R R_s5 :=
+  @MkSecurityWitness R R_s5 L
+    (Num.sqrt 5%:R * (1 - s5_spectral_gap) ^+ L)
+    (s5_schreier_rho L)
+    (fun s => s5_spectral_convergence L s)
+    None
+    (Some s5_asymptotic).
+
+End s5_spectral.
+
+(******************************************************************************)
+(*     Spectral AlgebraicRigidity at L=285 (40-bit security)                  *)
+(*                                                                            *)
+(* sqrt(5) * (1 - gap)^285 < 2^{-40} when gap ~ 0.0955.                     *)
+(* For 128-bit security, use L=893 instead.                                   *)
+(******************************************************************************)
+
+Section s5_rigidity_cryptographically_secure.
+
+Variable R : realType.
+
+Let R_s5 : GeneratedMonodromyReprType :=
+  @Gen_PGGTypes 3 3 (path_gen_tuple 3).
+
+(* Threshold witness — taken as parameter to avoid duplicating
+   genus-0 covering axioms (RS code, PGL bound, etc.) *)
+Variable s5_tw : ThresholdWitness R_s5.
+
+(* Spectral parameters *)
+Variable s5_spectral_gap : R.
+Hypothesis s5_gap_pos : (0 < s5_spectral_gap)%R.
+Hypothesis s5_gap_le1 : (s5_spectral_gap <= 1)%R.
+Variable s5_schreier_rho : nat -> R.-fdist {perm 'I_5}.
+Hypothesis s5_spectral_convergence :
+  forall (L : nat) (s : 'I_5),
+  (var_dist (fdistmap (fun sigma : {perm 'I_5} => sigma s)
+                     (s5_schreier_rho L))
+           (fdist_uniform (card_ord 5))
+  <= Num.sqrt 5%:R * (1 - s5_spectral_gap) ^+ L)%O.
+
+Definition s5_rigidity_cryptographically_secure : AlgebraicRigidity R R_s5 :=
+  @MkAlgebraicRigidity R R_s5
+    (@s5_security_witness_schreier R s5_spectral_gap s5_gap_pos
+       s5_gap_le1 s5_schreier_rho s5_spectral_convergence 285)
+    s5_tw.
+
+End s5_rigidity_cryptographically_secure.
 
 (******************************************************************************)
 (*     AlgebraicRigidity Instance                                             *)
