@@ -148,7 +148,7 @@ pgg-smc/denboer1989/five_card_group.v
 pgg-smc/denboer1989/five_card_program.v
 pgg-smc/denboer1989/five_card_pismc.v
 pgg-smc/denboer1989/five_card_security.v
-pgg-smc/denboer1989/five_card_kim.v
+pgg-smc/kim2025/five_card_kim.v
 pgg-smc/protocol/card_protocol.v
 pgg-smc/protocol/card_protocol_posterior.v
 pgg-smc/groups/pgg_raag.v
@@ -195,7 +195,7 @@ pgg-smc/reconstruct/rigidity_oc_instance.v
 pgg-smc/reconstruct/rigidity_cyclic_instance.v
 pgg-smc/reconstruct/rigidity_abelian_instance.v
 pgg-smc/reconstruct/rigidity_star_instance.v
-pgg-smc/reconstruct/rigidity_kim_instance.v
+pgg-smc/kim2025/rigidity_kim_instance.v
 pgg-smc/reconstruct/pgg_landscape_demo.v
 pgg-smc/reconstruct/pgl_bound.v
 pgg-smc/reconstruct/pgg_covering_correctness.v
@@ -210,3 +210,4 @@ pgg-smc/reconstruct/pgg_threshold.v
 -R pgg-smc/denboer1989 pgg_smc
 -R pgg-smc/security pgg_smc
 -R pgg-smc/reconstruct pgg_reconstruct
+-R pgg-smc/kim2025 pgg_smc
