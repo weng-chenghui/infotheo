@@ -22,7 +22,7 @@ From infotheo Require Import divergence entropy pinsker.
 From pgg_smc Require Import perm_uniform pgg_interface pgg_weval_inj.
 From pgg_smc Require Import pgg_collusion_bound pgg_entropy_security.
 From pgg_reconstruct Require Import algebraic_rigidity.
-From pgg_reconstruct Require Import rigidity_monster_instance rigidity_oc_instance.
+From pgg_smc Require Import rigidity_monster_instance rigidity_oc_instance.
 
 Set Implicit Arguments.
 Unset Strict Implicit.

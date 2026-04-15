@@ -31,9 +31,9 @@ From pgg_smc Require Import perm_uniform pgg_interface pgg_weval_inj
 From pgg_reconstruct Require Import pgg_sharing_framework covering_scheme
                                     cover_tradeoff algebraic_rigidity
                                     pgg_protocol_landscape.
-From pgg_reconstruct Require Import rigidity_monster_instance
-                                    rigidity_oc_instance
-                                    cover_genus0 coord_perm_compatible.
+From pgg_smc Require Import rigidity_monster_instance
+                             rigidity_oc_instance.
+From pgg_reconstruct Require Import cover_genus0 coord_perm_compatible.
 
 Set Implicit Arguments.
 Unset Strict Implicit.

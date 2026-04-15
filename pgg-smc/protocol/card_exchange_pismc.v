@@ -12,8 +12,8 @@ Require Import pgg_oc_param.
 Require Import pgg_abelian.
 From pgg_smc Require Import pgg_security_solver.
 From pgg_reconstruct Require Import algebraic_rigidity.
-From pgg_reconstruct Require Import rigidity_monster_instance.
-From pgg_reconstruct Require Import rigidity_abelian_instance.
+From pgg_smc Require Import rigidity_monster_instance.
+From pgg_smc Require Import rigidity_abelian_instance.
 
 (******************************************************************************)
 (* Card Exchange Phase Protocol                                               *)
