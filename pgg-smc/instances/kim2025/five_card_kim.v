@@ -328,8 +328,9 @@ End kim_schreier.
 (* Convergence: var_dist(P^T * uniform, uniform) <= sqrt(5) * |a-b|^T        *)
 (*            = sqrt(5) * ((5/4)*|eps|)^T                                     *)
 (*                                                                            *)
-(* For this initial formalization, we axiomatize the spectral convergence     *)
-(* bound and construct the WeightedSchreierCertificate + SecurityWitness.     *)
+(* We prove the spectral convergence bound via the uniform-off-diagonal       *)
+(* convergence theorem (unif_offdiag_convergence, pgg_schreier_weighted.v:498)*)
+(* and construct the WeightedSchreierCertificate + SecurityWitness.           *)
 (******************************************************************************)
 
 Section kim_security.

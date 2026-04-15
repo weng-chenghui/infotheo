@@ -48,6 +48,7 @@ From mathcomp Require Import prime ssralg finalg zmodp poly cyclic.
 Require Import ssralg_ext reed_solomon.
 From pgg_smc Require Import perm_uniform pgg_interface pgg_weval_inj pgg_raag.
 From pgg_smc Require Import pgg_raag_path pgg_raag_s5 pgg_collusion_bound.
+From pgg_smc Require Import s5_mixing.
 From pgg_reconstruct Require Import pgg_sharing_framework covering_scheme
                                     cover_tradeoff algebraic_rigidity.
 From pgg_reconstruct Require Import cover_genus0 coord_perm_compatible.
@@ -177,36 +178,21 @@ Variable R : realType.
 Let M_s5 := @Gen_PGGTypes 3 3 (path_gen_tuple 3).
 Let R_s5 : GeneratedMonodromyReprType := M_s5.
 
-(* Spectral gap of the Schreier walk: (1 - cos(pi/5)) / 2 ~ 0.0955 *)
-Variable s5_spectral_gap : R.
-Hypothesis s5_gap_pos : (0 < s5_spectral_gap)%R.
-Hypothesis s5_gap_le1 : (s5_spectral_gap <= 1)%R.
+(* Spectral gap derived from the Python-attested Rayleigh certificate
+   (see s5_mixing.v + s5_spectral_certificate.py).  No free variables. *)
 
-(* Schreier walk distribution family *)
-Variable s5_schreier_rho : nat -> R.-fdist {perm 'I_5}.
-
-(* Spectral convergence: var_dist <= sqrt(5) * (1 - gap)^L *)
-Hypothesis s5_spectral_convergence :
-  forall (L : nat) (s : 'I_5),
-  (var_dist (fdistmap (fun sigma : {perm 'I_5} => sigma s)
-                     (s5_schreier_rho L))
-           (fdist_uniform (card_ord 5))
-  <= Num.sqrt 5%:R * (1 - s5_spectral_gap) ^+ L)%O.
-
-Definition s5_asymptotic : @SecurityAsymptotic R R_s5.
-Proof.
-apply: (@MkSecurityAsymptotic R R_s5
-  s5_spectral_gap s5_gap_pos s5_gap_le1
-  s5_schreier_rho).
-exact: s5_spectral_convergence.
-Defined.
+Definition s5_asymptotic : @SecurityAsymptotic R R_s5 :=
+  @MkSecurityAsymptotic R R_s5
+    (s5_gap_R R) (s5_gap_R_pos R) (s5_gap_R_le1 R)
+    (fun L => rho_from_words L (path_gen_tuple 3))
+    (@s5_spectral_convergence_gap R).
 
 Definition s5_security_witness_schreier (L : nat) :
     SecurityWitness R R_s5 :=
   @MkSecurityWitness R R_s5 L
-    (Num.sqrt 5%:R * (1 - s5_spectral_gap) ^+ L)
-    (s5_schreier_rho L)
-    (fun s => s5_spectral_convergence L s)
+    (Num.sqrt 5%:R * (1 - s5_gap_R R) ^+ L)
+    (rho_from_words L (path_gen_tuple 3))
+    (fun s => @s5_spectral_convergence_gap R L s)
     None
     (Some s5_asymptotic).
 
@@ -230,22 +216,12 @@ Let R_s5 : GeneratedMonodromyReprType :=
    genus-0 covering axioms (RS code, PGL bound, etc.) *)
 Variable s5_tw : ThresholdWitness R_s5.
 
-(* Spectral parameters *)
-Variable s5_spectral_gap : R.
-Hypothesis s5_gap_pos : (0 < s5_spectral_gap)%R.
-Hypothesis s5_gap_le1 : (s5_spectral_gap <= 1)%R.
-Variable s5_schreier_rho : nat -> R.-fdist {perm 'I_5}.
-Hypothesis s5_spectral_convergence :
-  forall (L : nat) (s : 'I_5),
-  (var_dist (fdistmap (fun sigma : {perm 'I_5} => sigma s)
-                     (s5_schreier_rho L))
-           (fdist_uniform (card_ord 5))
-  <= Num.sqrt 5%:R * (1 - s5_spectral_gap) ^+ L)%O.
+(* The spectral content is now discharged by s5_mixing.v; no local
+   Variable/Hypothesis block is needed. *)
 
 Definition s5_rigidity_cryptographically_secure : AlgebraicRigidity R R_s5 :=
   @MkAlgebraicRigidity R R_s5
-    (@s5_security_witness_schreier R s5_spectral_gap s5_gap_pos
-       s5_gap_le1 s5_schreier_rho s5_spectral_convergence 285)
+    (@s5_security_witness_schreier R 285)
     s5_tw.
 
 End s5_rigidity_cryptographically_secure.

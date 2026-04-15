@@ -141,6 +141,7 @@ pgg-smc/instances/star/pgg_raag_star.v
 pgg-smc/groups/pgg_raag_path.v
 pgg-smc/instances/s5/pgg_raag_s5.v
 pgg-smc/instances/s5x5/pgg_s5x5.v
+pgg-smc/instances/s5x5/s5x5_pile.v
 pgg-smc/instances/oc/pgg_oc_param.v
 pgg-smc/groups/pgg_weval_inj.v
 pgg-smc/instances/denboer1989/five_card_session_types.v
@@ -168,6 +169,7 @@ pgg-smc/security/pgg_security.v
 pgg-smc/security/pgg_uniform_security.v
 pgg-smc/security/pgg_weighted_words.v
 pgg-smc/security/pgg_schreier_weighted.v
+pgg-smc/security/pgg_mixing.v
 pgg-smc/reconstruct/pgg_sum_mod.v
 pgg-smc/reconstruct/pgg_sharing_framework.v
 pgg-smc/reconstruct/massey.v
@@ -188,6 +190,7 @@ pgg-smc/reconstruct/algebraic_rigidity.v
 pgg-smc/reconstruct/pgg_dealer_bridge.v
 pgg-smc/reconstruct/pgg_protocol_landscape.v
 pgg-smc/reconstruct/product_threshold.v
+pgg-smc/instances/s5/s5_mixing.v
 pgg-smc/instances/s5/rigidity_s5_instance.v
 pgg-smc/instances/s5x5/rigidity_s5x5_instance.v
 pgg-smc/instances/monster/rigidity_monster_instance.v

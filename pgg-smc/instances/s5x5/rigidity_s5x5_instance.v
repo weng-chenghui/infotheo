@@ -43,7 +43,7 @@ From mathcomp Require Import morphism action bigop order ssrnum ssralg.
 From mathcomp Require Import boolp reals.
 From infotheo Require Import realType_ext fdist proba variation_dist.
 From pgg_smc Require Import perm_uniform pgg_interface pgg_weval_inj pgg_raag.
-From pgg_smc Require Import pgg_s5x5 pgg_collusion_bound.
+From pgg_smc Require Import pgg_s5x5 pgg_collusion_bound s5x5_pile.
 From pgg_reconstruct Require Import pgg_sharing_framework covering_scheme
                                     cover_tradeoff algebraic_rigidity.
 From pgg_reconstruct Require Import product_threshold.
@@ -60,10 +60,9 @@ Local Open Scope fdist_scope.
 Axiom s5x5_group_order :
   #|pgg_G (@Gen_PGGTypes 7 8 s5x5_gen_tuple)| = 14400.
 
-(* Generators preserve pile structure: pile-1 = {0..4}, pile-2 = {5..9} *)
-Axiom s5x5_preserves_pile1_ax :
-  forall g, g \in pgg_G (@Gen_PGGTypes 7 8 s5x5_gen_tuple) ->
-  forall i : 'I_10, (val i < 5)%N -> (val (@pgg_rho (@Gen_PGGTypes 7 8 s5x5_gen_tuple) g i) < 5)%N.
+(* Generators preserve pile structure: pile-1 = {0..4}, pile-2 = {5..9}.
+   Proved in pgg-smc/instances/s5x5/s5x5_pile.v via astabs_group closure +
+   gen_subG + an 8x10 = 80 case analysis on the generator action. *)
 
 (******************************************************************************)
 (*     SecurityWitness Construction                                           *)
@@ -300,7 +299,7 @@ Proof. by []. Qed.
 Lemma s5x5_preserves_pile1 :
   forall g, g \in pgg_G R_s5x5 ->
   forall i : 'I_10, (val i < 5)%N -> (val (@pgg_rho R_s5x5 g i) < 5)%N.
-Proof. exact: s5x5_preserves_pile1_ax. Qed.
+Proof. exact: s5x5_preserves_pile1_proved. Qed.
 
 Lemma s5x5_perm_compatible :
   @ts_perm_compatible _ (pgg_G R_s5x5) _ _ s5x5_ts (@pgg_rho R_s5x5).
