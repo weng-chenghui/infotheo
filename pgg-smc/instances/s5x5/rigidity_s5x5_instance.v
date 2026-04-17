@@ -286,8 +286,16 @@ Proof.
 by rewrite muln0 muln0 add0n s5x5_group_order.
 Qed.
 
+(** s5x5_n_branch_le — 6 <= 28804, the concrete branch-count-vs-total-ramif
+    inequality for the S_5 x S_5 instance.
+    Kind: helper.
+    Why: discharges the [cd_ramif_ge_n_branch] field required when building
+    the [CoveringData] record for R_s5x5.
+    Used by: s5x5_covering_data. *)
+Lemma s5x5_n_branch_le : (6 <= 28804)%N. Proof. by []. Qed.
+
 Definition s5x5_covering_data : CoveringData R_s5x5 :=
-  @MkCoveringData R_s5x5 0 6 28804 3 s5x5_hurwitz.
+  @MkCoveringData R_s5x5 0 6 28804 3 s5x5_n_branch_le s5x5_hurwitz.
 
 (* --- Product ThresholdScheme: two sum_mod on 'I_5 --- *)
 
@@ -335,8 +343,23 @@ Lemma s5x5_genus0_pgl :
   (#|pgg_G R_s5x5| <= pgl_bound R_s5x5)%N.
 Proof. by []. Qed.
 
+(** s5x5_genus0_automorphism — discharges [genus0_automorphism_bound] for the
+    S_5 x S_5 instance. Because the genus is 3, the genus-0 branch is
+    vacuous and the obligation is discharged by [s5x5_genus0_pgl] directly.
+    Kind: helper.
+    Why: required to instantiate [s5x5_threshold_witness].
+    Used by: s5x5_threshold_witness. *)
+Lemma s5x5_genus0_automorphism :
+  genus0_automorphism_bound R_s5x5 (cs_data s5x5_covering).
+Proof. exact: s5x5_genus0_pgl. Qed.
+
+(** s5x5_threshold_witness — threshold witness for the S_5 x S_5 instance,
+    packaging [s5x5_covering] with its genus-0 automorphism discharge.
+    Kind: instance.
+    Why: bundles [s5x5_covering] and [s5x5_genus0_automorphism] into a
+    single [ThresholdWitness] consumed by [s5x5_rigidity] below. *)
 Definition s5x5_threshold_witness : ThresholdWitness R_s5x5 :=
-  @MkThresholdWitness R_s5x5 s5x5_covering s5x5_genus0_pgl.
+  @MkThresholdWitness R_s5x5 s5x5_covering s5x5_genus0_automorphism.
 
 (* --- AlgebraicRigidity --- *)
 
@@ -367,6 +390,23 @@ Qed.
 Lemma s5x5_large_group :
   (0 < cd_genus (cs_data s5x5_covering))%N.
 Proof. by []. Qed.
+
+(** Protocol reconstruction correctness: named instance-level re-export of
+    [ar_protocol_correct]. Takes a [PGGInterface] as a parameter. *)
+Lemma s5x5_ts_recon_correct (PI : PGGInterface R_s5x5)
+    (HT : ts_T' (cs_scheme (tw_covering (ar_threshold s5x5_rigidity))) = pi_T' PI)
+    (s : 'I_10) (P : pgg_gT R_s5x5)
+    (G_stable : forall g, g \in pgg_G R_s5x5 ->
+       forall i : 'I_(ts_T' (cs_scheme (tw_covering (ar_threshold s5x5_rigidity)))).+1,
+         @pgg_rho R_s5x5 g
+           (tnth (cast_tuple (esym (congr1 S HT)) (pi_starts PI)) i) =
+         tnth (cast_tuple (esym (congr1 S HT)) (pi_starts PI))
+              (cs_perm (tw_covering (ar_threshold s5x5_rigidity)) g i)) :
+  P \in pgg_G R_s5x5 ->
+  ts_valid (cs_scheme (tw_covering (ar_threshold s5x5_rigidity))) s
+          (cast_tuple (esym (congr1 S HT)) (pi_starts PI)) ->
+  pgg_recon_endpoints HT P = s.
+Proof. exact: ar_protocol_correct. Qed.
 
 End s5x5_rigidity.
 

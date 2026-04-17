@@ -31,10 +31,10 @@
 (*   CoveringData M == covering geometry parameterized by MonodromyReprType  *)
 (*     cd_base_genus == genus of base curve B                                *)
 (*     cd_n_branch   == number of branch points                              *)
-(*     cd_ramif      == total ramification index                             *)
+(*     cd_total_ramif == total ramification index Sum (e_p - 1)              *)
 (*     cd_genus      == genus of covering curve C                            *)
 (*     cd_hurwitz    == Riemann-Hurwitz constraint (nat formulation):         *)
-(*       2 * cd_genus + 2 * #|G| = #|G| * (2 * cd_base_genus) + cd_ramif + 2 *)
+(*       2 * cd_genus + 2 * #|G| = #|G| * (2 * cd_base_genus) + cd_total_ramif + 2 *)
 (*                                                                            *)
 (*   CoveringScheme M == a ThresholdScheme built from a covering of M        *)
 (*     cs_data       == covering geometry (connects G to genus)              *)
@@ -75,18 +75,24 @@ Let G := pgg_G M.
 Record CoveringData := MkCoveringData {
   cd_base_genus : nat ;          (* genus of base curve B *)
   cd_n_branch   : nat ;          (* number of branch points *)
-  cd_ramif      : nat ;          (* total ramification index *)
+  cd_total_ramif : nat ;         (* total ramification index Σ (e_p − 1) *)
   cd_genus      : nat ;          (* genus of covering curve C *)
+  cd_ramif_ge_n_branch :         (* each branch point contributes e_p >= 2 *)
+    (cd_n_branch <= cd_total_ramif)%N ;
   cd_hurwitz    :                (* Riemann-Hurwitz constraint *)
-    2 * cd_genus + 2 * #|G| = #|G| * (2 * cd_base_genus) + cd_ramif + 2 ;
+    2 * cd_genus + 2 * #|G| = #|G| * (2 * cd_base_genus) + cd_total_ramif + 2 ;
 }.
+
+(* Every branch point has ramification index n, i.e. covering is fully ramified *)
+Definition cd_fully_ramified (cd : CoveringData) (n : nat) : Prop :=
+  cd_total_ramif cd = ((n.-1) * cd_n_branch cd)%N.
 
 (* Genus is determined by |G|, base genus, and ramification *)
 Lemma genus_from_hurwitz (cd : CoveringData) :
-  2 * cd_genus cd = #|G| * (2 * cd_base_genus cd) + cd_ramif cd + 2 - 2 * #|G|.
+  2 * cd_genus cd = #|G| * (2 * cd_base_genus cd) + cd_total_ramif cd + 2 - 2 * #|G|.
 Proof.
 have := cd_hurwitz cd.
-move/(f_equal (fun x => x - 2 * #|G|)).
+move/(congr1 (fun x => x - 2 * #|G|)).
 by rewrite addnK.
 Qed.
 
@@ -172,7 +178,7 @@ Let G := pgg_G M.
 
 Lemma hurwitz_base0 (cd : CoveringData M) :
   cd_base_genus cd = 0 ->
-  2 * cd_genus cd + 2 * #|G| = cd_ramif cd + 2.
+  2 * cd_genus cd + 2 * #|G| = cd_total_ramif cd + 2.
 Proof.
 move=> Hb0.
 by move: (cd_hurwitz cd); rewrite Hb0 !muln0 add0n.
@@ -182,17 +188,17 @@ Qed.
 Lemma genus0_ramif (cd : CoveringData M) :
   cd_base_genus cd = 0 ->
   cd_genus cd = 0 ->
-  cd_ramif cd = 2 * #|G| - 2.
+  cd_total_ramif cd = 2 * #|G| - 2.
 Proof.
 move=> Hb0 Hg0; have := hurwitz_base0 Hb0.
 rewrite Hg0 muln0 add0n => Heq.
-by rewrite -(addnK 2 (cd_ramif cd)) Heq addnK.
+by rewrite -(addnK 2 (cd_total_ramif cd)) Heq addnK.
 Qed.
 
 (* Ramification exceeding 2|G|-2 forces positive genus *)
 Lemma ramif_forces_genus (cd : CoveringData M) :
   cd_base_genus cd = 0 ->
-  2 * #|G| - 2 < cd_ramif cd ->
+  2 * #|G| - 2 < cd_total_ramif cd ->
   0 < cd_genus cd.
 Proof.
 move=> Hb0 Hramif.

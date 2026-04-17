@@ -52,6 +52,7 @@ From pgg_smc Require Import s5_mixing.
 From pgg_reconstruct Require Import pgg_sharing_framework covering_scheme
                                     cover_tradeoff algebraic_rigidity.
 From pgg_reconstruct Require Import cover_genus0 coord_perm_compatible.
+From pgg_reconstruct Require Import rs_code_5sheets.
 
 Set Implicit Arguments.
 Unset Strict Implicit.
@@ -220,17 +221,37 @@ Variable R : realType.
 Let R_s5 : GeneratedMonodromyReprType :=
   @Gen_PGGTypes 3 3 (path_gen_tuple 3).
 
-(* Threshold witness — taken as parameter to avoid duplicating
-   genus-0 covering axioms (RS code, PGL bound, etc.) *)
-Variable s5_tw : ThresholdWitness R_s5.
+(* Group nontriviality. Could be discharged by computation since |S_5| = 120. *)
+Hypothesis HG_s5_crypto : (1 < #|pgg_G R_s5|)%N.
 
-(* The spectral content is now discharged by s5_mixing.v; no local
-   Variable/Hypothesis block is needed. *)
+(* Sheet count: 5 sheets (pgg_N' = 4) — definitionally true. *)
+Lemma s5_HN5_crypto : (pgg_N' R_s5).+1 = 5.
+Proof. by []. Qed.
+
+(* PGL bound: |pgg_G R_s5| <= |{perm 'I_5}| = 5! = 120 = pgl_bound R_s5. *)
+Lemma s5_genus0_pgl_crypto :
+  (#|pgg_G R_s5| <= pgl_bound R_s5)%N.
+Proof.
+apply: (leq_trans (subset_leq_card (subsetT _))).
+rewrite cardsT.
+have <- : #|{perm 'I_5}| = #|pgg_gT R_s5| by rewrite /pgg_gT /=.
+by rewrite card_Sn /pgl_bound /=.
+Qed.
+
+(* Concrete threshold witness using the RS5_witness_trivial factory and
+   the directly-discharged PGL bound. Replaces the abstract `s5_tw`
+   Variable previously here. *)
+Definition s5_threshold_witness_concrete : ThresholdWitness R_s5 :=
+  @MkThresholdWitness R_s5
+    (genus0_covering_witness HG_s5_crypto (RS5_witness_trivial s5_HN5_crypto))
+    (fun _ => s5_genus0_pgl_crypto).
+
+(* The spectral content is discharged by s5_mixing.v. *)
 
 Definition s5_rigidity_cryptographically_secure : AlgebraicRigidity R R_s5 :=
   @MkAlgebraicRigidity R R_s5
     (@s5_security_witness_schreier R 285)
-    s5_tw.
+    s5_threshold_witness_concrete.
 
 End s5_rigidity_cryptographically_secure.
 
@@ -248,33 +269,31 @@ Let R_s5 : GeneratedMonodromyReprType :=
 (* Group nontriviality *)
 Hypothesis HG_s5 : (1 < #|pgg_G R_s5|)%N.
 
-(* Field parameters for RS code: F = GF(q^m') with |F| = N = 5 *)
-Variables (q m' : nat).
-Hypothesis primeq : prime q.
-Variable n'' : nat.
-Variable a : GF m' primeq.
-Hypothesis qn : ~~ (q %| n''.+3)%nat.
-Hypothesis an : (n''.+3).-primitive_root a.
-Hypothesis HN : (pgg_N' R_s5).+1 = #|GF m' primeq|.
+(* Sheet count for R_s5: 5 sheets (pgg_N' = 4). Verified definitionally
+   since R_s5 = Gen_PGGTypes 3 3 (path_gen_tuple 3), so pgg_N' = 4. *)
+Lemma s5_HN5 : (pgg_N' R_s5).+1 = 5.
+Proof. by []. Qed.
 
-(* Code automorphism: monodromy action on RS code coordinates *)
-Variable sigma_code : pgg_gT R_s5 -> {perm 'I_n''.+3}.
-Hypothesis sigma_fix0 :
-  forall g, g \in pgg_G R_s5 -> sigma_code g ord0 = ord0.
-Hypothesis code_auto :
-  forall g, g \in pgg_G R_s5 ->
-  coord_perm_compatible (RS.code a n''.+3 1) (sigma_code g).
-
-(* Genus-0 covering scheme constructed from RS codes *)
+(* Genus-0 covering scheme using the concrete RS5_witness_trivial factory. *)
 Definition s5_covering : CoveringScheme R_s5 :=
-  genus0_covering HG_s5 qn an HN sigma_fix0 code_auto.
+  genus0_covering_witness HG_s5 (RS5_witness_trivial s5_HN5).
 
 (* PGL bound hypothesis *)
 Hypothesis s5_genus0_pgl :
   (#|pgg_G R_s5| <= pgl_bound R_s5)%N.
 
+(** s5_genus0_automorphism — discharges [genus0_automorphism_bound] for the
+    S_5 instance by reducing to the concrete PGL bound [s5_genus0_pgl].
+    Kind: helper.
+    Why: required to instantiate [s5_threshold_witness], which packages the
+    covering scheme with its automorphism-bound obligation.
+    Used by: s5_threshold_witness. *)
+Lemma s5_genus0_automorphism :
+  genus0_automorphism_bound R_s5 (cs_data s5_covering).
+Proof. move=> _; exact: s5_genus0_pgl. Qed.
+
 Definition s5_threshold_witness : ThresholdWitness R_s5 :=
-  @MkThresholdWitness R_s5 s5_covering (fun _ => s5_genus0_pgl).
+  @MkThresholdWitness R_s5 s5_covering s5_genus0_automorphism.
 
 Definition s5_rigidity : AlgebraicRigidity R R_s5 :=
   @MkAlgebraicRigidity R R_s5
@@ -306,5 +325,23 @@ Proof.
 move=> /=.
 exact: (@security_threshold_tradeoff R_s5 s5_covering (fun _ => s5_genus0_pgl)).
 Qed.
+
+(** Protocol reconstruction correctness: named instance-level re-export of
+    [ar_protocol_correct]. Takes a [PGGInterface] as a parameter since the S5
+    instance is parameterised over the starting-card configuration. *)
+Lemma s5_ts_recon_correct (PI : PGGInterface R_s5)
+    (HT : ts_T' (cs_scheme (tw_covering (ar_threshold (s5_rigidity)))) = pi_T' PI)
+    (s : 'I_5) (P : pgg_gT R_s5)
+    (G_stable : forall g, g \in pgg_G R_s5 ->
+       forall i : 'I_(ts_T' (cs_scheme (tw_covering (ar_threshold (s5_rigidity))))).+1,
+         @pgg_rho R_s5 g
+           (tnth (cast_tuple (esym (congr1 S HT)) (pi_starts PI)) i) =
+         tnth (cast_tuple (esym (congr1 S HT)) (pi_starts PI))
+              (cs_perm (tw_covering (ar_threshold (s5_rigidity))) g i)) :
+  P \in pgg_G R_s5 ->
+  ts_valid (cs_scheme (tw_covering (ar_threshold (s5_rigidity)))) s
+          (cast_tuple (esym (congr1 S HT)) (pi_starts PI)) ->
+  pgg_recon_endpoints HT P = s.
+Proof. exact: ar_protocol_correct. Qed.
 
 End s5_rigidity.

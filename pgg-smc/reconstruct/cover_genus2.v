@@ -71,11 +71,27 @@ Proof.
 by rewrite muln0 muln0 add0n /ramif2 -addnA addnC.
 Qed.
 
+(** genus2_ramif_ge_nbr — lower bound [5 <= ramif2] for the total ramification
+    [ramif2] of the genus-2 hyperelliptic cover.
+    Kind: helper.
+    Why: fills the [cd_ramif_ge_n_branch] field when assembling the genus-2
+    [CoveringData] record; encodes the branch-count-vs-ramification bound for
+    the five-Weierstrass-point hyperelliptic model.
+    Used by: genus2_data. *)
+Lemma genus2_ramif_ge_nbr : (5 <= ramif2)%N.
+Proof.
+rewrite /ramif2.
+have : (2 <= #|G|)%N by exact: HG.
+case: #|G| => [|[|n]] //= _.
+by rewrite mulnS addn2 ltnS leq_addr.
+Qed.
+
 Definition genus2_data : CoveringData M := {|
   cd_base_genus := 0 ;
   cd_n_branch   := 5 ;   (* genus-2 hyperelliptic: 5 Weierstrass points *)
-  cd_ramif      := ramif2 ;
+  cd_total_ramif := ramif2 ;
   cd_genus      := 2 ;
+  cd_ramif_ge_n_branch := genus2_ramif_ge_nbr ;
   cd_hurwitz    := genus2_hurwitz ;
 |}.
 

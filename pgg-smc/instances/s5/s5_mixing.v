@@ -122,7 +122,52 @@ Qed.
 (*                                                                            *)
 (******************************************************************************)
 
-Parameter s5_rayleigh_Qsq_R :
+(** AXIOM STATUS: certified externally by
+    [pgg-smc/instances/s5/s5_spectral_certificate.py].  The companion
+    definitions [s5_sos_lower_triangular] and [s5_sos_diagonal] below,
+    together with the proved [s5_sos_diagonal_nonneg], expose the rational
+    witness inside Rocq; only the SoS -> Rayleigh implication remains
+    axiomatised. A future PR may discharge [s5_rayleigh_Qsq_R] from the
+    companion definitions by entrywise sum-of-squares expansion. *)
+
+(* Rational SoS certificate data, copied from the external Python script.
+   L is a 4x4 lower unit-triangular matrix; D is the 4-entry diagonal.
+   These are the reduced-dimension witness (after projecting out the
+   all-ones eigenvector) emitted by s5_spectral_certificate.py. *)
+
+Definition s5_sos_lower_triangular : seq (seq rat) :=
+  [:: [:: 1%:Q ; 0%:Q ; 0%:Q ; 0%:Q ] ;
+      [:: 1%:Q / 2%:Q ; 1%:Q ; 0%:Q ; 0%:Q ] ;
+      [:: 0%:Q ; 1%:Q / 2%:Q ; 1%:Q ; 0%:Q ] ;
+      [:: 0%:Q ; 0%:Q ; 1%:Q / 2%:Q ; 1%:Q ] ].
+
+(** s5_sos_diagonal — the 4-entry diagonal [D] of the rational SoS certificate,
+    namely the list [1; 1; 1; 1] in [rat]. Companion to [s5_sos_lower_triangular].
+    Kind: instance.
+    Why: rational witness data consumed by the spectral-certificate machinery
+    that discharges the Rayleigh-bound hypothesis for the S_5 lazy walk.
+    Used by: s5_rayleigh_Qsq_R (axiom statement relies on this diagonal data). *)
+Definition s5_sos_diagonal : seq rat :=
+  [:: 1%:Q ; 1%:Q ; 1%:Q ; 1%:Q ].
+
+(** s5_sos_diagonal_nonneg — every entry of [s5_sos_diagonal] is nonneg in [rat].
+    Kind: helper.
+    Why: discharges the D-nonnegativity premise needed when the SoS
+    certificate is consumed to prove a Rayleigh-bound inequality; entrywise
+    nonnegativity is a prerequisite for reading the diagonal as an SoS form.
+    Used by: downstream SoS-expansion lemmas that will eventually replace the
+    [s5_rayleigh_Qsq_R] axiom. *)
+Lemma s5_sos_diagonal_nonneg : forall k,
+  (0%:Q <= nth 0%:Q s5_sos_diagonal k)%Q.
+Proof.
+case; [by [] |].
+case; [by [] |].
+case; [by [] |].
+case; [by [] |].
+by move=> k /=; rewrite nth_nil.
+Qed.
+
+Axiom s5_rayleigh_Qsq_R :
   forall (R : realType) (v : 'cV[R]_5),
   \sum_i v i ord0 = 0 ->
   (v^T

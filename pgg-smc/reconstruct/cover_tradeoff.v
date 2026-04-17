@@ -28,10 +28,14 @@ From mathcomp Require Import morphism bigop div.
 From pgg_smc Require Import pgg_interface.
 From pgg_reconstruct Require Import pgg_sharing_framework.
 From pgg_reconstruct Require Import covering_scheme.
+From pgg_reconstruct Require Import pgl_bound.
 
 Set Implicit Arguments.
 Unset Strict Implicit.
 Import Prenex Implicits.
+
+Close Scope ring_scope.
+Close Scope group_scope.
 
 (******************************************************************************)
 (*     Section 1: Riemann-Hurwitz Consequences                                *)
@@ -51,7 +55,7 @@ Let N := (pgg_N' M).+1.
 Lemma genus0_forces_ramif (cd : CoveringData M) :
   cd_base_genus cd = 0 ->
   cd_genus cd = 0 ->
-  cd_ramif cd + 2 = 2 * #|G|.
+  cd_total_ramif cd + 2 = 2 * #|G|.
 Proof.
 move=> Hb0 Hg0; have := cd_hurwitz cd.
 by rewrite Hb0 Hg0 !muln0 !add0n.
@@ -61,7 +65,7 @@ Qed.
 Lemma more_ramif_more_genus (cd1 cd2 : CoveringData M) :
   cd_base_genus cd1 = 0 ->
   cd_base_genus cd2 = 0 ->
-  cd_ramif cd1 < cd_ramif cd2 ->
+  cd_total_ramif cd1 < cd_total_ramif cd2 ->
   cd_genus cd1 < cd_genus cd2.
 Proof.
 move=> Hb1 Hb2 HR.
@@ -152,7 +156,7 @@ Qed.
 Lemma group_genus_monotone (cd1 cd2 : CoveringData M) :
   cd_base_genus cd1 = 0 ->
   cd_base_genus cd2 = 0 ->
-  cd_ramif cd1 = cd_ramif cd2 ->
+  cd_total_ramif cd1 = cd_total_ramif cd2 ->
   cd_genus cd1 = cd_genus cd2.
 Proof.
 move=> Hb1 Hb2 HR.
@@ -185,3 +189,34 @@ case Hg : (cd_genus (cs_data cs) == 0).
 Qed.
 
 End tradeoff.
+
+(******************************************************************************)
+(*     Section 4: Bridge to pgl_card in pgl_bound.v                           *)
+(******************************************************************************)
+
+(** pgl_bound_eq_pgl_card — equational bridge [pgl_bound M = pgl_card (pgg_N' M).+1]
+    for any [GeneratedMonodromyReprType] [M].
+    Kind: helper.
+    Why: rewrites the abstract [pgl_bound] accessor into the closed-form
+    [pgl_card] expression so instance files can discharge the PGL bound by
+    direct numerical computation on [pgg_N'].
+    Used by: downstream instance PGL-bound discharges (rigidity_s5_instance). *)
+Lemma pgl_bound_eq_pgl_card (M : GeneratedMonodromyReprType) :
+  pgl_bound M = pgl_card (pgg_N' M).+1.
+Proof. by []. Qed.
+
+(******************************************************************************)
+(*     Section 5: Uniform name for the genus-0 automorphism bound             *)
+(******************************************************************************)
+
+(** genus0_automorphism_bound — predicate asserting that, when the covering
+    genus is 0, the automorphism group cardinality [#|pgg_G M|] is bounded by
+    [pgl_bound M].
+    Kind: interface.
+    Why: packages the genus-0 automorphism constraint as a named [Prop] so that
+    each concrete instance (five_card, kim, s5, s5x5) can discharge it by
+    direct proof or by unfolding [pgl_bound_eq_pgl_card]. *)
+Definition genus0_automorphism_bound (M : GeneratedMonodromyReprType)
+    (cd : CoveringData M) : Prop :=
+  cd_genus cd = 0 -> (#|pgg_G M| <= pgl_bound M)%N.
+Arguments genus0_automorphism_bound M cd : clear implicits.

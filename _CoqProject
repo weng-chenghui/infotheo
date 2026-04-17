@@ -152,6 +152,7 @@ pgg-smc/instances/denboer1989/five_card_security.v
 pgg-smc/instances/kim2025/five_card_kim.v
 pgg-smc/protocol/card_protocol.v
 pgg-smc/protocol/card_protocol_posterior.v
+pgg-smc/protocol/pgg_uc_security.v
 pgg-smc/groups/pgg_raag.v
 pgg-smc/groups/free_group_ball.v
 pgg-smc/groups/pgg_raag_clique.v
@@ -183,6 +184,7 @@ pgg-smc/reconstruct/hyperelliptic_code.v
 pgg-smc/reconstruct/coord_perm_compatible.v
 pgg-smc/reconstruct/ag_multiplicative.v
 pgg-smc/reconstruct/cover_genus0.v
+pgg-smc/reconstruct/rs_code_5sheets.v
 pgg-smc/reconstruct/cover_genus1.v
 pgg-smc/reconstruct/cover_genus2.v
 pgg-smc/reconstruct/cover_tradeoff.v

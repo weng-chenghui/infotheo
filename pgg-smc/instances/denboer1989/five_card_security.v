@@ -35,6 +35,7 @@ From pgg_smc Require Import five_card_group pgg_collusion_bound
 From pgg_reconstruct Require Import pgg_sharing_framework covering_scheme
                                     cover_tradeoff algebraic_rigidity.
 From pgg_reconstruct Require Import cover_genus0 coord_perm_compatible.
+From pgg_reconstruct Require Import rs_code_5sheets.
 
 Set Implicit Arguments.
 Unset Strict Implicit.
@@ -239,33 +240,34 @@ Variable R : realType.
 (* Group nontriviality *)
 Hypothesis HG_fc : (1 < #|pgg_G FiveCard_M|)%N.
 
-(* Field parameters for RS code: F = GF(q^m') with |F| = N = 5 *)
-Variables (q m' : nat).
-Hypothesis primeq : prime q.
-Variable n'' : nat.
-Variable a : GF m' primeq.
-Hypothesis qn : ~~ (q %| n''.+3)%nat.
-Hypothesis an : (n''.+3).-primitive_root a.
-Hypothesis HN : (pgg_N' FiveCard_M).+1 = #|GF m' primeq|.
+(* Sheet count for FiveCard_M: 5 sheets (pgg_N' = 4). Verified definitionally
+   since FiveCard_M = Gen_PGGTypes 0 3 fc_sigmas, so pgg_N' = 4. *)
+Lemma fc_HN5 : (pgg_N' FiveCard_M).+1 = 5.
+Proof. by []. Qed.
 
-(* Code automorphism *)
-Variable sigma_code : pgg_gT FiveCard_M -> {perm 'I_n''.+3}.
-Hypothesis sigma_fix0 :
-  forall g, g \in pgg_G FiveCard_M -> sigma_code g ord0 = ord0.
-Hypothesis code_auto :
-  forall g, g \in pgg_G FiveCard_M ->
-  coord_perm_compatible (RS.code a n''.+3 1) (sigma_code g).
-
-(* Genus-0 covering scheme *)
+(* Genus-0 covering scheme using the concrete RS5_witness_trivial factory.
+   This discharges all 11 RS-code obligations in one shot using GF(5),
+   length-4 RS code, and the trivial code automorphism (which suffices
+   because AlgebraicRigidity does not invoke genus0_secret_invariant). *)
 Definition fc_covering : CoveringScheme FiveCard_M :=
-  genus0_covering HG_fc qn an HN sigma_fix0 code_auto.
+  genus0_covering_witness HG_fc (RS5_witness_trivial fc_HN5).
 
 (* PGL bound: |C_5| = 5 <= 120 = PGL(2,5) *)
 Hypothesis fc_genus0_pgl :
   (#|pgg_G FiveCard_M| <= pgl_bound FiveCard_M)%N.
 
+(** fc_genus0_automorphism — discharges [genus0_automorphism_bound] for the
+    FiveCard instance by reducing to the concrete PGL bound [fc_genus0_pgl].
+    Kind: helper.
+    Why: required to instantiate [fc_threshold_witness], which packages the
+    covering scheme with its automorphism-bound obligation.
+    Used by: fc_threshold_witness. *)
+Lemma fc_genus0_automorphism :
+  genus0_automorphism_bound FiveCard_M (cs_data fc_covering).
+Proof. move=> _; exact: fc_genus0_pgl. Qed.
+
 Definition fc_threshold_witness : ThresholdWitness FiveCard_M :=
-  @MkThresholdWitness FiveCard_M fc_covering (fun _ => fc_genus0_pgl).
+  @MkThresholdWitness FiveCard_M fc_covering fc_genus0_automorphism.
 
 Definition fc_rigidity : AlgebraicRigidity R FiveCard_M :=
   @MkAlgebraicRigidity R FiveCard_M
@@ -286,6 +288,23 @@ move=> /=.
 exact: (@security_threshold_tradeoff FiveCard_M fc_covering
                                      (fun _ => fc_genus0_pgl)).
 Qed.
+
+(** Protocol reconstruction correctness: named instance-level re-export of
+    [ar_protocol_correct]. *)
+Lemma fc_ts_recon_correct (PI : PGGInterface FiveCard_M)
+    (HT : ts_T' (cs_scheme (tw_covering (ar_threshold fc_rigidity))) = pi_T' PI)
+    (s : 'I_5) (P : pgg_gT FiveCard_M)
+    (G_stable : forall g, g \in pgg_G FiveCard_M ->
+       forall i : 'I_(ts_T' (cs_scheme (tw_covering (ar_threshold fc_rigidity)))).+1,
+         @pgg_rho FiveCard_M g
+           (tnth (cast_tuple (esym (congr1 S HT)) (pi_starts PI)) i) =
+         tnth (cast_tuple (esym (congr1 S HT)) (pi_starts PI))
+              (cs_perm (tw_covering (ar_threshold fc_rigidity)) g i)) :
+  P \in pgg_G FiveCard_M ->
+  ts_valid (cs_scheme (tw_covering (ar_threshold fc_rigidity))) s
+          (cast_tuple (esym (congr1 S HT)) (pi_starts PI)) ->
+  pgg_recon_endpoints HT P = s.
+Proof. exact: ar_protocol_correct. Qed.
 
 End fc_rigidity.
 

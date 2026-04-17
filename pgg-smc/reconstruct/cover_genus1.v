@@ -69,11 +69,26 @@ Proof.
 by rewrite muln1 muln0 muln0 add0n /ramif1 addnC.
 Qed.
 
+(** genus1_ramif_ge_nbr — lower bound [3 <= ramif1] for the total ramification
+    [ramif1] of the genus-1 cover.
+    Kind: helper.
+    Why: fills the [cd_ramif_ge_n_branch] field when assembling the genus-1
+    [CoveringData] record, which asserts that the number of branch points is
+    bounded by the total ramification.
+    Used by: genus1_data. *)
+Lemma genus1_ramif_ge_nbr : (3 <= ramif1)%N.
+Proof.
+rewrite /ramif1.
+have : (2 <= #|G|)%N by exact: HG.
+by case: #|G| => [|[|n]] //= _; rewrite mulnS.
+Qed.
+
 Definition genus1_data : CoveringData M := {|
   cd_base_genus := 0 ;
   cd_n_branch   := 3 ;   (* elliptic covers typically have 3+ branch points *)
-  cd_ramif      := ramif1 ;
+  cd_total_ramif := ramif1 ;
   cd_genus      := 1 ;
+  cd_ramif_ge_n_branch := genus1_ramif_ge_nbr ;
   cd_hurwitz    := genus1_hurwitz ;
 |}.
 
@@ -269,11 +284,17 @@ Variable ramif_g : nat.
 Hypothesis hurwitz_g :
   (2 * g + 2 * #|G| = #|G| * (2 * 0) + ramif_g + 2)%N.
 
+(* Naming: intentional; parallels genus1_ramif_ge_nbr / genus2_ramif_ge_nbr so
+   the higher-genus scaffolding exposes the same [_ramif_ge_nbr] field name in
+   its [CoveringData] record as the concrete genus-1 and genus-2 siblings. *)
+Hypothesis higher_genus_ramif_ge_nbr : (g + 2 <= ramif_g)%N.
+
 Definition higher_genus_data : CoveringData M := {|
   cd_base_genus := 0 ;
   cd_n_branch   := g + 2 ;   (* heuristic: more branch points for higher genus *)
-  cd_ramif      := ramif_g ;
+  cd_total_ramif := ramif_g ;
   cd_genus      := g ;
+  cd_ramif_ge_n_branch := higher_genus_ramif_ge_nbr ;
   cd_hurwitz    := hurwitz_g ;
 |}.
 

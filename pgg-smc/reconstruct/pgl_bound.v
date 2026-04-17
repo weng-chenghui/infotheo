@@ -195,3 +195,48 @@ Proof. exact: card_pgl2. Qed.
 
 End pgl_connection.
 
+(******************************************************************************)
+(*     Section 5: pgl_card and the PGL(2,F_5) = S_5 anchor                    *)
+(******************************************************************************)
+
+Definition pgl_card (q : nat) : nat := q * (q ^ 2 - 1).
+
+(** pgl_card_eq — equational identity [#|pgl2 F| = pgl_card #|F|] for any
+    [finFieldType] [F].
+    Kind: helper.
+    Why: repackages [pgl2_card_formula] as a definitional rewrite lemma so
+    later instance proofs (e.g. [pgl_card_5]) can fold the cardinality of
+    [pgl2 F] into the closed-form polynomial in [#|F|].
+    Used by: pgl_card_5 (and downstream S5 anchor lemmas). *)
+Lemma pgl_card_eq (F : finFieldType) : #|pgl2 F| = pgl_card #|F|.
+Proof. exact: pgl2_card_formula. Qed.
+
+(** pgl_card_5 — numerical instance [pgl_card 5 = 120]. Definitionally true.
+    Kind: helper.
+    Why: used in combination with [card_set_S5] to identify the PGL(2,F_5)
+    order with the order of [S_5], which anchors the S_5 instance's PGL bound.
+    Used by: pgl2_5_eq_s5. *)
+Lemma pgl_card_5 : pgl_card 5 = 120%N.
+Proof. by []. Qed.
+
+(** card_set_S5 — [#|[set: 'S_5]| = 120], i.e. the order of the symmetric
+    group on five letters.
+    Kind: helper.
+    Why: standard cardinality fact expressed in the [{set: _}] form so it can
+    be chained with [pgl_card_5] to bridge the PGL(2,F_5) cardinality to the
+    S_5 order without rewriting [card_Sn] in each caller.
+    Used by: pgl2_5_eq_s5. *)
+Lemma card_set_S5 : #|[set: 'S_5]| = 120%N.
+Proof. by rewrite cardsT card_Sn. Qed.
+
+(** pgl2_5_eq_s5 — bridge equation [pgl_card 5 = #|[set: 'S_5]|]; identifies
+    the PGL(2,F_5) cardinality with the order of S_5.
+    Kind: helper.
+    Why: exposes the PGL(2,F_5)-vs-S_5 isomorphism at the cardinality level,
+    which is the form downstream instance files (rigidity_s5_instance) need
+    to satisfy the genus-0 PGL bound by a simple rewrite rather than invoking
+    the full permutation isomorphism.
+    Used by: rigidity_s5_instance.v (PGL-bound discharge for the S_5 instance). *)
+Lemma pgl2_5_eq_s5 : pgl_card 5 = #|[set: 'S_5]|.
+Proof. by rewrite pgl_card_5 card_set_S5. Qed.
+
