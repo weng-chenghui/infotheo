@@ -192,6 +192,7 @@ pgg-smc/reconstruct/pgg_protocol_landscape.v
 pgg-smc/reconstruct/product_threshold.v
 pgg-smc/instances/s5/s5_mixing.v
 pgg-smc/instances/s5/rigidity_s5_instance.v
+pgg-smc/instances/s5x5/s5x5_mixing.v
 pgg-smc/instances/s5x5/rigidity_s5x5_instance.v
 pgg-smc/instances/monster/rigidity_monster_instance.v
 pgg-smc/instances/oc/rigidity_oc_instance.v

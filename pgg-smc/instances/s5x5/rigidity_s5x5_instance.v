@@ -44,6 +44,7 @@ From mathcomp Require Import boolp reals.
 From infotheo Require Import realType_ext fdist proba variation_dist.
 From pgg_smc Require Import perm_uniform pgg_interface pgg_weval_inj pgg_raag.
 From pgg_smc Require Import pgg_s5x5 pgg_collusion_bound s5x5_pile.
+From pgg_smc Require Import s5x5_mixing s5_mixing.
 From pgg_reconstruct Require Import pgg_sharing_framework covering_scheme
                                     cover_tradeoff algebraic_rigidity.
 From pgg_reconstruct Require Import product_threshold.
@@ -210,47 +211,56 @@ Variable R : realType.
 Let M_s5x5 := @Gen_PGGTypes 7 8 s5x5_gen_tuple.
 Let R_s5x5 : GeneratedMonodromyReprType := M_s5x5.
 
-(* Spectral gap of the Schreier walk: (1 - cos(pi/5)) / 4 ~ 0.0477 *)
-Variable s5x5_spectral_gap : R.
-Hypothesis s5x5_gap_pos : (0 < s5x5_spectral_gap)%R.
-Hypothesis s5x5_gap_le1 : (s5x5_spectral_gap <= 1)%R.
+(* The S_5 x S_5 Schreier walk on 'I_10 is reducible: pile-1 generators
+   fix pile-2 sheets and vice versa. So the walk's stationary distribution
+   is uniform on the orbit (5 elements), not on all of 'I_10. The constant
+   variation-distance floor against fdist_uniform(card_ord 10) is 1
+   (in infotheo's un-halved L^1 convention; equivalent to TV-floor 1/2).
+   Within each pile, mixing is exponential at rate (1 + alpha)/2 ~ 0.9525,
+   reusing the S_5 Rayleigh certificate. See pgg-smc/instances/s5x5/s5x5_mixing.v
+   and pgg-smc/instances/s5/s5_mixing.v for the proofs. *)
 
-(* Schreier walk distribution family: for each L, the distribution on
-   {perm 'I_10} induced by a length-L random walk on the Schreier graph.
-   This is Q^L projected back to group elements, which equals
-   rho_from_words L when weval_inj holds, but is well-defined for all L. *)
-Variable s5x5_schreier_rho : nat -> R.-fdist {perm 'I_10}.
-
-(* Spectral convergence bound from the Schreier graph analysis.
-   Prefactor is sqrt(N) = sqrt(10), NOT sqrt(|G|) = sqrt(14400).
-   Source: Diaconis 1988 Ch. 3B Proposition 2, applied to Schreier graph. *)
-Hypothesis s5x5_spectral_convergence :
-  forall (L : nat) (s : 'I_10),
-  (var_dist (fdistmap (fun sigma : {perm 'I_10} => sigma s)
-                     (s5x5_schreier_rho L))
-           (fdist_uniform (card_ord 10))
-  <= Num.sqrt 10%:R * (1 - s5x5_spectral_gap) ^+ L)%O.
-
-(* SecurityAsymptotic certificate carrying the convergence guarantee *)
+(* SecurityAsymptotic certificate carrying the honest spectral guarantee.
+   The bound is var_dist <= 1 + sqrt(10) * lazy_alpha^L, which converges
+   to 1 (the orbit-vs-global gap), not to 0. *)
 Definition s5x5_asymptotic : @SecurityAsymptotic R R_s5x5.
 Proof.
 apply: (@MkSecurityAsymptotic R R_s5x5
-  s5x5_spectral_gap s5x5_gap_pos s5x5_gap_le1
-  s5x5_schreier_rho).
-exact: s5x5_spectral_convergence.
+  (1 - s5_lazy_alpha_R R)        (* sa_spectral_gap *)
+  1                              (* sa_eps_inf, the orbit-vs-global floor *)
+  _                              (* sa_gap_pos *)
+  _                              (* sa_gap_le1 *)
+  Num.Theory.ler01            (* sa_eps_inf_ge0: 0 <= 1 *)
+  (fun L => rho_from_words L s5x5_gen_tuple)).
+- by rewrite Num.Theory.subr_gt0; exact: s5_lazy_alpha_R_lt1.
+- by rewrite Num.Theory.lerBlDr Num.Theory.lerDl;
+  exact: s5_lazy_alpha_R_ge0.
+- move=> L s.
+  rewrite opprB addrCA subrr addr0.
+  change (pgg_N' R_s5x5).+1 with 10%N in s |- *.
+  apply: (Order.POrderTheory.le_trans (s5x5_spectral_TV_bound R L s)).
+  rewrite (Num.Theory.lerD2l 1).
+  apply: Num.Theory.ler_wpM2r.
+  + by rewrite Num.Theory.exprn_ge0 //; exact: s5_lazy_alpha_R_ge0.
+  + by rewrite Num.Theory.ler_sqrt ?Num.Theory.ler0n // Num.Theory.ler_nat.
 Defined.
 
-(* SecurityWitness at any word length L, with spectral convergence bound.
-   Unlike security_witness_schreier (pgg_schreier.v), this does NOT require
-   weval_inj — the Schreier walk distribution is axiomatized directly. *)
+(* SecurityWitness at any word length L, parametrised only by R. *)
 Definition s5x5_security_witness_schreier (L : nat) :
-    SecurityWitness R R_s5x5 :=
-  @MkSecurityWitness R R_s5x5 L
-    (Num.sqrt 10%:R * (1 - s5x5_spectral_gap) ^+ L)
-    (s5x5_schreier_rho L)
-    (fun s => s5x5_spectral_convergence L s)
-    None
-    (Some s5x5_asymptotic).
+    SecurityWitness R R_s5x5.
+Proof.
+apply: (@MkSecurityWitness R R_s5x5 L
+  (1 + Num.sqrt 10%:R * (s5_lazy_alpha_R R) ^+ L)
+  (rho_from_words L s5x5_gen_tuple)
+  _ None (Some s5x5_asymptotic)).
+move=> s.
+change (pgg_N' R_s5x5).+1 with 10%N in s |- *.
+apply: (Order.POrderTheory.le_trans (s5x5_spectral_TV_bound R L s)).
+rewrite (Num.Theory.lerD2l 1).
+apply: Num.Theory.ler_wpM2r.
+- by rewrite Num.Theory.exprn_ge0 //; exact: s5_lazy_alpha_R_ge0.
+- by rewrite Num.Theory.ler_sqrt ?Num.Theory.ler0n // Num.Theory.ler_nat.
+Defined.
 
 End s5x5_spectral.
 
@@ -377,24 +387,14 @@ Variable R : realType.
 Let R_s5x5 : GeneratedMonodromyReprType :=
   @Gen_PGGTypes 7 8 s5x5_gen_tuple.
 
-(* Spectral parameters (same as s5x5_spectral section) *)
-Variable s5x5_spectral_gap : R.
-Hypothesis s5x5_gap_pos : (0 < s5x5_spectral_gap)%R.
-Hypothesis s5x5_gap_le1 : (s5x5_spectral_gap <= 1)%R.
-Variable s5x5_schreier_rho : nat -> R.-fdist {perm 'I_10}.
-Hypothesis s5x5_spectral_convergence :
-  forall (L : nat) (s : 'I_10),
-  (var_dist (fdistmap (fun sigma : {perm 'I_10} => sigma s)
-                     (s5x5_schreier_rho L))
-           (fdist_uniform (card_ord 10))
-  <= Num.sqrt 10%:R * (1 - s5x5_spectral_gap) ^+ L)%O.
-
-(* 40-bit security: L=591 gives sqrt(10)*(1-gap)^591 < 2^{-40}
-   when gap = (1-cos(pi/5))/4 ~ 0.0477 *)
+(* Honest spectral SecurityWitness at L=591, fully discharged.
+   The bound is var_dist <= 1 + sqrt(10) * lazy_alpha^591, where lazy_alpha
+   = (1 + 181/200) / 2 = 0.9525. The 1 floor is the orbit-vs-global gap
+   (the walk preserves piles), not a security weakness in the threshold
+   sense (the product threshold scheme reconstructs per-pile). *)
 Definition s5x5_rigidity_cryptographically_secure : AlgebraicRigidity R R_s5x5 :=
   @MkAlgebraicRigidity R R_s5x5
-    (@s5x5_security_witness_schreier R s5x5_spectral_gap s5x5_gap_pos
-       s5x5_gap_le1 s5x5_schreier_rho s5x5_spectral_convergence 591)
+    (s5x5_security_witness_schreier R 591)
     s5x5_threshold_witness.
 
 End s5x5_rigidity_cryptographically_secure.

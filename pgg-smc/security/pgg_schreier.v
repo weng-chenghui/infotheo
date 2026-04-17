@@ -321,6 +321,19 @@ Qed.
    (to ensure rho_from_words is a valid distribution over achievable
    permutations). The Schreier spectral bound itself doesn't need it,
    but the downstream SecurityWitness construction does. *)
+Definition security_witness_schreier_asymptotic (sc : SchreierCertificate)
+  : @SecurityAsymptotic R M.
+Proof.
+apply: (@MkSecurityAsymptotic R M
+  (sc_lambda_gap sc) 0
+  (sc_lambda_pos sc) (sc_lambda_le1 sc)
+  (Order.POrderTheory.lexx 0)
+  (fun L' => rho_from_words L' sigmas)).
+move=> L' s.
+rewrite add0r.
+exact: sc_convergence.
+Defined.
+
 Definition security_witness_schreier (sc : SchreierCertificate)
     (L : nat) (Hlfree : @weval_inj M L) : SecurityWitness R M :=
   @MkSecurityWitness R M L
@@ -328,10 +341,7 @@ Definition security_witness_schreier (sc : SchreierCertificate)
     (rho_from_words L sigmas)
     (sc_convergence sc L)
     None
-    (Some (@MkSecurityAsymptotic R M
-      (sc_lambda_gap sc) (sc_lambda_pos sc) (sc_lambda_le1 sc)
-      (fun L' => rho_from_words L' sigmas)
-      (sc_convergence sc))).
+    (Some (security_witness_schreier_asymptotic sc)).
 
 (* Epsilon from Schreier certificate *)
 Definition schreier_epsilon (sc : SchreierCertificate) (L : nat) : R :=

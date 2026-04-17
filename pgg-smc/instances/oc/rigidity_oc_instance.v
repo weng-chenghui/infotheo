@@ -55,6 +55,8 @@ Import Prenex Implicits.
 Local Open Scope ring_scope.
 Local Open Scope fdist_scope.
 
+Import GRing.Theory Num.Theory.
+
 (******************************************************************************)
 (*     SecurityWitness Construction                                           *)
 (******************************************************************************)
@@ -166,8 +168,12 @@ Hypothesis oc_spectral_convergence :
 Definition oc_asymptotic : @SecurityAsymptotic R R_oc.
 Proof.
 apply: (@MkSecurityAsymptotic R R_oc
-  oc_spectral_gap oc_gap_pos oc_gap_le1
+  oc_spectral_gap 0
+  oc_gap_pos oc_gap_le1
+  (Order.POrderTheory.lexx 0)
   oc_schreier_rho).
+move=> L s.
+rewrite add0r.
 exact: oc_spectral_convergence.
 Defined.
 

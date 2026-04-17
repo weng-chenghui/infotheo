@@ -109,16 +109,25 @@ Record SecurityExact (rho : R.-fdist {perm 'I_N'.+1}) := MkSecurityExact {
 (* instantiated as rho_from_words L sigmas, but kept abstract here to          *)
 (* avoid requiring {perm 'I_N} typed generators (which Gen_PGGTypes has        *)
 (* but general MonodromyReprType may not).                                     *)
+(* sa_eps_inf is the constant variation-distance floor: the bound is        *)
+(*   var_dist (sigma s) uniform <= sa_eps_inf + sqrt(N) * (1 - gap)^L      *)
+(* For irreducible Schreier walks (e.g. S_5) sa_eps_inf = 0 and the bound  *)
+(* decays to 0. For reducible walks (e.g. S_5 x S_5 with pile-disjoint     *)
+(* generators) the actual stationary distribution is uniform on the orbit, *)
+(* and the gap to fdist_uniform is the constant sa_eps_inf (1 in infotheo's *)
+(* un-halved L^1 var_dist convention; 1/2 in standard TV).                  *)
 Record SecurityAsymptotic := MkSecurityAsymptotic {
   sa_spectral_gap : R;
+  sa_eps_inf : R;
   sa_gap_pos : (0 < sa_spectral_gap)%R;
   sa_gap_le1 : (sa_spectral_gap <= 1)%R;
+  sa_eps_inf_ge0 : (0 <= sa_eps_inf)%R;
   sa_rho_L : nat -> R.-fdist {perm 'I_N'.+1};
   sa_convergence : forall (L : nat) (s : 'I_N'.+1),
     (var_dist (fdistmap (fun sigma : {perm 'I_N'.+1} => sigma s)
                        (sa_rho_L L))
              (fdist_uniform (card_ord N'.+1))
-    <= Num.sqrt N'.+1%:R * (1 - sa_spectral_gap) ^+ L)%R
+    <= sa_eps_inf + Num.sqrt N'.+1%:R * (1 - sa_spectral_gap) ^+ L)%R
 }.
 
 (** SecurityWitness: unified record carrying an always-present bound,          *)

@@ -60,6 +60,8 @@ Import Prenex Implicits.
 Local Open Scope ring_scope.
 Local Open Scope fdist_scope.
 
+Import GRing.Theory Num.Theory.
+
 (******************************************************************************)
 (*     SecurityWitness Construction                                           *)
 (******************************************************************************)
@@ -181,11 +183,17 @@ Let R_s5 : GeneratedMonodromyReprType := M_s5.
 (* Spectral gap derived from the Python-attested Rayleigh certificate
    (see s5_mixing.v + s5_spectral_certificate.py).  No free variables. *)
 
-Definition s5_asymptotic : @SecurityAsymptotic R R_s5 :=
-  @MkSecurityAsymptotic R R_s5
-    (s5_gap_R R) (s5_gap_R_pos R) (s5_gap_R_le1 R)
-    (fun L => rho_from_words L (path_gen_tuple 3))
-    (@s5_spectral_convergence_gap R).
+Definition s5_asymptotic : @SecurityAsymptotic R R_s5.
+Proof.
+apply: (@MkSecurityAsymptotic R R_s5
+  (s5_gap_R R) 0
+  (s5_gap_R_pos R) (s5_gap_R_le1 R)
+  (Order.POrderTheory.lexx 0)
+  (fun L => rho_from_words L (path_gen_tuple 3))).
+move=> L s.
+rewrite add0r.
+exact: s5_spectral_convergence_gap.
+Defined.
 
 Definition s5_security_witness_schreier (L : nat) :
     SecurityWitness R R_s5 :=

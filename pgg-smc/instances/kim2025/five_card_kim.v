@@ -451,10 +451,12 @@ Qed.
 Definition fc_kim_asymptotic : @SecurityAsymptotic R FiveCardKim_M.
 Proof.
 apply: (@MkSecurityAsymptotic R FiveCardKim_M
-  kim_spectral_gap kim_spectral_gap_pos kim_spectral_gap_le1
+  kim_spectral_gap 0
+  kim_spectral_gap_pos kim_spectral_gap_le1
+  (Order.POrderTheory.lexx 0)
   (fun L' => @rho_from_words_weighted R 3 4 L' fc_kim_sigmas W)).
 move=> L' s.
-rewrite /kim_spectral_gap /kim_slev opprB addrC subrK.
+rewrite add0r /kim_spectral_gap /kim_slev opprB addrC subrK.
 exact: kim_spectral_convergence.
 Defined.
 
