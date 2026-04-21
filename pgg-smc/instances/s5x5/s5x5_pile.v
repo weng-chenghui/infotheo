@@ -58,3 +58,37 @@ move/astabsP: HginHg => /(_ i).
 rewrite /= apermE !inE Hi.
 by move=> ->.
 Qed.
+
+(** s5x5_preserves_pile2_proved — every [g \in pgg_G] preserves the upper
+    half of [`I_10] (indices >= 5) setwise under the [pgg_rho] action.
+    Kind: helper.
+    Why: companion to [s5x5_preserves_pile1]; together they discharge the
+    pile-decomposition invariance required by downstream S_5 x S_5 rigidity
+    witnesses.
+    Used by: (no caller committed yet; parallel to [s5x5_preserves_pile1]).
+    Naming: intentional; the `_proved` suffix keeps parity with the
+    pile-1 naming in the adjacent file, even though [_stab] would be the
+    canonical MathComp suffix for a set-stabiliser. *)
+Lemma s5x5_preserves_pile2_proved :
+  forall g, g \in pgg_G (@Gen_PGGTypes 7 8 s5x5_gen_tuple) ->
+  forall i : 'I_10, ~~ (val i < 5)%N ->
+  ~~ (val (@pgg_rho (@Gen_PGGTypes 7 8 s5x5_gen_tuple) g i) < 5)%N.
+Proof.
+move=> g HgG i Hi.
+have Hrho : pgg_rho g i = g i by [].
+rewrite Hrho.
+pose pile2 := [set x : 'I_10 | ~~ (val x < 5)%N].
+pose HH := astabs_group (perm_action _) pile2.
+have Hgensub : [set tnth s5x5_gen_tuple j | j : 'I_8] \subset HH.
+  apply/subsetP => x /imsetP[j _ ->].
+  apply/astabsP => y.
+  rewrite /= apermE !inE -s5x5_gens_agree.
+  by case: j => [[|[|[|[|[|[|[|[|?]]]]]]]] Hj];
+     case: y => [[|[|[|[|[|[|[|[|[|[|?]]]]]]]]]] Hy].
+have HGsub : pgg_G (@Gen_PGGTypes 7 8 s5x5_gen_tuple) \subset HH.
+  rewrite /pgg_G /= gen_subG. exact: Hgensub.
+have HginHg : g \in HH by move/subsetP: HGsub => /(_ g HgG).
+move/astabsP: HginHg => /(_ i).
+rewrite /= apermE !inE Hi.
+by move=> ->.
+Qed.
