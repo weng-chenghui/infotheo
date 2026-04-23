@@ -1,0 +1,72 @@
+# Audit scope for pgg-smc/, computed from transitive import closure.
+# Roots: instances/{kim2025,denboer1989,s5,s5x5,abelian}/, reconstruct/, and 8 named security files.
+# Excluded: pgg_raag_cartier_foata.v (deadcode); instances/{cyclic,monster,oc,star}/ (dormant); 7 unreached files.
+# Total in-scope: 67 files, 886 declarations.
+# Fragile files marked # fragile:no-tier-k import excluded-instance modules; driver passes --no-tier-k for them.
+groups/free_group_ball.v
+groups/pgg_raag.v
+groups/pgg_raag_clique.v
+groups/pgg_raag_path.v
+groups/pgg_weval_inj.v
+instances/abelian/abelian_word_collapse.v
+instances/abelian/pgg_abelian.v
+instances/abelian/rigidity_abelian_instance.v
+instances/denboer1989/five_card_group.v
+instances/denboer1989/five_card_pismc.v
+instances/denboer1989/five_card_program.v
+instances/denboer1989/five_card_security.v
+instances/denboer1989/five_card_session_types.v
+instances/kim2025/five_card_kim.v
+instances/kim2025/rigidity_kim_instance.v
+instances/s5/pgg_raag_s5.v
+instances/s5/rigidity_s5_instance.v
+instances/s5/s5_mixing.v
+instances/s5x5/pgg_s5x5.v
+instances/s5x5/rigidity_s5x5_instance.v
+instances/s5x5/s5x5_mixing.v
+instances/s5x5/s5x5_pile.v
+lib/perm_uniform.v
+protocol/card_exchange_pismc.v  # fragile:no-tier-k
+protocol/pgg_interface.v
+protocol/pgg_session_types.v
+reconstruct/ag_code.v
+reconstruct/ag_massey_bridge.v
+reconstruct/ag_multiplicative.v
+reconstruct/algebraic_rigidity.v
+reconstruct/coord_perm_compatible.v
+reconstruct/cover_genus0.v
+reconstruct/cover_genus1.v
+reconstruct/cover_genus2.v
+reconstruct/cover_tradeoff.v
+reconstruct/covering_scheme.v
+reconstruct/hyperelliptic_code.v
+reconstruct/lagrange.v
+reconstruct/massey.v
+reconstruct/pgg_assignment.v
+reconstruct/pgg_covering_correctness.v
+reconstruct/pgg_dealer_bridge.v
+reconstruct/pgg_deck_pairing.v
+reconstruct/pgg_landscape_demo.v  # fragile:no-tier-k
+reconstruct/pgg_protocol_landscape.v
+reconstruct/pgg_sharing_framework.v
+reconstruct/pgg_sum_mod.v
+reconstruct/pgg_threshold.v
+reconstruct/pgl_bound.v
+reconstruct/product_threshold.v
+reconstruct/rs_code_5sheets.v
+reconstruct/rs_massey_bridge.v
+reconstruct/rs_privacy.v
+security/pgg_abelian_collapse.v
+security/pgg_collusion_bound.v
+security/pgg_entropy_security.v
+security/pgg_entropy_security_demo.v  # fragile:no-tier-k
+security/pgg_mixing.v
+security/pgg_schreier.v
+security/pgg_schreier_weighted.v
+security/pgg_security.v
+security/pgg_security_demo.v
+security/pgg_security_solver.v
+security/pgg_uniform_security.v
+security/pgg_weighted_entropy.v
+security/pgg_weighted_words.v
+security/pgg_word_analysis.v

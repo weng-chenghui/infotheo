@@ -29,3 +29,7 @@ extraction/sumprod.mli
 
 # Notes
 pgg-smc/notes/
+
+# Rocq-audit per-run artifacts
+.claude/audit/file-audits/
+.claude/audit/runs/

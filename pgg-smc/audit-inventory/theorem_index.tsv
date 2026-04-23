@@ -1,0 +1,887 @@
+file	line	kind	name	tells_us	statement
+groups/free_group_ball.v	53	Lemma	letter_inv_lt		Lemma letter_inv_lt (i : nat) : i < alpha -> letter_inv i < alpha.
+groups/free_group_ball.v	56	Lemma	letter_invK		Lemma letter_invK (i : nat) : i < alpha -> letter_inv (letter_inv i) = i.
+groups/free_group_ball.v	66	Lemma	letter_inv_neq		Lemma letter_inv_neq (i : nat) : i < alpha -> letter_inv i != i.
+groups/free_group_ball.v	102	Lemma	sphere_size_0	(* Key recurrence: each reduced word of length k extends to exactly (2r - 1) reduced words of length k+1 (all letters except the inverse of the last letter). The first letter has 2r choices. *)	Lemma sphere_size_0 : sphere_size 0 = 1.
+groups/free_group_ball.v	105	Lemma	sphere_size_1		Lemma sphere_size_1 : sphere_size 1 = alpha.
+groups/free_group_ball.v	108	Lemma	sphere_size_S		Lemma sphere_size_S (k : nat) :
+groups/free_group_ball.v	129	Lemma	ball_size_0		Lemma ball_size_0 : ball_size 0 = 1.
+groups/free_group_ball.v	132	Lemma	ball_size_S		Lemma ball_size_S (L : nat) :
+groups/free_group_ball.v	136	Lemma	ball_size_ge1		Lemma ball_size_ge1 (L : nat) : 0 < ball_size L.
+groups/free_group_ball.v	148	Lemma	geom_series_nat	(* (q - 1) * sum_{k=0}^{L} q^k = q^{L+1} - 1, for q >= 1 *)	Lemma geom_series_nat (q L : nat) :
+groups/free_group_ball.v	165	Lemma	geom_series_div	(* Variant: sum_{k=0}^{L} q^k = (q^{L+1} - 1) / (q - 1), for q >= 2 *)	Lemma geom_series_div (q L : nat) :
+groups/free_group_ball.v	189	Lemma	alpha_gt1		Lemma alpha_gt1 : 1 < alpha.
+groups/free_group_ball.v	192	Lemma	q_gt0		Lemma q_gt0 : 0 < q.
+groups/free_group_ball.v	196	Lemma	ball_size_sum	(* ball_size r L = 1 + alpha * sum_{k=0}^{L-1} q^k *)	Lemma ball_size_sum (L : nat) :
+groups/free_group_ball.v	205	Lemma	ball_size_formula	(* Main formula, stated multiplicatively to avoid division: (q - 1) * (ball_size r L - 1) = alpha * (q^L - 1) *)	Lemma ball_size_formula (L : nat) :
+groups/free_group_ball.v	219	Lemma	ball_size_div	(* Division form for display: ball_size r L = 1 + alpha * (q^L - 1) / (q - 1) i.e., 1 + 2r * ((2r-1)^L - 1) / (2r - 2) *)	Lemma ball_size_div (L : nat) :
+groups/free_group_ball.v	230	Lemma	ball_size_lower	(* Exponential lower bound: ball_size r L >= q^L = (2r-1)^L *)	Lemma ball_size_lower (L : nat) : q ^ L <= ball_size r L.
+groups/free_group_ball.v	265	Lemma	search_space_exp_growth	(* For word-eval injective generators with branching factor Tg = 2r, the search space is Tg^L by weval_inj_search_space. The ball_size gives the size when restricted to reduced words. Key insight: wo…	Lemma search_space_exp_growth (r L : nat) :
+groups/pgg_raag.v	94	Lemma	foata_depth_at_ext	(* Extensionality: foata_nf depends only on crel values at word elements *)	Lemma foata_depth_at_ext comm1 comm2 prev x :
+groups/pgg_raag.v	105	Lemma	foata_pairs_ext		Lemma foata_pairs_ext comm1 comm2 prev w :
+groups/pgg_raag.v	123	Lemma	foata_nf_ext		Lemma foata_nf_ext comm1 comm2 w :
+groups/pgg_raag.v	132	Lemma	leq_sum_sub		Lemma leq_sum_sub (I : finType) (P Q : pred I) (f : I -> nat) :
+groups/pgg_raag.v	213	Lemma	swap_word_tnth		Lemma swap_word_tnth L' (k : 'I_L') (w : pgg_word M L'.+1)
+groups/pgg_raag.v	249	Lemma	word_eval_adj_swap	(* Swapping adjacent commuting generators preserves word_eval *)	Lemma word_eval_adj_swap L (w1 w2 : pgg_word M L) :
+groups/pgg_raag.v	354	Lemma	word_eval_trace		Lemma word_eval_trace L (w1 w2 : pgg_word M L) :
+groups/pgg_raag.v	367	Lemma	adj_swap_sym_sym	(* adj_swap_sym is symmetric *)	Lemma adj_swap_sym_sym L : symmetric (@adj_swap_sym L).
+groups/pgg_raag.v	371	Lemma	search_space_le_traces	(* Search space bounded by number of traces *)	Lemma search_space_le_traces L : @search_space M L <= n_traces L.
+groups/pgg_raag.v	389	Lemma	raag_weval_inj_search_space		Lemma raag_weval_inj_search_space L :
+groups/pgg_raag.v	414	Lemma	n_traces_le_words	(* Upper bound: n_traces <= Tg^L *)	Lemma n_traces_le_words L : n_traces L <= Tg ^ L.
+groups/pgg_raag.v	421	Lemma	search_space_chain		Lemma search_space_chain L :
+groups/pgg_raag.v	432	Lemma	empty_comm_adj_swap	(* Empty comm -> n_traces = Tg^L (free case) *)	Lemma empty_comm_adj_swap L (w1 w2 : pgg_word M L) :
+groups/pgg_raag.v	444	Lemma	empty_comm_traces		Lemma empty_comm_traces L :
+groups/pgg_raag.v	479	Lemma	swap_word_perm	(* --- Helper: adj_swap preserves perm_eq --- *)	Lemma swap_word_perm L' (k : 'I_L') (w : pgg_word M L'.+1) :
+groups/pgg_raag.v	505	Lemma	adj_swap_perm		Lemma adj_swap_perm L (w1 w2 : pgg_word M L) :
+groups/pgg_raag.v	513	Lemma	trace_perm		Lemma trace_perm L (w1 w2 : pgg_word M L) :
+groups/pgg_raag.v	526	Lemma	not_sorted_descent	(* --- Helper: unsorted sequence has adjacent descent --- *)	Lemma not_sorted_descent (s : seq nat) :
+groups/pgg_raag.v	547	Lemma	inv_count_zero_sorted		Lemma inv_count_zero_sorted L (w : pgg_word M L) :
+groups/pgg_raag.v	587	Lemma	inv_count_swap_lt	(* Swapping an adjacent descent decreases inv_count *)	Lemma inv_count_swap_lt L' (k : 'I_L') (w : pgg_word M L'.+1) :
+groups/pgg_raag.v	700	Lemma	full_comm_connect_sorted	(* --- Full comm: every word connects to a sorted word --- *)	Lemma full_comm_connect_sorted L
+groups/pgg_raag.v	749	Lemma	full_comm_traces	(* Full comm -> n_traces = 'C(L + Tg.-1, Tg.-1) (abelian case) *)	Lemma full_comm_traces L :
+groups/pgg_raag.v	820	Lemma	full_comm_trace_iff_perm		Lemma full_comm_trace_iff_perm L (w1 w2 : pgg_word M L) :
+groups/pgg_raag.v	847	Lemma	indep_adj_swap_false	(* Independent set lower bound on traces *)	Lemma indep_adj_swap_false (I : {set 'I_Tg}) L (w1 w2 : pgg_word M L) :
+groups/pgg_raag.v	865	Lemma	indep_set_traces_lb		Lemma indep_set_traces_lb (I : {set 'I_Tg}) (L : nat) :
+groups/pgg_raag.v	950	Lemma	word_eval_perm_eq		Lemma word_eval_perm_eq L (w1 w2 : pgg_word M L) :
+groups/pgg_raag.v	962	Lemma	indep_set_singleton_traces	(* Independent set generators have singleton trace classes: no two distinct I-words are trace-equivalent. *)	Lemma indep_set_singleton_traces (I : {set 'I_Tg}) (L : nat)
+groups/pgg_raag.v	996	Lemma	indep_set_word_eval_inj	(* Charney's theorem (finite analog): independent set generators with raag_weval_inj give word_eval injectivity on I-words *)	Lemma indep_set_word_eval_inj (I : {set 'I_Tg}) (L : nat) :
+groups/pgg_raag.v	1019	Lemma	raag_weval_inj1		Lemma raag_weval_inj1 : @weval_inj R 1.
+groups/pgg_raag.v	1022	Lemma	raag_search_space_1		Lemma raag_search_space_1 : @search_space R 1 = Tg.
+groups/pgg_raag.v	1896	Lemma	val_tnth_nth		Lemma val_tnth_nth n (w : n.-tuple 'I_Tg) (i : 'I_n) :
+groups/pgg_raag.v	2256	Lemma	n_traces_of_natB	(* ------------------------------------------------------------------ *)	Lemma n_traces_of_natB (L : nat) :
+groups/pgg_raag_clique.v	141	Lemma	star3_cc0	(* ---- Clique counts for star K_{1,3} (4 generators) ---- *)	Lemma star3_cc0 : clique_count 4 0 (star_comm_nat 3) = 1.
+groups/pgg_raag_clique.v	144	Lemma	star3_cc1		Lemma star3_cc1 : clique_count 4 1 (star_comm_nat 3) = 4.
+groups/pgg_raag_clique.v	147	Lemma	star3_cc2		Lemma star3_cc2 : clique_count 4 2 (star_comm_nat 3) = 3.
+groups/pgg_raag_clique.v	150	Lemma	star3_cc3		Lemma star3_cc3 : clique_count 4 3 (star_comm_nat 3) = 0.
+groups/pgg_raag_clique.v	153	Lemma	star3_cc4		Lemma star3_cc4 : clique_count 4 4 (star_comm_nat 3) = 0.
+groups/pgg_raag_clique.v	160	Lemma	complete3_cc0	(* ---- Clique counts for complete graph on 3 generators ---- *)	Lemma complete3_cc0 : clique_count 3 0 complete_comm_nat = 1.
+groups/pgg_raag_clique.v	163	Lemma	complete3_cc1		Lemma complete3_cc1 : clique_count 3 1 complete_comm_nat = 3.
+groups/pgg_raag_clique.v	166	Lemma	complete3_cc2		Lemma complete3_cc2 : clique_count 3 2 complete_comm_nat = 3.
+groups/pgg_raag_clique.v	169	Lemma	complete3_cc3		Lemma complete3_cc3 : clique_count 3 3 complete_comm_nat = 1.
+groups/pgg_raag_clique.v	176	Lemma	empty3_cc0	(* ---- Clique counts for empty graph on 3 generators ---- *)	Lemma empty3_cc0 : clique_count 3 0 (fun _ _ => false) = 1.
+groups/pgg_raag_clique.v	179	Lemma	empty3_cc1		Lemma empty3_cc1 : clique_count 3 1 (fun _ _ => false) = 3.
+groups/pgg_raag_clique.v	182	Lemma	empty3_cc2		Lemma empty3_cc2 : clique_count 3 2 (fun _ _ => false) = 0.
+groups/pgg_raag_clique.v	189	Lemma	path3_cc0	(* ---- Clique counts for path on 3 generators ---- *)	Lemma path3_cc0 : clique_count 3 0 path_comm_nat = 1.
+groups/pgg_raag_clique.v	192	Lemma	path3_cc1		Lemma path3_cc1 : clique_count 3 1 path_comm_nat = 3.
+groups/pgg_raag_clique.v	195	Lemma	path3_cc2		Lemma path3_cc2 : clique_count 3 2 path_comm_nat = 1.
+groups/pgg_raag_clique.v	198	Lemma	path3_cc3		Lemma path3_cc3 : clique_count 3 3 path_comm_nat = 0.
+groups/pgg_raag_clique.v	205	Lemma	star3_ct0	(* ---- Trace counts: star K_{1,3} ---- *)	Lemma star3_ct0 : clique_traces 4 0 (star_comm_nat 3) = 1.
+groups/pgg_raag_clique.v	208	Lemma	star3_ct1		Lemma star3_ct1 : clique_traces 4 1 (star_comm_nat 3) = 4.
+groups/pgg_raag_clique.v	211	Lemma	star3_ct2		Lemma star3_ct2 : clique_traces 4 2 (star_comm_nat 3) = 13.
+groups/pgg_raag_clique.v	214	Lemma	star3_ct3		Lemma star3_ct3 : clique_traces 4 3 (star_comm_nat 3) = 40.
+groups/pgg_raag_clique.v	218	Lemma	star3_ntB0	(* Cross-check with n_traces_natB *)	Lemma star3_ntB0 : n_traces_natB 4 0 (star_comm_nat 3) = 1.
+groups/pgg_raag_clique.v	221	Lemma	star3_ntB1		Lemma star3_ntB1 : n_traces_natB 4 1 (star_comm_nat 3) = 4.
+groups/pgg_raag_clique.v	224	Lemma	star3_ntB2		Lemma star3_ntB2 : n_traces_natB 4 2 (star_comm_nat 3) = 13.
+groups/pgg_raag_clique.v	227	Lemma	star3_ntB3		Lemma star3_ntB3 : n_traces_natB 4 3 (star_comm_nat 3) = 40.
+groups/pgg_raag_clique.v	232	Lemma	free3_ct0	(* ---- Trace counts: free group (3 generators) ---- *)	Lemma free3_ct0 : clique_traces 3 0 (fun _ _ => false) = 1.
+groups/pgg_raag_clique.v	235	Lemma	free3_ct1		Lemma free3_ct1 : clique_traces 3 1 (fun _ _ => false) = 3.
+groups/pgg_raag_clique.v	238	Lemma	free3_ct2		Lemma free3_ct2 : clique_traces 3 2 (fun _ _ => false) = 9.
+groups/pgg_raag_clique.v	241	Lemma	free3_ct3		Lemma free3_ct3 : clique_traces 3 3 (fun _ _ => false) = 27.
+groups/pgg_raag_clique.v	245	Lemma	free3_ntB2	(* Cross-check *)	Lemma free3_ntB2 : n_traces_natB 3 2 (fun _ _ => false) = 9.
+groups/pgg_raag_clique.v	250	Lemma	abelian3_ct0	(* ---- Trace counts: abelian (3 generators) ---- *)	Lemma abelian3_ct0 : clique_traces 3 0 complete_comm_nat = 1.
+groups/pgg_raag_clique.v	253	Lemma	abelian3_ct1		Lemma abelian3_ct1 : clique_traces 3 1 complete_comm_nat = 3.
+groups/pgg_raag_clique.v	256	Lemma	abelian3_ct2		Lemma abelian3_ct2 : clique_traces 3 2 complete_comm_nat = 6.
+groups/pgg_raag_clique.v	259	Lemma	abelian3_ct3		Lemma abelian3_ct3 : clique_traces 3 3 complete_comm_nat = 10.
+groups/pgg_raag_clique.v	265	Lemma	abelian3_ntB2	(* Cross-check *)	Lemma abelian3_ntB2 : n_traces_natB 3 2 complete_comm_nat = 6.
+groups/pgg_raag_clique.v	268	Lemma	abelian3_ntB3		Lemma abelian3_ntB3 : n_traces_natB 3 3 complete_comm_nat = 10.
+groups/pgg_raag_clique.v	273	Lemma	path3_ct0	(* ---- Trace counts: path (3 generators) ---- *)	Lemma path3_ct0 : clique_traces 3 0 path_comm_nat = 1.
+groups/pgg_raag_clique.v	276	Lemma	path3_ct1		Lemma path3_ct1 : clique_traces 3 1 path_comm_nat = 3.
+groups/pgg_raag_clique.v	279	Lemma	path3_ct2		Lemma path3_ct2 : clique_traces 3 2 path_comm_nat = 8.
+groups/pgg_raag_clique.v	282	Lemma	path3_ct3		Lemma path3_ct3 : clique_traces 3 3 path_comm_nat = 21.
+groups/pgg_raag_clique.v	286	Lemma	path3_ntB2	(* Cross-check *)	Lemma path3_ntB2 : n_traces_natB 3 2 path_comm_nat = 8.
+groups/pgg_raag_clique.v	289	Lemma	path3_ntB3		Lemma path3_ntB3 : n_traces_natB 3 3 path_comm_nat = 21.
+groups/pgg_raag_clique.v	298	Lemma	subseqs_k_size	(* --- Helper lemma: size of elements in subseqs_k --- *)	Lemma subseqs_k_size k s t : t \in subseqs_k k s -> size t = k.
+groups/pgg_raag_clique.v	310	Lemma	filter_pred1T	(* --- Empty graph: clique_count Tg 0 = 1, clique_count Tg 1 = Tg --- *)	Lemma filter_pred1T (T : Type) (p : pred T) (x : T) :
+groups/pgg_raag_clique.v	314	Lemma	all_pairs_comm_nil		Lemma all_pairs_comm_nil comm : all_pairs_comm_sorted comm [::] = true.
+groups/pgg_raag_clique.v	317	Lemma	subseqs_k0		Lemma subseqs_k0 s : subseqs_k 0 s = [:: [::]].
+groups/pgg_raag_clique.v	320	Lemma	clique_count0		Lemma clique_count0 Tg comm : clique_count Tg 0 comm = 1.
+groups/pgg_raag_clique.v	326	Lemma	subseqs_k1		Lemma subseqs_k1 s : subseqs_k 1 s = [seq [:: x] | x <- s].
+groups/pgg_raag_clique.v	332	Lemma	empty_clique_count1		Lemma empty_clique_count1 Tg :
+groups/pgg_raag_clique.v	340	Lemma	subseqs_k_subseq		Lemma subseqs_k_subseq k s t : t \in subseqs_k k s -> subseq t s.
+groups/pgg_raag_clique.v	350	Lemma	mem_subseqs_k		Lemma mem_subseqs_k k s t :
+groups/pgg_raag_clique.v	371	Lemma	all_pairs_false_neq		Lemma all_pairs_false_neq (s : seq nat) (a b : nat) :
+groups/pgg_raag_clique.v	381	Lemma	empty_clique_countk		Lemma empty_clique_countk Tg k :
+groups/pgg_raag_clique.v	404	Lemma	sumn_map_0	(* Helper: sumn of all-zero map is 0 *)	Lemma sumn_map_0 {A : eqType} (f : A -> nat) (s : seq A) :
+groups/pgg_raag_clique.v	413	Lemma	clique_step_free	(* clique_step for empty graph = Tg * previous element *)	Lemma clique_step_free Tg memo :
+groups/pgg_raag_clique.v	444	Lemma	clique_traces_aux_inv	(* Invariant: clique_traces_aux extends memo with powers of Tg *)	Lemma clique_traces_aux_inv Tg n memo :
+groups/pgg_raag_clique.v	472	Lemma	clique_traces_free		Lemma clique_traces_free Tg L :
+groups/pgg_raag_clique.v	488	Lemma	all_pairs_complete	(* All distinct pairs commute in a complete graph *)	Lemma all_pairs_complete (s : seq nat) :
+groups/pgg_raag_clique.v	497	Lemma	size_subseqs_k		Lemma size_subseqs_k k s :
+groups/pgg_raag_clique.v	506	Lemma	complete_clique_count		Lemma complete_clique_count Tg k :
+groups/pgg_raag_clique.v	534	Lemma	filter_iota_head_even		Lemma filter_iota_head_even L :
+groups/pgg_raag_clique.v	538	Lemma	filter_iota_head_odd		Lemma filter_iota_head_odd L :
+groups/pgg_raag_clique.v	542	Lemma	sumn_filter_map		Lemma sumn_filter_map {A : eqType} (p : pred A) (f : A -> nat) (s : seq A) :
+groups/pgg_raag_clique.v	547	Lemma	spos_unfold		Lemma spos_unfold n r L :
+groups/pgg_raag_clique.v	552	Lemma	sneg_unfold		Lemma sneg_unfold n r L :
+groups/pgg_raag_clique.v	557	Lemma	spos_split		Lemma spos_split n r L :
+groups/pgg_raag_clique.v	566	Lemma	sneg_eq_tail		Lemma sneg_eq_tail n r L :
+groups/pgg_raag_clique.v	576	Lemma	sumn_map_add		Lemma sumn_map_add {A : Type} (f g : A -> nat) (s : seq A) :
+groups/pgg_raag_clique.v	581	Lemma	sumn_map_split		Lemma sumn_map_split (f g h : nat -> nat) m M :
+groups/pgg_raag_clique.v	591	Lemma	sumn_map_eq		Lemma sumn_map_eq (f g : nat -> nat) m M :
+groups/pgg_raag_clique.v	600	Lemma	sumn_shift_even_to_odd_gen		Lemma sumn_shift_even_to_odd_gen (g : nat -> nat) m M :
+groups/pgg_raag_clique.v	608	Lemma	sumn_shift_odd_to_even_gen		Lemma sumn_shift_odd_to_even_gen (g : nat -> nat) m M :
+groups/pgg_raag_clique.v	616	Lemma	sumn_iota_map0		Lemma sumn_iota_map0 (f : nat -> nat) m M :
+groups/pgg_raag_clique.v	625	Lemma	spos_L0		Lemma spos_L0 n r : spos n r 0 = 'C(r, r).
+groups/pgg_raag_clique.v	628	Lemma	sneg_L0		Lemma sneg_L0 n r : sneg n r 0 = 0.
+groups/pgg_raag_clique.v	631	Lemma	spos0		Lemma spos0 r L : spos 0 r L = 'C(L + r, r).
+groups/pgg_raag_clique.v	640	Lemma	sneg0		Lemma sneg0 r L : sneg 0 r L = 0.
+groups/pgg_raag_clique.v	647	Lemma	binSn		Lemma binSn n k : 0 < k ->
+groups/pgg_raag_clique.v	653	Lemma	spos_pascal_core	(* Core identity for spos_pascal: decomposes even-parity sum using Pascal's rule C(n+1,k) = C(n,k) + C(n,k-1) and reindexing. *)	Lemma spos_pascal_core n r L :
+groups/pgg_raag_clique.v	685	Lemma	sneg_pascal_core	(* Core identity for sneg_pascal: decomposes odd-parity sum using Pascal's rule and reindexing. *)	Lemma sneg_pascal_core n r L :
+groups/pgg_raag_clique.v	715	Lemma	spos_pascal		Lemma spos_pascal n r L :
+groups/pgg_raag_clique.v	722	Lemma	sneg_pascal		Lemma sneg_pascal n r L :
+groups/pgg_raag_clique.v	729	Lemma	spos_inv		Lemma spos_inv n r L : n <= r ->
+groups/pgg_raag_clique.v	758	Lemma	spos_eq_sneg		Lemma spos_eq_sneg n L :
+groups/pgg_raag_clique.v	766	Lemma	pos_eq_sneg_range		Lemma pos_eq_sneg_range Tg r L :
+groups/pgg_raag_clique.v	772	Lemma	neg_eq_spos_sub		Lemma neg_eq_spos_sub Tg r L :
+groups/pgg_raag_clique.v	778	Lemma	clique_step_abelian		Lemma clique_step_abelian Tg memo :
+groups/pgg_raag_clique.v	807	Lemma	clique_traces_aux_inv_abelian		Lemma clique_traces_aux_inv_abelian Tg n memo :
+groups/pgg_raag_clique.v	830	Lemma	clique_traces_abelian		Lemma clique_traces_abelian Tg L :
+groups/pgg_raag_clique.v	850	Lemma	free_growth_check	(* Free: Tg^L *)	Lemma free_growth_check : [seq clique_traces 3 L (fun _ _ => false) | L <- iota 0 5]
+groups/pgg_raag_clique.v	855	Lemma	abelian_growth_check	(* Abelian: C(L+Tg-1, Tg-1) for Tg=3 gives C(L+2,2) *)	Lemma abelian_growth_check : [seq clique_traces 3 L complete_comm_nat | L <- iota 0 5]
+groups/pgg_raag_clique.v	860	Lemma	star3_growth_check	(* Star K_{1,3}: m_L = (3^{L+1}-1)/2 *)	Lemma star3_growth_check :
+groups/pgg_raag_clique.v	866	Lemma	path3_growth_check	(* Path on 3: m_L satisfies m_L = 3*m_{L-1} - m_{L-2} *)	Lemma path3_growth_check :
+groups/pgg_raag_clique.v	895	Lemma	cartier_foata_check_free3	(* vm_compute verification of cartier_foata for all concrete instances *)	Lemma cartier_foata_check_free3 :
+groups/pgg_raag_clique.v	901	Lemma	cartier_foata_check_abelian3		Lemma cartier_foata_check_abelian3 :
+groups/pgg_raag_clique.v	907	Lemma	cartier_foata_check_path3		Lemma cartier_foata_check_path3 :
+groups/pgg_raag_clique.v	913	Lemma	cartier_foata_check_star3		Lemma cartier_foata_check_star3 :
+groups/pgg_raag_clique.v	919	Lemma	cartier_foata_check_abelian4		Lemma cartier_foata_check_abelian4 :
+groups/pgg_raag_clique.v	963	Lemma	table_T4_free	(* Verify the T=4 comparison table *)	Lemma table_T4_free :
+groups/pgg_raag_clique.v	971	Lemma	table_T4_path		Lemma table_T4_path :
+groups/pgg_raag_clique.v	982	Lemma	table_T4_star3	(* Note: path P_4 and star K_{1,3} have the same clique polynomial P(z) = 1 - 4z + 3z^2 = (1-z)(1-3z), hence the same trace counts. By the Cartier-Foata theorem, the trace-counting generating functio…	Lemma table_T4_star3 :
+groups/pgg_raag_clique.v	987	Lemma	table_T4_abelian		Lemma table_T4_abelian :
+groups/pgg_raag_clique.v	993	Lemma	path4_ntB_check	(* Cross-check: n_traces_natB for path P_4 matches the clique prediction *)	Lemma path4_ntB_check :
+groups/pgg_raag_clique.v	999	Lemma	star3_ntB_check	(* Cross-check: n_traces_natB for star K_{1,3} matches *)	Lemma star3_ntB_check :
+groups/pgg_raag_path.v	49	Lemma	path_gen_tupleE		Lemma path_gen_tupleE (i : 'I_T) : tnth path_gen_tuple i = path_gen i.
+groups/pgg_raag_path.v	54	Lemma	path_gen_inj	(* --- Generator injectivity --- *)	Lemma path_gen_inj : injective path_gen.
+groups/pgg_raag_path.v	99	Lemma	path_comm_sym		Lemma path_comm_sym : symmetric path_comm.
+groups/pgg_raag_path.v	102	Lemma	path_comm_irrefl		Lemma path_comm_irrefl : irreflexive path_comm.
+groups/pgg_raag_path.v	105	Lemma	path_comm_dist2		Lemma path_comm_dist2 (i j : 'I_T) :
+groups/pgg_raag_path.v	110	Lemma	path_dist_neq		Lemma path_dist_neq (a b : nat) : (a - b) + (b - a) >= 2 -> a != b.
+groups/pgg_raag_path.v	113	Lemma	path_dist_neqS		Lemma path_dist_neqS (a b : nat) : (a - b) + (b - a) >= 2 -> a != b.+1.
+groups/pgg_raag_path.v	121	Lemma	path_Hcomm		Lemma path_Hcomm : forall i j : 'I_T,
+groups/pgg_raag_path.v	138	Lemma	path_gen_inj_sigmas	(* --- RAAG instance wrapper lemmas --- *)	Lemma path_gen_inj_sigmas :
+groups/pgg_raag_path.v	142	Lemma	path_Hcomm_sigmas		Lemma path_Hcomm_sigmas : forall i j : 'I_T,
+groups/pgg_raag_path.v	150	Lemma	path_adj_noncommute	(* --- Non-abelianity (via generic) --- *)	Lemma path_adj_noncommute (Hm : 0 < m) :
+groups/pgg_raag_path.v	171	Lemma	path_G_nonabelian		Lemma path_G_nonabelian : 0 < m ->
+groups/pgg_raag_path.v	186	Lemma	path_indep_pair	(* --- Independent set: any adjacent pair {i, i+1} --- *)	Lemma path_indep_pair (Hm : 0 < m) :
+groups/pgg_raag_path.v	204	Lemma	path_traces_lb		Lemma path_traces_lb (L : nat) : 0 < m ->
+groups/pgg_weval_inj.v	76	Lemma	map_uniq_injective		Lemma map_uniq_injective (T1 T2 : eqType) (f : T1 -> T2) (xs : seq T1) (a b : T1) :
+groups/pgg_weval_inj.v	92	Lemma	mem_all_words		Lemma mem_all_words Tg L (w : seq nat) :
+groups/pgg_weval_inj.v	122	Lemma	eval_foldl_agree	(* Key lemma 1: foldl on nat matches foldl on ordinals *)	Lemma eval_foldl_agree (ws : seq 'I_Tg) (x : 'I_N) :
+groups/pgg_weval_inj.v	130	Lemma	word_eval_foldl	(* Key lemma 2: word_eval equals foldl over the tuple *)	Lemma word_eval_foldl (L : nat) (w : @pgg_word M L) (x : 'I_N) :
+groups/pgg_weval_inj.v	153	Lemma	eval_word_agree	(* Combine: eval_word_nat agrees with word_eval *)	Lemma eval_word_agree (L : nat) (w : @pgg_word M L) (x : 'I_N) :
+groups/pgg_weval_inj.v	161	Lemma	map_val_tuple_inj	(* map val is injective on pgg_word *)	Lemma map_val_tuple_inj (L : nat) (w1 w2 : @pgg_word M L) :
+groups/pgg_weval_inj.v	166	Lemma	map_val_in_all_words	(* map val of a pgg_word is in all_words *)	Lemma map_val_in_all_words (L : nat) (w : @pgg_word M L) :
+groups/pgg_weval_inj.v	175	Lemma	weval_inj_of_natB	(* Main reflection lemma *)	Lemma weval_inj_of_natB (L : nat) :
+groups/pgg_weval_inj.v	202	Lemma	weval_inj_inst_search_space		Lemma weval_inj_inst_search_space : @search_space M L = m.+1 ^ L.
+groups/pgg_weval_inj.v	225	Lemma	oc_s0K		Lemma oc_s0K : cancel oc_s0_fun oc_s0_inv.
+groups/pgg_weval_inj.v	228	Lemma	oc_s0E		Lemma oc_s0E x : oc_s0 x = oc_s0_fun x. Proof. by rewrite permE. Qed.
+groups/pgg_weval_inj.v	239	Lemma	oc_s1K		Lemma oc_s1K : cancel oc_s1_fun oc_s1_inv.
+groups/pgg_weval_inj.v	242	Lemma	oc_s1E		Lemma oc_s1E x : oc_s1 x = oc_s1_fun x. Proof. by rewrite permE. Qed.
+groups/pgg_weval_inj.v	245	Lemma	oc_sigmas_size	(* Generator tuple *)	Lemma oc_sigmas_size : size [:: oc_s0; oc_s1] == 2.
+groups/pgg_weval_inj.v	250	Lemma	oc_sigmasE		Lemma oc_sigmasE (i : 'I_2) : tnth oc_sigmas i =
+groups/pgg_weval_inj.v	265	Lemma	oc_gens_agree		Lemma oc_gens_agree (i : 'I_2) (x : 'I_oc_N) :
+groups/pgg_weval_inj.v	273	Lemma	oc_s0_order3	(* Order 3 *)	Lemma oc_s0_order3 : (oc_s0 ^+ 3 = 1 :> {perm 'I_oc_N})%g.
+groups/pgg_weval_inj.v	279	Lemma	oc_s1_order3		Lemma oc_s1_order3 : (oc_s1 ^+ 3 = 1 :> {perm 'I_oc_N})%g.
+groups/pgg_weval_inj.v	286	Lemma	oc_noncommute	(* Non-commutativity *)	Lemma oc_noncommute : (oc_s0 * oc_s1 != oc_s1 * oc_s0)%g.
+groups/pgg_weval_inj.v	293	Lemma	oc_weval_inj2	(* Word-eval injectivity via nat-level boolean decision + vm_compute *)	Lemma oc_weval_inj2 : @weval_inj OC_PGGTypes 2.
+groups/pgg_weval_inj.v	300	Lemma	oc_search_space_2	(* Search space instantiation *)	Lemma oc_search_space_2 : @search_space OC_PGGTypes 2 = 4.
+instances/abelian/abelian_word_collapse.v	50	Lemma	freq_vec_sum	(* Sum of frequencies equals word length *)	Lemma freq_vec_sum (w : pgg_word M L) :
+instances/abelian/abelian_word_collapse.v	63	Lemma	abelian_prod_in	(* only Monoid.law. We reprove them under a runtime abelian hypothesis. *)	Lemma abelian_prod_in (Habel : abelian G)
+instances/abelian/abelian_word_collapse.v	73	Lemma	abelian_bigID		Lemma abelian_bigID (Habel : abelian G)
+instances/abelian/abelian_word_collapse.v	90	Lemma	abelian_big_union		Lemma abelian_big_union (Habel : abelian G)
+instances/abelian/abelian_word_collapse.v	107	Lemma	abelian_partition_big		Lemma abelian_partition_big (Habel : abelian G)
+instances/abelian/abelian_word_collapse.v	135	Lemma	big_const_expg		Lemma big_const_expg (n : nat) (P : pred 'I_n) (g : gT) :
+instances/abelian/abelian_word_collapse.v	147	Lemma	abelian_word_eval	(* Main theorem: abelian word evaluation depends only on frequency vector. In an abelian group, the product \prod_i sigma_{w_i} can be rearranged by collecting equal generators: sigma_j^{count of j i…	Lemma abelian_word_eval (w : pgg_word M L) :
+instances/abelian/abelian_word_collapse.v	165	Lemma	freq_vec_det	(* Two words with the same frequency vector give the same group element *)	Lemma freq_vec_det (w1 w2 : pgg_word M L) :
+instances/abelian/abelian_word_collapse.v	198	Lemma	freq_vec_lt	(* The frequency vector of a word, as a bounded function *)	Lemma freq_vec_lt (w : pgg_word M L) (j : 'I_Tg) :
+instances/abelian/abelian_word_collapse.v	208	Lemma	freq_vec_ffun_val		Lemma freq_vec_ffun_val (w : pgg_word M L) (j : 'I_Tg) :
+instances/abelian/abelian_word_collapse.v	212	Lemma	freq_vec_ffun_in		Lemma freq_vec_ffun_in (w : pgg_word M L) :
+instances/abelian/abelian_word_collapse.v	224	Lemma	abelian_word_eval_freq		Lemma abelian_word_eval_freq (w : pgg_word M L) :
+instances/abelian/abelian_word_collapse.v	234	Lemma	abelian_achievable_sub	(* Search space bound: achievable elements are at most the image of freq_vecs *)	Lemma abelian_achievable_sub :
+instances/abelian/abelian_word_collapse.v	244	Lemma	abelian_search_space_le		Lemma abelian_search_space_le :
+instances/abelian/abelian_word_collapse.v	281	Lemma	ffun_to_tupleK		Lemma ffun_to_tupleK : cancel ffun_to_tuple tuple_to_ffun.
+instances/abelian/abelian_word_collapse.v	284	Lemma	tuple_to_ffunK		Lemma tuple_to_ffunK : cancel tuple_to_ffun ffun_to_tuple.
+instances/abelian/abelian_word_collapse.v	287	Lemma	sum_ffun_to_tuple		Lemma sum_ffun_to_tuple (f : {ffun 'I_r.+1 -> 'I_L.+1}) :
+instances/abelian/abelian_word_collapse.v	294	Lemma	card_compositions		Lemma card_compositions :
+instances/abelian/abelian_word_collapse.v	322	Lemma	freq_vecs_eq_compositions	(* freq_vecs is exactly compositions for r = pgg_ngens' M *)	Lemma freq_vecs_eq_compositions :
+instances/abelian/abelian_word_collapse.v	326	Lemma	card_freq_vecs		Lemma card_freq_vecs :
+instances/abelian/abelian_word_collapse.v	333	Theorem	abelian_search_space_bound	(* Combined bound *)	Theorem abelian_search_space_bound :
+instances/abelian/pgg_abelian.v	51	Lemma	shift_unshiftK		Lemma shift_unshiftK : cancel shift_fun unshift_fun.
+instances/abelian/pgg_abelian.v	58	Lemma	shift_fun_inj		Lemma shift_fun_inj : injective shift_fun.
+instances/abelian/pgg_abelian.v	63	Lemma	ncycleE		Lemma ncycleE (i : 'I_N) :
+instances/abelian/pgg_abelian.v	68	Lemma	ncycle_iter	(* Iterated application of the N-cycle *)	Lemma ncycle_iter (k : nat) (x : 'I_N) :
+instances/abelian/pgg_abelian.v	79	Lemma	ncycle_expN		Lemma ncycle_expN : (ncycle ^+ N = 1 :> {perm 'I_N})%g.
+instances/abelian/pgg_abelian.v	86	Lemma	ncycle_order	(* Full order of the canonical N-cycle *)	Lemma ncycle_order : #[ncycle]%g = N.
+instances/abelian/pgg_abelian.v	113	Lemma	incl_morphM	(* Inclusion morphism: identity on the subgroup *)	Lemma incl_morphM : {in G &, {morph (@id gT) : x y / (x * y)%g}}.
+instances/abelian/pgg_abelian.v	126	Lemma	tnth_cyclic_sigmas		Lemma tnth_cyclic_sigmas (i : 'I_1) : tnth cyclic_sigmas i = sigma.
+instances/abelian/pgg_abelian.v	129	Lemma	cyclic_sigmas_gen		Lemma cyclic_sigmas_gen :
+instances/abelian/pgg_abelian.v	142	Lemma	cyclic_G_abelian	(* Key property: cyclic groups are abelian *)	Lemma cyclic_G_abelian : abelian G.
+instances/abelian/pgg_abelian.v	146	Lemma	cyclic_word_eval	(* Word evaluation in the cyclic (1-generator) instance *)	Lemma cyclic_word_eval (L : nat) (w : @pgg_word Cyclic_PGGTypes L) :
+instances/abelian/pgg_abelian.v	154	Lemma	cyclic_search_space_le	(* Search space collapse: at most #[sigma] distinct elements reachable *)	Lemma cyclic_search_space_le (L : nat) :
+instances/abelian/pgg_abelian.v	167	Lemma	cyclic_starts_2_uniq		Lemma cyclic_starts_2_uniq : uniq cyclic_starts_2.
+instances/abelian/pgg_abelian.v	208	Lemma	dt_even_lt		Lemma dt_even_lt (i : 'I_Tg) : (val i).*2 < N.
+instances/abelian/pgg_abelian.v	211	Lemma	dt_odd_lt		Lemma dt_odd_lt (i : 'I_Tg) : (val i).*2.+1 < N.
+instances/abelian/pgg_abelian.v	219	Lemma	dt_gen_tupleE		Lemma dt_gen_tupleE (i : 'I_Tg) : tnth dt_gen_tuple i = dt_gen i.
+instances/abelian/rigidity_abelian_instance.v	72	Lemma	abel_s1_neq_s2	(* Generators are distinct permutations *)	Lemma abel_s1_neq_s2 : abel_s1 != abel_s2.
+instances/abelian/rigidity_abelian_instance.v	80	Lemma	abel_sigmas_distinct		Lemma abel_sigmas_distinct :
+instances/abelian/rigidity_abelian_instance.v	102	Lemma	abel_weval_inj1	(* Word-eval injectivity at L=1: follows from generator injectivity *)	Lemma abel_weval_inj1 : @weval_inj M_abel 1.
+instances/abelian/rigidity_abelian_instance.v	109	Lemma	abel_perm_endpoint_inj1	(* Direct endpoint SecurityWitness at L=1. Epsilon = 2*(4-2)/4 = 1.0, tighter than DPI bound 44/24 ≈ 1.83. Proof: (01) and (23) have disjoint support, so they map every sheet to distinct values. *)	Lemma abel_perm_endpoint_inj1 :
+instances/abelian/rigidity_abelian_instance.v	181	Lemma	abel_complexity	(* Derived properties *)	Lemma abel_complexity (L : nat) :
+instances/abelian/rigidity_abelian_instance.v	185	Lemma	abel_tradeoff		Lemma abel_tradeoff :
+instances/denboer1989/five_card_group.v	80	Lemma	fc_sigmaK		Lemma fc_sigmaK : cancel fc_sigma_fun fc_sigma_inv.
+instances/denboer1989/five_card_group.v	98	Lemma	fc_gK	Definition fc_g_inv := fc_g_fun. (* g is its own inverse *)	Lemma fc_gK : cancel fc_g_fun fc_g_inv.
+instances/denboer1989/five_card_group.v	119	Lemma	fc_g_involution	(** Involution properties *)	Lemma fc_g_involution : is_involution fc_g.
+instances/denboer1989/five_card_group.v	137	Lemma	fc_sigmasE		Lemma fc_sigmasE (i : 'I_1) : tnth fc_sigmas i = fc_sigma.
+instances/denboer1989/five_card_group.v	140	Lemma	fc_gens_agree		Lemma fc_gens_agree (i : 'I_1) (x : 'I_5) :
+instances/denboer1989/five_card_group.v	149	Lemma	fc_weval_inj1	(** Word-eval injectivity at L=1: trivially true since there's only 1 generator and it is not the identity. *)	Lemma fc_weval_inj1 : @weval_inj FiveCard_M 1.
+instances/denboer1989/five_card_group.v	158	Lemma	fc_weval_inj4	(** Word-eval injectivity at L=4: the 4 words [0], [0,0], [0,0,0], [0,0,0,0] evaluate to sigma, sigma^2, sigma^3, sigma^4, all distinct since sigma has order 5. *)	Lemma fc_weval_inj4 : @weval_inj FiveCard_M 4.
+instances/denboer1989/five_card_pismc.v	110	Lemma	fc_ts_correct	(** Correctness: reconstruction of valid shares returns the secret. *)	Lemma fc_ts_correct (s : bool) (shares : 5.-tuple bool) :
+instances/denboer1989/five_card_pismc.v	115	Lemma	fc_ts_encode_valid	(** Canonical encoding is valid. *)	Lemma fc_ts_encode_valid (s : bool) : fc_ts_valid s (fc_ts_encode s).
+instances/denboer1989/five_card_pismc.v	149	Lemma	fc_witness_size		Lemma fc_witness_size (s : bool) (i : nat) (v : bool) :
+instances/denboer1989/five_card_pismc.v	156	Lemma	fc_witness_val		Lemma fc_witness_val s (i : 'I_5) v :
+instances/denboer1989/five_card_pismc.v	160	Lemma	fc_witness_valid		Lemma fc_witness_valid s (i : 'I_5) v :
+instances/denboer1989/five_card_pismc.v	167	Lemma	fc_witness_tnth		Lemma fc_witness_tnth s (i : 'I_5) v :
+instances/denboer1989/five_card_pismc.v	178	Lemma	fc_ts_private	(** Privacy: any single card position (|C| < 2) can be matched by shares valid for a different secret. In the five-card trick, each individual card position is compatible with both AND=0 and AND=1, b…	Lemma fc_ts_private (s1 s2 : bool) (shares : 5.-tuple bool)
+instances/denboer1989/five_card_program.v	68	Lemma	fc_arrange_size		Lemma fc_arrange_size (a b : bool) : size (fc_arrange a b) = 5.
+instances/denboer1989/five_card_program.v	100	Lemma	fc_correct	(** Three consecutive hearts appear in the shuffled arrangement iff both input bits are 1. Proved by exhaustive computation over 4 (bool x bool) * 5 (shift) = 20 cases. *)	Lemma fc_correct (a b : bool) (k : nat) (Hk : k < 5) :
+instances/denboer1989/five_card_program.v	108	Lemma	fc_arrange_size_proof	(******************************************************************************)	Lemma fc_arrange_size_proof (a b : bool) : size (fc_arrange a b) == 5.
+instances/denboer1989/five_card_program.v	117	Lemma	fc_sigma_funE	(** [fc_sigma] applied to an ordinal equals the plain function [fc_sigma_fun] from [five_card_group.v]. *)	Lemma fc_sigma_funE (i : 'I_5) : fc_sigma i = fc_sigma_fun i.
+instances/denboer1989/five_card_security.v	56	Lemma	fc_sigma_perm	(******************************************************************************)	Lemma fc_sigma_perm (x : 'I_5) : sigma x = fc_sigma_fun x.
+instances/denboer1989/five_card_security.v	60	Lemma	fc_sigma5	(** sigma^5 = 1 by direct computation *)	Lemma fc_sigma5 : sigma ^+ 5 = 1 :> {perm 'I_5}.
+instances/denboer1989/five_card_security.v	68	Lemma	fc_sigma_in_G	(** sigma is in G *)	Lemma fc_sigma_in_G : sigma \in G.
+instances/denboer1989/five_card_security.v	76	Lemma	fc_sigma_pow_in_G	(** All powers of sigma are in G *)	Lemma fc_sigma_pow_in_G (k : nat) : sigma ^+ k \in G.
+instances/denboer1989/five_card_security.v	85	Lemma	fc_pow0	(** We compute sigma^k(s) for k=0..4 and all s by direct expansion. *)	Lemma fc_pow0 (s : 'I_5) : (sigma ^+ 0) s = s.
+instances/denboer1989/five_card_security.v	88	Lemma	fc_pow1		Lemma fc_pow1 (s : 'I_5) : val ((sigma ^+ 1) s) = (val s).+1 %% 5.
+instances/denboer1989/five_card_security.v	95	Lemma	fc_reach	(** For each target x, we exhibit the power of sigma that maps s to x. *)	Lemma fc_reach (s x : 'I_5) :
+instances/denboer1989/five_card_security.v	115	Lemma	fc_G_pos	(******************************************************************************)	Lemma fc_G_pos : (0 < #|G|)%N.
+instances/denboer1989/five_card_security.v	122	Lemma	fc_orbit_full	(******************************************************************************)	Lemma fc_orbit_full (s : 'I_5) :
+instances/denboer1989/five_card_security.v	138	Lemma	fc_pow_fix_zero	(** Helper: sigma^k fixes any sheet s implies k is a multiple of 5. *)	Lemma fc_pow_fix_zero (k : nat) (s : 'I_5) :
+instances/denboer1989/five_card_security.v	150	Lemma	fc_fix_imp_id	(** Key: any element of G that fixes a sheet must be the identity. *)	Lemma fc_fix_imp_id (g : {perm 'I_5}) (s : 'I_5) :
+instances/denboer1989/five_card_security.v	167	Lemma	fc_eval_inj		Lemma fc_eval_inj (s : 'I_5) :
+instances/denboer1989/five_card_security.v	184	Lemma	fc_rho_id	(** For Gen_PGGTypes, pgg_rho = gen_incl_morph = id on {perm 'I_5}. So the image rhoG = G, and all G-level properties lift to rhoG. *)	Lemma fc_rho_id (g : {perm 'I_5}) : g \in G -> @pgg_rho FiveCard_M g = g.
+instances/denboer1989/five_card_security.v	189	Lemma	fc_rhoG_eq		Lemma fc_rhoG_eq : [set rho x | x in G] = G.
+instances/denboer1989/five_card_security.v	200	Lemma	fc_rhoG_pos	(******************************************************************************)	Lemma fc_rhoG_pos : (0 < #|[set rho x | x in G]|)%N.
+instances/denboer1989/five_card_security.v	203	Lemma	fc_rhoG_regular		Lemma fc_rhoG_regular (s : 'I_5) :
+instances/denboer1989/five_card_security.v	210	Lemma	fc_rhoG_trans		Lemma fc_rhoG_trans (s : 'I_5) :
+instances/denboer1989/five_card_security.v	223	Lemma	fc_eps_zero		Lemma fc_eps_zero : sw_bound_eps fc_security_uniform = GRing.zero.
+instances/denboer1989/five_card_security.v	245	Lemma	fc_HN5	(* Sheet count for FiveCard_M: 5 sheets (pgg_N' = 4). Verified definitionally since FiveCard_M = Gen_PGGTypes 0 3 fc_sigmas, so pgg_N' = 4. *)	Lemma fc_HN5 : (pgg_N' FiveCard_M).+1 = 5.
+instances/denboer1989/five_card_security.v	265	Lemma	fc_genus0_automorphism	(** fc_genus0_automorphism — discharges [genus0_automorphism_bound] for the FiveCard instance by reducing to the concrete PGL bound [fc_genus0_pgl]. Kind: helper. Why: required to instantiate [fc_thr…	Lemma fc_genus0_automorphism :
+instances/denboer1989/five_card_security.v	278	Lemma	fc_tradeoff	(* Verify tradeoff: genus-0 regime with T = k *)	Lemma fc_tradeoff :
+instances/denboer1989/five_card_security.v	294	Lemma	fc_ts_recon_correct	(** Protocol reconstruction correctness: named instance-level re-export of [ar_protocol_correct]. *)	Lemma fc_ts_recon_correct (PI : PGGInterface FiveCard_M)
+instances/denboer1989/five_card_session_types.v	46	Lemma	fc_dtype_eqP		Lemma fc_dtype_eqP : Equality.axiom fc_dtype_eqb.
+instances/denboer1989/five_card_session_types.v	71	Lemma	from_card_FC_card		Lemma from_card_FC_card (v : bool) :
+instances/denboer1989/five_card_session_types.v	75	Lemma	from_commit_FC_commit		Lemma from_commit_FC_commit (cs : seq bool) :
+instances/kim2025/five_card_kim.v	118	Lemma	fc_kim_sigmasE	(** Each generator sigma^k acts as expected *)	Lemma fc_kim_sigmasE (k : 'I_5) : tnth fc_kim_sigmas k = (sigma ^+ val k)%g.
+instances/kim2025/five_card_kim.v	163	Lemma	kim_weight_gt0		Lemma kim_weight_gt0 (k : 'I_5) : 0 < kim_weight_fun k.
+instances/kim2025/five_card_kim.v	177	Lemma	kim_weight_ge0		Lemma kim_weight_ge0 : forall k : 'I_5, 0 <= kim_weight_fun k.
+instances/kim2025/five_card_kim.v	180	Lemma	kim_weight_sum1		Lemma kim_weight_sum1 : \sum_(k in 'I_5) kim_weight_fun k = 1.
+instances/kim2025/five_card_kim.v	217	Lemma	kim_weight_distE		Lemma kim_weight_distE (k : 'I_5) :
+instances/kim2025/five_card_kim.v	254	Lemma	fc_kim_schreier_diag	(** Diagonal entries: Q(x,x) = W(0) = 1/5 - eps *)	Lemma fc_kim_schreier_diag (x : 'I_5) :
+instances/kim2025/five_card_kim.v	270	Lemma	fc_kim_row_stochastic	(** Row stochastic: inherited from generic Schreier lemma *)	Lemma fc_kim_row_stochastic (x : 'I_5) :
+instances/kim2025/five_card_kim.v	275	Lemma	fc_kim_col_stochastic	(** Column stochastic: for circulant matrices, column sums = row sums *)	Lemma fc_kim_col_stochastic (y : 'I_5) :
+instances/kim2025/five_card_kim.v	296	Lemma	fc_kim_schreier_offdiag	(** Off-diagonal entries: Q(x,y) = W(y-x mod 5) = 1/5 + eps/4 for x != y *)	Lemma fc_kim_schreier_offdiag (x y : 'I_5) :
+instances/kim2025/five_card_kim.v	312	Lemma	fc_kim_doubly_stochastic	(** Doubly stochastic *)	Lemma fc_kim_doubly_stochastic :
+instances/kim2025/five_card_kim.v	351	Lemma	kim_slev_ge0		Lemma kim_slev_ge0 : 0 <= kim_slev.
+instances/kim2025/five_card_kim.v	354	Lemma	kim_slev_lt1		Lemma kim_slev_lt1 : kim_slev < 1.
+instances/kim2025/five_card_kim.v	367	Lemma	kim_spectral_gap_pos		Lemma kim_spectral_gap_pos : 0 < kim_spectral_gap.
+instances/kim2025/five_card_kim.v	370	Lemma	kim_spectral_gap_le1		Lemma kim_spectral_gap_le1 : kim_spectral_gap <= 1.
+instances/kim2025/five_card_kim.v	379	Lemma	kim_spectral_convergence	(** Spectral convergence bound. Proved via the uniform-off-diagonal convergence theorem (unif_offdiag_convergence from pgg_schreier_weighted.v): Kim's circulant Schreier matrix has constant diagonal …	Lemma kim_spectral_convergence : forall (L : nat) (s : 'I_5),
+instances/kim2025/five_card_kim.v	425	Lemma	kim_var_dist_exact	(** Exact variation distance via the uniform-off-diagonal identity. The proof mirrors kim_spectral_convergence but calls unif_offdiag_var_dist (equality) instead of unif_offdiag_convergence (inequali…	Lemma kim_var_dist_exact (L : nat) (s : 'I_5) :
+instances/kim2025/five_card_kim.v	477	Lemma	kim_slev_at_zero	(** When eps = 0, the bias disappears and we recover the uniform case *)	Lemma kim_slev_at_zero : eps = 0 -> kim_slev = 0.
+instances/kim2025/five_card_kim.v	480	Lemma	kim_bound_at_zero		Lemma kim_bound_at_zero (L : nat) :
+instances/kim2025/five_card_kim.v	486	Lemma	kim_security_at_zero		Lemma kim_security_at_zero (L : nat) :
+instances/kim2025/five_card_kim.v	515	Lemma	fc_kim_security_bound	(** The security bound for L shuffles: var_dist <= sqrt(5) * ((5/4)*|eps|)^L *)	Lemma fc_kim_security_bound (eps : R)
+instances/kim2025/rigidity_kim_instance.v	66	Lemma	kim_HN5	(* Sheet count for M_kim: 5 sheets (pgg_N' = 4). Verified definitionally since M_kim = Gen_PGGTypes 4 3 fc_kim_sigmas, so pgg_N' = 4. *)	Lemma kim_HN5 : (pgg_N' M_kim).+1 = 5.
+instances/kim2025/rigidity_kim_instance.v	85	Lemma	kim_genus0_automorphism	(** kim_genus0_automorphism — discharges [genus0_automorphism_bound] for the Kim 2025 instance by reducing to the concrete PGL bound [kim_genus0_pgl]. Kind: helper. Why: required to instantiate [kim_…	Lemma kim_genus0_automorphism :
+instances/kim2025/rigidity_kim_instance.v	99	Lemma	kim_complexity	(* Derived properties *)	Lemma kim_complexity (L : nat) :
+instances/kim2025/rigidity_kim_instance.v	103	Lemma	kim_tradeoff		Lemma kim_tradeoff (L : nat) :
+instances/kim2025/rigidity_kim_instance.v	119	Lemma	kim_ts_recon_correct	(** Protocol reconstruction correctness: named instance-level re-export of [ar_protocol_correct]. *)	Lemma kim_ts_recon_correct (L : nat) (PI : PGGInterface M_kim)
+instances/s5/pgg_raag_s5.v	42	Lemma	s5_gens_agree		Lemma s5_gens_agree (i : 'I_4) (x : 'I_5) :
+instances/s5/pgg_raag_s5.v	51	Lemma	s5_weval_inj1	(* Word-eval injectivity via nat-level boolean check + vm_compute *)	Lemma s5_weval_inj1 : @weval_inj (@Gen_PGGTypes 3 3 (path_gen_tuple 3)) 1.
+instances/s5/pgg_raag_s5.v	60	Lemma	s5_nt_L1	(* N=5, Tg=4, comm = path (|i-j| >= 2) *)	Lemma s5_nt_L1 : n_traces_natB 4 1 path_comm_nat = 4.
+instances/s5/pgg_raag_s5.v	63	Lemma	s5_nt_L2		Lemma s5_nt_L2 : n_traces_natB 4 2 path_comm_nat = 13.
+instances/s5/pgg_raag_s5.v	66	Lemma	s5_nt_L3		Lemma s5_nt_L3 : n_traces_natB 4 3 path_comm_nat = 40.
+instances/s5/rigidity_s5_instance.v	83	Lemma	s5_endpoint_bound_fiber	(* Fiber-counted endpoint bound: for each sheet s in 'I_5, var_dist(fdistmap perm_endpoint (rho_from_words 1 path_gen_tuple_3), uniform) <= 6/5. Achievable(1) = {(01),(12),(23),(34)} (4 adjacent tran…	Lemma s5_endpoint_bound_fiber :
+instances/s5/rigidity_s5_instance.v	228	Lemma	s5_HN5_crypto	(* Sheet count: 5 sheets (pgg_N' = 4) — definitionally true. *)	Lemma s5_HN5_crypto : (pgg_N' R_s5).+1 = 5.
+instances/s5/rigidity_s5_instance.v	232	Lemma	s5_genus0_pgl_crypto	(* PGL bound: |pgg_G R_s5| <= |{perm 'I_5}| = 5! = 120 = pgl_bound R_s5. *)	Lemma s5_genus0_pgl_crypto :
+instances/s5/rigidity_s5_instance.v	274	Lemma	s5_HN5	(* Sheet count for R_s5: 5 sheets (pgg_N' = 4). Verified definitionally since R_s5 = Gen_PGGTypes 3 3 (path_gen_tuple 3), so pgg_N' = 4. *)	Lemma s5_HN5 : (pgg_N' R_s5).+1 = 5.
+instances/s5/rigidity_s5_instance.v	291	Lemma	s5_genus0_automorphism	(** s5_genus0_automorphism — discharges [genus0_automorphism_bound] for the S_5 instance by reducing to the concrete PGL bound [s5_genus0_pgl]. Kind: helper. Why: required to instantiate [s5_threshol…	Lemma s5_genus0_automorphism :
+instances/s5/rigidity_s5_instance.v	305	Lemma	s5_complexity	(* Derived properties *)	Lemma s5_complexity (L : nat) :
+instances/s5/rigidity_s5_instance.v	311	Lemma	s5_search_chain		Lemma s5_search_chain (L : nat) :
+instances/s5/rigidity_s5_instance.v	316	Lemma	s5_tradeoff		Lemma s5_tradeoff :
+instances/s5/rigidity_s5_instance.v	332	Lemma	s5_ts_recon_correct	(** Protocol reconstruction correctness: named instance-level re-export of [ar_protocol_correct]. Takes a [PGGInterface] as a parameter since the S5 instance is parameterised over the starting-card c…	Lemma s5_ts_recon_correct (PI : PGGInterface R_s5)
+instances/s5/s5_mixing.v	55	Lemma	s5_alpha_R_ge0		Lemma s5_alpha_R_ge0 (R : realType) : 0 <= s5_alpha_R R.
+instances/s5/s5_mixing.v	61	Lemma	s5_alpha_R_le1		Lemma s5_alpha_R_le1 (R : realType) : s5_alpha_R R <= 1.
+instances/s5/s5_mixing.v	67	Lemma	s5_alpha_R_lt1		Lemma s5_alpha_R_lt1 (R : realType) : s5_alpha_R R < 1.
+instances/s5/s5_mixing.v	77	Lemma	path_gen_tuple_3_invol	(******************************************************************************)	Lemma path_gen_tuple_3_invol :
+instances/s5/s5_mixing.v	160	Lemma	s5_sos_diagonal_nonneg	(** s5_sos_diagonal_nonneg — every entry of [s5_sos_diagonal] is nonneg in [rat]. Kind: helper. Why: discharges the D-nonnegativity premise needed when the SoS certificate is consumed to prove a Rayl…	Lemma s5_sos_diagonal_nonneg : forall k,
+instances/s5/s5_mixing.v	184	Lemma	s5_spectral_convergence_proved	(******************************************************************************)	Lemma s5_spectral_convergence_proved
+instances/s5/s5_mixing.v	209	Lemma	s5_gap_R_pos		Lemma s5_gap_R_pos (R : realType) : 0 < s5_gap_R R.
+instances/s5/s5_mixing.v	215	Lemma	s5_gap_R_le1		Lemma s5_gap_R_le1 (R : realType) : s5_gap_R R <= 1.
+instances/s5/s5_mixing.v	221	Lemma	s5_gap_R_one_minus		Lemma s5_gap_R_one_minus (R : realType) : 1 - s5_gap_R R = s5_alpha_R R.
+instances/s5/s5_mixing.v	224	Lemma	s5_spectral_convergence_gap		Lemma s5_spectral_convergence_gap
+instances/s5x5/pgg_s5x5.v	86	Lemma	s5x5_gens_agree	(******************************************************************************)	Lemma s5x5_gens_agree (i : 'I_8) (x : 'I_10) :
+instances/s5x5/pgg_s5x5.v	105	Lemma	s5x5_weval_inj1	(******************************************************************************)	Lemma s5x5_weval_inj1 : @weval_inj M_s5x5 1.
+instances/s5x5/pgg_s5x5.v	136	Lemma	s5x5_nt_L1	(******************************************************************************)	Lemma s5x5_nt_L1 : n_traces_natB 8 1 s5x5_comm_nat = 8.
+instances/s5x5/pgg_s5x5.v	139	Lemma	s5x5_nt_L2		Lemma s5x5_nt_L2 : n_traces_natB 8 2 s5x5_comm_nat = 42.
+instances/s5x5/rigidity_s5x5_instance.v	87	Lemma	s5x5_endpoint_bound_fiber		Lemma s5x5_endpoint_bound_fiber :
+instances/s5x5/rigidity_s5x5_instance.v	282	Lemma	s5x5_hurwitz	(* Riemann-Hurwitz: 2*3 + 2*|G| = |G|*(2*0) + ramif + 2 6 + 2*14400 = 28804 + 2 = 28806 *)	Lemma s5x5_hurwitz :
+instances/s5x5/rigidity_s5x5_instance.v	295	Lemma	s5x5_n_branch_le	(** s5x5_n_branch_le — 6 <= 28804, the concrete branch-count-vs-total-ramif inequality for the S_5 x S_5 instance. Kind: helper. Why: discharges the [cd_ramif_ge_n_branch] field required when buildin…	Lemma s5x5_n_branch_le : (6 <= 28804)%N. Proof. by []. Qed.
+instances/s5x5/rigidity_s5x5_instance.v	312	Lemma	s5x5_cs_gap	(* Gap: ts_T <= ts_k + 2 * genus = 5 + 6 = 11 >= 10 *)	Lemma s5x5_cs_gap :
+instances/s5x5/rigidity_s5x5_instance.v	317	Lemma	s5x5_preserves_pile1	(* Pile preservation: the monodromy of S_5 × S_5 preserves {0..4} *)	Lemma s5x5_preserves_pile1 :
+instances/s5x5/rigidity_s5x5_instance.v	322	Lemma	s5x5_perm_compatible		Lemma s5x5_perm_compatible :
+instances/s5x5/rigidity_s5x5_instance.v	341	Lemma	s5x5_genus0_pgl	(* genus = 3 ≠ 0 → the PGL hypothesis is vacuously true *)	Lemma s5x5_genus0_pgl :
+instances/s5x5/rigidity_s5x5_instance.v	352	Lemma	s5x5_genus0_automorphism	(** s5x5_genus0_automorphism — discharges [genus0_automorphism_bound] for the S_5 x S_5 instance. Because the genus is 3, the genus-0 branch is vacuous and the obligation is discharged by [s5x5_genus…	Lemma s5x5_genus0_automorphism :
+instances/s5x5/rigidity_s5x5_instance.v	373	Lemma	s5x5_complexity	(* --- Derived properties --- *)	Lemma s5x5_complexity (L : nat) :
+instances/s5x5/rigidity_s5x5_instance.v	377	Lemma	s5x5_tradeoff		Lemma s5x5_tradeoff :
+instances/s5x5/rigidity_s5x5_instance.v	390	Lemma	s5x5_large_group	(* The main point: genus > 0 is forced by |G| > pgl_bound *)	Lemma s5x5_large_group :
+instances/s5x5/rigidity_s5x5_instance.v	396	Lemma	s5x5_ts_recon_correct	(** Protocol reconstruction correctness: named instance-level re-export of [ar_protocol_correct]. Takes a [PGGInterface] as a parameter. *)	Lemma s5x5_ts_recon_correct (PI : PGGInterface R_s5x5)
+instances/s5x5/s5x5_mixing.v	58	Lemma	s5_lazy_gen_invol		Lemma s5_lazy_gen_invol :
+instances/s5x5/s5x5_mixing.v	101	Lemma	s5_lazy_tnth_0	(* tnth values of s5_lazy_gen_tuple at the 8 indices. The first 4 are path transpositions on 'I_5, the last 4 are identities. *)	Lemma s5_lazy_tnth_0 : tnth s5_lazy_gen_tuple (Ordinal (n:=8) (m:=0) erefl) = tperm o0 o1.
+instances/s5x5/s5x5_mixing.v	103	Lemma	s5_lazy_tnth_1		Lemma s5_lazy_tnth_1 : tnth s5_lazy_gen_tuple (Ordinal (n:=8) (m:=1) erefl) = tperm o1 o2.
+instances/s5x5/s5x5_mixing.v	105	Lemma	s5_lazy_tnth_2		Lemma s5_lazy_tnth_2 : tnth s5_lazy_gen_tuple (Ordinal (n:=8) (m:=2) erefl) = tperm o2 o3.
+instances/s5x5/s5x5_mixing.v	107	Lemma	s5_lazy_tnth_3		Lemma s5_lazy_tnth_3 : tnth s5_lazy_gen_tuple (Ordinal (n:=8) (m:=3) erefl) = tperm o3 o4.
+instances/s5x5/s5x5_mixing.v	109	Lemma	s5_lazy_tnth_4		Lemma s5_lazy_tnth_4 : tnth s5_lazy_gen_tuple (Ordinal (n:=8) (m:=4) erefl) = 1%g.
+instances/s5x5/s5x5_mixing.v	111	Lemma	s5_lazy_tnth_5		Lemma s5_lazy_tnth_5 : tnth s5_lazy_gen_tuple (Ordinal (n:=8) (m:=5) erefl) = 1%g.
+instances/s5x5/s5x5_mixing.v	113	Lemma	s5_lazy_tnth_6		Lemma s5_lazy_tnth_6 : tnth s5_lazy_gen_tuple (Ordinal (n:=8) (m:=6) erefl) = 1%g.
+instances/s5x5/s5x5_mixing.v	115	Lemma	s5_lazy_tnth_7		Lemma s5_lazy_tnth_7 : tnth s5_lazy_gen_tuple (Ordinal (n:=8) (m:=7) erefl) = 1%g.
+instances/s5x5/s5x5_mixing.v	119	Lemma	path_gen_3_tnth_0	(* Path generator tuple at the 4 indices. *)	Lemma path_gen_3_tnth_0 :
+instances/s5x5/s5x5_mixing.v	125	Lemma	path_gen_3_tnth_1		Lemma path_gen_3_tnth_1 :
+instances/s5x5/s5x5_mixing.v	131	Lemma	path_gen_3_tnth_2		Lemma path_gen_3_tnth_2 :
+instances/s5x5/s5x5_mixing.v	137	Lemma	path_gen_3_tnth_3		Lemma path_gen_3_tnth_3 :
+instances/s5x5/s5x5_mixing.v	146	Lemma	schreier_gen_count_eq_sum	(* For any generator tuple, we can express schreier_gen_count via a sum using sum1dep_card. *)	Lemma schreier_gen_count_eq_sum (m n' : nat) (sigmas : (m.+1).-tuple {perm 'I_n'.+2})
+instances/s5x5/s5x5_mixing.v	156	Lemma	sum_8_enum	(* Enumerate sum over 'I_8, right-associative form (matches big_ord_recl output). *)	Lemma sum_8_enum (f : 'I_8 -> nat) :
+instances/s5x5/s5x5_mixing.v	173	Lemma	sum_4_enum	(* Enumerate sum over 'I_4, right-associative form. *)	Lemma sum_4_enum (f : 'I_4 -> nat) :
+instances/s5x5/s5x5_mixing.v	186	Lemma	s5_lazy_count_eq	(* Lazy generator count = path generator count + (4 if i=j else 0). *)	Lemma s5_lazy_count_eq (i j : 'I_5) :
+instances/s5x5/s5x5_mixing.v	202	Lemma	s5_lazy_Q_eq	(* The Q matrix formula: Q_lazy = (Q_s5 + I) / 2. *)	Lemma s5_lazy_Q_eq (i j : 'I_5) :
+instances/s5x5/s5x5_mixing.v	231	Lemma	s5_lazy_alpha_R_ge0		Lemma s5_lazy_alpha_R_ge0 : 0 <= s5_lazy_alpha_R.
+instances/s5x5/s5x5_mixing.v	238	Lemma	s5_lazy_alpha_R_le1		Lemma s5_lazy_alpha_R_le1 : s5_lazy_alpha_R <= 1.
+instances/s5x5/s5x5_mixing.v	247	Lemma	var_dist_le_2	(* var_dist <= 2 trivial bound, used as fallback *)	Lemma var_dist_le_2 (A : finType) (P Q : R.-fdist A) :
+instances/s5x5/s5x5_mixing.v	261	Lemma	var_dist_fdistmap_inj	(* fdistmap with injective f preserves var_dist exactly. *)	Lemma var_dist_fdistmap_inj (A B : finType) (f : A -> B) (P Q : R.-fdist A) :
+instances/s5x5/s5x5_mixing.v	296	Lemma	Q_lazy_eq_matrix	(* === Matrix-level Q_lazy facts === *)	Lemma Q_lazy_eq_matrix : Q_lazy = (2%:R)^-1 *: (Q_s5 + 1%:M).
+instances/s5x5/s5x5_mixing.v	306	Lemma	Q_lazy_mul_v		Lemma Q_lazy_mul_v (v : 'cV[R]_5) :
+instances/s5x5/s5x5_mixing.v	314	Lemma	Q_lazy_symm		Lemma Q_lazy_symm : Q_lazy^T = Q_lazy.
+instances/s5x5/s5x5_mixing.v	317	Lemma	Q_s5_symm		Lemma Q_s5_symm : Q_s5^T = Q_s5.
+instances/s5x5/s5x5_mixing.v	321	Lemma	cV_innerDl_5	(* === Bilinearity of cV_inner === *)	Lemma cV_innerDl_5 (u v w : 'cV[R]_5) :
+instances/s5x5/s5x5_mixing.v	329	Lemma	cV_innerDr_5		Lemma cV_innerDr_5 (u v w : 'cV[R]_5) :
+instances/s5x5/s5x5_mixing.v	337	Lemma	cV_innerZl_5		Lemma cV_innerZl_5 (a : R) (v w : 'cV[R]_5) :
+instances/s5x5/s5x5_mixing.v	345	Lemma	cV_innerZr_5		Lemma cV_innerZr_5 (a : R) (v w : 'cV[R]_5) :
+instances/s5x5/s5x5_mixing.v	354	Lemma	cV_cauchy_schwarz	(* === Cauchy-Schwarz on cV_inner === *)	Lemma cV_cauchy_schwarz (v w : 'cV[R]_5) :
+instances/s5x5/s5x5_mixing.v	359	Lemma	s5_inner_v_Qv_bound	(* === Signed Cauchy-Schwarz: <v, Q_s5 v> <= alpha * <v, v> === *)	Lemma s5_inner_v_Qv_bound (v : 'cV[R]_5) :
+instances/s5x5/s5x5_mixing.v	384	Lemma	s5_lazy_alpha_sq_eq	(* === Algebraic identity for the lazy alpha squared === *)	Lemma s5_lazy_alpha_sq_eq :
+instances/s5x5/s5x5_mixing.v	400	Lemma	s5_lazy_rayleigh_Qsq_R	(* === Main theorem: Rayleigh bound for Q_lazy^2 === *)	Lemma s5_lazy_rayleigh_Qsq_R (v : 'cV[R]_5) :
+instances/s5x5/s5x5_mixing.v	466	Lemma	s5_lazy_alpha_R_lt1	(* Strict bound: lazy_alpha < 1 *)	Lemma s5_lazy_alpha_R_lt1 : s5_lazy_alpha_R < 1.
+instances/s5x5/s5x5_mixing.v	484	Lemma	s5_lazy_TV_bound		Lemma s5_lazy_TV_bound (L : nat) (s : 'I_5) :
+instances/s5x5/s5x5_mixing.v	508	Lemma	widen5to10_inj		Lemma widen5to10_inj : injective widen5to10.
+instances/s5x5/s5x5_mixing.v	516	Lemma	s5x5_gen_pile1_action	(* Per-step equivalence: each generator k acts identically on pile-1. *)	Lemma s5x5_gen_pile1_action (k : 'I_8) (s : 'I_5) :
+instances/s5x5/s5x5_mixing.v	536	Lemma	word_eval_pile1	(* Word-level equivalence: word_eval s5x5 w (widen s) = widen (word_eval s5_lazy w s) *)	Lemma word_eval_pile1 (L : nat) (w : L.-tuple 'I_8) (s : 'I_5) :
+instances/s5x5/s5x5_mixing.v	562	Lemma	s5x5_rho_pile1_eq	(* Distribution equivalence *)	Lemma s5x5_rho_pile1_eq (L : nat) (s : 'I_5) :
+instances/s5x5/s5x5_mixing.v	585	Lemma	rshift5_lt10	(******************************************************************************)	Lemma rshift5_lt10 (s : 'I_5) : (val s + 5 < 10)%N.
+instances/s5x5/s5x5_mixing.v	590	Lemma	rshift5to10_inj		Lemma rshift5to10_inj : injective rshift5to10.
+instances/s5x5/s5x5_mixing.v	614	Lemma	s5x5_gen_pile2_action	(* Pile-2 per-step equivalence: generators k act on rshift5to10 s. *)	Lemma s5x5_gen_pile2_action (k : 'I_8) (s : 'I_5) :
+instances/s5x5/s5x5_mixing.v	634	Lemma	word_eval_pile2	(* Word-level equivalence for pile-2 *)	Lemma word_eval_pile2 (L : nat) (w : L.-tuple 'I_8) (s : 'I_5) :
+instances/s5x5/s5x5_mixing.v	659	Lemma	s5x5_rho_pile2_eq		Lemma s5x5_rho_pile2_eq (L : nat) (s : 'I_5) :
+instances/s5x5/s5x5_mixing.v	689	Lemma	fdist_uniform_pile1E		Lemma fdist_uniform_pile1E (i : 'I_10) :
+instances/s5x5/s5x5_mixing.v	710	Lemma	fdist_uniform_pile2E		Lemma fdist_uniform_pile2E (i : 'I_10) :
+instances/s5x5/s5x5_mixing.v	734	Lemma	var_dist_uniform_pile1_uniform10		Lemma var_dist_uniform_pile1_uniform10 :
+instances/s5x5/s5x5_mixing.v	758	Lemma	var_dist_uniform_pile2_uniform10		Lemma var_dist_uniform_pile2_uniform10 :
+instances/s5x5/s5x5_mixing.v	790	Lemma	s5_lazy_gen_invol'	(******************************************************************************)	Lemma s5_lazy_gen_invol' :
+instances/s5x5/s5x5_mixing.v	800	Lemma	s5_lazy_tnth'_0		Lemma s5_lazy_tnth'_0 :
+instances/s5x5/s5x5_mixing.v	803	Lemma	s5_lazy_tnth'_1		Lemma s5_lazy_tnth'_1 :
+instances/s5x5/s5x5_mixing.v	806	Lemma	s5_lazy_tnth'_2		Lemma s5_lazy_tnth'_2 :
+instances/s5x5/s5x5_mixing.v	809	Lemma	s5_lazy_tnth'_3		Lemma s5_lazy_tnth'_3 :
+instances/s5x5/s5x5_mixing.v	812	Lemma	s5_lazy_tnth'_4		Lemma s5_lazy_tnth'_4 :
+instances/s5x5/s5x5_mixing.v	816	Lemma	s5_lazy_tnth'_5		Lemma s5_lazy_tnth'_5 :
+instances/s5x5/s5x5_mixing.v	820	Lemma	s5_lazy_tnth'_6		Lemma s5_lazy_tnth'_6 :
+instances/s5x5/s5x5_mixing.v	824	Lemma	s5_lazy_tnth'_7		Lemma s5_lazy_tnth'_7 :
+instances/s5x5/s5x5_mixing.v	829	Lemma	s5_lazy_count_eq'		Lemma s5_lazy_count_eq' (i j : 'I_5) :
+instances/s5x5/s5x5_mixing.v	846	Lemma	s5_lazy_Q_eq_swap		Lemma s5_lazy_Q_eq_swap (R : realType) :
+instances/s5x5/s5x5_mixing.v	862	Lemma	s5_lazy_TV_bound'	(******************************************************************************)	Lemma s5_lazy_TV_bound' (R : realType) (L : nat) (s : 'I_5) :
+instances/s5x5/s5x5_mixing.v	892	Lemma	s5x5_pile1_TV_bound	(* Pile-1 TV bound: distance to uniform_pile1 decays exponentially. *)	Lemma s5x5_pile1_TV_bound (L : nat) (s : 'I_5) :
+instances/s5x5/s5x5_mixing.v	911	Lemma	s5x5_pile2_TV_bound	(* Pile-2 TV bound: distance to uniform_pile2 decays exponentially. *)	Lemma s5x5_pile2_TV_bound (L : nat) (s : 'I_5) :
+instances/s5x5/s5x5_mixing.v	930	Lemma	s5x5_spectral_TV_bound	(* Final triangle bound: combines the pile bound with the gap to uniform_10. *)	Lemma s5x5_spectral_TV_bound (L : nat) (s : 'I_10) :
+instances/s5x5/s5x5_pile.v	38	Lemma	s5x5_preserves_pile1_proved	(******************************************************************************)	Lemma s5x5_preserves_pile1_proved :
+instances/s5x5/s5x5_pile.v	72	Lemma	s5x5_preserves_pile2_proved	(** s5x5_preserves_pile2_proved — every [g \in pgg_G] preserves the upper half of [`I_10] (indices >= 5) setwise under the [pgg_rho] action. Kind: helper. Why: companion to [s5x5_preserves_pile1]; to…	Lemma s5x5_preserves_pile2_proved :
+lib/perm_uniform.v	37	Lemma	prescribedP		Lemma prescribedP k (s v : 'I_k -> 'I_N) (sigma : {perm 'I_N}) :
+lib/perm_uniform.v	43	Lemma	prescribed0		Lemma prescribed0 (s v : 'I_0 -> 'I_N) : prescribed s v = [set: {perm 'I_N}].
+lib/perm_uniform.v	51	Lemma	Sn_k_transitive	(* Lemma 1: S_N acts k-transitively: given injective s and v, there exists sigma with sigma(s_i) = v_i for all i *)	Lemma Sn_k_transitive (k : nat) (s v : 'I_k -> 'I_N) :
+lib/perm_uniform.v	85	Lemma	prescribed_coset	(* Lemma 2: prescribed k s v is a right coset of Sym(~: im s) *)	Lemma prescribed_coset (k : nat) (s v : 'I_k -> 'I_N) (tau : {perm 'I_N}) :
+lib/perm_uniform.v	110	Lemma	card_prescribed	(* Lemma 3: |prescribed k s v| = (N - k)! *)	Lemma card_prescribed (k : nat) (s v : 'I_k -> 'I_N) :
+lib/perm_uniform.v	154	Lemma	s_ext_inj		Lemma s_ext_inj (s_new : 'I_N) :
+lib/perm_uniform.v	169	Lemma	v_ext_inj		Lemma v_ext_inj (v_new : 'I_N) :
+lib/perm_uniform.v	186	Lemma	prescribed_extend	(* The set of sigma in prescribed(s,v) with sigma(s_new) = v_new equals prescribed(s',v') with k+1 constraints *)	Lemma prescribed_extend (s_new v_new : 'I_N) :
+lib/perm_uniform.v	209	Lemma	prescribed_value_count	(* Lemma 4: counting prescribed values *)	Lemma prescribed_value_count (s_new v_new : 'I_N) :
+lib/perm_uniform.v	223	Lemma	prescribed_ratio	(* Corollary: ratio gives 1/(N-k) *)	Lemma prescribed_ratio :
+lib/perm_uniform.v	248	Lemma	N_pos		Lemma N_pos : (0 < N)%N. Proof. by []. Qed.
+lib/perm_uniform.v	251	Lemma	card_permT_N	(* Cardinality of S_N *)	Lemma card_permT_N : #|{perm 'I_N}| = (N`!.-1).+1.
+lib/perm_uniform.v	271	Lemma	Pr_prescribed	(* Probability of the prescribed event *)	Lemma Pr_prescribed :
+lib/perm_uniform.v	281	Lemma	Pr_prescribed_ne0		Lemma Pr_prescribed_ne0 : Pr perm_fdist obs_set != (0 : R)%R.
+lib/perm_uniform.v	289	Lemma	perm_cond_uniform	(* Main result: conditional probability *)	Lemma perm_cond_uniform (s_new v_new : 'I_N) :
+lib/perm_uniform.v	320	Lemma	perm_cond_zero	(* Conditional probability is zero for already-assigned values *)	Lemma perm_cond_zero (s_new : 'I_N) (v_new : 'I_N) :
+lib/perm_uniform.v	343	Lemma	card_remaining		Lemma card_remaining : #|remaining_values| = (N - k)%N.
+lib/perm_uniform.v	352	Lemma	collusion_uniform		Lemma collusion_uniform (s_new : 'I_N) (v_new : 'I_N) :
+lib/perm_uniform.v	362	Lemma	collusion_zero		Lemma collusion_zero (s_new : 'I_N) (v_new : 'I_N) :
+protocol/card_exchange_pismc.v	287	Lemma	id_perm_morphM	(* Identity morphism on permutation group *)	Lemma id_perm_morphM :
+protocol/card_exchange_pismc.v	313	Lemma	test_starts_2_uniq		Lemma test_starts_2_uniq : uniq test_starts_2.
+protocol/card_exchange_pismc.v	342	Lemma	dealer_player0_dual_2	(* 4-process duality: all 6 pairs *)	Lemma dealer_player0_dual_2 : channels_dual ap_dealer_2 ap_player0_2.
+protocol/card_exchange_pismc.v	345	Lemma	dealer_player1_dual_2		Lemma dealer_player1_dual_2 : channels_dual ap_dealer_2 ap_player1_2.
+protocol/card_exchange_pismc.v	348	Lemma	dealer_verifier_dual_2		Lemma dealer_verifier_dual_2 : channels_dual ap_dealer_2 ap_verifier_2.
+protocol/card_exchange_pismc.v	351	Lemma	player0_player1_dual_2		Lemma player0_player1_dual_2 : channels_dual ap_player0_2 ap_player1_2.
+protocol/card_exchange_pismc.v	354	Lemma	player0_verifier_dual_2		Lemma player0_verifier_dual_2 : channels_dual ap_player0_2 ap_verifier_2.
+protocol/card_exchange_pismc.v	357	Lemma	player1_verifier_dual_2		Lemma player1_verifier_dual_2 : channels_dual ap_player1_2 ap_verifier_2.
+protocol/card_exchange_pismc.v	393	Lemma	dealer_player0_dual_gen		Lemma dealer_player0_dual_gen : channels_dual ap_dealer_gen ap_player0_gen.
+protocol/card_exchange_pismc.v	396	Lemma	dealer_player1_dual_gen		Lemma dealer_player1_dual_gen : channels_dual ap_dealer_gen ap_player1_gen.
+protocol/card_exchange_pismc.v	399	Lemma	dealer_verifier_dual_gen		Lemma dealer_verifier_dual_gen : channels_dual ap_dealer_gen ap_verifier_gen.
+protocol/card_exchange_pismc.v	402	Lemma	player0_player1_dual_gen		Lemma player0_player1_dual_gen : channels_dual ap_player0_gen ap_player1_gen.
+protocol/card_exchange_pismc.v	405	Lemma	player0_verifier_dual_gen		Lemma player0_verifier_dual_gen : channels_dual ap_player0_gen ap_verifier_gen.
+protocol/card_exchange_pismc.v	408	Lemma	player1_verifier_dual_gen		Lemma player1_verifier_dual_gen : channels_dual ap_player1_gen ap_verifier_gen.
+protocol/card_exchange_pismc.v	467	Lemma	star_4_le_N		Lemma star_4_le_N : 4 <= m.+3.
+protocol/card_exchange_pismc.v	498	Lemma	oc_4_le_N		Lemma oc_4_le_N : 4 <= (k + p).+3.
+protocol/card_exchange_pismc.v	550	Lemma	abel_4_le_N		Lemma abel_4_le_N : 4 <= m.+1.*2.
+protocol/pgg_interface.v	88	Lemma	endpointM		Lemma endpointM (g h : gT) (s : 'I_N) :
+protocol/pgg_interface.v	93	Lemma	endpoint1		Lemma endpoint1 (s : 'I_N) : endpoint 1 s = s.
+protocol/pgg_interface.v	96	Lemma	endpoint_inj		Lemma endpoint_inj (g : gT) : injective (endpoint g).
+protocol/pgg_interface.v	99	Lemma	endpointV		Lemma endpointV (g : gT) (s : 'I_N) :
+protocol/pgg_interface.v	153	Lemma	sigmas_in_G	(* Upper bound: achievable ⊆ G *)	Lemma sigmas_in_G (i : 'I_Tg) : tnth sigmas i \in G.
+protocol/pgg_interface.v	161	Lemma	achievable_sub		Lemma achievable_sub (L : nat) : achievable L \subset G.
+protocol/pgg_interface.v	169	Lemma	search_space_leG	(* Upper bound: search space ≤ |G| *)	Lemma search_space_leG (L : nat) : search_space L <= #|G|.
+protocol/pgg_interface.v	176	Lemma	search_space_le_words	(* Upper bound: search space ≤ T^L (number of words) *)	Lemma search_space_le_words (L : nat) : search_space L <= Tg ^ L.
+protocol/pgg_interface.v	188	Lemma	weval_inj_search_space	(* Word-eval injective generators achieve the maximal search space T^L *)	Lemma weval_inj_search_space (L : nat) :
+protocol/pgg_interface.v	199	Lemma	weval_injP		Lemma weval_injP (L : nat) : reflect (weval_inj L) (weval_injB L).
+protocol/pgg_interface.v	216	Lemma	gen_inj_weval_inj1		Lemma gen_inj_weval_inj1 :
+protocol/pgg_interface.v	227	Lemma	gen_inj_weval_inj1_search_space		Lemma gen_inj_weval_inj1_search_space :
+protocol/pgg_interface.v	248	Lemma	pgg_dtype_eqP		Lemma pgg_dtype_eqP : Equality.axiom pgg_dtype_eqb.
+protocol/pgg_interface.v	282	Lemma	from_sheet_PGG_sheet		Lemma from_sheet_PGG_sheet {N} (i : 'I_N) :
+protocol/pgg_interface.v	286	Lemma	from_hand_PGG_hand		Lemma from_hand_PGG_hand {N} (s : seq ('I_N)) :
+protocol/pgg_interface.v	290	Lemma	from_idx_PGG_idx		Lemma from_idx_PGG_idx {N} (n : nat) :
+protocol/pgg_interface.v	327	Lemma	start_sheet_inj		Lemma start_sheet_inj : injective start_sheet.
+protocol/pgg_interface.v	341	Lemma	card_start_sheets		Lemma card_start_sheets : #|start_sheets| = T.
+protocol/pgg_interface.v	359	Lemma	compute_in_dealt_hand		Lemma compute_in_dealt_hand (W : seq gT) (P : gT) (i : 'I_T) :
+protocol/pgg_interface.v	366	Lemma	endpointsE		Lemma endpointsE (P : gT) (i : 'I_T) :
+protocol/pgg_interface.v	370	Lemma	endpoint_starts_uniq		Lemma endpoint_starts_uniq (g : gT) :
+protocol/pgg_interface.v	402	Lemma	gen_incl_morphM	(* Inclusion morphism: identity on the subgroup *)	Lemma gen_incl_morphM : {in G &, {morph (@id gT) : x y / (x * y)%g}}.
+protocol/pgg_interface.v	413	Lemma	gen_sigmas_gen		Lemma gen_sigmas_gen :
+protocol/pgg_interface.v	425	Lemma	gen_starts_2_uniq		Lemma gen_starts_2_uniq : uniq gen_starts_2.
+protocol/pgg_interface.v	445	Lemma	gen_starts_T_size		Lemma gen_starts_T_size : size (map (widen_ord HT) (enum 'I_T)) == T.
+protocol/pgg_interface.v	450	Lemma	gen_starts_T_uniq		Lemma gen_starts_T_uniq : uniq gen_starts_T.
+protocol/pgg_interface.v	471	Lemma	gen_map_size		Lemma gen_map_size : size (map gen (enum 'I_T.+1)) == T.+1.
+protocol/pgg_interface.v	476	Lemma	gen_tuple_ofE		Lemma gen_tuple_ofE (i : 'I_T.+1) : tnth gen_tuple_of i = gen i.
+protocol/pgg_interface.v	491	Lemma	tperm_disjoint_comm		Lemma tperm_disjoint_comm (fT : finType) (a b c d : fT) :
+protocol/pgg_interface.v	511	Lemma	gen_nonabelian	(* Non-abelianity from a non-commuting generator pair *)	Lemma gen_nonabelian (M : GeneratedMonodromyReprType)
+reconstruct/ag_code.v	43	Lemma	ag_code_eval		Lemma ag_code_eval (m : 'rV[F]_k) : m *m ev \in ag_code.
+reconstruct/ag_code.v	49	Lemma	ag_code_memP		Lemma ag_code_memP (c : 'rV[F]_n) :
+reconstruct/ag_code.v	57	Lemma	dim_ag_code		Lemma dim_ag_code : \rank ev = k -> \dim ag_code = k.
+reconstruct/ag_code.v	87	Lemma	ag_mulmx_inj		Lemma ag_mulmx_inj : forall m1 m2 : 'rV[F]_k,
+reconstruct/ag_code.v	95	Lemma	ag_mulmx_neq0		Lemma ag_mulmx_neq0 (m : 'rV[F]_k) : m != 0 -> m *m ev != 0.
+reconstruct/ag_code.v	102	Lemma	ag_not_trivial		Lemma ag_not_trivial : not_trivial (ag_code ev).
+reconstruct/ag_code.v	114	Lemma	ag_min_dist_lb		Lemma ag_min_dist_lb : n - (k + g - 1) <= min_dist ag_not_trivial.
+reconstruct/ag_code.v	125	Lemma	ag_min_dist_ge2		Lemma ag_min_dist_ge2 : k + g < n -> 1 < min_dist ag_not_trivial.
+reconstruct/ag_massey_bridge.v	66	Lemma	d_perp_eq	(* d_perp'.+2 = (k - g).+1 when g < k *)	Lemma d_perp_eq : d_perp'.+2 = (k - g).+1.
+reconstruct/ag_massey_bridge.v	73	Lemma	ag_massey_gap		Lemma ag_massey_gap : ts_T ag_massey <= ts_k ag_massey + 2 * g.
+reconstruct/ag_massey_bridge.v	97	Lemma	ag_genus_gap		Lemma ag_genus_gap :
+reconstruct/ag_multiplicative.v	45	Lemma	hadamard_comm		Lemma hadamard_comm (c1 c2 : 'rV[F]_n) :
+reconstruct/ag_multiplicative.v	49	Lemma	hadamardE		Lemma hadamardE (c1 c2 : 'rV[F]_n) (i : 'I_n) :
+reconstruct/ag_multiplicative.v	123	Lemma	hadamard_massey_codeword		Lemma hadamard_massey_codeword (s1 s2 : F)
+reconstruct/ag_multiplicative.v	198	Lemma	ag_massey_mult	(* Core: multiplying valid base shares gives valid doubled shares. Proof: the Hadamard product of two massey_codewords is a massey_codeword with secret = product (hadamard_massey_codeword), and ag_mu…	Lemma ag_massey_mult (s1 s2 : F)
+reconstruct/algebraic_rigidity.v	297	Lemma	ar_complexity	(** Complexity: search space is bounded by |G| *)	Lemma ar_complexity (L : nat) : @search_space M L <= #|G|.
+reconstruct/algebraic_rigidity.v	301	Lemma	ar_tradeoff	(** Tradeoff: either genus-0 with bounded |G|, or positive genus with gap *)	Lemma ar_tradeoff :
+reconstruct/algebraic_rigidity.v	317	Lemma	ar_search_gap_tradeoff	(** Search-gap tradeoff: search space bounded or threshold has gap *)	Lemma ar_search_gap_tradeoff (L : nat) :
+reconstruct/algebraic_rigidity.v	332	Lemma	ar_large_group_forces_gap	(** Large groups force positive genus *)	Lemma ar_large_group_forces_gap :
+reconstruct/algebraic_rigidity.v	344	Lemma	ar_gap_bound	(** Gap bound: threshold gap is bounded by twice the genus *)	Lemma ar_gap_bound :
+reconstruct/algebraic_rigidity.v	350	Lemma	ar_protocol_correct	(** Protocol correctness: perm-compatible scheme + valid shares + G-stable starts *)	Lemma ar_protocol_correct (PI : PGGInterface M)
+reconstruct/algebraic_rigidity.v	383	Lemma	ar_search_space_chain	(** Search space chain: search_space <= n_traces <= Tg^L (RAAG-specific) *)	Lemma ar_search_space_chain (L : nat) :
+reconstruct/coord_perm_compatible.v	58	Lemma	coord_perm_compatible_id	(** coord_perm_compatible_id — the identity permutation is coord-perm compatible with every linear code [C : Lcode0.t F n], because [col_perm 1%g c = c]. Kind: helper. Why: trivial-sigma base case fo…	Lemma coord_perm_compatible_id (F : finFieldType) (n : nat) (C : Lcode0.t F n) :
+reconstruct/coord_perm_compatible.v	74	Lemma	sigma_lift_neq0		Lemma sigma_lift_neq0 (j : 'I_n'.+1) : sigma (lift ord0 j) != ord0.
+reconstruct/coord_perm_compatible.v	85	Lemma	restrict_perm0_funE		Lemma restrict_perm0_funE (j : 'I_n'.+1) :
+reconstruct/coord_perm_compatible.v	94	Lemma	restrict_perm0_inj		Lemma restrict_perm0_inj : injective restrict_perm0_fun.
+reconstruct/coord_perm_compatible.v	106	Lemma	restrict_perm0_valE		Lemma restrict_perm0_valE (j : 'I_n'.+1) :
+reconstruct/coord_perm_compatible.v	134	Lemma	massey_codeword_col_perm		Lemma massey_codeword_col_perm (s : F) (shares : 'rV[F]_n'.+1) :
+reconstruct/coord_perm_compatible.v	158	Lemma	massey_recon_col_perm		Lemma massey_recon_col_perm (s : F) (shares : 'rV[F]_n'.+1) :
+reconstruct/coord_perm_compatible.v	208	Lemma	massey_share_permE		Lemma massey_share_permE (g : gT) (gG : g \in G) :
+reconstruct/coord_perm_compatible.v	216	Lemma	massey_perm_compatible		Lemma massey_perm_compatible :
+reconstruct/coord_perm_compatible.v	254	Lemma	transport_perm_compatible		Lemma transport_perm_compatible :
+reconstruct/cover_genus0.v	70	Lemma	genus0_hurwitz		Lemma genus0_hurwitz :
+reconstruct/cover_genus0.v	86	Lemma	genus0_ramif_ge_nbr	(** genus0_ramif_ge_nbr — lower bound [2 <= ramif0], where [ramif0] is the total ramification in the genus-0 case. Kind: helper. Why: fills the [cd_ramif_ge_n_branch] field when assembling the genus-…	Lemma genus0_ramif_ge_nbr : (2 <= ramif0)%N.
+reconstruct/cover_genus0.v	141	Lemma	ts0_perm_compatible		Lemma ts0_perm_compatible :
+reconstruct/cover_genus0.v	162	Lemma	shamir_exact	(* Exact threshold for genus-0 covering *)	Lemma shamir_exact :
+reconstruct/cover_genus0.v	168	Lemma	genus0_secret_invariant	(* Protocol integration: reconstruction recovers the secret (requires G-stable starts hypothesis) *)	Lemma genus0_secret_invariant (PI : PGGInterface M)
+reconstruct/cover_genus1.v	66	Lemma	genus1_hurwitz		Lemma genus1_hurwitz :
+reconstruct/cover_genus1.v	79	Lemma	genus1_ramif_ge_nbr	(** genus1_ramif_ge_nbr — lower bound [3 <= ramif1] for the total ramification [ramif1] of the genus-1 cover. Kind: helper. Why: fills the [cd_ramif_ge_n_branch] field when assembling the genus-1 [Co…	Lemma genus1_ramif_ge_nbr : (3 <= ramif1)%N.
+reconstruct/cover_genus1.v	238	Lemma	ts1_perm_compatible		Lemma ts1_perm_compatible :
+reconstruct/cover_genus1.v	257	Lemma	elliptic_gap	(* Quasi-(k, k+2) threshold *)	Lemma elliptic_gap :
+reconstruct/cover_genus1.v	262	Lemma	genus1_vs_genus0	(* The gap is strictly wider than genus-0 (when ts_T > ts_k) *)	Lemma genus1_vs_genus0 :
+reconstruct/cover_genus1.v	429	Lemma	ts_g_perm_compatible		Lemma ts_g_perm_compatible :
+reconstruct/cover_genus1.v	447	Lemma	higher_genus_gap_bound		Lemma higher_genus_gap_bound :
+reconstruct/cover_genus2.v	68	Lemma	genus2_hurwitz		Lemma genus2_hurwitz :
+reconstruct/cover_genus2.v	81	Lemma	genus2_ramif_ge_nbr	(** genus2_ramif_ge_nbr — lower bound [5 <= ramif2] for the total ramification [ramif2] of the genus-2 hyperelliptic cover. Kind: helper. Why: fills the [cd_ramif_ge_n_branch] field when assembling t…	Lemma genus2_ramif_ge_nbr : (5 <= ramif2)%N.
+reconstruct/cover_genus2.v	241	Lemma	ts2_perm_compatible		Lemma ts2_perm_compatible :
+reconstruct/cover_genus2.v	260	Lemma	genus2_gap	(* Quasi-(k, k+4) threshold *)	Lemma genus2_gap :
+reconstruct/cover_genus2.v	265	Lemma	genus2_vs_genus1	(* The gap is strictly wider than genus-1 *)	Lemma genus2_vs_genus1 :
+reconstruct/cover_tradeoff.v	55	Lemma	genus0_forces_ramif	(* For base P^1 (genus 0): 2g(C) + 2|G| = R + 2 So R = 2g(C) + 2|G| - 2 >= 2|G| - 2 And g(C) = (R + 2 - 2|G|) / 2 *)	Lemma genus0_forces_ramif (cd : CoveringData M) :
+reconstruct/cover_tradeoff.v	65	Lemma	more_ramif_more_genus	(* More ramification -> higher genus *)	Lemma more_ramif_more_genus (cd1 cd2 : CoveringData M) :
+reconstruct/cover_tradeoff.v	90	Lemma	search_space_le_group	(* Search space is bounded by |G| *)	Lemma search_space_le_group (L : nat) :
+reconstruct/cover_tradeoff.v	121	Theorem	security_threshold_tradeoff	(* THE MAIN TRADEOFF THEOREM: Either the anonymity entropy is bounded (genus 0, |G| <= PGL bound) or the threshold has a gap (genus > 0). Both regimes are information-theoretically secure. The genus0…	Theorem security_threshold_tradeoff (cs : CoveringScheme M)
+reconstruct/cover_tradeoff.v	143	Lemma	large_group_forces_gap	(* Contrapositive: large group forces threshold gap *)	Lemma large_group_forces_gap (cs : CoveringScheme M)
+reconstruct/cover_tradeoff.v	156	Lemma	group_genus_monotone	(* Monotonicity: larger group -> more ramification needed -> higher genus *)	Lemma group_genus_monotone (cd1 cd2 : CoveringData M) :
+reconstruct/cover_tradeoff.v	169	Theorem	search_gap_tradeoff	(* Combined statement: anonymity set size vs threshold gap *)	Theorem search_gap_tradeoff (cs : CoveringScheme M)
+reconstruct/cover_tradeoff.v	204	Lemma	pgl_bound_eq_pgl_card	(** pgl_bound_eq_pgl_card — equational bridge [pgl_bound M = pgl_card (pgg_N' M).+1] for any [GeneratedMonodromyReprType] [M]. Kind: helper. Why: rewrites the abstract [pgl_bound] accessor into the c…	Lemma pgl_bound_eq_pgl_card (M : GeneratedMonodromyReprType) :
+reconstruct/covering_scheme.v	91	Lemma	genus_from_hurwitz	(* Genus is determined by |G|, base genus, and ramification *)	Lemma genus_from_hurwitz (cd : CoveringData) :
+reconstruct/covering_scheme.v	144	Lemma	genus0_exact	(* Genus 0 implies exact threshold (gap = 0) *)	Lemma genus0_exact (cs : CoveringScheme M) :
+reconstruct/covering_scheme.v	154	Lemma	higher_genus_wider_gap	(* Higher genus allows a wider threshold gap *)	Lemma higher_genus_wider_gap (cs1 cs2 : CoveringScheme M) :
+reconstruct/covering_scheme.v	161	Lemma	gap_bound	(* The threshold gap is bounded by twice the genus *)	Lemma gap_bound (cs : CoveringScheme M) :
+reconstruct/covering_scheme.v	179	Lemma	hurwitz_base0	(* When base = P^1 (genus 0), Riemann-Hurwitz simplifies: 2g(C) + 2|G| = R + 2 i.e., 2g(C) = R + 2 - 2|G| *)	Lemma hurwitz_base0 (cd : CoveringData M) :
+reconstruct/covering_scheme.v	188	Lemma	genus0_ramif	(* Genus 0 with base = P^1 forces ramification = 2|G| - 2 *)	Lemma genus0_ramif (cd : CoveringData M) :
+reconstruct/covering_scheme.v	199	Lemma	ramif_forces_genus	(* Ramification exceeding 2|G|-2 forces positive genus *)	Lemma ramif_forces_genus (cd : CoveringData M) :
+reconstruct/hyperelliptic_code.v	47	Lemma	size_sqr		Lemma size_sqr (p : {poly R}) : p != 0 -> size (p ^+ 2) = (size p).*2.-1.
+reconstruct/hyperelliptic_code.v	58	Lemma	double_pred_odd	(* Odd-even parity contradiction: used for the resultant argument *)	Lemma double_pred_odd (n : nat) : 0 < n -> odd n.*2.-1.
+reconstruct/hyperelliptic_code.v	63	Lemma	parity_size_neq	(* Key parity lemma: (2a-1) cannot equal (2b-1 + (2k+2)) - 1 = 2b + 2k because the LHS is odd and the RHS is even. *)	Lemma parity_size_neq (a b k : nat) :
+reconstruct/hyperelliptic_code.v	132	Lemma	hyp_resultant_deg	(* Degree bound on the resultant. Key arithmetic: - size(A^2) = 2*size(A) - 1 <= 2*floor(m/2) + 1 <= m + 1 - size(B^2*f) = 2*size(B) - 1 + (2g+1) + 1 - 1 = 2*size(B) + 2g <= 2*floor((m-2g-1)/2) + 2g …	Lemma hyp_resultant_deg (A B : {poly F}) :
+reconstruct/hyperelliptic_code.v	172	Lemma	hyp_resultant_neq0	(* Parity argument: R = A^2 - B^2*f != 0 when (A,B) != (0,0). size(A^2) is odd, size(B^2*f) is even, so they cannot be equal. *)	Lemma hyp_resultant_neq0 (A B : {poly F}) :
+reconstruct/hyperelliptic_code.v	215	Lemma	hyp_zero_to_root	(* Zero-to-root mapping *)	Lemma hyp_zero_to_root (A B : {poly F}) (i : 'I_n) :
+reconstruct/hyperelliptic_code.v	240	Lemma	hyp_multiplicity	(* Multiplicity: if (X-x0) | A and (X-x0) | B, then (X-x0)^2 | R *)	Lemma hyp_multiplicity (A B : {poly F}) (x0 : F) :
+reconstruct/hyperelliptic_code.v	272	Theorem	hyp_goppa_wt_mdeg	(* Goppa bound: nonzero codewords have Hamming weight >= n - m_deg. Proved from resultant argument + max_poly_roots. *)	Theorem hyp_goppa_wt_mdeg :
+reconstruct/hyperelliptic_code.v	312	Theorem	hyp_goppa_wt		Theorem hyp_goppa_wt :
+reconstruct/hyperelliptic_code.v	347	Theorem	dual_root_poly	(* Proved from dual_ev_encode using resultant machinery *)	Theorem dual_root_poly :
+reconstruct/hyperelliptic_code.v	365	Theorem	dual_min_dist		Theorem dual_min_dist :
+reconstruct/hyperelliptic_code.v	405	Theorem	hyp_priv_surj	(* Privacy: for small coalitions S, the projection is surjective *)	Theorem hyp_priv_surj :
+reconstruct/lagrange.v	57	Lemma	lagrange_denom_neq0	(* The denominator is nonzero when points are distinct *)	Lemma lagrange_denom_neq0 (i : 'I_n) : lagrange_denom i != 0.
+reconstruct/lagrange.v	67	Lemma	lagrange_numer_eval_neq	(* Numerator evaluated at pts_j when j != i contains a zero factor *)	Lemma lagrange_numer_eval_neq (i j : 'I_n) :
+reconstruct/lagrange.v	76	Lemma	lagrange_numer_eval_eq	(* Numerator evaluated at pts_i equals the denominator *)	Lemma lagrange_numer_eval_eq (i : 'I_n) :
+reconstruct/lagrange.v	84	Lemma	lagrange_basis_eval	(* KEY LEMMA: Lagrange basis evaluation *)	Lemma lagrange_basis_eval (i j : 'I_n) :
+reconstruct/lagrange.v	97	Lemma	size_lagrange_numer	(* Size of the numerator polynomial *)	Lemma size_lagrange_numer (i : 'I_n) :
+reconstruct/lagrange.v	111	Lemma	size_lagrange_basis	(* Size of Lagrange basis polynomial *)	Lemma size_lagrange_basis (i : 'I_n) :
+reconstruct/lagrange.v	139	Lemma	lagrange_interp_eval	(* KEY LEMMA: Interpolation matches the given values *)	Lemma lagrange_interp_eval (i : 'I_n) :
+reconstruct/lagrange.v	151	Lemma	lagrange_interp_size	(* Interpolation polynomial has size at most n *)	Lemma lagrange_interp_size : size lagrange_interp <= n.
+reconstruct/lagrange.v	175	Lemma	lagrange_interp_unique	(* Two polynomials of size <= n agreeing on n distinct points are equal *)	Lemma lagrange_interp_unique (f : {poly F}) (vals : n.-tuple F) :
+reconstruct/massey.v	49	Lemma	rV_to_tupleK		Lemma rV_to_tupleK (v : 'rV[F]_m) : tuple_to_rV (rV_to_tuple v) = v.
+reconstruct/massey.v	52	Lemma	tuple_to_rVK		Lemma tuple_to_rVK (t : m.-tuple F) : rV_to_tuple (tuple_to_rV t) = t.
+reconstruct/massey.v	58	Lemma	tuple_to_rV_tnth		Lemma tuple_to_rV_tnth (t : m.-tuple F) (i : 'I_m) :
+reconstruct/massey.v	85	Lemma	massey_codeword0		Lemma massey_codeword0 (s : F) (shares : 'rV[F]_n'.+1) :
+reconstruct/massey.v	90	Lemma	lift_inord	(* Ordinal helper: lift ord0 (inord i.-1) = i when i != 0 *)	Lemma lift_inord (i : 'I_n) : (i : nat) != 0%N ->
+reconstruct/massey.v	99	Lemma	massey_codewordS		Lemma massey_codewordS (s : F) (shares : 'rV[F]_n'.+1) (j : 'I_n'.+1) :
+reconstruct/massey.v	107	Lemma	massey_codeword_decompose	(* Any row vector decomposes as massey_codeword of its parts *)	Lemma massey_codeword_decompose (v : 'rV[F]_n) :
+reconstruct/massey.v	117	Lemma	massey_secret_unique	(* Key uniqueness: if d >= 2, the secret is determined by the shares *)	Lemma massey_secret_unique (s1 s2 : F) (shares : 'rV[F]_n'.+1) :
+reconstruct/massey.v	148	Lemma	massey_reconstruct_correct		Lemma massey_reconstruct_correct (s : F) (shares : 'rV[F]_n'.+1) :
+reconstruct/massey.v	177	Lemma	vproj_coord_eq	(* Helper: extract coordinates from vproj equality *)	Lemma vproj_coord_eq (c target : 'rV[F]_n) (S : {set 'I_n}) (i : 'I_n) :
+reconstruct/massey.v	191	Lemma	lift_share_inj		Lemma lift_share_inj : injective lift_share.
+reconstruct/massey.v	194	Lemma	lift_coalition_card		Lemma lift_coalition_card (coal : {set 'I_n'.+1}) :
+reconstruct/massey.v	198	Lemma	ord0_notin_lift		Lemma ord0_notin_lift (coal : {set 'I_n'.+1}) :
+reconstruct/massey.v	206	Lemma	card_S_bound		Lemma card_S_bound (coal : {set 'I_n'.+1}) :
+reconstruct/massey.v	216	Lemma	massey_private	(* Main privacy lemma *)	Lemma massey_private (s1 s2 : F) (shares : 'rV[F]_n'.+1)
+reconstruct/massey.v	250	Lemma	first_coord_surj	(* First coordinate projection is surjective: for every s, there exists c in C with c_0 = s. By privacy_surj with S = {ord0}, since |S| = 1 < d_perp. *)	Lemma first_coord_surj (s : F) :
+reconstruct/massey.v	266	Lemma	massey_encode_codeword		Lemma massey_encode_codeword (s : F) :
+reconstruct/massey.v	286	Lemma	massey_correct_tuple		Lemma massey_correct_tuple (s : F) (shares : n'.+1.-tuple F) :
+reconstruct/massey.v	291	Lemma	massey_private_tuple		Lemma massey_private_tuple (s1 s2 : F) (shares : n'.+1.-tuple F)
+reconstruct/massey.v	311	Lemma	massey_encode_valid		Lemma massey_encode_valid (s : F) :
+reconstruct/massey.v	344	Lemma	mds_min_dist_eq	(* For MDS codes: d = n - k + 1 (Singleton bound with equality). The dual of an MDS code is MDS with d_perp = k + 1. Proving d_perp = k + 1 from HMDS requires the dual code theory (currently WIP in l…	Lemma mds_min_dist_eq : d = (n - k + 1)%N.
+reconstruct/pgg_assignment.v	33	Lemma	succ_mod_neq	(* Helper lemmas for modular arithmetic, proved before ring_scope to avoid scope conflicts with ssrnat rewrite lemmas. *)	Lemma succ_mod_neq (n m : nat) : (0 < m -> n < m.+1 ->
+reconstruct/pgg_assignment.v	48	Lemma	succ_mod_cycle2_ord		Lemma succ_mod_cycle2_ord (T : nat) (i j : 'I_T.+1) :
+reconstruct/pgg_assignment.v	140	Lemma	covered_mono		Lemma covered_mono (C C' : {set 'I_T}) :
+reconstruct/pgg_assignment.v	150	Lemma	covered_full		Lemma covered_full (C : {set 'I_T}) :
+reconstruct/pgg_assignment.v	157	Lemma	secure_subset		Lemma secure_subset (C : {set 'I_T}) :
+reconstruct/pgg_assignment.v	161	Lemma	covered_secure_partition		Lemma covered_secure_partition (C : {set 'I_T}) :
+reconstruct/pgg_assignment.v	169	Lemma	secure_singleton		Lemma secure_singleton (C : {set 'I_T}) :
+reconstruct/pgg_assignment.v	181	Lemma	covered_edges0		Lemma covered_edges0 : covered_edges G set0 = set0.
+reconstruct/pgg_assignment.v	206	Lemma	cycle_sym		Lemma cycle_sym (i j : 'I_T) :
+reconstruct/pgg_assignment.v	210	Lemma	cycle_irrefl		Lemma cycle_irrefl (i : 'I_T) : (i, i) \notin cycle_edge_set.
+reconstruct/pgg_assignment.v	227	Lemma	cycle_edge_set_union		Lemma cycle_edge_set_union : cycle_edge_set = fwd_edges :|: bwd_edges.
+reconstruct/pgg_assignment.v	242	Lemma	fwd_card		Lemma fwd_card : #|fwd_edges| = T.
+reconstruct/pgg_assignment.v	248	Lemma	bwd_card		Lemma bwd_card : #|bwd_edges| = T.
+reconstruct/pgg_assignment.v	254	Lemma	fwd_bwd_disjoint		Lemma fwd_bwd_disjoint : (1 < T')%N -> [disjoint fwd_edges & bwd_edges].
+reconstruct/pgg_assignment.v	268	Lemma	cycle_edges_count		Lemma cycle_edges_count : (1 < T')%N -> #|ag_edges cycle_graph| = 2 * T.
+reconstruct/pgg_assignment.v	288	Lemma	complete_sym		Lemma complete_sym (i j : 'I_T) :
+reconstruct/pgg_assignment.v	292	Lemma	complete_irrefl		Lemma complete_irrefl (i : 'I_T) : (i, i) \notin complete_edge_set.
+reconstruct/pgg_assignment.v	298	Lemma	complete_edges_count		Lemma complete_edges_count :
+reconstruct/pgg_assignment.v	321	Lemma	complete_covered_full		Lemma complete_covered_full (C : {set 'I_T}) :
+reconstruct/pgg_covering_correctness.v	52	Theorem	pgg_covering_correct	(* Main correctness theorem: CoveringScheme + PGGInterface + G-stable starts -> reconstruction recovers the hidden value. Uses pgg_hidden_invariant_perm with cs_perm_compatible. *)	Theorem pgg_covering_correct (s : 'I_N) (P : pgg_gT M)
+reconstruct/pgg_covering_correctness.v	67	Lemma	covering_gap_bound	(* The threshold gap is bounded by twice the covering genus *)	Lemma covering_gap_bound :
+reconstruct/pgg_covering_correctness.v	90	Theorem	pgg_covering_tradeoff	(* The security-threshold tradeoff, restated for the capstone: Either the covering has genus 0 (exact threshold, bounded group) or genus > 0 (threshold gap proportional to genus). *)	Theorem pgg_covering_tradeoff (cs : CoveringScheme M) :
+reconstruct/pgg_covering_correctness.v	113	Theorem	pgg_multiplicative_correct	(* Multiplying shares locally computes the product secret in the doubled scheme. This is the key property enabling secure multiplication gates in arithmetic circuits over secret-shared data. *)	Theorem pgg_multiplicative_correct (s1 s2 : F)
+reconstruct/pgg_dealer_bridge.v	52	Theorem	dealer_words_correct		Theorem dealer_words_correct
+reconstruct/pgg_dealer_bridge.v	64	Lemma	dealer_words_epsilon_bound		Lemma dealer_words_epsilon_bound (s : 'I_N) :
+reconstruct/pgg_dealer_bridge.v	73	Theorem	dealer_encode_correct	(* When the dealer uses ts_encode to produce the starting shares, the ts_valid hypothesis is automatically satisfied. *)	Theorem dealer_encode_correct
+reconstruct/pgg_deck_pairing.v	59	Lemma	involution_partner	(** An fpf involution pairs each element with a distinct partner. *)	Lemma involution_partner (g : {perm 'I_N}) (x : 'I_N) :
+reconstruct/pgg_deck_pairing.v	67	Lemma	fpf_involution_partner_neq		Lemma fpf_involution_partner_neq (g : {perm 'I_N}) (x : 'I_N) :
+reconstruct/pgg_deck_pairing.v	93	Lemma	decode_encode_bit1	(** Decoding the encoding of bit 1 yields true. *)	Lemma decode_encode_bit1 (g : {perm 'I_N}) (s : 'I_N) :
+reconstruct/pgg_deck_pairing.v	98	Lemma	decode_encode_bit0	(** Decoding the encoding of bit 0 yields false, provided g is fpf. *)	Lemma decode_encode_bit0 (g : {perm 'I_N}) (s : 'I_N) :
+reconstruct/pgg_deck_pairing.v	120	Lemma	equivariant_commute	(** Key equivariance property: if sigma commutes with g (in the group sense), then sigma preserves the action of g pointwise. Proof sketch: commute g sigma means (g * sigma = sigma * g)%g. Evaluating…	Lemma equivariant_commute (g sigma : {perm 'I_N}) (s : 'I_N) :
+reconstruct/pgg_deck_pairing.v	133	Theorem	decode_encode_1	(** Reconstruction correctness for bit 1: After encoding bit 1 as (s, g(s)) and applying a commuting permutation sigma, the pair becomes (sigma(s), sigma(g(s))). Decoding recovers true because g(sigm…	Theorem decode_encode_1 (g sigma : {perm 'I_N}) (s : 'I_N) :
+reconstruct/pgg_deck_pairing.v	146	Theorem	decode_encode_0	(** Reconstruction correctness for bit 0: After encoding bit 0 as (s, s) and applying sigma, the pair becomes (sigma(s), sigma(s)). Decoding recovers false because g is fpf, so g(sigma(s)) != sigma(s…	Theorem decode_encode_0 (g sigma : {perm 'I_N}) (s : 'I_N) :
+reconstruct/pgg_deck_pairing.v	157	Theorem	decode_encode_correct	(** Equivariance extends to the full encoding: applying a commuting permutation to an encoded bit preserves the decoded value. *)	Theorem decode_encode_correct (g sigma : {perm 'I_N}) (b : bool) (s : 'I_N) :
+reconstruct/pgg_deck_pairing.v	195	Theorem	multi_decode_encode_correct	(** Reconstruction correctness for multi-bit encoding: if every involution commutes with sigma and is fpf, then decoding after applying sigma recovers the original bits. *)	Theorem multi_decode_encode_correct
+reconstruct/pgg_landscape_demo.v	81	Lemma	monster_security_demo	(* A: For every sheet s, var_dist <= epsilon ~ 0. *)	Lemma monster_security_demo (s : 'I_monster_n.+2) :
+reconstruct/pgg_landscape_demo.v	92	Lemma	monster_tradeoff_demo	(* A: One of two branches — and large |G| forces the right branch. *)	Lemma monster_tradeoff_demo :
+reconstruct/pgg_landscape_demo.v	105	Lemma	monster_genus_forced_demo	(* A: No — |G| > PGL forces genus > 0. *)	Lemma monster_genus_forced_demo :
+reconstruct/pgg_landscape_demo.v	113	Lemma	monster_genus1_demo	(* A: At most 2 — one extra share beyond k. *)	Lemma monster_genus1_demo :
+reconstruct/pgg_landscape_demo.v	121	Lemma	monster_hurwitz_demo	(* A: Hurwitz forces |G| <= 84*(g-1), so g >= |G|/84 + 1 ~ 10^51. *)	Lemma monster_hurwitz_demo :
+reconstruct/pgg_landscape_demo.v	133	Lemma	monster_entropy_demo	(* A: H(P_s) <= log N — near-maximum for the Monster. *)	Lemma monster_entropy_demo (s : 'I_monster_n.+2) :
+reconstruct/pgg_landscape_demo.v	139	Lemma	monster_entropy_gap_demo	(* A: D(P_s || U_N) = log N - H(P_s), the KL divergence. *)	Lemma monster_entropy_gap_demo (s : 'I_monster_n.+2) :
+reconstruct/pgg_landscape_demo.v	148	Lemma	monster_pinsker_demo	(* A: Yes — Pinsker gives var_dist <= sqrt(2 * entropy_gap). *)	Lemma monster_pinsker_demo (s : 'I_monster_n.+2) :
+reconstruct/pgg_landscape_demo.v	211	Lemma	oc_security_demo	(* A: eps = 1 (fiber-counted). Weaker than Monster but exact threshold. *)	Lemma oc_security_demo (s : 'I_4) :
+reconstruct/pgg_landscape_demo.v	220	Lemma	oc_entropy_demo	(* A: H(P_s) <= log 4 = 2 bits. *)	Lemma oc_entropy_demo (s : 'I_4) :
+reconstruct/pgg_landscape_demo.v	228	Lemma	oc_tradeoff_demo	(* A: Genus 0, so T <= k (exact threshold, no gap). *)	Lemma oc_tradeoff_demo :
+reconstruct/pgg_landscape_demo.v	241	Lemma	oc_genus0_demo	(* A: Exact: T <= k. *)	Lemma oc_genus0_demo :
+reconstruct/pgg_protocol_landscape.v	119	Lemma	security_per_position		Lemma security_per_position (sw : SecurityWitness R M) (s : 'I_N) :
+reconstruct/pgg_protocol_landscape.v	124	Lemma	complexity_from_group		Lemma complexity_from_group (L : nat) : (@search_space M L <= #|G|)%N.
+reconstruct/pgg_protocol_landscape.v	139	Theorem	genus0_option		Theorem genus0_option (cs : CoveringScheme M) :
+reconstruct/pgg_protocol_landscape.v	144	Theorem	genus1_universal_option		Theorem genus1_universal_option (cs : CoveringScheme M) :
+reconstruct/pgg_protocol_landscape.v	153	Theorem	gap_from_genus		Theorem gap_from_genus (cs : CoveringScheme M) :
+reconstruct/pgg_protocol_landscape.v	169	Lemma	genus0_requires_small_group		Lemma genus0_requires_small_group (cs : CoveringScheme M)
+reconstruct/pgg_protocol_landscape.v	175	Corollary	large_group_minimum_gap		Corollary large_group_minimum_gap (cs : CoveringScheme M)
+reconstruct/pgg_protocol_landscape.v	185	Theorem	landscape_tradeoff		Theorem landscape_tradeoff (cs : CoveringScheme M)
+reconstruct/pgg_protocol_landscape.v	215	Lemma	group_forces_minimum_genus		Lemma group_forces_minimum_genus (cs : CoveringScheme M) (g : nat) :
+reconstruct/pgg_protocol_landscape.v	229	Theorem	higher_genus_landscape		Theorem higher_genus_landscape (cs : CoveringScheme M) :
+reconstruct/pgg_protocol_landscape.v	254	Lemma	protocol_correct_unbundled		Lemma protocol_correct_unbundled
+reconstruct/pgg_protocol_landscape.v	296	Lemma	ar_security_per_position		Lemma ar_security_per_position (s : 'I_N) :
+reconstruct/pgg_protocol_landscape.v	303	Lemma	ar_genus0_exact		Lemma ar_genus0_exact :
+reconstruct/pgg_protocol_landscape.v	308	Lemma	ar_genus1_gap2		Lemma ar_genus1_gap2 :
+reconstruct/pgg_protocol_landscape.v	316	Lemma	ar_hurwitz		Lemma ar_hurwitz :
+reconstruct/pgg_protocol_landscape.v	323	Lemma	ar_large_group_forces_genus		Lemma ar_large_group_forces_genus :
+reconstruct/pgg_protocol_landscape.v	371	Lemma	discovery_eps_monotone	(* Envelope monotonicity — re-exported for landscape visibility *)	Lemma discovery_eps_monotone (sc : SchreierCertificate R m n' sigmas)
+reconstruct/pgg_protocol_landscape.v	378	Lemma	discovery_to_certification	(* SecurityWitness construction from discovery — re-exported *)	Lemma discovery_to_certification (sc : SchreierCertificate R m n' sigmas)
+reconstruct/pgg_protocol_landscape.v	416	Lemma	ar_entropy_le_logN	(* Entropy is at most log N (maximum = uniform) *)	Lemma ar_entropy_le_logN (s : 'I_N) :
+reconstruct/pgg_protocol_landscape.v	427	Lemma	ar_entropy_gap	(* The entropy deficit equals the KL divergence (leakage in bits). D(P_s || U_N) = log N - H(P_s). *)	Lemma ar_entropy_gap (s : 'I_N) :
+reconstruct/pgg_protocol_landscape.v	448	Lemma	ar_var_dist_from_entropy	(* Pinsker bridge: var_dist bounded by entropy gap. var_dist(P_s, U_N) <= sqrt(2 * (log N - H(P_s))) *)	Lemma ar_var_dist_from_entropy (s : 'I_N) :
+reconstruct/pgg_protocol_landscape.v	491	Lemma	ar_covering_decomposition	(* The covering decomposition: security and threshold from one algebraic choice. The SecurityWitness gives the endpoint bound (security side), and the CoveringScheme gives the gap bound (threshold si…	Lemma ar_covering_decomposition :
+reconstruct/pgg_protocol_landscape.v	501	Lemma	ar_genus0_shamir	(* Genus-0 specialization: when the covering has genus 0, the threshold is exact (T <= k), recovering Shamir's (k,k)-threshold. *)	Lemma ar_genus0_shamir :
+reconstruct/pgg_sharing_framework.v	75	Lemma	ts_recon_encode		Lemma ts_recon_encode {sT shT : Type} (ts : ThresholdScheme sT shT) (s : sT) :
+reconstruct/pgg_sharing_framework.v	130	Lemma	sum_mod_scheme_correct		Lemma sum_mod_scheme_correct (s : 'I_N) (shares : T.-tuple 'I_N) :
+reconstruct/pgg_sharing_framework.v	138	Lemma	sum_mod_scheme_private		Lemma sum_mod_scheme_private (s1 s2 : 'I_N)
+reconstruct/pgg_sharing_framework.v	158	Lemma	sum_mod_encode_valid		Lemma sum_mod_encode_valid (s : 'I_N) :
+reconstruct/pgg_sharing_framework.v	193	Lemma	tnth_cast_tuple		Lemma tnth_cast_tuple {A : Type} {n m : nat} (H : n = m)
+reconstruct/pgg_sharing_framework.v	227	Lemma	pgg_hidden_invariant_perm	(* Main theorem: coordinate-permutation compatible scheme + G-stable starts + valid starting shares ⟹ reconstruction of endpoints recovers the secret *)	Lemma pgg_hidden_invariant_perm (s : 'I_N) (P : gT)
+reconstruct/pgg_sum_mod.v	64	Lemma	sum_mod_checkP	(* sum_mod_check is decidable and reflects sum_mod_valid *)	Lemma sum_mod_checkP (m : 'I_N) :
+reconstruct/pgg_sum_mod.v	82	Lemma	sum_mod_single_sheet		Lemma sum_mod_single_sheet :
+reconstruct/pgg_sum_mod.v	124	Theorem	reconstruct_correct	(* Main correctness theorem: if sigma preserves sum mod N, then the reconstruction recovers the original message *)	Theorem reconstruct_correct (sheets : T.-tuple 'I_N)
+reconstruct/pgg_sum_mod.v	137	Lemma	id_preserves_sum_mod	(* The identity permutation preserves sum mod N *)	Lemma id_preserves_sum_mod :
+reconstruct/pgg_sum_mod.v	144	Lemma	comp_preserves_sum_mod	(* Composition of sum-preserving permutations preserves sum mod N *)	Lemma comp_preserves_sum_mod (sigma1 sigma2 : {perm 'I_N}) :
+reconstruct/pgg_sum_mod.v	194	Lemma	pgg_reconstruct_correct	(* If rho(P) preserves sum mod N, reconstruction recovers the encoded message *)	Lemma pgg_reconstruct_correct (P : gT) (m : 'I_N) :
+reconstruct/pgg_sum_mod.v	205	Lemma	pgg_reconstruct_id	(* The identity group element always preserves reconstruction *)	Lemma pgg_reconstruct_id (m : 'I_N) :
+reconstruct/pgg_sum_mod.v	245	Lemma	partial_sum_full	(* Full sum: the coalition is all parties *)	Lemma partial_sum_full :
+reconstruct/pgg_sum_mod.v	258	Lemma	partial_sum_no_info	(* Partial sums of strict subsets do not determine m. Informally: knowing sum_{i in C} e_i mod N does not reveal m when |C| < T, because the remaining T - |C| unknown sheets can sum to any residue mo…	Lemma partial_sum_no_info :
+reconstruct/pgg_threshold.v	69	Theorem	ramp_threshold	(** The main ramp threshold theorem: three-part characterization of coalition power in terms of edge coverage. *)	Theorem ramp_threshold :
+reconstruct/pgg_threshold.v	90	Corollary	recoverable_mono	(** Derived: the number of recoverable bits is monotone in coalition size. *)	Corollary recoverable_mono (C C' : {set 'I_T}) :
+reconstruct/pgg_threshold.v	102	Corollary	singleton_no_info	(** A singleton coalition recovers nothing. *)	Corollary singleton_no_info (C : {set 'I_T}) :
+reconstruct/pgg_threshold.v	111	Corollary	empty_no_info	(** The empty coalition recovers nothing. *)	Corollary empty_no_info :
+reconstruct/pgg_threshold.v	118	Lemma	ramp_partition	(** Secure edges and covered edges partition the edge set. *)	Lemma ramp_partition (C : {set 'I_T}) :
+reconstruct/pgg_threshold.v	123	Lemma	secure_antimono	(** Secure edges decrease as coalition grows. *)	Lemma secure_antimono (C C' : {set 'I_T}) :
+reconstruct/pgg_threshold.v	147	Lemma	cycle_ramp_loss	(** In the cycle graph, losing any party from the full coalition leaves at least some edges uncovered (secure). *)	Lemma cycle_ramp_loss (C : {set 'I_T'.+1}) :
+reconstruct/pgg_threshold.v	169	Lemma	cycle_full_recovery	(** The full coalition on the cycle recovers all edges. *)	Lemma cycle_full_recovery :
+reconstruct/pgg_threshold.v	183	Lemma	complete_ramp_max	(** On the complete graph, the full coalition recovers the maximum number of bits: every pair of distinct parties contributes. *)	Lemma complete_ramp_max :
+reconstruct/pgg_threshold.v	216	Lemma	secure_edge_witness	(** For each secure edge, at least one endpoint is not in C. *)	Lemma secure_edge_witness (e : 'I_T * 'I_T) :
+reconstruct/pgg_threshold.v	235	Theorem	secure_edge_bound	(** For each secure edge, the adversary cannot distinguish the encoded bit from random. The var_dist bound from the collusion bound applies per component via DPI. This is a structural statement: the …	Theorem secure_edge_bound (e : 'I_T * 'I_T) :
+reconstruct/pgg_threshold.v	252	Theorem	ramp_security_reconstruction	(** Summary: the ramp scheme provides both reconstruction and security. - For covered edges: the coalition can reconstruct the encoded bits (via decode_encode_correct from pgg_deck_pairing) - For sec…	Theorem ramp_security_reconstruction :
+reconstruct/pgg_threshold.v	286	Theorem	ramp_config_threshold		Theorem ramp_config_threshold (C : {set 'I_T}) :
+reconstruct/pgg_threshold.v	293	Theorem	ramp_config_mono		Theorem ramp_config_mono (C C' : {set 'I_T}) :
+reconstruct/pgl_bound.v	56	Lemma	card_gl2	(* GL(2,q) cardinality: q * (q-1)^2 * (q+1) *)	Lemma card_gl2 : #|gl2| = (q * q.-1 ^ 2 * q.+1)%N.
+reconstruct/pgl_bound.v	77	Lemma	scalar_pred_group_set		Lemma scalar_pred_group_set : group_set [set u : {'GL_2[F]} | scalar_pred u].
+reconstruct/pgl_bound.v	94	Lemma	scalar_gl2_subset_center	(* Scalar matrices commute with everything, so scalar_gl2 is in the center *)	Lemma scalar_gl2_subset_center : scalar_gl2 \subset 'Z(gl2 F).
+reconstruct/pgl_bound.v	107	Lemma	scalar_gl2_normal	(* Scalar matrices are normal in GL(2,F) — they commute with everything *)	Lemma scalar_gl2_normal : scalar_gl2 <| gl2 F.
+reconstruct/pgl_bound.v	117	Lemma	scalar_unit_in_gl	(* Key helper: scalar matrix of a unit is in GL *)	Lemma scalar_unit_in_gl (a : {unit F}) :
+reconstruct/pgl_bound.v	125	Lemma	card_scalar_gl2	(* Cardinality of the scalar subgroup equals q-1 = |F^*| *)	Lemma card_scalar_gl2 : #|scalar_gl2| = q.-1.
+reconstruct/pgl_bound.v	164	Lemma	card_pgl2	(* Cardinality of PGL(2,q) *)	Lemma card_pgl2 : #|pgl2| = (q * (q ^ 2 - 1))%N.
+reconstruct/pgl_bound.v	193	Lemma	pgl2_card_formula	(* The combinatorial formula q * (q^2 - 1) matches the pgl_bound definition from cover_tradeoff.v *)	Lemma pgl2_card_formula : #|pgl2 F| = (q * (q ^ 2 - 1))%N.
+reconstruct/pgl_bound.v	211	Lemma	pgl_card_eq	(** pgl_card_eq — equational identity [#|pgl2 F| = pgl_card #|F|] for any [finFieldType] [F]. Kind: helper. Why: repackages [pgl2_card_formula] as a definitional rewrite lemma so later instance proof…	Lemma pgl_card_eq (F : finFieldType) : #|pgl2 F| = pgl_card #|F|.
+reconstruct/pgl_bound.v	219	Lemma	pgl_card_5	(** pgl_card_5 — numerical instance [pgl_card 5 = 120]. Definitionally true. Kind: helper. Why: used in combination with [card_set_S5] to identify the PGL(2,F_5) order with the order of [S_5], which …	Lemma pgl_card_5 : pgl_card 5 = 120%N.
+reconstruct/pgl_bound.v	229	Lemma	card_set_S5	(** card_set_S5 — [#|[set: 'S_5]| = 120], i.e. the order of the symmetric group on five letters. Kind: helper. Why: standard cardinality fact expressed in the [{set: _}] form so it can be chained wit…	Lemma card_set_S5 : #|[set: 'S_5]| = 120%N.
+reconstruct/pgl_bound.v	240	Lemma	pgl2_5_eq_s5	(** pgl2_5_eq_s5 — bridge equation [pgl_card 5 = #|[set: 'S_5]|]; identifies the PGL(2,F_5) cardinality with the order of S_5. Kind: helper. Why: exposes the PGL(2,F_5)-vs-S_5 isomorphism at the card…	Lemma pgl2_5_eq_s5 : pgl_card 5 = #|[set: 'S_5]|.
+reconstruct/product_threshold.v	41	Lemma	addn_leq_muln	(* N1, N2 >= 2 implies N1 + N2 <= N1 * N2 *)	Lemma addn_leq_muln : N <= N1 * N2.
+reconstruct/product_threshold.v	54	Lemma	divn_lt_N2	(* s div N1 < N2 for any s < N *)	Lemma divn_lt_N2 (s : 'I_N) : s %/ N1 < N2.
+reconstruct/product_threshold.v	69	Lemma	combine_splitK		Lemma combine_splitK (s : 'I_N) :
+reconstruct/product_threshold.v	77	Lemma	split_combineK	(* Partial cancel: holds when s1 + N1 * s2 < N *)	Lemma split_combineK (s1 : 'I_N1) (s2 : 'I_N2) :
+reconstruct/product_threshold.v	120	Lemma	embed_pile2_proof		Lemma embed_pile2_proof (x : 'I_N2) : N1 + val x < N.
+reconstruct/product_threshold.v	135	Lemma	pile1_idx_lt	(* Index embedding: pile-1 party index i < T1 -> product index i < T *)	Lemma pile1_idx_lt (i : 'I_T1) : val i < T.
+reconstruct/product_threshold.v	139	Lemma	pile2_idx_lt	(* Index embedding: pile-2 party index i < T2 -> product index T1+i < T *)	Lemma pile2_idx_lt (i : 'I_T2) : T1 + val i < T.
+reconstruct/product_threshold.v	173	Lemma	product_correct	(* --- Correctness --- *)	Lemma product_correct (s : 'I_N) (sh : T.-tuple 'I_N) :
+reconstruct/product_threshold.v	187	Lemma	product_private	(* Both parts have cardinality bounded by |C| *)	Lemma product_private (s1 s2 : 'I_N) (sh : T.-1.+1.-tuple 'I_N)
+reconstruct/product_threshold.v	288	Lemma	product_encode_valid	(* --- Encode validity --- *)	Lemma product_encode_valid (s : 'I_N) :
+reconstruct/product_threshold.v	324	Lemma	T_gt1	(* T >= 2 since T1, T2 >= 1 *)	Lemma T_gt1 : 1 < T.
+reconstruct/product_threshold.v	328	Lemma	k_gt0	(* k >= 1 since k1, k2 >= 1 *)	Lemma k_gt0 : 0 < k.
+reconstruct/product_threshold.v	380	Lemma	product_sum_mod_perm_compatible	(* When T1 + T2 = N (parties = sheets), perm_compatible holds because: 1. sigma preserves piles (preserves_pile1) 2. permuting shares within a pile preserves the pile sum 3. sum_mod_recon only depend…	Lemma product_sum_mod_perm_compatible :
+reconstruct/rs_code_5sheets.v	29	Lemma	prime5	(******************************************************************************)	Lemma prime5 : prime 5. Proof. by []. Qed.
+reconstruct/rs_code_5sheets.v	31	Lemma	char_GF5		Lemma char_GF5 : (5%:R : GF 0 prime5) = 0.
+reconstruct/rs_code_5sheets.v	34	Lemma	card_GF5		Lemma card_GF5 : #|GF 0 prime5| = 5.
+reconstruct/rs_code_5sheets.v	38	Lemma	nat_inj_GF5_neq0	(* Identity helper: for 0 < n < 5, n%:R != 0 in GF(5). *)	Lemma nat_inj_GF5_neq0 (n : nat) : ~~ (5 %| n)%N -> (n%:R : GF 0 prime5) != 0.
+reconstruct/rs_code_5sheets.v	45	Lemma	expr_2_mod_5	(* Powers of 2 reduce mod 5. *)	Lemma expr_2_mod_5 (k : nat) : (2%:R : GF 0 prime5) ^+ k = (2^k %% 5)%:R.
+reconstruct/rs_code_5sheets.v	55	Lemma	small_nat_neq0_GF5	(* Helper: if n is in {1,2,3,4} (i.e., 1 <= n < 5), then n%:R != 0 in GF(5). *)	Lemma small_nat_neq0_GF5 (n : nat) : (0 < n < 5)%N ->
+reconstruct/rs_code_5sheets.v	64	Lemma	nat_minus1_neq0_GF5	(* in GF(5). *)	Lemma nat_minus1_neq0_GF5 (n : nat) : (1 < n < 5)%N ->
+reconstruct/rs_code_5sheets.v	75	Lemma	prim_root_prim4_GF5		Lemma prim_root_prim4_GF5 : 4.-primitive_root (2%:R : GF 0 prime5).
+reconstruct/rs_code_5sheets.v	105	Lemma	qn5_4		Lemma qn5_4 : ~~ (5 %| 4)%N. Proof. by []. Qed.
+reconstruct/rs_code_5sheets.v	113	Lemma	trivial_sigma_fix0		Lemma trivial_sigma_fix0 (M : MonodromyReprType) :
+reconstruct/rs_code_5sheets.v	123	Lemma	trivial_sigma_auto		Lemma trivial_sigma_auto (M : MonodromyReprType) :
+reconstruct/rs_massey_bridge.v	54	Lemma	transport_correct		Lemma transport_correct (s : B) (shares : T'.+1.-tuple B) :
+reconstruct/rs_massey_bridge.v	61	Lemma	transport_private		Lemma transport_private (s1 s2 : B) (shares : T'.+1.-tuple B)
+reconstruct/rs_massey_bridge.v	90	Lemma	transport_encode_valid		Lemma transport_encode_valid (s : B) :
+reconstruct/rs_massey_bridge.v	106	Lemma	transport_exact		Lemma transport_exact :
+reconstruct/rs_massey_bridge.v	149	Lemma	rs_massey_exact	(* With d = 1 and the strong privacy bound, ts_T' = ts_k' = n''.+1 *)	Lemma rs_massey_exact : ts_T rs_massey = ts_k rs_massey.
+reconstruct/rs_massey_bridge.v	177	Lemma	ofFK		Lemma ofFK : cancel ofF toF.
+reconstruct/rs_massey_bridge.v	180	Lemma	toFK		Lemma toFK : cancel toF ofF.
+reconstruct/rs_massey_bridge.v	187	Lemma	rs_genus0_exact		Lemma rs_genus0_exact :
+reconstruct/rs_privacy.v	56	Lemma	poly_eval_in_code	(* An evaluation vector of a polynomial of degree < n-d is a codeword *)	Lemma poly_eval_in_code (p : {poly F}) :
+reconstruct/rs_privacy.v	129	Lemma	rs_privacy_surj	(* Main result: privacy surjectivity for RS codes. For any set S with |S| < (n-d)+1 (= dim(C)+1) and any target vector, there exists a codeword agreeing with target on S. Proof strategy: 1. Extract t…	Lemma rs_privacy_surj :
+reconstruct/rs_privacy.v	167	Lemma	rs_privacy_surj_massey	(* Corollary: instantiate massey_scheme for RS codes *)	Lemma rs_privacy_surj_massey (Hd2 : 1 < min_dist C_nt) :
+security/pgg_abelian_collapse.v	48	Lemma	one_eval_determines_perm		Lemma one_eval_determines_perm (g1 g2 : gT) (s : 'I_N) :
+security/pgg_abelian_collapse.v	78	Lemma	word_eval_in_G	(* Helper: word_eval produces elements of G *)	Lemma word_eval_in_G (w : pgg_word M L) : word_eval w \in G.
+security/pgg_abelian_collapse.v	87	Lemma	abelian_adversary_full_recovery	(* Item 4: Adversary seeing one endpoint determines the group element. For words w1, w2: if endpoint(word_eval w1)(s) = endpoint(word_eval w2)(s), then word_eval w1 = word_eval w2. *)	Lemma abelian_adversary_full_recovery (w1 w2 : pgg_word M L) (s : 'I_N) :
+security/pgg_abelian_collapse.v	95	Theorem	abelian_security_collapse	(* Security collapse: search space bounded by frequency vector count *)	Theorem abelian_security_collapse :
+security/pgg_collusion_bound.v	40	Lemma	var_dist_triangle		Lemma var_dist_triangle (P Q M : R.-fdist A) :
+security/pgg_collusion_bound.v	69	Lemma	var_dist_fdistmap	(* endpoint bounds from group-level spectral analysis. *)	Lemma var_dist_fdistmap (f : A -> B) (P Q : R.-fdist A) :
+security/pgg_collusion_bound.v	102	Lemma	var_dist_uniform_supp		Lemma var_dist_uniform_supp :
+security/pgg_collusion_bound.v	189	Lemma	ideal_marginal_uniform	(* Key lemma: the pushforward of uniform(S_N) through evaluation is uniform(I_N) *)	Lemma ideal_marginal_uniform : ideal_marginal = target_uniform.
+security/pgg_collusion_bound.v	227	Theorem	collusion_bound_unconditional	(* Main unconditional bound: var_dist(adv, uniform) <= epsilon *)	Theorem collusion_bound_unconditional :
+security/pgg_collusion_bound.v	239	Theorem	collusion_bound	(* The stronger statement including the 2(T-1)/N term from conditioning. When the adversary conditions on T-1 observed values, the ideal conditional distribution is uniform over N-(T-1) remaining val…	Theorem collusion_bound :
+security/pgg_collusion_bound.v	293	Lemma	Hcard_remaining		Lemma Hcard_remaining : #|remaining| = (N - T')%N.
+security/pgg_collusion_bound.v	296	Theorem	collusion_bound_conditional		Theorem collusion_bound_conditional :
+security/pgg_collusion_bound.v	325	Lemma	fdistmap_eval_uniform		Lemma fdistmap_eval_uniform (s : 'I_N) :
+security/pgg_collusion_bound.v	388	Lemma	fdistmap_inj_uniform		Lemma fdistmap_inj_uniform :
+security/pgg_collusion_bound.v	445	Lemma	card_word_L	(* Cardinality of word space *)	Lemma card_word_L :
+security/pgg_collusion_bound.v	460	Lemma	achievable_pos	(* achievable(L) has positive cardinality *)	Lemma achievable_pos : (0 < #|@achievable M L|)%N.
+security/pgg_collusion_bound.v	469	Lemma	rho_from_words_uniform_supp	(* Key: rho_from_words is uniform_supp over achievable(L) *)	Lemma rho_from_words_uniform_supp :
+security/pgg_collusion_bound.v	521	Lemma	card_word_L'		Lemma card_word_L' :
+security/pgg_collusion_bound.v	534	Lemma	fiber_prob	(* The probability of g under rho_from_words equals |fiber g| / Tg^L *)	Lemma fiber_prob (g : {perm 'I_N}) :
+security/pgg_collusion_bound.v	547	Lemma	weval_inj_fiber_le1	(* Under word-eval injectivity, each fiber has at most one element *)	Lemma weval_inj_fiber_le1 (Hlfree : @weval_inj M L) (g : {perm 'I_N}) :
+security/pgg_collusion_bound.v	556	Lemma	weval_inj_fiber_card1	(* Under word-eval injectivity, fibers of achievable elements are singletons *)	Lemma weval_inj_fiber_card1 (Hlfree : @weval_inj M L) (g : {perm 'I_N}) :
+security/pgg_collusion_bound.v	614	Theorem	collusion_bound_k	(* Main theorem: DPI gives the bound for joint observations *)	Theorem collusion_bound_k :
+security/pgg_collusion_bound.v	646	Lemma	fdistmap_uniform_supp_inj	(* When f is injective on C, the pushforward of uniform_supp(C) through f is uniform_supp(f(C)). This is the key lemma for direct endpoint epsilon. *)	Lemma fdistmap_uniform_supp_inj :
+security/pgg_collusion_bound.v	711	Lemma	direct_eps_ge0		Lemma direct_eps_ge0 : 0 <= direct_eps.
+security/pgg_collusion_bound.v	718	Lemma	achievable_card_TgL		Lemma achievable_card_TgL : #|@achievable M L| = (Tg ^ L)%N.
+security/pgg_collusion_bound.v	724	Lemma	achievable_pos'		Lemma achievable_pos' : (0 < #|@achievable M L|)%N.
+security/pgg_collusion_bound.v	728	Lemma	perm_endpoint_image_card	(* The image of achievable through eval_at s has cardinality Tg^L *)	Lemma perm_endpoint_image_card (s : 'I_N) :
+security/pgg_collusion_bound.v	738	Lemma	perm_endpoint_image_pos		Lemma perm_endpoint_image_pos (s : 'I_N) :
+security/pgg_collusion_bound.v	742	Lemma	TgL_leq_N		Lemma TgL_leq_N : (Tg ^ L <= N)%N.
+security/pgg_collusion_bound.v	752	Theorem	var_dist_endpoint_direct	(* Direct endpoint bound: for each sheet s, the marginal endpoint distribution is at distance 2*(N-Tg^L)/N from uniform. This is TIGHTER than the DPI bound 2*(N!-Tg^L)/N!. *)	Theorem var_dist_endpoint_direct (s : 'I_N) :
+security/pgg_collusion_bound.v	802	Lemma	var_dist_fdistmap_balanced	(* The balanced-case var_dist formula. When |C| = |B|, fibers partition C into |B| groups summing to |C| = |B|. The var_dist only depends on how many groups are empty (= |B| - |image|). *)	Lemma var_dist_fdistmap_balanced :
+security/pgg_collusion_bound.v	893	Lemma	var_dist_fdistmap_unbalanced		Lemma var_dist_fdistmap_unbalanced :
+security/pgg_collusion_bound.v	988	Lemma	var_dist_endpoint_unbalanced		Lemma var_dist_endpoint_unbalanced
+security/pgg_collusion_bound.v	1003	Lemma	var_dist_endpoint_image_bound_unbalanced		Lemma var_dist_endpoint_image_bound_unbalanced
+security/pgg_collusion_bound.v	1042	Lemma	var_dist_endpoint_balanced	(* When Tg^L = N (balanced), the fiber-counted var_dist reduces to the image-size formula 2*(N - |image_s|)/N. *)	Lemma var_dist_endpoint_balanced
+security/pgg_collusion_bound.v	1057	Lemma	var_dist_endpoint_image_bound	(* The key corollary: bound var_dist by bounding |image_s| from below *)	Lemma var_dist_endpoint_image_bound
+security/pgg_entropy_security.v	161	Lemma	entropy_uniform_supp		Lemma entropy_uniform_supp :
+security/pgg_entropy_security.v	194	Lemma	entropy_fdistmap_uniform_supp		Lemma entropy_fdistmap_uniform_supp :
+security/pgg_entropy_security.v	294	Lemma	fiber_entropy_general	(* General fiber entropy formula (works for ALL groups with weval_inj): H(P_s) = log(Tg^L) - (Tg^L)^{-1} sum_{x in img_s} c_x log c_x where c_x = |{sigma in achievable : sigma(s) = x}|. Injective cas…	Lemma fiber_entropy_general (s : 'I_N)
+security/pgg_entropy_security.v	317	Lemma	fiber_entropy_injective	(* When weval_inj AND perm_endpoint is injective on achievable(L): H(P_s) = log(Tg^L). Proof sketch: weval_inj -> rho_from_words = uniform_supp(achievable), pe_inj -> pushforward is uniform_supp(imag…	Lemma fiber_entropy_injective (s : 'I_N)
+security/pgg_entropy_security.v	335	Lemma	fiber_entropy_perfect	(* Perfect security: H(P_s) = log N (maximum entropy, zero leakage). Requires weval_inj + pe_inj + the saturation condition Tg^L = N. When Tg^L = N, the achievable permutations cover all N sheets inj…	Lemma fiber_entropy_perfect (s : 'I_N)
+security/pgg_entropy_security.v	344	Lemma	fiber_entropy_le_logN	(* Upper bound: H(P_s) <= log N always holds (entropy_max). *)	Lemma fiber_entropy_le_logN (s : 'I_N) :
+security/pgg_entropy_security.v	388	Lemma	fiber_entropy_gap	(* Fundamental identity: the entropy gap equals the KL divergence from the uniform distribution. This is the standard D(P||U) = log|X| - H(P) identity, specialized to the endpoint distribution P_s. *)	Lemma fiber_entropy_gap (s : 'I_N) :
+security/pgg_entropy_security.v	441	Lemma	var_dist_from_fiber_entropy	(* Pinsker bridge: entropy bound -> var_dist bound. Combines fiber_entropy_gap (D = log N - H) with Pinsker's inequality (var_dist <= sqrt(2*D)) to get var_dist <= sqrt(2*(log N - H)). *)	Lemma var_dist_from_fiber_entropy (s : 'I_N) :
+security/pgg_entropy_security.v	491	Lemma	Endpoint_RV_entropy	(* The entropy of Endpoint_RV equals fiber_entropy: both compute H(fdistmap (sigma |-> sigma(s)) rho_from_words), just via different factorizations of the word -> permutation -> endpoint pipeline. *)	Lemma Endpoint_RV_entropy (s : 'I_N) :
+security/pgg_entropy_security.v	684	Lemma	joint_entropy_le_log_words	(* Upper bound: H(joint) <= log(Tg^L). The joint distribution is a pushforward of a distribution on Tg^L words, so its support has at most Tg^L elements. *)	Lemma joint_entropy_le_log_words :
+security/pgg_entropy_security.v	714	Lemma	joint_entropy_le_T_logN	(* Trivial upper bound: H(joint) <= T * log N. Each coordinate has entropy at most log N, and H(X_1,...,X_T) <= sum H(X_i) by subadditivity. *)	Lemma joint_entropy_le_T_logN :
+security/pgg_entropy_security.v	725	Lemma	joint_entropy_single	(* Single-party consistency: when T = 1, joint_fiber_entropy reduces to fiber_entropy at the single party's sheet. *)	Lemma joint_entropy_single (HT1 : T' = 0) :
+security/pgg_entropy_security.v	761	Lemma	joint_entropy_full	(* Maximum entropy: H = log(Tg^L) when weval_inj AND T-fold endpoint injectivity both hold. - weval_inj ensures rho_from_words = uniform on achievable (Tg^L elements) - T-fold injectivity ensures joi…	Lemma joint_entropy_full
+security/pgg_entropy_security_demo.v	55	Lemma	monster_entropy_perfect	(* Perfect entropy: H(P_s) = log N at every sheet *)	Lemma monster_entropy_perfect (s : 'I_monster_n.+2) :
+security/pgg_entropy_security_demo.v	68	Lemma	monster_entropy_eps_perfect	(* eps = 0 under saturation *)	Lemma monster_entropy_eps_perfect :
+security/pgg_entropy_security_demo.v	93	Lemma	monster_entropy_short_L	(* H(P_s) = log(2^L) at every sheet when pe_inj holds *)	Lemma monster_entropy_short_L (s : 'I_monster_n.+2) :
+security/pgg_entropy_security_demo.v	98	Lemma	monster_leakage_short_L	(* Leakage = D(P_s || U_N) *)	Lemma monster_leakage_short_L (s : 'I_monster_n.+2) :
+security/pgg_entropy_security_demo.v	154	Lemma	oc_one_le_two_log2	(* 1 <= 2 * (log 4 - log 2). In base-2 logarithm: log 2 = 1, log 4 = 2, so 2 * (2 - 1) = 2 >= 1. *)	Lemma oc_one_le_two_log2 (R : realType) :
+security/pgg_entropy_security_demo.v	160	Lemma	oc_combinatorial_eps	(* sw_bound_eps(oc_security_witness_2) = 1 by definition of security_witness_fiber applied to oc_endpoint_bound_fiber (eps=1). *)	Lemma oc_combinatorial_eps (R : realType) :
+security/pgg_entropy_security_demo.v	181	Lemma	oc_entropy_bound	(* Entropy lower bound from axiom *)	Lemma oc_entropy_bound :
+security/pgg_entropy_security_demo.v	199	Lemma	oc_entropy_vs_combinatorial	(* Combinatorial bound (eps=1) is tighter than entropy bound (eps=sqrt 2). eps_combinatorial = 1, eps_entropy = sqrt(2*(log 4 - log 2)) = sqrt 2. Since 1 <= sqrt 2, the combinatorial bound is tighter…	Lemma oc_entropy_vs_combinatorial :
+security/pgg_entropy_security_demo.v	239	Lemma	oc_convergence_perfect	(* When H_min reaches log N = log 4, perfect security *)	Lemma oc_convergence_perfect :
+security/pgg_entropy_security_demo.v	263	Lemma	entropy_security_eps	(* Extract the epsilon formula *)	Lemma entropy_security_eps :
+security/pgg_entropy_security_demo.v	269	Lemma	entropy_security_perfect	(* Perfect security when H = log N *)	Lemma entropy_security_perfect :
+security/pgg_entropy_security_demo.v	275	Lemma	entropy_security_monotone	(* Monotonicity: larger H_min -> smaller eps *)	Lemma entropy_security_monotone (ew1 ew2 : EntropyWitness R M) :
+security/pgg_mixing.v	63	Lemma	cauchy_schwarz_bigR	(* Lagrange identity route: A * C - B^2 = (1/2) * sum_{i,j} (v_i w_j - v_j w_i)^2 >= 0. *)	Lemma cauchy_schwarz_bigR (R : realType) (I : finType) (vv ww : I -> R) :
+security/pgg_mixing.v	112	Lemma	var_dist_le_sqrtN_norm2	(* For any two distributions P, Q over a finite set of size N, var_dist(P, Q) = sum_a |P a - Q a| <= sqrt(N) * sqrt(sum_a (P a - Q a)^2) by Cauchy-Schwarz applied to constant 1 against |P - Q|. *)	Lemma var_dist_le_sqrtN_norm2 (R : realType) (A : finType)
+security/pgg_mixing.v	153	Lemma	cV_innerE		Lemma cV_innerE (v w : 'cV[R]_N) :
+security/pgg_mixing.v	157	Lemma	cV_inner_sym		Lemma cV_inner_sym (v w : 'cV[R]_N) : cV_inner v w = cV_inner w v.
+security/pgg_mixing.v	163	Lemma	cV_inner_ge0		Lemma cV_inner_ge0 (v : 'cV[R]_N) : 0 <= cV_inner v v.
+security/pgg_mixing.v	166	Lemma	cV_inner_self_sum		Lemma cV_inner_self_sum (v : 'cV[R]_N) :
+security/pgg_mixing.v	171	Lemma	cV_inner_Qv_Qv	(* ||Q v||^2 = <Q v, Q v> = v^T Q^T Q v. When Q^T = Q this equals v^T Q^2 v. *)	Lemma cV_inner_Qv_Qv (Q : 'M[R]_N) (v : 'cV[R]_N) :
+security/pgg_mixing.v	178	Lemma	cV_inner_Qv_Qv_symm		Lemma cV_inner_Qv_Qv_symm (Q : 'M[R]_N) (v : 'cV[R]_N) :
+security/pgg_mixing.v	202	Lemma	sum_Qv_zero	(* For a sum-zero column vector v (i.e. sum_i v_i = 0), Q *m v also has sum zero. *)	Lemma sum_Qv_zero (v : 'cV[R]_N) :
+security/pgg_mixing.v	228	Lemma	symm_ds_step_norm_sq_bound	(* Step 1: <Q v, Q v> <= alpha^2 * <v, v> for v in 1-perp. *)	Lemma symm_ds_step_norm_sq_bound (v : 'cV[R]_N) :
+security/pgg_mixing.v	238	Lemma	symm_ds_power_norm_sq_bound	(* Iterated power: <Q^L v, Q^L v> <= alpha^{2L} * <v, v> for v in 1-perp. *)	Lemma symm_ds_power_norm_sq_bound (L : nat) (v : 'cV[R]_N) :
+security/pgg_mixing.v	314	Lemma	Q_fixes_uniform	(* Q takes uniform to uniform (Q is row-stochastic => Q * 1 = 1 => Q U = U). *)	Lemma Q_fixes_uniform : Q *m uniform_cV = uniform_cV.
+security/pgg_mixing.v	327	Lemma	e_cV_sum		Lemma e_cV_sum (s : 'I_N) : \sum_i (e_cV s) i ord0 = 1.
+security/pgg_mixing.v	334	Lemma	uniform_cV_sum		Lemma uniform_cV_sum : \sum_i uniform_cV i ord0 = 1.
+security/pgg_mixing.v	343	Lemma	es_minus_U_sum_zero	(* The centred vector v_s := e_s - U has sum zero. *)	Lemma es_minus_U_sum_zero (s : 'I_N) :
+security/pgg_mixing.v	356	Lemma	es_minus_U_norm_sq	(* <e_s - U, e_s - U> = 1 - 1/N. *)	Lemma es_minus_U_norm_sq (s : 'I_N) :
+security/pgg_mixing.v	379	Lemma	es_minus_U_norm_sq_le1		Lemma es_minus_U_norm_sq_le1 (s : 'I_N) :
+security/pgg_mixing.v	389	Lemma	vec_norm2_ge0		Lemma vec_norm2_ge0 (v : 'cV[R]_N) : 0 <= vec_norm2 v.
+security/pgg_mixing.v	393	Lemma	symm_ds_power_norm2_bound	(* Task 1: sqrt of the power norm bound. *)	Lemma symm_ds_power_norm2_bound (L : nat) (v : 'cV[R]_N) :
+security/pgg_mixing.v	414	Lemma	Q_power_fixes_uniform	(* Q^L also fixes the uniform vector. *)	Lemma Q_power_fixes_uniform (L : nat) :
+security/pgg_mixing.v	423	Lemma	cV_l1_le_sqrtN_norm2	(* L^1 to L^2 bridge for column vectors. *)	Lemma cV_l1_le_sqrtN_norm2 (w : 'cV[R]_N) :
+security/pgg_mixing.v	450	Lemma	es_minus_U_norm2_le1	(* The L^2 norm of e_s - U is at most 1. *)	Lemma es_minus_U_norm2_le1 (s : 'I_N) :
+security/pgg_mixing.v	462	Lemma	symm_ds_TV_bound_cV	(* Task 2 (column-vector form): the main TV bound, in vector form. Combines L1-to-L2 bridge, the sqrt'd power bound, and ||e_s - U||_2 <= 1. *)	Lemma symm_ds_TV_bound_cV (L : nat) (s : 'I_N) :
+security/pgg_mixing.v	512	Lemma	schreier_transition_symm	(* Task 3: under self-inverse generators, the Schreier transition is symmetric. *)	Lemma schreier_transition_symm :
+security/pgg_mixing.v	535	Lemma	schreier_transition_doubly_stochastic_col	(* Task 4: column sum equals 1, completing doubly stochastic. *)	Lemma schreier_transition_doubly_stochastic_col (j : 'I_N) :
+security/pgg_mixing.v	552	Lemma	schreier_endpoint_eq_Q_power	(* Task 5: bridge from fdistmap-of-rho to the (Q^L *m e_s) column entry. *)	Lemma schreier_endpoint_eq_Q_power (L : nat) (s a : 'I_N) :
+security/pgg_mixing.v	597	Lemma	symm_ds_TV_bound		Lemma symm_ds_TV_bound (alpha : R) (L : nat) (s : 'I_N) :
+security/pgg_schreier.v	182	Lemma	schreier_transition_entry_ge0	(* All entries are non-negative *)	Lemma schreier_transition_entry_ge0 (i j : 'I_N) :
+security/pgg_schreier.v	193	Lemma	schreier_transition_stochastic	(* Each row sums to 1 (row-stochastic). Proof: for each generator sigma_k and sheet x, there is exactly one y such that sigma_k(x) = y (namely y = sigma_k(x)). So the total count across all y is Tg. …	Lemma schreier_transition_stochastic (i : 'I_N) :
+security/pgg_schreier.v	305	Lemma	convergence_rate_ge0		Lemma convergence_rate_ge0 (sc : SchreierCertificate) :
+security/pgg_schreier.v	312	Lemma	convergence_rate_lt1		Lemma convergence_rate_lt1 (sc : SchreierCertificate) :
+security/pgg_schreier.v	351	Lemma	schreier_epsilon_ge0	(* Epsilon is non-negative *)	Lemma schreier_epsilon_ge0 (sc : SchreierCertificate) (L : nat) :
+security/pgg_schreier.v	371	Lemma	schreier_epsilon_decreasing	(* The UPPER BOUND schreier_epsilon is monotonically decreasing in L. sqrt(N) * r^L2 <= sqrt(N) * r^L1 when 0 <= r < 1, L1 <= L2. Follows from r^(a+b) = r^a * r^b and r^b <= 1 for 0 <= r <= 1. IMPORT…	Lemma schreier_epsilon_decreasing (sc : SchreierCertificate) (L1 L2 : nat) :
+security/pgg_schreier.v	385	Lemma	security_monotone	(* Monotone security: if secure at L1, at least as secure at L2 >= L1 *)	Lemma security_monotone (sc : SchreierCertificate)
+security/pgg_schreier.v	432	Lemma	word_eval_cons		Lemma word_eval_cons (L : nat) (i : 'I_Tg) (w : L.-tuple 'I_Tg) :
+security/pgg_schreier.v	442	Lemma	word_eval_cons_endpoint		Lemma word_eval_cons_endpoint (L : nat) (i : 'I_Tg) (w : L.-tuple 'I_Tg)
+security/pgg_schreier.v	448	Lemma	schreier_walk_eq_endpoint		Lemma schreier_walk_eq_endpoint : forall (L : nat)
+security/pgg_schreier_weighted.v	78	Lemma	schreier_weighted_entry_ge0	(* All entries are non-negative *)	Lemma schreier_weighted_entry_ge0 (x y : 'I_N) :
+security/pgg_schreier_weighted.v	89	Lemma	schreier_weighted_stochastic	(* Each row sums to 1 (row-stochastic). Proof: partition generators by target sheet, then use FDist.f1. For each generator i, there is exactly one y = sigma_i(x), so sum_y sum_{i:sigma_i(x)=y} W(i) =…	Lemma schreier_weighted_stochastic (x : 'I_N) :
+security/pgg_schreier_weighted.v	102	Lemma	schreier_weighted_uniform	(* When W is uniform (W(i) = 1/Tg for all i), the weighted transition matrix recovers the original schreier_transition. *)	Lemma schreier_weighted_uniform :
+security/pgg_schreier_weighted.v	163	Lemma	weighted_convergence_rate_ge0		Lemma weighted_convergence_rate_ge0 (wsc : WeightedSchreierCertificate) :
+security/pgg_schreier_weighted.v	170	Lemma	weighted_convergence_rate_lt1		Lemma weighted_convergence_rate_lt1 (wsc : WeightedSchreierCertificate) :
+security/pgg_schreier_weighted.v	183	Lemma	weighted_schreier_epsilon_ge0	(* Epsilon is non-negative *)	Lemma weighted_schreier_epsilon_ge0
+security/pgg_schreier_weighted.v	193	Lemma	weighted_schreier_epsilon_decreasing	(* Epsilon is monotonically decreasing in L *)	Lemma weighted_schreier_epsilon_decreasing
+security/pgg_schreier_weighted.v	209	Lemma	weighted_security_monotone	(* Monotone security: if secure at L1, at least as secure at L2 >= L1 *)	Lemma weighted_security_monotone
+security/pgg_schreier_weighted.v	254	Lemma	schreier_weighted_bridge		Lemma schreier_weighted_bridge : forall (L : nat) (s x : 'I_N),
+security/pgg_schreier_weighted.v	380	Lemma	unif_offdiag_row_sum	(** Row stochastic follows from column stochastic + uniform-off-diagonal: a + (N-1)*b = 1. We derive this rather than assuming it. *)	Lemma unif_offdiag_row_sum : a + (N.-1)%:R * b = 1.
+security/pgg_schreier_weighted.v	390	Lemma	unif_offdiag_ab	(** a - b = 1 - N * b *)	Lemma unif_offdiag_ab : a - b = 1 - N%:R * b.
+security/pgg_schreier_weighted.v	400	Lemma	unif_offdiag_key_identity	(** Key identity: (a - b) / N + b = 1/N *)	Lemma unif_offdiag_key_identity : (a - b) / N%:R + b = N%:R^-1.
+security/pgg_schreier_weighted.v	408	Lemma	doubly_stochastic_power	(** Column sums of Q^L are 1 (doubly stochastic is preserved under powers) *)	Lemma doubly_stochastic_power (L : nat) (x : 'I_N) :
+security/pgg_schreier_weighted.v	424	Lemma	unif_offdiag_power_entry	(** Q^L entries for uniform-off-diagonal matrices *)	Lemma unif_offdiag_power_entry (L : nat) (s x : 'I_N) :
+security/pgg_schreier_weighted.v	451	Lemma	unif_offdiag_var_dist	(** Exact variation distance formula *)	Lemma unif_offdiag_var_dist (L : nat) (s : 'I_N) :
+security/pgg_schreier_weighted.v	474	Lemma	two_Nm1_div_N_le_sqrtN	(** The prefactor 2*(N-1)/N is at most sqrt(N) for N >= 2 *)	Lemma two_Nm1_div_N_le_sqrtN : 2%:R * (N.-1)%:R / N%:R <= Num.sqrt N%:R :> R.
+security/pgg_schreier_weighted.v	498	Lemma	unif_offdiag_convergence	(** Convergence bound *)	Lemma unif_offdiag_convergence (L : nat) (s : 'I_N) :
+security/pgg_security.v	29	Lemma	isqrt_aux_lower	(* --- auxiliary lemmas on isqrt_aux --- *)	Lemma isqrt_aux_lower fuel k n :
+security/pgg_security.v	36	Lemma	isqrt_aux_ge		Lemma isqrt_aux_ge fuel k n : k <= isqrt_aux fuel k n.
+security/pgg_security.v	43	Lemma	isqrt_aux_upper		Lemma isqrt_aux_upper fuel k n :
+security/pgg_security.v	55	Lemma	isqrt_aux_largest		Lemma isqrt_aux_largest fuel k n m :
+security/pgg_security.v	79	Lemma	isqrt_lower	(* --- main properties of isqrt --- *)	Lemma isqrt_lower n : isqrt n ^ 2 <= n.
+security/pgg_security.v	82	Lemma	isqrt_upper		Lemma isqrt_upper n : n < (isqrt n).+1 ^ 2.
+security/pgg_security.v	85	Lemma	isqrt_monotone		Lemma isqrt_monotone m n : m <= n -> isqrt m <= isqrt n.
+security/pgg_security.v	98	Lemma	isqrt_expn		Lemma isqrt_expn k : k <= isqrt (k ^ 2).
+security/pgg_security.v	116	Lemma	kappa_gt0		Lemma kappa_gt0 : 0 < kappa.
+security/pgg_security.v	125	Lemma	kappa_sq_L	(* ========================================================================== *)	Lemma kappa_sq_L (L : nat) : kappa ^ (2 * L) = (kappa ^ L) ^ 2.
+security/pgg_security.v	128	Theorem	grover_mitigation		Theorem grover_mitigation (L : nat) :
+security/pgg_security.v	144	Theorem	security_exponential	(* ========================================================================== *)	Theorem security_exponential (L : nat) :
+security/pgg_security.v	153	Theorem	security_storage_match	(* Combined: security and storage grow as Theta(kappa^L) *)	Theorem security_storage_match (L : nat) :
+security/pgg_security_solver.v	104	Lemma	epsilon_endpoint_rat_consistent	(******************************************************************************)	Lemma epsilon_endpoint_rat_consistent (Tg N L : nat) :
+security/pgg_security_solver.v	109	Lemma	epsilon_endpoint_rat_sp_consistent		Lemma epsilon_endpoint_rat_sp_consistent Tg N L :
+security/pgg_security_solver.v	122	Lemma	sp_consistent_endpoint		Lemma sp_consistent_endpoint Tg N L :
+security/pgg_security_solver.v	134	Lemma	solve_consistent		Lemma solve_consistent c p : solve c = Some p -> sp_consistent p.
+security/pgg_uniform_security.v	58	Lemma	fdist_uniform_supp_setT		Lemma fdist_uniform_supp_setT :
+security/pgg_uniform_security.v	77	Lemma	var_dist_self		Lemma var_dist_self (P : R.-fdist A) : var_dist P P = 0.
+security/pgg_uniform_security.v	124	Lemma	img_pos		Lemma img_pos (s : 'I_N) : (0 < #|img s|)%N.
+security/pgg_uniform_security.v	132	Lemma	img_setT	(* Key: the image is all of 'I_N *)	Lemma img_setT (s : 'I_N) : img s = [set: 'I_N].
+security/pgg_uniform_security.v	136	Lemma	eval_pushforward	(* The pushforward of uniform(rhoG) through eval_at s is uniform(img s) *)	Lemma eval_pushforward (s : 'I_N) :
+security/pgg_uniform_security.v	145	Lemma	eval_pushforward_uniform	(* The pushforward equals fdist_uniform *)	Lemma eval_pushforward_uniform (s : 'I_N) :
+security/pgg_uniform_security.v	155	Lemma	endpoint_bound	(* The endpoint bound: var_dist = 0 <= 0 *)	Lemma endpoint_bound (s : 'I_N) :
+security/pgg_uniform_security.v	164	Lemma	endpoint_exact	(* The exact endpoint equality: var_dist = 0 *)	Lemma endpoint_exact (s : 'I_N) :
+security/pgg_weighted_entropy.v	57	Lemma	KL_div_uniform		Lemma KL_div_uniform :
+security/pgg_weighted_entropy.v	113	Lemma	var_dist_from_weighted_entropy		Lemma var_dist_from_weighted_entropy (s : 'I_N) :
+security/pgg_weighted_words.v	72	Lemma	word_weightedE	(* Probability of each word under the weighted distribution *)	Lemma word_weightedE (w : L.-tuple 'I_Tg) :
+security/pgg_weighted_words.v	88	Lemma	fiber_prob_weighted	(* The probability of g under the weighted distribution *)	Lemma fiber_prob_weighted (g : {perm 'I_N}) :
+security/pgg_weighted_words.v	129	Lemma	word_weighted_is_uniform	(* When W is uniform, each word gets probability (1/Tg)^L = 1/Tg^L, which is the uniform distribution on L-tuples. *)	Lemma word_weighted_is_uniform :
+security/pgg_weighted_words.v	139	Lemma	rho_weighted_is_uniform		Lemma rho_weighted_is_uniform :
+security/pgg_word_analysis.v	62	Lemma	comm_pair_count_bound	(* Upper bound: at most L-1 adjacent pairs *)	Lemma comm_pair_count_bound (L : nat) (w : pgg_word M L) :
+security/pgg_word_analysis.v	76	Lemma	edge_count_sym		Lemma edge_count_sym : edge_count =
+security/pgg_word_analysis.v	89	Lemma	edge_count_even	(* edge_count is even: the swap involution (i,j) <-> (j,i) has no fixed points on commuting pairs (since comm is irreflexive), so the set partitions into pairs. *)	Lemma edge_count_even : 2 %| edge_count.
+security/pgg_word_analysis.v	131	Lemma	adj_swap_symmetric	(* Helper: adj_swap w' w implies adj_swap w w' (adj_swap is symmetric). If w = swap_word k w', then w' = swap_word k w, and the commutation condition at positions k,k+1 is preserved (by comm_sym and …	Lemma adj_swap_symmetric (L : nat) (w1 w2 : pgg_word M L) :
+security/pgg_word_analysis.v	170	Lemma	comm_pair_count_zero_adj_swap	(* If no adjacent generators in w commute, then no adjacent swap is possible, so the trace class of w is the singleton {w}. *)	Lemma comm_pair_count_zero_adj_swap (L : nat) (w1 w2 : pgg_word M L) :
+security/pgg_word_analysis.v	185	Lemma	comm_pair_count_zero_adj_swap_sym	(* The symmetric closure of adj_swap is also false when comm_pair_count = 0 *)	Lemma comm_pair_count_zero_adj_swap_sym (L : nat) (w1 w2 : pgg_word M L) :
+security/pgg_word_analysis.v	196	Lemma	comm_pair_count_zero_root	(* Words with zero commuting pairs are their own trace roots *)	Lemma comm_pair_count_zero_root (L : nat) (w : pgg_word M L) :
+security/pgg_word_analysis.v	217	Lemma	comm_pair_count_zero_singleton	(* The trace equivalence class of a zero-count word is a singleton *)	Lemma comm_pair_count_zero_singleton (L : nat)
+security/pgg_word_analysis.v	237	Lemma	comm_pair_count_full_comm	(* When all distinct generators commute and L >= 2, we have comm_pair_count w = L.-1 (every adjacent pair commutes, unless two adjacent generators happen to be equal, in which case comm is false by i…	Lemma comm_pair_count_full_comm (L' : nat) (w : pgg_word M L'.+1) :
+security/pgg_word_analysis.v	260	Lemma	adj_swap_comm_pair_diff	(* An adjacent swap at position k changes comm_pair_count by at most 2 (one pair created/destroyed at k, and adjacent pairs at k-1 and k+1 may be affected). This is a structural observation. *)	Lemma adj_swap_comm_pair_diff (L : nat) (w1 w2 : pgg_word M L) :
+security/pgg_word_analysis.v	343	Lemma	card_pgg_word	(* Total number of words of length L *)	Lemma card_pgg_word (L : nat) : #|{: pgg_word M L}| = Tg ^ L.
+security/pgg_word_analysis.v	347	Lemma	card_pgg_word_pos	(* For fdist_uniform, we need the (n.+1) form *)	Lemma card_pgg_word_pos (L : nat) :
+security/pgg_word_analysis.v	351	Lemma	card_pgg_word_succ		Lemma card_pgg_word_succ (L : nat) :
+security/pgg_word_analysis.v	415	Lemma	fiber_count_card		Lemma fiber_count_card (a b : T) :
+security/pgg_word_analysis.v	450	Lemma	total_comm_pairs	(* The total number of (word, commuting-position) pairs. For each position k < L-1, the pair (w_k, w_{k+1}) is drawn from Tg * Tg generators, and there are Tg^(L-2) choices for the remaining position…	Lemma total_comm_pairs (L : nat) :
+security/pgg_word_analysis.v	521	Lemma	zero_comm_pair_traces	(* Number of trace classes containing words with zero commuting pairs *)	Lemma zero_comm_pair_traces (L : nat) :
+security/pgg_word_analysis.v	534	Lemma	zero_comm_words_are_traces	(* Lower bound: words with no commuting adjacent pairs contribute directly to trace count *)	Lemma zero_comm_words_are_traces (L : nat) (w : pgg_word M L) :
