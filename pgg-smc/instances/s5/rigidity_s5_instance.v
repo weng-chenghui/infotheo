@@ -196,6 +196,8 @@ rewrite add0r.
 exact: s5_spectral_convergence_gap.
 Defined.
 
+(** s5_security_witness_schreier — Schreier-based security witness for S_5 at length [L].
+    Kind: instance. *)
 Definition s5_security_witness_schreier (L : nat) :
     SecurityWitness R R_s5 :=
   @MkSecurityWitness R R_s5 L
@@ -292,9 +294,13 @@ Lemma s5_genus0_automorphism :
   genus0_automorphism_bound R_s5 (cs_data s5_covering).
 Proof. move=> _; exact: s5_genus0_pgl. Qed.
 
+(** s5_threshold_witness — threshold-covering witness for the S_5 instance.
+    Kind: instance. *)
 Definition s5_threshold_witness : ThresholdWitness R_s5 :=
   @MkThresholdWitness R_s5 s5_covering s5_genus0_automorphism.
 
+(** s5_rigidity — algebraic rigidity record for the S_5 instance.
+    Kind: instance. *)
 Definition s5_rigidity : AlgebraicRigidity R R_s5 :=
   @MkAlgebraicRigidity R R_s5
     (s5_security_witness_1 R)
@@ -308,11 +314,18 @@ Proof. exact: search_space_leG. Qed.
 
 Let R_s5_raag : RAAGType := @Gen_PGGTypes 3 3 (path_gen_tuple 3).
 
+(** s5_search_chain — search-space / trace-count / alphabet-power chain for S_5.
+    Kind: helper.
+    Why: instantiates the generic [search_space_chain] at the S_5 path RAAG.
+    Used by: downstream tightness bounds for the S_5 instance. *)
 Lemma s5_search_chain (L : nat) :
   ((@search_space R_s5_raag L <= @n_traces R_s5_raag L) &&
    (@n_traces R_s5_raag L <= 4 ^ L))%N.
 Proof. exact: search_space_chain. Qed.
 
+(** s5_tradeoff — security/complexity trade-off for the S_5 instance.
+    Kind: main.
+    Why: specialises the generic [security_threshold_tradeoff] to S_5. *)
 Lemma s5_tradeoff :
   let cs := tw_covering (ar_threshold s5_rigidity) in
   (cd_genus (cs_data cs) = 0 /\

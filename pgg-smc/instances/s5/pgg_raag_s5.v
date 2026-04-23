@@ -39,6 +39,10 @@ Definition s5_gens_nat (i x : nat) : nat :=
   | _ => match x with 3 => 4 | 4 => 3 | _ => x end
   end.
 
+(** s5_gens_agree — the nat-level S_5 generators agree with the path-RAAG tuple.
+    Kind: helper.
+    Why: bridges the decidable nat description to the perm-level generators.
+    Used by: [s5_weval_inj1] and downstream word-evaluation proofs. *)
 Lemma s5_gens_agree (i : 'I_4) (x : 'I_5) :
   s5_gens_nat (val i) (val x) = val (tnth (path_gen_tuple 3) i x).
 Proof.
@@ -60,8 +64,12 @@ Proof. apply: (weval_inj_of_natB s5_gens_agree). by vm_compute. Qed.
 Lemma s5_nt_L1 : n_traces_natB 4 1 path_comm_nat = 4.
 Proof. by vm_compute. Qed.
 
+(** s5_nt_L2 — trace count at length 2 for the S_5 path RAAG.
+    Kind: example. *)
 Lemma s5_nt_L2 : n_traces_natB 4 2 path_comm_nat = 13.
 Proof. by vm_compute. Qed.
 
+(** s5_nt_L3 — trace count at length 3 for the S_5 path RAAG.
+    Kind: example. *)
 Lemma s5_nt_L3 : n_traces_natB 4 3 path_comm_nat = 40.
 Proof. by vm_compute. Qed.

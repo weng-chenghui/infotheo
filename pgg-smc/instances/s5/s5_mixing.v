@@ -52,18 +52,30 @@ Import GRing.Theory Num.Theory.
 
 Definition s5_alpha_R (R : realType) : R := 181%:R / 200%:R.
 
+(** s5_alpha_R_ge0 — the S_5 mixing coefficient [alpha] is non-negative.
+    Kind: helper.
+    Why: non-negativity is used when rearranging the [1 - alpha] bound.
+    Used by: [s5_gap_R_le1]. *)
 Lemma s5_alpha_R_ge0 (R : realType) : 0 <= s5_alpha_R R.
 Proof.
 rewrite /s5_alpha_R.
 apply divr_ge0; by rewrite ler0n.
 Qed.
 
+(** s5_alpha_R_le1 — the S_5 mixing coefficient [alpha] is at most one.
+    Kind: helper.
+    Why: together with [s5_alpha_R_ge0] locates [alpha] in [0,1].
+    Used by: [s5_gap_R_le1] and downstream bound manipulations. *)
 Lemma s5_alpha_R_le1 (R : realType) : s5_alpha_R R <= 1.
 Proof.
 rewrite /s5_alpha_R ler_pdivrMr ?mul1r; last by rewrite ltr0n.
 by rewrite ler_nat.
 Qed.
 
+(** s5_alpha_R_lt1 — the S_5 mixing coefficient [alpha] is strictly below one.
+    Kind: helper.
+    Why: strict inequality is required for the spectral gap to be positive.
+    Used by: [s5_gap_R_pos]. *)
 Lemma s5_alpha_R_lt1 (R : realType) : s5_alpha_R R < 1.
 Proof.
 rewrite /s5_alpha_R ltr_pdivrMr ?mul1r; last by rewrite ltr0n.
@@ -74,6 +86,12 @@ Qed.
 (*  Section 2. Involutivity of the four path-graph generators.               *)
 (******************************************************************************)
 
+(** path_gen_tuple_3_invol — every entry of the path-3 generator tuple is an involution.
+    Kind: helper.
+    Why: feeds Schreier mixing arguments that require generator^2 = 1.
+    Used by: s5_lazy_count_eq, the S_5 lazy-walk discharge.
+    Naming: the component [tuple_3] names the concrete arity (4 generators,
+    indexed by 'I_4), which is load-bearing for rewrite targeting. *)
 Lemma path_gen_tuple_3_invol :
   forall k : 'I_4,
   (tnth (path_gen_tuple 3) k * tnth (path_gen_tuple 3) k)%g = 1%g.
@@ -206,21 +224,36 @@ Qed.
 
 Definition s5_gap_R (R : realType) : R := 1 - s5_alpha_R R.
 
+(** s5_gap_R_pos — the S_5 spectral gap is strictly positive.
+    Kind: helper.
+    Why: positivity of the gap drives geometric convergence.
+    Used by: convergence-rate consumers of [s5_gap_R]. *)
 Lemma s5_gap_R_pos (R : realType) : 0 < s5_gap_R R.
 Proof.
 rewrite /s5_gap_R subr_gt0.
 exact: s5_alpha_R_lt1.
 Qed.
 
+(** s5_gap_R_le1 — the S_5 spectral gap is at most one.
+    Kind: helper.
+    Why: together with [s5_gap_R_pos], establishes [gap in [0,1]] for the convergence bound.
+    Used by: convergence-rate consumers of [s5_gap_R]. *)
 Lemma s5_gap_R_le1 (R : realType) : s5_gap_R R <= 1.
 Proof.
 rewrite /s5_gap_R lerBlDr addrC -lerBlDr subrr.
 exact: s5_alpha_R_ge0.
 Qed.
 
+(** s5_gap_R_one_minus — the complement of the S_5 spectral gap is [alpha].
+    Kind: helper.
+    Why: algebraic bridge for translating bounds between [alpha] and [1 - gap].
+    Used by: [s5_spectral_convergence_gap]. *)
 Lemma s5_gap_R_one_minus (R : realType) : 1 - s5_gap_R R = s5_alpha_R R.
 Proof. by rewrite /s5_gap_R opprB addrA addrAC subrr add0r. Qed.
 
+(** s5_spectral_convergence_gap — spectral-gap form of the S_5 convergence bound.
+    Kind: main.
+    Why: rephrases [s5_spectral_convergence_proved] in terms of the gap [1 - alpha]. *)
 Lemma s5_spectral_convergence_gap
     (R : realType) (L : nat) (s : 'I_5) :
   var_dist (fdistmap (fun sigma : {perm 'I_5} => sigma s)
