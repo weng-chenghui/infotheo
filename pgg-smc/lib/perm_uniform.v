@@ -34,12 +34,19 @@ Hypothesis N_pos : (0 < N)%N.
 Definition prescribed (k : nat) (s v : 'I_k -> 'I_N) : {set {perm 'I_N}} :=
   [set sigma : {perm 'I_N} | [forall i, sigma (s i) == v i]].
 
+(** prescribedP — reflection view for prescribed-set membership.
+    Kind: canonical.
+    Statement: sigma \in prescribed s v iff forall i, sigma (s i) = v i. *)
 Lemma prescribedP k (s v : 'I_k -> 'I_N) (sigma : {perm 'I_N}) :
   reflect (forall i, sigma (s i) = v i) (sigma \in prescribed s v).
 Proof.
 rewrite inE; apply: (iffP forallP) => H i; by [apply/eqP | apply/eqP].
 Qed.
 
+(** prescribed0 — the empty prescription is trivially satisfied.
+    Kind: helper.
+    Why: base case of the k-transitivity induction in Sn_k_transitive.
+    Used by: Sn_k_transitive. *)
 Lemma prescribed0 (s v : 'I_0 -> 'I_N) : prescribed s v = [set: {perm 'I_N}].
 Proof.
 apply/setP => sigma; rewrite inE in_setT.
@@ -120,7 +127,10 @@ rewrite card_rcoset card_Sym.
 congr (_`!).
 have Him : #|s @: setT| = k by rewrite card_imset // cardsT card_ord.
 have := cardsC (s @: setT : {set 'I_N}).
-by rewrite Him card_ord => /(f_equal (subn^~ k)); rewrite addKn.
+(* Fallback (A002): subtracting k from both sides of a cardinality sum
+   is arithmetic on an equality, not a congruence over a shared head
+   symbol; goal-level `congr` does not apply. *)
+by rewrite Him card_ord => /(congr1 (subn^~ k)); rewrite addKn.
 Qed.
 
 End prescribed_set.
@@ -145,12 +155,20 @@ Definition s_ext (s_new : 'I_N) : 'I_k.+1 -> 'I_N :=
            | None => s_new
            end.
 
+(** v_ext — extend an indexed family v : 'I_k -> 'I_N by one more value.
+    Kind: helper.
+    Why: mirrors s_ext so prescribed-set extensions can be stated uniformly.
+    Used by: prescribed_extend, prescribed_value_count. *)
 Definition v_ext (v_new : 'I_N) : 'I_k.+1 -> 'I_N :=
   fun i => match unlift ord_max i with
            | Some j => v j
            | None => v_new
            end.
 
+(** s_ext_inj — injectivity is preserved when extending s by a fresh value.
+    Kind: helper.
+    Why: feeds the k+1 step of card_prescribed via prescribed_extend.
+    Used by: prescribed_value_count. *)
 Lemma s_ext_inj (s_new : 'I_N) :
   injective s -> s_new \notin s @: setT ->
   injective (s_ext s_new).
@@ -166,6 +184,10 @@ case: (unliftP ord_max i) => [i' ->|->];
   by rewrite negbK; apply/imsetP; exists j'; rewrite ?inE.
 Qed.
 
+(** v_ext_inj — injectivity is preserved when extending v by a fresh value.
+    Kind: helper.
+    Why: paired with s_ext_inj to discharge the k+1 step of card_prescribed.
+    Used by: prescribed_value_count. *)
 Lemma v_ext_inj (v_new : 'I_N) :
   injective v -> v_new \notin v @: setT ->
   injective (v_ext v_new).
@@ -245,9 +267,17 @@ Context {R : realType}.
 Variable N_minus_1 : nat.
 Let N := N_minus_1.+1.
 
+(** N_pos — positivity of the ambient size N used in the probabilistic layer.
+    Kind: helper.
+    Why: several fdist constructions below need 0 < N.
+    Used by: Pr_prescribed, perm_cond_uniform. *)
 Lemma N_pos : (0 < N)%N. Proof. by []. Qed.
 
-(* Cardinality of S_N *)
+(** card_permT_N — the symmetric group S_N has N! elements, written (N!-1).+1 to
+    expose positivity.
+    Kind: helper.
+    Why: needed as the cardinality hypothesis for fdist_uniform over {perm 'I_N}.
+    Used by: perm_fdist definition, Pr_prescribed, perm_cond_uniform. *)
 Lemma card_permT_N : #|{perm 'I_N}| = (N`!.-1).+1.
 Proof.
 transitivity (#|perm_on [set: 'I_N]|).
@@ -278,6 +308,10 @@ set c := (#|{perm 'I_N}|%:R^-1 : R)%R.
 by rewrite -[LHS]mulr_natr mulrC /c card_permT_N prednK ?fact_gt0.
 Qed.
 
+(** Pr_prescribed_ne0 — the prescribed event has positive probability.
+    Kind: helper.
+    Why: needed to avoid division-by-zero in the conditional-probability rewrites.
+    Used by: perm_cond_uniform. *)
 Lemma Pr_prescribed_ne0 : Pr perm_fdist obs_set != (0 : R)%R.
 Proof.
 rewrite Pr_prescribed mulf_neq0 //.
@@ -340,15 +374,26 @@ Qed.
 (* The remaining values are exactly ~: (v @: setT) *)
 Definition remaining_values : {set 'I_N} := ~: (v @: setT).
 
+(** card_remaining — the complement of v's image has cardinality N - k.
+    Kind: helper.
+    Why: identifies the support of the uniform conditional distribution.
+    Used by: collusion_uniform, external collusion-bound proofs. *)
 Lemma card_remaining : #|remaining_values| = (N - k)%N.
 Proof.
 rewrite /remaining_values.
 have Hvi : #|v @: setT| = k by rewrite card_imset // cardsT card_ord.
 have := cardsC (v @: setT : {set 'I_N}).
 rewrite Hvi card_ord.
-by move/(f_equal (subn^~ k)); rewrite addKn.
+(* Fallback (A002): subtracting k from both sides of a cardinality sum
+   is arithmetic on an equality, not a congruence over a shared head
+   symbol; goal-level `congr` does not apply. *)
+by move/(congr1 (subn^~ k)); rewrite addKn.
 Qed.
 
+(** collusion_uniform — main statement of Proposition 4 on the uniform face.
+    Kind: main.
+    Why: the colluders' posterior on a fresh coordinate is uniform over remaining
+    values, which is the core security ingredient for the collusion bound. *)
 Lemma collusion_uniform (s_new : 'I_N) (v_new : 'I_N) :
   s_new \notin s @: setT ->
   v_new \in remaining_values ->
@@ -359,6 +404,10 @@ move=> Hs Hv; apply: perm_cond_uniform => //.
 by move: Hv; rewrite inE.
 Qed.
 
+(** collusion_zero — zero-probability face of Proposition 4 for used values.
+    Kind: main.
+    Why: complements collusion_uniform: colluders assign probability zero to any
+    already-revealed value. *)
 Lemma collusion_zero (s_new : 'I_N) (v_new : 'I_N) :
   s_new \notin s @: setT ->
   v_new \notin remaining_values ->
