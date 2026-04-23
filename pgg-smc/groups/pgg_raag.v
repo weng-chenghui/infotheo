@@ -87,6 +87,10 @@ Definition dv_leq (p1 p2 : nat * nat) : bool :=
 Definition foata_nf (comm : nat -> nat -> bool) (w : seq nat) : seq nat :=
   [seq p.2 | p <- sort dv_leq (foata_pairs comm [::] w)].
 
+(** n_traces_natB — nat-level computable count of Foata normal forms of
+    length-L words on Tg generators under commutativity relation comm.
+    Kind: canonical.
+*)
 Definition n_traces_natB (Tg L : nat) (comm : nat -> nat -> bool) : nat :=
   size (undup (map (foata_nf comm) (all_words Tg L))).
 
@@ -102,6 +106,12 @@ apply: IH => a Ha.
 by apply: Heq; rewrite /= inE Ha orbT.
 Qed.
 
+(** foata_pairs_ext — foata_pairs only inspects comm on values appearing in
+    prev ++ w, so two comm relations that agree there give equal outputs.
+    Kind: helper.
+    Used by: foata_nf_ext, enabling reflection of the abstract comm relation
+             to its nat-level counterpart on concrete words.
+*)
 Lemma foata_pairs_ext comm1 comm2 prev w :
   (forall a b, a \in [seq p.2 | p <- prev] ++ w ->
                b \in [seq p.2 | p <- prev] ++ w ->
@@ -120,6 +130,10 @@ rewrite map_rcons cat_rcons => Ha' Hb'.
 exact: Heq.
 Qed.
 
+(** foata_nf_ext — Foata normal form only inspects comm on entries of w.
+    Kind: helper.
+    Used by: nat-level reflection of n_traces_natB to the abstract count.
+*)
 Lemma foata_nf_ext comm1 comm2 w :
   (forall a b, a \in w -> b \in w -> comm1 a b = comm2 a b) ->
   foata_nf comm1 w = foata_nf comm2 w.
@@ -129,6 +143,12 @@ congr (map _ (sort _ _)).
 by apply: foata_pairs_ext => a b /=; exact: Heq.
 Qed.
 
+(** leq_sum_sub — weakening a bigop filter: if P implies Q, the P-sum is
+    bounded by the Q-sum (over a finType with a nonnegative summand).
+    Kind: helper.
+    Used by: size comparisons between filtered sums in the Cartier-Foata
+             counting arguments.
+*)
 Lemma leq_sum_sub (I : finType) (P Q : pred I) (f : I -> nat) :
   (forall i, P i -> Q i) ->
   \sum_(i | P i) f i <= \sum_(i | Q i) f i.
@@ -210,6 +230,11 @@ Definition swap_word (L : nat) (k : 'I_L.-1) (w : pgg_word M L)
       else tnth w i)
   end k w.
 
+(** swap_word_tnth — pointwise readout of swap_word: entries at position k
+    and k+1 are exchanged while all other positions are untouched.
+    Kind: helper.
+    Used by: word_eval_adj_swap, swap_word_perm, inv_count_swap_lt.
+*)
 Lemma swap_word_tnth L' (k : 'I_L') (w : pgg_word M L'.+1)
     (i : 'I_L'.+1) :
   tnth (@swap_word L'.+1 k w) i =
@@ -232,12 +257,26 @@ Definition adj_swap (L : nat) : rel (pgg_word M L) :=
       (w2 == @swap_word L'.+1 k w1)]
   end.
 
+(** adj_swap_sym — symmetric closure of adj_swap, i.e. w1 and w2 differ by
+    one adjacent commuting swap in either direction.
+    Kind: canonical.
+*)
 Definition adj_swap_sym (L : nat) (w1 w2 : pgg_word M L) : bool :=
   adj_swap w1 w2 || adj_swap w2 w1.
 
+(** trace_equiv — reflexive transitive closure of adj_swap_sym: two words
+    are Cartier-Foata trace-equivalent iff they are connected through a
+    chain of adjacent commuting swaps.
+    Kind: canonical.
+*)
 Definition trace_equiv (L : nat) : rel (pgg_word M L) :=
   connect (adj_swap_sym (L:=L)).
 
+(** n_traces — number of trace equivalence classes among length-L words,
+    computed as the number of connected components of adj_swap_sym on the
+    full pgg_word universe.
+    Kind: canonical.
+*)
 Definition n_traces (L : nat) : nat :=
   n_comp (adj_swap_sym (L:=L)) {: pgg_word M L}.
 
@@ -351,6 +390,10 @@ rewrite -val_eqE /=; apply/eqP => Habs.
 by move: Hi1; rewrite Habs Hj1 ltnn.
 Qed.
 
+(** word_eval_trace — word_eval is invariant under trace equivalence.
+    Kind: helper.
+    Used by: search_space_le_traces, raag_weval_inj_search_space.
+*)
 Lemma word_eval_trace L (w1 w2 : pgg_word M L) :
   trace_equiv w1 w2 -> word_eval w1 = word_eval w2.
 Proof.
@@ -386,6 +429,17 @@ Qed.
 Definition raag_weval_inj (L : nat) : Prop :=
   forall w1 w2 : pgg_word M L, word_eval w1 = word_eval w2 -> trace_equiv w1 w2.
 
+(** raag_weval_inj_search_space — if word_eval is injective up to trace
+    equivalence, then search_space and n_traces coincide.
+    Kind: main.
+    Why: identifies the number of distinct elements reachable by length-L
+         words with the combinatorial trace count, the key reduction used
+         in RAAG-based PGG security.
+    Naming: the five underscore components name the hypothesis
+            (raag_weval_inj) and the conclusion quantity (search_space); no
+            canonical MathComp suffix applies since this is a bridging
+            identity rather than an algebraic law.
+*)
 Lemma raag_weval_inj_search_space L :
   raag_weval_inj L -> @search_space M L = n_traces L.
 Proof.
@@ -418,6 +472,12 @@ apply: leq_trans (max_card _) _.
 by rewrite card_tuple card_ord.
 Qed.
 
+(** search_space_chain — the two-sided bound search_space L <= n_traces L
+    <= Tg^L, packaged as a single conjunction.
+    Kind: main.
+    Why: this is the headline sandwich cited by the file header when
+         discussing RAAG search space.
+*)
 Lemma search_space_chain L :
   (@search_space M L <= n_traces L) && (n_traces L <= Tg ^ L).
 Proof.
@@ -441,6 +501,11 @@ set b := tnth w1 (@Ordinal L'.+1 (val k).+1 (ltn_ord k)).
 by move: (Hempty a b); rewrite Hc.
 Qed.
 
+(** empty_comm_traces — the free case: if no two generators commute, each
+    word is its own trace class, so n_traces L = Tg^L.
+    Kind: main.
+    Why: establishes the upper extreme of the search_space_chain bound.
+*)
 Lemma empty_comm_traces L :
   (forall i j : 'I_Tg, ~~ comm i j) -> n_traces L = Tg ^ L.
 Proof.
@@ -502,6 +567,10 @@ have Hnik1 : (i == ik1) = false.
 by rewrite Hnik Hnik1.
 Qed.
 
+(** adj_swap_perm — an adjacent swap preserves the multiset of letters.
+    Kind: helper.
+    Used by: trace_perm, indep_adj_swap_false, and full_comm reasoning.
+*)
 Lemma adj_swap_perm L (w1 w2 : pgg_word M L) :
   adj_swap w1 w2 -> perm_eq (val w1) (val w2).
 Proof.
@@ -510,6 +579,11 @@ move/existsP => [k /andP [_ /eqP ->]].
 by rewrite perm_sym; exact: swap_word_perm.
 Qed.
 
+(** trace_perm — trace-equivalent words have equal letter multisets.
+    Kind: helper.
+    Used by: full_comm_traces, full_comm_trace_iff_perm, indep_set
+             singleton-trace arguments.
+*)
 Lemma trace_perm L (w1 w2 : pgg_word M L) :
   trace_equiv w1 w2 -> perm_eq (val w1) (val w2).
 Proof.
@@ -544,6 +618,12 @@ Definition inv_count L (w : pgg_word M L) : nat :=
   \sum_(i : 'I_L) \sum_(j : 'I_L | val i < val j)
     (val (tnth w j) < val (tnth w i)).
 
+(** inv_count_zero_sorted — inv_count characterises sortedness: a word has
+    zero inversions iff its underlying letter sequence is sorted.
+    Kind: helper.
+    Used by: full_comm_connect_sorted, the termination measure that drives
+             bubble-sort by adjacent commuting swaps.
+*)
 Lemma inv_count_zero_sorted L (w : pgg_word M L) :
   (inv_count w == 0) = sorted leq (map val (val w)).
 Proof.
@@ -817,6 +897,16 @@ have Hs2' : sorted oleq (val sw2) by rewrite -sorted_map.
 by apply: val_inj; exact: (sorted_eq oleq_trans oleq_anti Hs1' Hs2' Hpe).
 Qed.
 
+(** full_comm_trace_iff_perm — when all distinct generators commute, trace
+    equivalence is exactly equality up to permutation of letters.
+    Kind: main.
+    Why: gives a concrete recognition criterion for trace classes in the
+         abelian case, used by word_eval_perm_eq.
+    Naming: the five underscore components name the hypothesis domain
+            (full_comm), the defined relation (trace), and the
+            characterisation (iff perm); shortening either side obscures the
+            statement.
+*)
 Lemma full_comm_trace_iff_perm L (w1 w2 : pgg_word M L) :
   (forall i j : 'I_Tg, i != j -> comm i j) ->
   trace_equiv w1 w2 <-> perm_eq (val w1) (val w2).
@@ -862,6 +952,13 @@ case/boolP: (tnth w1 ik == tnth w1 ik1) => Heq.
 by move: (Hindep _ _ Hi Hj Heq); rewrite Hc.
 Qed.
 
+(** indep_set_traces_lb — an independent set I in the commutation graph
+    gives the lower bound |I|^L <= n_traces L on the number of trace
+    classes of length-L words.
+    Kind: main.
+    Why: the key exponential lower bound used by concrete PGG instances
+         (e.g. path-graph, star-graph) to quantify search-space growth.
+*)
 Lemma indep_set_traces_lb (I : {set 'I_Tg}) (L : nat) :
   (forall i j : 'I_Tg, i \in I -> j \in I -> i != j -> ~~ comm i j) ->
   #|I| ^ L <= n_traces L.
@@ -947,6 +1044,12 @@ rewrite !inE andbT /roots /=.
 by rewrite Hroot_self ?eqxx //; exact: Hf_Iword.
 Qed.
 
+(** word_eval_perm_eq — in the abelian case, word_eval is invariant under
+    permutations of letters.
+    Kind: helper.
+    Used by: full_comm instance-specific arguments that reduce a word to a
+             sorted representative before evaluating.
+*)
 Lemma word_eval_perm_eq L (w1 w2 : pgg_word M L) :
   (forall i j : 'I_Tg, i != j -> comm i j) ->
   perm_eq (val w1) (val w2) -> word_eval w1 = word_eval w2.
@@ -1016,9 +1119,20 @@ Section raag_derived.
 Variable R : RAAGType.
 Let Tg := (@pgg_ngens' R).+1.
 
+(** raag_weval_inj1 — length-1 word_eval injectivity, inherited from the
+    generator-injectivity axiom of the RAAG mixin.
+    Kind: helper.
+    Used by: raag_search_space_1 and instance-specific length-1 bounds.
+*)
 Lemma raag_weval_inj1 : @weval_inj R 1.
 Proof. exact: gen_inj_weval_inj1 (@raag_gen_inj R). Qed.
 
+(** raag_search_space_1 — at length 1, the search space equals the number
+    of generators, since raag_weval_inj1 holds.
+    Kind: main.
+    Why: the minimal concrete quantification of search_space used as the
+         base case in asymptotic bounds.
+*)
 Lemma raag_search_space_1 : @search_space R 1 = Tg.
 Proof. exact: weval_inj_search_space raag_weval_inj1. Qed.
 End raag_derived.
@@ -1301,6 +1415,11 @@ Let foata_inv (crel : nat -> nat -> bool) (w : seq nat) : nat :=
   \sum_(i < size w) \sum_(j < size w | i < j)
     (~~ dv_leq (nth (0, 0) ps i) (nth (0, 0) ps j)).
 
+(** foata_inv_zero — a word with zero foata-inversions has sorted foata pairs.
+    Kind: helper.
+    Why: reverse direction of the inversion count, used to promote sortedness
+    from the numeric inversion witness into the structural pair list.
+    Used by: normal-form reasoning in fnf_trace and downstream n_traces_of_natB. *)
 Let foata_inv_zero (crel : nat -> nat -> bool) w :
   foata_inv crel w = 0 ->
   sorted dv_leq (foata_pairs crel [::] w).
@@ -1469,6 +1588,13 @@ rewrite HszPab2 HszPba2 Hki2 in Hsuf_eq_i.
 by rewrite Hps'_ba Hps_ab.
 Qed.
 
+(** foata_inv_swap_lt — swapping two commuting adjacent letters strictly drops
+    the foata inversion count by one when the foata pair at that position is
+    out of order.
+    Kind: helper.
+    Why: the descent step that drives the inversion-decreasing rewrite system
+    for normalising to foata normal form; core to trace equivalence.
+    Used by: fnf_trace (below) and the trace-equivalence arguments. *)
 Let foata_inv_swap_lt (crel : nat -> nat -> bool) w k :
   (forall a b, crel a b -> crel b a) ->
   k.+1 < size w ->
@@ -1893,6 +2019,12 @@ Qed.
 Definition fnf (L : nat) (w : @pgg_word M L) : seq nat :=
   foata_nf comm_nat (map val (tval w)).
 
+(** val_tnth_nth — bridge between tnth and nth: val (tnth w i) equals the
+    val-ith entry of (map val (tval w)).
+    Kind: helper.
+    Used by: fnf_adj_swap and downstream Foata-normal-form reasoning where
+             we move between ordinal-level and nat-level indexing.
+*)
 Lemma val_tnth_nth n (w : n.-tuple 'I_Tg) (i : 'I_n) :
   val (tnth w i) = nth 0 (map val (tval w)) (val i).
 Proof.
@@ -1982,6 +2114,11 @@ have -> : (val k).+2 + (i - val k - 2) = i.
 by rewrite val_tnth_nth.
 Qed.
 
+(** fnf_trace — trace-equivalent words share the same foata normal form.
+    Kind: helper.
+    Why: reduces trace-equivalence to an equality on a canonical representative,
+    enabling downstream counts like n_traces_of_natB.
+    Used by: n_traces_of_natB, cartier-foata-style counting results. *)
 Let fnf_trace L (w1 w2 : @pgg_word M L) :
   @trace_equiv R L w1 w2 -> fnf w1 = fnf w2.
 Proof.
@@ -2154,6 +2291,12 @@ apply: allpairs_uniq; first exact: iota_uniq.
 - by move=> [a1 b1] [a2 b2] /= _ _ [-> ->].
 Qed.
 
+(** all_words_mem' — membership in all_words characterised by length and
+    per-letter bound.
+    Kind: helper.
+    Why: bridges the Fixpoint enumeration to a declarative predicate so
+    subsequent counting lemmas can quantify over bounded-letter words.
+    Used by: all_words_perm_tuples, n_traces_of_natB. *)
 Let all_words_mem' : forall Tg' L (w : seq nat),
   w \in all_words Tg' L <-> (size w = L /\ all (fun i => i < Tg') w).
 Proof.
@@ -2175,6 +2318,12 @@ move=> Tg' L w; split.
     apply/mapP; exists w' => //. exact (IH w' (conj Hsz Hbd)).
 Qed.
 
+(** all_words_perm_tuples — the enumeration [all_words Tg L] is a permutation of
+    the underlying-nat view of [enum {: pgg_word M L}].
+    Kind: helper.
+    Why: lets us transport counts between the two enumerations without proving
+    a specific ordering.
+    Used by: n_traces_of_natB. *)
 Let all_words_perm_tuples L :
   perm_eq (all_words Tg L)
           (map (fun w : @pgg_word M L => map val (tval w))
@@ -2241,6 +2390,11 @@ apply: uniq_perm.
     exact: Hinv (connect_root e x).
 Qed.
 
+(** size_undup_perm_eq — undup-size is invariant under [perm_eq].
+    Kind: helper.
+    Why: permutations preserve the underlying element set, so undup (which
+    counts distinct elements) has the same size on permuted sequences.
+    Used by: n_traces_of_natB to transfer distinct-count facts. *)
 Let size_undup_perm_eq (S : eqType) (s1 s2 : seq S) :
   perm_eq s1 s2 -> size (undup s1) = size (undup s2).
 Proof.
@@ -2253,6 +2407,14 @@ Qed.
 (* Main theorem                                                        *)
 (* ------------------------------------------------------------------ *)
 
+(** n_traces_of_natB — the nat-level trace count n_traces_natB agrees with
+    the abstract trace count n_traces on the realType R, under the
+    commutation oracle comm_nat.
+    Kind: main.
+    Why: this is the headline equivalence that lets vm_compute proofs at the
+    nat level (foata_nf, all_words) discharge cardinality statements about
+    the abstract pgg_word finType.
+*)
 Lemma n_traces_of_natB (L : nat) :
   n_traces_natB Tg L comm_nat = @n_traces R L.
 Proof.

@@ -37,6 +37,10 @@ Let gT : finGroupType := {perm 'I_N}.
 Definition path_lo (i : 'I_T) : 'I_N :=
   Ordinal (ltn_trans (ltn_ord i) (ltnSn _)).
 
+(** path_hi — upper endpoint (i+1) of the i-th path-graph transposition,
+    as an ordinal in 'I_N.
+    Kind: canonical.
+*)
 Definition path_hi (i : 'I_T) : 'I_N :=
   Ordinal (ltn_ord i : (val i).+1 < N).
 
@@ -46,6 +50,11 @@ Definition path_gen (i : 'I_T) : gT := tperm (path_lo i) (path_hi i).
 (* Generator tuple *)
 Definition path_gen_tuple : T.-tuple gT := gen_tuple_of path_gen.
 
+(** path_gen_tupleE — the generator tuple reads back through tnth to the
+    raw path_gen constructor.
+    Kind: helper.
+    Used by: path_gen_inj_sigmas, path_Hcomm, path_adj_noncommute.
+*)
 Lemma path_gen_tupleE (i : 'I_T) : tnth path_gen_tuple i = path_gen i.
 Proof. exact: gen_tuple_ofE. Qed.
 
@@ -96,20 +105,44 @@ Let M_path : GeneratedMonodromyReprType := Path_PGGTypes.
 Definition path_comm : rel 'I_T :=
   fun i j => (1 < (val i - val j) + (val j - val i))%N.
 
+(** path_comm_sym — the path-graph commutativity relation is symmetric.
+    Kind: helper.
+    Used by: isRAAG0.Build instance registration for Path_PGGTypes.
+*)
 Lemma path_comm_sym : symmetric path_comm.
 Proof. by move=> i j; rewrite /path_comm addnC. Qed.
 
+(** path_comm_irrefl — path_comm is irreflexive: no generator commutes with
+    itself under this relation.
+    Kind: helper.
+    Used by: isRAAG0.Build instance registration for Path_PGGTypes.
+*)
 Lemma path_comm_irrefl : irreflexive path_comm.
 Proof. by move=> i; rewrite /path_comm subnn. Qed.
 
+(** path_comm_dist2 — unpack the commutativity relation to its numeric form:
+    i and j commute iff |val i - val j| >= 2.
+    Kind: helper.
+    Used by: path_Hcomm to build a disjoint-support tperm argument.
+*)
 Lemma path_comm_dist2 (i j : 'I_T) :
   path_comm i j ->
   (val i - val j) + (val j - val i) >= 2.
 Proof. by []. Qed.
 
+(** path_dist_neq — nat-level: symmetric distance >= 2 implies a != b.
+    Kind: helper.
+    Used by: path_Hcomm, where we need to discharge the disjointness side
+             conditions of tperm_disjoint_comm.
+*)
 Lemma path_dist_neq (a b : nat) : (a - b) + (b - a) >= 2 -> a != b.
 Proof. by case: (a =P b) => [-> | //]; rewrite subnn. Qed.
 
+(** path_dist_neqS — distance >= 2 implies a and b.+1 still differ, a
+    companion to path_dist_neq used to rule out "i+1 = j" collisions.
+    Kind: helper.
+    Used by: path_Hcomm for the four disjointness side conditions.
+*)
 Lemma path_dist_neqS (a b : nat) : (a - b) + (b - a) >= 2 -> a != b.+1.
 Proof.
 move=> Hge; apply/eqP => Hab; rewrite Hab in Hge.
@@ -118,6 +151,11 @@ have H2 : b - b.+1 = 0 by apply/eqP; rewrite subn_eq0.
 by rewrite H1 H2 addn0 in Hge.
 Qed.
 
+(** path_Hcomm — generators at path-graph distance >= 2 commute in the
+    ambient symmetric group, via disjoint supports of the underlying tperms.
+    Kind: helper.
+    Used by: path_Hcomm_sigmas which feeds isRAAG0.Build.
+*)
 Lemma path_Hcomm : forall i j : 'I_T,
   path_comm i j ->
   (tnth path_gen_tuple i * tnth path_gen_tuple j =
@@ -139,6 +177,11 @@ Lemma path_gen_inj_sigmas :
   injective (fun i : 'I_T => tnth (@pgg_sigmas M_path) i).
 Proof. by move=> i j; rewrite !path_gen_tupleE; exact: path_gen_inj. Qed.
 
+(** path_Hcomm_sigmas — restatement of path_Hcomm in the abstract pgg_sigmas
+    API, as required by the RAAG mixin.
+    Kind: helper.
+    Used by: Path_isRAAG instance registration.
+*)
 Lemma path_Hcomm_sigmas : forall i j : 'I_T,
   path_comm i j ->
   (tnth (@pgg_sigmas M_path) i * tnth (@pgg_sigmas M_path) j =
@@ -168,6 +211,12 @@ rewrite H_hi0_lo1 tpermL.
 by move/(congr1 val).
 Qed.
 
+(** path_G_nonabelian — the path-graph PGG is non-abelian whenever there are
+    at least two adjacent generators (m >= 1).
+    Kind: main.
+    Why: justifies that the path-graph instance is genuinely non-trivial and
+         so a meaningful setting for the Cartier-Foata analysis.
+*)
 Lemma path_G_nonabelian : 0 < m ->
   ~~ abelian (pgg_G Path_PGGTypes).
 Proof.
@@ -201,6 +250,13 @@ HB.instance Definition Path_isRAAG :=
 
 Let R_path : RAAGType := Path_PGGTypes.
 
+(** path_traces_lb — any adjacent pair {i, i+1} forms an independent set in
+    the path graph, so the number of Cartier-Foata traces of length L is at
+    least 2^L.
+    Kind: main.
+    Why: gives the exponential lower bound on the search space used in the
+         PGG security analysis.
+*)
 Lemma path_traces_lb (L : nat) : 0 < m ->
   2 ^ L <= @n_traces R_path L.
 Proof.

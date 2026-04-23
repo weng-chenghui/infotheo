@@ -54,6 +54,15 @@ Import Prenex Implicits.
 (* Section 1: Nat-level computable word-eval injectivity check                 *)
 (* ========================================================================== *)
 
+(** all_words — enumerate every length-L word over the alphabet {0,...,Tg-1}
+    as a seq of seqs of nat.  Produced by recursion on the length so that
+    every recursive call prepends one alphabet symbol.
+    Kind: helper.
+    Why: the nat-level counterpart of enumerating the finType of pgg_words;
+    kept structural so vm_compute reduces it eagerly.
+    Used by: eval_word_nat / word_fp enumeration, n_traces_natB,
+             all_words_perm_tuples, and downstream injectivity checks.
+*)
 Fixpoint all_words (Tg L : nat) : seq (seq nat) :=
   match L with
   | 0 => [:: [::]]
@@ -67,12 +76,28 @@ Fixpoint all_words (Tg L : nat) : seq (seq nat) :=
 Definition eval_word_nat (gens : nat -> nat -> nat) (w : seq nat) (x : nat) : nat :=
   foldl (fun acc i => gens i acc) x w.
 
+(** word_fp — nat-level fingerprint of a word: the list of images of 0..N-1
+    under the word evaluation.  Two words collide iff their fingerprints
+    coincide on the canonical domain.
+    Kind: canonical.
+*)
 Definition word_fp (N : nat) (gens : nat -> nat -> nat) (w : seq nat) : seq nat :=
   map (eval_word_nat gens w) (iota 0 N).
 
+(** weval_inj_natB — boolean: fingerprints of all length-L words on Tg
+    generators over N points are pairwise distinct.  Evaluated with
+    vm_compute to discharge weval_inj for concrete instances.
+    Kind: canonical.
+*)
 Definition weval_inj_natB (N Tg L : nat) (gens : nat -> nat -> nat) : bool :=
   uniq (map (word_fp N gens) (all_words Tg L)).
 
+(** map_uniq_injective — if map f xs is duplicate-free, then f is injective
+    on the elements of xs.
+    Kind: helper.
+    Used by: weval_inj_of_natB to convert a uniq fingerprint list into
+             injectivity of word_eval on pgg_words.
+*)
 Lemma map_uniq_injective (T1 T2 : eqType) (f : T1 -> T2) (xs : seq T1) (a b : T1) :
   uniq (map f xs) -> a \in xs -> b \in xs -> f a = f b -> a = b.
 Proof.
@@ -89,6 +114,11 @@ have /eqP Hiab : ia == ib.
 by rewrite -(nth_index a Ha) -(nth_index a Hb) -/ia -/ib Hiab.
 Qed.
 
+(** mem_all_words — every length-L nat-word drawn from {0,...,Tg-1} lies in
+    the enumeration all_words Tg L.
+    Kind: helper.
+    Used by: weval_inj_of_natB via map_val_in_all_words.
+*)
 Lemma mem_all_words Tg L (w : seq nat) :
   size w = L -> all (fun i => i < Tg) w -> w \in all_words Tg L.
 Proof.
@@ -162,7 +192,15 @@ Lemma map_val_tuple_inj (L : nat) (w1 w2 : @pgg_word M L) :
   map val (tval w1) = map val (tval w2) -> w1 = w2.
 Proof. by move/(inj_map val_inj) => /val_inj. Qed.
 
-(* map val of a pgg_word is in all_words *)
+(** map_val_in_all_words — the nat-projection of any pgg_word is one of the
+    enumerated words in all_words Tg L.
+    Kind: helper.
+    Used by: weval_inj_of_natB to apply map_uniq_injective on the enumerated
+             fingerprint list.
+    Naming: the five underscore components spell out the operation
+            ("map val") and the target set ("all_words"); shortening either
+            loses the precise API name this lemma wraps.
+*)
 Lemma map_val_in_all_words (L : nat) (w : @pgg_word M L) :
   map val (tval w) \in all_words Tg L.
 Proof.
@@ -199,6 +237,17 @@ Variable sigmas : m.+1.-tuple {perm 'I_n.+2}.
 Let M := Gen_PGGTypes sigmas.
 Hypothesis Hlfree : @weval_inj M L.
 
+(** weval_inj_inst_search_space — instantiation of weval_inj_search_space
+    for a Gen_PGGTypes built from a concrete sigmas tuple with branching Tg
+    = m.+1, giving search_space = Tg^L.
+    Kind: main.
+    Why: this is the bridge lemma consumers call after discharging weval_inj
+         by vm_compute on weval_inj_natB.
+    Naming: the five underscore-separated components describe the namespace
+            (weval_inj) and the concrete object (inst = instance of
+            search_space); the exported user-facing name must mention both
+            the hypothesis kind and the conclusion quantity.
+*)
 Lemma weval_inj_inst_search_space : @search_space M L = m.+1 ^ L.
 Proof. exact: weval_inj_search_space Hlfree. Qed.
 
@@ -218,13 +267,30 @@ Definition oc_s0_fun (i : 'I_oc_N) : 'I_oc_N :=
   match val i with
   | 0 => @Ordinal oc_N 1 isT | 1 => @Ordinal oc_N 2 isT
   | 2 => @Ordinal oc_N 0 isT | _ => i end.
+(** oc_s0_inv — inverse function of the 3-cycle (0 1 2) on 'I_4, used only
+    to produce the cancel witness that elevates oc_s0_fun to a perm.
+    Kind: canonical.
+*)
 Definition oc_s0_inv (i : 'I_oc_N) : 'I_oc_N :=
   match val i with
   | 0 => @Ordinal oc_N 2 isT | 1 => @Ordinal oc_N 0 isT
   | 2 => @Ordinal oc_N 1 isT | _ => i end.
+(** oc_s0K — cancel law oc_s0_inv \o oc_s0_fun = id, witnessing that
+    oc_s0_fun is injective.
+    Kind: helper.
+    Used by: oc_s0 (the perm structure wrapping oc_s0_fun).
+*)
 Lemma oc_s0K : cancel oc_s0_fun oc_s0_inv.
 Proof. by move=> x; apply: val_inj; case: x => [[|[|[|[|?]]]] ?]. Qed.
+(** oc_s0 — the permutation on 'I_oc_N obtained from oc_s0_fun via the cancel
+    witness oc_s0K; realises the 3-cycle sigma_0 = (0 1 2) in S_4.
+    Kind: canonical.
+*)
 Definition oc_s0 : {perm 'I_oc_N} := perm (can_inj oc_s0K).
+(** oc_s0E — pointwise unfolding of the oc_s0 permutation to oc_s0_fun.
+    Kind: helper.
+    Used by: oc_s0_order3, oc_noncommute, oc_gens_agree.
+*)
 Lemma oc_s0E x : oc_s0 x = oc_s0_fun x. Proof. by rewrite permE. Qed.
 
 (* sigma_1 = (1 2 3): the 3-cycle mapping 1->2->3->1 *)
@@ -232,27 +298,56 @@ Definition oc_s1_fun (i : 'I_oc_N) : 'I_oc_N :=
   match val i with
   | 1 => @Ordinal oc_N 2 isT | 2 => @Ordinal oc_N 3 isT
   | 3 => @Ordinal oc_N 1 isT | _ => i end.
+(** oc_s1_inv — inverse function of the 3-cycle (1 2 3) on 'I_4, companion
+    of oc_s0_inv for the second generator.
+    Kind: canonical.
+*)
 Definition oc_s1_inv (i : 'I_oc_N) : 'I_oc_N :=
   match val i with
   | 1 => @Ordinal oc_N 3 isT | 2 => @Ordinal oc_N 1 isT
   | 3 => @Ordinal oc_N 2 isT | _ => i end.
+(** oc_s1K — cancel witness for oc_s1_fun against oc_s1_inv.
+    Kind: helper.
+    Used by: oc_s1 (the perm structure wrapping oc_s1_fun).
+*)
 Lemma oc_s1K : cancel oc_s1_fun oc_s1_inv.
 Proof. by move=> x; apply: val_inj; case: x => [[|[|[|[|?]]]] ?]. Qed.
+(** oc_s1 — the permutation on 'I_oc_N obtained from oc_s1_fun via the cancel
+    witness oc_s1K; realises the 3-cycle sigma_1 = (1 2 3) in S_4.
+    Kind: canonical.
+*)
 Definition oc_s1 : {perm 'I_oc_N} := perm (can_inj oc_s1K).
+(** oc_s1E — pointwise unfolding of the oc_s1 permutation to oc_s1_fun.
+    Kind: helper.
+    Used by: oc_s1_order3, oc_noncommute, oc_gens_agree.
+*)
 Lemma oc_s1E x : oc_s1 x = oc_s1_fun x. Proof. by rewrite permE. Qed.
 
 (* Generator tuple *)
 Lemma oc_sigmas_size : size [:: oc_s0; oc_s1] == 2.
 Proof. by []. Qed.
 
+(** oc_sigmas — the two-generator tuple [:: oc_s0; oc_s1] packaged as a
+    2-tuple of permutations, feeding the OC_PGGTypes instance.
+    Kind: canonical.
+*)
 Definition oc_sigmas : 2.-tuple {perm 'I_oc_N} := Tuple oc_sigmas_size.
 
+(** oc_sigmasE — pointwise unfolding of the two-generator tuple oc_sigmas.
+    Kind: helper.
+    Used by: oc_gens_agree; downstream Cartier-Foata trace counting on the
+             overlapping-3-cycles instance.
+*)
 Lemma oc_sigmasE (i : 'I_2) : tnth oc_sigmas i =
   match val i with 0 => oc_s0 | _ => oc_s1 end.
 Proof.
 by rewrite (tnth_nth oc_s0) /=; case: i => [[|[|?]] ?].
 Qed.
 
+(** OC_PGGTypes — the concrete PGGTypes instance built from the overlapping
+    3-cycles generator tuple in S_4.
+    Kind: instance.
+*)
 Definition OC_PGGTypes := Gen_PGGTypes oc_sigmas.
 
 (* Nat-level generator function for vm_compute *)
@@ -262,6 +357,11 @@ Definition oc_gens_nat (i x : nat) : nat :=
   | _ => match x with 1 => 2 | 2 => 3 | 3 => 1 | _ => x end
   end.
 
+(** oc_gens_agree — nat-level generators agree with the perm generators
+    pointwise on the four elements of 'I_4.
+    Kind: helper.
+    Used by: oc_weval_inj2 via weval_inj_of_natB.
+*)
 Lemma oc_gens_agree (i : 'I_2) (x : 'I_oc_N) :
   oc_gens_nat (val i) (val x) = val (tnth oc_sigmas i x).
 Proof.
@@ -269,13 +369,25 @@ by case: i => [[|[|?]] ?]; case: x => [[|[|[|[|?]]]] ?];
   rewrite oc_sigmasE /= permE.
 Qed.
 
-(* Order 3 *)
+(** oc_s0_order3 — the first generator (0 1 2) of the overlapping-3-cycles
+    instance has order dividing 3.
+    Kind: helper.
+    Why waived: algebraic-order suffix marks this as a cyclic-order fact.
+    Used by: sanity checks on the overlapping-3-cycles instance; paired with
+             oc_s1_order3 in file-header discussion of why L >= 3 collapses.
+*)
 Lemma oc_s0_order3 : (oc_s0 ^+ 3 = 1 :> {perm 'I_oc_N})%g.
 Proof.
 apply/permP => x; rewrite perm1 expgS permM expgS permM expg1 !oc_s0E.
 by apply: val_inj; case: x => [[|[|[|[|?]]]] ?].
 Qed.
 
+(** oc_s1_order3 — the second generator (1 2 3) has order dividing 3.
+    Kind: helper.
+    Why waived: algebraic-order suffix marks this as a cyclic-order fact.
+    Used by: sanity checks on the overlapping-3-cycles instance; cited in
+             the file header explaining why L >= 3 collapses.
+*)
 Lemma oc_s1_order3 : (oc_s1 ^+ 3 = 1 :> {perm 'I_oc_N})%g.
 Proof.
 apply/permP => x; rewrite perm1 expgS permM expgS permM expg1 !oc_s1E.

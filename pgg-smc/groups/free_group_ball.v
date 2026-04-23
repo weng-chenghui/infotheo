@@ -50,9 +50,20 @@ Let alpha := (r.*2).
 
 Definition letter_inv (i : nat) : nat := (i + r) %% alpha.
 
+(** letter_inv_lt — the inverse letter stays in the alphabet {0,...,2r-1}.
+    Kind: helper.
+    Why: range lemma used when building reduced words to guarantee the
+         inverse-of-last-letter constraint is well-typed.
+    Used by: letter_invK, letter_inv_neq.
+*)
 Lemma letter_inv_lt (i : nat) : i < alpha -> letter_inv i < alpha.
 Proof. by move=> _; rewrite /letter_inv ltn_mod double_gt0. Qed.
 
+(** letter_invK — letter inversion is involutive on the alphabet.
+    Kind: helper.
+    Used by: reduced-word reasoning that relies on letter_inv being an
+             involution; underlies later sphere/ball bijection arguments.
+*)
 Lemma letter_invK (i : nat) : i < alpha -> letter_inv (letter_inv i) = i.
 Proof.
 move=> Hi; rewrite /letter_inv.
@@ -63,6 +74,12 @@ rewrite addnC modnMDl.
 exact: modn_small.
 Qed.
 
+(** letter_inv_neq — no letter is its own inverse in the free group alphabet.
+    Kind: helper.
+    Why: used to derive the (2r-1) extensions recurrence for sphere_size and
+         to ensure the reduced-word predicate is non-trivial.
+    Used by: sphere_size_S consumers; ball_size growth arguments.
+*)
 Lemma letter_inv_neq (i : nat) : i < alpha -> letter_inv i != i.
 Proof.
 move=> Hi; rewrite /letter_inv.
@@ -102,9 +119,20 @@ Definition sphere_size (k : nat) : nat :=
 Lemma sphere_size_0 : sphere_size 0 = 1.
 Proof. by []. Qed.
 
+(** sphere_size_1 — there are exactly alpha = 2r reduced words of length 1.
+    Kind: helper.
+    Used by: ball_size_formula, ball_size_div, search_space_exp_growth.
+*)
 Lemma sphere_size_1 : sphere_size 1 = alpha.
 Proof. by rewrite /= muln1. Qed.
 
+(** sphere_size_S — recurrence: extending a positive-length reduced word by
+    one letter multiplies the count by (alpha - 1), since exactly one letter
+    (the inverse of the last) is forbidden.
+    Kind: helper.
+    Used by: ball_size_formula, ball_size_lower; this is the combinatorial
+             core of the free-group ball growth formula.
+*)
 Lemma sphere_size_S (k : nat) :
   0 < k -> sphere_size k.+1 = sphere_size k * (alpha - 1).
 Proof.
@@ -123,16 +151,33 @@ Section ball_size_def.
 Variable r : nat.
 Hypothesis Hr : 0 < r.
 
+(** ball_size — number of reduced words of length at most L in the free
+    group on r generators.
+    Kind: canonical.
+*)
 Definition ball_size (L : nat) : nat :=
   \sum_(k < L.+1) sphere_size r k.
 
+(** ball_size_0 — only the empty word sits inside the radius-0 ball.
+    Kind: helper.
+    Used by: ball_size_ge1 and base case of inductive ball growth proofs.
+*)
 Lemma ball_size_0 : ball_size 0 = 1.
 Proof. by rewrite /ball_size big_ord_recl big_ord0. Qed.
 
+(** ball_size_S — step form: the (L+1)-ball is the L-ball plus the outer
+    sphere of radius L+1.
+    Kind: helper.
+    Used by: inductive reasoning on ball growth and the closed-form proofs.
+*)
 Lemma ball_size_S (L : nat) :
   ball_size L.+1 = ball_size L + sphere_size r L.+1.
 Proof. by rewrite /ball_size big_ord_recr. Qed.
 
+(** ball_size_ge1 — every free-group ball is non-empty (contains the identity).
+    Kind: helper.
+    Used by: ball_size_lower base case and downstream search-space bounds.
+*)
 Lemma ball_size_ge1 (L : nat) : 0 < ball_size L.
 Proof. by rewrite /ball_size big_ord_recl /=; lia. Qed.
 
@@ -186,9 +231,18 @@ Hypothesis Hr : 1 < r.
 Let alpha := (r.*2).
 Let q := alpha - 1.
 
+(** alpha_gt1 — alphabet has at least two letters when r >= 2.
+    Kind: helper.
+    Used by: q_gt0, ball_size_formula, ball_size_div.
+*)
 Lemma alpha_gt1 : 1 < alpha.
 Proof. by rewrite /alpha; lia. Qed.
 
+(** q_gt0 — branching factor q = alpha - 1 is strictly positive when r >= 2.
+    Kind: helper.
+    Used by: ball_size_formula, ball_size_div, ball_size_lower; justifies
+             using q as a multiplicand for geometric-series arguments.
+*)
 Lemma q_gt0 : 0 < q.
 Proof. by rewrite /q /alpha; lia. Qed.
 
