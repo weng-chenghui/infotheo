@@ -51,10 +51,16 @@ Local Notation o2 := (Ordinal (n:=5) (m:=2) erefl).
 Local Notation o3 := (Ordinal (n:=5) (m:=3) erefl).
 Local Notation o4 := (Ordinal (n:=5) (m:=4) erefl).
 
+(** s5_lazy_gen_tuple — lazy generator tuple (four path transpositions followed by four identities).
+    Kind: instance. *)
 Definition s5_lazy_gen_tuple : 8.-tuple {perm 'I_5} :=
   [tuple tperm o0 o1; tperm o1 o2; tperm o2 o3; tperm o3 o4;
          1%g; 1%g; 1%g; 1%g].
 
+(** s5_lazy_gen_invol — involutivity of every slot of the lazy generator tuple.
+    Kind: helper.
+    Why: involutivity drives symmetry of [schreier_transition] and hence the Rayleigh/TV bounds.
+    Used by: [Q_lazy_symm] and [s5_lazy_TV_bound]. *)
 Lemma s5_lazy_gen_invol :
   forall k : 'I_8,
   (tnth s5_lazy_gen_tuple k * tnth s5_lazy_gen_tuple k)%g = 1%g.
@@ -100,40 +106,88 @@ Local Notation o4 := (Ordinal (n:=5) (m:=4) erefl).
    The first 4 are path transpositions on 'I_5, the last 4 are identities. *)
 Lemma s5_lazy_tnth_0 : tnth s5_lazy_gen_tuple (Ordinal (n:=8) (m:=0) erefl) = tperm o0 o1.
 Proof. by rewrite (tnth_nth 1%g). Qed.
+(** s5_lazy_tnth_1 — slot 1 of the lazy generator tuple is a path transposition.
+    Kind: helper.
+    Why: per-index evaluation for use in [s5_lazy_count_eq].
+    Used by: [s5_lazy_count_eq]. *)
 Lemma s5_lazy_tnth_1 : tnth s5_lazy_gen_tuple (Ordinal (n:=8) (m:=1) erefl) = tperm o1 o2.
 Proof. by rewrite (tnth_nth 1%g). Qed.
+(** s5_lazy_tnth_2 — slot 2 of the lazy generator tuple is a path transposition.
+    Kind: helper.
+    Why: per-index evaluation for use in [s5_lazy_count_eq].
+    Used by: [s5_lazy_count_eq]. *)
 Lemma s5_lazy_tnth_2 : tnth s5_lazy_gen_tuple (Ordinal (n:=8) (m:=2) erefl) = tperm o2 o3.
 Proof. by rewrite (tnth_nth 1%g). Qed.
+(** s5_lazy_tnth_3 — slot 3 of the lazy generator tuple is a path transposition.
+    Kind: helper.
+    Why: per-index evaluation for use in [s5_lazy_count_eq].
+    Used by: [s5_lazy_count_eq]. *)
 Lemma s5_lazy_tnth_3 : tnth s5_lazy_gen_tuple (Ordinal (n:=8) (m:=3) erefl) = tperm o3 o4.
 Proof. by rewrite (tnth_nth 1%g). Qed.
+(** s5_lazy_tnth_4 — slot 4 of the lazy generator tuple is the identity.
+    Kind: helper.
+    Why: per-index evaluation for use in [s5_lazy_count_eq].
+    Used by: [s5_lazy_count_eq]. *)
 Lemma s5_lazy_tnth_4 : tnth s5_lazy_gen_tuple (Ordinal (n:=8) (m:=4) erefl) = 1%g.
 Proof. by rewrite (tnth_nth 1%g). Qed.
+(** s5_lazy_tnth_5 — slot 5 of the lazy generator tuple is the identity.
+    Kind: helper.
+    Why: per-index evaluation for use in [s5_lazy_count_eq].
+    Used by: [s5_lazy_count_eq]. *)
 Lemma s5_lazy_tnth_5 : tnth s5_lazy_gen_tuple (Ordinal (n:=8) (m:=5) erefl) = 1%g.
 Proof. by rewrite (tnth_nth 1%g). Qed.
+(** s5_lazy_tnth_6 — slot 6 of the lazy generator tuple is the identity.
+    Kind: helper.
+    Why: per-index evaluation for use in [s5_lazy_count_eq].
+    Used by: [s5_lazy_count_eq]. *)
 Lemma s5_lazy_tnth_6 : tnth s5_lazy_gen_tuple (Ordinal (n:=8) (m:=6) erefl) = 1%g.
 Proof. by rewrite (tnth_nth 1%g). Qed.
+(** s5_lazy_tnth_7 — slot 7 of the lazy generator tuple is the identity.
+    Kind: helper.
+    Why: per-index evaluation for use in [s5_lazy_count_eq].
+    Used by: [s5_lazy_count_eq]. *)
 Lemma s5_lazy_tnth_7 : tnth s5_lazy_gen_tuple (Ordinal (n:=8) (m:=7) erefl) = 1%g.
 Proof. by rewrite (tnth_nth 1%g). Qed.
 
-(* Path generator tuple at the 4 indices. *)
+(** path_gen_3_tnth_0 — slot 0 of the path-3 generator tuple.
+    Kind: helper.
+    Why: per-index evaluation of [path_gen_tuple 3] for use in sum expansions.
+    Used by: [s5_lazy_count_eq].
+    Naming: the trailing [_N] disambiguates the four slot indices of the
+    path-3 tuple; dropping the slot would collide with its siblings. *)
 Lemma path_gen_3_tnth_0 :
   tnth (path_gen_tuple 3) (Ordinal (n:=4) (m:=0) erefl) = tperm o0 o1.
 Proof.
 rewrite path_gen_tupleE /path_gen.
 by congr tperm; apply: val_inj.
 Qed.
+(** path_gen_3_tnth_1 — slot 1 of the path-3 generator tuple.
+    Kind: helper.
+    Why: per-index evaluation of [path_gen_tuple 3] for use in sum expansions.
+    Used by: [s5_lazy_count_eq].
+    Naming: the trailing [_N] disambiguates the four slot indices. *)
 Lemma path_gen_3_tnth_1 :
   tnth (path_gen_tuple 3) (Ordinal (n:=4) (m:=1) erefl) = tperm o1 o2.
 Proof.
 rewrite path_gen_tupleE /path_gen.
 by congr tperm; apply: val_inj.
 Qed.
+(** path_gen_3_tnth_2 — slot 2 of the path-3 generator tuple.
+    Kind: helper.
+    Why: per-index evaluation of [path_gen_tuple 3] for use in sum expansions.
+    Used by: [s5_lazy_count_eq].
+    Naming: the trailing [_N] disambiguates the four slot indices. *)
 Lemma path_gen_3_tnth_2 :
   tnth (path_gen_tuple 3) (Ordinal (n:=4) (m:=2) erefl) = tperm o2 o3.
 Proof.
 rewrite path_gen_tupleE /path_gen.
 by congr tperm; apply: val_inj.
 Qed.
+(** path_gen_3_tnth_3 — slot 3 of the path-3 generator tuple.
+    Kind: helper.
+    Why: per-index evaluation of [path_gen_tuple 3] for use in sum expansions.
+    Used by: [s5_lazy_count_eq].
+    Naming: the trailing [_N] disambiguates the four slot indices. *)
 Lemma path_gen_3_tnth_3 :
   tnth (path_gen_tuple 3) (Ordinal (n:=4) (m:=3) erefl) = tperm o3 o4.
 Proof.
@@ -141,8 +195,12 @@ rewrite path_gen_tupleE /path_gen.
 by congr tperm; apply: val_inj.
 Qed.
 
-(* For any generator tuple, we can express schreier_gen_count via a sum
-   using sum1dep_card. *)
+(** schreier_gen_count_eq_sum — Schreier generator-count expressed as a [sum1dep_card].
+    Kind: helper.
+    Why: lets later lemmas manipulate the count with standard bigop reasoning.
+    Used by: s5_lazy_count_eq and the s5x5 lazy-walk discharge.
+    Naming: the five components encode the rewrite target precisely
+    (schreier_gen_count + equality + sum form) and are load-bearing. *)
 Lemma schreier_gen_count_eq_sum (m n' : nat) (sigmas : (m.+1).-tuple {perm 'I_n'.+2})
     (i j : 'I_n'.+2) :
   schreier_gen_count sigmas i j
@@ -226,8 +284,14 @@ Section s5_lazy_rayleigh.
 
 Variable R : realType.
 
+(** s5_lazy_alpha_R — lazy mixing coefficient, i.e. [(1 + alpha)/2].
+    Kind: instance. *)
 Definition s5_lazy_alpha_R : R := (1 + s5_alpha_R R) / 2%:R.
 
+(** s5_lazy_alpha_R_ge0 — the lazy mixing coefficient is non-negative.
+    Kind: helper.
+    Why: needed to keep [alpha_lazy in [0,1]] for the TV-distance bound.
+    Used by: [s5_lazy_TV_bound]. *)
 Lemma s5_lazy_alpha_R_ge0 : 0 <= s5_lazy_alpha_R.
 Proof.
 rewrite /s5_lazy_alpha_R.
@@ -235,6 +299,10 @@ apply: divr_ge0; last by rewrite ler0n.
 by rewrite addr_ge0 // ?ler01 // s5_alpha_R_ge0.
 Qed.
 
+(** s5_lazy_alpha_R_le1 — the lazy mixing coefficient is at most one.
+    Kind: helper.
+    Why: needed to keep [alpha_lazy in [0,1]] for the TV-distance bound.
+    Used by: [s5_lazy_TV_bound]. *)
 Lemma s5_lazy_alpha_R_le1 : s5_lazy_alpha_R <= 1.
 Proof.
 rewrite /s5_lazy_alpha_R ler_pdivrMr ?mul1r; last by rewrite ltr0n.
@@ -303,6 +371,10 @@ rewrite mxE mxE.
 case: (i == j); by rewrite ?addr0.
 Qed.
 
+(** Q_lazy_mul_v — lazy-walk matrix action: Q_lazy v = (Q_s5 v + v) / 2.
+    Kind: helper.
+    Why: separates the contraction (Q_s5) and identity parts for the Rayleigh bound.
+    Used by: [s5_lazy_rayleigh_Qsq_R] and downstream TV bounds. *)
 Lemma Q_lazy_mul_v (v : 'cV[R]_5) :
   Q_lazy *m v = (2%:R)^-1 *: (Q_s5 *m v + v).
 Proof.
@@ -311,9 +383,17 @@ rewrite -scalemxAl mulmxDl.
 by rewrite mul1mx.
 Qed.
 
+(** Q_lazy_symm — symmetry of the lazy Schreier transition matrix.
+    Kind: helper.
+    Why: symmetry follows from involutivity of the lazy tuple.
+    Used by: Rayleigh-quotient arguments for the lazy walk. *)
 Lemma Q_lazy_symm : Q_lazy^T = Q_lazy.
 Proof. exact: (@schreier_transition_symm R 7 3 s5_lazy_gen_tuple s5_lazy_gen_invol). Qed.
 
+(** Q_s5_symm — symmetry of the S_5 Schreier transition matrix.
+    Kind: helper.
+    Why: symmetry follows from the involutivity of the path transpositions.
+    Used by: Rayleigh-quotient arguments for the non-lazy S_5 walk. *)
 Lemma Q_s5_symm : Q_s5^T = Q_s5.
 Proof. exact: (@schreier_transition_symm R 3 3 (path_gen_tuple 3) path_gen_tuple_3_invol). Qed.
 
@@ -326,6 +406,10 @@ apply: eq_bigr => i _.
 by rewrite !mxE mulrDl.
 Qed.
 
+(** cV_innerDr_5 — right additivity of the column-vector inner product on 'cV_5.
+    Kind: helper.
+    Why: bilinearity ingredient for manipulating the Rayleigh quotient.
+    Used by: Rayleigh-quotient manipulations on 'cV[R]_5. *)
 Lemma cV_innerDr_5 (u v w : 'cV[R]_5) :
   cV_inner u (v + w) = cV_inner u v + cV_inner u w.
 Proof.
@@ -334,6 +418,10 @@ apply: eq_bigr => i _.
 by rewrite !mxE mulrDr.
 Qed.
 
+(** cV_innerZl_5 — left-scalar homogeneity of the column-vector inner product on 'cV_5.
+    Kind: helper.
+    Why: bilinearity ingredient for manipulating the Rayleigh quotient.
+    Used by: Rayleigh-quotient manipulations on 'cV[R]_5. *)
 Lemma cV_innerZl_5 (a : R) (v w : 'cV[R]_5) :
   cV_inner (a *: v) w = a * cV_inner v w.
 Proof.
@@ -342,6 +430,10 @@ apply: eq_bigr => i _.
 by rewrite !mxE mulrA.
 Qed.
 
+(** cV_innerZr_5 — right-scalar homogeneity of the column-vector inner product on 'cV_5.
+    Kind: helper.
+    Why: bilinearity ingredient for manipulating the Rayleigh quotient.
+    Used by: Rayleigh-quotient manipulations on 'cV[R]_5. *)
 Lemma cV_innerZr_5 (a : R) (v w : 'cV[R]_5) :
   cV_inner v (a *: w) = a * cV_inner v w.
 Proof.
@@ -380,7 +472,13 @@ have HabsB : `|cV_inner v (Q_s5 *m v)| <= s5_alpha_R R * i_v.
 exact: (Order.POrderTheory.le_trans (ler_norm _) HabsB).
 Qed.
 
-(* === Algebraic identity for the lazy alpha squared === *)
+(** s5_lazy_alpha_sq_eq — algebraic identity for the lazy-alpha squared.
+    Kind: helper.
+    Why: converts [s5_lazy_alpha_R ^+ 2] into a rational form that matches the
+    spectral-gap arithmetic in the lazy-walk discharge.
+    Used by: s5_lazy_spectral_gap, s5x5 lazy-walk reduction.
+    Naming: the suffix [_sq_eq] names "squared, equation" which pins the
+    rewrite target; compressing further would collide with [s5_lazy_alpha_R]. *)
 Lemma s5_lazy_alpha_sq_eq :
   s5_lazy_alpha_R ^+ 2 = ((s5_alpha_R R) ^+ 2 + 2 * s5_alpha_R R + 1) / 4%:R.
 Proof.
@@ -481,6 +579,9 @@ Section s5_lazy_TV.
 
 Variable R : realType.
 
+(** s5_lazy_TV_bound — TV-distance convergence of the lazy S_5 walk to uniform on {0..4}.
+    Kind: main.
+    Why: main spectral-to-TV bound for the lazy walk, [sqrt(5) * alpha_lazy^L]. *)
 Lemma s5_lazy_TV_bound (L : nat) (s : 'I_5) :
   var_dist (fdistmap (fun sigma : {perm 'I_5} => sigma s)
                      (rho_from_words L s5_lazy_gen_tuple))
@@ -503,8 +604,14 @@ End s5_lazy_TV.
 (******************************************************************************)
 
 Definition ltn5_10 : (5 <= 10)%N := isT.
+(** widen5to10 — widening embedding 'I_5 into pile-1 sheets {0..4} of 'I_10.
+    Kind: instance. *)
 Definition widen5to10 : 'I_5 -> 'I_10 := @widen_ord 5 10 ltn5_10.
 
+(** widen5to10_inj — [widen5to10] is injective.
+    Kind: helper.
+    Why: injectivity is required to pull TV distances back through [fdistmap].
+    Used by: pile-1 TV-distance computations. *)
 Lemma widen5to10_inj : injective widen5to10.
 Proof.
 move=> x y H. apply: val_inj.
@@ -585,8 +692,14 @@ End s5x5_rho_pile1.
 Lemma rshift5_lt10 (s : 'I_5) : (val s + 5 < 10)%N.
 Proof. by have := ltn_ord s; rewrite -(ltn_add2r 5). Qed.
 
+(** rshift5to10 — right-shift embedding 'I_5 into pile-2 sheets {5..9} of 'I_10.
+    Kind: instance. *)
 Definition rshift5to10 (s : 'I_5) : 'I_10 := Ordinal (rshift5_lt10 s).
 
+(** rshift5to10_inj — [rshift5to10] is injective.
+    Kind: helper.
+    Why: injectivity is required to pull TV distances back through [fdistmap].
+    Used by: pile-2 TV-distance computations. *)
 Lemma rshift5to10_inj : injective rshift5to10.
 Proof.
 move=> x y H. apply: val_inj.
@@ -604,6 +717,8 @@ Local Notation o2 := (Ordinal (n:=5) (m:=2) erefl).
 Local Notation o3 := (Ordinal (n:=5) (m:=3) erefl).
 Local Notation o4 := (Ordinal (n:=5) (m:=4) erefl).
 
+(** s5_lazy_gen_tuple' — shifted lazy generator tuple (identities first, path transpositions last).
+    Kind: instance. *)
 Definition s5_lazy_gen_tuple' : 8.-tuple {perm 'I_5} :=
   [tuple 1%g; 1%g; 1%g; 1%g;
          tperm o0 o1; tperm o1 o2; tperm o2 o3; tperm o3 o4].
@@ -656,6 +771,10 @@ Section s5x5_rho_pile2.
 
 Variable R : realType.
 
+(** s5x5_rho_pile2_eq — pile-2 restriction of the S_5 x S_5 monodromy agrees with the shifted lazy walk.
+    Kind: helper.
+    Why: reduces the pile-2 endpoint distribution to the shifted lazy walk on 'I_5.
+    Used by: pile-2 TV bound in the S_5 x S_5 convergence proof. *)
 Lemma s5x5_rho_pile2_eq (L : nat) (s : 'I_5) :
   fdistmap (fun sigma : {perm 'I_10} => sigma (rshift5to10 s))
            (@rho_from_words R 8 7 L s5x5_gen_tuple)
@@ -680,12 +799,20 @@ Section s5x5_pile_uniform.
 
 Variable R : realType.
 
+(** fdist_uniform_pile1 — uniform distribution on pile-1 sheets {0..4}, pushed forward into 'I_10.
+    Kind: instance. *)
 Definition fdist_uniform_pile1 : R.-fdist 'I_10 :=
   fdistmap widen5to10 (fdist_uniform (card_ord 5)).
 
+(** fdist_uniform_pile2 — uniform distribution on pile-2 sheets {5..9}, pushed forward into 'I_10.
+    Kind: instance. *)
 Definition fdist_uniform_pile2 : R.-fdist 'I_10 :=
   fdistmap rshift5to10 (fdist_uniform (card_ord 5)).
 
+(** fdist_uniform_pile1E — pointwise mass of the pile-1 uniform distribution.
+    Kind: helper.
+    Why: case-by-case formula for the pile-1 distribution on {0..9}.
+    Used by: [var_dist_uniform_pile1_uniform10]. *)
 Lemma fdist_uniform_pile1E (i : 'I_10) :
   fdist_uniform_pile1 i = if (val i < 5)%N then (5%:R^-1 : R) else 0.
 Proof.
@@ -707,6 +834,10 @@ case: (ltnP (val i) 5) => Hi.
   by have := leq_ltn_trans Hi HV; rewrite ltnn.
 Qed.
 
+(** fdist_uniform_pile2E — pointwise mass of the pile-2 uniform distribution.
+    Kind: helper.
+    Why: case-by-case formula for the pile-2 distribution on {0..9}.
+    Used by: [var_dist_uniform_pile2_uniform10]. *)
 Lemma fdist_uniform_pile2E (i : 'I_10) :
   fdist_uniform_pile2 i = if (val i < 5)%N then 0 else (5%:R^-1 : R).
 Proof.
@@ -731,6 +862,12 @@ case: (ltnP (val i) 5) => Hi.
   by apply/eqP; rewrite -(eqn_add2r 5) Hkv subnK.
 Qed.
 
+(** var_dist_uniform_pile1_uniform10 — TV-distance between uniform on pile-1 and uniform on {0..9} equals one.
+    Kind: helper.
+    Why: quantifies the residual gap from pile-supported distributions to the full-sheet uniform.
+    Used by: final S_5 x S_5 convergence bound combining pile and full-sheet terms.
+    Naming: the five components name both operands of the TV-distance precisely
+    (pile-1 uniform vs uniform on 10 symbols); dropping any is ambiguous. *)
 Lemma var_dist_uniform_pile1_uniform10 :
   var_dist fdist_uniform_pile1 (fdist_uniform (card_ord 10)) = 1.
 Proof.
@@ -755,6 +892,12 @@ rewrite (eq_bigr (fun _ : 'I_10 => 10%:R^-1 : R)); last first.
   by rewrite divff ?pnatr_eq0 // mulr1.
 Qed.
 
+(** var_dist_uniform_pile2_uniform10 — TV-distance between uniform on pile-2 and uniform on {0..9} equals one.
+    Kind: helper.
+    Naming: the five components name both operands of the TV-distance precisely
+    (pile-2 uniform vs uniform on 10 symbols); dropping any is ambiguous.
+    Why: quantifies the residual gap from pile-supported distributions to the full-sheet uniform.
+    Used by: final S_5 x S_5 convergence bound combining pile and full-sheet terms. *)
 Lemma var_dist_uniform_pile2_uniform10 :
   var_dist fdist_uniform_pile2 (fdist_uniform (card_ord 10)) = 1.
 Proof.
@@ -797,35 +940,71 @@ case: k => [[|[|[|[|[|[|[|[|?]]]]]]]] Hk] //;
   try exact: tperm2; by rewrite mul1g.
 Qed.
 
+(** s5_lazy_tnth'_0 — slot 0 of the shifted lazy tuple is the identity.
+    Kind: helper.
+    Why: evaluates [tnth] at a specific index for use in entry-wise count proofs.
+    Used by: [s5_lazy_count_eq']. *)
 Lemma s5_lazy_tnth'_0 :
   tnth s5_lazy_gen_tuple' (Ordinal (n:=8) (m:=0) erefl) = 1%g.
 Proof. by rewrite (tnth_nth 1%g). Qed.
+(** s5_lazy_tnth'_1 — slot 1 of the shifted lazy tuple is the identity.
+    Kind: helper.
+    Why: evaluates [tnth] at a specific index for use in entry-wise count proofs.
+    Used by: [s5_lazy_count_eq']. *)
 Lemma s5_lazy_tnth'_1 :
   tnth s5_lazy_gen_tuple' (Ordinal (n:=8) (m:=1) erefl) = 1%g.
 Proof. by rewrite (tnth_nth 1%g). Qed.
+(** s5_lazy_tnth'_2 — slot 2 of the shifted lazy tuple is the identity.
+    Kind: helper.
+    Why: evaluates [tnth] at a specific index for use in entry-wise count proofs.
+    Used by: [s5_lazy_count_eq']. *)
 Lemma s5_lazy_tnth'_2 :
   tnth s5_lazy_gen_tuple' (Ordinal (n:=8) (m:=2) erefl) = 1%g.
 Proof. by rewrite (tnth_nth 1%g). Qed.
+(** s5_lazy_tnth'_3 — slot 3 of the shifted lazy tuple is the identity.
+    Kind: helper.
+    Why: evaluates [tnth] at a specific index for use in entry-wise count proofs.
+    Used by: [s5_lazy_count_eq']. *)
 Lemma s5_lazy_tnth'_3 :
   tnth s5_lazy_gen_tuple' (Ordinal (n:=8) (m:=3) erefl) = 1%g.
 Proof. by rewrite (tnth_nth 1%g). Qed.
+(** s5_lazy_tnth'_4 — slot 4 of the shifted lazy tuple is a path transposition.
+    Kind: helper.
+    Why: evaluates [tnth] at a specific index for use in entry-wise count proofs.
+    Used by: [s5_lazy_count_eq']. *)
 Lemma s5_lazy_tnth'_4 :
   tnth s5_lazy_gen_tuple' (Ordinal (n:=8) (m:=4) erefl)
   = tperm (Ordinal (n:=5) (m:=0) erefl) (Ordinal (n:=5) (m:=1) erefl).
 Proof. by rewrite (tnth_nth 1%g). Qed.
+(** s5_lazy_tnth'_5 — slot 5 of the shifted lazy tuple is a path transposition.
+    Kind: helper.
+    Why: evaluates [tnth] at a specific index for use in entry-wise count proofs.
+    Used by: [s5_lazy_count_eq']. *)
 Lemma s5_lazy_tnth'_5 :
   tnth s5_lazy_gen_tuple' (Ordinal (n:=8) (m:=5) erefl)
   = tperm (Ordinal (n:=5) (m:=1) erefl) (Ordinal (n:=5) (m:=2) erefl).
 Proof. by rewrite (tnth_nth 1%g). Qed.
+(** s5_lazy_tnth'_6 — slot 6 of the shifted lazy tuple is a path transposition.
+    Kind: helper.
+    Why: evaluates [tnth] at a specific index for use in entry-wise count proofs.
+    Used by: [s5_lazy_count_eq']. *)
 Lemma s5_lazy_tnth'_6 :
   tnth s5_lazy_gen_tuple' (Ordinal (n:=8) (m:=6) erefl)
   = tperm (Ordinal (n:=5) (m:=2) erefl) (Ordinal (n:=5) (m:=3) erefl).
 Proof. by rewrite (tnth_nth 1%g). Qed.
+(** s5_lazy_tnth'_7 — slot 7 of the shifted lazy tuple is a path transposition.
+    Kind: helper.
+    Why: evaluates [tnth] at a specific index for use in entry-wise count proofs.
+    Used by: [s5_lazy_count_eq']. *)
 Lemma s5_lazy_tnth'_7 :
   tnth s5_lazy_gen_tuple' (Ordinal (n:=8) (m:=7) erefl)
   = tperm (Ordinal (n:=5) (m:=3) erefl) (Ordinal (n:=5) (m:=4) erefl).
 Proof. by rewrite (tnth_nth 1%g). Qed.
 
+(** s5_lazy_count_eq' — per-entry Schreier count for the shifted lazy tuple.
+    Kind: helper.
+    Why: entry-wise bridge between [s5_lazy_gen_tuple'] and [path_gen_tuple 3].
+    Used by: [s5_lazy_Q_eq_swap]. *)
 Lemma s5_lazy_count_eq' (i j : 'I_5) :
   schreier_gen_count s5_lazy_gen_tuple' i j
   = (schreier_gen_count (path_gen_tuple 3) i j
@@ -843,6 +1022,10 @@ rewrite -[(_ + 4)%N]/(_ + (1 + 1 + 1 + 1))%N.
 by rewrite [in RHS]addnC -!addnA.
 Qed.
 
+(** s5_lazy_Q_eq_swap — Schreier transition is invariant under the pile-1/pile-2 swap of generator slots.
+    Kind: helper.
+    Why: lets us reuse the pile-1 Rayleigh bound on the shifted tuple [s5_lazy_gen_tuple'].
+    Used by: the pile-2 Rayleigh and TV-distance bounds. *)
 Lemma s5_lazy_Q_eq_swap (R : realType) :
   schreier_transition R s5_lazy_gen_tuple'
   = schreier_transition R s5_lazy_gen_tuple.

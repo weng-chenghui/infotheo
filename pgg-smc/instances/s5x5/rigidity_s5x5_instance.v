@@ -84,6 +84,10 @@ Let R_s5x5 : GeneratedMonodromyReprType := M_s5x5.
    Worst case: img_min = 2, bound = 2*(10-2)/10 = 8/5. *)
 Let s5x5_eps := @GRing.natmul R 1 8 / @GRing.natmul R 1 5.
 
+(** s5x5_endpoint_bound_fiber — endpoint variational-distance bound at L=1 for S_5 x S_5.
+    Kind: helper.
+    Why: instantiates the unbalanced endpoint-image bound at the specific S_5 x S_5 generating tuple.
+    Used by: the L=1 security witness for the S_5 x S_5 instance. *)
 Lemma s5x5_endpoint_bound_fiber :
   forall s : 'I_10,
   (var_dist (fdistmap (fun sigma : {perm 'I_10} => sigma s)
@@ -294,6 +298,8 @@ Qed.
     Used by: s5x5_covering_data. *)
 Lemma s5x5_n_branch_le : (6 <= 28804)%N. Proof. by []. Qed.
 
+(** s5x5_covering_data — covering-data record for the S_5 x S_5 instance (genus=3, branches 6, degree 28804).
+    Kind: instance. *)
 Definition s5x5_covering_data : CoveringData R_s5x5 :=
   @MkCoveringData R_s5x5 0 6 28804 3 s5x5_n_branch_le s5x5_hurwitz.
 
@@ -319,12 +325,18 @@ Lemma s5x5_preserves_pile1 :
   forall i : 'I_10, (val i < 5)%N -> (val (@pgg_rho R_s5x5 g i) < 5)%N.
 Proof. exact: s5x5_preserves_pile1_proved. Qed.
 
+(** s5x5_perm_compatible — monodromy permutation-compatibility for S_5 x S_5.
+    Kind: helper.
+    Why: closes the [ts_perm_compatible] obligation of the covering scheme.
+    Used by: [s5x5_covering]. *)
 Lemma s5x5_perm_compatible :
   @ts_perm_compatible _ (pgg_G R_s5x5) _ _ s5x5_ts (@pgg_rho R_s5x5).
 Proof.
 exact: (@product_sum_mod_perm_compatible 3 3 4 4 _ _ (@pgg_rho R_s5x5) s5x5_preserves_pile1).
 Qed.
 
+(** s5x5_covering — covering-scheme record for the S_5 x S_5 instance.
+    Kind: instance. *)
 Definition s5x5_covering : CoveringScheme R_s5x5 := {|
   cs_data             := s5x5_covering_data ;
   cs_T'               := (ts_T' s5x5_ts) ;
@@ -374,6 +386,9 @@ Lemma s5x5_complexity (L : nat) :
   (@search_space R_s5x5 L <= #|pgg_G R_s5x5|)%N.
 Proof. exact: search_space_leG. Qed.
 
+(** s5x5_tradeoff — security/complexity trade-off for the S_5 x S_5 instance.
+    Kind: main.
+    Why: specialises the generic [security_threshold_tradeoff] to S_5 x S_5. *)
 Lemma s5x5_tradeoff :
   let cs := tw_covering (ar_threshold s5x5_rigidity) in
   (cd_genus (cs_data cs) = 0 /\
