@@ -64,6 +64,14 @@ have := congr1 (fun f : {perm 'I_N} => f x) Hinv.
 by rewrite permM perm1.
 Qed.
 
+(** fpf_involution_partner_neq — fixed-point-free involutions map x to a distinct partner.
+    Kind: helper.
+    Why: combines the fixed-point-free predicate with the involution structure
+         to give the neq witness used by deck pairing arguments.
+    Used by: deck-pairing constructions where x and g x form paired slots.
+    Naming: intentional; five-component name parallels the deck-pairing
+            terminology "fpf + involution + partner + neq" and renaming
+            would touch downstream call sites. *)
 Lemma fpf_involution_partner_neq (g : {perm 'I_N}) (x : 'I_N) :
   is_involution g -> is_fpf g -> g x != x.
 Proof. by move=> _ Hfpf; exact: Hfpf. Qed.

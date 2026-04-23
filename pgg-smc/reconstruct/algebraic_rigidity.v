@@ -190,6 +190,11 @@ Variable m n' : nat.
 Variable sigmas : m.+1.-tuple {perm 'I_n'.+2}.
 Let M := Gen_PGGTypes sigmas.
 
+(** security_witness_fiber — build a SecurityWitness from a pointwise fiber bound.
+    Kind: main.
+    Why: packages the generic fiber-based var_dist bound used by the OC, S5 and
+         Star instances, so callers only need to supply the epsilon estimate.
+*)
 Definition security_witness_fiber (L : nat)
     (Hlfree : @weval_inj M L)
     (epsilon : R)
@@ -223,6 +228,11 @@ Variable m n' : nat.
 Variable sigmas : m.+1.-tuple {perm 'I_n'.+2}.
 Let M := Gen_PGGTypes sigmas.
 
+(** security_witness_endpoint_inj — direct endpoint witness under injectivity.
+    Kind: main.
+    Why: when perm_endpoint is injective on achievable(L), the epsilon bound
+         improves to 2*(N - Tg^L)/N, handled by this specialized constructor.
+*)
 Definition security_witness_endpoint_inj (L : nat)
     (Hlfree : @weval_inj M L)
     (Hinj_s : forall s : 'I_n'.+2,
@@ -254,6 +264,11 @@ Variable R : realType.
 Variable M : GeneratedMonodromyReprType.
 Let N' := pgg_N' M.
 
+(** security_witness_from_bound — SecurityWitness from a bound only (no exact eps).
+    Kind: main.
+    Why: convenience wrapper used when only spectral / Pinsker / DPI upper
+         bounds are available, defaulting sw_exact to None.
+*)
 Definition security_witness_from_bound (L : nat)
     (eps : R)
     (rho_dist : R.-fdist {perm 'I_N'.+1})
@@ -263,6 +278,11 @@ Definition security_witness_from_bound (L : nat)
     : SecurityWitness R M :=
   @MkSecurityWitness R M L eps rho_dist Hbound None None.
 
+(** security_witness_with_exact — SecurityWitness with bound and exact equality.
+    Kind: main.
+    Why: used when closed-form var_dist equalities are known (e.g., structured
+         group orbits), filling sw_exact with the equality proof.
+*)
 Definition security_witness_with_exact (L : nat)
     (bound_eps : R)
     (rho_dist : R.-fdist {perm 'I_N'.+1})
@@ -328,7 +348,14 @@ exact (@search_gap_tradeoff M
   (@tw_genus0_pgl M (ar_threshold ar)) L).
 Qed.
 
-(** Large groups force positive genus *)
+(** ar_large_group_forces_gap — large monodromy groups force positive genus.
+    Kind: main.
+    Why: packages the "too many generators to fit in genus-zero" dichotomy as
+         an AlgebraicRigidity-indexed consequence used by landscape tables.
+    Naming: components describe the chain "AR + large group + forces + gap";
+            this domain-level phrase is clearer than any shortened MathComp-
+            suffix variant, so the 5-component name is retained intentionally.
+*)
 Lemma ar_large_group_forces_gap :
   let cs := tw_covering (ar_threshold ar) in
   pgl_bound M < #|G| ->
@@ -485,6 +512,12 @@ Variable M : GeneratedMonodromyReprType.
 
 Local Open Scope ring_scope.
 
+(** certified_from_witness — assemble a CertifiedSolution from a SecurityWitness.
+    Kind: main.
+    Why: bundles the rational epsilon certificate together with the witness
+         into a CertifiedSolution, the interface consumed by the certified
+         security tables in pgg_protocol_landscape.v.
+*)
 Definition certified_from_witness
     (sw : SecurityWitness R M)
     (eps_n eps_d : nat) (Hd : (0 < eps_d)%N)

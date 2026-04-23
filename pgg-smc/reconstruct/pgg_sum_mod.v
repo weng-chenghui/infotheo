@@ -79,6 +79,11 @@ Let N := N'.+2.
 Variable s : 'I_N.
 Let sheets := [tuple s].
 
+(** sum_mod_single_sheet - single-sheet encoding reduces to s mod N.
+    Kind: helper.
+    Why: degenerate base case of the sum-mod encoding for a one-sheet tuple.
+    Used by: sum_mod_encode_valid correctness argument when the tuple has length 1.
+*)
 Lemma sum_mod_single_sheet :
   @sheets_sum N' 0 sheets = s %% N.
 Proof.

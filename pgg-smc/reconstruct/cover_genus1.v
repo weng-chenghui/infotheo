@@ -63,6 +63,12 @@ Hypothesis HG : 1 < #|G|.
 
 Let ramif1 := (2 * #|G|)%N.
 
+(** genus1_hurwitz — Riemann-Hurwitz equality for the genus-1 covering instance.
+    Kind: helper.
+    Why: discharges the cd_hurwitz side-condition of CoveringData for the
+         elliptic cover, reducing to 2 + 2|G| = 2|G| + 2.
+    Used by: genus1_data.
+*)
 Lemma genus1_hurwitz :
   (2 * 1 + 2 * #|G| = #|G| * (2 * 0) + ramif1 + 2)%N.
 Proof.
@@ -83,6 +89,11 @@ have : (2 <= #|G|)%N by exact: HG.
 by case: #|G| => [|[|n]] //= _; rewrite mulnS.
 Qed.
 
+(** genus1_data — CoveringData record for the genus-1 (elliptic) covering.
+    Kind: main.
+    Why: supplies the Riemann-Hurwitz data used to assemble the genus-1
+         CoveringScheme built on an elliptic AG code.
+*)
 Definition genus1_data : CoveringData M := {|
   cd_base_genus := 0 ;
   cd_n_branch   := 3 ;   (* elliptic covers typically have 3+ branch points *)
@@ -235,6 +246,12 @@ Hypothesis code_auto_ec :
 Let ts1_perm : pgg_gT M -> {perm 'I_(ts_T' ts1).+1} :=
   massey_share_perm (G:=G) sigma_fix0_ec.
 
+(** ts1_perm_compatible — ts_perm_compatible witness for the genus-1 scheme.
+    Kind: helper.
+    Why: feeds cs_perm_compatible in genus1_covering via transport +
+         massey_perm_compatible applied to the AG-based threshold scheme.
+    Used by: genus1_covering.
+*)
 Lemma ts1_perm_compatible :
   @ts_perm_compatible _ G _ _ ts1 ts1_perm.
 Proof.
@@ -243,6 +260,12 @@ apply: transport_perm_compatible.
 exact: massey_perm_compatible.
 Qed.
 
+(** genus1_covering — CoveringScheme instance for the genus-1 (elliptic) cover.
+    Kind: main.
+    Why: packages genus1_data together with the AG-based threshold scheme ts1
+         and its perm-compatibility into the CoveringScheme interface used by
+         the protocol landscape.
+*)
 Definition genus1_covering : CoveringScheme M := {|
   cs_data       := genus1_data ;
   cs_T'         := ts_T' ts1 ;
@@ -289,6 +312,11 @@ Hypothesis hurwitz_g :
    its [CoveringData] record as the concrete genus-1 and genus-2 siblings. *)
 Hypothesis higher_genus_ramif_ge_nbr : (g + 2 <= ramif_g)%N.
 
+(** higher_genus_data — generic CoveringData for genus-g covers via AG codes.
+    Kind: main.
+    Why: abstract scaffold covering arbitrary g >= 1, parameterized by the
+         Riemann-Hurwitz witness hurwitz_g and branch-count bound.
+*)
 Definition higher_genus_data : CoveringData M := {|
   cd_base_genus := 0 ;
   cd_n_branch   := g + 2 ;   (* heuristic: more branch points for higher genus *)
@@ -426,6 +454,12 @@ Hypothesis code_auto_g :
 Let ts_g_perm : pgg_gT M -> {perm 'I_(ts_T' ts_g).+1} :=
   massey_share_perm (G:=G) sigma_fix0_g.
 
+(** ts_g_perm_compatible — ts_perm_compatible witness for the generic genus-g scheme.
+    Kind: helper.
+    Why: feeds cs_perm_compatible in higher_genus_covering via transport +
+         massey_perm_compatible on the generic AG-based threshold scheme.
+    Used by: higher_genus_covering.
+*)
 Lemma ts_g_perm_compatible :
   @ts_perm_compatible _ G _ _ ts_g ts_g_perm.
 Proof.
@@ -434,6 +468,12 @@ apply: transport_perm_compatible.
 exact: massey_perm_compatible.
 Qed.
 
+(** higher_genus_covering — CoveringScheme instance for a generic genus-g cover.
+    Kind: main.
+    Why: packages higher_genus_data together with the generic AG-based
+         threshold scheme and its perm-compatibility so the landscape can
+         instantiate a covering at arbitrary genus.
+*)
 Definition higher_genus_covering : CoveringScheme M := {|
   cs_data       := higher_genus_data ;
   cs_T'         := ts_T' ts_g ;
@@ -444,6 +484,11 @@ Definition higher_genus_covering : CoveringScheme M := {|
   cs_gap        := ts_g_gap ;
 |}.
 
+(** higher_genus_gap_bound — ts_T <= ts_k + 2g for the generic genus-g cover.
+    Kind: main.
+    Why: headline gap bound that downstream complexity tables quote when
+         reasoning about privacy/recovery thresholds at arbitrary genus.
+*)
 Lemma higher_genus_gap_bound :
   ts_T (cs_scheme higher_genus_covering) <=
   ts_k (cs_scheme higher_genus_covering) + 2 * g.

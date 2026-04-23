@@ -67,6 +67,12 @@ Hypothesis HG : 1 < #|G|.  (* nontrivial group *)
 (* Ramification for 2 fully-ramified branch points *)
 Let ramif0 := (2 * #|G| - 2)%N.
 
+(** genus0_hurwitz — Riemann-Hurwitz equality for the genus-0 covering instance.
+    Kind: helper.
+    Why: discharges the cd_hurwitz side-condition of CoveringData for the
+         genus-0 data, reducing to 2|G| = (2|G|-2) + 2.
+    Used by: genus0_data.
+*)
 Lemma genus0_hurwitz :
   2 * 0 + 2 * #|G| = #|G| * (2 * 0) + ramif0 + 2.
 Proof.
@@ -91,6 +97,11 @@ case: #|G| HG2 => [|[|n]] // _.
 by rewrite mulnS addKn mulnS leq_addr.
 Qed.
 
+(** genus0_data — CoveringData record for the genus-0 (projective-line) covering.
+    Kind: main.
+    Why: supplies the Riemann-Hurwitz data used to assemble the genus-0
+         CoveringScheme; base genus = 0 with two fully ramified branch points.
+*)
 Definition genus0_data : CoveringData M := {|
   cd_base_genus := 0 ;
   cd_n_branch   := 2 ;
@@ -138,6 +149,12 @@ Hypothesis code_auto :
 Let ts0_perm : pgg_gT M -> {perm 'I_(ts_T' ts0).+1} :=
   massey_share_perm (G:=G) sigma_fix0.
 
+(** ts0_perm_compatible — ts_perm_compatible witness for the genus-0 scheme.
+    Kind: helper.
+    Why: feeds cs_perm_compatible in genus0_covering via transport +
+         massey_perm_compatible applied to the RS-based threshold scheme.
+    Used by: genus0_covering.
+*)
 Lemma ts0_perm_compatible :
   @ts_perm_compatible _ G _ _ ts0 ts0_perm.
 Proof.

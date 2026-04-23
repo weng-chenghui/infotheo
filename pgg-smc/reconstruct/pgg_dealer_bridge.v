@@ -49,6 +49,11 @@ Hypothesis G_stable : forall g, g \in G ->
     tnth (cast_tuple (esym (congr1 S HT)) (pi_starts PI))
       (cs_perm (tw_covering (ar_threshold ar)) g i).
 
+(** dealer_words_correct — word-based dealer correctness: reconstruction at endpoints.
+    Kind: main.
+    Why: instantiates ar_protocol_correct with an L-word defining the protocol
+         composition, showing endpoint reconstruction yields the original secret.
+*)
 Theorem dealer_words_correct
     (w : L.-tuple 'I_Tg) (s : 'I_N) :
   let P := @word_eval M L w in
@@ -61,6 +66,11 @@ move=> /= PG Hvalid.
 exact: (@ar_protocol_correct R M ar PI HT s (word_eval w) G_stable PG Hvalid).
 Qed.
 
+(** dealer_words_epsilon_bound — var_dist epsilon bound for the word-based dealer.
+    Kind: main.
+    Why: re-exports the SecurityWitness var_dist bound at each secret position,
+         so dealer consumers do not need to unfold the AlgebraicRigidity record.
+*)
 Lemma dealer_words_epsilon_bound (s : 'I_N) :
   (var_dist (fdistmap (fun sigma : {perm 'I_N} => sigma s)
                       (sw_rho_dist (ar_security ar)))

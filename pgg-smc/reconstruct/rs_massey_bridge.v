@@ -45,12 +45,28 @@ Variable ts : ThresholdScheme A A.
 Let T' := ts_T' ts.
 Let k' := ts_k' ts.
 
+(** transport_valid - validity pulled back through a bijection f/g.
+    Kind: helper.
+    Why: defines validity on type B by applying g to the secret and shares,
+    then asking for validity in the original scheme on A.
+    Used by: transport_scheme as the ts_valid field.
+*)
 Definition transport_valid (s : B) (shares : T'.+1.-tuple B) : Prop :=
   ts_valid ts (g s) [tuple g (tnth shares i) | i < T'.+1].
 
+(** transport_recon - reconstruction pulled back through the bijection.
+    Kind: helper.
+    Why: reconstruct in A and map back to B via f after applying g to shares.
+    Used by: transport_scheme as the ts_recon field.
+*)
 Definition transport_recon (shares : T'.+1.-tuple B) : B :=
   f (ts_recon ts [tuple g (tnth shares i) | i < T'.+1]).
 
+(** transport_correct - transported reconstruction recovers the transported secret.
+    Kind: helper.
+    Why: correctness field for transport_scheme, using Hgf to close the round-trip.
+    Used by: transport_scheme as the ts_correct field.
+*)
 Lemma transport_correct (s : B) (shares : T'.+1.-tuple B) :
   transport_valid s shares -> transport_recon shares = s.
 Proof.
@@ -58,6 +74,12 @@ rewrite /transport_valid /transport_recon => Hv.
 by rewrite (@ts_correct _ _ ts _ _ Hv) Hgf.
 Qed.
 
+(** transport_private - privacy transported through the bijection.
+    Kind: helper.
+    Why: lifts sub-threshold privacy of the original scheme to the transported
+    scheme by applying g to shares, invoking ts_private, and mapping back by f.
+    Used by: transport_scheme as the ts_private field.
+*)
 Lemma transport_private (s1 s2 : B) (shares : T'.+1.-tuple B)
     (C : {set 'I_T'.+1}) :
   #|C| < k'.+1 ->
@@ -84,9 +106,21 @@ exists [tuple f (tnth shares_a i) | i < T'.+1]; split.
   by rewrite Hgf.
 Qed.
 
+(** transport_encode - encoding via the bijection: encode in A, then apply f.
+    Kind: helper.
+    Why: supplies the ts_encode field for transport_scheme by composing f with
+    the original encoding.
+    Used by: transport_scheme as the ts_encode field.
+*)
 Definition transport_encode (s : B) : T'.+1.-tuple B :=
   [tuple f (tnth (ts_encode ts (g s)) i) | i < T'.+1].
 
+(** transport_encode_valid - transported encoding is valid by construction.
+    Kind: helper.
+    Why: ts_encode_valid field of transport_scheme; g-f cancellation restores
+    the original encoding inside the transported validity predicate.
+    Used by: transport_scheme as the ts_encode_valid field.
+*)
 Lemma transport_encode_valid (s : B) :
   transport_valid s (transport_encode s).
 Proof.
@@ -98,11 +132,22 @@ have -> : [tuple g (tnth [tuple f (tnth (ts_encode ts (g s)) i0)
 exact: ts_encode_valid.
 Qed.
 
+(** transport_scheme - threshold scheme obtained by transport along f, g.
+    Kind: instance.
+    Why: packages the transport_* fields into a ThresholdScheme record on B,
+    delegating all proof obligations to the underlying scheme on A.
+*)
 Definition transport_scheme : ThresholdScheme B B :=
   @MkThresholdScheme B B T' k'
     transport_valid transport_recon transport_encode
     transport_correct transport_private transport_encode_valid.
 
+(** transport_exact - transport preserves the ts_T = ts_k equality.
+    Kind: helper.
+    Why: transported scheme shares the genus-0 exactness of its source because
+    T' and k' are transported verbatim.
+    Used by: rs_genus0_exact and downstream CoveringScheme-building proofs.
+*)
 Lemma transport_exact :
   ts_T ts = ts_k ts -> ts_T transport_scheme = ts_k transport_scheme.
 Proof. by []. Qed.
@@ -170,13 +215,30 @@ Hypothesis an : (n''.+3).-primitive_root a.
 Variable N : nat.
 Hypothesis HN : N = #|F|.
 
-(* Bijection between 'I_N and F *)
+(** toF - bijection from 'I_N to F via enum_val after recasting the index.
+    Kind: helper.
+    Why: supplies one half of the 'I_N <-> F bijection needed by the transport
+    construction of rs_genus0_scheme.
+    Used by: transport_scheme invocation in rs_genus0_scheme and ofFK/toFK.
+*)
 Definition toF (x : 'I_N) : F := enum_val (cast_ord HN x).
+(** ofF - inverse bijection from F to 'I_N via enum_rank after recasting.
+    Kind: helper.
+    Why: supplies the other half of the 'I_N <-> F bijection used by
+    transport_scheme.
+    Used by: transport_scheme invocation in rs_genus0_scheme and ofFK/toFK.
+*)
 Definition ofF (x : F) : 'I_N := cast_ord (esym HN) (enum_rank x).
 
+(** ofFK - the bijection ofF; toF cancels on the left.
+    Kind: canonical.
+*)
 Lemma ofFK : cancel ofF toF.
 Proof. by move=> x; rewrite /ofF /toF cast_ordKV enum_rankK. Qed.
 
+(** toFK - the bijection toF; ofF cancels on the left.
+    Kind: canonical.
+*)
 Lemma toFK : cancel toF ofF.
 Proof. by move=> x; rewrite /toF /ofF enum_valK cast_ordK. Qed.
 
@@ -184,6 +246,11 @@ Proof. by move=> x; rewrite /toF /ofF enum_valK cast_ordK. Qed.
 Definition rs_genus0_scheme : ThresholdScheme 'I_N 'I_N :=
   transport_scheme toFK ofFK (rs_massey qn an).
 
+(** rs_genus0_exact - the transported RS-Massey scheme hits T = k.
+    Kind: main.
+    Why: final genus-0 exactness statement on 'I_N, obtained by pushing the
+    RS-Massey exactness through the toF/ofF transport.
+*)
 Lemma rs_genus0_exact :
   ts_T rs_genus0_scheme = ts_k rs_genus0_scheme.
 Proof. exact: transport_exact (rs_massey_exact qn an). Qed.

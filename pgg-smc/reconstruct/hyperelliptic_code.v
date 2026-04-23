@@ -44,6 +44,12 @@ Section poly_size_lemmas.
 
 Variable R : idomainType.
 
+(** size_sqr — the size of a nonzero polynomial squared is 2 * size p - 1.
+    Kind: helper.
+    Why: computes the explicit polynomial degree needed when bounding
+         resultant sizes in the hyperelliptic Goppa argument.
+    Used by: hyp_goppa_wt_mdeg (resultant-degree bookkeeping).
+*)
 Lemma size_sqr (p : {poly R}) : p != 0 -> size (p ^+ 2) = (size p).*2.-1.
 Proof.
 move=> Hp.
@@ -309,6 +315,11 @@ Qed.
 (* The Goppa bound in the standard form used by ag_massey_bridge *)
 Hypothesis Hm_eq : m_deg = (k + g - 1)%N.
 
+(** hyp_goppa_wt — Goppa weight bound wH(v *m ev) >= n - (k + g - 1).
+    Kind: main.
+    Why: the central hyperelliptic bound in the form required by
+         ag_massey_bridge; removes the m_deg abstraction used internally.
+*)
 Theorem hyp_goppa_wt :
   forall v : 'rV[F]_k, v != 0 ->
   (n - (k + g - 1) <= wH (v *m ev))%N.
@@ -362,6 +373,11 @@ exists (hyp_resultant A B); split; [|split].
   by have := Heval i; rewrite Hwi.
 Qed.
 
+(** dual_min_dist — dual-code minimum distance wH w >= k - g + 1 for orthogonal w.
+    Kind: main.
+    Why: the dual-side bound needed to derive privacy-surjectivity for the
+         hyperelliptic AG code, via a polynomial-root counting argument.
+*)
 Theorem dual_min_dist :
   forall (w : 'rV[F]_n), w != 0 ->
   (forall c : 'rV[F]_n, c \in ag_code ev -> w *m c^T = 0) ->

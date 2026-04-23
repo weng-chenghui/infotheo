@@ -74,6 +74,11 @@ Let q := #|F|.
 Definition scalar_pred : pred {'GL_2[F]} :=
   fun u => is_scalar_mx (val u : 'M_2).
 
+(** scalar_pred_group_set - scalar GL_2 matrices form a subgroup.
+    Kind: helper.
+    Why: needed to build the scalar subgroup inside GL_2(F) as a bona fide group.
+    Used by: scalar_gl2 group definition and scalar_gl2_subset_center below.
+*)
 Lemma scalar_pred_group_set : group_set [set u : {'GL_2[F]} | scalar_pred u].
 Proof.
 apply/group_setP; split.

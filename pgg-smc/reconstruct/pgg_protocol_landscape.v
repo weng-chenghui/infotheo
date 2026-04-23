@@ -116,11 +116,21 @@ Variable M : GeneratedMonodromyReprType.
 Let G := pgg_G M.
 Let N := (pgg_N' M).+1.
 
+(** security_per_position — re-exports sw_bound at each secret sheet.
+    Kind: example.
+    Why: landscape-facing restatement of the SecurityWitness epsilon bound,
+         pinning the dependency on sw for downstream callers.
+*)
 Lemma security_per_position (sw : SecurityWitness R M) (s : 'I_N) :
   (var_dist (fdistmap (fun sigma : {perm 'I_N} => sigma s) (sw_rho_dist sw))
             (fdist_uniform (card_ord N)) <= sw_bound_eps sw)%O.
 Proof. exact: sw_bound. Qed.
 
+(** complexity_from_group — search space is bounded by the group order.
+    Kind: example.
+    Why: landscape-facing restatement of search_space_leG, used as the
+         complexity axis of the security-vs-complexity tradeoff table.
+*)
 Lemma complexity_from_group (L : nat) : (@search_space M L <= #|G|)%N.
 Proof. exact: search_space_leG. Qed.
 
@@ -136,11 +146,19 @@ Variable M : GeneratedMonodromyReprType.
 
 Let G := pgg_G M.
 
+(** genus0_option - genus-0 coverings give the exact threshold T <= k.
+    Kind: main.
+    Why: records the best-case threshold option for protocol designers.
+*)
 Theorem genus0_option (cs : CoveringScheme M) :
   cd_genus (cs_data cs) = 0 ->
   (ts_T (cs_scheme cs) <= ts_k (cs_scheme cs))%N.
 Proof. exact: genus0_exact. Qed.
 
+(** genus1_universal_option - genus-1 coverings force at most gap 2.
+    Kind: main.
+    Why: documents the universal genus-1 slot of the landscape, T <= k + 2.
+*)
 Theorem genus1_universal_option (cs : CoveringScheme M) :
   cd_genus (cs_data cs) = 1 ->
   (ts_T (cs_scheme cs) <= ts_k (cs_scheme cs) + 2)%N.
@@ -150,6 +168,11 @@ have := cs_gap cs.
 by rewrite Hg1 muln1.
 Qed.
 
+(** gap_from_genus - threshold gap is bounded by 2 * genus.
+    Kind: main.
+    Why: central inequality of the PGG landscape linking geometric genus to
+    the protocol gap T - k.
+*)
 Theorem gap_from_genus (cs : CoveringScheme M) :
   (ts_T (cs_scheme cs) - ts_k (cs_scheme cs) <= 2 * cd_genus (cs_data cs))%N.
 Proof. exact: gap_bound. Qed.
@@ -166,12 +189,24 @@ Variable M : GeneratedMonodromyReprType.
 
 Let G := pgg_G M.
 
+(** genus0_requires_small_group - large groups cannot live on genus-0 coverings.
+    Kind: helper.
+    Why: contrapositive bridge from the PGL bound to strict positivity of
+    genus, used to rule out exact thresholds when |G| is too large.
+    Used by: landscape_tradeoff and ar_large_group_forces_genus.
+*)
 Lemma genus0_requires_small_group (cs : CoveringScheme M)
     (genus0_pgl : cd_genus (cs_data cs) = 0 -> (#|G| <= pgl_bound M)%N) :
   (pgl_bound M < #|G|)%N ->
   (0 < cd_genus (cs_data cs))%N.
 Proof. exact: large_group_forces_gap genus0_pgl. Qed.
 
+(** large_group_minimum_gap - large-group, genus-1 case yields gap 2.
+    Kind: helper.
+    Why: combines the large-group hypothesis with the genus-1 universal option
+    to show the minimum achievable gap in that regime.
+    Used by: landscape tabulations in the landscape_tradeoff theorem.
+*)
 Corollary large_group_minimum_gap (cs : CoveringScheme M)
     (genus0_pgl : cd_genus (cs_data cs) = 0 -> (#|G| <= pgl_bound M)%N) :
   (pgl_bound M < #|G|)%N ->
@@ -182,6 +217,12 @@ move=> Hlarge Hg1.
 exact: genus1_universal_option Hg1.
 Qed.
 
+(** landscape_tradeoff - the two-branch landscape trade-off between |G| and gap.
+    Kind: main.
+    Why: packages the headline result of the paper: either the covering is
+    genus-0 with a small group and exact threshold, or the group is larger and
+    the gap is paid for by strictly positive genus.
+*)
 Theorem landscape_tradeoff (cs : CoveringScheme M)
     (genus0_pgl : cd_genus (cs_data cs) = 0 -> (#|G| <= pgl_bound M)%N) :
   (cd_genus (cs_data cs) = 0 /\
@@ -212,6 +253,12 @@ Axiom hurwitz_bound :
   (2 <= cd_genus (cs_data cs))%N ->
   (#|G| <= 84 * (cd_genus (cs_data cs) - 1))%N.
 
+(** group_forces_minimum_genus - large groups force genus strictly above g.
+    Kind: helper.
+    Why: contrapositive of Hurwitz: if |G| exceeds 84(g-1) then the covering
+    genus must strictly exceed g.
+    Used by: higher_genus_landscape and AlgebraicRigidity-based analogs.
+*)
 Lemma group_forces_minimum_genus (cs : CoveringScheme M) (g : nat) :
   (2 <= g)%N ->
   (84 * (g - 1) < #|G|)%N ->
@@ -226,6 +273,11 @@ have Hle' : (84 * (cd_genus (cs_data cs) - 1) <= 84 * (g - 1))%N.
 by move: (leq_ltn_trans (leq_trans Hhur Hle') Hlarge); rewrite ltnn.
 Qed.
 
+(** higher_genus_landscape - combined gap and Hurwitz bound for genus >= 2.
+    Kind: main.
+    Why: joint statement capturing the simultaneous bound on protocol gap and
+    group size in the high-genus regime of the landscape.
+*)
 Theorem higher_genus_landscape (cs : CoveringScheme M) :
   (2 <= cd_genus (cs_data cs))%N ->
   (ts_T (cs_scheme cs) - ts_k (cs_scheme cs) <=
@@ -251,6 +303,13 @@ Variable M : GeneratedMonodromyReprType.
 Let G := pgg_G M.
 Let N := (pgg_N' M).+1.
 
+(** protocol_correct_unbundled - standalone protocol correctness statement.
+    Kind: helper.
+    Why: spells out correctness of the PGG protocol without bundling the
+    SecurityWitness, CoveringScheme and PGGInterface into a single record,
+    so that instance authors can quote it without the full bundle machinery.
+    Used by: instance-level correctness proofs that assemble the bundle lazily.
+*)
 Lemma protocol_correct_unbundled
     (sw : SecurityWitness R M)
     (cs : CoveringScheme M)
@@ -293,6 +352,11 @@ Let G := pgg_G M.
 Let N := (pgg_N' M).+1.
 Let cs := tw_covering (ar_threshold ar).
 
+(** ar_security_per_position - per-sheet variational-distance epsilon bound.
+    Kind: example.
+    Why: entry in the landscape tabulation showing that AlgebraicRigidity
+    implies the per-position security bound sw_bound.
+*)
 Lemma ar_security_per_position (s : 'I_N) :
   (var_dist (fdistmap (fun sigma : {perm 'I_N} => sigma s)
                       (sw_rho_dist (ar_security ar)))
@@ -300,11 +364,20 @@ Lemma ar_security_per_position (s : 'I_N) :
    <= sw_bound_eps (ar_security ar))%O.
 Proof. exact: sw_bound. Qed.
 
+(** ar_genus0_exact - genus-0 exactness specialised to AlgebraicRigidity.
+    Kind: example.
+    Why: landscape-tabulation entry T <= k under genus 0, for AlgebraicRigidity.
+*)
 Lemma ar_genus0_exact :
   cd_genus (cs_data cs) = 0 ->
   (ts_T (cs_scheme cs) <= ts_k (cs_scheme cs))%N.
 Proof. exact: genus0_exact. Qed.
 
+(** ar_genus1_gap2 - genus-1 gap-2 bound specialised to AlgebraicRigidity.
+    Kind: example.
+    Why: landscape-tabulation entry T <= k + 2 under genus 1, for
+    AlgebraicRigidity.
+*)
 Lemma ar_genus1_gap2 :
   cd_genus (cs_data cs) = 1 ->
   (ts_T (cs_scheme cs) <= ts_k (cs_scheme cs) + 2)%N.
@@ -313,6 +386,11 @@ move=> Hg1; have := cs_gap cs.
 by rewrite Hg1 muln1.
 Qed.
 
+(** ar_hurwitz - Hurwitz-regime landscape entry for AlgebraicRigidity.
+    Kind: example.
+    Why: landscape-tabulation entry gap <= 2g combined with |G| <= 84(g-1)
+    under genus >= 2, specialised to AlgebraicRigidity.
+*)
 Lemma ar_hurwitz :
   (2 <= cd_genus (cs_data cs))%N ->
   (ts_T (cs_scheme cs) - ts_k (cs_scheme cs) <=
@@ -320,6 +398,14 @@ Lemma ar_hurwitz :
   (#|G| <= 84 * (cd_genus (cs_data cs) - 1))%N.
 Proof. exact: higher_genus_landscape. Qed.
 
+(** ar_large_group_forces_genus - large-group implication for AlgebraicRigidity.
+    Kind: example.
+    Why: landscape-tabulation entry recording that |G| > pgl_bound forces
+    strictly positive genus, specialised to AlgebraicRigidity.
+    Naming: `large_group_forces_genus` is the canonical PGG-landscape slogan;
+    the five-component name preserves the `ar_` namespace discriminator that
+    separates this entry from the non-AR analogue.
+*)
 Lemma ar_large_group_forces_genus :
   (pgl_bound M < #|G|)%N ->
   (0 < cd_genus (cs_data cs))%N.
@@ -445,6 +531,13 @@ Qed.
 
 (* Pinsker bridge: var_dist bounded by entropy gap.
    var_dist(P_s, U_N) <= sqrt(2 * (log N - H(P_s))) *)
+(** ar_var_dist_from_entropy - Pinsker bridge from entropy gap to variational distance.
+    Kind: example.
+    Why: landscape-tabulation entry showing the entropy view reproduces the
+    var-dist bound via Pinsker's inequality.
+    Naming: the five-component name reflects the cross-domain identity
+    `var_dist <- entropy`; both halves name independent quantities.
+*)
 Lemma ar_var_dist_from_entropy (s : 'I_N) :
   var_dist (P_s s) (fdist_uniform (card_ord N)) <=
   Num.sqrt (2%:R * (log N%:R - ar_entropy s)).

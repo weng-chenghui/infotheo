@@ -39,13 +39,29 @@ Section hadamard.
 Variable F : fieldType.
 Variable n : nat.
 
+(** hadamard — componentwise (Hadamard) product of two row vectors.
+    Kind: main.
+    Why: supports the multiplicative structure used to show that products of
+         AG-code codewords land in the doubled AG code.
+*)
 Definition hadamard (c1 c2 : 'rV[F]_n) : 'rV[F]_n :=
   \row_(i < n) (c1 ord0 i * c2 ord0 i).
 
+(** hadamard_comm — the Hadamard product is commutative.
+    Kind: helper.
+    Why waived: algebraic-law suffix (_comm aligns with MathComp conventions).
+    Used by: downstream rewrites that need to swap arguments of hadamard.
+*)
 Lemma hadamard_comm (c1 c2 : 'rV[F]_n) :
   hadamard c1 c2 = hadamard c2 c1.
 Proof. by apply/rowP => i; rewrite !mxE mulrC. Qed.
 
+(** hadamardE — coordinate evaluation of a Hadamard product.
+    Kind: helper.
+    Why: exposes the defining pointwise product equation once so that later
+         reasoning can just rewrite hadamardE rather than unfold mxE.
+    Used by: hadamard_massey_codeword and ag_massey_mult.
+*)
 Lemma hadamardE (c1 c2 : 'rV[F]_n) (i : 'I_n) :
   (hadamard c1 c2) ord0 i = c1 ord0 i * c2 ord0 i.
 Proof. by rewrite mxE. Qed.
@@ -120,6 +136,12 @@ Variable F : finFieldType.
 Variable n' : nat.
 Let n := n'.+2.
 
+(** hadamard_massey_codeword — Hadamard of Massey codewords is Massey of products.
+    Kind: helper.
+    Why: aligns the two possible ways of combining secrets and shares so that
+         multiplicative security reduces to the underlying AG-code product.
+    Used by: ag_massey_mult (in the ag_mult_scheme construction).
+*)
 Lemma hadamard_massey_codeword (s1 s2 : F)
     (sh1 sh2 : 'rV[F]_n'.+1) :
   hadamard (massey_codeword s1 sh1) (massey_codeword s2 sh2) =
@@ -214,6 +236,12 @@ rewrite -hadamard_massey_codeword.
 exact: ag_mult Hv1 Hv2.
 Qed.
 
+(** ag_mult_scheme — multiplicative sharing scheme built from AG codes.
+    Kind: main.
+    Why: packages the base and doubled ThresholdScheme together with
+         hadamard_massey_codeword into the MultiplicativeScheme record used
+         by downstream BGW-style secure multiplication.
+*)
 Definition ag_mult_scheme : MultiplicativeScheme :=
   {| ms_base := base ;
      ms_doubled := doubled ;

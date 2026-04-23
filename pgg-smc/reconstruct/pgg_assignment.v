@@ -45,6 +45,13 @@ case: (ltnP (n + 1) m.+1) => Hcase.
   by rewrite H0 ltnn in Hm.
 Qed.
 
+(** succ_mod_cycle2_ord — two ordinals cannot both be successors of each other mod T.
+    Kind: helper.
+    Why: shows that the forward-edge and backward-edge sets of the cycle graph
+         are disjoint whenever T > 2, by deriving a contradiction from i and j
+         each being the modular successor of the other.
+    Used by: fwd_bwd_disjoint.
+*)
 Lemma succ_mod_cycle2_ord (T : nat) (i j : 'I_T.+1) :
   (1 < T)%N ->
   j = inZp (i + 1) ->
@@ -137,6 +144,11 @@ Section Monotonicity.
 Variable T : nat.
 Variable G : AssignmentGraph T.
 
+(** covered_mono — covered_edges is monotone in the coalition.
+    Kind: helper.
+    Why: extending a coalition can only add covered edges, never remove them.
+    Used by: downstream bounds comparing privacy-recovery across coalitions.
+*)
 Lemma covered_mono (C C' : {set 'I_T}) :
   C \subset C' -> covered_edges G C \subset covered_edges G C'.
 Proof.
@@ -147,6 +159,11 @@ rewrite He /=; apply/andP; split;
   exact: (subsetP Hsub).
 Qed.
 
+(** covered_full — the full coalition covers every edge.
+    Kind: helper.
+    Why: trivially, setT covers the whole edge set.
+    Used by: complete_covered_full and similar upper-bound arguments.
+*)
 Lemma covered_full (C : {set 'I_T}) :
   C = setT -> covered_edges G C = ag_edges G.
 Proof.
@@ -154,10 +171,20 @@ move=> ->; apply/setP => e; rewrite /covered_edges !inE.
 by case: (e \in ag_edges G) => //=; rewrite !in_setT.
 Qed.
 
+(** secure_subset — secure_edges is a subset of the full edge set.
+    Kind: helper.
+    Why: follows directly from the :\: definition of secure_edges.
+    Used by: covered_secure_partition and similar set-arithmetic rewrites.
+*)
 Lemma secure_subset (C : {set 'I_T}) :
   secure_edges G C \subset ag_edges G.
 Proof. by apply/subsetP => e; rewrite /secure_edges !inE => /andP[]. Qed.
 
+(** covered_secure_partition — covered and secure edges partition ag_edges.
+    Kind: helper.
+    Why: needed for counting arguments that split the edge set by coverage.
+    Used by: the recoverable-bits vs secure-bits bookkeeping.
+*)
 Lemma covered_secure_partition (C : {set 'I_T}) :
   covered_edges G C :|: secure_edges G C = ag_edges G.
 Proof.
@@ -166,6 +193,12 @@ case Hedge : (e \in ag_edges G) => //=.
 by case: (e.1 \in C); case: (e.2 \in C).
 Qed.
 
+(** secure_singleton — a singleton coalition covers no edge.
+    Kind: helper.
+    Why: no edge has both endpoints in a singleton set because the graph has
+         no loops (ag_irrefl).
+    Used by: base case of coverage inductions.
+*)
 Lemma secure_singleton (C : {set 'I_T}) :
   #|C| = 1 -> covered_edges G C = set0.
 Proof.
@@ -178,6 +211,11 @@ subst i j.
 by move/negP: (ag_irrefl G x).
 Qed.
 
+(** covered_edges0 — the empty coalition covers nothing.
+    Kind: helper.
+    Why: degenerate coverage case used as base in several inductions.
+    Used by: downstream set-arithmetic rewrites about edge coverage.
+*)
 Lemma covered_edges0 : covered_edges G set0 = set0.
 Proof.
 apply/setP => e; rewrite /covered_edges !inE.
@@ -203,16 +241,32 @@ Definition cycle_edge_set : {set 'I_T * 'I_T} :=
   [set e : 'I_T * 'I_T |
     (e.2 == inZp (e.1 + 1)) || (e.1 == inZp (e.2 + 1))].
 
+(** cycle_sym — symmetry witness for the cycle edge set.
+    Kind: helper.
+    Why waived: algebraic-property suffix (_sym).
+    Used by: cycle_graph (AssignmentGraph record construction).
+*)
 Lemma cycle_sym (i j : 'I_T) :
   (i, j) \in cycle_edge_set -> (j, i) \in cycle_edge_set.
 Proof. by rewrite !inE /= orbC. Qed.
 
+(** cycle_irrefl — irreflexivity witness for the cycle edge set.
+    Kind: helper.
+    Why: the cycle graph has no self-loops because i = i + 1 mod T is
+         impossible for T > 0.
+    Used by: cycle_graph (AssignmentGraph record construction).
+*)
 Lemma cycle_irrefl (i : 'I_T) : (i, i) \notin cycle_edge_set.
 Proof.
 rewrite inE /= orbb; apply/negP => /eqP /(congr1 val) /= Hmod.
 exact: (succ_mod_neq HT (ltn_ord i) (esym Hmod)).
 Qed.
 
+(** cycle_graph — AssignmentGraph instance for the cycle on T vertices.
+    Kind: example.
+    Why: concrete instance used by the landscape tables and by bounds proved
+         against a fixed network topology.
+*)
 Definition cycle_graph : AssignmentGraph T :=
   mkAG cycle_sym cycle_irrefl.
 
@@ -221,9 +275,20 @@ Definition cycle_graph : AssignmentGraph T :=
 Definition fwd_edges : {set 'I_T * 'I_T} :=
   [set ((i : 'I_T), inZp (i + 1)) | i : 'I_T].
 
+(** bwd_edges — the "backward" directed edges (i+1 -> i) of the cycle.
+    Kind: helper.
+    Why: separates out the half of cycle_edge_set used for counting.
+    Used by: cycle_edge_set_union, bwd_card, cycle_edges_count.
+*)
 Definition bwd_edges : {set 'I_T * 'I_T} :=
   [set (inZp ((i : 'I_T) + 1), (i : 'I_T)) | i : 'I_T].
 
+(** cycle_edge_set_union — cycle_edge_set decomposes as forward + backward edges.
+    Kind: helper.
+    Why: enables counting |cycle_edge_set| via |fwd_edges| + |bwd_edges|
+         minus their intersection.
+    Used by: cycle_edges_count.
+*)
 Lemma cycle_edge_set_union : cycle_edge_set = fwd_edges :|: bwd_edges.
 Proof.
 apply/setP => [[a b]]; rewrite !inE /=.
@@ -239,18 +304,34 @@ apply/idP/idP.
   + by right; exact: eqxx.
 Qed.
 
+(** fwd_card — there are T forward edges in the cycle.
+    Kind: helper.
+    Why: counts forward edges via card_imset; one per vertex i -> i+1.
+    Used by: cycle_edges_count.
+*)
 Lemma fwd_card : #|fwd_edges| = T.
 Proof.
 rewrite card_imset ?card_ord //.
 by move=> i j /eqP; rewrite xpair_eqE => /andP[/eqP H _].
 Qed.
 
+(** bwd_card — there are T backward edges in the cycle.
+    Kind: helper.
+    Why: dual of fwd_card; one per vertex i+1 -> i.
+    Used by: cycle_edges_count.
+*)
 Lemma bwd_card : #|bwd_edges| = T.
 Proof.
 rewrite card_imset ?card_ord //.
 by move=> i j /eqP; rewrite xpair_eqE => /andP[_ /eqP].
 Qed.
 
+(** fwd_bwd_disjoint — forward and backward edges are disjoint when T > 2.
+    Kind: helper.
+    Why: prevents double-counting in cycle_edges_count. Uses
+         succ_mod_cycle2_ord to rule out "(i -> i+1) = (j+1 -> j)" coincidences.
+    Used by: cycle_edges_count.
+*)
 Lemma fwd_bwd_disjoint : (1 < T')%N -> [disjoint fwd_edges & bwd_edges].
 Proof.
 move=> HT2.
@@ -265,6 +346,11 @@ have Hji : j = inZp (i + 1) :> 'I_T by rewrite -Hb2 -Hb1.
 exact: (succ_mod_cycle2_ord HT2 Hji Hij).
 Qed.
 
+(** cycle_edges_count — the cycle graph has 2T directed edges for T > 2.
+    Kind: main.
+    Why: headline edge-count used by the landscape tables and by the
+         recoverable-bits computation for cycle topologies.
+*)
 Lemma cycle_edges_count : (1 < T')%N -> #|ag_edges cycle_graph| = 2 * T.
 Proof.
 move=> HT2.
@@ -282,19 +368,44 @@ Section CompleteGraph.
 Variable T' : nat.
 Let T := T'.+2.
 
+(** complete_edge_set — all directed edges between distinct vertices.
+    Kind: helper.
+    Why: underlies complete_graph; excluded-diagonal set on 'I_T x 'I_T.
+    Used by: complete_sym, complete_irrefl, complete_graph, complete_edges_count.
+*)
 Definition complete_edge_set : {set 'I_T * 'I_T} :=
   [set e : 'I_T * 'I_T | e.1 != e.2].
 
+(** complete_sym — symmetry witness for the complete edge set.
+    Kind: helper.
+    Why waived: algebraic-property suffix (_sym).
+    Used by: complete_graph (AssignmentGraph record construction).
+*)
 Lemma complete_sym (i j : 'I_T) :
   (i, j) \in complete_edge_set -> (j, i) \in complete_edge_set.
 Proof. by rewrite !inE eq_sym. Qed.
 
+(** complete_irrefl — irreflexivity witness for the complete edge set.
+    Kind: helper.
+    Why: diagonal pairs are excluded by the definition of complete_edge_set.
+    Used by: complete_graph (AssignmentGraph record construction).
+*)
 Lemma complete_irrefl (i : 'I_T) : (i, i) \notin complete_edge_set.
 Proof. by rewrite inE eqxx. Qed.
 
+(** complete_graph — AssignmentGraph instance for the complete graph on T vertices.
+    Kind: example.
+    Why: concrete instance used by landscape tables to compare coverage bounds
+         on all-to-all communication topologies.
+*)
 Definition complete_graph : AssignmentGraph T :=
   mkAG complete_sym complete_irrefl.
 
+(** complete_edges_count — the complete graph has T * (T - 1) directed edges.
+    Kind: main.
+    Why: headline edge count for the complete graph topology, obtained from
+         cardsC by subtracting diagonal pairs from the full product.
+*)
 Lemma complete_edges_count :
   #|ag_edges complete_graph| = T * T.-1.
 Proof.
@@ -318,6 +429,11 @@ have Harith : (T * T.-1 + T = T * T)%N by rewrite /T mulnS addnC.
 by apply/eqP; rewrite -(eqn_add2r T) Hsum Harith.
 Qed.
 
+(** complete_covered_full — setT covers every edge of the complete graph.
+    Kind: helper.
+    Why: direct specialization of covered_full to complete_graph.
+    Used by: landscape-level upper bounds assuming universal coalition.
+*)
 Lemma complete_covered_full (C : {set 'I_T}) :
   C = setT -> covered_edges complete_graph C = ag_edges complete_graph.
 Proof. exact: covered_full. Qed.

@@ -50,7 +50,19 @@ Record RampConfig := mkRamp {
   rc_num_bits : nat ;              (* total number of encoded bits = |edges|/2 *)
 }.
 
+(** rc_T - successor accessor for the coalition-index bound of a RampConfig.
+    Kind: helper.
+    Why: exposes the .+1-adjusted coalition-index bound stored in RampConfig,
+    mirroring rc_N for the sheet count.
+    Used by: ramp_config_threshold and ramp_config_mono when quantifying over
+    coalitions C : {set 'I_T}.
+*)
 Definition rc_T (rc : RampConfig) : nat := (rc_T' rc).+1.
+(** rc_N - successor accessor for the sheet count of a RampConfig.
+    Kind: helper.
+    Why: exposes the .+1-adjusted sheet count stored in RampConfig.
+    Used by: ramp_config_threshold and ramp_config_mono when quantifying over sheets.
+*)
 Definition rc_N (rc : RampConfig) : nat := (rc_N' rc).+1.
 
 (* ========================================================================= *)
@@ -283,6 +295,12 @@ Variable rc : RampConfig.
 Let T := rc_T rc.
 Let ag := rc_ag rc.
 
+(** ramp_config_threshold - ramp threshold packaged over a RampConfig.
+    Kind: main.
+    Why: bundles recovery count, monotonicity of covered edges and completeness
+    into a single statement parameterised by the configuration record.
+    Used by: downstream protocol landscape statements quoting the ramp threshold.
+*)
 Theorem ramp_config_threshold (C : {set 'I_T}) :
   recoverable_bits ag C = #|covered_edges ag C| %/ 2 /\
   (forall C' : {set 'I_T}, C \subset C' ->
@@ -290,6 +308,11 @@ Theorem ramp_config_threshold (C : {set 'I_T}) :
   (C = setT -> covered_edges ag C = ag_edges ag).
 Proof. exact: ramp_threshold. Qed.
 
+(** ramp_config_mono - recoverable-bits count is monotone in the coalition.
+    Kind: main.
+    Why: larger coalitions never recover fewer bits; clients rely on this
+    to extend availability arguments from small to larger coalitions.
+*)
 Theorem ramp_config_mono (C C' : {set 'I_T}) :
   C \subset C' ->
   (recoverable_bits ag C <= recoverable_bits ag C')%N.

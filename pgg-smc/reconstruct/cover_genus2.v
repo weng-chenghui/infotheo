@@ -65,6 +65,12 @@ Hypothesis HG : 1 < #|G|.
 
 Let ramif2 := (2 * #|G| + 2)%N.
 
+(** genus2_hurwitz — Riemann-Hurwitz equality for the genus-2 covering instance.
+    Kind: helper.
+    Why: discharges cd_hurwitz for the hyperelliptic genus-2 data, reducing
+         to 4 + 2|G| = 2|G| + 2 + 2.
+    Used by: genus2_data.
+*)
 Lemma genus2_hurwitz :
   (2 * 2 + 2 * #|G| = #|G| * (2 * 0) + ramif2 + 2)%N.
 Proof.
@@ -86,6 +92,11 @@ case: #|G| => [|[|n]] //= _.
 by rewrite mulnS addn2 ltnS leq_addr.
 Qed.
 
+(** genus2_data — CoveringData record for the genus-2 hyperelliptic covering.
+    Kind: main.
+    Why: supplies the Riemann-Hurwitz data used to assemble the genus-2
+         CoveringScheme built on a hyperelliptic AG code.
+*)
 Definition genus2_data : CoveringData M := {|
   cd_base_genus := 0 ;
   cd_n_branch   := 5 ;   (* genus-2 hyperelliptic: 5 Weierstrass points *)
@@ -238,6 +249,12 @@ Hypothesis code_auto_g2 :
 Let ts2_perm : pgg_gT M -> {perm 'I_(ts_T' ts2).+1} :=
   massey_share_perm (G:=G) sigma_fix0_g2.
 
+(** ts2_perm_compatible — ts_perm_compatible witness for the genus-2 scheme.
+    Kind: helper.
+    Why: feeds cs_perm_compatible in genus2_covering via transport +
+         massey_perm_compatible on the hyperelliptic AG scheme.
+    Used by: genus2_covering.
+*)
 Lemma ts2_perm_compatible :
   @ts_perm_compatible _ G _ _ ts2 ts2_perm.
 Proof.
@@ -246,6 +263,12 @@ apply: transport_perm_compatible.
 exact: massey_perm_compatible.
 Qed.
 
+(** genus2_covering — CoveringScheme instance for the genus-2 hyperelliptic cover.
+    Kind: main.
+    Why: packages genus2_data together with the AG-based threshold scheme ts2
+         and its perm-compatibility so the landscape can instantiate a
+         covering at genus 2 with gap bound ts_T <= ts_k + 4.
+*)
 Definition genus2_covering : CoveringScheme M := {|
   cs_data       := genus2_data ;
   cs_T'         := ts_T' ts2 ;
