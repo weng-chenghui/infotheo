@@ -66,9 +66,17 @@ Notation "'RecvCommit<' p '>' cs '=>' P" := (FCRecvCommit p (fun cs => P))
 Definition fc_alice (a : bool) : sproc fc_dtype fc_data alice_idx :=
   \pi{ Commit<dealer_idx> (fc_encode a) ; Finish }.
 
+(** fc_bob — Bob session program: commit encoded input bit b to the dealer and finish.
+    Kind: instance.
+    Why: Session-typed commit step for the second party; symmetric to fc_alice.
+*)
 Definition fc_bob (b : bool) : sproc fc_dtype fc_data bob_idx :=
   \pi{ Commit<dealer_idx> (fc_encode b) ; Finish }.
 
+(** fc_dealer — dealer session program: receive Alice/Bob commitments, shuffle by k, reveal all five cards to the verifier.
+    Kind: instance.
+    Why: Session-typed model of the dealer role encoding the five-card trick's physical shuffle-and-reveal step.
+*)
 Definition fc_dealer (a b : bool) (k : nat) (Hk : k < 5)
     : sproc fc_dtype fc_data dealer_idx :=
   let shuffled := fc_shuffle k (fc_arrange a b) in
@@ -81,6 +89,10 @@ Definition fc_dealer (a b : bool) (k : nat) (Hk : k < 5)
        Reveal<verifier_idx> (nth false shuffled 4) ;
        Finish }.
 
+(** fc_verifier — verifier session program: observe all five revealed cards and finish.
+    Kind: instance.
+    Why: Session-typed counterpart of the informal verifier role in the five-card trick; paired with fc_dealer to give a complete piSMC protocol.
+*)
 Definition fc_verifier : sproc fc_dtype fc_data verifier_idx :=
   \pi{ Observe<dealer_idx> c0 =>
        Observe<dealer_idx> c1 =>
@@ -146,17 +158,37 @@ Definition fc_witness (s : bool) (i : nat) (v : bool) : seq bool :=
     end
   end.
 
+(** fc_witness_size — every branch of fc_witness returns a seq of size 5.
+    Kind: helper.
+    Why: Size proof required to wrap fc_witness into a 5.-tuple via Tuple.
+    Used by: fc_witness_tup.
+*)
 Lemma fc_witness_size (s : bool) (i : nat) (v : bool) :
   i < 5 -> size (fc_witness s i v) == 5.
 Proof. by case: s; case: v; case: i => [|[|[|[|[|]]]]]. Qed.
 
+(** fc_witness_tup — tuple wrapping of fc_witness s i v with the size-5 witness.
+    Kind: helper.
+    Why: Lifts the concrete seq-level witness fc_witness to a 5.-tuple expected by fc_ts_valid and the privacy lemma.
+    Used by: fc_witness_val, fc_witness_valid, fc_witness_tnth, fc_ts_private.
+*)
 Definition fc_witness_tup (s : bool) (i : 'I_5) (v : bool) : 5.-tuple bool :=
   Tuple (@fc_witness_size s (val i) v (ltn_ord i)).
 
+(** fc_witness_val — projects the tuple wrapper to the underlying seq.
+    Kind: helper.
+    Why: Unfolds fc_witness_tup so that case-split reasoning on fc_witness can be applied under the tuple view.
+    Used by: fc_witness_valid, fc_witness_tnth.
+*)
 Lemma fc_witness_val s (i : 'I_5) v :
   val (fc_witness_tup s i v) = fc_witness s (val i) v.
 Proof. by []. Qed.
 
+(** fc_witness_valid — the witness tuple reconstructs the secret s.
+    Kind: helper.
+    Why: Shows fc_witness_tup produces valid shares for the threshold scheme so it can serve as the privacy-witness.
+    Used by: fc_ts_private.
+*)
 Lemma fc_witness_valid s (i : 'I_5) v :
   fc_three_consec (val (fc_witness_tup s i v)) = s.
 Proof.
@@ -164,6 +196,11 @@ rewrite fc_witness_val.
 by case: s; case: v; case: i => [[|[|[|[|[|]]]]]] //.
 Qed.
 
+(** fc_witness_tnth — the witness tuple has value v at position i.
+    Kind: helper.
+    Why: Allows the privacy proof to force a single observed position to any value v while keeping the reconstructed secret fixed.
+    Used by: fc_ts_private.
+*)
 Lemma fc_witness_tnth s (i : 'I_5) v :
   tnth (fc_witness_tup s i v) i = v.
 Proof.

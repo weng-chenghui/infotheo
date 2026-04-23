@@ -85,6 +85,11 @@ Proof. by apply: groupX; exact: fc_sigma_in_G. Qed.
 Lemma fc_pow0 (s : 'I_5) : (sigma ^+ 0) s = s.
 Proof. by rewrite expg0 perm1. Qed.
 
+(** fc_pow1 — sigma applied once advances a sheet by 1 mod 5.
+    Kind: helper.
+    Why: Base case for the sigma^k case-splits feeding fc_reach and fc_pow_fix_zero.
+    Used by: fc_reach, fc_pow_fix_zero.
+*)
 Lemma fc_pow1 (s : 'I_5) : val ((sigma ^+ 1) s) = (val s).+1 %% 5.
 Proof.
 rewrite expg1 fc_sigma_perm /fc_sigma_fun.
@@ -164,6 +169,11 @@ rewrite -(expg_mod k fc_sigma5).
 by rewrite (fc_pow_fix_zero gfix) expg0.
 Qed.
 
+(** fc_eval_inj — evaluation at any sheet s is injective on G: two elements of G that agree on s are equal.
+    Kind: helper.
+    Why: Regularity of the C_5 action; follows from fc_fix_imp_id and underlies fc_rhoG_regular.
+    Used by: fc_rhoG_regular.
+*)
 Lemma fc_eval_inj (s : 'I_5) :
   {in G &, injective (fun g : {perm 'I_5} => g s)}.
 Proof.
@@ -186,6 +196,11 @@ Proof. by []. Qed.
 
 Let rho := morphism.mfun (@pgg_rho FiveCard_M).
 
+(** fc_rhoG_eq — the image of G under rho equals G itself (rho is the identity morphism here).
+    Kind: helper.
+    Why: Lets us transport G-level facts (regularity, transitivity) into rhoG as required by the generic SecurityWitness builders.
+    Used by: fc_rhoG_pos, fc_rhoG_regular, fc_rhoG_trans.
+*)
 Lemma fc_rhoG_eq : [set rho x | x in G] = G.
 Proof.
 apply/setP => x; apply/imsetP/idP.
@@ -200,6 +215,11 @@ Qed.
 Lemma fc_rhoG_pos : (0 < #|[set rho x | x in G]|)%N.
 Proof. by rewrite fc_rhoG_eq; exact: fc_G_pos. Qed.
 
+(** fc_rhoG_regular — the rho-image of G acts regularly (free + transitive) on every sheet.
+    Kind: helper.
+    Why: Regularity input to uniform_security_witness; transports fc_eval_inj across the identity morphism.
+    Used by: fc_security_uniform.
+*)
 Lemma fc_rhoG_regular (s : 'I_5) :
   {in [set rho x | x in G] &,
    injective (fun sigma0 : {perm 'I_5} => sigma0 s)}.
@@ -207,6 +227,11 @@ Proof.
 by move=> g1 g2; rewrite fc_rhoG_eq => g1G g2G; exact: (fc_eval_inj g1G g2G).
 Qed.
 
+(** fc_rhoG_trans — the rho-image of G acts transitively on every sheet.
+    Kind: helper.
+    Why: Transitivity input to uniform_security_witness; derived from fc_rhoG_eq + fc_orbit_full.
+    Used by: fc_security_uniform.
+*)
 Lemma fc_rhoG_trans (s : 'I_5) :
   [set (sigma0 : {perm 'I_5}) s | sigma0 in [set rho x | x in G]] =
   [set: 'I_5].
@@ -217,9 +242,17 @@ Qed.
 Section fc_dealing_security.
 Variable R : realType.
 
+(** fc_security_uniform — uniform SecurityWitness for the five-card trick with epsilon = 0.
+    Kind: instance.
+    Why: Instantiates uniform_security_witness from non-triviality, regularity, and transitivity of rho(G) on the five sheets.
+*)
 Definition fc_security_uniform : SecurityWitness R FiveCard_M :=
   uniform_security_witness fc_rhoG_pos fc_rhoG_regular fc_rhoG_trans.
 
+(** fc_eps_zero — the uniform-security witness achieves epsilon = 0.
+    Kind: main.
+    Why: Records the perfect-security headline: the five-card trick's dealing phase leaks nothing.
+*)
 Lemma fc_eps_zero : sw_bound_eps fc_security_uniform = GRing.zero.
 Proof. reflexivity. Qed.
 
@@ -266,9 +299,17 @@ Lemma fc_genus0_automorphism :
   genus0_automorphism_bound FiveCard_M (cs_data fc_covering).
 Proof. move=> _; exact: fc_genus0_pgl. Qed.
 
+(** fc_threshold_witness — ThresholdWitness for the five-card instance using the RS5_witness_trivial genus-0 covering.
+    Kind: instance.
+    Why: Threshold half of fc_rigidity; packages fc_covering with the PGL collusion bound.
+*)
 Definition fc_threshold_witness : ThresholdWitness FiveCard_M :=
   @MkThresholdWitness FiveCard_M fc_covering fc_genus0_automorphism.
 
+(** fc_rigidity — AlgebraicRigidity instance for the five-card trick.
+    Kind: instance.
+    Why: Combines the uniform-security witness (epsilon = 0) with the genus-0 ThresholdWitness to certify algebraic rigidity of the five-card example.
+*)
 Definition fc_rigidity : AlgebraicRigidity R FiveCard_M :=
   @MkAlgebraicRigidity R FiveCard_M
     (fc_security_uniform R)

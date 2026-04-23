@@ -77,9 +77,18 @@ Definition fc_sigma_inv (x : 'I_5) : 'I_5 :=
   | _ => @Ordinal 5 3 isT
   end.
 
+(** fc_sigmaK — fc_sigma_inv cancels fc_sigma_fun on every sheet.
+    Kind: helper.
+    Why: Injectivity witness that lets us package fc_sigma_fun as a {perm 'I_5}.
+    Used by: fc_sigma.
+*)
 Lemma fc_sigmaK : cancel fc_sigma_fun fc_sigma_inv.
 Proof. by move=> x; apply/val_inj; case: x => [[|[|[|[|[|]]]]]]. Qed.
 
+(** fc_sigma — the five-cycle shuffle generator (0 1 2 3 4).
+    Kind: instance.
+    Why: Sole generator of the cyclic PGG underlying the five-card trick; its order-5 action determines the search space and security.
+*)
 Definition fc_sigma : {perm 'I_5} := perm (can_inj fc_sigmaK).
 
 (** The involution: g = (0 1)(2 3), fixing position 4.
@@ -98,6 +107,10 @@ Definition fc_g_inv := fc_g_fun. (* g is its own inverse *)
 Lemma fc_gK : cancel fc_g_fun fc_g_inv.
 Proof. by move=> x; apply/val_inj; case: x => [[|[|[|[|[|]]]]]]. Qed.
 
+(** fc_g — the involution g = (0 1)(2 3) used in the five-card trick.
+    Kind: instance.
+    Why: Models the swap of each player's card pair; paired with the shuffle generator fc_sigma to analyse security of the protocol.
+*)
 Definition fc_g : {perm 'I_5} := perm (can_inj fc_gK).
 
 (** Generator tuple for Gen_PGGTypes (1 generator). *)
@@ -126,7 +139,7 @@ Qed.
 
 (** fc_g = (0 1)(2 3) fixes position 4, so is_fpf does NOT hold.
     The five-card trick intentionally has a fixed point (the extra card).
-    Lemma fc_g_fpf is removed as it is unprovable. *)
+    The former fc_g_fpf statement has been removed as it is unprovable. *)
 
 (** Nat-level generator function for vm_compute reflection *)
 Definition fc_gens_nat (i x : nat) : nat :=
@@ -134,9 +147,19 @@ Definition fc_gens_nat (i x : nat) : nat :=
   | _ => match x with 0 => 1 | 1 => 2 | 2 => 3 | 3 => 4 | _ => 0 end
   end.
 
+(** fc_sigmasE — tuple lookup in the singleton generator tuple always returns fc_sigma.
+    Kind: helper.
+    Why: Rewrite lemma used to unfold fc_sigmas inside word-evaluation and reflection reasoning.
+    Used by: fc_gens_agree.
+*)
 Lemma fc_sigmasE (i : 'I_1) : tnth fc_sigmas i = fc_sigma.
 Proof. by rewrite (tnth_nth fc_sigma) /=; case: i => [[|?] ?]. Qed.
 
+(** fc_gens_agree — nat-level generator function fc_gens_nat agrees with the perm action of tnth fc_sigmas.
+    Kind: helper.
+    Why: Reflection bridge feeding the weval_inj_of_natB reflection lemma so vm_compute can discharge word-eval injectivity obligations.
+    Used by: fc_weval_inj1, fc_weval_inj4.
+*)
 Lemma fc_gens_agree (i : 'I_1) (x : 'I_5) :
   fc_gens_nat (val i) (val x) = val (tnth fc_sigmas i x).
 Proof.

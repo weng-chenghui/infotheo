@@ -65,6 +65,11 @@ Definition fc_negate (cs : seq bool) : seq bool := rev cs.
 Definition fc_arrange (a b : bool) : seq bool :=
   fc_negate (fc_encode a) ++ [:: true] ++ fc_encode b.
 
+(** fc_arrange_size — the arrangement seq always has length 5.
+    Kind: helper.
+    Why: Size invariant of fc_arrange used when iota-based windows traverse the 5-card row.
+    Used by: fc_correct, downstream size-dependent reasoning.
+*)
 Lemma fc_arrange_size (a b : bool) : size (fc_arrange a b) = 5.
 Proof. by case: a; case: b. Qed.
 
@@ -105,6 +110,12 @@ Proof. by case: a; case: b; case: k Hk => [|[|[|[|[|]]]]] //. Qed.
 (** * Tuple wrapper (for connection to PGG formalization)                      *)
 (******************************************************************************)
 
+(** fc_arrange_size_proof — boolean-equality form of fc_arrange_size, usable as a size witness for Tuple.
+    Kind: helper.
+    Why: The Tuple constructor expects a bool-valued size equality (size s == n), while fc_arrange_size proves the Prop-level version; this lemma supplies the boolean view.
+    Used by: fc_arrange_tup.
+    Naming: the `_proof` suffix distinguishes the bool-equality witness from the Prop-equality fc_arrange_size sibling; it names the data (boolean proof term) rather than the kind (Lemma).
+*)
 Lemma fc_arrange_size_proof (a b : bool) : size (fc_arrange a b) == 5.
 Proof. by case: a; case: b. Qed.
 
