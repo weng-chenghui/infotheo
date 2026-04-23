@@ -45,6 +45,11 @@ Hypothesis Hreg : forall (g1 g2 : gT) (s : 'I_N),
   g1 \in G -> g2 \in G ->
   endpoint g1 s = endpoint g2 s -> g1 = g2.
 
+(** one_eval_determines_perm — one sheet agreement forces two regular actions to be equal.
+    Kind: helper.
+    Why: surface the regularity hypothesis as a reusable lemma for downstream clients.
+    Used by: abelian_adversary_full_recovery and abelian_collapse Section consumers.
+*)
 Lemma one_eval_determines_perm (g1 g2 : gT) (s : 'I_N) :
   g1 \in G -> g2 \in G ->
   endpoint g1 s = endpoint g2 s -> g1 = g2.

@@ -47,9 +47,19 @@ Fixpoint orbit_step (gens : nat -> nat -> nat) (Tg : nat)
     else orbit_step gens Tg new_pts fuel'
   end.
 
+(** orbit_of — computes the sorted orbit of starting sheet s under the generators of a RAAG description.
+    Kind: helper.
+    Why: decidable orbit computation for demo transitivity checks.
+    Used by: is_transitive.
+*)
 Definition orbit_of (desc : RAAGDesc) (s : nat) : seq nat :=
   sort leq (orbit_step (rd_gens desc) (rd_Tg desc) [:: s] (rd_N desc)).
 
+(** is_transitive — decidable transitivity check: orbit of 0 covers all N sheets.
+    Kind: helper.
+    Why: recognises transitive RAAG actions in the demo instances.
+    Used by: RAAG instance sanity checks in this demo file.
+*)
 Definition is_transitive (desc : RAAGDesc) : bool :=
   size (orbit_of desc 0) == rd_N desc.
 

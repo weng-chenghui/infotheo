@@ -158,6 +158,11 @@ Variable A : finType.
 Variable C : {set A}.
 Hypothesis HC : (0 < #|C|)%N.
 
+(** entropy_uniform_supp — Shannon entropy of a uniform-on-support distribution equals log |C|.
+    Kind: helper.
+    Why: provides the closed-form entropy value used by the entropy-gap security arguments.
+    Used by: entropy_fdistmap_uniform_supp and security_witness_from_entropy.
+*)
 Lemma entropy_uniform_supp :
   `H (@fdist_uniform_supp R A C HC) = log #|C|%:R :> R.
 Proof.
@@ -191,6 +196,11 @@ Variable f : A -> B.
 Let img := f @: C.
 Let fiber_at (b : B) := [set a in C | f a == b].
 
+(** entropy_fdistmap_uniform_supp — entropy of pushforward-of-uniform-on-support expressed as log |C| minus a fiber-weighted correction.
+    Kind: helper.
+    Why: exposes the fiber-decomposition form of post-pushforward entropy needed for entropy-gap arguments.
+    Used by: var_dist_from_fiber_entropy and security_witness_from_entropy.
+*)
 Lemma entropy_fdistmap_uniform_supp :
   `H (fdistmap f (@fdist_uniform_supp R A C HC)) =
   log #|C|%:R -
@@ -438,6 +448,12 @@ Let P_s (s : 'I_N) : R.-fdist 'I_N :=
 (* Pinsker bridge: entropy bound -> var_dist bound.
    Combines fiber_entropy_gap (D = log N - H) with Pinsker's inequality
    (var_dist <= sqrt(2*D)) to get var_dist <= sqrt(2*(log N - H)). *)
+(** var_dist_from_fiber_entropy — Pinsker-style TV bound derived from the fiber entropy gap.
+    Kind: helper.
+    Why: the entropy-to-TV bridge that Pinsker's inequality provides in the fiber-decomposition form.
+    Used by: security_witness_from_entropy and downstream security-from-entropy consumers.
+    Naming: five components record the direction of the conversion (var_dist FROM fiber_entropy); shortening loses the source/target distinction.
+*)
 Lemma var_dist_from_fiber_entropy (s : 'I_N) :
   var_dist (P_s s) (fdist_uniform (card_ord N)) <=
   Num.sqrt (2%:R * (log N%:R - fiber_entropy (R:=R) L sigmas s)).
@@ -556,6 +572,10 @@ Variable R : realType.
 Variable M : GeneratedMonodromyReprType.
 Let N' := pgg_N' M.
 
+(** security_witness_from_entropy — constructs a SecurityWitness from an EntropyWitness via Pinsker.
+    Kind: main.
+    Why: materialises the entropy-to-TV conversion path (EntropyWitness -> Pinsker -> SecurityWitness) as a named construction.
+*)
 Definition security_witness_from_entropy
     (ew : EntropyWitness R M) : SecurityWitness R M.
 Proof.
@@ -681,6 +701,12 @@ Definition joint_fiber_entropy : R := `H joint_endpoint_dist.
 (* Upper bound: H(joint) <= log(Tg^L).
    The joint distribution is a pushforward of a distribution on Tg^L words,
    so its support has at most Tg^L elements. *)
+(** joint_entropy_le_log_words — joint fiber entropy is bounded by log of the total word count.
+    Kind: helper.
+    Why: the joint distribution is a pushforward of a uniform on L-tuples, bounding its Shannon entropy.
+    Used by: joint entropy bounds for multi-sheet adversaries.
+    Naming: five components record "H(joint) <= log(words)" as a compound phrase; shortening collides with joint_entropy_le without the word-count qualifier.
+*)
 Lemma joint_entropy_le_log_words :
   joint_fiber_entropy <= log (Tg ^ L)%:R.
 Proof.

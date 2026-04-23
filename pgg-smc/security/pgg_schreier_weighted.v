@@ -160,6 +160,11 @@ Record WeightedSchreierCertificate := MkWeightedSchreierCertificate {
 Definition weighted_convergence_rate (wsc : WeightedSchreierCertificate) : R :=
   1 - wsc_lambda_gap wsc.
 
+(** weighted_convergence_rate_ge0 — weighted Schreier convergence rate is non-negative.
+    Kind: helper.
+    Why: sanitises the rate for use as a probability-like quantity in downstream arguments.
+    Used by: weighted security witness constructions.
+*)
 Lemma weighted_convergence_rate_ge0 (wsc : WeightedSchreierCertificate) :
   0 <= weighted_convergence_rate wsc.
 Proof.
@@ -167,6 +172,11 @@ rewrite /weighted_convergence_rate subr_ge0.
 exact: (wsc_lambda_le1 wsc).
 Qed.
 
+(** weighted_convergence_rate_lt1 — weighted Schreier convergence rate is strictly less than 1.
+    Kind: helper.
+    Why: strict bound needed for geometric-decay arguments on the weighted transition.
+    Used by: weighted security witness constructions.
+*)
 Lemma weighted_convergence_rate_lt1 (wsc : WeightedSchreierCertificate) :
   weighted_convergence_rate wsc < 1.
 Proof.
@@ -251,6 +261,10 @@ Local Notation M := (Gen_PGGTypes sigmas).
 
 Variable W : R.-fdist 'I_Tg.
 
+(** schreier_weighted_bridge — weighted endpoint distribution equals the L-th matrix power of the weighted transition.
+    Kind: main.
+    Why: analog of schreier_walk_eq_endpoint for the weighted-generator setting; links probabilistic endpoint law to matrix-power spectral analysis.
+*)
 Lemma schreier_weighted_bridge : forall (L : nat) (s x : 'I_N),
   @endpoint_dist_weighted R n' m L sigmas W s x =
   (schreier_transition_weighted sigmas W ^+ L) s x.
@@ -435,7 +449,10 @@ have -> : \sum_(i < N | i != s) Q s i * (Q ^+ L) i x =
 have -> : \sum_(i < N | i != s) (Q ^+ L) i x = 1 - (Q ^+ L) s x.
   have := doubly_stochastic_power L x.
   rewrite (bigD1 s) //=.
-  by move=> /(f_equal (fun z => z - (Q ^+ L) s x)); rewrite addrC addrK.
+  (* Fallback (A002): subtracting (Q^+L) s x from both sides of a
+     doubly-stochastic row sum is not a congruence over a shared head
+     symbol; goal-level `congr` does not apply. *)
+  by move=> /(congr1 (fun z => z - (Q ^+ L) s x)); rewrite addrC addrK.
 rewrite IH.
 set c := a - b; set d := (s == x)%:R - N%:R^-1.
 set E := c ^+ L * d + N%:R^-1.

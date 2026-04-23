@@ -136,6 +136,9 @@ under eq_bigr do rewrite fdist_uniformE card_ord.
 by rewrite prodr_const card_ord natrX exprVn.
 Qed.
 
+(** rho_weighted_is_uniform — the weighted endpoint distribution collapses to the uniform-words distribution when the generator weights are uniform.
+    Kind: main.
+    Why: establishes that the weighted pipeline strictly generalises the uniform pipeline, so all uniform-case security results are inherited by the weighted construction. *)
 Lemma rho_weighted_is_uniform :
   @rho_from_words_weighted R N'' m L sigmas (fdist_uniform card_Tg) =
   @rho_from_words R N'' m L sigmas.

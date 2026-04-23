@@ -37,6 +37,10 @@ Section var_dist_extra.
 Context {R : realType}.
 Variable A : finType.
 
+(** var_dist_triangle — total variation distance satisfies the triangle inequality.
+    Kind: main.
+    Why: foundational metric property used to chain distance bounds in the security analysis.
+*)
 Lemma var_dist_triangle (P Q M : R.-fdist A) :
   var_dist P M <= var_dist P Q + var_dist Q M.
 Proof.
@@ -99,6 +103,11 @@ Hypothesis HC : (0 < #|C|)%N.
 
 Let k := (#|A| - #|C|)%N.
 
+(** var_dist_uniform_supp — TV distance between a uniform-on-support distribution and uniform on A equals 2k / |A|.
+    Kind: helper.
+    Why: quantifies how restricting support affects TV distance to full uniform, used in bound chains.
+    Used by: collusion_bound_conditional and var_dist_endpoint_direct.
+*)
 Lemma var_dist_uniform_supp :
   var_dist (@fdist_uniform_supp R A C HC) (fdist_uniform Hn) =
   2%:R * k%:R / #|A|%:R.
@@ -183,6 +192,9 @@ Definition ideal_marginal : R.-fdist 'I_N :=
 (* Full uniform over 'I_N *)
 Let card_IN : #|'I_N| = N'.+1 := card_ord N.
 
+(** target_uniform — the fully uniform distribution on 'I_N that the adversary's marginal is compared against.
+    Kind: canonical.
+*)
 Definition target_uniform : R.-fdist 'I_N := fdist_uniform card_IN.
 
 (* Key lemma: the pushforward of uniform(S_N) through evaluation is uniform(I_N) *)
@@ -290,9 +302,18 @@ Hypothesis epsilon_ge0 : 0 <= epsilon.
 Hypothesis dpi_bound :
   var_dist adversary_posterior ideal_posterior <= epsilon.
 
+(** Hcard_remaining — the remaining-sheet set has exactly N - T' elements.
+    Kind: helper.
+    Why: reuses card_remaining as a named lemma inside the conditional-bound Section.
+    Used by: collusion_bound_conditional.
+*)
 Lemma Hcard_remaining : #|remaining| = (N - T')%N.
 Proof. exact: card_remaining. Qed.
 
+(** collusion_bound_conditional — conditional TV bound between adversary posterior and full uniform, adding an additive 2T'/N slack.
+    Kind: main.
+    Why: quantifies how much the collusion set widens the DPI-derived statistical distance bound.
+*)
 Theorem collusion_bound_conditional :
   var_dist adversary_posterior full_uniform <= epsilon + 2%:R * T'%:R / N%:R.
 Proof.
@@ -322,6 +343,11 @@ Let N := N'.+1.
 
 Let card_perm_N : #|{perm 'I_N}| = (N`!.-1).+1 := card_permT_N N'.
 
+(** fdistmap_eval_uniform — evaluating a uniform permutation at a fixed sheet yields the uniform distribution on 'I_N.
+    Kind: helper.
+    Why: isolates the pushforward-of-uniform-perm-is-uniform identity for reuse outside the collusion bound.
+    Used by: collusion_bound_endpoint and other marginal-analysis consumers.
+*)
 Lemma fdistmap_eval_uniform (s : 'I_N) :
   fdistmap (fun sigma : {perm 'I_N} => sigma s)
            (fdist_uniform card_perm_N : R.-fdist _) =
@@ -385,6 +411,11 @@ rewrite card_imset ?cardsT //.
 by case: #|A| Hcard_A.
 Qed.
 
+(** fdistmap_inj_uniform — pushforward of uniform through an injection equals uniform-on-image.
+    Kind: helper.
+    Why: standard recipe for turning an injective pushforward into an fdist_uniform_supp.
+    Used by: fdistmap_uniform_supp_inj and downstream image-counting lemmas.
+*)
 Lemma fdistmap_inj_uniform :
   fdistmap f (fdist_uniform Hcard_A) =
   @fdist_uniform_supp R B img Himg_pos.
@@ -465,7 +496,12 @@ rewrite weval_inj_search_space //.
 by rewrite expn_gt0.
 Qed.
 
-(* Key: rho_from_words is uniform_supp over achievable(L) *)
+(** rho_from_words_uniform_supp — the word-induced distribution on permutations is uniform over achievable(L).
+    Kind: helper.
+    Why: bridges the uniform word distribution and the uniform-on-image distribution on the group.
+    Used by: collusion bound arguments that pass from words to group elements.
+    Naming: five components (rho / from_words / uniform_supp) match the canonical suffix "uniform_supp"; kept for clarity over cryptic shortenings.
+*)
 Lemma rho_from_words_uniform_supp :
   rho_from_words = @fdist_uniform_supp R _ (@achievable M L) achievable_pos.
 Proof.
@@ -518,6 +554,11 @@ Variable L : nat.
 Variable sigmas : Tg.-tuple {perm 'I_N}.
 Let M := Gen_PGGTypes sigmas.
 
+(** card_word_L' — the number of length-L words over Tg generators is Tg ^ L.
+    Kind: helper.
+    Why: mirrors card_word_L in the fiber_equidistribution section; provides the cardinality witness used for fdist_uniform.
+    Used by: word_unif and subsequent fiber probability lemmas.
+*)
 Lemma card_word_L' :
   #|{: L.-tuple 'I_Tg}| = (Tg ^ L).-1.+1.
 Proof.
@@ -708,6 +749,11 @@ Hypothesis Hinj_s :
 (* The key bound: epsilon = 2*(N - Tg^L)/N with denominator N, not N! *)
 Let direct_eps : R := 2%:R * (N - Tg ^ L)%:R / N%:R.
 
+(** direct_eps_ge0 — the direct endpoint epsilon is non-negative.
+    Kind: helper.
+    Why: exposes non-negativity of the epsilon constant used in bound-chain arguments.
+    Used by: var_dist_endpoint_direct consumers that require a non-negative upper bound.
+*)
 Lemma direct_eps_ge0 : 0 <= direct_eps.
 Proof.
 rewrite /direct_eps.
@@ -715,12 +761,22 @@ apply: divr_ge0; last by rewrite ler0n.
 by rewrite mulr_ge0 // ler0n.
 Qed.
 
+(** achievable_card_TgL — under weval injectivity, the achievable image has cardinality Tg ^ L.
+    Kind: helper.
+    Why: turns the weval-injectivity hypothesis into an explicit cardinality formula.
+    Used by: achievable_pos', perm_endpoint_image_card, and TgL_leq_N.
+*)
 Lemma achievable_card_TgL : #|@achievable M L| = (Tg ^ L)%N.
 Proof.
 have -> : #|@achievable M L| = @search_space M L by [].
 by rewrite weval_inj_search_space.
 Qed.
 
+(** achievable_pos' — the achievable-permutation set is non-empty.
+    Kind: helper.
+    Why: provides the positivity witness required by fdist_uniform_supp.
+    Used by: rho_from_words_uniform_supp-style constructions in this Section.
+*)
 Lemma achievable_pos' : (0 < #|@achievable M L|)%N.
 Proof. by rewrite achievable_card_TgL expn_gt0. Qed.
 
@@ -735,10 +791,20 @@ rewrite card_in_imset; last first.
 exact: achievable_card_TgL.
 Qed.
 
+(** perm_endpoint_image_pos — the endpoint image of achievable permutations at sheet s is non-empty.
+    Kind: helper.
+    Why: positivity witness for pushforward-uniform constructions on the image.
+    Used by: endpoint-direct bound derivations.
+*)
 Lemma perm_endpoint_image_pos (s : 'I_N) :
   (0 < #|(eval_at s) @: @achievable M L|)%N.
 Proof. by rewrite perm_endpoint_image_card expn_gt0. Qed.
 
+(** TgL_leq_N — the number of achievable endpoint values never exceeds N.
+    Kind: helper.
+    Why: records the obvious but required subset bound Tg ^ L <= N used in epsilon simplification.
+    Used by: var_dist_endpoint_direct and unbalanced endpoint bound derivations.
+*)
 Lemma TgL_leq_N : (Tg ^ L <= N)%N.
 Proof.
 rewrite -(perm_endpoint_image_card ord0).
@@ -890,6 +956,11 @@ Hypothesis HCleB : (#|C| <= #|B|)%N.
 
 Let img := f @: C.
 
+(** var_dist_fdistmap_unbalanced — closed form for TV distance when pushing uniform-on-support through a function and comparing against full uniform on B.
+    Kind: helper.
+    Why: packages the unbalanced-image TV computation as a single exchangeable formula.
+    Used by: var_dist_endpoint_image_bound_unbalanced and unbalanced endpoint-direct arguments.
+*)
 Lemma var_dist_fdistmap_unbalanced :
   var_dist (fdistmap f (@fdist_uniform_supp R _ C HC))
            (fdist_uniform Hn) =
@@ -985,6 +1056,11 @@ Let M := Gen_PGGTypes sigmas.
 
 Hypothesis Hlfree : @weval_inj M L.
 
+(** var_dist_endpoint_unbalanced — closed-form endpoint TV formula in the unbalanced (Tg ^ L <= N) regime.
+    Kind: helper.
+    Why: packages the unbalanced endpoint TV identity for downstream bound-by-image-size consumers.
+    Used by: var_dist_endpoint_image_bound_unbalanced.
+*)
 Lemma var_dist_endpoint_unbalanced
     (HCleN : (Tg ^ L <= N)%N) (s : 'I_N) :
   var_dist (fdistmap (fun sigma : {perm 'I_N} => sigma s)
@@ -1000,6 +1076,12 @@ have -> : #|@achievable M L| = @search_space M L by [].
 by rewrite weval_inj_search_space.
 Qed.
 
+(** var_dist_endpoint_image_bound_unbalanced — TV distance bound for unbalanced regime from a lower bound on the endpoint image size.
+    Kind: helper.
+    Why: turns a lower bound on |image_s| into an upper bound on the endpoint TV distance in the unbalanced case.
+    Used by: concrete instance bounds that compute |image_s| at the nat level.
+    Naming: six components reflect the four-way modifier stack (var_dist / endpoint / image_bound / unbalanced); canonical alternatives would lose discrimination from the balanced variant.
+*)
 Lemma var_dist_endpoint_image_bound_unbalanced
     (HCleN : (Tg ^ L <= N)%N) (img_min : nat) (s : 'I_N)
     (Himg : (img_min <= #|(fun sigma : {perm 'I_N} => sigma s) @: @achievable M L|)%N) :
@@ -1053,7 +1135,11 @@ have -> : #|@achievable M L| = @search_space M L by [].
 by rewrite weval_inj_search_space // Hbal.
 Qed.
 
-(* The key corollary: bound var_dist by bounding |image_s| from below *)
+(** var_dist_endpoint_image_bound — balanced-regime TV bound derived from a lower bound on the endpoint image size.
+    Kind: main.
+    Why: the key corollary used to bound var_dist from a concrete nat-level image-size computation.
+    Naming: five components mirror the unbalanced variant; retained for parallel structure with var_dist_endpoint_image_bound_unbalanced.
+*)
 Lemma var_dist_endpoint_image_bound
     (Hbal : (Tg ^ L = N)%N) (img_min : nat) (s : 'I_N)
     (Himg : (img_min <= #|(fun sigma : {perm 'I_N} => sigma s) @: @achievable M L|)%N) :

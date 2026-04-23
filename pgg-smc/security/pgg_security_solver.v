@@ -69,6 +69,11 @@ Fixpoint solve_L_aux (Tg N eps_n eps_d fuel L : nat) : option nat :=
     else solve_L_aux Tg N eps_n eps_d fuel' L.+1
   end.
 
+(** solve_L — search for the minimal word length L that achieves target epsilon given Tg, N.
+    Kind: helper.
+    Why: wraps the fuel-bounded search solve_L_aux with a default fuel budget of 100.
+    Used by: solve and star_solve.
+*)
 Definition solve_L (Tg N eps_n eps_d : nat) : option nat :=
   solve_L_aux Tg N eps_n eps_d 100 1.
 
@@ -101,11 +106,27 @@ Definition solve (c : Constraint) : option SecurityParams :=
 (*     Consistency proof                                                      *)
 (******************************************************************************)
 
+(** epsilon_endpoint_rat_consistent — when Tg^L <= N, the rational epsilon
+    pair reduces to its canonical (numerator, denominator) form
+    (2*(N - Tg^L), N).
+    Kind: helper.
+    Why: lets later SecurityParams / SecurityProfile reasoning rewrite
+    epsilon_endpoint_rat by the nominal endpoint formula without a case
+    split; epsilon_endpoint_rat_sp_consistent consumes this equality.
+    Used by: epsilon_endpoint_rat_sp_consistent, sp_consistent_endpoint,
+             and vm_compute demonstrations further down this file.
+*)
 Lemma epsilon_endpoint_rat_consistent (Tg N L : nat) :
   let er := epsilon_endpoint_rat Tg N L in
   (Tg ^ L <= N)%N -> er = (2 * (N - Tg ^ L), N).
 Proof. by rewrite /epsilon_endpoint_rat; move=> ->. Qed.
 
+(** epsilon_endpoint_rat_sp_consistent — the rational epsilon pair satisfies the sp_consistent cross-product equation.
+    Kind: helper.
+    Why: reduces sp_consistent for the endpoint-rational encoding to a cross-product equality in N.
+    Used by: sp_consistent_endpoint.
+    Naming: six components (epsilon / endpoint / rat / sp / consistent) faithfully record the indexing chain; shortening invites confusion with epsilon_endpoint_consistent.
+*)
 Lemma epsilon_endpoint_rat_sp_consistent Tg N L :
   let er := epsilon_endpoint_rat Tg N L in
   (2 * (N - Tg ^ L) * er.2 == er.1 * N)%N.
@@ -119,6 +140,11 @@ have /eqP -> : (N - Tg ^ L == 0)%N.
 by rewrite muln0 mul0n.
 Qed.
 
+(** sp_consistent_endpoint — concrete security parameters built from endpoint rationals are sp-consistent.
+    Kind: helper.
+    Why: packages the consistency proof as a direct claim on MkSP.
+    Used by: solve_consistent.
+*)
 Lemma sp_consistent_endpoint Tg N L :
   sp_consistent (MkSP Tg N L (epsilon_endpoint_rat Tg N L)).
 Proof.
@@ -131,6 +157,10 @@ have /eqP -> : (N - Tg ^ L == 0)%N.
 by rewrite muln0 mul0n.
 Qed.
 
+(** solve_consistent — any security parameter set returned by solve is sp-consistent.
+    Kind: main.
+    Why: top-level correctness of the solver: Some-results are valid security parameter encodings.
+*)
 Lemma solve_consistent c p : solve c = Some p -> sp_consistent p.
 Proof.
 case: c => [eps_n eps_d Tg N | L Tg N | eps_n eps_d Tg | eps_n eps_d L N] //=.
@@ -152,6 +182,11 @@ Record StarParams := MkStarP {
   star_eps : nat * nat
 }.
 
+(** star_to_generic — lifts star-graph-specific parameters into the generic SecurityParams record.
+    Kind: helper.
+    Why: star groups fix the relation Tg = m + 1, N = m + 3; this lift keeps downstream consumers generic.
+    Used by: star-graph demo instances in this file.
+*)
 Definition star_to_generic (sp : StarParams) : SecurityParams :=
   MkSP (star_m sp + 1) (star_m sp + 3) (star_L sp) (star_eps sp).
 
@@ -160,6 +195,11 @@ Inductive StarConstraint :=
 | Star_FixML (m L : nat)      (* given m, L -> compute eps *)
 .
 
+(** star_solve — specialised solver for star graphs given a StarConstraint.
+    Kind: helper.
+    Why: avoids running the generic solver search for the simpler star-graph case where Tg and N are fixed by m.
+    Used by: star-graph demo instances.
+*)
 Definition star_solve (c : StarConstraint) : option StarParams :=
   match c with
   | Star_FixML m L =>
@@ -282,6 +322,15 @@ Eval vm_compute in eps_lt1 (epsilon_endpoint_rat 1 4 1).   (* Cyclic N=4: false 
 (*     (duplicated from pgg_weval_inj.v to keep solver dependency-free)      *)
 (******************************************************************************)
 
+(** enum_words — enumerate every length-L word over the alphabet
+    {0,...,Tg-1} as a seq of seqs of nat, duplicating all_words from
+    pgg_weval_inj.v to keep the solver dependency-free.
+    Kind: helper.
+    Why: nat-level counterpart of the pgg_word finType enumeration,
+    required by the vm_compute-driven solver in this file.
+    Used by: word_fingerprint, check_weval_inj, achievable_fps and the
+             vm_compute demonstrations later in this file.
+*)
 Fixpoint enum_words (Tg L : nat) : seq (seq nat) :=
   match L with
   | 0 => [:: [::]]
@@ -289,14 +338,26 @@ Fixpoint enum_words (Tg L : nat) : seq (seq nat) :=
     flatten [seq map (cons i) (enum_words Tg L') | i <- iota 0 Tg]
   end.
 
+(** eval_word — left-fold evaluation of a generator word on a sheet index.
+    Kind: helper.
+    Why: nat-level word evaluator consumed by every solver check (fingerprint, injectivity, fiber epsilon); kept purely numeric so vm_compute stays fast.
+    Used by: word_fingerprint, check_weval_inj, achievable_fps. *)
 Definition eval_word (gens : nat -> nat -> nat) (w : seq nat) (x : nat)
     : nat :=
   foldl (fun acc i => gens i acc) x w.
 
+(** word_fingerprint — the full action of a word on all N sheets, reified as a seq.
+    Kind: helper.
+    Why: the fingerprint is the canonical representative that makes word-evaluation injectivity decidable at the nat level.
+    Used by: check_weval_inj. *)
 Definition word_fingerprint (N : nat) (gens : nat -> nat -> nat)
     (w : seq nat) : seq nat :=
   map (eval_word gens w) (iota 0 N).
 
+(** check_weval_inj — decidable test that the word-evaluation map is injective on length-L words.
+    Kind: helper.
+    Why: injectivity of the word-evaluation map is the precondition that turns the generic endpoint-epsilon formula into a tight bound; the solver refuses to emit a witness when this test fails.
+    Used by: group_template. *)
 Definition check_weval_inj (N Tg L : nat) (gens : nat -> nat -> nat)
     : bool :=
   uniq (map (word_fingerprint N gens) (enum_words Tg L)).
@@ -339,9 +400,17 @@ Definition star_gens (i x : nat) : nat :=
   else
     if x == 2 then i + 2 else if x == i + 2 then 2 else x.
 
+(** star_comm' — commutation relation for the star graph Star(m) at the nat level.
+    Kind: helper.
+    Why: captures that leaf generators commute with each other but not with the central generator; feeds star_desc.
+    Used by: star_desc. *)
 Definition star_comm' (m i j : nat) : bool :=
   ((i == 0) || (j == 0)) && (i != j).
 
+(** star_desc — GroupDesc packaging for the star family Star(m): Tg = m+1, N = m+3.
+    Kind: helper.
+    Why: standardised description that lets the generic solver reason about the star family without touching group_theoretic internals.
+    Used by: star_template, Star-family demonstrations. *)
 Definition star_desc (m : nat) : GroupDesc :=
   MkGroupDesc m.+1 (m + 3) (star_comm' m) star_gens.
 
@@ -350,9 +419,17 @@ Definition star_desc (m : nat) : GroupDesc :=
 Definition path_gens (i x : nat) : nat :=
   if x == i then i.+1 else if x == i.+1 then i else x.
 
+(** path_comm' — commutation relation for the path graph Path(n) at the nat level.
+    Kind: helper.
+    Why: adjacent transpositions commute iff their indices differ by at least 2; this is the nat-level encoding fed into path_desc.
+    Used by: path_desc. *)
 Definition path_comm' (i j : nat) : bool :=
   (2 <= (maxn i j - minn i j)) && (i != j).
 
+(** path_desc — GroupDesc packaging for the path family Path(n): Tg = n+1, N = n+2.
+    Kind: helper.
+    Why: standardised description for path-family solver runs; mirrors star_desc so the generic pipeline treats both uniformly.
+    Used by: path_template, Path-family demonstrations. *)
 Definition path_desc (n : nat) : GroupDesc :=
   MkGroupDesc n.+1 (n + 2) path_comm' path_gens.
 
@@ -362,6 +439,10 @@ Definition disjoint_gens (i x : nat) : nat :=
   let a := 2 * i in
   if x == a then a.+1 else if x == a.+1 then a else x.
 
+(** disjoint_desc — GroupDesc packaging for the disjoint family Disjoint(k): k commuting transpositions on 2k sheets.
+    Kind: helper.
+    Why: commodity instance to stress-test the solver on a fully commuting family; also serves as a sanity ceiling for the trace-counting code path.
+    Used by: disjoint_template, Disjoint-family demonstrations. *)
 Definition disjoint_desc (k : nat) : GroupDesc :=
   MkGroupDesc k (2 * k) (fun i j : nat => i != j) disjoint_gens.
 
@@ -372,9 +453,17 @@ Definition oc_gens (p i x : nat) : nat :=
     if x == i + p - 1 then i else x.+1
   else x.
 
+(** oc_comm' — commutation relation for the overlapping p-cycle family OC(k, p).
+    Kind: helper.
+    Why: p-cycles at offsets differing by at least p are disjoint and therefore commute; this nat-level encoding feeds oc_desc.
+    Used by: oc_desc. *)
 Definition oc_comm' (p i j : nat) : bool :=
   (p <= maxn i j - minn i j) && (i != j).
 
+(** oc_desc — GroupDesc packaging for the overlapping-cycle family OC(k, p): Tg = k, N = k + p - 1.
+    Kind: helper.
+    Why: standardised description for the OC family, matching the shape consumed by group_template so the solver reuses every generic check.
+    Used by: oc_template, OC-family demonstrations. *)
 Definition oc_desc (k p : nat) : GroupDesc :=
   MkGroupDesc k (k + p - 1) (oc_comm' p) (oc_gens p).
 
@@ -385,6 +474,10 @@ Definition cyclic_gens (n i x : nat) : nat :=
     if x.+1 < n then x.+1 else 0
   else x.
 
+(** cyclic_desc — GroupDesc packaging for the single-generator cyclic family Cyclic(n).
+    Kind: helper.
+    Why: degenerate one-generator case; used to check that the generic pipeline correctly handles groups where the commutation relation is vacuous.
+    Used by: cyclic_template, Cyclic-family demonstrations. *)
 Definition cyclic_desc (n : nat) : GroupDesc :=
   MkGroupDesc 1 n (fun _ _ => false) (cyclic_gens n).
 
@@ -460,6 +553,10 @@ Record GroupTemplate := MkGroupTemplate {
   gt_solve : SecuritySpec -> option SecurityParams ;
 }.
 
+(** group_template — solver entry point that turns a GroupDesc plus a default L into a GroupTemplate.
+    Kind: helper.
+    Why: unified front door for every group family; applies the injectivity check, the fibre epsilon, and the optional target comparison in one place so each family declarator stays a one-liner.
+    Used by: star_template, path_template, disjoint_template, oc_template, cyclic_template. *)
 Definition group_template (desc : GroupDesc) (default_L : nat)
     : GroupTemplate :=
   MkGroupTemplate (rd_Tg desc) (rd_N desc)
@@ -485,10 +582,18 @@ Notation raag_template := group_template (only parsing).
 (*     Named templates for known families                                    *)
 (******************************************************************************)
 
+(** star_template — named solver template for Star(m) with default L = 1. Kind: helper. *)
 Definition star_template (m : nat) := group_template (star_desc m) 1.
+(** path_template — named solver template for Path(n) with default L = 1. Kind: helper. *)
 Definition path_template (n : nat) := group_template (path_desc n) 1.
+(** disjoint_template — named solver template for Disjoint(k) with default L = 1. Kind: helper. *)
 Definition disjoint_template (k : nat) := group_template (disjoint_desc k) 1.
+(** oc_template — named solver template for OC(k, p) with default L = p - 1. Kind: helper. *)
 Definition oc_template (k p : nat) := group_template (oc_desc k p) (p - 1).
+(** cyclic_template — named solver template for the Cyclic(n) family with default L = 1.
+    Kind: helper.
+    Why: convenience alias for group_template applied to cyclic_desc; kept alongside the other named families for discoverability.
+    Used by: Cyclic-family demonstrations. *)
 Definition cyclic_template (n : nat) := group_template (cyclic_desc n) 1.
 
 (* Top-level dealer entry point *)

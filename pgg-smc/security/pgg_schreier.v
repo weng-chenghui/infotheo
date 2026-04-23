@@ -302,6 +302,11 @@ Record SchreierCertificate := MkSchreierCertificate {
 Definition convergence_rate (sc : SchreierCertificate) : R :=
   1 - sc_lambda_gap sc.
 
+(** convergence_rate_ge0 — the Schreier convergence rate is non-negative.
+    Kind: helper.
+    Why: needed to use convergence_rate as a well-typed probability-like quantity.
+    Used by: security_witness_schreier and asymptotic bound clients.
+*)
 Lemma convergence_rate_ge0 (sc : SchreierCertificate) :
   0 <= convergence_rate sc.
 Proof.
@@ -309,6 +314,11 @@ rewrite /convergence_rate subr_ge0.
 exact: (sc_lambda_le1 sc).
 Qed.
 
+(** convergence_rate_lt1 — the Schreier convergence rate is strictly less than 1.
+    Kind: helper.
+    Why: strict bound required to conclude that repeated application contracts strictly.
+    Used by: security_witness_schreier asymptotic exponential-decay arguments.
+*)
 Lemma convergence_rate_lt1 (sc : SchreierCertificate) :
   convergence_rate sc < 1.
 Proof.
@@ -334,6 +344,10 @@ rewrite add0r.
 exact: sc_convergence.
 Defined.
 
+(** security_witness_schreier — builds a SecurityWitness at word length L from a Schreier spectral certificate.
+    Kind: main.
+    Why: packages the spectral convergence bound together with the word distribution into the SecurityWitness structure.
+*)
 Definition security_witness_schreier (sc : SchreierCertificate)
     (L : nat) (Hlfree : @weval_inj M L) : SecurityWitness R M :=
   @MkSecurityWitness R M L
@@ -429,6 +443,11 @@ Variable sigmas : Tg.-tuple {perm 'I_N}.
 
 Local Notation M := (Gen_PGGTypes sigmas).
 
+(** word_eval_cons — evaluating a word with a prepended generator unfolds to the generator times the tail's word_eval.
+    Kind: helper.
+    Why: reduces cons-structured words to their recursive group-product form.
+    Used by: word_eval_cons_endpoint and schreier_walk_eq_endpoint.
+*)
 Lemma word_eval_cons (L : nat) (i : 'I_Tg) (w : L.-tuple 'I_Tg) :
   @word_eval M L.+1 [tuple of i :: w] =
   (tnth sigmas i * @word_eval M L w)%g.
@@ -439,12 +458,21 @@ apply: eq_bigr => j _.
 by rewrite tnthS.
 Qed.
 
+(** word_eval_cons_endpoint — pointwise version of word_eval_cons at a fixed sheet s.
+    Kind: helper.
+    Why: expresses the cons-endpoint identity as a pointwise equation, directly usable in Schreier walks.
+    Used by: schreier_walk_eq_endpoint.
+*)
 Lemma word_eval_cons_endpoint (L : nat) (i : 'I_Tg) (w : L.-tuple 'I_Tg)
     (s : 'I_N) :
   @word_eval M L.+1 [tuple of i :: w] s =
   @word_eval M L w (tnth sigmas i s).
 Proof. by rewrite word_eval_cons permM. Qed.
 
+(** schreier_walk_eq_endpoint — L-step Schreier random walk distribution equals the endpoint pushforward of rho_from_words.
+    Kind: main.
+    Why: bridges the matrix-power view of the Schreier walk to the probabilistic endpoint distribution over words.
+*)
 Lemma schreier_walk_eq_endpoint : forall (L : nat)
     (s x : 'I_N),
   (schreier_transition R sigmas ^+ L) s x =

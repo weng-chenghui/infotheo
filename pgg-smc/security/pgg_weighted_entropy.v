@@ -54,6 +54,9 @@ Variable R : realType.
 Variable n : nat.
 Variable P : R.-fdist 'I_n.+1.
 
+(** KL_div_uniform — D(P || U_{n+1}) = log(n+1) - H(P).
+    Kind: main.
+    Why: standard rearrangement of entropy_log_div that relates KL divergence from the uniform distribution to Shannon entropy; reused across the weighted-generator pipeline. *)
 Lemma KL_div_uniform :
   D(P || fdist_uniform (card_ord n.+1)) = log n.+1%:R - `H P.
 Proof.
@@ -110,6 +113,10 @@ Variable rho_dist : R.-fdist {perm 'I_N}.
 Let P_s (s : 'I_N) : R.-fdist 'I_N :=
   fdistmap (fun sigma : {perm 'I_N} => sigma s) rho_dist.
 
+(** var_dist_from_weighted_entropy — Pinsker bridge specialised to weighted endpoint entropy.
+    Kind: main.
+    Why: combines KL_div_uniform with Pinsker's inequality to bound variation distance of the endpoint marginal from the uniform distribution in terms of the weighted fiber entropy; headline lemma for the weighted security pipeline.
+    Naming: the chain "var_dist / from / weighted / entropy" reads as "variation distance derived from weighted entropy" and mirrors the companion KL_div_uniform; five components are intentional because each token names a distinct semantic role. *)
 Lemma var_dist_from_weighted_entropy (s : 'I_N) :
   var_dist (P_s s) (fdist_uniform (card_ord N)) <=
   Num.sqrt (2%:R * (log N%:R - fiber_entropy_weighted rho_dist s)).

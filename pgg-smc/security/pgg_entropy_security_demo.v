@@ -94,7 +94,16 @@ Lemma monster_entropy_short_L (s : 'I_monster_n.+2) :
   fiber_entropy (R:=R) L monster_sigmas s = log (2 ^ L)%:R.
 Proof. by rewrite fiber_entropy_injective. Qed.
 
-(* Leakage = D(P_s || U_N) *)
+(** monster_leakage_short_L — at every sheet s, the information leakage
+    log N - H(P_s) for the monster-group instance at short L equals the
+    Kullback-Leibler divergence D(P_s || U_N) against the uniform
+    distribution on N sheets.
+    Kind: example.
+    Why: concrete demonstration that fiber_entropy_gap instantiates the
+    entropy / divergence equality for the monster instance; paired with
+    monster_entropy_short_L and monster_security_short_L in the short-L
+    section.
+*)
 Lemma monster_leakage_short_L (s : 'I_monster_n.+2) :
   log monster_n.+2%:R - fiber_entropy (R:=R) L monster_sigmas s =
   D(fdistmap (fun sigma : {perm 'I_monster_n.+2} => sigma s)
@@ -151,6 +160,12 @@ Axiom oc_entropy_bound_axiom : forall (R : realType) (s : 'I_4),
 
 (* 1 <= 2 * (log 4 - log 2).
    In base-2 logarithm: log 2 = 1, log 4 = 2, so 2 * (2 - 1) = 2 >= 1. *)
+(** oc_one_le_two_log2 — the numeric inequality 1 <= 2 * (log 4 - log 2) in base-2 logs.
+    Kind: helper.
+    Why: discharges the entropy-gap numeric constant used by the OC demo entropy witness.
+    Used by: OC_entropy_witness_2 and related demo security-from-entropy constructions.
+    Naming: five components state the numeric content (1 le 2 log2); an abbreviation would obscure the constants.
+*)
 Lemma oc_one_le_two_log2 (R : realType) :
   (1 <= 2%:R * (log 4%:R - log 2%:R) :> R)%O.
 Proof. by rewrite log4 log2 mulrBr mulr1 -natrM /= -natrB //= ler1n. Qed.
@@ -183,6 +198,9 @@ Lemma oc_entropy_bound :
   (log 2%:R <= `H (P_s s))%O.
 Proof. exact: oc_entropy_bound_axiom. Qed.
 
+(** oc_entropy_witness_2 — entropy witness for the OC instance at L = 2.
+    Kind: example.
+*)
 Definition oc_entropy_witness_2 : EntropyWitness R R_oc :=
   @entropy_witness_from_rho R R_oc 2
     (rho_from_words (R:=R) 2 oc_sigmas)
@@ -229,9 +247,15 @@ Variable rho_dist : R.-fdist {perm 'I_4}.
 Hypothesis Hbound : forall s : 'I_4,
   (H_min <= `H (fdistmap (fun sigma : {perm 'I_4} => sigma s) rho_dist))%O.
 
+(** oc_entropy_witness_L — parametric entropy witness for the OC instance at arbitrary word length L.
+    Kind: example.
+*)
 Definition oc_entropy_witness_L : EntropyWitness R R_oc :=
   @entropy_witness_from_rho R R_oc L rho_dist H_min Hbound.
 
+(** oc_security_from_entropy_L — parametric security witness for OC obtained from the L-indexed entropy witness via Pinsker.
+    Kind: example.
+*)
 Definition oc_security_from_entropy_L : SecurityWitness R R_oc :=
   security_witness_from_entropy oc_entropy_witness_L.
 

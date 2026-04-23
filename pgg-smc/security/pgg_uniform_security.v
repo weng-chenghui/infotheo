@@ -55,6 +55,10 @@ Hypothesis Hn : #|A| = n.+1.
 Let HsetT : (0 < #|[set: A]|)%N.
 Proof. by rewrite cardsT Hn. Qed.
 
+(** fdist_uniform_supp_setT — fdist_uniform_supp over the universal set collapses to fdist_uniform.
+    Kind: helper.
+    Why: bridges the support-based uniform construction and the cardinal-based one, so downstream lemmas can move freely between the two representations.
+    Used by: eval_pushforward_uniform. *)
 Lemma fdist_uniform_supp_setT :
   @fdist_uniform_supp R A [set: A] HsetT = fdist_uniform Hn.
 Proof.
@@ -74,6 +78,10 @@ Section var_dist_self.
 Context {R : realType}.
 Variable A : finType.
 
+(** var_dist_self — variation distance of any distribution to itself is zero.
+    Kind: helper.
+    Why: base identity that lets the uniform-security witness discharge its endpoint bound with the trivial epsilon = 0.
+    Used by: endpoint_bound, endpoint_exact. *)
 Lemma var_dist_self (P : R.-fdist A) : var_dist P P = 0.
 Proof.
 rewrite /var_dist (eq_bigr (fun _ => 0)); last by move=> a _; rewrite subrr normr0.
@@ -121,6 +129,10 @@ Let eval_at (s : 'I_N) : {perm 'I_N} -> 'I_N :=
 (* The image of rhoG under eval_at s *)
 Let img (s : 'I_N) := (eval_at s) @: rhoG.
 
+(** img_pos — the endpoint image of rhoG at any sheet s is non-empty.
+    Kind: helper.
+    Why: positivity of the image cardinality is required to build the support-indexed uniform distribution used as the pushforward target.
+    Used by: eval_pushforward, eval_pushforward_uniform. *)
 Lemma img_pos (s : 'I_N) : (0 < #|img s|)%N.
 Proof.
 rewrite card_gt0; apply/set0Pn.
@@ -138,7 +150,7 @@ Lemma eval_pushforward (s : 'I_N) :
   @fdist_uniform_supp R _ (img s) (img_pos s).
 Proof.
 rewrite (@fdistmap_uniform_supp_inj R _ _ rhoG HrhoG_pos (eval_at s) (@Hregular s)).
-f_equal. exact: eq_irrelevance.
+congr fdist_uniform_supp; exact: eq_irrelevance.
 Qed.
 
 (* The pushforward equals fdist_uniform *)

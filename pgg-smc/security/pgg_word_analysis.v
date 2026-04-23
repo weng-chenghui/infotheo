@@ -73,6 +73,10 @@ Qed.
 Definition edge_count : nat :=
   #|[set p : 'I_Tg * 'I_Tg | comm p.1 p.2]|.
 
+(** edge_count_sym — the edge-count cardinality is unchanged when the commutation pair is read backwards.
+    Kind: helper.
+    Why: lets downstream fibre-counting arguments swap the two coordinates freely when enumerating commuting ordered pairs.
+    Used by: total_comm_pairs. *)
 Lemma edge_count_sym : edge_count =
   #|[set p : 'I_Tg * 'I_Tg | comm p.2 p.1]|.
 Proof.
@@ -165,8 +169,11 @@ rewrite (swap_word_tnth k w1 i) Hik Hik1.
 done.
 Qed.
 
-(* If no adjacent generators in w commute, then no adjacent swap is possible,
-   so the trace class of w is the singleton {w}. *)
+(** comm_pair_count_zero_adj_swap — a word with no commuting adjacent pairs admits no adjacent swap.
+    Kind: helper.
+    Why: bridges the numerical count of commuting adjacencies and the structural adjacency-swap predicate that drives trace equivalence.
+    Used by: comm_pair_count_zero_adj_swap_sym, comm_pair_count_zero_root.
+    Naming: six components read as "count of commuting pairs is zero implies no adjacent swap"; shorter names collide with the symmetric variant below, so each semantic fragment is retained. *)
 Lemma comm_pair_count_zero_adj_swap (L : nat) (w1 w2 : pgg_word M L) :
   comm_pair_count w1 = 0 -> adj_swap w1 w2 = false.
 Proof.
@@ -181,7 +188,11 @@ have : k \in [set k0 : 'I_L' |
 by rewrite Hempty inE.
 Qed.
 
-(* The symmetric closure of adj_swap is also false when comm_pair_count = 0 *)
+(** comm_pair_count_zero_adj_swap_sym — symmetric-closure version of comm_pair_count_zero_adj_swap.
+    Kind: helper.
+    Why: the trace-equivalence relation uses the symmetric closure of adj_swap, so the zero-count obstruction is lifted to that relation.
+    Used by: comm_pair_count_zero_root, comm_pair_count_zero_singleton.
+    Naming: seven components are the symmetric companion of comm_pair_count_zero_adj_swap; the trailing _sym is the standard MathComp symmetry marker. *)
 Lemma comm_pair_count_zero_adj_swap_sym (L : nat) (w1 w2 : pgg_word M L) :
   comm_pair_count w1 = 0 -> adj_swap_sym w1 w2 = false.
 Proof.
@@ -192,7 +203,11 @@ have := adj_swap_symmetric Hadj.
 by rewrite (comm_pair_count_zero_adj_swap _ H1).
 Qed.
 
-(* Words with zero commuting pairs are their own trace roots *)
+(** comm_pair_count_zero_root — a zero-count word is its own trace-class representative.
+    Kind: helper.
+    Why: establishes a canonical form for zero-commuting-pair words, used when counting the contribution of such words to the total trace count.
+    Used by: zero_comm_pair_traces.
+    Naming: five components "count of commuting pairs is zero implies root"; each token plays a distinct semantic role in the statement. *)
 Lemma comm_pair_count_zero_root (L : nat) (w : pgg_word M L) :
   comm_pair_count w = 0 -> root (@adj_swap_sym R L) w = w.
 Proof.
@@ -213,7 +228,11 @@ case: pickP => [w' /= Hw' | /= H].
 by move: (H w); rewrite /= connect0.
 Qed.
 
-(* The trace equivalence class of a zero-count word is a singleton *)
+(** comm_pair_count_zero_singleton — trace-equivalent words with zero commuting pairs are identical.
+    Kind: helper.
+    Why: zero-commuting-pair words have singleton trace classes, which is exactly the cardinality bound that feeds the trace-count argument.
+    Used by: zero_comm_words_are_traces.
+    Naming: five components capture subject / property / value / consequence; renaming would lose the parallel with comm_pair_count_zero_root and break the family's readability. *)
 Lemma comm_pair_count_zero_singleton (L : nat)
     (w1 w2 : pgg_word M L) :
   comm_pair_count w1 = 0 ->
@@ -230,10 +249,11 @@ Qed.
 (* Section 3: Maximum commuting pairs                                         *)
 (* ========================================================================== *)
 
-(* When all distinct generators commute and L >= 2, we have
-   comm_pair_count w = L.-1 (every adjacent pair commutes, unless two
-   adjacent generators happen to be equal, in which case comm is false
-   by irreflexivity). *)
+(** comm_pair_count_full_comm — when all distinct generators commute and adjacent generators in the word are distinct, the count hits its maximum L-1.
+    Kind: helper.
+    Why: upper-bound saturation lemma for the edge-count argument; provides the tight case that makes the mean-value estimate non-trivial.
+    Used by: total_comm_pairs and downstream mixing estimates.
+    Naming: five components "count of commuting pairs in the full-commuting regime"; the _full_comm qualifier is the standard way to mark the saturation hypothesis. *)
 Lemma comm_pair_count_full_comm (L' : nat) (w : pgg_word M L'.+1) :
   (forall i j : 'I_Tg, i != j -> comm i j) ->
   (forall k : 'I_L',
@@ -254,9 +274,11 @@ Qed.
 (* Section 4: Swap preserves comm_pair_count adjacently                       *)
 (* ========================================================================== *)
 
-(* An adjacent swap at position k changes comm_pair_count by at most 2
-   (one pair created/destroyed at k, and adjacent pairs at k-1 and k+1
-   may be affected). This is a structural observation. *)
+(** adj_swap_comm_pair_diff — an adjacent swap shifts the commuting-pair count by at most 2 in each direction.
+    Kind: helper.
+    Why: bi-directional Lipschitz control of comm_pair_count under a single swap, needed for telescoping arguments across trace equivalence chains.
+    Used by: downstream mixing estimates that track how comm_pair_count evolves along a trace-equivalence walk.
+    Naming: five components "swap at adjacent positions yields a commuting-pair difference"; each token names a distinct quantity, and the companion name in pgg_raag.v already uses this pattern. *)
 Lemma adj_swap_comm_pair_diff (L : nat) (w1 w2 : pgg_word M L) :
   adj_swap w1 w2 ->
   (comm_pair_count w1 <= comm_pair_count w2 + 2) /\
@@ -348,6 +370,10 @@ Lemma card_pgg_word_pos (L : nat) :
   0 < Tg ^ L.
 Proof. by rewrite expn_gt0. Qed.
 
+(** card_pgg_word_succ — word-cardinality rewritten in successor form for fdist_uniform.
+    Kind: helper.
+    Why: fdist_uniform expects a cardinality of the form n.+1; this lemma packages card_pgg_word with prednK to discharge that shape.
+    Used by: uniform word-distribution constructions in the security pipeline. *)
 Lemma card_pgg_word_succ (L : nat) :
   #|{: pgg_word M L}| = (Tg ^ L).-1.+1.
 Proof. by rewrite card_pgg_word prednK // expn_gt0. Qed.
@@ -412,6 +438,10 @@ apply: subset_leq_card.
 by apply/subsetP => w /imsetP [w' Hw' ->]; exact: tsp_in_fib.
 Qed.
 
+(** fiber_count_card — the number of (m+2)-tuples with prescribed values at two distinct positions is |T|^m.
+    Kind: helper.
+    Why: exact cardinality for fibres of the two-position projection, reused as the inner count in the edge-count pushforward argument.
+    Used by: total_comm_pairs and the pushforward counting in pgg_mixing. *)
 Lemma fiber_count_card (a b : T) :
   #|fib a b| = #|T| ^ m.
 Proof.
@@ -529,8 +559,11 @@ rewrite !inE => /eqP H0.
 by rewrite andbT; apply/eqP; exact: comm_pair_count_zero_root H0.
 Qed.
 
-(* Lower bound: words with no commuting adjacent pairs contribute
-   directly to trace count *)
+(** zero_comm_words_are_traces — the trace class of a zero-commuting-pair word is the singleton containing that word.
+    Kind: helper.
+    Why: converts the singleton result of comm_pair_count_zero_singleton into a set-level identity, which is the shape consumed by the subset bound on n_traces.
+    Used by: zero_comm_pair_traces and downstream trace-count estimates.
+    Naming: five components "zero commuting pairs make the words trace-class representatives"; each token names a semantic fragment and shorter names would collide with the _singleton variant. *)
 Lemma zero_comm_words_are_traces (L : nat) (w : pgg_word M L) :
   comm_pair_count w = 0 ->
   [set w' : pgg_word M L | trace_equiv w w'] = [set w].

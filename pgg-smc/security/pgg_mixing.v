@@ -150,19 +150,37 @@ Variable N : nat.
 (* <v, w> = v^T * w, read off as a scalar *)
 Definition cV_inner (v w : 'cV[R]_N) : R := (v^T *m w) ord0 ord0.
 
+(** cV_innerE — column-vector inner product expressed as a sum over coordinates.
+    Kind: helper.
+    Why: turns the matrix-product definition of cV_inner into a sum, enabling pointwise reasoning.
+    Used by: cV_inner_sym, cV_inner_ge0, cV_inner_self_sum.
+*)
 Lemma cV_innerE (v w : 'cV[R]_N) :
   cV_inner v w = \sum_i v i ord0 * w i ord0.
 Proof. by rewrite /cV_inner mxE; apply: eq_bigr => i _; rewrite mxE. Qed.
 
+(** cV_inner_sym — column-vector inner product is symmetric.
+    Kind: helper.
+    Used by: downstream norm manipulations where commutativity is invoked.
+*)
 Lemma cV_inner_sym (v w : 'cV[R]_N) : cV_inner v w = cV_inner w v.
 Proof.
 rewrite !cV_innerE.
 by apply: eq_bigr => i _; rewrite mulrC.
 Qed.
 
+(** cV_inner_ge0 — self inner product is non-negative.
+    Kind: helper.
+    Used by: Cauchy--Schwarz and spectral bounds in this file.
+*)
 Lemma cV_inner_ge0 (v : 'cV[R]_N) : 0 <= cV_inner v v.
 Proof. rewrite cV_innerE; apply: sumr_ge0 => i _; rewrite -expr2; exact: sqr_ge0. Qed.
 
+(** cV_inner_self_sum — self inner product equals the sum of squared coordinates.
+    Kind: helper.
+    Why: expresses ||v||^2 as a plain coordinate sum, needed to compare against vec_norm2.
+    Used by: vec_norm2 identities and norm-squared bound derivations.
+*)
 Lemma cV_inner_self_sum (v : 'cV[R]_N) :
   cV_inner v v = \sum_i (v i ord0) ^+ 2.
 Proof. by rewrite cV_innerE; apply: eq_bigr => i _; rewrite expr2. Qed.
@@ -175,6 +193,11 @@ rewrite /cV_inner trmx_mul.
 by rewrite !mulmxA.
 Qed.
 
+(** cV_inner_Qv_Qv_symm — for symmetric Q, ||Qv||^2 equals v^T Q^2 v.
+    Kind: helper.
+    Why: exploits Q^T = Q to collapse Q^T Q to Q^2 in the quadratic form, used in spectral bound derivations.
+    Used by: symm_ds_step_norm_sq_bound and other symmetric-Q bounds.
+*)
 Lemma cV_inner_Qv_Qv_symm (Q : 'M[R]_N) (v : 'cV[R]_N) :
   Q^T = Q ->
   cV_inner (Q *m v) (Q *m v) = (v^T *m (Q *m Q) *m v) ord0 ord0.
@@ -224,7 +247,13 @@ Hypothesis rayleigh_Qsq :
 
 Hypothesis Q_symm : Q^T = Q.
 
-(* Step 1: <Q v, Q v> <= alpha^2 * <v, v> for v in 1-perp. *)
+(** symm_ds_step_norm_sq_bound — one-step Rayleigh bound: <Qv,Qv> <= alpha^2 <v,v> on the 1-perp subspace.
+    Kind: helper.
+    Why: single-step spectral contraction on the mean-zero subspace used to seed the iterated bound.
+    Used by: symm_ds_power_norm_sq_bound.
+    Naming: five components capture subject (symm_ds) / granularity (step) / quantity (norm_sq) / direction (bound); shorter names conflict with the iterated variant below.
+    Step 1: <Q v, Q v> <= alpha^2 * <v, v> for v in 1-perp.
+*)
 Lemma symm_ds_step_norm_sq_bound (v : 'cV[R]_N) :
   \sum_i v i ord0 = 0 ->
   cV_inner (Q *m v) (Q *m v) <= alpha ^+ 2 * cV_inner v v.
@@ -234,7 +263,13 @@ rewrite cV_inner_Qv_Qv_symm //.
 exact: rayleigh_Qsq.
 Qed.
 
-(* Iterated power: <Q^L v, Q^L v> <= alpha^{2L} * <v, v> for v in 1-perp. *)
+(** symm_ds_power_norm_sq_bound — iterated Rayleigh bound: <Q^L v, Q^L v> <= alpha^{2L} <v,v> on 1-perp.
+    Kind: helper.
+    Why: the L-iterated spectral contraction; follows symm_ds_step_norm_sq_bound by induction on L.
+    Used by: symm_ds_power_norm2_bound and symm_ds_TV_bound_cV.
+    Naming: parallels symm_ds_step_norm_sq_bound; the power variant is explicitly tagged.
+    Iterated power: <Q^L v, Q^L v> <= alpha^{2L} * <v, v> for v in 1-perp.
+*)
 Lemma symm_ds_power_norm_sq_bound (L : nat) (v : 'cV[R]_N) :
   \sum_i v i ord0 = 0 ->
   cV_inner (Q ^+ L *m v) (Q ^+ L *m v) <= alpha ^+ (2 * L) * cV_inner v v.
@@ -324,6 +359,11 @@ Qed.
 (* The point mass e_s. *)
 Definition e_cV (s : 'I_N) : 'cV[R]_N := \col_i (i == s)%:R.
 
+(** e_cV_sum — coordinates of a point-mass column vector sum to 1.
+    Kind: helper.
+    Why: records that the indicator column e_s is a probability vector.
+    Used by: symm_ds_TV_bound_cV, where the mean-zero witness is e_s - U.
+*)
 Lemma e_cV_sum (s : 'I_N) : \sum_i (e_cV s) i ord0 = 1.
 Proof.
 rewrite /e_cV.
@@ -331,6 +371,11 @@ under eq_bigr do rewrite mxE.
 by rewrite (bigD1 s)//= eqxx big1 ?addr0// => j /negPf->.
 Qed.
 
+(** uniform_cV_sum — coordinates of the uniform column vector sum to 1.
+    Kind: helper.
+    Why: records that the uniform column is itself a probability vector.
+    Used by: mean-zero witnessing for e_s - U in the Rayleigh bound pipeline.
+*)
 Lemma uniform_cV_sum : \sum_i uniform_cV i ord0 = 1.
 Proof.
 rewrite /uniform_cV.
@@ -376,6 +421,11 @@ rewrite addr0 /= mul1r mulr2n.
 by rewrite -addrA -[_ - _ + _]addrA addNr addr0.
 Qed.
 
+(** es_minus_U_norm_sq_le1 — ||e_s - U||^2 is at most 1.
+    Kind: helper.
+    Why: bounds the norm of the point-mass mean-zero witness used in the spectral-to-TV conversion.
+    Used by: symm_ds_TV_bound_cV.
+*)
 Lemma es_minus_U_norm_sq_le1 (s : 'I_N) :
   cV_inner (e_cV s - uniform_cV) (e_cV s - uniform_cV) <= 1.
 Proof.
@@ -386,10 +436,21 @@ Qed.
 (* The L^2 norm of a column vector. *)
 Definition vec_norm2 (v : 'cV[R]_N) : R := Num.sqrt (cV_inner v v).
 
+(** vec_norm2_ge0 — the L^2 norm is non-negative.
+    Kind: helper.
+    Why: sanitises sqrt-based norms for downstream algebraic manipulations.
+    Used by: symm_ds_power_norm2_bound and sqrt-based spectral derivations.
+*)
 Lemma vec_norm2_ge0 (v : 'cV[R]_N) : 0 <= vec_norm2 v.
 Proof. exact: sqrtr_ge0. Qed.
 
-(* Task 1: sqrt of the power norm bound. *)
+(** symm_ds_power_norm2_bound — ||Q^L v|| <= alpha^L ||v|| on the 1-perp subspace.
+    Kind: helper.
+    Why: the sqrt form of symm_ds_power_norm_sq_bound, directly usable in Cauchy--Schwarz arguments.
+    Used by: symm_ds_TV_bound_cV.
+    Naming: five components match the sibling symm_ds_power_norm_sq_bound; "norm2" disambiguates from "norm_sq".
+    Task 1: sqrt of the power norm bound.
+*)
 Lemma symm_ds_power_norm2_bound (L : nat) (v : 'cV[R]_N) :
   \sum_i v i ord0 = 0 ->
   vec_norm2 (Q ^+ L *m v) <= alpha ^+ L * vec_norm2 v.
@@ -531,7 +592,13 @@ apply: eq_card => k; rewrite !inE.
 exact: Heq.
 Qed.
 
-(* Task 4: column sum equals 1, completing doubly stochastic. *)
+(** schreier_transition_doubly_stochastic_col — column sums of the Schreier transition matrix equal 1.
+    Kind: helper.
+    Why: combined with the row-sum version this yields double stochasticity, required for the symmetric spectral argument.
+    Used by: symm_ds_TV_bound.
+    Naming: five components capture subject (schreier_transition) / property (doubly_stochastic) / axis (col); renaming would lose parallel structure with the row variant.
+    Task 4: column sum equals 1, completing doubly stochastic.
+*)
 Lemma schreier_transition_doubly_stochastic_col (j : 'I_N) :
   \sum_i schreier_transition R sigmas i j = 1.
 Proof.
@@ -594,6 +661,10 @@ Variable sigmas : Tg.-tuple {perm 'I_N}.
 Hypothesis sigmas_invol :
   forall k : 'I_Tg, (tnth sigmas k * tnth sigmas k)%g = 1%g.
 
+(** symm_ds_TV_bound — TV bound between iterated Schreier transition from e_s and uniform, in terms of the spectral constant alpha.
+    Kind: main.
+    Why: headline spectral-mixing result for the symmetric doubly-stochastic transition kernel.
+*)
 Lemma symm_ds_TV_bound (alpha : R) (L : nat) (s : 'I_N) :
   0 <= alpha ->
   alpha <= 1 ->
