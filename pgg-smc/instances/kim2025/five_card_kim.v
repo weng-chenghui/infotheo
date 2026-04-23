@@ -160,6 +160,10 @@ Definition kim_weight_fun : {ffun 'I_5 -> R} :=
     if val k == 0%N then 5%:R^-1 - eps
     else 5%:R^-1 + eps / 4%:R].
 
+(** kim_weight_gt0 — the Kim weight function is strictly positive.
+    Kind: helper.
+    Why: strict positivity discharges the support hypothesis in the fdist lift.
+    Used by: [kim_weight_ge0] and the downstream fdist construction. *)
 Lemma kim_weight_gt0 (k : 'I_5) : 0 < kim_weight_fun k.
 Proof.
 rewrite ffunE.
@@ -174,9 +178,17 @@ case: ifP => Hk.
   by rewrite -(subrr (5%:R^-1)) ltrD2l.
 Qed.
 
+(** kim_weight_ge0 — the Kim weight function is non-negative.
+    Kind: helper.
+    Why: non-negativity is required for the fdist construction.
+    Used by: the fdist construction for the Kim five-card instance. *)
 Lemma kim_weight_ge0 : forall k : 'I_5, 0 <= kim_weight_fun k.
 Proof. by move=> k; exact: Order.POrderTheory.ltW (kim_weight_gt0 k). Qed.
 
+(** kim_weight_sum1 — the perturbed Kim weight vector sums to one.
+    Kind: helper.
+    Why: required to build a Kim-weighted fdist from [kim_weight_fun].
+    Used by: the fdist construction for the Kim five-card instance. *)
 Lemma kim_weight_sum1 : \sum_(k in 'I_5) kim_weight_fun k = 1.
 Proof.
 rewrite big_ord_recr /= big_ord_recr /= big_ord_recr /=
@@ -211,9 +223,18 @@ have -> : 5%:R^-1 + (5%:R^-1 + (5%:R^-1 + (5%:R^-1 + 5%:R^-1))) =
 by rewrite -[5%:R^-1 *+ 5]mulr_natl divff // pnatr_eq0.
 Qed.
 
+(** kim_weight_dist — fdist on 'I_5 packaging the weight function kim_weight_fun.
+    Kind: instance.
+    Why: Builds the probability distribution W used in the weighted Schreier analysis of Kim's trick.
+*)
 Definition kim_weight_dist : R.-fdist 'I_5 :=
   FDist.make kim_weight_ge0 kim_weight_sum1.
 
+(** kim_weight_distE — evaluation of kim_weight_dist on k gives the branch 5^-1 +/- (eps, eps/4).
+    Kind: helper.
+    Why: Rewrite lemma that replaces the FDist.make wrapper with the explicit case-analysis form.
+    Used by: fc_kim_schreier_diag, fc_kim_schreier_offdiag.
+*)
 Lemma kim_weight_distE (k : 'I_5) :
   kim_weight_dist k =
   if val k == 0%N then 5%:R^-1 - eps else 5%:R^-1 + eps / 4%:R.
@@ -348,9 +369,19 @@ Let W := kim_weight_dist eps_lt eps_gt.
 (** Second-largest eigenvalue modulus *)
 Definition kim_slev : R := 5%:R / 4%:R * `|eps|.
 
+(** kim_slev_ge0 — the second-largest eigenvalue modulus is non-negative.
+    Kind: helper.
+    Why: Non-negativity feeding kim_spectral_gap_le1.
+    Used by: kim_spectral_gap_le1.
+*)
 Lemma kim_slev_ge0 : 0 <= kim_slev.
 Proof. by rewrite /kim_slev mulr_ge0 // ?divr_ge0 // normr_ge0. Qed.
 
+(** kim_slev_lt1 — the second-largest eigenvalue modulus is strictly below 1.
+    Kind: helper.
+    Why: Ensures a strictly positive spectral gap; uses eps_spectral hypothesis.
+    Used by: kim_spectral_gap_pos.
+*)
 Lemma kim_slev_lt1 : kim_slev < 1.
 Proof.
 rewrite /kim_slev.
@@ -364,9 +395,19 @@ Qed.
 (** Spectral gap *)
 Definition kim_spectral_gap : R := 1 - kim_slev.
 
+(** kim_spectral_gap_pos — the spectral gap is strictly positive.
+    Kind: helper.
+    Why: Gap positivity input to the WeightedSchreierCertificate constructor; follows from kim_slev < 1.
+    Used by: fc_kim_wsc, fc_kim_asymptotic.
+*)
 Lemma kim_spectral_gap_pos : 0 < kim_spectral_gap.
 Proof. by rewrite /kim_spectral_gap subr_gt0; exact: kim_slev_lt1. Qed.
 
+(** kim_spectral_gap_le1 — the spectral gap is at most 1.
+    Kind: helper.
+    Why: Gap upper-bound input to the WeightedSchreierCertificate constructor.
+    Used by: fc_kim_wsc, fc_kim_asymptotic.
+*)
 Lemma kim_spectral_gap_le1 : kim_spectral_gap <= 1.
 Proof. by rewrite /kim_spectral_gap lerBlDr lerDl; exact: kim_slev_ge0. Qed.
 
@@ -477,12 +518,22 @@ Definition fc_kim_security_witness (L : nat) :
 Lemma kim_slev_at_zero : eps = 0 -> kim_slev = 0.
 Proof. by move=> H0; rewrite /kim_slev H0 normr0 mulr0. Qed.
 
+(** kim_bound_at_zero — at eps = 0 any positive power of kim_slev is zero.
+    Kind: helper.
+    Why: Intermediate step feeding kim_security_at_zero.
+    Used by: kim_security_at_zero.
+*)
 Lemma kim_bound_at_zero (L : nat) :
   eps = 0 -> kim_slev ^+ L.+1 = 0.
 Proof.
 by move=> H0; rewrite kim_slev_at_zero // expr0n.
 Qed.
 
+(** kim_security_at_zero — at eps = 0 the security bound collapses to zero for any positive word length.
+    Kind: helper.
+    Why: Degenerate limit check: unbiased weights recover the uniform-dealing regime.
+    Used by: downstream sanity checks of Kim's instance.
+*)
 Lemma kim_security_at_zero (L : nat) :
   eps = 0 -> Num.sqrt 5%:R * kim_slev ^+ L.+1 = 0.
 Proof. by move=> H0; rewrite kim_bound_at_zero // mulr0. Qed.

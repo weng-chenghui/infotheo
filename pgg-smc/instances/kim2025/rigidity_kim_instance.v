@@ -86,9 +86,13 @@ Lemma kim_genus0_automorphism :
   genus0_automorphism_bound M_kim (cs_data kim_covering).
 Proof. move=> _; exact: kim_genus0_pgl. Qed.
 
+(** kim_threshold_witness — threshold-covering witness for the Kim instance.
+    Kind: instance. *)
 Definition kim_threshold_witness : ThresholdWitness M_kim :=
   @MkThresholdWitness M_kim kim_covering kim_genus0_automorphism.
 
+(** kim_rigidity — algebraic rigidity record for the Kim instance.
+    Kind: instance. *)
 Definition kim_rigidity (L : nat) : AlgebraicRigidity R M_kim :=
   @MkAlgebraicRigidity R M_kim
     (@fc_kim_security_witness R eps eps_lt eps_gt eps_spectral L)
@@ -100,6 +104,9 @@ Lemma kim_complexity (L : nat) :
   (@search_space M_kim L <= #|pgg_G M_kim|)%N.
 Proof. exact: search_space_leG. Qed.
 
+(** kim_tradeoff — security/complexity trade-off for the Kim instance.
+    Kind: main.
+    Why: specialises the generic [security_threshold_tradeoff] to Kim. *)
 Lemma kim_tradeoff (L : nat) :
   let cs := tw_covering (ar_threshold (kim_rigidity L)) in
   (cd_genus (cs_data cs) = 0 /\
