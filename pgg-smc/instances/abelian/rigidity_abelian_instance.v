@@ -61,10 +61,18 @@ Definition abel_s1 : {perm 'I_4} :=
   tperm (Ordinal (n:=4) (isT : (0 < 4)%N))
         (Ordinal (n:=4) (isT : (1 < 4)%N)).
 
+(** abel_s2 — second generator (2 3), a transposition of sheets 2 and 3.
+    Kind: instance.
+    Why: One of the two commuting generators exhibiting the Z/2 x Z/2 action on 4 sheets.
+*)
 Definition abel_s2 : {perm 'I_4} :=
   tperm (Ordinal (n:=4) (isT : (2 < 4)%N))
         (Ordinal (n:=4) (isT : (3 < 4)%N)).
 
+(** abel_sigmas — 2-tuple of generators (0 1) and (2 3) for the abelian 4-sheet instance.
+    Kind: instance.
+    Why: Generator tuple feeding Gen_PGGTypes 1 2 to build the concrete abelian PGG.
+*)
 Definition abel_sigmas : 2.-tuple {perm 'I_4} :=
   [tuple abel_s1; abel_s2].
 
@@ -77,6 +85,11 @@ have := congr1 (fun sigma : {perm 'I_4} =>
 by rewrite /abel_s1 tpermL /abel_s2 tpermD.
 Qed.
 
+(** abel_sigmas_distinct — the two disjoint-transposition generators give an injective tuple-lookup.
+    Kind: helper.
+    Why: Feeds gen_inj_weval_inj1 to conclude word-evaluation injectivity at L=1.
+    Used by: abel_weval_inj1.
+*)
 Lemma abel_sigmas_distinct :
   injective (fun i : 'I_2 => tnth abel_sigmas i).
 Proof.
@@ -124,6 +137,11 @@ case: i => [[|[|i]] Hi]; case: j => [[|[|j]] Hj] //=;
   by have := congr1 val Hf; rewrite !permE.
 Qed.
 
+(** abel_security_witness_direct_1 — direct (non-DPI) SecurityWitness at L=1 for the abelian instance.
+    Kind: instance.
+    Why: Uses endpoint-injectivity to give a tighter epsilon than the generic DPI bound (44/24) for the disjoint-transposition case.
+    Naming: "direct" contrasts with the DPI-mediated construction and "1" marks the word length L=1 regime; both qualifiers are content-bearing and not redundant kind-suffixes.
+*)
 Definition abel_security_witness_direct_1 : SecurityWitness R R_abel :=
   security_witness_endpoint_inj R abel_weval_inj1 abel_perm_endpoint_inj1.
 
@@ -168,9 +186,17 @@ Definition abel_covering : CoveringScheme R_abel :=
 Hypothesis abel_genus0_pgl :
   (#|pgg_G R_abel| <= pgl_bound R_abel)%N.
 
+(** abel_threshold_witness — ThresholdWitness for the abelian instance using the genus-0 RS covering.
+    Kind: instance.
+    Why: Provides the threshold half of the AlgebraicRigidity pair via a covering plus the PGL collusion bound.
+*)
 Definition abel_threshold_witness : ThresholdWitness R_abel :=
   @MkThresholdWitness R_abel abel_covering (fun _ => abel_genus0_pgl).
 
+(** abel_rigidity — AlgebraicRigidity instance for the disjoint-transpositions abelian example.
+    Kind: instance.
+    Why: Bundles the direct endpoint SecurityWitness with the genus-0 ThresholdWitness to exhibit a concrete rigidity certificate for the abelian case.
+*)
 Definition abel_rigidity : AlgebraicRigidity R R_abel :=
   @MkAlgebraicRigidity R R_abel
     (abel_security_witness_direct_1 R)
@@ -182,6 +208,10 @@ Lemma abel_complexity (L : nat) :
   (@search_space R_abel L <= #|pgg_G R_abel|)%N.
 Proof. exact: search_space_leG. Qed.
 
+(** abel_tradeoff — covering-scheme tradeoff for the abelian instance: either genus 0 with T <= k and collusion bound, or positive genus with extended T <= k + 2g.
+    Kind: main.
+    Why: Instantiates the generic security_threshold_tradeoff for the abelian example so it can be quoted directly.
+*)
 Lemma abel_tradeoff :
   let cs := tw_covering (ar_threshold abel_rigidity) in
   (cd_genus (cs_data cs) = 0 /\
