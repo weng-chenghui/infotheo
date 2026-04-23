@@ -86,10 +86,18 @@ Definition PGGInit {party n env} (x : data) (p : @sproc pgg_dtype data party n e
     : @sproc pgg_dtype data party n.+1 env :=
   SInit x p.
 
+(** PGGRet — session-typed return: deliver final data [x] then end.
+    Kind: interface.
+    Why: wraps [SRet] so callers need not instantiate [sproc] arguments manually.
+*)
 Definition PGGRet {party : nat} (x : data)
     : @sproc pgg_dtype data party 2 senv_end :=
   SRet x.
 
+(** PGGFinish — session-typed terminal state with an empty environment.
+    Kind: interface.
+    Why: wraps [SFinish] so PGG protocol programs can close uniformly.
+*)
 Definition PGGFinish {party : nat}
     : @sproc pgg_dtype data party 1 senv_end :=
   SFinish.
