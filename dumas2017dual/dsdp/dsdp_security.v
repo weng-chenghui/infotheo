@@ -3,7 +3,8 @@ From mathcomp Require Import all_boot all_order all_algebra fingroup finalg matr
 From mathcomp Require Import ring boolp finmap matrix lra reals.
 Require Import rouche_capelli.
 Require Import realType_ext realType_ln ssr_ext ssralg_ext bigop_ext fdist.
-Require Import proba jfdist_cond entropy graphoid smc_interpreter spp_proba.
+Require Import proba jfdist_cond entropy graphoid smc_interpreter spp_proba bayes.
+Import BN.
 Require Import homomorphic_encryption.
 Require Import extra_algebra extra_proba extra_entropy.
 Require Import dsdp_program dsdp_entropy.
@@ -130,6 +131,7 @@ Hypothesis E_enc_unif : forall (T0 : finType) (P0 : R.-fdist T0)
   (card_A : #|A| = n.+1),
   `p_X = fdist_uniform (card_enc_for' p card_A).
 
+(* Remove this since we only need to assume for some enc RVs they are inde (and it is unsound). *)
 Hypothesis E_enc_inde : forall (A B : finType) (p : party_id)
   (X : {RV P -> p.-enc A}) (Y : {RV P -> B}),
   P |= X _|_ Y.
@@ -157,6 +159,8 @@ Hypothesis constraint_holds :
 (* U3 must be coprime to m for invertibility in Z/pqZ *)
 Hypothesis U3_coprime_m : forall t, coprime (val (U3 t)) m.
 
+(* Assume V2, V3 inde & uniform and prove the combined RV is uniform. *)
+
 (* Cryptographic assumptions for DSDP security:
    1. VarRV = (V2, V3) is uniformly distributed over msg × msg
    2. VarRV is independent of the inputs (V1, U1, U2, U3)
@@ -170,24 +174,6 @@ Hypothesis VarRV_indep_inputs : P |= [%V1, U1, U2, U3] _|_ VarRV.
 (* Additional hypotheses for joint_centropy_reduction *)
 Let Dec_view : {RV P -> (alice_inputsT * msg)} :=
   [% Dk_a, S, V1, U1, U2, U3, R2, R3].
-
-Hypothesis Pr_AliceView_neq0 :
-  forall
-    (x : alice_inputsT * msg * Alice.-enc msg * Charlie.-enc msg)
-    (e : Bob.-enc msg),
-  `Pr[ [% Dec_view, E_alice_d3, E_charlie_v3, E_bob_v2] = (x, e) ] != 0.
-
-Hypothesis Pr_Eqn1View_neq0 :
-  forall
-    (x : alice_inputsT * msg * Alice.-enc msg)
-    (e : Charlie.-enc msg),
-  `Pr[ [% Dec_view, E_alice_d3, E_charlie_v3] = (x, e) ] != 0.
-
-Hypothesis Pr_Eqn2View_neq0 :
-  forall
-    (x : (alice_inputsT * msg))
-    (e : Alice.-enc msg),
-  `Pr[ [% Dec_view, E_alice_d3] = (x, e) ] != 0.
 
 Hypothesis cinde_V2V3 :
   P |= [% Dk_a, R2, R3] _|_ [% V2, V3] | [% V1, U1, U2, U3, S].
@@ -208,11 +194,20 @@ Hypothesis V3_determined :
 Hypothesis U3_pos : forall t, (0 < val (U3 t))%N.
 Hypothesis U3_lt_minpq : forall t, (val (U3 t) < minn p q)%N.
 
-(* Hypothesis for malicious adversary analysis:
-   If A is const-RV actually P |= A _|_ A. But in the DSDP setting, 
-   we don't have such RVs. *)
-Hypothesis neg_self_indep : forall (TA : finType)
-  (A : {RV P -> TA}), ~ P |= A _|_ A.
+Lemma neg_self_inde (TA : finType) (A : {RV P -> TA}) :
+  (forall (a : TA), `Pr[A = a] != 1) -> ~ P |= A _|_ A.
+Proof.
+move=> PrA_neq1 H_indep.
+(* To get `a` and `Ha` *)
+case/set0Pn: (fdist_supp_neq0 `p_A) => a; rewrite inE dist_of_RVE => Ha.
+have Hpr : `Pr[A = a] = `Pr[A = a] * `Pr[A = a].
+  rewrite -[LHS]pfwd1_diag.
+  exact: H_indep.
+(* Rxx2 turns x = x * x to x = 1 or x = 0 *)
+case: (Rxx2 Hpr) => Heq.
+- by rewrite Heq eqxx in Ha.
+- by have := PrA_neq1 a; rewrite Heq eqxx.
+Qed.
 
 (* Core entropy bound: H((V2,V3) | constraint view) = log(m).
    Instantiates the general DSDP entropy analysis with security hypotheses.
@@ -268,9 +263,20 @@ Theorem dsdp_entropic_security :
 Proof.
 (* Proof chain: H(V2|AliceView) = H(V2|CondRV) = H([V2,V3]|CondRV) = log(m) *)
 have H_v2_logm: `H(V2 | AliceView) = log (m%:R : R).
-  (* Use alice_view_to_cond from dsdp_entropy.v with the record *)
-  rewrite (alice_view_to_cond E_enc_unif E_enc_inde Pr_AliceView_neq0 Pr_Eqn1View_neq0
-            Pr_Eqn2View_neq0 (decomposition cinde_V2V3)).
+  (* Use alice_view_to_cond from dsdp_entropy.v with the record.
+     `alice_view_to_cond` expects independence hypotheses with the encryption
+     RV on the RIGHT of `_|_`, but our `E_enc_inde` produces it on the LEFT.
+     We flip each one with `inde_RV_sym`. *)
+  have Hinde_bob : P |= [% [% Dk_a, S, V1, U1, U2, U3, R2, R3, E_alice_d3,
+                        E_charlie_v3], V2] _|_ E_bob_v2.
+    by apply/inde_RV_sym; apply: E_enc_inde.
+  have Hinde_charlie : P |= [% [% Dk_a, S, V1, U1, U2, U3, R2, R3, E_alice_d3], V2]
+                         _|_ E_charlie_v3.
+    by apply/inde_RV_sym; apply: E_enc_inde.
+  have Hinde_alice : P |= [% [% Dk_a, S, V1, U1, U2, U3, R2, R3], V2] _|_ E_alice_d3.
+    by apply/inde_RV_sym; apply: E_enc_inde.
+  rewrite (alice_view_to_cond Hinde_bob Hinde_charlie Hinde_alice
+             (decomposition cinde_V2V3)).
   rewrite -V3_determined_centropy_v2_local.
   exact: dsdp_constraint_centropy_eqlogm.
 split.
@@ -378,10 +384,22 @@ Theorem US_compromised_leaks_V2 :
   US = ConstUS -> ~ `H(V2 | AliceView ) = `H `p_V2.
 Proof.
 move => H.
-(* From alice_view to [% Alice_input_view, S] - strip encryption terms *)
-rewrite (E_enc_ce_contract E_enc_unif E_enc_inde V2 card_msg); last exact: Pr_AliceView_neq0.
-rewrite (E_enc_ce_contract E_enc_unif E_enc_inde V2 card_msg); last exact: Pr_Eqn1View_neq0.
-rewrite (E_enc_ce_contract E_enc_unif E_enc_inde V2 card_msg); last exact: Pr_Eqn2View_neq0.
+(* From alice_view to [% Alice_input_view, S] - strip encryption terms.
+   `E_enc_ce_contract` expects the encryption RV on the RIGHT of `_|_`, but
+   `E_enc_inde` produces it on the LEFT — flip each hypothesis with
+   `inde_RV_sym`. The order of the three peels matches the rightmost-first
+   shape of AliceView (Bob's V2 first, then Charlie's V3, then Alice's D3). *)
+have Hinde_bob : P |= [% [% Dk_a, S, V1, U1, U2, U3, R2, R3, E_alice_d3,
+                      E_charlie_v3], V2] _|_ E_bob_v2.
+  by apply/inde_RV_sym; apply: E_enc_inde.
+have Hinde_charlie : P |= [% [% Dk_a, S, V1, U1, U2, U3, R2, R3, E_alice_d3], V2]
+                       _|_ E_charlie_v3.
+  by apply/inde_RV_sym; apply: E_enc_inde.
+have Hinde_alice : P |= [% [% Dk_a, S, V1, U1, U2, U3, R2, R3], V2] _|_ E_alice_d3.
+  by apply/inde_RV_sym; apply: E_enc_inde.
+rewrite (E_enc_ce_contract Hinde_bob card_msg).
+rewrite (E_enc_ce_contract Hinde_charlie card_msg).
+rewrite (E_enc_ce_contract Hinde_alice card_msg).
 pose h := (fun o : (Alice.-key Dec msg * msg *
   msg * msg * msg * msg * msg * msg) =>
   let '(dk_a, s, v1, u1, u2, u3, r2, r3) := o in
@@ -414,7 +432,12 @@ have -> : z `o [% AliceInputsView, V2 \+ VU1] = V2.
   by ring.
 have -> : idfun `o V2 = V2.
   by apply: boolp.funext => i.
-exact: neg_self_indep.
+(* Discharge `neg_self_inde`'s precondition `forall a, Pr[V2 = a] != 1`.
+   V2 is uniform over msg of size m = p*q > 1, so each Pr[V2 = a] = 1/m != 1. *)
+apply: neg_self_inde => v2.
+rewrite -dist_of_RVE (dsdp_entropy.pV2_unif inputs) fdist_uniformE.
+rewrite card_msg invr_eq1 pnatr_eq1.
+by apply: contraTneq m_gt1 => ->.
 Qed.
 
 End malicious_adversary_case_analysis.
