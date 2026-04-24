@@ -295,32 +295,21 @@ Hypothesis E_enc_inde : forall (A B : finType) (p : party_id)
 *)
 Lemma E_enc_ce_contract (A B C : finType) (p : party_id)
   (X : {RV P -> A})(E : {RV P -> p.-enc B})(Z : {RV P -> C})(n : nat):
-  #|B| = n.+1 -> (forall x e, `Pr[ [%X, E] = (x, e)] != 0) ->
+  P |= [%X, Z] _|_ E ->
+  #|B| = n.+1 ->
   `H(Z | [%X, E]) = `H(Z | X).
 Proof.
-move => card_B XE_neq0.
-have HindeX_E : P |= X _|_ E.
-  rewrite inde_RV_sym.
-  exact: (E_enc_inde E X).
-have Hunif : `p_ E = fdist_uniform (card_enc_for' p card_B).
-  exact: (E_enc_unif E card_B).
-have HindeXZ_E : P |= [%X, Z] _|_ E.
-  rewrite inde_RV_sym.
-  exact: (E_enc_inde E [%X, Z]).
+move=> HindeXZ_E card_B.
 apply (cpr_centropy (Y2:=X)(Y3:=E)) => c a b.
-have Hpr : `Pr[ Z = c | [%X, E] = (a, b)] = `Pr[ Z = c | X = a].
-  have HindeZ_X : P |= E _|_ [%Z, X].
-    exact: (E_enc_inde E [%Z, X]).
-  rewrite inde_RV_sym in HindeZ_X.
-  have H:=(inde_RV2_cinde (X:=Z)(Y:=E)(Z:=X) HindeZ_X).
-  pose proof XE_neq0 as EX_neq0.
-  move/(_ a b) in EX_neq0. (* Specialize forall...*)
-  rewrite pfwd1_pairC in EX_neq0.
-  have H2:= (cinde_alt c H EX_neq0).
-  rewrite cpr_eq_pairCr.
-  exact: H2.
-move => ?.
-exact: Hpr.
+move=> XEab_neq0.
+have HindeZX_E : P |= [%Z, X] _|_ E.
+  exact: (inde_RV_comp (fun p => (p.2, p.1)) idfun HindeXZ_E).
+have HindeZE_X : Z _|_ E | X.
+  exact: (inde_RV2_cinde HindeZX_E).
+rewrite pfwd1_pairC in XEab_neq0.
+have H2 := (cinde_alt c HindeZE_X XEab_neq0).
+rewrite cpr_eq_pairCr.
+exact: H2.
 Qed.
 
 End enc_lemmas.
