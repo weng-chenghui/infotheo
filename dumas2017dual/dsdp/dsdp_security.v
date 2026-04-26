@@ -1713,7 +1713,8 @@ Theorem enc_ce_contract_ind {C : finType} (Z : {RV P -> C}) (target : R)
   enc_contractible Z target View -> `H(Z | View) = target.
 Proof.
 elim => [A' X -> // | A' B pty X E n _ IH card_B Hpr].
-by rewrite (E_enc_ce_contract E_enc_unif E_enc_inde Z card_B Hpr).
+have HE : P |= [% X, Z] _|_ E by apply/inde_RV_sym; apply: E_enc_inde.
+by rewrite (E_enc_ce_contract HE card_B).
 Qed.
 
 End enc_contraction_n.
