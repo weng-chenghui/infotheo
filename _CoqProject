@@ -176,6 +176,7 @@ pgg-smc/reconstruct/pgg_sharing_framework.v
 pgg-smc/reconstruct/massey.v
 pgg-smc/reconstruct/lagrange.v
 pgg-smc/reconstruct/covering_scheme.v
+pgg-smc/reconstruct/curve_realisation.v
 pgg-smc/reconstruct/rs_privacy.v
 pgg-smc/reconstruct/rs_massey_bridge.v
 pgg-smc/reconstruct/ag_code.v
