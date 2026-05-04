@@ -12,7 +12,7 @@
 (*   The reconstruction correctness theorem and the security-threshold        *)
 (*   tradeoff (in cover_tradeoff.v) depend only on three properties of the   *)
 (*   sharing scheme: correctness (ts_correct), privacy (ts_private), and     *)
-(*   compatibility with monodromy (ts_perm_compatible). These properties     *)
+(*   compatibility with monodromy (ts_recon_perm_invariant). These properties     *)
 (*   hold for any AG code on any curve of any genus, so the proofs are       *)
 (*   parametric in ThresholdScheme. Concrete curve arithmetic is unnecessary.*)
 (*                                                                            *)
@@ -23,7 +23,7 @@
 (*     - correctness and privacy axioms                                        *)
 (*                                                                            *)
 (* Section 2 -- Compatibility:                                                *)
-(*   ts_perm_compatible perm ts == reordering dealt hands by perm g preserves*)
+(*   ts_recon_perm_invariant perm ts == reordering dealt hands by perm g preserves*)
 (*     reconstruction. Satisfiable for monodromy groups (coordinate perm).   *)
 (*                                                                            *)
 (* Section 3 -- Sum-mod-N instance:                                           *)
@@ -111,10 +111,18 @@ Variable ts : ThresholdScheme secretT shareT.
 
 Let T := (ts_T' ts).+1.
 
-(* Coordinate-permutation compatibility: reordering shares by perm g
-   preserves reconstruction. This IS satisfiable for monodromy groups,
-   unlike value-transformation compatibility (which is not). *)
-Definition ts_perm_compatible (perm : gT -> {perm 'I_T}) : Prop :=
+(** ts_recon_perm_invariant — reconstruction is invariant under a permutation
+    of the share-tuple positions induced by the group element [g].
+    Kind: interface.
+    Why: the framework-level perm-equivariance contract that connects abstract
+    threshold schemes to monodromy actions; satisfiable for monodromy groups
+    via coordinate permutation, unlike value-transformation compatibility
+    (which is not).
+    Used by: [cs_recon_invariant] field of [CoveringScheme] and the per-instance
+    perm-compatibility lemmas (e.g. [s5x5_perm_compatible],
+    [product_sum_mod_perm_compatible], [massey_perm_compatible],
+    [transport_perm_compatible]). *)
+Definition ts_recon_perm_invariant (perm : gT -> {perm 'I_T}) : Prop :=
   forall (g : gT) (s : secretT) (shares : T.-tuple shareT),
     g \in G ->
     ts_valid ts s shares ->
@@ -122,7 +130,7 @@ Definition ts_perm_compatible (perm : gT -> {perm 'I_T}) : Prop :=
 
 End compatibility.
 
-Arguments ts_perm_compatible {gT G secretT shareT}.
+Arguments ts_recon_perm_invariant {gT G secretT shareT}.
 
 (******************************************************************************)
 (*     Section 3: Sum-mod-N Instance                                          *)
@@ -276,7 +284,7 @@ Lemma pgg_hidden_invariant_perm (s : 'I_N) (P : gT)
                           tnth (cast_tuple (esym (congr1 S HT)) starts) (perm g i)) :
   P \in pgg_G M ->
   ts_valid ts s (cast_tuple (esym (congr1 S HT)) starts) ->
-  @ts_perm_compatible gT (pgg_G M) _ _ ts perm ->
+  @ts_recon_perm_invariant gT (pgg_G M) _ _ ts perm ->
   pgg_recon_endpoints P = s.
 Proof.
 move=> PG Hvalid Hperm.

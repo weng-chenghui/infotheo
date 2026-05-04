@@ -14,7 +14,7 @@
 (*   1. ev_encode — evaluation structure (function space representation)     *)
 (*   2. dual_ev_encode — dual evaluation encoding (proves dual_min_dist)    *)
 (*   3. sigma_code + sigma_fix0 + code_auto — code automorphisms (Tier 2) *)
-(*      (ts_perm_compatible is now DERIVED via massey_perm_compatible)      *)
+(*      (ts_recon_perm_invariant is now DERIVED via massey_perm_compatible)      *)
 (*                                                                            *)
 (*   genus1_data       == CoveringData with genus 1, base P^1                *)
 (*   genus1_covering   == CoveringScheme with (k, k+2)-threshold             *)
@@ -233,7 +233,7 @@ Proof. exact: ts1_gap. Qed.
 (* Coordinate-permutation compatibility: derived from code automorphisms.
    sigma_code_ec maps monodromy elements to column permutations of the AG code
    that fix position 0 (the secret). massey_perm_compatible +
-   transport_perm_compatible derive ts_perm_compatible from these. *)
+   transport_perm_compatible derive ts_recon_perm_invariant from these. *)
 Variable sigma_code_ec : pgg_gT M -> {perm 'I_n_ec}.
 
 Hypothesis sigma_fix0_ec :
@@ -246,14 +246,14 @@ Hypothesis code_auto_ec :
 Let ts1_perm : pgg_gT M -> {perm 'I_(ts_T' ts1).+1} :=
   massey_share_perm (G:=G) sigma_fix0_ec.
 
-(** ts1_perm_compatible — ts_perm_compatible witness for the genus-1 scheme.
+(** ts1_perm_compatible — ts_recon_perm_invariant witness for the genus-1 scheme.
     Kind: helper.
-    Why: feeds cs_perm_compatible in genus1_covering via transport +
+    Why: feeds cs_recon_invariant in genus1_covering via transport +
          massey_perm_compatible applied to the AG-based threshold scheme.
     Used by: genus1_covering.
 *)
 Lemma ts1_perm_compatible :
-  @ts_perm_compatible _ G _ _ ts1 ts1_perm.
+  @ts_recon_perm_invariant _ G _ _ ts1 ts1_perm.
 Proof.
 rewrite /ts1 /= /ag_genus_scheme /ag_massey.
 apply: transport_perm_compatible.
@@ -271,8 +271,8 @@ Definition genus1_covering : CoveringScheme M := {|
   cs_T'         := ts_T' ts1 ;
   cs_scheme     := ts1 ;
   cs_scheme_T   := erefl ;
-  cs_perm       := ts1_perm ;
-  cs_perm_compatible := ts1_perm_compatible ;
+  cs_monodromy       := ts1_perm ;
+  cs_recon_invariant := ts1_perm_compatible ;
   cs_gap        := ts1_gap2 ;
 |}.
 
@@ -454,14 +454,14 @@ Hypothesis code_auto_g :
 Let ts_g_perm : pgg_gT M -> {perm 'I_(ts_T' ts_g).+1} :=
   massey_share_perm (G:=G) sigma_fix0_g.
 
-(** ts_g_perm_compatible — ts_perm_compatible witness for the generic genus-g scheme.
+(** ts_g_perm_compatible — ts_recon_perm_invariant witness for the generic genus-g scheme.
     Kind: helper.
-    Why: feeds cs_perm_compatible in higher_genus_covering via transport +
+    Why: feeds cs_recon_invariant in higher_genus_covering via transport +
          massey_perm_compatible on the generic AG-based threshold scheme.
     Used by: higher_genus_covering.
 *)
 Lemma ts_g_perm_compatible :
-  @ts_perm_compatible _ G _ _ ts_g ts_g_perm.
+  @ts_recon_perm_invariant _ G _ _ ts_g ts_g_perm.
 Proof.
 rewrite /ts_g /= /ag_genus_scheme /ag_massey.
 apply: transport_perm_compatible.
@@ -479,8 +479,8 @@ Definition higher_genus_covering : CoveringScheme M := {|
   cs_T'         := ts_T' ts_g ;
   cs_scheme     := ts_g ;
   cs_scheme_T   := erefl ;
-  cs_perm       := ts_g_perm ;
-  cs_perm_compatible := ts_g_perm_compatible ;
+  cs_monodromy       := ts_g_perm ;
+  cs_recon_invariant := ts_g_perm_compatible ;
   cs_gap        := ts_g_gap ;
 |}.
 

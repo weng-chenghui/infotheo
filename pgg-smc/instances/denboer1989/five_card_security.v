@@ -340,7 +340,7 @@ Lemma fc_ts_recon_correct (PI : PGGInterface FiveCard_M)
          @pgg_rho FiveCard_M g
            (tnth (cast_tuple (esym (congr1 S HT)) (pi_starts PI)) i) =
          tnth (cast_tuple (esym (congr1 S HT)) (pi_starts PI))
-              (cs_perm (tw_covering (ar_threshold fc_rigidity)) g i)) :
+              (cs_monodromy (tw_covering (ar_threshold fc_rigidity)) g i)) :
   P \in pgg_G FiveCard_M ->
   ts_valid (cs_scheme (tw_covering (ar_threshold fc_rigidity))) s
           (cast_tuple (esym (congr1 S HT)) (pi_starts PI)) ->

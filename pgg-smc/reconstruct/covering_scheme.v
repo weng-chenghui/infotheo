@@ -20,7 +20,7 @@
 (*     Grothendieck, SGA1 Exposé V (étale covers ↔ π₁-sets)                *)
 (*                                                                            *)
 (* Design rationale — why axiomatize the AG code:                             *)
-(*   CoveringScheme axiomatizes cs_perm_compatible and cs_gap because the    *)
+(*   CoveringScheme axiomatizes cs_recon_invariant and cs_gap because the    *)
 (*   security-threshold tradeoff theorem only needs: (1) Riemann-Hurwitz     *)
 (*   (proved here from cd_hurwitz) to link |G| to genus, and (2) the gap     *)
 (*   bound ts_T <= ts_k + 2*genus to link genus to threshold. Both facts     *)
@@ -39,8 +39,8 @@
 (*   CoveringScheme M == a ThresholdScheme built from a covering of M        *)
 (*     cs_data       == covering geometry (connects G to genus)              *)
 (*     cs_scheme     == the ThresholdScheme instance                         *)
-(*     cs_perm       == monodromy-induced permutation on share indices       *)
-(*     cs_perm_compatible == coord permutation preserves reconstruction     *)
+(*     cs_monodromy       == monodromy-induced share permutation             *)
+(*     cs_recon_invariant == reconstruction is invariant under the action    *)
 (*     cs_gap        == genus determines threshold gap:                      *)
 (*                      ts_T scheme <= ts_k scheme + 2 * genus               *)
 (*                                                                            *)
@@ -121,9 +121,9 @@ Record CoveringScheme := MkCoveringScheme {
   cs_T'     : nat ;
   cs_scheme : ThresholdScheme 'I_N 'I_N ;
   cs_scheme_T : ts_T' cs_scheme = cs_T' ;
-  cs_perm   : pgg_gT M -> {perm 'I_(ts_T' cs_scheme).+1} ;
-  cs_perm_compatible :
-    @ts_perm_compatible _ (pgg_G M) _ _ cs_scheme cs_perm ;
+  cs_monodromy   : pgg_gT M -> {perm 'I_(ts_T' cs_scheme).+1} ;
+  cs_recon_invariant :
+    @ts_recon_perm_invariant _ (pgg_G M) _ _ cs_scheme cs_monodromy ;
   cs_gap :
     ts_T cs_scheme <= ts_k cs_scheme + 2 * cd_genus (cs_data) ;
 }.

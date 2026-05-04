@@ -8,8 +8,8 @@
 (*   massey_codeword_col_perm == col_perm sigma on codeword = codeword with  *)
 (*     permuted shares                                                        *)
 (*   massey_recon_col_perm == code auto + fix-0 => recon of permuted = secret*)
-(*   massey_perm_compatible == derives ts_perm_compatible for massey_scheme   *)
-(*   transport_perm_compatible == ts_perm_compatible lifts thru transport     *)
+(*   massey_perm_compatible == derives ts_recon_perm_invariant for massey_scheme   *)
+(*   transport_perm_compatible == ts_recon_perm_invariant lifts thru transport     *)
 (******************************************************************************)
 
 From HB Require Import structures.
@@ -201,7 +201,7 @@ Qed.
     Kind: helper.
     Why: combines massey_codeword_col_perm with code-automorphism to show
          reconstruction still returns the original secret on permuted shares.
-    Used by: massey_perm_compatible (the ts_perm_compatible witness).
+    Used by: massey_perm_compatible (the ts_recon_perm_invariant witness).
 *)
 Lemma massey_recon_col_perm (s : F) (shares : 'rV[F]_n'.+1) :
   coord_perm_compatible C sigma ->
@@ -217,7 +217,7 @@ Qed.
 End massey_col_perm.
 
 (******************************************************************************)
-(*     Section 4: ts_perm_compatible for massey_scheme                        *)
+(*     Section 4: ts_recon_perm_invariant for massey_scheme                        *)
 (******************************************************************************)
 
 Section massey_perm_compat.
@@ -252,7 +252,7 @@ Hypothesis code_auto :
     Kind: main.
     Why: transforms a code-side automorphism sigma_code g into a sharing-side
          permutation over 'I_n'.+1, so that code automorphisms interface with
-         ts_perm_compatible.
+         ts_recon_perm_invariant.
 *)
 Definition massey_share_perm (g : gT) : {perm 'I_n'.+1} :=
   if Sumbool.sumbool_of_bool (g \in G) is left hg then
@@ -275,12 +275,12 @@ Qed.
 
 (** massey_perm_compatible — Massey scheme is ts-perm-compatible via code automorphisms.
     Kind: main.
-    Why: discharges the ts_perm_compatible side-condition used by the
+    Why: discharges the ts_recon_perm_invariant side-condition used by the
          AlgebraicRigidity protocol-correctness theorems for Massey-based
          covering schemes.
 *)
 Lemma massey_perm_compatible :
-  @ts_perm_compatible gT G _ _
+  @ts_recon_perm_invariant gT G _ _
     (massey_scheme C_nt Hd2 priv_surj)
     massey_share_perm.
 Proof.
@@ -298,7 +298,7 @@ Qed.
 End massey_perm_compat.
 
 (******************************************************************************)
-(*     Section 5: ts_perm_compatible lifts through transport_scheme           *)
+(*     Section 5: ts_recon_perm_invariant lifts through transport_scheme           *)
 (******************************************************************************)
 
 Section transport_perm_compat.
@@ -317,15 +317,15 @@ Let T := (ts_T' ts).+1.
 
 Variable perm_A : gT -> {perm 'I_T}.
 
-(** transport_perm_compatible — ts_perm_compatible survives transport_scheme.
+(** transport_perm_compatible — ts_recon_perm_invariant survives transport_scheme.
     Kind: main.
     Why: lets a compatibility proof on the source ThresholdScheme carry over
          to the transported variant, so downstream codes can work on 'I_N
          while compatibility is shown over the base field.
 *)
 Lemma transport_perm_compatible :
-  @ts_perm_compatible gT G _ _ ts perm_A ->
-  @ts_perm_compatible gT G _ _ (transport_scheme Hgi Hfg ts) perm_A.
+  @ts_recon_perm_invariant gT G _ _ ts perm_A ->
+  @ts_recon_perm_invariant gT G _ _ (transport_scheme Hgi Hfg ts) perm_A.
 Proof.
 move=> Hperm g s shares gG.
 change (ts_valid ts (g_inv s) [tuple g_inv (tnth shares i) | i < T] ->

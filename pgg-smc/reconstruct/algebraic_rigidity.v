@@ -381,15 +381,15 @@ Lemma ar_protocol_correct (PI : PGGInterface M)
        forall i : 'I_(ts_T' (cs_scheme (tw_covering (ar_threshold ar)))).+1,
          @pgg_rho M g (tnth (cast_tuple (esym (congr1 S HT)) (pi_starts PI)) i) =
          tnth (cast_tuple (esym (congr1 S HT)) (pi_starts PI))
-              (cs_perm (tw_covering (ar_threshold ar)) g i)) :
+              (cs_monodromy (tw_covering (ar_threshold ar)) g i)) :
   P \in G ->
   ts_valid (cs_scheme (tw_covering (ar_threshold ar))) s
           (cast_tuple (esym (congr1 S HT)) (pi_starts PI)) ->
   pgg_recon_endpoints HT P = s.
 Proof.
 move=> PG Hvalid.
-apply: (pgg_hidden_invariant_perm (perm := cs_perm (tw_covering (ar_threshold ar)))) => //.
-exact: cs_perm_compatible.
+apply: (pgg_hidden_invariant_perm (perm := cs_monodromy (tw_covering (ar_threshold ar)))) => //.
+exact: cs_recon_invariant.
 Qed.
 
 End derived_properties.

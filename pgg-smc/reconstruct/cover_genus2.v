@@ -236,7 +236,7 @@ Proof. exact: ts2_gap. Qed.
 (* Coordinate-permutation compatibility: derived from code automorphisms.
    sigma_code_g2 maps monodromy elements to column permutations of the AG code
    that fix position 0 (the secret). massey_perm_compatible +
-   transport_perm_compatible derive ts_perm_compatible from these. *)
+   transport_perm_compatible derive ts_recon_perm_invariant from these. *)
 Variable sigma_code_g2 : pgg_gT M -> {perm 'I_n_g2}.
 
 Hypothesis sigma_fix0_g2 :
@@ -249,14 +249,14 @@ Hypothesis code_auto_g2 :
 Let ts2_perm : pgg_gT M -> {perm 'I_(ts_T' ts2).+1} :=
   massey_share_perm (G:=G) sigma_fix0_g2.
 
-(** ts2_perm_compatible — ts_perm_compatible witness for the genus-2 scheme.
+(** ts2_perm_compatible — ts_recon_perm_invariant witness for the genus-2 scheme.
     Kind: helper.
-    Why: feeds cs_perm_compatible in genus2_covering via transport +
+    Why: feeds cs_recon_invariant in genus2_covering via transport +
          massey_perm_compatible on the hyperelliptic AG scheme.
     Used by: genus2_covering.
 *)
 Lemma ts2_perm_compatible :
-  @ts_perm_compatible _ G _ _ ts2 ts2_perm.
+  @ts_recon_perm_invariant _ G _ _ ts2 ts2_perm.
 Proof.
 rewrite /ts2 /= /ag_genus_scheme /ag_massey.
 apply: transport_perm_compatible.
@@ -274,8 +274,8 @@ Definition genus2_covering : CoveringScheme M := {|
   cs_T'         := ts_T' ts2 ;
   cs_scheme     := ts2 ;
   cs_scheme_T   := erefl ;
-  cs_perm       := ts2_perm ;
-  cs_perm_compatible := ts2_perm_compatible ;
+  cs_monodromy       := ts2_perm ;
+  cs_recon_invariant := ts2_perm_compatible ;
   cs_gap        := ts2_gap4 ;
 |}.
 

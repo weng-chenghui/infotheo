@@ -231,7 +231,7 @@ Hypothesis star_G_stable :
     @pgg_rho R_star g
       (tnth (cast_tuple (esym (congr1 S star_HT)) (pi_starts star_PI)) i) =
     tnth (cast_tuple (esym (congr1 S star_HT)) (pi_starts star_PI))
-      (cs_perm star_covering g i).
+      (cs_monodromy star_covering g i).
 
 Lemma star_protocol_correct (s : 'I_(pgg_N' R_star).+1) (P : pgg_gT R_star) :
   P \in pgg_G R_star ->

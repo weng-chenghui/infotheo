@@ -48,19 +48,19 @@ Hypothesis HT : ts_T' ts = pi_T' PI.
 
 (* Main correctness theorem: CoveringScheme + PGGInterface + G-stable starts
    -> reconstruction recovers the hidden value. Uses pgg_hidden_invariant_perm
-   with cs_perm_compatible. *)
+   with cs_recon_invariant. *)
 Theorem pgg_covering_correct (s : 'I_N) (P : pgg_gT M)
     (G_stable : forall g, g \in G ->
        forall i : 'I_(ts_T' ts).+1,
          rho g (tnth (cast_tuple (esym (congr1 S HT)) (pi_starts PI)) i) =
-         tnth (cast_tuple (esym (congr1 S HT)) (pi_starts PI)) (cs_perm cs g i)) :
+         tnth (cast_tuple (esym (congr1 S HT)) (pi_starts PI)) (cs_monodromy cs g i)) :
   P \in G ->
   ts_valid ts s (cast_tuple (esym (congr1 S HT)) (pi_starts PI)) ->
   pgg_recon_endpoints HT P = s.
 Proof.
 move=> PG Hvalid.
-apply: (pgg_hidden_invariant_perm (perm := cs_perm cs)) => //.
-exact: cs_perm_compatible.
+apply: (pgg_hidden_invariant_perm (perm := cs_monodromy cs)) => //.
+exact: cs_recon_invariant.
 Qed.
 
 (* The threshold gap is bounded by twice the covering genus *)

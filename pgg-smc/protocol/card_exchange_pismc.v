@@ -50,7 +50,7 @@ From pgg_smc Require Import rigidity_abelian_instance.
 (* How the hidden value is determined:                                        *)
 (* 1. The dealer encodes hidden value s as starting card positions: ts_encode(s).    *)
 (* 2. The word w scrambles these sheets: word_eval(w) applies a coordinate   *)
-(*    permutation (invisible to reconstruction by ts_perm_compatible).       *)
+(*    permutation (invisible to reconstruction by ts_recon_perm_invariant).       *)
 (* 3. The verifier collects card positions and recovers s via ts_recon.      *)
 (* The hidden value is fixed by the starting card positions, not by the shuffle.     *)
 (* ts_encode_valid guarantees ts_valid(s, ts_encode(s)), so the dealer       *)

@@ -450,7 +450,7 @@ Hypothesis preserves_pile1 :
     word identifies a distinct factor of the statement.
 *)
 Lemma product_sum_mod_perm_compatible :
-  @ts_perm_compatible _ G _ _ pts sigma.
+  @ts_recon_perm_invariant _ G _ _ pts sigma.
 Proof.
 move=> g s shares Hg Hvalid.
 apply product_correct.
@@ -479,12 +479,10 @@ rewrite /product_valid; split.
     by move=> i; apply val_inj.
   have Hsigma_r_inj : injective sigma_r.
     move=> x y Hxy.
-    have := congr1 val (Hemb_sigma x); have := congr1 val (Hemb_sigma y).
-    rewrite /emb /sigma_r /= => Hy Hx.
-    move: Hxy => /(congr1 val) /= Hval.
-    have Hsg : sigma g (emb x) = sigma g (emb y) by apply: val_inj.
-    have := @perm_inj _ (sigma g) _ _ Hsg => /(congr1 val) /=.
-    exact: val_inj.
+    have Hsg : sigma g (emb x) = sigma g (emb y) by rewrite -!Hemb_sigma Hxy.
+    have Hemb_eq : emb x = emb y := perm_inj Hsg.
+    apply val_inj.
+    by have : val (emb x) = val (emb y) by rewrite Hemb_eq.
   symmetry; rewrite (reindex_inj Hsigma_r_inj).
   by apply eq_bigr => i _; rewrite /emb; congr (F _); exact: Hemb_sigma.
 - (* pile2: derive preserves_pile2, then same reindexing argument *)
@@ -495,13 +493,20 @@ rewrite /product_valid; split.
     have Hemb1_lt : forall j, val (emb1 j) < T1
       by move=> j; rewrite /emb1 /=; exact: ltn_ord.
     pose sigma1 (j : 'I_T1) : 'I_T1 := Ordinal (preserves_pile1 Hg (Hemb1_lt j)).
+    have Hsigma1_emb1 : forall j, sigma g (emb1 j) = emb1 (sigma1 j) :> 'I_(T1+T2)
+      by move=> j; apply val_inj.
     have Hinj1 : injective sigma1.
-      move=> a b /= Hab; apply val_inj; move: Hab => /(congr1 val) /= Hv.
-      exact: (congr1 val (@perm_inj _ (sigma g) _ _ (val_inj Hv))).
+      move=> a b Hab.
+      have Hsg_eq : sigma g (emb1 a) = sigma g (emb1 b)
+        by rewrite !Hsigma1_emb1 Hab.
+      have Hemb_eq : emb1 a = emb1 b := perm_inj Hsg_eq.
+      apply val_inj.
+      by have : val (emb1 a) = val (emb1 b) by rewrite Hemb_eq.
     have [sigma1_inv Hcancel1 Hcancel2] := injF_bij Hinj1.
     pose k : 'I_T1 := Ordinal Hlt.
     have Hk : sigma g (emb1 (sigma1_inv k)) = sigma g i.
-      apply val_inj => /=; have := Hcancel2 k => /(congr1 val) /=; by [].
+      apply val_inj => /=.
+      by have : val (sigma1 (sigma1_inv k)) = val k by rewrite Hcancel2.
     have Hemb_eq := @perm_inj _ (sigma g) _ _ Hk.
     have : val (emb1 (sigma1_inv k)) < T1 by exact: Hemb1_lt.
     by rewrite Hemb_eq ltnNge Hi.
@@ -531,13 +536,13 @@ rewrite /product_valid; split.
     move=> i; apply val_inj => /=.
     by rewrite addnC subnK //; exact: preserves_pile2 _ (Hemb2_ge i).
   have Hsigma_r2_inj : injective sigma_r2.
-    move=> a b /(congr1 val) /= Hab; apply val_inj => /=.
-    have Hsg : sigma g (emb2 a) = sigma g (emb2 b).
-      apply val_inj => /=.
-      by rewrite -(subnK (preserves_pile2 _ (Hemb2_ge a)))
-                 -(subnK (preserves_pile2 _ (Hemb2_ge b))) Hab.
-    have := @perm_inj _ (sigma g) _ _ Hsg => /(congr1 val) /=.
-    by move/addnI => ->.
+    move=> a b Hab.
+    have Hsg : sigma g (emb2 a) = sigma g (emb2 b)
+      by rewrite -!Hemb2_sigma Hab.
+    have Hemb_eq : emb2 a = emb2 b := perm_inj Hsg.
+    apply val_inj.
+    have Hv : val (emb2 a) = val (emb2 b) by rewrite Hemb_eq.
+    exact: addnI Hv.
   symmetry; rewrite (reindex_inj Hsigma_r2_inj).
   by apply eq_bigr => i _; congr (F2 _); exact: Hemb2_sigma.
 Qed.

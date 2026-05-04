@@ -131,7 +131,7 @@ Lemma kim_ts_recon_correct (L : nat) (PI : PGGInterface M_kim)
          @pgg_rho M_kim g
            (tnth (cast_tuple (esym (congr1 S HT)) (pi_starts PI)) i) =
          tnth (cast_tuple (esym (congr1 S HT)) (pi_starts PI))
-              (cs_perm (tw_covering (ar_threshold (kim_rigidity L))) g i)) :
+              (cs_monodromy (tw_covering (ar_threshold (kim_rigidity L))) g i)) :
   P \in pgg_G M_kim ->
   ts_valid (cs_scheme (tw_covering (ar_threshold (kim_rigidity L)))) s
           (cast_tuple (esym (congr1 S HT)) (pi_starts PI)) ->

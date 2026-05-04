@@ -350,7 +350,7 @@ Lemma s5_ts_recon_correct (PI : PGGInterface R_s5)
          @pgg_rho R_s5 g
            (tnth (cast_tuple (esym (congr1 S HT)) (pi_starts PI)) i) =
          tnth (cast_tuple (esym (congr1 S HT)) (pi_starts PI))
-              (cs_perm (tw_covering (ar_threshold (s5_rigidity))) g i)) :
+              (cs_monodromy (tw_covering (ar_threshold (s5_rigidity))) g i)) :
   P \in pgg_G R_s5 ->
   ts_valid (cs_scheme (tw_covering (ar_threshold (s5_rigidity)))) s
           (cast_tuple (esym (congr1 S HT)) (pi_starts PI)) ->

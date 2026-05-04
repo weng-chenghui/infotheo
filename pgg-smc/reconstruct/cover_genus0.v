@@ -9,7 +9,7 @@
 (*                                                                            *)
 (* The ThresholdScheme is now concrete (from RS codes via Massey's            *)
 (* construction in rs_massey_bridge.v). Exactness (ts_T = ts_k) is proved.   *)
-(* ts_perm_compatible is derived from code automorphism hypotheses.          *)
+(* ts_recon_perm_invariant is derived from code automorphism hypotheses.          *)
 (*                                                                            *)
 (* Shamir-via-Galois connection:                                              *)
 (*   Genus 0 means the covering is P^1 → P^1, i.e., the function field     *)
@@ -136,7 +136,7 @@ Let ts0_exact : ts_T ts0 = ts_k ts0 := rs_genus0_exact primeq a qn an HN.
 (* Coordinate-permutation compatibility: derived from code automorphisms.
    sigma_code maps monodromy elements to column permutations of the RS code
    that fix position 0 (the secret). massey_perm_compatible +
-   transport_perm_compatible derive ts_perm_compatible from these. *)
+   transport_perm_compatible derive ts_recon_perm_invariant from these. *)
 Variable sigma_code : pgg_gT M -> {perm 'I_n''.+3}.
 
 Hypothesis sigma_fix0 :
@@ -149,14 +149,14 @@ Hypothesis code_auto :
 Let ts0_perm : pgg_gT M -> {perm 'I_(ts_T' ts0).+1} :=
   massey_share_perm (G:=G) sigma_fix0.
 
-(** ts0_perm_compatible — ts_perm_compatible witness for the genus-0 scheme.
+(** ts0_perm_compatible — ts_recon_perm_invariant witness for the genus-0 scheme.
     Kind: helper.
-    Why: feeds cs_perm_compatible in genus0_covering via transport +
+    Why: feeds cs_recon_invariant in genus0_covering via transport +
          massey_perm_compatible applied to the RS-based threshold scheme.
     Used by: genus0_covering.
 *)
 Lemma ts0_perm_compatible :
-  @ts_perm_compatible _ G _ _ ts0 ts0_perm.
+  @ts_recon_perm_invariant _ G _ _ ts0 ts0_perm.
 Proof.
 rewrite /ts0 /= /rs_genus0_scheme /rs_massey.
 apply: transport_perm_compatible.
@@ -169,8 +169,8 @@ Definition genus0_covering : CoveringScheme M := {|
   cs_T'         := ts_T' ts0 ;
   cs_scheme     := ts0 ;
   cs_scheme_T   := erefl ;
-  cs_perm       := ts0_perm ;
-  cs_perm_compatible := ts0_perm_compatible ;
+  cs_monodromy       := ts0_perm ;
+  cs_recon_invariant := ts0_perm_compatible ;
   cs_gap        := leq_trans (leqnn _)
                      (leq_trans (eq_leq ts0_exact) (leq_addr _ _)) ;
 |}.

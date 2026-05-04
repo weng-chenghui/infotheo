@@ -47,7 +47,7 @@ Hypothesis G_stable : forall g, g \in G ->
     @pgg_rho M g
       (tnth (cast_tuple (esym (congr1 S HT)) (pi_starts PI)) i) =
     tnth (cast_tuple (esym (congr1 S HT)) (pi_starts PI))
-      (cs_perm (tw_covering (ar_threshold ar)) g i).
+      (cs_monodromy (tw_covering (ar_threshold ar)) g i).
 
 (** dealer_words_correct — word-based dealer correctness: reconstruction at endpoints.
     Kind: main.

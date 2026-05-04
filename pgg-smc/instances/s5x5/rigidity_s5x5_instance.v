@@ -327,10 +327,10 @@ Proof. exact: s5x5_preserves_pile1_proved. Qed.
 
 (** s5x5_perm_compatible — monodromy permutation-compatibility for S_5 x S_5.
     Kind: helper.
-    Why: closes the [ts_perm_compatible] obligation of the covering scheme.
+    Why: closes the [ts_recon_perm_invariant] obligation of the covering scheme.
     Used by: [s5x5_covering]. *)
 Lemma s5x5_perm_compatible :
-  @ts_perm_compatible _ (pgg_G R_s5x5) _ _ s5x5_ts (@pgg_rho R_s5x5).
+  @ts_recon_perm_invariant _ (pgg_G R_s5x5) _ _ s5x5_ts (@pgg_rho R_s5x5).
 Proof.
 exact: (@product_sum_mod_perm_compatible 3 3 4 4 _ _ (@pgg_rho R_s5x5) s5x5_preserves_pile1).
 Qed.
@@ -342,8 +342,8 @@ Definition s5x5_covering : CoveringScheme R_s5x5 := {|
   cs_T'               := (ts_T' s5x5_ts) ;
   cs_scheme           := s5x5_ts ;
   cs_scheme_T         := erefl ;
-  cs_perm             := @pgg_rho R_s5x5 ;
-  cs_perm_compatible  := s5x5_perm_compatible ;
+  cs_monodromy             := @pgg_rho R_s5x5 ;
+  cs_recon_invariant  := s5x5_perm_compatible ;
   cs_gap              := s5x5_cs_gap ;
 |}.
 
@@ -416,7 +416,7 @@ Lemma s5x5_ts_recon_correct (PI : PGGInterface R_s5x5)
          @pgg_rho R_s5x5 g
            (tnth (cast_tuple (esym (congr1 S HT)) (pi_starts PI)) i) =
          tnth (cast_tuple (esym (congr1 S HT)) (pi_starts PI))
-              (cs_perm (tw_covering (ar_threshold s5x5_rigidity)) g i)) :
+              (cs_monodromy (tw_covering (ar_threshold s5x5_rigidity)) g i)) :
   P \in pgg_G R_s5x5 ->
   ts_valid (cs_scheme (tw_covering (ar_threshold s5x5_rigidity))) s
           (cast_tuple (esym (congr1 S HT)) (pi_starts PI)) ->
