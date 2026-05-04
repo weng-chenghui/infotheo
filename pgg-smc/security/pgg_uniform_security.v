@@ -178,12 +178,16 @@ Lemma endpoint_exact (s : 'I_N) :
            (fdist_uniform (card_ord N)) = 0.
 Proof. by rewrite eval_pushforward_uniform var_dist_self. Qed.
 
-(* The SecurityWitness with epsilon = 0 and exact equality *)
-Definition uniform_security_witness : SecurityWitness R M :=
-  @MkSecurityWitness R M 0 (0 : R) rho_uniform endpoint_bound
+(* The SecurityWitness with epsilon = 0 and exact equality.
+   L is recorded explicitly so callers can label the round count of
+   their protocol; the bound and exact-equality proofs are
+   independent of L because uniform dealing produces the same
+   distribution at every length. *)
+Definition uniform_security_witness (L : nat) : SecurityWitness R M :=
+  @MkSecurityWitness R M L (0 : R) rho_uniform endpoint_bound
     (Some (@MkSecurityExact R M rho_uniform 0 endpoint_exact))
     None.
 
 End uniform_security.
 
-Arguments uniform_security_witness {R M} HrhoG_pos Hregular Htrans.
+Arguments uniform_security_witness {R M} HrhoG_pos Hregular Htrans L.

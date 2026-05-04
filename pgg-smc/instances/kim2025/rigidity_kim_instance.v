@@ -34,6 +34,7 @@ From pgg_reconstruct Require Import pgg_sharing_framework covering_scheme
                                     cover_tradeoff algebraic_rigidity.
 From pgg_reconstruct Require Import cover_genus0 coord_perm_compatible.
 From pgg_reconstruct Require Import rs_code_5sheets.
+From pgg_reconstruct Require Import curve_realisation.
 
 Set Implicit Arguments.
 Unset Strict Implicit.
@@ -71,6 +72,17 @@ Proof. by []. Qed.
    and the trivial code automorphism. *)
 Definition kim_covering : CoveringScheme M_kim :=
   genus0_covering_witness HG_kim (RS5_witness_trivial kim_HN5).
+
+(** kim_covering_realised — documentation marker tying [kim_covering] to
+    a real algebraic curve.
+    Kind: helper.
+    Why: the realising curve is P^1 (the genus-0 line itself), with the
+    Z/5 cyclic group acting trivially on the 5 distinguished sheets. This
+    is the unique mathematically-honest realisation under the framework's
+    constraints (cyclic group on 5 sheets with secret-fix-0 forces trivial
+    sigma; see analysis in project_rs5_witness_trivial_vacuity.md).
+    Used by: documentation only; not consumed by tactics. *)
+Axiom kim_covering_realised : realised_by_curve (cs_data kim_covering).
 
 (* PGL bound hypothesis *)
 Hypothesis kim_genus0_pgl :

@@ -36,6 +36,7 @@ From pgg_reconstruct Require Import pgg_sharing_framework covering_scheme
                                     cover_tradeoff algebraic_rigidity.
 From pgg_reconstruct Require Import cover_genus0 coord_perm_compatible.
 From pgg_reconstruct Require Import rs_code_5sheets.
+From pgg_reconstruct Require Import curve_realisation.
 
 Set Implicit Arguments.
 Unset Strict Implicit.
@@ -247,7 +248,7 @@ Variable R : realType.
     Why: Instantiates uniform_security_witness from non-triviality, regularity, and transitivity of rho(G) on the five sheets.
 *)
 Definition fc_security_uniform : SecurityWitness R FiveCard_M :=
-  uniform_security_witness fc_rhoG_pos fc_rhoG_regular fc_rhoG_trans.
+  uniform_security_witness fc_rhoG_pos fc_rhoG_regular fc_rhoG_trans 1.
 
 (** fc_eps_zero — the uniform-security witness achieves epsilon = 0.
     Kind: main.
@@ -284,6 +285,16 @@ Proof. by []. Qed.
    because AlgebraicRigidity does not invoke genus0_secret_invariant). *)
 Definition fc_covering : CoveringScheme FiveCard_M :=
   genus0_covering_witness HG_fc (RS5_witness_trivial fc_HN5).
+
+(** fc_covering_realised — documentation marker tying [fc_covering] to a
+    real algebraic curve.
+    Kind: helper.
+    Why: the realising curve is P^1 (the genus-0 line itself), with the
+    cyclic group acting trivially on the 5 distinguished sheets. As with
+    kim2025, the (cyclic, 5-sheet, secret-fix-0) configuration structurally
+    forces sigma trivial. See project_rs5_witness_trivial_vacuity.md.
+    Used by: documentation only; not consumed by tactics. *)
+Axiom fc_covering_realised : realised_by_curve (cs_data fc_covering).
 
 (* PGL bound: |C_5| = 5 <= 120 = PGL(2,5) *)
 Hypothesis fc_genus0_pgl :
