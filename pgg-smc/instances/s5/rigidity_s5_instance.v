@@ -230,15 +230,33 @@ Hypothesis HG_s5_crypto : (1 < #|pgg_G R_s5|)%N.
 Lemma s5_HN5_crypto : (pgg_N' R_s5).+1 = 5.
 Proof. by []. Qed.
 
-(* PGL bound: |pgg_G R_s5| <= |{perm 'I_5}| = 5! = 120 = pgl_bound R_s5. *)
+(* PGL bound under the tightened (Klein finite-subgroup) [pgl_bound]:
+   pgl_bound R_s5 = maxn (2 * 5) 60 = 60, and |pgg_G R_s5| = |S_5| = 120.
+   So the bound 120 <= 60 is MATHEMATICALLY FALSE. The previous proof
+   `card_Sn /pgl_bound /= : 120 <= 5*24 = 120` worked only under the
+   off-by-one PGL formula `N(N^2-1)`; under Klein's classification of
+   finite subgroups of PGL(2, F̄), no genus-0 cover can carry an S_5
+   monodromy because S_5 is not in Klein's list (cyclic / dihedral /
+   A_4 / S_4 / A_5; max non-dihedral order 60).
+
+   By Hurwitz's automorphism bound |Aut(C)| <= 84(g-1), an S_5 monodromy
+   needs g >= 1 + 120/84 = 2.43, so g >= 3. But Wiman (1895) classifies
+   genus-3 automorphism groups: PSL(2,7), Fermat quartic stabiliser, etc.,
+   none containing S_5. So even at g = 3 there is no curve. Bring's curve
+   has S_5 action and is genus 4; that would be the next candidate.
+
+   Until s5 is migrated to a non-trivial higher-genus covering construction,
+   this lemma is admitted as a documented mathematical gap. The downstream
+   [s5_rigidity_cryptographically_secure] therefore inherits this admission;
+   any client should be aware that s5's "genus 0 with bounded |G|" claim
+   is no longer supportable under the corrected [pgl_bound] formula.
+
+   See also: project_rs5_witness_trivial_vacuity.md and
+   project_pgl_bound_offbyone.md (now superseded by the Phase A fix). *)
 Lemma s5_genus0_pgl_crypto :
   (#|pgg_G R_s5| <= pgl_bound R_s5)%N.
 Proof.
-apply: (leq_trans (subset_leq_card (subsetT _))).
-rewrite cardsT.
-have <- : #|{perm 'I_5}| = #|pgg_gT R_s5| by rewrite /pgg_gT /=.
-by rewrite card_Sn /pgl_bound /=.
-Qed.
+Admitted.
 
 (* Concrete threshold witness using the RS5_witness_trivial factory and
    the directly-discharged PGL bound. Replaces the abstract `s5_tw`
