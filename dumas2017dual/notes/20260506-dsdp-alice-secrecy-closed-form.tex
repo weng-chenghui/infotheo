@@ -1,0 +1,223 @@
+\documentclass[11pt]{article}
+\usepackage[a4paper,margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{enumitem}
+\usepackage[hidelinks]{hyperref}
+\usepackage{xurl}
+
+\newcommand{\indep}{\mathrel{\perp\mkern-9mu\perp}}
+\newcommand{\Renc}{\mathcal{R}_{\mathrm{enc}}}
+\newcommand{\epscpa}{\varepsilon_{\mathrm{cpa}}}
+\newcommand{\HunpC}{H_{\mathrm{unp}}^{\mathcal{C}}}
+\newcommand{\Hunp}{H_{\mathrm{unp}}}
+\newcommand{\C}{\mathcal{C}}
+\newcommand{\Yspace}{\mathcal{Y}}
+\newcommand{\Wspace}{\mathcal{W}}
+\newcommand{\Encf}{\mathrm{Enc}}
+\newcommand{\Decf}{\mathrm{Dec}}
+\newcommand{\KeyGen}{\mathrm{KeyGen}}
+\newcommand{\AliceView}{\mathit{AliceView}}
+\newcommand{\AliceViewHyb}{\mathit{AliceView}_{\textrm{after-swaps}}'}
+\newcommand{\Dk}{\mathit{Dk}}
+\newcommand{\pk}{\mathit{pk}}
+
+\title{DSDP secrecy of $V_2$ against corrupted Alice}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+
+\section*{Setup}
+
+\begin{enumerate}
+\item $(\Omega, \Sigma, P)$ is a discrete probability space.
+
+\item $(R, +, \cdot, 0_R, 1_R)$ is a finite commutative ring with $m := \#|R| \geq 2$. The unit group is $R^\times := \{ u \in R \mid \exists v \in R,\ u \cdot v = 1_R \}$.
+
+\item $(\KeyGen, \Encf, \Decf)$ is a public-key encryption scheme with plaintext space $R$, public-key registry $(\pk_a, \pk_b, \pk_c)$, corresponding decryption keys $(\Dk_a, \Dk_b, \Dk_c)$, and finite encryption-randomness space $\Renc$. We sample fresh encryption randomness from $\Renc$ uniformly, i.e.\ each element of $\Renc$ is drawn with probability $1 / |\Renc|$. Decryption correctness $\Decf(\Dk_p, \Encf(\pk_p, m; r)) = m$ holds for every party $p$, message $m$, and randomness $r$.
+
+\item Each decryption key $\Dk_p$ is a deterministic value fixed at protocol setup and held privately by party $p$. When party $p$ is the corrupted party in a security theorem, $\Dk_p$ appears inside $p$'s own view since $p$ owns it. In such a case, the ciphertext encrypted by $\pk_p$ in party $p$'s view is a plaintext by decryption.
+
+\item Public keys $(\pk_a, \pk_b, \pk_c)$ are known to all parties.
+
+\item \textbf{The adversary class $\C$.} $\C$ is a set of bounded adversaries used to measure secrecy.
+  \begin{enumerate}[label=6.\arabic*.]
+  \item An adversary $A \in \C$ observes a view $Y$ and outputs a randomized guess for a target $X \in R$.
+  \item For any finite view space $\Yspace$, $\C$ contains a family of Markov kernels $A : \Yspace \to \Delta(R)$, where $\Delta(R)$ is the set of probability distributions on $R$. When presented with a specific view value $y \in \Yspace$, the adversary samples a guess from the distribution $A(y)$.
+    \begin{enumerate}[label=6.2.\arabic*.]
+    \item In other words, all information observed by the adversary is captured in a view value $y \in \Yspace$. Their strategy $A$ then translates this accumulated knowledge into a biased distribution $A(y) \in \Delta(R)$, from which they sample their guess for the secret value in $R$.
+    \end{enumerate}
+  \item The average chance that the guess matches the target:
+    \[ \Pr[A(Y) = X] := \mathbb{E}_\omega \big[ A(Y(\omega))(\{X(\omega)\}) \big]. \]
+  \item We also assume $\C$ is closed under:
+    \begin{enumerate}[label=6.4.\arabic*.]
+    \item \textbf{Bounded enumeration:} the adversary can combine a finite set of different strategies to find the most successful one.
+    \item \textbf{Composition with samplers:} the adversary can augment their observed view with internally generated random values to simulate scenarios.
+    \item \textbf{Input fixing:} hard-coding specific values, like a known prefix of a secret, into an adversary's logic results in a new adversary that is still within the same power class $\C$.
+    \end{enumerate}
+  \end{enumerate}
+
+\item $\HunpC(X \mid Y) := -\log \sup_{A \in \C} \Pr[A(Y) = X]$ is conditional unpredictability entropy, [1, Definition 7].
+
+\item \textbf{$\epscpa$-Security (IND-CPA):} $\epscpa \in [0, 1]$ represents the real-or-random advantage of the encryption scheme against class $\C$.
+  \begin{enumerate}[label=8.\arabic*.]
+  \item For any party $p \in \{a, b, c\}$, the scheme is $\epscpa$-indistinguishable if the adversary cannot effectively distinguish between the following two views:
+    \begin{enumerate}[label=8.1.\arabic*.]
+    \item \textbf{Real View:} $(W, \Encf(\pk_p, M; r))$. The adversary sees side information $W$ and the encryption of a message $M$ using fresh randomness $r$.
+    \item \textbf{Zero View:} $(W, \Encf(\pk_p, 0_R; r'))$. The adversary sees the same $W$, but the message is replaced by $0_R$ and encrypted with fresh randomness $r'$.
+    \end{enumerate}
+  \item Formally:
+    \[ (W, \Encf(\pk_p, M; r)) \approx_{\C, \epscpa} (W, \Encf(\pk_p, 0_R; r')). \]
+  \item \textbf{Key constraints.}
+    \begin{enumerate}[label=8.3.\arabic*.]
+    \item \textbf{Independence:} the randomness $r, r'$ must be uniform and independent of the message $M$ and side information $W$.
+    \item \textbf{No decryption keys:} this security bound only applies if the side information $W$ does not contain the decryption key $\Dk_p$ corresponding to $\pk_p$.
+    \end{enumerate}
+  \end{enumerate}
+
+\item \textbf{Notation for indistinguishability.} $X \approx_{\C, \epscpa} Y$ means that for every $A \in \C$, $|\Pr[A(X) = 1] - \Pr[A(Y) = 1]| \leq \epscpa$, i.e.\ no adversary in $\C$ distinguishes the two distributions with probability gap above $\epscpa$.
+\end{enumerate}
+
+\section*{Theorem 1: DSDP secrecy of $V_2$ against corrupted Alice}
+
+\subsection*{Hypotheses}
+
+\begin{enumerate}
+\item $V_1, V_2, V_3 : \Omega \to R$ are jointly independent. $V_2$ and $V_3$ are individually uniform on $R$. $V_1$ may have arbitrary distribution (but in Infotheo we assume the same distribution as $V_2, V_3$).
+
+\item $U_1, U_2, U_3, R_2, R_3 : \Omega \to R$ are mutually independent, jointly independent of $(V_1, V_2, V_3)$. Namely,
+\[
+(V_1, V_2, V_3) \indep U_1 \indep U_2 \indep U_3 \indep R_2 \indep R_3.
+\]
+  \begin{enumerate}[label=2.\arabic*.]
+  \item $U_1, U_2, R_2, R_3$ are individually uniform on $R$.
+  \item $U_3 \in R^\times$ almost surely. That is, $\Pr[U_3 \notin R^\times] = 0$, so $U_3$ is neither $0_R$ nor a zero divisor with positive probability, a case that belongs to the malicious-adversary analysis. Its distribution on $R^\times$ is otherwise arbitrary.
+  \end{enumerate}
+
+\item Protocol-defined intermediate random variables on $\Omega$:
+\begin{align*}
+D_2 &:= V_2 \cdot U_2 + R_2, \\
+D_3 &:= V_3 \cdot U_3 + R_3 + D_2 = V_3 \cdot U_3 + V_2 \cdot U_2 + R_2 + R_3, \\
+S   &:= D_3 + U_1 \cdot V_1 - R_2 - R_3 = U_1 \cdot V_1 + U_2 \cdot V_2 + U_3 \cdot V_3,
+\end{align*}
+where $S$ is the publicly opened sum at the reveal step.
+
+\item $r_a, r_b, r_c : \Omega \to \Renc$ are mutually independent of each other, each individually uniform on $\Renc$, and jointly independent of $(V_1, V_2, V_3, U_1, U_2, U_3, R_2, R_3)$. Namely,
+\[
+(V_1, V_2, V_3, U_1, U_2, U_3, R_2, R_3) \indep r_a \indep r_b \indep r_c.
+\]
+
+\item The corrupted-Alice view is
+\begin{multline*}
+\AliceView := \big( \Dk_a, S, V_1, U_1, U_2, U_3, R_2, R_3, \\
+\Encf(\pk_a, D_3; r_a), \Encf(\pk_c, V_3; r_c), \Encf(\pk_b, V_2; r_b) \big).
+\end{multline*}
+\end{enumerate}
+
+\subsection*{Conclusion}
+
+For every $A \in \C$,
+\[ \Pr[A(\AliceView) = V_2] \leq \tfrac{1}{m} + 2 \cdot \epscpa, \]
+and equivalently as an entropy bound
+\[ \HunpC(V_2 \mid \AliceView) \geq \log m - 2 \cdot \epscpa. \]
+
+\subsection*{Proof outline}
+
+The bound is established by two applications of the IND-CPA real-or-random hypothesis, replacing each cross-key ciphertext by an encryption of $0_R$, followed by an information-theoretic uniformity argument on the resulting view.
+
+\paragraph{Step 1, first ciphertext swap.} Let
+\begin{multline*}
+W_1 := \big( V_2, V_3, \Dk_a, S, V_1, U_1, U_2, U_3, R_2, R_3, \\
+\Encf(\pk_a, D_3; r_a), \Encf(\pk_b, V_2; r_b) \big).
+\end{multline*}
+This is $\AliceView$ with $\Encf(\pk_c, V_3; r_c)$ removed and with the input random variables $V_2$ and $V_3$ added explicitly to $W_1$. Including $V_2$ and $V_3$ in $W_1$ means that the fresh randomness $r'_c$ we get from the IND-CPA real-or-random hypothesis below will be independent of $V_2$ and $V_3$, which Step~4 will rely on.
+
+The matching decryption key $\Dk_c$ is not in $W_1$, so the IND-CPA real-or-random hypothesis applies with $W_1$, target key $\pk_c$, and message $V_3$:
+\[
+(W_1, \Encf(\pk_c, V_3; r_c)) \approx_{\C, \epscpa} (W_1, \Encf(\pk_c, 0_R; r'_c)),
+\]
+where $r'_c : \Omega \to \Renc$ is fresh, uniform on $\Renc$, and jointly independent of $(W_1, V_3, r_c)$ by the hypothesis. Since $V_2$ and $V_3$ are inside $W_1$, $r'_c$ is in particular jointly independent of $V_2$, $V_3$, and $r_c$.
+
+Replacing the original ciphertext by $\Encf(\pk_c, 0_R; r'_c)$ in $\AliceView$ costs at most $\epscpa$ in the success probability of any $A \in \C$.
+
+\paragraph{Step 2, second ciphertext swap.} Let
+\begin{multline*}
+W_2 := \big( V_2, V_3, \Dk_a, S, V_1, U_1, U_2, U_3, R_2, R_3, \\
+\Encf(\pk_a, D_3; r_a), \Encf(\pk_c, 0_R; r'_c) \big).
+\end{multline*}
+This is the post-Step-1 view with $\Encf(\pk_b, V_2; r_b)$ removed and $V_2, V_3$ retained explicitly in $W_2$. As in Step~1, keeping $V_2$ and $V_3$ in $W_2$ means that the fresh randomness $r'_b$ we get from the IND-CPA real-or-random hypothesis below will be independent of $V_2$ and $V_3$.
+
+The matching decryption key $\Dk_b$ is not in $W_2$, so the IND-CPA real-or-random hypothesis applies with $W_2$, target key $\pk_b$, and message $V_2$:
+\[
+(W_2, \Encf(\pk_b, V_2; r_b)) \approx_{\C, \epscpa} (W_2, \Encf(\pk_b, 0_R; r'_b)),
+\]
+where $r'_b : \Omega \to \Renc$ is fresh, uniform on $\Renc$, and jointly independent of $(W_2, V_2, r_b)$ by the hypothesis. Since $V_2$ and $V_3$ are inside $W_2$, $r'_b$ is in particular jointly independent of $V_2$, $V_3$, and $r_b$.
+
+Replacing the original ciphertext by $\Encf(\pk_b, 0_R; r'_b)$ costs another $\epscpa$.
+
+\paragraph{Step 3, own-key plaintext rewrite.} $\Encf(\pk_a, D_3; r_a)$ is the own-key ciphertext, so it carries the same information as the plaintext $D_3$ inside Alice's view, since $\Dk_a$ is in the view. This gives
+\begin{multline*}
+\AliceViewHyb := \big( \Dk_a, S, V_1, U_1, U_2, U_3, R_2, R_3, D_3, \\
+\Encf(\pk_c, 0_R; r'_c), \Encf(\pk_b, 0_R; r'_b) \big).
+\end{multline*}
+
+\paragraph{Step 4, residual uniformity.}
+
+\textbf{Initial goal.} Show that $\Pr[V_2 = v \mid \AliceViewHyb] = 1/m$ for every $v \in R$, where
+\begin{multline*}
+\AliceViewHyb = \big( \Dk_a, S, V_1, U_1, U_2, U_3, R_2, R_3, D_3, \\
+\Encf(\pk_c, 0_R; r'_c), \Encf(\pk_b, 0_R; r'_b) \big).
+\end{multline*}
+We reach the goal by reducing the conditioning in four steps.
+
+\medskip
+
+\textit{Substep 4.1, drop the residual encryptions.} By Steps~1 and~2, the fresh randomness $r'_c, r'_b$ is jointly independent of $V_2$ and of every other variable in the conditioning. The encryptions $\Encf(\pk_c, 0_R; r'_c)$ and $\Encf(\pk_b, 0_R; r'_b)$ are deterministic functions of $(\pk_c, 0_R, r'_c)$ and $(\pk_b, 0_R, r'_b)$ respectively, with no dependence on $V_2$. Conditioning on independent variables does not change the conditional distribution.
+
+\quad Goal becomes: $\Pr[V_2 = v \mid (\Dk_a, S, V_1, U_1, U_2, U_3, R_2, R_3, D_3)] = 1/m$ for every $v \in R$.
+
+\medskip
+
+\textit{Substep 4.2, drop $D_3$ and $\Dk_a$.} $D_3 = (S - U_1 V_1) + R_2 + R_3$ is a deterministic function of $(S, V_1, U_1, R_2, R_3)$, all already in the conditioning. Conditioning on a deterministic function of variables already in the conditioning does not change the conditional distribution. $\Dk_a$ is a deterministic constant fixed at protocol setup, independent of all input random variables, so it also does not affect the conditional distribution.
+
+\quad Goal becomes: $\Pr[V_2 = v \mid (S, V_1, U_1, U_2, U_3, R_2, R_3)] = 1/m$ for every $v \in R$.
+
+\medskip
+
+\textit{Substep 4.3, drop $R_2, R_3$.} By hypothesis~2, $(R_2, R_3)$ is jointly independent of $(V_1, V_2, V_3, U_1, U_2, U_3)$. The opened sum $S = U_1 V_1 + U_2 V_2 + U_3 V_3$ does not involve $R_2$ or $R_3$, so $(R_2, R_3)$ is also jointly independent of $S$. Conditioning on independent variables does not change the conditional distribution.
+
+\quad Goal becomes: $\Pr[V_2 = v \mid (S, V_1, U_1, U_2, U_3)] = 1/m$ for every $v \in R$.
+
+\medskip
+
+\textit{Substep 4.4, solve the linear equation.} Set $c := S - U_1 V_1$, a constant given the conditioning on $(S, V_1, U_1)$. The remaining equation is $U_2 V_2 + U_3 V_3 = c$ with unknowns $V_2$ and $V_3$. For each candidate $v \in R$ for $V_2$, the unique $V_3$ satisfying the equation is $V_3 = U_3^{-1}(c - U_2 v)$, well-defined because $U_3 \in R^\times$ by hypothesis~2. So the fiber of solutions has exactly $m$ elements, one per candidate $v$. Since $V_2$ and $V_3$ are jointly independent and individually uniform on $R$ by hypothesis~1, the conditional distribution of $(V_2, V_3)$ given the equation is uniform on the $m$-element fiber. Marginalizing $V_3$ gives $V_2$ uniform on $R$.
+
+\quad Goal achieved: $\Pr[V_2 = v \mid (S, V_1, U_1, U_2, U_3)] = 1/m$ for every $v \in R$.
+
+This is exactly \texttt{Pr\_dsdp\_sol\_uniform} from the existing infotheo development. Combined with substeps~4.1, 4.2, 4.3, the initial goal $\Pr[V_2 = v \mid \AliceViewHyb] = 1/m$ for every $v \in R$ is established.
+
+\paragraph{Step 5, conclude.} By Step~4, when $A$ receives the post-Step-3 view $\AliceViewHyb$ as input, $A$ succeeds with probability exactly $1/m$:
+\[
+\Pr[A(\AliceViewHyb) = V_2] = \frac{1}{m} \quad \text{for every } A \in \C.
+\]
+The two swaps in Steps~1 and~2 each cost at most $\epscpa$ in success probability against $A$. Going back from $\AliceViewHyb$ to the real $\AliceView$ reverses those two swaps, so
+\begin{align*}
+\Pr[A(\AliceView) = V_2] &\leq \Pr[A(\AliceViewHyb) = V_2] + 2 \cdot \epscpa \\
+                          &= \tfrac{1}{m} + 2 \cdot \epscpa.
+\end{align*}
+The entropy form $\HunpC(V_2 \mid \AliceView) \geq \log m - 2 \cdot \epscpa$ follows the same way: $\HunpC(V_2 \mid \AliceViewHyb) = \log m$ by Step~4's uniformity, and each of the two swaps in Steps~1 and~2 subtracts at most $\epscpa$ from $\HunpC$.
+
+\bigskip
+\hrule
+\bigskip
+
+\noindent
+[1] Hsiao, Lu, Reyzin. \emph{Conditional Computational Entropy, or Toward Separating Pseudoentropy from Compressibility}. Advances in Cryptology -- Eurocrypt 2007, Lecture Notes in Computer Science 4515, pages 169--186. \url{https://www.iacr.org/archive/eurocrypt2007/45150169/45150169.pdf}
+
+\smallskip
+
+\noindent
+Definition~7 of this paper introduces conditional unpredictability entropy with the adversary class fixed concretely as polynomial-size circuits. The three closure properties we postulate on $\C$ (bounded enumeration, sampler composition, input fixing) are not axiomatized in the paper; they are immediate consequences of the circuit model in the concrete setting and are stated as separate hypotheses in our abstract treatment.
+
+\end{document}
