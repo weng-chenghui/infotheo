@@ -55,11 +55,11 @@
 
 \item $\HunpC(X \mid Y) := -\log \sup_{A \in \C} \Pr[A(Y) = X]$ is conditional unpredictability entropy, [1, Definition 7].
 
-\item \textbf{Real-or-zero indistinguishability.} $\epscpa \in [0, 1]$ is the distinguishing-probability gap allowed for the public-key encryption scheme against class $\C$. This is the real-or-zero form of the standard hybrid/game-hopping use of IND-CPA security: one ciphertext is replaced at a time, and each replacement is justified as a transition based on indistinguishability in the sense of [3].
+\item \textbf{Real-or-zero indistinguishability.} $\epscpa \in [0, 1]$ is the distinguishing-probability gap allowed for the public-key encryption scheme against class $\C$. This is the real-or-zero form of the standard hybrid/game-hopping use of IND-CPA security: one ciphertext is replaced at a time, and each replacement is what Shoup calls a transition based on indistinguishability [3, Sec.~1.1].
   \begin{enumerate}[label=8.\arabic*.]
-  \item For any party $p \in \{a, b, c\}$ and any efficiently samplable joint distribution $(W,M)$ generated without the secret key $\Dk_p$, where $W$ may be correlated with $M$, the adversary cannot effectively distinguish between the following two views:
+  \item Let $(W,M)$ be efficiently samplable, where $M$ is the challenge plaintext and $W$ is auxiliary input, i.e.\ side information given to the distinguisher. For any party $p \in \{a, b, c\}$, if $(W,M)$ is generated without $\Dk_p$, then even when $W$ is correlated with $M$, the adversary cannot effectively distinguish between the following two views.
     \begin{enumerate}[label=8.1.\arabic*.]
-    \item \textbf{Real view:} $(W, \Encf(\pk_p, M; r))$. The adversary sees auxiliary input, or side information, $W$ and a fresh encryption of $M$.
+    \item \textbf{Real view:} $(W, \Encf(\pk_p, M; r))$. The adversary sees the auxiliary input $W$ and a fresh encryption of $M$.
     \item \textbf{Zero view:} $(W, \Encf(\pk_p, 0_R; r'))$. The adversary sees the same $W$, but the message is replaced by $0_R$ and encrypted with fresh randomness.
     \end{enumerate}
   \item Formally:
@@ -231,6 +231,76 @@ Taking the supremum over $A \in \C$ and applying the definition of $\HunpC$ give
 = \log m - \log(1 + 2m\epscpa).
 \]
 This bound is informative when $\frac{1}{m} + 2\epscpa < 1$; otherwise it remains formally true but weak.
+
+\section*{Generalization to N parties}
+
+The 3-party theorem generalizes to the original $N$-party DSDP protocol with one corrupted party. The proof structure carries over verbatim, with a per-target leakage budget that scales linearly in $N$.
+
+\subsection*{Per-target bound}
+
+Let $N \geq 3$ be the number of parties, and suppose party $p \in \{1, \ldots, N\}$ is corrupted. The corrupted party's view contains
+\begin{itemize}
+\item the public protocol material such as opened sums and masks,
+\item the corrupted party's own decryption key $\Dk_p$,
+\item one ciphertext encrypted under each of the other $N-1$ parties' public keys.
+\end{itemize}
+Repeating the path-(b) hybrid argument of Theorem~1 with $N-1$ cross-key ciphertext swaps in place of the two used in the 3-party case gives the bound: for every $A \in \C$ and every target $V_i$ with $i \neq p$,
+\[
+\Pr[A(\mathit{View}_p) = V_i] \leq \frac{1}{m} + (N-1) \cdot \epscpa.
+\]
+The $(N-1) \cdot \epscpa$ term is the cost of $N-1$ applications of real-or-zero indistinguishability in the hybrid sequence $H_0 \to H_1 \to \cdots \to H_{N-1}$, one $\epscpa$ per swap.
+
+\subsection*{Concrete security as $N$ grows}
+
+The bound is linear in $N$. The standard concrete-security framing keeps it meaningful in the regime where the encryption advantage $\epscpa$ is negligible in a security parameter $\lambda$ and the number of parties is polynomially bounded in $\lambda$:
+\[
+\epscpa = \mathrm{negl}(\lambda), \qquad N = \mathrm{poly}(\lambda).
+\]
+Under these conditions,
+\[
+(N-1) \cdot \epscpa = \mathrm{poly}(\lambda) \cdot \mathrm{negl}(\lambda) = \mathrm{negl}(\lambda),
+\]
+so the per-target bound remains negligibly close to the IT baseline $1/m$ for every polynomially bounded $N$.
+
+A concrete numerical example clarifies the regime. Take $\epscpa = 2^{-128}$, the standard 128-bit security level, and $m = 2^{32}$. The IT baseline is $1/m = 2^{-32}$. For $N = 10^6$ parties,
+\[
+(N-1) \cdot \epscpa \approx 2^{20} \cdot 2^{-128} = 2^{-108},
+\]
+which is roughly $2^{76}$ times smaller than $1/m$. The cryptographic term is dominated by the IT baseline, and the bound is essentially $1/m$. The crossover point at which the cryptographic term begins to compete with the IT baseline is $N \approx 1/(m \cdot \epscpa) = 2^{96}$, far beyond any realistic instantiation.
+
+\subsection*{Per-target uncertainty does not grow with $N$}
+
+The per-target uncertainty of $V_i$, measured by $\log m$ bits, is fixed in $N$. Adding parties to the protocol does not increase the entropy of any individual secret. The per-target bound therefore compares a fixed IT baseline $1/m$ against a leakage budget $(N-1) \cdot \epscpa$ that grows linearly in $N$. The protocol remains secure as long as the leakage stays below the IT baseline, that is,
+\[
+(N-1) \cdot \epscpa < \frac{1}{m}.
+\]
+For $\epscpa = \mathrm{negl}(\lambda)$ and $m = \mathrm{poly}(\lambda)$, this inequality holds whenever $N$ is super-polynomially smaller than $1/(m \cdot \epscpa) = 1/\mathrm{negl}(\lambda)$, in particular whenever $N$ is polynomial in $\lambda$.
+
+\subsection*{Joint security across all targets}
+
+A joint claim about all $N-1$ secrets simultaneously imposes a much stricter requirement on $\epscpa$. The IT baseline for guessing the entire tuple $(V_2, \ldots, V_N)$ correctly is $1/m^{N-1}$, which decreases exponentially in $N$. The standard hybrid bound is
+\[
+\Pr[A \text{ guesses all of } (V_2, \ldots, V_N) \text{ correctly}] \leq \frac{1}{m^{N-1}} + (N-1) \cdot \epscpa.
+\]
+For the joint bound to remain meaningful, $\epscpa$ must be smaller than $1/m^{N-1}$, that is, exponentially small in $N \cdot \log m$. This is the regime in which the protocol's joint security is genuinely tight. For practical $N$, the requirement is unreachable with standard cryptographic schemes, and joint security across all secrets is usually not claimed. Per-target security, with the linear-in-$N$ bound above, is the natural notion to maintain.
+
+\subsection*{Asymptotic per-target theorem statement}
+
+The following is the precise asymptotic statement that the formal development carries.
+
+\textbf{Theorem (Asymptotic per-target security under $N$-party scaling).} Fix a security parameter $\lambda$. Assume the encryption scheme satisfies real-or-zero indistinguishability against $\C$ with advantage $\epscpa = \epscpa(\lambda)$ negligible in $\lambda$, and that the number of parties is $N = N(\lambda)$ polynomially bounded in $\lambda$. Let party $p \in \{1, \ldots, N\}$ be the corrupted party, and let $V_i$ be any target with $i \neq p$. Then
+\[
+\Pr[A(\mathit{View}_p) = V_i] \leq \frac{1}{m} + (N-1) \cdot \epscpa,
+\]
+and the right-hand side equals $1/m + \mathrm{negl}(\lambda)$.
+
+The corresponding entropy form, obtained by exponentiating, is
+\[
+\HunpC(V_i \mid \mathit{View}_p)
+\geq -\log\left( \frac{1}{m} + (N-1) \epscpa \right)
+= \log m - \log\left(1 + (N-1) \, m \, \epscpa\right).
+\]
+For $\epscpa$ negligible and $N$ polynomial, the second term $\log(1 + (N-1) \, m \, \epscpa)$ is $\mathrm{negl}(\lambda)$, so $\HunpC(V_i \mid \mathit{View}_p) \geq \log m - \mathrm{negl}(\lambda)$.
 
 \bigskip
 \hrule
