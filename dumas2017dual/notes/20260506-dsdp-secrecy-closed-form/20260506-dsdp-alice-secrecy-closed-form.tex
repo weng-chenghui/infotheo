@@ -1,0 +1,364 @@
+\documentclass[11pt]{article}
+\usepackage[a4paper,margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{enumitem}
+\usepackage[colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue]{hyperref}
+\usepackage{xurl}
+
+\newtheorem{lemma}{Lemma}
+
+\newcommand{\indep}{\mathrel{\perp\mkern-9mu\perp}}
+\newcommand{\Renc}{\mathcal{R}_{\mathrm{enc}}}
+\newcommand{\epscpa}{\varepsilon_{\mathrm{cpa}}}
+\newcommand{\HunpC}{H_{\mathrm{unp}}^{\mathcal{C}}}
+\newcommand{\Hunp}{H_{\mathrm{unp}}}
+\newcommand{\C}{\mathcal{C}}
+\newcommand{\Yspace}{\mathcal{Y}}
+\newcommand{\Wspace}{\mathcal{W}}
+\newcommand{\Encf}{\mathrm{Enc}}
+\newcommand{\Decf}{\mathrm{Dec}}
+\newcommand{\KeyGen}{\mathrm{KeyGen}}
+\newcommand{\AliceView}{\mathit{AliceView}}
+\newcommand{\AliceViewHyb}{\mathit{AliceView}_{\textrm{after-swaps}}'}
+\newcommand{\Dk}{\mathit{Dk}}
+\newcommand{\pk}{\mathit{pk}}
+
+\title{3-party DSDP $V_2$-unpredictability in $\AliceView$ against corrupted Alice}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+
+\section*{Setup}
+
+\begin{enumerate}
+\item $(\Omega, \Sigma, P)$ is a discrete probability space.
+
+\item $(R, +, \cdot, 0_R, 1_R)$ is a finite commutative ring with $m := \#|R| \geq 2$. The unit group is $R^\times := \{ u \in R \mid \exists v \in R,\ u \cdot v = 1_R \}$.
+
+\item $(\KeyGen, \Encf, \Decf)$ is a public-key encryption scheme with plaintext space $R$, fixed public-key registry $(\pk_a, \pk_b, \pk_c)$, corresponding fixed decryption keys $(\Dk_a, \Dk_b, \Dk_c)$, and finite encryption-randomness space $\Renc$. The theorem does not formalize the key-generation experiment; it assumes this fixed registry satisfies the real-or-zero bound stated in Setup item~8. We sample fresh encryption randomness from $\Renc$ uniformly, i.e.\ each element of $\Renc$ is drawn with probability $1 / |\Renc|$. Decryption correctness $\Decf(\Dk_p, \Encf(\pk_p, m; r)) = m$ holds for every party $p$, message $m$, and randomness $r$.
+
+\item Each decryption key $\Dk_p$ is a deterministic value fixed at protocol setup and held privately by party $p$. When party $p$ is the corrupted party in a security theorem, $\Dk_p$ appears inside $p$'s own view since $p$ owns it. In such a case, the ciphertext encrypted by $\pk_p$ in party $p$'s view is a plaintext by decryption.
+
+\item Public keys $(\pk_a, \pk_b, \pk_c)$ are known to all parties.
+
+\item \textbf{The adversary class $\C$.} For finite input and output spaces $\mathcal{X}$ and $\mathcal{O}$ and a size bound $s$, $\C_{\mathcal{X} \to \mathcal{O}, s}$ denotes the class of non-uniform randomized circuits of size at most $s$ that take inputs in $\mathcal{X}$ and output values in $\mathcal{O}$. We use this typed family both for predictors, whose randomized output is an element of $R$, and for Boolean distinguishers. When the input/output spaces and the size bound are clear from context, we write $\C$.
+  \begin{enumerate}[label=6.\arabic*.]
+  \item In the usual complexity-theoretic correspondence, a probabilistic polynomial-time adversary can be represented, for each input length, by a polynomial-size randomized circuit. Conversely, allowing arbitrary polynomial-size circuit families gives the standard non-uniform relaxation of polynomial-time computation \cite[Lecture~4, Thm.~16]{trevisan-randomized-circuits}\cite[Lecture~8]{goldreich-cc-notes}\cite[Chap.~6]{arora-barak-circuits}. Thus, in this note, circuit size is the formal proxy for efficient computation: circuits are finite syntactic objects, and their size can be bounded directly, whereas a full probabilistic-polynomial-time machine model is not formalized here.
+  \item A predictor $A \in \C_{\Yspace \to R, s_0}$ observes a view $Y : \Omega \to \Yspace$ and outputs a randomized guess for a target $X \in R$.
+  \item A Boolean distinguisher $D \in \C_{\mathcal{Z} \to \{0,1\}, s}$ observes a candidate view or hybrid sample in a finite sample space $\mathcal{Z}$ and outputs a bit in $\{0,1\}$.
+  \item For any finite view space $\Yspace$, the randomized circuit $A$ induces a Markov kernel $A : \Yspace \to \Delta(R)$, where $\Delta(R)$ is the set of probability distributions on $R$. When presented with a specific view value $y \in \Yspace$, the adversary samples a guess from the distribution $A(y)$.
+    \begin{enumerate}[label=6.3.\arabic*.]
+    \item In other words, all information observed by the adversary is captured in a view value $y \in \Yspace$. Their strategy $A$ then translates this accumulated knowledge into a biased distribution $A(y) \in \Delta(R)$, from which they sample their guess for the secret value in $R$.
+    \end{enumerate}
+  \item The average chance that the guess matches the target:
+    \[ \Pr[A(Y) = X] := \mathbb{E}_\omega \big[ A(Y(\omega))(\{X(\omega)\}) \big]. \]
+  \item The notation $\C_{\mathcal{X} \to \mathcal{O},s}$ is local to this note. The size parameter matters because the hybrid proof turns a predictor $A$ of size at most $s_0$ into a Boolean distinguisher $D_A$ of size at most $s_0 + t_{\mathrm{hyb}}$, where $t_{\mathrm{hyb}}$ accounts for hardwiring the real-or-zero hybrid context, sampling internal randomness, forming the candidate party view from the received pair $(W,C)$ by inserting $C$ into the missing ciphertext position, and comparing $A$'s output with the target value. Thus the real-or-zero assumption must hold for the corresponding typed distinguisher class at the larger size $s_0 + t_{\mathrm{hyb}}$. This follows the resource-bounded viewpoint used in computational entropy \cite[Sec.~2]{hsiao-lu-reyzin} and in computational indistinguishability arguments \cite[Secs.~1.3.3 and 3.2.4]{goldreich-foc}.
+    \begin{enumerate}[label=6.5.\arabic*.]
+    \item In other words, $D_A$ is a fixed wrapper around $A$: it contains the circuit for $A$ plus the fixed logic that expands $(W,C)$ into the relevant party view and tests whether $A$ guessed the target. The circuit does not grow during sampling; its larger size comes from this wrapper construction.
+    \end{enumerate}
+  \end{enumerate}
+
+\item $\HunpC(X \mid Y) := -\log \sup_{A \in \C} \Pr[A(Y) = X]$ is conditional unpredictability entropy \cite[Definition~7]{hsiao-lu-reyzin}. All logarithms are base~$2$.
+
+\item \textbf{Real-or-zero indistinguishability.} $\epscpa \in [0, 1]$ is the distinguishing-probability gap allowed for the fixed public-key registry against the typed distinguisher classes described above. This is the real-or-zero form of the standard hybrid/game-hopping use of IND-CPA security: one ciphertext is replaced at a time, and each replacement is what Shoup calls a transition based on indistinguishability \cite[Sec.~1.1]{shoup-games}.
+  \begin{enumerate}[label=8.\arabic*.]
+  \item Let $(W,M)$ be efficiently samplable, where $M$ is the challenge plaintext and $W$ is auxiliary input, i.e.\ side information given to the distinguisher. The auxiliary input may be arbitrarily correlated with $M$, and may even contain enough information to recover $M$, as long as it does not contain the matching decryption key $\Dk_p$ or any information that permits decryption under $\pk_p$. For any party $p \in \{a, b, c\}$, the adversary cannot effectively distinguish between the following two views.
+    \begin{enumerate}[label=8.1.\arabic*.]
+    \item \textbf{Real view:} $(W, \Encf(\pk_p, M; r))$. The adversary sees the auxiliary input $W$ and a fresh encryption of $M$.
+    \item \textbf{Zero view:} $(W, \Encf(\pk_p, 0_R; r'))$. The adversary sees the same $W$, but the message is replaced by $0_R$ and encrypted with fresh randomness.
+    \end{enumerate}
+  \item Formally:
+    \[ (W, \Encf(\pk_p, M; r)) \approx_{\C, \epscpa} (W, \Encf(\pk_p, 0_R; r')). \]
+  \item \textbf{Key constraints.}
+    \begin{enumerate}[label=8.3.\arabic*.]
+    \item \textbf{Independence:} the randomness $r, r'$ must be uniform and independent of the message $M$ and side information $W$.
+    \item \textbf{Matching-key degeneration:} if $W$ contains the decryption key $\Dk_p$ corresponding to $\pk_p$, then $\Encf(\pk_p, M; r)$ can be decrypted and the real view exposes $M$. Thus the real-or-zero bound is applied only when $W$ omits this matching decryption key and omits any other information that permits decryption under $\pk_p$.
+    \item \textbf{Nonmatching keys:} secret keys for other public keys may appear in $W$ only when they do not decrypt ciphertexts under $\pk_p$ and do not reveal $\Dk_p$.
+    \end{enumerate}
+  \item Equivalently, replacing a fresh encryption of $M$ by a fresh encryption of $0_R$ changes any Boolean distinguishing event by at most $\epscpa$. We use this statement with auxiliary input $W$ in the hybrids below.
+  \end{enumerate}
+
+\item \textbf{Notation for indistinguishability.} Following the standard indistinguishability-test formulation \cite[Sec.~3.2]{goldreich-uniform}, $X \approx_{\C, \epscpa} Y$ means that for every Boolean distinguisher $D$ in the relevant typed class,
+\[
+\left|\Pr[D(X) = 1] - \Pr[D(Y) = 1]\right| \leq \epscpa,
+\]
+i.e.\ no adversary in $\C$ distinguishes the two distributions with probability gap above $\epscpa$.
+\end{enumerate}
+
+\section*{Theorem 1: DSDP secrecy of $V_2$ against corrupted Alice}
+
+\subsection*{Hypotheses}
+
+\begin{enumerate}
+\item $V_1, V_2, V_3 : \Omega \to R$ are jointly independent. $V_2$ and $V_3$ are individually uniform on $R$. $V_1$ may have arbitrary distribution; only its independence from $(V_2, V_3)$ is used in the proof below.
+
+\item $U_1, U_2, U_3, R_2, R_3 : \Omega \to R$ satisfy the following properties, which are the ones used in the proof of this theorem:
+  \begin{enumerate}[label=2.\arabic*.]
+  \item $(V_1, V_2, V_3) \indep (U_1, U_2, U_3)$ and the $U_i$ are mutually independent.
+  \item $U_3 \in R^\times$ almost surely. That is, $\Pr[U_3 \notin R^\times] = 0$, so $U_3$ is neither $0_R$ nor a zero divisor with positive probability, a case that belongs to the malicious-adversary analysis. Its distribution on $R^\times$ is otherwise arbitrary.
+  \item $(R_2, R_3) \indep (V_1, V_2, V_3, U_1, U_2, U_3)$.
+  \end{enumerate}
+
+  \textit{Remark.} At the protocol level, $U_1, U_2$ and $R_2, R_3$ are uniform on $R$, since these uniformities are required by the analogous secrecy theorems against corrupted Bob and corrupted Charlie. The current theorem does not invoke them, so they are omitted from the hypotheses above. A reader composing this theorem with the corrupted-Bob and corrupted-Charlie analogues must reinstate them in the global hypothesis set.
+
+\item Protocol-defined intermediate random variables on $\Omega$:
+\begin{align*}
+D_2 &:= V_2 \cdot U_2 + R_2, \\
+D_3 &:= V_3 \cdot U_3 + R_3 + D_2 = V_3 \cdot U_3 + V_2 \cdot U_2 + R_2 + R_3, \\
+S   &:= D_3 + U_1 \cdot V_1 - R_2 - R_3 = U_1 \cdot V_1 + U_2 \cdot V_2 + U_3 \cdot V_3,
+\end{align*}
+where $S$ is the publicly opened sum at the reveal step.
+
+\item $r_a, r_b, r_c : \Omega \to \Renc$ are mutually independent, each individually uniform on $\Renc$, and jointly independent of $(V_1, V_2, V_3, U_1, U_2, U_3, R_2, R_3)$. Namely,
+\[
+(V_1, V_2, V_3, U_1, U_2, U_3, R_2, R_3) \indep r_a \indep r_b \indep r_c.
+\]
+The reduction-side randomness $r'_b, r'_c$ used in the proof is not part of the protocol input. It is introduced via a probability-space extension at the swap site, with $r'_c$ uniform on $\Renc$ and jointly independent of $(V_1,V_2,V_3,U_1,U_2,U_3,R_2,R_3,r_a,r_b,r_c)$, and $r'_b$ uniform on $\Renc$ and jointly independent of $(V_1,V_2,V_3,U_1,U_2,U_3,R_2,R_3,r_a,r_b,r_c,r'_c)$.
+
+\item The corrupted-Alice view is
+\begin{multline*}
+\AliceView := \big( \Dk_a, S, V_1, U_1, U_2, U_3, R_2, R_3, \\
+\Encf(\pk_a, D_3; r_a), \Encf(\pk_c, V_3; r_c), \Encf(\pk_b, V_2; r_b) \big).
+\end{multline*}
+\end{enumerate}
+
+\subsection*{Conclusion}
+
+For every allowed predictor $A$ of size at most $s_0$,
+\[ \Pr[A(\AliceView) = V_2] \leq \tfrac{1}{m} + 2 \cdot \epscpa, \]
+and therefore
+\[
+\HunpC(V_2 \mid \AliceView)
+\geq -\log\left(\frac{1}{m} + 2 \epscpa\right)
+= \log m - \log(1 + 2m\epscpa).
+\]
+
+\subsection*{Proof outline}
+
+The bound is established by a hybrid argument. We apply real-or-zero indistinguishability twice, replacing each cross-key ciphertext by an encryption of $0_R$, and then use an information-theoretic uniformity argument on the resulting hybrid.
+
+Let $H_0 := \AliceView$. Let $H_1$ be the same view except that $\Encf(\pk_c, V_3; r_c)$ is replaced by $\Encf(\pk_c, 0_R; r'_c)$, where $r'_c$ is fresh and independent. Let $H_2$ be the same as $H_1$ except that $\Encf(\pk_b, V_2; r_b)$ is also replaced by $\Encf(\pk_b, 0_R; r'_b)$, where $r'_b$ is fresh and independent.
+
+\paragraph{Step 1, first ciphertext swap.} Let
+\begin{multline*}
+W_1 := \big( V_2, V_3, \Dk_a, S, V_1, U_1, U_2, U_3, R_2, R_3, \\
+\Encf(\pk_a, D_3; r_a), \Encf(\pk_b, V_2; r_b) \big).
+\end{multline*}
+This is $H_0$ with $\Encf(\pk_c, V_3; r_c)$ removed and with the input random variables $V_2$ and $V_3$ added explicitly as auxiliary input for the reduction. They are not extra components of Alice's real view.
+
+The matching decryption key $\Dk_c$ is not in $W_1$, and $W_1$ contains no information that permits decryption under $\pk_c$, so real-or-zero indistinguishability applies with $W_1$, target key $\pk_c$, and message $V_3$:
+\[
+(W_1, \Encf(\pk_c, V_3; r_c)) \approx_{\C, \epscpa} (W_1, \Encf(\pk_c, 0_R; r'_c)),
+\]
+where $r'_c : \Omega \to \Renc$ is the fresh extension variable from Hypothesis~4, hence uniform on $\Renc$ and jointly independent of $(V_1,V_2,V_3,U_1,U_2,U_3,R_2,R_3,r_a,r_b,r_c)$. In particular, $W_1$ and $V_3$ are deterministic functions of these variables, so $r'_c$ is jointly independent of $(W_1, V_3, r_c)$.
+
+For any allowed predictor $A$ of size at most $s_0$, form the Boolean distinguisher $D_A$ that receives a pair $(W_1,C)$, forms the corresponding Alice view by inserting $C$ into the missing $\pk_c$ ciphertext position, samples $A$'s guess on that view, and outputs $1$ iff the guess equals the auxiliary target value $V_2$. By the wrapper-overhead convention in Setup item~6, $D_A$ belongs to the typed distinguisher class covered by the real-or-zero assumption. By construction,
+\[
+\Pr[D_A(W_1,\Encf(\pk_c,V_3;r_c))=1] = \Pr[A(H_0)=V_2]
+\]
+and
+\[
+\Pr[D_A(W_1,\Encf(\pk_c,0_R;r'_c))=1] = \Pr[A(H_1)=V_2].
+\]
+Thus the distinguishing bound for $D_A$ gives
+\[
+\left|\Pr[A(H_0)=V_2] - \Pr[A(H_1)=V_2]\right| \leq \epscpa.
+\]
+
+\paragraph{Step 2, second ciphertext swap.} Let
+\begin{multline*}
+W_2 := \big( V_2, V_3, \Dk_a, S, V_1, U_1, U_2, U_3, R_2, R_3, \\
+\Encf(\pk_a, D_3; r_a), \Encf(\pk_c, 0_R; r'_c) \big).
+\end{multline*}
+This is $H_1$ with $\Encf(\pk_b, V_2; r_b)$ removed and $V_2, V_3$ retained as auxiliary input for the reduction.
+
+The matching decryption key $\Dk_b$ is not in $W_2$, and $W_2$ contains no information that permits decryption under $\pk_b$, so real-or-zero indistinguishability applies with $W_2$, target key $\pk_b$, and message $V_2$. This is a known-message use of real-or-zero: the auxiliary input $W_2$ explicitly contains $V_2$, which is allowed by Setup item~8 because the matching decryption key is absent.
+\[
+(W_2, \Encf(\pk_b, V_2; r_b)) \approx_{\C, \epscpa} (W_2, \Encf(\pk_b, 0_R; r'_b)),
+\]
+where $r'_b : \Omega \to \Renc$ is the fresh extension variable from Hypothesis~4, hence uniform on $\Renc$ and jointly independent of $(V_1,V_2,V_3,U_1,U_2,U_3,R_2,R_3,r_a,r_b,r_c,r'_c)$. In particular, $W_2$ and $V_2$ are deterministic functions of these variables, so $r'_b$ is jointly independent of $(W_2, V_2, r_b)$.
+
+The same predictor-to-distinguisher conversion, again using the wrapper-overhead convention from Setup item~6, gives
+\[
+\left|\Pr[A(H_1)=V_2] - \Pr[A(H_2)=V_2]\right| \leq \epscpa.
+\]
+
+\paragraph{Step 3, own-key decryption and augmentation.} The ciphertext $\Encf(\pk_a, D_3; r_a)$ is encrypted under Alice's own public key, and $\Dk_a$ is in corrupted Alice's view. By correctness, $D_3$ is a deterministic function of $(\Dk_a,\Encf(\pk_a,D_3;r_a))$. Define the augmented view
+\begin{multline*}
+\AliceViewHyb := \big( \Dk_a, S, V_1, U_1, U_2, U_3, R_2, R_3, D_3, \\
+\Encf(\pk_a, D_3; r_a), \Encf(\pk_c, 0_R; r'_c), \Encf(\pk_b, 0_R; r'_b) \big).
+\end{multline*}
+Any size-$s_0$ predictor $A_2$ on $H_2$ extends to a size-$(s_0 + O(1))$ predictor $A'_2$ on $\AliceViewHyb$ that ignores the explicit $D_3$ component and feeds the remaining components to $A_2$. The two predictors achieve identical success probability:
+\[
+\Pr[A_2(H_2) = V_2] = \Pr[A'_2(\AliceViewHyb) = V_2].
+\]
+Hence it suffices to bound $\Pr[A'(\AliceViewHyb) = V_2]$ for every size-$(s_0 + O(1))$ predictor $A'$ on the augmented view. Given $D_3$ and $\Dk_a$, the own-key ciphertext is a deterministic function of the fresh randomness $r_a$, which is independent of $V_2$ and of the other input variables. Hence it carries no additional information about $V_2$ once $D_3$ is conditioned on.
+
+\paragraph{Step 4, residual uniformity.}
+
+\textbf{Initial goal.} Show that $\Pr[V_2 = v \mid \AliceViewHyb] = 1/m$ for every $v \in R$ and every positive-probability conditioning value of $\AliceViewHyb$, where
+\begin{multline*}
+\AliceViewHyb = \big( \Dk_a, S, V_1, U_1, U_2, U_3, R_2, R_3, D_3, \\
+\Encf(\pk_a, D_3; r_a), \Encf(\pk_c, 0_R; r'_c), \Encf(\pk_b, 0_R; r'_b) \big).
+\end{multline*}
+We reach the goal by reducing the conditioning in four steps.
+
+\medskip
+
+\textit{Substep 4.1, drop the residual encryptions.} We use the following elementary fact.
+
+\begin{lemma}[Independent augmentation]\label{lem:indep-aug}
+Let $X, Y, W$ be random variables on $(\Omega, \Sigma, P)$ with $W \indep (X, Y)$, and let $g$ be any function such that $Z := g(Y, W)$ is a well-defined random variable. Then for every value $(y, z)$ with $\Pr[Y = y, Z = z] > 0$ and every $x$,
+\[
+\Pr[X = x \mid Y = y, Z = z] = \Pr[X = x \mid Y = y].
+\]
+\end{lemma}
+
+We apply Lemma~\ref{lem:indep-aug} with
+\begin{align*}
+X &:= V_2, \\
+Y &:= (\Dk_a, S, V_1, U_1, U_2, U_3, R_2, R_3, D_3), \\
+W &:= (r_a, r'_c, r'_b), \\
+Z &:= \big(\Encf(\pk_a, D_3; r_a),\ \Encf(\pk_c, 0_R; r'_c),\ \Encf(\pk_b, 0_R; r'_b)\big),
+\end{align*}
+so that $\AliceViewHyb = (Y, Z)$. The hypothesis $W \indep (X, Y)$ holds by Hypothesis~4 and its extension clauses for $r'_c, r'_b$. The function $Z = g(Y, W)$ is given component-wise by reading $D_3$ out of $Y$ and combining it with the public constants $\pk_a, \pk_c, \pk_b, 0_R$ and the components of $W$. The lemma then yields
+\[
+\Pr[V_2 = v \mid \AliceViewHyb] = \Pr[V_2 = v \mid Y]
+\]
+for every $v \in R$ and every positive-probability conditioning value of $\AliceViewHyb$.
+
+\quad Goal becomes: $\Pr[V_2 = v \mid (\Dk_a, S, V_1, U_1, U_2, U_3, R_2, R_3, D_3)] = 1/m$ for every $v \in R$.
+
+\medskip
+
+\textit{Substep 4.2, drop $D_3$ and $\Dk_a$.} $D_3 = (S - U_1 V_1) + R_2 + R_3$ is a deterministic function of $(S, V_1, U_1, R_2, R_3)$, all already in the conditioning. Conditioning on a deterministic function of variables already in the conditioning does not change the conditional distribution. $\Dk_a$ is a deterministic constant fixed at protocol setup, independent of all input random variables, so it also does not affect the conditional distribution.
+
+\quad Goal becomes: $\Pr[V_2 = v \mid (S, V_1, U_1, U_2, U_3, R_2, R_3)] = 1/m$ for every $v \in R$.
+
+\medskip
+
+\textit{Substep 4.3, drop $R_2, R_3$.} By hypothesis~2,
+\[
+(R_2, R_3) \indep (V_1, V_2, V_3, U_1, U_2, U_3).
+\]
+The opened sum $S = U_1 V_1 + U_2 V_2 + U_3 V_3$ is a function of $(V_1, V_2, V_3, U_1, U_2, U_3)$, so $(R_2, R_3)$ is jointly independent of the whole tuple $(S, V_1, U_1, U_2, U_3)$. Conditioning on these independent variables does not change the conditional distribution.
+
+\quad Goal becomes: $\Pr[V_2 = v \mid (S, V_1, U_1, U_2, U_3)] = 1/m$ for every $v \in R$.
+
+\medskip
+
+\textit{Substep 4.4, solve the linear equation.} Set $c := S - U_1 V_1$, a constant given the conditioning on $(S, V_1, U_1)$. The remaining equation is $U_2 V_2 + U_3 V_3 = c$ with unknowns $V_2$ and $V_3$. For each candidate $v \in R$ for $V_2$, the unique $V_3$ satisfying the equation is $V_3 = U_3^{-1}(c - U_2 v)$, well-defined because $U_3 \in R^\times$ by hypothesis~2. So the fiber of solutions has exactly $m$ elements, one per candidate $v$. By Hypothesis~1, $(V_2, V_3)$ is jointly uniform on $R \times R$. By Hypothesis~2.1, $(V_2, V_3) \indep (V_1, U_1, U_2, U_3)$, so conditioning on $(V_1, U_1, U_2, U_3)$ does not change the joint law of $(V_2, V_3)$, which remains uniform on $R \times R$. The constraint $U_2 V_2 + U_3 V_3 = c$ then partitions $R \times R$ into $m$ fibers of size $m$, and the conditional law of $(V_2, V_3)$ given the equation is uniform on the relevant fiber. Marginalizing $V_3$ gives $V_2$ uniform on $R$.
+
+\quad Goal achieved: $\Pr[V_2 = v \mid (S, V_1, U_1, U_2, U_3)] = 1/m$ for every $v \in R$.
+
+This is the abstract finite-ring version of the fiber argument formalized as \texttt{Pr\_dsdp\_sol\_uniform} in the existing infotheo development. Combined with substeps~4.1, 4.2, 4.3, the initial goal $\Pr[V_2 = v \mid \AliceViewHyb] = 1/m$ for every $v \in R$ and every positive-probability conditioning value is established.
+
+\paragraph{Step 5, conclude.} Since $D_3$ is computable from $H_2$, any predictor on $H_2$ can be viewed as a predictor on the augmented view $\AliceViewHyb$ that ignores the explicit $D_3$ component. By Step~4, this predictor succeeds with probability exactly $1/m$:
+\[
+\Pr[A(H_2) = V_2] = \frac{1}{m} \quad \text{for every allowed predictor } A.
+\]
+Steps~1 and~2 establish
+\begin{align*}
+\big|\Pr[A(H_0)=V_2] - \Pr[A(H_1)=V_2]\big| &\leq \epscpa, \\
+\big|\Pr[A(H_1)=V_2] - \Pr[A(H_2)=V_2]\big| &\leq \epscpa.
+\end{align*}
+In particular, $\Pr[A(H_0)=V_2] - \Pr[A(H_1)=V_2] \leq \epscpa$ and $\Pr[A(H_1)=V_2] - \Pr[A(H_2)=V_2] \leq \epscpa$. Adding the two inequalities gives
+\begin{align*}
+\Pr[A(\AliceView) = V_2] &\leq \Pr[A(H_2) = V_2] + 2 \cdot \epscpa \\
+                          &= \tfrac{1}{m} + 2 \cdot \epscpa.
+\end{align*}
+The entropy form is derived from the probability bound in three steps.
+
+\textit{Step 5.1, take the supremum over allowed predictors.} The bound $\Pr[A(\AliceView) = V_2] \leq \frac{1}{m} + 2 \epscpa$ holds for every allowed predictor $A$ of size at most $s_0$. Since the right-hand side $\frac{1}{m} + 2 \epscpa$ is the same number for every choice of $A$, taking the supremum over $A$ on the left preserves the inequality:
+\[
+\sup_{A \in \C} \Pr[A(\AliceView) = V_2] \leq \frac{1}{m} + 2 \epscpa.
+\]
+
+\textit{Step 5.2, apply $-\log$.} The function $x \mapsto -\log x$ is monotonically decreasing on $(0, \infty)$. Applying it to both sides reverses the inequality:
+\[
+-\log \sup_{A \in \C} \Pr[A(\AliceView) = V_2] \;\geq\; -\log\left(\frac{1}{m} + 2 \epscpa\right).
+\]
+By the definition of conditional unpredictability entropy in Setup item~7, the left-hand side is exactly $\HunpC(V_2 \mid \AliceView)$, hence
+\[
+\HunpC(V_2 \mid \AliceView) \;\geq\; -\log\left(\frac{1}{m} + 2 \epscpa\right).
+\]
+
+\textit{Step 5.3, simplify the right-hand side.} Factor $1/m$ inside the logarithm and split the product:
+\begin{align*}
+-\log\left(\frac{1}{m} + 2 \epscpa\right)
+&= -\log\left(\frac{1}{m} \cdot \big(1 + 2\,m\,\epscpa\big)\right) \\
+&= -\log\frac{1}{m} \,-\, \log\!\big(1 + 2\,m\,\epscpa\big) \\
+&= \log m \,-\, \log\!\big(1 + 2\,m\,\epscpa\big).
+\end{align*}
+Combining with Step~5.2 gives the stated entropy bound:
+\[
+\HunpC(V_2 \mid \AliceView) \;\geq\; \log m \,-\, \log\!\big(1 + 2\,m\,\epscpa\big).
+\]
+This bound is informative when $\frac{1}{m} + 2\,\epscpa < 1$. Otherwise it remains formally true but weak.
+
+\section*{Reference Notes}
+
+Reference \cite[Definition~7]{hsiao-lu-reyzin} introduces conditional unpredictability entropy with the adversary class fixed concretely as polynomial-size circuits. It also states in Section~2: ``We will use $s$ as the circuit size parameter (or running time bound when dealing with Turing machines instead of circuits).'' The typed notation for $\C_{\mathcal{X} \to \mathcal{O},s}$ is local to this 3-party Alice note; its role is to record the resource bound needed when a predictor is wrapped into a larger hybrid distinguisher. Reference \cite[Secs.~1.3.3 and 3.2.4]{goldreich-foc} is a textbook source for the non-uniform circuit model and indistinguishability by circuits.
+
+For the bridge from probabilistic polynomial-time computation to polynomial-size circuits, Trevisan's lecture notes introduce randomized algorithms and state that they ``show that Boolean circuits can simulate randomized algorithms'' \cite[Lecture~4]{trevisan-randomized-circuits}; the same notes state Adleman's theorem as $\mathrm{BPP} \subseteq \mathrm{SIZE}(n^{O(1)})$ and conclude that one can simulate the probabilistic algorithm by ``a circuit of size polynomial in $n$'' \cite[Lecture~4, Thm.~16]{trevisan-randomized-circuits}. Goldreich's computational complexity notes describe $P/\mathrm{poly}$ as a non-uniform model and say that $P/\mathrm{poly}$ ``upper bounds'' efficient computation, with $\mathrm{BPP} \subseteq P/\mathrm{poly}$ \cite[Lecture~8]{goldreich-cc-notes}. Arora and Barak define $P/\mathrm{poly}$ as languages decidable by polynomial-sized circuit families and state $P \subseteq P/\mathrm{poly}$, while also recording that $P$-uniform circuit families characterize $P$ \cite[Chap.~6]{arora-barak-circuits}.
+
+References \cite{bellare-concrete,shoup-games,blanchet-pointcheval-games} justify the proof style used above: encryption indistinguishability is commonly handled through real-or-random and left-or-right style notions, and security proofs are often organized as game-hopping or hybrid sequences whose adjacent transitions are justified by computational indistinguishability. The public-key real-or-zero security of the fixed registry is a hypothesis of this note. The proof style is instantiated by two cross-key ciphertext swaps followed by the information-theoretic residual uniformity argument corresponding to \texttt{Pr\_dsdp\_sol\_uniform}.
+
+\begin{thebibliography}{12}\bibitem{hsiao-lu-reyzin}
+Hsiao, Lu, Reyzin.
+\emph{Conditional Computational Entropy, or Toward Separating Pseudoentropy from Compressibility}.
+Advances in Cryptology -- Eurocrypt 2007, Lecture Notes in Computer Science 4515, pages 169--186.
+\url{https://www.iacr.org/archive/eurocrypt2007/45150169/45150169.pdf}
+
+\bibitem{bellare-concrete}
+Bellare, Desai, Jokipii, Rogaway.
+\emph{A Concrete Security Treatment of Symmetric Encryption}.
+Full version of FOCS 1997 paper, September 2000.
+\url{https://cseweb.ucsd.edu/~mihir/papers/sym-enc.pdf}
+
+\bibitem{shoup-games}
+Shoup.
+\emph{Sequences of Games: A Tool for Taming Complexity in Security Proofs}.
+January 18, 2006.
+\url{https://www.shoup.net/papers/games.pdf}
+
+\bibitem{blanchet-pointcheval-games}
+Blanchet, Pointcheval.
+\emph{Automated Security Proofs with Sequences of Games}.
+Advances in Cryptology -- Crypto 2006, Lecture Notes in Computer Science 4117, pages 537--554.
+\url{https://bblanche.gitlabpages.inria.fr/publications/BlanchetPointchevalCrypto06.pdf}
+
+\bibitem{goldreich-foc}
+Goldreich.
+\emph{Foundations of Cryptography, Volume I: Basic Tools}.
+Cambridge University Press, 2001.
+\url{https://www.wisdom.weizmann.ac.il/~oded/foc-vol1.html}
+
+\bibitem{goldreich-uniform}
+Goldreich.
+\emph{A Uniform-Complexity Treatment of Encryption and Zero-Knowledge}.
+Journal of Cryptology, Vol.~6, No.~1, pages 21--53, 1993; revised version, July 1998.
+\url{https://www.wisdom.weizmann.ac.il/~oded/PSX/uniform.pdf}
+
+\bibitem{trevisan-randomized-circuits}
+Trevisan.
+\emph{CS254: Computational Complexity, Notes for Lecture 4}.
+January 16, 2014.
+\url{https://theory.stanford.edu/~trevisan/cs254-14/lecture04.pdf}
+
+\bibitem{goldreich-cc-notes}
+Goldreich.
+\emph{Computational Complexity: A Conceptual Perspective, lecture notes}.
+Lecture~8: Non-Uniform Polynomial Time ($P/\mathrm{poly}$).
+\url{https://www.wisdom.weizmann.ac.il/~oded/PS/CC/all.pdf}
+
+\bibitem{arora-barak-circuits}
+Arora, Barak.
+\emph{Computational Complexity: A Modern Approach}, Chapter~6 draft: Boolean Circuits.
+\url{https://theory.cs.princeton.edu/complexity/circuitschap.pdf}
+
+\end{thebibliography}
+
+\end{document}
