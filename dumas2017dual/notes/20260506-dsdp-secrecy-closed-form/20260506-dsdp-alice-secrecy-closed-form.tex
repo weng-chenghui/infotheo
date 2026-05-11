@@ -5,8 +5,6 @@
 \usepackage[colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue]{hyperref}
 \usepackage{xurl}
 
-\newtheorem{lemma}{Lemma}
-
 \newcommand{\indep}{\mathrel{\perp\mkern-9mu\perp}}
 \newcommand{\Renc}{\mathcal{R}_{\mathrm{enc}}}
 \newcommand{\epscpa}{\varepsilon_{\mathrm{cpa}}}
@@ -17,7 +15,6 @@
 \newcommand{\Wspace}{\mathcal{W}}
 \newcommand{\Encf}{\mathrm{Enc}}
 \newcommand{\Decf}{\mathrm{Dec}}
-\newcommand{\KeyGen}{\mathrm{KeyGen}}
 \newcommand{\AliceView}{\mathit{AliceView}}
 \newcommand{\AliceViewHyb}{\mathit{AliceView}_{\textrm{after-swaps}}'}
 \newcommand{\Dk}{\mathit{Dk}}
@@ -37,7 +34,7 @@
 
 \item $(R, +, \cdot, 0_R, 1_R)$ is a finite commutative ring with $m := \#|R| \geq 2$. The unit group is $R^\times := \{ u \in R \mid \exists v \in R,\ u \cdot v = 1_R \}$.
 
-\item $(\KeyGen, \Encf, \Decf)$ is a public-key encryption scheme with plaintext space $R$, fixed public-key registry $(\pk_a, \pk_b, \pk_c)$, corresponding fixed decryption keys $(\Dk_a, \Dk_b, \Dk_c)$, and finite encryption-randomness space $\Renc$. The theorem does not formalize the key-generation experiment; it assumes this fixed registry satisfies the real-or-zero bound stated in Setup item~8. We sample fresh encryption randomness from $\Renc$ uniformly, i.e.\ each element of $\Renc$ is drawn with probability $1 / |\Renc|$. Decryption correctness $\Decf(\Dk_p, \Encf(\pk_p, m; r)) = m$ holds for every party $p$, message $m$, and randomness $r$.
+\item $\Encf$ is the encryption procedure of a public-key encryption scheme with plaintext space $R$ and finite encryption-randomness space $\Renc$, and $\Decf$ is the corresponding decryption procedure. The fixed public-key registry $(\pk_a, \pk_b, \pk_c)$ and corresponding fixed decryption keys $(\Dk_a, \Dk_b, \Dk_c)$ are deterministic constants assumed to satisfy the real-or-zero bound stated in Setup item~8. The key-generation experiment is not formalized in this note. Fresh encryption randomness is sampled from $\Renc$ uniformly, i.e.\ each element of $\Renc$ is drawn with probability $1 / |\Renc|$. Decryption correctness $\Decf(\Dk_p, \Encf(\pk_p, m; r)) = m$ holds for every party $p$, message $m$, and randomness $r$; this identity is invoked implicitly in Step~3 (own-key decryption).
 
 \item Each decryption key $\Dk_p$ is a deterministic value fixed at protocol setup and held privately by party $p$. When party $p$ is the corrupted party in a security theorem, $\Dk_p$ appears inside $p$'s own view since $p$ owns it. In such a case, the ciphertext encrypted by $\pk_p$ in party $p$'s view is a plaintext by decryption.
 
@@ -80,6 +77,12 @@ For finite input and output spaces $\mathcal{X}$ and $\mathcal{O}$ and a size bo
     \item \textbf{Nonmatching keys:} secret keys for other public keys may appear in $W$ only when they do not decrypt ciphertexts under $\pk_p$ and do not reveal $\Dk_p$.
     \end{enumerate}
   \item Equivalently, replacing a fresh encryption of $M$ by a fresh encryption of $0_R$ changes any Boolean distinguishing event by at most $\epscpa$. We use this statement with auxiliary input $W$ in the hybrids below.
+  \item \textbf{Soundness as a variant of IND-CPA.} The real-or-zero formulation with auxiliary input is implied by textbook IND-CPA via standard reductions, in three steps.
+    \begin{enumerate}[label=8.5.\arabic*.]
+    \item \textbf{Real-or-zero $\equiv$ left-or-right $\equiv$ real-or-random.} The three forms of CPA-secure indistinguishability are equivalent up to a factor of $2$ in the distinguishing advantage \cite[Sec.~3]{bellare-concrete}. The real-or-zero form is the convenient hybrid-game-hopping idiom of \cite[Sec.~1.1]{shoup-games}.
+    \item \textbf{Auxiliary input.} Indistinguishability with auxiliary input is the standard formulation of semantic security used in uniform-complexity treatments. Goldreich's augmented definition of semantic security explicitly conditions on auxiliary partial information $h(X_n)$ about the message \cite[Def.~4]{goldreich-uniform}, and Goldreich proves it equivalent to indistinguishability of encryptions in the auxiliary-input form \cite[Thm.~1]{goldreich-uniform}. In the non-uniform circuit model used here (Setup item~6), the auxiliary-input formulation is moreover equivalent to the fixed-message formulation, since ``the a-priori information can be incorporated into the circuit'' \cite[Rem.~12]{goldreich-uniform}. The auxiliary input's correlation with $M$ therefore does not impose a stronger assumption.
+    \item \textbf{Plaintext-revealing auxiliary input.} Goldreich's indistinguishability definition with auxiliary input $Z_n$ explicitly admits the special case $Z_n = X_n Y_n$, where the auxiliary input contains the challenge plaintexts in cleartext, and ``restricting attention to this special case \ldots\ is equivalent to the general case'' \cite[Def.~5 and Rem.~11]{goldreich-uniform}. The constraint that $W$ omits $\Dk_p$ and any decryption-equivalent information for $\pk_p$ is the standard IND-CPA secrecy condition (the challenger does not reveal the private key to the reduction); without it, no security claim is meaningful. Together, allowing $W$ to contain $M$ in plaintext is the maximally-permissive case of item~8.5.2 and is implied by plain IND-CPA in the non-uniform model.
+    \end{enumerate}
   \end{enumerate}
 
 \item \textbf{Notation for indistinguishability.} Following the standard indistinguishability-test formulation \cite[Sec.~3.2]{goldreich-uniform}, $X \approx_{\C, \epscpa} Y$ means that for every Boolean distinguisher $D$ in the relevant typed class,
@@ -229,23 +232,13 @@ Hence it suffices to bound $\Pr[A'(\AliceViewHyb) = V_2]$ for every size-$(s_0 +
 
 \medskip
 
-\textit{Substep 4.1, drop the residual encryptions.} We use the following elementary fact.
-
-\begin{lemma}[Independent augmentation]\label{lem:indep-aug}
-Let $X, Y, W$ be random variables on $(\Omega, \Sigma, P)$ with $W \indep (X, Y)$, and let $g$ be any function such that $Z := g(Y, W)$ is a well-defined random variable. Then for every value $(y, z)$ with $\Pr[Y = y, Z = z] > 0$ and every $x$,
-\[
-\Pr[X = x \mid Y = y, Z = z] = \Pr[X = x \mid Y = y].
-\]
-\end{lemma}
-
-We apply Lemma~\ref{lem:indep-aug} with
+\textit{Substep 4.1, drop the residual encryptions.} Set
 \begin{align*}
-X &:= V_2, \\
 Y &:= (\Dk_a, S, V_1, U_1, U_2, U_3, R_2, R_3, D_3), \\
 W &:= (r_a, r'_c, r'_b), \\
 Z &:= \big(\Encf(\pk_a, D_3; r_a),\ \Encf(\pk_c, 0_R; r'_c),\ \Encf(\pk_b, 0_R; r'_b)\big),
 \end{align*}
-so that $\AliceViewHyb = (Y, Z)$. The hypothesis $W \indep (X, Y)$ holds by Hypothesis~4 (for $r_a$) together with the probability-space extension in the proof outline (for $r'_c$ and $r'_b$). The function $Z = g(Y, W)$ is given component-wise by reading $D_3$ out of $Y$ and combining it with the public constants $\pk_a, \pk_c, \pk_b, 0_R$ and the components of $W$. The lemma then yields
+so that $\AliceViewHyb = (Y, Z)$ and $Z$ is a deterministic function of $(Y, W)$, obtained by reading $D_3$ out of $Y$ and combining it with the public constants $\pk_a, \pk_c, \pk_b, 0_R$ and the components of $W$. By Hypothesis~4 (for $r_a$) and the probability-space extension in the proof outline (for $r'_c$ and $r'_b$), $W \indep (V_2, Y)$. By \texttt{inde\_RV2\_cinde} from infotheo (in \texttt{du2002/spp\_proba.v}), this yields the conditional independence $V_2 \indep W \mid Y$, and hence $V_2 \indep Z \mid Y$ since $Z$ is a function of $(Y, W)$. By \texttt{cinde\_rv\_comp\_removal} from infotheo (in \texttt{du2002/spp\_entropy.v}), this implies
 \[
 \Pr[V_2 = v \mid \AliceViewHyb] = \Pr[V_2 = v \mid Y]
 \]
@@ -329,6 +322,126 @@ Reference \cite[Sec.~2.1]{lindell-pinkas-yao} is a standard source for the stati
 For the bridge from probabilistic polynomial-time computation to polynomial-size circuits, Trevisan's lecture notes introduce randomized algorithms and state that they ``show that Boolean circuits can simulate randomized algorithms'' \cite[Lecture~4]{trevisan-randomized-circuits}; the same notes state Adleman's theorem as $\mathrm{BPP} \subseteq \mathrm{SIZE}(n^{O(1)})$ and conclude that one can simulate the probabilistic algorithm by ``a circuit of size polynomial in $n$'' \cite[Lecture~4, Thm.~16]{trevisan-randomized-circuits}. Goldreich's computational complexity notes describe $P/\mathrm{poly}$ as a non-uniform model and say that $P/\mathrm{poly}$ ``upper bounds'' efficient computation, with $\mathrm{BPP} \subseteq P/\mathrm{poly}$ \cite[Lecture~8]{goldreich-cc-notes}. Arora and Barak define $P/\mathrm{poly}$ as languages decidable by polynomial-sized circuit families and state $P \subseteq P/\mathrm{poly}$, while also recording that $P$-uniform circuit families characterize $P$ \cite[Chap.~6]{arora-barak-circuits}.
 
 References \cite{bellare-concrete,shoup-games,blanchet-pointcheval-games} justify the proof style used above: encryption indistinguishability is commonly handled through real-or-random and left-or-right style notions, and security proofs are often organized as game-hopping or hybrid sequences whose adjacent transitions are justified by computational indistinguishability. The public-key real-or-zero security of the fixed registry is a hypothesis of this note. The proof style is instantiated by two cross-key ciphertext swaps followed by the information-theoretic residual uniformity argument corresponding to \texttt{Pr\_dsdp\_sol\_uniform}.
+
+% =============================================================================
+% Verbatim quotes from cited references supporting Setup items 8.5.2 and 8.5.3.
+% Located here for traceability; not rendered in the typeset document.
+% =============================================================================
+%
+% --- Supporting Setup item 8.5.2 (auxiliary input is the standard formulation
+% --- in uniform-complexity treatments, and equivalent to fixed-message
+% --- formulation in the non-uniform circuit model). Source:
+% --- Goldreich, "A Uniform-Complexity Treatment of Encryption and
+% --- Zero-Knowledge", Section 3 ("Uniform Security of Encryption Schemes").
+%
+% Quote 1 (Section 3.1, motivation paragraph before Definition 4):
+% "Loosely speaking, semantic security as defined in [18] means that whatever
+%  can be efficiently computed from the encryption of the message, can be
+%  efficiently computed given only the length of the message. Here we augment
+%  this definition by requiring that the above remains valid in presence of
+%  auxiliary partial information about the message. Namely, whatever can be
+%  efficiently computed from the encryption of the message and additional
+%  partial information about the message, can be efficiently computed given
+%  only the length of the message and the same partial information."
+%
+% Quote 2 (Definition 4):
+% "An encryption scheme, (G, E, D), is semantically secure if for every
+%  probabilistic polynomial-time algorithm A, there exists a probabilistic
+%  polynomial-time algorithm A', such that for every polynomial-time random
+%  variable {X_n}, every polynomial-time computable function h, every function
+%  f, every constant c > 0 and all sufficiently large n:
+%  Pr[A(E(X_n), h(X_n), 1^n) = f(X_n)]
+%    < Pr[A'(|X_n|, h(X_n), 1^n) = f(X_n)] + 1/n^c."
+% (h(X_n) is the auxiliary input correlated with the message.)
+%
+% Quote 3 (Theorem 1):
+% "An encryption scheme is semantically secure if and only if it has
+%  indistinguishable encryptions."
+%
+% Quote 4 (Remark 12, non-uniform equivalence -- the key load-bearing quote):
+% "In the non-uniform case, the definition is equivalent to requiring that,
+%  for all families of polynomial-size circuits {C_n}, all sequences of pairs
+%  {(alpha_n, beta_n)} (with |alpha_n| = |beta_n|), and all c > 0 and all
+%  sufficiently large n:
+%  | Pr[C_n(E(alpha_n)) = 1] - Pr[C_n(E(beta_n)) = 1] | < 1/n^c.
+%  (Namely, in this case the a-priori information can be incorporated into
+%  the circuit.)"
+%
+% --- Supporting Setup item 8.5.3 (auxiliary input may contain the challenge
+% --- plaintexts in cleartext; the maximally permissive case is equivalent to
+% --- the general case). Source: same Goldreich paper, Section 3.2.
+%
+% Quote 5 (Definition 5, indistinguishability with auxiliary input):
+% "An encryption scheme, (G, E, D), has indistinguishable encryptions if for
+%  every polynomial-time random variable {T_n = X_n Y_n Z_n} (with
+%  |X_n| = |Y_n|), every probabilistic polynomial-time algorithm A, every
+%  constant c > 0 and all sufficiently large n:
+%  | Pr[A(Z_n, E(X_n)) = 1] - Pr[A(Z_n, E(Y_n)) = 1] | < 1/n^c."
+% (Z_n is the auxiliary input jointly distributed with X_n, Y_n.)
+%
+% Quote 6 (Remark 11 -- direct support for the plaintext-revealing case):
+% "The random variable Z_n models additional information, on the message
+%  space, given to algorithm A which tries to distinguish the encryptions
+%  (of X_n and Y_n). A special case of interest is when Z_n = X_n Y_n. In view
+%  of our results (see subsection 3.3), restricting attention to this special
+%  case (as done in [18]) is equivalent to the general case."
+%
+% Quote 7 (Proof of Proposition 1 -- explicit use of plaintext-containing
+% auxiliary input in the construction):
+% "we can distinguish the encryptions of X_n and Y_n =def 1^|X_n| (using
+%  auxiliary input Z_n = X_n Y_n)."
+%
+% --- Note: the Goldreich paper does NOT explicitly state the "W omits Dk_p"
+% --- constraint. That constraint is the standard IND-CPA secrecy condition
+% --- (the challenger does not reveal the private key to the reduction); it
+% --- is implicit in any IND-CPA-style security claim and noted in 8.5.3 only
+% --- to make the soundness condition for our reduction self-contained.
+%
+% --- Supporting Setup item 8.5.1 (real-or-zero, real-or-random, and
+% --- left-or-right CPA indistinguishability are equivalent up to a small
+% --- constant factor; the real-or-zero form is the standard hybrid-game-
+% --- hopping idiom). Sources: Bellare-Desai-Jokipii-Rogaway 2000 and
+% --- Shoup 2006.
+%
+% Quote 8 (Bellare-Desai-Jokipii-Rogaway, Section 3, equivalence summary):
+% "We show that LOR-ATK and ROR-ATK are equivalent, up to a small constant
+%  factor in the reduction. (That is, we have security-preserving reductions
+%  between them.) We also show a security-preserving reduction from these
+%  notions to FTG-ATK. ... We complete the picture by showing that SEM-ATK
+%  and FTG-ATK are equivalent."
+%
+% Quote 9 (Bellare-Desai-Jokipii-Rogaway, Theorem 1, the factor-of-2 bound):
+% "Theorem 1 [ROR-ATK => LOR-ATK] For any scheme SE = (K, E, D),
+%   Adv^{lor-cpa}_{SE}(k, t, q_e, mu_e) <= 2 * Adv^{ror-cpa}_{SE}(k, t, q_e, mu_e)."
+% (Theorem 2 gives the reverse direction with factor 1, so ROR ~ LOR with
+%  worst-case factor 2.)
+%
+% --- Note: BDJR does not use the term "real-or-zero" explicitly. Real-or-zero
+% --- is the special case of LOR where one of the two messages is fixed to
+% --- 0^|x|. By BDJR Theorem 1, indistinguishability under any such fixed
+% --- LOR oracle inherits the LOR <-> ROR equivalence up to the same constant.
+% --- Shoup uses real-or-zero / single-message-substitution hybrids
+% --- throughout the games tutorial.
+%
+% Quote 10 (Shoup, Section 1.1, definition of indistinguishability transition):
+% "Transitions based on indistinguishability. In such a transition, a small
+%  change is made that, if detected by the adversary, would imply an efficient
+%  method of distinguishing between two distributions that are
+%  indistinguishable (either statistically or computationally)."
+%
+% Quote 11 (Shoup, Section 1.1, hybrid-with-auxiliary-input construction --
+%  this is the construction we use in Steps 1 and 2):
+% "Typically, one designs the two games so that they could easily be rewritten
+%  as a single 'hybrid' game that takes an auxiliary input -- if the auxiliary
+%  input is drawn from P1, you get Game i, and if drawn from P2, you get
+%  Game i + 1. The distinguisher then simply runs this single hybrid game
+%  with its input, and outputs 1 if the appropriate event occurs."
+%
+% Quote 12 (Shoup, Section 1.1, hybrid-argument continuity with the literature):
+% "'Hybrid arguments' have been used extensively in cryptography for many
+%  years. Such an argument is essentially a sequence of transitions based on
+%  indistinguishability."
+% =============================================================================
 
 \begin{thebibliography}{13}\bibitem{hsiao-lu-reyzin}
 Hsiao, Lu, Reyzin.
