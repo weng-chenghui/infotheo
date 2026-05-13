@@ -13,10 +13,10 @@
 
 From HB Require Import structures.
 From mathcomp Require Import all_boot all_order all_algebra fingroup finalg.
-From mathcomp Require Import matrix ring boolp finmap reals.
+From mathcomp Require Import matrix ring boolp finmap reals realsum.
 
 Set Warnings "-notation-overridden,-ambiguous-paths".
-From SSProve.Crypt Require Import Package pkg_composition.
+From SSProve.Crypt Require Import Package pkg_composition Pr.
 Set Warnings "notation-overridden,ambiguous-paths".
 
 From Stdlib Require Import Utf8.
@@ -1169,5 +1169,158 @@ Proof. exact: card_ord. Qed.
     entry. *)
 Lemma alice_view_card_index : #|alice_view| = index_alice_view.
 Proof. by []. Qed.
+
+(* ================================================================== *)
+(* Task 12: SDistr-to-fdist bridge for alice_view                     *)
+(* ================================================================== *)
+
+#[local] Open Scope fdist_scope.
+
+(** bridge_psum_to_bigop - the elementary identity converting SSProve's
+    [psum] over an [alice_view]-valued sub-distribution into MathComp's
+    [\sum_(v : alice_view)].  On a [finType] both quantities enumerate
+    the same support, and [psum f = \sum_i |f i|] from realsum collapses
+    to the plain sum because [distr.mu mu] is non-negative.
+    Kind: helper bridge.
+    Why: Task 12 of the plan (~/.claude/plans/sprightly-finding-robin.md).
+    The SSProve denotational semantics produces a [distr R alice_view]
+    via [Pr_fst]; the infotheo target side wants an
+    [\sum_(v : alice_view)] indexed bigop.  This lemma is the only
+    place where the two summation conventions meet.
+    Naming: project-local; not a MathComp suffix-table entry.  The
+    leading [bridge_] prefix marks it as part of the SSProve / infotheo
+    bridge.
+    Used by: bridge_leak_to_fdist, bridge_total_mass. *)
+Lemma bridge_psum_to_bigop (mu : distr.distr R alice_view) :
+  \sum_(v : alice_view) (distr.mu mu) v = psum (distr.mu mu).
+Proof.
+rewrite psum_fin.
+apply: eq_bigr => a _.
+by rewrite ger0_norm //; apply: distr.ge0_mu.
+Qed.
+
+(** bridge_leak_to_fdist - the SDistr-to-fdist bridge.  Given a
+    sub-distribution [mu : distr R alice_view] and a proof that its
+    total mass is one, produce an infotheo-side [{fdist alice_view}]
+    by wrapping [distr.mu mu] in an [ffun] and discharging the
+    [FDist.make] obligations: non-negativity comes from [distr.ge0_mu],
+    summation-to-one comes from [bridge_psum_to_bigop] composed with
+    the mass hypothesis.
+    Kind: bridge construction.
+    Why: Task 12 of the plan.  This is the central piece of plumbing
+    that lets the IT residual analysis (Task 13) run against an
+    infotheo [{fdist alice_view}] while the upstream IND-CPA hops
+    (Tasks 06-08) work over SSProve's [distr R alice_view].  The
+    function is parametric in [mu] and its mass-1 hypothesis: the
+    [Pr_fst game_leak]-specific instance is the consumer's obligation
+    (Task 13 will supply it via [LosslessCode] resolution on the
+    resolved [game_leak] code).
+    Naming: project-local.  The [_to_] middle marks the bridge
+    direction (SSProve SDistr -> infotheo fdist).
+    Used by: Task 13's [Pr_game_leak_V2_uniform] (which feeds the
+    [Pr_fst]-side of [game_leak] through this bridge to land on a
+    [{fdist alice_view}] and then applies [inde_RV2_cinde],
+    [cinde_rv_comp_removal], and [Pr_dsdp_sol_uniform]). *)
+Definition bridge_leak_to_fdist (mu : distr.distr R alice_view)
+  (Hmass : psum (distr.mu mu) = 1) : R.-fdist alice_view.
+Proof.
+unshelve eapply FDist.make.
+- exact: [ffun v => (distr.mu mu) v].
+- by move=> a; rewrite ffunE; apply: distr.ge0_mu.
+- under eq_bigr=> a _ do rewrite ffunE.
+  by rewrite bridge_psum_to_bigop.
+Defined.
+
+(** bridge_leak_to_fdistE - elementwise equation for the bridge.
+    Spells out how to evaluate the resulting [{fdist alice_view}] at a
+    point: it is just [distr.mu mu] of the same point.
+    Kind: simplification.
+    Why: lets downstream proofs unfold the bridge to expose the
+    underlying SSProve density without forcing them to manage the
+    [ffun] wrapper.
+    Naming: trailing [E] follows MathComp convention for elementwise /
+    extensional equations (compare [fdist1E], [fdistbindE]).
+    Used by: bridge_correct, bridge_support_enum, and Task 13 callers. *)
+Lemma bridge_leak_to_fdistE (mu : distr.distr R alice_view)
+    (Hmass : psum (distr.mu mu) = 1) (v : alice_view) :
+  bridge_leak_to_fdist Hmass v = (distr.mu mu) v.
+Proof. by rewrite /bridge_leak_to_fdist /= ffunE. Qed.
+
+(** bridge_total_mass - sums to one.  For any sub-distribution [mu]
+    with [psum (distr.mu mu) = 1] (which is the [LosslessCode]
+    statement when [mu] is [Pr_fst c] for a lossless code [c]), the
+    MathComp bigop sum over [alice_view] is one.  This is exactly the
+    FDist.make obligation extracted to a named lemma so callers can
+    use it without re-running the bridge's discharge.
+    Kind: bridge obligation.
+    Why: Task 12 of the plan, verbatim.  Discharged generically by
+    [bridge_psum_to_bigop] composed with [Hmass]; specifically for
+    [Pr_fst (resolve game_leak RUN tt)] the [Hmass] hypothesis will be
+    supplied by [LosslessOp_bind] / [LosslessOp_ret] resolution
+    (Task 11) once the [game_leak] body is reduced to its raw_code
+    form by Task 13.  No fallback hypothesis is required here: the
+    bridge is parametric in the mass proof, and consumers carry the
+    [LosslessCode] obligation themselves.
+    Naming: project-local; follows the [bridge_] convention.
+    Used by: Task 13's [Pr_game_leak_V2_uniform]. *)
+Lemma bridge_total_mass (mu : distr.distr R alice_view)
+    (Hmass : psum (distr.mu mu) = 1) :
+  \sum_(v : alice_view) (distr.mu mu) v = 1.
+Proof. by rewrite bridge_psum_to_bigop. Qed.
+
+(** bridge_support_enum - the support of [bridge_leak_to_fdist] is
+    contained in the canonical [enum alice_view].  Trivial in this
+    direction since [enum alice_view] enumerates the whole finType,
+    but stating the bound named makes the residual analysis in Task 13
+    syntactically uniform with the partition-by-support pattern used
+    in [dsdp_centropy_uniform].
+    Kind: bridge obligation.
+    Why: Task 12 of the plan.  When the IT residual rewrites
+    [\sum_(v : alice_view) bridge_leak_to_fdist _ v] using infotheo
+    machinery, having a named lemma certifying that no element outside
+    the [enum] needs special handling keeps the rewriting steps
+    minimal.
+    Naming: project-local; [_support_enum] reads "support is contained
+    in the enum".
+    Used by: Task 13. *)
+Lemma bridge_support_enum (mu : distr.distr R alice_view)
+    (Hmass : psum (distr.mu mu) = 1) (v : alice_view) :
+  bridge_leak_to_fdist Hmass v != 0 -> v \in enum alice_view.
+Proof. by move=> _; rewrite mem_enum. Qed.
+
+(** bridge_correct - the bridge preserves event probabilities.  For
+    any predicate [P : pred alice_view], the SSProve-side conditional
+    sum equals the infotheo-side [Pr] over the corresponding set.
+    Kind: bridge obligation.
+    Why: Task 12 of the plan, verbatim.  This is the bookkeeping
+    lemma that lets Task 13 state its residual goal first on the
+    SSProve side (where the upstream IND-CPA hops live) and then
+    transfer through the bridge to the infotheo
+    [{fdist alice_view}] side (where [Pr_dsdp_sol_uniform] lives).
+    The proof unfolds [Pr d E = \sum_(a in E) d a], rewrites the set
+    membership against the predicate, and uses
+    [bridge_leak_to_fdistE] to expose the underlying [distr.mu mu].
+    Naming: project-local; [_correct] reads "the bridge respects the
+    intended interpretation".
+    Used by: Task 13's [Pr_game_leak_V2_uniform]. *)
+Lemma bridge_correct (mu : distr.distr R alice_view)
+    (Hmass : psum (distr.mu mu) = 1) (P : pred alice_view) :
+  \sum_(v : alice_view | P v) (distr.mu mu) v
+    = Pr (bridge_leak_to_fdist Hmass) [set v | P v].
+Proof.
+rewrite /Pr.
+apply: eq_big => [a|a _].
+- by rewrite inE.
+- by rewrite bridge_leak_to_fdistE.
+Qed.
+
+(* Task 12 verify clause: the bridge type-checks at the expected
+   signature, and [Print Assumptions] on [bridge_correct] reveals no
+   admitted obligation beyond the standard SSProve / MathComp axioms.
+   The construction is parametric in the mass hypothesis; consumers
+   supply [Hmass] from [LosslessCode] resolution at the use site. *)
+Check bridge_leak_to_fdist :
+  forall (mu : distr.distr R alice_view),
+    psum (distr.mu mu) = 1 -> R.-fdist alice_view.
 
 End dsdp_security_indcpa.
