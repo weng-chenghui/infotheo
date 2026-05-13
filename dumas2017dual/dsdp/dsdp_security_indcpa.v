@@ -987,92 +987,20 @@ Proof.
 Qed.
 
 (* ================================================================== *)
-(* Task 14: closed-form Alice secrecy bound                            *)
+(* Task 14 / Task I: closed-form Alice secrecy bound (unconditional)   *)
 (* ================================================================== *)
 
-(** dsdp_alice_secrecy_indcpa - the closed-form Alice secrecy bound.
-    For any adversary [predictor] satisfying the SSProve disjointness
-    conditions of [advantage_game_real_game_leak], the probability that
-    [predictor] outputs [true] when interacting with [game_real] is at
-    most [1/m + 2 * epsilon_cpa], where [m = index_msg] is the message
-    space cardinality and [epsilon_cpa] is the IND-CPA hardness
-    parameter.  Semantically the bound captures "Pr[A(AliceView) = V_2]
-    <= 1/m + 2 * epsilon_cpa": the predictor is interpreted to encode
-    its V_2-guess in its bool output (output [true] iff its guess
-    matches V_2).
-    Kind: main (Task 14 of the plan).
-    Why: closes the hybrid argument from the plan
-    ([~/.claude/plans/sprightly-finding-robin.md]).  The [2 *
-    epsilon_cpa] half comes from [advantage_game_real_game_leak] (Task
-    08): two IND-CPA real-or-zero hops plus a perfect-equivalence
-    residual.  The [1/m] half comes from [Pr_game_leak_V2_uniform]
-    (Task 13) on the infotheo-side [{R.-fdist T}] probability space.
-    The two halves are stitched here by the triangle inequality on
-    [AdvantageE].
-    Naming: project-local [dsdp_alice_secrecy_indcpa] follows the plan
-    (this is the new IND-CPA-based theorem replacing the old
-    [E_enc_inde]-dependent [dsdp_entropic_security] in
-    [dsdp_security.v]).
-    Used by: Task 15 retires [E_enc_inde] and its dependent IT-only
-    Sections in [dsdp_security.v] / [dsdp_entropy.v] / [homomorphic_encryption.v].
-    Closed-form gap (intentional, documented): the residual bound on
-    [Pr (predictor o game_leak) true] is taken as a hypothesis
-    [leak_bound].  The companion lemma [Pr_game_leak_V2_uniform] in
-    [Section dsdp_security_indcpa_residual] proves the infotheo-side
-    fdist statement [`Pr[V_2 = v | (Z_rand, V_1, U_1, U_2, U_3, S) =
-    ...] = 1/m].  Translating that fdist statement to the SSProve-side
-    [distr.mu (Pr (predictor o game_leak)) true <= 1/m] requires the
-    SDistr-to-fdist bridge from Task 12 ([bridge_correct]) plus a
-    marginalisation argument and is bookkeeping rather than new
-    mathematics.  Task 14b will discharge that bookkeeping and remove
-    the hypothesis; the present theorem makes the closed-form bound
-    Qed-checkable today and pins the only remaining gap to a single,
-    named hypothesis that downstream consumers see explicitly. *)
-Theorem dsdp_alice_secrecy_indcpa
-    (LA : Locations) (predictor : raw_package)
-    (predictor_valid :
-       ValidPackage LA game_iface A_export predictor)
-    (predictor_disj_real :
-       fseparate LA game_real.(locs))
-    (predictor_disj_h1 :
-       fseparate LA game_hybrid_one.(locs))
-    (predictor_disj_h2 :
-       fseparate LA game_hybrid_two.(locs))
-    (predictor_disj_leak :
-       fseparate LA game_leak.(locs))
-    (predictor_disj_tc :
-       fseparate LA translation_charlie.(locs))
-    (predictor_disj_tb :
-       fseparate LA translation_bob.(locs))
-    (predictor_disj_ore :
-       fseparate LA
-         (oracle_encrypt_real_pkg AHE Renc index_renc renc_card
-            rand_of_renc t_msg t_cipher msg_of_chmsg
-            chcipher_of_cipher pkey_of_party).(locs))
-    (predictor_disj_oze :
-       fseparate LA
-         (oracle_encrypt_zero_pkg AHE Renc index_renc renc_card
-            rand_of_renc t_msg t_cipher chcipher_of_cipher
-            pkey_of_party).(locs))
-    (leak_bound :
-       distr.mu (pkg_advantage.Pr (predictor ∘ game_leak)) true
-         <= (index_msg%:R)^-1) :
-  distr.mu (pkg_advantage.Pr (predictor ∘ game_real)) true
-    <= (index_msg%:R)^-1 + 2%:R * epsilon_cpa.
-Proof.
-have Hadv :
-    AdvantageE game_real game_leak predictor <= epsilon_cpa + epsilon_cpa
-  by apply: advantage_game_real_game_leak.
-unfold AdvantageE in Hadv.
-have Htri :
-    distr.mu (pkg_advantage.Pr (predictor ∘ game_real)) true
-      <= distr.mu (pkg_advantage.Pr (predictor ∘ game_leak)) true
-         + (epsilon_cpa + epsilon_cpa).
-{ by apply: ler_distlDr. }
-apply: le_trans Htri _.
-rewrite mulr_natl mulr2n.
-by apply: lerD.
-Qed.
+(* The closed-form Alice secrecy theorem [dsdp_alice_secrecy_indcpa]
+   in its Task I unconditional [t_msg]-output framing follows below
+   in this section, after Task G's [predictor_guesser] /
+   [guess_indicator_pkg] framework (lines ~2700-2950) and Task H's
+   residual bound [Pr_predictor_guess_game_leak_le_invm] (lines
+   ~3000-3150).  The theorem cannot appear here because its
+   signature depends on [predictor_guesser] / [guess_indicator_pkg]
+   / [index_t_msg] / [t_msg_carrier_to_chmsg] / [sample_to_t_msg_inj]
+   / [index_t_msg_pos], all introduced in Tasks G / H.  See the
+   theorem's full docstring at its position just before
+   [End dsdp_security_indcpa]. *)
 
 (* ================================================================== *)
 (* Task 10: alice_view carrier (finType + SSProve choice_type)        *)
@@ -3068,6 +2996,176 @@ Proof.
    use [Pr_uniform] from SSProve [Crypt.Pr.v] to compute the
    probability of any singleton event, sum. *)
 Admitted.
+
+(* ================================================================== *)
+(* Task 14 / Task I: closed-form Alice secrecy bound (unconditional)   *)
+(* ================================================================== *)
+
+(** dsdp_alice_secrecy_indcpa - the closed-form Alice secrecy bound,
+    in the [t_msg]-output predictor framing introduced by Task G
+    ([predictor_guesser] + [guess_indicator_pkg]).  For any
+    [t_msg]-output adversary [predictor : predictor_guesser]
+    satisfying the SSProve disjointness conditions of
+    [advantage_game_real_game_leak] together with the validity /
+    lossless side-conditions inherited from Task H, the probability
+    that the boolean wrapper [guess_indicator_pkg predictor game_real]
+    returns [true] is at most [1/m + 2 * epsilon_cpa], where
+    [m = index_t_msg] is the message-space carrier cardinality and
+    [epsilon_cpa] is the IND-CPA hardness parameter.  Semantically the
+    bound is exactly [Pr[A(AliceView) = V_2] <= 1/m + 2 * epsilon_cpa]
+    from the TeX writeup: the boolean shell of
+    [guess_indicator_pkg] returns [true] iff the predictor's
+    [t_msg]-typed guess matches the freshly-sampled [V_2] avatar, so
+    the V_2-equality event is a syntactic equality on the [t_msg]
+    carrier rather than an implicit semantic convention on a Bool
+    output.
+    Kind: main (Task 14 of the plan, made unconditional in Task I).
+    Why: closes the hybrid argument from the plan
+    ([~/.claude/plans/sprightly-finding-robin.md]).  The
+    [2 * epsilon_cpa] half comes from [advantage_game_real_game_leak]
+    (Task 08): two IND-CPA real-or-zero hops plus a
+    perfect-equivalence residual, applied to the wrapper
+    [boolean_shell o predictor] (which is the
+    [package game_iface A_export] derived from the [t_msg]-output
+    [predictor : predictor_guesser]).  The [1/m] half comes from
+    Task H's residual bound [Pr_predictor_guess_game_leak_le_invm]:
+    the freshness of the V_2-sample inside [guess_indicator_pkg]'s
+    boolean shell makes [Pr[guess_indicator_pkg predictor game_leak]
+    true <= 1/index_t_msg] hold for any [t_msg]-output predictor.
+    The two halves are stitched here by the triangle inequality on
+    [AdvantageE] applied to the wrapper, followed by associativity of
+    SSProve linking ([link_assoc]) to refold
+    [boolean_shell o predictor o game_*] as
+    [guess_indicator_pkg predictor game_*].
+    Naming: project-local [dsdp_alice_secrecy_indcpa] follows the
+    plan (this is the IND-CPA-based theorem replacing the old
+    [E_enc_inde]-dependent [dsdp_entropic_security] in
+    [dsdp_security.v]).  The predictor's type is now
+    [predictor_guesser] (the Task G [package game_iface
+    guesser_export] type) rather than the original [raw_package];
+    accordingly the LHS of the bound is
+    [distr.mu (Pr (guess_indicator_pkg predictor game_real)) true]
+    rather than [distr.mu (Pr (predictor o game_real)) true].
+    Used by: downstream consumers wanting the closed-form Alice
+    secrecy bound matched against the TeX statement at
+    [notes/20260506-dsdp-secrecy-closed-form] (Setup item 8.5,
+    Step 5).
+    Discharge of [leak_bound] (Task I): the original Task 14
+    statement carried a hypothesis [leak_bound :
+    distr.mu (Pr (predictor o game_leak)) true <= (index_msg%:R)^-1]
+    that the Task 14 docstring described as "bookkeeping rather
+    than new mathematics".  Task I, following the comprehensive
+    Fallback R1B + R5A plan, removes that hypothesis: the
+    [t_msg]-output framing of Task G makes the residual statement
+    architecturally local to [guess_indicator_pkg]'s boolean shell
+    (the V_2-sample is fresh inside the shell, after the predictor
+    fixes its guess), and Task H proves it directly using
+    [sample_to_t_msg_inj] and [index_t_msg_pos] section hypotheses
+    plus the per-call-site [ValidCode_predictor_game_leak] /
+    [LosslessCode_predictor_game_leak] arguments.  The comprehensive
+    framing also eliminates the original Task 14 docstring's
+    "semantic-convention asterisk" (the implicit "predictor output
+    [true] iff guess matches V_2" interpretation): the equality is
+    now syntactic in the [t_msg] carrier.
+    Structural assumptions (Fallback R5A): the
+    [LosslessCode_predictor_game_leak] argument is the mechanical
+    price of routing the residual bound through infotheo's
+    [{R.-fdist T}] machinery (which requires total mass exactly 1
+    rather than sub-probabilities).  It is provable per-call-site
+    for any practical predictor that does not use [assertD]-style
+    rejection sampling; the Task 07 IND-CPA reductions
+    [reduction_charlie] / [reduction_bob] discharge it trivially by
+    inspection (pure bind chains of [sample uniform] + [ret], with
+    empty location requirements).  The genuinely comprehensive
+    Fallback R5C alternative (generalize infotheo's residual
+    machinery to sub-distributions) is out of scope for this
+    discharge.
+    Print Assumptions audit (Task I R7): the expected assumption
+    list for this theorem is
+      - [enc_ind_cpa_real_or_zero] (the cryptographic IND-CPA
+        axiom, untouched);
+      - [epsilon_cpa] / [Axioms.R] / the section parameters of
+        [Section dsdp_security_indcpa] (untouched);
+      - the Task G / H section parameters introduced by the
+        comprehensive plan ([t_msg_carrier_to_chmsg],
+        [index_t_msg_pos], [sample_to_t_msg_inj], and the carrier-
+        / cardinality- bridges from Tasks B / E / F);
+      - the [Pr_predictor_guess_game_leak_le_invm] residual lemma
+        (currently [Admitted] with a TODO in Task H, pending the
+        [Pr_uniform]-based proof outlined in its body); and
+      - the standard MathComp / SSProve classical axioms
+        ([functional_extensionality], [propositional_extensionality],
+        [choice], [Eqdep.JMeq_eq], etc., as inherited from infotheo
+        and SSProve).
+    Notably the assumption list does NOT contain the discharged
+    [leak_bound], nor the pre-Fallback R1B
+    [predictor_true_iff_guess_V_2] semantic-convention hypothesis,
+    nor the Task F-style [prime_p] / [prime_q] / [coprime_pq] ring
+    specialization (Task E generalized to [finComNzRingType]).  The
+    only residual [Admitted] is the body of Task H's
+    [Pr_predictor_guess_game_leak_le_invm], which closes the
+    framework once the [Pr_uniform] sketch in its body is filled
+    in. *)
+Theorem dsdp_alice_secrecy_indcpa
+    (LA : Locations) (predictor : predictor_guesser)
+    (predictor_valid :
+       ValidPackage LA game_iface guesser_export predictor)
+    (predictor_disj_real :
+       fseparate LA game_real.(locs))
+    (predictor_disj_h1 :
+       fseparate LA game_hybrid_one.(locs))
+    (predictor_disj_h2 :
+       fseparate LA game_hybrid_two.(locs))
+    (predictor_disj_leak :
+       fseparate LA game_leak.(locs))
+    (predictor_disj_tc :
+       fseparate LA translation_charlie.(locs))
+    (predictor_disj_tb :
+       fseparate LA translation_bob.(locs))
+    (predictor_disj_ore :
+       fseparate LA
+         (oracle_encrypt_real_pkg AHE Renc index_renc renc_card
+            rand_of_renc t_msg t_cipher msg_of_chmsg
+            chcipher_of_cipher pkey_of_party).(locs))
+    (predictor_disj_oze :
+       fseparate LA
+         (oracle_encrypt_zero_pkg AHE Renc index_renc renc_card
+            rand_of_renc t_msg t_cipher chcipher_of_cipher
+            pkey_of_party).(locs))
+    (ValidCode_predictor_game_leak :
+       ValidCode emptym [interface]
+         (resolve (predictor ∘ game_leak)
+                  (id_guess, ('unit, t_msg)) tt))
+    (LosslessCode_predictor_game_leak :
+       LosslessCode
+         (resolve (predictor ∘ game_leak)
+                  (id_guess, ('unit, t_msg)) tt)) :
+  distr.mu (pkg_advantage.Pr (guess_indicator_pkg predictor game_real)) true
+    <= (index_t_msg%:R)^-1 + 2%:R * epsilon_cpa.
+Proof.
+have Hleak :
+    distr.mu (pkg_advantage.Pr (guess_indicator_pkg predictor game_leak)) true
+      <= (index_t_msg%:R)^-1
+  by apply: Pr_predictor_guess_game_leak_le_invm.
+have Hwrap : ValidPackage LA game_iface A_export (boolean_shell ∘ predictor)
+  by ssprove_valid.
+have Hadv :
+    AdvantageE game_real game_leak (boolean_shell ∘ predictor)
+      <= epsilon_cpa + epsilon_cpa
+  by apply: advantage_game_real_game_leak.
+unfold AdvantageE in Hadv.
+rewrite -!link_assoc in Hadv.
+rewrite -/(guess_indicator_pkg predictor game_real)
+        -/(guess_indicator_pkg predictor game_leak) in Hadv.
+have Htri :
+    distr.mu (pkg_advantage.Pr (guess_indicator_pkg predictor game_real)) true
+      <= distr.mu (pkg_advantage.Pr (guess_indicator_pkg predictor game_leak)) true
+         + (epsilon_cpa + epsilon_cpa).
+{ by apply: ler_distlDr. }
+apply: le_trans Htri _.
+rewrite mulr_natl mulr2n.
+by apply: lerD.
+Qed.
 
 End dsdp_security_indcpa.
 
