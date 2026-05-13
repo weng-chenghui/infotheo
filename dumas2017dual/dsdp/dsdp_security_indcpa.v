@@ -1837,6 +1837,403 @@ Check bridge_alice_view_with_secrets_to_fdist :
   forall (mu : distr.distr R alice_view_with_secrets),
     psum (distr.mu mu) = 1 -> R.-fdist alice_view_with_secrets.
 
+(* ================================================================== *)
+(* Task C: extended bridge over predictor composition                  *)
+(* ================================================================== *)
+
+(** t_msg_carrier - section parameter for the predictor's [t_msg]
+    output as a [finType].  The DSDP predictor in the [t_msg]-output
+    framing of Task G exports an SSProve [package] with codomain
+    [t_msg : choice_type]; lifting that output into the joint sample
+    space for the IT residual analysis requires a [finType] avatar of
+    the predictor's output range.  Concrete instantiations identify
+    [t_msg_carrier] with [plain AHE] (the plaintext-scalar carrier)
+    and [index_t_msg] with [index_msg].
+    Kind: parameter.
+    Why: Task C of [~/.claude/plans/sprightly-finding-robin.md]
+    (Fallback R3B).  Task B's [bridge_alice_view_with_secrets_to_fdist]
+    operates on the sample-space carrier [alice_view_with_secrets]
+    alone.  The Task H residual bound is on the joint event
+    [predictor-output = V_2_sample], so the bridge's target carrier
+    needs to be the joint product
+    [alice_view_with_secrets * t_msg_carrier].  Naming
+    [t_msg_carrier] mirrors [V_2_carrier], [V_3_carrier],
+    [Dk_a_carrier] above; the section parameter shape lets Task G
+    instantiate it without having the [t_msg]-output predictor type
+    defined yet.
+    Used by: alice_view_predictor_joint, Task H's residual bound,
+    Task G's predictor framework. *)
+Variable t_msg_carrier : finType.
+
+(** index_t_msg, t_msg_card - cardinality index for [t_msg_carrier]
+    and the bridge hypothesis tying [#|t_msg_carrier|] to it.  Same
+    pattern as [Renc] / [index_renc] / [renc_card] at the top of
+    this section, and as [V_2_carrier] / [index_V_2] / [V_2_card] in
+    Task B.
+    Kind: parameter + hypothesis.
+    Why: the Task H bound
+    [Pr [ (predictor o game_leak).output = V_2_sample ] <= #|R|^-1]
+    will marginalise over [t_msg_carrier] inhabitants; having a
+    [nat] index for cardinality keeps the SSProve-side [chFin]
+    embedding (see [alice_view_predictor_joint_ct] below) uniform
+    with the rest of the section.
+    Used by: alice_view_predictor_joint_ct, Task H. *)
+Variable index_t_msg : nat.
+Hypothesis t_msg_card : #|t_msg_carrier| = index_t_msg.
+
+(** alice_view_predictor_joint - the joint sample space of the
+    game's protocol-side samples (the eleven-component
+    [alice_view_with_secrets] carrier from Task B) paired with the
+    predictor's [t_msg]-typed output.  This is the carrier that the
+    Task C bridge produces an [{fdist _}] over, and the carrier on
+    which the Task H residual event [predictor-output = V_2_sample]
+    becomes a measurable predicate.
+    Kind: canonical.
+    Why: Task C of [~/.claude/plans/sprightly-finding-robin.md]
+    (Fallback R3B).  Task 12's [bridge_correct] transfers SSProve
+    probabilities for [game_leak] alone; Task H's residual bound is
+    on the composed game-predictor execution, so the bridge needs to
+    operate at a wider carrier that includes the predictor's output.
+    Building the carrier as a finType product keeps the HB
+    canonical-structure resolution automatic and matches the
+    [alice_view * V_2_carrier * V_3_carrier] pattern that Task B
+    already established.
+    Naming: [_predictor_joint] reads "the protocol joint sample
+    space extended with the predictor's output".  Project-local; not
+    a MathComp suffix-table entry.
+    Used by: [bridge_predictor_compose_to_fdist],
+    [Pr_predictor_compose_eq_fdist], Task H's residual bound. *)
+Definition alice_view_predictor_joint : finType :=
+  (alice_view_with_secrets * t_msg_carrier)%type.
+
+(* Task C verify clauses: the joint carrier inhabits finType and
+   choiceType simultaneously (HB instance resolution through product
+   types is automatic). *)
+Check (alice_view_predictor_joint : finType).
+Check (alice_view_predictor_joint : choiceType).
+
+(** index_alice_view_predictor_joint - cardinality of
+    [alice_view_predictor_joint] as a [nat].  Named once so the
+    SSProve-side [chFin] embedding below can refer to it
+    uniformly.
+    Kind: canonical.
+    Why: mirrors Task B's [index_alice_view_with_secrets].  SSProve's
+    [choice_type] GADT uses [chFin (n : nat)] for finite carriers;
+    naming the cardinality lets us state the cardinality coherence
+    lemmas cleanly.
+    Naming: [index_] prefix mirrors Task B's
+    [index_alice_view_with_secrets]; project-local convention for
+    SSProve [chFin]-indexed cardinality parameters.  MathComp-canonical
+    alternative would be [alice_view_predictor_joint_card], but that
+    suffix is reserved here for the cardinality-coherence lemma
+    [alice_view_predictor_joint_ct_card] below, so [index_] is used
+    for the [nat] value itself to keep the two roles distinct.
+    Used by: alice_view_predictor_joint_ct,
+    alice_view_predictor_joint_ct_card,
+    alice_view_predictor_joint_card_index, Task C bridge. *)
+Definition index_alice_view_predictor_joint : nat :=
+  #|alice_view_predictor_joint|.
+
+(** alice_view_predictor_joint_ct - the SSProve-side [choice_type]
+    avatar of [alice_view_predictor_joint], lifted as a single
+    [chFin] of the joint cardinality.  Mirrors Task B's
+    [alice_view_with_secrets_ct].
+    Kind: canonical.
+    Why: Task H's residual bound on the predictor-composition
+    distribution lives semantically over the SSProve [choice_type]
+    side ([chInterp alice_view_predictor_joint_ct =
+    'I_index_alice_view_predictor_joint]); routing through this
+    embedding mediates with the infotheo finType-indexed [{fdist _}]
+    side via [enum_rank] / [enum_val].
+    Naming: [_ct] is a project-local abbreviation for the SSProve
+    [choice_type] embedding, mirroring Task B's
+    [alice_view_with_secrets_ct] and Task 10's [alice_view_ct].
+    Not a MathComp suffix-table entry; no idiomatic MathComp
+    alternative exists for this SSProve-specific carrier role.
+    Used by: alice_view_predictor_joint_to_ct,
+    alice_view_predictor_joint_of_ct,
+    alice_view_predictor_joint_ct_card, Task H's
+    [Pr_predictor_guess_game_leak_le_invm]. *)
+Definition alice_view_predictor_joint_ct : choice_type :=
+  chFin index_alice_view_predictor_joint.
+
+(** alice_view_predictor_joint_to_ct - the forward direction of the
+    bijection between the MathComp finType
+    [alice_view_predictor_joint] and its SSProve avatar
+    [alice_view_predictor_joint_ct =
+    'I_index_alice_view_predictor_joint], realised via
+    [enum_rank].
+    Kind: helper.
+    Why: Task H's re-indexing argument between the SSProve
+    [psum]-side and the infotheo [\sum_]-side uses this map to send
+    finType inhabitants to their SSProve ordinal index.  Same role
+    as Task B's [alice_view_with_secrets_to_ct].
+    Naming: [_to_ct] is a project-local suffix mirroring Task B's
+    [alice_view_with_secrets_to_ct] and Task 10's [alice_view_to_ct];
+    [_to_ct] reads "forward direction into the SSProve choice_type
+    avatar".  Not a MathComp suffix-table entry.
+    Used by: alice_view_predictor_joint_to_ct_K,
+    alice_view_predictor_joint_of_ct_K, Task H's
+    [Pr_predictor_guess_game_leak_le_invm]. *)
+Definition alice_view_predictor_joint_to_ct
+    (v : alice_view_predictor_joint) : alice_view_predictor_joint_ct :=
+  enum_rank v.
+
+(** alice_view_predictor_joint_of_ct - the inverse direction of the
+    bijection: send an SSProve-side index
+    [i : alice_view_predictor_joint_ct] back to its
+    [alice_view_predictor_joint] inhabitant via [enum_val].
+    Kind: helper.
+    Why: companion to [alice_view_predictor_joint_to_ct]; together
+    they form the bijection mediating between the SSProve [chFin]-
+    indexed view and the infotheo [finType]-indexed view at the
+    wider predictor-composition carrier.
+    Naming: [_of_ct] is a project-local suffix mirroring Task B's
+    [alice_view_with_secrets_of_ct] and Task 10's [alice_view_of_ct];
+    [_of_ct] reads "inverse direction out of the SSProve choice_type
+    avatar".  Not a MathComp suffix-table entry.
+    Used by: alice_view_predictor_joint_to_ct_K,
+    alice_view_predictor_joint_of_ct_K, Task H's
+    [Pr_predictor_guess_game_leak_le_invm]. *)
+Definition alice_view_predictor_joint_of_ct
+    (i : alice_view_predictor_joint_ct) : alice_view_predictor_joint :=
+  enum_val i.
+
+(** alice_view_predictor_joint_to_ct_K - cancel law:
+    [alice_view_predictor_joint_of_ct] is a left inverse of
+    [alice_view_predictor_joint_to_ct].  Follows from MathComp's
+    [enum_rankK].
+    Kind: helper.
+    Why: Task H's re-indexing argument needs the forward-direction
+    cancel to argue that summing an SSProve density over
+    [alice_view_predictor_joint_ct] and re-indexing back through
+    [alice_view_predictor_joint_of_ct] recovers the original
+    [alice_view_predictor_joint] support.
+    Naming: trailing [_K] is the MathComp suffix-table entry for a
+    cancel law (see [enum_rankK], [enum_valK]).  The leading main
+    symbol [alice_view_predictor_joint_to_ct] is project-local; see
+    the [Naming:] line on that definition.
+    Used by: Task H's [Pr_predictor_guess_game_leak_le_invm]. *)
+Lemma alice_view_predictor_joint_to_ct_K :
+  cancel alice_view_predictor_joint_to_ct alice_view_predictor_joint_of_ct.
+Proof. exact: enum_rankK. Qed.
+
+(** alice_view_predictor_joint_of_ct_K - companion cancel:
+    [alice_view_predictor_joint_to_ct] is a left inverse of
+    [alice_view_predictor_joint_of_ct].  Follows from MathComp's
+    [enum_valK].
+    Kind: helper.
+    Why: same role as [alice_view_predictor_joint_to_ct_K] but for
+    the inverse direction; together the two cancel lemmas make the
+    pair a bijection, which Task H exploits to justify a [psum] /
+    [bigop] re-indexing across the SSProve / infotheo boundary.
+    Naming: trailing [_K] is the MathComp cancel-law suffix; main
+    symbol [alice_view_predictor_joint_of_ct] is project-local.
+    Used by: Task H's [Pr_predictor_guess_game_leak_le_invm]. *)
+Lemma alice_view_predictor_joint_of_ct_K :
+  cancel alice_view_predictor_joint_of_ct alice_view_predictor_joint_to_ct.
+Proof. exact: enum_valK. Qed.
+
+(** alice_view_predictor_joint_ct_card - cardinality of the SSProve
+    [choice_type] avatar.  [alice_view_predictor_joint_ct]
+    interprets as ['I_index_alice_view_predictor_joint] which has
+    cardinality [index_alice_view_predictor_joint] by [card_ord].
+    Kind: helper.
+    Why: Task H's residual bound rewrites [psum] over [chInterp
+    alice_view_predictor_joint_ct] (the SSProve semantics output)
+    against [\sum_(v : alice_view_predictor_joint) ...] (the infotheo
+    target); this lemma is the cardinality coherence needed to swap
+    the indexing finType under the bigop / psum without changing the
+    value.
+    Naming: trailing [_card] is the MathComp suffix-table entry for
+    a cardinality equality of the form [#|S| = n].  Main symbol
+    [alice_view_predictor_joint_ct] is project-local; see the
+    [Naming:] line on that definition.
+    Used by: Task H's [Pr_predictor_guess_game_leak_le_invm]. *)
+Lemma alice_view_predictor_joint_ct_card :
+  #|alice_view_predictor_joint_ct| = index_alice_view_predictor_joint.
+Proof. exact: card_ord. Qed.
+
+(** alice_view_predictor_joint_card_index - cardinality of the
+    infotheo-side [alice_view_predictor_joint] equals
+    [index_alice_view_predictor_joint] by definition.  Trivial by
+    reflexivity.
+    Kind: helper.
+    Why: companion to [alice_view_predictor_joint_ct_card] for the
+    finType side.  When Task H re-indexes a [psum] over the
+    SSProve-side [alice_view_predictor_joint_ct] back to a
+    [\sum_(v : alice_view_predictor_joint)], this lemma is the
+    cardinality side of that re-indexing.
+    Naming: [_card_index] is the project-local cardinality-equals-
+    named-index convention mirroring Task B's
+    [alice_view_with_secrets_card_index] and Task 10's
+    [alice_view_card_index].  The [_card] suffix is the MathComp
+    cardinality-equality marker; the trailing [_index] qualifies the
+    right-hand-side as the named [nat] parameter
+    [index_alice_view_predictor_joint] rather than an anonymous nat,
+    distinguishing this lemma from
+    [alice_view_predictor_joint_ct_card] which targets the SSProve
+    choice_type avatar.
+    Used by: Task H's [Pr_predictor_guess_game_leak_le_invm]. *)
+Lemma alice_view_predictor_joint_card_index :
+  #|alice_view_predictor_joint| = index_alice_view_predictor_joint.
+Proof. by []. Qed.
+
+(** bridge_psum_to_bigop_predictor_compose - the elementary identity
+    converting SSProve's [psum] over an
+    [alice_view_predictor_joint]-valued sub-distribution into
+    MathComp's [\sum_(v : alice_view_predictor_joint)].  On a
+    [finType] both quantities enumerate the same support, and
+    [psum f = \sum_i |f i|] from realsum collapses to the plain sum
+    because [distr.mu mu] is non-negative.
+    Kind: helper bridge.
+    Why: Task C of [~/.claude/plans/sprightly-finding-robin.md].
+    SSProve's denotational semantics produces a [distr R
+    alice_view_predictor_joint] via [Pr_fst] (after the predictor's
+    output and the game's protocol samples are projected jointly);
+    the infotheo target side wants an
+    [\sum_(v : alice_view_predictor_joint)] indexed bigop.  This
+    lemma is the only place where the two summation conventions
+    meet for the predictor-composition carrier.
+    Naming: project-local; mirrors Task B's
+    [bridge_psum_to_bigop_with_secrets] with the [_predictor_compose]
+    suffix.
+    Used by: bridge_predictor_compose_to_fdist,
+    Pr_predictor_compose_eq_fdist. *)
+Lemma bridge_psum_to_bigop_predictor_compose
+    (mu : distr.distr R alice_view_predictor_joint) :
+  \sum_(v : alice_view_predictor_joint) (distr.mu mu) v
+    = psum (distr.mu mu).
+Proof.
+rewrite psum_fin.
+apply: eq_bigr => a _.
+by rewrite ger0_norm //; apply: distr.ge0_mu.
+Qed.
+
+(** bridge_predictor_compose_to_fdist - the SDistr-to-fdist bridge
+    at the predictor-composition carrier.  Given a sub-distribution
+    [mu : distr R alice_view_predictor_joint] (the joint
+    distribution over the game's [alice_view_with_secrets] samples
+    paired with the predictor's [t_msg_carrier] output) and a proof
+    that its total mass is one, produce an infotheo-side
+    [{fdist alice_view_predictor_joint}] by wrapping [distr.mu mu]
+    in an [ffun] and discharging the [FDist.make] obligations:
+    non-negativity comes from [distr.ge0_mu], summation-to-one comes
+    from [bridge_psum_to_bigop_predictor_compose] composed with the
+    mass hypothesis.
+    Kind: bridge construction.
+    Why: Task C of [~/.claude/plans/sprightly-finding-robin.md]
+    (Fallback R3B).  Task 12's [bridge_correct] transfers SSProve
+    probabilities for the game-only carrier [alice_view]; Task B's
+    [bridge_alice_view_with_secrets_to_fdist] transfers for the
+    game-side eleven-component carrier
+    [alice_view_with_secrets].  The present bridge extends both to
+    the joint game-plus-predictor carrier.  The new bridge
+    subsumes Task 12's [bridge_correct] in the sense that the
+    identity-predictor specialisation recovers Task 12's bridge
+    structurally (same FDist.make pattern, same psum-to-bigop
+    plumbing).
+    The mass hypothesis [Hmass] is parametric: consumers (Task H)
+    discharge it from [LosslessCode] resolution on the resolved
+    [predictor o game_leak] run code, which decomposes into Task A's
+    [LosslessCode_game_leak] (the game side) and Fallback R5A's
+    [LosslessCode_predictor] (the predictor side); the composition
+    is lossless by [Lossless_bind] machinery, and the [Pr_fst]
+    pushforward preserves total mass.
+    Naming: project-local; [bridge_<source>_<target>_to_fdist]
+    follows Task 12's and Task B's pattern.
+    Used by: [bridge_predictor_compose_to_fdistE],
+    [Pr_predictor_compose_eq_fdist], Task H's residual bound. *)
+Definition bridge_predictor_compose_to_fdist
+    (mu : distr.distr R alice_view_predictor_joint)
+    (Hmass : psum (distr.mu mu) = 1) :
+  R.-fdist alice_view_predictor_joint.
+Proof.
+unshelve eapply FDist.make.
+- exact: [ffun v => (distr.mu mu) v].
+- by move=> a; rewrite ffunE; apply: distr.ge0_mu.
+- under eq_bigr=> a _ do rewrite ffunE.
+  by rewrite bridge_psum_to_bigop_predictor_compose.
+Defined.
+
+(** bridge_predictor_compose_to_fdistE - elementwise equation for
+    the bridge.  Spells out how to evaluate the resulting
+    [{fdist alice_view_predictor_joint}] at a point: it is just
+    [distr.mu mu] of the same point.
+    Kind: simplification.
+    Why: lets downstream proofs (Task H, Pr_predictor_compose_eq_fdist)
+    unfold the bridge to expose the underlying SSProve density
+    without forcing them to manage the [ffun] wrapper.  Mirrors
+    Task 12's [bridge_leak_to_fdistE] and Task B's
+    [bridge_alice_view_with_secrets_to_fdistE].
+    Naming: trailing [E] follows MathComp convention for elementwise
+    / extensional equations.
+    Used by: Pr_predictor_compose_eq_fdist, Task H. *)
+Lemma bridge_predictor_compose_to_fdistE
+    (mu : distr.distr R alice_view_predictor_joint)
+    (Hmass : psum (distr.mu mu) = 1) (v : alice_view_predictor_joint) :
+  bridge_predictor_compose_to_fdist Hmass v = (distr.mu mu) v.
+Proof. by rewrite /bridge_predictor_compose_to_fdist /= ffunE. Qed.
+
+(** Pr_predictor_compose_eq_fdist - the bridge preserves event
+    probabilities at the predictor-composition carrier.  For any
+    predicate [P : pred alice_view_predictor_joint], the SSProve-side
+    conditional sum equals the infotheo-side [Pr] over the
+    corresponding set [[set v | P v]].
+    Kind: helper.
+    Why: Task C of [~/.claude/plans/sprightly-finding-robin.md]
+    (Fallback R3B).  This is the bookkeeping lemma that lets
+    Task H state its residual goal first on the SSProve side (where
+    the upstream IND-CPA hops and the predictor's [t_msg] output
+    live) and then transfer through the bridge to the infotheo
+    [{fdist alice_view_predictor_joint}] side (where the IT
+    residual lemmas like [Pr_dsdp_sol_uniform_ring] from Task E
+    operate).  The proof unfolds [Pr d E = \sum_(a in E) d a],
+    rewrites the set membership against the predicate, and uses
+    [bridge_predictor_compose_to_fdistE] to expose the underlying
+    [distr.mu mu].
+    Subsumption claim.  For [predictor = identity] and predicates
+    that project away the [t_msg_carrier] component, the present
+    lemma reduces to Task 12's [bridge_correct] up to a
+    deterministic post-processing of the bridged fdist (the
+    [t_msg_carrier] marginal collapses to a Dirac at the identity-
+    predictor's deterministic output).  Tasks D-H exploit this
+    subsumption by reusing the proof structure rather than
+    reinstating [bridge_correct] at the wider carrier.
+    Naming: project-local; [Pr_<bridge>_eq_fdist] follows Task 12's
+    [bridge_correct] pattern with the [_predictor_compose] prefix
+    aligned to the wider carrier and an explicit [_eq_fdist] suffix
+    spelling out the transfer direction (SSProve [Pr] equals the
+    infotheo [Pr] of the bridged fdist).
+    Used by: Task H's [Pr_predictor_guess_game_leak_le_invm]. *)
+Lemma Pr_predictor_compose_eq_fdist
+    (mu : distr.distr R alice_view_predictor_joint)
+    (Hmass : psum (distr.mu mu) = 1)
+    (P : pred alice_view_predictor_joint) :
+  \sum_(v : alice_view_predictor_joint | P v) (distr.mu mu) v
+    = Pr (bridge_predictor_compose_to_fdist Hmass) [set v | P v].
+Proof.
+rewrite /Pr.
+apply: eq_big => [a|a _].
+- by rewrite inE.
+- by rewrite bridge_predictor_compose_to_fdistE.
+Qed.
+
+(* Task C verify clauses: the bridge type-checks at the expected
+   signatures, and the correctness lemma transfers SSProve [Pr]
+   statements to the infotheo side at the joint carrier.  Mirrors
+   Task 12's and Task B's verify [Check]s. *)
+Check bridge_predictor_compose_to_fdist :
+  forall (mu : distr.distr R alice_view_predictor_joint),
+    psum (distr.mu mu) = 1 -> R.-fdist alice_view_predictor_joint.
+
+Check Pr_predictor_compose_eq_fdist :
+  forall (mu : distr.distr R alice_view_predictor_joint)
+         (Hmass : psum (distr.mu mu) = 1)
+         (P : pred alice_view_predictor_joint),
+    \sum_(v : alice_view_predictor_joint | P v) (distr.mu mu) v
+      = Pr (bridge_predictor_compose_to_fdist Hmass) [set v | P v].
+
 End dsdp_security_indcpa.
 
 (* ================================================================== *)
