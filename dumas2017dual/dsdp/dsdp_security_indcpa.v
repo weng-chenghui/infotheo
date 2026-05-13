@@ -13,7 +13,7 @@
 
 From HB Require Import structures.
 From mathcomp Require Import all_boot all_order all_algebra fingroup finalg.
-From mathcomp Require Import matrix ring boolp finmap.
+From mathcomp Require Import matrix ring boolp finmap reals.
 
 Set Warnings "-notation-overridden,-ambiguous-paths".
 From SSProve.Crypt Require Import Package pkg_composition.
@@ -35,9 +35,11 @@ Set Bullet Behavior "Strict Subproofs".
 Set Default Goal Selector "!".
 Set Primitive Projections.
 
+Import GRing.Theory Num.Theory Order.POrderTheory.
 Import PackageNotation.
 #[local] Open Scope package_scope.
 #[local] Open Scope ring_scope.
+#[local] Open Scope real_scope.
 
 (* Pin SSProve's real type as the ambient realType for this file. *)
 Notation R := SSProve.Crypt.Axioms.R.
@@ -545,5 +547,304 @@ Check (enc_ind_cpa_real_or_zero
          t_msg t_cipher msg_of_chmsg chcipher_of_cipher pkey_of_party
          (reduction_bob predictor)).
 End reduction_typecheck.
+
+(** Local abbreviation for the IND-CPA real oracle package at this
+    section's parameters, kept anonymous-friendly so [enc_ind_cpa_real_or_zero]
+    fires cleanly under [Advantage_link] rewrites in Task 08.
+    Kind: helper.
+    Why: the IND-CPA hypothesis names the two oracle packages explicitly;
+    aliasing them here makes the [Advantage_link] / [enc_ind_cpa_real_or_zero]
+    chain at the hop-1 / hop-2 boundaries readable.
+    Used by: advantage_game_real_game_leak. *)
+Definition oracle_real : raw_package :=
+  oracle_encrypt_real AHE Renc index_renc renc_card rand_of_renc
+                      t_msg t_cipher msg_of_chmsg chcipher_of_cipher
+                      pkey_of_party.
+
+(** oracle_zero — local alias for [oracle_encrypt_zero] at this section's
+    parameters.
+    Kind: helper.
+    Why: aliasing [oracle_encrypt_zero] at the current section's
+    parameters keeps the [Advantage_link] / [enc_ind_cpa_real_or_zero]
+    chain at the hop boundaries readable, paired with [oracle_real] for
+    the IND-CPA real-or-zero hypothesis instantiation.
+    Used by: advantage_hop_real_h1, advantage_hop_h1_h2,
+    advantage_game_real_game_leak. *)
+Definition oracle_zero : raw_package :=
+  oracle_encrypt_zero AHE Renc index_renc renc_card rand_of_renc
+                      t_msg t_cipher chcipher_of_cipher pkey_of_party.
+
+(** game_real_equiv_charlie_real — perfect equivalence between [game_real]
+    and the Charlie translation linked with the real-encryption oracle.
+    Both sides sample the same protocol-level scalars, the same
+    encryption-randomness slots and produce the same four-ciphertext
+    accumulator; the only difference is that the right-hand side routes
+    Charlie's ciphertext through the oracle interface.  Inlining
+    [oracle_encrypt_real] makes the two sides relationally equal up to
+    swap of independent samples.
+    Kind: helper.
+    Naming: SSProve game-equivalence convention; `equiv` placed medially
+    between the two game operands so both sides of the [≈₀] relation are
+    readable at the hop-1 boundary.  The MathComp `_E` suffix is
+    unsuitable here because both operands carry their own multi-component
+    names and a single trailing `_E` would obscure which side is which.
+    Why: Task 08 uses this equivalence under [erewrite ... by ssprove_valid]
+    to bridge [AdvantageE game_real game_hybrid_one predictor] to
+    [AdvantageE (translation_charlie ∘ oracle_real) (translation_charlie ∘
+    oracle_zero) predictor], where [Advantage_link] then exposes the
+    IND-CPA reduction [reduction_charlie predictor].
+    Proof status: Admitted; to be discharged by Task 09 via SSProve
+    relational logic ([eq_rel_perf_ind_eq], [simplify_eq_rel],
+    [ssprove_sync_eq], [rreflexivity_rule]), mirroring
+    [IND_CPA_equiv_false] in [SSProve/examples/PRF.v] line 328.
+    Used by: advantage_hop_real_h1, advantage_game_real_game_leak. *)
+Lemma game_real_equiv_charlie_real :
+  game_real ≈₀ translation_charlie ∘ oracle_real.
+Proof.
+  (* TODO Task 09: SSProve relational-logic equality. *)
+Admitted.
+
+(** charlie_zero_equiv_game_hybrid_one — perfect equivalence between
+    the Charlie translation linked with the zero-encryption oracle and
+    [game_hybrid_one].  Symmetric to [game_real_equiv_charlie_real]: the
+    only difference between the two sides is that Charlie's ciphertext
+    slot encrypts [0%R] (in [game_hybrid_one]) and the oracle returns a
+    fresh zero-encryption (left-hand side).
+    Kind: helper.
+    Naming: SSProve game-equivalence convention; `equiv` placed medially
+    between the two game operands so both sides of the [≈₀] relation are
+    readable at the hop-1 boundary.
+    Why: Task 08 uses this to close the right end of the first IND-CPA
+    hop, after [game_real_equiv_charlie_real] has been used on the left.
+    Proof status: Admitted; to be discharged by Task 09 via SSProve
+    [eq_rel_perf_ind_eq].
+    Used by: advantage_hop_real_h1, advantage_game_real_game_leak. *)
+Lemma charlie_zero_equiv_game_hybrid_one :
+  translation_charlie ∘ oracle_zero ≈₀ game_hybrid_one.
+Proof.
+  (* TODO Task 09: SSProve relational-logic equality. *)
+Admitted.
+
+(** game_hybrid_one_equiv_bob_real — perfect equivalence between
+    [game_hybrid_one] and the Bob translation linked with the
+    real-encryption oracle.  Both sides freeze Charlie's slot to a
+    zero-encryption; only the Bob slot differs in routing (direct [enc]
+    in [game_hybrid_one], oracle on the right-hand side).
+    Kind: helper.
+    Naming: SSProve game-equivalence convention; `equiv` placed medially
+    between the two game operands so both sides of the [≈₀] relation are
+    readable at the hop-2 boundary.
+    Why: Task 08 uses this at the left end of the second IND-CPA hop.
+    Proof status: Admitted; to be discharged by Task 09 via SSProve
+    [eq_rel_perf_ind_eq] as for the Charlie case.
+    Used by: advantage_hop_h1_h2, advantage_game_real_game_leak. *)
+Lemma game_hybrid_one_equiv_bob_real :
+  game_hybrid_one ≈₀ translation_bob ∘ oracle_real.
+Proof.
+  (* TODO Task 09: SSProve relational-logic equality. *)
+Admitted.
+
+(** bob_zero_equiv_game_hybrid_two — perfect equivalence between the
+    Bob translation linked with the zero-encryption oracle and
+    [game_hybrid_two].  Symmetric to [game_hybrid_one_equiv_bob_real]:
+    both sides freeze Charlie and Bob slots to zero-encryptions.
+    Kind: helper.
+    Naming: SSProve game-equivalence convention; `equiv` placed medially
+    between the two game operands so both sides of the [≈₀] relation are
+    readable at the hop-2 boundary.
+    Why: Task 08 uses this at the right end of the second IND-CPA hop.
+    Proof status: Admitted; to be discharged by Task 09 via SSProve
+    [eq_rel_perf_ind_eq].
+    Used by: advantage_hop_h1_h2, advantage_game_real_game_leak. *)
+Lemma bob_zero_equiv_game_hybrid_two :
+  translation_bob ∘ oracle_zero ≈₀ game_hybrid_two.
+Proof.
+  (* TODO Task 09: SSProve relational-logic equality. *)
+Admitted.
+
+(** game_hybrid_two_perfect_game_leak — perfect equivalence between
+    [game_hybrid_two] and [game_leak].  Once both ciphertext slots are
+    zero-encryptions of the constant [0%R], the four-cipher accumulator
+    carries no information about the protocol secrets (V_2, U_2, U_3,
+    R_2, R_3); the residual is a function of fresh encryption randomness
+    only.  Task 09 closes the equivalence formally by showing the joint
+    distribution over the accumulator marginalises to a constant-list
+    distribution agreeing with [game_leak]'s empty list under the
+    observable projection used by the predictor.
+    Kind: helper.
+    Naming: SSProve game-equivalence convention; `perfect` placed
+    medially between the two game operands marking the residual
+    perfect-equivalence (zero-advantage) hop in the triangle chain.
+    Why: Task 08 uses this at the right end of the triangle to collapse
+    the residual hop [AdvantageE game_hybrid_two game_leak predictor] to
+    zero, so the [2 * epsilon_cpa] bound closes.
+    Proof status: Admitted; to be discharged by Task 09 via SSProve
+    relational logic ([eq_rel_perf_ind_eq], [ssprove_swap_seq_rhs],
+    [ssprove_code_simpl], [prove_perfect]) plus
+    residual-distribution collapse.
+    Used by: advantage_game_real_game_leak. *)
+Lemma game_hybrid_two_perfect_game_leak :
+  game_hybrid_two ≈₀ game_leak.
+Proof.
+  (* TODO Task 09: SSProve relational-logic equality
+     plus residual-distribution collapse. *)
+Admitted.
+
+(** advantage_hop_real_h1 — IND-CPA bound on the first hop
+    [AdvantageE game_real game_hybrid_one predictor].  Uses
+    [Advantage_triangle] to insert the two Charlie-translation
+    intermediates ([translation_charlie ∘ oracle_real] and
+    [translation_charlie ∘ oracle_zero]), zeroes the two outer
+    summands using [game_real_equiv_charlie_real] and
+    [charlie_zero_equiv_game_hybrid_one], then [Advantage_link]
+    exposes the IND-CPA reduction [reduction_charlie predictor]
+    so [enc_ind_cpa_real_or_zero] closes the bound.
+    Kind: helper.
+    Why: factoring the first hop's argument keeps
+    [advantage_game_real_game_leak] aligned with the PRF.v idiom
+    (a single [ssprove triangle] over the four-game chain followed
+    by [lerD]).
+    Used by: advantage_game_real_game_leak. *)
+Lemma advantage_hop_real_h1
+    (LA : Locations) (predictor : raw_package)
+    (predictor_valid :
+       ValidPackage LA game_iface A_export predictor)
+    (predictor_disj_real : fseparate LA game_real.(locs))
+    (predictor_disj_h1 : fseparate LA game_hybrid_one.(locs))
+    (predictor_disj_tc : fseparate LA translation_charlie.(locs))
+    (predictor_disj_ore :
+       fseparate LA
+         (oracle_encrypt_real_pkg AHE Renc index_renc renc_card
+            rand_of_renc t_msg t_cipher msg_of_chmsg
+            chcipher_of_cipher pkey_of_party).(locs))
+    (predictor_disj_oze :
+       fseparate LA
+         (oracle_encrypt_zero_pkg AHE Renc index_renc renc_card
+            rand_of_renc t_msg t_cipher chcipher_of_cipher
+            pkey_of_party).(locs)) :
+  AdvantageE game_real game_hybrid_one predictor <= epsilon_cpa.
+Proof.
+  have triangle_ineq :=
+    Advantage_triangle_chain (game_real : raw_package)
+      [:: (translation_charlie ∘ oracle_real : raw_package)
+        ; (translation_charlie ∘ oracle_zero : raw_package) ]
+      (game_hybrid_one : raw_package) predictor.
+  cbn in triangle_ineq.
+  rewrite ?addrA in triangle_ineq.
+  eapply le_trans. 1: exact triangle_ineq.
+  clear triangle_ineq.
+  erewrite game_real_equiv_charlie_real by ssprove_valid.
+  erewrite charlie_zero_equiv_game_hybrid_one by ssprove_valid.
+  rewrite GRing.add0r GRing.addr0.
+  rewrite -Advantage_link.
+  apply: (enc_ind_cpa_real_or_zero AHE Renc index_renc renc_card
+            rand_of_renc t_msg t_cipher msg_of_chmsg
+            chcipher_of_cipher pkey_of_party).
+Qed.
+
+(** advantage_hop_h1_h2 — IND-CPA bound on the second hop
+    [AdvantageE game_hybrid_one game_hybrid_two predictor], symmetric
+    to [advantage_hop_real_h1].  Uses
+    [game_hybrid_one_equiv_bob_real] and
+    [bob_zero_equiv_game_hybrid_two] together with
+    [enc_ind_cpa_real_or_zero] applied to [reduction_bob predictor].
+    Kind: helper.
+    Why: symmetric to [advantage_hop_real_h1], for the Bob slot.
+    Used by: advantage_game_real_game_leak. *)
+Lemma advantage_hop_h1_h2
+    (LA : Locations) (predictor : raw_package)
+    (predictor_valid :
+       ValidPackage LA game_iface A_export predictor)
+    (predictor_disj_h1 : fseparate LA game_hybrid_one.(locs))
+    (predictor_disj_h2 : fseparate LA game_hybrid_two.(locs))
+    (predictor_disj_tb : fseparate LA translation_bob.(locs))
+    (predictor_disj_ore :
+       fseparate LA
+         (oracle_encrypt_real_pkg AHE Renc index_renc renc_card
+            rand_of_renc t_msg t_cipher msg_of_chmsg
+            chcipher_of_cipher pkey_of_party).(locs))
+    (predictor_disj_oze :
+       fseparate LA
+         (oracle_encrypt_zero_pkg AHE Renc index_renc renc_card
+            rand_of_renc t_msg t_cipher chcipher_of_cipher
+            pkey_of_party).(locs)) :
+  AdvantageE game_hybrid_one game_hybrid_two predictor <= epsilon_cpa.
+Proof.
+  have triangle_ineq :=
+    Advantage_triangle_chain (game_hybrid_one : raw_package)
+      [:: (translation_bob ∘ oracle_real : raw_package)
+        ; (translation_bob ∘ oracle_zero : raw_package) ]
+      (game_hybrid_two : raw_package) predictor.
+  cbn in triangle_ineq.
+  rewrite ?addrA in triangle_ineq.
+  eapply le_trans. 1: exact triangle_ineq.
+  clear triangle_ineq.
+  erewrite game_hybrid_one_equiv_bob_real by ssprove_valid.
+  erewrite bob_zero_equiv_game_hybrid_two by ssprove_valid.
+  rewrite GRing.add0r GRing.addr0.
+  rewrite -Advantage_link.
+  apply: (enc_ind_cpa_real_or_zero AHE Renc index_renc renc_card
+            rand_of_renc t_msg t_cipher msg_of_chmsg
+            chcipher_of_cipher pkey_of_party).
+Qed.
+
+(** advantage_game_real_game_leak — Task 08 main result.  Bounds the
+    SSProve advantage of any predictor distinguishing [game_real] from
+    [game_leak] by [2 * epsilon_cpa].  The bound is established by
+    triangle inequality across the four-game chain
+        [game_real ; game_hybrid_one ; game_hybrid_two ; game_leak],
+    bounding the first two hops by [enc_ind_cpa_real_or_zero] (instantiated
+    at [reduction_charlie predictor] and [reduction_bob predictor]
+    respectively, via [advantage_hop_real_h1] and
+    [advantage_hop_h1_h2]) and the last hop by
+    [game_hybrid_two_perfect_game_leak].
+    Kind: main.
+    Why: this is the computational part of the closed-form Alice secrecy
+    bound (Tasks 13-14 stitch the information-theoretic residual onto
+    this advantage to get [1/m + 2 * epsilon_cpa]).
+    Used by: dsdp_alice_secrecy_indcpa (Task 14).
+    Naming: advantage_<source>_<target> is the project-local convention for
+    SSProve advantage-bound lemmas; the suffix records the two games whose
+    AdvantageE is being bounded, not a MathComp algebraic property. *)
+Lemma advantage_game_real_game_leak
+    (LA : Locations) (predictor : raw_package)
+    (predictor_valid :
+       ValidPackage LA game_iface A_export predictor)
+    (predictor_disj_real :
+       fseparate LA game_real.(locs))
+    (predictor_disj_h1 :
+       fseparate LA game_hybrid_one.(locs))
+    (predictor_disj_h2 :
+       fseparate LA game_hybrid_two.(locs))
+    (predictor_disj_leak :
+       fseparate LA game_leak.(locs))
+    (predictor_disj_tc :
+       fseparate LA translation_charlie.(locs))
+    (predictor_disj_tb :
+       fseparate LA translation_bob.(locs))
+    (predictor_disj_ore :
+       fseparate LA
+         (oracle_encrypt_real_pkg AHE Renc index_renc renc_card
+            rand_of_renc t_msg t_cipher msg_of_chmsg
+            chcipher_of_cipher pkey_of_party).(locs))
+    (predictor_disj_oze :
+       fseparate LA
+         (oracle_encrypt_zero_pkg AHE Renc index_renc renc_card
+            rand_of_renc t_msg t_cipher chcipher_of_cipher
+            pkey_of_party).(locs)) :
+  AdvantageE game_real game_leak predictor <= epsilon_cpa + epsilon_cpa.
+Proof.
+  ssprove triangle (game_real : raw_package)
+    [:: (game_hybrid_one : raw_package)
+      ; (game_hybrid_two : raw_package) ]
+    (game_leak : raw_package) predictor as advantage_bound.
+  eapply le_trans. 1: exact advantage_bound.
+  clear advantage_bound.
+  erewrite game_hybrid_two_perfect_game_leak by ssprove_valid.
+  rewrite GRing.addr0.
+  apply lerD.
+  - exact: advantage_hop_real_h1.
+  - exact: advantage_hop_h1_h2.
+Qed.
 
 End dsdp_security_indcpa.
