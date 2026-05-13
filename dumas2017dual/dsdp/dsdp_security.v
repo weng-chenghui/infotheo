@@ -121,17 +121,17 @@ Let E_alice_d3 := E' alice `o D3.
 Let E_charlie_v3 := E' charlie `o V3.
 Let E_bob_v2 := E' bob `o V2.
 
-(* Encryption hypotheses for E_enc_ce_contract:
-   These are standard information-theoretic assumptions for homomorphic encryption.
-   1. Fresh ciphertexts are uniformly distributed over the ciphertext space
-   2. Fresh ciphertexts are independent of all other random variables
-   These enable dropping encryption terms from conditional entropy calculations. *)
-Hypothesis E_enc_unif : forall (T0 : finType) (P0 : R.-fdist T0)
-  (A : finType) (p : party_id) (X : {RV P0 -> p.-enc A}) (n : nat)
-  (card_A : #|A| = n.+1),
-  `p_X = fdist_uniform (card_enc_for' p card_A).
+(* Encryption hypotheses (Task 15 status):
+   [E_enc_unif] was retired together with the IT-only entropic security
+   theorem; it is no longer declared here.
 
-(* Remove this since we only need to assume for some enc RVs they are inde (and it is unsound). *)
+   [E_enc_inde] is kept as a local section hypothesis because the
+   compromised-case theorem [US_compromised_leaks_V2] below uses it to
+   peel encryption layers from Alice's view. That theorem is a *negative*
+   result: under the (admittedly unsound) IT idealisation, it exhibits a
+   concrete malicious Alice strategy that breaks V2-secrecy. Computational
+   secrecy of the honest protocol is proved instead in
+   [dsdp_security_indcpa.v] without using either hypothesis. *)
 Hypothesis E_enc_inde : forall (A B : finType) (p : party_id)
   (X : {RV P -> p.-enc A}) (Y : {RV P -> B}),
   P |= X _|_ Y.
@@ -140,59 +140,11 @@ Hypothesis E_enc_inde : forall (A B : finType) (p : party_id)
 Let alice_inputsT :=
   (Alice.-key Dec msg * msg * msg * msg * msg * msg * msg)%type.
 Let AliceInputsView := [% Dk_a, V1, U1, U2, U3, R2, R3].
-Let alice_view_valuesT := 
-  (Alice.-key Dec msg * msg * msg * msg * msg * msg * msg * msg * 
+Let alice_view_valuesT :=
+  (Alice.-key Dec msg * msg * msg * msg * msg * msg * msg * msg *
    Alice.-enc msg * Charlie.-enc msg * Bob.-enc msg)%type.
 Let AliceView : {RV P -> alice_view_valuesT} :=
   [% Dk_a, S, V1, U1, U2, U3, R2, R3, E_alice_d3, E_charlie_v3, E_bob_v2].
-
-(* Protocol assumptions needed for security *)
-
-Let CondRV : {RV P -> (msg * msg * msg * msg * msg)} :=
-  [% V1, U1, U2, U3, S].
-Let VarRV : {RV P -> (msg * msg)} := [%V2, V3].
-
-(* Use Z/pqZ definitions from dsdp_entropy for constraint and fiber *)
-Hypothesis constraint_holds :
-  forall t, dsdp_constraint (CondRV t) (VarRV t).
-
-(* U3 must be coprime to m for invertibility in Z/pqZ *)
-Hypothesis U3_coprime_m : forall t, coprime (val (U3 t)) m.
-
-(* Assume V2, V3 inde & uniform and prove the combined RV is uniform. *)
-
-(* Cryptographic assumptions for DSDP security:
-   1. VarRV = (V2, V3) is uniformly distributed over msg × msg
-   2. VarRV is independent of the inputs (V1, U1, U2, U3)
-   These are standard assumptions in secure multi-party computation.
-   Note: We use dsdp_entropy.card_msg_pair_subproof to match the
-   parameter expected by dsdp_centropy_uniform. *)
-Hypothesis VarRV_uniform : 
-  `p_ VarRV = fdist_uniform (dsdp_entropy.card_msg_pair_subproof p_minus_2 q_minus_2).
-Hypothesis VarRV_indep_inputs : P |= [%V1, U1, U2, U3] _|_ VarRV.
-
-(* Additional hypotheses for joint_centropy_reduction *)
-Let Dec_view : {RV P -> (alice_inputsT * msg)} :=
-  [% Dk_a, S, V1, U1, U2, U3, R2, R3].
-
-Hypothesis cinde_V2V3 :
-  P |= [% Dk_a, R2, R3] _|_ [% V2, V3] | [% V1, U1, U2, U3, S].
-
-Hypothesis cinde_V2 :
-  P |= [% Dk_a, R2, R3] _|_ V2 | [% V1, U1, U2, U3, S, V2].
-
-(* V3 is determined by other variables via the linear constraint *)
-Definition compute_v3 : msg * msg * msg * msg * msg * msg -> msg :=
-  fun '(v1, u1, u2, u3, s, v2) => 
-    if u3 == 0 then 0 else (s - u1 * v1 - u2 * v2) / u3.
-
-Hypothesis V3_determined : 
-  V3 = compute_v3 `o [% V1, U1, U2, U3, S, V2].
-
-(* Additional hypotheses for Z/pqZ entropy theorem:
-   U3 must be positive and less than min(p,q) to ensure invertibility *)
-Hypothesis U3_pos : forall t, (0 < val (U3 t))%N.
-Hypothesis U3_lt_minpq : forall t, (val (U3 t) < minn p q)%N.
 
 Lemma neg_self_inde (TA : finType) (A : {RV P -> TA}) :
   (forall (a : TA), `Pr[A = a] != 1) -> ~ P |= A _|_ A.
@@ -209,99 +161,12 @@ case: (Rxx2 Hpr) => Heq.
 - by have := PrA_neq1 a; rewrite Heq eqxx.
 Qed.
 
-(* Core entropy bound: H((V2,V3) | constraint view) = log(m).
-   Instantiates the general DSDP entropy analysis with security hypotheses.
-   Shows Alice learns exactly log(m) bits about Bob/Charlie's joint input,
-   not the full log(m^2) bits - proving entropic security.
-*)
-Theorem dsdp_constraint_centropy_eqlogm :
-  `H(VarRV | CondRV) = log (m%:R : R).
-Proof.
-(* Goal: `H(VarRV | CondRV) = log (m%:R : R)
-   where VarRV = [% V2, V3], CondRV = [% V1, U1, U2, U3, S] *)
-(* Apply dsdp_centropy_uniform from dsdp_entropy.v.
-   Must provide all section parameters explicitly. *)
-apply dsdp_centropy_uniform.
-- exact prime_p.
-- exact prime_q.
-- exact coprime_pq.
-- exact constraint_holds.
-- exact VarRV_uniform.
-- exact VarRV_indep_inputs.
-- exact U3_pos.
-- exact U3_lt_minpq.
-Qed.
-
-(* V3 is determined by V2 and CondRV, so joint entropy equals single.
-   Uses chain rule and the fact that V3 = compute_v3(CondRV, V2).
-   Follows exact pattern from dsdp_entropy.v V3_determined_centropy_v2. *)
-Lemma V3_determined_centropy_v2_local :
-  `H([% V2, V3] | CondRV) = `H(V2 | CondRV).
-Proof.
-rewrite /CondRV.
-have ->: `H([% V2, V3] | [% V1, U1, U2, U3, S]) =
-  `H([% V1, U1, U2, U3, S], [% V2, V3]) - `H `p_ [% V1, U1, U2, U3, S].
-  by rewrite chain_rule_RV addrAC subrr add0r.
-rewrite V3_determined.
-have ->: `H([% V1, U1, U2, U3, S],
-    [% V2, compute_v3 `o [% V1, U1, U2, U3, S, V2]]) =
-  `H `p_[% V1, U1, U2, U3, S, V2].
-  by rewrite joint_entropy_RVA joint_entropy_RV_comp.
-have ->: `H(V2 | [% V1, U1, U2, U3, S]) =
-  `H([% V1, U1, U2, U3, S], V2) - `H `p_ [% V1, U1, U2, U3, S].
-  by rewrite chain_rule_RV addrAC subrr add0r.
-by [].
-Qed.
-
-(* DSDP entropic security: H(V2 | AliceView) = log(m) = H(V2) > 0.
-   Since log(m) is the maximum entropy for V2 over Z/pqZ, this means
-   Alice's view is statistically independent of V2: individual secrets
-   enjoy perfect privacy in the sense of Dodis-Smith entropic security. *)
-Theorem dsdp_entropic_security :
-  `H(V2 | AliceView) = log (m%:R : R) /\
-  `H(V2 | AliceView) > 0.
-Proof.
-(* Proof chain: H(V2|AliceView) = H(V2|CondRV) = H([V2,V3]|CondRV) = log(m) *)
-have H_v2_logm: `H(V2 | AliceView) = log (m%:R : R).
-  (* Use alice_view_to_cond from dsdp_entropy.v with the record.
-     `alice_view_to_cond` expects independence hypotheses with the encryption
-     RV on the RIGHT of `_|_`, but our `E_enc_inde` produces it on the LEFT.
-     We flip each one with `inde_RV_sym`. *)
-  have Hinde_bob : P |= [% [% Dk_a, S, V1, U1, U2, U3, R2, R3, E_alice_d3,
-                        E_charlie_v3], V2] _|_ E_bob_v2.
-    by apply/inde_RV_sym; apply: E_enc_inde.
-  have Hinde_charlie : P |= [% [% Dk_a, S, V1, U1, U2, U3, R2, R3, E_alice_d3], V2]
-                         _|_ E_charlie_v3.
-    by apply/inde_RV_sym; apply: E_enc_inde.
-  have Hinde_alice : P |= [% [% Dk_a, S, V1, U1, U2, U3, R2, R3], V2] _|_ E_alice_d3.
-    by apply/inde_RV_sym; apply: E_enc_inde.
-  rewrite (alice_view_to_cond Hinde_bob Hinde_charlie Hinde_alice
-             (decomposition cinde_V2V3)).
-  rewrite -V3_determined_centropy_v2_local.
-  exact: dsdp_constraint_centropy_eqlogm.
-split.
-- (* Goal 1: H(V2 | AliceView) = log(m) *)
-  exact: H_v2_logm.
-- (* Goal 2: H(V2 | AliceView) > 0 *)
-  rewrite H_v2_logm.
-  (* Goal: log(m) > 0, where m = p * q > 1 *)
-  rewrite -log1.
-  apply: ltr_log.
-    by [].  (* 0 < 1 *)
-  (* Goal: 1 < m%:R, use ltr1n: (1 < n%:R) = (1 < n)%N *)
-  rewrite ltr1n.
-  exact: m_gt1.
-Qed.
-
-(** ** Interpretation *)
-
-(* Entropic security interpretation:
-   H(V2 | AliceView) = log(m) = H(V2), so Alice's view reveals
-   nothing about V2 — individual secrets enjoy perfect privacy.
-   The joint (V2,V3) loses log(m) bits (from 2*log(m) to log(m)),
-   but this corresponds exactly to the protocol output S that
-   Alice is supposed to learn, not a security violation.
-*)
+(* The Z/pqZ entropic security theorems
+   ([dsdp_constraint_centropy_eqlogm], [V3_determined_centropy_v2_local],
+   [dsdp_entropic_security]) used to live here. They depended on the unsound
+   IT idealisation [E_enc_inde] and were retired in Task 15. The replacement
+   is the computational secrecy theorem [dsdp_alice_secrecy_indcpa] proved
+   in [dsdp_security_indcpa.v] via the IND-CPA hop. *)
 
 (******************************************************************************)
 (* Malicious Adversary Case Analysis                                          *)
@@ -1668,158 +1533,18 @@ Qed.
 End relay_security_n.
 
 (******************************************************************************)
-(* N-Party Encryption Contraction                                             *)
+(* N-Party Encryption Contraction and N-Party DSDP Entropic Security          *)
 (*                                                                            *)
-(* Inductive predicate for views that consist of a base RV plus encryptions:  *)
-(*   View = [%...[%[%Base, E_1], E_2], ..., E_k]                              *)
-(* Each encryption can be contracted using E_enc_ce_contract, yielding:       *)
-(*   H(Z | View) = H(Z | Base)                                               *)
-(*                                                                            *)
-(* This replaces the manual 3-fold application in alice_view_to_cond.         *)
+(* The sections [enc_contraction_n] (containing the inductive predicate       *)
+(* [enc_contractible] and the contraction theorem [enc_ce_contract_ind]) and  *)
+(* [dsdp_security_n] (containing [dsdp_entropic_security_n_eq] and            *)
+(* [dsdp_entropic_security_n]) used to live here. They depended on the        *)
+(* unsound IT idealisation [E_enc_inde] and were retired in Task 15. The      *)
+(* N-party secrecy story is now told via the IND-CPA reduction packaged in    *)
+(* [dsdp_security_indcpa.v]; the [Section relay_security_n] above is          *)
+(* unaffected since it is a one-time-pad argument that does not depend on the *)
+(* retired ciphertext-independence axiom.                                     *)
 (******************************************************************************)
-
-Section enc_contraction_n.
-
-Context {R : realType}.
-Variable T : finType.
-Variable P : R.-fdist T.
-
-(* Encryption hypotheses *)
-Hypothesis E_enc_unif : forall (T0 : finType) (P0 : R.-fdist T0)
-  (A : finType) (pty : party_id) (X : {RV P0 -> pty.-enc A}) (n : nat)
-  (card_A : #|A| = n.+1),
-  `p_X = fdist_uniform (card_enc_for' pty card_A).
-
-Hypothesis E_enc_inde : forall (A B : finType) (pty : party_id)
-  (X : {RV P -> pty.-enc A}) (Y : {RV P -> B}),
-  P |= X _|_ Y.
-
-(* Inductive predicate: a view that is "base plus encryptions" *)
-Inductive enc_contractible {C : finType} (Z : {RV P -> C}) (target : R)
-    : forall {A : finType}, {RV P -> A} -> Prop :=
-  | ec_base : forall {A : finType} (X : {RV P -> A}),
-      `H(Z | X) = target -> enc_contractible Z target X
-  | ec_enc : forall {A B : finType} (pty : party_id)
-      (X : {RV P -> A}) (E : {RV P -> pty.-enc B}) (n : nat),
-      enc_contractible Z target X ->
-      #|B| = n.+1 ->
-      (forall x e, `Pr[[%X, E] = (x, e)] != 0) ->
-      enc_contractible Z target [%X, E].
-
-(* Contraction theorem: if a view is enc_contractible, its conditional
-   entropy equals the target *)
-Theorem enc_ce_contract_ind {C : finType} (Z : {RV P -> C}) (target : R)
-    {A : finType} (View : {RV P -> A}) :
-  enc_contractible Z target View -> `H(Z | View) = target.
-Proof.
-elim => [A' X -> // | A' B pty X E n _ IH card_B Hpr].
-have HE : P |= [% X, Z] _|_ E by apply/inde_RV_sym; apply: E_enc_inde.
-by rewrite (E_enc_ce_contract HE card_B).
-Qed.
-
-End enc_contraction_n.
-
-(******************************************************************************)
-(* N-Party DSDP Entropic Security                                            *)
-(*                                                                            *)
-(* Generalizes Alice's security from 3 parties to N parties.                  *)
-(*                                                                            *)
-(* Alice's view in N-party protocol:                                          *)
-(*   [Dk_a, S, V0, U0, u_rel, R_1, ..., R_{n-1}, E_1, ..., E_k]              *)
-(*                                                                            *)
-(* Security theorem:                                                          *)
-(*   H(VarRV | AliceView_n) = log(m^n_relay) > 0                             *)
-(*                                                                            *)
-(* Proof chain:                                                               *)
-(*   1. Contract encryptions: H(VarRV | AliceView) = H(VarRV | DecView)      *)
-(*   2. Strip auxiliary: H(VarRV | DecView) = H(VarRV | CondRV)              *)
-(*   3. Entropy bound: H(VarRV | CondRV) = log(m^n_relay)                    *)
-(******************************************************************************)
-
-Section dsdp_security_n.
-
-Context {R : realType}.
-Variable T : finType.
-Variable P : R.-fdist T.
-
-(* Z/pqZ parameters *)
-Variables (p_minus_2 q_minus_2 : nat).
-Local Notation p := p_minus_2.+2.
-Local Notation q := q_minus_2.+2.
-Hypothesis prime_p : prime p.
-Hypothesis prime_q : prime q.
-Hypothesis coprime_pq : coprime p q.
-Local Notation m := (p * q).
-Local Notation msg := 'Z_m.
-
-Variable n_relay : nat.
-
-Let m_gt0 : (0 < m)%N.
-Proof. by rewrite muln_gt0 prime_gt0 // prime_gt0. Qed.
-
-Let m_gt1 : (1 < m)%N.
-Proof.
-have Hp2: (1 < p)%N by [].
-have Hq2: (1 < q)%N by [].
-by rewrite (ltn_trans Hp2) // -{1}(muln1 p) ltn_pmul2l // ltnS.
-Qed.
-
-Let card_msg : #|msg| = m.
-Proof. by rewrite card_ord Zp_cast. Qed.
-
-Let card_ffun_msg : #|{ffun 'I_n_relay.+1 -> msg}| = (m ^ n_relay.+1).-1.+1.
-Proof. by rewrite prednK ?expn_gt0 ?m_gt0 // card_ffun !card_ord Zp_cast. Qed.
-
-(* N-party section variables (instead of a record) *)
-Variable VarRV : {RV P -> {ffun 'I_n_relay.+1 -> msg}}.
-
-(* Condition: (v0, u0, u_relay_vector, s) *)
-Let CondT_n := (msg * msg * {ffun 'I_n_relay.+1 -> msg} * msg)%type.
-Variable CondRV : {RV P -> CondT_n}.
-
-(* Encryption hypotheses *)
-Hypothesis E_enc_unif : forall (T0 : finType) (P0 : R.-fdist T0)
-  (A : finType) (pty : party_id) (X : {RV P0 -> pty.-enc A}) (n : nat)
-  (card_A : #|A| = n.+1),
-  `p_X = fdist_uniform (card_enc_for' pty card_A).
-
-Hypothesis E_enc_inde : forall (A B : finType) (pty : party_id)
-  (X : {RV P -> pty.-enc A}) (Y : {RV P -> B}),
-  P |= X _|_ Y.
-
-(* The N-party entropy bound from dsdp_entropy_n *)
-Hypothesis dsdp_centropy_n :
-  `H(VarRV | CondRV) = log ((m ^ n_relay)%:R : R).
-
-(* Alice's view is some type that contracts to CondRV *)
-Variable AliceViewT : finType.
-Variable AliceView : {RV P -> AliceViewT}.
-
-(* The view contracts to CondRV (via enc_contractible or manual proof) *)
-Hypothesis alice_view_contract :
-  `H(VarRV | AliceView) = `H(VarRV | CondRV).
-
-(* Core N-party entropic security: entropy value *)
-Theorem dsdp_entropic_security_n_eq :
-  `H(VarRV | AliceView) = log ((m ^ n_relay)%:R : R).
-Proof. by rewrite alice_view_contract dsdp_centropy_n. Qed.
-
-(* Core N-party entropic security: entropy is positive when n_relay > 0 *)
-Theorem dsdp_entropic_security_n :
-  (0 < n_relay)%N ->
-  `H(VarRV | AliceView) = log ((m ^ n_relay)%:R : R) /\
-  `H(VarRV | AliceView) > 0.
-Proof.
-move=> Hn.
-split.
-- exact: dsdp_entropic_security_n_eq.
-- rewrite dsdp_entropic_security_n_eq -log1.
-  apply: ltr_log; first by [].
-  rewrite ltr1n -(expn0 m).
-  by rewrite ltn_exp2l.
-Qed.
-
-End dsdp_security_n.
 
 (******************************************************************************)
 (* N-Party Malicious Adversary Case Analysis                                  *)
