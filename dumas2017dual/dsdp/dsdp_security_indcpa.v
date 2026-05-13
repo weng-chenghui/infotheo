@@ -1497,6 +1497,346 @@ apply: Lossless_sample.
 exact: LosslessOp_uniform.
 Qed.
 
+(* ================================================================== *)
+(* Task B: alice_view_with_secrets carrier and SDistr-to-fdist bridge *)
+(* ================================================================== *)
+
+(** V_2_carrier, V_3_carrier - section parameters for the protocol
+    scalars V_2 and V_3 as [finType]s.  The DSDP protocol scalars live
+    in a finite commutative ring (the TeX abstraction at Setup item 2);
+    Tasks E-F will generalize the IT residual lemma to an arbitrary
+    [finComNzRingType] and instantiate this section at the ring of
+    plaintext scalars [plain AHE].  Until then, these section parameters
+    keep Task B parametric in the V_2 / V_3 carriers so the carrier and
+    bridge plumbing can be checked and committed independently of the
+    ring-genericity work.
+    Kind: parameter.
+    Why: Task B of [~/.claude/plans/sprightly-finding-robin.md] (Fallback
+    R2A: extend the carrier to [alice_view_with_secrets]).  Task 10's
+    [alice_view] does not include V_2 / V_3, but the IT residual analysis
+    in Task 13 / Task F treats V_2 and V_3 as random variables; lifting
+    them into the joint sample space requires their carriers to be
+    finType so the iterated product [alice_view * V_2_carrier *
+    V_3_carrier] remains a finType.
+    Used by: alice_view_with_secrets, Task D's V_2_RV / V_3_RV
+    projections, Task F's section instantiation. *)
+Variable V_2_carrier : finType.
+
+(** index_V_2, V_2_card - cardinality index for [V_2_carrier] and the
+    bridge hypothesis tying [#|V_2_carrier|] to it.  Same pattern as
+    [Renc] / [index_renc] / [renc_card] at the top of this section, and
+    as [Dk_a_carrier] / [index_Dk_a] / [Dk_a_card] in Task 10.
+    Kind: parameter + hypothesis.
+    Why: SSProve [sample uniform] requires a [nat] cardinality; the
+    Task H residual bound [Pr [ (predictor ∘ game_leak).output =
+    V_2_sample ] <= #|R|%:R^-1] (where [R] is the ring of plaintext
+    scalars) operates on [V_2_carrier] cardinality.  Concrete
+    instantiations identify [V_2_carrier] with [plain AHE] and
+    [index_V_2] with [index_msg].
+    Used by: Task D's V_2_RV projection, Task F's residual section
+    instantiation. *)
+Variable index_V_2 : nat.
+Hypothesis V_2_card : #|V_2_carrier| = index_V_2.
+
+(** V_3_carrier, index_V_3, V_3_card - companion parameters for the
+    third protocol scalar V_3.  Same shape as V_2's parameters.
+    Kind: parameter + hypothesis.
+    Why: same as V_2_carrier.  V_3 is the other DSDP secret scalar that
+    Task D will project from [alice_view_with_secrets] as a random
+    variable; the IT residual decomposition operates on the joint
+    [(V_2, V_3)] pair (the fiber of [u_2 v_2 + u_3 v_3 = s - u_1 v_1]).
+    Used by: alice_view_with_secrets, Task D's V_3_RV projection,
+    Task F's residual section instantiation. *)
+Variable V_3_carrier : finType.
+Variable index_V_3 : nat.
+Hypothesis V_3_card : #|V_3_carrier| = index_V_3.
+
+(** alice_view_with_secrets - the corrupted-Alice view extended with the
+    two protocol scalars V_2 and V_3 that Alice does NOT see directly
+    (they are masked into the ciphertexts and into the linear identity)
+    but that the IT residual analysis treats as random variables on the
+    same joint sample space.  Eleven-tuple finType built as the product
+    of Task 10's [alice_view] with [V_2_carrier] and [V_3_carrier].
+    Kind: canonical.
+    Why: Task B of [~/.claude/plans/sprightly-finding-robin.md]
+    (Fallback R2A).  The two real-or-zero IND-CPA hops (Tasks 06-08)
+    eliminate the three ciphertext slots from the distinguisher-visible
+    view, leaving Task 10's nine-component [alice_view].  But to argue
+    [Pr[predictor = V_2] <= 1/m] on the leak game, the joint sample
+    space must contain V_2 (so that the V_2-guess event is a measurable
+    predicate on the carrier) and V_3 (so that the constraint
+    [u_2 v_2 + u_3 v_3 = s - u_1 v_1] picks out the fiber).  Extending
+    the carrier here is the cleanest way to do this: HB instances
+    inherit automatically through [%type] products since [alice_view],
+    [V_2_carrier], [V_3_carrier] are all finType (which extends
+    choiceType).  The Task D projections then expose V_2 / V_3 as
+    [{RV _ -> _}].
+    Naming: [_with_secrets] reads "the surface view plus the secret
+    scalars V_2, V_3"; user-chosen, see plan line 53.  Not _full
+    (rejected as too generic).
+    Used by: Task C's [bridge_predictor_compose_to_fdist], Task D's
+    protocol random variables, Task F's residual section
+    instantiation. *)
+Definition alice_view_with_secrets : finType :=
+  (alice_view * V_2_carrier * V_3_carrier)%type.
+
+(** alice_view_with_secrets_choice_finType - the named HB instance label
+    tying [alice_view_with_secrets] simultaneously to MathComp's
+    [finType] and [choiceType] structures.  No additional plumbing is
+    required: the iterated product type-class search finds both
+    instances automatically because each component is itself a finType.
+    Kind: canonical (HB instance label, no new content).
+    Why: mirrors Task 10's [alice_view_choice_finType] so audits can
+    grep for the joint declaration.  The two [Check] judgments below
+    discharge the verify clause of Task B.
+    Naming: <type>_<class1>_<class2> follows the MathComp convention
+    used by Task 10.
+    Used by: documentation only; the instances are picked up by
+    canonical-structure resolution at the use sites. *)
+Definition alice_view_with_secrets_choice_finType : Type :=
+  alice_view_with_secrets.
+
+(* Task B verify clause: both finType and choiceType inhabit
+   alice_view_with_secrets. *)
+Check (alice_view_with_secrets : finType).
+Check (alice_view_with_secrets : choiceType).
+
+(** index_alice_view_with_secrets - the cardinality of
+    [alice_view_with_secrets] as a [nat].  Computed once so that the
+    SSProve-side [chFin] embedding below can refer to it by name.
+    Kind: canonical.
+    Why: mirrors Task 10's [index_alice_view].  SSProve's [choice_type]
+    GADT uses [chFin (n : nat)] for finite carriers, with
+    [chInterp (chFin n) = 'I_n].  Naming the cardinality lets us state
+    the cardinality lemma [alice_view_with_secrets_ct_card] cleanly.
+    Naming: [index_X] is a project-local prefix for SSProve [chFin]
+    cardinality parameters, mirroring Task 10's [index_alice_view] and
+    the top-of-section [index_renc] / [index_Dk_a].  The [_card] suffix
+    is reserved for the finType cardinality lemmas below
+    ([alice_view_with_secrets_ct_card],
+    [alice_view_with_secrets_card_index]), so [index_] is used for the
+    nat value itself to keep the two roles distinct.
+    Used by: alice_view_with_secrets_ct, the Task B bridge. *)
+Definition index_alice_view_with_secrets : nat :=
+  #|alice_view_with_secrets|.
+
+(** alice_view_with_secrets_ct - the SSProve-side [choice_type] avatar
+    of [alice_view_with_secrets], lifted as a single [chFin] of the
+    total cardinality.  This is the carrier that the Task B bridge
+    [bridge_alice_view_with_secrets_to_fdist :
+    SDistr alice_view_with_secrets -> {fdist alice_view_with_secrets}]
+    will round-trip through to transfer SSProve probabilities (which
+    live over [chInterp alice_view_with_secrets_ct =
+    'I_index_alice_view_with_secrets]) onto infotheo's
+    [{fdist alice_view_with_secrets}].
+    Kind: canonical.
+    Why: same reason as Task 10's [alice_view_ct].  SSProve's
+    [choice_type] is a closed inductive that does not directly cover
+    finType products; routing through [chFin (#|...|)] is the standard
+    idiom.  The [alice_view_with_secrets_to_ct] /
+    [alice_view_with_secrets_of_ct] bijection below mediates between
+    the two views.
+    Naming: <type>_ct uses the SSProve-side suffix _ct (choice_type)
+    matching Task 10's [alice_view_ct].
+    Used by: bridge_alice_view_with_secrets_to_fdist (Task B), Task C's
+    extended bridge over predictor composition. *)
+Definition alice_view_with_secrets_ct : choice_type :=
+  chFin index_alice_view_with_secrets.
+
+(** alice_view_with_secrets_to_ct, alice_view_with_secrets_of_ct -
+    bijection between the MathComp finType [alice_view_with_secrets]
+    and the SSProve-side [alice_view_with_secrets_ct =
+    chFin index_alice_view_with_secrets =
+    'I_index_alice_view_with_secrets], realised via MathComp's
+    [enum_rank] and [enum_val] on the canonical enumeration.
+    Kind: helper.
+    Why: Task B builds an [{fdist alice_view_with_secrets}] by walking
+    the SSProve [Pr_code] over [alice_view_with_secrets_ct] and
+    re-indexing each probability against the corresponding MathComp
+    finType element.  These two functions are the re-indexing
+    primitive; the [_K] cancel lemmas below guarantee the round-trip
+    is the identity.
+    Naming: <type>_to_ct / <type>_of_ct mirrors Task 10's
+    [alice_view_to_ct] / [alice_view_of_ct].
+    Used by: bridge_alice_view_with_secrets_to_fdist (Task B), Task C's
+    extended bridge, the support-enumeration obligation. *)
+Definition alice_view_with_secrets_to_ct
+    (v : alice_view_with_secrets) : alice_view_with_secrets_ct :=
+  enum_rank v.
+
+(** alice_view_with_secrets_of_ct - companion to
+    [alice_view_with_secrets_to_ct]: send an SSProve-side index
+    [i : alice_view_with_secrets_ct] back to its
+    [alice_view_with_secrets] inhabitant via [enum_val].
+    Kind: helper.
+    Why: same as the [_to_ct] direction; together they form the
+    bijection mediating between the SSProve [chFin]-indexed view and
+    the infotheo [finType]-indexed view.
+    Naming: <type>_of_ct mirrors Task 10's [alice_view_of_ct]; the
+    [_of_ct] suffix names the inverse direction of [_to_ct] for the
+    SSProve [choice_type] avatar.  Project-local, not a MathComp
+    suffix-table entry.
+    Used by: bridge_alice_view_with_secrets_to_fdist (Task B),
+    [alice_view_with_secrets_to_ct_K],
+    [alice_view_with_secrets_of_ct_K]. *)
+Definition alice_view_with_secrets_of_ct
+    (i : alice_view_with_secrets_ct) : alice_view_with_secrets :=
+  enum_val i.
+
+(** alice_view_with_secrets_to_ct_K - cancel law:
+    [alice_view_with_secrets_of_ct] is a left inverse of
+    [alice_view_with_secrets_to_ct].  Follows from MathComp's
+    [enum_rankK].
+    Kind: cancellation.
+    Why: Task C's extended bridge over predictor composition needs to
+    argue that summing an SSProve density over
+    [alice_view_with_secrets_ct] and re-indexing back through
+    [alice_view_with_secrets_of_ct] recovers the original
+    [alice_view_with_secrets] support; the cancel pair is the algebraic
+    content of that argument.
+    Used by: Task C's bridge correctness lemma. *)
+Lemma alice_view_with_secrets_to_ct_K :
+  cancel alice_view_with_secrets_to_ct alice_view_with_secrets_of_ct.
+Proof. exact: enum_rankK. Qed.
+
+(** alice_view_with_secrets_of_ct_K - companion cancel:
+    [alice_view_with_secrets_to_ct] is a left inverse of
+    [alice_view_with_secrets_of_ct].  Follows from MathComp's
+    [enum_valK].
+    Kind: cancellation.
+    Why: same role as [alice_view_with_secrets_to_ct_K] but for the
+    inverse direction; together they make the pair a bijection (used
+    by Task C to justify the [psum] / [bigop] re-indexing). *)
+Lemma alice_view_with_secrets_of_ct_K :
+  cancel alice_view_with_secrets_of_ct alice_view_with_secrets_to_ct.
+Proof. exact: enum_valK. Qed.
+
+(** alice_view_with_secrets_ct_card,
+    alice_view_with_secrets_card_index - cardinality coherence:
+    [alice_view_with_secrets_ct] interprets as
+    ['I_index_alice_view_with_secrets] which has cardinality
+    [index_alice_view_with_secrets], and [alice_view_with_secrets]
+    itself has the same cardinality by definition of
+    [index_alice_view_with_secrets].
+    Kind: coherence.
+    Why: Task C's total-mass bridge relates [psum] over [chInterp
+    alice_view_with_secrets_ct] (the SSProve semantics output) to
+    [\sum_(v : alice_view_with_secrets) ...] (the infotheo target);
+    these two facts let us swap the indexing finType under the bigop /
+    psum without changing the value.
+    Used by: Task C's extended bridge correctness. *)
+Lemma alice_view_with_secrets_ct_card :
+  #|alice_view_with_secrets_ct| = index_alice_view_with_secrets.
+Proof. exact: card_ord. Qed.
+
+(** alice_view_with_secrets_card_index - cardinality of the
+    infotheo-side [alice_view_with_secrets] equals
+    [index_alice_view_with_secrets] by definition.  Trivial by
+    reflexivity.
+    Kind: coherence.
+    Why: same role as Task 10's [alice_view_card_index].  When the
+    Task C bridge re-indexes a [psum] over the SSProve-side
+    [alice_view_with_secrets_ct] back to a
+    [\sum_(v : alice_view_with_secrets)], this lemma is the cardinality
+    side of that re-indexing.
+    Naming: _card_index records "cardinality equals the named index
+    parameter"; project-local convention, not a MathComp suffix-table
+    entry.
+    Used by: Task C's extended bridge. *)
+Lemma alice_view_with_secrets_card_index :
+  #|alice_view_with_secrets| = index_alice_view_with_secrets.
+Proof. by []. Qed.
+
+#[local] Open Scope fdist_scope.
+
+(** bridge_psum_to_bigop_with_secrets - the elementary identity
+    converting SSProve's [psum] over an [alice_view_with_secrets]-valued
+    sub-distribution into MathComp's
+    [\sum_(v : alice_view_with_secrets)].  On a [finType] both
+    quantities enumerate the same support, and [psum f = \sum_i |f i|]
+    from realsum collapses to the plain sum because [distr.mu mu] is
+    non-negative.
+    Kind: helper bridge.
+    Why: Task B of [~/.claude/plans/sprightly-finding-robin.md].  The
+    SSProve denotational semantics produces a [distr R
+    alice_view_with_secrets] via [Pr_fst]; the infotheo target side
+    wants an [\sum_(v : alice_view_with_secrets)] indexed bigop.  This
+    lemma is the only place where the two summation conventions meet
+    for the wider carrier (Task 12's [bridge_psum_to_bigop] does the
+    same job for the narrower [alice_view]).
+    Naming: project-local; mirrors Task 12's [bridge_psum_to_bigop]
+    with the [_with_secrets] suffix.
+    Used by: bridge_alice_view_with_secrets_to_fdist, Task C's
+    extended bridge correctness. *)
+Lemma bridge_psum_to_bigop_with_secrets
+    (mu : distr.distr R alice_view_with_secrets) :
+  \sum_(v : alice_view_with_secrets) (distr.mu mu) v
+    = psum (distr.mu mu).
+Proof.
+rewrite psum_fin.
+apply: eq_bigr => a _.
+by rewrite ger0_norm //; apply: distr.ge0_mu.
+Qed.
+
+(** bridge_alice_view_with_secrets_to_fdist - the SDistr-to-fdist
+    bridge at the extended carrier.  Given a sub-distribution
+    [mu : distr R alice_view_with_secrets] and a proof that its total
+    mass is one, produce an infotheo-side
+    [{fdist alice_view_with_secrets}] by wrapping [distr.mu mu] in an
+    [ffun] and discharging the [FDist.make] obligations:
+    non-negativity comes from [distr.ge0_mu], summation-to-one comes
+    from [bridge_psum_to_bigop_with_secrets] composed with the mass
+    hypothesis.
+    Kind: bridge construction.
+    Why: Task B of the plan.  Mirrors Task 12's
+    [bridge_leak_to_fdist] for the eleven-component carrier.  Task C's
+    extended bridge over predictor composition will produce a
+    sub-distribution of this shape (the joint distribution of the
+    game's samples plus the predictor's t_msg output), and the IT
+    residual analysis (Task F) will operate on the resulting
+    [{fdist alice_view_with_secrets}].
+    Naming: project-local.  Mirrors Task 12's [bridge_leak_to_fdist]
+    with the wider carrier suffix.
+    Used by: Task C's [bridge_predictor_compose_to_fdist],
+    [bridge_alice_view_with_secrets_to_fdistE], Task H's
+    [Pr_predictor_guess_game_leak_le_invm]. *)
+Definition bridge_alice_view_with_secrets_to_fdist
+    (mu : distr.distr R alice_view_with_secrets)
+    (Hmass : psum (distr.mu mu) = 1) :
+  R.-fdist alice_view_with_secrets.
+Proof.
+unshelve eapply FDist.make.
+- exact: [ffun v => (distr.mu mu) v].
+- by move=> a; rewrite ffunE; apply: distr.ge0_mu.
+- under eq_bigr=> a _ do rewrite ffunE.
+  by rewrite bridge_psum_to_bigop_with_secrets.
+Defined.
+
+(** bridge_alice_view_with_secrets_to_fdistE - elementwise equation for
+    the bridge.  Spells out how to evaluate the resulting
+    [{fdist alice_view_with_secrets}] at a point: it is just
+    [distr.mu mu] of the same point.
+    Kind: simplification.
+    Why: lets downstream proofs unfold the bridge to expose the
+    underlying SSProve density without forcing them to manage the
+    [ffun] wrapper.  Mirrors Task 12's [bridge_leak_to_fdistE].
+    Naming: trailing [E] follows MathComp convention for elementwise /
+    extensional equations.
+    Used by: Task C's [Pr_predictor_compose_eq_fdist], Task H's
+    [Pr_predictor_guess_game_leak_le_invm]. *)
+Lemma bridge_alice_view_with_secrets_to_fdistE
+    (mu : distr.distr R alice_view_with_secrets)
+    (Hmass : psum (distr.mu mu) = 1) (v : alice_view_with_secrets) :
+  bridge_alice_view_with_secrets_to_fdist Hmass v = (distr.mu mu) v.
+Proof. by rewrite /bridge_alice_view_with_secrets_to_fdist /= ffunE. Qed.
+
+(* Task B verify clause: the bridge type-checks at the expected
+   signature.  Mirrors Task 12's verify [Check] on
+   [bridge_leak_to_fdist]. *)
+Check bridge_alice_view_with_secrets_to_fdist :
+  forall (mu : distr.distr R alice_view_with_secrets),
+    psum (distr.mu mu) = 1 -> R.-fdist alice_view_with_secrets.
+
 End dsdp_security_indcpa.
 
 (* ================================================================== *)
