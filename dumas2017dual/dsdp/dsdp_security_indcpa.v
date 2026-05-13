@@ -24,6 +24,7 @@ From extructures Require Import ord fset fmap.
 
 Require Import realType_ext realType_ln ssr_ext ssralg_ext bigop_ext fdist.
 Require Import proba jfdist_cond entropy graphoid smc_interpreter spp_proba bayes.
+Require Import spp_entropy.
 Require Import homomorphic_encryption indcpa_ror.
 Require Import dsdp_program dsdp_entropy dsdp_pismc.
 
@@ -1324,3 +1325,184 @@ Check bridge_leak_to_fdist :
     psum (distr.mu mu) = 1 -> R.-fdist alice_view.
 
 End dsdp_security_indcpa.
+
+(* ================================================================== *)
+(* Task 13: residual uniformity Pr_game_leak_V2_uniform                *)
+(* ================================================================== *)
+
+(* Imports needed by the [du2002/spp_entropy.v] / [du2002/spp_proba.v]
+   chain consumed below.  Each lemma in the chain operates on an
+   infotheo-side [R.-fdist T] probability space; this section establishes
+   the matching probability space and discharges the residual uniformity
+   claim by composing [inde_RV2_cinde] (Lemma 3.3 of du2002),
+   [cinde_rv_comp_removal] (the deterministic-function conditioning
+   lemma), and [Pr_dsdp_sol_uniform] (the protocol-level residual). *)
+
+#[local] Open Scope proba_scope.
+#[local] Open Scope fdist_scope.
+#[local] Open Scope ring_scope.
+
+Section dsdp_security_indcpa_residual.
+
+(** Probability-space parameters mirroring [dsdp_entropy.v]'s
+    [Section dsdp_entropy].  The protocol scalars live in [Z/(p*q)Z]
+    with [p, q] distinct primes; the joint distribution [P] supplies
+    the DSDP-shaped random variables [V_1, V_2, V_3, U_1, U_2, U_3, S]
+    plus an auxiliary encryption-randomness random variable [Z_rand]
+    which represents the SSProve-sampled ciphertext-randomness tuple
+    [(r_a, r_c', r_b')] from [game_leak].
+    Kind: section parameters.
+    Why: Task 13 of [~/.claude/plans/sprightly-finding-robin.md].  The
+    residual uniformity step is purely information-theoretic; it
+    operates on the bridged [{fdist alice_view}]-side and is parametric
+    in the probability space.  Task 14 then instantiates this section
+    at the bridge image and combines with the SSProve-side advantage
+    bound to close [dsdp_alice_secrecy_indcpa].  The encryption-rand
+    tuple [Z_rand] is carried as a single auxiliary RV (its concrete
+    component shape is irrelevant to the residual argument: only the
+    independence hypothesis [V2V3_Z_inde_given_Y] matters). *)
+Context (p_minus_2 q_minus_2 : nat).
+Hypothesis prime_p_indcpa : prime p_minus_2.+2.
+Hypothesis prime_q_indcpa : prime q_minus_2.+2.
+Hypothesis coprime_pq_indcpa : coprime p_minus_2.+2 q_minus_2.+2.
+Local Notation p := p_minus_2.+2.
+Local Notation q := q_minus_2.+2.
+Local Notation m := (p * q)%N.
+Context (T : finType) (P : R.-fdist T).
+Context (V_1 V_2 V_3 U_1 U_2 U_3 S : {RV P -> 'Z_m}).
+Context (TR : finType) (Z_rand : {RV P -> TR}).
+
+(** constraint_holds_indcpa - DSDP constraint at every sample.  Same
+    shape as [dsdp_entropy.v]'s [constraint_holds] hypothesis.
+    Kind: hypothesis.
+    Why: required by [Pr_dsdp_sol_uniform] (dsdp_entropy.v:237).  The
+    constraint [s - u_1*v_1 = u_2*v_2 + u_3*v_3] is what makes the
+    fiber a CRT linear system and ultimately produces the [1/m]
+    residual. *)
+Hypothesis constraint_holds_indcpa :
+  forall t : T,
+    dsdp_constraint ([%V_1, U_1, U_2, U_3, S] t) ([%V_2, V_3] t).
+
+(** VarRV_uniform_indcpa - the protocol-level pair [(V_2, V_3)] is
+    uniformly distributed over [(msg * msg)].  Standard SMC
+    assumption, matches [dsdp_entropy.v:116].
+    Kind: hypothesis.
+    Why: required by [Pr_dsdp_sol_uniform]. *)
+Hypothesis VarRV_uniform_indcpa :
+  `p_ [%V_2, V_3] =
+    fdist_uniform (dsdp_entropy.card_msg_pair_subproof p_minus_2 q_minus_2).
+
+(** VarRV_indep_inputs_indcpa - [(V_2, V_3)] is independent of the
+    protocol inputs [(V_1, U_1, U_2, U_3)].  Matches
+    [dsdp_entropy.v:117].
+    Kind: hypothesis.
+    Why: required by [Pr_dsdp_sol_uniform]. *)
+Hypothesis VarRV_indep_inputs_indcpa :
+  P |= [%V_1, U_1, U_2, U_3] _|_ [%V_2, V_3].
+
+(** V2V3_Z_inde_given_Y - independence of the protocol pair [(V_2, V_3)]
+    jointly with the IT conditioning view [(V_1, U_1, U_2, U_3, S)]
+    from the encryption-randomness tuple [Z_rand].  This is the
+    semantic content of "the IND-CPA hops have eliminated all
+    information about [V_2] from the ciphertext slots": after the two
+    real-or-zero hops, every ciphertext is a function of fresh
+    encryption-randomness that is independent of the protocol-side
+    secrets.
+    Kind: hypothesis.
+    Why: feeds [inde_RV2_cinde] (Lemma 3.3, [du2002/spp_proba.v:146])
+    to obtain the conditional independence
+    [(V_2, V_3) _|_ Z_rand | (V_1, U_1, U_2, U_3, S)], which then feeds
+    [cinde_rv_comp_removal] to drop [Z_rand] from the conditioning. *)
+Hypothesis V2V3_Z_inde_given_Y :
+  P |= [%[%V_2, V_3], [%V_1, U_1, U_2, U_3, S]] _|_ Z_rand.
+
+(** Pr_game_leak_V2_uniform - residual uniformity of [V_2] after both
+    IND-CPA hops have been taken.  Conditioning the joint
+    [(V_2, V_3)] event on the full Alice view (which combines the
+    IT-side tuple [(V_1, U_1, U_2, U_3, S)] with the
+    encryption-randomness [Z_rand]) yields the [1/m] uniform residual
+    whenever the conditioning event has nonzero probability and the
+    target pair lies in the DSDP fiber.
+    Kind: main residual.
+    Why: Task 13 of [~/.claude/plans/sprightly-finding-robin.md].
+    This is the second half of the closed-form Alice secrecy bound
+    [1/m + 2 * epsilon_cpa]; the [2 * epsilon_cpa] half lives in
+    [advantage_game_real_game_leak] (Task 08).  Task 14 combines the
+    two halves into [dsdp_alice_secrecy_indcpa].
+    Proof: [inde_RV2_cinde] (independence to conditional
+    independence), then [cinde_rv_comp_removal] (drop [Z_rand] from
+    the conditioning, this is the cinde-removal arrow that the
+    SSProve-side [bridge_correct] feeds into via Task 14's caller),
+    then [Pr_dsdp_sol_uniform] (the IT residual at the fiber).  The
+    nonzero marginal precondition for [Pr_dsdp_sol_uniform] is
+    discharged via [pfwd1_domin_RV1] from the joint nonzero
+    hypothesis.
+    Naming: [Pr_<thing>_<property>] is the infotheo convention; see
+    [Pr_dsdp_sol_uniform] at [dsdp_entropy.v:237].
+    Used by: Task 14 ([dsdp_alice_secrecy_indcpa]).
+    Bookkeeping translation: the SSProve-side [V_2] sample inside
+    [game_leak] is projected to the infotheo-side RV [V_2] via the
+    bridge [bridge_leak_to_fdist] (Task 12); Task 14 calls
+    [bridge_correct] to transfer an SSProve [Pr] statement to the
+    infotheo [Pr], at which point the present lemma closes the
+    residual on the joint-fiber-event form.  Marginalisation onto the
+    single [V_2 = v_2] event (rather than the joint [(V_2, V_3) =
+    (v_2, v_3)] event) follows by partitioning the fiber on [v_3];
+    each [v_2] has exactly one fiber partner when [u_3] is invertible
+    (which is the [u_3 < minn p q] hypothesis), so the marginal is
+    also [1/m].  Task 14 handles that partitioning step. *)
+Lemma Pr_game_leak_V2_uniform
+    (u1 u2 u3 v1 s : 'Z_m) (v2 v3 : 'Z_m) (z : TR) :
+  (0 < u3)%N -> (u3 < minn p q)%N ->
+  `Pr[ [%Z_rand, [%V_1, U_1, U_2, U_3, S]] = (z, (v1, u1, u2, u3, s)) ] != 0 ->
+  (v2, v3) \in dsdp_fiber u1 u2 u3 v1 s ->
+  `Pr[ [%V_2, V_3] = (v2, v3) |
+       [%Z_rand, [%V_1, U_1, U_2, U_3, S]] = (z, (v1, u1, u2, u3, s)) ]
+    = m%:R^-1.
+Proof.
+move=> Hu3_pos Hu3_lt Hcond_pos Hin.
+(* Step 1: independence to conditional independence (inde_RV2_cinde). *)
+have V2V3_indep_Zrand :
+    [%V_2, V_3] _|_ Z_rand | [%V_1, U_1, U_2, U_3, S]
+  by apply: inde_RV2_cinde.
+(* Step 2: cinde_rv_comp_removal drops Z_rand from conditioning.
+   Cast the deterministic-function shape via two trivial eta lemmas. *)
+have Heta1 :
+    (fst `o [%Z_rand, [%V_1, U_1, U_2, U_3, S]] : {RV P -> TR}) = Z_rand
+  by [].
+have Heta2 :
+    (snd `o [%Z_rand, [%V_1, U_1, U_2, U_3, S]] : {RV P -> _})
+      = [%V_1, U_1, U_2, U_3, S]
+  by [].
+have Hcomp :=
+  @cinde_rv_comp_removal R T _ _ _ _ (v2, v3) z (v1, u1, u2, u3, s) P
+    [%V_2, V_3] [%Z_rand, [%V_1, U_1, U_2, U_3, S]] fst snd.
+rewrite Heta1 Heta2 in Hcomp.
+rewrite -(Hcomp V2V3_indep_Zrand Hcond_pos).
+(* Step 3: Pr_dsdp_sol_uniform closes the IT residual on the fiber.
+   The nonzero marginal precondition is the only side-obligation;
+   discharge it by pfwd1_domin_RV1 from the joint nonzero. *)
+apply: Pr_dsdp_sol_uniform => //.
+apply: contraNneq Hcond_pos => H0.
+by apply/eqP; apply: pfwd1_domin_RV1; exact: H0.
+Qed.
+
+(* Task 13 verify clause: [Pr_game_leak_V2_uniform] type-checks and
+   closes with [Qed].  The proof uses only the three infotheo lemmas
+   the plan names ([inde_RV2_cinde], [cinde_rv_comp_removal],
+   [Pr_dsdp_sol_uniform]), plus [pfwd1_domin_RV1] to discharge the
+   nonzero-marginal side-obligation.  [bridge_correct] (Task 12) is
+   not used in the proof body: the lemma is stated on the
+   infotheo-side [{fdist T}] directly, and Task 14's caller invokes
+   [bridge_correct] to transfer SSProve-side [Pr] statements to the
+   infotheo side before applying the present lemma. *)
+Check Pr_game_leak_V2_uniform :
+  forall (u1 u2 u3 v1 s : 'Z_m) (v2 v3 : 'Z_m) (z : TR),
+    (0 < u3)%N -> (u3 < minn p q)%N ->
+    `Pr[ [%Z_rand, [%V_1, U_1, U_2, U_3, S]] = (z, (v1, u1, u2, u3, s)) ] != 0 ->
+    (v2, v3) \in dsdp_fiber u1 u2 u3 v1 s ->
+    `Pr[ [%V_2, V_3] = (v2, v3) |
+         [%Z_rand, [%V_1, U_1, U_2, U_3, S]] = (z, (v1, u1, u2, u3, s)) ]
+      = m%:R^-1.
+
+End dsdp_security_indcpa_residual.
