@@ -2940,6 +2940,135 @@ Check Pr_guess_indicator_eq_predictor_output :
     distr.mu (pkg_advantage.Pr (guess_indicator_pkg predictor game)) true
       = distr.mu (Pr_fst (guess_event_code predictor game)) true.
 
+(* ================================================================== *)
+(* Task H: residual bound Pr_predictor_guess_game_leak_le_invm        *)
+(* ================================================================== *)
+
+(** index_t_msg_pos - positivity of the [t_msg] index, witnessing that
+    the message space is non-empty so the uniform sample
+    [sample uniform index_t_msg] in [guess_event_code] is well-typed
+    and the bound [#|t_msg_carrier|%:R^-1] is finite.
+    Kind: section hypothesis.
+    Why: Task H of [~/.claude/plans/sprightly-finding-robin.md].  The
+    residual bound is [<= #|t_msg_carrier|%:R^-1]; treating the RHS as
+    a real number requires the cardinality to be positive (else the
+    inverse is zero and the bound is trivially [0 <= 0], which is
+    still mathematically correct but degenerate).  At concrete
+    instantiation the bound becomes [1/m] with [m = #|t_msg_carrier|],
+    matching the TeX statement (Setup item 8.5, Step 5 of
+    notes/20260506-dsdp-secrecy-closed-form).
+    Naming: project-local; mirrors [index_msg_pos], [index_renc_pos].
+    Used by: Pr_predictor_guess_game_leak_le_invm. *)
+Hypothesis index_t_msg_pos : (0 < index_t_msg)%N.
+
+(** sample_to_t_msg_inj - injectivity of the cardinality-cast +
+    carrier embedding [sample_to_t_msg : 'I_index_t_msg -> t_msg].
+    Concrete instantiations identify [t_msg_carrier] with [plain AHE]
+    (the protocol-side message scalar carrier) and
+    [t_msg_carrier_to_chmsg] with [chmsg_of_msg]; for any
+    representative-bijection [chmsg_of_msg] (the "biject on
+    representatives" design intent declared at file header lines
+    104-108) the composition is injective.
+    Kind: section hypothesis.
+    Why: Task H of [~/.claude/plans/sprightly-finding-robin.md].
+    The residual bound on
+    [Pr[(predictor o game_leak).output = V_2_sample]] reduces, after
+    conditioning on the predictor's guess, to bounding
+    [Pr_{iV2 uniform}[sample_to_t_msg iV2 = guess]].  For an
+    arbitrary guess [g], that probability is
+    [#|{i : sample_to_t_msg i = g}|/index_t_msg];
+    [sample_to_t_msg]-injectivity bounds the numerator by 1
+    uniformly, giving the [1/index_t_msg] bound.  Without the
+    injectivity hypothesis, a malicious [t_msg_carrier_to_chmsg]
+    that collapses many ['I_index_t_msg] indices to a single
+    [t_msg] value could be exploited by a predictor that always
+    outputs that value, producing a probability larger than
+    [1/index_t_msg].
+    Naming: project-local; reads "[sample_to_t_msg] is injective".
+    Used by: Pr_predictor_guess_game_leak_le_invm. *)
+Hypothesis sample_to_t_msg_inj : injective sample_to_t_msg.
+
+(** Pr_predictor_guess_game_leak_le_invm - the headline residual
+    bound stated in the [t_msg]-output framing of Fallback R1B.  For
+    any [t_msg]-output predictor against [game_leak], the probability
+    that the predictor's guess equals the freshly-sampled
+    [V_2_sample] is at most [#|t_msg_carrier|%:R^-1].
+    Kind: main residual.
+    Why: Task H of [~/.claude/plans/sprightly-finding-robin.md]
+    (Fallback R1B).  This is the IT residual that Task I uses to
+    discharge the [leak_bound] hypothesis of
+    [dsdp_alice_secrecy_indcpa] without any opaque semantic
+    convention.  The freshness of [iV2] inside [guess_event_code]
+    makes the bound architecturally simpler than the plan's
+    documented "5-step" proof through the joint fdist
+    [bridge_predictor_compose_to_fdist]: by Task G's framing the
+    [V_2_sample] inside the event code is sampled UNIFORMLY AND
+    INDEPENDENTLY after the predictor produces its [guess], so the
+    bound follows from the freshness of [iV2] alone (no
+    marginalisation over the game's joint distribution).
+    Proof outline (3 steps, not 5):
+      (a) Transfer to [Pr_fst] via Task G's
+          [Pr_guess_indicator_eq_predictor_output].
+      (b) Unfold [guess_event_code] and apply [Pr_fst_bind] (using
+          [LosslessCode_predictor] / the validity of the inner
+          resolved code) to expose the [\dlet_(guess <- ...)] form.
+      (c) Bound the inner [\dlet_(iV2 <- uniform)] by
+          [1/index_t_msg] uniformly in [guess], using
+          [sample_to_t_msg_inj] to count the preimage of the
+          equality event at exactly one index.
+    The [LosslessCode_predictor] hypothesis (Fallback R5A) is used
+    to keep [predictor o game_leak] lossless so that the [Pr_fst]
+    representation of the composition has total mass exactly 1,
+    which is what makes the [\dlet]-bound a probability rather than
+    a sub-probability.
+    Fallback notice: this version follows the plan's allowed
+    fallback for Task H, taking the [sample_to_t_msg_inj] and
+    [index_t_msg_pos] hypotheses as additional section assumptions
+    plus the [ValidCode_predictor_game_leak] /
+    [LosslessCode_predictor_game_leak] pair as theorem-level
+    arguments, rather than threading them through the joint-
+    marginalisation machinery of Task F.  These hypotheses cascade
+    to Task I's signature; each is provable per-call-site for the
+    Task 07 IND-CPA reductions ([reduction_charlie],
+    [reduction_bob]) by inspection (the reductions are pure bind
+    chains of [sample uniform] + [ret] and have empty location
+    requirements).  The Task F three IT hypotheses
+    ([constraint_holds_avs], [VarRV_uniform_avs],
+    [VarRV_indep_inputs_avs]) are NOT needed here because the
+    [t_msg]-output framing renders the V_2-equality event
+    architecturally local to [guess_event_code]'s body — the
+    freshness of [iV2] is what makes the bound hold, not the
+    joint distribution of [game_leak]'s samples.
+    Naming: project-local; [Pr_<event>_le_<bound>] follows the
+    infotheo / MathComp probability-bound convention.  No MathComp
+    suffix-table entry applies; the [le_invm] suffix reads
+    "less-or-equal one-over-m".
+    Used by: Task I's rewritten [dsdp_alice_secrecy_indcpa]. *)
+Lemma Pr_predictor_guess_game_leak_le_invm
+    (predictor : predictor_guesser)
+    (ValidCode_predictor_game_leak :
+       ValidCode emptym [interface]
+         (resolve (predictor ∘ game_leak)
+                  (id_guess, ('unit, t_msg)) tt))
+    (LosslessCode_predictor_game_leak :
+       LosslessCode
+         (resolve (predictor ∘ game_leak)
+                  (id_guess, ('unit, t_msg)) tt)) :
+  distr.mu (pkg_advantage.Pr
+              (guess_indicator_pkg predictor game_leak)) true
+    <= (index_t_msg%:R)^-1.
+Proof.
+(* TODO Task H: discharge via uniformity of the fresh [iV2] sample
+   inside [guess_indicator_pkg]'s boolean shell.  The predictor's
+   output is fixed before [iV2] is drawn (by the bind ordering in
+   [guess_event_code]); so [Pr[guess = iV2]] equals
+   [Pr_uniform[i = guess]] = [1 / index_t_msg].  Proof structure:
+   unfold [Pr] via [resolve_link]/[coerce_kleisliE], rewrite the
+   [boolean_shell] body's [iV2 <- sample uniform index_t_msg],
+   use [Pr_uniform] from SSProve [Crypt.Pr.v] to compute the
+   probability of any singleton event, sum. *)
+Admitted.
+
 End dsdp_security_indcpa.
 
 (* ================================================================== *)
