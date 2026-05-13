@@ -34,6 +34,7 @@ depends: [
   "coq-mathcomp-algebra-tactics" { (>= "1.2.6") }
   "coq-interval" { >= "4.10.0"}
   "rocq-robot-rocq"
+  "coq-ssprove" { >= "0.3.0" }
 ]
 
 tags: [
