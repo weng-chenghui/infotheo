@@ -114,6 +114,7 @@ homomorphic_encryption/benaloh1994/benaloh_ahe.v
 homomorphic_encryption/paillier1999/paillier_enc.v
 homomorphic_encryption/paillier1999/paillier_ahe.v
 homomorphic_encryption/homomorphic_encryption.v
+homomorphic_encryption/indcpa_ror.v
 homomorphic_encryption/idealized/idealized_ahe.v
 dumas2017dual/lib/extra_algebra.v
 dumas2017dual/lib/extra_proba.v
