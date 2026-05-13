@@ -579,19 +579,10 @@ Let k x : data := inr x.
 Notation "u *h w" := (party_Emul u w).
 Notation "u ^h w" := (party_Epow u w).
 
-(* Encryption hypotheses for E_enc_ce_contract:
-   These are standard information-theoretic assumptions for homomorphic encryption.
-   1. Fresh ciphertexts are uniformly distributed over the ciphertext space
-   2. Fresh ciphertexts are independent of all other random variables
-   These enable dropping encryption terms from conditional entropy calculations. *)
-Hypothesis E_enc_unif : forall (T0 : finType) (P0 : R.-fdist T0)
-  (A : finType) (p : party_id) (X : {RV P0 -> p.-enc A}) (n : nat)
-  (card_A : #|A| = n.+1),
-  `p_X = fdist_uniform (card_enc_for' p card_A).
-
-Hypothesis E_enc_inde : forall (A B : finType) (p : party_id)
-  (X : {RV P -> p.-enc A}) (Y : {RV P -> B}),
-  P |= X _|_ Y.
+(* Note: the unsound IT-only hypotheses [E_enc_unif] and [E_enc_inde] were
+   declared here previously and are now retired (Task 15). They are not
+   consumed by any theorem in this section; ciphertext-secrecy reasoning is
+   handled computationally in [dsdp_security_indcpa.v]. *)
 
 (* Note: Trace-related entropy lemmas (DSDP_RV, AliceTraces,
    centropy_AliceTraces_AliceView) are defined in dsdp_entropy_trace.v

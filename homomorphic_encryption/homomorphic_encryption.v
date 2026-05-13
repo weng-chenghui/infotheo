@@ -120,8 +120,9 @@ Notation "'n(' w ')' " := (party_id_to_nat w).
 
 (* This section provides the basic party-labeled encryption types and operations
    used by the DSDP protocol proofs. This is an idealized model where
-   enc = (party * msg), enabling information-theoretic proofs with the
-   E_enc_unif and E_enc_inde axioms.
+   enc = (party * msg). Secrecy is now justified computationally via the IND-CPA
+   game in [dsdp_security_indcpa.v]; the unsound IT-only hypotheses
+   [E_enc_unif] / [E_enc_inde] were retired (Task 15).
 
    For concrete encryption (Benaloh, Paillier), see sections below. *)
 
@@ -273,16 +274,15 @@ Section enc_lemmas.
 Context {R : realType}.
 Variables (T : finType)(P : R.-fdist T).
 
-Hypothesis E_enc_unif : forall (T : finType) (P : R.-fdist T)
- (A : finType) (p : party_id) (X : {RV P -> p.-enc A}) (n : nat)
- (card_A : #|A| = n.+1),
-   `p_X = fdist_uniform (card_enc_for' p card_A).
-
-Hypothesis E_enc_inde : forall (A B : finType) (p : party_id)
-  (X : {RV P -> p.-enc A}) (Y : {RV P -> B}),
-  P |= X _|_ Y.
-(* Future work: what if B is (p.-enc A) ? Whether we need a way to
-   judge if B is (p.-enc A) or not? *)
+(* The IT-only hypotheses [E_enc_unif] and [E_enc_inde] used to live here.
+   They postulated that fresh ciphertexts are uniform over the ciphertext
+   space and independent of all other random variables. These axioms are
+   unsound for any real encryption scheme (a deterministic decryption oracle
+   refutes independence) and have been retired in Task 15. Secrecy of the
+   DSDP protocol is now justified computationally via the IND-CPA game in
+   [dsdp_security_indcpa.v]. The contraction lemma [E_enc_ce_contract]
+   below takes an explicit independence hypothesis as input, so it remains
+   usable wherever such an assumption is locally justified. *)
 
 (*
   "Ciphertext conditioning contract":
@@ -317,13 +317,14 @@ End enc_lemmas.
 (*
   Methodology note (two-layer justification for HE-based SMC proofs)
 
-  This development uses homomorphic encryption through an *idealized* interface:
-  ciphertext random variables are postulated to be (1) uniform over the ciphertext
-  type and (2) independent of all other random variables (see `E_enc_unif`,
-  `E_enc_inde`). Under these information-theoretic axioms we can carry out clean
-  Shannon-entropy calculations (e.g. dropping fresh ciphertexts from conditioning
-  as in `E_enc_ce_contract`) to prove protocol-level secrecy/correctness
-  properties.
+  This development originally used homomorphic encryption through an
+  *idealized* IT interface: ciphertext random variables were postulated to be
+  (1) uniform over the ciphertext type and (2) independent of all other random
+  variables. Those hypotheses were retired in Task 15 because the second is
+  unsound for any real encryption scheme. Secrecy of the DSDP protocol is now
+  justified computationally via the IND-CPA game in
+  [dsdp_security_indcpa.v]; the contraction lemma [E_enc_ce_contract] remains
+  available wherever a local independence assumption is justifiable.
 
   Computational HE security is accounted for in a *second layer* (not in this
   file): one proves a refinement/realization theorem showing that a concrete HE
