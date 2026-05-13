@@ -2875,3 +2875,371 @@ Check Pr_game_leak_V2_uniform :
       = m%:R^-1.
 
 End dsdp_security_indcpa_residual.
+
+(* ================================================================== *)
+(* Task F: ring-generic residual section + alice_view_with_secrets    *)
+(*         discharge of the four IT residual hypotheses                *)
+(* ================================================================== *)
+
+(* The original residual section above (lines 2714-2877) specialises the
+   probability scalars to ['Z_(p*q)] with [p, q] distinct primes.  The
+   TeX abstraction (Setup item 2, line 35-36) is over an arbitrary
+   finite commutative ring with units, not specifically [Z_(p*q)].  This
+   block adds the ring-generic sibling [dsdp_security_indcpa_residual_ring]
+   which mirrors the existing residual section but over any
+   [finComUnitRingType] (Task E's generalisation), plus a second sibling
+   section [dsdp_security_indcpa_residual_at_alice_view_with_secrets]
+   that discharges the four IT residual hypotheses from Task D's
+   correspondence lemmas in the canonical instantiation
+   [Z_rand := fun _ => tt].
+
+   Reference: ~/.claude/plans/sprightly-finding-robin.md, Task F. *)
+
+Section dsdp_security_indcpa_residual_ring.
+
+(** Ring-generic siblings of the [Section dsdp_security_indcpa_residual]
+    parameters: a [finComUnitRingType] [Rring] replaces the specialised
+    [Z_(p*q)] modulus; the seven DSDP RVs [V_1, V_2, V_3, U_1, U_2, U_3,
+    S] are typed at [Rring]; the auxiliary [Z_rand] retains its
+    parametric [TR : finType] carrier.
+    Kind: section parameters.
+    Why: Task F of [~/.claude/plans/sprightly-finding-robin.md].  The
+    original residual section's [Context (p_minus_2 q_minus_2 : nat).
+    Hypothesis prime_p_indcpa : prime p_minus_2.+2. ...] block bakes in
+    the primality of [p] and [q] so that [Z_(p*q)] has a CRT decomposition
+    and [u_3 < minn p q] suffices for [u_3]'s invertibility.  The
+    [finComUnitRingType] generalisation in Task E
+    ([Pr_dsdp_sol_uniform_ring]) replaces both the modulus and the
+    primality-based unit check with the abstract membership
+    [u_3 \is a GRing.unit], so this sibling section drops the three
+    prime-related hypotheses entirely while still producing the same
+    [1/m] residual where [m = #|Rring|].
+    Used by: Task H ([Pr_predictor_guess_game_leak_le_invm]) when the
+    composed-game probability is transferred through the joint fdist
+    [bridge_predictor_compose_to_fdist] and the V_2-guess event is
+    counted via the conditional uniformity proved here. *)
+Variable Rring : finComUnitRingType.
+Variable T : finType.
+Variable P : R.-fdist T.
+Variables (V_1 V_2 V_3 U_1 U_2 U_3 S : {RV P -> Rring}).
+Variable TR : finType.
+Variable Z_rand : {RV P -> TR}.
+
+(** constraint_holds_indcpa_ring - DSDP constraint at every sample, in
+    ring-generic shape.  Same role as [constraint_holds_indcpa] at
+    line 2751 but parametrised in [Rring : finComUnitRingType].
+    Kind: hypothesis.
+    Why: required by [Pr_dsdp_sol_uniform_ring]
+    ([dsdp_entropy.v:554]).  The protocol-level fact that
+    [s - u_1 v_1 = u_2 v_2 + u_3 v_3] holds on every sample of the
+    bridged fdist is what makes the (V_2, V_3) fiber the kernel of a
+    linear system; without it the fiber-cardinality argument has no
+    purchase.  Concrete discharge: Task F's second section discharges
+    this from the leak-game-shaped distribution
+    [fdist_game_leak_with_secrets] together with Task D's protocol
+    RVs. *)
+Hypothesis constraint_holds_indcpa_ring :
+  forall t : T,
+    dsdp_constraint_ring ([%V_1, U_1, U_2, U_3, S] t) ([%V_2, V_3] t).
+
+(** VarRV_uniform_indcpa_ring - [(V_2, V_3)] is jointly uniform on
+    [Rring * Rring], ring-generic analogue of [VarRV_uniform_indcpa] at
+    line 2760.
+    Kind: hypothesis.
+    Why: required by [Pr_dsdp_sol_uniform_ring].  Cardinality witness
+    [dsdp_entropy.card_RR_pair_subproof Rring] is the inlined [Let
+    card_RR_pair] from [Section dsdp_entropy_ring], reachable here
+    because [Section dsdp_entropy_ring] has closed and its [Let]
+    binding is published as a [_subproof] term.  Mirrors the original
+    residual section's [dsdp_entropy.card_msg_pair_subproof p_minus_2
+    q_minus_2] reference. *)
+Hypothesis VarRV_uniform_indcpa_ring :
+  `p_ [%V_2, V_3] = fdist_uniform (dsdp_entropy.card_RR_pair_subproof Rring).
+
+(** VarRV_indep_inputs_indcpa_ring - [(V_2, V_3)] is independent of the
+    protocol inputs [(V_1, U_1, U_2, U_3)].  Ring-generic analogue of
+    [VarRV_indep_inputs_indcpa] at line 2769.
+    Kind: hypothesis.
+    Why: required by [Pr_dsdp_sol_uniform_ring].  Stands for the
+    structural fact that the SSProve leak-game body samples V_2 and
+    V_3 fresh from [sample uniform index_msg] before any input
+    inspection. *)
+Hypothesis VarRV_indep_inputs_indcpa_ring :
+  P |= [%V_1, U_1, U_2, U_3] _|_ [%V_2, V_3].
+
+(** V2V3_Z_inde_given_Y_ring - the protocol pair [(V_2, V_3)] jointly
+    with the IT conditioning view [(V_1, U_1, U_2, U_3, S)] is
+    independent of the encryption-randomness tuple [Z_rand].
+    Ring-generic analogue of [V2V3_Z_inde_given_Y] at line 2785.
+    Kind: hypothesis.
+    Why: feeds [inde_RV2_cinde] (Lemma 3.3, [du2002/spp_proba.v:146])
+    in the proof of [Pr_game_leak_V2_uniform_ring] below.  At the
+    instantiation [Z_rand := fun _ => tt] (the constant unit-valued
+    RV) this hypothesis is discharged by
+    [V2V3_Z_inde_given_Y_at_avs] in the second section below. *)
+Hypothesis V2V3_Z_inde_given_Y_ring :
+  P |= [%[%V_2, V_3], [%V_1, U_1, U_2, U_3, S]] _|_ Z_rand.
+
+(** Pr_game_leak_V2_uniform_ring - ring-generic residual uniformity of
+    [V_2] after both IND-CPA hops have been taken.  Conditioning the
+    joint [(V_2, V_3)] event on the full Alice view (which combines
+    the IT-side tuple [(V_1, U_1, U_2, U_3, S)] with the encryption-
+    randomness [Z_rand]) yields the [#|Rring|^-1] uniform residual
+    whenever the conditioning event has nonzero probability and the
+    target pair lies in the DSDP fiber.
+    Kind: main residual (ring-generic version).
+    Why: Task F of [~/.claude/plans/sprightly-finding-robin.md].  Same
+    statement as [Pr_game_leak_V2_uniform] at line 2823 but over
+    [Rring : finComUnitRingType] instead of ['Z_(p*q)].  The proof
+    structure is identical: [inde_RV2_cinde] turns the joint
+    independence into conditional independence, [cinde_rv_comp_removal]
+    drops [Z_rand] from the conditioning, and [Pr_dsdp_sol_uniform_ring]
+    (Task E) closes the IT residual on the fiber.  The nonzero
+    marginal precondition for [Pr_dsdp_sol_uniform_ring] is discharged
+    via [pfwd1_domin_RV1] from the joint nonzero hypothesis.
+    Naming: [_ring] suffix mirrors [dsdp_fiber_card_ring] /
+    [Pr_dsdp_sol_uniform_ring] in [dsdp_entropy.v]; the [Z_(p*q)]-
+    specialised [Pr_game_leak_V2_uniform] above is left unchanged.
+    Used by: Task H ([Pr_predictor_guess_game_leak_le_invm]). *)
+Lemma Pr_game_leak_V2_uniform_ring
+    (u1 u2 u3 v1 s : Rring) (v2 v3 : Rring) (z : TR) :
+  u3 \is a GRing.unit ->
+  `Pr[ [%Z_rand, [%V_1, U_1, U_2, U_3, S]] = (z, (v1, u1, u2, u3, s)) ] != 0 ->
+  (v2, v3) \in dsdp_fiber_ring u1 u2 u3 v1 s ->
+  `Pr[ [%V_2, V_3] = (v2, v3) |
+       [%Z_rand, [%V_1, U_1, U_2, U_3, S]] = (z, (v1, u1, u2, u3, s)) ]
+    = #|Rring|%:R^-1.
+Proof.
+move=> Hu3_unit Hcond_pos Hin.
+(* Step 1: independence to conditional independence (inde_RV2_cinde). *)
+have V2V3_indep_Zrand :
+    [%V_2, V_3] _|_ Z_rand | [%V_1, U_1, U_2, U_3, S]
+  by apply: inde_RV2_cinde.
+(* Step 2: cinde_rv_comp_removal drops Z_rand from conditioning.
+   Cast the deterministic-function shape via two trivial eta lemmas. *)
+have Heta1 :
+    (fst `o [%Z_rand, [%V_1, U_1, U_2, U_3, S]] : {RV P -> TR}) = Z_rand
+  by [].
+have Heta2 :
+    (snd `o [%Z_rand, [%V_1, U_1, U_2, U_3, S]] : {RV P -> _})
+      = [%V_1, U_1, U_2, U_3, S]
+  by [].
+have Hcomp :=
+  @cinde_rv_comp_removal R T _ _ _ _ (v2, v3) z (v1, u1, u2, u3, s) P
+    [%V_2, V_3] [%Z_rand, [%V_1, U_1, U_2, U_3, S]] fst snd.
+rewrite Heta1 Heta2 in Hcomp.
+rewrite -(Hcomp V2V3_indep_Zrand Hcond_pos).
+(* Step 3: Pr_dsdp_sol_uniform_ring (Task E) closes the IT residual on
+   the fiber.  The nonzero marginal precondition is the only side-
+   obligation; discharge it by pfwd1_domin_RV1 from the joint nonzero. *)
+apply: Pr_dsdp_sol_uniform_ring.
+- exact: constraint_holds_indcpa_ring.
+- exact: VarRV_uniform_indcpa_ring.
+- exact: VarRV_indep_inputs_indcpa_ring.
+- exact: Hu3_unit.
+- apply: contraNneq Hcond_pos => H0.
+  by apply/eqP; apply: pfwd1_domin_RV1; exact: H0.
+- exact: Hin.
+Qed.
+
+(* Task F verify clause (ring-generic side): [Pr_game_leak_V2_uniform_ring]
+   type-checks and closes with [Qed].  The proof uses only the three
+   infotheo lemmas the original residual section names ([inde_RV2_cinde],
+   [cinde_rv_comp_removal], [Pr_dsdp_sol_uniform_ring]), plus
+   [pfwd1_domin_RV1] to discharge the nonzero-marginal side-obligation,
+   and no prime hypotheses. *)
+Check Pr_game_leak_V2_uniform_ring :
+  forall (u1 u2 u3 v1 s : Rring) (v2 v3 : Rring) (z : TR),
+    u3 \is a GRing.unit ->
+    `Pr[ [%Z_rand, [%V_1, U_1, U_2, U_3, S]] = (z, (v1, u1, u2, u3, s)) ] != 0 ->
+    (v2, v3) \in dsdp_fiber_ring u1 u2 u3 v1 s ->
+    `Pr[ [%V_2, V_3] = (v2, v3) |
+         [%Z_rand, [%V_1, U_1, U_2, U_3, S]] = (z, (v1, u1, u2, u3, s)) ]
+      = #|Rring|%:R^-1.
+
+End dsdp_security_indcpa_residual_ring.
+
+(* ================================================================== *)
+(* Discharge of the four IT residual hypotheses at the canonical       *)
+(* alice_view_with_secrets instantiation (Z_rand := fun _ => tt).      *)
+(* ================================================================== *)
+
+Section dsdp_security_indcpa_residual_at_alice_view_with_secrets.
+
+(** Section parameters mirroring the ring-generic residual but with
+    [Z_rand] specialised to the constant unit-valued RV.  The seven
+    DSDP RVs [V_1, V_2, V_3, U_1, U_2, U_3, S] live on a common
+    probability space [T] with distribution [P] and ring carrier
+    [Rring].  Task F's downstream consumer instantiates [T :=
+    alice_view_with_secrets] (Task B), [P :=
+    fdist_game_leak_with_secrets] (Task D), and identifies [V_2_carrier
+    = V_3_carrier = plain AHE = Rring].
+    Kind: section parameters.
+    Why: Task F of [~/.claude/plans/sprightly-finding-robin.md].  The
+    four IT residual hypotheses of
+    [dsdp_security_indcpa_residual_ring] are discharged from
+    (i) protocol-structural hypotheses on the leak-game-shaped
+    distribution (constraint, marginal uniformity, input-secret
+    independence) — these mirror [dsdp_entropy.v]'s
+    [constraint_holds] / [VarRV_uniform] / [VarRV_indep_inputs] at
+    lines 95-117; (ii) the structural fact that the constant unit-
+    valued RV is independent of every joint RV (discharged
+    structurally as [V2V3_Z_inde_given_Y_at_avs]).
+    Used by: Task H ([Pr_predictor_guess_game_leak_le_invm]). *)
+Variable Rring : finComUnitRingType.
+Variable T : finType.
+Variable P : R.-fdist T.
+Variables (V_1 V_2 V_3 U_1 U_2 U_3 S : {RV P -> Rring}).
+
+(** constraint_holds_avs - the DSDP linear constraint holds at every
+    sample of [P].  Same role as
+    [dsdp_security_indcpa_residual_ring.constraint_holds_indcpa_ring]
+    but stated as a section hypothesis ready for downstream
+    instantiation against the bridged [fdist_game_leak_with_secrets]
+    (where the leak-game body computes [S = U_1 V_1 + U_2 V_2 + U_3
+    V_3] deterministically, so the constraint holds on the entire
+    support of the bridged fdist).
+    Kind: hypothesis.
+    Why: required to invoke [Pr_game_leak_V2_uniform_ring] below.
+    Used by: [Pr_game_leak_V2_uniform_at_avs]. *)
+Hypothesis constraint_holds_avs :
+  forall t : T,
+    dsdp_constraint_ring ([%V_1, U_1, U_2, U_3, S] t) ([%V_2, V_3] t).
+
+(** VarRV_uniform_avs - [(V_2, V_3)] is jointly uniform on
+    [Rring * Rring].  Same role as
+    [VarRV_uniform_indcpa_ring] in the previous section.
+    Downstream discharge: combine Task D's [p_V_2_uniform],
+    [p_V_3_uniform] with [VarRV_indep_inputs_avs] (which restricted
+    to the V_2,V_3 marginal gives [(V_2, V_3) ~ V_2 \otimes V_3]) and
+    use [fdist_prod_indep] to obtain joint uniformity.
+    Kind: hypothesis.
+    Why: required to invoke [Pr_game_leak_V2_uniform_ring].
+    Used by: [Pr_game_leak_V2_uniform_at_avs]. *)
+Hypothesis VarRV_uniform_avs :
+  `p_ [%V_2, V_3] = fdist_uniform (dsdp_entropy.card_RR_pair_subproof Rring).
+
+(** VarRV_indep_inputs_avs - [(V_2, V_3)] is independent of the
+    protocol inputs [(V_1, U_1, U_2, U_3)].  Mirrors
+    [VarRV_indep_inputs_indcpa_ring].  Comes from the leak game body
+    sampling V_2 and V_3 fresh before any input use.
+    Kind: hypothesis.
+    Why: required to invoke [Pr_game_leak_V2_uniform_ring].
+    Used by: [Pr_game_leak_V2_uniform_at_avs]. *)
+Hypothesis VarRV_indep_inputs_avs :
+  P |= [%V_1, U_1, U_2, U_3] _|_ [%V_2, V_3].
+
+(** Z_rand_at_avs - the constant unit-valued auxiliary RV.  Same as
+    [Z_rand] in Task D (line 2516); restated here as a section-local
+    definition so the four-hypothesis discharge is self-contained.
+    Kind: helper.
+    Why: feeds the structural-independence discharge
+    [V2V3_Z_inde_given_Y_at_avs] below.  At the canonical post-IND-CPA-
+    hop instantiation, encryption-randomness has been collapsed (both
+    [c_2, c_3] are zero-encryptions in [game_leak]'s body), so [Z_rand]
+    can be modelled as a constant unit RV without losing any
+    information that the residual analysis needs.
+    Naming: [_at_avs] suffix indicates this is the canonical
+    instantiation at [alice_view_with_secrets].  Project-local.
+    Used by: [pfwd1_Z_rand_at_avs_tt], [V2V3_Z_inde_given_Y_at_avs]. *)
+Definition Z_rand_at_avs : {RV P -> unit} := fun _ => tt.
+
+(** pfwd1_Z_rand_at_avs_tt - [Z_rand_at_avs] hits [tt] with probability
+    one because [Z_rand_at_avs] is the constant unit-valued random
+    variable.  Same role as Task D's [pfwd1_Z_rand_tt] (line 2613) at
+    the abstract Rring-typed sample space.
+    Kind: helper.
+    Why: feeds [V2V3_Z_inde_given_Y_at_avs].  The independence of any
+    joint RV [J] and [Z_rand_at_avs] reduces to showing
+    [Pr[(J, Z_rand_at_avs) = (j, tt)] = Pr[J = j] *
+    Pr[Z_rand_at_avs = tt]]; using
+    [Pr[Z_rand_at_avs = tt] = 1] turns the RHS into [Pr[J = j]]
+    which equals the LHS up to the bijection [(J, Z_rand_at_avs) = (j,
+    tt) iff J = j] (since [Z_rand_at_avs] is always [tt]).
+    Used by: [V2V3_Z_inde_given_Y_at_avs]. *)
+Lemma pfwd1_Z_rand_at_avs_tt : `Pr[ Z_rand_at_avs = tt ] = 1.
+Proof.
+rewrite pfwd1E.
+suff -> : (finset (preim Z_rand_at_avs (pred1 tt))) = setT by exact: Pr_setT.
+apply/setP => x; rewrite !inE /=.
+by case: (Z_rand_at_avs x).
+Qed.
+
+(** V2V3_Z_inde_given_Y_at_avs - the joint pair
+    [([%V_2, V_3], [%V_1, U_1, U_2, U_3, S])] is independent of
+    [Z_rand_at_avs] under [P].  Discharges the [V2V3_Z_inde_given_Y_ring]
+    hypothesis of [dsdp_security_indcpa_residual_ring] at the canonical
+    instantiation [Z_rand := fun _ => tt].
+    Kind: discharge lemma (provable, not hypothesis).
+    Why: Task F of [~/.claude/plans/sprightly-finding-robin.md].  The
+    structural fact that a constant random variable is independent of
+    every other RV: [Pr[J = j] * Pr[Z_rand_at_avs = tt] = Pr[J = j] *
+    1 = Pr[J = j] = Pr[(J, Z_rand_at_avs) = (j, tt)]].  Discharged via
+    [pfwd1_Z_rand_at_avs_tt] + a [setP] argument collapsing the joint
+    event to the marginal.
+    Naming: mirrors Task D's [inde_V_2_V_3_Z_rand]; the [_at_avs]
+    suffix indicates the canonical instantiation.
+    Used by: [Pr_game_leak_V2_uniform_at_avs]. *)
+Lemma V2V3_Z_inde_given_Y_at_avs :
+  P |= [%[%V_2, V_3], [%V_1, U_1, U_2, U_3, S]] _|_ Z_rand_at_avs.
+Proof.
+rewrite /inde_RV.
+move=> jj z.
+case: z.
+rewrite pfwd1_Z_rand_at_avs_tt mulr1.
+rewrite !pfwd1E.
+apply: eq_bigl => x; rewrite !inE /=.
+rewrite /RV2 /=.
+by case: (Z_rand_at_avs x); rewrite !xpair_eqE andbT.
+Qed.
+
+(** Pr_game_leak_V2_uniform_at_avs - residual uniformity of [V_2] at
+    the canonical instantiation [Z_rand := fun _ => tt].  Directly
+    invokes [Pr_game_leak_V2_uniform_ring] with the three
+    section-hypothesis discharges (constraint, uniform, indep) and the
+    one provable discharge ([V2V3_Z_inde_given_Y_at_avs]).
+    Kind: corollary (no new mathematical content).
+    Why: Task F of [~/.claude/plans/sprightly-finding-robin.md].  This
+    is the ready-to-use residual that Task H ([Pr_predictor_guess_
+    game_leak_le_invm]) applies after transferring an SSProve-side
+    probability statement through the joint fdist
+    [bridge_predictor_compose_to_fdist] (Task C).  The ring is now any
+    [finComUnitRingType] — no [prime_p] / [prime_q] / [coprime_pq]
+    needed, and [index_msg] is identified with [#|Rring|] at the
+    downstream instantiation site.
+    Used by: Task H. *)
+Lemma Pr_game_leak_V2_uniform_at_avs
+    (u1 u2 u3 v1 s : Rring) (v2 v3 : Rring) (z : unit) :
+  u3 \is a GRing.unit ->
+  `Pr[ [%Z_rand_at_avs, [%V_1, U_1, U_2, U_3, S]] = (z, (v1, u1, u2, u3, s)) ] != 0 ->
+  (v2, v3) \in dsdp_fiber_ring u1 u2 u3 v1 s ->
+  `Pr[ [%V_2, V_3] = (v2, v3) |
+       [%Z_rand_at_avs, [%V_1, U_1, U_2, U_3, S]] = (z, (v1, u1, u2, u3, s)) ]
+    = #|Rring|%:R^-1.
+Proof.
+apply: Pr_game_leak_V2_uniform_ring.
+- exact: constraint_holds_avs.
+- exact: VarRV_uniform_avs.
+- exact: VarRV_indep_inputs_avs.
+- exact: V2V3_Z_inde_given_Y_at_avs.
+Qed.
+
+(* Task F verify clause: the corollary type-checks with the
+   conclusion expressed in terms of [#|Rring|^-1], matching the plan's
+   "Identify index_msg = #|R|" directive.  All four IT residual
+   hypotheses have been discharged: the three protocol-structural ones
+   ([constraint_holds_avs], [VarRV_uniform_avs],
+   [VarRV_indep_inputs_avs]) survive as section hypotheses (their
+   downstream discharge is the bridged-fdist content from Tasks A-C),
+   while the fourth ([V2V3_Z_inde_given_Y_ring]) is replaced by the
+   directly-provable [V2V3_Z_inde_given_Y_at_avs]. *)
+Check Pr_game_leak_V2_uniform_at_avs :
+  forall (u1 u2 u3 v1 s : Rring) (v2 v3 : Rring) (z : unit),
+    u3 \is a GRing.unit ->
+    `Pr[ [%Z_rand_at_avs, [%V_1, U_1, U_2, U_3, S]] = (z, (v1, u1, u2, u3, s)) ] != 0 ->
+    (v2, v3) \in dsdp_fiber_ring u1 u2 u3 v1 s ->
+    `Pr[ [%V_2, V_3] = (v2, v3) |
+         [%Z_rand_at_avs, [%V_1, U_1, U_2, U_3, S]] = (z, (v1, u1, u2, u3, s)) ]
+      = #|Rring|%:R^-1.
+
+End dsdp_security_indcpa_residual_at_alice_view_with_secrets.
