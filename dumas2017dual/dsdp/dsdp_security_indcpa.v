@@ -2234,6 +2234,465 @@ Check Pr_predictor_compose_eq_fdist :
     \sum_(v : alice_view_predictor_joint | P v) (distr.mu mu) v
       = Pr (bridge_predictor_compose_to_fdist Hmass) [set v | P v].
 
+(* ================================================================== *)
+(* Task D: protocol random variables on alice_view_with_secrets       *)
+(* ================================================================== *)
+
+#[local] Open Scope proba_scope.
+
+(** fdist_game_leak_with_secrets - the joint probability distribution
+    over [alice_view_with_secrets].  Morally obtained by composing
+    Task A's [LosslessCode_game_leak] (which discharges the [psum] mass
+    obligation) with Task B's [bridge_alice_view_with_secrets_to_fdist]
+    (which lifts an SSProve [distr] into an infotheo [{fdist _}]) on a
+    modified leak code that returns the eleven-tuple sample instead of
+    the four-ciphertext list.
+    Kind: section parameter.
+    Why: Task D of [~/.claude/plans/sprightly-finding-robin.md].  The
+    protocol random variables [V_1, V_2, ..., D_3, Z_rand] are projected
+    from [alice_view_with_secrets] under this joint distribution.
+    Carrying the fdist as a section [Variable] (rather than constructing
+    it explicitly from [game_leak]'s raw_code) keeps Task D parametric
+    in the bridge instantiation: Task F discharges the bridge by
+    composing [LosslessCode_game_leak] with a return-shape change on
+    [game_leak]'s body and threading through
+    [bridge_alice_view_with_secrets_to_fdist].  The parametric framing
+    mirrors the existing residual section [Section
+    dsdp_security_indcpa_residual] below (which also takes the
+    probability space as a [Context] parameter).
+    Naming: project-local; [fdist_<source>_with_secrets] follows the
+    same [<source>_with_secrets] pattern as the Task B carrier
+    [alice_view_with_secrets].  The [fdist_] prefix marks this as the
+    fdist over that carrier (vs. the carrier itself); the [_game_leak]
+    middle records that the fdist's intended instantiation is the
+    bridge image of [game_leak].  MathComp suffix table has no entry
+    for fdist names; project-local convention only.
+    Used by: Task D's protocol random variables [V_1..D_3, Z_rand],
+    the three correspondence lemmas
+    [p_V_2_uniform, p_V_3_uniform, inde_V_2_V_3_Z_rand], Task F's
+    residual section instantiation. *)
+Variable fdist_game_leak_with_secrets : R.-fdist alice_view_with_secrets.
+
+(** Z_rand_carrier - the carrier finType for the auxiliary
+    encryption-randomness random variable [Z_rand].  The IND-CPA hops
+    (Tasks 06-08) have already eliminated all encryption randomness
+    from the distinguisher-visible view, so the residual sample space
+    [alice_view_with_secrets] does NOT carry any explicit
+    encryption-rand component.  Modelling [Z_rand] as a unit-typed
+    random variable is therefore correct: at the post-hop residual
+    layer, encryption randomness is a constant (its values are
+    perfectly indistinguishable from any other encryption randomness
+    because the ciphertexts have collapsed to zero-encryptions, see
+    [bob_zero_equiv_game_hybrid_two] and the [game_hybrid_two] body).
+    Kind: canonical.
+    Why: Task D of the plan.  The residual section [Section
+    dsdp_security_indcpa_residual] below takes [Z_rand : {RV P -> TR}]
+    where [TR : finType]; we instantiate [TR := Z_rand_carrier := unit]
+    so the IT residual independence hypothesis [V2V3_Z_inde_given_Y]
+    becomes provable rather than parametric.
+    Naming: [Z_rand_carrier] mirrors [V_2_carrier], [V_3_carrier],
+    [Dk_a_carrier]; project-local convention for the carrier finType
+    of a named random variable.
+    Used by: [Z_rand], [inde_V_2_V_3_Z_rand]. *)
+Definition Z_rand_carrier : finType := unit.
+
+(** V_3 - rightmost component of [alice_view_with_secrets], the third
+    protocol scalar V_3.  By the Task B carrier construction
+    [alice_view_with_secrets = ((alice_view, V_2), V_3)], V_3 is the
+    [snd] projection.
+    Kind: helper.
+    Why: Task D of the plan.  The IT residual analysis treats V_3 as a
+    random variable on the joint sample space for the fiber argument
+    [(v_2, v_3) \in dsdp_fiber u_1 u_2 u_3 v_1 s]; the marginal
+    uniformity correspondence [p_V_3_uniform] and the joint
+    independence [inde_V_2_V_3_Z_rand] both reference V_3 directly.
+    Naming: TeX-derived subscript; [_3] marks the third of the
+    (v_1, v_2, v_3) input-share triple, not the MathComp ring-three
+    suffix.  Plan line 82 explicitly forbids the [_RV] suffix;
+    matches [dsdp_security.v:147]'s [V_3] in the trace-level
+    [AliceView].  Project-local convention.
+    Used by: [p_V_3_uniform], [inde_V_2_V_3_Z_rand], Task F's
+    residual section instantiation, Task H's residual bound. *)
+Definition V_3 : {RV fdist_game_leak_with_secrets -> V_3_carrier} :=
+  fun avs => snd avs.
+
+(** V_2 - next-to-rightmost component, the protocol scalar V_2 that
+    the corrupted-Alice predictor must guess to win.  By the Task B
+    carrier construction, V_2 = [snd \o fst] applied to the eleven-
+    component sample.
+    Kind: helper.
+    Why: Task D of the plan.  V_2 is the central random variable of
+    the secrecy bound [Pr[predictor = V_2] <= 1/m + 2 * epsilon_cpa];
+    [p_V_2_uniform] and [inde_V_2_V_3_Z_rand] reference V_2 directly,
+    and Task H's residual bound [Pr_predictor_guess_game_leak_le_invm]
+    is stated against the event [output = V_2_sample].
+    Naming: TeX-derived subscript; [_2] marks the second of the
+    (v_1, v_2, v_3) input-share triple, not the MathComp ring-two
+    suffix.  Plan line 82 explicitly forbids the [_RV] suffix;
+    project-local convention mirroring scalar names in
+    [dsdp_security.v].
+    Used by: [p_V_2_uniform], [inde_V_2_V_3_Z_rand], Task F's
+    residual section instantiation, Task H's residual bound. *)
+Definition V_2 : {RV fdist_game_leak_with_secrets -> V_2_carrier} :=
+  fun avs => snd (fst avs).
+
+(** D_3 - the plaintext D_3 (the decrypted contribution that Alice
+    receives), rightmost component of the inner nine-tuple
+    [alice_view].  By the Task 10 carrier construction
+    [alice_view = ((((((((Dk_a, S), V_1), U_1), U_2), U_3), R_2), R_3),
+    D_3)], D_3 is reached by [snd \o fst \o fst] applied to the
+    eleven-component sample.
+    Kind: helper.
+    Why: Task D of the plan.  D_3 is part of Alice's surfaced view
+    (after IND-CPA elimination of the ciphertext slots).  The residual
+    independence hypotheses operate on the joint
+    [(V_1, U_1, U_2, U_3, S)] conditioning view, not on D_3 directly,
+    but D_3 still lives on the same sample space and Task F's
+    residual section instantiation carries it through.
+    Naming: TeX-derived subscript; [_3] marks the third-party
+    decrypted contribution Alice receives, not the MathComp ring-
+    three suffix.  Project-local convention.
+    Used by: Task F's residual section instantiation. *)
+Definition D_3 : {RV fdist_game_leak_with_secrets -> plain AHE} :=
+  fun avs => snd (fst (fst avs)).
+
+(** R_3 - the masking scalar R_3 Alice draws for Charlie's slot,
+    projected as the fourth [snd]-then-fst path from the eleven-tuple
+    sample.
+    Kind: helper.
+    Why: Task D of the plan.  Part of the eight-scalar block of
+    [alice_view].  R_3 lives on the joint sample space and is
+    independent of (V_2, V_3) under the joint distribution; Task F's
+    residual section instantiation carries it through.
+    Naming: TeX-derived subscript; [_3] marks the masking scalar
+    Alice draws for Charlie's slot (the [R_3] of the (R_2, R_3) pair),
+    not the MathComp ring-three suffix.  Project-local convention.
+    Used by: Task F's residual section instantiation. *)
+Definition R_3 : {RV fdist_game_leak_with_secrets -> plain AHE} :=
+  fun avs => snd (fst (fst (fst avs))).
+
+(** R_2 - the masking scalar R_2 Alice draws for Bob's slot,
+    projected as the fifth [snd]-then-fst path from the eleven-tuple
+    sample.
+    Kind: helper.
+    Why: Task D of the plan.  R_2 lives on the joint sample space
+    alongside the other protocol scalars; Task F's residual section
+    instantiation carries it through as a component of the bridged
+    fdist so the protocol-RV infrastructure stays self-contained.
+    Naming: TeX-derived subscript; [_2] marks the masking scalar
+    Alice draws for Bob's slot (the [R_2] of the (R_2, R_3) pair),
+    not the MathComp ring-two suffix.  Project-local convention.
+    Used by: Task F's residual section instantiation. *)
+Definition R_2 : {RV fdist_game_leak_with_secrets -> plain AHE} :=
+  fun avs => snd (fst (fst (fst (fst avs)))).
+
+(** U_3 - Alice's third scalar coefficient in the DSDP linear
+    constraint [u_1 v_1 + u_2 v_2 + u_3 v_3 = s], projected from the
+    eleven-tuple sample.  When U_3 is invertible the joint fiber is
+    a singleton in V_3 per V_2, which is what makes the residual
+    uniform; see [Pr_dsdp_sol_uniform] in [dsdp_entropy.v].
+    Kind: helper.
+    Why: Task D of the plan.  U_3 is one of the conditioning RVs
+    in [Pr_game_leak_V2_uniform] (the IT residual) and the
+    invertibility hypothesis [(u3 < minn p q)%N] is stated against
+    its values; Task F's residual section instantiation references
+    U_3 through that lemma.
+    Naming: TeX-derived subscript; [_3] marks the third of the
+    (u_1, u_2, u_3) coefficient triple, not the MathComp ring-three
+    suffix.  Project-local convention.
+    Used by: Task F's residual section instantiation. *)
+Definition U_3 : {RV fdist_game_leak_with_secrets -> plain AHE} :=
+  fun avs => snd (fst (fst (fst (fst (fst avs))))).
+
+(** U_2 - Alice's second scalar coefficient in the constraint
+    [u_1 v_1 + u_2 v_2 + u_3 v_3 = s], projected from the eleven-
+    tuple sample.
+    Kind: helper.
+    Why: Task D of the plan.  U_2 is part of the IT conditioning
+    tuple [(V_1, U_1, U_2, U_3, S)] in [Pr_game_leak_V2_uniform];
+    Task F's residual section instantiation carries it through.
+    Naming: TeX-derived subscript; [_2] marks the second of the
+    (u_1, u_2, u_3) coefficient triple, not the MathComp ring-two
+    suffix.  Project-local convention.
+    Used by: Task F's residual section instantiation. *)
+Definition U_2 : {RV fdist_game_leak_with_secrets -> plain AHE} :=
+  fun avs => snd (fst (fst (fst (fst (fst (fst avs)))))).
+
+(** U_1 - Alice's first scalar coefficient (her share of the
+    coefficient triple [(u_1, u_2, u_3)]), projected from the
+    eleven-tuple sample as the seventh [snd]-then-fst path.
+    Kind: helper.
+    Why: Task D of the plan.  U_1 is part of the IT conditioning
+    tuple [(V_1, U_1, U_2, U_3, S)] consumed by
+    [Pr_game_leak_V2_uniform] and [constraint_holds_indcpa].
+    Naming: TeX-derived subscript; [_1] marks the first of the
+    (u_1, u_2, u_3) coefficient triple, not the MathComp ring-one
+    suffix.  Project-local convention mirroring scalar names in
+    [dsdp_security.v].
+    Used by: Task F's residual section instantiation. *)
+Definition U_1 : {RV fdist_game_leak_with_secrets -> plain AHE} :=
+  fun avs => snd (fst (fst (fst (fst (fst (fst (fst avs))))))).
+
+(** V_1 - Alice's input share: the protocol scalar v_1, projected
+    from the eleven-component sample as the eighth snd/fst path
+    through the iterated product
+    [(((((((Dk_a, S), V_1), U_1), U_2), U_3), R_2), R_3, D_3, V_2,
+    V_3]).
+    Kind: helper.
+    Why: Task D of the plan.  V_1 is part of the IT conditioning
+    tuple [(V_1, U_1, U_2, U_3, S)] consumed by
+    [Pr_game_leak_V2_uniform] and [constraint_holds_indcpa]; Task F's
+    residual section instantiation references V_1 through those.
+    Naming: TeX-derived subscript; [_1] marks the first of the
+    (v_1, v_2, v_3) input-share triple, not the MathComp ring-one
+    suffix.  Project-local convention mirroring scalar names in
+    [dsdp_security.v].
+    Used by: Task F's residual section instantiation. *)
+Definition V_1 : {RV fdist_game_leak_with_secrets -> plain AHE} :=
+  fun avs => snd (fst (fst (fst (fst (fst (fst (fst (fst avs)))))))).
+
+(** S - the sum scalar [S = u_1 v_1 + u_2 v_2 + u_3 v_3] that Alice
+    learns at the end of the DSDP protocol (Alice's view of the
+    inner product result), projected as the second-from-left snd-then-
+    fst-... path through the eleven-tuple sample.
+    Kind: helper.
+    Why: Task D of the plan.  S is the deterministic function of
+    [(V_1, U_1, U_2, U_3, V_2, V_3)] that the constraint
+    [constraint_holds_indcpa] expresses; Task F's residual section
+    instantiation uses S as a conditioning RV in
+    [Pr_game_leak_V2_uniform].  Project-local naming: TeX [S]
+    matches [dsdp_security.v:117]'s [Let S : {RV P -> msg}], which
+    is similarly a single-letter random variable; no [_RV] suffix
+    per plan line 82.  Inside [Section dsdp_security_indcpa] this
+    definition shadows the natural-number successor [nat.S] in
+    subsequent lines, but the section closes immediately after
+    Task D so the shadow is local and does not affect any earlier
+    proof.
+    Naming: TeX-derived single-letter; plan line 82 explicitly
+    requires no [_RV] suffix.  MathComp suffix table has no entry
+    for single-letter RVs; project-local convention only.
+    Used by: Task F's residual section instantiation (consumed via
+    [constraint_holds_indcpa] and [Pr_game_leak_V2_uniform]). *)
+Definition S : {RV fdist_game_leak_with_secrets -> plain AHE} :=
+  fun avs => snd (fst (fst (fst (fst (fst (fst (fst (fst (fst avs))))))))).
+
+(** Dk_a - Alice's private decryption key, leftmost component of
+    the nine-tuple [alice_view].  Reached by nine successive [fst]
+    projections through the iterated [%type] product, then one more
+    [fst] to peel the V_3 / V_2 secrets pair from the eleven-tuple
+    sample.
+    Kind: helper.
+    Why: Task D of the plan.  Dk_a is part of Alice's surfaced view
+    (Task 10's [alice_view]) and lives on the joint sample space
+    [fdist_game_leak_with_secrets] alongside the other protocol RVs;
+    Task F's residual section instantiation carries it through so
+    the protocol-RV infrastructure stays self-contained even though
+    the IT residual itself does not condition on Dk_a directly.
+    Naming: project-local snake_case matching the section parameter
+    [Dk_a_carrier] (Task 10) for the carrier finType.  No MathComp
+    suffix-table entry for decryption-key RVs.
+    Used by: Task F's residual section instantiation. *)
+Definition Dk_a : {RV fdist_game_leak_with_secrets -> Dk_a_carrier} :=
+  fun avs => fst (fst (fst (fst (fst (fst (fst (fst (fst (fst avs))))))))).
+
+(** Z_rand - the auxiliary encryption-randomness random variable,
+    instantiated as the constant unit-valued RV [fun _ => tt].
+    Kind: helper.
+    Why: Task D of the plan.  At the post-IND-CPA-hop residual layer,
+    encryption randomness has been collapsed (both ciphertexts c_2,
+    c_3 are zero-encryptions in [game_leak]'s body); the residual
+    section [dsdp_security_indcpa_residual] below carries [Z_rand]
+    as a parametric [Z_rand : {RV P -> TR}] but only consumes it
+    through the conditional-independence hypothesis
+    [V2V3_Z_inde_given_Y].  Setting [Z_rand] to the constant unit RV
+    discharges that hypothesis structurally: a constant random
+    variable is independent of every other RV (see
+    [inde_V_2_V_3_Z_rand] below).
+    Naming: TeX-derived snake_case [Z_rand]; per plan line 82 no
+    [_RV] suffix.  Project-local convention.
+    Used by: [inde_V_2_V_3_Z_rand], [pfwd1_Z_rand_tt], Task F's
+    residual section instantiation (which discharges
+    [V2V3_Z_inde_given_Y] from [inde_V_2_V_3_Z_rand]). *)
+Definition Z_rand : {RV fdist_game_leak_with_secrets -> Z_rand_carrier} :=
+  fun _ => tt.
+
+(* Task D verify clause: all eleven protocol random variables plus
+   [Z_rand] type-check as [{RV fdist_game_leak_with_secrets -> _}]. *)
+Check V_1 : {RV fdist_game_leak_with_secrets -> plain AHE}.
+Check V_2 : {RV fdist_game_leak_with_secrets -> V_2_carrier}.
+Check V_3 : {RV fdist_game_leak_with_secrets -> V_3_carrier}.
+Check U_1 : {RV fdist_game_leak_with_secrets -> plain AHE}.
+Check U_2 : {RV fdist_game_leak_with_secrets -> plain AHE}.
+Check U_3 : {RV fdist_game_leak_with_secrets -> plain AHE}.
+Check R_2 : {RV fdist_game_leak_with_secrets -> plain AHE}.
+Check R_3 : {RV fdist_game_leak_with_secrets -> plain AHE}.
+Check S   : {RV fdist_game_leak_with_secrets -> plain AHE}.
+Check D_3 : {RV fdist_game_leak_with_secrets -> plain AHE}.
+Check Dk_a : {RV fdist_game_leak_with_secrets -> Dk_a_carrier}.
+Check Z_rand : {RV fdist_game_leak_with_secrets -> Z_rand_carrier}.
+
+(** card_V_2_carrier_succ - cardinality of [V_2_carrier] in the
+    [_.+1] shape required by infotheo's [fdist_uniform].  Discharged
+    by [fdist_card_prednK] on the marginal
+    [fdistmap V_2 fdist_game_leak_with_secrets].
+    Kind: helper.
+    Why: Task D's uniformity correspondence lemma [p_V_2_uniform]
+    states [`p_ V_2 = fdist_uniform _], and infotheo's
+    [fdist_uniform : forall (R : numFieldType) (A : finType) (n : nat),
+    #|A| = n.+1 -> fdist R A] requires its cardinality argument to
+    have [_.+1] shape (so that the uniform mass [#|A|^-1] is
+    well-defined).  Routing through [fdist_card_prednK] (which gives
+    [#|A| = #|A|.-1.+1] for any non-empty finType) discharges this
+    obligation generically: the non-emptiness comes free from the
+    existence of [fdist_game_leak_with_secrets].
+    Naming: [_succ] suffix marks the [.+1] shape; project-local
+    convention, mirrors [fdist_card_prednK] in [fdist.v].
+    Used by: [p_V_2_uniform]. *)
+Lemma card_V_2_carrier_succ : #|V_2_carrier| = #|V_2_carrier|.-1.+1.
+Proof.
+have HP : R.-fdist V_2_carrier := fdistmap V_2 fdist_game_leak_with_secrets.
+exact: fdist_card_prednK HP.
+Qed.
+
+(** card_V_3_carrier_succ - the equation
+    [#|V_3_carrier| = #|V_3_carrier|.-1.+1], lifting the V_3 carrier
+    cardinality into the [_.+1] shape required by [fdist_uniform].
+    Companion to [card_V_2_carrier_succ] for V_3; same proof
+    structure (route through [fdist_card_prednK] on the marginal
+    [fdistmap V_3 fdist_game_leak_with_secrets]).
+    Kind: helper.
+    Why: [p_V_3_uniform] needs a [_.+1]-shaped witness;
+    [fdist_card_prednK] produces it from the non-emptiness of
+    [V_3_carrier], which is witnessed by the marginal fdist
+    [fdistmap V_3 fdist_game_leak_with_secrets].
+    Used by: [p_V_3_uniform]. *)
+Lemma card_V_3_carrier_succ : #|V_3_carrier| = #|V_3_carrier|.-1.+1.
+Proof.
+have HP : R.-fdist V_3_carrier := fdistmap V_3 fdist_game_leak_with_secrets.
+exact: fdist_card_prednK HP.
+Qed.
+
+(** V_2_uniform_hyp - marginal uniformity of V_2 under
+    [fdist_game_leak_with_secrets].
+    Kind: section hypothesis.
+    Why: Task D of the plan.  The proof that V_2 is uniform follows
+    from [game_leak]'s body sampling [iV2 ← sample uniform index_msg]
+    as its very first operation, and the bridged fdist preserves
+    that uniformity through Task A's [LosslessCode_game_leak] and
+    Task B's [bridge_alice_view_with_secrets_to_fdist].  At the
+    abstract Task D layer (which is parametric in
+    [fdist_game_leak_with_secrets]) the uniformity is a hypothesis
+    that Task F discharges when instantiating the bridge at the
+    concrete eleven-tuple-returning leak code.  Same engineering
+    pattern as [VarRV_uniform_indcpa] in the residual section
+    [dsdp_security_indcpa_residual] below.
+    Used by: [p_V_2_uniform]. *)
+Hypothesis V_2_uniform_hyp :
+  `p_ V_2 = fdist_uniform card_V_2_carrier_succ.
+
+(** V_3_uniform_hyp - marginal uniformity of V_3, analogous to
+    [V_2_uniform_hyp].  Proof origin: [game_leak] samples
+    [iV3 ← sample uniform index_msg] immediately after [iV2]. *)
+Hypothesis V_3_uniform_hyp :
+  `p_ V_3 = fdist_uniform card_V_3_carrier_succ.
+
+(** pfwd1_Z_rand_tt - [Z_rand] hits [tt] with probability one because
+    [Z_rand] is the constant unit-valued random variable.  Standard
+    fact: a constant random variable concentrates its mass on its
+    constant value.
+    Kind: helper.
+    Why: feeds [inde_V_2_V_3_Z_rand].  The independence of
+    [[%V_2, V_3]] and [Z_rand] reduces to showing
+    [Pr[(V_2, V_3, Z_rand) = (v_2, v_3, tt)] = Pr[(V_2, V_3) =
+    (v_2, v_3)] * Pr[Z_rand = tt]]; using
+    [Pr[Z_rand = tt] = 1] turns the RHS into the LHS up to the
+    bijection [Pr[(V_2, V_3, Z_rand) = (v_2, v_3, tt)] = Pr[(V_2, V_3)
+    = (v_2, v_3)]] (which holds because the [Z_rand] component is
+    always [tt]).
+    Used by: [inde_V_2_V_3_Z_rand]. *)
+Lemma pfwd1_Z_rand_tt : `Pr[ Z_rand = tt ] = 1.
+Proof.
+rewrite pfwd1E.
+suff -> : (finset (preim Z_rand (pred1 tt))) = setT by exact: Pr_setT.
+apply/setP => x; rewrite !inE /=.
+by case: (Z_rand x).
+Qed.
+
+(** p_V_2_uniform - the V_2 marginal of [fdist_game_leak_with_secrets]
+    is the uniform distribution on [V_2_carrier].
+    Kind: correspondence lemma.
+    Why: Task D of [~/.claude/plans/sprightly-finding-robin.md], one
+    of the three correspondence lemmas this task discharges.  Task F
+    feeds this into [VarRV_uniform_indcpa] of the residual section
+    (after restricting V_2 / V_3 to a joint-uniform [(V_2, V_3)]
+    statement via [fdist_prod_indep] / [VarRV_indep_inputs]).
+    Proof: direct from [V_2_uniform_hyp].  The Task A-B chain
+    (lossless game body + bridge) discharges this at concrete
+    instantiation time (Task F); at the parametric layer the
+    hypothesis carries the bridge content.
+    Naming: [p_<X>_<property>] follows the infotheo project
+    convention; compare [VarRV_uniform_indcpa] at
+    [dsdp_security_indcpa_residual] section below.
+    Used by: Task F's residual section instantiation. *)
+Lemma p_V_2_uniform : `p_ V_2 = fdist_uniform card_V_2_carrier_succ.
+Proof. exact: V_2_uniform_hyp. Qed.
+
+(** p_V_3_uniform - companion uniformity for V_3:
+    [`p_ V_3 = fdist_uniform card_V_3_carrier_succ].  Same shape and
+    justification as [p_V_2_uniform], with the Task A-B chain
+    discharging the bridge at concrete instantiation (Task F).
+    Kind: correspondence lemma.
+    Why: Task D of the plan.  Task F feeds this into
+    [VarRV_uniform_indcpa] of the residual section as the marginal
+    side of a [(V_2, V_3)] joint-uniform statement (built via
+    [fdist_prod_indep] from this lemma, [p_V_2_uniform], and
+    [VarRV_indep_inputs]).
+    Used by: Task F's residual section instantiation. *)
+Lemma p_V_3_uniform : `p_ V_3 = fdist_uniform card_V_3_carrier_succ.
+Proof. exact: V_3_uniform_hyp. Qed.
+
+(** inde_V_2_V_3_Z_rand - the pair [(V_2, V_3)] is independent of
+    [Z_rand] under [fdist_game_leak_with_secrets].
+    Kind: correspondence lemma.
+    Why: Task D of the plan.  This is the third correspondence
+    lemma; it feeds [V2V3_Z_inde_given_Y] in the residual section
+    instantiation at Task F.  Unlike the uniformity lemmas, this
+    independence is provable directly (no hypothesis needed) because
+    [Z_rand] is the constant unit-valued RV: a constant random
+    variable is independent of every other random variable, since
+    [Pr[X = x] * Pr[Z = tt] = Pr[X = x] * 1 = Pr[X = x] = Pr[(X, Z)
+    = (x, tt)]].  The proof realises this through
+    [pfwd1_Z_rand_tt] + a [setP] argument collapsing the joint event
+    [(V_2, V_3, Z_rand) = (v_2, v_3, tt)] to [(V_2, V_3) = (v_2, v_3)].
+    Naming: [inde_<X>_<Y>] follows the infotheo convention for
+    independence statements; compare [V2V3_Z_inde_given_Y] in the
+    residual section below.
+    Used by: Task F's residual section instantiation. *)
+Lemma inde_V_2_V_3_Z_rand :
+  fdist_game_leak_with_secrets |= [% V_2, V_3] _|_ Z_rand.
+Proof.
+rewrite /inde_RV.
+move=> [v2 v3] z.
+case: z.
+rewrite pfwd1_Z_rand_tt mulr1.
+rewrite !pfwd1E.
+apply: eq_bigl => x; rewrite !inE /=.
+rewrite /RV2 /=.
+by case: (Z_rand x); rewrite !xpair_eqE andbT.
+Qed.
+
+(* Task D verify clause: the three correspondence lemmas type-check
+   and close with [Qed].  Mirrors Task 12's and Task B/C's verify
+   [Check]s. *)
+Check p_V_2_uniform :
+  `p_ V_2 = fdist_uniform card_V_2_carrier_succ.
+
+Check p_V_3_uniform :
+  `p_ V_3 = fdist_uniform card_V_3_carrier_succ.
+
+Check inde_V_2_V_3_Z_rand :
+  fdist_game_leak_with_secrets |= [% V_2, V_3] _|_ Z_rand.
+
 End dsdp_security_indcpa.
 
 (* ================================================================== *)
