@@ -2693,6 +2693,253 @@ Check p_V_3_uniform :
 Check inde_V_2_V_3_Z_rand :
   fdist_game_leak_with_secrets |= [% V_2, V_3] _|_ Z_rand.
 
+(* ================================================================== *)
+(* Task G: t_msg-output predictor framework via guess_indicator_pkg   *)
+(* ================================================================== *)
+
+(** id_guess - operation identifier exported by a [t_msg]-output
+    predictor.  The predictor exposes a single operation under this
+    identifier; calling it [tt] runs the predictor body and returns a
+    [t_msg]-typed guess.
+    Kind: canonical.
+    Why: Task G of [~/.claude/plans/sprightly-finding-robin.md]
+    (Fallback R1B).  SSProve operations are identified by a [nat];
+    [id_game_run = 0%N] is already taken by the four games, so the
+    predictor's operation needs a fresh identifier.  The choice [1%N]
+    is arbitrary but stable across this file.
+    Naming: project-local; mirrors [id_game_run], [id_oracle_encrypt].
+    Used by: guesser_export, boolean_shell. *)
+Definition id_guess : nat := 1%N.
+
+(** guesser_export - the export interface of a [t_msg]-output
+    predictor.  Exposes a single operation [id_guess] taking ['unit]
+    and returning the SSProve message-space carrier [t_msg]
+    (aliased to the pack_type custom-entry notation ['msg']).
+    Kind: canonical.
+    Why: Task G of [~/.claude/plans/sprightly-finding-robin.md]
+    (Fallback R1B).  The new [predictor_guesser] type below exports
+    this interface in front of [game_iface]: it consumes the game's
+    ciphertext-list run and emits a [t_msg] guess of [V_2].  This is
+    the SSProve analogue of the TeX adversary
+    [A : Y -> Delta(R)] from the dsdp Alice-secrecy closed-form
+    writeup (notes/20260506-dsdp-secrecy-closed-form): map the
+    Alice-view [Y] to a distribution on the message space [R].
+    Used by: predictor_guesser, boolean_shell, guess_indicator_pkg. *)
+Definition guesser_export : Interface :=
+  [interface #val #[ id_guess ] : 'unit → msg ].
+
+(** predictor_guesser - the SSProve [package] type of a
+    [t_msg]-output predictor: imports [game_iface] (the
+    ciphertext-list run shared by the four games) and exports
+    [guesser_export] (the [t_msg]-guess oracle).
+    Kind: canonical.
+    Why: Task G of [~/.claude/plans/sprightly-finding-robin.md]
+    (Fallback R1B).  This is the type that the rewritten Task I
+    [dsdp_alice_secrecy_indcpa] will take in place of the original
+    [raw_package predictor] consuming [game_iface] and exporting the
+    Bool-shaped [A_export].  The original framing baked the
+    "predictor output = V_2_sample" semantics into the implicit
+    convention "the predictor returns [true] iff its internal guess
+    matches V_2"; the new framing makes the [t_msg] guess explicit so
+    the V_2-equality event is a syntactic equality, not a semantic
+    hypothesis.
+    Naming: project-local; reads "a guesser-style predictor".
+    Used by: guess_indicator_pkg, Pr_guess_indicator_eq_predictor_output,
+    Task H's residual bound, Task I's rewritten secrecy theorem. *)
+Definition predictor_guesser : Type :=
+  package game_iface guesser_export.
+
+(** t_msg_carrier_to_chmsg - section-parametric embedding of the
+    [t_msg_carrier] finType into the SSProve [t_msg] choice_type
+    message carrier.  This is the bridge that lets the
+    [guess_indicator_pkg] wrapper sample a uniform [V_2] from the
+    finType side and then compare for equality against a [t_msg]-
+    typed predictor output on the SSProve side.
+    Kind: section parameter.
+    Why: Task G of [~/.claude/plans/sprightly-finding-robin.md]
+    (Fallback R1B).  Concrete instantiations identify [t_msg_carrier]
+    with [plain AHE] (the protocol-side message scalar carrier) and
+    use [chmsg_of_msg] composed with identity to discharge this
+    parameter.  The section-parametric framing keeps Task G
+    insensitive to that concrete identification while letting
+    downstream consumers (Tasks H, I) reason about the wrapper's
+    bool-shaped distribution.
+    Naming: [_to_chmsg] is a project-local suffix mirroring the
+    [chmsg_of_msg] / [msg_of_chmsg] direction names declared at the
+    top of this section; [_to_] reads "forward direction into the
+    chosen SSProve choice_type message carrier".
+    Used by: sample_to_t_msg, boolean_shell, guess_indicator_pkg. *)
+Variable t_msg_carrier_to_chmsg : t_msg_carrier -> t_msg.
+
+(** sample_to_t_msg - convert an SSProve uniform-sample index
+    ['I_index_t_msg] to a [t_msg]-typed value, routing through
+    [enum_val] (the cardinality cast) and [t_msg_carrier_to_chmsg]
+    (the carrier-to-choice_type bridge).  Mirrors [sample_to_renc]
+    at the top of this section, for the message-space carrier.
+    Kind: helper.
+    Why: Task G of [~/.claude/plans/sprightly-finding-robin.md]
+    (Fallback R1B).  The [guess_indicator_pkg] wrapper samples
+    [iV2 : 'I_index_t_msg] uniformly and needs a [t_msg]-typed
+    avatar to compare with the predictor's guess via [eq_op].
+    Used by: boolean_shell, guess_event_code,
+    Pr_guess_indicator_eq_predictor_output. *)
+Definition sample_to_t_msg (i : 'I_index_t_msg) : t_msg :=
+  t_msg_carrier_to_chmsg (enum_val (cast_ord (esym t_msg_card) i)).
+
+(** boolean_shell - the inner Bool-output shell of the
+    [guess_indicator_pkg] wrapper.  Imports [guesser_export] (the
+    [t_msg]-output predictor's interface) and exports [A_export]
+    (the standard SSProve adversary interface,
+    [#val #[ RUN.1 ] : 'unit → 'bool]).  Body: imports the
+    predictor's [id_guess] operation, calls it to obtain a [t_msg]
+    [guess], samples a uniform index [iV2 ← sample uniform
+    index_t_msg], converts to a [t_msg]-typed [v2] via
+    [sample_to_t_msg], and returns the boolean equality
+    [guess == v2].  Naming-wise this is a [Definition] (no axiom,
+    no hypothesis): the whole framework is syntactic.
+    Kind: helper.
+    Why: Task G of [~/.claude/plans/sprightly-finding-robin.md]
+    (Fallback R1B).  Splitting the wrapper into a Bool-shaped shell
+    plus an outer link with [predictor ∘ game] keeps the
+    composition typing transparent: [boolean_shell] is a regular
+    SSProve [package] (so [Pr] can be applied to it after a single
+    link step) and the link step exposes the predictor's body for
+    the correspondence lemma below to reach by reflexivity after
+    one [coerce_kleisliE] step.
+    Naming: project-local; reads "the boolean indicator shell".
+    Used by: guess_indicator_pkg, Pr_guess_indicator_eq_predictor_output. *)
+Definition boolean_shell : package guesser_export A_export :=
+  [package emptym ;
+    #def #[ 0%N ] (_ : 'unit) : 'bool
+    {
+      #import {sig #[ id_guess ] : 'unit → msg } as call_pred ;;
+      guess ← call_pred tt ;;
+      iV2 ← sample uniform index_t_msg ;;
+      let v2 := sample_to_t_msg iV2 in
+      ret (guess == v2 : 'bool)
+    }
+  ].
+
+(** guess_indicator_pkg - the canonical Bool-output wrapper that
+    turns a [t_msg]-output [predictor : predictor_guesser] and a
+    closed game [game : package [interface] game_iface] into a
+    Bool-output package suitable for [pkg_advantage.Pr].  Defined as
+    the SSProve link [boolean_shell ∘ predictor ∘ game]: the inner
+    [predictor ∘ game] resolves the predictor's import of
+    [game_iface] against the game, producing a closed
+    [t_msg]-output package; the outer [boolean_shell] then layers
+    on the V_2-equality indicator semantics.  This is the
+    [Definition] form of the syntactic construction baked into the
+    original Task 14 theorem's implicit semantic convention.
+    Kind: main.
+    Why: Task G of [~/.claude/plans/sprightly-finding-robin.md]
+    (Fallback R1B).  Downstream consumers (Task H and Task I) take
+    a [predictor_guesser] explicitly and compose with
+    [guess_indicator_pkg] to recover the Bool-shaped distribution
+    that [pkg_advantage.Pr] consumes.  No axiom or hypothesis
+    encodes the V_2-equality semantics: the equality is a syntactic
+    bool returned by the shell, and the residual probability bound
+    in Task H operates on the explicit
+    [Pr_fst (guess_event_code predictor game)] event.
+    Naming: project-local; reads "the guess-indicator-style
+    package wrapper".  Mirrors [reduction_charlie],
+    [reduction_bob] in shape (a function from a predictor to a
+    raw_package) but with the additional [game] argument to keep
+    the closed/open distinction explicit.
+    Used by: Pr_guess_indicator_eq_predictor_output, Task H's
+    [Pr_predictor_guess_game_leak_le_invm], Task I's rewritten
+    [dsdp_alice_secrecy_indcpa]. *)
+Definition guess_indicator_pkg
+    (predictor : predictor_guesser)
+    (game : package [interface] game_iface) : raw_package :=
+  boolean_shell ∘ predictor ∘ game.
+
+(** guess_event_code - the explicit raw_code witnessing the
+    "predictor output equals V_2 sample" event.  Sequentially
+    resolves [predictor ∘ game] at the [id_guess] operation to
+    obtain a [t_msg] guess, samples a fresh uniform index
+    [iV2 ← sample uniform index_t_msg], and returns the boolean
+    equality [guess == sample_to_t_msg iV2].  This is the
+    semantic-side anchor of the correspondence below: it
+    syntactically captures the event
+    "[(predictor ∘ game).output = V_2_sample]" without going
+    through [pkg_advantage.Pr]'s [boolean_shell ∘ _] indirection.
+    Kind: helper / semantic anchor.
+    Why: Task G of [~/.claude/plans/sprightly-finding-robin.md]
+    (Fallback R1B).  Task H's residual bound is naturally stated
+    against the [Pr_fst]-driven SSProve probability of this code,
+    rather than against [pkg_advantage.Pr (guess_indicator_pkg
+    predictor game)] [true]; the present definition + the
+    correspondence lemma below lets Task H pick whichever side is
+    easier to bound and freely transfer.
+    Naming: project-local; reads "the guess-event raw_code".
+    Used by: Pr_guess_indicator_eq_predictor_output, Task H. *)
+Definition guess_event_code
+    (predictor : predictor_guesser)
+    (game : package [interface] game_iface) : raw_code 'bool :=
+  guess ← resolve (predictor ∘ game) (id_guess, ('unit, t_msg)) tt ;;
+  iV2 ← sample uniform index_t_msg ;;
+  ret ((guess == sample_to_t_msg iV2) : 'bool).
+
+(** Pr_guess_indicator_eq_predictor_output - the correspondence
+    lemma promised by Fallback R1B.  States that the SSProve
+    standard probability
+    [distr.mu (pkg_advantage.Pr (guess_indicator_pkg p g)) true]
+    equals the [Pr_fst]-driven probability of the explicit event
+    code [guess_event_code p g] evaluated at [true].  Proof: by
+    definition unfolding.  [Pr_Pr_fst] rewrites the [pkg_advantage]
+    side to a [Pr_fst (resolve ...)] expression;
+    [resolve_link] expands the outer link
+    [boolean_shell ∘ predictor ∘ game] into a
+    [code_link (resolve boolean_shell RUN tt) (predictor ∘ game)];
+    [resolve_set] looks up the [boolean_shell] body at the [0%N]
+    operation key; [coerce_kleisliE] discharges the
+    type-coercion identity since the [chsrc]/[chtgt] types are
+    already syntactically aligned; the residual goal is
+    syntactically identical to the [guess_event_code] body and
+    closes by [reflexivity].
+    Kind: main correspondence.
+    Why: Task G of [~/.claude/plans/sprightly-finding-robin.md]
+    (Fallback R1B).  This is the only piece that ties the wrapper's
+    Bool-shaped [pkg_advantage.Pr] to the explicit V_2-equality
+    event; without it, downstream consumers would have to choose
+    one or the other and could not transfer between them.  The
+    correspondence is by definition (no probabilistic reasoning),
+    matching the plan's design intent that Task G be a syntactic
+    framework piece, not a semantic one.
+    Naming: project-local; reads "the probability of the
+    guess-indicator wrapper [= true] equals the probability of
+    the predictor-output [=] V_2 event".  No MathComp suffix-table
+    entry applies.
+    Used by: Task H's [Pr_predictor_guess_game_leak_le_invm]
+    (the residual bound is stated against the LHS but proved
+    against the RHS via this lemma), Task I's rewritten
+    [dsdp_alice_secrecy_indcpa]. *)
+Lemma Pr_guess_indicator_eq_predictor_output
+    (predictor : predictor_guesser)
+    (game : package [interface] game_iface) :
+  distr.mu (pkg_advantage.Pr (guess_indicator_pkg predictor game)) true
+    = distr.mu (Pr_fst (guess_event_code predictor game)) true.
+Proof.
+rewrite Pr_Pr_fst /guess_indicator_pkg /guess_event_code.
+rewrite resolve_link /boolean_shell /= resolve_set /= coerce_kleisliE /=.
+reflexivity.
+Qed.
+
+(* Task G verify clauses: the predictor framework type-checks as
+   advertised, and the correspondence lemma closes with [Qed].
+   Mirrors Task 06/07's [Check] clauses for the games and
+   translation packages. *)
+Check predictor_guesser.
+Check boolean_shell.
+Check guess_indicator_pkg.
+Check guess_event_code.
+Check Pr_guess_indicator_eq_predictor_output :
+  forall (predictor : predictor_guesser)
+         (game : package [interface] game_iface),
+    distr.mu (pkg_advantage.Pr (guess_indicator_pkg predictor game)) true
+      = distr.mu (Pr_fst (guess_event_code predictor game)) true.
+
 End dsdp_security_indcpa.
 
 (* ================================================================== *)
