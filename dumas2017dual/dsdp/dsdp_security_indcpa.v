@@ -27,6 +27,7 @@ Require Import proba jfdist_cond entropy graphoid smc_interpreter spp_proba baye
 Require Import spp_entropy.
 Require Import homomorphic_encryption indcpa_ror.
 Require Import dsdp_program dsdp_entropy dsdp_pismc.
+Require Import smc.ssprove_ext_lossless.
 
 Set Implicit Arguments.
 Unset Strict Implicit.
@@ -1411,6 +1412,90 @@ Qed.
 Check bridge_leak_to_fdist :
   forall (mu : distr.distr R alice_view),
     psum (distr.mu mu) = 1 -> R.-fdist alice_view.
+
+(** index_msg_pos, index_renc_pos — positivity of the SSProve uniform-
+    sample cardinalities.
+    Kind: section hypothesis.
+    Why: [LosslessOp_uniform] (SSProve [pkg_distr.v:206]) requires
+    [Lt 0 i] (i.e. [0 < i]) for the sampler [uniform i] to have total
+    mass one.  The DSDP game samples ten times — six over [index_msg]
+    (the plaintext-scalar carrier ['I_index_msg]) and four over
+    [index_renc] (the encryption-randomness carrier ['I_index_renc]) —
+    and each draw must have nonzero support, otherwise the chain mass
+    collapses to zero rather than to one.  Concretely, an instantiation
+    against [plain AHE = 'Z_(p*q)] takes [index_msg = (p*q)%N] which is
+    positive because [p, q] are prime; an instantiation against a
+    concrete AHE randomness type [Renc] equates [index_renc] with the
+    finType cardinality [#|Renc|] (via [renc_card]), which is positive
+    when the scheme draws encryption randomness from a nonempty set.
+    Both are mild and concrete instantiations discharge them
+    trivially; they are stated as section hypotheses so the residual
+    [LosslessCode_game_leak] below is provable Section-internally.
+    Used by: LosslessCode_game_leak (and any subsequent Pr_fst-on-
+    game_leak mass argument). *)
+Hypothesis index_msg_pos : (0 < index_msg)%N.
+Hypothesis index_renc_pos : (0 < index_renc)%N.
+
+(** game_leak_run_code — the [raw_code] body of [game_leak] obtained by
+    resolving its single export operation [id_game_run] at the unit
+    argument.
+    Kind: helper definition.
+    Why: SSProve's [LosslessCode] class is a property of [raw_code]
+    values, not of [package] values.  The Task 12 bridge
+    [bridge_leak_to_fdist] takes its mass hypothesis as
+    [psum (distr.mu mu) = 1] where [mu = Pr_fst c] for some
+    [c : raw_code _]; the natural instantiation is
+    [c := game_leak_run_code] (the body of [game_leak]'s
+    [id_game_run] operation evaluated at [tt]).  Naming this body
+    once lets [LosslessCode_game_leak] state the [Pr_fst]-mass
+    obligation in a syntactically-uniform form that the consumer
+    (Task 13's [Pr_game_leak_V2_uniform] caller in Task 14) can feed
+    directly into [bridge_leak_to_fdist].
+    Used by: LosslessCode_game_leak. *)
+Definition game_leak_run_code : raw_code cipher_list :=
+  resolve game_leak (id_game_run, ('unit, cipher_list)) tt.
+
+(** LosslessCode_game_leak — the ten-sample-plus-[ret] body of
+    [game_leak] is lossless: [psum (Pr_fst game_leak_run_code) = 1].
+    Kind: instance / mass discharge.
+    Why: Task A of [~/.claude/plans/sprightly-finding-robin.md].  The
+    Task 12 bridge [bridge_leak_to_fdist] needs an [Hmass : psum (Pr_fst
+    _) = 1] hypothesis to bring an SSProve [distr R alice_view] across
+    to an infotheo [{fdist alice_view}]; this lemma supplies that
+    hypothesis at the concrete code [game_leak_run_code].
+    Proof outline.  [resolve game_leak _ tt] reduces to
+    [coerce_kleisli (λ _, body) tt] where [body] is the literal
+    ten-sample chain; [coerce_kleisliE] collapses the [coerce_kleisli]
+    wrapper since the source/target [choice_type]s match.  Then ten
+    applications of [Lossless_sample] (SSProve [nominal/Pr.v:198])
+    walk through the [sample uniform i ;; k] tree, each leaving a
+    [LosslessOp (uniform i)] subgoal discharged by
+    [LosslessOp_uniform] (which consumes [index_msg_pos] /
+    [index_renc_pos]).  The final [LosslessCode (ret _)] is closed by
+    [Lossless_ret] (resolved automatically by typeclass eauto inside
+    the last [Lossless_sample]).
+    Naming: upstream-style PascalCase exception, mirroring
+    [Lossless_ret], [Lossless_sample], and [LosslessOp_uniform] in
+    SSProve.  See [feedback_mathcomp_naming.md] in user memory.
+    Used by: Task 14 ([dsdp_alice_secrecy_indcpa]) where it discharges
+    the [Hmass] obligation of [bridge_leak_to_fdist] at the
+    [game_leak]-resolved code. *)
+Lemma LosslessCode_game_leak : LosslessCode game_leak_run_code.
+Proof.
+rewrite /game_leak_run_code /resolve /=.
+rewrite coerce_kleisliE.
+apply: Lossless_sample => [|?]; first by apply: LosslessOp_uniform.
+apply: Lossless_sample => [|?]; first by apply: LosslessOp_uniform.
+apply: Lossless_sample => [|?]; first by apply: LosslessOp_uniform.
+apply: Lossless_sample => [|?]; first by apply: LosslessOp_uniform.
+apply: Lossless_sample => [|?]; first by apply: LosslessOp_uniform.
+apply: Lossless_sample => [|?]; first by apply: LosslessOp_uniform.
+apply: Lossless_sample => [|?]; first by apply: LosslessOp_uniform.
+apply: Lossless_sample => [|?]; first by apply: LosslessOp_uniform.
+apply: Lossless_sample => [|?]; first by apply: LosslessOp_uniform.
+apply: Lossless_sample.
+exact: LosslessOp_uniform.
+Qed.
 
 End dsdp_security_indcpa.
 
