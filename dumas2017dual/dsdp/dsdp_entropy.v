@@ -361,6 +361,220 @@ End dsdp_var_entropy.
 End dsdp_entropy.
 
 (* ========================================================================== *)
+(* Ring-generic siblings of dsdp_fiber_card and Pr_dsdp_sol_uniform           *)
+(* ========================================================================== *)
+
+(** **Kind:** infrastructure lemma (ring-generic fiber cardinality).
+
+    **Why:** matches the TeX abstraction at Setup item 2 (line 35-36)
+    where the DSDP underlying additive masking operates over an arbitrary
+    finite commutative ring with units rather than the concrete [Z_(p*q)].
+    Replaces the prime-based unit check
+    [(0 < u3)%N /\ (u3 < minn p q)%N]
+    with the abstract membership [u3 \is a GRing.unit].
+
+    **Used-by:** [Pr_dsdp_sol_uniform_ring] below, and downstream
+    [dsdp_security_indcpa.v] when instantiating the IT residual
+    section at an arbitrary [finComUnitRingType] (Task F).
+
+    **Naming:** suffix [_ring] indicates the ring-generic sibling
+    of the [Z_(p*q)]-specialized [dsdp_fiber_card] at line 200; the
+    original lemma is preserved unchanged so the N-party code in
+    [dsdp_entropy_n] and the kept theorems in [dsdp_security.v]
+    continue to compile.
+*)
+
+(** **Kind:** infrastructure lemma (ring-generic conditional uniformity).
+
+    **Why:** the TeX residual analysis (Step 4 of the closed-form
+    secrecy proof) routes through [Pr[V_2 V_3 = (v_2,v_3) | view] =
+    1/m] where [m = #|R|]. The original
+    [Pr_dsdp_sol_uniform] specializes [R] to [Z_(p*q)]; the
+    [_ring] sibling carries the same statement parametric in
+    [R : finComUnitRingType], discharging the ring-specialization
+    asterisk that the goal-gap audit flagged.
+
+    **Used-by:** [dsdp_security_indcpa.v] Task F when instantiating
+    the residual section at the abstract carrier
+    [alice_view_with_secrets] over an arbitrary [finComUnitRingType].
+
+    **Naming:** suffix [_ring] mirrors [dsdp_fiber_card_ring]; the
+    [Z_(p*q)]-specialized [Pr_dsdp_sol_uniform] at line 237 is left
+    unchanged so the N-party generalization in [Section dsdp_entropy_n]
+    and the legacy theorems in [dsdp_security.v] keep their meaning.
+*)
+
+Section dsdp_entropy_ring.
+
+Context {R_real : realType}.
+Variable R : finComUnitRingType.
+
+(* Ring-generic fiber: solutions to u2*v2 + u3*v3 = s - u1*v1 in R*R. *)
+Definition dsdp_fiber_ring (u1 u2 u3 v1 s : R) : {set R * R} :=
+  [set vv : R * R | (u2 * vv.1 + u3 * vv.2 == s - u1 * v1)%R].
+
+(* Ring-generic fiber cardinality.
+   Replaces the (0 < u3)(u3 < minn p q) check of dsdp_fiber_card with
+   the abstract [u3 \is a GRing.unit]; the existing specialized lemma
+   is preserved unchanged. *)
+Lemma dsdp_fiber_card_ring (u1 u2 u3 v1 s : R) :
+  u3 \is a GRing.unit ->
+  #|dsdp_fiber_ring u1 u2 u3 v1 s| = #|R|.
+Proof.
+move=> Hu3.
+pose f := fun v2 : R => (v2, u3^-1 * (s - u1 * v1 - u2 * v2)).
+have Hf_inj : injective f.
+  move=> a b /=; rewrite /f.
+  by case=> H _.
+have Hf_image : [set f v2 | v2 : R] = dsdp_fiber_ring u1 u2 u3 v1 s.
+  apply/setP => [[v2 v3]]; rewrite /dsdp_fiber_ring !inE.
+  apply/imsetP/eqP.
+  - move=> [v2' _ [H1 H2]]; subst v2 v3.
+    rewrite mulrA mulrV ?Hu3 // mul1r.
+    by rewrite addrC subrK.
+  - move=> Heq.
+    exists v2 => //=.
+    congr pair.
+    have Hv3 : u3 * v3 = s - u1 * v1 - u2 * v2 by rewrite -Heq addrC addKr.
+    by rewrite -Hv3 mulrA mulVr ?Hu3 // mul1r.
+by rewrite -Hf_image card_imset.
+Qed.
+
+Variable T : finType.
+Variable P : R_real.-fdist T.
+Variables (V1 V2 V3 U1 U2 U3 S : {RV P -> R}).
+
+Let CondRV_r : {RV P -> (R * R * R * R * R)} := [%V1, U1, U2, U3, S].
+Let VarRV_r : {RV P -> (R * R)} := [%V2, V3].
+Let InputRV_r : {RV P -> (R * R * R * R)} := [%V1, U1, U2, U3].
+
+Let card_R_gt0 : (0 < #|R|)%N.
+Proof. by apply/card_gt0P; exists 0; rewrite inE. Qed.
+
+Let card_RR_pair :
+  #|((R * R)%type : finType)| = (#|R| * #|R|).-1.+1.
+Proof.
+rewrite card_prod prednK //.
+by rewrite muln_gt0; apply/andP; split.
+Qed.
+
+(** dsdp_constraint_ring — the DSDP linear constraint at the
+    ring-generic level: for a sample of conditions [cond = (v1, u1, u2,
+    u3, s)] and variables [var = (v2, v3)], the relation says that
+    [s - u1 * v1 = u2 * v2 + u3 * v3].  Same shape as the [Z_(p*q)]-side
+    [dsdp_constraint] used in [dsdp_centropy_uniform] (line 262);
+    parametrised here in [R : finComUnitRingType] so the residual
+    analysis can quote it at [alice_view_with_secrets] (Task F).
+    Kind: helper.
+    Why: needed as the hypothesis shape consumed by
+    [Pr_dsdp_sol_uniform_ring]; mirrors the specialized
+    [dsdp_constraint] for backward compatibility with the kept
+    IT-only theorems.
+    Used by: Pr_dsdp_sol_uniform_ring, constraint_holds_r,
+    dsdp_security_indcpa.v's Task F instantiation. *)
+Definition dsdp_constraint_ring (cond : R * R * R * R * R)
+  (var : R * R) : Prop :=
+  let '(v1, u1, u2, u3, s) := cond in
+  let '(v2, v3) := var in
+  (s - u1 * v1 = u2 * v2 + u3 * v3)%R.
+
+Hypothesis constraint_holds_r :
+  forall t, dsdp_constraint_ring (CondRV_r t) (VarRV_r t).
+
+Hypothesis VarRV_uniform_r : `p_ VarRV_r = fdist_uniform card_RR_pair.
+Hypothesis VarRV_indep_inputs_r : P |= InputRV_r _|_ VarRV_r.
+
+Let dsdp_fiber_fn_r (cond : R * R * R * R * R) : {set R * R} :=
+  let '(v1, u1, u2, u3, s) := cond in dsdp_fiber_ring u1 u2 u3 v1 s.
+
+Let dsdp_proj_input_r (cond : R * R * R * R * R) : R * R * R * R :=
+  let '(v1, u1, u2, u3, _) := cond in (v1, u1, u2, u3).
+
+Let constraint_fiber_r :
+  forall t, VarRV_r t \in dsdp_fiber_fn_r (CondRV_r t).
+Proof.
+move=> t.
+rewrite /dsdp_fiber_fn_r /dsdp_fiber_ring /CondRV_r /VarRV_r /=.
+rewrite inE /=.
+apply/eqP.
+move: (constraint_holds_r t).
+by rewrite /dsdp_constraint_ring /CondRV_r /VarRV_r /=.
+Qed.
+
+Let InputRV_proj_r :
+  forall t, InputRV_r t = dsdp_proj_input_r (CondRV_r t).
+Proof. by move=> t. Qed.
+
+Let joint_eq_input_r :
+  forall (cond : R * R * R * R * R) (var : R * R),
+    var \in dsdp_fiber_fn_r cond ->
+    `Pr[[%VarRV_r, CondRV_r] = (var, cond)] =
+    `Pr[[%VarRV_r, InputRV_r] = (var, dsdp_proj_input_r cond)].
+Proof.
+move=> [[[[v1 u1] u2] u3] s] [v2 v3] /= Hin_fiber.
+rewrite !pfwd1E.
+congr Pr.
+apply/setP => t0.
+rewrite !inE /= !xpair_eqE.
+apply/idP/idP => H.
+- move/and3P: H => [Hvar Hinput Hs].
+  move/andP: Hinput => [Hinput3 Hu3].
+  move/andP: Hinput3 => [Hinput2 Hu2].
+  move/andP: Hinput2 => [Hv1 Hu1].
+  apply/and3P.
+  split => //.
+  by rewrite Hv1 Hu1 Hu2.
+- move/and3P: H => [Hvar Hinput3 Hu3].
+  move/andP: Hinput3 => [Hinput2 Hu2].
+  move/andP: Hinput2 => [Hv1 Hu1].
+  apply/and3P.
+  split => //.
+  + by rewrite Hv1 Hu1 Hu2 Hu3.
+  + move/andP: Hvar => [/eqP Hv2_eq /eqP Hv3_eq].
+    move/eqP: Hv1 => Hv1_eq.
+    move/eqP: Hu1 => Hu1_eq.
+    move/eqP: Hu2 => Hu2_eq.
+    move/eqP: Hu3 => Hu3_eq.
+    move: (constraint_holds_r t0).
+    rewrite /dsdp_constraint_ring /CondRV_r /VarRV_r /=.
+    rewrite Hv1_eq Hu1_eq Hu2_eq Hu3_eq Hv2_eq Hv3_eq.
+    move=> Hconstr.
+    move: Hin_fiber.
+    rewrite /dsdp_fiber_fn_r /dsdp_fiber_ring inE /=.
+    move=> /eqP Hfiber_eq.
+    apply/eqP.
+    have Heq: S t0 - u1 * v1 = s - u1 * v1.
+      by rewrite Hconstr Hfiber_eq.
+    by move: Heq => /eqP; rewrite -subr_eq0 opprB addrA subrK subr_eq0 => /eqP.
+Qed.
+
+(* Ring-generic conditional uniformity.
+   Same shape as Pr_dsdp_sol_uniform at line 237 but parametric in
+   [R : finComUnitRingType]; the existing specialized lemma is preserved. *)
+Lemma Pr_dsdp_sol_uniform_ring (u1 u2 u3 v1 s v2 v3 : R) :
+  u3 \is a GRing.unit ->
+  `Pr[CondRV_r = (v1, u1, u2, u3, s)] != 0 ->
+  (v2, v3) \in dsdp_fiber_ring u1 u2 u3 v1 s ->
+  `Pr[ VarRV_r = (v2, v3) | CondRV_r = (v1, u1, u2, u3, s) ] = #|R|%:R^-1.
+Proof.
+move=> Hu3 Hcond_pos Hin.
+have Hcard: #|dsdp_fiber_ring u1 u2 u3 v1 s| = #|R|
+  by apply: dsdp_fiber_card_ring.
+have Hcpr := @gen_cPr_uniform_fiber R_real T P
+               ((R * R)%type : finType) _ card_RR_pair
+               VarRV_r ((R * R * R * R)%type : finType) InputRV_r
+               ((R * R * R * R * R)%type : finType) CondRV_r
+               dsdp_fiber_fn_r dsdp_proj_input_r
+               constraint_fiber_r InputRV_proj_r
+               VarRV_uniform_r VarRV_indep_inputs_r
+               joint_eq_input_r
+               (v1, u1, u2, u3, s) (v2, v3) Hcond_pos Hin.
+by rewrite Hcpr /= Hcard.
+Qed.
+
+End dsdp_entropy_ring.
+
+(* ========================================================================== *)
 (* N-party entropy analysis                                                    *)
 (* ========================================================================== *)
 
