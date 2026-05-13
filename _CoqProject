@@ -96,6 +96,7 @@ smc/graded_resource.v
 smc/smc_session_types.v
 smc/pismc.v
 smc/pismc_to_ssprove.v
+smc/ssprove_ext_lossless.v
 du2002/spp_tactics.v
 du2002/spp_proba.v
 du2002/spp_entropy.v
