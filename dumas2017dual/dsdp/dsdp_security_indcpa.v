@@ -109,6 +109,39 @@ Variable chcipher_of_cipher : cipher AHE -> t_cipher.
     Used by: reduction_charlie, reduction_bob. *)
 Variable cipher_of_chcipher : t_cipher -> cipher AHE.
 
+(** chcipher_of_cipherK — cancel law witnessing that [cipher_of_chcipher]
+    is a left inverse of [chcipher_of_cipher].  Together with
+    [chmsg_of_msgK] below this expresses the design intent (file header,
+    line 104-108) that the SSProve and AHE message/ciphertext carriers
+    are biject on representatives.  Concrete instantiations against a
+    real AHE (Benaloh/Paillier) discharge these hypotheses by picking
+    [chcipher_of_cipher] / [chmsg_of_msg] as identity-like encodings.
+    Kind: hypothesis.
+    Why: the Task 09 perfect-equivalence proofs ([game_real ≈₀
+    translation_charlie ∘ oracle_real] etc.) need to collapse the
+    round-trip [cipher_of_chcipher (chcipher_of_cipher c)] introduced
+    when the oracle returns its result and the reduction immediately
+    feeds that result into [Emul]/[Epow].  Without this cancel,
+    [rreflexivity_rule] cannot close the relational goal.
+    Used by: game_real_equiv_charlie_real, charlie_zero_equiv_game_hybrid_one,
+    game_hybrid_one_equiv_bob_real, bob_zero_equiv_game_hybrid_two. *)
+Hypothesis chcipher_of_cipherK :
+  cancel chcipher_of_cipher cipher_of_chcipher.
+
+(** chmsg_of_msgK — cancel law witnessing that [msg_of_chmsg] is a left
+    inverse of [chmsg_of_msg].  Companion of [chcipher_of_cipherK] for
+    the message-side round-trip.
+    Kind: hypothesis.
+    Why: the Charlie/Bob translation packages call the IND-CPA oracle on
+    [(party, chmsg_of_msg v_i)]; the oracle's body applies
+    [msg_of_chmsg] internally so the post-simplification goal carries
+    [msg_of_chmsg (chmsg_of_msg (msg_of_idx ...))] on one side and
+    [msg_of_idx ...] on the other.  Cancelling this round-trip is
+    required for [rreflexivity_rule] to close the Task 09 goals.
+    Used by: same as [chcipher_of_cipherK]. *)
+Hypothesis chmsg_of_msgK :
+  cancel chmsg_of_msg msg_of_chmsg.
+
 (* Public-key supply per party, again parametric (no commitment to a
    specific key-generation strategy). *)
 Variable pkey_of_party : party_id -> pub_key AHE.
@@ -325,17 +358,27 @@ Definition game_hybrid_two :
     }
   ].
 
-(** game_leak — ciphertext-free residual.  Returns an empty ciphertext
-    list, modelling the worldwhere all four ciphertext slots have been
-    replaced by deterministic functions of fresh encryption-randomness
-    independent of (V_2, V_3, U_2, U_3, R_2, R_3).  Used to close the
-    advantage triangle in Task 08.
+(** game_leak — residual game post-IND-CPA collapse.  Both ciphertext
+    slots encrypt the constant [0 : plain AHE], so the joint
+    distribution of the four-element ciphertext list is a deterministic
+    function of fresh encryption-randomness independent of the
+    protocol-side secret [V_2].  Identical in body to [game_hybrid_two];
+    the distinct name marks the role in the advantage triangle (this is
+    the post-collapse endpoint where the IT residual analysis takes
+    over).  Used to close the advantage triangle in Task 08 and as the
+    input distribution for the residual uniformity argument in Task 13.
     Kind: main.
     Why: Task 06 of the plan.  Once both IND-CPA hops have been taken,
     the remaining ciphertext content is independent of the protocol
-    secret V_2.  Returning the empty accumulator makes this explicit at
-    the package level.  The residual uniformity argument
-    (Pr_game_leak_V2_uniform, Task 13) acts on this package.
+    secret V_2; Task 13 then shows
+    [Pr[predictor game_leak = V_2] = 1/m].  Task 09's perfect
+    equivalence [game_hybrid_two ≈₀ game_leak] is by reflexivity.
+    Naming: an earlier draft used an empty-list residual.  The empty
+    list is not perfectly equivalent to [game_hybrid_two] (it returns a
+    syntactically distinct 0-length list), and Task 09 was unprovable in
+    that shape.  The body now matches [game_hybrid_two] so the perfect
+    equivalence holds, while Task 13 takes responsibility for showing
+    the IT residual is uniform on [V_2].
     Used by: Tasks 08 (advantage triangle), 09 (perfect equivalence),
     13 (residual uniformity). *)
 Definition game_leak :
@@ -343,7 +386,36 @@ Definition game_leak :
   [package emptym ;
     #def #[ id_game_run ] (_ : 'unit) : ciphers
     {
-      ret ([::] : cipher_list)
+      iV2 ← sample uniform index_msg ;;
+      iV3 ← sample uniform index_msg ;;
+      iU2 ← sample uniform index_msg ;;
+      iU3 ← sample uniform index_msg ;;
+      iR2 ← sample uniform index_msg ;;
+      iR3 ← sample uniform index_msg ;;
+      ira1 ← sample uniform index_renc ;;
+      ira2 ← sample uniform index_renc ;;
+      irb1 ← sample uniform index_renc ;;
+      irc1 ← sample uniform index_renc ;;
+      let _v2 := msg_of_idx iV2 in
+      let _v3 := msg_of_idx iV3 in
+      let u2 := msg_of_idx iU2 in
+      let u3 := msg_of_idx iU3 in
+      let r2 := msg_of_idx iR2 in
+      let r3 := msg_of_idx iR3 in
+      let ra1 := rand_of_renc (sample_to_renc ira1) in
+      let ra2 := rand_of_renc (sample_to_renc ira2) in
+      let rb1 := rand_of_renc (sample_to_renc irb1) in
+      let rc1 := rand_of_renc (sample_to_renc irc1) in
+      let pk_b := pkey_of_party Bob in
+      let pk_c := pkey_of_party Charlie in
+      let c2 := enc pk_b (0 : plain AHE) rb1 in
+      let c3 := enc pk_c (0 : plain AHE) rc1 in
+      let a1 := Emul (Epow c2 u2) (enc pk_b r2 ra1) in
+      let a2 := Emul (Epow c3 u3) (enc pk_c r3 ra2) in
+      ret ([:: chcipher_of_cipher a1
+             ; chcipher_of_cipher a2
+             ; chcipher_of_cipher c2
+             ; chcipher_of_cipher c3 ] : cipher_list)
     }
   ].
 
@@ -593,16 +665,29 @@ Definition oracle_zero : raw_package :=
     [AdvantageE (translation_charlie ∘ oracle_real) (translation_charlie ∘
     oracle_zero) predictor], where [Advantage_link] then exposes the
     IND-CPA reduction [reduction_charlie predictor].
-    Proof status: Admitted; to be discharged by Task 09 via SSProve
-    relational logic ([eq_rel_perf_ind_eq], [simplify_eq_rel],
-    [ssprove_sync_eq], [rreflexivity_rule]), mirroring
-    [IND_CPA_equiv_false] in [SSProve/examples/PRF.v] line 328.
+    Proof: Task 09.  [eq_rel_perf_ind_eq] reduces the goal to a
+    relational equality on the SSProve code; ten [ssprove_sync_eq]
+    steps synchronise the ten shared uniform samples; the round-trip
+    [cipher_of_chcipher (chcipher_of_cipher _)] and the message
+    round-trip [msg_of_chmsg (chmsg_of_msg _)] both collapse via the
+    [chcipher_of_cipherK] and [chmsg_of_msgK] cancel hypotheses;
+    [rreflexivity_rule] then closes the goal.  Mirrors the
+    [IND_CPA_equiv_false] proof at [SSProve/examples/PRF.v] line 328.
     Used by: advantage_hop_real_h1, advantage_game_real_game_leak. *)
 Lemma game_real_equiv_charlie_real :
   game_real ≈₀ translation_charlie ∘ oracle_real.
 Proof.
-  (* TODO Task 09: SSProve relational-logic equality. *)
-Admitted.
+  eapply eq_rel_perf_ind_eq.
+  simplify_eq_rel m.
+  do 10 ssprove_sync_eq=> ?.
+  rewrite chcipher_of_cipherK chmsg_of_msgK.
+  eapply rpost_weaken_rule.
+  1: eapply rreflexivity_rule.
+  cbn.
+  intros [? ?] [? ?] e.
+  inversion e.
+  intuition auto.
+Qed.
 
 (** charlie_zero_equiv_game_hybrid_one — perfect equivalence between
     the Charlie translation linked with the zero-encryption oracle and
@@ -616,14 +701,25 @@ Admitted.
     readable at the hop-1 boundary.
     Why: Task 08 uses this to close the right end of the first IND-CPA
     hop, after [game_real_equiv_charlie_real] has been used on the left.
-    Proof status: Admitted; to be discharged by Task 09 via SSProve
-    [eq_rel_perf_ind_eq].
+    Proof: Task 09.  Same shape as [game_real_equiv_charlie_real] but
+    the message-side cancel [chmsg_of_msgK] is unused: the zero oracle
+    discards its message argument, so the round-trip
+    [msg_of_chmsg (chmsg_of_msg _)] never appears on either side.
     Used by: advantage_hop_real_h1, advantage_game_real_game_leak. *)
 Lemma charlie_zero_equiv_game_hybrid_one :
   translation_charlie ∘ oracle_zero ≈₀ game_hybrid_one.
 Proof.
-  (* TODO Task 09: SSProve relational-logic equality. *)
-Admitted.
+  eapply eq_rel_perf_ind_eq.
+  simplify_eq_rel m.
+  do 10 ssprove_sync_eq=> ?.
+  rewrite chcipher_of_cipherK.
+  eapply rpost_weaken_rule.
+  1: eapply rreflexivity_rule.
+  cbn.
+  intros [? ?] [? ?] e.
+  inversion e.
+  intuition auto.
+Qed.
 
 (** game_hybrid_one_equiv_bob_real — perfect equivalence between
     [game_hybrid_one] and the Bob translation linked with the
@@ -635,14 +731,32 @@ Admitted.
     between the two game operands so both sides of the [≈₀] relation are
     readable at the hop-2 boundary.
     Why: Task 08 uses this at the left end of the second IND-CPA hop.
-    Proof status: Admitted; to be discharged by Task 09 via SSProve
-    [eq_rel_perf_ind_eq] as for the Charlie case.
+    Proof: Task 09.  Like the Charlie case, plus one [ssprove_swap_rhs
+    8%N] to align the encryption-randomness sample order: the LHS
+    samples irb1 (Bob's randomness) at position 9, irc1 at position 10;
+    [translation_bob] samples irc1 at position 9 and the oracle adds
+    Bob's randomness at position 10.  After the swap the two sides
+    agree on the ten-sample prefix and the cancels close as before.
     Used by: advantage_hop_h1_h2, advantage_game_real_game_leak. *)
 Lemma game_hybrid_one_equiv_bob_real :
   game_hybrid_one ≈₀ translation_bob ∘ oracle_real.
 Proof.
-  (* TODO Task 09: SSProve relational-logic equality. *)
-Admitted.
+  eapply eq_rel_perf_ind_eq.
+  simplify_eq_rel m.
+  (* Sample-order mismatch on the encryption randomness: game_hybrid_one
+     samples irb1 (position 9) before irc1 (position 10), but
+     translation_bob samples irc1 (position 9) before invoking the oracle
+     (which adds Bob's randomness at position 10).  Swap them on the RHS. *)
+  ssprove_swap_rhs 8%N.
+  do 10 ssprove_sync_eq=> ?.
+  rewrite chcipher_of_cipherK chmsg_of_msgK.
+  eapply rpost_weaken_rule.
+  1: eapply rreflexivity_rule.
+  cbn.
+  intros [? ?] [? ?] e.
+  inversion e.
+  intuition auto.
+Qed.
 
 (** bob_zero_equiv_game_hybrid_two — perfect equivalence between the
     Bob translation linked with the zero-encryption oracle and
@@ -653,24 +767,37 @@ Admitted.
     between the two game operands so both sides of the [≈₀] relation are
     readable at the hop-2 boundary.
     Why: Task 08 uses this at the right end of the second IND-CPA hop.
-    Proof status: Admitted; to be discharged by Task 09 via SSProve
-    [eq_rel_perf_ind_eq].
+    Proof: Task 09.  Mirror of [game_hybrid_one_equiv_bob_real] with
+    the sample-order swap on the LHS instead of the RHS (the oracle
+    sits on the LHS this time).  The message-side cancel
+    [chmsg_of_msgK] is unused (zero oracle), so only
+    [chcipher_of_cipherK] is rewritten before [rreflexivity_rule].
     Used by: advantage_hop_h1_h2, advantage_game_real_game_leak. *)
 Lemma bob_zero_equiv_game_hybrid_two :
   translation_bob ∘ oracle_zero ≈₀ game_hybrid_two.
 Proof.
-  (* TODO Task 09: SSProve relational-logic equality. *)
-Admitted.
+  eapply eq_rel_perf_ind_eq.
+  simplify_eq_rel m.
+  (* Sample-order mismatch on the encryption randomness, symmetric to
+     [game_hybrid_one_equiv_bob_real]: swap LHS positions 9 and 10 to
+     align with [game_hybrid_two]'s irb1-before-irc1 order. *)
+  ssprove_swap_lhs 8%N.
+  do 10 ssprove_sync_eq=> ?.
+  rewrite chcipher_of_cipherK.
+  eapply rpost_weaken_rule.
+  1: eapply rreflexivity_rule.
+  cbn.
+  intros [? ?] [? ?] e.
+  inversion e.
+  intuition auto.
+Qed.
 
 (** game_hybrid_two_perfect_game_leak — perfect equivalence between
-    [game_hybrid_two] and [game_leak].  Once both ciphertext slots are
-    zero-encryptions of the constant [0%R], the four-cipher accumulator
-    carries no information about the protocol secrets (V_2, U_2, U_3,
-    R_2, R_3); the residual is a function of fresh encryption randomness
-    only.  Task 09 closes the equivalence formally by showing the joint
-    distribution over the accumulator marginalises to a constant-list
-    distribution agreeing with [game_leak]'s empty list under the
-    observable projection used by the predictor.
+    [game_hybrid_two] and [game_leak].  [game_leak] has the same body
+    as [game_hybrid_two] (both ciphertext slots are zero-encryptions of
+    the constant [0 : plain AHE]); the distinct name marks the
+    triangle endpoint where the IT residual analysis takes over
+    (Task 13).
     Kind: helper.
     Naming: SSProve game-equivalence convention; `perfect` placed
     medially between the two game operands marking the residual
@@ -678,17 +805,27 @@ Admitted.
     Why: Task 08 uses this at the right end of the triangle to collapse
     the residual hop [AdvantageE game_hybrid_two game_leak predictor] to
     zero, so the [2 * epsilon_cpa] bound closes.
-    Proof status: Admitted; to be discharged by Task 09 via SSProve
-    relational logic ([eq_rel_perf_ind_eq], [ssprove_swap_seq_rhs],
-    [ssprove_code_simpl], [prove_perfect]) plus
-    residual-distribution collapse.
+    Proof: Task 09.  Reflexivity on the relational specification after
+    ten [ssprove_sync_eq] steps; no swap or cancel rewrite is needed
+    because the two game bodies are syntactically identical.
     Used by: advantage_game_real_game_leak. *)
 Lemma game_hybrid_two_perfect_game_leak :
   game_hybrid_two ≈₀ game_leak.
 Proof.
-  (* TODO Task 09: SSProve relational-logic equality
-     plus residual-distribution collapse. *)
-Admitted.
+  (* [game_leak] is defined to have the same body as [game_hybrid_two]
+     (both ciphertext slots encrypt the constant [0 : plain AHE]), so
+     the perfect equivalence reduces to a reflexivity on the relational
+     specification after stepping past the ten shared samples. *)
+  eapply eq_rel_perf_ind_eq.
+  simplify_eq_rel m.
+  do 10 ssprove_sync_eq=> ?.
+  eapply rpost_weaken_rule.
+  1: eapply rreflexivity_rule.
+  cbn.
+  intros [? ?] [? ?] e.
+  inversion e.
+  intuition auto.
+Qed.
 
 (** advantage_hop_real_h1 — IND-CPA bound on the first hop
     [AdvantageE game_real game_hybrid_one predictor].  Uses
