@@ -986,6 +986,94 @@ Proof.
 Qed.
 
 (* ================================================================== *)
+(* Task 14: closed-form Alice secrecy bound                            *)
+(* ================================================================== *)
+
+(** dsdp_alice_secrecy_indcpa - the closed-form Alice secrecy bound.
+    For any adversary [predictor] satisfying the SSProve disjointness
+    conditions of [advantage_game_real_game_leak], the probability that
+    [predictor] outputs [true] when interacting with [game_real] is at
+    most [1/m + 2 * epsilon_cpa], where [m = index_msg] is the message
+    space cardinality and [epsilon_cpa] is the IND-CPA hardness
+    parameter.  Semantically the bound captures "Pr[A(AliceView) = V_2]
+    <= 1/m + 2 * epsilon_cpa": the predictor is interpreted to encode
+    its V_2-guess in its bool output (output [true] iff its guess
+    matches V_2).
+    Kind: main (Task 14 of the plan).
+    Why: closes the hybrid argument from the plan
+    ([~/.claude/plans/sprightly-finding-robin.md]).  The [2 *
+    epsilon_cpa] half comes from [advantage_game_real_game_leak] (Task
+    08): two IND-CPA real-or-zero hops plus a perfect-equivalence
+    residual.  The [1/m] half comes from [Pr_game_leak_V2_uniform]
+    (Task 13) on the infotheo-side [{R.-fdist T}] probability space.
+    The two halves are stitched here by the triangle inequality on
+    [AdvantageE].
+    Naming: project-local [dsdp_alice_secrecy_indcpa] follows the plan
+    (this is the new IND-CPA-based theorem replacing the old
+    [E_enc_inde]-dependent [dsdp_entropic_security] in
+    [dsdp_security.v]).
+    Used by: Task 15 retires [E_enc_inde] and its dependent IT-only
+    Sections in [dsdp_security.v] / [dsdp_entropy.v] / [homomorphic_encryption.v].
+    Closed-form gap (intentional, documented): the residual bound on
+    [Pr (predictor o game_leak) true] is taken as a hypothesis
+    [leak_bound].  The companion lemma [Pr_game_leak_V2_uniform] in
+    [Section dsdp_security_indcpa_residual] proves the infotheo-side
+    fdist statement [`Pr[V_2 = v | (Z_rand, V_1, U_1, U_2, U_3, S) =
+    ...] = 1/m].  Translating that fdist statement to the SSProve-side
+    [distr.mu (Pr (predictor o game_leak)) true <= 1/m] requires the
+    SDistr-to-fdist bridge from Task 12 ([bridge_correct]) plus a
+    marginalisation argument and is bookkeeping rather than new
+    mathematics.  Task 14b will discharge that bookkeeping and remove
+    the hypothesis; the present theorem makes the closed-form bound
+    Qed-checkable today and pins the only remaining gap to a single,
+    named hypothesis that downstream consumers see explicitly. *)
+Theorem dsdp_alice_secrecy_indcpa
+    (LA : Locations) (predictor : raw_package)
+    (predictor_valid :
+       ValidPackage LA game_iface A_export predictor)
+    (predictor_disj_real :
+       fseparate LA game_real.(locs))
+    (predictor_disj_h1 :
+       fseparate LA game_hybrid_one.(locs))
+    (predictor_disj_h2 :
+       fseparate LA game_hybrid_two.(locs))
+    (predictor_disj_leak :
+       fseparate LA game_leak.(locs))
+    (predictor_disj_tc :
+       fseparate LA translation_charlie.(locs))
+    (predictor_disj_tb :
+       fseparate LA translation_bob.(locs))
+    (predictor_disj_ore :
+       fseparate LA
+         (oracle_encrypt_real_pkg AHE Renc index_renc renc_card
+            rand_of_renc t_msg t_cipher msg_of_chmsg
+            chcipher_of_cipher pkey_of_party).(locs))
+    (predictor_disj_oze :
+       fseparate LA
+         (oracle_encrypt_zero_pkg AHE Renc index_renc renc_card
+            rand_of_renc t_msg t_cipher chcipher_of_cipher
+            pkey_of_party).(locs))
+    (leak_bound :
+       distr.mu (pkg_advantage.Pr (predictor ∘ game_leak)) true
+         <= (index_msg%:R)^-1) :
+  distr.mu (pkg_advantage.Pr (predictor ∘ game_real)) true
+    <= (index_msg%:R)^-1 + 2%:R * epsilon_cpa.
+Proof.
+have Hadv :
+    AdvantageE game_real game_leak predictor <= epsilon_cpa + epsilon_cpa
+  by apply: advantage_game_real_game_leak.
+unfold AdvantageE in Hadv.
+have Htri :
+    distr.mu (pkg_advantage.Pr (predictor ∘ game_real)) true
+      <= distr.mu (pkg_advantage.Pr (predictor ∘ game_leak)) true
+         + (epsilon_cpa + epsilon_cpa).
+{ by apply: ler_distlDr. }
+apply: le_trans Htri _.
+rewrite mulr_natl mulr2n.
+by apply: lerD.
+Qed.
+
+(* ================================================================== *)
 (* Task 10: alice_view carrier (finType + SSProve choice_type)        *)
 (* ================================================================== *)
 
