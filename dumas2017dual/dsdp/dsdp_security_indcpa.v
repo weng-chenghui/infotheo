@@ -984,4 +984,190 @@ Proof.
   - exact: advantage_hop_h1_h2.
 Qed.
 
+(* ================================================================== *)
+(* Task 10: alice_view carrier (finType + SSProve choice_type)        *)
+(* ================================================================== *)
+
+(** Dk_a_carrier - section parameter for Alice's private-key carrier as
+    a [finType].  The AHE record (homomorphic_encryption/he_types.v:45)
+    declares [priv_key AHE : Type] without a finType structure, but the
+    Alice secrecy analysis needs the joint Alice-view to be a finType so
+    that infotheo's [{fdist alice_view}] machinery applies (Tasks 12-13).
+    Concrete instantiations against Benaloh/Paillier supply a concrete
+    finType for the private-key space at this section parameter; the
+    semi-honest secrecy proof is parametric in the choice.
+    Kind: parameter.
+    Why: the IND-CPA hops do not depend on the structure of [priv_key
+    AHE], only on its enumeration; refining to a finType here is the
+    minimal commitment that suffices for the entropy step.
+    Used by: alice_view, alice_view_RV (Task 13). *)
+Variable Dk_a_carrier : finType.
+
+(** index_Dk_a, Dk_a_card - cardinality index for [Dk_a_carrier] and the
+    bridge hypothesis tying [#|Dk_a_carrier|] to it.  Same pattern as
+    [Renc] / [index_renc] / [renc_card] at the top of this section.
+    Kind: parameter + hypothesis.
+    Why: SSProve uniform samples take a [nat] cardinality.  The IND-CPA
+    games (Task 06) sample protocol scalars over [index_msg]; the entropy
+    residual (Task 13) will likewise need to enumerate [alice_view] by
+    its total cardinality, which decomposes through [Dk_a_card].
+    Used by: index_alice_view, alice_view_ct, the residual entropy
+    arguments in Task 13. *)
+Variable index_Dk_a : nat.
+Hypothesis Dk_a_card : #|Dk_a_carrier| = index_Dk_a.
+
+(** alice_view - the corrupted-Alice view's codomain: a nine-tuple
+    finType bundling Alice's private key, the input scalars known to
+    Alice (S, V_1, U_1), the masking scalars Alice draws (U_2, U_3,
+    R_2, R_3), and the plaintext D_3 (the contribution Alice sees as a
+    cleartext value after decryption with [Dk_a]).
+    Kind: canonical.
+    Why: Task 10 of the plan (~/.claude/plans/sprightly-finding-robin.md).
+    This is strictly smaller than the trace-level [alice_view_valuesT]
+    in dsdp_security.v:143-145, because the IND-CPA swaps (Tasks 06-09)
+    have already eliminated the three ciphertext components from the
+    distinguisher-visible view.  MathComp's HB machinery automatically
+    inherits both [finType] and [choiceType] structures on the iterated
+    [%type] product since [Dk_a_carrier : finType] and [plain AHE :
+    finComNzRingType] (which extends [finType] and [choiceType]).  The
+    finType structure is consumed by infotheo's [{fdist alice_view}] in
+    Task 12-13; the choiceType structure is consumed by SSProve via the
+    bridge [alice_view_ct] below.
+    Used by: alice_view_RV (Task 13), bridge_leak_to_fdist (Task 12). *)
+Definition alice_view : finType :=
+  (Dk_a_carrier * plain AHE * plain AHE * plain AHE * plain AHE *
+   plain AHE * plain AHE * plain AHE * plain AHE)%type.
+
+(** alice_view_choice_finType - the named HB instance label tying
+    [alice_view] simultaneously to MathComp's [finType] and
+    [choiceType] structures.  No additional plumbing is required: the
+    iterated product type-class search finds both instances
+    automatically because each component is itself a finType (which
+    extends choiceType).  This [Definition] documents the canonical
+    structure agreement so downstream tasks can refer to it by name.
+    Kind: canonical (HB instance label, no new content).
+    Why: the plan names this instance explicitly (Task 10 in
+    ~/.claude/plans/sprightly-finding-robin.md, line 154) so audits can
+    grep for the joint declaration.  The two [Check] judgments below
+    discharge the verify clause of Task 10.
+    Naming: <type>_<class1>_<class2> is the MathComp convention for
+    composite HB instance labels.
+    Used by: documentation only; the instances are picked up by
+    canonical-structure resolution at the use sites. *)
+Definition alice_view_choice_finType : Type := alice_view.
+
+(* Task 10 verify clause: both finType and choiceType inhabit alice_view. *)
+Check (alice_view : finType).
+Check (alice_view : choiceType).
+
+(** index_alice_view - the cardinality of [alice_view] as a [nat].
+    Computed once so that the SSProve-side [chFin] embedding below can
+    refer to it by name.
+    Kind: canonical.
+    Why: SSProve's [choice_type] GADT (Crypt/choice_type.v:48) uses
+    [chFin (n : nat)] for finite carriers, with [chInterp (chFin n) =
+    'I_n].  Naming the cardinality lets us state the cardinality lemma
+    [alice_view_ct_card] cleanly.
+    Used by: alice_view_ct, the bridge in Task 12. *)
+Definition index_alice_view : nat := #|alice_view|.
+
+(** alice_view_ct - the SSProve-side [choice_type] avatar of
+    [alice_view], lifted as a single [chFin] of the total cardinality.
+    This is the carrier that the Task 12 bridge [bridge_leak_to_fdist :
+    SDistr alice_view -> {fdist alice_view}] will round-trip through to
+    transfer SSProve probabilities (which live over [chInterp
+    alice_view_ct = 'I_index_alice_view]) onto infotheo's
+    [{fdist alice_view}].
+    Kind: canonical.
+    Why: SSProve's [choice_type] is a closed inductive (eleven
+    constructors at the time of writing) and does not directly cover
+    finType products.  Routing through [chFin (#|alice_view|)] is the
+    standard idiom for SSProve-finType interop (see indcpa_ror.v and
+    pkg_distr.v for similar uses).  The [alice_view_to_ct] /
+    [alice_view_of_ct] bijection below mediates between the two views.
+    Naming: <type>_ct uses the SSProve-side suffix _ct (choice_type) so
+    the split between the MathComp finType and the GADT carrier is
+    visible at the use site.
+    Used by: bridge_leak_to_fdist (Task 12). *)
+Definition alice_view_ct : choice_type := chFin index_alice_view.
+
+(** alice_view_to_ct, alice_view_of_ct - bijection between the MathComp
+    finType [alice_view] and the SSProve-side [alice_view_ct = chFin
+    index_alice_view = 'I_index_alice_view], realised via MathComp's
+    [enum_rank] and [enum_val] on the canonical enumeration of
+    [alice_view].
+    Kind: helper.
+    Why: the bridge [bridge_leak_to_fdist] in Task 12 builds an
+    [{fdist alice_view}] by walking the SSProve [Pr_code] over
+    [alice_view_ct] and re-indexing each probability against the
+    corresponding MathComp finType element.  These two functions are
+    the re-indexing primitive; the [_K] cancel lemmas below guarantee
+    the round-trip is the identity.
+    Used by: bridge_leak_to_fdist (Task 12), the support-enumeration
+    obligation [bridge_support_enum]. *)
+Definition alice_view_to_ct (v : alice_view) : alice_view_ct :=
+  enum_rank v.
+
+(** alice_view_of_ct — companion to [alice_view_to_ct]: send an
+    SSProve-side index [i : alice_view_ct] back to its [alice_view]
+    inhabitant via [enum_val].
+    Kind: helper.
+    Why: Task 12's [bridge_leak_to_fdist] sums an SSProve [SDistr] over
+    [alice_view_ct] and re-indexes through this function to land on the
+    infotheo-side [{fdist alice_view}].
+    Used by: bridge_leak_to_fdist (Task 12), [alice_view_to_ct_K],
+    [alice_view_of_ct_K]. *)
+Definition alice_view_of_ct (i : alice_view_ct) : alice_view :=
+  enum_val i.
+
+(** alice_view_to_ct_K - cancel law: [alice_view_of_ct] is a left
+    inverse of [alice_view_to_ct].  Follows from MathComp's
+    [enum_rankK].
+    Kind: cancellation.
+    Why: Task 12's [bridge_correct] needs to argue that summing an
+    SSProve density over [alice_view_ct] and re-indexing back through
+    [alice_view_of_ct] recovers the original [alice_view] support; the
+    cancel pair is the algebraic content of that argument.
+    Used by: bridge_correct (Task 12). *)
+Lemma alice_view_to_ct_K : cancel alice_view_to_ct alice_view_of_ct.
+Proof. exact: enum_rankK. Qed.
+
+(** alice_view_of_ct_K - companion cancel: [alice_view_to_ct] is a left
+    inverse of [alice_view_of_ct].  Follows from MathComp's
+    [enum_valK].
+    Kind: cancellation.
+    Why: same role as [alice_view_to_ct_K] but for the inverse
+    direction; together they make the pair a bijection (used by Task 12
+    to justify the [psum]/[bigop] re-indexing). *)
+Lemma alice_view_of_ct_K : cancel alice_view_of_ct alice_view_to_ct.
+Proof. exact: enum_valK. Qed.
+
+(** alice_view_ct_card, alice_view_card_index - cardinality coherence:
+    [alice_view_ct] interprets as ['I_index_alice_view] which has
+    cardinality [index_alice_view], and [alice_view] itself has the
+    same cardinality by definition of [index_alice_view].
+    Kind: coherence.
+    Why: Task 12's [bridge_total_mass] relates [psum] over [chInterp
+    alice_view_ct] (which the SSProve semantics produces) to
+    [\sum_(v : alice_view) ...] (the infotheo target); these two facts
+    let us swap the indexing finType under the [bigop] / [psum] without
+    changing the value.
+    Used by: bridge_total_mass (Task 12). *)
+Lemma alice_view_ct_card : #|alice_view_ct| = index_alice_view.
+Proof. exact: card_ord. Qed.
+
+(** alice_view_card_index — cardinality of the infotheo-side [alice_view]
+    equals [index_alice_view] by definition (the latter is bound as
+    [#|alice_view|]).  Trivial by reflexivity.
+    Kind: coherence.
+    Why: Task 12's [bridge_total_mass] re-indexes a [psum] over the
+    SSProve-side [alice_view_ct] back to a [\sum_(v : alice_view)]; this
+    lemma is the cardinality side of that re-indexing.
+    Used by: bridge_total_mass (Task 12).
+    Naming: _card_index records "cardinality equals the named index
+    parameter"; project-local convention, not a MathComp suffix-table
+    entry. *)
+Lemma alice_view_card_index : #|alice_view| = index_alice_view.
+Proof. by []. Qed.
+
 End dsdp_security_indcpa.
