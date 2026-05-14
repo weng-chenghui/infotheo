@@ -42,6 +42,7 @@ Require Import dsdp_security_indcpa.
 Require Import smc.ssprove_ext_lossless.
 Require Import idealized_ahe.
 From infotheo.homomorphic_encryption.benaloh1994 Require Import benaloh_ahe.
+From infotheo.homomorphic_encryption.paillier1999 Require Import paillier_ahe.
 
 Set Implicit Arguments.
 Unset Strict Implicit.
@@ -875,3 +876,174 @@ Definition secrecy_random_guess :=
 End benaloh.
 
 End Benaloh.
+
+(* ================================================================== *)
+(* Task P: Paillier 1999 AHE specialisation                            *)
+(* ================================================================== *)
+
+(** Module Paillier - specialises [Concrete.secrecy_random_guess] at
+    the Paillier 1999 AHE instance [PaillierHETypes n] parametric in
+    any [n : nat] with [1 < n].  The carriers are:
+    - [plain ahe = 'Z_n] (canonical [finType])
+    - [rand ahe = {unit 'Z_(n*n)}] (canonical [finType] via [FinRing])
+    - [cipher ahe = 'Z_(n*n)] (canonical [finType])
+    - [pub_key ahe = PaillierPubKey n] (a [Record], NOT a [finType])
+    Inhabitance for [pub_key ahe] is built directly via
+    [@MkPaillierPubKey n 1 pub_gen_order1] where [pub_gen_order1]
+    proves [(1 : 'Z_(n*n)) ^+ n = 1] by [expr1n].  The Task N refactor
+    of [Module Concrete] (taking [pub_key_inhab] directly at
+    [pub_key AHE] rather than at a separate [Finite.type] bridge)
+    makes this work without declaring an HB [Finite] instance on the
+    [PaillierPubKey] record.
+
+    The resulting [Paillier.secrecy_random_guess] is an unconditional
+    corollary of [Concrete.secrecy_random_guess] at Paillier.  Its
+    [Print Assumptions] closure equals that of
+    [Idealized.secrecy_random_guess] and [Benaloh.secrecy_random_guess]:
+    only the cryptographic axioms ([epsilon_cpa],
+    [enc_ind_cpa_real_or_zero]) plus the SSProve / classical foundation
+    axioms.  This wires the Paillier AHE into the secrecy theorem
+    structurally; discharging [enc_ind_cpa_real_or_zero] from the DCR
+    assumption (the cryptographic security of Paillier) is a separate
+    project out of scope here.
+    Plan: Task P of ~/.claude/plans/sprightly-finding-robin.md. *)
+Module Paillier.
+
+Section paillier.
+
+(** n - the Paillier modulus.  [n] is the RSA-style composite (a
+    product of two primes in the standard Paillier instantiation).
+    The single positivity hypothesis [n_gt1] ensures the underlying
+    ['Z_n] and ['Z_(n*n)] are non-trivial.
+    Kind: parameter.
+    Why: [PaillierHETypes n] depends on [n].
+    Used by: ahe, rand_fin, cipher_fin. *)
+Variable n : nat.
+Hypothesis n_gt1 : (1 < n)%N.
+
+(** ahe - the concrete Paillier AHE scheme at parameter [n].  Built
+    via [@AHEnc.Pack] over [PaillierHETypes n] using the
+    [Paillier_isEncDec] and [Paillier_isAHEnc] mixin instances declared
+    in [homomorphic_encryption/paillier1999/paillier_ahe.v].
+    [Paillier_isEncDec] takes only [n] (no positivity hypotheses);
+    [Paillier_isAHEnc] takes [n] plus [n_gt1].
+    Kind: concrete carrier.
+    Why: Task P of the plan needs a concrete [AHEncType] to specialise
+    [Concrete.secrecy_random_guess].
+    Used by: secrecy_random_guess. *)
+Definition ahe : AHEncType :=
+  @AHEnc.Pack (PaillierHETypes n)
+    (@AHEnc.Class (PaillierHETypes n)
+       (@Paillier_isEncDec n)
+       (@Paillier_isAHEnc n n_gt1)).
+
+(** rand_fin - finType carrier for [rand ahe = {unit 'Z_(n*n)}].
+    Already a [finType] via MathComp's [FinRing] unit-group machinery,
+    so the [Finite.type] ascription suffices.
+    Kind: concrete carrier.
+    Why: discharges the [rand_finType] section variable of
+    [Module Concrete].
+    Used by: secrecy_random_guess. *)
+Definition rand_fin : Finite.type := {unit 'Z_(n * n)} : Finite.type.
+
+(** rand_fin_E - [Finite.sort rand_fin = rand ahe].  Both sides reduce
+    to [{unit 'Z_(n*n)}] by [PaillierHETypes]'s definition, so [erefl]
+    closes it.
+    Kind: coherence.
+    Why: discharges the [rand_finType_eq] hypothesis of
+    [Module Concrete].
+    Used by: secrecy_random_guess. *)
+Lemma rand_fin_E : Finite.sort rand_fin = rand ahe.
+Proof. by []. Qed.
+
+(** cipher_fin - finType carrier for [cipher ahe = 'Z_(n*n)].  Already
+    a [finType] via MathComp's ['Z_(n*n)] canonical structure.
+    Kind: concrete carrier.
+    Why: discharges the [cipher_finType] section variable of
+    [Module Concrete].
+    Used by: secrecy_random_guess. *)
+Definition cipher_fin : Finite.type := 'Z_(n * n) : Finite.type.
+
+(** cipher_fin_E - [Finite.sort cipher_fin = cipher ahe].  Closes by
+    [erefl] for the same reason as [rand_fin_E].  The [Let n2 := (n*n)]
+    binding inside [Section paillier_instance] in [paillier_ahe.v] does
+    NOT seal [n2] across module boundaries: outside the section, [n2]
+    expands to [(n*n)%N], which matches the right-hand side here.
+    Kind: coherence.
+    Why: discharges the [cipher_finType_eq] hypothesis of
+    [Module Concrete].
+    Used by: secrecy_random_guess. *)
+Lemma cipher_fin_E : Finite.sort cipher_fin = cipher ahe.
+Proof. by []. Qed.
+
+(** msg_inhab - plaintext inhabitance witness, picked as [0 : 'Z_n].
+    Kind: inhabitance witness.
+    Why: discharges the [msg_inhabited] section variable of
+    [Module Concrete] (which survives section pruning via the
+    [index_t_msg_gt0] positivity lemma used by the [LosslessCode]
+    discharge in [Concrete.secrecy_random_guess]).
+    Used by: secrecy_random_guess. *)
+Definition msg_inhab : plain ahe := 0%R.
+
+(** renc_inhab - encryption-randomness inhabitance witness, picked as
+    [1%g : {unit 'Z_(n*n)}] (the identity unit).  Declared for
+    completeness even though the [renc_inhabited] section variable of
+    [Module Concrete] is pruned at section close (not transitively
+    used in [secrecy_random_guess]'s type).
+    Kind: inhabitance witness.
+    Why: matches the API surface; not transitively required.
+    Used by: documentation. *)
+Definition renc_inhab : rand_fin := 1%g.
+
+(** pub_gen_order1 - the [pub_gen_order] proof obligation of
+    [PaillierPubKey] at the choice [pub_gen := 1 : 'Z_(n*n)] (the
+    multiplicative one of the ring ['Z_(n*n)]).  Proof: [1 ^+ n = 1]
+    by [expr1n].  Note that unlike Benaloh (which uses [{unit 'Z_n}]
+    for [pub_gen]), Paillier's [pub_gen] is plain ['Z_(n*n)] so no
+    [FinRing.val_unit1] step is needed.
+    Kind: proof obligation.
+    Why: needed to construct [pub_key_inhab] via [MkPaillierPubKey].
+    Used by: pub_key_inhab. *)
+Lemma pub_gen_order1 : (1 : 'Z_(n * n)) ^+ n = 1.
+Proof. exact: expr1n. Qed.
+
+(** pub_key_inhab - public-key inhabitance witness at [pub_key ahe =
+    PaillierPubKey n].  Built directly via [@MkPaillierPubKey n 1
+    pub_gen_order1] (taking [n] explicitly since [Set Implicit
+    Arguments] makes it implicit on [MkPaillierPubKey]).
+    Kind: inhabitance witness.
+    Why: discharges the [pub_key_inhab] section variable of
+    [Module Concrete] introduced by the Task N refactor.
+    Used by: secrecy_random_guess. *)
+Definition pub_key_inhab : pub_key ahe :=
+  @MkPaillierPubKey n 1 pub_gen_order1.
+
+(** secrecy_random_guess - the closed-form Alice-secrecy bound at the
+    Paillier AHE [ahe] and the trivial random-guess adversary.
+    Specialises [Concrete.secrecy_random_guess] by plugging in [ahe]
+    (named-implicit), the two [erefl] finType bridges ([rand_fin_E],
+    [cipher_fin_E]), the [0 : 'Z_n] plaintext inhabitance witness
+    ([msg_inhab]), and the [pub_key_inhab] direct witness at
+    [pub_key ahe = PaillierPubKey n].  No theorem-level arguments.
+    Kind: main corollary.
+    Why: this is the Task P output of the plan.  Wires Paillier AHE
+    into the secrecy theorem structurally.  The [Print Assumptions]
+    closure equals that of [Idealized.secrecy_random_guess] and
+    [Benaloh.secrecy_random_guess]: only the cryptographic axioms
+    ([epsilon_cpa], [enc_ind_cpa_real_or_zero]) plus the SSProve /
+    classical foundation axioms.  Discharging the IND-CPA axiom from
+    the DCR assumption (the cryptographic security of Paillier) is a
+    separate project out of scope here.
+    Used by: end users; this completes the discharge cascade plan
+    ~/.claude/plans/sprightly-finding-robin.md. *)
+Definition secrecy_random_guess :=
+  Concrete.secrecy_random_guess
+    (AHE:=ahe)
+    (rand_finType:=rand_fin)
+    (cipher_finType:=cipher_fin)
+    rand_fin_E cipher_fin_E
+    msg_inhab pub_key_inhab.
+
+End paillier.
+
+End Paillier.
