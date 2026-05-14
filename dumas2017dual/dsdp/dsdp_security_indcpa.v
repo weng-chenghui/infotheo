@@ -1646,6 +1646,167 @@ Qed.
 Check dsdp_alice_secrecy.
 
 (* ================================================================== *)
+(* Task U2: entropy form of the Alice-secrecy bound                   *)
+(*   H_unp^C(V_2 | AliceView) >= log m - log(1 + 2 * m * epsilon_cpa) *)
+(* ================================================================== *)
+
+(** Pr_guess_real_ge_invm — strict positivity lower bound on
+    [Pr_guess_real]: the indicator wrapper returns [true] with
+    probability at least [1/index_t_msg] for any predictor.
+    Kind: section hypothesis.
+    Why: needed for [entropy_ge_bound] to handle the [Pr = 0]
+    degenerate case.  In mathcomp-analysis [log 0 = 0] (not [+oo]),
+    so without this hypothesis the entropy lower bound fails when
+    [bound > 0].  Discharged at concrete instantiation by symmetry:
+    [V_2] is uniform on [t_msg] and the predictor's guess is
+    independent of [V_2] in expectation, so [Pr[guess = V_2] >= 1/m].
+    Mirrors the [Pr_guess_leak_le_invm] hypothesis pattern from T4.
+    Used by: [entropy_ge_bound]. *)
+Hypothesis Pr_guess_real_ge_invm :
+  forall (predictor : predictor_guesser),
+    (index_t_msg%:R)^-1
+      <= distr.mu (pkg_advantage.Pr
+                     (guess_indicator_pkg predictor game_real)) true.
+
+(** epsilon_cpa_ge0 — nonnegativity of the IND-CPA error parameter.
+    [indcpa_ror.epsilon_cpa : R] is declared as a bare [Parameter]
+    without positivity; the IND-CPA axiom bounds an [AdvantageE]
+    by it but does not imply [epsilon_cpa >= 0].
+    Kind: section hypothesis.
+    Why: required by [log_id] (the [1 + 2 * m * eps > 0] step).
+    Used by: [log_id], [entropy_ge_bound]. *)
+Hypothesis epsilon_cpa_ge0 : (0 <= epsilon_cpa)%R.
+
+(** log_id — algebraic identity connecting the probability and
+    entropy forms of the secrecy bound:
+      [-log (1/m + 2 * eps) = log m - log (1 + 2 * m * eps)]
+    for [0 < m] and [0 <= eps].
+    Kind: helper.
+    Why: bridges [dsdp_alice_secrecy]'s probability bound
+    [Pr <= 1/m + 2 * eps_cpa] to the entropy form
+    [-log Pr >= log m - log (1 + 2 * m * eps_cpa)] used in the
+    TeX writeup (line ~312).
+    Proof outline: rewrite [1/m + 2 * eps = (1 + 2 * m * eps) / m]
+    by basic algebra, then apply [LogDiv] from
+    [lib/realType_ln.v:104]:
+    [Log n (x / y) = Log n x - Log n y].
+    Used by: [entropy_ge_bound]. *)
+Lemma log_id (m : nat) (eps : R) :
+  (0 < m)%N -> (0 <= eps)%R ->
+  (- log (m%:R^-1 + 2%:R * eps) = log m%:R - log (1 + 2%:R * m%:R * eps))%R.
+Proof.
+move=> Hm Heps.
+have Hm_pos : (0 < m%:R :> R)%R by rewrite ltr0n.
+have Hmeps_pos : (0 < 1 + 2%:R * m%:R * eps :> R)%R.
+{ apply: ltr_pwDl; first exact: ltr01. by rewrite !mulr_ge0 // ?ler0n. }
+have Heq :
+    (m%:R^-1 + 2%:R * eps = (1 + 2%:R * m%:R * eps) / m%:R :> R)%R.
+{ rewrite [RHS]mulrDl mul1r.
+  congr (_ + _).
+  by rewrite [_ * eps / _]mulrAC mulfK // gt_eqF. }
+by rewrite Heq logDiv // opprB.
+Qed.
+
+(** entropy — the conditional unpredictability entropy
+    [H_unp^C(V_2 | AliceView)] for a fixed predictor at
+    [game_real].  Defined as the negative log of the predictor's
+    success probability:
+    [-log (Pr[guess = V_2 in game_real])].
+    Kind: definition.
+    Why: gives the LHS of the [entropy_ge_bound] inequality,
+    matching the TeX writeup's [H_unp^C].
+    Used by: [entropy_ge_bound]. *)
+Definition entropy (predictor : predictor_guesser) : R :=
+  (- log (distr.mu
+            (pkg_advantage.Pr
+               (guess_indicator_pkg predictor game_real)) true))%R.
+
+(** bound — the entropy lower bound
+    [log m - log (1 + 2 * m * epsilon_cpa)] from the TeX writeup.
+    Kind: definition.
+    Why: the target lower bound for [entropy_ge_bound].  At the
+    IND-CPA-secure regime [epsilon_cpa -> 0] the bound approaches
+    [log m], i.e. the information-theoretic maximum.
+    Used by: [entropy_ge_bound]. *)
+Definition bound : R :=
+  (log index_t_msg%:R - log (1 + 2%:R * index_t_msg%:R * epsilon_cpa))%R.
+
+(** entropy_ge_bound — the headline entropy lower bound:
+      [H_unp^C(V_2 | AliceView)
+         >= log m - log (1 + 2 * m * epsilon_cpa)]
+    for any V_2-aware adversary [predictor : predictor_guesser]
+    satisfying [dsdp_alice_secrecy]'s structural conditions.
+    Kind: main.
+    Why: matches TeX writeup
+    [dumas2017dual/notes/20260506-dsdp-secrecy-closed-form/].
+    line ~312:
+    [H_unp^C(V_2 | AliceView) >= log m - log (1 + 2 * m * eps_cpa)].
+    Consumed by U3's concrete entropy corollaries.
+    Proof outline:
+      1. [dsdp_alice_secrecy] (via [Pr_guess_le]): the probability
+         [Pr_real <= 1/m + 2 * eps_cpa].
+      2. [Pr_guess_real_ge_invm]: [Pr_real >= 1/m > 0].
+      3. [log_id]: [-log (1/m + 2 * eps_cpa) = log m -
+         log (1 + 2 * m * eps_cpa) = bound].
+      4. Monotonicity of [log] on [Num.pos] (via [ler_log]) and
+         [lerN2]: [-log Pr_real >= -log (1/m + 2 * eps_cpa) = bound].
+    Used by: U3 [entropy_random_guess] corollaries in
+    [dsdp_security_indcpa_concrete.v]. *)
+Theorem entropy_ge_bound
+    (LA : Locations) (predictor : predictor_guesser)
+    (chain_valid :
+       ValidPackage LA game_iface A_export
+         (boolean_shell ∘ predictor))
+    (chain_disj_real :
+       fseparate LA game_real.(locs))
+    (chain_disj_h1 :
+       fseparate LA game_hybrid_one.(locs))
+    (chain_disj_h2 :
+       fseparate LA game_hybrid_two.(locs))
+    (chain_disj_leak :
+       fseparate LA game_leak.(locs))
+    (chain_disj_tc :
+       fseparate LA translation_charlie.(locs))
+    (chain_disj_tb :
+       fseparate LA translation_bob.(locs))
+    (chain_disj_ore :
+       fseparate LA
+         (oracle_encrypt_real_pkg AHE Renc index_renc renc_card
+            rand_of_renc t_msg t_cipher msg_of_chmsg
+            chcipher_of_cipher pkey_of_party).(locs))
+    (chain_disj_oze :
+       fseparate LA
+         (oracle_encrypt_zero_pkg AHE Renc index_renc renc_card
+            rand_of_renc t_msg t_cipher chcipher_of_cipher
+            pkey_of_party).(locs)) :
+  (bound <= entropy predictor)%R.
+Proof.
+unfold entropy, bound.
+set Pr_real := distr.mu (pkg_advantage.Pr
+                          (guess_indicator_pkg predictor game_real)) true.
+have Hpr_le : (Pr_real <= (index_t_msg%:R)^-1 + 2%:R * epsilon_cpa)%R.
+{ rewrite /Pr_real. by apply: Pr_guess_le. }
+have Hinvm_pos : (0 < (index_t_msg%:R)^-1 :> R)%R.
+{ by rewrite invr_gt0 ltr0n; exact: index_t_msg_pos. }
+have Hpr_ge_inv : ((index_t_msg%:R)^-1 <= Pr_real)%R.
+{ exact: Pr_guess_real_ge_invm. }
+have Hpr_pos : (0 < Pr_real)%R.
+{ exact: (lt_le_trans Hinvm_pos Hpr_ge_inv). }
+have Hbound_pos : (0 < (index_t_msg%:R)^-1 + 2%:R * epsilon_cpa :> R)%R.
+{ apply: ltr_pwDl => //. by rewrite mulr_ge0 // ?ler0n. }
+rewrite -(log_id (m := index_t_msg) (eps := epsilon_cpa)
+                 index_t_msg_pos epsilon_cpa_ge0).
+by rewrite lerN2 ler_log // ?posrE.
+Qed.
+
+(* U2 verify clauses: the entropy form type-checks against the
+   Section-internal hypothesis chain. *)
+Check log_id.
+Check entropy.
+Check bound.
+Check entropy_ge_bound.
+
+(* ================================================================== *)
 (* Task 10: alice_view carrier (finType + SSProve choice_type)        *)
 (* ================================================================== *)
 
