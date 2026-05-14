@@ -40,6 +40,7 @@ Require Import homomorphic_encryption indcpa_ror.
 Require Import dsdp_program dsdp_entropy dsdp_pismc.
 Require Import dsdp_security_indcpa.
 Require Import smc.ssprove_ext_lossless.
+Require Import idealized_ahe.
 
 Set Implicit Arguments.
 Unset Strict Implicit.
@@ -584,3 +585,138 @@ Qed.
 End concrete.
 
 End Concrete.
+
+(* ================================================================== *)
+(* Task M: idealised-AHE specialisation                                *)
+(* ================================================================== *)
+
+(** Module Idealized - specialises [Concrete.secrecy_random_guess] at
+    the idealised AHE instance [Idealized_HETypes 'F_p] parametric in
+    any [p : nat] (primality not required: MathComp's ['F_p] routes
+    through [pdiv] making it a [finComNzRingType] unconditionally).
+    The three finType-bridge hypotheses of [Module Concrete] reduce to
+    [erefl] since [rand], [pub_key], and [cipher] of the idealised AHE
+    are all ['F_p] which already carries a [finType] instance.
+    Inhabitance witnesses are [GRing.zero : 'F_p].  The resulting
+    [Idealized.secrecy_random_guess] closes ALL project-local
+    hypotheses: its [Print Assumptions] closure contains only the
+    cryptographic axioms ([epsilon_cpa], [enc_ind_cpa_real_or_zero])
+    and the classical / SSProve foundation axioms.
+    Plan: Task M of ~/.claude/plans/sprightly-finding-robin.md. *)
+Module Idealized.
+
+Section idealized.
+
+(** p - the modulus chosen for the idealised AHE.  Variable so the
+    corollary is parametric in any nat.  MathComp's ['F_p] notation
+    automatically routes through [pdiv] / [Fp_finComNzRingType] so
+    primality of [p] is NOT required: ['F_p : finComNzRingType] holds
+    for any [p : nat].
+    Kind: parameter.
+    Why: [Idealized_HETypes 'F_p] uses ['F_p] for all five HETypes
+    carriers (see [idealized_ahe.v:49-54]).
+    Used by: ahe, rand_fin, pub_fin, cipher_fin. *)
+Variable p : nat.
+
+(** ahe - the concrete idealised AHE scheme at ['F_p].  Built via
+    [@AHEnc.Pack] over [Idealized_HETypes 'F_p] using the
+    [Idealized_isEncDec] and [Idealized_isAHEnc] mixin instances
+    declared in [idealized_ahe.v].  Mirrors the
+    [Idealized_AHEnc_local] pattern in [dsdp_correctness.v:79-82].
+    Kind: concrete carrier.
+    Why: Task M needs a concrete [AHEncType] to specialise
+    [Concrete.secrecy_random_guess].  Idealised AHE is the simplest
+    concrete instance.
+    Used by: secrecy_random_guess. *)
+Definition ahe : AHEncType :=
+  @AHEnc.Pack (Idealized_HETypes 'F_p)
+    (@AHEnc.Class (Idealized_HETypes 'F_p)
+      (@Idealized_isEncDec 'F_p)
+      (@Idealized_isAHEnc 'F_p)).
+
+(** rand_fin - finType carrier for [rand ahe].  Set to ['F_p]
+    since the idealised AHE picks [msgT] (i.e. ['F_p]) for all
+    five HETypes carriers (see [idealized_ahe.v:49-54]).
+    Kind: concrete carrier.
+    Why: discharges the [rand_finType] section variable of
+    [Module Concrete].
+    Used by: secrecy_random_guess. *)
+Definition rand_fin : Finite.type := 'F_p.
+
+(** rand_fin_E - [Finite.sort rand_fin = rand ahe].  Both sides
+    reduce to ['F_p] by [Idealized_HETypes]'s definition, so [erefl]
+    closes it.  Suffix [E] is MathComp's canonical equational-rewrite
+    suffix.
+    Kind: coherence.
+    Why: discharges the [rand_finType_eq] hypothesis of
+    [Module Concrete].
+    Used by: secrecy_random_guess. *)
+Lemma rand_fin_E : Finite.sort rand_fin = rand ahe.
+Proof. by []. Qed.
+
+(** pub_fin - finType carrier for [pub_key ahe], same pattern as
+    [rand_fin].
+    Kind: concrete carrier.
+    Why: discharges the [pub_key_finType] section variable of
+    [Module Concrete].
+    Used by: secrecy_random_guess. *)
+Definition pub_fin : Finite.type := 'F_p.
+
+(** pub_fin_E - [Finite.sort pub_fin = pub_key ahe].  Closes by
+    [erefl] for the same reason as [rand_fin_E].
+    Kind: coherence.
+    Why: discharges the [pub_key_finType_eq] hypothesis of
+    [Module Concrete].
+    Used by: secrecy_random_guess. *)
+Lemma pub_fin_E : Finite.sort pub_fin = pub_key ahe.
+Proof. by []. Qed.
+
+(** cipher_fin - finType carrier for [cipher ahe], same pattern
+    as [rand_fin].
+    Kind: concrete carrier.
+    Why: discharges the [cipher_finType] section variable of
+    [Module Concrete].
+    Used by: secrecy_random_guess. *)
+Definition cipher_fin : Finite.type := 'F_p.
+
+(** cipher_fin_E - [Finite.sort cipher_fin = cipher ahe].  Closes
+    by [erefl] for the same reason as [rand_fin_E].
+    Kind: coherence.
+    Why: discharges the [cipher_finType_eq] hypothesis of
+    [Module Concrete].
+    Used by: secrecy_random_guess. *)
+Lemma cipher_fin_E : Finite.sort cipher_fin = cipher ahe.
+Proof. by []. Qed.
+
+(** secrecy_random_guess - the closed-form Alice-secrecy bound
+    at the idealised AHE [ahe] and the trivial random-guess
+    adversary.  Specialises [Concrete.secrecy_random_guess] by
+    plugging in [ahe] (named-implicit), the three [erefl] finType
+    bridges, and the two [0 : 'F_p] inhabitance witnesses needed
+    (the section's [renc_inhabited] auto-prunes since it is not
+    transitively used in the closed proof term).  No theorem-level
+    arguments.
+    Kind: main corollary.
+    Why: this is the Task M output of the plan.  Its [Print
+    Assumptions] closure contains only the IND-CPA cryptographic
+    axioms ([epsilon_cpa], [enc_ind_cpa_real_or_zero]) and the
+    SSProve / classical foundation axioms.  No project-local
+    hypothesis (no [AHE] Variable, no finType bridges, no
+    inhabitance witnesses, no [V_2_uniform_hyp], no protocol
+    parameters) appears in the closure.  This is the unconditional
+    formal counterpart of the TeX bound [Pr[A(AliceView) = V_2] <=
+    1/m + 2 * epsilon_cpa] at the idealised AHE.
+    Used by: end users; the discharge plan
+    ~/.claude/plans/sprightly-finding-robin.md is now complete. *)
+Definition secrecy_random_guess :=
+  Concrete.secrecy_random_guess
+    (AHE:=ahe)
+    (rand_finType:=rand_fin)
+    (pub_key_finType:=pub_fin)
+    (cipher_finType:=cipher_fin)
+    rand_fin_E pub_fin_E cipher_fin_E
+    (0 : 'F_p) (0 : 'F_p).
+
+End idealized.
+
+End Idealized.
