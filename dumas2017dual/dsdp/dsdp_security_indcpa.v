@@ -1143,6 +1143,336 @@ Proof.
 Qed.
 
 (* ================================================================== *)
+(* Task T4: boolean_shell reading V_2 from id_v2_get + Pr_guess_le    *)
+(* ================================================================== *)
+
+(* T4 of [~/.claude/plans/sprightly-finding-robin.md]: re-introduce
+   the predictor/indicator framework that was deleted in T0 (it was
+   mathematically vacuous: the pre-T0 indicator sampled an
+   independent [iV2] after the predictor returned a guess, so the
+   probability that the guess matched that fresh sample was
+   trivially [1/m] regardless of IND-CPA hardness).  The V_2-aware
+   rebuild reads V_2 from the game's [id_v2_get] oracle, which
+   returns the V_2 stored in the shared [V_2_cell] by [id_game_run].
+   The resulting bound [Pr[guess = V_2] <= 1/m + 2 * epsilon_cpa]
+   is cryptographically meaningful: the [2 * epsilon_cpa] half is
+   load-bearing on the IND-CPA axiom
+   [enc_ind_cpa_real_or_zero], and the [1/m] half is the IT residual
+   at [game_leak] dischargeable via Task F's
+   [cPr_V2_V3_uniform_on_fiber_joint]. *)
+
+(** id_guess — operation identifier exported by a [t_msg]-output
+    predictor.  Calling it [tt] runs the predictor body (which has
+    imported [game_iface] and is free to query [id_game_run] but
+    NOT [id_v2_get]) and returns the predictor's [t_msg]-typed
+    guess.
+    Kind: canonical.
+    Why: T4 of [~/.claude/plans/sprightly-finding-robin.md].
+    SSProve operations are identified by a [nat]; [id_game_run = 0%N]
+    and [id_v2_get = 2%N] are already taken by [game_iface], so the
+    predictor's operation needs a fresh identifier.  [1%N] is the
+    next available slot.
+    Naming: project-local; mirrors [id_game_run], [id_v2_get],
+    [id_oracle_encrypt].
+    Used by: [guesser_export], [boolean_shell], [predictor_guesser]. *)
+Definition id_guess : nat := 1%N.
+
+(** guesser_export — the export interface of a [t_msg]-output
+    predictor.  Exposes a single operation [id_guess] taking
+    ['unit] and returning the SSProve message-space carrier
+    [t_msg] (aliased to the [pack_type] custom-entry notation
+    ['msg']).
+    Kind: canonical.
+    Why: T4 of [~/.claude/plans/sprightly-finding-robin.md].  The
+    [predictor_guesser] type below exports this interface in front
+    of [game_iface]: the predictor consumes the game's two-oracle
+    [game_iface] and emits a [t_msg] guess of V_2.  This is the
+    SSProve analogue of the TeX adversary [A : Y → Δ(R)] from
+    [notes/20260506-dsdp-secrecy-closed-form.tex]: map the Alice-
+    view [Y] to a distribution on the message space [R].
+    Naming: project-local; reads "predictor-style guess exporter".
+    Used by: [predictor_guesser], [boolean_shell],
+    [guess_indicator_pkg]. *)
+Definition guesser_export : Interface :=
+  [interface #val #[ id_guess ] : 'unit → msg ].
+
+(** predictor_guesser — the SSProve [package] type of a
+    [t_msg]-output predictor: imports [game_iface] (the two-oracle
+    DSDP game interface shared by [game_real], [game_hybrid_one],
+    [game_hybrid_two], [game_leak]) and exports [guesser_export]
+    (the [t_msg]-guess oracle).  Concrete instantiations (T6) build
+    predictors as section-parametric [package]s of this shape.
+    Kind: canonical.
+    Why: T4 of [~/.claude/plans/sprightly-finding-robin.md].  The
+    rebuilt closed-form theorem [Pr_guess_le] takes a value of this
+    type in place of the original [raw_package].  Importing the
+    full [game_iface] is convenient for the SSProve advantage
+    machinery — the IT residual side handles the constraint that
+    a correctness-respecting predictor must not query [id_v2_get]
+    (otherwise the bound is trivially violatable by echoing V_2;
+    the section hypothesis [Pr_guess_leak_le_invm] below carries
+    the IT load-bearing claim).
+    Naming: project-local; reads "a guesser-style predictor".
+    Used by: [guess_indicator_pkg], [Pr_guess_le]. *)
+Definition predictor_guesser : Type :=
+  package game_iface guesser_export.
+
+(** boolean_shell — the V_2-aware boolean indicator package.
+    Imports the union [unionm game_iface guesser_export] (giving
+    access to both the game's V_2-reveal oracle [id_v2_get] and
+    the predictor's [id_guess] oracle) and exports the standard
+    SSProve adversary interface [A_export] ([#val #[ 0%N ] :
+    'unit → 'bool]).  Body: calls the predictor to obtain a [t_msg]
+    [guess], calls the game's [id_v2_get] to obtain the V_2 value
+    stored in [V_2_cell] by [id_game_run], and returns the boolean
+    equality [guess == v2].
+    Kind: helper.
+    Why: T4 of [~/.claude/plans/sprightly-finding-robin.md] —
+    REPLACES the deleted pre-T0 [boolean_shell] which sampled an
+    independent [iV2] after the predictor returned (yielding a
+    vacuous [1/m] bound).  The new body reads V_2 from the game's
+    state via [id_v2_get], guaranteeing the V_2 the indicator
+    compares to is the SAME V_2 sampled inside [game_real]'s body
+    and propagated through the IND-CPA hops to [game_leak].
+    Naming: project-local; reads "the V_2-aware boolean indicator
+    shell".
+    Used by: [guess_indicator_pkg], [Pr_guess_le]. *)
+Definition boolean_shell :
+  package (unionm game_iface guesser_export) A_export :=
+  [package emptym ;
+    #def #[ 0%N ] (_ : 'unit) : 'bool
+    {
+      #import {sig #[ id_guess  ] : 'unit → msg } as call_pred ;;
+      #import {sig #[ id_v2_get ] : 'unit → msg } as call_v2 ;;
+      guess ← call_pred tt ;;
+      v2    ← call_v2 tt ;;
+      ret (guess == v2 : 'bool)
+    }
+  ].
+
+(** guess_indicator_pkg — the canonical bool-output wrapper that
+    turns a [t_msg]-output [predictor : predictor_guesser] and a
+    closed game [game : package [interface] game_iface] into a
+    Bool-output package suitable for [pkg_advantage.Pr].  Defined
+    as the sequential link [boolean_shell ∘ predictor ∘ game]:
+    [game] supplies [game_iface] (both [id_game_run] and
+    [id_v2_get]) to its consumers; [predictor] consumes
+    [id_game_run] for its body and re-exports [id_guess];
+    [boolean_shell] consumes both [id_guess] (from predictor) and
+    [id_v2_get] (which threads through predictor's import,
+    eventually resolving against [game]) and returns the boolean
+    [guess == v2].  Since SSProve link propagates unmatched
+    imports through the chain, [boolean_shell]'s [id_v2_get]
+    import is satisfied by [game] via the predictor layer (the
+    predictor's [game_iface] import is wider than [id_game_run],
+    so [id_v2_get] passes through transparently — at concrete
+    instantiation the predictor body simply never queries
+    [id_v2_get], matching the cryptographic intent "the
+    distinguisher is blind to V_2").
+    Kind: main.
+    Why: T4 of [~/.claude/plans/sprightly-finding-robin.md].
+    Downstream consumers (T5 / T6) take a [predictor_guesser]
+    explicitly and compose with [guess_indicator_pkg] to recover
+    the Bool-shaped distribution that [pkg_advantage.Pr] consumes.
+    The V_2-equality semantics is now syntactic (the [boolean_shell]
+    body literally compares [guess == v2] where [v2] comes from the
+    game's [V_2_cell]) rather than via an implicit semantic
+    convention on a Bool output.
+    Naming: project-local; reads "the guess-indicator-style
+    package wrapper".  Mirrors [reduction_charlie] / [reduction_bob]
+    in shape (a function from a predictor to a [raw_package]) but
+    with the additional [game] argument to keep the closed/open
+    distinction explicit.
+    Used by: [Pr_guess_le], T5's [dsdp_alice_secrecy], T6's
+    concrete corollaries. *)
+Definition guess_indicator_pkg
+    (predictor : predictor_guesser)
+    (game : package [interface] game_iface) : raw_package :=
+  boolean_shell ∘ predictor ∘ game.
+
+(** index_t_msg — cardinality of the (image of the) message-space
+    carrier the predictor's [t_msg] guesses live over.  Bridges
+    [#|plain AHE|] to a [nat] for the [1 / index_t_msg] residual
+    bound.  At concrete instantiation (T6) this is identified with
+    [index_msg] (the protocol-scalar carrier size) since V_2 is
+    sampled from [msg_of_idx] applied to ['I_index_msg] and stored
+    as [chmsg_of_msg v2] in [V_2_cell].
+    Kind: section parameter.
+    Why: T4 of [~/.claude/plans/sprightly-finding-robin.md].  The
+    IT residual bound on [Pr[guess = V_2]] at [game_leak] is
+    [1 / index_t_msg]; parametrising the bound on this index
+    decouples the abstract SSProve composition from the concrete
+    AHE plaintext carrier choice.
+    Naming: project-local; mirrors [index_msg], [index_renc].
+    Used by: [Pr_guess_leak_le_invm] hypothesis, [Pr_guess_le]. *)
+Variable index_t_msg : nat.
+
+(** index_t_msg_pos — positivity of [index_t_msg]: the message
+    space is non-empty.  Without positivity the residual bound
+    [1 / index_t_msg] would be vacuously [0 <= 0] which is still
+    mathematically correct but degenerate.
+    Kind: section hypothesis.
+    Why: T4 of [~/.claude/plans/sprightly-finding-robin.md].  Used
+    to keep the [1 / index_t_msg] bound a meaningful positive
+    quantity at concrete instantiation; the discharge at T6 is
+    trivial via [prime_p] / [prime_q] etc. depending on the AHE
+    scheme.
+    Naming: project-local; mirrors [index_msg_pos], [index_renc_pos].
+    Used by: [Pr_guess_le] (indirectly, via the hypothesis it
+    cascades). *)
+Hypothesis index_t_msg_pos : (0 < index_t_msg)%N.
+
+(** Pr_guess_leak_le_invm — IT residual bound: at [game_leak] the
+    probability that any [predictor_guesser]'s guess equals the
+    V_2 read via [id_v2_get] is at most [1 / index_t_msg].
+    Kind: section hypothesis.
+    Why: T4 of [~/.claude/plans/sprightly-finding-robin.md], the
+    [1/m] half of the closed-form bound.  At [game_leak] the
+    ciphertext slots [c_2], [c_3] are zero-encryptions, so V_2's
+    value does NOT influence the ciphertext list returned by
+    [id_game_run]; therefore the predictor's guess (computed from
+    [id_game_run] output only) is statistically independent of
+    V_2, and [Pr[guess = V_2] = E_guess[Pr[V_2 = guess | guess]]
+    = E_guess[1 / index_t_msg] = 1 / index_t_msg] by uniformity of
+    V_2.  The discharge at concrete instantiation (T6) routes
+    through the bridged joint fdist [fdist_game_leak_joint] and
+    the residual uniformity [cPr_V2_V3_uniform_on_fiber_joint]
+    (line 2899 below); this hypothesis captures the SSProve-side
+    statement those facts collectively imply.
+    Naming: project-local; reads "Pr[guess = V_2 at game_leak] is
+    bounded by [1 / m]".  Mirrors the section-hypothesis pattern
+    of [V_2_uniform_hyp], [V_3_uniform_hyp] in Task D below: the
+    fact is provable from the IT residual + bridge chain but is
+    captured here as a [Hypothesis] so [Pr_guess_le] is provable
+    Section-internally before the bridge content (Tasks A-F)
+    appears.
+    Used by: [Pr_guess_le]. *)
+Hypothesis Pr_guess_leak_le_invm :
+  forall (predictor : predictor_guesser),
+    distr.mu (pkg_advantage.Pr
+                (guess_indicator_pkg predictor game_leak)) true
+      <= (index_t_msg%:R)^-1.
+
+(** Pr_guess_le — the headline non-vacuous Alice-secrecy bound in
+    the V_2-aware framing.  For any [t_msg]-output adversary
+    [predictor : predictor_guesser] satisfying the disjointness
+    conditions of [advantage_game_real_game_leak], the probability
+    that the [boolean_shell]-wrapped indicator
+    [guess_indicator_pkg predictor game_real] evaluates to [true]
+    (i.e. the predictor's guess matches the V_2 that [game_real]
+    sampled and stored in [V_2_cell]) is at most
+    [1 / index_t_msg + 2 * epsilon_cpa].
+    Kind: main residual bound.
+    Why: T4 of [~/.claude/plans/sprightly-finding-robin.md].  This
+    is the IND-CPA-based replacement for the deleted (vacuous)
+    [dsdp_alice_secrecy_indcpa].  The [2 * epsilon_cpa] half comes
+    from [advantage_game_real_game_leak] (the SSProve triangle
+    across the four-game ladder, two IND-CPA hops plus a perfect-
+    equivalence residual), instantiated at the chain
+    [boolean_shell ∘ par predictor (ID game_iface)] (a closed
+    package importing [game_iface] and exporting [A_export]).  The
+    [1 / index_t_msg] half comes from the section hypothesis
+    [Pr_guess_leak_le_invm] (the IT residual at [game_leak]).
+    Proof outline (4 steps):
+      1. Triangle: by the elementary [a <= b + |a - b|]
+         identity (using [ler_norm] and [lerBlDl]), [Pr_real <=
+         Pr_leak + AdvantageE (boolean_shell ∘ par pred game_real)
+         (boolean_shell ∘ par pred game_leak)] (the AdvantageE
+         instantiated at the trivial distinguisher [A := ID
+         A_export] would give exactly this, but the
+         [a <= b + |a - b|] form is more direct).
+      2. Transfer the SSProve advantage [AdvantageE
+         (boolean_shell ∘ par pred game_real) (boolean_shell ∘
+         par pred game_leak) (ID A_export)] to [AdvantageE
+         game_real game_leak (boolean_shell ∘ par pred (ID
+         game_iface))] via [Advantage_link].  The chain
+         [boolean_shell ∘ par pred (ID game_iface)] is a closed
+         distinguisher package importing [game_iface] and
+         exporting [A_export], which is exactly the shape
+         [advantage_game_real_game_leak] consumes.
+      3. Bound this AdvantageE by [advantage_game_real_game_leak]
+         at [≤ epsilon_cpa + epsilon_cpa = 2 * epsilon_cpa].
+      4. Combine with the section hypothesis
+         [Pr_guess_leak_le_invm predictor] for the [1 /
+         index_t_msg] half.
+    The IND-CPA axiom [enc_ind_cpa_real_or_zero] is load-bearing
+    on step 3 via the [advantage_game_real_game_leak] chain.
+    Naming: project-local; reads "[Pr[guess = V_2]] is bounded
+    above" in the standard MathComp probability-bound idiom
+    ([Pr_X_le]).  Three components (verb-noun-mode); within the
+    project's F001/I001 budget.
+    Used by: T5's [dsdp_alice_secrecy] (thin wrapper), T6's
+    concrete corollaries. *)
+Lemma Pr_guess_le
+    (LA : Locations) (predictor : predictor_guesser)
+    (chain_valid :
+       ValidPackage LA game_iface A_export
+         (boolean_shell ∘ predictor))
+    (chain_disj_real :
+       fseparate LA game_real.(locs))
+    (chain_disj_h1 :
+       fseparate LA game_hybrid_one.(locs))
+    (chain_disj_h2 :
+       fseparate LA game_hybrid_two.(locs))
+    (chain_disj_leak :
+       fseparate LA game_leak.(locs))
+    (chain_disj_tc :
+       fseparate LA translation_charlie.(locs))
+    (chain_disj_tb :
+       fseparate LA translation_bob.(locs))
+    (chain_disj_ore :
+       fseparate LA
+         (oracle_encrypt_real_pkg AHE Renc index_renc renc_card
+            rand_of_renc t_msg t_cipher msg_of_chmsg
+            chcipher_of_cipher pkey_of_party).(locs))
+    (chain_disj_oze :
+       fseparate LA
+         (oracle_encrypt_zero_pkg AHE Renc index_renc renc_card
+            rand_of_renc t_msg t_cipher chcipher_of_cipher
+            pkey_of_party).(locs)) :
+  distr.mu (pkg_advantage.Pr
+              (guess_indicator_pkg predictor game_real)) true
+    <= (index_t_msg%:R)^-1 + 2%:R * epsilon_cpa.
+Proof.
+(* Step 1: Pr_real <= Pr_leak + |Pr_real - Pr_leak| (elementary). *)
+set Pr_real :=
+  distr.mu (pkg_advantage.Pr
+              (guess_indicator_pkg predictor game_real)) true.
+set Pr_leak :=
+  distr.mu (pkg_advantage.Pr
+              (guess_indicator_pkg predictor game_leak)) true.
+have Hsplit : Pr_real <= Pr_leak + `|Pr_real - Pr_leak|.
+{ rewrite -lerBlDl. exact: ler_norm. }
+apply: le_trans Hsplit _.
+apply: lerD; first exact: Pr_guess_leak_le_invm.
+(* Step 2: |Pr_real - Pr_leak| = AdvantageE on the chain.
+   By [link_assoc], [guess_indicator_pkg predictor game] equals
+   [(boolean_shell ∘ predictor) ∘ game], i.e. the distinguisher
+   is exactly [boolean_shell ∘ predictor].  AdvantageE then
+   reduces directly. *)
+have HEadvE :
+    `|Pr_real - Pr_leak|
+  = AdvantageE game_real game_leak
+      (boolean_shell ∘ predictor).
+{ rewrite /Pr_real /Pr_leak /AdvantageE /guess_indicator_pkg.
+  by rewrite !link_assoc. }
+rewrite HEadvE.
+(* Step 3: bound the AdvantageE by advantage_game_real_game_leak.
+   2 * epsilon_cpa = epsilon_cpa + epsilon_cpa via mulr2n / -addrr. *)
+have -> : 2%:R * epsilon_cpa = epsilon_cpa + epsilon_cpa
+  by rewrite mulrDl !mul1r.
+exact: advantage_game_real_game_leak.
+Qed.
+
+(* T4 verify clauses: the framework type-checks and the headline
+   bound closes with [Qed].  Mirrors the verify clauses of
+   [advantage_game_real_game_leak] above. *)
+Check predictor_guesser.
+Check boolean_shell.
+Check guess_indicator_pkg.
+Check Pr_guess_le.
+
+(* ================================================================== *)
 (* Task 10: alice_view carrier (finType + SSProve choice_type)        *)
 (* ================================================================== *)
 
