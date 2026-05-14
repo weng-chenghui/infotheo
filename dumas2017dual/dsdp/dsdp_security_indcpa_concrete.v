@@ -288,6 +288,123 @@ rewrite enum_rankK.
 by destruct cipher_finType_eq.
 Qed.
 
+(** index_t_msg - cardinality index used by [dsdp_alice_secrecy]'s
+    residual bound [1 / index_t_msg].  Set equal to [index_msg] (i.e.
+    [#|plain AHE|]) since V_2 is sampled uniformly over [plain AHE]
+    via [msg_of_idx] and the indicator compares the predictor's
+    [t_msg]-guess to that V_2.
+    Kind: concrete-carrier index.
+    Why: discharges [dsdp_security_indcpa]'s abstract [index_t_msg]
+    section parameter at the concrete carriers so the closed-form
+    bound numerically reads [1 / #|plain AHE| + 2 * epsilon_cpa].
+    Used by: random_guess_adv, secrecy_random_guess. *)
+Definition index_t_msg : nat := index_msg.
+
+(** index_t_msg_gt0 - strict positivity [0 < index_t_msg].  Follows
+    from [index_msg_gt0] since [index_t_msg = index_msg] by definition.
+    Kind: helper.
+    Why: needed for downstream entropy work in U3 ([log_id] and
+    [entropy_ge_bound] require [index_t_msg > 0]); also keeps the
+    [1 / index_t_msg] residual non-vacuous.
+    Naming: [index_t_msg] is the abstract section parameter from
+    [dsdp_security_indcpa.v:1359] preserved verbatim; the [_gt0]
+    suffix is the canonical MathComp strict-positivity tag, so the
+    surface 4-token count is intentional and mirrors the existing
+    pattern of [index_msg_gt0]/[index_renc_gt0] above.
+    Used by: secrecy_random_guess, U3's entropy_random_guess. *)
+Lemma index_t_msg_gt0 : (0 < index_t_msg)%N.
+Proof. exact: index_msg_gt0. Qed.
+
+(** Pr_guess_leak_le_invm - the IT residual bound at [game_leak],
+    taken as a Section hypothesis at the concrete instance.  Mirrors
+    [dsdp_security_indcpa.Pr_guess_leak_le_invm] specialised to the
+    concrete carriers.
+    Kind: section hypothesis.
+    Why: required by [dsdp_alice_secrecy] which consumes the IT half
+    of the closed-form bound abstractly; discharging it from the
+    [cPr_V2_V3_uniform_on_fiber_joint] chain in
+    [dsdp_security_indcpa.v] is tracked separately (out of scope for
+    U1).
+    Used by: secrecy_random_guess. *)
+Hypothesis Pr_guess_leak_le_invm :
+  forall (predictor : dsdp_security_indcpa.predictor_guesser t_msg t_cipher),
+    distr.mu (pkg_advantage.Pr
+                (dsdp_security_indcpa.guess_indicator_pkg predictor
+                   (dsdp_security_indcpa.game_leak (AHE:=AHE) renc_card
+                      rand_of_renc (t_msg:=t_msg) (t_cipher:=t_cipher)
+                      chmsg_of_msg chcipher_of_cipher pkey_of_party msg_of_idx)))
+              true
+      <= (index_t_msg%:R)^-1.
+
+Local Notation "'msg'" := t_msg (in custom pack_type at level 2).
+
+(** random_guess_adv - trivial adversary that samples a uniform
+    plain-AHE index and returns it (cast through [chmsg_of_msg]) as
+    its guess.  Built with [[package emptym ; ...]] so that
+    [locs random_guess_adv] reduces to [emptym] by iota, which makes
+    [valid_boolean_shell_link random_guess_adv] unify with the
+    [chain_valid] slot of [dsdp_alice_secrecy] by reflexivity.
+    Kind: example.
+    Why: enables [secrecy_random_guess] by instantiating
+    [dsdp_alice_secrecy] at a stateless predictor whose
+    location-set obligations close by [fseparate0m] without an
+    external witness package.
+    Used by: secrecy_random_guess. *)
+Definition random_guess_adv : dsdp_security_indcpa.predictor_guesser t_msg t_cipher :=
+  [package emptym ;
+    #def #[ dsdp_security_indcpa.id_guess ] (_ : 'unit) : msg
+    {
+      iV ← sample uniform #|plain AHE| ;;
+      ret (chmsg_of_msg (enum_val iV))
+    }
+  ].
+
+Check random_guess_adv : dsdp_security_indcpa.predictor_guesser t_msg t_cipher.
+
+(** secrecy_random_guess - the closed-form Alice-secrecy bound at
+    the trivial random-guess adversary.  Discharges the eight
+    [fseparate] obligations of [dsdp_alice_secrecy] by [fseparate0m]
+    (since [random_guess_adv]'s locations are [emptym]) and the
+    [chain_valid] obligation by
+    [dsdp_security_indcpa.valid_boolean_shell_link] applied to
+    [random_guess_adv].
+    Kind: main.
+    Why: instantiates [dsdp_alice_secrecy] at the concrete
+    random-guess adversary to produce the closed-form
+    [(index_t_msg^-1 + 2 * epsilon_cpa)] numeric secrecy bound;
+    consumed by [Idealized.secrecy_random_guess],
+    [Benaloh.secrecy_random_guess], and
+    [Paillier.secrecy_random_guess] in this file. *)
+Corollary secrecy_random_guess :
+  distr.mu
+    (pkg_advantage.Pr
+       (dsdp_security_indcpa.guess_indicator_pkg random_guess_adv
+          (dsdp_security_indcpa.game_real (AHE:=AHE) renc_card
+             rand_of_renc (t_msg:=t_msg) (t_cipher:=t_cipher)
+             chmsg_of_msg chcipher_of_cipher pkey_of_party msg_of_idx)))
+    true
+    <= (index_t_msg%:R)^-1 + 2%:R * indcpa_ror.epsilon_cpa.
+Proof.
+refine (@dsdp_security_indcpa.dsdp_alice_secrecy
+          AHE Renc index_renc renc_card rand_of_renc
+          t_msg t_cipher msg_of_chmsg chmsg_of_msg
+          chcipher_of_cipher cipher_of_chcipher
+          chcipher_of_cipherK chmsg_of_msgK
+          pkey_of_party index_msg msg_of_idx
+          index_t_msg
+          Pr_guess_leak_le_invm
+          emptym random_guess_adv _ _ _ _ _ _ _ _ _).
+- exact: (valid_boolean_shell_link random_guess_adv).
+- exact: fseparate0m.
+- exact: fseparate0m.
+- exact: fseparate0m.
+- exact: fseparate0m.
+- exact: fseparate0m.
+- exact: fseparate0m.
+- exact: fseparate0m.
+- exact: fseparate0m.
+Qed.
+
 End concrete.
 
 End Concrete.
@@ -376,6 +493,76 @@ Definition cipher_fin : Finite.type := 'F_p.
 Lemma cipher_fin_E : Finite.sort cipher_fin = cipher ahe.
 Proof. by []. Qed.
 
+(** pub_key_inhab - public-key inhabitance witness at [pub_key ahe = 'F_p].
+    Picked as [0 : 'F_p].
+    Kind: inhabitance witness.
+    Why: discharges the [pub_key_inhab] section variable of
+    [Module Concrete] at the idealised instance; needed to
+    instantiate [Concrete.secrecy_random_guess] at this specialisation.
+    Used by: secrecy_random_guess. *)
+Definition pub_key_inhab : pub_key ahe := 0%R.
+
+(** Pr_guess_leak_le_invm - IT residual bound at the idealised
+    [game_leak] specialised carriers.  Mirrors
+    [Module Concrete]'s Section hypothesis at the idealised
+    instance.
+    Kind: section hypothesis.
+    Why: required by [Concrete.secrecy_random_guess] which abstracts
+    over the IT half of the bound; discharging it from the residual
+    uniformity chain is tracked separately.
+    Used by: secrecy_random_guess. *)
+Hypothesis Pr_guess_leak_le_invm :
+  forall (predictor :
+            dsdp_security_indcpa.predictor_guesser
+              (Concrete.t_msg ahe) (Concrete.t_cipher cipher_fin)),
+    distr.mu
+      (pkg_advantage.Pr
+         (dsdp_security_indcpa.guess_indicator_pkg predictor
+            (dsdp_security_indcpa.game_leak (AHE:=ahe)
+               (Concrete.renc_card rand_fin)
+               (Concrete.rand_of_renc (AHE:=ahe)
+                  (rand_finType:=rand_fin) rand_fin_E)
+               (t_msg:=Concrete.t_msg ahe)
+               (t_cipher:=Concrete.t_cipher cipher_fin)
+               (Concrete.chmsg_of_msg (AHE:=ahe))
+               (Concrete.chcipher_of_cipher (AHE:=ahe)
+                  (cipher_finType:=cipher_fin) cipher_fin_E)
+               (Concrete.pkey_of_party (AHE:=ahe) pub_key_inhab)
+               (Concrete.msg_of_idx (AHE:=ahe)))))
+      true
+      <= ((Concrete.index_t_msg ahe)%:R)^-1.
+
+(** secrecy_random_guess - the closed-form Alice-secrecy bound at
+    the idealised AHE instance and the trivial random-guess
+    adversary.  Specialises [Concrete.secrecy_random_guess] at the
+    idealised carriers and the Section-local
+    [Pr_guess_leak_le_invm].
+    Kind: main.
+    Why: provides the idealised-AHE closed-form bound required by
+    the entropy-form corollaries in U3 that lift the probability
+    inequality to a mutual-information statement.
+    Used by: Idealized.entropy_random_guess in U3. *)
+Definition secrecy_random_guess :
+  distr.mu
+    (pkg_advantage.Pr
+       (dsdp_security_indcpa.guess_indicator_pkg
+          (Concrete.random_guess_adv ahe cipher_fin)
+          (dsdp_security_indcpa.game_real (AHE:=ahe)
+             (Concrete.renc_card rand_fin)
+             (Concrete.rand_of_renc (AHE:=ahe)
+                (rand_finType:=rand_fin) rand_fin_E)
+             (t_msg:=Concrete.t_msg ahe)
+             (t_cipher:=Concrete.t_cipher cipher_fin)
+             (Concrete.chmsg_of_msg (AHE:=ahe))
+             (Concrete.chcipher_of_cipher (AHE:=ahe)
+                (cipher_finType:=cipher_fin) cipher_fin_E)
+             (Concrete.pkey_of_party (AHE:=ahe) pub_key_inhab)
+             (Concrete.msg_of_idx (AHE:=ahe)))))
+    true
+    <= ((Concrete.index_t_msg ahe)%:R)^-1 + 2%:R * indcpa_ror.epsilon_cpa
+  := @Concrete.secrecy_random_guess ahe rand_fin rand_fin_E
+       cipher_fin cipher_fin_E pub_key_inhab Pr_guess_leak_le_invm.
+
 End idealized.
 
 End Idealized.
@@ -418,6 +605,11 @@ Section benaloh.
     Used by: ahe, rand_fin, cipher_fin. *)
 Variables (n r : nat).
 Hypothesis n_gt1 : (1 < n)%N.
+(* D001-bypass: n_gt1 is declared for API-surface uniformity with the
+   abstract Benaloh module (the mathematical statement requires
+   non-trivial n); it is not transitively consumed by any entity in
+   Section benaloh because BenalohHETypes / Benaloh_isEncDec /
+   Benaloh_isAHEnc all rely only on r_gt1. *)
 Hypothesis r_gt1 : (1 < r)%N.
 
 (** ahe - the concrete Benaloh AHE scheme at parameters [n r].  Built
@@ -514,6 +706,65 @@ Proof. by rewrite FinRing.val_unit1 expr1n. Qed.
     Used by: T1 V_2-aware rebuild. *)
 Definition pub_key_inhab : pub_key ahe :=
   @MkBenalohPubKey n r 1%g pub_gen_order1.
+
+(** Pr_guess_leak_le_invm - IT residual bound at the Benaloh
+    specialised carriers.  Mirrors [Module Concrete]'s Section
+    hypothesis at the Benaloh instance.
+    Kind: section hypothesis.
+    Why: required by [Concrete.secrecy_random_guess] which abstracts
+    over the IT half of the bound; the cryptographic-side discharge
+    via the higher-residuosity assumption is out of scope here.
+    Used by: secrecy_random_guess. *)
+Hypothesis Pr_guess_leak_le_invm :
+  forall (predictor :
+            dsdp_security_indcpa.predictor_guesser
+              (Concrete.t_msg ahe) (Concrete.t_cipher cipher_fin)),
+    distr.mu
+      (pkg_advantage.Pr
+         (dsdp_security_indcpa.guess_indicator_pkg predictor
+            (dsdp_security_indcpa.game_leak (AHE:=ahe)
+               (Concrete.renc_card rand_fin)
+               (Concrete.rand_of_renc (AHE:=ahe)
+                  (rand_finType:=rand_fin) rand_fin_E)
+               (t_msg:=Concrete.t_msg ahe)
+               (t_cipher:=Concrete.t_cipher cipher_fin)
+               (Concrete.chmsg_of_msg (AHE:=ahe))
+               (Concrete.chcipher_of_cipher (AHE:=ahe)
+                  (cipher_finType:=cipher_fin) cipher_fin_E)
+               (Concrete.pkey_of_party (AHE:=ahe) pub_key_inhab)
+               (Concrete.msg_of_idx (AHE:=ahe)))))
+      true
+      <= ((Concrete.index_t_msg ahe)%:R)^-1.
+
+(** secrecy_random_guess - the closed-form Alice-secrecy bound at
+    the Benaloh 1994 AHE instance and the trivial random-guess
+    adversary.  Specialises [Concrete.secrecy_random_guess] at the
+    Benaloh carriers and the Section-local [Pr_guess_leak_le_invm].
+    Kind: main.
+    Why: provides the Benaloh-instance closed-form bound required by
+    the entropy-form corollaries in U3 that lift the probability
+    inequality to a mutual-information statement.
+    Used by: Benaloh.entropy_random_guess in U3. *)
+Definition secrecy_random_guess :
+  distr.mu
+    (pkg_advantage.Pr
+       (dsdp_security_indcpa.guess_indicator_pkg
+          (Concrete.random_guess_adv ahe cipher_fin)
+          (dsdp_security_indcpa.game_real (AHE:=ahe)
+             (Concrete.renc_card rand_fin)
+             (Concrete.rand_of_renc (AHE:=ahe)
+                (rand_finType:=rand_fin) rand_fin_E)
+             (t_msg:=Concrete.t_msg ahe)
+             (t_cipher:=Concrete.t_cipher cipher_fin)
+             (Concrete.chmsg_of_msg (AHE:=ahe))
+             (Concrete.chcipher_of_cipher (AHE:=ahe)
+                (cipher_finType:=cipher_fin) cipher_fin_E)
+             (Concrete.pkey_of_party (AHE:=ahe) pub_key_inhab)
+             (Concrete.msg_of_idx (AHE:=ahe)))))
+    true
+    <= ((Concrete.index_t_msg ahe)%:R)^-1 + 2%:R * indcpa_ror.epsilon_cpa
+  := @Concrete.secrecy_random_guess ahe rand_fin rand_fin_E
+       cipher_fin cipher_fin_E pub_key_inhab Pr_guess_leak_le_invm.
 
 End benaloh.
 
@@ -651,6 +902,65 @@ Proof. exact: expr1n. Qed.
     Used by: T1 V_2-aware rebuild. *)
 Definition pub_key_inhab : pub_key ahe :=
   @MkPaillierPubKey n 1 pub_gen_order1.
+
+(** Pr_guess_leak_le_invm - IT residual bound at the Paillier
+    specialised carriers.  Mirrors [Module Concrete]'s Section
+    hypothesis at the Paillier instance.
+    Kind: section hypothesis.
+    Why: required by [Concrete.secrecy_random_guess] which abstracts
+    over the IT half of the bound; the cryptographic-side discharge
+    via the DCR assumption is out of scope here.
+    Used by: secrecy_random_guess. *)
+Hypothesis Pr_guess_leak_le_invm :
+  forall (predictor :
+            dsdp_security_indcpa.predictor_guesser
+              (Concrete.t_msg ahe) (Concrete.t_cipher cipher_fin)),
+    distr.mu
+      (pkg_advantage.Pr
+         (dsdp_security_indcpa.guess_indicator_pkg predictor
+            (dsdp_security_indcpa.game_leak (AHE:=ahe)
+               (Concrete.renc_card rand_fin)
+               (Concrete.rand_of_renc (AHE:=ahe)
+                  (rand_finType:=rand_fin) rand_fin_E)
+               (t_msg:=Concrete.t_msg ahe)
+               (t_cipher:=Concrete.t_cipher cipher_fin)
+               (Concrete.chmsg_of_msg (AHE:=ahe))
+               (Concrete.chcipher_of_cipher (AHE:=ahe)
+                  (cipher_finType:=cipher_fin) cipher_fin_E)
+               (Concrete.pkey_of_party (AHE:=ahe) pub_key_inhab)
+               (Concrete.msg_of_idx (AHE:=ahe)))))
+      true
+      <= ((Concrete.index_t_msg ahe)%:R)^-1.
+
+(** secrecy_random_guess - the closed-form Alice-secrecy bound at
+    the Paillier 1999 AHE instance and the trivial random-guess
+    adversary.  Specialises [Concrete.secrecy_random_guess] at the
+    Paillier carriers and the Section-local [Pr_guess_leak_le_invm].
+    Kind: main.
+    Why: provides the Paillier-instance closed-form bound required
+    by the entropy-form corollaries in U3 that lift the probability
+    inequality to a mutual-information statement.
+    Used by: Paillier.entropy_random_guess in U3. *)
+Definition secrecy_random_guess :
+  distr.mu
+    (pkg_advantage.Pr
+       (dsdp_security_indcpa.guess_indicator_pkg
+          (Concrete.random_guess_adv ahe cipher_fin)
+          (dsdp_security_indcpa.game_real (AHE:=ahe)
+             (Concrete.renc_card rand_fin)
+             (Concrete.rand_of_renc (AHE:=ahe)
+                (rand_finType:=rand_fin) rand_fin_E)
+             (t_msg:=Concrete.t_msg ahe)
+             (t_cipher:=Concrete.t_cipher cipher_fin)
+             (Concrete.chmsg_of_msg (AHE:=ahe))
+             (Concrete.chcipher_of_cipher (AHE:=ahe)
+                (cipher_finType:=cipher_fin) cipher_fin_E)
+             (Concrete.pkey_of_party (AHE:=ahe) pub_key_inhab)
+             (Concrete.msg_of_idx (AHE:=ahe)))))
+    true
+    <= ((Concrete.index_t_msg ahe)%:R)^-1 + 2%:R * indcpa_ror.epsilon_cpa
+  := @Concrete.secrecy_random_guess ahe rand_fin rand_fin_E
+       cipher_fin cipher_fin_E pub_key_inhab Pr_guess_leak_le_invm.
 
 End paillier.
 
