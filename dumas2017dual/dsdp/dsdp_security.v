@@ -163,10 +163,15 @@ Qed.
 
 (* The Z/pqZ entropic security theorems
    ([dsdp_constraint_centropy_eqlogm], [V3_determined_centropy_v2_local],
-   [dsdp_entropic_security]) used to live here. They depended on the unsound
-   IT idealisation [E_enc_inde] and were retired in Task 15. The replacement
-   is the computational secrecy theorem [dsdp_alice_secrecy_indcpa] proved
-   in [dsdp_security_indcpa.v] via the IND-CPA hop. *)
+   [dsdp_entropic_security]) used to live here. They depended on the
+   unsound IT idealisation [E_enc_inde] and were retired in Task 15.
+   The successor closed-form computational theorem
+   [dsdp_alice_secrecy_indcpa] (commit 76bff89, [dsdp_security_indcpa.v])
+   was itself retired in T0 cleanup after the predictor-side
+   [boolean_shell] was found to sample a fresh independent iV2
+   disconnected from any IND-CPA hop. T1 of
+   [~/.claude/plans/sprightly-finding-robin.md] rebuilds a V_2-aware
+   game chain. *)
 
 (******************************************************************************)
 (* Malicious Adversary Case Analysis                                          *)

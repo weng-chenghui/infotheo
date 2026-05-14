@@ -396,7 +396,7 @@ End dsdp_entropy.
 
     **Used-by:** [dsdp_security_indcpa.v] Task F when instantiating
     the residual section at the abstract carrier
-    [alice_view_with_secrets] over an arbitrary [finComUnitRingType].
+    [alice_view_joint] over an arbitrary [finComUnitRingType].
 
     **Naming:** suffix [_ring] mirrors [dsdp_fiber_card_ring]; the
     [Z_(p*q)]-specialized [Pr_dsdp_sol_uniform] at line 237 is left
@@ -464,7 +464,7 @@ Qed.
     [s - u1 * v1 = u2 * v2 + u3 * v3].  Same shape as the [Z_(p*q)]-side
     [dsdp_constraint] used in [dsdp_centropy_uniform] (line 262);
     parametrised here in [R : finComUnitRingType] so the residual
-    analysis can quote it at [alice_view_with_secrets] (Task F).
+    analysis can quote it at [alice_view_joint] (Task F).
     Kind: helper.
     Why: needed as the hypothesis shape consumed by
     [Pr_dsdp_sol_uniform_ring]; mirrors the specialized

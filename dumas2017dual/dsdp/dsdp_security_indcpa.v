@@ -941,7 +941,7 @@ Qed.
     Why: this is the computational part of the closed-form Alice secrecy
     bound (Tasks 13-14 stitch the information-theoretic residual onto
     this advantage to get [1/m + 2 * epsilon_cpa]).
-    Used by: dsdp_alice_secrecy_indcpa (Task 14).
+    Used by: T1 V_2-aware rebuild.
     Naming: advantage_<source>_<target> is the project-local convention for
     SSProve advantage-bound lemmas; the suffix records the two games whose
     AdvantageE is being bounded, not a MathComp algebraic property. *)
@@ -985,22 +985,6 @@ Proof.
   - exact: advantage_hop_real_h1.
   - exact: advantage_hop_h1_h2.
 Qed.
-
-(* ================================================================== *)
-(* Task 14 / Task I: closed-form Alice secrecy bound (unconditional)   *)
-(* ================================================================== *)
-
-(* The closed-form Alice secrecy theorem [dsdp_alice_secrecy_indcpa]
-   in its Task I unconditional [t_msg]-output framing follows below
-   in this section, after Task G's [predictor_guesser] /
-   [guess_indicator_pkg] framework (lines ~2700-2950) and Task H's
-   residual bound [Pr_guess_indicator_le_inv_msg_card] (lines
-   ~3000-3150).  The theorem cannot appear here because its
-   signature depends on [predictor_guesser] / [guess_indicator_pkg]
-   / [index_t_msg] / [t_msg_carrier_to_chmsg] / [sample_to_t_msg_inj]
-   / [index_t_msg_pos], all introduced in Tasks G / H.  See the
-   theorem's full docstring at its position just before
-   [End dsdp_security_indcpa]. *)
 
 (* ================================================================== *)
 (* Task 10: alice_view carrier (finType + SSProve choice_type)        *)
@@ -1235,7 +1219,7 @@ Qed.
     resolved [game_leak] code).
     Naming: project-local.  The [_to_] middle marks the bridge
     direction (SSProve SDistr -> infotheo fdist).
-    Used by: Task 13's [Pr_game_leak_V2_uniform] (which feeds the
+    Used by: Task 13's [cPr_V2_V3_uniform_on_fiber] (which feeds the
     [Pr_fst]-side of [game_leak] through this bridge to land on a
     [{fdist alice_view}] and then applies [inde_RV2_cinde],
     [cinde_rv_comp_removal], and [Pr_dsdp_sol_uniform]). *)
@@ -1280,7 +1264,7 @@ Proof. by rewrite /bridge_leak_to_fdist /= ffunE. Qed.
     bridge is parametric in the mass proof, and consumers carry the
     [LosslessCode] obligation themselves.
     Naming: project-local; follows the [bridge_] convention.
-    Used by: Task 13's [Pr_game_leak_V2_uniform]. *)
+    Used by: Task 13's [cPr_V2_V3_uniform_on_fiber]. *)
 Lemma bridge_total_mass (mu : distr.distr R alice_view)
     (Hmass : psum (distr.mu mu) = 1) :
   \sum_(v : alice_view) (distr.mu mu) v = 1.
@@ -1320,7 +1304,7 @@ Proof. by move=> _; rewrite mem_enum. Qed.
     [bridge_leak_to_fdistE] to expose the underlying [distr.mu mu].
     Naming: project-local; [_correct] reads "the bridge respects the
     intended interpretation".
-    Used by: Task 13's [Pr_game_leak_V2_uniform]. *)
+    Used by: Task 13's [cPr_V2_V3_uniform_on_fiber]. *)
 Lemma bridge_correct (mu : distr.distr R alice_view)
     (Hmass : psum (distr.mu mu) = 1) (P : pred alice_view) :
   \sum_(v : alice_view | P v) (distr.mu mu) v
@@ -1377,7 +1361,7 @@ Hypothesis index_renc_pos : (0 < index_renc)%N.
     [id_game_run] operation evaluated at [tt]).  Naming this body
     once lets [LosslessCode_game_leak] state the [Pr_fst]-mass
     obligation in a syntactically-uniform form that the consumer
-    (Task 13's [Pr_game_leak_V2_uniform] caller in Task 14) can feed
+    (Task 13's [cPr_V2_V3_uniform_on_fiber] caller in Task 14) can feed
     directly into [bridge_leak_to_fdist].
     Used by: LosslessCode_game_leak. *)
 Definition game_leak_run_code : raw_code cipher_list :=
@@ -1405,9 +1389,9 @@ Definition game_leak_run_code : raw_code cipher_list :=
     Naming: upstream-style PascalCase exception, mirroring
     [Lossless_ret], [Lossless_sample], and [LosslessOp_uniform] in
     SSProve.  See [feedback_mathcomp_naming.md] in user memory.
-    Used by: Task 14 ([dsdp_alice_secrecy_indcpa]) where it discharges
-    the [Hmass] obligation of [bridge_leak_to_fdist] at the
-    [game_leak]-resolved code. *)
+    Used by: T1 V_2-aware rebuild — discharges the [Hmass]
+    obligation of [bridge_leak_to_fdist] at the [game_leak]-resolved
+    code. *)
 Lemma LosslessCode_game_leak : LosslessCode game_leak_run_code.
 Proof.
 rewrite /game_leak_run_code /resolve /=.
@@ -1426,7 +1410,7 @@ exact: LosslessOp_uniform.
 Qed.
 
 (* ================================================================== *)
-(* Task B: alice_view_with_secrets carrier and SDistr-to-fdist bridge *)
+(* Task B: alice_view_joint carrier and SDistr-to-fdist bridge *)
 (* ================================================================== *)
 
 (** V_2_carrier, V_3_carrier - section parameters for the protocol
@@ -1440,13 +1424,13 @@ Qed.
     ring-genericity work.
     Kind: parameter.
     Why: Task B of [~/.claude/plans/sprightly-finding-robin.md] (Fallback
-    R2A: extend the carrier to [alice_view_with_secrets]).  Task 10's
+    R2A: extend the carrier to [alice_view_joint]).  Task 10's
     [alice_view] does not include V_2 / V_3, but the IT residual analysis
     in Task 13 / Task F treats V_2 and V_3 as random variables; lifting
     them into the joint sample space requires their carriers to be
     finType so the iterated product [alice_view * V_2_carrier *
     V_3_carrier] remains a finType.
-    Used by: alice_view_with_secrets, Task D's V_2_RV / V_3_RV
+    Used by: alice_view_joint, Task D's V_2_RV / V_3_RV
     projections, Task F's section instantiation. *)
 Variable V_2_carrier : finType.
 
@@ -1470,16 +1454,16 @@ Hypothesis V_2_card : #|V_2_carrier| = index_V_2.
     third protocol scalar V_3.  Same shape as V_2's parameters.
     Kind: parameter + hypothesis.
     Why: same as V_2_carrier.  V_3 is the other DSDP secret scalar that
-    Task D will project from [alice_view_with_secrets] as a random
+    Task D will project from [alice_view_joint] as a random
     variable; the IT residual decomposition operates on the joint
     [(V_2, V_3)] pair (the fiber of [u_2 v_2 + u_3 v_3 = s - u_1 v_1]).
-    Used by: alice_view_with_secrets, Task D's V_3_RV projection,
+    Used by: alice_view_joint, Task D's V_3_RV projection,
     Task F's residual section instantiation. *)
 Variable V_3_carrier : finType.
 Variable index_V_3 : nat.
 Hypothesis V_3_card : #|V_3_carrier| = index_V_3.
 
-(** alice_view_with_secrets - the corrupted-Alice view extended with the
+(** alice_view_joint - the corrupted-Alice view extended with the
     two protocol scalars V_2 and V_3 that Alice does NOT see directly
     (they are masked into the ciphertexts and into the linear identity)
     but that the IT residual analysis treats as random variables on the
@@ -1502,14 +1486,13 @@ Hypothesis V_3_card : #|V_3_carrier| = index_V_3.
     Naming: [_with_secrets] reads "the surface view plus the secret
     scalars V_2, V_3"; user-chosen, see plan line 53.  Not _full
     (rejected as too generic).
-    Used by: Task C's [bridge_predictor_compose_to_fdist], Task D's
-    protocol random variables, Task F's residual section
-    instantiation. *)
-Definition alice_view_with_secrets : finType :=
+    Used by: Task D's protocol random variables, Task F's residual
+    section instantiation, T1 V_2-aware rebuild. *)
+Definition alice_view_joint : finType :=
   (alice_view * V_2_carrier * V_3_carrier)%type.
 
-(** alice_view_with_secrets_choice_finType - the named HB instance label
-    tying [alice_view_with_secrets] simultaneously to MathComp's
+(** alice_view_joint_choice_finType - the named HB instance label
+    tying [alice_view_joint] simultaneously to MathComp's
     [finType] and [choiceType] structures.  No additional plumbing is
     required: the iterated product type-class search finds both
     instances automatically because each component is itself a finType.
@@ -1521,81 +1504,81 @@ Definition alice_view_with_secrets : finType :=
     used by Task 10.
     Used by: documentation only; the instances are picked up by
     canonical-structure resolution at the use sites. *)
-Definition alice_view_with_secrets_choice_finType : Type :=
-  alice_view_with_secrets.
+Definition alice_view_joint_choice_finType : Type :=
+  alice_view_joint.
 
 (* Task B verify clause: both finType and choiceType inhabit
-   alice_view_with_secrets. *)
-Check (alice_view_with_secrets : finType).
-Check (alice_view_with_secrets : choiceType).
+   alice_view_joint. *)
+Check (alice_view_joint : finType).
+Check (alice_view_joint : choiceType).
 
-(** index_alice_view_with_secrets - the cardinality of
-    [alice_view_with_secrets] as a [nat].  Computed once so that the
+(** index_alice_view_joint - the cardinality of
+    [alice_view_joint] as a [nat].  Computed once so that the
     SSProve-side [chFin] embedding below can refer to it by name.
     Kind: canonical.
     Why: mirrors Task 10's [index_alice_view].  SSProve's [choice_type]
     GADT uses [chFin (n : nat)] for finite carriers, with
     [chInterp (chFin n) = 'I_n].  Naming the cardinality lets us state
-    the cardinality lemma [alice_view_with_secrets_ct_card] cleanly.
+    the cardinality lemma [alice_view_joint_ct_card] cleanly.
     Naming: [index_X] is a project-local prefix for SSProve [chFin]
     cardinality parameters, mirroring Task 10's [index_alice_view] and
     the top-of-section [index_renc] / [index_Dk_a].  The [_card] suffix
     is reserved for the finType cardinality lemmas below
-    ([alice_view_with_secrets_ct_card],
-    [alice_view_with_secrets_card_index]), so [index_] is used for the
+    ([alice_view_joint_ct_card],
+    [alice_view_joint_card_index]), so [index_] is used for the
     nat value itself to keep the two roles distinct.
-    Used by: alice_view_with_secrets_ct, the Task B bridge. *)
-Definition index_alice_view_with_secrets : nat :=
-  #|alice_view_with_secrets|.
+    Used by: alice_view_joint_ct, the Task B bridge. *)
+Definition index_alice_view_joint : nat :=
+  #|alice_view_joint|.
 
-(** alice_view_with_secrets_ct - the SSProve-side [choice_type] avatar
-    of [alice_view_with_secrets], lifted as a single [chFin] of the
+(** alice_view_joint_ct - the SSProve-side [choice_type] avatar
+    of [alice_view_joint], lifted as a single [chFin] of the
     total cardinality.  This is the carrier that the Task B bridge
-    [bridge_alice_view_with_secrets_to_fdist :
-    SDistr alice_view_with_secrets -> {fdist alice_view_with_secrets}]
+    [bridge_alice_view_joint_to_fdist :
+    SDistr alice_view_joint -> {fdist alice_view_joint}]
     will round-trip through to transfer SSProve probabilities (which
-    live over [chInterp alice_view_with_secrets_ct =
-    'I_index_alice_view_with_secrets]) onto infotheo's
-    [{fdist alice_view_with_secrets}].
+    live over [chInterp alice_view_joint_ct =
+    'I_index_alice_view_joint]) onto infotheo's
+    [{fdist alice_view_joint}].
     Kind: canonical.
     Why: same reason as Task 10's [alice_view_ct].  SSProve's
     [choice_type] is a closed inductive that does not directly cover
     finType products; routing through [chFin (#|...|)] is the standard
-    idiom.  The [alice_view_with_secrets_to_ct] /
-    [alice_view_with_secrets_of_ct] bijection below mediates between
+    idiom.  The [alice_view_joint_to_ct] /
+    [alice_view_joint_of_ct] bijection below mediates between
     the two views.
     Naming: <type>_ct uses the SSProve-side suffix _ct (choice_type)
     matching Task 10's [alice_view_ct].
-    Used by: bridge_alice_view_with_secrets_to_fdist (Task B), Task C's
+    Used by: bridge_alice_view_joint_to_fdist (Task B), Task C's
     extended bridge over predictor composition. *)
-Definition alice_view_with_secrets_ct : choice_type :=
-  chFin index_alice_view_with_secrets.
+Definition alice_view_joint_ct : choice_type :=
+  chFin index_alice_view_joint.
 
-(** alice_view_with_secrets_to_ct, alice_view_with_secrets_of_ct -
-    bijection between the MathComp finType [alice_view_with_secrets]
-    and the SSProve-side [alice_view_with_secrets_ct =
-    chFin index_alice_view_with_secrets =
-    'I_index_alice_view_with_secrets], realised via MathComp's
+(** alice_view_joint_to_ct, alice_view_joint_of_ct -
+    bijection between the MathComp finType [alice_view_joint]
+    and the SSProve-side [alice_view_joint_ct =
+    chFin index_alice_view_joint =
+    'I_index_alice_view_joint], realised via MathComp's
     [enum_rank] and [enum_val] on the canonical enumeration.
     Kind: helper.
-    Why: Task B builds an [{fdist alice_view_with_secrets}] by walking
-    the SSProve [Pr_code] over [alice_view_with_secrets_ct] and
+    Why: Task B builds an [{fdist alice_view_joint}] by walking
+    the SSProve [Pr_code] over [alice_view_joint_ct] and
     re-indexing each probability against the corresponding MathComp
     finType element.  These two functions are the re-indexing
     primitive; the [_K] cancel lemmas below guarantee the round-trip
     is the identity.
     Naming: <type>_to_ct / <type>_of_ct mirrors Task 10's
     [alice_view_to_ct] / [alice_view_of_ct].
-    Used by: bridge_alice_view_with_secrets_to_fdist (Task B), Task C's
+    Used by: bridge_alice_view_joint_to_fdist (Task B), Task C's
     extended bridge, the support-enumeration obligation. *)
-Definition alice_view_with_secrets_to_ct
-    (v : alice_view_with_secrets) : alice_view_with_secrets_ct :=
+Definition alice_view_joint_to_ct
+    (v : alice_view_joint) : alice_view_joint_ct :=
   enum_rank v.
 
-(** alice_view_with_secrets_of_ct - companion to
-    [alice_view_with_secrets_to_ct]: send an SSProve-side index
-    [i : alice_view_with_secrets_ct] back to its
-    [alice_view_with_secrets] inhabitant via [enum_val].
+(** alice_view_joint_of_ct - companion to
+    [alice_view_joint_to_ct]: send an SSProve-side index
+    [i : alice_view_joint_ct] back to its
+    [alice_view_joint] inhabitant via [enum_val].
     Kind: helper.
     Why: same as the [_to_ct] direction; together they form the
     bijection mediating between the SSProve [chFin]-indexed view and
@@ -1604,101 +1587,101 @@ Definition alice_view_with_secrets_to_ct
     [_of_ct] suffix names the inverse direction of [_to_ct] for the
     SSProve [choice_type] avatar.  Project-local, not a MathComp
     suffix-table entry.
-    Used by: bridge_alice_view_with_secrets_to_fdist (Task B),
-    [alice_view_with_secrets_to_ct_K],
-    [alice_view_with_secrets_of_ct_K]. *)
-Definition alice_view_with_secrets_of_ct
-    (i : alice_view_with_secrets_ct) : alice_view_with_secrets :=
+    Used by: bridge_alice_view_joint_to_fdist (Task B),
+    [alice_view_joint_to_ct_K],
+    [alice_view_joint_of_ct_K]. *)
+Definition alice_view_joint_of_ct
+    (i : alice_view_joint_ct) : alice_view_joint :=
   enum_val i.
 
-(** alice_view_with_secrets_to_ct_K - cancel law:
-    [alice_view_with_secrets_of_ct] is a left inverse of
-    [alice_view_with_secrets_to_ct].  Follows from MathComp's
+(** alice_view_joint_to_ct_K - cancel law:
+    [alice_view_joint_of_ct] is a left inverse of
+    [alice_view_joint_to_ct].  Follows from MathComp's
     [enum_rankK].
     Kind: cancellation.
     Why: Task C's extended bridge over predictor composition needs to
     argue that summing an SSProve density over
-    [alice_view_with_secrets_ct] and re-indexing back through
-    [alice_view_with_secrets_of_ct] recovers the original
-    [alice_view_with_secrets] support; the cancel pair is the algebraic
+    [alice_view_joint_ct] and re-indexing back through
+    [alice_view_joint_of_ct] recovers the original
+    [alice_view_joint] support; the cancel pair is the algebraic
     content of that argument.
     Used by: Task C's bridge correctness lemma. *)
-Lemma alice_view_with_secrets_to_ct_K :
-  cancel alice_view_with_secrets_to_ct alice_view_with_secrets_of_ct.
+Lemma alice_view_joint_to_ct_K :
+  cancel alice_view_joint_to_ct alice_view_joint_of_ct.
 Proof. exact: enum_rankK. Qed.
 
-(** alice_view_with_secrets_of_ct_K - companion cancel:
-    [alice_view_with_secrets_to_ct] is a left inverse of
-    [alice_view_with_secrets_of_ct].  Follows from MathComp's
+(** alice_view_joint_of_ct_K - companion cancel:
+    [alice_view_joint_to_ct] is a left inverse of
+    [alice_view_joint_of_ct].  Follows from MathComp's
     [enum_valK].
     Kind: cancellation.
-    Why: same role as [alice_view_with_secrets_to_ct_K] but for the
+    Why: same role as [alice_view_joint_to_ct_K] but for the
     inverse direction; together they make the pair a bijection (used
     by Task C to justify the [psum] / [bigop] re-indexing). *)
-Lemma alice_view_with_secrets_of_ct_K :
-  cancel alice_view_with_secrets_of_ct alice_view_with_secrets_to_ct.
+Lemma alice_view_joint_of_ct_K :
+  cancel alice_view_joint_of_ct alice_view_joint_to_ct.
 Proof. exact: enum_valK. Qed.
 
-(** alice_view_with_secrets_ct_card,
-    alice_view_with_secrets_card_index - cardinality coherence:
-    [alice_view_with_secrets_ct] interprets as
-    ['I_index_alice_view_with_secrets] which has cardinality
-    [index_alice_view_with_secrets], and [alice_view_with_secrets]
+(** alice_view_joint_ct_card,
+    alice_view_joint_card_index - cardinality coherence:
+    [alice_view_joint_ct] interprets as
+    ['I_index_alice_view_joint] which has cardinality
+    [index_alice_view_joint], and [alice_view_joint]
     itself has the same cardinality by definition of
-    [index_alice_view_with_secrets].
+    [index_alice_view_joint].
     Kind: coherence.
     Why: Task C's total-mass bridge relates [psum] over [chInterp
-    alice_view_with_secrets_ct] (the SSProve semantics output) to
-    [\sum_(v : alice_view_with_secrets) ...] (the infotheo target);
+    alice_view_joint_ct] (the SSProve semantics output) to
+    [\sum_(v : alice_view_joint) ...] (the infotheo target);
     these two facts let us swap the indexing finType under the bigop /
     psum without changing the value.
     Used by: Task C's extended bridge correctness. *)
-Lemma alice_view_with_secrets_ct_card :
-  #|alice_view_with_secrets_ct| = index_alice_view_with_secrets.
+Lemma alice_view_joint_ct_card :
+  #|alice_view_joint_ct| = index_alice_view_joint.
 Proof. exact: card_ord. Qed.
 
-(** alice_view_with_secrets_card_index - cardinality of the
-    infotheo-side [alice_view_with_secrets] equals
-    [index_alice_view_with_secrets] by definition.  Trivial by
+(** alice_view_joint_card_index - cardinality of the
+    infotheo-side [alice_view_joint] equals
+    [index_alice_view_joint] by definition.  Trivial by
     reflexivity.
     Kind: coherence.
     Why: same role as Task 10's [alice_view_card_index].  When the
     Task C bridge re-indexes a [psum] over the SSProve-side
-    [alice_view_with_secrets_ct] back to a
-    [\sum_(v : alice_view_with_secrets)], this lemma is the cardinality
+    [alice_view_joint_ct] back to a
+    [\sum_(v : alice_view_joint)], this lemma is the cardinality
     side of that re-indexing.
     Naming: _card_index records "cardinality equals the named index
     parameter"; project-local convention, not a MathComp suffix-table
     entry.
     Used by: Task C's extended bridge. *)
-Lemma alice_view_with_secrets_card_index :
-  #|alice_view_with_secrets| = index_alice_view_with_secrets.
+Lemma alice_view_joint_card_index :
+  #|alice_view_joint| = index_alice_view_joint.
 Proof. by []. Qed.
 
 #[local] Open Scope fdist_scope.
 
 (** bridge_psum_to_bigop_with_secrets - the elementary identity
-    converting SSProve's [psum] over an [alice_view_with_secrets]-valued
+    converting SSProve's [psum] over an [alice_view_joint]-valued
     sub-distribution into MathComp's
-    [\sum_(v : alice_view_with_secrets)].  On a [finType] both
+    [\sum_(v : alice_view_joint)].  On a [finType] both
     quantities enumerate the same support, and [psum f = \sum_i |f i|]
     from realsum collapses to the plain sum because [distr.mu mu] is
     non-negative.
     Kind: helper bridge.
     Why: Task B of [~/.claude/plans/sprightly-finding-robin.md].  The
     SSProve denotational semantics produces a [distr R
-    alice_view_with_secrets] via [Pr_fst]; the infotheo target side
-    wants an [\sum_(v : alice_view_with_secrets)] indexed bigop.  This
+    alice_view_joint] via [Pr_fst]; the infotheo target side
+    wants an [\sum_(v : alice_view_joint)] indexed bigop.  This
     lemma is the only place where the two summation conventions meet
     for the wider carrier (Task 12's [bridge_psum_to_bigop] does the
     same job for the narrower [alice_view]).
     Naming: project-local; mirrors Task 12's [bridge_psum_to_bigop]
     with the [_with_secrets] suffix.
-    Used by: bridge_alice_view_with_secrets_to_fdist, Task C's
+    Used by: bridge_alice_view_joint_to_fdist, Task C's
     extended bridge correctness. *)
 Lemma bridge_psum_to_bigop_with_secrets
-    (mu : distr.distr R alice_view_with_secrets) :
-  \sum_(v : alice_view_with_secrets) (distr.mu mu) v
+    (mu : distr.distr R alice_view_joint) :
+  \sum_(v : alice_view_joint) (distr.mu mu) v
     = psum (distr.mu mu).
 Proof.
 rewrite psum_fin.
@@ -1706,11 +1689,11 @@ apply: eq_bigr => a _.
 by rewrite ger0_norm //; apply: distr.ge0_mu.
 Qed.
 
-(** bridge_alice_view_with_secrets_to_fdist - the SDistr-to-fdist
+(** bridge_alice_view_joint_to_fdist - the SDistr-to-fdist
     bridge at the extended carrier.  Given a sub-distribution
-    [mu : distr R alice_view_with_secrets] and a proof that its total
+    [mu : distr R alice_view_joint] and a proof that its total
     mass is one, produce an infotheo-side
-    [{fdist alice_view_with_secrets}] by wrapping [distr.mu mu] in an
+    [{fdist alice_view_joint}] by wrapping [distr.mu mu] in an
     [ffun] and discharging the [FDist.make] obligations:
     non-negativity comes from [distr.ge0_mu], summation-to-one comes
     from [bridge_psum_to_bigop_with_secrets] composed with the mass
@@ -1722,16 +1705,15 @@ Qed.
     sub-distribution of this shape (the joint distribution of the
     game's samples plus the predictor's t_msg output), and the IT
     residual analysis (Task F) will operate on the resulting
-    [{fdist alice_view_with_secrets}].
+    [{fdist alice_view_joint}].
     Naming: project-local.  Mirrors Task 12's [bridge_leak_to_fdist]
     with the wider carrier suffix.
-    Used by: Task C's [bridge_predictor_compose_to_fdist],
-    [bridge_alice_view_with_secrets_to_fdistE], Task H's
-    [Pr_guess_indicator_le_inv_msg_card]. *)
-Definition bridge_alice_view_with_secrets_to_fdist
-    (mu : distr.distr R alice_view_with_secrets)
+    Used by: [bridge_alice_view_joint_to_fdistE], T1 V_2-aware
+    rebuild. *)
+Definition bridge_alice_view_joint_to_fdist
+    (mu : distr.distr R alice_view_joint)
     (Hmass : psum (distr.mu mu) = 1) :
-  R.-fdist alice_view_with_secrets.
+  R.-fdist alice_view_joint.
 Proof.
 unshelve eapply FDist.make.
 - exact: [ffun v => (distr.mu mu) v].
@@ -1740,9 +1722,9 @@ unshelve eapply FDist.make.
   by rewrite bridge_psum_to_bigop_with_secrets.
 Defined.
 
-(** bridge_alice_view_with_secrets_to_fdistE - elementwise equation for
+(** bridge_alice_view_joint_to_fdistE - elementwise equation for
     the bridge.  Spells out how to evaluate the resulting
-    [{fdist alice_view_with_secrets}] at a point: it is just
+    [{fdist alice_view_joint}] at a point: it is just
     [distr.mu mu] of the same point.
     Kind: simplification.
     Why: lets downstream proofs unfold the bridge to expose the
@@ -1750,447 +1732,49 @@ Defined.
     [ffun] wrapper.  Mirrors Task 12's [bridge_leak_to_fdistE].
     Naming: trailing [E] follows MathComp convention for elementwise /
     extensional equations.
-    Used by: Task C's [Pr_predictor_compose_eq_fdist], Task H's
-    [Pr_guess_indicator_le_inv_msg_card]. *)
-Lemma bridge_alice_view_with_secrets_to_fdistE
-    (mu : distr.distr R alice_view_with_secrets)
-    (Hmass : psum (distr.mu mu) = 1) (v : alice_view_with_secrets) :
-  bridge_alice_view_with_secrets_to_fdist Hmass v = (distr.mu mu) v.
-Proof. by rewrite /bridge_alice_view_with_secrets_to_fdist /= ffunE. Qed.
+    Used by: T1 V_2-aware rebuild. *)
+Lemma bridge_alice_view_joint_to_fdistE
+    (mu : distr.distr R alice_view_joint)
+    (Hmass : psum (distr.mu mu) = 1) (v : alice_view_joint) :
+  bridge_alice_view_joint_to_fdist Hmass v = (distr.mu mu) v.
+Proof. by rewrite /bridge_alice_view_joint_to_fdist /= ffunE. Qed.
 
 (* Task B verify clause: the bridge type-checks at the expected
    signature.  Mirrors Task 12's verify [Check] on
    [bridge_leak_to_fdist]. *)
-Check bridge_alice_view_with_secrets_to_fdist :
-  forall (mu : distr.distr R alice_view_with_secrets),
-    psum (distr.mu mu) = 1 -> R.-fdist alice_view_with_secrets.
+Check bridge_alice_view_joint_to_fdist :
+  forall (mu : distr.distr R alice_view_joint),
+    psum (distr.mu mu) = 1 -> R.-fdist alice_view_joint.
 
 (* ================================================================== *)
-(* Task C: extended bridge over predictor composition                  *)
-(* ================================================================== *)
-
-(** t_msg_carrier - section parameter for the predictor's [t_msg]
-    output as a [finType].  The DSDP predictor in the [t_msg]-output
-    framing of Task G exports an SSProve [package] with codomain
-    [t_msg : choice_type]; lifting that output into the joint sample
-    space for the IT residual analysis requires a [finType] avatar of
-    the predictor's output range.  Concrete instantiations identify
-    [t_msg_carrier] with [plain AHE] (the plaintext-scalar carrier)
-    and [index_t_msg] with [index_msg].
-    Kind: parameter.
-    Why: Task C of [~/.claude/plans/sprightly-finding-robin.md]
-    (Fallback R3B).  Task B's [bridge_alice_view_with_secrets_to_fdist]
-    operates on the sample-space carrier [alice_view_with_secrets]
-    alone.  The Task H residual bound is on the joint event
-    [predictor-output = V_2_sample], so the bridge's target carrier
-    needs to be the joint product
-    [alice_view_with_secrets * t_msg_carrier].  Naming
-    [t_msg_carrier] mirrors [V_2_carrier], [V_3_carrier],
-    [Dk_a_carrier] above; the section parameter shape lets Task G
-    instantiate it without having the [t_msg]-output predictor type
-    defined yet.
-    Used by: alice_view_predictor_joint, Task H's residual bound,
-    Task G's predictor framework. *)
-Variable t_msg_carrier : finType.
-
-(** index_t_msg, t_msg_card - cardinality index for [t_msg_carrier]
-    and the bridge hypothesis tying [#|t_msg_carrier|] to it.  Same
-    pattern as [Renc] / [index_renc] / [renc_card] at the top of
-    this section, and as [V_2_carrier] / [index_V_2] / [V_2_card] in
-    Task B.
-    Kind: parameter + hypothesis.
-    Why: the Task H bound
-    [Pr [ (predictor o game_leak).output = V_2_sample ] <= #|R|^-1]
-    will marginalise over [t_msg_carrier] inhabitants; having a
-    [nat] index for cardinality keeps the SSProve-side [chFin]
-    embedding (see [alice_view_predictor_joint_ct] below) uniform
-    with the rest of the section.
-    Used by: alice_view_predictor_joint_ct, Task H. *)
-Variable index_t_msg : nat.
-Hypothesis t_msg_card : #|t_msg_carrier| = index_t_msg.
-
-(** alice_view_predictor_joint - the joint sample space of the
-    game's protocol-side samples (the eleven-component
-    [alice_view_with_secrets] carrier from Task B) paired with the
-    predictor's [t_msg]-typed output.  This is the carrier that the
-    Task C bridge produces an [{fdist _}] over, and the carrier on
-    which the Task H residual event [predictor-output = V_2_sample]
-    becomes a measurable predicate.
-    Kind: canonical.
-    Why: Task C of [~/.claude/plans/sprightly-finding-robin.md]
-    (Fallback R3B).  Task 12's [bridge_correct] transfers SSProve
-    probabilities for [game_leak] alone; Task H's residual bound is
-    on the composed game-predictor execution, so the bridge needs to
-    operate at a wider carrier that includes the predictor's output.
-    Building the carrier as a finType product keeps the HB
-    canonical-structure resolution automatic and matches the
-    [alice_view * V_2_carrier * V_3_carrier] pattern that Task B
-    already established.
-    Naming: [_predictor_joint] reads "the protocol joint sample
-    space extended with the predictor's output".  Project-local; not
-    a MathComp suffix-table entry.
-    Used by: [bridge_predictor_compose_to_fdist],
-    [Pr_predictor_compose_eq_fdist], Task H's residual bound. *)
-Definition alice_view_predictor_joint : finType :=
-  (alice_view_with_secrets * t_msg_carrier)%type.
-
-(* Task C verify clauses: the joint carrier inhabits finType and
-   choiceType simultaneously (HB instance resolution through product
-   types is automatic). *)
-Check (alice_view_predictor_joint : finType).
-Check (alice_view_predictor_joint : choiceType).
-
-(** index_alice_view_predictor_joint - cardinality of
-    [alice_view_predictor_joint] as a [nat].  Named once so the
-    SSProve-side [chFin] embedding below can refer to it
-    uniformly.
-    Kind: canonical.
-    Why: mirrors Task B's [index_alice_view_with_secrets].  SSProve's
-    [choice_type] GADT uses [chFin (n : nat)] for finite carriers;
-    naming the cardinality lets us state the cardinality coherence
-    lemmas cleanly.
-    Naming: [index_] prefix mirrors Task B's
-    [index_alice_view_with_secrets]; project-local convention for
-    SSProve [chFin]-indexed cardinality parameters.  MathComp-canonical
-    alternative would be [alice_view_predictor_joint_card], but that
-    suffix is reserved here for the cardinality-coherence lemma
-    [alice_view_predictor_joint_ct_card] below, so [index_] is used
-    for the [nat] value itself to keep the two roles distinct.
-    Used by: alice_view_predictor_joint_ct,
-    alice_view_predictor_joint_ct_card,
-    alice_view_predictor_joint_card_index, Task C bridge. *)
-Definition index_alice_view_predictor_joint : nat :=
-  #|alice_view_predictor_joint|.
-
-(** alice_view_predictor_joint_ct - the SSProve-side [choice_type]
-    avatar of [alice_view_predictor_joint], lifted as a single
-    [chFin] of the joint cardinality.  Mirrors Task B's
-    [alice_view_with_secrets_ct].
-    Kind: canonical.
-    Why: Task H's residual bound on the predictor-composition
-    distribution lives semantically over the SSProve [choice_type]
-    side ([chInterp alice_view_predictor_joint_ct =
-    'I_index_alice_view_predictor_joint]); routing through this
-    embedding mediates with the infotheo finType-indexed [{fdist _}]
-    side via [enum_rank] / [enum_val].
-    Naming: [_ct] is a project-local abbreviation for the SSProve
-    [choice_type] embedding, mirroring Task B's
-    [alice_view_with_secrets_ct] and Task 10's [alice_view_ct].
-    Not a MathComp suffix-table entry; no idiomatic MathComp
-    alternative exists for this SSProve-specific carrier role.
-    Used by: alice_view_predictor_joint_to_ct,
-    alice_view_predictor_joint_of_ct,
-    alice_view_predictor_joint_ct_card, Task H's
-    [Pr_guess_indicator_le_inv_msg_card]. *)
-Definition alice_view_predictor_joint_ct : choice_type :=
-  chFin index_alice_view_predictor_joint.
-
-(** alice_view_predictor_joint_to_ct - the forward direction of the
-    bijection between the MathComp finType
-    [alice_view_predictor_joint] and its SSProve avatar
-    [alice_view_predictor_joint_ct =
-    'I_index_alice_view_predictor_joint], realised via
-    [enum_rank].
-    Kind: helper.
-    Why: Task H's re-indexing argument between the SSProve
-    [psum]-side and the infotheo [\sum_]-side uses this map to send
-    finType inhabitants to their SSProve ordinal index.  Same role
-    as Task B's [alice_view_with_secrets_to_ct].
-    Naming: [_to_ct] is a project-local suffix mirroring Task B's
-    [alice_view_with_secrets_to_ct] and Task 10's [alice_view_to_ct];
-    [_to_ct] reads "forward direction into the SSProve choice_type
-    avatar".  Not a MathComp suffix-table entry.
-    Used by: alice_view_predictor_joint_to_ct_K,
-    alice_view_predictor_joint_of_ct_K, Task H's
-    [Pr_guess_indicator_le_inv_msg_card]. *)
-Definition alice_view_predictor_joint_to_ct
-    (v : alice_view_predictor_joint) : alice_view_predictor_joint_ct :=
-  enum_rank v.
-
-(** alice_view_predictor_joint_of_ct - the inverse direction of the
-    bijection: send an SSProve-side index
-    [i : alice_view_predictor_joint_ct] back to its
-    [alice_view_predictor_joint] inhabitant via [enum_val].
-    Kind: helper.
-    Why: companion to [alice_view_predictor_joint_to_ct]; together
-    they form the bijection mediating between the SSProve [chFin]-
-    indexed view and the infotheo [finType]-indexed view at the
-    wider predictor-composition carrier.
-    Naming: [_of_ct] is a project-local suffix mirroring Task B's
-    [alice_view_with_secrets_of_ct] and Task 10's [alice_view_of_ct];
-    [_of_ct] reads "inverse direction out of the SSProve choice_type
-    avatar".  Not a MathComp suffix-table entry.
-    Used by: alice_view_predictor_joint_to_ct_K,
-    alice_view_predictor_joint_of_ct_K, Task H's
-    [Pr_guess_indicator_le_inv_msg_card]. *)
-Definition alice_view_predictor_joint_of_ct
-    (i : alice_view_predictor_joint_ct) : alice_view_predictor_joint :=
-  enum_val i.
-
-(** alice_view_predictor_joint_to_ct_K - cancel law:
-    [alice_view_predictor_joint_of_ct] is a left inverse of
-    [alice_view_predictor_joint_to_ct].  Follows from MathComp's
-    [enum_rankK].
-    Kind: helper.
-    Why: Task H's re-indexing argument needs the forward-direction
-    cancel to argue that summing an SSProve density over
-    [alice_view_predictor_joint_ct] and re-indexing back through
-    [alice_view_predictor_joint_of_ct] recovers the original
-    [alice_view_predictor_joint] support.
-    Naming: trailing [_K] is the MathComp suffix-table entry for a
-    cancel law (see [enum_rankK], [enum_valK]).  The leading main
-    symbol [alice_view_predictor_joint_to_ct] is project-local; see
-    the [Naming:] line on that definition.
-    Used by: Task H's [Pr_guess_indicator_le_inv_msg_card]. *)
-Lemma alice_view_predictor_joint_to_ct_K :
-  cancel alice_view_predictor_joint_to_ct alice_view_predictor_joint_of_ct.
-Proof. exact: enum_rankK. Qed.
-
-(** alice_view_predictor_joint_of_ct_K - companion cancel:
-    [alice_view_predictor_joint_to_ct] is a left inverse of
-    [alice_view_predictor_joint_of_ct].  Follows from MathComp's
-    [enum_valK].
-    Kind: helper.
-    Why: same role as [alice_view_predictor_joint_to_ct_K] but for
-    the inverse direction; together the two cancel lemmas make the
-    pair a bijection, which Task H exploits to justify a [psum] /
-    [bigop] re-indexing across the SSProve / infotheo boundary.
-    Naming: trailing [_K] is the MathComp cancel-law suffix; main
-    symbol [alice_view_predictor_joint_of_ct] is project-local.
-    Used by: Task H's [Pr_guess_indicator_le_inv_msg_card]. *)
-Lemma alice_view_predictor_joint_of_ct_K :
-  cancel alice_view_predictor_joint_of_ct alice_view_predictor_joint_to_ct.
-Proof. exact: enum_valK. Qed.
-
-(** alice_view_predictor_joint_ct_card - cardinality of the SSProve
-    [choice_type] avatar.  [alice_view_predictor_joint_ct]
-    interprets as ['I_index_alice_view_predictor_joint] which has
-    cardinality [index_alice_view_predictor_joint] by [card_ord].
-    Kind: helper.
-    Why: Task H's residual bound rewrites [psum] over [chInterp
-    alice_view_predictor_joint_ct] (the SSProve semantics output)
-    against [\sum_(v : alice_view_predictor_joint) ...] (the infotheo
-    target); this lemma is the cardinality coherence needed to swap
-    the indexing finType under the bigop / psum without changing the
-    value.
-    Naming: trailing [_card] is the MathComp suffix-table entry for
-    a cardinality equality of the form [#|S| = n].  Main symbol
-    [alice_view_predictor_joint_ct] is project-local; see the
-    [Naming:] line on that definition.
-    Used by: Task H's [Pr_guess_indicator_le_inv_msg_card]. *)
-Lemma alice_view_predictor_joint_ct_card :
-  #|alice_view_predictor_joint_ct| = index_alice_view_predictor_joint.
-Proof. exact: card_ord. Qed.
-
-(** alice_view_predictor_joint_card_index - cardinality of the
-    infotheo-side [alice_view_predictor_joint] equals
-    [index_alice_view_predictor_joint] by definition.  Trivial by
-    reflexivity.
-    Kind: helper.
-    Why: companion to [alice_view_predictor_joint_ct_card] for the
-    finType side.  When Task H re-indexes a [psum] over the
-    SSProve-side [alice_view_predictor_joint_ct] back to a
-    [\sum_(v : alice_view_predictor_joint)], this lemma is the
-    cardinality side of that re-indexing.
-    Naming: [_card_index] is the project-local cardinality-equals-
-    named-index convention mirroring Task B's
-    [alice_view_with_secrets_card_index] and Task 10's
-    [alice_view_card_index].  The [_card] suffix is the MathComp
-    cardinality-equality marker; the trailing [_index] qualifies the
-    right-hand-side as the named [nat] parameter
-    [index_alice_view_predictor_joint] rather than an anonymous nat,
-    distinguishing this lemma from
-    [alice_view_predictor_joint_ct_card] which targets the SSProve
-    choice_type avatar.
-    Used by: Task H's [Pr_guess_indicator_le_inv_msg_card]. *)
-Lemma alice_view_predictor_joint_card_index :
-  #|alice_view_predictor_joint| = index_alice_view_predictor_joint.
-Proof. by []. Qed.
-
-(** bridge_psum_to_bigop_predictor_compose - the elementary identity
-    converting SSProve's [psum] over an
-    [alice_view_predictor_joint]-valued sub-distribution into
-    MathComp's [\sum_(v : alice_view_predictor_joint)].  On a
-    [finType] both quantities enumerate the same support, and
-    [psum f = \sum_i |f i|] from realsum collapses to the plain sum
-    because [distr.mu mu] is non-negative.
-    Kind: helper bridge.
-    Why: Task C of [~/.claude/plans/sprightly-finding-robin.md].
-    SSProve's denotational semantics produces a [distr R
-    alice_view_predictor_joint] via [Pr_fst] (after the predictor's
-    output and the game's protocol samples are projected jointly);
-    the infotheo target side wants an
-    [\sum_(v : alice_view_predictor_joint)] indexed bigop.  This
-    lemma is the only place where the two summation conventions
-    meet for the predictor-composition carrier.
-    Naming: project-local; mirrors Task B's
-    [bridge_psum_to_bigop_with_secrets] with the [_predictor_compose]
-    suffix.
-    Used by: bridge_predictor_compose_to_fdist,
-    Pr_predictor_compose_eq_fdist. *)
-Lemma bridge_psum_to_bigop_predictor_compose
-    (mu : distr.distr R alice_view_predictor_joint) :
-  \sum_(v : alice_view_predictor_joint) (distr.mu mu) v
-    = psum (distr.mu mu).
-Proof.
-rewrite psum_fin.
-apply: eq_bigr => a _.
-by rewrite ger0_norm //; apply: distr.ge0_mu.
-Qed.
-
-(** bridge_predictor_compose_to_fdist - the SDistr-to-fdist bridge
-    at the predictor-composition carrier.  Given a sub-distribution
-    [mu : distr R alice_view_predictor_joint] (the joint
-    distribution over the game's [alice_view_with_secrets] samples
-    paired with the predictor's [t_msg_carrier] output) and a proof
-    that its total mass is one, produce an infotheo-side
-    [{fdist alice_view_predictor_joint}] by wrapping [distr.mu mu]
-    in an [ffun] and discharging the [FDist.make] obligations:
-    non-negativity comes from [distr.ge0_mu], summation-to-one comes
-    from [bridge_psum_to_bigop_predictor_compose] composed with the
-    mass hypothesis.
-    Kind: bridge construction.
-    Why: Task C of [~/.claude/plans/sprightly-finding-robin.md]
-    (Fallback R3B).  Task 12's [bridge_correct] transfers SSProve
-    probabilities for the game-only carrier [alice_view]; Task B's
-    [bridge_alice_view_with_secrets_to_fdist] transfers for the
-    game-side eleven-component carrier
-    [alice_view_with_secrets].  The present bridge extends both to
-    the joint game-plus-predictor carrier.  The new bridge
-    subsumes Task 12's [bridge_correct] in the sense that the
-    identity-predictor specialisation recovers Task 12's bridge
-    structurally (same FDist.make pattern, same psum-to-bigop
-    plumbing).
-    The mass hypothesis [Hmass] is parametric: consumers (Task H)
-    discharge it from [LosslessCode] resolution on the resolved
-    [predictor o game_leak] run code, which decomposes into Task A's
-    [LosslessCode_game_leak] (the game side) and Fallback R5A's
-    [LosslessCode_predictor] (the predictor side); the composition
-    is lossless by [Lossless_bind] machinery, and the [Pr_fst]
-    pushforward preserves total mass.
-    Naming: project-local; [bridge_<source>_<target>_to_fdist]
-    follows Task 12's and Task B's pattern.
-    Used by: [bridge_predictor_compose_to_fdistE],
-    [Pr_predictor_compose_eq_fdist], Task H's residual bound. *)
-Definition bridge_predictor_compose_to_fdist
-    (mu : distr.distr R alice_view_predictor_joint)
-    (Hmass : psum (distr.mu mu) = 1) :
-  R.-fdist alice_view_predictor_joint.
-Proof.
-unshelve eapply FDist.make.
-- exact: [ffun v => (distr.mu mu) v].
-- by move=> a; rewrite ffunE; apply: distr.ge0_mu.
-- under eq_bigr=> a _ do rewrite ffunE.
-  by rewrite bridge_psum_to_bigop_predictor_compose.
-Defined.
-
-(** bridge_predictor_compose_to_fdistE - elementwise equation for
-    the bridge.  Spells out how to evaluate the resulting
-    [{fdist alice_view_predictor_joint}] at a point: it is just
-    [distr.mu mu] of the same point.
-    Kind: simplification.
-    Why: lets downstream proofs (Task H, Pr_predictor_compose_eq_fdist)
-    unfold the bridge to expose the underlying SSProve density
-    without forcing them to manage the [ffun] wrapper.  Mirrors
-    Task 12's [bridge_leak_to_fdistE] and Task B's
-    [bridge_alice_view_with_secrets_to_fdistE].
-    Naming: trailing [E] follows MathComp convention for elementwise
-    / extensional equations.
-    Used by: Pr_predictor_compose_eq_fdist, Task H. *)
-Lemma bridge_predictor_compose_to_fdistE
-    (mu : distr.distr R alice_view_predictor_joint)
-    (Hmass : psum (distr.mu mu) = 1) (v : alice_view_predictor_joint) :
-  bridge_predictor_compose_to_fdist Hmass v = (distr.mu mu) v.
-Proof. by rewrite /bridge_predictor_compose_to_fdist /= ffunE. Qed.
-
-(** Pr_predictor_compose_eq_fdist - the bridge preserves event
-    probabilities at the predictor-composition carrier.  For any
-    predicate [P : pred alice_view_predictor_joint], the SSProve-side
-    conditional sum equals the infotheo-side [Pr] over the
-    corresponding set [[set v | P v]].
-    Kind: helper.
-    Why: Task C of [~/.claude/plans/sprightly-finding-robin.md]
-    (Fallback R3B).  This is the bookkeeping lemma that lets
-    Task H state its residual goal first on the SSProve side (where
-    the upstream IND-CPA hops and the predictor's [t_msg] output
-    live) and then transfer through the bridge to the infotheo
-    [{fdist alice_view_predictor_joint}] side (where the IT
-    residual lemmas like [Pr_dsdp_sol_uniform_ring] from Task E
-    operate).  The proof unfolds [Pr d E = \sum_(a in E) d a],
-    rewrites the set membership against the predicate, and uses
-    [bridge_predictor_compose_to_fdistE] to expose the underlying
-    [distr.mu mu].
-    Subsumption claim.  For [predictor = identity] and predicates
-    that project away the [t_msg_carrier] component, the present
-    lemma reduces to Task 12's [bridge_correct] up to a
-    deterministic post-processing of the bridged fdist (the
-    [t_msg_carrier] marginal collapses to a Dirac at the identity-
-    predictor's deterministic output).  Tasks D-H exploit this
-    subsumption by reusing the proof structure rather than
-    reinstating [bridge_correct] at the wider carrier.
-    Naming: project-local; [Pr_<bridge>_eq_fdist] follows Task 12's
-    [bridge_correct] pattern with the [_predictor_compose] prefix
-    aligned to the wider carrier and an explicit [_eq_fdist] suffix
-    spelling out the transfer direction (SSProve [Pr] equals the
-    infotheo [Pr] of the bridged fdist).
-    Used by: Task H's [Pr_guess_indicator_le_inv_msg_card]. *)
-Lemma Pr_predictor_compose_eq_fdist
-    (mu : distr.distr R alice_view_predictor_joint)
-    (Hmass : psum (distr.mu mu) = 1)
-    (P : pred alice_view_predictor_joint) :
-  \sum_(v : alice_view_predictor_joint | P v) (distr.mu mu) v
-    = Pr (bridge_predictor_compose_to_fdist Hmass) [set v | P v].
-Proof.
-rewrite /Pr.
-apply: eq_big => [a|a _].
-- by rewrite inE.
-- by rewrite bridge_predictor_compose_to_fdistE.
-Qed.
-
-(* Task C verify clauses: the bridge type-checks at the expected
-   signatures, and the correctness lemma transfers SSProve [Pr]
-   statements to the infotheo side at the joint carrier.  Mirrors
-   Task 12's and Task B's verify [Check]s. *)
-Check bridge_predictor_compose_to_fdist :
-  forall (mu : distr.distr R alice_view_predictor_joint),
-    psum (distr.mu mu) = 1 -> R.-fdist alice_view_predictor_joint.
-
-Check Pr_predictor_compose_eq_fdist :
-  forall (mu : distr.distr R alice_view_predictor_joint)
-         (Hmass : psum (distr.mu mu) = 1)
-         (P : pred alice_view_predictor_joint),
-    \sum_(v : alice_view_predictor_joint | P v) (distr.mu mu) v
-      = Pr (bridge_predictor_compose_to_fdist Hmass) [set v | P v].
-
-(* ================================================================== *)
-(* Task D: protocol random variables on alice_view_with_secrets       *)
+(* Task D: protocol random variables on alice_view_joint       *)
 (* ================================================================== *)
 
 #[local] Open Scope proba_scope.
 
-(** fdist_game_leak_with_secrets - the joint probability distribution
-    over [alice_view_with_secrets].  Morally obtained by composing
+(** fdist_game_leak_joint - the joint probability distribution
+    over [alice_view_joint].  Morally obtained by composing
     Task A's [LosslessCode_game_leak] (which discharges the [psum] mass
-    obligation) with Task B's [bridge_alice_view_with_secrets_to_fdist]
+    obligation) with Task B's [bridge_alice_view_joint_to_fdist]
     (which lifts an SSProve [distr] into an infotheo [{fdist _}]) on a
     modified leak code that returns the eleven-tuple sample instead of
     the four-ciphertext list.
     Kind: section parameter.
     Why: Task D of [~/.claude/plans/sprightly-finding-robin.md].  The
     protocol random variables [V_1, V_2, ..., D_3, Z_rand] are projected
-    from [alice_view_with_secrets] under this joint distribution.
+    from [alice_view_joint] under this joint distribution.
     Carrying the fdist as a section [Variable] (rather than constructing
     it explicitly from [game_leak]'s raw_code) keeps Task D parametric
     in the bridge instantiation: Task F discharges the bridge by
     composing [LosslessCode_game_leak] with a return-shape change on
     [game_leak]'s body and threading through
-    [bridge_alice_view_with_secrets_to_fdist].  The parametric framing
+    [bridge_alice_view_joint_to_fdist].  The parametric framing
     mirrors the existing residual section [Section
     dsdp_security_indcpa_residual] below (which also takes the
     probability space as a [Context] parameter).
     Naming: project-local; [fdist_<source>_with_secrets] follows the
     same [<source>_with_secrets] pattern as the Task B carrier
-    [alice_view_with_secrets].  The [fdist_] prefix marks this as the
+    [alice_view_joint].  The [fdist_] prefix marks this as the
     fdist over that carrier (vs. the carrier itself); the [_game_leak]
     middle records that the fdist's intended instantiation is the
     bridge image of [game_leak].  MathComp suffix table has no entry
@@ -2199,13 +1783,13 @@ Check Pr_predictor_compose_eq_fdist :
     the three correspondence lemmas
     [p_V_2_uniform, p_V_3_uniform, inde_V_2_V_3_Z_rand], Task F's
     residual section instantiation. *)
-Variable fdist_game_leak_with_secrets : R.-fdist alice_view_with_secrets.
+Variable fdist_game_leak_joint : R.-fdist alice_view_joint.
 
 (** Z_rand_carrier - the carrier finType for the auxiliary
     encryption-randomness random variable [Z_rand].  The IND-CPA hops
     (Tasks 06-08) have already eliminated all encryption randomness
     from the distinguisher-visible view, so the residual sample space
-    [alice_view_with_secrets] does NOT carry any explicit
+    [alice_view_joint] does NOT carry any explicit
     encryption-rand component.  Modelling [Z_rand] as a unit-typed
     random variable is therefore correct: at the post-hop residual
     layer, encryption randomness is a constant (its values are
@@ -2224,9 +1808,9 @@ Variable fdist_game_leak_with_secrets : R.-fdist alice_view_with_secrets.
     Used by: [Z_rand], [inde_V_2_V_3_Z_rand]. *)
 Definition Z_rand_carrier : finType := unit.
 
-(** V_3 - rightmost component of [alice_view_with_secrets], the third
+(** V_3 - rightmost component of [alice_view_joint], the third
     protocol scalar V_3.  By the Task B carrier construction
-    [alice_view_with_secrets = ((alice_view, V_2), V_3)], V_3 is the
+    [alice_view_joint = ((alice_view, V_2), V_3)], V_3 is the
     [snd] projection.
     Kind: helper.
     Why: Task D of the plan.  The IT residual analysis treats V_3 as a
@@ -2241,7 +1825,7 @@ Definition Z_rand_carrier : finType := unit.
     [AliceView].  Project-local convention.
     Used by: [p_V_3_uniform], [inde_V_2_V_3_Z_rand], Task F's
     residual section instantiation, Task H's residual bound. *)
-Definition V_3 : {RV fdist_game_leak_with_secrets -> V_3_carrier} :=
+Definition V_3 : {RV fdist_game_leak_joint -> V_3_carrier} :=
   fun avs => snd avs.
 
 (** V_2 - next-to-rightmost component, the protocol scalar V_2 that
@@ -2252,8 +1836,8 @@ Definition V_3 : {RV fdist_game_leak_with_secrets -> V_3_carrier} :=
     Why: Task D of the plan.  V_2 is the central random variable of
     the secrecy bound [Pr[predictor = V_2] <= 1/m + 2 * epsilon_cpa];
     [p_V_2_uniform] and [inde_V_2_V_3_Z_rand] reference V_2 directly,
-    and Task H's residual bound [Pr_guess_indicator_le_inv_msg_card]
-    is stated against the event [output = V_2_sample].
+    and T1's V_2-aware residual bound is stated against the event
+    [output = V_2_sample].
     Naming: TeX-derived subscript; [_2] marks the second of the
     (v_1, v_2, v_3) input-share triple, not the MathComp ring-two
     suffix.  Plan line 82 explicitly forbids the [_RV] suffix;
@@ -2261,7 +1845,7 @@ Definition V_3 : {RV fdist_game_leak_with_secrets -> V_3_carrier} :=
     [dsdp_security.v].
     Used by: [p_V_2_uniform], [inde_V_2_V_3_Z_rand], Task F's
     residual section instantiation, Task H's residual bound. *)
-Definition V_2 : {RV fdist_game_leak_with_secrets -> V_2_carrier} :=
+Definition V_2 : {RV fdist_game_leak_joint -> V_2_carrier} :=
   fun avs => snd (fst avs).
 
 (** D_3 - the plaintext D_3 (the decrypted contribution that Alice
@@ -2281,7 +1865,7 @@ Definition V_2 : {RV fdist_game_leak_with_secrets -> V_2_carrier} :=
     decrypted contribution Alice receives, not the MathComp ring-
     three suffix.  Project-local convention.
     Used by: Task F's residual section instantiation. *)
-Definition D_3 : {RV fdist_game_leak_with_secrets -> plain AHE} :=
+Definition D_3 : {RV fdist_game_leak_joint -> plain AHE} :=
   fun avs => snd (fst (fst avs)).
 
 (** R_3 - the masking scalar R_3 Alice draws for Charlie's slot,
@@ -2296,7 +1880,7 @@ Definition D_3 : {RV fdist_game_leak_with_secrets -> plain AHE} :=
     Alice draws for Charlie's slot (the [R_3] of the (R_2, R_3) pair),
     not the MathComp ring-three suffix.  Project-local convention.
     Used by: Task F's residual section instantiation. *)
-Definition R_3 : {RV fdist_game_leak_with_secrets -> plain AHE} :=
+Definition R_3 : {RV fdist_game_leak_joint -> plain AHE} :=
   fun avs => snd (fst (fst (fst avs))).
 
 (** R_2 - the masking scalar R_2 Alice draws for Bob's slot,
@@ -2311,7 +1895,7 @@ Definition R_3 : {RV fdist_game_leak_with_secrets -> plain AHE} :=
     Alice draws for Bob's slot (the [R_2] of the (R_2, R_3) pair),
     not the MathComp ring-two suffix.  Project-local convention.
     Used by: Task F's residual section instantiation. *)
-Definition R_2 : {RV fdist_game_leak_with_secrets -> plain AHE} :=
+Definition R_2 : {RV fdist_game_leak_joint -> plain AHE} :=
   fun avs => snd (fst (fst (fst (fst avs)))).
 
 (** U_3 - Alice's third scalar coefficient in the DSDP linear
@@ -2321,7 +1905,7 @@ Definition R_2 : {RV fdist_game_leak_with_secrets -> plain AHE} :=
     uniform; see [Pr_dsdp_sol_uniform] in [dsdp_entropy.v].
     Kind: helper.
     Why: Task D of the plan.  U_3 is one of the conditioning RVs
-    in [Pr_game_leak_V2_uniform] (the IT residual) and the
+    in [cPr_V2_V3_uniform_on_fiber] (the IT residual) and the
     invertibility hypothesis [(u3 < minn p q)%N] is stated against
     its values; Task F's residual section instantiation references
     U_3 through that lemma.
@@ -2329,7 +1913,7 @@ Definition R_2 : {RV fdist_game_leak_with_secrets -> plain AHE} :=
     (u_1, u_2, u_3) coefficient triple, not the MathComp ring-three
     suffix.  Project-local convention.
     Used by: Task F's residual section instantiation. *)
-Definition U_3 : {RV fdist_game_leak_with_secrets -> plain AHE} :=
+Definition U_3 : {RV fdist_game_leak_joint -> plain AHE} :=
   fun avs => snd (fst (fst (fst (fst (fst avs))))).
 
 (** U_2 - Alice's second scalar coefficient in the constraint
@@ -2337,13 +1921,13 @@ Definition U_3 : {RV fdist_game_leak_with_secrets -> plain AHE} :=
     tuple sample.
     Kind: helper.
     Why: Task D of the plan.  U_2 is part of the IT conditioning
-    tuple [(V_1, U_1, U_2, U_3, S)] in [Pr_game_leak_V2_uniform];
+    tuple [(V_1, U_1, U_2, U_3, S)] in [cPr_V2_V3_uniform_on_fiber];
     Task F's residual section instantiation carries it through.
     Naming: TeX-derived subscript; [_2] marks the second of the
     (u_1, u_2, u_3) coefficient triple, not the MathComp ring-two
     suffix.  Project-local convention.
     Used by: Task F's residual section instantiation. *)
-Definition U_2 : {RV fdist_game_leak_with_secrets -> plain AHE} :=
+Definition U_2 : {RV fdist_game_leak_joint -> plain AHE} :=
   fun avs => snd (fst (fst (fst (fst (fst (fst avs)))))).
 
 (** U_1 - Alice's first scalar coefficient (her share of the
@@ -2352,13 +1936,13 @@ Definition U_2 : {RV fdist_game_leak_with_secrets -> plain AHE} :=
     Kind: helper.
     Why: Task D of the plan.  U_1 is part of the IT conditioning
     tuple [(V_1, U_1, U_2, U_3, S)] consumed by
-    [Pr_game_leak_V2_uniform] and [constraint_holds_indcpa].
+    [cPr_V2_V3_uniform_on_fiber] and [constraint_holds_indcpa].
     Naming: TeX-derived subscript; [_1] marks the first of the
     (u_1, u_2, u_3) coefficient triple, not the MathComp ring-one
     suffix.  Project-local convention mirroring scalar names in
     [dsdp_security.v].
     Used by: Task F's residual section instantiation. *)
-Definition U_1 : {RV fdist_game_leak_with_secrets -> plain AHE} :=
+Definition U_1 : {RV fdist_game_leak_joint -> plain AHE} :=
   fun avs => snd (fst (fst (fst (fst (fst (fst (fst avs))))))).
 
 (** V_1 - Alice's input share: the protocol scalar v_1, projected
@@ -2369,14 +1953,14 @@ Definition U_1 : {RV fdist_game_leak_with_secrets -> plain AHE} :=
     Kind: helper.
     Why: Task D of the plan.  V_1 is part of the IT conditioning
     tuple [(V_1, U_1, U_2, U_3, S)] consumed by
-    [Pr_game_leak_V2_uniform] and [constraint_holds_indcpa]; Task F's
+    [cPr_V2_V3_uniform_on_fiber] and [constraint_holds_indcpa]; Task F's
     residual section instantiation references V_1 through those.
     Naming: TeX-derived subscript; [_1] marks the first of the
     (v_1, v_2, v_3) input-share triple, not the MathComp ring-one
     suffix.  Project-local convention mirroring scalar names in
     [dsdp_security.v].
     Used by: Task F's residual section instantiation. *)
-Definition V_1 : {RV fdist_game_leak_with_secrets -> plain AHE} :=
+Definition V_1 : {RV fdist_game_leak_joint -> plain AHE} :=
   fun avs => snd (fst (fst (fst (fst (fst (fst (fst (fst avs)))))))).
 
 (** S - the sum scalar [S = u_1 v_1 + u_2 v_2 + u_3 v_3] that Alice
@@ -2388,7 +1972,7 @@ Definition V_1 : {RV fdist_game_leak_with_secrets -> plain AHE} :=
     [(V_1, U_1, U_2, U_3, V_2, V_3)] that the constraint
     [constraint_holds_indcpa] expresses; Task F's residual section
     instantiation uses S as a conditioning RV in
-    [Pr_game_leak_V2_uniform].  Project-local naming: TeX [S]
+    [cPr_V2_V3_uniform_on_fiber].  Project-local naming: TeX [S]
     matches [dsdp_security.v:117]'s [Let S : {RV P -> msg}], which
     is similarly a single-letter random variable; no [_RV] suffix
     per plan line 82.  Inside [Section dsdp_security_indcpa] this
@@ -2400,8 +1984,8 @@ Definition V_1 : {RV fdist_game_leak_with_secrets -> plain AHE} :=
     requires no [_RV] suffix.  MathComp suffix table has no entry
     for single-letter RVs; project-local convention only.
     Used by: Task F's residual section instantiation (consumed via
-    [constraint_holds_indcpa] and [Pr_game_leak_V2_uniform]). *)
-Definition S : {RV fdist_game_leak_with_secrets -> plain AHE} :=
+    [constraint_holds_indcpa] and [cPr_V2_V3_uniform_on_fiber]). *)
+Definition S : {RV fdist_game_leak_joint -> plain AHE} :=
   fun avs => snd (fst (fst (fst (fst (fst (fst (fst (fst (fst avs))))))))).
 
 (** Dk_a - Alice's private decryption key, leftmost component of
@@ -2412,7 +1996,7 @@ Definition S : {RV fdist_game_leak_with_secrets -> plain AHE} :=
     Kind: helper.
     Why: Task D of the plan.  Dk_a is part of Alice's surfaced view
     (Task 10's [alice_view]) and lives on the joint sample space
-    [fdist_game_leak_with_secrets] alongside the other protocol RVs;
+    [fdist_game_leak_joint] alongside the other protocol RVs;
     Task F's residual section instantiation carries it through so
     the protocol-RV infrastructure stays self-contained even though
     the IT residual itself does not condition on Dk_a directly.
@@ -2420,7 +2004,7 @@ Definition S : {RV fdist_game_leak_with_secrets -> plain AHE} :=
     [Dk_a_carrier] (Task 10) for the carrier finType.  No MathComp
     suffix-table entry for decryption-key RVs.
     Used by: Task F's residual section instantiation. *)
-Definition Dk_a : {RV fdist_game_leak_with_secrets -> Dk_a_carrier} :=
+Definition Dk_a : {RV fdist_game_leak_joint -> Dk_a_carrier} :=
   fun avs => fst (fst (fst (fst (fst (fst (fst (fst (fst (fst avs))))))))).
 
 (** Z_rand - the auxiliary encryption-randomness random variable,
@@ -2441,28 +2025,28 @@ Definition Dk_a : {RV fdist_game_leak_with_secrets -> Dk_a_carrier} :=
     Used by: [inde_V_2_V_3_Z_rand], [pfwd1_Z_rand_tt], Task F's
     residual section instantiation (which discharges
     [V2V3_Z_inde_given_Y] from [inde_V_2_V_3_Z_rand]). *)
-Definition Z_rand : {RV fdist_game_leak_with_secrets -> Z_rand_carrier} :=
+Definition Z_rand : {RV fdist_game_leak_joint -> Z_rand_carrier} :=
   fun _ => tt.
 
 (* Task D verify clause: all eleven protocol random variables plus
-   [Z_rand] type-check as [{RV fdist_game_leak_with_secrets -> _}]. *)
-Check V_1 : {RV fdist_game_leak_with_secrets -> plain AHE}.
-Check V_2 : {RV fdist_game_leak_with_secrets -> V_2_carrier}.
-Check V_3 : {RV fdist_game_leak_with_secrets -> V_3_carrier}.
-Check U_1 : {RV fdist_game_leak_with_secrets -> plain AHE}.
-Check U_2 : {RV fdist_game_leak_with_secrets -> plain AHE}.
-Check U_3 : {RV fdist_game_leak_with_secrets -> plain AHE}.
-Check R_2 : {RV fdist_game_leak_with_secrets -> plain AHE}.
-Check R_3 : {RV fdist_game_leak_with_secrets -> plain AHE}.
-Check S   : {RV fdist_game_leak_with_secrets -> plain AHE}.
-Check D_3 : {RV fdist_game_leak_with_secrets -> plain AHE}.
-Check Dk_a : {RV fdist_game_leak_with_secrets -> Dk_a_carrier}.
-Check Z_rand : {RV fdist_game_leak_with_secrets -> Z_rand_carrier}.
+   [Z_rand] type-check as [{RV fdist_game_leak_joint -> _}]. *)
+Check V_1 : {RV fdist_game_leak_joint -> plain AHE}.
+Check V_2 : {RV fdist_game_leak_joint -> V_2_carrier}.
+Check V_3 : {RV fdist_game_leak_joint -> V_3_carrier}.
+Check U_1 : {RV fdist_game_leak_joint -> plain AHE}.
+Check U_2 : {RV fdist_game_leak_joint -> plain AHE}.
+Check U_3 : {RV fdist_game_leak_joint -> plain AHE}.
+Check R_2 : {RV fdist_game_leak_joint -> plain AHE}.
+Check R_3 : {RV fdist_game_leak_joint -> plain AHE}.
+Check S   : {RV fdist_game_leak_joint -> plain AHE}.
+Check D_3 : {RV fdist_game_leak_joint -> plain AHE}.
+Check Dk_a : {RV fdist_game_leak_joint -> Dk_a_carrier}.
+Check Z_rand : {RV fdist_game_leak_joint -> Z_rand_carrier}.
 
 (** card_V_2_carrier_succ - cardinality of [V_2_carrier] in the
     [_.+1] shape required by infotheo's [fdist_uniform].  Discharged
     by [fdist_card_prednK] on the marginal
-    [fdistmap V_2 fdist_game_leak_with_secrets].
+    [fdistmap V_2 fdist_game_leak_joint].
     Kind: helper.
     Why: Task D's uniformity correspondence lemma [p_V_2_uniform]
     states [`p_ V_2 = fdist_uniform _], and infotheo's
@@ -2472,13 +2056,13 @@ Check Z_rand : {RV fdist_game_leak_with_secrets -> Z_rand_carrier}.
     well-defined).  Routing through [fdist_card_prednK] (which gives
     [#|A| = #|A|.-1.+1] for any non-empty finType) discharges this
     obligation generically: the non-emptiness comes free from the
-    existence of [fdist_game_leak_with_secrets].
+    existence of [fdist_game_leak_joint].
     Naming: [_succ] suffix marks the [.+1] shape; project-local
     convention, mirrors [fdist_card_prednK] in [fdist.v].
     Used by: [p_V_2_uniform]. *)
 Lemma card_V_2_carrier_succ : #|V_2_carrier| = #|V_2_carrier|.-1.+1.
 Proof.
-have HP : R.-fdist V_2_carrier := fdistmap V_2 fdist_game_leak_with_secrets.
+have HP : R.-fdist V_2_carrier := fdistmap V_2 fdist_game_leak_joint.
 exact: fdist_card_prednK HP.
 Qed.
 
@@ -2487,29 +2071,29 @@ Qed.
     cardinality into the [_.+1] shape required by [fdist_uniform].
     Companion to [card_V_2_carrier_succ] for V_3; same proof
     structure (route through [fdist_card_prednK] on the marginal
-    [fdistmap V_3 fdist_game_leak_with_secrets]).
+    [fdistmap V_3 fdist_game_leak_joint]).
     Kind: helper.
     Why: [p_V_3_uniform] needs a [_.+1]-shaped witness;
     [fdist_card_prednK] produces it from the non-emptiness of
     [V_3_carrier], which is witnessed by the marginal fdist
-    [fdistmap V_3 fdist_game_leak_with_secrets].
+    [fdistmap V_3 fdist_game_leak_joint].
     Used by: [p_V_3_uniform]. *)
 Lemma card_V_3_carrier_succ : #|V_3_carrier| = #|V_3_carrier|.-1.+1.
 Proof.
-have HP : R.-fdist V_3_carrier := fdistmap V_3 fdist_game_leak_with_secrets.
+have HP : R.-fdist V_3_carrier := fdistmap V_3 fdist_game_leak_joint.
 exact: fdist_card_prednK HP.
 Qed.
 
 (** V_2_uniform_hyp - marginal uniformity of V_2 under
-    [fdist_game_leak_with_secrets].
+    [fdist_game_leak_joint].
     Kind: section hypothesis.
     Why: Task D of the plan.  The proof that V_2 is uniform follows
     from [game_leak]'s body sampling [iV2 ← sample uniform index_msg]
     as its very first operation, and the bridged fdist preserves
     that uniformity through Task A's [LosslessCode_game_leak] and
-    Task B's [bridge_alice_view_with_secrets_to_fdist].  At the
+    Task B's [bridge_alice_view_joint_to_fdist].  At the
     abstract Task D layer (which is parametric in
-    [fdist_game_leak_with_secrets]) the uniformity is a hypothesis
+    [fdist_game_leak_joint]) the uniformity is a hypothesis
     that Task F discharges when instantiating the bridge at the
     concrete eleven-tuple-returning leak code.  Same engineering
     pattern as [VarRV_uniform_indcpa] in the residual section
@@ -2546,7 +2130,7 @@ apply/setP => x; rewrite !inE /=.
 by case: (Z_rand x).
 Qed.
 
-(** p_V_2_uniform - the V_2 marginal of [fdist_game_leak_with_secrets]
+(** p_V_2_uniform - the V_2 marginal of [fdist_game_leak_joint]
     is the uniform distribution on [V_2_carrier].
     Kind: correspondence lemma.
     Why: Task D of [~/.claude/plans/sprightly-finding-robin.md], one
@@ -2580,7 +2164,7 @@ Lemma p_V_3_uniform : `p_ V_3 = fdist_uniform card_V_3_carrier_succ.
 Proof. exact: V_3_uniform_hyp. Qed.
 
 (** inde_V_2_V_3_Z_rand - the pair [(V_2, V_3)] is independent of
-    [Z_rand] under [fdist_game_leak_with_secrets].
+    [Z_rand] under [fdist_game_leak_joint].
     Kind: correspondence lemma.
     Why: Task D of the plan.  This is the third correspondence
     lemma; it feeds [V2V3_Z_inde_given_Y] in the residual section
@@ -2597,7 +2181,7 @@ Proof. exact: V_3_uniform_hyp. Qed.
     residual section below.
     Used by: Task F's residual section instantiation. *)
 Lemma inde_V_2_V_3_Z_rand :
-  fdist_game_leak_with_secrets |= [% V_2, V_3] _|_ Z_rand.
+  fdist_game_leak_joint |= [% V_2, V_3] _|_ Z_rand.
 Proof.
 rewrite /inde_RV.
 move=> [v2 v3] z.
@@ -2619,614 +2203,12 @@ Check p_V_3_uniform :
   `p_ V_3 = fdist_uniform card_V_3_carrier_succ.
 
 Check inde_V_2_V_3_Z_rand :
-  fdist_game_leak_with_secrets |= [% V_2, V_3] _|_ Z_rand.
-
-(* ================================================================== *)
-(* Task G: t_msg-output predictor framework via guess_indicator_pkg   *)
-(* ================================================================== *)
-
-(** id_guess - operation identifier exported by a [t_msg]-output
-    predictor.  The predictor exposes a single operation under this
-    identifier; calling it [tt] runs the predictor body and returns a
-    [t_msg]-typed guess.
-    Kind: canonical.
-    Why: Task G of [~/.claude/plans/sprightly-finding-robin.md]
-    (Fallback R1B).  SSProve operations are identified by a [nat];
-    [id_game_run = 0%N] is already taken by the four games, so the
-    predictor's operation needs a fresh identifier.  The choice [1%N]
-    is arbitrary but stable across this file.
-    Naming: project-local; mirrors [id_game_run], [id_oracle_encrypt].
-    Used by: guesser_export, boolean_shell. *)
-Definition id_guess : nat := 1%N.
-
-(** guesser_export - the export interface of a [t_msg]-output
-    predictor.  Exposes a single operation [id_guess] taking ['unit]
-    and returning the SSProve message-space carrier [t_msg]
-    (aliased to the pack_type custom-entry notation ['msg']).
-    Kind: canonical.
-    Why: Task G of [~/.claude/plans/sprightly-finding-robin.md]
-    (Fallback R1B).  The new [predictor_guesser] type below exports
-    this interface in front of [game_iface]: it consumes the game's
-    ciphertext-list run and emits a [t_msg] guess of [V_2].  This is
-    the SSProve analogue of the TeX adversary
-    [A : Y -> Delta(R)] from the dsdp Alice-secrecy closed-form
-    writeup (notes/20260506-dsdp-secrecy-closed-form): map the
-    Alice-view [Y] to a distribution on the message space [R].
-    Used by: predictor_guesser, boolean_shell, guess_indicator_pkg. *)
-Definition guesser_export : Interface :=
-  [interface #val #[ id_guess ] : 'unit → msg ].
-
-(** predictor_guesser - the SSProve [package] type of a
-    [t_msg]-output predictor: imports [game_iface] (the
-    ciphertext-list run shared by the four games) and exports
-    [guesser_export] (the [t_msg]-guess oracle).
-    Kind: canonical.
-    Why: Task G of [~/.claude/plans/sprightly-finding-robin.md]
-    (Fallback R1B).  This is the type that the rewritten Task I
-    [dsdp_alice_secrecy_indcpa] will take in place of the original
-    [raw_package predictor] consuming [game_iface] and exporting the
-    Bool-shaped [A_export].  The original framing baked the
-    "predictor output = V_2_sample" semantics into the implicit
-    convention "the predictor returns [true] iff its internal guess
-    matches V_2"; the new framing makes the [t_msg] guess explicit so
-    the V_2-equality event is a syntactic equality, not a semantic
-    hypothesis.
-    Naming: project-local; reads "a guesser-style predictor".
-    Used by: guess_indicator_pkg, Pr_guess_indicator_eq_predictor_output,
-    Task H's residual bound, Task I's rewritten secrecy theorem. *)
-Definition predictor_guesser : Type :=
-  package game_iface guesser_export.
-
-(** t_msg_carrier_to_chmsg - section-parametric embedding of the
-    [t_msg_carrier] finType into the SSProve [t_msg] choice_type
-    message carrier.  This is the bridge that lets the
-    [guess_indicator_pkg] wrapper sample a uniform [V_2] from the
-    finType side and then compare for equality against a [t_msg]-
-    typed predictor output on the SSProve side.
-    Kind: section parameter.
-    Why: Task G of [~/.claude/plans/sprightly-finding-robin.md]
-    (Fallback R1B).  Concrete instantiations identify [t_msg_carrier]
-    with [plain AHE] (the protocol-side message scalar carrier) and
-    use [chmsg_of_msg] composed with identity to discharge this
-    parameter.  The section-parametric framing keeps Task G
-    insensitive to that concrete identification while letting
-    downstream consumers (Tasks H, I) reason about the wrapper's
-    bool-shaped distribution.
-    Naming: [_to_chmsg] is a project-local suffix mirroring the
-    [chmsg_of_msg] / [msg_of_chmsg] direction names declared at the
-    top of this section; [_to_] reads "forward direction into the
-    chosen SSProve choice_type message carrier".
-    Used by: sample_to_t_msg, boolean_shell, guess_indicator_pkg. *)
-Variable t_msg_carrier_to_chmsg : t_msg_carrier -> t_msg.
-
-(** sample_to_t_msg - convert an SSProve uniform-sample index
-    ['I_index_t_msg] to a [t_msg]-typed value, routing through
-    [enum_val] (the cardinality cast) and [t_msg_carrier_to_chmsg]
-    (the carrier-to-choice_type bridge).  Mirrors [sample_to_renc]
-    at the top of this section, for the message-space carrier.
-    Kind: helper.
-    Why: Task G of [~/.claude/plans/sprightly-finding-robin.md]
-    (Fallback R1B).  The [guess_indicator_pkg] wrapper samples
-    [iV2 : 'I_index_t_msg] uniformly and needs a [t_msg]-typed
-    avatar to compare with the predictor's guess via [eq_op].
-    Used by: boolean_shell, guess_event_code,
-    Pr_guess_indicator_eq_predictor_output. *)
-Definition sample_to_t_msg (i : 'I_index_t_msg) : t_msg :=
-  t_msg_carrier_to_chmsg (enum_val (cast_ord (esym t_msg_card) i)).
-
-(** boolean_shell - the inner Bool-output shell of the
-    [guess_indicator_pkg] wrapper.  Imports [guesser_export] (the
-    [t_msg]-output predictor's interface) and exports [A_export]
-    (the standard SSProve adversary interface,
-    [#val #[ RUN.1 ] : 'unit → 'bool]).  Body: imports the
-    predictor's [id_guess] operation, calls it to obtain a [t_msg]
-    [guess], samples a uniform index [iV2 ← sample uniform
-    index_t_msg], converts to a [t_msg]-typed [v2] via
-    [sample_to_t_msg], and returns the boolean equality
-    [guess == v2].  Naming-wise this is a [Definition] (no axiom,
-    no hypothesis): the whole framework is syntactic.
-    Kind: helper.
-    Why: Task G of [~/.claude/plans/sprightly-finding-robin.md]
-    (Fallback R1B).  Splitting the wrapper into a Bool-shaped shell
-    plus an outer link with [predictor ∘ game] keeps the
-    composition typing transparent: [boolean_shell] is a regular
-    SSProve [package] (so [Pr] can be applied to it after a single
-    link step) and the link step exposes the predictor's body for
-    the correspondence lemma below to reach by reflexivity after
-    one [coerce_kleisliE] step.
-    Naming: project-local; reads "the boolean indicator shell".
-    Used by: guess_indicator_pkg, Pr_guess_indicator_eq_predictor_output. *)
-Definition boolean_shell : package guesser_export A_export :=
-  [package emptym ;
-    #def #[ 0%N ] (_ : 'unit) : 'bool
-    {
-      #import {sig #[ id_guess ] : 'unit → msg } as call_pred ;;
-      guess ← call_pred tt ;;
-      iV2 ← sample uniform index_t_msg ;;
-      let v2 := sample_to_t_msg iV2 in
-      ret (guess == v2 : 'bool)
-    }
-  ].
-
-(** guess_indicator_pkg - the canonical Bool-output wrapper that
-    turns a [t_msg]-output [predictor : predictor_guesser] and a
-    closed game [game : package [interface] game_iface] into a
-    Bool-output package suitable for [pkg_advantage.Pr].  Defined as
-    the SSProve link [boolean_shell ∘ predictor ∘ game]: the inner
-    [predictor ∘ game] resolves the predictor's import of
-    [game_iface] against the game, producing a closed
-    [t_msg]-output package; the outer [boolean_shell] then layers
-    on the V_2-equality indicator semantics.  This is the
-    [Definition] form of the syntactic construction baked into the
-    original Task 14 theorem's implicit semantic convention.
-    Kind: main.
-    Why: Task G of [~/.claude/plans/sprightly-finding-robin.md]
-    (Fallback R1B).  Downstream consumers (Task H and Task I) take
-    a [predictor_guesser] explicitly and compose with
-    [guess_indicator_pkg] to recover the Bool-shaped distribution
-    that [pkg_advantage.Pr] consumes.  No axiom or hypothesis
-    encodes the V_2-equality semantics: the equality is a syntactic
-    bool returned by the shell, and the residual probability bound
-    in Task H operates on the explicit
-    [Pr_fst (guess_event_code predictor game)] event.
-    Naming: project-local; reads "the guess-indicator-style
-    package wrapper".  Mirrors [reduction_charlie],
-    [reduction_bob] in shape (a function from a predictor to a
-    raw_package) but with the additional [game] argument to keep
-    the closed/open distinction explicit.
-    Used by: Pr_guess_indicator_eq_predictor_output, Task H's
-    [Pr_guess_indicator_le_inv_msg_card], Task I's rewritten
-    [dsdp_alice_secrecy_indcpa]. *)
-Definition guess_indicator_pkg
-    (predictor : predictor_guesser)
-    (game : package [interface] game_iface) : raw_package :=
-  boolean_shell ∘ predictor ∘ game.
-
-(** guess_event_code - the explicit raw_code witnessing the
-    "predictor output equals V_2 sample" event.  Sequentially
-    resolves [predictor ∘ game] at the [id_guess] operation to
-    obtain a [t_msg] guess, samples a fresh uniform index
-    [iV2 ← sample uniform index_t_msg], and returns the boolean
-    equality [guess == sample_to_t_msg iV2].  This is the
-    semantic-side anchor of the correspondence below: it
-    syntactically captures the event
-    "[(predictor ∘ game).output = V_2_sample]" without going
-    through [pkg_advantage.Pr]'s [boolean_shell ∘ _] indirection.
-    Kind: helper / semantic anchor.
-    Why: Task G of [~/.claude/plans/sprightly-finding-robin.md]
-    (Fallback R1B).  Task H's residual bound is naturally stated
-    against the [Pr_fst]-driven SSProve probability of this code,
-    rather than against [pkg_advantage.Pr (guess_indicator_pkg
-    predictor game)] [true]; the present definition + the
-    correspondence lemma below lets Task H pick whichever side is
-    easier to bound and freely transfer.
-    Naming: project-local; reads "the guess-event raw_code".
-    Used by: Pr_guess_indicator_eq_predictor_output, Task H. *)
-Definition guess_event_code
-    (predictor : predictor_guesser)
-    (game : package [interface] game_iface) : raw_code 'bool :=
-  guess ← resolve (predictor ∘ game) (id_guess, ('unit, t_msg)) tt ;;
-  iV2 ← sample uniform index_t_msg ;;
-  ret ((guess == sample_to_t_msg iV2) : 'bool).
-
-(** Pr_guess_indicator_eq_predictor_output - the correspondence
-    lemma promised by Fallback R1B.  States that the SSProve
-    standard probability
-    [distr.mu (pkg_advantage.Pr (guess_indicator_pkg p g)) true]
-    equals the [Pr_fst]-driven probability of the explicit event
-    code [guess_event_code p g] evaluated at [true].  Proof: by
-    definition unfolding.  [Pr_Pr_fst] rewrites the [pkg_advantage]
-    side to a [Pr_fst (resolve ...)] expression;
-    [resolve_link] expands the outer link
-    [boolean_shell ∘ predictor ∘ game] into a
-    [code_link (resolve boolean_shell RUN tt) (predictor ∘ game)];
-    [resolve_set] looks up the [boolean_shell] body at the [0%N]
-    operation key; [coerce_kleisliE] discharges the
-    type-coercion identity since the [chsrc]/[chtgt] types are
-    already syntactically aligned; the residual goal is
-    syntactically identical to the [guess_event_code] body and
-    closes by [reflexivity].
-    Kind: main correspondence.
-    Why: Task G of [~/.claude/plans/sprightly-finding-robin.md]
-    (Fallback R1B).  This is the only piece that ties the wrapper's
-    Bool-shaped [pkg_advantage.Pr] to the explicit V_2-equality
-    event; without it, downstream consumers would have to choose
-    one or the other and could not transfer between them.  The
-    correspondence is by definition (no probabilistic reasoning),
-    matching the plan's design intent that Task G be a syntactic
-    framework piece, not a semantic one.
-    Naming: project-local; reads "the probability of the
-    guess-indicator wrapper [= true] equals the probability of
-    the predictor-output [=] V_2 event".  No MathComp suffix-table
-    entry applies.
-    Used by: Task H's [Pr_guess_indicator_le_inv_msg_card]
-    (the residual bound is stated against the LHS but proved
-    against the RHS via this lemma), Task I's rewritten
-    [dsdp_alice_secrecy_indcpa]. *)
-Lemma Pr_guess_indicator_eq_predictor_output
-    (predictor : predictor_guesser)
-    (game : package [interface] game_iface) :
-  distr.mu (pkg_advantage.Pr (guess_indicator_pkg predictor game)) true
-    = distr.mu (Pr_fst (guess_event_code predictor game)) true.
-Proof.
-rewrite Pr_Pr_fst /guess_indicator_pkg /guess_event_code.
-rewrite resolve_link /boolean_shell /= resolve_set /= coerce_kleisliE /=.
-reflexivity.
-Qed.
-
-(* Task G verify clauses: the predictor framework type-checks as
-   advertised, and the correspondence lemma closes with [Qed].
-   Mirrors Task 06/07's [Check] clauses for the games and
-   translation packages. *)
-Check predictor_guesser.
-Check boolean_shell.
-Check guess_indicator_pkg.
-Check guess_event_code.
-Check Pr_guess_indicator_eq_predictor_output :
-  forall (predictor : predictor_guesser)
-         (game : package [interface] game_iface),
-    distr.mu (pkg_advantage.Pr (guess_indicator_pkg predictor game)) true
-      = distr.mu (Pr_fst (guess_event_code predictor game)) true.
-
-(* ================================================================== *)
-(* Task H: residual bound Pr_guess_indicator_le_inv_msg_card        *)
-(* ================================================================== *)
-
-(** index_t_msg_pos - positivity of the [t_msg] index, witnessing that
-    the message space is non-empty so the uniform sample
-    [sample uniform index_t_msg] in [guess_event_code] is well-typed
-    and the bound [#|t_msg_carrier|%:R^-1] is finite.
-    Kind: section hypothesis.
-    Why: Task H of [~/.claude/plans/sprightly-finding-robin.md].  The
-    residual bound is [<= #|t_msg_carrier|%:R^-1]; treating the RHS as
-    a real number requires the cardinality to be positive (else the
-    inverse is zero and the bound is trivially [0 <= 0], which is
-    still mathematically correct but degenerate).  At concrete
-    instantiation the bound becomes [1/m] with [m = #|t_msg_carrier|],
-    matching the TeX statement (Setup item 8.5, Step 5 of
-    notes/20260506-dsdp-secrecy-closed-form).
-    Naming: project-local; mirrors [index_msg_pos], [index_renc_pos].
-    Used by: Pr_guess_indicator_le_inv_msg_card. *)
-Hypothesis index_t_msg_pos : (0 < index_t_msg)%N.
-
-(** sample_to_t_msg_inj - injectivity of the cardinality-cast +
-    carrier embedding [sample_to_t_msg : 'I_index_t_msg -> t_msg].
-    Concrete instantiations identify [t_msg_carrier] with [plain AHE]
-    (the protocol-side message scalar carrier) and
-    [t_msg_carrier_to_chmsg] with [chmsg_of_msg]; for any
-    representative-bijection [chmsg_of_msg] (the "biject on
-    representatives" design intent declared at file header lines
-    104-108) the composition is injective.
-    Kind: section hypothesis.
-    Why: Task H of [~/.claude/plans/sprightly-finding-robin.md].
-    The residual bound on
-    [Pr[(predictor o game_leak).output = V_2_sample]] reduces, after
-    conditioning on the predictor's guess, to bounding
-    [Pr_{iV2 uniform}[sample_to_t_msg iV2 = guess]].  For an
-    arbitrary guess [g], that probability is
-    [#|{i : sample_to_t_msg i = g}|/index_t_msg];
-    [sample_to_t_msg]-injectivity bounds the numerator by 1
-    uniformly, giving the [1/index_t_msg] bound.  Without the
-    injectivity hypothesis, a malicious [t_msg_carrier_to_chmsg]
-    that collapses many ['I_index_t_msg] indices to a single
-    [t_msg] value could be exploited by a predictor that always
-    outputs that value, producing a probability larger than
-    [1/index_t_msg].
-    Naming: project-local; reads "[sample_to_t_msg] is injective".
-    Used by: Pr_guess_indicator_le_inv_msg_card. *)
-Hypothesis sample_to_t_msg_inj : injective sample_to_t_msg.
-
-(** Pr_guess_indicator_le_inv_msg_card - the headline residual
-    bound stated in the [t_msg]-output framing of Fallback R1B.  For
-    any [t_msg]-output predictor against [game_leak], the probability
-    that the predictor's guess equals the freshly-sampled
-    [V_2_sample] is at most [#|t_msg_carrier|%:R^-1].
-    Kind: main residual.
-    Why: Task H of [~/.claude/plans/sprightly-finding-robin.md]
-    (Fallback R1B).  This is the IT residual that Task I uses to
-    discharge the [leak_bound] hypothesis of
-    [dsdp_alice_secrecy_indcpa] without any opaque semantic
-    convention.  The freshness of [iV2] inside [guess_event_code]
-    makes the bound architecturally simpler than the plan's
-    documented "5-step" proof through the joint fdist
-    [bridge_predictor_compose_to_fdist]: by Task G's framing the
-    [V_2_sample] inside the event code is sampled UNIFORMLY AND
-    INDEPENDENTLY after the predictor produces its [guess], so the
-    bound follows from the freshness of [iV2] alone (no
-    marginalisation over the game's joint distribution).
-    Proof outline (3 steps, not 5):
-      (a) Transfer to [Pr_fst] via Task G's
-          [Pr_guess_indicator_eq_predictor_output].
-      (b) Unfold [guess_event_code] and apply [Pr_fst_bind] (using
-          [LosslessCode_predictor] / the validity of the inner
-          resolved code) to expose the [\dlet_(guess <- ...)] form.
-      (c) Bound the inner [\dlet_(iV2 <- uniform)] by
-          [1/index_t_msg] uniformly in [guess], using
-          [sample_to_t_msg_inj] to count the preimage of the
-          equality event at exactly one index.
-    The [LosslessCode_predictor] hypothesis (Fallback R5A) is used
-    to keep [predictor o game_leak] lossless so that the [Pr_fst]
-    representation of the composition has total mass exactly 1,
-    which is what makes the [\dlet]-bound a probability rather than
-    a sub-probability.
-    Fallback notice: this version follows the plan's allowed
-    fallback for Task H, taking the [sample_to_t_msg_inj] and
-    [index_t_msg_pos] hypotheses as additional section assumptions
-    plus the [ValidCode_predictor_game_leak] /
-    [LosslessCode_predictor_game_leak] pair as theorem-level
-    arguments, rather than threading them through the joint-
-    marginalisation machinery of Task F.  These hypotheses cascade
-    to Task I's signature; each is provable per-call-site for the
-    Task 07 IND-CPA reductions ([reduction_charlie],
-    [reduction_bob]) by inspection (the reductions are pure bind
-    chains of [sample uniform] + [ret] and have empty location
-    requirements).  The Task F three IT hypotheses
-    ([constraint_holds_avs], [VarRV_uniform_avs],
-    [VarRV_indep_inputs_avs]) are NOT needed here because the
-    [t_msg]-output framing renders the V_2-equality event
-    architecturally local to [guess_event_code]'s body — the
-    freshness of [iV2] is what makes the bound hold, not the
-    joint distribution of [game_leak]'s samples.
-    Naming: project-local; [Pr_<event>_le_<bound>] follows the
-    infotheo / MathComp probability-bound convention.  The
-    [_inv_msg_card] suffix reads "one over the cardinality of the
-    plaintext message space", mirroring MathComp's [card_X] family
-    (e.g. [card_ord], [card_ffun]) and infotheo's [Pr_dsdp_sol_uniform]
-    siblings, in preference to the earlier [_invm] shorthand.
-    Used by: Task I's rewritten [dsdp_alice_secrecy_indcpa]. *)
-Lemma Pr_guess_indicator_le_inv_msg_card
-    (predictor : predictor_guesser)
-    (ValidCode_predictor_game_leak :
-       ValidCode emptym [interface]
-         (resolve (predictor ∘ game_leak)
-                  (id_guess, ('unit, t_msg)) tt))
-    (LosslessCode_predictor_game_leak :
-       LosslessCode
-         (resolve (predictor ∘ game_leak)
-                  (id_guess, ('unit, t_msg)) tt)) :
-  distr.mu (pkg_advantage.Pr
-              (guess_indicator_pkg predictor game_leak)) true
-    <= (index_t_msg%:R)^-1.
-Proof.
-rewrite Pr_guess_indicator_eq_predictor_output /guess_event_code.
-rewrite (Pr_fst_bind ValidCode_predictor_game_leak).
-under eq_dlet=> guess do
-  (rewrite Pr_fst_sample; under eq_dlet=> iV2 do rewrite Pr_fst_ret).
-(* Bound the inner uniform sample for each guess by 1 / index_t_msg.
-   Uses sample_to_t_msg_inj to count the preimage at exactly one index. *)
-have inner_le : forall (g : tgt (id_guess, ('unit, t_msg))),
-   distr.mu
-     (distr.dlet (fun x : Arit (uniform index_t_msg) =>
-                    distr.dunit (g == sample_to_t_msg x))
-                 (projT2 (uniform index_t_msg)))
-     true
-   <= (index_t_msg%:R)^-1.
-{ have rhs_eq : (index_t_msg%:~R^-1 : R) = index_t_msg%:R^-1 by [].
-  have card_sum_inj :
-    forall (g0 : tgt (id_guess, ('unit, t_msg))),
-      (\sum_(i < index_t_msg) (g0 == sample_to_t_msg i) <= 1)%N.
-  { move=> g0.
-    case: (boolP [exists i : 'I_index_t_msg, g0 == sample_to_t_msg i]); last first.
-    - move=> /existsPn Hn.
-      by rewrite big1 //; move=> i _; move/negbTE: (Hn i) => ->.
-    - case/existsP => i0 /eqP Hi0.
-      rewrite (bigD1 i0) //= Hi0 eqxx /= big1 //; move=> j Hj.
-      apply/eqP; rewrite eqb0; apply/eqP=> /sample_to_t_msg_inj Heq.
-      by move/eqP: Hj; rewrite Heq. }
-  move=> g.
-  rewrite distr.dletE psum_fin /uniform /=.
-  under eq_bigr=> i _ do rewrite distr.dunit1E eqb_id.
-  rewrite /UniformDistrLemmas.r card_ord mul1r.
-  under eq_bigr=> i _ do
-    rewrite normrM ger0_norm ?invr_ge0 ?ler0n // ger0_norm ?ler0n //.
-  rewrite -big_distrr /= rhs_eq -[X in _ <= X]mulr1.
-  apply: ler_wpM2l; first by rewrite invr_ge0 ler0n.
-  rewrite -natr_sum.
-  have <- : (1%N)%:R = 1 :> R by [].
-  by rewrite ler_nat; apply: card_sum_inj. }
-(* Collapse the outer [\dlet_(guess <- Pr_fst ...)] by bounding each
-   summand mu(...) guess * inner_term <= mu(...) guess * (1/index_t_msg),
-   then pulling out the constant via psumZ and using LosslessCode's
-   psum = 1 statement. *)
-rewrite distr.dletE.
-apply: (@le_trans _ _
-  (psum (fun guess : tgt (id_guess, ('unit, t_msg)) =>
-           distr.mu
-             (Pr_fst (resolve (predictor ∘ game_leak)
-                              (id_guess, ('unit, t_msg)) tt)) guess
-           * (index_t_msg%:R)^-1))); last first.
-- under eq_psum=> guess do rewrite mulrC.
-  rewrite psumZ; last by rewrite invr_ge0 ler0n.
-  by rewrite LosslessCode_predictor_game_leak mulr1.
-- apply: le_psum.
-  + move=> x; apply/andP; split.
-    * by apply: mulr_ge0; apply: distr.ge0_mu.
-    * rewrite mulrC [X in _ <= X]mulrC; apply: ler_pM.
-      -- by apply: distr.ge0_mu.
-      -- by apply: distr.ge0_mu.
-      -- exact: inner_le.
-      -- exact: lexx.
-  + by apply: (@summableZr _ _ _ (index_t_msg%:R^-1));
-       apply: distr.summable_mu.
-Qed.
-
-(* ================================================================== *)
-(* Task 14 / Task I: closed-form Alice secrecy bound (unconditional)   *)
-(* ================================================================== *)
-
-(** dsdp_alice_secrecy_indcpa - the closed-form Alice secrecy bound,
-    in the [t_msg]-output predictor framing introduced by Task G
-    ([predictor_guesser] + [guess_indicator_pkg]).  For any
-    [t_msg]-output adversary [predictor : predictor_guesser]
-    satisfying the SSProve disjointness conditions of
-    [advantage_game_real_game_leak] together with the validity /
-    lossless side-conditions inherited from Task H, the probability
-    that the boolean wrapper [guess_indicator_pkg predictor game_real]
-    returns [true] is at most [1/m + 2 * epsilon_cpa], where
-    [m = index_t_msg] is the message-space carrier cardinality and
-    [epsilon_cpa] is the IND-CPA hardness parameter.  Semantically the
-    bound is exactly [Pr[A(AliceView) = V_2] <= 1/m + 2 * epsilon_cpa]
-    from the TeX writeup: the boolean shell of
-    [guess_indicator_pkg] returns [true] iff the predictor's
-    [t_msg]-typed guess matches the freshly-sampled [V_2] avatar, so
-    the V_2-equality event is a syntactic equality on the [t_msg]
-    carrier rather than an implicit semantic convention on a Bool
-    output.
-    Kind: main (Task 14 of the plan, made unconditional in Task I).
-    Why: closes the hybrid argument from the plan
-    ([~/.claude/plans/sprightly-finding-robin.md]).  The
-    [2 * epsilon_cpa] half comes from [advantage_game_real_game_leak]
-    (Task 08): two IND-CPA real-or-zero hops plus a
-    perfect-equivalence residual, applied to the wrapper
-    [boolean_shell o predictor] (which is the
-    [package game_iface A_export] derived from the [t_msg]-output
-    [predictor : predictor_guesser]).  The [1/m] half comes from
-    Task H's residual bound [Pr_guess_indicator_le_inv_msg_card]:
-    the freshness of the V_2-sample inside [guess_indicator_pkg]'s
-    boolean shell makes [Pr[guess_indicator_pkg predictor game_leak]
-    true <= 1/index_t_msg] hold for any [t_msg]-output predictor.
-    The two halves are stitched here by the triangle inequality on
-    [AdvantageE] applied to the wrapper, followed by associativity of
-    SSProve linking ([link_assoc]) to refold
-    [boolean_shell o predictor o game_*] as
-    [guess_indicator_pkg predictor game_*].
-    Naming: project-local [dsdp_alice_secrecy_indcpa] follows the
-    plan (this is the IND-CPA-based theorem replacing the old
-    [E_enc_inde]-dependent [dsdp_entropic_security] in
-    [dsdp_security.v]).  The predictor's type is now
-    [predictor_guesser] (the Task G [package game_iface
-    guesser_export] type) rather than the original [raw_package];
-    accordingly the LHS of the bound is
-    [distr.mu (Pr (guess_indicator_pkg predictor game_real)) true]
-    rather than [distr.mu (Pr (predictor o game_real)) true].
-    Used by: downstream consumers wanting the closed-form Alice
-    secrecy bound matched against the TeX statement at
-    [notes/20260506-dsdp-secrecy-closed-form] (Setup item 8.5,
-    Step 5).
-    Discharge of [leak_bound] (Task I): the original Task 14
-    statement carried a hypothesis [leak_bound :
-    distr.mu (Pr (predictor o game_leak)) true <= (index_msg%:R)^-1]
-    that the Task 14 docstring described as "bookkeeping rather
-    than new mathematics".  Task I, following the comprehensive
-    Fallback R1B + R5A plan, removes that hypothesis: the
-    [t_msg]-output framing of Task G makes the residual statement
-    architecturally local to [guess_indicator_pkg]'s boolean shell
-    (the V_2-sample is fresh inside the shell, after the predictor
-    fixes its guess), and Task H proves it directly using
-    [sample_to_t_msg_inj] and [index_t_msg_pos] section hypotheses
-    plus the per-call-site [ValidCode_predictor_game_leak] /
-    [LosslessCode_predictor_game_leak] arguments.  The comprehensive
-    framing also eliminates the original Task 14 docstring's
-    "semantic-convention asterisk" (the implicit "predictor output
-    [true] iff guess matches V_2" interpretation): the equality is
-    now syntactic in the [t_msg] carrier.
-    Structural assumptions (Fallback R5A): the
-    [LosslessCode_predictor_game_leak] argument is the mechanical
-    price of routing the residual bound through infotheo's
-    [{R.-fdist T}] machinery (which requires total mass exactly 1
-    rather than sub-probabilities).  It is provable per-call-site
-    for any practical predictor that does not use [assertD]-style
-    rejection sampling; the Task 07 IND-CPA reductions
-    [reduction_charlie] / [reduction_bob] discharge it trivially by
-    inspection (pure bind chains of [sample uniform] + [ret], with
-    empty location requirements).  The genuinely comprehensive
-    Fallback R5C alternative (generalize infotheo's residual
-    machinery to sub-distributions) is out of scope for this
-    discharge.
-    Print Assumptions audit (Task I R7): the expected assumption
-    list for this theorem is
-      - [enc_ind_cpa_real_or_zero] (the cryptographic IND-CPA
-        axiom, untouched);
-      - [epsilon_cpa] / [Axioms.R] / the section parameters of
-        [Section dsdp_security_indcpa] (untouched);
-      - the Task G / H section parameters introduced by the
-        comprehensive plan ([t_msg_carrier_to_chmsg],
-        [index_t_msg_pos], [sample_to_t_msg_inj], and the carrier-
-        / cardinality- bridges from Tasks B / E / F);
-      - the [Pr_guess_indicator_le_inv_msg_card] residual lemma
-        (currently [Admitted] with a TODO in Task H, pending the
-        [Pr_uniform]-based proof outlined in its body); and
-      - the standard MathComp / SSProve classical axioms
-        ([functional_extensionality], [propositional_extensionality],
-        [choice], [Eqdep.JMeq_eq], etc., as inherited from infotheo
-        and SSProve).
-    Notably the assumption list does NOT contain the discharged
-    [leak_bound], nor the pre-Fallback R1B
-    [predictor_true_iff_guess_V_2] semantic-convention hypothesis,
-    nor the Task F-style [prime_p] / [prime_q] / [coprime_pq] ring
-    specialization (Task E generalized to [finComNzRingType]).  The
-    only residual [Admitted] is the body of Task H's
-    [Pr_guess_indicator_le_inv_msg_card], which closes the
-    framework once the [Pr_uniform] sketch in its body is filled
-    in. *)
-Theorem dsdp_alice_secrecy_indcpa
-    (LA : Locations) (predictor : predictor_guesser)
-    (predictor_valid :
-       ValidPackage LA game_iface guesser_export predictor)
-    (predictor_disj_real :
-       fseparate LA game_real.(locs))
-    (predictor_disj_h1 :
-       fseparate LA game_hybrid_one.(locs))
-    (predictor_disj_h2 :
-       fseparate LA game_hybrid_two.(locs))
-    (predictor_disj_leak :
-       fseparate LA game_leak.(locs))
-    (predictor_disj_tc :
-       fseparate LA translation_charlie.(locs))
-    (predictor_disj_tb :
-       fseparate LA translation_bob.(locs))
-    (predictor_disj_ore :
-       fseparate LA
-         (oracle_encrypt_real_pkg AHE Renc index_renc renc_card
-            rand_of_renc t_msg t_cipher msg_of_chmsg
-            chcipher_of_cipher pkey_of_party).(locs))
-    (predictor_disj_oze :
-       fseparate LA
-         (oracle_encrypt_zero_pkg AHE Renc index_renc renc_card
-            rand_of_renc t_msg t_cipher chcipher_of_cipher
-            pkey_of_party).(locs))
-    (ValidCode_predictor_game_leak :
-       ValidCode emptym [interface]
-         (resolve (predictor ∘ game_leak)
-                  (id_guess, ('unit, t_msg)) tt))
-    (LosslessCode_predictor_game_leak :
-       LosslessCode
-         (resolve (predictor ∘ game_leak)
-                  (id_guess, ('unit, t_msg)) tt)) :
-  distr.mu (pkg_advantage.Pr (guess_indicator_pkg predictor game_real)) true
-    <= (index_t_msg%:R)^-1 + 2%:R * epsilon_cpa.
-Proof.
-have Hleak :
-    distr.mu (pkg_advantage.Pr (guess_indicator_pkg predictor game_leak)) true
-      <= (index_t_msg%:R)^-1
-  by apply: Pr_guess_indicator_le_inv_msg_card.
-have Hwrap : ValidPackage LA game_iface A_export (boolean_shell ∘ predictor)
-  by ssprove_valid.
-have Hadv :
-    AdvantageE game_real game_leak (boolean_shell ∘ predictor)
-      <= epsilon_cpa + epsilon_cpa
-  by apply: advantage_game_real_game_leak.
-unfold AdvantageE in Hadv.
-rewrite -!link_assoc in Hadv.
-rewrite -/(guess_indicator_pkg predictor game_real)
-        -/(guess_indicator_pkg predictor game_leak) in Hadv.
-have Htri :
-    distr.mu (pkg_advantage.Pr (guess_indicator_pkg predictor game_real)) true
-      <= distr.mu (pkg_advantage.Pr (guess_indicator_pkg predictor game_leak)) true
-         + (epsilon_cpa + epsilon_cpa).
-{ by apply: ler_distlDr. }
-apply: le_trans Htri _.
-rewrite mulr_natl mulr2n.
-by apply: lerD.
-Qed.
-
-Print Assumptions Pr_guess_indicator_le_inv_msg_card.
-Print Assumptions dsdp_alice_secrecy_indcpa.
+  fdist_game_leak_joint |= [% V_2, V_3] _|_ Z_rand.
 
 End dsdp_security_indcpa.
 
 (* ================================================================== *)
-(* Task 13: residual uniformity Pr_game_leak_V2_uniform                *)
+(* Task 13: residual uniformity cPr_V2_V3_uniform_on_fiber                *)
 (* ================================================================== *)
 
 (* Imports needed by the [du2002/spp_entropy.v] / [du2002/spp_proba.v]
@@ -3254,12 +2236,13 @@ Section dsdp_security_indcpa_residual.
     Why: Task 13 of [~/.claude/plans/sprightly-finding-robin.md].  The
     residual uniformity step is purely information-theoretic; it
     operates on the bridged [{fdist alice_view}]-side and is parametric
-    in the probability space.  Task 14 then instantiates this section
-    at the bridge image and combines with the SSProve-side advantage
-    bound to close [dsdp_alice_secrecy_indcpa].  The encryption-rand
-    tuple [Z_rand] is carried as a single auxiliary RV (its concrete
-    component shape is irrelevant to the residual argument: only the
-    independence hypothesis [V2V3_Z_inde_given_Y] matters). *)
+    in the probability space.  T1's V_2-aware rebuild instantiates
+    this section at the bridge image and combines with the SSProve-
+    side advantage bound to close the rebuilt secrecy theorem.  The
+    encryption-rand tuple [Z_rand] is carried as a single auxiliary
+    RV (its concrete component shape is irrelevant to the residual
+    argument: only the independence hypothesis [V2V3_Z_inde_given_Y]
+    matters). *)
 Context (p_minus_2 q_minus_2 : nat).
 Hypothesis prime_p_indcpa : prime p_minus_2.+2.
 Hypothesis prime_q_indcpa : prime q_minus_2.+2.
@@ -3315,7 +2298,7 @@ Hypothesis VarRV_indep_inputs_indcpa :
 Hypothesis V2V3_Z_inde_given_Y :
   P |= [%[%V_2, V_3], [%V_1, U_1, U_2, U_3, S]] _|_ Z_rand.
 
-(** Pr_game_leak_V2_uniform - residual uniformity of [V_2] after both
+(** cPr_V2_V3_uniform_on_fiber - residual uniformity of [V_2] after both
     IND-CPA hops have been taken.  Conditioning the joint
     [(V_2, V_3)] event on the full Alice view (which combines the
     IT-side tuple [(V_1, U_1, U_2, U_3, S)] with the
@@ -3326,8 +2309,9 @@ Hypothesis V2V3_Z_inde_given_Y :
     Why: Task 13 of [~/.claude/plans/sprightly-finding-robin.md].
     This is the second half of the closed-form Alice secrecy bound
     [1/m + 2 * epsilon_cpa]; the [2 * epsilon_cpa] half lives in
-    [advantage_game_real_game_leak] (Task 08).  Task 14 combines the
-    two halves into [dsdp_alice_secrecy_indcpa].
+    [advantage_game_real_game_leak] (Task 08).  T1's V_2-aware
+    rebuild combines the two halves into the rebuilt secrecy
+    theorem.
     Proof: [inde_RV2_cinde] (independence to conditional
     independence), then [cinde_rv_comp_removal] (drop [Z_rand] from
     the conditioning, this is the cinde-removal arrow that the
@@ -3338,7 +2322,7 @@ Hypothesis V2V3_Z_inde_given_Y :
     hypothesis.
     Naming: [Pr_<thing>_<property>] is the infotheo convention; see
     [Pr_dsdp_sol_uniform] at [dsdp_entropy.v:237].
-    Used by: Task 14 ([dsdp_alice_secrecy_indcpa]).
+    Used by: T1 V_2-aware rebuild.
     Bookkeeping translation: the SSProve-side [V_2] sample inside
     [game_leak] is projected to the infotheo-side RV [V_2] via the
     bridge [bridge_leak_to_fdist] (Task 12); Task 14 calls
@@ -3350,7 +2334,7 @@ Hypothesis V2V3_Z_inde_given_Y :
     each [v_2] has exactly one fiber partner when [u_3] is invertible
     (which is the [u_3 < minn p q] hypothesis), so the marginal is
     also [1/m].  Task 14 handles that partitioning step. *)
-Lemma Pr_game_leak_V2_uniform
+Lemma cPr_V2_V3_uniform_on_fiber
     (u1 u2 u3 v1 s : 'Z_m) (v2 v3 : 'Z_m) (z : TR) :
   (0 < u3)%N -> (u3 < minn p q)%N ->
   `Pr[ [%Z_rand, [%V_1, U_1, U_2, U_3, S]] = (z, (v1, u1, u2, u3, s)) ] != 0 ->
@@ -3386,7 +2370,7 @@ apply: contraNneq Hcond_pos => H0.
 by apply/eqP; apply: pfwd1_domin_RV1; exact: H0.
 Qed.
 
-(* Task 13 verify clause: [Pr_game_leak_V2_uniform] type-checks and
+(* Task 13 verify clause: [cPr_V2_V3_uniform_on_fiber] type-checks and
    closes with [Qed].  The proof uses only the three infotheo lemmas
    the plan names ([inde_RV2_cinde], [cinde_rv_comp_removal],
    [Pr_dsdp_sol_uniform]), plus [pfwd1_domin_RV1] to discharge the
@@ -3395,7 +2379,7 @@ Qed.
    infotheo-side [{fdist T}] directly, and Task 14's caller invokes
    [bridge_correct] to transfer SSProve-side [Pr] statements to the
    infotheo side before applying the present lemma. *)
-Check Pr_game_leak_V2_uniform :
+Check cPr_V2_V3_uniform_on_fiber :
   forall (u1 u2 u3 v1 s : 'Z_m) (v2 v3 : 'Z_m) (z : TR),
     (0 < u3)%N -> (u3 < minn p q)%N ->
     `Pr[ [%Z_rand, [%V_1, U_1, U_2, U_3, S]] = (z, (v1, u1, u2, u3, s)) ] != 0 ->
@@ -3407,7 +2391,7 @@ Check Pr_game_leak_V2_uniform :
 End dsdp_security_indcpa_residual.
 
 (* ================================================================== *)
-(* Task F: ring-generic residual section + alice_view_with_secrets    *)
+(* Task F: ring-generic residual section + alice_view_joint    *)
 (*         discharge of the four IT residual hypotheses                *)
 (* ================================================================== *)
 
@@ -3418,7 +2402,7 @@ End dsdp_security_indcpa_residual.
    block adds the ring-generic sibling [dsdp_security_indcpa_residual_ring]
    which mirrors the existing residual section but over any
    [finComUnitRingType] (Task E's generalisation), plus a second sibling
-   section [dsdp_security_indcpa_residual_at_alice_view_with_secrets]
+   section [dsdp_security_indcpa_residual_joint]
    that discharges the four IT residual hypotheses from Task D's
    correspondence lemmas in the canonical instantiation
    [Z_rand := fun _ => tt].
@@ -3444,10 +2428,10 @@ Section dsdp_security_indcpa_residual_ring.
     [u_3 \is a GRing.unit], so this sibling section drops the three
     prime-related hypotheses entirely while still producing the same
     [1/m] residual where [m = #|Rring|].
-    Used by: Task H ([Pr_guess_indicator_le_inv_msg_card]) when the
-    composed-game probability is transferred through the joint fdist
-    [bridge_predictor_compose_to_fdist] and the V_2-guess event is
-    counted via the conditional uniformity proved here. *)
+    Used by: T1 V_2-aware rebuild — when the composed-game
+    probability is transferred to a V_2-aware joint fdist and the
+    V_2-guess event is counted via the conditional uniformity
+    proved here. *)
 Variable Rring : finComUnitRingType.
 Variable T : finType.
 Variable P : R.-fdist T.
@@ -3466,7 +2450,7 @@ Variable Z_rand : {RV P -> TR}.
     linear system; without it the fiber-cardinality argument has no
     purchase.  Concrete discharge: Task F's second section discharges
     this from the leak-game-shaped distribution
-    [fdist_game_leak_with_secrets] together with Task D's protocol
+    [fdist_game_leak_joint] together with Task D's protocol
     RVs. *)
 Hypothesis constraint_holds_indcpa_ring :
   forall t : T,
@@ -3503,14 +2487,14 @@ Hypothesis VarRV_indep_inputs_indcpa_ring :
     Ring-generic analogue of [V2V3_Z_inde_given_Y] at line 2785.
     Kind: hypothesis.
     Why: feeds [inde_RV2_cinde] (Lemma 3.3, [du2002/spp_proba.v:146])
-    in the proof of [Pr_game_leak_V2_uniform_ring] below.  At the
+    in the proof of [cPr_V2_V3_uniform_on_fiber_ring] below.  At the
     instantiation [Z_rand := fun _ => tt] (the constant unit-valued
     RV) this hypothesis is discharged by
-    [V2V3_Z_inde_given_Y_at_avs] in the second section below. *)
+    [V2V3_Z_inde_given_Y_joint] in the second section below. *)
 Hypothesis V2V3_Z_inde_given_Y_ring :
   P |= [%[%V_2, V_3], [%V_1, U_1, U_2, U_3, S]] _|_ Z_rand.
 
-(** Pr_game_leak_V2_uniform_ring - ring-generic residual uniformity of
+(** cPr_V2_V3_uniform_on_fiber_ring - ring-generic residual uniformity of
     [V_2] after both IND-CPA hops have been taken.  Conditioning the
     joint [(V_2, V_3)] event on the full Alice view (which combines
     the IT-side tuple [(V_1, U_1, U_2, U_3, S)] with the encryption-
@@ -3519,7 +2503,7 @@ Hypothesis V2V3_Z_inde_given_Y_ring :
     target pair lies in the DSDP fiber.
     Kind: main residual (ring-generic version).
     Why: Task F of [~/.claude/plans/sprightly-finding-robin.md].  Same
-    statement as [Pr_game_leak_V2_uniform] at line 2823 but over
+    statement as [cPr_V2_V3_uniform_on_fiber] at line 2823 but over
     [Rring : finComUnitRingType] instead of ['Z_(p*q)].  The proof
     structure is identical: [inde_RV2_cinde] turns the joint
     independence into conditional independence, [cinde_rv_comp_removal]
@@ -3529,9 +2513,9 @@ Hypothesis V2V3_Z_inde_given_Y_ring :
     via [pfwd1_domin_RV1] from the joint nonzero hypothesis.
     Naming: [_ring] suffix mirrors [dsdp_fiber_card_ring] /
     [Pr_dsdp_sol_uniform_ring] in [dsdp_entropy.v]; the [Z_(p*q)]-
-    specialised [Pr_game_leak_V2_uniform] above is left unchanged.
-    Used by: Task H ([Pr_guess_indicator_le_inv_msg_card]). *)
-Lemma Pr_game_leak_V2_uniform_ring
+    specialised [cPr_V2_V3_uniform_on_fiber] above is left unchanged.
+    Used by: T1 V_2-aware rebuild. *)
+Lemma cPr_V2_V3_uniform_on_fiber_ring
     (u1 u2 u3 v1 s : Rring) (v2 v3 : Rring) (z : TR) :
   u3 \is a GRing.unit ->
   `Pr[ [%Z_rand, [%V_1, U_1, U_2, U_3, S]] = (z, (v1, u1, u2, u3, s)) ] != 0 ->
@@ -3572,13 +2556,13 @@ apply: Pr_dsdp_sol_uniform_ring.
 - exact: Hin.
 Qed.
 
-(* Task F verify clause (ring-generic side): [Pr_game_leak_V2_uniform_ring]
+(* Task F verify clause (ring-generic side): [cPr_V2_V3_uniform_on_fiber_ring]
    type-checks and closes with [Qed].  The proof uses only the three
    infotheo lemmas the original residual section names ([inde_RV2_cinde],
    [cinde_rv_comp_removal], [Pr_dsdp_sol_uniform_ring]), plus
    [pfwd1_domin_RV1] to discharge the nonzero-marginal side-obligation,
    and no prime hypotheses. *)
-Check Pr_game_leak_V2_uniform_ring :
+Check cPr_V2_V3_uniform_on_fiber_ring :
   forall (u1 u2 u3 v1 s : Rring) (v2 v3 : Rring) (z : TR),
     u3 \is a GRing.unit ->
     `Pr[ [%Z_rand, [%V_1, U_1, U_2, U_3, S]] = (z, (v1, u1, u2, u3, s)) ] != 0 ->
@@ -3591,18 +2575,18 @@ End dsdp_security_indcpa_residual_ring.
 
 (* ================================================================== *)
 (* Discharge of the four IT residual hypotheses at the canonical       *)
-(* alice_view_with_secrets instantiation (Z_rand := fun _ => tt).      *)
+(* alice_view_joint instantiation (Z_rand := fun _ => tt).      *)
 (* ================================================================== *)
 
-Section dsdp_security_indcpa_residual_at_alice_view_with_secrets.
+Section dsdp_security_indcpa_residual_joint.
 
 (** Section parameters mirroring the ring-generic residual but with
     [Z_rand] specialised to the constant unit-valued RV.  The seven
     DSDP RVs [V_1, V_2, V_3, U_1, U_2, U_3, S] live on a common
     probability space [T] with distribution [P] and ring carrier
     [Rring].  Task F's downstream consumer instantiates [T :=
-    alice_view_with_secrets] (Task B), [P :=
-    fdist_game_leak_with_secrets] (Task D), and identifies [V_2_carrier
+    alice_view_joint] (Task B), [P :=
+    fdist_game_leak_joint] (Task D), and identifies [V_2_carrier
     = V_3_carrier = plain AHE = Rring].
     Kind: section parameters.
     Why: Task F of [~/.claude/plans/sprightly-finding-robin.md].  The
@@ -3614,162 +2598,161 @@ Section dsdp_security_indcpa_residual_at_alice_view_with_secrets.
     [constraint_holds] / [VarRV_uniform] / [VarRV_indep_inputs] at
     lines 95-117; (ii) the structural fact that the constant unit-
     valued RV is independent of every joint RV (discharged
-    structurally as [V2V3_Z_inde_given_Y_at_avs]).
-    Used by: Task H ([Pr_guess_indicator_le_inv_msg_card]). *)
+    structurally as [V2V3_Z_inde_given_Y_joint]).
+    Used by: T1 V_2-aware rebuild. *)
 Variable Rring : finComUnitRingType.
 Variable T : finType.
 Variable P : R.-fdist T.
 Variables (V_1 V_2 V_3 U_1 U_2 U_3 S : {RV P -> Rring}).
 
-(** constraint_holds_avs - the DSDP linear constraint holds at every
+(** constraint_holds_joint - the DSDP linear constraint holds at every
     sample of [P].  Same role as
     [dsdp_security_indcpa_residual_ring.constraint_holds_indcpa_ring]
     but stated as a section hypothesis ready for downstream
-    instantiation against the bridged [fdist_game_leak_with_secrets]
+    instantiation against the bridged [fdist_game_leak_joint]
     (where the leak-game body computes [S = U_1 V_1 + U_2 V_2 + U_3
     V_3] deterministically, so the constraint holds on the entire
     support of the bridged fdist).
     Kind: hypothesis.
-    Why: required to invoke [Pr_game_leak_V2_uniform_ring] below.
-    Used by: [Pr_game_leak_V2_uniform_at_avs]. *)
-Hypothesis constraint_holds_avs :
+    Why: required to invoke [cPr_V2_V3_uniform_on_fiber_ring] below.
+    Used by: [cPr_V2_V3_uniform_on_fiber_joint]. *)
+Hypothesis constraint_holds_joint :
   forall t : T,
     dsdp_constraint_ring ([%V_1, U_1, U_2, U_3, S] t) ([%V_2, V_3] t).
 
-(** VarRV_uniform_avs - [(V_2, V_3)] is jointly uniform on
+(** VarRV_uniform_joint - [(V_2, V_3)] is jointly uniform on
     [Rring * Rring].  Same role as
     [VarRV_uniform_indcpa_ring] in the previous section.
     Downstream discharge: combine Task D's [p_V_2_uniform],
-    [p_V_3_uniform] with [VarRV_indep_inputs_avs] (which restricted
+    [p_V_3_uniform] with [VarRV_indep_inputs_joint] (which restricted
     to the V_2,V_3 marginal gives [(V_2, V_3) ~ V_2 \otimes V_3]) and
     use [fdist_prod_indep] to obtain joint uniformity.
     Kind: hypothesis.
-    Why: required to invoke [Pr_game_leak_V2_uniform_ring].
-    Used by: [Pr_game_leak_V2_uniform_at_avs]. *)
-Hypothesis VarRV_uniform_avs :
+    Why: required to invoke [cPr_V2_V3_uniform_on_fiber_ring].
+    Used by: [cPr_V2_V3_uniform_on_fiber_joint]. *)
+Hypothesis VarRV_uniform_joint :
   `p_ [%V_2, V_3] = fdist_uniform (dsdp_entropy.card_RR_pair_subproof Rring).
 
-(** VarRV_indep_inputs_avs - [(V_2, V_3)] is independent of the
+(** VarRV_indep_inputs_joint - [(V_2, V_3)] is independent of the
     protocol inputs [(V_1, U_1, U_2, U_3)].  Mirrors
     [VarRV_indep_inputs_indcpa_ring].  Comes from the leak game body
     sampling V_2 and V_3 fresh before any input use.
     Kind: hypothesis.
-    Why: required to invoke [Pr_game_leak_V2_uniform_ring].
-    Used by: [Pr_game_leak_V2_uniform_at_avs]. *)
-Hypothesis VarRV_indep_inputs_avs :
+    Why: required to invoke [cPr_V2_V3_uniform_on_fiber_ring].
+    Used by: [cPr_V2_V3_uniform_on_fiber_joint]. *)
+Hypothesis VarRV_indep_inputs_joint :
   P |= [%V_1, U_1, U_2, U_3] _|_ [%V_2, V_3].
 
-(** Z_rand_at_avs - the constant unit-valued auxiliary RV.  Same as
+(** Z_rand_joint - the constant unit-valued auxiliary RV.  Same as
     [Z_rand] in Task D (line 2516); restated here as a section-local
     definition so the four-hypothesis discharge is self-contained.
     Kind: helper.
     Why: feeds the structural-independence discharge
-    [V2V3_Z_inde_given_Y_at_avs] below.  At the canonical post-IND-CPA-
+    [V2V3_Z_inde_given_Y_joint] below.  At the canonical post-IND-CPA-
     hop instantiation, encryption-randomness has been collapsed (both
     [c_2, c_3] are zero-encryptions in [game_leak]'s body), so [Z_rand]
     can be modelled as a constant unit RV without losing any
     information that the residual analysis needs.
-    Naming: [_at_avs] suffix indicates this is the canonical
-    instantiation at [alice_view_with_secrets].  Project-local.
-    Used by: [pfwd1_Z_rand_at_avs_tt], [V2V3_Z_inde_given_Y_at_avs]. *)
-Definition Z_rand_at_avs : {RV P -> unit} := fun _ => tt.
+    Naming: [_joint] suffix indicates this is the canonical
+    instantiation at [alice_view_joint].  Project-local.
+    Used by: [pfwd1_Z_rand_joint_tt], [V2V3_Z_inde_given_Y_joint]. *)
+Definition Z_rand_joint : {RV P -> unit} := fun _ => tt.
 
-(** pfwd1_Z_rand_at_avs_tt - [Z_rand_at_avs] hits [tt] with probability
-    one because [Z_rand_at_avs] is the constant unit-valued random
+(** pfwd1_Z_rand_joint_tt - [Z_rand_joint] hits [tt] with probability
+    one because [Z_rand_joint] is the constant unit-valued random
     variable.  Same role as Task D's [pfwd1_Z_rand_tt] (line 2613) at
     the abstract Rring-typed sample space.
     Kind: helper.
-    Why: feeds [V2V3_Z_inde_given_Y_at_avs].  The independence of any
-    joint RV [J] and [Z_rand_at_avs] reduces to showing
-    [Pr[(J, Z_rand_at_avs) = (j, tt)] = Pr[J = j] *
-    Pr[Z_rand_at_avs = tt]]; using
-    [Pr[Z_rand_at_avs = tt] = 1] turns the RHS into [Pr[J = j]]
-    which equals the LHS up to the bijection [(J, Z_rand_at_avs) = (j,
-    tt) iff J = j] (since [Z_rand_at_avs] is always [tt]).
-    Used by: [V2V3_Z_inde_given_Y_at_avs]. *)
-Lemma pfwd1_Z_rand_at_avs_tt : `Pr[ Z_rand_at_avs = tt ] = 1.
+    Why: feeds [V2V3_Z_inde_given_Y_joint].  The independence of any
+    joint RV [J] and [Z_rand_joint] reduces to showing
+    [Pr[(J, Z_rand_joint) = (j, tt)] = Pr[J = j] *
+    Pr[Z_rand_joint = tt]]; using
+    [Pr[Z_rand_joint = tt] = 1] turns the RHS into [Pr[J = j]]
+    which equals the LHS up to the bijection [(J, Z_rand_joint) = (j,
+    tt) iff J = j] (since [Z_rand_joint] is always [tt]).
+    Used by: [V2V3_Z_inde_given_Y_joint]. *)
+Lemma pfwd1_Z_rand_joint_tt : `Pr[ Z_rand_joint = tt ] = 1.
 Proof.
 rewrite pfwd1E.
-suff -> : (finset (preim Z_rand_at_avs (pred1 tt))) = setT by exact: Pr_setT.
+suff -> : (finset (preim Z_rand_joint (pred1 tt))) = setT by exact: Pr_setT.
 apply/setP => x; rewrite !inE /=.
-by case: (Z_rand_at_avs x).
+by case: (Z_rand_joint x).
 Qed.
 
-(** V2V3_Z_inde_given_Y_at_avs - the joint pair
+(** V2V3_Z_inde_given_Y_joint - the joint pair
     [([%V_2, V_3], [%V_1, U_1, U_2, U_3, S])] is independent of
-    [Z_rand_at_avs] under [P].  Discharges the [V2V3_Z_inde_given_Y_ring]
+    [Z_rand_joint] under [P].  Discharges the [V2V3_Z_inde_given_Y_ring]
     hypothesis of [dsdp_security_indcpa_residual_ring] at the canonical
     instantiation [Z_rand := fun _ => tt].
     Kind: discharge lemma (provable, not hypothesis).
     Why: Task F of [~/.claude/plans/sprightly-finding-robin.md].  The
     structural fact that a constant random variable is independent of
-    every other RV: [Pr[J = j] * Pr[Z_rand_at_avs = tt] = Pr[J = j] *
-    1 = Pr[J = j] = Pr[(J, Z_rand_at_avs) = (j, tt)]].  Discharged via
-    [pfwd1_Z_rand_at_avs_tt] + a [setP] argument collapsing the joint
+    every other RV: [Pr[J = j] * Pr[Z_rand_joint = tt] = Pr[J = j] *
+    1 = Pr[J = j] = Pr[(J, Z_rand_joint) = (j, tt)]].  Discharged via
+    [pfwd1_Z_rand_joint_tt] + a [setP] argument collapsing the joint
     event to the marginal.
-    Naming: mirrors Task D's [inde_V_2_V_3_Z_rand]; the [_at_avs]
+    Naming: mirrors Task D's [inde_V_2_V_3_Z_rand]; the [_joint]
     suffix indicates the canonical instantiation.
-    Used by: [Pr_game_leak_V2_uniform_at_avs]. *)
-Lemma V2V3_Z_inde_given_Y_at_avs :
-  P |= [%[%V_2, V_3], [%V_1, U_1, U_2, U_3, S]] _|_ Z_rand_at_avs.
+    Used by: [cPr_V2_V3_uniform_on_fiber_joint]. *)
+Lemma V2V3_Z_inde_given_Y_joint :
+  P |= [%[%V_2, V_3], [%V_1, U_1, U_2, U_3, S]] _|_ Z_rand_joint.
 Proof.
 rewrite /inde_RV.
 move=> jj z.
 case: z.
-rewrite pfwd1_Z_rand_at_avs_tt mulr1.
+rewrite pfwd1_Z_rand_joint_tt mulr1.
 rewrite !pfwd1E.
 apply: eq_bigl => x; rewrite !inE /=.
 rewrite /RV2 /=.
-by case: (Z_rand_at_avs x); rewrite !xpair_eqE andbT.
+by case: (Z_rand_joint x); rewrite !xpair_eqE andbT.
 Qed.
 
-(** Pr_game_leak_V2_uniform_at_avs - residual uniformity of [V_2] at
+(** cPr_V2_V3_uniform_on_fiber_joint - residual uniformity of [V_2] at
     the canonical instantiation [Z_rand := fun _ => tt].  Directly
-    invokes [Pr_game_leak_V2_uniform_ring] with the three
+    invokes [cPr_V2_V3_uniform_on_fiber_ring] with the three
     section-hypothesis discharges (constraint, uniform, indep) and the
-    one provable discharge ([V2V3_Z_inde_given_Y_at_avs]).
+    one provable discharge ([V2V3_Z_inde_given_Y_joint]).
     Kind: corollary (no new mathematical content).
     Why: Task F of [~/.claude/plans/sprightly-finding-robin.md].  This
-    is the ready-to-use residual that Task H ([Pr_predictor_guess_
-    game_leak_le_invm]) applies after transferring an SSProve-side
-    probability statement through the joint fdist
-    [bridge_predictor_compose_to_fdist] (Task C).  The ring is now any
+    is the ready-to-use residual that T1's V_2-aware rebuild applies
+    after transferring an SSProve-side probability statement through
+    a V_2-aware joint fdist.  The ring is now any
     [finComUnitRingType] — no [prime_p] / [prime_q] / [coprime_pq]
     needed, and [index_msg] is identified with [#|Rring|] at the
     downstream instantiation site.
-    Used by: Task H. *)
-Lemma Pr_game_leak_V2_uniform_at_avs
+    Used by: T1 V_2-aware rebuild. *)
+Lemma cPr_V2_V3_uniform_on_fiber_joint
     (u1 u2 u3 v1 s : Rring) (v2 v3 : Rring) (z : unit) :
   u3 \is a GRing.unit ->
-  `Pr[ [%Z_rand_at_avs, [%V_1, U_1, U_2, U_3, S]] = (z, (v1, u1, u2, u3, s)) ] != 0 ->
+  `Pr[ [%Z_rand_joint, [%V_1, U_1, U_2, U_3, S]] = (z, (v1, u1, u2, u3, s)) ] != 0 ->
   (v2, v3) \in dsdp_fiber_ring u1 u2 u3 v1 s ->
   `Pr[ [%V_2, V_3] = (v2, v3) |
-       [%Z_rand_at_avs, [%V_1, U_1, U_2, U_3, S]] = (z, (v1, u1, u2, u3, s)) ]
+       [%Z_rand_joint, [%V_1, U_1, U_2, U_3, S]] = (z, (v1, u1, u2, u3, s)) ]
     = #|Rring|%:R^-1.
 Proof.
-apply: Pr_game_leak_V2_uniform_ring.
-- exact: constraint_holds_avs.
-- exact: VarRV_uniform_avs.
-- exact: VarRV_indep_inputs_avs.
-- exact: V2V3_Z_inde_given_Y_at_avs.
+apply: cPr_V2_V3_uniform_on_fiber_ring.
+- exact: constraint_holds_joint.
+- exact: VarRV_uniform_joint.
+- exact: VarRV_indep_inputs_joint.
+- exact: V2V3_Z_inde_given_Y_joint.
 Qed.
 
 (* Task F verify clause: the corollary type-checks with the
    conclusion expressed in terms of [#|Rring|^-1], matching the plan's
    "Identify index_msg = #|R|" directive.  All four IT residual
    hypotheses have been discharged: the three protocol-structural ones
-   ([constraint_holds_avs], [VarRV_uniform_avs],
-   [VarRV_indep_inputs_avs]) survive as section hypotheses (their
+   ([constraint_holds_joint], [VarRV_uniform_joint],
+   [VarRV_indep_inputs_joint]) survive as section hypotheses (their
    downstream discharge is the bridged-fdist content from Tasks A-C),
    while the fourth ([V2V3_Z_inde_given_Y_ring]) is replaced by the
-   directly-provable [V2V3_Z_inde_given_Y_at_avs]. *)
-Check Pr_game_leak_V2_uniform_at_avs :
+   directly-provable [V2V3_Z_inde_given_Y_joint]. *)
+Check cPr_V2_V3_uniform_on_fiber_joint :
   forall (u1 u2 u3 v1 s : Rring) (v2 v3 : Rring) (z : unit),
     u3 \is a GRing.unit ->
-    `Pr[ [%Z_rand_at_avs, [%V_1, U_1, U_2, U_3, S]] = (z, (v1, u1, u2, u3, s)) ] != 0 ->
+    `Pr[ [%Z_rand_joint, [%V_1, U_1, U_2, U_3, S]] = (z, (v1, u1, u2, u3, s)) ] != 0 ->
     (v2, v3) \in dsdp_fiber_ring u1 u2 u3 v1 s ->
     `Pr[ [%V_2, V_3] = (v2, v3) |
-         [%Z_rand_at_avs, [%V_1, U_1, U_2, U_3, S]] = (z, (v1, u1, u2, u3, s)) ]
+         [%Z_rand_joint, [%V_1, U_1, U_2, U_3, S]] = (z, (v1, u1, u2, u3, s)) ]
       = #|Rring|%:R^-1.
 
-End dsdp_security_indcpa_residual_at_alice_view_with_secrets.
+End dsdp_security_indcpa_residual_joint.
