@@ -478,6 +478,109 @@ exact: (@dsdp_alice_secrecy_indcpa
           LosslessCode_predictor_game_leak).
 Qed.
 
+(* ================================================================== *)
+(* Task L: trivial random-guess adversary + theorem-level arg discharge *)
+(* ================================================================== *)
+
+(** Local message-side pack_type custom-entry notation.  Mirrors the
+    abstract section's [Local Notation "'msg'" := t_msg ...] at
+    [dsdp_security_indcpa.v:438].  Without this notation the
+    [#def ... : msg] sugar inside the [random_guess_adv] body fails to
+    parse.  Local to the concrete section, so it does not leak to
+    consumers of [Module Concrete]. *)
+Local Notation "'msg'" := t_msg (in custom pack_type at level 2).
+
+(** random_guess_adv - trivial adversary that ignores the game
+    interface, samples a uniform index [iV : 'I_index_t_msg],
+    and returns [embed_to_msg (enum_val (cast_ord (esym t_msg_card)
+    iV))] as its [t_msg] guess.  Crucially this is the SAME
+    construction that [boolean_shell] uses internally to derive a
+    uniform [V_2_sample] for the equality test (see
+    [dsdp_security_indcpa.v:2714 sample_to_t_msg]); composing
+    [random_guess_adv] with [guess_indicator_pkg] yields a residual
+    game whose probability of true is exactly
+    [index_t_msg%:R^-1] (this is the [Pr_guess_indicator_le_inv_msg_card]
+    bound at saturation), and the IND-CPA hops contribute the
+    [2%:R * epsilon_cpa] term.
+    Kind: concrete adversary.
+    Why: Task L of [~/.claude/plans/sprightly-finding-robin.md].
+    Used by: secrecy_random_guess. *)
+Definition random_guess_adv : predictor_guesser t_msg t_cipher :=
+  [package emptym ;
+    #def #[ id_guess ] (_ : 'unit) : msg
+    {
+      iV ← sample uniform index_t_msg ;;
+      ret (embed_to_msg (enum_val (cast_ord (esym t_msg_card) iV)))
+    }
+  ].
+
+(** secrecy_random_guess - the closed-form
+    Alice-secrecy bound at the concrete carriers AND the trivial
+    adversary.  Takes ZERO theorem-level arguments (the 11 arguments
+    of [Concrete.dsdp_alice_secrecy_indcpa] are discharged below): the
+    eight [fseparate] disjointness goals close by [fseparate0m]
+    ([Concrete.random_guess_adv.(locs) = emptym]), the [ValidPackage]
+    arg closes by typeclass resolution through [random_guess_adv]'s
+    declaration, and the [ValidCode] / [LosslessCode] args close by
+    unfolding [resolve] on the composition (which collapses to
+    [random_guess_adv]'s body via [coerce_kleisliE] since
+    [random_guess_adv] never invokes [game_iface]) plus [ssprove_valid]
+    (for [ValidCode]) and [Lossless_sample] + [LosslessOp_uniform] +
+    [index_t_msg_gt0] (for [LosslessCode]).
+    Kind: main corollary.
+    Why: this is the Task L output of the plan.  Task M (next)
+    specialises this at idealised AHE
+    ([Idealized_HETypes 'F_p]) to remove [AHE] from the [Print
+    Assumptions] closure.
+    Used by: Task M
+    (~/.claude/plans/sprightly-finding-robin.md). *)
+Corollary secrecy_random_guess :
+  distr.mu
+    (pkg_advantage.Pr
+       (guess_indicator_pkg t_msg_card
+          embed_to_msg random_guess_adv
+          (game_real renc_card rand_of_renc
+             chcipher_of_cipher pkey_of_party
+             msg_of_idx))) true
+    <= (index_t_msg%:R)^-1 + 2%:R * epsilon_cpa.
+Proof.
+refine (@dsdp_security_indcpa.dsdp_alice_secrecy_indcpa
+          AHE
+          Renc index_renc renc_card
+          rand_of_renc
+          t_msg t_cipher
+          msg_of_chmsg chmsg_of_msg
+          chcipher_of_cipher
+          cipher_of_chcipher
+          chcipher_of_cipherK chmsg_of_msgK
+          pkey_of_party
+          index_msg msg_of_idx
+          t_msg_carrier index_t_msg t_msg_card
+          embed_to_msg
+          sample_to_t_msg_inj
+          emptym random_guess_adv _ _ _ _ _ _ _ _ _ _ _).
+- (* predictor_disj_real *) apply: fseparate0m.
+- (* predictor_disj_h1   *) apply: fseparate0m.
+- (* predictor_disj_h2   *) apply: fseparate0m.
+- (* predictor_disj_leak *) apply: fseparate0m.
+- (* predictor_disj_tc   *) apply: fseparate0m.
+- (* predictor_disj_tb   *) apply: fseparate0m.
+- (* predictor_disj_ore  *) apply: fseparate0m.
+- (* predictor_disj_oze  *) apply: fseparate0m.
+- (* ValidCode_predictor_game_leak *)
+  unfold pkg_composition.link, random_guess_adv; simpl.
+  unfold resolve; simpl.
+  rewrite coerce_kleisliE.
+  ssprove_valid.
+- (* LosslessCode_predictor_game_leak *)
+  unfold pkg_composition.link, random_guess_adv; simpl.
+  unfold resolve; simpl.
+  rewrite coerce_kleisliE.
+  apply: Lossless_sample.
+  apply: LosslessOp_uniform.
+  exact: index_t_msg_gt0.
+Qed.
+
 End concrete.
 
 End Concrete.
