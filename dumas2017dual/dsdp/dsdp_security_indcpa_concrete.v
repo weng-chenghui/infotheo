@@ -1,0 +1,483 @@
+(* DSDP Alice secrecy under IND-CPA, concrete-section instantiation.
+
+   Discharges every section variable of [Section dsdp_security_indcpa]
+   in [dsdp_security_indcpa.v] at concrete carriers built from an
+   arbitrary [AHE : AHEncType], producing [Theorem
+   dsdp_alice_secrecy_indcpa] whose only remaining
+   project-local hypotheses are the standard 11 theorem-level
+   arguments (LA, predictor, validity, eight disjointness witnesses,
+   code validity / losslessness).
+
+   The 21 section variables of [Section dsdp_security_indcpa]
+   transitively referenced by [dsdp_alice_secrecy_indcpa]'s signature
+   are discharged below.  The auxiliary section variables [Dk_a_carrier]
+   / [V_2_carrier] / [V_3_carrier] / [fdist_game_leak_with_secrets] and
+   their hypotheses [V_2_uniform_hyp] / [V_3_uniform_hyp] / [Dk_a_card]
+   / [V_2_card] / [V_3_card] / [index_msg_pos] / [index_renc_pos] /
+   [index_t_msg_pos] do NOT appear in the theorem's type and so are
+   not transitively needed; they show up only in the [Print Assumptions]
+   closure (via [Pr_guess_indicator_le_inv_msg_card]) and are
+   discharged downstream by the concrete adversary in Task L.
+
+   Plan: ~/.claude/plans/sprightly-finding-robin.md (Task K).
+*)
+
+From HB Require Import structures.
+From mathcomp Require Import all_boot all_order all_algebra fingroup finalg.
+From mathcomp Require Import matrix ring boolp finmap reals realsum.
+
+Set Warnings "-notation-overridden,-ambiguous-paths".
+From SSProve.Crypt Require Import Package pkg_composition Pr.
+Set Warnings "notation-overridden,ambiguous-paths".
+
+From Stdlib Require Import Utf8.
+From extructures Require Import ord fset fmap.
+
+Require Import realType_ext realType_ln ssr_ext ssralg_ext bigop_ext fdist.
+Require Import proba jfdist_cond entropy graphoid smc_interpreter spp_proba bayes.
+Require Import spp_entropy.
+Require Import homomorphic_encryption indcpa_ror.
+Require Import dsdp_program dsdp_entropy dsdp_pismc.
+Require Import dsdp_security_indcpa.
+Require Import smc.ssprove_ext_lossless.
+
+Set Implicit Arguments.
+Unset Strict Implicit.
+Import Prenex Implicits.
+
+Set Bullet Behavior "Strict Subproofs".
+Set Default Goal Selector "!".
+Set Primitive Projections.
+
+Import GRing.Theory Num.Theory Order.POrderTheory.
+Import PackageNotation.
+#[local] Open Scope package_scope.
+#[local] Open Scope ring_scope.
+#[local] Open Scope real_scope.
+
+(* Pin SSProve's real type as the ambient realType for this file (matches
+   the convention in [dsdp_security_indcpa.v:47]). *)
+Notation R := SSProve.Crypt.Axioms.R.
+
+Module Concrete.
+
+Section concrete.
+
+(** AHE - the abstract AHE scheme this concrete instantiation is
+    parametric in.  Matches the convention in
+    [dsdp_security_indcpa.v:56].
+    Kind: parameter.
+    Why: the concrete carriers built below are functions of [AHE].
+    Different AHE schemes give different concrete carriers, but the
+    same closed-form bound applies uniformly.
+    Used by: every concrete carrier and bijection below. *)
+Variable AHE : AHEncType.
+
+(** rand_finType, rand_finType_eq - extra finType-bridging variables
+    for [rand AHE], which is a bare [Type] (per [he_types.v:40]) not a
+    [finType].  Plan audit correction #5: SSProve cannot sample over
+    a bare Type, so the concrete section declares a finType carrier
+    plus an equality hypothesis tying its [Finite.sort] to [rand AHE].
+    Kind: parameter + hypothesis.
+    Why: needed to instantiate the abstract [Renc] / [rand_of_renc]
+    section parameters.  For idealised AHE both reduce to [erefl]
+    since [rand (Idealized_HETypes 'F_p) = 'F_p] which already carries
+    a [finType] instance.
+    Used by: Renc, rand_of_renc. *)
+Variable rand_finType : Finite.type.
+Hypothesis rand_finType_eq : Finite.sort rand_finType = rand AHE.
+
+(** pub_key_finType, pub_key_finType_eq - extra finType-bridging
+    variables for [pub_key AHE], which is a bare [Type] (per
+    [he_types.v:44]).  Same pattern as [rand_finType].
+    Kind: parameter + hypothesis.
+    Why: needed to construct [pkey_of_party] when the AHE
+    scheme's [pub_key] is not already a finType.  For idealised AHE
+    the public key is a singleton type; the hypothesis reduces to
+    [erefl].
+    Used by: pkey_of_party. *)
+Variable pub_key_finType : Finite.type.
+Hypothesis pub_key_finType_eq : Finite.sort pub_key_finType = pub_key AHE.
+
+(** cipher_finType, cipher_finType_eq - extra finType-bridging
+    variables for [cipher AHE], which is an [nzRingType] (per
+    [he_types.v:43]) not a [finType].  Same pattern as
+    [rand_finType].  Plan note: this was flagged as a possible extra
+    bridge in the "If you stall" section.
+    Kind: parameter + hypothesis.
+    Why: needed to build [t_cipher := chFin
+    #|cipher_finType|] and discharge [chcipher_of_cipher] /
+    [cipher_of_chcipher] cleanly.  For idealised AHE the
+    cipher is [Fp p] (a finComNzRingType hence a finType); the
+    hypothesis is [erefl].
+    Used by: t_cipher, chcipher_of_cipher,
+    cipher_of_chcipher. *)
+Variable cipher_finType : Finite.type.
+Hypothesis cipher_finType_eq : Finite.sort cipher_finType = cipher AHE.
+
+(** msg_inhabited, renc_inhabited, pub_key_inhabited - inhabitance
+    witnesses for [plain AHE], [rand_finType], and [pub_key_finType].
+    Required to discharge auxiliary positivity hypotheses (used in
+    the [Print Assumptions] closure transitively) and to build the
+    constant [pkey_of_party] function.  Plan risk R1
+    explicitly anticipated this need.
+    Kind: parameter.
+    Why: [AHEncType] does not carry inhabitance proofs in its mixin,
+    so the concrete section requests them externally.  At idealised
+    AHE all three are [0%R] or [GRing.zero].
+    Used by: pkey_of_party (pub_key_inhabited);
+    index_msg_gt0 / index_renc_gt0 /
+    index_t_msg_gt0 (msg / renc inhabited). *)
+Variable msg_inhabited : plain AHE.
+Variable renc_inhabited : rand_finType.
+Variable pub_key_inhabited : pub_key_finType.
+
+(** index_msg - cardinality index for the plaintext-scalar
+    carrier.  Picks [#|plain AHE|] so the cardinality coherence laws
+    close by [erefl].
+    Kind: concrete-carrier index.
+    Why: discharges the abstract [index_msg : nat] section parameter
+    of [Section dsdp_security_indcpa] (line 156).
+    Used by: dsdp_alice_secrecy_indcpa. *)
+Definition index_msg : nat := #|plain AHE|.
+
+(** index_renc - cardinality index for the
+    encryption-randomness carrier.  Picks [#|rand_finType|].
+    Kind: concrete-carrier index.
+    Why: discharges [index_renc] of the abstract section (line 68).
+    Used by: dsdp_alice_secrecy_indcpa. *)
+Definition index_renc : nat := #|rand_finType|.
+
+(** index_t_msg - cardinality index for the predictor-output
+    finType.  Same as [index_msg] since the predictor outputs
+    a guess at a plaintext-scalar value (Task G framework).
+    Kind: concrete-carrier index.
+    Why: discharges [index_t_msg] of the abstract section (line 1809).
+    Used by: dsdp_alice_secrecy_indcpa. *)
+Definition index_t_msg : nat := #|plain AHE|.
+
+(** Renc - concrete instantiation of the abstract [Renc :
+    finType] section parameter (line 63).  Set to [rand_finType].
+    Kind: concrete carrier.
+    Why: discharges [Renc] of the abstract section.
+    Used by: dsdp_alice_secrecy_indcpa. *)
+Definition Renc : finType := rand_finType.
+
+(** t_msg - concrete SSProve [choice_type] avatar of the
+    message carrier, picked as [chFin index_t_msg] (per the
+    project's [alice_view_ct] pattern at
+    [dsdp_security_indcpa.v:1110]).  With [index_t_msg :=
+    #|plain AHE|], the interpretation is ['I_#|plain AHE|], so
+    [enum_rank] / [enum_val] bridge cleanly.
+    Kind: concrete choice_type.
+    Why: discharges [t_msg : choice_type] of the abstract section
+    (line 91).
+    Used by: dsdp_alice_secrecy_indcpa. *)
+Definition t_msg : choice_type := chFin index_t_msg.
+
+(** t_cipher - concrete SSProve [choice_type] avatar of the
+    ciphertext carrier, picked as [chFin #|cipher_finType|].  Mirrors
+    [t_msg] for the ciphertext side.
+    Kind: concrete choice_type.
+    Why: discharges [t_cipher : choice_type] of the abstract section
+    (line 92).
+    Used by: dsdp_alice_secrecy_indcpa. *)
+Definition t_cipher : choice_type := chFin #|cipher_finType|.
+
+(** t_msg_carrier - concrete carrier finType for the
+    predictor-output guess, set to [plain AHE] (which is a
+    [finComNzRingType] hence a [finType]).
+    Kind: concrete carrier.
+    Why: discharges [t_msg_carrier] of the abstract section
+    (line 1794).
+    Used by: dsdp_alice_secrecy_indcpa. *)
+Definition t_msg_carrier : finType := plain AHE.
+
+(** msg_of_chmsg - concrete bijection from [t_msg]
+    to [plain AHE].  [t_msg] interprets as
+    ['I_#|plain AHE|], so [enum_val] is exactly the right shape.
+    Kind: concrete bijection.
+    Why: discharges [msg_of_chmsg : t_msg -> plain AHE] of the
+    abstract section (line 93).
+    Used by: dsdp_alice_secrecy_indcpa. *)
+Definition msg_of_chmsg : t_msg -> plain AHE :=
+  fun i => enum_val i.
+
+(** chmsg_of_msg - concrete inverse [plain AHE ->
+    t_msg].
+    Kind: concrete bijection.
+    Why: discharges [chmsg_of_msg : plain AHE -> t_msg] of the
+    abstract section (line 94).
+    Used by: dsdp_alice_secrecy_indcpa. *)
+Definition chmsg_of_msg : plain AHE -> t_msg :=
+  fun m => enum_rank m.
+
+(** cipher_of_chcipher - concrete bijection [t_cipher
+    -> cipher AHE], routing through [enum_val] on [cipher_finType]
+    and the [cipher_finType_eq] cast.
+    Kind: concrete bijection.
+    Why: discharges [cipher_of_chcipher : t_cipher -> cipher AHE] of
+    the abstract section (line 112).
+    Used by: dsdp_alice_secrecy_indcpa. *)
+Definition cipher_of_chcipher : t_cipher -> cipher AHE :=
+  fun i => eq_rect _ id (enum_val i : cipher_finType) _ cipher_finType_eq.
+
+(** chcipher_of_cipher - concrete inverse [cipher AHE ->
+    t_cipher].
+    Kind: concrete bijection.
+    Why: discharges [chcipher_of_cipher : cipher AHE -> t_cipher] of
+    the abstract section (line 95).
+    Used by: dsdp_alice_secrecy_indcpa. *)
+Definition chcipher_of_cipher : cipher AHE -> t_cipher :=
+  fun c => enum_rank (eq_rect _ id c _ (esym cipher_finType_eq)
+                       : cipher_finType).
+
+(** msg_of_idx - concrete bridge from ['I_index_msg]
+    to [plain AHE].  Since [index_msg := #|plain AHE|] the
+    domain is ['I_#|plain AHE|], so [enum_val] applies directly.
+    Kind: concrete bijection.
+    Why: discharges [msg_of_idx : 'I_index_msg -> plain AHE] of the
+    abstract section (line 168).
+    Used by: dsdp_alice_secrecy_indcpa. *)
+Definition msg_of_idx : 'I_index_msg -> plain AHE :=
+  fun i => enum_val i.
+
+(** rand_of_renc - concrete bridge from [Renc] to
+    [rand AHE].  Routes through the [rand_finType_eq] cast.
+    Kind: concrete bijection.
+    Why: discharges [rand_of_renc : Renc -> rand AHE] of the abstract
+    section (line 86).
+    Used by: dsdp_alice_secrecy_indcpa. *)
+Definition rand_of_renc : Renc -> rand AHE :=
+  fun r => eq_rect _ id r _ rand_finType_eq.
+
+(** pkey_of_party - constant function assigning the same
+    public key to every party.  The protocol logic does not depend on
+    the key values themselves (the IND-CPA hops are key-independent
+    at this layer), so a constant suffices.
+    Kind: concrete supply.
+    Why: discharges [pkey_of_party : party_id -> pub_key AHE] of the
+    abstract section (line 149).
+    Used by: dsdp_alice_secrecy_indcpa. *)
+Definition pkey_of_party : party_id -> pub_key AHE :=
+  fun _ => eq_rect _ id pub_key_inhabited _ pub_key_finType_eq.
+
+(** embed_to_msg - concrete embedding of
+    [t_msg_carrier = plain AHE] into [t_msg].
+    Reuses [chmsg_of_msg] since it has the right signature.
+    Kind: concrete bridge.
+    Why: discharges the abstract section's variable
+    [t_msg_carrier_to_chmsg : t_msg_carrier -> t_msg]
+    (file [dsdp_security_indcpa.v:2700]).
+    Used by: dsdp_alice_secrecy_indcpa. *)
+Definition embed_to_msg :
+    t_msg_carrier -> t_msg :=
+  chmsg_of_msg.
+
+(** renc_card - cardinality coherence for [Renc].
+    Closes by reflexivity since [Renc := rand_finType] and
+    [index_renc := #|rand_finType|].
+    Kind: coherence.
+    Why: discharges [renc_card : #|Renc| = index_renc] (line 69).
+    Used by: dsdp_alice_secrecy_indcpa. *)
+Lemma renc_card : #|Renc| = index_renc.
+Proof. by []. Qed.
+
+(** t_msg_card - cardinality coherence for
+    [t_msg_carrier].
+    Kind: coherence.
+    Why: discharges [t_msg_card] (line 1810).
+    Used by: dsdp_alice_secrecy_indcpa. *)
+Lemma t_msg_card :
+  #|t_msg_carrier| = index_t_msg.
+Proof. by []. Qed.
+
+(** index_msg_gt0 - positivity of [index_msg].
+    Follows from [msg_inhabited : plain AHE] via [card_gt0P].
+    Kind: positivity.
+    Why: discharges [index_msg_pos] (line 1364) when needed in the
+    [Print Assumptions] closure.
+    Used by: downstream Task L. *)
+Lemma index_msg_gt0 : (0 < index_msg)%N.
+Proof. by apply/card_gt0P; exists msg_inhabited. Qed.
+
+(** index_renc_gt0 - positivity of [index_renc].
+    Follows from [renc_inhabited : rand_finType] via [card_gt0P].
+    Kind: positivity.
+    Why: discharges [index_renc_pos] (line 1365).
+    Used by: downstream Task L. *)
+Lemma index_renc_gt0 : (0 < index_renc)%N.
+Proof. by apply/card_gt0P; exists renc_inhabited. Qed.
+
+(** index_t_msg_gt0 - positivity of [index_t_msg].
+    Same as [index_msg_gt0] since both equal [#|plain AHE|].
+    Kind: positivity.
+    Why: discharges [index_t_msg_pos] (line 2890).
+    Used by: downstream Task L. *)
+Lemma index_t_msg_gt0 : (0 < index_t_msg)%N.
+Proof. by apply/card_gt0P; exists msg_inhabited. Qed.
+
+(** chmsg_of_msgK - cancel law for the message-side
+    bijection.  Follows from MathComp's [enum_rankK].
+    Kind: cancellation.
+    Why: discharges [chmsg_of_msgK] (line 144).
+    Used by: dsdp_alice_secrecy_indcpa. *)
+Lemma chmsg_of_msgK :
+  cancel chmsg_of_msg msg_of_chmsg.
+Proof. exact: enum_rankK. Qed.
+
+(** chcipher_of_cipherK - cancel law for the ciphertext-side
+    bijection.  Routes through [eq_rect] cancellation on the
+    [cipher_finType_eq] cast plus [enum_rankK].
+    Kind: cancellation.
+    Why: discharges [chcipher_of_cipherK] (line 130).
+    Used by: dsdp_alice_secrecy_indcpa. *)
+Lemma chcipher_of_cipherK :
+  cancel chcipher_of_cipher cipher_of_chcipher.
+Proof.
+move=> c.
+rewrite /chcipher_of_cipher /cipher_of_chcipher.
+rewrite enum_rankK.
+by destruct cipher_finType_eq.
+Qed.
+
+(** sample_to_t_msg_inj - injectivity of [sample_to_t_msg]
+    at the concrete carriers.  [sample_to_t_msg] composes
+    [embed_to_msg] (injective via [can_inj] +
+    [chmsg_of_msgK]), [enum_val] (injective via
+    [enum_val_inj]), and [cast_ord] (injective via [cast_ord_inj]).
+    Kind: injectivity.
+    Why: discharges [sample_to_t_msg_inj] (line 2917).
+    Used by: dsdp_alice_secrecy_indcpa. *)
+Lemma sample_to_t_msg_inj :
+  injective (sample_to_t_msg
+              t_msg_card
+              embed_to_msg).
+Proof.
+move=> i j; rewrite /sample_to_t_msg /embed_to_msg.
+move/(can_inj chmsg_of_msgK).
+move/enum_val_inj.
+exact: cast_ord_inj.
+Qed.
+
+(** dsdp_alice_secrecy_indcpa - the closed-form Alice
+    secrecy bound at the concrete carriers built above.  Takes the
+    same 11 theorem-level arguments as the abstract
+    [dsdp_alice_secrecy_indcpa] (LA, predictor, validity, 8
+    disjointness witnesses, code validity / losslessness) and
+    produces the same bound [<= (index_t_msg%:R)^-1 + 2%:R *
+    epsilon_cpa].
+
+    The 21 section variables of [Section dsdp_security_indcpa]
+    transitively named in [dsdp_alice_secrecy_indcpa]'s type are
+    discharged by the [] siblings above.  The auxiliary
+    section variables [Dk_a_carrier] / [V_2_carrier] / [V_3_carrier]
+    / [fdist_game_leak_with_secrets] / [V_2_uniform_hyp] /
+    [V_3_uniform_hyp] do NOT appear in this theorem's type because
+    they are downstream of [Pr_guess_indicator_le_inv_msg_card]'s
+    internals; their [Print Assumptions] closure will be visible in
+    Task L's [Print Assumptions] audit.
+    Kind: main theorem.
+    Why: this is the Task K output of the plan.  Tasks L / M build
+    on this by supplying a concrete adversary and an idealised AHE
+    specialisation.
+    Used by: Tasks L and M
+    (~/.claude/plans/sprightly-finding-robin.md). *)
+Theorem dsdp_alice_secrecy_indcpa
+    (LA : Locations)
+    (predictor : predictor_guesser t_msg t_cipher)
+    (predictor_valid :
+       ValidPackage LA (game_iface t_cipher)
+         (guesser_export t_msg) predictor)
+    (predictor_disj_real :
+       fseparate LA
+         (game_real renc_card rand_of_renc
+            chcipher_of_cipher pkey_of_party
+            msg_of_idx).(locs))
+    (predictor_disj_h1 :
+       fseparate LA
+         (game_hybrid_one renc_card rand_of_renc
+            chcipher_of_cipher pkey_of_party
+            msg_of_idx).(locs))
+    (predictor_disj_h2 :
+       fseparate LA
+         (game_hybrid_two renc_card rand_of_renc
+            chcipher_of_cipher pkey_of_party
+            msg_of_idx).(locs))
+    (predictor_disj_leak :
+       fseparate LA
+         (game_leak renc_card rand_of_renc
+            chcipher_of_cipher pkey_of_party
+            msg_of_idx).(locs))
+    (predictor_disj_tc :
+       fseparate LA
+         (translation_charlie renc_card rand_of_renc
+            chmsg_of_msg chcipher_of_cipher
+            cipher_of_chcipher pkey_of_party
+            msg_of_idx).(locs))
+    (predictor_disj_tb :
+       fseparate LA
+         (translation_bob renc_card rand_of_renc
+            chmsg_of_msg chcipher_of_cipher
+            cipher_of_chcipher pkey_of_party
+            msg_of_idx).(locs))
+    (predictor_disj_ore :
+       fseparate LA
+         (oracle_encrypt_real_pkg AHE Renc index_renc
+            renc_card rand_of_renc
+            t_msg t_cipher msg_of_chmsg
+            chcipher_of_cipher pkey_of_party).(locs))
+    (predictor_disj_oze :
+       fseparate LA
+         (oracle_encrypt_zero_pkg AHE Renc index_renc
+            renc_card rand_of_renc
+            t_msg t_cipher
+            chcipher_of_cipher pkey_of_party).(locs))
+    (ValidCode_predictor_game_leak :
+       ValidCode emptym [interface]
+         (resolve (predictor ∘
+                    (game_leak renc_card rand_of_renc
+                       chcipher_of_cipher pkey_of_party
+                       msg_of_idx))
+                  (id_guess, ('unit, t_msg)) tt))
+    (LosslessCode_predictor_game_leak :
+       LosslessCode
+         (resolve (predictor ∘
+                    (game_leak renc_card rand_of_renc
+                       chcipher_of_cipher pkey_of_party
+                       msg_of_idx))
+                  (id_guess, ('unit, t_msg)) tt)) :
+  distr.mu
+     (pkg_advantage.Pr
+        (guess_indicator_pkg t_msg_card
+           embed_to_msg predictor
+           (game_real renc_card rand_of_renc
+              chcipher_of_cipher pkey_of_party
+              msg_of_idx))) true
+    <= (index_t_msg%:R)^-1 + 2%:R * epsilon_cpa.
+Proof.
+exact: (@dsdp_alice_secrecy_indcpa
+          AHE
+          Renc index_renc renc_card
+          rand_of_renc
+          t_msg t_cipher
+          msg_of_chmsg chmsg_of_msg
+          chcipher_of_cipher
+          cipher_of_chcipher
+          chcipher_of_cipherK chmsg_of_msgK
+          pkey_of_party
+          index_msg msg_of_idx
+          t_msg_carrier index_t_msg t_msg_card
+          embed_to_msg
+          sample_to_t_msg_inj
+          LA predictor predictor_valid
+          predictor_disj_real predictor_disj_h1 predictor_disj_h2
+          predictor_disj_leak predictor_disj_tc predictor_disj_tb
+          predictor_disj_ore predictor_disj_oze
+          ValidCode_predictor_game_leak
+          LosslessCode_predictor_game_leak).
+Qed.
+
+End concrete.
+
+End Concrete.
