@@ -88,18 +88,6 @@ Variable AHE : AHEncType.
 Variable rand_finType : Finite.type.
 Hypothesis rand_finType_eq : Finite.sort rand_finType = rand AHE.
 
-(** pub_key_finType, pub_key_finType_eq - extra finType-bridging
-    variables for [pub_key AHE], which is a bare [Type] (per
-    [he_types.v:44]).  Same pattern as [rand_finType].
-    Kind: parameter + hypothesis.
-    Why: needed to construct [pkey_of_party] when the AHE
-    scheme's [pub_key] is not already a finType.  For idealised AHE
-    the public key is a singleton type; the hypothesis reduces to
-    [erefl].
-    Used by: pkey_of_party. *)
-Variable pub_key_finType : Finite.type.
-Hypothesis pub_key_finType_eq : Finite.sort pub_key_finType = pub_key AHE.
-
 (** cipher_finType, cipher_finType_eq - extra finType-bridging
     variables for [cipher AHE], which is an [nzRingType] (per
     [he_types.v:43]) not a [finType].  Same pattern as
@@ -116,8 +104,8 @@ Hypothesis pub_key_finType_eq : Finite.sort pub_key_finType = pub_key AHE.
 Variable cipher_finType : Finite.type.
 Hypothesis cipher_finType_eq : Finite.sort cipher_finType = cipher AHE.
 
-(** msg_inhabited, renc_inhabited, pub_key_inhabited - inhabitance
-    witnesses for [plain AHE], [rand_finType], and [pub_key_finType].
+(** msg_inhabited, renc_inhabited, pub_key_inhab - inhabitance
+    witnesses for [plain AHE], [rand_finType], and [pub_key AHE].
     Required to discharge auxiliary positivity hypotheses (used in
     the [Print Assumptions] closure transitively) and to build the
     constant [pkey_of_party] function.  Plan risk R1
@@ -125,13 +113,19 @@ Hypothesis cipher_finType_eq : Finite.sort cipher_finType = cipher AHE.
     Kind: parameter.
     Why: [AHEncType] does not carry inhabitance proofs in its mixin,
     so the concrete section requests them externally.  At idealised
-    AHE all three are [0%R] or [GRing.zero].
-    Used by: pkey_of_party (pub_key_inhabited);
+    AHE all three are [0%R] or [GRing.zero].  [pub_key_inhab] is
+    typed directly at [pub_key AHE] rather than at a separate
+    [pub_key_finType] bridge: AHE schemes whose [pub_key] is a
+    Record (Benaloh, Paillier) do not carry a [Finite] instance,
+    and the only use of an inhabitance witness for [pub_key] in
+    this concrete section is to build the constant [pkey_of_party]
+    function, which does not need finite-type machinery.
+    Used by: pkey_of_party (pub_key_inhab);
     index_msg_gt0 / index_renc_gt0 /
     index_t_msg_gt0 (msg / renc inhabited). *)
 Variable msg_inhabited : plain AHE.
 Variable renc_inhabited : rand_finType.
-Variable pub_key_inhabited : pub_key_finType.
+Variable pub_key_inhab : pub_key AHE.
 
 (** index_msg - cardinality index for the plaintext-scalar
     carrier.  Picks [#|plain AHE|] so the cardinality coherence laws
@@ -255,13 +249,15 @@ Definition rand_of_renc : Renc -> rand AHE :=
 (** pkey_of_party - constant function assigning the same
     public key to every party.  The protocol logic does not depend on
     the key values themselves (the IND-CPA hops are key-independent
-    at this layer), so a constant suffices.
+    at this layer), so a constant suffices.  Returns [pub_key_inhab]
+    directly: since [pub_key_inhab] is now typed at [pub_key AHE]
+    (Task N refactor), no [eq_rect] cast is needed.
     Kind: concrete supply.
     Why: discharges [pkey_of_party : party_id -> pub_key AHE] of the
     abstract section (line 149).
     Used by: dsdp_alice_secrecy_indcpa. *)
 Definition pkey_of_party : party_id -> pub_key AHE :=
-  fun _ => eq_rect _ id pub_key_inhabited _ pub_key_finType_eq.
+  fun _ => pub_key_inhab.
 
 (** embed_to_msg - concrete embedding of
     [t_msg_carrier = plain AHE] into [t_msg].
@@ -615,7 +611,7 @@ Section idealized.
     Kind: parameter.
     Why: [Idealized_HETypes 'F_p] uses ['F_p] for all five HETypes
     carriers (see [idealized_ahe.v:49-54]).
-    Used by: ahe, rand_fin, pub_fin, cipher_fin. *)
+    Used by: ahe, rand_fin, cipher_fin. *)
 Variable p : nat.
 
 (** ahe - the concrete idealised AHE scheme at ['F_p].  Built via
@@ -654,23 +650,6 @@ Definition rand_fin : Finite.type := 'F_p.
 Lemma rand_fin_E : Finite.sort rand_fin = rand ahe.
 Proof. by []. Qed.
 
-(** pub_fin - finType carrier for [pub_key ahe], same pattern as
-    [rand_fin].
-    Kind: concrete carrier.
-    Why: discharges the [pub_key_finType] section variable of
-    [Module Concrete].
-    Used by: secrecy_random_guess. *)
-Definition pub_fin : Finite.type := 'F_p.
-
-(** pub_fin_E - [Finite.sort pub_fin = pub_key ahe].  Closes by
-    [erefl] for the same reason as [rand_fin_E].
-    Kind: coherence.
-    Why: discharges the [pub_key_finType_eq] hypothesis of
-    [Module Concrete].
-    Used by: secrecy_random_guess. *)
-Lemma pub_fin_E : Finite.sort pub_fin = pub_key ahe.
-Proof. by []. Qed.
-
 (** cipher_fin - finType carrier for [cipher ahe], same pattern
     as [rand_fin].
     Kind: concrete carrier.
@@ -691,10 +670,13 @@ Proof. by []. Qed.
 (** secrecy_random_guess - the closed-form Alice-secrecy bound
     at the idealised AHE [ahe] and the trivial random-guess
     adversary.  Specialises [Concrete.secrecy_random_guess] by
-    plugging in [ahe] (named-implicit), the three [erefl] finType
-    bridges, and the two [0 : 'F_p] inhabitance witnesses needed
-    (the section's [renc_inhabited] auto-prunes since it is not
-    transitively used in the closed proof term).  No theorem-level
+    plugging in [ahe] (named-implicit), the two [erefl] finType
+    bridges ([rand_fin_E], [cipher_fin_E]), the [0 : 'F_p]
+    plaintext inhabitance witness ([msg_inhabited]), and the
+    [0 : 'F_p] cast at [pub_key ahe] for the direct
+    [pub_key_inhab] argument introduced by the Task N refactor.
+    The section's [renc_inhabited] auto-prunes since it is not
+    transitively used in the closed proof term.  No theorem-level
     arguments.
     Kind: main corollary.
     Why: this is the Task M output of the plan.  Its [Print
@@ -712,10 +694,9 @@ Definition secrecy_random_guess :=
   Concrete.secrecy_random_guess
     (AHE:=ahe)
     (rand_finType:=rand_fin)
-    (pub_key_finType:=pub_fin)
     (cipher_finType:=cipher_fin)
-    rand_fin_E pub_fin_E cipher_fin_E
-    (0 : 'F_p) (0 : 'F_p).
+    rand_fin_E cipher_fin_E
+    (0 : 'F_p) ((0 : 'F_p) : pub_key ahe).
 
 End idealized.
 
