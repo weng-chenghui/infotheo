@@ -994,7 +994,7 @@ Qed.
    in its Task I unconditional [t_msg]-output framing follows below
    in this section, after Task G's [predictor_guesser] /
    [guess_indicator_pkg] framework (lines ~2700-2950) and Task H's
-   residual bound [Pr_predictor_guess_game_leak_le_invm] (lines
+   residual bound [Pr_guess_indicator_le_inv_msg_card] (lines
    ~3000-3150).  The theorem cannot appear here because its
    signature depends on [predictor_guesser] / [guess_indicator_pkg]
    / [index_t_msg] / [t_msg_carrier_to_chmsg] / [sample_to_t_msg_inj]
@@ -1727,7 +1727,7 @@ Qed.
     with the wider carrier suffix.
     Used by: Task C's [bridge_predictor_compose_to_fdist],
     [bridge_alice_view_with_secrets_to_fdistE], Task H's
-    [Pr_predictor_guess_game_leak_le_invm]. *)
+    [Pr_guess_indicator_le_inv_msg_card]. *)
 Definition bridge_alice_view_with_secrets_to_fdist
     (mu : distr.distr R alice_view_with_secrets)
     (Hmass : psum (distr.mu mu) = 1) :
@@ -1751,7 +1751,7 @@ Defined.
     Naming: trailing [E] follows MathComp convention for elementwise /
     extensional equations.
     Used by: Task C's [Pr_predictor_compose_eq_fdist], Task H's
-    [Pr_predictor_guess_game_leak_le_invm]. *)
+    [Pr_guess_indicator_le_inv_msg_card]. *)
 Lemma bridge_alice_view_with_secrets_to_fdistE
     (mu : distr.distr R alice_view_with_secrets)
     (Hmass : psum (distr.mu mu) = 1) (v : alice_view_with_secrets) :
@@ -1881,7 +1881,7 @@ Definition index_alice_view_predictor_joint : nat :=
     Used by: alice_view_predictor_joint_to_ct,
     alice_view_predictor_joint_of_ct,
     alice_view_predictor_joint_ct_card, Task H's
-    [Pr_predictor_guess_game_leak_le_invm]. *)
+    [Pr_guess_indicator_le_inv_msg_card]. *)
 Definition alice_view_predictor_joint_ct : choice_type :=
   chFin index_alice_view_predictor_joint.
 
@@ -1902,7 +1902,7 @@ Definition alice_view_predictor_joint_ct : choice_type :=
     avatar".  Not a MathComp suffix-table entry.
     Used by: alice_view_predictor_joint_to_ct_K,
     alice_view_predictor_joint_of_ct_K, Task H's
-    [Pr_predictor_guess_game_leak_le_invm]. *)
+    [Pr_guess_indicator_le_inv_msg_card]. *)
 Definition alice_view_predictor_joint_to_ct
     (v : alice_view_predictor_joint) : alice_view_predictor_joint_ct :=
   enum_rank v.
@@ -1922,7 +1922,7 @@ Definition alice_view_predictor_joint_to_ct
     avatar".  Not a MathComp suffix-table entry.
     Used by: alice_view_predictor_joint_to_ct_K,
     alice_view_predictor_joint_of_ct_K, Task H's
-    [Pr_predictor_guess_game_leak_le_invm]. *)
+    [Pr_guess_indicator_le_inv_msg_card]. *)
 Definition alice_view_predictor_joint_of_ct
     (i : alice_view_predictor_joint_ct) : alice_view_predictor_joint :=
   enum_val i.
@@ -1941,7 +1941,7 @@ Definition alice_view_predictor_joint_of_ct
     cancel law (see [enum_rankK], [enum_valK]).  The leading main
     symbol [alice_view_predictor_joint_to_ct] is project-local; see
     the [Naming:] line on that definition.
-    Used by: Task H's [Pr_predictor_guess_game_leak_le_invm]. *)
+    Used by: Task H's [Pr_guess_indicator_le_inv_msg_card]. *)
 Lemma alice_view_predictor_joint_to_ct_K :
   cancel alice_view_predictor_joint_to_ct alice_view_predictor_joint_of_ct.
 Proof. exact: enum_rankK. Qed.
@@ -1957,7 +1957,7 @@ Proof. exact: enum_rankK. Qed.
     [bigop] re-indexing across the SSProve / infotheo boundary.
     Naming: trailing [_K] is the MathComp cancel-law suffix; main
     symbol [alice_view_predictor_joint_of_ct] is project-local.
-    Used by: Task H's [Pr_predictor_guess_game_leak_le_invm]. *)
+    Used by: Task H's [Pr_guess_indicator_le_inv_msg_card]. *)
 Lemma alice_view_predictor_joint_of_ct_K :
   cancel alice_view_predictor_joint_of_ct alice_view_predictor_joint_to_ct.
 Proof. exact: enum_valK. Qed.
@@ -1977,7 +1977,7 @@ Proof. exact: enum_valK. Qed.
     a cardinality equality of the form [#|S| = n].  Main symbol
     [alice_view_predictor_joint_ct] is project-local; see the
     [Naming:] line on that definition.
-    Used by: Task H's [Pr_predictor_guess_game_leak_le_invm]. *)
+    Used by: Task H's [Pr_guess_indicator_le_inv_msg_card]. *)
 Lemma alice_view_predictor_joint_ct_card :
   #|alice_view_predictor_joint_ct| = index_alice_view_predictor_joint.
 Proof. exact: card_ord. Qed.
@@ -2002,7 +2002,7 @@ Proof. exact: card_ord. Qed.
     distinguishing this lemma from
     [alice_view_predictor_joint_ct_card] which targets the SSProve
     choice_type avatar.
-    Used by: Task H's [Pr_predictor_guess_game_leak_le_invm]. *)
+    Used by: Task H's [Pr_guess_indicator_le_inv_msg_card]. *)
 Lemma alice_view_predictor_joint_card_index :
   #|alice_view_predictor_joint| = index_alice_view_predictor_joint.
 Proof. by []. Qed.
@@ -2133,7 +2133,7 @@ Proof. by rewrite /bridge_predictor_compose_to_fdist /= ffunE. Qed.
     aligned to the wider carrier and an explicit [_eq_fdist] suffix
     spelling out the transfer direction (SSProve [Pr] equals the
     infotheo [Pr] of the bridged fdist).
-    Used by: Task H's [Pr_predictor_guess_game_leak_le_invm]. *)
+    Used by: Task H's [Pr_guess_indicator_le_inv_msg_card]. *)
 Lemma Pr_predictor_compose_eq_fdist
     (mu : distr.distr R alice_view_predictor_joint)
     (Hmass : psum (distr.mu mu) = 1)
@@ -2252,7 +2252,7 @@ Definition V_3 : {RV fdist_game_leak_with_secrets -> V_3_carrier} :=
     Why: Task D of the plan.  V_2 is the central random variable of
     the secrecy bound [Pr[predictor = V_2] <= 1/m + 2 * epsilon_cpa];
     [p_V_2_uniform] and [inde_V_2_V_3_Z_rand] reference V_2 directly,
-    and Task H's residual bound [Pr_predictor_guess_game_leak_le_invm]
+    and Task H's residual bound [Pr_guess_indicator_le_inv_msg_card]
     is stated against the event [output = V_2_sample].
     Naming: TeX-derived subscript; [_2] marks the second of the
     (v_1, v_2, v_3) input-share triple, not the MathComp ring-two
@@ -2775,7 +2775,7 @@ Definition boolean_shell : package guesser_export A_export :=
     raw_package) but with the additional [game] argument to keep
     the closed/open distinction explicit.
     Used by: Pr_guess_indicator_eq_predictor_output, Task H's
-    [Pr_predictor_guess_game_leak_le_invm], Task I's rewritten
+    [Pr_guess_indicator_le_inv_msg_card], Task I's rewritten
     [dsdp_alice_secrecy_indcpa]. *)
 Definition guess_indicator_pkg
     (predictor : predictor_guesser)
@@ -2839,7 +2839,7 @@ Definition guess_event_code
     guess-indicator wrapper [= true] equals the probability of
     the predictor-output [=] V_2 event".  No MathComp suffix-table
     entry applies.
-    Used by: Task H's [Pr_predictor_guess_game_leak_le_invm]
+    Used by: Task H's [Pr_guess_indicator_le_inv_msg_card]
     (the residual bound is stated against the LHS but proved
     against the RHS via this lemma), Task I's rewritten
     [dsdp_alice_secrecy_indcpa]. *)
@@ -2869,7 +2869,7 @@ Check Pr_guess_indicator_eq_predictor_output :
       = distr.mu (Pr_fst (guess_event_code predictor game)) true.
 
 (* ================================================================== *)
-(* Task H: residual bound Pr_predictor_guess_game_leak_le_invm        *)
+(* Task H: residual bound Pr_guess_indicator_le_inv_msg_card        *)
 (* ================================================================== *)
 
 (** index_t_msg_pos - positivity of the [t_msg] index, witnessing that
@@ -2886,7 +2886,7 @@ Check Pr_guess_indicator_eq_predictor_output :
     matching the TeX statement (Setup item 8.5, Step 5 of
     notes/20260506-dsdp-secrecy-closed-form).
     Naming: project-local; mirrors [index_msg_pos], [index_renc_pos].
-    Used by: Pr_predictor_guess_game_leak_le_invm. *)
+    Used by: Pr_guess_indicator_le_inv_msg_card. *)
 Hypothesis index_t_msg_pos : (0 < index_t_msg)%N.
 
 (** sample_to_t_msg_inj - injectivity of the cardinality-cast +
@@ -2913,10 +2913,10 @@ Hypothesis index_t_msg_pos : (0 < index_t_msg)%N.
     outputs that value, producing a probability larger than
     [1/index_t_msg].
     Naming: project-local; reads "[sample_to_t_msg] is injective".
-    Used by: Pr_predictor_guess_game_leak_le_invm. *)
+    Used by: Pr_guess_indicator_le_inv_msg_card. *)
 Hypothesis sample_to_t_msg_inj : injective sample_to_t_msg.
 
-(** Pr_predictor_guess_game_leak_le_invm - the headline residual
+(** Pr_guess_indicator_le_inv_msg_card - the headline residual
     bound stated in the [t_msg]-output framing of Fallback R1B.  For
     any [t_msg]-output predictor against [game_leak], the probability
     that the predictor's guess equals the freshly-sampled
@@ -2968,11 +2968,13 @@ Hypothesis sample_to_t_msg_inj : injective sample_to_t_msg.
     freshness of [iV2] is what makes the bound hold, not the
     joint distribution of [game_leak]'s samples.
     Naming: project-local; [Pr_<event>_le_<bound>] follows the
-    infotheo / MathComp probability-bound convention.  No MathComp
-    suffix-table entry applies; the [le_invm] suffix reads
-    "less-or-equal one-over-m".
+    infotheo / MathComp probability-bound convention.  The
+    [_inv_msg_card] suffix reads "one over the cardinality of the
+    plaintext message space", mirroring MathComp's [card_X] family
+    (e.g. [card_ord], [card_ffun]) and infotheo's [Pr_dsdp_sol_uniform]
+    siblings, in preference to the earlier [_invm] shorthand.
     Used by: Task I's rewritten [dsdp_alice_secrecy_indcpa]. *)
-Lemma Pr_predictor_guess_game_leak_le_invm
+Lemma Pr_guess_indicator_le_inv_msg_card
     (predictor : predictor_guesser)
     (ValidCode_predictor_game_leak :
        ValidCode emptym [interface]
@@ -2986,16 +2988,67 @@ Lemma Pr_predictor_guess_game_leak_le_invm
               (guess_indicator_pkg predictor game_leak)) true
     <= (index_t_msg%:R)^-1.
 Proof.
-(* TODO Task H: discharge via uniformity of the fresh [iV2] sample
-   inside [guess_indicator_pkg]'s boolean shell.  The predictor's
-   output is fixed before [iV2] is drawn (by the bind ordering in
-   [guess_event_code]); so [Pr[guess = iV2]] equals
-   [Pr_uniform[i = guess]] = [1 / index_t_msg].  Proof structure:
-   unfold [Pr] via [resolve_link]/[coerce_kleisliE], rewrite the
-   [boolean_shell] body's [iV2 <- sample uniform index_t_msg],
-   use [Pr_uniform] from SSProve [Crypt.Pr.v] to compute the
-   probability of any singleton event, sum. *)
-Admitted.
+rewrite Pr_guess_indicator_eq_predictor_output /guess_event_code.
+rewrite (Pr_fst_bind ValidCode_predictor_game_leak).
+under eq_dlet=> guess do
+  (rewrite Pr_fst_sample; under eq_dlet=> iV2 do rewrite Pr_fst_ret).
+(* Bound the inner uniform sample for each guess by 1 / index_t_msg.
+   Uses sample_to_t_msg_inj to count the preimage at exactly one index. *)
+have inner_le : forall (g : tgt (id_guess, ('unit, t_msg))),
+   distr.mu
+     (distr.dlet (fun x : Arit (uniform index_t_msg) =>
+                    distr.dunit (g == sample_to_t_msg x))
+                 (projT2 (uniform index_t_msg)))
+     true
+   <= (index_t_msg%:R)^-1.
+{ have rhs_eq : (index_t_msg%:~R^-1 : R) = index_t_msg%:R^-1 by [].
+  have card_sum_inj :
+    forall (g0 : tgt (id_guess, ('unit, t_msg))),
+      (\sum_(i < index_t_msg) (g0 == sample_to_t_msg i) <= 1)%N.
+  { move=> g0.
+    case: (boolP [exists i : 'I_index_t_msg, g0 == sample_to_t_msg i]); last first.
+    - move=> /existsPn Hn.
+      by rewrite big1 //; move=> i _; move/negbTE: (Hn i) => ->.
+    - case/existsP => i0 /eqP Hi0.
+      rewrite (bigD1 i0) //= Hi0 eqxx /= big1 //; move=> j Hj.
+      apply/eqP; rewrite eqb0; apply/eqP=> /sample_to_t_msg_inj Heq.
+      by move/eqP: Hj; rewrite Heq. }
+  move=> g.
+  rewrite distr.dletE psum_fin /uniform /=.
+  under eq_bigr=> i _ do rewrite distr.dunit1E eqb_id.
+  rewrite /UniformDistrLemmas.r card_ord mul1r.
+  under eq_bigr=> i _ do
+    rewrite normrM ger0_norm ?invr_ge0 ?ler0n // ger0_norm ?ler0n //.
+  rewrite -big_distrr /= rhs_eq -[X in _ <= X]mulr1.
+  apply: ler_wpM2l; first by rewrite invr_ge0 ler0n.
+  rewrite -natr_sum.
+  have <- : (1%N)%:R = 1 :> R by [].
+  by rewrite ler_nat; apply: card_sum_inj. }
+(* Collapse the outer [\dlet_(guess <- Pr_fst ...)] by bounding each
+   summand mu(...) guess * inner_term <= mu(...) guess * (1/index_t_msg),
+   then pulling out the constant via psumZ and using LosslessCode's
+   psum = 1 statement. *)
+rewrite distr.dletE.
+apply: (@le_trans _ _
+  (psum (fun guess : tgt (id_guess, ('unit, t_msg)) =>
+           distr.mu
+             (Pr_fst (resolve (predictor ∘ game_leak)
+                              (id_guess, ('unit, t_msg)) tt)) guess
+           * (index_t_msg%:R)^-1))); last first.
+- under eq_psum=> guess do rewrite mulrC.
+  rewrite psumZ; last by rewrite invr_ge0 ler0n.
+  by rewrite LosslessCode_predictor_game_leak mulr1.
+- apply: le_psum.
+  + move=> x; apply/andP; split.
+    * by apply: mulr_ge0; apply: distr.ge0_mu.
+    * rewrite mulrC [X in _ <= X]mulrC; apply: ler_pM.
+      -- by apply: distr.ge0_mu.
+      -- by apply: distr.ge0_mu.
+      -- exact: inner_le.
+      -- exact: lexx.
+  + by apply: (@summableZr _ _ _ (index_t_msg%:R^-1));
+       apply: distr.summable_mu.
+Qed.
 
 (* ================================================================== *)
 (* Task 14 / Task I: closed-form Alice secrecy bound (unconditional)   *)
@@ -3028,7 +3081,7 @@ Admitted.
     [boolean_shell o predictor] (which is the
     [package game_iface A_export] derived from the [t_msg]-output
     [predictor : predictor_guesser]).  The [1/m] half comes from
-    Task H's residual bound [Pr_predictor_guess_game_leak_le_invm]:
+    Task H's residual bound [Pr_guess_indicator_le_inv_msg_card]:
     the freshness of the V_2-sample inside [guess_indicator_pkg]'s
     boolean shell makes [Pr[guess_indicator_pkg predictor game_leak]
     true <= 1/index_t_msg] hold for any [t_msg]-output predictor.
@@ -3090,7 +3143,7 @@ Admitted.
         comprehensive plan ([t_msg_carrier_to_chmsg],
         [index_t_msg_pos], [sample_to_t_msg_inj], and the carrier-
         / cardinality- bridges from Tasks B / E / F);
-      - the [Pr_predictor_guess_game_leak_le_invm] residual lemma
+      - the [Pr_guess_indicator_le_inv_msg_card] residual lemma
         (currently [Admitted] with a TODO in Task H, pending the
         [Pr_uniform]-based proof outlined in its body); and
       - the standard MathComp / SSProve classical axioms
@@ -3103,7 +3156,7 @@ Admitted.
     nor the Task F-style [prime_p] / [prime_q] / [coprime_pq] ring
     specialization (Task E generalized to [finComNzRingType]).  The
     only residual [Admitted] is the body of Task H's
-    [Pr_predictor_guess_game_leak_le_invm], which closes the
+    [Pr_guess_indicator_le_inv_msg_card], which closes the
     framework once the [Pr_uniform] sketch in its body is filled
     in. *)
 Theorem dsdp_alice_secrecy_indcpa
@@ -3146,7 +3199,7 @@ Proof.
 have Hleak :
     distr.mu (pkg_advantage.Pr (guess_indicator_pkg predictor game_leak)) true
       <= (index_t_msg%:R)^-1
-  by apply: Pr_predictor_guess_game_leak_le_invm.
+  by apply: Pr_guess_indicator_le_inv_msg_card.
 have Hwrap : ValidPackage LA game_iface A_export (boolean_shell ∘ predictor)
   by ssprove_valid.
 have Hadv :
@@ -3166,6 +3219,9 @@ apply: le_trans Htri _.
 rewrite mulr_natl mulr2n.
 by apply: lerD.
 Qed.
+
+Print Assumptions Pr_guess_indicator_le_inv_msg_card.
+Print Assumptions dsdp_alice_secrecy_indcpa.
 
 End dsdp_security_indcpa.
 
@@ -3388,7 +3444,7 @@ Section dsdp_security_indcpa_residual_ring.
     [u_3 \is a GRing.unit], so this sibling section drops the three
     prime-related hypotheses entirely while still producing the same
     [1/m] residual where [m = #|Rring|].
-    Used by: Task H ([Pr_predictor_guess_game_leak_le_invm]) when the
+    Used by: Task H ([Pr_guess_indicator_le_inv_msg_card]) when the
     composed-game probability is transferred through the joint fdist
     [bridge_predictor_compose_to_fdist] and the V_2-guess event is
     counted via the conditional uniformity proved here. *)
@@ -3474,7 +3530,7 @@ Hypothesis V2V3_Z_inde_given_Y_ring :
     Naming: [_ring] suffix mirrors [dsdp_fiber_card_ring] /
     [Pr_dsdp_sol_uniform_ring] in [dsdp_entropy.v]; the [Z_(p*q)]-
     specialised [Pr_game_leak_V2_uniform] above is left unchanged.
-    Used by: Task H ([Pr_predictor_guess_game_leak_le_invm]). *)
+    Used by: Task H ([Pr_guess_indicator_le_inv_msg_card]). *)
 Lemma Pr_game_leak_V2_uniform_ring
     (u1 u2 u3 v1 s : Rring) (v2 v3 : Rring) (z : TR) :
   u3 \is a GRing.unit ->
@@ -3559,7 +3615,7 @@ Section dsdp_security_indcpa_residual_at_alice_view_with_secrets.
     lines 95-117; (ii) the structural fact that the constant unit-
     valued RV is independent of every joint RV (discharged
     structurally as [V2V3_Z_inde_given_Y_at_avs]).
-    Used by: Task H ([Pr_predictor_guess_game_leak_le_invm]). *)
+    Used by: Task H ([Pr_guess_indicator_le_inv_msg_card]). *)
 Variable Rring : finComUnitRingType.
 Variable T : finType.
 Variable P : R.-fdist T.
