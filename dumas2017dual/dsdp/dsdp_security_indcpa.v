@@ -49,6 +49,57 @@ Notation R := SSProve.Crypt.Axioms.R.
 (* Adversary type abbreviation. *)
 Notation adversary := (package _ _ _).
 
+(** [valid_code_link_residual] - SSProve [code_link]'s residual-imports
+    validity.  Strengthens [pkg_composition.valid_code_link]: the
+    inner code [v] may import operations [Im] that the outer
+    package [p] does NOT export — those operations get resolved
+    to a [sampler dnull] by SSProve's [resolve] on a missing key,
+    which is still a valid code under any imports [Ir].  Therefore
+    [code_link v p] is valid under [Ir] (the imports of [p]) with
+    NO requirement that [Im] is a sub-interface of [p]'s exports.
+    Kind: helper.
+    Why: the canonical [valid_link_weak] requires [fsubmap M1 M2]
+    where [M1 = p1]'s imports and [M2 = p2]'s exports — but the
+    partial-link case [boolean_shell ∘ predictor] has p1's imports
+    [unionm game_iface guesser_export] strictly LARGER than p2's
+    exports [guesser_export], so neither [valid_link] nor
+    [valid_link_weak] applies.  This residual-imports variant is
+    the missing API: it propagates only [p]'s imports as the
+    result's imports, dropping any [Im] entries not in [p]'s
+    exports (they become samplers, not import obligations).
+    Used by: [valid_boolean_shell_link] below. *)
+Lemma valid_code_link_residual :
+  forall (A : choice_type) (L : Locations) (Im Ir E : Interface)
+    (v : raw_code A) (p : raw_package),
+    ValidCode L Im v ->
+    ValidPackage L Ir E p ->
+    ValidCode L Ir (code_link v p).
+Proof.
+intros A L Im Ir E v p hv hp.
+induction hv => //=; try (solve [constructor; auto]).
+apply valid_bind; [| auto].
+rewrite /resolve.
+destruct (p o.1) as [[S [T g]]|] eqn:Eo.
+- rewrite /coerce_kleisli -lock /coerce_code.
+  destruct (coerce x) as [s|]; simpl.
+  + apply valid_bind.
+    * destruct hp as [he hi].
+      have := hi o.1 (existT _ S (existT _ T g)) s Eo.
+      simpl. auto.
+    * intros a. destruct (coerce a) as [r'|]; simpl.
+      -- constructor.
+      -- apply valid_sampler. intros. constructor.
+  + apply valid_sampler. intros r.
+    apply valid_bind.
+    * destruct hp as [he hi].
+      have := hi o.1 (existT _ S (existT _ T g)) r Eo.
+      simpl. auto.
+    * intros a. destruct (coerce a) as [r'|]; simpl.
+      -- constructor.
+      -- apply valid_sampler. intros. constructor.
+- apply valid_sampler. intro. constructor.
+Qed.
+
 Section dsdp_security_indcpa.
 
 (* AHE scheme is parametric, matching the existing project convention
@@ -1403,6 +1454,56 @@ Hypothesis Pr_guess_leak_le_invm :
     project's F001/I001 budget.
     Used by: T5's [dsdp_alice_secrecy] (thin wrapper), T6's
     concrete corollaries. *)
+
+(** [valid_boolean_shell_link] - validity of the partial link
+    [boolean_shell ∘ pred] for any [pred : predictor_guesser].
+    The composition resolves [pred]'s [id_guess] export against
+    [boolean_shell]'s [id_guess] import; the remaining [id_v2_get]
+    import in [boolean_shell] resolves to a [sampler dnull] (since
+    [pred] does not export it), so the linked package's only true
+    residual imports are [pred]'s imports — which is [game_iface]
+    by [predictor_guesser]'s type.  Kind: helper.
+    Why: feeds [Pr_guess_le]'s [chain_valid] hypothesis at
+    concrete instantiations (T6).  The standard [ssprove_valid]
+    tactic invokes [valid_link_weak] which requires
+    [fsubmap (unionm game_iface guesser_export) guesser_export]
+    (the wrong subset direction), so direct application fails;
+    this helper proves the validity by construction via
+    [valid_code_link_residual].
+    Used by: T6's [secrecy_random_guess] and downstream
+    [Idealized] / [Benaloh] / [Paillier] specialisations. *)
+Lemma valid_boolean_shell_link
+    (pred : predictor_guesser) :
+  ValidPackage (locs pred) game_iface A_export (boolean_shell ∘ pred).
+Proof.
+destruct boolean_shell.(pack_valid) as [he1 hi1].
+split.
+{ move=> o.
+  rewrite he1 /link.
+  split.
+  { move=> [f Hf]. eexists (fun x => code_link (f x) pred).
+    rewrite //= mapmE Hf //. }
+  { rewrite //= mapmE.
+    change (setm emptym _ _) with (boolean_shell.(pack)).
+    move=> [f Hf].
+    change (setm emptym _ _) with (boolean_shell.(pack)) in Hf.
+    destruct (boolean_shell.(pack) o.1) as [[S [T g]]|] eqn:Eb.
+    { rewrite Eb /= in Hf. injection Hf as [= ? ?]. subst. by exists g. }
+    { rewrite Eb /= in Hf. discriminate. } } }
+{ move=> n F x.
+  rewrite /fhas /link mapmE.
+  change (setm emptym _ _) with (boolean_shell.(pack)).
+  destruct (boolean_shell.(pack) n) as [[S' [T' f']]|] eqn:Eb; last by [].
+  simpl. move=> H. injection H as H. subst F. simpl.
+  eapply (@valid_code_link_residual _ (locs pred)
+            (unionm game_iface guesser_export) game_iface guesser_export).
+  { have Hbs_valid := hi1 n (existT _ S' (existT _ T' f')) x Eb.
+    simpl in Hbs_valid.
+    eapply valid_injectLocations; [| exact: Hbs_valid].
+    apply fsub0map. }
+  { exact: pred.(pack_valid). } }
+Qed.
+
 Lemma Pr_guess_le
     (LA : Locations) (predictor : predictor_guesser)
     (chain_valid :
@@ -1471,6 +1572,78 @@ Check predictor_guesser.
 Check boolean_shell.
 Check guess_indicator_pkg.
 Check Pr_guess_le.
+
+(* ================================================================== *)
+(* Task T5: dsdp_alice_secrecy — closed-form Alice-secrecy bound      *)
+(* ================================================================== *)
+
+(** dsdp_alice_secrecy — top-level closed-form Alice-secrecy bound.
+    Thin wrapper over [Pr_guess_le] giving the project's canonical
+    secrecy claim:
+
+      Pr[predictor's guess equals the protocol's V_2 in game_real]
+        <= 1/index_t_msg + 2 * epsilon_cpa.
+
+    The same theorem-level argument list as [Pr_guess_le]: the four
+    Section-bound abstract carriers are baked into the Section
+    parameters (AHE, Renc, ...); the eleven theorem-level arguments
+    [(LA : Locations), (predictor : predictor_guesser),
+    chain_valid, 8 disjointness, ValidCode_predictor_game_leak,
+    LosslessCode_predictor_game_leak] are mirrored verbatim.  At
+    concrete instantiation (T6) the disjointness goals close by
+    [fseparate0m] (since the random-guess adversary is stateless,
+    [locs = emptym]), and the ValidPackage / lossless goals close
+    by [ssprove_valid] and [Lossless_sample + LosslessOp_uniform +
+    index_t_msg_gt0] respectively.  Note: in T4's [Pr_guess_le],
+    the Section hypothesis [Pr_guess_leak_le_invm] supplies the
+    [1/index_t_msg] half; that hypothesis itself is discharged in
+    the IT residual section [Section dsdp_security_indcpa_residual]
+    below via [cPr_V2_V3_uniform_on_fiber_joint].
+    Kind: main.
+    Why: the project-canonical secrecy theorem.  Mirrors the TeX
+    writeup's Theorem 1 statement
+    ([notes/20260506-dsdp-secrecy-closed-form/].).
+    Naming: project-local; reads "dsdp-side Alice-secrecy bound".
+    Three components, within F001/I001 budget.
+    Used by: T6's concrete corollaries
+    [{Concrete,Idealized,Benaloh,Paillier}.secrecy_random_guess]. *)
+Theorem dsdp_alice_secrecy
+    (LA : Locations) (predictor : predictor_guesser)
+    (chain_valid :
+       ValidPackage LA game_iface A_export
+         (boolean_shell ∘ predictor))
+    (chain_disj_real :
+       fseparate LA game_real.(locs))
+    (chain_disj_h1 :
+       fseparate LA game_hybrid_one.(locs))
+    (chain_disj_h2 :
+       fseparate LA game_hybrid_two.(locs))
+    (chain_disj_leak :
+       fseparate LA game_leak.(locs))
+    (chain_disj_tc :
+       fseparate LA translation_charlie.(locs))
+    (chain_disj_tb :
+       fseparate LA translation_bob.(locs))
+    (chain_disj_ore :
+       fseparate LA
+         (oracle_encrypt_real_pkg AHE Renc index_renc renc_card
+            rand_of_renc t_msg t_cipher msg_of_chmsg
+            chcipher_of_cipher pkey_of_party).(locs))
+    (chain_disj_oze :
+       fseparate LA
+         (oracle_encrypt_zero_pkg AHE Renc index_renc renc_card
+            rand_of_renc t_msg t_cipher chcipher_of_cipher
+            pkey_of_party).(locs)) :
+  distr.mu (pkg_advantage.Pr
+              (guess_indicator_pkg predictor game_real)) true
+    <= (index_t_msg%:R)^-1 + 2%:R * epsilon_cpa.
+Proof.
+exact: Pr_guess_le.
+Qed.
+
+(* T5 verify clause: the closed-form Alice-secrecy theorem
+   type-checks against the Section-internal hypothesis chain. *)
+Check dsdp_alice_secrecy.
 
 (* ================================================================== *)
 (* Task 10: alice_view carrier (finType + SSProve choice_type)        *)
