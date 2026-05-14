@@ -41,6 +41,7 @@ Require Import dsdp_program dsdp_entropy dsdp_pismc.
 Require Import dsdp_security_indcpa.
 Require Import smc.ssprove_ext_lossless.
 Require Import idealized_ahe.
+From infotheo.homomorphic_encryption.benaloh1994 Require Import benaloh_ahe.
 
 Set Implicit Arguments.
 Unset Strict Implicit.
@@ -701,3 +702,176 @@ Definition secrecy_random_guess :=
 End idealized.
 
 End Idealized.
+
+(* ================================================================== *)
+(* Task O: Benaloh 1994 AHE specialisation                             *)
+(* ================================================================== *)
+
+(** Module Benaloh - specialises [Concrete.secrecy_random_guess] at the
+    Benaloh 1994 AHE instance [BenalohHETypes n r] parametric in any
+    [n r : nat] with [1 < n] and [1 < r].  The carriers are:
+    - [plain ahe = 'Z_r] (canonical [finType])
+    - [rand ahe = {unit 'Z_n}] (canonical [finType] via [FinRing])
+    - [cipher ahe = 'Z_n] (canonical [finType])
+    - [pub_key ahe = BenalohPubKey n r] (a [Record], NOT a [finType])
+    Inhabitance for [pub_key ahe] is built directly via
+    [@MkBenalohPubKey n r 1%g pub_gen_order1] where [pub_gen_order1]
+    proves [(val 1%g) ^+ r = 1] by [FinRing.val_unit1] + [expr1n].
+    The Task N refactor of [Module Concrete] (taking [pub_key_inhab]
+    directly at [pub_key AHE] rather than at a separate [Finite.type]
+    bridge) makes this work without declaring an HB [Finite] instance
+    on the [BenalohPubKey] record.
+
+    The resulting [Benaloh.secrecy_random_guess] is an unconditional
+    corollary of [Concrete.secrecy_random_guess] at Benaloh.  Its
+    [Print Assumptions] closure equals that of
+    [Idealized.secrecy_random_guess]: only the cryptographic axioms
+    ([epsilon_cpa], [enc_ind_cpa_real_or_zero]) plus the SSProve /
+    classical foundation axioms.  This wires the Benaloh AHE into
+    the secrecy theorem structurally; discharging
+    [enc_ind_cpa_real_or_zero] from the higher-residuosity
+    assumption (the cryptographic security of Benaloh) is a separate
+    project out of scope here.
+    Plan: Task O of ~/.claude/plans/sprightly-finding-robin.md. *)
+Module Benaloh.
+
+Section benaloh.
+
+(** n, r - the Benaloh modulus and message-block parameters.  [n] is
+    the RSA-style composite (a product of two primes in the standard
+    Benaloh instantiation), [r] is the message-space modulus dividing
+    [phi(n)].  Both [> 1] so that ['Z_n] and ['Z_r] are non-trivial.
+    Kind: parameter.
+    Why: [BenalohHETypes n r] depends on both.
+    Used by: ahe, rand_fin, cipher_fin. *)
+Variables (n r : nat).
+Hypothesis n_gt1 : (1 < n)%N.
+Hypothesis r_gt1 : (1 < r)%N.
+
+(** ahe - the concrete Benaloh AHE scheme at parameters [n r].  Built
+    via [@AHEnc.Pack] over [BenalohHETypes n r] using the
+    [Benaloh_isEncDec] and [Benaloh_isAHEnc] mixin instances declared
+    in [homomorphic_encryption/benaloh1994/benaloh_ahe.v].  Note that
+    [Benaloh_isEncDec] takes only [n r] (no positivity hypotheses) and
+    [Benaloh_isAHEnc] takes [n r] plus [r_gt1] only ([n_gt1] is not
+    consumed by either mixin).  [n_gt1] is still declared as a section
+    hypothesis to keep the API at the Benaloh module surface uniform
+    with the mathematical statement (non-trivial [n]).
+    Kind: concrete carrier.
+    Why: Task O of the plan needs a concrete [AHEncType] to specialise
+    [Concrete.secrecy_random_guess].
+    Used by: secrecy_random_guess. *)
+Definition ahe : AHEncType :=
+  @AHEnc.Pack (BenalohHETypes n r)
+    (@AHEnc.Class (BenalohHETypes n r)
+       (Benaloh_isEncDec n r)
+       (@Benaloh_isAHEnc n r r_gt1)).
+
+(** rand_fin - finType carrier for [rand ahe = {unit 'Z_n}].  Already
+    a [finType] via MathComp's [FinRing] unit-group machinery, so the
+    [Finite.type] ascription suffices.
+    Kind: concrete carrier.
+    Why: discharges the [rand_finType] section variable of
+    [Module Concrete].
+    Used by: secrecy_random_guess. *)
+Definition rand_fin : Finite.type := {unit 'Z_n} : Finite.type.
+
+(** rand_fin_E - [Finite.sort rand_fin = rand ahe].  Both sides reduce
+    to [{unit 'Z_n}] by [BenalohHETypes]'s definition, so [erefl]
+    closes it.  Suffix [E] is MathComp's canonical equational-rewrite
+    suffix.
+    Kind: coherence.
+    Why: discharges the [rand_finType_eq] hypothesis of
+    [Module Concrete].
+    Used by: secrecy_random_guess. *)
+Lemma rand_fin_E : Finite.sort rand_fin = rand ahe.
+Proof. by []. Qed.
+
+(** cipher_fin - finType carrier for [cipher ahe = 'Z_n].  Already a
+    [finType] via MathComp's ['Z_n] canonical structure.
+    Kind: concrete carrier.
+    Why: discharges the [cipher_finType] section variable of
+    [Module Concrete].
+    Used by: secrecy_random_guess. *)
+Definition cipher_fin : Finite.type := 'Z_n : Finite.type.
+
+(** cipher_fin_E - [Finite.sort cipher_fin = cipher ahe].  Closes by
+    [erefl] for the same reason as [rand_fin_E].
+    Kind: coherence.
+    Why: discharges the [cipher_finType_eq] hypothesis of
+    [Module Concrete].
+    Used by: secrecy_random_guess. *)
+Lemma cipher_fin_E : Finite.sort cipher_fin = cipher ahe.
+Proof. by []. Qed.
+
+(** msg_inhab - plaintext inhabitance witness, picked as [0 : 'Z_r].
+    Kind: inhabitance witness.
+    Why: discharges the [msg_inhabited] section variable of
+    [Module Concrete] (which survives section pruning via the
+    [index_t_msg_gt0] positivity lemma used by the [LosslessCode]
+    discharge in [Concrete.secrecy_random_guess]).
+    Used by: secrecy_random_guess. *)
+Definition msg_inhab : plain ahe := 0%R.
+
+(** renc_inhab - encryption-randomness inhabitance witness, picked as
+    [1%g : {unit 'Z_n}] (the identity unit).  Declared for
+    completeness even though the [renc_inhabited] section variable of
+    [Module Concrete] is pruned at section close (not transitively
+    used in [secrecy_random_guess]'s type).
+    Kind: inhabitance witness.
+    Why: matches the API surface; not transitively required.
+    Used by: documentation. *)
+Definition renc_inhab : rand_fin := 1%g.
+
+(** pub_gen_order1 - the [pub_gen_order] proof obligation of
+    [BenalohPubKey] at the choice [pub_gen := 1%g] (the identity unit
+    of the multiplicative group of ['Z_n]).  Proof: [val 1%g = 1] by
+    [FinRing.val_unit1], then [1 ^+ r = 1] by [expr1n].  Name uses 3
+    underscore-components per the snake_case naming convention.
+    Kind: proof obligation.
+    Why: needed to construct [pub_key_inhab] via [MkBenalohPubKey].
+    Used by: pub_key_inhab. *)
+Lemma pub_gen_order1 : (val (1%g : {unit 'Z_n})) ^+ r = 1.
+Proof. by rewrite FinRing.val_unit1 expr1n. Qed.
+
+(** pub_key_inhab - public-key inhabitance witness at [pub_key ahe =
+    BenalohPubKey n r].  Built directly via [@MkBenalohPubKey n r 1%g
+    pub_gen_order1] (taking [n r] explicitly since
+    [Set Implicit Arguments] makes them implicit on
+    [MkBenalohPubKey]).
+    Kind: inhabitance witness.
+    Why: discharges the [pub_key_inhab] section variable of
+    [Module Concrete] introduced by the Task N refactor.
+    Used by: secrecy_random_guess. *)
+Definition pub_key_inhab : pub_key ahe :=
+  @MkBenalohPubKey n r 1%g pub_gen_order1.
+
+(** secrecy_random_guess - the closed-form Alice-secrecy bound at the
+    Benaloh AHE [ahe] and the trivial random-guess adversary.
+    Specialises [Concrete.secrecy_random_guess] by plugging in [ahe]
+    (named-implicit), the two [erefl] finType bridges ([rand_fin_E],
+    [cipher_fin_E]), the [0 : 'Z_r] plaintext inhabitance witness
+    ([msg_inhab]), and the [pub_key_inhab] direct witness at
+    [pub_key ahe = BenalohPubKey n r].  No theorem-level arguments.
+    Kind: main corollary.
+    Why: this is the Task O output of the plan.  Wires Benaloh AHE
+    into the secrecy theorem structurally.  The [Print Assumptions]
+    closure equals that of [Idealized.secrecy_random_guess]: only
+    the cryptographic axioms ([epsilon_cpa],
+    [enc_ind_cpa_real_or_zero]) plus the SSProve / classical
+    foundation axioms.  Discharging the IND-CPA axiom from the
+    higher-residuosity assumption (the cryptographic security of
+    Benaloh) is a separate project out of scope here.
+    Used by: end users; Task P (next) does the analogous wiring for
+    Paillier 1999. *)
+Definition secrecy_random_guess :=
+  Concrete.secrecy_random_guess
+    (AHE:=ahe)
+    (rand_finType:=rand_fin)
+    (cipher_finType:=cipher_fin)
+    rand_fin_E cipher_fin_E
+    msg_inhab pub_key_inhab.
+
+End benaloh.
+
+End Benaloh.
