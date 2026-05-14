@@ -183,9 +183,12 @@ Definition cipher_list : choice_type := chList t_cipher.
 
 Local Notation "'ciphers'" := cipher_list (in custom pack_type at level 2).
 
-(** id_game_run — the single operation identifier exported by every
-    game.  Calling it executes the joint protocol run and returns the
-    ciphertext accumulator visible to corrupted Alice.
+(** id_game_run — the cipher-output operation identifier exported by
+    every game.  Calling it executes the joint protocol run and returns
+    the ciphertext accumulator visible to corrupted Alice; as a side
+    effect the protocol-side scalar V_2 sampled inside the body is
+    written to the shared [V_2_cell] location so the second oracle
+    [id_v2_get] can read it back.
     Kind: canonical.
     Why: SSProve operations are identified by a [nat]; a single shared
     identifier across the four games keeps [game_iface] unique so
@@ -193,17 +196,68 @@ Local Notation "'ciphers'" := cipher_list (in custom pack_type at level 2).
     Used by: game_iface and all four game packages. *)
 Definition id_game_run : nat := 0%N.
 
+(** id_v2_get — the V_2-reveal operation identifier exported by every
+    game.  Calling it returns the protocol-side V_2 sample written into
+    [V_2_cell] by the previous call to [id_game_run].
+    Kind: canonical.
+    Why: T1 of [~/.claude/plans/sprightly-finding-robin.md].  The
+    indicator wrapper (T4) compares the predictor's guess against V_2
+    by reading this oracle.  Operation id [2] is fresh; id [1] is
+    reserved for the predictor's own export identifier ([id_guess] in
+    T4).
+    Used by: game_iface and all four game packages. *)
+Definition id_v2_get : nat := 2%N.
+
+(** V_2_cell — shared SSProve [Location] storing the protocol-side V_2
+    sample.  The cell holds an [option t_msg]; the cipher oracle [#put]s
+    it to [Some _] before returning, the V_2 oracle [get]s it back.
+    Kind: canonical.
+    Why: T1 of [~/.claude/plans/sprightly-finding-robin.md].  The
+    pre-T0 framework sampled an independent [iV2] inside the indicator
+    after the predictor returned its guess, making the V_2-guess event
+    vacuously [1/m]-bounded.  T1 fixes this by routing the actual V_2
+    used inside the cipher-game body through a state-shared location;
+    the indicator (T4) reads this location to obtain the V_2 the
+    predictor was distinguishing against.
+    Naming: project-local [V_2] preserves TeX subscript; [_cell] marks
+    the SSProve mutable location.
+    Used by: game_real, game_hybrid_one, game_hybrid_two, game_leak,
+    translation_charlie, translation_bob, T4's indicator wrapper. *)
+Definition V_2_cell : Location := mkloc 8 (None : option t_msg).
+
+(** protocol_state — the [Locations] fmap holding [V_2_cell].  Used as
+    the [locs] field of every game and translation package so the four
+    games and the two reductions all share the same state-cell layout.
+    Kind: canonical.
+    Why: T1 of [~/.claude/plans/sprightly-finding-robin.md].  SSProve
+    packages carry their own [locs] field; for two packages to share a
+    state cell at runtime they must declare the same [Locations] map.
+    Using [protocol_state] uniformly across the games and translations
+    is the standard SSProve idiom (compare [IND_CPA_location] in
+    [SSProve/examples/PRF.v:276]).
+    Used by: game_real, game_hybrid_one, game_hybrid_two, game_leak,
+    translation_charlie, translation_bob. *)
+Definition protocol_state : Locations := [fmap V_2_cell].
+
+Local Notation "'msg'" := t_msg (in custom pack_type at level 2).
+
 (** game_iface — the shared export interface of the four games.  Each
-    game exports a single operation [id_game_run] taking ['unit] and
-    returning the ciphertext accumulator [ciphers].
+    game exports two operations: [id_game_run] taking ['unit] and
+    returning the ciphertext accumulator [ciphers], and [id_v2_get]
+    taking ['unit] and returning the protocol-side V_2 sample
+    ([t_msg]).
     Kind: canonical.
     Why: the SSProve advantage [AdvantageE G_0 G_1 A] requires both
-    games to share their export interface.  The IND-CPA hops in Task 08
-    chain four games against this single shared signature.
+    games to share their export interface.  The IND-CPA hops chain four
+    games against this single shared two-oracle signature.  The
+    predictor (T2's reductions) only imports the [id_game_run]
+    sub-interface; the indicator (T4) imports both oracles.
     Used by: game_real, game_hybrid_one, game_hybrid_two, game_leak,
-    and the Task 08 advantage triangle. *)
+    advantage_game_real_game_leak. *)
 Definition game_iface : Interface :=
-  [interface #val #[ id_game_run ] : 'unit → ciphers ].
+  [interface
+     #val #[ id_game_run ] : 'unit → ciphers ;
+     #val #[ id_v2_get   ] : 'unit → msg ].
 
 (** game_real — package modelling the real DSDP execution.  Samples the
     protocol-level random variables (V_2, V_3, U_2, U_3, R_2, R_3) and
@@ -221,7 +275,7 @@ Definition game_iface : Interface :=
     Used by: Tasks 07 (reductions), 08 (advantage triangle). *)
 Definition game_real :
   package [interface] game_iface :=
-  [package emptym ;
+  [package protocol_state ;
     #def #[ id_game_run ] (_ : 'unit) : ciphers
     {
       (* protocol-level scalars *)
@@ -237,6 +291,7 @@ Definition game_real :
       irb1 ← sample uniform index_renc ;;
       irc1 ← sample uniform index_renc ;;
       let v2 := msg_of_idx iV2 in
+      #put V_2_cell := Some (chmsg_of_msg v2) ;;
       let v3 := msg_of_idx iV3 in
       let u2 := msg_of_idx iU2 in
       let u3 := msg_of_idx iU3 in
@@ -256,6 +311,14 @@ Definition game_real :
              ; chcipher_of_cipher a2
              ; chcipher_of_cipher c2
              ; chcipher_of_cipher c3 ] : cipher_list)
+    } ;
+    #def #[ id_v2_get ] (_ : 'unit) : msg
+    {
+      stored ← get V_2_cell ;;
+      match stored with
+      | Some v => @ret t_msg v
+      | None   => @ret t_msg (chmsg_of_msg (0%R : plain AHE))
+      end
     }
   ].
 
@@ -272,7 +335,7 @@ Definition game_real :
     Used by: Tasks 07 (reductions), 08 (advantage triangle). *)
 Definition game_hybrid_one :
   package [interface] game_iface :=
-  [package emptym ;
+  [package protocol_state ;
     #def #[ id_game_run ] (_ : 'unit) : ciphers
     {
       iV2 ← sample uniform index_msg ;;
@@ -286,6 +349,7 @@ Definition game_hybrid_one :
       irb1 ← sample uniform index_renc ;;
       irc1 ← sample uniform index_renc ;;
       let v2 := msg_of_idx iV2 in
+      #put V_2_cell := Some (chmsg_of_msg v2) ;;
       let _v3 := msg_of_idx iV3 in
       let u2 := msg_of_idx iU2 in
       let u3 := msg_of_idx iU3 in
@@ -306,6 +370,14 @@ Definition game_hybrid_one :
              ; chcipher_of_cipher a2
              ; chcipher_of_cipher c2
              ; chcipher_of_cipher c3 ] : cipher_list)
+    } ;
+    #def #[ id_v2_get ] (_ : 'unit) : msg
+    {
+      stored ← get V_2_cell ;;
+      match stored with
+      | Some v => @ret t_msg v
+      | None   => @ret t_msg (chmsg_of_msg (0%R : plain AHE))
+      end
     }
   ].
 
@@ -323,7 +395,7 @@ Definition game_hybrid_one :
     09 (perfect equivalence). *)
 Definition game_hybrid_two :
   package [interface] game_iface :=
-  [package emptym ;
+  [package protocol_state ;
     #def #[ id_game_run ] (_ : 'unit) : ciphers
     {
       iV2 ← sample uniform index_msg ;;
@@ -336,7 +408,8 @@ Definition game_hybrid_two :
       ira2 ← sample uniform index_renc ;;
       irb1 ← sample uniform index_renc ;;
       irc1 ← sample uniform index_renc ;;
-      let _v2 := msg_of_idx iV2 in
+      let v2 := msg_of_idx iV2 in
+      #put V_2_cell := Some (chmsg_of_msg v2) ;;
       let _v3 := msg_of_idx iV3 in
       let u2 := msg_of_idx iU2 in
       let u3 := msg_of_idx iU3 in
@@ -357,6 +430,14 @@ Definition game_hybrid_two :
              ; chcipher_of_cipher a2
              ; chcipher_of_cipher c2
              ; chcipher_of_cipher c3 ] : cipher_list)
+    } ;
+    #def #[ id_v2_get ] (_ : 'unit) : msg
+    {
+      stored ← get V_2_cell ;;
+      match stored with
+      | Some v => @ret t_msg v
+      | None   => @ret t_msg (chmsg_of_msg (0%R : plain AHE))
+      end
     }
   ].
 
@@ -385,7 +466,7 @@ Definition game_hybrid_two :
     13 (residual uniformity). *)
 Definition game_leak :
   package [interface] game_iface :=
-  [package emptym ;
+  [package protocol_state ;
     #def #[ id_game_run ] (_ : 'unit) : ciphers
     {
       iV2 ← sample uniform index_msg ;;
@@ -398,7 +479,8 @@ Definition game_leak :
       ira2 ← sample uniform index_renc ;;
       irb1 ← sample uniform index_renc ;;
       irc1 ← sample uniform index_renc ;;
-      let _v2 := msg_of_idx iV2 in
+      let v2 := msg_of_idx iV2 in
+      #put V_2_cell := Some (chmsg_of_msg v2) ;;
       let _v3 := msg_of_idx iV3 in
       let u2 := msg_of_idx iU2 in
       let u3 := msg_of_idx iU3 in
@@ -418,6 +500,14 @@ Definition game_leak :
              ; chcipher_of_cipher a2
              ; chcipher_of_cipher c2
              ; chcipher_of_cipher c3 ] : cipher_list)
+    } ;
+    #def #[ id_v2_get ] (_ : 'unit) : msg
+    {
+      stored ← get V_2_cell ;;
+      match stored with
+      | Some v => @ret t_msg v
+      | None   => @ret t_msg (chmsg_of_msg (0%R : plain AHE))
+      end
     }
   ].
 
@@ -430,12 +520,9 @@ Check game_hybrid_one.
 Check game_hybrid_two.
 Check game_leak.
 
-(** msg_pack — pack_type notation aliasing [t_msg] inside the SSProve
-    interface custom-entry grammar.  Mirrors the [cipher_t] notation
-    declared above so the IND-CPA oracle import signature
-    [#import {sig #[ id_oracle_encrypt ] : 'nat × msg → cipher_t}]
-    parses cleanly inside the Task 07 translation packages. *)
-Local Notation "'msg'" := t_msg (in custom pack_type at level 2).
+(* The [msg] pack_type notation aliasing [t_msg] is declared above
+   alongside the [game_iface] definition so the V_2 oracle's return-type
+   slot can use it. *)
 
 (** translation_charlie — SSProve translation package mediating between
     the IND-CPA real-or-zero oracle on Charlie's public key and the
@@ -465,7 +552,7 @@ Definition translation_charlie :
   package
     (oracle_encrypt_iface t_msg t_cipher)
     game_iface :=
-  [package emptym ;
+  [package protocol_state ;
     #def #[ id_game_run ] (_ : 'unit) : ciphers
     {
       #import {sig #[ id_oracle_encrypt ] : 'nat × msg → cipher_t } as oracle_enc ;;
@@ -479,6 +566,7 @@ Definition translation_charlie :
       ira2 ← sample uniform index_renc ;;
       irb1 ← sample uniform index_renc ;;
       let v2 := msg_of_idx iV2 in
+      #put V_2_cell := Some (chmsg_of_msg v2) ;;
       let v3 := msg_of_idx iV3 in
       let u2 := msg_of_idx iU2 in
       let u3 := msg_of_idx iU3 in
@@ -498,6 +586,14 @@ Definition translation_charlie :
              ; chcipher_of_cipher a2
              ; chcipher_of_cipher c2
              ; ch3 ] : cipher_list)
+    } ;
+    #def #[ id_v2_get ] (_ : 'unit) : msg
+    {
+      stored ← get V_2_cell ;;
+      match stored with
+      | Some v => @ret t_msg v
+      | None   => @ret t_msg (chmsg_of_msg (0%R : plain AHE))
+      end
     }
   ].
 
@@ -528,7 +624,7 @@ Definition translation_bob :
   package
     (oracle_encrypt_iface t_msg t_cipher)
     game_iface :=
-  [package emptym ;
+  [package protocol_state ;
     #def #[ id_game_run ] (_ : 'unit) : ciphers
     {
       #import {sig #[ id_oracle_encrypt ] : 'nat × msg → cipher_t } as oracle_enc ;;
@@ -542,6 +638,7 @@ Definition translation_bob :
       ira2 ← sample uniform index_renc ;;
       irc1 ← sample uniform index_renc ;;
       let v2 := msg_of_idx iV2 in
+      #put V_2_cell := Some (chmsg_of_msg v2) ;;
       let _v3 := msg_of_idx iV3 in
       let u2 := msg_of_idx iU2 in
       let u3 := msg_of_idx iU3 in
@@ -561,6 +658,14 @@ Definition translation_bob :
              ; chcipher_of_cipher a2
              ; ch2
              ; chcipher_of_cipher c3 ] : cipher_list)
+    } ;
+    #def #[ id_v2_get ] (_ : 'unit) : msg
+    {
+      stored ← get V_2_cell ;;
+      match stored with
+      | Some v => @ret t_msg v
+      | None   => @ret t_msg (chmsg_of_msg (0%R : plain AHE))
+      end
     }
   ].
 
@@ -681,14 +786,27 @@ Lemma game_real_equiv_charlie_real :
 Proof.
   eapply eq_rel_perf_ind_eq.
   simplify_eq_rel m.
-  do 10 ssprove_sync_eq=> ?.
-  rewrite chcipher_of_cipherK chmsg_of_msgK.
-  eapply rpost_weaken_rule.
-  1: eapply rreflexivity_rule.
-  cbn.
-  intros [? ?] [? ?] e.
-  inversion e.
-  intuition auto.
+  (* Two operations now: id_game_run and id_v2_get.  The cipher
+     oracle's RHS samples Charlie's randomness inside the oracle, so
+     the #put-V_2_cell step appears before the renc sample on the RHS
+     whereas the LHS [game_real] samples all four renc values before
+     #put.  Swap RHS positions 9-10 to align. *)
+  - ssprove_swap_rhs 9%N.
+    do 10 ssprove_sync_eq=> ?.
+    ssprove_sync_eq.
+    rewrite chcipher_of_cipherK chmsg_of_msgK.
+    eapply rpost_weaken_rule.
+    1: eapply rreflexivity_rule.
+    cbn.
+    intros [? ?] [? ?] e.
+    inversion e.
+    intuition auto.
+  - (* id_v2_get oracle: both sides read V_2_cell and return its
+       contents (or the unreachable-None fallback) identically. *)
+    ssprove_sync_eq=> stored.
+    destruct stored as [v|].
+    + apply: r_ret. by [].
+    + apply: r_ret. by [].
 Qed.
 
 (** charlie_zero_equiv_game_hybrid_one — perfect equivalence between
@@ -713,14 +831,25 @@ Lemma charlie_zero_equiv_game_hybrid_one :
 Proof.
   eapply eq_rel_perf_ind_eq.
   simplify_eq_rel m.
-  do 10 ssprove_sync_eq=> ?.
-  rewrite chcipher_of_cipherK.
-  eapply rpost_weaken_rule.
-  1: eapply rreflexivity_rule.
-  cbn.
-  intros [? ?] [? ?] e.
-  inversion e.
-  intuition auto.
+  - (* Cipher oracle: same sample-order swap as the real-oracle side,
+       on the LHS instead.  [translation_charlie] samples irb1 at
+       position 9 and the oracle adds Charlie's renc at position 10
+       on the LHS; [game_hybrid_one] samples all four renc before
+       #put on the RHS.  Swap LHS positions 9-10 to align. *)
+    ssprove_swap_lhs 9%N.
+    do 10 ssprove_sync_eq=> ?.
+    ssprove_sync_eq.
+    rewrite chcipher_of_cipherK.
+    eapply rpost_weaken_rule.
+    1: eapply rreflexivity_rule.
+    cbn.
+    intros [? ?] [? ?] e.
+    inversion e.
+    intuition auto.
+  - ssprove_sync_eq=> stored.
+    destruct stored as [v|].
+    + apply: r_ret. by [].
+    + apply: r_ret. by [].
 Qed.
 
 (** game_hybrid_one_equiv_bob_real — perfect equivalence between
@@ -745,19 +874,30 @@ Lemma game_hybrid_one_equiv_bob_real :
 Proof.
   eapply eq_rel_perf_ind_eq.
   simplify_eq_rel m.
-  (* Sample-order mismatch on the encryption randomness: game_hybrid_one
-     samples irb1 (position 9) before irc1 (position 10), but
-     translation_bob samples irc1 (position 9) before invoking the oracle
-     (which adds Bob's randomness at position 10).  Swap them on the RHS. *)
-  ssprove_swap_rhs 8%N.
-  do 10 ssprove_sync_eq=> ?.
-  rewrite chcipher_of_cipherK chmsg_of_msgK.
-  eapply rpost_weaken_rule.
-  1: eapply rreflexivity_rule.
-  cbn.
-  intros [? ?] [? ?] e.
-  inversion e.
-  intuition auto.
+  - (* Two RHS swaps are needed: the #put-V_2_cell step sits between
+       the three direct renc samples and the oracle-supplied Bob's
+       randomness on [translation_bob ∘ oracle_real], whereas
+       [game_hybrid_one] samples all four renc before #put.  First
+       [ssprove_swap_rhs 9%N] swaps the #put past the oracle's renc
+       sample so all four renc samples are contiguous on the RHS;
+       then [ssprove_swap_rhs 8%N] reorders the last two renc samples
+       so the (ira1, ira2, irb1, irc1) order on the LHS matches the
+       (x4, x5, oracle-supplied, x6-from-irc1) order on the RHS. *)
+    ssprove_swap_rhs 9%N.
+    ssprove_swap_rhs 8%N.
+    do 10 ssprove_sync_eq=> ?.
+    ssprove_sync_eq.
+    rewrite chcipher_of_cipherK chmsg_of_msgK.
+    eapply rpost_weaken_rule.
+    1: eapply rreflexivity_rule.
+    cbn.
+    intros [? ?] [? ?] e.
+    inversion e.
+    intuition auto.
+  - ssprove_sync_eq=> stored.
+    destruct stored as [v|].
+    + apply: r_ret. by [].
+    + apply: r_ret. by [].
 Qed.
 
 (** bob_zero_equiv_game_hybrid_two — perfect equivalence between the
@@ -780,18 +920,26 @@ Lemma bob_zero_equiv_game_hybrid_two :
 Proof.
   eapply eq_rel_perf_ind_eq.
   simplify_eq_rel m.
-  (* Sample-order mismatch on the encryption randomness, symmetric to
-     [game_hybrid_one_equiv_bob_real]: swap LHS positions 9 and 10 to
-     align with [game_hybrid_two]'s irb1-before-irc1 order. *)
-  ssprove_swap_lhs 8%N.
-  do 10 ssprove_sync_eq=> ?.
-  rewrite chcipher_of_cipherK.
-  eapply rpost_weaken_rule.
-  1: eapply rreflexivity_rule.
-  cbn.
-  intros [? ?] [? ?] e.
-  inversion e.
-  intuition auto.
+  - (* Two LHS swaps mirror the RHS swaps in
+       [game_hybrid_one_equiv_bob_real]: push the #put past the
+       oracle-supplied renc sample, then reorder the last two renc
+       samples to match [game_hybrid_two]'s (ira1, ira2, irb1, irc1)
+       order. *)
+    ssprove_swap_lhs 9%N.
+    ssprove_swap_lhs 8%N.
+    do 10 ssprove_sync_eq=> ?.
+    ssprove_sync_eq.
+    rewrite chcipher_of_cipherK.
+    eapply rpost_weaken_rule.
+    1: eapply rreflexivity_rule.
+    cbn.
+    intros [? ?] [? ?] e.
+    inversion e.
+    intuition auto.
+  - ssprove_sync_eq=> stored.
+    destruct stored as [v|].
+    + apply: r_ret. by [].
+    + apply: r_ret. by [].
 Qed.
 
 (** game_hybrid_two_perfect_game_leak — perfect equivalence between
@@ -815,18 +963,26 @@ Lemma game_hybrid_two_perfect_game_leak :
   game_hybrid_two ≈₀ game_leak.
 Proof.
   (* [game_leak] is defined to have the same body as [game_hybrid_two]
-     (both ciphertext slots encrypt the constant [0 : plain AHE]), so
-     the perfect equivalence reduces to a reflexivity on the relational
-     specification after stepping past the ten shared samples. *)
+     (both ciphertext slots encrypt the constant [0 : plain AHE] and
+     both #put V_2_cell at the same position), so the perfect
+     equivalence reduces to a reflexivity on the relational
+     specification after stepping past the ten samples and the
+     #put.  The id_v2_get oracle bodies are also syntactically
+     identical. *)
   eapply eq_rel_perf_ind_eq.
   simplify_eq_rel m.
-  do 10 ssprove_sync_eq=> ?.
-  eapply rpost_weaken_rule.
-  1: eapply rreflexivity_rule.
-  cbn.
-  intros [? ?] [? ?] e.
-  inversion e.
-  intuition auto.
+  - do 10 ssprove_sync_eq=> ?.
+    ssprove_sync_eq.
+    eapply rpost_weaken_rule.
+    1: eapply rreflexivity_rule.
+    cbn.
+    intros [? ?] [? ?] e.
+    inversion e.
+    intuition auto.
+  - ssprove_sync_eq=> stored.
+    destruct stored as [v|].
+    + apply: r_ret. by [].
+    + apply: r_ret. by [].
 Qed.
 
 (** advantage_hop_real_h1 — IND-CPA bound on the first hop
@@ -1392,6 +1548,25 @@ Definition game_leak_run_code : raw_code cipher_list :=
     Used by: T1 V_2-aware rebuild — discharges the [Hmass]
     obligation of [bridge_leak_to_fdist] at the [game_leak]-resolved
     code. *)
+(** Lossless_put_ret — putting to a location and immediately returning
+    is lossless: the [#put] step only mutates the heap, and the
+    subsequent [ret] gives a Dirac mass on the projected value.
+    Kind: helper instance.
+    Why: T1's [#put V_2_cell := Some ...] step inside [game_leak]'s
+    cipher-oracle body extends the pre-T0 ten-sample-plus-[ret] chain
+    with an extra effect node.  The upstream [Lossless_sample] /
+    [Lossless_ret] instances do not cover [#put]; this lemma fills the
+    one missing case so [LosslessCode_game_leak] still discharges.
+    Used by: LosslessCode_game_leak. *)
+Lemma Lossless_put_ret {A : choiceType} (l : Location) (v : l) (x : A) :
+  LosslessCode (#put l := v ;; ret x).
+Proof.
+rewrite /LosslessCode /Pr_fst.
+rewrite Pr_code_put Pr_code_ret.
+rewrite /(distr.dmargin _ _) dlet_unit_ext.
+exact: Couplings.psum_SDistr_unit.
+Qed.
+
 Lemma LosslessCode_game_leak : LosslessCode game_leak_run_code.
 Proof.
 rewrite /game_leak_run_code /resolve /=.
@@ -1405,8 +1580,8 @@ apply: Lossless_sample => [|?]; first by apply: LosslessOp_uniform.
 apply: Lossless_sample => [|?]; first by apply: LosslessOp_uniform.
 apply: Lossless_sample => [|?]; first by apply: LosslessOp_uniform.
 apply: Lossless_sample => [|?]; first by apply: LosslessOp_uniform.
-apply: Lossless_sample.
-exact: LosslessOp_uniform.
+apply: Lossless_sample => [|?]; first by apply: LosslessOp_uniform.
+exact: Lossless_put_ret.
 Qed.
 
 (* ================================================================== *)
