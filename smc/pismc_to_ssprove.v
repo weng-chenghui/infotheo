@@ -238,7 +238,12 @@ Fixpoint code_of_proc (p : @smc_interpreter.proc data) {struct p} :
   | smc_interpreter.Finish => code_of_finish
   | smc_interpreter.Fail => code_of_finish
   | smc_interpreter.Ret d =>
-      {code ret ([:: data_to_cipher d] : chList t_cipher) }
+      (* [Ret d] is a piSMC program's local return value, not a wire
+         send.  Returning [[::]] (the empty ciphertext list) makes the
+         translator's wire-trace output align with the leaked-ciphertext
+         view: only [Send] actions contribute to the list, and [Ret]
+         marks "end of wire trace plus a local result we discard". *)
+      {code ret ([::] : chList t_cipher) }
   | smc_interpreter.Init _ k => code_of_proc k
   | smc_interpreter.Send dst d k =>
       code_of_send dst (data_to_cipher d) (code_of_proc k)

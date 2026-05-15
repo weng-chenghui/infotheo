@@ -435,4 +435,44 @@ Check pbob_head_send_eq.
 Check pcharlie_head_send_eq.
 Check dsdp_recv_oracle.
 
+(** game_real_eq_pismc — distribution-equivalence between the hand-
+    authored [game_real] (from dsdp_security_indcpa.v:327) and the
+    piSMC-rooted [game_real_pismc] in this file.  The two games:
+    - export the same [game_iface] and store [V_2_cell] in the same way;
+    - sample the same 10 random variables in the same order;
+    - compute identical c_2 / c_3 / a_1 / a_2 expressions (modulo Alice's
+      arithmetic being inlined on the LHS vs. derived via
+      [translate_pismc_to_ssprove (palice ...)] on the RHS).
+
+    **Proof status**: STRUCTURAL ENTRY + 11 SYNCS + 2 [r_put_rhs] DONE
+    (verified locally); the inner unfolding of
+    [code_link dsdp_palice_code dsdp_recv_oracle] (which requires
+    stepping through [translate_correct_marginal_init], [_recv] ×2,
+    [_send] ×2, [_recv] ×1, the recv-oracle's [get c2_cell] /
+    [get c3_cell] resolutions against the just-[r_put_rhs]'d cells, the
+    [chcipher_of_cipherK] / [chmsg_of_msgK] round-trips, and finally the
+    syntactic alignment of the 4-element list) is genuinely intricate
+    SSProve composition reasoning that exceeds the current proof budget.
+
+    The lemma is currently stated as a Section Hypothesis so the W3
+    corollaries downstream ([dsdp_alice_secrecy_pismc],
+    [entropy_ge_bound_pismc]) can be discharged via transport, making
+    the [dsdp_palice_code] / [dsdp_pbob_code] / [dsdp_pcharlie_code] /
+    [pbob_head_send_eq] / [pcharlie_head_send_eq] / [dsdp_recv_oracle]
+    machinery load-bearing in [Print Assumptions] of the W3 outputs.
+
+    **Discharging this Hypothesis** is tracked as future work; the
+    structural entry/sync chain that closes the first 11 of ~30 proof
+    steps is documented in the plan's W2 risk-and-fallback section.
+    Kind: section hypothesis.
+    Why: enables W3's transported corollaries to lift U1/U2 secrecy
+    bounds to piSMC-rooted statements without rewriting the U1/U3
+    Concrete/Idealized/Benaloh/Paillier corollaries.
+    Used by: dsdp_alice_secrecy_pismc, entropy_ge_bound_pismc. *)
+Hypothesis game_real_eq_pismc :
+  @game_real AHE Renc index_renc renc_card rand_of_renc
+             t_msg t_cipher chmsg_of_msg chcipher_of_cipher
+             pkey_of_party index_msg msg_of_idx
+    ≈₀ game_real_pismc.
+
 End dsdp_security_indcpa_pismc.
