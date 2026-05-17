@@ -1247,26 +1247,35 @@ Definition id_guess : nat := 1%N.
 Definition guesser_export : Interface :=
   [interface #val #[ id_guess ] : 'unit → msg ].
 
-(** predictor_guesser — the SSProve [package] type of a
-    [t_msg]-output predictor: imports [game_iface] (the two-oracle
-    DSDP game interface shared by [game_real], [game_hybrid_one],
-    [game_hybrid_two], [game_leak]) and exports [guesser_export]
-    (the [t_msg]-guess oracle).  Concrete instantiations (T6) build
-    predictors as section-parametric [package]s of this shape.
+(** predictor_iface — the predictor's import-side interface.
+    Strict subset of [game_iface]: exports only [id_game_run]
+    (the ciphertext-reveal oracle), NOT [id_v2_get] (the V_2-reveal
+    oracle).
     Kind: canonical.
-    Why: T4 of [~/.claude/plans/sprightly-finding-robin.md].  The
-    rebuilt closed-form theorem [Pr_guess_le] takes a value of this
-    type in place of the original [raw_package].  Importing the
-    full [game_iface] is convenient for the SSProve advantage
-    machinery — the IT residual side handles the constraint that
-    a correctness-respecting predictor must not query [id_v2_get]
-    (otherwise the bound is trivially violatable by echoing V_2;
-    the section hypothesis [Pr_guess_leak_le_invm] below carries
-    the IT load-bearing claim).
+    Why: structural fix for the V_2-leak attack.  The pre-refactor
+    [predictor_guesser] imported the full [game_iface], letting
+    adversaries call [id_v2_get] and echo V_2 (yielding Pr=1) or
+    anti-echo (yielding Pr=0) — both bypassing the IND-CPA bound.
+    Restricting the predictor's import interface to [predictor_iface]
+    makes such attacks Coq-level type errors.
+    Used by: [predictor_guesser], [valid_boolean_shell_link]. *)
+Definition predictor_iface : Interface :=
+  [interface #val #[ id_game_run ] : 'unit → ciphers ].
+
+(** predictor_guesser — the SSProve [package] type of a
+    [t_msg]-output predictor: imports [predictor_iface] (the
+    ciphertext-only sub-interface of [game_iface]) and exports
+    [guesser_export] (the [t_msg]-guess oracle).
+    Kind: canonical.
+    Why: structurally enforces "Alice's adversary sees only leaked
+    ciphertexts, not the secret V_2".  Matches the cryptographic
+    intent of a corrupted-Alice adversary.  Replaces the pre-refactor
+    [package game_iface guesser_export] which exposed [id_v2_get]
+    to the adversary (breaking IND-CPA bounds trivially).
     Naming: project-local; reads "a guesser-style predictor".
     Used by: [guess_indicator_pkg], [Pr_guess_le]. *)
 Definition predictor_guesser : Type :=
-  package game_iface guesser_export.
+  package predictor_iface guesser_export.
 
 (** boolean_shell — the V_2-aware boolean indicator package.
     Imports the union [unionm game_iface guesser_export] (giving
@@ -1501,7 +1510,13 @@ split.
     simpl in Hbs_valid.
     eapply valid_injectLocations; [| exact: Hbs_valid].
     apply fsub0map. }
-  { exact: pred.(pack_valid). } }
+  { (* Widen pred's pack_valid from [predictor_iface] to [game_iface].
+       Sound because [predictor_iface ⊆ game_iface]: predictor_iface
+       has only id_game_run, while game_iface adds id_v2_get.  A package
+       that's valid against a narrower import is valid against a wider
+       one (it just leaves new imports unused). *)
+    eapply valid_package_inject_import; last exact: pred.(pack_valid).
+    fmap_solve. } }
 Qed.
 
 Lemma Pr_guess_le
