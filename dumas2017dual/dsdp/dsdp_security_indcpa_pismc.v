@@ -649,7 +649,7 @@ Definition entropy_pismc (predictor : predictor_guesser t_msg t_cipher) : R :=
     Used by: future end-to-end statements. *)
 Theorem entropy_ge_bound_pismc
     (index_t_msg : nat)
-    (index_t_msg_pos : (0 < index_t_msg)%N)
+    (index_t_msg_gt0 : (0 < index_t_msg)%N)
     (Pr_guess_leak_le_invm :
        forall (predictor : predictor_guesser t_msg t_cipher),
          distr.mu (pkg_advantage.Pr
@@ -735,7 +735,7 @@ exact: (@entropy_ge_bound
           chcipher_of_cipher cipher_of_chcipher
           chcipher_of_cipherK chmsg_of_msgK
           pkey_of_party index_msg msg_of_idx
-          index_t_msg index_t_msg_pos
+          index_t_msg index_t_msg_gt0
           Pr_guess_leak_le_invm
           Pr_guess_real_ge_invm epsilon_cpa_ge0
           LA predictor chain_valid chain_disj_real

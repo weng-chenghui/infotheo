@@ -1358,7 +1358,7 @@ Definition guess_indicator_pkg
     Used by: [Pr_guess_leak_le_invm] hypothesis, [Pr_guess_le]. *)
 Variable index_t_msg : nat.
 
-(** index_t_msg_pos — positivity of [index_t_msg]: the message
+(** index_t_msg_gt0 — positivity of [index_t_msg]: the message
     space is non-empty.  Without positivity the residual bound
     [1 / index_t_msg] would be vacuously [0 <= 0] which is still
     mathematically correct but degenerate.
@@ -1368,10 +1368,10 @@ Variable index_t_msg : nat.
     quantity at concrete instantiation; the discharge at T6 is
     trivial via [prime_p] / [prime_q] etc. depending on the AHE
     scheme.
-    Naming: project-local; mirrors [index_msg_pos], [index_renc_pos].
+    Naming: project-local; mirrors [index_msg_gt0], [index_renc_gt0].
     Used by: [Pr_guess_le] (indirectly, via the hypothesis it
     cascades). *)
-Hypothesis index_t_msg_pos : (0 < index_t_msg)%N.
+Hypothesis index_t_msg_gt0 : (0 < index_t_msg)%N.
 
 (** Pr_guess_leak_le_invm — IT residual bound: at [game_leak] the
     probability that any [predictor_guesser]'s guess equals the
@@ -1787,7 +1787,7 @@ set Pr_real := distr.mu (pkg_advantage.Pr
 have Hpr_le : (Pr_real <= (index_t_msg%:R)^-1 + 2%:R * epsilon_cpa)%R.
 { rewrite /Pr_real. by apply: Pr_guess_le. }
 have Hinvm_pos : (0 < (index_t_msg%:R)^-1 :> R)%R.
-{ by rewrite invr_gt0 ltr0n; exact: index_t_msg_pos. }
+{ by rewrite invr_gt0 ltr0n; exact: index_t_msg_gt0. }
 have Hpr_ge_inv : ((index_t_msg%:R)^-1 <= Pr_real)%R.
 { exact: Pr_guess_real_ge_invm. }
 have Hpr_pos : (0 < Pr_real)%R.
@@ -1795,7 +1795,7 @@ have Hpr_pos : (0 < Pr_real)%R.
 have Hbound_pos : (0 < (index_t_msg%:R)^-1 + 2%:R * epsilon_cpa :> R)%R.
 { apply: ltr_pwDl => //. by rewrite mulr_ge0 // ?ler0n. }
 rewrite -(log_id (m := index_t_msg) (eps := epsilon_cpa)
-                 index_t_msg_pos epsilon_cpa_ge0).
+                 index_t_msg_gt0 epsilon_cpa_ge0).
 by rewrite lerN2 ler_log // ?posrE.
 Qed.
 
@@ -2145,7 +2145,7 @@ Check bridge_leak_to_fdist :
   forall (mu : distr.distr R alice_view),
     psum (distr.mu mu) = 1 -> R.-fdist alice_view.
 
-(** index_msg_pos, index_renc_pos — positivity of the SSProve uniform-
+(** index_msg_gt0, index_renc_gt0 — positivity of the SSProve uniform-
     sample cardinalities.
     Kind: section hypothesis.
     Why: [LosslessOp_uniform] (SSProve [pkg_distr.v:206]) requires
@@ -2165,8 +2165,8 @@ Check bridge_leak_to_fdist :
     [LosslessCode_game_leak] below is provable Section-internally.
     Used by: LosslessCode_game_leak (and any subsequent Pr_fst-on-
     game_leak mass argument). *)
-Hypothesis index_msg_pos : (0 < index_msg)%N.
-Hypothesis index_renc_pos : (0 < index_renc)%N.
+Hypothesis index_msg_gt0 : (0 < index_msg)%N.
+Hypothesis index_renc_gt0 : (0 < index_renc)%N.
 
 (** game_leak_run_code — the [raw_code] body of [game_leak] obtained by
     resolving its single export operation [id_game_run] at the unit
@@ -2202,8 +2202,8 @@ Definition game_leak_run_code : raw_code cipher_list :=
     applications of [Lossless_sample] (SSProve [nominal/Pr.v:198])
     walk through the [sample uniform i ;; k] tree, each leaving a
     [LosslessOp (uniform i)] subgoal discharged by
-    [LosslessOp_uniform] (which consumes [index_msg_pos] /
-    [index_renc_pos]).  The final [LosslessCode (ret _)] is closed by
+    [LosslessOp_uniform] (which consumes [index_msg_gt0] /
+    [index_renc_gt0]).  The final [LosslessCode (ret _)] is closed by
     [Lossless_ret] (resolved automatically by typeclass eauto inside
     the last [Lossless_sample]).
     Naming: upstream-style PascalCase exception, mirroring
