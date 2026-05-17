@@ -1665,24 +1665,6 @@ Check dsdp_alice_secrecy.
 (*   H_unp^C(V_2 | AliceView) >= log m - log(1 + 2 * m * epsilon_cpa) *)
 (* ================================================================== *)
 
-(** Pr_guess_real_ge_invm — strict positivity lower bound on
-    [Pr_guess_real]: the indicator wrapper returns [true] with
-    probability at least [1/index_t_msg] for any predictor.
-    Kind: section hypothesis.
-    Why: needed for [entropy_ge_bound] to handle the [Pr = 0]
-    degenerate case.  In mathcomp-analysis [log 0 = 0] (not [+oo]),
-    so without this hypothesis the entropy lower bound fails when
-    [bound > 0].  Discharged at concrete instantiation by symmetry:
-    [V_2] is uniform on [t_msg] and the predictor's guess is
-    independent of [V_2] in expectation, so [Pr[guess = V_2] >= 1/m].
-    Mirrors the [Pr_guess_leak_le_invm] hypothesis pattern from T4.
-    Used by: [entropy_ge_bound]. *)
-Hypothesis Pr_guess_real_ge_invm :
-  forall (predictor : predictor_guesser),
-    (index_t_msg%:R)^-1
-      <= distr.mu (pkg_advantage.Pr
-                     (guess_indicator_pkg predictor game_real)) true.
-
 (** epsilon_cpa_ge0 — nonnegativity of the IND-CPA error parameter.
     [indcpa_ror.epsilon_cpa : R] is declared as a bare [Parameter]
     without positivity; the IND-CPA axiom bounds an [AdvantageE]
@@ -1760,7 +1742,14 @@ Definition bound : R :=
     Proof outline:
       1. [dsdp_alice_secrecy] (via [Pr_guess_le]): the probability
          [Pr_real <= 1/m + 2 * eps_cpa].
-      2. [Pr_guess_real_ge_invm]: [Pr_real >= 1/m > 0].
+      2. Theorem-level [Pr_real_gt0]: per-predictor positivity
+         [0 < Pr_real].  Replaces the pre-refactor universal
+         Section Hypothesis [Pr_guess_real_ge_invm] which was
+         structurally false on anti-correlating adversaries.
+         Concrete corollaries discharge [Pr_real_gt0] for their
+         specific witness predictor (e.g., random_guess_adv's
+         output is information-theoretically independent of V_2,
+         so Pr = 1/m > 0).
       3. [log_id]: [-log (1/m + 2 * eps_cpa) = log m -
          log (1 + 2 * m * eps_cpa) = bound].
       4. Monotonicity of [log] on [Num.pos] (via [ler_log]) and
@@ -1793,7 +1782,10 @@ Theorem entropy_ge_bound
        fseparate LA
          (oracle_encrypt_zero_pkg AHE Renc index_renc renc_card
             rand_of_renc t_msg t_cipher chcipher_of_cipher
-            pkey_of_party).(locs)) :
+            pkey_of_party).(locs))
+    (Pr_real_gt0 :
+       (0 < distr.mu (pkg_advantage.Pr
+                        (guess_indicator_pkg predictor game_real)) true)%R) :
   (bound <= entropy predictor)%R.
 Proof.
 unfold entropy, bound.
@@ -1801,12 +1793,10 @@ set Pr_real := distr.mu (pkg_advantage.Pr
                           (guess_indicator_pkg predictor game_real)) true.
 have Hpr_le : (Pr_real <= (index_t_msg%:R)^-1 + 2%:R * epsilon_cpa)%R.
 { rewrite /Pr_real. by apply: Pr_guess_le. }
+have Hpr_pos : (0 < Pr_real)%R.
+{ exact: Pr_real_gt0. }
 have Hinvm_pos : (0 < (index_t_msg%:R)^-1 :> R)%R.
 { by rewrite invr_gt0 ltr0n; exact: index_t_msg_gt0. }
-have Hpr_ge_inv : ((index_t_msg%:R)^-1 <= Pr_real)%R.
-{ exact: Pr_guess_real_ge_invm. }
-have Hpr_pos : (0 < Pr_real)%R.
-{ exact: (lt_le_trans Hinvm_pos Hpr_ge_inv). }
 have Hbound_pos : (0 < (index_t_msg%:R)^-1 + 2%:R * epsilon_cpa :> R)%R.
 { apply: ltr_pwDl => //. by rewrite mulr_ge0 // ?ler0n. }
 rewrite -(log_id (m := index_t_msg) (eps := epsilon_cpa)
