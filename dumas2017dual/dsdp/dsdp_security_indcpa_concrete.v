@@ -405,29 +405,43 @@ refine (@dsdp_security_indcpa.dsdp_alice_secrecy
 - exact: fseparate0m.
 Qed.
 
-(** Pr_guess_real_ge_invm - IT lower bound at [game_real] at the
-    concrete carriers, taken as a Section hypothesis at the
-    concrete instance.  Mirrors
-    [dsdp_security_indcpa.Pr_guess_real_ge_invm] specialised to the
-    concrete carriers.
+(** Pr_real_gt0 - strict positivity of [Pr at game_real with
+    random_guess_adv] at the concrete carriers.  Narrower than the
+    deleted universal [Pr_guess_real_ge_invm]: quantifies only at
+    the specific witness predictor used by [entropy_random_guess].
+
+    Information-theoretic discharge sketch (out of scope here):
+    [random_guess_adv] samples [iV] fresh and uniform over
+    [#|plain AHE|]; [game_real] samples V_2 fresh and uniform over
+    the same space; the two samples live at distinct SSProve
+    sampling sites and are jointly independent.  Therefore
+    [Pr[guess = V_2] = 1/index_t_msg] exactly, giving the strict
+    positivity claim.  Encoding this pointwise identity needs the
+    [chmsg_of_msgK] cancel law plus SSProve's Fubini machinery
+    (~50-100 lines) - tracked as follow-up.
+
     Kind: section hypothesis.
-    Why: needed for [entropy_random_guess] which lifts
-    [secrecy_random_guess]'s probability bound through
-    [dsdp_security_indcpa.entropy_ge_bound]; the [Pr >= 1/m] step
-    closes the [Pr = 0] degenerate case where the entropy
-    [-log 0] would otherwise vanish.  Discharging the bound from
-    the residual uniformity chain is out of scope here (mirrors the
-    [Pr_guess_leak_le_invm] hypothesis pattern from U1).
+    Why: feeds [entropy_ge_bound]'s new [Pr_real_gt0] slot for the
+    random-guess corollary.  Replaces the universal
+    [Pr_guess_real_ge_invm] that was structurally false on
+    anti-echo adversaries (type-level anti-echo is now blocked by
+    the narrower [predictor_iface], but ciphertext-decryption-based
+    anti-correlation could still violate the universal [>= 1/m]
+    bound; the weaker [> 0] claim survives because
+    [random_guess_adv] never queries any oracle and is
+    unconditionally V_2-independent).
+    Naming: 3 components inside [Module Concrete / Section concrete];
+    externally referenced as [Concrete.Pr_real_gt0].  Canonical
+    [_gt0] suffix for [0 < x] (AUTHORITY.md).
     Used by: entropy_random_guess. *)
-Hypothesis Pr_guess_real_ge_invm :
-  forall (predictor : dsdp_security_indcpa.predictor_guesser t_msg t_cipher),
-    (index_t_msg%:R)^-1
-      <= distr.mu (pkg_advantage.Pr
-                     (dsdp_security_indcpa.guess_indicator_pkg predictor
-                        (dsdp_security_indcpa.game_real (AHE:=AHE) renc_card
-                           rand_of_renc (t_msg:=t_msg) (t_cipher:=t_cipher)
-                           chmsg_of_msg chcipher_of_cipher pkey_of_party msg_of_idx)))
-                  true.
+Hypothesis Pr_real_gt0 :
+  (0 < distr.mu (pkg_advantage.Pr
+                   (dsdp_security_indcpa.guess_indicator_pkg
+                      random_guess_adv
+                      (dsdp_security_indcpa.game_real (AHE:=AHE) renc_card
+                         rand_of_renc (t_msg:=t_msg) (t_cipher:=t_cipher)
+                         chmsg_of_msg chcipher_of_cipher pkey_of_party msg_of_idx)))
+                 true)%R.
 
 (** epsilon_cpa_ge0 - nonnegativity of the IND-CPA error parameter
     at the concrete instance.  Same shape as
@@ -473,8 +487,8 @@ refine (@dsdp_security_indcpa.entropy_ge_bound
           pkey_of_party index_msg msg_of_idx
           index_t_msg index_t_msg_gt0
           Pr_guess_leak_le_invm
-          Pr_guess_real_ge_invm epsilon_cpa_ge0
-          emptym random_guess_adv _ _ _ _ _ _ _ _ _).
+          epsilon_cpa_ge0
+          emptym random_guess_adv _ _ _ _ _ _ _ _ _ _).
 - exact: (valid_boolean_shell_link random_guess_adv).
 - exact: fseparate0m.
 - exact: fseparate0m.
@@ -484,6 +498,7 @@ refine (@dsdp_security_indcpa.entropy_ge_bound
 - exact: fseparate0m.
 - exact: fseparate0m.
 - exact: fseparate0m.
+- exact: Pr_real_gt0.
 Qed.
 
 End concrete.
@@ -656,35 +671,34 @@ Definition secrecy_random_guess :
   := @Concrete.secrecy_random_guess ahe rand_fin rand_fin_E
        cipher_fin cipher_fin_E pub_key_inhab Pr_guess_leak_le_invm.
 
-(** Pr_guess_real_ge_invm - IT lower bound at [game_real] at the
-    idealised specialised carriers.  Mirrors [Module Concrete]'s
-    [Pr_guess_real_ge_invm] Section hypothesis at the idealised
-    instance.
+(** Pr_real_gt0 - strict positivity at the idealised carriers for
+    [Concrete.random_guess_adv]'s specific predictor.  Narrower than
+    the deleted universal [Pr_guess_real_ge_invm]; only quantifies
+    over the random-guess witness.  Naming: 3 components inside
+    [Module Idealized / Section idealized]; externally
+    [Idealized.Pr_real_gt0].  Canonical [_gt0] suffix.
     Kind: section hypothesis.
-    Why: needed for [Concrete.entropy_random_guess] which abstracts
-    over the lower-bound side of the entropy proof; discharging it
-    from the residual uniformity chain is out of scope here.
+    Why: feeds [Concrete.entropy_random_guess]'s new [Pr_real_gt0]
+    slot at the idealised instance.  See [Module Concrete]'s
+    [Pr_real_gt0] docstring for the IT discharge sketch.
     Used by: entropy_random_guess. *)
-Hypothesis Pr_guess_real_ge_invm :
-  forall (predictor :
-            dsdp_security_indcpa.predictor_guesser
-              (Concrete.t_msg ahe) (Concrete.t_cipher cipher_fin)),
-    ((Concrete.index_t_msg ahe)%:R)^-1
-      <= distr.mu
-           (pkg_advantage.Pr
-              (dsdp_security_indcpa.guess_indicator_pkg predictor
-                 (dsdp_security_indcpa.game_real (AHE:=ahe)
-                    (Concrete.renc_card rand_fin)
-                    (Concrete.rand_of_renc (AHE:=ahe)
-                       (rand_finType:=rand_fin) rand_fin_E)
-                    (t_msg:=Concrete.t_msg ahe)
-                    (t_cipher:=Concrete.t_cipher cipher_fin)
-                    (Concrete.chmsg_of_msg (AHE:=ahe))
-                    (Concrete.chcipher_of_cipher (AHE:=ahe)
-                       (cipher_finType:=cipher_fin) cipher_fin_E)
-                    (Concrete.pkey_of_party (AHE:=ahe) pub_key_inhab)
-                    (Concrete.msg_of_idx (AHE:=ahe)))))
-           true.
+Hypothesis Pr_real_gt0 :
+  (0 < distr.mu
+        (pkg_advantage.Pr
+           (dsdp_security_indcpa.guess_indicator_pkg
+              (Concrete.random_guess_adv ahe cipher_fin)
+              (dsdp_security_indcpa.game_real (AHE:=ahe)
+                 (Concrete.renc_card rand_fin)
+                 (Concrete.rand_of_renc (AHE:=ahe)
+                    (rand_finType:=rand_fin) rand_fin_E)
+                 (t_msg:=Concrete.t_msg ahe)
+                 (t_cipher:=Concrete.t_cipher cipher_fin)
+                 (Concrete.chmsg_of_msg (AHE:=ahe))
+                 (Concrete.chcipher_of_cipher (AHE:=ahe)
+                    (cipher_finType:=cipher_fin) cipher_fin_E)
+                 (Concrete.pkey_of_party (AHE:=ahe) pub_key_inhab)
+                 (Concrete.msg_of_idx (AHE:=ahe)))))
+        true)%R.
 
 (** epsilon_cpa_ge0 - nonnegativity of the IND-CPA error parameter.
     Mirrors [Module Concrete]'s Section hypothesis.
@@ -720,7 +734,7 @@ Definition entropy_random_guess :
         (Concrete.random_guess_adv ahe cipher_fin))%R
   := @Concrete.entropy_random_guess ahe rand_fin rand_fin_E
        cipher_fin cipher_fin_E msg_inhab pub_key_inhab
-       Pr_guess_leak_le_invm Pr_guess_real_ge_invm epsilon_cpa_ge0.
+       Pr_guess_leak_le_invm Pr_real_gt0 epsilon_cpa_ge0.
 
 End idealized.
 
@@ -925,36 +939,33 @@ Definition secrecy_random_guess :
   := @Concrete.secrecy_random_guess ahe rand_fin rand_fin_E
        cipher_fin cipher_fin_E pub_key_inhab Pr_guess_leak_le_invm.
 
-(** Pr_guess_real_ge_invm - IT lower bound at [game_real] at the
-    Benaloh specialised carriers.  Mirrors [Module Concrete]'s
-    [Pr_guess_real_ge_invm] Section hypothesis at the Benaloh
-    instance.
+(** Pr_real_gt0 - strict positivity at the Benaloh carriers for
+    [Concrete.random_guess_adv]'s specific predictor.  Narrower than
+    the deleted universal [Pr_guess_real_ge_invm].  Naming: 3
+    components inside [Module Benaloh / Section benaloh]; externally
+    [Benaloh.Pr_real_gt0].
     Kind: section hypothesis.
-    Why: needed for [Concrete.entropy_random_guess] which abstracts
-    over the lower-bound side of the entropy proof; the
-    cryptographic-side discharge via the higher-residuosity
-    assumption is out of scope here.
+    Why: feeds [Concrete.entropy_random_guess]'s new [Pr_real_gt0]
+    slot at the Benaloh instance.  See [Module Concrete]'s
+    [Pr_real_gt0] docstring for the IT discharge sketch.
     Used by: entropy_random_guess. *)
-Hypothesis Pr_guess_real_ge_invm :
-  forall (predictor :
-            dsdp_security_indcpa.predictor_guesser
-              (Concrete.t_msg ahe) (Concrete.t_cipher cipher_fin)),
-    ((Concrete.index_t_msg ahe)%:R)^-1
-      <= distr.mu
-           (pkg_advantage.Pr
-              (dsdp_security_indcpa.guess_indicator_pkg predictor
-                 (dsdp_security_indcpa.game_real (AHE:=ahe)
-                    (Concrete.renc_card rand_fin)
-                    (Concrete.rand_of_renc (AHE:=ahe)
-                       (rand_finType:=rand_fin) rand_fin_E)
-                    (t_msg:=Concrete.t_msg ahe)
-                    (t_cipher:=Concrete.t_cipher cipher_fin)
-                    (Concrete.chmsg_of_msg (AHE:=ahe))
-                    (Concrete.chcipher_of_cipher (AHE:=ahe)
-                       (cipher_finType:=cipher_fin) cipher_fin_E)
-                    (Concrete.pkey_of_party (AHE:=ahe) pub_key_inhab)
-                    (Concrete.msg_of_idx (AHE:=ahe)))))
-           true.
+Hypothesis Pr_real_gt0 :
+  (0 < distr.mu
+        (pkg_advantage.Pr
+           (dsdp_security_indcpa.guess_indicator_pkg
+              (Concrete.random_guess_adv ahe cipher_fin)
+              (dsdp_security_indcpa.game_real (AHE:=ahe)
+                 (Concrete.renc_card rand_fin)
+                 (Concrete.rand_of_renc (AHE:=ahe)
+                    (rand_finType:=rand_fin) rand_fin_E)
+                 (t_msg:=Concrete.t_msg ahe)
+                 (t_cipher:=Concrete.t_cipher cipher_fin)
+                 (Concrete.chmsg_of_msg (AHE:=ahe))
+                 (Concrete.chcipher_of_cipher (AHE:=ahe)
+                    (cipher_finType:=cipher_fin) cipher_fin_E)
+                 (Concrete.pkey_of_party (AHE:=ahe) pub_key_inhab)
+                 (Concrete.msg_of_idx (AHE:=ahe)))))
+        true)%R.
 
 (** epsilon_cpa_ge0 - nonnegativity of the IND-CPA error parameter.
     Mirrors [Module Concrete]'s Section hypothesis.
@@ -990,7 +1001,7 @@ Definition entropy_random_guess :
         (Concrete.random_guess_adv ahe cipher_fin))%R
   := @Concrete.entropy_random_guess ahe rand_fin rand_fin_E
        cipher_fin cipher_fin_E msg_inhab pub_key_inhab
-       Pr_guess_leak_le_invm Pr_guess_real_ge_invm epsilon_cpa_ge0.
+       Pr_guess_leak_le_invm Pr_real_gt0 epsilon_cpa_ge0.
 
 End benaloh.
 
@@ -1188,36 +1199,33 @@ Definition secrecy_random_guess :
   := @Concrete.secrecy_random_guess ahe rand_fin rand_fin_E
        cipher_fin cipher_fin_E pub_key_inhab Pr_guess_leak_le_invm.
 
-(** Pr_guess_real_ge_invm - IT lower bound at [game_real] at the
-    Paillier specialised carriers.  Mirrors [Module Concrete]'s
-    [Pr_guess_real_ge_invm] Section hypothesis at the Paillier
-    instance.
+(** Pr_real_gt0 - strict positivity at the Paillier carriers for
+    [Concrete.random_guess_adv]'s specific predictor.  Narrower than
+    the deleted universal [Pr_guess_real_ge_invm].  Naming: 3
+    components inside [Module Paillier / Section paillier]; externally
+    [Paillier.Pr_real_gt0].
     Kind: section hypothesis.
-    Why: needed for [Concrete.entropy_random_guess] which abstracts
-    over the lower-bound side of the entropy proof; the
-    cryptographic-side discharge via the DCR assumption is out of
-    scope here.
+    Why: feeds [Concrete.entropy_random_guess]'s new [Pr_real_gt0]
+    slot at the Paillier instance.  See [Module Concrete]'s
+    [Pr_real_gt0] docstring for the IT discharge sketch.
     Used by: entropy_random_guess. *)
-Hypothesis Pr_guess_real_ge_invm :
-  forall (predictor :
-            dsdp_security_indcpa.predictor_guesser
-              (Concrete.t_msg ahe) (Concrete.t_cipher cipher_fin)),
-    ((Concrete.index_t_msg ahe)%:R)^-1
-      <= distr.mu
-           (pkg_advantage.Pr
-              (dsdp_security_indcpa.guess_indicator_pkg predictor
-                 (dsdp_security_indcpa.game_real (AHE:=ahe)
-                    (Concrete.renc_card rand_fin)
-                    (Concrete.rand_of_renc (AHE:=ahe)
-                       (rand_finType:=rand_fin) rand_fin_E)
-                    (t_msg:=Concrete.t_msg ahe)
-                    (t_cipher:=Concrete.t_cipher cipher_fin)
-                    (Concrete.chmsg_of_msg (AHE:=ahe))
-                    (Concrete.chcipher_of_cipher (AHE:=ahe)
-                       (cipher_finType:=cipher_fin) cipher_fin_E)
-                    (Concrete.pkey_of_party (AHE:=ahe) pub_key_inhab)
-                    (Concrete.msg_of_idx (AHE:=ahe)))))
-           true.
+Hypothesis Pr_real_gt0 :
+  (0 < distr.mu
+        (pkg_advantage.Pr
+           (dsdp_security_indcpa.guess_indicator_pkg
+              (Concrete.random_guess_adv ahe cipher_fin)
+              (dsdp_security_indcpa.game_real (AHE:=ahe)
+                 (Concrete.renc_card rand_fin)
+                 (Concrete.rand_of_renc (AHE:=ahe)
+                    (rand_finType:=rand_fin) rand_fin_E)
+                 (t_msg:=Concrete.t_msg ahe)
+                 (t_cipher:=Concrete.t_cipher cipher_fin)
+                 (Concrete.chmsg_of_msg (AHE:=ahe))
+                 (Concrete.chcipher_of_cipher (AHE:=ahe)
+                    (cipher_finType:=cipher_fin) cipher_fin_E)
+                 (Concrete.pkey_of_party (AHE:=ahe) pub_key_inhab)
+                 (Concrete.msg_of_idx (AHE:=ahe)))))
+        true)%R.
 
 (** epsilon_cpa_ge0 - nonnegativity of the IND-CPA error parameter.
     Mirrors [Module Concrete]'s Section hypothesis.
@@ -1253,7 +1261,7 @@ Definition entropy_random_guess :
         (Concrete.random_guess_adv ahe cipher_fin))%R
   := @Concrete.entropy_random_guess ahe rand_fin rand_fin_E
        cipher_fin cipher_fin_E msg_inhab pub_key_inhab
-       Pr_guess_leak_le_invm Pr_guess_real_ge_invm epsilon_cpa_ge0.
+       Pr_guess_leak_le_invm Pr_real_gt0 epsilon_cpa_ge0.
 
 End paillier.
 

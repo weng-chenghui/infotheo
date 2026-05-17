@@ -660,16 +660,6 @@ Theorem entropy_ge_bound_pismc
                                     pkey_of_party index_msg msg_of_idx)))
                   true
            <= (index_t_msg%:R)^-1)
-    (Pr_guess_real_ge_invm :
-       forall (predictor : predictor_guesser t_msg t_cipher),
-         (index_t_msg%:R)^-1
-           <= distr.mu (pkg_advantage.Pr
-                          (guess_indicator_pkg predictor
-                             (@game_real AHE Renc index_renc renc_card
-                                         rand_of_renc t_msg t_cipher
-                                         chmsg_of_msg chcipher_of_cipher
-                                         pkey_of_party index_msg msg_of_idx)))
-                       true)
     (epsilon_cpa_ge0 : (0 <= epsilon_cpa)%R)
     (LA : Locations)
     (predictor : predictor_guesser t_msg t_cipher)
@@ -723,12 +713,39 @@ Theorem entropy_ge_bound_pismc
        fseparate LA
          (oracle_encrypt_zero_pkg AHE Renc index_renc renc_card
             rand_of_renc t_msg t_cipher chcipher_of_cipher
-            pkey_of_party).(locs)) :
+            pkey_of_party).(locs))
+    (* Per-predictor positivity at game_real_pismc.  CRITICAL:
+       quantifies over THIS SPECIFIC [predictor] argument, NOT
+       [forall predictor : predictor_guesser, ...].  A universal
+       version would recreate the original soundness defect at the
+       piSMC layer: an IND-CPA-breaking adversary that decrypts the
+       leaked c_2 / c_3 and anti-correlates would survive the
+       structural narrowing (it uses only id_game_run, not
+       id_v2_get) and violate a universal lower bound. *)
+    (Pr_real_pismc_gt0 :
+       (0 < distr.mu (pkg_advantage.Pr
+                        (guess_indicator_pkg predictor game_real_pismc)) true)%R) :
   (bound index_t_msg <= entropy_pismc predictor)%R.
 Proof.
 rewrite /entropy_pismc.
 rewrite -(Pr_eq_of_game_real_eq_pismc
             chain_valid chain_disj_real chain_disj_pismc).
+(* Transport positivity along the W2 equivalence:
+   game_real ≈₀ game_real_pismc implies Pr equality for any
+   distinguisher composed with either game, including
+   [guess_indicator_pkg predictor].  So
+   [Pr_real_pismc_gt0] at game_real_pismc transfers to
+   positivity at game_real for the SAME [predictor]. *)
+have Pr_real_gt0 :
+  (0 < distr.mu (pkg_advantage.Pr
+                   (guess_indicator_pkg predictor
+                      (@game_real AHE Renc index_renc renc_card
+                                  rand_of_renc t_msg t_cipher
+                                  chmsg_of_msg chcipher_of_cipher
+                                  pkey_of_party index_msg msg_of_idx))) true)%R.
+{ rewrite (Pr_eq_of_game_real_eq_pismc
+              chain_valid chain_disj_real chain_disj_pismc).
+  exact: Pr_real_pismc_gt0. }
 exact: (@entropy_ge_bound
           AHE Renc index_renc renc_card rand_of_renc
           t_msg t_cipher msg_of_chmsg chmsg_of_msg
@@ -737,11 +754,12 @@ exact: (@entropy_ge_bound
           pkey_of_party index_msg msg_of_idx
           index_t_msg index_t_msg_gt0
           Pr_guess_leak_le_invm
-          Pr_guess_real_ge_invm epsilon_cpa_ge0
+          epsilon_cpa_ge0
           LA predictor chain_valid chain_disj_real
           chain_disj_h1 chain_disj_h2 chain_disj_leak
           chain_disj_tc chain_disj_tb
-          chain_disj_ore chain_disj_oze).
+          chain_disj_ore chain_disj_oze
+          Pr_real_gt0).
 Qed.
 
 (* W3 verification: the transported corollaries type-check against
