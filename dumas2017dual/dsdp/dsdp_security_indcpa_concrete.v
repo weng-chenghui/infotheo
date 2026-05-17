@@ -250,7 +250,7 @@ Proof. by []. Qed.
 (** index_msg_gt0 - positivity of [index_msg].
     Follows from [msg_inhabited : plain AHE] via [card_gt0P].
     Kind: positivity.
-    Why: discharges [index_msg_pos] (line 1364) when needed in the
+    Why: discharges [index_msg_gt0] (line 1364) when needed in the
     [Print Assumptions] closure.
     Used by: downstream Task L. *)
 Lemma index_msg_gt0 : (0 < index_msg)%N.
@@ -259,7 +259,7 @@ Proof. by apply/card_gt0P; exists msg_inhabited. Qed.
 (** index_renc_gt0 - positivity of [index_renc].
     Follows from [renc_inhabited : rand_finType] via [card_gt0P].
     Kind: positivity.
-    Why: discharges [index_renc_pos] (line 1365).
+    Why: discharges [index_renc_gt0] (line 1365).
     Used by: downstream Task L. *)
 Lemma index_renc_gt0 : (0 < index_renc)%N.
 Proof. by apply/card_gt0P; exists renc_inhabited. Qed.
@@ -591,7 +591,7 @@ Definition pub_key_inhab : pub_key ahe := 0%R.
     references [msg_inhabited] at the abstract level).
     [secrecy_random_guess] did not need this because the
     [dsdp_alice_secrecy] underlying it does not take
-    [index_t_msg_pos] as an explicit argument.
+    [index_t_msg_gt0] as an explicit argument.
     Used by: entropy_random_guess. *)
 Definition msg_inhab : plain ahe := 0%R.
 
