@@ -332,7 +332,7 @@ Proof. exact: card_msg_gt0. Qed.
 Hypothesis Pr_guess_enc_zero_le_invm :
   forall (predictor : dsdp_security_indcpa.predictor_guesser t_msg t_cipher),
     distr.mu (pkg_advantage.Pr
-                (dsdp_security_indcpa.guess_indicator_pkg predictor
+                (dsdp_security_indcpa.guessing_experiment predictor
                    (dsdp_security_indcpa.game_enc_zero (AHE:=AHE) renc_card
                       rand_of_renc (t_msg:=t_msg) (t_cipher:=t_cipher)
                       chmsg_of_msg chcipher_of_cipher pkey_of_party msg_of_idx)))
@@ -340,12 +340,14 @@ Hypothesis Pr_guess_enc_zero_le_invm :
       <= (card_t_msg%:R)^-1.
 
 Local Notation "'msg'" := t_msg (in custom pack_type at level 2).
+Local Notation "'ciphers'" :=
+  (chList t_cipher) (in custom pack_type at level 2).
 
 (** random_guess_adv - trivial adversary that samples a uniform
     plain-AHE index and returns it (cast through [chmsg_of_msg]) as
     its guess.  Built with [[package emptym ; ...]] so that
     [locs random_guess_adv] reduces to [emptym] by iota, which makes
-    [valid_boolean_shell_link random_guess_adv] unify with the
+    [valid_guessing_challenger_link random_guess_adv] unify with the
     [chain_valid] slot of [dsdp_alice_secrecy] by reflexivity.
     Kind: example.
     Why: enables [secrecy_random_guess] by instantiating
@@ -355,7 +357,7 @@ Local Notation "'msg'" := t_msg (in custom pack_type at level 2).
     Used by: secrecy_random_guess. *)
 Definition random_guess_adv : dsdp_security_indcpa.predictor_guesser t_msg t_cipher :=
   [package emptym ;
-    #def #[ dsdp_security_indcpa.id_guess ] (_ : 'unit) : msg
+    #def #[ dsdp_security_indcpa.id_guess ] (view : ciphers) : msg
     {
       iV ← sample uniform #|plain AHE| ;;
       ret (chmsg_of_msg (enum_val iV))
@@ -369,7 +371,7 @@ Check random_guess_adv : dsdp_security_indcpa.predictor_guesser t_msg t_cipher.
     [fseparate] obligations of [dsdp_alice_secrecy] by [fseparate0m]
     (since [random_guess_adv]'s locations are [emptym]) and the
     [chain_valid] obligation by
-    [dsdp_security_indcpa.valid_boolean_shell_link] applied to
+    [dsdp_security_indcpa.valid_guessing_challenger_link] applied to
     [random_guess_adv].
     Kind: main.
     Why: instantiates [dsdp_alice_secrecy] at the concrete
@@ -381,7 +383,7 @@ Check random_guess_adv : dsdp_security_indcpa.predictor_guesser t_msg t_cipher.
 Corollary secrecy_random_guess :
   distr.mu
     (pkg_advantage.Pr
-       (dsdp_security_indcpa.guess_indicator_pkg random_guess_adv
+       (dsdp_security_indcpa.guessing_experiment random_guess_adv
           (dsdp_security_indcpa.game_real (AHE:=AHE) renc_card
              rand_of_renc (t_msg:=t_msg) (t_cipher:=t_cipher)
              chmsg_of_msg chcipher_of_cipher pkey_of_party msg_of_idx)))
@@ -397,7 +399,7 @@ refine (@dsdp_security_indcpa.dsdp_alice_secrecy
           card_t_msg
           Pr_guess_enc_zero_le_invm
           emptym random_guess_adv _ _ _ _ _ _ _ _ _).
-- exact: (valid_boolean_shell_link random_guess_adv).
+- exact: (valid_guessing_challenger_link random_guess_adv).
 - exact: fseparate0m.
 - exact: fseparate0m.
 - exact: fseparate0m.
@@ -427,8 +429,9 @@ Qed.
     Why: feeds [Hunp_ge_bound]'s new [Pr_real_gt0] slot for the
     random-guess corollary.  Replaces the universal
     [Pr_guess_real_ge_invm] that was structurally false on
-    anti-echo adversaries (type-level anti-echo is now blocked by
-    the narrower [predictor_iface], but ciphertext-decryption-based
+    anti-echo adversaries (type-level anti-echo is now blocked
+    because the predictor imports nothing — it is a closed function
+    of the view it is handed — but ciphertext-decryption-based
     anti-correlation could still violate the universal [>= 1/m]
     bound; the weaker [> 0] claim survives because
     [random_guess_adv] never queries any oracle and is
@@ -439,7 +442,7 @@ Qed.
     Used by: Hunp_random_guess. *)
 Hypothesis Pr_real_gt0 :
   (0 < distr.mu (pkg_advantage.Pr
-                   (dsdp_security_indcpa.guess_indicator_pkg
+                   (dsdp_security_indcpa.guessing_experiment
                       random_guess_adv
                       (dsdp_security_indcpa.game_real (AHE:=AHE) renc_card
                          rand_of_renc (t_msg:=t_msg) (t_cipher:=t_cipher)
@@ -462,7 +465,7 @@ Hypothesis epsilon_cpa_ge0 : (0 <= indcpa_ror.epsilon_cpa)%R.
     entropy form at the trivial random-guess adversary.
     Specialises [dsdp_security_indcpa.Hunp_ge_bound] exactly the
     same way [secrecy_random_guess] specialises [dsdp_alice_secrecy]:
-    [chain_valid] by [valid_boolean_shell_link], the eight
+    [chain_valid] by [valid_guessing_challenger_link], the eight
     [fseparate] obligations by [fseparate0m] (since
     [random_guess_adv] has [emptym] locations).
     Kind: main.
@@ -492,7 +495,7 @@ refine (@dsdp_security_indcpa.Hunp_ge_bound
           Pr_guess_enc_zero_le_invm
           epsilon_cpa_ge0
           emptym random_guess_adv _ _ _ _ _ _ _ _ _ _).
-- exact: (valid_boolean_shell_link random_guess_adv).
+- exact: (valid_guessing_challenger_link random_guess_adv).
 - exact: fseparate0m.
 - exact: fseparate0m.
 - exact: fseparate0m.
@@ -629,7 +632,7 @@ Hypothesis Pr_guess_enc_zero_le_invm :
               (t_msg ahe) (t_cipher cipher_fin)),
     distr.mu
       (pkg_advantage.Pr
-         (dsdp_security_indcpa.guess_indicator_pkg predictor
+         (dsdp_security_indcpa.guessing_experiment predictor
             (dsdp_security_indcpa.game_enc_zero (AHE:=ahe)
                (renc_card rand_fin)
                (rand_of_renc (AHE:=ahe)
@@ -657,7 +660,7 @@ Hypothesis Pr_guess_enc_zero_le_invm :
 Definition secrecy_random_guess :
   distr.mu
     (pkg_advantage.Pr
-       (dsdp_security_indcpa.guess_indicator_pkg
+       (dsdp_security_indcpa.guessing_experiment
           (random_guess_adv ahe cipher_fin)
           (dsdp_security_indcpa.game_real (AHE:=ahe)
              (renc_card rand_fin)
@@ -689,7 +692,7 @@ Definition secrecy_random_guess :
 Hypothesis Pr_real_gt0 :
   (0 < distr.mu
         (pkg_advantage.Pr
-           (dsdp_security_indcpa.guess_indicator_pkg
+           (dsdp_security_indcpa.guessing_experiment
               (random_guess_adv ahe cipher_fin)
               (dsdp_security_indcpa.game_real (AHE:=ahe)
                  (renc_card rand_fin)
@@ -899,7 +902,7 @@ Hypothesis Pr_guess_enc_zero_le_invm :
               (t_msg ahe) (t_cipher cipher_fin)),
     distr.mu
       (pkg_advantage.Pr
-         (dsdp_security_indcpa.guess_indicator_pkg predictor
+         (dsdp_security_indcpa.guessing_experiment predictor
             (dsdp_security_indcpa.game_enc_zero (AHE:=ahe)
                (renc_card rand_fin)
                (rand_of_renc (AHE:=ahe)
@@ -926,7 +929,7 @@ Hypothesis Pr_guess_enc_zero_le_invm :
 Definition secrecy_random_guess :
   distr.mu
     (pkg_advantage.Pr
-       (dsdp_security_indcpa.guess_indicator_pkg
+       (dsdp_security_indcpa.guessing_experiment
           (random_guess_adv ahe cipher_fin)
           (dsdp_security_indcpa.game_real (AHE:=ahe)
              (renc_card rand_fin)
@@ -957,7 +960,7 @@ Definition secrecy_random_guess :
 Hypothesis Pr_real_gt0 :
   (0 < distr.mu
         (pkg_advantage.Pr
-           (dsdp_security_indcpa.guess_indicator_pkg
+           (dsdp_security_indcpa.guessing_experiment
               (random_guess_adv ahe cipher_fin)
               (dsdp_security_indcpa.game_real (AHE:=ahe)
                  (renc_card rand_fin)
@@ -1160,7 +1163,7 @@ Hypothesis Pr_guess_enc_zero_le_invm :
               (t_msg ahe) (t_cipher cipher_fin)),
     distr.mu
       (pkg_advantage.Pr
-         (dsdp_security_indcpa.guess_indicator_pkg predictor
+         (dsdp_security_indcpa.guessing_experiment predictor
             (dsdp_security_indcpa.game_enc_zero (AHE:=ahe)
                (renc_card rand_fin)
                (rand_of_renc (AHE:=ahe)
@@ -1187,7 +1190,7 @@ Hypothesis Pr_guess_enc_zero_le_invm :
 Definition secrecy_random_guess :
   distr.mu
     (pkg_advantage.Pr
-       (dsdp_security_indcpa.guess_indicator_pkg
+       (dsdp_security_indcpa.guessing_experiment
           (random_guess_adv ahe cipher_fin)
           (dsdp_security_indcpa.game_real (AHE:=ahe)
              (renc_card rand_fin)
@@ -1218,7 +1221,7 @@ Definition secrecy_random_guess :
 Hypothesis Pr_real_gt0 :
   (0 < distr.mu
         (pkg_advantage.Pr
-           (dsdp_security_indcpa.guess_indicator_pkg
+           (dsdp_security_indcpa.guessing_experiment
               (random_guess_adv ahe cipher_fin)
               (dsdp_security_indcpa.game_real (AHE:=ahe)
                  (renc_card rand_fin)

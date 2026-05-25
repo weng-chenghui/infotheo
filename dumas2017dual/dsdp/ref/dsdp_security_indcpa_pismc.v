@@ -476,21 +476,21 @@ Hypothesis game_real_eq_pismc :
     ≈₀ game_real_pismc.
 
 (** Pr_eq_of_game_real_eq_pismc — transport equality of the
-    [guess_indicator_pkg] probability across the W2 Hypothesis.
+    [guessing_experiment] probability across the W2 Hypothesis.
     Given any [predictor : predictor_guesser t_msg t_cipher] whose
-    composed indicator [boolean_shell ∘ predictor] is a valid
+    composed indicator [guessing_challenger ∘ predictor] is a valid
     distinguisher with locations [LA] disjoint from both games, the
-    probability that [guess_indicator_pkg predictor game] returns
+    probability that [guessing_experiment predictor game] returns
     [true] is the same whether [game] is [game_real] or
     [game_real_pismc].
     Kind: helper.
     Why: distills the W2 Hypothesis [game_real ≈₀ game_real_pismc]
     into the Pr-equality the U1/U2 transports actually need.
     The proof unfolds [≈₀] (which is [AdvantageE _ _ A = 0] for any
-    valid distinguisher [A]), instantiates with the boolean shell as
-    [A], rewrites [link_assoc] to identify
-    [(boolean_shell ∘ predictor) ∘ game] with
-    [boolean_shell ∘ predictor ∘ game = guess_indicator_pkg predictor game],
+    valid distinguisher [A]), instantiates with the guessing
+    challenger as [A], rewrites [link_assoc] to identify
+    [(guessing_challenger ∘ predictor) ∘ game] with
+    [guessing_challenger ∘ predictor ∘ game = guessing_experiment predictor game],
     and concludes by [Num.Theory.normr0P]:
     the absolute difference of the two probabilities is [0], so they
     are equal.
@@ -500,7 +500,7 @@ Lemma Pr_eq_of_game_real_eq_pismc
     (predictor : predictor_guesser t_msg t_cipher)
     (chain_valid :
        ValidPackage LA (game_iface t_msg t_cipher) A_export
-         (boolean_shell t_msg t_cipher ∘ predictor))
+         (guessing_challenger t_msg t_cipher ∘ predictor))
     (chain_disj_real :
        fseparate LA
          (@game_real AHE Renc card_renc renc_card rand_of_renc
@@ -509,12 +509,12 @@ Lemma Pr_eq_of_game_real_eq_pismc
     (chain_disj_pismc :
        fseparate LA game_real_pismc.(locs)) :
   distr.mu (pkg_advantage.Pr
-              (guess_indicator_pkg predictor
+              (guessing_experiment predictor
                  (@game_real AHE Renc card_renc renc_card rand_of_renc
                              t_msg t_cipher chmsg_of_msg chcipher_of_cipher
                              pkey_of_party card_msg msg_of_idx))) true
   = distr.mu (pkg_advantage.Pr
-                (guess_indicator_pkg predictor game_real_pismc)) true.
+                (guessing_experiment predictor game_real_pismc)) true.
 Proof.
 have Hadv :
     AdvantageE
@@ -522,11 +522,11 @@ have Hadv :
                   t_msg t_cipher chmsg_of_msg chcipher_of_cipher
                   pkey_of_party card_msg msg_of_idx)
       game_real_pismc
-      (boolean_shell t_msg t_cipher ∘ predictor) = 0
+      (guessing_challenger t_msg t_cipher ∘ predictor) = 0
   by apply: game_real_eq_pismc; eassumption.
 move: Hadv; rewrite /AdvantageE => /eqP.
 rewrite Num.Theory.normr_eq0 subr_eq0 => /eqP HE.
-rewrite /guess_indicator_pkg.
+rewrite /guessing_experiment.
 by rewrite !link_assoc HE.
 Qed.
 
@@ -547,7 +547,7 @@ Theorem dsdp_alice_secrecy_pismc
     (Pr_guess_enc_zero_le_invm :
        forall (predictor : predictor_guesser t_msg t_cipher),
          distr.mu (pkg_advantage.Pr
-                     (guess_indicator_pkg predictor
+                     (guessing_experiment predictor
                         (@game_enc_zero AHE Renc card_renc renc_card
                                     rand_of_renc t_msg t_cipher
                                     chmsg_of_msg chcipher_of_cipher
@@ -558,7 +558,7 @@ Theorem dsdp_alice_secrecy_pismc
     (predictor : predictor_guesser t_msg t_cipher)
     (chain_valid :
        ValidPackage LA (game_iface t_msg t_cipher) A_export
-         (boolean_shell t_msg t_cipher ∘ predictor))
+         (guessing_challenger t_msg t_cipher ∘ predictor))
     (chain_disj_real :
        fseparate LA
          (@game_real AHE Renc card_renc renc_card rand_of_renc
@@ -608,7 +608,7 @@ Theorem dsdp_alice_secrecy_pismc
             rand_of_renc t_msg t_cipher chcipher_of_cipher
             pkey_of_party).(locs)) :
   distr.mu (pkg_advantage.Pr
-              (guess_indicator_pkg predictor game_real_pismc)) true
+              (guessing_experiment predictor game_real_pismc)) true
     <= (card_t_msg%:R)^-1 + 2%:R * epsilon_cpa.
 Proof.
 rewrite -(Pr_eq_of_game_real_eq_pismc
@@ -636,7 +636,7 @@ Qed.
 Definition Hunp_pismc (predictor : predictor_guesser t_msg t_cipher) : R :=
   (- log (distr.mu
             (pkg_advantage.Pr
-               (guess_indicator_pkg predictor game_real_pismc)) true))%R.
+               (guessing_experiment predictor game_real_pismc)) true))%R.
 
 (** Hunp_ge_bound_pismc — the U2 entropy lower bound transported
     from [game_real] to [game_real_pismc] along the W2 Hypothesis.
@@ -653,7 +653,7 @@ Theorem Hunp_ge_bound_pismc
     (Pr_guess_enc_zero_le_invm :
        forall (predictor : predictor_guesser t_msg t_cipher),
          distr.mu (pkg_advantage.Pr
-                     (guess_indicator_pkg predictor
+                     (guessing_experiment predictor
                         (@game_enc_zero AHE Renc card_renc renc_card
                                     rand_of_renc t_msg t_cipher
                                     chmsg_of_msg chcipher_of_cipher
@@ -665,7 +665,7 @@ Theorem Hunp_ge_bound_pismc
     (predictor : predictor_guesser t_msg t_cipher)
     (chain_valid :
        ValidPackage LA (game_iface t_msg t_cipher) A_export
-         (boolean_shell t_msg t_cipher ∘ predictor))
+         (guessing_challenger t_msg t_cipher ∘ predictor))
     (chain_disj_real :
        fseparate LA
          (@game_real AHE Renc card_renc renc_card rand_of_renc
@@ -724,7 +724,7 @@ Theorem Hunp_ge_bound_pismc
        id_v2_get) and violate a universal lower bound. *)
     (Pr_real_pismc_gt0 :
        (0 < distr.mu (pkg_advantage.Pr
-                        (guess_indicator_pkg predictor game_real_pismc)) true)%R) :
+                        (guessing_experiment predictor game_real_pismc)) true)%R) :
   (bound card_t_msg <= Hunp_pismc predictor)%R.
 Proof.
 rewrite /Hunp_pismc.
@@ -733,12 +733,12 @@ rewrite -(Pr_eq_of_game_real_eq_pismc
 (* Transport positivity along the W2 equivalence:
    game_real ≈₀ game_real_pismc implies Pr equality for any
    distinguisher composed with either game, including
-   [guess_indicator_pkg predictor].  So
+   [guessing_experiment predictor].  So
    [Pr_real_pismc_gt0] at game_real_pismc transfers to
    positivity at game_real for the SAME [predictor]. *)
 have Pr_real_gt0 :
   (0 < distr.mu (pkg_advantage.Pr
-                   (guess_indicator_pkg predictor
+                   (guessing_experiment predictor
                       (@game_real AHE Renc card_renc renc_card
                                   rand_of_renc t_msg t_cipher
                                   chmsg_of_msg chcipher_of_cipher
