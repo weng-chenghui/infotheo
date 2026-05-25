@@ -1610,10 +1610,34 @@ Hypothesis card_t_msg_gt0 : (0 < card_t_msg)%N.
     sees S).  The discharge is therefore an SSProve independence proof
     ([id_game_run] output _|_ [V_2_cell]); see the dated note
     [notes/20260525-two-channel-secrecy-fiber-vs-indcpa.md].
+
+    WHY THIS IS A [Hypothesis] AND NOT A [Lemma].  The [forall
+    predictor] quantifier is essential: this is the SECURITY statement
+    (no adversary in the class guesses V_2 better than [1 / m]).  A
+    per-predictor version would be a mere example, not a security
+    theorem, so the universal quantifier must stay.  It is kept
+    ASSUMED, rather than machine-checked, because mechanizing the
+    forall-arbitrary-adversary ABSOLUTE-probability bound needs program
+    logic SSProve does not provide: SSProve reasons about [Advantage]
+    (differences between two games) for arbitrary adversaries, but has
+    no machinery to compute an absolute single-program [Pr] value, nor
+    to push the independence fact through an OPAQUE adversary to an
+    exact [1 / m].  After linking, the adversary's [id_game_run] calls
+    are inlined as [game_enc_zero]'s body, which itself [#put]s
+    [V_2_cell], so the swap / non-interference rules for concrete code
+    do not lift to the opaque-predictor case.  The argument is one line
+    on paper (independence + uniformity of V_2); only the SSProve
+    formalisation route is missing.  The MECHANISED contribution is the
+    reduction: the [2 * epsilon_cpa] game-hopping chain
+    ([advantage_game_real_game_enc_zero]) is fully machine-checked.
+    This [1 / m] ideal-world bound is the standard assumed step.
+    TIGHTNESS / NON-VACUITY is witnessed concretely by
+    [random_guess_adv] (a stateless adversary that emits a fresh
+    uniform guess), which achieves the [1 / m] guess rate and satisfies
+    every chain hypothesis: see [secrecy_random_guess] in
+    [dsdp_security_indcpa_concrete.v].
     Naming: project-local; reads "Pr[guess = V_2 at game_enc_zero] is
-    bounded by [1 / m]".  Captured here as a [Hypothesis] so
-    [Pr_guess_le] is provable Section-internally; the discharge is
-    tracked separately.
+    bounded by [1 / m]".
     Used by: [Pr_guess_le]. *)
 Hypothesis Pr_guess_enc_zero_le_invm :
   forall (predictor : predictor_guesser),
