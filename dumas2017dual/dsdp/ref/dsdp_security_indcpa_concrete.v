@@ -321,10 +321,13 @@ Proof. exact: card_msg_gt0. Qed.
     concrete carriers.
     Kind: section hypothesis.
     Why: required by [dsdp_alice_secrecy] which consumes the IT half
-    of the closed-form bound abstractly; discharging it from the
-    [cPr_V2_V3_uniform_on_fiber_joint] chain in
-    [dsdp_security_indcpa.v] is tracked separately (out of scope for
-    U1).
+    of the closed-form bound abstractly.  It is a Channel-2
+    (ciphertext-transcript) direct-independence obligation: at
+    [game_enc_zero] the cipher list returned by [id_game_run] is
+    independent of V_2, so the bound follows by independence plus
+    uniformity of V_2.  The discharge is tracked separately (out of
+    scope for U1); see
+    [notes/20260525-two-channel-secrecy-fiber-vs-indcpa.md].
     Used by: secrecy_random_guess. *)
 Hypothesis Pr_guess_enc_zero_le_invm :
   forall (predictor : dsdp_security_indcpa.predictor_guesser t_msg t_cipher),
