@@ -60,14 +60,14 @@ Notation adversary := (package _ _ _).
     Kind: helper.
     Why: the canonical [valid_link_weak] requires [fsubmap M1 M2]
     where [M1 = p1]'s imports and [M2 = p2]'s exports — but the
-    partial-link case [boolean_shell ∘ predictor] has p1's imports
+    partial-link case [guessing_challenger ∘ predictor] has p1's imports
     [unionm game_iface guesser_export] strictly LARGER than p2's
     exports [guesser_export], so neither [valid_link] nor
     [valid_link_weak] applies.  This residual-imports variant is
     the missing API: it propagates only [p]'s imports as the
     result's imports, dropping any [Im] entries not in [p]'s
     exports (they become samplers, not import obligations).
-    Used by: [valid_boolean_shell_link] below. *)
+    Used by: [valid_guessing_challenger_link] below. *)
 Lemma valid_code_link_residual :
   forall (A : choice_type) (L : Locations) (Im Ir E : Interface)
     (v : raw_code A) (p : raw_package),
@@ -1399,7 +1399,7 @@ Proof.
 Qed.
 
 (* ================================================================== *)
-(* Task T4: boolean_shell reading V_2 from id_v2_get + Pr_guess_le    *)
+(* Task T4: guessing_challenger reading V_2 from id_v2_get + Pr_guess_le    *)
 (* ================================================================== *)
 
 (* T4 of [~/.claude/plans/sprightly-finding-robin.md]: re-introduce
@@ -1417,11 +1417,32 @@ Qed.
    at [game_enc_zero] dischargeable via Task F's
    [cPr_V2_V3_uniform_on_fiber_joint]. *)
 
+(* ROLES IN THE GUESSING GAME (view-as-input model)
+   - game (game_real … game_enc_zero): the protocol oracle.
+     id_game_run samples V_2 into V_2_cell and returns the cipher
+     view; id_v2_get reveals the V_2 just stored.
+   - predictor (predictor_guesser): corrupted Alice.  A closed
+     function id_guess : ciphers → msg — it receives the view as
+     input and returns a guessed message.  It imports nothing.
+     This is the paper's adversary A : Y → Δ(R).
+   - guessing_challenger: the challenger/harness.
+     Runs the game (id_game_run), hands the resulting view to the
+     predictor (id_guess), reads V_2 (id_v2_get), and outputs the
+     win bit (guess == V_2).  Exports A_export.
+
+   INTERACTION:  guessing_experiment p g = guessing_challenger ∘ p ∘ g
+     re-associates (link_assoc) to (guessing_challenger ∘ p) ∘ g.
+   NOTE: SSProve's "adversary" (the A in AdvantageE/Pr) is the bool
+     distinguisher guessing_challenger ∘ predictor — challenger +
+     predictor together — NOT the predictor alone (which returns a
+     msg, not a bool).  See
+     notes/20260525-paper-adversary-model-view-as-input.md. *)
+
 (** id_guess — operation identifier exported by a [t_msg]-output
-    predictor.  Calling it [tt] runs the predictor body (which has
-    imported [game_iface] and is free to query [id_game_run] but
-    NOT [id_v2_get]) and returns the predictor's [t_msg]-typed
-    guess.
+    predictor.  Calling it on the cipher [view] runs the predictor
+    body (a closed function of its [ciphers] argument — it imports
+    nothing and cannot query [id_game_run] or [id_v2_get]) and
+    returns the predictor's [t_msg]-typed guess.
     Kind: canonical.
     Why: T4 of [~/.claude/plans/sprightly-finding-robin.md].
     SSProve operations are identified by a [nat]; [id_game_run = 0%N]
@@ -1430,130 +1451,123 @@ Qed.
     next available slot.
     Naming: project-local; mirrors [id_game_run], [id_v2_get],
     [id_oracle_encrypt].
-    Used by: [guesser_export], [boolean_shell], [predictor_guesser]. *)
+    Used by: [guesser_export], [guessing_challenger], [predictor_guesser]. *)
 Definition id_guess : nat := 1%N.
 
 (** guesser_export — the export interface of a [t_msg]-output
-    predictor.  Exposes a single operation [id_guess] taking
-    ['unit] and returning the SSProve message-space carrier
-    [t_msg] (aliased to the [pack_type] custom-entry notation
-    ['msg']).
+    predictor.  Exposes a single operation [id_guess] taking the
+    cipher view [ciphers] and returning the SSProve message-space
+    carrier [t_msg] (aliased to the [pack_type] custom-entry
+    notation ['msg']).
     Kind: canonical.
-    Why: T4 of [~/.claude/plans/sprightly-finding-robin.md].  The
-    [predictor_guesser] type below exports this interface in front
-    of [game_iface]: the predictor consumes the game's two-oracle
-    [game_iface] and emits a [t_msg] guess of V_2.  This is the
+    Why: T4 of [~/.claude/plans/sprightly-finding-robin.md], rebuilt
+    for the view-as-input model.  The [predictor_guesser] type below
+    exports this interface over the empty import interface: the
+    predictor is a closed function that receives the view [ciphers]
+    and emits a [t_msg] guess of V_2.  This is the
     SSProve analogue of the TeX adversary [A : Y → Δ(R)] from
     [notes/20260506-dsdp-secrecy-closed-form.tex]: map the Alice-
     view [Y] to a distribution on the message space [R].
     Naming: project-local; reads "predictor-style guess exporter".
-    Used by: [predictor_guesser], [boolean_shell],
-    [guess_indicator_pkg]. *)
+    Used by: [predictor_guesser], [guessing_challenger],
+    [guessing_experiment]. *)
 Definition guesser_export : Interface :=
-  [interface #val #[ id_guess ] : 'unit → msg ].
-
-(** predictor_iface — the predictor's import-side interface.
-    Strict subset of [game_iface]: exports only [id_game_run]
-    (the ciphertext-reveal oracle), NOT [id_v2_get] (the V_2-reveal
-    oracle).
-    Kind: canonical.
-    Why: structural fix for the V_2-leak attack.  The pre-refactor
-    [predictor_guesser] imported the full [game_iface], letting
-    adversaries call [id_v2_get] and echo V_2 (yielding Pr=1) or
-    anti-echo (yielding Pr=0) — both bypassing the IND-CPA bound.
-    Restricting the predictor's import interface to [predictor_iface]
-    makes such attacks Coq-level type errors.
-    Used by: [predictor_guesser], [valid_boolean_shell_link]. *)
-Definition predictor_iface : Interface :=
-  [interface #val #[ id_game_run ] : 'unit → ciphers ].
+  [interface #val #[ id_guess ] : ciphers → msg ].
 
 (** predictor_guesser — the SSProve [package] type of a
-    [t_msg]-output predictor: imports [predictor_iface] (the
-    ciphertext-only sub-interface of [game_iface]) and exports
-    [guesser_export] (the [t_msg]-guess oracle).
+    [t_msg]-output predictor: imports nothing ([interface], the
+    empty interface) and exports [guesser_export] (the [t_msg]-guess
+    oracle taking the cipher view [ciphers] as input).
     Kind: canonical.
-    Why: structurally enforces "Alice's adversary sees only leaked
-    ciphertexts, not the secret V_2".  Matches the cryptographic
-    intent of a corrupted-Alice adversary.  Replaces the pre-refactor
-    [package game_iface guesser_export] which exposed [id_v2_get]
-    to the adversary (breaking IND-CPA bounds trivially).
+    Why: structurally enforces "Alice's adversary is a closed
+    function of the view it receives, not an interactive oracle
+    consumer".  In the view-as-input model the challenger drives the
+    run and hands the predictor its [ciphers] view as an argument, so
+    the predictor imports nothing.  This closes the V_2-leak soundness
+    hole: a closed predictor cannot call [id_game_run] to re-sample
+    V_2 nor [id_v2_get] to echo it — both are Coq-level type errors.
     Naming: project-local; reads "a guesser-style predictor".
-    Used by: [guess_indicator_pkg], [Pr_guess_le]. *)
+    Used by: [guessing_experiment], [Pr_guess_le]. *)
 Definition predictor_guesser : Type :=
-  package predictor_iface guesser_export.
+  package [interface] guesser_export.
 
-(** boolean_shell — the V_2-aware boolean indicator package.
+(** guessing_challenger — the V_2-aware boolean indicator package; the
+    challenger/harness in the view-as-input model.
     Imports the union [unionm game_iface guesser_export] (giving
-    access to both the game's V_2-reveal oracle [id_v2_get] and
-    the predictor's [id_guess] oracle) and exports the standard
-    SSProve adversary interface [A_export] ([#val #[ 0%N ] :
-    'unit → 'bool]).  Body: calls the predictor to obtain a [t_msg]
-    [guess], calls the game's [id_v2_get] to obtain the V_2 value
-    stored in [V_2_cell] by [id_game_run], and returns the boolean
-    equality [guess == v2].
+    access to the game's run oracle [id_game_run], its V_2-reveal
+    oracle [id_v2_get] and the predictor's [id_guess] oracle) and
+    exports the standard SSProve adversary interface [A_export]
+    ([#val #[ 0%N ] : 'unit → 'bool]).  Body: calls the game's
+    [id_game_run] to drive the run (which samples V_2 into
+    [V_2_cell] and returns the cipher [view]); hands [view] to the
+    predictor's [id_guess] to obtain a [t_msg] [guess]; calls the
+    game's [id_v2_get] to obtain the V_2 value just stored in
+    [V_2_cell]; and returns the boolean equality [guess == v2].
     Kind: helper.
-    Why: T4 of [~/.claude/plans/sprightly-finding-robin.md] —
-    REPLACES the deleted pre-T0 [boolean_shell] which sampled an
-    independent [iV2] after the predictor returned (yielding a
-    vacuous [1/m] bound).  The new body reads V_2 from the game's
-    state via [id_v2_get], guaranteeing the V_2 the indicator
-    compares to is the SAME V_2 sampled inside [game_real]'s body
-    and propagated through the IND-CPA hops to [game_enc_zero].
-    Naming: project-local; reads "the V_2-aware boolean indicator
-    shell".
-    Used by: [guess_indicator_pkg], [Pr_guess_le]. *)
-Definition boolean_shell :
+    Why: T4 of [~/.claude/plans/sprightly-finding-robin.md], rebuilt
+    for the view-as-input model.  The challenger drives the run
+    itself (it no longer leaves the run call to the predictor),
+    guaranteeing the V_2 the indicator compares against is the SAME
+    V_2 sampled by the run and revealed by [id_v2_get] — and that the
+    predictor sees only the view it is handed, never V_2.  This both
+    restores soundness of [Pr_guess_enc_zero_le_invm] and lets the
+    package be named honestly as the challenger.
+    Naming: project-local; reads "the guessing-game challenger".
+    Used by: [guessing_experiment], [Pr_guess_le]. *)
+Definition guessing_challenger :
   package (unionm game_iface guesser_export) A_export :=
   [package emptym ;
     #def #[ 0%N ] (_ : 'unit) : 'bool
     {
-      #import {sig #[ id_guess  ] : 'unit → msg } as call_pred ;;
-      #import {sig #[ id_v2_get ] : 'unit → msg } as call_v2 ;;
-      guess ← call_pred tt ;;
+      #import {sig #[ id_game_run ] : 'unit → ciphers } as call_run ;;
+      #import {sig #[ id_guess     ] : ciphers → msg   } as call_pred ;;
+      #import {sig #[ id_v2_get    ] : 'unit → msg     } as call_v2 ;;
+      view  ← call_run tt ;;
+      guess ← call_pred view ;;
       v2    ← call_v2 tt ;;
       ret (guess == v2 : 'bool)
     }
   ].
 
-(** guess_indicator_pkg — the canonical bool-output wrapper that
+(** guessing_experiment — the canonical bool-output wrapper that
     turns a [t_msg]-output [predictor : predictor_guesser] and a
     closed game [game : package [interface] game_iface] into a
     Bool-output package suitable for [pkg_advantage.Pr].  Defined
-    as the sequential link [boolean_shell ∘ predictor ∘ game]:
+    as the sequential link [guessing_challenger ∘ predictor ∘ game]:
     [game] supplies [game_iface] (both [id_game_run] and
-    [id_v2_get]) to its consumers; [predictor] consumes
-    [id_game_run] for its body and re-exports [id_guess];
-    [boolean_shell] consumes both [id_guess] (from predictor) and
-    [id_v2_get] (which threads through predictor's import,
-    eventually resolving against [game]) and returns the boolean
-    [guess == v2].  Since SSProve link propagates unmatched
-    imports through the chain, [boolean_shell]'s [id_v2_get]
-    import is satisfied by [game] via the predictor layer (the
-    predictor's [game_iface] import is wider than [id_game_run],
-    so [id_v2_get] passes through transparently — at concrete
-    instantiation the predictor body simply never queries
-    [id_v2_get], matching the cryptographic intent "the
-    distinguisher is blind to V_2").
+    [id_v2_get]); [predictor] consumes NOTHING (it is a closed
+    function of its [ciphers] view argument) and re-exports
+    [id_guess]; [guessing_challenger] consumes [id_guess] (from
+    [predictor]) and [id_game_run] / [id_v2_get] — which the
+    predictor does not export, so they stay residual imports of
+    [guessing_challenger ∘ predictor] (see [valid_code_link_residual])
+    and are resolved against [game] by the outer link — and
+    returns the boolean [guess == v2].  Because the predictor is
+    closed, the challenger — not the predictor — drives the run via
+    [id_game_run] and reads V_2 via [id_v2_get], matching the
+    cryptographic intent "the predictor is blind to V_2 and sees only
+    the view it is handed".
     Kind: main.
     Why: T4 of [~/.claude/plans/sprightly-finding-robin.md].
     Downstream consumers (T5 / T6) take a [predictor_guesser]
-    explicitly and compose with [guess_indicator_pkg] to recover
+    explicitly and compose with [guessing_experiment] to recover
     the Bool-shaped distribution that [pkg_advantage.Pr] consumes.
-    The V_2-equality semantics is now syntactic (the [boolean_shell]
+    The V_2-equality semantics is now syntactic (the [guessing_challenger]
     body literally compares [guess == v2] where [v2] comes from the
     game's [V_2_cell]) rather than via an implicit semantic
     convention on a Bool output.
-    Naming: project-local; reads "the guess-indicator-style
-    package wrapper".  Mirrors [predictor_via_oracle_charlie] / [predictor_via_oracle_bob]
+    Naming: project-local; reads "the guessing-game experiment" —
+    the challenger-wrapped composition of predictor and game whose
+    Bool output [pkg_advantage.Pr] consumes.  Mirrors [predictor_via_oracle_charlie] / [predictor_via_oracle_bob]
     in shape (a function from a predictor to a [raw_package]) but
     with the additional [game] argument to keep the closed/open
     distinction explicit.
     Used by: [Pr_guess_le], T5's [dsdp_alice_secrecy], T6's
     concrete corollaries. *)
-Definition guess_indicator_pkg
+Definition guessing_experiment
     (predictor : predictor_guesser)
     (game : package [interface] game_iface) : raw_package :=
-  boolean_shell ∘ predictor ∘ game.
+  guessing_challenger ∘ predictor ∘ game.
 
 (** card_t_msg — cardinality of the (image of the) message-space
     carrier the predictor's [t_msg] guesses live over.  Bridges
@@ -1642,15 +1656,15 @@ Hypothesis card_t_msg_gt0 : (0 < card_t_msg)%N.
 Hypothesis Pr_guess_enc_zero_le_invm :
   forall (predictor : predictor_guesser),
     distr.mu (pkg_advantage.Pr
-                (guess_indicator_pkg predictor game_enc_zero)) true
+                (guessing_experiment predictor game_enc_zero)) true
       <= (card_t_msg%:R)^-1.
 
 (** Pr_guess_le — the headline non-vacuous Alice-secrecy bound in
     the V_2-aware framing.  For any [t_msg]-output adversary
     [predictor : predictor_guesser] satisfying the disjointness
     conditions of [advantage_game_real_game_enc_zero], the probability
-    that the [boolean_shell]-wrapped indicator
-    [guess_indicator_pkg predictor game_real] evaluates to [true]
+    that the [guessing_challenger]-wrapped indicator
+    [guessing_experiment predictor game_real] evaluates to [true]
     (i.e. the predictor's guess matches the V_2 that [game_real]
     sampled and stored in [V_2_cell]) is at most
     [1 / card_t_msg + 2 * epsilon_cpa].
@@ -1661,24 +1675,24 @@ Hypothesis Pr_guess_enc_zero_le_invm :
     from [advantage_game_real_game_enc_zero] (the SSProve triangle
     across the four-game ladder, two IND-CPA hops plus a perfect-
     equivalence residual), instantiated at the chain
-    [boolean_shell ∘ par predictor (ID game_iface)] (a closed
+    [guessing_challenger ∘ par predictor (ID game_iface)] (a closed
     package importing [game_iface] and exporting [A_export]).  The
     [1 / card_t_msg] half comes from the section hypothesis
     [Pr_guess_enc_zero_le_invm] (the IT residual at [game_enc_zero]).
     Proof outline (4 steps):
       1. Triangle: by the elementary [a <= b + |a - b|]
          identity (using [ler_norm] and [lerBlDl]), [Pr_real <=
-         Pr_enc_zero + AdvantageE (boolean_shell ∘ par pred game_real)
-         (boolean_shell ∘ par pred game_enc_zero)] (the AdvantageE
+         Pr_enc_zero + AdvantageE (guessing_challenger ∘ par pred game_real)
+         (guessing_challenger ∘ par pred game_enc_zero)] (the AdvantageE
          instantiated at the trivial distinguisher [A := ID
          A_export] would give exactly this, but the
          [a <= b + |a - b|] form is more direct).
       2. Transfer the SSProve advantage [AdvantageE
-         (boolean_shell ∘ par pred game_real) (boolean_shell ∘
+         (guessing_challenger ∘ par pred game_real) (guessing_challenger ∘
          par pred game_enc_zero) (ID A_export)] to [AdvantageE
-         game_real game_enc_zero (boolean_shell ∘ par pred (ID
+         game_real game_enc_zero (guessing_challenger ∘ par pred (ID
          game_iface))] via [Advantage_link].  The chain
-         [boolean_shell ∘ par pred (ID game_iface)] is a closed
+         [guessing_challenger ∘ par pred (ID game_iface)] is a closed
          distinguisher package importing [game_iface] and
          exporting [A_export], which is exactly the shape
          [advantage_game_real_game_enc_zero] consumes.
@@ -1696,32 +1710,34 @@ Hypothesis Pr_guess_enc_zero_le_invm :
     Used by: T5's [dsdp_alice_secrecy] (thin wrapper), T6's
     concrete corollaries. *)
 
-(** boolean_shell_pack_setm — folds the displayed [setm emptym 0%N …]
-    form of [boolean_shell.(pack)] back to the named term.  The body on
-    the right-hand side is exactly what [boolean_shell.(pack)] reduces
-    to after δ-unfolding [boolean_shell] into its record literal and
+(** guessing_challenger_pack_setm — folds the displayed [setm emptym 0%N …]
+    form of [guessing_challenger.(pack)] back to the named term.  The body on
+    the right-hand side is exactly what [guessing_challenger.(pack)] reduces
+    to after δ-unfolding [guessing_challenger] into its record literal and
     ι-projecting the [.pack] field; the two notations [#def] and
-    [#import] in [boolean_shell] expand to [mkdef] and [opr]
+    [#import] in [guessing_challenger] expand to [mkdef] and [opr]
     respectively, after which monadic-bind beta-iota leaves the form
     shown below.  Equality therefore holds by βδιζη convertibility and
-    [change] witnesses it directly.  Used by: [valid_boolean_shell_link]
+    [change] witnesses it directly.  Used by: [valid_guessing_challenger_link]
     in place of the in-proof [change (setm emptym _ _) with
-    (boolean_shell.(pack))] folds. *)
-Lemma boolean_shell_pack_setm :
-  boolean_shell.(pack) =
+    (guessing_challenger.(pack))] folds. *)
+Lemma guessing_challenger_pack_setm :
+  guessing_challenger.(pack) =
   setm emptym 0%N
     (mkdef 'unit 'bool
       (fun _ : 'unit =>
-        guess ← op {sig #[id_guess]  : 'unit → msg } ⋅ tt ;;
-        v2    ← op {sig #[id_v2_get] : 'unit → msg } ⋅ tt ;;
+        view  ← op {sig #[id_game_run] : 'unit → ciphers } ⋅ tt ;;
+        guess ← op {sig #[id_guess]    : ciphers → msg } ⋅ view ;;
+        v2    ← op {sig #[id_v2_get]   : 'unit → msg } ⋅ tt ;;
         ret (guess == v2 : 'bool))).
 Proof.
-change boolean_shell.(pack) with
+change guessing_challenger.(pack) with
   (setm emptym 0%N
     (mkdef 'unit 'bool
       (fun _ : 'unit =>
-        guess ← op {sig #[id_guess]  : 'unit → msg } ⋅ tt ;;
-        v2    ← op {sig #[id_v2_get] : 'unit → msg } ⋅ tt ;;
+        view  ← op {sig #[id_game_run] : 'unit → ciphers } ⋅ tt ;;
+        guess ← op {sig #[id_guess]    : ciphers → msg } ⋅ view ;;
+        v2    ← op {sig #[id_v2_get]   : 'unit → msg } ⋅ tt ;;
         ret (guess == v2 : 'bool)))).
 reflexivity.
 Qed.
@@ -1746,20 +1762,20 @@ Qed.
      - split on ValidPackage to get the two field obligations.
      - split on the inner ↔ of valid_exports to get two implications.
      - move=> [f Hf] to destructure existentials.
-     - case Eb: on boolean_shell.(pack) o.1 to fork on whether the lookup
+     - case Eb: on guessing_challenger.(pack) o.1 to fork on whether the lookup
        hits an entry.
   2. Align the goal with a lemma or hypothesis. This is the step that
      does the actual work — almost every line of the proof is a
      translation from one form into another so that a stored fact about
      the original package becomes applicable.
-     - rewrite he1 substitutes the exports of boolean_shell for A_export
+     - rewrite he1 substitutes the exports of guessing_challenger for A_export
        so we can compare the two setms directly.
      - rewrite //= mapmE converts the mapm plumbing inside the linked
        package into an omap on the original's lookup, which is what the
        case analysis needs.
-     - change (setm emptym _ _) with (boolean_shell.(pack)) (now backed
-       by boolean_shell_pack_setm) renames the unfolded form so that
-       Eb : boolean_shell.(pack) o.1 = … lines up.
+     - change (setm emptym _ _) with (guessing_challenger.(pack)) (now backed
+       by guessing_challenger_pack_setm) renames the unfolded form so that
+       Eb : guessing_challenger.(pack) o.1 = … lines up.
      - eapply valid_code_link_residual reduces the body-validity question
        to two smaller validity claims that match the shapes of hi1 and
        pred.(pack_valid) respectively.
@@ -1785,11 +1801,11 @@ Qed.
   body. The [=] injection pattern + subst is the standard SSProve idiom
   for that bump.
 *)
-Lemma valid_boolean_shell_link
+Lemma valid_guessing_challenger_link
     (pred : predictor_guesser) :
-  ValidPackage (locs pred) game_iface A_export (boolean_shell ∘ pred).
+  ValidPackage (locs pred) game_iface A_export (guessing_challenger ∘ pred).
 Proof.
-case: boolean_shell.(pack_valid) => he1 hi1.
+case: guessing_challenger.(pack_valid) => he1 hi1.
 
 (* split is decomposing the ValidPackage Record into its two field
    obligations. Looking at the definition in SSProve's
@@ -1814,11 +1830,11 @@ case: boolean_shell.(pack_valid) => he1 hi1.
     export interface.
 
     ∀ o, fhas A_export o  ↔ 
-      (∃ f, fhas (boolean_shell ∘ pred) (o.1, ⟨chsrc o, chtgt o, f⟩))
+      (∃ f, fhas (guessing_challenger ∘ pred) (o.1, ⟨chsrc o, chtgt o, f⟩))
 
   Subgoal 2 — valid_imports: each operation body is well-formed code.
  
-    ∀ n F x, fhas (boolean_shell ∘ pred) (n, F) →
+    ∀ n F x, fhas (guessing_challenger ∘ pred) (n, F) →
       ValidCode (locs pred) game_iface (F.π2.π2 x)
 *)
 split.
@@ -1829,16 +1845,17 @@ split.
    a Record.
 
    Forward (→).
-   Given f such that fhas boolean_shell (o.1, ⟨chsrc o, chtgt o, f⟩),
+   Given f such that fhas guessing_challenger (o.1, ⟨chsrc o, chtgt o, f⟩),
    the linked-side entry has to be the result of applying the linking
    transform to f.
 
    `eexists (fun x => code_link (f x) pred)`
    Supplies the witness on the conclusion side.
-   This is the function-table entry that boolean_shell ∘ pred
+   This is the function-table entry that guessing_challenger ∘ pred
    must have at name o.1: it is the original body f,
    post-linked by code_link _ pred so all its imports of
-   predictor_iface are resolved through pred.
+   guesser_export (the predictor's [id_guess]) are resolved
+   through pred.
 
    `by rewrite //= mapmE Hf`
    Finishes by appealing to the SSProve lemma mapmE, which says
@@ -1848,7 +1865,7 @@ split.
    i.e., looking up k in mapm φ m returns Some (φ v) whenever
    m k = Some v.
 
-   With Hf : boolean_shell o.1 = Some ⟨chsrc o, chtgt o, f⟩,
+   With Hf : guessing_challenger o.1 = Some ⟨chsrc o, chtgt o, f⟩,
    mapmE rewrites the lookup on the linked side to
    Some (φ ⟨chsrc o, chtgt o, f⟩) =
      Some ⟨chsrc o, chtgt o, fun x => code_link (f x) pred⟩,
@@ -1862,10 +1879,10 @@ split.
    ----
 
    - The → direction says completeness:
-     if boolean_shell exports o, then so does boolean_shell ∘ pred.
+     if guessing_challenger exports o, then so does guessing_challenger ∘ pred.
      Linking does not delete exports.
-   - The ← direction says minimality: if boolean_shell ∘ pred exports o,
-     then boolean_shell already did. Linking does not invent new exports
+   - The ← direction says minimality: if guessing_challenger ∘ pred exports o,
+     then guessing_challenger already did. Linking does not invent new exports
      out of thin air.
 *)
   split.
@@ -1890,64 +1907,64 @@ split.
    It is about mapm (update a table for a key if found then entity) and
    omap (option map: apply f if looking up result is Some v).
 
-   Since mapm φ boolean_shell is exactly the post-link function table,
+   Since mapm φ guessing_challenger is exactly the post-link function table,
    mapmE is what lets the proof translate questions about that post-link
-   table into questions about the original boolean_shell table,
+   table into questions about the original guessing_challenger table,
    which is what he1 and hi1 already give us facts about.
 *)
     by rewrite //= mapmE Hf.
   + rewrite //= mapmE.
 (* Since we want `setm (setm emptym <K1> <V1>) <K2> <V2>` being converted to
-   boolean_shell.(pack) -- the singleton lookup table to the named structure. 
+   guessing_challenger.(pack) -- the singleton lookup table to the named structure. 
    `change` works because:
 
-   boolean_shell.(pack)
+   guessing_challenger.(pack)
    by _δ   {| locs := … ;
              pack := setm (setm emptym K1 V1) K2 V2 ; pack_valid := … |}.(pack)
-         (δ unfolds the Definition `boolean_shell` into its record literal body)
+         (δ unfolds the Definition `guessing_challenger` into its record literal body)
    by _ι   setm (setm emptym K1 V1) K2 V2
          (ι projects the `.pack` field out of the record literal)
 *)
-    change (setm emptym _ _) with (boolean_shell.(pack)).
+    change (setm emptym _ _) with (guessing_challenger.(pack)).
     move=> [f Hf].
-    change (setm emptym _ _) with (boolean_shell.(pack)) in Hf.
-    case Eb: (boolean_shell.(pack) o.1) => [[S [T g]]|].
+    change (setm emptym _ _) with (guessing_challenger.(pack)) in Hf.
+    case Eb: (guessing_challenger.(pack) o.1) => [[S [T g]]|].
     * rewrite Eb /= in Hf.
 (* by move: Hf we have Eb in the top:
 
-   boolean_shell.(pack) o.1 = Some (existT _ S (existT _ T g))
+   guessing_challenger.(pack) o.1 = Some (existT _ S (existT _ T g))
 
    After subst:  
 
-   boolean_shell.(pack) o.1 =
+   guessing_challenger.(pack) o.1 =
       Some (existT _ (chsrc o) (existT _ (chtgt o) g))
 
    Then give the g:
 
-   fhas boolean_shell.(pack) (o.1, existT _ (chsrc o) (existT _ (chtgt o) g))
+   fhas guessing_challenger.(pack) (o.1, existT _ (chsrc o) (existT _ (chtgt o) g))
 
    which by SSProve's definition unfolds to
    
-   boolean_shell.(pack) o.1 = Some (existT _ (chsrc o) (existT _ (chtgt o) g))
+   guessing_challenger.(pack) o.1 = Some (existT _ (chsrc o) (existT _ (chtgt o) g))
    — exactly Eb (after the subst we just did). So `by` makes it done.
 *)
       by move: Hf => [= ? ?]; subst; exists g.
     * by rewrite Eb /= in Hf.
 - move=> n F x.
   rewrite /fhas /link mapmE.
-  change (setm emptym _ _) with (boolean_shell.(pack)).
-  case Eb: (boolean_shell.(pack) n) => [[S' [T' f']]|]; last by [].
+  change (setm emptym _ _) with (guessing_challenger.(pack)).
+  case Eb: (guessing_challenger.(pack) n) => [[S' [T' f']]|]; last by [].
   move=> /= [= ?]; subst F => /=.
   eapply (@valid_code_link_residual _ (locs pred)
             (unionm game_iface guesser_export) game_iface guesser_export).
   + have /= Hbs_valid := hi1 n (existT _ S' (existT _ T' f')) x Eb.
     eapply valid_injectLocations; [| exact: Hbs_valid].
     exact: fsub0map.
-  + (* Widen pred's pack_valid from [predictor_iface] to [game_iface].
-       Sound because [predictor_iface ⊆ game_iface]: predictor_iface
-       has only id_game_run, while game_iface adds id_v2_get.  A package
-       that's valid against a narrower import is valid against a wider
-       one (it just leaves new imports unused). *)
+  + (* Widen pred's pack_valid from [interface] (empty) to [game_iface].
+       Sound because the empty import interface is a subinterface of
+       any interface: a package valid against [interface] (the closed
+       predictor imports nothing) is a fortiori valid against the wider
+       [game_iface] (it just leaves all those imports unused). *)
     eapply valid_package_inject_import; last exact: pred.(pack_valid).
     fmap_solve.
 Qed.
@@ -2020,7 +2037,7 @@ Lemma Pr_guess_le
     (LA : Locations) (predictor : predictor_guesser)
     (chain_valid :
        ValidPackage LA game_iface A_export
-         (boolean_shell ∘ predictor))
+         (guessing_challenger ∘ predictor))
     (chain_disj_real :
        fseparate LA game_real.(locs))
     (chain_disj_h1 :
@@ -2044,16 +2061,16 @@ Lemma Pr_guess_le
             rand_of_renc t_msg t_cipher chcipher_of_cipher
             pkey_of_party).(locs)) :
   distr.mu (pkg_advantage.Pr
-              (guess_indicator_pkg predictor game_real)) true
+              (guessing_experiment predictor game_real)) true
     <= (card_t_msg%:R)^-1 + 2%:R * epsilon_cpa.
 Proof.
 (* Step 1: Pr_real <= Pr_enc_zero + |Pr_real - Pr_enc_zero| (elementary). *)
 set Pr_real :=
   distr.mu (pkg_advantage.Pr
-              (guess_indicator_pkg predictor game_real)) true.
+              (guessing_experiment predictor game_real)) true.
 set Pr_enc_zero :=
   distr.mu (pkg_advantage.Pr
-              (guess_indicator_pkg predictor game_enc_zero)) true.
+              (guessing_experiment predictor game_enc_zero)) true.
 
 (*
   Split the goal:   Pr_real ≤ (card_t_msg%:R)^-1 + 2%:R * epsilon_cpa
@@ -2072,44 +2089,44 @@ apply: lerD; first exact: Pr_guess_enc_zero_le_invm.
   advantage_game_real_game_enc_zero produces. Walking left to right:
 
   1. /Pr_real /Pr_enc_zero: unfold the two set names. The goal's LHS becomes
-     the literal |distr.mu (Pr (guess_indicator_pkg predictor game_real)) true
-     − distr.mu (Pr (guess_indicator_pkg predictor game_enc_zero)) true|.
+     the literal |distr.mu (Pr (guessing_experiment predictor game_real)) true
+     − distr.mu (Pr (guessing_experiment predictor game_enc_zero)) true|.
 
   2. !link_assoc: link_assoc says (p ∘ q) ∘ r = p ∘ (q ∘ r). Package linking
      is associative. The ! prefix applies it repeatedly, re-associating the
      two compositions inside the absolute value so that on each side the
-     package reads (boolean_shell ∘ predictor) ∘ game_X, i.e. a single
-     distinguisher boolean_shell ∘ predictor composed against game_real and
+     package reads (guessing_challenger ∘ predictor) ∘ game_X, i.e. a single
+     distinguisher guessing_challenger ∘ predictor composed against game_real and
      against game_enc_zero. That is the form
-     AdvantageE game_real game_enc_zero (boolean_shell ∘ predictor) expects.
+     AdvantageE game_real game_enc_zero (guessing_challenger ∘ predictor) expects.
 
   After this single combined rewrite line, the goal is
 
-    AdvantageE game_real game_enc_zero (boolean_shell ∘ predictor)
+    AdvantageE game_real game_enc_zero (guessing_challenger ∘ predictor)
       <= epsilon_cpa + epsilon_cpa
 
   Two things matter:
-  - ∘ is right-associative. So boolean_shell ∘ predictor ∘ game_X parses as
-    boolean_shell ∘ (predictor ∘ game_X), not
-    (boolean_shell ∘ predictor) ∘ game_X.
-  - guess_indicator_pkg predictor game_X is definitionally equal to
-    boolean_shell ∘ (predictor ∘ game_X) (by δ), but syntactically it is the
-    opaque constant guess_indicator_pkg applied to two arguments.
+  - ∘ is right-associative. So guessing_challenger ∘ predictor ∘ game_X parses as
+    guessing_challenger ∘ (predictor ∘ game_X), not
+    (guessing_challenger ∘ predictor) ∘ game_X.
+  - guessing_experiment predictor game_X is definitionally equal to
+    guessing_challenger ∘ (predictor ∘ game_X) (by δ), but syntactically it is the
+    opaque constant guessing_experiment applied to two arguments.
 
   The whole point is making link_assoc works.
   We δ-unfold (unfold the defined function in its application, "turn function
   application into function composition in this case, by the definition of
-  guess_indicator_pkg"):
+  guessing_experiment"):
 
-  guess_indicator_pkg predictor game_real ⇝ 
-    boolean_shell ∘ predictor ∘ game_real
+  guessing_experiment predictor game_real ⇝ 
+    guessing_challenger ∘ predictor ∘ game_real
 
   After this step, the ∘ is visible,
-  then link_assoc re-associates so that boolean_shell ∘ predictor becomes one
+  then link_assoc re-associates so that guessing_challenger ∘ predictor becomes one
   syntactic unit (the distinguisher). After that, the goal is definitionally
   equal to the chain lemma's conclusion and exact: closes it.
 *)
-rewrite /Pr_real /Pr_enc_zero /guess_indicator_pkg
+rewrite /Pr_real /Pr_enc_zero /guessing_experiment
         !link_assoc mulr_natl mulr2n.
 exact: advantage_game_real_game_enc_zero.
 Qed.
@@ -2118,8 +2135,8 @@ Qed.
    bound closes with [Qed].  Mirrors the verify clauses of
    [advantage_game_real_game_enc_zero] above. *)
 Check predictor_guesser.
-Check boolean_shell.
-Check guess_indicator_pkg.
+Check guessing_challenger.
+Check guessing_experiment.
 Check Pr_guess_le.
 
 (* ================================================================== *)
@@ -2160,7 +2177,7 @@ Theorem dsdp_alice_secrecy
     (LA : Locations) (predictor : predictor_guesser)
     (chain_valid :
        ValidPackage LA game_iface A_export
-         (boolean_shell ∘ predictor))
+         (guessing_challenger ∘ predictor))
     (chain_disj_real :
        fseparate LA game_real.(locs))
     (chain_disj_h1 :
@@ -2184,7 +2201,7 @@ Theorem dsdp_alice_secrecy
             rand_of_renc t_msg t_cipher chcipher_of_cipher
             pkey_of_party).(locs)) :
   distr.mu (pkg_advantage.Pr
-              (guess_indicator_pkg predictor game_real)) true
+              (guessing_experiment predictor game_real)) true
     <= (card_t_msg%:R)^-1 + 2%:R * epsilon_cpa.
 Proof.
 exact: Pr_guess_le.
@@ -2248,7 +2265,7 @@ Qed.
 Definition Hunp (predictor : predictor_guesser) : R :=
   (- log (distr.mu
             (pkg_advantage.Pr
-               (guess_indicator_pkg predictor game_real)) true))%R.
+               (guessing_experiment predictor game_real)) true))%R.
 
 (** bound — the entropy lower bound
     [log m - log (1 + 2 * m * epsilon_cpa)] from the TeX writeup.
@@ -2292,7 +2309,7 @@ Theorem Hunp_ge_bound
     (LA : Locations) (predictor : predictor_guesser)
     (chain_valid :
        ValidPackage LA game_iface A_export
-         (boolean_shell ∘ predictor))
+         (guessing_challenger ∘ predictor))
     (chain_disj_real :
        fseparate LA game_real.(locs))
     (chain_disj_h1 :
@@ -2317,12 +2334,12 @@ Theorem Hunp_ge_bound
             pkey_of_party).(locs))
     (Pr_real_gt0 :
        (0 < distr.mu (pkg_advantage.Pr
-                        (guess_indicator_pkg predictor game_real)) true)%R) :
+                        (guessing_experiment predictor game_real)) true)%R) :
   (bound <= Hunp predictor)%R.
 Proof.
 unfold Hunp, bound.
 set Pr_real := distr.mu (pkg_advantage.Pr
-                          (guess_indicator_pkg predictor game_real)) true.
+                          (guessing_experiment predictor game_real)) true.
 have Hpr_le : (Pr_real <= (card_t_msg%:R)^-1 + 2%:R * epsilon_cpa)%R
   by apply: Pr_guess_le.
 have Hinvm_pos : (0 < (card_t_msg%:R)^-1 :> R)%R
