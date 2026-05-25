@@ -55,8 +55,8 @@ Section dsdp_security_indcpa_pismc.
 (* AHE carrier and the encryption-randomness finType bridge. *)
 Variable AHE : AHEncType.
 Variable Renc : finType.
-Variable index_renc : nat.
-Hypothesis renc_card : #|Renc| = index_renc.
+Variable card_renc : nat.
+Hypothesis renc_card : #|Renc| = card_renc.
 Variable rand_of_renc : Renc -> rand AHE.
 
 (* SSProve choice_type carriers for messages and ciphertexts, with the
@@ -76,16 +76,16 @@ Hypothesis chmsg_of_msgK :
 Variable pkey_of_party : party_id -> pub_key AHE.
 
 (* Plaintext-scalar uniform index. *)
-Variable index_msg : nat.
-Variable msg_of_idx : 'I_index_msg -> plain AHE.
+Variable card_msg : nat.
+Variable msg_of_idx : 'I_card_msg -> plain AHE.
 
-(** sample_to_renc — bridge from the SSProve uniform-index ['I_index_renc]
+(** sample_to_renc — bridge from the SSProve uniform-index ['I_card_renc]
     to an [Renc] value (same plumbing as in [dsdp_security_indcpa.v:131]).
     Kind: helper.
-    Why: SSProve's [sample uniform index_renc] returns an ['I_index_renc],
+    Why: SSProve's [sample uniform card_renc] returns an ['I_card_renc],
     but the AHE encryption takes a [rand AHE] obtained through [rand_of_renc].
     Used by: game_real_pismc. *)
-Definition sample_to_renc (i : 'I_index_renc) : Renc :=
+Definition sample_to_renc (i : 'I_card_renc) : Renc :=
   enum_val (cast_ord (esym renc_card) i).
 
 Local Notation "'cipher_t'" := t_cipher (in custom pack_type at level 2).
@@ -194,9 +194,9 @@ Definition dsdp_cipher_to_data (c : t_cipher) : data_dsdp :=
 (* Hypothesis: an arbitrary AHE inhabitance witness on the private-key
    side, needed to feed [palice], [pbob], [pcharlie] (each of which
    takes a [priv_key AHE] as the binding for [Init #dk]).  Sourced
-   externally to mirror the [pub_key_inhab] pattern in
+   externally to mirror the [pub_key_witness] pattern in
    [dsdp_security_indcpa_concrete.v:126]. *)
-Variable priv_key_inhab : priv_key AHE.
+Variable priv_key_witness : priv_key AHE.
 
 (** dsdp_palice_code — SSProve [code] obtained by translating Alice's
     piSMC program via [translate_pismc_to_ssprove].  Six actions: Init
@@ -380,16 +380,16 @@ Definition game_real_pismc :
   [package dsdp_pismc_locs ;
     #def #[ id_game_run ] (_ : 'unit) : ciphers
     {
-      iV2 ← sample uniform index_msg ;;
-      iV3 ← sample uniform index_msg ;;
-      iU2 ← sample uniform index_msg ;;
-      iU3 ← sample uniform index_msg ;;
-      iR2 ← sample uniform index_msg ;;
-      iR3 ← sample uniform index_msg ;;
-      ira1 ← sample uniform index_renc ;;
-      ira2 ← sample uniform index_renc ;;
-      irb1 ← sample uniform index_renc ;;
-      irc1 ← sample uniform index_renc ;;
+      iV2 ← sample uniform card_msg ;;
+      iV3 ← sample uniform card_msg ;;
+      iU2 ← sample uniform card_msg ;;
+      iU3 ← sample uniform card_msg ;;
+      iR2 ← sample uniform card_msg ;;
+      iR3 ← sample uniform card_msg ;;
+      ira1 ← sample uniform card_renc ;;
+      ira2 ← sample uniform card_renc ;;
+      irb1 ← sample uniform card_renc ;;
+      irc1 ← sample uniform card_renc ;;
       let v2 := msg_of_idx iV2 in
       #put (V_2_cell t_msg) := Some (chmsg_of_msg v2) ;;
       let v3 := msg_of_idx iV3 in
@@ -408,7 +408,7 @@ Definition game_real_pismc :
       #put c2_cell := Some (chcipher_of_cipher c2) ;;
       #put c3_cell := Some (chcipher_of_cipher c3) ;;
       alice_sends ← code_link
-                      (dsdp_palice_code priv_key_inhab
+                      (dsdp_palice_code priv_key_witness
                          (msg_of_idx iV2) (msg_of_idx iV2)
                          u2 u3 r2 r3 ra1 ra2)
                       (pack dsdp_recv_oracle) ;;
@@ -456,7 +456,7 @@ Check dsdp_recv_oracle.
 
     The lemma is currently stated as a Section Hypothesis so the W3
     corollaries downstream ([dsdp_alice_secrecy_pismc],
-    [entropy_ge_bound_pismc]) can be discharged via transport, making
+    [Hunp_ge_bound_pismc]) can be discharged via transport, making
     the [dsdp_palice_code] / [dsdp_pbob_code] / [dsdp_pcharlie_code] /
     [pbob_head_send_eq] / [pcharlie_head_send_eq] / [dsdp_recv_oracle]
     machinery load-bearing in [Print Assumptions] of the W3 outputs.
@@ -468,11 +468,11 @@ Check dsdp_recv_oracle.
     Why: enables W3's transported corollaries to lift U1/U2 secrecy
     bounds to piSMC-rooted statements without rewriting the U1/U3
     Concrete/Idealized/Benaloh/Paillier corollaries.
-    Used by: dsdp_alice_secrecy_pismc, entropy_ge_bound_pismc. *)
+    Used by: dsdp_alice_secrecy_pismc, Hunp_ge_bound_pismc. *)
 Hypothesis game_real_eq_pismc :
-  @game_real AHE Renc index_renc renc_card rand_of_renc
+  @game_real AHE Renc card_renc renc_card rand_of_renc
              t_msg t_cipher chmsg_of_msg chcipher_of_cipher
-             pkey_of_party index_msg msg_of_idx
+             pkey_of_party card_msg msg_of_idx
     ≈₀ game_real_pismc.
 
 (** Pr_eq_of_game_real_eq_pismc — transport equality of the
@@ -494,7 +494,7 @@ Hypothesis game_real_eq_pismc :
     and concludes by [Num.Theory.normr0P]:
     the absolute difference of the two probabilities is [0], so they
     are equal.
-    Used by: dsdp_alice_secrecy_pismc, entropy_ge_bound_pismc. *)
+    Used by: dsdp_alice_secrecy_pismc, Hunp_ge_bound_pismc. *)
 Lemma Pr_eq_of_game_real_eq_pismc
     (LA : Locations)
     (predictor : predictor_guesser t_msg t_cipher)
@@ -503,24 +503,24 @@ Lemma Pr_eq_of_game_real_eq_pismc
          (boolean_shell t_msg t_cipher ∘ predictor))
     (chain_disj_real :
        fseparate LA
-         (@game_real AHE Renc index_renc renc_card rand_of_renc
+         (@game_real AHE Renc card_renc renc_card rand_of_renc
                      t_msg t_cipher chmsg_of_msg chcipher_of_cipher
-                     pkey_of_party index_msg msg_of_idx).(locs))
+                     pkey_of_party card_msg msg_of_idx).(locs))
     (chain_disj_pismc :
        fseparate LA game_real_pismc.(locs)) :
   distr.mu (pkg_advantage.Pr
               (guess_indicator_pkg predictor
-                 (@game_real AHE Renc index_renc renc_card rand_of_renc
+                 (@game_real AHE Renc card_renc renc_card rand_of_renc
                              t_msg t_cipher chmsg_of_msg chcipher_of_cipher
-                             pkey_of_party index_msg msg_of_idx))) true
+                             pkey_of_party card_msg msg_of_idx))) true
   = distr.mu (pkg_advantage.Pr
                 (guess_indicator_pkg predictor game_real_pismc)) true.
 Proof.
 have Hadv :
     AdvantageE
-      (@game_real AHE Renc index_renc renc_card rand_of_renc
+      (@game_real AHE Renc card_renc renc_card rand_of_renc
                   t_msg t_cipher chmsg_of_msg chcipher_of_cipher
-                  pkey_of_party index_msg msg_of_idx)
+                  pkey_of_party card_msg msg_of_idx)
       game_real_pismc
       (boolean_shell t_msg t_cipher ∘ predictor) = 0
   by apply: game_real_eq_pismc; eassumption.
@@ -533,7 +533,7 @@ Qed.
 (** dsdp_alice_secrecy_pismc — the U1 closed-form Alice-secrecy
     bound transported from [game_real] to [game_real_pismc] along
     the W2 Hypothesis.  Same numerical bound
-    [1 / index_t_msg + 2 * epsilon_cpa] as [dsdp_alice_secrecy]:
+    [1 / card_t_msg + 2 * epsilon_cpa] as [dsdp_alice_secrecy]:
     the piSMC encoding of Alice does not weaken the secrecy
     guarantee.
     Kind: main.
@@ -543,17 +543,17 @@ Qed.
     Used by: future end-to-end statements stating "piSMC DSDP is
     IND-CPA secure under [game_real_eq_pismc]". *)
 Theorem dsdp_alice_secrecy_pismc
-    (index_t_msg : nat)
-    (Pr_guess_leak_le_invm :
+    (card_t_msg : nat)
+    (Pr_guess_enc_zero_le_invm :
        forall (predictor : predictor_guesser t_msg t_cipher),
          distr.mu (pkg_advantage.Pr
                      (guess_indicator_pkg predictor
-                        (@game_leak AHE Renc index_renc renc_card
+                        (@game_enc_zero AHE Renc card_renc renc_card
                                     rand_of_renc t_msg t_cipher
                                     chmsg_of_msg chcipher_of_cipher
-                                    pkey_of_party index_msg msg_of_idx)))
+                                    pkey_of_party card_msg msg_of_idx)))
                   true
-           <= (index_t_msg%:R)^-1)
+           <= (card_t_msg%:R)^-1)
     (LA : Locations)
     (predictor : predictor_guesser t_msg t_cipher)
     (chain_valid :
@@ -561,105 +561,105 @@ Theorem dsdp_alice_secrecy_pismc
          (boolean_shell t_msg t_cipher ∘ predictor))
     (chain_disj_real :
        fseparate LA
-         (@game_real AHE Renc index_renc renc_card rand_of_renc
+         (@game_real AHE Renc card_renc renc_card rand_of_renc
                      t_msg t_cipher chmsg_of_msg chcipher_of_cipher
-                     pkey_of_party index_msg msg_of_idx).(locs))
+                     pkey_of_party card_msg msg_of_idx).(locs))
     (chain_disj_pismc :
        fseparate LA game_real_pismc.(locs))
     (chain_disj_h1 :
        fseparate LA
-         (@game_hybrid_one AHE Renc index_renc renc_card rand_of_renc
+         (@game_hybrid_one AHE Renc card_renc renc_card rand_of_renc
                            t_msg t_cipher chmsg_of_msg
                            chcipher_of_cipher pkey_of_party
-                           index_msg msg_of_idx).(locs))
+                           card_msg msg_of_idx).(locs))
     (chain_disj_h2 :
        fseparate LA
-         (@game_hybrid_two AHE Renc index_renc renc_card rand_of_renc
+         (@game_hybrid_two AHE Renc card_renc renc_card rand_of_renc
                            t_msg t_cipher chmsg_of_msg
                            chcipher_of_cipher pkey_of_party
-                           index_msg msg_of_idx).(locs))
-    (chain_disj_leak :
+                           card_msg msg_of_idx).(locs))
+    (chain_disj_enc_zero :
        fseparate LA
-         (@game_leak AHE Renc index_renc renc_card rand_of_renc
+         (@game_enc_zero AHE Renc card_renc renc_card rand_of_renc
                      t_msg t_cipher chmsg_of_msg chcipher_of_cipher
-                     pkey_of_party index_msg msg_of_idx).(locs))
-    (chain_disj_tc :
+                     pkey_of_party card_msg msg_of_idx).(locs))
+    (chain_disj_via_oracle_charlie :
        fseparate LA
-         (@translation_charlie AHE Renc index_renc renc_card
+         (@game_via_oracle_charlie AHE Renc card_renc renc_card
                                rand_of_renc t_msg t_cipher
                                chmsg_of_msg chcipher_of_cipher
                                cipher_of_chcipher pkey_of_party
-                               index_msg msg_of_idx).(locs))
-    (chain_disj_tb :
+                               card_msg msg_of_idx).(locs))
+    (chain_disj_via_oracle_bob :
        fseparate LA
-         (@translation_bob AHE Renc index_renc renc_card
+         (@game_via_oracle_bob AHE Renc card_renc renc_card
                            rand_of_renc t_msg t_cipher
                            chmsg_of_msg chcipher_of_cipher
                            cipher_of_chcipher pkey_of_party
-                           index_msg msg_of_idx).(locs))
+                           card_msg msg_of_idx).(locs))
     (chain_disj_ore :
        fseparate LA
-         (oracle_encrypt_real_pkg AHE Renc index_renc renc_card
+         (oracle_encrypt_real_pkg AHE Renc card_renc renc_card
             rand_of_renc t_msg t_cipher msg_of_chmsg
             chcipher_of_cipher pkey_of_party).(locs))
     (chain_disj_oze :
        fseparate LA
-         (oracle_encrypt_zero_pkg AHE Renc index_renc renc_card
+         (oracle_encrypt_zero_pkg AHE Renc card_renc renc_card
             rand_of_renc t_msg t_cipher chcipher_of_cipher
             pkey_of_party).(locs)) :
   distr.mu (pkg_advantage.Pr
               (guess_indicator_pkg predictor game_real_pismc)) true
-    <= (index_t_msg%:R)^-1 + 2%:R * epsilon_cpa.
+    <= (card_t_msg%:R)^-1 + 2%:R * epsilon_cpa.
 Proof.
 rewrite -(Pr_eq_of_game_real_eq_pismc
             chain_valid chain_disj_real chain_disj_pismc).
 exact: (@dsdp_alice_secrecy
-          AHE Renc index_renc renc_card rand_of_renc
+          AHE Renc card_renc renc_card rand_of_renc
           t_msg t_cipher msg_of_chmsg chmsg_of_msg
           chcipher_of_cipher cipher_of_chcipher
           chcipher_of_cipherK chmsg_of_msgK
-          pkey_of_party index_msg msg_of_idx
-          index_t_msg
-          Pr_guess_leak_le_invm
+          pkey_of_party card_msg msg_of_idx
+          card_t_msg
+          Pr_guess_enc_zero_le_invm
           LA predictor chain_valid chain_disj_real
-          chain_disj_h1 chain_disj_h2 chain_disj_leak
-          chain_disj_tc chain_disj_tb
+          chain_disj_h1 chain_disj_h2 chain_disj_enc_zero
+          chain_disj_via_oracle_charlie chain_disj_via_oracle_bob
           chain_disj_ore chain_disj_oze).
 Qed.
 
-(** entropy_pismc — the conditional unpredictability entropy
+(** Hunp_pismc — the conditional unpredictability entropy
     [H_unp^C(V_2 | AliceView)] evaluated at the piSMC-rooted
     [game_real_pismc] instead of [game_real].
     Kind: definition.
-    Why: gives the LHS of [entropy_ge_bound_pismc].
-    Used by: entropy_ge_bound_pismc. *)
-Definition entropy_pismc (predictor : predictor_guesser t_msg t_cipher) : R :=
+    Why: gives the LHS of [Hunp_ge_bound_pismc].
+    Used by: Hunp_ge_bound_pismc. *)
+Definition Hunp_pismc (predictor : predictor_guesser t_msg t_cipher) : R :=
   (- log (distr.mu
             (pkg_advantage.Pr
                (guess_indicator_pkg predictor game_real_pismc)) true))%R.
 
-(** entropy_ge_bound_pismc — the U2 entropy lower bound transported
+(** Hunp_ge_bound_pismc — the U2 entropy lower bound transported
     from [game_real] to [game_real_pismc] along the W2 Hypothesis.
     Same target [log m - log(1 + 2 * m * epsilon_cpa)] as
-    [entropy_ge_bound].
+    [Hunp_ge_bound].
     Kind: main.
     Why: closes leg 2 of the chain analysis announced in the bridge
     plan; the piSMC encoding's entropy bound matches the U2
     abstract entropy bound exactly.
     Used by: future end-to-end statements. *)
-Theorem entropy_ge_bound_pismc
-    (index_t_msg : nat)
-    (index_t_msg_gt0 : (0 < index_t_msg)%N)
-    (Pr_guess_leak_le_invm :
+Theorem Hunp_ge_bound_pismc
+    (card_t_msg : nat)
+    (card_t_msg_gt0 : (0 < card_t_msg)%N)
+    (Pr_guess_enc_zero_le_invm :
        forall (predictor : predictor_guesser t_msg t_cipher),
          distr.mu (pkg_advantage.Pr
                      (guess_indicator_pkg predictor
-                        (@game_leak AHE Renc index_renc renc_card
+                        (@game_enc_zero AHE Renc card_renc renc_card
                                     rand_of_renc t_msg t_cipher
                                     chmsg_of_msg chcipher_of_cipher
-                                    pkey_of_party index_msg msg_of_idx)))
+                                    pkey_of_party card_msg msg_of_idx)))
                   true
-           <= (index_t_msg%:R)^-1)
+           <= (card_t_msg%:R)^-1)
     (epsilon_cpa_ge0 : (0 <= epsilon_cpa)%R)
     (LA : Locations)
     (predictor : predictor_guesser t_msg t_cipher)
@@ -668,50 +668,50 @@ Theorem entropy_ge_bound_pismc
          (boolean_shell t_msg t_cipher ∘ predictor))
     (chain_disj_real :
        fseparate LA
-         (@game_real AHE Renc index_renc renc_card rand_of_renc
+         (@game_real AHE Renc card_renc renc_card rand_of_renc
                      t_msg t_cipher chmsg_of_msg chcipher_of_cipher
-                     pkey_of_party index_msg msg_of_idx).(locs))
+                     pkey_of_party card_msg msg_of_idx).(locs))
     (chain_disj_pismc :
        fseparate LA game_real_pismc.(locs))
     (chain_disj_h1 :
        fseparate LA
-         (@game_hybrid_one AHE Renc index_renc renc_card rand_of_renc
+         (@game_hybrid_one AHE Renc card_renc renc_card rand_of_renc
                            t_msg t_cipher chmsg_of_msg
                            chcipher_of_cipher pkey_of_party
-                           index_msg msg_of_idx).(locs))
+                           card_msg msg_of_idx).(locs))
     (chain_disj_h2 :
        fseparate LA
-         (@game_hybrid_two AHE Renc index_renc renc_card rand_of_renc
+         (@game_hybrid_two AHE Renc card_renc renc_card rand_of_renc
                            t_msg t_cipher chmsg_of_msg
                            chcipher_of_cipher pkey_of_party
-                           index_msg msg_of_idx).(locs))
-    (chain_disj_leak :
+                           card_msg msg_of_idx).(locs))
+    (chain_disj_enc_zero :
        fseparate LA
-         (@game_leak AHE Renc index_renc renc_card rand_of_renc
+         (@game_enc_zero AHE Renc card_renc renc_card rand_of_renc
                      t_msg t_cipher chmsg_of_msg chcipher_of_cipher
-                     pkey_of_party index_msg msg_of_idx).(locs))
-    (chain_disj_tc :
+                     pkey_of_party card_msg msg_of_idx).(locs))
+    (chain_disj_via_oracle_charlie :
        fseparate LA
-         (@translation_charlie AHE Renc index_renc renc_card
+         (@game_via_oracle_charlie AHE Renc card_renc renc_card
                                rand_of_renc t_msg t_cipher
                                chmsg_of_msg chcipher_of_cipher
                                cipher_of_chcipher pkey_of_party
-                               index_msg msg_of_idx).(locs))
-    (chain_disj_tb :
+                               card_msg msg_of_idx).(locs))
+    (chain_disj_via_oracle_bob :
        fseparate LA
-         (@translation_bob AHE Renc index_renc renc_card
+         (@game_via_oracle_bob AHE Renc card_renc renc_card
                            rand_of_renc t_msg t_cipher
                            chmsg_of_msg chcipher_of_cipher
                            cipher_of_chcipher pkey_of_party
-                           index_msg msg_of_idx).(locs))
+                           card_msg msg_of_idx).(locs))
     (chain_disj_ore :
        fseparate LA
-         (oracle_encrypt_real_pkg AHE Renc index_renc renc_card
+         (oracle_encrypt_real_pkg AHE Renc card_renc renc_card
             rand_of_renc t_msg t_cipher msg_of_chmsg
             chcipher_of_cipher pkey_of_party).(locs))
     (chain_disj_oze :
        fseparate LA
-         (oracle_encrypt_zero_pkg AHE Renc index_renc renc_card
+         (oracle_encrypt_zero_pkg AHE Renc card_renc renc_card
             rand_of_renc t_msg t_cipher chcipher_of_cipher
             pkey_of_party).(locs))
     (* Per-predictor positivity at game_real_pismc.  CRITICAL:
@@ -725,9 +725,9 @@ Theorem entropy_ge_bound_pismc
     (Pr_real_pismc_gt0 :
        (0 < distr.mu (pkg_advantage.Pr
                         (guess_indicator_pkg predictor game_real_pismc)) true)%R) :
-  (bound index_t_msg <= entropy_pismc predictor)%R.
+  (bound card_t_msg <= Hunp_pismc predictor)%R.
 Proof.
-rewrite /entropy_pismc.
+rewrite /Hunp_pismc.
 rewrite -(Pr_eq_of_game_real_eq_pismc
             chain_valid chain_disj_real chain_disj_pismc).
 (* Transport positivity along the W2 equivalence:
@@ -739,25 +739,25 @@ rewrite -(Pr_eq_of_game_real_eq_pismc
 have Pr_real_gt0 :
   (0 < distr.mu (pkg_advantage.Pr
                    (guess_indicator_pkg predictor
-                      (@game_real AHE Renc index_renc renc_card
+                      (@game_real AHE Renc card_renc renc_card
                                   rand_of_renc t_msg t_cipher
                                   chmsg_of_msg chcipher_of_cipher
-                                  pkey_of_party index_msg msg_of_idx))) true)%R.
+                                  pkey_of_party card_msg msg_of_idx))) true)%R.
 { rewrite (Pr_eq_of_game_real_eq_pismc
               chain_valid chain_disj_real chain_disj_pismc).
   exact: Pr_real_pismc_gt0. }
-exact: (@entropy_ge_bound
-          AHE Renc index_renc renc_card rand_of_renc
+exact: (@Hunp_ge_bound
+          AHE Renc card_renc renc_card rand_of_renc
           t_msg t_cipher msg_of_chmsg chmsg_of_msg
           chcipher_of_cipher cipher_of_chcipher
           chcipher_of_cipherK chmsg_of_msgK
-          pkey_of_party index_msg msg_of_idx
-          index_t_msg index_t_msg_gt0
-          Pr_guess_leak_le_invm
+          pkey_of_party card_msg msg_of_idx
+          card_t_msg card_t_msg_gt0
+          Pr_guess_enc_zero_le_invm
           epsilon_cpa_ge0
           LA predictor chain_valid chain_disj_real
-          chain_disj_h1 chain_disj_h2 chain_disj_leak
-          chain_disj_tc chain_disj_tb
+          chain_disj_h1 chain_disj_h2 chain_disj_enc_zero
+          chain_disj_via_oracle_charlie chain_disj_via_oracle_bob
           chain_disj_ore chain_disj_oze
           Pr_real_gt0).
 Qed.
@@ -766,12 +766,12 @@ Qed.
    the Section parameters + the W2 Hypothesis. *)
 Check Pr_eq_of_game_real_eq_pismc.
 Check dsdp_alice_secrecy_pismc.
-Check entropy_pismc.
-Check entropy_ge_bound_pismc.
+Check Hunp_pismc.
+Check Hunp_ge_bound_pismc.
 
 (* Assumption closure of W3 outputs (verified at commit time and recorded
    in the W3 commit message): both [dsdp_alice_secrecy_pismc] and
-   [entropy_ge_bound_pismc] depend on the W2 Hypothesis
+   [Hunp_ge_bound_pismc] depend on the W2 Hypothesis
    [game_real_eq_pismc] (which transitively pins [pbob_head_send_eq] /
    [pcharlie_head_send_eq] / [dsdp_palice_code] / [dsdp_pbob_code] /
    [dsdp_pcharlie_code] / [dsdp_recv_oracle] as the piSMC encoding's
