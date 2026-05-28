@@ -136,5 +136,6 @@ dumas2017dual/dsdp/dsdp_pismc.v
 dumas2017dual/dsdp/ref/dsdp_security_indcpa.v
 dumas2017dual/dsdp/ref/dsdp_security_indcpa_concrete.v
 dumas2017dual/dsdp/ref/dsdp_security_indcpa_pismc.v
+dumas2017dual/dsdp/ref/dsdp_trace_bridge.v
 
 -R . infotheo
