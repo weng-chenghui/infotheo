@@ -285,16 +285,8 @@ Proof.
 (* The [unlock] step is required because [coerce_kleisli] is wrapped in
    a lock; the [setm] dispatch ordering depends on
    [id_recv_enc_pismc < id_recv_dec_pismc] reducing to numerals first. *)
-cbn.
-unfold resolve; cbn.
-rewrite /id_recv_enc_pismc /id_recv_dec_pismc; cbn.
-simpl.
-unfold coerce_kleisli; simpl.
-unlock; simpl.
-unfold coerce_code; simpl.
-rewrite !coerceE /=.
-rewrite /c2_chc /c3_chc !chcipher_of_cipherK.
-by rewrite /c2_in /c3_in /pkey_of_party /=.
+by cbn; unfold resolve, coerce_kleisli, coerce_code; unlock;
+   rewrite /= !coerceE /= !chcipher_of_cipherK.
 Qed.
 
 (******************************************************************************)
@@ -334,12 +326,7 @@ Proof.
    [chcipher_of_cipherK] (the [data -> cipher] extractor round-trip) and
    the [idealized_*] op definitions, the result is definitionally equal
    to [[:: a1_send_pi; a2_send_pi]]. *)
-cbn.
-rewrite /c2_chc /c3_chc !chcipher_of_cipherK /=.
-rewrite /a1_send_pi /a2_send_pi /a1_send /a2_send
-        /c2_in /c3_in /pkey_of_party /Emul /Epow /=.
-by rewrite /idealized_Emul /idealized_Epow /idealized_enc
-           /u2_in /u3_in /r2_in /r3_in /=.
+by rewrite /= !chcipher_of_cipherK.
 Qed.
 
 (******************************************************************************)
@@ -364,7 +351,6 @@ Corollary alice_trace_eq_concrete (seed : nat) :
                                          r2_in r3_in ra1_in ra2_in))
                              recvs_piSMC)).
 Proof.
-rewrite alice_pismc_sends_concrete.
-by rewrite alice_run_trace_concrete /=.
+by rewrite alice_pismc_sends_concrete alice_run_trace_concrete.
 Qed.
 
