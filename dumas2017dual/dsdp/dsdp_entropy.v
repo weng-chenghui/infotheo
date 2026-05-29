@@ -1055,18 +1055,8 @@ Qed.
 Lemma V3_determined_centropy_v2 :
   `H([% V2, V3] | [% V1, U1, U2, U3, S]) = `H(V2 | [% V1, U1, U2, U3, S]).
 Proof.
-have ->: `H([% V2, V3] | [% V1, U1, U2, U3, S]) =
-  `H([% V1, U1, U2, U3, S], [% V2, V3]) - `H `p_ [% V1, U1, U2, U3, S].
-  by rewrite chain_rule_RV addrAC subrr add0r.
-rewrite V3_determined.
-have ->: `H([% V1, U1, U2, U3, S],
-    [% V2, compute_v3 `o [% V1, U1, U2, U3, S, V2]]) =
-  `H `p_[% V1, U1, U2, U3, S, V2].
-  by rewrite joint_entropy_RVA joint_entropy_RV_comp.
-have ->: `H( V2 | [% V1, U1, U2, U3, S]) =
-  `H([% V1, U1, U2, U3, S], V2) - `H `p_ [% V1, U1, U2, U3, S].
-  by rewrite chain_rule_RV addrAC subrr add0r.
-by [].
+apply: (@centropy_determined_contract _ _ _ _ _ _ V2 V3 _ (fun (v2 : msg) (c : ((((msg*msg)*msg)*msg)*msg)) => let '(v1,u1,u2,u3,s) := c in compute_v3 (v1,u1,u2,u3,s,v2))).
+by rewrite V3_determined; apply: boolp.funext.
 Qed.
 
 End functional_determination.
