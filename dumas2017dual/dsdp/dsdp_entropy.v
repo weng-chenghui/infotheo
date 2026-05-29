@@ -289,30 +289,92 @@ rewrite (@centropy1_uniform_over_set R T P _ _ VarRV CondRV
 by rewrite card_m muln_gt0 prime_gt0 // prime_gt0.
 Qed.
 
-(* Main entropy result: H(V2, V3 | Alice's view) = log(pq) *)
-(* This establishes that Alice learns nothing beyond the constraint. *)
+(* The constraint function g for centropy_jcond_determined_fibers:
+   given a value (v2,v3) of VarRV and a value (v1,u1,u2,u3) of InputRV,
+   produces the value of S that satisfies the DSDP constraint. *)
+Definition dsdp_g (var : msg * msg) (inp : msg * msg * msg * msg) : msg :=
+  let '(v2, v3) := var in
+  let '(v1, u1, u2, u3) := inp in
+  (u1 * v1 + u2 * v2 + u3 * v3)%R.
+
+(* Bridge: the DSDP fiber matches the abstract fiber set of dsdp_g. *)
+Lemma dsdp_fiber_eq_abstract (v1 u1 u2 u3 s : msg) :
+  dsdp_fiber u1 u2 u3 v1 s =
+  [set x' : msg * msg | dsdp_g x' (v1, u1, u2, u3) == s].
+Proof.
+apply/setP => [[v2 v3]].
+rewrite /dsdp_fiber /linear_fiber_2d !inE /dsdp_g /=.
+apply/eqP/eqP => H.
+- by rewrite -addrA H addrC subrK.
+- by rewrite -H; ring.
+Qed.
+
+(* S is functionally determined by VarRV and InputRV through dsdp_g. *)
+Lemma S_determined : S = (fun t => dsdp_g (VarRV t) (InputRV t)).
+Proof.
+apply: boolp.funext => t.
+move: (constraint_holds t).
+rewrite /dsdp_constraint /CondRV /VarRV /InputRV /dsdp_g /=.
+move=> Heq.
+move/eqP: Heq; rewrite subr_eq addrC => /eqP ->.
+by rewrite addrA.
+Qed.
+
+(* Main entropy result: H(V2, V3 | Alice's view) = log(pq).
+   This establishes that Alice learns nothing beyond the constraint.
+   Now a thin application of centropy_jcond_determined_fibers from
+   entropy_fiber.v, with S_determined providing the functional
+   constraint and Pr_dsdp_sol_uniform + dsdp_fiber_card discharging
+   the uniformity and constant-cardinality hypotheses. *)
 Theorem dsdp_centropy_uniform :
   (forall t, (0 < U3 t)%N) ->
   (forall t, (U3 t < minn p q)%N) ->
   `H(VarRV | CondRV) = log (m%:R : R).
 Proof.
 move=> HU3_pos HU3_lt.
-(* Expand conditional entropy as weighted sum *)
+have Hm_pos : (0 < m)%N by rewrite muln_gt0 prime_gt0 // prime_gt0.
+apply: (@centropy_jcond_determined_fibers R T P
+          (msg * msg)%type (msg * msg * msg * msg)%type msg
+          VarRV InputRV S dsdp_g S_determined _ m _ Hm_pos).
+- move=> [[[v1 u1] u2] u3] s [v2 v3] /= Hcond_pos Hin.
+  move/pfwd1_neq0: (Hcond_pos) => [t [Ht _]].
+  move: Ht; rewrite inE => /eqP Ht.
+  have HU3t : U3 t = u3 by case: Ht => _ _ _ ->.
+  have Hu3_pos : (0 < u3)%N by rewrite -HU3t; apply: HU3_pos.
+  have Hu3_lt : (u3 < minn p q)%N by rewrite -HU3t; apply: HU3_lt.
+  rewrite -dsdp_fiber_eq_abstract in Hin *.
+  rewrite (@dsdp_fiber_card u1 u2 u3 v1 s Hu3_pos Hu3_lt).
+  exact: (Pr_dsdp_sol_uniform Hu3_pos Hu3_lt Hcond_pos Hin).
+- move=> [[[v1 u1] u2] u3] s Hcond_pos.
+  rewrite -dsdp_fiber_eq_abstract.
+  move/pfwd1_neq0: (Hcond_pos) => [t [Ht _]].
+  move: Ht; rewrite inE => /eqP Ht.
+  have HU3t : U3 t = u3 by case: Ht => _ _ _ ->.
+  apply: dsdp_fiber_card.
+  + by rewrite -HU3t; apply: HU3_pos.
+  + by rewrite -HU3t; apply: HU3_lt.
+Qed.
+
+(* Self-contained direct proof, preserved alongside the abstract-routed version
+   above as an alternative derivation that does not depend on the abstract
+   centropy_jcond_determined_fibers layer. *)
+Theorem dsdp_centropy_uniform_direct :
+  (forall t, (0 < U3 t)%N) ->
+  (forall t, (U3 t < minn p q)%N) ->
+  `H(VarRV | CondRV) = log (m%:R : R).
+Proof.
+move=> HU3_pos HU3_lt.
 rewrite centropy_RVE' /=.
-(* Transform each term in the sum *)
-transitivity (\sum_(a : msg * msg * msg * msg * msg) 
+transitivity (\sum_(a : msg * msg * msg * msg * msg)
                `Pr[ CondRV = a ] * log (m%:R : R)).
-  (* Show each term equals Pr[...] * log(m) *)
   apply: eq_bigr => [] [] [] [] [] v1 u1 u2 u3 s H.
   have [->|Hcond_pos] := eqVneq (`Pr[CondRV = (v1, u1, u2, u3, s)]) 0.
     by rewrite !mul0r.
-  (* Get u3 positivity from HU3_pos *)
   have Hu3_pos: (0 < u3)%N.
     move/pfwd1_neq0: Hcond_pos => [t [Ht _]].
     move: Ht; rewrite inE => /eqP Ht.
     have HU3t : U3 t = u3 by case: Ht => _ _ _ ->.
     by rewrite -HU3t; apply: HU3_pos.
-  (* Get u3 < min(p,q) from HU3_lt *)
   have Hu3_lt: (u3 < minn p q)%N.
     move/pfwd1_neq0: Hcond_pos => [t [Ht _]].
     move: Ht; rewrite inE => /eqP Ht.
