@@ -269,7 +269,7 @@ Variable dtype : eqType.
     operational behaviour as the protocol-level RVs.  This is the marginal
     soundness statement (Design Commitment 4 of the Rocq audit).
     Used by: dsdp_security_indcpa.v (Task 06 onwards) to build the four
-    games [game_real], [game_hybrid_one], [game_hybrid_two], [game_leak]. *)
+    games [game_real], [game_hybrid_one], [game_hybrid_two], [game_enc_zero]. *)
 Definition translate_pismc_to_ssprove
     {party : nat} {n : nat} {env : senv dtype}
     (p : @sproc dtype data party n env) :
@@ -286,7 +286,7 @@ Definition translate_pismc_to_ssprove
     variables": the SSProve code carrier depends on the input sproc only
     via the unindexed [proc] that dsdp_program.v's RVs already sample
     over.  A stronger SDistr-to-fdist bridge is built later as Task 12.
-    Used by: dsdp_security_indcpa.v Task 13 (Pr_game_leak_V2_uniform). *)
+    Used by: dsdp_security_indcpa.v Task 13 (Pr_game_enc_zero_V2_uniform). *)
 Lemma translate_correct_marginal
     {party : nat} {n : nat} {env : senv dtype}
     (p : @sproc dtype data party n env) :

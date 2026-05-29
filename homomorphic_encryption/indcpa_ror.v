@@ -19,7 +19,7 @@
     The hypothesis ships with no proof: it is the cryptographic assumption
     that replaces the false IT idealisation [E_enc_inde] from
     [homomorphic_encryption.v].  Downstream consumers (Tasks 06-08) supply
-    concrete adversaries via [reduction_charlie] and [reduction_bob] and
+    concrete adversaries via [predictor_via_oracle_charlie] and [predictor_via_oracle_bob] and
     feed them through this hypothesis using the SSProve [ssprove triangle]
     idiom from [theories/Crypt/examples/PRF.v]. *)
 
