@@ -655,11 +655,20 @@ Hypothesis pV3_unif : `p_ V3 = fdist_uniform card_msg.
    This directly expresses that conditioning on BobView reveals
    nothing about V1, i.e., observing Bob's view does not reduce
    uncertainty about Alice's private input V1.
-   
+
    Mathematical reasoning:
    - BobView _|_ V1 (independence hypothesis)
    - By definition of independence: observing BobView gives no information about V1
    - Therefore: H(V1 | BobView) = H(V1)
+
+   Classification (A5 generification audit): pure independence absorption.
+   V1 does not appear in any component of BobView -- the view contains
+   Dk_b, V2, E_charlie_vur3 (Bob cannot decrypt), and E_bob_d2 = E(D2)
+   where D2 = V2*U2 + R2 is V1-free. There is no functional-determination
+   edge Z = g(V1, Y) inside the view, so abstract_privacy_bridge does
+   not apply. The independence hypothesis BobView_indep_V1 already
+   carries the entire privacy content, and inde_cond_entropy gives the
+   one-line proof. Intentionally left as-is per the A5 rubric.
 *)
 Theorem bob_privacy_V1_alt :
   `H(V1 | BobView) = `H `p_ V1.
@@ -691,11 +700,19 @@ Qed.
    This directly expresses that conditioning on BobView reveals
    nothing about V3, i.e., observing Bob's view does not reduce
    uncertainty about Charlie's private input V3.
-   
+
    Mathematical reasoning:
    - BobView _|_ V3 (independence hypothesis)
    - By definition of independence: observing BobView gives no information about V3
    - Therefore: H(V3 | BobView) = H(V3)
+
+   Classification (A5 generification audit): pure independence absorption.
+   V3 appears in BobView only inside E_charlie_vur3 = E(charlie, V3*U3 + R3),
+   which Bob cannot decrypt; the secrecy is delivered by the encryption
+   premise BobView_indep_V3, not by a constant-fiber/joint-to-marginal
+   collapse. abstract_privacy_bridge requires a functional-determination
+   view component Z = g(V3, Y), which is absent in plaintext.
+   Intentionally left as-is per the A5 rubric.
 *)
 Theorem bob_privacy_V3_alt :
   `H(V3 | BobView) = `H `p_ V3.
@@ -1357,11 +1374,17 @@ Hypothesis pV2_unif : `p_ V2 = fdist_uniform card_msg.
    This directly expresses that conditioning on CharlieView reveals
    nothing about V1, i.e., observing Charlie's view does not reduce
    uncertainty about Alice's private input V1.
-   
+
    Mathematical reasoning:
    - CharlieView _|_ V1 (independence hypothesis)
    - By definition of independence: observing CharlieView gives no information about V1
    - Therefore: H(V1 | CharlieView) = H(V1)
+
+   Classification (A5 generification audit): pure independence absorption.
+   V1 is never transmitted to Charlie; CharlieView = [Dk_c, V3, E_charlie_d3]
+   and D3 = (V3*U3 + R3) + (V2*U2 + R2) is V1-free in plaintext. There is
+   no functional-determination edge Z = g(V1, Y) to invoke
+   abstract_privacy_bridge. Intentionally left as-is per the A5 rubric.
 *)
 Theorem charlie_privacy_V1_alt :
   `H(V1 | CharlieView) = `H `p_ V1.
@@ -1393,14 +1416,23 @@ Qed.
    This directly expresses that conditioning on CharlieView reveals
    nothing about V2, i.e., observing Charlie's view does not reduce
    uncertainty about Bob's private input V2.
-   
+
    Mathematical reasoning:
    - CharlieView _|_ V2 (independence hypothesis)
    - By definition of independence: observing CharlieView gives no information about V2
    - Therefore: H(V2 | CharlieView) = H(V2)
-   
+
    This is more fundamental than stating H(V2|CharlieView) = log(m),
    as it captures the independence relationship directly.
+
+   Classification (A5 generification audit): one-time-pad absorption.
+   V2 enters CharlieView only through D2 = V2*U2 + R2 (an OTP masking by
+   fresh uniform R2), which is itself blinded by encryption inside
+   E_charlie_d3. The secrecy is delivered by lemma_3_5'-style independence
+   (proven upstream as CharlieView_indep_V2_proven), not by a
+   constant-fiber argument. abstract_privacy_bridge would require Charlie
+   to observe a constraint Z = g(V2, Y) in plaintext, which the OTP mask
+   explicitly prevents. Intentionally left as-is per the A5 rubric.
 *)
 Theorem charlie_privacy_V2_alt :
   `H(V2 | CharlieView) = `H `p_ V2.
