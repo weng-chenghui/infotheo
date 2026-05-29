@@ -465,3 +465,92 @@ Qed.
 
 End conditional_entropy_with_functional_constraint.
 
+Section abstract_perfect_privacy_bridge.
+
+(* Abstract perfect-privacy bridge.
+
+   Setting. Let X1 be a "secret" random variable; let V := [% Y, Z] be a
+   conditioning ("view") random variable. We package the three hypotheses
+   used by the perfect-privacy argument as:
+
+     (H1) Uniform fibers + constant fiber size.
+            For every (y, z) with positive joint probability, the conditional
+            distribution X1 | (Y, Z) = (y, z) is uniform on the fiber
+            [set x' | g x' y == z], whose cardinality equals a constant k > 0.
+
+     (H2) Functional determination.
+            There exists a deterministic function g with Z = g(X1, Y).
+
+     (H3) Prior uncertainty.
+            H(X1) = log k.
+
+   The two theorems below mirror the two-theorem split of Section 3.1 of
+   the design spec: structural_centropy is a pure-mechanism statement that
+   uses (H1) + (H2) and concludes H(X1 | V) = log k.  abstract_privacy_bridge
+   then composes structural_centropy with (H3) to obtain H(X1 | V) = H(X1).
+
+   The structural theorem is a thin re-export of
+   centropy_jcond_determined_fibers (which already combines (H1) and (H2)
+   internally through its section hypotheses).  We restate it here under
+   the (X1, V) naming used by the perfect-privacy bridge so that the
+   call-site signature is parametric in X1 and V := [% Y, Z]. *)
+
+Context {R : realType}.
+Variable T : finType.
+Variable P : R.-fdist T.
+Variables (X1T YT ZT : finType).
+Variable X1 : {RV P -> X1T}.
+Variable Y  : {RV P -> YT}.
+Variable Z  : {RV P -> ZT}.
+
+(* (H2) Functional determination: Z = g(X1, Y). *)
+Variable g : X1T -> YT -> ZT.
+Hypothesis Z_determined : Z = (fun t => g (X1 t) (Y t)).
+
+(* (H1, part a) Uniform fibers. *)
+Hypothesis uniform_over_fibers : forall y z x,
+  `Pr[[% Y, Z] = (y, z)] != 0 ->
+  x \in [set x' | g x' y == z] ->
+  `Pr[X1 = x | [% Y, Z] = (y, z)] =
+    #|[set x' | g x' y == z]|%:R^-1.
+
+(* Structural conditional entropy theorem.
+
+   Given (H1) uniform fibers of constant size k and (H2) functional
+   determination, the conditional entropy of X1 given the view V := [% Y, Z]
+   equals log k.  This is the mechanism-only result. *)
+Lemma structural_centropy (fiber_card : nat) :
+  (forall y z,
+    `Pr[[% Y, Z] = (y, z)] != 0 ->
+    #|[set x' | g x' y == z]| = fiber_card) ->
+  (0 < fiber_card)%N ->
+  `H(X1 | [% Y, Z]) = log (fiber_card%:R : R).
+Proof.
+exact: centropy_jcond_determined_fibers.
+Qed.
+
+(* Abstract perfect-privacy bridge.
+
+   Composing the structural theorem with the prior-uncertainty hypothesis
+   (H3) H(X1) = log k yields H(X1 | V) = H(X1), i.e. the view V leaks no
+   information about X1.
+
+   Naming: descriptive overarching-theorem name; the main symbol is centropy
+   but the result is presented as a privacy statement rather than a bare
+   equational lemma, so `_bridge` replaces the equational suffix `E`.
+   No shorter MathComp-grammar form preserves the meaning at this abstraction
+   level. *)
+Lemma abstract_privacy_bridge (fiber_card : nat) :
+  (forall y z,
+    `Pr[[% Y, Z] = (y, z)] != 0 ->
+    #|[set x' | g x' y == z]| = fiber_card) ->
+  (0 < fiber_card)%N ->
+  `H `p_ X1 = log (fiber_card%:R : R) ->
+  `H(X1 | [% Y, Z]) = `H `p_ X1.
+Proof.
+move=> Hcard Hcard_pos HX1.
+by rewrite (structural_centropy Hcard Hcard_pos) -HX1.
+Qed.
+
+End abstract_perfect_privacy_bridge.
+
