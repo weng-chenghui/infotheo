@@ -75,6 +75,8 @@ Definition step (ps : seq proc) (trace : seq data) (i : nat) :=
   | Fail => nop
   end.
 
+(* Fuel-bounded driver: each round runs step at every party and keeps
+   going while any party fired, returning the final processes and traces. *)
 Fixpoint interp h (ps : seq proc) (traces : seq (seq data)) :=
   if h is h.+1 then
     let ps_trs' := [seq step ps (nth [::] traces i) i
@@ -86,21 +88,27 @@ Fixpoint interp h (ps : seq proc) (traces : seq (seq data)) :=
     else (ps, traces)
   else (ps, traces).
 
+(* Entry point: run the interpreter from empty traces for the given fuel. *)
 Definition run_interp h procs := interp h procs (nseq (size procs) [::]).
 
 Local Open Scope tuple_ext_scope.
 Local Open Scope fset_scope.
 
-(* Definition of lenses from qecc *)
+(* Lenses (from qecc) name the subset of parties a reduction touches. *)
 Section lens.
 Variables n m : nat.
+(* A choice of m party indices among n, addressing a sub-tuple. *)
 Definition lens : Type := m.-tuple 'I_n.
 Variables (l : lens) (T : Type).
+(* Read the m selected entries out of a full n-tuple. *)
 Definition extract (t : n.-tuple T) := map_tuple (tnth t) l.
+(* Write m new entries back into a full n-tuple at the selected positions. *)
 Definition inject (t : n.-tuple T) (t' : m.-tuple T) :=
   [tuple nth (t !_ i) t' (index i l) | i < n].
 End lens.
 
+(* extract commutes with a pointwise map: lets the soundness proof push
+   data transformations through the lens. *)
 Lemma map_extract n m A B (l : lens n m) (f : A -> B) v :
   map_tuple f (extract l v) = extract l (map_tuple f v).
 Proof. by apply: eq_from_tnth => i; rewrite !tnth_map. Qed.
@@ -126,17 +134,19 @@ Inductive rsteps {n} :
     tr3 = [tuple tr2 !_ i ++ tr1 !_ i | i < n] ->
     rsteps ps1 ps3 tr3.
 
-Definition res_procs n (res : n.-tuple (proc * seq data * bool)) :=
+(* Project the surviving process out of each party's step result. *)
+Definition result_procs n (res : n.-tuple (proc * seq data * bool)) :=
   map_tuple (fun r : proc * seq data * bool => r.1.1) res.
-Definition res_traces n (res : n.-tuple (proc * seq data * bool)) :=
+(* Project the accumulated trace out of each party's step result. *)
+Definition result_traces n (res : n.-tuple (proc * seq data * bool)) :=
   map_tuple (fun r : proc * seq data * bool => r.1.2) res.
 
 (* The step function does all possible reductions at once *)
 Lemma step_complete n m (l : lens n m) ps ps' traces' :
   rstep l (extract l ps) ps' traces' ->
   let res := extract l [tuple step ps nil i | i < n] in
-  res_procs res = ps' /\
-  res_traces res = traces'.
+  result_procs res = ps' /\
+  result_traces res = traces'.
 Proof.
 move Hps: (extract l ps) => psl H.
 case: H Hps => /=.
@@ -147,17 +157,20 @@ case: H Hps => /=.
   split; apply /val_inj;
     by rewrite /= tnth_mktuple /= /step -tnth_nth Hps.
 - move=> i j x pi pj [] Hi Hj.
-  rewrite /res_procs /res_traces !map_extract.
+  rewrite /result_procs /result_traces !map_extract.
   split; apply /val_inj; congr ([:: _; _]);
     rewrite /= tnth_map tnth_mktuple /= /step;
     by rewrite -tnth_nth (Hi,Hj) -tnth_nth (Hi,Hj) eqxx.
 Qed.
 
+(* Characterization of a 2-party reduction at indices a, b: it must be a
+   matched Send/Recv pair. The reflection target for rstep2P. *)
 Variant rstep2_spec n (ps : n.-tuple proc) (a b : 'I_n) : Prop :=
   | Rstep2Comm x pi pj of
       ps !_ a = Send b x pi & ps !_ b = Recv a pj
     : rstep2_spec ps a b.
 
+(* Invert a 2-party rstep into the Send/Recv pair that produced it. *)
 Lemma rstep2P n (ps : n.-tuple proc) (a b : 'I_n) ps' traces :
   rstep [tuple a; b] (extract [tuple a; b] ps) ps' traces ->
   rstep2_spec ps a b.
@@ -166,21 +179,10 @@ inversion 1; subst.
 exact: (Rstep2Comm (esym H3) (esym H4)).
 Qed.
 
-(* Cannot have two steps conflicting each other.
-   Stronger than comm_disjoint, which has the same intension.
-
-   If a reduction gives a Send, there must be a Recv.
-   Recv can be rebuilt from Send.
-
-   Build a list of all reductions that we can do,
-   meaning list of indices, conditions for firing must be built,
-   from this can rebuild the reduction step,
-   they are all disjointed,
-   ---- still need a proof that combine all of them I get the reduction,
-
-   
-   Current
-*)
+(* No two reductions fireable from the same state can conflict: any two
+   are either the identical reduction or act on disjoint party indices.
+   This disjointness lets the soundness proof compose per-party
+   reductions in any order. Stronger than the old comm_disjoint. *)
 Lemma rstep_disjoint n m p (ps : n.-tuple proc) (l1 : lens n m) (l2 : lens n p)
   psl1 psl2 ps1 tr1 ps2 tr2 :
   psl1 = extract l1 ps -> psl2 = extract l2 ps ->
@@ -190,8 +192,9 @@ Lemma rstep_disjoint n m p (ps : n.-tuple proc) (l1 : lens n m) (l2 : lens n p)
   (* [disjoint l1 & l2] *)
 Proof.
 move=> Hpsl1 Hpsl2 Hred1 Hred2.
-case: Hred1 Hpsl1 => [i j pi | i x | i j x pi pj] /(f_equal val) /= [] Hpi;
-case: Hred2 Hpsl2 => [i' j' pi' | i' x' | i' j' x' pi' pj'] /(f_equal val) /=[];
+(* Fallback: the constructor equality is consumed as a view in destructuring position, so goal-level congr does not apply. *)
+case: Hred1 Hpsl1 => [i j pi | i x | i j x pi pj] /(congr1 val) /= [] Hpi;
+case: Hred2 Hpsl2 => [i' j' pi' | i' x' | i' j' x' pi' pj'] /(congr1 val) /=[];
   (have [<-|ii' Hpi'] := eqVneq i i'; [rewrite -Hpi // => -[]
    | right => a b; rewrite !inE; try by do! move /eqP ->]).
  by move=> <- <-; left.
@@ -222,6 +225,8 @@ Section traces.
 Variable data : eqType.
 Local Open Scope nat_scope.
 
+(* Fuel bounds trace length: every trace produced in h rounds has at most
+   h entries, since each round appends at most one datum per party. *)
 Lemma size_traces h (procs : seq (proc data)) :
   forall s, s \in (run_interp h procs).2 -> size s <= h.
 Proof.
@@ -274,6 +279,8 @@ case: p => [d1 p1|dst1 d1 p1|frm1 f1|d1||] /=.
 - by move=> ->; exact (ltnW Hsz).
 Qed.
 
+(* interp preserves the party count: process and trace lists keep the
+   same length as the input across all rounds. *)
 Lemma size_interp h (procs : seq (proc data)) (traces : seq (seq data)) :
   size procs = size traces ->
   size (interp h procs traces).1 = size procs /\
@@ -290,15 +297,21 @@ move=> -> ->.
 by rewrite !size_map size_iota.
 Qed.
 
+(* Per-party form of size_traces: the i-th party's trace fits in h.
+   Supplies the size proof needed to package traces as bounded sequences. *)
 Lemma size_traces_nth h (procs : seq (proc data)) (i : 'I_(size procs)) :
   (size (nth [::] (run_interp h procs).2 i) <= h)%N.
 Proof.
 by apply/size_traces/mem_nth; rewrite (size_interp _ _).2 // size_nseq.
 Qed.
 
+(* Final traces packaged as a tuple of length-bounded sequences, the form
+   downstream entropy and security reasoning consumes. *)
 Definition interp_traces h procs : (size procs).-tuple (h.-bseq data) :=
   [tuple Bseq (size_traces_nth h i) | i < size procs].
 
+(* interp_traces is faithful: stripping the bounds recovers exactly the
+   raw traces returned by run_interp. *)
 Lemma interp_traces_ok h procs :
  map val (interp_traces h procs) = (run_interp h procs).2.
 Proof.
