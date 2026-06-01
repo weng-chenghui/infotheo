@@ -367,10 +367,10 @@ Definition dsdp_procs : seq (proc data) :=
   erase_aprocs dsdp_saprocs.
 
 (* Fuel bound computed from program structure:
-   - palice: 15 (7*Init + 2*Recv_enc + 2*Send + Recv_dec + Ret=2)
+   - palice: 14 (7*Init + 2*Recv_enc + 2*Send + Recv_dec + Ret=2)
    - pbob: 7 (2*Init + Send + Recv_dec + Recv_enc + Send + Finish=1)
    - pcharlie: 6 (2*Init + Send + Recv_dec + Send + Finish=1)
-   Total: 15 + 7 + 6 = 28, but actually computed as 27 *)
+   Total: 14 + 7 + 6 = 27 *)
 Lemma dsdp_max_fuel_ok : [> dsdp_saprocs] = 27.
 Proof. reflexivity. Qed.
 
