@@ -182,6 +182,9 @@ pgg-smc/reconstruct/rs_privacy.v
 pgg-smc/reconstruct/rs_massey_bridge.v
 pgg-smc/reconstruct/ag_code.v
 pgg-smc/reconstruct/ag_massey_bridge.v
+pgg-smc/reconstruct/gap_dimension.v
+pgg-smc/reconstruct/invariant_profiler.v
+pgg-smc/reconstruct/s5_nogo.v
 pgg-smc/reconstruct/hyperelliptic_code.v
 pgg-smc/reconstruct/coord_perm_compatible.v
 pgg-smc/reconstruct/ag_multiplicative.v

@@ -27,6 +27,7 @@ depends: [
   "coq-mathcomp-algebra"
   "coq-mathcomp-solvable"
   "coq-mathcomp-field"
+  "coq-mathcomp-character"
   "coq-mathcomp-analysis" { (>= "1.12.0") }
   "coq-mathcomp-reals-stdlib" { (>= "1.12.0") }
   ( "coq-hierarchy-builder" { = "1.9.1" } & "coq-elpi" { < "3.0.0" }
