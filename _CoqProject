@@ -157,6 +157,7 @@ pgg-smc/groups/pgg_raag.v
 pgg-smc/groups/free_group_ball.v
 pgg-smc/groups/pgg_raag_clique.v
 pgg-smc/groups/pgg_raag_cartier_foata.v
+pgg-smc/groups/pgg_cycle.v
 pgg-smc/security/pgg_collusion_bound.v
 pgg-smc/security/pgg_security_solver.v
 pgg-smc/security/pgg_schreier.v
@@ -194,9 +195,11 @@ pgg-smc/reconstruct/cover_genus1.v
 pgg-smc/reconstruct/cover_genus2.v
 pgg-smc/reconstruct/cover_tradeoff.v
 pgg-smc/reconstruct/algebraic_rigidity.v
+pgg-smc/reconstruct/dropout_witness.v
 pgg-smc/reconstruct/pgg_dealer_bridge.v
 pgg-smc/reconstruct/pgg_protocol_landscape.v
 pgg-smc/reconstruct/product_threshold.v
+pgg-smc/reconstruct/combinatorial_rigidity.v
 pgg-smc/instances/s5/s5_mixing.v
 pgg-smc/instances/s5/rigidity_s5_instance.v
 pgg-smc/instances/s5x5/s5x5_mixing.v
@@ -207,6 +210,11 @@ pgg-smc/instances/cyclic/rigidity_cyclic_instance.v
 pgg-smc/instances/abelian/rigidity_abelian_instance.v
 pgg-smc/instances/star/rigidity_star_instance.v
 pgg-smc/instances/kim2025/rigidity_kim_instance.v
+pgg-smc/instances/wreath7/pgg_wreath.v
+pgg-smc/instances/wreath7/wreath_recovery.v
+pgg-smc/instances/wreath7/wreath_security.v
+pgg-smc/instances/wreath7/wreath_program.v
+pgg-smc/instances/wreath7/rigidity_wreath_instance.v
 pgg-smc/reconstruct/pgg_landscape_demo.v
 pgg-smc/reconstruct/pgl_bound.v
 pgg-smc/reconstruct/pgg_covering_correctness.v
@@ -229,3 +237,4 @@ pgg-smc/reconstruct/pgg_threshold.v
 -R pgg-smc/instances/abelian pgg_smc
 -R pgg-smc/instances/cyclic pgg_smc
 -R pgg-smc/instances/monster pgg_smc
+-R pgg-smc/instances/wreath7 pgg_smc
