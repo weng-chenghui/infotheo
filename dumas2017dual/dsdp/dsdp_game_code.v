@@ -162,8 +162,8 @@ Variable chcipher_of_cipher : cipher AHE -> t_cipher.
 
 (* Forward scaffolding (unused until the hop tasks): cipher_of_chcipher brings
    an oracle-returned ciphertext back to [cipher AHE] in denote_game_shim, and
-   the two cancel laws collapse the encode/decode round-trips in the hop_equiv
-   perfect-equivalence proofs, mirroring the *_equiv_* lemmas of
+   the two cancel laws collapse the encode/decode round-trips in the later
+   hop-equivalence proofs, mirroring the *_equiv_* lemmas of
    dsdp_security_indcpa.v. *)
 
 (* cipher_of_chcipher — inverse of [chcipher_of_cipher], bringing an
@@ -451,5 +451,124 @@ Qed.
 Definition denote_game (gc : game_code) :
   package [interface] game_iface :=
   mkpackage protocol_state (denote_game_raw gc) (denote_game_valid gc).
+
+(* ------------------------------------------------------------------ *)
+(* Oracle-routed denotation (one-hop shim): the raw_code core and      *)
+(* package that route a single GC_enc_hop site through the IND-CPA     *)
+(* encryption oracle, leaving every other node identical to denote_run.*)
+(* ------------------------------------------------------------------ *)
+
+(* denote_run_shim — oracle-importing variant of [denote_run] for a single
+   IND-CPA reduction: routes exactly the [site]-th [GC_enc_hop] through the
+   imported encryption oracle, so composing with the real/zero IND-CPA oracle
+   yields one rung of the hybrid ladder.  All other nodes denote identically to
+   [denote_run], preserving the sample sequence.  Threads the denotation env and
+   a hop counter [hop] (the running index of [GC_enc_hop] nodes seen so far):
+   the counter advances only at [GC_enc_hop], so every [GC_sample], [GC_put],
+   [GC_let] and every off-target [GC_enc_hop] denotes exactly as in [denote_run]
+   — the sample sequence is therefore identical to [denote_run]'s (the target
+   hop's randomness is still drawn by its [GC_sample] into [de_rand], just left
+   unused once the oracle supplies the ciphertext).  At the matching hop the
+   oracle is queried on the hop's party index and plaintext (encoded via
+   [chmsg_of_msg]); the returned [t_cipher] is brought back into [cipher AHE] by
+   [cipher_of_chcipher] and pushed as the hop's value (so a downstream [GC_ret]
+   re-encodes it through [chcipher_of_cipher], collapsing the round-trip by
+   [chcipher_of_cipherK] in the later hop-equivalence proof). *)
+Fixpoint denote_run_shim
+    (site : nat) (hop : nat) (e : denv) (gc : game_code) :
+    raw_code cipher_list :=
+  match gc with
+  | GC_sample n k =>
+      if n == card_msg then
+        x ← sample uniform card_msg ;;
+        denote_run_shim site hop (push_val (Gplain (msg_of_idx x)) e) k
+      else if n == card_renc then
+        x ← sample uniform card_renc ;;
+        denote_run_shim site hop
+          (push_rand (rand_of_renc (sample_to_renc x)) e) k
+      else
+        x ← sample uniform n ;; denote_run_shim site hop e k
+  | GC_put t k =>
+      #put V_2_cell := Some (chmsg_of_msg (as_plain (denote_he e t))) ;;
+      denote_run_shim site hop e k
+  | GC_let t k =>
+      denote_run_shim site hop (push_val (denote_he e t) e) k
+  | GC_enc_hop pk secret rnd k =>
+      if hop == site then
+        #import {sig #[ id_oracle_encrypt ] : 'nat × msg → cipher_t }
+          as oracle_enc ;;
+        ch ← oracle_enc
+               (pk, chmsg_of_msg (as_plain (denote_he e secret))) ;;
+        denote_run_shim site hop.+1
+          (push_val (Gcipher (cipher_of_chcipher ch)) e) k
+      else
+        denote_run_shim site hop.+1
+          (push_val
+             (Gcipher (enc (pkey_of_party (nat_to_party_id pk))
+                           (as_plain (denote_he e secret)) (de_rand_nth e rnd)))
+             e) k
+  | GC_ret outs =>
+      ret ([seq chcipher_of_cipher (as_cipher (denote_he e o)) | o <- outs]
+           : cipher_list)
+  end.
+
+(* Certificate that the oracle-routed run core type-checks against the IND-CPA
+   encryption import: SSProve cannot infer [ValidCode] through the opaque
+   [denote_run_shim] recursion, so it is supplied explicitly by structural
+   induction on [gc], generic over [site], [hop] and the env.  The
+   oracle-routed hop discharges its [fhas] obligation against
+   [oracle_encrypt_iface t_msg t_cipher]; all other nodes mirror
+   [denote_run_valid]. *)
+Lemma denote_run_shim_valid (site hop : nat) (e : denv) (gc : game_code) :
+  ValidCode protocol_state (oracle_encrypt_iface t_msg t_cipher)
+    (denote_run_shim site hop e gc).
+Proof.
+elim: gc site hop e => [n k IH|t k IH|t k IH|pk secret rnd k IH|outs] site hop e /=.
+- case: (n == card_msg); last case: (n == card_renc).
+  + by apply: valid_sampler => x; exact: IH.
+  + by apply: valid_sampler => x; exact: IH.
+  + by apply: valid_sampler => x; exact: IH.
+- by apply: valid_putr; last exact: IH.
+- exact: IH.
+- case: (hop == site).
+  + by apply: valid_opr; last by move=> v; exact: IH.
+  + exact: IH.
+- exact: valid_ret.
+Qed.
+
+(* ValidPackage certificate for denote_game_shim, needed because SSProve cannot
+   infer it through the opaque oracle-routed run map.  The run oracle uses
+   denote_run_shim_valid; the V_2-reveal oracle lifts its empty-import
+   certificate via valid_injectMap. *)
+Lemma denote_game_shim_valid (gc : game_code) (site : nat) :
+  ValidPackage protocol_state (oracle_encrypt_iface t_msg t_cipher) game_iface
+    (mkfmap
+       [:: (id_game_run, mkdef 'unit cipher_list
+              (fun _ => denote_run_shim site 0 empty_denv gc))
+         ; (id_v2_get,   mkdef 'unit t_msg (fun _ => denote_v2_get_body)) ]).
+Proof.
+rewrite /game_iface.
+apply: valid_package_cons; last by move=> x; exact: denote_run_shim_valid.
+apply: valid_package_cons; last first.
+- by move=> x; apply: valid_injectMap; last exact: denote_v2_get_valid.
+Qed.
+
+(* denote_game_shim — oracle-routed image of a [game_code]: a package importing
+   the IND-CPA encryption oracle [oracle_encrypt_iface t_msg t_cipher] and
+   exporting [game_iface].  The [id_game_run] oracle runs [denote_run_shim]
+   from the empty env with hop counter 0, routing the [site]-th [GC_enc_hop]
+   through the imported oracle and inlining every other hop; the [id_v2_get]
+   oracle is the fixed V_2-reveal body shared with [denote_game].  Composing
+   it with the real / zero IND-CPA oracle reproduces one hybrid-ladder rung;
+   the corresponding perfect-equivalence proof transfers the IND-CPA advantage
+   to [denote_game]. *)
+Definition denote_game_shim (gc : game_code) (site : nat) :
+  package (oracle_encrypt_iface t_msg t_cipher) game_iface :=
+  mkpackage protocol_state
+    (mkfmap
+       [:: (id_game_run, mkdef 'unit cipher_list
+              (fun _ => denote_run_shim site 0 empty_denv gc))
+         ; (id_v2_get,   mkdef 'unit t_msg (fun _ => denote_v2_get_body)) ])
+    (denote_game_shim_valid gc site).
 
 End dsdp_game_code.
