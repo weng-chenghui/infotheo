@@ -46,6 +46,30 @@ Import PackageNotation.
 (* Pin SSProve's real type as the ambient realType for this file. *)
 Notation R := SSProve.Crypt.Axioms.R.
 
+(* Deep embedding of the HE message algebra (single-sorted; Plain/Cipher
+   sort-indexing deferred). nat args: HE_var/HE_const pool index; HE_enc/HE_dec
+   carry a pubkey id and (for enc) a randomness slot. *)
+Inductive he_term : Type :=
+| HE_var   : nat -> he_term
+| HE_const : nat -> he_term
+| HE_enc   : nat -> he_term -> nat -> he_term
+| HE_dec   : nat -> he_term -> he_term
+| HE_emul  : he_term -> he_term -> he_term
+| HE_epow  : he_term -> he_term -> he_term
+| HE_add   : he_term -> he_term -> he_term
+| HE_sub   : he_term -> he_term -> he_term
+| HE_mul   : he_term -> he_term -> he_term.
+
+(* Reified body of the id_game_run oracle. nat args are de Bruijn-style pool
+   indices / pubkey ids / randomness slots. GC_enc_hop is the only hoppable
+   statement; GC_let carries non-hoppable he_terms (incl. encryptions of masks). *)
+Inductive game_code : Type :=
+| GC_sample  : nat -> game_code -> game_code
+| GC_put     : he_term -> game_code -> game_code
+| GC_let     : he_term -> game_code -> game_code
+| GC_enc_hop : nat -> he_term -> nat -> game_code -> game_code
+| GC_ret     : seq he_term -> game_code.
+
 Section dsdp_game_code.
 
 (* ------------------------------------------------------------------ *)
@@ -138,9 +162,10 @@ Definition protocol_state : Locations := [fmap V_2_cell].
 
 Local Notation "'msg'" := t_msg (in custom pack_type at level 2).
 
-(* game_iface — shared export interface of the games: id_game_run takes
-   ['unit] and returns the ciphertext accumulator [ciphers], id_v2_get takes
-   ['unit] and returns the protocol-side V_2 sample ([msg]). *)
+(* Shared export interface for every derived game (the real game, the hybrid
+   ladder, the all-zero endpoint) and the oracle shims.  A single common
+   interface is what keeps AdvantageE and the ≈₀ perfect-equivalence steps
+   well-typed across the whole ladder, so no game needs an interface cast. *)
 Definition game_iface : Interface :=
   [interface
      #val #[ id_game_run ] : 'unit → ciphers ;
