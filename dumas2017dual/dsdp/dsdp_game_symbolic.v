@@ -179,7 +179,10 @@ Definition game_of_trace (obs : seq alice_obs) : game_code :=
 
 (* count_hops_lower_obs — environment-generalised induction lemma: lowering
    neither creates nor drops hop sites, so the back-end [count_hops] of the
-   lowered code is the protocol-side [count_obs_hops], for any environments. *)
+   lowered code is the protocol-side [count_obs_hops], for any environments.
+   Naming: the [mainSymbol_argument] form [count_hops] of [lower_obs]
+   (cf. MathComp [count_map]); the four segments are the multi-word identifiers
+   [count_hops] and [lower_obs], not grammar drift. *)
 Lemma count_hops_lower_obs venv renv obs :
   count_hops (lower_obs venv renv obs) = count_obs_hops obs.
 Proof. elim: obs venv renv => [|o rest IH] venv renv //=; case: o => //= *; rewrite ?IH //. Qed.
@@ -245,9 +248,7 @@ Proof. by []. Qed.
    onto the game DERIVED from the corrupted-Alice trace: any adversary's
    advantage distinguishing the real derived game from its all-zero endpoint is
    at most [2 * epsilon_cpa].  Parameters and premises mirror [advantage_gc_dsdp]
-   verbatim; the proof rewrites by [dsdp_faithful] and applies it.
-
-   PROOF TARGET for /rocq:prove. *)
+   verbatim; the proof rewrites by [dsdp_faithful] and applies it. *)
 Lemma dsdp_advantage_derived
     (AHE : AHEncType) (Renc : finType) (card_renc : nat)
     (renc_card : #|Renc| = card_renc) (rand_of_renc : Renc -> rand AHE)
