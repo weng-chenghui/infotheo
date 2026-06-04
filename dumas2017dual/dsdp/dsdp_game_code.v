@@ -160,6 +160,12 @@ Variable msg_of_chmsg : t_msg -> plain AHE.
 Variable chmsg_of_msg : plain AHE -> t_msg.
 Variable chcipher_of_cipher : cipher AHE -> t_cipher.
 
+(* Forward scaffolding (unused until the hop tasks): cipher_of_chcipher brings
+   an oracle-returned ciphertext back to [cipher AHE] in denote_game_shim, and
+   the two cancel laws collapse the encode/decode round-trips in the hop_equiv
+   perfect-equivalence proofs, mirroring the *_equiv_* lemmas of
+   dsdp_security_indcpa.v. *)
+
 (* cipher_of_chcipher — inverse of [chcipher_of_cipher], bringing an
    SSProve-side ciphertext back into [cipher AHE]. *)
 Variable cipher_of_chcipher : t_cipher -> cipher AHE.
@@ -226,5 +232,224 @@ Definition game_iface : Interface :=
   [interface
      #val #[ id_game_run ] : 'unit → ciphers ;
      #val #[ id_v2_get   ] : 'unit → msg ].
+
+(* rand0 — default encryption-randomness value, used only as the [nth]
+   fallback when a [HE_enc]/[GC_enc_hop] randomness slot indexes past the
+   denotation env's randomness pool.  Well-formed game_code never reaches it
+   (every slot is populated by a prior [GC_sample]); it exists solely to keep
+   [de_rand_nth] total, since [rand AHE] is a bare Type with no canonical 0. *)
+Variable rand0 : rand AHE.
+
+(* ------------------------------------------------------------------ *)
+(* Denotation env (Checkpoint 1): the single-sort value pool, the     *)
+(* randomness pool, their pushers, and the indexed lookup helpers.    *)
+(* ------------------------------------------------------------------ *)
+
+(* gval — single-sort denotation value: a denoted he_term is either a plaintext
+   scalar (Gplain) or a ciphertext (Gcipher).  Sort indexing is deferred, so
+   the projections [as_plain]/[as_cipher] coerce on the wrong constructor by
+   returning the ring 0, mirroring the deep embedding's single-sort he_term. *)
+Inductive gval : Type :=
+| Gplain  : plain AHE -> gval
+| Gcipher : cipher AHE -> gval.
+
+(* as_plain — project a [gval] to its plaintext component, defaulting to 0 on a
+   ciphertext (the wrong sort).  Used wherever a denoted he_term is consumed in
+   a plaintext position (encryption message, [Epow] exponent, ring ops). *)
+Definition as_plain (g : gval) : plain AHE :=
+  match g with Gplain p => p | Gcipher _ => 0 end.
+
+(* as_cipher — project a [gval] to its ciphertext component, defaulting to 0 on
+   a plaintext (the wrong sort).  Used wherever a denoted he_term is consumed in
+   a ciphertext position ([Emul]/[Epow] base, [GC_ret] output). *)
+Definition as_cipher (g : gval) : cipher AHE :=
+  match g with Gcipher c => c | Gplain _ => 0 end.
+
+(* denv — denotation environment threaded through [denote_run].  Two de
+   Bruijn-style pools, each pushed at the front (index 0 is most recent):
+   [de_val] holds scalar/cipher values addressed by [HE_var], and [de_rand]
+   holds encryption-randomness addressed by the [HE_enc]/[GC_enc_hop] slot. *)
+Record denv := MkDenv {
+  de_val  : seq gval ;
+  de_rand : seq (rand AHE) ;
+}.
+
+(* empty_denv — the initial denotation env: both pools empty.  [denote_run]
+   starts from here at the top of the id_game_run oracle body. *)
+Definition empty_denv : denv := MkDenv [::] [::].
+
+(* push_val — extend the value pool with a fresh denoted value at index 0
+   (consumed by [GC_sample]'s scalar branch, [GC_let], and [GC_enc_hop]). *)
+Definition push_val (g : gval) (e : denv) : denv :=
+  MkDenv (g :: de_val e) (de_rand e).
+
+(* push_rand — extend the randomness pool with a fresh randomness at index 0
+   (consumed by [GC_sample]'s randomness branch). *)
+Definition push_rand (r : rand AHE) (e : denv) : denv :=
+  MkDenv (de_val e) (r :: de_rand e).
+
+(* de_val_nth — look up the i-th value-pool entry, defaulting to [Gplain 0]
+   when the index is out of range (only in malformed game_code). *)
+Definition de_val_nth (e : denv) (i : nat) : gval :=
+  nth (Gplain 0) (de_val e) i.
+
+(* de_rand_nth — look up the i-th randomness-pool entry, defaulting to [rand0]
+   when the index is out of range (only in malformed game_code). *)
+Definition de_rand_nth (e : denv) (i : nat) : rand AHE :=
+  nth rand0 (de_rand e) i.
+
+(* ------------------------------------------------------------------ *)
+(* Denotation of he_term (Checkpoint 2): the single-sort evaluator    *)
+(* mapping a deep-embedded message-algebra term to a [gval] under an  *)
+(* env, reusing the project's AHE operations (enc/Emul/Epow) and ring *)
+(* operations on [plain AHE].                                         *)
+(* ------------------------------------------------------------------ *)
+
+(* denote_he — evaluate a deep-embedded [he_term] to a [gval] under a denotation
+   env.  Variables resolve through [de_val]; encryptions consume a randomness
+   slot from [de_rand] and the party's public key via [nat_to_party_id];
+   homomorphic [Emul]/[Epow] and the plaintext ring ops are the project's own
+   AHE operations (never redefined).  [HE_dec] has no secret-key supply in this
+   game-code denotation and never occurs on the game path, so it defaults to
+   [Gplain 0]. *)
+Fixpoint denote_he (e : denv) (t : he_term) : gval :=
+  match t with
+  | HE_var i => de_val_nth e i
+  | HE_const k => Gplain (k%:R)
+  | HE_enc pk m r =>
+      Gcipher (enc (pkey_of_party (nat_to_party_id pk))
+                   (as_plain (denote_he e m)) (de_rand_nth e r))
+  | HE_dec _ _ => Gplain 0
+  | HE_emul a b =>
+      Gcipher (Emul (as_cipher (denote_he e a)) (as_cipher (denote_he e b)))
+  | HE_epow c x =>
+      Gcipher (Epow (as_cipher (denote_he e c)) (as_plain (denote_he e x)))
+  | HE_add a b => Gplain (as_plain (denote_he e a) + as_plain (denote_he e b))
+  | HE_sub a b => Gplain (as_plain (denote_he e a) - as_plain (denote_he e b))
+  | HE_mul a b => Gplain (as_plain (denote_he e a) * as_plain (denote_he e b))
+  end.
+
+(* ------------------------------------------------------------------ *)
+(* Denotation of game_code (Checkpoint 3): the raw_code core of the   *)
+(* id_game_run oracle.  Recurses on the game_code structure, threading *)
+(* the denotation env through each continuation and extending it INSIDE *)
+(* the continuation (so de Bruijn indices align with the binder depth). *)
+(* ------------------------------------------------------------------ *)
+
+(* denote_run — lower a [game_code] body to an SSProve [raw_code cipher_list]
+   under a denotation env.  [GC_sample] routes on the requested cardinality
+   (an n-discriminator, NOT a dependent cast): [card_msg] samples a scalar and
+   pushes it on the value pool, [card_renc] samples encryption-randomness and
+   pushes it on the randomness pool, any other [n] samples without pushing
+   (a default unused by well-formed game_code).  [GC_put] writes the protocol
+   V_2 cell; [GC_let] pushes a denoted value; [GC_enc_hop] pushes the denoted
+   encryption (the zero/real secret choice is already baked into [secret] by
+   [zero_hop_prefix]); [GC_ret] returns the denoted output ciphertext list. *)
+Fixpoint denote_run (e : denv) (gc : game_code) : raw_code cipher_list :=
+  match gc with
+  | GC_sample n k =>
+      if n == card_msg then
+        x ← sample uniform card_msg ;;
+        denote_run (push_val (Gplain (msg_of_idx x)) e) k
+      else if n == card_renc then
+        x ← sample uniform card_renc ;;
+        denote_run (push_rand (rand_of_renc (sample_to_renc x)) e) k
+      else
+        x ← sample uniform n ;; denote_run e k
+  | GC_put t k =>
+      #put V_2_cell := Some (chmsg_of_msg (as_plain (denote_he e t))) ;;
+      denote_run e k
+  | GC_let t k =>
+      denote_run (push_val (denote_he e t) e) k
+  | GC_enc_hop pk secret rnd k =>
+      denote_run
+        (push_val
+           (Gcipher (enc (pkey_of_party (nat_to_party_id pk))
+                         (as_plain (denote_he e secret)) (de_rand_nth e rnd)))
+           e) k
+  | GC_ret outs =>
+      ret ([seq chcipher_of_cipher (as_cipher (denote_he e o)) | o <- outs]
+           : cipher_list)
+  end.
+
+(* ------------------------------------------------------------------ *)
+(* Denotation of game_code as a package (Checkpoint 4): wrap the       *)
+(* raw_code core as the id_game_run oracle and pair it with the fixed  *)
+(* id_v2_get oracle (copied verbatim from game_real), over the shared  *)
+(* protocol_state locs and game_iface export interface.                *)
+(* ------------------------------------------------------------------ *)
+
+(* Lets denote_game_valid assemble the package: SSProve's mkpackage cannot
+   infer validity through the opaque denote_run recursion, so this ValidCode
+   certificate is supplied explicitly, by structural induction on gc.  Generic
+   over the env and game_code so every hybrid-ladder rung reuses one proof.
+   Naming: the _valid suffix follows SSProve's ValidCode/ValidPackage
+   certificate convention (cf. pack_valid) — the project's upstream-class
+   naming exception — and is shared by the three denote_*_valid lemmas. *)
+Lemma denote_run_valid (e : denv) (gc : game_code) :
+  ValidCode protocol_state [interface] (denote_run e gc).
+Proof.
+elim: gc e => [n k IH|t k IH|t k IH|pk secret rnd k IH|outs] e /=.
+- case: (n == card_msg); last case: (n == card_renc).
+  + by apply: valid_sampler => x; exact: IH.
+  + by apply: valid_sampler => x; exact: IH.
+  + by apply: valid_sampler => x; exact: IH.
+- by apply: valid_putr; last exact: IH.
+- exact: IH.
+- exact: IH.
+- exact: valid_ret.
+Qed.
+
+(* denote_v2_get_body — the V_2-reveal oracle body, copied verbatim from
+   [game_real]'s [id_v2_get] oracle: read [V_2_cell] and return the stored
+   sample (or the canonical 0 message when unset). *)
+Definition denote_v2_get_body : raw_code t_msg :=
+  stored ← get V_2_cell ;;
+  match stored with
+  | Some v => @ret t_msg v
+  | None   => @ret t_msg (chmsg_of_msg (0%R : plain AHE))
+  end.
+
+(* Validity certificate for the V_2-reveal oracle: denote_game_valid assembles
+   the two-oracle package by name and must supply a valid-code proof for each
+   oracle independently. *)
+Lemma denote_v2_get_valid :
+  ValidCode protocol_state [interface] denote_v2_get_body.
+Proof.
+rewrite /denote_v2_get_body.
+apply: valid_getr; first by [].
+by case=> [v|]; exact: valid_ret.
+Qed.
+
+(* denote_game_raw — the raw two-oracle map underlying [denote_game]: the
+   [id_game_run] oracle runs [denote_run] from the empty env, the [id_v2_get]
+   oracle reveals the protocol-side V_2 sample. *)
+Definition denote_game_raw (gc : game_code) : raw_package :=
+  mkfmap
+    [:: (id_game_run, mkdef 'unit cipher_list (fun _ => denote_run empty_denv gc))
+      ; (id_v2_get,   mkdef 'unit t_msg       (fun _ => denote_v2_get_body)) ].
+
+(* Discharges the pack_valid field of denote_game: SSProve cannot infer
+   ValidPackage through the opaque denote_game_raw map, so the certificate is
+   supplied explicitly (the V_2-reveal oracle via denote_v2_get_valid, the run
+   oracle via denote_run_valid). *)
+Lemma denote_game_valid (gc : game_code) :
+  ValidPackage protocol_state [interface] game_iface (denote_game_raw gc).
+Proof.
+rewrite /denote_game_raw /game_iface.
+apply: valid_package_cons; last by move=> x; exact: denote_run_valid.
+by apply: valid_package_cons; last by move=> x; exact: denote_v2_get_valid.
+Qed.
+
+(* denote_game — lower a [game_code] to an SSProve package exporting
+   [game_iface].  The [id_game_run] oracle runs [denote_run] from the empty
+   env; the [id_v2_get] oracle reveals the protocol-side V_2 sample written
+   into [V_2_cell] (verbatim from [game_real]).  Every derived game (real
+   endpoint, hybrid rungs, all-zero endpoint) is the image under [denote_game]
+   of a [game_code], so AdvantageE / perfect-equivalence steps stay well-typed
+   across the ladder without an interface cast. *)
+Definition denote_game (gc : game_code) :
+  package [interface] game_iface :=
+  mkpackage protocol_state (denote_game_raw gc) (denote_game_valid gc).
 
 End dsdp_game_code.
