@@ -162,10 +162,10 @@ Variable msg_of_chmsg : t_msg -> plain AHE.
 Variable chmsg_of_msg : plain AHE -> t_msg.
 Variable chcipher_of_cipher : cipher AHE -> t_cipher.
 
-(* Forward scaffolding (unused until the hop tasks): cipher_of_chcipher brings
-   an oracle-returned ciphertext back to [cipher AHE] in denote_game_shim, and
-   the two cancel laws collapse the encode/decode round-trips in the later
-   hop-equivalence proofs, mirroring the *_equiv_* lemmas of
+(* cipher_of_chcipher brings an oracle-returned ciphertext back to [cipher AHE]
+   in denote_game_shim; chcipher_of_cipherK and chmsg_of_msgK discharge the
+   encode/decode round-trips at the target hop in denote_run_shim_real_equiv
+   and denote_run_shim_zero_equiv, mirroring the *_equiv_* lemmas of
    dsdp_security_indcpa.v. *)
 
 (* cipher_of_chcipher — inverse of [chcipher_of_cipher], bringing an
@@ -632,5 +632,137 @@ Definition oracle_zero : raw_package :=
 Definition hybrid_ladder (gc : game_code) : seq raw_package :=
   [seq (denote_game (zero_hop_prefix i gc) : raw_package)
      | i <- iota 1 (count_hops gc - 1)].
+
+(* ------------------------------------------------------------------ *)
+(* Per-hop perfect equivalence: each hybrid-ladder rung equals the     *)
+(* oracle-routed shim composed with the matching IND-CPA oracle.       *)
+(* ------------------------------------------------------------------ *)
+
+(* Run-level witness that the directly-denoted game and the oracle-routed shim
+   composed with the real-encryption oracle are perfectly equivalent at every
+   site and hop.  Used by hop_equiv_real once simplify_eq_rel exposes the
+   run-oracle goal; proved by structural induction on gc, collapsing the target
+   hop's encode/decode round-trip via chcipher_of_cipherK and chmsg_of_msgK.
+   Naming: _equiv marks an SSProve relational perfect-equivalence (≈), not an
+   equation, in the *_equiv_* family of dsdp_security_indcpa.v (MathComp's _E is
+   for equational rewrites and would misdescribe it). *)
+Lemma denote_run_shim_real_equiv (gc : game_code) :
+  forall (e : denv) (site hop : nat),
+  ⊢ ⦃ λ '(s0, s1), s0 = s1 ⦄
+     denote_run e gc
+   ≈ code_link (denote_run_shim site hop e gc) oracle_real
+   ⦃ eq ⦄.
+Proof.
+elim: gc => [n k IH|t k IH|t k IH|pk secret k IH|outs] e site hop /=.
+- case: (n == card_msg); last case: (n == card_renc).
+  + rewrite [code_link _ _]/=. ssprove_sync_eq=> x. apply: IH.
+  + rewrite [code_link _ _]/=. ssprove_sync_eq=> x. apply: IH.
+  + rewrite [code_link _ _]/=. ssprove_sync_eq=> x. apply: IH.
+- ssprove_sync_eq. apply: IH.
+- apply: IH.
+- case Hhs: (hop == site).
+  + rewrite [code_link _ _]/=. ssprove_code_simpl. rewrite /bind /=.
+    ssprove_sync_eq=> x. rewrite chcipher_of_cipherK chmsg_of_msgK. apply: IH.
+  + rewrite [code_link _ _]/=. ssprove_sync_eq=> x. apply: IH.
+- apply: rreflexivity_rule.
+Qed.
+
+(* Real-side per-hop equivalence: ladder rung i equals the shim addressed at
+   site i composed with the real-encryption oracle.  Left endpoint of one
+   IND-CPA hop; the right endpoint is [hop_equiv_zero].  Discharged through
+   [denote_run_shim_real_equiv] on the run oracle and a [V_2_cell] read on the
+   reveal oracle. *)
+Lemma hop_equiv_real (gc : game_code) (i : nat) :
+  denote_game (zero_hop_prefix i gc) ≈₀ denote_game_shim (zero_hop_prefix i gc) i ∘ oracle_real.
+Proof.
+eapply eq_rel_perf_ind_eq.
+simplify_eq_rel m.
+- apply: rpost_weaken_rule; first by apply: denote_run_shim_real_equiv.
+  by move=> [? ?] [? ?] [-> ->].
+- ssprove_sync_eq=> stored.
+  by case: stored => [v|]; apply: r_ret.
+Qed.
+
+(* Suffix lemma for the zero-side per-hop equivalence: once the addressed site
+   has been passed (site < hop), no remaining GC_enc_hop matches, so the
+   oracle-routed shim and denote_run agree on every remaining constructor
+   without ever querying oracle_zero.  Closes the tail of the induction in
+   denote_run_shim_zero_equiv after the target hop is consumed.
+   Naming: a condition-tail helper name (post-target regime, zero side) for an
+   SSProve relational equivalence with no canonical MathComp suffix; matches the
+   file's descriptive *_shim_* helper convention. *)
+Lemma denote_run_shim_post_target_zero (gc : game_code) :
+  forall (e : denv) (site hop : nat), (site < hop)%N ->
+  ⊢ ⦃ λ '(s0, s1), s0 = s1 ⦄
+     code_link (denote_run_shim site hop e gc) oracle_zero
+   ≈ denote_run e gc
+   ⦃ eq ⦄.
+Proof.
+elim: gc => [n k IH|t k IH|t k IH|pk secret k IH|outs] e site hop Hlt /=.
+- case: (n == card_msg); last case: (n == card_renc).
+  + rewrite [code_link _ _]/=. ssprove_sync_eq=> x. by apply: IH.
+  + rewrite [code_link _ _]/=. ssprove_sync_eq=> x. by apply: IH.
+  + rewrite [code_link _ _]/=. ssprove_sync_eq=> x. by apply: IH.
+- ssprove_sync_eq. by apply: IH.
+- by apply: IH.
+- rewrite (gtn_eqF Hlt) [code_link _ _]/=.
+  ssprove_sync_eq=> x. apply: IH. by rewrite ltnS ltnW.
+- apply: rreflexivity_rule.
+Qed.
+
+(* Run-level half of the zero-side per-hop equivalence: the shim over
+   [zero_hop_prefix p gc] composed with the zero-encryption oracle equals the
+   directly-denoted run over [zero_hop_prefix p.+1 gc], the rung with one extra
+   leading hop zeroed.  The site is pinned at [p + hop] so the addressed hop is
+   reached exactly when the prefix is exhausted; at that hop the zero oracle
+   discards its message and reproduces the [HE_const 0] encryption of the
+   denoted rung, after which [denote_run_shim_post_target_zero] closes the
+   suffix.  Used by [hop_equiv_zero] after [simplify_eq_rel].
+   Naming: _equiv marks the SSProve relational equivalence (≈), zero-oracle side;
+   pairs with denote_run_shim_real_equiv in the *_equiv_* family (MathComp's _E
+   is for equations). *)
+Lemma denote_run_shim_zero_equiv (gc : game_code) :
+  forall (e : denv) (p hop : nat),
+  ⊢ ⦃ λ '(s0, s1), s0 = s1 ⦄
+     code_link (denote_run_shim (p + hop) hop e (zero_hop_prefix p gc)) oracle_zero
+   ≈ denote_run e (zero_hop_prefix p.+1 gc)
+   ⦃ eq ⦄.
+Proof.
+elim: gc => [n k IH|t k IH|t k IH|pk secret k IH|outs] e p hop /=.
+- case: (n == card_msg); last case: (n == card_renc).
+  + rewrite [code_link _ _]/=. ssprove_sync_eq=> x. apply: IH.
+  + rewrite [code_link _ _]/=. ssprove_sync_eq=> x. apply: IH.
+  + rewrite [code_link _ _]/=. ssprove_sync_eq=> x. apply: IH.
+- ssprove_sync_eq. apply: IH.
+- apply: IH.
+- case: p => [|i'] /=.
+  + rewrite add0n eqxx [code_link _ _]/=. ssprove_code_simpl. rewrite /bind /=.
+    ssprove_sync_eq=> x. rewrite chcipher_of_cipherK.
+    apply: denote_run_shim_post_target_zero. by rewrite ltnSn.
+  + have Hne : (hop == (i'.+1 + hop)%N) = false
+      by apply: ltn_eqF; rewrite -{1}[hop]add0n ltn_add2r.
+    rewrite Hne [code_link _ _]/=. ssprove_sync_eq=> x. rewrite addSnnS. apply: IH.
+- apply: rreflexivity_rule.
+Qed.
+
+(* Zero-side per-hop equivalence: the shim addressed at site i composed with the
+   zero-encryption oracle equals ladder rung i+1, the rung with one extra
+   leading hop zeroed.  Right endpoint of one IND-CPA hop; the left endpoint is
+   [hop_equiv_real].  Discharged through [denote_run_shim_zero_equiv] on the run
+   oracle (the [i] site is matched to the helper's [p + hop] form by [addn0])
+   and a [V_2_cell] read on the reveal oracle; the message cancel [chmsg_of_msgK]
+   is unused since the zero oracle discards its message. *)
+Lemma hop_equiv_zero (gc : game_code) (i : nat) :
+  denote_game_shim (zero_hop_prefix i gc) i ∘ oracle_zero ≈₀ denote_game (zero_hop_prefix i.+1 gc).
+Proof.
+eapply eq_rel_perf_ind_eq.
+simplify_eq_rel m.
+- rewrite -[i in denote_run_shim i]addn0.
+  apply: rpost_weaken_rule; first by apply: denote_run_shim_zero_equiv.
+  by move=> [? ?] [? ?] [-> ->].
+- rewrite /denote_v2_get_body.
+  ssprove_sync_eq=> stored.
+  by case: stored => [v|]; rewrite [code_link _ _]/=; apply: r_ret.
+Qed.
 
 End dsdp_game_code.
