@@ -70,6 +70,62 @@ Inductive game_code : Type :=
 | GC_enc_hop : nat -> he_term -> nat -> game_code -> game_code
 | GC_ret     : seq he_term -> game_code.
 
+(* ------------------------------------------------------------------ *)
+(* Structural functions over game_code (parameter-free).              *)
+(*                                                                    *)
+(* Encrypt-mode mechanism for the hybrid ladder: a GC_enc_hop node is *)
+(* "addressed" by its 0-based position in left-to-right traversal     *)
+(* order.  zero_hop_prefix i replaces the secret plaintext of every   *)
+(* hop with index < i by the canonical zero (HE_const 0) and leaves   *)
+(* the rest real.  all_real / all_zero are the two endpoints of this  *)
+(* prefix family; hop_sites enumerates the addressable site indices.  *)
+(* ------------------------------------------------------------------ *)
+
+(* Hybrid-ladder rung function: [zero_hop_prefix i gc] is the game at rung i
+   of the AdvantageE telescoping chain — the first i GC_enc_hop sites encrypt
+   the zero plaintext, the rest encrypt their real secret.  Adjacent rungs i
+   and i+1 differ at exactly one hop, so each ladder step is a single IND-CPA
+   reduction. *)
+Fixpoint zero_hop_prefix (i : nat) (gc : game_code) : game_code :=
+  match gc with
+  | GC_sample n k => GC_sample n (zero_hop_prefix i k)
+  | GC_put e k => GC_put e (zero_hop_prefix i k)
+  | GC_let e k => GC_let e (zero_hop_prefix i k)
+  | GC_enc_hop pk secret rnd k =>
+      match i with
+      | O => GC_enc_hop pk secret rnd (zero_hop_prefix 0 k)
+      | S i' => GC_enc_hop pk (HE_const 0) rnd (zero_hop_prefix i' k)
+      end
+  | GC_ret outs => GC_ret outs
+  end.
+
+(* Length of the hybrid ladder: the GC_enc_hop count is the number of rung
+   transitions, and the full-prefix argument that makes zero_hop_prefix
+   yield all_zero. *)
+Fixpoint count_hops (gc : game_code) : nat :=
+  match gc with
+  | GC_sample _ k => count_hops k
+  | GC_put _ k => count_hops k
+  | GC_let _ k => count_hops k
+  | GC_enc_hop _ _ _ k => S (count_hops k)
+  | GC_ret _ => 0
+  end.
+
+(* Index domain for the AdvantageE telescoping sum: each element i names one
+   rung transition (zero_hop_prefix i to zero_hop_prefix i.+1), so summing
+   over hop_sites gc covers every hop in the ladder exactly once. *)
+Definition hop_sites (gc : game_code) : seq nat := iota 0 (count_hops gc).
+
+(* Real-game endpoint of the hybrid ladder: every GC_enc_hop encrypts its
+   real secret.  Defined via zero_hop_prefix 0 so it shares the structural
+   shape of all_zero, keeping the two endpoint lemmas symmetric. *)
+Definition all_real (gc : game_code) : game_code := zero_hop_prefix 0 gc.
+
+(* Ideal-game endpoint of the hybrid ladder: every GC_enc_hop encrypts the
+   canonical zero plaintext (HE_const 0).  The IND-CPA argument bounds the
+   whole ladder by the distance between all_real and this endpoint. *)
+Definition all_zero (gc : game_code) : game_code := zero_hop_prefix (count_hops gc) gc.
+
 Section dsdp_game_code.
 
 (* ------------------------------------------------------------------ *)
