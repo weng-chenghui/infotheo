@@ -219,6 +219,7 @@ pgg-smc/instances/wreath7/wreath_smc.v
 pgg-smc/instances/wreath7/wreath_mixing.v
 pgg-smc/instances/wreath7/wreath_monodromy_profile.v
 pgg-smc/instances/wreath7/wreath_profile_security.v
+pgg-smc/instances/wreath7/wreath_crypto_rigidity.v
 pgg-smc/reconstruct/pgg_landscape_demo.v
 pgg-smc/reconstruct/pgl_bound.v
 pgg-smc/reconstruct/pgg_covering_correctness.v

@@ -147,4 +147,23 @@ Proof. by rewrite pgl_bound_unfold wreath_deck. Qed.
 Lemma wreath_demo_nonabelian : ~~ abelian (pgg_G M_wreath).
 Proof. exact: wreath_nonabelian. Qed.
 
+(******************************************************************************)
+(*     Complexity bounds (S_5-parity derived lemmas)                          *)
+(******************************************************************************)
+
+(** wreath_complexity — the brute-force search space is bounded by the group.
+    Kind: helper.
+    Why: the S_5-parity bound (mirror of s5_complexity); the L-round search
+    space never exceeds |G| = 98. Used by: tightness arguments for the wreath. *)
+Lemma wreath_complexity (L : nat) :
+  (@search_space M_wreath L <= #|pgg_G M_wreath|)%N.
+Proof. exact: search_space_leG. Qed.
+
+(* No wreath analogue of s5_search_chain: that chain bounds search_space by
+   n_traces (Cartier-Foata traces), which is defined for a RAAGType. Z_7 wr S_2
+   is NOT a right-angled Artin group (cut1 has order 7, so the group has
+   torsion, whereas RAAGs are torsion-free), so the trace machinery does not
+   apply. The generic group bound wreath_complexity above is the part that
+   transfers. *)
+
 End rigidity_wreath.

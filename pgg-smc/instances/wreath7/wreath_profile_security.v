@@ -23,8 +23,9 @@
 (*            spectral gap, so the Schreier-walk witness's SecurityAsymptotic   *)
 (*            has additive floor sa_eps_inf = 0 (s5_eps_inf_zero) and bound     *)
 (*            sqrt 5 * (1 - gap)^L with 0 <= 1 - gap < 1 (s5_decay_base_lt1),   *)
-(*            so the endpoint reaches uniform: at some L it beats the abelian   *)
-(*            floor 1/4 for every start sheet (s5_beats_abelian_floor).         *)
+(*            so the endpoint reaches uniform: at some L its var_dist falls      *)
+(*            below the abelian floor 1/4 for every start sheet                  *)
+(*            (s5_var_dist_lt_abel_floor).                                       *)
 (*                                                                            *)
 (* So the same run_* program is floored-insecure at the abelian plug and       *)
 (* asymptotically-secure at the S_5 plug: a genuine inequality, not a tie.     *)
@@ -151,7 +152,7 @@ Proof. exact: s5_spectral_convergence_gap. Qed.
 (** s5_decay_base_lt1 — the geometric decay base lies in [0, 1).
     Kind: helper.
     Why: 0 <= 1 - gap < 1, the contraction that drives s5_var_dist_bound to 0.
-    Used by: s5_beats_abelian_floor. *)
+    Used by: s5_var_dist_lt_abel_floor. *)
 Lemma s5_decay_base_lt1 : (0 <= 1 - s5_gap_R R) /\ (1 - s5_gap_R R < 1).
 Proof.
 split.
@@ -160,17 +161,17 @@ by rewrite ltrBlDr ltrDl s5_gap_R_pos.
 Qed.
 
 (******************************************************************************)
-(*     The crossover: the S_5 plug beats the abelian floor                     *)
+(*     The crossover: the S_5 var_dist falls below the abelian floor           *)
 (******************************************************************************)
 
-(** s5_beats_abelian_floor — at some word length the S_5 endpoint is closer to
+(** s5_var_dist_lt_abel_floor — at some word length the S_5 endpoint is closer to
     uniform than the abelian's permanent floor 1/4, for every start sheet.
     Kind: main.
     Why: THE quantitative separation. var_dist(S_5) <= sqrt 5 * (1 - gap)^L decays
     geometrically to 0 (s5_decay_base_lt1), so it eventually drops below 4%:R^-1,
-    the lower bound the abelian plug can never beat (abel_var_dist_floor). Same
-    run_* program, two genuinely different security characters. *)
-Lemma s5_beats_abelian_floor :
+    the lower bound the abelian plug's var_dist stays at or above for every L
+    (abel_var_dist_floor). Same run_* program, two different security characters. *)
+Lemma s5_var_dist_lt_abel_floor :
   exists L : nat, forall s : 'I_5,
     (var_dist (fdistmap (fun sigma : {perm 'I_5} => sigma s)
                         (@rho_from_words R _ _ L (path_gen_tuple 3)))
