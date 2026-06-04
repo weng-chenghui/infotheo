@@ -60,14 +60,16 @@ Inductive he_term : Type :=
 | HE_sub   : he_term -> he_term -> he_term
 | HE_mul   : he_term -> he_term -> he_term.
 
-(* Reified body of the id_game_run oracle. nat args are de Bruijn-style pool
-   indices / pubkey ids / randomness slots. GC_enc_hop is the only hoppable
-   statement; GC_let carries non-hoppable he_terms (incl. encryptions of masks). *)
+(* Reified body of the id_game_run oracle. GC_sample's nat is a sample
+   cardinality; GC_enc_hop's is a pubkey id (its randomness is sampled inline).
+   GC_enc_hop is the only hoppable statement; GC_let carries non-hoppable
+   he_terms (incl. mask encryptions, whose he_term randomness slots index the
+   de_rand pool). *)
 Inductive game_code : Type :=
 | GC_sample  : nat -> game_code -> game_code
 | GC_put     : he_term -> game_code -> game_code
 | GC_let     : he_term -> game_code -> game_code
-| GC_enc_hop : nat -> he_term -> nat -> game_code -> game_code
+| GC_enc_hop : nat -> he_term -> game_code -> game_code
 | GC_ret     : seq he_term -> game_code.
 
 (* ------------------------------------------------------------------ *)
@@ -91,10 +93,10 @@ Fixpoint zero_hop_prefix (i : nat) (gc : game_code) : game_code :=
   | GC_sample n k => GC_sample n (zero_hop_prefix i k)
   | GC_put e k => GC_put e (zero_hop_prefix i k)
   | GC_let e k => GC_let e (zero_hop_prefix i k)
-  | GC_enc_hop pk secret rnd k =>
+  | GC_enc_hop pk secret k =>
       match i with
-      | O => GC_enc_hop pk secret rnd (zero_hop_prefix 0 k)
-      | S i' => GC_enc_hop pk (HE_const 0) rnd (zero_hop_prefix i' k)
+      | O => GC_enc_hop pk secret (zero_hop_prefix 0 k)
+      | S i' => GC_enc_hop pk (HE_const 0) (zero_hop_prefix i' k)
       end
   | GC_ret outs => GC_ret outs
   end.
@@ -107,7 +109,7 @@ Fixpoint count_hops (gc : game_code) : nat :=
   | GC_sample _ k => count_hops k
   | GC_put _ k => count_hops k
   | GC_let _ k => count_hops k
-  | GC_enc_hop _ _ _ k => S (count_hops k)
+  | GC_enc_hop _ _ k => S (count_hops k)
   | GC_ret _ => 0
   end.
 
@@ -361,11 +363,13 @@ Fixpoint denote_run (e : denv) (gc : game_code) : raw_code cipher_list :=
       denote_run e k
   | GC_let t k =>
       denote_run (push_val (denote_he e t) e) k
-  | GC_enc_hop pk secret rnd k =>
+  | GC_enc_hop pk secret k =>
+      ir_hop ← sample uniform card_renc ;;
       denote_run
         (push_val
            (Gcipher (enc (pkey_of_party (nat_to_party_id pk))
-                         (as_plain (denote_he e secret)) (de_rand_nth e rnd)))
+                         (as_plain (denote_he e secret))
+                         (rand_of_renc (sample_to_renc ir_hop))))
            e) k
   | GC_ret outs =>
       ret ([seq chcipher_of_cipher (as_cipher (denote_he e o)) | o <- outs]
@@ -389,14 +393,14 @@ Fixpoint denote_run (e : denv) (gc : game_code) : raw_code cipher_list :=
 Lemma denote_run_valid (e : denv) (gc : game_code) :
   ValidCode protocol_state [interface] (denote_run e gc).
 Proof.
-elim: gc e => [n k IH|t k IH|t k IH|pk secret rnd k IH|outs] e /=.
+elim: gc e => [n k IH|t k IH|t k IH|pk secret k IH|outs] e /=.
 - case: (n == card_msg); last case: (n == card_renc).
   + by apply: valid_sampler => x; exact: IH.
   + by apply: valid_sampler => x; exact: IH.
   + by apply: valid_sampler => x; exact: IH.
 - by apply: valid_putr; last exact: IH.
 - exact: IH.
-- exact: IH.
+- by apply: valid_sampler => x; exact: IH.
 - exact: valid_ret.
 Qed.
 
@@ -493,7 +497,7 @@ Fixpoint denote_run_shim
       denote_run_shim site hop e k
   | GC_let t k =>
       denote_run_shim site hop (push_val (denote_he e t) e) k
-  | GC_enc_hop pk secret rnd k =>
+  | GC_enc_hop pk secret k =>
       if hop == site then
         #import {sig #[ id_oracle_encrypt ] : 'nat × msg → cipher_t }
           as oracle_enc ;;
@@ -502,10 +506,12 @@ Fixpoint denote_run_shim
         denote_run_shim site hop.+1
           (push_val (Gcipher (cipher_of_chcipher ch)) e) k
       else
+        ir_hop ← sample uniform card_renc ;;
         denote_run_shim site hop.+1
           (push_val
              (Gcipher (enc (pkey_of_party (nat_to_party_id pk))
-                           (as_plain (denote_he e secret)) (de_rand_nth e rnd)))
+                           (as_plain (denote_he e secret))
+                           (rand_of_renc (sample_to_renc ir_hop))))
              e) k
   | GC_ret outs =>
       ret ([seq chcipher_of_cipher (as_cipher (denote_he e o)) | o <- outs]
@@ -523,7 +529,7 @@ Lemma denote_run_shim_valid (site hop : nat) (e : denv) (gc : game_code) :
   ValidCode protocol_state (oracle_encrypt_iface t_msg t_cipher)
     (denote_run_shim site hop e gc).
 Proof.
-elim: gc site hop e => [n k IH|t k IH|t k IH|pk secret rnd k IH|outs] site hop e /=.
+elim: gc site hop e => [n k IH|t k IH|t k IH|pk secret k IH|outs] site hop e /=.
 - case: (n == card_msg); last case: (n == card_renc).
   + by apply: valid_sampler => x; exact: IH.
   + by apply: valid_sampler => x; exact: IH.
@@ -532,7 +538,7 @@ elim: gc site hop e => [n k IH|t k IH|t k IH|pk secret rnd k IH|outs] site hop e
 - exact: IH.
 - case: (hop == site).
   + by apply: valid_opr; last by move=> v; exact: IH.
-  + exact: IH.
+  + by apply: valid_sampler => x; exact: IH.
 - exact: valid_ret.
 Qed.
 
