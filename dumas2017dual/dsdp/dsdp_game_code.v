@@ -571,4 +571,60 @@ Definition denote_game_shim (gc : game_code) (site : nat) :
          ; (id_v2_get,   mkdef 'unit t_msg (fun _ => denote_v2_get_body)) ])
     (denote_game_shim_valid gc site).
 
+(* ------------------------------------------------------------------ *)
+(* IND-CPA encryption oracle at this section's parameters: the two     *)
+(* package forms (carry .(locs)) and their raw aliases (for the        *)
+(* oracle composition in the per-hop equivalence).                     *)
+(* ------------------------------------------------------------------ *)
+
+(* oracle_real_pkg — the real-encryption IND-CPA oracle instantiated at this
+   Section's AHE parameters.  The package (not raw_package) form is needed
+   wherever the hybrid-ladder advantage bound's adversary-disjointness premises
+   consume a located package via [.(locs)]. *)
+Definition oracle_real_pkg :
+  package [interface] (oracle_encrypt_iface t_msg t_cipher) :=
+  oracle_encrypt_real_pkg AHE Renc card_renc renc_card rand_of_renc
+                          t_msg t_cipher msg_of_chmsg chcipher_of_cipher
+                          pkey_of_party.
+
+(* oracle_zero_pkg — the zero-encryption IND-CPA oracle instantiated at this
+   Section's AHE parameters.  Paired with [oracle_real_pkg] as the real-or-zero
+   pair; both package forms supply [.(locs)] to the adversary-disjointness
+   premises of the hybrid-ladder advantage bound. *)
+Definition oracle_zero_pkg :
+  package [interface] (oracle_encrypt_iface t_msg t_cipher) :=
+  oracle_encrypt_zero_pkg AHE Renc card_renc renc_card rand_of_renc
+                          t_msg t_cipher chcipher_of_cipher pkey_of_party.
+
+(* oracle_real — raw-package alias of the real-encryption IND-CPA oracle, for the
+   [∘] composition [denote_game_shim gc site ∘ oracle_real] that reproduces a
+   real-hop rung of the hybrid ladder. *)
+Definition oracle_real : raw_package :=
+  oracle_encrypt_real AHE Renc card_renc renc_card rand_of_renc
+                      t_msg t_cipher msg_of_chmsg chcipher_of_cipher
+                      pkey_of_party.
+
+(* oracle_zero — raw-package alias of the zero-encryption IND-CPA oracle, for the
+   [∘] composition [denote_game_shim gc site ∘ oracle_zero] that reproduces a
+   zero-hop rung of the hybrid ladder. *)
+Definition oracle_zero : raw_package :=
+  oracle_encrypt_zero AHE Renc card_renc renc_card rand_of_renc
+                      t_msg t_cipher chcipher_of_cipher pkey_of_party.
+
+(* ------------------------------------------------------------------ *)
+(* Hybrid ladder: the intermediate rungs of the AdvantageE telescoping *)
+(* chain whose endpoints are the real and all-zero games.              *)
+(* ------------------------------------------------------------------ *)
+
+(* hybrid_ladder — the intermediate rungs of the hybrid ladder, for use as the
+   middle argument of [Advantage_triangle_chain].  Rung i is
+   [denote_game (zero_hop_prefix i gc)] for i in 1 .. count_hops gc - 1; the
+   endpoints [denote_game (all_real gc)] (rung 0) and [denote_game (all_zero gc)]
+   (rung count_hops gc) are supplied separately as [P] and [Q], so
+   [advantage_sum P (hybrid_ladder gc) Q A] telescopes into count_hops gc
+   consecutive single-hop AdvantageE terms. *)
+Definition hybrid_ladder (gc : game_code) : seq raw_package :=
+  [seq (denote_game (zero_hop_prefix i gc) : raw_package)
+     | i <- iota 1 (count_hops gc - 1)].
+
 End dsdp_game_code.
