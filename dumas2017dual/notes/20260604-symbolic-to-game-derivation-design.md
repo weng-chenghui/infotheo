@@ -165,10 +165,12 @@ games differ at exactly one site.
 site, the inlined game is `≈₀` to `denote_game_shim gc site` linked with the
 real oracle, and the next game is `≈₀` to the same shim linked with the zero
 oracle. Because the canonical sample order makes the two sides identical except
-at the site, the proof is: synchronise the shared prefix (`ssprove_sync_eq`),
-then close by reflexivity — *no swaps, no encoding round-trip cancels*. This is
-the design payoff: generation collapses the six near-identical hand proofs into
-one generic lemma instantiated k times.
+at the site, the proof synchronises the shared prefix (`ssprove_sync_eq`) and closes
+with *no swaps* — collapsing the six near-identical hand proofs into one generic
+lemma. (Outcome: the encode/decode cancels `chcipher_of_cipherK` /
+`chmsg_of_msgK` *do* fire, as expected — the oracle returns a `t_cipher` that
+round-trips; "no swaps" is the payoff, not "no cancels". Realising the canonical
+order required a design correction discovered at the T8 gate — see §9.1.)
 
 `advantage_le`: triangle inequality over `hybrid_ladder`, each consecutive hop
 bounded via `hop_equiv` + `Advantage_link` + the IND-CPA axiom
@@ -195,28 +197,45 @@ Charlie's c_3) and the homomorphic assembly as `GC_let`s, matching
 
 ## 9. Risks and open questions
 
-1. **Generic `hop_equiv` (highest risk).** The argument that the canonical
-   sample order makes the two sides "identical except at one statement" must
-   survive SSProve's `simplify_eq_rel` / `ssprove_sync_eq` machinery on a
-   *generated* term. Mitigation: prototype `hop_equiv` on the smallest possible
-   `game_code` (one sample, one `GC_enc_hop`, one `GC_ret`) before scaling.
-   Proving is delegated to rocq-prover; tactic scripts are NOT pre-specified
-   here (they must be verified against the installed SSProve, per project
-   policy).
-2. **`ValidPackage` of generated packages.** Discharging validity once,
-   parametrically over `gc`, may need a structural lemma over `game_code`
-   (analogue of the file's `valid_code_link_residual`). Named, not yet designed.
-3. **`raw_code` vs `package`.** Whether `denote_game` targets `raw_code` and the
-   package wrapper is separate, or targets `package` directly. Lean: `raw_code`
-   core + a thin wrapper, so validity is isolated.
-4. **`he_term` sorts.** Minimal viable: `Plain` and `Cipher`. Confirm whether
-   `Key`/`Rand` need to be first-class or can be opaque parameters.
+1. **Generic `hop_equiv` — RESOLVED (with a design correction).** The T8 gate
+   prototype FAILED on the first attempt: the original design pre-sampled each
+   hop's randomness into the `de_rand` pool, but the IND-CPA oracle samples its
+   randomness internally at the hop, giving a 2-vs-1 sample-count mismatch (the
+   shim carried a dead up-front sample plus the oracle's), which would have
+   needed `ssprove_swap` + dead-sample absorption. Fix: `GC_enc_hop` samples its
+   randomness *inline* (binder `ir_hop`), coupling 1:1 with the oracle's sample.
+   After the fix, `hop_equiv_real` and `hop_equiv_zero` proved generically over
+   `(gc, i)` by induction (helpers `denote_run_shim_real_equiv`,
+   `denote_run_shim_post_target_zero`, `denote_run_shim_zero_equiv`), with NO
+   `ssprove_swap` anywhere — only the expected cancels. The §7 "no swaps" payoff
+   holds; the "no cancels" over-claim did not.
+2. **`ValidPackage` of generated packages — RESOLVED.** Constructing a `package`
+   *value* requires its validity proof, so `denote_run_valid` /
+   `denote_game_valid` (and the shim analogues) were proved by induction on
+   `game_code` as part of `denote_game` itself; no separate residual lemma was
+   needed.
+3. **`raw_code` vs `package` — RESOLVED.** `denote_game` targets `package`
+   directly (the smart constructor needed the explicit validity certificate
+   above); no `raw_code`-core/wrapper split was necessary.
+4. **`he_term` sorts — RESOLVED (single-sort sufficed).** A single-sorted
+   `he_term` with a 2-case value sum `gval` (`Gplain`/`Gcipher`) plus totality
+   defaults lowered cleanly; no `Plain`/`Cipher` sort index was needed. `Key`/
+   `Rand` stayed opaque (party-id nats and rand-slot nats).
 
-## 10. Success criteria
+## 10. Success criteria — ALL MET (back end complete)
 
-- `game_code`, `denote_game`, `denote_game_shim`, `hybrid_ladder` defined and
-  type-checked; `denote_game` package wrapper is a `ValidPackage`.
-- `hop_equiv` and `advantage_le` proved generically (no `Admitted`,
-  no new custom axioms beyond the existing `enc_ind_cpa_real_or_zero`).
-- `gc_dsdp` validation: `advantage_le` instantiates to `2·epsilon_cpa`.
-- Naming passes the project's MathComp-style audit; rocq-auditor Stage-2 clean.
+- ✓ `game_code`, `denote_game`, `denote_game_shim`, `hybrid_ladder` defined and
+  type-checked; `denote_game` is a `ValidPackage` (`denote_game_valid`).
+- ✓ `hop_equiv` (`hop_equiv_real`/`hop_equiv_zero`) and `advantage_le` proved
+  generically — all `Qed`, no `Admitted`, no new custom axioms beyond the
+  existing `enc_ind_cpa_real_or_zero`.
+- ✓ `gc_dsdp` validation: `advantage_gc_dsdp` instantiates `advantage_le` to
+  `2·epsilon_cpa` (de Bruijn indices verified faithful to `game_real`).
+- ✓ Naming passes the MathComp-style audit; the pre-commit rocq-audit hook gates
+  every commit (`Naming:` justifications recorded for the SSProve `*_equiv_*`
+  upstream-class exception on the ≥5-component helper names).
+
+Deferred (follow-ups, not blocking the back end): extract the shared interface
+vocabulary into `dsdp_game_iface.v` once `dsdp_security_indcpa.v` is retired; the
+symbolic-interpreter front end (`Symbolic_AHEnc` + `game_of_trace`, sub-project
+2); the IT `1/m` leg; the `1/m + 2·epsilon_cpa` composition theorem.
