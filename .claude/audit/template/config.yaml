@@ -1,0 +1,34 @@
+audit_model: sonnet
+daily_token_cap: 2000000
+escalation_model: opus
+excluded_paths:
+- _build/**
+- rocq_mcp_cache_*.v
+- '**/extraction/**'
+- .lia.cache
+- .Makefile.d/**
+- .claude/audit/fixtures/**
+max_agent_lines: 4000
+max_attempts_per_diff: 3
+monthly_usd_cap: 50
+on_agent_failure: block
+on_agent_failure_reason: ''
+oscillation_log_ttl_days: 7
+per_commit_wall_seconds: 600
+pricing:
+  opus_input_per_mtok: 15
+  opus_output_per_mtok: 75
+  sonnet_input_per_mtok: 3
+  sonnet_output_per_mtok: 15
+stage1_enabled: true
+stage2_enabled: true
+stage2_parallelism_cap: 8
+strict_comment_coverage: false
+# Allowed labels for the @main <label> comment tag (Part A).
+main_purpose_labels:
+  - security
+  - correctness
+  - architecture
+  - bound
+# Opt-in agent check that prose matches the claimed @main pillar (H004). Default off.
+comment_semantic_check: false

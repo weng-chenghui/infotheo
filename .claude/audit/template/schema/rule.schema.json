@@ -1,0 +1,109 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://infotheo-pgg/audit/rule.schema.json",
+  "title": "Rocq audit rule",
+  "type": "object",
+  "required": ["id", "category", "title", "severity", "enabled", "stage_mode", "authority", "scope", "fix_hint"],
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[A-Z][0-9]{3}$"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "deprecated_tactics",
+        "verbose_idioms",
+        "opaque_signatures",
+        "unused_hypotheses",
+        "overlong_proofs",
+        "naming",
+        "mathcomp_suffix",
+        "formatting",
+        "operational"
+      ]
+    },
+    "title": { "type": "string", "minLength": 3 },
+    "severity": { "type": "string", "enum": ["error", "warning", "info"] },
+    "enabled": { "type": "boolean" },
+    "stage_mode": { "type": "string", "enum": ["stage1_only", "stage2_only", "both", "sentinel"] },
+    "authority": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 1
+    },
+    "fast_pattern": {
+      "type": "object",
+      "required": ["pattern"],
+      "additionalProperties": false,
+      "properties": {
+        "pattern": { "type": "string" },
+        "ignore_in_comments": { "type": "boolean", "default": true },
+        "file_glob": { "type": "string", "default": "*.v" },
+        "severity_override": { "type": "string", "enum": ["error", "warning", "info"] },
+        "notes": { "type": "string" }
+      }
+    },
+    "fast_check": {
+      "type": "object",
+      "required": ["kind"],
+      "additionalProperties": false,
+      "properties": {
+        "kind": { "type": "string", "enum": [
+          "missing_preceding_comment",
+          "naming_conformance_or_justify",
+          "comment_tag_absence",
+          "comment_tag_validity",
+          "comment_composes_reachability"
+        ] },
+        "severity_override": { "type": "string", "enum": ["error", "warning", "info"] },
+        "parameters": { "type": "object" }
+      }
+    },
+    "agent_prompt": { "type": "string", "minLength": 10 },
+    "scope": { "type": "string", "enum": ["changed_lemmas", "changed_files", "changed_hunks"] },
+    "kernel_contract": {
+      "type": "object",
+      "required": ["name"],
+      "additionalProperties": false,
+      "properties": {
+        "name": { "type": "string", "enum": ["unused_hypothesis", "goal_closed_at_line"] },
+        "parameters": { "type": "object" }
+      }
+    },
+    "fix_hint": { "type": "string", "minLength": 3 },
+    "exceptions": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "escalation": {
+      "type": "object",
+      "required": ["fire_count", "promote_to"],
+      "additionalProperties": false,
+      "properties": {
+        "fire_count": { "type": "integer", "minimum": 1 },
+        "promote_to": { "type": "string", "enum": ["error", "warning"] }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "stage_mode": { "enum": ["stage1_only", "both"] } }
+      },
+      "then": {
+        "anyOf": [
+          { "required": ["fast_pattern"] },
+          { "required": ["fast_check"] }
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": { "stage_mode": { "enum": ["stage2_only", "both"] } }
+      },
+      "then": { "required": ["agent_prompt"] }
+    }
+  ]
+}
