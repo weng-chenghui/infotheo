@@ -43,21 +43,47 @@ single externally certified spectral inequality.
 
 \section{Introduction}
 
-A threshold secret-sharing protocol lets a dealer split a secret into shares so
-that any sufficiently large coalition can reconstruct it and any smaller
-coalition learns nothing. We study such protocols in a multiparty computation
-setting where the dealer additionally applies a \emph{false shuffle} to the
-dealt shares, that is, a permutation drawn from a fixed finite group. The group
-that supplies this shuffle is the single tunable parameter of the whole
+Threshold secret sharing, introduced by Shamir~\cite{shamir1979}, lets a dealer
+split a secret into shares so that any sufficiently large coalition can
+reconstruct it and any smaller coalition learns nothing. In Shamir's scheme the secret is the constant term of a random
+polynomial and each party holds one evaluation of it, so any $k$ shares
+interpolate the secret and any fewer reveal nothing about it. We study such
+protocols in a multiparty computation setting where the dealer additionally
+permutes the dealt card positions by an element drawn from a fixed finite group. The secret is fixed by the starting
+positions and is recovered by a reconstruction that is invariant under this
+permutation, so the permutation never changes what is recovered. What it changes
+is what an observer sees: it scrambles the observed positions, and the better the
+permutation mixes, the closer those positions are to uniform. The permutation is
+therefore a secrecy device, not a re-encoding of the secret, and secrecy of the
+observables through permutation is the property the family tunes. The group that
+supplies the permutation is the single tunable parameter of the whole
 construction. We call it the monodromy group because, in the geometric reading
 of the framework, it is the monodromy of a branched cover of the deck.
+
+This permutation view is the abstract form of card-based secure
+computation~\cite{koch2015,ruangwises2019}, where a multiparty computation is
+carried out with a physical deck of cards. The foundational example is the
+five-card trick of den Boer~\cite{denboer1989}: a two-party protocol that
+computes the logical AND of two private bits with five cards. Each player encodes a bit as an arrangement of two cards, the players
+apply a random cyclic cut to the pile, and turning the cards face up reveals the
+AND and nothing more. The cyclic cut is a permutation drawn from the cyclic group
+on the deck, and it is exactly the secrecy device above: it hides which input
+arrangement produced the revealed pattern, while the output is read off by a
+decoding that the cut leaves unchanged. Our framework keeps this structure and
+lets the cut be a permutation from an arbitrary monodromy group. The cards become
+the card positions, the cut becomes the group element, the computed value is
+encoded in the starting positions and recovered by a permutation-invariant
+reconstruction, and the strength of the secrecy is how well the group mixes the
+deck. The five-card trick is then one instance of the family, recovered by taking
+the group to be cyclic, and the instances studied here replace that cut by larger
+groups whose mixing and recovery we analyse.
 
 Our goal is a protocol \emph{family} in which the program is fixed and only the
 plugged group varies. Concretely, the sequence of sends and receives, the value
 each party observes, and the secret recovered at the end are invariant across
 the family. What varies is twofold. The first varying quantity is
 \emph{security}, by which we mean anonymity: how close the distribution of the
-observed shuffle is to the uniform distribution on the deck. The second varying
+observed card positions is to the uniform distribution on the deck. The second varying
 quantity is \emph{recoverability}, by which we mean both the privacy threshold
 below which a coalition learns nothing and the conditions under which the dealt
 secret can be reconstructed. The plug-in principle is therefore that identical
@@ -225,14 +251,14 @@ cards, and a share is a card position in $\{0,\dots,N-1\}$.
 
 A run proceeds in four steps. In the \emph{split} step the dealer encodes the
 secret into the $T$-share tuple through the scheme's encoder. In the
-\emph{compute} step the dealer applies the false shuffle: it hands party $j$ the
-share at position $g(j)$, where $g$ is the plugged group element. In the
+\emph{compute} step the dealer applies the secrecy permutation: it hands party
+$j$ the share at position $g(j)$, where $g$ is the plugged group element. In the
 \emph{share} step each party forwards its received share to the recoverer. In
 the \emph{recover} step the recoverer collects the $T$ shares and applies the
-scheme's reconstruction. The three roles are realised by the programs
-\id{exchange\_dealer}, \id{exchange\_player}, and \id{exchange\_verifier}, and
-the dealt payload carries the plugged group's shuffle, so the group enters the
-protocol exactly at the compute step.
+scheme's reconstruction, which is invariant under the permutation. The three
+roles are realised by the programs \id{exchange\_dealer}, \id{exchange\_player},
+and \id{exchange\_verifier}, and the dealt payload carries the plugged group's
+permutation, so the group enters the protocol exactly at the compute step.
 
 \subsubsection{Plug-in Mechanism}
 
@@ -425,9 +451,13 @@ probability on a card outside the block for every protocol length. The variation
 distance is therefore bounded below by a fixed positive constant, independent of
 length, so the walk does not mix and the security witness carries no asymptotic
 record. The instance is the insecure baseline of the family: it certifies its
-recoverability through a genus-zero covering built from Reed-Solomon codes and
-the algebraic rigidity record, and it plugs into the same shared program as the
-mixing instances, where it exhibits the permanent floor that the mixing plugs
-escape.
+recoverability through a genus-zero covering built from Reed-Solomon codes, which
+is exactly Shamir's secret-sharing scheme~\cite{shamir1979}, together with the
+algebraic rigidity
+record, and it plugs into the same shared program as the mixing instances, where
+it exhibits the permanent floor that the mixing plugs escape.
+
+\bibliographystyle{plain}
+\bibliography{20260605T063044Z-pgg_protocol_family}
 
 \end{document}
