@@ -58,15 +58,24 @@ Let priv_keyT := priv_key AHE.
 
 (* Data type and constructors from interface *)
 Let data := di_data DI.
-Let d := di_d DI.
-Let e := di_e DI.
-Let k := di_priv_key DI.
-Let Recv_dec := @di_Recv_dec AHE DI.
-Let Recv_enc := @di_Recv_enc AHE DI.
+Let d := di_data_of_plain DI.
+Let e := di_data_of_cipher DI.
+Let k := di_data_of_priv_key DI.
 
-(* HE operations from the AHEncType - using @ to provide AHEncType explicitly *)
-Let Emul := @Emul AHE.
-Let Epow := @Epow AHE.
+(* Per-instance decoder for recv-and-decrypt: at the Standard interface this is
+   the scheme's [dec].  Typed through the interface carriers so DRecv_dec can
+   infer DI from its [decode] argument. *)
+Let decode : di_priv_keyT DI -> di_cipherT DI -> option (di_msgT DI) := @dec AHE.
+
+(* HE operations sourced from the interface (definitionally @Emul/@Epow AHE) *)
+Let Emul := di_emul DI.
+Let Epow := di_epow DI.
+
+(* Plaintext ring operations sourced from the interface
+   (definitionally +%R / subtraction / *%R at the Standard interface) *)
+Let dadd := di_add DI.
+Let dsub := di_sub DI.
+Let dmul := di_mul DI.
 
 Notation "u *h w" := (Emul u w).
 Notation "u ^h w" := (Epow u w).
@@ -81,9 +90,10 @@ Variable pn : party_id -> nat.
 (* Public key mapping: each party has an associated public key *)
 Variable ek : party_id -> pub_key AHE.
 
-(* Party-indexed encryption: maps party to their public key for enc *)
+(* Party-indexed encryption: maps party to their public key for enc.
+   Sourced from the interface (definitionally @enc AHE at Standard). *)
 Definition enc_pk (p : party_id) (m : msgT) (r : randT) : encT :=
-  enc (ek p) m r.
+  di_encrypt DI (ek p) m r.
 Local Notation E := enc_pk.
 
 Definition pbob (dk : priv_keyT)(v2 : msgT)(rb1 rb2 : randT) :
@@ -91,7 +101,7 @@ Definition pbob (dk : priv_keyT)(v2 : msgT)(rb1 rb2 : randT) :
   DInit (k dk) (
   DInit (d v2) (
   DSend (pn alice) (e (E bob v2 rb1)) (
-  DRecv_dec (pn alice) dk (fun d2 =>
+  DRecv_dec decode (pn alice) dk (fun d2 =>
   DRecv_enc (pn alice) (fun a3 =>
     DSend (pn charlie) (e (a3 *h (E charlie d2 rb2))) (
   DFinish)))))).
@@ -101,7 +111,7 @@ Definition pcharlie (dk : priv_keyT)(v3 : msgT)(rc1 rc2 : randT) :
   DInit (k dk) (
   DInit (d v3) (
   DSend (pn alice) (e (E charlie v3 rc1)) (
-  DRecv_dec (pn bob) dk (fun d3 => (
+  DRecv_dec decode (pn bob) dk (fun d3 => (
     DSend (pn alice) (e (E alice d3 rc2))
   DFinish))))).
 
@@ -120,8 +130,8 @@ Definition palice (dk : priv_keyT)(v1 u1 u2 u3 r2 r3: msgT)(ra1 ra2 : randT) :
   let a3 := (c3 ^h u3 *h (E charlie r3 ra2)) in
     DSend (pn bob) (e a2) (
     DSend (pn bob) (e a3) (
-    DRecv_dec (pn charlie) dk (fun g =>
-    DRet (d ((g - r2 - r3 + u1 * v1))))))))))))))).
+    DRecv_dec decode (pn charlie) dk (fun g =>
+    DRet (d (dadd (dsub (dsub g r2) r3) (dmul u1 v1))))))))))))))).
   
 (* Randomness variables for each party's encryptions *)
 Variables (rb1 rb2 rc1 rc2 ra1 ra2 : randT).
@@ -175,6 +185,19 @@ Local Lemma enc_curry_eq (kk : pub_key AHE) (m : msgT) (r : randT) :
   enc kk m r = ahe_enc.enc_curry AHE kk (m, r).
 Proof. by []. Qed.
 
+(* Bridges from the interface operations (used by the protocol procs) back to
+   the underlying AHEncType operations (used by the homomorphic morphism lemmas).
+   These hold by computation since DI = Standard_DSDP_Interface AHE. *)
+Local Lemma enc_pkE (p : party_id) (m : msgT) (r : randT) :
+  enc_pk p m r = enc (ek p) m r.
+Proof. by []. Qed.
+
+Local Lemma EmulE : Emul = @ahe_enc.Emul AHE.
+Proof. by []. Qed.
+
+Local Lemma EpowE : Epow = @ahe_enc.Epow AHE.
+Proof. by []. Qed.
+
 (* 
    Protocol correctness theorem (algebraic version):
    
@@ -213,7 +236,7 @@ Definition alice_a3 : encT :=
 Lemma alice_a2_value : exists rr,
   alice_a2 = E bob (v2 * u2 + r2) rr.
 Proof.
-  rewrite /alice_a2 /bob_encrypted_input /Epow /enc_pk /Emul.
+  rewrite /alice_a2 /bob_encrypted_input EpowE EmulE !enc_pkE.
   rewrite !enc_curry_eq.
   rewrite -Epow_eq_mul -Emul_eq_add.
   by eexists.
@@ -223,7 +246,7 @@ Qed.
 Lemma alice_a3_value : exists rr,
   alice_a3 = E charlie (v3 * u3 + r3) rr.
 Proof.
-  rewrite /alice_a3 /charlie_encrypted_input /Epow /enc_pk /Emul.
+  rewrite /alice_a3 /charlie_encrypted_input EpowE EmulE !enc_pkE.
   rewrite !enc_curry_eq.
   rewrite -Epow_eq_mul -Emul_eq_add.
   by eexists.
@@ -240,10 +263,11 @@ Definition bob_combined (a3_enc : encT) : encT :=
 Lemma bob_combined_value : exists rr,
   bob_combined alice_a3 = E charlie (v3 * u3 + r3 + d2_value) rr.
 Proof.
-  rewrite /bob_combined /Emul /enc_pk.
+  rewrite /bob_combined EmulE !enc_pkE.
   have [rr3 Ha3] := alice_a3_value.
-  rewrite /enc_pk in Ha3.
-  rewrite Ha3 !enc_curry_eq -Emul_eq_add.
+  rewrite Ha3 !enc_curry_eq.
+  rewrite enc_pkE enc_curry_eq.
+  rewrite -Emul_eq_add.
   by eexists.
 Qed.
 

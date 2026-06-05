@@ -224,7 +224,7 @@ Definition dsdp_palice_code
     dsdp_pismc_locs
     data_dsdp dsdp_data_to_cipher dsdp_cipher_to_data
     dsdp_dtype
-    (@palice AHE pkey_of_party dk v1 u1 u2 u3 r2 r3 ra1 ra2).
+    (@palice (Standard_DSDP_Interface AHE) (@dec AHE) pkey_of_party dk v1 u1 u2 u3 r2 r3 ra1 ra2).
 
 (** dsdp_pbob_code — SSProve [code] obtained by translating Bob's
     piSMC program.  Same translator as [dsdp_palice_code] under the
@@ -245,7 +245,7 @@ Definition dsdp_pbob_code
     dsdp_pismc_locs
     data_dsdp dsdp_data_to_cipher dsdp_cipher_to_data
     dsdp_dtype
-    (@pbob AHE pkey_of_party dk v2 rb1 rb2).
+    (@pbob (Standard_DSDP_Interface AHE) (@dec AHE) pkey_of_party dk v2 rb1 rb2).
 
 (** dsdp_pcharlie_code — SSProve [code] obtained by translating
     Charlie's piSMC program.  Symmetric to [dsdp_pbob_code].
@@ -262,7 +262,7 @@ Definition dsdp_pcharlie_code
     dsdp_pismc_locs
     data_dsdp dsdp_data_to_cipher dsdp_cipher_to_data
     dsdp_dtype
-    (@pcharlie AHE pkey_of_party dk v3 rc1 rc2).
+    (@pcharlie (Standard_DSDP_Interface AHE) (@dec AHE) pkey_of_party dk v3 rc1 rc2).
 
 (** pbob_head_send_eq — exposes the first ciphertext sent by Bob's
     translated SSProve code as [chcipher_of_cipher (enc (pkey_of_party
