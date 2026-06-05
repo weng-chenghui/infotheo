@@ -12,28 +12,38 @@ Local Open Scope ring_scope.
 
 Section smc_dsdp_program.
 
-(* Parameterize by an AHEncType instance *)
-Variable AHE : AHEncType.
+(* Parameterize by a standalone DSDP interface.
+   The same protocol text drives the cryptographic (Standard) instance below
+   and a parameter-free symbolic instance. *)
+Variable DI : DSDP_Interface.
 
-(* Use standard DSDP interface for data types *)
-Let DI := Standard_DSDP_Interface AHE.
+(* Per-instance decoder for recv-and-decrypt (Standard supplies the scheme's
+   [dec]; the symbolic instance supplies [HE_dec]). *)
+Variable decode : di_priv_keyT DI -> di_cipherT DI -> option (di_msgT DI).
 
-(* Extract types from the scheme *)
-Let msgT := plain AHE.
-Let randT := rand AHE.
-Let encT := cipher AHE.
-Let priv_keyT := priv_key AHE.
-Let pub_keyT := pub_key AHE.
+(* Extract types from the interface *)
+Let msgT := di_msgT DI.
+Let randT := di_randT DI.
+Let encT := di_cipherT DI.
+Let priv_keyT := di_priv_keyT DI.
+Let pub_keyT := di_pub_keyT DI.
 
 (* Data type and constructors from interface *)
 Let data := di_data DI.
-Let d := di_d DI.
-Let e := di_e DI.
-Let priv_key := di_priv_key DI.
+Let d := di_data_of_plain DI.
+Let e := di_data_of_cipher DI.
+Let priv_key := di_data_of_priv_key DI.
 
-(* HE operations from the scheme - using @ to provide scheme explicitly *)
-Let Emul := @Emul AHE.
-Let Epow := @Epow AHE.
+(* HE operations sourced from the interface *)
+Let Emul := di_emul DI.
+Let Epow := di_epow DI.
+
+(* Plaintext ring operations sourced from the interface (used by the final Ret;
+   abstracted so the procs typecheck at a symbolic instance whose plaintexts
+   carry no GRing structure). *)
+Let dadd := di_add DI.
+Let dsub := di_sub DI.
+Let dmul := di_mul DI.
 
 Notation "u *h w" := (Emul u w).
 Notation "u ^h w" := (Epow u w).
@@ -54,10 +64,10 @@ Coercion nat_to_party_id : nat >-> party_id.
 (* Make dtype and data explicit for sproc type annotations *)
 Arguments sproc dtype data party {_} {_}.
 
-(* Use session-typed wrappers from dsdp_interface directly *)
-Let PSend {party n env} := @DSend AHE party n env.
-Let Recv_dec {party n env} := @DRecv_dec AHE party n env.
-Let Recv_enc {party n env} := @DRecv_enc AHE party n env.
+(* Use session-typed wrappers parameterized by the interface *)
+Let PSend {party n env} := @DSend DI party n env.
+Let Recv_dec {party n env} := @DRecv_dec DI decode party n env.
+Let Recv_enc {party n env} := @DRecv_enc DI party n env.
 
 (** * Data wrapper shorthand notations *)
 
@@ -94,11 +104,11 @@ Notation "'Recv<' p '>' '#' dk x '=>' P" :=
 (******************************************************************************)
 
 (* Public key mapping: each party has an associated public key *)
-Variable ek : party_id -> pub_key AHE.
+Variable ek : party_id -> di_pub_keyT DI.
 
 (* Party-indexed encryption: maps party to their public key for enc *)
 Definition enc_pub_key (p : party_id) (m : msgT) (r : randT) : encT :=
-  enc (ek p) m r.
+  di_encrypt DI (ek p) m r.
 Local Notation "'E<' r '>' p m" := (enc_pub_key p m r)
   (at level 10, r constr at level 0, p constr at level 0, m constr at level 0,
    format "'E<' r '>'  p  m").
@@ -131,56 +141,8 @@ Definition palice (dk : priv_keyT)(v1 u1 u2 u3 r2 r3: msgT)(ra1 ra2 : randT)
      Send<bob_idx> $(c2 ^h u2 *h (E<ra1> bob_idx r2)) ;
      Send<bob_idx> $(c3 ^h u3 *h (E<ra2> charlie_idx r3)) ;
      Recv<charlie_idx> #dk g =>
-     Ret &(g - r2 - r3 + u1 * v1) }.
+     Ret &(dadd (dsub (dsub g r2) r3) (dmul u1 v1)) }.
 
-
-(******************************************************************************)
-(** * Cross-equality with dsdp_program                                        *)
-(** * Proves that piSMC programs equal the original dsdp_program definitions  *)
-(******************************************************************************)
-
-(* Party-to-nat mapping and hypotheses relating it to concrete indices.
-   DSDP uses abstract party_id variables. We need hypotheses to connect
-   pn with concrete indices. *)
-Variable pn : party_id -> nat.
-Hypothesis pn_alice : pn alice = alice_idx.
-Hypothesis pn_bob : pn bob = bob_idx.
-Hypothesis pn_charlie : pn charlie = charlie_idx.
-Hypothesis np_alice : nat_to_party_id alice_idx = alice.
-Hypothesis np_bob : nat_to_party_id bob_idx = bob.
-Hypothesis np_charlie : nat_to_party_id charlie_idx = charlie.
-
-(* Import original programs from dsdp_program *)
-Let palice_orig := @dsdp_program.palice AHE bob charlie pn ek.
-Let pbob_orig := @dsdp_program.pbob AHE alice bob charlie pn ek.
-Let pcharlie_orig := @dsdp_program.pcharlie AHE alice bob charlie pn ek.
-
-(* Cross-equality proofs on erased processes (proc, not sproc).
-   The sproc types differ in session env indices, but erased procs are equal
-   when pn maps parties to the expected concrete indices. *)
-Lemma alice_cross_eq dk' v1' u1' u2' u3' r2' r3' ra1' ra2' :
-  erase (palice dk' v1' u1' u2' u3' r2' r3' ra1' ra2') =
-  erase (palice_orig dk' v1' u1' u2' u3' r2' r3' ra1' ra2').
-Proof.
-by rewrite /palice /palice_orig /dsdp_program.palice pn_bob pn_charlie
-           /enc_pub_key /dsdp_program.enc_pk np_bob np_charlie.
-Qed.
-
-Lemma bob_cross_eq dk' v2' rb1' rb2' :
-  erase (pbob dk' v2' rb1' rb2') =
-  erase (pbob_orig dk' v2' rb1' rb2').
-Proof.
-by rewrite /pbob /pbob_orig /dsdp_program.pbob pn_alice pn_charlie
-           /enc_pub_key /dsdp_program.enc_pk np_bob np_charlie.
-Qed.
-
-Lemma charlie_cross_eq dk' v3' rc1' rc2' :
-  erase (pcharlie dk' v3' rc1' rc2') =
-  erase (pcharlie_orig dk' v3' rc1' rc2').
-Proof.
-by rewrite /pcharlie /pcharlie_orig /dsdp_program.pcharlie pn_alice pn_bob
-           /enc_pub_key /dsdp_program.enc_pk np_alice np_charlie.
-Qed.
 
 (******************************************************************************)
 (** * Session Type Duality Verification                                       *)
@@ -308,7 +270,9 @@ Definition palice_n
        k
      end ;
      Recv<(n_relay.+1)> #dk g =>
-     Ret &(g - \sum_(j < n_relay.+1) r j + u ord0 * v0) }.
+     Ret &(dadd (foldl (fun acc j => dsub acc (r j)) g
+                       (enum 'I_n_relay.+1))
+                (dmul (u ord0) v0)) }.
 
 (* Map relay index j to the appropriate relay template (first/intermediate/last).
    Requires n_relay >= 1 (at least 3 parties). *)
@@ -375,6 +339,84 @@ Lemma dsdp_max_fuel_ok : [> dsdp_saprocs] = 27.
 Proof. reflexivity. Qed.
 
 End smc_dsdp_program.
+
+(******************************************************************************)
+(** * Cross-equality with dsdp_program                                        *)
+(** * Proves that piSMC programs equal the original dsdp_program definitions  *)
+(******************************************************************************)
+
+(* The piSMC procs above are discharged over an abstract [DSDP_Interface].
+   The reference programs in dsdp_program.v are discharged over an
+   [AHEncType].  The cross-equality therefore only typechecks once the piSMC
+   procs are instantiated at the Standard interface [Standard_DSDP_Interface
+   AHE] with [decode := @dec AHE] — the very instance dsdp_program.v also uses
+   internally.  Hence this block lives AFTER the section, quantified over
+   [AHE]. *)
+Section dsdp_cross_equality.
+
+Variable AHE : AHEncType.
+Let DI := Standard_DSDP_Interface AHE.
+Let decode : di_priv_keyT DI -> di_cipherT DI -> option (di_msgT DI) := @dec AHE.
+
+(* Abstract party identifiers and the party-to-index mapping. *)
+Variable alice : party_id.
+Variable bob : party_id.
+Variable charlie : party_id.
+Variable pn : party_id -> nat.
+Variable ek : party_id -> pub_key AHE.
+
+Hypothesis pn_alice : pn alice = alice_idx.
+Hypothesis pn_bob : pn bob = bob_idx.
+Hypothesis pn_charlie : pn charlie = charlie_idx.
+Hypothesis np_alice : nat_to_party_id alice_idx = alice.
+Hypothesis np_bob : nat_to_party_id bob_idx = bob.
+Hypothesis np_charlie : nat_to_party_id charlie_idx = charlie.
+
+(* piSMC procs instantiated at the Standard interface. *)
+Let palice_std := @palice DI decode ek.
+Let pbob_std := @pbob DI decode ek.
+Let pcharlie_std := @pcharlie DI decode ek.
+
+(* Reference programs from dsdp_program. *)
+Let palice_orig := @dsdp_program.palice AHE bob charlie pn ek.
+Let pbob_orig := @dsdp_program.pbob AHE alice bob charlie pn ek.
+Let pcharlie_orig := @dsdp_program.pcharlie AHE alice bob charlie pn ek.
+
+(* Cross-equality proofs on erased processes (proc, not sproc).
+   The sproc types differ in session env indices, but erased procs are equal
+   when pn maps parties to the expected concrete indices. *)
+Lemma alice_cross_eq dk' v1' u1' u2' u3' r2' r3' ra1' ra2' :
+  erase (palice_std dk' v1' u1' u2' u3' r2' r3' ra1' ra2') =
+  erase (palice_orig dk' v1' u1' u2' u3' r2' r3' ra1' ra2').
+Proof.
+by rewrite /palice_std /palice_orig /palice /dsdp_program.palice
+           pn_bob pn_charlie
+           /enc_pub_key /dsdp_program.enc_pk np_bob np_charlie.
+Qed.
+
+(* bob_cross_eq: the session-typed [pbob] at the Standard interface erases to
+   the same [proc] as the reference [dsdp_program.pbob]. *)
+Lemma bob_cross_eq dk' v2' rb1' rb2' :
+  erase (pbob_std dk' v2' rb1' rb2') =
+  erase (pbob_orig dk' v2' rb1' rb2').
+Proof.
+by rewrite /pbob_std /pbob_orig /pbob /dsdp_program.pbob
+           pn_alice pn_charlie
+           /enc_pub_key /dsdp_program.enc_pk np_bob np_charlie.
+Qed.
+
+(* charlie_cross_eq: the session-typed [pcharlie] at the Standard interface
+   erases to the same [proc] as the reference [dsdp_program.pcharlie]. *)
+Lemma charlie_cross_eq dk' v3' rc1' rc2' :
+  erase (pcharlie_std dk' v3' rc1' rc2') =
+  erase (pcharlie_orig dk' v3' rc1' rc2').
+Proof.
+by rewrite /pcharlie_std /pcharlie_orig /pcharlie /dsdp_program.pcharlie
+           pn_alice pn_bob
+           /enc_pub_key /dsdp_program.enc_pk np_alice np_charlie.
+Qed.
+
+End dsdp_cross_equality.
 
 (*******************************************************************************)
 (** * Session Environment Convergence for DSDP (Idealized Instance)            *)
@@ -515,6 +557,10 @@ Let AHE : AHEncType := N4_AHEnc_local.
 Let DI := Standard_DSDP_Interface AHE.
 Let data := di_data DI.
 
+(* Per-instance decoder for the pismc procs' recv-and-decrypt.
+   At the Standard interface this is the scheme's [dec]. *)
+Let decode : di_priv_keyT DI -> di_cipherT DI -> option (di_msgT DI) := @dec AHE.
+
 (* Party keys *)
 Variables (k0 k1 k2 k3 : msg).
 Let dk0 : priv_key AHE := k0.
@@ -545,12 +591,12 @@ Let r4_3 : 'I_3 -> msg := fun i =>
 Let rand4_3 : 'I_3 -> rand AHE := fun _ => runit.
 
 (* 4-party programs: Alice + first relay + intermediate + last relay *)
-Let palice_4 := @palice_n AHE ek4 2
+Let palice_4 := @palice_n DI decode ek4 2
   [:: @Ordinal 3 0 isT; @Ordinal 3 1 isT; @Ordinal 3 2 isT]
   dk0 v0 u4 r4_3 rand4_3.
-Let pfirst_4 := @DParty_first AHE ek4 1 2 dk1 v1 runit runit.
-Let pinter_4 := @DParty_intermediate AHE ek4 2 0 1 3 dk2 v2 runit runit.
-Let plast_4 := @DParty_last AHE ek4 3 2 dk3 v3 runit runit.
+Let pfirst_4 := @DParty_first DI decode ek4 1 2 dk1 v1 runit runit.
+Let pinter_4 := @DParty_intermediate DI decode ek4 2 0 1 3 dk2 v2 runit runit.
+Let plast_4 := @DParty_last DI decode ek4 3 2 dk3 v3 runit runit.
 
 Local Open Scope sproc_scope.
 Local Open Scope proc_scope.
@@ -589,7 +635,7 @@ Let r1_relay_4 : 'I_3 -> rand AHE := fun _ => runit.
 Let r2_relay_4 : 'I_3 -> rand AHE := fun _ => runit.
 
 Lemma dsdp_n4_builder_correct :
-  @dsdp_n_procs AHE ek4 2
+  @dsdp_n_procs DI decode ek4 2
     [:: @Ordinal 3 0 isT; @Ordinal 3 1 isT; @Ordinal 3 2 isT]
     dk0 v0 u4 r4_3 rand4_3 dk_relay_4 v_relay_4 r1_relay_4 r2_relay_4 =
   erase_aprocs [aprocs palice_4; pfirst_4; pinter_4; plast_4].
@@ -654,6 +700,10 @@ Let AHE : AHEncType := N5_AHEnc_local.
 Let DI := Standard_DSDP_Interface AHE.
 Let data := di_data DI.
 
+(* Per-instance decoder for the pismc procs' recv-and-decrypt.
+   At the Standard interface this is the scheme's [dec]. *)
+Let decode : di_priv_keyT DI -> di_cipherT DI -> option (di_msgT DI) := @dec AHE.
+
 (* Party keys (parties 3 and 4 both map to NoParty via nat_to_party_id) *)
 Variables (k0 k1 k2 k3 k4 : msg).
 Let dk0 : priv_key AHE := k0.
@@ -684,13 +734,13 @@ Let r5_4 : 'I_4 -> msg := fun i =>
 Let rand5_4 : 'I_4 -> rand AHE := fun _ => runit.
 
 (* 5-party programs *)
-Let palice_5 := @palice_n AHE ek5 3
+Let palice_5 := @palice_n DI decode ek5 3
   [:: @Ordinal 4 0 isT; @Ordinal 4 1 isT; @Ordinal 4 2 isT; @Ordinal 4 3 isT]
   dk0 v0 u5 r5_4 rand5_4.
-Let pfirst_5 := @DParty_first AHE ek5 1 2 dk1 v1 runit runit.
-Let pinter2_5 := @DParty_intermediate AHE ek5 2 0 1 3 dk2 v2 runit runit.
-Let pinter3_5 := @DParty_intermediate AHE ek5 3 0 2 4 dk3 v3 runit runit.
-Let plast_5 := @DParty_last AHE ek5 4 3 dk4 v4 runit runit.
+Let pfirst_5 := @DParty_first DI decode ek5 1 2 dk1 v1 runit runit.
+Let pinter2_5 := @DParty_intermediate DI decode ek5 2 0 1 3 dk2 v2 runit runit.
+Let pinter3_5 := @DParty_intermediate DI decode ek5 3 0 2 4 dk3 v3 runit runit.
+Let plast_5 := @DParty_last DI decode ek5 4 3 dk4 v4 runit runit.
 
 Local Open Scope sproc_scope.
 Local Open Scope proc_scope.

@@ -71,40 +71,69 @@ HB.instance Definition _ := hasDecEq.Build dsdp_dtype dsdp_dtype_eqP.
 (* DSDP Interface Record                                                      *)
 (* ========================================================================== *)
 
-(** Parameterized record bundling all DSDP data operations.
-    This eliminates the need to repeat
-    data/d/e/priv_key/pub_key/from_enc/Recv_dec/Recv_enc
-    definitions in every DSDP file. *)
-Record DSDP_Interface (AHE : AHEncType) := MkDSDP_Interface {
-  (* The carrier data type *)
+(** Standalone record bundling all DSDP data types and operations.
+
+    This record carries its own message/cipher/randomness/key carriers as
+    fields (no AHEncType parameter), so a non-AHE symbolic instance can be
+    built alongside the standard cryptographic one.  It eliminates the need
+    to repeat data/conversion/operation definitions in every DSDP file. *)
+Record DSDP_Interface := MkDSDP_Interface {
+  (* Carrier types *)
+  di_msgT : Type ;
+  di_cipherT : Type ;
+  di_randT : Type ;
+  di_priv_keyT : Type ;
+  di_pub_keyT : Type ;
   di_data : Type ;
-  
-  (* Constructors: wrap msg/enc/priv_key into data *)
-  di_d : plain AHE -> di_data ;
-  di_e : cipher AHE -> di_data ;
-  di_priv_key : priv_key AHE -> di_data ;
-  di_pub_key : pub_key AHE -> di_data ;
-  
-  (* Extractor: get enc from data *)
-  di_from_enc : di_data -> option (cipher AHE) ;
-  
-  (* Specialized Recv operations (proc is now unindexed) *)
-  di_Recv_dec : 
-    nat -> priv_key AHE -> (plain AHE -> proc di_data) -> 
+
+  (* Injectors: wrap a typed value into the unified data carrier.
+     Naming: MathComp X_of_Y total-conversion form (the [di_data] of a plain/
+     cipher/key); the 5 underscore segments of the *_priv_key/*_pub_key fields
+     are the multi-word key sorts, not grammar drift. *)
+  di_data_of_plain    : di_msgT      -> di_data ;
+  di_data_of_cipher   : di_cipherT   -> di_data ;
+  di_data_of_priv_key : di_priv_keyT -> di_data ;
+  di_data_of_pub_key  : di_pub_keyT  -> di_data ;
+
+  (* Extractor: get a ciphertext out of the data carrier *)
+  di_get_cipher : di_data -> option di_cipherT ;
+
+  (* Encryption and homomorphic operations *)
+  di_encrypt : di_pub_keyT -> di_msgT -> di_randT -> di_cipherT ;
+  di_emul : di_cipherT -> di_cipherT -> di_cipherT ;
+  di_epow : di_cipherT -> di_msgT -> di_cipherT ;
+
+  (* Plaintext ring operations used by the parties' final reconstruction *)
+  di_add : di_msgT -> di_msgT -> di_msgT ;
+  di_sub : di_msgT -> di_msgT -> di_msgT ;
+  di_mul : di_msgT -> di_msgT -> di_msgT ;
+
+  (* Specialized Recv operations (proc is unindexed) *)
+  di_Recv_dec :
+    nat -> di_priv_keyT -> (di_msgT -> proc di_data) ->
     proc di_data ;
   di_Recv_enc :
-    nat -> (cipher AHE -> proc di_data) -> 
+    nat -> (di_cipherT -> proc di_data) ->
     proc di_data ;
 }.
 
-Arguments di_data {AHE} _.
-Arguments di_d {AHE} _ _.
-Arguments di_e {AHE} _ _.
-Arguments di_priv_key {AHE} _ _.
-Arguments di_pub_key {AHE} _ _.
-Arguments di_from_enc {AHE} _ _.
-Arguments di_Recv_dec {AHE} _ _ _ _.
-Arguments di_Recv_enc {AHE} _ _ _.
+(* Keep the interface argument explicit on every field projection.
+   Under [Set Implicit Arguments] the leading DSDP_Interface argument
+   would otherwise be inferred from a later carrier-typed argument,
+   which breaks [field DI x] applications. *)
+Arguments di_data_of_plain : clear implicits.
+Arguments di_data_of_cipher : clear implicits.
+Arguments di_data_of_priv_key : clear implicits.
+Arguments di_data_of_pub_key : clear implicits.
+Arguments di_get_cipher : clear implicits.
+Arguments di_encrypt : clear implicits.
+Arguments di_emul : clear implicits.
+Arguments di_epow : clear implicits.
+Arguments di_add : clear implicits.
+Arguments di_sub : clear implicits.
+Arguments di_mul : clear implicits.
+Arguments di_Recv_dec : clear implicits.
+Arguments di_Recv_enc : clear implicits.
 
 (* ========================================================================== *)
 (* Standard DSDP Interface using Sum Types                                    *)
@@ -116,23 +145,27 @@ Variable AHE : AHEncType.
 
 Let msgT := plain AHE.
 Let encT := cipher AHE.
+Let randT := rand AHE.
 Let priv_keyT := priv_key AHE.
 Let pub_keyT := pub_key AHE.
 Let D := @dec AHE.
 
-(* Standard sum-type data encoding *)
+(* Standard sum-type data encoding.
+   Naming: the std_data_of_* injectors mirror the interface's di_data_of_*
+   X_of_Y total-conversion fields; the 5-segment *_priv_key/*_pub_key names
+   carry the multi-word key sort, not grammar drift. *)
 Definition std_data := (msgT + encT + priv_keyT + pub_keyT)%type.
-Definition std_d (x : msgT) : std_data := inl (inl (inl x)).
-Definition std_e (x : encT) : std_data := inl (inl (inr x)).
-Definition std_priv_key (x : priv_keyT) : std_data := inl (inr x).
-Definition std_pub_key (x : pub_keyT) : std_data := inr x.
-Definition std_from_enc (x : std_data) : option encT :=
+Definition std_data_of_plain (x : msgT) : std_data := inl (inl (inl x)).
+Definition std_data_of_cipher (x : encT) : std_data := inl (inl (inr x)).
+Definition std_data_of_priv_key (x : priv_keyT) : std_data := inl (inr x).
+Definition std_data_of_pub_key (x : pub_keyT) : std_data := inr x.
+Definition std_get_cipher (x : std_data) : option encT :=
   if x is inl (inl (inr v)) then Some v else None.
 
 (* Recv-and-decrypt: extract ciphertext, decrypt, continue with plaintext *)
-Definition std_Recv_dec (frm : nat) (dk : priv_keyT) 
+Definition std_Recv_dec (frm : nat) (dk : priv_keyT)
     (f : msgT -> proc std_data) : proc std_data :=
-  Recv_param std_data (obind (D dk) \o std_from_enc) frm f.
+  Recv_param std_data (obind (D dk) \o std_get_cipher) frm f.
 
 (* Recv-for-HE: extract ciphertext, continue with it for HE computation *)
 (* We assume public key of the sender is known to the receiver,
@@ -140,18 +173,31 @@ Definition std_Recv_dec (frm : nat) (dk : priv_keyT)
    Rather, the receiver uses the public key of the sender
   to perform the HE computation inside the function f.
 *)
-Definition std_Recv_enc (frm : nat) 
+Definition std_Recv_enc (frm : nat)
     (f : encT -> proc std_data) : proc std_data :=
-  Recv_param std_data std_from_enc frm f.
+  Recv_param std_data std_get_cipher frm f.
 
-(** The canonical standard interface instance *)
-Definition Standard_DSDP_Interface : DSDP_Interface AHE := {|
+(** The canonical standard interface instance.
+    di_data stays definitionally std_data (the sum carrier) since
+    downstream proofs pattern-match that shape. *)
+Definition Standard_DSDP_Interface : DSDP_Interface := {|
+  di_msgT := msgT ;
+  di_cipherT := encT ;
+  di_randT := randT ;
+  di_priv_keyT := priv_keyT ;
+  di_pub_keyT := pub_keyT ;
   di_data := std_data ;
-  di_d := std_d ;
-  di_e := std_e ;
-  di_priv_key := std_priv_key ;
-  di_pub_key := std_pub_key ;
-  di_from_enc := std_from_enc ;
+  di_data_of_plain := std_data_of_plain ;
+  di_data_of_cipher := std_data_of_cipher ;
+  di_data_of_priv_key := std_data_of_priv_key ;
+  di_data_of_pub_key := std_data_of_pub_key ;
+  di_get_cipher := std_get_cipher ;
+  di_encrypt := @enc AHE ;
+  di_emul := @Emul AHE ;
+  di_epow := @Epow AHE ;
+  di_add := +%R ;
+  di_sub := (fun a b => a - b) ;
+  di_mul := *%R ;
   di_Recv_dec := @std_Recv_dec ;
   di_Recv_enc := @std_Recv_enc ;
 |}.
@@ -167,16 +213,20 @@ Section Standard_Interface_Properties.
 Variable AHE : AHEncType.
 Let DI := Standard_DSDP_Interface AHE.
 
-Lemma std_from_enc_e (x : cipher AHE) : 
-  di_from_enc DI (di_e DI x) = Some x.
+(* At the Standard instance, [di_get_cipher] recovers a ciphertext from a
+   [di_data_of_cipher] injection (std_get_cipher_e) and fails with [None] on a
+   plaintext (std_get_cipher_d) or private-key (std_get_cipher_k) injection.
+   The [_e]/[_d]/[_k] suffix names the injected sort (enc/data/key). *)
+Lemma std_get_cipher_e (x : cipher AHE) :
+  di_get_cipher DI (di_data_of_cipher DI x) = Some x.
 Proof. by []. Qed.
 
-Lemma std_from_enc_d (x : plain AHE) : 
-  di_from_enc DI (di_d DI x) = None.
+Lemma std_get_cipher_d (x : plain AHE) :
+  di_get_cipher DI (di_data_of_plain DI x) = None.
 Proof. by []. Qed.
 
-Lemma std_from_enc_k (x : priv_key AHE) : 
-  di_from_enc DI (di_priv_key DI x) = None.
+Lemma std_get_cipher_k (x : priv_key AHE) :
+  di_get_cipher DI (di_data_of_priv_key DI x) = None.
 Proof. by []. Qed.
 
 End Standard_Interface_Properties.
@@ -187,7 +237,7 @@ End Standard_Interface_Properties.
 
 (* These can be used with: Let data := di_data DI. etc. *)
 Notation "'data_of' DI" := (di_data DI) (at level 10, only parsing).
-Notation "'d_of' DI" := (di_d DI) (at level 10, only parsing).
-Notation "'e_of' DI" := (di_e DI) (at level 10, only parsing).
-Notation "'priv_key_of' DI" := (di_priv_key DI) (at level 10, only parsing).
-Notation "'pub_key_of' DI" := (di_pub_key DI) (at level 10, only parsing).
+Notation "'d_of' DI" := (di_data_of_plain DI) (at level 10, only parsing).
+Notation "'e_of' DI" := (di_data_of_cipher DI) (at level 10, only parsing).
+Notation "'priv_key_of' DI" := (di_data_of_priv_key DI) (at level 10, only parsing).
+Notation "'pub_key_of' DI" := (di_data_of_pub_key DI) (at level 10, only parsing).

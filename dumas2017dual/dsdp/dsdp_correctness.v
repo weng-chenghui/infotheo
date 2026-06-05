@@ -89,9 +89,9 @@ Let DI := Standard_DSDP_Interface AHE.
 
 (* Extract type aliases for readability *)
 Let data := di_data DI.
-Let d := di_d DI.
-Let e := di_e DI.
-Let k := di_priv_key DI.
+Let d := di_data_of_plain DI.
+Let e := di_data_of_cipher DI.
+Let k := di_data_of_priv_key DI.
 
 (* Party definitions *)
 Definition alice : party_id := Alice.

@@ -257,7 +257,7 @@ Definition dsdp_palice_code
     emptym
     data_dsdp dsdp_data_to_cipher dsdp_cipher_to_data
     dsdp_dtype
-    (@palice AHE pkey_of_party dk v1 u1 u2 u3 r2 r3 ra1 ra2).
+    (@palice (Standard_DSDP_Interface AHE) (@dec AHE) pkey_of_party dk v1 u1 u2 u3 r2 r3 ra1 ra2).
 
 (* The two ciphertexts Alice actually sends, computed concretely.  These
    are the literal SSProve-side targets the [Run]-trace lemma equals. *)
@@ -313,7 +313,7 @@ Definition a2_send_pi : data_dsdp := inl (inl (inr a2_send)).
     pin down the trace-level equivalence through [dsdp_data_to_cipher]. *)
 Lemma alice_pismc_sends_concrete :
   sent_payloads (smc_session_types.erase
-                   (@palice AHE pkey_of_party
+                   (@palice (Standard_DSDP_Interface AHE) (@dec AHE) pkey_of_party
                             dk_witness v1_in u1_in u2_in u3_in
                             r2_in r3_in ra1_in ra2_in))
                 recvs_piSMC
@@ -346,7 +346,7 @@ Corollary alice_trace_eq_concrete (seed : nat) :
       seed
   = Some (map dsdp_data_to_cipher
               (sent_payloads (smc_session_types.erase
-                                (@palice AHE pkey_of_party
+                                (@palice (Standard_DSDP_Interface AHE) (@dec AHE) pkey_of_party
                                          dk_witness v1_in u1_in u2_in u3_in
                                          r2_in r3_in ra1_in ra2_in))
                              recvs_piSMC)).

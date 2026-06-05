@@ -55,9 +55,9 @@ Let priv_keyT := priv_key AHE.
 
 (* Data type and constructors from interface *)
 Let data := di_data DI.
-Let d := di_d DI.
-Let e := di_e DI.
-Let k := di_priv_key DI.
+Let d := di_data_of_plain DI.
+Let e := di_data_of_cipher DI.
+Let k := di_data_of_priv_key DI.
 
 (* HE operations from the scheme *)
 Let Emul := @Emul AHE.
