@@ -1,0 +1,71 @@
+// Paper figure: abstract (type-level) coverage of the PGG framework across the
+// four instances S5, S5x5, WR, AB. Colour = how many instances instantiate it.
+// Render: dot -Tpdf pgg_coverage_fig.dot -o pgg_coverage_fig.pdf
+digraph pgg_abstract {
+  rankdir=LR; nodesep=0.30; ranksep=0.75;
+  fontname="Helvetica"; fontsize=11;
+  node [fontname="Helvetica", fontsize=11, shape=box, style="rounded,filled",
+        margin="0.13,0.09"];
+  edge [fontname="Helvetica", fontsize=9.5, color="#555555", fontcolor="#333333"];
+
+  subgraph cluster_if {
+    label="INTERFACES"; labeljust=l; style="rounded,filled"; fillcolor="#f5f7ff"; color="#33518a";
+    repr   [label="MonodromyReprType\n(Gen_PGGTypes)\nALL 4", fillcolor="#bfe6bf"];
+    pin    [label="PGGInterface\nALL 4", fillcolor="#bfe6bf"];
+    scheme [label="ThresholdScheme\nALL 4", fillcolor="#bfe6bf"];
+  }
+  subgraph cluster_ext {
+    label="EXTERNAL (spectral)"; labeljust=l; style="rounded,filled"; fillcolor="#fff3e6"; color="#cc8800";
+    cert  [label="spectral certificate\n(Python)\nS5, WR  (S5x5 reuses S5)", shape=note, fillcolor="#ffe6cc"];
+    axiom [label="Rayleigh axiom\nS5, WR  (S5x5 reuses S5)", style="filled,dashed", fillcolor="#ffe0e0"];
+  }
+  subgraph cluster_rec {
+    label="RECORDS"; labeljust=l; style="rounded,filled"; fillcolor="#eef4ff"; color="#3366aa";
+    schreier [label="SchreierCertificate\nWR only", style="rounded,filled,dashed", fillcolor="#ffd2a6"];
+    asym     [label="SecurityAsymptotic\nS5, S5x5, WR", fillcolor="#bcd8ff"];
+    exact    [label="SecurityExact\n(none of these 4)", style="rounded,filled,dotted", fillcolor="#e6e6e6", fontcolor="#888888"];
+    secw     [label="SecurityWitness\nALL 4", fillcolor="#bfe6bf"];
+    cover    [label="CoveringScheme\nALL 4", fillcolor="#bfe6bf"];
+    tw       [label="ThresholdWitness\nS5, S5x5, AB", fillcolor="#bcd8ff"];
+    alg      [label="AlgebraicRigidity\nS5, S5x5, AB", fillcolor="#bcd8ff"];
+    comb     [label="CombinatorialRigidity\nWR only", style="rounded,filled,dashed", fillcolor="#ffd2a6"];
+  }
+  subgraph cluster_prog {
+    label="PROGRAMS"; labeljust=l; style="rounded,filled"; fillcolor="#eafaea"; color="#338833";
+    profile [label="MonodromyProfile\nS5, WR, AB  (not S5x5)", fillcolor="#bcd8ff"];
+    program [label="piSMC program  run_*\n(= exchange_*)\nS5, WR, AB", fillcolor="#bcd8ff"];
+  }
+
+  cert     -> axiom    [label="certifies"];
+  axiom    -> asym     [label="direct (S5, S5x5)"];
+  axiom    -> schreier [label="(WR)"];
+  schreier -> asym     [label="sc_convergence"];
+  asym     -> secw     [label="sw_asymptotic"];
+  exact    -> secw     [label="sw_exact", style=dotted, color="#999999", fontcolor="#999999"];
+  scheme   -> cover    [label="cs_scheme"];
+  secw  -> alg  [label="ar_security"];
+  cover -> tw   [label="packaged"];
+  tw    -> alg  [label="ar_threshold"];
+  secw  -> comb [label="cr_security"];
+  cover -> comb [label="cr_covering"];
+  repr    -> profile [label="mp_M"];
+  pin     -> profile [label="mp_PI"];
+  scheme  -> profile [label="mp_scheme"];
+  secw    -> profile [label="mp_security"];
+  profile -> program [label="run_profile"];
+  repr -> secw  [style=dashed, color="#aaaaaa", label="over M", constraint=false];
+  repr -> cover [style=dashed, color="#aaaaaa", constraint=false];
+  repr -> pin   [style=dashed, color="#aaaaaa", constraint=false];
+
+  subgraph cluster_legend {
+    label="KEY"; labeljust=l; style="rounded,filled"; fillcolor="#fbfbfb"; color="#999999"; fontcolor="#666666";
+    instkey [shape=note, fillcolor="#ffffff", color="#3366aa", fontsize=10.5, fontcolor="#222222",
+      label="The four instances:\l  S5    = S_5          adjacent transpositions (path P_5);  5 cards,  |G|=120\l  S5x5  = S_5 x S_5    two path-P_5 piles;  10 cards,  |G|=14400\l  WR    = Z_7 wr S_2   wreath product (two piles of 7);  14 cards,  |G|=98\l  AB    = Z_2 x Z_2    commuting transpositions (0 1)(2 3);  4 cards,  |G|=4\l"];
+    L4 [label="4/4 universal", fillcolor="#bfe6bf", fontsize=9];
+    L3 [label="3/4", fillcolor="#bcd8ff", fontsize=9];
+    L1 [label="1/4 only", fillcolor="#ffd2a6", style="rounded,filled,dashed", fontsize=9];
+    L0 [label="0/4 unused", fillcolor="#e6e6e6", style="rounded,filled,dotted", fontsize=9, fontcolor="#888888"];
+    instkey -> L4 [style=invis];
+    L4 -> L3 -> L1 -> L0 [style=invis];
+  }
+}

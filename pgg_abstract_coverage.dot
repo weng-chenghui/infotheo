@@ -1,0 +1,104 @@
+// Abstract (type-level) coverage of the PGG framework across four instances:
+//   S5 = s5,  S5x5 = s5x5,  WR = wreath7,  AB = abelian
+// Nodes are the abstract interfaces / records / programs (no instance values).
+// Node colour encodes how many of the four instances instantiate it.
+// Render: dot -Tpng pgg_abstract_coverage.dot -o pgg_abstract_coverage.png
+digraph pgg_abstract {
+  rankdir=LR; nodesep=0.35; ranksep=0.85;
+  fontname="Helvetica"; fontsize=15; labelloc=t;
+  label="PGG framework: abstract coverage over { S5, S5x5, WR, AB }";
+  node [fontname="Helvetica", fontsize=10, shape=box, style="rounded,filled",
+        margin="0.13,0.08"];
+  edge [fontname="Helvetica", fontsize=9, color="#555555", fontcolor="#333333"];
+
+  // colour by coverage count:
+  //   4/4 universal  = green   #bfe6bf
+  //   3/4            = blue    #bcd8ff
+  //   1/4 specialised= orange  #ffd2a6 (dashed)
+  //   0/4 unused here= grey    #e6e6e6 (dotted)
+  //   external/axiom = pink    #ffe0e0 (dashed)
+
+  // ---------- INTERFACES ----------
+  subgraph cluster_if {
+    label="INTERFACES"; labeljust=l; style="rounded,filled"; fillcolor="#f5f7ff"; color="#33518a";
+    repr   [label="MonodromyReprType\n(Gen_PGGTypes)\nALL 4", fillcolor="#bfe6bf"];
+    pin    [label="PGGInterface\nALL 4", fillcolor="#bfe6bf"];
+    scheme [label="ThresholdScheme\nALL 4", fillcolor="#bfe6bf"];
+  }
+
+  // ---------- EXTERNAL INPUT (spectral) ----------
+  subgraph cluster_ext {
+    label="EXTERNAL (spectral)"; labeljust=l; style="rounded,filled"; fillcolor="#fff3e6"; color="#cc8800";
+    cert  [label="spectral certificate (Python)\nS5, WR     (S5x5 reuses S5)", shape=note, fillcolor="#ffe6cc"];
+    axiom [label="Rayleigh axiom\nS5, WR     (S5x5 reuses S5)", style="filled,dashed", fillcolor="#ffe0e0"];
+  }
+
+  // ---------- RECORDS ----------
+  subgraph cluster_rec {
+    label="RECORDS"; labeljust=l; style="rounded,filled"; fillcolor="#eef4ff"; color="#3366aa";
+
+    schreier [label="SchreierCertificate\nWR only", style="rounded,filled,dashed", fillcolor="#ffd2a6"];
+    asym     [label="SecurityAsymptotic\nS5, S5x5, WR", fillcolor="#bcd8ff"];
+    exact    [label="SecurityExact\n(none of these 4)", style="rounded,filled,dotted", fillcolor="#e6e6e6", fontcolor="#888888"];
+    secw     [label="SecurityWitness\nALL 4", fillcolor="#bfe6bf"];
+    cover    [label="CoveringScheme\nALL 4", fillcolor="#bfe6bf"];
+    tw       [label="ThresholdWitness\nS5, S5x5, AB", fillcolor="#bcd8ff"];
+    alg      [label="AlgebraicRigidity\nS5, S5x5, AB", fillcolor="#bcd8ff"];
+    comb     [label="CombinatorialRigidity\nWR only", style="rounded,filled,dashed", fillcolor="#ffd2a6"];
+  }
+
+  // ---------- PROGRAMS ----------
+  subgraph cluster_prog {
+    label="PROGRAMS"; labeljust=l; style="rounded,filled"; fillcolor="#eafaea"; color="#338833";
+    profile [label="MonodromyProfile\nS5, WR, AB     (not S5x5)", fillcolor="#bcd8ff"];
+    program [label="piSMC program  run_*\n(= exchange_*)\nS5, WR, AB", fillcolor="#bcd8ff"];
+  }
+
+  // ---------- spectral sub-chain ----------
+  cert     -> axiom    [label="certifies"];
+  axiom    -> asym     [label="bound, direct\n(S5, S5x5)"];
+  axiom    -> schreier [label="bound (WR)"];
+  schreier -> asym     [label="sc_convergence ->\nasymptotic"];
+  asym     -> secw     [label="sw_asymptotic\n(option)"];
+  exact    -> secw     [label="sw_exact (option)", style=dotted, color="#999999", fontcolor="#999999"];
+
+  // ---------- recovery / scheme ----------
+  scheme -> cover [label="cs_scheme"];
+
+  // ---------- rigidity caps (a fork: pick ONE) ----------
+  secw  -> alg  [label="ar_security"];
+  cover -> tw   [label="packaged"];
+  tw    -> alg  [label="ar_threshold"];
+  secw  -> comb [label="cr_security"];
+  cover -> comb [label="cr_covering"];
+
+  // ---------- program plug ----------
+  repr    -> profile [label="mp_M"];
+  pin     -> profile [label="mp_PI"];
+  scheme  -> profile [label="mp_scheme"];
+  secw    -> profile [label="mp_security"];
+  profile -> program [label="run_profile"];
+
+  // repr parameterises the M-indexed records (shown once, dashed)
+  repr -> secw  [style=dashed, color="#aaaaaa", label="over M", constraint=false];
+  repr -> cover [style=dashed, color="#aaaaaa", constraint=false];
+  repr -> pin   [style=dashed, color="#aaaaaa", constraint=false];
+
+  // ---------- legend + tally ----------
+  subgraph cluster_legend {
+    label="KEY"; labeljust=l; style="rounded,filled"; fillcolor="#fbfbfb"; color="#999999"; fontcolor="#666666";
+    instkey [shape=note, fillcolor="#ffffff", color="#3366aa", fontsize=10, fontcolor="#222222",
+      label="The four instances covered:\l  S5    = S_5          symmetric group, adjacent transpositions (path P_5);  5 cards,  |G| = 120\l  S5x5  = S_5 x S_5    product of two path-P_5 piles;  10 cards,  |G| = 14400\l  WR    = Z_7 wr S_2   wreath product (two piles of 7);  14 cards,  |G| = 98\l  AB    = Z_2 x Z_2    commuting transpositions (0 1)(2 3);  4 cards,  |G| = 4\l"];
+    colourkey [shape=plaintext, fillcolor="#fbfbfb", fontsize=9, fontcolor="#666666",
+      label="colour = how many of the four instances instantiate the node"];
+    L4 [label="4/4  universal core", fillcolor="#bfe6bf", fontsize=9];
+    L3 [label="3/4", fillcolor="#bcd8ff", fontsize=9];
+    L1 [label="1/4  specialised", fillcolor="#ffd2a6", style="rounded,filled,dashed", fontsize=9];
+    L0 [label="0/4  unused by these", fillcolor="#e6e6e6", style="rounded,filled,dotted", fontsize=9, fontcolor="#888888"];
+    instkey -> colourkey [style=invis];
+    colourkey -> L4 [style=invis];
+    L4 -> L3 -> L1 -> L0 [style=invis];
+  }
+  tally [shape=note, fillcolor="#fbfbfb", fontcolor="#444444", fontsize=10,
+         label="To cover all four instances you need:\l  - 5 universal abstractions: MonodromyReprType, PGGInterface,\l    ThresholdScheme, SecurityWitness, CoveringScheme\l  - 1 rigidity cap, chosen from 2: AlgebraicRigidity | CombinatorialRigidity\l  - a spectral add-on (Rayleigh axiom + SecurityAsymptotic) only for the\l    3 mixing instances; abelian skips it; S5x5 reuses S5's certificate\l  - SchreierCertificate: used by wreath alone (others build the\l    asymptotic directly)\l  - the piSMC MonodromyProfile/run_* demo: 3 of 4 (not S5x5)\l  - SecurityExact: present in the framework, unused by these four\l"];
+}
