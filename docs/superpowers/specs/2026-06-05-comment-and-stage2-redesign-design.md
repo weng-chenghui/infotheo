@@ -140,9 +140,10 @@ target with no matching declaration anywhere in the repo is a dangling reference
 
 | Finding | Condition | Severity |
 |---|---|---|
-| H001 absent | in-scope entity, no role tag, AND (`touched_header` OR a comment-block line in `touched_lines` OR no preceding comment) | error |
-| H001 no-comment | pre-existing decl, no preceding comment at all | error |
-| H001 grandfathered | pre-existing decl, body-only change (`touched_header` false AND no comment-block line in `touched_lines`), preceding comment passes the content floor, no tag | warning |
+| H001 no-comment | in-scope entity, no role tag, no preceding comment present | error |
+| H001 absent | in-scope entity, no role tag, preceding comment present, AND `touched_header` true | error |
+| H001 degenerate | in-scope entity, no role tag, preceding comment present, `touched_header` false, comment fails the content floor | error |
+| H001 grandfathered | in-scope entity, no role tag, preceding comment present, `touched_header` false, comment passes the content floor | warning |
 | H002 empty | tag present, value fails the content floor | error |
 | H002 bad-label | `@main <label>`, a label not in `main_purpose_labels` | error |
 | H002 dangling | `@composes` target has no declaration in the repo | error |
@@ -162,12 +163,18 @@ need to. The trigger redefines "new declaration" as `touched_header`:
 
 - `touched_header` true: the declaration line changed (new lemma or signature
   edit). Require a tag, error if missing.
-- `touched_header` false, body-only change, preceding comment passes the content
-  floor, no tag: grandfather to warning.
-- `touched_header` false, no preceding comment: error.
-- Comment-block line edited: if any line in
-  `[line_start - num_comment_lines, line_start - 1]` is in `touched_lines`,
-  require a tag.
+- `touched_header` false, body-only change, preceding comment present and passes
+  the content floor, no tag: grandfather to warning.
+- `touched_header` false, preceding comment present but fails the content floor,
+  no tag: error (degenerate, treated as uncommented).
+- No preceding comment present: error.
+
+Implementation note: `tier0-extract.py` intersects an entity's `touched_lines`
+with `[decl_line, end]`, so a comment-only edit above the declaration lands in
+`unanchored_hunks`, never in the entity, and does not by itself bring the entity
+into scope. A "comment edited" trigger is therefore both unimplementable from the
+entity record and moot (a comment-only edit surfaces no entity). The migration
+keys on `touched_header` and legacy-comment substance only.
 
 The 36 in-flight files are not re-flagged en masse; they convert opportunistically.
 
