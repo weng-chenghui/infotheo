@@ -163,16 +163,16 @@ apply: transport_perm_compatible.
 exact: massey_perm_compatible.
 Qed.
 
-(* The CoveringScheme instance *)
+(* The CoveringScheme instance (content = id: position model) *)
 Definition genus0_covering : CoveringScheme M := {|
-  cs_data       := genus0_data ;
-  cs_T'         := ts_T' ts0 ;
-  cs_scheme     := ts0 ;
-  cs_scheme_T   := erefl ;
-  cs_monodromy       := ts0_perm ;
-  cs_recon_invariant := ts0_perm_compatible ;
-  cs_gap        := leq_trans (leqnn _)
-                     (leq_trans (eq_leq ts0_exact) (leq_addr _ _)) ;
+  cs_plug := {|
+    rp_scheme    := ts0 ;
+    rp_content   := id ;
+    rp_monodromy := ts0_perm ;
+    rp_recon_invariant := ts0_perm_compatible |} ;
+  cs_data := genus0_data ;
+  cs_gap  := leq_trans (leqnn _)
+               (leq_trans (eq_leq ts0_exact) (leq_addr _ _)) ;
 |}.
 
 (* Exact threshold for genus-0 covering *)
@@ -186,14 +186,18 @@ Lemma genus0_secret_invariant (PI : PGGInterface M)
     (HT : ts_T' ts0 = pi_T' PI) (s : 'I_N) (P : pgg_gT M)
     (G_stable : forall g, g \in G ->
        forall i : 'I_(ts_T' ts0).+1,
-         rho g (tnth (cast_tuple (esym (congr1 S HT)) (pi_starts PI)) i) =
-         tnth (cast_tuple (esym (congr1 S HT)) (pi_starts PI)) (ts0_perm g i)) :
+         id (rho g (tnth (cast_tuple (esym (congr1 S HT)) (pi_starts PI)) i)) =
+         tnth [tuple id (tnth (cast_tuple (esym (congr1 S HT)) (pi_starts PI)) j)
+              | j < (ts_T' ts0).+1] (ts0_perm g i)) :
   P \in G ->
-  ts_valid ts0 s (cast_tuple (esym (congr1 S HT)) (pi_starts PI)) ->
-  pgg_recon_endpoints HT P = s.
+  ts_valid ts0 s [tuple id (tnth (cast_tuple (esym (congr1 S HT)) (pi_starts PI)) j)
+                 | j < (ts_T' ts0).+1] ->
+  pgg_recon_endpoints HT id P = s.
 Proof.
 move=> PG Hvalid.
-exact: pgg_hidden_invariant_perm G_stable PG Hvalid ts0_perm_compatible.
+apply: (pgg_hidden_invariant_perm (perm := ts0_perm));
+  [exact: subxx | exact: G_stable | exact: PG | exact: Hvalid
+  | exact: ts0_perm_compatible].
 Qed.
 
 End genus0.

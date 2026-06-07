@@ -270,13 +270,13 @@ Qed.
          covering at genus 2 with gap bound ts_T <= ts_k + 4.
 *)
 Definition genus2_covering : CoveringScheme M := {|
-  cs_data       := genus2_data ;
-  cs_T'         := ts_T' ts2 ;
-  cs_scheme     := ts2 ;
-  cs_scheme_T   := erefl ;
-  cs_monodromy       := ts2_perm ;
-  cs_recon_invariant := ts2_perm_compatible ;
-  cs_gap        := ts2_gap4 ;
+  cs_plug := {|
+    rp_scheme    := ts2 ;
+    rp_content   := id ;
+    rp_monodromy := ts2_perm ;
+    rp_recon_invariant := ts2_perm_compatible |} ;
+  cs_data := genus2_data ;
+  cs_gap  := ts2_gap4 ;
 |}.
 
 (* Quasi-(k, k+4) threshold *)

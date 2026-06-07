@@ -265,38 +265,51 @@ Let starts := pi_starts PI.
 Variable ts : ThresholdScheme 'I_N 'I_N.
 Hypothesis HT : ts_T' ts = pi_T' PI.
 
+(* A fixed content readout applied to each shuffled start before reconstruction.
+   With [content = id] every statement below collapses definitionally to the
+   original position model. *)
+Variable content : 'I_N -> 'I_N.
+
 Let sT := (ts_T' ts).+1.
 
 (* Cast endpoints to the scheme's tuple type *)
 Definition pgg_recon (eps : T.-tuple 'I_N) : 'I_N :=
   ts_recon ts (cast_tuple (esym (congr1 S HT)) eps).
 
-(* The secret reconstructed from endpoints *)
+(* The secret reconstructed from endpoints, read through the content map *)
 Definition pgg_recon_endpoints (P : gT) : 'I_N :=
-  pgg_recon [tuple rho P (tnth starts i) | i < T].
+  pgg_recon [tuple content (rho P (tnth starts i)) | i < T].
 
 (* Main theorem: coordinate-permutation compatible scheme + G-stable starts
-   + valid starting shares ⟹ reconstruction of endpoints recovers the secret *)
-Lemma pgg_hidden_invariant_perm (s : 'I_N) (P : gT)
+   + valid starting shares ⟹ reconstruction of endpoints recovers the secret.
+   The reconstruction-invariance and start-stability hypotheses are only needed
+   on the recon-symmetry subgroup [H] that actually contains the hidden element
+   [P]; [H] is required to be a subgroup of [pgg_G M] so the morphism action of
+   [rho] applies. *)
+Lemma pgg_hidden_invariant_perm (H : {group gT}) (s : 'I_N) (P : gT)
     (perm : gT -> {perm 'I_sT})
-    (G_stable : forall g, g \in pgg_G M ->
-       forall i : 'I_sT, rho g (tnth (cast_tuple (esym (congr1 S HT)) starts) i) =
-                          tnth (cast_tuple (esym (congr1 S HT)) starts) (perm g i)) :
-  P \in pgg_G M ->
-  ts_valid ts s (cast_tuple (esym (congr1 S HT)) starts) ->
-  @ts_recon_perm_invariant gT (pgg_G M) _ _ ts perm ->
+    (HsubG : H \subset pgg_G M)
+    (G_stable : forall g, g \in H ->
+       forall i : 'I_sT,
+         content (rho g (tnth (cast_tuple (esym (congr1 S HT)) starts) i)) =
+         tnth [tuple content (tnth (cast_tuple (esym (congr1 S HT)) starts) j)
+              | j < sT] (perm g i)) :
+  P \in H ->
+  ts_valid ts s [tuple content (tnth (cast_tuple (esym (congr1 S HT)) starts) j)
+                | j < sT] ->
+  @ts_recon_perm_invariant gT H _ _ ts perm ->
   pgg_recon_endpoints P = s.
 Proof.
 move=> PG Hvalid Hperm.
 rewrite /pgg_recon_endpoints /pgg_recon.
 have -> : cast_tuple (esym (congr1 S HT))
-            [tuple rho P (tnth starts i) | i < T] =
-          [tuple tnth (cast_tuple (esym (congr1 S HT)) starts) (perm P i) | i < sT].
+            [tuple content (rho P (tnth starts i)) | i < T] =
+          [tuple tnth [tuple content
+              (tnth (cast_tuple (esym (congr1 S HT)) starts) j) | j < sT]
+              (perm P i) | i < sT].
   apply: eq_from_tnth => i.
-  rewrite tnth_cast_tuple !tnth_mktuple.
-  rewrite -(G_stable P PG i).
-  congr (rho P _).
-  by rewrite tnth_cast_tuple.
+  rewrite tnth_cast_tuple tnth_mktuple tnth_mktuple -tnth_cast_tuple.
+  by rewrite (G_stable P PG i).
 exact: Hperm PG Hvalid.
 Qed.
 

@@ -56,7 +56,7 @@ Variable eps : R.
 Hypothesis eps_lt : eps < 5%:R^-1.
 Hypothesis eps_gt : - (4%:R * 5%:R^-1) < eps.
 Hypothesis eps_spectral : (`|eps| < 4%:R / 5%:R)%R.
-Let M_kim : GeneratedMonodromyReprType :=
+Let M_kim : MonodromyReprWithGeneratorType :=
   @Gen_PGGTypes 4 3 fc_kim_sigmas.
 
 (* Group nontriviality *)
@@ -140,14 +140,20 @@ Lemma kim_ts_recon_correct (L : nat) (PI : PGGInterface M_kim)
     (s : 'I_5) (P : pgg_gT M_kim)
     (G_stable : forall g, g \in pgg_G M_kim ->
        forall i : 'I_(ts_T' (cs_scheme (tw_covering (ar_threshold (kim_rigidity L))))).+1,
-         @pgg_rho M_kim g
-           (tnth (cast_tuple (esym (congr1 S HT)) (pi_starts PI)) i) =
-         tnth (cast_tuple (esym (congr1 S HT)) (pi_starts PI))
-              (cs_monodromy (tw_covering (ar_threshold (kim_rigidity L))) g i)) :
+         rp_content (cs_plug (tw_covering (ar_threshold (kim_rigidity L))))
+           (@pgg_rho M_kim g
+             (tnth (cast_tuple (esym (congr1 S HT)) (pi_starts PI)) i)) =
+         tnth [tuple rp_content (cs_plug (tw_covering (ar_threshold (kim_rigidity L))))
+                 (tnth (cast_tuple (esym (congr1 S HT)) (pi_starts PI)) j)
+              | j < (ts_T' (cs_scheme (tw_covering (ar_threshold (kim_rigidity L))))).+1]
+              (rp_monodromy (cs_plug (tw_covering (ar_threshold (kim_rigidity L)))) g i)) :
   P \in pgg_G M_kim ->
   ts_valid (cs_scheme (tw_covering (ar_threshold (kim_rigidity L)))) s
-          (cast_tuple (esym (congr1 S HT)) (pi_starts PI)) ->
-  pgg_recon_endpoints HT P = s.
+          [tuple rp_content (cs_plug (tw_covering (ar_threshold (kim_rigidity L))))
+             (tnth (cast_tuple (esym (congr1 S HT)) (pi_starts PI)) j)
+          | j < (ts_T' (cs_scheme (tw_covering (ar_threshold (kim_rigidity L))))).+1] ->
+  pgg_recon_endpoints HT
+    (rp_content (cs_plug (tw_covering (ar_threshold (kim_rigidity L))))) P = s.
 Proof. exact: ar_protocol_correct. Qed.
 
 End kim_rigidity.

@@ -31,7 +31,7 @@ Local Open Scope fdist_scope.
 Section dealer_bridge.
 
 Variable R : realType.
-Variable M : GeneratedMonodromyReprType.
+Variable M : MonodromyReprWithGeneratorType.
 Variable PI : PGGInterface M.
 Variable ar : AlgebraicRigidity R M.
 
@@ -40,14 +40,18 @@ Let Tg := (@pgg_ngens' M).+1.
 Let N := (pgg_N' M).+1.
 Let T := (pi_T' PI).+1.
 Let G := pgg_G M.
+Let cont := rp_content (cs_plug (tw_covering (ar_threshold ar))).
+Let mono := rp_monodromy (cs_plug (tw_covering (ar_threshold ar))).
 
 Variable HT : ts_T' (cs_scheme (tw_covering (ar_threshold ar))) = pi_T' PI.
 Hypothesis G_stable : forall g, g \in G ->
   forall i : 'I_(ts_T' (cs_scheme (tw_covering (ar_threshold ar)))).+1,
-    @pgg_rho M g
-      (tnth (cast_tuple (esym (congr1 S HT)) (pi_starts PI)) i) =
-    tnth (cast_tuple (esym (congr1 S HT)) (pi_starts PI))
-      (cs_monodromy (tw_covering (ar_threshold ar)) g i).
+    cont (@pgg_rho M g
+      (tnth (cast_tuple (esym (congr1 S HT)) (pi_starts PI)) i)) =
+    tnth [tuple cont
+            (tnth (cast_tuple (esym (congr1 S HT)) (pi_starts PI)) j)
+         | j < (ts_T' (cs_scheme (tw_covering (ar_threshold ar)))).+1]
+      (mono g i).
 
 (** dealer_words_correct — word-based dealer correctness: reconstruction at endpoints.
     Kind: main.
@@ -59,8 +63,9 @@ Theorem dealer_words_correct
   let P := @word_eval M L w in
   P \in G ->
   ts_valid (cs_scheme (tw_covering (ar_threshold ar))) s
-    (cast_tuple (esym (congr1 S HT)) (pi_starts PI)) ->
-  pgg_recon_endpoints HT P = s.
+    [tuple cont (tnth (cast_tuple (esym (congr1 S HT)) (pi_starts PI)) j)
+    | j < (ts_T' (cs_scheme (tw_covering (ar_threshold ar)))).+1] ->
+  pgg_recon_endpoints HT cont P = s.
 Proof.
 move=> /= PG Hvalid.
 exact: (@ar_protocol_correct R M ar PI HT s (word_eval w) G_stable PG Hvalid).
@@ -79,22 +84,30 @@ Lemma dealer_words_epsilon_bound (s : 'I_N) :
 Proof. exact: sw_bound. Qed.
 
 (* When the dealer uses ts_encode to produce the starting shares,
-   the ts_valid hypothesis is automatically satisfied. *)
+   the ts_valid hypothesis is automatically satisfied. In the position model
+   the content readout is the identity, so the content-mapped starts coincide
+   with the encoded shares. *)
 Theorem dealer_encode_correct
     (w : L.-tuple 'I_Tg) (s : 'I_N) :
   let P := @word_eval M L w in
+  cont = id ->
   P \in G ->
   pi_starts PI = cast_tuple (congr1 S HT)
     (ts_encode (cs_scheme (tw_covering (ar_threshold ar))) s) ->
-  pgg_recon_endpoints HT P = s.
+  pgg_recon_endpoints HT cont P = s.
 Proof.
-move=> /= PG Hstarts.
+move=> /= Hcont PG Hstarts.
 apply: dealer_words_correct => //.
-rewrite Hstarts.
+rewrite Hstarts Hcont.
 have cast_tupleK : forall (A : Type) (n m : nat) (H : n = m)
     (t : n.-tuple A), cast_tuple (esym H) (cast_tuple H t) = t.
   by move=> A' n' m' H'; subst m'.
-by rewrite cast_tupleK; exact: ts_encode_valid.
+rewrite cast_tupleK.
+have -> : [tuple id (tnth (ts_encode (cs_scheme (tw_covering (ar_threshold ar))) s) j)
+          | j < (ts_T' (cs_scheme (tw_covering (ar_threshold ar)))).+1]
+        = ts_encode (cs_scheme (tw_covering (ar_threshold ar))) s.
+  by apply: eq_from_tnth => j; rewrite tnth_mktuple.
+exact: ts_encode_valid.
 Qed.
 
 End dealer_bridge.

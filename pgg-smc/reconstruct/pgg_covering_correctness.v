@@ -48,19 +48,25 @@ Hypothesis HT : ts_T' ts = pi_T' PI.
 
 (* Main correctness theorem: CoveringScheme + PGGInterface + G-stable starts
    -> reconstruction recovers the hidden value. Uses pgg_hidden_invariant_perm
-   with cs_recon_invariant. *)
+   over the full group pgg_G with the plug's rp_recon_invariant and rp_content. *)
 Theorem pgg_covering_correct (s : 'I_N) (P : pgg_gT M)
-    (G_stable : forall g, g \in G ->
+    (G_stable : forall g, g \in pgg_G M ->
        forall i : 'I_(ts_T' ts).+1,
-         rho g (tnth (cast_tuple (esym (congr1 S HT)) (pi_starts PI)) i) =
-         tnth (cast_tuple (esym (congr1 S HT)) (pi_starts PI)) (cs_monodromy cs g i)) :
-  P \in G ->
-  ts_valid ts s (cast_tuple (esym (congr1 S HT)) (pi_starts PI)) ->
-  pgg_recon_endpoints HT P = s.
+         rp_content (cs_plug cs)
+           (rho g (tnth (cast_tuple (esym (congr1 S HT)) (pi_starts PI)) i)) =
+         tnth [tuple rp_content (cs_plug cs)
+                 (tnth (cast_tuple (esym (congr1 S HT)) (pi_starts PI)) j)
+              | j < (ts_T' ts).+1] (rp_monodromy (cs_plug cs) g i)) :
+  P \in pgg_G M ->
+  ts_valid ts s [tuple rp_content (cs_plug cs)
+                   (tnth (cast_tuple (esym (congr1 S HT)) (pi_starts PI)) j)
+                | j < (ts_T' ts).+1] ->
+  pgg_recon_endpoints HT (rp_content (cs_plug cs)) P = s.
 Proof.
 move=> PG Hvalid.
-apply: (pgg_hidden_invariant_perm (perm := cs_monodromy cs)) => //.
-exact: cs_recon_invariant.
+apply: (pgg_hidden_invariant_perm (perm := rp_monodromy (cs_plug cs)));
+  [exact: subxx | exact: G_stable | exact: PG | exact: Hvalid
+  | exact: rp_recon_invariant].
 Qed.
 
 (* The threshold gap is bounded by twice the covering genus *)
@@ -76,7 +82,7 @@ End pgg_covering.
 
 Section covering_tradeoff.
 
-Variable M : GeneratedMonodromyReprType.
+Variable M : MonodromyReprWithGeneratorType.
 Let G := pgg_G M.
 
 (* Genus 0 -> |G| bounded by PGL(2,N) *)

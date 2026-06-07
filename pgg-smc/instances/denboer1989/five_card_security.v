@@ -18,10 +18,10 @@
 (* |C_5| = 5 << 120 = PGL(2,5) = n(n^2-1), so the genus-0 regime holds      *)
 (* trivially and T = k (every party's reveal is essential).                   *)
 (*                                                                            *)
-(* TODO (future work): populate `sw_exact` of fc_security_uniform with the   *)
-(* exact var_dist = 0 equality for the uniform case. This is a one-step      *)
-(* follow-up via `security_witness_with_exact`. See five_card_kim.v header   *)
-(* for the Kim biased case.                                                   *)
+(* sw_exact is populated through uniform_security_witness, which sets         *)
+(* sw_exact = Some (MkSecurityExact rho_uniform 0 endpoint_exact). The exact  *)
+(* var_dist = 0 equality follows from regularity and transitivity of the     *)
+(* C_5 action proved below.                                                  *)
 (******************************************************************************)
 
 From mathcomp Require Import ssreflect ssrbool ssrfun eqtype ssrnat seq.
@@ -349,14 +349,20 @@ Lemma fc_ts_recon_correct (PI : PGGInterface FiveCard_M)
     (s : 'I_5) (P : pgg_gT FiveCard_M)
     (G_stable : forall g, g \in pgg_G FiveCard_M ->
        forall i : 'I_(ts_T' (cs_scheme (tw_covering (ar_threshold fc_rigidity)))).+1,
-         @pgg_rho FiveCard_M g
-           (tnth (cast_tuple (esym (congr1 S HT)) (pi_starts PI)) i) =
-         tnth (cast_tuple (esym (congr1 S HT)) (pi_starts PI))
-              (cs_monodromy (tw_covering (ar_threshold fc_rigidity)) g i)) :
+         rp_content (cs_plug (tw_covering (ar_threshold fc_rigidity)))
+           (@pgg_rho FiveCard_M g
+             (tnth (cast_tuple (esym (congr1 S HT)) (pi_starts PI)) i)) =
+         tnth [tuple rp_content (cs_plug (tw_covering (ar_threshold fc_rigidity)))
+                 (tnth (cast_tuple (esym (congr1 S HT)) (pi_starts PI)) j)
+              | j < (ts_T' (cs_scheme (tw_covering (ar_threshold fc_rigidity)))).+1]
+              (rp_monodromy (cs_plug (tw_covering (ar_threshold fc_rigidity))) g i)) :
   P \in pgg_G FiveCard_M ->
   ts_valid (cs_scheme (tw_covering (ar_threshold fc_rigidity))) s
-          (cast_tuple (esym (congr1 S HT)) (pi_starts PI)) ->
-  pgg_recon_endpoints HT P = s.
+          [tuple rp_content (cs_plug (tw_covering (ar_threshold fc_rigidity)))
+             (tnth (cast_tuple (esym (congr1 S HT)) (pi_starts PI)) j)
+          | j < (ts_T' (cs_scheme (tw_covering (ar_threshold fc_rigidity)))).+1] ->
+  pgg_recon_endpoints HT
+    (rp_content (cs_plug (tw_covering (ar_threshold fc_rigidity)))) P = s.
 Proof. exact: ar_protocol_correct. Qed.
 
 End fc_rigidity.

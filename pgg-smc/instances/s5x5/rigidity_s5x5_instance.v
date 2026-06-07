@@ -95,7 +95,7 @@ Section s5x5_security.
 Variable R : realType.
 
 Let M_s5x5 := @Gen_PGGTypes 7 8 s5x5_gen_tuple.
-Let R_s5x5 : GeneratedMonodromyReprType := M_s5x5.
+Let R_s5x5 : MonodromyReprWithGeneratorType := M_s5x5.
 
 (* Fiber-counted endpoint bound: for each sheet s in 'I_10,
    var_dist(endpoint, uniform) <= 8/5.
@@ -234,7 +234,7 @@ Section s5x5_spectral.
 Variable R : realType.
 
 Let M_s5x5 := @Gen_PGGTypes 7 8 s5x5_gen_tuple.
-Let R_s5x5 : GeneratedMonodromyReprType := M_s5x5.
+Let R_s5x5 : MonodromyReprWithGeneratorType := M_s5x5.
 
 (* The S_5 x S_5 Schreier walk on 'I_10 is reducible: pile-1 generators
    fix pile-2 sheets and vice versa. So the walk's stationary distribution
@@ -297,7 +297,7 @@ Section s5x5_rigidity.
 
 Variable R : realType.
 
-Let R_s5x5 : GeneratedMonodromyReprType :=
+Let R_s5x5 : MonodromyReprWithGeneratorType :=
   @Gen_PGGTypes 7 8 s5x5_gen_tuple.
 
 (* --- CoveringData: genus 173 --- *)
@@ -383,13 +383,10 @@ Qed.
 (** s5x5_covering — covering-scheme record for the S_5 x S_5 instance.
     Kind: instance. *)
 Definition s5x5_covering : CoveringScheme R_s5x5 := {|
-  cs_data             := s5x5_covering_data ;
-  cs_T'               := (ts_T' s5x5_ts) ;
-  cs_scheme           := s5x5_ts ;
-  cs_scheme_T         := erefl ;
-  cs_monodromy             := @pgg_rho R_s5x5 ;
-  cs_recon_invariant  := s5x5_perm_compatible ;
-  cs_gap              := s5x5_cs_gap ;
+  cs_plug := @MkReconPlug R_s5x5 s5x5_ts id (@pgg_rho R_s5x5)
+               s5x5_perm_compatible ;
+  cs_data := s5x5_covering_data ;
+  cs_gap  := s5x5_cs_gap ;
 |}.
 
 (* --- ThresholdWitness --- *)
@@ -458,14 +455,20 @@ Lemma s5x5_ts_recon_correct (PI : PGGInterface R_s5x5)
     (s : 'I_10) (P : pgg_gT R_s5x5)
     (G_stable : forall g, g \in pgg_G R_s5x5 ->
        forall i : 'I_(ts_T' (cs_scheme (tw_covering (ar_threshold s5x5_rigidity)))).+1,
-         @pgg_rho R_s5x5 g
-           (tnth (cast_tuple (esym (congr1 S HT)) (pi_starts PI)) i) =
-         tnth (cast_tuple (esym (congr1 S HT)) (pi_starts PI))
-              (cs_monodromy (tw_covering (ar_threshold s5x5_rigidity)) g i)) :
+         rp_content (cs_plug (tw_covering (ar_threshold s5x5_rigidity)))
+           (@pgg_rho R_s5x5 g
+             (tnth (cast_tuple (esym (congr1 S HT)) (pi_starts PI)) i)) =
+         tnth [tuple rp_content (cs_plug (tw_covering (ar_threshold s5x5_rigidity)))
+                 (tnth (cast_tuple (esym (congr1 S HT)) (pi_starts PI)) j)
+              | j < (ts_T' (cs_scheme (tw_covering (ar_threshold s5x5_rigidity)))).+1]
+              (rp_monodromy (cs_plug (tw_covering (ar_threshold s5x5_rigidity))) g i)) :
   P \in pgg_G R_s5x5 ->
   ts_valid (cs_scheme (tw_covering (ar_threshold s5x5_rigidity))) s
-          (cast_tuple (esym (congr1 S HT)) (pi_starts PI)) ->
-  pgg_recon_endpoints HT P = s.
+          [tuple rp_content (cs_plug (tw_covering (ar_threshold s5x5_rigidity)))
+             (tnth (cast_tuple (esym (congr1 S HT)) (pi_starts PI)) j)
+          | j < (ts_T' (cs_scheme (tw_covering (ar_threshold s5x5_rigidity)))).+1] ->
+  pgg_recon_endpoints HT
+    (rp_content (cs_plug (tw_covering (ar_threshold s5x5_rigidity)))) P = s.
 Proof. exact: ar_protocol_correct. Qed.
 
 End s5x5_rigidity.
@@ -484,7 +487,7 @@ Section s5x5_rigidity_cryptographically_secure.
 
 Variable R : realType.
 
-Let R_s5x5 : GeneratedMonodromyReprType :=
+Let R_s5x5 : MonodromyReprWithGeneratorType :=
   @Gen_PGGTypes 7 8 s5x5_gen_tuple.
 
 (* Honest spectral SecurityWitness at L=591, fully discharged.

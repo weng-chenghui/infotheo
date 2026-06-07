@@ -73,7 +73,7 @@ Section s5_security.
 Variable R : realType.
 
 Let M_s5 := @Gen_PGGTypes 3 3 (path_gen_tuple 3).
-Let R_s5 : GeneratedMonodromyReprType := M_s5.
+Let R_s5 : MonodromyReprWithGeneratorType := M_s5.
 
 Local Open Scope ring_scope.
 
@@ -180,7 +180,7 @@ Section s5_spectral.
 Variable R : realType.
 
 Let M_s5 := @Gen_PGGTypes 3 3 (path_gen_tuple 3).
-Let R_s5 : GeneratedMonodromyReprType := M_s5.
+Let R_s5 : MonodromyReprWithGeneratorType := M_s5.
 
 (* Spectral gap derived from the Python-attested Rayleigh certificate
    (see s5_mixing.v + s5_spectral_certificate.py).  No free variables. *)
@@ -245,35 +245,106 @@ Section s5_brings_axiomatisation.
 Local Notation R_s5_brings :=
   (@Gen_PGGTypes 3 3 (path_gen_tuple 3)).
 
-(** s5_brings_covering — the AlgebraicRigidity-compatible covering scheme
-    arising from Bring's curve (genus 4) with S_5 acting by coordinate
-    permutation on 5 distinguished rational points.
-    Kind: instance.
-    Why: replaces the previous [genus0_covering_witness ...
-    (RS5_witness_trivial ...)] construction, which under the corrected
-    [pgl_bound] would require the literally-false hypothesis
-    [|S_5| = 120 <= 60]. The Bring's-based covering gives a CoveringData
-    with cd_genus = 4, making the genus-0 PGL obligation vacuously
-    discharged.
-    Reference: Edge (1978), "Bring's curve". *)
-Axiom s5_brings_covering : CoveringScheme R_s5_brings.
+(* The construction below replaces the previous opaque axiomatisation of the
+   covering scheme with a concrete record. All numerical fields (base genus,
+   branch count, total ramification, covering genus) are explicit. The
+   reconstruction-invariance proof is discharged in the kernel. Two
+   irreducible axioms remain:
 
-(** s5_brings_covering_genus — Bring's curve has genus 4.
-    Kind: helper.
-    Why: needed to discharge the genus-0 PGL automorphism obligation
-    vacuously (premise [cd_genus = 0] reduces to [4 = 0], which is false).
-    Reference: Edge (1978), genus formula. *)
-Axiom s5_brings_covering_genus :
-  cd_genus (cs_data s5_brings_covering) = 4.
+     - [s5_group_order_eq]: the path-A_4 generators span the full S_5
+       of order 120. This is "bubble-sort generates S_n", true but the
+       lifting through the [Gen_PGGTypes] HB stack is engineering deferred
+       to a future commit. Mirrors [s5x5_group_order_eq].
 
-(** s5_brings_covering_realised — the [s5_brings_covering] CoveringData
-    is realised by a real algebraic curve (Bring's).
+     - [s5_brings_covering_realised]: Bring's curve is the (genus-4)
+       algebraic curve realising this CoveringData. Edge (1978). *)
+
+(** s5_group_order_eq — the path-A_4 adjacent-transposition generators of
+    [R_s5_brings] span the full S_5, of order 120.
+    Kind: axiom. *)
+Axiom s5_group_order_eq :
+  #|pgg_G R_s5_brings| = 120.
+
+(** s5_n_branch_le — branch-count vs total-ramification inequality for the
+    S_5 Bring's cover (4 <= 246).
     Kind: helper.
-    Why: documentation hook tying the abstract CoveringData to the real
-    curve cited in the construction. Used as a marker only; not consumed
-    by tactics. *)
+    Why: discharges [cd_ramif_ge_n_branch] in [s5_brings_covering_data]. *)
+Lemma s5_n_branch_le : (4 <= 246)%N. Proof. by []. Qed.
+
+(** s5_hurwitz — Riemann-Hurwitz arithmetic for the S_5 cover at genus 4:
+    2*4 + 2*120 = 120*(2*0) + 246 + 2, i.e. 248 = 248.
+    Kind: helper. *)
+Lemma s5_hurwitz :
+  (2 * 4 + 2 * #|pgg_G R_s5_brings| =
+   #|pgg_G R_s5_brings| * (2 * 0) + 246 + 2)%N.
+Proof. by rewrite muln0 muln0 add0n s5_group_order_eq. Qed.
+
+(** s5_brings_covering_data — covering-data record for the S_5 instance
+    (genus = 4, base genus = 0, branches = 4, total ramification = 246).
+    Kind: instance. *)
+Definition s5_brings_covering_data : CoveringData R_s5_brings :=
+  @MkCoveringData R_s5_brings 0 4 246 4 s5_n_branch_le s5_hurwitz.
+
+(** s5_brings_covering_realised — Bring's curve realises
+    [s5_brings_covering_data].
+    Kind: axiom.
+    Why: the sole remaining geometry axiom. Edge (1978), "Bring's curve",
+    J. London Math. Soc. s2-18(3):539-545. *)
 Axiom s5_brings_covering_realised :
-  realised_by_curve (cs_data s5_brings_covering).
+  realised_by_curve s5_brings_covering_data.
+
+(* Threshold scheme: sum-mod on 'I_5 with 5 parties. ts_T = ts_k = 5, so
+   T - k = 0. The covering-scheme machinery therefore lives in the exact
+   regime; only the [s5x5] instance exercises the strict-gap branch. *)
+Let s5_ts : ThresholdScheme 'I_5 'I_5 := @sum_mod_scheme 3 4.
+
+(** s5_cs_gap — the cs_gap obligation: ts_T <= ts_k + 2*cd_genus.
+    With ts_T = ts_k = 5 and cd_genus = 4, the bound reads 5 <= 13.
+    Kind: helper. *)
+Lemma s5_cs_gap :
+  (ts_T s5_ts <= ts_k s5_ts + 2 * cd_genus s5_brings_covering_data)%N.
+Proof. by []. Qed.
+
+(** s5_sum_mod_perm_compatible — sum-mod reconstruction is invariant under
+    the monodromy permutation of the share-index tuple. Single-pile analogue
+    of [product_sum_mod_perm_compatible] in reconstruct/product_threshold.v;
+    the absence of a pile partition makes the proof a single reindex.
+    Kind: helper.
+    Why: discharges [cs_recon_invariant] for [s5_brings_covering]. *)
+Lemma s5_sum_mod_perm_compatible :
+  @ts_recon_perm_invariant _ (pgg_G R_s5_brings) _ _ s5_ts
+    (@pgg_rho R_s5_brings).
+Proof.
+move=> g s shares Hg Hvalid.
+apply: sum_mod_scheme_correct.
+rewrite /sum_mod_valid_pred in Hvalid *.
+rewrite -Hvalid; congr (_ %% _).
+under eq_bigr do rewrite tnth_mktuple.
+symmetry; rewrite (reindex_inj (@perm_inj _ (@pgg_rho R_s5_brings g))).
+by apply: eq_bigr.
+Qed.
+
+(** s5_brings_covering — concrete CoveringScheme for the S_5 instance,
+    built on Bring's curve (genus 4) with a sum-mod threshold scheme.
+    Kind: instance.
+    Why: replaces the previous opaque [Axiom s5_brings_covering]. Threshold
+    values, monodromy, reconstruction invariance and gap bound are all
+    proved; only the curve realisation remains an axiom. *)
+Definition s5_brings_covering : CoveringScheme R_s5_brings := {|
+  cs_plug := @MkReconPlug R_s5_brings s5_ts id (@pgg_rho R_s5_brings)
+               s5_sum_mod_perm_compatible ;
+  cs_data := s5_brings_covering_data ;
+  cs_gap  := s5_cs_gap ;
+|}.
+
+(** s5_brings_covering_genus — Bring's covering scheme has genus 4.
+    Kind: helper.
+    Why: definitional consequence of [s5_brings_covering_data]; retains the
+    statement of the previous axiom so that downstream callers
+    ([s5_genus0_pgl_crypto], [s5_genus0_automorphism]) need no edit. *)
+Lemma s5_brings_covering_genus :
+  cd_genus (cs_data s5_brings_covering) = 4.
+Proof. by []. Qed.
 
 End s5_brings_axiomatisation.
 
@@ -281,7 +352,7 @@ Section s5_rigidity_cryptographically_secure.
 
 Variable R : realType.
 
-Let R_s5 : GeneratedMonodromyReprType :=
+Let R_s5 : MonodromyReprWithGeneratorType :=
   @Gen_PGGTypes 3 3 (path_gen_tuple 3).
 
 (* Group nontriviality. Could be discharged by computation since |S_5| = 120. *)
@@ -327,7 +398,7 @@ Section s5_rigidity.
 
 Variable R : realType.
 
-Let R_s5 : GeneratedMonodromyReprType :=
+Let R_s5 : MonodromyReprWithGeneratorType :=
   @Gen_PGGTypes 3 3 (path_gen_tuple 3).
 
 (* Group nontriviality *)
@@ -409,14 +480,20 @@ Lemma s5_ts_recon_correct (PI : PGGInterface R_s5)
     (s : 'I_5) (P : pgg_gT R_s5)
     (G_stable : forall g, g \in pgg_G R_s5 ->
        forall i : 'I_(ts_T' (cs_scheme (tw_covering (ar_threshold (s5_rigidity))))).+1,
-         @pgg_rho R_s5 g
-           (tnth (cast_tuple (esym (congr1 S HT)) (pi_starts PI)) i) =
-         tnth (cast_tuple (esym (congr1 S HT)) (pi_starts PI))
-              (cs_monodromy (tw_covering (ar_threshold (s5_rigidity))) g i)) :
+         rp_content (cs_plug (tw_covering (ar_threshold (s5_rigidity))))
+           (@pgg_rho R_s5 g
+             (tnth (cast_tuple (esym (congr1 S HT)) (pi_starts PI)) i)) =
+         tnth [tuple rp_content (cs_plug (tw_covering (ar_threshold (s5_rigidity))))
+                 (tnth (cast_tuple (esym (congr1 S HT)) (pi_starts PI)) j)
+              | j < (ts_T' (cs_scheme (tw_covering (ar_threshold (s5_rigidity))))).+1]
+              (rp_monodromy (cs_plug (tw_covering (ar_threshold (s5_rigidity)))) g i)) :
   P \in pgg_G R_s5 ->
   ts_valid (cs_scheme (tw_covering (ar_threshold (s5_rigidity)))) s
-          (cast_tuple (esym (congr1 S HT)) (pi_starts PI)) ->
-  pgg_recon_endpoints HT P = s.
+          [tuple rp_content (cs_plug (tw_covering (ar_threshold (s5_rigidity))))
+             (tnth (cast_tuple (esym (congr1 S HT)) (pi_starts PI)) j)
+          | j < (ts_T' (cs_scheme (tw_covering (ar_threshold (s5_rigidity))))).+1] ->
+  pgg_recon_endpoints HT
+    (rp_content (cs_plug (tw_covering (ar_threshold (s5_rigidity))))) P = s.
 Proof. exact: ar_protocol_correct. Qed.
 
 End s5_rigidity.

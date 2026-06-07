@@ -267,13 +267,13 @@ Qed.
          the protocol landscape.
 *)
 Definition genus1_covering : CoveringScheme M := {|
-  cs_data       := genus1_data ;
-  cs_T'         := ts_T' ts1 ;
-  cs_scheme     := ts1 ;
-  cs_scheme_T   := erefl ;
-  cs_monodromy       := ts1_perm ;
-  cs_recon_invariant := ts1_perm_compatible ;
-  cs_gap        := ts1_gap2 ;
+  cs_plug := {|
+    rp_scheme    := ts1 ;
+    rp_content   := id ;
+    rp_monodromy := ts1_perm ;
+    rp_recon_invariant := ts1_perm_compatible |} ;
+  cs_data := genus1_data ;
+  cs_gap  := ts1_gap2 ;
 |}.
 
 (* Quasi-(k, k+2) threshold *)
@@ -475,13 +475,13 @@ Qed.
          instantiate a covering at arbitrary genus.
 *)
 Definition higher_genus_covering : CoveringScheme M := {|
-  cs_data       := higher_genus_data ;
-  cs_T'         := ts_T' ts_g ;
-  cs_scheme     := ts_g ;
-  cs_scheme_T   := erefl ;
-  cs_monodromy       := ts_g_perm ;
-  cs_recon_invariant := ts_g_perm_compatible ;
-  cs_gap        := ts_g_gap ;
+  cs_plug := {|
+    rp_scheme    := ts_g ;
+    rp_content   := id ;
+    rp_monodromy := ts_g_perm ;
+    rp_recon_invariant := ts_g_perm_compatible |} ;
+  cs_data := higher_genus_data ;
+  cs_gap  := ts_g_gap ;
 |}.
 
 (** higher_genus_gap_bound — ts_T <= ts_k + 2g for the generic genus-g cover.

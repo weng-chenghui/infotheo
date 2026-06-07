@@ -111,7 +111,7 @@ Import GRing.Theory Num.Theory.
 Section security_from_group.
 
 Variable R : realType.
-Variable M : GeneratedMonodromyReprType.
+Variable M : MonodromyReprWithGeneratorType.
 
 Let G := pgg_G M.
 Let N := (pgg_N' M).+1.
@@ -142,7 +142,7 @@ End security_from_group.
 
 Section threshold_from_covering.
 
-Variable M : GeneratedMonodromyReprType.
+Variable M : MonodromyReprWithGeneratorType.
 
 Let G := pgg_G M.
 
@@ -185,7 +185,7 @@ End threshold_from_covering.
 
 Section group_constrains_covering.
 
-Variable M : GeneratedMonodromyReprType.
+Variable M : MonodromyReprWithGeneratorType.
 
 Let G := pgg_G M.
 
@@ -241,7 +241,7 @@ End group_constrains_covering.
 
 Section hurwitz.
 
-Variable M : GeneratedMonodromyReprType.
+Variable M : MonodromyReprWithGeneratorType.
 
 Let G := pgg_G M.
 
@@ -298,7 +298,7 @@ End hurwitz.
 Section protocol_correctness.
 
 Variable R : realType.
-Variable M : GeneratedMonodromyReprType.
+Variable M : MonodromyReprWithGeneratorType.
 
 Let G := pgg_G M.
 Let N := (pgg_N' M).+1.
@@ -316,19 +316,24 @@ Lemma protocol_correct_unbundled
     (PI : PGGInterface M)
     (HT : ts_T' (cs_scheme cs) = pi_T' PI)
     (s : 'I_N) (P : pgg_gT M)
-    (G_stable : forall g, g \in G ->
+    (G_stable : forall g, g \in pgg_G M ->
        forall i : 'I_(ts_T' (cs_scheme cs)).+1,
-         @pgg_rho M g (tnth (cast_tuple (esym (congr1 S HT)) (pi_starts PI)) i) =
-         tnth (cast_tuple (esym (congr1 S HT)) (pi_starts PI))
-              (cs_monodromy cs g i)) :
-  P \in G ->
+         rp_content (cs_plug cs)
+           (@pgg_rho M g (tnth (cast_tuple (esym (congr1 S HT)) (pi_starts PI)) i)) =
+         tnth [tuple rp_content (cs_plug cs)
+                 (tnth (cast_tuple (esym (congr1 S HT)) (pi_starts PI)) j)
+              | j < (ts_T' (cs_scheme cs)).+1] (rp_monodromy (cs_plug cs) g i)) :
+  P \in pgg_G M ->
   ts_valid (cs_scheme cs) s
-          (cast_tuple (esym (congr1 S HT)) (pi_starts PI)) ->
-  pgg_recon_endpoints HT P = s.
+          [tuple rp_content (cs_plug cs)
+             (tnth (cast_tuple (esym (congr1 S HT)) (pi_starts PI)) j)
+          | j < (ts_T' (cs_scheme cs)).+1] ->
+  pgg_recon_endpoints HT (rp_content (cs_plug cs)) P = s.
 Proof.
 move=> PG Hvalid.
-apply: (pgg_hidden_invariant_perm (perm := cs_monodromy cs)) => //.
-exact: cs_recon_invariant.
+apply: (pgg_hidden_invariant_perm (perm := rp_monodromy (cs_plug cs)));
+  [exact: subxx | exact: G_stable | exact: PG | exact: Hvalid
+  | exact: rp_recon_invariant].
 Qed.
 
 End protocol_correctness.
@@ -345,7 +350,7 @@ End protocol_correctness.
 Section landscape_from_rigidity.
 
 Variable R : realType.
-Variable M : GeneratedMonodromyReprType.
+Variable M : MonodromyReprWithGeneratorType.
 Variable ar : AlgebraicRigidity R M.
 
 Let G := pgg_G M.
@@ -485,7 +490,7 @@ End discovery_phase.
 Section entropy_view.
 
 Variable R : realType.
-Variable M : GeneratedMonodromyReprType.
+Variable M : MonodromyReprWithGeneratorType.
 Variable ar : AlgebraicRigidity R M.
 
 Let sw := ar_security ar.
@@ -571,7 +576,7 @@ End entropy_view.
 Section covering_decomposition.
 
 Variable R : realType.
-Variable M : GeneratedMonodromyReprType.
+Variable M : MonodromyReprWithGeneratorType.
 Variable ar : AlgebraicRigidity R M.
 
 Let N := (pgg_N' M).+1.

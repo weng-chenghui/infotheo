@@ -31,6 +31,9 @@
 (*   ThresholdWitness M  == packages the covering scheme + PGL hypothesis     *)
 (*   AlgebraicRigidity R M == combines both into a unified witness            *)
 (*                                                                            *)
+(*   See dropout_witness.v for [DropoutWitness], the capability-side          *)
+(*   record that complements the structural ThresholdWitness here.            *)
+(*                                                                            *)
 (* Constructors:                                                              *)
 (*   security_witness_fiber == SecurityWitness from fiber-counted epsilon      *)
 (*     Accepts any epsilon + proof; instances use vm_compute/case analysis.   *)
@@ -76,7 +79,7 @@ Local Open Scope fdist_scope.
 Section algebraic_rigidity_records.
 
 Variable R : realType.
-Variable M : GeneratedMonodromyReprType.
+Variable M : MonodromyReprWithGeneratorType.
 Let N' := pgg_N' M.
 Let G := pgg_G M.
 
@@ -153,6 +156,28 @@ Record SecurityWitness := MkSecurityWitness {
   sw_asymptotic : option SecurityAsymptotic
 }.
 
+(* The cs_gap field of [tw_covering] (ts_T <= ts_k + 2 * cd_genus,
+   from cover_tradeoff.v:gap_bound) is a privacy-vs-reveal gap, not
+   a dropout-tolerance budget. Reconstruction in every concrete
+   threshold scheme used here consumes the FULL share tuple:
+   - rs_massey_exact (rs_massey_bridge.v:194): RS gives ts_T = ts_k
+     at genus 0, so the gap is zero;
+   - shamir_exact (cover_genus0.v:179): same statement at the
+     transported covering scheme;
+   - ag_massey_gap (ag_massey_bridge.v:85): AG-Massey gives
+     ts_T <= ts_k + 2g for genus g > 0 codes, but its ts_recon
+     (massey_recon_tuple, massey.v:369) still takes a full tuple.
+   Operationalising T - k as "any T - k missing shares can be
+   tolerated" requires a partial-erasure decoder, which is left
+   as future work; see [reconstruct/dropout_witness.v] for the
+   [DropoutWitness] record that records such a decoder when one
+   is constructed.
+
+   ThresholdWitness is purely structural: it says the covering's
+   parameters fit together legally. DropoutWitness is a capability
+   claim: a specific decoder exists meeting a specific bound.
+   Different kinds of obligations, even though both attach to the
+   same CoveringScheme. *)
 Record ThresholdWitness := MkThresholdWitness {
   tw_covering : CoveringScheme M;
   tw_genus0_pgl :
@@ -261,7 +286,7 @@ End direct_endpoint_security.
 Section security_witness_constructors.
 
 Variable R : realType.
-Variable M : GeneratedMonodromyReprType.
+Variable M : MonodromyReprWithGeneratorType.
 Let N' := pgg_N' M.
 
 (** security_witness_from_bound — SecurityWitness from a bound only (no exact eps).
@@ -307,7 +332,7 @@ End security_witness_constructors.
 Section derived_properties.
 
 Variable R : realType.
-Variable M : GeneratedMonodromyReprType.
+Variable M : MonodromyReprWithGeneratorType.
 Variable ar : AlgebraicRigidity R M.
 
 Let G := pgg_G M.
@@ -377,19 +402,27 @@ Proof. move=> /=. exact: gap_bound. Qed.
 Lemma ar_protocol_correct (PI : PGGInterface M)
     (HT : ts_T' (cs_scheme (tw_covering (ar_threshold ar))) = pi_T' PI)
     (s : 'I_N) (P : pgg_gT M)
-    (G_stable : forall g, g \in G ->
+    (G_stable : forall g, g \in pgg_G M ->
        forall i : 'I_(ts_T' (cs_scheme (tw_covering (ar_threshold ar)))).+1,
-         @pgg_rho M g (tnth (cast_tuple (esym (congr1 S HT)) (pi_starts PI)) i) =
-         tnth (cast_tuple (esym (congr1 S HT)) (pi_starts PI))
-              (cs_monodromy (tw_covering (ar_threshold ar)) g i)) :
-  P \in G ->
+         rp_content (cs_plug (tw_covering (ar_threshold ar)))
+           (@pgg_rho M g (tnth (cast_tuple (esym (congr1 S HT)) (pi_starts PI)) i)) =
+         tnth [tuple rp_content (cs_plug (tw_covering (ar_threshold ar)))
+                 (tnth (cast_tuple (esym (congr1 S HT)) (pi_starts PI)) j)
+              | j < (ts_T' (cs_scheme (tw_covering (ar_threshold ar)))).+1]
+              (rp_monodromy (cs_plug (tw_covering (ar_threshold ar))) g i)) :
+  P \in pgg_G M ->
   ts_valid (cs_scheme (tw_covering (ar_threshold ar))) s
-          (cast_tuple (esym (congr1 S HT)) (pi_starts PI)) ->
-  pgg_recon_endpoints HT P = s.
+          [tuple rp_content (cs_plug (tw_covering (ar_threshold ar)))
+             (tnth (cast_tuple (esym (congr1 S HT)) (pi_starts PI)) j)
+          | j < (ts_T' (cs_scheme (tw_covering (ar_threshold ar)))).+1] ->
+  pgg_recon_endpoints HT
+    (rp_content (cs_plug (tw_covering (ar_threshold ar)))) P = s.
 Proof.
 move=> PG Hvalid.
-apply: (pgg_hidden_invariant_perm (perm := cs_monodromy (tw_covering (ar_threshold ar)))) => //.
-exact: cs_recon_invariant.
+apply: (pgg_hidden_invariant_perm
+          (perm := rp_monodromy (cs_plug (tw_covering (ar_threshold ar)))));
+  [exact: subxx | exact: G_stable | exact: PG | exact: Hvalid
+  | exact: rp_recon_invariant].
 Qed.
 
 End derived_properties.
@@ -433,7 +466,7 @@ End raag_derived_properties.
 Section security_profile.
 
 Variable R : realType.
-Variable M : GeneratedMonodromyReprType.
+Variable M : MonodromyReprWithGeneratorType.
 
 Local Open Scope ring_scope.
 
@@ -474,7 +507,7 @@ Arguments SecurityProfile R M : clear implicits.
 Section certified_solution.
 
 Variable R : realType.
-Variable M : GeneratedMonodromyReprType.
+Variable M : MonodromyReprWithGeneratorType.
 
 Local Open Scope ring_scope.
 
@@ -500,7 +533,7 @@ Arguments CertifiedSolution R M : clear implicits.
 (* Architecture layers:                                                       *)
 (*   Layer 1 (Computable — RAAG only):                                       *)
 (*     RAAGDesc -> dealer_solve -> SecurityParams (uses vm_compute)           *)
-(*   Layer 2 (Proof-level — ANY GeneratedMonodromyReprType):                  *)
+(*   Layer 2 (Proof-level — ANY MonodromyReprWithGeneratorType):                  *)
 (*     SecurityWitness -> certified_from_witness -> CertifiedSolution         *)
 (*     AlgebraicRigidity + PGGInterface + G_stable -> ar_protocol_correct     *)
 (******************************************************************************)
@@ -508,7 +541,7 @@ Arguments CertifiedSolution R M : clear implicits.
 Section certified_from_witness.
 
 Variable R : realType.
-Variable M : GeneratedMonodromyReprType.
+Variable M : MonodromyReprWithGeneratorType.
 
 Local Open Scope ring_scope.
 

@@ -37,12 +37,12 @@
 (*       2 * cd_genus + 2 * #|G| = #|G| * (2 * cd_base_genus) + cd_total_ramif + 2 *)
 (*                                                                            *)
 (*   CoveringScheme M == a ThresholdScheme built from a covering of M        *)
-(*     cs_data       == covering geometry (connects G to genus)              *)
-(*     cs_scheme     == the ThresholdScheme instance                         *)
+(*     cs_data            == covering geometry (connects G to genus)         *)
+(*     cs_scheme          == the ThresholdScheme instance                    *)
 (*     cs_monodromy       == monodromy-induced share permutation             *)
 (*     cs_recon_invariant == reconstruction is invariant under the action    *)
-(*     cs_gap        == genus determines threshold gap:                      *)
-(*                      ts_T scheme <= ts_k scheme + 2 * genus               *)
+(*     cs_gap             == genus determines threshold gap:                 *)
+(*                            ts_T scheme <= ts_k scheme + 2 * genus         *)
 (*                                                                            *)
 (* Key results:                                                               *)
 (*   genus0_exact  == genus 0 implies exact threshold (ts_T <= ts_k)         *)
@@ -102,36 +102,45 @@ Arguments CoveringData M : clear implicits.
 Arguments MkCoveringData {M}.
 
 (******************************************************************************)
+(*     Section 1b: ReconPlug — the pluggable reconstruction half             *)
+(******************************************************************************)
+
+(** ReconPlug — the pluggable reconstruction half of an instance. Kind: interface.
+    What: a threshold scheme on 'I_N, a fixed content readout, a monodromy->share
+    permutation, and perm-invariance of reconstruction over the FULL group pgg_G.
+    Why: the program run_* and correctness (pgg_hidden_invariant_perm) consume
+    this bare record; only the genus/tradeoff narrative needs CoveringScheme.
+    Used-by: CoveringScheme, MonodromyProfile, every instance plug. *)
+Record ReconPlug (M : MonodromyReprType) := MkReconPlug {
+  rp_scheme    : ThresholdScheme 'I_(pgg_N' M).+1 'I_(pgg_N' M).+1 ;
+  rp_content   : 'I_(pgg_N' M).+1 -> 'I_(pgg_N' M).+1 ;
+  rp_monodromy : pgg_gT M -> {perm 'I_(ts_T' rp_scheme).+1} ;
+  rp_recon_invariant :
+    @ts_recon_perm_invariant _ (pgg_G M) _ _ rp_scheme rp_monodromy ;
+}.
+
+Arguments ReconPlug M : clear implicits.
+Arguments MkReconPlug {M}.
+
+(******************************************************************************)
 (*     Section 2: Covering Scheme — G Determines Threshold                    *)
 (******************************************************************************)
 
-Section covering_scheme.
-Variable M : MonodromyReprType.
-Let N := (pgg_N' M).+1.
-Let rho := @pgg_rho M.
-
 (* A CoveringScheme bundles:
-   1. Covering geometry (CoveringData) — connects G to genus via Riemann-Hurwitz
-   2. A ThresholdScheme — the actual secret sharing scheme
-   3. Coordinate permutation — monodromy-induced share reordering
-   4. Compatibility — permuting shares preserves reconstruction
-   5. Gap bound — genus determines the threshold gap *)
-Record CoveringScheme := MkCoveringScheme {
-  cs_data   : CoveringData M ;
-  cs_T'     : nat ;
-  cs_scheme : ThresholdScheme 'I_N 'I_N ;
-  cs_scheme_T : ts_T' cs_scheme = cs_T' ;
-  cs_monodromy   : pgg_gT M -> {perm 'I_(ts_T' cs_scheme).+1} ;
-  cs_recon_invariant :
-    @ts_recon_perm_invariant _ (pgg_G M) _ _ cs_scheme cs_monodromy ;
-  cs_gap :
-    ts_T cs_scheme <= ts_k cs_scheme + 2 * cd_genus (cs_data) ;
+   1. A ReconPlug — scheme + content + monodromy + full-group invariance
+   2. Covering geometry (CoveringData) — connects G to genus via Riemann-Hurwitz
+   3. Gap bound — genus determines the threshold gap *)
+Record CoveringScheme (M : MonodromyReprType) := MkCoveringScheme {
+  cs_plug : ReconPlug M ;
+  cs_data : CoveringData M ;
+  cs_gap  : ts_T (rp_scheme cs_plug) <= ts_k (rp_scheme cs_plug)
+            + 2 * cd_genus cs_data ;
 }.
-
-End covering_scheme.
 
 Arguments CoveringScheme M : clear implicits.
 Arguments MkCoveringScheme {M}.
+
+Notation cs_scheme cs := (rp_scheme (cs_plug cs)).
 
 (******************************************************************************)
 (*     Section 3: Consequences of the Covering Structure                      *)
