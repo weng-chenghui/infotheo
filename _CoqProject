@@ -217,16 +217,6 @@ pgg-smc/instances/abelian/rigidity_abelian_instance.v
 pgg-smc/instances/abelian/abel_profile.v
 pgg-smc/instances/star/rigidity_star_instance.v
 pgg-smc/instances/kim2025/rigidity_kim_instance.v
-pgg-smc/instances/wreath7/pgg_wreath.v
-pgg-smc/instances/wreath7/wreath_recovery.v
-pgg-smc/instances/wreath7/wreath_security.v
-pgg-smc/instances/wreath7/wreath_program.v
-pgg-smc/instances/wreath7/rigidity_wreath_instance.v
-pgg-smc/instances/wreath7/wreath_smc.v
-pgg-smc/instances/wreath7/wreath_mixing.v
-pgg-smc/instances/wreath7/wreath_monodromy_profile.v
-pgg-smc/instances/wreath7/wreath_profile_security.v
-pgg-smc/instances/wreath7/wreath_crypto_rigidity.v
 pgg-smc/reconstruct/pgg_landscape_demo.v
 pgg-smc/reconstruct/pgl_bound.v
 pgg-smc/reconstruct/pgg_covering_correctness.v
@@ -249,4 +239,3 @@ pgg-smc/reconstruct/pgg_threshold.v
 -R pgg-smc/instances/abelian pgg_smc
 -R pgg-smc/instances/cyclic pgg_smc
 -R pgg-smc/instances/monster pgg_smc
--R pgg-smc/instances/wreath7 pgg_smc
