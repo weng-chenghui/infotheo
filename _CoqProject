@@ -146,10 +146,8 @@ pgg-smc/instances/s5x5/pgg_s5x5.v
 pgg-smc/instances/s5x5/s5x5_pile.v
 pgg-smc/instances/oc/pgg_oc_param.v
 pgg-smc/groups/pgg_weval_inj.v
-pgg-smc/instances/denboer1989/five_card_session_types.v
 pgg-smc/instances/denboer1989/five_card_group.v
 pgg-smc/instances/denboer1989/five_card_program.v
-pgg-smc/instances/denboer1989/five_card_pismc.v
 pgg-smc/instances/denboer1989/five_card_scheme_I5.v
 pgg-smc/instances/denboer1989/five_card_security.v
 pgg-smc/instances/denboer1989/den_boer_profile.v
