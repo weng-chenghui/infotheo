@@ -49,9 +49,10 @@ Local Open Scope ring_scope.
     the dealer's content readout come from one field. *)
 Record MonodromyProfile (R : realType) := MkMonodromyProfile {
   mp_M        : MonodromyReprWithGeneratorType ;
+  mp_secretT  : Type ;
   mp_PI       : PGGInterface mp_M ;
   mp_security : SecurityWitness R mp_M ;
-  mp_plug     : ReconPlug mp_M ;
+  mp_plug     : ReconPlug mp_M mp_secretT ;
 }.
 
 (******************************************************************************)
@@ -84,9 +85,10 @@ Definition run_party (i : 'I_(pi_T' PI).+1) := exchange_player PI i.
 Definition run_verifier := exchange_verifier PI players.
 
 (** run_recover — reconstruction via the plug's scheme. Kind: instance.
-    Why: the program's recover phase calls ts_recon of the plug's scheme. *)
+    Why: the program's recover phase calls ts_recon of the plug's scheme; the
+    recovered value lives in the plug's secret type mp_secretT. *)
 Definition run_recover (collected : (ts_T' (rp_scheme plug)).+1.-tuple 'I_N)
-    : 'I_N :=
+    : mp_secretT mp :=
   ts_recon (rp_scheme plug) collected.
 
 (** run_eps — the anonymity character of the plug. Kind: definition.
@@ -111,7 +113,7 @@ Definition run_private := ts_private (rp_scheme plug).
     Kind: main.
     Why: the correctness guarantee, consuming the plug's scheme (ts_correct on
     the canonical encoding). *)
-Lemma run_recovers (s : 'I_N) :
+Lemma run_recovers (s : mp_secretT mp) :
   run_recover (ts_encode (rp_scheme plug) s) = s.
 Proof. exact: ts_correct (ts_encode_valid (rp_scheme plug) s). Qed.
 

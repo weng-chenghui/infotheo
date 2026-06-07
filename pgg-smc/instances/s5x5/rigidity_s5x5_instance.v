@@ -391,7 +391,7 @@ Qed.
 (** s5x5_covering — covering-scheme record for the S_5 x S_5 instance.
     Kind: instance. *)
 Definition s5x5_covering : CoveringScheme R_s5x5 := {|
-  cs_plug := @MkReconPlug R_s5x5 s5x5_ts id (@pgg_rho R_s5x5)
+  cs_plug := @MkReconPlug R_s5x5 'I_10 s5x5_ts id (@pgg_rho R_s5x5)
                s5x5_perm_compatible ;
   cs_data := s5x5_covering_data ;
   cs_gap  := s5x5_cs_gap ;
@@ -547,10 +547,10 @@ Theorem s5x5_protocol_correct (s : 'I_10) (P : pgg_gT R_s5x5) :
   ts_valid s5x5_ts s
     [tuple id (tnth (cast_tuple (esym (congr1 S s5x5_HT)) (pi_starts s5x5_PI)) j)
     | j < (ts_T' s5x5_ts).+1] ->
-  @pgg_recon_endpoints R_s5x5 s5x5_PI s5x5_ts s5x5_HT id P = s.
+  @pgg_recon_endpoints R_s5x5 s5x5_PI 'I_10 s5x5_ts s5x5_HT id P = s.
 Proof.
 move=> PG Hvalid.
-apply: (@pgg_hidden_invariant_perm R_s5x5 s5x5_PI s5x5_ts s5x5_HT id
+apply: (@pgg_hidden_invariant_perm R_s5x5 s5x5_PI 'I_10 s5x5_ts s5x5_HT id
           (pgg_G R_s5x5) s P (@pgg_rho R_s5x5));
   [exact: subxx | exact: s5x5_G_stable | exact: PG | exact: Hvalid
   | exact: s5x5_perm_compatible].

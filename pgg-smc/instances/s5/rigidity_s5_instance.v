@@ -331,7 +331,7 @@ Qed.
     values, monodromy, reconstruction invariance and gap bound are all
     proved; only the curve realisation remains an axiom. *)
 Definition s5_brings_covering : CoveringScheme R_s5_brings := {|
-  cs_plug := @MkReconPlug R_s5_brings s5_ts id (@pgg_rho R_s5_brings)
+  cs_plug := @MkReconPlug R_s5_brings 'I_5 s5_ts id (@pgg_rho R_s5_brings)
                s5_sum_mod_perm_compatible ;
   cs_data := s5_brings_covering_data ;
   cs_gap  := s5_cs_gap ;

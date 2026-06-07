@@ -57,8 +57,8 @@ Qed.
     id content + abelian monodromy + abel_sum_mod_perm_compatible. Why: routes
     the abelian (insecure) example through the general MonodromyProfile program.
     Used-by: abel_profile. *)
-Definition abel_plug : ReconPlug (@Gen_PGGTypes 1 2 abel_sigmas) :=
-  @MkReconPlug (@Gen_PGGTypes 1 2 abel_sigmas) abel_ts id
+Definition abel_plug : ReconPlug (@Gen_PGGTypes 1 2 abel_sigmas) 'I_4 :=
+  @MkReconPlug (@Gen_PGGTypes 1 2 abel_sigmas) 'I_4 abel_ts id
     (@pgg_rho (@Gen_PGGTypes 1 2 abel_sigmas)) abel_sum_mod_perm_compatible.
 
 (** abel_profile — plug the abelian Z_2 x Z_2 (N = 4), paired with sum-mod.
@@ -67,7 +67,7 @@ Definition abel_plug : ReconPlug (@Gen_PGGTypes 1 2 abel_sigmas) :=
     commuting generators, k = 2, the eps-floor contrast to the secure plugs.
     Used-by: contrast demos. *)
 Definition abel_profile (R : realType) : MonodromyProfile R :=
-  @MkMonodromyProfile R (@Gen_PGGTypes 1 2 abel_sigmas) (Gen_PGG_2 abel_sigmas)
+  @MkMonodromyProfile R (@Gen_PGGTypes 1 2 abel_sigmas) 'I_4 (Gen_PGG_2 abel_sigmas)
     (abel_security_witness_direct_1 R) abel_plug.
 
 (** run_k_abel — the abelian plug's privacy threshold is 4 (one share per

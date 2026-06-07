@@ -29,14 +29,12 @@ From mathcomp Require Import div fintype tuple finfun finset fingroup perm actio
 From mathcomp Require Import morphism ssralg boolp reals.
 From mathcomp Require Import prime finalg zmodp poly cyclic.
 From infotheo Require Import realType_ext fdist proba variation_dist.
-Require Import pgg_interface ssralg_ext reed_solomon.
+Require Import pgg_interface.
 From pgg_smc Require Import five_card_group pgg_collusion_bound
-                            pgg_uniform_security.
+                            pgg_uniform_security five_card_program
+                            five_card_scheme_I5.
 From pgg_reconstruct Require Import pgg_sharing_framework covering_scheme
-                                    cover_tradeoff algebraic_rigidity.
-From pgg_reconstruct Require Import cover_genus0 coord_perm_compatible.
-From pgg_reconstruct Require Import rs_code_5sheets.
-From pgg_reconstruct Require Import curve_realisation.
+                                    algebraic_rigidity.
 
 Set Implicit Arguments.
 Unset Strict Implicit.
@@ -259,112 +257,113 @@ Proof. reflexivity. Qed.
 
 End fc_dealing_security.
 
+End five_card_security.
+
 (******************************************************************************)
-(** * ThresholdWitness and AlgebraicRigidity (vacuous for C_5)                *)
+(** * Reconstruction plug and end-to-end protocol correctness                 *)
 (*                                                                            *)
-(* |C_5| = 5, pgl_bound = maxn (2*N) 60 = 60 for N=5 (Klein bound on        *)
-(* finite subgroups of Aut(P^1)), so 5 <= 60 trivially.                       *)
-(* The threshold side adds no content; the interesting part is the            *)
-(* SecurityWitness (eps = 0, perfect security).                               *)
+(* The genus-0 RS5 ThresholdWitness/AlgebraicRigidity block (fc_covering,     *)
+(* fc_covering_realised Axiom, fc_genus0_automorphism, fc_threshold_witness,  *)
+(* fc_rigidity, fc_tradeoff, fc_ts_recon_correct) was removed: it was a       *)
+(* vacuous (RS5_witness_trivial) packaging with no external consumer, and the *)
+(* secret-space cardinality forced an 'I_5 secret that cannot model the       *)
+(* one-bit (a AND b) five-card trick. The heterogeneous-secret ReconPlug      *)
+(* (covering_scheme.v) replaces it: shares are card positions in 'I_5, the    *)
+(* secret is a bool, and reconstruction is the rotation-invariant             *)
+(* three-consecutive-hearts read (fcI_scheme, five_card_scheme_I5.v).         *)
 (******************************************************************************)
 
-Section fc_rigidity.
-
-Variable R : realType.
-
-(* Group nontriviality *)
-Hypothesis HG_fc : (1 < #|pgg_G FiveCard_M|)%N.
-
-(* Sheet count for FiveCard_M: 5 sheets (pgg_N' = 4). Verified definitionally
-   since FiveCard_M = Gen_PGGTypes 0 3 fc_sigmas, so pgg_N' = 4. *)
-Lemma fc_HN5 : (pgg_N' FiveCard_M).+1 = 5.
-Proof. by []. Qed.
-
-(* Genus-0 covering scheme using the concrete RS5_witness_trivial factory.
-   This discharges all 11 RS-code obligations in one shot using GF(5),
-   length-4 RS code, and the trivial code automorphism (which suffices
-   because AlgebraicRigidity does not invoke genus0_secret_invariant). *)
-Definition fc_covering : CoveringScheme FiveCard_M :=
-  genus0_covering_witness HG_fc (RS5_witness_trivial fc_HN5).
-
-(** fc_covering_realised — documentation marker tying [fc_covering] to a
-    real algebraic curve.
-    Kind: helper.
-    Why: the realising curve is P^1 (the genus-0 line itself), with the
-    cyclic group acting trivially on the 5 distinguished sheets. As with
-    kim2025, the (cyclic, 5-sheet, secret-fix-0) configuration structurally
-    forces sigma trivial. See project_rs5_witness_trivial_vacuity.md.
-    Used by: documentation only; not consumed by tactics. *)
-Axiom fc_covering_realised : realised_by_curve (cs_data fc_covering).
-
-(* PGL bound: |C_5| = 5 <= 120 = PGL(2,5) *)
-Hypothesis fc_genus0_pgl :
-  (#|pgg_G FiveCard_M| <= pgl_bound FiveCard_M)%N.
-
-(** fc_genus0_automorphism — discharges [genus0_automorphism_bound] for the
-    FiveCard instance by reducing to the concrete PGL bound [fc_genus0_pgl].
-    Kind: helper.
-    Why: required to instantiate [fc_threshold_witness], which packages the
-    covering scheme with its automorphism-bound obligation.
-    Used by: fc_threshold_witness. *)
-Lemma fc_genus0_automorphism :
-  genus0_automorphism_bound FiveCard_M (cs_data fc_covering).
-Proof. move=> _; exact: fc_genus0_pgl. Qed.
-
-(** fc_threshold_witness — ThresholdWitness for the five-card instance using the RS5_witness_trivial genus-0 covering.
+(** den_boer_plug — the five-card reconstruction plug.
     Kind: instance.
-    Why: Threshold half of fc_rigidity; packages fc_covering with the PGL collusion bound.
-*)
-Definition fc_threshold_witness : ThresholdWitness FiveCard_M :=
-  @MkThresholdWitness FiveCard_M fc_covering fc_genus0_automorphism.
+    Why: the heterogeneous-secret ReconPlug for FiveCard_M: the bool/'I_5
+    scheme fcI_scheme, the identity content readout fc_content, the C_5
+    monodromy pgg_rho, and the proven full-group reconstruction invariance
+    fcI_perm_compatible. Routes the five-card trick through the shared
+    MonodromyProfile program. Used-by: den_boer_profile, the protocol
+    correctness theorem. *)
+Definition den_boer_plug : ReconPlug FiveCard_M bool :=
+  @MkReconPlug FiveCard_M bool fcI_scheme fc_content
+    (morphism.mfun (@pgg_rho FiveCard_M)) fcI_perm_compatible.
 
-(** fc_rigidity — AlgebraicRigidity instance for the five-card trick.
-    Kind: instance.
-    Why: Combines the uniform-security witness (epsilon = 0) with the genus-0 ThresholdWitness to certify algebraic rigidity of the five-card example.
-*)
-Definition fc_rigidity : AlgebraicRigidity R FiveCard_M :=
-  @MkAlgebraicRigidity R FiveCard_M
-    (fc_security_uniform R)
-    fc_threshold_witness.
+(** fc_starts_uniq — the five starting card positions are distinct.
+    Kind: helper. What: uniq (ord_tuple 5). Why: the uniqueness witness for
+    FiveCard_PI. Used-by: FiveCard_PI. *)
+Lemma fc_starts_uniq : uniq (ord_tuple 5).
+Proof. by rewrite val_ord_tuple enum_uniq. Qed.
 
-(* Verify tradeoff: genus-0 regime with T = k *)
-Lemma fc_tradeoff :
-  let cs := tw_covering (ar_threshold fc_rigidity) in
-  (cd_genus (cs_data cs) = 0 /\
-   (#|pgg_G FiveCard_M| <= pgl_bound FiveCard_M)%N /\
-   (ts_T (cs_scheme cs) <= ts_k (cs_scheme cs))%N)
-  \/
-  ((0 < cd_genus (cs_data cs))%N /\
-   (ts_T (cs_scheme cs) <= ts_k (cs_scheme cs) + 2 * cd_genus (cs_data cs))%N).
+(** FiveCard_PI — the concrete five-sheet starting interface.
+    Kind: instance. What: the identity start tuple (ord_tuple 5) over the five
+    card positions. Why: the identity starts make the G_stable condition reduce
+    to reflexivity of pgg_rho (content = fc_content = id). Used-by:
+    den_boer_HT, den_boer_protocol_correct, den_boer_profile. *)
+Definition FiveCard_PI : PGGInterface FiveCard_M :=
+  @MkPGGI FiveCard_M 4 (ord_tuple 5) fc_starts_uniq.
+
+(** den_boer_HT — the scheme and interface party counts agree (both 4).
+    Kind: helper. What: the cast witness, kept as erefl so tuple casts reduce
+    away. Why: bridges ts_T' fcI_scheme with pi_T' FiveCard_PI in the protocol
+    statements. Used-by: den_boer_G_stable, den_boer_protocol_correct. *)
+Definition den_boer_HT : ts_T' fcI_scheme = pi_T' FiveCard_PI := erefl.
+
+(** den_boer_G_stable — the monodromy permutes the starts as the share
+    permutation (content = fc_content = id form).
+    Kind: main.
+    Why: the structural condition of protocol correctness, proven not assumed.
+    With starts = ord_tuple 5 and fc_content the identity, both sides collapse
+    to pgg_rho g i. Mirrors s5x5_G_stable. Used-by: den_boer_protocol_correct. *)
+Lemma den_boer_G_stable :
+  forall g, g \in pgg_G FiveCard_M ->
+  forall i : 'I_(ts_T' fcI_scheme).+1,
+    fc_content (@pgg_rho FiveCard_M g
+      (tnth (cast_tuple (esym (congr1 S den_boer_HT)) (pi_starts FiveCard_PI)) i)) =
+    tnth [tuple fc_content
+            (tnth (cast_tuple (esym (congr1 S den_boer_HT)) (pi_starts FiveCard_PI)) j)
+         | j < (ts_T' fcI_scheme).+1] (morphism.mfun (@pgg_rho FiveCard_M) g i).
 Proof.
-move=> /=.
-exact: (@security_threshold_tradeoff FiveCard_M fc_covering
-                                     (fun _ => fc_genus0_pgl)).
+move=> g Hg i.
+by rewrite tnth_mktuple /fc_content !tnth_cast_tuple !tnth_ord_tuple !cast_ord_id.
 Qed.
 
-(** Protocol reconstruction correctness: named instance-level re-export of
-    [ar_protocol_correct]. *)
-Lemma fc_ts_recon_correct (PI : PGGInterface FiveCard_M)
-    (HT : ts_T' (cs_scheme (tw_covering (ar_threshold fc_rigidity))) = pi_T' PI)
-    (s : 'I_5) (P : pgg_gT FiveCard_M)
-    (G_stable : forall g, g \in pgg_G FiveCard_M ->
-       forall i : 'I_(ts_T' (cs_scheme (tw_covering (ar_threshold fc_rigidity)))).+1,
-         rp_content (cs_plug (tw_covering (ar_threshold fc_rigidity)))
-           (@pgg_rho FiveCard_M g
-             (tnth (cast_tuple (esym (congr1 S HT)) (pi_starts PI)) i)) =
-         tnth [tuple rp_content (cs_plug (tw_covering (ar_threshold fc_rigidity)))
-                 (tnth (cast_tuple (esym (congr1 S HT)) (pi_starts PI)) j)
-              | j < (ts_T' (cs_scheme (tw_covering (ar_threshold fc_rigidity)))).+1]
-              (rp_monodromy (cs_plug (tw_covering (ar_threshold fc_rigidity))) g i)) :
+(** den_boer_protocol_correct — recovery of the dealt endpoints returns the
+    secret bit (unconditional, concrete interface).
+    Kind: main.
+    Why: the end-to-end guarantee for the five-card trick. For any hidden
+    element P of the full C_5 monodromy, reconstructing the revealed endpoints
+    recovers the secret bit, via the generic pgg_hidden_invariant_perm fed the
+    proven G_stable and the plug's full-group reconstruction invariance. The
+    one-bit secret (bool) is now expressible because shares are 'I_5 positions
+    and the secret is the AND. *)
+Theorem den_boer_protocol_correct (s : bool) (P : pgg_gT FiveCard_M) :
   P \in pgg_G FiveCard_M ->
-  ts_valid (cs_scheme (tw_covering (ar_threshold fc_rigidity))) s
-          [tuple rp_content (cs_plug (tw_covering (ar_threshold fc_rigidity)))
-             (tnth (cast_tuple (esym (congr1 S HT)) (pi_starts PI)) j)
-          | j < (ts_T' (cs_scheme (tw_covering (ar_threshold fc_rigidity)))).+1] ->
-  pgg_recon_endpoints HT
-    (rp_content (cs_plug (tw_covering (ar_threshold fc_rigidity)))) P = s.
-Proof. exact: ar_protocol_correct. Qed.
+  ts_valid fcI_scheme s
+    [tuple fc_content
+       (tnth (cast_tuple (esym (congr1 S den_boer_HT)) (pi_starts FiveCard_PI)) j)
+    | j < (ts_T' fcI_scheme).+1] ->
+  @pgg_recon_endpoints FiveCard_M FiveCard_PI bool fcI_scheme den_boer_HT
+    fc_content P = s.
+Proof.
+move=> PG Hvalid.
+apply: (@pgg_hidden_invariant_perm FiveCard_M FiveCard_PI bool fcI_scheme
+          den_boer_HT fc_content (pgg_G FiveCard_M) s P
+          (morphism.mfun (@pgg_rho FiveCard_M)));
+  [exact: subxx | exact: den_boer_G_stable | exact: PG | exact: Hvalid
+  | exact: fcI_perm_compatible].
+Qed.
 
-End fc_rigidity.
-
-End five_card_security.
+(** den_boer_recovers_and — reading the shuffled canonical arrangement returns
+    the AND of the two input bits.
+    Kind: main.
+    Why: the literal den-Boer semantics tied to a AND b. The canonical
+    arrangement fcI_encode (a && b) is shuffled by any monodromy element g
+    (the random cyclic shift) and the three-consecutive-hearts read still
+    returns a && b, because reconstruction is invariant under the C_5 action.
+    This is the protocol statement specialised to the standard arrangement. *)
+Corollary den_boer_recovers_and (a b : bool) (g : pgg_gT FiveCard_M) :
+  g \in pgg_G FiveCard_M ->
+  ts_recon fcI_scheme
+    [tuple tnth (fcI_encode (a && b)) (morphism.mfun (@pgg_rho FiveCard_M) g i)
+    | i < (ts_T' fcI_scheme).+1] = a && b.
+Proof.
+move=> Hg.
+exact: (fcI_perm_compatible Hg (fcI_encode_valid (a && b))).
+Qed.

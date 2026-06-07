@@ -149,7 +149,9 @@ pgg-smc/instances/denboer1989/five_card_session_types.v
 pgg-smc/instances/denboer1989/five_card_group.v
 pgg-smc/instances/denboer1989/five_card_program.v
 pgg-smc/instances/denboer1989/five_card_pismc.v
+pgg-smc/instances/denboer1989/five_card_scheme_I5.v
 pgg-smc/instances/denboer1989/five_card_security.v
+pgg-smc/instances/denboer1989/den_boer_profile.v
 pgg-smc/instances/kim2025/five_card_kim.v
 pgg-smc/protocol/card_protocol.v
 pgg-smc/protocol/card_protocol_posterior.v

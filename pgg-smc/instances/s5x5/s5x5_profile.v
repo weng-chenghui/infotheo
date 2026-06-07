@@ -31,7 +31,7 @@ Import Prenex Implicits.
     S_5 x S_5 monodromy pgg_rho, proven invariance s5x5_perm_compatible). Why:
     routes S_5 x S_5 through the general MonodromyProfile program. Used-by:
     s5x5_profile. *)
-Definition s5x5_plug : ReconPlug (@Gen_PGGTypes 7 8 s5x5_gen_tuple) :=
+Definition s5x5_plug : ReconPlug (@Gen_PGGTypes 7 8 s5x5_gen_tuple) 'I_10 :=
   cs_plug s5x5_covering.
 
 (** s5x5_profile — plug the S_5 x S_5 product monodromy (N = 10, two piles of
@@ -40,7 +40,7 @@ Definition s5x5_plug : ReconPlug (@Gen_PGGTypes 7 8 s5x5_gen_tuple) :=
     the shared program; its privacy threshold is k = 5 (per-pile sum-mod).
     Used-by: contrast demos. *)
 Definition s5x5_profile (R : realType) : MonodromyProfile R :=
-  @MkMonodromyProfile R (@Gen_PGGTypes 7 8 s5x5_gen_tuple) s5x5_PI
+  @MkMonodromyProfile R (@Gen_PGGTypes 7 8 s5x5_gen_tuple) 'I_10 s5x5_PI
     (s5x5_security_witness_1 R) s5x5_plug.
 
 (** run_k_s5x5 — the S_5 x S_5 plug's privacy threshold is 5.

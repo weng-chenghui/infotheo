@@ -262,7 +262,11 @@ Let T := (pi_T' PI).+1.
 Let rho := @pgg_rho M.
 Let starts := pi_starts PI.
 
-Variable ts : ThresholdScheme 'I_N 'I_N.
+(* The SHARES live on 'I_N (the card positions); the SECRET is an arbitrary
+   [secretT]. For the position-model instances secretT = 'I_N; den Boer plugs in
+   secretT = bool. *)
+Variable secretT : Type.
+Variable ts : ThresholdScheme secretT 'I_N.
 Hypothesis HT : ts_T' ts = pi_T' PI.
 
 (* A fixed content readout applied to each shuffled start before reconstruction.
@@ -273,11 +277,11 @@ Variable content : 'I_N -> 'I_N.
 Let sT := (ts_T' ts).+1.
 
 (* Cast endpoints to the scheme's tuple type *)
-Definition pgg_recon (eps : T.-tuple 'I_N) : 'I_N :=
+Definition pgg_recon (eps : T.-tuple 'I_N) : secretT :=
   ts_recon ts (cast_tuple (esym (congr1 S HT)) eps).
 
 (* The secret reconstructed from endpoints, read through the content map *)
-Definition pgg_recon_endpoints (P : gT) : 'I_N :=
+Definition pgg_recon_endpoints (P : gT) : secretT :=
   pgg_recon [tuple content (rho P (tnth starts i)) | i < T].
 
 (* Main theorem: coordinate-permutation compatible scheme + G-stable starts
@@ -286,7 +290,7 @@ Definition pgg_recon_endpoints (P : gT) : 'I_N :=
    on the recon-symmetry subgroup [H] that actually contains the hidden element
    [P]; [H] is required to be a subgroup of [pgg_G M] so the morphism action of
    [rho] applies. *)
-Lemma pgg_hidden_invariant_perm (H : {group gT}) (s : 'I_N) (P : gT)
+Lemma pgg_hidden_invariant_perm (H : {group gT}) (s : secretT) (P : gT)
     (perm : gT -> {perm 'I_sT})
     (HsubG : H \subset pgg_G M)
     (G_stable : forall g, g \in H ->

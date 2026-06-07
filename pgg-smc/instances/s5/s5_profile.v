@@ -41,7 +41,7 @@ Definition s5_PI : PGGInterface (@Gen_PGGTypes 3 3 (path_gen_tuple 3)) :=
     covering plug (sum-mod scheme, id content, S_5 monodromy, proven
     invariance). Why: routes S_5 through the general MonodromyProfile program.
     Used-by: s5_profile. *)
-Definition s5_plug : ReconPlug (@Gen_PGGTypes 3 3 (path_gen_tuple 3)) :=
+Definition s5_plug : ReconPlug (@Gen_PGGTypes 3 3 (path_gen_tuple 3)) 'I_5 :=
   cs_plug s5_brings_covering.
 
 (** s5_profile — plug the S_5 adjacent-transposition monodromy (N = 5).
@@ -49,7 +49,7 @@ Definition s5_plug : ReconPlug (@Gen_PGGTypes 3 3 (path_gen_tuple 3)) :=
     security witness, and s5_plug. Why: the S_5 plug of the shared program; its
     anonymity bound decays geometrically to 0, k = 5. Used-by: contrast demos. *)
 Definition s5_profile (R : realType) : MonodromyProfile R :=
-  @MkMonodromyProfile R (@Gen_PGGTypes 3 3 (path_gen_tuple 3)) s5_PI
+  @MkMonodromyProfile R (@Gen_PGGTypes 3 3 (path_gen_tuple 3)) 'I_5 s5_PI
     (s5_security_witness_schreier R 285) s5_plug.
 
 (** run_k_s5 — the S_5 plug's privacy threshold is 5.

@@ -106,21 +106,24 @@ Arguments MkCoveringData {M}.
 (******************************************************************************)
 
 (** ReconPlug — the pluggable reconstruction half of an instance. Kind: interface.
-    What: a threshold scheme on 'I_N, a fixed content readout, a monodromy->share
+    What: a threshold scheme whose SHARES live on 'I_N and whose SECRET is an
+    arbitrary [secretT], a fixed content readout 'I_N -> 'I_N, a monodromy->share
     permutation, and perm-invariance of reconstruction over the FULL group pgg_G.
     Why: the program run_* and correctness (pgg_hidden_invariant_perm) consume
-    this bare record; only the genus/tradeoff narrative needs CoveringScheme.
-    Used-by: CoveringScheme, MonodromyProfile, every instance plug. *)
-Record ReconPlug (M : MonodromyReprType) := MkReconPlug {
-  rp_scheme    : ThresholdScheme 'I_(pgg_N' M).+1 'I_(pgg_N' M).+1 ;
+    this bare record; only the genus/tradeoff narrative needs CoveringScheme. The
+    heterogeneous secret lets a one-bit instance (den Boer: secretT = bool) plug
+    in alongside the position-model instances (secretT = 'I_N).
+    Used-by: CoveringScheme (at secretT = 'I_N), MonodromyProfile, every plug. *)
+Record ReconPlug (M : MonodromyReprType) (secretT : Type) := MkReconPlug {
+  rp_scheme    : ThresholdScheme secretT 'I_(pgg_N' M).+1 ;
   rp_content   : 'I_(pgg_N' M).+1 -> 'I_(pgg_N' M).+1 ;
   rp_monodromy : pgg_gT M -> {perm 'I_(ts_T' rp_scheme).+1} ;
   rp_recon_invariant :
     @ts_recon_perm_invariant _ (pgg_G M) _ _ rp_scheme rp_monodromy ;
 }.
 
-Arguments ReconPlug M : clear implicits.
-Arguments MkReconPlug {M}.
+Arguments ReconPlug M secretT.
+Arguments MkReconPlug {M secretT}.
 
 (******************************************************************************)
 (*     Section 2: Covering Scheme — G Determines Threshold                    *)
@@ -131,7 +134,7 @@ Arguments MkReconPlug {M}.
    2. Covering geometry (CoveringData) — connects G to genus via Riemann-Hurwitz
    3. Gap bound — genus determines the threshold gap *)
 Record CoveringScheme (M : MonodromyReprType) := MkCoveringScheme {
-  cs_plug : ReconPlug M ;
+  cs_plug : ReconPlug M 'I_(pgg_N' M).+1 ;
   cs_data : CoveringData M ;
   cs_gap  : ts_T (rp_scheme cs_plug) <= ts_k (rp_scheme cs_plug)
             + 2 * cd_genus cs_data ;
