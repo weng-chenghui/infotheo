@@ -7,13 +7,8 @@ From mathcomp Require Import boolp reals.
 Require Import smc_interpreter pismc smc_session_types.
 Require Import pgg_interface pgg_session_types.
 Require Import pgg_weval_inj.
-Require Import pgg_raag_star.
-Require Import pgg_oc_param.
-Require Import pgg_abelian.
 From pgg_smc Require Import pgg_security_solver.
 From pgg_reconstruct Require Import algebraic_rigidity.
-From pgg_smc Require Import rigidity_monster_instance.
-From pgg_smc Require Import rigidity_abelian_instance.
 
 (******************************************************************************)
 (* Card Exchange Phase Protocol                                               *)
@@ -198,6 +193,22 @@ Let dealer_idx_env (j : 'I_T) (env : senv pgg_dtype) :=
 Let verifier_env_step (j : 'I_T) (env : senv pgg_dtype) :=
   senv_recv env (player_idx j) DT_Sheet.
 
+(** dealt_hand_content — the dealer's column after the fixed content readout:
+    [seq content (rho w (start i)) | w <- W]. Kind: helper. What: bakes the plug's
+    face/id readout into the wire so the revealed values are faces, not identities,
+    while the wire stays 'I_N. Used-by: exchange_dealer. *)
+Definition dealt_hand_content (content : 'I_N -> 'I_N) (W : seq gT) (i : 'I_T)
+    : seq 'I_N :=
+  [seq content (rho w (tnth starts i)) | w <- W].
+
+(** dealt_hand_content_id — with the identity readout the content dealing is the
+    plain [dealt_hand]. Kind: helper. What: dealt_hand_content id = dealt_hand.
+    Why: position-model instances (content=id) reuse every existing dealt_hand
+    fact and duality proof. Used-by: exchange_dealer id re-exports. *)
+Lemma dealt_hand_content_id (W : seq gT) (i : 'I_T) :
+  dealt_hand_content id W i = dealt_hand PI W i.
+Proof. by rewrite /dealt_hand_content /dealt_hand. Qed.
+
 (******************************************************************************)
 (** * PGG Protocol Programs                                                   *)
 (******************************************************************************)
@@ -207,11 +218,12 @@ Let verifier_env_step (j : 'I_T) (env : senv pgg_dtype) :=
    Phase 2 (ForList): announce selection index P_idx to all players.
    The two ForList loops separate hand dealing (DT_Hand) from
    index announcement (DT_Idx) to keep session types uniform per loop. *)
-Definition exchange_dealer (players : seq 'I_T) (W : seq gT) (P_idx : nat)
+Definition exchange_dealer (content : 'I_N -> 'I_N)
+    (players : seq 'I_T) (W : seq gT) (P_idx : nat)
     : sproc pgg_dtype data dealer_idx :=
   \pi{ Init (@PGG_idx N P_idx) ;
      ForList players step S enstep dealer_hand_env as j cont k =>
-       Deal<(player_idx j)> #(dealt_hand PI W j) ;
+       Deal<(player_idx j)> #(dealt_hand_content content W j) ;
        k
      end ;
      ForList players step S enstep dealer_idx_env as j cont k =>
@@ -259,7 +271,7 @@ Arguments exchange_verifier {M} PI.
 
 Section exchange_dealer_from_words.
 
-Variable M : GeneratedMonodromyReprType.
+Variable M : MonodromyReprWithGeneratorType.
 Variable PI : PGGInterface M.
 
 Let T := (pi_T' PI).+1.
@@ -272,7 +284,7 @@ Let Tg := (@pgg_ngens' M).+1.
 *)
 Definition exchange_dealer_from_words (L : nat)
     (players : seq 'I_T) (w : L.-tuple 'I_Tg) (P_idx : nat) :=
-  exchange_dealer PI players [:: @word_eval M L w] P_idx.
+  exchange_dealer PI id players [:: @word_eval M L w] P_idx.
 
 End exchange_dealer_from_words.
 
@@ -364,7 +376,7 @@ Local Open Scope sproc_scope.
 
 (* Wrap as aprocs for duality checking *)
 Definition ap_dealer_2 :=
-  mk_aproc (exchange_dealer PI players_2 W P_idx).
+  mk_aproc (exchange_dealer PI id players_2 W P_idx).
 (** ap_player0_2 — player-0 program as an [aproc] for duality checking.
     Kind: example.
 *)
@@ -452,7 +464,7 @@ Local Open Scope sproc_scope.
 (** ap_dealer_gen — generic dealer program as an [aproc] for duality checking.
     Kind: instance.
 *)
-Definition ap_dealer_gen := mk_aproc (exchange_dealer PI_gen players_2 W P_idx).
+Definition ap_dealer_gen := mk_aproc (exchange_dealer PI_gen id players_2 W P_idx).
 (** ap_player0_gen — generic player-0 program as an [aproc] for duality checking.
     Kind: instance.
 *)
@@ -503,225 +515,3 @@ Lemma player1_verifier_dual_gen : channels_dual ap_player1_gen ap_verifier_gen.
 Proof. by native_compute. Qed.
 
 End pgg_generated_duality.
-
-(******************************************************************************)
-(** * Monster Group Duality (N ~ 10^20 card positions)                        *)
-(******************************************************************************)
-
-Section pgg_monster_duality.
-(* Monster group M: N ~ 10^20 card positions — large encoding space.
-   Instantiates generic duality with axiomatized generators.
-   No native_compute needed — the generic proof already covers this case.
-   Shows PGG scales to arbitrarily large card decks. *)
-
-Variables (W : seq {perm 'I_monster_n.+2}) (P_idx : nat).
-
-(** dealer_player0_dual_mon — Monster-group instance of dealer vs player 0 duality.
-    Kind: instance.
-*)
-Definition dealer_player0_dual_mon :=
-  @dealer_player0_dual_gen 1 monster_n monster_sigmas W P_idx.
-
-(** dealer_player1_dual_mon — Monster-group instance of dealer vs player 1 duality.
-    Kind: instance.
-*)
-Definition dealer_player1_dual_mon :=
-  @dealer_player1_dual_gen 1 monster_n monster_sigmas W P_idx.
-
-(** dealer_verifier_dual_mon — Monster-group instance of dealer vs verifier duality.
-    Kind: instance.
-*)
-Definition dealer_verifier_dual_mon :=
-  @dealer_verifier_dual_gen 1 monster_n monster_sigmas W P_idx.
-
-(** player0_player1_dual_mon — Monster-group instance of player 0 vs player 1 duality.
-    Kind: instance.
-*)
-Definition player0_player1_dual_mon :=
-  @player0_player1_dual_gen 1 monster_n monster_sigmas.
-
-(** player0_verifier_dual_mon — Monster-group instance of player 0 vs verifier duality.
-    Kind: instance.
-*)
-Definition player0_verifier_dual_mon :=
-  @player0_verifier_dual_gen 1 monster_n monster_sigmas.
-
-(** player1_verifier_dual_mon — Monster-group instance of player 1 vs verifier duality.
-    Kind: instance.
-*)
-Definition player1_verifier_dual_mon :=
-  @player1_verifier_dual_gen 1 monster_n monster_sigmas.
-
-End pgg_monster_duality.
-
-(******************************************************************************)
-(** * Concrete Group Instances, T=4 Players via CertifiedSolution             *)
-(*                                                                            *)
-(*   Star(m)    : N=m+3,       Tg=m+1,  RAAG with commuting leaves          *)
-(*   OC(k,p)    : N=k+p+3,    Tg=k+1,  overlapping (p+3)-cycles            *)
-(*   Monster    : N~10^20,    Tg=2,    axiomatized 2-generated              *)
-(*   Abelian(m) : N=2*(m+1),  Tg=m+1,  disjoint transpositions (insecure)  *)
-(* Each parameterized by CertifiedSolution cs: solver determines L, eps.    *)
-(******************************************************************************)
-
-(* --- Section A: Star(m) — RAAG, N=m+3, T=4 --- *)
-
-Section pgg_star_protocol.
-
-Variable R : realType.
-Variable m : nat.
-Hypothesis Hm : (1 <= m)%N.
-
-Let R_star : GeneratedMonodromyReprType := Gen_PGGTypes (star_gen_tuple m).
-Variable cs : CertifiedSolution R R_star.
-Let L := sp_L (cs_params cs).
-
-(** star_4_le_N — the Star([m]) card-position count [m+3] is at least 4.
-    Kind: helper.
-    Why: side-condition for instantiating the 4-player interface [Gen_PGG_T].
-    Used by: star_PI.
-*)
-Lemma star_4_le_N : 4 <= m.+3.
-Proof. by rewrite -[4]/(1).+3 ltnS. Qed.
-
-Let star_PI := @Gen_PGG_T R_star 3 star_4_le_N.
-Let players := enum 'I_4.
-Variable P_idx : nat.
-
-(** star4_exchange_dealer — 4-player dealer program specialised to the Star([m]) RAAG instance.
-    Kind: instance.
-*)
-Definition star4_exchange_dealer (w : L.-tuple 'I_m.+1) :=
-  exchange_dealer_from_words star_PI L players w P_idx.
-(** star4_exchange_player — 4-player participant program for the Star([m]) RAAG instance.
-    Kind: instance.
-*)
-Definition star4_exchange_player (i : 'I_4) := exchange_player star_PI i.
-(** star4_exchange_verifier — 4-player verifier program for the Star([m]) RAAG instance.
-    Kind: instance.
-*)
-Definition star4_exchange_verifier := exchange_verifier star_PI players.
-
-End pgg_star_protocol.
-
-(* --- Section B: OC(k,p) — parametric overlapping cycles, N=k+p+3, T=4 --- *)
-
-Section pgg_oc_protocol.
-
-Variable R : realType.
-Variable k p : nat.
-Hypothesis Hkp : (1 <= k + p)%N.
-
-(* OC tuple cast: k + p.+3 = (k+p).+3 = ((k+p).+1).+2 to match Gen_PGGTypes *)
-Let oc_param_tuple' : k.+1.-tuple {perm 'I_(k+p).+3}.
-Proof. by rewrite -addnS -addnS -addnS; exact: oc_param_tuple k p. Defined.
-
-Let R_oc : GeneratedMonodromyReprType :=
-  @Gen_PGGTypes k (k + p).+1 oc_param_tuple'.
-Variable cs : CertifiedSolution R R_oc.
-Let L := sp_L (cs_params cs).
-
-(** oc_4_le_N — the OC([k, p]) card-position count [(k+p)+3] is at least 4.
-    Kind: helper.
-    Why: side-condition for instantiating the 4-player interface [Gen_PGG_T].
-    Used by: oc_PI.
-*)
-Lemma oc_4_le_N : 4 <= (k + p).+3.
-Proof. by []. Qed.
-
-Let oc_PI := @Gen_PGG_T R_oc 3 oc_4_le_N.
-Let players := enum 'I_4.
-Variable P_idx : nat.
-
-(** oc4_exchange_dealer — 4-player dealer program specialised to the OC([k], [p]) instance.
-    Kind: instance.
-*)
-Definition oc4_exchange_dealer (w : L.-tuple 'I_k.+1) :=
-  exchange_dealer_from_words oc_PI L players w P_idx.
-(** oc4_exchange_player — 4-player participant program for the OC([k], [p]) instance.
-    Kind: instance.
-*)
-Definition oc4_exchange_player (i : 'I_4) := exchange_player oc_PI i.
-(** oc4_exchange_verifier — 4-player verifier program for the OC([k], [p]) instance.
-    Kind: instance.
-*)
-Definition oc4_exchange_verifier := exchange_verifier oc_PI players.
-
-End pgg_oc_protocol.
-
-(* --- Section C: Monster — N ~ 10^20, T=4 --- *)
-
-Section pgg_monster_protocol.
-
-Variable R : realType.
-Hypothesis Hmon : (4 <= monster_n.+2)%N.
-
-Let R_mon : GeneratedMonodromyReprType := Gen_PGGTypes monster_sigmas.
-Variable cs : CertifiedSolution R R_mon.
-Let L := sp_L (cs_params cs).
-
-Let mon_PI := @Gen_PGG_T R_mon 3 Hmon.
-Let players := enum 'I_4.
-Variable P_idx : nat.
-
-(** mon4_exchange_dealer — 4-player dealer program specialised to the Monster-group instance.
-    Kind: instance.
-*)
-Definition mon4_exchange_dealer (w : L.-tuple 'I_2) :=
-  exchange_dealer_from_words mon_PI L players w P_idx.
-(** mon4_exchange_player — 4-player participant program for the Monster-group instance.
-    Kind: instance.
-*)
-Definition mon4_exchange_player (i : 'I_4) := exchange_player mon_PI i.
-(** mon4_exchange_verifier — 4-player verifier program for the Monster-group instance.
-    Kind: instance.
-*)
-Definition mon4_exchange_verifier := exchange_verifier mon_PI players.
-
-End pgg_monster_protocol.
-
-(* --- Section D: Abelian(m) — disjoint transpositions, insecure --- *)
-
-Section pgg_abelian_protocol.
-(* Abelian instance: m+1 disjoint transpositions, N = 2*(m+1), T = 4.
-   Demonstrates protocol-level INSECURITY: abelian groups have
-   linear trace growth (n_traces ~ 2L+1), so epsilon stays large
-   regardless of shuffle count L. *)
-
-Variable R : realType.
-Variable m : nat.
-Hypothesis Hm : (1 <= m)%N.
-
-Let R_abel : GeneratedMonodromyReprType := Gen_PGGTypes (dt_gen_tuple m).
-Variable cs : CertifiedSolution R R_abel.
-Let L := sp_L (cs_params cs).
-
-(** abel_4_le_N — the Abelian([m]) card-position count [2(m+1)] is at least 4.
-    Kind: helper.
-    Why: side-condition for instantiating the 4-player interface [Gen_PGG_T].
-    Used by: abel_PI.
-*)
-Lemma abel_4_le_N : 4 <= m.+1.*2.
-Proof. by rewrite -[4]/(1.+1.*2) leq_double. Qed.
-
-Let abel_PI := @Gen_PGG_T R_abel 3 abel_4_le_N.
-Let players := enum 'I_4.
-Variable P_idx : nat.
-
-(** abel4_exchange_dealer — 4-player dealer program specialised to the Abelian([m]) instance.
-    Kind: instance.
-    Why: demonstrates protocol-level insecurity of abelian shuffles by exposing
-    a concrete dealer program whose per-session entropy stays bounded regardless of [L].
-*)
-Definition abel4_exchange_dealer (w : L.-tuple 'I_m.+1) :=
-  exchange_dealer_from_words abel_PI L players w P_idx.
-(** abel4_exchange_player — 4-player participant program for the Abelian([m]) instance.
-    Kind: instance.
-*)
-Definition abel4_exchange_player (i : 'I_4) := exchange_player abel_PI i.
-(** abel4_exchange_verifier — 4-player verifier program for the Abelian([m]) instance.
-    Kind: instance.
-*)
-Definition abel4_exchange_verifier := exchange_verifier abel_PI players.
-
-End pgg_abelian_protocol.
