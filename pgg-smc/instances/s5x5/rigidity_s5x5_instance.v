@@ -46,7 +46,8 @@ From pgg_smc Require Import perm_uniform pgg_interface pgg_weval_inj pgg_raag.
 From pgg_smc Require Import pgg_s5x5 pgg_collusion_bound s5x5_pile.
 From pgg_smc Require Import s5x5_mixing s5_mixing.
 From pgg_reconstruct Require Import pgg_sharing_framework covering_scheme
-                                    cover_tradeoff algebraic_rigidity.
+                                    cover_tradeoff algebraic_rigidity
+                                    combinatorial_rigidity.
 From pgg_reconstruct Require Import product_threshold.
 From pgg_reconstruct Require Import curve_realisation.
 From pgg_reconstruct Require Import multi_covering.
@@ -359,9 +360,16 @@ Let s5x5_ts : ThresholdScheme 'I_10 'I_10 :=
 
 (* --- CoveringScheme --- *)
 
-(* Gap: ts_T <= ts_k + 2 * genus = 5 + 6 = 11 >= 10 *)
+(** s5x5_cs_gap — the recovery gap bound for the S_5 x S_5 covering scheme.
+    Kind: helper.
+    Why: discharges the [cs_gap] field of [CoveringScheme] for R_s5x5. The
+    genus is the Hurwitz-honest cd_genus s5x5_covering_data = 173, so the
+    bound is ts_T <= ts_k + 2 * 173 = 5 + 346 = 351 >= 10, immediate by
+    computation. (Reconciled from the stale literal 3 to the actual record
+    genus 173, keeping s5x5_covering_data unchanged.)
+    Used by: s5x5_covering. *)
 Lemma s5x5_cs_gap :
-  (ts_T s5x5_ts <= ts_k s5x5_ts + 2 * 3)%N.
+  (ts_T s5x5_ts <= ts_k s5x5_ts + 2 * cd_genus s5x5_covering_data)%N.
 Proof. by []. Qed.
 
 (* Pile preservation: the monodromy of S_5 × S_5 preserves {0..4} *)
@@ -470,6 +478,100 @@ Lemma s5x5_ts_recon_correct (PI : PGGInterface R_s5x5)
   pgg_recon_endpoints HT
     (rp_content (cs_plug (tw_covering (ar_threshold s5x5_rigidity)))) P = s.
 Proof. exact: ar_protocol_correct. Qed.
+
+(******************************************************************************)
+(*     Non-abelianness, concrete interface, and unconditional correctness     *)
+(******************************************************************************)
+
+(** s5x5_nonabelian — the S_5 x S_5 monodromy group is non-abelian.
+    Kind: main.
+    Why: the security character of the instance; the order |G| = 14400 alone
+    does not force non-abelianness, so it is proven, not assumed. Two adjacent
+    transpositions in the same 5-card pile (the cut at 0--1 and the cut at
+    1--2) fail to commute, witnessed at card 0. Mirrors wreath_nonabelian. *)
+Lemma s5x5_nonabelian : ~~ abelian (pgg_G R_s5x5).
+Proof.
+apply: (@gen_nonabelian R_s5x5 (@Ordinal 8 0 isT) (@Ordinal 8 1 isT)) => //.
+by apply/eqP => /permP /(_ (@Ordinal 10 0 isT)); rewrite !permM !permE.
+Qed.
+
+(** s5x5_starts_uniq — the ten starting card positions are distinct.
+    Kind: helper.
+    Why: the uniqueness witness for s5x5_PI.
+    Used by: s5x5_PI. *)
+Lemma s5x5_starts_uniq : uniq (ord_tuple 10).
+Proof. by rewrite val_ord_tuple enum_uniq. Qed.
+
+(** s5x5_PI — the concrete ten-sheet (two piles of five) starting interface.
+    Kind: instance.
+    Why: the 10 starting card positions, in order. The identity start tuple
+    makes the G_stable condition reduce to reflexivity of pgg_rho.
+    Used by: s5x5_protocol_correct, s5x5_profile. *)
+Definition s5x5_PI : PGGInterface R_s5x5 :=
+  @MkPGGI R_s5x5 9 (ord_tuple 10) s5x5_starts_uniq.
+
+(** s5x5_HT — the scheme and interface party counts agree (both 9).
+    Kind: helper.
+    Why: the cast witness; kept as erefl so the tuple casts reduce away.
+    Used by: s5x5_G_stable, s5x5_protocol_correct. *)
+Definition s5x5_HT : ts_T' s5x5_ts = pi_T' s5x5_PI := erefl.
+
+(** s5x5_G_stable — the monodromy permutes the starts as the share permutation
+    (content = id form).
+    Kind: main.
+    Why: the structural condition of protocol correctness, proven (not assumed).
+    With starts = ord_tuple 10 and content = id, both sides collapse to
+    pgg_rho g i. Closes the audit gap that G_stable was a hypothesis.
+    Used by: s5x5_protocol_correct. *)
+Lemma s5x5_G_stable :
+  forall g, g \in pgg_G R_s5x5 ->
+  forall i : 'I_(ts_T' s5x5_ts).+1,
+    id (@pgg_rho R_s5x5 g
+         (tnth (cast_tuple (esym (congr1 S s5x5_HT)) (pi_starts s5x5_PI)) i)) =
+    tnth [tuple id (tnth (cast_tuple (esym (congr1 S s5x5_HT)) (pi_starts s5x5_PI)) j)
+         | j < (ts_T' s5x5_ts).+1] (@pgg_rho R_s5x5 g i).
+Proof.
+move=> g Hg i.
+by rewrite tnth_mktuple !tnth_cast_tuple !tnth_ord_tuple !cast_ord_id.
+Qed.
+
+(** s5x5_protocol_correct — recovery of the dealt endpoints returns the secret
+    (unconditional, concrete interface).
+    Kind: main.
+    Why: the end-to-end protocol guarantee. For any hidden element P of the
+    full group, reconstructing the revealed endpoints recovers the secret,
+    via the generic pgg_hidden_invariant_perm fed the proven G_stable and the
+    covering's recon-invariance. No G_stable hypothesis is assumed. *)
+Theorem s5x5_protocol_correct (s : 'I_10) (P : pgg_gT R_s5x5) :
+  P \in pgg_G R_s5x5 ->
+  ts_valid s5x5_ts s
+    [tuple id (tnth (cast_tuple (esym (congr1 S s5x5_HT)) (pi_starts s5x5_PI)) j)
+    | j < (ts_T' s5x5_ts).+1] ->
+  @pgg_recon_endpoints R_s5x5 s5x5_PI s5x5_ts s5x5_HT id P = s.
+Proof.
+move=> PG Hvalid.
+apply: (@pgg_hidden_invariant_perm R_s5x5 s5x5_PI s5x5_ts s5x5_HT id
+          (pgg_G R_s5x5) s P (@pgg_rho R_s5x5));
+  [exact: subxx | exact: s5x5_G_stable | exact: PG | exact: Hvalid
+  | exact: s5x5_perm_compatible].
+Qed.
+
+(******************************************************************************)
+(*     CombinatorialRigidity instance                                         *)
+(******************************************************************************)
+
+(** s5x5_combinatorial_rigidity — the CombinatorialRigidity value for
+    S_5 x S_5.
+    Kind: main.
+    Why: certifies security (the L=1 fiber witness), recovery (the covering
+    with its positive gap), the positive genus (173 > 0), and the order
+    inequality (60 < 14400), in one record. The positive dual of s5_nogo:
+    the product realises an order inequality with a positive gap that no
+    genus-zero curve admits. *)
+Definition s5x5_combinatorial_rigidity : CombinatorialRigidity R R_s5x5 :=
+  @MkCombinatorialRigidity R R_s5x5
+    (s5x5_security_witness_1 R) s5x5_covering
+    s5x5_large_group s5x5_group_order_bound.
 
 End s5x5_rigidity.
 
