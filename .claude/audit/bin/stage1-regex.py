@@ -177,6 +177,12 @@ def _main_purpose_labels(cfg: dict) -> set[str]:
     return {str(s).lower() for s in (cfg.get("main_purpose_labels") or [])}
 
 
+def _entity_touched(entity: dict) -> bool:
+    """In commit mode an entity is in scope when any of its body lines or its
+    header line changed. file_manifest sets touched_header=True for all."""
+    return bool(entity.get("touched_lines")) or entity.get("touched_header", False)
+
+
 def _composes_target_exists(name: str) -> bool:
     """Bounded git grep for an exact top-level declaration of `name`.
     The decl-keyword anchor excludes `Used by:` comment mentions."""
@@ -234,9 +240,11 @@ def validate_fast_pattern(rule: dict) -> tuple[bool, str]:
     return True, ""
 
 
-def apply_fast_check(rule: dict, manifest: dict, strict_comment_coverage: bool) -> list[dict]:
+def apply_fast_check(rule: dict, manifest: dict, strict_comment_coverage: bool, cfg: dict = None) -> list[dict]:
     """Named entity-level checks that cannot be expressed as single-line
     regex. Dispatched by `fast_check.kind`."""
+    if cfg is None:
+        cfg = {}
     fc = rule.get("fast_check") or {}
     kind = fc.get("kind")
     findings: list[dict] = []
@@ -259,6 +267,32 @@ def apply_fast_check(rule: dict, manifest: dict, strict_comment_coverage: bool) 
                 "severity": sev,
                 "evidence_quote": entity.get("header", "").strip(),
                 "stage": "stage1",
+            })
+    elif kind == "comment_tag_absence":
+        for entity in manifest.get("entities", []):
+            if not h_series_applies(entity):
+                continue
+            if not strict_comment_coverage and not _entity_touched(entity):
+                continue
+            tag = _comment_role_tag(entity)
+            if tag is not None:
+                continue  # validity handled by H002
+            name = entity.get("name", "")
+            present = entity.get("preceding_comment_present", False)
+            if not present:
+                sev_use, why = "error", "no preceding comment and no role tag"
+            elif entity.get("touched_header", False):
+                sev_use, why = "error", "declaration changed; a role tag is required"
+            elif _content_floor_ok(_strip_comment_delims(entity.get("preceding_comment", "")), name):
+                sev_use, why = "warning", "legacy comment grandfathered; add a role tag"
+            else:
+                sev_use, why = "error", "degenerate comment and no role tag"
+            findings.append({
+                "rule_id": rule["id"], "file": entity["file"],
+                "line_start": entity["line_start"], "line_end": entity["line_start"],
+                "lemma_name": name, "severity": sev_use,
+                "evidence_quote": entity.get("header", "").strip(),
+                "stage": "stage1", "reason": why,
             })
     elif kind == "naming_conformance_or_justify":
         findings.extend(_check_naming_conformance_or_justify(rule, manifest, sev))
@@ -553,7 +587,7 @@ def main() -> int:
         if stage_mode not in ("stage1_only", "both"):
             continue
         if rule.get("fast_check"):
-            findings.extend(apply_fast_check(rule, manifest, strict_comment))
+            findings.extend(apply_fast_check(rule, manifest, strict_comment, cfg))
             continue
         ok, msg = validate_fast_pattern(rule)
         if not ok:

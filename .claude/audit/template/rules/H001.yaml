@@ -1,0 +1,14 @@
+id: H001
+category: formatting
+title: "Declaration lacks a required role tag (@intent / @composes / @main)"
+severity: error
+enabled: true
+stage_mode: stage1_only
+authority:
+  - peer-feedback-2026-04
+  - coqdoc
+fast_check:
+  kind: comment_tag_absence
+scope: changed_lemmas
+fix_hint: "Add exactly one role tag in the preceding comment: `@intent: ...` for a Definition/Fixpoint, `@composes: <lemma>` for a helper, or `@main <security|correctness|architecture|bound>: ...` for a main lemma. See AUTHORITY.md."
+exceptions: []
