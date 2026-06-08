@@ -48,22 +48,6 @@ End coord_perm_compat_def.
 
 Arguments coord_perm_compatible {F n} C sigma.
 
-(** coord_perm_compatible_id — the identity permutation is coord-perm
-    compatible with every linear code [C : Lcode0.t F n], because
-    [col_perm 1%g c = c].
-    Kind: helper.
-    Why: trivial-sigma base case for building coord-perm-compatibility
-    witnesses on concrete instances; avoids inlining [col_perm1] at call
-    sites.
-    Used by: rs_code_5sheets (instance uses it via [apply: coord_perm_compatible_id]).
-    Naming: intentional; the suffix `_id` names the identity-element
-    instance. MathComp convention would prefer `_1` (cf. [perm1], [mul1g]);
-    keep `_id` here because the existing call site in rs_code_5sheets
-    pins the name and a repo-wide rename is out of scope for this commit. *)
-Lemma coord_perm_compatible_id (F : finFieldType) (n : nat) (C : Lcode0.t F n) :
-  coord_perm_compatible C 1%g.
-Proof. by move=> c Hc; rewrite col_perm1. Qed.
-
 (******************************************************************************)
 (*     Section 2: Restricting a Permutation that Fixes Position 0             *)
 (******************************************************************************)

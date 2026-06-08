@@ -192,7 +192,6 @@ pgg-smc/reconstruct/hyperelliptic_code.v
 pgg-smc/reconstruct/coord_perm_compatible.v
 pgg-smc/reconstruct/ag_multiplicative.v
 pgg-smc/reconstruct/cover_genus0.v
-pgg-smc/reconstruct/rs_code_5sheets.v
 pgg-smc/reconstruct/cover_genus1.v
 pgg-smc/reconstruct/cover_genus2.v
 pgg-smc/reconstruct/cover_tradeoff.v
