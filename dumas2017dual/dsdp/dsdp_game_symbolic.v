@@ -400,11 +400,11 @@ Proof. by []. Qed.
    the two AO_combine homomorphic assemblies off [palice_sym]'s [Send] payloads,
    threads fresh result names from 100, synthesises the sample prefix from the
    trace's free variables in first-appearance order, and frames the put and the
-   leak.  The fixed derivation parameters are: challenge secret 10 (= v2, the
-   corrupted party's secret cell write); leak ordering [combines ++ recvs]
+   leak.  The fixed derivation parameters are: challenge secret [dsdp_v2_name]
+   (= v2, Bob's secret = the V_2 cell write); leak ordering [combines ++ recvs]
    (Alice's view ciphertexts, combines before receptions). *)
 Definition dsdp_alice_obs (card_msg card_renc : nat) : seq alice_obs :=
-  obs_of_procs palice_sym dsdp_received_hop_ciphertexts 10
+  obs_of_procs palice_sym dsdp_received_hop_ciphertexts dsdp_v2_name
     (fun combines recvs => combines ++ recvs) card_msg card_renc.
 
 (* dsdp_faithful — headline of the front end: the generic lowering pass applied
@@ -565,72 +565,4 @@ eapply advantage_le.
 1: apply: (adv_disjoint_from_protocol_state Adv).
 1: apply: (adv_disjoint_from_real_oracle Adv).
 1: apply: (adv_disjoint_from_zero_oracle Adv).
-Qed.
-
-(* ------------------------------------------------------------------ *)
-(* Capstone: the IND-CPA bound holds for the DERIVED game.             *)
-(* ------------------------------------------------------------------ *)
-
-(* dsdp_advantage_derived — the DSDP corollary of [dsdp_indcpa_secrecy]: any
-   adversary's advantage distinguishing the real derived game from its all-zero
-   endpoint is at most [2 * epsilon_cpa].  Parameters and premises mirror the
-   loose-argument back-end interface verbatim; the proof packages the loose
-   arguments into a [dsdp_indcpa_secrecy_problem] and a [dsdp_indcpa_adversary],
-   instantiates the generic [dsdp_indcpa_secrecy], and reduces
-   [count_obs_hops (corrupted_view (dsdp_problem ...))] to [2]. *)
-Lemma dsdp_advantage_derived
-    (AHE : AHEncType) (Renc : finType) (card_renc : nat)
-    (renc_card : #|Renc| = card_renc) (rand_of_renc : Renc -> rand AHE)
-    (t_msg t_cipher : choice_type) (msg_of_chmsg : t_msg -> plain AHE)
-    (chmsg_of_msg : plain AHE -> t_msg)
-    (chcipher_of_cipher : cipher AHE -> t_cipher)
-    (cipher_of_chcipher : t_cipher -> cipher AHE)
-    (chcipher_of_cipherK : cancel chcipher_of_cipher cipher_of_chcipher)
-    (chmsg_of_msgK : cancel chmsg_of_msg msg_of_chmsg)
-    (pkey_of_party : party_id -> pub_key AHE)
-    (card_msg : nat) (msg_of_idx : 'I_card_msg -> plain AHE)
-    (rand0 : rand AHE) (LA : Locations) (A : raw_package)
-    (A_valid : ValidPackage LA (game_iface t_msg t_cipher) A_export A)
-    (A_disj_state : fseparate LA (protocol_state t_msg))
-    (A_disj_ore : fseparate LA
-       (locs (oracle_real_pkg renc_card rand_of_renc msg_of_chmsg
-                chcipher_of_cipher pkey_of_party)))
-    (A_disj_oze : fseparate LA
-       (locs (oracle_zero_pkg renc_card rand_of_renc t_msg
-                chcipher_of_cipher pkey_of_party))) :
-  AdvantageE
-    (denote_game renc_card rand_of_renc chmsg_of_msg chcipher_of_cipher
-       pkey_of_party msg_of_idx rand0
-       (all_real (game_of_trace (dsdp_alice_obs card_msg card_renc))))
-    (denote_game renc_card rand_of_renc chmsg_of_msg chcipher_of_cipher
-       pkey_of_party msg_of_idx rand0
-       (all_zero (game_of_trace (dsdp_alice_obs card_msg card_renc))))
-    A <= 2%:R * epsilon_cpa.
-Proof.
-pose P : dsdp_indcpa_secrecy_problem :=
-  {| sp_card_plaintext  := card_msg ;
-     sp_card_randomness := card_renc ;
-     sp_corrupted_party_program := palice_sym ;
-     sp_received_hop_ciphertexts := dsdp_received_hop_ciphertexts ;
-     sp_challenge_secret := 10 ;
-     sp_leak_order := fun combines recvs => combines ++ recvs ;
-     sp_enc_scheme := AHE ;
-     sp_rand_carrier := Renc ;
-     sp_rand_carrier_card := renc_card ;
-     sp_rand_of_carrier := rand_of_renc ;
-     sp_choice_msg_type := t_msg ;
-     sp_choice_cipher_type := t_cipher ;
-     sp_choice_msg_of_plain := chmsg_of_msg ;
-     sp_plain_of_choice_msg := msg_of_chmsg ;
-     sp_choice_msg_of_plainK := chmsg_of_msgK ;
-     sp_choice_cipher_of_cipher := chcipher_of_cipher ;
-     sp_cipher_of_choice_cipher := cipher_of_chcipher ;
-     sp_choice_cipher_of_cipherK := chcipher_of_cipherK ;
-     sp_pub_key_of_party := pkey_of_party ;
-     sp_msg_of_index := msg_of_idx ;
-     sp_fallback_rand := rand0 |}.
-pose Adv : dsdp_indcpa_adversary P :=
-  @Build_dsdp_indcpa_adversary P LA A A_valid A_disj_state A_disj_ore A_disj_oze.
-have H := dsdp_indcpa_secrecy Adv.
-move: H; by [].
 Qed.
