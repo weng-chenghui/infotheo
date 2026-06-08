@@ -906,8 +906,10 @@ Qed.
 
    Structure (de Bruijn indices into the de_val / de_rand stacks, index 0 = most
    recent push; computed against the push convention of [denote_run]):
-   - 6 [GC_sample card_msg] draw the protocol scalars iV2, iV3, iU2, iU3, iR2,
-     iR3 onto the value stack;
+   - 6 [GC_sample card_msg] draw the protocol scalars iV2, iV3, iU2, iR2, iU3,
+     iR3 onto the value stack (this is the first-appearance structural order the
+     derived corrupted-Alice trace emits: v2, v3, then per hop its u-then-r pair,
+     so iU2/iR2 precede iU3/iR3);
    - 2 [GC_sample card_renc] draw the two MASK randomnesses ra1, ra2 onto the
      randomness stack (the hop randomnesses rb1/rc1 are sampled INLINE at the
      [GC_enc_hop] sites by [denote_run], per the T8 inline-hop convention, so
@@ -921,7 +923,7 @@ Qed.
    Its two [GC_enc_hop] nodes give [count_hops gc_dsdp = 2], the validation
    target of [hop_sites_gc_dsdp]. *)
 Definition gc_dsdp : game_code :=
-  (* iV2 iV3 iU2 iU3 iR2 iR3 *)
+  (* iV2 iV3 iU2 iR2 iU3 iR3 *)
   GC_sample card_msg (GC_sample card_msg (GC_sample card_msg
   (GC_sample card_msg (GC_sample card_msg (GC_sample card_msg
   (* ra1 ra2 (mask randomness) *)
@@ -932,10 +934,10 @@ Definition gc_dsdp : game_code :=
   (GC_enc_hop 1 (HE_var 5)
   (* c3 = Enc(pk_Charlie, v3 = iV3@5, inline rand) ; pushes c3 at index 0 *)
   (GC_enc_hop 2 (HE_var 5)
-  (* a1 = Emul (Epow c2@1 iU2@5) (Enc 1 iR2@3 ra1@rand1) ; pushes a1 at index 0 *)
-  (GC_let (HE_emul (HE_epow (HE_var 1) (HE_var 5)) (HE_enc 1 (HE_var 3) 1))
-  (* a2 = Emul (Epow c3@1 iU3@5) (Enc 2 iR3@3 ra2@rand0) ; pushes a2 at index 0 *)
-  (GC_let (HE_emul (HE_epow (HE_var 1) (HE_var 5)) (HE_enc 2 (HE_var 3) 0))
+  (* a1 = Emul (Epow c2@1 iU2@5) (Enc 1 iR2@4 ra1@rand1) ; pushes a1 at index 0 *)
+  (GC_let (HE_emul (HE_epow (HE_var 1) (HE_var 5)) (HE_enc 1 (HE_var 4) 1))
+  (* a2 = Emul (Epow c3@1 iU3@4) (Enc 2 iR3@3 ra2@rand0) ; pushes a2 at index 0 *)
+  (GC_let (HE_emul (HE_epow (HE_var 1) (HE_var 4)) (HE_enc 2 (HE_var 3) 0))
   (* leak [a1@1; a2@0; c2@3; c3@2] *)
   (GC_ret [:: HE_var 1 ; HE_var 0 ; HE_var 3 ; HE_var 2 ])
   )))))))))))).
