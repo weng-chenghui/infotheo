@@ -1,0 +1,11 @@
+.venv/
+web/
+print/
+src/web.bbl
+rocq_decls
+*.paux
+*.aux
+*.log
+*.fls
+*.fdb_latexmk
+*.out
