@@ -1,0 +1,579 @@
+% Full DSDP corrupted-Alice IND-CPA secrecy auto-derivation chain.
+% Each node carries \rocq{<full declaration name>} (link to the formal artifact),
+% \rocqok (formalized), and \uses{...} (dependency edges).  Module prefixes:
+%   infotheo.dumas2017dual.dsdp.dsdp_symbolic
+%   infotheo.dumas2017dual.dsdp.dsdp_game_symbolic
+%   infotheo.dumas2017dual.dsdp.dsdp_game_code
+%   infotheo.dumas2017dual.dsdp.dsdp_indcpa_security
+%   infotheo.homomorphic_encryption.indcpa_ror
+
+\chapter{Introduction}
+
+DSDP is a three-party scalar-product protocol built on additively homomorphic
+encryption. This blueprint presents its corrupted-Alice ciphertext privacy:
+every choice the security argument depends on is gathered in one record, and
+from that record a generic theorem reads off the advantage bound. The whole
+chain is derived from the one protocol program that already defines the
+protocol's behaviour, rather than written by hand. It is the worked instance of
+the derivation framework developed in the thesis part on the derived game.
+
+Game hopping reduces a protocol's ciphertext privacy to a chain of IND-CPA swaps
+costing $k\,\epscpa$ for $k$ hops. The method takes the chain of games as given,
+and someone writes that chain once per protocol: the real game, every
+intermediate game, and the oracle each hop calls. For DSDP the hand-written
+chain runs to several thousand lines. The derivation here removes that
+hand-writing.
+
+The derivation rests on a single idea. The protocol's procedures are written
+once over an interface that names the message carriers and the homomorphic
+operations and leaves their laws open. The concrete reading fills the interface
+with a real encryption scheme and recovers the protocol's existing proofs
+unchanged, its correctness, its termination, and its session duality. The
+symbolic reading fills the interface with a free term algebra, runs the
+corrupted party's procedures, and exposes the homomorphic expressions that party
+sends as ordinary data. The symbolic reading is what makes the game derivable.
+
+The chain has two halves that meet at a reified game
+(Figure~\ref{fig:bp:architecture}). The front end runs the symbolic reading and
+lowers the corrupted party's whole view to a first-order game syntax, a
+straight-line list of samples, cell writes, encryptions, and homomorphic
+assemblies. The back end denotes that syntax into an SSProve game and bounds the
+adversary's advantage with one lemma that holds for every well-formed game in the
+syntax. That bound is the number of encryption hops the game contains times the
+single-hop IND-CPA advantage $\epscpa$.
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[
+  box/.style={draw, rounded corners, align=center, inner sep=4pt,
+              font=\small, text width=2.9cm, minimum height=0.7cm},
+  every path/.append style={-stealth, thick},
+  font=\small
+]
+\node[box] (procs)  at (4,9.2)   {Protocol procedures (one program) over the protocol interface};
+\node[box] (conc)   at (0.6,7.3) {Concrete instance};
+\node[box] (symb)   at (7.4,7.3) {Symbolic instance};
+\node[box] (proofs) at (0.6,5.4) {Correctness, termination, duality preserved};
+\node[box] (run)    at (7.4,5.4) {Symbolic run of the corrupted party};
+\node[box] (comb)   at (7.4,3.5) {Derived combine terms};
+\node[box, text width=3.0cm] (cfg) at (4.4,4.6) {Declared security-model configuration};
+\node[box] (trace)  at (4.4,2.1)  {Observation trace};
+\node[box] (reif)   at (4.4,0.6)  {Reified game};
+\node[box] (denote) at (4.4,-1.0) {Denotation into \ssprove{}};
+\node[box] (game)   at (4.4,-2.45) {\ssprove{} game};
+\node[box, text width=3.4cm] (ladder) at (4.4,-3.9) {Hybrid ladder, $k$ IND-CPA hops};
+\node[box, text width=4.2cm] (bound) at (4.4,-5.4) {Advantage $\le k\,\epscpa$};
+
+\draw (procs) -- (conc);
+\draw (procs) -- (symb);
+\draw (conc)  -- (proofs);
+\draw (symb)  -- (run);
+\draw (run)   -- (comb);
+\draw (comb)  -- (trace);
+\draw (cfg)   -- (trace);
+\draw (trace) -- (reif);
+\draw (reif)   -- (denote);
+\draw (denote) -- (game);
+\draw (game)   -- (ladder);
+\draw (ladder) -- (bound);
+
+\draw[densely dashed, black!40, -] (-1.1,0.6) -- (2.7,0.6);
+\draw[densely dashed, black!40, -] (6.1,0.6) -- (9.2,0.6);
+\node[font=\itshape\small, anchor=west] at (-1.1,1.15) {front end: produce the game};
+\node[font=\itshape\small, anchor=west] at (-1.1,0.05) {back end: consume the game};
+\end{tikzpicture}
+\caption{The derivation in two halves, meeting at the reified game. The
+protocol's procedures, parameterized over one interface, admit a concrete
+instance (left, recovering the existing proofs) and a symbolic instance (right).
+The symbolic run yields the derived combine terms. Together with a declared
+security-model configuration they form an observation trace, which the front end
+lowers to the reified game. The back end denotes that game into SSProve, then
+bounds the advantage through a hybrid ladder of $k$ IND-CPA hops.}
+\label{fig:bp:architecture}
+\end{figure}
+
+One control record carries every choice the chain depends on. It holds the
+corrupted party's program, the received hop ciphertexts, the challenge secret,
+the order the viewed ciphertexts leak, and the two sample-domain sizes, together
+with the concrete scheme and its marshalling into SSProve choice types. From this
+one record the corrupted view, the real game, the all-zero game, and the hop
+count are all projections, and a single generic theorem bounds every valid
+adversary's advantage by the hop count times $\epscpa$. The DSDP instance fills
+the record, its hop count computes to two, and the bound reads off as
+$2\,\epscpa$.
+
+The scope is precise. The computation and the whole observation trace are derived
+from the program. The sampled scalars and randomness, the receptions read off
+each ciphertext's shape, and the homomorphic combinations all come from the
+symbolic run rather than from a transcription. What stays declared is small and
+sits as fields of the record: which party is corrupt, the secret the game
+challenges, the order the viewed ciphertexts leak, and the two cardinalities. The
+generality lives in the back end, whose bound applies to whatever game the record
+produces.
+
+Each node below links to its Rocq declaration through its Rocq button. A node's
+colour records its formalization status: green for the definitions and for the
+proved lemmas and theorems, and blue dashed for the two deferred legs, the
+information-theoretic bound at the all-zero endpoint and the composition that
+joins it to the computational bound. The dependency graph draws the whole chain
+from the control record to the final bound.
+
+\chapter{The symbolic protocol model}
+
+\begin{definition}[Symbolic interpretation of the protocol]
+  \label{def:symbolic_interface}
+  \rocq{infotheo.dumas2017dual.dsdp.dsdp_symbolic.Symbolic_DSDP_Interface,
+       infotheo.dumas2017dual.dsdp.dsdp_symbolic.symbolic_data}
+  \rocqok
+  The protocol is expressed once over an abstract interface of homomorphic
+  operations. The symbolic interpretation fills that interface with a carrier of
+  homomorphic syntax trees, so running a party's program records the syntactic
+  assembly it performs rather than a concrete ciphertext.
+\end{definition}
+
+\begin{definition}[Corrupted party's program]
+  \label{def:palice_sym}
+  \rocq{infotheo.dumas2017dual.dsdp.dsdp_symbolic.palice_sym}
+  \rocqok
+  \uses{def:symbolic_interface}
+  The corrupted party Alice, run at the symbolic interpretation with named
+  inputs. Running it is the derivation step for the messages Alice returns.
+\end{definition}
+
+\begin{definition}[Sender programs and the challenge secret]
+  \label{def:sender_programs}
+  \rocq{infotheo.dumas2017dual.dsdp.dsdp_symbolic.pbob_sym,
+       infotheo.dumas2017dual.dsdp.dsdp_symbolic.pcharlie_sym,
+       infotheo.dumas2017dual.dsdp.dsdp_symbolic.dsdp_v2_name}
+  \rocqok
+  \uses{def:symbolic_interface}
+  The two honest senders at the symbolic interpretation. Each one's head message
+  encrypts its own secret input. Bob's secret name is the value the game later
+  challenges, so the challenge provably coincides with the first received secret.
+\end{definition}
+
+\begin{lemma}[The assembled ciphertexts are derived]
+  \label{lem:observed_combines}
+  \rocq{infotheo.dumas2017dual.dsdp.dsdp_symbolic.dsdp_observed_combines_eq}
+  \rocqok
+  Running the corrupted program against placeholder receptions, the two messages
+  it returns compute to the two homomorphic assemblies $a_1$ and $a_2$. These
+  fall out of the program and are not written by hand.
+\end{lemma}
+\begin{proof}
+  \uses{def:palice_sym}
+  \rocqok
+  By full computation on the closed symbolic terms.
+\end{proof}
+
+\begin{definition}[Received hop ciphertexts]
+  \label{def:received_hops}
+  \rocq{infotheo.dumas2017dual.dsdp.dsdp_symbolic.dsdp_received_hop_ciphertexts,
+       infotheo.dumas2017dual.dsdp.dsdp_symbolic.first_send}
+  \rocqok
+  \uses{def:sender_programs}
+  The stream of ciphertexts Alice receives, taken as the senders' head messages.
+  By computation it is the two structured secret-bearing ciphertexts, Bob's
+  encryption of $v_2$ and Charlie's encryption of $v_3$. Supplying exactly these
+  fixes where the walk over Alice's program stops.
+\end{definition}
+
+\chapter{Deriving the corrupted view}
+
+\begin{definition}[Corrupted-view observations]
+  \label{def:alice_obs}
+  \rocq{infotheo.dumas2017dual.dsdp.dsdp_game_symbolic.alice_obs}
+  \rocqok
+  A first-order vocabulary of the actions in a corrupted party's view: sample a
+  scalar, sample randomness, write the challenge cell, receive an encrypted
+  secret from a party, assemble a homomorphic combination, and leak a list of
+  named ciphertexts. The reception is the only hoppable action.
+\end{definition}
+
+\begin{definition}[Walking the program into observations]
+  \label{def:walk_obs}
+  \rocq{infotheo.dumas2017dual.dsdp.dsdp_game_symbolic.walk_obs}
+  \rocqok
+  \uses{def:alice_obs}
+  Walk the corrupted program against the received hop ciphertexts. At each
+  reception read the sending party and the encrypted secret off the ciphertext
+  shape and emit a reception bound to a fresh result name. At each send emit an
+  assembly of its message. The walk halts at the decrypt-reception and at
+  termination.
+\end{definition}
+
+\begin{definition}[Synthesising the sample prefix]
+  \label{def:collect_samples}
+  \rocq{infotheo.dumas2017dual.dsdp.dsdp_game_symbolic.collect_samples}
+  \rocqok
+  \uses{def:alice_obs}
+  Scan the walked observations for their free scalar and randomness names in
+  first-appearance order, excluding the walk's own bound result names, and emit
+  one sample action per name, tagged as a plaintext scalar or an encryption
+  randomness by where the name occurs.
+\end{definition}
+
+\begin{definition}[The whole corrupted-view trace]
+  \label{def:obs_of_procs}
+  \rocq{infotheo.dumas2017dual.dsdp.dsdp_game_symbolic.obs_of_procs}
+  \rocqok
+  \uses{def:walk_obs,def:collect_samples}
+  Assemble the full trace from the loose symbolic inputs: the synthesised sample
+  prefix, the challenge-cell write, the walked body, and the final leak of the
+  viewed ciphertexts in the chosen order.
+\end{definition}
+
+\begin{lemma}[The derived DSDP trace]
+  \label{lem:obs_of_procs_dsdp}
+  \rocq{infotheo.dumas2017dual.dsdp.dsdp_game_symbolic.obs_of_procs_dsdp}
+  \rocqok
+  For the DSDP inputs the trace computes to a fourteen-action sequence: six
+  scalar samples in first-appearance order, two randomness samples, the challenge
+  write, two receptions, two assemblies, and the leak.
+\end{lemma}
+\begin{proof}
+  \uses{def:obs_of_procs,def:palice_sym,def:received_hops}
+  \rocqok
+  By full computation.
+\end{proof}
+
+\begin{definition}[The DSDP corrupted-Alice trace]
+  \label{def:dsdp_alice_obs}
+  \rocq{infotheo.dumas2017dual.dsdp.dsdp_game_symbolic.dsdp_alice_obs}
+  \rocqok
+  \uses{def:obs_of_procs,def:palice_sym,def:received_hops,def:sender_programs}
+  The DSDP instance of the whole-trace observer, with the challenge fixed to
+  Bob's secret and the leak ordering assemblies before receptions. Nothing in it
+  is hand-written.
+\end{definition}
+
+\chapter{Lowering the view to reified game code}
+
+\begin{definition}[Reified terms and game code]
+  \label{def:embedding}
+  \rocq{infotheo.dumas2017dual.dsdp.dsdp_game_code.he_term,
+       infotheo.dumas2017dual.dsdp.dsdp_game_code.game_code}
+  \rocqok
+  A deep embedding. Homomorphic terms cover variables, constants, encryption,
+  decryption, homomorphic addition, the scalar action, and ring operations.
+  Straight-line game code covers sampling, the challenge write, let-binding, the
+  encryption hop, and the return. The encryption hop is the only hoppable
+  statement.
+\end{definition}
+
+\begin{definition}[Resolving names to positions]
+  \label{def:resolve_term}
+  \rocq{infotheo.dumas2017dual.dsdp.dsdp_game_symbolic.resolve_term}
+  \rocqok
+  \uses{def:embedding}
+  Rewrite a named term into the positional form the denotation expects, replacing
+  each name by its binding position. Only order survives, so the particular names
+  disappear from the lowered code.
+\end{definition}
+
+\begin{definition}[Folding observations into game code]
+  \label{def:lower_obs}
+  \rocq{infotheo.dumas2017dual.dsdp.dsdp_game_symbolic.lower_obs}
+  \rocqok
+  \uses{def:resolve_term,def:alice_obs,def:embedding}
+  Fold the observation trace into game code, threading the value and randomness
+  name environments so each resolved term lands at the right position. A
+  reception becomes an encryption hop, an assembly becomes a let-binding, and the
+  leak becomes the return.
+\end{definition}
+
+\begin{definition}[The lowering pass]
+  \label{def:game_of_trace}
+  \rocq{infotheo.dumas2017dual.dsdp.dsdp_game_symbolic.game_of_trace}
+  \rocqok
+  \uses{def:lower_obs}
+  Lower a corrupted-view trace to game code, starting from empty environments.
+\end{definition}
+
+\begin{definition}[Hop counts]
+  \label{def:count_hops}
+  \rocq{infotheo.dumas2017dual.dsdp.dsdp_game_symbolic.count_obs_hops,
+       infotheo.dumas2017dual.dsdp.dsdp_game_code.count_hops,
+       infotheo.dumas2017dual.dsdp.dsdp_game_code.hop_sites}
+  \rocqok
+  \uses{def:alice_obs,def:embedding}
+  Two counts: the number of hoppable receptions before the leak that ends a
+  trace, and the number of encryption hops in a piece of game code together with
+  the list of their site indices.
+\end{definition}
+
+\begin{lemma}[Hop-count adequacy]
+  \label{lem:count_hops_adequacy}
+  \rocq{infotheo.dumas2017dual.dsdp.dsdp_game_symbolic.count_hops_game_of_trace}
+  \rocqok
+  Lowering neither creates nor drops hops, so the game-side hop count of a
+  lowered trace equals its protocol-side count. This ties the ladder length to
+  the protocol structure.
+\end{lemma}
+\begin{proof}
+  \uses{def:game_of_trace,def:count_hops}
+  \rocqok
+  By induction over the trace, generalised over the name environments.
+\end{proof}
+
+\chapter{Denotation into SSProve}
+
+\begin{definition}[Denotation into a package]
+  \label{def:denote_game}
+  \rocq{infotheo.dumas2017dual.dsdp.dsdp_game_code.denote_he,
+       infotheo.dumas2017dual.dsdp.dsdp_game_code.denote_run,
+       infotheo.dumas2017dual.dsdp.dsdp_game_code.denote_game}
+  \rocqok
+  \uses{def:embedding}
+  Evaluate game code into an SSProve package: draw each sample, write the
+  challenge cell, evaluate each homomorphic term against the concrete scheme, and
+  draw each encryption hop's randomness inline so it couples one-to-one with the
+  IND-CPA oracle's internal sample.
+\end{definition}
+
+\begin{definition}[Hybrid endpoints]
+  \label{def:hybrid_endpoints}
+  \rocq{infotheo.dumas2017dual.dsdp.dsdp_game_code.zero_hop_prefix,
+       infotheo.dumas2017dual.dsdp.dsdp_game_code.all_real,
+       infotheo.dumas2017dual.dsdp.dsdp_game_code.all_zero}
+  \rocqok
+  \uses{def:embedding,def:count_hops}
+  Replacing the secret of the first $i$ encryption hops by the canonical zero
+  gives a family of games. The real game keeps every secret, and the all-zero
+  game replaces all of them. Adjacent members differ at one hop.
+\end{definition}
+
+\chapter{The IND-CPA hybrid bound}
+
+\begin{definition}[Single-hop IND-CPA bound]
+  \label{def:indcpa_assumption}
+  \rocq{infotheo.homomorphic_encryption.indcpa_ror.epsilon_cpa,
+       infotheo.homomorphic_encryption.indcpa_ror.enc_ind_cpa_real_or_zero}
+  \rocqok
+  The scheme's assumed IND-CPA real-or-zero advantage. Any adversary's advantage
+  between the real-encryption oracle and the zero-encryption oracle is at most
+  $\epscpa$. This is the one cryptographic assumption the chain rests on.
+\end{definition}
+
+\begin{definition}[One-hop oracle routing]
+  \label{def:denote_game_shim}
+  \rocq{infotheo.dumas2017dual.dsdp.dsdp_game_code.denote_game_shim}
+  \rocqok
+  \uses{def:denote_game,def:indcpa_assumption}
+  Route exactly one encryption hop through the IND-CPA encryption oracle, leaving
+  every other statement identical to the direct denotation. Composing it with the
+  real or zero oracle reproduces one rung of the ladder.
+\end{definition}
+
+\begin{lemma}[Per-hop perfect equivalence]
+  \label{lem:hop_equiv}
+  \rocq{infotheo.dumas2017dual.dsdp.dsdp_game_code.hop_equiv_real,
+       infotheo.dumas2017dual.dsdp.dsdp_game_code.hop_equiv_zero}
+  \rocqok
+  Each ladder rung equals the one-hop shim composed with the matching real or
+  zero oracle, the encode-and-decode round trip at the hop collapsing.
+\end{lemma}
+\begin{proof}
+  \uses{def:denote_game_shim}
+  \rocqok
+  By structural induction on the game code, collapsing the round trip with the
+  marshalling cancellations.
+\end{proof}
+
+\begin{lemma}[Adjacent rungs cost one query]
+  \label{lem:advantage_hop}
+  \rocq{infotheo.dumas2017dual.dsdp.dsdp_game_code.advantage_hop}
+  \rocqok
+  Two adjacent rungs of the ladder differ at a single hop, so their advantage is
+  at most the single-hop IND-CPA bound $\epscpa$.
+\end{lemma}
+\begin{proof}
+  \uses{lem:hop_equiv,def:indcpa_assumption,def:hybrid_endpoints}
+  \rocqok
+  By a triangle chain through the two shim compositions, then the IND-CPA bound.
+\end{proof}
+
+\begin{definition}[The hybrid ladder]
+  \label{def:hybrid_ladder}
+  \rocq{infotheo.dumas2017dual.dsdp.dsdp_game_code.hybrid_ladder}
+  \rocqok
+  \uses{def:denote_game,def:hybrid_endpoints}
+  The intermediate rungs between the real game and the all-zero game.
+\end{definition}
+
+\begin{lemma}[Telescoping bound]
+  \label{lem:advantage_sum_ladder_le}
+  \rocq{infotheo.dumas2017dual.dsdp.dsdp_game_code.advantage_sum_ladder_le}
+  \rocqok
+  A contiguous block of rungs costs at most one IND-CPA query per rung.
+\end{lemma}
+\begin{proof}
+  \uses{lem:advantage_hop,def:hybrid_ladder}
+  \rocqok
+  By induction on the rung count, splitting one rung off and folding the tail.
+\end{proof}
+
+\begin{theorem}[Generic hybrid bound]
+  \label{thm:advantage_le}
+  \rocq{infotheo.dumas2017dual.dsdp.dsdp_game_code.advantage_le}
+  \rocqok
+  For any game code, every valid adversary's advantage between the real and
+  all-zero denoted games is at most the number of encryption hops times
+  $\epscpa$.
+\end{theorem}
+\begin{proof}
+  \uses{lem:advantage_sum_ladder_le,def:hybrid_endpoints,def:denote_game}
+  \rocqok
+  A triangle chain inserts the ladder rungs; the empty ladder collapses to a
+  self-advantage of zero, and the non-empty ladder telescopes through the
+  contiguous-block bound.
+\end{proof}
+
+\chapter{The control record and the generic theorem}
+
+\begin{definition}[The secrecy-problem record]
+  \label{def:secrecy_problem}
+  \rocq{infotheo.dumas2017dual.dsdp.dsdp_game_symbolic.dsdp_indcpa_secrecy_problem}
+  \rocqok
+  \uses{def:obs_of_procs}
+  One record bundling the symbolic corrupted-view model, the corrupted program,
+  the received hop ciphertexts, the challenge secret, the leak order, and the two
+  sample-domain sizes, together with the concrete scheme and its marshalling into
+  SSProve choice types. One value of this record determines the real game, the
+  all-zero game, and the hop count.
+\end{definition}
+
+\begin{definition}[Corrupted view of a problem]
+  \label{def:corrupted_view}
+  \rocq{infotheo.dumas2017dual.dsdp.dsdp_game_symbolic.corrupted_view}
+  \rocqok
+  \uses{def:obs_of_procs,def:secrecy_problem}
+  Apply the whole-trace observer to the record's symbolic fields.
+\end{definition}
+
+\begin{definition}[Real and all-zero games of a problem]
+  \label{def:games}
+  \rocq{infotheo.dumas2017dual.dsdp.dsdp_game_symbolic.game_of_problem,
+       infotheo.dumas2017dual.dsdp.dsdp_game_symbolic.real_game,
+       infotheo.dumas2017dual.dsdp.dsdp_game_symbolic.zero_game}
+  \rocqok
+  \uses{def:denote_game,def:corrupted_view,def:hybrid_endpoints,def:game_of_trace}
+  Lower the corrupted view to game code, then denote its real and all-zero
+  endpoints into the record's concrete scheme.
+\end{definition}
+
+\begin{definition}[Valid adversary against a problem]
+  \label{def:adversary}
+  \rocq{infotheo.dumas2017dual.dsdp.dsdp_game_symbolic.dsdp_indcpa_adversary}
+  \rocqok
+  \uses{def:secrecy_problem}
+  A distinguisher bundled with its validity and its disjointness from the game
+  state and the two oracles. Quantifying over this record quantifies over all
+  valid adversaries.
+\end{definition}
+
+\begin{theorem}[Generic corrupted-view secrecy]
+  \label{thm:generic_secrecy}
+  \rocq{infotheo.dumas2017dual.dsdp.dsdp_game_symbolic.dsdp_indcpa_secrecy}
+  \rocqok
+  For every secrecy-problem record and every valid adversary, the advantage
+  between the real game and the all-zero game is at most the corrupted view's hop
+  count times $\epscpa$.
+\end{theorem}
+\begin{proof}
+  \uses{thm:advantage_le,lem:count_hops_adequacy,def:corrupted_view,def:games,def:adversary}
+  \rocqok
+  Rewrite the protocol-side hop count as the size of the game's hop-site list
+  through adequacy, then apply the generic hybrid bound, discharging validity and
+  the marshalling cancellations carried as fields of the record.
+\end{proof}
+
+\chapter{The DSDP instance}
+
+\begin{lemma}[The derived game matches the fixture]
+  \label{lem:dsdp_faithful}
+  \rocq{infotheo.dumas2017dual.dsdp.dsdp_game_symbolic.dsdp_faithful}
+  \rocqok
+  Lowering the DSDP corrupted-Alice trace reproduces the back-end fixture game
+  code exactly, binding positions and all. The fixture is therefore derived
+  rather than hand-written.
+\end{lemma}
+\begin{proof}
+  \uses{def:game_of_trace,def:dsdp_alice_obs}
+  \rocqok
+  By full computation.
+\end{proof}
+
+\begin{definition}[The DSDP problem instance]
+  \label{def:dsdp_problem}
+  \rocq{infotheo.dumas2017dual.dsdp.dsdp_indcpa_security.dsdp_problem}
+  \rocqok
+  \uses{def:secrecy_problem,def:palice_sym,def:received_hops,def:sender_programs}
+  The record at the DSDP corrupted-Alice model: the corrupted program, the
+  derived hop stream, and the challenge fixed to Bob's secret, together with a
+  supplied scheme and marshalling. This is the whole input a researcher provides.
+\end{definition}
+
+\begin{lemma}[Two hops]
+  \label{lem:dsdp_problem_hops}
+  \rocq{infotheo.dumas2017dual.dsdp.dsdp_indcpa_security.dsdp_problem_hops}
+  \rocqok
+  The DSDP corrupted view has exactly two encryption hops, one for Bob's secret
+  and one for Charlie's.
+\end{lemma}
+\begin{proof}
+  \uses{def:dsdp_problem,def:count_hops,def:corrupted_view}
+  \rocqok
+  By computation.
+\end{proof}
+
+\begin{theorem}[DSDP corrupted-Alice secrecy]
+  \label{thm:dsdp_secure}
+  \rocq{infotheo.dumas2017dual.dsdp.dsdp_indcpa_security.dsdp_problem_secure}
+  \rocqok
+  Every valid adversary's advantage between the real and all-zero DSDP games is
+  at most $2\,\epscpa$.
+\end{theorem}
+\begin{proof}
+  \uses{thm:generic_secrecy,def:dsdp_problem,lem:dsdp_problem_hops}
+  \rocqok
+  Specialise the generic theorem to the DSDP problem and rewrite the hop count to
+  two.
+\end{proof}
+
+\begin{corollary}[Loose-argument form]
+  \label{cor:dsdp_advantage_derived}
+  \rocq{infotheo.dumas2017dual.dsdp.dsdp_indcpa_security.dsdp_advantage_derived}
+  \rocqok
+  The same $2\,\epscpa$ bound stated directly over the denoted games, packaging
+  the loose arguments into the record.
+\end{corollary}
+\begin{proof}
+  \uses{thm:generic_secrecy,def:dsdp_problem}
+  \rocqok
+  Package the loose arguments into the record and adversary, then apply the
+  generic theorem.
+\end{proof}
+
+\chapter{The full bound by composition (deferred)}
+
+The two nodes below state the remaining legs that close the full secrecy
+argument. They are stated targets and are not yet formalized in this derivation
+branch, so they carry no formal link.
+
+\begin{theorem}[Information-theoretic leg]
+  \label{thm:it_leg}
+  \uses{def:dsdp_problem}
+  At the all-zero endpoint the corrupted party's view is independent of the
+  challenged secret, so any guess succeeds with probability at most $1/m$ for a
+  plaintext space of size $m$. This leg lives in a separate probability world and
+  is argued by an entropy computation.
+\end{theorem}
+
+\begin{theorem}[Full secrecy by composition]
+  \label{thm:composition}
+  \uses{thm:dsdp_secure,thm:it_leg}
+  The full DSDP corrupted-Alice secrecy bound combines the information-theoretic
+  $1/m$ leg at the all-zero endpoint with the computational $2\,\epscpa$ distance
+  to that endpoint, giving a total bound of $1/m + 2\,\epscpa$.
+\end{theorem}
