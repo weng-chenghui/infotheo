@@ -180,6 +180,15 @@ Proof. by []. Qed.
 (* The senders whose first sends are the ciphertexts Alice receives.          *)
 (* ========================================================================== *)
 
+(* dsdp_v2_name — symbolic name of Bob's secret input v2: the first ciphertext
+   corrupted Alice receives (her first hop), and the secret the corrupted-Alice
+   IND-CPA game challenges. Referenced by both pbob_sym and the downstream
+   sp_challenge_secret field, so the challenge provably equals Bob's secret. *)
+Definition dsdp_v2_name : nat := 10.
+(* dsdp_v3_name — symbolic name of Charlie's secret input v3 (Alice's second
+   hop). A different problem instance could challenge this instead of v2. *)
+Definition dsdp_v3_name : nat := 11.
+
 (* pbob_sym — Bob's DI-parameterized program instantiated at the symbolic
    interface and erased to a plain [proc]. Its head send is the structured
    secret-bearing ciphertext corrupted Alice receives as her first hop: it
@@ -188,7 +197,7 @@ Proof. by []. Qed.
    names. *)
 Definition pbob_sym : proc symbolic_data :=
   smc_session_types.erase
-    (@pbob Symbolic_DSDP_Interface decode_sym ek_sym 0 (HE_var 10) 22 23).
+    (@pbob Symbolic_DSDP_Interface decode_sym ek_sym 0 (HE_var dsdp_v2_name) 22 23).
 
 (* pcharlie_sym — Charlie's program at the symbolic interface, erased to a plain
    [proc] (the sibling of [pbob_sym]). Its head send encrypts Charlie's secret
@@ -196,7 +205,7 @@ Definition pbob_sym : proc symbolic_data :=
    inside the ciphertext and take unused names. *)
 Definition pcharlie_sym : proc symbolic_data :=
   smc_session_types.erase
-    (@pcharlie Symbolic_DSDP_Interface decode_sym ek_sym 0 (HE_var 11) 24 25).
+    (@pcharlie Symbolic_DSDP_Interface decode_sym ek_sym 0 (HE_var dsdp_v3_name) 24 25).
 
 (* first_send — read a party's head [Send] payload, walking past [Init]; None
    if the program reaches a Recv/Ret/Finish/Fail before sending. The sender
@@ -226,6 +235,6 @@ Definition dsdp_received_hop_ciphertexts : seq symbolic_data :=
    all-snake_case style, matching the sibling [dsdp_observed_combines_eq]. *)
 Lemma dsdp_received_hop_ciphertexts_eq :
   dsdp_received_hop_ciphertexts
-  = [:: SD_cipher (HE_enc 1 (HE_var 10) 22)
-      ; SD_cipher (HE_enc 2 (HE_var 11) 24) ].
+  = [:: SD_cipher (HE_enc 1 (HE_var dsdp_v2_name) 22)
+      ; SD_cipher (HE_enc 2 (HE_var dsdp_v3_name) 24) ].
 Proof. by []. Qed.
