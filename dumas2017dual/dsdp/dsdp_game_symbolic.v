@@ -392,33 +392,20 @@ Proof. by []. Qed.
 (* The DSDP corrupted-Alice trace and the faithfulness result.        *)
 (* ------------------------------------------------------------------ *)
 
-(* dsdp_alice_obs — the corrupted-Alice observation trace of DSDP, at the
-   protocol-action level (names: 10..15 = v2 v3 u2 u3 r2 r3 the sampled
-   scalars; 20,21 = ra1 ra2 the mask randomness; 30,31 = c2 c3 the ciphertexts
-   received from Bob/Charlie; 40,41 = a1 a2 the homomorphic assemblies).
-
-   The two AO_combine terms (a1, a2) are NOT hand-written: they are DERIVED by
-   symbolically running [palice] at [Symbolic_DSDP_Interface] and reading off
-   its [Send] payloads — that is exactly [dsdp_observed_combines] from
-   dsdp_symbolic.v (which computes to a1, a2 by [dsdp_observed_combines_eq]).
-
-   The remaining structure — the AO_sample / AO_put / AO_recv_hop / AO_leak
-   prefix and suffix — is the explicit, GENERIC security-model framing, not a
-   per-term hand-tuning: corrupted party = Alice; samples = the leaked-view free
-   variables typed by their parameter origin (12..15 the scalars at card_msg,
-   20/21 the mask randomness at card_renc); the put = the V_2 cell write; the
-   hops = the two received ciphertexts (c2 from Bob bound to 30, c3 from Charlie
-   bound to 31); the leak = Alice's view ciphertexts [a1;a2;c2;c3]. *)
+(* dsdp_alice_obs — the corrupted-Alice observation trace of DSDP, DERIVED by
+   running the generic [obs_of_procs] walk on [palice_sym] (the corrupted
+   party's symbolic program) against [dsdp_received_hop_ciphertexts] (the
+   derived hop-reception stream from Bob and Charlie).  Nothing here is
+   hand-written: the walk reads the two received ciphertexts off the stream and
+   the two AO_combine homomorphic assemblies off [palice_sym]'s [Send] payloads,
+   threads fresh result names from 100, synthesises the sample prefix from the
+   trace's free variables in first-appearance order, and frames the put and the
+   leak.  The fixed derivation parameters are: challenge secret 10 (= v2, the
+   corrupted party's secret cell write); leak ordering [combines ++ recvs]
+   (Alice's view ciphertexts, combines before receptions). *)
 Definition dsdp_alice_obs (card_msg card_renc : nat) : seq alice_obs :=
-  [:: AO_sample_val card_msg 10 ; AO_sample_val card_msg 11 ;
-      AO_sample_val card_msg 12 ; AO_sample_val card_msg 13 ;
-      AO_sample_val card_msg 14 ; AO_sample_val card_msg 15 ;
-      AO_sample_rnd card_renc 20 ; AO_sample_rnd card_renc 21 ;
-      AO_put 10 ;
-      AO_recv_hop 1 10 30 ; AO_recv_hop 2 11 31 ;
-      AO_combine 40 (nth (HE_const 0) dsdp_observed_combines 0) ;
-      AO_combine 41 (nth (HE_const 0) dsdp_observed_combines 1) ;
-      AO_leak [:: 40 ; 41 ; 30 ; 31 ] ].
+  obs_of_procs palice_sym dsdp_received_hop_ciphertexts 10
+    (fun combines recvs => combines ++ recvs) card_msg card_renc.
 
 (* dsdp_faithful — headline of the front end: the generic lowering pass applied
    to the DSDP corrupted-Alice trace reproduces the back-end fixture [gc_dsdp]
