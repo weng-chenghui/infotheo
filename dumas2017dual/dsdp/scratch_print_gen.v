@@ -75,6 +75,8 @@ Variable rand0 : rand AHE.
    ciphertext Enc(v2) raised to u2, not an encryption of the (ill-typed)
    plaintext [m[x] ^h m[x1]].  [*h]/[^h] share the reserved non-associative
    level 40, so a power inside a product needs parens: (c ^h u) *h e. *)
+
+
 Set Warnings "-notation-overridden".
 Notation "u *h w" := (Emul u w) (at level 40).
 Notation "u ^h w" := (Epow u w) (at level 40).
@@ -86,9 +88,33 @@ Notation "'m[' i ']'" := (msg_of_idx i) (at level 0).
 Notation "'<[' c ']>'" := (chcipher_of_cipher c) (at level 0).
 Set Warnings "notation-overridden".
 
-(* gen — the SSProve real game the generator emits for the corrupted-Alice DSDP
-   view: the back end's [denote_run] run on the real endpoint of the [gc_dsdp]
-   fixture, at the demo cardinalities, with the crypto operations abstract. *)
+(* gen — the generator's SSProve real game for the corrupted-Alice DSDP view.
+   It is one call to the back-end interpreter [denote_run], which walks a
+   [game_code] AST and emits the SSProve [raw_code].  The AST is abstract over
+   the carriers and operations, so each argument supplies one missing piece,
+   and why it has to be there:
+
+     denote_run            the lowering itself: game_code AST -> SSProve raw_code
+     renc_card             proof [#|Renc| = card_renc]; without it a uniform
+                           sample over card_renc could not be cast back to a
+                           real Renc randomness ([sample_to_renc] needs it)
+     rand_of_renc          embeds that Renc element into the scheme's [rand],
+                           the type [enc] actually consumes
+     chmsg_of_msg          encodes a plaintext into the SSProve message type;
+                           used by the [#put] that stores Alice's secret v2
+     chcipher_of_cipher    encodes a ciphertext into the wire type [t_cipher];
+                           wraps every ciphertext the game leaks in its result
+     pkey_of_party         recipient identity -> public key, so each encryption
+                           is addressed to Bob or Charlie
+     msg_of_idx            decodes a uniform sample index into the actual scalar
+                           (v2, u2, ...) the protocol computes on
+     rand0                 default randomness for an out-of-range slot lookup;
+                           dead here, since every slot is filled by a real sample
+     empty_denv AHE        the initial de Bruijn environment (both pools empty)
+     all_real (gc_dsdp 2 3)  the program to lower: the DSDP fixture at
+                           card_renc = 2, card_msg = 3, with [all_real] selecting
+                           the real endpoint (every hop encrypts its true secret,
+                           as opposed to [all_zero]) *)
 Definition gen :=
   denote_run renc_card rand_of_renc chmsg_of_msg chcipher_of_cipher
     pkey_of_party msg_of_idx rand0 (empty_denv AHE) (all_real (gc_dsdp 2 3)).
