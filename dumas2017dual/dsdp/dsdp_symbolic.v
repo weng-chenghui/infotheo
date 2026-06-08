@@ -175,3 +175,57 @@ Definition a2_observed : he_term :=
 Lemma dsdp_observed_combines_eq :
   dsdp_observed_combines = [:: a1_observed ; a2_observed ].
 Proof. by []. Qed.
+
+(* ========================================================================== *)
+(* The senders whose first sends are the ciphertexts Alice receives.          *)
+(* ========================================================================== *)
+
+(* pbob_sym — Bob's DI-parameterized program instantiated at the symbolic
+   interface and erased to a plain [proc]. Its head send is the structured
+   secret-bearing ciphertext corrupted Alice receives as her first hop: it
+   encrypts Bob's secret [HE_var 10] (= v2). The randomness slots 22/23 sit
+   inside the hop ciphertext and are never read by the hop, so they take unused
+   names. *)
+Definition pbob_sym : proc symbolic_data :=
+  smc_session_types.erase
+    (@pbob Symbolic_DSDP_Interface decode_sym ek_sym 0 (HE_var 10) 22 23).
+
+(* pcharlie_sym — Charlie's program at the symbolic interface, erased to a plain
+   [proc] (the sibling of [pbob_sym]). Its head send encrypts Charlie's secret
+   [HE_var 11] (= v3), corrupted Alice's second hop; randomness slots 24/25 sit
+   inside the ciphertext and take unused names. *)
+Definition pcharlie_sym : proc symbolic_data :=
+  smc_session_types.erase
+    (@pcharlie Symbolic_DSDP_Interface decode_sym ek_sym 0 (HE_var 11) 24 25).
+
+(* first_send — read a party's head [Send] payload, walking past [Init]; None
+   if the program reaches a Recv/Ret/Finish/Fail before sending. The sender
+   programs above emit their hop ciphertext as their first send. *)
+Fixpoint first_send (p : proc symbolic_data) : option symbolic_data :=
+  match p with
+  | smc_interpreter.Init _ k => first_send k
+  | smc_interpreter.Send _ d _ => Some d
+  | _ => None
+  end.
+
+(* dsdp_received_hop_ciphertexts — the hop-reception stream fed to the
+   corrupted-view walk: the head sends of Bob and Charlie, in call order. This
+   is DERIVED from the sender programs (via [first_send]), not hand-written; by
+   [dsdp_received_hop_ciphertexts_eq] it computes to the two structured Enc
+   ciphertexts Alice receives. *)
+Definition dsdp_received_hop_ciphertexts : seq symbolic_data :=
+  pmap first_send [:: pbob_sym ; pcharlie_sym].
+
+(* dsdp_received_hop_ciphertexts_eq — THE DERIVATION RESULT for the hop stream.
+   The head [Send] payloads Bob's and Charlie's programs emit at the symbolic
+   interface ARE exactly the structured secret-bearing ciphertexts
+   [HE_enc 1 (HE_var 10) 22] (Bob) and [HE_enc 2 (HE_var 11) 24] (Charlie), by
+   full computation. The party tags 1/2 come from [ek_sym] round-tripping the
+   party ids; the secrets [HE_var 10]/[HE_var 11] are v2/v3.
+   Naming: the [_eq] suffix renders MathComp's equation [E] suffix in this file's
+   all-snake_case style, matching the sibling [dsdp_observed_combines_eq]. *)
+Lemma dsdp_received_hop_ciphertexts_eq :
+  dsdp_received_hop_ciphertexts
+  = [:: SD_cipher (HE_enc 1 (HE_var 10) 22)
+      ; SD_cipher (HE_enc 2 (HE_var 11) 24) ].
+Proof. by []. Qed.
