@@ -55,14 +55,14 @@ single-hop IND-CPA advantage $\epscpa$.
 \node[box] (symb)   at (7.4,7.3) {Symbolic instance};
 \node[box] (proofs) at (0.6,5.4) {Correctness, termination, duality preserved};
 \node[box] (run)    at (7.4,5.4) {Symbolic run of the corrupted party};
-\node[box] (comb)   at (7.4,3.5) {Derived combine terms};
-\node[box, text width=3.0cm] (cfg) at (4.4,4.6) {Declared security-model configuration};
+\node[box] (comb)   at (7.4,3.5) {Derived trace: samples, receptions, combines};
+\node[box, text width=3.0cm] (cfg) at (4.4,4.6) {Control record (declared fields)};
 \node[box] (trace)  at (4.4,2.1)  {Observation trace};
 \node[box] (reif)   at (4.4,0.6)  {Reified game};
 \node[box] (denote) at (4.4,-1.0) {Denotation into \ssprove{}};
 \node[box] (game)   at (4.4,-2.45) {\ssprove{} game};
 \node[box, text width=3.4cm] (ladder) at (4.4,-3.9) {Hybrid ladder, $k$ IND-CPA hops};
-\node[box, text width=4.2cm] (bound) at (4.4,-5.4) {Advantage $\le k\,\epscpa$};
+\node[box, text width=4.4cm] (bound) at (4.4,-5.4) {Generic bound $k\,\epscpa$, DSDP $2\,\epscpa$};
 
 \draw (procs) -- (conc);
 \draw (procs) -- (symb);
@@ -85,10 +85,11 @@ single-hop IND-CPA advantage $\epscpa$.
 \caption{The derivation in two halves, meeting at the reified game. The
 protocol's procedures, parameterized over one interface, admit a concrete
 instance (left, recovering the existing proofs) and a symbolic instance (right).
-The symbolic run yields the derived combine terms. Together with a declared
-security-model configuration they form an observation trace, which the front end
-lowers to the reified game. The back end denotes that game into SSProve, then
-bounds the advantage through a hybrid ladder of $k$ IND-CPA hops.}
+The symbolic run yields the derived trace, and one control record supplies the
+declared fields. Together they form the observation trace, which the front end
+lowers to the reified game. The back end denotes that game into \ssprove{} and
+bounds the advantage through a hybrid ladder of $k$ IND-CPA hops, generically
+$k\,\epscpa$ and $2\,\epscpa$ for DSDP.}
 \label{fig:bp:architecture}
 \end{figure}
 
