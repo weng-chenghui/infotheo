@@ -110,16 +110,15 @@ Proof. by []. Qed.
 (** FiveCardKim_HT — the scheme and interface party counts agree (both 4).
     @intent: the cast witness, kept as erefl so tuple casts reduce away;
     bridges ts_T' fcI_scheme with pi_T' FiveCardKim_PI in the protocol
-    statements, mirroring the den Boer den_boer_HT. Used-by:
-    FiveCardKim_G_stable, FiveCardKim_protocol_correct. *)
+    statements. Used-by: FiveCardKim_G_stable, FiveCardKim_protocol_correct. *)
 Definition FiveCardKim_HT : ts_T' fcI_scheme = pi_T' FiveCardKim_PI := erefl.
 
 (** FiveCardKim_G_stable — the monodromy permutes the starts as the share
     permutation (content = fc_content = id form).
     @main correctness: the structural condition of protocol correctness on the
     five-card family instance, proven not assumed. With starts = ord_tuple 5 and
-    fc_content the identity, both sides collapse to pgg_rho g i; the same proof
-    as the den Boer den_boer_G_stable. *)
+    fc_content the identity, both sides collapse to pgg_rho g i, exactly as in
+    s5x5_G_stable. *)
 Lemma FiveCardKim_G_stable :
   forall g, g \in pgg_G FiveCardKim_M ->
   forall i : 'I_(ts_T' fcI_scheme).+1,
@@ -296,7 +295,7 @@ Proof. by []. Qed.
     Naming: den_boer_committed_protocol_correct is the instance-namespaced
     end-to-end claim; the den_boer_ instance prefix plus committed/protocol/
     correct descriptor exceed five components by design, kept for parity with
-    den_boer_protocol_correct. *)
+    the sibling FiveCardKim_protocol_correct and s5x5_protocol_correct. *)
 Theorem den_boer_committed_protocol_correct (s : bool) (P : pgg_gT FiveCardKim_M) :
   P \in pgg_G FiveCardKim_M ->
   ts_valid fcI_scheme s

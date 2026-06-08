@@ -1,11 +1,11 @@
 (* infotheo: information theory and error-correcting codes in Rocq            *)
 (* Copyright (C) 2025 infotheo authors, license: LGPL-2.1-or-later            *)
 (******************************************************************************)
-(* Den Boer's Five-Card Trick as a PGG Instance                               *)
+(* Den Boer's Five-Card Trick: the two permutation generators                 *)
 (*                                                                            *)
-(* Formalizes the foundational card-based protocol (den Boer, EUROCRYPT 1989) *)
-(* as a concrete PGG monodromy instance. This is the base case of the         *)
-(* generalization spectrum: card protocols -> PGG -> spectral analysis.        *)
+(* Provides the two permutations of 'I_5 used by the five-card trick          *)
+(* (den Boer, EUROCRYPT 1989), shared by the Kim-family monodromy instance    *)
+(* and the bool/'I_5 ThresholdScheme.                                         *)
 (*                                                                            *)
 (* Setup:                                                                     *)
 (*   N = 5 cards: 3 black (spades) + 2 red (hearts)                          *)
@@ -20,20 +20,9 @@
 (*   - Bit 1: (s, g(s)) = matched pair                                       *)
 (*   - Bit 0: (s, s) = same position                                         *)
 (*                                                                            *)
-(* Generator (shuffle): sigma = random cyclic shift of all 5 positions        *)
-(*   sigma = (0 1 2 3 4) -- 5-cycle                                           *)
-(*   This generates Z_5 (cyclic group of order 5)                             *)
-(*                                                                            *)
-(* PGG parameters: m = 0 (1 generator), n = 3 (N = n+2 = 5 sheets)           *)
-(*   M = Gen_PGGTypes [tuple sigma]                                           *)
-(*   word_eval at L=1: achievable = {sigma} (1 element)                       *)
-(*   word_eval at L=4: achievable = {sigma, sigma^2, sigma^3, sigma^4}        *)
-(*     (4 elements, since sigma^5 = 1)                                        *)
-(*                                                                            *)
-(* Security analysis:                                                         *)
-(*   At L=4: achievable has 4 distinct non-identity elements                  *)
-(*   Fiber counting per sheet determines epsilon                              *)
-(*   For cyclic group: transitive action -> eps determined by uniformity      *)
+(* Shuffle generator: sigma = (0 1 2 3 4), the 5-cycle cyclic shift of all    *)
+(*   five positions; sigma^5 = 1. This is the generator fc_kim_sigmas is      *)
+(*   built from in the Kim-family instance.                                   *)
 (*                                                                            *)
 (* References:                                                                *)
 (*   den Boer (1989), "More Efficient Match-Making and Satisfiability:        *)
@@ -42,8 +31,6 @@
 
 From mathcomp Require Import ssreflect ssrbool ssrfun eqtype ssrnat seq.
 From mathcomp Require Import fintype tuple finfun finset fingroup perm.
-Require Import pgg_interface.
-From pgg_smc Require Import pgg_weval_inj.
 From pgg_reconstruct Require Import pgg_deck_pairing.
 
 Set Implicit Arguments.
@@ -113,20 +100,13 @@ Proof. by move=> x; apply/val_inj; case: x => [[|[|[|[|[|]]]]]]. Qed.
 *)
 Definition fc_g : {perm 'I_5} := perm (can_inj fc_gK).
 
-(** Generator tuple for Gen_PGGTypes (1 generator). *)
-Definition fc_sigmas : 1.-tuple {perm 'I_5} := [tuple fc_sigma].
-
 End five_card_generators.
 
 (******************************************************************************)
-(** * PGG Instance: Gen_PGGTypes from the 5-cycle generator                   *)
+(** * Involution property of g = (0 1)(2 3)                                   *)
 (******************************************************************************)
 
 Section five_card_pgg.
-
-(** m = 0 (1 generator), n = 3 (N = n+2 = 5 sheets) *)
-Definition FiveCard_M : MonodromyReprWithGeneratorType :=
-  @Gen_PGGTypes 0 3 fc_sigmas.
 
 (** Involution properties *)
 Lemma fc_g_involution : is_involution fc_g.
@@ -140,48 +120,5 @@ Qed.
 (** fc_g = (0 1)(2 3) fixes position 4, so is_fpf does NOT hold.
     The five-card trick intentionally has a fixed point (the extra card).
     The former fc_g_fpf statement has been removed as it is unprovable. *)
-
-(** Nat-level generator function for vm_compute reflection *)
-Definition fc_gens_nat (i x : nat) : nat :=
-  match i with
-  | _ => match x with 0 => 1 | 1 => 2 | 2 => 3 | 3 => 4 | _ => 0 end
-  end.
-
-(** fc_sigmasE — tuple lookup in the singleton generator tuple always returns fc_sigma.
-    Kind: helper.
-    Why: Rewrite lemma used to unfold fc_sigmas inside word-evaluation and reflection reasoning.
-    Used by: fc_gens_agree.
-*)
-Lemma fc_sigmasE (i : 'I_1) : tnth fc_sigmas i = fc_sigma.
-Proof. by rewrite (tnth_nth fc_sigma) /=; case: i => [[|?] ?]. Qed.
-
-(** fc_gens_agree — nat-level generator function fc_gens_nat agrees with the perm action of tnth fc_sigmas.
-    Kind: helper.
-    Why: Reflection bridge feeding the weval_inj_of_natB reflection lemma so vm_compute can discharge word-eval injectivity obligations.
-    Used by: fc_weval_inj1, fc_weval_inj4.
-*)
-Lemma fc_gens_agree (i : 'I_1) (x : 'I_5) :
-  fc_gens_nat (val i) (val x) = val (tnth fc_sigmas i x).
-Proof.
-by case: i => [[|?] ?]; case: x => [[|[|[|[|[|?]]]]] ?];
-  rewrite fc_sigmasE /= permE.
-Qed.
-
-(** Word-eval injectivity at L=1: trivially true since there's only 1 generator
-    and it is not the identity. *)
-Lemma fc_weval_inj1 : @weval_inj FiveCard_M 1.
-Proof.
-apply: (weval_inj_of_natB fc_gens_agree).
-by vm_compute.
-Qed.
-
-(** Word-eval injectivity at L=4: the 4 words [0], [0,0], [0,0,0], [0,0,0,0]
-    evaluate to sigma, sigma^2, sigma^3, sigma^4, all distinct since
-    sigma has order 5. *)
-Lemma fc_weval_inj4 : @weval_inj FiveCard_M 4.
-Proof.
-apply: (weval_inj_of_natB fc_gens_agree).
-by vm_compute.
-Qed.
 
 End five_card_pgg.

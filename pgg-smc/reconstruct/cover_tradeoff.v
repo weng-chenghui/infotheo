@@ -219,7 +219,7 @@ End tradeoff.
     form [maxn (2 * N) 60] so instance files can discharge it by direct
     numerical computation on the sheet count [N = (pgg_N' M).+1].
     Used by: downstream instance PGL-bound discharges (rigidity_s5_instance,
-    rigidity_kim_instance, five_card_security). *)
+    rigidity_kim_instance). *)
 Lemma pgl_bound_unfold (M : MonodromyReprWithGeneratorType) :
   pgl_bound M = maxn (2 * (pgg_N' M).+1) 60.
 Proof. by []. Qed.

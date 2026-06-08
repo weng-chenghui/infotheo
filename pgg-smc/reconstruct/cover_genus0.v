@@ -254,7 +254,7 @@ Variable rsw : RSCodeWitness M.
     into [genus0_covering].
     Kind: instance.
     Why: provides a one-line constructor usable by concrete instance files
-    (five_card_security, rigidity_kim_instance, rigidity_s5_instance) so each
+    (rigidity_kim_instance, rigidity_s5_instance) so each
     of them can instantiate a covering scheme by supplying a bare RS witness
     rather than repeating the 11-field argument list. *)
 Definition genus0_covering_witness : CoveringScheme M :=

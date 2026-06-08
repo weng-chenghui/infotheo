@@ -189,13 +189,13 @@ Definition fc_face (c : 'I_5) : bool := decode_bool c.
     Kind: definition. What: the identity on 'I_5. Why: with content = id and
     starts = ord_tuple 5, the protocol's G_stable condition collapses to
     reflexivity exactly as in s5x5_G_stable, which makes the end-to-end
-    correctness theorem (den_boer_protocol_correct) provable without assuming
-    a layout-dependent face permutation. The position-faithful readout
+    correctness theorem provable without assuming a layout-dependent face
+    permutation. The position-faithful readout
     [fun c => encode_bool (fc_face c)] is definitionally the identity on the
     two used marks (positions 0 and 1) but not on positions 2..4; choosing id
     keeps the G_stable collapse, with the boolean reading recovered by
-    fcI_recon's per-position decode_bool. Used-by: den_boer_plug,
-    den_boer_protocol_correct. *)
+    fcI_recon's per-position decode_bool. Used-by: five_card_plug,
+    den_boer_profile (five_card_family.v, den_boer_profile.v). *)
 Definition fc_content (c : 'I_5) : 'I_5 := c.
 
 End five_card_program.

@@ -18,16 +18,14 @@
 (*   fc_sigma_pow_val == the 5-cycle power acts as +k mod 5 on positions.     *)
 (*   fc_three_consec_rot == three-consecutive-hearts is rotation-invariant    *)
 (*     for shifts k < 5 (essential: MathComp rot j s = s for j >= size s).    *)
-(*   fcI_perm_compatible == the net-new fact: reconstruction is invariant     *)
-(*     under the FULL monodromy group <[fc_sigma]> = pgg_G FiveCard_M, since   *)
-(*     every group element is a power of the 5-cycle, hence a rotation of the  *)
-(*     decoded share row, and fc_three_consec is rotation-invariant.          *)
+(*                                                                            *)
+(* The full-group reconstruction invariance over the Kim-family monodromy     *)
+(* (fcI_perm_compatible_kim) lives in five_card_family.v and is built from    *)
+(* fc_sigma_pow_val and fc_three_consec_rot.                                  *)
 (******************************************************************************)
 
 From mathcomp Require Import ssreflect ssrbool ssrfun eqtype ssrnat seq.
 From mathcomp Require Import div fintype tuple finfun finset fingroup perm.
-From mathcomp Require Import morphism cyclic.
-Require Import pgg_interface.
 From pgg_smc Require Import five_card_group five_card_program.
 From pgg_reconstruct Require Import pgg_sharing_framework.
 
@@ -47,14 +45,14 @@ Section five_card_scheme_I5.
     decoded heart-pattern has three consecutive hearts equal to s.
     Kind: definition. What: fc_three_consec of the decoded share row equals s.
     Why: the validity predicate of the bool/'I_5 threshold scheme. Used-by:
-    fcI_scheme, fcI_correct, fcI_encode_valid, fcI_perm_compatible. *)
+    fcI_scheme, fcI_correct, fcI_encode_valid, fcI_perm_compatible_kim. *)
 Definition fcI_valid (s : bool) (shares : 5.-tuple 'I_5) : Prop :=
   fc_three_consec [seq decode_bool x | x <- shares] = s.
 
 (** fcI_recon — recover the secret bit from 'I_5 shares.
     Kind: definition. What: decode each position, then read three consecutive
     hearts. Why: the reconstruction map of the bool/'I_5 threshold scheme.
-    Used-by: fcI_scheme, fcI_correct, fcI_perm_compatible. *)
+    Used-by: fcI_scheme, fcI_correct, fcI_perm_compatible_kim. *)
 Definition fcI_recon (shares : 5.-tuple 'I_5) : bool :=
   fc_three_consec [seq decode_bool x | x <- shares].
 
@@ -214,7 +212,8 @@ Qed.
     (card-position) shares: 5 shares, privacy threshold 2 (any single card
     position reveals nothing about the AND).
     Kind: instance.
-    Why: the heterogeneous-secret scheme plugged into den_boer_plug; secretT =
+    Why: the heterogeneous-secret scheme plugged into the Kim-family
+    reconstruction plug (five_card_plug, five_card_family.v); secretT =
     bool dodges the surjectivity contradiction that blocks an 'I_5 secret. *)
 Definition fcI_scheme : ThresholdScheme bool 'I_5 :=
   @MkThresholdScheme bool 'I_5 4 1
@@ -230,7 +229,7 @@ Definition fcI_scheme : ThresholdScheme bool 'I_5 :=
     Kind: helper.
     Why: turns the monodromy reindexing tnth shares ((fc_sigma^k) i) into a
     cyclic rotation of the decoded share row.
-    Used by: fcI_perm_compatible. *)
+    Used by: fcI_perm_compatible_kim (five_card_family.v). *)
 Lemma fc_sigma_pow_val (k : nat) (i : 'I_5) :
   val ((fc_sigma ^+ k) i) = (val i + k) %% 5.
 Proof.
@@ -248,10 +247,10 @@ Qed.
 (** fc_three_consec_rot — three consecutive hearts is invariant under a cyclic
     shift by k < 5 of a five-card row.
     Kind: helper.
-    Why: the rotation-invariance behind fcI_perm_compatible. The hypothesis
+    Why: the rotation-invariance behind fcI_perm_compatible_kim. The hypothesis
     k < 5 is essential: MathComp's rot j s returns s unchanged when
     j >= size s, so only genuine shifts (k = k mod 5 < 5) rotate the row.
-    Used by: fcI_perm_compatible. *)
+    Used by: fcI_perm_compatible_kim (five_card_family.v). *)
 Lemma fc_three_consec_rot (k : nat) (s : seq bool) :
   k < 5 -> size s = 5 -> fc_three_consec (rot k s) = fc_three_consec s.
 Proof.
@@ -259,71 +258,6 @@ move=> Hk Hs.
 case: k Hk => [|[|[|[|[|k]]]]] // _.
 all: move: Hs; case: s => [|a [|b [|c [|d [|e []]]]]] //= _.
 all: by rewrite /fc_three_consec /=; case: a; case: b; case: c; case: d; case: e.
-Qed.
-
-(******************************************************************************)
-(** * Net-new: reconstruction is invariant under the full monodromy group     *)
-(******************************************************************************)
-
-(** fcI_perm_compatible — reconstruction is invariant under the monodromy share
-    permutation over the FULL group pgg_G FiveCard_M.
-    Kind: helper.
-    Why: the ts_recon_perm_invariant obligation of den_boer_plug. Because
-    pgg_G FiveCard_M = <[fc_sigma]> is cyclic, every g is a power fc_sigma^k;
-    pgg_rho is the identity inclusion here, so reindexing the shares by g is a
-    cyclic rotation by k mod 5 of the decoded row (fc_sigma_pow_val), and
-    fc_three_consec is invariant under that rotation (fc_three_consec_rot).
-    Used by: den_boer_plug (rp_recon_invariant). *)
-Lemma fcI_perm_compatible :
-  @ts_recon_perm_invariant _ (pgg_G FiveCard_M) _ _ fcI_scheme
-    (morphism.mfun (@pgg_rho FiveCard_M)).
-Proof.
-rewrite /ts_recon_perm_invariant.
-move=> g s shares Hg Hvalid.
-rewrite /ts_recon /ts_valid /= in Hvalid *.
-rewrite /fcI_recon.
-have Gcyc : pgg_G FiveCard_M = <[fc_sigma]>.
-  rewrite /pgg_G /FiveCard_M /=.
-  congr (<<_>>%G).
-  apply/setP => x; apply/imsetP/set1P.
-    by move=> [i _ ->]; rewrite fc_sigmasE.
-  by move=> ->; exists ord0; rewrite // fc_sigmasE.
-rewrite Gcyc in Hg.
-have /cycleP [k Hk] := Hg.
-rewrite Hk.
-set L := [seq decode_bool x | x <- shares].
-have HLsize : size L = 5 by rewrite /L size_map size_tuple.
-have Hrot :
-    [seq decode_bool x | x <- [tuple tnth shares ((fc_sigma ^+ k) i) | i < 5]]
-    = rot (k %% 5) L.
-  have nth_rot_mod : forall (n p : nat) (xs : seq bool),
-      n < 5 -> p < 5 -> size xs = 5 ->
-      nth false (rot n xs) p = nth false xs ((p + n) %% 5).
-    move=> n p xs Hn Hp Hxs.
-    rewrite /rot nth_cat size_drop Hxs.
-    case: (ltnP p (5 - n)) => Hpn.
-      by rewrite nth_drop addnC modn_small // addnC -ltn_subRL.
-    have Hqn : p - (5 - n) < n by rewrite ltn_subLR // subnK ?(ltnW Hn).
-    rewrite nth_take //.
-    have Heq2 : p + n - 5 = p - (5 - n) by rewrite subnBA ?(ltnW Hn).
-    have Hpn5 : (5 <= p + n)%N by rewrite -(subnK (ltnW Hn)) leq_add2r.
-    by rewrite -Heq2 -(subnK Hpn5) modnDr modn_small ?addnK //
-       Heq2 (leq_ltn_trans (leq_subr _ _) Hp).
-  apply: (@eq_from_nth _ false).
-    by rewrite size_map size_tuple size_rot HLsize.
-  move=> p Hp.
-  rewrite size_map size_tuple in Hp.
-  rewrite (nth_map (Ordinal Hp)); last by rewrite size_tuple.
-  rewrite nth_rot_mod //; last exact: ltn_pmod.
-  rewrite (nth_mktuple _ (Ordinal Hp) (Ordinal Hp)) /L.
-  have Hq : (p + k %% 5) %% 5 < 5 by exact: ltn_pmod.
-  rewrite (nth_map (Ordinal Hp)); last by rewrite size_tuple.
-  congr decode_bool.
-  rewrite -(tnth_nth (Ordinal Hp) shares (Ordinal Hq)).
-  congr (tnth shares _).
-  apply: val_inj => /=.
-  by rewrite fc_sigma_pow_val /= modnDmr.
-by rewrite Hrot fc_three_consec_rot //; exact: ltn_pmod.
 Qed.
 
 End five_card_scheme_I5.
