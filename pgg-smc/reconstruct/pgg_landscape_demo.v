@@ -190,7 +190,7 @@ Variable a : GF m' primeq.
 Hypothesis qn : ~~ (q %| n''.+3)%nat.
 Hypothesis an : (n''.+3).-primitive_root a.
 
-Let R_oc : GeneratedMonodromyReprType := @Gen_PGGTypes 1 2 oc_sigmas.
+Let R_oc : MonodromyReprWithGeneratorType := @Gen_PGGTypes 1 2 oc_sigmas.
 Hypothesis HN : (pgg_N' R_oc).+1 = #|GF m' primeq|.
 Hypothesis HG_oc : (1 < #|pgg_G R_oc|)%N.
 

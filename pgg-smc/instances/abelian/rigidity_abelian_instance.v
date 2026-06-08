@@ -109,7 +109,7 @@ Section abel_security.
 Variable R : realType.
 
 Let M_abel := @Gen_PGGTypes 1 2 abel_sigmas.
-Let R_abel : GeneratedMonodromyReprType := M_abel.
+Let R_abel : MonodromyReprWithGeneratorType := M_abel.
 
 (* Word-eval injectivity at L=1: follows from generator injectivity *)
 Lemma abel_weval_inj1 : @weval_inj M_abel 1.
@@ -155,7 +155,7 @@ Section abel_rigidity.
 
 Variable R : realType.
 
-Let R_abel : GeneratedMonodromyReprType :=
+Let R_abel : MonodromyReprWithGeneratorType :=
   @Gen_PGGTypes 1 2 abel_sigmas.
 
 (* Group nontriviality *)

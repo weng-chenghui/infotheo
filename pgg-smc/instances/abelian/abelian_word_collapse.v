@@ -33,7 +33,7 @@ Import Prenex Implicits.
 
 Section freq_vector.
 
-Variable M : GeneratedMonodromyReprType.
+Variable M : MonodromyReprWithGeneratorType.
 
 Let gT := pgg_gT M.
 Let G := pgg_G M.
@@ -200,7 +200,7 @@ End freq_vector.
 
 Section freq_counting.
 
-Variable M : GeneratedMonodromyReprType.
+Variable M : MonodromyReprWithGeneratorType.
 
 Let gT := pgg_gT M.
 Let G := pgg_G M.
@@ -385,7 +385,7 @@ End stars_and_bars.
 
 Section stars_and_bars_application.
 
-Variable M : GeneratedMonodromyReprType.
+Variable M : MonodromyReprWithGeneratorType.
 
 Let Tg := (@pgg_ngens' M).+1.
 

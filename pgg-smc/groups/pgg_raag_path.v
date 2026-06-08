@@ -98,7 +98,7 @@ Qed.
 (* --- PGGTypes instance --- *)
 
 Local Notation Path_PGGTypes := (@Gen_PGGTypes m m path_gen_tuple).
-Let M_path : GeneratedMonodromyReprType := Path_PGGTypes.
+Let M_path : MonodromyReprWithGeneratorType := Path_PGGTypes.
 
 (* --- Commutativity relation --- *)
 

@@ -63,7 +63,7 @@ End regular_action.
 
 Section abelian_collapse.
 
-Variable M : GeneratedMonodromyReprType.
+Variable M : MonodromyReprWithGeneratorType.
 
 Let gT := pgg_gT M.
 Let N := (pgg_N' M).+1.

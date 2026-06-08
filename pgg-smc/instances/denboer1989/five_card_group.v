@@ -125,7 +125,7 @@ End five_card_generators.
 Section five_card_pgg.
 
 (** m = 0 (1 generator), n = 3 (N = n+2 = 5 sheets) *)
-Definition FiveCard_M : GeneratedMonodromyReprType :=
+Definition FiveCard_M : MonodromyReprWithGeneratorType :=
   @Gen_PGGTypes 0 3 fc_sigmas.
 
 (** Involution properties *)

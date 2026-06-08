@@ -22,7 +22,7 @@
 (*     spectral convergence.                                                  *)
 (*                                                                            *)
 (* Contents:                                                                  *)
-(*   CardShuffle == record bundling a GeneratedMonodromyReprType with an       *)
+(*   CardShuffle == record bundling a MonodromyReprWithGeneratorType with an       *)
 (*     involution (card-pairing), encoding the card protocol as a PGG         *)
 (*     instance where endpoints = card positions after shuffling.             *)
 (*   card_security_from_endpoint == bridge theorem: PGG endpoint security     *)

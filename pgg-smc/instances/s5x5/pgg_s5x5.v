@@ -96,7 +96,7 @@ Qed.
 (******************************************************************************)
 
 Definition M_s5x5 := @Gen_PGGTypes 7 8 s5x5_gen_tuple.
-Definition R_s5x5 : GeneratedMonodromyReprType := M_s5x5.
+Definition R_s5x5 : MonodromyReprWithGeneratorType := M_s5x5.
 
 (******************************************************************************)
 (*     Word-eval injectivity at L=1                                           *)

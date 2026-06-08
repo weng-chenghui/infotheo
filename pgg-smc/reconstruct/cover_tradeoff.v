@@ -82,7 +82,7 @@ End riemann_hurwitz_consequences.
 
 Section search_space_bounds.
 
-Variable M : GeneratedMonodromyReprType.
+Variable M : MonodromyReprWithGeneratorType.
 Let G := pgg_G M.
 Let N := (pgg_N' M).+1.
 
@@ -127,7 +127,7 @@ End search_space_bounds.
 
 Section tradeoff.
 
-Variable M : GeneratedMonodromyReprType.
+Variable M : MonodromyReprWithGeneratorType.
 Let G := pgg_G M.
 Let N := (pgg_N' M).+1.
 
@@ -220,7 +220,7 @@ End tradeoff.
     numerical computation on the sheet count [N = (pgg_N' M).+1].
     Used by: downstream instance PGL-bound discharges (rigidity_s5_instance,
     rigidity_kim_instance, five_card_security). *)
-Lemma pgl_bound_unfold (M : GeneratedMonodromyReprType) :
+Lemma pgl_bound_unfold (M : MonodromyReprWithGeneratorType) :
   pgl_bound M = maxn (2 * (pgg_N' M).+1) 60.
 Proof. by []. Qed.
 
@@ -235,7 +235,7 @@ Proof. by []. Qed.
     Why: packages the genus-0 automorphism constraint as a named [Prop] so that
     each concrete instance (five_card, kim, s5, s5x5) can discharge it by
     direct proof or by unfolding [pgl_bound_unfold]. *)
-Definition genus0_automorphism_bound (M : GeneratedMonodromyReprType)
+Definition genus0_automorphism_bound (M : MonodromyReprWithGeneratorType)
     (cd : CoveringData M) : Prop :=
   cd_genus cd = 0 -> (#|pgg_G M| <= pgl_bound M)%N.
 Arguments genus0_automorphism_bound M cd : clear implicits.

@@ -37,7 +37,7 @@ Section word_analysis.
 
 Variable R : RAAGType.
 Let gT := pgg_gT R.
-Let M : GeneratedMonodromyReprType := R.
+Let M : MonodromyReprWithGeneratorType := R.
 Let Tg := (@pgg_ngens' R).+1.
 Let sigmas := @pgg_sigmas R.
 Let comm : rel 'I_Tg := @raag_comm R.

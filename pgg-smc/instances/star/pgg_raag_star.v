@@ -200,7 +200,7 @@ Qed.
 (* --- PGGTypes instance --- *)
 
 Local Notation Star_PGGTypes := (@Gen_PGGTypes m m.+1 star_gen_tuple).
-Let M_star : GeneratedMonodromyReprType := Star_PGGTypes.
+Let M_star : MonodromyReprWithGeneratorType := Star_PGGTypes.
 
 (* --- RAAG instance wrapper lemmas --- *)
 

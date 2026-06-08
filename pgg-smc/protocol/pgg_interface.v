@@ -66,8 +66,8 @@ HB.mixin Record hasGenerators (T : PGGTypes) := {
   pgg_sigmas_gen : <<[set tnth pgg_sigmas i | i : 'I_pgg_ngens'.+1]>>%G = pgg_G T ;
 }.
 
-#[short(type=GeneratedMonodromyReprType)]
-HB.structure Definition GeneratedMonodromyRepr :=
+#[short(type=MonodromyReprWithGeneratorType)]
+HB.structure Definition MonodromyReprWithGenerator :=
   { T of isMonodromyRepr T & hasGenerators T }.
 
 (* ========================================================================== *)
@@ -149,7 +149,7 @@ End perm_endpoint_def.
 
 Section search_space_ops.
 
-Variable M : GeneratedMonodromyReprType.
+Variable M : MonodromyReprWithGeneratorType.
 
 Let gT := pgg_gT M.
 Let G := pgg_G M.
@@ -240,7 +240,7 @@ End search_space_ops.
 
 Section gen_inj_theory.
 
-Variable M : GeneratedMonodromyReprType.
+Variable M : MonodromyReprWithGeneratorType.
 
 Let gT := pgg_gT M.
 Let Tg := (@pgg_ngens' M).+1.
@@ -696,7 +696,7 @@ by rewrite !(tpermD _ _) // 1?eq_sym.
 Qed.
 
 (* Non-abelianity from a non-commuting generator pair *)
-Lemma gen_nonabelian (M : GeneratedMonodromyReprType)
+Lemma gen_nonabelian (M : MonodromyReprWithGeneratorType)
     (i j : 'I_(@pgg_ngens' M).+1) :
   i != j ->
   (tnth (@pgg_sigmas M) i * tnth (@pgg_sigmas M) j !=
@@ -722,7 +722,7 @@ Qed.
 Local Open Scope fdist_scope.
 
 HB.mixin Record hasWeights (R : realType) (T : PGGTypes)
-    of GeneratedMonodromyRepr T := {
+    of MonodromyReprWithGenerator T := {
   pgg_gen_weights : R.-fdist 'I_(@pgg_ngens' T).+1 ;
 }.
 

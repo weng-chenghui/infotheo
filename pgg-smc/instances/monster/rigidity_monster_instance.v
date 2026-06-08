@@ -84,7 +84,7 @@ Axiom monster_n : nat.
 Axiom monster_sigmas : 2.-tuple {perm 'I_monster_n.+2}.
 
 Definition M_monster := @Gen_PGGTypes 1 monster_n monster_sigmas.
-Definition R_monster : GeneratedMonodromyReprType := M_monster.
+Definition R_monster : MonodromyReprWithGeneratorType := M_monster.
 
 (* Generators are distinct: weaker than word-eval injectivity, implies it via
    gen_inj_weval_inj1. Axiomatized because the generators are abstract. *)

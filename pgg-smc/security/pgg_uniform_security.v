@@ -97,7 +97,7 @@ End var_dist_self.
 Section uniform_security.
 
 Variable R : realType.
-Variable M : GeneratedMonodromyReprType.
+Variable M : MonodromyReprWithGeneratorType.
 Let N' := pgg_N' M.
 Let N := N'.+1.
 Let G := pgg_G M.

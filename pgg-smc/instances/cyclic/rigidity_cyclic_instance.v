@@ -57,7 +57,7 @@ Variable n : nat.
 (* Build as Gen_PGGTypes for compatibility with security_witness_endpoint_inj *)
 Let ncycle_sigs := cyclic_sigmas (ncycle n).
 Let M_ncycle := @Gen_PGGTypes 0 n ncycle_sigs.
-Let R_ncycle : GeneratedMonodromyReprType := M_ncycle.
+Let R_ncycle : MonodromyReprWithGeneratorType := M_ncycle.
 
 (* Generator tuple injectivity: trivial for Tg = 1 (singleton domain) *)
 Lemma ncycle_sigmas_inj :
@@ -99,7 +99,7 @@ Variable R : realType.
 Variable n : nat.
 
 Let ncycle_sigs := cyclic_sigmas (ncycle n).
-Let R_ncycle : GeneratedMonodromyReprType :=
+Let R_ncycle : MonodromyReprWithGeneratorType :=
   @Gen_PGGTypes 0 n ncycle_sigs.
 
 (* Group nontriviality *)

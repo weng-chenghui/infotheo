@@ -78,7 +78,7 @@ Variable R : realType.
 Variable m : nat.
 
 Let M_star := @Gen_PGGTypes m m.+1 (star_gen_tuple m).
-Let R_star : GeneratedMonodromyReprType := M_star.
+Let R_star : MonodromyReprWithGeneratorType := M_star.
 Let N := m.+3.
 Let Tg := m.+1.
 
@@ -122,7 +122,7 @@ Section star_rigidity.
 Variable R : realType.
 Variable m : nat.
 
-Let R_star : GeneratedMonodromyReprType :=
+Let R_star : MonodromyReprWithGeneratorType :=
   @Gen_PGGTypes m m.+1 (star_gen_tuple m).
 
 (* Group nontriviality *)
@@ -226,7 +226,7 @@ Hypothesis star_HT :
    This is the structural condition connecting the code automorphism
    (sigma_code) to the monodromy representation on protocol starts. *)
 Hypothesis star_G_stable :
-  forall g, g \in pgg_G R_star ->
+  forall g, g \in cs_recon_symmetry (tw_covering (ar_threshold star_rigidity)) ->
   forall i : 'I_(ts_T' (cs_scheme star_covering)).+1,
     @pgg_rho R_star g
       (tnth (cast_tuple (esym (congr1 S star_HT)) (pi_starts star_PI)) i) =
@@ -234,7 +234,7 @@ Hypothesis star_G_stable :
       (cs_monodromy star_covering g i).
 
 Lemma star_protocol_correct (s : 'I_(pgg_N' R_star).+1) (P : pgg_gT R_star) :
-  P \in pgg_G R_star ->
+  P \in cs_recon_symmetry (tw_covering (ar_threshold star_rigidity)) ->
   ts_valid (cs_scheme star_covering) s
     (cast_tuple (esym (congr1 S star_HT)) (pi_starts star_PI)) ->
   pgg_recon_endpoints star_HT P = s.

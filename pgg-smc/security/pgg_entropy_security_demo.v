@@ -185,7 +185,7 @@ Section oc_entropy.
 Variable R : realType.
 
 Let M_oc := @Gen_PGGTypes 1 2 oc_sigmas.
-Let R_oc : GeneratedMonodromyReprType := M_oc.
+Let R_oc : MonodromyReprWithGeneratorType := M_oc.
 
 (* The endpoint distribution at each sheet *)
 Let P_s (s : 'I_4) : R.-fdist 'I_4 :=
@@ -240,7 +240,7 @@ Variable R : realType.
 Variable L : nat.
 
 Let M_oc := @Gen_PGGTypes 1 2 oc_sigmas.
-Let R_oc : GeneratedMonodromyReprType := M_oc.
+Let R_oc : MonodromyReprWithGeneratorType := M_oc.
 
 Variable H_min : R.
 Variable rho_dist : R.-fdist {perm 'I_4}.
@@ -278,7 +278,7 @@ End oc_convergence.
 Section generic_convergence.
 
 Variable R : realType.
-Variable M : GeneratedMonodromyReprType.
+Variable M : MonodromyReprWithGeneratorType.
 Let N' := pgg_N' M.
 
 Variable ew : EntropyWitness R M.

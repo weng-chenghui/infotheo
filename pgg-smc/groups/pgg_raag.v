@@ -164,7 +164,7 @@ Qed.
 (* RAAG mixin + structure                                                     *)
 (* ========================================================================== *)
 
-HB.mixin Record isRAAG0 (T : PGGTypes) of GeneratedMonodromyRepr T := {
+HB.mixin Record isRAAG0 (T : PGGTypes) of MonodromyReprWithGenerator T := {
   raag_comm : rel 'I_(@pgg_ngens' T).+1 ;
   raag_comm_sym : symmetric raag_comm ;
   raag_comm_irrefl : irreflexive raag_comm ;
@@ -180,7 +180,7 @@ HB.mixin Record isRAAG0 (T : PGGTypes) of GeneratedMonodromyRepr T := {
 HB.structure Definition RAAG :=
   { T of isMonodromyRepr T & hasGenerators T & isRAAG0 T }.
 
-HB.factory Record isRAAG (T : PGGTypes) of GeneratedMonodromyRepr T := {
+HB.factory Record isRAAG (T : PGGTypes) of MonodromyReprWithGenerator T := {
   raag_comm : rel 'I_(@pgg_ngens' T).+1 ;
   raag_comm_sym : symmetric raag_comm ;
   raag_comm_irrefl : irreflexive raag_comm ;
@@ -205,7 +205,7 @@ Section raag_theory.
 
 Variable R : RAAGType.
 Let gT := pgg_gT R.
-Let M : GeneratedMonodromyReprType := R.
+Let M : MonodromyReprWithGeneratorType := R.
 Let Tg := (@pgg_ngens' R).+1.
 Let sigmas := @pgg_sigmas R.
 Let comm : rel 'I_Tg := @raag_comm R.
@@ -1153,7 +1153,7 @@ Hypothesis Hcomm_nat : forall i j : 'I_Tg,
 
 Definition comm_ord : rel 'I_Tg := fun i j => comm_nat (val i) (val j).
 
-Let M : GeneratedMonodromyReprType := R.
+Let M : MonodromyReprWithGeneratorType := R.
 
 (* ------------------------------------------------------------------ *)
 (* Helper: foldl maxn shift lemma                                      *)

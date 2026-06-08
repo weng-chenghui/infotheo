@@ -66,7 +66,7 @@ Section oc_security.
 Variable R : realType.
 
 Let M_oc := @Gen_PGGTypes 1 2 oc_sigmas.
-Let R_oc : GeneratedMonodromyReprType := M_oc.
+Let R_oc : MonodromyReprWithGeneratorType := M_oc.
 
 Local Open Scope ring_scope.
 
@@ -147,7 +147,7 @@ Section oc_spectral.
 Variable R : realType.
 
 Let M_oc := @Gen_PGGTypes 1 2 oc_sigmas.
-Let R_oc : GeneratedMonodromyReprType := M_oc.
+Let R_oc : MonodromyReprWithGeneratorType := M_oc.
 
 (* Spectral gap: 1 - 1/sqrt(2) ~ 0.293 *)
 Variable oc_spectral_gap : R.
@@ -199,7 +199,7 @@ Section oc_rigidity_cryptographically_secure.
 
 Variable R : realType.
 
-Let R_oc : GeneratedMonodromyReprType :=
+Let R_oc : MonodromyReprWithGeneratorType :=
   @Gen_PGGTypes 1 2 oc_sigmas.
 
 (* Threshold witness — taken as parameter to avoid duplicating
@@ -234,7 +234,7 @@ Section oc_rigidity.
 
 Variable R : realType.
 
-Let R_oc : GeneratedMonodromyReprType :=
+Let R_oc : MonodromyReprWithGeneratorType :=
   @Gen_PGGTypes 1 2 oc_sigmas.
 
 (* Group nontriviality *)

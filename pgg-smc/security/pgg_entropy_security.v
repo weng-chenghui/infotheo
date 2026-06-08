@@ -11,7 +11,7 @@
 (*   pgg_security_solver.v -- check_perm_endpoint_inj, fiber_entropy_summary  *)
 (*   pgg_schreier.v -- Schreier spectral gap, convergence rate               *)
 (*                                                                            *)
-(* All definitions are generic over GeneratedMonodromyReprType.               *)
+(* All definitions are generic over MonodromyReprWithGeneratorType.               *)
 (*                                                                            *)
 (* Security model:                                                            *)
 (*   The dealer samples word w uniformly from Tg^L possible L-tuples.        *)
@@ -521,7 +521,7 @@ End protocol_rvs.
 (*  Section 6: EntropyWitness Record                                          *)
 (*                                                                            *)
 (*  Packages a min-entropy lower bound for ALL sheets into a single record.   *)
-(*  Generic over M : GeneratedMonodromyReprType (not RAAG-specific).          *)
+(*  Generic over M : MonodromyReprWithGeneratorType (not RAAG-specific).          *)
 (*                                                                            *)
 (*  Fields:                                                                    *)
 (*    ew_L             : word length                                           *)
@@ -534,7 +534,7 @@ End protocol_rvs.
 Section entropy_witness.
 
 Variable R : realType.
-Variable M : GeneratedMonodromyReprType.
+Variable M : MonodromyReprWithGeneratorType.
 Let N' := pgg_N' M.
 
 Record EntropyWitness := MkEntropyWitness {
@@ -569,7 +569,7 @@ Arguments entropy_witness_from_rho {R M}.
 Section security_from_entropy.
 
 Variable R : realType.
-Variable M : GeneratedMonodromyReprType.
+Variable M : MonodromyReprWithGeneratorType.
 Let N' := pgg_N' M.
 
 (** security_witness_from_entropy — constructs a SecurityWitness from an EntropyWitness via Pinsker.
