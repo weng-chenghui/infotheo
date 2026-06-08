@@ -202,6 +202,193 @@ Lemma count_hops_game_of_trace obs :
 Proof. exact: count_hops_lower_obs. Qed.
 
 (* ------------------------------------------------------------------ *)
+(* Deriving the corrupted-view trace from the symbolic programs.       *)
+(* ------------------------------------------------------------------ *)
+
+(* walk_obs — the dual-purpose drive over a corrupted party's symbolic
+   program [p].  At each [Recv] it consumes one hop ciphertext from [resp],
+   reads the sending party and the encrypted secret off its [HE_enc] shape, and
+   emits an [AO_recv_hop] bound to a fresh result name [next], feeding the
+   reception result back as [SD_cipher (HE_var next)] so subsequent statements
+   reference it by name.  At each [Send] whose payload carries a ciphertext it
+   emits an [AO_combine] of that he_term, also bound to a fresh [next].  The
+   single counter allocates distinct names for hops and combines alike (the only
+   property the lowering pass [game_of_trace] needs; it resolves de Bruijn
+   indices by position).  Halts at the decrypt-receive (when [resp] runs out)
+   and at [Ret]/[Finish]/[Fail]. *)
+Fixpoint walk_obs (p : proc symbolic_data) (resp : seq symbolic_data)
+    (next : nat) : seq alice_obs :=
+  match p with
+  | smc_interpreter.Init _ k => walk_obs k resp next
+  | smc_interpreter.Recv _ f =>
+      match resp with
+      | [::] => [::]
+      | r :: rs =>
+          match symbolic_get_cipher r with
+          | Some (HE_enc party (HE_var secret) _) =>
+              AO_recv_hop party secret next
+                :: walk_obs (f (SD_cipher (HE_var next))) rs next.+1
+          | _ => [::]
+          end
+      end
+  | smc_interpreter.Send _ d k =>
+      match symbolic_get_cipher d with
+      | Some c => AO_combine next c :: walk_obs k resp next.+1
+      | None => walk_obs k resp next
+      end
+  | smc_interpreter.Ret _ => [::]
+  | smc_interpreter.Finish => [::]
+  | smc_interpreter.Fail => [::]
+  end.
+
+(* walk_obs_dsdp — the load-bearing reduction: walking [palice_sym] against the
+   two received hop ciphertexts, starting result names at 100, yields the two
+   [AO_recv_hop]s (Bob's secret 10 bound to 100, Charlie's 11 to 101) and the
+   two homomorphic [AO_combine] assemblies (each referencing its hop result
+   100/101 by name).  Closes by computation.
+   Naming: this is the equational characterisation of [walk_obs] on the DSDP
+   inputs (the MathComp [_E]-suffix convention would render it [walk_obsE], but
+   the [_dsdp] suffix pins the specific instance rather than a generic equation,
+   so the four-segment snake_case name reads [walk_obs] applied to [dsdp]). *)
+Lemma walk_obs_dsdp :
+  walk_obs palice_sym dsdp_received_hop_ciphertexts 100
+  = [:: AO_recv_hop 1 10 100 ; AO_recv_hop 2 11 101
+      ; AO_combine 102 (HE_emul (HE_epow (HE_var 100) (HE_var 12))
+                                (HE_enc 1 (HE_var 14) 20))
+      ; AO_combine 103 (HE_emul (HE_epow (HE_var 101) (HE_var 13))
+                                (HE_enc 2 (HE_var 15) 21)) ].
+Proof. by []. Qed.
+
+(* bound_names — the result names that the walk binds (one per [AO_recv_hop] and
+   per [AO_combine]).  These name reception/assembly results, NOT free inputs, so
+   the sample synthesis below must exclude them. *)
+Definition bound_names (w : seq alice_obs) : seq nat :=
+  foldr (fun o acc =>
+    match o with
+    | AO_recv_hop _ _ result => result :: acc
+    | AO_combine result _ => result :: acc
+    | _ => acc
+    end) [::] w.
+
+(* term_value_names — the free [HE_var] value names occurring in a he_term, in
+   first-appearance (left-to-right) order.  An [HE_enc]'s randomness slot is a
+   nat, not a he_term, so it is not collected here (see [term_rnd_names]). *)
+Fixpoint term_value_names (t : he_term) : seq nat :=
+  match t with
+  | HE_var x => [:: x]
+  | HE_const _ => [::]
+  | HE_enc _ m _ => term_value_names m
+  | HE_dec _ c => term_value_names c
+  | HE_emul a b => term_value_names a ++ term_value_names b
+  | HE_epow a b => term_value_names a ++ term_value_names b
+  | HE_add a b => term_value_names a ++ term_value_names b
+  | HE_sub a b => term_value_names a ++ term_value_names b
+  | HE_mul a b => term_value_names a ++ term_value_names b
+  end.
+
+(* term_rnd_names — the [HE_enc] randomness-slot names occurring in a he_term, in
+   first-appearance order (each encryption's slot is appended after its plaintext
+   subterm's slots). *)
+Fixpoint term_rnd_names (t : he_term) : seq nat :=
+  match t with
+  | HE_var _ => [::]
+  | HE_const _ => [::]
+  | HE_enc _ m r => term_rnd_names m ++ [:: r]
+  | HE_dec _ c => term_rnd_names c
+  | HE_emul a b => term_rnd_names a ++ term_rnd_names b
+  | HE_epow a b => term_rnd_names a ++ term_rnd_names b
+  | HE_add a b => term_rnd_names a ++ term_rnd_names b
+  | HE_sub a b => term_rnd_names a ++ term_rnd_names b
+  | HE_mul a b => term_rnd_names a ++ term_rnd_names b
+  end.
+
+(* obs_value_names — the value names one observation step contributes: a hop's
+   encrypted secret, or every value name of a combine's assembled term. *)
+Definition obs_value_names (o : alice_obs) : seq nat :=
+  match o with
+  | AO_recv_hop _ secret _ => [:: secret]
+  | AO_combine _ expr => term_value_names expr
+  | _ => [::]
+  end.
+
+(* obs_rnd_names — the randomness names one observation step contributes: the
+   encryption-randomness slots of a combine's assembled term. *)
+Definition obs_rnd_names (o : alice_obs) : seq nat :=
+  match o with
+  | AO_combine _ expr => term_rnd_names expr
+  | _ => [::]
+  end.
+
+(* collect_samples — the free-variable / sample-synthesis pass.  It gathers the
+   value names then the randomness names contributed by the walk, dedups each by
+   [undup] (first appearance), drops any that name a walk-bound result, and emits
+   the surviving value names as [AO_sample_val card_msg] then the randomness
+   names as [AO_sample_rnd card_renc].  This is the canonical sample prefix the
+   lowering pass expects ahead of the put/hop/combine body. *)
+Definition collect_samples (card_msg card_renc : nat) (w : seq alice_obs)
+  : seq alice_obs :=
+  let bound := bound_names w in
+  let vals  := undup (flatten [seq obs_value_names o | o <- w]) in
+  let rnds  := undup (flatten [seq obs_rnd_names o | o <- w]) in
+  let vals' := [seq x <- vals | x \notin bound] in
+  let rnds' := [seq x <- rnds | x \notin bound] in
+  [seq AO_sample_val card_msg x | x <- vals']
+    ++ [seq AO_sample_rnd card_renc x | x <- rnds'].
+
+(* combine_names — the result names bound by the walk's [AO_combine]s, in order
+   (the homomorphic assemblies Alice leaks). *)
+Definition combine_names (w : seq alice_obs) : seq nat :=
+  pmap (fun o => match o with
+                 | AO_combine result _ => Some result | _ => None end) w.
+
+(* recv_names — the result names bound by the walk's [AO_recv_hop]s, in order
+   (the received hop ciphertexts Alice leaks). *)
+Definition recv_names (w : seq alice_obs) : seq nat :=
+  pmap (fun o => match o with
+                 | AO_recv_hop _ _ result => Some result | _ => None end) w.
+
+(* obs_of_procs — assemble the whole corrupted-view trace from loose symbolic
+   arguments (not a record, so [dsdp_alice_obs] stays scheme-agnostic): run the
+   walk on [corrupt] against [hop_sends] (result names from 100), prepend the
+   synthesised sample prefix and the [AO_put challenge] cell write, then append
+   the walk body and the final [AO_leak] of the leaked-view names ([leak] orders
+   the combine and recv result names). *)
+Definition obs_of_procs (corrupt : proc symbolic_data)
+    (hop_sends : seq symbolic_data) (challenge : nat)
+    (leak : seq nat -> seq nat -> seq nat) (card_msg card_renc : nat)
+  : seq alice_obs :=
+  let w := walk_obs corrupt hop_sends 100 in
+  collect_samples card_msg card_renc w
+    ++ [:: AO_put challenge]
+    ++ w
+    ++ [:: AO_leak (leak (combine_names w) (recv_names w)) ].
+
+(* obs_of_procs_dsdp — the derived corrupted-Alice trace for DSDP: walking
+   [palice_sym] against the two hop ciphertexts, with the leak ordering
+   combines-then-recvs, reproduces the 14-element trace.  The value samples come
+   out in first-appearance order 10,11,12,14,13,15 (= v2,v3,u2,r2,u3,r3) and the
+   walk-bound result names 100..103 are correctly excluded from the prefix.
+   Closes by computation.
+   Naming: the equational characterisation of [obs_of_procs] on the DSDP inputs;
+   as with [walk_obs_dsdp] the [_dsdp] suffix pins the instance (the generic
+   [_E] convention would give [obs_of_procsE]), so the four-segment snake_case
+   name reads [obs_of_procs] applied to [dsdp]. *)
+Lemma obs_of_procs_dsdp (cm cr : nat) :
+  obs_of_procs palice_sym dsdp_received_hop_ciphertexts 10
+    (fun combines recvs => combines ++ recvs) cm cr
+  = [:: AO_sample_val cm 10 ; AO_sample_val cm 11 ; AO_sample_val cm 12 ;
+        AO_sample_val cm 14 ; AO_sample_val cm 13 ; AO_sample_val cm 15 ;
+        AO_sample_rnd cr 20 ; AO_sample_rnd cr 21 ;
+        AO_put 10 ;
+        AO_recv_hop 1 10 100 ; AO_recv_hop 2 11 101 ;
+        AO_combine 102 (HE_emul (HE_epow (HE_var 100) (HE_var 12))
+                                (HE_enc 1 (HE_var 14) 20)) ;
+        AO_combine 103 (HE_emul (HE_epow (HE_var 101) (HE_var 13))
+                                (HE_enc 2 (HE_var 15) 21)) ;
+        AO_leak [:: 102 ; 103 ; 100 ; 101 ] ].
+Proof. by []. Qed.
+
+(* ------------------------------------------------------------------ *)
 (* The DSDP corrupted-Alice trace and the faithfulness result.        *)
 (* ------------------------------------------------------------------ *)
 
