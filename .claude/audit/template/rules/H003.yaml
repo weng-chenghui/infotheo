@@ -1,0 +1,13 @@
+id: H003
+category: formatting
+title: "@composes chain does not reach a @main lemma within the commit"
+severity: warning
+enabled: true
+stage_mode: stage1_only
+authority:
+  - peer-feedback-2026-04
+fast_check:
+  kind: comment_composes_reachability
+scope: changed_lemmas
+fix_hint: "Point the helper's @composes (directly or transitively) at a lemma tagged @main, or retag the helper. Cross-file chains are not checked; this fires only on intra-commit chains that demonstrably dead-end."
+exceptions: []

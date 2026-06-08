@@ -337,6 +337,51 @@ def apply_fast_check(rule: dict, manifest: dict, strict_comment_coverage: bool, 
                     "evidence_quote": (entity.get("preceding_comment", "") or "").strip()[:200],
                     "stage": "stage1", "reason": "; ".join(problems),
                 })
+    elif kind == "comment_composes_reachability":
+        # Build the @composes edge graph over the manifest's entities. Mark
+        # @main nodes. A helper is flagged when NO node reachable from it
+        # (including via other in-manifest helpers) is @main AND every edge it
+        # follows stays inside the manifest (a target outside the manifest is
+        # treated as "unknown" -> not flagged, disclosed limitation).
+        by_name = {}
+        is_main = {}
+        edges = {}
+        for entity in manifest.get("entities", []):
+            tag = _comment_role_tag(entity)
+            nm = entity.get("name", "")
+            by_name[nm] = entity
+            is_main[nm] = bool(tag and tag["kind"] == "main")
+            edges[nm] = list(tag["targets"]) if (tag and tag["kind"] == "composes") else []
+        for entity in manifest.get("entities", []):
+            if not strict_comment_coverage and not _entity_touched(entity):
+                continue
+            tag = _comment_role_tag(entity)
+            if not tag or tag["kind"] != "composes":
+                continue
+            nm = entity.get("name", "")
+            # BFS within the manifest.
+            seen, stack, reached_main, left_manifest = set(), list(edges[nm]), False, False
+            while stack:
+                t = stack.pop()
+                if t in seen:
+                    continue
+                seen.add(t)
+                if t not in by_name:
+                    left_manifest = True
+                    continue
+                if is_main.get(t):
+                    reached_main = True
+                    break
+                stack.extend(edges.get(t, []))
+            if not reached_main and not left_manifest:
+                findings.append({
+                    "rule_id": rule["id"], "file": entity["file"],
+                    "line_start": entity["line_start"], "line_end": entity["line_start"],
+                    "lemma_name": nm, "severity": "warning",
+                    "evidence_quote": entity.get("header", "").strip(),
+                    "stage": "stage1",
+                    "reason": "@composes chain dead-ends without reaching a @main lemma",
+                })
     elif kind == "naming_conformance_or_justify":
         findings.extend(_check_naming_conformance_or_justify(rule, manifest, sev))
     return findings
