@@ -98,10 +98,10 @@ Record dsdp_indcpa_secrecy_problem := {
   (* ---- sample-domain sizes (shared by the symbolic trace and the game) ---- *)
   sp_card_plaintext  : nat ;   (* size of the plaintext-scalar sample space *)
   sp_card_randomness : nat ;   (* size of the encryption-randomness sample space *)
-  sp_card_neq : sp_card_plaintext != sp_card_randomness ;
-    (* the two sizes differ, so the denotation tells a plaintext sample from a
-       randomness sample by cardinality and routes them to separate de Bruijn
-       stacks; a well-formedness condition, hence a field *)
+  (* NB: card_plaintext != card_randomness is NOT a field. The advantage bound never
+     consumes it (the back end has no such hypothesis), and requiring it would exclude
+     schemes whose plaintext and randomness domains have equal size. The denotation's
+     sample routing is a semantic-fidelity concern, not a precondition of the theorem. *)
 
   (* ---- the corrupted-view model (the security question) ---- *)
   sp_corrupted_party_program : proc symbolic_data ;
@@ -156,14 +156,16 @@ expanded and re-cast in `X_of_Y` / `K`-suffix form.
 Record dsdp_indcpa_adversary (P : dsdp_indcpa_secrecy_problem) := {
   adv_locations : Locations ;
   adv_package   : raw_package ;
-  adv_valid : ValidPackage adv_locations (game_iface P) A_export adv_package ;
-  adv_disjoint_from_protocol_state : fseparate adv_locations (protocol_state P) ;
-  adv_disjoint_from_real_oracle : fseparate adv_locations (real_oracle P).(locs) ;
-  adv_disjoint_from_zero_oracle : fseparate adv_locations (zero_oracle P).(locs) ;
+  adv_valid : ValidPackage adv_locations (game_iface_P P) A_export adv_package ;
+  adv_disjoint_from_protocol_state : fseparate adv_locations (protocol_state_P P) ;
+  adv_disjoint_from_real_oracle : fseparate adv_locations (real_oracle_P P).(locs) ;
+  adv_disjoint_from_zero_oracle : fseparate adv_locations (zero_oracle_P P).(locs) ;
 }.
 
 Definition corrupted_view (P : dsdp_indcpa_secrecy_problem) : seq alice_obs :=
-  obs_of_procs P.
+  obs_of_procs (sp_corrupted_party_program P) (sp_received_hop_ciphertexts P)
+    (sp_challenge_secret P) (sp_leak_order P)
+    (sp_card_plaintext P) (sp_card_randomness P).
 Definition game_of_problem (P) : game_code := game_of_trace (corrupted_view P).
 Definition real_game (P) : raw_package :=
   denote_game (sp_rand_carrier_card P) (sp_rand_of_carrier P)
@@ -179,12 +181,21 @@ Theorem dsdp_indcpa_secrecy (P : dsdp_indcpa_secrecy_problem)
     <= (count_obs_hops (corrupted_view P))%:R * epsilon_cpa.
 ```
 
-`game_iface P`, `protocol_state P`, `real_oracle P`, `zero_oracle P` are thin
-projections that apply the back end's `game_iface` / `protocol_state` /
-`oracle_real_pkg` / `oracle_zero_pkg` to the corresponding fields of `P` (see the
-mapping table in the appendix). The hop count is left inline as
-`count_obs_hops (corrupted_view P)` rather than given a new name, because `count_hops`
-and `count_obs_hops` already exist with different argument types.
+`game_iface_P`, `protocol_state_P`, `real_oracle_P`, `zero_oracle_P` are thin projections
+that apply the back end's `game_iface` / `protocol_state` / `oracle_real_pkg` /
+`oracle_zero_pkg` to the fields of `P` (see the mapping table in the appendix). The `_P`
+suffix avoids a name clash with the imported back-end globals `game_iface`/`protocol_state`.
+The hop count is left inline as `count_obs_hops (corrupted_view P)` rather than given a new
+name, because `count_hops` and `count_obs_hops` already exist with different argument types.
+
+Two facts the adversarial Rocq audit established by compilation (both fixed in the plan):
+(1) under `Set Primitive Projections`, every record field must be accessed as `P.(field)`,
+not `field P` (the record argument is implicit for function-valued fields whose domain
+mentions the record). (2) `dsdp_indcpa_secrecy` is proved GENERICALLY for any `P` via the
+back end's `advantage_le` (bridging `count_obs_hops` to `size (hop_sites …)` then
+`eapply advantage_le`), not via the `gc_dsdp`-specific `advantage_gc_dsdp` (which times out
+under an abstract `P`). The DSDP `2 * epsilon_cpa` bound is the corollary at
+`P := dsdp_problem …`.
 
 ## 6. Derivation internals
 
@@ -216,10 +227,12 @@ In `dumas2017dual/dsdp/dsdp_game_symbolic.v`:
   for free variables, splitting `HE_var` value names from `HE_enc` randomness slots by
   syntactic position, preserving first appearance, dedup. Emits `AO_sample_val` for the
   value names then `AO_sample_rnd` for the randomness slots.
-- `obs_of_procs (P) : seq alice_obs` — reads the symbolic fields of `P`:
-  `collect_samples w ++ [:: AO_put (sp_challenge_secret P)] ++ w ++
-   [:: AO_leak (sp_leak_order P combine_names recv_names)]`, where `w` is the `walk_obs`
-   output of `sp_corrupted_party_program P` against `sp_received_hop_ciphertexts P`.
+- `obs_of_procs corrupt hop_sends challenge leak card_msg card_renc : seq alice_obs` —
+  `collect_samples card_msg card_renc w ++ [:: AO_put challenge] ++ w ++
+   [:: AO_leak (leak (combine_names w) (recv_names w))]`, where `w := walk_obs corrupt
+   hop_sends 100`. It takes the loose symbolic arguments (not the record), so the projection
+   `corrupted_view P` applies it to `P`'s symbolic fields and `dsdp_alice_obs` stays
+   scheme-agnostic.
 - `dsdp_problem (…) : dsdp_indcpa_secrecy_problem` — the DSDP instance, a record literal:
   `sp_corrupted_party_program := palice_sym`,
   `sp_received_hop_ciphertexts := dsdp_received_hop_ciphertexts`,
@@ -353,3 +366,8 @@ leg (`dsdp_entropy.v`) is not touched and does not depend on any of this.
 | `sp_fallback_rand` | `denote_game` arg 7 | `rand0` |
 | `sp_card_plaintext` | `gc_dsdp` sample cardinality | `card_msg` |
 | `sp_card_randomness` | `gc_dsdp` sample cardinality | `card_renc` |
+
+Real/zero oracle asymmetry: `oracle_real_pkg` arg 3 is `sp_plain_of_choice_msg` (the
+`t_msg -> plain` decoder), but `oracle_zero_pkg` arg 3 is `sp_choice_msg_type` (the
+choice_type itself), per `dsdp_advantage_derived:277,280`. The `real_oracle`/`zero_oracle`
+projections must wire these asymmetrically.
