@@ -88,9 +88,9 @@ Lemma den_boer_perfect (R : realType) :
 Proof. by rewrite /= kim_security_at_zero. Qed.
 
 (** run_k_den_boer — the five-card plug's privacy threshold is 2.
-    @intent: run_k (den_boer_profile R) = 2; the contrast character (any single
-    revealed card leaks nothing about the AND, but two may), read off the shared
-    run_k of the five-card plug. *)
+    @main architecture: run_k (den_boer_profile R) = 2; the contrast character
+    (any single revealed card leaks nothing about the AND, but two may), read off
+    the shared run_k of the five-card plug. *)
 Lemma run_k_den_boer (R : realType) : run_k (den_boer_profile R) = 2.
 Proof. by []. Qed.
 
@@ -194,7 +194,7 @@ Definition den_boer_assemble (committed : seq 'I_(pgg_N' FiveCardKim_M).+1)
     @intent: the explicit five-element list of 'I_5 player ordinals; a concrete
     list (rather than enum 'I_5) lets the dealer's fold_senv reduce under
     vm_compute when checking session-type duality. Used-by:
-    den_boer_dealer_committed, den_boer_ap_verifier. *)
+    den_boer_dealer_committed, den_boer_verifier_ap. *)
 Definition den_boer_players : seq 'I_(pi_T' FiveCardKim_PI).+1 :=
   [:: @Ordinal 5 0 isT; @Ordinal 5 1 isT; @Ordinal 5 2 isT;
       @Ordinal 5 3 isT; @Ordinal 5 4 isT].
@@ -212,64 +212,74 @@ Definition den_boer_dealer_committed (P_idx : nat)
   exchange_dealer_with_commit FiveCardKim_PI [:: 7; 8] den_boer_assemble
     fc_content den_boer_players P_idx.
 
-(** den_boer_ap_dealer_committed — the committed den Boer dealer as an aproc.
-    @intent: the committed den Boer dealer packaged for the duality checks. *)
-Definition den_boer_ap_dealer_committed (P_idx : nat) :=
+(** den_boer_dealer_committed_ap — the committed den Boer dealer as an aproc.
+    @intent: the committed den Boer dealer packaged for the duality checks.
+    Naming: den_boer_ instance prefix + dealer/committed descriptor + terminal
+    _ap aproc marker; >5 components by design. *)
+Definition den_boer_dealer_committed_ap (P_idx : nat) :=
   mk_aproc (den_boer_dealer_committed P_idx).
 
-(** den_boer_ap_input0 — input party 0 (process id 7) committing bit a as an
+(** den_boer_input0_ap — input party 0 (process id 7) committing bit a as an
     aproc.
     @intent: the first input party's bit-commit, packaged for the duality
     checks. *)
-Definition den_boer_ap_input0 (a : bool) :=
+Definition den_boer_input0_ap (a : bool) :=
   mk_aproc (@pgg_commit FiveCardKim_M 7 (encode_bool a)).
 
-(** den_boer_ap_input1 — input party 1 (process id 8) committing bit b as an
+(** den_boer_input1_ap — input party 1 (process id 8) committing bit b as an
     aproc.
     @intent: the second input party's bit-commit, packaged for the duality
     checks. *)
-Definition den_boer_ap_input1 (b : bool) :=
+Definition den_boer_input1_ap (b : bool) :=
   mk_aproc (@pgg_commit FiveCardKim_M 8 (encode_bool b)).
 
-(** den_boer_ap_player0 — den Boer player 0 as an aproc.
+(** den_boer_player0_ap — den Boer player 0 as an aproc.
     @intent: the first dealing player, packaged for the duality checks. *)
-Definition den_boer_ap_player0 :=
+Definition den_boer_player0_ap :=
   mk_aproc (exchange_player FiveCardKim_PI (@Ordinal 5 0 isT)).
 
-(** den_boer_ap_verifier — the den Boer verifier as an aproc.
+(** den_boer_verifier_ap — the den Boer verifier as an aproc.
     @intent: the dealing verifier, packaged for the duality checks. *)
-Definition den_boer_ap_verifier :=
+Definition den_boer_verifier_ap :=
   mk_aproc (exchange_verifier FiveCardKim_PI den_boer_players).
 
 (** den_boer_commit_input0_dual — the committed dealer is dual to input party 0.
     @main architecture: the prologue's first receive is the session dual of the
     first input party's bit commit (a embedded via encode_bool), for the
-    concrete M = 2 den Boer instance. *)
+    concrete M = 2 den Boer instance.
+    Naming: den_boer_ instance prefix + commit/input0/dual descriptor;
+    >5 components by design. *)
 Lemma den_boer_commit_input0_dual (a : bool) (P_idx : nat) :
-  channels_dual (den_boer_ap_dealer_committed P_idx) (den_boer_ap_input0 a).
+  channels_dual (den_boer_dealer_committed_ap P_idx) (den_boer_input0_ap a).
 Proof. apply/eqP. rewrite /channels_dual /are_dual. by vm_compute. Qed.
 
 (** den_boer_commit_input1_dual — the committed dealer is dual to input party 1.
     @main architecture: the prologue's second receive is the session dual of
-    the second input party's bit commit (b embedded via encode_bool). *)
+    the second input party's bit commit (b embedded via encode_bool).
+    Naming: den_boer_ instance prefix + commit/input1/dual descriptor;
+    >5 components by design. *)
 Lemma den_boer_commit_input1_dual (b : bool) (P_idx : nat) :
-  channels_dual (den_boer_ap_dealer_committed P_idx) (den_boer_ap_input1 b).
+  channels_dual (den_boer_dealer_committed_ap P_idx) (den_boer_input1_ap b).
 Proof. apply/eqP. rewrite /channels_dual /are_dual. by vm_compute. Qed.
 
 (** den_boer_commit_player0_dual — the committed dealer stays dual to player 0.
     @main architecture: the input-commitment prologue does not disturb the
-    dealing-phase sends, so the dealer's session with each player is unchanged. *)
+    dealing-phase sends, so the dealer's session with each player is unchanged.
+    Naming: den_boer_ instance prefix + commit/player0/dual descriptor;
+    >5 components by design. *)
 Lemma den_boer_commit_player0_dual (P_idx : nat) :
-  channels_dual (den_boer_ap_dealer_committed P_idx) den_boer_ap_player0.
+  channels_dual (den_boer_dealer_committed_ap P_idx) den_boer_player0_ap.
 Proof. apply/eqP. rewrite /channels_dual /are_dual. by vm_compute. Qed.
 
 (** den_boer_commit_verifier_dual — the committed dealer stays dual to the
     verifier.
     @main architecture: the input-commitment prologue does not disturb the
     dealing-phase verifier wire, so the dealer's session with the verifier is
-    unchanged. *)
+    unchanged.
+    Naming: den_boer_ instance prefix + commit/verifier/dual descriptor;
+    >5 components by design. *)
 Lemma den_boer_commit_verifier_dual (P_idx : nat) :
-  channels_dual (den_boer_ap_dealer_committed P_idx) den_boer_ap_verifier.
+  channels_dual (den_boer_dealer_committed_ap P_idx) den_boer_verifier_ap.
 Proof. apply/eqP. rewrite /channels_dual /are_dual. by vm_compute. Qed.
 
 (** den_boer_committed_nil — with no committed inputs the committed dealer is

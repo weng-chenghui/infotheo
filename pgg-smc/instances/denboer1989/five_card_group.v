@@ -43,8 +43,10 @@ Import Prenex Implicits.
 
 Section five_card_generators.
 
-(** The shuffle generator: cyclic shift of all 5 positions.
-    sigma = (0 1 2 3 4), i.e., sigma(i) = (i + 1) mod 5. *)
+(** fc_sigma_fun — the shuffle generator as a plain function on 'I_5.
+    @intent: cyclic shift of all 5 positions, sigma = (0 1 2 3 4), i.e.
+    sigma(i) = (i + 1) mod 5; the underlying map packaged into the {perm 'I_5}
+    generator fc_sigma. Used-by: fc_sigmaK, fc_sigma. *)
 Definition fc_sigma_fun (x : 'I_5) : 'I_5 :=
   match val x with
   | 0 => @Ordinal 5 1 isT
@@ -54,7 +56,9 @@ Definition fc_sigma_fun (x : 'I_5) : 'I_5 :=
   | _ => @Ordinal 5 0 isT
   end.
 
-(** Inverse: sigma^{-1} = (0 4 3 2 1). *)
+(** fc_sigma_inv — the inverse shuffle map on 'I_5.
+    @intent: sigma^{-1} = (0 4 3 2 1); the cancel partner that witnesses
+    fc_sigma_fun is a permutation. Used-by: fc_sigmaK. *)
 Definition fc_sigma_inv (x : 'I_5) : 'I_5 :=
   match val x with
   | 0 => @Ordinal 5 4 isT
@@ -65,60 +69,14 @@ Definition fc_sigma_inv (x : 'I_5) : 'I_5 :=
   end.
 
 (** fc_sigmaK — fc_sigma_inv cancels fc_sigma_fun on every sheet.
-    Kind: helper.
-    Why: Injectivity witness that lets us package fc_sigma_fun as a {perm 'I_5}.
-    Used by: fc_sigma.
-*)
+    @main architecture: the injectivity witness that lets fc_sigma_fun be
+    packaged as the {perm 'I_5} generator fc_sigma. *)
 Lemma fc_sigmaK : cancel fc_sigma_fun fc_sigma_inv.
 Proof. by move=> x; apply/val_inj; case: x => [[|[|[|[|[|]]]]]]. Qed.
 
 (** fc_sigma — the five-cycle shuffle generator (0 1 2 3 4).
-    Kind: instance.
-    Why: Sole generator of the cyclic PGG underlying the five-card trick; its order-5 action determines the search space and security.
-*)
+    @intent: the sole generator of the cyclic PGG underlying the five-card
+    trick; its order-5 action determines the search space and security. *)
 Definition fc_sigma : {perm 'I_5} := perm (can_inj fc_sigmaK).
 
-(** The involution: g = (0 1)(2 3), fixing position 4.
-    Swaps each player's card pair. *)
-Definition fc_g_fun (x : 'I_5) : 'I_5 :=
-  match val x with
-  | 0 => @Ordinal 5 1 isT
-  | 1 => @Ordinal 5 0 isT
-  | 2 => @Ordinal 5 3 isT
-  | 3 => @Ordinal 5 2 isT
-  | _ => x
-  end.
-
-Definition fc_g_inv := fc_g_fun. (* g is its own inverse *)
-
-Lemma fc_gK : cancel fc_g_fun fc_g_inv.
-Proof. by move=> x; apply/val_inj; case: x => [[|[|[|[|[|]]]]]]. Qed.
-
-(** fc_g — the involution g = (0 1)(2 3) used in the five-card trick.
-    Kind: instance.
-    Why: Models the swap of each player's card pair; paired with the shuffle generator fc_sigma to analyse security of the protocol.
-*)
-Definition fc_g : {perm 'I_5} := perm (can_inj fc_gK).
-
 End five_card_generators.
-
-(******************************************************************************)
-(** * Involution property of g = (0 1)(2 3)                                   *)
-(******************************************************************************)
-
-Section five_card_pgg.
-
-(** Involution properties *)
-Lemma fc_g_involution : is_involution fc_g.
-Proof.
-rewrite /is_involution.
-apply/permP => x.
-rewrite permM perm1 permE permE.
-by apply/val_inj; case: x => [[|[|[|[|[|]]]]] ?].
-Qed.
-
-(** fc_g = (0 1)(2 3) fixes position 4, so is_fpf does NOT hold.
-    The five-card trick intentionally has a fixed point (the extra card).
-    The former fc_g_fpf statement has been removed as it is unprovable. *)
-
-End five_card_pgg.
