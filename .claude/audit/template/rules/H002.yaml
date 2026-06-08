@@ -1,0 +1,13 @@
+id: H002
+category: formatting
+title: "Role tag is malformed, empty, bad-label, or names a dangling @composes target"
+severity: error
+enabled: true
+stage_mode: stage1_only
+authority:
+  - peer-feedback-2026-04
+fast_check:
+  kind: comment_tag_validity
+scope: changed_lemmas
+fix_hint: "Give the tag a non-degenerate value; use a @main label from main_purpose_labels; ensure each @composes target names a real declaration; use @intent for definitions and @main/@composes for lemmas."
+exceptions: []

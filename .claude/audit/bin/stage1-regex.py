@@ -294,6 +294,49 @@ def apply_fast_check(rule: dict, manifest: dict, strict_comment_coverage: bool, 
                 "evidence_quote": entity.get("header", "").strip(),
                 "stage": "stage1", "reason": why,
             })
+    elif kind == "comment_tag_validity":
+        labels = _main_purpose_labels(cfg)
+        for entity in manifest.get("entities", []):
+            if not h_series_applies(entity):
+                continue
+            if not strict_comment_coverage and not _entity_touched(entity):
+                continue
+            tag = _comment_role_tag(entity)
+            if tag is None:
+                continue  # absence handled by H001
+            name = entity.get("name", "")
+            kindk = entity.get("kind", "")
+            problems = []
+            if tag.get("multi"):
+                problems.append("more than one role tag")
+            is_def = kindk in ("Definition", "Fixpoint")
+            if is_def and tag["kind"] != "intent":
+                problems.append("definitions use @intent, not @" + tag["kind"])
+            if not is_def and tag["kind"] == "intent":
+                problems.append("lemmas use @main or @composes, not @intent")
+            if tag["kind"] in ("intent", "main") and not _content_floor_ok(tag["value"], name):
+                problems.append("empty or degenerate tag value")
+            if tag["kind"] == "main":
+                for lab in (tag.get("labels") or []):
+                    if lab not in labels:
+                        problems.append(f"@main label '{lab}' not in main_purpose_labels")
+                if not tag.get("labels"):
+                    problems.append("@main missing a label")
+            if tag["kind"] == "composes":
+                targets = tag.get("targets") or []
+                if not targets:
+                    problems.append("@composes names no target")
+                for tgt in targets:
+                    if not _composes_target_exists(tgt):
+                        problems.append(f"@composes target '{tgt}' has no declaration in the repo")
+            if problems:
+                findings.append({
+                    "rule_id": rule["id"], "file": entity["file"],
+                    "line_start": entity["line_start"], "line_end": entity["line_start"],
+                    "lemma_name": name, "severity": rule.get("severity", "error"),
+                    "evidence_quote": (entity.get("preceding_comment", "") or "").strip()[:200],
+                    "stage": "stage1", "reason": "; ".join(problems),
+                })
     elif kind == "naming_conformance_or_justify":
         findings.extend(_check_naming_conformance_or_justify(rule, manifest, sev))
     return findings
