@@ -12,7 +12,7 @@
 (*   2. Security (fiber): var_dist <= 6/5 at L=1 (fiber-counted, proved)     *)
 (*   3. Security (spectral): L=285, eps = sqrt(5)*(1-gap)^285               *)
 (*      40-bit security from axiomatized spectral gap                        *)
-(*   4. Threshold: genus-0 covering from RS codes (+ PGL hypothesis)          *)
+(*   4. Threshold: genus-4 Bring's-curve cover (no-go: |S_5|=120 > Klein 60)   *)
 (*                                                                            *)
 (* Spectral gap of the Schreier walk on 'I_5:                                *)
 (*   The 5x5 Schreier matrix with 4 adjacent transpositions is               *)
@@ -45,14 +45,12 @@ From mathcomp Require Import morphism action bigop order ssrnum.
 From mathcomp Require Import boolp reals.
 From infotheo Require Import realType_ext fdist proba variation_dist.
 From mathcomp Require Import prime ssralg finalg zmodp poly cyclic.
-Require Import ssralg_ext reed_solomon.
+Require Import ssralg_ext.
 From pgg_smc Require Import perm_uniform pgg_interface pgg_weval_inj pgg_raag.
 From pgg_smc Require Import pgg_raag_path pgg_raag_s5 pgg_collusion_bound.
 From pgg_smc Require Import s5_mixing.
 From pgg_reconstruct Require Import pgg_sharing_framework covering_scheme
                                     cover_tradeoff algebraic_rigidity.
-From pgg_reconstruct Require Import cover_genus0 coord_perm_compatible.
-From pgg_reconstruct Require Import rs_code_5sheets.
 From pgg_reconstruct Require Import curve_realisation.
 
 Set Implicit Arguments.
@@ -409,11 +407,10 @@ Hypothesis HG_s5 : (1 < #|pgg_G R_s5|)%N.
 Lemma s5_HN5 : (pgg_N' R_s5).+1 = 5.
 Proof. by []. Qed.
 
-(* Bring's-curve-based covering. The previous [genus0_covering_witness ...
-   (RS5_witness_trivial ...)] construction is no longer used because, under
-   the corrected [pgl_bound], the [genus0_pgl] obligation [|S_5| <= 60]
-   is mathematically false. See [s5_brings_covering] above for the Bring's
-   curve axioms. *)
+(* Bring's-curve-based covering. S_5 is the no-go: under the corrected
+   [pgl_bound] the genus-0 obligation [|S_5| <= 60] is mathematically false
+   (120 > 60), so no genus-0 Reed-Solomon cover exists. See [s5_brings_covering]
+   above for the Bring's-curve (genus 4) axioms. *)
 Definition s5_covering : CoveringScheme R_s5 := s5_brings_covering.
 
 (** s5_genus0_automorphism — discharges [genus0_automorphism_bound] for the
