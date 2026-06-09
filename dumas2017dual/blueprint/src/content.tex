@@ -130,6 +130,8 @@ from the control record to the final bound.
   operations. The symbolic interpretation fills that interface with a carrier of
   homomorphic syntax trees, so running a party's program records the syntactic
   assembly it performs rather than a concrete ciphertext.
+  \[ d ::= \mathsf{plain}(t) \mid \mathsf{cipher}(t) \mid \mathsf{sk}(n)
+        \mid \mathsf{pk}(n) \]
 \end{definition}
 
 \begin{definition}[Corrupted party's program]
@@ -138,7 +140,8 @@ from the control record to the final bound.
   \rocqok
   \uses{def:symbolic_interface}
   The corrupted party Alice, run at the symbolic interpretation with named
-  inputs. Running it is the derivation step for the messages Alice returns.
+  inputs. Running it is the derivation step for the messages Alice returns. Its
+  leaked scalars are $u_2,r_2,u_3,r_3$ and its mask randomness $r_{a1},r_{a2}$.
 \end{definition}
 
 \begin{definition}[Sender programs and the challenge secret]
@@ -151,6 +154,8 @@ from the control record to the final bound.
   The two honest senders at the symbolic interpretation. Each one's head message
   encrypts its own secret input. Bob's secret name is the value the game later
   challenges, so the challenge provably coincides with the first received secret.
+  \[ c_2 = \Enc_{pk_B}(v_2), \quad c_3 = \Enc_{pk_C}(v_3), \quad
+        \text{challenge} = v_2 \]
 \end{definition}
 
 \begin{lemma}[The assembled ciphertexts are derived]
@@ -160,6 +165,8 @@ from the control record to the final bound.
   Running the corrupted program against placeholder receptions, the two messages
   it returns compute to the two homomorphic assemblies $a_1$ and $a_2$. These
   fall out of the program and are not written by hand.
+  \[ a_1 = (u_2 \hmul c_2) \hadd \Enc_{pk_B}(r_2), \qquad
+        a_2 = (u_3 \hmul c_3) \hadd \Enc_{pk_C}(r_3) \]
 \end{lemma}
 \begin{proof}
   \uses{def:palice_sym}
@@ -177,6 +184,7 @@ from the control record to the final bound.
   By computation it is the two structured secret-bearing ciphertexts, Bob's
   encryption of $v_2$ and Charlie's encryption of $v_3$. Supplying exactly these
   fixes where the walk over Alice's program stops.
+  \[ \rho = [\, c_2, \, c_3 \,] \]
 \end{definition}
 
 \chapter{Deriving the corrupted view}
@@ -189,6 +197,8 @@ from the control record to the final bound.
   scalar, sample randomness, write the challenge cell, receive an encrypted
   secret from a party, assemble a homomorphic combination, and leak a list of
   named ciphertexts. The reception is the only hoppable action.
+  \[ o ::= \mathsf{smp}_v(c,x) \mid \mathsf{smp}_r(c,x) \mid \mathsf{put}(x)
+        \mid \mathsf{recv}(p,s,x) \mid \mathsf{comb}(x,e) \mid \mathsf{leak}(\bar x) \]
 \end{definition}
 
 \begin{definition}[Walking the program into observations]
@@ -200,7 +210,8 @@ from the control record to the final bound.
   reception read the sending party and the encrypted secret off the ciphertext
   shape and emit a reception bound to a fresh result name. At each send emit an
   assembly of its message. The walk halts at the decrypt-reception and at
-  termination.
+  termination. On receiving $\Enc_p(s)$ it emits $\mathsf{recv}(p,s,n)$ and
+  recurses at $n{+}1$.
 \end{definition}
 
 \begin{definition}[Synthesising the sample prefix]
@@ -212,6 +223,8 @@ from the control record to the final bound.
   first-appearance order, excluding the walk's own bound result names, and emit
   one sample action per name, tagged as a plaintext scalar or an encryption
   randomness by where the name occurs.
+  \[ \samples(\tau) = [\, \mathsf{smp}_\bullet(c,x) \mid x \in \mathrm{fv}(\tau) \,]
+        \ \text{in first-appearance order} \]
 \end{definition}
 
 \begin{definition}[The whole corrupted-view trace]
@@ -222,6 +235,8 @@ from the control record to the final bound.
   Assemble the full trace from the loose symbolic inputs: the synthesised sample
   prefix, the challenge-cell write, the walked body, and the final leak of the
   viewed ciphertexts in the chosen order.
+  \[ \mathrm{obs}(p,\rho,ch,\ell) = \samples(w) \cat [\mathsf{put}(ch)] \cat w
+        \cat [\mathsf{leak}(\ell)], \quad w = \walk(p,\rho,100) \]
 \end{definition}
 
 \begin{lemma}[The derived DSDP trace]
@@ -231,6 +246,9 @@ from the control record to the final bound.
   For the DSDP inputs the trace computes to a fourteen-action sequence: six
   scalar samples in first-appearance order, two randomness samples, the challenge
   write, two receptions, two assemblies, and the leak.
+  \[ |\tau_{\mathrm{DSDP}}| = 14:\ 8\,\mathsf{smp},\ \mathsf{put}(v_2),\
+        \mathsf{recv}(B,v_2),\ \mathsf{recv}(C,v_3),\ \mathsf{comb}(a_1),\
+        \mathsf{comb}(a_2),\ \mathsf{leak}(a_1,a_2,c_2,c_3) \]
 \end{lemma}
 \begin{proof}
   \uses{def:obs_of_procs,def:palice_sym,def:received_hops}
@@ -246,6 +264,8 @@ from the control record to the final bound.
   The DSDP instance of the whole-trace observer, with the challenge fixed to
   Bob's secret and the leak ordering assemblies before receptions. Nothing in it
   is hand-written.
+  \[ \tau_{\mathrm{DSDP}} = \mathrm{obs}(P_A, [c_2,c_3], v_2,\
+        \mathrm{comb}\cat\mathrm{recv}) \]
 \end{definition}
 
 \chapter{Lowering the view to reified game code}
@@ -260,6 +280,10 @@ from the control record to the final bound.
   Straight-line game code covers sampling, the challenge write, let-binding, the
   encryption hop, and the return. The encryption hop is the only hoppable
   statement.
+  \[ t ::= x \mid k \mid \Enc(p,t,r) \mid \Dec(p,t) \mid t\hadd t \mid t\hmul t
+        \mid t{+}t \mid t{-}t \mid t{\cdot}t \]
+  \[ g ::= \mathsf{smp}(c,g) \mid \mathsf{put}(t,g) \mid \mathsf{let}(t,g)
+        \mid \mathsf{hop}(p,t,g) \mid \mathsf{ret}(\bar t) \]
 \end{definition}
 
 \begin{definition}[Resolving names to positions]
@@ -270,6 +294,9 @@ from the control record to the final bound.
   Rewrite a named term into the positional form the denotation expects, replacing
   each name by its binding position. Only order survives, so the particular names
   disappear from the lowered code.
+  \[ \mathsf{res}_\Gamma(x) = \mathrm{idx}(x,\Gamma_v), \qquad
+        \mathsf{res}_\Gamma(\Enc(p,t,r)) =
+        \Enc(p, \mathsf{res}_\Gamma(t), \mathrm{idx}(r,\Gamma_r)) \]
 \end{definition}
 
 \begin{definition}[Folding observations into game code]
@@ -280,7 +307,8 @@ from the control record to the final bound.
   Fold the observation trace into game code, threading the value and randomness
   name environments so each resolved term lands at the right position. A
   reception becomes an encryption hop, an assembly becomes a let-binding, and the
-  leak becomes the return.
+  leak becomes the return: $\mathsf{recv}\mapsto\mathsf{hop}$,
+  $\mathsf{comb}\mapsto\mathsf{let}$, $\mathsf{leak}\mapsto\mathsf{ret}$.
 \end{definition}
 
 \begin{definition}[The lowering pass]
@@ -289,6 +317,7 @@ from the control record to the final bound.
   \rocqok
   \uses{def:lower_obs}
   Lower a corrupted-view trace to game code, starting from empty environments.
+  \[ \gtrace(\tau) = \mathrm{lower}(\varepsilon, \varepsilon, \tau) \]
 \end{definition}
 
 \begin{definition}[Hop counts]
@@ -301,6 +330,8 @@ from the control record to the final bound.
   Two counts: the number of hoppable receptions before the leak that ends a
   trace, and the number of encryption hops in a piece of game code together with
   the list of their site indices.
+  \[ \nhops(\tau) = \#\{\mathsf{recv}\text{ before }\mathsf{leak}\}, \qquad
+        \sites(g) = [\, 0, \nhops(g) \,) \]
 \end{definition}
 
 \begin{lemma}[Hop-count adequacy]
@@ -310,6 +341,7 @@ from the control record to the final bound.
   Lowering neither creates nor drops hops, so the game-side hop count of a
   lowered trace equals its protocol-side count. This ties the ladder length to
   the protocol structure.
+  \[ \nhops(\gtrace(\tau)) = \nhops(\tau) \]
 \end{lemma}
 \begin{proof}
   \uses{def:game_of_trace,def:count_hops}
@@ -330,6 +362,8 @@ from the control record to the final bound.
   challenge cell, evaluate each homomorphic term against the concrete scheme, and
   draw each encryption hop's randomness inline so it couples one-to-one with the
   IND-CPA oracle's internal sample.
+  \[ \sem{\cdot} : \text{game code} \longrightarrow \text{SSProve package},
+        \qquad \sem{t}_e\ \text{evaluates } t \text{ in environment } e \]
 \end{definition}
 
 \begin{definition}[Hybrid endpoints]
@@ -342,6 +376,8 @@ from the control record to the final bound.
   Replacing the secret of the first $i$ encryption hops by the canonical zero
   gives a family of games. The real game keeps every secret, and the all-zero
   game replaces all of them. Adjacent members differ at one hop.
+  \[ g^{(0)} = \text{all-real}, \qquad g^{(\nhops(g))} = \text{all-zero}, \qquad
+        g^{(i)}\ \text{zeroes the first } i \text{ hops} \]
 \end{definition}
 
 \chapter{The IND-CPA hybrid bound}
@@ -354,6 +390,7 @@ from the control record to the final bound.
   The scheme's assumed IND-CPA real-or-zero advantage. Any adversary's advantage
   between the real-encryption oracle and the zero-encryption oracle is at most
   $\epscpa$. This is the one cryptographic assumption the chain rests on.
+  \[ \AdvE(\Oreal, \Ozero, A) \le \epscpa \]
 \end{definition}
 
 \begin{definition}[One-hop oracle routing]
@@ -363,7 +400,8 @@ from the control record to the final bound.
   \uses{def:denote_game,def:indcpa_assumption}
   Route exactly one encryption hop through the IND-CPA encryption oracle, leaving
   every other statement identical to the direct denotation. Composing it with the
-  real or zero oracle reproduces one rung of the ladder.
+  real or zero oracle reproduces one rung of the ladder. Write $\mathrm{shim}_i(g)$
+  for the shim that routes hop $i$ through the oracle and inlines the rest.
 \end{definition}
 
 \begin{lemma}[Per-hop perfect equivalence]
@@ -373,6 +411,8 @@ from the control record to the final bound.
   \rocqok
   Each ladder rung equals the one-hop shim composed with the matching real or
   zero oracle, the encode-and-decode round trip at the hop collapsing.
+  \[ \sem{g^{(i)}} \approx \mathrm{shim}_i(g) \circ \mathcal{O}_b, \qquad
+        b \in \{\real, \zero\} \]
 \end{lemma}
 \begin{proof}
   \uses{def:denote_game_shim}
@@ -387,6 +427,7 @@ from the control record to the final bound.
   \rocqok
   Two adjacent rungs of the ladder differ at a single hop, so their advantage is
   at most the single-hop IND-CPA bound $\epscpa$.
+  \[ \AdvE(\sem{g^{(i)}}, \sem{g^{(i+1)}}, A) \le \epscpa \]
 \end{lemma}
 \begin{proof}
   \uses{lem:hop_equiv,def:indcpa_assumption,def:hybrid_endpoints}
@@ -400,6 +441,7 @@ from the control record to the final bound.
   \rocqok
   \uses{def:denote_game,def:hybrid_endpoints}
   The intermediate rungs between the real game and the all-zero game.
+  \[ \mathrm{ladder}(g) = [\, \sem{g^{(1)}}, \dots, \sem{g^{(\nhops(g)-1)}} \,] \]
 \end{definition}
 
 \begin{lemma}[Telescoping bound]
@@ -407,6 +449,7 @@ from the control record to the final bound.
   \rocq{infotheo.dumas2017dual.dsdp.dsdp_game_code.advantage_sum_ladder_le}
   \rocqok
   A contiguous block of rungs costs at most one IND-CPA query per rung.
+  \[ \text{a block of } n{+}1 \text{ rungs} \ \le\ (n{+}1)\,\epscpa \]
 \end{lemma}
 \begin{proof}
   \uses{lem:advantage_hop,def:hybrid_ladder}
@@ -421,6 +464,7 @@ from the control record to the final bound.
   For any game code, every valid adversary's advantage between the real and
   all-zero denoted games is at most the number of encryption hops times
   $\epscpa$.
+  \[ \AdvE(\sem{g^{(0)}},\sem{g^{(\nhops(g))}},A) \ \le\ |\sites(g)|\,\epscpa \]
 \end{theorem}
 \begin{proof}
   \uses{lem:advantage_sum_ladder_le,def:hybrid_endpoints,def:denote_game}
@@ -442,6 +486,7 @@ from the control record to the final bound.
   sample-domain sizes, together with the concrete scheme and its marshalling into
   SSProve choice types. One value of this record determines the real game, the
   all-zero game, and the hop count.
+  \[ P = (\, p, \rho, ch, \ell, c_m, c_r \,;\ E,\ \text{marshalling} \,) \]
 \end{definition}
 
 \begin{definition}[Corrupted view of a problem]
@@ -450,6 +495,7 @@ from the control record to the final bound.
   \rocqok
   \uses{def:obs_of_procs,def:secrecy_problem}
   Apply the whole-trace observer to the record's symbolic fields.
+  \[ \view(P) = \mathrm{obs}(P.p,\, P.\rho,\, P.ch,\, P.\ell) \]
 \end{definition}
 
 \begin{definition}[Real and all-zero games of a problem]
@@ -461,6 +507,8 @@ from the control record to the final bound.
   \uses{def:denote_game,def:corrupted_view,def:hybrid_endpoints,def:game_of_trace}
   Lower the corrupted view to game code, then denote its real and all-zero
   endpoints into the record's concrete scheme.
+  \[ \real(P) = \sem{g^{(0)}}_E, \qquad \zero(P) = \sem{g^{(\nhops(g))}}_E,
+        \qquad g = \gtrace(\view(P)) \]
 \end{definition}
 
 \begin{definition}[Valid adversary against a problem]
@@ -470,7 +518,8 @@ from the control record to the final bound.
   \uses{def:secrecy_problem}
   A distinguisher bundled with its validity and its disjointness from the game
   state and the two oracles. Quantifying over this record quantifies over all
-  valid adversaries.
+  valid adversaries. Such an $A$ is typed by $P$'s interface and disjoint from its
+  state and oracles.
 \end{definition}
 
 \begin{theorem}[Generic corrupted-view secrecy]
@@ -480,6 +529,7 @@ from the control record to the final bound.
   For every secrecy-problem record and every valid adversary, the advantage
   between the real game and the all-zero game is at most the corrupted view's hop
   count times $\epscpa$.
+  \[ \AdvE(\real(P), \zero(P), A) \ \le\ \nhops(\view(P))\,\epscpa \]
 \end{theorem}
 \begin{proof}
   \uses{thm:advantage_le,lem:count_hops_adequacy,def:corrupted_view,def:games,def:adversary}
@@ -498,6 +548,7 @@ from the control record to the final bound.
   Lowering the DSDP corrupted-Alice trace reproduces the back-end fixture game
   code exactly, binding positions and all. The fixture is therefore derived
   rather than hand-written.
+  \[ \gtrace(\tau_{\mathrm{DSDP}}) = g_{\mathrm{DSDP}} \]
 \end{lemma}
 \begin{proof}
   \uses{def:game_of_trace,def:dsdp_alice_obs}
@@ -513,6 +564,8 @@ from the control record to the final bound.
   The record at the DSDP corrupted-Alice model: the corrupted program, the
   derived hop stream, and the challenge fixed to Bob's secret, together with a
   supplied scheme and marshalling. This is the whole input a researcher provides.
+  \[ P_{\mathrm{DSDP}} = (\, P_A, [c_2,c_3], v_2,\ \mathrm{comb}\cat\mathrm{recv},
+        c_m, c_r \,;\ E, \dots \,) \]
 \end{definition}
 
 \begin{lemma}[Two hops]
@@ -521,6 +574,7 @@ from the control record to the final bound.
   \rocqok
   The DSDP corrupted view has exactly two encryption hops, one for Bob's secret
   and one for Charlie's.
+  \[ \nhops(\view(P_{\mathrm{DSDP}})) = 2 \]
 \end{lemma}
 \begin{proof}
   \uses{def:dsdp_problem,def:count_hops,def:corrupted_view}
@@ -534,6 +588,8 @@ from the control record to the final bound.
   \rocqok
   Every valid adversary's advantage between the real and all-zero DSDP games is
   at most $2\,\epscpa$.
+  \[ \AdvE(\real(P_{\mathrm{DSDP}}), \zero(P_{\mathrm{DSDP}}), A) \ \le\
+        2\,\epscpa \]
 \end{theorem}
 \begin{proof}
   \uses{thm:generic_secrecy,def:dsdp_problem,lem:dsdp_problem_hops}
@@ -569,6 +625,8 @@ branch, so they carry no formal link.
   challenged secret, so any guess succeeds with probability at most $1/m$ for a
   plaintext space of size $m$. This leg lives in a separate probability world and
   is argued by an entropy computation.
+  \[ \Pr[\, A \text{ guesses } v_2 \,] \ \le\ 1/m \quad
+        \text{at the all-zero endpoint} \]
 \end{theorem}
 
 \begin{theorem}[Full secrecy by composition]
@@ -577,4 +635,5 @@ branch, so they carry no formal link.
   The full DSDP corrupted-Alice secrecy bound combines the information-theoretic
   $1/m$ leg at the all-zero endpoint with the computational $2\,\epscpa$ distance
   to that endpoint, giving a total bound of $1/m + 2\,\epscpa$.
+  \[ \text{total advantage} \ \le\ 1/m + 2\,\epscpa \]
 \end{theorem}
