@@ -54,33 +54,44 @@ adversary and its well-formedness.
 
 ```
 pbob_sym, pcharlie_sym ── first_send ─► dsdp_received_hop_ciphertexts : seq symbolic_data
-                                         [ Enc(Bob,v2,rb1) ; Enc(Charlie,v3,rc1) ]
-                                                     │
-palice_sym (corrupted party) ────────────────────────┤
+                                         [ Enc(Bob,v2,rb1) ; Enc(Charlie,v3,rc1) ]   (= [ c2 ; c3 ])
+                                                     │  populates the record field
                                                      ▼
-                    walk_obs : dual-purpose drive of the corrupted proc
+ ┌──────────  Control record  dsdp_problem : dsdp_indcpa_secrecy_problem  (the facade)  ──────────┐
+ │  declared:  sp_corrupted_party_program = palice_sym                                            │
+ │             sp_received_hop_ciphertexts = [ c2 ; c3 ]   ·   sp_challenge_secret = v2           │
+ │             sp_leak_order = combines ++ recvs                                                  │
+ │             sp_card_plaintext = c_m   ·   sp_card_randomness = c_r                             │
+ │  carried :  sp_enc_scheme = E : AHEncType (supplied directly, NOT via Standard_DSDP_Interface) │
+ │             +  marshalling into the game's choice types                                        │
+ └────────────────────────────────────────┬───────────────────────────────────────────────────────┘
+                                           │  corrupted_view P := obs_of_procs P   (a projection)
+                                           ▼
+                    walk_obs : dual-purpose drive of the corrupted proc palice_sym
                     ├ each reception: read (party, secret) from the structured
                     │   incoming send → AO_recv_hop; thread an opaque fresh
                     │   HE_var name into the continuation (so combines name it)
                     ├ each send: AO_combine (fresh name) (payload term)
                     └ halt on the first unanswered reception (the decrypt-receive)
                                                      ▼
-                    walk output = [ hop c2 ; hop c3 ; combine a1 ; combine a2 ]
+                    walk output = [ hop c2 ; hop c3 ; combine a1 ; combine a2 ]   (a1, a2 DERIVED)
                                                      │
             collect_samples (first-appearance; split value-vars from rand-slots
-                              by syntactic position; dedup)
+                              by syntactic position; dedup; split by c_m / c_r)
                 values [v2;v3;u2;r2;u3;r3]   randomness [ra1;ra2]
                                                      ▼
-   obs_of_procs P = samples ++ [AO_put challenge] ++ walk output ++ [AO_leak (view)]
+   corrupted_view P = samples ++ [AO_put challenge] ++ walk output ++ [AO_leak (view)]
+   ( dsdp_alice_obs := corrupted_view (dsdp_problem …) )
                                                      │
                     game_of_trace  (REUSE, unchanged)  ─►  game_code
                                                      ▼
-   dsdp_faithful : game_of_trace (obs_of_procs (dsdp_problem …)) = gc_dsdp …   [by []]
+   dsdp_faithful : game_of_trace (corrupted_view (dsdp_problem …)) = gc_dsdp …   [by []]
                                                      │
-        denote_game + advantage_le + advantage_gc_dsdp  (REUSE, unchanged)
+        denote_game + advantage_le  (uses E)  (REUSE, unchanged)  ─►  SSProve package
                                                      ▼
-   dsdp_indcpa_secrecy : AdvantageE (real_game P) (zero_game P) (adv_package Adv)
-                            <= (count_obs_hops (corrupted_view P))%:R * epsilon_cpa
+   generic  dsdp_indcpa_secrecy : AdvantageE (real_game P) (zero_game P) (adv_package Adv)
+                                     <= (count_obs_hops (corrupted_view P))%:R * epsilon_cpa
+   DSDP     dsdp_problem_secure  : AdvantageE (real_game …) (zero_game …) … <= 2 * epsilon_cpa
 ```
 
 The corrupted party's program, the two interface instances (`Standard_DSDP_Interface`,

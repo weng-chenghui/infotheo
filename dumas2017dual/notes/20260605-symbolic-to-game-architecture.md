@@ -52,30 +52,46 @@ Two halves meet at a reified game AST (`game_code`):
   re-implemented).
 
 ```
-        DSDP procs (palice / pbob / pcharlie) : parameterized over DSDP_Interface
-              /                                                          \
-  Standard_DSDP_Interface AHE  (concrete)              Symbolic_DSDP_Interface  (he_term / nat)
-        |                                                               |
-  correctness / termination / duality              run palice symbolically (palice_symbolic):
-  (existing proofs, preserved)                       erase + sent_payloads
-                                                       -> dsdp_observed_combines
-                                                       (a1, a2 DERIVED, proved = Send payloads)
-                                                                        |
-                                       dsdp_alice_obs  =  derived combine terms
-                                       (dsdp_game_symbolic.v)   +  explicit security-model config
-                                                                    (samples / put / hops / leak)
-                                                                        |
-                                           game_of_trace   -->   game_code            (REUSE)
-                                                                        |
-                                 (REUSE back end)  denote_game   -->   SSProve package
-                                                   advantage_le
-                                                                        |
-                                       AdvantageE (real) (all-zero) A   <=   2 * epsilon_cpa
+            DSDP procs (palice / pbob / pcharlie) : parameterized over DSDP_Interface
+                  /                                                      \
+  Standard_DSDP_Interface AHE  (concrete)          Symbolic_DSDP_Interface  (he_term / nat)
+            |                                                            |
+  correctness / termination / duality            palice_sym runs symbolically
+  (existing proofs, preserved)                   (its Send payloads are readable terms)
+            |                                                            |
+            v                                          derived combines a1, a2  +  declared
+  IT-security line  =>  Pr_zero <= 1/m                 fields (party program, received hops,
+  ( separate chain; NOT consumed                        challenge v2, leak order, c_m, c_r)
+    by the record or the game )                                        |
+                                                                       v
+   concrete scheme  E : AHEncType   ─────────────►   Control record  dsdp_indcpa_secrecy_problem
+   + marshalling into choice types                   ( symbolic fields  +  sp_enc_scheme E )
+   ( sp_enc_scheme, supplied directly,                              |
+     NOT via Standard_DSDP_Interface )                view(P) = obs_of_procs P    (projection)
+                                                                    v
+                                      dsdp_alice_obs := corrupted_view (dsdp_problem ...)
+                                                                    |
+                                         game_of_trace   -->   game_code             (REUSE)
+                                                                    |
+                           (REUSE back end)  denote_game  (uses E)   -->   SSProve package
+                                                                    |
+   generic  dsdp_indcpa_secrecy :  AdvantageE (real P) (zero P) A  <=  count_obs_hops(view P) * epsilon_cpa
+   DSDP     dsdp_problem_secure :  AdvantageE (real)   (zero)   A  <=                       2 * epsilon_cpa
 ```
 
 The horizontal split at the top is the load-bearing idea: **one set of protocol procs, two
-instances of one interface.** The left instance recovers the existing concrete proofs
-unchanged; the right instance is what makes the game derivable.
+instances of one interface.** The left instance recovers the existing concrete proofs unchanged
+and underlies the information-theoretic line that yields the `1/m` residual; the right instance
+is what makes the game derivable. The two branches do **not** both feed the game. The
+computational chain is driven by the symbolic branch alone. The **control record**
+`dsdp_indcpa_secrecy_problem` gathers the corrupted party's symbolic program and the declared
+fields (received hops, challenge, leak order, the two cardinalities), and it takes the concrete
+scheme `E` directly as an `AHEncType` field `sp_enc_scheme` together with its choice-type
+marshalling. It never reads `Standard_DSDP_Interface` (confirmed: that record appears only in the
+correctness / entropy-trace / pismc files, never in `dsdp_game_symbolic.v`, `dsdp_indcpa_security.v`,
+`dsdp_game_code.v`, or `dsdp_symbolic.v`). The corrupted view, the real and all-zero games, and the
+hop count are all projections of that one record, so the generic theorem `dsdp_indcpa_secrecy`
+delivers the bound and the DSDP instance reads off `2 * epsilon_cpa`.
 
 ---
 
