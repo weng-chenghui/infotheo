@@ -10,12 +10,24 @@
 \chapter{Introduction}
 
 DSDP is a three-party scalar-product protocol built on additively homomorphic
-encryption. This blueprint presents its corrupted-Alice ciphertext privacy:
-every choice the security argument depends on is gathered in one record, and
-from that record a generic theorem reads off the advantage bound. The whole
-chain is derived from the one protocol program that already defines the
-protocol's behaviour, rather than written by hand. It is the worked instance of
-the derivation framework developed in the thesis part on the derived game.
+encryption. This blueprint presents its corrupted-Alice secrecy. Alice's view
+leaks through two channels, and the blueprint bounds each and composes them. The
+ciphertexts she receives leak computationally, bounded by $2\,\epscpa$ from the
+scheme's IND-CPA assumption. The scalar-product output $S$ she decrypts leaks
+information-theoretically, bounded by $1/m$ from a fiber-counting argument that
+no assumption can improve. Both bounds read off one corrupted view, and that
+view is derived from the one protocol program that already defines the
+protocol's behaviour, rather than written by hand. The full bound is
+$1/m + 2\,\epscpa$.
+
+The two channels split the blueprint into two parts. Part~I derives the game
+from the program and bounds the ciphertext channel by $2\,\epscpa$, every choice
+the argument depends on gathered in one record from which a generic theorem
+reads off the advantage. It is the worked instance of the derivation framework
+developed in the thesis part on the derived game. Part~II continues the same
+derivation to the decryption Alice performs, exposing $S$, and bounds the output
+channel by $1/m$ by citing the information-theoretic fiber theorems through one
+probability identity, then composes the two bounds.
 
 Game hopping reduces a protocol's ciphertext privacy to a chain of IND-CPA swaps
 costing $k\,\epscpa$ for $k$ hops. The method takes the chain of games as given,
@@ -40,7 +52,10 @@ straight-line list of samples, cell writes, encryptions, and homomorphic
 assemblies. The back end denotes that syntax into an SSProve game and bounds the
 adversary's advantage with one lemma that holds for every well-formed game in the
 syntax. That bound is the number of encryption hops the game contains times the
-single-hop IND-CPA advantage $\epscpa$.
+single-hop IND-CPA advantage $\epscpa$. The walk that produces the view runs to
+the decryption Alice performs, so the same denoted game also exposes the
+scalar-product output $S$; reading the second channel off that output is the
+subject of Part~II.
 
 \begin{figure}[t]
 \centering
@@ -60,9 +75,12 @@ single-hop IND-CPA advantage $\epscpa$.
 \node[box] (trace)  at (4.4,2.1)  {Observation trace};
 \node[box] (reif)   at (4.4,0.6)  {Reified game};
 \node[box] (denote) at (4.4,-1.0) {Denotation into \ssprove{}};
-\node[box] (game)   at (4.4,-2.45) {\ssprove{} game};
-\node[box, text width=3.4cm] (ladder) at (4.4,-3.9) {Hybrid ladder, $k$ IND-CPA hops};
-\node[box, text width=4.4cm] (bound) at (4.4,-5.4) {Generic bound $k\,\epscpa$, DSDP $2\,\epscpa$};
+\node[box] (game)   at (4.4,-2.45) {\ssprove{} game (ciphertexts and output $S$)};
+\node[box, text width=3.2cm] (ladder) at (1.9,-4.0) {Hybrid ladder, $k$ IND-CPA hops};
+\node[box, text width=3.2cm] (bound)  at (1.9,-5.6) {Computational bound $2\,\epscpa$};
+\node[box, text width=3.2cm] (leak)   at (6.9,-4.0) {Output leak $S$ (derived decrypt-receive)};
+\node[box, text width=3.2cm] (fiber)  at (6.9,-5.6) {Guessing experiment, fiber bound $1/m$};
+\node[box, text width=4.6cm] (compose) at (4.4,-7.2) {Full corrupted-Alice secrecy $1/m + 2\,\epscpa$};
 
 \draw (procs) -- (conc);
 \draw (procs) -- (symb);
@@ -76,20 +94,27 @@ single-hop IND-CPA advantage $\epscpa$.
 \draw (denote) -- (game);
 \draw (game)   -- (ladder);
 \draw (ladder) -- (bound);
+\draw (game)   -- (leak);
+\draw (leak)   -- (fiber);
+\draw (bound)  -- (compose);
+\draw (fiber)  -- (compose);
 
 \draw[densely dashed, black!40, -] (-1.1,0.6) -- (2.7,0.6);
 \draw[densely dashed, black!40, -] (6.1,0.6) -- (9.2,0.6);
 \node[font=\itshape\small, anchor=west] at (-1.1,1.15) {front end: produce the game};
 \node[font=\itshape\small, anchor=west] at (-1.1,0.05) {back end: consume the game};
 \end{tikzpicture}
-\caption{The derivation in two halves, meeting at the reified game. The
-protocol's procedures, parameterized over one interface, admit a concrete
-instance (left, recovering the existing proofs) and a symbolic instance (right).
-The symbolic run yields the derived trace, and one control record supplies the
-declared fields. Together they form the observation trace, which the front end
-lowers to the reified game. The back end denotes that game into \ssprove{} and
-bounds the advantage through a hybrid ladder of $k$ IND-CPA hops, generically
-$k\,\epscpa$ and $2\,\epscpa$ for DSDP.}
+\caption{The derivation in two halves, meeting at the reified game, whose back
+end forks into the two leakage channels. The protocol's procedures, parameterized
+over one interface, admit a concrete instance (left, recovering the existing
+proofs) and a symbolic instance (right). The symbolic run yields the derived
+trace, and one control record supplies the declared fields. Together they form
+the observation trace, which the front end lowers to the reified game. The back
+end denotes that game into \ssprove{}, exposing both the received ciphertexts and
+the decrypted output $S$. The ciphertext channel (left, Part~I) is bounded
+through a hybrid ladder of $k$ IND-CPA hops, generically $k\,\epscpa$ and
+$2\,\epscpa$ for DSDP. The output channel (right, Part~II) is bounded by the
+fiber argument $1/m$. The two compose to $1/m + 2\,\epscpa$.}
 \label{fig:bp:architecture}
 \end{figure}
 
@@ -112,12 +137,15 @@ challenges, the order the viewed ciphertexts leak, and the two cardinalities. Th
 generality lives in the back end, whose bound applies to whatever game the record
 produces.
 
-Each node below links to its Rocq declaration through its Rocq button. A node's
-colour records its formalization status: green for the definitions and for the
-proved lemmas and theorems, and blue dashed for the two deferred legs, the
-information-theoretic bound at the all-zero endpoint and the composition that
-joins it to the computational bound. The dependency graph draws the whole chain
-from the control record to the final bound.
+Each entry below links to its Rocq declaration through its Rocq button. An
+entry's colour records its formalization status: green for proved declarations,
+and blue dashed for declarations under construction. Part~I is green throughout.
+Part~II is the construction that exposes the output $S$, transports the fiber
+bound to the denoted game, and composes the two channels; its entries are blue
+until built. The dependency graph draws the whole chain from the control record
+to the final bound.
+
+\part{Ciphertext privacy by derived game-hopping}
 
 \chapter{The symbolic protocol model}
 
@@ -196,7 +224,9 @@ from the control record to the final bound.
   A first-order vocabulary of the actions in a corrupted party's view: sample a
   scalar, sample randomness, write the challenge cell, receive an encrypted
   secret from a party, assemble a homomorphic combination, and leak a list of
-  named ciphertexts. The reception is the only hoppable action.
+  named ciphertexts. The reception is the only hoppable action. Part~II adds one
+  further action, the output reception
+  (Definition~\ref{def:alice_obs_output}).
   \[ o ::= \mathsf{smp}_v(c,x) \mid \mathsf{smp}_r(c,x) \mid \mathsf{put}(x)
         \mid \mathsf{recv}(p,s,x) \mid \mathsf{comb}(x,e) \mid \mathsf{leak}(\bar x) \]
 \end{definition}
@@ -209,9 +239,11 @@ from the control record to the final bound.
   Walk the corrupted program against the received hop ciphertexts. At each
   reception read the sending party and the encrypted secret off the ciphertext
   shape and emit a reception bound to a fresh result name. At each send emit an
-  assembly of its message. The walk halts at the decrypt-reception and at
-  termination. On receiving $\Enc_p(s)$ it emits $\mathsf{recv}(p,s,n)$ and
-  recurses at $n{+}1$.
+  assembly of its message. For the ciphertext channel the walk stops at the
+  decrypt-reception and at termination; Part~II
+  (Chapter~\ref{ch:deriving_output}) continues it across that decrypt-reception
+  to expose the output. On receiving $\Enc_p(s)$ it emits $\mathsf{recv}(p,s,n)$
+  and recurses at $n{+}1$.
 \end{definition}
 
 \begin{definition}[Synthesising the sample prefix]
@@ -612,28 +644,9 @@ from the control record to the final bound.
   generic theorem.
 \end{proof}
 
-\chapter{The full bound by composition (deferred)}
-
-The two nodes below state the remaining legs that close the full secrecy
-argument. They are stated targets and are not yet formalized in this derivation
-branch, so they carry no formal link.
-
-\begin{theorem}[Information-theoretic leg]
-  \label{thm:it_leg}
-  \uses{def:dsdp_problem}
-  At the all-zero endpoint the corrupted party's view is independent of the
-  challenged secret, so any guess succeeds with probability at most $1/m$ for a
-  plaintext space of size $m$. This leg lives in a separate probability world and
-  is argued by an entropy computation.
-  \[ \Pr[\, A \text{ guesses } v_2 \,] \ \le\ 1/m \quad
-        \text{at the all-zero endpoint} \]
-\end{theorem}
-
-\begin{theorem}[Full secrecy by composition]
-  \label{thm:composition}
-  \uses{thm:dsdp_secure,thm:it_leg}
-  The full DSDP corrupted-Alice secrecy bound combines the information-theoretic
-  $1/m$ leg at the all-zero endpoint with the computational $2\,\epscpa$ distance
-  to that endpoint, giving a total bound of $1/m + 2\,\epscpa$.
-  \[ \text{total advantage} \ \le\ 1/m + 2\,\epscpa \]
-\end{theorem}
+% Part II: continue the SAME derivation across Alice's decrypt-receive to expose
+% the output S, build the absolute-Pr guessing layer on the DERIVED endpoint
+% game, transport the Infotheo fiber 1/m through one probability identity, and
+% compose with the Part I 2*epsilon_cpa.  See it_bound_bridge.tex.
+\part{Output secrecy and the full bound}
+\input{it_bound_bridge}
