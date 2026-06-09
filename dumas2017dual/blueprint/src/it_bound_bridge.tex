@@ -1,0 +1,303 @@
+% =====================================================================
+% Part II: Output secrecy and the full bound.
+%
+% Continues the Part I derivation across Alice's decrypt-receive to expose the
+% scalar-product output S, builds the absolute-Pr guessing layer on the DERIVED
+% endpoint game, transports the Infotheo fiber 1/m to that game through one
+% probability identity, and composes with the Part I 2*epsilon_cpa.
+%
+% Colour / status convention (same as content.tex):
+%   \rocqok + \rocq{...}  green : ALREADY EXISTS, cited as a black box.
+%   no \rocqok, no \rocq  blue  : TO CONSTRUCT (this plan).
+%
+% Statement bodies are terse mathematical statements (no proof, no status, no
+% motivation).  Proof strategy and the exact Coq names to construct live in
+% "% proof:" / "% to create:" comments for the implementer.  Identifiers are
+% written in clean math (no \texttt).
+%
+% Existing module prefixes cited as green:
+%   infotheo.dumas2017dual.dsdp.dsdp_game_symbolic   (derived view, Part I)
+%   infotheo.dumas2017dual.dsdp.dsdp_indcpa_security (derived 2*epsilon_cpa)
+%   infotheo.dumas2017dual.dsdp.dsdp_entropy         (fiber facts)
+%   infotheo.dumas2017dual.entropy_fiber.entropy_fiber_zpq
+% New identifiers land in the derived chain (dsdp_game_symbolic / dsdp_game_code
+% / dsdp_indcpa_security) and a new module dsdp_security_indcpa_fiber.
+%
+% New notation local to Part II.
+\newcommand{\fib}{\mathrm{fiber}}
+\newcommand{\guess}{\mathrm{guess}}
+\newcommand{\cond}{\mathrm{cond}}
+\newcommand{\Prexp}{\Pr\nolimits_{\mathrm{exp}}}
+% =====================================================================
+
+\chapter{Extending the derivation to Alice's decryption}
+\label{ch:deriving_output}
+
+In the protocol Alice receives the masked aggregate, decrypts it, and removes
+her masks to read the scalar-product output $S=U_1V_1+U_2V_2+U_3V_3$. The Part~I
+walk stops one reception short of this decrypt
+(Definition~\ref{def:walk_obs}), so the derived view exposes only the
+ciphertexts. This chapter continues the same walk across that decrypt-reception,
+lowers and denotes the new observation, and so the derived endpoint game exposes
+$S$ alongside the ciphertexts. Adjoining $S$ to both endpoints is a common
+deterministic post-processing: it adds no encryption hop, so the Part~I bound
+$2\,\epscpa$ carries over unchanged.
+
+\begin{definition}[Output reception]
+  \label{def:alice_obs_output}
+  \uses{def:alice_obs}
+  % to create: alice_obs constructor AO_recv_output (dsdp_game_symbolic).
+  The corrupted-view vocabulary (Definition~\ref{def:alice_obs}) gains one
+  action: receive the decrypted output and bind it to a result name. It is not
+  an encryption hop.
+  \[ o \mathrel{::=} \dots \mid \mathsf{recvOut}(x) \]
+\end{definition}
+
+\begin{definition}[Walking across the decrypt-reception]
+  \label{def:walk_obs_output}
+  \uses{def:walk_obs,def:alice_obs_output}
+  % to create: extend walk_obs (dsdp_game_symbolic) with the decrypt-receive arm
+  %   and feed the three-element response stream dsdp_recv_responses (the third
+  %   entry HE_var 50 is Alice's decrypt input); emit AO_recv_output carrying the
+  %   he_term for S, then halt.
+  At the decrypt-reception the extended walk reads the received plaintext off the
+  response stream and emits the output reception instead of halting. The
+  ciphertext receptions and assemblies before it are unchanged, so the
+  encryption-hop count is unchanged.
+\end{definition}
+
+\begin{lemma}[The derived output-exposing DSDP trace]
+  \label{lem:obs_of_procs_dsdp_leak_S}
+  \uses{lem:obs_of_procs_dsdp,def:walk_obs_output}
+  % to create: obs_of_procs_dsdp_leak_S, the equational characterisation of the
+  %   extended obs_of_procs on the DSDP inputs; computes to the Part I trace plus
+  %   one AO_recv_output before the leak.
+  For the DSDP inputs the extended trace computes to the Part~I trace
+  (Lemma~\ref{lem:obs_of_procs_dsdp}) with the output reception inserted before
+  the leak. The two encryption hops are exactly the Part~I two.
+  \[ \tau^{S}_{\mathrm{DSDP}}
+        = \tau_{\mathrm{DSDP}} \text{ with } \mathsf{recvOut}(S)
+        \text{ before } \mathsf{leak} \]
+\end{lemma}
+
+\begin{definition}[Lowering the output reception]
+  \label{def:lower_obs_output}
+  \uses{def:lower_obs,def:alice_obs_output}
+  % to create: extend lower_obs (dsdp_game_symbolic) with the AO_recv_output arm
+  %   -> a let binding the resolved S term followed by a put to S_output_cell;
+  %   reuses existing game_code constructors (let, put), so game_code is NOT
+  %   extended.
+  The lowering pass maps the output reception to a let-binding of the resolved
+  output term followed by a write to a dedicated output cell. It introduces no
+  new game-code statement and no new hop.
+  \[ \mathsf{recvOut}(S) \;\mapsto\; \mathsf{let}(S);\ \mathsf{put}_{S}(S) \]
+\end{definition}
+
+\begin{definition}[Denoting the output and exposing it]
+  \label{def:denote_game_leak_S}
+  \uses{def:denote_game,def:lower_obs_output}
+  % to create: S_output_cell : Location; id_s_get oracle id; denote_s_get_body;
+  %   widen the denoted game's export interface with #val #[id_s_get] : 'unit ->
+  %   t_msg returning S_output_cell.  GC_ret stays cipher_list, so the Part I
+  %   generic theorem is untouched.
+  Denotation writes the lowered output to a dedicated cell and adds one oracle
+  reading it, leaving the return value and every other statement as in Part~I
+  (Definition~\ref{def:denote_game}).
+  \[ \sem{\mathsf{put}_{S}(S)} : \text{write } S \text{ to } S\text{-cell},
+        \qquad \mathsf{getOut} : \mathbf{1} \to \mathsf{msg} \]
+\end{definition}
+
+\begin{definition}[The output-exposing endpoint games]
+  \label{def:games_leak_s}
+  \uses{def:denote_game_leak_S,def:games}
+  % to create: real_game_leak_S, zero_game_leak_S (dsdp_indcpa_security), the
+  %   real/all-zero denotations of the output-exposing DSDP problem.
+  The real and all-zero games of the DSDP problem
+  (Definition~\ref{def:games}) denoted from the output-exposing derivation. Each
+  exposes the ciphertexts and the output $S$. Write $\real_S$ and $\zero_S$ for
+  the two.
+  \[ \view = \big(\,[\,a_1,a_2,c_2,c_3\,],\ S\,\big),\qquad
+        S = u_1 v_1 + u_2 v_2 + u_3 v_3 \]
+\end{definition}
+
+\begin{lemma}[Computational distance, output-exposing games]
+  \label{lem:dsdp_advantage_derived_leak_S}
+  \uses{def:games_leak_s,thm:dsdp_secure}
+  % to create: dsdp_advantage_derived_leak_S; the output cell is a common
+  %   deterministic post-processing of both endpoints (no new hop), so the
+  %   Part I 2*epsilon_cpa bound (thm:dsdp_secure) transports verbatim.
+  The advantage between the output-exposing real and all-zero games is at most
+  $2\,\epscpa$, the Part~I bound (Theorem~\ref{thm:dsdp_secure}).
+  \[ \AdvE(\,\real_S,\ \zero_S,\ A\,) \le 2\,\epscpa \]
+\end{lemma}
+
+\chapter{The output-secrecy guessing experiment}
+\label{ch:guessing_experiment}
+
+The output channel is measured not by an advantage but by the absolute
+probability that a predictor, reading the view including $S$, names Bob's secret
+$V_2$. This chapter builds that guessing experiment on the derived endpoint game
+and rewrites its success probability as an Infotheo distribution probability, the
+single identity that carries the fiber bound of Chapter~\ref{ch:it_bound} to the
+\ssprove{} side.
+
+\begin{definition}[Guessing experiment on the endpoint game]
+  \label{def:guessing_experiment_leak_S}
+  \uses{def:games_leak_s}
+  % to create: predictor_guesser, guessing_challenger, guessing_experiment
+  %   (dsdp_security_indcpa_fiber).  Challenger imports id_game_run, id_s_get,
+  %   id_v2_get; feeds (ciphertexts, S) to the predictor; tests guess == V2.
+  A predictor reads the leaked ciphertexts and the output $S$ and returns a
+  guess. The experiment runs it against the endpoint game and tests
+  $\guess = V_2$. Its success probability is written $\Prexp(\text{game})$.
+  \[ \Prexp(\text{game})
+        = \mu\big(\mathrm{Pr}(\,\text{challenger}\circ\text{predictor}
+        \circ\text{game}\,)\big)(\mathrm{true}) \]
+\end{definition}
+
+\begin{lemma}[\ssprove{} absolute-$\mathrm{Pr}$ reflection calculus (library)]
+  \label{lem:exist_pr_code}
+  \rocqok
+  % library: Pr_code_ret/_sample/_bind/_get/_put (Crypt.nominal.Pr), dlet_uniform
+  %   (Crypt.HybridArgument), SDistr = {distr A/R}, dletE, dunit1E, Pr_Pr_fst.
+  SSProve's nominal layer expresses the probability of a closed program as an
+  iterated sum over its sample operations, a uniform draw of domain $n$
+  contributing the factor $1/n$. Its subdistribution type is the
+  mathcomp-analysis distribution $\{\mathrm{distr}\ A/R\}$.
+  \[ \mathrm{Pr}(x \leftarrow \mathrm{sample}\ \mathrm{unif}\,n \,;;\, k\,x)
+        = \tfrac1n{\textstyle\sum_x}\mathrm{Pr}(k\,x) \]
+\end{lemma}
+
+\begin{definition}[The guessing-experiment distribution]
+  \label{def:dsdp_guess_fdist}
+  \uses{def:guessing_experiment_leak_S}
+  % to create: dsdp_guess_fdist (dsdp_security_indcpa_fiber), the uniform fdist
+  %   on the experiment's sample tuple; V2,V3,U2,U3,S,guess as RVs over it.
+  The uniform distribution $P$ on the samples of the guessing experiment at
+  $\zero_S$, the game's draws together with the predictor's. The protocol
+  quantities and the predictor's output are random variables over $P$.
+  \[ P : \{\mathrm{fdist}\ \mathrm{Samples}\},
+        \qquad V_2,\,V_3,\,U_2,\,U_3,\,S,\,\guess : \{\mathrm{RV}\ P\} \]
+\end{definition}
+
+\begin{lemma}[The game probability is the fdist probability]
+  \label{lem:Pr_guess_enc_zero_leak_S_eqE}
+  \uses{def:games_leak_s,def:dsdp_guess_fdist,def:guessing_experiment_leak_S,lem:exist_pr_code}
+  % to create: Pr_guess_enc_zero_leak_S_eqE (the connector).  Proof: the closed
+  %   experiment denotes to the uniform distribution on its samples, which is P
+  %   (the predictor's draws are extra coordinates of P, so an opaque predictor
+  %   needs no inspection); reflection (lem:exist_pr_code) rewrites both sides to
+  %   the uniform average of [guess = V2].  ~30-80 lines, one induction over the
+  %   sample list.
+  $\Prexp(\zero_S)$ equals the Infotheo probability, over $P$, of the event
+  $\guess = V_2$. Both reduce to the same uniform average of the indicator
+  $[\,\guess = V_2\,]$ over the experiment's samples. This identity carries the
+  fiber bound, proved on the Infotheo side, to $\Prexp(\zero_S)$.
+  \[ \Prexp(\zero_S) = \Pr\nolimits_{P}[\,\guess = V_2\,] \]
+\end{lemma}
+
+\chapter{The information-theoretic bound and full secrecy}
+\label{ch:it_bound}
+
+Conditioned on $S$ and her inputs, Bob's secret $V_2$ is uniform over a fiber of
+$m$ points, so any guess succeeds with probability at most $1/m$. Infotheo proves
+this over an abstract joint distribution. Instantiating that distribution at the
+guessing-experiment distribution $P$ and pushing the bound through the connector
+(Lemma~\ref{lem:Pr_guess_enc_zero_leak_S_eqE}) gives the output bound at the
+endpoint, and composing with the computational distance gives the full secrecy
+bound $1/m + 2\,\epscpa$.
+
+\section{Reused Infotheo facts}
+
+\begin{lemma}[Fiber cardinality is $m$]
+  \label{lem:exist_fiber_card}
+  \rocq{infotheo.dumas2017dual.dsdp.dsdp_entropy.dsdp_fiber_card}
+  \rocqok
+  The solution set of the scalar-product constraint, for admissible
+  multipliers, has exactly $m$ points.
+  \[ \#\lvert \fib(u_1,u_2,u_3,v_1,s)\rvert = m \]
+\end{lemma}
+
+\begin{lemma}[Conditional uniformity on the fiber]
+  \label{lem:exist_cpr_fiber}
+  \rocq{infotheo.dumas2017dual.entropy_fiber.entropy_fiber_zpq.cPr_uniform_fiber}
+  \rocqok
+  \uses{lem:exist_fiber_card}
+  For a joint distribution in which the variable pair is uniform and
+  independent of the inputs, conditioning on the revealed values leaves the
+  variable uniform over its fiber.
+  \[ \Pr[\,\mathrm{Var}=v \mid \mathrm{Cond}=\cond\,]
+        = \#\lvert\fib(\cond)\rvert^{-1} \]
+\end{lemma}
+
+\begin{lemma}[DSDP solution is uniform, probability $1/m$]
+  \label{lem:exist_pr_sol}
+  \rocq{infotheo.dumas2017dual.dsdp.dsdp_entropy.Pr_dsdp_sol_uniform}
+  \rocqok
+  \uses{lem:exist_cpr_fiber,lem:exist_fiber_card}
+  Each solution $(v_2,v_3)$ of the DSDP constraint has conditional probability
+  $1/m$ given the inputs and $S$.
+  \[ \Pr[\,(V_2,V_3)=(v_2,v_3)\mid \mathrm{Cond}=\cond\,] = m^{-1} \]
+\end{lemma}
+
+\begin{theorem}[Residual entropy is $\log m$]
+  \label{thm:exist_centropy}
+  \rocq{infotheo.dumas2017dual.dsdp.dsdp_entropy.dsdp_centropy_uniform}
+  \rocqok
+  \uses{lem:exist_pr_sol}
+  Conditioned on the inputs and $S$, the variable pair retains $\log m$ bits of
+  entropy.
+  \[ H(\mathrm{Var}\mid \mathrm{Cond}) = \log m \]
+\end{theorem}
+
+\section{Instantiating the fiber bound at $P$}
+
+\begin{lemma}[Distribution identities: uniformity, independence, constraint]
+  \label{lem:dsdp_guess_identities}
+  \uses{def:dsdp_guess_fdist,def:games_leak_s}
+  % to create: dsdp_guess_V2_uniform, dsdp_guess_VarRV_indep_inputs,
+  %   dsdp_guess_S_determined, dsdp_guess_indep_V2_given_S
+  %   (dsdp_security_indcpa_fiber); the hypotheses dsdp_entropy needs, read off
+  %   the uniform structure of P and the all-zero ciphertexts.
+  Over $P$, the variable pair $(V_2,V_3)$ is uniform and independent of the
+  inputs, the output $S$ is the constraint function of the variables and inputs,
+  and the guess depends on $V_2$ only through $S$.
+  \[ {p}_{(V_2,V_3)} = \mathrm{unif},\quad
+     (V_2,V_3)\perp \mathrm{Inputs},\quad
+     S = g(\mathrm{Var},\mathrm{Input}),\quad
+     \guess \perp V_2 \mid S \]
+\end{lemma}
+
+\begin{lemma}[Fiber residual]
+  \label{lem:Pr_guess_fiber_le_invm}
+  \uses{lem:exist_pr_sol,lem:dsdp_guess_identities}
+  % to create: Pr_guess_fiber_le_invm (dsdp_security_indcpa_fiber).  Proof:
+  %   condition on S; lem:exist_pr_sol gives each V2 value probability 1/m, and
+  %   guess _|_ V2 | S (lem:dsdp_guess_identities) caps the collision at 1/m.
+  Over $P$, the predictor guesses $V_2$ with probability at most $1/m$.
+  \[ \Pr\nolimits_{P}[\,\guess=V_2\,] \le 1/m \]
+\end{lemma}
+
+\section{The output bound and composition}
+
+\begin{theorem}[Information-theoretic bound at the endpoint]
+  \label{thm:Pr_guess_enc_zero_leak_S_le_invm}
+  \uses{lem:Pr_guess_enc_zero_leak_S_eqE,lem:Pr_guess_fiber_le_invm}
+  % to create: Pr_guess_enc_zero_leak_S_le_invm (dsdp_security_indcpa_fiber).
+  %   Proof: rewrite Prexp(zero_S) by the connector, then the fiber residual.
+  At the output-exposing all-zero endpoint, the predictor guesses $V_2$ with
+  probability at most $1/m$.
+  \[ \Prexp(\zero_S) \le 1/m \]
+\end{theorem}
+
+\begin{theorem}[Full secrecy by composition]
+  \label{thm:dsdp_alice_secrecy_leak_S}
+  \uses{thm:Pr_guess_enc_zero_leak_S_le_invm,lem:dsdp_advantage_derived_leak_S}
+  % to create: dsdp_alice_secrecy_leak_S (dsdp_security_indcpa_fiber).  Proof:
+  %   triangle Prexp(real_S) <= Prexp(zero_S) + AdvE(real_S, zero_S, predictor),
+  %   then thm:Pr_guess_enc_zero_leak_S_le_invm (1/m) and
+  %   lem:dsdp_advantage_derived_leak_S (2*epsilon_cpa).
+  Against the output-exposing real game, the predictor guesses $V_2$ with
+  probability at most $1/m + 2\,\epscpa$.
+  \[ \Prexp(\real_S) \le 1/m + 2\,\epscpa \]
+\end{theorem}
