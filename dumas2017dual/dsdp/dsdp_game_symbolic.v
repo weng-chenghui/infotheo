@@ -104,14 +104,18 @@ Definition s_dec (p : nat) (c : he_term) : he_term := HE_dec p c.
      masks are emitted by [AO_combine] and stay real;
    - [AO_combine result expr] — Alice binds a homomorphic assembly [expr]
      (over named variables) to [result];
+   - [AO_recv_output out] — Alice's decrypt-receive followed by the final
+     return: [out] is the output [he_term] Alice computes (the scalar-product
+     [S]).  Not a hop and binds no new value (it becomes [GC_put_output]);
    - [AO_leak names] — the named ciphertexts leaked to the adversary. *)
 Inductive alice_obs : Type :=
-| AO_sample_val : nat -> nat -> alice_obs
-| AO_sample_rnd : nat -> nat -> alice_obs
-| AO_put        : nat -> alice_obs
-| AO_recv_hop   : nat -> nat -> nat -> alice_obs
-| AO_combine    : nat -> he_term -> alice_obs
-| AO_leak       : seq nat -> alice_obs.
+| AO_sample_val  : nat -> nat -> alice_obs
+| AO_sample_rnd  : nat -> nat -> alice_obs
+| AO_put         : nat -> alice_obs
+| AO_recv_hop    : nat -> nat -> nat -> alice_obs
+| AO_combine     : nat -> he_term -> alice_obs
+| AO_recv_output : he_term -> alice_obs
+| AO_leak        : seq nat -> alice_obs.
 
 (* count_obs_hops — the number of hoppable receptions ([AO_recv_hop]) before
    the leak that ends the trace.  This is the protocol-side count the IND-CPA
@@ -151,7 +155,8 @@ Fixpoint resolve_term (venv renv : seq nat) (t : he_term) : he_term :=
    a [game_code], threading the value/randomness name environments.  Each
    binding step pushes its result name on the appropriate environment so that
    subsequent [resolve_term] calls assign the correct de Bruijn index; the
-   leak ends the straight-line code as [GC_ret]. *)
+   output step writes the resolved [S] term via [GC_put_output] without binding
+   a new value; the leak ends the straight-line code as [GC_ret]. *)
 Fixpoint lower_obs (venv renv : seq nat) (obs : seq alice_obs) : game_code :=
   match obs with
   | [::] => GC_ret [::]
@@ -166,6 +171,8 @@ Fixpoint lower_obs (venv renv : seq nat) (obs : seq alice_obs) : game_code :=
           (lower_obs (result :: venv) renv rest)
     | AO_combine result expr =>
         GC_let (resolve_term venv renv expr) (lower_obs (result :: venv) renv rest)
+    | AO_recv_output out =>
+        GC_put_output (resolve_term venv renv out) (lower_obs venv renv rest)
     | AO_leak names =>
         GC_ret [seq resolve_term venv renv (HE_var n) | n <- names]
     end
@@ -206,16 +213,19 @@ Proof. exact: count_hops_lower_obs. Qed.
 (* ------------------------------------------------------------------ *)
 
 (* walk_obs — the dual-purpose drive over a corrupted party's symbolic
-   program [p].  At each [Recv] it consumes one hop ciphertext from [resp],
-   reads the sending party and the encrypted secret off its [HE_enc] shape, and
-   emits an [AO_recv_hop] bound to a fresh result name [next], feeding the
-   reception result back as [SD_cipher (HE_var next)] so subsequent statements
-   reference it by name.  At each [Send] whose payload carries a ciphertext it
-   emits an [AO_combine] of that he_term, also bound to a fresh [next].  The
-   single counter allocates distinct names for hops and combines alike (the only
-   property the lowering pass [game_of_trace] needs; it resolves de Bruijn
-   indices by position).  Halts at the decrypt-receive (when [resp] runs out)
-   and at [Ret]/[Finish]/[Fail]. *)
+   program [p].  At each [Recv] whose response is a structured secret-bearing
+   ciphertext ([HE_enc party (HE_var secret) _]) it emits an [AO_recv_hop] bound
+   to a fresh result name [next], feeding the reception result back as
+   [SD_cipher (HE_var next)] so subsequent statements reference it by name; at a
+   [Recv] whose response is a non-[HE_enc] ciphertext (the decrypt-receive) it
+   binds the raw response into the continuation WITHOUT emitting a hop, letting
+   the walk continue to the return.  At each [Send] whose payload carries a
+   ciphertext it emits an [AO_combine] of that he_term, also bound to a fresh
+   [next].  The single counter allocates distinct names for hops and combines
+   alike (the only property the lowering pass [game_of_trace] needs; it resolves
+   de Bruijn indices by position).  At [Ret (SD_plain s)] it emits the output
+   [AO_recv_output s] ([s] is the scalar-product [S] Alice returns); halts at
+   [Finish]/[Fail] and at an empty response stream. *)
 Fixpoint walk_obs (p : proc symbolic_data) (resp : seq symbolic_data)
     (next : nat) : seq alice_obs :=
   match p with
@@ -228,7 +238,8 @@ Fixpoint walk_obs (p : proc symbolic_data) (resp : seq symbolic_data)
           | Some (HE_enc party (HE_var secret) _) =>
               AO_recv_hop party secret next
                 :: walk_obs (f (SD_cipher (HE_var next))) rs next.+1
-          | _ => [::]
+          | Some _ => walk_obs (f r) rs next
+          | None => [::]
           end
       end
   | smc_interpreter.Send _ d k =>
@@ -236,7 +247,11 @@ Fixpoint walk_obs (p : proc symbolic_data) (resp : seq symbolic_data)
       | Some c => AO_combine next c :: walk_obs k resp next.+1
       | None => walk_obs k resp next
       end
-  | smc_interpreter.Ret _ => [::]
+  | smc_interpreter.Ret x =>
+      match x with
+      | SD_plain s => [:: AO_recv_output s]
+      | _ => [::]
+      end
   | smc_interpreter.Finish => [::]
   | smc_interpreter.Fail => [::]
   end.
@@ -257,6 +272,36 @@ Lemma walk_obs_dsdp :
                                 (HE_enc 1 (HE_var 14) 20))
       ; AO_combine 103 (HE_emul (HE_epow (HE_var 101) (HE_var 13))
                                 (HE_enc 2 (HE_var 15) 21)) ].
+Proof. by []. Qed.
+
+(* dsdp_received_responses_output — the response stream that drives the walk
+   PAST Alice's decrypt-receive: the two structured hop ciphertexts
+   ([dsdp_received_hop_ciphertexts]) followed by the named placeholder
+   [SD_cipher (HE_var 50)] Charlie returns, mirroring the third entry of
+   [dsdp_symbolic.dsdp_recv_responses].  Feeding this third response lets the
+   walk continue to Alice's [Ret], where the scalar-product output [S] is read
+   off the return payload. *)
+Definition dsdp_received_responses_output : seq symbolic_data :=
+  dsdp_received_hop_ciphertexts ++ [:: SD_cipher (HE_var 50) ].
+
+(* walk_obs_dsdp_leak_S — the output-exposing reduction: walking [palice_sym]
+   against [dsdp_received_responses_output] extends [walk_obs_dsdp] with the
+   final [AO_recv_output S], where [S] is the scalar-product output
+   [g - r2 - r3 + u1*v1] Alice returns ([g] = [HE_dec 0 (HE_var 50)] the
+   decrypted aggregate; r2,r3,u1,v1 = HE_var 14,15,17,16).  The decrypt-receive
+   binds the third response without emitting a hop, so the two [AO_recv_hop]s and
+   two [AO_combine]s are unchanged.  Closes by computation. *)
+Lemma walk_obs_dsdp_leak_S :
+  walk_obs palice_sym dsdp_received_responses_output 100
+  = [:: AO_recv_hop 1 10 100 ; AO_recv_hop 2 11 101
+      ; AO_combine 102 (HE_emul (HE_epow (HE_var 100) (HE_var 12))
+                                (HE_enc 1 (HE_var 14) 20))
+      ; AO_combine 103 (HE_emul (HE_epow (HE_var 101) (HE_var 13))
+                                (HE_enc 2 (HE_var 15) 21))
+      ; AO_recv_output
+          (HE_add (HE_sub (HE_sub (HE_dec 0 (HE_var 50)) (HE_var 14))
+                          (HE_var 15))
+                  (HE_mul (HE_var 17) (HE_var 16))) ].
 Proof. by []. Qed.
 
 (* bound_names — the result names that the walk binds (one per [AO_recv_hop] and
@@ -388,6 +433,33 @@ Lemma obs_of_procs_dsdp (cm cr : nat) :
         AO_leak [:: 102 ; 103 ; 100 ; 101 ] ].
 Proof. by []. Qed.
 
+(* obs_of_procs_dsdp_leak_S — the output-exposing corrupted-Alice trace for DSDP:
+   walking [palice_sym] against [dsdp_received_responses_output] is the Part I
+   trace [obs_of_procs_dsdp] with one [AO_recv_output S] inserted before the
+   final [AO_leak].  The sample prefix, the [AO_put], the two [AO_recv_hop]s, the
+   two [AO_combine]s and the leak are unchanged: [AO_recv_output] contributes no
+   sampled value, binds no walk result, and is neither leaked nor counted.  [S]
+   is Alice's scalar-product return [g - r2 - r3 + u1*v1].  Closes by
+   computation. *)
+Lemma obs_of_procs_dsdp_leak_S (cm cr : nat) :
+  obs_of_procs palice_sym dsdp_received_responses_output 10
+    (fun combines recvs => combines ++ recvs) cm cr
+  = [:: AO_sample_val cm 10 ; AO_sample_val cm 11 ; AO_sample_val cm 12 ;
+        AO_sample_val cm 14 ; AO_sample_val cm 13 ; AO_sample_val cm 15 ;
+        AO_sample_rnd cr 20 ; AO_sample_rnd cr 21 ;
+        AO_put 10 ;
+        AO_recv_hop 1 10 100 ; AO_recv_hop 2 11 101 ;
+        AO_combine 102 (HE_emul (HE_epow (HE_var 100) (HE_var 12))
+                                (HE_enc 1 (HE_var 14) 20)) ;
+        AO_combine 103 (HE_emul (HE_epow (HE_var 101) (HE_var 13))
+                                (HE_enc 2 (HE_var 15) 21)) ;
+        AO_recv_output
+          (HE_add (HE_sub (HE_sub (HE_dec 0 (HE_var 50)) (HE_var 14))
+                          (HE_var 15))
+                  (HE_mul (HE_var 17) (HE_var 16))) ;
+        AO_leak [:: 102 ; 103 ; 100 ; 101 ] ].
+Proof. by []. Qed.
+
 (* ------------------------------------------------------------------ *)
 (* The DSDP corrupted-Alice trace and the faithfulness result.        *)
 (* ------------------------------------------------------------------ *)
@@ -422,6 +494,25 @@ Proof. by []. Qed.
    ladder has two rungs, matching [hop_sites_gc_dsdp]. *)
 Lemma dsdp_obs_hops (card_msg card_renc : nat) :
   count_obs_hops (dsdp_alice_obs card_msg card_renc) = 2.
+Proof. by []. Qed.
+
+(* dsdp_alice_obs_leak_S — the output-exposing corrupted-Alice observation trace
+   of DSDP, DERIVED by running [obs_of_procs] on [palice_sym] against
+   [dsdp_received_responses_output] (the hop-reception stream extended with the
+   decrypt-receive response).  Identical to [dsdp_alice_obs] except that the walk
+   continues across Alice's decrypt-receive and emits the [AO_recv_output S]
+   output step, which the lowering pass [game_of_trace] routes to
+   [S_output_cell] via [GC_put_output]. *)
+Definition dsdp_alice_obs_leak_S (card_msg card_renc : nat) : seq alice_obs :=
+  obs_of_procs palice_sym dsdp_received_responses_output dsdp_v2_name
+    (fun combines recvs => combines ++ recvs) card_msg card_renc.
+
+(* dsdp_obs_hops_leak_S — the output-exposing DSDP trace still has exactly two
+   hoppable receptions: the added [AO_recv_output] is not counted ([count_obs_-
+   hops]'s catch-all) and sits before the leak, so the derived game's ladder
+   length is unchanged at two, matching [dsdp_obs_hops]. *)
+Lemma dsdp_obs_hops_leak_S (card_msg card_renc : nat) :
+  count_obs_hops (dsdp_alice_obs_leak_S card_msg card_renc) = 2.
 Proof. by []. Qed.
 
 (* ------------------------------------------------------------------ *)
