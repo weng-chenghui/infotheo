@@ -333,4 +333,79 @@ rewrite eqb_id inE /=.
 by rewrite (inj_eq (can_inj msg_to_finK)).
 Qed.
 
+(* ===== Reflection infrastructure (option B, risk R1) =====
+   Reflect guess_joint_code into an explicit sample distribution.
+   - card_renc_neq routes the GC_sample branches: the plaintext space (pq) and
+     the encryption-randomness space differ, so the two sample cardinalities are
+     distinct.  Harmless, discharged at instantiation.
+   - predictor_locs_disj keeps the predictor's own state separate from the
+     protocol cells; it is what makes the predictor blind to V_2 (the footprint
+     lemma Pr_fst_agree_locs frames its output off V_2_cell). *)
+Hypothesis card_renc_neq : card_renc != card_msg.
+Hypothesis predictor_locs_disj : fseparate (locs predictor) (protocol_state t_msg).
+
+Let gc := all_zero (game_of_trace (dsdp_alice_obs_leak_S card_msg card_renc)).
+Let drun := denote_run renc_card rand_of_renc chmsg_of_msg chcipher_of_cipher pkey_of_party msg_of_idx rand0.
+Let dhe := denote_he pkey_of_party rand0.
+
+(* denote_run per-constructor unfold lemmas. *)
+Lemma drun_sample_msg (e:denv AHE) k : drun e (GC_sample card_msg k) = (x ← sample uniform card_msg ;; drun (push_val (Gplain (msg_of_idx x)) e) k).
+Proof. by rewrite /drun /denote_run -/denote_run eqxx. Qed.
+Lemma drun_sample_renc (e:denv AHE) k : drun e (GC_sample card_renc k) = (x ← sample uniform card_renc ;; drun (push_rand (rand_of_renc (sample_to_renc renc_card x)) e) k).
+Proof. by rewrite /drun /denote_run -/denote_run (negbTE card_renc_neq) eqxx. Qed.
+Lemma drun_put (e:denv AHE) t k : drun e (GC_put t k) = (#put (V_2_cell t_msg) := Some (chmsg_of_msg (as_plain (dhe e t))) ;; drun e k).
+Proof. by rewrite /drun /dhe /denote_run -/denote_run. Qed.
+Lemma drun_put_output (e:denv AHE) t k : drun e (GC_put_output t k) = (#put (S_output_cell t_msg) := Some (chmsg_of_msg (as_plain (dhe e t))) ;; drun e k).
+Proof. by rewrite /drun /dhe /denote_run -/denote_run. Qed.
+Lemma drun_let (e:denv AHE) t k : drun e (GC_let t k) = drun (push_val (dhe e t) e) k.
+Proof. by rewrite /drun /dhe /denote_run -/denote_run. Qed.
+Lemma drun_enc_hop (e:denv AHE) pk secret k : drun e (GC_enc_hop pk secret k) = (ir ← sample uniform card_renc ;; drun (push_val (Gcipher (enc (pkey_of_party (nat_to_party_id pk)) (as_plain (dhe e secret)) (rand_of_renc (sample_to_renc renc_card ir)))) e) k).
+Proof. by rewrite /drun /dhe /denote_run -/denote_run. Qed.
+Lemma drun_ret (e:denv AHE) outs : drun e (GC_ret outs) = ret ([seq chcipher_of_cipher (as_cipher (dhe e o)) | o <- outs] : cipher_list t_cipher).
+Proof. by rewrite /drun /dhe /denote_run -/denote_run. Qed.
+
+(* gc_eq — the concrete output-exposing all-zero game body (14 constructors). *)
+Lemma gc_eq : gc = GC_sample card_msg (GC_sample card_msg (GC_sample card_msg (GC_sample card_msg (GC_sample card_msg (GC_sample card_msg (GC_sample card_renc (GC_sample card_renc (GC_put (HE_var 5) (GC_enc_hop 1 (HE_const 0) (GC_enc_hop 2 (HE_const 0) (GC_let (HE_emul (HE_epow (HE_var 1) (HE_var 5)) (HE_enc 1 (HE_var 4) 1)) (GC_let (HE_emul (HE_epow (HE_var 1) (HE_var 4)) (HE_enc 2 (HE_var 3) 0)) (GC_put_output (HE_add (HE_sub (HE_sub (HE_dec 0 (HE_var 10)) (HE_var 6)) (HE_var 4)) (HE_mul (HE_var 10) (HE_var 10))) (GC_ret [:: HE_var 1; HE_var 0; HE_var 3; HE_var 2])))))))))))))).
+Proof. by rewrite /gc; vm_compute. Qed.
+
+(* denote_run_distr — the explicit Pr_code reflection of denote_run: samples
+   become dlet over uniforms threading the env; puts update the heap. *)
+Fixpoint denote_run_distr (e : denv AHE) (gc0 : game_code) (h : heap) {struct gc0}
+  : distr.distr R (cipher_list t_cipher * heap)%type :=
+  match gc0 with
+  | GC_sample n k =>
+      if n == card_msg then
+        distr.dlet (fun x => denote_run_distr (push_val (Gplain (msg_of_idx x)) e) k h) (projT2 (uniform card_msg))
+      else if n == card_renc then
+        distr.dlet (fun x => denote_run_distr (push_rand (rand_of_renc (sample_to_renc renc_card x)) e) k h) (projT2 (uniform card_renc))
+      else
+        distr.dlet (fun x : Arit (uniform n) => denote_run_distr e k h) (projT2 (uniform n))
+  | GC_put t k =>
+      denote_run_distr e k (set_heap h (V_2_cell t_msg) (Some (chmsg_of_msg (as_plain (dhe e t)))))
+  | GC_put_output t k =>
+      denote_run_distr e k (set_heap h (S_output_cell t_msg) (Some (chmsg_of_msg (as_plain (dhe e t)))))
+  | GC_let t k =>
+      denote_run_distr (push_val (dhe e t) e) k h
+  | GC_enc_hop pk secret k =>
+      distr.dlet (fun ir => denote_run_distr (push_val (Gcipher (enc (pkey_of_party (nat_to_party_id pk)) (as_plain (dhe e secret)) (rand_of_renc (sample_to_renc renc_card ir)))) e) k h) (projT2 (uniform card_renc))
+  | GC_ret outs =>
+      distr.dunit (([seq chcipher_of_cipher (as_cipher (dhe e o)) | o <- outs] : cipher_list t_cipher), h)
+  end.
+
+(* denote_run_distrE — the run reflects to denote_run_distr (generic induction). *)
+Lemma denote_run_distrE (gc0 : game_code) (e : denv AHE) (h : heap) :
+  Pr_code (drun e gc0) h = denote_run_distr e gc0 h.
+Proof.
+elim: gc0 e h => [n k IH|t k IH|t k IH|t k IH|pk secret k IH|outs] e h /=.
+- rewrite /drun /denote_run -/denote_run.
+  case: (n == card_msg).
+  + rewrite Pr_code_sample; apply: eq_dlet => x; exact: IH.
+  + case: (n == card_renc); rewrite Pr_code_sample; apply: eq_dlet => x; exact: IH.
+- rewrite /drun /denote_run -/denote_run Pr_code_put; exact: IH.
+- rewrite /drun /denote_run -/denote_run Pr_code_put; exact: IH.
+- rewrite /drun /denote_run -/denote_run; exact: IH.
+- rewrite /drun /denote_run -/denote_run Pr_code_sample; apply: eq_dlet => ir; exact: IH.
+- rewrite /drun /denote_run -/denote_run Pr_code_ret //.
+Qed.
+
 End dsdp_guess_distribution.
