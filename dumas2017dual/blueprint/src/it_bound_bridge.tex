@@ -256,8 +256,8 @@ diagonal.
   \rocq{infotheo.dumas2017dual.dsdp.dsdp_security_indcpa_fiber.dsdp_guess_fdist,
        infotheo.dumas2017dual.dsdp.dsdp_security_indcpa_fiber.dsdp_guess_core}
   \rocqok
-  % committed as dsdp_guess_fdist / dsdp_guess_core; renamed to
-  %   dsdp_guess_joint_fdist / dsdp_guess_joint_code in option B (update \rocq).
+  % committed as dsdp_guess_fdist / dsdp_guess_core; option B renames to
+  %   guess_joint_fdist / guess_joint_code (prefix policy: drop dsdp_; update \rocq).
   The Infotheo fdist of the $(\guess,V_2)$ pair the experiment produces: it is
   the pushforward $\mathrm{Pr}_{\mathrm{fst}}$ of the closed pair-returning code
   (the experiment without the equality test) into the finite carrier.
@@ -269,6 +269,9 @@ diagonal.
   \label{lem:Pr_guess_enc_zero_leak_S_eqE}
   \rocq{infotheo.dumas2017dual.dsdp.dsdp_security_indcpa_fiber.Pr_guess_enc_zero_leak_S_eqE}
   \rocqok
+  % committed as Pr_guess_enc_zero_leak_S_eqE; option B restructures into two named
+  %   sides guess_sdistr_success = guess_fdist_success and renames the lemma
+  %   guess_success_sdistr_eq_fdist (update \rocq at the code rename).
   \uses{def:games_leak_s,def:dsdp_guess_joint_fdist,def:guessing_experiment_leak_S,lem:exist_pr_code}
   % proof (committed): the bool experiment is the pair code post-composed with
   %   the equality test; Pr_Pr_fst + the bind law (Pr_code_bind) factor the test
@@ -359,7 +362,7 @@ connector and the computational distance to the full bound $1/m + 2\,\epscpa$.
 \begin{definition}[The experiment's sample distribution]
   \label{def:dsdp_guess_sample_fdist}
   \uses{def:guessing_experiment_leak_S}
-  % to create: dsdp_guess_sample_fdist (dsdp_security_indcpa_fiber) and the RVs
+  % to create: guess_sample_fdist (dsdp_security_indcpa_fiber) and the RVs
   %   V2,V3,U2,U3,S,guess over it; the protocol scalars uniform-independent, the
   %   guess following the predictor kernel on (view, S).
   The joint fdist of the zero-game's protocol scalars and the guess: the scalars
@@ -374,7 +377,7 @@ connector and the computational distance to the full bound $1/m + 2\,\epscpa$.
 \begin{lemma}[The joint distribution is the sample distribution's image]
   \label{lem:Pr_fst_dsdp_guess_joint_code}
   \uses{def:dsdp_guess_joint_fdist,def:dsdp_guess_sample_fdist,lem:Pr_fst_agree_locs,lem:exist_pr_code}
-  % to create: Pr_fst_dsdp_guess_joint_code.  Proof: reflect the pair code's
+  % to create: Pr_fst_guess_joint_code.  Proof: reflect the pair code's
   %   uniform samples (Pr_fst_sample + dlet_uniform), thread the cells
   %   (Pr_code_get/_put), and frame the opaque predictor out of the secret cell
   %   (Pr_fst_agree_locs); the result is the (guess, V2)-marginal of P.
@@ -391,8 +394,8 @@ connector and the computational distance to the full bound $1/m + 2\,\epscpa$.
 \begin{lemma}[Distribution identities: uniformity, independence, constraint]
   \label{lem:dsdp_guess_identities}
   \uses{def:dsdp_guess_sample_fdist,lem:Pr_fst_agree_locs}
-  % to create: dsdp_guess_V2_uniform, dsdp_guess_VarRV_indep_inputs,
-  %   dsdp_guess_S_determined, dsdp_guess_indep_V2_given_S
+  % to create: guess_V2_uniform, guess_VarRV_indep_inputs,
+  %   guess_S_determined, guess_indep_V2_given_S
   %   (dsdp_security_indcpa_fiber); the four hypotheses dsdp_entropy needs.  The
   %   first three are marginal facts of the uniform product; guess _|_ V2 | S is
   %   delivered by the footprint (the predictor's output is framed out of V2).
@@ -408,10 +411,11 @@ connector and the computational distance to the full bound $1/m + 2\,\epscpa$.
 \begin{lemma}[Fiber residual]
   \label{lem:Pr_guess_fiber_le_invm}
   \uses{lem:exist_pr_sol,lem:dsdp_guess_identities,lem:Pr_fst_dsdp_guess_joint_code}
-  % to create: Pr_guess_fiber_le_invm (dsdp_security_indcpa_fiber).  Proof: the
-  %   joint diagonal is Pr_P[guess = V2] (Pr_fst_dsdp_guess_joint_code);
-  %   instantiate dsdp_entropy at P with the identities, lem:exist_pr_sol gives
-  %   each V2 value 1/m, and guess _|_ V2 | S caps the collision at 1/m.
+  % to create: guess_fdist_success_le_invm (dsdp_security_indcpa_fiber), where
+  %   guess_fdist_success := Pr_[guess_joint_fdist][diag].  Proof: the joint
+  %   diagonal is Pr_P[guess = V2] (Pr_fst_guess_joint_code); instantiate
+  %   dsdp_entropy at P with the identities, lem:exist_pr_sol gives each V2 value
+  %   1/m, and guess _|_ V2 | S caps the collision at 1/m.
   Over the joint fdist, the predictor guesses $V_2$ with probability at most
   $1/m$.
   \[ \Pr\nolimits_{\jointfdist}[\,\guess=V_2\,] \le 1/m \]
@@ -422,8 +426,9 @@ connector and the computational distance to the full bound $1/m + 2\,\epscpa$.
 \begin{theorem}[Information-theoretic bound at the endpoint]
   \label{thm:Pr_guess_enc_zero_leak_S_le_invm}
   \uses{lem:Pr_guess_enc_zero_leak_S_eqE,lem:Pr_guess_fiber_le_invm}
-  % to create: Pr_guess_enc_zero_leak_S_le_invm (dsdp_security_indcpa_fiber).
-  %   Proof: rewrite Prexp(zero_S) by the connector, then the fiber residual.
+  % to create: guess_sdistr_success_le_invm (dsdp_security_indcpa_fiber), where
+  %   guess_sdistr_success := Prexp(zero_S).  Proof: rewrite by the connector
+  %   guess_success_sdistr_eq_fdist, then guess_fdist_success_le_invm.
   At the output-exposing all-zero endpoint, the predictor guesses $V_2$ with
   probability at most $1/m$.
   \[ \Prexp(\zero_S) \le 1/m \]
@@ -432,7 +437,7 @@ connector and the computational distance to the full bound $1/m + 2\,\epscpa$.
 \begin{lemma}[Computational distance between the experiments]
   \label{lem:dsdp_guess_advantage_le}
   \uses{def:guessing_experiment_leak_S,lem:dsdp_advantage_derived_leak_S,def:relational_advantage}
-  % to create: dsdp_guess_advantage_le (dsdp_security_indcpa_fiber).  Proof:
+  % to create: guess_advantage_le (dsdp_security_indcpa_fiber).  Proof:
   %   re-associate guessing_experiment = challenger o (predictor || game) into
   %   (challenger o predictor) o game, package challenger o predictor as a valid
   %   dsdp_indcpa_adversary (disjointness from the game state and oracles), then
