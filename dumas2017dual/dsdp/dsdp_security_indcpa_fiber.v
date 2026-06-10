@@ -8,7 +8,7 @@
    games: a predictor reads (view, S) and names a guess, the challenger tests
    guess = V_2, and the closed experiment's success probability is rewritten as
    an Infotheo distribution probability.  That rewrite (the connector
-   Pr_guess_enc_zero_leak_S_eqE) is the single identity through which the
+   guess_success_sdistr_eq_fdist) is the single identity through which the
    information-theoretic fiber bound 1/m, proved Infotheo-side, transfers to the
    SSProve-side absolute probability. *)
 
@@ -232,24 +232,24 @@ Definition guess_pair_challenger :
    output (parallel to SSProve's bool-locked [RUN]). *)
 Definition guess_op : opsig := (0%N, (chUnit, chProd t_msg t_msg)).
 
-(* dsdp_guess_resolved — the closed pair-returning experiment over [t_msg]:
+(* guess_resolved — the closed pair-returning experiment over [t_msg]:
    the pair challenger fed by the predictor and the game in parallel. *)
-Definition dsdp_guess_resolved : raw_code (t_msg * t_msg)%type :=
+Definition guess_resolved : raw_code (t_msg * t_msg)%type :=
   resolve (guess_pair_challenger ∘ par predictor game) guess_op tt.
 
-(* dsdp_guess_core — the experiment's (guess, V_2) pair pushed into the finite
+(* guess_joint_code — the experiment's (guess, V_2) pair pushed into the finite
    carrier [Mfin] for the Infotheo distribution. *)
-Definition dsdp_guess_core : raw_code (Mfin * Mfin)%type :=
-  gv ← dsdp_guess_resolved ;; ret (msg_to_fin gv.1, msg_to_fin gv.2).
+Definition guess_joint_code : raw_code (Mfin * Mfin)%type :=
+  gv ← guess_resolved ;; ret (msg_to_fin gv.1, msg_to_fin gv.2).
 
-(* dsdp_guess_resolve_eq — the bool-output guessing experiment is the pair
+(* guess_resolve_eq — the bool-output guessing experiment is the pair
    experiment post-composed with the equality test; both resolve the same
    oracle prefix and differ only in the final return. *)
-Lemma dsdp_guess_resolve_eq :
+Lemma guess_resolve_eq :
   resolve (guessing_experiment predictor game) RUN tt
-  = (gv ← dsdp_guess_resolved ;; ret (gv.1 == gv.2 : 'bool)).
+  = (gv ← guess_resolved ;; ret (gv.1 == gv.2 : 'bool)).
 Proof.
-rewrite /dsdp_guess_resolved /guessing_experiment resolve_link resolve_link.
+rewrite /guess_resolved /guessing_experiment resolve_link resolve_link.
 have body_eq : resolve (guessing_challenger t_msg t_cipher) RUN tt
    = (gv ← resolve guess_pair_challenger guess_op tt ;;
       ret (gv.1 == gv.2 : 'bool)).
@@ -258,7 +258,7 @@ have body_eq : resolve (guessing_challenger t_msg t_cipher) RUN tt
 by rewrite body_eq code_link_bind.
 Qed.
 
-(* Hypothesis dsdp_guess_lossless — the closed pair experiment terminates with
+(* Hypothesis guess_lossless — the closed pair experiment terminates with
    probability one (mass-1).  SSProve's [LosslessCode] is the [Pr_fst]-based
    closed-state class; the experiment's stateful game oracles place it outside
    the [LosslessOp_bind] closure, so the standard guessing-adversary assumption
@@ -266,24 +266,35 @@ Qed.
    resolved code.  The predictor is the only non-terminating component (the
    challenger and the concrete game are total), making this exactly the
    predictor-losslessness hypothesis for the guessing layer. *)
-Hypothesis dsdp_guess_lossless : psum (distr.mu (Pr_fst dsdp_guess_core)) = 1.
+Hypothesis guess_lossless : psum (distr.mu (Pr_fst guess_joint_code)) = 1.
 
-(* dsdp_guess_fdist — the Infotheo distribution of the observed pair
+(* guess_joint_fdist — the Infotheo distribution of the observed pair
    (guess, V_2). *)
-Definition dsdp_guess_fdist := sdistr_to_fdist dsdp_guess_lossless.
+Definition guess_joint_fdist := sdistr_to_fdist guess_lossless.
 
-(* Pr_guess_enc_zero_leak_S_eqE — the SSProve-to-Infotheo connector: the
+(* guess_sdistr_success — the SSProve-side success probability: the true-mass
+   of the guessing game's output subdistribution (sdistr). *)
+Definition guess_sdistr_success : R :=
+  distr.mu (pkg_advantage.Pr (guessing_experiment predictor game)) true.
+
+(* guess_fdist_success — the Infotheo-side success probability: the diagonal
+   mass of the bridged fdist.  Same real as guess_sdistr_success; the connector
+   below is this experiment's instance of sdistr_to_fdist. *)
+Definition guess_fdist_success : R :=
+  Pr guess_joint_fdist [set gv | gv.1 == gv.2].
+
+(* guess_success_sdistr_eq_fdist — the SSProve-to-Infotheo connector: the
    guessing experiment's success probability on the all-zero output-exposing
    game equals the probability that the observed guess equals V_2 under
-   [dsdp_guess_fdist].  Heap-free: pushforward [Pr_fst_map] plus the
+   [guess_joint_fdist].  Heap-free: pushforward [Pr_fst_map] plus the
    subdistribution-probability identities. *)
-Lemma Pr_guess_enc_zero_leak_S_eqE :
-  distr.mu (pkg_advantage.Pr (guessing_experiment predictor game)) true
-  = Pr dsdp_guess_fdist [set gv | gv.1 == gv.2].
+Lemma guess_success_sdistr_eq_fdist :
+  guess_sdistr_success = guess_fdist_success.
 Proof.
-rewrite Pr_Pr_fst dsdp_guess_resolve_eq Pr_fst_map.
-rewrite /dsdp_guess_fdist Pr_sdistr_to_fdist.
-rewrite /dsdp_guess_core Pr_fst_map distr.pr_dmargin.
+rewrite /guess_sdistr_success /guess_fdist_success.
+rewrite Pr_Pr_fst guess_resolve_eq Pr_fst_map.
+rewrite /guess_joint_fdist Pr_sdistr_to_fdist.
+rewrite /guess_joint_code Pr_fst_map distr.pr_dmargin.
 rewrite distr.dmargin_psumE /distr.pr.
 apply: eq_psum => gv /=.
 congr (_ * _).
