@@ -213,6 +213,36 @@ move=> Hc h; rewrite /Pr_fst.
 apply: (Pr_fst_agree_locs Hc) => l /fhas_empty [].
 Qed.
 
+(* eq_in_dlet — dlet congruence on the support: bodies that agree on the support
+   of [mu] give equal [dlet] (mass outside the support is zero). *)
+Lemma eq_in_dlet {T U : choiceType} (f g : T -> distr.distr R U) (mu : distr.distr R T) :
+  (forall x, x \in distr.dinsupp mu -> f x = g x) -> distr.dlet f mu = distr.dlet g mu.
+Proof.
+move=> Hfg; apply: SubDistr.distr_ext => y; rewrite 2!distr.dletE.
+apply: eq_psum => x; case: (boolP (x \in distr.dinsupp mu)) => Hx.
+- by rewrite (Hfg _ Hx).
+- by move/distr.dinsuppPn: Hx => ->; rewrite !mul0r.
+Qed.
+
+(* Pr_code_preserves — valid code with locations [L] leaves cells outside [L]
+   unchanged: every heap in the support of [Pr_code c h] agrees with [h] at [l].
+   The heap-level frame property (companion to the marginal frame
+   Pr_fst_agree_locs); it is what makes the post-predictor V_2 read return the
+   value the run wrote. *)
+Lemma Pr_code_preserves {A : choice_type} (L : Locations) (c : raw_code A) (l : Location) :
+  ValidCode L [interface] c -> l.1 \notin domm L ->
+  forall h ah, ah \in distr.dinsupp (Pr_code c h) -> get_heap ah.2 l = get_heap h l.
+Proof.
+move=> Hc Hl; elim: Hc => [x|o x k Hin _ IH|l' k Hin _ IH|l' v k Hin _ IH|op k _ IH] h ah Hah.
+- by move: Hah; rewrite Pr_code_ret => /distr.in_dunit ->.
+- by exfalso; eapply fhas_empty; eassumption.
+- by move: Hah; rewrite Pr_code_get => Hah; exact: (IH _ _ _ Hah).
+- by move: Hah; rewrite Pr_code_put => Hah; rewrite (IH _ _ Hah);
+     apply: get_set_heap_neq; apply: contraNneq Hl => ->; exact: fhas_in Hin.
+- by move: Hah; rewrite Pr_code_sample => /distr.dinsupp_dlet [x _];
+     rewrite -distr.in_dinsupp => Hah; exact: (IH x _ _ Hah).
+Qed.
+
 Section dsdp_guess_distribution.
 (* Same scheme and marshalling as the output-exposing endpoint games.  [Mfin]
    is the finite carrier on which the guess and V_2 are observed, with
