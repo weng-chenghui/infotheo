@@ -408,4 +408,21 @@ elim: gc0 e h => [n k IH|t k IH|t k IH|t k IH|pk secret k IH|outs] e h /=.
 - rewrite /drun /denote_run -/denote_run Pr_code_ret //.
 Qed.
 
+(* guess_resolved_par — the challenger body distributed over the parallel game:
+   the four oracle calls (run, read S, predict, read V_2) resolve against
+   [par predictor game] in sequence. *)
+Lemma guess_resolved_par :
+  guess_resolved =
+  (view ← resolve (par predictor game) (id_game_run, (chUnit, cipher_list t_cipher)) tt ;;
+   s    ← resolve (par predictor game) (id_s_get, (chUnit, t_msg)) tt ;;
+   guess ← resolve (par predictor game) (id_guess, (chProd (cipher_list t_cipher) t_msg, t_msg)) (view, s) ;;
+   v2   ← resolve (par predictor game) (id_v2_get, (chUnit, t_msg)) tt ;;
+   ret (guess, v2)).
+Proof.
+rewrite /guess_resolved resolve_link /resolve /guess_pair_challenger /=.
+rewrite coerce_kleisliE.
+cbn [code_link].
+reflexivity.
+Qed.
+
 End dsdp_guess_distribution.
