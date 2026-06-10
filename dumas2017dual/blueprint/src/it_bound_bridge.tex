@@ -37,6 +37,77 @@
 \newcommand{\jointfdist}{J}        % the (guess, V_2) joint fdist (margin of P)
 % =====================================================================
 
+\chapter{Absolute probability versus relational advantage}
+\label{ch:absolute_pr}
+
+\ssprove{} measures security relationally. Its headline quantity is the
+\emph{advantage}, the difference between two games' success probabilities, and
+its whole indistinguishability calculus bounds only such differences. The output
+channel asks a different question: the standalone probability that one game lets
+a predictor name Bob's secret $V_2$. That standalone quantity is an
+\emph{absolute} probability, ``absolute'' marking the contrast with the relative
+quantity the relational calculus returns. This chapter fixes the two notions,
+records why the relational machinery cannot deliver the absolute one, and states
+the two-leg composition that the contrast forces on Part~II.
+
+\begin{definition}[Relational advantage]
+  \label{def:relational_advantage}
+  \rocqok
+  % library: SSProve AdvantageE (Crypt.pkg_advantage); the difference bounded by
+  %   eq_rel_perf_ind and the perfect-indistinguishability lemmas.  No \rocq link
+  %   (library fact, outside the project's coqdoc), as for lem:exist_pr_code.
+  The advantage of a distinguisher $A$ between two closed games is the absolute
+  difference of the probabilities that $A$, composed with each game, returns
+  true. \ssprove{}'s indistinguishability calculus bounds this difference and
+  never the magnitude of either term alone.
+  \[ \AdvE(G_0, G_1, A)
+        = \bigl|\,\Pr[\,A\circ G_0 = \mathrm{true}\,]
+                - \Pr[\,A\circ G_1 = \mathrm{true}\,]\,\bigr| \]
+\end{definition}
+
+\begin{definition}[Absolute success probability]
+  \label{def:absolute_pr}
+  \rocqok
+  % library: SSProve Pr / Pr_code / Pr_fst (Crypt.nominal.Pr); the standalone
+  %   true-mass of one closed game run from the empty heap.  Reflected as an
+  %   iterated sum over the game's samples by lem:exist_pr_code.
+  The absolute success probability of one closed game is the true-mass of its
+  denotation run from the empty heap. It is a property of a single game, not a
+  difference of two.
+  \[ \Pr[\,G = \mathrm{true}\,]
+        = \mu\bigl(\mathrm{Pr}_{\mathrm{code}}(G)(\emptyset)\bigr)(\mathrm{true}) \]
+\end{definition}
+
+\textbf{The obstruction.} Every relational rule rewrites or bounds a difference
+$\AdvE(G_0, G_1, A)$; none yields the absolute $\Pr[\,G = \mathrm{true}\,]$ of a
+lone game. The bound the fiber argument supplies is exactly such an absolute
+statement, the success probability of the single guessing game
+(Definition~\ref{def:guessing_experiment_leak_S}),
+\[ \Prexp(\zero_S) \le 1/m, \]
+so it lies outside the reach of the advantage calculus. The absolute leg is
+therefore discharged through the denotational layer of
+Definition~\ref{def:absolute_pr} directly: the connector
+(Lemma~\ref{lem:Pr_guess_enc_zero_leak_S_eqE}) reflects $\Prexp(\zero_S)$ as a
+distribution probability, and the footprint frame
+(Lemma~\ref{lem:Pr_fst_agree_locs}) carries the Infotheo $1/m$ across, never
+forming an advantage.
+
+\textbf{The two legs and their join.} The output channel splits into one
+absolute leg and one relational leg, joined by the triangle inequality. The
+absolute leg bounds the all-zero endpoint's standalone probability by $1/m$
+(Theorem~\ref{thm:Pr_guess_enc_zero_leak_S_le_invm}); the relational leg keeps
+the real-to-zero distance inside the advantage world at $2\,\epscpa$
+(Lemma~\ref{lem:dsdp_guess_advantage_le}). One term is a single-game probability
+and the other a difference of two, which is why the triangle inequality is what
+joins them (Theorem~\ref{thm:dsdp_alice_secrecy_leak_S}):
+\[ \underbrace{\Prexp(\real_S)}_{\text{absolute}}
+   \;\le\;
+   \underbrace{\Prexp(\zero_S)}_{\le\, 1/m\ \text{(absolute leg)}}
+   \;+\;
+   \underbrace{\bigl|\,\Prexp(\real_S) - \Prexp(\zero_S)\,\bigr|}
+             _{\le\, 2\,\epscpa\ \text{(relational leg)}}
+   \;\le\; 1/m + 2\,\epscpa. \]
+
 \chapter{Extending the derivation to Alice's decryption}
 \label{ch:deriving_output}
 
@@ -156,7 +227,7 @@ diagonal.
        infotheo.dumas2017dual.dsdp.dsdp_security_indcpa_fiber.guessing_challenger,
        infotheo.dumas2017dual.dsdp.dsdp_security_indcpa_fiber.guessing_experiment}
   \rocqok
-  \uses{def:games_leak_s}
+  \uses{def:games_leak_s,def:absolute_pr}
   A predictor reads the leaked ciphertexts and the output $S$ and returns a
   guess. The experiment runs it against the endpoint game and tests
   $\guess = V_2$. Its success probability is written $\Prexp(\text{game})$.
@@ -360,7 +431,7 @@ connector and the computational distance to the full bound $1/m + 2\,\epscpa$.
 
 \begin{lemma}[Computational distance between the experiments]
   \label{lem:dsdp_guess_advantage_le}
-  \uses{def:guessing_experiment_leak_S,lem:dsdp_advantage_derived_leak_S}
+  \uses{def:guessing_experiment_leak_S,lem:dsdp_advantage_derived_leak_S,def:relational_advantage}
   % to create: dsdp_guess_advantage_le (dsdp_security_indcpa_fiber).  Proof:
   %   re-associate guessing_experiment = challenger o (predictor || game) into
   %   (challenger o predictor) o game, package challenger o predictor as a valid
