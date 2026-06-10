@@ -425,4 +425,52 @@ cbn [code_link].
 reflexivity.
 Qed.
 
+(* resolve_game_run / _sget / _v2get — the game's three oracles resolve to the
+   run denotation and the two cell-read bodies (getm_def lookup in the raw map). *)
+Lemma resolve_game_run :
+  resolve game (id_game_run, ('unit, cipher_list t_cipher)) tt = drun (empty_denv AHE) gc.
+Proof.
+rewrite /resolve /game /zero_game_leak_S -/gc /denote_game_leak_S /denote_game_leak_S_raw mkfmapE /id_game_run /id_v2_get /id_s_get /fst.
+cbn [getm_def]; cbn [fst snd].
+by rewrite eqxx /mkdef coerce_kleisliE /drun.
+Qed.
+
+Lemma resolve_game_sget :
+  resolve game (id_s_get, ('unit, t_msg)) tt = denote_s_get_body chmsg_of_msg.
+Proof.
+rewrite /resolve /game /zero_game_leak_S -/gc /denote_game_leak_S /denote_game_leak_S_raw mkfmapE /id_game_run /id_v2_get /id_s_get /fst.
+cbn [getm_def]; cbn [fst snd].
+by rewrite -[(3 == 0)%N]/false -[(3 == 2)%N]/false eqxx /mkdef coerce_kleisliE.
+Qed.
+
+Lemma resolve_game_v2get :
+  resolve game (id_v2_get, ('unit, t_msg)) tt = denote_v2_get_body chmsg_of_msg.
+Proof.
+rewrite /resolve /game /zero_game_leak_S -/gc /denote_game_leak_S /denote_game_leak_S_raw mkfmapE /id_game_run /id_v2_get /id_s_get /fst.
+cbn [getm_def]; cbn [fst snd].
+by rewrite -[(2 == 0)%N]/false eqxx /mkdef coerce_kleisliE.
+Qed.
+
+(* guess_resolved_oracles — resolve the four oracle calls: the game's run / S /
+   V_2 oracles route to the game (not in the predictor's domm), the guess oracle
+   to the predictor. *)
+Lemma guess_resolved_oracles :
+  guess_resolved =
+  (view ← drun (empty_denv AHE) gc ;;
+   s    ← denote_s_get_body chmsg_of_msg ;;
+   guess ← resolve (pack predictor) (id_guess, (chProd (cipher_list t_cipher) t_msg, t_msg)) (view, s) ;;
+   v2   ← denote_v2_get_body chmsg_of_msg ;;
+   ret (guess, v2)).
+Proof.
+rewrite guess_resolved_par !resolve_par.
+have Hpred_none : forall id : nat, (id == id_guess) = false -> isSome (pack predictor id) = false by (move=> id Hid; rewrite -mem_domm -(valid_domm (pack_valid predictor)) /guesser_export domm_set domm0 fsetU0 in_fset1 Hid).
+cbn [fst].
+rewrite (Hpred_none id_game_run erefl) (Hpred_none id_s_get erefl) (Hpred_none id_v2_get erefl).
+have Hguess : isSome (pack predictor id_guess) = true by (rewrite -mem_domm -(valid_domm (pack_valid predictor)) /guesser_export domm_set domm0 fsetU0 in_fset1 eqxx).
+rewrite resolve_game_run resolve_game_sget resolve_game_v2get.
+have Hpar_guess : forall x, resolve (par predictor game) (id_guess, (chProd (cipher_list t_cipher) t_msg, t_msg)) x = resolve predictor (id_guess, (chProd (cipher_list t_cipher) t_msg, t_msg)) x by (move=> x; rewrite resolve_par; cbn [fst]; rewrite Hguess).
+setoid_rewrite Hpar_guess.
+by [].
+Qed.
+
 End dsdp_guess_distribution.
