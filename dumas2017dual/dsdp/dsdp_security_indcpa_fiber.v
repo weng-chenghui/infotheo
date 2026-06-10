@@ -182,6 +182,37 @@ apply: SubDistr.distr_ext => y; apply: dlet_f_equal => z.
 by apply: SubDistr.distr_ext => w; rewrite distr.dmargin_dunit /=.
 Qed.
 
+(* Pr_fst_agree_locs — footprint/frame property: the value-marginal of valid
+   import-free code with locations [L] depends only on the heap restricted to
+   [L].  Heaps agreeing on [L] yield equal value-marginals, so the code cannot
+   observe state outside its own locations. *)
+Lemma Pr_fst_agree_locs {A : choice_type} (L : Locations) (c : raw_code A) :
+  ValidCode L [interface] c ->
+  forall h h', (forall l, fhas L l -> get_heap h l = get_heap h' l) ->
+  distr.dmargin fst (Pr_code c h) = distr.dmargin fst (Pr_code c h').
+Proof.
+induction 1 as [x | o x k Hin IH | l k Hin IH | l v Hin IH | op k IH]; intros h h' Hagree.
+1: rewrite !Pr_code_ret; apply: SubDistr.distr_ext => w; rewrite 2!distr.dmargin_dunit //.
+1: exfalso; eapply fhas_empty; eassumption.
+1: rewrite !Pr_code_get (Hagree l Hin); apply: H; exact: Hagree.
+1: rewrite !Pr_code_put; apply: IHvalid_code => l0 Hl0.
+1: case: (eqVneq l0.1 l.1) => [Heq | Hneq].
+1: by rewrite /get_heap /set_heap !setmE Heq eqxx.
+1: by rewrite !get_set_heap_neq // Hagree.
+rewrite !Pr_code_sample !distr.dmarginE !dlet_dlet_ext; apply: eq_dlet => y.
+rewrite -!distr.dmarginE; exact: (H y h h' Hagree).
+Qed.
+
+(* Pr_fst_closed — the [L = emptym] case of Pr_fst_agree_locs: import-free,
+   location-free code has a heap-independent value-marginal equal to Pr_fst c. *)
+Lemma Pr_fst_closed {A : choice_type} (c : raw_code A) :
+  ValidCode emptym [interface] c ->
+  forall h, distr.dmargin fst (Pr_code c h) = Pr_fst c.
+Proof.
+move=> Hc h; rewrite /Pr_fst.
+apply: (Pr_fst_agree_locs Hc) => l /fhas_empty [].
+Qed.
+
 Section dsdp_guess_distribution.
 (* Same scheme and marshalling as the output-exposing endpoint games.  [Mfin]
    is the finite carrier on which the guess and V_2 are observed, with
