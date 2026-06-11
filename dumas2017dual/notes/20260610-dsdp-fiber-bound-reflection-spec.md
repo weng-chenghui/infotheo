@@ -1,238 +1,236 @@
-# DSDP output-channel 1/m by full reflection — design spec (option B)
+# DSDP output-channel 1/m by full reflection — design spec (option B, corrected)
 
-Date: 2026-06-10. Branch: itp2026-dumas2017dual.
+Date: 2026-06-10, corrected 2026-06-11. Branch: itp2026-dumas2017dual.
 Scope: discharge the information-theoretic fiber bound `Pr[guess = V2] ≤ 1/m` at
-the all-zero output-exposing endpoint with **zero new assumptions** (only the
-already-committed predictor-losslessness `guess_lossless`), completing the
-chain `dsdp_alice_secrecy_leak_S ≤ 1/m + 2·epsilon_cpa`.
+the all-zero output-exposing endpoint with **no new assumptions** beyond the
+already-committed predictor-losslessness `guess_lossless`, completing the chain
+`dsdp_alice_secrecy_leak_S ≤ 1/m + 2·epsilon_cpa`.
 
 Supersedes the option-A fallback (a localized `guess_fdist_success_le_invm`
 hypothesis) in `20260610-dsdp-output-channel-derived-implementation-plan.md`.
 
-## 1. Goal and why option B is feasible
+## 0. Correction (2026-06-11): the committed games leak a degenerate S
 
-The connector (`guess_success_sdistr_eq_fdist`; committed as
-`Pr_guess_enc_zero_leak_S_eqE`) already proves
-`guess_sdistr_success = guess_fdist_success`, i.e.
-`Pr(experiment, zero_S) true = Pr_[guess_joint_fdist] [diagonal]`, moving
-the question into infotheo's fdist world. What remained was bounding that
-diagonal by `1/m`, which needs the joint's structure (`V2` uniform on the
-`m`-point fiber given `S`; `guess ⊥ V2 | S`). The prior analysis
-(`ssprove_absolute_Pr_gap`) judged this intractable because SSProve's relational
-tools give `AdvantageE`, not an absolute `Pr`, and a cell-read cannot be
-commuted past an opaque predictor.
+The committed output-exposing games leak `S = −(r2 + r3)`, **not** the protocol
+output `u1·v1 + u2·v2 + u3·v3`. The original step 2/3 (reflect, then read `S` off
+the run) rested on the false premise that the game's `S` is the scalar product.
 
-That analysis missed the **absolute-`Pr` footprint route**, now validated by a
-compiled probe (`dsdp/probe_fiber_reflection.v`, throwaway):
+Evidence (all current code):
+- **Symbolic trace** (`obs_of_procs_dsdp_leak_S`, `dsdp_game_symbolic.v:444`):
+  the output term is `S = Dec(agg) − r2 − r3 + u1·v1`, with the aggregate
+  (`HE_var 50`), `u1` (`HE_var 17`), `v1` (`HE_var 16`) occurring **only** inside
+  `AO_recv_output`. `obs_value_names` returns `[::]` for `AO_recv_output`, so
+  `collect_samples` never samples them and `resolve_term` maps them to the
+  out-of-range `HE_var 10`.
+- **Denotation** (`dsdp_game_code.v:349`): `HE_dec _ _ → Gplain 0`, and an
+  out-of-range `HE_var → Gplain 0`.
+- **Env trace** over `gc_eq` (de Bruijn `4 = r3`, `6 = r2`):
+  `as_plain S = (0 − r2 − r3) + (0·0) = −(r2 + r3)`.
+- **Cross-check** (`dsdp_program.v:282`, `dsdp_correctness.v`): the real output
+  is `u1·v1 + u2·v2 + u3·v3`.
 
-- `Pr_fst_closed` (PROVEN, ~9 tactic lines, `Qed`): a closed predictor's
-  value-marginal is heap-independent, so it cannot read `V2_cell` — by induction
-  on `valid_code`, the `opr`/`getr`/`putr` cases vacuous (`fhas_empty`),
-  `ret`/`sampler` thread the heap unchanged.
-- The integration (`toy_reflect`) advanced through every substantive step:
-  reflect a concrete `sample → put → get` program with `Pr_code_sample` /
-  `dlet_uniform` / `Pr_code_get`, compose an opaque predictor via
-  `Pr_code_bind`, and eliminate its heap-dependence via the footprint lemma.
-  Only a cosmetic `dlet`-congruence fold remained.
+Consequence: the committed `guess_S_determined : S = dsdp_g` is false against this
+game. The bound `1/m` still holds at the zero endpoint, but only by the trivial
+direct-independence route (the whole view is `V2`-free), which this project
+explicitly rejected as not security-meaningful
+(`project_dsdp_it_leg_ssprove_merge`). The Infotheo fiber leg has nothing to
+discharge.
 
-Design choice settled with the user: the predictor is **general** (may keep its
-own state in locations disjoint from the game cells — the strictly stronger
-adversary class, matching the committed `predictor_guesser` type). This needs
-the general footprint `Pr_fst_agree_locs`; `Pr_fst_closed` is its `L = emptym`
-corollary.
+## 1. Root cause, and why modeling decryption cannot fix it
 
-## 2. Proof architecture (data flow)
+Design-level cause: `S` was defined as a **decryption of the cipher aggregate**,
+and the IND-CPA hybrid zeroes those ciphers, so a decryption-derived `S` is
+`V2`-free at the all-zero endpoint by construction:
 
 ```
- guess_joint_code : raw_code (Mfin × Mfin)             (committed, returns (guess,V2) pair)
-        │ Pr_fst
-        ▼
- guess_joint_fdist : {fdist Mfin × Mfin}               (committed; the (guess,V2) joint)
-        │ reflect the program's INTERNAL samples (Pr_fst_guess_joint_code)
-        │ opaque predictor framed out by Pr_fst_agree_locs
-        ▼
- guess_sample_fdist : {fdist <samples × guess>}        (NEW; full joint of v2,v3,u2,u3,S,guess)
-        │ discharge dsdp_entropy hypotheses:
-        │   guess_V2_uniform, guess_VarRV_indep_inputs,
-        │   guess_S_determined, guess_indep_V2_given_S
-        ▼
- Pr_dsdp_sol_uniform (cited, guess-free) ⇒ each (v2,v3) has prob 1/m; guess ⊥ V2 | S
-        ▼
- guess_fdist_success_le_invm : guess_fdist_success = Pr_[guess_joint_fdist][diag] ≤ 1/m   (NEW)
-        │ + connector guess_success_sdistr_eq_fdist : guess_sdistr_success = guess_fdist_success
-        ▼
- guess_sdistr_success_le_invm : guess_sdistr_success = Pr(exp, zero_S) true ≤ 1/m          (NEW)
-        │ + guess_advantage_le (NEW; 2ε between the real/zero experiments,
-        │   from dsdp_advantage_derived_leak_S committed)
-        ▼
- dsdp_alice_secrecy_leak_S : Pr(exp, real_S) true ≤ 1/m + 2·epsilon_cpa  (NEW, final)
+zero endpoint: c100 = enc 0,  a1 = enc r2,  a2 = enc r3,
+               agg = enc(r2+r3),  Dec agg = r2+r3,
+               S = (r2+r3) − r2 − r3 + u1·v1 = u1·v1     (still V2-free)
 ```
 
-## 3. Components — every new identifier (signatures + role)
+Zeroing the ciphers (Channel 2) necessarily zeroes the `V2`-content of any `S`
+decrypted from them (Channel 1). The two channels are independent only if `S` is
+modeled independently of the ciphers. A *correct* decryption model does not help
+(it still gives `u1·v1` at the zero endpoint) and is not even locally expressible
+in Alice's view (`agg` is a value she receives, not one her denotation builds).
 
-### 3.0 Naming conventions (locked 2026-06-10)
+## 2. Resolution: recompose S as the plaintext output
 
-- **Prefix policy.** Building blocks inside `Section dsdp_guess_distribution`
-  are bare `guess_*` — the section name already carries `dsdp`, so the prefix is
-  redundant on its locals. Only the final exported result keeps the project
-  prefix: `dsdp_alice_secrecy_leak_S`.
-- **The connector's two sides are named by distribution TYPE, mirroring the
-  bridge `sdistr_to_fdist`.** `guess_sdistr_success` is the mass of the SSProve
-  subdistribution (`sdistr` = the `distr`/`SDistr` the game run induces);
-  `guess_fdist_success` is the diagonal mass of the Infotheo fdist. Both denote
-  the *same* real. `game` is rejected (a game is a program, not a distribution,
-  so it would not be parallel to `fdist`); `sdistr` is the SSProve distribution
-  type, already the name in `sdistr_to_fdist`.
-- **`guess` belongs on both connector sides.** The quantity is the adversary's
-  success probability; the guess is the predictor's output, foreign to Infotheo.
-  So neither side is "Infotheo content" — the fdist side is only the fdist
-  *representation*. The distinctively-Infotheo facts are **guess-free** and keep
-  their `dsdp_entropy` names (`Pr_dsdp_sol_uniform`, `dsdp_fiber_card`); they are
-  about `V2`'s distribution, cited not renamed.
-- **The connector names both representations** (`guess_success_sdistr_eq_fdist`,
-  not the terse `…E`), so the bridge is legible from the lemma name.
+Leak `S` as the genuine protocol output `u1·v1 + u2·v2 + u3·v3`, computed from the
+input weights and the secret samples and written into `S_output_cell`
+independently of the cipher hybrid. The input weights `u1,u2,u3,v1` are **theorem
+parameters** (not samples — decision R-u3-regular, §8), seeded into the game env;
+only the secrets `v2,v3` and masks `r2,r3` are sampled. Then:
+- `S` is written identically in the real and zero games (a plaintext computation,
+  untouched by the hops), so the committed `2·epsilon_cpa` cipher leg is
+  unaffected.
+- At the zero endpoint the ciphers are `V2`-free but `S` carries `v2` through
+  `u2·v2`, so conditioning on `S` pins `(v2,v3)` to an `m`-point fiber and the
+  fiber `1/m` is genuine.
 
-### 3.1 Generic reflection infrastructure (fiber file, reusable)
+Provenance contract:
+```
+cipher channel  = lower(trace)               (single source of truth, committed)
+output value S  = protocol correctness       (dsdp_computes_dot_product, cited)
+```
+The output channel is where **local-view security meets global correctness**:
+security reasons over Alice's local trace, which cannot see that her output is the
+scalar product; correctness, reasoning over the joint run, supplies it. No
+mechanism is duplicated — the output node references the shared spec function
+`dsdp_output`, not a re-typed copy.
 
-- `Pr_fst_agree_locs` — lemma. The value-marginal of valid code depends only on
-  the heap restricted to the code's own locations `L`: heaps agreeing on `L`
-  give equal `distr.dmargin fst (Pr_code c ·)`. Proof by induction on
-  `valid_code` (the `getr`/`putr` cases touch only `L`, so agreement on `L` is
-  preserved; `ret`/`sampler` thread the heap; `opr` vacuous for `[interface]`).
-  Source comment states the separation-logic FOOTPRINT/frame reading and that
-  it is what makes the predictor blind to `V2_cell`. (Generic: no `guess_`
-  prefix — not a member of the guess family.)
-- `Pr_fst_closed` — lemma (PROVEN). The `L = emptym` corollary of
-  `Pr_fst_agree_locs`: `ValidCode emptym [interface] c → ∀ h, distr.dmargin fst
-  (Pr_code c h) = Pr_fst c`.
-- `Pr_fst_guess_joint_code` — lemma. The explicit reflection of
-  `Pr_fst guess_joint_code`: the experiment's internal uniform samples
-  (`dlet_uniform`) threaded through the cells (`Pr_code_get`/`_put`) with the
-  opaque predictor framed out (`Pr_fst_agree_locs`), equating it to the
-  pushforward of `guess_sample_fdist` onto `(guess, V2)`.
+## 3. What stands unchanged (committed, done; independent of the S value)
 
-### 3.2 The explicit sample distribution and its random variables
+- The SSProve→Infotheo bridge `sdistr_to_fdist` + `Pr_sdistr_to_fdist`, and the
+  connector `guess_success_sdistr_eq_fdist`
+  (`guess_sdistr_success = guess_fdist_success`; heap-free pushforward).
+- The generic reflection toolkit: `Pr_fst_map`, `Pr_fst_agree_locs`,
+  `Pr_fst_closed`, `eq_in_dlet`, `Pr_code_preserves`.
+- The reflection core: `denote_run_distr` + `denote_run_distrE`, the `drun_*`
+  unfolds, `gc_eq`.
+- Oracle resolution: `guess_resolved_par`, `resolve_game_{run,sget,v2get}`,
+  `guess_resolved_oracles`.
 
-- `guess_sample_fdist` — def. The joint fdist of the zero-game's protocol
-  scalars and the guess: the scalars `(V2, V3, U2, U3)` are uniform and
-  independent (the `denote_run` samples), and `guess` follows the predictor's
-  output distribution on the resulting `(view, S)` — i.e. a uniform product on
-  the scalars composed with the predictor kernel, NOT a uniform draw on the
-  guess. `Pr_fst_guess_joint_code` proves the program realizes it, and its
-  `(guess, V2)`-marginal is `guess_joint_fdist`.
-- `V2 V3 U2 U3 S guess` (and the constant inputs `V1 U1`) — random variables
-  (`Let`/def) over `guess_sample_fdist`, the projections feeding `dsdp_entropy`.
-  Names preserve the math symbols, mirroring `dsdp_entropy`'s
-  `V1 V2 V3 U1 U2 U3 S`.
+## 4. The shared output function and the output-node recomposition (verified)
 
-### 3.3 The four `dsdp_entropy` hypotheses, discharged over the sample fdist
+### 4.1 dsdp_output — the single source of truth for the output value
 
-- `guess_V2_uniform` — lemma. `(V2, V3)` is uniform under `guess_sample_fdist`
-  (independent uniform samples).
-- `guess_VarRV_indep_inputs` — lemma. `(V2, V3) ⊥ (V1, U1, U2, U3)`. (`VarRV`
-  kept to mirror `dsdp_entropy`'s local naming.)
-- `guess_S_determined` — lemma. `S` is the constraint function of the variables
-  and inputs (`S = u1·v1 + u2·v2 + u3·v3 = dsdp_g`).
-- `guess_indep_V2_given_S` — lemma. `guess ⊥ V2 | S` — at the all-zero endpoint
-  the view is `V2`-free (enc of 0), so the guess depends on `V2` only through
-  `S`; the conditional independence is delivered by `Pr_fst_agree_locs` (the
-  predictor's output is framed out from `V2_cell`).
+```coq
+Definition dsdp_output {R : comNzRingType} (v1 u1 u2 u3 v2 v3 : R) : R :=
+  u1 * v1 + u2 * v2 + u3 * v3.
+```
+Verified (`/tmp/output_probe.v`, `coqc` exit 0): the class is `comNzRingType`
+(`plain : finComNzRingType`; `comRingType` is wrong), and the same function
+instantiates at **both** `plain AHE` (game) and `'Z_m` (entropy).
 
-### 3.4 The two success probabilities, the connector, the bound, composition
+Re-express the existing copies as wrappers (no fourth copy):
+- `dsdp_program.v`: `alice_resultE : alice_result = dsdp_output v1 u1 u2 u3 v2 v3`
+  (by `dsdp_computes_dot_product`).
+- `dsdp_entropy.v`: the former `dsdp_g` renamed `dsdp_output`; `dsdp_outputE`
+  relating the tupled and curried forms; downstream uses updated.
 
-- `guess_sdistr_success` — def. The SSProve-side success probability: the
-  true-mass of the guessing game's output subdistribution,
-  `distr.mu (pkg_advantage.Pr (guessing_experiment predictor zero_game_leak_S)) true`.
-- `guess_fdist_success` — def. The Infotheo-side success probability: the
-  diagonal mass of the bridged fdist,
-  `Pr guess_joint_fdist [set gv | gv.1 == gv.2]`. Same real as
-  `guess_sdistr_success`.
-- `guess_success_sdistr_eq_fdist` — lemma (connector).
-  `guess_sdistr_success = guess_fdist_success`. The guessing experiment's
-  instance of `sdistr_to_fdist`: pushforward (`Pr_fst_map`) onto the diagonal,
-  then `Pr_sdistr_to_fdist`. Heap-free. (Restructures the committed
-  `Pr_guess_enc_zero_leak_S_eqE`, introducing the two named sides.)
-- `guess_fdist_success_le_invm` — lemma. `guess_fdist_success ≤
-  (card_msg)%:R^-1`. Proof: the diagonal of the `(guess, V2)` marginal equals
-  `Pr_[guess_sample_fdist] [guess = V2]`; instantiate `dsdp_entropy` at
-  `guess_sample_fdist` with §3.3; the guess-free `Pr_dsdp_sol_uniform` gives each
-  `(v2,v3)` probability `1/m`, and `guess_indep_V2_given_S` caps the collision
-  at `1/m`.
-- `guess_sdistr_success_le_invm` — theorem. `guess_sdistr_success ≤
-  (card_msg)%:R^-1`. Proof: rewrite by `guess_success_sdistr_eq_fdist`, then
-  `guess_fdist_success_le_invm`.
-- `guess_advantage_le` — lemma (named, ~10–25 lines; carries the predictor
-  disjointness hypotheses). `|Pr(exp, real_S) true − Pr(exp, zero_S) true| ≤
-  2·epsilon_cpa`. Proof: re-associate `guessing_experiment = guessing_challenger
-  ∘ par predictor game` into `(guessing_challenger ∘ predictor) ∘ game`, package
-  `guessing_challenger ∘ predictor` as a `dsdp_indcpa_adversary` (validity
-  automatic; disjointness from the three hypotheses + the challenger's `emptym`
-  locations), then `exact: dsdp_advantage_derived_leak_S`.
-- `dsdp_alice_secrecy_leak_S` — theorem (final, prefixed; replaces
-  `dsdp_alice_secrecy`).
-  `Pr(guessing_experiment predictor real_game_leak_S) true ≤
-  (card_msg)%:R^-1 + 2·epsilon_cpa`. Proof: triangle
-  `Pr(real) ≤ Pr(zero) + |Pr(real) − Pr(zero)|`, then
-  `guess_sdistr_success_le_invm` and `guess_advantage_le`.
+### 4.2 Trace re-derivation (`dsdp_game_symbolic.v`)
 
-### 3.5 Renames of committed identifiers (fiber file only)
+Per decision R-u3-regular (§8), the input weights `u1,u2,u3,v1` move OUT of the
+sample prefix and become theorem parameters seeded into the game's initial env
+(the construction generalizes `empty_denv` to a parameter-seeded env). The sample
+prefix then samples only `v2,v3` (secrets) and `r2,r3` (masks). Make
+`AO_recv_output` (or its lowering) yield the scalar-product term
+`HE_add (HE_add (HE_mul u1 v1) (HE_mul u2 v2)) (HE_mul u3 v3)` over the seeded and
+sampled indices, replacing the `Dec`-based term. Re-derive
+`dsdp_alice_obs_leak_S` and `gc_eq`; the real indices come out of the rebuilt env.
+(Designing the env-seeding mechanism is the first writing-plans task.)
 
-Apply the prefix policy and the success-naming to the committed
-`Section dsdp_guess_distribution`:
+### 4.3 denote_output_termE — the reference (verified shape)
 
-- `dsdp_guess_core → guess_joint_code` (the `(guess, V2)`-pair program).
-- `dsdp_guess_fdist → guess_joint_fdist` (its `(guess, V2)` joint fdist).
-- `dsdp_guess_resolved → guess_resolved`, `dsdp_guess_resolve_eq →
-  guess_resolve_eq`, `dsdp_guess_lossless → guess_lossless`.
-- `Pr_guess_enc_zero_leak_S_eqE → guess_success_sdistr_eq_fdist`, restructured to
-  state `guess_sdistr_success = guess_fdist_success` via the two new defs.
-- update all internal references; sync the blueprint `\rocq` links and coqdoc
-  anchors in the same commit as the code rename (so no link dangles).
+```coq
+Lemma denote_output_termE (e : denv AHE) :
+  as_plain (denote_he pkey_of_party rand0 e output_term)
+  = dsdp_output (as_plain (de_val_nth e iv1)) (as_plain (de_val_nth e iu1))
+                (as_plain (de_val_nth e iu2)) (as_plain (de_val_nth e iu3))
+                (as_plain (de_val_nth e iv2)) (as_plain (de_val_nth e iv3)).
+Proof. by rewrite /dsdp_output //=. Qed.
+```
+Verified definitional (no `ring`); index-agnostic, so the placeholder probe
+transfers to the real indices.
 
-## 4. Cited (unchanged) anchors
+## 5. The fiber bound, now genuinely meaningful
 
-- infotheo `dsdp_entropy`: `dsdp_g`, `dsdp_fiber_card`, `Pr_dsdp_sol_uniform`,
-  the section interface (`P`, `V1..S`, `CondRV`/`VarRV`/`InputRV`, hypotheses
-  `VarRV_uniform`/`VarRV_indep_inputs`/`constraint_holds`).
-- SSProve nominal: `Pr_code_sample`/`_get`/`_put`/`_bind`, `Pr_fst_sample`/
-  `_bind`, `Pr_Pr_fst`, `dlet_uniform`, `distr.dmargin*`.
-- committed derived chain: `real_game_leak_S`, `zero_game_leak_S`,
-  `dsdp_advantage_derived_leak_S`; the connector and guessing layer.
+With weights as parameters (§4.2), `guess_sample_fdist` is over the sampled
+randomness only: `(V2,V3)` uniform secrets (plus masks), with `(V1,U1,U2,U3)` the
+constant input RVs. Discharge the four entropy hypotheses over it:
+- `guess_V2_uniform` — `(V2,V3)` uniform.
+- `guess_VarRV_indep_inputs` — `(V2,V3) ⊥ (V1,U1,U2,U3)`, trivial since the inputs
+  are constant.
+- `guess_S_determined` — `S = dsdp_output(...)`, now provable via
+  `denote_output_termE` and the recomposed game (was false before).
+- `guess_indep_V2_given_S` — `guess ⊥ V2 | S`, delivered by `Pr_fst_agree_locs`
+  framing the predictor off `V2_cell`.
 
-## 5. Risks and mitigations
+The fiber instantiation carries the precondition `injective (fun v => u3 * v)` on
+the parameter `u3` (decision R-u3-regular).
 
-- **R1 (main): reflecting the full `denote_run`.** The zero-game's `denote_run`
-  unfolds to ~14 straight-line statements carrying the AHE marshalling and
-  `he_term` evaluation. Mitigation: reflect the *unfolded* concrete program
-  (computed from `gc_dsdp`) statement-by-statement with the proven calculus; the
-  `he_term`/marshalling appears only inside `S`'s value, which feeds
-  `guess_S_determined` as a closed-form equation, not something to reflect
-  probabilistically. Mechanical, no opaque obstruction.
-- **R2: connecting the reflected sample distribution to `dsdp_entropy`'s RV
-  framework.** Mitigation: `guess_sample_fdist` is an explicit
-  `fdist_uniform` over a product index; the four identities are then standard
-  marginal/independence facts of a uniform product, plus the closed-form `S`.
-- **R3: the `par predictor game` vs `A ∘ game` reconciliation** in
-  `guess_advantage_le`. Mitigation: the committed `guess_resolve_eq`
-  already resolves the `par` form; the same link/interchange lemmas re-associate
-  it to the sequential `(challenger ∘ predictor) ∘ game` that `AdvantageE`
-  expects.
-- None of R1–R3 is a documented infra gap; all use proven calculus.
+Then instantiate the entropy fiber for
+`guess_fdist_success_le_invm : guess_fdist_success ≤ (card_msg)%:R^-1`, and
+`guess_sdistr_success_le_invm` via the connector.
 
-## 6. Verification
+Entropy instantiation (route F, verified): relax the ring-generic fiber
+(`dsdp_fiber_card_ring`/`Pr_dsdp_sol_uniform_ring`) from `finComUnitRingType` +
+`u3 \is a GRing.unit` to `finComNzRingType` + `injective (fun v => u3 * v)`, then
+instantiate at `R := plain AHE`. The card proof replaces `u3^-1` with the
+bijective inverse from `inj_card_bij` (injective on a finite type is bijective).
+A unit is a regular multiplier, so the generalization subsumes the existing
+lemmas. No change to the homomorphic-encryption library; full AHE-genericity
+kept. The earlier candidates — strengthening `plain` to `finComUnitRingType`
+(library-wide) or specializing to a `'Z_(p*q)` scheme (loses genericity) — are
+both unnecessary.
 
-- Each component verified by `rocq_compile_file` on the fiber file; no
-  `Admitted`/`admit`/`Axiom` (the only assumption is the committed
-  `guess_lossless`). Final axiom set = the committed chain's (`epsilon_cpa`,
-  `enc_ind_cpa_real_or_zero`, standard SSProve/classical), no new custom axiom.
-- The throwaway probe `dsdp/probe_fiber_reflection.v` is deleted before the real
-  work; the proven `Pr_fst_closed`/`Pr_fst_agree_locs` are ported into the fiber
-  file.
-- On completion, the blueprint Part II (ch 10–11) nodes flip from blue to green
-  and lose the option-A hypothesis caveat.
+## 6. Composition (unchanged shape)
 
-## 7. Out of scope
+`guess_advantage_le` (`≤ 2·epsilon_cpa`, from `dsdp_advantage_derived_leak_S`;
+re-confirm under the recomposed `S`), then the triangle. The final theorem
+quantifies over the input-weight parameters with the regularity precondition:
+`dsdp_alice_secrecy_leak_S : forall (u1 u2 u3 v1 : plain AHE),
+injective (fun v => u3 * v) -> Pr(guessing_experiment predictor
+(real_game_leak_S … u1 u2 u3 v1)) true ≤ (card_msg)%:R^-1 + 2·epsilon_cpa`.
 
-- No change to Part I or the `2·epsilon_cpa` machinery.
-- No new SSProve general-purpose infra beyond the two footprint lemmas
-  (`Pr_fst_agree_locs`, `Pr_fst_closed`), which live in the fiber file.
+## 7. Cited anchors, naming, notation
+
+Cited unchanged: infotheo `dsdp_entropy` (`dsdp_fiber_card`,
+`Pr_dsdp_sol_uniform`/`Pr_dsdp_sol_uniform_ring`, the RV interface);
+SSProve nominal (`Pr_code_*`, `Pr_fst_*`, `dlet_uniform`, `distr.dmargin*`);
+the committed derived chain (`real_game_leak_S`, `zero_game_leak_S`,
+`dsdp_advantage_derived_leak_S`).
+
+Naming: building blocks inside `Section dsdp_guess_distribution` are bare
+`guess_*`; only the exported `dsdp_alice_secrecy_leak_S` keeps the project prefix.
+`dsdp_g → dsdp_output` (the `g` is the opaque inherited constraint-function
+symbol). Equation lemmas use the MathComp `E`-suffix **without** underscore
+(`alice_resultE`, `dsdp_outputE`, `denote_output_termE`).
+
+Notation: do **not** reuse `$`/`#` for `as_plain`/`de_val_nth` — both are
+established piSMC data-wrapper notations in `pismc_scope` (`$ x := e x`
+"encrypted", `# x := priv_key x`), so reusing `$` for `as_plain` inverts its
+meaning. If brevity is wanted, pick fresh two-char tokens (the `*h`/`^h`/`E<>`
+family) and grep-verify against the fiber file's open scopes at implementation.
+
+## 8. Open items and risks
+
+- **R-trace** (mechanical): the re-derivation in §4.2; the §4.3 proof is
+  index-agnostic, so low risk once the trace is rebuilt.
+- **R-entropy type-compatibility** (RESOLVED, route F): `plain AHE` is
+  `finComNzRingType` and does **not** upgrade to `finComUnitRingType` (probe
+  `/tmp/unit_probe2.v`: no free upgrade; `u3 \is a GRing.unit` is not even
+  statable). Resolution: generalize `dsdp_fiber_card_ring`/
+  `Pr_dsdp_sol_uniform_ring` to `finComNzRingType` + `injective (fun v => u3 * v)`
+  (probe `/tmp/inj_route_probe.v`, `fiber_nz_card`, `coqc` exit 0), instantiate at
+  `R := plain AHE`. No library change; genericity kept; subsumes the unit version.
+- **R-u3-regular** (RESOLVED, decision 2026-06-11): `injective (u3 * ·)` ≡ `u3`
+  regular/a unit; uniform `u3` is not always regular, so an unconditional 1/m would
+  carry slack `Pr[u3 non-regular]`. **Decision: weights as parameters.** Model the
+  input weights `u1,u2,u3,v1` as universally-quantified theorem parameters with
+  precondition `injective (fun v => u3 * v)`; sample only `v2,v3` (secrets) and
+  `r2,r3` (masks). Yields the clean worst-case `∀ regular u3, Pr ≤ 1/m +
+  2·epsilon_cpa`; matches game-based security (adversary commits inputs) and the IT
+  framework (InputRV conditioned). Consequence: the §4.2 trace rebuild seeds the
+  weights into the game env rather than sampling them (env-seeding is the first
+  writing-plans task). Rejected: sample `u3` from regulars (artificial input
+  distribution, average-case); accept additive slack (non-clean headline).
+- **R-2eps**: re-confirm `dsdp_advantage_derived_leak_S` with `S` written
+  identically in real/zero (expected, since `S` no longer routes through the
+  hops).
+- The resulting `1/m` is the **meaningful fiber bound** (Channel 1 open at the
+  zero endpoint), not the trivial direct-independence one.
+
+## 9. Verification status
+
+- `/tmp/output_probe.v` (throwaway, `coqc` exit 0): `dsdp_output` over
+  `comNzRingType` at both `plain AHE` and `'Z_m`; `denote_output_termE` closes
+  definitionally.
+- `/tmp/unit_probe2.v` (throwaway, `coqc` exit 0): confirmed `plain AHE` is not
+  `finComUnitRingType` and there is no free upgrade; `'Z_m` is, with the unit
+  predicate and `dsdp_fiber_card_ring` usable.
+- `/tmp/inj_route_probe.v` (throwaway, `coqc` exit 0): `fiber_nz_card` proved over
+  `finComNzRingType` with `injective (u3 * ·)`, no `u3^-1`, no library change.
+- No `Admitted`/`admit`/`Axiom` introduced; the only assumption remains the
+  committed `guess_lossless`.
