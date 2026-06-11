@@ -405,6 +405,24 @@ Proof. by rewrite /drun /dhe /denote_run -/denote_run. Qed.
 Lemma gc_eq : gc = GC_sample card_msg (GC_sample card_msg (GC_sample card_msg (GC_sample card_msg (GC_sample card_renc (GC_sample card_renc (GC_put (HE_var 3) (GC_enc_hop 1 (HE_const 0) (GC_enc_hop 2 (HE_const 0) (GC_let (HE_emul (HE_epow (HE_var 1) (HE_var 7)) (HE_enc 1 (HE_var 3) 1)) (GC_let (HE_emul (HE_epow (HE_var 1) (HE_var 9)) (HE_enc 2 (HE_var 3) 0)) (GC_put_output (HE_add (HE_add (HE_mul (HE_var 8) (HE_var 11)) (HE_mul (HE_var 9) (HE_var 7))) (HE_mul (HE_var 10) (HE_var 6))) (GC_ret [:: HE_var 1; HE_var 0; HE_var 3; HE_var 2])))))))))))).
 Proof. by rewrite /gc; vm_compute. Qed.
 
+(* output_term — the seeded all-zero game's GC_put_output he_term (from gc_eq):
+   the scalar product over the put_output env indices (v1=11, u1=8, u2=9, u3=10,
+   v2=7, v3=6). *)
+Notation output_term :=
+  (HE_add (HE_add (HE_mul (HE_var 8) (HE_var 11)) (HE_mul (HE_var 9) (HE_var 7)))
+          (HE_mul (HE_var 10) (HE_var 6))).
+
+(* denote_output_termE — the leaked output term denotes (via denote_he) to the
+   shared scalar-product spec dsdp_output of the env values at the put_output
+   indices; the bridge by which the recomposed game's S meets the entropy-side
+   constraint.  Definitional. *)
+Lemma denote_output_termE (e : denv AHE) :
+  as_plain (dhe e output_term)
+  = dsdp_output (as_plain (de_val_nth e 11)) (as_plain (de_val_nth e 8))
+                (as_plain (de_val_nth e 9)) (as_plain (de_val_nth e 10))
+                (as_plain (de_val_nth e 7)) (as_plain (de_val_nth e 6)).
+Proof. by rewrite /dhe /dsdp_output /=. Qed.
+
 (* denote_run_distr — the explicit Pr_code reflection of denote_run: samples
    become dlet over uniforms threading the env; puts update the heap. *)
 Fixpoint denote_run_distr (e : denv AHE) (gc0 : game_code) (h : heap) {struct gc0}
