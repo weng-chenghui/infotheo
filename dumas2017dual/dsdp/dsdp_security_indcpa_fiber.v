@@ -377,7 +377,8 @@ Qed.
 Hypothesis card_renc_neq : card_renc != card_msg.
 Hypothesis predictor_locs_disj : fseparate (locs predictor) (protocol_state t_msg).
 
-Let gc := all_zero (game_of_trace (dsdp_alice_obs_leak_S card_msg card_renc)).
+Let gc := all_zero (game_of_trace_seeded dsdp_weight_names
+                      (dsdp_alice_obs_leak_S_seeded card_msg card_renc)).
 Let drun := denote_run renc_card rand_of_renc chmsg_of_msg chcipher_of_cipher pkey_of_party msg_of_idx rand0.
 Let dhe := denote_he pkey_of_party rand0.
 
@@ -397,8 +398,11 @@ Proof. by rewrite /drun /dhe /denote_run -/denote_run. Qed.
 Lemma drun_ret (e:denv AHE) outs : drun e (GC_ret outs) = ret ([seq chcipher_of_cipher (as_cipher (dhe e o)) | o <- outs] : cipher_list t_cipher).
 Proof. by rewrite /drun /dhe /denote_run -/denote_run. Qed.
 
-(* gc_eq — the concrete output-exposing all-zero game body (14 constructors). *)
-Lemma gc_eq : gc = GC_sample card_msg (GC_sample card_msg (GC_sample card_msg (GC_sample card_msg (GC_sample card_msg (GC_sample card_msg (GC_sample card_renc (GC_sample card_renc (GC_put (HE_var 5) (GC_enc_hop 1 (HE_const 0) (GC_enc_hop 2 (HE_const 0) (GC_let (HE_emul (HE_epow (HE_var 1) (HE_var 5)) (HE_enc 1 (HE_var 4) 1)) (GC_let (HE_emul (HE_epow (HE_var 1) (HE_var 4)) (HE_enc 2 (HE_var 3) 0)) (GC_put_output (HE_add (HE_sub (HE_sub (HE_dec 0 (HE_var 10)) (HE_var 6)) (HE_var 4)) (HE_mul (HE_var 10) (HE_var 10))) (GC_ret [:: HE_var 1; HE_var 0; HE_var 3; HE_var 2])))))))))))))).
+(* gc_eq — the concrete output-exposing all-zero seeded game body: 6 samples
+   (secrets v2,v3, masks r2,r3, two hop randomness), the V_2 write, two zeroed
+   hops, the two homomorphic combines, and the scalar-product output S
+   (u1*v1 + u2*v2 + u3*v3, weights from the seed). *)
+Lemma gc_eq : gc = GC_sample card_msg (GC_sample card_msg (GC_sample card_msg (GC_sample card_msg (GC_sample card_renc (GC_sample card_renc (GC_put (HE_var 3) (GC_enc_hop 1 (HE_const 0) (GC_enc_hop 2 (HE_const 0) (GC_let (HE_emul (HE_epow (HE_var 1) (HE_var 7)) (HE_enc 1 (HE_var 3) 1)) (GC_let (HE_emul (HE_epow (HE_var 1) (HE_var 9)) (HE_enc 2 (HE_var 3) 0)) (GC_put_output (HE_add (HE_add (HE_mul (HE_var 8) (HE_var 11)) (HE_mul (HE_var 9) (HE_var 7))) (HE_mul (HE_var 10) (HE_var 6))) (GC_ret [:: HE_var 1; HE_var 0; HE_var 3; HE_var 2])))))))))))).
 Proof. by rewrite /gc; vm_compute. Qed.
 
 (* denote_run_distr — the explicit Pr_code reflection of denote_run: samples
