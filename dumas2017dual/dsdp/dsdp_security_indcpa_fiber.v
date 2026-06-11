@@ -213,6 +213,24 @@ move=> Hc h; rewrite /Pr_fst.
 apply: (Pr_fst_agree_locs Hc) => l /fhas_empty [].
 Qed.
 
+(* Pr_fst_put_invariant — the value-marginal of import-free code [c] is
+   invariant under the value written to a cell outside [c]'s locations [L]:
+   [c] cannot observe [cell].  Specializes Pr_fst_agree_locs to a put; it is
+   what frames the guessing predictor's output off the V_2 cell. *)
+Lemma Pr_fst_put_invariant {A : choice_type} (cell : Location) (L : Locations)
+    (c : raw_code A) (h : heap) (x y : cell) :
+  ValidCode L [interface] c -> cell.1 \notin domm L ->
+  distr.dmargin fst (Pr_code (#put cell := x ;; c) h)
+  = distr.dmargin fst (Pr_code (#put cell := y ;; c) h).
+Proof.
+move=> Hv Hcell.
+rewrite !Pr_code_put.
+apply: (Pr_fst_agree_locs Hv) => l Hl.
+have Hne : l.1 != cell.1
+  by apply: contra Hcell => /eqP <-; exact: fhas_in L l Hl.
+by rewrite !get_set_heap_neq.
+Qed.
+
 (* eq_in_dlet — dlet congruence on the support: bodies that agree on the support
    of [mu] give equal [dlet] (mass outside the support is zero). *)
 Lemma eq_in_dlet {T U : choiceType} (f g : T -> distr.distr R U) (mu : distr.distr R T) :
