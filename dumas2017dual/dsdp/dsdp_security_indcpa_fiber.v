@@ -254,6 +254,9 @@ Variables (AHE : AHEncType) (Renc : finType) (card_renc : nat)
   (chcipher_of_cipher : cipher AHE -> t_cipher)
   (pkey_of_party : party_id -> pub_key AHE)
   (card_msg : nat) (msg_of_idx : 'I_card_msg -> plain AHE) (rand0 : rand AHE).
+(* seed — initial env carrying the fixed input-weight parameters (Task 7 gives it
+   structure; here the run/resolve lemmas thread it abstractly). *)
+Variable seed : denv AHE.
 Variable predictor : predictor_guesser t_msg t_cipher.
 Variable Mfin : finType.
 Variable msg_to_fin : t_msg -> Mfin.
@@ -266,7 +269,7 @@ Local Notation "'ciphers'" := (cipher_list t_cipher) (in custom pack_type at lev
 (* zero_game_leak_S instantiated at this section's parameters. *)
 Let game : raw_package :=
   zero_game_leak_S renc_card rand_of_renc chmsg_of_msg chcipher_of_cipher
-    pkey_of_party msg_of_idx rand0.
+    pkey_of_party msg_of_idx rand0 seed.
 
 (* guess_pair_challenger — the pair-returning analogue of [guessing_challenger]:
    it runs the game, reads S, queries the predictor, reads V_2, and returns the
@@ -458,7 +461,7 @@ Qed.
 (* resolve_game_run / _sget / _v2get — the game's three oracles resolve to the
    run denotation and the two cell-read bodies (getm_def lookup in the raw map). *)
 Lemma resolve_game_run :
-  resolve game (id_game_run, ('unit, cipher_list t_cipher)) tt = drun (empty_denv AHE) gc.
+  resolve game (id_game_run, ('unit, cipher_list t_cipher)) tt = drun seed gc.
 Proof.
 rewrite /resolve /game /zero_game_leak_S -/gc /denote_game_leak_S /denote_game_leak_S_raw mkfmapE /id_game_run /id_v2_get /id_s_get /fst.
 cbn [getm_def]; cbn [fst snd].
@@ -486,7 +489,7 @@ Qed.
    to the predictor. *)
 Lemma guess_resolved_oracles :
   guess_resolved =
-  (view ← drun (empty_denv AHE) gc ;;
+  (view ← drun seed gc ;;
    s    ← denote_s_get_body chmsg_of_msg ;;
    guess ← resolve (pack predictor) (id_guess, (chProd (cipher_list t_cipher) t_msg, t_msg)) (view, s) ;;
    v2   ← denote_v2_get_body chmsg_of_msg ;;

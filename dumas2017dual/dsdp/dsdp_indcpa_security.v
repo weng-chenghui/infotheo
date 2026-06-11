@@ -202,6 +202,10 @@ Variable pkey_of_party : party_id -> pub_key AHE.
 Variable card_msg : nat.
 Variable msg_of_idx : 'I_card_msg -> plain AHE.
 Variable rand0 : rand AHE.
+(* seed — the initial denotation env carrying the fixed input-weight parameters
+   (weights-as-parameters, R-u3-regular).  The hybrid advantage is independent of
+   it (S is common context), so it is threaded abstractly here. *)
+Variable seed : denv AHE.
 
 (* denote_game_shim_leak_S_raw — the raw three-oracle map underlying the
    output-exposing oracle-routed shim: the [denote_game_shim] run/V_2 pair
@@ -211,7 +215,7 @@ Definition denote_game_shim_leak_S_raw (gc : game_code) (site : nat) : raw_packa
     [:: (id_game_run, mkdef 'unit (cipher_list t_cipher)
            (fun _ => denote_run_shim renc_card rand_of_renc chmsg_of_msg
                        chcipher_of_cipher cipher_of_chcipher pkey_of_party
-                       msg_of_idx rand0 site 0 (empty_denv AHE) gc))
+                       msg_of_idx rand0 site 0 seed gc))
       ; (id_v2_get,   mkdef 'unit t_msg (fun _ => denote_v2_get_body chmsg_of_msg))
       ; (id_s_get,    mkdef 'unit t_msg (fun _ => denote_s_get_body chmsg_of_msg)) ].
 
@@ -244,7 +248,7 @@ Definition denote_game_shim_leak_S (gc : game_code) (site : nat) :
    at site i composed with the real-encryption oracle. *)
 Lemma hop_equiv_real_leak_S (gc : game_code) (i : nat) :
   denote_game_leak_S renc_card rand_of_renc chmsg_of_msg chcipher_of_cipher
-    pkey_of_party msg_of_idx rand0 (zero_hop_prefix i gc)
+    pkey_of_party msg_of_idx rand0 seed (zero_hop_prefix i gc)
   ≈₀ denote_game_shim_leak_S (zero_hop_prefix i gc) i
        ∘ oracle_real renc_card rand_of_renc msg_of_chmsg chcipher_of_cipher
            pkey_of_party.
@@ -270,7 +274,7 @@ Lemma hop_equiv_zero_leak_S (gc : game_code) (i : nat) :
     ∘ oracle_zero renc_card rand_of_renc t_msg chcipher_of_cipher
         pkey_of_party
   ≈₀ denote_game_leak_S renc_card rand_of_renc chmsg_of_msg chcipher_of_cipher
-       pkey_of_party msg_of_idx rand0 (zero_hop_prefix i.+1 gc).
+       pkey_of_party msg_of_idx rand0 seed (zero_hop_prefix i.+1 gc).
 Proof.
 (* Same shape as hop_equiv_real_leak_S: the run goal is Part I's
    denote_run_shim_zero_equiv (site pinned at i + 0 by addn0), the two
@@ -303,15 +307,15 @@ Lemma advantage_hop_leak_S
           pkey_of_party).(locs)) :
   AdvantageE
     (denote_game_leak_S renc_card rand_of_renc chmsg_of_msg chcipher_of_cipher
-       pkey_of_party msg_of_idx rand0 (zero_hop_prefix i gc))
+       pkey_of_party msg_of_idx rand0 seed (zero_hop_prefix i gc))
     (denote_game_leak_S renc_card rand_of_renc chmsg_of_msg chcipher_of_cipher
-       pkey_of_party msg_of_idx rand0 (zero_hop_prefix i.+1 gc)) A
+       pkey_of_party msg_of_idx rand0 seed (zero_hop_prefix i.+1 gc)) A
     <= epsilon_cpa.
 Proof.
 have triangle_ineq :=
   Advantage_triangle_chain
     (denote_game_leak_S renc_card rand_of_renc chmsg_of_msg chcipher_of_cipher
-       pkey_of_party msg_of_idx rand0 (zero_hop_prefix i gc) : raw_package)
+       pkey_of_party msg_of_idx rand0 seed (zero_hop_prefix i gc) : raw_package)
     [:: (denote_game_shim_leak_S (zero_hop_prefix i gc) i
            ∘ oracle_real renc_card rand_of_renc msg_of_chmsg chcipher_of_cipher
                pkey_of_party : raw_package)
@@ -319,7 +323,7 @@ have triangle_ineq :=
            ∘ oracle_zero renc_card rand_of_renc t_msg chcipher_of_cipher
                pkey_of_party : raw_package) ]
     (denote_game_leak_S renc_card rand_of_renc chmsg_of_msg chcipher_of_cipher
-       pkey_of_party msg_of_idx rand0 (zero_hop_prefix i.+1 gc) : raw_package) A.
+       pkey_of_party msg_of_idx rand0 seed (zero_hop_prefix i.+1 gc) : raw_package) A.
 cbn [advantage_sum] in triangle_ineq.
 rewrite ?addrA in triangle_ineq.
 apply: (le_trans triangle_ineq).
@@ -349,12 +353,12 @@ Lemma advantage_sum_ladder_le_leak_S
   forall (n start : nat),
   advantage_sum
     (denote_game_leak_S renc_card rand_of_renc chmsg_of_msg chcipher_of_cipher
-       pkey_of_party msg_of_idx rand0 (zero_hop_prefix start gc))
+       pkey_of_party msg_of_idx rand0 seed (zero_hop_prefix start gc))
     [seq (denote_game_leak_S renc_card rand_of_renc chmsg_of_msg
-            chcipher_of_cipher pkey_of_party msg_of_idx rand0
+            chcipher_of_cipher pkey_of_party msg_of_idx rand0 seed
             (zero_hop_prefix l gc) : raw_package) | l <- iota start.+1 n]
     (denote_game_leak_S renc_card rand_of_renc chmsg_of_msg chcipher_of_cipher
-       pkey_of_party msg_of_idx rand0 (zero_hop_prefix (start + n.+1) gc)) A
+       pkey_of_party msg_of_idx rand0 seed (zero_hop_prefix (start + n.+1) gc)) A
     <= n.+1 %:R * epsilon_cpa.
 Proof.
 elim=> [|n IHn] start.
@@ -383,9 +387,9 @@ Lemma advantage_le_leak_S
           pkey_of_party).(locs)) :
   AdvantageE
     (denote_game_leak_S renc_card rand_of_renc chmsg_of_msg chcipher_of_cipher
-       pkey_of_party msg_of_idx rand0 (all_real gc))
+       pkey_of_party msg_of_idx rand0 seed (all_real gc))
     (denote_game_leak_S renc_card rand_of_renc chmsg_of_msg chcipher_of_cipher
-       pkey_of_party msg_of_idx rand0 (all_zero gc)) A
+       pkey_of_party msg_of_idx rand0 seed (all_zero gc)) A
     <= (size (hop_sites gc))%:R * epsilon_cpa.
 Proof.
 rewrite /all_real /all_zero /hop_sites size_iota.
@@ -394,12 +398,12 @@ case Hch: (count_hops gc) => [|m].
 - have tri :=
     Advantage_triangle_chain
       (denote_game_leak_S renc_card rand_of_renc chmsg_of_msg chcipher_of_cipher
-         pkey_of_party msg_of_idx rand0 (zero_hop_prefix 0 gc) : raw_package)
+         pkey_of_party msg_of_idx rand0 seed (zero_hop_prefix 0 gc) : raw_package)
       [seq (denote_game_leak_S renc_card rand_of_renc chmsg_of_msg
-              chcipher_of_cipher pkey_of_party msg_of_idx rand0
+              chcipher_of_cipher pkey_of_party msg_of_idx rand0 seed
               (zero_hop_prefix i gc) : raw_package) | i <- iota 1 (count_hops gc - 1)]
       (denote_game_leak_S renc_card rand_of_renc chmsg_of_msg chcipher_of_cipher
-         pkey_of_party msg_of_idx rand0 (zero_hop_prefix m.+1 gc) : raw_package) A.
+         pkey_of_party msg_of_idx rand0 seed (zero_hop_prefix m.+1 gc) : raw_package) A.
   apply: (le_trans tri).
   rewrite Hch subn1 succnK.
   apply: advantage_sum_ladder_le_leak_S.
@@ -421,9 +425,9 @@ Definition real_game_leak_S
     (chcipher_of_cipher : cipher AHE -> t_cipher)
     (pkey_of_party : party_id -> pub_key AHE)
     (card_msg : nat) (msg_of_idx : 'I_card_msg -> plain AHE)
-    (rand0 : rand AHE) : raw_package :=
+    (rand0 : rand AHE) (seed : denv AHE) : raw_package :=
   denote_game_leak_S renc_card rand_of_renc chmsg_of_msg chcipher_of_cipher
-    pkey_of_party msg_of_idx rand0
+    pkey_of_party msg_of_idx rand0 seed
     (all_real (game_of_trace (dsdp_alice_obs_leak_S card_msg card_renc))).
 
 (* zero_game_leak_S — the output-exposing all-zero endpoint of the DSDP problem,
@@ -435,9 +439,9 @@ Definition zero_game_leak_S
     (chcipher_of_cipher : cipher AHE -> t_cipher)
     (pkey_of_party : party_id -> pub_key AHE)
     (card_msg : nat) (msg_of_idx : 'I_card_msg -> plain AHE)
-    (rand0 : rand AHE) : raw_package :=
+    (rand0 : rand AHE) (seed : denv AHE) : raw_package :=
   denote_game_leak_S renc_card rand_of_renc chmsg_of_msg chcipher_of_cipher
-    pkey_of_party msg_of_idx rand0
+    pkey_of_party msg_of_idx rand0 seed
     (all_zero (game_of_trace (dsdp_alice_obs_leak_S card_msg card_renc))).
 
 (* dsdp_advantage_derived_leak_S — the output-exposing analogue of
@@ -458,7 +462,7 @@ Lemma dsdp_advantage_derived_leak_S
     (chmsg_of_msgK : cancel chmsg_of_msg msg_of_chmsg)
     (pkey_of_party : party_id -> pub_key AHE)
     (card_msg : nat) (msg_of_idx : 'I_card_msg -> plain AHE)
-    (rand0 : rand AHE) (LA : Locations) (A : raw_package)
+    (rand0 : rand AHE) (seed : denv AHE) (LA : Locations) (A : raw_package)
     (A_valid : ValidPackage LA (game_iface_leak_S t_msg t_cipher) A_export A)
     (A_disj_state : fseparate LA (protocol_state t_msg))
     (A_disj_ore : fseparate LA
@@ -469,16 +473,16 @@ Lemma dsdp_advantage_derived_leak_S
                 chcipher_of_cipher pkey_of_party))) :
   AdvantageE
     (real_game_leak_S renc_card rand_of_renc chmsg_of_msg chcipher_of_cipher
-       pkey_of_party msg_of_idx rand0)
+       pkey_of_party msg_of_idx rand0 seed)
     (zero_game_leak_S renc_card rand_of_renc chmsg_of_msg chcipher_of_cipher
-       pkey_of_party msg_of_idx rand0)
+       pkey_of_party msg_of_idx rand0 seed)
     A <= 2%:R * epsilon_cpa.
 Proof.
 rewrite /real_game_leak_S /zero_game_leak_S.
 have Hsz : size (hop_sites
     (game_of_trace (dsdp_alice_obs_leak_S card_msg card_renc))) = 2
   by rewrite /hop_sites size_iota count_hops_game_of_trace dsdp_obs_hops_leak_S.
-have H := advantage_le_leak_S chcipher_of_cipherK chmsg_of_msgK msg_of_idx rand0
+have H := advantage_le_leak_S chcipher_of_cipherK chmsg_of_msgK msg_of_idx rand0 seed
   (game_of_trace (dsdp_alice_obs_leak_S card_msg card_renc))
   A_valid A_disj_state A_disj_ore A_disj_oze.
 rewrite Hsz in H.
