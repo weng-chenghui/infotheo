@@ -7,6 +7,7 @@ Require Import extra_algebra.
 
 Import GRing.Theory.
 Import Num.Theory.
+Import Order.POrderTheory.
 
 (******************************************************************************)
 (*                                                                            *)
@@ -579,4 +580,74 @@ case: (eqVneq a c) => [->|ana].
 Qed.
 
 End inde_const_RV_sec.
+
+Section cinde_diagonal_bound_sec.
+Context {R : realType}.
+Variables (U : finType) (P : R.-fdist U) (A C : finType).
+Variables (X Y : {RV P -> A}) (Z : {RV P -> C}).
+
+(* The second-coordinate marginal of a pair law recovers the first marginal:
+   summing [%W, Z] over Z gives W. *)
+Lemma marg_snd {B : finType} (W : {RV P -> B}) (w : B) :
+  \sum_(c : C) `Pr[ [% W, Z] = (w, c) ] = `Pr[ W = w ].
+Proof.
+under eq_bigr => c _ do rewrite pfwd1E /Pr.
+rewrite pfwd1E /Pr (partition_big Z xpredT) //=.
+apply: eq_bigr => c _; apply: eq_bigl => t.
+by rewrite !inE /= !xpair_eqE andbC.
+Qed.
+
+(* The probability that X and Y agree is the diagonal sum of their joint law. *)
+Lemma Pr_diag_sum :
+  Pr P [set t | X t == Y t] = \sum_(a : A) `Pr[ [% X, Y] = (a, a) ].
+Proof.
+under eq_bigr => a _ do rewrite pfwd1E /Pr.
+rewrite /Pr (partition_big X xpredT) //=.
+apply: eq_bigr => a _; apply: eq_bigl => t.
+rewrite !inE /= !xpair_eqE.
+by case: (X t =P a) => [->|]; rewrite ?andbF ?andbT // eq_sym andbb.
+Qed.
+
+Variable m : nat.
+Hypothesis Hcinde : P |= X _|_ Y | Z.
+Hypothesis HYbound : forall (a : A) (c : C), `Pr[ Y = a | Z = c ] <= m%:R^-1.
+
+(* When X and Y are conditionally independent given Z and Y is, conditionally on
+   each Z value, spread over at least m outcomes ([`Pr[ Y = a | Z = c ] <= 1/m]),
+   the probability that X equals Y is at most 1/m: the predictor X cannot match
+   the conditionally-uniform Y better than guessing within each Z-fiber. *)
+Lemma cinde_diagonal_bound : Pr P [set t | X t == Y t] <= m%:R^-1.
+Proof.
+have cge0 : forall (a : A) (c : C), 0 <= `Pr[ X = a | Z = c ].
+  move=> a c; rewrite cpr_eqE; apply: mulr_ge0; first exact: pfwd1_ge0.
+  by rewrite invr_ge0; exact: pfwd1_ge0.
+rewrite Pr_diag_sum.
+under eq_bigr => a _ do rewrite -(marg_snd [%X,Y] (a,a)).
+rewrite exchange_big /=.
+apply: (@le_trans _ _ (\sum_(c : C) m%:R^-1 * `Pr[ Z = c ])); last first.
+  by rewrite -big_distrr /= sum_pfwd1 mulr1; apply: lexx.
+apply: ler_sum => c _.
+have [Hc0|Hc0] := eqVneq (`Pr[ Z = c ]) 0.
+- rewrite Hc0 mulr0 big1 // => a _.
+  exact: (pfwd1_domin_RV1 [% X, Y] (a, a) Hc0).
+- have key : forall a : A,
+    `Pr[ [% [% X, Y], Z] = ((a, a), c) ]
+      = `Pr[ X = a | Z = c ] * `Pr[ Y = a | Z = c ] * `Pr[ Z = c ].
+    by move=> a; rewrite -(Hcinde a a c) cpr_eqE -mulrA mulVf // mulr1.
+  have lhs_eq : \sum_(a : A) `Pr[ [% [% X, Y], Z] = ((a, a), c) ]
+      = (\sum_(a : A) `Pr[ X = a | Z = c ] * `Pr[ Y = a | Z = c ])
+          * `Pr[ Z = c ].
+    by rewrite big_distrl /=; apply: eq_bigr => a0 _; exact: (key a0).
+  rewrite lhs_eq.
+  apply: ler_wpM2r; first exact: pfwd1_ge0.
+  apply: (@le_trans _ _ (\sum_(a : A) `Pr[ X = a | Z = c ] * m%:R^-1)).
+    apply: ler_sum => a _.
+    by apply: ler_wpM2l; [exact: cge0 | exact: HYbound].
+  rewrite -big_distrl /=.
+  have -> : \sum_(a : A) `Pr[ X = a | Z = c ] = 1.
+    by rewrite -(sum_cPr_eq X Hc0); apply: eq_bigl => a; rewrite inE.
+  by rewrite mul1r; apply: lexx.
+Qed.
+
+End cinde_diagonal_bound_sec.
 
