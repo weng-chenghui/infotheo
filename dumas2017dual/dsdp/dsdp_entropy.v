@@ -469,36 +469,30 @@ End dsdp_entropy.
 Section dsdp_entropy_ring.
 
 Context {R_real : realType}.
-Variable R : finComUnitRingType.
+Variable R : finComNzRingType.
 
 (* Ring-generic fiber: solutions to u2*v2 + u3*v3 = s - u1*v1 in R*R. *)
 Definition dsdp_fiber_ring (u1 u2 u3 v1 s : R) : {set R * R} :=
   [set vv : R * R | (u2 * vv.1 + u3 * vv.2 == s - u1 * v1)%R].
 
-(* Ring-generic fiber cardinality.
-   Replaces the (0 < u3)(u3 < minn p q) check of dsdp_fiber_card with
-   the abstract [u3 \is a GRing.unit]; the existing specialized lemma
-   is preserved unchanged. *)
+(* Ring-generic fiber cardinality: when multiplication by u3 is injective (on a
+   finite ring, u3 regular / a unit), the fiber has #|R| solutions. *)
 Lemma dsdp_fiber_card_ring (u1 u2 u3 v1 s : R) :
-  u3 \is a GRing.unit ->
+  injective (fun v : R => u3 * v) ->
   #|dsdp_fiber_ring u1 u2 u3 v1 s| = #|R|.
 Proof.
-move=> Hu3.
-pose f := fun v2 : R => (v2, u3^-1 * (s - u1 * v1 - u2 * v2)).
-have Hf_inj : injective f.
-  move=> a b /=; rewrite /f.
-  by case=> H _.
+move=> Hinj.
+have Hbij : bijective (fun v : R => u3 * v) by apply: (inj_card_bij Hinj).
+case: Hbij => g Hg1 Hg2.
+pose f := fun v2 : R => (v2, g (s - u1 * v1 - u2 * v2)).
+have Hf_inj : injective f by move=> a b /=; case.
 have Hf_image : [set f v2 | v2 : R] = dsdp_fiber_ring u1 u2 u3 v1 s.
   apply/setP => [[v2 v3]]; rewrite /dsdp_fiber_ring !inE.
   apply/imsetP/eqP.
-  - move=> [v2' _ [H1 H2]]; subst v2 v3.
-    rewrite mulrA mulrV ?Hu3 // mul1r.
-    by rewrite addrC subrK.
-  - move=> Heq.
-    exists v2 => //=.
-    congr pair.
+  - by move=> [v2' _ [H1 H2]]; subst v2 v3; rewrite Hg2 addrC subrK.
+  - move=> Heq; exists v2 => //=; congr pair.
     have Hv3 : u3 * v3 = s - u1 * v1 - u2 * v2 by rewrite -Heq addrC addKr.
-    by rewrite -Hv3 mulrA mulVr ?Hu3 // mul1r.
+    by rewrite -Hv3 Hg1.
 by rewrite -Hf_image card_imset.
 Qed.
 
@@ -520,20 +514,8 @@ rewrite card_prod prednK //.
 by rewrite muln_gt0; apply/andP; split.
 Qed.
 
-(** dsdp_constraint_ring — the DSDP linear constraint at the
-    ring-generic level: for a sample of conditions [cond = (v1, u1, u2,
-    u3, s)] and variables [var = (v2, v3)], the relation says that
-    [s - u1 * v1 = u2 * v2 + u3 * v3].  Same shape as the [Z_(p*q)]-side
-    [dsdp_constraint] used in [dsdp_centropy_uniform] (line 262);
-    parametrised here in [R : finComUnitRingType] so the residual
-    analysis can quote it at [alice_view_joint] (Task F).
-    Kind: helper.
-    Why: needed as the hypothesis shape consumed by
-    [Pr_dsdp_sol_uniform_ring]; mirrors the specialized
-    [dsdp_constraint] for backward compatibility with the kept
-    IT-only theorems.
-    Used by: Pr_dsdp_sol_uniform_ring, constraint_holds_r,
-    dsdp_security_indcpa.v's Task F instantiation. *)
+(* dsdp_constraint_ring — the ring-generic DSDP linear constraint: for conditions
+   (v1, u1, u2, u3, s) and variables (v2, v3), s - u1 * v1 = u2 * v2 + u3 * v3. *)
 Definition dsdp_constraint_ring (cond : R * R * R * R * R)
   (var : R * R) : Prop :=
   let '(v1, u1, u2, u3, s) := cond in
@@ -610,11 +592,10 @@ apply/idP/idP => H.
     by move: Heq => /eqP; rewrite -subr_eq0 opprB addrA subrK subr_eq0 => /eqP.
 Qed.
 
-(* Ring-generic conditional uniformity.
-   Same shape as Pr_dsdp_sol_uniform at line 237 but parametric in
-   [R : finComUnitRingType]; the existing specialized lemma is preserved. *)
+(* Ring-generic conditional uniformity: when multiplication by u3 is injective,
+   (v2, v3) is uniform on the fiber given the conditioning view. *)
 Lemma Pr_dsdp_sol_uniform_ring (u1 u2 u3 v1 s v2 v3 : R) :
-  u3 \is a GRing.unit ->
+  injective (fun v : R => u3 * v) ->
   `Pr[CondRV_r = (v1, u1, u2, u3, s)] != 0 ->
   (v2, v3) \in dsdp_fiber_ring u1 u2 u3 v1 s ->
   `Pr[ VarRV_r = (v2, v3) | CondRV_r = (v1, u1, u2, u3, s) ] = #|R|%:R^-1.
