@@ -26,7 +26,7 @@ From extructures Require Import ord fset fmap.
 
 Require Import realType_ext realType_ln ssr_ext ssralg_ext bigop_ext fdist.
 Require Import proba jfdist_cond entropy graphoid smc_interpreter spp_proba bayes.
-Require Import spp_entropy.
+Require Import spp_entropy extra_proba.
 Require Import homomorphic_encryption indcpa_ror.
 Require Import dsdp_program dsdp_entropy dsdp_pismc.
 Require Import smc.ssprove_ext_lossless.
@@ -747,5 +747,22 @@ Definition Sout : {RV guess_sample_fdist -> plain AHE} :=
 Lemma guess_S_determined :
   Sout = (fun t => dsdp_output (V1 t) (U1 t) (U2 t) (U3 t) (V2 t) (V3 t)).
 Proof. by []. Qed.
+
+(* guess_inputs_indep — the protocol inputs (seeded constants) are independent of
+   the secret samples: a constant random variable is independent of every RV. *)
+Lemma guess_inputs_indep :
+  guess_sample_fdist |= [% V1, U1, U2, U3] _|_ [% V2, V3].
+Proof.
+have Hc : [% V1, U1, U2, U3]
+    = const_RV guess_sample_fdist (w_v1, w_u1, w_u2, w_u3)
+  by apply: boolp.funext => t; rewrite /V1 /U1 /U2 /U3 !const_RVE.
+by rewrite Hc; exact: inde_const_RV.
+Qed.
+
+(* Zcond — the conditioning view: the hop randomness (determining the cipher
+   view the predictor sees) and the leaked output S. *)
+Definition Zcond : {RV guess_sample_fdist ->
+    (option 'I_card_renc * option 'I_card_renc * plain AHE)} :=
+  [% ir1_rv, ir2_rv, Sout].
 
 End dsdp_guess_distribution.
