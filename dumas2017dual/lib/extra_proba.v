@@ -395,3 +395,92 @@ Qed.
 
 End perm_extra.
 
+Section cinde_RV_comp_lemma.
+Context {R : realType}.
+Variables (U : finType) (P : R.-fdist U) (A B C D : finType).
+Variables (X : {RV P -> A}) (Y : {RV P -> B}) (Z : {RV P -> C}).
+Variable f : A -> C -> D.
+
+Let W : {RV P -> D} := (fun ac => f ac.1 ac.2) `o [% X, Z].
+
+(* Joint law of the composed variable [W = f(X, Z)] with [X] and [Z]: at
+   [(dd, a, cc)] it is the indicator [f a cc == dd] times the law of [%X, Z] at
+   [(a, cc)], since [X = a] and [Z = cc] force [W = f a cc]. *)
+Lemma pr_eq_comp_constraint (dd : D) (cc : C) (a : A) :
+  `Pr[ [% W, X, Z] = (dd, a, cc) ] =
+  (f a cc == dd)%:R * `Pr[ [% X, Z] = (a, cc) ].
+Proof.
+have -> : [% W, X, Z]
+  = (fun p : A * C => (f p.1 p.2, p.1, p.2)) `o [% X, Z] by [].
+rewrite -pr_in1 pr_in_comp' -pr_in1.
+case: (eqVneq (f a cc) dd) => [Hf|Hf].
+- rewrite mul1r; congr (pr_in _ _).
+  apply/setP => p; rewrite !inE.
+  case: p => p1 p2; rewrite !xpair_eqE /=.
+  case: (eqVneq p1 a) => [->|?]; last by rewrite !andbF.
+  case: (eqVneq p2 cc) => [->|?]; last by rewrite andbF.
+  by rewrite Hf !eqxx.
+- rewrite mul0r.
+  have -> : (fun p : A * C => (f p.1 p.2, p.1, p.2))
+              @^-1: [set (dd, a, cc)] = set0.
+    apply/setP => p; rewrite !inE.
+    case: p => p1 p2; rewrite !xpair_eqE /=.
+    apply/negbTE; apply: contra Hf.
+    by move=> /andP[/andP[H1 /eqP H2] /eqP H3]; rewrite -H2 -H3.
+  by rewrite pr_inE preimset0 Pr_set0.
+Qed.
+
+(* [pr_eq_comp_constraint] with an extra spectator variable [T] carried through
+   the joint law. *)
+Lemma pr_eq_comp_constraint_tail (E : finType) (T : {RV P -> E})
+    (dd : D) (e : E) (a : A) (cc : C) :
+  `Pr[ [% W, T, X, Z] = (dd, e, a, cc) ] =
+  (f a cc == dd)%:R * `Pr[ [% T, X, Z] = (e, a, cc) ].
+Proof.
+have -> : [% W, T, X, Z]
+  = (fun q : E * A * C => (f q.1.2 q.2, q.1.1, q.1.2, q.2)) `o [% T, X, Z]
+    by [].
+rewrite -pr_in1 pr_in_comp' -pr_in1.
+case: (eqVneq (f a cc) dd) => [Hf|Hf].
+- rewrite mul1r; congr (pr_in _ _).
+  apply/setP => q; rewrite !inE.
+  case: q => [[q1 q2] q3]; rewrite !xpair_eqE /=.
+  case: (eqVneq q2 a) => [->|?]; last by rewrite !andbF.
+  case: (eqVneq q3 cc) => [->|?]; last by rewrite !andbF.
+  by rewrite Hf !eqxx.
+- rewrite mul0r.
+  have -> : (fun q : E * A * C => (f q.1.2 q.2, q.1.1, q.1.2, q.2))
+              @^-1: [set (dd, e, a, cc)] = set0.
+    apply/setP => q; rewrite !inE.
+    case: q => [[q1 q2] q3]; rewrite !xpair_eqE /=.
+    apply/negbTE; apply: contra Hf.
+    by move=> /andP[/andP[/andP[H1 _] /eqP H2] /eqP H3]; rewrite -H2 -H3.
+  by rewrite pr_inE preimset0 Pr_set0.
+Qed.
+
+(* Conditional independence is preserved by composing a deterministic function
+   of the conditioned variable and the conditioning variable: [X _|_ Y | Z]
+   entails [f(X, Z) _|_ Y | Z].  The conditional analogue of [inde_RV_comp]. *)
+Lemma cinde_RV_comp :
+  P |= X _|_ Y | Z -> P |= ((fun ac => f ac.1 ac.2) `o [% X, Z]) _|_ Y | Z.
+Proof.
+move=> H d b c; rewrite -/W.
+have wfib : `Pr[ W = d | Z = c] =
+    \sum_(a <- fin_img X | f a c == d) `Pr[ X = a | Z = c].
+  rewrite -cpr_in1 (creasoning_by_cases _ X) [RHS]big_mkcond /=.
+  apply: eq_bigr => a _.
+  rewrite setX1 cpr_in1 cpr_eqE pr_eq_comp_constraint -mulrA -cpr_eqE.
+  by case: (f a c == d); rewrite ?mul1r ?mul0r.
+have jfib : cPr_eq [% W, Y] (d, b) Z c =
+    \sum_(a <- fin_img X | f a c == d) `Pr[ [% Y, X] = (b, a) | Z = c].
+  rewrite -cpr_in1 (creasoning_by_cases _ X) [RHS]big_mkcond /=.
+  apply: eq_bigr => a _.
+  rewrite setX1 cpr_in1 cpr_eqE pr_eq_comp_constraint_tail -mulrA -cpr_eqE.
+  by case: (f a c == d); rewrite ?mul1r ?mul0r.
+rewrite jfib wfib big_distrl /=.
+apply: eq_bigr => a _.
+by rewrite cpr_eq_pairC (H a b c).
+Qed.
+
+End cinde_RV_comp_lemma.
+
