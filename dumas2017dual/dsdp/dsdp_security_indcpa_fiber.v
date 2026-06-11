@@ -546,4 +546,75 @@ setoid_rewrite Hpar_guess.
 by [].
 Qed.
 
+(* denote_run_caps — the run denotation that, at the output point, also
+   returns the seven plaintext env values (v1,u1,u2,u3,v2,v3,S) at the given de
+   Bruijn indices and the accumulated hop encryption-randomness [irs] (the
+   samples that determine the all-zero [view]); the finite handle on [view]. *)
+Fixpoint denote_run_caps (iv1 iu1 iu2 iu3 iv2 iv3 : nat)
+  (irs : seq 'I_card_renc) (e : denv AHE) (gc0 : game_code) {struct gc0}
+  : raw_code (cipher_list t_cipher *
+       (plain AHE * plain AHE * plain AHE * plain AHE * plain AHE * plain AHE
+        * plain AHE) * seq 'I_card_renc)%type :=
+  match gc0 with
+  | GC_sample n k =>
+      if n == card_msg then
+        x ← sample uniform card_msg ;;
+        denote_run_caps iv1 iu1 iu2 iu3 iv2 iv3 irs
+          (push_val (Gplain (msg_of_idx x)) e) k
+      else if n == card_renc then
+        x ← sample uniform card_renc ;;
+        denote_run_caps iv1 iu1 iu2 iu3 iv2 iv3 irs
+          (push_rand (rand_of_renc (sample_to_renc renc_card x)) e) k
+      else
+        x ← sample uniform n ;;
+        denote_run_caps iv1 iu1 iu2 iu3 iv2 iv3 irs e k
+  | GC_put t k =>
+      #put (V_2_cell t_msg) :=
+        Some (chmsg_of_msg (as_plain (denote_he pkey_of_party rand0 e t))) ;;
+      denote_run_caps iv1 iu1 iu2 iu3 iv2 iv3 irs e k
+  | GC_put_output t k =>
+      #put (S_output_cell t_msg) :=
+        Some (chmsg_of_msg (as_plain (denote_he pkey_of_party rand0 e t))) ;;
+      cl ← denote_run renc_card rand_of_renc chmsg_of_msg chcipher_of_cipher
+             pkey_of_party msg_of_idx rand0 e k ;;
+      ret (cl, (as_plain (de_val_nth e iv1), as_plain (de_val_nth e iu1),
+                as_plain (de_val_nth e iu2), as_plain (de_val_nth e iu3),
+                as_plain (de_val_nth e iv2), as_plain (de_val_nth e iv3),
+                as_plain (denote_he pkey_of_party rand0 e t)), irs)
+  | GC_let t k =>
+      denote_run_caps iv1 iu1 iu2 iu3 iv2 iv3 irs
+        (push_val (denote_he pkey_of_party rand0 e t) e) k
+  | GC_enc_hop pk secret k =>
+      ir ← sample uniform card_renc ;;
+      denote_run_caps iv1 iu1 iu2 iu3 iv2 iv3 (rcons irs ir)
+        (push_val
+           (Gcipher (enc (pkey_of_party (nat_to_party_id pk))
+                         (as_plain (denote_he pkey_of_party rand0 e secret))
+                         (rand_of_renc (sample_to_renc renc_card ir)))) e) k
+  | GC_ret outs =>
+      ret (([seq
+           chcipher_of_cipher (as_cipher (denote_he pkey_of_party rand0 e o))
+             | o <- outs] : cipher_list t_cipher),
+           (0%R, 0%R, 0%R, 0%R, 0%R, 0%R, 0%R), irs)
+  end.
+
+(* denote_run_caps_fst — forgetting the captured plaintext tuple and hop
+   randomness recovers the plain run; the rich run is faithful on the
+   cipher-list channel. *)
+Lemma denote_run_caps_fst iv1 iu1 iu2 iu3 iv2 iv3 irs (e : denv AHE)
+    (gc0 : game_code) :
+  (xy ← denote_run_caps iv1 iu1 iu2 iu3 iv2 iv3 irs e gc0 ;; ret xy.1.1)
+  = denote_run renc_card rand_of_renc chmsg_of_msg chcipher_of_cipher
+      pkey_of_party msg_of_idx rand0 e gc0.
+Proof.
+elim: gc0 e irs => [n k IH|t k IH|t k IH|t k IH|pk secret k IH|outs] e irs /=.
+- case: (n == card_msg); [|case: (n == card_renc)]; cbn [bind]; congr sampler;
+    apply: boolp.funext => x; exact: IH.
+- cbn [bind]; congr putr; exact: IH.
+- by rewrite bind_assoc; cbn [bind]; rewrite bind_ret.
+- exact: IH.
+- cbn [bind]; congr sampler; apply: boolp.funext => x; exact: IH.
+- by [].
+Qed.
+
 End dsdp_guess_distribution.
