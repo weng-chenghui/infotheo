@@ -261,6 +261,70 @@ move=> Hc Hl; elim: Hc => [x|o x k Hin _ IH|l' k Hin _ IH|l' v k Hin _ IH|op k _
      rewrite -distr.in_dinsupp => Hah; exact: (IH x _ _ Hah).
 Qed.
 
+(* General fdist/distr helpers for the (V_2, V_3) marginal.  Stated with the
+   default goal selector so the multi-goal proofs read without strict-mode
+   bracketing; strict mode is restored afterwards. *)
+Set Default Goal Selector "1".
+Set Bullet Behavior "None".
+
+(* fdistmap_bij_unif — a bijection carries a uniform distribution to the uniform
+   distribution on the (equicardinal) codomain. *)
+Lemma fdistmap_bij_unif (A B : finType) (f : A -> B) (nA nB : nat)
+    (cardA : #|A| = nA.+1) (cardB : #|B| = nB.+1) :
+  bijective f ->
+  fdistmap f (fdist_uniform cardA) = fdist_uniform cardB :> FDist.t R B.
+Proof.
+move=> [g fg gf].
+apply: fdist_ext => b.
+rewrite fdistmapE fdist_uniformE.
+rewrite (eq_bigl (pred1 (g b))); last first.
+  by move=> a; rewrite inE /=; apply/eqP/eqP => [Hf|->]; [rewrite -Hf fg|exact: gf].
+rewrite big_pred1_eq fdist_uniformE.
+have <- : #|A| = #|B| by apply: (bij_eq_card (f := f)); exists g.
+by [].
+Qed.
+
+(* mean1_eq1 — a weight [w] bounded in [[0,1]] whose [D]-mean is 1 (with [D]
+   mass 1) equals 1 on the support of [D].  Normalizes the lossless predictor's
+   mass out of the value-marginal. *)
+Lemma mean1_eq1 (T : choiceType) (D : distr.distr R T) (w : T -> R) :
+  (forall x, 0 <= w x <= 1) -> psum (distr.mu D) = 1 ->
+  psum (fun x => w x * distr.mu D x) = 1 ->
+  forall x, x \in distr.dinsupp D -> w x = 1.
+Proof.
+move=> Hw HD Hwsum x Hx.
+have Hsm1 : summable (fun y => (1 - w y) * distr.mu D y).
+  apply: (@le_summable _ _ _ (distr.mu D)); last exact: distr.summable_mu.
+  move=> y; case/andP: (Hw y) => Hw0 Hw1.
+  rewrite mulr_ge0 ?subr_ge0 //=.
+  by rewrite ler_piMl ?distr.ge0_mu // ?subr_ge0 // lerBlDr lerDl.
+have Hsm2 : summable (fun y => w y * distr.mu D y).
+  apply: (@le_summable _ _ _ (distr.mu D)); last exact: distr.summable_mu.
+  move=> y; case/andP: (Hw y) => Hw0 Hw1.
+  by rewrite mulr_ge0 //= ler_piMl ?distr.ge0_mu.
+have Hsum0 : psum (fun y => (1 - w y) * distr.mu D y) = 0.
+  have Hsplit : (distr.mu D) =1
+     (fun y => (1 - w y) * distr.mu D y + w y * distr.mu D y)
+    by move=> y; rewrite -mulrDl addrNK mul1r.
+  have H1 : psum (distr.mu D)
+     = psum (fun y => (1 - w y) * distr.mu D y)
+     + psum (fun y => w y * distr.mu D y).
+    rewrite (eq_psum Hsplit); apply: psumD => //.
+    - move=> y; apply: mulr_ge0; last exact: distr.ge0_mu.
+      by rewrite subr_ge0; case/andP: (Hw y).
+    - move=> y; apply: mulr_ge0; last exact: distr.ge0_mu.
+      by case/andP: (Hw y).
+  by move: H1; rewrite HD Hwsum => /eqP; rewrite eq_sym -subr_eq0 addrK => /eqP.
+have Hzero : (1 - w x) * distr.mu D x = 0 by apply: (eq0_psum Hsm1 Hsum0).
+move: Hx => /distr.dinsuppP /eqP Hmu.
+move: Hzero => /eqP.
+rewrite mulf_eq0 (negbTE Hmu) orbF subr_eq0 eq_sym.
+by move=> /eqP ->.
+Qed.
+
+Set Bullet Behavior "Strict Subproofs".
+Set Default Goal Selector "!".
+
 Section dsdp_guess_distribution.
 (* Same scheme and marshalling as the output-exposing endpoint games.  [Mfin]
    is the finite carrier on which the guess and V_2 are observed, with
@@ -394,6 +458,18 @@ Qed.
      lemma Pr_fst_agree_locs frames its output off V_2_cell). *)
 Hypothesis card_renc_neq : card_renc != card_msg.
 Hypothesis predictor_locs_disj : fseparate (locs predictor) (protocol_state t_msg).
+
+(* resolve_predictor_valid — resolving the closed predictor package at its guess
+   oracle yields import-free code over the predictor's own locations.  Vanilla
+   [eapply valid_resolve] avoids the raw_package delta-unfolding blowup. *)
+Lemma resolve_predictor_valid (cl : cipher_list t_cipher) (sread : t_msg) :
+  ValidCode (locs predictor) [interface]
+    (resolve (pack predictor)
+       (id_guess, (chProd (cipher_list t_cipher) t_msg, t_msg)) (cl, sread)).
+Proof.
+eapply valid_resolve; first exact: (pack_valid predictor).
+exact: fhas_set.
+Qed.
 
 Let gc := all_zero (game_of_trace_seeded dsdp_weight_names
                       (dsdp_alice_obs_leak_S_seeded card_msg card_renc)).
