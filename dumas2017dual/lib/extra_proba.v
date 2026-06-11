@@ -553,3 +553,30 @@ Qed.
 
 End cinde_RV_factor_sec.
 
+Section inde_const_RV_sec.
+Context {R : realType}.
+Variables (U : finType) (P : R.-fdist U) (A B : finType).
+
+(* A constant random variable is independent of every random variable. *)
+Lemma inde_const_RV (c : A) (W : {RV P -> B}) : P |= const_RV P c _|_ W.
+Proof.
+move=> a b.
+rewrite !pfwd1E.
+case: (eqVneq a c) => [->|ana].
+- rewrite [X in _ = X * _](_ : _ = 1); last first.
+    rewrite (_ : finset _ = setT) ?Pr_setT//.
+    by apply/setP => t; rewrite !inE /= const_RVE eqxx.
+  rewrite mul1r; congr (Pr P _).
+  by apply/setP => t; rewrite !inE /= const_RVE xpair_eqE eqxx.
+- rewrite [X in _ = X * _](_ : _ = 0); last first.
+    rewrite (_ : finset _ = set0) ?Pr_set0//.
+    apply/setP => t; rewrite !inE /= const_RVE.
+    by apply/negbTE; rewrite eq_sym.
+  rewrite mul0r.
+  rewrite (_ : finset _ = set0) ?Pr_set0//.
+  apply/setP => t; rewrite !inE /= const_RVE xpair_eqE.
+  by rewrite eq_sym (negbTE ana).
+Qed.
+
+End inde_const_RV_sec.
+
