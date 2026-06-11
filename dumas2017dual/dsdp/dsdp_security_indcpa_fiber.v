@@ -644,4 +644,23 @@ Definition guess_full_code :
        msg_to_fin (chmsg_of_msg v3), msg_to_fin (chmsg_of_msg s),
        onth irs 0, onth irs 1).
 
+(* msg_of_chmsg / chmsg_of_msgK — the plaintext-channel encoding [chmsg_of_msg]
+   has a left inverse, so the finite carrier values cross back to [plain AHE].
+   Hmsg_bij — the message-index encoding is a bijection (uniform sampling is
+   faithful: #|plain AHE| = card_msg and V_2 is uniform on plain AHE). *)
+Variable msg_of_chmsg : t_msg -> plain AHE.
+Hypothesis chmsg_of_msgK : cancel chmsg_of_msg msg_of_chmsg.
+Hypothesis Hmsg_bij : bijective msg_of_idx.
+
+(* guess_full_lossless — the rich experiment terminates with probability one
+   (the predictor-losslessness hypothesis for the rich-trace layer). *)
+Hypothesis guess_full_lossless : psum (distr.mu (Pr_fst guess_full_code)) = 1.
+
+(* guess_sample_fdist — the Infotheo distribution over the rich observed tuple
+   (guess, V2, V3, S, ir1, ir2). *)
+Definition guess_sample_fdist := sdistr_to_fdist guess_full_lossless.
+
+(* fin_to_plain — recover the plaintext from a finite-carrier message. *)
+Definition fin_to_plain (m : Mfin) : plain AHE := msg_of_chmsg (fin_to_msg m).
+
 End dsdp_guess_distribution.
