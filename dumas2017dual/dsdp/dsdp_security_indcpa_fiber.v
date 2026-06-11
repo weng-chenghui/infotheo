@@ -617,4 +617,31 @@ elim: gc0 e irs => [n k IH|t k IH|t k IH|t k IH|pk secret k IH|outs] e irs /=.
 - by [].
 Qed.
 
+(* guess_resolved_caps — rich pair experiment: the capturing run exposes the
+   output-point env values and hop randomness, then S / guess / V_2 are read as
+   in [guess_resolved_oracles]; returns the eight observed values and [irs]. *)
+Definition guess_resolved_caps :
+  raw_code (t_msg * t_msg *
+            (plain AHE * plain AHE * plain AHE * plain AHE * plain AHE *
+             plain AHE * plain AHE) * seq 'I_card_renc)%type :=
+  vt ← denote_run_caps 11 8 9 10 7 6 [::] seed gc ;;
+  s     ← denote_s_get_body chmsg_of_msg ;;
+  guess ← resolve (pack predictor)
+            (id_guess, (chProd (cipher_list t_cipher) t_msg, t_msg))
+            (vt.1.1, s) ;;
+  v2    ← denote_v2_get_body chmsg_of_msg ;;
+  ret (guess, v2, vt.1.2, vt.2).
+
+(* guess_full_code — the rich observed tuple in the finite carrier
+   [Mfin^4 * (option 'I_card_renc)^2]: (guess, V2, V3, S, ir1, ir2), where
+   ir1, ir2 are the finite handle on the predictor's [view]. *)
+Definition guess_full_code :
+  raw_code (Mfin * Mfin * Mfin * Mfin *
+            (option 'I_card_renc) * (option 'I_card_renc))%type :=
+  gv ← guess_resolved_caps ;;
+  let '(guess, v2, (v1, u1, u2, u3, v2', v3, s), irs) := gv in
+  ret (msg_to_fin guess, msg_to_fin v2,
+       msg_to_fin (chmsg_of_msg v3), msg_to_fin (chmsg_of_msg s),
+       onth irs 0, onth irs 1).
+
 End dsdp_guess_distribution.
