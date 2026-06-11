@@ -183,6 +183,13 @@ Fixpoint lower_obs (venv renv : seq nat) (obs : seq alice_obs) : game_code :=
 Definition game_of_trace (obs : seq alice_obs) : game_code :=
   lower_obs [::] [::] obs.
 
+(* game_of_trace_seeded — [game_of_trace] with a pre-seeded value environment
+   [wnames] (the fixed input-weight names, placed at the env bottom so the sample
+   pushes give them stable high de Bruijn indices, matching the seeded
+   denotation env [MkDenv weight_values [::]]). *)
+Definition game_of_trace_seeded (wnames : seq nat) (obs : seq alice_obs)
+  : game_code := lower_obs wnames [::] obs.
+
 (* ------------------------------------------------------------------ *)
 (* Hop-count adequacy: the lowered game's hop count is the protocol's. *)
 (* ------------------------------------------------------------------ *)
@@ -206,6 +213,13 @@ Proof. elim: obs venv renv => [|o rest IH] venv renv //=; case: o => //= *; rewr
    drift. *)
 Lemma count_hops_game_of_trace obs :
   count_hops (game_of_trace obs) = count_obs_hops obs.
+Proof. exact: count_hops_lower_obs. Qed.
+
+(* count_hops_game_of_trace_seeded — the seeded lowering has the same ladder
+   length as the trace's hoppable receptions (a pre-seeded value env adds no
+   hops). *)
+Lemma count_hops_game_of_trace_seeded wnames obs :
+  count_hops (game_of_trace_seeded wnames obs) = count_obs_hops obs.
 Proof. exact: count_hops_lower_obs. Qed.
 
 (* ------------------------------------------------------------------ *)
@@ -513,6 +527,40 @@ Definition dsdp_alice_obs_leak_S (card_msg card_renc : nat) : seq alice_obs :=
    length is unchanged at two, matching [dsdp_obs_hops]. *)
 Lemma dsdp_obs_hops_leak_S (card_msg card_renc : nat) :
   count_obs_hops (dsdp_alice_obs_leak_S card_msg card_renc) = 2.
+Proof. by []. Qed.
+
+(* dsdp_weight_names — the fixed input-weight names in seed-env order
+   (u1, u2, u3, v1), carried at the denotation env bottom by the seed
+   [MkDenv [:: Gplain u1; Gplain u2; Gplain u3; Gplain v1] [::]]. *)
+Definition dsdp_weight_names : seq nat := [:: 17; 12; 13; 16].
+
+(* dsdp_alice_obs_leak_S_seeded — the output-exposing trace with the input weights
+   u1,u2,u3,v1 carried by the seed (excluded from the sample prefix) and the
+   output S the genuine scalar product u1*v1 + u2*v2 + u3*v3.  The two AO_combine
+   homomorphic assemblies are the auto-derived ones (obs_of_procs_dsdp_leak_S);
+   the sample prefix samples only the secrets v2 (=10), v3 (=11) and the masks
+   r2 (=14), r3 (=15).  Names: 10 v2, 11 v3, 12 u2, 13 u3, 14 r2, 15 r3, 16 v1,
+   17 u1. *)
+Definition dsdp_alice_obs_leak_S_seeded (card_msg card_renc : nat)
+  : seq alice_obs :=
+  [:: AO_sample_val card_msg 10 ; AO_sample_val card_msg 11 ;
+      AO_sample_val card_msg 14 ; AO_sample_val card_msg 15 ;
+      AO_sample_rnd card_renc 20 ; AO_sample_rnd card_renc 21 ;
+      AO_put 10 ;
+      AO_recv_hop 1 10 100 ; AO_recv_hop 2 11 101 ;
+      AO_combine 102 (HE_emul (HE_epow (HE_var 100) (HE_var 12))
+                              (HE_enc 1 (HE_var 14) 20)) ;
+      AO_combine 103 (HE_emul (HE_epow (HE_var 101) (HE_var 13))
+                              (HE_enc 2 (HE_var 15) 21)) ;
+      AO_recv_output (HE_add (HE_add (HE_mul (HE_var 17) (HE_var 16))
+                                     (HE_mul (HE_var 12) (HE_var 10)))
+                             (HE_mul (HE_var 13) (HE_var 11))) ;
+      AO_leak [:: 102 ; 103 ; 100 ; 101 ] ].
+
+(* dsdp_obs_hops_leak_S_seeded — the seeded trace still has two hoppable
+   receptions, so the derived ladder has two rungs. *)
+Lemma dsdp_obs_hops_leak_S_seeded (card_msg card_renc : nat) :
+  count_obs_hops (dsdp_alice_obs_leak_S_seeded card_msg card_renc) = 2.
 Proof. by []. Qed.
 
 (* ------------------------------------------------------------------ *)

@@ -428,7 +428,7 @@ Definition real_game_leak_S
     (rand0 : rand AHE) (seed : denv AHE) : raw_package :=
   denote_game_leak_S renc_card rand_of_renc chmsg_of_msg chcipher_of_cipher
     pkey_of_party msg_of_idx rand0 seed
-    (all_real (game_of_trace (dsdp_alice_obs_leak_S card_msg card_renc))).
+    (all_real (game_of_trace_seeded dsdp_weight_names (dsdp_alice_obs_leak_S_seeded card_msg card_renc))).
 
 (* zero_game_leak_S — the output-exposing all-zero endpoint of the DSDP problem,
    the distinguishing target of the output-exposing secrecy bound. *)
@@ -442,7 +442,7 @@ Definition zero_game_leak_S
     (rand0 : rand AHE) (seed : denv AHE) : raw_package :=
   denote_game_leak_S renc_card rand_of_renc chmsg_of_msg chcipher_of_cipher
     pkey_of_party msg_of_idx rand0 seed
-    (all_zero (game_of_trace (dsdp_alice_obs_leak_S card_msg card_renc))).
+    (all_zero (game_of_trace_seeded dsdp_weight_names (dsdp_alice_obs_leak_S_seeded card_msg card_renc))).
 
 (* dsdp_advantage_derived_leak_S — the output-exposing analogue of
    [dsdp_advantage_derived]: any valid adversary distinguishing the
@@ -480,10 +480,11 @@ Lemma dsdp_advantage_derived_leak_S
 Proof.
 rewrite /real_game_leak_S /zero_game_leak_S.
 have Hsz : size (hop_sites
-    (game_of_trace (dsdp_alice_obs_leak_S card_msg card_renc))) = 2
-  by rewrite /hop_sites size_iota count_hops_game_of_trace dsdp_obs_hops_leak_S.
+    (game_of_trace_seeded dsdp_weight_names (dsdp_alice_obs_leak_S_seeded card_msg card_renc))) = 2
+  by rewrite /hop_sites size_iota count_hops_game_of_trace_seeded
+             dsdp_obs_hops_leak_S_seeded.
 have H := advantage_le_leak_S chcipher_of_cipherK chmsg_of_msgK msg_of_idx rand0 seed
-  (game_of_trace (dsdp_alice_obs_leak_S card_msg card_renc))
+  (game_of_trace_seeded dsdp_weight_names (dsdp_alice_obs_leak_S_seeded card_msg card_renc))
   A_valid A_disj_state A_disj_ore A_disj_oze.
 rewrite Hsz in H.
 exact: H.
