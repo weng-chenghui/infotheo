@@ -715,4 +715,37 @@ rewrite inE /= ger0_norm;
 by case: (_ == y); rewrite ?mul1r ?mul0r.
 Qed.
 
+Local Open Scope proba_scope.
+
+(* The four protocol weights Alice holds (seeded constants). *)
+Variables (w_v1 w_u1 w_u2 w_u3 : plain AHE).
+
+(* Projection random variables from the rich carrier (named as in
+   dsdp_entropy_ring); inputs are constants, the secrets and guess cross to
+   [plain AHE] via [fin_to_plain]. *)
+Definition guess_rv : {RV guess_sample_fdist -> plain AHE} :=
+  fun t => fin_to_plain t.1.1.1.1.1.
+Definition V2 : {RV guess_sample_fdist -> plain AHE} :=
+  fun t => fin_to_plain t.1.1.1.1.2.
+Definition V3 : {RV guess_sample_fdist -> plain AHE} :=
+  fun t => fin_to_plain t.1.1.1.2.
+Definition V1 : {RV guess_sample_fdist -> plain AHE} := const_RV _ w_v1.
+Definition U1 : {RV guess_sample_fdist -> plain AHE} := const_RV _ w_u1.
+Definition U2 : {RV guess_sample_fdist -> plain AHE} := const_RV _ w_u2.
+Definition U3 : {RV guess_sample_fdist -> plain AHE} := const_RV _ w_u3.
+Definition ir1_rv : {RV guess_sample_fdist -> option 'I_card_renc} :=
+  fun t => t.1.2.
+Definition ir2_rv : {RV guess_sample_fdist -> option 'I_card_renc} :=
+  fun t => t.2.
+
+(* Sout — the leaked output as the scalar product of the inputs and secrets. *)
+Definition Sout : {RV guess_sample_fdist -> plain AHE} :=
+  fun t => dsdp_output w_v1 w_u1 w_u2 w_u3 (V2 t) (V3 t).
+
+(* guess_S_determined — the leaked output is the scalar-product spec of the
+   inputs and secrets; the fiber-side instance of [S_determined]. *)
+Lemma guess_S_determined :
+  Sout = (fun t => dsdp_output (V1 t) (U1 t) (U2 t) (U3 t) (V2 t) (V3 t)).
+Proof. by []. Qed.
+
 End dsdp_guess_distribution.
