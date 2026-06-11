@@ -275,3 +275,67 @@ Theorem dsdp_alice_secrecy_leak_S (u1 u2 u3 v1 : plain AHE) :
 - **Sequencing dependency:** Phase 1+2 (entropy/spec) are game-independent and can run first/in parallel; Phase 3 (game) feeds Phase 4; Phase 4 feeds Phase 5; Phase 6 last. Bottleneck-first (your chosen order) is preserved: the S-recomposition (Tasks 7,9) is the load-bearing algebra and is front-loaded among the game tasks, with its kernel already probe-verified.
 - **Proof-body honesty:** probe-verified bodies (Tasks 1, 4, 9) are given exactly; the rest fix the statement + strategy and delegate the body to `rocq-prover`, because their proofs are not yet known and fabricating them would violate `feedback_test_proof_steps_before_plan`.
 - **Open implementation risk:** Task 6 (env-seeding) is the one genuinely new mechanism; if threading a seed through `denote_game_leak_S` proves heavy, fall back to seeding via `GC_let`-prefixed constants in the trace (a `game_code`-level seed) rather than an env-constructor change.
+
+---
+
+## 2026-06-11 progress + de-risk experiments (A, B)
+
+**Tasks 1–9 committed and green** (see prior commits). The single genuinely-new
+lemma the de-risk flagged is now **done and committed**.
+
+### `cinde_RV_comp` — landed (commit `1be50da`, `dumas2017dual/lib/extra_proba.v`)
+
+The conditional analogue of infotheo's `inde_RV_comp`:
+`P |= X _|_ Y | Z -> P |= f(X,Z) _|_ Y | Z`.
+
+- **Experiment A (compiled standalone):** ~70 lines, standard classical axioms
+  only. Proof is a fiber sum over `X` (`creasoning_by_cases`) with the
+  `W = f(X,Z)` constraint collapsed to the indicator `f a c == d` by two
+  joint-law helpers (`pr_eq_comp_constraint`, `pr_eq_comp_constraint_tail`,
+  each a `pr_in_comp'` + singleton-preimage computation).
+- **Confirmed genuinely absent from infotheo** (MCP signature search +
+  full-tree grep over 153 installed `.v`): only the unconditional
+  `inde_RV_comp` exists; the nearest cinde lemmas (`decomposition`,
+  `cinde_alt`, `inde_RV2_cinde`, `cinde_rv_comp_removal`) are different
+  statements. Not a trivial corollary (cinde does not give `[%X,Z] _|_ Y`).
+  General enough to upstream next to `inde_RV_comp`; lives in `extra_proba`
+  for now.
+- **Naming** vetted against the corpus: `comp` is the house spelling
+  (`inde_RV_comp`, `comp_RV`, `` `o ``; 76 `_comp` vs 0 `funcomp`); the `c`
+  of `cinde` already carries "conditional", so no `_cond` suffix.
+
+### Experiment B — the open question is resolved; no residual bridge lemma
+
+Reading the real reflection (`dsdp_security_indcpa_fiber.v`):
+`guess_joint_fdist` (line 337) is `sdistr_to_fdist` of `guess_joint_code`,
+which returns only `(msg_to_fin guess, msg_to_fin v2)` — **S and W are
+marginalized away**, so `guess _|_ V2 | S` is not even statable over it. The
+richer fdist that retains S and W *is* `guess_sample_fdist` (Task 10).
+
+In that trace-level fdist `guess = call_pred(view, s)` (line 289) — `predictor`
+applied to `(view/randomness, S)`, never reading the V2 coordinate — so
+`guess` is literally the composed RV `predictor `o [%W, S]` **by construction
+of the trace projection**. The plug-in compiles as a one-liner
+`exact: cinde_RV_comp` (toy verified). Consequences:
+
+- `Pr_fst_agree_locs` does **not** by itself give the conditional
+  independence (it is a `Pr`-marginal frame fact); the missing piece was
+  `cinde_RV_comp`, now done.
+- There is **no residual bridge lemma** beyond it: the factorization is
+  pointwise from the trace, not a marginal-replacement. `Pr_fst_agree_locs`'s
+  real jobs are the post-run V2-cell read (`Pr_code_preserves`) and the frame
+  used when building the rich fdist.
+
+### Refinements to the remaining tasks
+
+- **Task 11** `guess_indep_V2_given_S` is now `exact: cinde_RV_comp` (with
+  `X := W`, `Z := S`, `Y := V2`, `f := predictor`), conditional on Task 10
+  delivering `guess_sample_fdist` with `guess` as the trace-level
+  `predictor `o [%W, S]`.
+- **Task 10** is the real remaining plumbing (the "bridge"): build
+  `guess_sample_fdist` over the full sample trace (retaining S, W), with
+  `guess_joint_fdist` recovered as its `(guess,V2)`-marginal.
+- **Task 12** `bijective msg_of_idx` confirmed sound: it is the
+  uniform-sampling faithfulness condition (pushforward of uniform stays
+  uniform iff the index map is injective); `#|plain AHE| = card_msg` alone is
+  insufficient. Lands at the `Mfin`/`msg_of_idx` carrier boundary.
