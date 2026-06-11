@@ -143,9 +143,17 @@ constant input RVs. Discharge the four entropy hypotheses over it:
 - `guess_VarRV_indep_inputs` — `(V2,V3) ⊥ (V1,U1,U2,U3)`, trivial since the inputs
   are constant.
 - `guess_S_determined` — `S = dsdp_output(...)`, now provable via
-  `denote_output_termE` and the recomposed game (was false before).
-- `guess_indep_V2_given_S` — `guess ⊥ V2 | S`, delivered by `Pr_fst_agree_locs`
-  framing the predictor off `V2_cell`.
+  `denote_output_termE` and the recomposed game (was false before). De-risk:
+  proved green (not admitted) by compile-test.
+- `guess_indep_V2_given_S` — `guess ⊥ V2 | S`. `Pr_fst_agree_locs` +
+  `predictor_locs_disj` mechanically give the distribution-level "predictor is
+  `V2`-blind" fact (de-risk: proved green), but crossing from that to an Infotheo
+  `cinde_RV` needs ONE new lemma absent from Infotheo: `cinde_RV_funcomp_cond`,
+  the conditional analogue of `inde_RV_comp`
+  (`P |= X _|_ Y | Z → P |= f(X,Z) _|_ Y | Z`). Provable from `cinde_RV_events` +
+  `reasoning_by_cases`/`creasoning_by_cases` (~30–60 lines, no new axiom); given
+  it, `guess_indep_V2_given_S` assembles in ~4 lines. This is the one genuine new
+  proof in the chain (everything else is assembly of committed/existing lemmas).
 
 The fiber instantiation carries the precondition `injective (fun v => u3 * v)` on
 the parameter `u3` (decision R-u3-regular).
@@ -169,10 +177,20 @@ both unnecessary.
 
 `guess_advantage_le` (`≤ 2·epsilon_cpa`, from `dsdp_advantage_derived_leak_S`;
 re-confirm under the recomposed `S`), then the triangle. The final theorem
-quantifies over the input-weight parameters with the regularity precondition:
+quantifies over the input-weight parameters with the regularity precondition AND
+the message-indexing bijection `bijective msg_of_idx` (de-risk finding, Task 12:
+required to make `V2 = msg_of_idx x` uniform on `plain AHE` for `VarRV_uniform`,
+and to reconcile the fiber's `1/#|plain AHE|` with the headline `1/card_msg` via
+`#|plain AHE| = card_msg`):
 `dsdp_alice_secrecy_leak_S : forall (u1 u2 u3 v1 : plain AHE),
-injective (fun v => u3 * v) -> Pr(guessing_experiment predictor
-(real_game_leak_S … u1 u2 u3 v1)) true ≤ (card_msg)%:R^-1 + 2·epsilon_cpa`.
+bijective msg_of_idx -> injective (fun v => u3 * v) ->
+Pr(guessing_experiment predictor (real_game_leak_S … u1 u2 u3 v1)) true ≤
+(card_msg)%:R^-1 + 2·epsilon_cpa`.
+
+Composition de-risk (Task 13–15, verified green): par-factoring is one
+`eapply Advantage_par`; `eapply dsdp_advantage_derived_leak_S` unifies with no
+OOM (6 expected side goals); `AdvantageE`-to-`Pr` is definitional; the triangle is
+a one-liner (`ler_norm`/`lerD2r`/`subrK`). No new axioms.
 
 ## 7. Cited anchors, naming, notation
 
@@ -216,11 +234,31 @@ family) and grep-verify against the fiber file's open scopes at implementation.
   weights into the game env rather than sampling them (env-seeding is the first
   writing-plans task). Rejected: sample `u3` from regulars (artificial input
   distribution, average-case); accept additive slack (non-clean headline).
-- **R-2eps**: re-confirm `dsdp_advantage_derived_leak_S` with `S` written
-  identically in real/zero (expected, since `S` no longer routes through the
-  hops).
+- **R-trace** / **R-2eps** (DONE 2026-06-11, Tasks 7/8 committed): the seeded
+  trace recomposes `S` as the scalar product (`vm_compute`-verified), and
+  `dsdp_advantage_derived_leak_S` (2·epsilon_cpa) re-proves unchanged (seed is
+  common context).
+- **R-cinde** (NEW, the one genuine remaining proof): Infotheo lacks
+  `cinde_RV_funcomp_cond` (`P |= X _|_ Y | Z → P |= f(X,Z) _|_ Y | Z`), the
+  conditional analogue of `inde_RV_comp`. Provable from `cinde_RV_events` +
+  `reasoning_by_cases` (~30–60 lines, no new axiom). It is what bridges the
+  committed footprint frame fact (`Pr_fst_agree_locs`, proved green) to the
+  fdist-level `guess_indep_V2_given_S`.
+- **R-bijection** (NEW, Task 12): the final theorem must carry
+  `bijective msg_of_idx` (uniformity of `V2` on `plain AHE` + reconciling
+  `1/#|plain AHE|` with `1/card_msg`).
 - The resulting `1/m` is the **meaningful fiber bound** (Channel 1 open at the
   zero endpoint), not the trivial direct-independence one.
+
+**De-risk verdict (2026-06-11, four compile-tested clusters).** Not
+research-level. Tasks 10, 13–15 are mechanical assembly of committed/existing
+lemmas (verified by green `/tmp` tests); Task 12's RV instantiation at
+`R := plain AHE` is mechanical; the genuine new work is exactly (i) the one
+infotheo lemma `cinde_RV_funcomp_cond` (R-cinde), (ii) the `guess_sample_fdist`
+bridge connecting the SSProve-bridged `guess_joint_fdist` to a full-run `P` with
+RVs `(guess,V2,S,V1..U3)` satisfying the three hypotheses, and (iii) the
+`bijective msg_of_idx` hypothesis (R-bijection). Implementation status: Tasks 1–9
+committed and green; the fiber bound (Tasks 10–15) remains.
 
 ## 9. Verification status
 
