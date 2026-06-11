@@ -36,6 +36,11 @@ Local Open Scope sproc_scope.
 Reserved Notation "u *h w" (at level 40).
 Reserved Notation "u ^h w" (at level 40).
 
+(* dsdp_output — the DSDP specification function: Alice's protocol output, the
+   weighted scalar product of the two input vectors. *)
+Definition dsdp_output {R : comNzRingType} (v1 u1 u2 u3 v2 v3 : R) : R :=
+  u1 * v1 + u2 * v2 + u3 * v3.
+
 Section dsdp.
 
 (* Party identifiers.
@@ -284,6 +289,10 @@ Proof.
   rewrite /alice_result /g_value /d2_value.
   ring.
 Qed.
+
+(* alice_resultE — Alice's reconstruction equals the shared output spec. *)
+Lemma alice_resultE : alice_result = dsdp_output v1 u1 u2 u3 v2 v3.
+Proof. by rewrite dsdp_computes_dot_product /dsdp_output. Qed.
 
 (* ========================================================================== *)
 (* N-party generalization of algebraic correctness                            *)
