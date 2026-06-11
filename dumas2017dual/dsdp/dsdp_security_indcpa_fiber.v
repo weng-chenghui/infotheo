@@ -663,4 +663,56 @@ Definition guess_sample_fdist := sdistr_to_fdist guess_full_lossless.
 (* fin_to_plain — recover the plaintext from a finite-carrier message. *)
 Definition fin_to_plain (m : Mfin) : plain AHE := msg_of_chmsg (fin_to_msg m).
 
+(* guess_full_proj_code — the (guess, V_2)-projection of the rich carrier code
+   is the bridged pair code [guess_joint_code]. *)
+Lemma guess_full_proj_code :
+  (gv ← guess_full_code ;; ret (gv.1.1.1.1.1, gv.1.1.1.1.2)) = guess_joint_code.
+Proof.
+rewrite /guess_full_code /guess_joint_code bind_assoc.
+rewrite guess_resolved_oracles.
+transitivity (vt ← denote_run_caps 11 8 9 10 7 6 [::] seed gc ;;
+  s ← denote_s_get_body chmsg_of_msg ;;
+  guess ← resolve predictor
+            (id_guess, (cipher_list t_cipher × t_msg, t_msg)) (vt.1.1, s) ;;
+  v2 ← denote_v2_get_body chmsg_of_msg ;;
+  ret (msg_to_fin guess, msg_to_fin v2)).
+- rewrite /guess_resolved_caps !bind_assoc.
+  apply: bind_cong => //; apply: boolp.funext => vt.
+  rewrite !bind_assoc; apply: bind_cong => //; apply: boolp.funext => s.
+  rewrite !bind_assoc; apply: bind_cong => //; apply: boolp.funext => guess.
+  rewrite !bind_assoc; apply: bind_cong => //; apply: boolp.funext => v2.
+  by case: (vt.1.2) => [[[[[[a b] c] d] e] f] g]; cbn [bind].
+- rewrite /drun -(denote_run_caps_fst 11 8 9 10 7 6 [::] seed gc) !bind_assoc.
+  apply: bind_cong => //; apply: boolp.funext => vt.
+  cbn [bind].
+  rewrite !bind_assoc; apply: bind_cong => //; apply: boolp.funext => s.
+  rewrite !bind_assoc; apply: bind_cong => //; apply: boolp.funext => guess.
+  by rewrite !bind_assoc; apply: bind_cong => //; apply: boolp.funext => v2.
+Qed.
+
+(* guess_joint_fdist_marginal — the bridged pair distribution is the
+   (guess, V_2)-marginal of the rich sample distribution. *)
+Lemma guess_joint_fdist_marginal :
+  guess_joint_fdist
+  = fdistmap (fun t : (Mfin * Mfin * Mfin * Mfin *
+                       (option 'I_card_renc) * (option 'I_card_renc))%type
+              => (t.1.1.1.1.1, t.1.1.1.1.2)) guess_sample_fdist.
+Proof.
+have Hbridge : Pr_fst guess_joint_code
+  = distr.dmargin (fun t : Mfin * Mfin * Mfin * Mfin * option 'I_card_renc *
+                          option 'I_card_renc => (t.1.1.1.1.1, t.1.1.1.1.2))
+      (Pr_fst guess_full_code).
+{ by rewrite -guess_full_proj_code Pr_fst_map. }
+apply: fdist_ext => y.
+rewrite /guess_joint_fdist /guess_sample_fdist sdistr_to_fdistE.
+rewrite Hbridge fdistmapE.
+under eq_bigr do rewrite sdistr_to_fdistE.
+rewrite distr.dmargin_psumE psum_fin.
+rewrite [RHS]big_mkcond /=.
+apply: eq_bigr => x _.
+rewrite inE /= ger0_norm;
+  last by rewrite mulr_ge0 // ?ler0n//; exact: distr.ge0_mu.
+by case: (_ == y); rewrite ?mul1r ?mul0r.
+Qed.
+
 End dsdp_guess_distribution.
