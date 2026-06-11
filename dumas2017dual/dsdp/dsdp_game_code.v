@@ -516,9 +516,9 @@ Qed.
 (* denote_game_leak_S_raw — the raw three-oracle map underlying
    [denote_game_leak_S]: the [id_game_run] and [id_v2_get] oracles are the
    [denote_game_raw] pair, plus an [id_s_get] oracle revealing the output S. *)
-Definition denote_game_leak_S_raw (gc : game_code) : raw_package :=
+Definition denote_game_leak_S_raw (seed : denv) (gc : game_code) : raw_package :=
   mkfmap
-    [:: (id_game_run, mkdef 'unit cipher_list (fun _ => denote_run empty_denv gc))
+    [:: (id_game_run, mkdef 'unit cipher_list (fun _ => denote_run seed gc))
       ; (id_v2_get,   mkdef 'unit t_msg       (fun _ => denote_v2_get_body))
       ; (id_s_get,    mkdef 'unit t_msg       (fun _ => denote_s_get_body)) ].
 
@@ -526,9 +526,9 @@ Definition denote_game_leak_S_raw (gc : game_code) : raw_package :=
    ValidPackage through the opaque denote_game_leak_S_raw map, so the
    certificate is supplied explicitly (run oracle via denote_run_valid, the two
    reveal oracles via denote_v2_get_valid / denote_s_get_valid). *)
-Lemma denote_game_leak_S_valid (gc : game_code) :
+Lemma denote_game_leak_S_valid (seed : denv) (gc : game_code) :
   ValidPackage protocol_state [interface] game_iface_leak_S
-    (denote_game_leak_S_raw gc).
+    (denote_game_leak_S_raw seed gc).
 Proof.
 rewrite /denote_game_leak_S_raw /game_iface_leak_S.
 apply: valid_package_cons; last by move=> x; exact: denote_run_valid.
@@ -543,10 +543,10 @@ Qed.
    generic over [game_code]: for code without a [GC_put_output] the cell stays
    [None] and [id_s_get] returns the canonical 0 message; for output-exposing
    code it returns the written S. *)
-Definition denote_game_leak_S (gc : game_code) :
+Definition denote_game_leak_S (seed : denv) (gc : game_code) :
   package [interface] game_iface_leak_S :=
-  mkpackage protocol_state (denote_game_leak_S_raw gc)
-    (denote_game_leak_S_valid gc).
+  mkpackage protocol_state (denote_game_leak_S_raw seed gc)
+    (denote_game_leak_S_valid seed gc).
 
 (* ------------------------------------------------------------------ *)
 (* Oracle-routed denotation (one-hop shim): the raw_code core and      *)
