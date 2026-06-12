@@ -509,19 +509,19 @@ Let drun := denote_run renc_card rand_of_renc chmsg_of_msg chcipher_of_cipher pk
 Let dhe := denote_he pkey_of_party rand0.
 
 (* denote_run per-constructor unfold lemmas. *)
-Lemma drun_sample_msg (e:denv AHE) k : drun e (GC_sample card_msg k) = (x ← sample uniform card_msg ;; drun (push_val (Gplain (msg_of_idx x)) e) k).
+Lemma denote_run_sample_msg (e:denv AHE) k : drun e (GC_sample card_msg k) = (x ← sample uniform card_msg ;; drun (push_val (Gplain (msg_of_idx x)) e) k).
 Proof. by rewrite /drun /denote_run -/denote_run eqxx. Qed.
-Lemma drun_sample_renc (e:denv AHE) k : drun e (GC_sample card_renc k) = (x ← sample uniform card_renc ;; drun (push_rand (rand_of_renc (sample_to_renc renc_card x)) e) k).
+Lemma denote_run_sample_renc (e:denv AHE) k : drun e (GC_sample card_renc k) = (x ← sample uniform card_renc ;; drun (push_rand (rand_of_renc (sample_to_renc renc_card x)) e) k).
 Proof. by rewrite /drun /denote_run -/denote_run (negbTE card_renc_neq) eqxx. Qed.
-Lemma drun_put (e:denv AHE) t k : drun e (GC_put t k) = (#put (V_2_cell t_msg) := Some (chmsg_of_msg (as_plain (dhe e t))) ;; drun e k).
+Lemma denote_run_put (e:denv AHE) t k : drun e (GC_put t k) = (#put (V_2_cell t_msg) := Some (chmsg_of_msg (as_plain (dhe e t))) ;; drun e k).
 Proof. by rewrite /drun /dhe /denote_run -/denote_run. Qed.
-Lemma drun_put_output (e:denv AHE) t k : drun e (GC_put_output t k) = (#put (S_output_cell t_msg) := Some (chmsg_of_msg (as_plain (dhe e t))) ;; drun e k).
+Lemma denote_run_put_output (e:denv AHE) t k : drun e (GC_put_output t k) = (#put (S_output_cell t_msg) := Some (chmsg_of_msg (as_plain (dhe e t))) ;; drun e k).
 Proof. by rewrite /drun /dhe /denote_run -/denote_run. Qed.
-Lemma drun_let (e:denv AHE) t k : drun e (GC_let t k) = drun (push_val (dhe e t) e) k.
+Lemma denote_run_let (e:denv AHE) t k : drun e (GC_let t k) = drun (push_val (dhe e t) e) k.
 Proof. by rewrite /drun /dhe /denote_run -/denote_run. Qed.
-Lemma drun_enc_hop (e:denv AHE) pk secret k : drun e (GC_enc_hop pk secret k) = (ir ← sample uniform card_renc ;; drun (push_val (Gcipher (enc (pkey_of_party (nat_to_party_id pk)) (as_plain (dhe e secret)) (rand_of_renc (sample_to_renc renc_card ir)))) e) k).
+Lemma denote_run_enc_hop (e:denv AHE) pk secret k : drun e (GC_enc_hop pk secret k) = (ir ← sample uniform card_renc ;; drun (push_val (Gcipher (enc (pkey_of_party (nat_to_party_id pk)) (as_plain (dhe e secret)) (rand_of_renc (sample_to_renc renc_card ir)))) e) k).
 Proof. by rewrite /drun /dhe /denote_run -/denote_run. Qed.
-Lemma drun_ret (e:denv AHE) outs : drun e (GC_ret outs) = ret ([seq chcipher_of_cipher (as_cipher (dhe e o)) | o <- outs] : cipher_list t_cipher).
+Lemma denote_run_ret (e:denv AHE) outs : drun e (GC_ret outs) = ret ([seq chcipher_of_cipher (as_cipher (dhe e o)) | o <- outs] : cipher_list t_cipher).
 Proof. by rewrite /drun /dhe /denote_run -/denote_run. Qed.
 
 (* gc_eq — the concrete output-exposing all-zero seeded game body: 6 samples
@@ -801,31 +801,31 @@ Qed.
 
 (* denote_run_caps per-constructor unfold lemmas (rich-run analogues of the
    drun_* lemmas), used to peel the run inside the (V_2, V_3) reflection. *)
-Lemma drc_sample_msg iv1 iu1 iu2 iu3 iv2 iv3 irs (e : denv AHE) k :
+Lemma denote_run_caps_sample_msg iv1 iu1 iu2 iu3 iv2 iv3 irs (e : denv AHE) k :
   denote_run_caps iv1 iu1 iu2 iu3 iv2 iv3 irs e (GC_sample card_msg k)
   = (x ← sample uniform card_msg ;;
      denote_run_caps iv1 iu1 iu2 iu3 iv2 iv3 irs (push_val (Gplain (msg_of_idx x)) e) k).
 Proof. by rewrite /denote_run_caps -/denote_run_caps eqxx. Qed.
 
-Lemma drc_sample_renc iv1 iu1 iu2 iu3 iv2 iv3 irs (e : denv AHE) k :
+Lemma denote_run_caps_sample_renc iv1 iu1 iu2 iu3 iv2 iv3 irs (e : denv AHE) k :
   denote_run_caps iv1 iu1 iu2 iu3 iv2 iv3 irs e (GC_sample card_renc k)
   = (x ← sample uniform card_renc ;;
      denote_run_caps iv1 iu1 iu2 iu3 iv2 iv3 irs
        (push_rand (rand_of_renc (sample_to_renc renc_card x)) e) k).
 Proof. by rewrite /denote_run_caps -/denote_run_caps (negbTE card_renc_neq) eqxx. Qed.
 
-Lemma drc_put iv1 iu1 iu2 iu3 iv2 iv3 irs (e : denv AHE) t k :
+Lemma denote_run_caps_put iv1 iu1 iu2 iu3 iv2 iv3 irs (e : denv AHE) t k :
   denote_run_caps iv1 iu1 iu2 iu3 iv2 iv3 irs e (GC_put t k)
   = (#put (V_2_cell t_msg) := Some (chmsg_of_msg (as_plain (dhe e t))) ;;
      denote_run_caps iv1 iu1 iu2 iu3 iv2 iv3 irs e k).
 Proof. by rewrite /denote_run_caps -/denote_run_caps. Qed.
 
-Lemma drc_let iv1 iu1 iu2 iu3 iv2 iv3 irs (e : denv AHE) t k :
+Lemma denote_run_caps_let iv1 iu1 iu2 iu3 iv2 iv3 irs (e : denv AHE) t k :
   denote_run_caps iv1 iu1 iu2 iu3 iv2 iv3 irs e (GC_let t k)
   = denote_run_caps iv1 iu1 iu2 iu3 iv2 iv3 irs (push_val (dhe e t) e) k.
 Proof. by rewrite /denote_run_caps -/denote_run_caps. Qed.
 
-Lemma drc_hop iv1 iu1 iu2 iu3 iv2 iv3 irs (e : denv AHE) pk secret k :
+Lemma denote_run_caps_enc_hop iv1 iu1 iu2 iu3 iv2 iv3 irs (e : denv AHE) pk secret k :
   denote_run_caps iv1 iu1 iu2 iu3 iv2 iv3 irs e (GC_enc_hop pk secret k)
   = (ir ← sample uniform card_renc ;;
      denote_run_caps iv1 iu1 iu2 iu3 iv2 iv3 (rcons irs ir)
@@ -834,7 +834,7 @@ Lemma drc_hop iv1 iu1 iu2 iu3 iv2 iv3 irs (e : denv AHE) pk secret k :
                                (rand_of_renc (sample_to_renc renc_card ir)))) e) k).
 Proof. by rewrite /denote_run_caps -/denote_run_caps. Qed.
 
-Lemma drc_putout iv1 iu1 iu2 iu3 iv2 iv3 irs (e : denv AHE) t k :
+Lemma denote_run_caps_put_output iv1 iu1 iu2 iu3 iv2 iv3 irs (e : denv AHE) t k :
   denote_run_caps iv1 iu1 iu2 iu3 iv2 iv3 irs e (GC_put_output t k)
   = (#put (S_output_cell t_msg) := Some (chmsg_of_msg (as_plain (dhe e t))) ;;
      cl ← drun e k ;;
@@ -966,17 +966,17 @@ Lemma view_marginal_indep (m0 m1 m0' m1' : plain AHE) (h : heap) :
        output_term (GC_ret [:: HE_var 1; HE_var 0; HE_var 3;
        HE_var 2])))))))))))) h).
 Proof.
-rewrite !drun_sample_msg.
+rewrite !denote_run_sample_msg.
 rewrite !Pr_code_sample !dfst_dlet_commut; apply: eq_dlet => x2.
-rewrite !drun_sample_msg !Pr_code_sample !dfst_dlet_commut; apply: eq_dlet => x3.
-rewrite !drun_sample_renc !Pr_code_sample !dfst_dlet_commut; apply: eq_dlet => r0.
-rewrite drun_sample_renc Pr_code_sample dfst_dlet_commut.
-rewrite drun_sample_renc Pr_code_sample dfst_dlet_commut.
+rewrite !denote_run_sample_msg !Pr_code_sample !dfst_dlet_commut; apply: eq_dlet => x3.
+rewrite !denote_run_sample_renc !Pr_code_sample !dfst_dlet_commut; apply: eq_dlet => r0.
+rewrite denote_run_sample_renc Pr_code_sample dfst_dlet_commut.
+rewrite denote_run_sample_renc Pr_code_sample dfst_dlet_commut.
 apply: eq_dlet => r1.
-rewrite !drun_put !Pr_code_put.
-rewrite !drun_enc_hop !Pr_code_sample !dfst_dlet_commut; apply: eq_dlet => ir1.
-rewrite !drun_enc_hop !Pr_code_sample !dfst_dlet_commut; apply: eq_dlet => ir2.
-rewrite !drun_let !drun_put_output !Pr_code_put !drun_ret !Pr_code_ret.
+rewrite !denote_run_put !Pr_code_put.
+rewrite !denote_run_enc_hop !Pr_code_sample !dfst_dlet_commut; apply: eq_dlet => ir1.
+rewrite !denote_run_enc_hop !Pr_code_sample !dfst_dlet_commut; apply: eq_dlet => ir2.
+rewrite !denote_run_let !denote_run_put_output !Pr_code_put !denote_run_ret !Pr_code_ret.
 apply: SubDistr.distr_ext => w; rewrite !distr.dmargin_dunit /=.
 by congr (distr.mu (distr.dunit _) w).
 Qed.
@@ -1012,10 +1012,10 @@ have sba : forall (A B : choiceType) (op : Op) (k : Arit op -> raw_code A)
     (f : A -> raw_code B),
     (vt ← (x ← sample op ;; k x) ;; f vt)
     = (x ← sample op ;; vt ← k x ;; f vt) by [].
-rewrite guess_triple_proj_code gc_eq drc_sample_msg
+rewrite guess_triple_proj_code gc_eq denote_run_caps_sample_msg
  [in X in X = _]sba.
 apply: f_equal; apply: boolp.funext => a.
-rewrite drc_sample_msg [in X in X = _]sba.
+rewrite denote_run_caps_sample_msg [in X in X = _]sba.
 apply: f_equal; apply: boolp.funext => b.
 by rewrite /guess_inner.
 Qed.
@@ -1117,7 +1117,7 @@ Lemma de_val_nth_pushrand (r : rand AHE) (e : denv AHE) n :
 Proof. by []. Qed.
 Lemma as_plain_Gplain (x : plain AHE) : as_plain (Gplain x) = x.
 Proof. by []. Qed.
-Lemma dhe_var (e : denv AHE) n : dhe e (HE_var n) = de_val_nth e n.
+Lemma denote_he_var (e : denv AHE) n : dhe e (HE_var n) = de_val_nth e n.
 Proof. by []. Qed.
 
 (* guess_run_cells — every heap in the support of [guess_inner]'s run carries the
@@ -1140,14 +1140,14 @@ Lemma guess_run_cells (a b : 'I_card_msg) z :
   /\ z.1.1.2.1.2 = msg_of_idx b.
 Proof.
 case: z => zv zh Hin.
-move: Hin; rewrite drc_sample_msg Pr_code_sample => /distr.dinsupp_dlet [a0 _ Hin].
-move: Hin; rewrite drc_sample_msg Pr_code_sample => /distr.dinsupp_dlet [a1 _ Hin].
-move: Hin; rewrite drc_sample_renc Pr_code_sample => /distr.dinsupp_dlet [b0 _ Hin].
-move: Hin; rewrite drc_sample_renc Pr_code_sample => /distr.dinsupp_dlet [b1 _ Hin].
-move: Hin; rewrite drc_put Pr_code_put drc_hop Pr_code_sample
+move: Hin; rewrite denote_run_caps_sample_msg Pr_code_sample => /distr.dinsupp_dlet [a0 _ Hin].
+move: Hin; rewrite denote_run_caps_sample_msg Pr_code_sample => /distr.dinsupp_dlet [a1 _ Hin].
+move: Hin; rewrite denote_run_caps_sample_renc Pr_code_sample => /distr.dinsupp_dlet [b0 _ Hin].
+move: Hin; rewrite denote_run_caps_sample_renc Pr_code_sample => /distr.dinsupp_dlet [b1 _ Hin].
+move: Hin; rewrite denote_run_caps_put Pr_code_put denote_run_caps_enc_hop Pr_code_sample
   => /distr.dinsupp_dlet [c0 _ Hin].
-move: Hin; rewrite drc_hop Pr_code_sample => /distr.dinsupp_dlet [c1 _ Hin].
-move: Hin; rewrite drc_let drc_let drc_putout Pr_code_put Pr_code_bind drun_ret
+move: Hin; rewrite denote_run_caps_enc_hop Pr_code_sample => /distr.dinsupp_dlet [c1 _ Hin].
+move: Hin; rewrite denote_run_caps_let denote_run_caps_let denote_run_caps_put_output Pr_code_put Pr_code_bind denote_run_ret
   Pr_code_ret dlet_unit_ext Pr_code_ret => /distr.in_dunit [= -> ->].
 split; first by rewrite get_set_heap_eq
   !(de_val_nth_pushS, de_val_nth_pushrand, de_val_nth_push0)
@@ -1309,9 +1309,9 @@ have Hc : [% V1, U1, U2, U3]
 by rewrite Hc; exact: inde_const_RV.
 Qed.
 
-(* Zcond — the conditioning view: the hop randomness (determining the cipher
+(* cond_view — the conditioning view: the hop randomness (determining the cipher
    view the predictor sees) and the leaked output S. *)
-Definition Zcond : {RV guess_sample_fdist ->
+Definition cond_view : {RV guess_sample_fdist ->
     (option 'I_card_renc * option 'I_card_renc * plain AHE)} :=
   [% ir1_rv, ir2_rv, Sout].
 
@@ -1319,9 +1319,9 @@ Definition Zcond : {RV guess_sample_fdist ->
 Set Default Goal Selector "1".
 Set Bullet Behavior "None".
 
-(* cardpp — the plaintext-pair carrier is non-empty, so its cardinality is a
+(* card_plain_pair — the plaintext-pair carrier is non-empty, so its cardinality is a
    successor (the shape [fdist_uniform] demands). *)
-Lemma cardpp :
+Lemma card_plain_pair :
   #|((plain AHE * plain AHE)%type : finType)|
   = (#|plain AHE| * #|plain AHE|).-1.+1.
 Proof.
@@ -1329,13 +1329,13 @@ rewrite card_prod prednK //; rewrite muln_gt0; apply/andP; split.
 all: by apply/card_gt0P; exists 0%R; rewrite inE.
 Qed.
 
-(* Htail2_abs — the post-run tail collapse, abstracted over the predictor code
+(* tail_collapse_pred_abstract — the post-run tail collapse, abstracted over the predictor code
    [pc] (a variable) so its rewrite matches without unfolding the giant resolved
    predictor term.  The predictor never writes the V_2 cell (Pr_code_preserves +
    predictor_locs_disj), so the read returns the value the run stored, and the
    tail's value-marginal is the constant [(msg_of_chmsg cv, v3val)] scaled by the
    predictor mass. *)
-Lemma Htail2_abs (h : heap) (pc : raw_code t_msg) (cv : t_msg)
+Lemma tail_collapse_pred_abstract (h : heap) (pc : raw_code t_msg) (cv : t_msg)
     (v3val : plain AHE) :
   ValidCode (locs predictor) [interface] pc ->
   get_heap h (V_2_cell t_msg) = Some cv ->
@@ -1363,7 +1363,7 @@ Qed.
 (* guess_VarRV_uniform — the two secret samples (V_2, V_3) are jointly uniform on
    the plaintext space: they are msg_of_idx of two independent uniform index
    samples, and msg_of_idx is a bijection. *)
-Lemma guess_VarRV_uniform : `p_[% V2, V3] = fdist_uniform cardpp.
+Lemma guess_VarRV_uniform : `p_[% V2, V3] = fdist_uniform card_plain_pair.
 Proof.
 rewrite /dist_of_RV.
 pose proj := (fun t : (Mfin * Mfin * Mfin * Mfin * option 'I_card_renc *
@@ -1435,9 +1435,9 @@ have Hcore :
     by rewrite Pr_code_ret !dlet_unit_ext.
   rewrite HRHS Hbody /Pr_fst gc_eq.
   (* Peel the six leading samples (4 plaintext, 2 encryption-randomness). *)
-  rewrite drc_sample_msg; cbn [bind]; rewrite Pr_code_sample dfst_dlet_commut.
+  rewrite denote_run_caps_sample_msg; cbn [bind]; rewrite Pr_code_sample dfst_dlet_commut.
   apply: eq_dlet => x0.
-  rewrite drc_sample_msg; cbn [bind]; rewrite Pr_code_sample dfst_dlet_commut.
+  rewrite denote_run_caps_sample_msg; cbn [bind]; rewrite Pr_code_sample dfst_dlet_commut.
   apply: eq_dlet => x1.
   (* After peeling x0, x1: the inner experiment INNER has a constant value-marginal
      [(msg_of_idx x0, msg_of_idx x1)] (the predictor never touches V_2, V_3), so the
@@ -1464,20 +1464,20 @@ have Hcore :
         z.1.1.2.1.2 = msg_of_idx x1
         /\ get_heap z.2 (V_2_cell t_msg) = Some (chmsg_of_msg (msg_of_idx x0)).
       move=> [zv zh] Hin.
-      move: Hin; rewrite drc_sample_msg Pr_code_sample
+      move: Hin; rewrite denote_run_caps_sample_msg Pr_code_sample
         => /distr.dinsupp_dlet [a0 _ Hin].
-      move: Hin; rewrite drc_sample_msg Pr_code_sample
+      move: Hin; rewrite denote_run_caps_sample_msg Pr_code_sample
         => /distr.dinsupp_dlet [a1 _ Hin].
-      move: Hin; rewrite drc_sample_renc Pr_code_sample
+      move: Hin; rewrite denote_run_caps_sample_renc Pr_code_sample
         => /distr.dinsupp_dlet [b0 _ Hin].
-      move: Hin; rewrite drc_sample_renc Pr_code_sample
+      move: Hin; rewrite denote_run_caps_sample_renc Pr_code_sample
         => /distr.dinsupp_dlet [b1 _ Hin].
-      move: Hin; rewrite drc_put Pr_code_put drc_hop Pr_code_sample
+      move: Hin; rewrite denote_run_caps_put Pr_code_put denote_run_caps_enc_hop Pr_code_sample
         => /distr.dinsupp_dlet [c0 _ Hin].
-      move: Hin; rewrite drc_hop Pr_code_sample
+      move: Hin; rewrite denote_run_caps_enc_hop Pr_code_sample
         => /distr.dinsupp_dlet [c1 _ Hin].
-      move: Hin; rewrite drc_let drc_let drc_putout Pr_code_put Pr_code_bind
-        drun_ret Pr_code_ret dlet_unit_ext Pr_code_ret
+      move: Hin; rewrite denote_run_caps_let denote_run_caps_let denote_run_caps_put_output Pr_code_put Pr_code_bind
+        denote_run_ret Pr_code_ret dlet_unit_ext Pr_code_ret
         => /distr.in_dunit [= -> ->].
       split; [by [] | by rewrite get_set_heap_neq // get_set_heap_eq].
     case: (Hrun y Hy) => Hcap Hheap.
@@ -1505,7 +1505,7 @@ have Hcore :
              (id_guess, (cipher_list t_cipher × t_msg, t_msg))
              (y.1.1.1, match get_heap y.2 (S_output_cell t_msg) with
                        | Some v => v | None => chmsg_of_msg 0%R end)) y.2));
-        first by apply: Htail2_abs;
+        first by apply: tail_collapse_pred_abstract;
           [exact: resolve_predictor_valid | exact: Hheap].
       by rewrite chmsg_of_msgK Hcap.
     have Hvs : val \in distr.dinsupp (distr.dmargin fst (Pr_code
@@ -1569,10 +1569,10 @@ have Hcore :
         (f : A -> raw_code B),
         (vt ← (x ← sample op ;; k x) ;; f vt)
         = (x ← sample op ;; vt ← k x ;; f vt) by [].
-    rewrite Hbody gc_eq /two_idx_code drc_sample_msg
+    rewrite Hbody gc_eq /two_idx_code denote_run_caps_sample_msg
       [in X in _ = X]sba [in X in X = _]sba.
     apply: f_equal; apply: boolp.funext => a.
-    rewrite drc_sample_msg [in X in _ = X]sba [in X in X = _]sba.
+    rewrite denote_run_caps_sample_msg [in X in _ = X]sba [in X in X = _]sba.
     apply: f_equal; apply: boolp.funext => b.
     by rewrite /INNERf.
   have HmeanD : psum (fun p : ('I_card_msg * 'I_card_msg)%type =>
@@ -1630,7 +1630,7 @@ have Htwoval : forall p : ('I_card_msg * 'I_card_msg)%type,
   rewrite -big_distrr /= (bigD1 a) //= eqxx big1 ?addr0;
     last by move=> i Hia; rewrite (negbTE Hia).
   by rewrite mulr1 -invfM -natrM.
-rewrite -(fdistmap_bij_unif card_pair cardpp Hpairbij).
+rewrite -(fdistmap_bij_unif card_pair card_plain_pair Hpairbij).
 apply: fdist_ext => u.
 rewrite sdistr_to_fdistE Hcore distr.dmargin_psumE fdistmapE Htwo.
 under eq_psum => x do rewrite Htwoval.
@@ -1745,9 +1745,9 @@ apply: eq_bigr => b bE; rewrite fdistmapE.
 by apply: eq_bigl => a; rewrite inE [in RHS]andb_idl // => /eqP ->.
 Qed.
 
-(* Dview — the cipher-list view marginal at the all-zero secrets; by
+(* view_distr — the cipher-list view marginal at the all-zero secrets; by
    [view_marginal_indep] it is the run's view marginal for any secret pair. *)
-Let Dview : distr.distr R (cipher_list t_cipher) :=
+Let view_distr : distr.distr R (cipher_list t_cipher) :=
   distr.dmargin fst (Pr_code (drun (push_val (Gplain 0) (push_val (Gplain 0) seed))
      (GC_sample card_msg (GC_sample card_msg (GC_sample card_renc
        (GC_sample card_renc (GC_put (HE_var 3) (GC_enc_hop 1 (HE_const 0)
@@ -1757,26 +1757,26 @@ Let Dview : distr.distr R (cipher_list t_cipher) :=
        output_term (GC_ret [:: HE_var 1; HE_var 0; HE_var 3;
        HE_var 2])))))))))))) emptym).
 
-(* Kguess z — the guess distribution conditioned on leaked output S = z: the
+(* guess_kernel z — the guess distribution conditioned on leaked output S = z: the
    predictor's guess marginal averaged over the (secret-independent) cipher view,
    with z supplied as the read output. *)
-Definition Kguess (z : plain AHE) : distr.distr R Mfin :=
+Definition guess_kernel (z : plain AHE) : distr.distr R Mfin :=
   distr.dlet (fun cl : cipher_list t_cipher =>
      distr.dmargin (fun gh : (t_msg * heap)%type => msg_to_fin gh.1)
        (Pr_code (resolve (pack predictor)
           (id_guess, (chProd (cipher_list t_cipher) t_msg, t_msg))
-          (cl, chmsg_of_msg z)) emptym)) Dview.
+          (cl, chmsg_of_msg z)) emptym)) view_distr.
 
 (* guess_inner_kernel_z — the guess marginal of [guess_inner a b] is the
-   output-determined kernel [Kguess] at the leaked output: the (a,b)-dependence
+   output-determined kernel [guess_kernel] at the leaked output: the (a,b)-dependence
    enters only through [dsdp_output] (the cipher view being secret-independent by
    view_marginal_indep). *)
 Lemma guess_inner_kernel_z (a b : 'I_card_msg) :
   distr.dmargin (fun t : (Mfin * Mfin * Mfin)%type => t.1.1)
     (Pr_fst (guess_inner a b))
-  = Kguess (dsdp_output w_v1 w_u1 w_u2 w_u3 (msg_of_idx a) (msg_of_idx b)).
+  = guess_kernel (dsdp_output w_v1 w_u1 w_u2 w_u3 (msg_of_idx a) (msg_of_idx b)).
 Proof.
-rewrite guess_inner_kernel_form /Kguess.
+rewrite guess_inner_kernel_form /guess_kernel.
 congr (distr.dlet _ _).
 exact: (view_marginal_indep (msg_of_idx a) (msg_of_idx b) 0 0 emptym).
 Qed.
@@ -1790,7 +1790,7 @@ Lemma guess_triple_pr (x y v3 : plain AHE) :
   pfwd1 [% guess_rv, V2, V3] (x, y, v3)
   = (#|plain AHE|%:R^-1) ^+ 2
     * distr.mu (distr.dmargin fin_to_plain
-        (Kguess (dsdp_output w_v1 w_u1 w_u2 w_u3 y v3))) x.
+        (guess_kernel (dsdp_output w_v1 w_u1 w_u2 w_u3 y v3))) x.
 Proof.
 pose proj3 := (fun t : (Mfin * Mfin * Mfin * Mfin * option 'I_card_renc *
                       option 'I_card_renc)%type
@@ -1825,7 +1825,7 @@ have Hab : forall a b : 'I_card_msg,
        (fin_to_plain t.1.1, fin_to_plain t.1.2, fin_to_plain t.2))
       (Pr_fst (guess_inner a b))
     = distr.dmargin (fun g : Mfin => (fin_to_plain g, msg_of_idx a, msg_of_idx b))
-        (Kguess (dsdp_output w_v1 w_u1 w_u2 w_u3 (msg_of_idx a) (msg_of_idx b))).
+        (guess_kernel (dsdp_output w_v1 w_u1 w_u2 w_u3 (msg_of_idx a) (msg_of_idx b))).
   by move=> a b; rewrite [in LHS](guess_inner_v2v3_det a b) dmargin_comp
      guess_inner_kernel_z; congr (distr.dmargin _ _);
      apply: boolp.funext => g; rewrite /= /fin_to_plain !msg_to_finK !chmsg_of_msgK.
@@ -1874,7 +1874,7 @@ apply: (cinde_RV_factor
   (f := fun (y z : plain AHE) =>
      \sum_(v3 : plain AHE)
         (dsdp_output w_v1 w_u1 w_u2 w_u3 y v3 == z)%:R * pfwd1 [% V2, V3] (y, v3))
-  (g := fun (z x : plain AHE) => distr.mu (distr.dmargin fin_to_plain (Kguess z)) x)).
+  (g := fun (z x : plain AHE) => distr.mu (distr.dmargin fin_to_plain (guess_kernel z)) x)).
 move=> x y z.
 have Hmarg : pfwd1 [% guess_rv, V2, Sout] (x, y, z)
    = \sum_(v3 : plain AHE) (dsdp_output w_v1 w_u1 w_u2 w_u3 y v3 == z)%:R

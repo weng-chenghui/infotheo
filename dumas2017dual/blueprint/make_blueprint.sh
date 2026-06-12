@@ -16,13 +16,15 @@ MODULES=(
   dumas2017dual/dsdp/dsdp_indcpa_security.v
   homomorphic_encryption/indcpa_ror.v
   # Modules cited green by Part II (it_bound_bridge.tex): the Infotheo fiber
-  # facts and the committed output-channel chain (derivation extension, the
-  # S-exposing games + 2*epsilon_cpa, the guessing layer + connector).  The
-  # remaining option-B construction nodes (footprint, sample fdist, identities,
-  # fiber bound, composition) are blue (no \rocq link yet).
+  # facts and the full output-channel chain: the derivation extension, the
+  # S-exposing games + 2*epsilon_cpa, the guessing layer + connector, and the
+  # information-theoretic bound + composition (footprint frame, sample fdist, the
+  # output-determined guess kernel + guess _|_ V2 | S, the route-F fiber bound,
+  # and the triangle composition).  Every Part II node is green.
   dumas2017dual/dsdp/dsdp_entropy.v
   dumas2017dual/entropy_fiber/entropy_fiber_zpq.v
   dumas2017dual/dsdp/dsdp_security_indcpa_fiber.v
+  dumas2017dual/lib/extra_proba.v
 )
 
 echo "[1/3] blueprint HTML + dependency graph (plastex)"

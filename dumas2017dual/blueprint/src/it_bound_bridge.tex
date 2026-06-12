@@ -8,14 +8,13 @@
 % with the Part I 2*epsilon_cpa.
 %
 % Colour / status convention (same as content.tex):
-%   \rocqok + \rocq{...}  green : ALREADY EXISTS, cited as a black box.
-%   no \rocqok, no \rocq  blue  : TO CONSTRUCT (option B; see
-%     notes/20260610-dsdp-fiber-bound-reflection-spec.md).
-% Committed so far (green): the whole derivation extension (Chapter
-% ref{ch:deriving_output}), the S-exposing games + 2*epsilon_cpa, and the
-% guessing experiment + connector (Chapter ref{ch:guessing_experiment}).
-% To construct (blue): the footprint lemma, the explicit sample reflection, the
-% dsdp_entropy identities, the fiber bound, and the composition.
+%   \rocqok + \rocq{...}  green : EXISTS in the formalization, cited as a black box.
+% The whole output-channel chain is committed and machine-checked; every node is
+% green.  Chapter ref{ch:deriving_output}: the derivation extension and the
+% S-exposing games + 2*epsilon_cpa.  Chapter ref{ch:guessing_experiment}: the
+% guessing experiment and the connector.  Chapter ref{ch:it_bound}: the footprint
+% frame, the sample reflection, the output-determined guess kernel and
+% guess _|_ V2 | S, the route-F fiber bound, and the triangle composition.
 %
 % Statement bodies are terse mathematical statements (no proof, no status, no
 % motivation).  Proof strategy and the exact Coq names live in "% proof:" /
@@ -95,7 +94,7 @@ forming an advantage.
 \textbf{The two legs and their join.} The output channel splits into one
 absolute leg and one relational leg, joined by the triangle inequality. The
 absolute leg bounds the all-zero endpoint's standalone probability by $1/m$
-(Theorem~\ref{thm:guess_sdistr_success_le_invm}); the relational leg keeps
+(Theorem~\ref{thm:guess_sdistr_success_le}); the relational leg keeps
 the real-to-zero distance inside the advantage world at $2\,\epscpa$
 (Lemma~\ref{lem:guess_advantage_le}). One term is a single-game probability
 and the other a difference of two, which is why the triangle inequality is what
@@ -290,28 +289,31 @@ diagonal.
 \chapter{The information-theoretic bound and full secrecy}
 \label{ch:it_bound}
 
-Conditioned on $S$ and her inputs, Bob's secret $V_2$ is uniform over a fiber of
-$m$ points, so any guess succeeds with probability at most $1/m$. Infotheo
-proves this over an abstract joint distribution. This chapter reflects the
-experiment's own samples into an explicit such distribution, frames the opaque
-predictor out of the secret cell so the guess depends on $V_2$ only through $S$,
-discharges Infotheo's hypotheses, and pushes the resulting $1/m$ through the
-connector and the computational distance to the full bound $1/m + 2\,\epscpa$.
+Conditioned on the leaked output $S$, Bob's secret $V_2$ is uniform over a fiber
+of $m$ points, so any guess succeeds with probability at most $1/m$. The
+predictor reads only the view and $S$, so its guess is conditionally independent
+of $V_2$ given $S$; with the fiber bound this caps the diagonal mass of the
+$(\guess,V_2)$ joint. This chapter reflects the experiment's samples into an
+explicit distribution, proves that conditional independence through an
+output-determined guess kernel, instantiates the route-F fiber bound, and pushes
+the resulting $1/m$ through the connector and the computational distance to the
+full bound $1/m + 2\,\epscpa$.
 
-\section{Reused Infotheo facts}
+\section{Reused Infotheo facts (route F)}
 
 \begin{lemma}[Fiber cardinality is $m$]
   \label{lem:exist_fiber_card}
-  \rocq{infotheo.dumas2017dual.dsdp.dsdp_entropy.dsdp_fiber_card}
+  \rocq{infotheo.dumas2017dual.dsdp.dsdp_entropy.dsdp_fiber_card_ring}
   \rocqok
-  The solution set of the scalar-product constraint, for admissible
-  multipliers, has exactly $m$ points.
-  \[ \#\lvert \fib(u_1,u_2,u_3,v_1,s)\rvert = m \]
+  Over a commutative ring, when the multiplier $u_3$ is injective the solution
+  set of the scalar-product constraint has exactly $\#R = m$ points, the image of
+  the ring under $v \mapsto u_3 v$.
+  \[ \#\lvert \fib(u_1,u_2,u_3,v_1,s)\rvert = \#R = m \]
 \end{lemma}
 
 \begin{lemma}[Conditional uniformity on the fiber]
   \label{lem:exist_cpr_fiber}
-  \rocq{infotheo.dumas2017dual.entropy_fiber.entropy_fiber_zpq.cPr_uniform_fiber}
+  \rocq{infotheo.dumas2017dual.entropy_fiber.entropy_fiber_zpq.gen_cPr_uniform_fiber}
   \rocqok
   \uses{lem:exist_fiber_card}
   For a joint distribution in which the variable pair is uniform and
@@ -323,39 +325,31 @@ connector and the computational distance to the full bound $1/m + 2\,\epscpa$.
 
 \begin{lemma}[DSDP solution is uniform, probability $1/m$]
   \label{lem:exist_pr_sol}
-  \rocq{infotheo.dumas2017dual.dsdp.dsdp_entropy.Pr_dsdp_sol_uniform}
+  \rocq{infotheo.dumas2017dual.dsdp.dsdp_entropy.Pr_dsdp_sol_uniform_ring}
   \rocqok
   \uses{lem:exist_cpr_fiber,lem:exist_fiber_card}
-  Each solution $(v_2,v_3)$ of the DSDP constraint has conditional probability
-  $1/m$ given the inputs and $S$.
+  Over a commutative ring with injective multiplier, each solution $(v_2,v_3)$ of
+  the DSDP constraint has conditional probability $1/m$ given the inputs and $S$.
   \[ \Pr[\,(V_2,V_3)=(v_2,v_3)\mid \mathrm{Cond}=\cond\,] = m^{-1} \]
 \end{lemma}
-
-\begin{theorem}[Residual entropy is $\log m$]
-  \label{thm:exist_centropy}
-  \rocq{infotheo.dumas2017dual.dsdp.dsdp_entropy.dsdp_centropy_uniform}
-  \rocqok
-  \uses{lem:exist_pr_sol}
-  Conditioned on the inputs and $S$, the variable pair retains $\log m$ bits of
-  entropy.
-  \[ H(\mathrm{Var}\mid \mathrm{Cond}) = \log m \]
-\end{theorem}
 
 \section{Reflecting the experiment and framing the predictor}
 
 \begin{lemma}[Footprint of valid code]
   \label{lem:Pr_fst_agree_locs}
+  \rocq{infotheo.dumas2017dual.dsdp.dsdp_security_indcpa_fiber.Pr_fst_agree_locs,
+       infotheo.dumas2017dual.dsdp.dsdp_security_indcpa_fiber.Pr_fst_closed}
+  \rocqok
   \uses{lem:exist_pr_code}
-  % to create: Pr_fst_agree_locs (dsdp_security_indcpa_fiber), with
-  %   Pr_fst_closed the L = emptym corollary.  Proof: induction on valid_code;
-  %   the get/put cases touch only L, the op case is vacuous for the empty
-  %   import interface, sample/ret thread the heap.
+  % proof: induction on valid_code; the get/put cases touch only L, the op case
+  %   is vacuous for the empty import interface, sample/ret thread the heap.
+  %   Pr_fst_closed is the L = emptym corollary.
   The value-marginal of valid code depends only on the heap restricted to the
   code's own locations $L$: heaps agreeing on $L$ give equal
-  $\mathrm{Pr}_{\mathrm{fst}}$. This is the separation-logic footprint property
-  --- a program cannot observe state outside the locations it reads or writes
-  --- and it is what makes the predictor, whose $L$ excludes the secret cell,
-  blind to $V_2$.
+  $\mathrm{Pr}_{\mathrm{fst}}$. This separation-logic footprint --- a program
+  observes only the locations it reads or writes --- makes the predictor, whose
+  $L$ excludes the secret cell, depend on $V_2$ only through what its inputs
+  reveal.
   \[ h =_{L} h' \;\Longrightarrow\;
         \mathrm{dmargin}_{\mathrm{fst}}(\mathrm{Pr}_{\mathrm{code}}\,c\,h)
         = \mathrm{dmargin}_{\mathrm{fst}}(\mathrm{Pr}_{\mathrm{code}}\,c\,h') \]
@@ -363,74 +357,135 @@ connector and the computational distance to the full bound $1/m + 2\,\epscpa$.
 
 \begin{definition}[The experiment's sample distribution]
   \label{def:guess_sample_fdist}
+  \rocq{infotheo.dumas2017dual.dsdp.dsdp_security_indcpa_fiber.guess_sample_fdist,
+       infotheo.dumas2017dual.dsdp.dsdp_security_indcpa_fiber.guess_rv,
+       infotheo.dumas2017dual.dsdp.dsdp_security_indcpa_fiber.Sout}
+  \rocqok
   \uses{def:guessing_experiment_leak_S}
-  % to create: guess_sample_fdist (dsdp_security_indcpa_fiber) and the RVs
-  %   V2,V3,U2,U3,S,guess over it; the protocol scalars uniform-independent, the
-  %   guess following the predictor kernel on (view, S).
-  The joint fdist of the zero-game's protocol scalars and the guess: the scalars
-  $(V_2,V_3,U_2,U_3)$ are uniform and independent (the run's samples), $S$ is
-  their constraint function, and $\guess$ follows the predictor's output on
-  $(\view,S)$ --- a uniform product on the scalars composed with the predictor
-  kernel, not a uniform draw on the guess.
+  % impl: guess_sample_fdist := sdistr_to_fdist of the lossless guessing code; the
+  %   RVs guess_rv, V2, V3, Sout (and the constant inputs V1,U1,U2,U3) over it.
+  The Infotheo fdist of the zero-game's samples: the secret pair $(V_2,V_3)$ and
+  the masks are uniform and independent, $S$ is their constraint function
+  $\mathrm{Sout}$, and $\guess$ follows the predictor's output on $(\view,S)$ ---
+  a uniform product on the secrets composed with the predictor kernel.
   \[ P : \{\mathrm{fdist}\ \mathrm{Samples}\},
-        \qquad V_2,V_3,U_2,U_3,S,\guess : \{\mathrm{RV}\ P\} \]
+        \qquad V_2,V_3,S,\guess : \{\mathrm{RV}\ P\} \]
 \end{definition}
 
 \begin{lemma}[The joint distribution is the sample distribution's image]
-  \label{lem:Pr_fst_guess_joint_code}
-  \uses{def:guess_joint_fdist,def:guess_sample_fdist,lem:Pr_fst_agree_locs,lem:exist_pr_code}
-  % to create: Pr_fst_guess_joint_code.  Proof: reflect the pair code's
-  %   uniform samples (Pr_fst_sample + dlet_uniform), thread the cells
-  %   (Pr_code_get/_put), and frame the opaque predictor out of the secret cell
-  %   (Pr_fst_agree_locs); the result is the (guess, V2)-marginal of P.
+  \label{lem:guess_joint_fdist_marginal}
+  \rocq{infotheo.dumas2017dual.dsdp.dsdp_security_indcpa_fiber.guess_joint_fdist_marginal}
+  \rocqok
+  \uses{def:guess_joint_fdist,def:guess_sample_fdist}
+  % proof: guess_joint_fdist = fdistmap (projection to (guess, V2)) of the sample
+  %   fdist, by sdistr_to_fdist mass preservation.
   The joint fdist (Definition~\ref{def:guess_joint_fdist}) is the
   $(\guess,V_2)$-marginal of the sample distribution
-  (Definition~\ref{def:guess_sample_fdist}): reflecting the pair code's
-  samples and framing the predictor out of the secret cell exposes the full
-  joint, of which the experiment observes the guess and $V_2$.
+  (Definition~\ref{def:guess_sample_fdist}).
   \[ \jointfdist = \mathrm{margin}_{(\guess,V_2)}\,P \]
+\end{lemma}
+
+\section{The guess kernel and conditional independence}
+
+\begin{lemma}[The output-determined guess kernel]
+  \label{lem:guess_triple_pr}
+  \rocq{infotheo.dumas2017dual.dsdp.dsdp_security_indcpa_fiber.guess_inner_kernel_form,
+       infotheo.dumas2017dual.dsdp.dsdp_security_indcpa_fiber.guess_inner_out,
+       infotheo.dumas2017dual.dsdp.dsdp_security_indcpa_fiber.view_marginal_indep,
+       infotheo.dumas2017dual.dsdp.dsdp_security_indcpa_fiber.guess_triple_pr}
+  \rocqok
+  \uses{def:guess_sample_fdist,lem:Pr_fst_agree_locs}
+  % proof: peel the experiment run to a guess kernel (guess_inner_kernel_form);
+  %   the guess marginal reaches the secrets only through their scalar-product
+  %   output (guess_inner_out, view_marginal_indep); collapse the two uniform
+  %   secret samples (dlet_uniform + the msg_of_idx bijection).
+  The joint mass of $(\guess,V_2,V_3)$ is the uniform secret-pair weight times an
+  output-determined guess kernel $K$: the secrets are uniform on the plaintext
+  square, and the guess law given the secrets reaches them only through $S$.
+  \[ \Pr[\,(\guess,V_2,V_3)=(x,y,v_3)\,]
+        = m^{-2}\cdot K\big(\mathrm{Sout}(y,v_3)\big)(x) \]
+\end{lemma}
+
+\begin{lemma}[The predictor reads only the view and $S$]
+  \label{lem:run_heap_agree_predictor}
+  \rocq{infotheo.dumas2017dual.dsdp.dsdp_security_indcpa_fiber.run_heap_agree_predictor}
+  \rocqok
+  \uses{lem:Pr_fst_agree_locs}
+  % proof: every heap in the support of the capturing run agrees with the start
+  %   heap off the two protocol cells; the predictor's locations exclude the V2
+  %   cell, so Pr_fst_agree_locs gives an equal guess distribution.
+  Every heap the experiment run produces agrees, on the predictor's locations,
+  with the start heap; since those locations exclude the $V_2$ cell, the
+  predictor's guess distribution is a function of the view and $S$ alone.
+\end{lemma}
+
+\begin{lemma}[Guess is conditionally independent of $V_2$ given $S$]
+  \label{lem:guess_cinde_V2}
+  \rocq{infotheo.dumas2017dual.dsdp.dsdp_security_indcpa_fiber.guess_cinde_V2}
+  \rocqok
+  \uses{lem:guess_triple_pr,lem:run_heap_agree_predictor,lem:guess_joint_fdist_marginal}
+  % proof: cinde_RV_factor with f the V3-fibre weight and g the kernel mass;
+  %   pfwd1[guess,V2,Sout] is the V3-fibre sum of the triple law (guess_triple_pr).
+  Over the sample distribution the guess is conditionally independent of the
+  challenge secret $V_2$ given the leaked output $S$.
+  \[ P \models \guess \perp V_2 \mid S \]
 \end{lemma}
 
 \section{Instantiating the fiber bound}
 
-\begin{lemma}[Distribution identities: uniformity, independence, constraint]
-  \label{lem:guess_identities}
-  \uses{def:guess_sample_fdist,lem:Pr_fst_agree_locs}
-  % to create: guess_V2_uniform, guess_VarRV_indep_inputs,
-  %   guess_S_determined, guess_indep_V2_given_S
-  %   (dsdp_security_indcpa_fiber); the four hypotheses dsdp_entropy needs.  The
-  %   first three are marginal facts of the uniform product; guess _|_ V2 | S is
-  %   delivered by the footprint (the predictor's output is framed out of V2).
-  Over the sample distribution $P$, the variable pair $(V_2,V_3)$ is uniform and
-  independent of the inputs, the output $S$ is the constraint function of the
-  variables and inputs, and the guess depends on $V_2$ only through $S$.
-  \[ {p}_{(V_2,V_3)} = \mathrm{unif},\quad
-     (V_2,V_3)\perp \mathrm{Inputs},\quad
-     S = g(\mathrm{Var},\mathrm{Input}),\quad
-     \guess \perp V_2 \mid S \]
+\begin{lemma}[Per-fiber bound on $V_2$]
+  \label{lem:guess_V2_cond_le}
+  \rocq{infotheo.dumas2017dual.dsdp.dsdp_security_indcpa_fiber.guess_VarRV_uniform,
+       infotheo.dumas2017dual.dsdp.dsdp_security_indcpa_fiber.guess_inputs_indep,
+       infotheo.dumas2017dual.dsdp.dsdp_security_indcpa_fiber.guess_S_determined,
+       infotheo.dumas2017dual.dsdp.dsdp_security_indcpa_fiber.guess_VarRV_cond_uniform,
+       infotheo.dumas2017dual.dsdp.dsdp_security_indcpa_fiber.guess_V2_cond_le}
+  \rocqok
+  \uses{lem:exist_pr_sol,def:guess_sample_fdist}
+  % proof: instantiate Pr_dsdp_sol_uniform_ring at P with the marginal facts
+  %   (guess_VarRV_uniform: (V2,V3) uniform; guess_inputs_indep; guess_S_determined);
+  %   marginalize V3 out (guess_VarRV_cond_uniform) and lift the conditioning from
+  %   the constraint to Sout alone (guess_V2_cond_Sout).
+  Conditioned on the leaked output $S$, the secret $V_2$ takes any fixed value
+  with probability at most $1/m$. (Over the sample distribution $P$, $(V_2,V_3)$
+  is uniform and independent of the inputs, and $S$ is their constraint function;
+  these are the hypotheses the route-F fiber bound consumes.)
+  \[ \Pr[\,V_2 = a \mid S = s\,] \le 1/m \]
+\end{lemma}
+
+\begin{lemma}[Conditional-independence diagonal bound]
+  \label{lem:cinde_diagonal_bound}
+  \rocq{infotheo.dumas2017dual.lib.extra_proba.cinde_diagonal_bound}
+  \rocqok
+  When $X$ and $Y$ are conditionally independent given $Z$ and each value of $Y$
+  has conditional probability at most $1/m$ given $Z$, the probability of the
+  diagonal $X = Y$ is at most $1/m$.
+  \[ X \perp Y \mid Z,\quad \Pr[\,Y = a \mid Z = c\,] \le 1/m
+        \;\Longrightarrow\; \Pr[\,X = Y\,] \le 1/m \]
 \end{lemma}
 
 \begin{lemma}[Fiber residual]
-  \label{lem:guess_fdist_success_le_invm}
-  \uses{lem:exist_pr_sol,lem:guess_identities,lem:Pr_fst_guess_joint_code}
-  % to create: guess_fdist_success_le_invm (dsdp_security_indcpa_fiber), where
-  %   guess_fdist_success := Pr_[guess_joint_fdist][diag].  Proof: the joint
-  %   diagonal is Pr_P[guess = V2] (Pr_fst_guess_joint_code); instantiate
-  %   dsdp_entropy at P with the identities, lem:exist_pr_sol gives each V2 value
-  %   1/m, and guess _|_ V2 | S caps the collision at 1/m.
+  \label{lem:guess_fdist_success_le}
+  \rocq{infotheo.dumas2017dual.dsdp.dsdp_security_indcpa_fiber.guess_fdist_success_le}
+  \rocqok
+  \uses{lem:cinde_diagonal_bound,lem:guess_cinde_V2,lem:guess_V2_cond_le,lem:guess_joint_fdist_marginal}
+  % proof: guess_fdist_success := Pr_[guess_joint_fdist][diag]; rewrite onto P by
+  %   the marginal, then cinde_diagonal_bound(guess_cinde_V2, guess_V2_cond_le).
   Over the joint fdist, the predictor guesses $V_2$ with probability at most
-  $1/m$.
+  $1/m$: the guess is conditionally independent of $V_2$ given $S$, and given $S$
+  the secret takes any value with probability at most $1/m$.
   \[ \Pr\nolimits_{\jointfdist}[\,\guess=V_2\,] \le 1/m \]
 \end{lemma}
 
 \section{The output bound and composition}
 
 \begin{theorem}[Information-theoretic bound at the endpoint]
-  \label{thm:guess_sdistr_success_le_invm}
-  \uses{lem:guess_success_sdistr_eq_fdist,lem:guess_fdist_success_le_invm}
-  % to create: guess_sdistr_success_le_invm (dsdp_security_indcpa_fiber), where
-  %   guess_sdistr_success := Prexp(zero_S).  Proof: rewrite by the connector
-  %   guess_success_sdistr_eq_fdist, then guess_fdist_success_le_invm.
+  \label{thm:guess_sdistr_success_le}
+  \rocq{infotheo.dumas2017dual.dsdp.dsdp_security_indcpa_fiber.guess_sdistr_success_le}
+  \rocqok
+  \uses{lem:guess_success_sdistr_eq_fdist,lem:guess_fdist_success_le}
+  % proof: rewrite Prexp(zero_S) by the connector guess_success_sdistr_eq_fdist,
+  %   then guess_fdist_success_le.
   At the output-exposing all-zero endpoint, the predictor guesses $V_2$ with
   probability at most $1/m$.
   \[ \Prexp(\zero_S) \le 1/m \]
@@ -438,12 +493,13 @@ connector and the computational distance to the full bound $1/m + 2\,\epscpa$.
 
 \begin{lemma}[Computational distance between the experiments]
   \label{lem:guess_advantage_le}
+  \rocq{infotheo.dumas2017dual.dsdp.dsdp_security_indcpa_fiber.guess_advantage_eq,
+       infotheo.dumas2017dual.dsdp.dsdp_security_indcpa_fiber.guess_advantage_le}
+  \rocqok
   \uses{def:guessing_experiment_leak_S,lem:dsdp_advantage_derived_leak_S,def:relational_advantage}
-  % to create: guess_advantage_le (dsdp_security_indcpa_fiber).  Proof:
-  %   re-associate guessing_experiment = challenger o (predictor || game) into
-  %   (challenger o predictor) o game, package challenger o predictor as a valid
-  %   dsdp_indcpa_adversary (disjointness from the game state and oracles), then
-  %   apply dsdp_advantage_derived_leak_S.
+  % proof: guess_advantage_eq slides the fixed predictor out of the par
+  %   (Advantage_par); guess_advantage_le then applies dsdp_advantage_derived_leak_S
+  %   (eapply, since apply: delta-unfolds the linked games).
   The success probabilities of the experiment on the real and all-zero games
   differ by at most $2\,\epscpa$: the challenger-wrapped predictor is a valid
   adversary, to which the Part~II computational distance
@@ -453,11 +509,11 @@ connector and the computational distance to the full bound $1/m + 2\,\epscpa$.
 
 \begin{theorem}[Full secrecy by composition]
   \label{thm:dsdp_alice_secrecy_leak_S}
-  \uses{thm:guess_sdistr_success_le_invm,lem:guess_advantage_le}
-  % to create: dsdp_alice_secrecy_leak_S (dsdp_security_indcpa_fiber); REPLACES
-  %   dsdp_alice_secrecy.  Proof: triangle Prexp(real_S) <= Prexp(zero_S) +
-  %   |Prexp(real_S) - Prexp(zero_S)|, then the endpoint bound (1/m) and the
-  %   computational distance (2*epsilon_cpa).
+  \rocq{infotheo.dumas2017dual.dsdp.dsdp_security_indcpa_fiber.dsdp_alice_secrecy_leak_S}
+  \rocqok
+  \uses{thm:guess_sdistr_success_le,lem:guess_advantage_le}
+  % proof: triangle Prexp(real_S) <= Prexp(zero_S) + |Prexp(real_S) - Prexp(zero_S)|,
+  %   then the endpoint bound (1/m) and the computational distance (2*epsilon_cpa).
   Against the output-exposing real game, the predictor guesses $V_2$ with
   probability at most $1/m + 2\,\epscpa$.
   \[ \Prexp(\real_S) \le 1/m + 2\,\epscpa \]
