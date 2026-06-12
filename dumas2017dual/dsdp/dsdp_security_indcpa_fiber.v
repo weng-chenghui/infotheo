@@ -713,6 +713,80 @@ elim: gc0 e irs => [n k IH|t k IH|t k IH|t k IH|pk secret k IH|outs] e irs /=.
 - by [].
 Qed.
 
+(* denote_run_caps_valid — the capturing run is valid over [protocol_state]:
+   it writes only the protocol cells (V_2_cell / S_output_cell) and the captures
+   live in the returned value, so every run heap agrees with the start heap
+   outside [protocol_state].  Structural induction on [gc0], reusing
+   [denote_run_valid] at the [GC_put_output] leaf (where the rich run hands off
+   to the plain [denote_run]). *)
+Lemma denote_run_caps_valid iv1 iu1 iu2 iu3 iv2 iv3 irs (e : denv AHE)
+    (gc0 : game_code) :
+  ValidCode (protocol_state t_msg) [interface]
+    (denote_run_caps iv1 iu1 iu2 iu3 iv2 iv3 irs e gc0).
+Proof.
+elim: gc0 e irs => [n k IH|t k IH|t k IH|t k IH|pk secret k IH|outs] e irs /=.
+- case: (n == card_msg); last case: (n == card_renc).
+  + by apply: valid_sampler => x; exact: IH.
+  + by apply: valid_sampler => x; exact: IH.
+  + by apply: valid_sampler => x; exact: IH.
+- by apply: valid_putr; last exact: IH.
+- apply: valid_putr; first by [].
+  apply: valid_bind; first exact: denote_run_valid.
+  by move=> x; exact: valid_ret.
+- exact: IH.
+- by apply: valid_sampler => x; exact: IH.
+- exact: valid_ret.
+Qed.
+
+(* denote_run_caps_preserves — the capturing run leaves every cell outside
+   [protocol_state] unchanged: a heap in its support (from any start heap [h])
+   agrees with [h] off the two protocol cells.  Heap-level frame property of the
+   rich run, proved by structural induction reusing [denote_run_valid] +
+   [Pr_code_preserves] at the [GC_put_output] leaf (where the value type
+   [cipher_list] is a genuine choice_type, so the generic frame applies). *)
+Lemma denote_run_caps_preserves (l : Location) iv1 iu1 iu2 iu3 iv2 iv3
+    (gc0 : game_code) :
+  l.1 \notin domm (protocol_state t_msg) ->
+  forall irs (e : denv AHE) h ah,
+  ah \in distr.dinsupp
+    (Pr_code (denote_run_caps iv1 iu1 iu2 iu3 iv2 iv3 irs e gc0) h) ->
+  get_heap ah.2 l = get_heap h l.
+Proof.
+move=> Hl.
+have HV2 : l.1 != (V_2_cell t_msg).1
+  by apply: contraNneq Hl => ->; rewrite mem_domm.
+have HSo : l.1 != (S_output_cell t_msg).1
+  by apply: contraNneq Hl => ->; rewrite mem_domm.
+elim: gc0 => [n k IH|t k IH|t k IH|t k IH|pk secret k IH|outs] irs e h ah /=.
+- case: (n == card_msg); [|case: (n == card_renc)];
+    rewrite Pr_code_sample => /distr.dinsupp_dlet [x _ Hin]; exact: (IH _ _ _ _ Hin).
+- rewrite Pr_code_put => Hin; rewrite (IH _ _ _ _ Hin); exact: get_set_heap_neq.
+- rewrite Pr_code_put Pr_code_bind => /distr.dinsupp_dlet [[cl h'] Hcl Hret].
+  move: Hret; rewrite Pr_code_ret => /distr.in_dunit -> /=.
+  have Hv : ValidCode (protocol_state t_msg) [interface]
+    (denote_run renc_card rand_of_renc chmsg_of_msg chcipher_of_cipher
+       pkey_of_party msg_of_idx rand0 e k) by exact: denote_run_valid.
+  by rewrite (Pr_code_preserves Hv Hl Hcl) get_set_heap_neq.
+- exact: (IH _ _ _ _).
+- rewrite Pr_code_sample => /distr.dinsupp_dlet [x _ Hin]; exact: (IH _ _ _ _ Hin).
+- by rewrite Pr_code_ret => /distr.in_dunit ->.
+Qed.
+
+(* run_heap_agree_predictor — every heap in the support of the capturing run
+   (started from [emptym]) agrees with [emptym] on the predictor's locations: the
+   run writes only [protocol_state] cells, disjoint from [locs predictor].  Used
+   to drop the run heap when the predictor's guess marginal is factored out. *)
+Lemma run_heap_agree_predictor iv1 iu1 iu2 iu3 iv2 iv3 irs (e : denv AHE)
+    (gc0 : game_code) ah l :
+  ah \in distr.dinsupp
+    (Pr_code (denote_run_caps iv1 iu1 iu2 iu3 iv2 iv3 irs e gc0) emptym) ->
+  fhas (locs predictor) l ->
+  get_heap ah.2 l = get_heap emptym l.
+Proof.
+move=> Hah Hl.
+exact: (denote_run_caps_preserves (notin_has_separate _ _ _ Hl predictor_locs_disj) Hah).
+Qed.
+
 (* denote_run_caps per-constructor unfold lemmas (rich-run analogues of the
    drun_* lemmas), used to peel the run inside the (V_2, V_3) reflection. *)
 Lemma drc_sample_msg iv1 iu1 iu2 iu3 iv2 iv3 irs (e : denv AHE) k :
