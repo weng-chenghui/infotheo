@@ -1343,4 +1343,33 @@ case: (eqVneq `Pr[ Sout = s ] 0) => [H0 | Hn0].
 - by rewrite (guess_V2_cond_Sout a Hinj Hn0) Hcard lexx.
 Qed.
 
+(* Pr_fdistmap_pre — the pushforward probability of a set is the probability of
+   its preimage: [Pr (fdistmap g p) E = Pr p (g @^-1 E)].  General. *)
+Lemma Pr_fdistmap_pre {Rr : realType} {A B : finType} (g : A -> B)
+    (p : FDist.t Rr A) (E : {set B}) :
+  Pr (fdistmap g p) E = Pr p [set a | g a \in E].
+Proof.
+rewrite /Pr (partition_big g (mem E)) /=; last by move=> a; rewrite inE.
+apply: eq_bigr => b bE; rewrite fdistmapE.
+by apply: eq_bigl => a; rewrite inE [in RHS]andb_idl // => /eqP ->.
+Qed.
+
+(* guess_fdist_success_le — the Infotheo-side success probability is at most
+   1/card_msg.  Given the conditional independence of the guess from V2 (the
+   output S being the only channel), the bridged-pair diagonal mass is bounded by
+   the fiber 1/card_msg through [cinde_diagonal_bound] and [guess_V2_cond_le].
+   [Hcinde] is item 1 (guess_cinde_V2), discharged separately. *)
+Lemma guess_fdist_success_le
+    (Hcinde : guess_sample_fdist |= guess_rv _|_ V2 | Sout) :
+  injective (fun v : plain AHE => w_u3 * v) ->
+  guess_fdist_success <= card_msg%:R^-1.
+Proof.
+move=> Hinj.
+apply: (le_trans _ (cinde_diagonal_bound Hcinde
+                      (fun a c => @guess_V2_cond_le a c Hinj))).
+rewrite /guess_fdist_success guess_joint_fdist_marginal Pr_fdistmap_pre.
+apply: subset_Pr; apply/subsetP => t.
+by rewrite !inE /= => /eqP Heq; rewrite /guess_rv /V2 Heq eqxx.
+Qed.
+
 End dsdp_guess_distribution.
