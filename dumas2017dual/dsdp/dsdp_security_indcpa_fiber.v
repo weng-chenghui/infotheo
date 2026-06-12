@@ -1237,4 +1237,28 @@ Qed.
 Set Bullet Behavior "Strict Subproofs".
 Set Default Goal Selector "!".
 
+(* guess_VarRV_cond_uniform — the fiber-file instance of the entropy-side
+   ring-generic conditional uniformity [Pr_dsdp_sol_uniform_ring]: conditioned on
+   the inputs and the leaked output S, the secret pair (V2, V3) is uniform on the
+   solution fiber, with mass 1/#|plain AHE|. *)
+Lemma guess_VarRV_cond_uniform (s v2 v3 : plain AHE) :
+  injective (fun v : plain AHE => w_u3 * v) ->
+  `Pr[ [% V1, U1, U2, U3, Sout] = (w_v1, w_u1, w_u2, w_u3, s) ] != 0 ->
+  (v2, v3) \in dsdp_fiber_ring w_u1 w_u2 w_u3 w_v1 s ->
+  `Pr[ [% V2, V3] = (v2, v3)
+     | [% V1, U1, U2, U3, Sout] = (w_v1, w_u1, w_u2, w_u3, s) ]
+  = #|plain AHE|%:R^-1.
+Proof.
+move=> Hinj Hcond Hin.
+apply: (@Pr_dsdp_sol_uniform_ring _ (plain AHE) _ guess_sample_fdist
+          V1 V2 V3 U1 U2 U3 Sout).
+- by move=> t; rewrite /dsdp_constraint_ring /Sout /dsdp_output /V1 /U1 /U2 /U3 /=
+       !const_RVE; ring.
+- by rewrite guess_VarRV_uniform; apply: fdist_ext => x; rewrite !fdist_uniformE.
+- exact: guess_inputs_indep.
+- exact: Hinj.
+- exact: Hcond.
+- exact: Hin.
+Qed.
+
 End dsdp_guess_distribution.
