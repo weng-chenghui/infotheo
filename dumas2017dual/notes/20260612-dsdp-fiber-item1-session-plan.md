@@ -158,6 +158,8 @@ Re-add both skeletons after `guess_inner_v2v3_det`; prove then commit.
 
 - **`guess_inner_out`** (a b a' b'): `output(a,b) = output(a',b') ->
   dmargin .1.1 (Pr_fst (guess_inner a b)) = dmargin .1.1 (Pr_fst (guess_inner a' b'))`.
+  COMMENT to use (clear story): *if two secret pairs yield the same leaked output S,
+  [guess_inner]'s guess distribution is identical.*
   THE crux. Plan (uses the v2v3_det peel pattern above):
   `rewrite dmargin_comp` on both sides → `dmargin (fun vh => vh.1.1.1) (Pr_code
   (guess_inner _ _) emptym)`. Peel run (`Pr_code_bind` + `dfst_dlet_commut`/the
