@@ -858,6 +858,24 @@ Qed.
 
 Local Open Scope proba_scope.
 
+(* cpr_eq_drop_indep — a conditioning coordinate independent of the numerator
+   pair drops out of the conditioning view: if [W] is independent of [%X,Y], then
+   [`Pr[X = a | [%W,Y] = (w,y)] = `Pr[X = a | Y = y]].  General; placed here for
+   the open [proba_scope] (the [{RV _ -> _}] notation). *)
+Lemma cpr_eq_drop_indep {Rr : realType} {U : finType} {P : FDist.t Rr U}
+  {A B C : finType} (X : {RV P -> A}) (Y : {RV P -> B}) (W : {RV P -> C})
+  (a : A) (y : B) (w : C) :
+  `Pr[ W = w ] != 0 ->
+  P |= W _|_ [% X, Y] ->
+  `Pr[ X = a | [% W, Y] = (w, y) ] = `Pr[ X = a | Y = y ].
+Proof.
+move=> Hw Hindep.
+rewrite !cpr_eqE.
+have HWY : P |= W _|_ Y by exact: (inde_RV_comp idfun snd Hindep).
+rewrite (pfwd1_pairCA X W Y a w y) (Hindep w (a, y)) (HWY w y).
+by rewrite invfM mulrACA (mulfV Hw) mul1r.
+Qed.
+
 (* The four protocol weights Alice holds (seeded constants). *)
 Variables (w_v1 w_u1 w_u2 w_u3 : plain AHE).
 
@@ -1259,6 +1277,56 @@ apply: (@Pr_dsdp_sol_uniform_ring _ (plain AHE) _ guess_sample_fdist
 - exact: Hinj.
 - exact: Hcond.
 - exact: Hin.
+Qed.
+
+(* guess_V2_cond_Sout — conditioned on the leaked output S alone, the secret V2 is
+   uniform on the plaintext space: marginalizing V3 out of [guess_VarRV_cond_uniform]
+   over the single fiber solution (u3 injective) and dropping the constant inputs. *)
+Lemma guess_V2_cond_Sout (a s : plain AHE) :
+  injective (fun v : plain AHE => w_u3 * v) ->
+  `Pr[ Sout = s ] != 0 ->
+  `Pr[ V2 = a | Sout = s ] = #|plain AHE|%:R^-1.
+Proof.
+move=> Hinj Hs.
+have Hbij : bijective (fun v : plain AHE => w_u3 * v) by apply: inj_card_bij.
+case: Hbij => g Hg1 Hg2.
+pose v3star := g (s - w_u1 * w_v1 - w_u2 * a).
+have Hfib : (a, v3star) \in dsdp_fiber_ring w_u1 w_u2 w_u3 w_v1 s
+  by rewrite inE /=; apply/eqP; rewrite /v3star Hg2; ring.
+have Hnum : pfwd1 [% V2, Sout] (a, s)
+          = pfwd1 [% [% V2, V3], Sout] ((a, v3star), s).
+{ rewrite !pfwd1E; congr (Pr _ _).
+  apply/setP => t; rewrite !inE /= !xpair_eqE.
+  case Hva: (V2 t == a) => //=.
+  move/eqP: Hva => Hva.
+  have HsEq : (Sout t == s) = (V3 t == v3star).
+  { rewrite /Sout /dsdp_output Hva.
+    have -> : s = w_u1 * w_v1 + w_u2 * a + w_u3 * v3star
+      by rewrite /v3star Hg2; ring.
+    by rewrite (inj_eq (addrI _)) (inj_eq Hinj). }
+  by rewrite HsEq andbb. }
+have Hcst : [% V1, U1, U2, U3]
+    = const_RV guess_sample_fdist (w_v1, w_u1, w_u2, w_u3)
+  by apply: boolp.funext => t; rewrite /V1 /U1 /U2 /U3 !const_RVE.
+have HcwN : `Pr[ [% V1, U1, U2, U3] = (w_v1, w_u1, w_u2, w_u3) ] != 0.
+{ rewrite Hcst pfwd1E.
+  have -> : finset (preim (const_RV guess_sample_fdist (w_v1, w_u1, w_u2, w_u3))
+                     (pred1 (w_v1, w_u1, w_u2, w_u3))) = [set: _].
+  { by apply/setP => t; rewrite !inE /= const_RVE eqxx. }
+  by rewrite Pr_setT oner_neq0. }
+have Hind : guess_sample_fdist |= [% V1, U1, U2, U3] _|_ [% [% V2, V3], Sout]
+  by rewrite Hcst; exact: inde_const_RV.
+have Hcond_eq : `Pr[ [% V1, U1, U2, U3, Sout] = (w_v1, w_u1, w_u2, w_u3, s) ]
+              = `Pr[ Sout = s ].
+{ rewrite Hcst !pfwd1E; congr (Pr _ _).
+  by apply/setP => t; rewrite !inE /= !xpair_eqE !eqxx. }
+rewrite cpr_eqE Hnum -cpr_eqE.
+rewrite -(@cpr_eq_drop_indep _ _ guess_sample_fdist _ _ _ [% V2, V3] Sout
+            [% V1, U1, U2, U3] (a, v3star) s (w_v1, w_u1, w_u2, w_u3) HcwN Hind).
+apply: guess_VarRV_cond_uniform.
+- exact: Hinj.
+- by rewrite Hcond_eq.
+- exact: Hfib.
 Qed.
 
 End dsdp_guess_distribution.
