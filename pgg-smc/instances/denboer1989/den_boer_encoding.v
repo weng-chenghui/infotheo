@@ -31,3 +31,19 @@ under eq_map => x do rewrite /comp decode_encode_bool.
 rewrite map_id.
 by have := fc_correct ab.1 ab.2 (k:=0) isT; rewrite /fc_shuffle rot0.
 Qed.
+
+(** den_boer_orbit — inputs with equal AND give layouts that differ by a cyclic
+    rotation: the three a&&b=false inputs lie in one rotation orbit.
+    @composes: den_boer_encoding. *)
+Lemma den_boer_orbit (ab ab' : bool * bool) :
+  ab.1 && ab.2 = ab'.1 && ab'.2 ->
+  exists k : 'I_5, val (den_boer_layout ab') = rot k (val (den_boer_layout ab)).
+Proof.
+move=> H; move: H; case: ab => a b; case: ab' => a' b'.
+case: a; case: b; case: a'; case: b' => //=; move=> _;
+  first [ exists (inord 0); by rewrite inordK// rot0
+        | exists (inord 1); by rewrite inordK
+        | exists (inord 2); by rewrite inordK
+        | exists (inord 3); by rewrite inordK
+        | exists (inord 4); by rewrite inordK ].
+Qed.
