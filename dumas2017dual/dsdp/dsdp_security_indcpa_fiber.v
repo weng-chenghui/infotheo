@@ -831,6 +831,28 @@ transitivity (vt ← denote_run_caps 11 8 9 10 7 6 [::] seed gc ;;
   by rewrite !bind_assoc; apply: bind_cong => //; apply: boolp.funext => v2.
 Qed.
 
+(* guess_triple_proj_code — the (guess, V_2, V_3)-projection of the rich carrier
+   code reflects to the rich-run form: the run captures the cipher view, then the
+   predictor produces guess from (view, s), then V_2 / V_3 are read back. *)
+Lemma guess_triple_proj_code :
+  (gv ← guess_full_code ;; ret (gv.1.1.1.1.1, gv.1.1.1.1.2, gv.1.1.1.2))
+  = (vt ← denote_run_caps 11 8 9 10 7 6 [::] seed gc ;;
+     s ← denote_s_get_body chmsg_of_msg ;;
+     guess ← resolve (pack predictor)
+               (id_guess, (chProd (cipher_list t_cipher) t_msg, t_msg))
+               (vt.1.1, s) ;;
+     v2 ← denote_v2_get_body chmsg_of_msg ;;
+     ret (msg_to_fin guess, msg_to_fin v2,
+          msg_to_fin (chmsg_of_msg vt.1.2.1.2))).
+Proof.
+rewrite /guess_full_code /guess_resolved_caps !bind_assoc.
+apply: bind_cong => //; apply: boolp.funext => vt.
+rewrite !bind_assoc; apply: bind_cong => //; apply: boolp.funext => s.
+rewrite !bind_assoc; apply: bind_cong => //; apply: boolp.funext => guess.
+rewrite !bind_assoc; apply: bind_cong => //; apply: boolp.funext => v2.
+by case: (vt.1.2) => [[[[[[a b] c] d] e] f] g]; cbn [bind].
+Qed.
+
 (* guess_joint_fdist_marginal — the bridged pair distribution is the
    (guess, V_2)-marginal of the rich sample distribution. *)
 Lemma guess_joint_fdist_marginal :
