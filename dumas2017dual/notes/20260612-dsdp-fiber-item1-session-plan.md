@@ -137,35 +137,42 @@ has already computed past it); reduce de Bruijn reads directly with
 `!(de_val_nth_pushS, de_val_nth_pushrand, de_val_nth_push0)` then `seed_*` +
 `/dsdp_output`. See [[reference_dsdp_protocol_flow]].
 
-### Remaining: kernel + factorization (3 skeletons DRAFTED, in working tree, Admitted)
-Three `Admitted` skeletons are drafted + type-check after `guess_run_cells`
-(uncommitted WIP; prove then commit, or they must be removed before any commit):
+### guess_inner_v2v3_det — DONE (Qed, committed)
+Full predictor peel proved. `guess_run_cells` extended with a 3rd conjunct
+`z.1.1.2.1.2 = msg b` (captured v3, closes by `by []`). Pattern that worked, reusable
+for `guess_inner_out`: `dmargin_comp`+`dmarginE`+`dlet_dunit_id`+`eq_in_dlet` → support
+fact; peel `Pr_code` of `guess_inner` bind-by-bind with `Pr_code_bind`+`dfst_dlet_commut`
++`distr.dinsupp_dlet`; collapse the deterministic `get` bodies with inline
+`have Hxget : Pr_code (denote_X_get_body _) h = dunit (val, h) by rewrite /denote_X_get_body
+Pr_code_get <heapfact> Pr_code_ret`; predictor `V_2`-preservation via
+`have Hnotin : (V_2_cell t_msg).1 \notin domm (locs predictor) by apply:
+(@notin_has_separate _ _ (protocol_state t_msg) (locs predictor) (V_2_cell t_msg));
+[exact: fhas_set | exact: fseparateC predictor_locs_disj]` then
+`Pr_code_preserves (resolve_predictor_valid _ _) Hnotin Hpred`. CRITICAL SSReflect note:
+this section's selector does NOT auto-focus, so use inline `have H : P by tac` (never
+`have H : P.` then a separate proof sentence — leaves 2 goals focused) and `split; first by`
+/ `; [ | ]` (never `1:{}`/`2:{}`).
 
-- **`guess_inner_v2v3_det`** (a b): `Pr_fst (guess_inner a b) = dmargin (g ↦ (g,
-  fin(chmsg(msg a)), fin(chmsg(msg b)))) (dmargin .1.1 (Pr_fst (guess_inner a b)))`.
-  REDUCTION DONE + verified in MCP — the working prefix is:
-  ```
-  rewrite dmargin_comp distr.dmarginE.
-  apply: SubDistr.distr_ext => w.
-  rewrite -[X in X = _](distr.dlet_dunit_id _ w).
-  apply: distr.eq_in_dlet => [t Ht /=|//].
-  move=> y; congr (distr.mu (distr.dunit _) y).
-  ```
-  leaving exactly the SUPPORT FACT: `t ∈ supp (Pr_fst (guess_inner a b)) ->
-  t = (t.1.1, fin(chmsg(msg a)), fin(chmsg(msg b)))` (i.e. `t.1.2 = c2`, `t.2 = c3`).
-  Prove it: `case: t Ht => [[g v2c] v3c] Ht`; peel `guess_inner` (bind: run →
-  `s_get` → predictor → `v2_get` → ret) via `Pr_code_bind`/`dinsupp_dlet`;
-  `guess_run_cells` gives `V_2 = chmsg(msg a)` in the run heap; the predictor
-  preserves `V_2` (`Pr_code_preserves` + `predictor_locs_disj`, the item-2
-  `Htail2_abs` move at fiber `:947`); the captured `vt.1.2.1.2 = msg b` needs a
-  small run-capture companion (de_val index 6, off the value `vt.1.2`, not the heap).
+### Remaining: guess_inner_out + guess_cinde_V2 (skeletons REMOVED; re-add from here)
+Re-add both skeletons after `guess_inner_v2v3_det`; prove then commit.
 
 - **`guess_inner_out`** (a b a' b'): `output(a,b) = output(a',b') ->
   dmargin .1.1 (Pr_fst (guess_inner a b)) = dmargin .1.1 (Pr_fst (guess_inner a' b'))`.
-  THE crux. Peel `guess_inner`; decouple the predictor's guess-dist from the heap's
-  protocol cells (`Pr_fst_agree_locs` + `predictor_locs_disj` + `resolve_predictor_valid`,
-  so the predictor sees only `(view, s)`); `s = chmsg(output(a,b))` (`guess_run_cells`);
-  `view`-dist ⊥ (a,b) (`view_marginal_indep`); same output ⇒ same s ⇒ same guess-dist.
+  THE crux. Plan (uses the v2v3_det peel pattern above):
+  `rewrite dmargin_comp` on both sides → `dmargin (fun vh => vh.1.1.1) (Pr_code
+  (guess_inner _ _) emptym)`. Peel run (`Pr_code_bind` + `dfst_dlet_commut`/the
+  dmargin-dlet commute); collapse `s_get` (s = chmsg(output) via `guess_run_cells`'s
+  `HS`) and `v2_get` (lossless dunit) with the inline-have pattern, keeping `guess`;
+  the inner reduces to `dmargin (msg_to_fin ∘ fst) (Pr_code (resolve predictor …
+  (vt.1.1, chmsg(output))) h_run)`. Drop `h_run → emptym` with `Pr_fst_agree_locs`
+  (`resolve_predictor_valid` + the `Hnotin`-style `\notin domm (locs predictor)` for
+  every protocol cell the run wrote — `V_2_cell`, `S_output_cell`; run touches only
+  `protocol_state`), so the predictor sees only `(vt.1.1, output)`. The guess marginal
+  is then `dlet (over the run's vt.1.1 marginal) of dmargin(…) (predictor(view,
+  chmsg output) emptym)`. Connect the run's vt.1.1 marginal to `drun` via
+  `denote_run_caps_fst` (`xy ← denote_run_caps … ;; ret xy.1.1 = drun … gc_rest`),
+  then `view_marginal_indep` (card_renc_neq) gives that drun cipher-list marginal is
+  the same for `(a,b)` and `(a',b')`. Same output (hyp) + same view marginal ⇒ equal.
 
 - **`guess_cinde_V2`**: `guess_sample_fdist |= guess_rv _|_ V2 | Sout`. Via
   `cinde_RV_factor` with code-derived `f y z` (secret-pair mass for V2=y, Sout=z) and
