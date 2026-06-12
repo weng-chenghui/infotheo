@@ -1329,4 +1329,18 @@ apply: guess_VarRV_cond_uniform.
 - exact: Hfib.
 Qed.
 
+(* guess_V2_cond_le — the fiber bound: conditioned on the leaked output S, the
+   secret V2 is matched with probability at most 1/card_msg (the entropy bound,
+   carried to the message-index cardinality through the sampling bijection). *)
+Lemma guess_V2_cond_le (a s : plain AHE) :
+  injective (fun v : plain AHE => w_u3 * v) ->
+  `Pr[ V2 = a | Sout = s ] <= card_msg%:R^-1.
+Proof.
+move=> Hinj.
+have Hcard : #|plain AHE| = card_msg by rewrite -(bij_eq_card Hmsg_bij) card_ord.
+case: (eqVneq `Pr[ Sout = s ] 0) => [H0 | Hn0].
+- by rewrite cpr_eqE H0 invr0 mulr0 invr_ge0 ler0n.
+- by rewrite (guess_V2_cond_Sout a Hinj Hn0) Hcard lexx.
+Qed.
+
 End dsdp_guess_distribution.
