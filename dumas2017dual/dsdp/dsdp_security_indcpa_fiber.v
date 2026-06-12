@@ -1018,6 +1018,22 @@ Lemma guess_S_determined :
   Sout = (fun t => dsdp_output (V1 t) (U1 t) (U2 t) (U3 t) (V2 t) (V3 t)).
 Proof. by []. Qed.
 
+(* de_val_nth peeling: [push_val] consumes one successor index, [push_rand] is
+   transparent to the value stack; keeps [de_val_nth seed] folded. *)
+Lemma de_val_nth_pushS (g : gval AHE) (e : denv AHE) n :
+  de_val_nth (push_val g e) n.+1 = de_val_nth e n.
+Proof. by []. Qed.
+Lemma de_val_nth_push0 (g : gval AHE) (e : denv AHE) :
+  de_val_nth (push_val g e) 0 = g.
+Proof. by []. Qed.
+Lemma de_val_nth_pushrand (r : rand AHE) (e : denv AHE) n :
+  de_val_nth (push_rand r e) n = de_val_nth e n.
+Proof. by []. Qed.
+Lemma as_plain_Gplain (x : plain AHE) : as_plain (Gplain x) = x.
+Proof. by []. Qed.
+Lemma dhe_var (e : denv AHE) n : dhe e (HE_var n) = de_val_nth e n.
+Proof. by []. Qed.
+
 (* guess_inputs_indep — the protocol inputs (seeded constants) are independent of
    the secret samples: a constant random variable is independent of every RV. *)
 Lemma guess_inputs_indep :
