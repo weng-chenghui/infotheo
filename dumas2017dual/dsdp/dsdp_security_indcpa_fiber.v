@@ -167,6 +167,18 @@ rewrite distr.dmarginE distr.dmarginE distr.dmarginE dlet_dlet_ext.
 by apply: dlet_f_equal => z; rewrite dlet_unit_ext.
 Qed.
 
+(* dlet_dmargin_eq — a bind over a pushforward reindexes the kernel: binding [g]
+   over [dmargin f mu] is binding [g \o f] over [mu].  Keeps [dmargin] folded
+   (unlike unfolding to [dlet] then [dlet_dlet_ext], which exposes the monad
+   internals). *)
+Lemma dlet_dmargin_eq {T U V : choiceType} (g : U -> distr.distr R V)
+    (f : T -> U) (mu : distr.distr R T) :
+  distr.dlet g (distr.dmargin f mu) = distr.dlet (fun x => g (f x)) mu.
+Proof.
+rewrite distr.dmarginE dlet_dlet_ext.
+by apply: eq_dlet => x; rewrite dlet_unit_ext.
+Qed.
+
 (* Pr_fst_map — post-composing a closed computation with a pure return is a
    pushforward of its first-projection subdistribution; holds for stateful [c]
    since it threads through [Pr_code]. *)
@@ -1186,6 +1198,104 @@ have Hv2get : Pr_code (denote_v2_get_body chmsg_of_msg) h_pred
 move: Hv2; rewrite Pr_code_bind Hv2get dlet_unit_ext Pr_code_ret
   distr.dmargin_dunit => /distr.in_dunit [= _ -> ->].
 by [].
+Qed.
+
+(* guess_inner_kernel_form — the guess marginal of [guess_inner a b] factors as a
+   bind over the cipher-view marginal (the plain run [drun]) of the predictor's
+   guess kernel applied to (view, chmsg of the leaked output
+   [dsdp_output _ (msg a)(msg b)]).  The run heap is dropped
+   (Pr_fst_agree_locs + denote_run_caps_preserves); the run's cipher channel meets
+   [drun] via denote_run_caps_fst.  The (a,b)-dependence is funnelled into the
+   single output scalar (kernel) and the secret pushes (base, indep by
+   view_marginal_indep), so equal outputs give equal guess marginals. *)
+Lemma guess_inner_kernel_form (a b : 'I_card_msg) :
+  distr.dmargin (fun t : (Mfin * Mfin * Mfin)%type => t.1.1)
+    (Pr_fst (guess_inner a b))
+  = distr.dlet (fun cl : cipher_list t_cipher =>
+      distr.dmargin (fun gh : (t_msg * heap)%type => msg_to_fin gh.1)
+        (Pr_code (resolve (pack predictor)
+           (id_guess, (chProd (cipher_list t_cipher) t_msg, t_msg))
+           (cl, chmsg_of_msg (dsdp_output w_v1 w_u1 w_u2 w_u3
+                               (msg_of_idx a) (msg_of_idx b)))) emptym))
+      (distr.dmargin fst (Pr_code (drun (push_val (Gplain (msg_of_idx b))
+         (push_val (Gplain (msg_of_idx a)) seed))
+         (GC_sample card_msg (GC_sample card_msg (GC_sample card_renc
+           (GC_sample card_renc (GC_put (HE_var 3) (GC_enc_hop 1 (HE_const 0)
+           (GC_enc_hop 2 (HE_const 0) (GC_let (HE_emul (HE_epow (HE_var 1)
+           (HE_var 7)) (HE_enc 1 (HE_var 3) 1)) (GC_let (HE_emul (HE_epow
+           (HE_var 1) (HE_var 9)) (HE_enc 2 (HE_var 3) 0)) (GC_put_output
+           output_term (GC_ret [:: HE_var 1; HE_var 0; HE_var 3;
+           HE_var 2])))))))))))) emptym)).
+Proof.
+rewrite -Pr_fst_map /guess_inner !bind_assoc.
+rewrite /Pr_fst Pr_code_bind dfst_dlet_commut.
+set gci := (GC_sample card_msg _).
+set env := (push_val (Gplain (msg_of_idx b)) _).
+set RUN := (denote_run_caps _ _ _ _ _ _ _ env gci).
+have HBASE : distr.dmargin fst (Pr_code (drun env gci) emptym)
+   = distr.dmargin (fun x => x.1.1.1) (Pr_code RUN emptym)
+  by rewrite /drun -(denote_run_caps_fst 11 8 9 10 7 6 [::] env gci) -/RUN
+     Pr_code_bind dfst_dlet_commut distr.dmarginE;
+     apply: eq_dlet => x; rewrite Pr_code_ret distr.dmarginE dlet_unit_ext.
+rewrite HBASE dlet_dmargin_eq.
+apply: eq_in_dlet => x Hx.
+have [HS [HV2 _]] := guess_run_cells Hx.
+have Hsget : Pr_code (denote_s_get_body chmsg_of_msg) x.2
+   = distr.dunit (chmsg_of_msg (dsdp_output w_v1 w_u1 w_u2 w_u3
+                                  (msg_of_idx a) (msg_of_idx b)), x.2)
+  by rewrite /denote_s_get_body Pr_code_get HS Pr_code_ret.
+rewrite bind_assoc Pr_code_bind dfst_dlet_commut Hsget dlet_unit_ext.
+rewrite /= !bind_assoc Pr_code_bind dfst_dlet_commut.
+have Hinner : forall (p : t_msg) (h : heap),
+   distr.dmargin fst (Pr_code (x1 ← (v ← get (V_2_cell t_msg) ;;
+      v2 ← match v with
+           | Some v0 => @ret t_msg v0
+           | None => @ret t_msg (chmsg_of_msg 0)
+           end ;;
+      ret (msg_to_fin p, msg_to_fin v2,
+           msg_to_fin (chmsg_of_msg x.1.1.2.1.2))) ;;
+      ret x1.1.1) h) = distr.dunit (msg_to_fin p)
+  by move=> p h; rewrite Pr_code_bind Pr_code_get;
+     case: (get_heap h (V_2_cell t_msg)) => [v|];
+     rewrite Pr_code_bind Pr_code_ret dlet_unit_ext Pr_code_ret dlet_unit_ext
+       Pr_code_ret distr.dmarginE dlet_unit_ext.
+under eq_dlet => x0 do rewrite (Hinner x0.1 x0.2).
+rewrite -distr.dmarginE.
+have Hdrop : distr.dmargin fst (Pr_code (resolve (pack predictor)
+     (id_guess, (chProd (cipher_list t_cipher) t_msg, t_msg))
+     (x.1.1.1, chmsg_of_msg (dsdp_output w_v1 w_u1 w_u2 w_u3
+                              (msg_of_idx a) (msg_of_idx b)))) x.2)
+   = distr.dmargin fst (Pr_code (resolve (pack predictor)
+     (id_guess, (chProd (cipher_list t_cipher) t_msg, t_msg))
+     (x.1.1.1, chmsg_of_msg (dsdp_output w_v1 w_u1 w_u2 w_u3
+                              (msg_of_idx a) (msg_of_idx b)))) emptym)
+  by apply: (Pr_fst_agree_locs (resolve_predictor_valid _ _)) => l Hl;
+     exact: (run_heap_agree_predictor Hx Hl).
+transitivity (distr.dmargin msg_to_fin (distr.dmargin fst (Pr_code
+  (resolve (pack predictor) (id_guess, (chProd (cipher_list t_cipher) t_msg, t_msg))
+     (x.1.1.1, chmsg_of_msg (dsdp_output w_v1 w_u1 w_u2 w_u3
+                              (msg_of_idx a) (msg_of_idx b)))) x.2))).
+- by rewrite dmargin_comp.
+- by rewrite Hdrop dmargin_comp.
+Qed.
+
+(* guess_inner_out — two secret pairs with the same leaked output S yield the
+   same guess distribution: the predictor's guess marginal depends on the secrets
+   only through the cipher view (independent of them by view_marginal_indep) and
+   through S (equal by hypothesis), so the kernel-form factorisations coincide. *)
+Lemma guess_inner_out (a b a' b' : 'I_card_msg) :
+  dsdp_output w_v1 w_u1 w_u2 w_u3 (msg_of_idx a) (msg_of_idx b)
+  = dsdp_output w_v1 w_u1 w_u2 w_u3 (msg_of_idx a') (msg_of_idx b') ->
+  distr.dmargin (fun t : (Mfin * Mfin * Mfin)%type => t.1.1)
+    (Pr_fst (guess_inner a b))
+  = distr.dmargin (fun t : (Mfin * Mfin * Mfin)%type => t.1.1)
+    (Pr_fst (guess_inner a' b')).
+Proof.
+move=> Hout.
+rewrite !guess_inner_kernel_form Hout.
+congr (distr.dlet _ _).
+exact: (view_marginal_indep (msg_of_idx a) (msg_of_idx b)
+          (msg_of_idx a') (msg_of_idx b') emptym).
 Qed.
 
 (* guess_inputs_indep — the protocol inputs (seeded constants) are independent of
