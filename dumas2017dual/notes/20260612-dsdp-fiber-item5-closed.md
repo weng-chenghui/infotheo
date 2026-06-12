@@ -91,15 +91,60 @@ committed item-2 code, deferred): `cardpp` -> `card_plain_pair`, `Htail2_abs`
 ## Remaining
 
 ### Item 1 (CRUX) — `guess_cinde_V2 : guess_sample_fdist |= guess_rv _|_ V2 | Sout`
-Via committed `cinde_RV_factor (f g) : (forall x y z, Pr[[%X,Y,Z]=(x,y,z)] =
-f y z * g z x) -> P |= X _|_ Y | Z`, with X:=guess_rv, Y:=V2, Z:=Sout. Need the
-joint `Pr[[%guess_rv,V2,Sout]=(g,v,s)] = f(v,s) * k(s,g)` where k(s,·) is the
-predictor's guess kernel given the run (V2-independent: predictor never reads
-V2_cell, `predictor_locs_disj` + `Pr_fst_put_invariant`/`Pr_fst_agree_locs`).
-The deep reflection of `guess_full_code`'s joint law on (guess,V2,Sout); ~item-2
-scale. The predictor output is `resolve (pack predictor) (id_guess,_) (view,s)`;
-view = `vt.1.1` = run cipher output (V2/V3-free in the zero game). Sout =
-`dsdp_output ... (V2 t)(V3 t)` = `g0 `o [%V2,V3]`.
+THE remaining reflection. Confirmed TRUE; the entry point and decomposition are
+pinned down below. ~item-2 scale or harder (item 2 took 1h+; this is harder
+because the predictor coordinate is KEPT, not discarded).
+
+ENTRY (verified in session): `apply: cinde_RV_factor` reduces to
+`forall x y z, pfwd1 [%guess_rv,V2,Sout] (x,y,z) = ?f y z * ?g z x`. With the
+"obvious" f:=`pfwd1 [%V2,Sout]`, g:=`Pr[guess_rv=·|Sout=·]` the goal becomes
+`pfwd1 [%guess_rv,V2,Sout](x,y,z) = pfwd1 [%V2,Sout](y,z) * Pr[guess_rv=x|Sout=z]`
+which is circular (= the cinde via chain rule). MUST use CODE-DERIVED f,g: f =
+the secret-sampling mass for (V2=y, Sout=z); g = the predictor-kernel mass for
+guess=x given view-from-fresh-randomness and S=z. The factorization then holds
+because in `guess_full_code` the secret samples and the view/predictor samples are
+DISTINCT, independent draws (the product law), and the predictor reads the secrets
+only through s=output(V2,V3).
+
+WHY item 2's machinery doesn't transfer directly: item 2's `Hbody` (fiber file
+~line 1016) reflects `gv ← guess_full_code ;; ret (proj gv)` but DISCARDS guess
+and s (they don't appear in its `ret`), so they collapse by losslessness. Item 1
+KEEPS the guess coordinate, so it cannot collapse the predictor.
+
+DECOMPOSITION (the plan):
+1. 3-coord reflection (adapt `Hbody`/`guess_full_proj_code`): reflect
+   `gv ← guess_full_code ;; ret (gv.1.1.1.1.1, gv.1.1.1.1.2, gv.1.1.1.2)` (= the
+   (guess_M, V2_M, V3_M) coords) to `vt ← denote_run_caps 11 8 9 10 7 6 [::] seed gc
+   ;; s ← denote_s_get_body ;; guess ← resolve (pack predictor) … (vt.1.1, s) ;;
+   v2 ← denote_v2_get_body ;; ret (msg_to_fin guess, msg_to_fin v2, vt.1.2.1.2)`.
+   [%guess_rv,V2,Sout] is a function of these 3 coords (Sout = output `o [%V2,V3]).
+2. KEY sub-lemma `view_indep_secrets`: the run's view (vt.1.1, the cipher list) is
+   a function of the V2/V3-INDEPENDENT randomness only (hop randomness, masks
+   r2,r3 = samples 3,4, encryption randomness, seed weights), NOT of the secret
+   samples v2,v3 (= samples 1,2). Decisive de Bruijn fact (already traced): the
+   GC_ret outputs `[:: HE_var 1; HE_var 0; HE_var 3; HE_var 2]` = the two let-
+   combines + two hop ciphers; the combines are `(hopcipher=enc 0)^seedweight *
+   HE_enc(mask)`, referencing masks/seed/hop-rand, never v2,v3. Reflect
+   `denote_run_caps` peeling the 4 GC_sample card_msg with `drc_sample_msg`,
+   showing the view component is constant in the first two (v2,v3) sample binders.
+   This is the load-bearing run reflection (the new hard work).
+3. Predictor kernel V2-independence: `guess` given (view, s) is
+   `Pr_fst (resolve (pack predictor) … (view, s))`, invariant under the V2 cell
+   (committed `Pr_fst_put_invariant`/`Pr_fst_agree_locs` + `predictor_locs_disj`;
+   `resolve_predictor_valid` gives the ValidCode). So the kernel depends on
+   (view, s), and via (2) view ⊥ secrets, so the guess law depends on the secrets
+   only through s.
+4. s_read = output: the S cell content read by `denote_s_get_body` is
+   `chmsg_of_msg (dsdp_output …)` = the Sout value (committed `denote_output_termE`
+   + the run's `GC_put_output`). So conditioning on Sout fixes the predictor's s
+   input.
+5. Assemble the product law (Pr_code_bind / dlet factoring of the independent
+   secret-sample and view+predictor pieces) into the f·g factorization; supply to
+   `cinde_RV_factor`.
+
+Once proven, INLINE `guess_cinde_V2` for the `Hcinde` hypothesis in
+`guess_fdist_success_le` / `guess_sdistr_success_le` (move it before item 6, drop
+the `Hcinde` binder).
 
 Items 6, 7 DONE (given Hcinde) — see "Done this session (continued)" above.
 
