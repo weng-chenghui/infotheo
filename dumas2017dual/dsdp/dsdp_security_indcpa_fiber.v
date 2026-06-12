@@ -242,6 +242,26 @@ apply: eq_psum => x; case: (boolP (x \in distr.dinsupp mu)) => Hx.
 - by move/distr.dinsuppPn: Hx => ->; rewrite !mul0r.
 Qed.
 
+(* dlet_const_unit — a bind into a constant [dunit v] kernel collapses to [dunit v]
+   once the base subdistribution carries unit mass (the [dweight] is 1). *)
+Lemma dlet_const_unit {T U : choiceType} (D : distr.distr R T) (v : U) :
+  psum (distr.mu D) = 1 ->
+  distr.dlet (fun=> distr.dunit v) D = distr.dunit v.
+Proof.
+move=> HD; apply: SubDistr.distr_ext => y.
+by rewrite distr.dletC distr.pr_predT HD mul1r.
+Qed.
+
+(* dmargin_fst_const — the first-component marginal of a subdistribution whose
+   support has constant first component [v] is the constant-[v] bind. *)
+Lemma dmargin_fst_const {T U : choiceType} (D : distr.distr R (U * T)%type) (v : U) :
+  (forall p, p \in distr.dinsupp D -> p.1 = v) ->
+  distr.dmargin fst D = distr.dlet (fun=> distr.dunit v) D.
+Proof.
+move=> Hsupp; rewrite distr.dmarginE.
+by apply: eq_in_dlet => p Hp; rewrite (Hsupp p Hp).
+Qed.
+
 (* Pr_code_preserves — valid code with locations [L] leaves cells outside [L]
    unchanged: every heap in the support of [Pr_code c h] agrees with [h] at [l].
    The heap-level frame property (companion to the marginal frame
@@ -693,6 +713,51 @@ elim: gc0 e irs => [n k IH|t k IH|t k IH|t k IH|pk secret k IH|outs] e irs /=.
 - by [].
 Qed.
 
+(* denote_run_caps per-constructor unfold lemmas (rich-run analogues of the
+   drun_* lemmas), used to peel the run inside the (V_2, V_3) reflection. *)
+Lemma drc_sample_msg iv1 iu1 iu2 iu3 iv2 iv3 irs (e : denv AHE) k :
+  denote_run_caps iv1 iu1 iu2 iu3 iv2 iv3 irs e (GC_sample card_msg k)
+  = (x ← sample uniform card_msg ;;
+     denote_run_caps iv1 iu1 iu2 iu3 iv2 iv3 irs (push_val (Gplain (msg_of_idx x)) e) k).
+Proof. by rewrite /denote_run_caps -/denote_run_caps eqxx. Qed.
+
+Lemma drc_sample_renc iv1 iu1 iu2 iu3 iv2 iv3 irs (e : denv AHE) k :
+  denote_run_caps iv1 iu1 iu2 iu3 iv2 iv3 irs e (GC_sample card_renc k)
+  = (x ← sample uniform card_renc ;;
+     denote_run_caps iv1 iu1 iu2 iu3 iv2 iv3 irs
+       (push_rand (rand_of_renc (sample_to_renc renc_card x)) e) k).
+Proof. by rewrite /denote_run_caps -/denote_run_caps (negbTE card_renc_neq) eqxx. Qed.
+
+Lemma drc_put iv1 iu1 iu2 iu3 iv2 iv3 irs (e : denv AHE) t k :
+  denote_run_caps iv1 iu1 iu2 iu3 iv2 iv3 irs e (GC_put t k)
+  = (#put (V_2_cell t_msg) := Some (chmsg_of_msg (as_plain (dhe e t))) ;;
+     denote_run_caps iv1 iu1 iu2 iu3 iv2 iv3 irs e k).
+Proof. by rewrite /denote_run_caps -/denote_run_caps. Qed.
+
+Lemma drc_let iv1 iu1 iu2 iu3 iv2 iv3 irs (e : denv AHE) t k :
+  denote_run_caps iv1 iu1 iu2 iu3 iv2 iv3 irs e (GC_let t k)
+  = denote_run_caps iv1 iu1 iu2 iu3 iv2 iv3 irs (push_val (dhe e t) e) k.
+Proof. by rewrite /denote_run_caps -/denote_run_caps. Qed.
+
+Lemma drc_hop iv1 iu1 iu2 iu3 iv2 iv3 irs (e : denv AHE) pk secret k :
+  denote_run_caps iv1 iu1 iu2 iu3 iv2 iv3 irs e (GC_enc_hop pk secret k)
+  = (ir ← sample uniform card_renc ;;
+     denote_run_caps iv1 iu1 iu2 iu3 iv2 iv3 (rcons irs ir)
+       (push_val (Gcipher (enc (pkey_of_party (nat_to_party_id pk))
+                               (as_plain (dhe e secret))
+                               (rand_of_renc (sample_to_renc renc_card ir)))) e) k).
+Proof. by rewrite /denote_run_caps -/denote_run_caps. Qed.
+
+Lemma drc_putout iv1 iu1 iu2 iu3 iv2 iv3 irs (e : denv AHE) t k :
+  denote_run_caps iv1 iu1 iu2 iu3 iv2 iv3 irs e (GC_put_output t k)
+  = (#put (S_output_cell t_msg) := Some (chmsg_of_msg (as_plain (dhe e t))) ;;
+     cl ← drun e k ;;
+     ret (cl, (as_plain (de_val_nth e iv1), as_plain (de_val_nth e iu1),
+               as_plain (de_val_nth e iu2), as_plain (de_val_nth e iu3),
+               as_plain (de_val_nth e iv2), as_plain (de_val_nth e iv3),
+               as_plain (dhe e t)), irs)).
+Proof. by rewrite /denote_run_caps -/denote_run_caps /drun /dhe. Qed.
+
 (* guess_resolved_caps — rich pair experiment: the capturing run exposes the
    output-point env values and hop randomness, then S / guess / V_2 are read as
    in [guess_resolved_oracles]; returns the eight observed values and [irs]. *)
@@ -840,5 +905,336 @@ Qed.
 Definition Zcond : {RV guess_sample_fdist ->
     (option 'I_card_renc * option 'I_card_renc * plain AHE)} :=
   [% ir1_rv, ir2_rv, Sout].
+
+(* Lenient goal/bullet selectors for the multi-have marginal reflection. *)
+Set Default Goal Selector "1".
+Set Bullet Behavior "None".
+
+(* cardpp — the plaintext-pair carrier is non-empty, so its cardinality is a
+   successor (the shape [fdist_uniform] demands). *)
+Lemma cardpp :
+  #|((plain AHE * plain AHE)%type : finType)|
+  = (#|plain AHE| * #|plain AHE|).-1.+1.
+Proof.
+rewrite card_prod prednK //; rewrite muln_gt0; apply/andP; split.
+all: by apply/card_gt0P; exists 0%R; rewrite inE.
+Qed.
+
+(* Htail2_abs — the post-run tail collapse, abstracted over the predictor code
+   [pc] (a variable) so its rewrite matches without unfolding the giant resolved
+   predictor term.  The predictor never writes the V_2 cell (Pr_code_preserves +
+   predictor_locs_disj), so the read returns the value the run stored, and the
+   tail's value-marginal is the constant [(msg_of_chmsg cv, v3val)] scaled by the
+   predictor mass. *)
+Lemma Htail2_abs (h : heap) (pc : raw_code t_msg) (cv : t_msg)
+    (v3val : plain AHE) :
+  ValidCode (locs predictor) [interface] pc ->
+  get_heap h (V_2_cell t_msg) = Some cv ->
+  distr.dmargin fst (Pr_code
+    (guess ← pc ;;
+     v2 ← denote_v2_get_body chmsg_of_msg ;;
+     ret (msg_of_chmsg v2, v3val)) h)
+  = distr.dlet (fun _ : (t_msg * heap)%type =>
+       distr.dunit (msg_of_chmsg cv, v3val)) (Pr_code pc h).
+Proof.
+move=> Hpc Hcv.
+rewrite Pr_code_bind dfst_dlet_commut.
+apply: eq_in_dlet => -[g hg] Hg.
+have Hpres : get_heap hg (V_2_cell t_msg) = Some cv.
+  rewrite -Hcv.
+  apply: (Pr_code_preserves (L := locs predictor) (l := V_2_cell t_msg) _ _ Hg).
+  apply: (@notin_has_separate _ _ (protocol_state t_msg) (locs predictor)
+            (V_2_cell t_msg)).
+  exact: fhas_set.
+  exact: fseparateC predictor_locs_disj.
+rewrite /denote_v2_get_body Pr_code_get Hpres Pr_code_ret.
+by apply: SubDistr.distr_ext => w; rewrite distr.dmargin_dunit.
+Qed.
+
+(* guess_VarRV_uniform — the two secret samples (V_2, V_3) are jointly uniform on
+   the plaintext space: they are msg_of_idx of two independent uniform index
+   samples, and msg_of_idx is a bijection. *)
+Lemma guess_VarRV_uniform : `p_[% V2, V3] = fdist_uniform cardpp.
+Proof.
+rewrite /dist_of_RV.
+pose proj := (fun t : (Mfin * Mfin * Mfin * Mfin * option 'I_card_renc *
+                      option 'I_card_renc)%type
+              => (fin_to_plain t.1.1.1.1.2, fin_to_plain t.1.1.1.2)).
+have HVproj : [% V2, V3] = proj.
+  by apply: boolp.funext => t.
+rewrite HVproj.
+have Hproj_lossless :
+    psum (distr.mu (Pr_fst (gv ← guess_full_code ;; ret (proj gv)))) = 1.
+  rewrite Pr_fst_map -distr.pr_predT distr.pr_dmargin.
+  rewrite (distr.eq_pr (B := predT)); last by [].
+  by rewrite distr.pr_predT.
+have Hbridge_sd :
+    fdistmap proj guess_sample_fdist = sdistr_to_fdist Hproj_lossless.
+  apply: fdist_ext => u.
+  rewrite fdistmapE sdistr_to_fdistE Pr_fst_map distr.dmargin_psumE psum_fin
+    big_mkcond /=.
+  apply: eq_bigr => i _.
+  rewrite ffunE !inE /=.
+  case: (proj i == u); rewrite ?mul1r ?mul0r ?normr0 //.
+  by rewrite ger0_norm //; exact: distr.ge0_mu.
+rewrite Hbridge_sd.
+pose pairmap := (fun p : ('I_card_msg * 'I_card_msg)%type =>
+                   (msg_of_idx p.1, msg_of_idx p.2)).
+pose two_idx_code : raw_code ('I_card_msg * 'I_card_msg)%type :=
+  (x0 ← sample uniform card_msg ;; x1 ← sample uniform card_msg ;; ret (x0, x1)).
+have card_pair :
+    #|('I_card_msg * 'I_card_msg : finType)%type| = (card_msg * card_msg).-1.+1.
+  rewrite card_prod !card_ord prednK //.
+  rewrite muln_gt0; apply/andP; split; rewrite -(card_ord card_msg);
+    apply/card_gt0P; by have [x _ _] := Hmsg_bij; exists (x 0%R); rewrite inE.
+have Hpairbij : bijective pairmap.
+  have [gm cgm gcm] := Hmsg_bij.
+  exists (fun q : (plain AHE * plain AHE)%type => (gm q.1, gm q.2)).
+    by move=> [a b]; rewrite /pairmap /= !cgm.
+  by move=> [a b]; rewrite /pairmap /= !gcm.
+have Hcard0 : (0 < card_msg)%N.
+  have [gm _ _] := Hmsg_bij.
+  by rewrite -[card_msg]card_ord; apply/card_gt0P; exists (gm 0%R).
+have Hbody :
+    (gv ← guess_full_code ;; ret (proj gv))
+    = (vt ← denote_run_caps 11 8 9 10 7 6 [::] seed gc ;;
+       s ← denote_s_get_body chmsg_of_msg ;;
+       guess ← resolve (pack predictor)
+                 (id_guess, (chProd (cipher_list t_cipher) t_msg, t_msg))
+                 (vt.1.1, s) ;;
+       v2 ← denote_v2_get_body chmsg_of_msg ;;
+       ret (msg_of_chmsg v2, vt.1.2.1.2)).
+  rewrite /guess_full_code /guess_resolved_caps !bind_assoc.
+  apply: bind_cong=>//; apply: boolp.funext=>vt.
+  rewrite !bind_assoc; apply: bind_cong=>//; apply: boolp.funext=>s.
+  rewrite !bind_assoc; apply: bind_cong=>//; apply: boolp.funext=>guess.
+  rewrite !bind_assoc; apply: bind_cong=>//; apply: boolp.funext=>v2.
+  case: (vt.1.2) => [[[[[[a b] c] d] e] f] g] /=.
+  by rewrite /proj /fin_to_plain /= !msg_to_finK !chmsg_of_msgK.
+have Hcore :
+    Pr_fst (gv ← guess_full_code ;; ret (proj gv))
+    = distr.dmargin pairmap (Pr_fst two_idx_code).
+  have HRHS : distr.dmargin pairmap (Pr_fst two_idx_code)
+      = distr.dlet (fun x0 => distr.dlet (fun x1 =>
+          distr.dunit (msg_of_idx x0, msg_of_idx x1)) (projT2 (uniform card_msg)))
+          (projT2 (uniform card_msg)).
+    rewrite /two_idx_code /Pr_fst /pairmap Pr_code_sample dfst_dlet_commut
+      /distr.dmargin dlet_dlet_ext.
+    apply: eq_dlet => x0.
+    rewrite Pr_code_sample !dlet_dlet_ext.
+    apply: eq_dlet => x1.
+    by rewrite Pr_code_ret !dlet_unit_ext.
+  rewrite HRHS Hbody /Pr_fst gc_eq.
+  (* Peel the six leading samples (4 plaintext, 2 encryption-randomness). *)
+  rewrite drc_sample_msg; cbn [bind]; rewrite Pr_code_sample dfst_dlet_commut.
+  apply: eq_dlet => x0.
+  rewrite drc_sample_msg; cbn [bind]; rewrite Pr_code_sample dfst_dlet_commut.
+  apply: eq_dlet => x1.
+  (* After peeling x0, x1: the inner experiment INNER has a constant value-marginal
+     [(msg_of_idx x0, msg_of_idx x1)] (the predictor never touches V_2, V_3), so the
+     marginal is [dunit VAL] scaled by INNER's total mass, which is 1 (losslessness).
+     [dmargin_fst_const] discharges the constant-value side via the run-support facts
+     [Hrun]; [dlet_const_unit] reduces to the mass obligation. *)
+  set INNER := (X in distr.dmargin fst (Pr_code X emptym)).
+  rewrite (dmargin_fst_const (v := (msg_of_idx x0, msg_of_idx x1))); last first.
+    move=> [val h] /=; rewrite /INNER Pr_code_bind.
+    move/distr.dinsupp_dlet => [y Hy Hval].
+    have Hrun : forall z : (cipher_list t_cipher *
+        (plain AHE * plain AHE * plain AHE * plain AHE * plain AHE * plain AHE
+         * plain AHE) * seq 'I_card_renc)%type * heap,
+        z \in distr.dinsupp (Pr_code (denote_run_caps 11 8 9 10 7 6 [::]
+            (push_val (Gplain (msg_of_idx x1))
+               (push_val (Gplain (msg_of_idx x0)) seed))
+            (GC_sample card_msg (GC_sample card_msg (GC_sample card_renc
+              (GC_sample card_renc (GC_put (HE_var 3) (GC_enc_hop 1 (HE_const 0)
+              (GC_enc_hop 2 (HE_const 0) (GC_let (HE_emul (HE_epow (HE_var 1)
+              (HE_var 7)) (HE_enc 1 (HE_var 3) 1)) (GC_let (HE_emul (HE_epow
+              (HE_var 1) (HE_var 9)) (HE_enc 2 (HE_var 3) 0)) (GC_put_output
+              output_term (GC_ret [:: HE_var 1; HE_var 0; HE_var 3;
+              HE_var 2])))))))))))) emptym) ->
+        z.1.1.2.1.2 = msg_of_idx x1
+        /\ get_heap z.2 (V_2_cell t_msg) = Some (chmsg_of_msg (msg_of_idx x0)).
+      move=> [zv zh] Hin.
+      move: Hin; rewrite drc_sample_msg Pr_code_sample
+        => /distr.dinsupp_dlet [a0 _ Hin].
+      move: Hin; rewrite drc_sample_msg Pr_code_sample
+        => /distr.dinsupp_dlet [a1 _ Hin].
+      move: Hin; rewrite drc_sample_renc Pr_code_sample
+        => /distr.dinsupp_dlet [b0 _ Hin].
+      move: Hin; rewrite drc_sample_renc Pr_code_sample
+        => /distr.dinsupp_dlet [b1 _ Hin].
+      move: Hin; rewrite drc_put Pr_code_put drc_hop Pr_code_sample
+        => /distr.dinsupp_dlet [c0 _ Hin].
+      move: Hin; rewrite drc_hop Pr_code_sample
+        => /distr.dinsupp_dlet [c1 _ Hin].
+      move: Hin; rewrite drc_let drc_let drc_putout Pr_code_put Pr_code_bind
+        drun_ret Pr_code_ret dlet_unit_ext Pr_code_ret
+        => /distr.in_dunit [= -> ->].
+      split; [by [] | by rewrite get_set_heap_neq // get_set_heap_eq].
+    case: (Hrun y Hy) => Hcap Hheap.
+    have Hsget : Pr_code (denote_s_get_body chmsg_of_msg) y.2
+        = distr.dunit (match get_heap y.2 (S_output_cell t_msg) with
+                       | Some v => v | None => chmsg_of_msg 0%R end, y.2).
+      by rewrite /denote_s_get_body Pr_code_get;
+         case: (get_heap y.2 (S_output_cell t_msg)) => [sv|]; rewrite Pr_code_ret.
+    have Hmarg : distr.dmargin fst (Pr_code
+        (s ← denote_s_get_body chmsg_of_msg ;;
+         resolve predictor (id_guess, (cipher_list t_cipher × t_msg, t_msg))
+           (y.1.1.1, s) ;;
+         v2 ← denote_v2_get_body chmsg_of_msg ;;
+         ret (msg_of_chmsg v2, y.1.1.2.1.2)) y.2)
+        = distr.dlet (fun=> distr.dunit (msg_of_idx x0, msg_of_idx x1))
+            (Pr_code (resolve predictor
+               (id_guess, (cipher_list t_cipher × t_msg, t_msg))
+               (y.1.1.1, match get_heap y.2 (S_output_cell t_msg) with
+                         | Some v => v | None => chmsg_of_msg 0%R end)) y.2).
+      rewrite Pr_code_bind Hsget dlet_unit_ext.
+      transitivity (distr.dlet
+          (fun=> distr.dunit (msg_of_chmsg (chmsg_of_msg (msg_of_idx x0)),
+                              y.1.1.2.1.2))
+          (Pr_code (resolve predictor
+             (id_guess, (cipher_list t_cipher × t_msg, t_msg))
+             (y.1.1.1, match get_heap y.2 (S_output_cell t_msg) with
+                       | Some v => v | None => chmsg_of_msg 0%R end)) y.2));
+        first by apply: Htail2_abs;
+          [exact: resolve_predictor_valid | exact: Hheap].
+      by rewrite chmsg_of_msgK Hcap.
+    have Hvs : val \in distr.dinsupp (distr.dmargin fst (Pr_code
+        (s ← denote_s_get_body chmsg_of_msg ;;
+         resolve predictor (id_guess, (cipher_list t_cipher × t_msg, t_msg))
+           (y.1.1.1, s) ;;
+         v2 ← denote_v2_get_body chmsg_of_msg ;;
+         ret (msg_of_chmsg v2, y.1.1.2.1.2)) y.2)).
+      by rewrite distr.dmarginE; apply: (distr.dlet_dinsupp (x := (val, h)));
+        [exact: Hval | rewrite distr.dunit1E eqxx; exact: oner_neq0].
+    move: Hvs; rewrite Hmarg => /distr.dinsupp_dlet [q _ Hq];
+      by move: Hq => /distr.in_dunit ->.
+  apply: dlet_const_unit.
+  (* INNER's total mass is 1: the predictor mass averages to 1 over the secrets
+     (guess_full_lossless) and is bounded by 1, so it is 1 on the full uniform
+     support (mean1_eq1). *)
+  pose INNERf := fun a b : 'I_card_msg =>
+    (vt ← denote_run_caps 11 8 9 10 7 6 [::]
+        (push_val (Gplain (msg_of_idx b))
+           (push_val (Gplain (msg_of_idx a)) seed))
+        (GC_sample card_msg (GC_sample card_msg (GC_sample card_renc
+          (GC_sample card_renc (GC_put (HE_var 3) (GC_enc_hop 1 (HE_const 0)
+          (GC_enc_hop 2 (HE_const 0) (GC_let (HE_emul (HE_epow (HE_var 1)
+          (HE_var 7)) (HE_enc 1 (HE_var 3) 1)) (GC_let (HE_emul (HE_epow
+          (HE_var 1) (HE_var 9)) (HE_enc 2 (HE_var 3) 0)) (GC_put_output
+          output_term (GC_ret [:: HE_var 1; HE_var 0; HE_var 3;
+          HE_var 2]))))))))))) ;;
+     s ← denote_s_get_body chmsg_of_msg ;;
+     resolve predictor (id_guess, (cipher_list t_cipher × t_msg, t_msg))
+       (vt.1.1, s) ;;
+     v2 ← denote_v2_get_body chmsg_of_msg ;;
+     ret (msg_of_chmsg v2, vt.1.2.1.2)).
+  have Hpd : forall (U V : choiceType) (f : U -> V) (D : distr.distr R U),
+      psum (distr.mu (distr.dmargin f D)) = psum (distr.mu D).
+    move=> U V f D; rewrite -[LHS]distr.pr_predT distr.pr_dmargin -[RHS]distr.pr_predT.
+    by apply: distr.eq_pr => z; rewrite !inE.
+  have mass_dlet : forall (U : finType) (V : choiceType)
+      (f : U -> distr.distr R V) (mu0 : distr.distr R U),
+      psum (distr.mu (distr.dlet f mu0))
+      = psum (fun x => psum (distr.mu (f x)) * distr.mu mu0 x).
+    move=> U V f mu0.
+    transitivity (psum (fun y : V =>
+        \sum_(x : U) distr.mu mu0 x * distr.mu (f x) y)).
+      apply: eq_psum => y; rewrite distr.dletE psum_fin.
+      by apply: eq_bigr => x _; rewrite ger0_norm //;
+         apply: mulr_ge0; exact: distr.ge0_mu.
+    rewrite -psum_bigop;
+      [ | by move=> x y; apply: mulr_ge0; exact: distr.ge0_mu
+        | by move=> x; apply: summableZ; exact: distr.summable_mu ].
+    rewrite psum_fin; apply: eq_bigr => x _.
+    rewrite ger0_norm; last by apply: mulr_ge0; [exact: ge0_psum | exact: distr.ge0_mu].
+    by rewrite psumZ ?distr.ge0_mu // mulrC.
+  have HDmass : psum (distr.mu (Pr_fst two_idx_code)) = 1.
+    rewrite /two_idx_code.
+    apply: Lossless_sample; first by apply: LosslessOp_uniform; exact: Hcard0.
+    by move=> a; apply: Lossless_sample;
+       first by apply: LosslessOp_uniform; exact: Hcard0.
+  have HbodyEq : (x ← two_idx_code ;; INNERf x.1 x.2)
+      = (gv ← guess_full_code ;; ret (proj gv)).
+    have sba : forall (A B : choiceType) (op : Op) (k : Arit op -> raw_code A)
+        (f : A -> raw_code B),
+        (vt ← (x ← sample op ;; k x) ;; f vt)
+        = (x ← sample op ;; vt ← k x ;; f vt) by [].
+    rewrite Hbody gc_eq /two_idx_code drc_sample_msg
+      [in X in _ = X]sba [in X in X = _]sba.
+    apply: f_equal; apply: boolp.funext => a.
+    rewrite drc_sample_msg [in X in _ = X]sba [in X in X = _]sba.
+    apply: f_equal; apply: boolp.funext => b.
+    by rewrite /INNERf.
+  have HmeanD : psum (fun p : ('I_card_msg * 'I_card_msg)%type =>
+      psum (distr.mu (Pr_code (INNERf p.1 p.2) emptym))
+      * distr.mu (Pr_fst two_idx_code) p) = 1.
+    under eq_psum => p do
+      rewrite -(Hpd _ _ fst (Pr_code (INNERf p.1 p.2) emptym)).
+    rewrite -mass_dlet.
+    have Hvc : ValidCode emptym [interface] two_idx_code
+      by rewrite /two_idx_code; ssprove_valid.
+    rewrite -(Pr_fst_bind Hvc).
+    by rewrite HbodyEq.
+  have Hbound : forall p : ('I_card_msg * 'I_card_msg)%type,
+      0 <= psum (distr.mu (Pr_code (INNERf p.1 p.2) emptym)) <= 1.
+    by move=> p; rewrite ge0_psum distr.le1_mu.
+  suff HM : forall p : ('I_card_msg * 'I_card_msg)%type,
+      psum (distr.mu (Pr_code (INNERf p.1 p.2) emptym)) = 1.
+    by rewrite /INNER; exact: (HM (x0, x1)).
+  move=> p; apply: (mean1_eq1 Hbound HDmass HmeanD).
+  rewrite /two_idx_code Pr_fst_sample.
+  apply: (distr.dlet_dinsupp (x := p.1));
+    first by rewrite distr.in_dinsupp distr.mkdistrE /UniformDistrLemmas.r
+                     card_ord div1r invr_eq0 pnatr_eq0 -lt0n.
+  rewrite Pr_fst_sample.
+  apply: (distr.dlet_dinsupp (x := p.2));
+    first by rewrite distr.in_dinsupp distr.mkdistrE /UniformDistrLemmas.r
+                     card_ord div1r invr_eq0 pnatr_eq0 -lt0n.
+  by rewrite Pr_fst_ret distr.dunit1E; case: p => a b; rewrite eqxx oner_neq0.
+have Htwo : Pr_fst two_idx_code
+    = distr.dlet (fun x0 => distr.dlet (fun x1 => distr.dunit (x0, x1))
+        (projT2 (uniform card_msg))) (projT2 (uniform card_msg)).
+  rewrite /two_idx_code Pr_fst_sample.
+  apply: eq_dlet => x0; rewrite Pr_fst_sample.
+  by apply: eq_dlet => x1; rewrite Pr_fst_ret.
+have inner_sum : forall (x0 a b : 'I_card_msg),
+    (\sum_(i < card_msg)
+       ((x0, i) == (a, b) :> ('I_card_msg * 'I_card_msg)%type)%:R) = (x0 == a)%:R :> R.
+  move=> x0 a b.
+  rewrite (eq_bigr (fun i => (x0 == a)%:R * (i == b)%:R));
+    last by move=> i _; rewrite xpair_eqE -natrM mulnb.
+  rewrite (bigD1 b) //= eqxx mulr1 big1 ?addr0 // => i Hib.
+  by rewrite (negbTE Hib) mulr0.
+have Htwoval : forall p : ('I_card_msg * 'I_card_msg)%type,
+    distr.mu (distr.dlet (fun x0 => distr.dlet (fun x1 => distr.dunit (x0, x1))
+      (projT2 (uniform card_msg))) (projT2 (uniform card_msg))) p
+    = ((card_msg * card_msg)%:R)^-1 :> R.
+  move=> [a b].
+  rewrite (dlet_uniform (Hlt := Hcard0)).
+  under eq_bigr => x0 _.
+    rewrite (dlet_uniform (Hlt := Hcard0)).
+    under eq_bigr => x1 _ do rewrite distr.dunit1E.
+    rewrite inner_sum.
+    over.
+  under eq_bigr => x0 _ do rewrite mulrC.
+  rewrite -big_distrr /= (bigD1 a) //= eqxx big1 ?addr0;
+    last by move=> i Hia; rewrite (negbTE Hia).
+  by rewrite mulr1 -invfM -natrM.
+rewrite -(fdistmap_bij_unif card_pair cardpp Hpairbij).
+apply: fdist_ext => u.
+rewrite sdistr_to_fdistE Hcore distr.dmargin_psumE fdistmapE Htwo.
+under eq_psum => x do rewrite Htwoval.
+rewrite psum_fin [RHS]big_mkcond /= [LHS]big_mkcond /=.
+apply: eq_bigr => x _.
+rewrite fdist_uniformE card_pair inE /=.
+case: (pairmap x == u); rewrite ?mul1r ?mul0r ?normr0 //.
+rewrite ger0_norm //.
+  by rewrite prednK // muln_gt0 Hcard0.
+by rewrite invr_ge0 ler0n.
+Qed.
+
+Set Bullet Behavior "Strict Subproofs".
+Set Default Goal Selector "!".
 
 End dsdp_guess_distribution.
