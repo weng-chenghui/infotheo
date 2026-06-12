@@ -1776,4 +1776,140 @@ move=> Hinj.
 by rewrite guess_success_sdistr_eq_fdist; exact: (guess_fdist_success_le Hcinde Hinj).
 Qed.
 
+(* real_game — the output-exposing real endpoint game, at this section's
+   parameters (the all-real counterpart of [game]). *)
+Let real_game : raw_package :=
+  real_game_leak_S renc_card rand_of_renc chmsg_of_msg chcipher_of_cipher
+    pkey_of_party msg_of_idx rand0 seed.
+
+(* guess_sdistr_success_real — the SSProve-side success probability of the
+   guessing experiment on the output-exposing real game. *)
+Definition guess_sdistr_success_real : R :=
+  distr.mu (pkg_advantage.Pr (guessing_experiment predictor real_game)) true.
+
+(* guess_reduction — the IND-CPA distinguisher built from the guessing layer:
+   the challenger linked with the predictor, leaving the game oracles open as
+   imports so the real and all-zero games plug into the same hole. *)
+Let guess_reduction : raw_package :=
+  guessing_challenger t_msg t_cipher
+    ∘ par (pack predictor) (ID (game_iface_leak_S t_msg t_cipher)).
+
+(* guess_reduction_valid — the reduction distinguisher is a valid package over
+   the predictor's locations, importing the game interface and exporting the
+   single distinguishing bit. *)
+Lemma guess_reduction_valid :
+  ValidPackage (locs predictor) (game_iface_leak_S t_msg t_cipher) A_export
+    guess_reduction.
+Proof.
+rewrite /guess_reduction.
+have Vpar : ValidPackage (unionm (locs predictor) emptym)
+    (game_iface_leak_S t_msg t_cipher)
+    (unionm (guesser_export t_msg t_cipher) (game_iface_leak_S t_msg t_cipher))
+    (par (pack predictor) (ID (game_iface_leak_S t_msg t_cipher))).
+{ have := @valid_par (locs predictor) emptym [interface]
+    (game_iface_leak_S t_msg t_cipher)
+    (guesser_export t_msg t_cipher) (game_iface_leak_S t_msg t_cipher)
+    (pack predictor) (ID (game_iface_leak_S t_msg t_cipher))
+    (pack_valid predictor) (valid_ID (game_iface_leak_S t_msg t_cipher)).
+  rewrite union0m; apply.
+  - by fmap_solve.
+  - by rewrite /fcompat union0m unionm0. }
+eapply valid_package_inject_locations.
+2:{
+  eapply valid_link_weak.
+  - exact: (pack_valid (guessing_challenger t_msg t_cipher)).
+  - exact: Vpar.
+  - exact: fcompat0m.
+  - have Hc : fcompat (guesser_export t_msg t_cipher)
+                      (game_iface_leak_S t_msg t_cipher) by fmap_solve.
+    rewrite -Hc. exact: fsubmapxx.
+}
+rewrite union0m unionm0.
+exact: fsubmapxx.
+Qed.
+
+(* real_game_valid — the output-exposing real endpoint game is a valid package
+   over [protocol_state], importing nothing and exporting the game interface. *)
+Lemma real_game_valid :
+  ValidPackage (protocol_state t_msg) [interface] (game_iface_leak_S t_msg t_cipher)
+    real_game.
+Proof. rewrite /real_game /real_game_leak_S. exact: denote_game_leak_S_valid. Qed.
+
+(* game_valid — the output-exposing all-zero endpoint game is a valid package
+   over [protocol_state], importing nothing and exporting the game interface. *)
+Lemma game_valid :
+  ValidPackage (protocol_state t_msg) [interface] (game_iface_leak_S t_msg t_cipher)
+    game.
+Proof. rewrite /game /zero_game_leak_S. exact: denote_game_leak_S_valid. Qed.
+
+(* guess_advantage_eq — the gap between the real and all-zero guessing success is
+   the IND-CPA advantage of the reduction distinguisher: the guessing experiment
+   on either game is the reduction distinguisher composed with that game, and
+   [Advantage_par] slides the fixed predictor out of the [par]. *)
+Lemma guess_advantage_eq :
+  `| guess_sdistr_success_real - guess_sdistr_success |
+  = AdvantageE real_game game guess_reduction.
+Proof.
+rewrite /guess_sdistr_success_real /guess_sdistr_success
+        /guessing_experiment /guess_reduction.
+have Hpar := @Advantage_par (pack predictor) real_game game
+   (guessing_challenger t_msg t_cipher)
+   (locs predictor) (protocol_state t_msg) (protocol_state t_msg)
+   (guesser_export t_msg t_cipher) (game_iface_leak_S t_msg t_cipher)
+   (pack_valid predictor) real_game_valid game_valid.
+by rewrite -Hpar /AdvantageE.
+Qed.
+
+(* guess_advantage_le — the reduction distinguisher's advantage is at most
+   [2 * epsilon_cpa]: the output-exposing endpoint games add only the common
+   id_s_get oracle (no encryption hop), so the Part I IND-CPA bound applies. *)
+Lemma guess_advantage_le
+    (cipher_of_chcipher : t_cipher -> cipher AHE)
+    (chcipher_of_cipherK : cancel chcipher_of_cipher cipher_of_chcipher)
+    (Hore : fseparate (locs predictor)
+       (locs (oracle_real_pkg renc_card rand_of_renc msg_of_chmsg
+                chcipher_of_cipher pkey_of_party)))
+    (Hoze : fseparate (locs predictor)
+       (locs (oracle_zero_pkg renc_card rand_of_renc t_msg
+                chcipher_of_cipher pkey_of_party))) :
+  AdvantageE real_game game guess_reduction <= 2%:R * epsilon_cpa.
+Proof.
+rewrite /real_game /game.
+eapply dsdp_advantage_derived_leak_S.
+- exact: chcipher_of_cipherK.
+- exact: chmsg_of_msgK.
+- exact: guess_reduction_valid.
+- exact: predictor_locs_disj.
+- exact: Hore.
+- exact: Hoze.
+Qed.
+
+(* dsdp_alice_secrecy_leak_S — Alice's probability of guessing the challenge
+   secret V2 from her cipher view and the leaked scalar-product output S is at
+   most 1/card_msg plus twice the IND-CPA advantage: the fiber bound 1/card_msg
+   at the all-zero endpoint, plus the 2 * epsilon_cpa cost of moving to the real
+   game.  [Hcinde] is the guess/V2 conditional independence given S (item 1). *)
+Theorem dsdp_alice_secrecy_leak_S
+    (cipher_of_chcipher : t_cipher -> cipher AHE)
+    (chcipher_of_cipherK : cancel chcipher_of_cipher cipher_of_chcipher)
+    (Hore : fseparate (locs predictor)
+       (locs (oracle_real_pkg renc_card rand_of_renc msg_of_chmsg
+                chcipher_of_cipher pkey_of_party)))
+    (Hoze : fseparate (locs predictor)
+       (locs (oracle_zero_pkg renc_card rand_of_renc t_msg
+                chcipher_of_cipher pkey_of_party)))
+    (Hcinde : guess_sample_fdist |= guess_rv _|_ V2 | Sout)
+    (Hinj : injective (fun v : plain AHE => w_u3 * v)) :
+  guess_sdistr_success_real <= card_msg%:R^-1 + 2%:R * epsilon_cpa.
+Proof.
+have Hzero : guess_sdistr_success <= card_msg%:R^-1
+  by exact: (guess_sdistr_success_le Hcinde Hinj).
+apply: (@le_trans _ _ (guess_sdistr_success + 2%:R * epsilon_cpa)).
+- rewrite addrC -lerBlDr.
+  apply: (le_trans (ler_norm _)).
+  rewrite guess_advantage_eq.
+  exact: (guess_advantage_le chcipher_of_cipherK Hore Hoze).
+- by rewrite lerD2r.
+Qed.
+
 End dsdp_guess_distribution.
