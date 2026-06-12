@@ -1050,7 +1050,8 @@ Lemma guess_run_cells (a b : 'I_card_msg) z :
   get_heap z.2 (S_output_cell t_msg)
     = Some (chmsg_of_msg (dsdp_output w_v1 w_u1 w_u2 w_u3
                             (msg_of_idx a) (msg_of_idx b)))
-  /\ get_heap z.2 (V_2_cell t_msg) = Some (chmsg_of_msg (msg_of_idx a)).
+  /\ get_heap z.2 (V_2_cell t_msg) = Some (chmsg_of_msg (msg_of_idx a))
+  /\ z.1.1.2.1.2 = msg_of_idx b.
 Proof.
 case: z => zv zh Hin.
 move: Hin; rewrite drc_sample_msg Pr_code_sample => /distr.dinsupp_dlet [a0 _ Hin].
@@ -1062,12 +1063,55 @@ move: Hin; rewrite drc_put Pr_code_put drc_hop Pr_code_sample
 move: Hin; rewrite drc_hop Pr_code_sample => /distr.dinsupp_dlet [c1 _ Hin].
 move: Hin; rewrite drc_let drc_let drc_putout Pr_code_put Pr_code_bind drun_ret
   Pr_code_ret dlet_unit_ext Pr_code_ret => /distr.in_dunit [= -> ->].
-split.
-2:{ rewrite get_set_heap_neq; last by [].
-    by rewrite get_set_heap_eq. }
-rewrite get_set_heap_eq.
-rewrite !(de_val_nth_pushS, de_val_nth_pushrand, de_val_nth_push0).
-by rewrite seed_wu1 seed_wv1 seed_wu2 seed_wu3 /dsdp_output.
+split; first by rewrite get_set_heap_eq
+  !(de_val_nth_pushS, de_val_nth_pushrand, de_val_nth_push0)
+  seed_wu1 seed_wv1 seed_wu2 seed_wu3 /dsdp_output.
+split; first by rewrite get_set_heap_neq// get_set_heap_eq.
+by [].
+Qed.
+
+(* guess_inner_v2v3_det — within [guess_inner a b] the V_2 and V_3 output
+   coordinates are deterministic ([msg a], [msg b]); the joint is the guess
+   marginal tagged with those two constants. *)
+Lemma guess_inner_v2v3_det (a b : 'I_card_msg) :
+  Pr_fst (guess_inner a b)
+  = distr.dmargin (fun g : Mfin =>
+       (g, msg_to_fin (chmsg_of_msg (msg_of_idx a)),
+        msg_to_fin (chmsg_of_msg (msg_of_idx b))))
+      (distr.dmargin (fun t : (Mfin * Mfin * Mfin)%type => t.1.1)
+         (Pr_fst (guess_inner a b))).
+Proof.
+rewrite dmargin_comp distr.dmarginE.
+apply: SubDistr.distr_ext => w.
+rewrite -[X in X = _](distr.dlet_dunit_id _ w).
+apply: distr.eq_in_dlet => [t Ht /=|//].
+move=> y; congr (distr.mu (distr.dunit _) y).
+move: Ht; case: t => [[g v2c] v3c] Ht.
+move: Ht; rewrite /Pr_fst /guess_inner Pr_code_bind dfst_dlet_commut.
+move=> /distr.dinsupp_dlet [[vt h_run] Hrun Hrest].
+have [HS [HV2 Hv3]] := guess_run_cells Hrun.
+rewrite Hv3 in Hrest.
+have Hsget : Pr_code (denote_s_get_body chmsg_of_msg) (vt, h_run).2
+    = distr.dunit (chmsg_of_msg (dsdp_output w_v1 w_u1 w_u2 w_u3
+                                   (msg_of_idx a) (msg_of_idx b)), (vt, h_run).2)
+  by rewrite /denote_s_get_body Pr_code_get HS Pr_code_ret.
+move: Hrest; rewrite Pr_code_bind Hsget dlet_unit_ext.
+move=> Hrest; move: Hrest.
+rewrite Pr_code_bind dfst_dlet_commut
+  => /distr.dinsupp_dlet [[guess h_pred] Hpred Hv2].
+have Hnotin : (V_2_cell t_msg).1 \notin domm (locs predictor)
+  by apply: (@notin_has_separate _ _ (protocol_state t_msg) (locs predictor)
+       (V_2_cell t_msg)); [exact: fhas_set | exact: fseparateC predictor_locs_disj].
+have HV2pred : get_heap h_pred (V_2_cell t_msg)
+    = Some (chmsg_of_msg (msg_of_idx a))
+  by rewrite -HV2;
+     exact: (Pr_code_preserves (resolve_predictor_valid _ _) Hnotin Hpred).
+have Hv2get : Pr_code (denote_v2_get_body chmsg_of_msg) h_pred
+    = distr.dunit (chmsg_of_msg (msg_of_idx a), h_pred)
+  by rewrite /denote_v2_get_body Pr_code_get HV2pred Pr_code_ret.
+move: Hv2; rewrite Pr_code_bind Hv2get dlet_unit_ext Pr_code_ret
+  distr.dmargin_dunit => /distr.in_dunit [= _ -> ->].
+by [].
 Qed.
 
 (* guess_inputs_indep — the protocol inputs (seeded constants) are independent of
