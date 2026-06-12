@@ -121,22 +121,21 @@ With `seed` abstract and unlinked, the cinde is false. User-approved fix added
 (`seed_wu1/wu2/wu3/wv1 : as_plain (de_val_nth seed 0..3) = w_u1,w_u2,w_u3,w_v1`).
 True once `seed` is instantiated; makes `Sout` = the run's leaked output.
 
-### Finding 2 — OPEN: shape of the leaked `S` (blocks `guess_run_cells`)
-Attempted `guess_run_cells` (the run-heap support fact: `S_output_cell =
-chmsg(Sout)`, `V_2_cell = chmsg(msg a)`). The peel (mirror item-2 `Hrun`) works;
-`V_2_cell` side is straightforward. But the stored `S_output_cell` value, after
-`get_set_heap_eq`, does **not** present as `as_plain (dhe e output_term)` (so
-`denote_output_termE` does not match) — it shows a **cipher-shaped** denotation
-(`Epow`, `enc`, `(.)`), suggesting either (a) the de Bruijn index mapping at the
-`put_output` env differs from the assumed `8/9/10/11 = seed 0/1/2/3`,
-`7/6 = msg a/msg b`, or (b) `denote_he output_term` produces a homomorphic
-ciphertext rather than the plain scalar `dsdp_output`. RESOLVE before re-stating
-`guess_run_cells`: inspect `denote_he`'s `HE_mul`/`HE_add` semantics on plain
-operands and recount the `put_output` env (the `GC_put`/hop/let pushes), or
-restate step 4 about the cipher-valued leak. The `de_val_nth_*` helpers + the
-peel skeleton (8 `drc_*` peels ending in `distr.in_dunit [= -> ->]`) are ready;
-the only blocker is the `S_output` value's correct closed form. The session was
-stopped here rather than leave an `Admitted`.
+### Finding 2 — RESOLVED: the SSProve program is faithful; `guess_run_cells` DONE
+The apparent "cipher-shaped" `S_output` value was a misread of the un-reduced env
+display. From `denote_he` (`dsdp_game_code.v:354-356`), `HE_mul`/`HE_add`/`HE_sub`
+are **plaintext** ring ops (`Gplain (as_plain a * as_plain b)`), and `HE_dec` is a
+`Gplain 0` stub (off the game path) — so `output_term` denotes to a **plaintext
+scalar**. Reducing the de Bruijn reads (`de_val_nth_*`) turns the stored value into
+`as_plain(de_val seed 0)*as_plain(de_val seed 3) + as_plain(de_val seed 1)*msg a
++ as_plain(de_val seed 2)*msg b`, which the seed hypotheses close to
+`dsdp_output`. So the program puts the protocol's leaked S (the plain scalar, =
+`D_privA(γ) − r2 − r3 + u1·v1` per the paper; masks r2,r3 sit at slots 4/5 and are
+unread) into `S_output_cell`. `guess_run_cells` is **Qed**, full `coqc` exit 0.
+Key proof move: after `get_set_heap_eq`, do NOT use `denote_output_termE` (the term
+has already computed past it); reduce de Bruijn reads directly with
+`!(de_val_nth_pushS, de_val_nth_pushrand, de_val_nth_push0)` then `seed_*` +
+`/dsdp_output`. See [[reference_dsdp_protocol_flow]].
 
 ### Remaining (unchanged): kernel + factorization
 After `guess_run_cells`: predictor-kernel V_2-independence (`Pr_fst_put_invariant`
