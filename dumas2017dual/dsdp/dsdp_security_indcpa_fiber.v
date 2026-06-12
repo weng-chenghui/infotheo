@@ -853,6 +853,48 @@ rewrite !bind_assoc; apply: bind_cong => //; apply: boolp.funext => v2.
 by case: (vt.1.2) => [[[[[[a b] c] d] e] f] g]; cbn [bind].
 Qed.
 
+(* view_marginal_indep — the cipher-list view the predictor receives is
+   independent of the two secret samples: after the secrets [m0, m1] are pushed,
+   the run's cipher-list marginal is the same for any [m0', m1'].  The secrets
+   reach only the heap cells [V_2_cell] / [S_output_cell] (the [GC_put] /
+   [GC_put_output] writes), which the [dmargin fst] projection discards; the
+   [GC_ret] outputs (let-combines and hop ciphers) read masks, weights, and hop
+   randomness only. *)
+Lemma view_marginal_indep (m0 m1 m0' m1' : plain AHE) (h : heap) :
+  distr.dmargin fst (Pr_code (drun (push_val (Gplain m1)
+     (push_val (Gplain m0) seed))
+     (GC_sample card_msg (GC_sample card_msg (GC_sample card_renc
+       (GC_sample card_renc (GC_put (HE_var 3) (GC_enc_hop 1 (HE_const 0)
+       (GC_enc_hop 2 (HE_const 0) (GC_let (HE_emul (HE_epow (HE_var 1)
+       (HE_var 7)) (HE_enc 1 (HE_var 3) 1)) (GC_let (HE_emul (HE_epow
+       (HE_var 1) (HE_var 9)) (HE_enc 2 (HE_var 3) 0)) (GC_put_output
+       output_term (GC_ret [:: HE_var 1; HE_var 0; HE_var 3;
+       HE_var 2])))))))))))) h)
+  = distr.dmargin fst (Pr_code (drun (push_val (Gplain m1')
+     (push_val (Gplain m0') seed))
+     (GC_sample card_msg (GC_sample card_msg (GC_sample card_renc
+       (GC_sample card_renc (GC_put (HE_var 3) (GC_enc_hop 1 (HE_const 0)
+       (GC_enc_hop 2 (HE_const 0) (GC_let (HE_emul (HE_epow (HE_var 1)
+       (HE_var 7)) (HE_enc 1 (HE_var 3) 1)) (GC_let (HE_emul (HE_epow
+       (HE_var 1) (HE_var 9)) (HE_enc 2 (HE_var 3) 0)) (GC_put_output
+       output_term (GC_ret [:: HE_var 1; HE_var 0; HE_var 3;
+       HE_var 2])))))))))))) h).
+Proof.
+rewrite !drun_sample_msg.
+rewrite !Pr_code_sample !dfst_dlet_commut; apply: eq_dlet => x2.
+rewrite !drun_sample_msg !Pr_code_sample !dfst_dlet_commut; apply: eq_dlet => x3.
+rewrite !drun_sample_renc !Pr_code_sample !dfst_dlet_commut; apply: eq_dlet => r0.
+rewrite drun_sample_renc Pr_code_sample dfst_dlet_commut.
+rewrite drun_sample_renc Pr_code_sample dfst_dlet_commut.
+apply: eq_dlet => r1.
+rewrite !drun_put !Pr_code_put.
+rewrite !drun_enc_hop !Pr_code_sample !dfst_dlet_commut; apply: eq_dlet => ir1.
+rewrite !drun_enc_hop !Pr_code_sample !dfst_dlet_commut; apply: eq_dlet => ir2.
+rewrite !drun_let !drun_put_output !Pr_code_put !drun_ret !Pr_code_ret.
+apply: SubDistr.distr_ext => w; rewrite !distr.dmargin_dunit /=.
+by congr (distr.mu (distr.dunit _) w).
+Qed.
+
 (* guess_joint_fdist_marginal — the bridged pair distribution is the
    (guess, V_2)-marginal of the rich sample distribution. *)
 Lemma guess_joint_fdist_marginal :
