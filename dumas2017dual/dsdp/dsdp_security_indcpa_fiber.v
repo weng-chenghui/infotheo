@@ -1372,4 +1372,17 @@ apply: subset_Pr; apply/subsetP => t.
 by rewrite !inE /= => /eqP Heq; rewrite /guess_rv /V2 Heq eqxx.
 Qed.
 
+(* guess_sdistr_success_le — the SSProve-side success probability of the all-zero
+   guessing experiment is at most 1/card_msg: the connector
+   [guess_success_sdistr_eq_fdist] crosses to the Infotheo side, then the fiber
+   bound [guess_fdist_success_le].  [Hcinde] is item 1. *)
+Lemma guess_sdistr_success_le
+    (Hcinde : guess_sample_fdist |= guess_rv _|_ V2 | Sout) :
+  injective (fun v : plain AHE => w_u3 * v) ->
+  guess_sdistr_success <= card_msg%:R^-1.
+Proof.
+move=> Hinj.
+by rewrite guess_success_sdistr_eq_fdist; exact: (guess_fdist_success_le Hcinde Hinj).
+Qed.
+
 End dsdp_guess_distribution.
