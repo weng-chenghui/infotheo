@@ -150,6 +150,7 @@ pgg-smc/instances/denboer1989/five_card_group.v
 pgg-smc/instances/denboer1989/five_card_program.v
 pgg-smc/instances/denboer1989/five_card_scheme_I5.v
 pgg-smc/instances/denboer1989/den_boer_profile.v
+pgg-smc/instances/denboer1989/five_card_leakage.v
 pgg-smc/instances/kim2025/five_card_kim.v
 pgg-smc/instances/kim2025/five_card_family.v
 pgg-smc/protocol/card_protocol.v
@@ -179,6 +180,7 @@ pgg-smc/reconstruct/pgg_sharing_framework.v
 pgg-smc/reconstruct/massey.v
 pgg-smc/reconstruct/lagrange.v
 pgg-smc/reconstruct/covering_scheme.v
+pgg-smc/reconstruct/input_encoding.v
 pgg-smc/reconstruct/curve_realisation.v
 pgg-smc/reconstruct/multi_covering.v
 pgg-smc/reconstruct/rs_privacy.v
