@@ -1034,6 +1034,42 @@ Proof. by []. Qed.
 Lemma dhe_var (e : denv AHE) n : dhe e (HE_var n) = de_val_nth e n.
 Proof. by []. Qed.
 
+(* guess_run_cells — every heap in the support of [guess_inner]'s run carries the
+   leaked output [chmsg(Sout)] in [S_output_cell] (the seeded scalar product, via
+   the seed-weight slots) and the first secret [chmsg(msg a)] in [V_2_cell]. *)
+Lemma guess_run_cells (a b : 'I_card_msg) z :
+  z \in distr.dinsupp (Pr_code (denote_run_caps 11 8 9 10 7 6 [::]
+     (push_val (Gplain (msg_of_idx b)) (push_val (Gplain (msg_of_idx a)) seed))
+     (GC_sample card_msg (GC_sample card_msg (GC_sample card_renc
+       (GC_sample card_renc (GC_put (HE_var 3) (GC_enc_hop 1 (HE_const 0)
+       (GC_enc_hop 2 (HE_const 0) (GC_let (HE_emul (HE_epow (HE_var 1)
+       (HE_var 7)) (HE_enc 1 (HE_var 3) 1)) (GC_let (HE_emul (HE_epow
+       (HE_var 1) (HE_var 9)) (HE_enc 2 (HE_var 3) 0)) (GC_put_output
+       output_term (GC_ret [:: HE_var 1; HE_var 0; HE_var 3;
+       HE_var 2])))))))))))) emptym) ->
+  get_heap z.2 (S_output_cell t_msg)
+    = Some (chmsg_of_msg (dsdp_output w_v1 w_u1 w_u2 w_u3
+                            (msg_of_idx a) (msg_of_idx b)))
+  /\ get_heap z.2 (V_2_cell t_msg) = Some (chmsg_of_msg (msg_of_idx a)).
+Proof.
+case: z => zv zh Hin.
+move: Hin; rewrite drc_sample_msg Pr_code_sample => /distr.dinsupp_dlet [a0 _ Hin].
+move: Hin; rewrite drc_sample_msg Pr_code_sample => /distr.dinsupp_dlet [a1 _ Hin].
+move: Hin; rewrite drc_sample_renc Pr_code_sample => /distr.dinsupp_dlet [b0 _ Hin].
+move: Hin; rewrite drc_sample_renc Pr_code_sample => /distr.dinsupp_dlet [b1 _ Hin].
+move: Hin; rewrite drc_put Pr_code_put drc_hop Pr_code_sample
+  => /distr.dinsupp_dlet [c0 _ Hin].
+move: Hin; rewrite drc_hop Pr_code_sample => /distr.dinsupp_dlet [c1 _ Hin].
+move: Hin; rewrite drc_let drc_let drc_putout Pr_code_put Pr_code_bind drun_ret
+  Pr_code_ret dlet_unit_ext Pr_code_ret => /distr.in_dunit [= -> ->].
+split.
+2:{ rewrite get_set_heap_neq; last by [].
+    by rewrite get_set_heap_eq. }
+rewrite get_set_heap_eq.
+rewrite !(de_val_nth_pushS, de_val_nth_pushrand, de_val_nth_push0).
+by rewrite seed_wu1 seed_wv1 seed_wu2 seed_wu3 /dsdp_output.
+Qed.
+
 (* guess_inputs_indep — the protocol inputs (seeded constants) are independent of
    the secret samples: a constant random variable is independent of every RV. *)
 Lemma guess_inputs_indep :
