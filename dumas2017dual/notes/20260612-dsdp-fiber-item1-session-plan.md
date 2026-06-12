@@ -181,4 +181,19 @@ Re-add both skeletons after `guess_inner_v2v3_det`; prove then commit.
   pattern (as in `guess_joint_fdist_marginal`); fiber-sum over V3 with `guess_inner_out`
   giving the output-determined kernel. Then inline for `Hcinde` in items 6/7.
 
+PERF WARNING (measured): on `guess_inner_out`, `rewrite /Pr_fst !(dmargin_comp fst)`
+took 18.6s — unifying `dmargin_comp` against `Pr_code (guess_inner _ _)` (the giant
+unfolded run+predictor term) is very expensive, and the proof needs ~30 such steps on
+BOTH sides. Before grinding, abstract the giant subterms: `set GI := guess_inner` won't
+help (it's a def); instead unfold `/guess_inner Pr_code_bind` FIRST to expose the bind
+chain (cheap, as in v2v3_det) and peel from there, OR introduce a kernel-form HELPER
+lemma `guess_inner_kernel_form x y : dmargin .1.1 (Pr_fst (guess_inner x y)) =
+dlet (fun cl => dmargin (msg_to_fin \o fst) (Pr_code (resolve (pack predictor) … (cl,
+chmsg(output x y))) emptym)) (dmargin fst (Pr_code (drun (push (msg y)(push (msg x) seed))
+gc_rest) emptym))` proved once (the v2v3_det peel + `Pr_fst_agree_locs` to drop the heap +
+`denote_run_caps_fst` to turn the run's vt.1.1 marginal into the `drun` marginal); then
+`guess_inner_out` is: rewrite the helper on both sides, `Hout` collapses the kernels and
+`view_marginal_indep` collapses the `drun` marginals. The helper isolates the expensive
+peel to one proof instead of two.
+
 Then item 8 (real-vs-zero composition + final theorem).
