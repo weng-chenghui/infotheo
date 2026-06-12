@@ -895,6 +895,45 @@ apply: SubDistr.distr_ext => w; rewrite !distr.dmargin_dunit /=.
 by congr (distr.mu (distr.dunit _) w).
 Qed.
 
+(* guess_inner — the rich (guess, V_2, V_3)-experiment with the two secret
+   samples fixed to [a, b]: the masks / encryption randomness / hops are drawn,
+   the predictor produces guess from (view, s), and V_2 / V_3 are read back. *)
+Definition guess_inner (a b : 'I_card_msg) : raw_code (Mfin * Mfin * Mfin)%type :=
+  vt ← denote_run_caps 11 8 9 10 7 6 [::]
+     (push_val (Gplain (msg_of_idx b)) (push_val (Gplain (msg_of_idx a)) seed))
+     (GC_sample card_msg (GC_sample card_msg (GC_sample card_renc
+       (GC_sample card_renc (GC_put (HE_var 3) (GC_enc_hop 1 (HE_const 0)
+       (GC_enc_hop 2 (HE_const 0) (GC_let (HE_emul (HE_epow (HE_var 1)
+       (HE_var 7)) (HE_enc 1 (HE_var 3) 1)) (GC_let (HE_emul (HE_epow
+       (HE_var 1) (HE_var 9)) (HE_enc 2 (HE_var 3) 0)) (GC_put_output
+       output_term (GC_ret [:: HE_var 1; HE_var 0; HE_var 3;
+       HE_var 2]))))))))))) ;;
+   s ← denote_s_get_body chmsg_of_msg ;;
+   guess ← resolve (pack predictor)
+             (id_guess, (chProd (cipher_list t_cipher) t_msg, t_msg))
+             (vt.1.1, s) ;;
+   v2 ← denote_v2_get_body chmsg_of_msg ;;
+   ret (msg_to_fin guess, msg_to_fin v2, msg_to_fin (chmsg_of_msg vt.1.2.1.2)).
+
+(* guess_triple_peel — the rich triple experiment is two uniform secret draws
+   followed by [guess_inner]. *)
+Lemma guess_triple_peel :
+  (gv ← guess_full_code ;; ret (gv.1.1.1.1.1, gv.1.1.1.1.2, gv.1.1.1.2))
+  = (a ← sample uniform card_msg ;; b ← sample uniform card_msg ;;
+     guess_inner a b).
+Proof.
+have sba : forall (A B : choiceType) (op : Op) (k : Arit op -> raw_code A)
+    (f : A -> raw_code B),
+    (vt ← (x ← sample op ;; k x) ;; f vt)
+    = (x ← sample op ;; vt ← k x ;; f vt) by [].
+rewrite guess_triple_proj_code gc_eq drc_sample_msg
+ [in X in X = _]sba.
+apply: f_equal; apply: boolp.funext => a.
+rewrite drc_sample_msg [in X in X = _]sba.
+apply: f_equal; apply: boolp.funext => b.
+by rewrite /guess_inner.
+Qed.
+
 (* guess_joint_fdist_marginal — the bridged pair distribution is the
    (guess, V_2)-marginal of the rich sample distribution. *)
 Lemma guess_joint_fdist_marginal :
