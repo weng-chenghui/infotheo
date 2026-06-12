@@ -1745,6 +1745,42 @@ apply: eq_bigr => b bE; rewrite fdistmapE.
 by apply: eq_bigl => a; rewrite inE [in RHS]andb_idl // => /eqP ->.
 Qed.
 
+(* Dview — the cipher-list view marginal at the all-zero secrets; by
+   [view_marginal_indep] it is the run's view marginal for any secret pair. *)
+Let Dview : distr.distr R (cipher_list t_cipher) :=
+  distr.dmargin fst (Pr_code (drun (push_val (Gplain 0) (push_val (Gplain 0) seed))
+     (GC_sample card_msg (GC_sample card_msg (GC_sample card_renc
+       (GC_sample card_renc (GC_put (HE_var 3) (GC_enc_hop 1 (HE_const 0)
+       (GC_enc_hop 2 (HE_const 0) (GC_let (HE_emul (HE_epow (HE_var 1)
+       (HE_var 7)) (HE_enc 1 (HE_var 3) 1)) (GC_let (HE_emul (HE_epow
+       (HE_var 1) (HE_var 9)) (HE_enc 2 (HE_var 3) 0)) (GC_put_output
+       output_term (GC_ret [:: HE_var 1; HE_var 0; HE_var 3;
+       HE_var 2])))))))))))) emptym).
+
+(* Kguess z — the guess distribution conditioned on leaked output S = z: the
+   predictor's guess marginal averaged over the (secret-independent) cipher view,
+   with z supplied as the read output. *)
+Definition Kguess (z : plain AHE) : distr.distr R Mfin :=
+  distr.dlet (fun cl : cipher_list t_cipher =>
+     distr.dmargin (fun gh : (t_msg * heap)%type => msg_to_fin gh.1)
+       (Pr_code (resolve (pack predictor)
+          (id_guess, (chProd (cipher_list t_cipher) t_msg, t_msg))
+          (cl, chmsg_of_msg z)) emptym)) Dview.
+
+(* guess_inner_kernel_z — the guess marginal of [guess_inner a b] is the
+   output-determined kernel [Kguess] at the leaked output: the (a,b)-dependence
+   enters only through [dsdp_output] (the cipher view being secret-independent by
+   view_marginal_indep). *)
+Lemma guess_inner_kernel_z (a b : 'I_card_msg) :
+  distr.dmargin (fun t : (Mfin * Mfin * Mfin)%type => t.1.1)
+    (Pr_fst (guess_inner a b))
+  = Kguess (dsdp_output w_v1 w_u1 w_u2 w_u3 (msg_of_idx a) (msg_of_idx b)).
+Proof.
+rewrite guess_inner_kernel_form /Kguess.
+congr (distr.dlet _ _).
+exact: (view_marginal_indep (msg_of_idx a) (msg_of_idx b) 0 0 emptym).
+Qed.
+
 (* guess_fdist_success_le — the Infotheo-side success probability is at most
    1/card_msg.  Given the conditional independence of the guess from V2 (the
    output S being the only channel), the bridged-pair diagonal mass is bounded by
