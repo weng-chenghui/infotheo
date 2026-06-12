@@ -982,6 +982,14 @@ Qed.
 (* The four protocol weights Alice holds (seeded constants). *)
 Variables (w_v1 w_u1 w_u2 w_u3 : plain AHE).
 
+(* seed_weights — the seed's four value slots 0..3 are the protocol weights
+   w_u1, w_u2, w_u3, w_v1, so the run's leaked output (computed from the seed at
+   the [output_term] de Bruijn indices) coincides with [Sout]. *)
+Hypothesis seed_wu1 : as_plain (de_val_nth seed 0) = w_u1.
+Hypothesis seed_wu2 : as_plain (de_val_nth seed 1) = w_u2.
+Hypothesis seed_wu3 : as_plain (de_val_nth seed 2) = w_u3.
+Hypothesis seed_wv1 : as_plain (de_val_nth seed 3) = w_v1.
+
 (* Projection random variables from the rich carrier (named as in
    dsdp_entropy_ring); inputs are constants, the secrets and guess cross to
    [plain AHE] via [fin_to_plain]. *)
