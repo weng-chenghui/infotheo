@@ -101,3 +101,46 @@ add predictor-kernel V_2-independence (`Pr_fst_put_invariant` + `predictor_locs_
 predictor reads only its own locs, disjoint from `protocol_state`), s_read = output
 (`denote_output_termE`), and assemble the `cinde_RV_factor` factorization into
 `guess_cinde_V2`, then inline it for the `Hcinde` hypothesis in items 6/7.
+
+## Session B — progress (committed) + two findings
+
+Committed, full `coqc` exit 0:
+- **`guess_inner` + `guess_triple_peel`**: the (guess,V2,V3) triple experiment =
+  two uniform secret draws then `guess_inner a b` (the run/predictor with secrets
+  `a,b` fixed). Mirrors item-2 `HbodyEq` (`gc_eq` + 2 `drc_sample_msg` + `sba`).
+  GOTCHA: `guess_full_code` is on the LHS, so `sba` targets `[in X in X = _]`
+  (item-2's orientation was flipped).
+- **de Bruijn helpers** `de_val_nth_pushS/push0/pushrand`, `as_plain_Gplain`,
+  `dhe_var` (all `by []`). `push_val` consumes one successor index, `push_rand`
+  is transparent; keep `de_val_nth seed` folded so the seed hypotheses apply.
+
+### Finding 1 — DEFECT FIXED: seed weights unlinked to `w_v1..w_u3`
+`Sout` (line ~1005) is `dsdp_output w_v1 w_u1 w_u2 w_u3 V2 V3` with **abstract**
+weights, but the run's leaked `S` is computed from the **seed's** weight slots.
+With `seed` abstract and unlinked, the cinde is false. User-approved fix added
+(`seed_wu1/wu2/wu3/wv1 : as_plain (de_val_nth seed 0..3) = w_u1,w_u2,w_u3,w_v1`).
+True once `seed` is instantiated; makes `Sout` = the run's leaked output.
+
+### Finding 2 — OPEN: shape of the leaked `S` (blocks `guess_run_cells`)
+Attempted `guess_run_cells` (the run-heap support fact: `S_output_cell =
+chmsg(Sout)`, `V_2_cell = chmsg(msg a)`). The peel (mirror item-2 `Hrun`) works;
+`V_2_cell` side is straightforward. But the stored `S_output_cell` value, after
+`get_set_heap_eq`, does **not** present as `as_plain (dhe e output_term)` (so
+`denote_output_termE` does not match) — it shows a **cipher-shaped** denotation
+(`Epow`, `enc`, `(.)`), suggesting either (a) the de Bruijn index mapping at the
+`put_output` env differs from the assumed `8/9/10/11 = seed 0/1/2/3`,
+`7/6 = msg a/msg b`, or (b) `denote_he output_term` produces a homomorphic
+ciphertext rather than the plain scalar `dsdp_output`. RESOLVE before re-stating
+`guess_run_cells`: inspect `denote_he`'s `HE_mul`/`HE_add` semantics on plain
+operands and recount the `put_output` env (the `GC_put`/hop/let pushes), or
+restate step 4 about the cipher-valued leak. The `de_val_nth_*` helpers + the
+peel skeleton (8 `drc_*` peels ending in `distr.in_dunit [= -> ->]`) are ready;
+the only blocker is the `S_output` value's correct closed form. The session was
+stopped here rather than leave an `Admitted`.
+
+### Remaining (unchanged): kernel + factorization
+After `guess_run_cells`: predictor-kernel V_2-independence (`Pr_fst_put_invariant`
+/ `Pr_fst_agree_locs` + `predictor_locs_disj`), the kernel `K(output)` with
+`guess-marginal(guess_inner a b) = K(output(msg a, msg b))` (via
+`view_marginal_indep`), then the `pfwd1` fiber-sum factorization into
+`cinde_RV_factor` → `guess_cinde_V2`, then inline for `Hcinde`. Then item 8.
