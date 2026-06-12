@@ -4,10 +4,14 @@
 (* Den Boer input encoding: the AND function via fc_arrange                   *)
 (******************************************************************************)
 From mathcomp Require Import ssreflect ssrbool ssrfun eqtype ssrnat seq.
-From mathcomp Require Import fintype tuple finfun finset fingroup perm bigop.
-From mathcomp Require Import ssralg ssrnum reals.
+From mathcomp Require Import div fintype tuple finfun finset fingroup perm.
+From mathcomp Require Import morphism cyclic bigop ssralg ssrnum reals.
 From infotheo Require Import realType_ext realType_ln fdist proba entropy.
+Require Import pgg_interface.
+From pgg_reconstruct Require Import pgg_sharing_framework covering_scheme.
 From pgg_smc Require Import five_card_program five_card_scheme_I5.
+From pgg_smc Require Import five_card_group five_card_kim five_card_family.
+From pgg_reconstruct Require Import input_encoding.
 
 Set Implicit Arguments.
 Unset Strict Implicit.
@@ -47,3 +51,57 @@ case: a; case: b; case: a'; case: b' => //=; move=> _;
         | exists (inord 3); by rewrite inordK
         | exists (inord 4); by rewrite inordK ].
 Qed.
+
+(** den_boer_orbit_perm — den_boer_orbit in the rp_monodromy reindex form the
+    InputEncoding.ie_orbit field expects.
+    @composes: den_boer_encoding. *)
+Lemma den_boer_orbit_perm (ab ab' : bool * bool) :
+  ab.1 && ab.2 = ab'.1 && ab'.2 ->
+  exists g : pgg_gT FiveCardKim_M, g \in pgg_G FiveCardKim_M /\
+    den_boer_layout ab' =
+      [tuple tnth (den_boer_layout ab) (rp_monodromy five_card_plug g i) | i < 5].
+Proof.
+move=> H; case: (den_boer_orbit H) => k Hk.
+have Gcyc : pgg_G FiveCardKim_M = <[five_card_group.fc_sigma]>.
+  rewrite /pgg_G /FiveCardKim_M /=.
+  apply/val_inj => /=.
+  apply/eqP; rewrite eqEsubset; apply/andP; split.
+    rewrite gen_subG; apply/subsetP => x /imsetP[i _ ->].
+    by rewrite fc_kim_sigmasE; exact: mem_cycle.
+  rewrite cycle_subG; apply: mem_gen; apply/imsetP.
+  by exists (@Ordinal 5 1 isT) => //; rewrite fc_kim_sigmasE expg1.
+exists (five_card_group.fc_sigma ^+ k)%g; split.
+  by rewrite Gcyc; exact: mem_cycle.
+have Hmono : forall i,
+    rp_monodromy five_card_plug (fc_sigma ^+ k)%g i = (fc_sigma ^+ k)%g i by [].
+apply: eq_from_tnth => i.
+rewrite tnth_mktuple Hmono.
+rewrite (tnth_nth i) (tnth_nth i) Hk.
+set s := \val (den_boer_layout ab).
+have Hs : size s = 5 by rewrite /s size_tuple.
+have nth_rot_mod : forall (n p : nat) (xs : seq 'I_5),
+    n < 5 -> p < 5 -> size xs = 5 ->
+    nth i (rot n xs) p = nth i xs ((p + n) %% 5).
+  move=> n p xs Hn Hp Hxs.
+  rewrite /rot nth_cat size_drop Hxs.
+  case: (ltnP p (5 - n)) => Hpn.
+    by rewrite nth_drop addnC modn_small // addnC -ltn_subRL.
+  have Hqn : p - (5 - n) < n by rewrite ltn_subLR // subnK ?(ltnW Hn).
+  rewrite nth_take //.
+  have Heq2 : p + n - 5 = p - (5 - n) by rewrite subnBA ?(ltnW Hn).
+  have Hpn5 : (5 <= p + n)%N by rewrite -(subnK (ltnW Hn)) leq_add2r.
+  by rewrite -Heq2 -(subnK Hpn5) modnDr modn_small ?addnK //
+     Heq2 (leq_ltn_trans (leq_subr _ _) Hp).
+rewrite nth_rot_mod //.
+by rewrite -/s fc_sigma_pow_val.
+Qed.
+
+(** den_boer_encoding — the AND-function input encoding through five_card_plug.
+    @main correctness: assembles input bits into a valid five-card layout whose
+    equal-output orbit is the cyclic cut group. *)
+Definition den_boer_encoding : InputEncoding five_card_plug (bool * bool) :=
+  @MkInputEncoding FiveCardKim_M bool five_card_plug (bool * bool)
+    den_boer_layout
+    (fun ab => ab.1 && ab.2)
+    den_boer_assemble_valid
+    den_boer_orbit_perm.
