@@ -137,9 +137,34 @@ has already computed past it); reduce de Bruijn reads directly with
 `!(de_val_nth_pushS, de_val_nth_pushrand, de_val_nth_push0)` then `seed_*` +
 `/dsdp_output`. See [[reference_dsdp_protocol_flow]].
 
-### Remaining (unchanged): kernel + factorization
-After `guess_run_cells`: predictor-kernel V_2-independence (`Pr_fst_put_invariant`
-/ `Pr_fst_agree_locs` + `predictor_locs_disj`), the kernel `K(output)` with
-`guess-marginal(guess_inner a b) = K(output(msg a, msg b))` (via
-`view_marginal_indep`), then the `pfwd1` fiber-sum factorization into
-`cinde_RV_factor` → `guess_cinde_V2`, then inline for `Hcinde`. Then item 8.
+### Remaining: kernel + factorization (3 skeletons DRAFTED, in working tree, Admitted)
+Three `Admitted` skeletons are drafted + type-check after `guess_run_cells`
+(uncommitted WIP; prove then commit, or they must be removed before any commit):
+
+- **`guess_inner_v2v3_det`** (a b): `Pr_fst (guess_inner a b) = dmargin (g ↦ (g,
+  fin(chmsg(msg a)), fin(chmsg(msg b)))) (dmargin .1.1 (Pr_fst (guess_inner a b)))`.
+  REDUCTION done: `rewrite dmargin_comp` leaves `D = dmargin (t ↦ (t.1.1, c2, c3)) D`.
+  Close with a generic `{in dinsupp D, g =1 id} -> dmargin g D = D` (via
+  `dmargin = dlet (dunit ∘ g)`, `eq_in_dlet`, `dlet dunit = id`) + the SUPPORT FACT:
+  every `t ∈ supp (Pr_fst (guess_inner a b))` has `t.1.2 = fin(chmsg(msg a))`,
+  `t.2 = fin(chmsg(msg b))`. The support fact = peel `guess_inner` (bind: run →
+  `s_get` → predictor → `v2_get` → ret); `guess_run_cells` gives `V_2 = chmsg(msg a)`
+  in the run heap; the predictor preserves `V_2` (`Pr_code_preserves` +
+  `predictor_locs_disj`, the item-2 `Htail2_abs` move at fiber `:947`); the captured
+  `vt.1.2.1.2 = msg b` needs a small run-capture companion (de_val index 6).
+
+- **`guess_inner_out`** (a b a' b'): `output(a,b) = output(a',b') ->
+  dmargin .1.1 (Pr_fst (guess_inner a b)) = dmargin .1.1 (Pr_fst (guess_inner a' b'))`.
+  THE crux. Peel `guess_inner`; decouple the predictor's guess-dist from the heap's
+  protocol cells (`Pr_fst_agree_locs` + `predictor_locs_disj` + `resolve_predictor_valid`,
+  so the predictor sees only `(view, s)`); `s = chmsg(output(a,b))` (`guess_run_cells`);
+  `view`-dist ⊥ (a,b) (`view_marginal_indep`); same output ⇒ same s ⇒ same guess-dist.
+
+- **`guess_cinde_V2`**: `guess_sample_fdist |= guess_rv _|_ V2 | Sout`. Via
+  `cinde_RV_factor` with code-derived `f y z` (secret-pair mass for V2=y, Sout=z) and
+  `g z x` (the predictor kernel K(z)(x)). Bridge `pfwd1 [%guess_rv,V2,Sout]` to the
+  triple via `guess_triple_peel` + the `sdistr_to_fdist`/`fdistmap`/`Pr_fst_map`
+  pattern (as in `guess_joint_fdist_marginal`); fiber-sum over V3 with `guess_inner_out`
+  giving the output-determined kernel. Then inline for `Hcinde` in items 6/7.
+
+Then item 8 (real-vs-zero composition + final theorem).
