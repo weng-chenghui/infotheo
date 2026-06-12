@@ -40,3 +40,17 @@ Record InputEncoding (M : MonodromyReprType) (secretT : Type)
 
 Arguments InputEncoding M secretT plug inputT.
 Arguments MkInputEncoding {M secretT plug inputT}.
+
+(** ie_output_correct — the cut-permuted assembled layout reconstructs ie_fun x,
+    for every cut element of the full group.
+    @composes: den_boer_run_output. *)
+Lemma ie_output_correct (M : MonodromyReprType) (secretT : Type)
+    (plug : ReconPlug M secretT) (inputT : Type)
+    (ie : InputEncoding plug inputT) (x : inputT) (g0 : pgg_gT M) :
+  g0 \in pgg_G M ->
+  ts_recon (rp_scheme plug)
+    [tuple tnth (ie_assemble ie x) (rp_monodromy plug g0 i)
+          | i < (ts_T' (rp_scheme plug)).+1] = ie_fun ie x.
+Proof.
+move=> Hg0. apply: (rp_recon_invariant Hg0). exact: ie_assemble_valid.
+Qed.
