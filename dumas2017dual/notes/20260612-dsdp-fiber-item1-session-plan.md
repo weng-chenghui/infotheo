@@ -143,15 +143,22 @@ Three `Admitted` skeletons are drafted + type-check after `guess_run_cells`
 
 - **`guess_inner_v2v3_det`** (a b): `Pr_fst (guess_inner a b) = dmargin (g ↦ (g,
   fin(chmsg(msg a)), fin(chmsg(msg b)))) (dmargin .1.1 (Pr_fst (guess_inner a b)))`.
-  REDUCTION done: `rewrite dmargin_comp` leaves `D = dmargin (t ↦ (t.1.1, c2, c3)) D`.
-  Close with a generic `{in dinsupp D, g =1 id} -> dmargin g D = D` (via
-  `dmargin = dlet (dunit ∘ g)`, `eq_in_dlet`, `dlet dunit = id`) + the SUPPORT FACT:
-  every `t ∈ supp (Pr_fst (guess_inner a b))` has `t.1.2 = fin(chmsg(msg a))`,
-  `t.2 = fin(chmsg(msg b))`. The support fact = peel `guess_inner` (bind: run →
-  `s_get` → predictor → `v2_get` → ret); `guess_run_cells` gives `V_2 = chmsg(msg a)`
-  in the run heap; the predictor preserves `V_2` (`Pr_code_preserves` +
-  `predictor_locs_disj`, the item-2 `Htail2_abs` move at fiber `:947`); the captured
-  `vt.1.2.1.2 = msg b` needs a small run-capture companion (de_val index 6).
+  REDUCTION DONE + verified in MCP — the working prefix is:
+  ```
+  rewrite dmargin_comp distr.dmarginE.
+  apply: SubDistr.distr_ext => w.
+  rewrite -[X in X = _](distr.dlet_dunit_id _ w).
+  apply: distr.eq_in_dlet => [t Ht /=|//].
+  move=> y; congr (distr.mu (distr.dunit _) y).
+  ```
+  leaving exactly the SUPPORT FACT: `t ∈ supp (Pr_fst (guess_inner a b)) ->
+  t = (t.1.1, fin(chmsg(msg a)), fin(chmsg(msg b)))` (i.e. `t.1.2 = c2`, `t.2 = c3`).
+  Prove it: `case: t Ht => [[g v2c] v3c] Ht`; peel `guess_inner` (bind: run →
+  `s_get` → predictor → `v2_get` → ret) via `Pr_code_bind`/`dinsupp_dlet`;
+  `guess_run_cells` gives `V_2 = chmsg(msg a)` in the run heap; the predictor
+  preserves `V_2` (`Pr_code_preserves` + `predictor_locs_disj`, the item-2
+  `Htail2_abs` move at fiber `:947`); the captured `vt.1.2.1.2 = msg b` needs a
+  small run-capture companion (de_val index 6, off the value `vt.1.2`, not the heap).
 
 - **`guess_inner_out`** (a b a' b'): `output(a,b) = output(a',b') ->
   dmargin .1.1 (Pr_fst (guess_inner a b)) = dmargin .1.1 (Pr_fst (guess_inner a' b'))`.
