@@ -1781,18 +1781,134 @@ congr (distr.dlet _ _).
 exact: (view_marginal_indep (msg_of_idx a) (msg_of_idx b) 0 0 emptym).
 Qed.
 
+Set Default Goal Selector "1".
+Set Bullet Behavior "None".
+
+(* guess_triple_pr — the (guess, V_2, V_3) joint mass is the uniform secret-pair
+   weight (1/card_msg)^2 times the output-determined guess kernel mass. *)
+Lemma guess_triple_pr (x y v3 : plain AHE) :
+  pfwd1 [% guess_rv, V2, V3] (x, y, v3)
+  = (#|plain AHE|%:R^-1) ^+ 2
+    * distr.mu (distr.dmargin fin_to_plain
+        (Kguess (dsdp_output w_v1 w_u1 w_u2 w_u3 y v3))) x.
+Proof.
+pose proj3 := (fun t : (Mfin * Mfin * Mfin * Mfin * option 'I_card_renc *
+                      option 'I_card_renc)%type
+              => (fin_to_plain t.1.1.1.1.1, fin_to_plain t.1.1.1.1.2,
+                  fin_to_plain t.1.1.1.2)).
+have HVproj : [% guess_rv, V2, V3] = proj3 by apply: boolp.funext.
+rewrite -dist_of_RVE HVproj /dist_of_RV.
+have Hproj_lossless :
+    psum (distr.mu (Pr_fst (gv ← guess_full_code ;; ret (proj3 gv)))) = 1.
+  rewrite Pr_fst_map -distr.pr_predT distr.pr_dmargin.
+  rewrite (distr.eq_pr (B := predT)); last by [].
+  by rewrite distr.pr_predT.
+have Hbridge_sd :
+    fdistmap proj3 guess_sample_fdist = sdistr_to_fdist Hproj_lossless.
+  apply: fdist_ext => u.
+  rewrite fdistmapE sdistr_to_fdistE Pr_fst_map distr.dmargin_psumE psum_fin
+    big_mkcond /=.
+  apply: eq_bigr => i _.
+  rewrite ffunE !inE /=.
+  case: (proj3 i == u); rewrite ?mul1r ?mul0r ?normr0 //.
+  by rewrite ger0_norm //; exact: distr.ge0_mu.
+rewrite Hbridge_sd sdistr_to_fdistE.
+have Htag : Pr_fst (gv ← guess_full_code ;; ret (proj3 gv))
+  = distr.dmargin (fun t : (Mfin * Mfin * Mfin)%type =>
+       (fin_to_plain t.1.1, fin_to_plain t.1.2, fin_to_plain t.2))
+      (Pr_fst (a ← sample uniform card_msg ;;
+               b ← sample uniform card_msg ;; guess_inner a b)).
+  by rewrite -guess_triple_peel !Pr_fst_map [X in _ = X]dmargin_comp.
+rewrite Htag !Pr_fst_sample.
+have Hab : forall a b : 'I_card_msg,
+    distr.dmargin (fun t : (Mfin * Mfin * Mfin)%type =>
+       (fin_to_plain t.1.1, fin_to_plain t.1.2, fin_to_plain t.2))
+      (Pr_fst (guess_inner a b))
+    = distr.dmargin (fun g : Mfin => (fin_to_plain g, msg_of_idx a, msg_of_idx b))
+        (Kguess (dsdp_output w_v1 w_u1 w_u2 w_u3 (msg_of_idx a) (msg_of_idx b))).
+  by move=> a b; rewrite [in LHS](guess_inner_v2v3_det a b) dmargin_comp
+     guess_inner_kernel_z; congr (distr.dmargin _ _);
+     apply: boolp.funext => g; rewrite /= /fin_to_plain !msg_to_finK !chmsg_of_msgK.
+have Hdm : forall (S T U : choiceType) (f : T -> U)
+    (g : S -> distr.distr R T) (mu0 : distr.distr R S),
+    distr.dmargin f (distr.dlet g mu0)
+    = distr.dlet (fun a => distr.dmargin f (g a)) mu0.
+  by move=> S T U f g mu0; rewrite distr.dmarginE dlet_dlet_ext;
+     apply: eq_dlet => a; rewrite -distr.dmarginE.
+rewrite Hdm.
+under eq_dlet => a do rewrite Pr_fst_sample Hdm.
+under eq_dlet => a do under eq_dlet => b do rewrite Hab.
+have Hpos : Prelude.Lt 0 card_msg by have [gm _ _] := Hmsg_bij;
+  rewrite -[card_msg]card_ord; apply/card_gt0P; exists (gm 0%R).
+have Hcard : #|plain AHE| = card_msg by rewrite -(bij_eq_card Hmsg_bij) card_ord.
+have [gm cfg cgf] := Hmsg_bij.
+have Hpt : forall (x0 x1 : 'I_card_msg) (D : distr.distr R Mfin),
+    distr.mu (distr.dmargin
+       (fun g : Mfin => (fin_to_plain g, msg_of_idx x0, msg_of_idx x1)) D) (x, y, v3)
+    = (msg_of_idx x0 == y)%:R * (msg_of_idx x1 == v3)%:R
+      * distr.mu (distr.dmargin fin_to_plain D) x.
+  move=> x0 x1 D; rewrite !distr.dmargin_psumE -psumZ; last by rewrite mulr_ge0 ?ler0n.
+  apply: eq_psum => g; rewrite /GRing.scale /= !xpair_eqE;
+    case: (fin_to_plain g == x); case: (msg_of_idx x0 == y);
+    case: (msg_of_idx x1 == v3); rewrite /=; ring.
+have Hcol : forall (F : 'I_card_msg -> R) (c : plain AHE),
+   \sum_(i : 'I_card_msg) (msg_of_idx i == c)%:R * F i = F (gm c).
+  move=> F c; rewrite (eq_bigr (fun i => (i == gm c)%:R * F i)); last first.
+    by move=> i _; rewrite -(inj_eq (bij_inj Hmsg_bij)) cgf.
+  rewrite (bigD1 (gm c)) //= eqxx mul1r big1 ?addr0 // => i Hi.
+  by rewrite (negbTE Hi) mul0r.
+rewrite (@dlet_uniform _ card_msg Hpos).
+under eq_bigr => x0 do rewrite (@dlet_uniform _ card_msg Hpos).
+under eq_bigr => x0 do
+  (under eq_bigr => x1 do rewrite Hpt -mulrA; rewrite -big_distrr /= Hcol).
+rewrite -big_distrl /= Hcol (cgf y) (cgf v3).
+have Hz : (card_msg%:~R : R) = card_msg%:R by [].
+rewrite Hz Hcard expr2; ring.
+Qed.
+
+(* guess_cinde_V2 — the guess is conditionally independent of the challenge
+   secret V_2 given the leaked scalar-product output S. *)
+Lemma guess_cinde_V2 : guess_sample_fdist |= guess_rv _|_ V2 | Sout.
+Proof.
+apply: (cinde_RV_factor
+  (f := fun (y z : plain AHE) =>
+     \sum_(v3 : plain AHE)
+        (dsdp_output w_v1 w_u1 w_u2 w_u3 y v3 == z)%:R * pfwd1 [% V2, V3] (y, v3))
+  (g := fun (z x : plain AHE) => distr.mu (distr.dmargin fin_to_plain (Kguess z)) x)).
+move=> x y z.
+have Hmarg : pfwd1 [% guess_rv, V2, Sout] (x, y, z)
+   = \sum_(v3 : plain AHE) (dsdp_output w_v1 w_u1 w_u2 w_u3 y v3 == z)%:R
+       * pfwd1 [% guess_rv, V2, V3] (x, y, v3).
+  rewrite pfwd1_pairC /= pfwd1_pairA -(marg_snd V3).
+  apply: eq_bigr => v3 _.
+  rewrite (_ : Sout = (fun ac : (plain AHE * plain AHE)%type =>
+                  dsdp_output w_v1 w_u1 w_u2 w_u3 ac.1 ac.2) `o [% V2, V3]);
+    last by apply: boolp.funext.
+  exact: pr_eq_comp_constraint_tail.
+have Huni : forall yy vv3 : plain AHE,
+    pfwd1 [% V2, V3] (yy, vv3) = (#|plain AHE|%:R^-1) ^+ 2.
+  by move=> yy vv3; rewrite -dist_of_RVE guess_VarRV_uniform fdist_uniformE
+     card_prod natrM invfM -expr2.
+rewrite Hmarg big_distrl /=.
+apply: eq_bigr => v3 _.
+case: (eqVneq (dsdp_output w_v1 w_u1 w_u2 w_u3 y v3) z) => [Heq|Hne].
+  by rewrite !mul1r guess_triple_pr Heq -(Huni y v3).
+by rewrite !mul0r.
+Qed.
+
+Set Default Goal Selector "!".
+Set Bullet Behavior "Strict Subproofs".
+
 (* guess_fdist_success_le — the Infotheo-side success probability is at most
-   1/card_msg.  Given the conditional independence of the guess from V2 (the
-   output S being the only channel), the bridged-pair diagonal mass is bounded by
-   the fiber 1/card_msg through [cinde_diagonal_bound] and [guess_V2_cond_le].
-   [Hcinde] is item 1 (guess_cinde_V2), discharged separately. *)
-Lemma guess_fdist_success_le
-    (Hcinde : guess_sample_fdist |= guess_rv _|_ V2 | Sout) :
+   1/card_msg: the guess being conditionally independent of V2 given the output S
+   ([guess_cinde_V2]), the bridged-pair diagonal mass is bounded by the fiber
+   1/card_msg through [cinde_diagonal_bound] and [guess_V2_cond_le]. *)
+Lemma guess_fdist_success_le :
   injective (fun v : plain AHE => w_u3 * v) ->
   guess_fdist_success <= card_msg%:R^-1.
 Proof.
 move=> Hinj.
-apply: (le_trans _ (cinde_diagonal_bound Hcinde
+apply: (le_trans _ (cinde_diagonal_bound guess_cinde_V2
                       (fun a c => @guess_V2_cond_le a c Hinj))).
 rewrite /guess_fdist_success guess_joint_fdist_marginal Pr_fdistmap_pre.
 apply: subset_Pr; apply/subsetP => t.
@@ -1802,14 +1918,13 @@ Qed.
 (* guess_sdistr_success_le — the SSProve-side success probability of the all-zero
    guessing experiment is at most 1/card_msg: the connector
    [guess_success_sdistr_eq_fdist] crosses to the Infotheo side, then the fiber
-   bound [guess_fdist_success_le].  [Hcinde] is item 1. *)
-Lemma guess_sdistr_success_le
-    (Hcinde : guess_sample_fdist |= guess_rv _|_ V2 | Sout) :
+   bound [guess_fdist_success_le]. *)
+Lemma guess_sdistr_success_le :
   injective (fun v : plain AHE => w_u3 * v) ->
   guess_sdistr_success <= card_msg%:R^-1.
 Proof.
 move=> Hinj.
-by rewrite guess_success_sdistr_eq_fdist; exact: (guess_fdist_success_le Hcinde Hinj).
+by rewrite guess_success_sdistr_eq_fdist; exact: (guess_fdist_success_le Hinj).
 Qed.
 
 (* real_game — the output-exposing real endpoint game, at this section's
@@ -1924,7 +2039,7 @@ Qed.
    secret V2 from her cipher view and the leaked scalar-product output S is at
    most 1/card_msg plus twice the IND-CPA advantage: the fiber bound 1/card_msg
    at the all-zero endpoint, plus the 2 * epsilon_cpa cost of moving to the real
-   game.  [Hcinde] is the guess/V2 conditional independence given S (item 1). *)
+   game. *)
 Theorem dsdp_alice_secrecy_leak_S
     (cipher_of_chcipher : t_cipher -> cipher AHE)
     (chcipher_of_cipherK : cancel chcipher_of_cipher cipher_of_chcipher)
@@ -1934,12 +2049,11 @@ Theorem dsdp_alice_secrecy_leak_S
     (Hoze : fseparate (locs predictor)
        (locs (oracle_zero_pkg renc_card rand_of_renc t_msg
                 chcipher_of_cipher pkey_of_party)))
-    (Hcinde : guess_sample_fdist |= guess_rv _|_ V2 | Sout)
     (Hinj : injective (fun v : plain AHE => w_u3 * v)) :
   guess_sdistr_success_real <= card_msg%:R^-1 + 2%:R * epsilon_cpa.
 Proof.
 have Hzero : guess_sdistr_success <= card_msg%:R^-1
-  by exact: (guess_sdistr_success_le Hcinde Hinj).
+  by exact: (guess_sdistr_success_le Hinj).
 apply: (@le_trans _ _ (guess_sdistr_success + 2%:R * epsilon_cpa)).
 - rewrite addrC -lerBlDr.
   apply: (le_trans (ler_norm _)).
