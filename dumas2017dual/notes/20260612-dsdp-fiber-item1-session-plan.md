@@ -183,14 +183,19 @@ Re-add both skeletons after `guess_inner_v2v3_det`; prove then commit.
   pattern (as in `guess_joint_fdist_marginal`); fiber-sum over V3 with `guess_inner_out`
   giving the output-determined kernel. Then inline for `Hcinde` in items 6/7.
 
-PERF WARNING (MEASURED): on `guess_inner_out`, `rewrite /Pr_fst !(dmargin_comp fst)`
-= 18.6s, `rewrite /guess_inner !Pr_code_bind` = 4.5s. Every step that unifies against the
-unfolded `guess_inner` / resolved-predictor giant term costs 5–18s, and there are ~20–30
-such steps on BOTH sides with ~10K-token goals — too compute/context-heavy to grind
-straight. THE REAL FIX (per the SSProve perf memory — "abstract over a code variable"):
-after unfolding to the bind/dlet form, `set PC := (resolve predictor … (_, _))` (and
-likely the `denote_s_get_body`/`denote_v2_get_body` bodies) to abstract the giant subterms
-BEFORE peeling, so the tactics stop re-unifying against them. NOT YET TESTED. The
+PERF — ROOT CAUSE ISOLATED (measured, MCP): `/Pr_fst` (unfold) = 2ms;
+`(dmargin_comp fst)` single = 18.2s, `!` = 18.6s, all-3-args-explicit = 17.8s,
+`set Da := Pr_code (guess_inner a b) emptym` (+ second) + dmargin_comp = 21.4s. So `!` is
+NOT the cause (single ≈ `!`), explicit args don't help, and `set`-abstraction does NOT
+help (the `set` pays the same traversal). The ~18s is `dmargin_comp` rewriting against the
+UNFOLDED `dmargin fst (Pr_code (guess_inner _) emptym)` (SDistr choice-type / canonical
+resolution over the product). KEY: in `guess_inner_v2v3_det` the structural peel
+(`Pr_code_bind`, `distr.dinsupp_dlet`) AND `dmargin_comp` on the FOLDED `Pr_fst` were all
+ms-fast — only `dmargin_comp` on the UNFOLDED `Pr_fst` is slow. THE FIX for `guess_inner_out`:
+do NOT unfold `Pr_fst` under `dmargin_comp`; compose while `Pr_fst` is still folded (as
+v2v3_det's first step `rewrite dmargin_comp` was instant), or avoid `dmargin_comp` entirely
+and peel structurally via `Pr_code_bind`/`dinsupp_dlet` (the fast path). The kernel-form
+helper still pays off (slow peel once, not twice). The
 kernel-form HELPER lemma `guess_inner_kernel_form x y : dmargin .1.1 (Pr_fst (guess_inner
 x y)) = dlet (fun cl => dmargin (msg_to_fin \o fst) (Pr_code (resolve (pack predictor) …
 (cl, chmsg(output x y))) emptym)) (dmargin fst (Pr_code (drun (push (msg y)(push (msg x)
