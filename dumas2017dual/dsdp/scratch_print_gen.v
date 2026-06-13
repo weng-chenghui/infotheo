@@ -90,31 +90,54 @@ Set Warnings "notation-overridden".
 
 (* gen — the generator's SSProve real game for the corrupted-Alice DSDP view.
    It is one call to the back-end interpreter [denote_run], which walks a
-   [game_code] AST and emits the SSProve [raw_code].  The AST is abstract over
-   the carriers and operations, so each argument supplies one missing piece,
-   and why it has to be there:
+   [game_code] AST and emits the SSProve [raw_code].
 
-     denote_run            the lowering itself: game_code AST -> SSProve raw_code
-     renc_card             proof [#|Renc| = card_renc]; without it a uniform
-                           sample over card_renc could not be cast back to a
-                           real Renc randomness ([sample_to_renc] needs it)
-     rand_of_renc          embeds that Renc element into the scheme's [rand],
-                           the type [enc] actually consumes
-     chmsg_of_msg          encodes a plaintext into the SSProve message type;
-                           used by the [#put] that stores Alice's secret v2
-     chcipher_of_cipher    encodes a ciphertext into the wire type [t_cipher];
-                           wraps every ciphertext the game leaks in its result
-     pkey_of_party         recipient identity -> public key, so each encryption
-                           is addressed to Bob or Charlie
-     msg_of_idx            decodes a uniform sample index into the actual scalar
-                           (v2, u2, ...) the protocol computes on
-     rand0                 default randomness for an out-of-range slot lookup;
-                           dead here, since every slot is filled by a real sample
-     empty_denv AHE        the initial de Bruijn environment (both pools empty)
-     all_real (gc_dsdp 2 3)  the program to lower: the DSDP fixture at
-                           card_renc = 2, card_msg = 3, with [all_real] selecting
-                           the real endpoint (every hop encrypts its true secret,
-                           as opposed to [all_zero]) *)
+   [game_code] is the small intermediate representation sitting between the
+   symbolic front end and the SSProve back end. It's a deep-embedded (reified)
+   AST of the corrupted party's leaked-view computation.
+
+    denote_run            the lowering itself: game_code AST -> SSProve raw_code
+    renc_card             proof [#|Renc| = card_renc]; without it a uniform
+                          sample over card_renc could not be cast back to a
+                          real Renc randomness ([sample_to_renc] needs it)
+    rand_of_renc          embeds that Renc element into the scheme's [rand],
+                          the type [enc] actually consumes
+    chmsg_of_msg          encodes a plaintext into the SSProve message type;
+                          used by the [#put] that stores Alice's secret v2
+    chcipher_of_cipher    encodes a ciphertext into the wire type [t_cipher];
+                          wraps every ciphertext the game leaks in its result
+    pkey_of_party         recipient identity -> public key, so each encryption
+                          is addressed to Bob or Charlie
+    msg_of_idx            decodes a uniform sample index into the actual scalar
+                          (v2, u2, ...) the protocol computes on
+    rand0                 default randomness for an out-of-range slot lookup;
+                          dead here, since every slot is filled by a real sample
+    empty_denv AHE        the initial de Bruijn environment (both pools empty)
+    all_real (gc_dsdp 2 3)  the program to lower: the DSDP fixture at
+                          card_renc = 2, card_msg = 3, with [all_real] selecting
+                          the real endpoint (every hop encrypts its true secret,
+                          as opposed to [all_zero])
+
+    card_msg and card_renc are the two finite sample-space sizes the game draws
+    from: the cardinalities a [sample uniform n] ranges over.
+
+      card_msg   size of the plaintext-scalar domain.  [msg_of_idx :
+                 'I_card_msg -> plain AHE] decodes a uniform draw over
+                 'I_card_msg into a plaintext; every protocol scalar
+                 (v2, v3, u2, u3, r2, r3) is drawn from this card_msg-element
+                 space (the [sample uniform 3] lines).
+
+      card_renc  size of the encryption-randomness domain.  [Renc : finType] is
+                 the randomness carrier, with [renc_card : #|Renc| = card_renc];
+                 [sample_to_renc] casts a uniform draw over 'I_card_renc into a
+                 Renc and [rand_of_renc] embeds it into [rand AHE].  Every
+                 encryption's randomness (ra1, ra2, rb1, rc1) is drawn from this
+                 card_renc-element space (the [sample uniform 2] lines).
+
+   The numbers 2 and 3 are demo placeholders; the real theorems keep card_msg
+   and card_renc abstract (e.g. card_renc = #|Renc|).
+
+*)
 Definition gen :=
   denote_run renc_card rand_of_renc chmsg_of_msg chcipher_of_cipher
     pkey_of_party msg_of_idx rand0 (empty_denv AHE) (all_real (gc_dsdp 2 3)).
