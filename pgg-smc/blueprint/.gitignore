@@ -1,2 +1,5 @@
 web/
 .venv/
+rocq_decls
+*.paux
+src/*.paux
