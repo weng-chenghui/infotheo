@@ -2062,4 +2062,63 @@ apply: (@le_trans _ _ (guess_sdistr_success + 2%:R * epsilon_cpa)).
 - by rewrite lerD2r.
 Qed.
 
+(* log_id — the algebraic identity transporting the probability bound
+   [Pr <= 1/m + 2 * eps] into entropy form
+   [-log Pr >= log m - log (1 + 2 * m * eps)]. *)
+Lemma log_id (m : nat) (eps : R) :
+  (0 < m)%N -> (0 <= eps)%R ->
+  (- log (m%:R^-1 + 2%:R * eps) = log m%:R - log (1 + 2%:R * m%:R * eps))%R.
+Proof.
+move=> Hm Heps.
+have Hm_pos : (0 < m%:R :> R)%R by rewrite ltr0n.
+have Hmeps_pos : (0 < 1 + 2%:R * m%:R * eps :> R)%R
+  by rewrite ltr_pwDl ?ltr01 // !mulr_ge0 // ?ler0n.
+have Heq : (m%:R^-1 + 2%:R * eps =
+            (1 + 2%:R * m%:R * eps) / m%:R :> R)%R
+  by rewrite [RHS]mulrDl mul1r mulrAC mulfK // gt_eqF.
+by rewrite Heq logDiv // opprB.
+Qed.
+
+(* Hunp_leak_S — the conditional unpredictability entropy
+   [H_unp^C(V_2 | AliceView, S)] for the fixed predictor at the
+   output-exposing real game, the negative log of its success
+   probability. *)
+Definition Hunp_leak_S : R := (- log guess_sdistr_success_real)%R.
+
+(* Hunp_ge_bound_leak_S — the entropy lower bound
+   [log card_msg - log (1 + 2 * card_msg * epsilon_cpa) <= Hunp_leak_S],
+   the leaked-output analogue of [Hunp_ge_bound]: the predictor's
+   unpredictability entropy on the output-exposing real game is at least
+   the closed-form bound, approaching [log card_msg] as
+   [epsilon_cpa -> 0]. *)
+Theorem Hunp_ge_bound_leak_S
+    (cipher_of_chcipher : t_cipher -> cipher AHE)
+    (chcipher_of_cipherK : cancel chcipher_of_cipher cipher_of_chcipher)
+    (Hore : fseparate (locs predictor)
+       (locs (oracle_real_pkg renc_card rand_of_renc msg_of_chmsg
+                chcipher_of_cipher pkey_of_party)))
+    (Hoze : fseparate (locs predictor)
+       (locs (oracle_zero_pkg renc_card rand_of_renc t_msg
+                chcipher_of_cipher pkey_of_party)))
+    (Hinj : injective (fun v : plain AHE => w_u3 * v))
+    (Hpos : (0 < guess_sdistr_success_real)%R)
+    (epsilon_cpa_ge0 : (0 <= epsilon_cpa)%R) :
+  (log card_msg%:R - log (1 + 2%:R * card_msg%:R * epsilon_cpa)
+     <= Hunp_leak_S)%R.
+Proof.
+rewrite /Hunp_leak_S.
+have Hcard0 : (0 < card_msg)%N
+  by have [gm _ _] := Hmsg_bij;
+     rewrite -[card_msg]card_ord; apply/card_gt0P; exists (gm 0%R).
+have Hpr_le :
+    (guess_sdistr_success_real <= card_msg%:R^-1 + 2%:R * epsilon_cpa)%R
+  by apply: (dsdp_alice_secrecy_leak_S chcipher_of_cipherK Hore Hoze Hinj).
+have Hinvm_pos : (0 < card_msg%:R^-1 :> R)%R
+  by rewrite invr_gt0 ltr0n Hcard0.
+have Hbound_pos : (0 < card_msg%:R^-1 + 2%:R * epsilon_cpa :> R)%R
+  by rewrite ltr_pwDl // mulr_ge0 //.
+rewrite -(log_id (m := card_msg) (eps := epsilon_cpa) Hcard0 epsilon_cpa_ge0).
+by rewrite lerN2 ler_log //.
+Qed.
+
 End dsdp_guess_distribution.
