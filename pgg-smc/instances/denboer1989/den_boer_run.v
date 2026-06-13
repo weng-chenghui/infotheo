@@ -49,3 +49,30 @@ apply: (@pgg_hidden_invariant_perm FiveCardKim_M FiveCardKim_PI bool fcI_scheme
   exact: den_boer_assemble_valid.
 - exact: fcI_perm_compatible_kim.
 Qed.
+
+(** den_boer_decode — recover the two committed input bits from their card
+    encodings.
+    @intent: reads the bits committed by the two input parties back out of their
+    encode_bool card positions via decode_bool. *)
+Definition den_boer_decode (committed : seq 'I_(pgg_N' FiveCardKim_M).+1)
+    : bool * bool :=
+  (decode_bool (nth ord0 committed 0), decode_bool (nth ord0 committed 1)).
+
+(** den_boer_decode_commit — decoding the honestly committed bits returns them.
+    @composes: den_boer_run_output. *)
+Lemma den_boer_decode_commit (a b : bool) :
+  den_boer_decode [:: encode_bool a; encode_bool b] = (a, b).
+Proof. by rewrite /den_boer_decode /= !decode_encode_bool. Qed.
+
+(** den_boer_dealer_layout — the den Boer committed dealer injecting the
+    input-derived layout through the content readout.
+    @intent: like den_boer_dealer_committed, but the dealt content readout is
+    tnth (den_boer_layout (den_boer_decode committed)) instead of fc_content, so
+    the dealing phase carries the input-derived layout; the bits committed at
+    parties 7 and 8 then determine the recovered secret (den_boer_run_output). *)
+Definition den_boer_dealer_layout (P_idx : nat) :=
+  pgg_commit_prologue
+    (fun committed => exchange_dealer FiveCardKim_PI
+       (tnth (den_boer_layout (den_boer_decode committed)))
+       den_boer_players (den_boer_assemble committed) P_idx)
+    [::] [:: 7; 8].
