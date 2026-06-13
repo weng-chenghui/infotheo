@@ -54,3 +54,26 @@ Lemma ie_output_correct (M : MonodromyReprType) (secretT : Type)
 Proof.
 move=> Hg0. apply: (rp_recon_invariant Hg0). exact: ie_assemble_valid.
 Qed.
+
+(** recon_from_layout — the secret recovered from a layout viewed through the
+    cut P, in the reindex (position-permutation) form matching the scheme's
+    reconstruction invariance.
+    @intent: the operational recovery for input-dependent layouts, reading the
+    cut-permuted layout under the plug scheme. *)
+Definition recon_from_layout (M : MonodromyReprType) (secretT : Type)
+    (plug : ReconPlug M secretT)
+    (layout : (ts_T' (rp_scheme plug)).+1.-tuple 'I_(pgg_N' M).+1)
+    (P : pgg_gT M) : secretT :=
+  ts_recon (rp_scheme plug)
+    [tuple tnth layout (rp_monodromy plug P i)
+          | i < (ts_T' (rp_scheme plug)).+1].
+
+(** recon_from_layout_output — recovering an encoded input's layout returns
+    ie_fun x, for every cut; generic over the plug and the encoded function.
+    @composes: ie_output_correct. *)
+Lemma recon_from_layout_output (M : MonodromyReprType) (secretT : Type)
+    (plug : ReconPlug M secretT) (inputT : Type)
+    (ie : InputEncoding plug inputT) (x : inputT) (P : pgg_gT M) :
+  P \in pgg_G M ->
+  recon_from_layout (ie_assemble ie x) P = ie_fun ie x.
+Proof. exact: ie_output_correct. Qed.
