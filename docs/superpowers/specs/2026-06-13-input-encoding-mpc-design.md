@@ -207,3 +207,35 @@ All forms satisfy the project's I001 naming rule (at most four underscore compon
 | `pgg-smc/protocol/card_exchange_pismc.v` | `exchange_dealer_from_layout` + session types |
 | `pgg-smc/instances/denboer1989/den_boer_profile.v` | committed dealer rewrite, `den_boer_run_output` |
 | `pgg-smc/instances/denboer1989/five_card_leakage.v` | the `ViewA`/`Secret` bridge already present; reused by input privacy |
+
+## 12. De-risking findings (2026-06-13 rocq-mcp spike)
+
+Definitional probes (E1-E5) against the live code settled the one load-bearing
+question (generic vs den-Boer-specific output theorem) and corrected the
+operational dealer form in Section 6.
+
+**Verified facts.**
+
+- `ts_recon_perm_invariant ts perm := forall g s shares, g \in G -> ts_valid ts s shares -> ts_recon ts [tuple tnth shares (perm g i) | i] = s`. The only recon invariance in the codebase is the **position-reindex** form, not a value-action form.
+- `five_card_plug = {| rp_scheme := fcI_scheme; rp_content := fc_content; rp_monodromy := pgg_rho; rp_recon_invariant := fcI_perm_compatible_kim |}`, with `fc_content = id` and `fcI_perm_compatible_kim : ts_recon_perm_invariant fcI_scheme pgg_rho`.
+- `pi_starts FiveCardKim_PI` is the identity tuple `[0,1,2,3,4]` (`ord_tuple 5`).
+- `ie_output_correct den_boer_encoding ab` already has the type `ts_recon (rp_scheme five_card_plug) [tuple tnth (ie_assemble den_boer_encoding ab) (rp_monodromy five_card_plug P i) | i] = ie_fun den_boer_encoding ab`.
+
+**Verdict.** The run-output theorem is GENERIC over any `InputEncoding plug
+inputT` and equals `ie_output_correct` when the layout-recovery is the
+reindex form. `den_boer_run_output (a,b) = a && b` is that theorem at
+`den_boer_encoding`. No bridging or equivariance lemma is missing.
+
+**Correction to Section 6.** The operational dealer/recovery must use the
+**reindex** form, not value-action. `pgg_recon_endpoints` uses
+`content (rho P (tnth starts i))`, which is recon-invariant ONLY because
+`starts` is the identity (`tnth ord_tuple i = i` makes value-action and
+reindex coincide). On a non-identity input layout they diverge and only the
+reindex form recovers `ie_fun`. So:
+
+- the layout-recovery is `recon_from_layout plug layout P := ts_recon (rp_scheme plug) [tuple tnth layout (rp_monodromy plug P i) | i]`, and `recon_from_layout plug (ie_assemble ie x) P = ie_fun ie x` is `exact: ie_output_correct`;
+- `exchange_dealer_from_layout` deals the reindexed hand `content (tnth layout (rho w i))` ("arrange the layout, then cut by rotating positions"), NOT `content (rho w (tnth layout i))`.
+
+**Scope decisions carried in.** Session-type duality for the new dealer is
+deferred (left `Admitted`, orthogonal to correctness/privacy). The output
+theorem is stated generically; `a && b` is only the den Boer instance.
