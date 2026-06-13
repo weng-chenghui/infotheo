@@ -236,6 +236,10 @@ reindex form recovers `ie_fun`. So:
 - the layout-recovery is `recon_from_layout plug layout P := ts_recon (rp_scheme plug) [tuple tnth layout (rp_monodromy plug P i) | i]`, and `recon_from_layout plug (ie_assemble ie x) P = ie_fun ie x` is `exact: ie_output_correct`;
 - `exchange_dealer_from_layout` deals the reindexed hand `content (tnth layout (rho w i))` ("arrange the layout, then cut by rotating positions"), NOT `content (rho w (tnth layout i))`.
 
-**Scope decisions carried in.** Session-type duality for the new dealer is
-deferred (left `Admitted`, orthogonal to correctness/privacy). The output
-theorem is stated generically; `a && b` is only the den Boer instance.
+**Scope decisions carried in.** The output theorem is stated generically
+(`recon_from_layout_output`); `a && b` is only the den Boer instance
+(`den_boer_run_output`). Session-type duality for the new dealer was planned as
+deferrable but landed proven: the layout-content dealer keeps the
+`den_boer_dealer_committed` session type, so all four duality lemmas discharge by
+the same `vm_compute`. The realization (`pgg-smc/instances/denboer1989/den_boer_run.v`)
+is `Qed` throughout, zero new axioms.
