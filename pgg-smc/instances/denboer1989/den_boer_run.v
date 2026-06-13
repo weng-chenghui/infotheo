@@ -6,6 +6,7 @@ Require Import pgg_interface.
 From pgg_smc Require Import five_card_group five_card_program five_card_scheme_I5.
 From pgg_smc Require Import five_card_kim five_card_family.
 From pgg_smc Require Import card_exchange_pismc pgg_input_commitment.
+Require Import smc_interpreter pismc smc_session_types.
 From pgg_reconstruct Require Import pgg_sharing_framework covering_scheme input_encoding.
 From pgg_smc Require Import den_boer_profile den_boer_encoding.
 
@@ -76,3 +77,44 @@ Definition den_boer_dealer_layout (P_idx : nat) :=
        (tnth (den_boer_layout (den_boer_decode committed)))
        den_boer_players (den_boer_assemble committed) P_idx)
     [::] [:: 7; 8].
+
+(** den_boer_dealer_layout_ap — the input-derived-content den Boer dealer as an
+    aproc.
+    @intent: den_boer_dealer_layout packaged for the session-type duality
+    checks. *)
+Definition den_boer_dealer_layout_ap (P_idx : nat) :=
+  mk_aproc (den_boer_dealer_layout P_idx).
+
+(** den_boer_layout_player0_dual — the input-derived-content dealer stays dual to
+    player 0.
+    @main architecture: injecting the layout through the content readout leaves
+    the dealing-phase session structure unchanged, so the dealer's session with
+    each player is the same as for den_boer_dealer_committed. *)
+Lemma den_boer_layout_player0_dual (P_idx : nat) :
+  channels_dual (den_boer_dealer_layout_ap P_idx) den_boer_player0_ap.
+Proof. apply/eqP. rewrite /channels_dual /are_dual. by vm_compute. Qed.
+
+(** den_boer_layout_input0_dual — the input-derived-content dealer is dual to
+    input party 0.
+    @main architecture: the prologue's first receive is the session dual of the
+    first input party's bit commit, unchanged by the content readout. *)
+Lemma den_boer_layout_input0_dual (a : bool) (P_idx : nat) :
+  channels_dual (den_boer_dealer_layout_ap P_idx) (den_boer_input0_ap a).
+Proof. apply/eqP. rewrite /channels_dual /are_dual. by vm_compute. Qed.
+
+(** den_boer_layout_input1_dual — the input-derived-content dealer is dual to
+    input party 1.
+    @main architecture: the prologue's second receive is the session dual of the
+    second input party's bit commit, unchanged by the content readout. *)
+Lemma den_boer_layout_input1_dual (b : bool) (P_idx : nat) :
+  channels_dual (den_boer_dealer_layout_ap P_idx) (den_boer_input1_ap b).
+Proof. apply/eqP. rewrite /channels_dual /are_dual. by vm_compute. Qed.
+
+(** den_boer_layout_verifier_dual — the input-derived-content dealer stays dual
+    to the verifier.
+    @main architecture: the content readout leaves the dealing-phase verifier
+    wire unchanged, so the dealer's session with the verifier is the same as for
+    den_boer_dealer_committed. *)
+Lemma den_boer_layout_verifier_dual (P_idx : nat) :
+  channels_dual (den_boer_dealer_layout_ap P_idx) den_boer_verifier_ap.
+Proof. apply/eqP. rewrite /channels_dual /are_dual. by vm_compute. Qed.
