@@ -426,17 +426,45 @@ lens; the $\checkmark$/$\times$ is the verdict.}
 
 \chapter{The $S_5$ no-go: a representation-theoretic obstruction}
 
+The admissibility gate of the previous chapter rejects a monodromy group by a
+counting argument: a group too large for the Klein cap cannot act on a genus-0
+curve, so its threshold gap is forced wide. That argument bounds how large the
+gap must grow. It does not, on its own, show that a usable scheme fails to exist.
+This chapter proves the sharper statement for the wired $S_5$ instance. It
+exhibits a single representation-theoretic obstruction, internal to the group and
+independent of any curve, that forbids the secret-encoding code outright. The
+whole no-go collapses to one fact about the submodule lattice of the natural
+permutation module of $S_5$ in characteristic five.
+
+We first fix how the secret and the shares sit inside a vector space.
+
 \begin{definition}[The wired $S_5$ representation]
   \label{def:wired_s5}
   \rocq{pgg_reconstruct.s5_nogo.rG_secret,
        pgg_reconstruct.s5_nogo.e0,
        pgg_reconstruct.s5_nogo.proj_share}
   \rocqok
-  The wired instance places the secret in coordinate $0$ of $\GF(5)^6$ (fixed)
-  and the five shares in coordinates $1..5$ (permuted by $S_5$). Recovery would
-  need an $S_5$-invariant submodule carrying the secret direction $e_0$ with a
-  dimension in the gap window.
+  The wired instance places the secret in the fixed coordinate $0$ of
+  $\GF(5)^6$ and the five shares in the coordinates $1$ through $5$, permuted by
+  $S_5$. The secret direction is the basis vector $e_0$ at coordinate $0$.
 \end{definition}
+
+A covering scheme recovers the secret by reading it off a linear code that the
+monodromy leaves invariant. Concretely, a recovering code is an $S_5$-submodule
+$U$ of $\GF(5)^6$ subject to two demands. It must be invariant, because the cut
+acts through the monodromy and the recovered value may not depend on which cut
+was drawn. And it must contain the secret direction $e_0$, because the secret is
+the value stored in coordinate $0$. The existence of a recovering code is thus
+exactly the existence of a secret-carrying invariant submodule.
+
+Not every such submodule yields a threshold scheme. If $U$ is all of
+$\GF(5)^6$, every coordinate is needed to pin down a codeword and there is no
+threshold at all. If $U$ is only the line through $e_0$, no genuine sharing takes
+place. A non-degenerate threshold gap lives strictly between these extremes, and
+the algebraic-geometry dimension count makes the admissible band precise. At the
+six evaluation points of the wired instance, the Riemann-Roch relations of an
+AG-Massey code force a strict gap to come from a code whose dimension is neither
+too small nor too large.
 
 \begin{definition}[The gap-dimension window]
   \label{def:gap_window}
@@ -445,32 +473,88 @@ lens; the $\checkmark$/$\times$ is the verdict.}
        pgg_reconstruct.gap_dimension.gap_dim_window}
   \rocqok
   \uses{def:covering_scheme}
-  Under the AG-Massey relations at length $6$, any strict threshold gap forces
-  the required code dimension into the window $\{3,4\}$.
+  Under the AG-Massey relations at six evaluation points, a strict threshold gap
+  forces the secret-encoding code dimension into the window $\{3,4\}$.
 \end{definition}
 
-\begin{theorem}[The kernel fact]
+The secret coordinate plays a distinguished role: it is the one coordinate the
+group fixes. Forgetting it should therefore lose nothing about the group action
+and exactly one dimension about the secret, which is what makes the
+six-dimensional problem collapse to a five-dimensional one. Write $\mathrm{Pr}$
+for the projection that drops coordinate $0$ and keeps the five share
+coordinates. It intertwines the wired action with the natural permutation action,
+so it carries an invariant submodule to an invariant submodule of the natural
+module $\GF(5)^5$. Its kernel is precisely the secret line, so a submodule that
+contains $e_0$ meets that kernel in one dimension and loses exactly that one
+dimension under projection.
+
+\begin{lemma}[The reduction: projection drops the dimension by one]
+  \label{lem:reduction}
+  \rocq{pgg_reconstruct.s5_nogo.proj_mxmodule,
+       pgg_reconstruct.s5_nogo.mxrank_proj_pred,
+       pgg_reconstruct.s5_nogo.e0_proj_share,
+       pgg_reconstruct.s5_nogo.proj_share_rank}
+  \rocqok
+  \uses{def:wired_s5}
+  The projection $\mathrm{Pr}$ sends a secret-carrying invariant submodule of
+  $\GF(5)^6$ of dimension $d$ to an invariant submodule of the natural module
+  $\GF(5)^5$ of dimension $d-1$.
+\end{lemma}
+
+Apply the reduction to the gap window. A secret-encoding code of dimension $3$
+projects to an invariant submodule of the natural module of dimension $2$, and a
+code of dimension $4$ projects to one of dimension $3$. The whole question is now
+internal to the natural permutation module of $S_5$: does it carry an invariant
+subspace of dimension $2$ or $3$? The answer is no, for a reason special to
+characteristic five.
+
+\begin{theorem}[The kernel fact: no submodule of dimension $2$ or $3$]
   \label{thm:kernel_fact}
   \rocq{pgg_reconstruct.s5_nogo.perm_module_no_dim23}
   \rocqok
   \uses{def:wired_s5}
-  The natural permutation module $\GF(5)^5$ of $S_5$ has no submodule of
-  dimension $2$ or $3$; the submodule dimensions are exactly $\{0,1,4,5\}$. A
-  non-constant vector and a transposition force a difference vector
-  $e_i-e_j$ into the submodule, and $2$-transitivity spreads it to all of them,
-  giving rank $\ge 4$; otherwise the module is constant, rank $\le 1$.
+  Every $S_5$-submodule of the natural module $\GF(5)^5$ has dimension in
+  $\{0,1,4,5\}$; none has dimension $2$ or $3$.
 \end{theorem}
 
-\begin{theorem}[A characteristic-5 phenomenon]
+The proof is elementary and turns on the difference vectors $e_i - e_j$. The
+natural module has two evident invariant subspaces: the line spanned by the
+all-ones vector and the hyperplane of sum-zero vectors. The claim is that nothing
+lies strictly between dimension one and dimension four. Let $W$ be a submodule.
+Either every vector of $W$ is constant, in which case $W$ lies in the all-ones
+line and has dimension at most one, or $W$ contains a vector $v$ with two
+distinct coordinates $v_i \ne v_j$. In the second case, subtract from $v$ its
+image under the transposition that swaps $i$ and $j$. The difference is a nonzero
+scalar multiple of $e_i - e_j$, so after rescaling $e_i - e_j$ itself lies in
+$W$. The group $S_5$ is doubly transitive, so it carries this one difference
+vector to every $e_a - e_b$, and those vectors span the whole sum-zero subspace,
+of dimension four. Hence $W$ has dimension at least four. The middle dimensions
+two and three never occur.
+
+Characteristic five is not a convenience here, it is the mechanism. When the
+field characteristic is coprime to the group order, Maschke's theorem splits
+every module into irreducible summands, and the sum-zero subspace breaks as the
+all-ones line plus a three-dimensional irreducible heart. That heart would be a
+submodule of dimension three, and the forbidden dimensions would reappear. The
+obstruction survives precisely because five divides the dimension five, which
+forces the all-ones vector into the sum-zero subspace and collapses the lattice
+into a single chain.
+
+\begin{theorem}[A characteristic-five contrast]
   \label{thm:maschke_contrast}
   \rocq{pgg_reconstruct.invariant_profiler.maschke_ss}
   \rocqok
   \uses{thm:kernel_fact}
-  The kernel fact is modular: $\mathrm{char}\,\GF = 5$ divides $5$, so the
-  all-ones vector sits inside the sum-zero subspace and the lattice is uniserial.
-  In coprime characteristic Maschke splits the module and dimensions $2,3$
-  reappear.
+  When the characteristic is coprime to $|G|$, Maschke's theorem makes the module
+  completely reducible, so the heart of dimension three appears and the kernel
+  fact fails. The no-go is a modular phenomenon.
 \end{theorem}
+
+Everything now assembles. A gap instance needs a secret-encoding code of
+dimension three or four. By the reduction such a code yields an invariant
+submodule of the natural module of dimension two or three. The kernel fact
+forbids both. There is therefore no secret-encoding invariant code in the gap
+window, and the wired $S_5$ gap is mathematically impossible.
 
 \begin{theorem}[The $S_5$ no-go]
   \label{thm:s5_nogo}
@@ -479,12 +563,20 @@ lens; the $\checkmark$/$\times$ is the verdict.}
        pgg_reconstruct.s5_nogo.s5_gap_window_infeasible,
        pgg_reconstruct.s5_nogo.s5_gap_infeasible}
   \rocqok
-  \uses{thm:kernel_fact,def:gap_window}
-  Projecting away the secret coordinate drops the rank by exactly one, so a
-  secret submodule of dimension $3$ or $4$ becomes a kernel submodule of
-  dimension $2$ or $3$, which is forbidden. Hence no secret-encoding invariant
-  AG code exists for any gap instance: $S_5$ is an AG-code no-go. Axiom-free.
+  \uses{thm:kernel_fact,lem:reduction,def:gap_window}
+  No secret-encoding $S_5$-invariant code of dimension $3$ or $4$ exists, so the
+  wired $S_5$ gap is infeasible: $S_5$ admits no AG code in the gap window. The
+  result is axiom-free.
 \end{theorem}
+
+Read through the covering dictionary, an invariant code of the right dimension is
+an algebraic-geometry code on the covering curve, and the no-go says $S_5$
+supports none in the gap window. The only realizations available are forced up to
+positive genus, where the gap exceeds the number of shares and the threshold
+becomes vacuous. This is one rung of a ladder that the framework makes explicit:
+genus zero gives the exact Shamir threshold with no gap, and each unit of genus
+widens the gap by two. A group as large as $S_5$ is pushed past the rung where a
+threshold scheme is still useful.
 
 \begin{definition}[The genus ladder]
   \label{def:genus_ladder}
