@@ -35,9 +35,9 @@
 (*   kim_weight_dist   == FDist from kim_weight_fun (needs positivity hyps)   *)
 (*   fc_kim_schreier_circulant == Schreier matrix is circulant                *)
 (*   fc_kim_doubly_stochastic  == column sums = 1                             *)
-(*   kim_var_dist_exact      == exact var_dist = 8/5 * kim_slev^L            *)
+(*   kim_var_dist_exact      == exact var_dist = 8/5 * kim_lambda2^L            *)
 (*   fc_kim_security_witness == SecurityWitness with sw_exact populated      *)
-(*   fc_kim_wsc        == WeightedSchreierCertificate (sibling packaging)     *)
+(*   fc_kim_schreier_cert        == WeightedSchreierCertificate (sibling packaging)     *)
 (*                                                                            *)
 (* References:                                                                *)
 (*   Kim & Cetinkaya (2025), arXiv:2511.05111                                 *)
@@ -367,24 +367,24 @@ Hypothesis eps_spectral : `|eps| < 4%:R / 5%:R.
 Let W := kim_weight_dist eps_lt eps_gt.
 
 (** Second-largest eigenvalue modulus *)
-Definition kim_slev : R := 5%:R / 4%:R * `|eps|.
+Definition kim_lambda2 : R := 5%:R / 4%:R * `|eps|.
 
-(** kim_slev_ge0 — the second-largest eigenvalue modulus is non-negative.
+(** kim_lambda2_ge0 — the second-largest eigenvalue modulus is non-negative.
     Kind: helper.
     Why: Non-negativity feeding kim_spectral_gap_le1.
     Used by: kim_spectral_gap_le1.
 *)
-Lemma kim_slev_ge0 : 0 <= kim_slev.
-Proof. by rewrite /kim_slev mulr_ge0 // ?divr_ge0 // normr_ge0. Qed.
+Lemma kim_lambda2_ge0 : 0 <= kim_lambda2.
+Proof. by rewrite /kim_lambda2 mulr_ge0 // ?divr_ge0 // normr_ge0. Qed.
 
-(** kim_slev_lt1 — the second-largest eigenvalue modulus is strictly below 1.
+(** kim_lambda2_lt1 — the second-largest eigenvalue modulus is strictly below 1.
     Kind: helper.
     Why: Ensures a strictly positive spectral gap; uses eps_spectral hypothesis.
     Used by: kim_spectral_gap_pos.
 *)
-Lemma kim_slev_lt1 : kim_slev < 1.
+Lemma kim_lambda2_lt1 : kim_lambda2 < 1.
 Proof.
-rewrite /kim_slev.
+rewrite /kim_lambda2.
 apply: (Order.POrderTheory.lt_le_trans (y := 5 / 4 * (4 / 5))); last first.
 - rewrite -mulrA mulrCA mulrA -!mulrA.
   rewrite [4%:R^-1 * (5%:R * (4%:R * 5%:R^-1))]mulrCA.
@@ -393,23 +393,23 @@ apply: (Order.POrderTheory.lt_le_trans (y := 5 / 4 * (4 / 5))); last first.
 Qed.
 
 (** Spectral gap *)
-Definition kim_spectral_gap : R := 1 - kim_slev.
+Definition kim_spectral_gap : R := 1 - kim_lambda2.
 
 (** kim_spectral_gap_pos — the spectral gap is strictly positive.
     Kind: helper.
-    Why: Gap positivity input to the WeightedSchreierCertificate constructor; follows from kim_slev < 1.
-    Used by: fc_kim_wsc, fc_kim_asymptotic.
+    Why: Gap positivity input to the WeightedSchreierCertificate constructor; follows from kim_lambda2 < 1.
+    Used by: fc_kim_schreier_cert, fc_kim_asymptotic.
 *)
 Lemma kim_spectral_gap_pos : 0 < kim_spectral_gap.
-Proof. by rewrite /kim_spectral_gap subr_gt0; exact: kim_slev_lt1. Qed.
+Proof. by rewrite /kim_spectral_gap subr_gt0; exact: kim_lambda2_lt1. Qed.
 
 (** kim_spectral_gap_le1 — the spectral gap is at most 1.
     Kind: helper.
     Why: Gap upper-bound input to the WeightedSchreierCertificate constructor.
-    Used by: fc_kim_wsc, fc_kim_asymptotic.
+    Used by: fc_kim_schreier_cert, fc_kim_asymptotic.
 *)
 Lemma kim_spectral_gap_le1 : kim_spectral_gap <= 1.
-Proof. by rewrite /kim_spectral_gap lerBlDr lerDl; exact: kim_slev_ge0. Qed.
+Proof. by rewrite /kim_spectral_gap lerBlDr lerDl; exact: kim_lambda2_ge0. Qed.
 
 (** Spectral convergence bound.
     Proved via the uniform-off-diagonal convergence theorem
@@ -420,7 +420,7 @@ Proof. by rewrite /kim_spectral_gap lerBlDr lerDl; exact: kim_slev_ge0. Qed.
 Lemma kim_spectral_convergence : forall (L : nat) (s : 'I_5),
   var_dist (@endpoint_dist_weighted R 3 4 L fc_kim_sigmas W s)
            (fdist_uniform (card_ord 5))
-  <= Num.sqrt 5%:R * kim_slev ^+ L.
+  <= Num.sqrt 5%:R * kim_lambda2 ^+ L.
 Proof.
 move=> L s.
 (* Rewrite var_dist using bridge: endpoint_dist = matrix power entry *)
@@ -434,8 +434,8 @@ have := @unif_offdiag_convergence R 3
   (fc_kim_schreier_diag eps_lt eps_gt)
   (fc_kim_schreier_offdiag eps_lt eps_gt)
   (fc_kim_doubly_stochastic eps_lt eps_gt) L s.
-(* |a - b| = |(1/5 - eps) - (1/5 + eps/4)| = |-(5/4)*eps| = kim_slev *)
-rewrite /kim_slev.
+(* |a - b| = |(1/5 - eps) - (1/5 + eps/4)| = |-(5/4)*eps| = kim_lambda2 *)
+rewrite /kim_lambda2.
 have -> : 5%:R^-1 - eps - (5%:R^-1 + eps / 4%:R) = - (5%:R / 4%:R * eps) :> R.
   rewrite opprD addrA [5%:R^-1 - eps - 5%:R^-1]addrAC subrr add0r.
   rewrite -opprD; congr (- _).
@@ -447,14 +447,14 @@ by rewrite normrN normrM ger0_norm // divr_ge0.
 Qed.
 
 (** Weighted Schreier Certificate *)
-Definition fc_kim_wsc : WeightedSchreierCertificate R 4 3 fc_kim_sigmas W.
+Definition fc_kim_schreier_cert : WeightedSchreierCertificate R 4 3 fc_kim_sigmas W.
 Proof.
 apply: (@MkWeightedSchreierCertificate R 4 3 fc_kim_sigmas W).
 - exact: fc_kim_doubly_stochastic.
 - exact: kim_spectral_gap_pos.
 - exact: kim_spectral_gap_le1.
 - move=> L s.
-  rewrite /kim_spectral_gap /kim_slev.
+  rewrite /kim_spectral_gap /kim_lambda2.
   rewrite opprB addrC subrK.
   exact: kim_spectral_convergence.
 Defined.
@@ -466,7 +466,7 @@ Defined.
 Lemma kim_var_dist_exact (L : nat) (s : 'I_5) :
   var_dist (@endpoint_dist_weighted R 3 4 L fc_kim_sigmas W s)
            (fdist_uniform (card_ord 5))
-  = 2%:R * 4%:R / 5%:R * kim_slev ^+ L.
+  = 2%:R * 4%:R / 5%:R * kim_lambda2 ^+ L.
 Proof.
 rewrite /var_dist.
 under eq_bigr => x _ do
@@ -477,7 +477,7 @@ have := @unif_offdiag_var_dist R 3
   (fc_kim_schreier_diag eps_lt eps_gt)
   (fc_kim_schreier_offdiag eps_lt eps_gt)
   (fc_kim_doubly_stochastic eps_lt eps_gt) L s.
-rewrite /kim_slev.
+rewrite /kim_lambda2.
 have -> : 5%:R^-1 - eps - (5%:R^-1 + eps / 4%:R) = - (5%:R / 4%:R * eps) :> R.
   rewrite opprD addrA [5%:R^-1 - eps - 5%:R^-1]addrAC subrr add0r.
   rewrite -opprD; congr (- _).
@@ -497,7 +497,7 @@ apply: (@MkSecurityAsymptotic R FiveCardKim_M
   (Order.POrderTheory.lexx 0)
   (fun L' => @rho_from_words_weighted R 3 4 L' fc_kim_sigmas W)).
 move=> L' s.
-rewrite add0r /kim_spectral_gap /kim_slev opprB addrC subrK.
+rewrite add0r /kim_spectral_gap /kim_lambda2 opprB addrC subrK.
 exact: kim_spectral_convergence.
 Defined.
 
@@ -505,28 +505,28 @@ Defined.
 Definition fc_kim_security_witness (L : nat) :
   SecurityWitness R FiveCardKim_M :=
   @MkSecurityWitness R FiveCardKim_M L
-    (Num.sqrt 5%:R * kim_slev ^+ L)
+    (Num.sqrt 5%:R * kim_lambda2 ^+ L)
     (@rho_from_words_weighted R 3 4 L fc_kim_sigmas W)
     (fun s => kim_spectral_convergence L s)
     (Some (@MkSecurityExact R FiveCardKim_M
       (@rho_from_words_weighted R 3 4 L fc_kim_sigmas W)
-      (2%:R * 4%:R / 5%:R * kim_slev ^+ L)
+      (2%:R * 4%:R / 5%:R * kim_lambda2 ^+ L)
       (kim_var_dist_exact L)))
     (Some fc_kim_asymptotic).
 
 (** When eps = 0, the bias disappears and we recover the uniform case *)
-Lemma kim_slev_at_zero : eps = 0 -> kim_slev = 0.
-Proof. by move=> H0; rewrite /kim_slev H0 normr0 mulr0. Qed.
+Lemma kim_lambda2_at_zero : eps = 0 -> kim_lambda2 = 0.
+Proof. by move=> H0; rewrite /kim_lambda2 H0 normr0 mulr0. Qed.
 
-(** kim_bound_at_zero — at eps = 0 any positive power of kim_slev is zero.
+(** kim_bound_at_zero — at eps = 0 any positive power of kim_lambda2 is zero.
     Kind: helper.
     Why: Intermediate step feeding kim_security_at_zero.
     Used by: kim_security_at_zero.
 *)
 Lemma kim_bound_at_zero (L : nat) :
-  eps = 0 -> kim_slev ^+ L.+1 = 0.
+  eps = 0 -> kim_lambda2 ^+ L.+1 = 0.
 Proof.
-by move=> H0; rewrite kim_slev_at_zero // expr0n.
+by move=> H0; rewrite kim_lambda2_at_zero // expr0n.
 Qed.
 
 (** kim_security_at_zero — at eps = 0 the security bound collapses to zero for any positive word length.
@@ -535,7 +535,7 @@ Qed.
     Used by: downstream sanity checks of Kim's instance.
 *)
 Lemma kim_security_at_zero (L : nat) :
-  eps = 0 -> Num.sqrt 5%:R * kim_slev ^+ L.+1 = 0.
+  eps = 0 -> Num.sqrt 5%:R * kim_lambda2 ^+ L.+1 = 0.
 Proof. by move=> H0; rewrite kim_bound_at_zero // mulr0. Qed.
 
 End kim_security.
@@ -571,7 +571,7 @@ Lemma fc_kim_security_bound (eps : R)
   var_dist (@endpoint_dist_weighted R 3 4 L fc_kim_sigmas
               (kim_weight_dist Hlt Hgt) s)
            (fdist_uniform (card_ord 5))
-  <= Num.sqrt 5%:R * (kim_slev eps) ^+ L.
+  <= Num.sqrt 5%:R * (kim_lambda2 eps) ^+ L.
 Proof. exact: kim_spectral_convergence. Qed.
 
 End kim_concrete.

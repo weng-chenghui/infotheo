@@ -5,7 +5,7 @@
 (*                                                                            *)
 (* First concrete group instance with genus > 0. The product structure        *)
 (* S_5 × S_5 ⊂ S_10 forces genus >= 3 because:                              *)
-(*   1. |G| = 14400 > pgl_bound(10) = 990 → genus > 0                       *)
+(*   1. |G| = 14400 > klein_genus0_bound(10) = 990 → genus > 0                       *)
 (*   2. Product sum_mod gives (5,10)-threshold with gap 5 → genus >= 3      *)
 (*                                                                            *)
 (* Parameters:                                                                *)
@@ -72,14 +72,14 @@ Axiom s5x5_group_order_eq :
     Klein PGL bound for genus-0 covers on 10 sheets.
     Kind: helper.
     Why: forces the s5x5 instance into the positive-genus branch of the
-    AlgebraicRigidity tradeoff theorem. With pgl_bound = max(2*10, 60) = 60
+    AlgebraicRigidity tradeoff theorem. With klein_genus0_bound = max(2*10, 60) = 60
     and |S_5 x S_5| = 14400 (from s5x5_group_order_eq), the strict
     inequality 60 < 14400 is immediate; combined with
     [ar_large_group_forces_gap], this discharges the genus > 0 conclusion.
     Used by: downstream callers that rely on the genus > 0 branch of
-    [ar_tradeoff] for s5x5. *)
+    [ar_genus_gap_dichotomy] for s5x5. *)
 Lemma s5x5_group_order_bound :
-  (pgl_bound (@Gen_PGGTypes 7 8 s5x5_gen_tuple) <
+  (klein_genus0_bound (@Gen_PGGTypes 7 8 s5x5_gen_tuple) <
    #|pgg_G (@Gen_PGGTypes 7 8 s5x5_gen_tuple)|)%N.
 Proof. by rewrite s5x5_group_order_eq. Qed.
 
@@ -96,7 +96,7 @@ Section s5x5_security.
 Variable R : realType.
 
 Let M_s5x5 := @Gen_PGGTypes 7 8 s5x5_gen_tuple.
-Let R_s5x5 : MonodromyReprWithGeneratorType := M_s5x5.
+Let s5x5_M : MonodromyReprWithGeneratorType := M_s5x5.
 
 (* Fiber-counted endpoint bound: for each sheet s in 'I_10,
    var_dist(endpoint, uniform) <= 8/5.
@@ -201,7 +201,7 @@ case: m Hm Hmem => [|[|[|[|[|m']]]]] Hm Hmem.
 Qed.
 
 (* SecurityWitness at L=1 via fiber counting. Epsilon = 8/5. *)
-Definition s5x5_security_witness_1 : SecurityWitness R R_s5x5 :=
+Definition s5x5_security_witness_1 : SecurityWitness R s5x5_M :=
   security_witness_fiber s5x5_weval_inj1 s5x5_endpoint_bound_fiber.
 
 End s5x5_security.
@@ -235,7 +235,7 @@ Section s5x5_spectral.
 Variable R : realType.
 
 Let M_s5x5 := @Gen_PGGTypes 7 8 s5x5_gen_tuple.
-Let R_s5x5 : MonodromyReprWithGeneratorType := M_s5x5.
+Let s5x5_M : MonodromyReprWithGeneratorType := M_s5x5.
 
 (* The S_5 x S_5 Schreier walk on 'I_10 is reducible: pile-1 generators
    fix pile-2 sheets and vice versa. So the walk's stationary distribution
@@ -249,9 +249,9 @@ Let R_s5x5 : MonodromyReprWithGeneratorType := M_s5x5.
 (* SecurityAsymptotic certificate carrying the honest spectral guarantee.
    The bound is var_dist <= 1 + sqrt(10) * lazy_alpha^L, which converges
    to 1 (the orbit-vs-global gap), not to 0. *)
-Definition s5x5_asymptotic : @SecurityAsymptotic R R_s5x5.
+Definition s5x5_asymptotic : @SecurityAsymptotic R s5x5_M.
 Proof.
-apply: (@MkSecurityAsymptotic R R_s5x5
+apply: (@MkSecurityAsymptotic R s5x5_M
   (1 - s5_lazy_alpha_R R)        (* sa_spectral_gap *)
   1                              (* sa_eps_inf, the orbit-vs-global floor *)
   _                              (* sa_gap_pos *)
@@ -263,7 +263,7 @@ apply: (@MkSecurityAsymptotic R R_s5x5
   exact: s5_lazy_alpha_R_ge0.
 - move=> L s.
   rewrite opprB addrCA subrr addr0.
-  change (pgg_N' R_s5x5).+1 with 10%N in s |- *.
+  change (pgg_N' s5x5_M).+1 with 10%N in s |- *.
   apply: (Order.POrderTheory.le_trans (s5x5_spectral_TV_bound R L s)).
   rewrite (Num.Theory.lerD2l 1).
   apply: Num.Theory.ler_wpM2r.
@@ -273,14 +273,14 @@ Defined.
 
 (* SecurityWitness at any word length L, parametrised only by R. *)
 Definition s5x5_security_witness_schreier (L : nat) :
-    SecurityWitness R R_s5x5.
+    SecurityWitness R s5x5_M.
 Proof.
-apply: (@MkSecurityWitness R R_s5x5 L
+apply: (@MkSecurityWitness R s5x5_M L
   (1 + Num.sqrt 10%:R * (s5_lazy_alpha_R R) ^+ L)
   (rho_from_words L s5x5_gen_tuple)
   _ None (Some s5x5_asymptotic)).
 move=> s.
-change (pgg_N' R_s5x5).+1 with 10%N in s |- *.
+change (pgg_N' s5x5_M).+1 with 10%N in s |- *.
 apply: (Order.POrderTheory.le_trans (s5x5_spectral_TV_bound R L s)).
 rewrite (Num.Theory.lerD2l 1).
 apply: Num.Theory.ler_wpM2r.
@@ -298,7 +298,7 @@ Section s5x5_rigidity.
 
 Variable R : realType.
 
-Let R_s5x5 : MonodromyReprWithGeneratorType :=
+Let s5x5_M : MonodromyReprWithGeneratorType :=
   @Gen_PGGTypes 7 8 s5x5_gen_tuple.
 
 (* --- CoveringData: genus 173 --- *)
@@ -314,8 +314,8 @@ Let R_s5x5 : MonodromyReprWithGeneratorType :=
    Riemann-Hurwitz: 2*173 + 2*14400 = 14400*(2*0) + 29144 + 2.
    Check: 346 + 28800 = 29146; 29144 + 2 = 29146. *)
 Lemma s5x5_hurwitz :
-  (2 * 173 + 2 * #|pgg_G R_s5x5| =
-   #|pgg_G R_s5x5| * (2 * 0) + 29144 + 2)%N.
+  (2 * 173 + 2 * #|pgg_G s5x5_M| =
+   #|pgg_G s5x5_M| * (2 * 0) + 29144 + 2)%N.
 Proof.
 by rewrite muln0 muln0 add0n s5x5_group_order_eq.
 Qed.
@@ -324,7 +324,7 @@ Qed.
     inequality for the S_5 x S_5 instance.
     Kind: helper.
     Why: discharges the [cd_ramif_ge_n_branch] field required when building
-    the [CoveringData] record for R_s5x5.
+    the [CoveringData] record for s5x5_M.
     Used by: s5x5_covering_data. *)
 Lemma s5x5_n_branch_le : (6 <= 29144)%N. Proof. by []. Qed.
 
@@ -334,8 +334,8 @@ Lemma s5x5_n_branch_le : (6 <= 29144)%N. Proof. by []. Qed.
     Why: Hurwitz lower bound forces genus >= 173 for any S_5 x S_5 Galois
     cover of P^1; see [s5x5_inverse_galois_realised] below for the
     realisation axiom citing the inverse-Galois construction. *)
-Definition s5x5_covering_data : CoveringData R_s5x5 :=
-  @MkCoveringData R_s5x5 0 6 29144 173 s5x5_n_branch_le s5x5_hurwitz.
+Definition s5x5_covering_data : CoveringData s5x5_M :=
+  @MkCoveringData s5x5_M 0 6 29144 173 s5x5_n_branch_le s5x5_hurwitz.
 
 (** s5x5_inverse_galois_realised — the [s5x5_covering_data] record corresponds
     to a real Galois cover of P^1 with deck group S_5 x S_5 and genus 173.
@@ -362,7 +362,7 @@ Let s5x5_ts : ThresholdScheme 'I_10 'I_10 :=
 
 (** s5x5_cs_gap — the recovery gap bound for the S_5 x S_5 covering scheme.
     Kind: helper.
-    Why: discharges the [cs_gap] field of [CoveringScheme] for R_s5x5. The
+    Why: discharges the [cs_gap] field of [CoveringScheme] for s5x5_M. The
     genus is the Hurwitz-honest cd_genus s5x5_covering_data = 173, so the
     bound is ts_T <= ts_k + 2 * 173 = 5 + 346 = 351 >= 10, immediate by
     computation. (Reconciled from the stale literal 3 to the actual record
@@ -374,24 +374,24 @@ Proof. by []. Qed.
 
 (* Pile preservation: the monodromy of S_5 × S_5 preserves {0..4} *)
 Lemma s5x5_preserves_pile1 :
-  forall g, g \in pgg_G R_s5x5 ->
-  forall i : 'I_10, (val i < 5)%N -> (val (@pgg_rho R_s5x5 g i) < 5)%N.
-Proof. exact: s5x5_preserves_pile1_proved. Qed.
+  forall g, g \in pgg_G s5x5_M ->
+  forall i : 'I_10, (val i < 5)%N -> (val (@pgg_rho s5x5_M g i) < 5)%N.
+Proof. exact: s5x5_pile1_stab. Qed.
 
 (** s5x5_perm_compatible — monodromy permutation-compatibility for S_5 x S_5.
     Kind: helper.
     Why: closes the [ts_recon_perm_invariant] obligation of the covering scheme.
     Used by: [s5x5_covering]. *)
 Lemma s5x5_perm_compatible :
-  @ts_recon_perm_invariant _ (pgg_G R_s5x5) _ _ s5x5_ts (@pgg_rho R_s5x5).
+  @ts_recon_perm_invariant _ (pgg_G s5x5_M) _ _ s5x5_ts (@pgg_rho s5x5_M).
 Proof.
-exact: (@product_sum_mod_perm_compatible 3 3 4 4 _ _ (@pgg_rho R_s5x5) s5x5_preserves_pile1).
+exact: (@product_sum_mod_perm_compatible 3 3 4 4 _ _ (@pgg_rho s5x5_M) s5x5_preserves_pile1).
 Qed.
 
 (** s5x5_covering — covering-scheme record for the S_5 x S_5 instance.
     Kind: instance. *)
-Definition s5x5_covering : CoveringScheme R_s5x5 := {|
-  cs_plug := @MkReconPlug R_s5x5 'I_10 s5x5_ts id (@pgg_rho R_s5x5)
+Definition s5x5_covering : CoveringScheme s5x5_M := {|
+  cs_plug := @MkReconPlug s5x5_M 'I_10 s5x5_ts id (@pgg_rho s5x5_M)
                s5x5_perm_compatible ;
   cs_data := s5x5_covering_data ;
   cs_gap  := s5x5_cs_gap ;
@@ -400,40 +400,40 @@ Definition s5x5_covering : CoveringScheme R_s5x5 := {|
 (* --- ThresholdWitness --- *)
 
 (* genus = 3 ≠ 0 → the PGL hypothesis is vacuously true *)
-Lemma s5x5_genus0_pgl :
+Lemma s5x5_genus0_klein :
   cd_genus (cs_data s5x5_covering) = 0 ->
-  (#|pgg_G R_s5x5| <= pgl_bound R_s5x5)%N.
+  (#|pgg_G s5x5_M| <= klein_genus0_bound s5x5_M)%N.
 Proof. by []. Qed.
 
 (** s5x5_genus0_automorphism — discharges [genus0_automorphism_bound] for the
     S_5 x S_5 instance. Because the genus is 3, the genus-0 branch is
-    vacuous and the obligation is discharged by [s5x5_genus0_pgl] directly.
+    vacuous and the obligation is discharged by [s5x5_genus0_klein] directly.
     Kind: helper.
     Why: required to instantiate [s5x5_threshold_witness].
     Used by: s5x5_threshold_witness. *)
 Lemma s5x5_genus0_automorphism :
-  genus0_automorphism_bound R_s5x5 (cs_data s5x5_covering).
-Proof. exact: s5x5_genus0_pgl. Qed.
+  genus0_automorphism_bound s5x5_M (cs_data s5x5_covering).
+Proof. exact: s5x5_genus0_klein. Qed.
 
 (** s5x5_threshold_witness — threshold witness for the S_5 x S_5 instance,
     packaging [s5x5_covering] with its genus-0 automorphism discharge.
     Kind: instance.
     Why: bundles [s5x5_covering] and [s5x5_genus0_automorphism] into a
     single [ThresholdWitness] consumed by [s5x5_rigidity] below. *)
-Definition s5x5_threshold_witness : ThresholdWitness R_s5x5 :=
-  @MkThresholdWitness R_s5x5 s5x5_covering s5x5_genus0_automorphism.
+Definition s5x5_threshold_witness : ThresholdWitness s5x5_M :=
+  @MkThresholdWitness s5x5_M s5x5_covering s5x5_genus0_automorphism.
 
 (* --- AlgebraicRigidity --- *)
 
-Definition s5x5_rigidity : AlgebraicRigidity R R_s5x5 :=
-  @MkAlgebraicRigidity R R_s5x5
+Definition s5x5_rigidity : AlgebraicRigidity R s5x5_M :=
+  @MkAlgebraicRigidity R s5x5_M
     (s5x5_security_witness_1 R)
     s5x5_threshold_witness.
 
 (* --- Derived properties --- *)
 
 Lemma s5x5_complexity (L : nat) :
-  (@search_space R_s5x5 L <= #|pgg_G R_s5x5|)%N.
+  (@search_space s5x5_M L <= #|pgg_G s5x5_M|)%N.
 Proof. exact: search_space_leG. Qed.
 
 (** s5x5_tradeoff — security/complexity trade-off for the S_5 x S_5 instance.
@@ -442,35 +442,35 @@ Proof. exact: search_space_leG. Qed.
 Lemma s5x5_tradeoff :
   let cs := tw_covering (ar_threshold s5x5_rigidity) in
   (cd_genus (cs_data cs) = 0 /\
-   (#|pgg_G R_s5x5| <= pgl_bound R_s5x5)%N /\
+   (#|pgg_G s5x5_M| <= klein_genus0_bound s5x5_M)%N /\
    (ts_T (cs_scheme cs) <= ts_k (cs_scheme cs))%N)
   \/
   ((0 < cd_genus (cs_data cs))%N /\
    (ts_T (cs_scheme cs) <= ts_k (cs_scheme cs) + 2 * cd_genus (cs_data cs))%N).
 Proof.
-exact: (@security_threshold_tradeoff R_s5x5 s5x5_covering s5x5_genus0_pgl).
+exact: (@security_threshold_tradeoff s5x5_M s5x5_covering s5x5_genus0_klein).
 Qed.
 
-(* The main point: genus > 0 is forced by |G| > pgl_bound *)
+(* The main point: genus > 0 is forced by |G| > klein_genus0_bound *)
 Lemma s5x5_large_group :
   (0 < cd_genus (cs_data s5x5_covering))%N.
 Proof. by []. Qed.
 
 (** Protocol reconstruction correctness: named instance-level re-export of
     [ar_protocol_correct]. Takes a [PGGInterface] as a parameter. *)
-Lemma s5x5_ts_recon_correct (PI : PGGInterface R_s5x5)
+Lemma s5x5_ts_recon_correct (PI : PGGInterface s5x5_M)
     (HT : ts_T' (cs_scheme (tw_covering (ar_threshold s5x5_rigidity))) = pi_T' PI)
-    (s : 'I_10) (P : pgg_gT R_s5x5)
-    (G_stable : forall g, g \in pgg_G R_s5x5 ->
+    (s : 'I_10) (P : pgg_gT s5x5_M)
+    (G_stable : forall g, g \in pgg_G s5x5_M ->
        forall i : 'I_(ts_T' (cs_scheme (tw_covering (ar_threshold s5x5_rigidity)))).+1,
          rp_content (cs_plug (tw_covering (ar_threshold s5x5_rigidity)))
-           (@pgg_rho R_s5x5 g
+           (@pgg_rho s5x5_M g
              (tnth (cast_tuple (esym (congr1 S HT)) (pi_starts PI)) i)) =
          tnth [tuple rp_content (cs_plug (tw_covering (ar_threshold s5x5_rigidity)))
                  (tnth (cast_tuple (esym (congr1 S HT)) (pi_starts PI)) j)
               | j < (ts_T' (cs_scheme (tw_covering (ar_threshold s5x5_rigidity)))).+1]
               (rp_monodromy (cs_plug (tw_covering (ar_threshold s5x5_rigidity))) g i)) :
-  P \in pgg_G R_s5x5 ->
+  P \in pgg_G s5x5_M ->
   ts_valid (cs_scheme (tw_covering (ar_threshold s5x5_rigidity))) s
           [tuple rp_content (cs_plug (tw_covering (ar_threshold s5x5_rigidity)))
              (tnth (cast_tuple (esym (congr1 S HT)) (pi_starts PI)) j)
@@ -489,9 +489,9 @@ Proof. exact: ar_protocol_correct. Qed.
     does not force non-abelianness, so it is proven, not assumed. Two adjacent
     transpositions in the same 5-card pile (the cut at 0--1 and the cut at
     1--2) fail to commute, witnessed at card 0. Mirrors wreath_nonabelian. *)
-Lemma s5x5_nonabelian : ~~ abelian (pgg_G R_s5x5).
+Lemma s5x5_nonabelian : ~~ abelian (pgg_G s5x5_M).
 Proof.
-apply: (@gen_nonabelian R_s5x5 (@Ordinal 8 0 isT) (@Ordinal 8 1 isT)) => //.
+apply: (@gen_nonabelian s5x5_M (@Ordinal 8 0 isT) (@Ordinal 8 1 isT)) => //.
 by apply/eqP => /permP /(_ (@Ordinal 10 0 isT)); rewrite !permM !permE.
 Qed.
 
@@ -507,8 +507,8 @@ Proof. by rewrite val_ord_tuple enum_uniq. Qed.
     Why: the 10 starting card positions, in order. The identity start tuple
     makes the G_stable condition reduce to reflexivity of pgg_rho.
     Used by: s5x5_protocol_correct, s5x5_profile. *)
-Definition s5x5_PI : PGGInterface R_s5x5 :=
-  @MkPGGI R_s5x5 9 (ord_tuple 10) s5x5_starts_uniq.
+Definition s5x5_PI : PGGInterface s5x5_M :=
+  @MkPGGI s5x5_M 9 (ord_tuple 10) s5x5_starts_uniq.
 
 (** s5x5_HT — the scheme and interface party counts agree (both 9).
     Kind: helper.
@@ -524,12 +524,12 @@ Definition s5x5_HT : ts_T' s5x5_ts = pi_T' s5x5_PI := erefl.
     pgg_rho g i. Closes the audit gap that G_stable was a hypothesis.
     Used by: s5x5_protocol_correct. *)
 Lemma s5x5_G_stable :
-  forall g, g \in pgg_G R_s5x5 ->
+  forall g, g \in pgg_G s5x5_M ->
   forall i : 'I_(ts_T' s5x5_ts).+1,
-    id (@pgg_rho R_s5x5 g
+    id (@pgg_rho s5x5_M g
          (tnth (cast_tuple (esym (congr1 S s5x5_HT)) (pi_starts s5x5_PI)) i)) =
     tnth [tuple id (tnth (cast_tuple (esym (congr1 S s5x5_HT)) (pi_starts s5x5_PI)) j)
-         | j < (ts_T' s5x5_ts).+1] (@pgg_rho R_s5x5 g i).
+         | j < (ts_T' s5x5_ts).+1] (@pgg_rho s5x5_M g i).
 Proof.
 move=> g Hg i.
 by rewrite tnth_mktuple !tnth_cast_tuple !tnth_ord_tuple !cast_ord_id.
@@ -540,18 +540,18 @@ Qed.
     Kind: main.
     Why: the end-to-end protocol guarantee. For any hidden element P of the
     full group, reconstructing the revealed endpoints recovers the secret,
-    via the generic pgg_hidden_invariant_perm fed the proven G_stable and the
+    via the generic pgg_recon_monodromy_correct fed the proven G_stable and the
     covering's recon-invariance. No G_stable hypothesis is assumed. *)
-Theorem s5x5_protocol_correct (s : 'I_10) (P : pgg_gT R_s5x5) :
-  P \in pgg_G R_s5x5 ->
+Theorem s5x5_protocol_correct (s : 'I_10) (P : pgg_gT s5x5_M) :
+  P \in pgg_G s5x5_M ->
   ts_valid s5x5_ts s
     [tuple id (tnth (cast_tuple (esym (congr1 S s5x5_HT)) (pi_starts s5x5_PI)) j)
     | j < (ts_T' s5x5_ts).+1] ->
-  @pgg_recon_endpoints R_s5x5 s5x5_PI 'I_10 s5x5_ts s5x5_HT id P = s.
+  @pgg_recon_endpoints s5x5_M s5x5_PI 'I_10 s5x5_ts s5x5_HT id P = s.
 Proof.
 move=> PG Hvalid.
-apply: (@pgg_hidden_invariant_perm R_s5x5 s5x5_PI 'I_10 s5x5_ts s5x5_HT id
-          (pgg_G R_s5x5) s P (@pgg_rho R_s5x5));
+apply: (@pgg_recon_monodromy_correct s5x5_M s5x5_PI 'I_10 s5x5_ts s5x5_HT id
+          (pgg_G s5x5_M) s P (@pgg_rho s5x5_M));
   [exact: subxx | exact: s5x5_G_stable | exact: PG | exact: Hvalid
   | exact: s5x5_perm_compatible].
 Qed.
@@ -568,8 +568,8 @@ Qed.
     inequality (60 < 14400), in one record. The positive dual of s5_nogo:
     the product realises an order inequality with a positive gap that no
     genus-zero curve admits. *)
-Definition s5x5_combinatorial_rigidity : CombinatorialRigidity R R_s5x5 :=
-  @MkCombinatorialRigidity R R_s5x5
+Definition s5x5_combinatorial_rigidity : CombinatorialRigidity R s5x5_M :=
+  @MkCombinatorialRigidity R s5x5_M
     (s5x5_security_witness_1 R) s5x5_covering
     s5x5_large_group s5x5_group_order_bound.
 
@@ -589,7 +589,7 @@ Section s5x5_rigidity_cryptographically_secure.
 
 Variable R : realType.
 
-Let R_s5x5 : MonodromyReprWithGeneratorType :=
+Let s5x5_M : MonodromyReprWithGeneratorType :=
   @Gen_PGGTypes 7 8 s5x5_gen_tuple.
 
 (* Honest spectral SecurityWitness at L=591, fully discharged.
@@ -597,8 +597,8 @@ Let R_s5x5 : MonodromyReprWithGeneratorType :=
    = (1 + 181/200) / 2 = 0.9525. The 1 floor is the orbit-vs-global gap
    (the walk preserves piles), not a security weakness in the threshold
    sense (the product threshold scheme reconstructs per-pile). *)
-Definition s5x5_rigidity_cryptographically_secure : AlgebraicRigidity R R_s5x5 :=
-  @MkAlgebraicRigidity R R_s5x5
+Definition s5x5_rigidity_cryptographically_secure : AlgebraicRigidity R s5x5_M :=
+  @MkAlgebraicRigidity R s5x5_M
     (s5x5_security_witness_schreier R 591)
     s5x5_threshold_witness.
 
@@ -625,7 +625,7 @@ End s5x5_rigidity_cryptographically_secure.
 
 Section s5x5_multi_realisation.
 
-Local Notation R_s5x5_M := (@Gen_PGGTypes 7 8 s5x5_gen_tuple).
+Local Notation s5x5_multi_M := (@Gen_PGGTypes 7 8 s5x5_gen_tuple).
 
 (** s5x5_brings_pile_component — one Bring's curve at genus 4 acting on
     5 sheets (one s5x5 pile) as a degree-5 cover of P^1.
@@ -644,8 +644,8 @@ Defined.
     Why: makes explicit that s5x5 is operationally a 2-component cover with
     each component at the realisable genus 4 (Bring's), not a single
     connected curve at the Galois-closure genus 173. *)
-Definition s5x5_multi_data : MultiCoveringData R_s5x5_M.
-refine (@MkMultiCoveringData R_s5x5_M
+Definition s5x5_multi_data : MultiCoveringData s5x5_multi_M.
+refine (@MkMultiCoveringData s5x5_multi_M
           [:: s5x5_brings_pile_component ; s5x5_brings_pile_component] _).
 by rewrite big_cons big_cons big_nil.
 Defined.

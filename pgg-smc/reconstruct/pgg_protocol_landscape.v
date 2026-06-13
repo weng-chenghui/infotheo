@@ -37,7 +37,7 @@
 (*                                       |                                    *)
 (*                           +-----------+-----------+                        *)
 (*                           v           v           v                        *)
-(*                     ar_tradeoff  ar_gap_bound  ar_protocol_correct         *)
+(*                     ar_genus_gap_dichotomy  ar_gap_bound  ar_protocol_correct         *)
 (*                                       |                                    *)
 (*                                       v                                    *)
 (*                   LANDSCAPE (this file, from ar)                           *)
@@ -69,7 +69,7 @@
 (* threshold regardless of |G|. The worst-case threshold gap is 2.           *)
 (*                                                                            *)
 (* Sources:                                                                   *)
-(*   Genus 0: |G| <= PGL(2,N) -- cover_genus0.v, pgl_bound.v               *)
+(*   Genus 0: |G| <= PGL(2,N) -- cover_genus0.v, klein_genus0_bound.v               *)
 (*   Genus 1: no group bound -- Silverman, Arithmetic of Elliptic Curves,   *)
 (*     Ch. III.4 (isogenies give arbitrarily large monodromy groups)         *)
 (*   Genus >= 2: |G| <= 84(g-1) -- Hurwitz 1893, Miranda Thm V.1.3         *)
@@ -196,8 +196,8 @@ Let G := pgg_G M.
     Used by: landscape_tradeoff and ar_large_group_forces_genus.
 *)
 Lemma genus0_requires_small_group (cs : CoveringScheme M)
-    (genus0_pgl : cd_genus (cs_data cs) = 0 -> (#|G| <= pgl_bound M)%N) :
-  (pgl_bound M < #|G|)%N ->
+    (genus0_pgl : cd_genus (cs_data cs) = 0 -> (#|G| <= klein_genus0_bound M)%N) :
+  (klein_genus0_bound M < #|G|)%N ->
   (0 < cd_genus (cs_data cs))%N.
 Proof. exact: large_group_forces_gap genus0_pgl. Qed.
 
@@ -208,8 +208,8 @@ Proof. exact: large_group_forces_gap genus0_pgl. Qed.
     Used by: landscape tabulations in the landscape_tradeoff theorem.
 *)
 Corollary large_group_minimum_gap (cs : CoveringScheme M)
-    (genus0_pgl : cd_genus (cs_data cs) = 0 -> (#|G| <= pgl_bound M)%N) :
-  (pgl_bound M < #|G|)%N ->
+    (genus0_pgl : cd_genus (cs_data cs) = 0 -> (#|G| <= klein_genus0_bound M)%N) :
+  (klein_genus0_bound M < #|G|)%N ->
   cd_genus (cs_data cs) = 1 ->
   (ts_T (cs_scheme cs) <= ts_k (cs_scheme cs) + 2)%N.
 Proof.
@@ -224,9 +224,9 @@ Qed.
     the gap is paid for by strictly positive genus.
 *)
 Theorem landscape_tradeoff (cs : CoveringScheme M)
-    (genus0_pgl : cd_genus (cs_data cs) = 0 -> (#|G| <= pgl_bound M)%N) :
+    (genus0_pgl : cd_genus (cs_data cs) = 0 -> (#|G| <= klein_genus0_bound M)%N) :
   (cd_genus (cs_data cs) = 0 /\
-   (#|G| <= pgl_bound M)%N /\
+   (#|G| <= klein_genus0_bound M)%N /\
    (ts_T (cs_scheme cs) <= ts_k (cs_scheme cs))%N)
   \/
   ((0 < cd_genus (cs_data cs))%N /\
@@ -331,7 +331,7 @@ Lemma protocol_correct_unbundled
   pgg_recon_endpoints HT (rp_content (cs_plug cs)) P = s.
 Proof.
 move=> PG Hvalid.
-apply: (pgg_hidden_invariant_perm (perm := rp_monodromy (cs_plug cs)));
+apply: (pgg_recon_monodromy_correct (perm := rp_monodromy (cs_plug cs)));
   [exact: subxx | exact: G_stable | exact: PG | exact: Hvalid
   | exact: rp_recon_invariant].
 Qed.
@@ -405,14 +405,14 @@ Proof. exact: higher_genus_landscape. Qed.
 
 (** ar_large_group_forces_genus - large-group implication for AlgebraicRigidity.
     Kind: example.
-    Why: landscape-tabulation entry recording that |G| > pgl_bound forces
+    Why: landscape-tabulation entry recording that |G| > klein_genus0_bound forces
     strictly positive genus, specialised to AlgebraicRigidity.
     Naming: `large_group_forces_genus` is the canonical PGG-landscape slogan;
     the five-component name preserves the `ar_` namespace discriminator that
     separates this entry from the non-AR analogue.
 *)
 Lemma ar_large_group_forces_genus :
-  (pgl_bound M < #|G|)%N ->
+  (klein_genus0_bound M < #|G|)%N ->
   (0 < cd_genus (cs_data cs))%N.
 Proof. exact: ar_large_group_forces_gap ar. Qed.
 

@@ -47,7 +47,7 @@ Let ts := cs_scheme cs.
 Hypothesis HT : ts_T' ts = pi_T' PI.
 
 (* Main correctness theorem: CoveringScheme + PGGInterface + G-stable starts
-   -> reconstruction recovers the hidden value. Uses pgg_hidden_invariant_perm
+   -> reconstruction recovers the hidden value. Uses pgg_recon_monodromy_correct
    over the full group pgg_G with the plug's rp_recon_invariant and rp_content. *)
 Theorem pgg_covering_correct (s : 'I_N) (P : pgg_gT M)
     (G_stable : forall g, g \in pgg_G M ->
@@ -64,7 +64,7 @@ Theorem pgg_covering_correct (s : 'I_N) (P : pgg_gT M)
   pgg_recon_endpoints HT (rp_content (cs_plug cs)) P = s.
 Proof.
 move=> PG Hvalid.
-apply: (pgg_hidden_invariant_perm (perm := rp_monodromy (cs_plug cs)));
+apply: (pgg_recon_monodromy_correct (perm := rp_monodromy (cs_plug cs)));
   [exact: subxx | exact: G_stable | exact: PG | exact: Hvalid
   | exact: rp_recon_invariant].
 Qed.
@@ -88,14 +88,14 @@ Let G := pgg_G M.
 (* Genus 0 -> |G| bounded by PGL(2,N) *)
 Hypothesis genus0_pgl :
   forall (cd : CoveringData M),
-    cd_genus cd = 0 -> #|G| <= pgl_bound M.
+    cd_genus cd = 0 -> #|G| <= klein_genus0_bound M.
 
 (* The security-threshold tradeoff, restated for the capstone:
    Either the covering has genus 0 (exact threshold, bounded group)
    or genus > 0 (threshold gap proportional to genus). *)
 Theorem pgg_covering_tradeoff (cs : CoveringScheme M) :
   (cd_genus (cs_data cs) = 0 /\
-   #|G| <= pgl_bound M /\
+   #|G| <= klein_genus0_bound M /\
    ts_T (cs_scheme cs) <= ts_k (cs_scheme cs))
   \/
   (0 < cd_genus (cs_data cs) /\

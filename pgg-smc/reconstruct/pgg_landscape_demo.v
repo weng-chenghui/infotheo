@@ -11,7 +11,7 @@
 (*   OC(2,3):  |G| small  -> genus 0 -> gap = 0, eps = 1                    *)
 (*   Monster:  |G| huge   -> genus > 0 -> gap >= 2, eps ~ 0                 *)
 (*                                                                            *)
-(* The point: ar_tradeoff forces exactly one of these two regimes.           *)
+(* The point: ar_genus_gap_dichotomy forces exactly one of these two regimes.           *)
 (* The landscape lemmas (ar_genus0_exact, ar_genus1_gap2, ar_hurwitz)        *)
 (* refine each branch, telling you WHAT threshold you get and WHY.           *)
 (******************************************************************************)
@@ -92,18 +92,18 @@ Proof. exact: ar_security_per_position ar s. Qed.
 Lemma monster_tradeoff_demo :
   let cs := tw_covering (ar_threshold ar) in
   (cd_genus (cs_data cs) = 0 /\
-   (#|pgg_G R_monster| <= pgl_bound R_monster)%N /\
+   (#|pgg_G R_monster| <= klein_genus0_bound R_monster)%N /\
    (ts_T (cs_scheme cs) <= ts_k (cs_scheme cs))%N)
   \/
   ((0 < cd_genus (cs_data cs))%N /\
    (ts_T (cs_scheme cs) <= ts_k (cs_scheme cs) +
     2 * cd_genus (cs_data cs))%N).
-Proof. exact: ar_tradeoff ar. Qed.
+Proof. exact: ar_genus_gap_dichotomy ar. Qed.
 
 (* Q: Is genus 0 available to the Monster? *)
 (* A: No — |G| > PGL forces genus > 0. *)
 Lemma monster_genus_forced_demo :
-  (pgl_bound R_monster < #|pgg_G R_monster|)%N ->
+  (klein_genus0_bound R_monster < #|pgg_G R_monster|)%N ->
   let cs := tw_covering (ar_threshold ar) in
   (0 < cd_genus (cs_data cs))%N.
 Proof. exact: ar_large_group_forces_genus ar. Qed.
@@ -200,9 +200,9 @@ Hypothesis sigma_fix0 :
 Hypothesis code_auto :
   forall g, g \in pgg_G R_oc ->
   coord_perm_compatible (RS.code a n''.+3 1) (sigma_code g).
-Hypothesis oc_genus0_pgl : (#|pgg_G R_oc| <= pgl_bound R_oc)%N.
+Hypothesis oc_genus0_klein : (#|pgg_G R_oc| <= klein_genus0_bound R_oc)%N.
 
-Let ar := oc_rigidity R HG_oc qn an HN sigma_fix0 code_auto oc_genus0_pgl.
+Let ar := oc_rigidity R HG_oc qn an HN sigma_fix0 code_auto oc_genus0_klein.
 
 (* --- Phase 2: Certification — security side --- *)
 
@@ -228,13 +228,13 @@ Proof. exact: ar_entropy_le_logN. Qed.
 Lemma oc_tradeoff_demo :
   let cs := tw_covering (ar_threshold ar) in
   (cd_genus (cs_data cs) = 0 /\
-   (#|pgg_G R_oc| <= pgl_bound R_oc)%N /\
+   (#|pgg_G R_oc| <= klein_genus0_bound R_oc)%N /\
    (ts_T (cs_scheme cs) <= ts_k (cs_scheme cs))%N)
   \/
   ((0 < cd_genus (cs_data cs))%N /\
    (ts_T (cs_scheme cs) <= ts_k (cs_scheme cs) +
     2 * cd_genus (cs_data cs))%N).
-Proof. exact: ar_tradeoff ar. Qed.
+Proof. exact: ar_genus_gap_dichotomy ar. Qed.
 
 (* Q: If genus 0, what's the threshold? *)
 (* A: Exact: T <= k. *)

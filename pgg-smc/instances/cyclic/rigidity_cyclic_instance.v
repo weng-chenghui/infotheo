@@ -127,11 +127,11 @@ Definition ncycle_covering : CoveringScheme R_ncycle :=
   genus0_covering HG_ncycle qn an HN sigma_fix0 code_auto.
 
 (* PGL bound hypothesis *)
-Hypothesis ncycle_genus0_pgl :
-  (#|pgg_G R_ncycle| <= pgl_bound R_ncycle)%N.
+Hypothesis ncycle_genus0_klein :
+  (#|pgg_G R_ncycle| <= klein_genus0_bound R_ncycle)%N.
 
 Definition ncycle_threshold_witness : ThresholdWitness R_ncycle :=
-  @MkThresholdWitness R_ncycle ncycle_covering (fun _ => ncycle_genus0_pgl).
+  @MkThresholdWitness R_ncycle ncycle_covering (fun _ => ncycle_genus0_klein).
 
 Definition ncycle_rigidity : AlgebraicRigidity R R_ncycle :=
   @MkAlgebraicRigidity R R_ncycle
@@ -147,7 +147,7 @@ Proof. exact: search_space_leG. Qed.
 Lemma ncycle_tradeoff :
   let cs := tw_covering (ar_threshold ncycle_rigidity) in
   (cd_genus (cs_data cs) = 0 /\
-   (#|pgg_G R_ncycle| <= pgl_bound R_ncycle)%N /\
+   (#|pgg_G R_ncycle| <= klein_genus0_bound R_ncycle)%N /\
    (ts_T (cs_scheme cs) <= ts_k (cs_scheme cs))%N)
   \/
   ((0 < cd_genus (cs_data cs))%N /\
@@ -155,7 +155,7 @@ Lemma ncycle_tradeoff :
 Proof.
 move=> /=.
 exact: (@security_threshold_tradeoff R_ncycle ncycle_covering
-                                     (fun _ => ncycle_genus0_pgl)).
+                                     (fun _ => ncycle_genus0_klein)).
 Qed.
 
 End ncycle_rigidity.

@@ -42,7 +42,7 @@
 (*   monster_weval_inj_Lstar : word-eval injectivity at L*                   *)
 (*   monster_perm_endpoint_inj_Lstar : endpoint eval injective on achievable(L_s)  *)
 (*   monster_covering : existence of a covering scheme                        *)
-(*   monster_genus0_pgl : genus-0 coverings have |G| <= PGL(2,N)             *)
+(*   monster_genus0_klein : genus-0 coverings have |G| <= PGL(2,N)             *)
 (*                                                                            *)
 (* Proved (not axiomatized):                                                  *)
 (*   monster_security_witness_Lstar : SecurityWitness                        *)
@@ -160,12 +160,12 @@ Axiom monster_covering : CoveringScheme R_monster.
    This is about the SPECIFIC covering scheme, not universal.
    For the Monster (|G| ~ 10^53), this is vacuously true since the
    covering genus is necessarily > 0 for such a large group. *)
-Axiom monster_genus0_pgl :
+Axiom monster_genus0_klein :
   cd_genus (cs_data monster_covering) = 0 ->
-  (#|pgg_G R_monster| <= pgl_bound R_monster)%N.
+  (#|pgg_G R_monster| <= klein_genus0_bound R_monster)%N.
 
 Definition monster_threshold_witness : ThresholdWitness R_monster :=
-  @MkThresholdWitness R_monster monster_covering monster_genus0_pgl.
+  @MkThresholdWitness R_monster monster_covering monster_genus0_klein.
 
 Definition monster_rigidity : AlgebraicRigidity R R_monster :=
   @MkAlgebraicRigidity R R_monster
@@ -181,14 +181,14 @@ Proof. exact: search_space_leG. Qed.
 Lemma monster_tradeoff :
   let cs := tw_covering (ar_threshold monster_rigidity) in
   (cd_genus (cs_data cs) = 0 /\
-   (#|pgg_G R_monster| <= pgl_bound R_monster)%N /\
+   (#|pgg_G R_monster| <= klein_genus0_bound R_monster)%N /\
    (ts_T (cs_scheme cs) <= ts_k (cs_scheme cs))%N)
   \/
   ((0 < cd_genus (cs_data cs))%N /\
    (ts_T (cs_scheme cs) <= ts_k (cs_scheme cs) + 2 * cd_genus (cs_data cs))%N).
 Proof.
 move=> /=.
-exact: (@security_threshold_tradeoff R_monster monster_covering monster_genus0_pgl).
+exact: (@security_threshold_tradeoff R_monster monster_covering monster_genus0_klein).
 Qed.
 
 End monster_rigidity.

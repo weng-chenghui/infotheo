@@ -290,7 +290,7 @@ Definition pgg_recon_endpoints (P : gT) : secretT :=
    on the recon-symmetry subgroup [H] that actually contains the hidden element
    [P]; [H] is required to be a subgroup of [pgg_G M] so the morphism action of
    [rho] applies. *)
-Lemma pgg_hidden_invariant_perm (H : {group gT}) (s : secretT) (P : gT)
+Lemma pgg_recon_monodromy_correct (H : {group gT}) (s : secretT) (P : gT)
     (perm : gT -> {perm 'I_sT})
     (HsubG : H \subset pgg_G M)
     (G_stable : forall g, g \in H ->

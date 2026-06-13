@@ -45,8 +45,8 @@
 (*                                                                            *)
 (* Derived properties:                                                        *)
 (*   ar_complexity      == search space bounded by |G|                        *)
-(*   ar_tradeoff        == genus-0/bounded or genus>0/gap tradeoff           *)
-(*   ar_search_gap_tradeoff == search space vs threshold gap                 *)
+(*   ar_genus_gap_dichotomy        == genus-0/bounded or genus>0/gap tradeoff           *)
+(*   ar_search_gap_dichotomy == search space vs threshold gap                 *)
 (*   ar_large_group_forces_gap == |G| > PGL -> genus > 0                    *)
 (*   ar_gap_bound       == threshold gap <= 2*genus                          *)
 (*   ar_protocol_correct == end-to-end protocol correctness                  *)
@@ -180,8 +180,8 @@ Record SecurityWitness := MkSecurityWitness {
    same CoveringScheme. *)
 Record ThresholdWitness := MkThresholdWitness {
   tw_covering : CoveringScheme M;
-  tw_genus0_pgl :
-    cd_genus (cs_data tw_covering) = 0 -> #|G| <= pgl_bound M
+  tw_genus0_klein :
+    cd_genus (cs_data tw_covering) = 0 -> #|G| <= klein_genus0_bound M
 }.
 
 Record AlgebraicRigidity := MkAlgebraicRigidity {
@@ -343,10 +343,10 @@ Lemma ar_complexity (L : nat) : @search_space M L <= #|G|.
 Proof. exact: search_space_leG. Qed.
 
 (** Tradeoff: either genus-0 with bounded |G|, or positive genus with gap *)
-Lemma ar_tradeoff :
+Lemma ar_genus_gap_dichotomy :
   let cs := tw_covering (ar_threshold ar) in
   (cd_genus (cs_data cs) = 0 /\
-   #|G| <= pgl_bound M /\
+   #|G| <= klein_genus0_bound M /\
    ts_T (cs_scheme cs) <= ts_k (cs_scheme cs))
   \/
   (0 < cd_genus (cs_data cs) /\
@@ -355,13 +355,13 @@ Proof.
 move=> /=.
 exact (@security_threshold_tradeoff M
   (tw_covering (ar_threshold ar))
-  (@tw_genus0_pgl M (ar_threshold ar))).
+  (@tw_genus0_klein M (ar_threshold ar))).
 Qed.
 
 (** Search-gap tradeoff: search space bounded or threshold has gap *)
-Lemma ar_search_gap_tradeoff (L : nat) :
+Lemma ar_search_gap_dichotomy (L : nat) :
   let cs := tw_covering (ar_threshold ar) in
-  (@search_space M L <= pgl_bound M /\
+  (@search_space M L <= klein_genus0_bound M /\
    ts_T (cs_scheme cs) <= ts_k (cs_scheme cs))
   \/
   (0 < cd_genus (cs_data cs) /\
@@ -370,7 +370,7 @@ Proof.
 move=> /=.
 exact (@search_gap_tradeoff M
   (tw_covering (ar_threshold ar))
-  (@tw_genus0_pgl M (ar_threshold ar)) L).
+  (@tw_genus0_klein M (ar_threshold ar)) L).
 Qed.
 
 (** ar_large_group_forces_gap — large monodromy groups force positive genus.
@@ -383,13 +383,13 @@ Qed.
 *)
 Lemma ar_large_group_forces_gap :
   let cs := tw_covering (ar_threshold ar) in
-  pgl_bound M < #|G| ->
+  klein_genus0_bound M < #|G| ->
   0 < cd_genus (cs_data cs).
 Proof.
 move=> /=.
 exact (@large_group_forces_gap M
   (tw_covering (ar_threshold ar))
-  (@tw_genus0_pgl M (ar_threshold ar))).
+  (@tw_genus0_klein M (ar_threshold ar))).
 Qed.
 
 (** Gap bound: threshold gap is bounded by twice the genus *)
@@ -419,7 +419,7 @@ Lemma ar_protocol_correct (PI : PGGInterface M)
     (rp_content (cs_plug (tw_covering (ar_threshold ar)))) P = s.
 Proof.
 move=> PG Hvalid.
-apply: (pgg_hidden_invariant_perm
+apply: (pgg_recon_monodromy_correct
           (perm := rp_monodromy (cs_plug (tw_covering (ar_threshold ar)))));
   [exact: subxx | exact: G_stable | exact: PG | exact: Hvalid
   | exact: rp_recon_invariant].

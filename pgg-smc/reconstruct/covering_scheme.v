@@ -109,7 +109,7 @@ Arguments MkCoveringData {M}.
     What: a threshold scheme whose SHARES live on 'I_N and whose SECRET is an
     arbitrary [secretT], a fixed content readout 'I_N -> 'I_N, a monodromy->share
     permutation, and perm-invariance of reconstruction over the FULL group pgg_G.
-    Why: the program run_* and correctness (pgg_hidden_invariant_perm) consume
+    Why: the program run_* and correctness (pgg_recon_monodromy_correct) consume
     this bare record; only the genus/tradeoff narrative needs CoveringScheme. The
     heterogeneous secret lets a one-bit instance (den Boer: secretT = bool) plug
     in alongside the position-model instances (secretT = 'I_N).

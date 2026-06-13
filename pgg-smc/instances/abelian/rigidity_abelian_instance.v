@@ -183,15 +183,15 @@ Definition abel_covering : CoveringScheme R_abel :=
   genus0_covering HG_abel qn an HN sigma_fix0 code_auto.
 
 (* PGL bound hypothesis *)
-Hypothesis abel_genus0_pgl :
-  (#|pgg_G R_abel| <= pgl_bound R_abel)%N.
+Hypothesis abel_genus0_klein :
+  (#|pgg_G R_abel| <= klein_genus0_bound R_abel)%N.
 
 (** abel_threshold_witness — ThresholdWitness for the abelian instance using the genus-0 RS covering.
     Kind: instance.
     Why: Provides the threshold half of the AlgebraicRigidity pair via a covering plus the PGL collusion bound.
 *)
 Definition abel_threshold_witness : ThresholdWitness R_abel :=
-  @MkThresholdWitness R_abel abel_covering (fun _ => abel_genus0_pgl).
+  @MkThresholdWitness R_abel abel_covering (fun _ => abel_genus0_klein).
 
 (** abel_rigidity — AlgebraicRigidity instance for the disjoint-transpositions abelian example.
     Kind: instance.
@@ -215,7 +215,7 @@ Proof. exact: search_space_leG. Qed.
 Lemma abel_tradeoff :
   let cs := tw_covering (ar_threshold abel_rigidity) in
   (cd_genus (cs_data cs) = 0 /\
-   (#|pgg_G R_abel| <= pgl_bound R_abel)%N /\
+   (#|pgg_G R_abel| <= klein_genus0_bound R_abel)%N /\
    (ts_T (cs_scheme cs) <= ts_k (cs_scheme cs))%N)
   \/
   ((0 < cd_genus (cs_data cs))%N /\
@@ -223,7 +223,7 @@ Lemma abel_tradeoff :
 Proof.
 move=> /=.
 exact: (@security_threshold_tradeoff R_abel abel_covering
-                                     (fun _ => abel_genus0_pgl)).
+                                     (fun _ => abel_genus0_klein)).
 Qed.
 
 End abel_rigidity.

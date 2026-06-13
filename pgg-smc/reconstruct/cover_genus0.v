@@ -195,7 +195,7 @@ Lemma genus0_secret_invariant (PI : PGGInterface M)
   pgg_recon_endpoints HT id P = s.
 Proof.
 move=> PG Hvalid.
-apply: (pgg_hidden_invariant_perm (perm := ts0_perm));
+apply: (pgg_recon_monodromy_correct (perm := ts0_perm));
   [exact: subxx | exact: G_stable | exact: PG | exact: Hvalid
   | exact: ts0_perm_compatible].
 Qed.

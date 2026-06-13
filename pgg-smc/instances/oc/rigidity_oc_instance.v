@@ -262,11 +262,11 @@ Definition oc_covering : CoveringScheme R_oc :=
   genus0_covering HG_oc qn an HN sigma_fix0 code_auto.
 
 (* PGL bound hypothesis *)
-Hypothesis oc_genus0_pgl :
-  (#|pgg_G R_oc| <= pgl_bound R_oc)%N.
+Hypothesis oc_genus0_klein :
+  (#|pgg_G R_oc| <= klein_genus0_bound R_oc)%N.
 
 Definition oc_threshold_witness : ThresholdWitness R_oc :=
-  @MkThresholdWitness R_oc oc_covering (fun _ => oc_genus0_pgl).
+  @MkThresholdWitness R_oc oc_covering (fun _ => oc_genus0_klein).
 
 Definition oc_rigidity : AlgebraicRigidity R R_oc :=
   @MkAlgebraicRigidity R R_oc
@@ -282,14 +282,14 @@ Proof. exact: search_space_leG. Qed.
 Lemma oc_tradeoff :
   let cs := tw_covering (ar_threshold oc_rigidity) in
   (cd_genus (cs_data cs) = 0 /\
-   (#|pgg_G R_oc| <= pgl_bound R_oc)%N /\
+   (#|pgg_G R_oc| <= klein_genus0_bound R_oc)%N /\
    (ts_T (cs_scheme cs) <= ts_k (cs_scheme cs))%N)
   \/
   ((0 < cd_genus (cs_data cs))%N /\
    (ts_T (cs_scheme cs) <= ts_k (cs_scheme cs) + 2 * cd_genus (cs_data cs))%N).
 Proof.
 move=> /=.
-exact: (@security_threshold_tradeoff R_oc oc_covering (fun _ => oc_genus0_pgl)).
+exact: (@security_threshold_tradeoff R_oc oc_covering (fun _ => oc_genus0_klein)).
 Qed.
 
 End oc_rigidity.

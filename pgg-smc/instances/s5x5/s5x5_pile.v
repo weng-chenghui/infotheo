@@ -35,7 +35,7 @@ Import Prenex Implicits.
 (*     Pile preservation lemma                                                *)
 (******************************************************************************)
 
-Lemma s5x5_preserves_pile1_proved :
+Lemma s5x5_pile1_stab :
   forall g, g \in pgg_G (@Gen_PGGTypes 7 8 s5x5_gen_tuple) ->
   forall i : 'I_10, (val i < 5)%N ->
   (val (@pgg_rho (@Gen_PGGTypes 7 8 s5x5_gen_tuple) g i) < 5)%N.

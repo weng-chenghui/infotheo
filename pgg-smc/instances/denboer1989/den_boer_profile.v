@@ -7,8 +7,8 @@
 (* (five_card_family.v): the cyclic C_5 monodromy plugged through the          *)
 (* five-generator instance FiveCardKim_M, at bias eps = 0 and word length 1    *)
 (* (one uniform cyclic cut). At eps = 0 the second-largest eigenvalue modulus  *)
-(* kim_slev vanishes, so one shuffle drives the dealing-phase security bound    *)
-(* sqrt 5 * kim_slev ^+ 1 to 0: the perfectly-anonymous den Boer regime.       *)
+(* kim_lambda2 vanishes, so one shuffle drives the dealing-phase security bound    *)
+(* sqrt 5 * kim_lambda2 ^+ 1 to 0: the perfectly-anonymous den Boer regime.       *)
 (* The plug bundles the five-card starting interface (FiveCardKim_PI), the      *)
 (* heterogeneous-secret bool/'I_5 threshold scheme fcI_scheme, the identity     *)
 (* content readout fc_content, the C_5 monodromy pgg_rho, and the proven        *)
@@ -80,38 +80,38 @@ Definition den_boer_profile (R : realType) : MonodromyProfile R :=
 (** den_boer_perfect — the den Boer dealing-phase security bound is exactly 0.
     @main bound: sw_bound_eps of the den Boer profile is 0; the precise sense in
     which the unbiased family member is perfectly anonymous. One uniform cut
-    (word length 1) at bias 0 drives sqrt 5 * kim_slev ^+ 1 to 0, since
-    kim_slev 0 = 0 (kim_security_at_zero). Naming: _perfect marks the lhs = 0
+    (word length 1) at bias 0 drives sqrt 5 * kim_lambda2 ^+ 1 to 0, since
+    kim_lambda2 0 = 0 (kim_security_at_zero). Naming: _perfect marks the lhs = 0
     perfect-security shape. *)
 Lemma den_boer_perfect (R : realType) :
   sw_bound_eps (mp_security (den_boer_profile R)) = 0.
 Proof. by rewrite /= kim_security_at_zero. Qed.
 
-(** run_k_den_boer — the five-card plug's privacy threshold is 2.
+(** den_boer_run_k — the five-card plug's privacy threshold is 2.
     @main architecture: run_k (den_boer_profile R) = 2; the contrast character
     (any single revealed card leaks nothing about the AND, but two may), read off
     the shared run_k of the five-card plug. *)
-Lemma run_k_den_boer (R : realType) : run_k (den_boer_profile R) = 2.
+Lemma den_boer_run_k (R : realType) : run_k (den_boer_profile R) = 2.
 Proof. by []. Qed.
 
 (******************************************************************************)
 (** * Den Boer correctness on the five-card family instance                   *)
 (*                                                                            *)
 (* The end-to-end correctness theorem is the den Boer member of the shared    *)
-(* five-card family, stated on FiveCardKim_M. The cast witness FiveCardKim_HT, *)
+(* five-card family, stated on FiveCardKim_M. The cast witness FiveCardKim_Teq, *)
 (* the start-stability lemma FiveCardKim_G_stable and the protocol-correctness  *)
 (* theorem FiveCardKim_protocol_correct mirror the original single-generator   *)
 (* den Boer correctness exactly: starts are ord_tuple 5 and content is the     *)
 (* identity, so G-stability collapses to reflexivity of pgg_rho, and the        *)
-(* generic pgg_hidden_invariant_perm is fed the family's full-group             *)
+(* generic pgg_recon_monodromy_correct is fed the family's full-group             *)
 (* reconstruction invariance fcI_perm_compatible_kim.                          *)
 (******************************************************************************)
 
-(** FiveCardKim_HT — the scheme and interface party counts agree (both 4).
+(** FiveCardKim_Teq — the scheme and interface party counts agree (both 4).
     @intent: the cast witness, kept as erefl so tuple casts reduce away;
     bridges ts_T' fcI_scheme with pi_T' FiveCardKim_PI in the protocol
     statements. Used-by: FiveCardKim_G_stable, FiveCardKim_protocol_correct. *)
-Definition FiveCardKim_HT : ts_T' fcI_scheme = pi_T' FiveCardKim_PI := erefl.
+Definition FiveCardKim_Teq : ts_T' fcI_scheme = pi_T' FiveCardKim_PI := erefl.
 
 (** FiveCardKim_G_stable — the monodromy permutes the starts as the share
     permutation (content = fc_content = id form).
@@ -123,9 +123,9 @@ Lemma FiveCardKim_G_stable :
   forall g, g \in pgg_G FiveCardKim_M ->
   forall i : 'I_(ts_T' fcI_scheme).+1,
     fc_content (@pgg_rho FiveCardKim_M g
-      (tnth (cast_tuple (esym (congr1 S FiveCardKim_HT)) (pi_starts FiveCardKim_PI)) i)) =
+      (tnth (cast_tuple (esym (congr1 S FiveCardKim_Teq)) (pi_starts FiveCardKim_PI)) i)) =
     tnth [tuple fc_content
-            (tnth (cast_tuple (esym (congr1 S FiveCardKim_HT)) (pi_starts FiveCardKim_PI)) j)
+            (tnth (cast_tuple (esym (congr1 S FiveCardKim_Teq)) (pi_starts FiveCardKim_PI)) j)
          | j < (ts_T' fcI_scheme).+1] (morphism.mfun (@pgg_rho FiveCardKim_M) g i).
 Proof.
 move=> g Hg i.
@@ -137,21 +137,21 @@ Qed.
     @main correctness: the end-to-end guarantee for the five-card trick on the
     family instance FiveCardKim_M. For any hidden element P of the full C_5
     monodromy, reconstructing the revealed endpoints recovers the secret bit,
-    via the generic pgg_hidden_invariant_perm fed FiveCardKim_G_stable and the
+    via the generic pgg_recon_monodromy_correct fed FiveCardKim_G_stable and the
     family's full-group reconstruction invariance fcI_perm_compatible_kim. The
     den Boer member of the five-card family's correctness theorem. *)
 Theorem FiveCardKim_protocol_correct (s : bool) (P : pgg_gT FiveCardKim_M) :
   P \in pgg_G FiveCardKim_M ->
   ts_valid fcI_scheme s
     [tuple fc_content
-       (tnth (cast_tuple (esym (congr1 S FiveCardKim_HT)) (pi_starts FiveCardKim_PI)) j)
+       (tnth (cast_tuple (esym (congr1 S FiveCardKim_Teq)) (pi_starts FiveCardKim_PI)) j)
     | j < (ts_T' fcI_scheme).+1] ->
-  @pgg_recon_endpoints FiveCardKim_M FiveCardKim_PI bool fcI_scheme FiveCardKim_HT
+  @pgg_recon_endpoints FiveCardKim_M FiveCardKim_PI bool fcI_scheme FiveCardKim_Teq
     fc_content P = s.
 Proof.
 move=> PG Hvalid.
-apply: (@pgg_hidden_invariant_perm FiveCardKim_M FiveCardKim_PI bool fcI_scheme
-          FiveCardKim_HT fc_content (pgg_G FiveCardKim_M) s P
+apply: (@pgg_recon_monodromy_correct FiveCardKim_M FiveCardKim_PI bool fcI_scheme
+          FiveCardKim_Teq fc_content (pgg_G FiveCardKim_M) s P
           (morphism.mfun (@pgg_rho FiveCardKim_M)));
   [exact: subxx | exact: FiveCardKim_G_stable | exact: PG | exact: Hvalid
   | exact: fcI_perm_compatible_kim].
@@ -310,8 +310,8 @@ Theorem den_boer_committed_protocol_correct (s : bool) (P : pgg_gT FiveCardKim_M
   P \in pgg_G FiveCardKim_M ->
   ts_valid fcI_scheme s
     [tuple fc_content
-       (tnth (cast_tuple (esym (congr1 S FiveCardKim_HT)) (pi_starts FiveCardKim_PI)) j)
+       (tnth (cast_tuple (esym (congr1 S FiveCardKim_Teq)) (pi_starts FiveCardKim_PI)) j)
     | j < (ts_T' fcI_scheme).+1] ->
-  @pgg_recon_endpoints FiveCardKim_M FiveCardKim_PI bool fcI_scheme FiveCardKim_HT
+  @pgg_recon_endpoints FiveCardKim_M FiveCardKim_PI bool fcI_scheme FiveCardKim_Teq
     fc_content P = s.
 Proof. exact: FiveCardKim_protocol_correct. Qed.

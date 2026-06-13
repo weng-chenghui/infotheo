@@ -117,7 +117,7 @@ Proof. exact: search_space_leG. Qed.
    This bound is field-agnostic, exact, and edge-case-safe (always >= 60). *)
 
 (* Klein finite-subgroup bound for genus-0 covers. *)
-Definition pgl_bound := maxn (2 * N) 60.
+Definition klein_genus0_bound := maxn (2 * N) 60.
 
 End search_space_bounds.
 
@@ -138,10 +138,10 @@ Let N := (pgg_N' M).+1.
    The genus0_pgl hypothesis is about the SPECIFIC covering scheme cs,
    not universal over all coverings — each instance provides its own proof. *)
 Theorem security_threshold_tradeoff (cs : CoveringScheme M)
-    (genus0_pgl : cd_genus (cs_data cs) = 0 -> #|G| <= pgl_bound M) :
+    (genus0_pgl : cd_genus (cs_data cs) = 0 -> #|G| <= klein_genus0_bound M) :
   (* Either genus 0 with bounded group ... *)
   (cd_genus (cs_data cs) = 0 /\
-   #|G| <= pgl_bound M /\
+   #|G| <= klein_genus0_bound M /\
    ts_T (cs_scheme cs) <= ts_k (cs_scheme cs))
   \/
   (* ... or positive genus with threshold gap *)
@@ -160,8 +160,8 @@ Qed.
 
 (* Contrapositive: large group forces threshold gap *)
 Lemma large_group_forces_gap (cs : CoveringScheme M)
-    (genus0_pgl : cd_genus (cs_data cs) = 0 -> #|G| <= pgl_bound M) :
-  pgl_bound M < #|G| ->
+    (genus0_pgl : cd_genus (cs_data cs) = 0 -> #|G| <= klein_genus0_bound M) :
+  klein_genus0_bound M < #|G| ->
   0 < cd_genus (cs_data cs).
 Proof.
 move=> Hpgl.
@@ -186,10 +186,10 @@ Qed.
 
 (* Combined statement: anonymity set size vs threshold gap *)
 Theorem search_gap_tradeoff (cs : CoveringScheme M)
-    (genus0_pgl : cd_genus (cs_data cs) = 0 -> #|G| <= pgl_bound M)
+    (genus0_pgl : cd_genus (cs_data cs) = 0 -> #|G| <= klein_genus0_bound M)
     (L : nat) :
   (* Either search space is bounded by PGL(2,N) ... *)
-  (@search_space M L <= pgl_bound M /\
+  (@search_space M L <= klein_genus0_bound M /\
    ts_T (cs_scheme cs) <= ts_k (cs_scheme cs))
   \/
   (* ... or threshold has a gap proportional to genus *)
@@ -210,18 +210,18 @@ Qed.
 End tradeoff.
 
 (******************************************************************************)
-(*     Section 4: Bridge to pgl_card in pgl_bound.v                           *)
+(*     Section 4: Bridge to pgl_card in klein_genus0_bound.v                           *)
 (******************************************************************************)
 
-(** pgl_bound_unfold — unfolding lemma exposing the Klein bound formula.
+(** klein_genus0_bound_unfold — unfolding lemma exposing the Klein bound formula.
     Kind: helper.
-    Why: rewrites the abstract [pgl_bound] accessor into its concrete Klein
+    Why: rewrites the abstract [klein_genus0_bound] accessor into its concrete Klein
     form [maxn (2 * N) 60] so instance files can discharge it by direct
     numerical computation on the sheet count [N = (pgg_N' M).+1].
     Used by: downstream instance PGL-bound discharges (rigidity_s5_instance,
     rigidity_kim_instance). *)
-Lemma pgl_bound_unfold (M : MonodromyReprWithGeneratorType) :
-  pgl_bound M = maxn (2 * (pgg_N' M).+1) 60.
+Lemma klein_genus0_bound_unfold (M : MonodromyReprWithGeneratorType) :
+  klein_genus0_bound M = maxn (2 * (pgg_N' M).+1) 60.
 Proof. by []. Qed.
 
 (******************************************************************************)
@@ -230,12 +230,12 @@ Proof. by []. Qed.
 
 (** genus0_automorphism_bound — predicate asserting that, when the covering
     genus is 0, the automorphism group cardinality [#|pgg_G M|] is bounded by
-    [pgl_bound M].
+    [klein_genus0_bound M].
     Kind: interface.
     Why: packages the genus-0 automorphism constraint as a named [Prop] so that
     each concrete instance (five_card, kim, s5, s5x5) can discharge it by
-    direct proof or by unfolding [pgl_bound_unfold]. *)
+    direct proof or by unfolding [klein_genus0_bound_unfold]. *)
 Definition genus0_automorphism_bound (M : MonodromyReprWithGeneratorType)
     (cd : CoveringData M) : Prop :=
-  cd_genus cd = 0 -> (#|pgg_G M| <= pgl_bound M)%N.
+  cd_genus cd = 0 -> (#|pgg_G M| <= klein_genus0_bound M)%N.
 Arguments genus0_automorphism_bound M cd : clear implicits.

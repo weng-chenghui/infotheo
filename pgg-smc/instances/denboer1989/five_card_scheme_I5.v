@@ -45,14 +45,14 @@ Section five_card_scheme_I5.
     decoded heart-pattern has three consecutive hearts equal to s.
     Kind: definition. What: fc_three_consec of the decoded share row equals s.
     Why: the validity predicate of the bool/'I_5 threshold scheme. Used-by:
-    fcI_scheme, fcI_correct, fcI_encode_valid, fcI_perm_compatible_kim. *)
+    fcI_scheme, fcI_reconK, fcI_encode_valid, fcI_perm_compatible_kim. *)
 Definition fcI_valid (s : bool) (shares : 5.-tuple 'I_5) : Prop :=
   fc_three_consec [seq decode_bool x | x <- shares] = s.
 
 (** fcI_recon — recover the secret bit from 'I_5 shares.
     Kind: definition. What: decode each position, then read three consecutive
     hearts. Why: the reconstruction map of the bool/'I_5 threshold scheme.
-    Used-by: fcI_scheme, fcI_correct, fcI_perm_compatible_kim. *)
+    Used-by: fcI_scheme, fcI_reconK, fcI_perm_compatible_kim. *)
 Definition fcI_recon (shares : 5.-tuple 'I_5) : bool :=
   fc_three_consec [seq decode_bool x | x <- shares].
 
@@ -64,13 +64,13 @@ Definition fcI_recon (shares : 5.-tuple 'I_5) : bool :=
 Definition fcI_encode (s : bool) : 5.-tuple 'I_5 :=
   [tuple of [seq encode_bool x | x <- fc_arrange_tup s s]].
 
-(** fcI_correct — reconstruction of valid shares returns the secret.
+(** fcI_reconK — reconstruction of valid shares returns the secret.
     Kind: helper.
     Why: the ts_correct field of fcI_scheme; both fcI_recon and fcI_valid are
     the same fc_three_consec expression, so validity is exactly the recovered
     value.
     Used by: fcI_scheme. *)
-Lemma fcI_correct (s : bool) (shares : 5.-tuple 'I_5) :
+Lemma fcI_reconK (s : bool) (shares : 5.-tuple 'I_5) :
   fcI_valid s shares -> fcI_recon shares = s.
 Proof. by rewrite /fcI_recon /fcI_valid => ->. Qed.
 
@@ -218,7 +218,7 @@ Qed.
 Definition fcI_scheme : ThresholdScheme bool 'I_5 :=
   @MkThresholdScheme bool 'I_5 4 1
     fcI_valid fcI_recon fcI_encode
-    fcI_correct fcI_private fcI_encode_valid.
+    fcI_reconK fcI_private fcI_encode_valid.
 
 (******************************************************************************)
 (** * The 5-cycle as a cyclic shift, and rotation invariance                  *)

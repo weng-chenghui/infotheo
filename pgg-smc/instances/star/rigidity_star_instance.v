@@ -152,11 +152,11 @@ Definition star_covering : CoveringScheme R_star :=
 (* PGL bound hypothesis: |G| <= PGL(2,N).
    With star_covering concrete, cd_genus = 0 is trivially true,
    so we drop the genus=0 premise and keep only the bound. *)
-Hypothesis star_genus0_pgl :
-  (#|pgg_G R_star| <= pgl_bound R_star)%N.
+Hypothesis star_genus0_klein :
+  (#|pgg_G R_star| <= klein_genus0_bound R_star)%N.
 
 Definition star_threshold_witness : ThresholdWitness R_star :=
-  @MkThresholdWitness R_star star_covering (fun _ => star_genus0_pgl).
+  @MkThresholdWitness R_star star_covering (fun _ => star_genus0_klein).
 
 Definition star_rigidity : AlgebraicRigidity R R_star :=
   @MkAlgebraicRigidity R R_star
@@ -180,14 +180,14 @@ Proof. exact: search_space_chain. Qed.
 Lemma star_tradeoff :
   let cs := tw_covering (ar_threshold star_rigidity) in
   (cd_genus (cs_data cs) = 0 /\
-   (#|pgg_G R_star| <= pgl_bound R_star)%N /\
+   (#|pgg_G R_star| <= klein_genus0_bound R_star)%N /\
    (ts_T (cs_scheme cs) <= ts_k (cs_scheme cs))%N)
   \/
   ((0 < cd_genus (cs_data cs))%N /\
    (ts_T (cs_scheme cs) <= ts_k (cs_scheme cs) + 2 * cd_genus (cs_data cs))%N).
 Proof.
 move=> /=.
-exact: (@security_threshold_tradeoff R_star star_covering (fun _ => star_genus0_pgl)).
+exact: (@security_threshold_tradeoff R_star star_covering (fun _ => star_genus0_klein)).
 Qed.
 
 (******************************************************************************)

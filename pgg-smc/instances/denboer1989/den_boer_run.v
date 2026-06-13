@@ -24,16 +24,16 @@ From pgg_smc Require Import den_boer_profile den_boer_encoding.
     @main correctness: the running den Boer protocol computes ab.1 && ab.2, not
     a constant. The committed layout den_boer_layout ab is injected through the
     dealer content readout tnth (den_boer_layout ab); with starts = ord_tuple the
-    endpoint recovery is the reindex form, discharged by pgg_hidden_invariant_perm
+    endpoint recovery is the reindex form, discharged by pgg_recon_monodromy_correct
     fed the layout-content G-stability and den_boer_assemble_valid. *)
 Lemma den_boer_run_output (ab : bool * bool) (P : pgg_gT FiveCardKim_M) :
   P \in pgg_G FiveCardKim_M ->
-  @pgg_recon_endpoints FiveCardKim_M FiveCardKim_PI bool fcI_scheme FiveCardKim_HT
+  @pgg_recon_endpoints FiveCardKim_M FiveCardKim_PI bool fcI_scheme FiveCardKim_Teq
     (tnth (den_boer_layout ab)) P = ab.1 && ab.2.
 Proof.
 move=> PG.
-apply: (@pgg_hidden_invariant_perm FiveCardKim_M FiveCardKim_PI bool fcI_scheme
-          FiveCardKim_HT (tnth (den_boer_layout ab)) (pgg_G FiveCardKim_M)
+apply: (@pgg_recon_monodromy_correct FiveCardKim_M FiveCardKim_PI bool fcI_scheme
+          FiveCardKim_Teq (tnth (den_boer_layout ab)) (pgg_G FiveCardKim_M)
           (ab.1 && ab.2) P (morphism.mfun (@pgg_rho FiveCardKim_M))).
 - exact: subxx.
 - by move=> g Hg i;
@@ -41,7 +41,7 @@ apply: (@pgg_hidden_invariant_perm FiveCardKim_M FiveCardKim_PI bool fcI_scheme
 - exact: PG.
 - have Hlay :
     [tuple tnth (den_boer_layout ab)
-       (tnth (cast_tuple (esym (congr1 succn FiveCardKim_HT))
+       (tnth (cast_tuple (esym (congr1 succn FiveCardKim_Teq))
                 (pi_starts FiveCardKim_PI)) j)
      | j < (ts_T' fcI_scheme).+1] = den_boer_layout ab.
     apply: eq_from_tnth => j.
@@ -59,9 +59,9 @@ Definition den_boer_decode (committed : seq 'I_(pgg_N' FiveCardKim_M).+1)
     : bool * bool :=
   (decode_bool (nth ord0 committed 0), decode_bool (nth ord0 committed 1)).
 
-(** den_boer_decode_commit — decoding the honestly committed bits returns them.
+(** den_boer_decodeK — decoding the honestly committed bits returns them.
     @composes: den_boer_run_output. *)
-Lemma den_boer_decode_commit (a b : bool) :
+Lemma den_boer_decodeK (a b : bool) :
   den_boer_decode [:: encode_bool a; encode_bool b] = (a, b).
 Proof. by rewrite /den_boer_decode /= !decode_encode_bool. Qed.
 

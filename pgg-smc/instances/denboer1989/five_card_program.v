@@ -158,7 +158,7 @@ Definition decode_bool (s : 'I_5) : bool := s == inord 1.
     Kind: helper.
     Why: makes encode_bool a section of decode_bool, which gives injectivity
     (encode_bool_inj) and lets the bool-level scheme facts lift to 'I_5.
-    Used by: encode_bool_inj, fcI_encode_valid, fcI_correct. *)
+    Used by: encode_bool_inj, fcI_encode_valid, fcI_reconK. *)
 Lemma decode_encode_bool (x : bool) : decode_bool (encode_bool x) = x.
 Proof.
 rewrite /decode_bool /encode_bool; case: x => //=.

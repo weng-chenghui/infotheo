@@ -18,7 +18,7 @@
 (*   card_scalar_gl2 == |scalar_gl2| = q - 1                                 *)
 (*   scalar_gl2_normal == scalar_gl2 is normal in GL(2,F)                     *)
 (*   card_pgl2     == |PGL(2,q)| = q * (q^2 - 1)                             *)
-(*   pgl2_card_eq_pgl_bound == |PGL(2,q)| = pgl_bound M when q = N           *)
+(*   pgl2_card_eq_pgl_bound == |PGL(2,q)| = klein_genus0_bound M when q = N           *)
 (*                                                                            *)
 (* The genus-0 PGL bound (|G| <= |PGL(2,N)| for genus-0 coverings) is      *)
 (* NOT stated here — it is an interface-implementation pattern where each   *)
@@ -185,7 +185,7 @@ Qed.
 End pgl2_def.
 
 (******************************************************************************)
-(*     Section 4: Connection to pgl_bound                                     *)
+(*     Section 4: Connection to klein_genus0_bound                                     *)
 (******************************************************************************)
 
 Section pgl_connection.
@@ -193,7 +193,7 @@ Section pgl_connection.
 Variable F : finFieldType.
 Let q := #|F|.
 
-(* The combinatorial formula q * (q^2 - 1) matches the pgl_bound
+(* The combinatorial formula q * (q^2 - 1) matches the klein_genus0_bound
    definition from cover_tradeoff.v *)
 Lemma pgl2_card_formula : #|pgl2 F| = (q * (q ^ 2 - 1))%N.
 Proof. exact: card_pgl2. Qed.

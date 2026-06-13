@@ -178,7 +178,7 @@ Qed.
 
 (** binent_2_5 — the binary entropy at 2/5 in closed form.
     -2/5 log(2/5) - 3/5 log(3/5) = log 5 - 2/5 - 3/5 log 3.
-    @composes: leak_k2_d2. *)
+    @composes: leak_k2_dist2. *)
 Lemma binent_2_5 :
   - (2%:R / 5%:R) * log (2%:R / 5%:R) - (3%:R / 5%:R) * log (3%:R / 5%:R)
   = log 5%:R - 2%:R / 5%:R - 3%:R / 5%:R * log 3%:R :> R.
@@ -376,11 +376,11 @@ rewrite !binent_1_7 binent_2_5 addr0.
 lra.
 Qed.
 
-(** leak_k2_d2 — two distance-2 cards leak
+(** leak_k2_dist2 — two distance-2 cards leak
     5/2 - (3/20) log 3 - (1/2) log 5 - (7/20) log 7 bits about a && b.
     @main security: the mutual information between the secret and the colours
     at the distance-2 positions {0, 2}. *)
-Lemma leak_k2_d2 :
+Lemma leak_k2_dist2 :
   `I( Secret ; ViewA [:: 0; 2]%N ) =
     5%:R / 2%:R - (3%:R / 20%:R) * log 3%:R - (2%:R^-1) * log 5%:R
       - (7%:R / 20%:R) * log 7%:R.

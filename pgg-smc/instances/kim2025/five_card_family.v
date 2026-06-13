@@ -172,8 +172,8 @@ Definition five_card_profile (R : realType) (eps : R)
     sw_bound_eps at bias 0 equals 0, the precise sense in which the unbiased
     family member recovers den Boer's perfect dealing-phase anonymity (a
     uniform cyclic cut leaks nothing). At eps = 0 the second-largest eigenvalue
-    modulus kim_slev is 0, so any positive power vanishes and the bound
-    sqrt 5 * kim_slev ^+ L.+1 collapses to 0 (kim_security_at_zero). Restricted
+    modulus kim_lambda2 is 0, so any positive power vanishes and the bound
+    sqrt 5 * kim_lambda2 ^+ L.+1 collapses to 0 (kim_security_at_zero). Restricted
     to L.+1 because at L = 0 the bound is sqrt 5, not 0 (no shuffle applied).
     Naming: _eq0 marks the lhs = 0 shape (the auditor's own G001 sketch); the
     eps0 component keeps the bias condition explicit. *)

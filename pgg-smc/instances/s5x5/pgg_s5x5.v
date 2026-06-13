@@ -19,7 +19,7 @@
 (*   s5x5_gens_nat      == nat-level generator function for vm_compute       *)
 (*   s5x5_gen_tuple     == 8.-tuple {perm 'I_10} of generators              *)
 (*   s5x5_gens_agree    == agreement between nat and perm levels             *)
-(*   M_s5x5 / R_s5x5   == Gen_PGGTypes instance                             *)
+(*   M_s5x5 / s5x5_M   == Gen_PGGTypes instance                             *)
 (*   s5x5_weval_inj1    == word-eval injectivity at L=1                      *)
 (*   s5x5_comm_nat      == commutation predicate for trace counting          *)
 (*   s5x5_nt_L*         == trace count demonstrations                        *)
@@ -96,7 +96,7 @@ Qed.
 (******************************************************************************)
 
 Definition M_s5x5 := @Gen_PGGTypes 7 8 s5x5_gen_tuple.
-Definition R_s5x5 : MonodromyReprWithGeneratorType := M_s5x5.
+Definition s5x5_M : MonodromyReprWithGeneratorType := M_s5x5.
 
 (******************************************************************************)
 (*     Word-eval injectivity at L=1                                           *)

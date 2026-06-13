@@ -22,7 +22,7 @@
 (* normalisation exceeds a five-minute budget on the LDL^T coefficients      *)
 (* (numerators up to 10^18), measured empirically.                            *)
 (*                                                                            *)
-(* The Parameter s5_rayleigh_Qsq_R below is the sole imported assumption;   *)
+(* The Parameter s5_rayleigh_Q2_R below is the sole imported assumption;   *)
 (* every other step is a structural Rocq proof.                               *)
 (******************************************************************************)
 
@@ -145,7 +145,7 @@ Qed.
     definitions [s5_sos_lower_triangular] and [s5_sos_diagonal] below,
     together with the proved [s5_sos_diagonal_nonneg], expose the rational
     witness inside Rocq; only the SoS -> Rayleigh implication remains
-    axiomatised. A future PR may discharge [s5_rayleigh_Qsq_R] from the
+    axiomatised. A future PR may discharge [s5_rayleigh_Q2_R] from the
     companion definitions by entrywise sum-of-squares expansion. *)
 
 (* Rational SoS certificate data, copied from the external Python script.
@@ -164,7 +164,7 @@ Definition s5_sos_lower_triangular : seq (seq rat) :=
     Kind: instance.
     Why: rational witness data consumed by the spectral-certificate machinery
     that discharges the Rayleigh-bound hypothesis for the S_5 lazy walk.
-    Used by: s5_rayleigh_Qsq_R (axiom statement relies on this diagonal data). *)
+    Used by: s5_rayleigh_Q2_R (axiom statement relies on this diagonal data). *)
 Definition s5_sos_diagonal : seq rat :=
   [:: 1%:Q ; 1%:Q ; 1%:Q ; 1%:Q ].
 
@@ -174,7 +174,7 @@ Definition s5_sos_diagonal : seq rat :=
     certificate is consumed to prove a Rayleigh-bound inequality; entrywise
     nonnegativity is a prerequisite for reading the diagonal as an SoS form.
     Used by: downstream SoS-expansion lemmas that will eventually replace the
-    [s5_rayleigh_Qsq_R] axiom. *)
+    [s5_rayleigh_Q2_R] axiom. *)
 Lemma s5_sos_diagonal_nonneg : forall k,
   (0%:Q <= nth 0%:Q s5_sos_diagonal k)%Q.
 Proof.
@@ -185,7 +185,7 @@ case; [by [] |].
 by move=> k /=; rewrite nth_nil.
 Qed.
 
-Axiom s5_rayleigh_Qsq_R :
+Axiom s5_rayleigh_Q2_R :
   forall (R : realType) (v : 'cV[R]_5),
   \sum_i v i ord0 = 0 ->
   (v^T
@@ -210,7 +210,7 @@ have Hbound :=
   @symm_ds_TV_bound R 3 3 (path_gen_tuple 3) path_gen_tuple_3_invol
     (s5_alpha_R R) L s
     (s5_alpha_R_ge0 R) (s5_alpha_R_le1 R)
-    (@s5_rayleigh_Qsq_R R).
+    (@s5_rayleigh_Q2_R R).
 by rewrite /= in Hbound.
 Qed.
 

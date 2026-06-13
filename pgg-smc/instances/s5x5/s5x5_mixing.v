@@ -374,7 +374,7 @@ Qed.
 (** Q_lazy_mul_v — lazy-walk matrix action: Q_lazy v = (Q_s5 v + v) / 2.
     Kind: helper.
     Why: separates the contraction (Q_s5) and identity parts for the Rayleigh bound.
-    Used by: [s5_lazy_rayleigh_Qsq_R] and downstream TV bounds. *)
+    Used by: [s5_lazy_rayleigh_Q2_R] and downstream TV bounds. *)
 Lemma Q_lazy_mul_v (v : 'cV[R]_5) :
   Q_lazy *m v = (2%:R)^-1 *: (Q_s5 *m v + v).
 Proof.
@@ -458,7 +458,7 @@ have iv_ge0 : 0 <= i_v by exact: cV_inner_ge0.
 have a_ge0 : 0 <= s5_alpha_R R by exact: s5_alpha_R_ge0.
 have Hbound : cV_inner (Q_s5 *m v) (Q_s5 *m v) <= (s5_alpha_R R) ^+ 2 * i_v.
   rewrite cV_inner_Qv_Qv_symm; last exact: Q_s5_symm.
-  exact: s5_rayleigh_Qsq_R.
+  exact: s5_rayleigh_Q2_R.
 have HCS := cV_cauchy_schwarz v (Q_s5 *m v).
 have HCS2 : (cV_inner v (Q_s5 *m v)) ^+ 2 <= i_v * ((s5_alpha_R R) ^+ 2 * i_v).
   apply: (Order.POrderTheory.le_trans HCS).
@@ -495,7 +495,7 @@ by rewrite addrA addrAC.
 Qed.
 
 (* === Main theorem: Rayleigh bound for Q_lazy^2 === *)
-Lemma s5_lazy_rayleigh_Qsq_R (v : 'cV[R]_5) :
+Lemma s5_lazy_rayleigh_Q2_R (v : 'cV[R]_5) :
   \sum_i v i ord0 = 0 ->
   (v^T *m (Q_lazy *m Q_lazy) *m v) ord0 ord0
     <= s5_lazy_alpha_R ^+ 2 * cV_inner v v.
@@ -521,7 +521,7 @@ have iv_ge0 : 0 <= Ivv by exact: cV_inner_ge0.
 have a_ge0 : 0 <= s5_alpha_R R by exact: s5_alpha_R_ge0.
 have HQQ : IQQ <= (s5_alpha_R R) ^+ 2 * Ivv.
   rewrite /IQQ cV_inner_Qv_Qv_symm; last exact: Q_s5_symm.
-  exact: s5_rayleigh_Qsq_R.
+  exact: s5_rayleigh_Q2_R.
 have HvQ : IvQ <= s5_alpha_R R * Ivv.
   exact: s5_inner_v_Qv_bound.
 (* Algebraic chain *)
@@ -592,7 +592,7 @@ apply: (@symm_ds_TV_bound R 7 3 s5_lazy_gen_tuple s5_lazy_gen_invol
           (s5_lazy_alpha_R R) L s).
 - exact: s5_lazy_alpha_R_ge0.
 - exact: s5_lazy_alpha_R_le1.
-- exact: s5_lazy_rayleigh_Qsq_R.
+- exact: s5_lazy_rayleigh_Q2_R.
 Qed.
 
 End s5_lazy_TV.
@@ -1056,7 +1056,7 @@ apply: (@symm_ds_TV_bound R 7 3 s5_lazy_gen_tuple' s5_lazy_gen_invol'
   have -> : schreier_transition R s5_lazy_gen_tuple'
           = schreier_transition R s5_lazy_gen_tuple.
     by rewrite (s5_lazy_Q_eq_swap R).
-  exact: s5_lazy_rayleigh_Qsq_R.
+  exact: s5_lazy_rayleigh_Q2_R.
 Qed.
 
 (******************************************************************************)

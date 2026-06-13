@@ -187,7 +187,7 @@ Eval vm_compute in achievable_scan (path_desc 4) [:: 1; 2; 3; 4; 5].
 (******************************************************************************)
 (*     Section 4: Threshold Options                                          *)
 (*                                                                           *)
-(*     genus=0: gap=0 -> (N,N)-threshold, requires |G| <= pgl_bound(N).     *)
+(*     genus=0: gap=0 -> (N,N)-threshold, requires |G| <= klein_genus0_bound(N).     *)
 (*     genus=g: gap=2g -> (N-2g, N)-threshold, tolerates 2g failures.       *)
 (*     PGL bound = N*(N^2-1).                                                *)
 (******************************************************************************)
@@ -214,8 +214,8 @@ Eval vm_compute in threshold_options 6 3.
 (* Threshold options for N=7 (genus 0..3) *)
 Eval vm_compute in threshold_options 7 3.
 
-(* Can Path(3) use genus=0?  |S5|=120, pgl_bound(5)=120. YES! *)
-(* Can OC(2,5) use genus=0?  Need |G| <= pgl_bound(6)=210. *)
+(* Can Path(3) use genus=0?  |S5|=120, klein_genus0_bound(5)=120. YES! *)
+(* Can OC(2,5) use genus=0?  Need |G| <= klein_genus0_bound(6)=210. *)
 
 (******************************************************************************)
 (*     Section 5: Combined Tradeoff — Best Secure Instances                  *)
@@ -224,7 +224,7 @@ Eval vm_compute in threshold_options 7 3.
 (*     Highlight instances with eps < 1 AND fault-tolerant threshold.        *)
 (******************************************************************************)
 
-(* Path(3), N=5, |S5|=120, pgl_bound(5)=120 (genus=0 possible!) *)
+(* Path(3), N=5, |S5|=120, klein_genus0_bound(5)=120 (genus=0 possible!) *)
 (* Eps progression with threshold context:
    genus=0 -> (5,5)-threshold (exact, no fault tolerance)
    genus=1 -> (3,5)-threshold (tolerates 2 failures)            *)
@@ -236,7 +236,7 @@ Eval vm_compute in
    threshold_options 5 2,
    pgl_bound_nat 5).
 
-(* OC(2,5), N=6, pgl_bound(6)=210 *)
+(* OC(2,5), N=6, klein_genus0_bound(6)=210 *)
 (* genus=0 -> (6,6)-threshold; genus=1 -> (4,6)-threshold *)
 Eval vm_compute in
   let desc := oc_desc 2 5 in
@@ -246,7 +246,7 @@ Eval vm_compute in
    threshold_options 6 2,
    pgl_bound_nat 6).
 
-(* OC(2,3), N=4, pgl_bound(4)=60 *)
+(* OC(2,3), N=4, klein_genus0_bound(4)=60 *)
 Eval vm_compute in
   let desc := oc_desc 2 3 in
   let Ls := [:: 1; 2; 3; 4; 5] in
@@ -255,7 +255,7 @@ Eval vm_compute in
    threshold_options 4 2,
    pgl_bound_nat 4).
 
-(* Path(4), N=6, |S6|=720, pgl_bound(6)=210 *)
+(* Path(4), N=6, |S6|=720, klein_genus0_bound(6)=210 *)
 (* |S6|=720 > 210, so genus=0 NOT available for full S6 *)
 Eval vm_compute in
   let desc := path_desc 4 in
