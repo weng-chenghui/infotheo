@@ -1,0 +1,572 @@
+% The PGG framework blueprint: modular monodromy MPC + the den Boer instance.
+% Module prefixes:  pgg_smc.<mod>  (lib/protocol/groups/security/instances)
+%                   pgg_reconstruct.<mod>  (reconstruct/)
+% Status: \rocqok = proved/defined in Rocq (green). No \rocqok = an assumed,
+% cited classical fact (the six justified axioms), rendered blue-dashed.
+
+\chapter{Introduction}
+
+The PGG framework runs a card-shuffling multiparty protocol whose recovered
+secret lives in a starting layout, with the monodromy cut as anonymizing
+randomness. Its guarantees are theorems quantified over interface records; an
+\emph{instance} is a tuple of records that fills those interfaces. This
+blueprint makes that modularity structural. Part~I introduces every interface
+and every generic theorem with no instance named. Part~II is pure
+instantiation: den Boer as the worked end-to-end hero, the five-card family of
+Kim as the biased anonymity instance, and $S_5$ / $S_5\times S_5$ as the large
+groups the admissibility gate rejects as algebraic-geometry codes.
+
+The worked MPC (den Boer), its quantitative leakage analysis (Kim), and the
+impossibility theorem (the $S_5$ no-go) are entirely axiom-free. Only the
+statement that the large groups exist as covers of the right genus is taken on
+trust, as six cited classical facts confined to the $S_5$ and $S_5\times S_5$
+chapters. In the dependency graph these six are the only blue-dashed nodes;
+everything else is green.
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[
+  iface/.style={draw, rounded corners, align=center, inner sep=4pt, font=\small,
+                text width=4.0cm, minimum height=0.7cm, fill=black!4},
+  plug/.style={draw, rounded corners, align=center, inner sep=3pt, font=\footnotesize,
+               text width=3.2cm, minimum height=0.6cm},
+  band/.style={draw, rounded corners, align=center, inner sep=4pt, font=\footnotesize,
+               text width=6.4cm, fill=black!3},
+  verdict/.style={draw, rounded corners, align=center, inner sep=3pt, font=\footnotesize,
+                  text width=4.2cm, minimum height=0.6cm},
+  every path/.append style={-stealth, thick}, font=\small ]
+\node[iface] (mono)  at (0,9.0) {\textbf{MonodromyRepr} / PGGInterface\\ \scriptsize cut group $G$, starts $\pi$};
+\node[iface] (ts)    at (0,7.5) {\textbf{ThresholdScheme}\\ \scriptsize share $\cdot$ reconstruct};
+\node[iface] (plug)  at (0,6.0) {\textbf{ReconPlug}\\ \scriptsize reconstruction invariance};
+\node[iface] (ie)    at (0,4.5) {\textbf{InputEncoding}\\ \scriptsize inputs $\mapsto$ layout};
+\node[iface] (prof)  at (0,3.0) {\textbf{MonodromyProfile} $+$ SecurityWitness\\ \scriptsize anonymity $\eps$};
+\node[iface] (pismc) at (0,1.5) {\textbf{piSMC dealer} $+$ session types};
+\node[plug] (fkim)  at (6.2,9.0) {$\mathtt{FiveCardKim\_M}$, $\pi=\mathrm{ord\_tuple}\,5$};
+\node[plug] (fcs)   at (6.2,7.5) {$\mathtt{fcI\_scheme}$};
+\node[plug] (fcp)   at (6.2,6.0) {$\mathtt{five\_card\_plug}$};
+\node[plug] (dbe)   at (6.2,4.5) {$\mathtt{den\_boer\_encoding}$};
+\node[plug] (dbp)   at (6.2,3.0) {$\mathtt{den\_boer\_profile}$ ($\eps=0$)};
+\node[plug] (dbd)   at (6.2,1.5) {$\mathtt{den\_boer\_dealer\_layout}$};
+\draw (fkim) -- (mono);  \draw (fcs) -- (ts);    \draw (fcp) -- (plug);
+\draw (dbe)  -- (ie);    \draw (dbp) -- (prof);  \draw (dbd) -- (pismc);
+\node[band] (gen) at (0,-0.2) {\textbf{generic theorems} (proven once):\\
+  $\mathtt{pgg\_recon\_monodromy\_correct}$ $\cdot$ $\mathtt{recon\_from\_layout\_output}$\\
+  $\cdot$ $\mathtt{ts\_private}$ $\cdot$ $\mathtt{sw\_bound}$ $\cdot$ session duality};
+\draw (ts) -- (gen); \draw (plug) -- (gen); \draw (ie) -- (gen);
+\draw (prof) -- (gen); \draw (pismc) -- (gen);
+\node[band, text width=4.0cm, fill=black!1] (e2e) at (6.2,-0.2)
+  {\textbf{den Boer end-to-end:}\\ recovers $a\AND b$, $\MI(\text{in};\text{view}\mid\text{out})=0$,\\
+   $\mathtt{leak\_k}$ ramp, duality};
+\draw (dbd) -- (e2e); \draw (dbe) -- (e2e);
+\node[band, text width=7.2cm] (gate) at (3.0,-2.2)
+  {\textbf{AlgebraicRigidity gate} \;($\mathtt{ar\_large\_group\_forces\_gap}\cdot\mathtt{ar\_gap\_bound}$)\\
+   Klein cap $\Klein$ sorts instances by $|G|$};
+\draw (gen) -- (gate);
+\node[verdict, fill=green!8] (sharp) at (-0.3,-4.0)
+  {$|G|\le 60$: genus-0 sharp\\ \textbf{den Boer} $C_5$, $|G|=5$ \;$\checkmark$ AG code};
+\node[verdict, fill=red!6]  (nogo)  at (6.0,-4.0)
+  {$|G|>60$: AG-code no-go\\ \textbf{s5} $|G|{=}120$ $\times$, \textbf{s5x5} $|G|{=}14400$ $\times$\\
+   \scriptsize genus forced $>0$; s5 $\to$ Bring genus 4; gap vacuous};
+\draw (gate) -- (sharp); \draw (gate) -- (nogo);
+\node[font=\itshape\footnotesize, anchor=south] at (0,9.7) {Part I: the framework (no instance named)};
+\node[font=\itshape\footnotesize, anchor=south] at (6.2,9.7) {Part II: instantiation};
+\end{tikzpicture}
+\caption{The PGG framework's modularity. The interface column (left, Part~I)
+names no instance; an instance is exactly a tuple of arrows filling the six
+slots. den Boer (right, Part~II) fills all six and inherits every generic
+theorem (band, centre): reconstruction is monodromy-invariant, the input
+encoding's output is correct under every cut, the scheme is threshold-private,
+and the dealing is anonymous. Its end-to-end guarantees follow. The
+admissibility gate (bottom) sorts monodromy groups by the Klein cap $\Klein$:
+small groups admit a sharp genus-0 AG code (den Boer's $C_5$, $\checkmark$), while
+large groups are forced off genus 0, where the threshold gap is vacuous, so they
+are an AG-code no-go (s5, s5x5, $\times$). The genus and gap are the AG-code
+lens; the $\checkmark$/$\times$ is the verdict.}
+\label{fig:bp:modularity}
+\end{figure}
+
+\part{The modular framework}
+
+\chapter{The monodromy interface}
+
+\begin{definition}[Monodromy representation]
+  \label{def:monodromy_repr}
+  \rocq{pgg_smc.pgg_interface.MonodromyReprType,
+       pgg_smc.pgg_interface.PGGTypes,
+       pgg_smc.pgg_interface.MonodromyReprWithGeneratorType}
+  \rocqok
+  A monodromy representation packages a finite group $G$ acting by a morphism
+  $\mono : G \to \mathfrak{S}_N$ on $N$ card positions. The generator-aware
+  variant adds a generating tuple, supporting the word search of the security
+  analysis.
+\end{definition}
+
+\begin{definition}[Protocol interface and starting layout]
+  \label{def:pgg_interface}
+  \rocq{pgg_smc.pgg_interface.PGGInterface,
+       pgg_smc.pgg_interface.pgg_dtype,
+       pgg_smc.pgg_interface.pgg_data}
+  \rocqok
+  \uses{def:monodromy_repr}
+  A protocol interface fixes the player count $T$ and a tuple $\pi$ of distinct
+  starting positions. The session data type tags the three message kinds dealt
+  during the protocol.
+\end{definition}
+
+\begin{definition}[Endpoints and the word layer]
+  \label{def:endpoint}
+  \rocq{pgg_smc.pgg_interface.endpoint,
+       pgg_smc.pgg_interface.endpoints,
+       pgg_smc.pgg_interface.word_eval,
+       pgg_smc.pgg_interface.search_space}
+  \rocqok
+  \uses{def:monodromy_repr,def:pgg_interface}
+  The endpoint of a cut $\cut$ at a position is its image $\mono(\cut)$.
+  A length-$L$ word evaluates to a group element, and the search space is the
+  cardinality of the reachable set, bounded by $|G|$.
+\end{definition}
+
+\chapter{Sharing, reconstruction, and the recon plug}
+
+\begin{definition}[Threshold scheme]
+  \label{def:threshold_scheme}
+  \rocq{pgg_reconstruct.pgg_sharing_framework.ThresholdScheme}
+  \rocqok
+  A threshold scheme bundles a validity predicate $\val$, a reconstruction map
+  $\recon$, and an encoder, with correctness ($\val~\secret~\text{shares}
+  \Rightarrow \recon~\text{shares}=\secret$) and privacy (sub-threshold
+  coalitions are indistinguishable across secrets) as axioms.
+\end{definition}
+
+\begin{definition}[Reconstruction invariance and the recon plug]
+  \label{def:recon_plug}
+  \rocq{pgg_reconstruct.pgg_sharing_framework.ts_recon_perm_invariant,
+       pgg_reconstruct.covering_scheme.ReconPlug}
+  \rocqok
+  \uses{def:threshold_scheme,def:monodromy_repr}
+  Reconstruction invariance is the position-permutation law
+  $\recon[\,\text{tnth shares}~(\sigma(g)~i)\,] = \secret$ for $g\in G$. A recon
+  plug bundles a scheme, a content readout, the monodromy-induced permutation,
+  and a proof of this invariance over the full group.
+\end{definition}
+
+\begin{definition}[Endpoint reconstruction]
+  \label{def:pgg_recon}
+  \rocq{pgg_reconstruct.pgg_sharing_framework.pgg_recon,
+       pgg_reconstruct.pgg_sharing_framework.pgg_recon_endpoints}
+  \rocqok
+  \uses{def:threshold_scheme,def:pgg_interface}
+  Reconstruction of the dealt endpoints reads each player's shuffled start
+  through the content map and applies $\recon$.
+\end{definition}
+
+\begin{theorem}[Recovery is monodromy-invariant]
+  \label{thm:recon_monodromy_correct}
+  \rocq{pgg_reconstruct.pgg_sharing_framework.pgg_recon_monodromy_correct}
+  \rocqok
+  \uses{def:pgg_recon,def:recon_plug}
+  For any hidden cut $P$ in the monodromy group, reconstructing the endpoints
+  recovers the secret. This is the central correctness guarantee of the whole
+  framework: it depends only on reconstruction invariance and a valid starting
+  layout, not on any instance.
+\end{theorem}
+
+\begin{definition}[Covering data and the covering scheme]
+  \label{def:covering_scheme}
+  \rocq{pgg_reconstruct.covering_scheme.CoveringData,
+       pgg_reconstruct.covering_scheme.CoveringScheme,
+       pgg_reconstruct.covering_scheme.genus_from_hurwitz}
+  \rocqok
+  \uses{def:recon_plug}
+  Covering data records the Riemann--Hurwitz parameters of a curve cover and
+  determines the covering genus $\genus$. A covering scheme couples a recon plug
+  to covering data with the gap bound $T \le k + 2\genus$.
+\end{definition}
+
+\chapter{Input encoding}
+
+\begin{definition}[Input encoding]
+  \label{def:input_encoding}
+  \rocq{pgg_reconstruct.input_encoding.InputEncoding}
+  \rocqok
+  \uses{def:recon_plug}
+  An input encoding is the deterministic half of a randomized encoding of a
+  function $f$ over a plug. It maps each input to a valid share layout
+  ($\mathtt{ie\_assemble}$), names the computed function $f$
+  ($\mathtt{ie\_output}$), and requires equal-output inputs to lie in one
+  cut-orbit ($\mathtt{ie\_orbit}$). The cut supplies the randomness.
+\end{definition}
+
+\begin{theorem}[Output correctness for every cut]
+  \label{thm:ie_output_correct}
+  \rocq{pgg_reconstruct.input_encoding.ie_output_correct}
+  \rocqok
+  \uses{def:input_encoding,def:recon_plug}
+  For every cut $g_0$ in the group, reconstructing the cut-permuted assembled
+  layout returns $f$ of the input. The output is independent of the cut.
+\end{theorem}
+
+\begin{theorem}[Layout recovery]
+  \label{thm:recon_from_layout_output}
+  \rocq{pgg_reconstruct.input_encoding.recon_from_layout,
+       pgg_reconstruct.input_encoding.recon_from_layout_output}
+  \rocqok
+  \uses{thm:ie_output_correct}
+  The reindex-form recovery of an encoded input's layout returns $f$, generic
+  over the plug and the encoded function. The den Boer output theorem is this
+  result at one instance.
+\end{theorem}
+
+\chapter{Anonymity: profile and security witness}
+
+\begin{definition}[Security witness]
+  \label{def:security_witness}
+  \rocq{pgg_reconstruct.algebraic_rigidity.SecurityWitness,
+       pgg_reconstruct.algebraic_rigidity.SecurityExact,
+       pgg_reconstruct.algebraic_rigidity.SecurityAsymptotic}
+  \rocqok
+  A security witness carries an always-present variation-distance bound on the
+  cut distribution, optionally an exact equality, and optionally an asymptotic
+  spectral-gap convergence certificate. The bound is the anonymity parameter
+  $\eps$.
+\end{definition}
+
+\begin{definition}[Monodromy profile]
+  \label{def:monodromy_profile}
+  \rocq{pgg_smc.pgg_monodromy_profile.MonodromyProfile}
+  \rocqok
+  \uses{def:monodromy_repr,def:pgg_interface,def:security_witness,def:recon_plug}
+  A monodromy profile is a fully plugged group program: a monodromy
+  representation, a protocol interface, a security witness, and a recon plug.
+\end{definition}
+
+\chapter{The piSMC realization}
+
+\begin{definition}[The exchange programs]
+  \label{def:exchange_programs}
+  \rocq{pgg_smc.card_exchange_pismc.exchange_dealer,
+       pgg_smc.card_exchange_pismc.exchange_player,
+       pgg_smc.card_exchange_pismc.exchange_verifier,
+       pgg_smc.pgg_input_commitment.exchange_dealer_with_commit}
+  \rocqok
+  \uses{def:pgg_interface}
+  The dealer deals each player a hand and a selection index; the player reveals
+  one card position; the verifier collects them. A commit prologue prepends one
+  receive per input party, threading the committed values into the dealing body.
+\end{definition}
+
+\begin{lemma}[Session-type duality]
+  \label{lem:session_duality}
+  \rocq{pgg_smc.card_exchange_pismc.channels_dual,
+       pgg_smc.card_exchange_pismc.dealer_player0_dual_gen,
+       pgg_smc.pgg_input_commitment.exchange_dealer_with_commit_nil}
+  \rocqok
+  \uses{def:exchange_programs}
+  Every pair of protocol processes has dual session types, discharged by
+  reduction. The check is on the channel structure, independent of the dealt
+  payload, so it transfers to any content readout.
+\end{lemma}
+
+\chapter{Admissibility: the algebraic-rigidity gate}
+
+\begin{definition}[The Klein genus-0 bound]
+  \label{def:klein_bound}
+  \rocq{pgg_reconstruct.cover_tradeoff.klein_genus0_bound,
+       pgg_reconstruct.cover_tradeoff.genus0_automorphism_bound}
+  \rocqok
+  \uses{def:covering_scheme}
+  A genus-0 cover embeds $G$ in $\mathrm{PGL}(2,\overline{\GF})$, so Klein's
+  classification bounds $|G| \le \max(2N,60)$, with $60=|A_5|$ the largest
+  polyhedral exception. The constant is the Klein cap, not $|\mathrm{PGL}(2,q)|$.
+\end{definition}
+
+\begin{definition}[Algebraic rigidity]
+  \label{def:algebraic_rigidity}
+  \rocq{pgg_reconstruct.algebraic_rigidity.ThresholdWitness,
+       pgg_reconstruct.algebraic_rigidity.AlgebraicRigidity}
+  \rocqok
+  \uses{def:security_witness,def:covering_scheme,def:klein_bound}
+  Algebraic rigidity combines a security witness with a threshold witness, the
+  latter carrying the genus-0 obligation $\genus=0 \Rightarrow |G| \le
+  \mathtt{klein\_genus0\_bound}$.
+\end{definition}
+
+\begin{theorem}[The rigidity laws]
+  \label{thm:rigidity_laws}
+  \rocq{pgg_reconstruct.algebraic_rigidity.ar_large_group_forces_gap,
+       pgg_reconstruct.algebraic_rigidity.ar_gap_bound,
+       pgg_reconstruct.algebraic_rigidity.ar_genus_gap_dichotomy,
+       pgg_reconstruct.algebraic_rigidity.ar_protocol_correct}
+  \rocqok
+  \uses{def:algebraic_rigidity,def:klein_bound,thm:recon_monodromy_correct}
+  A group exceeding the Klein cap is forced off genus 0; the threshold gap is
+  then bounded by $2\genus$. The dichotomy: either genus-0 with a bounded group
+  and no gap, or positive genus with a gap.
+\end{theorem}
+
+\part{The instances}
+
+\chapter{den Boer: the perfect five-card MPC}
+
+\begin{definition}[The five-card scheme and plug]
+  \label{def:five_card}
+  \rocq{pgg_smc.five_card_scheme_I5.fcI_scheme,
+       pgg_smc.five_card_scheme_I5.fcI_reconK,
+       pgg_smc.five_card_kim.FiveCardKim_M,
+       pgg_smc.five_card_family.five_card_plug,
+       pgg_smc.five_card_family.fcI_perm_compatible_kim}
+  \rocqok
+  \uses{def:threshold_scheme,def:recon_plug,def:monodromy_repr}
+  The five-card scheme reconstructs the secret bit as ``three consecutive
+  hearts''. Its monodromy is the cyclic group $C_5$ generated by the 5-cycle,
+  and reconstruction is invariant over the whole group; together they form
+  $\mathtt{five\_card\_plug}$.
+\end{definition}
+
+\begin{definition}[The den Boer encoding]
+  \label{def:den_boer_encoding}
+  \rocq{pgg_smc.den_boer_encoding.den_boer_layout,
+       pgg_smc.den_boer_encoding.den_boer_encoding,
+       pgg_smc.den_boer_encoding.den_boer_orbit_perm}
+  \rocqok
+  \uses{def:input_encoding,def:five_card}
+  The two committed bits $a,b$ determine the starting layout, which is a valid
+  sharing of $a\AND b$, and equal-output inputs are one cyclic rotation apart.
+  This instantiates the input encoding at $f(a,b)=a\AND b$.
+\end{definition}
+
+\begin{theorem}[The running protocol computes $a\AND b$]
+  \label{thm:den_boer_run_output}
+  \rocq{pgg_smc.den_boer_run.den_boer_run_output,
+       pgg_smc.den_boer_run.den_boer_dealer_layout,
+       pgg_smc.den_boer_run.den_boer_decodeK}
+  \rocqok
+  \uses{def:den_boer_encoding,thm:recon_monodromy_correct}
+  The committed dealer injects the input-derived layout through the content
+  readout, and recovery returns $a\AND b$ for every cut. Zero axioms.
+\end{theorem}
+
+\begin{lemma}[The layout dealer is dual]
+  \label{lem:den_boer_duality}
+  \rocq{pgg_smc.den_boer_run.den_boer_layout_player0_dual,
+       pgg_smc.den_boer_run.den_boer_layout_verifier_dual}
+  \rocqok
+  \uses{thm:den_boer_run_output,lem:session_duality}
+  The input-derived-content dealer keeps the session type of the constant
+  dealer, so all four duality checks discharge by reduction.
+\end{lemma}
+
+\begin{theorem}[Perfect input privacy]
+  \label{thm:den_boer_input_private}
+  \rocq{pgg_smc.den_boer_encoding.den_boer_input_private,
+       pgg_smc.den_boer_encoding.den_boer_cinde}
+  \rocqok
+  \uses{def:den_boer_encoding}
+  The conditional mutual information $\MI(\text{inputs};\text{view}\mid
+  \text{output}) = 0$: a coalition learns nothing about the inputs beyond
+  $a\AND b$, because equal-output inputs are cyclic rotations giving an
+  identically distributed view under the uniform cut.
+\end{theorem}
+
+\begin{theorem}[The partial-view leakage ramp]
+  \label{thm:leak_ramp}
+  \rocq{pgg_smc.five_card_leakage.leak_k1,
+       pgg_smc.five_card_leakage.leak_k2_adj,
+       pgg_smc.five_card_leakage.leak_k2_dist2,
+       pgg_smc.five_card_leakage.leak_k3,
+       pgg_smc.five_card_leakage.leak_k4,
+       pgg_smc.five_card_leakage.leak_k5}
+  \rocqok
+  \uses{def:den_boer_encoding}
+  A coalition seeing $k$ cards leaks a quantified amount of the secret: nothing
+  at $k=1$, a closed-form positive amount at $k=2$ that depends on whether the
+  cards are adjacent or distance-2, growing to the full $H(\tfrac14)$ at $k\ge4$.
+\end{theorem}
+
+\begin{theorem}[Profile and end-to-end correctness]
+  \label{thm:den_boer_profile}
+  \rocq{pgg_smc.den_boer_profile.den_boer_profile,
+       pgg_smc.den_boer_profile.den_boer_perfect,
+       pgg_smc.den_boer_profile.FiveCardKim_protocol_correct,
+       pgg_smc.den_boer_profile.den_boer_run_k}
+  \rocqok
+  \uses{def:monodromy_profile,def:five_card,thm:recon_monodromy_correct}
+  den Boer is the $\eps=0$ member of the five-card family: the dealing phase is
+  perfectly anonymous, the privacy threshold is two, and reconstruction recovers
+  the secret bit for any cut.
+\end{theorem}
+
+\chapter{The five-card family and biased anonymity}
+
+\begin{definition}[The five-card family]
+  \label{def:five_card_family}
+  \rocq{pgg_smc.five_card_family.five_card_profile,
+       pgg_smc.rigidity_kim_instance.kim_profile}
+  \rocqok
+  \uses{def:monodromy_profile,def:five_card}
+  The family is parameterized by the cut bias $\eps$; den Boer is the $\eps=0$
+  (perfect) member, and Kim's instance is the biased one.
+\end{definition}
+
+\begin{theorem}[Spectral-gap anonymity]
+  \label{thm:kim_mixing}
+  \rocq{pgg_smc.five_card_kim.kim_lambda2,
+       pgg_smc.five_card_kim.kim_spectral_gap,
+       pgg_smc.five_card_kim.kim_spectral_convergence,
+       pgg_smc.five_card_kim.kim_var_dist_exact,
+       pgg_smc.five_card_kim.fc_kim_security_witness}
+  \rocqok
+  \uses{def:five_card_family,def:security_witness}
+  Kim's Schreier walk is doubly stochastic with second eigenvalue
+  $\lambda_2=\tfrac54|\eps|$; the spectral gap $1-\lambda_2$ is positive and
+  drives an exact variation-distance bound. This exercises the security-witness
+  interface with a genuine mixing argument, of which den Boer's $\eps=0$ case is
+  the sharp limit.
+\end{theorem}
+
+\chapter{The $S_5$ no-go: a representation-theoretic obstruction}
+
+\begin{definition}[The wired $S_5$ representation]
+  \label{def:wired_s5}
+  \rocq{pgg_reconstruct.s5_nogo.rG_secret,
+       pgg_reconstruct.s5_nogo.e0,
+       pgg_reconstruct.s5_nogo.proj_share}
+  \rocqok
+  The wired instance places the secret in coordinate $0$ of $\GF(5)^6$ (fixed)
+  and the five shares in coordinates $1..5$ (permuted by $S_5$). Recovery would
+  need an $S_5$-invariant submodule carrying the secret direction $e_0$ with a
+  dimension in the gap window.
+\end{definition}
+
+\begin{definition}[The gap-dimension window]
+  \label{def:gap_window}
+  \rocq{pgg_reconstruct.invariant_profiler.secret_inv_dim,
+       pgg_reconstruct.invariant_profiler.feasible,
+       pgg_reconstruct.gap_dimension.gap_dim_window}
+  \rocqok
+  \uses{def:covering_scheme}
+  Under the AG-Massey relations at length $6$, any strict threshold gap forces
+  the required code dimension into the window $\{3,4\}$.
+\end{definition}
+
+\begin{theorem}[The kernel fact]
+  \label{thm:kernel_fact}
+  \rocq{pgg_reconstruct.s5_nogo.perm_module_no_dim23}
+  \rocqok
+  \uses{def:wired_s5}
+  The natural permutation module $\GF(5)^5$ of $S_5$ has no submodule of
+  dimension $2$ or $3$; the submodule dimensions are exactly $\{0,1,4,5\}$. A
+  non-constant vector and a transposition force a difference vector
+  $e_i-e_j$ into the submodule, and $2$-transitivity spreads it to all of them,
+  giving rank $\ge 4$; otherwise the module is constant, rank $\le 1$.
+\end{theorem}
+
+\begin{theorem}[A characteristic-5 phenomenon]
+  \label{thm:maschke_contrast}
+  \rocq{pgg_reconstruct.invariant_profiler.maschke_ss}
+  \rocqok
+  \uses{thm:kernel_fact}
+  The kernel fact is modular: $\mathrm{char}\,\GF = 5$ divides $5$, so the
+  all-ones vector sits inside the sum-zero subspace and the lattice is uniserial.
+  In coprime characteristic Maschke splits the module and dimensions $2,3$
+  reappear.
+\end{theorem}
+
+\begin{theorem}[The $S_5$ no-go]
+  \label{thm:s5_nogo}
+  \rocq{pgg_reconstruct.s5_nogo.s5_no_secret_dim3,
+       pgg_reconstruct.s5_nogo.s5_no_secret_dim4,
+       pgg_reconstruct.s5_nogo.s5_gap_window_infeasible,
+       pgg_reconstruct.s5_nogo.s5_gap_infeasible}
+  \rocqok
+  \uses{thm:kernel_fact,def:gap_window}
+  Projecting away the secret coordinate drops the rank by exactly one, so a
+  secret submodule of dimension $3$ or $4$ becomes a kernel submodule of
+  dimension $2$ or $3$, which is forbidden. Hence no secret-encoding invariant
+  AG code exists for any gap instance: $S_5$ is an AG-code no-go. Axiom-free.
+\end{theorem}
+
+\begin{definition}[The genus ladder]
+  \label{def:genus_ladder}
+  \rocq{pgg_reconstruct.cover_genus0.shamir_exact,
+       pgg_reconstruct.cover_genus1.higher_genus_gap_bound,
+       pgg_reconstruct.cover_genus2.genus2_gap,
+       pgg_reconstruct.combinatorial_rigidity.CombinatorialRigidity}
+  \rocqok
+  \uses{def:covering_scheme}
+  Genus $0$ gives an exact (Shamir) threshold; genus $g$ gives a gap of $2g$
+  (elliptic $2$, hyperelliptic $4$). Combinatorial rigidity is the curve-free
+  dual, replacing the genus-0 cap with the order inequality $|G| >
+  \mathtt{klein\_genus0\_bound}$.
+\end{definition}
+
+\chapter{$S_5\times S_5$ and the Klein-cap genus context}
+
+\begin{definition}[The $S_5$ instance]
+  \label{def:s5_instance}
+  \rocq{pgg_smc.rigidity_s5_instance.s5_rigidity,
+       pgg_smc.rigidity_s5_instance.s5_brings_covering_genus,
+       pgg_smc.rigidity_s5_instance.s5_genus0_klein,
+       pgg_smc.rigidity_s5_instance.s5_tradeoff}
+  \rocqok
+  \uses{def:algebraic_rigidity,def:klein_bound,def:genus_ladder}
+  $|S_5|=120$ exceeds the Klein cap, so genus 0 is impossible; the instance
+  lands on Bring's curve at genus $4$, with a gap that exceeds $N$ and is
+  therefore vacuous. The rigidity witness exists only at this cost.
+\end{definition}
+
+\begin{definition}[$S_5$ group order]
+  \label{ax:s5_group_order}
+  \rocq{pgg_smc.rigidity_s5_instance.s5_group_order_eq}
+  \uses{def:s5_instance}
+  Assumed: $|G| = 120$ for the path-generator $S_5$. The kernel computation of
+  the generated subgroup order is infeasible, so this is a justified axiom.
+\end{definition}
+
+\begin{definition}[Bring's curve realization]
+  \label{ax:s5_brings}
+  \rocq{pgg_smc.rigidity_s5_instance.s5_brings_covering_realised,
+       pgg_smc.s5_mixing.s5_rayleigh_Q2_R}
+  \uses{def:s5_instance}
+  Assumed: Bring's curve realizes the genus-4 covering data (Edge 1978), and a
+  Rayleigh bound on the squared transition operator (an externally certified
+  sum-of-squares certificate). Cited classical / external facts.
+\end{definition}
+
+\begin{definition}[The $S_5\times S_5$ instance]
+  \label{def:s5x5_instance}
+  \rocq{pgg_smc.rigidity_s5x5_instance.s5x5_rigidity,
+       pgg_smc.rigidity_s5x5_instance.s5x5_protocol_correct,
+       pgg_smc.rigidity_s5x5_instance.s5x5_combinatorial_rigidity,
+       pgg_smc.rigidity_s5x5_instance.s5x5_tradeoff,
+       pgg_smc.s5x5_pile.s5x5_pile1_stab}
+  \rocqok
+  \uses{def:algebraic_rigidity,def:genus_ladder}
+  The product $S_5\times S_5$ ($|G|=14400$) also exceeds the cap and is forced
+  to positive genus; the protocol's reconstruction is still correct, but the
+  scheme is a combinatorial-rigidity (curve-free) instance, not a sharp AG code.
+\end{definition}
+
+\begin{definition}[$S_5\times S_5$ realizations]
+  \label{ax:s5x5}
+  \rocq{pgg_smc.rigidity_s5x5_instance.s5x5_group_order_eq,
+       pgg_smc.rigidity_s5x5_instance.s5x5_inverse_galois_realised,
+       pgg_smc.rigidity_s5x5_instance.s5x5_multi_realised}
+  \uses{def:s5x5_instance}
+  Assumed: $|G|=14400$; a genus-173 Galois cover of $\mathbb{P}^1$ with deck
+  group $S_5\times S_5$ exists (inverse Galois); and the two-component Bring
+  realization exists. Cited classical facts.
+\end{definition}
+
+\chapter{The modularity ledger}
+
+Each interface slot of Part~I is filled by exactly one node per instance, and
+the generic theorems are inherited rather than reproved. den Boer fills all six
+slots (Figure~\ref{fig:bp:modularity}) and is the only instance carried to a
+full MPC end-to-end. Kim fills the monodromy and security-witness slots with a
+biased, spectral fill. $S_5$ and $S_5\times S_5$ reach the admissibility gate
+and are rejected as AG codes by the Klein cap, the first through the
+representation-theoretic no-go (Theorem~\ref{thm:s5_nogo}), the second through
+the order inequality of combinatorial rigidity. The generic side is entirely
+axiom-free; the six assumptions live only in the geometric realization of the
+two large groups.

@@ -12,7 +12,7 @@ The headline contrast the blueprint sells: **the worked MPC (den Boer), its quan
 
 ## 2. Naming
 
-Display names in this blueprint are the **post-rename targets** from `docs/superpowers/plans/2026-06-13-pgg-naming-rename.md` (the naming audit). Until that rename executes, each `\rocq{}` link anchor uses the *current* identifier per that plan's mapping (e.g. display `pgg_recon_monodromy_correct` links to the current `pgg_hidden_invariant_perm`; display `s5_gap_infeasible` links to `s5_wired_gap_impossible`). Node *statements* use pen-and-paper math via macros (no Rocq code in statement bodies), exactly as the reference blueprint does.
+The audited rename has executed (commit `70db287`), so display names **and** `\rocq{}` link anchors both use the new identifiers directly (`pgg_recon_monodromy_correct`, `s5_gap_infeasible`, `klein_genus0_bound`, `ie_output`, `kim_lambda2`, `s5_M`/`s5x5_M`, the `s5_nogo` internals, …). Node *statements* use pen-and-paper math via macros (no Rocq code in statement bodies), exactly as the reference blueprint does. `rigidity_star_instance.v` was removed from `_CoqProject` (pre-existing broken) and is not a blueprint node.
 
 ## 3. The architecture diagram
 
