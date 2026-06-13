@@ -2032,6 +2032,152 @@ Qed.
   of the *_equiv_* lemmas in the file). ≈ is the IND-CPA indistinguishability
   step (the only place epsilon_cpa is paid).
 
+
+  Why micro-chain is needed: hop A and hop B are not themselves instances of
+  the IND-CPA assumption. game_real and game_hybrid_one are full protocol games
+  with the encryptions inlined (look at game_via_oracle_charlie line 632–633:
+  Emul, Epow, enc all assembled together).
+
+  The IND-CPA axiom enc_ind_cpa_real_or_zero only talks about a bare
+  encryption oracle. So you can't discharge hop A directly —
+  you need to transform game_real into the oracle's shape first.
+  That transformation is the micro-chain.
+
+  The micro-chain (the inner 3-step expansion)
+
+  Each micro-hop expands into 3 sub-hops, proved by advantage_hop_real_h1
+  and advantage_hop_h1_h2. For hop A:
+
+  game_real
+     ≡  game_via_oracle_charlie ∘ oracle_encrypt_real_pkg     (perfect, adv 0)
+     ≈  game_via_oracle_charlie ∘ oracle_encrypt_zero_pkg     (THE ε_cpa step)
+     ≡  game_hybrid_one                                       (perfect, adv 0)
+
+  ≡ (advantage 0) is discharged by the *_equiv_* lemmas:
+  game_real_equiv_charlie_real, charlie_zero_equiv_game_hybrid_one
+  (the erewrite ... by ssprove_valid lines).
+
+  ≈ is the only place epsilon_cpa is actually paid.
+
+
+    The factoring trick — the real idea
+
+  ----
+
+  The heart of it is the oracle/distinguisher factoring.
+  The monolithic protocol game is rewritten as a composition:
+
+  game_real  ≡  (shim)  ∘  (encryption oracle)
+                └ game_via_oracle_charlie    └ oracle_encrypt_real_pkg
+
+  game_via_oracle_charlie is a shim / translation package.
+  It does all the protocol-specific work — samples V_2,V_3,U_2,…, builds c_2,
+  runs the homomorphic Emul/Epow assembly.
+
+  But the one encryption it can't do itself, Charlie's ciphertext c_3,
+  it delegates to an imported oracle (ch3 ← oracle_enc (Charlie, v3)).
+  That imported oracle is instantiated two ways:
+
+  - oracle_encrypt_real_pkg — encrypts the real V_3
+  - oracle_encrypt_zero_pkg — encrypts 0
+
+  Now the two middle worlds differ only in that imported oracle,
+  with the identical shim wrapped around both.
+
+  ----
+
+  So:
+
+  1. In `advantage_game_real_game_enc_zero`,
+     Advantage_link absorbs the shim game_via_oracle_charlie into the adversary,
+     producing the reshaped distinguisher:
+     predictor_via_oracle_charlie predictor.
+
+     The "absorbs" means by associating, components become belonging to
+     different roles:
+
+     - RHS AdvantageE (P ∘ G₀) (P ∘ G₁) A: the shim P is part of the game.
+       The adversary A faces a wrapped oracle P ∘ G₀ vs P ∘ G₁.
+     - LHS AdvantageE G₀ G₁ (A ∘ P): the shim P is part of the adversary.
+       A bigger adversary A ∘ P faces the bare oracles G₀ vs G₁.
+
+  2. What's left is literally AdvantageE oracle_real oracle_zero
+     (reshaped adversary) — the bare real-or-zero oracle problem.
+  3. That is enc_ind_cpa_real_or_zero, which closes it at epsilon_cpa
+
+
+The brief of dependency graph:
+
+ Advantage_link                [ssprove leaf]
+     ▲   (used twice)
+     ├── advantage_hop_real_h1
+     └── advantage_hop_h1_h2
+              ▲
+              └── advantage_game_real_game_enc_zero
+                       ▲   (used by `exact:`)
+                       └── Pr_guess_le
+                                (used by `exact:`)
+
+
+Detailed version:
+
+  Pr_guess_le  ◀ goal
+  │   proof: apply: lerD          splits  1/m + 2·ε_cpa
+  │
+  ├── Pr_guess_enc_zero_le_invm        1/m  (IT residual hypothesis)
+  │
+  └── advantage_game_real_game_enc_zero  
+      │   proof: ssprove triangle ; erewrite perfect ; apply: lerD
+      │
+      ├── game_hybrid_two_perfect_game_enc_zero    hop C   = 0
+      │
+      ├── advantage_hop_real_h1            hop A   ≤ ε 
+      │   │   proof: Advantage_triangle_chain ; 2× erewrite ≡=0 ;
+      │   │          -Advantage_link ; enc_ind_cpa_real_or_zero
+      │   ├── game_real_equiv_charlie_real           ≡  = 0
+      │   ├── charlie_zero_equiv_game_hybrid_one     ≡  = 0
+      │   ├── Advantage_link  ★      rewrite -Advantage_link
+      │   └── enc_ind_cpa_real_or_zero         IND-CPA axiom   ≤ ε
+      │
+      └── advantage_hop_h1_h2              hop B   ≤ ε 
+          │   proof: Advantage_triangle_chain ; 2× erewrite ≡=0 ;
+          │          -Advantage_link ; enc_ind_cpa_real_or_zero
+          ├── game_hybrid_one_equiv_bob_real         ≡  = 0
+          ├── bob_zero_equiv_game_hybrid_two         ≡  = 0
+          ├── Advantage_link  ★      rewrite -Advantage_link
+          └── enc_ind_cpa_real_or_zero         IND-CPA axiom   ≤ ε
+
+  ----
+
+  The micro-chain is the standard SSProve reduction idiom:
+  to lean on an assumption stated about a bare primitive, we
+  
+  (a) rewrite both worlds as common-shim ∘ {real,ideal} primitive,
+  (b) push the shim into the adversary by associativity of linking,
+  (c) invoke the assumption. game_via_oracle_charlie / game_via_oracle_bob
+      are scaffolding "micro-games" that exist only inside one hop's proof:
+      they never appear in the published four-game chain.
+
+  ----
+
+  Why all the disjointness premises
+
+  That's the second sentence at line 2002: "each visited location needs its own
+  disjointness premise." Every package the proof passes through — the four chain
+  games, the two via-oracle shims, and the two oracle packages — has its own
+  state locs, and the equiv/advantage rewrites each require fseparate LA <those locs>.
+  
+  That's why Pr_guess_le carries eight chain_disj_* hypotheses:
+  chain_disj_via_oracle_charlie, chain_disj_ore, chain_disj_oze, etc. are
+  exactly the locations the micro-chains visit that the outer skeleton
+  alone wouldn't reveal.
+
+  ----
+
+  In short: the four-game chain is the skeleton we advertise; the micro-chain is
+  the per-hop reduction machinery that turns "two protocol games differ by an
+  encryption" into a literal invocation of the IND-CPA axiom, by factoring out
+  a shim and absorbing it into the adversary.
 *)
 Lemma Pr_guess_le
     (LA : Locations) (predictor : predictor_guesser)
