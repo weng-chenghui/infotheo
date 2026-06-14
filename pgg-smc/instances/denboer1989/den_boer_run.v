@@ -125,16 +125,17 @@ Proof. apply/eqP. rewrite /channels_dual /are_dual. by vm_compute. Qed.
 (******************************************************************************)
 
 (** den_boer_dealer_run — the den Boer dealer via the generic input-encoding
-    dealer (identity cut, input-derived content from den_boer_layout). *)
-Definition den_boer_dealer_run (P_idx : nat) :=
+    dealer, dealing the cut [w0] (any group element) with input-derived content
+    from den_boer_layout. *)
+Definition den_boer_dealer_run (w0 : pgg_gT FiveCardKim_M) (P_idx : nat) :=
   dealer_with_input_encoding FiveCardKim_PI
     (fun committed => tnth (den_boer_layout (den_boer_decode committed)))
-    [:: 7; 8] den_boer_players P_idx.
+    [:: w0] [:: 7; 8] den_boer_players P_idx.
 
 (** den_boer_saprocs — dealer ++ verifier ++ five players ++ two input parties,
     ordered by process id (0..8). *)
-Definition den_boer_saprocs (a b : bool) (P_idx : nat) :=
-  [:: mk_aproc (den_boer_dealer_run P_idx)
+Definition den_boer_saprocs (a b : bool) (w0 : pgg_gT FiveCardKim_M) (P_idx : nat) :=
+  [:: mk_aproc (den_boer_dealer_run w0 P_idx)
     ; mk_aproc (exchange_verifier FiveCardKim_PI den_boer_players)
     ; mk_aproc (exchange_player FiveCardKim_PI (@Ordinal 5 0 isT))
     ; mk_aproc (exchange_player FiveCardKim_PI (@Ordinal 5 1 isT))
@@ -145,12 +146,13 @@ Definition den_boer_saprocs (a b : bool) (P_idx : nat) :=
     ; mk_aproc (@pgg_commit FiveCardKim_M 8 (encode_bool b))].
 
 (** den_boer_procs — the erased process list fed to the interpreter. *)
-Definition den_boer_procs (a b : bool) (P_idx : nat) :=
-  erase_aprocs (den_boer_saprocs a b P_idx).
+Definition den_boer_procs (a b : bool) (w0 : pgg_gT FiveCardKim_M) (P_idx : nat) :=
+  erase_aprocs (den_boer_saprocs a b w0 P_idx).
 
-(** den_boer_run_terminates — every process reaches Finish (9 procs). *)
-Lemma den_boer_run_terminates (a b : bool) (P_idx : nat) :
-  (run_interp 100 (den_boer_procs a b P_idx)).1 = nseq 9 Finish.
+(** den_boer_run_terminates — every process reaches Finish (9 procs), for any
+    cut w0. *)
+Lemma den_boer_run_terminates (a b : bool) (w0 : pgg_gT FiveCardKim_M) (P_idx : nat) :
+  (run_interp 100 (den_boer_procs a b w0 P_idx)).1 = nseq 9 Finish.
 Proof. by vm_compute. Qed.
 
 (** den_boer_verifier_endpoints — the verifier's executed endpoints are the
@@ -176,28 +178,37 @@ Lemma den_boer_verifier_endpoints
 Proof. move=> PI'; rewrite /PI'; vm_compute; reflexivity. Qed.
 
 (** den_boer_endpoints — the verifier's collected endpoints are the dealt
-    input-derived layout (identity cut, ord_tuple starts, single-card hand at
-    index 0). *)
-Lemma den_boer_endpoints (a b : bool) :
-  endpoints_of_trace (nth [::] (run_interp 100 (den_boer_procs a b 0)).2 1)
-  = val (den_boer_layout (a, b)).
+    input-derived layout viewed through the cut w0, one per player (the
+    pgg_recon_endpoints form at P = w0). *)
+Lemma den_boer_endpoints (a b : bool) (w0 : pgg_gT FiveCardKim_M) :
+  endpoints_of_trace (nth [::] (run_interp 100 (den_boer_procs a b w0 0)).2 1)
+  = [seq tnth (den_boer_layout (a, b))
+        (@pgg_rho FiveCardKim_M w0 (tnth (pi_starts FiveCardKim_PI) i))
+     | i <- enum 'I_(pi_T' FiveCardKim_PI).+1].
 Proof.
 rewrite /den_boer_procs /den_boer_saprocs /den_boer_dealer_run
-        /dealer_with_input_encoding /identity_deck.
+  /dealer_with_input_encoding /identity_deck.
 rewrite (den_boer_verifier_endpoints
-          (fun committed => tnth (den_boer_layout (den_boer_decode committed)))
-          (encode_bool a) (encode_bool b) 1%g (ord_tuple 5) ord_tuple5_uniq).
+  (fun committed => tnth (den_boer_layout (den_boer_decode committed)))
+  (encode_bool a) (encode_bool b) w0 (ord_tuple 5) ord_tuple5_uniq).
 rewrite den_boer_decodeK.
-under eq_map => i do rewrite morph1 perm1 tnth_ord_tuple.
 have Hde : den_boer_players = enum 'I_5 by apply: (inj_map val_inj); rewrite val_enum_ord.
-by rewrite Hde map_tnth_enum.
+by rewrite Hde.
 Qed.
 
 (** den_boer_run_recovers — reconstructing the verifier's executed endpoints
-    returns the committed AND. The DSDP dsdp_is_correct analog; fcI_recon read
-    at the seq level (= fc_three_consec of the decoded endpoints). *)
-Lemma den_boer_run_recovers (a b : bool) :
+    returns the committed AND, for ANY cut w0 in the group (the random cut buys
+    privacy, not correctness). The DSDP dsdp_is_correct analog; fcI_recon read at
+    the seq level (= fc_three_consec of the decoded endpoints), discharged by the
+    monodromy-invariant den_boer_run_output at P = w0. *)
+Lemma den_boer_run_recovers (a b : bool) (w0 : pgg_gT FiveCardKim_M) :
+  w0 \in pgg_G FiveCardKim_M ->
   fc_three_consec [seq decode_bool x | x <-
-    endpoints_of_trace (nth [::] (run_interp 100 (den_boer_procs a b 0)).2 1)]
+    endpoints_of_trace (nth [::] (run_interp 100 (den_boer_procs a b w0 0)).2 1)]
   = a && b.
-Proof. rewrite den_boer_endpoints. exact: (den_boer_assemble_valid (a, b)). Qed.
+Proof.
+move=> Hw0; rewrite den_boer_endpoints.
+have HX := den_boer_run_output (a, b) w0 Hw0.
+rewrite /pgg_recon_endpoints /pgg_recon /ts_recon /fcI_scheme /fcI_recon in HX.
+exact: HX.
+Qed.

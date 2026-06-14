@@ -56,16 +56,16 @@ Definition s5x5_players : seq 'I_(pi_T' s5x5_PI).+1 :=
     @intent: deals the encoded shares of the secret position s; the empty
     prologue [::] makes this a pure position-model dealer. Used-by:
     s5x5_saprocs. *)
-Definition s5x5_dealer_run (s : 'I_10) :=
+Definition s5x5_dealer_run (s : 'I_10) (w0 : pgg_gT s5x5_M) :=
   dealer_with_input_encoding s5x5_PI
     (fun _ => tnth (ts_encode s5x5_scheme s))
-    [::] s5x5_players 0.
+    [:: w0] [::] s5x5_players 0.
 
 (** s5x5_saprocs — dealer ++ verifier ++ ten players, ordered by process id
     (0..11). @intent: the twelve session-typed processes of one S_5 x S_5 run.
     Used-by: s5x5_procs. *)
-Definition s5x5_saprocs (s : 'I_10) :=
-  [:: mk_aproc (s5x5_dealer_run s)
+Definition s5x5_saprocs (s : 'I_10) (w0 : pgg_gT s5x5_M) :=
+  [:: mk_aproc (s5x5_dealer_run s w0)
     ; mk_aproc (exchange_verifier s5x5_PI s5x5_players)
     ; mk_aproc (exchange_player s5x5_PI (@Ordinal 10 0 isT))
     ; mk_aproc (exchange_player s5x5_PI (@Ordinal 10 1 isT))
@@ -79,11 +79,13 @@ Definition s5x5_saprocs (s : 'I_10) :=
     ; mk_aproc (exchange_player s5x5_PI (@Ordinal 10 9 isT))].
 
 (** s5x5_procs — the erased process list fed to the interpreter. *)
-Definition s5x5_procs (s : 'I_10) := erase_aprocs (s5x5_saprocs s).
+Definition s5x5_procs (s : 'I_10) (w0 : pgg_gT s5x5_M) :=
+  erase_aprocs (s5x5_saprocs s w0).
 
-(** s5x5_run_terminates — every process reaches Finish (12 procs). *)
-Lemma s5x5_run_terminates (s : 'I_10) :
-  (run_interp 300 (s5x5_procs s)).1 = nseq 12 Finish.
+(** s5x5_run_terminates — every process reaches Finish (12 procs), for any
+    cut w0. *)
+Lemma s5x5_run_terminates (s : 'I_10) (w0 : pgg_gT s5x5_M) :
+  (run_interp 300 (s5x5_procs s w0)).1 = nseq 12 Finish.
 Proof. by vm_compute. Qed.
 
 (** s5x5_verifier_endpoints — the verifier's executed endpoints are the dealt
@@ -114,43 +116,56 @@ Proof. move=> PI'; rewrite /PI'; vm_compute; reflexivity. Qed.
 (** s5x5_endpoints — the verifier's collected endpoints are the dealt shares of
     the secret position s (identity cut, ord_tuple starts).
     @composes: s5x5_run_recovers. *)
-Lemma s5x5_endpoints (s : 'I_10) :
-  endpoints_of_trace (nth [::] (run_interp 300 (s5x5_procs s)).2 1)
-  = val (ts_encode s5x5_scheme s).
+Lemma s5x5_endpoints (s : 'I_10) (w0 : pgg_gT s5x5_M) :
+  endpoints_of_trace (nth [::] (run_interp 300 (s5x5_procs s w0)).2 1)
+  = [seq tnth (ts_encode s5x5_scheme s)
+        (@pgg_rho s5x5_M w0 (tnth (pi_starts s5x5_PI) i))
+     | i <- enum 'I_(pi_T' s5x5_PI).+1].
 Proof.
-rewrite /s5x5_procs /s5x5_saprocs /s5x5_dealer_run
-        /dealer_with_input_encoding /identity_deck.
-rewrite (@s5x5_verifier_endpoints
-          (fun=> tnth (ts_encode s5x5_scheme s))
-          1%g (ord_tuple 10) s5x5_starts_uniq).
-under eq_map => i do rewrite morph1 perm1 tnth_ord_tuple.
+rewrite /s5x5_procs /s5x5_saprocs /s5x5_dealer_run /dealer_with_input_encoding
+  /identity_deck.
+rewrite (@s5x5_verifier_endpoints (fun=> tnth (ts_encode s5x5_scheme s))
+  w0 (ord_tuple 10) s5x5_starts_uniq).
 have Hde : s5x5_players = enum 'I_10
   by apply: (inj_map val_inj); rewrite val_enum_ord.
-by rewrite Hde map_tnth_enum.
+by rewrite Hde.
 Qed.
 
 (** s5x5_endpoints_size — the verifier collects exactly ts_T'.+1 endpoints.
     @composes: s5x5_run_recovers. *)
-Lemma s5x5_endpoints_size (s : 'I_10) :
-  size (endpoints_of_trace (nth [::] (run_interp 300 (s5x5_procs s)).2 1))
+Lemma s5x5_endpoints_size (s : 'I_10) (w0 : pgg_gT s5x5_M) :
+  size (endpoints_of_trace (nth [::] (run_interp 300 (s5x5_procs s w0)).2 1))
   = (ts_T' s5x5_scheme).+1.
-Proof. by rewrite s5x5_endpoints size_tuple. Qed.
+Proof. by rewrite s5x5_endpoints size_map size_enum_ord. Qed.
 
 (** s5x5_run_recovers — reconstructing the verifier's executed endpoints returns
-    the dealt secret position s.
+    the dealt secret position s, for ANY cut w0 in the group.
     @main correctness: the running S_5 x S_5 protocol recovers the dealt secret
-    position s : 'I_10 from the verifier's collected endpoints, reshaped to the
-    scheme's ts_T'.+1-tuple via the size equality s5x5_endpoints_size. *)
-Lemma s5x5_run_recovers (s : 'I_10) :
+    position s : 'I_10 from the verifier's cut-permuted endpoints, via the
+    scheme's reconstruction perm-invariance (rp_recon_invariant) at w0. *)
+Lemma s5x5_run_recovers (s : 'I_10) (w0 : pgg_gT s5x5_M) :
+  w0 \in pgg_G s5x5_M ->
   ts_recon s5x5_scheme
-    (tcast (s5x5_endpoints_size s)
-       (in_tuple (endpoints_of_trace (nth [::] (run_interp 300 (s5x5_procs s)).2 1))))
+    (tcast (s5x5_endpoints_size s w0)
+       (in_tuple (endpoints_of_trace (nth [::] (run_interp 300 (s5x5_procs s w0)).2 1))))
   = s.
 Proof.
-have Heq : tcast (s5x5_endpoints_size s)
-             (in_tuple (endpoints_of_trace (nth [::] (run_interp 300 (s5x5_procs s)).2 1)))
-         = ts_encode s5x5_scheme s.
-  apply: val_inj; rewrite [LHS]val_tcast in_tupleE; exact: s5x5_endpoints.
-rewrite Heq.
-exact: ts_correct (ts_encode_valid s5x5_scheme s).
+move=> Hw0.
+have Hgoal : forall (ep : seq 'I_(pgg_N' s5x5_M).+1)
+    (Hsz : size ep = (ts_T' s5x5_scheme).+1),
+    ep = [seq tnth (ts_encode s5x5_scheme s)
+                (pgg_rho w0 (tnth (pi_starts s5x5_PI) i))
+            | i <- enum 'I_(pi_T' s5x5_PI).+1] ->
+    ts_recon s5x5_scheme (tcast Hsz (in_tuple ep)) = s.
+  move=> ep Hsz Hep.
+  rewrite -[s](s5x5_perm_compatible Hw0 (ts_encode_valid s5x5_scheme s)).
+  congr (ts_recon _ _).
+  apply: eq_from_tnth => i.
+  rewrite tcastE tnth_mktuple.
+  rewrite (tnth_nth ord0) /= Hep.
+  rewrite (nth_map i) ?nth_ord_enum ?tnth_ord_tuple;
+    last by rewrite size_enum_ord ltn_ord.
+  by [].
+apply: Hgoal.
+exact: s5x5_endpoints.
 Qed.

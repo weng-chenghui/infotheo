@@ -27,15 +27,17 @@ Import Prenex Implicits.
     and the five-card layout with den Boer, so the program is den_boer_procs. *)
 Definition kim_procs := den_boer_procs.
 
-(** kim_run_terminates — every process of the Kim run reaches Finish. *)
-Lemma kim_run_terminates (a b : bool) (P_idx : nat) :
-  (run_interp 100 (kim_procs a b P_idx)).1 = nseq 9 Finish.
+(** kim_run_terminates — every process of the Kim run reaches Finish, for any
+    cut w0. *)
+Lemma kim_run_terminates (a b : bool) (w0 : pgg_gT FiveCardKim_M) (P_idx : nat) :
+  (run_interp 100 (kim_procs a b w0 P_idx)).1 = nseq 9 Finish.
 Proof. exact: den_boer_run_terminates. Qed.
 
 (** kim_run_recovers — reconstructing the Kim run's executed verifier endpoints
-    returns the committed AND, for the full C_5 five-card family. *)
-Lemma kim_run_recovers (a b : bool) :
+    returns the committed AND, for any cut w0 in the full C_5 family. *)
+Lemma kim_run_recovers (a b : bool) (w0 : pgg_gT FiveCardKim_M) :
+  w0 \in pgg_G FiveCardKim_M ->
   fc_three_consec [seq decode_bool x | x <-
-    endpoints_of_trace (nth [::] (run_interp 100 (kim_procs a b 0)).2 1)]
+    endpoints_of_trace (nth [::] (run_interp 100 (kim_procs a b w0 0)).2 1)]
   = a && b.
 Proof. exact: den_boer_run_recovers. Qed.

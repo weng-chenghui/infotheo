@@ -39,13 +39,15 @@ Definition identity_deck : seq (pgg_gT M) := [:: 1%g].
 
 (** dealer_with_input_encoding — generic input-derived-content dealer: a commit
     prologue collecting [inputs], then [exchange_dealer] with the committed
-    content readout and the identity cut. Generalizes den_boer_dealer_layout. *)
+    content readout and the dealer's word/deck [W]. The deck carries the cut;
+    pass [identity_deck] for no shuffle or any [seq (pgg_gT M)] for a real word.
+    Generalizes den_boer_dealer_layout. *)
 Definition dealer_with_input_encoding
-    (content_of : seq 'I_N -> ('I_N -> 'I_N))
+    (content_of : seq 'I_N -> ('I_N -> 'I_N)) (W : seq (pgg_gT M))
     (inputs : seq nat) (players : seq 'I_T) (P_idx : nat) :=
   pgg_commit_prologue
     (fun committed =>
-       exchange_dealer PI (content_of committed) players identity_deck P_idx)
+       exchange_dealer PI (content_of committed) players W P_idx)
     [::] inputs.
 
 (** sheets_of — the PGG_sheet payloads of a trace, in trace order. *)
