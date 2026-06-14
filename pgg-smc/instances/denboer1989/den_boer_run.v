@@ -5,7 +5,7 @@ From mathcomp Require Import morphism action bigop order ssrnum ssralg boolp rea
 Require Import pgg_interface.
 From pgg_smc Require Import five_card_group five_card_program five_card_scheme_I5.
 From pgg_smc Require Import five_card_kim five_card_family.
-From pgg_smc Require Import card_exchange_pismc pgg_input_commitment.
+From pgg_smc Require Import card_exchange_pismc pgg_input_commitment pgg_run.
 Require Import smc_interpreter pismc smc_session_types.
 From pgg_reconstruct Require Import pgg_sharing_framework covering_scheme input_encoding.
 From pgg_smc Require Import den_boer_profile den_boer_encoding.
@@ -118,3 +118,53 @@ Proof. apply/eqP. rewrite /channels_dual /are_dual. by vm_compute. Qed.
 Lemma den_boer_layout_verifier_dual (P_idx : nat) :
   channels_dual (den_boer_dealer_layout_ap P_idx) den_boer_verifier_ap.
 Proof. apply/eqP. rewrite /channels_dual /are_dual. by vm_compute. Qed.
+
+(******************************************************************************)
+(** * Executed trace bridge: run the program, recover the secret from the     *)
+(*     verifier's collected endpoints (DSDP-style).                           *)
+(******************************************************************************)
+
+(** den_boer_dealer_run — the den Boer dealer via the generic input-encoding
+    dealer (identity cut, input-derived content from den_boer_layout). *)
+Definition den_boer_dealer_run (P_idx : nat) :=
+  dealer_with_input_encoding FiveCardKim_PI
+    (fun committed => tnth (den_boer_layout (den_boer_decode committed)))
+    [:: 7; 8] den_boer_players P_idx.
+
+(** den_boer_saprocs — dealer ++ verifier ++ five players ++ two input parties,
+    ordered by process id (0..8). *)
+Definition den_boer_saprocs (a b : bool) (P_idx : nat) :=
+  [:: mk_aproc (den_boer_dealer_run P_idx)
+    ; mk_aproc (exchange_verifier FiveCardKim_PI den_boer_players)
+    ; mk_aproc (exchange_player FiveCardKim_PI (@Ordinal 5 0 isT))
+    ; mk_aproc (exchange_player FiveCardKim_PI (@Ordinal 5 1 isT))
+    ; mk_aproc (exchange_player FiveCardKim_PI (@Ordinal 5 2 isT))
+    ; mk_aproc (exchange_player FiveCardKim_PI (@Ordinal 5 3 isT))
+    ; mk_aproc (exchange_player FiveCardKim_PI (@Ordinal 5 4 isT))
+    ; mk_aproc (@pgg_commit FiveCardKim_M 7 (encode_bool a))
+    ; mk_aproc (@pgg_commit FiveCardKim_M 8 (encode_bool b))].
+
+(** den_boer_procs — the erased process list fed to the interpreter. *)
+Definition den_boer_procs (a b : bool) (P_idx : nat) :=
+  erase_aprocs (den_boer_saprocs a b P_idx).
+
+(** den_boer_run_terminates — every process reaches Finish (9 procs). *)
+Lemma den_boer_run_terminates (a b : bool) (P_idx : nat) :
+  (run_interp 100 (den_boer_procs a b P_idx)).1 = nseq 9 Finish.
+Proof. by vm_compute. Qed.
+
+(** den_boer_endpoints — the verifier's collected endpoints are the dealt
+    input-derived layout (identity cut, ord_tuple starts). *)
+Lemma den_boer_endpoints (a b : bool) (P_idx : nat) :
+  endpoints_of_trace (nth [::] (run_interp 100 (den_boer_procs a b P_idx)).2 1)
+  = val (den_boer_layout (a, b)).
+Proof. Admitted.
+
+(** den_boer_run_recovers — reconstructing the verifier's executed endpoints
+    returns the committed AND. The DSDP dsdp_is_correct analog; fcI_recon read
+    at the seq level (= fc_three_consec of the decoded endpoints). *)
+Lemma den_boer_run_recovers (a b : bool) (P_idx : nat) :
+  fc_three_consec [seq decode_bool x | x <-
+    endpoints_of_trace (nth [::] (run_interp 100 (den_boer_procs a b P_idx)).2 1)]
+  = a && b.
+Proof. Admitted.
