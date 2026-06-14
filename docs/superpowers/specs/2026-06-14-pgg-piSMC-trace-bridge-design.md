@@ -160,3 +160,57 @@ Build discipline: `make -j1` per file (RAM safety). Perm values are never forced
   `InputEncoding` under a clear name.
 - No statement of an existing correctness/privacy theorem is weakened; the new `X_recovers` is an
   *additional* operational guarantee, not a replacement.
+
+## 8. Academic claims (reference)
+
+Fact-checked 2026-06-14 against the codebase and the reference papers
+(`~/Projects/aplas2024-poster/feb12ITP2026/feb12ITP2026.tex`,
+`~/Projects/aplas2024-poster/forteApr22/forteApr22.tex`). Full audit and evidence table in the
+companion `2026-06-14-pgg-piSMC-trace-bridge-academic-claims-review.md`. This section records what is
+defensible to claim, all **verified true** unless marked otherwise.
+
+### 8.1 Claims you CAN make (verified true)
+
+- **Executable operational semantics.** The PGG piSMC protocols gain a concrete executable semantics
+  via the pi-calculus interpreter; they are no longer abstract definitions or session-type-checked
+  stubs only.
+- **End-to-end operational correctness.** Correctness is derived from executed traces: the verifier's
+  dynamically collected buffer matches the input of `pgg_recon_endpoints`
+  (`pgg_sharing_framework.v:284`, verifier collection `card_exchange_pismc.v:247`), so the protocol
+  computes the intended secret in practice.
+- **Verification via symbolic execution.** Correctness is proved even though permutation application
+  is computationally opaque/stuck under `vm_compute`; keeping endpoints symbolic proves control-flow
+  and structural correctness algebraically (DSDP-style).
+- **Generality of the trace bridge.** The `pgg_run.v` architecture uniformly covers heterogeneous
+  instances (den Boer, Kim; `secretT = bool`) and position-model instances (S5, S5x5; `secretT = 'I_N`).
+
+### 8.2 Claims you CANNOT make (verified false / out of scope)
+
+- **Privacy from traces — FALSE for piSMC.** Unlike DSDP, this bridge does not lift traces to random
+  variables. Privacy stays distributional over the abstract random cut
+  (`den_boer_input_private : cond_mutual_info = 0`, `five_card_leakage.v`), decoupled from `interp`.
+- **Active/malicious-adversary security — FALSE.** The interpreter models deterministic honest
+  execution (`feb12ITP2026.tex:127` "honest parties"; VIEW is passive observation). No active
+  deviation is modeled.
+- **Modeling the real randomized cut — FALSE.** The dealer's word stays the identity; the trace
+  proves only *word-independent* correctness (`pgg_recon_monodromy_correct` holds for all `P`).
+
+### 8.3 Correction to "not deployment-runnable" (the one review imprecision)
+
+The review marked "the interpreter yields a concretely executable program for deployment" as
+SUSPICIOUS. The **conclusion is correct** — this work is verification-only and makes no deployment
+claim — but the **stated reason is imprecise**: it conflates kernel `vm_compute` reduction with Coq
+program **extraction**. `vm_compute` being stuck on a permutation application (blocked by opaque
+finType/`reflect` proofs) does **not** imply the protocol cannot extract to runnable OCaml/Rust;
+extraction erases opaque proofs, and a perm finfun extracts to a computable function. So: do not
+claim a deployment-runnable artifact, but also do not claim it is *unextractable* on
+`nat_of_ord`-stuck grounds. Whether extraction yields a runnable artifact is untested and out of
+scope for this spec.
+
+### 8.4 DSDP vs piSMC, the distinction to state in any paper (verified true)
+
+DSDP's interpreter traces carry **both** correctness and privacy: `feb12ITP2026.tex:210` builds each
+party's view from the collected traces and proves Peer-wise Perfect Privacy
+(`H(X_i | View_j) = H(X_i)`, Def. at `feb12ITP2026.tex:1241–1252`), and `forteApr22.tex:61–177`
+verifies traces for correctness **and** information leakage freedom. This piSMC bridge carries
+**correctness only**; privacy is handled by a separate abstract layer (the random-cut lemmas).
