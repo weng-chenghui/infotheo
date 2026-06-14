@@ -75,7 +75,7 @@ Definition den_boer_dealer_layout (P_idx : nat) :=
   pgg_commit_prologue
     (fun committed => exchange_dealer FiveCardKim_PI
        (tnth (den_boer_layout (den_boer_decode committed)))
-       den_boer_players (den_boer_assemble committed) P_idx)
+       den_boer_players [:: 1%g] P_idx)
     [::] [:: 7; 8].
 
 (** den_boer_dealer_layout_ap — the input-derived-content den Boer dealer as an

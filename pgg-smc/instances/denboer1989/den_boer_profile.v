@@ -179,17 +179,6 @@ Qed.
 
 Local Open Scope sproc_scope.
 
-(** den_boer_assemble — assemble the two committed input bits into the dealing
-    word table.
-    @intent: returns the singleton identity word, so the dealer deals the
-    canonical (unshuffled) den Boer arrangement readout. The committed bits
-    drive the input-commitment stage; the reconstruction is fixed by the
-    starting layout, so any word table preserves correctness, and the identity
-    word is the canonical den Boer arrangement read. Used-by:
-    den_boer_dealer_committed. *)
-Definition den_boer_assemble (committed : seq 'I_(pgg_N' FiveCardKim_M).+1)
-    : seq (pgg_gT FiveCardKim_M) := [:: 1%g].
-
 (** den_boer_players — the five-player list for the den Boer dealing phase.
     @intent: the explicit five-element list of 'I_5 player ordinals; a concrete
     list (rather than enum 'I_5) lets the dealer's fold_senv reduce under
@@ -202,14 +191,13 @@ Definition den_boer_players : seq 'I_(pi_T' FiveCardKim_PI).+1 :=
 (** den_boer_dealer_committed — the den Boer dealer with the M = 2
     input-commitment prologue.
     @intent: exchange_dealer_with_commit at FiveCardKim_PI receiving from input
-    parties 7 and 8, assembling via den_boer_assemble, then running the
-    fc_content dealing body for the five players; routes the foundational
-    five-card trick through the shared committed-dealer program with the two
-    input bits committed up front. Used-by: the den Boer M = 2 duality
-    lemmas. *)
+    parties 7 and 8, dealing the identity word, then running the fc_content
+    dealing body for the five players; routes the foundational five-card trick
+    through the shared committed-dealer program with the two input bits
+    committed up front. Used-by: the den Boer M = 2 duality lemmas. *)
 Definition den_boer_dealer_committed (P_idx : nat)
     : @sproc pgg_dtype (pgg_data (pgg_N' FiveCardKim_M).+1) dealer_idx _ _ :=
-  exchange_dealer_with_commit FiveCardKim_PI [:: 7; 8] den_boer_assemble
+  exchange_dealer_with_commit FiveCardKim_PI [:: 7; 8] (fun=> [:: 1%g])
     fc_content den_boer_players P_idx.
 
 (** den_boer_dealer_committed_ap — the committed den Boer dealer as an aproc.
@@ -283,16 +271,16 @@ Lemma den_boer_commit_verifier_dual (P_idx : nat) :
 Proof. apply/eqP. rewrite /channels_dual /are_dual. by vm_compute. Qed.
 
 (** den_boer_committed_nil — with no committed inputs the committed dealer is
-    the plain den Boer dealer on the assembled-from-nothing word table.
-    @composes: exchange_dealer_with_commit exchange_dealer den_boer_assemble
-    den_boer_players. The M = 0 degeneration specialised to the den Boer
-    instance, holding by computation; confirms the committed dealer extends,
-    rather than replaces, the uncommitted dealing program. *)
+    the plain den Boer dealer on the identity word table.
+    @composes: exchange_dealer_with_commit exchange_dealer den_boer_players. The
+    M = 0 degeneration specialised to the den Boer instance, holding by
+    computation; confirms the committed dealer extends, rather than replaces,
+    the uncommitted dealing program. *)
 Lemma den_boer_committed_nil (P_idx : nat) :
-  exchange_dealer_with_commit FiveCardKim_PI [::] den_boer_assemble fc_content
+  exchange_dealer_with_commit FiveCardKim_PI [::] (fun=> [:: 1%g]) fc_content
     den_boer_players P_idx
   = exchange_dealer FiveCardKim_PI fc_content den_boer_players
-      (den_boer_assemble [::]) P_idx.
+      [:: 1%g] P_idx.
 Proof. by []. Qed.
 
 (** den_boer_committed_protocol_correct — end-to-end correctness through the
