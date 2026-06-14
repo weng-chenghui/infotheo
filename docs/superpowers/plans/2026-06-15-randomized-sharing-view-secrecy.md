@@ -376,6 +376,24 @@ git commit -m "chore(secrecy): records-parity + axiom-hygiene sweep across four 
 
 ---
 
+## Completion (2026-06-15)
+
+All nine tasks landed (commits fb2e749..a3ac34a). Every headline lemma is `Qed` with only the
+three standard `boolp` axioms; parity confirmed (one `<inst>_view_secrecy` per instance).
+Deviations from the plan as written, all discovered during execution:
+
+- `rsh_mask_indep` was corrected to the bundle-of-OTHERS form; the originally-sketched
+  bundle-with-full-family form is unsatisfiable for uniform masks (forces a mask constant).
+- `additive_view_indep` was proved via an explicit "all-but-one share" core lemma
+  (`additive_allbut_indep`) plus an `inde_RV_comp` reduction for general coalitions.
+- Record constructors from another record's projections need destructuring
+  (`let: MkR .. := x in ..`) to avoid a unification metavar.
+- den Boer and kim both reduce to `leak_k1` via `mutual_info_RV0_indep`; kim needed NO new
+  counting because its C_5 cut and `a && b` computation coincide with den Boer's at the view
+  level (`kim_run_recovers = den_boer_run_recovers`).
+- s5/s5x5 `<inst>_view_secrecy` are parameterized by an abstract `RandomizedSharing`; the
+  concrete additive sampler is deferred with the operational layer.
+
 ## Notes on deferred work (not in this plan)
 
 The executed-trace operational layer (`trace_secrecy`, per-instance trace-ok lemmas, lifting `run_interp` to a probability space) is deferred. See `project_trace_bridge_deferred` and the spec's Non-goals. Do not attempt it here.
