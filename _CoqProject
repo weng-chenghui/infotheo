@@ -154,6 +154,7 @@ pgg-smc/instances/denboer1989/den_boer_profile.v
 pgg-smc/instances/denboer1989/five_card_leakage.v
 pgg-smc/instances/denboer1989/den_boer_encoding.v
 pgg-smc/instances/denboer1989/den_boer_run.v
+pgg-smc/instances/denboer1989/denboer_secrecy.v
 pgg-smc/instances/kim2025/five_card_kim.v
 pgg-smc/instances/kim2025/five_card_family.v
 pgg-smc/instances/kim2025/kim_run.v
@@ -215,10 +216,12 @@ pgg-smc/instances/s5/s5_mixing.v
 pgg-smc/instances/s5/rigidity_s5_instance.v
 pgg-smc/instances/s5/s5_profile.v
 pgg-smc/instances/s5/s5_run.v
+pgg-smc/instances/s5/s5_secrecy.v
 pgg-smc/instances/s5x5/s5x5_mixing.v
 pgg-smc/instances/s5x5/rigidity_s5x5_instance.v
 pgg-smc/instances/s5x5/s5x5_profile.v
 pgg-smc/instances/s5x5/s5x5_run.v
+pgg-smc/instances/s5x5/s5x5_secrecy.v
 pgg-smc/instances/monster/rigidity_monster_instance.v
 pgg-smc/instances/oc/rigidity_oc_instance.v
 pgg-smc/instances/cyclic/rigidity_cyclic_instance.v
