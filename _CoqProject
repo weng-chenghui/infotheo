@@ -181,6 +181,7 @@ pgg-smc/security/pgg_schreier_weighted.v
 pgg-smc/security/pgg_mixing.v
 pgg-smc/security/pgg_leakage_witness.v
 pgg-smc/security/pgg_randomized_sharing.v
+pgg-smc/security/pgg_cyclic_cut_leakage.v
 pgg-smc/reconstruct/pgg_sum_mod.v
 pgg-smc/reconstruct/pgg_sharing_framework.v
 pgg-smc/reconstruct/massey.v
