@@ -179,6 +179,7 @@ pgg-smc/security/pgg_uniform_security.v
 pgg-smc/security/pgg_weighted_words.v
 pgg-smc/security/pgg_schreier_weighted.v
 pgg-smc/security/pgg_mixing.v
+pgg-smc/security/pgg_leakage_witness.v
 pgg-smc/reconstruct/pgg_sum_mod.v
 pgg-smc/reconstruct/pgg_sharing_framework.v
 pgg-smc/reconstruct/massey.v
