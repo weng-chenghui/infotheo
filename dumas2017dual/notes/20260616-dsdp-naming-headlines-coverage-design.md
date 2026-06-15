@@ -90,53 +90,49 @@ n-party generalizations:
 | `relay_privacy_n` | `relay_privacy_logm` | `H(Y \| View) = log m > 0` for a generic relay |
 | `US_n_compromised_leaks_V1` | `ConstUS_n_discloses_V1` | constant `US` ⇒ `Dotp_n_rv US VS = (fun t => VS t ord0)` |
 
-### Relocation strategy (full physical relocation)
+### Relocation strategy (headline theorems only; clone context, full bodies)
 
-Every headline's proof body moves into `dsdp_main.v`. Two mechanisms by how
-entangled the body is with section-local machinery.
+One uniform rule for every headline. Move **only the headline theorem** — its
+statement and its **full original proof body** — into a matching section in
+`dsdp_main.v`. Do **not** move supporting lemmas/definitions, and do **not**
+leave a thin `Proof. exact: <lemma>. Qed.` wrapper. Specifically:
 
-**(1) Whole conclusion-section move — clean, LOW/MED effort.** When a section
-contains only headline theorems plus their tightly-coupled `_alt` helpers and is
-parameterized by already-proven results as hypotheses, the entire section moves
-to the apex verbatim; its helpers travel with it, no argument threading.
+1. **Clone the section context.** In the apex, open a section that re-declares
+   the same `Variable`s and `Hypothesis`es, plus the context `Let`
+   abbreviations the statement/proof refers to (`V1`, `V2`, `BobView`,
+   `AliceView`, `US`, `ConstUS`, `guess_sdistr_success_real`, `CondRV`/`VarRV`,
+   …). Variables and hypotheses are cloned; lemmas are not.
+2. **Copy the full proof body verbatim**, then fix only the references that now
+   cross the file boundary: each supporting lemma/definition the body calls
+   stays in its (renamed) support file and exports when its section closes, so
+   the moved body invokes it with explicit arguments (compiler-driven; expect
+   ~13–19 args on the deepest fiber/entropy calls).
+3. **Leave every non-headline declaration in place** — best effort, no
+   supporting lemma moves. Orphan-but-stays (a support lemma whose only
+   remaining consumer is the apex) is acceptable; it is not promoted to the
+   apex. The `bob_privacy_V1_alt`/`_V3_alt`, `charlie_privacy_*_alt`,
+   `dsdp_problem`/`dsdp_problem_hops`, `dsdp_g`/`S_determined`, the whole fiber
+   guessing scaffold, the outer `dsdp_security`/`dotp2` apparatus, the
+   `dsdp_entropy_n` and `malicious_n` sections — all remain in their files.
 
-- `Section bob_security` — LOW. Self-contained, takes `BobView_indep_V1/V3`,
-  `pV1/pV3_unif` as Hypotheses.
-- `Section charlie_security` — MED. Its `Let`s `CharlieView_indep_V1/V2` call
-  `CharlieView_indep_V*_proven` from the separate `Section
-  charlie_security_independence`, so the apex must `Require` the renamed
-  `dsdp_view_independence` (which still holds the `_proven` lemmas) and the load
-  order must place it before `dsdp_main`.
-- `dsdp_alice_view_advantage_le` (was `dsdp_problem_secure`, an `Example`) —
-  trivial: a two-line body over `dsdp_indcpa_secrecy` + `dsdp_problem_hops`.
+Effort by headline (drives Phase-X commit granularity):
 
-**(2) Lift-out + re-section + argument-thread — HIGH effort, all of the following.**
-The conclusion theorems are interleaved with their machinery inside one flat (or
-nested) section, with no usable internal split point. Mechanism: delete the
-conclusion theorems from the support section (the remaining machinery still
-compiles and, at `End`, auto-generalizes each lemma over exactly the section
-variables it uses), then in the apex re-open a section with the same
-variables/hypotheses and paste each conclusion body, passing explicit arguments
-to every now-exported machinery lemma. The compiler drives the arg lists; expect
-~13–19 threaded args per call.
+- **Trivial** — `dsdp_alice_view_advantage_le` (was `dsdp_problem_secure`):
+  two-line body over `dsdp_indcpa_secrecy` + `dsdp_problem_hops` (both stay).
+- **LOW/MED** — `bob_privacy_V1/V3`, `charlie_privacy_V1/V2`: short bodies that
+  call their staying `_alt` helpers + a uniformity hypothesis; clone the bob /
+  charlie `Let` context. Charlie additionally needs the apex to `Require`
+  `dsdp_view_independence` (its `CharlieView_indep_V*_proven` stay there).
+- **HIGH (arg-threaded full bodies)** — `US_compromised_leaks_V2`,
+  `dsdp_centropy_uniform`, `dsdp_centropy_uniform_n`, the four fiber
+  guessing/entropy theorems, `relay_privacy_n`, `US_n_compromised_leaks_V1`:
+  clone the (sometimes nested) section context, paste the full body, thread
+  explicit args to the staying machinery. Preserve the fiber internal DAG
+  (`ideal, advantage → real → unpredictability`) among the four moved theorems.
 
-- Fiber guessing triangle + entropy form (`dsdp_alice_guess_ideal_le`,
-  `_advantage_le`, `_real_le`, `dsdp_alice_unpredictability_ge`) — one flat
-  `Section dsdp_guess_distribution`; `guess_advantage_eq` and the
-  `real_game`/`guess_reduction` `Let`s are interleaved between the conclusions.
-  Preserve the internal DAG (`ideal,advantage → real → unpredictability`).
-- `dsdp_centropy_uniform`, `dsdp_centropy_uniform_n` — mid-section in
-  `dsdp_entropy.v`, deepest entropy machinery.
-- `US_compromised_leaks_V2` — 2-deep (`dsdp_security ⊃
-  malicious_adversary_case_analysis`); drags the sibling `Section dotp2`
-  apparatus (`dotp2, US, VS, ConstUS, S_E, ConstUS_discloses_V2, neg_self_inde`)
-  and the `E_enc_inde` hypothesis.
-- `relay_privacy_n`, `US_n_compromised_leaks_V1` — in `Section relay_security_n`
-  / `Section malicious_n`.
-
-Supporting files retain every machinery definition and lemma (now exported); only
-the headline statements and proof bodies (plus the `_alt` helpers that travel
-with a whole-section move) leave. No theorem is left behind as a thin corollary.
+After the move each support file keeps its machinery exported and compiling;
+`dsdp_main.v` holds 14 headline theorems (+ the cloned contexts) with real proof
+text, no redirections.
 
 ## C. Blueprint coverage checker (Issue 5) — Phase C
 
@@ -173,33 +169,49 @@ conscious "add a `\rocq{}` node or add to the exclude-list" decision, and every
 rename is caught the moment its `\rocq{}` target goes dangling. The headline
 theorems get real nodes; the baseline shrinks over time as blueprint prose grows.
 
-## D. Sequencing — each phase build-green + own commit
+## D. Sequencing + branch isolation
 
-1. **Phase R** — the five renames (mechanical). `make dsdp` green.
-2. **Phase M** — create `dsdp_main.v`; whole-section moves (`bob_security`,
-   `charlie_security`) + the trivial `dsdp_alice_view_advantage_le`. Green.
-3. **Phase X** — lift-out + re-section + argument-thread the embedded headlines
-   (`US_compromised_leaks_V2`, `dsdp_centropy_uniform(_n)`, the four fiber
-   guessing/entropy theorems, `relay_privacy_n`, `US_n_compromised_leaks_V1`).
-   All HIGH effort; one commit per support-file source so a failure is bisectable.
-   Green.
-4. **Phase C** — coverage script + exclude-list + make target + hook; populate
-   nodes / exclude-list until green.
+The mechanical, low-risk work lands on the working branch `itp2026-dumas2017dual`;
+the large theorem relocation is isolated on a separate branch that is committed
+but **not merged back**.
+
+**On `itp2026-dumas2017dual` (commit each, bypass the rocq audit hook):**
+
+1. **Spec finalization** — this document at the final model.
+2. **Phase R** — the five renames (mechanical, repo-wide Require scan incl.
+   `dsdp_game_gen_literal.v`). `make dsdp` green.
+3. **Phase C** — coverage script + exclude-list (seed the current uncovered
+   baseline) + make target + standalone pre-commit step. Checker green.
+
+**Then branch off `itp2026-dumas2017dual` for the main-file move (do not merge back):**
+
+4. **Phase M** — create `dsdp_main.v`; clone contexts + copy full bodies for the
+   trivial + LOW/MED headlines (`dsdp_alice_view_advantage_le`, `bob_privacy_*`,
+   `charlie_privacy_*`). Green.
+5. **Phase X** — clone contexts + copy full bodies (arg-threaded) for the HIGH
+   headlines (`US_compromised_leaks_V2`, `dsdp_centropy_uniform(_n)`, the four
+   fiber guessing/entropy theorems, `relay_privacy_n`, `US_n_compromised_leaks_V1`);
+   one commit per support-file source so a failure is bisectable. Green. Commit
+   on the branch, leave unmerged.
 
 Rejected alternatives: relocate-first (forces two rounds of ref updates);
-big-bang (un-bisectable).
+big-bang (un-bisectable); moving orphan machinery into the apex (balloons it into
+the whole derivation and guts the support files).
 
 ## Risks
 
-- **Argument-threading churn (the dominant risk)**: all ~9 embedded headlines
-  are HIGH-effort lift-outs (~13–19 explicit args per machinery-lemma call),
-  not just `dsdp_centropy_uniform_n`. Each is compiler-driven and mechanical but
-  brittle; delegate to the rocq-prover agent and verify each support-file's
-  relocation independently before the next. No thin-corollary fallback — full
-  physical relocation is the chosen approach.
-- **`US_compromised_leaks_V2` drags `dotp2` + `E_enc_inde`**: lifting it
-  requires re-declaring the `dsdp_security` outer context and the exported
-  `dotp2` apparatus in the apex; comparable to the entropy moves in difficulty.
+- **Argument-threading churn (the dominant risk)**: the HIGH headlines copy full
+  bodies that call staying machinery with ~13–19 explicit args per call. The
+  supporting lemmas are not moved, so the apex bodies cross the file boundary on
+  every call. Compiler-driven and mechanical but brittle; delegate to the
+  rocq-prover agent and verify each headline before the next. The full body is
+  copied, never reduced to a `Proof. exact: <lemma>. Qed.` wrapper.
+- **Context cloning fidelity**: the cloned `Variable`/`Hypothesis`/context-`Let`
+  block in the apex must match the support section exactly (same names/types) or
+  the staying lemmas will not unify when called. `US_compromised_leaks_V2` is the
+  worst case — it needs the nested `dsdp_security` outer context plus the
+  statement-level `dotp2`/`US`/`ConstUS`/`AliceView` `Let`s cloned, while
+  `dotp2`, `ConstUS_discloses_V2`, `neg_self_inde`, `E_enc_inde` stay in support.
 - **Blueprint module-name coupling**: coqdoc names HTML by full logical module
   name, so every rename and every relocation changes `\rocq{}` targets. The
   coverage checker (Phase C) is itself the guard that catches any missed ref.
