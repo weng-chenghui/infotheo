@@ -159,6 +159,7 @@ pgg-smc/instances/kim2025/five_card_kim.v
 pgg-smc/instances/kim2025/five_card_family.v
 pgg-smc/instances/kim2025/kim_run.v
 pgg-smc/instances/kim2025/kim_secrecy.v
+pgg-smc/instances/kim2025/kim_trace.v
 pgg-smc/protocol/card_protocol.v
 pgg-smc/protocol/card_protocol_posterior.v
 pgg-smc/protocol/pgg_uc_security.v
