@@ -21,10 +21,10 @@
 % "% to create:" comments.  Identifiers are written in clean math (no \texttt).
 %
 % Module prefixes cited green:
-%   infotheo.dumas2017dual.dsdp.symbolic_game.dsdp_game_symbolic
+%   infotheo.dumas2017dual.dsdp.symbolic_game.dsdp_game_derivation
 %   infotheo.dumas2017dual.dsdp.symbolic_game.dsdp_game_code
-%   infotheo.dumas2017dual.dsdp.indcpa_hopping.dsdp_indcpa_security
-%   infotheo.dumas2017dual.dsdp.indcpa_hopping.dsdp_security_indcpa_fiber
+%   infotheo.dumas2017dual.dsdp.indcpa_hopping.dsdp_indcpa_advantage
+%   infotheo.dumas2017dual.dsdp.indcpa_hopping.dsdp_guess_fiber
 %   infotheo.dumas2017dual.dsdp.counting.dsdp_entropy
 %   infotheo.dumas2017dual.entropy_fiber.entropy_fiber_zpq
 %
@@ -122,7 +122,7 @@ $2\,\epscpa$ carries over unchanged.
 
 \begin{definition}[Output reception]
   \label{def:alice_obs_output}
-  \rocq{infotheo.dumas2017dual.dsdp.symbolic_game.dsdp_game_symbolic.AO_recv_output}
+  \rocq{infotheo.dumas2017dual.dsdp.symbolic_game.dsdp_game_derivation.AO_recv_output}
   \rocqok
   \uses{def:alice_obs}
   The corrupted-view vocabulary (Definition~\ref{def:alice_obs}) gains one
@@ -133,8 +133,8 @@ $2\,\epscpa$ carries over unchanged.
 
 \begin{definition}[Walking across the decrypt-reception]
   \label{def:walk_obs_output}
-  \rocq{infotheo.dumas2017dual.dsdp.symbolic_game.dsdp_game_symbolic.walk_obs,
-       infotheo.dumas2017dual.dsdp.symbolic_game.dsdp_game_symbolic.dsdp_received_responses_output}
+  \rocq{infotheo.dumas2017dual.dsdp.symbolic_game.dsdp_game_derivation.walk_obs,
+       infotheo.dumas2017dual.dsdp.symbolic_game.dsdp_game_derivation.dsdp_received_responses_output}
   \rocqok
   \uses{def:walk_obs,def:alice_obs_output}
   At the decrypt-reception the extended walk reads the received plaintext off the
@@ -145,8 +145,8 @@ $2\,\epscpa$ carries over unchanged.
 
 \begin{lemma}[The derived output-exposing DSDP trace]
   \label{lem:obs_of_procs_dsdp_leak_S}
-  \rocq{infotheo.dumas2017dual.dsdp.symbolic_game.dsdp_game_symbolic.obs_of_procs_dsdp_leak_S,
-       infotheo.dumas2017dual.dsdp.symbolic_game.dsdp_game_symbolic.dsdp_obs_hops_leak_S}
+  \rocq{infotheo.dumas2017dual.dsdp.symbolic_game.dsdp_game_derivation.obs_of_procs_dsdp_leak_S,
+       infotheo.dumas2017dual.dsdp.symbolic_game.dsdp_game_derivation.dsdp_obs_hops_leak_S}
   \rocqok
   \uses{lem:obs_of_procs_dsdp,def:walk_obs_output}
   For the DSDP inputs the extended trace computes to the Part~I trace
@@ -159,7 +159,7 @@ $2\,\epscpa$ carries over unchanged.
 
 \begin{definition}[Lowering the output reception]
   \label{def:lower_obs_output}
-  \rocq{infotheo.dumas2017dual.dsdp.symbolic_game.dsdp_game_symbolic.lower_obs}
+  \rocq{infotheo.dumas2017dual.dsdp.symbolic_game.dsdp_game_derivation.lower_obs}
   \rocqok
   \uses{def:lower_obs,def:alice_obs_output}
   The lowering pass maps the output reception to the resolved output term
@@ -184,8 +184,8 @@ $2\,\epscpa$ carries over unchanged.
 
 \begin{definition}[The output-exposing endpoint games]
   \label{def:games_leak_s}
-  \rocq{infotheo.dumas2017dual.dsdp.indcpa_hopping.dsdp_indcpa_security.real_game_leak_S,
-       infotheo.dumas2017dual.dsdp.indcpa_hopping.dsdp_indcpa_security.zero_game_leak_S}
+  \rocq{infotheo.dumas2017dual.dsdp.indcpa_hopping.dsdp_indcpa_advantage.real_game_leak_S,
+       infotheo.dumas2017dual.dsdp.indcpa_hopping.dsdp_indcpa_advantage.zero_game_leak_S}
   \rocqok
   \uses{def:denote_game_leak_S,def:games}
   The real and all-zero games of the DSDP problem
@@ -198,7 +198,7 @@ $2\,\epscpa$ carries over unchanged.
 
 \begin{lemma}[Computational distance, output-exposing games]
   \label{lem:dsdp_advantage_derived_leak_S}
-  \rocq{infotheo.dumas2017dual.dsdp.indcpa_hopping.dsdp_indcpa_security.dsdp_advantage_derived_leak_S}
+  \rocq{infotheo.dumas2017dual.dsdp.indcpa_hopping.dsdp_indcpa_advantage.dsdp_advantage_derived_leak_S}
   \rocqok
   \uses{def:games_leak_s,thm:dsdp_secure}
   The advantage between the output-exposing real and all-zero games is at most
@@ -222,9 +222,9 @@ diagonal.
 
 \begin{definition}[Guessing experiment on the endpoint game]
   \label{def:guessing_experiment_leak_S}
-  \rocq{infotheo.dumas2017dual.dsdp.indcpa_hopping.dsdp_security_indcpa_fiber.predictor_guesser,
-       infotheo.dumas2017dual.dsdp.indcpa_hopping.dsdp_security_indcpa_fiber.guessing_challenger,
-       infotheo.dumas2017dual.dsdp.indcpa_hopping.dsdp_security_indcpa_fiber.guessing_experiment}
+  \rocq{infotheo.dumas2017dual.dsdp.indcpa_hopping.dsdp_guess_fiber.predictor_guesser,
+       infotheo.dumas2017dual.dsdp.indcpa_hopping.dsdp_guess_fiber.guessing_challenger,
+       infotheo.dumas2017dual.dsdp.indcpa_hopping.dsdp_guess_fiber.guessing_experiment}
   \rocqok
   \uses{def:games_leak_s,def:absolute_pr}
   A predictor reads the leaked ciphertexts and the output $S$ and returns a
@@ -252,8 +252,8 @@ diagonal.
 
 \begin{definition}[The guessing-experiment joint distribution]
   \label{def:guess_joint_fdist}
-  \rocq{infotheo.dumas2017dual.dsdp.indcpa_hopping.dsdp_security_indcpa_fiber.guess_joint_fdist,
-       infotheo.dumas2017dual.dsdp.indcpa_hopping.dsdp_security_indcpa_fiber.guess_joint_code}
+  \rocq{infotheo.dumas2017dual.dsdp.indcpa_hopping.dsdp_guess_fiber.guess_joint_fdist,
+       infotheo.dumas2017dual.dsdp.indcpa_hopping.dsdp_guess_fiber.guess_joint_code}
   \rocqok
   % renamed from dsdp_guess_fdist / dsdp_guess_core (prefix policy drops dsdp_
   %   on section-locals; guess_joint_* carries the (guess, V2) role).
@@ -266,9 +266,9 @@ diagonal.
 
 \begin{lemma}[The game probability is the joint diagonal]
   \label{lem:guess_success_sdistr_eq_fdist}
-  \rocq{infotheo.dumas2017dual.dsdp.indcpa_hopping.dsdp_security_indcpa_fiber.guess_sdistr_success,
-       infotheo.dumas2017dual.dsdp.indcpa_hopping.dsdp_security_indcpa_fiber.guess_fdist_success,
-       infotheo.dumas2017dual.dsdp.indcpa_hopping.dsdp_security_indcpa_fiber.guess_success_sdistr_eq_fdist}
+  \rocq{infotheo.dumas2017dual.dsdp.indcpa_hopping.dsdp_guess_fiber.guess_sdistr_success,
+       infotheo.dumas2017dual.dsdp.indcpa_hopping.dsdp_guess_fiber.guess_fdist_success,
+       infotheo.dumas2017dual.dsdp.indcpa_hopping.dsdp_guess_fiber.guess_success_sdistr_eq_fdist}
   \rocqok
   % renamed from Pr_guess_enc_zero_leak_S_eqE, restructured to name both sides:
   %   guess_sdistr_success (SSProve subdistribution mass) = guess_fdist_success
@@ -337,8 +337,8 @@ full bound $1/m + 2\,\epscpa$.
 
 \begin{lemma}[Footprint of valid code]
   \label{lem:Pr_fst_agree_locs}
-  \rocq{infotheo.dumas2017dual.dsdp.indcpa_hopping.dsdp_security_indcpa_fiber.Pr_fst_agree_locs,
-       infotheo.dumas2017dual.dsdp.indcpa_hopping.dsdp_security_indcpa_fiber.Pr_fst_closed}
+  \rocq{infotheo.dumas2017dual.dsdp.indcpa_hopping.dsdp_guess_fiber.Pr_fst_agree_locs,
+       infotheo.dumas2017dual.dsdp.indcpa_hopping.dsdp_guess_fiber.Pr_fst_closed}
   \rocqok
   \uses{lem:exist_pr_code}
   % proof: induction on valid_code; the get/put cases touch only L, the op case
@@ -357,9 +357,9 @@ full bound $1/m + 2\,\epscpa$.
 
 \begin{definition}[The experiment's sample distribution]
   \label{def:guess_sample_fdist}
-  \rocq{infotheo.dumas2017dual.dsdp.indcpa_hopping.dsdp_security_indcpa_fiber.guess_sample_fdist,
-       infotheo.dumas2017dual.dsdp.indcpa_hopping.dsdp_security_indcpa_fiber.guess_rv,
-       infotheo.dumas2017dual.dsdp.indcpa_hopping.dsdp_security_indcpa_fiber.Sout}
+  \rocq{infotheo.dumas2017dual.dsdp.indcpa_hopping.dsdp_guess_fiber.guess_sample_fdist,
+       infotheo.dumas2017dual.dsdp.indcpa_hopping.dsdp_guess_fiber.guess_rv,
+       infotheo.dumas2017dual.dsdp.indcpa_hopping.dsdp_guess_fiber.Sout}
   \rocqok
   \uses{def:guessing_experiment_leak_S}
   % impl: guess_sample_fdist := sdistr_to_fdist of the lossless guessing code; the
@@ -374,7 +374,7 @@ full bound $1/m + 2\,\epscpa$.
 
 \begin{lemma}[The joint distribution is the sample distribution's image]
   \label{lem:guess_joint_fdist_marginal}
-  \rocq{infotheo.dumas2017dual.dsdp.indcpa_hopping.dsdp_security_indcpa_fiber.guess_joint_fdist_marginal}
+  \rocq{infotheo.dumas2017dual.dsdp.indcpa_hopping.dsdp_guess_fiber.guess_joint_fdist_marginal}
   \rocqok
   \uses{def:guess_joint_fdist,def:guess_sample_fdist}
   % proof: guess_joint_fdist = fdistmap (projection to (guess, V2)) of the sample
@@ -389,10 +389,10 @@ full bound $1/m + 2\,\epscpa$.
 
 \begin{lemma}[The output-determined guess kernel]
   \label{lem:guess_triple_pr}
-  \rocq{infotheo.dumas2017dual.dsdp.indcpa_hopping.dsdp_security_indcpa_fiber.guess_inner_kernel_form,
-       infotheo.dumas2017dual.dsdp.indcpa_hopping.dsdp_security_indcpa_fiber.guess_inner_out,
-       infotheo.dumas2017dual.dsdp.indcpa_hopping.dsdp_security_indcpa_fiber.view_marginal_indep,
-       infotheo.dumas2017dual.dsdp.indcpa_hopping.dsdp_security_indcpa_fiber.guess_triple_pr}
+  \rocq{infotheo.dumas2017dual.dsdp.indcpa_hopping.dsdp_guess_fiber.guess_inner_kernel_form,
+       infotheo.dumas2017dual.dsdp.indcpa_hopping.dsdp_guess_fiber.guess_inner_out,
+       infotheo.dumas2017dual.dsdp.indcpa_hopping.dsdp_guess_fiber.view_marginal_indep,
+       infotheo.dumas2017dual.dsdp.indcpa_hopping.dsdp_guess_fiber.guess_triple_pr}
   \rocqok
   \uses{def:guess_sample_fdist,lem:Pr_fst_agree_locs}
   % proof: peel the experiment run to a guess kernel (guess_inner_kernel_form);
@@ -408,7 +408,7 @@ full bound $1/m + 2\,\epscpa$.
 
 \begin{lemma}[The predictor reads only the view and $S$]
   \label{lem:run_heap_agree_predictor}
-  \rocq{infotheo.dumas2017dual.dsdp.indcpa_hopping.dsdp_security_indcpa_fiber.run_heap_agree_predictor}
+  \rocq{infotheo.dumas2017dual.dsdp.indcpa_hopping.dsdp_guess_fiber.run_heap_agree_predictor}
   \rocqok
   \uses{lem:Pr_fst_agree_locs}
   % proof: every heap in the support of the capturing run agrees with the start
@@ -421,7 +421,7 @@ full bound $1/m + 2\,\epscpa$.
 
 \begin{lemma}[Guess is conditionally independent of $V_2$ given $S$]
   \label{lem:guess_cinde_V2}
-  \rocq{infotheo.dumas2017dual.dsdp.indcpa_hopping.dsdp_security_indcpa_fiber.guess_cinde_V2}
+  \rocq{infotheo.dumas2017dual.dsdp.indcpa_hopping.dsdp_guess_fiber.guess_cinde_V2}
   \rocqok
   \uses{lem:guess_triple_pr,lem:run_heap_agree_predictor,lem:guess_joint_fdist_marginal}
   % proof: cinde_RV_factor with f the V3-fibre weight and g the kernel mass;
@@ -435,11 +435,11 @@ full bound $1/m + 2\,\epscpa$.
 
 \begin{lemma}[Per-fiber bound on $V_2$]
   \label{lem:guess_V2_cond_le}
-  \rocq{infotheo.dumas2017dual.dsdp.indcpa_hopping.dsdp_security_indcpa_fiber.guess_VarRV_uniform,
-       infotheo.dumas2017dual.dsdp.indcpa_hopping.dsdp_security_indcpa_fiber.guess_inputs_indep,
-       infotheo.dumas2017dual.dsdp.indcpa_hopping.dsdp_security_indcpa_fiber.guess_S_determined,
-       infotheo.dumas2017dual.dsdp.indcpa_hopping.dsdp_security_indcpa_fiber.guess_VarRV_cond_uniform,
-       infotheo.dumas2017dual.dsdp.indcpa_hopping.dsdp_security_indcpa_fiber.guess_V2_cond_le}
+  \rocq{infotheo.dumas2017dual.dsdp.indcpa_hopping.dsdp_guess_fiber.guess_VarRV_uniform,
+       infotheo.dumas2017dual.dsdp.indcpa_hopping.dsdp_guess_fiber.guess_inputs_indep,
+       infotheo.dumas2017dual.dsdp.indcpa_hopping.dsdp_guess_fiber.guess_S_determined,
+       infotheo.dumas2017dual.dsdp.indcpa_hopping.dsdp_guess_fiber.guess_VarRV_cond_uniform,
+       infotheo.dumas2017dual.dsdp.indcpa_hopping.dsdp_guess_fiber.guess_V2_cond_le}
   \rocqok
   \uses{lem:exist_pr_sol,def:guess_sample_fdist}
   % proof: instantiate Pr_dsdp_sol_uniform_ring at P with the marginal facts
@@ -466,7 +466,7 @@ full bound $1/m + 2\,\epscpa$.
 
 \begin{lemma}[Fiber residual]
   \label{lem:guess_fdist_success_le}
-  \rocq{infotheo.dumas2017dual.dsdp.indcpa_hopping.dsdp_security_indcpa_fiber.guess_fdist_success_le}
+  \rocq{infotheo.dumas2017dual.dsdp.indcpa_hopping.dsdp_guess_fiber.guess_fdist_success_le}
   \rocqok
   \uses{lem:cinde_diagonal_bound,lem:guess_cinde_V2,lem:guess_V2_cond_le,lem:guess_joint_fdist_marginal}
   % proof: guess_fdist_success := Pr_[guess_joint_fdist][diag]; rewrite onto P by
@@ -481,7 +481,7 @@ full bound $1/m + 2\,\epscpa$.
 
 \begin{theorem}[Information-theoretic bound at the endpoint]
   \label{thm:guess_sdistr_success_le}
-  \rocq{infotheo.dumas2017dual.dsdp.indcpa_hopping.dsdp_security_indcpa_fiber.guess_sdistr_success_le}
+  \rocq{infotheo.dumas2017dual.dsdp.indcpa_hopping.dsdp_guess_fiber.guess_sdistr_success_le}
   \rocqok
   \uses{lem:guess_success_sdistr_eq_fdist,lem:guess_fdist_success_le}
   % proof: rewrite Prexp(zero_S) by the connector guess_success_sdistr_eq_fdist,
@@ -493,8 +493,8 @@ full bound $1/m + 2\,\epscpa$.
 
 \begin{lemma}[Computational distance between the experiments]
   \label{lem:guess_advantage_le}
-  \rocq{infotheo.dumas2017dual.dsdp.indcpa_hopping.dsdp_security_indcpa_fiber.guess_advantage_eq,
-       infotheo.dumas2017dual.dsdp.indcpa_hopping.dsdp_security_indcpa_fiber.guess_advantage_le}
+  \rocq{infotheo.dumas2017dual.dsdp.indcpa_hopping.dsdp_guess_fiber.guess_advantage_eq,
+       infotheo.dumas2017dual.dsdp.indcpa_hopping.dsdp_guess_fiber.guess_advantage_le}
   \rocqok
   \uses{def:guessing_experiment_leak_S,lem:dsdp_advantage_derived_leak_S,def:relational_advantage}
   % proof: guess_advantage_eq slides the fixed predictor out of the par
@@ -509,7 +509,7 @@ full bound $1/m + 2\,\epscpa$.
 
 \begin{theorem}[Full secrecy by composition]
   \label{thm:dsdp_alice_secrecy_leak_S}
-  \rocq{infotheo.dumas2017dual.dsdp.indcpa_hopping.dsdp_security_indcpa_fiber.dsdp_alice_secrecy_leak_S}
+  \rocq{infotheo.dumas2017dual.dsdp.indcpa_hopping.dsdp_guess_fiber.dsdp_alice_secrecy_leak_S}
   \rocqok
   \uses{thm:guess_sdistr_success_le,lem:guess_advantage_le}
   % proof: triangle Prexp(real_S) <= Prexp(zero_S) + |Prexp(real_S) - Prexp(zero_S)|,
