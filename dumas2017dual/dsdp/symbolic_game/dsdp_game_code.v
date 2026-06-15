@@ -4,7 +4,7 @@
    (design doc: dumas2017dual/notes/20260604-symbolic-to-game-derivation-design.md).
 
    This file mirrors the import header + Section parameter block + SSProve
-   interface vocabulary of dumas2017dual/dsdp/ref/dsdp_security_indcpa.v so
+   interface vocabulary of dumas2017dual/dsdp/legacy/superseded/dsdp_security_indcpa.v so
    that game_iface, cipher_list, t_msg, t_cipher, AHE, pkey_of_party,
    card_msg, msg_of_idx, ... are in scope for the later derivation tasks.
    The inductives (he_term, game_code), denotation functions, and lemmas are
