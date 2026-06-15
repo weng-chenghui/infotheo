@@ -188,6 +188,7 @@ pgg-smc/security/pgg_sharing_mechanism.v
 pgg-smc/security/pgg_fdist_rV_indep.v
 pgg-smc/security/pgg_canonical_sharing.v
 pgg-smc/security/pgg_leakage_product.v
+pgg-smc/security/pgg_trace_secrecy.v
 pgg-smc/reconstruct/pgg_sum_mod.v
 pgg-smc/reconstruct/pgg_sharing_framework.v
 pgg-smc/reconstruct/massey.v
