@@ -137,6 +137,7 @@ dumas2017dual/dsdp/symbolic_game/dsdp_game_code.v
 dumas2017dual/dsdp/symbolic_game/dsdp_symbolic.v
 dumas2017dual/dsdp/symbolic_game/dsdp_game_symbolic.v
 dumas2017dual/dsdp/symbolic_game/dsdp_game_gen_literal.v
+dumas2017dual/dsdp/convert/dsdp_convert.v
 dumas2017dual/dsdp/indcpa_hopping/dsdp_indcpa_security.v
 dumas2017dual/dsdp/indcpa_hopping/dsdp_security_indcpa_fiber.v
 
