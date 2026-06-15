@@ -219,25 +219,29 @@ Definition id_game_run : nat := 0%N.
    the previous call to id_game_run. *)
 Definition id_v2_get : nat := 2%N.
 
-(* id_s_get — the output-reveal operation identifier exported by the
+(* id_Sout_get — the output-reveal operation identifier exported by the
    output-exposing games.  Running it returns the scalar-product output S
-   written into S_output_cell by the previous call to id_game_run. *)
-Definition id_s_get : nat := 3%N.
+   written into Sout_cell by the previous call to id_game_run. *)
+Definition id_Sout_get : nat := 3%N.
 
 (* V_2_cell — shared SSProve [Location] storing the protocol-side V_2 sample,
    as an [option t_msg]: the cipher oracle [#put]s it before returning, the
    V_2 oracle [get]s it back. *)
 Definition V_2_cell : Location := mkloc 8 (None : option t_msg).
 
-(* S_output_cell — shared SSProve [Location] storing the scalar-product output
+(* Sout_cell — shared SSProve [Location] storing the scalar-product output
    S, as an [option t_msg], parallel to [V_2_cell]: an output-exposing game
-   [#put]s it from a [GC_put_output] statement, the output oracle [id_s_get]
+   [#put]s it from a [GC_put_output] statement, the output oracle [id_Sout_get]
    [get]s it back. *)
-Definition S_output_cell : Location := mkloc 9 (None : option t_msg).
+Definition Sout_cell : Location := mkloc 9 (None : option t_msg).
 
-(* protocol_state — the [Locations] fmap holding V_2_cell and S_output_cell,
+(* S_cell — short alias for [Sout_cell], so `grep S_cell` lands on the
+   leaked-output cell. *)
+Notation S_cell := Sout_cell.
+
+(* protocol_state — the [Locations] fmap holding V_2_cell and Sout_cell,
    shared as the [locs] field of every game and translation package. *)
-Definition protocol_state : Locations := [fmap V_2_cell ; S_output_cell].
+Definition protocol_state : Locations := [fmap V_2_cell ; Sout_cell].
 
 Local Notation "'msg'" := t_msg (in custom pack_type at level 2).
 
@@ -251,14 +255,14 @@ Definition game_iface : Interface :=
      #val #[ id_v2_get   ] : 'unit → msg ].
 
 (* game_iface_leak_S — the output-exposing export interface: [game_iface]
-   extended with the output-reveal operation [id_s_get : 'unit → msg].  Kept
+   extended with the output-reveal operation [id_Sout_get : 'unit → msg].  Kept
    separate from [game_iface] so Part I's games, perfect-equivalence steps and
    generic hybrid bound stay over the unextended interface. *)
 Definition game_iface_leak_S : Interface :=
   [interface
      #val #[ id_game_run ] : 'unit → ciphers ;
      #val #[ id_v2_get   ] : 'unit → msg ;
-     #val #[ id_s_get    ] : 'unit → msg ].
+     #val #[ id_Sout_get    ] : 'unit → msg ].
 
 (* rand0 — default encryption-randomness value, used only as the [nth]
    fallback when a [HE_enc]/[GC_enc_hop] randomness slot indexes past the
@@ -369,7 +373,7 @@ Fixpoint denote_he (e : denv) (t : he_term) : gval :=
    pushes it on the value pool, [card_renc] samples encryption-randomness and
    pushes it on the randomness pool, any other [n] samples without pushing
    (a default unused by well-formed game_code).  [GC_put] writes the protocol
-   V_2 cell; [GC_put_output] writes the scalar-product output [S_output_cell];
+   V_2 cell; [GC_put_output] writes the scalar-product output [Sout_cell];
    [GC_let] pushes a denoted value; [GC_enc_hop] pushes the denoted
    encryption (the zero/real secret choice is already baked into [secret] by
    [zero_hop_prefix]); [GC_ret] returns the denoted output ciphertext list. *)
@@ -388,7 +392,7 @@ Fixpoint denote_run (e : denv) (gc : game_code) : raw_code cipher_list :=
       #put V_2_cell := Some (chmsg_of_msg (as_plain (denote_he e t))) ;;
       denote_run e k
   | GC_put_output t k =>
-      #put S_output_cell := Some (chmsg_of_msg (as_plain (denote_he e t))) ;;
+      #put Sout_cell := Some (chmsg_of_msg (as_plain (denote_he e t))) ;;
       denote_run e k
   | GC_let t k =>
       denote_run (push_val (denote_he e t) e) k
@@ -488,16 +492,16 @@ Definition denote_game (gc : game_code) :
 
 (* ------------------------------------------------------------------ *)
 (* Output-exposing denotation: the same two oracles as denote_game     *)
-(* plus an id_s_get oracle reading the scalar-product output written    *)
-(* into S_output_cell by a GC_put_output statement.                     *)
+(* plus an id_Sout_get oracle reading the scalar-product output written    *)
+(* into Sout_cell by a GC_put_output statement.                     *)
 (* ------------------------------------------------------------------ *)
 
-(* denote_s_get_body — the output-reveal oracle body, mirroring
-   [denote_v2_get_body] on [S_output_cell]: read the cell and return the stored
+(* denote_Sout_get_body — the output-reveal oracle body, mirroring
+   [denote_v2_get_body] on [Sout_cell]: read the cell and return the stored
    output S (or the canonical 0 message when unset, i.e. for game_code with no
    [GC_put_output] statement). *)
-Definition denote_s_get_body : raw_code t_msg :=
-  stored ← get S_output_cell ;;
+Definition denote_Sout_get_body : raw_code t_msg :=
+  stored ← get Sout_cell ;;
   match stored with
   | Some v => @ret t_msg v
   | None   => @ret t_msg (chmsg_of_msg (0%R : plain AHE))
@@ -505,27 +509,27 @@ Definition denote_s_get_body : raw_code t_msg :=
 
 (* Validity certificate for the output-reveal oracle, supplied explicitly to
    denote_game_leak_S_valid alongside the run and V_2-reveal oracles. *)
-Lemma denote_s_get_valid :
-  ValidCode protocol_state [interface] denote_s_get_body.
+Lemma denote_Sout_get_valid :
+  ValidCode protocol_state [interface] denote_Sout_get_body.
 Proof.
-rewrite /denote_s_get_body.
+rewrite /denote_Sout_get_body.
 apply: valid_getr; first by [].
 by case=> [v|]; exact: valid_ret.
 Qed.
 
 (* denote_game_leak_S_raw — the raw three-oracle map underlying
    [denote_game_leak_S]: the [id_game_run] and [id_v2_get] oracles are the
-   [denote_game_raw] pair, plus an [id_s_get] oracle revealing the output S. *)
+   [denote_game_raw] pair, plus an [id_Sout_get] oracle revealing the output S. *)
 Definition denote_game_leak_S_raw (seed : denv) (gc : game_code) : raw_package :=
   mkfmap
     [:: (id_game_run, mkdef 'unit cipher_list (fun _ => denote_run seed gc))
       ; (id_v2_get,   mkdef 'unit t_msg       (fun _ => denote_v2_get_body))
-      ; (id_s_get,    mkdef 'unit t_msg       (fun _ => denote_s_get_body)) ].
+      ; (id_Sout_get,    mkdef 'unit t_msg       (fun _ => denote_Sout_get_body)) ].
 
 (* Discharges the pack_valid field of denote_game_leak_S: SSProve cannot infer
    ValidPackage through the opaque denote_game_leak_S_raw map, so the
    certificate is supplied explicitly (run oracle via denote_run_valid, the two
-   reveal oracles via denote_v2_get_valid / denote_s_get_valid). *)
+   reveal oracles via denote_v2_get_valid / denote_Sout_get_valid). *)
 Lemma denote_game_leak_S_valid (seed : denv) (gc : game_code) :
   ValidPackage protocol_state [interface] game_iface_leak_S
     (denote_game_leak_S_raw seed gc).
@@ -533,15 +537,15 @@ Proof.
 rewrite /denote_game_leak_S_raw /game_iface_leak_S.
 apply: valid_package_cons; last by move=> x; exact: denote_run_valid.
 apply: valid_package_cons; last by move=> x; exact: denote_v2_get_valid.
-by apply: valid_package_cons; last by move=> x; exact: denote_s_get_valid.
+by apply: valid_package_cons; last by move=> x; exact: denote_Sout_get_valid.
 Qed.
 
 (* denote_game_leak_S — lower a [game_code] to an SSProve package exporting
    [game_iface_leak_S].  The [id_game_run] and [id_v2_get] oracles are exactly
-   those of [denote_game]; the [id_s_get] oracle reveals the scalar-product
-   output S written into [S_output_cell] by a [GC_put_output] statement.  It is
+   those of [denote_game]; the [id_Sout_get] oracle reveals the scalar-product
+   output S written into [Sout_cell] by a [GC_put_output] statement.  It is
    generic over [game_code]: for code without a [GC_put_output] the cell stays
-   [None] and [id_s_get] returns the canonical 0 message; for output-exposing
+   [None] and [id_Sout_get] returns the canonical 0 message; for output-exposing
    code it returns the written S. *)
 Definition denote_game_leak_S (seed : denv) (gc : game_code) :
   package [interface] game_iface_leak_S :=
@@ -588,7 +592,7 @@ Fixpoint denote_run_shim
       #put V_2_cell := Some (chmsg_of_msg (as_plain (denote_he e t))) ;;
       denote_run_shim site hop e k
   | GC_put_output t k =>
-      #put S_output_cell := Some (chmsg_of_msg (as_plain (denote_he e t))) ;;
+      #put Sout_cell := Some (chmsg_of_msg (as_plain (denote_he e t))) ;;
       denote_run_shim site hop e k
   | GC_let t k =>
       denote_run_shim site hop (push_val (denote_he e t) e) k
