@@ -40,6 +40,12 @@ dsdp-rebuild: Makefile.coq
 	find $(DSDP_DIRS) \( -name "*.vo" -o -name "*.vos" -o -name "*.vok" -o -name "*.glob" \) -delete 2>/dev/null || true
 	$(MAKE) -f Makefile.coq $(DSDP_VO)
 
+# DSDP blueprint coverage: every declaration in the make_blueprint.sh MODULES
+# scope must have a \rocq{} node or sit in blueprint-exclude.txt; fails on a
+# dangling \rocq ref. Pure text check, no build needed.
+dsdp-blueprint-coverage:
+	python3 dumas2017dual/blueprint/check_coverage.py
+
 # SPP: rebuild smc du2002
 SPP_DIRS := smc du2002
 SPP_VO := $(patsubst %.v,%.vo,$(shell grep -E '^(smc/|du2002/)' _CoqProject))
@@ -61,4 +67,4 @@ hom-rebuild: Makefile.coq
 	find $(HOM_DIRS) \( -name "*.vo" -o -name "*.vos" -o -name "*.vok" -o -name "*.glob" \) -delete 2>/dev/null || true
 	$(MAKE) -f Makefile.coq $(HOM_VO)
 
-.PHONY: all clean dsdp
+.PHONY: all clean dsdp dsdp-rebuild dsdp-blueprint-coverage spp spp-rebuild hom hom-rebuild

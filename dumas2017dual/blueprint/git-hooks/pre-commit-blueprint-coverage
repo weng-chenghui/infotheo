@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+# Standalone pre-commit step: DSDP blueprint coverage.
+# Independent of the rocq-audit hook. Fast — runs only when a staged file could
+# affect coverage (a scoped .v, the blueprint .tex, make_blueprint.sh, the
+# exclude-list, or the checker itself). Bypass with BLUEPRINT_COVERAGE_BYPASS=1.
+set -euo pipefail
+
+if [ "${BLUEPRINT_COVERAGE_BYPASS:-0}" = "1" ]; then
+  exit 0
+fi
+
+ROOT="$(git rev-parse --show-toplevel)"
+staged="$(git diff --cached --name-only --diff-filter=ACMR)"
+
+# Only run when something coverage-relevant is staged.
+if ! printf '%s\n' "$staged" | grep -qE \
+  '^(dumas2017dual/dsdp/.*\.v|homomorphic_encryption/indcpa_ror\.v|dumas2017dual/entropy_fiber/entropy_fiber_zpq\.v|dumas2017dual/lib/extra_proba\.v|dumas2017dual/blueprint/(src/.*\.tex|make_blueprint\.sh|blueprint-exclude\.txt|check_coverage\.py))$'
+then
+  exit 0
+fi
+
+echo "[blueprint-coverage] checking \\rocq{} node coverage…"
+if ! python3 "$ROOT/dumas2017dual/blueprint/check_coverage.py"; then
+  echo "[blueprint-coverage] FAILED — add a \\rocq{} node, fix the dangling ref," >&2
+  echo "  or add the declaration to dumas2017dual/blueprint/blueprint-exclude.txt." >&2
+  echo "  Bypass once with: BLUEPRINT_COVERAGE_BYPASS=1 git commit …" >&2
+  exit 1
+fi
