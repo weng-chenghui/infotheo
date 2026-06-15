@@ -503,6 +503,9 @@ eapply valid_resolve; first exact: (pack_valid predictor).
 exact: fhas_set.
 Qed.
 
+(* The legible hand-spelled form of [drun seed gc] (with the leaked output S
+   written by name into [Sout_cell]) is certified by [gen_literal_zeroE] in
+   dsdp_game_gen_literal.v; the real endpoint by [gen_literal_realE]. *)
 Let gc := all_zero (game_of_trace_seeded dsdp_weight_names
                       (dsdp_alice_obs_leak_S_seeded card_msg card_renc)).
 Let drun := denote_run renc_card rand_of_renc chmsg_of_msg chcipher_of_cipher pkey_of_party msg_of_idx rand0.
