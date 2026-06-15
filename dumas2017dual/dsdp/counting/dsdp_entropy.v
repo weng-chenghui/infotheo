@@ -442,7 +442,7 @@ End dsdp_entropy.
     **Naming:** suffix [_ring] indicates the ring-generic sibling
     of the [Z_(p*q)]-specialized [dsdp_fiber_card] at line 200; the
     original lemma is preserved unchanged so the N-party code in
-    [dsdp_entropy_n] and the kept theorems in [dsdp_security.v]
+    [dsdp_entropy_n] and the kept theorems in [dsdp_view_independence.v]
     continue to compile.
 *)
 
@@ -463,7 +463,7 @@ End dsdp_entropy.
     **Naming:** suffix [_ring] mirrors [dsdp_fiber_card_ring]; the
     [Z_(p*q)]-specialized [Pr_dsdp_sol_uniform] at line 237 is left
     unchanged so the N-party generalization in [Section dsdp_entropy_n]
-    and the legacy theorems in [dsdp_security.v] keep their meaning.
+    and the legacy theorems in [dsdp_view_independence.v] keep their meaning.
 *)
 
 Section dsdp_entropy_ring.
@@ -964,7 +964,7 @@ Hypothesis AliceInputView_indep_V2 :
 
 (* Note: The dotp2 definitions (dotp2, Dotp2_rv, US, VS, ConstUS, VU1, S_E)
    and malicious_adversary_case_analysis section (ConstUS_discloses_V2, 
-   US_compromised_leaks_V2) have been moved to dsdp_security.v for better
+   US_compromised_leaks_V2) have been moved to dsdp_view_independence.v for better
    organization - security analysis belongs with security theorems. *)
 
 Section semi_honest_case_analysis.
@@ -1120,7 +1120,7 @@ Hypothesis V3_determined :
    independence.
    Given: X is conditionally independent of [Dk_a, R2, R3] given CondRV
    Proves: H(X | AliceView) = H(X | CondRV)
-   This is reused in dsdp_security.v for the entropic security proof. *)
+   This is reused in dsdp_view_independence.v for the entropic security proof. *)
 Lemma alice_view_to_cond (A : finType) (Xvar : {RV P -> A})
   (* Three independence hypotheses for peeling encryption layers.
      E_enc_ce_contract strips the rightmost item of the joint pair, so
@@ -1194,7 +1194,7 @@ Qed.
 
 (* Joint conditional entropy reduction: H(V2,V3 | AliceView) = H(V2 | AliceView).
    V3 adds no additional entropy because it is functionally determined by V2
-   and the constraint. Used in the entropic security proof (dsdp_security.v). *)
+   and the constraint. Used in the entropic security proof (dsdp_view_independence.v). *)
 Lemma joint_centropy_reduction
     (* Encryption-peeling hypotheses for Xvar = [% V2, V3] *)
     (Hinde_bob_v2v3 :

@@ -31,8 +31,8 @@ Require Import homomorphic_encryption indcpa_ror.
 Require Import dsdp_program dsdp_entropy dsdp_pismc.
 Require Import smc.ssprove_ext_lossless.
 Require Import dsdp_game_code.
-Require Import dsdp_symbolic.
-Require Import dsdp_game_symbolic.
+Require Import dsdp_symbolic_exec.
+Require Import dsdp_game_derivation.
 
 Set Implicit Arguments.
 Unset Strict Implicit.
@@ -51,7 +51,7 @@ Import PackageNotation.
 (* Pin SSProve's real type as the ambient realType for this file. *)
 Notation R := SSProve.Crypt.Axioms.R.
 
-Section dsdp_indcpa_security.
+Section dsdp_indcpa_advantage.
 (* the only inputs a researcher supplies: the corrupt-view model is fixed to DSDP
    inside the record; these are the concrete scheme + marshalling. *)
 Variables (AHE : AHEncType) (Renc : finType) (card_renc : nat)
@@ -97,7 +97,7 @@ Example dsdp_problem_secure (Adv : dsdp_indcpa_adversary dsdp_problem) :
   AdvantageE (real_game dsdp_problem) (zero_game dsdp_problem) (adv_package Adv)
     <= 2%:R * epsilon_cpa.
 Proof. have H := dsdp_indcpa_secrecy Adv. by rewrite dsdp_problem_hops in H. Qed.
-End dsdp_indcpa_security.
+End dsdp_indcpa_advantage.
 
 (* ------------------------------------------------------------------ *)
 (* Capstone: the IND-CPA bound holds for the DERIVED game.             *)

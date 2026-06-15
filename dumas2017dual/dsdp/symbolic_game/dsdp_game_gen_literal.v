@@ -6,7 +6,7 @@
    S written by name into [Sout_cell].  The reflection scaffolding (the seven
    [denote_run] unfold lemmas, [gc_eq], [output_term], [denote_output_termE]) is
    re-established here, standalone, so this file sits upstream of and independent
-   from dsdp_security_indcpa_fiber.v. *)
+   from dsdp_guess_fiber.v. *)
 
 From mathcomp Require Import all_boot all_order all_algebra fingroup finalg.
 From mathcomp Require Import matrix ring boolp finmap reals realsum.
@@ -21,8 +21,8 @@ Require Import homomorphic_encryption indcpa_ror.
 Require Import dsdp_program dsdp_entropy dsdp_pismc.
 Require Import smc.ssprove_ext_lossless.
 Require Import dsdp_game_code.
-Require Import dsdp_symbolic.
-Require Import dsdp_game_symbolic.
+Require Import dsdp_symbolic_exec.
+Require Import dsdp_game_derivation.
 
 Set Implicit Arguments.
 Unset Strict Implicit.
@@ -98,7 +98,7 @@ Proof. by rewrite /drun /dhe /denote_run -/denote_run. Qed.
 
 (* The explicit AST of the seeded all-zero output-exposing game.
    Naming: kept as [gc_eq] (the defining equation of [gc]) to mirror [gc_eq] in
-   dsdp_security_indcpa_fiber.v. *)
+   dsdp_guess_fiber.v. *)
 Lemma gc_eq : gc = GC_sample card_msg (GC_sample card_msg (GC_sample card_msg (GC_sample card_msg (GC_sample card_renc (GC_sample card_renc (GC_put (HE_var 3) (GC_enc_hop 1 (HE_const 0) (GC_enc_hop 2 (HE_const 0) (GC_let (HE_emul (HE_epow (HE_var 1) (HE_var 7)) (HE_enc 1 (HE_var 3) 1)) (GC_let (HE_emul (HE_epow (HE_var 1) (HE_var 9)) (HE_enc 2 (HE_var 3) 0)) (GC_put_output (HE_add (HE_add (HE_mul (HE_var 8) (HE_var 11)) (HE_mul (HE_var 9) (HE_var 7))) (HE_mul (HE_var 10) (HE_var 6))) (GC_ret [:: HE_var 1; HE_var 0; HE_var 3; HE_var 2])))))))))))).
 Proof. by rewrite /gc; vm_compute. Qed.
 

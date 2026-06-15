@@ -10,10 +10,10 @@ PLASTEX="$BP/.venv/bin/plastex"
 # Modules the blueprint references via \rocq{...}; coqdoc needs their .glob
 # (present after a normal build of the project).
 MODULES=(
-  dumas2017dual/dsdp/symbolic_game/dsdp_symbolic.v
-  dumas2017dual/dsdp/symbolic_game/dsdp_game_symbolic.v
+  dumas2017dual/dsdp/symbolic_game/dsdp_symbolic_exec.v
+  dumas2017dual/dsdp/symbolic_game/dsdp_game_derivation.v
   dumas2017dual/dsdp/symbolic_game/dsdp_game_code.v
-  dumas2017dual/dsdp/indcpa_hopping/dsdp_indcpa_security.v
+  dumas2017dual/dsdp/indcpa_hopping/dsdp_indcpa_advantage.v
   homomorphic_encryption/indcpa_ror.v
   # Modules cited green by Part II (it_bound_bridge.tex): the Infotheo fiber
   # facts and the full output-channel chain: the derivation extension, the
@@ -23,7 +23,7 @@ MODULES=(
   # and the triangle composition).  Every Part II node is green.
   dumas2017dual/dsdp/counting/dsdp_entropy.v
   dumas2017dual/entropy_fiber/entropy_fiber_zpq.v
-  dumas2017dual/dsdp/indcpa_hopping/dsdp_security_indcpa_fiber.v
+  dumas2017dual/dsdp/indcpa_hopping/dsdp_guess_fiber.v
   dumas2017dual/lib/extra_proba.v
 )
 

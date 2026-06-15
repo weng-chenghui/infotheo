@@ -132,13 +132,13 @@ dumas2017dual/dsdp/core/dsdp_pismc.v
 dumas2017dual/dsdp/core/dsdp_correctness.v
 dumas2017dual/dsdp/counting/dsdp_entropy_trace.v
 dumas2017dual/dsdp/counting/dsdp_entropy.v
-dumas2017dual/dsdp/counting/dsdp_security.v
+dumas2017dual/dsdp/counting/dsdp_view_independence.v
 dumas2017dual/dsdp/symbolic_game/dsdp_game_code.v
-dumas2017dual/dsdp/symbolic_game/dsdp_symbolic.v
-dumas2017dual/dsdp/symbolic_game/dsdp_game_symbolic.v
+dumas2017dual/dsdp/symbolic_game/dsdp_symbolic_exec.v
+dumas2017dual/dsdp/symbolic_game/dsdp_game_derivation.v
 dumas2017dual/dsdp/symbolic_game/dsdp_game_gen_literal.v
 dumas2017dual/dsdp/convert/dsdp_convert.v
-dumas2017dual/dsdp/indcpa_hopping/dsdp_indcpa_security.v
-dumas2017dual/dsdp/indcpa_hopping/dsdp_security_indcpa_fiber.v
+dumas2017dual/dsdp/indcpa_hopping/dsdp_indcpa_advantage.v
+dumas2017dual/dsdp/indcpa_hopping/dsdp_guess_fiber.v
 
 -R . infotheo

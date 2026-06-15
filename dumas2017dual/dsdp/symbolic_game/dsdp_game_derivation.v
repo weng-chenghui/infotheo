@@ -21,7 +21,7 @@
    requires [plain : finComNzRingType] and [cipher : nzRingType], but a free
    [he_term] algebra is infinite.  Resolution: the protocol is re-parameterised
    over a standalone [DSDP_Interface] (no AHEncType, hence no finType/ring/law
-   constraints), and [dsdp_symbolic.v] instantiates it at
+   constraints), and [dsdp_symbolic_exec.v] instantiates it at
    [Symbolic_DSDP_Interface] over [he_term].  [dsdp_alice_obs]'s homomorphic
    combine terms ([AO_combine] payloads) are now DERIVED by symbolically running
    [palice] at that instance ([dsdp_observed_combines]), not hand-written; the
@@ -46,7 +46,7 @@ Require Import homomorphic_encryption indcpa_ror.
 Require Import dsdp_program dsdp_entropy dsdp_pismc.
 Require Import smc.ssprove_ext_lossless.
 Require Import dsdp_game_code.
-Require Import dsdp_symbolic.
+Require Import dsdp_symbolic_exec.
 
 Set Implicit Arguments.
 Unset Strict Implicit.
@@ -292,7 +292,7 @@ Proof. by []. Qed.
    PAST Alice's decrypt-receive: the two structured hop ciphertexts
    ([dsdp_received_hop_ciphertexts]) followed by the named placeholder
    [SD_cipher (HE_var 50)] Charlie returns, mirroring the third entry of
-   [dsdp_symbolic.dsdp_recv_responses].  Feeding this third response lets the
+   [dsdp_symbolic_exec.dsdp_recv_responses].  Feeding this third response lets the
    walk continue to Alice's [Ret], where the scalar-product output [S] is read
    off the return payload. *)
 Definition dsdp_received_responses_output : seq symbolic_data :=

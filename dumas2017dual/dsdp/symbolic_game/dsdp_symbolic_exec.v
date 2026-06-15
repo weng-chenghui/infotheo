@@ -1,4 +1,4 @@
-(* dsdp_symbolic.v — symbolic instance of the standalone DSDP_Interface, and
+(* dsdp_symbolic_exec.v — symbolic instance of the standalone DSDP_Interface, and
    the DERIVED homomorphic-combine terms of corrupted Alice.
 
    Phase-2b of the symbolic-to-game observer derivation (design doc:
@@ -9,11 +9,11 @@
    message/cipher carriers are the deep-embedded [he_term] algebra of
    dsdp_game_code.v, and reads off the homomorphic-assembly [he_term]s that
    corrupted Alice sends back.  These DERIVED terms ([dsdp_observed_combines])
-   are what dsdp_game_symbolic.v feeds to its [AO_combine] observation steps,
+   are what dsdp_game_derivation.v feeds to its [AO_combine] observation steps,
    replacing the hand-written terms.
 
    The [he_term] algebra is the REAL one from dsdp_game_code.v (imported), so
-   the symbolic sends and dsdp_game_symbolic.dsdp_alice_obs share one type;
+   the symbolic sends and dsdp_game_derivation.dsdp_alice_obs share one type;
    downstream [game_of_trace]/[denote_he] lower these terms to the SSProve game
    with no translation. *)
 
@@ -90,7 +90,7 @@ Definition decode_sym (sk : nat) (c : he_term) : option he_term :=
    Bob 1, Charlie 2). Composed with the procs' [nat_to_party_id] coercion this
    round-trips the literal party tag (party_id_to_nat (nat_to_party_id 1) = 1),
    so the HE_enc party tags in the sends are 1 (Bob) and 2 (Charlie), matching
-   dsdp_game_symbolic.dsdp_alice_obs. *)
+   dsdp_game_derivation.dsdp_alice_obs. *)
 Definition ek_sym (p : party_id) : nat := party_id_to_nat p.
 
 (* ========================================================================== *)
@@ -125,7 +125,7 @@ Fixpoint sent_payloads {dT} (p : @smc_interpreter.proc dT)
 
 (* palice_sym — Alice's DI-parameterized program instantiated at the symbolic
    interface and erased to a plain [proc]. Inputs (names follow
-   dsdp_game_symbolic.dsdp_alice_obs's canonical map): dk = key id 0; the two
+   dsdp_game_derivation.dsdp_alice_obs's canonical map): dk = key id 0; the two
    inputs Alice does not leak (v1 u1) get unused names 16/17; her four leaked
    scalars u2 u3 r2 r3 = HE_var 12..15; the two mask randomness slots ra1 ra2 =
    20, 21.  Running this is the DERIVATION: the combine terms below come out of
@@ -142,7 +142,7 @@ Definition palice_sym : proc symbolic_data :=
    [HE_var 50] (consumed by Alice's last Recv_dec, never re-sent).  Feeding the
    received ciphertexts as names (rather than their actual Enc terms) is what
    makes Alice's computed [Send] payloads reference c2/c3 BY NAME 30/31, exactly
-   as dsdp_game_symbolic.dsdp_alice_obs does after its AO_recv_hop steps bind
+   as dsdp_game_derivation.dsdp_alice_obs does after its AO_recv_hop steps bind
    the received ciphertexts to 30/31. *)
 Definition dsdp_recv_responses : seq symbolic_data :=
   [:: SD_cipher (HE_var 30) ; SD_cipher (HE_var 31) ; SD_cipher (HE_var 50) ].

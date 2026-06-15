@@ -3,7 +3,7 @@
    framing lemmas (footprint, write-invariance, pushforward composition,
    bijection-carries-uniform, lossless-mean normalization) used to read an
    SSProve game's value marginal as an Infotheo distribution.  Consumed by
-   indcpa_hopping/dsdp_security_indcpa_fiber. *)
+   indcpa_hopping/dsdp_guess_fiber. *)
 
 From HB Require Import structures.
 From mathcomp Require Import all_boot all_order all_algebra fingroup finalg.

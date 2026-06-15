@@ -59,7 +59,7 @@ Local Open Scope fdist_scope.
 Local Open Scope entropy_scope.
 Local Open Scope vec_ext_scope.
 
-Section dsdp_security.
+Section dsdp_view_independence.
 
 Context {R : realType}.
 Variable T : finType.
@@ -312,7 +312,7 @@ Qed.
 
 End malicious_adversary_case_analysis.
 
-End dsdp_security.
+End dsdp_view_independence.
 
 (******************************************************************************)
 (* Bob's Security Independence Proofs                                         *)

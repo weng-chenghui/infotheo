@@ -3,7 +3,7 @@
    connector.
 
    The output-exposing endpoint games real_game_leak_S / zero_game_leak_S
-   (dsdp_indcpa_security) expose Alice's view together with the scalar-product
+   (dsdp_indcpa_advantage) expose Alice's view together with the scalar-product
    output S.  This file builds the absolute-probability guessing layer on those
    games: a predictor reads (view, S) and names a guess, the challenger tests
    guess = V_2, and the closed experiment's success probability is rewritten as
@@ -31,9 +31,9 @@ Require Import homomorphic_encryption indcpa_ror.
 Require Import dsdp_program dsdp_entropy dsdp_pismc.
 Require Import smc.ssprove_ext_lossless.
 Require Import dsdp_game_code.
-Require Import dsdp_symbolic.
-Require Import dsdp_game_symbolic.
-Require Import dsdp_indcpa_security.
+Require Import dsdp_symbolic_exec.
+Require Import dsdp_game_derivation.
+Require Import dsdp_indcpa_advantage.
 Require Import dsdp_convert.
 
 Set Implicit Arguments.
@@ -53,7 +53,7 @@ Import PackageNotation.
 (* Pin SSProve's real type as the ambient realType for this file. *)
 Notation R := SSProve.Crypt.Axioms.R.
 
-Section dsdp_security_indcpa_fiber.
+Section dsdp_guess_fiber.
 (* The concrete scheme and marshalling fixed by the output-exposing endpoint
    games (same parameters as dsdp_advantage_derived_leak_S). *)
 Variables (AHE : AHEncType) (Renc : finType) (card_renc : nat)
@@ -115,7 +115,7 @@ Definition guessing_experiment
     : raw_package :=
   guessing_challenger ∘ par predictor game.
 
-End dsdp_security_indcpa_fiber.
+End dsdp_guess_fiber.
 
 
 Set Bullet Behavior "Strict Subproofs".
