@@ -1,10 +1,10 @@
 % Full DSDP corrupted-Alice IND-CPA secrecy auto-derivation chain.
 % Each node carries \rocq{<full declaration name>} (link to the formal artifact),
 % \rocqok (formalized), and \uses{...} (dependency edges).  Module prefixes:
-%   infotheo.dumas2017dual.dsdp.dsdp_symbolic
-%   infotheo.dumas2017dual.dsdp.dsdp_game_symbolic
-%   infotheo.dumas2017dual.dsdp.dsdp_game_code
-%   infotheo.dumas2017dual.dsdp.dsdp_indcpa_security
+%   infotheo.dumas2017dual.dsdp.symbolic_game.dsdp_symbolic
+%   infotheo.dumas2017dual.dsdp.symbolic_game.dsdp_game_symbolic
+%   infotheo.dumas2017dual.dsdp.symbolic_game.dsdp_game_code
+%   infotheo.dumas2017dual.dsdp.indcpa_hopping.dsdp_indcpa_security
 %   infotheo.homomorphic_encryption.indcpa_ror
 
 \chapter{Introduction}
@@ -151,8 +151,8 @@ to the final bound.
 
 \begin{definition}[Symbolic interpretation of the protocol]
   \label{def:symbolic_interface}
-  \rocq{infotheo.dumas2017dual.dsdp.dsdp_symbolic.Symbolic_DSDP_Interface,
-       infotheo.dumas2017dual.dsdp.dsdp_symbolic.symbolic_data}
+  \rocq{infotheo.dumas2017dual.dsdp.symbolic_game.dsdp_symbolic.Symbolic_DSDP_Interface,
+       infotheo.dumas2017dual.dsdp.symbolic_game.dsdp_symbolic.symbolic_data}
   \rocqok
   The protocol is expressed once over an abstract interface of homomorphic
   operations. The symbolic interpretation fills that interface with a carrier of
@@ -164,7 +164,7 @@ to the final bound.
 
 \begin{definition}[Corrupted party's program]
   \label{def:palice_sym}
-  \rocq{infotheo.dumas2017dual.dsdp.dsdp_symbolic.palice_sym}
+  \rocq{infotheo.dumas2017dual.dsdp.symbolic_game.dsdp_symbolic.palice_sym}
   \rocqok
   \uses{def:symbolic_interface}
   The corrupted party Alice, run at the symbolic interpretation with named
@@ -174,9 +174,9 @@ to the final bound.
 
 \begin{definition}[Sender programs and the challenge secret]
   \label{def:sender_programs}
-  \rocq{infotheo.dumas2017dual.dsdp.dsdp_symbolic.pbob_sym,
-       infotheo.dumas2017dual.dsdp.dsdp_symbolic.pcharlie_sym,
-       infotheo.dumas2017dual.dsdp.dsdp_symbolic.dsdp_v2_name}
+  \rocq{infotheo.dumas2017dual.dsdp.symbolic_game.dsdp_symbolic.pbob_sym,
+       infotheo.dumas2017dual.dsdp.symbolic_game.dsdp_symbolic.pcharlie_sym,
+       infotheo.dumas2017dual.dsdp.symbolic_game.dsdp_symbolic.dsdp_v2_name}
   \rocqok
   \uses{def:symbolic_interface}
   The two honest senders at the symbolic interpretation. Each one's head message
@@ -188,7 +188,7 @@ to the final bound.
 
 \begin{lemma}[The assembled ciphertexts are derived]
   \label{lem:observed_combines}
-  \rocq{infotheo.dumas2017dual.dsdp.dsdp_symbolic.dsdp_observed_combines_eq}
+  \rocq{infotheo.dumas2017dual.dsdp.symbolic_game.dsdp_symbolic.dsdp_observed_combines_eq}
   \rocqok
   Running the corrupted program against placeholder receptions, the two messages
   it returns compute to the two homomorphic assemblies $a_1$ and $a_2$. These
@@ -204,8 +204,8 @@ to the final bound.
 
 \begin{definition}[Received hop ciphertexts]
   \label{def:received_hops}
-  \rocq{infotheo.dumas2017dual.dsdp.dsdp_symbolic.dsdp_received_hop_ciphertexts,
-       infotheo.dumas2017dual.dsdp.dsdp_symbolic.first_send}
+  \rocq{infotheo.dumas2017dual.dsdp.symbolic_game.dsdp_symbolic.dsdp_received_hop_ciphertexts,
+       infotheo.dumas2017dual.dsdp.symbolic_game.dsdp_symbolic.first_send}
   \rocqok
   \uses{def:sender_programs}
   The stream of ciphertexts Alice receives, taken as the senders' head messages.
@@ -219,7 +219,7 @@ to the final bound.
 
 \begin{definition}[Corrupted-view observations]
   \label{def:alice_obs}
-  \rocq{infotheo.dumas2017dual.dsdp.dsdp_game_symbolic.alice_obs}
+  \rocq{infotheo.dumas2017dual.dsdp.symbolic_game.dsdp_game_symbolic.alice_obs}
   \rocqok
   A first-order vocabulary of the actions in a corrupted party's view: sample a
   scalar, sample randomness, write the challenge cell, receive an encrypted
@@ -233,7 +233,7 @@ to the final bound.
 
 \begin{definition}[Walking the program into observations]
   \label{def:walk_obs}
-  \rocq{infotheo.dumas2017dual.dsdp.dsdp_game_symbolic.walk_obs}
+  \rocq{infotheo.dumas2017dual.dsdp.symbolic_game.dsdp_game_symbolic.walk_obs}
   \rocqok
   \uses{def:alice_obs}
   Walk the corrupted program against the received hop ciphertexts. At each
@@ -248,7 +248,7 @@ to the final bound.
 
 \begin{definition}[Synthesising the sample prefix]
   \label{def:collect_samples}
-  \rocq{infotheo.dumas2017dual.dsdp.dsdp_game_symbolic.collect_samples}
+  \rocq{infotheo.dumas2017dual.dsdp.symbolic_game.dsdp_game_symbolic.collect_samples}
   \rocqok
   \uses{def:alice_obs}
   Scan the walked observations for their free scalar and randomness names in
@@ -261,7 +261,7 @@ to the final bound.
 
 \begin{definition}[The whole corrupted-view trace]
   \label{def:obs_of_procs}
-  \rocq{infotheo.dumas2017dual.dsdp.dsdp_game_symbolic.obs_of_procs}
+  \rocq{infotheo.dumas2017dual.dsdp.symbolic_game.dsdp_game_symbolic.obs_of_procs}
   \rocqok
   \uses{def:walk_obs,def:collect_samples}
   Assemble the full trace from the loose symbolic inputs: the synthesised sample
@@ -273,7 +273,7 @@ to the final bound.
 
 \begin{lemma}[The derived DSDP trace]
   \label{lem:obs_of_procs_dsdp}
-  \rocq{infotheo.dumas2017dual.dsdp.dsdp_game_symbolic.obs_of_procs_dsdp}
+  \rocq{infotheo.dumas2017dual.dsdp.symbolic_game.dsdp_game_symbolic.obs_of_procs_dsdp}
   \rocqok
   For the DSDP inputs the trace computes to a fourteen-action sequence: six
   scalar samples in first-appearance order, two randomness samples, the challenge
@@ -290,7 +290,7 @@ to the final bound.
 
 \begin{definition}[The DSDP corrupted-Alice trace]
   \label{def:dsdp_alice_obs}
-  \rocq{infotheo.dumas2017dual.dsdp.dsdp_game_symbolic.dsdp_alice_obs}
+  \rocq{infotheo.dumas2017dual.dsdp.symbolic_game.dsdp_game_symbolic.dsdp_alice_obs}
   \rocqok
   \uses{def:obs_of_procs,def:palice_sym,def:received_hops,def:sender_programs}
   The DSDP instance of the whole-trace observer, with the challenge fixed to
@@ -304,8 +304,8 @@ to the final bound.
 
 \begin{definition}[Reified terms and game code]
   \label{def:embedding}
-  \rocq{infotheo.dumas2017dual.dsdp.dsdp_game_code.he_term,
-       infotheo.dumas2017dual.dsdp.dsdp_game_code.game_code}
+  \rocq{infotheo.dumas2017dual.dsdp.symbolic_game.dsdp_game_code.he_term,
+       infotheo.dumas2017dual.dsdp.symbolic_game.dsdp_game_code.game_code}
   \rocqok
   A deep embedding. Homomorphic terms cover variables, constants, encryption,
   decryption, homomorphic addition, the scalar action, and ring operations.
@@ -320,7 +320,7 @@ to the final bound.
 
 \begin{definition}[Resolving names to positions]
   \label{def:resolve_term}
-  \rocq{infotheo.dumas2017dual.dsdp.dsdp_game_symbolic.resolve_term}
+  \rocq{infotheo.dumas2017dual.dsdp.symbolic_game.dsdp_game_symbolic.resolve_term}
   \rocqok
   \uses{def:embedding}
   Rewrite a named term into the positional form the denotation expects, replacing
@@ -333,7 +333,7 @@ to the final bound.
 
 \begin{definition}[Folding observations into game code]
   \label{def:lower_obs}
-  \rocq{infotheo.dumas2017dual.dsdp.dsdp_game_symbolic.lower_obs}
+  \rocq{infotheo.dumas2017dual.dsdp.symbolic_game.dsdp_game_symbolic.lower_obs}
   \rocqok
   \uses{def:resolve_term,def:alice_obs,def:embedding}
   Fold the observation trace into game code, threading the value and randomness
@@ -345,7 +345,7 @@ to the final bound.
 
 \begin{definition}[The lowering pass]
   \label{def:game_of_trace}
-  \rocq{infotheo.dumas2017dual.dsdp.dsdp_game_symbolic.game_of_trace}
+  \rocq{infotheo.dumas2017dual.dsdp.symbolic_game.dsdp_game_symbolic.game_of_trace}
   \rocqok
   \uses{def:lower_obs}
   Lower a corrupted-view trace to game code, starting from empty environments.
@@ -354,9 +354,9 @@ to the final bound.
 
 \begin{definition}[Hop counts]
   \label{def:count_hops}
-  \rocq{infotheo.dumas2017dual.dsdp.dsdp_game_symbolic.count_obs_hops,
-       infotheo.dumas2017dual.dsdp.dsdp_game_code.count_hops,
-       infotheo.dumas2017dual.dsdp.dsdp_game_code.hop_sites}
+  \rocq{infotheo.dumas2017dual.dsdp.symbolic_game.dsdp_game_symbolic.count_obs_hops,
+       infotheo.dumas2017dual.dsdp.symbolic_game.dsdp_game_code.count_hops,
+       infotheo.dumas2017dual.dsdp.symbolic_game.dsdp_game_code.hop_sites}
   \rocqok
   \uses{def:alice_obs,def:embedding}
   Two counts: the number of hoppable receptions before the leak that ends a
@@ -368,7 +368,7 @@ to the final bound.
 
 \begin{lemma}[Hop-count adequacy]
   \label{lem:count_hops_adequacy}
-  \rocq{infotheo.dumas2017dual.dsdp.dsdp_game_symbolic.count_hops_game_of_trace}
+  \rocq{infotheo.dumas2017dual.dsdp.symbolic_game.dsdp_game_symbolic.count_hops_game_of_trace}
   \rocqok
   Lowering neither creates nor drops hops, so the game-side hop count of a
   lowered trace equals its protocol-side count. This ties the ladder length to
@@ -385,9 +385,9 @@ to the final bound.
 
 \begin{definition}[Denotation into a package]
   \label{def:denote_game}
-  \rocq{infotheo.dumas2017dual.dsdp.dsdp_game_code.denote_he,
-       infotheo.dumas2017dual.dsdp.dsdp_game_code.denote_run,
-       infotheo.dumas2017dual.dsdp.dsdp_game_code.denote_game}
+  \rocq{infotheo.dumas2017dual.dsdp.symbolic_game.dsdp_game_code.denote_he,
+       infotheo.dumas2017dual.dsdp.symbolic_game.dsdp_game_code.denote_run,
+       infotheo.dumas2017dual.dsdp.symbolic_game.dsdp_game_code.denote_game}
   \rocqok
   \uses{def:embedding}
   Evaluate game code into an SSProve package: draw each sample, write the
@@ -400,9 +400,9 @@ to the final bound.
 
 \begin{definition}[Hybrid endpoints]
   \label{def:hybrid_endpoints}
-  \rocq{infotheo.dumas2017dual.dsdp.dsdp_game_code.zero_hop_prefix,
-       infotheo.dumas2017dual.dsdp.dsdp_game_code.all_real,
-       infotheo.dumas2017dual.dsdp.dsdp_game_code.all_zero}
+  \rocq{infotheo.dumas2017dual.dsdp.symbolic_game.dsdp_game_code.zero_hop_prefix,
+       infotheo.dumas2017dual.dsdp.symbolic_game.dsdp_game_code.all_real,
+       infotheo.dumas2017dual.dsdp.symbolic_game.dsdp_game_code.all_zero}
   \rocqok
   \uses{def:embedding,def:count_hops}
   Replacing the secret of the first $i$ encryption hops by the canonical zero
@@ -427,7 +427,7 @@ to the final bound.
 
 \begin{definition}[One-hop oracle routing]
   \label{def:denote_game_shim}
-  \rocq{infotheo.dumas2017dual.dsdp.dsdp_game_code.denote_game_shim}
+  \rocq{infotheo.dumas2017dual.dsdp.symbolic_game.dsdp_game_code.denote_game_shim}
   \rocqok
   \uses{def:denote_game,def:indcpa_assumption}
   Route exactly one encryption hop through the IND-CPA encryption oracle, leaving
@@ -438,8 +438,8 @@ to the final bound.
 
 \begin{lemma}[Per-hop perfect equivalence]
   \label{lem:hop_equiv}
-  \rocq{infotheo.dumas2017dual.dsdp.dsdp_game_code.hop_equiv_real,
-       infotheo.dumas2017dual.dsdp.dsdp_game_code.hop_equiv_zero}
+  \rocq{infotheo.dumas2017dual.dsdp.symbolic_game.dsdp_game_code.hop_equiv_real,
+       infotheo.dumas2017dual.dsdp.symbolic_game.dsdp_game_code.hop_equiv_zero}
   \rocqok
   Each ladder rung equals the one-hop shim composed with the matching real or
   zero oracle, the encode-and-decode round trip at the hop collapsing.
@@ -455,7 +455,7 @@ to the final bound.
 
 \begin{lemma}[Adjacent rungs cost one query]
   \label{lem:advantage_hop}
-  \rocq{infotheo.dumas2017dual.dsdp.dsdp_game_code.advantage_hop}
+  \rocq{infotheo.dumas2017dual.dsdp.symbolic_game.dsdp_game_code.advantage_hop}
   \rocqok
   Two adjacent rungs of the ladder differ at a single hop, so their advantage is
   at most the single-hop IND-CPA bound $\epscpa$.
@@ -469,7 +469,7 @@ to the final bound.
 
 \begin{definition}[The hybrid ladder]
   \label{def:hybrid_ladder}
-  \rocq{infotheo.dumas2017dual.dsdp.dsdp_game_code.hybrid_ladder}
+  \rocq{infotheo.dumas2017dual.dsdp.symbolic_game.dsdp_game_code.hybrid_ladder}
   \rocqok
   \uses{def:denote_game,def:hybrid_endpoints}
   The intermediate rungs between the real game and the all-zero game.
@@ -478,7 +478,7 @@ to the final bound.
 
 \begin{lemma}[Telescoping bound]
   \label{lem:advantage_sum_ladder_le}
-  \rocq{infotheo.dumas2017dual.dsdp.dsdp_game_code.advantage_sum_ladder_le}
+  \rocq{infotheo.dumas2017dual.dsdp.symbolic_game.dsdp_game_code.advantage_sum_ladder_le}
   \rocqok
   A contiguous block of rungs costs at most one IND-CPA query per rung.
   \[ \text{a block of } n{+}1 \text{ rungs} \ \le\ (n{+}1)\,\epscpa \]
@@ -491,7 +491,7 @@ to the final bound.
 
 \begin{theorem}[Generic hybrid bound]
   \label{thm:advantage_le}
-  \rocq{infotheo.dumas2017dual.dsdp.dsdp_game_code.advantage_le}
+  \rocq{infotheo.dumas2017dual.dsdp.symbolic_game.dsdp_game_code.advantage_le}
   \rocqok
   For any game code, every valid adversary's advantage between the real and
   all-zero denoted games is at most the number of encryption hops times
@@ -510,7 +510,7 @@ to the final bound.
 
 \begin{definition}[The secrecy-problem record]
   \label{def:secrecy_problem}
-  \rocq{infotheo.dumas2017dual.dsdp.dsdp_game_symbolic.dsdp_indcpa_secrecy_problem}
+  \rocq{infotheo.dumas2017dual.dsdp.symbolic_game.dsdp_game_symbolic.dsdp_indcpa_secrecy_problem}
   \rocqok
   \uses{def:obs_of_procs}
   One record bundling the symbolic corrupted-view model, the corrupted program,
@@ -523,7 +523,7 @@ to the final bound.
 
 \begin{definition}[Corrupted view of a problem]
   \label{def:corrupted_view}
-  \rocq{infotheo.dumas2017dual.dsdp.dsdp_game_symbolic.corrupted_view}
+  \rocq{infotheo.dumas2017dual.dsdp.symbolic_game.dsdp_game_symbolic.corrupted_view}
   \rocqok
   \uses{def:obs_of_procs,def:secrecy_problem}
   Apply the whole-trace observer to the record's symbolic fields.
@@ -532,9 +532,9 @@ to the final bound.
 
 \begin{definition}[Real and all-zero games of a problem]
   \label{def:games}
-  \rocq{infotheo.dumas2017dual.dsdp.dsdp_game_symbolic.game_of_problem,
-       infotheo.dumas2017dual.dsdp.dsdp_game_symbolic.real_game,
-       infotheo.dumas2017dual.dsdp.dsdp_game_symbolic.zero_game}
+  \rocq{infotheo.dumas2017dual.dsdp.symbolic_game.dsdp_game_symbolic.game_of_problem,
+       infotheo.dumas2017dual.dsdp.symbolic_game.dsdp_game_symbolic.real_game,
+       infotheo.dumas2017dual.dsdp.symbolic_game.dsdp_game_symbolic.zero_game}
   \rocqok
   \uses{def:denote_game,def:corrupted_view,def:hybrid_endpoints,def:game_of_trace}
   Lower the corrupted view to game code, then denote its real and all-zero
@@ -545,7 +545,7 @@ to the final bound.
 
 \begin{definition}[Valid adversary against a problem]
   \label{def:adversary}
-  \rocq{infotheo.dumas2017dual.dsdp.dsdp_game_symbolic.dsdp_indcpa_adversary}
+  \rocq{infotheo.dumas2017dual.dsdp.symbolic_game.dsdp_game_symbolic.dsdp_indcpa_adversary}
   \rocqok
   \uses{def:secrecy_problem}
   A distinguisher bundled with its validity and its disjointness from the game
@@ -556,7 +556,7 @@ to the final bound.
 
 \begin{theorem}[Generic corrupted-view secrecy]
   \label{thm:generic_secrecy}
-  \rocq{infotheo.dumas2017dual.dsdp.dsdp_game_symbolic.dsdp_indcpa_secrecy}
+  \rocq{infotheo.dumas2017dual.dsdp.symbolic_game.dsdp_game_symbolic.dsdp_indcpa_secrecy}
   \rocqok
   For every secrecy-problem record and every valid adversary, the advantage
   between the real game and the all-zero game is at most the corrupted view's hop
@@ -575,7 +575,7 @@ to the final bound.
 
 \begin{lemma}[The derived game matches the fixture]
   \label{lem:dsdp_faithful}
-  \rocq{infotheo.dumas2017dual.dsdp.dsdp_game_symbolic.dsdp_faithful}
+  \rocq{infotheo.dumas2017dual.dsdp.symbolic_game.dsdp_game_symbolic.dsdp_faithful}
   \rocqok
   Lowering the DSDP corrupted-Alice trace reproduces the back-end fixture game
   code exactly, binding positions and all. The fixture is therefore derived
@@ -590,7 +590,7 @@ to the final bound.
 
 \begin{definition}[The DSDP problem instance]
   \label{def:dsdp_problem}
-  \rocq{infotheo.dumas2017dual.dsdp.dsdp_indcpa_security.dsdp_problem}
+  \rocq{infotheo.dumas2017dual.dsdp.indcpa_hopping.dsdp_indcpa_security.dsdp_problem}
   \rocqok
   \uses{def:secrecy_problem,def:palice_sym,def:received_hops,def:sender_programs}
   The record at the DSDP corrupted-Alice model: the corrupted program, the
@@ -602,7 +602,7 @@ to the final bound.
 
 \begin{lemma}[Two hops]
   \label{lem:dsdp_problem_hops}
-  \rocq{infotheo.dumas2017dual.dsdp.dsdp_indcpa_security.dsdp_problem_hops}
+  \rocq{infotheo.dumas2017dual.dsdp.indcpa_hopping.dsdp_indcpa_security.dsdp_problem_hops}
   \rocqok
   The DSDP corrupted view has exactly two encryption hops, one for Bob's secret
   and one for Charlie's.
@@ -616,7 +616,7 @@ to the final bound.
 
 \begin{theorem}[DSDP corrupted-Alice secrecy]
   \label{thm:dsdp_secure}
-  \rocq{infotheo.dumas2017dual.dsdp.dsdp_indcpa_security.dsdp_problem_secure}
+  \rocq{infotheo.dumas2017dual.dsdp.indcpa_hopping.dsdp_indcpa_security.dsdp_problem_secure}
   \rocqok
   Every valid adversary's advantage between the real and all-zero DSDP games is
   at most $2\,\epscpa$.
@@ -632,7 +632,7 @@ to the final bound.
 
 \begin{corollary}[Loose-argument form]
   \label{cor:dsdp_advantage_derived}
-  \rocq{infotheo.dumas2017dual.dsdp.dsdp_indcpa_security.dsdp_advantage_derived}
+  \rocq{infotheo.dumas2017dual.dsdp.indcpa_hopping.dsdp_indcpa_security.dsdp_advantage_derived}
   \rocqok
   The same $2\,\epscpa$ bound stated directly over the denoted games, packaging
   the loose arguments into the record.
