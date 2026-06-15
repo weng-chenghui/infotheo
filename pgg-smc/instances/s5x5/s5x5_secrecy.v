@@ -11,6 +11,7 @@ From mathcomp Require Import fintype finfun finset bigop ssralg ssrnum reals zmo
 From infotheo Require Import realType_ext realType_ln fdist proba entropy.
 From pgg_smc Require Import pgg_leakage_witness pgg_randomized_sharing.
 From pgg_smc Require Import pgg_sharing_mechanism pgg_canonical_sharing.
+From pgg_smc Require Import pgg_leakage_product.
 
 Import GRing.Theory Num.Theory.
 Set Implicit Arguments.
@@ -62,5 +63,19 @@ Lemma s5x5_view_secrecy_concrete (C1 C2 : {set 'I_5})
        lw_view  (mechanism_leakage (Additive (@unif_randomized_sharing R 3 4) HC2)) )
      = `H `p_ (lw_secret (mechanism_leakage (Additive (@unif_randomized_sharing R 3 4) HC2)))).
 Proof. split; apply: leakage_of_view_indep; exact: lw_indep _. Qed.
+
+(** s5x5_joint_view_secrecy — the combined coalition view across both 5-of-5
+    components is independent of the joint secret (s1, s2), with the two
+    components on independent uniform tapes. No abstract sharing hypothesis.
+    @main security: zero mutual information and unchanged conditional entropy for
+    the combined view against the joint secret of the product scheme. *)
+Lemma s5x5_joint_view_secrecy (C1 C2 : {set 'I_5})
+    (HC1 : (#|C1| < 5)%N) (HC2 : (#|C2| < 5)%N) :
+  let lw := leakage_product
+              (mechanism_leakage (Additive (@unif_randomized_sharing R 3 4) HC1))
+              (mechanism_leakage (Additive (@unif_randomized_sharing R 3 4) HC2)) in
+  `I( lw_secret lw ; lw_view lw ) = 0%R /\
+  `H( lw_secret lw | lw_view lw ) = `H `p_ (lw_secret lw).
+Proof. apply: leakage_of_view_indep; exact: lw_indep _. Qed.
 
 End s5x5_secrecy.
