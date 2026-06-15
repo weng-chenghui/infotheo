@@ -11,7 +11,7 @@ From mathcomp Require Import ssreflect ssrbool ssrfun eqtype ssrnat seq.
 From mathcomp Require Import fintype finfun finset bigop ssralg ssrnum reals zmodp.
 From infotheo Require Import realType_ext realType_ln fdist proba entropy.
 From pgg_smc Require Import pgg_leakage_witness pgg_randomized_sharing.
-From pgg_smc Require Import pgg_sharing_mechanism.
+From pgg_smc Require Import pgg_sharing_mechanism pgg_canonical_sharing.
 
 Import GRing.Theory Num.Theory.
 Set Implicit Arguments.
@@ -38,6 +38,18 @@ Lemma s5_view_secrecy (rs : RandomizedSharing P 3 4)
   `H( lw_secret (mechanism_leakage (Additive rs HC)) |
       lw_view  (mechanism_leakage (Additive rs HC)) )
     = `H `p_ (lw_secret (mechanism_leakage (Additive rs HC))).
+Proof. apply: leakage_of_view_indep; exact: lw_indep _. Qed.
+
+(** s5_view_secrecy_concrete — the S_5 secrecy with the concrete uniform iid
+    sampler, with no abstract sharing hypothesis.
+    @main security: zero mutual information and unchanged conditional entropy for
+    any sub-threshold coalition over the uniform iid 5-of-5 sharing. *)
+Lemma s5_view_secrecy_concrete (C : {set 'I_5}) (HC : (#|C| < 5)%N) :
+  `I( lw_secret (mechanism_leakage (Additive (@unif_randomized_sharing R 3 4) HC)) ;
+      lw_view  (mechanism_leakage (Additive (@unif_randomized_sharing R 3 4) HC)) ) = 0%R /\
+  `H( lw_secret (mechanism_leakage (Additive (@unif_randomized_sharing R 3 4) HC)) |
+      lw_view  (mechanism_leakage (Additive (@unif_randomized_sharing R 3 4) HC)) )
+    = `H `p_ (lw_secret (mechanism_leakage (Additive (@unif_randomized_sharing R 3 4) HC))).
 Proof. apply: leakage_of_view_indep; exact: lw_indep _. Qed.
 
 End s5_secrecy.

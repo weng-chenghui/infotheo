@@ -10,7 +10,7 @@ From mathcomp Require Import ssreflect ssrbool ssrfun eqtype ssrnat seq.
 From mathcomp Require Import fintype finfun finset bigop ssralg ssrnum reals zmodp.
 From infotheo Require Import realType_ext realType_ln fdist proba entropy.
 From pgg_smc Require Import pgg_leakage_witness pgg_randomized_sharing.
-From pgg_smc Require Import pgg_sharing_mechanism.
+From pgg_smc Require Import pgg_sharing_mechanism pgg_canonical_sharing.
 
 Import GRing.Theory Num.Theory.
 Set Implicit Arguments.
@@ -43,6 +43,24 @@ Lemma s5x5_view_secrecy (rs1 rs2 : RandomizedSharing P 3 4)
    `H( lw_secret (mechanism_leakage (Additive rs2 HC2)) |
        lw_view  (mechanism_leakage (Additive rs2 HC2)) )
      = `H `p_ (lw_secret (mechanism_leakage (Additive rs2 HC2)))).
+Proof. split; apply: leakage_of_view_indep; exact: lw_indep _. Qed.
+
+(** s5x5_view_secrecy_concrete — the per-component S_5 x S_5 secrecy with the
+    concrete uniform iid sampler on each component, no abstract sharing hypothesis.
+    @main security: zero mutual information and unchanged conditional entropy on
+    both uniform iid components. *)
+Lemma s5x5_view_secrecy_concrete (C1 C2 : {set 'I_5})
+    (HC1 : (#|C1| < 5)%N) (HC2 : (#|C2| < 5)%N) :
+  (`I( lw_secret (mechanism_leakage (Additive (@unif_randomized_sharing R 3 4) HC1)) ;
+       lw_view  (mechanism_leakage (Additive (@unif_randomized_sharing R 3 4) HC1)) ) = 0%R /\
+   `H( lw_secret (mechanism_leakage (Additive (@unif_randomized_sharing R 3 4) HC1)) |
+       lw_view  (mechanism_leakage (Additive (@unif_randomized_sharing R 3 4) HC1)) )
+     = `H `p_ (lw_secret (mechanism_leakage (Additive (@unif_randomized_sharing R 3 4) HC1)))) /\
+  (`I( lw_secret (mechanism_leakage (Additive (@unif_randomized_sharing R 3 4) HC2)) ;
+       lw_view  (mechanism_leakage (Additive (@unif_randomized_sharing R 3 4) HC2)) ) = 0%R /\
+   `H( lw_secret (mechanism_leakage (Additive (@unif_randomized_sharing R 3 4) HC2)) |
+       lw_view  (mechanism_leakage (Additive (@unif_randomized_sharing R 3 4) HC2)) )
+     = `H `p_ (lw_secret (mechanism_leakage (Additive (@unif_randomized_sharing R 3 4) HC2)))).
 Proof. split; apply: leakage_of_view_indep; exact: lw_indep _. Qed.
 
 End s5x5_secrecy.
