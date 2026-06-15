@@ -169,15 +169,15 @@ Qed.
 
 (* ------------------------------------------------------------------ *)
 (* Output-exposing hybrid ladder: the Part I IND-CPA bound carried     *)
-(* through the wider denotation that adds the id_s_get output oracle.   *)
+(* through the wider denotation that adds the id_Sout_get output oracle.   *)
 (*                                                                      *)
 (* The run oracle is the SAME denote_run as in Part I, so the ladder    *)
 (* reuses Part I's run-level perfect equivalences (denote_run_shim_-    *)
 (* real_equiv / denote_run_shim_zero_equiv) verbatim; the only          *)
-(* difference is that simplify_eq_rel exposes a third (id_s_get)        *)
+(* difference is that simplify_eq_rel exposes a third (id_Sout_get)        *)
 (* reveal-oracle goal at every rung, discharged exactly as the          *)
 (* id_v2_get goal.  Every *_leak_S lemma below is the Part I lemma of   *)
-(* the same name with id_s_get carried alongside id_v2_get; the Part I  *)
+(* the same name with id_Sout_get carried alongside id_v2_get; the Part I  *)
 (* statements are untouched.                                            *)
 (* ------------------------------------------------------------------ *)
 
@@ -209,7 +209,7 @@ Variable seed : denv AHE.
 
 (* denote_game_shim_leak_S_raw — the raw three-oracle map underlying the
    output-exposing oracle-routed shim: the [denote_game_shim] run/V_2 pair
-   plus the [id_s_get] output-reveal oracle. *)
+   plus the [id_Sout_get] output-reveal oracle. *)
 Definition denote_game_shim_leak_S_raw (gc : game_code) (site : nat) : raw_package :=
   mkfmap
     [:: (id_game_run, mkdef 'unit (cipher_list t_cipher)
@@ -217,7 +217,7 @@ Definition denote_game_shim_leak_S_raw (gc : game_code) (site : nat) : raw_packa
                        chcipher_of_cipher cipher_of_chcipher pkey_of_party
                        msg_of_idx rand0 site 0 seed gc))
       ; (id_v2_get,   mkdef 'unit t_msg (fun _ => denote_v2_get_body chmsg_of_msg))
-      ; (id_s_get,    mkdef 'unit t_msg (fun _ => denote_s_get_body chmsg_of_msg)) ].
+      ; (id_Sout_get,    mkdef 'unit t_msg (fun _ => denote_Sout_get_body chmsg_of_msg)) ].
 
 (* Discharges the pack_valid field of denote_game_shim_leak_S: the run oracle
    via denote_run_shim_valid, the two reveal oracles by lifting their
@@ -232,11 +232,11 @@ apply: valid_package_cons; last by move=> x; exact: denote_run_shim_valid.
 apply: valid_package_cons;
   last by move=> x; apply: valid_injectMap; last exact: denote_v2_get_valid.
 by apply: valid_package_cons;
-  last by move=> x; apply: valid_injectMap; last exact: denote_s_get_valid.
+  last by move=> x; apply: valid_injectMap; last exact: denote_Sout_get_valid.
 Qed.
 
 (* denote_game_shim_leak_S — output-exposing oracle-routed image of a
-   [game_code]: [denote_game_shim] extended with the [id_s_get] output-reveal
+   [game_code]: [denote_game_shim] extended with the [id_Sout_get] output-reveal
    oracle, exporting [game_iface_leak_S]. *)
 Definition denote_game_shim_leak_S (gc : game_code) (site : nat) :
   package (oracle_encrypt_iface t_msg t_cipher) (game_iface_leak_S t_msg t_cipher) :=
@@ -287,7 +287,7 @@ simplify_eq_rel m.
 - rewrite /denote_v2_get_body.
   ssprove_sync_eq=> stored.
   by case: stored => [v|]; rewrite [code_link _ _]/=; apply: r_ret.
-- rewrite /denote_s_get_body.
+- rewrite /denote_Sout_get_body.
   ssprove_sync_eq=> stored.
   by case: stored => [v|]; rewrite [code_link _ _]/=; apply: r_ret.
 Qed.
@@ -447,7 +447,7 @@ Definition zero_game_leak_S
 (* dsdp_advantage_derived_leak_S — the output-exposing analogue of
    [dsdp_advantage_derived]: any valid adversary distinguishing the
    output-exposing real game from its all-zero endpoint has advantage at most
-   [2 * epsilon_cpa].  The output cell adds the common id_s_get oracle but no
+   [2 * epsilon_cpa].  The output cell adds the common id_Sout_get oracle but no
    encryption hop, so the bound is the Part I bound; [advantage_le_leak_S] gives
    [size (hop_sites …) * epsilon_cpa] and the hop count reduces to 2 by
    [count_hops_game_of_trace] and [dsdp_obs_hops_leak_S]. *)

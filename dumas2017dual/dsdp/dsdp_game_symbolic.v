@@ -516,7 +516,7 @@ Proof. by []. Qed.
    decrypt-receive response).  Identical to [dsdp_alice_obs] except that the walk
    continues across Alice's decrypt-receive and emits the [AO_recv_output S]
    output step, which the lowering pass [game_of_trace] routes to
-   [S_output_cell] via [GC_put_output]. *)
+   [Sout_cell] via [GC_put_output]. *)
 Definition dsdp_alice_obs_leak_S (card_msg card_renc : nat) : seq alice_obs :=
   obs_of_procs palice_sym dsdp_received_responses_output dsdp_v2_name
     (fun combines recvs => combines ++ recvs) card_msg card_renc.

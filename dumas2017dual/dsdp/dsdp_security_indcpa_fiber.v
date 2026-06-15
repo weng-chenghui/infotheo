@@ -70,7 +70,7 @@ Local Notation "'msg'" := t_msg (in custom pack_type at level 2).
 Local Notation "'ciphers'" := (cipher_list t_cipher) (in custom pack_type at level 2).
 
 (* id_guess — the predictor's operation identifier (the game oracles
-   id_game_run/id_v2_get/id_s_get take 0/2/3, so 1 is free). *)
+   id_game_run/id_v2_get/id_Sout_get take 0/2/3, so 1 is free). *)
 Definition id_guess : nat := 1%N.
 
 (* guesser_export — the predictor's export interface: one operation reading the
@@ -93,12 +93,12 @@ Definition guessing_challenger :
     #def #[ 0%N ] (_ : 'unit) : 'bool
     {
       #import {sig #[ id_game_run ] : 'unit → ciphers } as call_run ;;
-      #import {sig #[ id_s_get    ] : 'unit → msg     } as call_s_get ;;
+      #import {sig #[ id_Sout_get    ] : 'unit → msg     } as call_Sout_get ;;
       #import {sig #[ id_guess     ] : (ciphers × msg) → msg } as call_pred ;;
       #import {sig #[ id_v2_get    ] : 'unit → msg     } as call_v2 ;;
       view  ← call_run tt ;;
-      s     ← call_s_get tt ;;
-      guess ← call_pred (view, s) ;;
+      Sout_val     ← call_Sout_get tt ;;
+      guess ← call_pred (view, Sout_val) ;;
       v2    ← call_v2 tt ;;
       ret (guess == v2 : 'bool)
     }
@@ -106,7 +106,7 @@ Definition guessing_challenger :
 
 (* guessing_experiment — the closed bool-output experiment: the challenger fed
    by the predictor and the game in parallel, so the challenger's game oracles
-   (id_game_run, id_s_get, id_v2_get) resolve against the game and id_guess
+   (id_game_run, id_Sout_get, id_v2_get) resolve against the game and id_guess
    against the predictor. *)
 Definition guessing_experiment
     (predictor : predictor_guesser)
@@ -395,12 +395,12 @@ Definition guess_pair_challenger :
     #def #[ 0%N ] (_ : 'unit) : msg × msg
     {
       #import {sig #[ id_game_run ] : 'unit → ciphers } as call_run ;;
-      #import {sig #[ id_s_get    ] : 'unit → msg     } as call_s_get ;;
+      #import {sig #[ id_Sout_get    ] : 'unit → msg     } as call_Sout_get ;;
       #import {sig #[ id_guess     ] : (ciphers × msg) → msg } as call_pred ;;
       #import {sig #[ id_v2_get    ] : 'unit → msg     } as call_v2 ;;
       view  ← call_run tt ;;
-      s     ← call_s_get tt ;;
-      guess ← call_pred (view, s) ;;
+      Sout_val     ← call_Sout_get tt ;;
+      guess ← call_pred (view, Sout_val) ;;
       v2    ← call_v2 tt ;;
       ret (guess, v2)
     }
@@ -515,7 +515,7 @@ Lemma denote_run_sample_renc (e:denv AHE) k : drun e (GC_sample card_renc k) = (
 Proof. by rewrite /drun /denote_run -/denote_run (negbTE card_renc_neq) eqxx. Qed.
 Lemma denote_run_put (e:denv AHE) t k : drun e (GC_put t k) = (#put (V_2_cell t_msg) := Some (chmsg_of_msg (as_plain (dhe e t))) ;; drun e k).
 Proof. by rewrite /drun /dhe /denote_run -/denote_run. Qed.
-Lemma denote_run_put_output (e:denv AHE) t k : drun e (GC_put_output t k) = (#put (S_output_cell t_msg) := Some (chmsg_of_msg (as_plain (dhe e t))) ;; drun e k).
+Lemma denote_run_put_output (e:denv AHE) t k : drun e (GC_put_output t k) = (#put (Sout_cell t_msg) := Some (chmsg_of_msg (as_plain (dhe e t))) ;; drun e k).
 Proof. by rewrite /drun /dhe /denote_run -/denote_run. Qed.
 Lemma denote_run_let (e:denv AHE) t k : drun e (GC_let t k) = drun (push_val (dhe e t) e) k.
 Proof. by rewrite /drun /dhe /denote_run -/denote_run. Qed.
@@ -564,7 +564,7 @@ Fixpoint denote_run_distr (e : denv AHE) (gc0 : game_code) (h : heap) {struct gc
   | GC_put t k =>
       denote_run_distr e k (set_heap h (V_2_cell t_msg) (Some (chmsg_of_msg (as_plain (dhe e t)))))
   | GC_put_output t k =>
-      denote_run_distr e k (set_heap h (S_output_cell t_msg) (Some (chmsg_of_msg (as_plain (dhe e t)))))
+      denote_run_distr e k (set_heap h (Sout_cell t_msg) (Some (chmsg_of_msg (as_plain (dhe e t)))))
   | GC_let t k =>
       denote_run_distr (push_val (dhe e t) e) k h
   | GC_enc_hop pk secret k =>
@@ -595,8 +595,8 @@ Qed.
 Lemma guess_resolved_par :
   guess_resolved =
   (view ← resolve (par predictor game) (id_game_run, (chUnit, cipher_list t_cipher)) tt ;;
-   s    ← resolve (par predictor game) (id_s_get, (chUnit, t_msg)) tt ;;
-   guess ← resolve (par predictor game) (id_guess, (chProd (cipher_list t_cipher) t_msg, t_msg)) (view, s) ;;
+   Sout_val    ← resolve (par predictor game) (id_Sout_get, (chUnit, t_msg)) tt ;;
+   guess ← resolve (par predictor game) (id_guess, (chProd (cipher_list t_cipher) t_msg, t_msg)) (view, Sout_val) ;;
    v2   ← resolve (par predictor game) (id_v2_get, (chUnit, t_msg)) tt ;;
    ret (guess, v2)).
 Proof.
@@ -606,20 +606,20 @@ cbn [code_link].
 reflexivity.
 Qed.
 
-(* resolve_game_run / _sget / _v2get — the game's three oracles resolve to the
+(* resolve_game_run / _Sout_get / _v2get — the game's three oracles resolve to the
    run denotation and the two cell-read bodies (getm_def lookup in the raw map). *)
 Lemma resolve_game_run :
   resolve game (id_game_run, ('unit, cipher_list t_cipher)) tt = drun seed gc.
 Proof.
-rewrite /resolve /game /zero_game_leak_S -/gc /denote_game_leak_S /denote_game_leak_S_raw mkfmapE /id_game_run /id_v2_get /id_s_get /fst.
+rewrite /resolve /game /zero_game_leak_S -/gc /denote_game_leak_S /denote_game_leak_S_raw mkfmapE /id_game_run /id_v2_get /id_Sout_get /fst.
 cbn [getm_def]; cbn [fst snd].
 by rewrite eqxx /mkdef coerce_kleisliE /drun.
 Qed.
 
-Lemma resolve_game_sget :
-  resolve game (id_s_get, ('unit, t_msg)) tt = denote_s_get_body chmsg_of_msg.
+Lemma resolve_game_Sout_get :
+  resolve game (id_Sout_get, ('unit, t_msg)) tt = denote_Sout_get_body chmsg_of_msg.
 Proof.
-rewrite /resolve /game /zero_game_leak_S -/gc /denote_game_leak_S /denote_game_leak_S_raw mkfmapE /id_game_run /id_v2_get /id_s_get /fst.
+rewrite /resolve /game /zero_game_leak_S -/gc /denote_game_leak_S /denote_game_leak_S_raw mkfmapE /id_game_run /id_v2_get /id_Sout_get /fst.
 cbn [getm_def]; cbn [fst snd].
 by rewrite -[(3 == 0)%N]/false -[(3 == 2)%N]/false eqxx /mkdef coerce_kleisliE.
 Qed.
@@ -627,7 +627,7 @@ Qed.
 Lemma resolve_game_v2get :
   resolve game (id_v2_get, ('unit, t_msg)) tt = denote_v2_get_body chmsg_of_msg.
 Proof.
-rewrite /resolve /game /zero_game_leak_S -/gc /denote_game_leak_S /denote_game_leak_S_raw mkfmapE /id_game_run /id_v2_get /id_s_get /fst.
+rewrite /resolve /game /zero_game_leak_S -/gc /denote_game_leak_S /denote_game_leak_S_raw mkfmapE /id_game_run /id_v2_get /id_Sout_get /fst.
 cbn [getm_def]; cbn [fst snd].
 by rewrite -[(2 == 0)%N]/false eqxx /mkdef coerce_kleisliE.
 Qed.
@@ -638,17 +638,17 @@ Qed.
 Lemma guess_resolved_oracles :
   guess_resolved =
   (view ← drun seed gc ;;
-   s    ← denote_s_get_body chmsg_of_msg ;;
-   guess ← resolve (pack predictor) (id_guess, (chProd (cipher_list t_cipher) t_msg, t_msg)) (view, s) ;;
+   Sout_val    ← denote_Sout_get_body chmsg_of_msg ;;
+   guess ← resolve (pack predictor) (id_guess, (chProd (cipher_list t_cipher) t_msg, t_msg)) (view, Sout_val) ;;
    v2   ← denote_v2_get_body chmsg_of_msg ;;
    ret (guess, v2)).
 Proof.
 rewrite guess_resolved_par !resolve_par.
 have Hpred_none : forall id : nat, (id == id_guess) = false -> isSome (pack predictor id) = false by (move=> id Hid; rewrite -mem_domm -(valid_domm (pack_valid predictor)) /guesser_export domm_set domm0 fsetU0 in_fset1 Hid).
 cbn [fst].
-rewrite (Hpred_none id_game_run erefl) (Hpred_none id_s_get erefl) (Hpred_none id_v2_get erefl).
+rewrite (Hpred_none id_game_run erefl) (Hpred_none id_Sout_get erefl) (Hpred_none id_v2_get erefl).
 have Hguess : isSome (pack predictor id_guess) = true by (rewrite -mem_domm -(valid_domm (pack_valid predictor)) /guesser_export domm_set domm0 fsetU0 in_fset1 eqxx).
-rewrite resolve_game_run resolve_game_sget resolve_game_v2get.
+rewrite resolve_game_run resolve_game_Sout_get resolve_game_v2get.
 have Hpar_guess : forall x, resolve (par predictor game) (id_guess, (chProd (cipher_list t_cipher) t_msg, t_msg)) x = resolve predictor (id_guess, (chProd (cipher_list t_cipher) t_msg, t_msg)) x by (move=> x; rewrite resolve_par; cbn [fst]; rewrite Hguess).
 setoid_rewrite Hpar_guess.
 by [].
@@ -681,7 +681,7 @@ Fixpoint denote_run_caps (iv1 iu1 iu2 iu3 iv2 iv3 : nat)
         Some (chmsg_of_msg (as_plain (denote_he pkey_of_party rand0 e t))) ;;
       denote_run_caps iv1 iu1 iu2 iu3 iv2 iv3 irs e k
   | GC_put_output t k =>
-      #put (S_output_cell t_msg) :=
+      #put (Sout_cell t_msg) :=
         Some (chmsg_of_msg (as_plain (denote_he pkey_of_party rand0 e t))) ;;
       cl ← denote_run renc_card rand_of_renc chmsg_of_msg chcipher_of_cipher
              pkey_of_party msg_of_idx rand0 e k ;;
@@ -726,7 +726,7 @@ elim: gc0 e irs => [n k IH|t k IH|t k IH|t k IH|pk secret k IH|outs] e irs /=.
 Qed.
 
 (* denote_run_caps_valid — the capturing run is valid over [protocol_state]:
-   it writes only the protocol cells (V_2_cell / S_output_cell) and the captures
+   it writes only the protocol cells (V_2_cell / Sout_cell) and the captures
    live in the returned value, so every run heap agrees with the start heap
    outside [protocol_state].  Structural induction on [gc0], reusing
    [denote_run_valid] at the [GC_put_output] leaf (where the rich run hands off
@@ -767,7 +767,7 @@ Proof.
 move=> Hl.
 have HV2 : l.1 != (V_2_cell t_msg).1
   by apply: contraNneq Hl => ->; rewrite mem_domm.
-have HSo : l.1 != (S_output_cell t_msg).1
+have HSo : l.1 != (Sout_cell t_msg).1
   by apply: contraNneq Hl => ->; rewrite mem_domm.
 elim: gc0 => [n k IH|t k IH|t k IH|t k IH|pk secret k IH|outs] irs e h ah /=.
 - case: (n == card_msg); [|case: (n == card_renc)];
@@ -836,7 +836,7 @@ Proof. by rewrite /denote_run_caps -/denote_run_caps. Qed.
 
 Lemma denote_run_caps_put_output iv1 iu1 iu2 iu3 iv2 iv3 irs (e : denv AHE) t k :
   denote_run_caps iv1 iu1 iu2 iu3 iv2 iv3 irs e (GC_put_output t k)
-  = (#put (S_output_cell t_msg) := Some (chmsg_of_msg (as_plain (dhe e t))) ;;
+  = (#put (Sout_cell t_msg) := Some (chmsg_of_msg (as_plain (dhe e t))) ;;
      cl ← drun e k ;;
      ret (cl, (as_plain (de_val_nth e iv1), as_plain (de_val_nth e iu1),
                as_plain (de_val_nth e iu2), as_plain (de_val_nth e iu3),
@@ -852,10 +852,10 @@ Definition guess_resolved_caps :
             (plain AHE * plain AHE * plain AHE * plain AHE * plain AHE *
              plain AHE * plain AHE) * seq 'I_card_renc)%type :=
   vt ← denote_run_caps 11 8 9 10 7 6 [::] seed gc ;;
-  s     ← denote_s_get_body chmsg_of_msg ;;
+  Sout_val     ← denote_Sout_get_body chmsg_of_msg ;;
   guess ← resolve (pack predictor)
             (id_guess, (chProd (cipher_list t_cipher) t_msg, t_msg))
-            (vt.1.1, s) ;;
+            (vt.1.1, Sout_val) ;;
   v2    ← denote_v2_get_body chmsg_of_msg ;;
   ret (guess, v2, vt.1.2, vt.2).
 
@@ -866,9 +866,9 @@ Definition guess_full_code :
   raw_code (Mfin * Mfin * Mfin * Mfin *
             (option 'I_card_renc) * (option 'I_card_renc))%type :=
   gv ← guess_resolved_caps ;;
-  let '(guess, v2, (v1, u1, u2, u3, v2', v3, s), irs) := gv in
+  let '(guess, v2, (v1, u1, u2, u3, v2', v3, Sout_val), irs) := gv in
   ret (msg_to_fin guess, msg_to_fin v2,
-       msg_to_fin (chmsg_of_msg v3), msg_to_fin (chmsg_of_msg s),
+       msg_to_fin (chmsg_of_msg v3), msg_to_fin (chmsg_of_msg Sout_val),
        onth irs 0, onth irs 1).
 
 (* msg_of_chmsg / chmsg_of_msgK — the plaintext-channel encoding [chmsg_of_msg]
@@ -898,9 +898,9 @@ Proof.
 rewrite /guess_full_code /guess_joint_code bind_assoc.
 rewrite guess_resolved_oracles.
 transitivity (vt ← denote_run_caps 11 8 9 10 7 6 [::] seed gc ;;
-  s ← denote_s_get_body chmsg_of_msg ;;
+  Sout_val ← denote_Sout_get_body chmsg_of_msg ;;
   guess ← resolve predictor
-            (id_guess, (cipher_list t_cipher × t_msg, t_msg)) (vt.1.1, s) ;;
+            (id_guess, (cipher_list t_cipher × t_msg, t_msg)) (vt.1.1, Sout_val) ;;
   v2 ← denote_v2_get_body chmsg_of_msg ;;
   ret (msg_to_fin guess, msg_to_fin v2)).
 - rewrite /guess_resolved_caps !bind_assoc.
@@ -919,14 +919,14 @@ Qed.
 
 (* guess_triple_proj_code — the (guess, V_2, V_3)-projection of the rich carrier
    code reflects to the rich-run form: the run captures the cipher view, then the
-   predictor produces guess from (view, s), then V_2 / V_3 are read back. *)
+   predictor produces guess from (view, Sout_val), then V_2 / V_3 are read back. *)
 Lemma guess_triple_proj_code :
   (gv ← guess_full_code ;; ret (gv.1.1.1.1.1, gv.1.1.1.1.2, gv.1.1.1.2))
   = (vt ← denote_run_caps 11 8 9 10 7 6 [::] seed gc ;;
-     s ← denote_s_get_body chmsg_of_msg ;;
+     Sout_val ← denote_Sout_get_body chmsg_of_msg ;;
      guess ← resolve (pack predictor)
                (id_guess, (chProd (cipher_list t_cipher) t_msg, t_msg))
-               (vt.1.1, s) ;;
+               (vt.1.1, Sout_val) ;;
      v2 ← denote_v2_get_body chmsg_of_msg ;;
      ret (msg_to_fin guess, msg_to_fin v2,
           msg_to_fin (chmsg_of_msg vt.1.2.1.2))).
@@ -942,7 +942,7 @@ Qed.
 (* view_marginal_indep — the cipher-list view the predictor receives is
    independent of the two secret samples: after the secrets [m0, m1] are pushed,
    the run's cipher-list marginal is the same for any [m0', m1'].  The secrets
-   reach only the heap cells [V_2_cell] / [S_output_cell] (the [GC_put] /
+   reach only the heap cells [V_2_cell] / [Sout_cell] (the [GC_put] /
    [GC_put_output] writes), which the [dmargin fst] projection discards; the
    [GC_ret] outputs (let-combines and hop ciphers) read masks, weights, and hop
    randomness only. *)
@@ -983,7 +983,7 @@ Qed.
 
 (* guess_inner — the rich (guess, V_2, V_3)-experiment with the two secret
    samples fixed to [a, b]: the masks / encryption randomness / hops are drawn,
-   the predictor produces guess from (view, s), and V_2 / V_3 are read back. *)
+   the predictor produces guess from (view, Sout_val), and V_2 / V_3 are read back. *)
 Definition guess_inner (a b : 'I_card_msg) : raw_code (Mfin * Mfin * Mfin)%type :=
   vt ← denote_run_caps 11 8 9 10 7 6 [::]
      (push_val (Gplain (msg_of_idx b)) (push_val (Gplain (msg_of_idx a)) seed))
@@ -994,10 +994,10 @@ Definition guess_inner (a b : 'I_card_msg) : raw_code (Mfin * Mfin * Mfin)%type 
        (HE_var 1) (HE_var 9)) (HE_enc 2 (HE_var 3) 0)) (GC_put_output
        output_term (GC_ret [:: HE_var 1; HE_var 0; HE_var 3;
        HE_var 2]))))))))))) ;;
-   s ← denote_s_get_body chmsg_of_msg ;;
+   Sout_val ← denote_Sout_get_body chmsg_of_msg ;;
    guess ← resolve (pack predictor)
              (id_guess, (chProd (cipher_list t_cipher) t_msg, t_msg))
-             (vt.1.1, s) ;;
+             (vt.1.1, Sout_val) ;;
    v2 ← denote_v2_get_body chmsg_of_msg ;;
    ret (msg_to_fin guess, msg_to_fin v2, msg_to_fin (chmsg_of_msg vt.1.2.1.2)).
 
@@ -1121,7 +1121,7 @@ Lemma denote_he_var (e : denv AHE) n : dhe e (HE_var n) = de_val_nth e n.
 Proof. by []. Qed.
 
 (* guess_run_cells — every heap in the support of [guess_inner]'s run carries the
-   leaked output [chmsg(Sout)] in [S_output_cell] (the seeded scalar product, via
+   leaked output [chmsg(Sout)] in [Sout_cell] (the seeded scalar product, via
    the seed-weight slots) and the first secret [chmsg(msg a)] in [V_2_cell]. *)
 Lemma guess_run_cells (a b : 'I_card_msg) z :
   z \in distr.dinsupp (Pr_code (denote_run_caps 11 8 9 10 7 6 [::]
@@ -1133,7 +1133,7 @@ Lemma guess_run_cells (a b : 'I_card_msg) z :
        (HE_var 1) (HE_var 9)) (HE_enc 2 (HE_var 3) 0)) (GC_put_output
        output_term (GC_ret [:: HE_var 1; HE_var 0; HE_var 3;
        HE_var 2])))))))))))) emptym) ->
-  get_heap z.2 (S_output_cell t_msg)
+  get_heap z.2 (Sout_cell t_msg)
     = Some (chmsg_of_msg (dsdp_output w_v1 w_u1 w_u2 w_u3
                             (msg_of_idx a) (msg_of_idx b)))
   /\ get_heap z.2 (V_2_cell t_msg) = Some (chmsg_of_msg (msg_of_idx a))
@@ -1177,11 +1177,11 @@ move: Ht; rewrite /Pr_fst /guess_inner Pr_code_bind dfst_dlet_commut.
 move=> /distr.dinsupp_dlet [[vt h_run] Hrun Hrest].
 have [HS [HV2 Hv3]] := guess_run_cells Hrun.
 rewrite Hv3 in Hrest.
-have Hsget : Pr_code (denote_s_get_body chmsg_of_msg) (vt, h_run).2
+have HSout_get : Pr_code (denote_Sout_get_body chmsg_of_msg) (vt, h_run).2
     = distr.dunit (chmsg_of_msg (dsdp_output w_v1 w_u1 w_u2 w_u3
                                    (msg_of_idx a) (msg_of_idx b)), (vt, h_run).2)
-  by rewrite /denote_s_get_body Pr_code_get HS Pr_code_ret.
-move: Hrest; rewrite Pr_code_bind Hsget dlet_unit_ext.
+  by rewrite /denote_Sout_get_body Pr_code_get HS Pr_code_ret.
+move: Hrest; rewrite Pr_code_bind HSout_get dlet_unit_ext.
 move=> Hrest; move: Hrest.
 rewrite Pr_code_bind dfst_dlet_commut
   => /distr.dinsupp_dlet [[guess h_pred] Hpred Hv2].
@@ -1240,11 +1240,11 @@ have HBASE : distr.dmargin fst (Pr_code (drun env gci) emptym)
 rewrite HBASE dlet_dmargin_eq.
 apply: eq_in_dlet => x Hx.
 have [HS [HV2 _]] := guess_run_cells Hx.
-have Hsget : Pr_code (denote_s_get_body chmsg_of_msg) x.2
+have HSout_get : Pr_code (denote_Sout_get_body chmsg_of_msg) x.2
    = distr.dunit (chmsg_of_msg (dsdp_output w_v1 w_u1 w_u2 w_u3
                                   (msg_of_idx a) (msg_of_idx b)), x.2)
-  by rewrite /denote_s_get_body Pr_code_get HS Pr_code_ret.
-rewrite bind_assoc Pr_code_bind dfst_dlet_commut Hsget dlet_unit_ext.
+  by rewrite /denote_Sout_get_body Pr_code_get HS Pr_code_ret.
+rewrite bind_assoc Pr_code_bind dfst_dlet_commut HSout_get dlet_unit_ext.
 rewrite /= !bind_assoc Pr_code_bind dfst_dlet_commut.
 have Hinner : forall (p : t_msg) (h : heap),
    distr.dmargin fst (Pr_code (x1 ← (v ← get (V_2_cell t_msg) ;;
@@ -1407,10 +1407,10 @@ have Hcard0 : (0 < card_msg)%N.
 have Hbody :
     (gv ← guess_full_code ;; ret (proj gv))
     = (vt ← denote_run_caps 11 8 9 10 7 6 [::] seed gc ;;
-       s ← denote_s_get_body chmsg_of_msg ;;
+       Sout_val ← denote_Sout_get_body chmsg_of_msg ;;
        guess ← resolve (pack predictor)
                  (id_guess, (chProd (cipher_list t_cipher) t_msg, t_msg))
-                 (vt.1.1, s) ;;
+                 (vt.1.1, Sout_val) ;;
        v2 ← denote_v2_get_body chmsg_of_msg ;;
        ret (msg_of_chmsg v2, vt.1.2.1.2)).
   rewrite /guess_full_code /guess_resolved_caps !bind_assoc.
@@ -1481,37 +1481,37 @@ have Hcore :
         => /distr.in_dunit [= -> ->].
       split; [by [] | by rewrite get_set_heap_neq // get_set_heap_eq].
     case: (Hrun y Hy) => Hcap Hheap.
-    have Hsget : Pr_code (denote_s_get_body chmsg_of_msg) y.2
-        = distr.dunit (match get_heap y.2 (S_output_cell t_msg) with
+    have HSout_get : Pr_code (denote_Sout_get_body chmsg_of_msg) y.2
+        = distr.dunit (match get_heap y.2 (Sout_cell t_msg) with
                        | Some v => v | None => chmsg_of_msg 0%R end, y.2).
-      by rewrite /denote_s_get_body Pr_code_get;
-         case: (get_heap y.2 (S_output_cell t_msg)) => [sv|]; rewrite Pr_code_ret.
+      by rewrite /denote_Sout_get_body Pr_code_get;
+         case: (get_heap y.2 (Sout_cell t_msg)) => [sv|]; rewrite Pr_code_ret.
     have Hmarg : distr.dmargin fst (Pr_code
-        (s ← denote_s_get_body chmsg_of_msg ;;
+        (Sout_val ← denote_Sout_get_body chmsg_of_msg ;;
          resolve predictor (id_guess, (cipher_list t_cipher × t_msg, t_msg))
-           (y.1.1.1, s) ;;
+           (y.1.1.1, Sout_val) ;;
          v2 ← denote_v2_get_body chmsg_of_msg ;;
          ret (msg_of_chmsg v2, y.1.1.2.1.2)) y.2)
         = distr.dlet (fun=> distr.dunit (msg_of_idx x0, msg_of_idx x1))
             (Pr_code (resolve predictor
                (id_guess, (cipher_list t_cipher × t_msg, t_msg))
-               (y.1.1.1, match get_heap y.2 (S_output_cell t_msg) with
+               (y.1.1.1, match get_heap y.2 (Sout_cell t_msg) with
                          | Some v => v | None => chmsg_of_msg 0%R end)) y.2).
-      rewrite Pr_code_bind Hsget dlet_unit_ext.
+      rewrite Pr_code_bind HSout_get dlet_unit_ext.
       transitivity (distr.dlet
           (fun=> distr.dunit (msg_of_chmsg (chmsg_of_msg (msg_of_idx x0)),
                               y.1.1.2.1.2))
           (Pr_code (resolve predictor
              (id_guess, (cipher_list t_cipher × t_msg, t_msg))
-             (y.1.1.1, match get_heap y.2 (S_output_cell t_msg) with
+             (y.1.1.1, match get_heap y.2 (Sout_cell t_msg) with
                        | Some v => v | None => chmsg_of_msg 0%R end)) y.2));
         first by apply: tail_collapse_pred_abstract;
           [exact: resolve_predictor_valid | exact: Hheap].
       by rewrite chmsg_of_msgK Hcap.
     have Hvs : val \in distr.dinsupp (distr.dmargin fst (Pr_code
-        (s ← denote_s_get_body chmsg_of_msg ;;
+        (Sout_val ← denote_Sout_get_body chmsg_of_msg ;;
          resolve predictor (id_guess, (cipher_list t_cipher × t_msg, t_msg))
-           (y.1.1.1, s) ;;
+           (y.1.1.1, Sout_val) ;;
          v2 ← denote_v2_get_body chmsg_of_msg ;;
          ret (msg_of_chmsg v2, y.1.1.2.1.2)) y.2)).
       by rewrite distr.dmarginE; apply: (distr.dlet_dinsupp (x := (val, h)));
@@ -1533,9 +1533,9 @@ have Hcore :
           (HE_var 1) (HE_var 9)) (HE_enc 2 (HE_var 3) 0)) (GC_put_output
           output_term (GC_ret [:: HE_var 1; HE_var 0; HE_var 3;
           HE_var 2]))))))))))) ;;
-     s ← denote_s_get_body chmsg_of_msg ;;
+     Sout_val ← denote_Sout_get_body chmsg_of_msg ;;
      resolve predictor (id_guess, (cipher_list t_cipher × t_msg, t_msg))
-       (vt.1.1, s) ;;
+       (vt.1.1, Sout_val) ;;
      v2 ← denote_v2_get_body chmsg_of_msg ;;
      ret (msg_of_chmsg v2, vt.1.2.1.2)).
   have Hpd : forall (U V : choiceType) (f : U -> V) (D : distr.distr R U),
@@ -2013,7 +2013,7 @@ Qed.
 
 (* guess_advantage_le — the reduction distinguisher's advantage is at most
    [2 * epsilon_cpa]: the output-exposing endpoint games add only the common
-   id_s_get oracle (no encryption hop), so the Part I IND-CPA bound applies. *)
+   id_Sout_get oracle (no encryption hop), so the Part I IND-CPA bound applies. *)
 Lemma guess_advantage_le
     (cipher_of_chcipher : t_cipher -> cipher AHE)
     (chcipher_of_cipherK : cancel chcipher_of_cipher cipher_of_chcipher)
