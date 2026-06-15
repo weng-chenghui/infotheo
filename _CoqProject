@@ -222,6 +222,7 @@ pgg-smc/instances/s5/rigidity_s5_instance.v
 pgg-smc/instances/s5/s5_profile.v
 pgg-smc/instances/s5/s5_run.v
 pgg-smc/instances/s5/s5_secrecy.v
+pgg-smc/instances/s5/s5_trace.v
 pgg-smc/instances/s5x5/s5x5_mixing.v
 pgg-smc/instances/s5x5/rigidity_s5x5_instance.v
 pgg-smc/instances/s5x5/s5x5_profile.v
