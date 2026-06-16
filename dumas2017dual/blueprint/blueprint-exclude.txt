@@ -243,7 +243,8 @@ dsdp_main:dsdp_centropy_uniform
 dsdp_main:dsdp_centropy_uniform_n
 dsdp_main:guess_sdistr_success_real
 dsdp_main:relay_privacy_n
-dsdp_main:US_n_compromised_leaks_V1
+dsdp_main:US_compromised_leaks_V2
+dsdp_main:US_n_compromised_leaks_secret
 dsdp_symbolic_exec:a1_observed
 dsdp_symbolic_exec:a2_observed
 dsdp_symbolic_exec:decode_sym
