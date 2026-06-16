@@ -17,6 +17,10 @@
        [3-party instance of US_n_compromised_leaks_secret]
      bob_privacy_V1 / charlie_privacy_V1 — H(V1 | RelayView) = log m > 0:
        a corrupted relay learns nothing about Alice's input V1  [3-party]
+     bob_privacy_V3 — H(V3 | BobView) = log m > 0: a corrupted Bob learns
+       nothing about Charlie's input V3 (R3 one-time-pad masking)  [3-party]
+     charlie_privacy_V2 — H(V2 | CharlieView) = log m > 0: a corrupted Charlie
+       learns nothing about Bob's input V2 (R2 one-time-pad masking)  [3-party]
 
    Corrupted-Alice secrecy (indcpa_hopping axis), the guessing triangle  [3-party]
      dsdp_alice_view_advantage_le — AdvantageE <= 2 * epsilon_cpa
@@ -506,8 +510,10 @@ Variables (V1 V2 V3 U2 U3 R2 R3 : {RV P -> msg}).
 Variable Dk_b : {RV P -> Bob.-key Dec msg}.
 Variable Dk_c : {RV P -> Charlie.-key Dec msg}.
 
-Let VU3R : {RV P -> msg} := V3 \* U3 \+ R3.
-Let D2 : {RV P -> msg} := V2 \* U2 \+ R2.
+Let VU2 : {RV P -> msg} := V2 \* U2.
+Let VU3 : {RV P -> msg} := V3 \* U3.
+Let VU3R : {RV P -> msg} := VU3 \+ R3.
+Let D2 : {RV P -> msg} := VU2 \+ R2.
 Let D3 : {RV P -> msg} := VU3R \+ D2.
 
 Let E_charlie_vur3 : {RV P -> Charlie.-enc msg} := E' Charlie `o VU3R.
@@ -564,6 +570,127 @@ Theorem charlie_privacy_V1 :
 Proof.
 have H_logm : `H(V1 | CharlieView) = log (m%:R : R).
   by rewrite (inde_cond_entropy CharlieView_indep_V1) pV1_unif entropy_uniform card_msg.
+split; first exact: H_logm.
+rewrite H_logm -log1; apply: ltr_log; first by [].
+by rewrite ltr1n.
+Qed.
+
+(* The Charlie-ciphertext Bob forwards carries plaintext V3 * U3 + R3, masked by
+   Alice's fresh one-time pad R3, so Bob's full view is independent of V3. *)
+Hypothesis pV3_unif : `p_ V3 = fdist_uniform card_msg.
+Hypothesis pR3_unif : `p_ R3 = fdist_uniform card_msg.
+Hypothesis R3_indep_VU3_V3 : P |= R3 _|_ [% VU3, V3].
+Hypothesis bob_data_indep_charlie : P |= [% Dk_b, V2, D2] _|_ [% V3, VU3, R3].
+
+(* The masked plaintext V3 * U3 + R3 is independent of V3 (one-time pad). *)
+Let VU3R_indep_V3 : P |= VU3R _|_ V3.
+Proof.
+have card_TZ : #|msg| = (Zp_trunc m).+1.+1 by rewrite card_ord.
+have pR3_adj : `p_ R3 = fdist_uniform card_TZ.
+  by rewrite pR3_unif; congr fdist_uniform; exact: eq_irrelevance.
+exact: (@lemma_3_5' R T msg msg P VU3 R3 V3 R3_indep_VU3_V3
+        (Zp_trunc m).+1 card_TZ pR3_adj).
+Qed.
+
+(* Bob's clean data is independent of (V3, the masked term VU3R): push the clean
+   cross-party independence through (v3, vu3, r3) |-> (v3, vu3 + r3). *)
+Let clean_indep_V3_VU3R : P |= [% Dk_b, V2, D2] _|_ [% V3, VU3R].
+Proof.
+have H := @inde_RV_comp _ _ P _ _ _ _ [% Dk_b, V2, D2] [% V3, VU3, R3]
+            idfun (fun w => (w.1.1, w.1.2 + w.2)) bob_data_indep_charlie.
+by rewrite /comp_RV /VU3R /add_RV /= in H *.
+Qed.
+
+(* The joint masked-input independence, assembled by the graphoid mixing rule. *)
+Let bob_inputs_indep_V3 : P |= [% Dk_b, V2, D2, VU3R] _|_ V3.
+Proof.
+apply cinde_RV_unit.
+apply (mixing_rule (X := [% Dk_b, V2, D2]) (Y := V3) (Z := unit_RV P) (W := VU3R)).
+split.
+- by apply cinde_RV_unit; exact: clean_indep_V3_VU3R.
+- by apply cinde_RV_unit; rewrite inde_RV_sym; exact: VU3R_indep_V3.
+Qed.
+
+(* BobView_indep_V3 — Bob's full view is independent of Charlie's input V3. *)
+Let BobView_indep_V3 : P |= BobView _|_ V3.
+Proof.
+have H := inde_RV_comp
+  (fun w : (((Bob.-key Dec msg * msg) * msg) * msg)%type =>
+     (((w.1.1.1, w.1.1.2), E' Charlie w.2), E' Bob w.1.2))
+  idfun bob_inputs_indep_V3.
+by rewrite /comp_RV /= in H *.
+Qed.
+
+(* bob_privacy_V3 — Bob's view carries log m bits of uncertainty about Charlie's
+   input V3, hence a corrupted Bob learns nothing about V3.  [3-party] *)
+Theorem bob_privacy_V3 :
+  `H(V3 | BobView) = log (m%:R : R) /\ `H(V3 | BobView) > 0.
+Proof.
+have H_logm : `H(V3 | BobView) = log (m%:R : R).
+  by rewrite (inde_cond_entropy BobView_indep_V3) pV3_unif entropy_uniform card_msg.
+split; first exact: H_logm.
+rewrite H_logm -log1; apply: ltr_log; first by [].
+by rewrite ltr1n.
+Qed.
+
+(* Charlie's decrypted aggregate D3 carries V2 * U2 masked by Alice's fresh pad
+   R2, so the ciphertext Charlie returns to Alice is independent of V2. *)
+Hypothesis pV2_unif : `p_ V2 = fdist_uniform card_msg.
+Hypothesis pR2_unif : `p_ R2 = fdist_uniform card_msg.
+Hypothesis R2_indep_VU2_V2 : P |= R2 _|_ [% VU2, V2].
+Hypothesis R2_indep_VU2_VU3R_V2 : P |= R2 _|_ [% VU2, [%VU3R, V2]].
+Hypothesis Dk_c_V3_indep_V2_E : P |= [%Dk_c, V3] _|_ [%V2, E_charlie_d3].
+
+(* D2 = V2 * U2 + R2 is independent of (VU3R, V2) (one-time pad). *)
+Let D2_indep_VU3R_V2 : P |= D2 _|_ [%VU3R, V2].
+Proof.
+have card_TZ : #|msg| = (Zp_trunc m).+1.+1 by rewrite card_ord.
+have pR2_adj : `p_ R2 = fdist_uniform card_TZ.
+  by rewrite pR2_unif; congr fdist_uniform; exact: eq_irrelevance.
+exact: (@lemma_3_5' R T _ msg P VU2 R2 [%VU3R, V2] R2_indep_VU2_VU3R_V2
+        (Zp_trunc m).+1 card_TZ pR2_adj).
+Qed.
+
+(* D3 = VU3R + D2 is independent of V2: D2 is a uniform mask independent of
+   (VU3R, V2), so VU3R + D2 hides V2. *)
+Let D3_indep_V2 : P |= D3 _|_ V2.
+Proof.
+have card_TZ : #|msg| = (Zp_trunc m).+1.+1 by rewrite card_ord.
+have pR2_adj : `p_ R2 = fdist_uniform card_TZ.
+  by rewrite pR2_unif; congr fdist_uniform; exact: eq_irrelevance.
+have pD2_unif : `p_ D2 = fdist_uniform card_TZ.
+  have R2_VU2_indep : P |= R2 _|_ VU2.
+    exact/cinde_RV_unit/decomposition/cinde_RV_unit/R2_indep_VU2_V2.
+  have VU2_R2_indep : P |= VU2 _|_ R2 by rewrite inde_RV_sym.
+  exact: (add_RV_unif VU2 R2 card_TZ pR2_adj VU2_R2_indep).
+exact: (@lemma_3_5' R T msg msg P VU3R D2 V2 D2_indep_VU3R_V2
+        (Zp_trunc m).+1 card_TZ pD2_unif).
+Qed.
+
+(* The ciphertext E'(Charlie, D3) hides V2 (deterministic image of D3). *)
+Let E_charlie_d3_indep_V2 : P |= E_charlie_d3 _|_ V2.
+Proof.
+have H := @inde_RV_comp _ _ P _ _ _ _ D3 V2 (E' Charlie) idfun D3_indep_V2.
+by rewrite /E_charlie_d3 /comp_RV.
+Qed.
+
+(* CharlieView_indep_V2 — Charlie's full view is independent of Bob's input V2. *)
+Let CharlieView_indep_V2 : P |= CharlieView _|_ V2.
+Proof.
+apply cinde_RV_unit.
+apply (mixing_rule (X := [%Dk_c, V3]) (Y := V2) (Z := unit_RV P) (W := E_charlie_d3)).
+split.
+- by apply cinde_RV_unit; exact: Dk_c_V3_indep_V2_E.
+- by apply cinde_RV_unit; rewrite inde_RV_sym; exact: E_charlie_d3_indep_V2.
+Qed.
+
+(* charlie_privacy_V2 — Charlie's view carries log m bits of uncertainty about
+   Bob's input V2, hence a corrupted Charlie learns nothing about V2.  [3-party] *)
+Theorem charlie_privacy_V2 :
+  `H(V2 | CharlieView) = log (m%:R : R) /\ `H(V2 | CharlieView) > 0.
+Proof.
+have H_logm : `H(V2 | CharlieView) = log (m%:R : R).
+  by rewrite (inde_cond_entropy CharlieView_indep_V2) pV2_unif entropy_uniform card_msg.
 split; first exact: H_logm.
 rewrite H_logm -log1; apply: ltr_log; first by [].
 by rewrite ltr1n.
