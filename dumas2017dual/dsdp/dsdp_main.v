@@ -8,26 +8,26 @@
    instances; each theorem's comment states its party scope. The headlines are:
 
    Information-theoretic (counting axis)
-     dsdp_centropy_uniform — H(V2,V3 | view) = log m  [3-party]
-     dsdp_centropy_uniform_n — H(V | view) = log (m^n)  [N-party]
-     relay_privacy_n — H(Y | View) = log m > 0 for a generic relay  [N-party]
-     US_n_compromised_leaks_secret — corrupted Alice leaks a relay's input,
+     dsdp_centropy_uniform : H(V2,V3 | view) = log m  [3-party]
+     dsdp_centropy_uniform_n : H(V | view) = log (m^n)  [N-party]
+     relay_privacy_n : H(Y | View) = log m > 0 for a generic relay  [N-party]
+     US_n_compromised_leaks_secret : corrupted Alice leaks a relay's input,
        H(VS_0 | View) = 0  [N-party]
-     US_compromised_leaks_V2 — corrupted Alice leaks Bob's V2, H(V2 | View) = 0
+     US_compromised_leaks_V2 : corrupted Alice leaks Bob's V2, H(V2 | View) = 0
        [3-party instance of US_n_compromised_leaks_secret]
-     bob_privacy_V1 / charlie_privacy_V1 — H(V1 | RelayView) = log m > 0:
+     bob_privacy_V1 / charlie_privacy_V1 : H(V1 | RelayView) = log m > 0:
        a corrupted relay learns nothing about Alice's input V1  [3-party]
-     bob_privacy_V3 — H(V3 | BobView) = log m > 0: a corrupted Bob learns
+     bob_privacy_V3 : H(V3 | BobView) = log m > 0: a corrupted Bob learns
        nothing about Charlie's input V3 (R3 one-time-pad masking)  [3-party]
-     charlie_privacy_V2 — H(V2 | CharlieView) = log m > 0: a corrupted Charlie
+     charlie_privacy_V2 : H(V2 | CharlieView) = log m > 0: a corrupted Charlie
        learns nothing about Bob's input V2 (R2 one-time-pad masking)  [3-party]
 
    Corrupted-Alice secrecy (indcpa_hopping axis), the guessing triangle  [3-party]
-     dsdp_alice_view_advantage_le — AdvantageE <= 2 * epsilon_cpa
-     dsdp_alice_guess_ideal_le — guess <= 1/m (all-zero endpoint)
-     dsdp_alice_guess_advantage_le — AdvantageE <= 2 * epsilon_cpa
-     dsdp_alice_guess_real_le — guess <= 1/m + 2 * epsilon_cpa
-     dsdp_alice_unpredictability_ge — H_unp >= log m - log (1 + 2 m epsilon_cpa) *)
+     dsdp_alice_view_advantage_le : AdvantageE <= 2 * epsilon_cpa
+     dsdp_alice_guess_ideal_le : guess <= 1/m (all-zero endpoint)
+     dsdp_alice_guess_advantage_le : AdvantageE <= 2 * epsilon_cpa
+     dsdp_alice_guess_real_le : guess <= 1/m + 2 * epsilon_cpa
+     dsdp_alice_unpredictability_ge : H_unp >= log m - log (1 + 2 m epsilon_cpa) *)
 
 From HB Require Import structures.
 From mathcomp Require Import all_boot all_order all_algebra fingroup finalg.
