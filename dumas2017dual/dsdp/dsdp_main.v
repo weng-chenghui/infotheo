@@ -851,28 +851,12 @@ apply: (@le_trans _ _ (guess_sdistr_success renc_card rand_of_renc chmsg_of_msg
 - by rewrite lerD2r.
 Qed.
 
-(* log_id — the algebraic identity transporting the probability bound
-   [Pr <= 1/m + 2 * eps] into entropy form
-   [-log Pr >= log m - log (1 + 2 * m * eps)]. *)
-Lemma log_id (m : nat) (eps : R) :
-  (0 < m)%N -> (0 <= eps)%R ->
-  (- log (m%:R^-1 + 2%:R * eps) = log m%:R - log (1 + 2%:R * m%:R * eps))%R.
-Proof.
-move=> Hm Heps.
-have Hm_pos : (0 < m%:R :> R)%R by rewrite ltr0n.
-have Hmeps_pos : (0 < 1 + 2%:R * m%:R * eps :> R)%R
-  by rewrite ltr_pwDl ?ltr01 // !mulr_ge0 // ?ler0n.
-have Heq : (m%:R^-1 + 2%:R * eps =
-            (1 + 2%:R * m%:R * eps) / m%:R :> R)%R
-  by rewrite [RHS]mulrDl mul1r mulrAC mulfK // gt_eqF.
-by rewrite Heq logDiv // opprB.
-Qed.
-
 (* Hunp_leak_S — the conditional unpredictability entropy
    [H_unp^C(V_2 | AliceView, S)] for the fixed predictor at the
    output-exposing real game, the negative log of its success
-   probability. *)
-Definition Hunp_leak_S : R := (- log guess_sdistr_success_real)%R.
+   probability. Cloned context abbreviation; log_id (the algebraic identity
+   carrying the probability bound into entropy form) stays in dsdp_guess_fiber. *)
+Let Hunp_leak_S : R := (- log guess_sdistr_success_real)%R.
 
 (* dsdp_alice_unpredictability_ge — the entropy lower bound
    [log card_msg - log (1 + 2 * card_msg * epsilon_cpa) <= Hunp_leak_S]:
