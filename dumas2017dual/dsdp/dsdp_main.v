@@ -760,6 +760,21 @@ Hypothesis seed_wu2 : as_plain (de_val_nth seed 1) = w_u2.
 Hypothesis seed_wu3 : as_plain (de_val_nth seed 2) = w_u3.
 Hypothesis seed_wv1 : as_plain (de_val_nth seed 3) = w_v1.
 
+(* zero_game_leak_S instantiated at this section's parameters. *)
+Let game : raw_package :=
+  zero_game_leak_S renc_card rand_of_renc chmsg_of_msg chcipher_of_cipher
+    pkey_of_party msg_of_idx rand0 seed.
+
+(* real_game — the output-exposing real endpoint game (all-real counterpart). *)
+Let real_game : raw_package :=
+  real_game_leak_S renc_card rand_of_renc chmsg_of_msg chcipher_of_cipher
+    pkey_of_party msg_of_idx rand0 seed.
+
+(* guess_reduction — the IND-CPA distinguisher built from the guessing layer. *)
+Let guess_reduction : raw_package :=
+  guessing_challenger t_msg t_cipher
+    ∘ par (pack predictor) (ID (game_iface_leak_S t_msg t_cipher)).
+
 (* dsdp_alice_guess_ideal_le — the SSProve-side success probability of the
    all-zero guessing experiment is at most 1/card_msg: the connector
    [guess_success_sdistr_eq_fdist] crosses to the Infotheo side, then the fiber
@@ -774,6 +789,35 @@ rewrite (guess_success_sdistr_eq_fdist msg_to_finK guess_lossless).
 exact: (guess_fdist_success_le msg_to_finK guess_lossless card_renc_neq
   predictor_locs_disj chmsg_of_msgK Hmsg_bij guess_full_lossless
   seed_wu1 seed_wu2 seed_wu3 seed_wv1 Hinj).
+Qed.
+
+(* guess_sdistr_success_real — the SSProve-side success probability of the
+   guessing experiment on the output-exposing real game. *)
+Definition guess_sdistr_success_real : R :=
+  distr.mu (pkg_advantage.Pr (guessing_experiment predictor real_game)) true.
+
+(* dsdp_alice_guess_advantage_le — the reduction distinguisher's advantage is at
+   most [2 * epsilon_cpa]: the output-exposing endpoint games add only the common
+   id_Sout_get oracle (no encryption hop), so the Part I IND-CPA bound applies. *)
+Lemma dsdp_alice_guess_advantage_le
+    (cipher_of_chcipher : t_cipher -> cipher AHE)
+    (chcipher_of_cipherK : cancel chcipher_of_cipher cipher_of_chcipher)
+    (Hore : fseparate (locs predictor)
+       (locs (oracle_real_pkg renc_card rand_of_renc msg_of_chmsg
+                chcipher_of_cipher pkey_of_party)))
+    (Hoze : fseparate (locs predictor)
+       (locs (oracle_zero_pkg renc_card rand_of_renc t_msg
+                chcipher_of_cipher pkey_of_party))) :
+  AdvantageE real_game game guess_reduction <= 2%:R * epsilon_cpa.
+Proof.
+rewrite /real_game /game.
+eapply dsdp_advantage_derived_leak_S.
+- exact: chcipher_of_cipherK.
+- exact: chmsg_of_msgK.
+- exact: guess_reduction_valid.
+- exact: predictor_locs_disj.
+- exact: Hore.
+- exact: Hoze.
 Qed.
 
 End dsdp_alice_guess.
