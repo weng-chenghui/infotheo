@@ -142,3 +142,75 @@ Channel-2 direct-independence discharge.
   bridge-completion run; its alice_view_joint findings belong to Channel 1.
 - `[[20260430-dsdp-unpredictability-entropy-audited-plan]]` — origin of the
   Task 12/13/F split and the fiber residual.
+
+## Packaging vs channels (one game, two channels)
+
+A channel is NOT a package. The game, challenger, predictor, and adversary are
+all `raw_package`s composed with `∘`/`par`. A channel is one COMPONENT of the
+single game's output bundle — a conduit through which the secret `V2` leaks.
+Two oracles of the one game project the one bundle into the two channels:
+`id_game_run → ciphers` (cipher channel), `id_s_get → S` (output channel).
+
+```
+  CHALLENGER              ONE GAME                       PREDICTOR
+  (boolean shell)         (game_*, ONE raw_code)         (= adversary A : Y → Δ(R))
+  ═══════════════         ══════════════════════         ════════════════════════
+        │                        │                              │
+  (1)   │── id_game_run ────────►│                              │
+        │                        │  sample V_2 ~ Unif(R)        │
+        │                        │  run protocol ONCE           │
+        │                        │  → ONE output bundle:        │
+        │                        │    ┌──────────────────────┐  │
+        │                        │    │ ciphers [a1;a2;c2;c3] │ ─┼─► CHANNEL 2
+        │                        │    │ scalar  S in S_cell   │ ─┼─► CHANNEL 1
+        │                        │    └──────────────────────┘  │
+        │◄── view Y (ciphers) ───│  (id_game_run returns this)  │
+        │                        │                              │
+  (2)   │── id_s_get ───────────►│                              │
+        │◄── S ──────────────────│  (the output channel value) │
+        │                        │                              │
+  (3)   │──────── hand (view Y, S) ─────────────────────────────►│  receive (Y,S)
+        │                        │                              │  g = A(Y,S)
+        │◄──────── guess g ──────────────────────────────────────│
+        │                        │                              │
+  (4)   │── id_v2_get ──────────►│   (challenger only; reads    │
+        │◄──── V_2 ──────────────│    secret to score, NOT A)   │
+        │                        │                              │
+  (5)   │  output (g == V_2)                                    │
+        ▼
+   win  ⟺  g = V_2.
+
+  ════════════════════════════════════════════════════════════════════════════
+  Two oracles project the one bundle into the two channels:
+
+        id_game_run  ──►  ciphers   =  CHANNEL 2  (cipher channel)
+        id_s_get     ──►  S         =  CHANNEL 1  (output channel)
+
+  ┌─ CHANNEL 1 — OUTPUT (S) ───────────┐   ┌─ CHANNEL 2 — CIPHER ──────────────┐
+  │ S = U1·V1 + U2·V2 + U3·V3           │   │ the encrypted contributions       │
+  │ Alice is SUPPOSED to learn S.       │   │ [a1;a2;c2;c3] she receives.       │
+  │ Leak is intrinsic, not removable.   │   │ Could leak MORE than S alone.     │
+  │                                     │   │                                   │
+  │ Tool:  fiber counting              │   │ Tool:  IND-CPA hybrid hops        │
+  │   (Pr_dsdp_sol_uniform_ring,        │   │   (game_real → … → game_zero,     │
+  │    dsdp_entropy.v)                  │   │    dsdp_advantage_derived_leak_S) │
+  │ Nature: INFORMATION-THEORETIC       │   │ Nature: COMPUTATIONAL             │
+  │ Bound:  ≤ 1/m                       │   │ Bound:  ≤ 2·ε_cpa                 │
+  └─────────────────────────────────────┘   └────────────────────────────────────┘
+                    │                                     │
+                    └──────────────┬──────────────────────┘
+                                   ▼
+                       triangle inequality
+                Pr[A wins | real]  ≤  1/m + 2·ε_cpa,   ∀ A
+
+  ════════════════════════════════════════════════════════════════════════════
+  THE HINGE: at the all-zero endpoint (zero_game_leak_S) the ciphers are Enc(0),
+  so CHANNEL 2 is CLOSED — it carries no V_2. Only CHANNEL 1 stays open, and
+  S's fiber of size m caps it at 1/m. That residual 1/m is the information-
+  theoretic floor; the 2·ε_cpa is the cost of having closed channel 2.
+```
+
+One line: one game, one `raw_code`, one output bundle; "two channels" = the two
+components of that bundle (`id_game_run`→ciphers, `id_s_get`→`S`), each attacked
+by a different tool and joined by the triangle inequality — no package is a
+channel.
