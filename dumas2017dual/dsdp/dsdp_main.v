@@ -15,6 +15,8 @@
        H(VS_0 | View) = 0  [N-party]
      US_compromised_leaks_V2 — corrupted Alice leaks Bob's V2, H(V2 | View) = 0
        [3-party instance of US_n_compromised_leaks_secret]
+     bob_privacy_V1 / charlie_privacy_V1 — H(V1 | RelayView) = log m > 0:
+       a corrupted relay learns nothing about Alice's input V1  [3-party]
 
    Corrupted-Alice secrecy (indcpa_hopping axis), the guessing triangle  [3-party]
      dsdp_alice_view_advantage_le — AdvantageE <= 2 * epsilon_cpa
@@ -473,6 +475,101 @@ by rewrite HVS0.
 Qed.
 
 End dsdp_malicious_3party.
+
+(* ================================================================= *)
+(* Corrupted-relay secrecy of Alice's input (counting axis)          *)
+(* ================================================================= *)
+
+Section dsdp_relay_secrecy_v1.
+(* Alice's input V1 occurs in no protocol message; each corrupted relay's full
+   real view is a deterministic function of inputs independent of V1, so its
+   conditional entropy about V1 stays at log m. *)
+Local Set Default Goal Selector "1".
+Local Open Scope reals_ext_scope.
+Local Open Scope proba_scope.
+Local Open Scope fdist_scope.
+Local Open Scope entropy_scope.
+Local Open Scope ring_scope.
+Context {R : realType}.
+Variable T : finType.
+Variable P : R.-fdist T.
+Variables (p_minus_2 q_minus_2 : nat).
+Local Notation p := p_minus_2.+2.
+Local Notation q := q_minus_2.+2.
+Local Notation m := (p * q).
+Local Notation msg := 'Z_m.
+
+Let card_msg : #|msg| = m.
+Proof. by rewrite card_ord Zp_cast. Qed.
+
+Variables (V1 V2 V3 U2 U3 R2 R3 : {RV P -> msg}).
+Variable Dk_b : {RV P -> Bob.-key Dec msg}.
+Variable Dk_c : {RV P -> Charlie.-key Dec msg}.
+
+Let VU3R : {RV P -> msg} := V3 \* U3 \+ R3.
+Let D2 : {RV P -> msg} := V2 \* U2 \+ R2.
+Let D3 : {RV P -> msg} := VU3R \+ D2.
+
+Let E_charlie_vur3 : {RV P -> Charlie.-enc msg} := E' Charlie `o VU3R.
+Let E_bob_d2 : {RV P -> Bob.-enc msg} := E' Bob `o D2.
+Let E_charlie_d3 : {RV P -> Charlie.-enc msg} := E' Charlie `o D3.
+
+(* Bob's full real view: his key, his own input V2, the Charlie-ciphertext he
+   forwards, and the ciphertext of his decrypted masked aggregate D2. *)
+Let BobView := [% Dk_b, V2, E_charlie_vur3, E_bob_d2].
+(* Charlie's full real view: his key, his own input V3, the encrypted aggregate
+   D3 he returns to Alice. *)
+Let CharlieView := [% Dk_c, V3, E_charlie_d3].
+
+Hypothesis pV1_unif : `p_ V1 = fdist_uniform card_msg.
+Hypothesis bob_inputs_indep_V1 : P |= [% Dk_b, V2, VU3R, D2] _|_ V1.
+Hypothesis charlie_inputs_indep_V1 : P |= [% Dk_c, V3, D3] _|_ V1.
+
+Let bob_view_of (w : (((Bob.-key Dec msg * msg) * msg) * msg)%type) :=
+  (((w.1.1.1, w.1.1.2), E' Charlie w.1.2), E' Bob w.2).
+Let charlie_view_of (w : ((Charlie.-key Dec msg * msg) * msg)%type) :=
+  ((w.1.1, w.1.2), E' Charlie w.2).
+
+(* BobView_indep_V1 — Bob's view is independent of Alice's input V1. *)
+Lemma BobView_indep_V1 : P |= BobView _|_ V1.
+Proof.
+have H := inde_RV_comp bob_view_of idfun bob_inputs_indep_V1.
+by rewrite /comp_RV /= in H *.
+Qed.
+
+(* CharlieView_indep_V1 — Charlie's view is independent of Alice's input V1. *)
+Lemma CharlieView_indep_V1 : P |= CharlieView _|_ V1.
+Proof.
+have H := inde_RV_comp charlie_view_of idfun charlie_inputs_indep_V1.
+by rewrite /comp_RV /= in H *.
+Qed.
+
+(* bob_privacy_V1 — Bob's view carries log m bits of uncertainty about Alice's
+   input V1, hence a corrupted Bob learns nothing about V1.  [3-party] *)
+Theorem bob_privacy_V1 :
+  `H(V1 | BobView) = log (m%:R : R) /\ `H(V1 | BobView) > 0.
+Proof.
+have H_logm : `H(V1 | BobView) = log (m%:R : R).
+  by rewrite (inde_cond_entropy BobView_indep_V1) pV1_unif entropy_uniform card_msg.
+split; first exact: H_logm.
+rewrite H_logm -log1; apply: ltr_log; first by [].
+by rewrite ltr1n.
+Qed.
+
+(* charlie_privacy_V1 — Charlie's view carries log m bits of uncertainty about
+   Alice's input V1, hence a corrupted Charlie learns nothing about V1.
+   [3-party] *)
+Theorem charlie_privacy_V1 :
+  `H(V1 | CharlieView) = log (m%:R : R) /\ `H(V1 | CharlieView) > 0.
+Proof.
+have H_logm : `H(V1 | CharlieView) = log (m%:R : R).
+  by rewrite (inde_cond_entropy CharlieView_indep_V1) pV1_unif entropy_uniform card_msg.
+split; first exact: H_logm.
+rewrite H_logm -log1; apply: ltr_log; first by [].
+by rewrite ltr1n.
+Qed.
+
+End dsdp_relay_secrecy_v1.
 
 (* ================================================================= *)
 (* Corrupted-Alice secrecy: the guessing triangle (indcpa_hopping axis) *)
