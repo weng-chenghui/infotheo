@@ -221,3 +221,25 @@ the whole derivation and guts the support files).
   renames are contained to the DSDP subtree, blueprint, and `_CoqProject`. The
   one within-`dsdp/` sibling importer (`dsdp_game_gen_literal.v`) is why the
   Require-update scan in Phase R runs repo-wide rather than over the five files.
+
+## Addendum — unsound encryption-independence cluster removed (commit d3098a9)
+
+The information-theoretic party-view privacy results rested on the unsound
+idealization that AHE encryption hides perfectly: the `E_enc_inde` hypothesis,
+its siblings `inde_Echarlie`/`inde_Ebob`, and the `BobView/CharlieView _|_ V_i`
+antecedents only dischargeable through encryption-independence. The whole cluster
+was deleted.
+
+- **Headlines removed (main 14 → 9):** `US_compromised_leaks_V2`, `bob_privacy_V1`,
+  `bob_privacy_V3`, `charlie_privacy_V1`, `charlie_privacy_V2`.
+- **Support removed:** in `dsdp_view_independence.v` the Sections
+  `dsdp_view_independence` (the `E_enc_inde` scaffold + `dotp2` +
+  `malicious_adversary_case_analysis`), `bob_security(_independence)`,
+  `charlie_security(_independence)` (1483 → 199 lines); in `dsdp_entropy.v` the
+  Section `dsdp_privacy_analysis` (1168 → 725 lines).
+- **Kept (sound, no encryption-independence assumption):** `dsdp_centropy_uniform(_n)`
+  (plaintext solution-counting), `relay_privacy_n`, `US_n_compromised_leaks_V1`,
+  the IND-CPA `dsdp_alice_view_advantage_le`, and the SSProve guessing triangle +
+  `dsdp_alice_unpredictability_ge` (the `1/m` output-fiber bound).
+- **Follow-up:** `dsdp_view_independence.v` now holds only `relay_security_n` +
+  `malicious_n`; its filename no longer matches its contents (rename candidate).
