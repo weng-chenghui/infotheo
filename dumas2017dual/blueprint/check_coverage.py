@@ -66,17 +66,26 @@ def module_logical_name(relpath):
 
 
 def read_modules():
-    """Parse the MODULES=( ... ) array from make_blueprint.sh."""
+    """Parse the MODULES=( ... ) array from make_blueprint.sh.
+
+    Reads the lines between the `MODULES=(` line and the line that *is* `)`;
+    a stray `)` inside a comment must not terminate the array.
+    """
     with open(MAKE_BLUEPRINT) as f:
-        body = f.read()
-    m = re.search(r"MODULES=\((.*?)\)", body, re.S)
-    if not m:
-        sys.exit("check_coverage: could not find MODULES=( ... ) in make_blueprint.sh")
-    mods = []
-    for line in m.group(1).splitlines():
-        line = line.split("#", 1)[0].strip()
-        if line.endswith(".v"):
-            mods.append(line)
+        lines = f.read().splitlines()
+    inside, mods = False, []
+    for line in lines:
+        if not inside:
+            if re.match(r"\s*MODULES=\(", line):
+                inside = True
+            continue
+        if line.split("#", 1)[0].strip() == ")":
+            break
+        entry = line.split("#", 1)[0].strip()
+        if entry.endswith(".v"):
+            mods.append(entry)
+    if not mods:
+        sys.exit("check_coverage: could not parse MODULES=( ... ) in make_blueprint.sh")
     return mods
 
 
