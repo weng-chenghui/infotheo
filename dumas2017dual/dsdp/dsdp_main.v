@@ -717,3 +717,63 @@ by rewrite dotp_n_e1.
 Qed.
 
 End dsdp_malicious_n.
+
+(* ================================================================= *)
+(* Corrupted-Alice secrecy: the guessing triangle (indcpa_hopping axis) *)
+(* ================================================================= *)
+
+Section dsdp_alice_guess.
+(* cloned context of Section dsdp_guess_distribution *)
+Variables (AHE : AHEncType) (Renc : finType) (card_renc : nat)
+  (renc_card : #|Renc| = card_renc) (rand_of_renc : Renc -> rand AHE)
+  (t_msg t_cipher : choice_type)
+  (chmsg_of_msg : plain AHE -> t_msg)
+  (chcipher_of_cipher : cipher AHE -> t_cipher)
+  (pkey_of_party : party_id -> pub_key AHE)
+  (card_msg : nat) (msg_of_idx : 'I_card_msg -> plain AHE) (rand0 : rand AHE).
+Variable seed : denv AHE.
+Variable predictor : predictor_guesser t_msg t_cipher.
+Variable Mfin : finType.
+Variable msg_to_fin : t_msg -> Mfin.
+Variable fin_to_msg : Mfin -> t_msg.
+Hypothesis msg_to_finK : cancel msg_to_fin fin_to_msg.
+
+Hypothesis guess_lossless :
+  psum (distr.mu (Pr_fst (guess_joint_code renc_card rand_of_renc chmsg_of_msg
+    chcipher_of_cipher pkey_of_party msg_of_idx rand0 seed predictor
+    msg_to_fin))) = 1.
+
+Hypothesis card_renc_neq : card_renc != card_msg.
+Hypothesis predictor_locs_disj : fseparate (locs predictor) (protocol_state t_msg).
+
+Variable msg_of_chmsg : t_msg -> plain AHE.
+Hypothesis chmsg_of_msgK : cancel chmsg_of_msg msg_of_chmsg.
+Hypothesis Hmsg_bij : bijective msg_of_idx.
+Hypothesis guess_full_lossless :
+  psum (distr.mu (Pr_fst (guess_full_code renc_card rand_of_renc chmsg_of_msg
+    chcipher_of_cipher pkey_of_party msg_of_idx rand0 seed predictor
+    msg_to_fin))) = 1.
+
+Variables (w_v1 w_u1 w_u2 w_u3 : plain AHE).
+Hypothesis seed_wu1 : as_plain (de_val_nth seed 0) = w_u1.
+Hypothesis seed_wu2 : as_plain (de_val_nth seed 1) = w_u2.
+Hypothesis seed_wu3 : as_plain (de_val_nth seed 2) = w_u3.
+Hypothesis seed_wv1 : as_plain (de_val_nth seed 3) = w_v1.
+
+(* dsdp_alice_guess_ideal_le — the SSProve-side success probability of the
+   all-zero guessing experiment is at most 1/card_msg: the connector
+   [guess_success_sdistr_eq_fdist] crosses to the Infotheo side, then the fiber
+   bound [guess_fdist_success_le]. *)
+Lemma dsdp_alice_guess_ideal_le :
+  injective (fun v : plain AHE => w_u3 * v) ->
+  guess_sdistr_success renc_card rand_of_renc chmsg_of_msg chcipher_of_cipher
+    pkey_of_party msg_of_idx rand0 seed predictor <= card_msg%:R^-1.
+Proof.
+move=> Hinj.
+rewrite (guess_success_sdistr_eq_fdist msg_to_finK guess_lossless).
+exact: (guess_fdist_success_le msg_to_finK guess_lossless card_renc_neq
+  predictor_locs_disj chmsg_of_msgK Hmsg_bij guess_full_lossless
+  seed_wu1 seed_wu2 seed_wu3 seed_wv1 Hinj).
+Qed.
+
+End dsdp_alice_guess.
