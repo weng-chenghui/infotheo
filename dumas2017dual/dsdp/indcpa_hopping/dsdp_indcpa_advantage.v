@@ -89,14 +89,6 @@ Definition dsdp_problem : dsdp_indcpa_secrecy_problem :=
 Example dsdp_problem_hops : count_obs_hops (corrupted_view dsdp_problem) = 2.
 Proof. by []. Qed.
 
-(* dsdp_problem_secure — the capstone, over the record's OWN games: every
-   adversary's advantage distinguishing real_game dsdp_problem from
-   zero_game dsdp_problem is at most 2 * epsilon_cpa. One application of the
-   generic dsdp_indcpa_secrecy, reducing the hop count to 2. *)
-Example dsdp_problem_secure (Adv : dsdp_indcpa_adversary dsdp_problem) :
-  AdvantageE (real_game dsdp_problem) (zero_game dsdp_problem) (adv_package Adv)
-    <= 2%:R * epsilon_cpa.
-Proof. have H := dsdp_indcpa_secrecy Adv. by rewrite dsdp_problem_hops in H. Qed.
 End dsdp_indcpa_advantage.
 
 (* ------------------------------------------------------------------ *)

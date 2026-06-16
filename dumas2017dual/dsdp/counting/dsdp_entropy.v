@@ -320,41 +320,6 @@ move/eqP: Heq; rewrite subr_eq addrC => /eqP ->.
 by rewrite addrA.
 Qed.
 
-(* Main entropy result: H(V2, V3 | Alice's view) = log(pq).
-   This establishes that Alice learns nothing beyond the constraint.
-   Now a thin application of centropy_jcond_determined_fibers from
-   entropy_fiber.v, with S_determined providing the functional
-   constraint and Pr_dsdp_sol_uniform + dsdp_fiber_card discharging
-   the uniformity and constant-cardinality hypotheses. *)
-Theorem dsdp_centropy_uniform :
-  (forall t, (0 < U3 t)%N) ->
-  (forall t, (U3 t < minn p q)%N) ->
-  `H(VarRV | CondRV) = log (m%:R : R).
-Proof.
-move=> HU3_pos HU3_lt.
-have Hm_pos : (0 < m)%N by rewrite muln_gt0 prime_gt0 // prime_gt0.
-apply: (@centropy_jcond_determined_fibers R T P
-          (msg * msg)%type (msg * msg * msg * msg)%type msg
-          VarRV InputRV S dsdp_g S_determined _ m _ Hm_pos).
-- move=> [[[v1 u1] u2] u3] s [v2 v3] /= Hcond_pos Hin.
-  move/pfwd1_neq0: (Hcond_pos) => [t [Ht _]].
-  move: Ht; rewrite inE => /eqP Ht.
-  have HU3t : U3 t = u3 by case: Ht => _ _ _ ->.
-  have Hu3_pos : (0 < u3)%N by rewrite -HU3t; apply: HU3_pos.
-  have Hu3_lt : (u3 < minn p q)%N by rewrite -HU3t; apply: HU3_lt.
-  rewrite -dsdp_fiber_eq_abstract in Hin *.
-  rewrite (@dsdp_fiber_card u1 u2 u3 v1 s Hu3_pos Hu3_lt).
-  exact: (Pr_dsdp_sol_uniform Hu3_pos Hu3_lt Hcond_pos Hin).
-- move=> [[[v1 u1] u2] u3] s Hcond_pos.
-  rewrite -dsdp_fiber_eq_abstract.
-  move/pfwd1_neq0: (Hcond_pos) => [t [Ht _]].
-  move: Ht; rewrite inE => /eqP Ht.
-  have HU3t : U3 t = u3 by case: Ht => _ _ _ ->.
-  apply: dsdp_fiber_card.
-  + by rewrite -HU3t; apply: HU3_pos.
-  + by rewrite -HU3t; apply: HU3_lt.
-Qed.
-
 (* Self-contained direct proof, preserved alongside the abstract-routed version
    above as an alternative derivation that does not depend on the abstract
    centropy_jcond_determined_fibers layer. *)
@@ -752,36 +717,6 @@ Qed.
 (* Extract relay coefficient vector from condition tuple *)
 Let u_of_cond (c : CondT_n) : {ffun 'I_n_relay.+1 -> msg} :=
   let '(_, _, u_rel, _) := c in u_rel.
-
-(* Main N-party entropy result:
-   H(V_relay | CondRV) = log(m^n_relay)
-   where V_relay are the relay parties' private inputs. *)
-Theorem dsdp_centropy_uniform_n :
-  (forall t, (0 < val (u_of_cond (CondRV t) ord_max))%N) ->
-  (forall t, (val (u_of_cond (CondRV t) ord_max) < minn p q)%N) ->
-  `H(VarRV | CondRV) = log ((m ^ n_relay)%:R : R).
-Proof.
-move=> HU_pos HU_lt.
-rewrite centropy_RVE' /=.
-transitivity (\sum_(a : CondT_n)
-               `Pr[ CondRV = a ] * log ((m ^ n_relay)%:R : R)).
-  apply: eq_bigr => [] [[[v0 u0] u_rel] s] _.
-  have [->|Hcond_pos] := eqVneq (`Pr[CondRV = (v0, u0, u_rel, s)]) 0.
-    by rewrite !mul0r.
-  have Hu_pos: (0 < val (u_rel ord_max))%N.
-    move/pfwd1_neq0: Hcond_pos => [t [Ht _]].
-    move: Ht; rewrite inE => /eqP Ht.
-    have := HU_pos t; rewrite Ht /=.
-    by [].
-  have Hu_lt: (val (u_rel ord_max) < minn p q)%N.
-    move/pfwd1_neq0: Hcond_pos => [t [Ht _]].
-    move: Ht; rewrite inE => /eqP Ht.
-    have := HU_lt t; rewrite Ht /=.
-    by [].
-  by rewrite (dsdp_centropy1_uniform_n Hu_pos Hu_lt Hcond_pos).
-under eq_bigr do rewrite mulrC.
-by rewrite -big_distrr /= sum_pfwd1 mulr1.
-Qed.
 
 End dsdp_entropy_n.
 
