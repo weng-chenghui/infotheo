@@ -245,71 +245,6 @@ apply: boolp.funext => i //=.
 ring.
 Qed.
 
-(* This theorem shows that if an active adversary controls Alice,
-   it can set U1 and U2 as a special combination (1, 0),
-   which allows revealing `V2` from the result that Alice receives.
-   \cite[\S5.2]{dumas2017dual}.
-*)
-Theorem US_compromised_leaks_V2 :
-  US = ConstUS -> ~ `H(V2 | AliceView ) = `H `p_V2.
-Proof.
-move => H.
-(* From alice_view to [% Alice_input_view, S] - strip encryption terms.
-   `E_enc_ce_contract` expects the encryption RV on the RIGHT of `_|_`, but
-   `E_enc_inde` produces it on the LEFT — flip each hypothesis with
-   `inde_RV_sym`. The order of the three peels matches the rightmost-first
-   shape of AliceView (Bob's V2 first, then Charlie's V3, then Alice's D3). *)
-have Hinde_bob : P |= [% [% Dk_a, S, V1, U1, U2, U3, R2, R3, E_alice_d3,
-                      E_charlie_v3], V2] _|_ E_bob_v2.
-  by apply/inde_RV_sym; apply: E_enc_inde.
-have Hinde_charlie : P |= [% [% Dk_a, S, V1, U1, U2, U3, R2, R3, E_alice_d3], V2]
-                       _|_ E_charlie_v3.
-  by apply/inde_RV_sym; apply: E_enc_inde.
-have Hinde_alice : P |= [% [% Dk_a, S, V1, U1, U2, U3, R2, R3], V2] _|_ E_alice_d3.
-  by apply/inde_RV_sym; apply: E_enc_inde.
-rewrite (E_enc_ce_contract Hinde_bob card_msg).
-rewrite (E_enc_ce_contract Hinde_charlie card_msg).
-rewrite (E_enc_ce_contract Hinde_alice card_msg).
-pose h := (fun o : (Alice.-key Dec msg * msg *
-  msg * msg * msg * msg * msg * msg) =>
-  let '(dk_a, s, v1, u1, u2, u3, r2, r3) := o in
-   (dk_a, v1, u1, u2, u3, r2, r3, s)).
-pose h' := (fun o : (Alice.-key Dec msg * msg *
-  msg * msg * msg * msg * msg * msg) =>
-  let '(dk_a, v1, u1, u2, u3, r2, r3, s) := o in
-  (dk_a, s, v1, u1, u2, u3, r2, r3)).
-rewrite -(centropy_RV_contraction _ _ h).
-have ->: `H( V2 | [% Dk_a, S, V1, U1, U2, U3, R2, R3, h `o
-  [% Dk_a, S, V1, U1, U2, U3, R2, R3]]) =
-  `H( V2 | [% Dk_a, S, V1, U1, U2, U3, R2, R3,
-  [% Dk_a, V1, U1, U2, U3, R2, R3, S]]).
-  by [].
-rewrite centropyC (centropy_RV_contraction _ _ h') -/AliceInputsView.
-(* From the cond_entropy to the independence goal via mutual info *)
-move => H2.
-have: `I(V2;[% AliceInputsView, S]) = 0.
-  by rewrite mutual_info_RVE H2 subrr.
-move/mutual_info_RV0_indep.
-(* Show the independence is impossible if Alice has been compromised
-   and cheat with the specific `us`*)
-rewrite S_E /add_RV //= (ConstUS_discloses_V2 H).
-pose z := (fun o : (alice_inputsT * msg) =>
-  let '(_, v1, u1, _, _, _, _, v2_r) := o in v2_r - v1 * u1).
-move/(inde_RV_comp idfun z).
-have -> : z `o [% AliceInputsView, V2 \+ VU1] = V2.
-  rewrite /z /VU1 /comp_RV /add_RV.
-  apply: boolp.funext => i //=.
-  by ring.
-have -> : idfun `o V2 = V2.
-  by apply: boolp.funext => i.
-(* Discharge `neg_self_inde`'s precondition `forall a, Pr[V2 = a] != 1`.
-   V2 is uniform over msg of size m = p*q > 1, so each Pr[V2 = a] = 1/m != 1. *)
-apply: neg_self_inde => v2.
-rewrite -dist_of_RVE (dsdp_entropy.pV2_unif inputs) fdist_uniformE.
-rewrite card_msg invr_eq1 pnatr_eq1.
-by apply: contraTneq m_gt1 => ->.
-Qed.
-
 End malicious_adversary_case_analysis.
 
 End dsdp_view_independence.
@@ -678,23 +613,6 @@ Proof.
 exact: (inde_cond_entropy BobView_indep_V1).
 Qed.
 
-(* Bob cannot learn V1 - complete privacy (concrete entropy value) *)
-Theorem bob_privacy_V1 :
-  `H(V1 | BobView) = log (m%:R : R) /\
-  `H(V1 | BobView) > 0.
-Proof.
-have H_v1_logm: `H(V1 | BobView) = log (m%:R : R).
-  (* Reuse alternative formulation: H(V1 | BobView) = H(V1) *)
-  rewrite bob_privacy_V1_alt.
-  (* Now compute H(V1) = log(m) using uniformity *)
-  by rewrite pV1_unif entropy_uniform card_msg.
-split.
-- exact: H_v1_logm.
-- rewrite H_v1_logm -log1.
-  apply: ltr_log; first by [].
-  by rewrite ltr1n.
-Qed.
-
 (* Bob cannot learn V3 - complete privacy.
    Alternative formulation: H(V3 | BobView) = H(V3)
    This directly expresses that conditioning on BobView reveals
@@ -720,23 +638,6 @@ Proof.
 (* Goal: `H(V3 | BobView) = `H `p_ V3 *)
 (* Use inde_cond_entropy: P |= View _|_ X -> `H(X | View) = `H `p_ X *)
 exact: (inde_cond_entropy BobView_indep_V3).
-Qed.
-
-(* Bob cannot learn V3 - complete privacy (concrete entropy value) *)
-Theorem bob_privacy_V3 :
-  `H(V3 | BobView) = log (m%:R : R) /\
-  `H(V3 | BobView) > 0.
-Proof.
-have H_v3_logm: `H(V3 | BobView) = log (m%:R : R).
-  (* Reuse alternative formulation: H(V3 | BobView) = H(V3) *)
-  rewrite bob_privacy_V3_alt.
-  (* Now compute H(V3) = log(m) using uniformity *)
-  by rewrite pV3_unif entropy_uniform card_msg.
-split.
-- exact: H_v3_logm.
-- rewrite H_v3_logm -log1.
-  apply: ltr_log; first by [].
-  by rewrite ltr1n.
 Qed.
 
 End bob_security.
@@ -1394,23 +1295,6 @@ Proof.
 exact: (inde_cond_entropy CharlieView_indep_V1).
 Qed.
 
-(* Charlie cannot learn V1 - complete privacy (concrete entropy value) *)
-Theorem charlie_privacy_V1 :
-  `H(V1 | CharlieView) = log (m%:R : R) /\
-  `H(V1 | CharlieView) > 0.
-Proof.
-have H_v1_logm: `H(V1 | CharlieView) = log (m%:R : R).
-  (* Reuse alternative formulation: H(V1 | CharlieView) = H(V1) *)
-  rewrite charlie_privacy_V1_alt.
-  (* Now compute H(V1) = log(m) using uniformity *)
-  by rewrite pV1_unif entropy_uniform card_msg.
-split.
-- exact: H_v1_logm.
-- rewrite H_v1_logm -log1.
-  apply: ltr_log; first by [].
-  by rewrite ltr1n.
-Qed.
-
 (* Charlie cannot learn V2 - complete privacy.
    Alternative formulation: H(V2 | CharlieView) = H(V2)
    This directly expresses that conditioning on CharlieView reveals
@@ -1442,22 +1326,6 @@ Proof.
 exact: (inde_cond_entropy CharlieView_indep_V2).
 Qed.
 
-(* Charlie cannot learn V2 - complete privacy (concrete entropy value) *)
-Theorem charlie_privacy_V2 :
-  `H(V2 | CharlieView) = log (m%:R : R) /\
-  `H(V2 | CharlieView) > 0.
-Proof.
-have H_v2_logm: `H(V2 | CharlieView) = log (m%:R : R).
-  (* Reuse alternative formulation: H(V2 | CharlieView) = H(V2) *)
-  rewrite charlie_privacy_V2_alt.
-  (* Now compute H(V2) = log(m) using uniformity *)
-  by rewrite pV2_unif entropy_uniform card_msg.
-split.
-- exact: H_v2_logm.
-- rewrite H_v2_logm -log1.
-  apply: ltr_log; first by [].
-  by rewrite ltr1n.
-Qed.
 
 End charlie_security.
 
@@ -1549,24 +1417,6 @@ Lemma relay_privacy_from_indep {A : finType}
   `H(V_target | View) = `H `p_ V_target.
 Proof. exact: (inde_cond_entropy View_indep). Qed.
 
-(* Concrete privacy: H(V_target | View) = log(m) > 0 *)
-Lemma relay_privacy_logm {A : finType}
-    (View : {RV P -> A}) (V_target : {RV P -> msg})
-    (pV_unif : `p_ V_target = fdist_uniform card_msg)
-    (View_indep : P |= View _|_ V_target) :
-  `H(V_target | View) = log (m%:R : R) /\
-  `H(V_target | View) > 0.
-Proof.
-have H_logm: `H(V_target | View) = log (m%:R : R).
-  rewrite (relay_privacy_from_indep pV_unif View_indep).
-  by rewrite pV_unif entropy_uniform card_msg.
-split.
-- exact: H_logm.
-- rewrite H_logm -log1.
-  apply: ltr_log; first by [].
-  by rewrite ltr1n.
-Qed.
-
 End relay_security_n.
 
 (******************************************************************************)
@@ -1627,18 +1477,6 @@ rewrite ffunE eq_refl mul1r.
 rewrite big1 ?addr0 //.
 move=> i Hi.
 by rewrite ffunE (negbTE Hi) mul0r.
-Qed.
-
-(* If Alice sets US = e_1, she can extract V_1 *)
-Lemma ConstUS_n_discloses_V1
-    (US VS : {RV P -> {ffun 'I_n_relay.+1 -> msg}}) :
-  US = (fun _ => ConstUS_n) ->
-  Dotp_n_rv US VS = (fun t => VS t ord0).
-Proof.
-move->.
-rewrite /Dotp_n_rv.
-apply: boolp.funext => t /=.
-by rewrite dotp_n_e1.
 Qed.
 
 End malicious_n.
