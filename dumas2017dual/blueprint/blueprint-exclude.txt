@@ -6,9 +6,6 @@
 #
 # Format: one `module_basename:identifier` per line. Auto-excluded kinds
 # (Variable/Hypothesis/Context/Let) are not listed.
-dsdp_entropy:alice_view_to_cond
-dsdp_entropy:compute_v3
-dsdp_entropy:Dec_view
 dsdp_entropy:dsdp_centropy_uniform_direct
 dsdp_entropy:dsdp_centropy1_uniform
 dsdp_entropy:dsdp_centropy1_uniform_n
@@ -21,17 +18,10 @@ dsdp_entropy:dsdp_fiber_eq_abstract
 dsdp_entropy:dsdp_fiber_n
 dsdp_entropy:dsdp_fiber_ring
 dsdp_entropy:dsdp_g
-dsdp_entropy:dsdp_random_inputs
 dsdp_entropy:dsdp_var_entropy
-dsdp_entropy:Eqn1_view
-dsdp_entropy:Eqn2_view
-dsdp_entropy:joint_centropy_reduction
 dsdp_entropy:Pr_dsdp_nosol_eq0
 dsdp_entropy:Pr_dsdp_sol_uniform
 dsdp_entropy:S_determined
-dsdp_entropy:U3_nonzero
-dsdp_entropy:V3_determined
-dsdp_entropy:V3_determined_centropy_v2
 dsdp_game_code:advantage_gc_dsdp
 dsdp_game_code:advantage_self_zero
 dsdp_game_code:all_real
@@ -247,17 +237,12 @@ dsdp_indcpa_advantage:hop_equiv_real_leak_S
 dsdp_indcpa_advantage:hop_equiv_zero_leak_S
 dsdp_indcpa_advantage:real_game_leak_S
 dsdp_indcpa_advantage:zero_game_leak_S
-dsdp_main:bob_privacy_V1
-dsdp_main:bob_privacy_V3
-dsdp_main:charlie_privacy_V1
-dsdp_main:charlie_privacy_V2
 dsdp_main:dsdp_alice_guess_advantage_le
 dsdp_main:dsdp_alice_unpredictability_ge
 dsdp_main:dsdp_centropy_uniform
 dsdp_main:dsdp_centropy_uniform_n
 dsdp_main:guess_sdistr_success_real
 dsdp_main:relay_privacy_n
-dsdp_main:US_compromised_leaks_V2
 dsdp_main:US_n_compromised_leaks_V1
 dsdp_symbolic_exec:a1_observed
 dsdp_symbolic_exec:a2_observed
