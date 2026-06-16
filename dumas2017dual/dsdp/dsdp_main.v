@@ -4,14 +4,19 @@
    theorem's full proof is presented here over a cloned copy of its source
    section context; the supporting machinery stays in the axis files
    (counting/, symbolic_game/, indcpa_hopping/, convert/) and is referenced, not
-   duplicated. The headlines are:
+   duplicated. The file mixes generic N-party results with their 3-party DSDP
+   instances; each theorem's comment states its party scope. The headlines are:
 
    Information-theoretic (counting axis)
-     dsdp_centropy_uniform / dsdp_centropy_uniform_n — H(V2,V3 | view) = log m
-     US_n_compromised_leaks_V1 — corrupted U leaks V
-     relay_privacy_n — H(Y | View) = log m > 0 for a generic relay
+     dsdp_centropy_uniform — H(V2,V3 | view) = log m  [3-party]
+     dsdp_centropy_uniform_n — H(V | view) = log (m^n)  [N-party]
+     relay_privacy_n — H(Y | View) = log m > 0 for a generic relay  [N-party]
+     US_n_compromised_leaks_secret — corrupted Alice leaks a relay's input,
+       H(VS_0 | View) = 0  [N-party]
+     US_compromised_leaks_V2 — corrupted Alice leaks Bob's V2, H(V2 | View) = 0
+       [3-party instance of US_n_compromised_leaks_secret]
 
-   Corrupted-Alice secrecy (indcpa_hopping axis), the guessing triangle
+   Corrupted-Alice secrecy (indcpa_hopping axis), the guessing triangle  [3-party]
      dsdp_alice_view_advantage_le — AdvantageE <= 2 * epsilon_cpa
      dsdp_alice_guess_ideal_le — guess <= 1/m (all-zero endpoint)
      dsdp_alice_guess_advantage_le — AdvantageE <= 2 * epsilon_cpa
@@ -104,7 +109,7 @@ Proof. by []. Qed.
    generic bound [dsdp_indcpa_secrecy] (any experiment's real-vs-all-zero advantage
    is at most its hop count times epsilon_cpa) at hop count two. [dsdp_experiment]
    is the DSDP instance of such a two-hop experiment, its corrupted-Alice trace
-   having exactly two encryption hops ([dsdp_experiment_hops]). *)
+   having exactly two encryption hops ([dsdp_experiment_hops]).  [3-party] *)
 Theorem dsdp_alice_view_advantage_le (Adv : dsdp_indcpa_adversary dsdp_experiment) :
   AdvantageE (real_game dsdp_experiment) (zero_game dsdp_experiment) (adv_package Adv)
     <= 2%:R * epsilon_cpa.
@@ -161,7 +166,8 @@ Hypothesis R_i_indep_VU_Y : P |= R_i _|_ [%VU_i, Y].
 Hypothesis pR_i_unif : `p_ R_i = fdist_uniform card_msg.
 
 (* relay_privacy_n — for a generic relay party whose view is independent of a
-   uniform target, the view carries log m bits of uncertainty about the target. *)
+   uniform target, the view carries log m bits of uncertainty about the target.
+   [N-party] *)
 Lemma relay_privacy_n {A : finType}
     (View : {RV P -> A}) (V_target : {RV P -> msg})
     (pV_unif : `p_ V_target = fdist_uniform card_msg)
@@ -225,7 +231,7 @@ Hypothesis VarRV_indep_inputs : P |= [%V1, U1, U2, U3] _|_ VarRV.
 Let InputRV : {RV P -> (msg * msg * msg * msg)} := [%V1, U1, U2, U3].
 
 (* dsdp_centropy_uniform — conditioning on Alice's view (V1, U1, U2, U3, S),
-   the relay private inputs (V2, V3) retain log m bits of uncertainty. *)
+   the relay private inputs (V2, V3) retain log m bits of uncertainty.  [3-party] *)
 Theorem dsdp_centropy_uniform :
   (forall t, (0 < U3 t)%N) ->
   (forall t, (U3 t < minn p q)%N) ->
@@ -327,7 +333,7 @@ Let u_of_cond (c : CondT_n) : {ffun 'I_n_relay.+1 -> msg} :=
   let '(_, _, u_rel, _) := c in u_rel.
 
 (* dsdp_centropy_uniform_n — conditioning on the N-party view, the relay private
-   inputs retain log (m ^ n_relay) bits of uncertainty. *)
+   inputs retain log (m ^ n_relay) bits of uncertainty.  [N-party] *)
 Theorem dsdp_centropy_uniform_n :
   (forall t, (0 < val (u_of_cond (CondRV t) ord_max))%N) ->
   (forall t, (val (u_of_cond (CondRV t) ord_max) < minn p q)%N) ->
@@ -528,7 +534,7 @@ Let guess_reduction : raw_package :=
 (* dsdp_alice_guess_ideal_le — the SSProve-side success probability of the
    all-zero guessing experiment is at most 1/card_msg: the connector
    [guess_success_sdistr_eq_fdist] crosses to the Infotheo side, then the fiber
-   bound [guess_fdist_success_le]. *)
+   bound [guess_fdist_success_le].  [3-party] *)
 Lemma dsdp_alice_guess_ideal_le :
   injective (fun v : plain AHE => w_u3 * v) ->
   guess_sdistr_success renc_card rand_of_renc chmsg_of_msg chcipher_of_cipher
@@ -548,7 +554,8 @@ Definition guess_sdistr_success_real : R :=
 
 (* dsdp_alice_guess_advantage_le — the reduction distinguisher's advantage is at
    most [2 * epsilon_cpa]: the output-exposing endpoint games add only the common
-   id_Sout_get oracle (no encryption hop), so the Part I IND-CPA bound applies. *)
+   id_Sout_get oracle (no encryption hop), so the Part I IND-CPA bound applies.
+   [3-party] *)
 Lemma dsdp_alice_guess_advantage_le
     (cipher_of_chcipher : t_cipher -> cipher AHE)
     (chcipher_of_cipherK : cancel chcipher_of_cipher cipher_of_chcipher)
@@ -574,7 +581,7 @@ Qed.
    secret V2 from her cipher view and the leaked scalar-product output S is at
    most 1/card_msg plus twice the IND-CPA advantage: the fiber bound 1/card_msg
    at the all-zero endpoint, plus the 2 * epsilon_cpa cost of moving to the real
-   game. *)
+   game.  [3-party] *)
 Theorem dsdp_alice_guess_real_le
     (cipher_of_chcipher : t_cipher -> cipher AHE)
     (chcipher_of_cipherK : cancel chcipher_of_cipher cipher_of_chcipher)
@@ -612,7 +619,7 @@ Let Hunp_leak_S : R := (- log guess_sdistr_success_real)%R.
    [log card_msg - log (1 + 2 * card_msg * epsilon_cpa) <= Hunp_leak_S]:
    the predictor's unpredictability entropy on the output-exposing real game is
    at least the closed-form bound, approaching [log card_msg] as
-   [epsilon_cpa -> 0]. *)
+   [epsilon_cpa -> 0].  [3-party] *)
 Theorem dsdp_alice_unpredictability_ge
     (cipher_of_chcipher : t_cipher -> cipher AHE)
     (chcipher_of_cipherK : cancel chcipher_of_cipher cipher_of_chcipher)
