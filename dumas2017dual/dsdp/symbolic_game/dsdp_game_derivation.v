@@ -567,51 +567,51 @@ Proof. by []. Qed.
 (* The one-record IND-CPA secrecy facade.                              *)
 (* ------------------------------------------------------------------ *)
 
-(* dsdp_indcpa_secrecy_problem — every input that drives the DSDP corrupted-view
+(* dsdp_indcpa_experiment — every input that drives the DSDP corrupted-view
    IND-CPA secrecy derivation, from the symbolic trace to the advantage bound.
    One value determines the real game, the zero game, and the hop count.  The
    scheme/marshalling block is exactly the parameter list of [dsdp_advantage_-
    derived], with each abbreviated name expanded into [X_of_Y]/[K]-suffix form. *)
-Record dsdp_indcpa_secrecy_problem := {
+Record dsdp_indcpa_experiment := {
   (* sample-domain sizes (shared by the symbolic trace and the game) *)
-  sp_card_plaintext  : nat ;
+  exp_card_plaintext  : nat ;
     (* size of the plaintext-scalar sample space *)
-  sp_card_randomness : nat ;
+  exp_card_randomness : nat ;
     (* size of the encryption-randomness sample space *)
   (* the corrupted-view model (the security question) *)
-  sp_corrupted_party_program : proc symbolic_data ;
+  exp_corrupted_party_program : proc symbolic_data ;
     (* the corrupted party's protocol program at the symbolic interface;
        [obs_of_procs] walks it to read off what the party samples, receives,
        assembles, and leaks *)
-  sp_received_hop_ciphertexts : seq symbolic_data ;
+  exp_received_hop_ciphertexts : seq symbolic_data ;
     (* the ciphertexts the corrupted party receives that carry other parties'
        secret inputs, in reception order; each is a sender's first send and
        becomes one IND-CPA hop, and supplying exactly these fixes where the
        walk stops (the party's later decrypt-receive gets no response) *)
-  sp_challenge_secret : nat ;
+  exp_challenge_secret : nat ;
     (* the name of the secret the game challenges; written to the challenge cell *)
-  sp_leak_order : seq nat -> seq nat -> seq nat ;
+  exp_leak_order : seq nat -> seq nat -> seq nat ;
     (* given the names of the ciphertexts the corrupted party ASSEMBLED and the
        names of those it RECEIVED, returns the ordered name list the game leaks *)
   (* the concrete scheme the abstract game is denoted into *)
-  sp_enc_scheme : AHEncType ;
-  sp_rand_carrier : finType ;
-  sp_rand_carrier_card : #|sp_rand_carrier| = sp_card_randomness ;
-  sp_rand_of_carrier : sp_rand_carrier -> rand sp_enc_scheme ;
-  sp_choice_msg_type : choice_type ;
+  exp_enc_scheme : AHEncType ;
+  exp_rand_carrier : finType ;
+  exp_rand_carrier_card : #|exp_rand_carrier| = exp_card_randomness ;
+  exp_rand_of_carrier : exp_rand_carrier -> rand exp_enc_scheme ;
+  exp_choice_msg_type : choice_type ;
     (* the choice_type a plaintext is encoded as on the oracle interface *)
-  sp_choice_cipher_type : choice_type ;
+  exp_choice_cipher_type : choice_type ;
     (* the choice_type a ciphertext is encoded as; the type of each leaked slot *)
-  sp_choice_msg_of_plain : plain sp_enc_scheme -> sp_choice_msg_type ;
-  sp_plain_of_choice_msg : sp_choice_msg_type -> plain sp_enc_scheme ;
-  sp_choice_msg_of_plainK : cancel sp_choice_msg_of_plain sp_plain_of_choice_msg ;
-  sp_choice_cipher_of_cipher : cipher sp_enc_scheme -> sp_choice_cipher_type ;
-  sp_cipher_of_choice_cipher : sp_choice_cipher_type -> cipher sp_enc_scheme ;
-  sp_choice_cipher_of_cipherK :
-    cancel sp_choice_cipher_of_cipher sp_cipher_of_choice_cipher ;
-  sp_pub_key_of_party : party_id -> pub_key sp_enc_scheme ;
-  sp_msg_of_index : 'I_sp_card_plaintext -> plain sp_enc_scheme ;
-  sp_fallback_rand : rand sp_enc_scheme ;
+  exp_choice_msg_of_plain : plain exp_enc_scheme -> exp_choice_msg_type ;
+  exp_plain_of_choice_msg : exp_choice_msg_type -> plain exp_enc_scheme ;
+  exp_choice_msg_of_plainK : cancel exp_choice_msg_of_plain exp_plain_of_choice_msg ;
+  exp_choice_cipher_of_cipher : cipher exp_enc_scheme -> exp_choice_cipher_type ;
+  exp_cipher_of_choice_cipher : exp_choice_cipher_type -> cipher exp_enc_scheme ;
+  exp_choice_cipher_of_cipherK :
+    cancel exp_choice_cipher_of_cipher exp_cipher_of_choice_cipher ;
+  exp_pub_key_of_party : party_id -> pub_key exp_enc_scheme ;
+  exp_msg_of_index : 'I_exp_card_plaintext -> plain exp_enc_scheme ;
+  exp_fallback_rand : rand exp_enc_scheme ;
     (* randomness returned by an out-of-range slot lookup; dead in a well-formed
        game (every slot is filled by a prior sample), present only for totality *)
 }.
@@ -619,59 +619,59 @@ Record dsdp_indcpa_secrecy_problem := {
 (* corrupted_view — applies the generic lowering pass [obs_of_procs] to the
    symbolic fields of [P], yielding the corrupted party's whole observation
    trace; for the DSDP instance it reduces to [dsdp_alice_obs]. *)
-Definition corrupted_view (P : dsdp_indcpa_secrecy_problem) : seq alice_obs :=
-  obs_of_procs (sp_corrupted_party_program P) (sp_received_hop_ciphertexts P)
-    (sp_challenge_secret P) (sp_leak_order P)
-    (sp_card_plaintext P) (sp_card_randomness P).
+Definition corrupted_view (P : dsdp_indcpa_experiment) : seq alice_obs :=
+  obs_of_procs (exp_corrupted_party_program P) (exp_received_hop_ciphertexts P)
+    (exp_challenge_secret P) (exp_leak_order P)
+    (exp_card_plaintext P) (exp_card_randomness P).
 
 (* game_of_problem — lowers the corrupted view to the back-end [game_code]
    through the reused [game_of_trace]. *)
-Definition game_of_problem (P : dsdp_indcpa_secrecy_problem) : game_code :=
+Definition game_of_problem (P : dsdp_indcpa_experiment) : game_code :=
   game_of_trace (corrupted_view P).
 
 (* game_iface_P — the oracle interface the adversary plugs into, the back-end
    [game_iface] applied to [P]'s message/cipher choice types.  (The [_P] suffix
    avoids a clash with the imported back-end [game_iface].) *)
-Definition game_iface_P (P : dsdp_indcpa_secrecy_problem) : Interface :=
-  game_iface (sp_choice_msg_type P) (sp_choice_cipher_type P).
+Definition game_iface_P (P : dsdp_indcpa_experiment) : Interface :=
+  game_iface (exp_choice_msg_type P) (exp_choice_cipher_type P).
 
 (* protocol_state_P — the game's protocol-state locations, the back-end
    [protocol_state] at [P]'s message choice type. *)
-Definition protocol_state_P (P : dsdp_indcpa_secrecy_problem) : Locations :=
-  protocol_state (sp_choice_msg_type P).
+Definition protocol_state_P (P : dsdp_indcpa_experiment) : Locations :=
+  protocol_state (exp_choice_msg_type P).
 
 (* real_oracle_P — the real IND-CPA encryption oracle for [P]; its arg-3 is the
-   [t_msg -> plain] decoder [sp_plain_of_choice_msg]. *)
-Definition real_oracle_P (P : dsdp_indcpa_secrecy_problem) :=
-  oracle_real_pkg (sp_rand_carrier_card P) P.(sp_rand_of_carrier)
-    P.(sp_plain_of_choice_msg) P.(sp_choice_cipher_of_cipher) (sp_pub_key_of_party P).
+   [t_msg -> plain] decoder [exp_plain_of_choice_msg]. *)
+Definition real_oracle_P (P : dsdp_indcpa_experiment) :=
+  oracle_real_pkg (exp_rand_carrier_card P) P.(exp_rand_of_carrier)
+    P.(exp_plain_of_choice_msg) P.(exp_choice_cipher_of_cipher) (exp_pub_key_of_party P).
 
 (* zero_oracle_P — the all-zero oracle for [P]; asymmetric to [real_oracle_P],
-   its arg-3 is the choice_type [sp_choice_msg_type] itself, not the decoder. *)
-Definition zero_oracle_P (P : dsdp_indcpa_secrecy_problem) :=
-  oracle_zero_pkg (sp_rand_carrier_card P) P.(sp_rand_of_carrier)
-    (sp_choice_msg_type P) P.(sp_choice_cipher_of_cipher) (sp_pub_key_of_party P).
+   its arg-3 is the choice_type [exp_choice_msg_type] itself, not the decoder. *)
+Definition zero_oracle_P (P : dsdp_indcpa_experiment) :=
+  oracle_zero_pkg (exp_rand_carrier_card P) P.(exp_rand_of_carrier)
+    (exp_choice_msg_type P) P.(exp_choice_cipher_of_cipher) (exp_pub_key_of_party P).
 
 (* real_game — the denoted real game for [P]: [game_of_problem]'s all-real
    endpoint denoted into [P]'s concrete scheme. *)
-Definition real_game (P : dsdp_indcpa_secrecy_problem) : raw_package :=
-  denote_game (sp_rand_carrier_card P) P.(sp_rand_of_carrier)
-    P.(sp_choice_msg_of_plain) P.(sp_choice_cipher_of_cipher)
-    (sp_pub_key_of_party P) P.(sp_msg_of_index) (sp_fallback_rand P)
+Definition real_game (P : dsdp_indcpa_experiment) : raw_package :=
+  denote_game (exp_rand_carrier_card P) P.(exp_rand_of_carrier)
+    P.(exp_choice_msg_of_plain) P.(exp_choice_cipher_of_cipher)
+    (exp_pub_key_of_party P) P.(exp_msg_of_index) (exp_fallback_rand P)
     (all_real (game_of_problem P)).
 
 (* zero_game — the denoted all-zero endpoint for [P], the distinguishing target
    of the secrecy bound. *)
-Definition zero_game (P : dsdp_indcpa_secrecy_problem) : raw_package :=
-  denote_game (sp_rand_carrier_card P) P.(sp_rand_of_carrier)
-    P.(sp_choice_msg_of_plain) P.(sp_choice_cipher_of_cipher)
-    (sp_pub_key_of_party P) P.(sp_msg_of_index) (sp_fallback_rand P)
+Definition zero_game (P : dsdp_indcpa_experiment) : raw_package :=
+  denote_game (exp_rand_carrier_card P) P.(exp_rand_of_carrier)
+    P.(exp_choice_msg_of_plain) P.(exp_choice_cipher_of_cipher)
+    (exp_pub_key_of_party P) P.(exp_msg_of_index) (exp_fallback_rand P)
     (all_zero (game_of_problem P)).
 
 (* dsdp_indcpa_adversary P — a distinguisher against problem [P] bundled with its
    well-formedness; the secrecy theorem quantifies over this record, so it
    quantifies over all valid adversaries. *)
-Record dsdp_indcpa_adversary (P : dsdp_indcpa_secrecy_problem) := {
+Record dsdp_indcpa_adversary (P : dsdp_indcpa_experiment) := {
   adv_locations : Locations ;
   adv_package   : raw_package ;
   adv_valid : ValidPackage adv_locations (game_iface_P P) A_export adv_package ;
@@ -687,7 +687,7 @@ Record dsdp_indcpa_adversary (P : dsdp_indcpa_secrecy_problem) := {
    [count_obs_hops] to [size (hop_sites ...)] then [eapply advantage_le]), NOT the
    [gc_dsdp]-specific [advantage_gc_dsdp], which times out for an abstract [P].
    The DSDP [2 * epsilon_cpa] bound is the [dsdp_advantage_derived] corollary. *)
-Theorem dsdp_indcpa_secrecy (P : dsdp_indcpa_secrecy_problem)
+Theorem dsdp_indcpa_secrecy (P : dsdp_indcpa_experiment)
     (Adv : dsdp_indcpa_adversary P) :
   AdvantageE (real_game P) (zero_game P) (adv_package Adv)
     <= (count_obs_hops (corrupted_view P))%:R * epsilon_cpa.
@@ -699,8 +699,8 @@ have Hcnt : count_obs_hops (corrupted_view P)
 rewrite Hcnt.
 eapply advantage_le.
 3: apply: (adv_valid Adv).
-1: apply: (P.(sp_choice_cipher_of_cipherK)).
-1: apply: (P.(sp_choice_msg_of_plainK)).
+1: apply: (P.(exp_choice_cipher_of_cipherK)).
+1: apply: (P.(exp_choice_msg_of_plainK)).
 1: apply: (adv_disjoint_from_protocol_state Adv).
 1: apply: (adv_disjoint_from_real_oracle Adv).
 1: apply: (adv_disjoint_from_zero_oracle Adv).

@@ -510,7 +510,7 @@ to the final bound.
 
 \begin{definition}[The secrecy-problem record]
   \label{def:secrecy_problem}
-  \rocq{infotheo.dumas2017dual.dsdp.symbolic_game.dsdp_game_derivation.dsdp_indcpa_secrecy_problem}
+  \rocq{infotheo.dumas2017dual.dsdp.symbolic_game.dsdp_game_derivation.dsdp_indcpa_experiment}
   \rocqok
   \uses{def:obs_of_procs}
   One record bundling the symbolic corrupted-view model, the corrupted program,
@@ -589,8 +589,8 @@ to the final bound.
 \end{proof}
 
 \begin{definition}[The DSDP problem instance]
-  \label{def:dsdp_problem}
-  \rocq{infotheo.dumas2017dual.dsdp.indcpa_hopping.dsdp_indcpa_advantage.dsdp_problem}
+  \label{def:dsdp_experiment}
+  \rocq{infotheo.dumas2017dual.dsdp.dsdp_main.dsdp_experiment}
   \rocqok
   \uses{def:secrecy_problem,def:palice_sym,def:received_hops,def:sender_programs}
   The record at the DSDP corrupted-Alice model: the corrupted program, the
@@ -601,15 +601,15 @@ to the final bound.
 \end{definition}
 
 \begin{lemma}[Two hops]
-  \label{lem:dsdp_problem_hops}
-  \rocq{infotheo.dumas2017dual.dsdp.indcpa_hopping.dsdp_indcpa_advantage.dsdp_problem_hops}
+  \label{lem:dsdp_experiment_hops}
+  \rocq{infotheo.dumas2017dual.dsdp.dsdp_main.dsdp_experiment_hops}
   \rocqok
   The DSDP corrupted view has exactly two encryption hops, one for Bob's secret
   and one for Charlie's.
   \[ \nhops(\view(P_{\mathrm{DSDP}})) = 2 \]
 \end{lemma}
 \begin{proof}
-  \uses{def:dsdp_problem,def:count_hops,def:corrupted_view}
+  \uses{def:dsdp_experiment,def:count_hops,def:corrupted_view}
   \rocqok
   By computation.
 \end{proof}
@@ -624,7 +624,7 @@ to the final bound.
         2\,\epscpa \]
 \end{theorem}
 \begin{proof}
-  \uses{thm:generic_secrecy,def:dsdp_problem,lem:dsdp_problem_hops}
+  \uses{thm:generic_secrecy,def:dsdp_experiment,lem:dsdp_experiment_hops}
   \rocqok
   Specialise the generic theorem to the DSDP problem and rewrite the hop count to
   two.
@@ -638,7 +638,7 @@ to the final bound.
   the loose arguments into the record.
 \end{corollary}
 \begin{proof}
-  \uses{thm:generic_secrecy,def:dsdp_problem}
+  \uses{thm:generic_secrecy,def:dsdp_experiment}
   \rocqok
   Package the loose arguments into the record and adversary, then apply the
   generic theorem.

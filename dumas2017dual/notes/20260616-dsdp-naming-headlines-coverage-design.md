@@ -18,7 +18,7 @@ naming and centralization debt:
    fact the information-theoretic party-privacy analysis; it also sits oddly
    under the `counting/` bucket.
 4. Headline theorems are scattered across `counting/` and `indcpa_hopping/`.
-   There is no single apex file presenting the central results with the other
+   There is no single main-results file presenting the central results with the other
    files as support.
 5. Nothing mechanically guarantees the blueprint documents every declaration; a
    rename can silently leave a dangling `\rocq{}` ref or an uncovered lemma.
@@ -26,7 +26,7 @@ naming and centralization debt:
 ## Decisions
 
 - **Relocation, not re-export.** Headline proof bodies physically move into a
-  new apex file `dumas2017dual/dsdp/dsdp_main.v`; supporting files keep the
+  new main-results file `dumas2017dual/dsdp/dsdp_main.v`; supporting files keep the
   machinery. (Refactor-then-move: helpers a moved body calls are exported from
   the supporting file first.)
 - **Coverage checker is strict 1:1 + exclude-list**, run as a fast standalone
@@ -52,9 +52,9 @@ the repo root are MCP scratch — ignore.)
 | `indcpa_hopping/` | `dsdp_security_indcpa_fiber.v` → `dsdp_guess_fiber.v` | guessing experiment + Infotheo `1/m` fiber + exported branch helpers |
 | `counting/` | `dsdp_security.v` → `dsdp_view_independence.v` | `Bob/CharlieView` independence lemmas, `dotp2`, `relay_security_n`, `malicious_n` |
 
-## B. Apex `dumas2017dual/dsdp/dsdp_main.v` (Issue 4) — Phases M, X
+## B. Main results `dumas2017dual/dsdp/dsdp_main.v` (Issue 4) — Phases M, X
 
-New apex at the dsdp root (above the buckets); requires every axis file. Logical
+New main-results file at the dsdp root (above the buckets); requires every axis file. Logical
 name `infotheo.dumas2017dual.dsdp.dsdp_main`.
 
 ### Headline set and name mapping
@@ -97,7 +97,7 @@ statement and its **full original proof body** — into a matching section in
 `dsdp_main.v`. Do **not** move supporting lemmas/definitions, and do **not**
 leave a thin `Proof. exact: <lemma>. Qed.` wrapper. Specifically:
 
-1. **Clone the section context.** In the apex, open a section that re-declares
+1. **Clone the section context.** In the main-results file, open a section that re-declares
    the same `Variable`s and `Hypothesis`es, plus the context `Let`
    abbreviations the statement/proof refers to (`V1`, `V2`, `BobView`,
    `AliceView`, `US`, `ConstUS`, `guess_sdistr_success_real`, `CondRV`/`VarRV`,
@@ -109,8 +109,8 @@ leave a thin `Proof. exact: <lemma>. Qed.` wrapper. Specifically:
    ~13–19 args on the deepest fiber/entropy calls).
 3. **Leave every non-headline declaration in place** — best effort, no
    supporting lemma moves. Orphan-but-stays (a support lemma whose only
-   remaining consumer is the apex) is acceptable; it is not promoted to the
-   apex. The `bob_privacy_V1_alt`/`_V3_alt`, `charlie_privacy_*_alt`,
+   remaining consumer is the main-results file) is acceptable; it is not promoted to the
+   main-results file. The `bob_privacy_V1_alt`/`_V3_alt`, `charlie_privacy_*_alt`,
    `dsdp_problem`/`dsdp_problem_hops`, `dsdp_g`/`S_determined`, the whole fiber
    guessing scaffold, the outer `dsdp_security`/`dotp2` apparatus, the
    `dsdp_entropy_n` and `malicious_n` sections — all remain in their files.
@@ -121,7 +121,7 @@ Effort by headline (drives Phase-X commit granularity):
   two-line body over `dsdp_indcpa_secrecy` + `dsdp_problem_hops` (both stay).
 - **LOW/MED** — `bob_privacy_V1/V3`, `charlie_privacy_V1/V2`: short bodies that
   call their staying `_alt` helpers + a uniformity hypothesis; clone the bob /
-  charlie `Let` context. Charlie additionally needs the apex to `Require`
+  charlie `Let` context. Charlie additionally needs the main-results file to `Require`
   `dsdp_view_independence` (its `CharlieView_indep_V*_proven` stay there).
 - **HIGH (arg-threaded full bodies)** — `US_compromised_leaks_V2`,
   `dsdp_centropy_uniform`, `dsdp_centropy_uniform_n`, the four fiber
@@ -195,19 +195,19 @@ but **not merged back**.
    on the branch, leave unmerged.
 
 Rejected alternatives: relocate-first (forces two rounds of ref updates);
-big-bang (un-bisectable); moving orphan machinery into the apex (balloons it into
+big-bang (un-bisectable); moving orphan machinery into the main-results file (balloons it into
 the whole derivation and guts the support files).
 
 ## Risks
 
 - **Argument-threading churn (the dominant risk)**: the HIGH headlines copy full
   bodies that call staying machinery with ~13–19 explicit args per call. The
-  supporting lemmas are not moved, so the apex bodies cross the file boundary on
+  supporting lemmas are not moved, so the main-results file bodies cross the file boundary on
   every call. Compiler-driven and mechanical but brittle; delegate to the
   rocq-prover agent and verify each headline before the next. The full body is
   copied, never reduced to a `Proof. exact: <lemma>. Qed.` wrapper.
 - **Context cloning fidelity**: the cloned `Variable`/`Hypothesis`/context-`Let`
-  block in the apex must match the support section exactly (same names/types) or
+  block in the main-results file must match the support section exactly (same names/types) or
   the staying lemmas will not unify when called. `US_compromised_leaks_V2` is the
   worst case — it needs the nested `dsdp_security` outer context plus the
   statement-level `dotp2`/`US`/`ConstUS`/`AliceView` `Let`s cloned, while

@@ -183,7 +183,7 @@ Proof. by []. Qed.
 (* dsdp_v2_name — symbolic name of Bob's secret input v2: the first ciphertext
    corrupted Alice receives (her first hop), and the secret the corrupted-Alice
    IND-CPA game challenges. Referenced by both pbob_sym and the downstream
-   sp_challenge_secret field, so the challenge provably equals Bob's secret. *)
+   exp_challenge_secret field, so the challenge provably equals Bob's secret. *)
 Definition dsdp_v2_name : nat := 10.
 (* dsdp_v3_name — symbolic name of Charlie's secret input v3 (Alice's second
    hop). A different problem instance could challenge this instead of v2. *)
