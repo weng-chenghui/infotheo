@@ -1,4 +1,4 @@
-(* DSDP headline results — the apex.
+(* DSDP main results — the headline theorems.
 
    This file centralizes the headline theorems of the DSDP development. Each
    theorem's full proof is presented here over a cloned copy of its source
@@ -77,20 +77,39 @@ Variables (AHE : AHEncType) (Renc : finType) (card_renc : nat)
   (pkey_of_party : party_id -> pub_key AHE)
   (card_msg : nat) (msg_of_idx : 'I_card_msg -> plain AHE) (rand0 : rand AHE).
 
-Let problem := @dsdp_problem AHE Renc card_renc renc_card rand_of_renc t_msg t_cipher
-  msg_of_chmsg chmsg_of_msg chcipher_of_cipher cipher_of_chcipher chmsg_of_msgK
-  chcipher_of_cipherK pkey_of_party card_msg msg_of_idx rand0.
+(* dsdp_experiment — THE one control record: the DSDP corrupted-Alice model
+   (palice_sym, the derived hop stream, challenge = Bob's secret name) plus the
+   chosen scheme + marshalling. Everything downstream is a projection of this. *)
+Definition dsdp_experiment : dsdp_indcpa_experiment :=
+  {| exp_card_plaintext  := card_msg ; exp_card_randomness := card_renc ;
+     exp_corrupted_party_program := palice_sym ;
+     exp_received_hop_ciphertexts := dsdp_received_hop_ciphertexts ;
+     exp_challenge_secret := dsdp_v2_name ;
+     exp_leak_order := fun combines recvs => combines ++ recvs ;
+     exp_enc_scheme := AHE ; exp_rand_carrier := Renc ;
+     exp_rand_carrier_card := renc_card ; exp_rand_of_carrier := rand_of_renc ;
+     exp_choice_msg_type := t_msg ; exp_choice_cipher_type := t_cipher ;
+     exp_choice_msg_of_plain := chmsg_of_msg ; exp_plain_of_choice_msg := msg_of_chmsg ;
+     exp_choice_msg_of_plainK := chmsg_of_msgK ;
+     exp_choice_cipher_of_cipher := chcipher_of_cipher ;
+     exp_cipher_of_choice_cipher := cipher_of_chcipher ;
+     exp_choice_cipher_of_cipherK := chcipher_of_cipherK ;
+     exp_pub_key_of_party := pkey_of_party ; exp_msg_of_index := msg_of_idx ;
+     exp_fallback_rand := rand0 |}.
 
-(* dsdp_alice_view_advantage_le — for the concrete dsdp_problem instance, every
+(* the corrupted-Alice trace of dsdp_experiment has exactly two encryption hops. *)
+Example dsdp_experiment_hops : count_obs_hops (corrupted_view dsdp_experiment) = 2.
+Proof. by []. Qed.
+
+(* dsdp_alice_view_advantage_le — for the concrete dsdp_experiment instance, every
    adversary's advantage distinguishing the real corrupted-Alice cipher view
    from the all-zero view is at most 2 * epsilon_cpa. *)
-Theorem dsdp_alice_view_advantage_le (Adv : dsdp_indcpa_adversary problem) :
-  AdvantageE (real_game problem) (zero_game problem) (adv_package Adv)
+Theorem dsdp_alice_view_advantage_le (Adv : dsdp_indcpa_adversary dsdp_experiment) :
+  AdvantageE (real_game dsdp_experiment) (zero_game dsdp_experiment) (adv_package Adv)
     <= 2%:R * epsilon_cpa.
 Proof.
 have H := dsdp_indcpa_secrecy Adv.
-rewrite /problem in H *.
-by rewrite dsdp_problem_hops in H.
+by rewrite dsdp_experiment_hops in H.
 Qed.
 
 End dsdp_alice_indcpa.
@@ -548,7 +567,7 @@ Qed.
 
 End dsdp_var_centropy_n.
 
-Section dsdp_view_independence_apex.
+Section dsdp_view_independence_main.
 (* cloned context of Section dsdp_view_independence *)
 Local Set Default Goal Selector "1".
 Local Open Scope reals_ext_scope.
@@ -682,7 +701,7 @@ rewrite card_msg invr_eq1 pnatr_eq1.
 by apply: contraTneq m_gt1 => ->.
 Qed.
 
-End dsdp_view_independence_apex.
+End dsdp_view_independence_main.
 
 Section dsdp_malicious_n.
 (* cloned context of Section malicious_n *)
