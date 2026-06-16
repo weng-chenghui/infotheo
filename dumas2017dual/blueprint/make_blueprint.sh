@@ -25,6 +25,8 @@ MODULES=(
   dumas2017dual/entropy_fiber/entropy_fiber_zpq.v
   dumas2017dual/dsdp/indcpa_hopping/dsdp_guess_fiber.v
   dumas2017dual/lib/extra_proba.v
+  # The apex: every headline theorem, relocated with its full proof.
+  dumas2017dual/dsdp/dsdp_main.v
 )
 
 echo "[1/3] blueprint HTML + dependency graph (plastex)"
