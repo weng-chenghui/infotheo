@@ -548,6 +548,142 @@ Qed.
 
 End dsdp_var_centropy_n.
 
+Section dsdp_view_independence_apex.
+(* cloned context of Section dsdp_view_independence *)
+Local Set Default Goal Selector "1".
+Local Open Scope reals_ext_scope.
+Local Open Scope proba_scope.
+Local Open Scope fdist_scope.
+Local Open Scope entropy_scope.
+Context {R : realType}.
+Variable T : finType.
+Variable P : R.-fdist T.
+
+(* Z/pqZ parameters *)
+Variables (p_minus_2 q_minus_2 : nat).
+Local Notation p := p_minus_2.+2.
+Local Notation q := q_minus_2.+2.
+Hypothesis prime_p : prime p.
+Hypothesis prime_q : prime q.
+Hypothesis coprime_pq : coprime p q.
+Local Notation m := (p * q).
+Local Notation msg := 'Z_m.
+
+Let m_gt1 : (1 < m)%N.
+Proof.
+have Hp2: (1 < p)%N by [].
+have Hq2: (1 < q)%N by [].
+by rewrite (ltn_trans Hp2) // -{1}(muln1 p) ltn_pmul2l // ltnS.
+Qed.
+
+Let card_msg : #|msg| = m.
+Proof. by rewrite card_ord Zp_cast. Qed.
+
+Let alice : party_id := Alice.
+Let bob : party_id := Bob.
+Let charlie : party_id := Charlie.
+
+Variable inputs : dsdp_random_inputs P p_minus_2 q_minus_2.
+
+Let Dk_a := dsdp_entropy.Dk_a inputs.
+Let Dk_b := dsdp_entropy.Dk_b inputs.
+Let Dk_c := dsdp_entropy.Dk_c inputs.
+Let V1 := dsdp_entropy.V1 inputs.
+Let V2 := dsdp_entropy.V2 inputs.
+Let V3 := dsdp_entropy.V3 inputs.
+Let U1 := dsdp_entropy.U1 inputs.
+Let U2 := dsdp_entropy.U2 inputs.
+Let U3 := dsdp_entropy.U3 inputs.
+Let R2 := dsdp_entropy.R2 inputs.
+Let R3 := dsdp_entropy.R3 inputs.
+
+Let VU2 : {RV P -> msg} := V2 \* U2.
+Let VU3 : {RV P -> msg} := V3 \* U3.
+Let D2  : {RV P -> msg} := VU2 \+ R2.
+Let VU3R : {RV P -> msg} := VU3 \+ R3.
+Let D3 : {RV P -> msg} := VU3R \+ D2.
+Let S : {RV P -> msg} := D3 \- R2 \- R3 \+ U1 \* V1.
+
+Let E_alice_d3 := E' alice `o D3.
+Let E_charlie_v3 := E' charlie `o V3.
+Let E_bob_v2 := E' bob `o V2.
+
+Hypothesis E_enc_inde : forall (A B : finType) (p : party_id)
+  (X : {RV P -> p.-enc A}) (Y : {RV P -> B}),
+  P |= X _|_ Y.
+
+Let alice_inputsT :=
+  (Alice.-key Dec msg * msg * msg * msg * msg * msg * msg)%type.
+Let AliceInputsView := [% Dk_a, V1, U1, U2, U3, R2, R3].
+Let alice_view_valuesT :=
+  (Alice.-key Dec msg * msg * msg * msg * msg * msg * msg * msg *
+   Alice.-enc msg * Charlie.-enc msg * Bob.-enc msg)%type.
+Let AliceView : {RV P -> alice_view_valuesT} :=
+  [% Dk_a, S, V1, U1, U2, U3, R2, R3, E_alice_d3, E_charlie_v3, E_bob_v2].
+
+(* US_compromised_leaks_V2 — a malicious Alice fixing US = (1, 0) reads Bob's
+   private input V2 off her view, collapsing its conditional entropy. *)
+Theorem US_compromised_leaks_V2 :
+  US inputs = ConstUS P p_minus_2 q_minus_2 ->
+  ~ `H(V2 | AliceView ) = `H `p_V2.
+Proof.
+move => H.
+have Hinde_bob : P |= [% [% Dk_a, S, V1, U1, U2, U3, R2, R3, E_alice_d3,
+                      E_charlie_v3], V2] _|_ E_bob_v2.
+  by apply/inde_RV_sym; apply: E_enc_inde.
+have Hinde_charlie : P |= [% [% Dk_a, S, V1, U1, U2, U3, R2, R3, E_alice_d3], V2]
+                       _|_ E_charlie_v3.
+  by apply/inde_RV_sym; apply: E_enc_inde.
+have Hinde_alice : P |= [% [% Dk_a, S, V1, U1, U2, U3, R2, R3], V2] _|_ E_alice_d3.
+  by apply/inde_RV_sym; apply: E_enc_inde.
+rewrite (E_enc_ce_contract Hinde_bob card_msg).
+rewrite (E_enc_ce_contract Hinde_charlie card_msg).
+rewrite (E_enc_ce_contract Hinde_alice card_msg).
+pose h := (fun o : (Alice.-key Dec msg * msg *
+  msg * msg * msg * msg * msg * msg) =>
+  let '(dk_a, s, v1, u1, u2, u3, r2, r3) := o in
+   (dk_a, v1, u1, u2, u3, r2, r3, s)).
+pose h' := (fun o : (Alice.-key Dec msg * msg *
+  msg * msg * msg * msg * msg * msg) =>
+  let '(dk_a, v1, u1, u2, u3, r2, r3, s) := o in
+  (dk_a, s, v1, u1, u2, u3, r2, r3)).
+rewrite -(centropy_RV_contraction _ _ h).
+have ->: `H( V2 | [% Dk_a, S, V1, U1, U2, U3, R2, R3, h `o
+  [% Dk_a, S, V1, U1, U2, U3, R2, R3]]) =
+  `H( V2 | [% Dk_a, S, V1, U1, U2, U3, R2, R3,
+  [% Dk_a, V1, U1, U2, U3, R2, R3, S]]).
+  by [].
+rewrite centropyC (centropy_RV_contraction _ _ h') -/AliceInputsView.
+move => H2.
+have: `I(V2;[% AliceInputsView, S]) = 0.
+  by rewrite mutual_info_RVE H2 subrr.
+move/mutual_info_RV0_indep.
+(* S_E's imported LHS is the fully-unfolded S; bridge the folded Let S to its
+   dot-product form by an explicit equation discharged definitionally. *)
+rewrite (_ : S = Dotp2_rv (VS inputs) (US inputs) \+ VU1 inputs);
+  last exact: S_E inputs.
+rewrite /add_RV //= (ConstUS_discloses_V2 H).
+pose z := (fun o : (alice_inputsT * msg) =>
+  let '(_, v1, u1, _, _, _, _, v2_r) := o in v2_r - v1 * u1).
+move/(inde_RV_comp idfun z).
+have -> : z `o [% AliceInputsView, V2 \+ VU1 inputs] = V2.
+  rewrite /z /VU1 /comp_RV /add_RV.
+  apply: boolp.funext => i //=.
+  (* The imported VU1 unfolds to dsdp_entropy.V1/U1 inputs; unfold the cloned
+     Lets V1/U1 (exposed only after /= reduces the destructure) so both factors
+     are the same ring atom. *)
+  rewrite /V1 /U1.
+  by ring.
+have -> : idfun `o V2 = V2.
+  by apply: boolp.funext => i.
+apply: neg_self_inde => v2.
+rewrite -dist_of_RVE (dsdp_entropy.pV2_unif inputs) fdist_uniformE.
+rewrite card_msg invr_eq1 pnatr_eq1.
+by apply: contraTneq m_gt1 => ->.
+Qed.
+
+End dsdp_view_independence_apex.
+
 Section dsdp_malicious_n.
 (* cloned context of Section malicious_n *)
 Local Set Default Goal Selector "1".
