@@ -401,6 +401,73 @@ Qed.
 
 End dsdp_malicious_n.
 
+Section dsdp_malicious_3party.
+(* 3-party instance of US_n_compromised_leaks_secret at n_relay = 1 *)
+Local Set Default Goal Selector "1".
+Local Open Scope reals_ext_scope.
+Local Open Scope proba_scope.
+Local Open Scope fdist_scope.
+Local Open Scope entropy_scope.
+Context {R : realType}.
+Variable T : finType.
+Variable P : R.-fdist T.
+Variables (p_minus_2 q_minus_2 : nat).
+Local Notation p := p_minus_2.+2.
+Local Notation q := q_minus_2.+2.
+Local Notation m := (p * q).
+Local Notation msg := 'Z_m.
+
+Variables (V1 V2 V3 U1 U2 U3 R2 R3 : {RV P -> msg}).
+Variable Dk_a : {RV P -> Alice.-key Dec msg}.
+
+Let D2 : {RV P -> msg} := V2 \* U2 \+ R2.
+Let D3 : {RV P -> msg} := V3 \* U3 \+ R3 \+ D2.
+Let S  : {RV P -> msg} := D3 \- R2 \- R3 \+ U1 \* V1.
+
+Let E_alice_d3   : {RV P -> Alice.-enc msg}   := E' Alice `o D3.
+Let E_charlie_v3 : {RV P -> Charlie.-enc msg} := E' Charlie `o V3.
+Let E_bob_v2     : {RV P -> Bob.-enc msg}     := E' Bob `o V2.
+
+(* Alice's full real view: her key, the output S, her own inputs and masks, and
+   the three ciphertext hops. V2 appears only inside S and the Bob hop. *)
+Let AliceView :=
+  [% Dk_a, S, V1, U1, U2, U3, R2, R3, E_alice_d3, E_charlie_v3, E_bob_v2].
+
+(* US_compromised_leaks_V2 — a malicious Alice fixing her query to e_1
+   (U2 = 1, U3 = 0) reads Bob's private input V2 off her view, ciphertext hops
+   included; its conditional entropy collapses to zero. 3-party instance. *)
+Theorem US_compromised_leaks_V2 :
+  U2 = (fun _ => 1) -> U3 = (fun _ => 0) ->
+  `H( V2 | AliceView ) = 0.
+Proof.
+move=> HU2 HU3.
+pose VS : {RV P -> {ffun 'I_1.+1 -> msg}} :=
+  fun t => [ffun i => if i == ord0 then V2 t else V3 t].
+pose US : {RV P -> {ffun 'I_1.+1 -> msg}} :=
+  fun t => [ffun i => if i == ord0 then U2 t else U3 t].
+pose g := fun o : (Alice.-key Dec msg * msg * msg * msg * msg * msg * msg * msg
+                    * Alice.-enc msg * Charlie.-enc msg * Bob.-enc msg) =>
+  let '(_, s, _, u1, _, _, _, _, _, _, _) := o in
+  let '(_, _, v1, _, _, _, _, _, _, _, _) := o in
+  s - v1 * u1.
+have HVS0 : (fun t => VS t ord0) = V2.
+  by apply: boolp.funext => t; rewrite /VS ffunE eqxx.
+have HUS_e1 : US = fun _ => @ConstUS_n p_minus_2 q_minus_2 1.
+  rewrite /US /ConstUS_n; apply: boolp.funext => t; apply/ffunP => i.
+  by rewrite !ffunE HU2 HU3 /=; case: (i == ord0).
+have Hout : @Dotp_n_rv R T P p_minus_2 q_minus_2 1 US VS = g `o AliceView.
+  rewrite (_ : @Dotp_n_rv R T P p_minus_2 q_minus_2 1 US VS = (fun t => V2 t)).
+    rewrite /g /AliceView /comp_RV /S /D3 /D2.
+    by apply: boolp.funext => t /=; rewrite HU2 HU3 /=; ring.
+  rewrite HUS_e1 /Dotp_n_rv.
+  by apply: boolp.funext => t /=; rewrite dotp_n_e1 /VS ffunE eqxx.
+have := US_n_compromised_leaks_secret (View := AliceView) (g := g)
+          (US := US) (VS := VS) HUS_e1 Hout.
+by rewrite HVS0.
+Qed.
+
+End dsdp_malicious_3party.
+
 (* ================================================================= *)
 (* Corrupted-Alice secrecy: the guessing triangle (indcpa_hopping axis) *)
 (* ================================================================= *)
