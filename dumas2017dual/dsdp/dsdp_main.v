@@ -365,6 +365,7 @@ Local Set Default Goal Selector "1".
 Local Open Scope reals_ext_scope.
 Local Open Scope proba_scope.
 Local Open Scope fdist_scope.
+Local Open Scope entropy_scope.
 Context {R : realType}.
 Variable T : finType.
 Variable P : R.-fdist T.
@@ -378,17 +379,24 @@ Local Notation msg := 'Z_m.
 
 Variable n_relay : nat.
 
-(* US_n_compromised_leaks_V1 — a corrupted Alice fixing US = e_1 (first basis
-   vector) extracts relay party 1's input V_1 from the dot-product output. *)
-Lemma US_n_compromised_leaks_V1
-    (US VS : {RV P -> {ffun 'I_n_relay.+1 -> msg}}) :
-  US = (fun _ => @ConstUS_n p_minus_2 q_minus_2 n_relay) ->
-  @Dotp_n_rv R T P p_minus_2 q_minus_2 n_relay US VS = (fun t => VS t ord0).
+(* US_n_compromised_leaks_secret — a corrupted Alice fixing her query to e_1
+   makes relay party 1's input VS_0 a function of her view: the protocol output
+   is in the view and equals VS_0, so its conditional entropy collapses to zero.
+   N-party generic; the 3-party result is the n_relay = 1 instance. *)
+Theorem US_n_compromised_leaks_secret {A : finType}
+    (View : {RV P -> A}) (g : A -> msg)
+    (US VS : {RV P -> {ffun 'I_n_relay.+1 -> msg}})
+    (US_e1 : US = fun _ => @ConstUS_n p_minus_2 q_minus_2 n_relay)
+    (output_in_view :
+       @Dotp_n_rv R T P p_minus_2 q_minus_2 n_relay US VS = g `o View) :
+  `H( (fun t => VS t ord0) | View ) = 0.
 Proof.
-move->.
-rewrite /Dotp_n_rv.
-apply: boolp.funext => t /=.
-by rewrite dotp_n_e1.
+have disc : @Dotp_n_rv R T P p_minus_2 q_minus_2 n_relay US VS
+            = (fun t => VS t ord0).
+  rewrite US_e1 /Dotp_n_rv; apply: boolp.funext => t /=.
+  exact: dotp_n_e1.
+have key : (fun t => VS t ord0) = g `o View by rewrite -disc.
+rewrite key; exact: centropy_RV_comp0.
 Qed.
 
 End dsdp_malicious_n.
