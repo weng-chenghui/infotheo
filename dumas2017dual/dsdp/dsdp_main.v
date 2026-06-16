@@ -820,4 +820,35 @@ eapply dsdp_advantage_derived_leak_S.
 - exact: Hoze.
 Qed.
 
+(* dsdp_alice_guess_real_le — Alice's probability of guessing the challenge
+   secret V2 from her cipher view and the leaked scalar-product output S is at
+   most 1/card_msg plus twice the IND-CPA advantage: the fiber bound 1/card_msg
+   at the all-zero endpoint, plus the 2 * epsilon_cpa cost of moving to the real
+   game. *)
+Theorem dsdp_alice_guess_real_le
+    (cipher_of_chcipher : t_cipher -> cipher AHE)
+    (chcipher_of_cipherK : cancel chcipher_of_cipher cipher_of_chcipher)
+    (Hore : fseparate (locs predictor)
+       (locs (oracle_real_pkg renc_card rand_of_renc msg_of_chmsg
+                chcipher_of_cipher pkey_of_party)))
+    (Hoze : fseparate (locs predictor)
+       (locs (oracle_zero_pkg renc_card rand_of_renc t_msg
+                chcipher_of_cipher pkey_of_party)))
+    (Hinj : injective (fun v : plain AHE => w_u3 * v)) :
+  guess_sdistr_success_real <= card_msg%:R^-1 + 2%:R * epsilon_cpa.
+Proof.
+have Hzero : guess_sdistr_success renc_card rand_of_renc chmsg_of_msg
+    chcipher_of_cipher pkey_of_party msg_of_idx rand0 seed predictor
+    <= card_msg%:R^-1
+  by exact: (dsdp_alice_guess_ideal_le Hinj).
+apply: (@le_trans _ _ (guess_sdistr_success renc_card rand_of_renc chmsg_of_msg
+    chcipher_of_cipher pkey_of_party msg_of_idx rand0 seed predictor
+    + 2%:R * epsilon_cpa)).
+- rewrite addrC -lerBlDr.
+  apply: (le_trans (ler_norm _)).
+  rewrite guess_advantage_eq.
+  exact: (dsdp_alice_guess_advantage_le chcipher_of_cipherK Hore Hoze).
+- by rewrite lerD2r.
+Qed.
+
 End dsdp_alice_guess.
