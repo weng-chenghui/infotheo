@@ -140,5 +140,6 @@ dumas2017dual/dsdp/symbolic_game/dsdp_game_gen_literal.v
 dumas2017dual/dsdp/convert/dsdp_convert.v
 dumas2017dual/dsdp/indcpa_hopping/dsdp_indcpa_advantage.v
 dumas2017dual/dsdp/indcpa_hopping/dsdp_guess_fiber.v
+dumas2017dual/dsdp/dsdp_main.v
 
 -R . infotheo
