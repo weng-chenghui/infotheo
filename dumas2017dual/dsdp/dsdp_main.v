@@ -101,9 +101,12 @@ Definition dsdp_experiment : dsdp_indcpa_experiment :=
 Example dsdp_experiment_hops : count_obs_hops (corrupted_view dsdp_experiment) = 2.
 Proof. by []. Qed.
 
-(* dsdp_alice_view_advantage_le — for the concrete dsdp_experiment instance, every
-   adversary's advantage distinguishing the real corrupted-Alice cipher view
-   from the all-zero view is at most 2 * epsilon_cpa. *)
+(* dsdp_alice_view_advantage_le — every adversary's advantage between DSDP's real
+   corrupted-Alice game and its all-zero endpoint is at most 2 * epsilon_cpa: the
+   generic bound [dsdp_indcpa_secrecy] (any experiment's real-vs-all-zero advantage
+   is at most its hop count times epsilon_cpa) at hop count two. [dsdp_experiment]
+   is the DSDP instance of such a two-hop experiment, its corrupted-Alice trace
+   having exactly two encryption hops ([dsdp_experiment_hops]). *)
 Theorem dsdp_alice_view_advantage_le (Adv : dsdp_indcpa_adversary dsdp_experiment) :
   AdvantageE (real_game dsdp_experiment) (zero_game dsdp_experiment) (adv_package Adv)
     <= 2%:R * epsilon_cpa.
