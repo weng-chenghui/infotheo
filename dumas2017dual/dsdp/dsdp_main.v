@@ -35,6 +35,7 @@ From extructures Require Import ord fset fmap.
 Require Import realType_ext realType_ln ssr_ext ssralg_ext bigop_ext fdist.
 Require Import proba jfdist_cond entropy graphoid smc_interpreter spp_proba bayes.
 Require Import spp_entropy extra_proba extra_algebra extra_entropy rouche_capelli.
+Require Import entropy_fiber.
 Require Import homomorphic_encryption indcpa_ror.
 Require Import dsdp_program dsdp_entropy dsdp_pismc.
 Require Import smc.ssprove_ext_lossless.
@@ -371,6 +372,181 @@ split.
 Qed.
 
 End dsdp_relay_privacy.
+
+Section dsdp_var_centropy.
+(* cloned context of Section dsdp_entropy *)
+Local Set Default Goal Selector "1".
+Local Open Scope reals_ext_scope.
+Local Open Scope proba_scope.
+Local Open Scope fdist_scope.
+Local Open Scope entropy_scope.
+Context {R : realType}.
+Variables (p_minus_2 q_minus_2 : nat).
+Local Notation p := p_minus_2.+2.
+Local Notation q := q_minus_2.+2.
+Hypothesis prime_p : prime p.
+Hypothesis prime_q : prime q.
+Hypothesis coprime_pq : coprime p q.
+Local Notation m := (p * q).
+Local Notation msg := 'Z_m.
+
+Variable T : finType.
+Variable P : R.-fdist T.
+Variables (V1 V2 V3 U1 U2 U3 S : {RV P -> msg}).
+Let CondRV : {RV P -> (msg * msg * msg * msg * msg)} :=
+  [% V1, U1, U2, U3, S].
+Let VarRV : {RV P -> (msg * msg)} := [%V2, V3].
+
+Let card_msg : #|msg| = m.
+Proof. by rewrite card_ord Zp_cast. Qed.
+
+(* Match the proof term baked into the staying lemmas' fdist_uniform argument so
+   the cloned VarRV_uniform hypothesis unifies on application. *)
+Let card_msg_pair : #|((msg * msg)%type : finType)| = (m ^ 2)%N :=
+  dsdp_entropy.card_msg_pair_subproof p_minus_2 q_minus_2.
+
+Hypothesis constraint_holds :
+  forall t, dsdp_constraint (CondRV t) (VarRV t).
+
+Hypothesis VarRV_uniform : `p_ VarRV = fdist_uniform card_msg_pair.
+Hypothesis VarRV_indep_inputs : P |= [%V1, U1, U2, U3] _|_ VarRV.
+
+Let InputRV : {RV P -> (msg * msg * msg * msg)} := [%V1, U1, U2, U3].
+
+(* dsdp_centropy_uniform — conditioning on Alice's view (V1, U1, U2, U3, S),
+   the relay private inputs (V2, V3) retain log m bits of uncertainty. *)
+Theorem dsdp_centropy_uniform :
+  (forall t, (0 < U3 t)%N) ->
+  (forall t, (U3 t < minn p q)%N) ->
+  `H(VarRV | CondRV) = log (m%:R : R).
+Proof.
+move=> HU3_pos HU3_lt.
+have Hm_pos : (0 < m)%N by rewrite muln_gt0 prime_gt0 // prime_gt0.
+apply: (@centropy_jcond_determined_fibers R T P
+          (msg * msg)%type (msg * msg * msg * msg)%type msg
+          VarRV InputRV S (@dsdp_g p_minus_2 q_minus_2)
+          (S_determined constraint_holds) _ m _ Hm_pos).
+- move=> [[[v1 u1] u2] u3] s [v2 v3] /= Hcond_pos Hin.
+  move/pfwd1_neq0: (Hcond_pos) => [t [Ht _]].
+  move: Ht; rewrite inE => /eqP Ht.
+  have HU3t : U3 t = u3 by case: Ht => _ _ _ ->.
+  have Hu3_pos : (0 < u3)%N by rewrite -HU3t; apply: HU3_pos.
+  have Hu3_lt : (u3 < minn p q)%N by rewrite -HU3t; apply: HU3_lt.
+  rewrite -dsdp_fiber_eq_abstract in Hin *.
+  rewrite (dsdp_fiber_card prime_p prime_q coprime_pq u1 u2 (u3 := u3) v1 s
+             Hu3_pos Hu3_lt).
+  exact: (Pr_dsdp_sol_uniform prime_p prime_q coprime_pq constraint_holds
+            VarRV_uniform VarRV_indep_inputs Hu3_pos Hu3_lt Hcond_pos Hin).
+- move=> [[[v1 u1] u2] u3] s Hcond_pos.
+  rewrite -dsdp_fiber_eq_abstract.
+  move/pfwd1_neq0: (Hcond_pos) => [t [Ht _]].
+  move: Ht; rewrite inE => /eqP Ht.
+  have HU3t : U3 t = u3 by case: Ht => _ _ _ ->.
+  apply: (dsdp_fiber_card prime_p prime_q coprime_pq).
+  + by rewrite -HU3t; apply: HU3_pos.
+  + by rewrite -HU3t; apply: HU3_lt.
+Qed.
+
+End dsdp_var_centropy.
+
+Section dsdp_var_centropy_n.
+(* cloned context of Section dsdp_entropy_n *)
+Local Set Default Goal Selector "1".
+Local Open Scope reals_ext_scope.
+Local Open Scope proba_scope.
+Local Open Scope fdist_scope.
+Local Open Scope entropy_scope.
+Context {R : realType}.
+Variables (p_minus_2 q_minus_2 : nat).
+Local Notation p := p_minus_2.+2.
+Local Notation q := q_minus_2.+2.
+Hypothesis prime_p : prime p.
+Hypothesis prime_q : prime q.
+Hypothesis coprime_pq : coprime p q.
+Local Notation m := (p * q).
+Local Notation msg := 'Z_m.
+
+Variable n_relay : nat.
+
+Variable T : finType.
+Variable P : R.-fdist T.
+
+Let m_gt0 : (0 < m)%N.
+Proof. by rewrite muln_gt0 prime_gt0 // prime_gt0. Qed.
+
+(* Match the proof term baked into dsdp_centropy1_uniform_n's fdist_uniform
+   argument so the cloned VarRV_uniform_n hypothesis unifies on application. *)
+Let card_ffun_msg : #|{ffun 'I_n_relay.+1 -> msg}| = (m ^ n_relay.+1).-1.+1 :=
+  dsdp_entropy.card_ffun_msg_subproof (p_minus_2 := p_minus_2) q_minus_2
+    prime_p n_relay.
+
+Let CondT_n := (msg * msg * {ffun 'I_n_relay.+1 -> msg} * msg)%type.
+Let InputT_n := (msg * msg * {ffun 'I_n_relay.+1 -> msg})%type.
+
+Variable VarRV : {RV P -> {ffun 'I_n_relay.+1 -> msg}}.
+Variable CondRV : {RV P -> CondT_n}.
+Variable InputRV : {RV P -> InputT_n}.
+
+Let dsdp_fiber_fn_n (cond : CondT_n) : {set {ffun 'I_n_relay.+1 -> msg}} :=
+  let '(v0, u0, u_rel, s) := cond in
+  dsdp_fiber_n u_rel (s - u0 * v0).
+
+Let dsdp_proj_input_n (cond : CondT_n) : InputT_n :=
+  let '(v0, u0, u_rel, _) := cond in (v0, u0, u_rel).
+
+Hypothesis constraint_fiber_n :
+  forall t, VarRV t \in dsdp_fiber_fn_n (CondRV t).
+
+Hypothesis InputRV_proj_n :
+  forall t, InputRV t = dsdp_proj_input_n (CondRV t).
+
+Hypothesis VarRV_uniform_n :
+  `p_ VarRV = fdist_uniform card_ffun_msg.
+
+Hypothesis VarRV_indep_inputs_n :
+  P |= InputRV _|_ VarRV.
+
+Hypothesis joint_eq_input_n :
+  forall (cond : CondT_n) (var : {ffun 'I_n_relay.+1 -> msg}),
+    var \in dsdp_fiber_fn_n cond ->
+    `Pr[[%VarRV, CondRV] = (var, cond)] =
+    `Pr[[%VarRV, InputRV] = (var, dsdp_proj_input_n cond)].
+
+Let u_of_cond (c : CondT_n) : {ffun 'I_n_relay.+1 -> msg} :=
+  let '(_, _, u_rel, _) := c in u_rel.
+
+(* dsdp_centropy_uniform_n — conditioning on the N-party view, the relay private
+   inputs retain log (m ^ n_relay) bits of uncertainty. *)
+Theorem dsdp_centropy_uniform_n :
+  (forall t, (0 < val (u_of_cond (CondRV t) ord_max))%N) ->
+  (forall t, (val (u_of_cond (CondRV t) ord_max) < minn p q)%N) ->
+  `H(VarRV | CondRV) = log ((m ^ n_relay)%:R : R).
+Proof.
+move=> HU_pos HU_lt.
+rewrite centropy_RVE' /=.
+transitivity (\sum_(a : CondT_n)
+               `Pr[ CondRV = a ] * log ((m ^ n_relay)%:R : R)).
+  apply: eq_bigr => [] [[[v0 u0] u_rel] s] _.
+  have [->|Hcond_pos] := eqVneq (`Pr[CondRV = (v0, u0, u_rel, s)]) 0.
+    by rewrite !mul0r.
+  have Hu_pos: (0 < val (u_rel ord_max))%N.
+    move/pfwd1_neq0: Hcond_pos => [t [Ht _]].
+    move: Ht; rewrite inE => /eqP Ht.
+    have := HU_pos t; rewrite Ht /=.
+    by [].
+  have Hu_lt: (val (u_rel ord_max) < minn p q)%N.
+    move/pfwd1_neq0: Hcond_pos => [t [Ht _]].
+    move: Ht; rewrite inE => /eqP Ht.
+    have := HU_lt t; rewrite Ht /=.
+    by [].
+  by rewrite (dsdp_centropy1_uniform_n prime_q constraint_fiber_n
+                InputRV_proj_n VarRV_uniform_n VarRV_indep_inputs_n
+                joint_eq_input_n Hu_pos Hu_lt Hcond_pos).
+under eq_bigr do rewrite mulrC.
+by rewrite -big_distrr /= sum_pfwd1 mulr1.
+Qed.
+
+End dsdp_var_centropy_n.
 
 Section dsdp_malicious_n.
 (* cloned context of Section malicious_n *)
