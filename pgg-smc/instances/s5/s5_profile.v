@@ -50,7 +50,7 @@ Definition s5_plug : ReconPlug (@Gen_PGGTypes 3 3 (path_gen_tuple 3)) 'I_5 :=
     anonymity bound decays geometrically to 0, k = 5. Used-by: contrast demos. *)
 Definition s5_profile (R : realType) : MonodromyProfile R :=
   @MkMonodromyProfile R (@Gen_PGGTypes 3 3 (path_gen_tuple 3)) 'I_5 s5_PI
-    (s5_security_witness_schreier R 285) s5_plug.
+    (s5_security_witness_schreier R 286) s5_plug.
 
 (** run_k_s5 — the S_5 plug's privacy threshold is 5.
     Kind: example. What: run_k (s5_profile R) = 5. Why: contrast character

@@ -15,7 +15,7 @@ matrix S := B^T (alpha^2 I - Q^2) B, where
   - Q is the 5x5 Schreier transition matrix for the path-graph P_5
     (diagonal [3/4, 1/2, 1/2, 1/2, 3/4], adjacent off-diagonal 1/4),
   - alpha = 181/200 (a rational upper bound on the second-largest
-    eigenvalue of Q, targeting 40-bit mixing at L=285),
+    eigenvalue of Q, targeting 40-bit mixing at L=286),
   - B : 'M[rat]_(5,4) is the "differences" basis for the mean-zero
     hyperplane in Q^5, whose columns are (1,-1,0,0,0), (0,1,-1,0,0),
     (0,0,1,-1,0), (0,0,0,1,-1).

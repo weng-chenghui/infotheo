@@ -10,7 +10,7 @@
 (* a single (G, I) choice with concrete vm_compute-checkable results:         *)
 (*   1. Complexity: search_space L <= |G|                                     *)
 (*   2. Security (fiber): var_dist <= 6/5 at L=1 (fiber-counted, proved)     *)
-(*   3. Security (spectral): L=285, eps = sqrt(5)*(1-gap)^285               *)
+(*   3. Security (spectral): L=286, eps = sqrt(5)*(1-gap)^286               *)
 (*      40-bit security from axiomatized spectral gap                        *)
 (*   4. Threshold: genus-4 Bring's-curve cover (no-go: |S_5|=120 > Klein 60)   *)
 (*                                                                            *)
@@ -20,8 +20,8 @@
 (*   where L(P_5) is the graph Laplacian of the 5-vertex path.               *)
 (*   Smallest nonzero Laplacian eigenvalue: 2*(1-cos(pi/5)).                  *)
 (*   Spectral gap = (1 - cos(pi/5)) / 2 ~ 0.0955.                           *)
-(*     L = 285 gives var_dist < 2^{-40}  (40-bit security)                   *)
-(*     L = 893 gives var_dist < 2^{-128} (128-bit security)                  *)
+(*     L = 286 gives var_dist < 2^{-40}  (40-bit security)                   *)
+(*     L = 897 gives var_dist < 2^{-128} (128-bit security)                  *)
 (*                                                                            *)
 (*   Brouwer-Haemers (2012), Spectra of Graphs, Springer.                    *)
 (*   Chung (1997), Spectral Graph Theory, AMS.                               *)
@@ -209,10 +209,10 @@ Definition s5_security_witness_schreier (L : nat) :
 End s5_spectral.
 
 (******************************************************************************)
-(*     Spectral AlgebraicRigidity at L=285 (40-bit security)                  *)
+(*     Spectral AlgebraicRigidity at L=286 (40-bit security)                  *)
 (*                                                                            *)
-(* sqrt(5) * (1 - gap)^285 < 2^{-40} when gap ~ 0.0955.                     *)
-(* For 128-bit security, use L=893 instead.                                   *)
+(* sqrt(5) * (1 - gap)^286 < 2^{-40} when gap ~ 0.0955.                     *)
+(* For 128-bit security, use L=897 instead.                                   *)
 (******************************************************************************)
 
 (******************************************************************************)
@@ -383,7 +383,7 @@ Definition s5_threshold_witness_concrete : ThresholdWitness s5_M :=
 
 Definition s5_rigidity_cryptographically_secure : AlgebraicRigidity R s5_M :=
   @MkAlgebraicRigidity R s5_M
-    (@s5_security_witness_schreier R 285)
+    (@s5_security_witness_schreier R 286)
     s5_threshold_witness_concrete.
 
 End s5_rigidity_cryptographically_secure.
