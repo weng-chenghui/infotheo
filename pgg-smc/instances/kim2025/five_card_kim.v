@@ -645,7 +645,7 @@ Qed.
 
 (** Variation distance of a single biased cut from uniform equals 1/50.
     @main security: the paper-faithful single-shuffle leak at bias 1/100. *)
-Lemma kim_one_cut_centi (s : 'I_5) :
+Lemma kim_one_cut_centiE (s : 'I_5) :
   var_dist (fdistmap (fun sigma : {perm 'I_5} => sigma s)
               (@rho_from_words_weighted R 3 4 1 fc_kim_sigmas
                  (kim_weight_dist kim_centi_lt kim_centi_gt)))
