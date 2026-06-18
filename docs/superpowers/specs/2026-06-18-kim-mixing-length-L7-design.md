@@ -41,7 +41,7 @@ the only fully machine-checked mixing bound among the four instances.
 | # | Decision | Choice |
 |---|---|---|
 | 1 | Closeness convention | `var_dist < 2^-40` (strict, un-halved L1) |
-| 2 | S5 285->286 fix extent | comment-only: fix S5 source comments + slide; leave S5 Rocq wiring at 285 |
+| 2 | S5 285->286 fix extent | align all to L=286 (the value correct under decision 1): bump the 2 Rocq wirings, the 4 comments, the Python doc comment, and the slide |
 | 3 | Deliverable tier | (b) numeric lemma + concrete `SecurityWitness`, exposing `sw_bound_eps < 2^-40` |
 | 4 | Bias | `eps_repo = 1/100` (P(no-cut) = `0.19`), `lambda2 = 1/80`, `L = 7` |
 | 5 | Single-cut leak | include the paper-faithful `var_dist = 1/50` at `(eps=1/100, L=1)` |
@@ -131,12 +131,18 @@ the `sw_bound` field bounds the real `var_dist`.
 
 ## 7. Companion edits (outside Rocq)
 
-- S5 comments: correct `rigidity_s5_instance.v:23,214` and the
-  `s5_spectral_certificate.py` doc line from "L=285 gives var_dist < 2^-40" to
-  "L=285 gives var_dist < 2^-39; L=286 gives var_dist < 2^-40". The descriptive
-  comment at `:13` (which records the wired witness at 285) stays. The Rocq
-  wiring `s5_security_witness_schreier R 285` (`s5_profile.v:53`,
-  `rigidity_s5_instance.v:386`) is left unchanged per decision 2.
+- S5: align everything to L=286, the value correct under decision 1 (at L=285
+  the bound is `var_dist ~9.87e-13 > 2^-40`; at L=286 it is `~8.93e-13 < 2^-40`).
+  - Bump the 2 Rocq wirings `s5_security_witness_schreier R 285 -> 286`
+    (`s5_profile.v:53`, `rigidity_s5_instance.v:386`). The witness is parametric
+    in L, so only `sw_bound_eps` changes (`sqrt5*alpha^286`); no types change and
+    no proof breaks. Recompiles `s5_profile.vo`, `rigidity_s5_instance.vo`, and
+    their dependents.
+  - Update the 4 comments `285 -> 286` (`rigidity_s5_instance.v:13,23,212,214`);
+    the `var_dist < 2^-40` claim then holds.
+  - Update the doc comment in `s5_spectral_certificate.py` `285 -> 286`. The SOS
+    certificate itself is L-independent (it certifies `alpha=181/200`), so only
+    the "targeting 40-bit mixing at L=285" line changes.
 - Slide `wadtSep17/slides.tex`, page 16 list:
   - Kim line: relabel bias to "bias eps = 1/100 (P(no-cut) = 0.19)" (the paper's
     own eps is this deviation, so 1/100 is kept and the no-cut probability is
@@ -146,10 +152,8 @@ the `sw_bound` field bounds the real `var_dist`.
     in-kernel; S5 and S5xS5 bounds are verified externally (Python SOS
     certificate plus an imported axiom).
 
-Open point for user confirmation: the slide S5 line will read `L=286` while the
-S5 Rocq instance remains wired at `L=285` (which achieves `var_dist < 2^-39`).
-This gap is documented in the corrected comment; flagged here so it is a
-conscious choice.
+S5 code and comments are now aligned to L=286, so the slide, comments, and wired
+instance all state the same correct value.
 
 ## 8. Adversarial audit plan (run after this spec, before user review)
 
@@ -177,6 +181,7 @@ Three independent targets:
 - `kim_lambda2_at_centi`, `kim_bound_centi`, `kim_deal_centi_lt`,
   `kim_one_cut_centi` all `Qed`.
 - Audit targets A, B, C pass with no unresolved error-severity finding.
+- `s5_profile.vo` and `rigidity_s5_instance.vo` recompile cleanly at L=286.
 - Slide rebuilds; Kim line, S5 line, and footnote are mutually consistent.
 
 ## 10. Risks (status after audit)
