@@ -46,7 +46,7 @@ the only fully machine-checked mixing bound among the four instances.
 | 4 | Bias | `eps_repo = 1/100` (P(no-cut) = `0.19`), `lambda2 = 1/80`, `L = 7` |
 | 5 | Single-cut leak | include the paper-faithful `var_dist = 1/50` at `(eps=1/100, L=1)` |
 | 6 | File location | extend `instances/kim2025/five_card_kim.v` Section 6 (already fixes the concrete-bias regime) |
-| 7 | Proof technique | square both sides: `sqrt5 * (1/80)^7 < 2^-40` reduces to `5*2^80 < 80^14` |
+| 7 | Proof technique | square both sides: `sqrt5 * (1/80)^7 < 2^-40` reduces to `5*2^80 < 80^14`, nat leaf by `lia`/`zify` (not `vm_compute`) |
 | 8 | Slide epistemic footnote | mark den Boer and Kim as in-kernel; S5 and S5xS5 as externally verified (Python SOS certificate plus axiom, which is solid) |
 | 9 | Adversarial audit | run after this spec; three targets (math, Rocq typecheck, honesty/non-vacuity) |
 
@@ -69,7 +69,9 @@ sqrt 5 * (1/80)^7 < 2^-40
   <->  5 * 2^80 < 80^14
 ```
 
-with `5*2^80 = 9.90e24 < 80^14 = 4.40e26` (exact nat inequality, `vm_compute`).
+with `5*2^80 = 6.04e24 < 80^14 = 4.40e26` (exact: `5*2^80 =
+6,044,629,098,073,145,873,530,880`). The `nat` leaf is NOT `vm_compute`-tractable
+(mathcomp `nat` is unary, times out > 130s); it is closed by `lia` with `zify`.
 
 Cross-check used during design: under the same strict convention, the smallest
 `L` for S5 (`alpha = 181/200`) is `286`, not `285`; at `L=285` the bound is
@@ -80,20 +82,32 @@ Cross-check used during design: under the same strict convention, the smallest
 All in `five_card_kim.v` Section 6 unless noted. Names provisional, subject to
 the I001 naming rule.
 
-1. `kim_lambda2_at_centi : kim_lambda2 (eps := 1/100) = 1/80`.
-   Reduces the real definition; parallels existing `kim_lambda2_at_zero`.
+Prerequisite import (near the import block, lines 14-24):
+`Require Import Lia.` and `From mathcomp Require Import zify.` (no scope conflict,
+no added axioms; needed for the nat leaf in artifact 2).
+
+1. `kim_lambda2_at_centi : kim_lambda2 (1/100) = 1/80`.
+   Propositional, not definitional (`5/4*(1/100)` is not defeq `1/80`); proved by
+   `rewrite /kim_lambda2 ger0_norm` then cross-multiply. Parallels `kim_lambda2_at_zero`.
 2. `kim_bound_centi : Num.sqrt 5%:R * (kim_lambda2 (1/100)) ^+ 7 < 2%:R ^- 40`.
-   Leaf `5*2^80 < 80^14` via square-both-sides; the only purely-numeric step.
+   Square both sides via `ltr_pXn2r` + `sqr_sqrtr` (`(sqrt 5)^2 = 5`), collapse
+   exponents (`exprMn`, `exprVn`), cross-multiply (`ltr_pdivlMr`/`ltr_pdivrMr`),
+   bridge to nat (`natrX`, `natrM`, `ltr_nat`); leaf `(5*2^80 < 80^14)%N` by `lia`.
+   The only purely-numeric step.
 3. `kim_security_witness_centi : SecurityWitness R FiveCardKim_M`
-   `:= fc_kim_security_witness <Hlt Hgt Hspec at 1/100> 7`.
-   Concrete witness over the real biased deal.
-4. `kim_deal_centi_lt : forall s, var_dist (fdistmap (eval s) (real deal at 1/100, L=7))
-   (fdist_uniform (card_ord 5)) < 2^-40`.
-   Top-level deliverable; composes the witness `sw_bound` field with
-   `kim_bound_centi`.
-5. `kim_one_cut_centi : forall s, var_dist (fdistmap (eval s) (real deal at 1/100, L=1))
+   `:= @fc_kim_security_witness R (1/100) Hlt Hgt Hspec 7`.
+   No section instantiation: after `Section kim_security` closes, `eps` and the
+   three hypotheses are explicit arguments. Concrete witness over the real deal.
+4. `kim_deal_centi_lt : forall s, var_dist (fdistmap (fun sigma => sigma s)
+   (sw_rho_dist kim_security_witness_centi)) (fdist_uniform (card_ord 5)) < 2^-40`,
+   where `sw_rho_dist = rho_from_words_weighted 3 4 7 fc_kim_sigmas
+   (kim_weight_dist Hlt Hgt)` is the real biased deal. Top-level deliverable;
+   composes the witness `sw_bound` field with `kim_bound_centi` via `le_lt_trans`.
+5. `kim_one_cut_centi : forall s, var_dist (fdistmap (fun sigma => sigma s)
+   (rho_from_words_weighted 3 4 1 fc_kim_sigmas (kim_weight_dist Hlt Hgt)))
    (fdist_uniform (card_ord 5)) = 1/50`.
-   Paper-faithful single biased cut; from `kim_var_dist_exact` at `L=1`.
+   Paper-faithful single biased cut; from `kim_var_dist_exact` at `L=1`
+   (`(8/5)*(1/80) = 1/50`).
 
 ## 6. Non-vacuity requirements (load-bearing guards)
 
@@ -124,8 +138,9 @@ the `sw_bound` field bounds the real `var_dist`.
   wiring `s5_security_witness_schreier R 285` (`s5_profile.v:53`,
   `rigidity_s5_instance.v:386`) is left unchanged per decision 2.
 - Slide `wadtSep17/slides.tex`, page 16 list:
-  - Kim line: relabel bias to "P(no-cut) = 0.19 (deviation 1/100)"; keep `L=7`,
-    `var_dist < 2^-40`.
+  - Kim line: relabel bias to "bias eps = 1/100 (P(no-cut) = 0.19)" (the paper's
+    own eps is this deviation, so 1/100 is kept and the no-cut probability is
+    added for clarity); keep `L=7`, `var_dist < 2^-40`.
   - S5 line: `L=285 -> L=286` (the threshold achieving `var_dist < 2^-40`).
   - Add a one-line footnote: den Boer and Kim bounds are machine-checked
     in-kernel; S5 and S5xS5 bounds are verified externally (Python SOS
@@ -151,7 +166,8 @@ Three independent targets:
   that no step needs `Admitted`; that `80^14` is `vm_compute`-tractable.
 - C. Honesty and non-vacuity. Confirm G1-G3; confirm the deliverable is the
   `var_dist` statement; confirm faithfulness to arXiv:2511.05111 (symbolic bias,
-  repeated shuffles, the `eps_repo = 1/5 - eps_paper` notation mapping); confirm
+  repeated shuffles, the notation mapping `eps_repo = eps_paper = 1/100` with
+  `P(no-cut) = 1/5 - eps = 0.19`, per the paper Assumption 2 eqs 7-8); confirm
   the "in-kernel vs externally verified" slide labeling is accurate.
 
 ## 9. Success criteria
@@ -163,12 +179,30 @@ Three independent targets:
 - Audit targets A, B, C pass with no unresolved error-severity finding.
 - Slide rebuilds; Kim line, S5 line, and footnote are mutually consistent.
 
-## 10. Risks
+## 10. Risks (status after audit)
 
-- Section plumbing: how `eps` and `L` are bound in Section `kim_concrete` may
-  require instantiating the section or using the explicit-argument lemma forms
-  (`fc_kim_security_bound` takes `eps` as an argument). Audit B resolves.
-- nat/R bridge for the squared inequality (`natrX`, `ler_pXn2l`/`ltr_pXn2`,
-  `sqr_sqrtr`) is standard but fiddly; budget proof iterations accordingly.
-- `80^14 ~ 4.4e26` bignum `vm_compute` cost; expected fine, confirm by a check.
-```
+- Section plumbing: RESOLVED. No section instantiation; after `Section
+  kim_security` closes, `eps` and the three hypotheses are explicit arguments
+  (`@fc_kim_security_witness R (1/100) Hlt Hgt Hspec 7`).
+- nat leaf: RESOLVED. `(5*2^80 < 80^14)%N` is NOT `vm_compute`-tractable (mathcomp
+  `nat` is unary, times out > 130s). Closed by `lia` after `Require Import Lia.`
+  and `From mathcomp Require Import zify.` (no scope conflict, no added axioms).
+- nat/R bridge lemmas: known good (`ltr_pXn2r`, `sqr_sqrtr`, `exprMn`, `exprVn`,
+  `ltr_pdivlMr`, `ltr_pdivrMr`, `natrX`, `natrM`, `ltr_nat`). The Rocq auditor
+  assembled the full chain end-to-end (310ms), no `Admitted`, no new axiom.
+
+## 11. Audit outcome
+
+Both adversarial auditors completed; corrections folded into this spec.
+
+- Math + honesty (independent re-derivation + paper fetch): the load-bearing math
+  is all correct (`lambda2=1/80`; `L=7` minimal, `L=6` fails; square-both-sides;
+  `5*2^80 < 80^14`; S5 285-vs-286; non-vacuity G1-G3; deliverable load-bearing;
+  `kim_one_cut = 1/50`). Caught and fixed: the `6.04e24` gloss (was `9.90e24`) and
+  the bias mapping (`eps_repo = eps_paper = 1/100`, P(no-cut) = 0.19).
+- Rocq typecheck (rocq-mcp, read-only): FEASIBLE-WITH-CHANGES. Built and closed
+  every lemma end-to-end. Required change: `vm_compute` -> `lia`/`zify` for the
+  nat leaf (folded into decision 7 and sections 5, 10). Confirmed the witness
+  signature, hypothesis-discharge tactics, and statement shapes (folded into
+  section 5). Estimate: ~30-40 proof lines + 2 import lines, Low-Medium, no
+  `Admitted`, no new axiom.
