@@ -71,6 +71,8 @@
 (******************************************************************************)
 
 From HB Require Import structures.
+Require Import Lia.
+From mathcomp Require Import zify.
 From mathcomp Require Import ssreflect ssrbool ssrfun eqtype ssrnat seq.
 From mathcomp Require Import div fintype tuple finfun finset fingroup perm.
 From mathcomp Require Import morphism action bigop order ssrnum ssralg.
@@ -573,6 +575,89 @@ Lemma fc_kim_security_bound (eps : R)
            (fdist_uniform (card_ord 5))
   <= Num.sqrt 5%:R * (kim_lambda2 eps) ^+ L.
 Proof. exact: kim_spectral_convergence. Qed.
+
+(** At bias eps = 1/100 the second eigenvalue modulus equals 1/80.
+    @composes: kim_bound_centi *)
+Lemma kim_lambda2_at_centi : kim_lambda2 (1 / 100 : R) = 1 / 80.
+Proof.
+rewrite /kim_lambda2 ger0_norm; last by rewrite divr_ge0.
+rewrite mulf_div mulr1; apply/eqP; rewrite eqr_div ?pnatr_eq0 //;
+  last by rewrite -natrM pnatr_eq0.
+by rewrite mul1r -!natrM.
+Qed.
+
+(** The bias 1/100 lies below the no-cut threshold 1/5.
+    @composes: kim_deal_centi_lt *)
+Lemma kim_centi_lt : (1 / 100 : R) < 5%:R^-1.
+Proof. by rewrite div1r ltf_pV2 ?posrE ?ltr0n // ltr_nat. Qed.
+
+(** The bias 1/100 lies above the lower positivity bound -(4/5).
+    @composes: kim_deal_centi_lt *)
+Lemma kim_centi_gt : - (4%:R * 5%:R^-1) < (1 / 100 : R).
+Proof.
+apply: (Order.POrderTheory.lt_le_trans (y := 0)).
+- by rewrite oppr_lt0 divr_gt0 ?ltr0n.
+- by rewrite divr_ge0.
+Qed.
+
+(** The bias 1/100 has magnitude below the spectral-gap bound 4/5.
+    @composes: kim_deal_centi_lt *)
+Lemma kim_centi_spec : `|1 / 100 : R| < 4%:R / 5%:R.
+Proof.
+rewrite ger0_norm; last by rewrite divr_ge0.
+by rewrite ltr_pdivrMr ?ltr0n // mulrAC ltr_pdivlMr ?ltr0n // mul1r -natrM ltr_nat.
+Qed.
+
+(** At bias 1/100 and word length 7 the spectral bound is below 2^-40.
+    @composes: kim_deal_centi_lt *)
+Lemma kim_bound_centi :
+  Num.sqrt 5%:R * (kim_lambda2 (1 / 100 : R)) ^+ 7 < 2%:R ^- 40.
+Proof.
+rewrite kim_lambda2_at_centi -(@ltr_pXn2r R 2 isT).
+2: by rewrite nnegrE mulr_ge0 ?sqrtr_ge0 // exprn_ge0 // divr_ge0.
+2: by rewrite nnegrE invr_ge0 exprn_ge0 // ler0n.
+rewrite exprMn sqr_sqrtr ?ler0n // -exprM div1r exprVn.
+rewrite -[2 ^- 40]exprVn -exprM exprVn.
+rewrite ltr_pdivrMr; last by rewrite exprn_gt0 // ltr0n.
+rewrite mulrC -[2 ^- (40 * 2)]div1r mulrA mulr1 ltr_pdivlMr;
+  last by rewrite exprn_gt0 // ltr0n.
+rewrite -!natrX -natrM ltr_nat.
+by lia.
+Qed.
+
+(** SecurityWitness for Kim at bias 1/100 and word length 7.
+    @intent: the concrete witness bounding the 7-cut deal by sqrt 5 * (1/80)^7. *)
+Definition kim_security_witness_centi : SecurityWitness R FiveCardKim_M :=
+  @fc_kim_security_witness R (1 / 100) kim_centi_lt kim_centi_gt kim_centi_spec 7.
+
+(** Variation distance of the 7-cut biased deal from uniform is below 2^-40.
+    @main security: closes the numeric mixing-length step in-kernel for Kim. *)
+Lemma kim_deal_centi_lt (s : 'I_5) :
+  var_dist (fdistmap (fun sigma : {perm 'I_5} => sigma s)
+              (sw_rho_dist kim_security_witness_centi))
+           (fdist_uniform (card_ord 5))
+  < 2%:R ^- 40.
+Proof.
+apply: (Order.POrderTheory.le_lt_trans (sw_bound kim_security_witness_centi s)).
+rewrite /kim_security_witness_centi /fc_kim_security_witness /sw_bound_eps.
+exact: kim_bound_centi.
+Qed.
+
+(** Variation distance of a single biased cut from uniform equals 1/50.
+    @main security: the paper-faithful single-shuffle leak at bias 1/100. *)
+Lemma kim_one_cut_centi (s : 'I_5) :
+  var_dist (fdistmap (fun sigma : {perm 'I_5} => sigma s)
+              (@rho_from_words_weighted R 3 4 1 fc_kim_sigmas
+                 (kim_weight_dist kim_centi_lt kim_centi_gt)))
+           (fdist_uniform (card_ord 5))
+  = 1 / 50.
+Proof.
+have HE := @kim_var_dist_exact R (1 / 100) kim_centi_lt kim_centi_gt 1 s.
+rewrite /endpoint_dist_weighted in HE.
+rewrite HE kim_lambda2_at_centi expr1 mulf_div.
+apply/eqP; rewrite eqr_div ?pnatr_eq0 //; last by rewrite -natrM pnatr_eq0.
+by rewrite -[1]/(1%:R) -!natrM.
+Qed.
 
 End kim_concrete.
 
