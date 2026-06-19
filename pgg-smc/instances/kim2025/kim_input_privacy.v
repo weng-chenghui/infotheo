@@ -174,6 +174,47 @@ have -> : #|(fun i : bool * bool => ~~ (i.1 && i.2) (+) false)| = 3.
 by rewrite mulrnAl mul1r.
 Qed.
 
+(** chi2_div — the Pearson chi-square divergence sum_a (P a - Q a)^2 / Q a.
+    @intent: the second-order surrogate that upper-bounds the KL divergence. *)
+Definition chi2_div (T : finType) (P Q : R.-fdist T) : R :=
+  \sum_(a in T) (P a - Q a) ^+ 2 / Q a.
+
+(** le_div_chi2 — KL is bounded by chi-square times log e (a one-step
+    consequence of log x <= (x - 1) log e).
+    @composes: kim_input_private *)
+Fact le_div_chi2 (T : finType) (P Q : R.-fdist T) :
+  (forall a, 0 < Q a) ->
+  divergence.div P Q <= chi2_div P Q * log (sequences.expR 1).
+Proof.
+move=> Qpos; rewrite /divergence.div /chi2_div.
+have Hbound : divergence.div P Q <=
+    (\sum_(a in T) (P a ^+ 2 / Q a - P a)) * log (sequences.expR 1).
+  rewrite big_distrl /= /divergence.div.
+  apply: ler_sum => a _.
+  have QaN0 : Q a != 0 by apply: lt0r_neq0; exact: Qpos.
+  have [Pa0|PaN0] := eqVneq (P a) 0.
+    by rewrite Pa0 expr0n /= mul0r !mul0r subr0 mul0r.
+  have HPQ : 0 < P a / Q a by rewrite divr_gt0 // lt0r PaN0 FDist.ge0.
+  have Hlog := log_id_cmp HPQ.
+  rewrite -mulrA -[X in _ - X]mulr1 -mulrBr -mulrA.
+  by apply: ler_wpM2l; [exact: FDist.ge0 | exact: Hlog].
+have HR : \sum_(a in T) (P a ^+ 2 / Q a - P a) =
+    (\sum_(a in T) P a ^+ 2 / Q a) - 1 by rewrite sumrB FDist.f1.
+have Hterm : forall a : T, (P a - Q a) ^+ 2 / Q a =
+    P a ^+ 2 / Q a - P a *+ 2 + Q a.
+  move=> a.
+  have QaN0 : Q a != 0 by apply: lt0r_neq0; exact: Qpos.
+  apply: (mulIf QaN0).
+  rewrite divfK // sqrrB mulrDl mulrBl divfK //.
+  by rewrite mulrnAl -expr2.
+have HL : \sum_(a in T) (P a - Q a) ^+ 2 / Q a =
+    (\sum_(a in T) P a ^+ 2 / Q a) - 1.
+  under eq_bigr => a _ do rewrite Hterm.
+  rewrite big_split /= sumrB FDist.f1 sumrMnl FDist.f1 mulr2n.
+  by rewrite opprD addrA addrNK.
+by rewrite HL -HR; exact: Hbound.
+Qed.
+
 (** kim_input_private — under Kim's biased cut, a partial view carries at most
     kim_leak_bound eps conditional mutual information about the inputs given the
     output a && b.
