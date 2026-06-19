@@ -26,6 +26,7 @@
 (******************************************************************************)
 From mathcomp Require Import ssreflect ssrbool ssrfun eqtype ssrnat seq.
 From mathcomp Require Import fintype tuple finfun finset bigop ssralg ssrnum reals.
+From mathcomp Require Import lra.
 From infotheo Require Import realType_ext realType_ln fdist proba entropy.
 From pgg_smc Require Import five_card_leakage den_boer_encoding five_card_kim.
 
@@ -71,11 +72,10 @@ Definition kim_secret : {RV kim_input_dist -> bool} := Secret R.
 Definition kim_view (A : seq nat) : {RV kim_input_dist -> (size A).-tuple bool} :=
   ViewA R A.
 
-(** kim_leak_bound — the [O(eps^2)] leakage ceiling, constant refined in the
-    assembly step.
+(** kim_leak_bound — the [O(eps^2)] leakage ceiling.
     @intent: Kim's input-privacy bound as a function of the bias. *)
 Definition kim_leak_bound (e : R) : R :=
-  3%:R / 4%:R * e ^+ 2 / (5%:R^-1 - `|e|).
+  12%:R * log (sequences.expR 1) * e ^+ 2 / (5%:R^-1 - `|e|).
 
 Let PQR (A : seq nat) := `p_ [% kim_inputs, kim_view A, kim_secret].
 
@@ -214,6 +214,150 @@ have HL : \sum_(a in T) (P a - Q a) ^+ 2 / Q a =
   by rewrite opprD addrA addrNK.
 by rewrite HL -HR; exact: Hbound.
 Qed.
+
+Local Notation W := (kim_weight_dist eps_lt_inv5 eps_gt_neg4inv5).
+
+(** kim_mass — the Kim joint law factors as a uniform input times the biased cut.
+    @composes: kim_input_private *)
+Fact kim_mass (w : Omega) : kim_input_dist w = 4%:R^-1 * W w.2.
+Proof. by case: w => [ab k]; rewrite /kim_input_dist fdist_prodE /= fdist_uniformE card_bool2. Qed.
+
+(** kim_w_dev — each Kim weight deviates from uniform by at most the bias.
+    @composes: kim_input_private *)
+Fact kim_w_dev (k : 'I_5) : `|W k - 5%:R^-1| <= `|eps|.
+Proof.
+rewrite /W kim_weight_distE; case: ifP => _.
+  by rewrite addrAC subrr add0r normrN.
+have -> : 5%:R^-1 + eps / 4%:R - 5%:R^-1 = eps / 4%:R by lra.
+rewrite normrM (@ger0_norm _ (4%:R^-1)) ?invr_ge0 //.
+by rewrite ler_pdivrMr ?ltr0n // ler_peMr ?normr_ge0 // ler1n.
+Qed.
+
+(** kim_w_ge — each Kim weight is at least the uniform value minus the bias.
+    @composes: kim_input_private *)
+Fact kim_w_ge (k : 'I_5) : 5%:R^-1 - `|eps| <= W k.
+Proof.
+have := kim_w_dev k; rewrite ler_norml => /andP[H1 _]; lra.
+Qed.
+
+(** kim_w_tv — the Kim weight vector deviates from uniform by total variation
+    at most twice the bias.
+    @composes: kim_input_private *)
+Fact kim_w_tv : \sum_(k in 'I_5) `|W k - 5%:R^-1| <= 2%:R * `|eps|.
+Proof.
+rewrite /W /kim_weight_dist /=.
+rewrite big_ord_recl big_ord_recr /= !ffunE /=.
+under eq_bigr => i _ do rewrite ffunE /=.
+have inner_eq : `|5%:R^-1 + eps / 4%:R - 5%:R^-1| = `|eps / 4%:R|
+  by congr (`| _ |); lra.
+have step : \sum_(i < 3) `|(5%:R^-1 + eps / 4%:R) - 5%:R^-1| = `|eps / 4%:R| *+ 3
+  by rewrite sumr_const card_ord inner_eq.
+rewrite step inner_eq.
+have -> : 5%:R^-1 - eps - 5%:R^-1 = - eps by lra.
+rewrite normrN normrM (@ger0_norm _ (4%:R^-1)) ?invr_ge0 //.
+by rewrite -mulr_natr; lra.
+Qed.
+
+(** kim_q — the weight a given input deals to a given view: the cut mass that
+    realises that partial reveal.
+    @intent: per-input view law, summed weight of cuts matching the view. *)
+Definition kim_q (A : seq nat) (x : bool * bool) (v : (size A).-tuple bool) : R :=
+  \sum_(k in 'I_5 | ViewA R A (x, k) == v) W k.
+Arguments kim_q A x v : clear implicits.
+
+(** kim_qctr — the uniform-cut reference value for kim_q: the same sum with each
+    weight replaced by 1 / 5.
+    @intent: the den Boer (unbiased) view law against which kim_q is compared. *)
+Definition kim_qctr (A : seq nat) (x : bool * bool)
+    (v : (size A).-tuple bool) : R :=
+  \sum_(k in 'I_5 | ViewA R A (x, k) == v) 5%:R^-1.
+Arguments kim_qctr A x v : clear implicits.
+
+(** kim_qbar — the view law conditioned on the output being false: the average
+    of kim_q over the three false-fibre inputs.
+    @intent: the product-reference view marginal in the chi-square comparison. *)
+Definition kim_qbar (A : seq nat) (v : (size A).-tuple bool) : R :=
+  3%:R^-1 * \sum_(x in {: bool * bool} | ~~ (x.1 && x.2)) kim_q A x v.
+Arguments kim_qbar A v : clear implicits.
+
+(** kim_q_ge0 — kim_q is non-negative.
+    @composes: kim_input_private *)
+Fact kim_q_ge0 (A : seq nat) (x : bool * bool) (v : (size A).-tuple bool) :
+  0 <= kim_q A x v.
+Proof. by apply: sumr_ge0 => k _; exact: FDist.ge0. Qed.
+
+(** kim_qbar_ge0 — kim_qbar is non-negative.
+    @composes: kim_input_private *)
+Fact kim_qbar_ge0 (A : seq nat) (v : (size A).-tuple bool) : 0 <= kim_qbar A v.
+Proof.
+rewrite /kim_qbar mulr_ge0 ?invr_ge0 ?ler0n //.
+by apply: sumr_ge0 => x _; exact: kim_q_ge0.
+Qed.
+
+(** kim_qsum1 — kim_q is a probability law over views.
+    @composes: kim_input_private *)
+Fact kim_qsum1 (A : seq nat) (x : bool * bool) : \sum_v kim_q A x v = 1.
+Proof.
+rewrite /kim_q (exchange_big_dep predT) //=.
+under eq_bigr => k _ do rewrite (big_pred1 (ViewA R A (x, k))) //=.
+exact: (FDist.f1 W).
+Qed.
+
+(** kim_qctr_card — the uniform reference value counts the cuts matching the
+    view, as a preimage cardinality of the joint input-view map.
+    @composes: kim_input_private *)
+Fact kim_qctr_card (A : seq nat) (x : bool * bool) (v : (size A).-tuple bool) :
+  kim_qctr A x v =
+  #|preim [% Inputs R, ViewA R A] (pred1 (x, v))|%:R * 5%:R^-1.
+Proof.
+rewrite /kim_qctr -sum1_card natr_sum big_distrl /=.
+rewrite [RHS](reindex (fun k : 'I_5 => ((x, k) : Omega))) /=; last first.
+  exists (fun w : Omega => w.2) => [k _|]; first by [].
+  by move=> [[a b] k]; rewrite !inE /= xpair_eqE => /andP[/eqP /= -> _].
+apply: eq_big => [k|k _]; last by rewrite mul1r.
+rewrite inE /=.
+have -> : [% Inputs R, ViewA R A] (x, k) = (x, ViewA R A (x, k)) by case: x.
+by rewrite xpair_eqE eqxx.
+Qed.
+
+(** kim_qctr_eq — equal-output inputs share the uniform reference view value:
+    the cut count realising a view is the same across the false fibre.
+    @composes: kim_input_private *)
+Fact kim_qctr_eq (A : seq nat) (x x' : bool * bool) (v : (size A).-tuple bool) :
+  x.1 && x.2 = x'.1 && x'.2 -> kim_qctr A x v = kim_qctr A x' v.
+Proof.
+move=> Hxx; rewrite !kim_qctr_card.
+by rewrite (den_boer_view_count_eq R v Hxx).
+Qed.
+
+(** kim_q_dev — the per-input view law deviates from the uniform reference in
+    total variation by at most twice the bias.
+    @composes: kim_input_private *)
+Fact kim_q_dev (A : seq nat) (x : bool * bool) :
+  \sum_v `|kim_q A x v - kim_qctr A x v| <= 2%:R * `|eps|.
+Proof.
+apply: (order.Order.POrderTheory.le_trans
+  (y := \sum_(k in 'I_5) `|W k - 5%:R^-1|)); last exact: kim_w_tv.
+rewrite [X in _ <= X](eq_bigr (fun k =>
+  \sum_(v | ViewA R A (x, k) == v) `|W k - 5%:R^-1|)); last first.
+  move=> i _.
+  rewrite (eq_bigl (fun v => v == ViewA R A (x, i)));
+    last by move=> v; rewrite eq_sym.
+  by rewrite big_pred1_eq.
+rewrite (exchange_big_dep predT) //=.
+apply: ler_sum => v _.
+rewrite /kim_q /kim_qctr -sumrB.
+apply: (order.Order.POrderTheory.le_trans (ler_norm_sum _ _ _)).
+by apply: ler_sum => k _.
+Qed.
+
+(** kim_qbar_diff — a false-fibre input's view law differs from the mixed
+    reference in total variation by at most four times the bias.
+    @composes: kim_input_private *)
+Fact kim_qbar_diff (A : seq nat) (x : bool * bool) :
+  ~~ (x.1 && x.2) ->
+  \sum_v `|kim_q A x v - kim_qbar A v| <= 4%:R * `|eps|.
+Proof. Admitted.
 
 (** kim_input_private — under Kim's biased cut, a partial view carries at most
     kim_leak_bound eps conditional mutual information about the inputs given the
