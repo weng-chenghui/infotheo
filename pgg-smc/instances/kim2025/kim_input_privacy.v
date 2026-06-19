@@ -357,7 +357,56 @@ Qed.
 Fact kim_qbar_diff (A : seq nat) (x : bool * bool) :
   ~~ (x.1 && x.2) ->
   \sum_v `|kim_q A x v - kim_qbar A v| <= 4%:R * `|eps|.
-Proof. Admitted.
+Proof.
+move=> Hx.
+have F0x : x.1 && x.2 = false by apply/negbTE.
+have key : forall x' : bool * bool, x'.1 && x'.2 = false ->
+    \sum_v `|kim_q A x v - kim_q A x' v| <= 4%:R * `|eps|.
+  move=> x' Hx'.
+  apply: (order.Order.POrderTheory.le_trans
+    (y := \sum_v (`|kim_q A x v - kim_qctr A x v|
+               + `|kim_q A x' v - kim_qctr A x' v|))).
+    apply: ler_sum => v _.
+    have hctr : kim_qctr A x v = kim_qctr A x' v
+      by apply: kim_qctr_eq; rewrite F0x Hx'.
+    apply: (order.Order.POrderTheory.le_trans (ler_distD (kim_qctr A x v) _ _)).
+    by rewrite hctr; apply: lerD => //; rewrite distrC.
+  rewrite big_split /=.
+  have -> : 4%:R * `|eps| = 2%:R * `|eps| + 2%:R * `|eps| by rewrite -mulrDl -natrD.
+  by apply: lerD; exact: kim_q_dev.
+have Henum : forall g : bool * bool -> R,
+    \sum_(x' in {: bool * bool} | ~~ (x'.1 && x'.2)) g x'
+    = g (false, false) + g (false, true) + g (true, false).
+  move=> g; rewrite big_mkcondl /=.
+  rewrite (bigD1 (false, false)) //= (bigD1 (false, true)) //=
+    (bigD1 (true, false)) //=.
+  rewrite big1 ?addr0; [lra | by move=> [[|] [|]]].
+apply: (order.Order.POrderTheory.le_trans (y :=
+  \sum_v 3%:R^-1 * (`|kim_q A x v - kim_q A (false, false) v|
+                  + `|kim_q A x v - kim_q A (false, true) v|
+                  + `|kim_q A x v - kim_q A (true, false) v|))).
+  apply: ler_sum => v _.
+  rewrite /kim_qbar (Henum (fun x' => kim_q A x' v)).
+  have -> : kim_q A x v
+            - 3%:R^-1 * (kim_q A (false, false) v + kim_q A (false, true) v
+                       + kim_q A (true, false) v)
+          = 3%:R^-1 * ((kim_q A x v - kim_q A (false, false) v)
+                     + (kim_q A x v - kim_q A (false, true) v)
+                     + (kim_q A x v - kim_q A (true, false) v)) by lra.
+  rewrite normrM ger0_norm ?invr_ge0 ?ler0n //.
+  apply: ler_wpM2l; first by rewrite invr_ge0 ler0n.
+  apply: (order.Order.POrderTheory.le_trans (ler_normD _ _)).
+  by rewrite lerD2r; exact: ler_normD.
+rewrite -mulr_sumr !big_split /=.
+apply: (order.Order.POrderTheory.le_trans (y :=
+  3%:R^-1 * (4%:R * `|eps| + 4%:R * `|eps| + 4%:R * `|eps|))).
+  apply: ler_wpM2l; first by rewrite invr_ge0 ler0n.
+  apply: lerD; [apply: lerD|].
+  - by apply: key.
+  - by apply: key.
+  - by apply: key.
+by lra.
+Qed.
 
 (** kim_input_private — under Kim's biased cut, a partial view carries at most
     kim_leak_bound eps conditional mutual information about the inputs given the
