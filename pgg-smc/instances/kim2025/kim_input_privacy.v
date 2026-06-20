@@ -419,6 +419,265 @@ Qed.
     All concrete Kim instances (den Boer eps = 0, Kim bias 1/100) satisfy it. *)
 Hypothesis eps_small : 0 < 5%:R^-1 - `|eps|.
 
+(** kim_q_ge_pos — when a view is realised by some uniform cut, its biased weight
+    is at least the minimum cut weight 1/5 - |eps|.
+    @composes: kim_input_private *)
+Fact kim_q_ge_pos (A : seq nat) (x' : bool * bool) (v : (size A).-tuple bool) :
+  0 < kim_qctr A x' v -> 5%:R^-1 - `|eps| <= kim_q A x' v.
+Proof.
+move=> Hpos.
+have Hcard : (0 < #|(fun i : 'I_5 => ViewA R A (x', i) == v)|)%N.
+  rewrite lt0n; apply/negP => /eqP Hc0.
+  move: Hpos; rewrite /kim_qctr sumr_const Hc0 mulr0n.
+  by move=> /lt0r_neq0; rewrite eqxx.
+rewrite /kim_q.
+apply: (order.Order.POrderTheory.le_trans
+  (y := \sum_(k in 'I_5 | ViewA R A (x', k) == v) (5%:R^-1 - `|eps|))).
+  set c := (5%:R^-1 - `|eps|).
+  have Hc0 : 0 <= c by rewrite /c; exact: order.Order.POrderTheory.ltW eps_small.
+  rewrite sumr_const -[X in X <= _]mulr1n.
+  rewrite -subr_ge0 -mulrnBr //.
+  exact: mulrn_wge0.
+by apply: ler_sum => k _; exact: kim_w_ge.
+Qed.
+
+(** kim_qbar_ge — when the false-fibre average view law is nonzero, it is at
+    least the minimum cut weight 1/5 - |eps|.
+    @composes: kim_input_private *)
+Fact kim_qbar_ge (A : seq nat) (v : (size A).-tuple bool) :
+  kim_qbar A v != 0 -> 5%:R^-1 - `|eps| <= kim_qbar A v.
+Proof.
+move=> Hbar.
+have Hsum : \sum_(x in {: bool * bool} | ~~ (x.1 && x.2)) kim_q A x v != 0.
+  by apply: contra Hbar => /eqP H0; rewrite /kim_qbar H0 mulr0.
+move: Hsum; rewrite psumr_neq0; last by move=> i _; exact: kim_q_ge0.
+move=> /hasP[x0 _] /andP[Hfib Hq0].
+have Hctr0 : forall x', 0 < kim_q A x' v -> 0 < kim_qctr A x' v.
+  move=> x' Hqx.
+  have Hcard : (0 < #|(fun i : 'I_5 => ViewA R A (x', i) == v)|)%N.
+    have Hq0' : kim_q A x' v != 0 by rewrite Num.Theory.lt0r_neq0.
+    move: Hq0'; rewrite /kim_q psumr_neq0; last by move=> i _; exact: FDist.ge0.
+    move=> /hasP[k _] /andP[Hk _]; apply/card_gt0P; exists k.
+    by case/andP: Hk.
+  rewrite /kim_qctr sumr_const pmulrn_rgt0 //.
+  by rewrite invr_gt0 ltr0n.
+have Hx0F : x0.1 && x0.2 = false by move: Hfib => /andP[_] /negbTE.
+have Hctrx0 : 0 < kim_qctr A x0 v by exact: Hctr0.
+have Hall : forall x', x'.1 && x'.2 = false -> 5%:R^-1 - `|eps| <= kim_q A x' v.
+  move=> x' Hx'.
+  apply: kim_q_ge_pos.
+  by rewrite (kim_qctr_eq (x' := x0)) // Hx' Hx0F.
+rewrite /kim_qbar.
+apply: (order.Order.POrderTheory.le_trans
+  (y := 3%:R^-1 * \sum_(x' in {: bool * bool} | ~~ (x'.1 && x'.2))
+           (5%:R^-1 - `|eps|))).
+  rewrite sumr_const.
+  have Hc3 : #|(fun i : bool * bool => ~~ (i.1 && i.2))| = 3%N.
+    rewrite -sum1_card.
+    rewrite (bigD1 (false, false)) //= (bigD1 (false, true)) //=
+      (bigD1 (true, false)) //=.
+    by rewrite big1 ?addn0; [ | by move=> [[|] [|]]].
+  rewrite Hc3.
+  rewrite -[X in _ <= _ * X]mulr_natr; lra.
+apply: ler_wpM2l; first by rewrite invr_ge0 ler0n.
+apply: ler_sum => x' Hx'.
+by apply: Hall; apply/negbTE.
+Qed.
+
+(** kim_qbar_sum1 — the false-fibre average view law is a probability law.
+    @composes: kim_input_private *)
+Fact kim_qbar_sum1 (A : seq nat) : \sum_v kim_qbar A v = 1.
+Proof.
+rewrite /kim_qbar -mulr_sumr exchange_big /=.
+under eq_bigr => x _ do rewrite kim_qsum1.
+rewrite sumr_const.
+have Hc3 : #|(fun i : bool * bool => ~~ (i.1 && i.2))| = 3%N.
+  rewrite -sum1_card.
+  rewrite (bigD1 (false, false)) //= (bigD1 (false, true)) //=
+    (bigD1 (true, false)) //=.
+  by rewrite big1 ?addn0; [ | by move=> [[|] [|]]].
+by rewrite Hc3 mulVf // pnatr_eq0.
+Qed.
+
+(** kim_chi2_bound — a false-fibre input's view law deviates from the mixed
+    reference by chi-square at most 16 eps^2 / (1/5 - |eps|).
+    @composes: kim_input_private *)
+Fact kim_chi2_bound (A : seq nat) (x : bool * bool) :
+  ~~ (x.1 && x.2) ->
+  \sum_v (kim_q A x v - kim_qbar A v) ^+ 2 / kim_qbar A v
+    <= 16%:R * eps ^+ 2 / (5%:R^-1 - `|eps|).
+Proof.
+move=> Hx.
+set c := 5%:R^-1 - `|eps|.
+have c0 : 0 < c by exact: eps_small.
+have qimp : forall v, kim_qbar A v = 0 -> kim_q A x v = 0.
+  move=> v /eqP; rewrite /kim_qbar mulf_eq0 invr_eq0 pnatr_eq0 /=.
+  move=> /eqP Hsum0.
+  have Hnn : forall i : bool * bool, ~~ (i.1 && i.2) -> 0 <= kim_q A i v
+    by move=> i _; exact: kim_q_ge0.
+  exact: (psumr_eq0P Hnn Hsum0 Hx).
+apply: (order.Order.POrderTheory.le_trans
+  (y := \sum_v (kim_q A x v - kim_qbar A v) ^+ 2 / c)).
+  apply: ler_sum => v _.
+  have [qv0 | qvN0] := eqVneq (kim_qbar A v) 0.
+    by rewrite qv0 (qimp v qv0) subrr expr0n /= mul0r mul0r.
+  apply: ler_wpM2l; first exact: sqr_ge0.
+  have qpos : 0 < kim_qbar A v by rewrite lt0r qvN0 kim_qbar_ge0.
+  rewrite lef_pV2 ?inE ?posrE //.
+  by apply: kim_qbar_ge.
+rewrite -mulr_suml.
+apply: ler_wpM2r; first by rewrite invr_ge0 (order.Order.POrderTheory.ltW c0).
+apply: (order.Order.POrderTheory.le_trans
+  (y := (\sum_v `|kim_q A x v - kim_qbar A v|) ^+ 2)).
+  rewrite expr2 big_distrl /=.
+  apply: ler_sum => v _.
+  rewrite -(@real_normK _ (kim_q A x v - kim_qbar A v)) ?num_real // expr2.
+  apply: ler_wpM2l; first exact: normr_ge0.
+  rewrite (bigD1 v) //= lerDl.
+  by apply: sumr_ge0 => w _; exact: normr_ge0.
+have Hd := kim_qbar_diff A Hx.
+have Hs0 : 0 <= \sum_v `|kim_q A x v - kim_qbar A v|
+  by apply: sumr_ge0 => v _; exact: normr_ge0.
+apply: (order.Order.POrderTheory.le_trans (y := (4%:R * `|eps|) ^+ 2)).
+  rewrite expr2 expr2.
+  by apply: ler_pM; [exact: Hs0 | exact: Hs0 | exact: Hd | exact: Hd].
+by rewrite exprMn -natrX /= real_normK ?num_real //.
+Qed.
+
+(** kim_div_bound — a false-fibre input's view law has KL against the mixed
+    reference at most 16 eps^2 log e / (1/5 - |eps|).
+    @composes: kim_input_private *)
+Fact kim_div_bound (A : seq nat) (x : bool * bool) :
+  ~~ (x.1 && x.2) ->
+  \sum_v kim_q A x v * log (kim_q A x v / kim_qbar A v)
+    <= 16%:R * eps ^+ 2 * log (sequences.expR 1) / (5%:R^-1 - `|eps|).
+Proof.
+move=> Hx.
+have f0 : forall v, 0 <= [ffun v => kim_q A x v] v
+  by move=> v; rewrite ffunE; exact: kim_q_ge0.
+have f1 : \sum_w [ffun v => kim_q A x v] w = 1.
+  by under eq_bigr do rewrite ffunE; exact: kim_qsum1.
+pose P := FDist.make f0 f1.
+have g0 : forall v, 0 <= [ffun v => kim_qbar A v] v
+  by move=> v; rewrite ffunE; exact: kim_qbar_ge0.
+have g1 : \sum_w [ffun v => kim_qbar A v] w = 1.
+  by under eq_bigr do rewrite ffunE; exact: kim_qbar_sum1.
+pose Q := FDist.make g0 g1.
+have PvE : forall v, P v = kim_q A x v by move=> v; rewrite /P/= ffunE.
+have QvE : forall v, Q v = kim_qbar A v by move=> v; rewrite /Q/= ffunE.
+have qimp : forall v, kim_qbar A v = 0 -> kim_q A x v = 0.
+  move=> v /eqP; rewrite /kim_qbar mulf_eq0 invr_eq0 pnatr_eq0 /=.
+  move=> /eqP Hsum0.
+  have Hnn : forall i : bool * bool, ~~ (i.1 && i.2) -> 0 <= kim_q A i v
+    by move=> i _; exact: kim_q_ge0.
+  exact: (psumr_eq0P Hnn Hsum0 Hx).
+have key : divergence.div P Q <= chi2_div P Q * log (sequences.expR 1).
+  apply: le_div_chi2; apply/dominatesP => v Qv0.
+  by rewrite PvE; apply: qimp; rewrite -QvE.
+have chi2le : chi2_div P Q <= 16%:R * eps ^+ 2 / (5%:R^-1 - `|eps|).
+  rewrite /chi2_div; under eq_bigr => v _ do rewrite PvE QvE.
+  exact: kim_chi2_bound.
+rewrite (_ : \sum_v kim_q A x v * log (kim_q A x v / kim_qbar A v)
+           = divergence.div P Q); last first.
+  by rewrite /divergence.div; apply: eq_bigr => v _; rewrite PvE QvE.
+apply: (order.Order.POrderTheory.le_trans key).
+have RHSeq : 16%:R * eps ^+ 2 * log (sequences.expR 1) / (5%:R^-1 - `|eps|)
+           = (16%:R * eps ^+ 2 / (5%:R^-1 - `|eps|)) * log (sequences.expR 1)
+  by rewrite mulrAC.
+rewrite RHSeq.
+apply: ler_wpM2r; first exact: log_exp1_Rle_0.
+exact: chi2le.
+Qed.
+
+(** kim_cdiv1_false — the output-false conditional KL term is the false-fibre
+    average of the per-input view-law KL terms.
+    @composes: kim_input_private *)
+Fact kim_cdiv1_false (A : seq nat) :
+  cdiv1 (PQR A) false =
+  3%:R^-1 * \sum_(x in {: bool * bool} | ~~ (x.1 && x.2))
+    \sum_v kim_q A x v * log (kim_q A x v / kim_qbar A v).
+Proof.
+have massE : forall (i : bool * bool) (v : (size A).-tuple bool) (s : bool),
+    PQR A (i, v, s) = (i.1 && i.2 == s)%:R * (4%:R^-1 * kim_q A i v).
+  move=> i v s.
+  rewrite /PQR fdistmapE /=.
+  rewrite (reindex (fun k : 'I_5 => ((i, k) : Omega))) /=; last first.
+    exists (fun w : Omega => w.2) => [k _|w]; first by [].
+    by case: w => [[a b] k] /=; rewrite inE /= => /eqP[] -> _ _.
+  rewrite (eq_bigl
+    (fun j : 'I_5 => (ViewA R A (i, j) == v) && (i.1 && i.2 == s))); last first.
+    by move=> j; rewrite inE /=; case: i => i1 i2; rewrite !xpair_eqE !eqxx.
+  have [Hs|Hs] := boolP (i.1 && i.2 == s).
+    under eq_bigl => j do rewrite andbT.
+    rewrite mul1r /kim_q mulr_sumr.
+    by apply: eq_bigr => j _; rewrite kim_mass /=.
+  by under eq_bigl => j do rewrite andbF; rewrite big_pred0_eq mul0r.
+have D2E : (PQR A)`2 false = 3%:R / 4%:R.
+  rewrite fdist_sndE.
+  rewrite (eq_bigr (fun p : (bool * bool) * ((size A).-tuple bool) =>
+    (p.1.1 && p.1.2 == false)%:R * (4%:R^-1 * kim_q A p.1 p.2))); last first.
+    by move=> p _; rewrite -massE; case: p.
+  rewrite -(pair_bigA _ (fun i v =>
+    (i.1 && i.2 == false)%:R * (4%:R^-1 * kim_q A i v))) /=.
+  under eq_bigr => i _ do rewrite -mulr_sumr -mulr_sumr kim_qsum1 mulr1.
+  rewrite -mulr_suml.
+  have S3 : \sum_(i : bool * bool) ((i.1 && i.2 == false)%:R) = 3%:R :> R.
+    rewrite (bigD1 (false, false)) //= (bigD1 (false, true)) //=
+      (bigD1 (true, false)) //=.
+    by rewrite big1; [rewrite /= addr0; lra | move=> [[|] [|]]].
+  by rewrite S3.
+have jcE : forall (i : bool * bool) (v : (size A).-tuple bool),
+    jfdist_cond.jcPr (PQR A) [set (i, v)] [set false]
+      = (i.1 && i.2 == false)%:R * (3%:R^-1 * kim_q A i v).
+  move=> i v.
+  rewrite /jfdist_cond.jcPr ssr_ext.setX1 Pr_set1 Pr_set1 massE D2E.
+  set c := (i.1 && i.2 == false)%:R; set q := kim_q A i v; lra.
+have p13E : forall i : bool * bool,
+    jfdist_cond.jcPr (fdist_proj13 (PQR A)) [set i] [set false]
+      = (i.1 && i.2 == false)%:R * 3%:R^-1.
+  move=> i.
+  rewrite /jfdist_cond.jcPr ssr_ext.setX1 Pr_set1 Pr_set1.
+  rewrite fdist_proj13_snd D2E fdist_proj13E /=.
+  under eq_bigr => v _ do rewrite massE.
+  rewrite -mulr_sumr -mulr_sumr kim_qsum1 mulr1.
+  set c := (i.1 && i.2 == false)%:R; lra.
+have p23E : forall v : (size A).-tuple bool,
+    jfdist_cond.jcPr (fdist_proj23 (PQR A)) [set v] [set false] = kim_qbar A v.
+  move=> v.
+  rewrite /jfdist_cond.jcPr ssr_ext.setX1 Pr_set1 Pr_set1.
+  rewrite fdist_proj23_snd D2E fdist_proj23E /=.
+  under eq_bigr => i _ do rewrite massE mulr_natl mulrb.
+  rewrite -big_mkcond /= -mulr_sumr.
+  rewrite (eq_bigl (fun i : bool * bool => ~~ (i.1 && i.2))); last first.
+    by move=> i; case: (i.1 && i.2).
+  rewrite /kim_qbar.
+  set S := \sum_(x in {: bool * bool} | ~~ (x.1 && x.2)) kim_q A x v; lra.
+have jcE' : forall x : (bool * bool) * ((size A).-tuple bool),
+    jfdist_cond.jcPr (PQR A) [set x] [set false]
+      = (x.1.1 && x.1.2 == false)%:R * (3%:R^-1 * kim_q A x.1 x.2).
+  by move=> [i v]; exact: jcE.
+have ae : forall q qb : R, 3%:R^-1 * q / (3%:R^-1 * qb) = q / qb.
+  move=> q qb; rewrite invfM invrK mulrACA mulVf ?mul1r//.
+  by rewrite pnatr_eq0.
+rewrite /cdiv1.
+under eq_bigr => x _ do rewrite jcE' p13E p23E.
+have term : forall (b : bool) (q qb : R),
+    (b%:R * (3%:R^-1 * q)) * log (b%:R * (3%:R^-1 * q) / (b%:R / 3%:R * qb))
+      = b%:R * (3%:R^-1 * (q * log (q / qb))).
+  move=> [|] q qb; last by rewrite !mul0r.
+  by rewrite !mul1r ae -mulrA.
+under eq_bigr => x _ do rewrite term mulrCA.
+rewrite -mulr_sumr.
+under eq_bigr => x _ do rewrite mulr_natl mulrb.
+rewrite -big_mkcond /=.
+congr (_ * _).
+rewrite (eq_bigl (fun i => (i.1.1 && i.1.2 == false) && true)); last first.
+  by move=> i; rewrite andbT.
+rewrite -(pair_big (fun a : bool * bool => a.1 && a.2 == false) xpredT
+  (fun a v => kim_q A a v * log (kim_q A a v / kim_qbar A v))) /=.
+apply: eq_bigl => i; by case: (i.1 && i.2).
+Qed.
+
 (** kim_input_private — under Kim's biased cut, a partial view carries at most
     kim_leak_bound eps conditional mutual information about the inputs given the
     output a && b.
@@ -426,6 +685,28 @@ Hypothesis eps_small : 0 < 5%:R^-1 - `|eps|.
 Lemma kim_input_private (A : seq nat) :
   cond_mutual_info (`p_ [% kim_inputs, kim_view A, kim_secret]) <= kim_leak_bound eps.
 Proof.
-Admitted.
+rewrite -/(PQR A) kim_cond_mutual_infoE kim_cdiv1_false.
+set D := 5%:R^-1 - `|eps|.
+pose C := 16%:R * eps ^+ 2 * log (sequences.expR 1) / D.
+apply: (order.Order.POrderTheory.le_trans
+  (y := 3%:R / 4%:R * (3%:R^-1 * \sum_(x in {: bool * bool} | ~~ (x.1 && x.2)) C))).
+  apply: ler_wpM2l; first by apply: divr_ge0; apply: ler0n.
+  apply: ler_wpM2l; first by rewrite invr_ge0 ler0n.
+  by apply: ler_sum => x Hx; exact: kim_div_bound.
+rewrite sumr_const.
+have Hc3 : #|(fun i : bool * bool => ~~ (i.1 && i.2))| = 3%N.
+  rewrite -sum1_card.
+  rewrite (bigD1 (false, false)) //= (bigD1 (false, true)) //=
+    (bigD1 (true, false)) //=.
+  by rewrite big1 ?addn0; [ | by move=> [[|] [|]]].
+rewrite Hc3.
+have e1 : C = 16%:R * (eps ^+ 2 * log (sequences.expR 1) / D)
+  by rewrite /C -!mulrA.
+have e2 : kim_leak_bound eps = 12%:R * (eps ^+ 2 * log (sequences.expR 1) / D)
+  by rewrite /kim_leak_bound -/D [eps ^+ 2 * _]mulrC -!mulrA.
+rewrite e1 e2.
+set w := eps ^+ 2 * log (sequences.expR 1) / D.
+by lra.
+Qed.
 
 End kim_input_privacy.
