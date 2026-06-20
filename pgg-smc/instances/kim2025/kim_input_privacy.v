@@ -180,21 +180,24 @@ Definition chi2_div (T : finType) (P Q : R.-fdist T) : R :=
   \sum_(a in T) (P a - Q a) ^+ 2 / Q a.
 
 (** le_div_chi2 — KL is bounded by chi-square times log e (a one-step
-    consequence of log x <= (x - 1) log e).
+    consequence of log x <= (x - 1) log e), under absolute continuity so the
+    bound also covers product references with zeros off the support.
     @composes: kim_input_private *)
 Fact le_div_chi2 (T : finType) (P Q : R.-fdist T) :
-  (forall a, 0 < Q a) ->
+  P `<< Q ->
   divergence.div P Q <= chi2_div P Q * log (sequences.expR 1).
 Proof.
-move=> Qpos; rewrite /divergence.div /chi2_div.
+move=> /dominatesP PQ; rewrite /divergence.div /chi2_div.
 have Hbound : divergence.div P Q <=
     (\sum_(a in T) (P a ^+ 2 / Q a - P a)) * log (sequences.expR 1).
   rewrite big_distrl /= /divergence.div.
   apply: ler_sum => a _.
-  have QaN0 : Q a != 0 by apply: lt0r_neq0; exact: Qpos.
   have [Pa0|PaN0] := eqVneq (P a) 0.
     by rewrite Pa0 expr0n /= mul0r !mul0r subr0 mul0r.
-  have HPQ : 0 < P a / Q a by rewrite divr_gt0 // lt0r PaN0 FDist.ge0.
+  have QaN0 : Q a != 0.
+    by apply/negP => /eqP Qa0; rewrite (PQ a Qa0) eqxx in PaN0.
+  have HPQ : 0 < P a / Q a.
+    by apply: divr_gt0; rewrite lt0r ?PaN0 ?QaN0 /=; exact: FDist.ge0.
   have Hlog := log_id_cmp HPQ.
   rewrite -mulrA -[X in _ - X]mulr1 -mulrBr -mulrA.
   by apply: ler_wpM2l; [exact: FDist.ge0 | exact: Hlog].
@@ -203,10 +206,11 @@ have HR : \sum_(a in T) (P a ^+ 2 / Q a - P a) =
 have Hterm : forall a : T, (P a - Q a) ^+ 2 / Q a =
     P a ^+ 2 / Q a - P a *+ 2 + Q a.
   move=> a.
-  have QaN0 : Q a != 0 by apply: lt0r_neq0; exact: Qpos.
-  apply: (mulIf QaN0).
-  rewrite divfK // sqrrB mulrDl mulrBl divfK //.
-  by rewrite mulrnAl -expr2.
+  have [Qa0|QaN0] := eqVneq (Q a) 0; last first.
+    apply: (mulIf QaN0).
+    rewrite divfK // sqrrB mulrDl mulrBl divfK //.
+    by rewrite mulrnAl -expr2.
+  by rewrite Qa0 (PQ a Qa0) subrr expr0n /= mul0r mul0rn subr0 addr0.
 have HL : \sum_(a in T) (P a - Q a) ^+ 2 / Q a =
     (\sum_(a in T) P a ^+ 2 / Q a) - 1.
   under eq_bigr => a _ do rewrite Hterm.
