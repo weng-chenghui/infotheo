@@ -412,6 +412,13 @@ apply: (order.Order.POrderTheory.le_trans (y :=
 by lra.
 Qed.
 
+(** eps_small — the input-privacy bound holds in the small-bias regime
+    |eps| < 1/5, where the minimum cut weight (hence every realised conditional
+    view mass) stays positive; without it the bound's denominator 1/5 - |eps|
+    turns nonpositive and the inequality fails against cond_mutual_info >= 0.
+    All concrete Kim instances (den Boer eps = 0, Kim bias 1/100) satisfy it. *)
+Hypothesis eps_small : 0 < 5%:R^-1 - `|eps|.
+
 (** kim_input_private — under Kim's biased cut, a partial view carries at most
     kim_leak_bound eps conditional mutual information about the inputs given the
     output a && b.
