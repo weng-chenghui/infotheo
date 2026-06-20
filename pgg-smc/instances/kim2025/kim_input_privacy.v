@@ -710,3 +710,14 @@ by lra.
 Qed.
 
 End kim_input_privacy.
+
+(** kim_input_private0 — at zero bias the conditional mutual information meets
+    kim_leak_bound 0, the unbiased (den Boer) endpoint of the O(eps^2) ceiling.
+    @composes: kim_input_private *)
+Corollary kim_input_private0 (R : realType)
+    (H1 : (0 : R) < 5%:R^-1) (H2 : - (4%:R * 5%:R^-1) < (0 : R))
+    (H3 : 0 < 5%:R^-1 - `|0 : R|) (A : seq nat) :
+  cond_mutual_info
+    (`p_ [% @kim_inputs R 0 H1 H2, @kim_view R 0 H1 H2 A, @kim_secret R 0 H1 H2])
+    <= @kim_leak_bound R 0.
+Proof. exact: (@kim_input_private R 0 H1 H2 H3 A). Qed.
