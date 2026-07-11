@@ -176,6 +176,33 @@ Axiom hygiene: target boolp-only plus at most the two L2 justified axioms.
 - Proof iteration through rocq-mcp (`rocq_start` / `rocq_check` /
   `rocq_step_multi`); `make -j1` only for dependency refreshes and the
   final full-chain build, mutex-serialized across tracks (section 3).
+- MathComp style conformance is enforced by four layers, and every
+  rocq-prover agent prompt MUST name its mathcomp-skills reading list:
+  1. WRITE time: agents invoke the `mathcomp-skills` skill and consult,
+     per file: `domains/46_tuple_perm_binomial.md` ('S_n, n.-tuple,
+     'C(n,m)) + `domains/40_finset.md` ({set 'I_8}, cardinality) for
+     `pgl27_group.v` / `pgl27_orbit.v`; `domains/41_int_rat.md` for the
+     'F_7 cross-ratio arithmetic; `reference.md` section 34 (bigops)
+     for the fdist/entropy work in `transitivity_privacy.v` and
+     `pgl27_trace.v`; `templates.md` (goal-shape skeletons) and
+     `phrasebook.md` (intent -> idiom) when starting or stuck;
+     `proof-development.md` for the Admitted-filling loop. Naming
+     follows `reference.md` sections 10-11 (mainSymbol_suffixes), which
+     is also what audit rule I001 checks.
+  2. EDIT time: the bundled PostToolUse hook runs `audit-quick.sh` on
+     every edited `.v` (line length, tactic spacing, name-then-consume,
+     goal-closing `by`), advisory but read by the agent.
+  3. PRE-COMMIT: the mandatory rocq-audit gate (Stage 1 regex + Stage 2
+     rocq-auditor agent against the rule catalog) blocks on
+     error-severity findings at every checkpoint commit.
+  4. PRE-MERGE: `/mathcomp-review` fans out the read-only
+     `mathcomp-style-auditor` subagent one-per-file over all eight
+     files, emitting `[section N] file:line` punch lists; findings are
+     fixed before the final gate.
+  Project override: the skill's `rocq_step_multi` batteries suggest
+  `lia.`/`nia.` — FORBIDDEN here (CLAUDE.md: lia is not available; use
+  MathComp nat lemmas). Batteries must exclude them, and `rewrite !`
+  with arithmetic lemmas stays banned regardless of skill examples.
 - Per-milestone checkpoint commits through the rocq-audit gate: H-series
   role tags (`@intent:` / `@composes:` / `@main <label>:`) on every
   declaration, I-series naming (no metaphor identifiers, canonical MathComp
