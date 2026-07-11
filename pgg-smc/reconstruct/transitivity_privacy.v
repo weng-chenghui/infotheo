@@ -20,6 +20,11 @@
 (* Section 3 -- Distributional corollaries:                                   *)
 (*   ttrans_view_indep == the coalition view is independent of the secret.    *)
 (*   ttrans_point_uniform == the single-point pushforward is uniform.         *)
+(*                                                                            *)
+(* Section 4 -- Monotone leakage ramp:                                        *)
+(*   view_mutual_info_le == a deterministic reduction of the view has mutual  *)
+(*     information with the secret at most that of the full view (DPI at the  *)
+(*     random-variable level).                                                *)
 (******************************************************************************)
 
 From HB Require Import structures.
@@ -336,3 +341,39 @@ Qed.
 End view_indep.
 
 End transitivity_privacy.
+
+From infotheo Require Import entropy.
+
+Section monotone_ramp.
+Local Open Scope ring_scope.
+Local Open Scope proba_scope.
+Local Open Scope entropy_scope.
+Context {R : realType} {U : finType} (P : R.-fdist U).
+Variables (secretT viewT viewT' : finType).
+Variables (secret : {RV P -> secretT}) (fullview : {RV P -> viewT}).
+Variable proj : viewT -> viewT'.
+
+(** centropy_pair_le == conditioning on a pair of observables cannot exceed
+    the conditional entropy given only the second observable.
+    @composes: view_mutual_info_le *)
+Lemma centropy_pair_le (TX TW TZ : finType)
+    (X : {RV P -> TX}) (W : {RV P -> TW}) (Z : {RV P -> TZ}) :
+  `H(X | [% W, Z]) <= `H(X | Z).
+Proof.
+move: (cond_mutual_info_ge0 `p_[% X, W, Z]).
+by rewrite /cond_mutual_info fdist_proj13_RV3 fdistA_RV3 subr_ge0.
+Qed.
+
+(** view_mutual_info_le == a deterministic reduction of the view cannot
+    increase the mutual information shared with the secret; the data-processing
+    inequality at the random-variable level.
+    @main bound: the monotone leakage ramp making (k, T) well-defined. *)
+Lemma view_mutual_info_le :
+  `I(secret ; proj `o fullview) <= `I(secret ; fullview).
+Proof.
+rewrite !mutual_info_RVE lerD2l lerN2.
+rewrite -(centropy_RV_contraction secret fullview proj).
+exact: centropy_pair_le.
+Qed.
+
+End monotone_ramp.
