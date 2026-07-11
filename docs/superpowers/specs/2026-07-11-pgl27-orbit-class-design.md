@@ -55,6 +55,7 @@ SecurityAsymptotic / mixing file (single uniform draw; den Boer pattern).
 | L6 | Execution strategy B: two-track parallel | User authorizes 2 concurrent rocqworkers for this build only, under the section 3 guardrails. |
 | L7 | `ts_valid` carries the deck constraint, in Prop | `ts_valid s sh := deck_ok sh /\ orbit_class sh = s` where `deck_ok` states the fixed 4-hearts/4-clubs deck multiset. Required so Theorem B's `deck_ok` hypothesis and conclusion match the `ts_private` obligation (the probe's SHAPE C requires and returns `deck_ok`). `ts_correct` becomes a projection; `ts_encode_valid` additionally obliges `deck_ok (orbit_encode s)`. |
 | L8 | Trace secrecy gets the s5 file split and an explicit probability model | An eighth file `pgl27_trace.v` mirrors `s5_trace.v`; `pgl27_secrecy.v` holds only view independence. The sampler fdist is named up front (section 4). |
+| L9 | Model policy: Opus default, Fable as escalation only | All rocq-prover agents run on Opus (the tier that built every comparable proof in this repo). Fable is an escalation rung reserved for the two HIGH obligations after an Opus stall: `pgl_3transitive` ladder becomes Opus rocq-prover -> `rocq:autoprove` -> Fable retry -> justified axiom (L2); Theorem B becomes Opus -> Fable -> combinatorial fallback (L3, still no axiom). LOW/MED mirroring work never escalates. |
 
 The source note's section 5 record table remains normative except as
 amended here (L7 `ts_valid`; `sw_L` and `sw_asymptotic` added;
