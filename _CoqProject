@@ -243,6 +243,14 @@ pgg-smc/reconstruct/pgg_covering_correctness.v
 pgg-smc/reconstruct/pgg_assignment.v
 pgg-smc/reconstruct/pgg_deck_pairing.v
 pgg-smc/reconstruct/pgg_threshold.v
+pgg-smc/reconstruct/transitivity_privacy.v
+pgg-smc/instances/pgl27/pgl27_group.v
+pgg-smc/instances/pgl27/pgl27_orbit.v
+pgg-smc/instances/pgl27/pgl27_scheme.v
+pgg-smc/instances/pgl27/pgl27_profile.v
+pgg-smc/instances/pgl27/pgl27_run.v
+pgg-smc/instances/pgl27/pgl27_secrecy.v
+pgg-smc/instances/pgl27/pgl27_trace.v
 
 -R . infotheo
 -R pgg-smc/lib pgg_smc
@@ -259,3 +267,4 @@ pgg-smc/reconstruct/pgg_threshold.v
 -R pgg-smc/instances/abelian pgg_smc
 -R pgg-smc/instances/cyclic pgg_smc
 -R pgg-smc/instances/monster pgg_smc
+-R pgg-smc/instances/pgl27 pgg_smc
