@@ -5,6 +5,13 @@ the group 3-transitivity axiom, the all-valid-decks dealer, sub-8
 recovery, and the reveal-phase model. Feasibility was probed live in
 Rocq before this design was written; probe evidence is quoted inline.
 
+Adversarially audited 2026-07-12 against the live MathComp 2.4.0 and
+infotheo sources: no load-bearing claim failed; this revision applies
+the audit's fixes (two I001 renames to `_deck`, the scalar `papply`
+layer in item 1, the forced all-decks RV definitions in item 2, two
+extra sweep targets in item 4, `%N` discipline in the delegation
+notes).
+
 ## Feasibility verdicts
 
 | # | Item | Verdict | Core evidence |
@@ -67,14 +74,16 @@ recompile unchanged.
 | Piece | Content | Discharge |
 |-------|---------|-----------|
 | `wgenn i` | nat table of generator i (reuse `tr_tbl`/`sc_tbl`/`inv_tbl` via `nth`) | definition |
-| `wstep`, `wapply` | apply one table to a nat triple; `foldl` a word | definition |
+| `papply w a` | word applied to ONE code: `foldl (fun x i => wgenn i x) a w` | definition |
+| `wstep`, `wapply` | apply one table to a nat triple; `foldl` a word over a triple | definition |
+| `wapply_map` | `wapply w [:: a; b; c] = [:: papply w a; papply w b; papply w c]` (foldl/map commutation) | induction on `w` |
 | `word_bfs` | fueled BFS from `([:: 0;1;2], [::])`, dedup against seen, fuel 12 | definition |
 | `word_table` | `word_bfs` output, 336 entries | definition |
 | `word_table_ok` | nested `all` over `iota 0 8` cubed: distinct triples have a table entry whose word re-verifies | `by vm_compute` |
 | `gen_of : nat -> {perm 'I_8}` | 0, 1, 2 to `tr_perm`, `sc_perm`, `inv_perm`; default a generator | definition |
 | `word_perm w` | `foldl (fun a i => (a * gen_of i)%g) 1%g w` | definition |
 | `word_perm_mem` | `word_perm w \in pgg_G pgl27_M` | induction; `group1`, `groupM`, `mem_gen` |
-| `word_perm_val` | `val (word_perm w x) = wapply w (val x)` pointwise | `foldl` induction, generalized accumulator, `permM` + per-generator val lemmas (mirror `gen0_val`..`gen2_val` of `pgl27_orbit.v`) |
+| `word_perm_val` | `val (word_perm w x) = papply w (val x)` pointwise (scalar level) | `foldl` induction, generalized accumulator, `permM` + per-generator val lemmas (mirror `gen0_val`..`gen2_val` of `pgl27_orbit.v`) |
 | `triple_word` | for distinct `a b c < 8`: a word `w` with `wapply w [:: 0;1;2] = [:: a; b; c]` | nested `allP`/`mem_iota` read-off, the `gen_class` pattern |
 | `pgl27_3transitive` | the axiom's statement, now a Lemma | `morphimEdom imset_id`; `apply/imsetP`; goal 1 by `inE` + computation; goal 2 by `eqEsubset`: orbit side via `orbitP` + `n_act_dtuple` (the `'N([set: 'I_8] | 'P)` condition is trivial by `astabsP`), dtuple side via `tupleP` destructuring ×3, `dtuple_onP` distinctness, `triple_word`, witness `word_perm w`, tuple equality by `eq_from_tnth` + `tnth_map` + `val_inj` + `word_perm_val` |
 
@@ -82,8 +91,10 @@ The file-header comment and the justification block are replaced by a
 terse statement description per the statement-comment rule; the BFS
 rationale lives in a non-rendered source comment.
 
-Estimated 300-350 lines. Delegated to `rocq-prover` with the probe
-transcript, exact line range, and the standard budget block.
+Estimated 350-450 lines. Delegated to `rocq-prover` with the probe
+transcript, exact line range, the standard budget block, and explicit
+`%N` discipline: `pgl27_group.v` opens `ring_scope` at line 43 and
+the new machinery is nat-heavy.
 
 ### Verification
 
@@ -138,17 +149,29 @@ unnecessary: per-deck genericity plus a mixture argument suffices.
 | `fdist_uniform_supp_bij` | a bijection stabilising the support pushes `fdist_uniform_supp` to itself (mirrors `bij_uniform`) |
 | `ttrans_view_indep_alldecks` | new section generic over `orbit_class`, `deck_ok`, invariance and stability hypotheses (the `redeal`-section shape): in the deck-and-shuffle model every coalition of at most t positions has view independent of the secret |
 | `alldecks_shuffle_absorb` | `fdistmap (act) (D_s `x (`U HG)) = D_s` |
-| `ttrans_view_indep_uniform_deck` | shuffle-free model independence, transferred along `alldecks_shuffle_absorb` |
+| `ttrans_view_indep_deck` | shuffle-free model independence, transferred along `alldecks_shuffle_absorb` |
 
-Note: `P1 `x P2` vs the kernel notation ``P `X W`` in fdist.v must be
-reconciled at plan time; if `` `x `` is the constant-kernel special
-case, the new lemmas state everything over `` `X ``.
+The new section also carries three forced definitions the prover must
+not improvise: the all-decks view RV and secret RV over the new
+sample space `bool * (deck * gT)` (the existing `coalition_view` and
+`dealt_secret` are typed over `bool * gT` and cannot be reused), and
+the positivity glue turning `Hpopulated` into
+`0 < #|[set sh | deck_ok sh && (orbit_class sh == s)]|` for the
+`fdist_uniform_supp` argument. Section variable order is pinned in
+the delegation prompt; unused hypotheses discharge away silently.
+
+Notation status (audited): `P1 `x P2 := P1 `X (fun _ => P2)` in
+fdist.v, so `pgl27P` already is a `` `X `` term and the new lemmas
+state everything over `` `X `` with no restatement needed.
 
 ### Instance layer (`pgl27_secrecy.v`)
 
 `pgl27_class_decks_pos` (positivity of each class-s deck set, from
 `orbit_populated`), `pgl27P_alldecks`, `pgl27_view_alldecks`,
-`pgl27_view_indep_alldecks`, `pgl27_view_indep_uniform_deck`.
+`pgl27_view_indep_alldecks`, `pgl27_view_indep_deck`. The two
+`_uniform_deck` names from the first draft were renamed to
+`_deck`: five underscore components without a canonical tail trip
+I001 at error severity.
 The secret prior stays an abstract `secretP` in the bridge; the
 instance uses the uniform prior as today. Estimated 300-350 lines
 total across the two files.
@@ -236,6 +259,8 @@ Sweep list:
 | `pgl27_secrecy.v` header | add the mid-execution qualifier |
 | `pgl27_trace.v` header | add the qualifier next to the trace-secrecy summary |
 | `pgl27_scheme.v` header | qualifier + item-3 sharp-threshold correction |
+| `pgl27_scheme.v` `orbit_scheme` statement comment (line ~75) | keep terse and descriptive; ensure no necessity implication in "reads all eight endpoints" |
+| `pgl27_run.v` header | operational-run header gets the qualifier and the sharp-threshold sentence |
 | `docs/superpowers/specs/2026-07-11-pgl27-orbit-class-design.md` post-note | qualifier + item-3 correction + axiom-status update after item 1 |
 | `docs/superpowers/plans/2026-07-11-pgl27-orbit-class.md` post-note | same status updates |
 | memory: `project_pgl27_instance_landed.md`, `project_pgl27_audit_findings.md` | axiom now theorem; sharp recovery pair; all-decks dealer closed |
@@ -270,5 +295,4 @@ status, exact line ranges, section contexts, a turn budget, and the
 | `foldl` accumulator induction fiddliness in `word_perm_val` | standard generalized-accumulator induction; probe transcript pins the definitions |
 | 3-tuple destructuring / `n_act` coordinate juggling | `tupleP` ×3 + `tnth_map`; intro shape already probed (state 265) |
 | infotheo API drift around `fdist_uniform_supp` pushforwards | write `fdist_uniform_supp_bij` by hand mirroring `bij_uniform` |
-| `` `x `` vs `` `X `` notation reconciliation | resolved at plan time by reading `fdist.v`; worst case the new lemmas restate the constant case |
 | audit Stage-2 token budget across 4 commits | commits are small and focused; bypass only per the documented policy if a cap fires |
