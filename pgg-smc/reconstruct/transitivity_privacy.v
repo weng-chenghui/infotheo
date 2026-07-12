@@ -125,6 +125,141 @@ Qed.
 
 End uniform_bijection.
 
+Section kernel_independence.
+Local Open Scope ring_scope.
+Local Open Scope proba_scope.
+Variables (R : realType) (A B : finType) (P : R.-fdist A) (W : A -> R.-fdist B).
+
+(** inde_prod_kernel_fst == over a kernel product, a random variable whose
+    conditional law given any first coordinate of positive mass is a fixed
+    law is independent of the first coordinate.
+    @composes: ttrans_view_indep_alldecks *)
+Lemma inde_prod_kernel_fst (T : finType) (Z : A * B -> T) (mu : R.-fdist T) :
+  (forall a, P a != 0 -> fdistmap (fun b => Z (a, b)) (W a) = mu) ->
+  (P `X W) |= (Z : {RV (P `X W) -> T})
+    _|_ ((fun ab => ab.1) : {RV (P `X W) -> A}).
+Proof.
+move=> Hcond.
+have HZa : forall (a : A) (z : T),
+    Pr (P `X W) (finset (preim [% (Z : {RV (P `X W) -> T}),
+       ((fun ab => ab.1) : {RV (P `X W) -> A})] (pred1 (z, a))))
+    = P a * mu z.
+  move=> a z; rewrite /Pr.
+  under eq_bigl => ab do rewrite inE /= xpair_eqE.
+  rewrite (eq_bigr (fun ab => P ab.1 * W ab.1 ab.2)); last first.
+    by move=> ab _; rewrite fdist_prodE.
+  rewrite (reindex_onto (fun b : B => (a, b)) (fun i => i.2)); last first.
+    by move=> [a' b] /= /andP[_ /eqP ->].
+  under eq_bigl => b do rewrite /= !eqxx !andbT.
+  under eq_bigr => b _ do rewrite /=.
+  have [Pa0|Pa0] := eqVneq (P a) 0.
+    rewrite Pa0 mul0r; apply: big1 => b _; by rewrite mul0r.
+  by rewrite -big_distrr /= -(Hcond a Pa0) fdistmapE.
+have HfstA : forall a0,
+    `Pr[ ((fun ab => ab.1) : {RV (P `X W) -> A}) = a0 ] = P a0.
+  move=> a0; rewrite pfwd1E.
+  have -> : finset (preim ((fun ab : A * B => ab.1)) (pred1 a0))
+      = (finset (preim (@id A) (pred1 a0)) `*T).
+    by apply/setP => -[a' b]; rewrite !inE.
+  rewrite -Pr_fdist_fst fdist_prod1.
+  have -> : finset (preim (@id A) (pred1 a0)) = [set a0].
+    by apply/setP => x; rewrite !inE.
+  by rewrite Pr_set1.
+have HZz : forall z0, `Pr[ (Z : {RV (P `X W) -> T}) = z0 ] = mu z0.
+  move=> z0; rewrite pfwd1E /Pr.
+  under eq_bigl => ab do rewrite inE /=.
+  under eq_bigr => ab _ do rewrite fdist_prodE.
+  transitivity (\sum_(a' : A) (P a' * mu z0)); last first.
+    by rewrite -big_distrl /= FDist.f1 mul1r.
+  rewrite (partition_big (fun ab => ab.1) xpredT) //=.
+  apply: eq_bigr => a' _.
+  rewrite -(HZa a' z0) /Pr.
+  apply: eq_big => [ab | ab _]; last by rewrite fdist_prodE.
+  by rewrite inE /= xpair_eqE andbC.
+by move=> z a; rewrite pfwd1E HZa HZz HfstA mulrC.
+Qed.
+
+(** fdistmap_prod_const == a kernel product pushes forward to the common law
+    of its positive-mass sections.
+    @composes: ttrans_view_indep_alldecks *)
+Lemma fdistmap_prod_const (T : finType) (f : A * B -> T) (mu : R.-fdist T) :
+  (forall a, P a != 0 -> fdistmap (fun b => f (a, b)) (W a) = mu) ->
+  fdistmap f (P `X W) = mu.
+Proof.
+move=> Hf; apply: fdist_ext => t.
+rewrite fdistmapE.
+transitivity (\sum_(a : A) P a * mu t); last first.
+  by rewrite -big_distrl /= FDist.f1 mul1r.
+rewrite (partition_big (fun ab => ab.1) xpredT) //=.
+apply: eq_bigr => a _.
+have [Pa0|Pa0] := eqVneq (P a) 0.
+  rewrite Pa0 mul0r; apply: big1 => ab /andP[_ /eqP Hab1].
+  by rewrite fdist_prodE Hab1 Pa0 mul0r.
+rewrite (reindex_onto (fun b : B => (a, b)) (fun i => i.2)); last first.
+  by move=> [a' b] /= /andP[_ /eqP ->].
+under eq_bigl => b do rewrite /= !eqxx !andbT.
+under eq_bigr => b _ do rewrite fdist_prodE /=.
+by rewrite -big_distrr /= -(Hf a Pa0) fdistmapE.
+Qed.
+
+(** fdistmap_prod_snd_const == over a product with a constant kernel, if every
+    positive-mass second-coordinate section pushes the first marginal to the
+    same law, the pair pushforward is that law.
+    @composes: alldecks_shuffle_absorb *)
+Lemma fdistmap_prod_snd_const (T : finType) (P2 : R.-fdist B)
+    (f : A * B -> T) (mu : R.-fdist T) :
+  (forall b, P2 b != 0 -> fdistmap (fun a => f (a, b)) P = mu) ->
+  fdistmap f (P `x P2) = mu.
+Proof.
+move=> Hf; apply: fdist_ext => t.
+rewrite fdistmapE.
+transitivity (\sum_(b : B) mu t * P2 b); last first.
+  by rewrite -big_distrr /= FDist.f1 mulr1.
+rewrite (partition_big (fun ab => ab.2) xpredT) //=.
+apply: eq_bigr => b _.
+have [Pb0|Pb0] := eqVneq (P2 b) 0.
+  rewrite Pb0 mulr0; apply: big1 => ab /andP[_ /eqP Hab2].
+  by rewrite fdist_prodE Hab2 Pb0 mulr0.
+rewrite (reindex_onto (fun a : A => (a, b)) (fun i => i.1)); last first.
+  by move=> [a b'] /= /andP[_ /eqP ->].
+under eq_bigl => a do rewrite /= !eqxx !andbT.
+under eq_bigr => a _ do rewrite fdist_prodE /=.
+by rewrite -big_distrl /= -(Hf b Pb0) fdistmapE.
+Qed.
+
+End kernel_independence.
+
+Section uniform_supp_bij.
+Local Open Scope ring_scope.
+Variables (R : realType) (A : finType) (C : {set A}).
+Hypothesis HC : (0 < #|C|)%N.
+
+(** fdist_uniform_supp_bij == an injective endomap stabilising the support
+    pushes the uniform-support law to itself.
+    @composes: alldecks_shuffle_absorb *)
+Lemma fdist_uniform_supp_bij (f : A -> A) :
+  injective f -> (forall a, (f a \in C) = (a \in C)) ->
+  fdistmap f (fdist_uniform_supp R HC) = fdist_uniform_supp R HC.
+Proof.
+move=> finj Hstab.
+have [f' f'K f'K'] := injF_bij finj.
+apply: fdist_ext => a.
+rewrite fdistmapE.
+rewrite (eq_bigl (fun a0 => a0 == f' a)); last first.
+  by move=> i; rewrite !inE /= (can2_eq f'K f'K').
+rewrite big_pred1_eq.
+have HfC : (f' a \in C) = (a \in C) by rewrite -{2}(f'K' a) Hstab.
+case: (boolP (a \in C)) => Ha.
+  have HfaC : f' a \in C by rewrite HfC.
+  by rewrite (fdist_uniform_supp_in R HC HfaC)
+             (fdist_uniform_supp_in R HC Ha).
+have HfaC : f' a \notin C by rewrite HfC.
+by rewrite (fdist_uniform_supp_notin R HC HfaC)
+           (fdist_uniform_supp_notin R HC Ha).
+Qed.
+
+End uniform_supp_bij.
+
 Section transitivity_privacy.
 Variables (N' : nat) (gT : finGroupType) (G : {group gT}).
 Variable rho : {morphism G >-> {perm 'I_N'.+1}}.
@@ -547,3 +682,177 @@ exact: view_mutual_info_le.
 Qed.
 
 End transitivity_privacy_gen.
+
+Section alldecks_view_indep.
+Local Open Scope ring_scope.
+Local Open Scope proba_scope.
+Variables (N' : nat) (gT : finGroupType) (G : {group gT}).
+Variable rho : {morphism G >-> {perm 'I_N'.+1}}.
+Variable t : nat.
+Hypothesis Htrans : ntransitive t (rho @* G) [set: 'I_N'.+1] 'P.
+Variable R : realType.
+Variable secretP : R.-fdist bool.
+Hypothesis HG : (0 < #|G|)%N.
+Variable orbit_class : N'.+1.-tuple 'I_N'.+1 -> bool.
+Variable deck_ok : N'.+1.-tuple 'I_N'.+1 -> bool.
+Hypothesis Hdeck_uniq : forall sh, deck_ok sh -> uniq sh.
+Hypothesis Hinv : forall g sh, g \in G ->
+  orbit_class [tuple tnth sh (rho g i) | i < N'.+1] = orbit_class sh.
+Hypothesis Hdeck_stable : forall g sh, g \in G ->
+  deck_ok [tuple tnth sh (rho g i) | i < N'.+1] = deck_ok sh.
+
+(** class_decks == the valid decks of orbit class s.
+    @intent: the support of the all-decks dealer at secret s. *)
+Definition class_decks (s : bool) : {set N'.+1.-tuple 'I_N'.+1} :=
+  [set sh | deck_ok sh && (orbit_class sh == s)].
+
+Hypothesis Hpop : forall s : bool, (0 < #|class_decks s|)%N.
+
+(** alldecksP == the joint law of a secret, a uniform valid deck of that
+    class, and an independent uniform shuffle.
+    @intent: the all-decks dealer sample space. *)
+Definition alldecksP : R.-fdist (bool * (N'.+1.-tuple 'I_N'.+1 * gT)) :=
+  secretP `X (fun s => ((`U (Hpop s)) `x (`U HG))).
+
+(** alldecks_secret == the dealt secret component.
+    @intent: the secret random variable of the all-decks dealer. *)
+Definition alldecks_secret : {RV alldecksP -> bool} := fun u => u.1.
+
+(** alldecks_view == the dealt card values a coalition C observes after the
+    shuffle, and ord0 outside C.
+    @intent: the coalition observable of the all-decks dealer. *)
+Definition alldecks_view (C : {set 'I_N'.+1}) :
+    {RV alldecksP -> {ffun 'I_N'.+1 -> 'I_N'.+1}} :=
+  fun u => [ffun i => if i \in C then tnth u.2.1 (rho u.2.2 i) else ord0].
+
+(* The per-class law of the shuffled coalition view is deck-independent:
+   uniform over the masked injective value-tuples. *)
+Local Lemma alldecks_view_law (C : {set 'I_N'.+1}) (s : bool)
+    (Hdt : (0 < #|dtuple_on (size (enum C)) [set: 'I_N'.+1]|)%N) :
+  (#|C| <= t)%N ->
+  fdistmap (fun dg => alldecks_view C (s, dg))
+    ((`U (Hpop s)) `x ((`U HG) : R.-fdist gT))
+  = fdistmap (fun r : (size (enum C)).-tuple 'I_N'.+1 =>
+       [ffun i : 'I_N'.+1 => nth ord0 (val r) (index i (enum C))])
+      (`U Hdt).
+Proof.
+move=> HC.
+pose k := size (enum C).
+pose p : k.-tuple 'I_N'.+1 := in_tuple (enum C).
+have Hk : (k <= t)%N by rewrite /k -cardE.
+have Hp : p \in dtuple_on k [set: 'I_N'.+1].
+  by rewrite inE; apply/andP;
+     split; [exact: enum_uniq | apply/subsetP => x _; rewrite inE].
+apply: (fdistmap_prod_const (P := `U (Hpop s)) (W := fun _ => `U HG)) => sh Hsh.
+have Hmem : sh \in class_decks s.
+  apply: contraNT Hsh => Hsh'.
+  by rewrite (fdist_uniform_supp_notin R (Hpop s) Hsh') eqxx.
+move: Hmem; rewrite inE => /andP[Hok _].
+have Huniqsh : uniq sh := Hdeck_uniq Hok.
+have Hcomp : (fun g : gT => alldecks_view C (s, (sh, g)))
+    = (fun r : k.-tuple 'I_N'.+1 =>
+         [ffun i : 'I_N'.+1 => nth ord0 (val r) (index i (enum C))])
+      \o (fun g : gT => [tuple tnth sh (rho g (tnth p l)) | l < k]).
+  apply: boolp.funext => g; apply/ffunP => i.
+  rewrite /alldecks_view /comp !ffunE.
+  case Hi: (i \in C).
+    have Hmem2 : i \in enum C by rewrite mem_enum Hi.
+    have Hj : (index i (enum C) < k)%N by rewrite /k index_mem.
+    rewrite -(tnth_nth ord0 [tuple tnth sh (rho g (tnth p l)) | l < k]
+              (Ordinal Hj)) tnth_mktuple.
+    have -> : tnth p (Ordinal Hj) = i by rewrite (tnth_nth i) nth_index.
+    by [].
+  have Hni : i \notin enum C by rewrite mem_enum Hi.
+  have Hidx : index i (enum C) = k.
+    apply/eqP; rewrite eqn_leq; apply/andP.
+    by split; [rewrite /k; exact: index_size | rewrite /k leqNgt index_mem].
+  by rewrite Hidx nth_default // size_tuple.
+rewrite Hcomp -fdistmap_comp.
+rewrite (@ktuple_encode_uniform N' gT G rho t Htrans R HG
+          (fun _ => sh) k p true Hdt Hk Huniqsh Hp).
+by [].
+Qed.
+
+(** ttrans_view_indep_alldecks == a dealer dealing a uniform valid deck of the
+    secret's class followed by a t-transitive uniform shuffle gives every
+    coalition of at most t positions a view independent of the secret.
+    @main security: the all-decks dealer privacy bridge. *)
+Lemma ttrans_view_indep_alldecks (C : {set 'I_N'.+1}) :
+  (#|C| <= t)%N -> alldecksP |= alldecks_view C _|_ alldecks_secret.
+Proof.
+move=> HC.
+have Hdt : (0 < #|dtuple_on (size (enum C)) [set: 'I_N'.+1]|)%N.
+  apply/card_gt0P; exists (in_tuple (enum C)).
+  by rewrite inE; apply/andP;
+     split; [exact: enum_uniq | apply/subsetP => x _; rewrite inE].
+apply: (inde_prod_kernel_fst
+   (mu := fdistmap (fun r : (size (enum C)).-tuple 'I_N'.+1 =>
+            [ffun i => nth ord0 (val r) (index i (enum C))]) (`U Hdt))) => s _.
+exact: (alldecks_view_law s Hdt HC).
+Qed.
+
+(** alldecks_shuffle_absorb == the uniform shuffle preserves the uniform law
+    on the valid decks of a class.
+    @composes: ttrans_view_indep_deck *)
+Lemma alldecks_shuffle_absorb (s : bool) :
+  fdistmap (fun shg : N'.+1.-tuple 'I_N'.+1 * gT =>
+              [tuple tnth shg.1 (rho shg.2 i) | i < N'.+1])
+           ((`U (Hpop s)) `x ((`U HG) : R.-fdist gT))
+  = `U (Hpop s).
+Proof.
+apply: fdistmap_prod_snd_const => g Hg.
+have gG : g \in G.
+  apply: contraNT Hg => gN.
+  by rewrite (fdist_uniform_supp_notin R HG gN) eqxx.
+apply: (fdist_uniform_supp_bij R (Hpop s)).
+  move=> sh1 sh2 Heq; apply: eq_from_tnth => j.
+  move: (congr1 (fun T : N'.+1.-tuple 'I_N'.+1 =>
+                   tnth T (((rho g)^-1)%g j)) Heq).
+  by rewrite !tnth_mktuple permKV.
+move=> sh; rewrite /class_decks !inE (@Hdeck_stable g sh gG) (@Hinv g sh gG).
+by [].
+Qed.
+
+(** uniform_deckP == the joint law of a secret and a uniform valid deck of
+    that class, with no shuffle.
+    @intent: the shuffle-free all-decks dealer sample space. *)
+Definition uniform_deckP : R.-fdist (bool * N'.+1.-tuple 'I_N'.+1) :=
+  secretP `X (fun s => `U (Hpop s)).
+
+(** uniform_deck_view == the dealt card values a coalition C reads directly
+    off the dealt deck, and ord0 outside C.
+    @intent: the coalition observable of the shuffle-free dealer. *)
+Definition uniform_deck_view (C : {set 'I_N'.+1}) :
+    {RV uniform_deckP -> {ffun 'I_N'.+1 -> 'I_N'.+1}} :=
+  fun u => [ffun i => if i \in C then tnth u.2 i else ord0].
+
+(** ttrans_view_indep_deck == a dealer dealing a uniform valid deck of the
+    secret's class gives, with no further shuffle, every coalition of at most
+    t positions a view independent of the secret.
+    @main security: representative-free all-decks privacy. *)
+Lemma ttrans_view_indep_deck (C : {set 'I_N'.+1}) :
+  (#|C| <= t)%N ->
+  uniform_deckP |= uniform_deck_view C
+    _|_ ((fun u => u.1) : {RV uniform_deckP -> bool}).
+Proof.
+move=> HC.
+have Hdt : (0 < #|dtuple_on (size (enum C)) [set: 'I_N'.+1]|)%N.
+  apply/card_gt0P; exists (in_tuple (enum C)).
+  by rewrite inE; apply/andP;
+     split; [exact: enum_uniq | apply/subsetP => x _; rewrite inE].
+apply: (inde_prod_kernel_fst
+   (mu := fdistmap (fun r : (size (enum C)).-tuple 'I_N'.+1 =>
+            [ffun i => nth ord0 (val r) (index i (enum C))]) (`U Hdt))) => s _.
+rewrite -(alldecks_shuffle_absorb s) fdistmap_comp.
+rewrite (_ : (fun b => uniform_deck_view C (s, b))
+             \o (fun shg : N'.+1.-tuple 'I_N'.+1 * gT =>
+                   [tuple tnth shg.1 (rho shg.2 i) | i < N'.+1])
+           = (fun dg => alldecks_view C (s, dg))); last first.
+  apply: boolp.funext => dg; apply/ffunP => i.
+  rewrite /comp /uniform_deck_view /alldecks_view !ffunE.
+  case: (i \in C) => //=.
+  by rewrite tnth_mktuple.
+exact: (alldecks_view_law s Hdt HC).
+Qed.
+
+End alldecks_view_indep.

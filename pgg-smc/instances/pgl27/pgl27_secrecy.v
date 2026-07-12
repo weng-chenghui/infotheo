@@ -7,6 +7,8 @@
 (* a coalition view independent of the orbit secret for every coalition of at *)
 (* most three cards, instantiating the bridge's ttrans_view_indep_gen         *)
 (* (reconstruct/transitivity_privacy.v) at t = 3.                             *)
+(* The all-decks results remove the fixed-representative scope limit: the     *)
+(* dealt deck is uniform over ALL valid decks of the class.                   *)
 (*                                                                            *)
 (* Key results:                                                               *)
 (*   pgl27_view_indep == the PGL(2,7) coalition view independence at three    *)
@@ -17,6 +19,12 @@
 (*     the orbit secret, so the privacy threshold three is sharp              *)
 (*   pgl27_view_leak_k4 == a four-card coalition shares strictly positive     *)
 (*     mutual information with the orbit secret                               *)
+(*   pgl27_view_indep_alldecks == all-decks dealer privacy at three cards     *)
+(*   pgl27_view_indep_deck == shuffle-free uniform-deck privacy at three      *)
+(*     cards                                                                  *)
+(*                                                                            *)
+(* The secrecy statements concern the pre-reveal execution: after the public  *)
+(* reveal every player learns the secret by design.                           *)
 (******************************************************************************)
 
 From HB Require Import structures.
@@ -182,6 +190,50 @@ split; first exact: (proj1 pgl27_view_dep_k4).
 rewrite lt0r; apply/andP; split; last exact: mutual_info_ge0.
 apply/eqP => HI0.
 exact: (proj2 pgl27_view_dep_k4) (mutual_info_RV0_indep HI0).
+Qed.
+
+(** pgl27_class_decks_pos — both orbit classes are realised by valid decks,
+    so each class-conditional uniform deck law is well defined.
+    @composes: pgl27_view_indep_alldecks *)
+Lemma pgl27_class_decks_pos (s : bool) :
+  (0 < #|class_decks orbit_class deck_ok s|)%N.
+Proof.
+apply/card_gt0P; exists (orbit_encode s).
+by rewrite inE orbit_encode_deck orbit_encodeK eqxx.
+Qed.
+
+(** pgl27_view_indep_alldecks — a dealer dealing a uniform valid deck of the
+    secret's class followed by the uniform PGL(2,7) shuffle gives every
+    coalition of at most three cards a view independent of the orbit secret.
+    @main security: all-decks dealer coalition privacy at three cards. *)
+Lemma pgl27_view_indep_alldecks (C : {set 'I_8}) : (#|C| <= 3)%N ->
+  alldecksP (fdist_uniform card_bool) pgl27_G_pos (R:=R) pgl27_class_decks_pos
+  |= alldecks_view (@pgg_rho pgl27_M) (fdist_uniform card_bool) pgl27_G_pos
+       pgl27_class_decks_pos C
+  _|_ alldecks_secret (fdist_uniform card_bool) pgl27_G_pos
+        pgl27_class_decks_pos.
+Proof.
+move=> HC.
+exact: (ttrans_view_indep_alldecks pgl27_3transitive
+  (fdist_uniform card_bool) pgl27_G_pos (fun sh H => H)
+  pgl27_class_decks_pos HC).
+Qed.
+
+(** pgl27_view_indep_deck — a dealer dealing a uniform valid deck of the
+    secret's class gives, with no further shuffle, every coalition of at most
+    three cards a view independent of the orbit secret.
+    @main security: representative-free all-decks privacy at three cards. *)
+Lemma pgl27_view_indep_deck (C : {set 'I_8}) : (#|C| <= 3)%N ->
+  uniform_deckP (fdist_uniform card_bool) (R:=R) pgl27_class_decks_pos
+  |= uniform_deck_view (fdist_uniform card_bool) pgl27_class_decks_pos C
+  _|_ ((fun u => u.1)
+        : {RV (uniform_deckP (fdist_uniform card_bool)
+                 pgl27_class_decks_pos) -> bool}).
+Proof.
+move=> HC.
+exact: (ttrans_view_indep_deck pgl27_3transitive
+  (fdist_uniform card_bool) pgl27_G_pos (fun sh H => H)
+  orbit_class_invariant deck_stable pgl27_class_decks_pos HC).
 Qed.
 
 End pgl27_secrecy.
