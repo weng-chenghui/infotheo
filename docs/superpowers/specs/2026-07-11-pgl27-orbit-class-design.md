@@ -1,5 +1,15 @@
 # PGL(2,7) orbit-class instance + transitivity-privacy bridge: design
 
+Update (2026-07-13): the axiom is gone. pgl27_3transitive is proven
+in-kernel (commit 6fce3f4); the whole pgl27 chain is boolp-only. The
+sharp recovery pair landed in pgl27_recovery.v (commit 2bf1174): seven
+reveals determine the class, six never do, so "recovery reads all 8"
+below describes the implemented decoder only. All-decks dealer privacy
+landed (commit 3902366): pgl27_view_indep_alldecks and the shuffle-free
+pgl27_view_indep_deck cover a dealer dealing a uniform valid deck of
+the class, removing the fixed-representative scope limit. See
+2026-07-12-pgl27-open-questions-design.md.
+
 Date: 2026-07-11
 Status: IMPLEMENTED 2026-07-12; audit follow-up landed same day. All eight
 files landed, all Qed; axioms = pgl27_3transitive (justified L2, structural

@@ -15,6 +15,9 @@
 (*   pgl27_player_trace_full       == the full player trace is its dealt card *)
 (*   pgl27_trace_secrecy           == one player's trace keeps the secret     *)
 (*   pgl27_coalition_trace_secrecy == any <= 3 coalition trace keeps it       *)
+(*                                                                            *)
+(* The secrecy statements concern the pre-reveal execution: after the public  *)
+(* reveal every player learns the secret by design.                           *)
 (******************************************************************************)
 
 From HB Require Import structures.

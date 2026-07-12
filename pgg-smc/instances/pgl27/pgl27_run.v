@@ -18,6 +18,11 @@
 (* Key results:                                                               *)
 (*   pgl27_endpoints     == the collected endpoints are the dealt shares      *)
 (*   pgl27_run_recovers  == the executed run reconstructs the dealt secret    *)
+(*                                                                            *)
+(* The implemented decoder reads all eight endpoints; seven already determine *)
+(* the class and six never do (pgl27_recovery.v). The secrecy statements of   *)
+(* the companion files concern the pre-reveal execution: after the public     *)
+(* reveal every player learns the secret by design.                           *)
 (******************************************************************************)
 
 From HB Require Import structures.
