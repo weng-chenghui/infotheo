@@ -15,6 +15,10 @@
 (*   pgl27_player_trace_full       == the full player trace is its dealt card *)
 (*   pgl27_trace_secrecy           == one player's trace keeps the secret     *)
 (*   pgl27_coalition_trace_secrecy == any <= 3 coalition trace keeps it       *)
+(*   pgl27_alldecks_trace_secrecy  == one player's trace keeps the secret     *)
+(*                                    under the all-decks dealer              *)
+(*   pgl27_alldecks_coalition_secrecy == any <= 3 coalition trace keeps it    *)
+(*                                    under the all-decks dealer              *)
 (*                                                                            *)
 (* The secrecy statements concern the pre-reveal execution: after the public  *)
 (* reveal every player learns the secret by design.                           *)
@@ -29,6 +33,7 @@ Require Import pgg_interface.
 From pgg_smc Require Import card_exchange_pismc pgg_input_commitment pgg_run.
 Require Import smc_interpreter pismc smc_session_types.
 From pgg_reconstruct Require Import covering_scheme pgg_sharing_framework.
+From pgg_reconstruct Require Import transitivity_privacy.
 From pgg_smc Require Import pgl27_group pgl27_orbit pgl27_scheme pgl27_profile.
 From pgg_smc Require Import pgl27_run pgl27_secrecy.
 From pgg_smc Require Import pgg_trace_secrecy.
@@ -433,6 +438,179 @@ apply: (trace_secrecy_of_view (view := pgl27_view R C)
 - by rewrite pgl27_coalition_trace_E.
 - by [].
 - exact: pgl27_view_indep R C HC.
+Qed.
+
+(* -------------------------------------------------------------------------- *)
+(* All-decks dealer: executed-trace secrecy when the dealt arrangement is a   *)
+(* uniform valid deck of the secret's class, shuffled by a uniform cut.       *)
+(* -------------------------------------------------------------------------- *)
+
+(** pgl27_procs_deck_abs — the all-decks run at arrangement sh and cut w0 is
+    the abstract run with the dealt readout tnth sh.
+    @composes: pgl27_alldecks_trace_E *)
+Lemma pgl27_procs_deck_abs (sh : 8.-tuple 'I_8) (w0 : pgg_gT pgl27_M) :
+  pgl27_procs_deck sh w0 = pgl27_aprocs_abs (tnth sh) w0.
+Proof. by []. Qed.
+
+(** pgl27P_alldecks — the all-decks joint law of the eight-card orbit scheme:
+    a uniform orbit secret, a uniform valid deck of its class and an
+    independent uniform PGL(2,7) shuffle.
+    @intent: the all-decks dealer sample space of the executed run. *)
+Definition pgl27P_alldecks :
+    R.-fdist (bool * (8.-tuple 'I_8 * pgg_gT pgl27_M)) :=
+  alldecksP (fdist_uniform card_bool) pgl27_G_pos (R:=R) pgl27_class_decks_pos.
+
+(** pgl27_alldecks_secret — the dealt orbit-class secret component of an
+    all-decks sample.
+    @intent: the orbit-secret random variable of the all-decks run. *)
+Definition pgl27_alldecks_secret : {RV pgl27P_alldecks -> bool} :=
+  alldecks_secret (fdist_uniform card_bool) pgl27_G_pos pgl27_class_decks_pos.
+
+(** pgl27_alldecks_trace — player i's executed-trace content over the
+    all-decks sampler: the run_interp projection at process index 2+i of the
+    run dealing the sampled arrangement at the sampled cut.
+    @intent: single-player executed trace of the all-decks run. *)
+Definition pgl27_alldecks_trace (i : 'I_8) : {RV pgl27P_alldecks -> 'I_8} :=
+  fun u =>
+    content_of
+      (nth [::] (run_interp pgl27_fuel (pgl27_procs_deck u.2.1 u.2.2)).2
+           (2 + i)).
+
+(** pgl27_alldecks_trace_E — the all-decks player trace equals the dealt card
+    of player i, the cut-permuted card of the sampled arrangement.
+    @composes: pgl27_alldecks_trace_secrecy *)
+Lemma pgl27_alldecks_trace_E (i : 'I_8) :
+  pgl27_alldecks_trace i
+  = (fun u => tnth u.2.1 (@pgg_rho pgl27_M u.2.2 i)).
+Proof.
+apply: boolp.funext => u; rewrite /pgl27_alldecks_trace pgl27_procs_deck_abs.
+case: i => -[|[|[|[|[|[|[|[|//]]]]]]]] Hi.
+- rewrite (pgl27_abs_p0 (tnth u.2.1) u.2.2) tnth_ord_tuple.
+  by congr (tnth u.2.1 (@pgg_rho pgl27_M u.2.2 _)); apply: val_inj.
+- rewrite (pgl27_abs_p1 (tnth u.2.1) u.2.2) tnth_ord_tuple.
+  by congr (tnth u.2.1 (@pgg_rho pgl27_M u.2.2 _)); apply: val_inj.
+- rewrite (pgl27_abs_p2 (tnth u.2.1) u.2.2) tnth_ord_tuple.
+  by congr (tnth u.2.1 (@pgg_rho pgl27_M u.2.2 _)); apply: val_inj.
+- rewrite (pgl27_abs_p3 (tnth u.2.1) u.2.2) tnth_ord_tuple.
+  by congr (tnth u.2.1 (@pgg_rho pgl27_M u.2.2 _)); apply: val_inj.
+- rewrite (pgl27_abs_p4 (tnth u.2.1) u.2.2) tnth_ord_tuple.
+  by congr (tnth u.2.1 (@pgg_rho pgl27_M u.2.2 _)); apply: val_inj.
+- rewrite (pgl27_abs_p5 (tnth u.2.1) u.2.2) tnth_ord_tuple.
+  by congr (tnth u.2.1 (@pgg_rho pgl27_M u.2.2 _)); apply: val_inj.
+- rewrite (pgl27_abs_p6 (tnth u.2.1) u.2.2) tnth_ord_tuple.
+  by congr (tnth u.2.1 (@pgg_rho pgl27_M u.2.2 _)); apply: val_inj.
+- rewrite (pgl27_abs_p7 (tnth u.2.1) u.2.2) tnth_ord_tuple.
+  by congr (tnth u.2.1 (@pgg_rho pgl27_M u.2.2 _)); apply: val_inj.
+Qed.
+
+(** pgl27_alldecks_trace_full — player i's full executed trace over the
+    all-decks sampler is the index marker and the singleton hand holding the
+    dealt card; the trace is a deterministic function of that single card.
+    @main security: the full all-decks executed player trace carries no more
+    information about the secret than its single dealt-card content. *)
+Lemma pgl27_alldecks_trace_full (i : 'I_8)
+    (u : bool * (8.-tuple 'I_8 * pgg_gT pgl27_M)) :
+  nth [::] (run_interp pgl27_fuel (pgl27_procs_deck u.2.1 u.2.2)).2 (2 + i)
+  = [:: PGG_idx 0; PGG_hand [:: pgl27_alldecks_trace i u]].
+Proof.
+rewrite pgl27_procs_deck_abs pgl27_alldecks_trace_E.
+case: i => -[|[|[|[|[|[|[|[|//]]]]]]]] Hi.
+- have -> : (@Ordinal 8 0 Hi) = (@Ordinal 8 0 isT) by apply: val_inj.
+  by rewrite (pgl27_full_p0 (tnth u.2.1) u.2.2) tnth_ord_tuple.
+- have -> : (@Ordinal 8 1 Hi) = (@Ordinal 8 1 isT) by apply: val_inj.
+  by rewrite (pgl27_full_p1 (tnth u.2.1) u.2.2) tnth_ord_tuple.
+- have -> : (@Ordinal 8 2 Hi) = (@Ordinal 8 2 isT) by apply: val_inj.
+  by rewrite (pgl27_full_p2 (tnth u.2.1) u.2.2) tnth_ord_tuple.
+- have -> : (@Ordinal 8 3 Hi) = (@Ordinal 8 3 isT) by apply: val_inj.
+  by rewrite (pgl27_full_p3 (tnth u.2.1) u.2.2) tnth_ord_tuple.
+- have -> : (@Ordinal 8 4 Hi) = (@Ordinal 8 4 isT) by apply: val_inj.
+  by rewrite (pgl27_full_p4 (tnth u.2.1) u.2.2) tnth_ord_tuple.
+- have -> : (@Ordinal 8 5 Hi) = (@Ordinal 8 5 isT) by apply: val_inj.
+  by rewrite (pgl27_full_p5 (tnth u.2.1) u.2.2) tnth_ord_tuple.
+- have -> : (@Ordinal 8 6 Hi) = (@Ordinal 8 6 isT) by apply: val_inj.
+  by rewrite (pgl27_full_p6 (tnth u.2.1) u.2.2) tnth_ord_tuple.
+- have -> : (@Ordinal 8 7 Hi) = (@Ordinal 8 7 isT) by apply: val_inj.
+  by rewrite (pgl27_full_p7 (tnth u.2.1) u.2.2) tnth_ord_tuple.
+Qed.
+
+(** pgl27_alldecks_point_indep — one player's dealt card under the all-decks
+    sampler is independent of the secret.
+    @composes: pgl27_alldecks_trace_secrecy *)
+Lemma pgl27_alldecks_point_indep (i : 'I_8) :
+  pgl27P_alldecks |= (fun u => tnth u.2.1 (@pgg_rho pgl27_M u.2.2 i))
+              _|_ pgl27_alldecks_secret.
+Proof.
+have Hcard : (#|[set i]| <= 3)%N by rewrite cards1.
+have Hview := pgl27_view_indep_alldecks R (C := [set i]) Hcard.
+have -> : (fun u : bool * (8.-tuple 'I_8 * pgg_gT pgl27_M) =>
+             tnth u.2.1 (@pgg_rho pgl27_M u.2.2 i))
+        = (fun f : {ffun 'I_8 -> 'I_8} => f i)
+          `o alldecks_view (R:=R) (@pgg_rho pgl27_M)
+               (fdist_uniform card_bool) pgl27_G_pos
+               pgl27_class_decks_pos [set i].
+  by apply: boolp.funext => u;
+     rewrite /comp_RV /alldecks_view ffunE in_set1 eqxx.
+exact: (inde_RV_comp (fun f : {ffun 'I_8 -> 'I_8} => f i) Hview).
+Qed.
+
+(** pgl27_alldecks_trace_secrecy — a single corrupted player's executed trace
+    of the all-decks run leaves the secret's conditional entropy equal to its
+    plain entropy.
+    @main security: single-player executed-trace secrecy under the all-decks
+    dealer, via the executed-trace bridge with cancel = id. *)
+Lemma pgl27_alldecks_trace_secrecy (i : 'I_8) :
+  `H( pgl27_alldecks_secret | pgl27_alldecks_trace i )
+  = `H `p_ pgl27_alldecks_secret.
+Proof.
+apply: (trace_secrecy_of_view
+          (view := (fun u => tnth u.2.1 (@pgg_rho pgl27_M u.2.2 i)))
+          (trace_of := id) (view_of := id)).
+- by rewrite pgl27_alldecks_trace_E.
+- by [].
+- exact: pgl27_alldecks_point_indep i.
+Qed.
+
+(** pgl27_alldecks_coalition_trace — the coalition's joint executed-trace
+    record over the all-decks sampler: the dealt card each member of C
+    observes, and ord0 outside C.
+    @intent: the coalition's joint executed trace of the all-decks run. *)
+Definition pgl27_alldecks_coalition_trace (C : {set 'I_8}) :
+    {RV pgl27P_alldecks -> {ffun 'I_8 -> 'I_8}} :=
+  fun u => [ffun i => if i \in C then pgl27_alldecks_trace i u else ord0].
+
+(** pgl27_alldecks_coalition_trace_E — the coalition's joint executed trace
+    over the all-decks sampler equals its all-decks coalition view.
+    @composes: pgl27_alldecks_coalition_secrecy *)
+Lemma pgl27_alldecks_coalition_trace_E (C : {set 'I_8}) :
+  pgl27_alldecks_coalition_trace C
+  = alldecks_view (R:=R) (@pgg_rho pgl27_M) (fdist_uniform card_bool)
+      pgl27_G_pos pgl27_class_decks_pos C.
+Proof.
+apply: boolp.funext => u; apply/ffunP => i.
+rewrite /pgl27_alldecks_coalition_trace /alldecks_view !ffunE.
+case: ifP => // _.
+by rewrite (pgl27_alldecks_trace_E i).
+Qed.
+
+(** pgl27_alldecks_coalition_secrecy — the joint executed trace of any
+    coalition of at most three cards under the all-decks dealer leaves the
+    secret's conditional entropy equal to its plain entropy.
+    @main security: coalition executed-trace secrecy under the all-decks
+    dealer, via the executed-trace bridge with cancel = id. *)
+Lemma pgl27_alldecks_coalition_secrecy (C : {set 'I_8}) :
+  (#|C| <= 3)%N ->
+  `H( pgl27_alldecks_secret | pgl27_alldecks_coalition_trace C )
+  = `H `p_ pgl27_alldecks_secret.
+Proof.
+move=> HC.
+apply: (trace_secrecy_of_view
+          (view := alldecks_view (R:=R) (@pgg_rho pgl27_M)
+                     (fdist_uniform card_bool) pgl27_G_pos
+                     pgl27_class_decks_pos C)
+          (trace_of := id) (view_of := id)).
+- by rewrite pgl27_alldecks_coalition_trace_E.
+- by [].
+- exact: (pgl27_view_indep_alldecks R (C:=C) HC).
 Qed.
 
 End pgl27_trace_sec.

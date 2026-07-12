@@ -14,6 +14,7 @@
 (*   pgl27_dealer_run == the dealer dealing the encoded shares of s at cut w0 *)
 (*   pgl27_saprocs    == the ten session-typed processes of one run           *)
 (*   pgl27_procs      == the erased ten-process list fed to the interpreter   *)
+(*   pgl27_procs_deck == the run over an arbitrary dealt arrangement sh       *)
 (*                                                                            *)
 (* Key results:                                                               *)
 (*   pgl27_endpoints     == the collected endpoints are the dealt shares      *)
@@ -83,6 +84,34 @@ Definition pgl27_saprocs (s : bool) (w0 : pgg_gT pgl27_M) :=
     @intent: the plain-proc image of pgl27_saprocs driving run_interp. *)
 Definition pgl27_procs (s : bool) (w0 : pgg_gT pgl27_M) :=
   erase_aprocs (pgl27_saprocs s w0).
+
+(** pgl27_dealer_deck — the PGL(2,7) dealer dealing an arbitrary eight-card
+    arrangement sh (cut w0, empty input prologue).
+    @intent: deals the cards of the arrangement sh; the all-decks analogue of
+    pgl27_dealer_run. *)
+Definition pgl27_dealer_deck (sh : 8.-tuple 'I_8) (w0 : pgg_gT pgl27_M) :=
+  dealer_with_input_encoding pgl27_PI
+    (fun _ => tnth sh) [:: w0] [::] pgl27_players 0.
+
+(** pgl27_saprocs_deck — dealer ++ verifier ++ eight players over the dealt
+    arrangement sh, ordered by process id (0..9).
+    @intent: the ten session-typed processes of one all-decks PGL(2,7) run. *)
+Definition pgl27_saprocs_deck (sh : 8.-tuple 'I_8) (w0 : pgg_gT pgl27_M) :=
+  [:: mk_aproc (pgl27_dealer_deck sh w0)
+    ; mk_aproc (exchange_verifier pgl27_PI pgl27_players)
+    ; mk_aproc (exchange_player pgl27_PI (@Ordinal 8 0 isT))
+    ; mk_aproc (exchange_player pgl27_PI (@Ordinal 8 1 isT))
+    ; mk_aproc (exchange_player pgl27_PI (@Ordinal 8 2 isT))
+    ; mk_aproc (exchange_player pgl27_PI (@Ordinal 8 3 isT))
+    ; mk_aproc (exchange_player pgl27_PI (@Ordinal 8 4 isT))
+    ; mk_aproc (exchange_player pgl27_PI (@Ordinal 8 5 isT))
+    ; mk_aproc (exchange_player pgl27_PI (@Ordinal 8 6 isT))
+    ; mk_aproc (exchange_player pgl27_PI (@Ordinal 8 7 isT))].
+
+(** pgl27_procs_deck — the erased ten-process list of the all-decks run.
+    @intent: the plain-proc image of pgl27_saprocs_deck driving run_interp. *)
+Definition pgl27_procs_deck (sh : 8.-tuple 'I_8) (w0 : pgg_gT pgl27_M) :=
+  erase_aprocs (pgl27_saprocs_deck sh w0).
 
 (** pgl27_run_terminates — every process reaches Finish (ten procs), for any
     cut w0.

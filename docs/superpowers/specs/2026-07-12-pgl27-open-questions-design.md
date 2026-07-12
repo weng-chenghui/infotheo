@@ -281,6 +281,10 @@ status, exact line ranges, section contexts, a turn budget, and the
 ## Out of scope
 
 - Trace-level all-decks secrecy (`pgl27_trace.v`), noted above.
+  Update (2026-07-13): landed as a follow-on after this spec closed
+  (`pgl27_alldecks_trace_secrecy`, `pgl27_alldecks_coalition_secrecy`,
+  via the deck-parameterized run `pgl27_procs_deck` and the existing
+  abstract-readout interpreter layer; boolp-only).
 - Resurrecting `pgl27_card` (|G| = 336 in-kernel). The BFS closure
   machinery makes it reachable (group closure has exactly 336
   elements, verified in the Python sanity run), but the audit deleted
