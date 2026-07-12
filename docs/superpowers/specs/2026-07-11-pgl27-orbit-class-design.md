@@ -1,8 +1,15 @@
 # PGL(2,7) orbit-class instance + transitivity-privacy bridge: design
 
 Date: 2026-07-11
-Status: approved design, revised after adversarial review (all 10 findings
-applied; see section 9), ready for implementation planning.
+Status: IMPLEMENTED 2026-07-12. All nine files landed, all Qed; axioms =
+pgl27_3transitive + pgl27_card (justified L2, structural Moebius/Bruhat route
+blocked by symbolic 'F_7 field identities with no field tactic) + boolp trio.
+The security chain uses only pgl27_3transitive. ttrans_view_indep_gen landed
+general (#|C| <= t) and lives in the bridge. Landed labeling: orbit_class
+true = 28-orbit (equianharmonic), inverting section 1's narrative. Deferred:
+orbit_class_split (narrative 42/28 count; {set 'I_8} enum is vm_compute
+hostile). Previously: approved design, revised after adversarial review
+(all 10 findings applied; see section 9).
 Sources: `pgg-smc/notes/20260702-114631-pgl27-orbit-class-ROCQ-formalization-spec.md`
 (design-validated spec, shape probe `.local/wip/pgl_shape_probe.v` compiled),
 `pgg-smc/notes/20260701-175221-report-shuffle-matters-group-ladder.md` (research),
