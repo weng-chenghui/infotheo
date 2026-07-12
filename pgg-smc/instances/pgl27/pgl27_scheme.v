@@ -5,8 +5,9 @@
 (*                                                                            *)
 (* The orbit-class secret of pgl27_orbit is packaged as a ThresholdScheme     *)
 (* bool 'I_8 with privacy threshold three: a coalition of at most three card  *)
-(* positions learns nothing of the secret, while reconstruction reads all     *)
-(* eight endpoints. Privacy is discharged by the                              *)
+(* positions learns nothing of the secret, while the implemented              *)
+(* reconstruction reads all eight endpoints; seven already determine the      *)
+(* class and six never do (pgl27_recovery.v). Privacy is discharged by the    *)
 (* transitivity bridge ttrans_private applied to the sharp 3-transitivity of  *)
 (* PGL(2,7) (pgl27_3transitive), the coordinate invariance of the classifier  *)
 (* (orbit_class_invariant), deck stability (deck_stable) and population of    *)
@@ -20,6 +21,9 @@
 (* Key results:                                                               *)
 (*   pgl27_private         == coalitions of size at most three are private    *)
 (*   orbit_recon_invariant == recovery is invariant under the shuffle action  *)
+(*                                                                            *)
+(* The secrecy statements concern the pre-reveal execution: after the         *)
+(* public reveal every player learns the secret by design.                    *)
 (******************************************************************************)
 
 From HB Require Import structures.
