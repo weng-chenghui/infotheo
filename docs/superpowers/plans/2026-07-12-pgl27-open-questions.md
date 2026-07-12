@@ -1,5 +1,19 @@
 # pgl27 Open Questions Closure Implementation Plan
 
+> **Completion note (2026-07-13):** all tasks executed and verified.
+> Commits: 6fce3f4 (Tasks 1-3, axiom deleted), 040a0df (pre-existing
+> remediation work landed en route), 2bf1174 (Tasks 4-5, sharp 7/6
+> recovery pair), 3902366 (Tasks 6-8, all-decks dealer; bridge section
+> landed exactly as planned), 0e5b974 (Task 9, prose sweep). Final
+> verification: no Axiom/Admitted in pgl27 + bridge;
+> pgl27_3transitive, pgl27_seven_reveal_class and
+> pgl27_six_reveal_ambiguous Closed under the global context;
+> pgl27_view_indep_deck boolp-only. Deviations from skeletons are
+> recorded in the executing agents' reports (wgenn literal dispatch,
+> triple_word binder trim, tnth_map convertibility, two-inE fixes,
+> cards1P boolean form, atransP2 coordinate extraction via
+> definitional rewrite).
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Close the four open pgl27 audit items: prove `pgl27_3transitive` in-kernel (axiom becomes theorem), add the sharp recovery pair (7 reveals determine, 6 never do), prove all-valid-decks dealer privacy, and sweep the reveal-phase prose.
@@ -27,7 +41,7 @@
 **Files:**
 - Modify: `pgg-smc/instances/pgl27/pgl27_group.v` (insert before the axiom block at lines 165-189)
 
-- [ ] **Step 1.1: Insert the nat-level definitions.** All `Local` (escape the H-gate). They reuse the existing `tr_tbl`/`sc_tbl`/`inv_tbl` (lines 52-54) as the single source of truth:
+- [x] **Step 1.1: Insert the nat-level definitions.** All `Local` (escape the H-gate). They reuse the existing `tr_tbl`/`sc_tbl`/`inv_tbl` (lines 52-54) as the single source of truth:
 
 ```coq
 (* ---------------------------------------------------------------------- *)
@@ -76,7 +90,7 @@ Local Definition word_table_ok : bool :=
 
 Note vs. the probe: the probe used a dispatch `if i == 0 then ptrn ...`; this version reads the table list by `nth`, which is equivalent and shorter. If `vm_compute` in Step 1.3 fails to reduce for any reason, fall back to the probe's literal dispatch form.
 
-- [ ] **Step 1.2: Add the two computational lemmas:**
+- [x] **Step 1.2: Add the two computational lemmas:**
 
 ```coq
 (* Every word in the table re-verifies against every distinct code triple. *)
@@ -91,7 +105,7 @@ Proof. by elim: w a b c => [|i w IH] a b c //=. Qed.
 
 If the `wapply_map` one-liner does not close, the expected shape is `elim: w a b c => [|i w IH] a b c //=; rewrite IH` (foldl unfolds one step; `wstep i [:: a; b; c]` reduces to the mapped triple by `/=`).
 
-- [ ] **Step 1.3: Check interactively.** `rocq_start` with preamble = the imports of `pgl27_group.v` lines 29-43 plus `From pgg_smc Require Import pgl27_group.` is NOT possible while editing the same file; instead run `rocq_start(file="pgg-smc/instances/pgl27/pgl27_group.v", line=163, character=0)` (position mode, before the axiom block) and `rocq_check` each definition and lemma in order. Expected: `word_table_okT` closes by `vm_compute` in about 1 s (probe evidence).
+- [x] **Step 1.3: Check interactively.** `rocq_start` with preamble = the imports of `pgl27_group.v` lines 29-43 plus `From pgg_smc Require Import pgl27_group.` is NOT possible while editing the same file; instead run `rocq_start(file="pgg-smc/instances/pgl27/pgl27_group.v", line=163, character=0)` (position mode, before the axiom block) and `rocq_check` each definition and lemma in order. Expected: `word_table_okT` closes by `vm_compute` in about 1 s (probe evidence).
 
 ---
 
@@ -100,7 +114,7 @@ If the `wapply_map` one-liner does not close, the expected shape is `elim: w a b
 **Files:**
 - Modify: `pgg-smc/instances/pgl27/pgl27_group.v` (continue after Task 1's insertions; then REPLACE the axiom block lines 165-189 and update the header lines 20-26)
 
-- [ ] **Step 2.1: Word-to-perm bridge definitions and lemmas** (all `Local` except `pgl27_rho_im`):
+- [x] **Step 2.1: Word-to-perm bridge definitions and lemmas** (all `Local` except `pgl27_rho_im`):
 
 ```coq
 Local Definition gen_of (i : nat) : {perm 'I_8} :=
@@ -147,7 +161,7 @@ Qed.
 
 `tnth pgl27_gens (Ordinal 0) = tr_perm` (for `gen_of_mem`): if the `exists` leaves that goal, close with `by rewrite (tnth_nth tr_perm).` or plain `by []`; try `rocq_step_multi(["by [].", "by rewrite (tnth_nth tr_perm).", "by apply: val_inj."])`.
 
-- [ ] **Step 2.2: Extraction lemma** (`Local`, mirrors `gen_class` of `pgl27_orbit.v:181`):
+- [x] **Step 2.2: Extraction lemma** (`Local`, mirrors `gen_class` of `pgl27_orbit.v:181`):
 
 ```coq
 Local Lemma triple_word (x y z : 'I_8) :
@@ -170,7 +184,7 @@ Qed.
 
 Watch: inside `ring_scope`, the `mem_iota` rewrite produces nat comparisons; if `case: n` does not close the `Hin` goal, use `by move=> n; rewrite mem_iota add0n leq0n /=; exact: ltn_ord.` with explicit `%N` if needed.
 
-- [ ] **Step 2.3: The exported collapse lemma** (non-`Local`, needs an H-tag):
+- [x] **Step 2.3: The exported collapse lemma** (non-`Local`, needs an H-tag):
 
 ```coq
 (** pgl27_rho_im — the permutation image of the monodromy morphism is the
@@ -181,7 +195,7 @@ Lemma pgl27_rho_im :
 Proof. by rewrite morphimEdom imset_id. Qed.
 ```
 
-- [ ] **Step 2.4: Replace the axiom block (lines 165-189) with the theorem.** Delete the entire justification comment block AND the `Axiom` declaration. Insert:
+- [x] **Step 2.4: Replace the axiom block (lines 165-189) with the theorem.** Delete the entire justification comment block AND the `Axiom` declaration. Insert:
 
 ```coq
 (* -------------------------------------------------------------------------- *)
@@ -223,9 +237,9 @@ Qed.
 
 This skeleton encodes the probed structure; the exact `tnth`/`tnth_map` simplifications in the last block are the expected friction point. Work them in rocq-mcp: after `eq_from_tnth => j`, `Show` the goal, and expect to need `(tnth_nth ord0)` or `tnth_mktuple`-style rewrites plus `tnth_map` on the `n_act` side (`n_act to t a = [tuple of map (to^~ a) t]`, so `tnth (n_act 'P t0 g) j = 'P (tnth t0 j) g = g (tnth t0 j)` via `tnth_map` and `apermE`/`permE`). Try `rocq_step_multi` with: `rewrite tnth_map tnth_ord_tuple.`, `rewrite !(tnth_nth ord0) /=.`, `rewrite apermE.`.
 
-- [ ] **Step 2.5: Update the file header.** Line 23 `pgl27_3transitive == ... (axiom)` becomes `pgl27_3transitive      == the group acts 3-transitively on 'I_8`; delete lines 25-26 (the axiom-justification pointer); add a line for `pgl27_rho_im` in the key-results list.
+- [x] **Step 2.5: Update the file header.** Line 23 `pgl27_3transitive == ... (axiom)` becomes `pgl27_3transitive      == the group acts 3-transitively on 'I_8`; delete lines 25-26 (the axiom-justification pointer); add a line for `pgl27_rho_im` in the key-results list.
 
-- [ ] **Step 2.6: Whole-file check.** Run `mcp rocq_compile_file` on `pgg-smc/instances/pgl27/pgl27_group.v` (or `make -j1 pgg-smc/instances/pgl27/pgl27_group.vo` after `rm -f` of that `.vo`). Expected: compiles with no `Axiom` remaining. Then `rocq_assumptions` (or `rocq_query "Print Assumptions pgl27_3transitive."` in file mode). Expected: `Closed under the global context`.
+- [x] **Step 2.6: Whole-file check.** Run `mcp rocq_compile_file` on `pgg-smc/instances/pgl27/pgl27_group.v` (or `make -j1 pgg-smc/instances/pgl27/pgl27_group.vo` after `rm -f` of that `.vo`). Expected: compiles with no `Axiom` remaining. Then `rocq_assumptions` (or `rocq_query "Print Assumptions pgl27_3transitive."` in file mode). Expected: `Closed under the global context`.
 
 ---
 
@@ -234,10 +248,10 @@ This skeleton encodes the probed structure; the exact `tnth`/`tnth_map` simplifi
 **Files:**
 - No new edits; rebuild `pgl27_orbit.vo`, `pgl27_scheme.vo`, `pgl27_profile.vo`, `pgl27_secrecy.vo`, `pgl27_run.vo`, `pgl27_trace.vo`
 
-- [ ] **Step 3.1:** `make -j1 pgg-smc/instances/pgl27/pgl27_trace.vo pgg-smc/instances/pgl27/pgl27_secrecy.vo pgg-smc/instances/pgl27/pgl27_profile.vo` (make resolves the dependency order; single job). Expected: all six pgl27 `.vo` files rebuild cleanly with zero source changes outside `pgl27_group.v`.
-- [ ] **Step 3.2:** `grep -rn "^Axiom" pgg-smc/instances/pgl27/` — expected: no output.
-- [ ] **Step 3.3:** `rocq_query "Print Assumptions pgl27_view_indep." (file mode on pgl27_secrecy.v)` — expected: boolp axioms only (functional_extensionality_dep etc.), no `pgl27_3transitive`.
-- [ ] **Step 3.4: Commit.**
+- [x] **Step 3.1:** `make -j1 pgg-smc/instances/pgl27/pgl27_trace.vo pgg-smc/instances/pgl27/pgl27_secrecy.vo pgg-smc/instances/pgl27/pgl27_profile.vo` (make resolves the dependency order; single job). Expected: all six pgl27 `.vo` files rebuild cleanly with zero source changes outside `pgl27_group.v`.
+- [x] **Step 3.2:** `grep -rn "^Axiom" pgg-smc/instances/pgl27/` — expected: no output.
+- [x] **Step 3.3:** `rocq_query "Print Assumptions pgl27_view_indep." (file mode on pgl27_secrecy.v)` — expected: boolp axioms only (functional_extensionality_dep etc.), no `pgl27_3transitive`.
+- [x] **Step 3.4: Commit.**
 
 ```bash
 git add pgg-smc/instances/pgl27/pgl27_group.v
@@ -257,7 +271,7 @@ Audit gate: stage 2 runs; the only non-Local additions are `pgl27_rho_im` (`@com
 - Create: `pgg-smc/instances/pgl27/pgl27_recovery.v`
 - Modify: `_CoqProject` (add `pgg-smc/instances/pgl27/pgl27_recovery.v` next to the other pgl27 entries, lines ~247-253)
 
-- [ ] **Step 4.1: Create the file** with header and imports (mirror `pgl27_orbit.v`'s import block):
+- [x] **Step 4.1: Create the file** with header and imports (mirror `pgl27_orbit.v`'s import block):
 
 ```coq
 (* infotheo: information theory and error-correcting codes in Rocq            *)
@@ -294,7 +308,7 @@ Unset Strict Implicit.
 Import Prenex Implicits.
 ```
 
-- [ ] **Step 4.2: The determination pair:**
+- [x] **Step 4.2: The determination pair:**
 
 ```coq
 (** pgl27_seven_reveal_determines — two valid decks agreeing everywhere off
@@ -344,7 +358,7 @@ Qed.
 
 API notes for the worker: `[set~ p]` is the complement of the singleton; `cardsC1 : #|[set~ a]| = #|T|.-1`. The `Hcard` chain may need adjustment; the target fact is `#|~: (f @: [set~ p])| = 1` from `#|f @: [set~ p]| = 7` and `#|'I_8| = 8`; candidates: `cardsCs`, `cardsC`, `card_imset`, `cardsC1`, `card_ord`. If the one-line chain resists, prove `#|f @: [set~ p]| = 7` first, then use `cardsC` (`#|A| + #|~:A| = #|T|`) and arithmetic (`addnC`, no `!` rewrites).
 
-- [ ] **Step 4.3:** `_CoqProject`: add the file line. Then `rocq_compile_file` on the new file (only these two lemmas present). Expected: clean compile.
+- [x] **Step 4.3:** `_CoqProject`: add the file line. Then `rocq_compile_file` on the new file (only these two lemmas present). Expected: clean compile.
 
 ---
 
@@ -353,7 +367,7 @@ API notes for the worker: `[set~ p]` is the complement of the singleton; `cardsC
 **Files:**
 - Modify: `pgg-smc/instances/pgl27/pgl27_recovery.v` (append)
 
-- [ ] **Step 5.1: 2-transitivity corollary and base witness:**
+- [x] **Step 5.1: 2-transitivity corollary and base witness:**
 
 ```coq
 (** pgl27_2transitive — the PGL(2,7) monodromy acts 2-transitively on the
@@ -374,7 +388,7 @@ Qed.
 
 For `encode_agree_off34`: at codes 3 and 4 the corresponding disequality hypothesis is false (both sides are the same ordinal up to `val`), so those branches discharge by the hypothesis itself; the worker may need `move=> /negP[]` or `rewrite eqE /=` per branch — probe with `rocq_step_multi`.
 
-- [ ] **Step 5.2: The transfer lemma:**
+- [x] **Step 5.2: The transfer lemma:**
 
 ```coq
 (** pgl27_six_reveal_ambiguous — for every two hidden positions there are two
@@ -419,10 +433,10 @@ Qed.
 
 Direction check (audited): the deck action `d_k i = tnth (orbit_encode k) (rho g i)` differs between k = true/false exactly on `(rho g)^-1 {3,4}`, so the pair `(p,q)` must map TO `(3,4)`; `atransP2` is applied with `x := [tuple p; q]`, `y := [tuple 3; 4]`. `atransP2` gives `y = to x a` coordinatewise under `'P * 2`; extracting the two coordinates uses `tnth_map` (n_act is a map) plus `apermE`/`permE` as needed — expect friction, use `Show` and `rocq_step_multi`. Since `rho` is the identity inclusion, `@pgg_rho pgl27_M g i` is convertible to `g i`; if the `tnth_mktuple` rewrite leaves `pgg_rho` wrappers, add `rewrite [pgg_rho _ _]/=` or unfold via `rewrite /=`.
 
-- [ ] **Step 5.3:** `rocq_compile_file` on `pgl27_recovery.v`. Expected: clean. Then `rocq_query "Print Assumptions pgl27_six_reveal_ambiguous."` (file mode). Expected: `Closed under the global context` (no boolp needed — pure combinatorics).
-- [ ] **Step 5.4:** Update `pgl27_scheme.v` header sentence (line 8-9): replace "while reconstruction reads all eight endpoints" with "while the implemented reconstruction reads all eight endpoints; seven already determine the class and six never do (pgl27_recovery.v)". Also add the reveal-phase qualifier sentence to this header now (same sentence as Task 9.1), so the file is touched once; Task 9 then skips `pgl27_scheme.v`. Statement comment at line ~75 (`orbit_scheme`) stays terse; only ensure it says "reads", not "requires".
-- [ ] **Step 5.5:** Rebuild scheme downstream if the header edit touched it (comment-only edit still changes the file): `make -j1 pgg-smc/instances/pgl27/pgl27_trace.vo`. Expected: clean.
-- [ ] **Step 5.6: Commit.**
+- [x] **Step 5.3:** `rocq_compile_file` on `pgl27_recovery.v`. Expected: clean. Then `rocq_query "Print Assumptions pgl27_six_reveal_ambiguous."` (file mode). Expected: `Closed under the global context` (no boolp needed — pure combinatorics).
+- [x] **Step 5.4:** Update `pgl27_scheme.v` header sentence (line 8-9): replace "while reconstruction reads all eight endpoints" with "while the implemented reconstruction reads all eight endpoints; seven already determine the class and six never do (pgl27_recovery.v)". Also add the reveal-phase qualifier sentence to this header now (same sentence as Task 9.1), so the file is touched once; Task 9 then skips `pgl27_scheme.v`. Statement comment at line ~75 (`orbit_scheme`) stays terse; only ensure it says "reads", not "requires".
+- [x] **Step 5.5:** Rebuild scheme downstream if the header edit touched it (comment-only edit still changes the file): `make -j1 pgg-smc/instances/pgl27/pgl27_trace.vo`. Expected: clean.
+- [x] **Step 5.6: Commit.**
 
 ```bash
 git add pgg-smc/instances/pgl27/pgl27_recovery.v _CoqProject pgg-smc/instances/pgl27/pgl27_scheme.v
@@ -441,7 +455,7 @@ decoder, not an information-theoretic necessity."
 **Files:**
 - Modify: `pgg-smc/reconstruct/transitivity_privacy.v` (insert two new sections after `Section uniform_bijection` ends, line ~127)
 
-- [ ] **Step 6.1: Kernel independence section:**
+- [x] **Step 6.1: Kernel independence section:**
 
 ```coq
 Section kernel_independence.
@@ -479,7 +493,7 @@ End kernel_independence.
 
 Proof guidance: `inde_prod_kernel_fst` mirrors `inde_prod_fst` (lines 62-103 of the same file) step by step; `fdist_prodE` already yields `P ab.1 * W ab.1 ab.2` for kernels; in the `HZa` block add the case split `have [Pa0|Pa0] := eqVneq (P a) 0` — in the zero branch both sides vanish (`Pa0` kills each summand and the RHS via `mul0r`); in the positive branch use the hypothesis at `a`. `fdistmap_prod_const` is the `HZz` sub-argument of the same proof extracted standalone: `fdist_ext t; rewrite fdistmapE; partition_big` over `ab.1`, per-`a` block equals `P a * mu t` (zero case as above), then `-big_distrl FDist.f1 mul1r`. `fdistmap_prod_snd_const`: either swap via `fdistX` machinery (`fdistXE`, `fdistX_prod` if present — Search first: `rocq_query "Search fdistX fdist_prod."`) or prove directly by the mirrored `partition_big` over `ab.2` — the direct proof is the fallback and is authorized immediately if the Search comes back empty.
 
-- [ ] **Step 6.2: Uniform-support bijection section:**
+- [x] **Step 6.2: Uniform-support bijection section:**
 
 ```coq
 Section uniform_supp_bij.
@@ -499,7 +513,7 @@ End uniform_supp_bij.
 
 Proof guidance: mirror `bij_uniform` (lines 112-127): `injF_bij` upgrades `f` to a bijection with inverse `f'`; `fdist_ext a; fdistmapE`; the preimage of `a` is the singleton `f' a`; case on `a \in C` — by stability `f' a \in C` iff `a \in C`; `fdist_uniform_supp_in` / `fdist_uniform_supp_notin` finish. Check the exact `` `U `` notation and constructor arguments first with `rocq_query "About fdist_uniform_supp."`.
 
-- [ ] **Step 6.3:** Each lemma: write statement with `Admitted.`, confirm it typechecks via `rocq_check`, then develop the proof interactively and replace. Whole-file compile at the end of the task: `rocq_compile_file` on `transitivity_privacy.v`. Expected: clean, existing lemmas untouched.
+- [x] **Step 6.3:** Each lemma: write statement with `Admitted.`, confirm it typechecks via `rocq_check`, then develop the proof interactively and replace. Whole-file compile at the end of the task: `rocq_compile_file` on `transitivity_privacy.v`. Expected: clean, existing lemmas untouched.
 
 ---
 
@@ -508,7 +522,7 @@ Proof guidance: mirror `bij_uniform` (lines 112-127): `injF_bij` upgrades `f` to
 **Files:**
 - Modify: `pgg-smc/reconstruct/transitivity_privacy.v` (append a new section AFTER `Section transitivity_privacy_gen`, i.e. at file end)
 
-- [ ] **Step 7.1: Section header and forced definitions.** Variable order is pinned; unused hypotheses discharge away silently, so anything unused is simply dropped — do not reorder:
+- [x] **Step 7.1: Section header and forced definitions.** Variable order is pinned; unused hypotheses discharge away silently, so anything unused is simply dropped — do not reorder:
 
 ```coq
 Section alldecks_view_indep.
@@ -556,7 +570,7 @@ Definition alldecks_view (C : {set 'I_N'.+1}) :
 
 Check whether `` `U (Hpop s) `` elaborates (the notation takes the positivity proof; the set is inferred from its type). If inference fails, use the explicit `fdist_uniform_supp R (Hpop s)` form everywhere.
 
-- [ ] **Step 7.2: The deck-and-shuffle independence theorem:**
+- [x] **Step 7.2: The deck-and-shuffle independence theorem:**
 
 ```coq
 (** ttrans_view_indep_alldecks == a dealer dealing a uniform valid deck of the
@@ -574,7 +588,7 @@ Proof skeleton (adapt `ttrans_view_indep_gen`, lines 484-519 of the same file):
 4. Per-s obligation: `fdistmap (fun dg => alldecks_view C (s, dg)) ((`U (Hpop s)) `x (`U HG)) = mu`. Apply `fdistmap_prod_const` (first coordinate = deck). Per-deck obligation at `sh` with `(`U (Hpop s)) sh != 0`: membership `sh \in class_decks s` via `fdist_uniform_supp` support characterization (`fdist_uniform_supp_notin` contrapositive, or Search for `fdist_uniform_supp_neq0`), hence `deck_ok sh` hence `uniq sh` by `Hdeck_uniq`.
 5. The section over `g` at fixed `sh` composes as `maskf \o (fun g => [tuple tnth sh (rho g (tnth p l)) | l < k])` — the identical `Hcomp` funext argument of lines 501-516 with `encode b` replaced by `sh`. Then `-fdistmap_comp` and `ktuple_encode_uniform` with `encode := fun _ => sh`, `b := true`, `Hub := uniq sh`.
 
-- [ ] **Step 7.3: Shuffle absorption and the shuffle-free theorem:**
+- [x] **Step 7.3: Shuffle absorption and the shuffle-free theorem:**
 
 ```coq
 (** alldecks_shuffle_absorb == the uniform shuffle preserves the uniform law
@@ -626,7 +640,7 @@ Local Lemma alldecks_view_law (C : {set 'I_N'.+1}) (k := size (enum C)) ...
 
 (The worker shapes `alldecks_view_law`'s exact statement while proving 7.2: it should state `fdistmap (fun dg => alldecks_view C (s, dg)) ((`U (Hpop s)) `x (`U HG)) = fdistmap maskf (`U Hdt)` with `maskf`, `Hdt` fixed as in the skeleton; both 7.2 and 7.3 then consume it.)
 
-- [ ] **Step 7.4:** Whole-file compile: `rocq_compile_file` on `transitivity_privacy.v`. Expected: clean; then `rocq_query "Print Assumptions ttrans_view_indep_deck."` in file mode. Expected: boolp only (funext via `boolp.funext` in `Hcomp`).
+- [x] **Step 7.4:** Whole-file compile: `rocq_compile_file` on `transitivity_privacy.v`. Expected: clean; then `rocq_query "Print Assumptions ttrans_view_indep_deck."` in file mode. Expected: boolp only (funext via `boolp.funext` in `Hcomp`).
 
 ---
 
@@ -635,7 +649,7 @@ Local Lemma alldecks_view_law (C : {set 'I_N'.+1}) (k := size (enum C)) ...
 **Files:**
 - Modify: `pgg-smc/instances/pgl27/pgl27_secrecy.v` (append inside `Section pgl27_secrecy`; the section has `Variable R : realType` in scope)
 
-- [ ] **Step 8.1: Positivity and instance statements:**
+- [x] **Step 8.1: Positivity and instance statements:**
 
 ```coq
 (** pgl27_class_decks_pos — both orbit classes are realised by valid decks,
@@ -666,9 +680,9 @@ Lemma pgl27_view_indep_deck (C : {set 'I_8}) : (#|C| <= 3)%N -> ... .
 
 The exact argument lists of the instantiated statements depend on how the section variables of `alldecks_view_indep` discharge (declaration order, unused dropped). The worker MUST first run `rocq_query "About ttrans_view_indep_alldecks." / "About alldecksP."` (file mode on the recompiled `transitivity_privacy.v`) and copy the discharged signatures, then shape the instance statements as direct `exact:` applications in the style of the existing `pgl27_view_indep` (lines 66-73): arguments will be drawn from `pgl27_3transitive`, `fdist_uniform card_bool`, `pgl27_G_pos`, `orbit_class`, `deck_ok`, `(fun sh H => H : deck_ok sh -> uniq sh)` (note `deck_ok = uniq` definitionally, so `id` works: `fun sh => id`), `orbit_class_invariant`-shaped and `deck_stable`-shaped arguments (their statements in `pgl27_orbit.v:283,302` match the hypothesis shapes with `g \in pgg_G pgl27_M` premises in the same order), and `pgl27_class_decks_pos`. If a hypothesis-shape mismatch appears (argument order g/sh), wrap in a lambda.
 
-- [ ] **Step 8.2: Header update** for `pgl27_secrecy.v`: add the two new key results to the header list and the sentence "The all-decks dealer results remove the fixed-representative scope limit: the dealt deck is uniform over ALL valid decks of the class."
-- [ ] **Step 8.3:** Compile: `make -j1 pgg-smc/instances/pgl27/pgl27_secrecy.vo` (after `rm -f`), then `make -j1 pgg-smc/instances/pgl27/pgl27_trace.vo` (secrecy is imported downstream). `rocq_query "Print Assumptions pgl27_view_indep_deck."` — expected: boolp only.
-- [ ] **Step 8.4: Commit.**
+- [x] **Step 8.2: Header update** for `pgl27_secrecy.v`: add the two new key results to the header list and the sentence "The all-decks dealer results remove the fixed-representative scope limit: the dealt deck is uniform over ALL valid decks of the class."
+- [x] **Step 8.3:** Compile: `make -j1 pgg-smc/instances/pgl27/pgl27_secrecy.vo` (after `rm -f`), then `make -j1 pgg-smc/instances/pgl27/pgl27_trace.vo` (secrecy is imported downstream). `rocq_query "Print Assumptions pgl27_view_indep_deck."` — expected: boolp only.
+- [x] **Step 8.4: Commit.**
 
 ```bash
 git add pgg-smc/reconstruct/transitivity_privacy.v pgg-smc/instances/pgl27/pgl27_secrecy.v
@@ -688,12 +702,12 @@ instantiation closes the fixed-representative scope limit."
 - Modify: `docs/superpowers/specs/2026-07-11-pgl27-orbit-class-design.md`, `docs/superpowers/plans/2026-07-11-pgl27-orbit-class.md` (post-notes)
 - Modify: memory files `project_pgl27_instance_landed.md`, `project_pgl27_audit_findings.md` (in the auto-memory directory)
 
-- [ ] **Step 9.1: The qualifier sentence**, verbatim, for each file header (`pgl27_secrecy.v`, `pgl27_trace.v`, `pgl27_run.v`): `(* The secrecy statements concern the pre-reveal execution: after the public reveal every player learns the secret by design. *)` — placed as the last paragraph of the header comment block, adapted to the box-comment layout of each file.
-- [ ] **Step 9.2:** `pgl27_run.v` header additionally gets: "The implemented decoder reads all eight endpoints; seven already determine the class and six never do (pgl27_recovery.v)."
-- [ ] **Step 9.3:** 2026-07-11 spec + plan post-notes: append one dated paragraph each: axiom now a theorem (commit ref of Task 3), "(no sub-8 recovery)" superseded by the sharp 7/6 pair (commit ref of Task 5), all-decks dealer landed (commit ref of Task 8), reveal-phase qualifier added.
-- [ ] **Step 9.4:** Memory updates (Write tool, update the two existing files in place; keep MEMORY.md hooks accurate): `project_pgl27_instance_landed.md` — axioms line becomes "boolp only (pgl27_3transitive PROVEN in-kernel 2026-07-12)"; add the sharp recovery pair and the all-decks dealer results. `project_pgl27_audit_findings.md` — mark the four open items closed with lemma names.
-- [ ] **Step 9.5:** Comment-only .v edits still recompile: `make -j1 pgg-smc/instances/pgl27/pgl27_trace.vo`. Expected: clean.
-- [ ] **Step 9.6: Commit.**
+- [x] **Step 9.1: The qualifier sentence**, verbatim, for each file header (`pgl27_secrecy.v`, `pgl27_trace.v`, `pgl27_run.v`): `(* The secrecy statements concern the pre-reveal execution: after the public reveal every player learns the secret by design. *)` — placed as the last paragraph of the header comment block, adapted to the box-comment layout of each file.
+- [x] **Step 9.2:** `pgl27_run.v` header additionally gets: "The implemented decoder reads all eight endpoints; seven already determine the class and six never do (pgl27_recovery.v)."
+- [x] **Step 9.3:** 2026-07-11 spec + plan post-notes: append one dated paragraph each: axiom now a theorem (commit ref of Task 3), "(no sub-8 recovery)" superseded by the sharp 7/6 pair (commit ref of Task 5), all-decks dealer landed (commit ref of Task 8), reveal-phase qualifier added.
+- [x] **Step 9.4:** Memory updates (Write tool, update the two existing files in place; keep MEMORY.md hooks accurate): `project_pgl27_instance_landed.md` — axioms line becomes "boolp only (pgl27_3transitive PROVEN in-kernel 2026-07-12)"; add the sharp recovery pair and the all-decks dealer results. `project_pgl27_audit_findings.md` — mark the four open items closed with lemma names.
+- [x] **Step 9.5:** Comment-only .v edits still recompile: `make -j1 pgg-smc/instances/pgl27/pgl27_trace.vo`. Expected: clean.
+- [x] **Step 9.6: Commit.**
 
 ```bash
 git add pgg-smc/instances/pgl27/pgl27_secrecy.v pgg-smc/instances/pgl27/pgl27_trace.v pgg-smc/instances/pgl27/pgl27_run.v docs/superpowers/specs/2026-07-11-pgl27-orbit-class-design.md docs/superpowers/plans/2026-07-11-pgl27-orbit-class.md
@@ -708,9 +722,9 @@ all-decks dealer."
 
 ## Final verification (after Task 9)
 
-- [ ] `grep -rn "^Axiom" pgg-smc/instances/pgl27/` → empty.
-- [ ] `rocq_query "Print Assumptions pgl27_3transitive."` → closed under the global context.
-- [ ] `rocq_query "Print Assumptions pgl27_six_reveal_ambiguous."` → closed under the global context.
-- [ ] `rocq_query "Print Assumptions pgl27_view_indep_deck."` → boolp only.
-- [ ] All six pre-existing pgl27 `.vo` files + `pgl27_recovery.vo` rebuilt via `make -j1`.
-- [ ] `git log --oneline -5` shows the four commits.
+- [x] `grep -rn "^Axiom" pgg-smc/instances/pgl27/` → empty.
+- [x] `rocq_query "Print Assumptions pgl27_3transitive."` → closed under the global context.
+- [x] `rocq_query "Print Assumptions pgl27_six_reveal_ambiguous."` → closed under the global context.
+- [x] `rocq_query "Print Assumptions pgl27_view_indep_deck."` → boolp only.
+- [x] All six pre-existing pgl27 `.vo` files + `pgl27_recovery.vo` rebuilt via `make -j1`.
+- [x] `git log --oneline -5` shows the four commits.
