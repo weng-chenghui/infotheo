@@ -25,6 +25,10 @@
 (*   view_mutual_info_le == a deterministic reduction of the view has mutual  *)
 (*     information with the secret at most that of the full view (DPI at the  *)
 (*     random-variable level).                                                *)
+(*                                                                            *)
+(* Section 5 -- Coalition-general view independence:                          *)
+(*   ttrans_view_indep_gen == every coalition of at most t positions has view *)
+(*     independent of the secret, by k-tuple fiber counting.                  *)
 (******************************************************************************)
 
 From HB Require Import structures.
@@ -377,3 +381,139 @@ exact: centropy_pair_le.
 Qed.
 
 End monotone_ramp.
+
+Section transitivity_privacy_gen.
+Local Open Scope ring_scope.
+Local Open Scope proba_scope.
+Variables (N' : nat) (gT : finGroupType) (G : {group gT}).
+Variable rho : {morphism G >-> {perm 'I_N'.+1}}.
+Variable t : nat.
+Hypothesis Htrans : ntransitive t (rho @* G) [set: 'I_N'.+1] 'P.
+Variable R : realType.
+Variable secretP : R.-fdist bool.
+Hypothesis HG : (0 < #|G|)%N.
+Variable encode : bool -> N'.+1.-tuple 'I_N'.+1.
+
+(** ktuple_encode_uniform == the pushforward of the uniform shuffle by the
+    coalition's encoded value-tuple map is uniform over injective tuples.
+    @composes: ttrans_view_indep_gen *)
+Lemma ktuple_encode_uniform (k : nat) (p : k.-tuple 'I_N'.+1) (b : bool)
+    (Hdt : (0 < #|dtuple_on k [set: 'I_N'.+1]|)%N) :
+  (k <= t)%N -> uniq (encode b) ->
+  p \in dtuple_on k [set: 'I_N'.+1] ->
+  fdistmap (fun g : gT => [tuple tnth (encode b) (rho g (tnth p l)) | l < k])
+    (`U HG : R.-fdist gT) = `U Hdt.
+Proof.
+move=> Hk Hub Hp.
+have b_inj : injective (tnth (encode b)) by apply/tuple_uniqP; exact: Hub.
+have [eb ebK ebK'] := injF_bij b_inj.
+have phi_in : forall g : gT,
+    [tuple tnth (encode b) (rho g (tnth p l)) | l < k]
+      \in dtuple_on k [set: 'I_N'.+1].
+  move=> g; rewrite inE; apply/andP; split.
+    apply/tuple_uniqP => l1 l2; rewrite !tnth_mktuple => /b_inj/perm_inj.
+    by move: Hp; rewrite inE => /andP[/tuple_uniqP pinj _]; apply: pinj.
+  by apply/subsetP => x _; rewrite inE.
+have fibeqgen : forall r : k.-tuple 'I_N'.+1,
+    r \in dtuple_on k [set: 'I_N'.+1] ->
+    #|[set g in G | [tuple tnth (encode b) (rho g (tnth p l)) | l < k] == r]|
+    = (#|G| %/ #|dtuple_on k [set: 'I_N'.+1]|)%N.
+  move=> r Hr.
+  have Hr' : [tuple eb (tnth r l) | l < k] \in dtuple_on k [set: 'I_N'.+1].
+    rewrite inE; apply/andP; split.
+      apply/tuple_uniqP => l1 l2; rewrite !tnth_mktuple => /(can_inj ebK').
+      by move: Hr; rewrite inE => /andP[/tuple_uniqP rinj _]; apply: rinj.
+    by apply/subsetP => x _; rewrite inE.
+  rewrite -(rho_tuple_fiber_card Htrans Hk Hp Hr').
+  apply: eq_card => g; rewrite !inE; congr (_ && _).
+  apply/idP/idP => /eqP H; apply/eqP.
+    apply: eq_from_tnth => l.
+    move: (congr1 (fun z : k.-tuple _ => tnth z l) H).
+    rewrite !tnth_mktuple => Hl.
+    by rewrite -(ebK (rho g (tnth p l))) Hl.
+  apply: eq_from_tnth => l.
+  move: (congr1 (fun z : k.-tuple _ => tnth z l) H).
+  rewrite !tnth_mktuple => Hl.
+  by rewrite Hl ebK'.
+have Hpart : #|G| = (#|dtuple_on k [set: 'I_N'.+1]|
+                     * (#|G| %/ #|dtuple_on k [set: 'I_N'.+1]|))%N.
+  rewrite -[LHS]sum1_card.
+  rewrite (partition_big
+    (fun g : gT => [tuple tnth (encode b) (rho g (tnth p l)) | l < k])
+    (mem (dtuple_on k [set: 'I_N'.+1]))) /=; last first.
+    by move=> g _; exact: phi_in.
+  rewrite (eq_bigr (fun=> (#|G| %/ #|dtuple_on k [set: 'I_N'.+1]|)%N));
+    last first.
+    move=> r Hr; rewrite sum1dep_card -(fibeqgen r Hr).
+    by apply: eq_card => g; rewrite !inE.
+  by rewrite sum_nat_const.
+apply: fdist_ext => q.
+rewrite fdistmapE.
+case: (boolP (q \in dtuple_on k [set: 'I_N'.+1])) => Hq.
+  rewrite fdist_uniform_supp_in //.
+  rewrite (bigID (fun g : gT => g \in G)) /=.
+  rewrite [X in (_ + X)%R]big1; last first.
+    by move=> g /andP[_ Hg]; rewrite fdist_uniform_supp_notin.
+  rewrite addr0.
+  rewrite (eq_bigr (fun=> (#|G|%:R^-1))); last first.
+    by move=> g /andP[_ Hg]; rewrite fdist_uniform_supp_in.
+  rewrite sumr_const.
+  have -> : #|(fun i : gT =>
+    (i \in preim (fun g : gT =>
+              [tuple tnth (encode b) (rho g (tnth p l)) | l < k]) (pred1 q))
+       && (i \in G))|
+  = (#|G| %/ #|dtuple_on k [set: 'I_N'.+1]|)%N.
+    by rewrite -(fibeqgen q Hq); apply: eq_card => i; rewrite !inE andbC.
+  have HGR : (#|G|%:R != 0 :> R) by rewrite pnatr_eq0 -lt0n.
+  have HdR : (#|dtuple_on k [set: 'I_N'.+1]|%:R != 0 :> R).
+    by rewrite pnatr_eq0 -lt0n.
+  apply: (mulfI HGR).
+  by rewrite mulrnAr (mulfV HGR) {2}Hpart natrM mulrAC (mulfV HdR) mul1r.
+rewrite fdist_uniform_supp_notin //.
+apply: big1 => g Hg.
+case/andP: Hg => _ /eqP Hgq.
+by move: (phi_in g); rewrite Hgq (negbTE Hq).
+Qed.
+
+(** ttrans_view_indep_gen == a t-transitive shuffle over a distinct-card deck
+    makes every coalition view of at most t positions independent of the
+    orbit secret.
+    @main security: the coalition-general distributional privacy bridge. *)
+Lemma ttrans_view_indep_gen (C : {set 'I_N'.+1}) :
+  (#|C| <= t)%N -> (0 < t)%N -> (forall b, uniq (encode b)) ->
+  secretP `x (`U HG) |= coalition_view rho secretP HG encode C _|_
+    @dealt_secret gT G R secretP HG.
+Proof.
+move=> HC _ Huniq.
+pose k := size (enum C).
+pose p : k.-tuple 'I_N'.+1 := in_tuple (enum C).
+have Hk : (k <= t)%N by rewrite /k -cardE.
+have Hp : p \in dtuple_on k [set: 'I_N'.+1].
+  by rewrite inE; apply/andP;
+     split; [exact: enum_uniq | apply/subsetP => x _; rewrite inE].
+have Hdt : (0 < #|dtuple_on k [set: 'I_N'.+1]|)%N by apply/card_gt0P; exists p.
+pose maskf := fun r : k.-tuple 'I_N'.+1 =>
+  [ffun i : 'I_N'.+1 => nth ord0 (val r) (index i (enum C))].
+apply: (@inde_prod_fst R bool gT secretP (`U HG) _
+  (coalition_view rho secretP HG encode C) (fdistmap maskf (`U Hdt))) => b.
+have Hcomp : (fun b0 : gT => coalition_view rho secretP HG encode C (b, b0))
+    = maskf \o
+      (fun g : gT => [tuple tnth (encode b) (rho g (tnth p l)) | l < k]).
+  apply: boolp.funext => g; apply/ffunP => i.
+  rewrite /= /maskf ffunE /coalition_view ffunE.
+  case Hi: (i \in C).
+    have Hmem : i \in enum C by rewrite mem_enum Hi.
+    have Hj : (index i (enum C) < k)%N by rewrite /k index_mem.
+    rewrite -(tnth_nth ord0 _ (Ordinal Hj)) tnth_mktuple.
+    have -> : tnth p (Ordinal Hj) = i by rewrite (tnth_nth i) nth_index.
+    by [].
+  have Hni : i \notin enum C by rewrite mem_enum Hi.
+  have Hidx : index i (enum C) = k.
+    apply/eqP; rewrite eqn_leq; apply/andP.
+    by split; [rewrite /k; exact: index_size | rewrite /k leqNgt index_mem].
+  by rewrite Hidx nth_default // size_tuple.
+rewrite Hcomp -fdistmap_comp.
+by rewrite (@ktuple_encode_uniform k p b Hdt Hk (Huniq b) Hp).
+Qed.
+
+End transitivity_privacy_gen.
