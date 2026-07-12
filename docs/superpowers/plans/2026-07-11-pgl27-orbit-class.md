@@ -1,5 +1,7 @@
 # PGL(2,7) Orbit-Class Instance + Transitivity-Privacy Bridge Implementation Plan
 
+> **Post-implementation note (2026-07-12):** the landed labeling is inverted from this draft: `orbit_class` true = 28-orbit (equianharmonic), false = 42-orbit (harmonic). The landed sampler is the uniform-prior orbit-of-representative model (uniform boolean secret; deck = `orbit_encode` of the secret shuffled by a uniform group element), not this draft's dealt-arrangement model. Audit follow-up (same day): the ramp is now two-sided (privacy for size <= 3; monotone leakage under coalition inclusion via `pgl27_view_leakage_le`; a concrete four-position coalition leaks, `pgl27_view_leak_k4`, boolp-only); recovery still reads all 8 endpoints (no sub-8 recovery). `pgl27_card` was deleted (dead axiom); `inv_moebius` landed; `orbit_class_split` (42/28) is proven axiom-free. Labeling and model references below reflect the superseded draft.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Formalize the fifth PGG instance `pgl27` (8-card scheme, bool secret = PGL(2,7) orbit-class of the heart 4-subset, coalitions of size <= 3 perfectly private) plus the reusable t-transitivity privacy bridge `transitivity_privacy.v`.
@@ -258,7 +260,8 @@ Definition cross_ratio (x1 x2 x3 x4 : 'I_8) : 'I_8 := ...
 Definition equianharmonic (l : 'I_8) : bool := (l == inord 3) || (l == inord 5).
 (* orbit_class: the class of the heart 4-subset, read off one fixed ordering
    (the sorted enumeration of heart_set); true = harmonic 42-orbit,
-   false = equianharmonic 28-orbit. *)
+   false = equianharmonic 28-orbit.
+   [superseded: landed labeling is true = 28-orbit/equianharmonic] *)
 Definition orbit_class (sh : 8.-tuple 'I_8) : bool := ...
 ```
 
@@ -285,7 +288,7 @@ Lemma orbit_populated (b : bool) :
   exists sh : 8.-tuple 'I_8, deck_ok sh /\ orbit_class sh = b.
 ```
 
-by exhibiting two explicit ground tuples (hearts 0..3 placed at a harmonic 4-subset for `true`, an equianharmonic one for `false` — e.g. try positions {0,1,2,3}: cr(0,1,2,3) computes to a definite value; adjust to hit both classes; ground `by vm_compute`-closable).
+by exhibiting two explicit ground tuples (hearts 0..3 placed at a harmonic 4-subset for `true`, an equianharmonic one for `false` [superseded: landed labeling is true = 28-orbit/equianharmonic] — e.g. try positions {0,1,2,3}: cr(0,1,2,3) computes to a definite value; adjust to hit both classes; ground `by vm_compute`-closable).
 
 - [ ] **Step 3.5 (encode, prove):** `orbit_encode : bool -> 8.-tuple 'I_8` := the two ground tuples of 3.4; `orbit_encodeK : orbit_class (orbit_encode s) = s` and `orbit_encode_deck : deck_ok (orbit_encode s)` — both `by case; vm_compute` style ground checks.
 - [ ] **Step 3.6 (split, prove):**

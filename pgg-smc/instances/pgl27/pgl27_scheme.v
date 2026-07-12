@@ -4,8 +4,9 @@
 (* pgl27_scheme: the eight-card PGL(2,7) threshold scheme and its plug        *)
 (*                                                                            *)
 (* The orbit-class secret of pgl27_orbit is packaged as a ThresholdScheme     *)
-(* bool 'I_8 with recovery threshold three: a coalition of at most three card *)
-(* positions learns nothing of the secret. Privacy is discharged by the       *)
+(* bool 'I_8 with privacy threshold three: a coalition of at most three card  *)
+(* positions learns nothing of the secret, while reconstruction reads all     *)
+(* eight endpoints. Privacy is discharged by the                              *)
 (* transitivity bridge ttrans_private applied to the sharp 3-transitivity of  *)
 (* PGL(2,7) (pgl27_3transitive), the coordinate invariance of the classifier  *)
 (* (orbit_class_invariant), deck stability (deck_stable) and population of    *)
@@ -13,7 +14,7 @@
 (*                                                                            *)
 (* Definitions:                                                               *)
 (*   orbit_valid s sh == sh is a valid deck whose orbit class is s            *)
-(*   orbit_scheme     == the ThresholdScheme bool 'I_8, recovery threshold 3  *)
+(*   orbit_scheme     == the ThresholdScheme bool 'I_8, privacy threshold 3   *)
 (*   pgl27_plug       == the ReconPlug over pgl27_M with content the identity *)
 (*                                                                            *)
 (* Key results:                                                               *)
@@ -55,14 +56,13 @@ Lemma pgl27_private (s1 s2 : bool) (sh : 8.-tuple 'I_8) (C : {set 'I_8}) :
   exists sh', orbit_valid s2 sh' /\
     (forall i : 'I_8, i \in C -> tnth sh' i = tnth sh i).
 Proof.
-rewrite ltnS => HC [Hdeck Hclass].
+rewrite ltnS => HC [Hdeck _].
 have [sh' [Hdeck' Hclass' Hagree]] :=
   @ttrans_private (pgg_N' pgl27_M) (pgg_gT pgl27_M) (pgg_G pgl27_M)
     (@pgg_rho pgl27_M) 3 pgl27_3transitive orbit_class deck_ok
     (fun sh0 (H : deck_ok sh0) => H) orbit_class_invariant deck_stable
-    orbit_populated s1 s2 sh C HC Hdeck Hclass.
-exists sh'; split; last exact: Hagree.
-by split.
+    orbit_populated s2 sh C HC Hdeck.
+by exists sh'; split; [split | exact: Hagree].
 Qed.
 
 (** orbit_encode_valid — the encoder outputs a valid deck of the requested
@@ -72,7 +72,7 @@ Lemma orbit_encode_valid (s : bool) : orbit_valid s (orbit_encode s).
 Proof. by split; [exact: orbit_encode_deck | exact: orbit_encodeK]. Qed.
 
 (** orbit_scheme — the eight-card PGL(2,7) orbit ThresholdScheme, secret bool,
-    shares 'I_8, recovery threshold three.
+    shares 'I_8, privacy threshold three. Recovery reads all eight endpoints.
     @intent: the threshold scheme dealt by the eight-card protocol. *)
 Definition orbit_scheme : ThresholdScheme bool 'I_8 :=
   @MkThresholdScheme bool 'I_8 (pgg_N' pgl27_M) 3

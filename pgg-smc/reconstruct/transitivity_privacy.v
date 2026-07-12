@@ -29,6 +29,8 @@
 (* Section 5 -- Coalition-general view independence:                          *)
 (*   ttrans_view_indep_gen == every coalition of at most t positions has view *)
 (*     independent of the secret, by k-tuple fiber counting.                  *)
+(*   coalition_view_mutual_info_le == leakage about the secret is monotone    *)
+(*     under coalition inclusion.                                             *)
 (******************************************************************************)
 
 From HB Require Import structures.
@@ -196,13 +198,13 @@ Hypothesis Hpopulated : forall b : bool,
     for every coalition of at most t positions and every target secret, a
     re-dealt valid arrangement agreeing with the coalition's exact view.
     @main security: the transitivity privacy bridge discharging ts_private. *)
-Theorem ttrans_private (s1 s2 : bool) (sh : N'.+1.-tuple 'I_N'.+1)
+Theorem ttrans_private (s2 : bool) (sh : N'.+1.-tuple 'I_N'.+1)
     (C : {set 'I_N'.+1}) :
-  (#|C| <= t)%N -> deck_ok sh -> orbit_class sh = s1 ->
+  (#|C| <= t)%N -> deck_ok sh ->
   exists sh', [/\ deck_ok sh', orbit_class sh' = s2 &
     forall i, i \in C -> tnth sh' i = tnth sh i].
 Proof.
-move=> HC Hsh _.
+move=> HC Hsh.
 have [sh2 [Hsh2 Hsh2c]] := Hpopulated s2.
 have sh_inj : injective (tnth sh) by apply/tuple_uniqP; exact: Hdeck_uniq.
 have sh2_inj : injective (tnth sh2) by apply/tuple_uniqP; exact: Hdeck_uniq.
@@ -480,11 +482,11 @@ Qed.
     orbit secret.
     @main security: the coalition-general distributional privacy bridge. *)
 Lemma ttrans_view_indep_gen (C : {set 'I_N'.+1}) :
-  (#|C| <= t)%N -> (0 < t)%N -> (forall b, uniq (encode b)) ->
+  (#|C| <= t)%N -> (forall b, uniq (encode b)) ->
   secretP `x (`U HG) |= coalition_view rho secretP HG encode C _|_
     @dealt_secret gT G R secretP HG.
 Proof.
-move=> HC _ Huniq.
+move=> HC Huniq.
 pose k := size (enum C).
 pose p : k.-tuple 'I_N'.+1 := in_tuple (enum C).
 have Hk : (k <= t)%N by rewrite /k -cardE.
@@ -514,6 +516,34 @@ have Hcomp : (fun b0 : gT => coalition_view rho secretP HG encode C (b, b0))
   by rewrite Hidx nth_default // size_tuple.
 rewrite Hcomp -fdistmap_comp.
 by rewrite (@ktuple_encode_uniform k p b Hdt Hk (Huniq b) Hp).
+Qed.
+
+Local Open Scope entropy_scope.
+
+(** coalition_view_mutual_info_le == a sub-coalition shares at most the mutual
+    information about the secret that the enclosing coalition shares; leakage
+    is monotone under coalition inclusion.
+    @main bound: leakage is monotone under coalition inclusion (the ramp
+    ordering).
+    Naming: extends view_mutual_info_le to coalitions; the shared
+    _mutual_info_le tail is kept for symmetry with that lemma. *)
+Lemma coalition_view_mutual_info_le (C C' : {set 'I_N'.+1}) :
+  C' \subset C ->
+  `I(dealt_secret secretP HG ;
+       coalition_view rho secretP HG encode C')
+    <= `I(dealt_secret secretP HG ; coalition_view rho secretP HG encode C).
+Proof.
+move=> HCC'.
+pose restrict := fun v : {ffun 'I_N'.+1 -> 'I_N'.+1} =>
+  [ffun i => if i \in C' then v i else ord0].
+have Hview : coalition_view rho secretP HG encode C'
+    = restrict `o coalition_view rho secretP HG encode C.
+  apply: boolp.funext => u; apply/ffunP => i.
+  rewrite /comp_RV /restrict /coalition_view !ffunE.
+  case: (boolP (i \in C')) => iC' //=.
+  by rewrite (subsetP HCC' _ iC').
+rewrite Hview.
+exact: view_mutual_info_le.
 Qed.
 
 End transitivity_privacy_gen.

@@ -11,6 +11,12 @@
 (* Key results:                                                               *)
 (*   pgl27_view_indep == the PGL(2,7) coalition view independence at three    *)
 (*     cards                                                                  *)
+(*   pgl27_view_leakage_le == leakage about the orbit secret is monotone in   *)
+(*     the observed position set, for every coalition size                    *)
+(*   pgl27_view_dep_k4 == a four-card coalition view is not independent of    *)
+(*     the orbit secret, so the privacy threshold three is sharp              *)
+(*   pgl27_view_leak_k4 == a four-card coalition shares strictly positive     *)
+(*     mutual information with the orbit secret                               *)
 (******************************************************************************)
 
 From HB Require Import structures.
@@ -20,7 +26,7 @@ From mathcomp Require Import morphism action bigop div prime.
 From mathcomp Require Import ssralg ssrnum order.
 From mathcomp Require Import primitive_action.
 From mathcomp Require Import boolp reals.
-From infotheo Require Import realType_ext fdist proba variation_dist.
+From infotheo Require Import realType_ext fdist proba variation_dist entropy.
 From pgg_smc Require Import pgg_interface pgg_monodromy_profile.
 From pgg_reconstruct Require Import pgg_sharing_framework covering_scheme.
 From pgg_reconstruct Require Import transitivity_privacy algebraic_rigidity.
@@ -63,7 +69,119 @@ Proof.
 move=> HC.
 exact: (@ttrans_view_indep_gen (pgg_N' pgl27_M) (pgg_gT pgl27_M) (pgg_G pgl27_M)
   (@pgg_rho pgl27_M) 3 pgl27_3transitive R (fdist_uniform card_bool) pgl27_G_pos
-  orbit_encode C HC isT orbit_encode_deck).
+  orbit_encode C HC orbit_encode_deck).
+Qed.
+
+Local Open Scope ring_scope.
+Local Open Scope entropy_scope.
+
+(** pgl27_view_leakage_le == the mutual information a coalition shares with the
+    orbit secret is monotone under coalition inclusion, for every coalition
+    size including above the privacy threshold.
+    @main bound: instance leakage is monotone in the observed position set. *)
+Lemma pgl27_view_leakage_le (C C' : {set 'I_8}) : C' \subset C ->
+  `I(pgl27_secret ; pgl27_view C') <= `I(pgl27_secret ; pgl27_view C).
+Proof.
+move=> HCC'.
+exact: (@coalition_view_mutual_info_le (pgg_N' pgl27_M) (pgg_gT pgl27_M)
+  (pgg_G pgl27_M) (@pgg_rho pgl27_M) R (fdist_uniform card_bool) pgl27_G_pos
+  orbit_encode C C' HCC').
+Qed.
+
+(** pgl27_leak_coalition == the four heart seats, the positions carrying a
+    card of code below four in the identity deal.
+    @intent: the size-four coalition witnessing sharpness of the privacy
+    threshold three. *)
+Definition pgl27_leak_coalition : {set 'I_8} := [set i | (val i < 4)%N].
+
+(** pgl27_view_dep_k4 == a four-card coalition whose view of the shuffled
+    dealt arrangement is not independent of the orbit secret.
+    @main security: the privacy threshold three is sharp, a coalition of four
+    cards already depends on the orbit secret. *)
+Lemma pgl27_view_dep_k4 :
+  #|pgl27_leak_coalition| = 4 /\
+  ~ pgl27P |= pgl27_secret _|_ pgl27_view pgl27_leak_coalition.
+Proof.
+pose v0 : {ffun 'I_8 -> 'I_8} :=
+  [ffun i => if (val i < 4)%N then i else ord0].
+have Hhs : heart_set (orbit_encode false) = pgl27_leak_coalition.
+  apply/setP => x; rewrite /heart_set /pgl27_leak_coalition !inE /is_heart.
+  by case: x => -[|[|[|[|[|[|[|[|//]]]]]]]] ?.
+have Hsc : subset_class pgl27_leak_coalition = false.
+  by rewrite -Hhs; exact: (orbit_encodeK false).
+have Hview_false : pgl27_view pgl27_leak_coalition (false, 1%g) = v0.
+  rewrite /pgl27_view /v0; apply/ffunP => i.
+  rewrite !ffunE /pgl27_leak_coalition inE /= perm1.
+  have Hid : tnth (orbit_encode false) i = i.
+    by apply/val_inj; case: i => -[|[|[|[|[|[|[|[|//]]]]]]]] ?.
+  by rewrite Hid.
+have Hview_true : forall g, g \in pgg_G pgl27_M ->
+    pgl27_view pgl27_leak_coalition (true, g) <> v0.
+  move=> g gG Hveq.
+  set d := [tuple tnth (orbit_encode true) (@pgg_rho pgl27_M g i) | i < 8].
+  have Hud : uniq d.
+    by rewrite -[uniq d]/(deck_ok d) (deck_stable g (orbit_encode true) gG)
+       orbit_encode_deck.
+  have Hinj : injective (tnth d) by apply/tuple_uniqP.
+  have Hpin : forall i, i \in pgl27_leak_coalition -> tnth d i = i.
+    move=> i; rewrite /pgl27_leak_coalition inE => Hi.
+    move/ffunP/(_ i): Hveq.
+    rewrite !ffunE /pgl27_leak_coalition inE Hi /= => Heq.
+    by rewrite /d tnth_mktuple.
+  have Hheart : heart_set d = pgl27_leak_coalition.
+    apply/setP => x; rewrite /heart_set inE; apply/idP/idP.
+      move=> Hx.
+      have Hc : tnth d x \in pgl27_leak_coalition.
+        by rewrite /pgl27_leak_coalition inE.
+      by move: (Hpin _ Hc) => /Hinj Hdx; rewrite -Hdx.
+    move=> Hx; rewrite (Hpin _ Hx); move: Hx.
+    by rewrite /pgl27_leak_coalition !inE /is_heart.
+  move: (orbit_class_invariant g (orbit_encode true) gG).
+  by rewrite orbit_encodeK -/d /orbit_class Hheart Hsc.
+have Hzero :
+    `Pr[ [% pgl27_secret, pgl27_view pgl27_leak_coalition] = (true, v0) ] = 0.
+  apply/eqP; apply/negPn; apply/negP => /pfwd1_neq0 [[s g] [Hmem Hpos]].
+  have gG : g \in pgg_G pgl27_M.
+    apply: contraLR Hpos => gN.
+    rewrite /pgl27P fdist_prodE /=
+      (@fdist_uniform_supp_notin R _ (pgg_G pgl27_M) pgl27_G_pos g gN) mulr0.
+    by apply/negP => /lt0r_neq0; rewrite eqxx.
+  move: Hmem; rewrite inE /= xpair_eqE => /andP[/eqP Hs /eqP Hv].
+  by apply: (Hview_true g gG); rewrite -Hs.
+have HP1 : forall b : bool, 0 < pgl27P (b, 1%g).
+  move=> b; rewrite /pgl27P fdist_prodE /=; apply: mulr_gt0.
+    by rewrite fdist_uniformE invr_gt0 ltr0n card_bool.
+  rewrite (@fdist_uniform_supp_in R _ (pgg_G pgl27_M) pgl27_G_pos 1%g
+    (group1 _)).
+  by rewrite invr_gt0 ltr0n; exact: pgl27_G_pos.
+have Hpt : 0 < `Pr[ pgl27_secret = true ].
+  rewrite lt0r pfwd1_ge0 andbT.
+  apply/pfwd1_neq0; exists (true, 1%g); split; last exact: HP1.
+  by rewrite inE.
+have Hpv : 0 < `Pr[ (pgl27_view pgl27_leak_coalition) = v0 ].
+  rewrite lt0r pfwd1_ge0 andbT.
+  apply/pfwd1_neq0; exists (false, 1%g); split; last exact: HP1.
+  by rewrite inE /= Hview_false.
+split.
+  rewrite /pgl27_leak_coalition -sum1dep_card big_mkcond /=.
+  by do 8 rewrite big_ord_recl; rewrite big_ord0.
+move=> Hind; move: (Hind true v0) => Heq.
+move: (mulr_gt0 Hpt Hpv); rewrite -Heq Hzero.
+by move/lt0r_neq0; rewrite eqxx.
+Qed.
+
+(** pgl27_view_leak_k4 == a four-card coalition sharing strictly positive
+    mutual information with the orbit secret.
+    @main security: above the privacy threshold three the coalition view of
+    the shuffled dealt arrangement leaks the orbit secret. *)
+Lemma pgl27_view_leak_k4 :
+  #|pgl27_leak_coalition| = 4 /\
+  0 < `I(pgl27_secret ; pgl27_view pgl27_leak_coalition).
+Proof.
+split; first exact: (proj1 pgl27_view_dep_k4).
+rewrite lt0r; apply/andP; split; last exact: mutual_info_ge0.
+apply/eqP => HI0.
+exact: (proj2 pgl27_view_dep_k4) (mutual_info_RV0_indep HI0).
 Qed.
 
 End pgl27_secrecy.

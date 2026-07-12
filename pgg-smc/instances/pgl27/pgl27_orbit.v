@@ -27,6 +27,8 @@
 (*   deck_stable           == the coordinate action preserves distinctness    *)
 (*   orbit_populated       == both orbit classes occur among distinct decks   *)
 (*   orbit_encodeK         == orbit_encode is a section of orbit_class        *)
+(*   orbit_class_split     == 28 of the 70 four-subsets are equianharmonic,   *)
+(*                            42 are harmonic (the two PGL(2,7) orbit sizes) *)
 (******************************************************************************)
 
 From HB Require Import structures.
@@ -364,4 +366,165 @@ Proof.
 exists (orbit_encode b); split.
 - exact: orbit_encode_deck.
 - exact: orbit_encodeK.
+Qed.
+
+(* -------------------------------------------------------------------------- *)
+(* The forty-two / twenty-eight split of the seventy four-subsets.            *)
+(* -------------------------------------------------------------------------- *)
+
+(* The four-subset of positions whose codes occur in a code list. *)
+Local Definition list_to_set (L : seq nat) : {set 'I_8} :=
+  [set i : 'I_8 | val i \in L].
+
+(* A strictly ascending four-list of codes below eight. *)
+Local Definition asc4 (L : seq nat) : bool :=
+  [&& sorted ltn L, all (fun n => (n < 8)%N) L & size L == 4].
+
+(* The seventy strictly ascending four-lists of codes below eight. *)
+Local Definition sorted4 : seq (seq nat) :=
+  flatten [seq flatten [seq flatten [seq [seq [:: a; b; c; d]
+    | d <- iota c.+1 (8 - c.+1)]
+    | c <- iota b.+1 (8 - b.+1)]
+    | b <- iota a.+1 (8 - a.+1)]
+    | a <- iota 0 8].
+
+(* sorted4 lists no code quadruple twice. @composes: orbit_class_split *)
+Local Lemma sorted4_uniq : uniq sorted4.
+Proof. by vm_compute. Qed.
+
+(* Every element of sorted4 is a strictly ascending four-list below eight. *)
+Local Lemma sorted4_asc : all asc4 sorted4.
+Proof. by vm_compute. Qed.
+
+(* sorted4 enumerates every strictly ascending four-list below eight. *)
+Local Lemma sorted4_complete (L : seq nat) : asc4 L -> L \in sorted4.
+Proof.
+case: L => [|a [|b [|c [|d [|e l]]]]] A //.
+all: try by case/and3P: A => _ _ /eqP.
+case/and3P: A => Hsort Hall _.
+move: Hsort; rewrite /= => /andP[Hab /andP[Hbc Hcd]].
+move: Hall => /= /andP[Ha /andP[Hb /andP[Hc /andP[Hd _]]]].
+move: Hcd; rewrite andbT => Hcd.
+apply/flatten_mapP; exists a; first by rewrite mem_iota add0n Ha.
+apply/flatten_mapP; exists b; first by rewrite mem_iota (subnKC Ha) Hab Hb.
+apply/flatten_mapP; exists c; first by rewrite mem_iota (subnKC Hb) Hbc Hc.
+apply/mapP; exists d; first by rewrite mem_iota (subnKC Hc) Hcd Hd.
+by [].
+Qed.
+
+(* The code list of a subset's enumeration is strictly ascending. *)
+Local Lemma sorted_val_enum (S : {set 'I_8}) : sorted ltn (map val (enum S)).
+Proof.
+rewrite sorted_map.
+have He : enum S = [seq x <- enum 'I_8 | x \in S]
+  by rewrite enumT -deprecated_filter_index_enum.
+rewrite He; apply: sorted_filter.
+  by move=> y x z; apply: ltn_trans.
+by rewrite -sorted_map val_enum_ord; exact: iota_ltn_sorted.
+Qed.
+
+(* list_to_set is a section of the code list of the enumeration. *)
+Local Lemma list_to_setK (S : {set 'I_8}) :
+  list_to_set (map val (enum S)) = S.
+Proof.
+by apply/setP => i; rewrite /list_to_set inE (mem_map val_inj) mem_enum.
+Qed.
+
+(* The code list of list_to_set L is a permutation of L for ascending L. *)
+Local Lemma perm_list_to_set (L : seq nat) :
+  asc4 L -> perm_eq (map val (enum (list_to_set L))) L.
+Proof.
+move=> /and3P[Hsort Hall _].
+apply: uniq_perm.
+- rewrite (map_inj_uniq val_inj); exact: enum_uniq.
+- exact: (sorted_uniq ltn_trans ltnn Hsort).
+- move=> n; apply/mapP/idP => [[i Hi ->]|Hn];
+    first by move: Hi; rewrite mem_enum inE.
+  have Hn8 : (n < 8)%N by move/allP: Hall => /(_ n Hn).
+  by exists (Ordinal Hn8); [rewrite mem_enum inE|].
+Qed.
+
+(* An ascending four-list codes a four-element position subset. *)
+Local Lemma card_list_to_set (L : seq nat) : asc4 L -> #|list_to_set L| = 4.
+Proof.
+move=> A; rewrite cardE -(size_map val (enum (list_to_set L)))
+  (perm_size (@perm_list_to_set L A)).
+by move: A => /and3P[_ _ /eqP ->].
+Qed.
+
+(* The subset classifier of list_to_set L is the code verdict of L. *)
+Local Lemma subset_class_list_to_set (L : seq nat) :
+  asc4 L -> subset_class (list_to_set L) = nclass L.
+Proof.
+by move=> A; rewrite subset_classE; apply: nclass_perm;
+   exact: perm_list_to_set.
+Qed.
+
+(* list_to_set is injective on strictly ascending four-lists. *)
+Local Lemma list_to_set_inj (L1 L2 : seq nat) :
+  asc4 L1 -> asc4 L2 -> list_to_set L1 = list_to_set L2 -> L1 = L2.
+Proof.
+move=> A1 A2 Heq; apply: (irr_sorted_eq ltn_trans ltnn).
+- by case/and3P: A1.
+- by case/and3P: A2.
+- move=> n; rewrite -(perm_mem (@perm_list_to_set L1 A1)) Heq.
+  by rewrite (perm_mem (@perm_list_to_set L2 A2)).
+Qed.
+
+(* A four-subset class count equals the code-level count over sorted4. *)
+(* @composes: orbit_class_split *)
+Local Lemma class_count (p : {set 'I_8} -> bool) (pn : seq nat -> bool) :
+  (forall L, asc4 L -> p (list_to_set L) = pn L) ->
+  #|[set S : {set 'I_8} | (#|S| == 4) && p S]| = count pn sorted4.
+Proof.
+move=> Hp.
+have key : forall S : {set 'I_8}, #|S| = 4 -> asc4 (map val (enum S)).
+  move=> S HcS; rewrite /asc4 sorted_val_enum /=; apply/andP; split.
+    by apply/allP => n /mapP[i _ ->]; exact: ltn_ord.
+  by rewrite size_map -cardE HcS.
+have Huniq : uniq [seq list_to_set L | L <- filter pn sorted4].
+  rewrite map_inj_in_uniq; last first.
+    move=> L1 L2; rewrite !mem_filter => /andP[_ H1] /andP[_ H2].
+    by apply: list_to_set_inj; apply: (allP sorted4_asc).
+  by rewrite filter_uniq // sorted4_uniq.
+have Hmem : [set S : {set 'I_8} | (#|S| == 4) && p S]
+              =i [seq list_to_set L | L <- filter pn sorted4].
+  move=> S; rewrite inE; apply/idP/idP.
+    move=> /andP[/eqP HcS HpS]; apply/mapP.
+    exists (map val (enum S)); last by rewrite list_to_setK.
+    rewrite mem_filter (@sorted4_complete (map val (enum S)) (key S HcS)) andbT.
+    by rewrite -(Hp _ (key S HcS)) list_to_setK.
+  move=> /mapP[L]; rewrite mem_filter => /andP[HpnL HinL] ->.
+  have AL : asc4 L by apply: (allP sorted4_asc).
+  by rewrite (@card_list_to_set L AL) eqxx (Hp _ AL).
+rewrite (eq_card Hmem).
+transitivity (size [seq list_to_set L | L <- filter pn sorted4]).
+  by apply/card_uniqP.
+by rewrite size_map size_filter.
+Qed.
+
+(** orbit_class_split — twenty-eight of the seventy four-subsets of the
+    projective line are equianharmonic.
+    @main architecture: the classifier splits the seventy four-subsets into
+    forty-two harmonic and twenty-eight equianharmonic, identifying the two
+    secret classes with the two PGL(2,7) orbit sizes on four-subsets. *)
+Lemma orbit_class_split :
+  #|[set S : {set 'I_8} | (#|S| == 4) && subset_class S]| = 28.
+Proof.
+rewrite (@class_count subset_class nclass subset_class_list_to_set).
+by vm_compute.
+Qed.
+
+(** orbit_class_split_complement — forty-two of the seventy four-subsets of
+    the projective line are harmonic.
+    @main architecture: the harmonic orbit has size forty-two, the complement
+    of the twenty-eight equianharmonic four-subsets. *)
+Lemma orbit_class_split_complement :
+  #|[set S : {set 'I_8} | (#|S| == 4) && ~~ subset_class S]| = 42.
+Proof.
+have Hneg : forall L, asc4 L -> ~~ subset_class (list_to_set L) = ~~ nclass L
+  by move=> L AL; rewrite (@subset_class_list_to_set L AL).
+by rewrite (@class_count (fun S => ~~ subset_class S)
+             (fun L => ~~ nclass L) Hneg);
+  vm_compute.
 Qed.

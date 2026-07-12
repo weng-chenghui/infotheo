@@ -1,15 +1,34 @@
 # PGL(2,7) orbit-class instance + transitivity-privacy bridge: design
 
 Date: 2026-07-11
-Status: IMPLEMENTED 2026-07-12. All nine files landed, all Qed; axioms =
-pgl27_3transitive + pgl27_card (justified L2, structural Moebius/Bruhat route
-blocked by symbolic 'F_7 field identities with no field tactic) + boolp trio.
-The security chain uses only pgl27_3transitive. ttrans_view_indep_gen landed
-general (#|C| <= t) and lives in the bridge. Landed labeling: orbit_class
-true = 28-orbit (equianharmonic), inverting section 1's narrative. Deferred:
-orbit_class_split (narrative 42/28 count; {set 'I_8} enum is vm_compute
-hostile). Previously: approved design, revised after adversarial review
-(all 10 findings applied; see section 9).
+Status: IMPLEMENTED 2026-07-12; audit follow-up landed same day. All eight
+files landed, all Qed; axioms = pgl27_3transitive (justified L2, structural
+Moebius/Bruhat route blocked by symbolic 'F_7 field identities with no field
+tactic) + boolp trio. pgl27_card was deleted in the audit follow-up (zero
+consumers; the machine-checked pgl27_pgl2_order concerns the abstract
+quotient, with no formalized isomorphism to the generated group). All three
+generators are machine-checked Moebius maps (tr_moebius, sc_moebius,
+inv_moebius). The security chain uses only pgl27_3transitive.
+ttrans_view_indep_gen landed general (#|C| <= t) and lives in the bridge.
+Landed labeling: orbit_class true = 28-orbit (equianharmonic), inverting
+section 1's narrative. Landed probability model: uniform boolean secret
+prior with the deck sampled as the G-orbit of the fixed representative
+orbit_encode(s) under a uniform group element, replacing section 4's locked
+non-uniform 42/70 vs 28/70 prior over all valid decks; the theorems are
+stated and proven for this landed model. The leakage ramp is two-sided:
+coalition privacy for size <= 3 (pgl27_view_indep, under the axiom),
+monotone leakage under coalition inclusion for every size
+(pgl27_view_leakage_le, boolp-only, via the bridge's
+coalition_view_mutual_info_le consuming view_mutual_info_le), and a
+concrete four-position coalition with strictly positive mutual information
+(pgl27_view_leak_k4, boolp-only), so the privacy threshold three is sharp.
+Recovery reads all 8 endpoints; a record-free, axiom-free correctness
+corollary (pgl27_run_recovers_class, closed under the global context) and
+full-trace losslessness (pgl27_player_trace_full) landed in pgl27_trace.v.
+orbit_class_split (the 42/28 count) is proven axiom-free via an explicit
+seventy-list generator and a locked-enum-free counting bridge, closing the
+earlier deferral. Previously: approved design, revised after adversarial
+review (all 10 findings applied; see section 9).
 Sources: `pgg-smc/notes/20260702-114631-pgl27-orbit-class-ROCQ-formalization-spec.md`
 (design-validated spec, shape probe `.local/wip/pgl_shape_probe.v` compiled),
 `pgg-smc/notes/20260701-175221-report-shuffle-matters-group-ladder.md` (research),
@@ -132,7 +151,7 @@ consumed by `pgl27_secrecy.v`.
 |------|--------------|
 | `reconstruct/transitivity_privacy.v` | Theorem B: t-transitive action + fixed deck => <= t coalition view secret-independent => `ts_private` (side-hypotheses: `Htrans`, `Hinv`, `Hdeck_stable`, `Hpopulated`, `#|C| < t.+1`; `deck_ok` flows through `ts_valid` per L7). Distributional corollary for view independence (L8). Theorem A (tail): `A \subset B -> mutual_info(Secret, View A) <= mutual_info(Secret, View B)` via infotheo `data_processing_inequality`. Group-agnostic. |
 | `pgl27_group.v` | P^1(F_7) identification on `'I_8` (0..6 field elements, 7 = infinity); `pgl27_gens : 3.-tuple {perm 'I_8}` (z+1, 3z, -1/z; 3 is a non-square mod 7, which is what exceeds PSL); `pgl_M := @Gen_PGGTypes 2 6 pgl27_gens` (unascribed); `pgl27_card : #|pgg_G pgl_M| = 336`; `pgl_3transitive : ntransitive 3 (@pgg_rho pgl_M @* pgg_G pgl_M) [set: 'I_8] 'P`. |
-| `pgl27_orbit.v` | `deck_ok` (fixed 4-hearts/4-clubs multiset predicate); `cross_ratio` (partial, total on distinct 4-tuples); `orbit_class : 8.-tuple 'I_8 -> bool` (true = 42-orbit / harmonic, false = 28-orbit / equianharmonic); `orbit_class_split` (42 and 28); `orbit_class_invariant` (PGL-invariance under the coordinate action); `orbit_encode` + `orbit_encodeK` + `orbit_encode_deck : deck_ok (orbit_encode s)`. |
+| `pgl27_orbit.v` | `deck_ok` (fixed 4-hearts/4-clubs multiset predicate); `cross_ratio` (partial, total on distinct 4-tuples); `orbit_class : 8.-tuple 'I_8 -> bool` (true = 28-orbit / equianharmonic, false = 42-orbit / harmonic; landed labeling, inverted from the original draft); `orbit_class_split` (42 and 28); `orbit_class_invariant` (PGL-invariance under the coordinate action); `orbit_encode` + `orbit_encodeK` + `orbit_encode_deck : deck_ok (orbit_encode s)`. |
 | `pgl27_scheme.v` | `orbit_scheme : ThresholdScheme bool 'I_8` with `ts_T' = 7`, `ts_k' = 3`, `ts_valid s sh := deck_ok sh /\ orbit_class sh = s` (Prop, L7), `ts_recon = orbit_class`, `ts_encode = orbit_encode`, `ts_correct` by projection, `ts_encode_valid` from `orbit_encodeK` + `orbit_encode_deck`; `orbit_private` (Theorem B instantiated); `orbit_plug : ReconPlug pgl_M bool` with `rp_scheme = orbit_scheme`, `rp_content` per L5 probe, `rp_monodromy = fun g => @pgg_rho pgl_M g`, `rp_recon_invariant = orbit_recon_invariant` (from `orbit_class_invariant`). |
 | `pgl27_profile.v` | `pgl27_PI : PGGInterface pgl_M` (`pi_T' = 7`, `pi_starts = ord_tuple 8`, `pi_starts_uniq` by a custom one-liner `pgl27_starts_uniq : uniq (ord_tuple 8)` mirroring `s5_starts_uniq` at s5_profile.v:30 — there is NO mathcomp lemma `ord_tuple_uniq`); `pgl27_security : SecurityWitness R pgl_M` with ALL SIX fields: `sw_L = 0`, `sw_bound_eps = 0`, `sw_rho_dist` = uniform on the pgg_rho image, `sw_bound` exact (uniform draw over a transitive group gives an exactly uniform single-card marginal, axiom-free), `sw_exact = Some ...` (`SecurityExact` per-s var_dist equality), `sw_asymptotic = None` (den Boer uniform-dealing pattern, algebraic_rigidity.v:102-104); `pgl27_profile : MonodromyProfile R` (mp_M = pgl_M, mp_secretT = bool, mp_PI, mp_security, mp_plug). |
 | `pgl27_run.v` | The dealer-run pipeline mirroring `s5_run.v`'s full artifact set: `pgl27_players`, `pgl27_dealer_run`, `pgl27_procs`, `pgl27_run_terminates`, `pgl27_endpoints` + `pgl27_endpoints_size`, and the target `pgl27_run_recovers` (recon of the dealt-then-shuffled encoding returns the secret, via `orbit_recon_invariant` + `orbit_encodeK`). |

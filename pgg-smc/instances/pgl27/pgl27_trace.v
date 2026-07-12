@@ -11,6 +11,8 @@
 (* of at most three cards.                                                    *)
 (*                                                                            *)
 (* Key results:                                                               *)
+(*   pgl27_run_recovers_class      == record-free axiom-free run recovery     *)
+(*   pgl27_player_trace_full       == the full player trace is its dealt card *)
 (*   pgl27_trace_secrecy           == one player's trace keeps the secret     *)
 (*   pgl27_coalition_trace_secrecy == any <= 3 coalition trace keeps it       *)
 (******************************************************************************)
@@ -138,6 +140,97 @@ Lemma pgl27_abs_p7 :
   = g (@pgg_rho pgl27_M w0 (tnth (pi_starts pgl27_PI) (@Ordinal 8 7 isT))).
 Proof. rewrite /pgl27_aprocs_abs; vm_compute; reflexivity. Qed.
 
+(* The full per-player trace is the two-element list of an index marker and a
+   singleton hand: [:: PGG_idx 0; PGG_hand [:: card]]. Each card value is held
+   abstract in g so vm_compute closes the list skeleton by reflexivity. *)
+(** pgl27_full_p0 — player 0's full executed trace: the index marker PGG_idx 0
+    and the singleton hand g at the cut-permuted starting position of player 0.
+    @composes: pgl27_player_trace_full *)
+Lemma pgl27_full_p0 :
+  nth [::] (run_interp pgl27_fuel pgl27_aprocs_abs).2 (2 + 0)
+  = [:: PGG_idx 0;
+        PGG_hand
+          [:: g (@pgg_rho pgl27_M w0
+                   (tnth (pi_starts pgl27_PI) (@Ordinal 8 0 isT)))]].
+Proof. rewrite /pgl27_aprocs_abs; vm_compute; reflexivity. Qed.
+
+(** pgl27_full_p1 — player 1's full executed trace: the index marker PGG_idx 0
+    and the singleton hand g at the cut-permuted starting position of player 1.
+    @composes: pgl27_player_trace_full *)
+Lemma pgl27_full_p1 :
+  nth [::] (run_interp pgl27_fuel pgl27_aprocs_abs).2 (2 + 1)
+  = [:: PGG_idx 0;
+        PGG_hand
+          [:: g (@pgg_rho pgl27_M w0
+                   (tnth (pi_starts pgl27_PI) (@Ordinal 8 1 isT)))]].
+Proof. rewrite /pgl27_aprocs_abs; vm_compute; reflexivity. Qed.
+
+(** pgl27_full_p2 — player 2's full executed trace: the index marker PGG_idx 0
+    and the singleton hand g at the cut-permuted starting position of player 2.
+    @composes: pgl27_player_trace_full *)
+Lemma pgl27_full_p2 :
+  nth [::] (run_interp pgl27_fuel pgl27_aprocs_abs).2 (2 + 2)
+  = [:: PGG_idx 0;
+        PGG_hand
+          [:: g (@pgg_rho pgl27_M w0
+                   (tnth (pi_starts pgl27_PI) (@Ordinal 8 2 isT)))]].
+Proof. rewrite /pgl27_aprocs_abs; vm_compute; reflexivity. Qed.
+
+(** pgl27_full_p3 — player 3's full executed trace: the index marker PGG_idx 0
+    and the singleton hand g at the cut-permuted starting position of player 3.
+    @composes: pgl27_player_trace_full *)
+Lemma pgl27_full_p3 :
+  nth [::] (run_interp pgl27_fuel pgl27_aprocs_abs).2 (2 + 3)
+  = [:: PGG_idx 0;
+        PGG_hand
+          [:: g (@pgg_rho pgl27_M w0
+                   (tnth (pi_starts pgl27_PI) (@Ordinal 8 3 isT)))]].
+Proof. rewrite /pgl27_aprocs_abs; vm_compute; reflexivity. Qed.
+
+(** pgl27_full_p4 — player 4's full executed trace: the index marker PGG_idx 0
+    and the singleton hand g at the cut-permuted starting position of player 4.
+    @composes: pgl27_player_trace_full *)
+Lemma pgl27_full_p4 :
+  nth [::] (run_interp pgl27_fuel pgl27_aprocs_abs).2 (2 + 4)
+  = [:: PGG_idx 0;
+        PGG_hand
+          [:: g (@pgg_rho pgl27_M w0
+                   (tnth (pi_starts pgl27_PI) (@Ordinal 8 4 isT)))]].
+Proof. rewrite /pgl27_aprocs_abs; vm_compute; reflexivity. Qed.
+
+(** pgl27_full_p5 — player 5's full executed trace: the index marker PGG_idx 0
+    and the singleton hand g at the cut-permuted starting position of player 5.
+    @composes: pgl27_player_trace_full *)
+Lemma pgl27_full_p5 :
+  nth [::] (run_interp pgl27_fuel pgl27_aprocs_abs).2 (2 + 5)
+  = [:: PGG_idx 0;
+        PGG_hand
+          [:: g (@pgg_rho pgl27_M w0
+                   (tnth (pi_starts pgl27_PI) (@Ordinal 8 5 isT)))]].
+Proof. rewrite /pgl27_aprocs_abs; vm_compute; reflexivity. Qed.
+
+(** pgl27_full_p6 — player 6's full executed trace: the index marker PGG_idx 0
+    and the singleton hand g at the cut-permuted starting position of player 6.
+    @composes: pgl27_player_trace_full *)
+Lemma pgl27_full_p6 :
+  nth [::] (run_interp pgl27_fuel pgl27_aprocs_abs).2 (2 + 6)
+  = [:: PGG_idx 0;
+        PGG_hand
+          [:: g (@pgg_rho pgl27_M w0
+                   (tnth (pi_starts pgl27_PI) (@Ordinal 8 6 isT)))]].
+Proof. rewrite /pgl27_aprocs_abs; vm_compute; reflexivity. Qed.
+
+(** pgl27_full_p7 — player 7's full executed trace: the index marker PGG_idx 0
+    and the singleton hand g at the cut-permuted starting position of player 7.
+    @composes: pgl27_player_trace_full *)
+Lemma pgl27_full_p7 :
+  nth [::] (run_interp pgl27_fuel pgl27_aprocs_abs).2 (2 + 7)
+  = [:: PGG_idx 0;
+        PGG_hand
+          [:: g (@pgg_rho pgl27_M w0
+                   (tnth (pi_starts pgl27_PI) (@Ordinal 8 7 isT)))]].
+Proof. rewrite /pgl27_aprocs_abs; vm_compute; reflexivity. Qed.
+
 End abstract_leaf.
 
 (** pgl27_procs_abs — the concrete run at secret s and cut w0 is the abstract
@@ -146,6 +239,65 @@ End abstract_leaf.
 Lemma pgl27_procs_abs (s : bool) (w0 : pgg_gT pgl27_M) :
   pgl27_procs s w0 = pgl27_aprocs_abs (tnth (orbit_encode s)) w0.
 Proof. by []. Qed.
+
+(** pgl27_aprocs_endpoints — the abstract run's collected endpoints are the
+    readout g at each cut-permuted starting position, one per player.
+    @composes: pgl27_run_recovers_class *)
+Lemma pgl27_aprocs_endpoints (g : 'I_8 -> 'I_8) (w0 : pgg_gT pgl27_M) :
+  endpoints_of_trace
+    (nth [::] (run_interp pgl27_fuel (pgl27_aprocs_abs g w0)).2 1)
+  = [seq g (@pgg_rho pgl27_M w0 (tnth (pi_starts pgl27_PI) i))
+     | i <- enum 'I_(pi_T' pgl27_PI).+1].
+Proof.
+rewrite /pgl27_aprocs_abs /dealer_with_input_encoding /identity_deck.
+rewrite (@pgl27_verifier_endpoints (fun _ : seq _ => g) w0
+           (ord_tuple 8) pgl27_starts_uniq).
+have Hde : pgl27_players = enum 'I_8.
+  by apply: (inj_map val_inj); rewrite val_enum_ord.
+by rewrite Hde.
+Qed.
+
+(** pgl27_aprocs_endpoints_size — the abstract run collects exactly eight
+    endpoints.
+    @composes: pgl27_run_recovers_class *)
+Lemma pgl27_aprocs_endpoints_size (g : 'I_8 -> 'I_8) (w0 : pgg_gT pgl27_M) :
+  size (endpoints_of_trace
+          (nth [::] (run_interp pgl27_fuel (pgl27_aprocs_abs g w0)).2 1)) = 8.
+Proof. by rewrite pgl27_aprocs_endpoints size_map size_enum_ord. Qed.
+
+(** pgl27_run_recovers_class — executed run over the abstract dealt readout
+    tnth (orbit_encode s) recovers the orbit class s from the verifier's
+    cut-permuted endpoints, for any cut w0 in the group, with neither the
+    threshold-scheme record nor its privacy axiom in scope.
+    @main correctness: record-free axiom-free recovery of the dealt orbit
+    secret s : bool by the orbit classifier, via its shuffle invariance
+    (orbit_class_invariant) and section (orbit_encodeK) at w0. *)
+Lemma pgl27_run_recovers_class (s : bool) (w0 : pgg_gT pgl27_M) :
+  w0 \in pgg_G pgl27_M ->
+  orbit_class (tcast (pgl27_aprocs_endpoints_size (tnth (orbit_encode s)) w0)
+     (in_tuple (endpoints_of_trace
+        (nth [::]
+          (run_interp pgl27_fuel
+             (pgl27_aprocs_abs (tnth (orbit_encode s)) w0)).2 1)))) = s.
+Proof.
+move=> Hw0.
+have Hgoal : forall (ep : seq 'I_(pgg_N' pgl27_M).+1) (H8 : size ep = 8),
+    ep = [seq tnth (orbit_encode s)
+              (@pgg_rho pgl27_M w0 (tnth (pi_starts pgl27_PI) i))
+            | i <- enum 'I_(pi_T' pgl27_PI).+1] ->
+    orbit_class (tcast H8 (in_tuple ep)) = s.
+  move=> ep H8 Hep.
+  have -> : tcast H8 (in_tuple ep)
+          = [tuple tnth (orbit_encode s) (@pgg_rho pgl27_M w0 j) | j < 8].
+    apply: eq_from_tnth => j.
+    rewrite tcastE tnth_mktuple (tnth_nth ord0) /= Hep.
+    rewrite (nth_map j) ?nth_ord_enum ?tnth_ord_tuple;
+      last by rewrite size_enum_ord ltn_ord.
+    by [].
+  by rewrite (orbit_class_invariant w0 (orbit_encode s) Hw0) orbit_encodeK.
+apply: Hgoal.
+by rewrite pgl27_aprocs_endpoints.
+Qed.
 
 (** pgl27_player_trace — player i's executed-trace content, lifted over the
     joint secret-and-shuffle sampler via the run_interp projection at process
@@ -181,6 +333,37 @@ case: i => -[|[|[|[|[|[|[|[|//]]]]]]]] Hi.
   by congr (tnth (orbit_encode u.1) (@pgg_rho pgl27_M u.2 _)); apply: val_inj.
 - rewrite (pgl27_abs_p7 (tnth (orbit_encode u.1)) u.2) tnth_ord_tuple.
   by congr (tnth (orbit_encode u.1) (@pgg_rho pgl27_M u.2 _)); apply: val_inj.
+Qed.
+
+(** pgl27_player_trace_full — player i's full executed trace is a two-element
+    list [:: PGG_idx 0; PGG_hand [:: pgl27_player_trace i u]] of the index
+    marker and the singleton hand holding the dealt card; the trace is a
+    deterministic function of that single card, so content_of is a lossless
+    projection and conditioning on it equals conditioning on the whole trace.
+    @main security: the full executed player trace carries no more information
+    about the secret than its single dealt-card content. *)
+Lemma pgl27_player_trace_full (i : 'I_8) (u : bool * pgg_gT pgl27_M) :
+  nth [::] (run_interp pgl27_fuel (pgl27_procs u.1 u.2)).2 (2 + i)
+  = [:: PGG_idx 0; PGG_hand [:: pgl27_player_trace i u]].
+Proof.
+rewrite pgl27_procs_abs pgl27_player_trace_E.
+case: i => -[|[|[|[|[|[|[|[|//]]]]]]]] Hi.
+- have -> : (@Ordinal 8 0 Hi) = (@Ordinal 8 0 isT) by apply: val_inj.
+  by rewrite (pgl27_full_p0 (tnth (orbit_encode u.1)) u.2) tnth_ord_tuple.
+- have -> : (@Ordinal 8 1 Hi) = (@Ordinal 8 1 isT) by apply: val_inj.
+  by rewrite (pgl27_full_p1 (tnth (orbit_encode u.1)) u.2) tnth_ord_tuple.
+- have -> : (@Ordinal 8 2 Hi) = (@Ordinal 8 2 isT) by apply: val_inj.
+  by rewrite (pgl27_full_p2 (tnth (orbit_encode u.1)) u.2) tnth_ord_tuple.
+- have -> : (@Ordinal 8 3 Hi) = (@Ordinal 8 3 isT) by apply: val_inj.
+  by rewrite (pgl27_full_p3 (tnth (orbit_encode u.1)) u.2) tnth_ord_tuple.
+- have -> : (@Ordinal 8 4 Hi) = (@Ordinal 8 4 isT) by apply: val_inj.
+  by rewrite (pgl27_full_p4 (tnth (orbit_encode u.1)) u.2) tnth_ord_tuple.
+- have -> : (@Ordinal 8 5 Hi) = (@Ordinal 8 5 isT) by apply: val_inj.
+  by rewrite (pgl27_full_p5 (tnth (orbit_encode u.1)) u.2) tnth_ord_tuple.
+- have -> : (@Ordinal 8 6 Hi) = (@Ordinal 8 6 isT) by apply: val_inj.
+  by rewrite (pgl27_full_p6 (tnth (orbit_encode u.1)) u.2) tnth_ord_tuple.
+- have -> : (@Ordinal 8 7 Hi) = (@Ordinal 8 7 isT) by apply: val_inj.
+  by rewrite (pgl27_full_p7 (tnth (orbit_encode u.1)) u.2) tnth_ord_tuple.
 Qed.
 
 (** pgl27_point_indep — one player's dealt card is independent of the secret,
