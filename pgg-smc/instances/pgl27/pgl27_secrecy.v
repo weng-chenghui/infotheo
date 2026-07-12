@@ -29,10 +29,9 @@ From pgg_smc Require Import pgl27_group pgl27_orbit pgl27_scheme pgl27_profile.
 Set Implicit Arguments.
 Unset Strict Implicit.
 Import Prenex Implicits.
-Import GRing.Theory Num.Theory Order.Theory.
+Import GRing.Theory Num.Theory.
 
 Local Open Scope fdist_scope.
-
 
 Section pgl27_secrecy.
 Local Open Scope proba_scope.

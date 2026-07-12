@@ -152,7 +152,7 @@ Qed.
 (** pgl27_pgl2_order — the abstract PGL(2,7) quotient has order
     336 = 7*(7^2-1), the target value of [pgl27_card].
     @main bound: the machine-checked |PGL(2,7)| = 336. *)
-Lemma pgl27_pgl2_order : #|pgl2 'F_7| = 336%N.
+Lemma pgl27_pgl2_order : #|pgl2 'F_7| = 336.
 Proof. by rewrite card_pgl2 card_Fp. Qed.
 
 (* -------------------------------------------------------------------------- *)

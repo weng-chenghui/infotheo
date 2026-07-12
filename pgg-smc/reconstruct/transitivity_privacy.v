@@ -183,7 +183,7 @@ Qed.
 
 Section redeal.
 Variable orbit_class : N'.+1.-tuple 'I_N'.+1 -> bool.
-Variable deck_ok     : N'.+1.-tuple 'I_N'.+1 -> bool.
+Variable deck_ok : N'.+1.-tuple 'I_N'.+1 -> bool.
 Hypothesis Hdeck_uniq : forall sh, deck_ok sh -> uniq sh.
 Hypothesis Hinv : forall g sh, g \in G ->
   orbit_class [tuple tnth sh (rho g i) | i < N'.+1] = orbit_class sh.
@@ -426,13 +426,13 @@ have fibeqgen : forall r : k.-tuple 'I_N'.+1,
     by apply/subsetP => x _; rewrite inE.
   rewrite -(rho_tuple_fiber_card Htrans Hk Hp Hr').
   apply: eq_card => g; rewrite !inE; congr (_ && _).
-  apply/idP/idP => /eqP H; apply/eqP.
+  apply/idP/idP => /eqP Htup; apply/eqP.
     apply: eq_from_tnth => l.
-    move: (congr1 (fun z : k.-tuple _ => tnth z l) H).
+    move: (congr1 (fun z : k.-tuple _ => tnth z l) Htup).
     rewrite !tnth_mktuple => Hl.
     by rewrite -(ebK (rho g (tnth p l))) Hl.
   apply: eq_from_tnth => l.
-  move: (congr1 (fun z : k.-tuple _ => tnth z l) H).
+  move: (congr1 (fun z : k.-tuple _ => tnth z l) Htup).
   rewrite !tnth_mktuple => Hl.
   by rewrite Hl ebK'.
 have Hpart : #|G| = (#|dtuple_on k [set: 'I_N'.+1]|

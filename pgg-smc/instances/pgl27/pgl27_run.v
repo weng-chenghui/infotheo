@@ -12,6 +12,7 @@
 (*   pgl27_fuel       == the interpreter fuel driving the ten-process run     *)
 (*   pgl27_players    == the eight explicit player ordinals of 'I_8           *)
 (*   pgl27_dealer_run == the dealer dealing the encoded shares of s at cut w0 *)
+(*   pgl27_saprocs    == the ten session-typed processes of one run           *)
 (*   pgl27_procs      == the erased ten-process list fed to the interpreter   *)
 (*                                                                            *)
 (* Key results:                                                               *)
@@ -129,7 +130,8 @@ Qed.
 (** pgl27_endpoints_size — the verifier collects exactly ts_T'.+1 endpoints.
     @composes: pgl27_run_recovers *)
 Lemma pgl27_endpoints_size (s : bool) (w0 : pgg_gT pgl27_M) :
-  size (endpoints_of_trace (nth [::] (run_interp pgl27_fuel (pgl27_procs s w0)).2 1))
+  size (endpoints_of_trace
+          (nth [::] (run_interp pgl27_fuel (pgl27_procs s w0)).2 1))
   = (ts_T' orbit_scheme).+1.
 Proof. by rewrite pgl27_endpoints size_map size_enum_ord. Qed.
 

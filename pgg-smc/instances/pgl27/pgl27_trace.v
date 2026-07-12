@@ -152,7 +152,9 @@ Proof. by []. Qed.
     index 2+i.
     @intent: single-player executed trace as a content random variable. *)
 Definition pgl27_player_trace (i : 'I_8) : {RV (pgl27P R) -> 'I_8} :=
-  fun u => content_of (nth [::] (run_interp pgl27_fuel (pgl27_procs u.1 u.2)).2 (2 + i)).
+  fun u =>
+    content_of
+      (nth [::] (run_interp pgl27_fuel (pgl27_procs u.1 u.2)).2 (2 + i)).
 
 (** pgl27_player_trace_E — the lifted player trace equals the dealt card of
     player i, the cut-permuted encoded value.
