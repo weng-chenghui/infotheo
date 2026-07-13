@@ -58,6 +58,46 @@ floats, itemized Generative AI Declaration).
    conformance artifact binding every prose claim to a kernel object
    or an explicit disclosure.
 
+### Novelty decomposition (deep-research verdict, 2026-07-14)
+
+A 19-source adversarial sweep (16 claims confirmed, 0 refuted) found no
+work preempting the full combination, but three axes are partially
+preempted, so claim 1 is stated at the combination level, never per
+axis. See [[project_framework_novelty_verdict]].
+
+- Axis (a) proof-assistant card-crypto formalization: NOT preempted.
+  Prior card-crypto formalization is SAT bounded model checking
+  (Koch-Schrempp-Kirsten; the 2025 four-card-XOR APKC successor) or
+  pen-and-paper (Mizuki-Shizuya, Koch-Walzer). Wording constraint:
+  "first interactive-theorem-prover / kernel-checked formalization of
+  card-based cryptography", NEVER "first formal verification/methods"
+  (Koch-Schrempp-Kirsten claim that verbatim, confirmed 3-0).
+- Axis (b) group-parametric shuffle framing: PARTIALLY preempted
+  pen-and-paper. Koch-Walzer uniform closed shuffles and the
+  Shinagawa-Miyamoto graph-automorphism shuffles already make a
+  permutation group a first-class shuffle parameter. Novel part =
+  biased law over generators, L-step shuffle words, and machine-checked
+  security over the triple.
+- Axis (c) certified mixing / variation-distance bounds: PARTIALLY
+  preempted. Karayel "Expander Graphs" (Isabelle AFP 2023) machine-
+  checks Cheeger and random-walk tail bounds; Barthe et al. pRHL/xpRHL
+  mechanize only the logic's soundness, not object-level mixing proofs.
+  Novel part = an in-kernel card-shuffle variation-distance-to-uniform
+  bound wired into a protocol's security.
+- Axis (d) the full combination plus threshold recovery and trace
+  entropy privacy: NOT preempted. This is the safe headline.
+
+Self-ancestor: the author's own FORTE 2025 Rocq pi-calculus interpreter
+and trace-security methodology is the origin of the trace-level entropy
+privacy component; cite it as the foundation, not as novelty. The novel
+part on that axis is the card and group-parametric application.
+
+Recommended combination-level wording for the abstract and introduction:
+"the first framework to treat the shuffle group as a first-class
+parameter of card-protocol security inside an interactive theorem
+prover, with machine-checked variation-distance mixing bounds and
+coalition entropy privacy proven over executed protocol traces."
+
 ## Introduction plan (problem-first; SSProve TOPLAS 15:2-15:3 pattern)
 
 1. Setting: card-based protocols realise MPC with physical cards;
@@ -89,10 +129,10 @@ naturally fit (Sections 2 and 9).
 | 4 | The PGL(2,7) instance: orbit-class secret, the 14+56 orbit split, in-kernel 3-transitivity word search | pgl27_group.v, pgl27_orbit.v (`pgl27_3transitive`, `orbit_class_split`, `orbit_encodeK`) | 2 |
 | 5 | Correctness and the exact recovery ramp; recovery-component table across instances (hearts-read 3, sum-mod 0, product sum-mod 5, pgl27 reveal ramp); den Boer 0.811-bit leakage cap in one sentence | pgl27_run.v, pgl27_recovery.v (`pgl27_run_recovers_class`, `pgl27_seven_reveal_determines`, `pgl27_six_reveal_ambiguous`, `pgl27_view_dep_k4`) | 2 |
 | 6 | Privacy: view independence and leakage bounds; six executed-trace secrecy theorems; all-decks dealer; deck marginal (class-proportional prior = uniform over 40,320 decks) | pgl27_secrecy.v, pgl27_trace.v (`pgl27_view_indep*`, `pgl27_trace_secrecy`, `pgl27_coalition_trace_secrecy`, `pgl27_alldecks_*`, `pgl27_deck_*`) | 2.5 |
-| 7 | Mixing: per-instance certified table (den Boer eps=0 at L=1; Kim 2^-40 at L=7 in-kernel; S5 2^-40 at L=286 external certificate; S5xS5 floor; pgl27 2^-40 at L=200 in-kernel); the binary-N certificate technique; `pgl27_card = 336` and `pgl27_gen5_eq` as zero-axiom byproducts. The general bound `mixing_bound_gen` is a `Local` lemma in the instance file and is credited as an instance contribution | pgl27_mixing.v; Stdlib BinNat | 2.5 |
+| 7 | Mixing: per-instance certified table (den Boer eps=0 at L=1; Kim 2^-40 at L=7 in-kernel; S5 2^-40 at L=286 external certificate; S5xS5 floor; pgl27 2^-40 at L=200 in-kernel); the binary-N certificate technique; `pgl27_card = 336` and `pgl27_gen5_eq` as zero-axiom byproducts. The general bound `mixing_bound_gen` is a `Local` lemma in the instance file and is credited as an instance contribution | pgl27_mixing.v; Stdlib BinNat | 2 |
 | 8 | Sibling instances in brief: the eps-family (`five_card_profile`; den Boer = eps 0, Kim = biased); S5 and S5xS5 with sum-mod recovery; one context paragraph on the Klein cap `max(2n,60)` and Hurwitz genus bounds explaining why recovery is combinatorial rather than algebraic-geometry codes; honest S5 disclosure (external Rayleigh certificate, group-order axiom) | instances/, slides table, accepted abstract | 1 |
 | 9 | Methodology: roles table (human = specification, design, audit, acceptance; agents = proof authorship; kernel = soundness; audit pipeline = statement integrity); the claim matrix as a prose-to-kernel conformance artifact with the termination rule; two-stage audit gate; axiom hygiene (trust base = boolp trio + vm_compute; group/orbit/recovery rows zero-axiom); full effort accounting (models, agent counts, wall-clock, tokens, audit statistics) reconstructed from git history, session logs, and `token-usage.json`; failure catalog (three lazy-eval bombs, agent stalls) playing the SSProve found-an-error role; trajectory from the abstract's "lemma development under supervision" to the claim-boundary regime | claim-boundary note `docs/superpowers/notes/20260713-pgl27-claim-boundary.md`, audit pipeline, git log | 2 |
-| 10 | Related work, two lanes. Lane 1 card-crypto and verification: Mizuki-Shizuya, den Boer, Koch-Walzer, KSK 2021 (SBMC), Kim-Cetinkaya, and proof-assistant crypto frameworks (SSProve, CryptHOL, Butler et al.) as computational/simulation-based contrast. Lane 2 LLM formalization: AlphaProof (Nature 2025), Putnam-Rocq (arXiv 2603.20405), CertiCoq-ANF (arXiv 2602.20082), Gauss/strongpnt (web), EconCSLib (EC'26 workshop), ETP (arXiv 2512.07087) | research-kb slices | 1 |
+| 10 | Related work, organised by the four novelty axes (each subsection distinguishes the framework from its nearest neighbours). (a) Card-crypto verification: Mizuki-Shizuya (pen-and-paper model), Koch-Schrempp-Kirsten and the 2025 four-card-XOR APKC successor (SBMC/SAT), Kim-Cetinkaya (single-parameter manual spectral), and proof-assistant crypto frameworks (SSProve, CryptHOL, Butler et al.) as computational/simulation-based contrast. (b) Group-parametric shuffles: Koch-Walzer uniform closed shuffles and Shinagawa-Miyamoto graph-automorphism shuffles (arXiv 2109.00397, 2205.04774) as the pen-and-paper precedent for the shuffle group as a first-class parameter. (c) Machine-checked mixing: Karayel "Expander Graphs" (Isabelle AFP 2023, Cheeger and random-walk bounds) and Barthe et al. pRHL/xpRHL (POPL 2017; logic-soundness only). Foundation, not contrast: the author's own FORTE 2025 (Rocq pi-calculus interpreter, trace security) cited as the ancestor of the trace-privacy component. (d) LLM formalization lane: AlphaProof (Nature 2025), Putnam-Rocq (arXiv 2603.20405), CertiCoq-ANF (arXiv 2602.20082), Gauss/strongpnt (web), EconCSLib (EC'26 workshop), ETP (arXiv 2512.07087) | research-kb slices | 1.5 |
 | 11 | Conclusion: honest-gap progress (executed-trace secrecy landed for all instances since the talk; simulation-based composition still open); future work (algebraic-geometry recovery for feasible-genus groups; quantum direction in one line); Generative AI Declaration, itemized in the ITP 2026 style but covering agent proof authorship | boundary note, slides conclusion | 1 |
 
 Overflow policy: Sections 4-8 compress first (proofs live in the
@@ -147,10 +187,19 @@ repo; the paper states and cites); Section 9 never compresses.
 
 1. Full-text passes for every abstract-level knowledge-base slice
    cited: putnam2025-rocq-opus, econcslib-ec26, certicoq-anf-claude,
-   AlphaProof Nature, gauss-mathinc (web-only; cite as such). No
-   citation ships from an abstract-level slice.
-2. First-claim audits for both headline claims: cross-instance check
-   plus a fresh literature sweep near the deadline.
+   AlphaProof Nature, gauss-mathinc (web-only; cite as such). Also the
+   related-work axis neighbours whose slices are fetch-agent extractions
+   or verification-errored: Shinagawa-Miyamoto (arXiv 2109.00397,
+   2205.04774), Karayel Expander Graphs (Isabelle AFP 2023), Barthe et
+   al. pRHL/xpRHL (POPL 2017), the 2025 four-card-XOR APKC paper, and
+   FORTE 2025 (author's own; already published). No citation ships from
+   an abstract-level slice.
+2. First-claim audits for both headline claims. The framework-novelty
+   sweep is DONE (deep-research 2026-07-14: 19 sources, 16 confirmed, 0
+   refuted; verdict in [[project_framework_novelty_verdict]] and the
+   Novelty-decomposition section). Remaining: re-run a fresh literature
+   sweep near the deadline (this literature moves monthly) and the
+   cross-instance check for the agent-authorship claim.
 3. Effort-accounting reconstruction: commits, dates, proof-line
    counts from git history; agent counts, wall-clock, and tokens from
    session logs; audit statistics from
