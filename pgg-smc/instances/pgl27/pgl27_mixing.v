@@ -23,6 +23,10 @@
 (*   mixing_bound_okT == the length-200 walk meets the 2^-40 mixing bound     *)
 (*   pgl27_gen5_eq    == the five letters generate the PGL(2,7) group         *)
 (*   pgl27_card       == the PGL(2,7) shuffle group has exactly 336 elements  *)
+(*   pgl27_word_mixing     == the 200-letter word law is within 2^-40 of the  *)
+(*                            uniform shuffle in variation distance           *)
+(*   pgl27_endpoint_mixing == the same for each single-card marginal          *)
+(*   pgl27_joint_mixing    == the same for the joint secret-and-shuffle law   *)
 (*                                                                            *)
 (******************************************************************************)
 
@@ -897,6 +901,47 @@ apply: (@mixing_bound_gen (pgg_G pgl27_M)%G entry_perm
   (fun k => nth 0%num (walkN 200) k) pgl27_G_pos pgl27_card mem_G_Ps
   entry_perm_inj entry_perm_mem (fun k : nat => @fiber_count 200 k)
   (@word_eval_in_G 200) mixing_cert_nat).
+Qed.
+
+(** pgl27_endpoint_mixing — each single-card marginal of the 200-letter word
+    shuffle is within 2^-40 of uniform.
+    @main security: the realistic-shuffle single-card mixing bound. *)
+Lemma pgl27_endpoint_mixing (s : 'I_8) :
+  var_dist (@endpoint_dist_weighted R 6 4 200 pgl27_sym_sigmas Wuni s)
+           (fdist_uniform (card_ord 8))
+  <= 2%:R^-40.
+Proof.
+rewrite -(pgl27_point_uniform R s).
+apply: Order.POrderTheory.le_trans pgl27_word_mixing.
+exact: (var_dist_fdistmap (fun sigma : {perm 'I_8} => sigma s)).
+Qed.
+
+(* var_dist of products with equal first marginal factorizes. *)
+Local Lemma var_dist_prodR (A B : finType) (P : R.-fdist A)
+    (Q1 Q2 : R.-fdist B) :
+  var_dist (P `x Q1) (P `x Q2) = var_dist Q1 Q2.
+Proof.
+rewrite /var_dist.
+under eq_bigr => ab _ do
+  rewrite !fdist_prodE -mulrBr normrM (ger0_norm (FDist.ge0 _ _)).
+rewrite -(pair_bigA _ (fun a b => P a * `|Q1 b - Q2 b|)) /=.
+rewrite exchange_big /=.
+apply: eq_bigr => b _.
+by rewrite -big_distrl /= FDist.f1 mul1r.
+Qed.
+
+(** pgl27_joint_mixing — the joint secret-and-shuffle law of the 200-letter
+    word run is within 2^-40 of the exact-shuffle joint law.
+    @main security: every observable of the realistic-shuffle run differs
+    from the exact-shuffle one by at most 2^-40 in variation distance. *)
+Lemma pgl27_joint_mixing (secretP : R.-fdist bool) :
+  var_dist
+    (secretP `x (@rho_from_words_weighted R 6 4 200 pgl27_sym_sigmas Wuni))
+    (secretP `x (`U pgl27_G_pos))
+  <= 2%:R^-40.
+Proof.
+rewrite var_dist_prodR.
+exact: pgl27_word_mixing.
 Qed.
 
 End pgl27_mixing_sec.

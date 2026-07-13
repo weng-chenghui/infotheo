@@ -38,9 +38,12 @@ Scheme and profile: pgl27_private, orbit_recon_invariant
 (pgl27_scheme.v); the exact eps = 0 SecurityWitness
 (pgl27_profile.v; see disclosure 5).
 
-Realistic shuffle (Part 3 of the 2026-07-13 spec): pgl27_word_mixing,
-pgl27_endpoint_mixing, pgl27_card (pgl27_mixing.v) — rows added when
-landed.
+Realistic shuffle (boolp trio only unless noted): pgl27_word_mixing
+(the 200-letter word law is within 2^-40 of the uniform shuffle in
+variation distance), pgl27_endpoint_mixing (each single-card
+marginal), pgl27_joint_mixing (the joint secret-and-shuffle law, any
+prior); pgl27_gen5_eq and pgl27_card (|G| = 336) — the latter two
+zero-axiom (pgl27_mixing.v).
 
 ## Disclosed non-claims
 
@@ -55,8 +58,10 @@ landed.
 5. The framework SecurityWitness eps = 0 measures the single-card
    marginal; coalition-level exactness is carried by the view and
    trace theorems, not by the witness.
-6. Until pgl27_word_mixing lands: the shuffle is exactly uniform on
-   the group; word-of-generators realism is Part 3's claim.
+6. The realistic-shuffle claims hold at L = 200 letters with
+   variation distance at most 2^-40 (group law, single-card marginal
+   and the joint secret-and-shuffle law); pointwise approximate
+   independence constants (the 2-epsilon form) are not stated.
 
 ## Trust base
 
