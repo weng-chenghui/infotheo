@@ -22,6 +22,9 @@
 (*   pgl27_view_indep_alldecks == all-decks dealer privacy at three cards     *)
 (*   pgl27_view_indep_deck == shuffle-free uniform-deck privacy at three      *)
 (*     cards                                                                  *)
+(*   pgl27_view_indep_deck_prior == the same for every secret prior          *)
+(*   pgl27_deck_marginal == at the class-proportional prior the dealt deck   *)
+(*     is uniform over ALL valid decks                                       *)
 (*                                                                            *)
 (* The secrecy statements concern the pre-reveal execution: after the public  *)
 (* reveal every player learns the secret by design.                           *)
@@ -234,6 +237,89 @@ move=> HC.
 exact: (ttrans_view_indep_deck pgl27_3transitive
   (fdist_uniform card_bool) pgl27_G_pos (fun sh H => H)
   orbit_class_invariant deck_stable pgl27_class_decks_pos HC).
+Qed.
+
+(** pgl27_view_indep_deck_prior — for every secret prior, a dealer dealing a
+    uniform valid deck of the secret's class gives, with no further shuffle,
+    every coalition of at most three cards a view independent of the secret.
+    @main security: prior-free representative-free all-decks privacy.
+    Naming: extends pgl27_view_indep_deck with the prior parameter; the
+    shared prefix is kept for symmetry with that lemma family. *)
+Lemma pgl27_view_indep_deck_prior (secretP : R.-fdist bool)
+    (C : {set 'I_8}) : (#|C| <= 3)%N ->
+  uniform_deckP secretP (R:=R) pgl27_class_decks_pos
+  |= uniform_deck_view secretP pgl27_class_decks_pos C
+  _|_ ((fun u => u.1)
+        : {RV (uniform_deckP secretP pgl27_class_decks_pos) -> bool}).
+Proof.
+move=> HC.
+exact: (ttrans_view_indep_deck pgl27_3transitive secretP pgl27_G_pos
+  (fun sh H => H) orbit_class_invariant deck_stable
+  pgl27_class_decks_pos HC).
+Qed.
+
+(** pgl27_decks_pos — the valid decks form a nonempty set.
+    @composes: pgl27_deck_marginal *)
+Lemma pgl27_decks_pos : (0 < #|[set sh : 8.-tuple 'I_8 | deck_ok sh]|)%N.
+Proof.
+by apply/card_gt0P; exists (orbit_encode false); rewrite inE orbit_encode_deck.
+Qed.
+
+(** pgl27_deck_marginal — at the class-proportional prior the dealt-deck
+    marginal of the shuffle-free dealer is uniform over all valid decks.
+    @main security: the uniform-over-valid-decks reading of the dealer. *)
+Lemma pgl27_deck_marginal (secretP : R.-fdist bool) :
+  (forall s : bool,
+     secretP s = #|class_decks orbit_class deck_ok s|%:R
+                 / #|[set sh : 8.-tuple 'I_8 | deck_ok sh]|%:R :> R) ->
+  fdistmap (fun u : bool * 8.-tuple 'I_8 => u.2)
+    (uniform_deckP secretP (R:=R) pgl27_class_decks_pos)
+  = `U pgl27_decks_pos.
+Proof.
+move=> Hprior.
+apply: fdist_ext => sh.
+rewrite fdistmapE.
+rewrite (reindex_onto (fun s : bool => (s, sh))
+           (fun a : bool * 8.-tuple 'I_8 => a.1)); last first.
+  by move=> a; rewrite inE => /eqP Ha; rewrite -Ha; case: a Ha.
+under eq_bigl => s do rewrite !inE /= !eqxx /=.
+rewrite big_bool /=.
+rewrite /uniform_deckP !fdist_prodE /=.
+case Hok: (deck_ok sh); last first.
+  have Hnp : forall s : bool,
+      sh \notin class_decks orbit_class deck_ok s.
+    by move=> s; rewrite inE Hok.
+  rewrite (fdist_uniform_supp_notin R (pgl27_class_decks_pos true) (Hnp true)).
+  rewrite (fdist_uniform_supp_notin R (pgl27_class_decks_pos false)
+             (Hnp false)).
+  rewrite !mulr0 addr0.
+  have Hnv : sh \notin [set sh0 : 8.-tuple 'I_8 | deck_ok sh0].
+    by rewrite inE Hok.
+  by rewrite (fdist_uniform_supp_notin R pgl27_decks_pos Hnv).
+have Hvin : sh \in [set sh0 : 8.-tuple 'I_8 | deck_ok sh0].
+  by rewrite inE Hok.
+rewrite (fdist_uniform_supp_in R pgl27_decks_pos Hvin).
+case Hc: (orbit_class sh).
+- have Hin : sh \in class_decks orbit_class deck_ok true.
+    by rewrite inE Hok Hc.
+  have Hnin : sh \notin class_decks orbit_class deck_ok false.
+    by rewrite inE Hok Hc.
+  rewrite (fdist_uniform_supp_in R (pgl27_class_decks_pos true) Hin).
+  rewrite (fdist_uniform_supp_notin R (pgl27_class_decks_pos false) Hnin).
+  rewrite mulr0 addr0 Hprior.
+  have Ha : #|class_decks orbit_class deck_ok true|%:R != 0 :> R.
+    by rewrite pnatr_eq0 -lt0n; exact: pgl27_class_decks_pos.
+  by rewrite mulrAC mulfV // mul1r.
+- have Hin : sh \in class_decks orbit_class deck_ok false.
+    by rewrite inE Hok Hc.
+  have Hnin : sh \notin class_decks orbit_class deck_ok true.
+    by rewrite inE Hok Hc.
+  rewrite (fdist_uniform_supp_in R (pgl27_class_decks_pos false) Hin).
+  rewrite (fdist_uniform_supp_notin R (pgl27_class_decks_pos true) Hnin).
+  rewrite mulr0 add0r Hprior.
+  have Ha : #|class_decks orbit_class deck_ok false|%:R != 0 :> R.
+    by rewrite pnatr_eq0 -lt0n; exact: pgl27_class_decks_pos.
+  by rewrite mulrAC mulfV // mul1r.
 Qed.
 
 End pgl27_secrecy.

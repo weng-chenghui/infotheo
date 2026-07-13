@@ -126,3 +126,27 @@ split.
   + apply: contra niq => /eqP Hgi; apply/eqP; apply: (@perm_inj _ g).
     by rewrite Hgi Hgq.
 Qed.
+
+(** pgl27_reveal_ambiguous — for every revealed position set of at most six
+    positions there are two valid decks of opposite orbit classes agreeing on
+    all revealed positions.
+    @main security: at most six revealed cards never determine the orbit
+    class, for every choice of the revealed set. *)
+Lemma pgl27_reveal_ambiguous (D : {set 'I_8}) : (#|D| <= 6)%N ->
+  exists sh1 sh2 : 8.-tuple 'I_8,
+    [/\ deck_ok sh1, deck_ok sh2, orbit_class sh1 != orbit_class sh2 &
+        {in D, forall i, tnth sh1 i = tnth sh2 i}].
+Proof.
+move=> HD.
+have Hc : (1 < #|~: D|)%N.
+  have := cardsC D.
+  rewrite card_ord => HDC.
+  rewrite -(leq_add2l #|D|) HDC.
+  by apply: (leq_trans _ (leq_add HD (leqnn _))).
+case/card_gt1P: Hc => p [q [Hp Hq npq]].
+have [sh1 [sh2 [Hok1 Hok2 Hcl Hagree]]] := pgl27_six_reveal_ambiguous npq.
+exists sh1, sh2; split=> // i iD.
+apply: Hagree.
+- by apply: contraTneq iD => ->; rewrite -in_setC.
+- by apply: contraTneq iD => ->; rewrite -in_setC.
+Qed.

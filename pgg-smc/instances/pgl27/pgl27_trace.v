@@ -19,6 +19,10 @@
 (*                                    under the all-decks dealer              *)
 (*   pgl27_alldecks_coalition_secrecy == any <= 3 coalition trace keeps it    *)
 (*                                    under the all-decks dealer              *)
+(*   pgl27_deck_trace_secrecy      == one player's trace keeps the secret     *)
+(*                                    under the shuffle-free dealer           *)
+(*   pgl27_deck_coalition_secrecy  == any <= 3 coalition trace keeps it       *)
+(*                                    under the shuffle-free dealer           *)
 (*                                                                            *)
 (* The secrecy statements concern the pre-reveal execution: after the public  *)
 (* reveal every player learns the secret by design.                           *)
@@ -611,6 +615,126 @@ apply: (trace_secrecy_of_view
 - by rewrite pgl27_alldecks_coalition_trace_E.
 - by [].
 - exact: (pgl27_view_indep_alldecks R (C:=C) HC).
+Qed.
+
+(* -------------------------------------------------------------------------- *)
+(* Shuffle-free dealer: executed-trace secrecy when a uniform valid deck of   *)
+(* the secret's class is dealt at the identity cut, with no shuffle at all.   *)
+(* -------------------------------------------------------------------------- *)
+
+(** pgl27P_deck — the shuffle-free all-decks joint law: a uniform orbit
+    secret and a uniform valid deck of its class, no cut.
+    @intent: the shuffle-free dealer sample space of the executed run. *)
+Definition pgl27P_deck : R.-fdist (bool * 8.-tuple 'I_8) :=
+  uniform_deckP (fdist_uniform card_bool) (R:=R) pgl27_class_decks_pos.
+
+(** pgl27_deck_secret — the dealt orbit-class secret component.
+    @intent: the orbit-secret random variable of the shuffle-free run. *)
+Definition pgl27_deck_secret : {RV pgl27P_deck -> bool} := fun u => u.1.
+
+(** pgl27_deck_trace — player i's executed-trace content when the sampled
+    deck is dealt at the identity cut.
+    @intent: single-player executed trace of the shuffle-free run. *)
+Definition pgl27_deck_trace (i : 'I_8) : {RV pgl27P_deck -> 'I_8} :=
+  fun u =>
+    content_of
+      (nth [::] (run_interp pgl27_fuel (pgl27_procs_deck u.2 1%g)).2 (2 + i)).
+
+(** pgl27_deck_trace_E — the shuffle-free player trace is the dealt card at
+    the player's own position.
+    @composes: pgl27_deck_trace_secrecy *)
+Lemma pgl27_deck_trace_E (i : 'I_8) :
+  pgl27_deck_trace i = (fun u => tnth u.2 i).
+Proof.
+apply: boolp.funext => u; rewrite /pgl27_deck_trace pgl27_procs_deck_abs.
+case: i => -[|[|[|[|[|[|[|[|//]]]]]]]] Hi.
+- rewrite (pgl27_abs_p0 (tnth u.2) 1%g) tnth_ord_tuple morph1 perm1.
+  by congr (tnth u.2 _); apply: val_inj.
+- rewrite (pgl27_abs_p1 (tnth u.2) 1%g) tnth_ord_tuple morph1 perm1.
+  by congr (tnth u.2 _); apply: val_inj.
+- rewrite (pgl27_abs_p2 (tnth u.2) 1%g) tnth_ord_tuple morph1 perm1.
+  by congr (tnth u.2 _); apply: val_inj.
+- rewrite (pgl27_abs_p3 (tnth u.2) 1%g) tnth_ord_tuple morph1 perm1.
+  by congr (tnth u.2 _); apply: val_inj.
+- rewrite (pgl27_abs_p4 (tnth u.2) 1%g) tnth_ord_tuple morph1 perm1.
+  by congr (tnth u.2 _); apply: val_inj.
+- rewrite (pgl27_abs_p5 (tnth u.2) 1%g) tnth_ord_tuple morph1 perm1.
+  by congr (tnth u.2 _); apply: val_inj.
+- rewrite (pgl27_abs_p6 (tnth u.2) 1%g) tnth_ord_tuple morph1 perm1.
+  by congr (tnth u.2 _); apply: val_inj.
+- rewrite (pgl27_abs_p7 (tnth u.2) 1%g) tnth_ord_tuple morph1 perm1.
+  by congr (tnth u.2 _); apply: val_inj.
+Qed.
+
+(** pgl27_deck_point_indep — one player's dealt card under the shuffle-free
+    dealer is independent of the secret.
+    @composes: pgl27_deck_trace_secrecy *)
+Lemma pgl27_deck_point_indep (i : 'I_8) :
+  pgl27P_deck |= (fun u => tnth u.2 i) _|_ pgl27_deck_secret.
+Proof.
+have Hcard : (#|[set i]| <= 3)%N by rewrite cards1.
+have Hview := pgl27_view_indep_deck R (C := [set i]) Hcard.
+have -> : (fun u : bool * 8.-tuple 'I_8 => tnth u.2 i)
+        = (fun f : {ffun 'I_8 -> 'I_8} => f i)
+          `o uniform_deck_view (R:=R) (fdist_uniform card_bool)
+               pgl27_class_decks_pos [set i].
+  by apply: boolp.funext => u;
+     rewrite /comp_RV /uniform_deck_view ffunE in_set1 eqxx.
+exact: (inde_RV_comp (fun f : {ffun 'I_8 -> 'I_8} => f i) Hview).
+Qed.
+
+(** pgl27_deck_trace_secrecy — a single corrupted player's executed trace of
+    the shuffle-free run leaves the secret's conditional entropy equal to its
+    plain entropy.
+    @main security: shuffle-free executed-trace secrecy. *)
+Lemma pgl27_deck_trace_secrecy (i : 'I_8) :
+  `H( pgl27_deck_secret | pgl27_deck_trace i ) = `H `p_ pgl27_deck_secret.
+Proof.
+apply: (trace_secrecy_of_view (view := (fun u => tnth u.2 i))
+          (trace_of := id) (view_of := id)).
+- by rewrite pgl27_deck_trace_E.
+- by [].
+- exact: pgl27_deck_point_indep i.
+Qed.
+
+(** pgl27_deck_coalition_trace — the coalition's joint executed-trace record
+    of the shuffle-free run, ord0 outside C.
+    @intent: the coalition's joint executed trace of the shuffle-free run. *)
+Definition pgl27_deck_coalition_trace (C : {set 'I_8}) :
+    {RV pgl27P_deck -> {ffun 'I_8 -> 'I_8}} :=
+  fun u => [ffun i => if i \in C then pgl27_deck_trace i u else ord0].
+
+(** pgl27_deck_coalition_trace_E — the coalition's joint executed trace of
+    the shuffle-free run equals its shuffle-free coalition view.
+    @composes: pgl27_deck_coalition_secrecy *)
+Lemma pgl27_deck_coalition_trace_E (C : {set 'I_8}) :
+  pgl27_deck_coalition_trace C
+  = uniform_deck_view (R:=R) (fdist_uniform card_bool)
+      pgl27_class_decks_pos C.
+Proof.
+apply: boolp.funext => u; apply/ffunP => i.
+rewrite /pgl27_deck_coalition_trace /uniform_deck_view !ffunE.
+case: ifP => // _.
+by rewrite (pgl27_deck_trace_E i).
+Qed.
+
+(** pgl27_deck_coalition_secrecy — the joint executed trace of any coalition
+    of at most three cards under the shuffle-free dealer leaves the secret's
+    conditional entropy equal to its plain entropy.
+    @main security: shuffle-free coalition executed-trace secrecy. *)
+Lemma pgl27_deck_coalition_secrecy (C : {set 'I_8}) :
+  (#|C| <= 3)%N ->
+  `H( pgl27_deck_secret | pgl27_deck_coalition_trace C )
+  = `H `p_ pgl27_deck_secret.
+Proof.
+move=> HC.
+apply: (trace_secrecy_of_view
+          (view := uniform_deck_view (R:=R) (fdist_uniform card_bool)
+                     pgl27_class_decks_pos C)
+          (trace_of := id) (view_of := id)).
+- by rewrite pgl27_deck_coalition_trace_E.
+- by [].
+- exact: (pgl27_view_indep_deck R (C:=C) HC).
 Qed.
 
 End pgl27_trace_sec.
