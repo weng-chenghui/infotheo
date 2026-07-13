@@ -123,6 +123,12 @@ repo; the paper states and cites); Section 9 never compresses.
 
 ## Voice and prose discipline
 
+- All paper prose is DRAFTED with the thesis-prose skill and CHECKED
+  with the thesis-prose skill: every section draft is written under
+  its rules, and every completed section gets a thesis-prose audit
+  pass (AI-isms, em-dashes, semicolons, negative framing, code
+  identifiers in body prose, twisted sentences) before it is
+  considered done. No section ships on a single unaudited draft.
 - Personal "I" for decisions and direction; mathematical
   reader-inclusive "we" only inside proofs and constructions; agents
   are the instrument, never authors.
@@ -151,9 +157,10 @@ repo; the paper states and cites); Section 9 never compresses.
    `.claude/audit/central-state/token-usage.json` and run metadata.
 4. Statistics recount at submission (the abstract said 85 files, 33K
    lines, 42 main theorems; the count has grown since).
-5. Jargon table for the full draft; adversarial writing audit and
-   citation audit before submission; Springer LNCS AI-policy re-read
-   at submission time.
+5. Jargon table for the full draft; per-section thesis-prose audit
+   passes during drafting (see Voice and prose discipline);
+   adversarial writing audit and citation audit before submission;
+   Springer LNCS AI-policy re-read at submission time.
 6. Confirm the EasyChair full-paper submission path and any
    presenter-eligibility fine print early (the abstract was presented,
    so this is expected to be a formality).
