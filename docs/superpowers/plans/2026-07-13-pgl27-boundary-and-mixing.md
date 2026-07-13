@@ -1,5 +1,17 @@
 # pgl27 Boundary Closure + Mixing Implementation Plan
 
+> **Completion note (2026-07-13):** all tasks executed and verified.
+> Commits: ee2073f (three residual cells), c88e98f (claim-boundary
+> note), caf3604 (mixing bound; pgl27_word_mixing boolp-only,
+> pgl27_card and pgl27_gen5_eq zero-axiom), 79d7262 (endpoint and
+> joint-law corollaries; note updated). Execution deviations: three
+> lazy-kernel-evaluation bombs were found and defused (premise-first
+> side conditions for conditional rewrites over the BFS tables; an
+> abstract-vector certificate decode; controlled nseq casts) — the
+> pattern is recorded in the session memory as
+> reference-lazy-eval-bomb-vm-tables. The joint-law stretch goal
+> LANDED (not deferred).
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Fill the last three claim-matrix cells of the exact-shuffle model, commit the claim-boundary note, and prove the in-kernel L-word mixing bound `pgl27_word_mixing` (with `pgl27_card` as a load-bearing byproduct) plus its corollaries.
@@ -36,7 +48,7 @@
 - Modify: `pgg-smc/instances/pgl27/pgl27_trace.v` (append in section)
 - Modify: `pgg-smc/instances/pgl27/pgl27_recovery.v` (append)
 
-- [ ] **Step 1.1 (cell: prior-generic + marginal identification, pgl27_secrecy.v).** Append inside `Section pgl27_secrecy`:
+- [x] **Step 1.1 (cell: prior-generic + marginal identification, pgl27_secrecy.v).** Append inside `Section pgl27_secrecy`:
 
 ```coq
 (** pgl27_view_indep_deck_prior — for every secret prior, a dealer dealing a
@@ -77,7 +89,7 @@ Lemma pgl27_deck_marginal (secretP : R.-fdist bool) :
 
 Proof route for `pgl27_deck_marginal` (develop interactively): `fdist_ext => sh; rewrite fdistmapE fdist_uniform_supp*`; the preimage sum over `bool * deck` pairs with second component `sh` has exactly two summands (s = true, false); `fdist_prodE` gives `secretP s * (`U (pgl27_class_decks_pos s)) sh`; the class-conditional factor is `1/#|class_decks s|` when `orbit_class sh = s` and 0 otherwise (`fdist_uniform_supp_in/notin` with membership `inE`: `deck_ok sh && (orbit_class sh == s)`), so for a valid `sh` exactly ONE summand survives and equals `(#|class_cs|/#|valid|) * (1/#|class_cs|) = 1/#|valid|` (cancel with `mulrA mulVf`, nonzero cardinals via `pnatr_eq0`/`card_gt0P` from `Hpop`); for invalid `sh` both summands vanish and `fdist_uniform_supp_notin` gives 0. No numeric cardinalities are ever computed — everything symbolic. If summing over the pair type resists, use `partition_big` on `u.1` or `big_pair`/`sum over bool = big_bool`.
 
-- [ ] **Step 1.2 (cell: shuffle-free trace, pgl27_trace.v).** Append inside `Section pgl27_trace_sec` (after the alldecks block):
+- [x] **Step 1.2 (cell: shuffle-free trace, pgl27_trace.v).** Append inside `Section pgl27_trace_sec` (after the alldecks block):
 
 ```coq
 (** pgl27P_deck — the shuffle-free all-decks joint law: a uniform orbit
@@ -180,7 +192,7 @@ apply: (trace_secrecy_of_view
 Qed.
 ```
 
-- [ ] **Step 1.3 (cell: sub-6 ambiguity, pgl27_recovery.v).** Append:
+- [x] **Step 1.3 (cell: sub-6 ambiguity, pgl27_recovery.v).** Append:
 
 ```coq
 (** pgl27_reveal_ambiguous — for every revealed position set of at most six
@@ -207,9 +219,9 @@ Qed.
 
 The two `...` blocks are arithmetic/set plumbing to develop interactively: `#|~:D| = 8 - #|D| >= 2` via `cardsC` (`#|D| + #|~:D| = #|T|`) and `leq_subRL`-style steps (NO `!` rewrites); `card_gt1P` yields the distinct pair with memberships `Hp Hq : _ \in ~: D`; the agreement premises `i != p`, `i != q` follow from `i \in D` vs `p \in ~: D` (`contraTneq` + `in_setC`). Check the exact shape of `card_gt1P` with `rocq_query "About card_gt1P."` (it may produce `exists x y` unpacked differently).
 
-- [ ] **Step 1.4:** Rebuild: `rm -f pgg-smc/instances/pgl27/pgl27_secrecy.vo pgg-smc/instances/pgl27/pgl27_trace.vo pgg-smc/instances/pgl27/pgl27_recovery.vo && make -j1 pgg-smc/instances/pgl27/pgl27_trace.vo pgg-smc/instances/pgl27/pgl27_recovery.vo`. Expected: clean.
-- [ ] **Step 1.5:** Assumptions via `rocq compile` scratch (flags: `-R . infotheo -R pgg-smc/lib pgg_smc -R pgg-smc/protocol pgg_smc -R pgg-smc/groups pgg_smc -R pgg-smc/security pgg_smc -R pgg-smc/reconstruct pgg_reconstruct -R pgg-smc/instances/pgl27 pgg_smc`): `pgl27_reveal_ambiguous` → Closed under the global context; `pgl27_deck_coalition_secrecy`, `pgl27_deck_marginal` → boolp trio only.
-- [ ] **Step 1.6:** Update the three file headers' key-results lists with the new names (one line each, box-comment aligned). Commit:
+- [x] **Step 1.4:** Rebuild: `rm -f pgg-smc/instances/pgl27/pgl27_secrecy.vo pgg-smc/instances/pgl27/pgl27_trace.vo pgg-smc/instances/pgl27/pgl27_recovery.vo && make -j1 pgg-smc/instances/pgl27/pgl27_trace.vo pgg-smc/instances/pgl27/pgl27_recovery.vo`. Expected: clean.
+- [x] **Step 1.5:** Assumptions via `rocq compile` scratch (flags: `-R . infotheo -R pgg-smc/lib pgg_smc -R pgg-smc/protocol pgg_smc -R pgg-smc/groups pgg_smc -R pgg-smc/security pgg_smc -R pgg-smc/reconstruct pgg_reconstruct -R pgg-smc/instances/pgl27 pgg_smc`): `pgl27_reveal_ambiguous` → Closed under the global context; `pgl27_deck_coalition_secrecy`, `pgl27_deck_marginal` → boolp trio only.
+- [x] **Step 1.6:** Update the three file headers' key-results lists with the new names (one line each, box-comment aligned). Commit:
 
 ```bash
 git add pgg-smc/instances/pgl27/pgl27_secrecy.v pgg-smc/instances/pgl27/pgl27_trace.v pgg-smc/instances/pgl27/pgl27_recovery.v
@@ -227,7 +239,7 @@ identification, and sub-6 reveal ambiguity for every revealed set."
 **Files:**
 - Create: `pgg-smc/notes/20260713-pgl27-claim-boundary.md`
 
-- [ ] **Step 2.1:** Write the note with these sections (content locked; expand each lemma row from the named file's header if a summary line is wanted):
+- [x] **Step 2.1:** Write the note with these sections (content locked; expand each lemma row from the named file's header if a summary line is wanted):
 
 ```markdown
 # pgl27 claim boundary (2026-07-13)
@@ -289,7 +301,7 @@ virtual machine. Group/orbit/recovery rows are closed under the
 global context (no axioms at all).
 ```
 
-- [ ] **Step 2.2:** Commit:
+- [x] **Step 2.2:** Commit:
 
 ```bash
 git add pgg-smc/notes/20260713-pgl27-claim-boundary.md
@@ -304,7 +316,7 @@ git commit -m "pgl27: claim-boundary note (matrix, disclosures, termination rule
 - Create: `pgg-smc/instances/pgl27/pgl27_mixing.v`
 - Modify: `_CoqProject` (add `pgg-smc/instances/pgl27/pgl27_mixing.v` after the pgl27 block, line ~254)
 
-- [ ] **Step 3.1: File skeleton.** Header comment (terse, statement-style), imports:
+- [x] **Step 3.1: File skeleton.** Header comment (terse, statement-style), imports:
 
 ```coq
 From HB Require Import structures.
@@ -321,7 +333,7 @@ From pgg_smc Require Import pgl27_group pgl27_profile.
 
 (Adjust the security-file module paths after `rocq_query "Locate rho_from_words_weighted."`; add `Set Implicit Arguments` block and scopes as in sibling files. `BinNat`: ssrnat already provides `nat_of_bin`/`bin_of_nat`; `N` literals via `%num`/`%N`-scope care — check with `rocq_query "Check (5%num * 5%num)%num."` and use `N.add`/`N.mul` explicitly if the scopes fight.)
 
-- [ ] **Step 3.2: Generators and tables.**
+- [x] **Step 3.2: Generators and tables.**
 
 ```coq
 (** pgl27_sym_sigmas — the inverse-closed symmetrized generator tuple of the
@@ -348,7 +360,7 @@ Local Lemma mtbl_val (j : 'I_5) (x : 'I_8) :
 
 Proof: `case: j => -[|[|[|[|[|//]]]]] Hj`; per branch `case: x => -[|...] Hx; rewrite !(tnth_nth 1%g) /= ?permE ?permE //`. The two inverse branches need the inverse-perm evaluation: `(p^-1)%g x` — evaluate via `permE`? Use `invg_perm`/`permK`-style: the equality `(tr_perm^-1)%g x = y` iff `tr_perm y = x`; the clean route is `apply/(canRL (permKV _))`-style or verify by `apply: (canLR (permK _))`; alternatively state the branch as `val_inj`-checked table equality by first proving `(tnth pgl27_gens 0)^-1 = perm-of-inverse-table` via `permP => y; apply: (canLR (permK _))` + 8-case split. Develop with `rocq_step_multi`; the audit confirmed this is the same 8-case pattern as `tr_inj` (pgl27_group.v:67).
 
-- [ ] **Step 3.3: Element BFS, successor and predecessor tables** (all `Local`):
+- [x] **Step 3.3: Element BFS, successor and predecessor tables** (all `Local`):
 
 ```coq
 Local Definition mcomp (t1 t2 : seq nat) : seq nat :=
@@ -384,7 +396,7 @@ Local Definition pred_table : seq (seq nat) :=
   | sw <- elem_table].
 ```
 
-- [ ] **Step 3.4: Binary-N walk and checker** (all `Local`):
+- [x] **Step 3.4: Binary-N walk and checker** (all `Local`):
 
 ```coq
 Local Fixpoint walkN (L : nat) : seq N :=
@@ -426,7 +438,7 @@ Proof. by vm_compute. Qed.
 
 Notation caution: `N` operations may need `N.mul`/`N.add`/`N.pow`/`N.ltb`/`N.leb` spelled out if `%num` scope notations are unavailable in this import set — resolve with `rocq_query` first (`Check (N.pow 5 200).`). Timing: expect seconds; if `mixing_bound_okT` exceeds ~5 minutes, STOP and report (do not retry blindly).
 
-- [ ] **Step 3.5:** Interactive check of every definition and the two vm_compute lemmas via preamble-mode rocq-mcp BEFORE writing the file; then write the file, add the `_CoqProject` line, and `make -j1 pgg-smc/instances/pgl27/pgl27_mixing.vo`. Expected: clean. No commit yet.
+- [x] **Step 3.5:** Interactive check of every definition and the two vm_compute lemmas via preamble-mode rocq-mcp BEFORE writing the file; then write the file, add the `_CoqProject` line, and `make -j1 pgg-smc/instances/pgl27/pgl27_mixing.vo`. Expected: clean. No commit yet.
 
 ---
 
@@ -435,7 +447,7 @@ Notation caution: `N` operations may need `N.mul`/`N.add`/`N.pow`/`N.ltb`/`N.leb
 **Files:**
 - Modify: `pgg-smc/instances/pgl27/pgl27_mixing.v` (append)
 
-- [ ] **Step 4.1: Word/perm bridge over the 5-letter alphabet** (Local): clone the landed 3-letter pattern (pgl27_group.v word_perm block):
+- [x] **Step 4.1: Word/perm bridge over the 5-letter alphabet** (Local): clone the landed 3-letter pattern (pgl27_group.v word_perm block):
 
 ```coq
 Local Definition gen5_of (j : nat) : {perm 'I_8} :=
@@ -452,7 +464,7 @@ Local Lemma word5_perm_tbl (w : seq nat) (x : 'I_8) :
 
 `gen5_of_mem`: the three originals via `mem_gen`/`imsetP` (as `gen_of_mem`, pgl27_group.v), the two inverses via `groupV`. `word5_perm_tbl`: generalized-accumulator foldl induction using `mtbl_val` and `permM` (mirror `word_perm_val`, pgl27_group.v; the accumulator now carries a TABLE, so the invariant is `val (foldl step g w x) = nth 0 (foldl tstep (table-of g) w) (val x)` — state it with an explicit `forall t, (forall y, val (g y) = nth 0 t (val y)) -> ...` premise).
 
-- [ ] **Step 4.2: Entry perms and the group equality.**
+- [x] **Step 4.2: Entry perms and the group equality.**
 
 ```coq
 Local Definition entry_perm (k : nat) : {perm 'I_8} :=
@@ -472,7 +484,7 @@ Lemma pgl27_card : #|pgg_G pgl27_M| = 336.
 
 Proof routes (develop interactively): `pgl27_gen5_eq` by `eqEsubset`: forward `gen_subG` + per-letter membership (`gen5_of_mem` content); backward `genS` after showing the 3-generator imset is a subset of the 5-generator imset (`apply/subsetP => x /imsetP[i _ ->]; apply/mem_gen/imsetP`; map i in 'I_3 to the matching 'I_5 index 0/2/4). `pgl27_card`: build the bijection between `pgg_G pgl27_M` and the 336 uniq entry tables. Direction 1 — every `g \in pgg_G` is some `entry_perm k`: by `gen_prodgP` (after rewriting with `pgl27_gen5_eq` backwards NOT needed — use the 3-generator group directly: `gen_prodgP` gives a product of the THREE generators; every 3-letter word is also a 5-letter word; induction on the product length shows its table is reachable by `elem_table`'s closure (checker conjunct 5: closure under all five letters, hence under the three); the table determines the perm (`permP` + `val_inj` pointwise from `word5_perm_tbl`). Direction 2 — entries are distinct elements of G: `word5_perm_mem` + `uniq (unzip1 elem_table)` (checker) + injectivity of the table map (two perms with equal tables are equal by `permP`/`val_inj`). Then `#|G| = size elem_table = 336` via `card_uniqP`-style counting over the image list (the `class_count`/`card_uniqP` pattern landed in pgl27_orbit.v:476-504 is the model). Cross-check: `pgl27_pgl2_order` (pgl27_group.v:161) = 336 for the abstract quotient — narrative only, not used.
 
-- [ ] **Step 4.3:** `make -j1 pgg-smc/instances/pgl27/pgl27_mixing.vo`; scratch `Print Assumptions pgl27_card` → Closed under the global context. No commit yet.
+- [x] **Step 4.3:** `make -j1 pgg-smc/instances/pgl27/pgl27_mixing.vo`; scratch `Print Assumptions pgl27_card` → Closed under the global context. No commit yet.
 
 ---
 
@@ -481,7 +493,7 @@ Proof routes (develop interactively): `pgl27_gen5_eq` by `eqEsubset`: forward `g
 **Files:**
 - Modify: `pgg-smc/instances/pgl27/pgl27_mixing.v` (append)
 
-- [ ] **Step 5.1: The walk monodromy and the word law.** Fix the instantiation objects:
+- [x] **Step 5.1: The walk monodromy and the word law.** Fix the instantiation objects:
 
 ```coq
 Local Notation M5 := (@Gen_PGGTypes 4 6 pgl27_sym_sigmas).
@@ -490,7 +502,7 @@ Definition Wuni : R.-fdist 'I_5 := fdist_uniform (card_ord 5).   (* inside a Sec
 
 (Open a `Section pgl27_mixing_sec. Variable R : realType.` for the R-dependent part; keep the nat/N ground layer outside the section.)
 
-- [ ] **Step 5.2: Fiber counting.** The counting bridge, stated over the entry indexing:
+- [x] **Step 5.2: Fiber counting.** The counting bridge, stated over the entry indexing:
 
 ```coq
 Local Lemma fiber_count (L : nat) (k : nat) : (k < 336)%N ->
@@ -500,7 +512,7 @@ Local Lemma fiber_count (L : nat) (k : nat) : (k < 336)%N ->
 
 Proof by induction on L. Base: `word_eval` of the empty tuple is `1%g`; the only k with `entry_perm k = 1` is k = 0 (identity entry, checker conjunct 3 + uniq); `walkN 0` is `1 :: nseq 335 0`. Step: split each (L+1)-tuple as `[tuple of rcons w' j]` (the `tuple_rcons`/`big_ord_recr` route: `word_eval (rcons-tuple) = word_eval w' * tnth sigmas j` — prove as a Local lemma via `big_ord_recr` + `tnth` of rcons); partition the fiber by the last letter j; the sub-fiber for letter j bijects with the L-fiber of `entry_perm (pred_table k j)` (right-cancel by `gen5_of j`: `w' * g_j = entry_k` iff `w' = entry_k * g_j^-1` = the predecessor entry — table-level fact from checker conjunct 5 + `word5_perm_tbl` + `permP`); card of the disjoint union = sum over j; `walkN (L+1)` computes exactly that sum with `nat_of_add_bin` distributing `nat_of_bin` over the foldl (prove a tiny Local lemma `nat_of_bin (foldl N.add 0 s) = \sum nat_of_bin s` by induction). Budget: this is the load-bearing proof; if it exceeds 60 rocq-mcp turns without the induction shape closing, STOP and report rather than thrash.
 
-- [ ] **Step 5.3: The headline assembly.**
+- [x] **Step 5.3: The headline assembly.**
 
 ```coq
 (** pgl27_word_mixing — the law of a uniform 200-letter generator word is
@@ -514,7 +526,7 @@ Lemma pgl27_word_mixing :
 
 Proof skeleton: `rho_weighted_is_uniform` collapses to `rho_from_words`; `eq_irrelevance` reconciles the `card_word_L`/`card_word_L'` witnesses; `var_dist` unfolds to `\sum_(g : {perm 'I_8}) |...|`; `bigID (fun g => g \in pgg_G pgl27_M)`; off-G: both laws are 0 (`fdist_uniform_supp_notin`; `fiber_prob` numerator 0 because a nonempty fiber puts g in G via `word5_perm_mem`-style membership — actually via `word_eval` membership: each letter in `pgg_G` by `gen5_of_mem` content, product closed by `group_prod`); on-G: reindex the sum over the 336 `entry_perm` list (`big_uniq`/`big_seq` over the uniq entry list, coverage by `pgl27_card` direction 1); each term is `|#|fiber|/5^200 - 1/336|` (`fiber_prob`, `fdist_uniform_supp_in` + `pgl27_card`); rewrite by `fiber_count`; bound the real sum by the N-level `mixing_bound_okT` via `nat_of_bin` monotone reflection (per-index case split on `336*n_i >= 5^200` matching `absdiffN`'s comparison; `ler_pdivrMr`-style cross-multiplication with positive `336%:R * (5^200)%:R * (2^40)%:R`; `natrX`/`natrM` push `%:R` through). This assembly is real-analysis plumbing but every ingredient is named; expect the longest interactive session here.
 
-- [ ] **Step 5.4:** `make -j1 pgg-smc/instances/pgl27/pgl27_mixing.vo`; scratch `Print Assumptions pgl27_word_mixing` → boolp trio only. Commit:
+- [x] **Step 5.4:** `make -j1 pgg-smc/instances/pgl27/pgl27_mixing.vo`; scratch `Print Assumptions pgl27_word_mixing` → boolp trio only. Commit:
 
 ```bash
 git add pgg-smc/instances/pgl27/pgl27_mixing.v _CoqProject
@@ -533,7 +545,7 @@ uniform shuffle; pgl27_card = 336 returns as a load-bearing theorem."
 - Modify: `pgg-smc/instances/pgl27/pgl27_mixing.v` (append)
 - Modify: `pgg-smc/notes/20260713-pgl27-claim-boundary.md`
 
-- [ ] **Step 6.1: Endpoint corollary.**
+- [x] **Step 6.1: Endpoint corollary.**
 
 ```coq
 (** pgl27_endpoint_mixing — each single-card marginal of the 200-letter word
@@ -551,7 +563,7 @@ Proof.
    le_trans (var_dist_fdistmap ...) pgl27_word_mixing. *)
 ```
 
-- [ ] **Step 6.2: Joint-law stretch goal** (attempt; defer with a disclosure if it exceeds 40 turns):
+- [x] **Step 6.2: Joint-law stretch goal** (attempt; defer with a disclosure if it exceeds 40 turns):
 
 ```coq
 (* var_dist of kernel-equal products factorizes through the first marginal. *)
@@ -574,8 +586,8 @@ Proof.
 
 `var_dist_prodR`: `\sum_(ab) |P ab.1 * Q1 ab.2 - P ab.1 * Q2 ab.2|` = `\sum_a P a * \sum_b |Q1 b - Q2 b|` (`-mulrBr normrM ger0_norm` on `P a >= 0`, `pair_big`/`big_pair` split, `-big_distrl FDist.f1 mul1r`). The honest pointwise 2-epsilon corollary is OUT of this round (disclosed in the note) — the joint-law form is the deliverable.
 
-- [ ] **Step 6.3:** Update the closure note: move the mixing row from "added when landed" to the matrix proper (pgl27_word_mixing, pgl27_endpoint_mixing, pgl27_joint_mixing if landed, pgl27_card); rewrite disclosure 6 to: "The realistic-shuffle claims hold at L = 200 letters with variation distance at most 2^-40 (joint-law form); pointwise approximate-independence constants (2-epsilon form) are not stated." Update the mixing file header key-results list.
-- [ ] **Step 6.4: Final verification.**
+- [x] **Step 6.3:** Update the closure note: move the mixing row from "added when landed" to the matrix proper (pgl27_word_mixing, pgl27_endpoint_mixing, pgl27_joint_mixing if landed, pgl27_card); rewrite disclosure 6 to: "The realistic-shuffle claims hold at L = 200 letters with variation distance at most 2^-40 (joint-law form); pointwise approximate-independence constants (2-epsilon form) are not stated." Update the mixing file header key-results list.
+- [x] **Step 6.4: Final verification.**
 
 ```bash
 grep -rn "^Axiom\|Admitted" pgg-smc/instances/pgl27/ && echo FAIL || echo OK
