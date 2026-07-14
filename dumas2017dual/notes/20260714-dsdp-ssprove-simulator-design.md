@@ -1,11 +1,15 @@
 # DSDP SSProve simulator formalization — design memo
 
 Date: 2026-07-14
-Status: design approved in-session; all four de-risking probes completed and
-passing; adversarial design audit run — its B1 (statement scope), M1
-(mass-1 discharge), M2 (allowed-info witness), M3 (P1 validation scope)
-findings are resolved by the re-scopings and decisions marked "audit" in
-this revision, and its six confirmed-sound verdicts cover the architecture.
+Status: design approved in-session; five de-risking probes completed and
+passing (P1, P2, P3, P5, P6); adversarial design audit run — its B1
+(statement scope), M1 (mass-1 discharge), M2 (allowed-info witness), M3
+(P1 validation scope) findings are resolved by the re-scopings and
+decisions marked "audit" in this revision, and its six confirmed-sound
+verdicts cover the architecture. User decisions locked (2026-07-14):
+statement scope = average-case (B1 option i); mass-1 = P6 graceful
+degradation (see M1 block); sim_view_body witness adopted (P6-confirmed
+feasible); probe files kept uncommitted.
 Next step: implementation plan (writing-plans), then execution.
 
 ## Objective
@@ -91,6 +95,7 @@ copying, per the no-scratch-imports rule):
 - `dumas2017dual/dsdp/simulation/probe_p3_statdist.v` (P3)
 - `dumas2017dual/dsdp/simulation/probe_p5_skeletons.v` (P5)
 - `dumas2017dual/dsdp/simulation/probe_p1_factorization_pet.v` (P1)
+- `dumas2017dual/dsdp/simulation/probe_p6_lossless_heap.v` (P6)
 
 Compile command for out-of-_CoqProject files (from repo root):
 
@@ -209,6 +214,15 @@ Components:
   (call id_Sout_get tt)`. The Gallina type of `sim_view_body` is the
   type-level witness that the fabricated view uses only allowed
   information, matching the thesis' `Sim : X_A x Y_A -> Dist(B_A)` reading.
+  P6-CONFIRMED FEASIBLE (Part B, Qed): `sim_view_body : raw_code 'unit ->
+  raw_code t_msg -> raw_code (cipher_list t_cipher)` and the package
+  ValidPackage-check both work, with two required idioms: (1) a
+  `valid_sim_view_body` lemma + `#[local] Hint Extern 2 (ValidCode _ _
+  (sim_view_body _ _)) ... : typeclass_instances ssprove_valid_db`, because
+  the resolver cannot descend an opaque helper head (`#[export]` is illegal
+  on a Hint inside a Section); (2) call arguments in bind-wrapped form
+  `x <- c tt ;; ret x`, since a bare `c tt` leaves a beta-redex that
+  `valid_opr`'s syntactic hint cannot match.
   (Alternative considered: splitting the package into an allowed-info core
   `par` a v2-forwarder — stronger package-level witness but complicates the
   factorization proof and diverges from P1's timed shape; not adopted.)
@@ -226,22 +240,33 @@ Components:
   chains upstream `Pr_Pr_fst` + repo `Pr_fst_map` (`dsdp_convert.v`) +
   `distr.pr_dmargin`, cloning the `guess_resolve_eq` proof pattern from
   `dsdp_guess_fiber.v`.
-- MASS-1 DISCHARGE DECISION (audit M1): the resolved view code contains
-  `#put`/`get` (cell writes, `id_Sout_get`), which places it OUTSIDE the
-  `LosslessOp_bind` closure (`ValidCode emptym [interface]` prefix
-  requirement; the repo already documents this at
-  `dsdp_guess_fiber.v:203-210` and takes `guess_lossless` as a Hypothesis).
-  Headline 2 therefore carries mass-1 HYPOTHESES on the two resolved view
-  codes, exactly the `guess_lossless` precedent in `dsdp_main.v:721-735`.
-  Honesty note: these hypotheses are mathematically true — the view code is
-  total (every branch samples-then-returns; no lossy predictor is linked),
-  unlike the guess code whose predictor could be lossy. Discharging them
-  would need a new heap-parametric lossless class
-  (`forall h, psum (dfst (Pr_code c h)) = 1` with get/put/sample/bind
-  instances + a bridge to `LosslessCode`) — recorded as optional future
-  work, NOT in this plan. Prop `prop:smc:max-advantage`'s mechanization is
-  unconditional (Layer 2); its DSDP application (headline 2) is conditional
-  on these mass-1 hypotheses.
+- MASS-1 DISCHARGE DECISION (audit M1, resolved by probe P6): the resolved
+  view code contains `#put`/`get`, placing it OUTSIDE the `LosslessOp_bind`
+  closure (`ValidCode emptym [interface]` prefix requirement; documented at
+  `dsdp_guess_fiber.v:203-210`, where `guess_lossless` is a Hypothesis).
+  P6 built the missing machinery and it is PROVEN (11 Qed, 0 Admitted):
+  `LosslessHeapCode c := forall h, psum (distr.mu (Pr_code c h)) = 1`
+  (JOINT mass, chosen because every upstream `Pr_code_*` equation is stated
+  at the joint level), instances ret/sample/get/put/bind/if with NO
+  `ValidCode emptym` restriction, the `Pr_fst` bridge, and — the
+  load-bearing piece — `denote_run_lossless_heap` by induction on the
+  game_code AST (hypotheses: `gc_sample_cards gc`, `card_msg`/`card_renc`
+  positivity, `card_renc_neq`), which discharges the stateful game core
+  WITHOUT materialising the 100-MB resolved term. One mechanical step
+  remains open for full `view_zero_mass1`: a structural reduction lemma for
+  `gc_sample_cards` on the concrete `all_zero (game_of_trace_seeded ...)`
+  with abstract cardinalities (`vm_compute` cannot fire on abstract-nat
+  guards; needs `cbn` + per-sample `eqxx`). PLAN (graceful degradation):
+  task 5 promotes the P6 infrastructure and attempts that reduction lemma
+  with bounded effort; if it lands, headline 2 is unconditional; if not,
+  headline 2 carries mass-1 hypotheses citing `denote_run_lossless_heap`
+  (the `guess_lossless` precedent, with the hypotheses' truth now
+  machine-supported for the core). Axiom note (P6, checked via Print
+  Assumptions): the class depends on the boolp trio plus mathcomp-analysis'
+  admitted `interchange_psum` — the SAME dependency upstream
+  `Lossless_sample` and the `Pr`/`AdvantageE` stack already carry; no new
+  axiom enters. Prop `prop:smc:max-advantage`'s mechanization is
+  unconditional (Layer 2).
 
 ## Headlines in `dsdp_main.v`
 
@@ -277,6 +302,7 @@ simulator -> game is `Simulates_reduction` (generic) and headline 2
 | P1 | PET cost of the factorization proof | ENTRY + EARLY ALIGNMENT VIABLE: entry ms; `simplify_eq_rel` 124.9 s / ~5.6-5.9 GB on T1 (first goal 97.7 MB); on T0 (zero-vs-zero) 240 s / 11.6 GB with `rewrite eqxx` collapsing 195 MB -> 1.36 MB; 2 syncs + 3 swaps fired. TAIL UNVALIDATED (see proof-engineering rules) |
 | P3 | statdist optimal-test lemma provable on realsum? | YES, all Qed standalone; mass-1 required for BOTH lemmas; effort low |
 | P5 | Skeletons/interfaces/class-fit type-check? | YES; conversion lemmas already Qed; two Admitted = exactly the planned work |
+| P6 | Mass-1 provable outright? sim_view_body feasible? | Class + all instances + `denote_run_lossless_heap` Qed (AST induction, no giant term); one open reduction lemma (`gc_sample_cards` concrete); sim_view_body + package Qed with two documented idioms |
 
 ## Proof-engineering rules for the factorization (from P1)
 
@@ -321,8 +347,12 @@ simulator -> game is `Simulates_reduction` (generic) and headline 2
    LARGEST-RISK TASK: the tail is unvalidated (audit M3); escalate to the
    symbolic-`denote_run` fallback lemma if the Sout-term equality or tail
    swaps stall.
-5. `dsdp_simulator.v` part 3 — view law, resolution lemma, mass-1
-   hypotheses per the M1 decision (hypotheses, guess_lossless precedent).
+5. `dsdp_simulator.v` part 3 — view law, resolution lemma, mass-1 per the
+   M1 decision: promote P6's `LosslessHeapCode` infrastructure (likely
+   into `smc/ssprove_ext_lossless.v` or a sibling) + attempt the
+   `gc_sample_cards` concrete-reduction lemma with bounded effort;
+   unconditional headline 2 if it lands, else mass-1 hypotheses citing
+   `denote_run_lossless_heap`.
 6. `dsdp_main.v` — two headlines + header block, statements worded per the
    B1 scope note (average-case, honest inputs uniform).
 7. Follow-up (separate): thesis chapter hedge update worded per the B1
