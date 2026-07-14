@@ -229,4 +229,45 @@ Definition dsdp_adm (LA : Locations) (A : raw_package) : Prop :=
   fseparate LA (locs (oracle_zero_pkg renc_card rand_of_renc t_msg
                         chcipher_of_cipher pkey_of_party)).
 
+(* dsdp_simulator_factorization — the output-exposing all-zero endpoint game
+   is perfectly equivalent to the simulator composed with the ideal
+   functionality, with no epsilon term.  Average-case scope: the honest
+   inputs v2, v3 are sampled inside the ideal. *)
+Lemma dsdp_simulator_factorization :
+  zero_game_leak_S renc_card rand_of_renc chmsg_of_msg chcipher_of_cipher
+    pkey_of_party msg_of_idx rand0 seed
+  ≈₀ dsdp_simulator_pkg ∘ dsdp_ideal_pkg.
+Proof.
+eapply eq_rel_perf_ind_eq.
+simplify_eq_rel m.
+(* id_game_run: collapse the stuck cardinality-dispatch guards, then commute
+   the ideal's two early cell writes (V_2, Sout) rightward past the
+   simulator's mask and hop-randomness samples so both sides share the run's
+   sample-then-write order; the de Bruijn value reads compute to the same
+   scalar product and cipher view. *)
+1: rewrite !eqxx !(negbTE card_renc_neq).
+- ssprove_sync_eq=> x_v2.
+  ssprove_sync_eq=> x_v3.
+  ssprove_swap_seq_rhs [:: 1; 2; 3; 4; 5; 6]%N.
+  ssprove_swap_seq_rhs [:: 0; 1; 2; 3]%N.
+  ssprove_sync_eq=> x_r2.
+  ssprove_sync_eq=> x_r3.
+  ssprove_sync_eq=> x_ra1.
+  ssprove_sync_eq=> x_ra2.
+  ssprove_sync_eq.
+  ssprove_sync_eq=> x_c2.
+  ssprove_sync_eq=> x_c3.
+  cbn [de_val_nth de_rand_nth de_val de_rand push_val push_rand nth
+       as_plain as_cipher nat_to_party_id].
+  by rewrite /de_val_nth; ssprove_sync_eq; apply: r_ret; move=> ? ? ->.
+- ssprove_code_simpl.
+  rewrite /denote_v2_get_body.
+  ssprove_sync_eq=> stored.
+  by case: stored => [v|]; apply: r_ret.
+- ssprove_code_simpl.
+  rewrite /denote_Sout_get_body.
+  ssprove_sync_eq=> stored.
+  by case: stored => [v|]; apply: r_ret.
+Qed.
+
 End dsdp_simulator.
