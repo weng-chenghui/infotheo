@@ -2,7 +2,11 @@
 
 Date: 2026-07-14
 Status: design approved in-session; all four de-risking probes completed and
-passing. Next step: implementation plan (writing-plans), then execution.
+passing; adversarial design audit run — its B1 (statement scope), M1
+(mass-1 discharge), M2 (allowed-info witness), M3 (P1 validation scope)
+findings are resolved by the re-scopings and decisions marked "audit" in
+this revision, and its six confirmed-sound verdicts cover the architecture.
+Next step: implementation plan (writing-plans), then execution.
 
 ## Objective
 
@@ -14,14 +18,37 @@ supports the thesis chapter `security-models.tex`:
 | Thesis claim | Mechanized counterpart |
 |---|---|
 | Simulator `Sim : X_A x Y_A -> Dist(B_A)` (Def `def:smc:simulator`) | `dsdp_simulator_pkg` (package level) + its view law (distr level) |
-| eps-privacy `Delta(view law, Sim law) <= eps` (Def `def:smc:epsilon-privacy`) | `dsdp_alice_view_statdist_le` |
+| eps-privacy `Delta(view law, Sim law) <= eps` (Def `def:smc:epsilon-privacy`) | `dsdp_alice_view_statdist_le` — AVERAGE-CASE analogue, see scope note |
 | Game advantage bound (Eq `eq:smc:advantage`) | existing `AdvantageE` bounds (unchanged) |
-| max advantage = statistical distance (Prop `prop:smc:max-advantage`) | `statdist_test_le` + `statdist_test_max` |
+| max advantage = statistical distance (Prop `prop:smc:max-advantage`) | `statdist_test_le` + `statdist_test_max` (mass-1 laws over a choiceType, generalizing the thesis' finite `Dist(B_A)`) |
 | perfect/eps privacy <=> all-distinguisher bound (§`sec:smc:relating`) | `Simulates_from_endpoint` / `Simulates_reduction` + headline derivations |
+
+STATEMENT SCOPE (adversarial-audit finding B1, resolved by re-scoping).
+The thesis' eps-privacy quantifies per input x over ALL parties' inputs
+(`def:smc:epsilon-privacy`: "for every input x"; the test advantage
+`eq:smc:test-advantage` takes max over x). The mechanized headlines fix
+Alice's inputs (the seed slots u1, u2, u3, v1) but the honest inputs v2, v3
+are SAMPLED IN-GAME, uniformly. Both headlines therefore bound the distance
+between mixture laws averaged over uniform (v2, v3) at each fixed corrupted
+input — by joint convexity a strictly weaker statement than the thesis'
+per-x bound, which they do not imply. Exposing v2 through `id_v2_get`
+(headline 1's adversaries may call it) upgrades this to the average over v2
+of conditional distances, never the max; v3 is not exposed at all. The
+mechanized claims are therefore: average-case eps-privacy at fixed corrupted
+input, honest inputs uniform. The thesis follow-up must present them as
+such. A per-v2 corollary is recoverable via v2-indicator tests at cost
+factor card_msg (bound m * 2 * epsilon_cpa) — recorded as optional future
+work, not planned. Fixed-honest-input game variants would require
+re-deriving the whole hop ladder and are ruled out by decision 3.
 
 The chapter hedge at `security-models.tex:973-975` ("the factorization stays
 on paper") becomes updatable after this lands (thesis edit is a separate
-follow-up task).
+follow-up task, worded per the scope note above). One more honesty note for
+that follow-up (audit m5): headline 2's test space `chList t_cipher * t_msg`
+is the (received-ciphers, leaked-S) MARGINAL of the thesis view B_A at fixed
+corrupted input; B_A also contains x_A and the corrupted party's own
+randomness, and `def:smc:simulator`'s extraction condition only holds in the
+per-x_A sliced reading.
 
 ## Decisions (fixed during brainstorming)
 
@@ -91,6 +118,11 @@ Qed in the probe).
   Statement-shape note (P5): the factorization hypothesis is phrased as the
   class-restricted advantage equality, NOT upstream `≈₀`/`adv_equiv`, because
   `adv_equiv` quantifies over all adversaries and cannot carry `adm`.
+  Bridge from an rhl `≈₀` proof to this hypothesis: trivial restriction —
+  `dsdp_adm`'s protocol_state conjunct implies `adv_equiv`'s two `fseparate`
+  side conditions (sim locations empty, zero_game locations =
+  protocol_state); P5 closed both obligations with the class conjunct
+  (audit confirmed-sound #4).
 - `Simulates_reduction` (simulator -> game): `adv_sim_le ... eps ->`
   post-processed comparisons `AdvantageE (T ∘ Real) (T ∘ Sim ∘ Ideal) A
   <= eps`, for classes closed under `A ∘ T` (hypothesis). Engine:
@@ -109,8 +141,9 @@ only, 303 lines; promotion effort: low).
 - `statdist_test_le : psum p = 1 -> psum q = 1 ->
   `|pr p D - pr q D| <= statdist p q`.
   MASS-1 IS REQUIRED: the inequality is false for general subdistributions
-  (counterexample in probe). Both view laws are lossless in our use, per the
-  existing `LosslessCode` discipline (`ssprove_ext_lossless.v`).
+  (counterexample: p = dunit a, q = dnull gives gap 1 > 1/2 = statdist; the
+  probe established the necessity, and the promoted file adds this
+  counterexample as an Example — audit m1).
 - `statdist_test_max : psum p = 1 -> psum q = 1 ->
   pr p (fun t => q t < p t) - pr q (fun t => q t < p t) = statdist p q`.
   Strongest form: strict optimal test, plain difference, exact attainment.
@@ -126,7 +159,8 @@ only, 303 lines; promotion effort: low).
 
 Grounded in machine-checked P2 facts and P5 skeletons.
 
-P2 facts (all proved by `vm_compute` Examples in the P2 probe):
+P2 facts (all machine-checked as conversion-proof `by []` Examples in the
+P2 probe):
 
 - All-zero code shape: 4x `GC_sample card_msg` (v2, v3, r2, r3);
   2x `GC_sample card_renc` (ra1, ra2); `GC_put V_2_cell v2`; two
@@ -144,10 +178,12 @@ P2 facts (all proved by `vm_compute` Examples in the P2 probe):
 
 Components:
 
-- `I_dsdp_ideal` interface: `id_ideal_run = (4, 'unit -> 'unit)` (ident 4:
-  0/1/2/3 are taken; 1 is `id_guess` in the guessing layer, so the P2-probe
-  suggestion of 1 is superseded), plus the existing `id_v2_get`,
-  `id_Sout_get` signatures.
+- `I_dsdp_ideal` interface: `id_ideal_run = (4, 'unit -> 'unit)`, plus the
+  existing `id_v2_get`, `id_Sout_get` signatures. Ident note (audit m2):
+  ident 1 is `id_guess` in the guesser's EXPORT space and would not
+  actually collide here (the ideal's export is consumed by the simulator);
+  4 is a safe stylistic choice avoiding any ident reuse, not a necessity.
+  P1's probe used a probe-local ident 1.
 - `dsdp_ideal_pkg` (locations `protocol_state t_msg`): `id_ideal_run`
   samples v2, v3 (uniform card_msg), computes S mirroring the real
   `put_output` expression from the seed weights (`as_plain (de_val_nth
@@ -161,21 +197,51 @@ Components:
   ra1, ra2 and the two hop randomnesses, builds `c_i = Enc(pk_i, 0, _)` and
   the combines `a_i`, returns `[a1; a2; c2; c3]`. Pass-through oracles end
   in `x <- call tt ;; ret x` (P5: bare `call` tails break `pack_valid`
-  resolution). Parameter honesty: the simulator's free parameters are
-  Alice's data only (u2, u3 seed slots, public keys); v2/v3 never appear in
-  its code. The allowed-info-only property is witnessed syntactically.
+  resolution).
+- ALLOWED-INFO WITNESS (audit M2): the package type alone does NOT witness
+  allowed-info-only, since `I_dsdp_ideal` includes `id_v2_get` (needed for
+  the pass-through re-export) and nothing in the type stops `id_game_run`
+  from calling it. Fix adopted: the view-synthesis body is a standalone
+  Gallina function abstracted over ONLY the allowed-info oracles,
+  `sim_view_body (run_ideal : raw_code 'unit) (get_S : raw_code t_msg) :
+  raw_code (chList t_cipher)` (no v2 continuation in its type), and the
+  package's `id_game_run` is `sim_view_body (call id_ideal_run tt)
+  (call id_Sout_get tt)`. The Gallina type of `sim_view_body` is the
+  type-level witness that the fabricated view uses only allowed
+  information, matching the thesis' `Sim : X_A x Y_A -> Dist(B_A)` reading.
+  (Alternative considered: splitting the package into an allowed-info core
+  `par` a v2-forwarder — stronger package-level witness but complicates the
+  factorization proof and diverges from P1's timed shape; not adopted.)
+  Parameter honesty stands: the simulator's free parameters are Alice's
+  data only (u2, u3 seed slots, public keys); v2/v3 never appear.
 - Factorization (the axis workhorse): forall admissible A,
   `AdvantageE (zero_game_leak_S ...) (dsdp_simulator_pkg ∘ dsdp_ideal_pkg)
   A = 0`. Proof route validated by P1 (see risk table).
-- View law + bridge (P4, pattern already exercised): `view_dump_challenger`
+- View law + bridge (pattern already exercised in P5 Part C plus the
+  `guess_resolve_eq` precedent; the "P4" label from the probe planning was
+  folded into P5): `view_dump_challenger`
   calls `id_game_run` then `id_Sout_get`, returns the pair;
   `view_law G := Pr_fst (resolve (view_dump_challenger ∘ G) view_op tt)`.
   Resolution lemma `view_dump_resolve_eq` (statement type-checked in P5)
   chains upstream `Pr_Pr_fst` + repo `Pr_fst_map` (`dsdp_convert.v`) +
   `distr.pr_dmargin`, cloning the `guess_resolve_eq` proof pattern from
-  `dsdp_guess_fiber.v`. Losslessness of the composed view code via
-  `LosslessOp_bind` (`ssprove_ext_lossless.v`) + upstream uniform
-  instances.
+  `dsdp_guess_fiber.v`.
+- MASS-1 DISCHARGE DECISION (audit M1): the resolved view code contains
+  `#put`/`get` (cell writes, `id_Sout_get`), which places it OUTSIDE the
+  `LosslessOp_bind` closure (`ValidCode emptym [interface]` prefix
+  requirement; the repo already documents this at
+  `dsdp_guess_fiber.v:203-210` and takes `guess_lossless` as a Hypothesis).
+  Headline 2 therefore carries mass-1 HYPOTHESES on the two resolved view
+  codes, exactly the `guess_lossless` precedent in `dsdp_main.v:721-735`.
+  Honesty note: these hypotheses are mathematically true — the view code is
+  total (every branch samples-then-returns; no lossy predictor is linked),
+  unlike the guess code whose predictor could be lossy. Discharging them
+  would need a new heap-parametric lossless class
+  (`forall h, psum (dfst (Pr_code c h)) = 1` with get/put/sample/bind
+  instances + a bridge to `LosslessCode`) — recorded as optional future
+  work, NOT in this plan. Prop `prop:smc:max-advantage`'s mechanization is
+  unconditional (Layer 2); its DSDP application (headline 2) is conditional
+  on these mass-1 hypotheses.
 
 ## Headlines in `dsdp_main.v`
 
@@ -207,8 +273,8 @@ simulator -> game is `Simulates_reduction` (generic) and headline 2
 
 | Probe | Question | Result |
 |---|---|---|
-| P2 | Zero-endpoint view reads allowed info only? | YES, machine-checked; view reads {u2,u3}+fresh only; v2/v3 absent (present in all_real) |
-| P1 | PET cost of the factorization proof | VIABLE: entry ms; `simplify_eq_rel` ~125 s / ~6 GB (T1); guard-rewrite collapses goal 195 MB -> 1.4 MB; sync/swap fire |
+| P2 | Zero-endpoint view reads allowed info only? | YES, machine-checked (conversion-proof `by []` Examples); view reads {u2,u3}+fresh only; v2/v3 absent (present in all_real) |
+| P1 | PET cost of the factorization proof | ENTRY + EARLY ALIGNMENT VIABLE: entry ms; `simplify_eq_rel` 124.9 s / ~5.6-5.9 GB on T1 (first goal 97.7 MB); on T0 (zero-vs-zero) 240 s / 11.6 GB with `rewrite eqxx` collapsing 195 MB -> 1.36 MB; 2 syncs + 3 swaps fired. TAIL UNVALIDATED (see proof-engineering rules) |
 | P3 | statdist optimal-test lemma provable on realsum? | YES, all Qed standalone; mass-1 required for BOTH lemmas; effort low |
 | P5 | Skeletons/interfaces/class-fit type-check? | YES; conversion lemmas already Qed; two Admitted = exactly the planned work |
 
@@ -220,29 +286,48 @@ simulator -> game is `Simulates_reduction` (generic) and headline 2
   (budget ~2 min / ~6 GB per direction; acceptable, once per proof).
 - Immediately reduce the stuck cardinality guards on each run-oracle goal:
   `rewrite eqxx` and `rewrite (negbTE card_renc_neq)` (the section already
-  carries `card_renc_neq`), BEFORE any sync/swap.
+  carries `card_renc_neq`), BEFORE any sync/swap. Note (audit M3): the
+  `card_renc` guard reduction was NOT exercised in P1 (the probe section
+  omitted `card_renc_neq`); only `rewrite eqxx` was measured.
 - `ssprove_sync_eq` for the v2/v3 samples; `ssprove_swap_rhs`/
   `ssprove_swap_lhs` to commute the ideal's early cell writes past the
-  simulator's mask/randomness samples (swap inventory: 2 puts x 4-6
-  samples, all fired in probe).
-- Fallback (validated as unnecessary, kept for safety): prove the
-  run-oracle equivalence as a separate lemma with `denote_run` kept
-  symbolic, `hop_equiv_*_leak_S` style.
+  simulator's mask/randomness samples. P1 fired 2 syncs + 3 swaps of the
+  estimated 2-puts x 4-6-samples inventory; the remaining swaps, the renc
+  sample syncs, the Sout heap-term equality (the denoted term re-embeds the
+  whole denotation env at every `de_val_nth` read, vs the ideal's
+  hand-written `u2*v2 + u3*v3 + u1*v1`), the closing `r_ret`, and the two
+  get-oracle goals are UNVALIDATED — the tail is where ~100 MB goals get
+  manipulated (audit M3).
+- Fallback (LIVE, not retired): prove the run-oracle equivalence as a
+  separate lemma with `denote_run` kept symbolic, `hop_equiv_*_leak_S`
+  style. Escalate to it if the Sout-term equality or the tail swaps stall.
+- Probe-package divergences that do not transfer: P1's ideal used ident 1
+  (plan uses 4; immaterial to PET cost) and its packages diverge from the
+  real denotation as listed in the P1 report (regrouped sampling, early
+  cell writes — the intentional swap challenge).
 - Monitor rocqworker RSS; kill the process group on runaway, not the
   launcher.
 
 ## Task breakdown (atomic; each verified via rocq_check/compile + committed)
 
-1. `smc/ssprove_ext_statdist.v` — promote P3 content; add to `_CoqProject`.
+1. `smc/ssprove_ext_statdist.v` — promote P3 content + the dnull
+   counterexample Example (audit m1); add to `_CoqProject`.
 2. `smc/ssprove_ext_simulator.v` — promote P5 Part A; generic conversion
    lemmas proven (already Qed in probe).
 3. `dsdp_simulator.v` part 1 — interfaces + ideal + simulator packages
-   (promote P5 Part B skeleton with real bodies per P2 facts).
+   (promote P5 Part B skeleton with real bodies per P2 facts), with the
+   `sim_view_body` allowed-info abstraction (audit M2).
 4. `dsdp_simulator.v` part 2 — the factorization proof (P1 recipe).
-5. `dsdp_simulator.v` part 3 — view law, resolution lemma, losslessness.
-6. `dsdp_main.v` — two headlines + header block.
-7. Follow-up (separate): thesis chapter hedge update; probe-file cleanup
-   decision (keep as-is for now).
+   LARGEST-RISK TASK: the tail is unvalidated (audit M3); escalate to the
+   symbolic-`denote_run` fallback lemma if the Sout-term equality or tail
+   swaps stall.
+5. `dsdp_simulator.v` part 3 — view law, resolution lemma, mass-1
+   hypotheses per the M1 decision (hypotheses, guess_lossless precedent).
+6. `dsdp_main.v` — two headlines + header block, statements worded per the
+   B1 scope note (average-case, honest inputs uniform).
+7. Follow-up (separate): thesis chapter hedge update worded per the B1
+   scope note and the m5 marginal note; probe-file cleanup decision (keep
+   as-is for now).
 
 ## Gates (every commit, in order)
 
@@ -252,6 +337,14 @@ simulator -> game is `Simulates_reduction` (generic) and headline 2
 4. Crypto-vacuity statement check of the headlines against
    Eq `eq:smc:simulation` and Prop `prop:smc:max-advantage`
    (English-statement match, variable tracing, parallel-track test).
+   Match criterion per the B1 scope note: the headlines are the
+   AVERAGE-CASE analogues (honest inputs uniform, fixed corrupted input);
+   a checker demanding the thesis' per-x statement must flag the wording,
+   not the design. Vacuity anchors already established by the adversarial
+   audit: `dsdp_adm` is inhabited (empty-locations test adversaries;
+   `guess_reduction`), and the factorization is falsifiable (a wrong
+   simulator, e.g. returning `[::]`, is distinguished with advantage 1 by
+   a view-length test in the class).
 
 ## Out of scope
 
