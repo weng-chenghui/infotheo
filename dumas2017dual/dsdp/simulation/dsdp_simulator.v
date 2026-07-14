@@ -270,4 +270,252 @@ simplify_eq_rel m.
   by case: stored => [v|]; apply: r_ret.
 Qed.
 
+(* dsdp_adv_sim_le — the output-exposing real game is
+   bounded-simulation secure against dsdp_ideal_pkg with simulator
+   dsdp_simulator_pkg over the dsdp_adm class, with bound [2 * epsilon_cpa].
+   Average-case scope: the honest inputs v2, v3 are sampled inside the
+   ideal package. *)
+Lemma dsdp_adv_sim_le
+    (cipher_of_chcipher : t_cipher -> cipher AHE)
+    (chcipher_of_cipherK : cancel chcipher_of_cipher cipher_of_chcipher) :
+  adv_sim_le (game_iface_leak_S t_msg t_cipher) dsdp_adm
+    (real_game_leak_S renc_card rand_of_renc chmsg_of_msg chcipher_of_cipher
+       pkey_of_party msg_of_idx rand0 seed)
+    dsdp_ideal_pkg dsdp_simulator_pkg
+    (2%:R * epsilon_cpa).
+Proof.
+apply: (adv_sim_le_from_endpoint
+  (Endpoint := zero_game_leak_S renc_card rand_of_renc chmsg_of_msg
+     chcipher_of_cipher pkey_of_party msg_of_idx rand0 seed)).
+- move=> LA A A_valid [Hstate [Hore Hoze]].
+  eapply dsdp_advantage_derived_leak_S.
+  + exact: chcipher_of_cipherK.
+  + exact: chmsg_of_msgK.
+  + exact: A_valid.
+  + exact: Hstate.
+  + exact: Hore.
+  + exact: Hoze.
+- move=> LA A A_valid [Hstate _].
+  exact: (dsdp_simulator_factorization A_valid Hstate Hstate).
+Qed.
+
+(* view_pair_challenger — the pair-returning experiment: run the game and read
+   the leaked output S, returning the pair (cipher view, S). *)
+Definition view_pair_challenger :
+  package (game_iface_leak_S t_msg t_cipher)
+    [interface #val #[ 0%N ] : 'unit → (ciphers × msg) ] :=
+  [package emptym ;
+    #def #[ 0%N ] (_ : 'unit) : (ciphers × msg)
+    {
+      #import {sig #[ id_game_run ] : 'unit → ciphers } as call_run ;;
+      #import {sig #[ id_Sout_get ] : 'unit → msg } as call_Sout ;;
+      view ← call_run Datatypes.tt ;;
+      Sout_val ← call_Sout Datatypes.tt ;;
+      ret (view, Sout_val)
+    }
+  ].
+
+(* view_op — the operation signature reading view_pair_challenger's pair. *)
+Definition view_op : opsig :=
+  (0%N, (chUnit, chProd (cipher_list t_cipher) t_msg)).
+
+(* view_resolved G — the view-dumper challenger linked with a game G,
+   resolved at view_op into closed pair-returning code. *)
+Definition view_resolved (G : raw_package) :
+  raw_code (chProd (cipher_list t_cipher) t_msg) :=
+  resolve (view_pair_challenger ∘ G) view_op Datatypes.tt.
+
+(* test_adversary D — the boolean distinguisher applying the predicate D to
+   the pair (cipher view, S). *)
+Definition test_adversary (D : (cipher_list t_cipher * t_msg)%type -> bool) :
+  package (game_iface_leak_S t_msg t_cipher) A_export :=
+  [package emptym ;
+    #def #[ 0%N ] (_ : 'unit) : 'bool
+    {
+      #import {sig #[ id_game_run ] : 'unit → ciphers } as call_run ;;
+      #import {sig #[ id_Sout_get ] : 'unit → msg } as call_Sout ;;
+      view ← call_run Datatypes.tt ;;
+      Sout_val ← call_Sout Datatypes.tt ;;
+      ret (D (view, Sout_val) : 'bool)
+    }
+  ].
+
+(* view_resolve_eq — the first-projection subdistribution of the resolved
+   distinguisher is the pushforward under D of the first-projection
+   subdistribution of the resolved view-dumper experiment. *)
+Lemma view_resolve_eq (G : raw_package)
+    (D : (cipher_list t_cipher * t_msg)%type -> bool) :
+  Pr_fst (resolve (test_adversary D ∘ G) RUN Datatypes.tt)
+  = distr.dmargin (fun p => (D p : 'bool)) (Pr_fst (view_resolved G)).
+Proof.
+have resolve_eq :
+  resolve (test_adversary D ∘ G) RUN Datatypes.tt
+  = (p ← view_resolved G ;; ret (D p : 'bool)).
+{ rewrite /view_resolved !resolve_link.
+  have body_eq : resolve (test_adversary D) RUN Datatypes.tt
+    = (p ← resolve view_pair_challenger view_op Datatypes.tt ;;
+       ret (D p : 'bool)).
+  { rewrite /resolve /test_adversary /view_pair_challenger /=.
+    by rewrite !coerce_kleisliE /=. }
+  by rewrite body_eq code_link_bind. }
+by rewrite resolve_eq Pr_fst_map.
+Qed.
+
+(* sample_cards_msg_renc gc — every GC_sample cardinality in gc is card_msg or
+   card_renc. *)
+Fixpoint sample_cards_msg_renc (gc : game_code) : bool :=
+  match gc with
+  | GC_sample n k =>
+      ((n == card_msg) || (n == card_renc)) && sample_cards_msg_renc k
+  | GC_put _ k => sample_cards_msg_renc k
+  | GC_put_output _ k => sample_cards_msg_renc k
+  | GC_let _ k => sample_cards_msg_renc k
+  | GC_enc_hop _ _ k => sample_cards_msg_renc k
+  | GC_ret _ => true
+  end.
+
+(* denote_run_lossless_heap — the denoted game-code core is heap-parametric
+   lossless whenever its sample cardinalities are the two positive sorts. *)
+Lemma denote_run_lossless_heap (gc : game_code) (e : denv AHE) :
+  sample_cards_msg_renc gc ->
+  LosslessHeapCode (@denote_run AHE Renc card_renc renc_card rand_of_renc
+    t_msg t_cipher chmsg_of_msg chcipher_of_cipher pkey_of_party card_msg
+    msg_of_idx rand0 e gc).
+Proof.
+elim: gc e => [n k IH|t k IH|t k IH|t k IH|pk secret k IH|outs] e /=.
+- move=> /andP[Hn Hk]; case/orP: Hn => /eqP Heq.
+  + rewrite Heq eqxx.
+    apply: LosslessHeap_sample; first exact: LosslessOp_uniform.
+    move=> x; exact: (IH _ Hk).
+  + rewrite Heq (negbTE card_renc_neq) eqxx.
+    apply: LosslessHeap_sample; first exact: LosslessOp_uniform.
+    move=> x; exact: (IH _ Hk).
+- move=> Hk; apply: LosslessHeap_put; exact: (IH _ Hk).
+- move=> Hk; apply: LosslessHeap_put; exact: (IH _ Hk).
+- move=> Hk; exact: (IH _ Hk).
+- move=> Hk; apply: LosslessHeap_sample; first exact: LosslessOp_uniform.
+  move=> x; exact: (IH _ Hk).
+- by move=> _; exact: LosslessHeap_ret.
+Qed.
+
+(* sample_cards_msg_renc_all_zero — the all-zero output-exposing DSDP game
+   has only card_msg and card_renc sample cardinalities. *)
+Local Lemma sample_cards_msg_renc_all_zero :
+  sample_cards_msg_renc
+    (all_zero (game_of_trace_seeded dsdp_weight_names
+       (dsdp_alice_obs_leak_S_seeded card_msg card_renc))) = true.
+Proof.
+rewrite /all_zero /game_of_trace_seeded /dsdp_weight_names
+        /dsdp_alice_obs_leak_S_seeded.
+cbn [sample_cards_msg_renc lower_obs zero_hop_prefix count_hops].
+by rewrite !eqxx !orbT.
+Qed.
+
+(* sample_cards_msg_renc_all_real — the all-real output-exposing DSDP game
+   has only card_msg and card_renc sample cardinalities. *)
+Local Lemma sample_cards_msg_renc_all_real :
+  sample_cards_msg_renc
+    (all_real (game_of_trace_seeded dsdp_weight_names
+       (dsdp_alice_obs_leak_S_seeded card_msg card_renc))) = true.
+Proof.
+rewrite /all_real /game_of_trace_seeded /dsdp_weight_names
+        /dsdp_alice_obs_leak_S_seeded.
+cbn [sample_cards_msg_renc lower_obs zero_hop_prefix count_hops].
+by rewrite !eqxx !orbT.
+Qed.
+
+(* resolve_denote_game_leak_S_run — the run oracle of the output-exposing
+   denotation resolves to the game-code run denotation. *)
+Local Lemma resolve_denote_game_leak_S_run (gc : game_code) :
+  resolve
+    (denote_game_leak_S_raw renc_card rand_of_renc chmsg_of_msg
+       chcipher_of_cipher pkey_of_party msg_of_idx rand0 seed gc)
+    (id_game_run, ('unit, cipher_list t_cipher)) Datatypes.tt
+  = denote_run renc_card rand_of_renc chmsg_of_msg chcipher_of_cipher
+      pkey_of_party msg_of_idx rand0 seed gc.
+Proof.
+rewrite /resolve /denote_game_leak_S_raw mkfmapE
+        /id_game_run /id_v2_get /id_Sout_get /fst.
+cbn [getm_def]; cbn [fst snd].
+by rewrite eqxx /mkdef coerce_kleisliE.
+Qed.
+
+(* resolve_denote_game_leak_S_Sout — the output-reveal oracle of the
+   output-exposing denotation resolves to the Sout-cell read body. *)
+Local Lemma resolve_denote_game_leak_S_Sout (gc : game_code) :
+  resolve
+    (denote_game_leak_S_raw renc_card rand_of_renc chmsg_of_msg
+       chcipher_of_cipher pkey_of_party msg_of_idx rand0 seed gc)
+    (id_Sout_get, ('unit, t_msg)) Datatypes.tt
+  = denote_Sout_get_body chmsg_of_msg.
+Proof.
+rewrite /resolve /denote_game_leak_S_raw mkfmapE
+        /id_game_run /id_v2_get /id_Sout_get /fst.
+cbn [getm_def]; cbn [fst snd].
+by rewrite -[(3 == 0)%N]/false -[(3 == 2)%N]/false eqxx /mkdef coerce_kleisliE.
+Qed.
+
+(* view_resolved_denote — the resolved view-dumper over a denoted game is
+   the run denotation sequenced with the Sout read and the pair return. *)
+Local Lemma view_resolved_denote (gc : game_code) :
+  view_resolved
+    (denote_game_leak_S renc_card rand_of_renc chmsg_of_msg chcipher_of_cipher
+       pkey_of_party msg_of_idx rand0 seed gc)
+  = (view ← denote_run renc_card rand_of_renc chmsg_of_msg chcipher_of_cipher
+               pkey_of_party msg_of_idx rand0 seed gc ;;
+     Sout_val ← denote_Sout_get_body chmsg_of_msg ;;
+     ret (view, Sout_val)).
+Proof.
+rewrite /view_resolved resolve_link /resolve /view_pair_challenger /=.
+rewrite coerce_kleisliE.
+cbn [code_link].
+rewrite resolve_denote_game_leak_S_run resolve_denote_game_leak_S_Sout.
+by rewrite /denote_Sout_get_body.
+Qed.
+
+(* view_mass1_denote — the resolved view-dumper over a denoted game whose
+   sample cardinalities are the two positive sorts has first-projection
+   subdistribution mass one. *)
+Local Lemma view_mass1_denote (gc : game_code) :
+  sample_cards_msg_renc gc ->
+  psum (distr.mu (Pr_fst (view_resolved
+    (denote_game_leak_S renc_card rand_of_renc chmsg_of_msg chcipher_of_cipher
+       pkey_of_party msg_of_idx rand0 seed gc)))) = 1.
+Proof.
+move=> Hcards.
+rewrite view_resolved_denote.
+apply: LosslessHeap_Pr_fst.
+apply: LosslessHeap_bind.
+- by apply: denote_run_lossless_heap.
+- move=> view.
+  apply: LosslessHeap_bind.
+  + rewrite /denote_Sout_get_body.
+    apply: LosslessHeap_get => v; case: v => [x|]; exact: LosslessHeap_ret.
+  + move=> Sout_val; exact: LosslessHeap_ret.
+Qed.
+
+(* view_zero_mass1 — the resolved view-dumper over the all-zero endpoint game
+   has first-projection subdistribution mass one. *)
+Lemma view_zero_mass1 :
+  psum (distr.mu (Pr_fst (view_resolved
+    (zero_game_leak_S renc_card rand_of_renc chmsg_of_msg chcipher_of_cipher
+       pkey_of_party msg_of_idx rand0 seed)))) = 1.
+Proof.
+rewrite /zero_game_leak_S.
+apply: view_mass1_denote.
+exact: sample_cards_msg_renc_all_zero.
+Qed.
+
+(* view_real_mass1 — the resolved view-dumper over the all-real endpoint game
+   has first-projection subdistribution mass one. *)
+Lemma view_real_mass1 :
+  psum (distr.mu (Pr_fst (view_resolved
+    (real_game_leak_S renc_card rand_of_renc chmsg_of_msg chcipher_of_cipher
+       pkey_of_party msg_of_idx rand0 seed)))) = 1.
+Proof.
+rewrite /real_game_leak_S.
+apply: view_mass1_denote.
+exact: sample_cards_msg_renc_all_real.
+Qed.
+
 End dsdp_simulator.
