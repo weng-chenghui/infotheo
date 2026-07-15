@@ -7,7 +7,7 @@
     encryption operation parametric in [party_id]: the real oracle returns
     [Enc pk_p m r] for a fresh [r], the zero oracle returns [Enc pk_p 0 r']
     for a fresh [r'].  The hypothesis bounds the [AdvantageE] of any adversary
-    discriminating these two oracles by [epsilon_cpa].
+    discriminating these two oracles by [epsilon_cpa AHE].
 
     Design commitments (Rocq audit, plan section "Design commitments"):
     - Commitment 1: encryption randomness is a finType ([Renc]), with an
@@ -230,35 +230,29 @@ Definition oracle_encrypt_zero : raw_package :=
 
 End indcpa_ror.
 
-(** epsilon_cpa — the IND-CPA hardness parameter, abstract real number in
-    [R] (i.e., [SSProve.Crypt.Axioms.R]).  Top-level parameter so the
-    hypothesis below quantifies it once and downstream files share the
-    same security parameter.
+(** epsilon_cpa AHE — the IND-CPA real-or-zero advantage bound of scheme [AHE].
     Kind: canonical.
-    Why: the IND-CPA advantage bound is parametric in the security
-    parameter; pinning a concrete value would over-constrain the
-    cryptographic assumption.
+    Why per-scheme: the hypothesis below quantifies over every [AHEncType].
+    A bare constant bounds them all at once, including schemes that return
+    the plaintext ([Idealized_AHEnc_local], [dsdp_correctness.v:79], advantage
+    1), forcing [1 <= epsilon_cpa] and leaving every [_ <= 2 * epsilon_cpa]
+    bound vacuous.
     Used by: enc_ind_cpa_real_or_zero, downstream advantage_bound theorems. *)
-Parameter epsilon_cpa : reals.Real.sort R.
+Parameter epsilon_cpa : AHEncType -> reals.Real.sort R.
 
 (** enc_ind_cpa_real_or_zero — the IND-CPA real-or-zero hypothesis.
-    For every choice of AHE scheme, encryption randomness carrier, message
-    and ciphertext carriers, public-key map, and every adversary
-    [reduction], the SSProve advantage of distinguishing
-    [oracle_encrypt_real] from [oracle_encrypt_zero] is at most
-    [epsilon_cpa].  This is the cryptographic assumption that replaces the
-    false IT idealisation [E_enc_inde] from
-    [homomorphic_encryption.v:281].
+    For every AHE scheme, encryption randomness carrier, message and
+    ciphertext carriers, public-key map, and every adversary [reduction],
+    the SSProve advantage of distinguishing [oracle_encrypt_real] from
+    [oracle_encrypt_zero] is at most [epsilon_cpa AHE].
     Kind: main.
-    Why: only realistic encryption assumption needed by the DSDP Alice
-    secrecy proof in the new file [dsdp_security_indcpa.v].  Combined with
-    [Pr_dsdp_sol_uniform] (the IT residual on the joint sample), it yields
-    the closed-form bound [1/m + 2 * epsilon_cpa] on the predictor's
-    success probability.  Stated at the top level (outside the Section) so
-    Section parameters are universally quantified and the hypothesis is
-    visible to downstream files via [Require Import indcpa_ror.].
-    Used by: dsdp_security_indcpa.v Tasks 08-14 (advantage_bound,
-    dsdp_alice_secrecy_indcpa, dsdp_alice_unp_entropy_indcpa). *)
+    Why: the realistic encryption assumption replacing the false IT
+    idealisation [E_enc_inde] from [homomorphic_encryption.v:281].  Stated
+    at the top level (outside the Section) so Section parameters are
+    universally quantified and the hypothesis is visible to downstream
+    files via [Require Import indcpa_ror.].
+    Used by: dsdp_game_code.v:908 (advantage_hop),
+    dsdp_indcpa_advantage.v:284 (advantage_hop_leak_S). *)
 Axiom enc_ind_cpa_real_or_zero :
   forall (AHE : AHEncType) (Renc : finType) (index_renc : nat)
          (renc_card : #|Renc| = index_renc)
@@ -273,7 +267,7 @@ Axiom enc_ind_cpa_real_or_zero :
          t_msg t_cipher msg_of_chmsg chcipher_of_cipher pkey_of_party)
       (oracle_encrypt_zero AHE Renc index_renc renc_card rand_of_renc
          t_msg t_cipher chcipher_of_cipher pkey_of_party)
-      reduction <= epsilon_cpa.
+      reduction <= epsilon_cpa AHE.
 
 (** Task 05 verification: both oracle packages type-check as SSProve
     [package _ _ _], and the IND-CPA hypothesis type-checks against

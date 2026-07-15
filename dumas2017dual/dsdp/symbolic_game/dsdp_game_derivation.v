@@ -3,7 +3,7 @@
    The back end (dsdp_game_code.v) lowers a reified [game_code] AST to an
    SSProve [package] and proves the generic hybrid-ladder bound
    [advantage_le : AdvantageE (denote_game (all_real gc)) (denote_game
-   (all_zero gc)) A <= (size (hop_sites gc)) * epsilon_cpa].  Its [gc_dsdp]
+   (all_zero gc)) A <= (size (hop_sites gc)) * epsilon_cpa AHE].  Its [gc_dsdp]
    was a HAND-BUILT fixture standing in for the AST a symbolic execution of
    the piSMC source should emit.
 
@@ -206,7 +206,7 @@ Proof. elim: obs venv renv => [|o rest IH] venv renv //=; case: o => //= *; rewr
 
 (* count_hops_game_of_trace — the IND-CPA ladder length of the derived game is
    exactly the number of hoppable receptions in the trace.  This is what ties
-   the [k * epsilon_cpa] bound's [k] to the protocol structure generically.
+   the [k * epsilon_cpa AHE] bound's [k] to the protocol structure generically.
    Naming: the [mainSymbol_argument] form [count_hops] of [game_of_trace]
    (cf. MathComp [size_map] / [count_map]); the five underscore segments are
    the two multi-word identifiers [count_hops] and [game_of_trace], not grammar
@@ -683,14 +683,15 @@ Record dsdp_indcpa_adversary (P : dsdp_indcpa_experiment) := {
 (* dsdp_indcpa_secrecy — the one-record IND-CPA secrecy bound, GENERIC over any
    problem [P]: every valid adversary's advantage distinguishing the real game
    from its all-zero endpoint is at most [count_obs_hops (corrupted_view P)] times
-   [epsilon_cpa].  Proved via the back end's [advantage_le] (bridging
-   [count_obs_hops] to [size (hop_sites ...)] then [eapply advantage_le]), NOT the
-   [gc_dsdp]-specific [advantage_gc_dsdp], which times out for an abstract [P].
-   The DSDP [2 * epsilon_cpa] bound is the [dsdp_advantage_derived] corollary. *)
+   [epsilon_cpa (exp_enc_scheme P)].  Proved via the back end's [advantage_le]
+   (bridging [count_obs_hops] to [size (hop_sites ...)] then [eapply
+   advantage_le]), NOT the [gc_dsdp]-specific [advantage_gc_dsdp], which times
+   out for an abstract [P].  The DSDP [2 * epsilon_cpa AHE] bound is the
+   [dsdp_advantage_derived] corollary. *)
 Theorem dsdp_indcpa_secrecy (P : dsdp_indcpa_experiment)
     (Adv : dsdp_indcpa_adversary P) :
   AdvantageE (real_game P) (zero_game P) (adv_package Adv)
-    <= (count_obs_hops (corrupted_view P))%:R * epsilon_cpa.
+    <= (count_obs_hops (corrupted_view P))%:R * epsilon_cpa (exp_enc_scheme P).
 Proof.
 rewrite /real_game /zero_game /game_of_problem.
 have Hcnt : count_obs_hops (corrupted_view P)
