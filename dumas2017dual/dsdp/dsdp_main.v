@@ -712,11 +712,6 @@ exact: (guess_fdist_success_le msg_to_finK guess_lossless card_renc_neq
   seed_wu1 seed_wu2 seed_wu3 seed_wv1 Hinj).
 Qed.
 
-(* guess_sdistr_success_real — the SSProve-side success probability of the
-   guessing experiment on the output-exposing real game. *)
-Definition guess_sdistr_success_real : R :=
-  distr.mu (pkg_advantage.Pr (guessing_experiment predictor real_game)) true.
-
 (* dsdp_alice_guess_advantage_le — the reduction distinguisher's advantage is at
    most [2 * epsilon_cpa]: the output-exposing endpoint games add only the common
    id_Sout_get oracle (no encryption hop), so the Part I IND-CPA bound applies.
@@ -746,7 +741,10 @@ Qed.
    secret V2 from her cipher view and the leaked scalar-product output S is at
    most 1/card_msg plus twice the IND-CPA advantage: the fiber bound 1/card_msg
    at the all-zero endpoint, plus the 2 * epsilon_cpa cost of moving to the real
-   game.  [3-party] *)
+   game.
+   Naming: subject-prefixed [dsdp_alice_guess], with [real] naming the real
+   endpoint game the probability is measured on and [_le] the upper bound.
+   [3-party] *)
 Theorem dsdp_alice_guess_real_le
     (cipher_of_chcipher : t_cipher -> cipher AHE)
     (chcipher_of_cipherK : cancel chcipher_of_cipher cipher_of_chcipher)
@@ -757,7 +755,9 @@ Theorem dsdp_alice_guess_real_le
        (locs (oracle_zero_pkg renc_card rand_of_renc t_msg
                 chcipher_of_cipher pkey_of_party)))
     (Hinj : injective (fun v : plain AHE => w_u3 * v)) :
-  guess_sdistr_success_real <= card_msg%:R^-1 + 2%:R * epsilon_cpa.
+  guess_sdistr_success_real renc_card rand_of_renc chmsg_of_msg
+    chcipher_of_cipher pkey_of_party msg_of_idx rand0 seed predictor
+    <= card_msg%:R^-1 + 2%:R * epsilon_cpa.
 Proof.
 have Hzero : guess_sdistr_success renc_card rand_of_renc chmsg_of_msg
     chcipher_of_cipher pkey_of_party msg_of_idx rand0 seed predictor
@@ -772,13 +772,6 @@ apply: (@le_trans _ _ (guess_sdistr_success renc_card rand_of_renc chmsg_of_msg
   exact: (dsdp_alice_guess_advantage_le chcipher_of_cipherK Hore Hoze).
 - by rewrite lerD2r.
 Qed.
-
-(* Hunp_leak_S — the conditional unpredictability entropy
-   [H_unp^C(V_2 | AliceView, S)] for the fixed predictor at the
-   output-exposing real game, the negative log of its success
-   probability. Cloned context abbreviation; log_id (the algebraic identity
-   carrying the probability bound into entropy form) stays in dsdp_guess_fiber. *)
-Let Hunp_leak_S : R := (- log guess_sdistr_success_real)%R.
 
 (* dsdp_alice_unpredictability_ge — the entropy lower bound
    [log card_msg - log (1 + 2 * card_msg * epsilon_cpa) <= Hunp_leak_S]:
@@ -795,17 +788,22 @@ Theorem dsdp_alice_unpredictability_ge
        (locs (oracle_zero_pkg renc_card rand_of_renc t_msg
                 chcipher_of_cipher pkey_of_party)))
     (Hinj : injective (fun v : plain AHE => w_u3 * v))
-    (Hpos : (0 < guess_sdistr_success_real)%R)
+    (Hpos : (0 < guess_sdistr_success_real renc_card rand_of_renc chmsg_of_msg
+                chcipher_of_cipher pkey_of_party msg_of_idx rand0 seed
+                predictor)%R)
     (epsilon_cpa_ge0 : (0 <= epsilon_cpa)%R) :
   (log card_msg%:R - log (1 + 2%:R * card_msg%:R * epsilon_cpa)
-     <= Hunp_leak_S)%R.
+     <= Hunp_leak_S renc_card rand_of_renc chmsg_of_msg chcipher_of_cipher
+          pkey_of_party msg_of_idx rand0 seed predictor)%R.
 Proof.
 rewrite /Hunp_leak_S.
 have Hcard0 : (0 < card_msg)%N
   by have [gm _ _] := Hmsg_bij;
      rewrite -[card_msg]card_ord; apply/card_gt0P; exists (gm 0%R).
 have Hpr_le :
-    (guess_sdistr_success_real <= card_msg%:R^-1 + 2%:R * epsilon_cpa)%R
+    (guess_sdistr_success_real renc_card rand_of_renc chmsg_of_msg
+       chcipher_of_cipher pkey_of_party msg_of_idx rand0 seed predictor
+     <= card_msg%:R^-1 + 2%:R * epsilon_cpa)%R
   by apply: (dsdp_alice_guess_real_le chcipher_of_cipherK Hore Hoze Hinj).
 have Hinvm_pos : (0 < card_msg%:R^-1 :> R)%R
   by rewrite invr_gt0 ltr0n Hcard0.
