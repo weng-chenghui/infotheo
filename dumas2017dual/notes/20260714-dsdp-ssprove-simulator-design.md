@@ -1,16 +1,19 @@
 # DSDP SSProve simulator formalization — design memo
 
 Date: 2026-07-14
-Status: design approved in-session; five de-risking probes completed and
-passing (P1, P2, P3, P5, P6); adversarial design audit run — its B1
-(statement scope), M1 (mass-1 discharge), M2 (allowed-info witness), M3
-(P1 validation scope) findings are resolved by the re-scopings and
-decisions marked "audit" in this revision, and its six confirmed-sound
-verdicts cover the architecture. User decisions locked (2026-07-14):
-statement scope = average-case (B1 option i); mass-1 = P6 graceful
-degradation (see M1 block); sim_view_body witness adopted (P6-confirmed
-feasible); probe files kept uncommitted.
-Next step: implementation plan (writing-plans), then execution.
+Status: IMPLEMENTED (2026-07-15). The design below was approved in-session and
+de-risked by five probes (P1, P2, P3, P5, P6); it was then executed in full and
+both headlines are Qed in `dsdp_main.v`. Landed across seven commits: 2bbc1714
+(smc statdist), bea78b5f (smc simulator), b10187b5 (smc lossless_heap),
+cc6863fa (ideal/simulator packages), b0dedbac (zero-game factorization),
+beb898a4 (security, view law, mass-1 discharge), eef925e5 (dsdp_main headlines).
+The adversarial design audit's B1 (statement scope), M1 (mass-1 discharge), M2
+(allowed-info witness), M3 (P1 validation scope) findings were resolved by the
+re-scopings and decisions marked "audit" in this revision. User decisions locked
+(2026-07-14): statement scope = average-case (B1 option i); mass-1 = P6 graceful
+degradation (see M1 block); sim_view_body witness adopted; probe files kept
+uncommitted. See the Implementation outcome section at the end for what deviated
+from the plan sketch.
 
 ## Objective
 
@@ -380,3 +383,39 @@ simulator -> game is `Simulates_reduction` (generic) and headline 2
 
 Relay-party (Bob/Charlie) simulators; the record-based non-leak_S game
 pair; thesis `.tex` edits; UC/composition beyond this protocol.
+
+## Implementation outcome (2026-07-15)
+
+Both headlines are Qed in `dsdp_main.v`, average-case scope as designed:
+`dsdp_alice_simulation_secure` (`AdvantageE real (Sim ∘ Ideal) <= 2 * epsilon_cpa`)
+and `dsdp_alice_view_statdist_le` (statistical distance `<= 2 * epsilon_cpa`).
+The axiom footprint of both is the SSProve library baseline plus `epsilon_cpa`
+and `enc_ind_cpa_real_or_zero`, no custom axioms beyond that crypto assumption.
+
+Headline 2 is UNCONDITIONAL. The M1 graceful-degradation fallback (the mass-1
+hypotheses) was not needed. `view_real_mass1` and `view_simulated_mass1` are
+proven outright via the heap-parametric lossless class, so the statistical
+distance bound carries no side condition.
+
+The factorization (`dsdp_simulator_factorization`, epsilon-free) closed on the
+DIRECT rhl route. The P1 fallback was not consumed.
+
+Deviations from the plan sketch, recorded:
+- `sim_view_body` dropped its unused `get_S` parameter. It takes one parameter,
+  runs `run_ideal` only, and the fabricated view provably reads no S.
+- Headline 1 inlines the triangle derivation. It does not call
+  `adv_sim_le_from_endpoint`, so `dsdp_main.v` does not import
+  `smc.ssprove_ext_simulator`. The generic layer stays load-bearing through the
+  axis file's `dsdp_adv_sim_le`.
+- The ideal's `Sout` operand order matches the denotation's `dsdp_output` order
+  (`u1 * v1 + u2 * v2 + u3 * v3`), which spares a ring step.
+- View-layer and mass-1 names finalized as `view_pair_challenger`,
+  `view_resolved`, `view_resolve_eq`, `sample_cards_msg_renc`, and
+  `view_{zero,real,simulated}_mass1`.
+
+Probe files stay uncommitted under
+`dumas2017dual/dsdp/simulation/probe_p{1,2,3,5,6}_*.v` (decision 4).
+
+Full-project build check: `make -f Makefile.coq dumas2017dual/dsdp/dsdp_main.vo`
+rebuilds the four new files and `dsdp_main.vo` in `_CoqProject` dependency order,
+against compiled `.vo` for every upstream dependency, and completes with exit 0.
