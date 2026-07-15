@@ -10,7 +10,6 @@
    Information-theoretic (counting axis)
      dsdp_centropy_uniform : H(V2,V3 | view) = log m  [3-party]
      dsdp_centropy_uniform_n : H(V | view) = log (m^n)  [N-party]
-     relay_privacy_n : H(Y | View) = log m > 0 for a generic relay  [N-party]
      US_n_compromised_leaks_secret : corrupted Alice leaks a relay's input,
        H(VS_0 | View) = 0  [N-party]
      US_compromised_leaks_V2 : corrupted Alice leaks Bob's V2, H(V2 | View) = 0
@@ -58,7 +57,7 @@ Require Import smc.ssprove_ext_lossless.
 Require Import smc.ssprove_ext_statdist.
 Require Import dsdp_game_code dsdp_symbolic_exec dsdp_game_derivation.
 Require Import dsdp_indcpa_advantage dsdp_convert dsdp_guess_fiber.
-Require Import dsdp_view_independence dsdp_simulator.
+Require Import dsdp_malicious_dotp dsdp_simulator.
 
 Set Implicit Arguments.
 Unset Strict Implicit.
@@ -137,72 +136,6 @@ End dsdp_alice_indcpa.
 (* ================================================================= *)
 (* Information-theoretic party privacy (counting axis)               *)
 (* ================================================================= *)
-
-Section dsdp_relay_privacy.
-(* cloned context of Section relay_security_n *)
-Local Set Default Goal Selector "1".
-Local Open Scope reals_ext_scope.
-Local Open Scope proba_scope.
-Local Open Scope fdist_scope.
-Local Open Scope entropy_scope.
-Context {R : realType}.
-Variable T : finType.
-Variable P : R.-fdist T.
-
-(* Z/pqZ parameters *)
-Variables (p_minus_2 q_minus_2 : nat).
-Local Notation p := p_minus_2.+2.
-Local Notation q := q_minus_2.+2.
-Hypothesis prime_p : prime p.
-Hypothesis prime_q : prime q.
-Hypothesis coprime_pq : coprime p q.
-Local Notation m := (p * q).
-Local Notation msg := 'Z_m.
-
-Let m_gt1 : (1 < m)%N.
-Proof.
-have Hp2: (1 < p)%N by [].
-have Hq2: (1 < q)%N by [].
-by rewrite (ltn_trans Hp2) // -{1}(muln1 p) ltn_pmul2l // ltnS.
-Qed.
-
-Let card_msg : #|msg| = m.
-Proof. by rewrite card_ord Zp_cast. Qed.
-
-(* Random variables for one relay party's one-time-pad argument *)
-Variable VU_i : {RV P -> msg}.   (* V_i * U_i *)
-Variable R_i : {RV P -> msg}.    (* random mask *)
-Variable Y : {RV P -> msg}.      (* any RV; constrained only by R_i_indep_VU_Y *)
-
-Let D_i : {RV P -> msg} := VU_i \+ R_i.
-
-Hypothesis R_i_indep_VU_Y : P |= R_i _|_ [%VU_i, Y].
-Hypothesis pR_i_unif : `p_ R_i = fdist_uniform card_msg.
-
-(* relay_privacy_n — for a generic relay party whose view is independent of a
-   uniform target, the view carries log m bits of uncertainty about the target.
-   [N-party] *)
-Lemma relay_privacy_n {A : finType}
-    (View : {RV P -> A}) (V_target : {RV P -> msg})
-    (pV_unif : `p_ V_target = fdist_uniform card_msg)
-    (View_indep : P |= View _|_ V_target) :
-  `H(V_target | View) = log (m%:R : R) /\
-  `H(V_target | View) > 0.
-Proof.
-have H_logm: `H(V_target | View) = log (m%:R : R).
-  have step : `H(V_target | View) = `H `p_ V_target.
-    apply: relay_privacy_from_indep; last exact: View_indep.
-    rewrite pV_unif; congr fdist_uniform; exact: eq_irrelevance.
-  rewrite step.
-  by rewrite pV_unif entropy_uniform card_msg.
-split.
-- exact: H_logm.
-- rewrite H_logm -log1.
-  apply: ltr_log; first by [].
-  by rewrite ltr1n.
-Qed.
-
-End dsdp_relay_privacy.
 
 Section dsdp_var_centropy.
 (* cloned context of Section dsdp_entropy *)

@@ -407,7 +407,7 @@ End dsdp_entropy.
     **Naming:** suffix [_ring] indicates the ring-generic sibling
     of the [Z_(p*q)]-specialized [dsdp_fiber_card] at line 200; the
     original lemma is preserved unchanged so the N-party code in
-    [dsdp_entropy_n] and the kept theorems in [dsdp_view_independence.v]
+    [dsdp_entropy_n] and the kept theorems in [dsdp_malicious_dotp.v]
     continue to compile.
 *)
 
