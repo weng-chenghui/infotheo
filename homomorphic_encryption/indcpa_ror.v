@@ -230,13 +230,13 @@ Definition oracle_encrypt_zero : raw_package :=
 
 End indcpa_ror.
 
-(** epsilon_cpa AHE — the IND-CPA real-or-zero advantage bound of scheme [AHE].
+(** epsilon_cpa AHE — the IND-CPA real-or-zero advantage bound of [AHE].
     Kind: canonical.
     Why per-scheme: the hypothesis below quantifies over every [AHEncType].
     A bare constant bounds them all at once, including schemes that return
-    the plaintext ([Idealized_AHEnc_local], [dsdp_correctness.v:79], advantage
-    1), forcing [1 <= epsilon_cpa] and leaving every [_ <= 2 * epsilon_cpa]
-    bound vacuous.
+    the plaintext, whose advantage is 1 ([epsilon_cpa_idealized_ge1],
+    [idealized/idealized_indcpa.v]); it is then forced to
+    [1 <= epsilon_cpa], leaving every [_ <= 2 * epsilon_cpa] bound vacuous.
     Used by: enc_ind_cpa_real_or_zero, downstream advantage_bound theorems. *)
 Parameter epsilon_cpa : AHEncType -> reals.Real.sort R.
 
