@@ -518,4 +518,60 @@ apply: view_mass1_denote.
 exact: sample_cards_msg_renc_all_real.
 Qed.
 
+(* view_simulated_mass1 — the resolved view-dumper over the simulator composed
+   with the ideal functionality has first-projection subdistribution mass
+   one. *)
+Lemma view_simulated_mass1 :
+  psum (distr.mu (Pr_fst (view_resolved
+    (dsdp_simulator_pkg ∘ dsdp_ideal_pkg)))) = 1.
+Proof.
+apply: LosslessHeap_Pr_fst.
+rewrite /view_resolved resolve_link /resolve /view_pair_challenger /=.
+rewrite coerce_kleisliE.
+cbn [code_link].
+rewrite !resolve_link.
+apply: LosslessHeap_bind.
+- rewrite /resolve setmE eqxx /mkdef coerce_kleisliE.
+  rewrite /sim_view_body code_link_bind.
+  apply: LosslessHeap_bind.
+  + cbn [code_link].
+    rewrite /resolve setmE eqxx coerce_kleisliE.
+    apply: LosslessHeap_bind.
+    * apply: LosslessHeap_sample; first exact: LosslessOp_uniform.
+      move=> x2.
+      apply: LosslessHeap_sample; first exact: LosslessOp_uniform.
+      move=> x3.
+      apply: LosslessHeap_put.
+      apply: LosslessHeap_put.
+      exact: LosslessHeap_ret.
+    * move=> b1; exact: LosslessHeap_ret.
+  + move=> b1.
+    cbn [code_link].
+    apply: LosslessHeap_sample; first exact: LosslessOp_uniform.
+    move=> x_r2.
+    apply: LosslessHeap_sample; first exact: LosslessOp_uniform.
+    move=> x_r3.
+    apply: LosslessHeap_sample; first exact: LosslessOp_uniform.
+    move=> x_ra1.
+    apply: LosslessHeap_sample; first exact: LosslessOp_uniform.
+    move=> x_ra2.
+    apply: LosslessHeap_sample; first exact: LosslessOp_uniform.
+    move=> x_c2.
+    apply: LosslessHeap_sample; first exact: LosslessOp_uniform.
+    move=> x_c3.
+    exact: LosslessHeap_ret.
+- move=> b_view.
+  apply: LosslessHeap_bind.
+  + rewrite /resolve /id_game_run /id_v2_get /id_Sout_get !setmE /fst.
+    rewrite -[(3 == 0)%N]/false -[(3 == 2)%N]/false eqxx /mkdef coerce_kleisliE.
+    cbn [code_link].
+    rewrite /resolve /id_ideal_run !setmE /fst.
+    rewrite -[(3 == 4)%N]/false -[(3 == 2)%N]/false eqxx coerce_kleisliE.
+    apply: LosslessHeap_bind.
+    * apply: LosslessHeap_get => stored.
+      case: stored => [v|]; exact: LosslessHeap_ret.
+    * move=> b0; exact: LosslessHeap_ret.
+  + move=> b0; exact: LosslessHeap_ret.
+Qed.
+
 End dsdp_simulator.
