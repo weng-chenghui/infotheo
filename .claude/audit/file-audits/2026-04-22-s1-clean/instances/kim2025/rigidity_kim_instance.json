@@ -1,0 +1,21 @@
+{
+  "findings": [
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/kim2025/rigidity_kim_instance.v",
+      "line_start": 126,
+      "line_end": 126,
+      "lemma_name": "kim_ts_recon_correct",
+      "severity": "warning",
+      "evidence_quote": "Lemma kim_ts_recon_correct (L : nat) (PI : PGGInterface M_kim)",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": null,
+  "exit_code": 0
+}

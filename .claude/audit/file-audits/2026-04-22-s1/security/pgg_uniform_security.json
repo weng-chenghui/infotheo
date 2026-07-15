@@ -1,0 +1,60 @@
+{
+  "findings": [
+    {
+      "rule_id": "A002",
+      "file": "pgg-smc/security/pgg_uniform_security.v",
+      "line_start": 141,
+      "line_end": 141,
+      "lemma_name": "eval_pushforward",
+      "severity": "error",
+      "evidence_quote": "f_equal. exact: eq_irrelevance.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/security/pgg_uniform_security.v",
+      "line_start": 58,
+      "line_end": 58,
+      "lemma_name": "fdist_uniform_supp_setT",
+      "severity": "error",
+      "evidence_quote": "Lemma fdist_uniform_supp_setT :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/security/pgg_uniform_security.v",
+      "line_start": 77,
+      "line_end": 77,
+      "lemma_name": "var_dist_self",
+      "severity": "error",
+      "evidence_quote": "Lemma var_dist_self (P : R.-fdist A) : var_dist P P = 0.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/security/pgg_uniform_security.v",
+      "line_start": 124,
+      "line_end": 124,
+      "lemma_name": "img_pos",
+      "severity": "error",
+      "evidence_quote": "Lemma img_pos (s : 'I_N) : (0 < #|img s|)%N.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": null,
+  "exit_code": 2
+}

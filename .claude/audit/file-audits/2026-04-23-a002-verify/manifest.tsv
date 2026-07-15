@@ -1,0 +1,4 @@
+timestamp	file	chunk	lines	exit_code	errors	warnings	duration_s	note
+2026-04-23T04:23:41Z	security/pgg_schreier_weighted.v			2	1	7	0	
+2026-04-23T04:23:41Z	reconstruct/ag_code.v			2	1	2	1	
+2026-04-23T04:23:42Z	lib/perm_uniform.v			0	0	0	0	

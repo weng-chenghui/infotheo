@@ -1,0 +1,44 @@
+id: G001
+category: mathcomp_suffix
+title: "Lemma name suffix does not match semantic role"
+severity: warning
+enabled: true
+stage_mode: stage2_only
+authority:
+  - mathcomp-CONTRIBUTING#naming-conventions
+  - Roosterize-2021
+agent_prompt: |
+  For each touched Lemma, Theorem, Fact, Corollary, Definition or Fixpoint,
+  split the name into main symbol plus suffix chain, then check whether the
+  chosen suffix matches the semantic role of the declaration according to
+  the MathComp suffix table loaded in AUTHORITY.md.
+
+  Common semantic patterns and their expected suffixes:
+  - Boolean reflection (`reflect P (bool_form)`): suffix `P`.
+  - Equational rewrite (`lhs = rhs`): suffix `E`.
+  - Injectivity (`f x = f y -> x = y`): suffix `I`.
+  - Associativity / commutativity: `A`, `AC`, `C`, `CA`.
+  - Non-negativity (`0 <= x`): suffix `_ge0`.
+  - Cardinality (`#|S| = n`): suffix `_card`.
+  - Membership predicate unfold: prefix `in_`.
+  - Membership-related: prefix `mem_`.
+
+  Examples of mismatches to flag:
+  - A lemma named `fooP` whose statement is `lhs = rhs` (it is an `E`
+    lemma, not a reflection `P` lemma).
+  - A lemma named `foo_eq` when `foo_E` would be the MathComp convention.
+  - A `Definition` whose name ends with `_lemma` or `_theorem`.
+
+  Do NOT flag:
+  - Names that match the semantic role correctly.
+  - Names that already appear in the `F001.exceptions` allowlist.
+  - Infotheo-specific conventions already documented in AUTHORITY.md.
+
+  Evidence must include the lemma name, the statement shape, and a
+  proposed idiomatic rename.
+scope: changed_lemmas
+fix_hint: "Rename following `mainSymbol_suffixes(_condition)?`. Pick the suffix that matches the theorem's semantic role per AUTHORITY.md. Update call sites if the rename is applied."
+exceptions:
+  - '^in_'
+  - '^mem_'
+  - '^card_'

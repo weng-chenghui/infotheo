@@ -1,0 +1,115 @@
+{
+  "findings": [
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/reconstruct/algebraic_rigidity.v",
+      "line_start": 236,
+      "line_end": 236,
+      "lemma_name": "security_witness_endpoint_inj",
+      "severity": "warning",
+      "evidence_quote": "Definition security_witness_endpoint_inj (L : nat)",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/reconstruct/algebraic_rigidity.v",
+      "line_start": 272,
+      "line_end": 272,
+      "lemma_name": "security_witness_from_bound",
+      "severity": "warning",
+      "evidence_quote": "Definition security_witness_from_bound (L : nat)",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/reconstruct/algebraic_rigidity.v",
+      "line_start": 286,
+      "line_end": 286,
+      "lemma_name": "security_witness_with_exact",
+      "severity": "warning",
+      "evidence_quote": "Definition security_witness_with_exact (L : nat)",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/reconstruct/algebraic_rigidity.v",
+      "line_start": 337,
+      "line_end": 337,
+      "lemma_name": "ar_search_gap_tradeoff",
+      "severity": "warning",
+      "evidence_quote": "Lemma ar_search_gap_tradeoff (L : nat) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/reconstruct/algebraic_rigidity.v",
+      "line_start": 359,
+      "line_end": 359,
+      "lemma_name": "ar_large_group_forces_gap",
+      "severity": "warning",
+      "evidence_quote": "Lemma ar_large_group_forces_gap :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/reconstruct/algebraic_rigidity.v",
+      "line_start": 410,
+      "line_end": 410,
+      "lemma_name": "ar_search_space_chain",
+      "severity": "warning",
+      "evidence_quote": "Lemma ar_search_space_chain (L : nat) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "S998",
+      "file": "rocq-audit",
+      "line_start": 1,
+      "line_end": 1,
+      "severity": "warning",
+      "evidence_quote": "agent rc=1: ",
+      "closeness": "near",
+      "explanation": "Stage 2 call failed for chunk 3; see logs.",
+      "fix_sketch": "Retry the commit. If repeated, check agent configuration.",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": {
+    "entity_count": 44,
+    "chunk_count": 8,
+    "chunk_size": 6,
+    "workers_used": 4,
+    "tokens_used": 0,
+    "tokens_cap": 20000000,
+    "wall_ms_used": 6739,
+    "wall_ms_cap": 1800000,
+    "deferred_chunks": 0,
+    "stop_reason": "clean",
+    "estimated_usd": 0.0,
+    "model": "sonnet"
+  },
+  "exit_code": 0
+}

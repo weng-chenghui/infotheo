@@ -1,0 +1,76 @@
+{
+  "findings": [
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/denboer1989/five_card_security.v",
+      "line_start": 143,
+      "line_end": 143,
+      "lemma_name": "fc_pow_fix_zero",
+      "severity": "warning",
+      "evidence_quote": "Lemma fc_pow_fix_zero (k : nat) (s : 'I_5) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/denboer1989/five_card_security.v",
+      "line_start": 155,
+      "line_end": 155,
+      "lemma_name": "fc_fix_imp_id",
+      "severity": "warning",
+      "evidence_quote": "Lemma fc_fix_imp_id (g : {perm 'I_5}) (s : 'I_5) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/denboer1989/five_card_security.v",
+      "line_start": 335,
+      "line_end": 335,
+      "lemma_name": "fc_ts_recon_correct",
+      "severity": "warning",
+      "evidence_quote": "Lemma fc_ts_recon_correct (PI : PGGInterface FiveCard_M)",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "S998",
+      "file": "rocq-audit",
+      "line_start": 1,
+      "line_end": 1,
+      "severity": "warning",
+      "evidence_quote": "agent rc=1: ",
+      "closeness": "near",
+      "explanation": "Stage 2 call failed for chunk 0; see logs.",
+      "fix_sketch": "Retry the commit. If repeated, check agent configuration.",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": {
+    "entity_count": 33,
+    "chunk_count": 7,
+    "chunk_size": 5,
+    "workers_used": 4,
+    "tokens_used": 0,
+    "tokens_cap": 20000000,
+    "wall_ms_used": 6417,
+    "wall_ms_cap": 1800000,
+    "deferred_chunks": 0,
+    "stop_reason": "clean",
+    "estimated_usd": 0.0,
+    "model": "sonnet"
+  },
+  "exit_code": 0
+}

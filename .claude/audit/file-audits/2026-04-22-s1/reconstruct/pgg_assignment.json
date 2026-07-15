@@ -1,0 +1,320 @@
+{
+  "findings": [
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/reconstruct/pgg_assignment.v",
+      "line_start": 48,
+      "line_end": 48,
+      "lemma_name": "succ_mod_cycle2_ord",
+      "severity": "warning",
+      "evidence_quote": "Lemma succ_mod_cycle2_ord (T : nat) (i j : 'I_T.+1) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/reconstruct/pgg_assignment.v",
+      "line_start": 227,
+      "line_end": 227,
+      "lemma_name": "cycle_edge_set_union",
+      "severity": "warning",
+      "evidence_quote": "Lemma cycle_edge_set_union : cycle_edge_set = fwd_edges :|: bwd_edges.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/pgg_assignment.v",
+      "line_start": 48,
+      "line_end": 48,
+      "lemma_name": "succ_mod_cycle2_ord",
+      "severity": "error",
+      "evidence_quote": "Lemma succ_mod_cycle2_ord (T : nat) (i j : 'I_T.+1) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/pgg_assignment.v",
+      "line_start": 140,
+      "line_end": 140,
+      "lemma_name": "covered_mono",
+      "severity": "error",
+      "evidence_quote": "Lemma covered_mono (C C' : {set 'I_T}) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/pgg_assignment.v",
+      "line_start": 150,
+      "line_end": 150,
+      "lemma_name": "covered_full",
+      "severity": "error",
+      "evidence_quote": "Lemma covered_full (C : {set 'I_T}) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/pgg_assignment.v",
+      "line_start": 157,
+      "line_end": 157,
+      "lemma_name": "secure_subset",
+      "severity": "error",
+      "evidence_quote": "Lemma secure_subset (C : {set 'I_T}) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/pgg_assignment.v",
+      "line_start": 161,
+      "line_end": 161,
+      "lemma_name": "covered_secure_partition",
+      "severity": "error",
+      "evidence_quote": "Lemma covered_secure_partition (C : {set 'I_T}) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/pgg_assignment.v",
+      "line_start": 169,
+      "line_end": 169,
+      "lemma_name": "secure_singleton",
+      "severity": "error",
+      "evidence_quote": "Lemma secure_singleton (C : {set 'I_T}) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/pgg_assignment.v",
+      "line_start": 181,
+      "line_end": 181,
+      "lemma_name": "covered_edges0",
+      "severity": "error",
+      "evidence_quote": "Lemma covered_edges0 : covered_edges G set0 = set0.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/pgg_assignment.v",
+      "line_start": 206,
+      "line_end": 206,
+      "lemma_name": "cycle_sym",
+      "severity": "error",
+      "evidence_quote": "Lemma cycle_sym (i j : 'I_T) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/pgg_assignment.v",
+      "line_start": 210,
+      "line_end": 210,
+      "lemma_name": "cycle_irrefl",
+      "severity": "error",
+      "evidence_quote": "Lemma cycle_irrefl (i : 'I_T) : (i, i) \\notin cycle_edge_set.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/pgg_assignment.v",
+      "line_start": 216,
+      "line_end": 216,
+      "lemma_name": "cycle_graph",
+      "severity": "error",
+      "evidence_quote": "Definition cycle_graph : AssignmentGraph T :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/pgg_assignment.v",
+      "line_start": 224,
+      "line_end": 224,
+      "lemma_name": "bwd_edges",
+      "severity": "error",
+      "evidence_quote": "Definition bwd_edges : {set 'I_T * 'I_T} :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/pgg_assignment.v",
+      "line_start": 227,
+      "line_end": 227,
+      "lemma_name": "cycle_edge_set_union",
+      "severity": "error",
+      "evidence_quote": "Lemma cycle_edge_set_union : cycle_edge_set = fwd_edges :|: bwd_edges.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/pgg_assignment.v",
+      "line_start": 242,
+      "line_end": 242,
+      "lemma_name": "fwd_card",
+      "severity": "error",
+      "evidence_quote": "Lemma fwd_card : #|fwd_edges| = T.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/pgg_assignment.v",
+      "line_start": 248,
+      "line_end": 248,
+      "lemma_name": "bwd_card",
+      "severity": "error",
+      "evidence_quote": "Lemma bwd_card : #|bwd_edges| = T.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/pgg_assignment.v",
+      "line_start": 254,
+      "line_end": 254,
+      "lemma_name": "fwd_bwd_disjoint",
+      "severity": "error",
+      "evidence_quote": "Lemma fwd_bwd_disjoint : (1 < T')%N -> [disjoint fwd_edges & bwd_edges].",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/pgg_assignment.v",
+      "line_start": 268,
+      "line_end": 268,
+      "lemma_name": "cycle_edges_count",
+      "severity": "error",
+      "evidence_quote": "Lemma cycle_edges_count : (1 < T')%N -> #|ag_edges cycle_graph| = 2 * T.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/pgg_assignment.v",
+      "line_start": 285,
+      "line_end": 285,
+      "lemma_name": "complete_edge_set",
+      "severity": "error",
+      "evidence_quote": "Definition complete_edge_set : {set 'I_T * 'I_T} :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/pgg_assignment.v",
+      "line_start": 288,
+      "line_end": 288,
+      "lemma_name": "complete_sym",
+      "severity": "error",
+      "evidence_quote": "Lemma complete_sym (i j : 'I_T) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/pgg_assignment.v",
+      "line_start": 292,
+      "line_end": 292,
+      "lemma_name": "complete_irrefl",
+      "severity": "error",
+      "evidence_quote": "Lemma complete_irrefl (i : 'I_T) : (i, i) \\notin complete_edge_set.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/pgg_assignment.v",
+      "line_start": 295,
+      "line_end": 295,
+      "lemma_name": "complete_graph",
+      "severity": "error",
+      "evidence_quote": "Definition complete_graph : AssignmentGraph T :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/pgg_assignment.v",
+      "line_start": 298,
+      "line_end": 298,
+      "lemma_name": "complete_edges_count",
+      "severity": "error",
+      "evidence_quote": "Lemma complete_edges_count :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/pgg_assignment.v",
+      "line_start": 321,
+      "line_end": 321,
+      "lemma_name": "complete_covered_full",
+      "severity": "error",
+      "evidence_quote": "Lemma complete_covered_full (C : {set 'I_T}) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": null,
+  "exit_code": 2
+}

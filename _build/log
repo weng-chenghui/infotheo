@@ -1,0 +1,15 @@
+# dune build pgg-smc/groups/five_card_security.vo
+# OCAMLPARAM: unset
+# Shared cache: enabled-except-user-rules
+# Shared cache location: /Users/cheng-huiweng/.cache/dune/db
+# Workspace root: /Users/cheng-huiweng/Projects/coq/infotheo
+# Auto-detected concurrency: 12
+# Dune context:
+#  { name = "default"
+#  ; kind = "default"
+#  ; profile = Dev
+#  ; merlin = true
+#  ; fdo_target_exe = None
+#  ; build_dir = In_build_dir "default"
+#  ; instrument_with = []
+#  }

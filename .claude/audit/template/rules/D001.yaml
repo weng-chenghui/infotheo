@@ -1,0 +1,37 @@
+id: D001
+category: unused_hypotheses
+title: "Hypothesis declared in scope but not used in the body"
+severity: warning
+enabled: true
+stage_mode: stage2_only
+authority:
+  - peer-feedback-2026-03
+agent_prompt: |
+  Scan the enclosing Section context for each touched lemma, theorem, or
+  definition. For each `Variable` or `Hypothesis` declared above the entity,
+  check whether the entity's body references the name.
+
+  Only emit a finding when the Variable or Hypothesis is declared in the
+  same Section as the entity (not transitively through other Sections) AND
+  the name does not appear anywhere in the entity's body.
+
+  Attach `kernel_contract: unused_hypothesis` with parameter
+  `{ "hypothesis": "<name>" }`. Tier K verifies the claim by re-trying the
+  proof with the hypothesis removed. A confirmed finding means the
+  hypothesis is provably unused.
+
+  Do NOT flag:
+  - Hypotheses used only inside other lemmas in the same Section; we only
+    audit the touched entity's body.
+  - Variables that are used via an implicit-argument resolution path (check
+    the proof term, not just tactic text).
+  - Hypotheses whose removal would change the Section-close generalisation
+    of other dependent entities.
+
+  Evidence must include the Section name, the hypothesis declaration line,
+  and the entity body span.
+scope: changed_lemmas
+kernel_contract:
+  name: unused_hypothesis
+fix_hint: "If Tier K confirms the hypothesis is unused, drop the `Hypothesis` or `Variable` line, or move it out of the Section. If the hypothesis is needed for a different entity, keep it and add a comment explaining why it is declared here."
+exceptions: []

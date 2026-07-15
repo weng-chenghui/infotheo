@@ -1,0 +1,22 @@
+id: A003
+category: deprecated_tactics
+title: "Bare auto, tauto, or intuition as terminator; prefer done or a named tactic"
+severity: warning
+enabled: true
+stage_mode: both
+authority:
+  - mathcomp-CONTRIBUTING#proofs
+fast_pattern:
+  pattern: '^[ \t]*(auto|tauto|intuition)[ \t]*\.[ \t]*$'
+  ignore_in_comments: true
+  file_glob: '*.v'
+agent_prompt: |
+  Flag lines containing only `auto.`, `tauto.`, or `intuition.` as
+  terminators. Explain that SSReflect prefers `done.` or a named tactic so
+  readers can tell what closed the goal. When the surrounding proof
+  context suggests a specific closer (`by apply: foo_ge0`, `by rewrite
+  cancel`), offer it in `fix_sketch`. Allow wrapped forms such as
+  `by auto` because they announce intent.
+scope: changed_hunks
+fix_hint: "Replace a bare `auto.` / `tauto.` / `intuition.` terminator with `done.`, `by [].`, `trivial.`, or a specific named tactic. These opaque closers hide which lemma solved the goal."
+exceptions: []

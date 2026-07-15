@@ -1,0 +1,233 @@
+{
+  "findings": [
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/security/pgg_weighted_words.v",
+      "line_start": 64,
+      "line_end": 67,
+      "lemma_name": "rho_from_words_weighted",
+      "severity": "warning",
+      "evidence_quote": "Definition rho_from_words_weighted : R.-fdist {perm 'I_N} :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1",
+        "stage2"
+      ],
+      "explanation": "Stage 1 already flagged the literal at line 64. Closeness upgrade: the main symbol `rho` is correctly identified, but the suffix chain `_from_words_weighted` uses the connective `_from_` which is not a canonical MathComp suffix per AUTHORITY.md. The phrase reads as prose ('rho from words, weighted') rather than the grammar `mainSymbol_suffixes`. The parallel Definition `word_weighted` in the same Section uses two components without `_from_`; consistency would favour a two-component rename here as well. Proposed idiomatic alternatives: `rho_weighted` (parallel to `word_weighted`, emphasises the weighted-distribution character) or `rhoW` (CamelCase, names the weight parameter explicitly).",
+      "fix_sketch": "Rename to `rho_weighted` for consistency with `word_weighted`, or to `rhoW` in CamelCase. Update all downstream call sites (including the Stage 1-flagged `rho_weighted_is_uniform` lemma at line 142, which already anticipates the shorter name)."
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/security/pgg_weighted_words.v",
+      "line_start": 129,
+      "line_end": 129,
+      "lemma_name": "word_weighted_is_uniform",
+      "severity": "warning",
+      "evidence_quote": "Lemma word_weighted_is_uniform :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/security/pgg_weighted_words.v",
+      "line_start": 142,
+      "line_end": 142,
+      "lemma_name": "rho_weighted_is_uniform",
+      "severity": "warning",
+      "evidence_quote": "Lemma rho_weighted_is_uniform :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/security/pgg_weighted_words.v",
+      "line_start": 88,
+      "line_end": 98,
+      "lemma_name": "fiber_prob_weighted",
+      "severity": "warning",
+      "evidence_quote": "Lemma fiber_prob_weighted (g : {perm 'I_N}) :\n  rho_from_words_weighted g =\n  \\sum_(w | w \\in fiber_weighted g) word_weighted w.",
+      "closeness": "near",
+      "explanation": "The statement is an equation (rho_from_words_weighted g = sum over fiber_weighted g of word_weighted w), so the MathComp grammar calls for a trailing E suffix. The current name fiber_prob_weighted ends with _weighted, which is not a canonical suffix in AUTHORITY.md's table and does not signal the equational / elimination role. The main symbol appears to be rho_from_words_weighted (the quantity being characterised), making a name like rho_from_words_weightedE or rho_weighted_fiberE more idiomatic. Proposed rename: rho_from_words_weightedE (equational unfolding of rho_from_words_weighted onto the fiber sum).",
+      "fix_sketch": "Rename to `rho_from_words_weightedE` to signal the equational-rewrite role per the E suffix convention in AUTHORITY.md. If the fiber is the primary concept, `fiber_weighted_rhoE` is an alternative.",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/security/pgg_weighted_words.v",
+      "line_start": 129,
+      "line_end": 131,
+      "lemma_name": "word_weighted_is_uniform",
+      "severity": "warning",
+      "evidence_quote": "Lemma word_weighted_is_uniform :\n  @word_weighted R m L (fdist_uniform card_Tg) =\n  fdist_uniform (card_word_L m L).",
+      "closeness": "near",
+      "explanation": "The statement is an equation whose right-hand head symbol is fdist_uniform. MathComp convention assigns suffix E to equational rewrites (see AUTHORITY.md suffix table). The current suffix chain 'is_uniform' is English prose, not a canonical MathComp suffix. The main symbol is word_weighted; idiomatic alternatives are word_weighted_uniformE or word_weightedE_uniform. Stage 1 already flagged F001 for the four-component count; this finding upgrades the diagnosis to a suffix-role mismatch under G001.",
+      "fix_sketch": "Rename to word_weighted_uniformE (main symbol word_weighted, condition uniform, role-suffix E). Update the call site in rho_weighted_is_uniform at line 146 to match.",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/security/pgg_weighted_words.v",
+      "line_start": 142,
+      "line_end": 144,
+      "lemma_name": "rho_weighted_is_uniform",
+      "severity": "warning",
+      "evidence_quote": "Lemma rho_weighted_is_uniform :\n  @rho_from_words_weighted R N'' m L sigmas (fdist_uniform card_Tg) =\n  @rho_from_words R N'' m L sigmas.",
+      "closeness": "near",
+      "explanation": "The statement is an equation (rho_from_words_weighted ... = rho_from_words ...). MathComp convention assigns suffix E to equational rewrites (AUTHORITY.md). The suffix chain 'is_uniform' is English prose. The main symbol is rho_from_words_weighted; idiomatic alternatives are rho_weighted_uniformE or rho_from_words_weightedE. Stage 1 flagged F001 for the four-component count; this finding upgrades the diagnosis to a suffix-role mismatch under G001.",
+      "fix_sketch": "Rename to rho_weighted_uniformE or rho_from_words_weightedE. Verify with Grep that no other file in pgg-smc/ references rho_weighted_is_uniform and update any call sites found.",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/security/pgg_weighted_words.v",
+      "line_start": 60,
+      "line_end": 63,
+      "lemma_name": "word_weighted",
+      "severity": "warning",
+      "evidence_quote": "(* Convert row vector distribution to tuple distribution *)",
+      "closeness": "near",
+      "explanation": "The preceding comment provides a WHAT paraphrase (the conversion from row-vector to tuple distribution) but is missing KIND classification and WHY motivation. No label equivalent to 'helper' or 'main' is present. WHY is not waived: the name carries no algebraic-law suffix, Kind is not canonical/notation/coercion/instance, and the WHAT clause does not name a downstream use-site. Because KIND is absent, USED_BY cannot be assessed; if this is a helper (probable, given it feeds rho_from_words_weighted), a consumer name is also required.",
+      "fix_sketch": "(** word_weighted — pushes the IID row-vector distribution word_rV through tuple_of_row to obtain an L-tuple distribution over 'I_Tg.\n    Kind: helper.\n    Why: rho_from_words_weighted requires an fdist on L.-tuple 'I_Tg before applying word_eval; this definition provides it.\n    Used by: rho_from_words_weighted. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/security/pgg_weighted_words.v",
+      "line_start": 64,
+      "line_end": 67,
+      "lemma_name": "rho_from_words_weighted",
+      "severity": "warning",
+      "evidence_quote": "(* Pushforward through word evaluation *)",
+      "closeness": "near",
+      "explanation": "The preceding comment provides a WHAT paraphrase (pushforward through word_eval) but is missing KIND classification and WHY motivation. WHY is not waived: the name carries no algebraic-law suffix, Kind is not canonical/notation/coercion/instance, and the WHAT clause does not name a downstream use-site crisply. If Kind is helper, USED_BY is also required; the comment names no consumer.",
+      "fix_sketch": "(** rho_from_words_weighted — pushes the word_weighted tuple distribution through word_eval to obtain an fdist on {perm 'I_N}.\n    Kind: helper.\n    Why: central derived distribution for the weighted-word security analysis; consumed by uniformity and entropy results in the same file.\n    Used by: rho_weighted_is_uniform. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/security/pgg_weighted_words.v",
+      "line_start": 68,
+      "line_end": 71,
+      "lemma_name": "fiber_weighted",
+      "severity": "warning",
+      "evidence_quote": "(* Fiber: set of words evaluating to a given group element *)",
+      "closeness": "near",
+      "explanation": "The comment adequately paraphrases the statement (WHAT: pass) but is missing two required parts. (1) KIND: no classification (helper / main / canonical / etc.) is present. (2) WHY: no motivation is given and none of the waiver conditions apply — the entity name carries no algebraic-law suffix, and the WHAT clause does not name a downstream use-site.",
+      "fix_sketch": "(** fiber_weighted — the set of L-tuples over 'I_Tg that evaluate to a given permutation g under word_eval.\n    Kind: helper.\n    Why: serves as the index set in fiber_prob_weighted, which sums word_weighted over this fiber.\n    Used by: fiber_prob_weighted. *)",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/security/pgg_weighted_words.v",
+      "line_start": 72,
+      "line_end": 87,
+      "lemma_name": "word_weightedE",
+      "severity": "warning",
+      "evidence_quote": "(* Probability of each word under the weighted distribution *)",
+      "closeness": "near",
+      "explanation": "Three checklist failures. (1) KIND: no classification (helper / main / etc.) is present. (2) WHAT: the comment names the topic ('probability of each word') but does not paraphrase the equational statement word_weighted w = \\prod_(i < L) W (tnth w i); mere topic description is insufficient per AUTHORITY.md. (3) WHY: no motivation is given; the suffix E is not in the algebraic-law waiver list (_A, _AC, _ACA, _C, _CA, _K, _D, _I, _V, _X, _Xn, _Xz, _Mn, _Z).",
+      "fix_sketch": "(** word_weightedE — word_weighted w equals the product \\prod_(i < L) W (tnth w i), unfolding fdistmapE over the row-of-tuple bijection.\n    Kind: helper.\n    Why: needed by fiber_prob_weighted and any caller that must unfold word_weighted into a product of per-letter weights.\n    Used by: fiber_prob_weighted. *)",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/security/pgg_weighted_words.v",
+      "line_start": 88,
+      "line_end": 98,
+      "lemma_name": "fiber_prob_weighted",
+      "severity": "warning",
+      "evidence_quote": "(* The probability of g under the weighted distribution *)",
+      "closeness": "near",
+      "explanation": "Three checklist failures. (1) KIND: no classification present. (2) WHAT: the comment names the topic but the actual statement is an equation equating rho_from_words_weighted g to a sum over fiber_weighted g; a paraphrase of that equation is absent. (3) WHY: no motivation given; no waiver applies (_weighted is not an algebraic-law suffix; WHAT does not name a downstream use-site crisply).",
+      "fix_sketch": "(** fiber_prob_weighted — rho_from_words_weighted g equals the sum of word_weighted w over all w in fiber_weighted g, unfolding fdistmapE and the fiber membership condition.\n    Kind: helper.\n    Why: bridges the fiber set definition to the scalar probability mass, enabling sum-over-fiber manipulations in downstream security lemmas.\n    Used by: <downstream lemma name>. *)",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/security/pgg_weighted_words.v",
+      "line_start": 99,
+      "line_end": 114,
+      "lemma_name": "endpoint_dist_weighted",
+      "severity": "warning",
+      "evidence_quote": "(* Endpoint distribution: push rho_from_words_weighted through\n   sigma |-> sigma(s) for a given starting sheet s *)",
+      "closeness": "near",
+      "explanation": "Two checklist failures. (1) KIND: no classification (helper / main / canonical / etc.) is present. (2) WHY: the comment describes the construction mechanics well but gives no motivation — it does not explain why this distribution is introduced or which downstream results depend on it. The WHAT clause does not name a downstream use-site. No waiver applies (no algebraic-law suffix; not a canonical/notation/coercion/instance kind).",
+      "fix_sketch": "(** endpoint_dist_weighted — the distribution on 'I_N obtained by pushing rho_from_words_weighted through sigma |-> sigma(s), giving the marginal distribution of the endpoint of a weighted random walk starting at sheet s.\n    Kind: main (or helper, depending on the file's primary claim).\n    Why: the central object of the weighted-words security argument; compared to the uniform endpoint distribution in the uniform-recovery section.\n    Used by: <downstream lemma name>. *)",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/security/pgg_weighted_words.v",
+      "line_start": 129,
+      "line_end": 141,
+      "lemma_name": "word_weighted_is_uniform",
+      "severity": "warning",
+      "evidence_quote": "(* When W is uniform, each word gets probability (1/Tg)^L = 1/Tg^L,\n   which is the uniform distribution on L-tuples. *)",
+      "closeness": "near",
+      "explanation": "KIND is absent: no classification token (helper, main, auxiliary, etc.) appears anywhere in the comment. WHY is absent: the phrase 'When W is uniform' describes the mathematical condition but supplies no motivation — it does not name a downstream consumer or explain why the uniform case matters for the surrounding development. WHAT is marginally satisfied ('each word gets probability … uniform distribution on L-tuples'). USED_BY cannot be determined because KIND is unset; however, word_weighted_is_uniform is directly consumed by rho_weighted_is_uniform at line 146, so if Kind is helper the USED_BY field is also missing.",
+      "fix_sketch": "(** word_weighted_is_uniform — when the generator alphabet carries the uniform distribution, word_weighted collapses to fdist_uniform on L-tuples.\n    Kind: helper.\n    Why: needed by rho_weighted_is_uniform to reduce the weighted recovery pipeline to the standard uniform pipeline.\n    Used by: rho_weighted_is_uniform. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": {
+    "entity_count": 27,
+    "chunk_count": 7,
+    "chunk_size": 4,
+    "workers_used": 4,
+    "tokens_used": 257960,
+    "tokens_cap": 20000000,
+    "wall_ms_used": 148033,
+    "wall_ms_cap": 1800000,
+    "deferred_chunks": 0,
+    "stop_reason": "clean",
+    "estimated_usd": 1.5478,
+    "model": "sonnet"
+  },
+  "exit_code": 0
+}

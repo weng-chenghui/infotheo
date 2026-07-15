@@ -1,0 +1,216 @@
+{
+  "findings": [
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/reconstruct/coord_perm_compatible.v",
+      "line_start": 58,
+      "line_end": 58,
+      "lemma_name": "coord_perm_compatible_id",
+      "severity": "warning",
+      "evidence_quote": "Lemma coord_perm_compatible_id (F : finFieldType) (n : nat) (C : Lcode0.t F n) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/reconstruct/coord_perm_compatible.v",
+      "line_start": 134,
+      "line_end": 134,
+      "lemma_name": "massey_codeword_col_perm",
+      "severity": "warning",
+      "evidence_quote": "Lemma massey_codeword_col_perm (s : F) (shares : 'rV[F]_n'.+1) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/reconstruct/coord_perm_compatible.v",
+      "line_start": 158,
+      "line_end": 158,
+      "lemma_name": "massey_recon_col_perm",
+      "severity": "warning",
+      "evidence_quote": "Lemma massey_recon_col_perm (s : F) (shares : 'rV[F]_n'.+1) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/coord_perm_compatible.v",
+      "line_start": 39,
+      "line_end": 39,
+      "lemma_name": "coord_perm_compatible",
+      "severity": "error",
+      "evidence_quote": "Definition coord_perm_compatible (sigma : {perm 'I_n}) : Prop :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/coord_perm_compatible.v",
+      "line_start": 74,
+      "line_end": 74,
+      "lemma_name": "sigma_lift_neq0",
+      "severity": "error",
+      "evidence_quote": "Lemma sigma_lift_neq0 (j : 'I_n'.+1) : sigma (lift ord0 j) != ord0.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/coord_perm_compatible.v",
+      "line_start": 82,
+      "line_end": 82,
+      "lemma_name": "restrict_perm0_fun",
+      "severity": "error",
+      "evidence_quote": "Definition restrict_perm0_fun (j : 'I_n'.+1) : 'I_n'.+1 :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/coord_perm_compatible.v",
+      "line_start": 85,
+      "line_end": 85,
+      "lemma_name": "restrict_perm0_funE",
+      "severity": "error",
+      "evidence_quote": "Lemma restrict_perm0_funE (j : 'I_n'.+1) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/coord_perm_compatible.v",
+      "line_start": 94,
+      "line_end": 94,
+      "lemma_name": "restrict_perm0_inj",
+      "severity": "error",
+      "evidence_quote": "Lemma restrict_perm0_inj : injective restrict_perm0_fun.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/coord_perm_compatible.v",
+      "line_start": 103,
+      "line_end": 103,
+      "lemma_name": "restrict_perm0_val",
+      "severity": "error",
+      "evidence_quote": "Definition restrict_perm0_val : {perm 'I_n'.+1} :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/coord_perm_compatible.v",
+      "line_start": 106,
+      "line_end": 106,
+      "lemma_name": "restrict_perm0_valE",
+      "severity": "error",
+      "evidence_quote": "Lemma restrict_perm0_valE (j : 'I_n'.+1) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/coord_perm_compatible.v",
+      "line_start": 134,
+      "line_end": 134,
+      "lemma_name": "massey_codeword_col_perm",
+      "severity": "error",
+      "evidence_quote": "Lemma massey_codeword_col_perm (s : F) (shares : 'rV[F]_n'.+1) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/coord_perm_compatible.v",
+      "line_start": 158,
+      "line_end": 158,
+      "lemma_name": "massey_recon_col_perm",
+      "severity": "error",
+      "evidence_quote": "Lemma massey_recon_col_perm (s : F) (shares : 'rV[F]_n'.+1) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/coord_perm_compatible.v",
+      "line_start": 203,
+      "line_end": 203,
+      "lemma_name": "massey_share_perm",
+      "severity": "error",
+      "evidence_quote": "Definition massey_share_perm (g : gT) : {perm 'I_n'.+1} :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/coord_perm_compatible.v",
+      "line_start": 208,
+      "line_end": 208,
+      "lemma_name": "massey_share_permE",
+      "severity": "error",
+      "evidence_quote": "Lemma massey_share_permE (g : gT) (gG : g \\in G) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/coord_perm_compatible.v",
+      "line_start": 216,
+      "line_end": 216,
+      "lemma_name": "massey_perm_compatible",
+      "severity": "error",
+      "evidence_quote": "Lemma massey_perm_compatible :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/coord_perm_compatible.v",
+      "line_start": 254,
+      "line_end": 254,
+      "lemma_name": "transport_perm_compatible",
+      "severity": "error",
+      "evidence_quote": "Lemma transport_perm_compatible :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": null,
+  "exit_code": 2
+}

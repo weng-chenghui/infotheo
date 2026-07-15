@@ -1,0 +1,60 @@
+{
+  "findings": [
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_weval_inj.v",
+      "line_start": 182,
+      "line_end": 182,
+      "lemma_name": "map_val_tuple_inj",
+      "severity": "warning",
+      "evidence_quote": "Lemma map_val_tuple_inj (L : nat) (w1 w2 : @pgg_word M L) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_weval_inj.v",
+      "line_start": 195,
+      "line_end": 195,
+      "lemma_name": "map_val_in_all_words",
+      "severity": "warning",
+      "evidence_quote": "Lemma map_val_in_all_words (L : nat) (w : @pgg_word M L) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_weval_inj.v",
+      "line_start": 242,
+      "line_end": 242,
+      "lemma_name": "weval_inj_inst_search_space",
+      "severity": "warning",
+      "evidence_quote": "Lemma weval_inj_inst_search_space : @search_space M L = m.+1 ^ L.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_weval_inj.v",
+      "line_start": 397,
+      "line_end": 397,
+      "lemma_name": "oc_search_space_2",
+      "severity": "warning",
+      "evidence_quote": "Lemma oc_search_space_2 : @search_space OC_PGGTypes 2 = 4.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": null,
+  "exit_code": 0
+}

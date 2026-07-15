@@ -1,0 +1,86 @@
+{
+  "findings": [
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/denboer1989/five_card_group.v",
+      "line_start": 80,
+      "line_end": 80,
+      "lemma_name": "fc_sigmaK",
+      "severity": "error",
+      "evidence_quote": "Lemma fc_sigmaK : cancel fc_sigma_fun fc_sigma_inv.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/denboer1989/five_card_group.v",
+      "line_start": 83,
+      "line_end": 83,
+      "lemma_name": "fc_sigma",
+      "severity": "error",
+      "evidence_quote": "Definition fc_sigma : {perm 'I_5} := perm (can_inj fc_sigmaK).",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/denboer1989/five_card_group.v",
+      "line_start": 101,
+      "line_end": 101,
+      "lemma_name": "fc_g",
+      "severity": "error",
+      "evidence_quote": "Definition fc_g : {perm 'I_5} := perm (can_inj fc_gK).",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/denboer1989/five_card_group.v",
+      "line_start": 129,
+      "line_end": 129,
+      "lemma_name": "fc_g_fpf",
+      "severity": "error",
+      "evidence_quote": "Lemma fc_g_fpf is removed as it is unprovable. *)",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/denboer1989/five_card_group.v",
+      "line_start": 137,
+      "line_end": 137,
+      "lemma_name": "fc_sigmasE",
+      "severity": "error",
+      "evidence_quote": "Lemma fc_sigmasE (i : 'I_1) : tnth fc_sigmas i = fc_sigma.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/denboer1989/five_card_group.v",
+      "line_start": 140,
+      "line_end": 140,
+      "lemma_name": "fc_gens_agree",
+      "severity": "error",
+      "evidence_quote": "Lemma fc_gens_agree (i : 'I_1) (x : 'I_5) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": null,
+  "exit_code": 2
+}

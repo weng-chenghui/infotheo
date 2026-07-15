@@ -1,0 +1,98 @@
+<!doctype html><html><head><meta charset='utf-8'><title>rocq-audit dashboard</title><style>body{font-family:system-ui,sans-serif;max-width:960px;margin:2em auto;padding:0 1em;}table{border-collapse:collapse;margin:1em 0;}th,td{border:1px solid #ccc;padding:.3em .6em;}code{background:#f4f4f4;padding:.1em .3em;border-radius:.2em;}h1,h2{border-bottom:1px solid #ddd;padding-bottom:.2em;}</style></head><body><pre style='white-space:pre-wrap;font-family:inherit;'># rocq-audit dashboard  (last 30 days)
+
+## Top-firing rules
+
+| Rule | Count | Title |
+|---|---|---|
+| S998 | 40 |  |
+| H001 | 19 | Lemma, Theorem, Fact, Corollary, or Proposition lacks a preceding comment (or comment is degenerate) |
+| I001 | 6 | Name breaks MathComp grammar without a `Naming:` justification in the preceding comment |
+| F001 | 3 | Lemma/Theorem/Fact/Definition name does not follow MathComp grammar |
+| G001 | 2 | Lemma name suffix does not match semantic role |
+| S996 | 1 | Stage 2 budget exhausted before all chunks ran (daily, token, or wall cap) |
+
+## Top-offending files
+
+| File | Count |
+|---|---|
+| `rocq-audit` | 41 |
+| `dumas2017dual/dsdp/dsdp_game_gen_literal.v` | 12 |
+| `smc/ssprove_ext_statdist.v` | 9 |
+| `dumas2017dual/dsdp/dsdp_security_indcpa_fiber.v` | 3 |
+| `dumas2017dual/dsdp/simulation/dsdp_simulator.v` | 3 |
+| `dumas2017dual/dsdp/dsdp_main.v` | 2 |
+| `smc/ssprove_ext_simulator.v` | 1 |
+
+## Dead rules
+
+Rules enabled but with zero firings in the last 30 days.
+
+| Rule | Title |
+|---|---|
+| A001 | pose proof is non-idiomatic; prefer have |
+| A002 | f_equal is non-idiomatic; prefer goal-level congr (congr1 is only a fallback) |
+| A003 | Bare auto, tauto, or intuition as terminator; prefer done or a named tactic |
+| A004 | assert is non-idiomatic in SSReflect proofs; prefer have |
+| B001 | have [/eqP h|h] := boolP (X == Y) is verbose; prefer case: (eqVneq X Y) |
+| C001 | Inductive or Record has opaque nested-dependent header |
+| D001 | Hypothesis declared in scope but not used in the body |
+| E001 | Proof continues past the line where the goal is already closed |
+| H002 | Comment uses templated slots, stale crossrefs, type restatement, exceeds budget, or describes only mechanism |
+
+## Bypass events
+
+| Timestamp | Commit | Diff | Rules that would have fired |
+|---|---|---|---|
+| 2026-04-20T15:05:13Z | `34fb4c43` | `76f5538d` | A001 |
+| 2026-04-21T04:37:19Z | `6ded1ce8` | `bb5f2e39` | F001,F001,F001,F001,F001,F001,F001,F001,F001,F001,F001,F001,F001,F001,H001,H001,H001,H001,H001,H001,H001,H001,H001,H001,H001,H001,H001,H001,H001,I001 |
+| 2026-04-21T06:08:18Z | `3547f28b` | `533dae44` | F001,H001,I001,I001 |
+| 2026-04-21T06:09:21Z | `3547f28b` | `533dae44` | F001,H001,I001,I001 |
+| 2026-04-21T15:08:30Z | `3547f28b` | `3e0d5777` | F001,H001,I001 |
+| 2026-04-26T08:30:31Z | `d8b3457e` | `6c97e659` | H002,H002,S996 |
+| 2026-04-26T09:46:46Z | `9db1dab3` | `a01288d5` | S996 |
+| 2026-04-26T10:37:52Z | `2bb62843` | `2a4c7c01` | F001,F001,F001,F001,I001,I001,I001,S998,F001,F001,H002 |
+| 2026-04-26T10:53:16Z | `10d2ff85` | `9b2ed4fd` | A002,S998 |
+| 2026-04-26T10:58:47Z | `a0c4d7b0` | `fcc388b8` | S996 |
+| 2026-04-26T11:15:03Z | `ee710bcc` | `e859743d` | F001,D001,D001,F001,G001,S996 |
+| 2026-04-26T11:21:07Z | `34f50e49` | `29556e7f` | F001,F001,G001,S996 |
+| 2026-05-14T11:34:44Z | `179c21aa` | `cb33f2ab` | F001,F001,F001,F001,F001,H002,S996 |
+| 2026-05-14T15:01:13Z | `5b8a7d4c` | `e40f53e3` | F001,F001,S996 |
+| 2026-05-14T15:28:56Z | `0c6b04a9` | `bb66626d` | S996 |
+| 2026-05-15T09:41:40Z | `7aecbf2b` | `29245fc5` | F001,F001,F001,F001,H001,F001,G001,S996 |
+| 2026-05-15T14:44:58Z | `868cf55e` | `c66e61cc` | S996 |
+| 2026-05-17T08:53:27Z | `414fbabd` | `083f5322` | S996 |
+| 2026-05-17T11:49:48Z | `57617185` | `52db0519` | S997,S998,S996 |
+| 2026-05-17T12:02:47Z | `d485d8ce` | `1e2d33d8` | F001,S996 |
+| 2026-06-01T02:49:03Z | `2cc180db` | `2b74542e` | A002,A002,B001,B001,F001,F001,F001,F001,F001,F001,F001,F001,H001,H001,H001,H001,H002,A002,A002,B001,B001,F001,F001,F001,F001,B001,B001,B001,B001,F001,F001,F001,G001,S996 |
+| 2026-06-04T07:22:55Z | `bd46fe85` | `3855e337` | H002,H002,H002,S996 |
+| 2026-06-05T06:43:16Z | `7bfef85c` | `64122f59` | F001,F001,F001,H001,H001,H001,I001,I001,H002,H002,H002,H002,H001,H001,F001,F001,F001,S996 |
+| 2026-06-08T05:46:17Z | `ec1e05fc` | `9e533050` | S996 |
+| 2026-06-11T04:13:05Z | `0584f7e0` | `0f050fc3` | H002,H002,S996 |
+| 2026-06-11T04:16:41Z | `f6738e80` | `0f050fc3` | H002,H002,H002,H002,S996 |
+| 2026-06-11T04:35:50Z | `f6738e80` | `93a15044` | I001,G001,F001 |
+| 2026-06-12T19:14:54Z | `6f80bb33` | `45787423` | F001,F001,F001,F001,F001,F001,F001,H001,H001,H001,H001,H001,H001,H001,H001,H001,H001,H001,H001,I001,I001,I001,I001,G001,G001,G001,G001,S998,F001,S998,S998 |
+| 2026-06-15T12:32:16Z | `9bbb585a` | `e9a5af55` | H001,H001,I001,S998,S998,S998,S998,S998,S998 |
+| (git-note) | `0584f7e0` | `?` | - |
+| (git-note) | `0c6b04a9` | `?` | - |
+| (git-note) | `10d2ff85` | `?` | - |
+| (git-note) | `179c21aa` | `?` | - |
+| (git-note) | `2bb62843` | `?` | - |
+| (git-note) | `2cc180db` | `?` | - |
+| (git-note) | `34f50e49` | `?` | - |
+| (git-note) | `414fbabd` | `?` | - |
+| (git-note) | `57617185` | `?` | - |
+| (git-note) | `5b8a7d4c` | `?` | - |
+| (git-note) | `6f80bb33` | `?` | - |
+| (git-note) | `7aecbf2b` | `?` | - |
+| (git-note) | `7bfef85c` | `?` | - |
+| (git-note) | `868cf55e` | `?` | - |
+| (git-note) | `9bbb585a` | `?` | - |
+| (git-note) | `9db1dab3` | `?` | - |
+| (git-note) | `a0c4d7b0` | `?` | - |
+| (git-note) | `bd46fe85` | `?` | - |
+| (git-note) | `d485d8ce` | `?` | - |
+| (git-note) | `d8b3457e` | `?` | - |
+| (git-note) | `ec1e05fc` | `?` | - |
+| (git-note) | `ee710bcc` | `?` | - |
+| (git-note) | `f6738e80` | `?` | - |
+</pre></body></html>

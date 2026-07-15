@@ -1,0 +1,673 @@
+{
+  "since_days": 30,
+  "top_rules": [
+    {
+      "rule_id": "S998",
+      "count": 40,
+      "title": ""
+    },
+    {
+      "rule_id": "H001",
+      "count": 19,
+      "title": "Lemma, Theorem, Fact, Corollary, or Proposition lacks a preceding comment (or comment is degenerate)"
+    },
+    {
+      "rule_id": "I001",
+      "count": 6,
+      "title": "Name breaks MathComp grammar without a `Naming:` justification in the preceding comment"
+    },
+    {
+      "rule_id": "F001",
+      "count": 3,
+      "title": "Lemma/Theorem/Fact/Definition name does not follow MathComp grammar"
+    },
+    {
+      "rule_id": "G001",
+      "count": 2,
+      "title": "Lemma name suffix does not match semantic role"
+    },
+    {
+      "rule_id": "S996",
+      "count": 1,
+      "title": "Stage 2 budget exhausted before all chunks ran (daily, token, or wall cap)"
+    }
+  ],
+  "top_files": [
+    {
+      "file": "rocq-audit",
+      "count": 41
+    },
+    {
+      "file": "dumas2017dual/dsdp/dsdp_game_gen_literal.v",
+      "count": 12
+    },
+    {
+      "file": "smc/ssprove_ext_statdist.v",
+      "count": 9
+    },
+    {
+      "file": "dumas2017dual/dsdp/dsdp_security_indcpa_fiber.v",
+      "count": 3
+    },
+    {
+      "file": "dumas2017dual/dsdp/simulation/dsdp_simulator.v",
+      "count": 3
+    },
+    {
+      "file": "dumas2017dual/dsdp/dsdp_main.v",
+      "count": 2
+    },
+    {
+      "file": "smc/ssprove_ext_simulator.v",
+      "count": 1
+    }
+  ],
+  "dead_rules": [
+    {
+      "rule_id": "A001",
+      "title": "pose proof is non-idiomatic; prefer have"
+    },
+    {
+      "rule_id": "A002",
+      "title": "f_equal is non-idiomatic; prefer goal-level congr (congr1 is only a fallback)"
+    },
+    {
+      "rule_id": "A003",
+      "title": "Bare auto, tauto, or intuition as terminator; prefer done or a named tactic"
+    },
+    {
+      "rule_id": "A004",
+      "title": "assert is non-idiomatic in SSReflect proofs; prefer have"
+    },
+    {
+      "rule_id": "B001",
+      "title": "have [/eqP h|h] := boolP (X == Y) is verbose; prefer case: (eqVneq X Y)"
+    },
+    {
+      "rule_id": "C001",
+      "title": "Inductive or Record has opaque nested-dependent header"
+    },
+    {
+      "rule_id": "D001",
+      "title": "Hypothesis declared in scope but not used in the body"
+    },
+    {
+      "rule_id": "E001",
+      "title": "Proof continues past the line where the goal is already closed"
+    },
+    {
+      "rule_id": "H002",
+      "title": "Comment uses templated slots, stale crossrefs, type restatement, exceeds budget, or describes only mechanism"
+    }
+  ],
+  "bypass_events": [
+    {
+      "ts": "2026-04-20T15:05:13Z",
+      "commit": "34fb4c431a8b5bebe5297a34146bb4d6cce5d15f",
+      "diff": "76f5538dcd979690",
+      "rules": [
+        "A001"
+      ]
+    },
+    {
+      "ts": "2026-04-21T04:37:19Z",
+      "commit": "6ded1ce86187abf3629a7d066c61ae0d56a50bc5",
+      "diff": "bb5f2e39c3fbcbf9",
+      "rules": [
+        "F001",
+        "F001",
+        "F001",
+        "F001",
+        "F001",
+        "F001",
+        "F001",
+        "F001",
+        "F001",
+        "F001",
+        "F001",
+        "F001",
+        "F001",
+        "F001",
+        "H001",
+        "H001",
+        "H001",
+        "H001",
+        "H001",
+        "H001",
+        "H001",
+        "H001",
+        "H001",
+        "H001",
+        "H001",
+        "H001",
+        "H001",
+        "H001",
+        "H001",
+        "I001"
+      ]
+    },
+    {
+      "ts": "2026-04-21T06:08:18Z",
+      "commit": "3547f28bab8a1787966acdda2da253f1a19f19f5",
+      "diff": "533dae44ef67f1b7",
+      "rules": [
+        "F001",
+        "H001",
+        "I001",
+        "I001"
+      ]
+    },
+    {
+      "ts": "2026-04-21T06:09:21Z",
+      "commit": "3547f28bab8a1787966acdda2da253f1a19f19f5",
+      "diff": "533dae44ef67f1b7",
+      "rules": [
+        "F001",
+        "H001",
+        "I001",
+        "I001"
+      ]
+    },
+    {
+      "ts": "2026-04-21T15:08:30Z",
+      "commit": "3547f28bab8a1787966acdda2da253f1a19f19f5",
+      "diff": "3e0d577729b3dc3e",
+      "rules": [
+        "F001",
+        "H001",
+        "I001"
+      ]
+    },
+    {
+      "ts": "2026-04-26T08:30:31Z",
+      "commit": "d8b3457e882d9d7b86599116076b395937a423e9",
+      "diff": "6c97e659e7c2b89c",
+      "rules": [
+        "H002",
+        "H002",
+        "S996"
+      ]
+    },
+    {
+      "ts": "2026-04-26T09:46:46Z",
+      "commit": "9db1dab391d911cfe5ec4a825eda4598ca8a71dc",
+      "diff": "a01288d56c90dec5",
+      "rules": [
+        "S996"
+      ]
+    },
+    {
+      "ts": "2026-04-26T10:37:52Z",
+      "commit": "2bb62843a5e14cc0da1846a2496355575330de23",
+      "diff": "2a4c7c011a950d03",
+      "rules": [
+        "F001",
+        "F001",
+        "F001",
+        "F001",
+        "I001",
+        "I001",
+        "I001",
+        "S998",
+        "F001",
+        "F001",
+        "H002"
+      ]
+    },
+    {
+      "ts": "2026-04-26T10:53:16Z",
+      "commit": "10d2ff859b47c4b468386637fd5da4d41dba7343",
+      "diff": "9b2ed4fda85e49d9",
+      "rules": [
+        "A002",
+        "S998"
+      ]
+    },
+    {
+      "ts": "2026-04-26T10:58:47Z",
+      "commit": "a0c4d7b0a6cb8b2c348aec9f322d97576b013cd4",
+      "diff": "fcc388b8522253b4",
+      "rules": [
+        "S996"
+      ]
+    },
+    {
+      "ts": "2026-04-26T11:15:03Z",
+      "commit": "ee710bccb61d1639817506ad0bcf78630277b1a7",
+      "diff": "e859743dcc582786",
+      "rules": [
+        "F001",
+        "D001",
+        "D001",
+        "F001",
+        "G001",
+        "S996"
+      ]
+    },
+    {
+      "ts": "2026-04-26T11:21:07Z",
+      "commit": "34f50e49a73f1558af462d5f472a7733c0f0bb60",
+      "diff": "29556e7f42e115b1",
+      "rules": [
+        "F001",
+        "F001",
+        "G001",
+        "S996"
+      ]
+    },
+    {
+      "ts": "2026-05-14T11:34:44Z",
+      "commit": "179c21aa2b7a8e38cb1af1458be5d34635909a12",
+      "diff": "cb33f2ab76e3bd68",
+      "rules": [
+        "F001",
+        "F001",
+        "F001",
+        "F001",
+        "F001",
+        "H002",
+        "S996"
+      ]
+    },
+    {
+      "ts": "2026-05-14T15:01:13Z",
+      "commit": "5b8a7d4ca391dae85e390d600fca427509594129",
+      "diff": "e40f53e37cc5f74a",
+      "rules": [
+        "F001",
+        "F001",
+        "S996"
+      ]
+    },
+    {
+      "ts": "2026-05-14T15:28:56Z",
+      "commit": "0c6b04a9032bbef74708937af30beaffe39ea3c5",
+      "diff": "bb66626da28eb67d",
+      "rules": [
+        "S996"
+      ]
+    },
+    {
+      "ts": "2026-05-15T09:41:40Z",
+      "commit": "7aecbf2bcd685c07595156c3f782faa2d394ed8d",
+      "diff": "29245fc575615e51",
+      "rules": [
+        "F001",
+        "F001",
+        "F001",
+        "F001",
+        "H001",
+        "F001",
+        "G001",
+        "S996"
+      ]
+    },
+    {
+      "ts": "2026-05-15T14:44:58Z",
+      "commit": "868cf55e729d3e153d7f01524647e786b3480057",
+      "diff": "c66e61cc95272ca2",
+      "rules": [
+        "S996"
+      ]
+    },
+    {
+      "ts": "2026-05-17T08:53:27Z",
+      "commit": "414fbabd11f2bbb13bcee9967ecf6c28f88cf92b",
+      "diff": "083f5322be3562e3",
+      "rules": [
+        "S996"
+      ]
+    },
+    {
+      "ts": "2026-05-17T11:49:48Z",
+      "commit": "5761718526ba9d76d161220f0ffa64418b39ceab",
+      "diff": "52db051995ef8af3",
+      "rules": [
+        "S997",
+        "S998",
+        "S996"
+      ]
+    },
+    {
+      "ts": "2026-05-17T12:02:47Z",
+      "commit": "d485d8ce5f59d7df29e2d267cb2e497defd39ef0",
+      "diff": "1e2d33d8076157d8",
+      "rules": [
+        "F001",
+        "S996"
+      ]
+    },
+    {
+      "ts": "2026-06-01T02:49:03Z",
+      "commit": "2cc180dbbb8ffb78ed99efebd603846bf520ade7",
+      "diff": "2b74542ef07e1e79",
+      "rules": [
+        "A002",
+        "A002",
+        "B001",
+        "B001",
+        "F001",
+        "F001",
+        "F001",
+        "F001",
+        "F001",
+        "F001",
+        "F001",
+        "F001",
+        "H001",
+        "H001",
+        "H001",
+        "H001",
+        "H002",
+        "A002",
+        "A002",
+        "B001",
+        "B001",
+        "F001",
+        "F001",
+        "F001",
+        "F001",
+        "B001",
+        "B001",
+        "B001",
+        "B001",
+        "F001",
+        "F001",
+        "F001",
+        "G001",
+        "S996"
+      ]
+    },
+    {
+      "ts": "2026-06-04T07:22:55Z",
+      "commit": "bd46fe85d593bf637fb536600a925e0cb63c39a1",
+      "diff": "3855e3372fb587be",
+      "rules": [
+        "H002",
+        "H002",
+        "H002",
+        "S996"
+      ]
+    },
+    {
+      "ts": "2026-06-05T06:43:16Z",
+      "commit": "7bfef85c6a99aff8d9e26aafea77b95c8580a244",
+      "diff": "64122f59f8146c62",
+      "rules": [
+        "F001",
+        "F001",
+        "F001",
+        "H001",
+        "H001",
+        "H001",
+        "I001",
+        "I001",
+        "H002",
+        "H002",
+        "H002",
+        "H002",
+        "H001",
+        "H001",
+        "F001",
+        "F001",
+        "F001",
+        "S996"
+      ]
+    },
+    {
+      "ts": "2026-06-08T05:46:17Z",
+      "commit": "ec1e05fc6cdbff86f214d836300a6cd599dc32a9",
+      "diff": "9e533050c6ecc162",
+      "rules": [
+        "S996"
+      ]
+    },
+    {
+      "ts": "2026-06-11T04:13:05Z",
+      "commit": "0584f7e0e9bb73f7ad40b0913f861cd2a4bdb673",
+      "diff": "0f050fc3763f8dcd",
+      "rules": [
+        "H002",
+        "H002",
+        "S996"
+      ]
+    },
+    {
+      "ts": "2026-06-11T04:16:41Z",
+      "commit": "f6738e8026f7b4b03eacd205b82a2c036d23e7ae",
+      "diff": "0f050fc3763f8dcd",
+      "rules": [
+        "H002",
+        "H002",
+        "H002",
+        "H002",
+        "S996"
+      ]
+    },
+    {
+      "ts": "2026-06-11T04:35:50Z",
+      "commit": "f6738e8026f7b4b03eacd205b82a2c036d23e7ae",
+      "diff": "93a15044b51dc695",
+      "rules": [
+        "I001",
+        "G001",
+        "F001"
+      ]
+    },
+    {
+      "ts": "2026-06-12T19:14:54Z",
+      "commit": "6f80bb335c2fc9abd63e6ea9f82490ac2cde79f6",
+      "diff": "4578742319ec6040",
+      "rules": [
+        "F001",
+        "F001",
+        "F001",
+        "F001",
+        "F001",
+        "F001",
+        "F001",
+        "H001",
+        "H001",
+        "H001",
+        "H001",
+        "H001",
+        "H001",
+        "H001",
+        "H001",
+        "H001",
+        "H001",
+        "H001",
+        "H001",
+        "I001",
+        "I001",
+        "I001",
+        "I001",
+        "G001",
+        "G001",
+        "G001",
+        "G001",
+        "S998",
+        "F001",
+        "S998",
+        "S998"
+      ]
+    },
+    {
+      "ts": "2026-06-15T12:32:16Z",
+      "commit": "9bbb585a6218525d600284a7360c2ab28bfa80a4",
+      "diff": "e9a5af55fbdf6b97",
+      "rules": [
+        "H001",
+        "H001",
+        "I001",
+        "S998",
+        "S998",
+        "S998",
+        "S998",
+        "S998",
+        "S998"
+      ]
+    },
+    {
+      "ts": "(git-note)",
+      "commit": "0584f7e0e9bb73f7ad40b0913f861cd2a4bdb673",
+      "diff": "?",
+      "rules": [],
+      "via": "git-notes"
+    },
+    {
+      "ts": "(git-note)",
+      "commit": "0c6b04a9032bbef74708937af30beaffe39ea3c5",
+      "diff": "?",
+      "rules": [],
+      "via": "git-notes"
+    },
+    {
+      "ts": "(git-note)",
+      "commit": "10d2ff859b47c4b468386637fd5da4d41dba7343",
+      "diff": "?",
+      "rules": [],
+      "via": "git-notes"
+    },
+    {
+      "ts": "(git-note)",
+      "commit": "179c21aa2b7a8e38cb1af1458be5d34635909a12",
+      "diff": "?",
+      "rules": [],
+      "via": "git-notes"
+    },
+    {
+      "ts": "(git-note)",
+      "commit": "2bb62843a5e14cc0da1846a2496355575330de23",
+      "diff": "?",
+      "rules": [],
+      "via": "git-notes"
+    },
+    {
+      "ts": "(git-note)",
+      "commit": "2cc180dbbb8ffb78ed99efebd603846bf520ade7",
+      "diff": "?",
+      "rules": [],
+      "via": "git-notes"
+    },
+    {
+      "ts": "(git-note)",
+      "commit": "34f50e49a73f1558af462d5f472a7733c0f0bb60",
+      "diff": "?",
+      "rules": [],
+      "via": "git-notes"
+    },
+    {
+      "ts": "(git-note)",
+      "commit": "414fbabd11f2bbb13bcee9967ecf6c28f88cf92b",
+      "diff": "?",
+      "rules": [],
+      "via": "git-notes"
+    },
+    {
+      "ts": "(git-note)",
+      "commit": "5761718526ba9d76d161220f0ffa64418b39ceab",
+      "diff": "?",
+      "rules": [],
+      "via": "git-notes"
+    },
+    {
+      "ts": "(git-note)",
+      "commit": "5b8a7d4ca391dae85e390d600fca427509594129",
+      "diff": "?",
+      "rules": [],
+      "via": "git-notes"
+    },
+    {
+      "ts": "(git-note)",
+      "commit": "6f80bb335c2fc9abd63e6ea9f82490ac2cde79f6",
+      "diff": "?",
+      "rules": [],
+      "via": "git-notes"
+    },
+    {
+      "ts": "(git-note)",
+      "commit": "7aecbf2bcd685c07595156c3f782faa2d394ed8d",
+      "diff": "?",
+      "rules": [],
+      "via": "git-notes"
+    },
+    {
+      "ts": "(git-note)",
+      "commit": "7bfef85c6a99aff8d9e26aafea77b95c8580a244",
+      "diff": "?",
+      "rules": [],
+      "via": "git-notes"
+    },
+    {
+      "ts": "(git-note)",
+      "commit": "868cf55e729d3e153d7f01524647e786b3480057",
+      "diff": "?",
+      "rules": [],
+      "via": "git-notes"
+    },
+    {
+      "ts": "(git-note)",
+      "commit": "9bbb585a6218525d600284a7360c2ab28bfa80a4",
+      "diff": "?",
+      "rules": [],
+      "via": "git-notes"
+    },
+    {
+      "ts": "(git-note)",
+      "commit": "9db1dab391d911cfe5ec4a825eda4598ca8a71dc",
+      "diff": "?",
+      "rules": [],
+      "via": "git-notes"
+    },
+    {
+      "ts": "(git-note)",
+      "commit": "a0c4d7b0a6cb8b2c348aec9f322d97576b013cd4",
+      "diff": "?",
+      "rules": [],
+      "via": "git-notes"
+    },
+    {
+      "ts": "(git-note)",
+      "commit": "bd46fe85d593bf637fb536600a925e0cb63c39a1",
+      "diff": "?",
+      "rules": [],
+      "via": "git-notes"
+    },
+    {
+      "ts": "(git-note)",
+      "commit": "d485d8ce5f59d7df29e2d267cb2e497defd39ef0",
+      "diff": "?",
+      "rules": [],
+      "via": "git-notes"
+    },
+    {
+      "ts": "(git-note)",
+      "commit": "d8b3457e882d9d7b86599116076b395937a423e9",
+      "diff": "?",
+      "rules": [],
+      "via": "git-notes"
+    },
+    {
+      "ts": "(git-note)",
+      "commit": "ec1e05fc6cdbff86f214d836300a6cd599dc32a9",
+      "diff": "?",
+      "rules": [],
+      "via": "git-notes"
+    },
+    {
+      "ts": "(git-note)",
+      "commit": "ee710bccb61d1639817506ad0bcf78630277b1a7",
+      "diff": "?",
+      "rules": [],
+      "via": "git-notes"
+    },
+    {
+      "ts": "(git-note)",
+      "commit": "f6738e8026f7b4b03eacd205b82a2c036d23e7ae",
+      "diff": "?",
+      "rules": [],
+      "via": "git-notes"
+    }
+  ]
+}

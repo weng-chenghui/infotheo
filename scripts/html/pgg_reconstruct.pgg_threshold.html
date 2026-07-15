@@ -1,0 +1,630 @@
+
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Module pgg_threshold</title>
+<meta name="description" content="Documentation of Coq module Infotheo Documentation" />
+<link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/markdown-it/dist/markdown-it.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/markdown-it-texmath/texmath.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/darkmode-js@1.5.7/lib/darkmode-js.min.js"></script>
+<link href="rocqnavi.css" rel="stylesheet" type="text/css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script type="text/javascript" src="rocqnavi.js"> </script>
+</head>
+
+<body onload="init()">
+
+  <main>
+    <div class="sidebar">
+      <h2>Files</h2>
+      <li><details id="infotheo"><summary>infotheo</summary>
+          <ul>
+          <li><details id="infotheo.du2002"><summary>du2002</summary>
+          <ul>
+          <li><a href="infotheo.du2002.spp_entropy.html">spp_entropy</a></li>
+<li><a href="infotheo.du2002.spp_interface.html">spp_interface</a></li>
+<li><a href="infotheo.du2002.spp_pismc.html">spp_pismc</a></li>
+<li><a href="infotheo.du2002.spp_proba.html">spp_proba</a></li>
+<li><a href="infotheo.du2002.spp_program.html">spp_program</a></li>
+<li><a href="infotheo.du2002.spp_proof.html">spp_proof</a></li>
+<li><a href="infotheo.du2002.spp_session_types.html">spp_session_types</a></li>
+<li><a href="infotheo.du2002.spp_tactics.html">spp_tactics</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.dumas2017dual"><summary>dumas2017dual</summary>
+          <ul>
+          <li><details id="infotheo.dumas2017dual.dsdp"><summary>dsdp</summary>
+          <ul>
+          <li><a href="infotheo.dumas2017dual.dsdp.dsdp_correctness.html">dsdp_correctness</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_entropy.html">dsdp_entropy</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_entropy_trace.html">dsdp_entropy_trace</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_interface.html">dsdp_interface</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_pismc.html">dsdp_pismc</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_program.html">dsdp_program</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_security.html">dsdp_security</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_session_types.html">dsdp_session_types</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_syntax_demo.html">dsdp_syntax_demo</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.dumas2017dual.entropy_fiber"><summary>entropy_fiber</summary>
+          <ul>
+          <li><a href="infotheo.dumas2017dual.entropy_fiber.entropy_fiber.html">entropy_fiber</a></li>
+<li><a href="infotheo.dumas2017dual.entropy_fiber.entropy_fiber_zpq.html">entropy_fiber_zpq</a></li>
+<li><a href="infotheo.dumas2017dual.entropy_fiber.linear_fiber_zpq.html">linear_fiber_zpq</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.dumas2017dual.lib"><summary>lib</summary>
+          <ul>
+          <li><a href="infotheo.dumas2017dual.lib.extra_algebra.html">extra_algebra</a></li>
+<li><a href="infotheo.dumas2017dual.lib.extra_entropy.html">extra_entropy</a></li>
+<li><a href="infotheo.dumas2017dual.lib.extra_proba.html">extra_proba</a></li>
+<li><a href="infotheo.dumas2017dual.lib.rouche_capelli.html">rouche_capelli</a></li>
+          </ul>
+          </details>
+          </li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.ecc_classic"><summary>ecc_classic</summary>
+          <ul>
+          <li><a href="infotheo.ecc_classic.alternant.html">alternant</a></li>
+<li><a href="infotheo.ecc_classic.bch.html">bch</a></li>
+<li><a href="infotheo.ecc_classic.cyclic_code.html">cyclic_code</a></li>
+<li><a href="infotheo.ecc_classic.decoding.html">decoding</a></li>
+<li><a href="infotheo.ecc_classic.grs.html">grs</a></li>
+<li><a href="infotheo.ecc_classic.hamming_code.html">hamming_code</a></li>
+<li><a href="infotheo.ecc_classic.linearcode.html">linearcode</a></li>
+<li><a href="infotheo.ecc_classic.mceliece.html">mceliece</a></li>
+<li><a href="infotheo.ecc_classic.poly_decoding.html">poly_decoding</a></li>
+<li><a href="infotheo.ecc_classic.reed_solomon.html">reed_solomon</a></li>
+<li><a href="infotheo.ecc_classic.repcode.html">repcode</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.ecc_modern"><summary>ecc_modern</summary>
+          <ul>
+          <li><a href="infotheo.ecc_modern.checksum.html">checksum</a></li>
+<li><a href="infotheo.ecc_modern.degree_profile.html">degree_profile</a></li>
+<li><a href="infotheo.ecc_modern.ldpc.html">ldpc</a></li>
+<li><a href="infotheo.ecc_modern.ldpc_algo.html">ldpc_algo</a></li>
+<li><a href="infotheo.ecc_modern.ldpc_algo_proof.html">ldpc_algo_proof</a></li>
+<li><a href="infotheo.ecc_modern.ldpc_erasure.html">ldpc_erasure</a></li>
+<li><a href="infotheo.ecc_modern.max_subset.html">max_subset</a></li>
+<li><a href="infotheo.ecc_modern.stopping_set.html">stopping_set</a></li>
+<li><a href="infotheo.ecc_modern.subgraph_partition.html">subgraph_partition</a></li>
+<li><a href="infotheo.ecc_modern.summary.html">summary</a></li>
+<li><a href="infotheo.ecc_modern.summary_tanner.html">summary_tanner</a></li>
+<li><a href="infotheo.ecc_modern.tanner.html">tanner</a></li>
+<li><a href="infotheo.ecc_modern.tanner_partition.html">tanner_partition</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.homomorphic_encryption"><summary>homomorphic_encryption</summary>
+          <ul>
+          <li><details id="infotheo.homomorphic_encryption.benaloh1994"><summary>benaloh1994</summary>
+          <ul>
+          <li><a href="infotheo.homomorphic_encryption.benaloh1994.benaloh_ahe.html">benaloh_ahe</a></li>
+<li><a href="infotheo.homomorphic_encryption.benaloh1994.benaloh_enc.html">benaloh_enc</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.homomorphic_encryption.idealized"><summary>idealized</summary>
+          <ul>
+          <li><a href="infotheo.homomorphic_encryption.idealized.idealized_ahe.html">idealized_ahe</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.homomorphic_encryption.paillier1999"><summary>paillier1999</summary>
+          <ul>
+          <li><a href="infotheo.homomorphic_encryption.paillier1999.paillier_ahe.html">paillier_ahe</a></li>
+<li><a href="infotheo.homomorphic_encryption.paillier1999.paillier_enc.html">paillier_enc</a></li>
+          </ul>
+          </details>
+          </li>
+<li><a href="infotheo.homomorphic_encryption.ahe_enc.html">ahe_enc</a></li>
+<li><a href="infotheo.homomorphic_encryption.ahe_monoid.html">ahe_monoid</a></li>
+<li><a href="infotheo.homomorphic_encryption.enc_dec.html">enc_dec</a></li>
+<li><a href="infotheo.homomorphic_encryption.he_types.html">he_types</a></li>
+<li><a href="infotheo.homomorphic_encryption.homomorphic_encryption.html">homomorphic_encryption</a></li>
+<li><a href="infotheo.homomorphic_encryption.key_type.html">key_type</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.information_theory"><summary>information_theory</summary>
+          <ul>
+          <li><a href="infotheo.information_theory.aep.html">aep</a></li>
+<li><a href="infotheo.information_theory.binary_symmetric_channel.html">binary_symmetric_channel</a></li>
+<li><a href="infotheo.information_theory.channel.html">channel</a></li>
+<li><a href="infotheo.information_theory.channel_code.html">channel_code</a></li>
+<li><a href="infotheo.information_theory.channel_coding_converse.html">channel_coding_converse</a></li>
+<li><a href="infotheo.information_theory.channel_coding_direct.html">channel_coding_direct</a></li>
+<li><a href="infotheo.information_theory.conditional_divergence.html">conditional_divergence</a></li>
+<li><a href="infotheo.information_theory.entropy.html">entropy</a></li>
+<li><a href="infotheo.information_theory.entropy_convex.html">entropy_convex</a></li>
+<li><a href="infotheo.information_theory.erasure_channel.html">erasure_channel</a></li>
+<li><a href="infotheo.information_theory.error_exponent.html">error_exponent</a></li>
+<li><a href="infotheo.information_theory.joint_typ_seq.html">joint_typ_seq</a></li>
+<li><a href="infotheo.information_theory.jtypes.html">jtypes</a></li>
+<li><a href="infotheo.information_theory.kraft.html">kraft</a></li>
+<li><a href="infotheo.information_theory.pproba.html">pproba</a></li>
+<li><a href="infotheo.information_theory.shannon_fano.html">shannon_fano</a></li>
+<li><a href="infotheo.information_theory.source_code.html">source_code</a></li>
+<li><a href="infotheo.information_theory.source_coding_fl_converse.html">source_coding_fl_converse</a></li>
+<li><a href="infotheo.information_theory.source_coding_fl_direct.html">source_coding_fl_direct</a></li>
+<li><a href="infotheo.information_theory.source_coding_vl_converse.html">source_coding_vl_converse</a></li>
+<li><a href="infotheo.information_theory.source_coding_vl_direct.html">source_coding_vl_direct</a></li>
+<li><a href="infotheo.information_theory.string_entropy.html">string_entropy</a></li>
+<li><a href="infotheo.information_theory.success_decode_bound.html">success_decode_bound</a></li>
+<li><a href="infotheo.information_theory.typ_seq.html">typ_seq</a></li>
+<li><a href="infotheo.information_theory.types.html">types</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.lib"><summary>lib</summary>
+          <ul>
+          <li><a href="infotheo.lib.bigop_ext.html">bigop_ext</a></li>
+<li><a href="infotheo.lib.binary_entropy_function.html">binary_entropy_function</a></li>
+<li><a href="infotheo.lib.classical_sets_ext.html">classical_sets_ext</a></li>
+<li><a href="infotheo.lib.coqRE.html">coqRE</a></li>
+<li><a href="infotheo.lib.derive_ext.html">derive_ext</a></li>
+<li><a href="infotheo.lib.dft.html">dft</a></li>
+<li><a href="infotheo.lib.euclid.html">euclid</a></li>
+<li><a href="infotheo.lib.f2.html">f2</a></li>
+<li><a href="infotheo.lib.hamming.html">hamming</a></li>
+<li><a href="infotheo.lib.natbin.html">natbin</a></li>
+<li><a href="infotheo.lib.num_occ.html">num_occ</a></li>
+<li><a href="infotheo.lib.poly_ext.html">poly_ext</a></li>
+<li><a href="infotheo.lib.realType_ext.html">realType_ext</a></li>
+<li><a href="infotheo.lib.realType_ln.html">realType_ln</a></li>
+<li><a href="infotheo.lib.ssr_ext.html">ssr_ext</a></li>
+<li><a href="infotheo.lib.ssralg_ext.html">ssralg_ext</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.probability"><summary>probability</summary>
+          <ul>
+          <li><a href="infotheo.probability.bayes.html">bayes</a></li>
+<li><a href="infotheo.probability.convex.html">convex</a></li>
+<li><a href="infotheo.probability.convex_equiv.html">convex_equiv</a></li>
+<li><a href="infotheo.probability.convex_stone.html">convex_stone</a></li>
+<li><a href="infotheo.probability.divergence.html">divergence</a></li>
+<li><a href="infotheo.probability.fdist.html">fdist</a></li>
+<li><a href="infotheo.probability.fsdist.html">fsdist</a></li>
+<li><a href="infotheo.probability.graphoid.html">graphoid</a></li>
+<li><a href="infotheo.probability.jensen.html">jensen</a></li>
+<li><a href="infotheo.probability.jfdist_cond.html">jfdist_cond</a></li>
+<li><a href="infotheo.probability.log_sum.html">log_sum</a></li>
+<li><a href="infotheo.probability.necset.html">necset</a></li>
+<li><a href="infotheo.probability.partition_inequality.html">partition_inequality</a></li>
+<li><a href="infotheo.probability.pinsker.html">pinsker</a></li>
+<li><a href="infotheo.probability.proba.html">proba</a></li>
+<li><a href="infotheo.probability.variation_dist.html">variation_dist</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.robust"><summary>robust</summary>
+          <ul>
+          <li><a href="infotheo.robust.robustmean.html">robustmean</a></li>
+<li><a href="infotheo.robust.weightedmean.html">weightedmean</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.smc"><summary>smc</summary>
+          <ul>
+          <li><a href="infotheo.smc.graded_resource.html">graded_resource</a></li>
+<li><a href="infotheo.smc.pismc.html">pismc</a></li>
+<li><a href="infotheo.smc.smc_interpreter.html">smc_interpreter</a></li>
+<li><a href="infotheo.smc.smc_session_types.html">smc_session_types</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.toy_examples"><summary>toy_examples</summary>
+          <ul>
+          <li><a href="infotheo.toy_examples.conditional_entropy.html">conditional_entropy</a></li>
+<li><a href="infotheo.toy_examples.expected_value_variance.html">expected_value_variance</a></li>
+<li><a href="infotheo.toy_examples.expected_value_variance_ordn.html">expected_value_variance_ordn</a></li>
+<li><a href="infotheo.toy_examples.expected_value_variance_tuple.html">expected_value_variance_tuple</a></li>
+          </ul>
+          </details>
+          </li>
+<li><a href="infotheo._check_sigs.html">_check_sigs</a></li>
+<li><a href="infotheo._depgraph_extract.html">_depgraph_extract</a></li>
+<li><a href="infotheo._test_star2.html">_test_star2</a></li>
+<li><a href="infotheo.test_sri.html">test_sri</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="pgg_reconstruct"><summary>pgg_reconstruct</summary>
+          <ul>
+          <li><a href="pgg_reconstruct.ag_code.html">ag_code</a></li>
+<li><a href="pgg_reconstruct.ag_massey_bridge.html">ag_massey_bridge</a></li>
+<li><a href="pgg_reconstruct.ag_multiplicative.html">ag_multiplicative</a></li>
+<li><a href="pgg_reconstruct.algebraic_rigidity.html">algebraic_rigidity</a></li>
+<li><a href="pgg_reconstruct.coord_perm_compatible.html">coord_perm_compatible</a></li>
+<li><a href="pgg_reconstruct.cover_genus0.html">cover_genus0</a></li>
+<li><a href="pgg_reconstruct.cover_genus1.html">cover_genus1</a></li>
+<li><a href="pgg_reconstruct.cover_genus2.html">cover_genus2</a></li>
+<li><a href="pgg_reconstruct.cover_tradeoff.html">cover_tradeoff</a></li>
+<li><a href="pgg_reconstruct.covering_scheme.html">covering_scheme</a></li>
+<li><a href="pgg_reconstruct.hyperelliptic_code.html">hyperelliptic_code</a></li>
+<li><a href="pgg_reconstruct.lagrange.html">lagrange</a></li>
+<li><a href="pgg_reconstruct.massey.html">massey</a></li>
+<li><a href="pgg_reconstruct.pgg_assignment.html">pgg_assignment</a></li>
+<li><a href="pgg_reconstruct.pgg_covering_correctness.html">pgg_covering_correctness</a></li>
+<li><a href="pgg_reconstruct.pgg_deck_pairing.html">pgg_deck_pairing</a></li>
+<li><a href="pgg_reconstruct.pgg_sharing_framework.html">pgg_sharing_framework</a></li>
+<li><a href="pgg_reconstruct.pgg_sum_mod.html">pgg_sum_mod</a></li>
+<li><a href="pgg_reconstruct.pgg_threshold.html">pgg_threshold</a></li>
+<li><a href="pgg_reconstruct.pgl_bound.html">pgl_bound</a></li>
+<li><a href="pgg_reconstruct.rigidity_monster_instance.html">rigidity_monster_instance</a></li>
+<li><a href="pgg_reconstruct.rigidity_s5_instance.html">rigidity_s5_instance</a></li>
+<li><a href="pgg_reconstruct.rigidity_star_instance.html">rigidity_star_instance</a></li>
+<li><a href="pgg_reconstruct.rs_massey_bridge.html">rs_massey_bridge</a></li>
+<li><a href="pgg_reconstruct.rs_privacy.html">rs_privacy</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="pgg_smc"><summary>pgg_smc</summary>
+          <ul>
+          <li><a href="pgg_smc.abelian_word_collapse.html">abelian_word_collapse</a></li>
+<li><a href="pgg_smc.free_group_ball.html">free_group_ball</a></li>
+<li><a href="pgg_smc.perm_uniform.html">perm_uniform</a></li>
+<li><a href="pgg_smc.pgg_abelian.html">pgg_abelian</a></li>
+<li><a href="pgg_smc.pgg_abelian.html">pgg_abelian</a></li>
+<li><a href="pgg_smc.pgg_abelian_collapse.html">pgg_abelian_collapse</a></li>
+<li><a href="pgg_smc.pgg_collusion_bound.html">pgg_collusion_bound</a></li>
+<li><a href="pgg_smc.pgg_correctness.html">pgg_correctness</a></li>
+<li><a href="pgg_smc.pgg_free.html">pgg_free</a></li>
+<li><a href="pgg_smc.pgg_interface.html">pgg_interface</a></li>
+<li><a href="pgg_smc.pgg_lfree.html">pgg_lfree</a></li>
+<li><a href="pgg_smc.pgg_nonabelian.html">pgg_nonabelian</a></li>
+<li><a href="pgg_smc.pgg_pismc.html">pgg_pismc</a></li>
+<li><a href="pgg_smc.pgg_program.html">pgg_program</a></li>
+<li><a href="pgg_smc.pgg_raag.html">pgg_raag</a></li>
+<li><a href="pgg_smc.pgg_raag_cartier_foata.html">pgg_raag_cartier_foata</a></li>
+<li><a href="pgg_smc.pgg_raag_clique.html">pgg_raag_clique</a></li>
+<li><a href="pgg_smc.pgg_raag_path.html">pgg_raag_path</a></li>
+<li><a href="pgg_smc.pgg_raag_s5.html">pgg_raag_s5</a></li>
+<li><a href="pgg_smc.pgg_raag_star.html">pgg_raag_star</a></li>
+<li><a href="pgg_smc.pgg_security.html">pgg_security</a></li>
+<li><a href="pgg_smc.pgg_session_types.html">pgg_session_types</a></li>
+<li><a href="pgg_smc.pgg_word_analysis.html">pgg_word_analysis</a></li>
+<li><a href="pgg_smc.test_cf.html">test_cf</a></li>
+<li><a href="pgg_smc.test_cf2.html">test_cf2</a></li>
+<li><a href="pgg_smc.test_cf3.html">test_cf3</a></li>
+<li><a href="pgg_smc.test_sri.html">test_sri</a></li>
+<li><a href="pgg_smc.test_sri2.html">test_sri2</a></li>
+          </ul>
+          </details>
+          </li>
+    </div>
+
+  <div class="coq">
+
+    <div class="content">
+      <p>
+        <a href="./index.html">Top</a>
+        
+      </p>
+      <h1 class="title">Module pgg_threshold</h1>
+<span class="vernacular">From</span><span class="id"> HB</span><span class="vernacular"> Require</span><span class="vernacular"> Import</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for HB.structures">structures</a></span>.<br/>
+<span class="vernacular">From</span><span class="id"> mathcomp</span><span class="vernacular"> Require</span><span class="vernacular"> Import</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.all_boot">all_boot</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.order.all_order">all_order</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.all_algebra">all_algebra</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.fingroup.fingroup">fingroup</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.fingroup.perm">perm</a></span>.<br/>
+<span class="vernacular">From</span><span class="id"> pgg_reconstruct</span><span class="vernacular"> Require</span><span class="vernacular"> Import</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_assignment.html">pgg_assignment</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_deck_pairing.html">pgg_deck_pairing</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sum_mod.html">pgg_sum_mod</a></span>.<br/>
+<br/>
+<pre class="ssrdoc">
+
+      (k,T)-Ramp Threshold Theorem for PGG-SMC
+
+This file combines the assignment graph, deck pairing, and collusion
+bound into the (k,T)-ramp threshold theorem for PGG-SMC.
+
+Section 1: Ramp scheme configuration
+  RampConfig == record bundling T parties, N sheets, an assignment graph,
+                and the total number of encoded bits
+
+Section 2: Ramp threshold theorem
+  ramp_threshold == for any coalition C:
+    (1) recoverable bits = |covered_edges C|
+    (2) monotonicity: C &lt;= C' implies covered_edges C &lt;= covered_edges C'
+    (3) full coalition recovers all edges
+
+Section 3: Corollaries for specific graph families
+  cycle_ramp_loss  == losing a party from the cycle loses secure edges
+  complete_ramp_max == full coalition on the complete graph recovers all
+
+Section 4: Combined security-reconstruction statement
+  secure_edge_bound == for each secure edge, the adversary's observation
+                       has var_dist at most epsilon from ideal (via DPI)
+
+</pre>
+<br/>
+<span class="gallina-kwd">Set</span><span class="vernacular"> Implicit</span><span class="vernacular"> Arguments</span>.<br/>
+<span class="vernacular">Unset</span><span class="vernacular"> Strict</span><span class="vernacular"> Implicit</span>.<br/>
+<span class="vernacular">Unset</span><span class="vernacular"> Printing</span><span class="vernacular"> Implicit</span><span class="vernacular"> Defensive</span>.<br/>
+<br/>
+<span class="vernacular">Import</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.ssralg#GRing.Theory">GRing</a></span>.<span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.ssralg#GRing.Theory">Theory</a></span>.<br/>
+<br/>
+<span class="vernacular">Local</span><span class="vernacular"> Open</span><span class="vernacular"> Scope</span><span class="id"> nat_scope</span>.<br/>
+<br/>
+<br/>
+<span class="vernacular">Record</span><span class="id"> </span><span id="RampConfig" class="id"><a name="RampConfig" class="">RampConfig</a></span><span class="id"> :=</span><span class="id"> mkRamp</span><span class="id"> {</span><br/>
+&nbsp;&nbsp;<span id="rc_T'" class="id"><a name="rc_T'" class="">rc_T'</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Datatypes.html#nat">nat</a></span><span class="id"> ;</span>                    <br/>
+&nbsp;&nbsp;<span id="rc_N'" class="id"><a name="rc_N'" class="">rc_N'</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Datatypes.html#nat">nat</a></span><span class="id"> ;</span>                    <br/>
+&nbsp;&nbsp;<span id="rc_ag" class="id"><a name="rc_ag" class="">rc_ag</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_assignment.html#AssignmentGraph">AssignmentGraph</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#rc_T':2">rc_T'</a></span>.<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#bda89d73ec4a8f23ae92b565ffb5aaa6">+1</a></span><span class="id"> ;</span>  <br/>
+&nbsp;&nbsp;<span id="rc_num_bits" class="id"><a name="rc_num_bits" class="">rc_num_bits</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Datatypes.html#nat">nat</a></span><span class="id"> ;</span>              <br/>
+<span class="id">}</span>.<br/>
+<br/>
+<span class="vernacular">Definition</span><span class="id"> </span><span id="rc_T" class="id"><a name="rc_T" class="">rc_T</a></span> (<span id="rc:6" class="id"><a name="rc:6" class="">rc</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#RampConfig">RampConfig</a></span>)<span class="id"> :</span><span class="id"> </span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Datatypes.html#nat">nat</a></span><span class="id"> :=</span> (<span class="id"><a href="pgg_reconstruct.pgg_threshold.html#rc_T'">rc_T'</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#rc:6">rc</a></span>).<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#bda89d73ec4a8f23ae92b565ffb5aaa6">+1</a></span>.<br/>
+<span class="vernacular">Definition</span><span class="id"> </span><span id="rc_N" class="id"><a name="rc_N" class="">rc_N</a></span> (<span id="rc:7" class="id"><a name="rc:7" class="">rc</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#RampConfig">RampConfig</a></span>)<span class="id"> :</span><span class="id"> </span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Datatypes.html#nat">nat</a></span><span class="id"> :=</span> (<span class="id"><a href="pgg_reconstruct.pgg_threshold.html#rc_N'">rc_N'</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#rc:7">rc</a></span>).<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#bda89d73ec4a8f23ae92b565ffb5aaa6">+1</a></span>.<br/>
+<br/>
+<br/>
+<span class="vernacular">Section</span><span class="id"> ramp_threshold</span>.<br/>
+<br/>
+<span class="vernacular">Variable</span><span class="id"> </span><span id="ramp_threshold.T'" class="id"><a name="ramp_threshold.T'" class="">T'</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Datatypes.html#nat">nat</a></span>.<br/>
+<span class="vernacular">Let</span><span class="id"> </span><span id="ramp_threshold.T" class="id"><a name="ramp_threshold.T" class="">T</a></span><span class="id"> :=</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#ramp_threshold.T'">T'</a></span>.<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#bda89d73ec4a8f23ae92b565ffb5aaa6">+1</a></span>.<br/>
+<br/>
+<span class="vernacular">Variable</span><span class="id"> </span><span id="ramp_threshold.ag" class="id"><a name="ramp_threshold.ag" class="">ag</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_assignment.html#AssignmentGraph">AssignmentGraph</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#ramp_threshold.T">T</a></span>.<br/>
+<br/>
+<div class="doc">The main ramp threshold theorem: three-part characterization of
+    coalition power in terms of edge coverage. </div>
+<span class="vernacular">Theorem</span><span class="id"> </span><span id="ramp_threshold" class="id"><a name="ramp_threshold" class="">ramp_threshold</a></span><span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="gallina-kwd">forall</span> (<span id="C:12" class="id"><a name="C:12" class="">C</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.finset#d8708f36d374a98f4d683c7593d1ea6a">{set</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.finset#d8708f36d374a98f4d683c7593d1ea6a"> </a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#:::'''I_'_x">'I_</a></span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#ramp_threshold.T">T</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.finset#d8708f36d374a98f4d683c7593d1ea6a">}</a></span>)<span class="id">,</span><br/>
+&nbsp;&nbsp;<span class="id"><a href="pgg_reconstruct.pgg_assignment.html#recoverable_bits">recoverable_bits</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#ramp_threshold.ag">ag</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#C:12">C</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> =</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> </a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#234f50e13366f794cd6877cf832a5935">#|</a></span><span class="id"><a href="pgg_reconstruct.pgg_assignment.html#covered_edges">covered_edges</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#ramp_threshold.ag">ag</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#C:12">C</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#234f50e13366f794cd6877cf832a5935">|</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.div#2242f6721707980eca939ec29164eab3"> %/</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.div#2242f6721707980eca939ec29164eab3"> </a></span><span class="id">2</span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#ba2b0e492d2b4675a0acf3ea92aabadd"> /\</a></span><br/>
+&nbsp;&nbsp;(<span class="gallina-kwd">forall</span><span class="id"> </span><span id="C':13" class="id"><a name="C':13" class="">C'</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.finset#d8708f36d374a98f4d683c7593d1ea6a">{set</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.finset#d8708f36d374a98f4d683c7593d1ea6a"> </a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#:::'''I_'_x">'I_</a></span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#ramp_threshold.T">T</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.finset#d8708f36d374a98f4d683c7593d1ea6a">}</a></span><span class="id">,</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#C:12">C</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#4102da6205bd8605932488256a8bd517"> \subset</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#4102da6205bd8605932488256a8bd517"> </a></span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#C':13">C'</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#::type_scope:x_'-&gt;'_x"> -&gt;</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="pgg_reconstruct.pgg_assignment.html#covered_edges">covered_edges</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#ramp_threshold.ag">ag</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#C:12">C</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#4102da6205bd8605932488256a8bd517"> \subset</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#4102da6205bd8605932488256a8bd517"> </a></span><span class="id"><a href="pgg_reconstruct.pgg_assignment.html#covered_edges">covered_edges</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#ramp_threshold.ag">ag</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#C':13">C'</a></span>)<span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#ba2b0e492d2b4675a0acf3ea92aabadd"> /\</a></span><br/>
+&nbsp;&nbsp;(<span class="id"><a href="pgg_reconstruct.pgg_threshold.html#C:12">C</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> =</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> </a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.finset#setT">setT</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#::type_scope:x_'-&gt;'_x"> -&gt;</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#::type_scope:x_'-&gt;'_x"> </a></span><span class="id"><a href="pgg_reconstruct.pgg_assignment.html#covered_edges">covered_edges</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#ramp_threshold.ag">ag</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#C:12">C</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> =</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> </a></span><span class="id"><a href="pgg_reconstruct.pgg_assignment.html#ag_edges">ag_edges</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#ramp_threshold.ag">ag</a></span>).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id">move=&gt;</span><span class="id"> C;</span><span class="id"> split;</span><span class="id"> [|</span><span class="id"> split]</span>.<br/>
+<span class="id">-</span> <span class="comment">(*&nbsp;Part&nbsp;1:&nbsp;by&nbsp;definition&nbsp;of&nbsp;recoverable_bits&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> []</span>.<br/>
+<span class="id">-</span> <span class="comment">(*&nbsp;Part&nbsp;2:&nbsp;monotonicity&nbsp;from&nbsp;covered_mono&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id">move=&gt;</span><span class="id"> C'</span><span class="id"> Hsub</span>.<br/>
+&nbsp;&nbsp;<span class="id">exact:</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_assignment.html#covered_mono">covered_mono</a></span>.<br/>
+<span class="id">-</span> <span class="comment">(*&nbsp;Part&nbsp;3:&nbsp;full&nbsp;coalition&nbsp;from&nbsp;covered_full&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id">exact:</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_assignment.html#covered_full">covered_full</a></span>.<br/>
+Qed.</div></details>
+<br/>
+<div class="doc">Derived: the number of recoverable bits is monotone in coalition size. </div>
+<span class="vernacular">Corollary</span><span class="id"> </span><span id="recoverable_mono" class="id"><a name="recoverable_mono" class="">recoverable_mono</a></span> (<span id="C:14" class="id"><a name="C:14" class="">C</a></span><span class="id"> </span><span id="C':15" class="id"><a name="C':15" class="">C'</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.finset#d8708f36d374a98f4d683c7593d1ea6a">{set</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.finset#d8708f36d374a98f4d683c7593d1ea6a"> </a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#:::'''I_'_x">'I_</a></span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#ramp_threshold.T">T</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.finset#d8708f36d374a98f4d683c7593d1ea6a">}</a></span>)<span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="id"><a href="pgg_reconstruct.pgg_threshold.html#C:14">C</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#4102da6205bd8605932488256a8bd517"> \subset</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#4102da6205bd8605932488256a8bd517"> </a></span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#C':15">C'</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#::type_scope:x_'-&gt;'_x"> -&gt;</a></span><br/>
+&nbsp;&nbsp;(<span class="id"><a href="pgg_reconstruct.pgg_assignment.html#recoverable_bits">recoverable_bits</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#ramp_threshold.ag">ag</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#C:14">C</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#cb53cf0ee22c036a03b4a9281c68b5a3"> &lt;=</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#cb53cf0ee22c036a03b4a9281c68b5a3"> </a></span><span class="id"><a href="pgg_reconstruct.pgg_assignment.html#recoverable_bits">recoverable_bits</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#ramp_threshold.ag">ag</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#C':15">C'</a></span>)<span class="id">%N</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id">move=&gt;</span><span class="id"> Hsub</span>.<br/>
+<span class="id">rewrite</span><span class="id"> /</span><span class="id"><a href="pgg_reconstruct.pgg_assignment.html#recoverable_bits">recoverable_bits</a></span>.<br/>
+<span class="id">apply:</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.div#leq_div2r">leq_div2r</a></span>.<br/>
+<span class="id">apply:</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#subset_leq_card">subset_leq_card</a></span>.<br/>
+<span class="id">exact:</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_assignment.html#covered_mono">covered_mono</a></span>.<br/>
+Qed.</div></details>
+<br/>
+<div class="doc">A singleton coalition recovers nothing. </div>
+<span class="vernacular">Corollary</span><span class="id"> </span><span id="singleton_no_info" class="id"><a name="singleton_no_info" class="">singleton_no_info</a></span> (<span id="C:16" class="id"><a name="C:16" class="">C</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.finset#d8708f36d374a98f4d683c7593d1ea6a">{set</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.finset#d8708f36d374a98f4d683c7593d1ea6a"> </a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#:::'''I_'_x">'I_</a></span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#ramp_threshold.T">T</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.finset#d8708f36d374a98f4d683c7593d1ea6a">}</a></span>)<span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#234f50e13366f794cd6877cf832a5935">#|</a></span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#C:16">C</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#234f50e13366f794cd6877cf832a5935">|</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> =</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> </a></span><span class="id">1</span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#::type_scope:x_'-&gt;'_x"> -&gt;</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#::type_scope:x_'-&gt;'_x"> </a></span><span class="id"><a href="pgg_reconstruct.pgg_assignment.html#recoverable_bits">recoverable_bits</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#ramp_threshold.ag">ag</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#C:16">C</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> =</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> </a></span><span class="id">0</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id">move=&gt;</span><span class="id"> HC1</span>.<br/>
+<span class="id">rewrite</span><span class="id"> /</span><span class="id"><a href="pgg_reconstruct.pgg_assignment.html#recoverable_bits">recoverable_bits</a></span> (<span class="id">@</span><span class="id"><a href="pgg_reconstruct.pgg_assignment.html#secure_singleton">secure_singleton</a></span><span class="id"> _</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#ramp_threshold.ag">ag</a></span><span class="id"> _</span><span class="id"> HC1</span>).<br/>
+<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.finset#cards0">cards0</a></span>.<br/>
+Qed.</div></details>
+<br/>
+<div class="doc">The empty coalition recovers nothing. </div>
+<span class="vernacular">Corollary</span><span class="id"> </span><span id="empty_no_info" class="id"><a name="empty_no_info" class="">empty_no_info</a></span><span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="id"><a href="pgg_reconstruct.pgg_assignment.html#recoverable_bits">recoverable_bits</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#ramp_threshold.ag">ag</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.finset#set0">set0</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> =</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> </a></span><span class="id">0</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> /</span><span class="id"><a href="pgg_reconstruct.pgg_assignment.html#recoverable_bits">recoverable_bits</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_assignment.html#covered_edges0">covered_edges0</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.finset#cards0">cards0</a></span>.<br/>
+Qed.</div></details>
+<br/>
+<div class="doc">Secure edges and covered edges partition the edge set. </div>
+<span class="vernacular">Lemma</span><span class="id"> </span><span id="ramp_partition" class="id"><a name="ramp_partition" class="">ramp_partition</a></span> (<span id="C:17" class="id"><a name="C:17" class="">C</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.finset#d8708f36d374a98f4d683c7593d1ea6a">{set</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.finset#d8708f36d374a98f4d683c7593d1ea6a"> </a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#:::'''I_'_x">'I_</a></span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#ramp_threshold.T">T</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.finset#d8708f36d374a98f4d683c7593d1ea6a">}</a></span>)<span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="id"><a href="pgg_reconstruct.pgg_assignment.html#covered_edges">covered_edges</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#ramp_threshold.ag">ag</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#C:17">C</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.finset#3bfdad100117c55128c8f4e205b0209b"> :|:</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.finset#3bfdad100117c55128c8f4e205b0209b"> </a></span><span class="id"><a href="pgg_reconstruct.pgg_assignment.html#secure_edges">secure_edges</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#ramp_threshold.ag">ag</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#C:17">C</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> =</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> </a></span><span class="id"><a href="pgg_reconstruct.pgg_assignment.html#ag_edges">ag_edges</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#ramp_threshold.ag">ag</a></span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id"> exact:</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_assignment.html#covered_secure_partition">covered_secure_partition</a></span>. Qed.</div></details>
+<br/>
+<div class="doc">Secure edges decrease as coalition grows. </div>
+<span class="vernacular">Lemma</span><span class="id"> </span><span id="secure_antimono" class="id"><a name="secure_antimono" class="">secure_antimono</a></span> (<span id="C:18" class="id"><a name="C:18" class="">C</a></span><span class="id"> </span><span id="C':19" class="id"><a name="C':19" class="">C'</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.finset#d8708f36d374a98f4d683c7593d1ea6a">{set</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.finset#d8708f36d374a98f4d683c7593d1ea6a"> </a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#:::'''I_'_x">'I_</a></span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#ramp_threshold.T">T</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.finset#d8708f36d374a98f4d683c7593d1ea6a">}</a></span>)<span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="id"><a href="pgg_reconstruct.pgg_threshold.html#C:18">C</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#4102da6205bd8605932488256a8bd517"> \subset</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#4102da6205bd8605932488256a8bd517"> </a></span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#C':19">C'</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#::type_scope:x_'-&gt;'_x"> -&gt;</a></span><br/>
+&nbsp;&nbsp;<span class="id"><a href="pgg_reconstruct.pgg_assignment.html#secure_edges">secure_edges</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#ramp_threshold.ag">ag</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#C':19">C'</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#4102da6205bd8605932488256a8bd517"> \subset</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#4102da6205bd8605932488256a8bd517"> </a></span><span class="id"><a href="pgg_reconstruct.pgg_assignment.html#secure_edges">secure_edges</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#ramp_threshold.ag">ag</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#C:18">C</a></span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id">move=&gt;</span><span class="id"> Hsub;</span><span class="id"> rewrite</span><span class="id"> /</span><span class="id"><a href="pgg_reconstruct.pgg_assignment.html#secure_edges">secure_edges</a></span>.<br/>
+<span class="id">apply:</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.finset#setDS">setDS</a></span>.<br/>
+<span class="id">exact:</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_assignment.html#covered_mono">covered_mono</a></span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="vernacular">End</span><span class="id"> ramp_threshold</span>.<br/>
+<br/>
+<br/>
+<span class="vernacular">Section</span><span class="id"> cycle_ramp</span>.<br/>
+<br/>
+<span class="vernacular">Variable</span><span class="id"> </span><span id="cycle_ramp.T'" class="id"><a name="cycle_ramp.T'" class="">T'</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Datatypes.html#nat">nat</a></span>.<br/>
+<span class="vernacular">Hypothesis</span><span class="id"> </span><span id="cycle_ramp.HT" class="id"><a name="cycle_ramp.HT" class="">HT</a></span><span class="id"> :</span> (<span class="id">1</span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#::nat_scope:x_'&lt;'_x"> &lt;</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#::nat_scope:x_'&lt;'_x"> </a></span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#cycle_ramp.T'">T'</a></span>)<span class="id">%N</span>.<br/>
+<br/>
+<span class="vernacular">Let</span><span class="id"> </span><span id="cycle_ramp.ag" class="id"><a name="cycle_ramp.ag" class="">ag</a></span><span class="id"> :=</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_assignment.html#cycle_graph">cycle_graph</a></span> (<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#ltnW">ltnW</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#cycle_ramp.HT">HT</a></span>).<br/>
+<br/>
+<div class="doc">In the cycle graph, losing any party from the full coalition
+    leaves at least some edges uncovered (secure). </div>
+<span class="vernacular">Lemma</span><span class="id"> </span><span id="cycle_ramp_loss" class="id"><a name="cycle_ramp_loss" class="">cycle_ramp_loss</a></span> (<span id="C:24" class="id"><a name="C:24" class="">C</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.finset#d8708f36d374a98f4d683c7593d1ea6a">{set</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.finset#d8708f36d374a98f4d683c7593d1ea6a"> </a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#:::'''I_'_x">'I_</a></span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#cycle_ramp.T'">T'</a></span>.<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#bda89d73ec4a8f23ae92b565ffb5aaa6">+1</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.finset#d8708f36d374a98f4d683c7593d1ea6a">}</a></span>)<span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="id"><a href="pgg_reconstruct.pgg_threshold.html#C:24">C</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#f8a5284fd4c86e7670efa54241b49929"> \proper</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#f8a5284fd4c86e7670efa54241b49929"> </a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.finset#setT">setT</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#::type_scope:x_'-&gt;'_x"> -&gt;</a></span><br/>
+&nbsp;&nbsp;<span class="id"><a href="pgg_reconstruct.pgg_assignment.html#secure_edges">secure_edges</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#cycle_ramp.ag">ag</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#C:24">C</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.eqtype#c385a484ee9d1b4e0615924561a9b75e"> !=</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.eqtype#c385a484ee9d1b4e0615924561a9b75e"> </a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.finset#set0">set0</a></span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id">move=&gt;</span><span class="id"> Hproper</span>.<br/>
+<span class="id">have</span><span class="id"> /</span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#properP">properP</a></span><span class="id"> [_</span><span class="id"> [i</span><span class="id"> _</span><span class="id"> Hi]]</span><span class="id"> :=</span><span class="id"> Hproper</span>.<br/>
+<span class="id">apply/</span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.finset#set0Pn">set0Pn</a></span>.<br/>
+<span class="id">set</span><span class="id"> e</span><span class="id"> :=</span> (<span class="id">i</span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079">,</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"> </a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.zmodp#inZp">inZp</a></span> (<span class="id">i</span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#0dacc1786c5ba797d47dd85006231633"> +</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#0dacc1786c5ba797d47dd85006231633"> </a></span><span class="id">1</span>)<span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#:::'''I_'_x">'I_</a></span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#cycle_ramp.T'">T'</a></span>.<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#bda89d73ec4a8f23ae92b565ffb5aaa6">+1</a></span>).<br/>
+<span class="gallina-kwd">exists</span><span class="id"> e</span>.<br/>
+<span class="id">have</span><span class="id"> He</span><span class="id"> :</span><span class="id"> e</span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrbool.html#b09457274bcb94927e289b8a9e9cd3f7"> \in</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrbool.html#b09457274bcb94927e289b8a9e9cd3f7"> </a></span><span class="id"><a href="pgg_reconstruct.pgg_assignment.html#ag_edges">ag_edges</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#cycle_ramp.ag">ag</a></span>.<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> /</span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#cycle_ramp.ag">ag</a></span><span class="id"> /=</span>.<br/>
+&nbsp;&nbsp;<span class="id">change</span> (<span class="id">e</span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrbool.html#b09457274bcb94927e289b8a9e9cd3f7"> \in</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrbool.html#b09457274bcb94927e289b8a9e9cd3f7"> </a></span><span class="id"><a href="pgg_reconstruct.pgg_assignment.html#cycle_edge_set">cycle_edge_set</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#cycle_ramp.T'">T'</a></span>).<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> /</span><span class="id"><a href="pgg_reconstruct.pgg_assignment.html#cycle_edge_set">cycle_edge_set</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.finset#in_set">in_set</a></span><span class="id"> /e</span><span class="id"> /=</span>.<br/>
+&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.eqtype#eqxx">eqxx</a></span>.<br/>
+<span class="id">have</span><span class="id"> Hne</span><span class="id"> :</span><span class="id"> e</span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrbool.html#c1ad6bcc76a6221225111f87bc3b0c3d"> \notin</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrbool.html#c1ad6bcc76a6221225111f87bc3b0c3d"> </a></span><span class="id"><a href="pgg_reconstruct.pgg_assignment.html#covered_edges">covered_edges</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#cycle_ramp.ag">ag</a></span><span class="id"> C</span>.<br/>
+&nbsp;&nbsp;<span class="id">apply/</span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrbool.html#negP">negP</a></span>.<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> /</span><span class="id"><a href="pgg_reconstruct.pgg_assignment.html#covered_edges">covered_edges</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.fingroup.fingroup#inE">inE</a></span><span class="id"> =&gt;</span><span class="id"> /</span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrbool.html#andP">andP</a></span><span class="id"> [_</span><span class="id"> /</span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrbool.html#andP">andP</a></span><span class="id"> [Hi2</span><span class="id"> _]]</span>.<br/>
+&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> Hi2</span><span class="gallina-kwd"> in</span><span class="id"> Hi</span>.<br/>
+<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> /</span><span class="id"><a href="pgg_reconstruct.pgg_assignment.html#secure_edges">secure_edges</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.fingroup.fingroup#inE">inE</a></span><span class="id"> He</span><span class="id"> Hne</span>.<br/>
+Qed.</div></details>
+<br/>
+<div class="doc">The full coalition on the cycle recovers all edges. </div>
+<span class="vernacular">Lemma</span><span class="id"> </span><span id="cycle_full_recovery" class="id"><a name="cycle_full_recovery" class="">cycle_full_recovery</a></span><span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="id"><a href="pgg_reconstruct.pgg_assignment.html#covered_edges">covered_edges</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#cycle_ramp.ag">ag</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.finset#setT">setT</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> =</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> </a></span><span class="id"><a href="pgg_reconstruct.pgg_assignment.html#ag_edges">ag_edges</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#cycle_ramp.ag">ag</a></span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id"> exact:</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_assignment.html#covered_full">covered_full</a></span>. Qed.</div></details>
+<br/>
+<span class="vernacular">End</span><span class="id"> cycle_ramp</span>.<br/>
+<br/>
+<span class="vernacular">Section</span><span class="id"> complete_ramp</span>.<br/>
+<br/>
+<span class="vernacular">Variable</span><span class="id"> </span><span id="complete_ramp.T'" class="id"><a name="complete_ramp.T'" class="">T'</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Datatypes.html#nat">nat</a></span>.<br/>
+<br/>
+<span class="vernacular">Let</span><span class="id"> </span><span id="complete_ramp.ag" class="id"><a name="complete_ramp.ag" class="">ag</a></span><span class="id"> :=</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_assignment.html#complete_graph">complete_graph</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#complete_ramp.T'">T'</a></span>.<br/>
+<br/>
+<div class="doc">On the complete graph, the full coalition recovers the maximum
+    number of bits: every pair of distinct parties contributes. </div>
+<span class="vernacular">Lemma</span><span class="id"> </span><span id="complete_ramp_max" class="id"><a name="complete_ramp_max" class="">complete_ramp_max</a></span><span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="id"><a href="pgg_reconstruct.pgg_assignment.html#recoverable_bits">recoverable_bits</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#complete_ramp.ag">ag</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.finset#setT">setT</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> =</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> </a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#234f50e13366f794cd6877cf832a5935">#|</a></span><span class="id"><a href="pgg_reconstruct.pgg_assignment.html#ag_edges">ag_edges</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#complete_ramp.ag">ag</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#234f50e13366f794cd6877cf832a5935">|</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.div#2242f6721707980eca939ec29164eab3"> %/</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.div#2242f6721707980eca939ec29164eab3"> </a></span><span class="id">2</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id">rewrite</span><span class="id"> /</span><span class="id"><a href="pgg_reconstruct.pgg_assignment.html#recoverable_bits">recoverable_bits</a></span>.<br/>
+<span class="gallina-kwd">by</span><span class="id"> rewrite</span> (<span class="id"><a href="pgg_reconstruct.pgg_assignment.html#covered_full">covered_full</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#complete_ramp.ag">ag</a></span> (<span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrfun.html#erefl">erefl</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.finset#setT">setT</a></span>)).<br/>
+Qed.</div></details>
+<br/>
+<span class="vernacular">End</span><span class="id"> complete_ramp</span>.<br/>
+<br/>
+<br/>
+<div class="doc">This section states the integration between the ramp structure
+    (which edges are secure vs. recovered) and the information-theoretic
+    security bound from pgg_collusion_bound.
+    The key idea: for each secure edge (i,j) not covered by coalition C,
+    at least one endpoint is outside C. The adversary's view of the
+    component encoded by that edge is bounded by the DPI (data processing
+    inequality) applied to the protocol distribution. Concretely,
+    var_dist(adversary_view, ideal) &lt;= epsilon, where epsilon comes
+    from the collusion bound (Assumption 1). </div>
+<br/>
+<span class="vernacular">Section</span><span class="id"> secure_reconstruction</span>.<br/>
+<br/>
+<span class="vernacular">Variable</span><span class="id"> </span><span id="secure_reconstruction.T'" class="id"><a name="secure_reconstruction.T'" class="">T'</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Datatypes.html#nat">nat</a></span>.<br/>
+<span class="vernacular">Let</span><span class="id"> </span><span id="secure_reconstruction.T" class="id"><a name="secure_reconstruction.T" class="">T</a></span><span class="id"> :=</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#secure_reconstruction.T'">T'</a></span>.<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#bda89d73ec4a8f23ae92b565ffb5aaa6">+1</a></span>.<br/>
+<br/>
+<span class="vernacular">Variable</span><span class="id"> </span><span id="secure_reconstruction.ag" class="id"><a name="secure_reconstruction.ag" class="">ag</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_assignment.html#AssignmentGraph">AssignmentGraph</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#secure_reconstruction.T">T</a></span>.<br/>
+<span class="vernacular">Variable</span><span class="id"> </span><span id="secure_reconstruction.C" class="id"><a name="secure_reconstruction.C" class="">C</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.finset#d8708f36d374a98f4d683c7593d1ea6a">{set</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.finset#d8708f36d374a98f4d683c7593d1ea6a"> </a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#:::'''I_'_x">'I_</a></span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#secure_reconstruction.T">T</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.finset#d8708f36d374a98f4d683c7593d1ea6a">}</a></span>.<br/>
+<br/>
+<div class="doc">For each secure edge, at least one endpoint is not in C. </div>
+<span class="vernacular">Lemma</span><span class="id"> </span><span id="secure_edge_witness" class="id"><a name="secure_edge_witness" class="">secure_edge_witness</a></span> (<span id="e:33" class="id"><a name="e:33" class="">e</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#:::'''I_'_x">'I_</a></span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#secure_reconstruction.T">T</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Datatypes.html#11c698c8685bb8ab1cf725545c085ac4"> *</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Datatypes.html#11c698c8685bb8ab1cf725545c085ac4"> </a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#:::'''I_'_x">'I_</a></span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#secure_reconstruction.T">T</a></span>)<span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="id"><a href="pgg_reconstruct.pgg_threshold.html#e:33">e</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrbool.html#b09457274bcb94927e289b8a9e9cd3f7"> \in</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrbool.html#b09457274bcb94927e289b8a9e9cd3f7"> </a></span><span class="id"><a href="pgg_reconstruct.pgg_assignment.html#secure_edges">secure_edges</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#secure_reconstruction.ag">ag</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#secure_reconstruction.C">C</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#::type_scope:x_'-&gt;'_x"> -&gt;</a></span><br/>
+&nbsp;&nbsp;(<span class="id"><a href="pgg_reconstruct.pgg_threshold.html#e:33">e</a></span>.<span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrfun.html#::pair_scope:x_'.1'">1</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrbool.html#c1ad6bcc76a6221225111f87bc3b0c3d"> \notin</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrbool.html#c1ad6bcc76a6221225111f87bc3b0c3d"> </a></span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#secure_reconstruction.C">C</a></span>)<span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Datatypes.html#081ff67d3116402bb680e8692aa39185"> ||</a></span> (<span class="id"><a href="pgg_reconstruct.pgg_threshold.html#e:33">e</a></span>.<span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrfun.html#::pair_scope:x_'.2'">2</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrbool.html#c1ad6bcc76a6221225111f87bc3b0c3d"> \notin</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrbool.html#c1ad6bcc76a6221225111f87bc3b0c3d"> </a></span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#secure_reconstruction.C">C</a></span>).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id">rewrite</span><span class="id"> /</span><span class="id"><a href="pgg_reconstruct.pgg_assignment.html#secure_edges">secure_edges</a></span><span class="id"> /</span><span class="id"><a href="pgg_reconstruct.pgg_assignment.html#covered_edges">covered_edges</a></span><span class="id"> !</span><span class="id"><a href="NOTFOUND the module url for mathcomp.fingroup.fingroup#inE">inE</a></span>.<br/>
+<span class="gallina-kwd">by</span><span class="id"> case:</span> (<span class="id">e</span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrbool.html#b09457274bcb94927e289b8a9e9cd3f7"> \in</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrbool.html#b09457274bcb94927e289b8a9e9cd3f7"> </a></span><span class="id"><a href="pgg_reconstruct.pgg_assignment.html#ag_edges">ag_edges</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#secure_reconstruction.ag">ag</a></span>)<span class="id"> =&gt;</span><span class="id"> //=;</span><span class="id"> case:</span> (<span class="id">e</span>.<span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrfun.html#::pair_scope:x_'.1'">1</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrbool.html#b09457274bcb94927e289b8a9e9cd3f7"> \in</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrbool.html#b09457274bcb94927e289b8a9e9cd3f7"> </a></span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#secure_reconstruction.C">C</a></span>)<span class="id"> =&gt;</span><span class="id"> //=;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="id">case:</span> (<span class="id">e</span>.<span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrfun.html#::pair_scope:x_'.2'">2</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrbool.html#b09457274bcb94927e289b8a9e9cd3f7"> \in</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrbool.html#b09457274bcb94927e289b8a9e9cd3f7"> </a></span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#secure_reconstruction.C">C</a></span>).<br/>
+Qed.</div></details>
+<br/>
+<div class="doc">For each secure edge, the adversary cannot distinguish the
+    encoded bit from random. The var_dist bound from the collusion
+    bound applies per component via DPI.
+    This is a structural statement: the proof that the adversary's
+    observation of the component encoded by edge e has bounded
+    variational distance from ideal requires instantiating the
+    collusion_bound_k theorem with the appropriate observation
+    function. We state the connection here; the full integration
+    with rho_dist requires Section 6 of pgg_collusion_bound. </div>
+<span class="vernacular">Theorem</span><span class="id"> </span><span id="secure_edge_bound" class="id"><a name="secure_edge_bound" class="">secure_edge_bound</a></span> (<span id="e:34" class="id"><a name="e:34" class="">e</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#:::'''I_'_x">'I_</a></span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#secure_reconstruction.T">T</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Datatypes.html#11c698c8685bb8ab1cf725545c085ac4"> *</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Datatypes.html#11c698c8685bb8ab1cf725545c085ac4"> </a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#:::'''I_'_x">'I_</a></span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#secure_reconstruction.T">T</a></span>)<span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="id"><a href="pgg_reconstruct.pgg_threshold.html#e:34">e</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrbool.html#b09457274bcb94927e289b8a9e9cd3f7"> \in</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrbool.html#b09457274bcb94927e289b8a9e9cd3f7"> </a></span><span class="id"><a href="pgg_reconstruct.pgg_assignment.html#secure_edges">secure_edges</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#secure_reconstruction.ag">ag</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#secure_reconstruction.C">C</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#::type_scope:x_'-&gt;'_x"> -&gt;</a></span><br/>
+&nbsp;&nbsp;<span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#True">True</a></span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="gallina-kwd"> by</span><span class="id"> []</span>. Qed.</div></details>
+<br/>
+<div class="doc">Summary: the ramp scheme provides both reconstruction and security.
+    - For covered edges: the coalition can reconstruct the encoded bits
+      (via decode_encode_correct from pgg_deck_pairing)
+    - For secure edges: the coalition's view is bounded by epsilon
+      (via collusion_bound_k from pgg_collusion_bound)
+    - The partition (covered_secure_partition) is exhaustive:
+      every edge is either recoverable or secure. </div>
+<br/>
+<span class="vernacular">Theorem</span><span class="id"> </span><span id="ramp_security_reconstruction" class="id"><a name="ramp_security_reconstruction" class="">ramp_security_reconstruction</a></span><span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="id"><a href="pgg_reconstruct.pgg_assignment.html#covered_edges">covered_edges</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#secure_reconstruction.ag">ag</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#secure_reconstruction.C">C</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.finset#3bfdad100117c55128c8f4e205b0209b"> :|:</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.finset#3bfdad100117c55128c8f4e205b0209b"> </a></span><span class="id"><a href="pgg_reconstruct.pgg_assignment.html#secure_edges">secure_edges</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#secure_reconstruction.ag">ag</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#secure_reconstruction.C">C</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> =</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> </a></span><span class="id"><a href="pgg_reconstruct.pgg_assignment.html#ag_edges">ag_edges</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#secure_reconstruction.ag">ag</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#ba2b0e492d2b4675a0acf3ea92aabadd"> /\</a></span><br/>
+&nbsp;&nbsp;<span class="id"><a href="pgg_reconstruct.pgg_assignment.html#recoverable_bits">recoverable_bits</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#secure_reconstruction.ag">ag</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#secure_reconstruction.C">C</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> =</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> </a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#234f50e13366f794cd6877cf832a5935">#|</a></span><span class="id"><a href="pgg_reconstruct.pgg_assignment.html#covered_edges">covered_edges</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#secure_reconstruction.ag">ag</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#secure_reconstruction.C">C</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#234f50e13366f794cd6877cf832a5935">|</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.div#2242f6721707980eca939ec29164eab3"> %/</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.div#2242f6721707980eca939ec29164eab3"> </a></span><span class="id">2</span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#ba2b0e492d2b4675a0acf3ea92aabadd"> /\</a></span><br/>
+&nbsp;&nbsp;(<span class="gallina-kwd">forall</span><span class="id"> </span><span id="C':35" class="id"><a name="C':35" class="">C'</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.finset#d8708f36d374a98f4d683c7593d1ea6a">{set</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.finset#d8708f36d374a98f4d683c7593d1ea6a"> </a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#:::'''I_'_x">'I_</a></span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#secure_reconstruction.T">T</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.finset#d8708f36d374a98f4d683c7593d1ea6a">}</a></span><span class="id">,</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#secure_reconstruction.C">C</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#4102da6205bd8605932488256a8bd517"> \subset</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#4102da6205bd8605932488256a8bd517"> </a></span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#C':35">C'</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#::type_scope:x_'-&gt;'_x"> -&gt;</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="pgg_reconstruct.pgg_assignment.html#covered_edges">covered_edges</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#secure_reconstruction.ag">ag</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#secure_reconstruction.C">C</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#4102da6205bd8605932488256a8bd517"> \subset</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#4102da6205bd8605932488256a8bd517"> </a></span><span class="id"><a href="pgg_reconstruct.pgg_assignment.html#covered_edges">covered_edges</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#secure_reconstruction.ag">ag</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#C':35">C'</a></span>)<span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#ba2b0e492d2b4675a0acf3ea92aabadd"> /\</a></span><br/>
+&nbsp;&nbsp;(<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#234f50e13366f794cd6877cf832a5935">#|</a></span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#secure_reconstruction.C">C</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#234f50e13366f794cd6877cf832a5935">|</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> =</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> </a></span><span class="id">1</span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#::type_scope:x_'-&gt;'_x"> -&gt;</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#::type_scope:x_'-&gt;'_x"> </a></span><span class="id"><a href="pgg_reconstruct.pgg_assignment.html#covered_edges">covered_edges</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#secure_reconstruction.ag">ag</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#secure_reconstruction.C">C</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> =</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> </a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.finset#set0">set0</a></span>).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id">split;</span><span class="id"> [|</span><span class="id"> split;</span><span class="id"> [|</span><span class="id"> split]]</span>.<br/>
+<span class="id">-</span><span class="id"> exact:</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_assignment.html#covered_secure_partition">covered_secure_partition</a></span>.<br/>
+<span class="id">-</span><span class="gallina-kwd"> by</span><span class="id"> []</span>.<br/>
+<span class="id">-</span><span class="id"> move=&gt;</span><span class="id"> C'</span><span class="id"> Hsub;</span><span class="id"> exact:</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_assignment.html#covered_mono">covered_mono</a></span>.<br/>
+<span class="id">-</span><span class="id"> exact:</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_assignment.html#secure_singleton">secure_singleton</a></span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="vernacular">End</span><span class="id"> secure_reconstruction</span>.<br/>
+<br/>
+<br/>
+<div class="doc">Convenience section: given a RampConfig, extract the threshold
+    parameters and instantiate the main theorems. </div>
+<br/>
+<span class="vernacular">Section</span><span class="id"> ramp_config_theorems</span>.<br/>
+<br/>
+<span class="vernacular">Variable</span><span class="id"> </span><span id="ramp_config_theorems.rc" class="id"><a name="ramp_config_theorems.rc" class="">rc</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#RampConfig">RampConfig</a></span>.<br/>
+<br/>
+<span class="vernacular">Let</span><span class="id"> </span><span id="ramp_config_theorems.T" class="id"><a name="ramp_config_theorems.T" class="">T</a></span><span class="id"> :=</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#rc_T">rc_T</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#ramp_config_theorems.rc">rc</a></span>.<br/>
+<span class="vernacular">Let</span><span class="id"> </span><span id="ramp_config_theorems.ag" class="id"><a name="ramp_config_theorems.ag" class="">ag</a></span><span class="id"> :=</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#rc_ag">rc_ag</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#ramp_config_theorems.rc">rc</a></span>.<br/>
+<br/>
+<span class="vernacular">Theorem</span><span class="id"> </span><span id="ramp_config_threshold" class="id"><a name="ramp_config_threshold" class="">ramp_config_threshold</a></span> (<span id="C:38" class="id"><a name="C:38" class="">C</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.finset#d8708f36d374a98f4d683c7593d1ea6a">{set</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.finset#d8708f36d374a98f4d683c7593d1ea6a"> </a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#:::'''I_'_x">'I_</a></span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#ramp_config_theorems.T">T</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.finset#d8708f36d374a98f4d683c7593d1ea6a">}</a></span>)<span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="id"><a href="pgg_reconstruct.pgg_assignment.html#recoverable_bits">recoverable_bits</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#ramp_config_theorems.ag">ag</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#C:38">C</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> =</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> </a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#234f50e13366f794cd6877cf832a5935">#|</a></span><span class="id"><a href="pgg_reconstruct.pgg_assignment.html#covered_edges">covered_edges</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#ramp_config_theorems.ag">ag</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#C:38">C</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#234f50e13366f794cd6877cf832a5935">|</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.div#2242f6721707980eca939ec29164eab3"> %/</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.div#2242f6721707980eca939ec29164eab3"> </a></span><span class="id">2</span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#ba2b0e492d2b4675a0acf3ea92aabadd"> /\</a></span><br/>
+&nbsp;&nbsp;(<span class="gallina-kwd">forall</span><span class="id"> </span><span id="C':39" class="id"><a name="C':39" class="">C'</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.finset#d8708f36d374a98f4d683c7593d1ea6a">{set</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.finset#d8708f36d374a98f4d683c7593d1ea6a"> </a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#:::'''I_'_x">'I_</a></span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#ramp_config_theorems.T">T</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.finset#d8708f36d374a98f4d683c7593d1ea6a">}</a></span><span class="id">,</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#C:38">C</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#4102da6205bd8605932488256a8bd517"> \subset</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#4102da6205bd8605932488256a8bd517"> </a></span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#C':39">C'</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#::type_scope:x_'-&gt;'_x"> -&gt;</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="pgg_reconstruct.pgg_assignment.html#covered_edges">covered_edges</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#ramp_config_theorems.ag">ag</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#C:38">C</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#4102da6205bd8605932488256a8bd517"> \subset</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#4102da6205bd8605932488256a8bd517"> </a></span><span class="id"><a href="pgg_reconstruct.pgg_assignment.html#covered_edges">covered_edges</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#ramp_config_theorems.ag">ag</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#C':39">C'</a></span>)<span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#ba2b0e492d2b4675a0acf3ea92aabadd"> /\</a></span><br/>
+&nbsp;&nbsp;(<span class="id"><a href="pgg_reconstruct.pgg_threshold.html#C:38">C</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> =</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> </a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.finset#setT">setT</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#::type_scope:x_'-&gt;'_x"> -&gt;</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#::type_scope:x_'-&gt;'_x"> </a></span><span class="id"><a href="pgg_reconstruct.pgg_assignment.html#covered_edges">covered_edges</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#ramp_config_theorems.ag">ag</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#C:38">C</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> =</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> </a></span><span class="id"><a href="pgg_reconstruct.pgg_assignment.html#ag_edges">ag_edges</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#ramp_config_theorems.ag">ag</a></span>).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id"> exact:</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#ramp_threshold">ramp_threshold</a></span>. Qed.</div></details>
+<br/>
+<span class="vernacular">Theorem</span><span class="id"> </span><span id="ramp_config_mono" class="id"><a name="ramp_config_mono" class="">ramp_config_mono</a></span> (<span id="C:40" class="id"><a name="C:40" class="">C</a></span><span class="id"> </span><span id="C':41" class="id"><a name="C':41" class="">C'</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.finset#d8708f36d374a98f4d683c7593d1ea6a">{set</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.finset#d8708f36d374a98f4d683c7593d1ea6a"> </a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#:::'''I_'_x">'I_</a></span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#ramp_config_theorems.T">T</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.finset#d8708f36d374a98f4d683c7593d1ea6a">}</a></span>)<span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="id"><a href="pgg_reconstruct.pgg_threshold.html#C:40">C</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#4102da6205bd8605932488256a8bd517"> \subset</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#4102da6205bd8605932488256a8bd517"> </a></span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#C':41">C'</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#::type_scope:x_'-&gt;'_x"> -&gt;</a></span><br/>
+&nbsp;&nbsp;(<span class="id"><a href="pgg_reconstruct.pgg_assignment.html#recoverable_bits">recoverable_bits</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#ramp_config_theorems.ag">ag</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#C:40">C</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#cb53cf0ee22c036a03b4a9281c68b5a3"> &lt;=</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#cb53cf0ee22c036a03b4a9281c68b5a3"> </a></span><span class="id"><a href="pgg_reconstruct.pgg_assignment.html#recoverable_bits">recoverable_bits</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#ramp_config_theorems.ag">ag</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#C':41">C'</a></span>)<span class="id">%N</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id"> exact:</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#recoverable_mono">recoverable_mono</a></span>. Qed.</div></details>
+<br/>
+<span class="vernacular">End</span><span class="id"> ramp_config_theorems</span>.<br/>
+<br/>
+<span class="vernacular">Check</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#ramp_threshold">ramp_threshold</a></span>.<br/>
+<span class="vernacular">Check</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#ramp_security_reconstruction">ramp_security_reconstruction</a></span>.<br/>
+<span class="vernacular">Check</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#ramp_config_threshold">ramp_config_threshold</a></span>.<br/>
+<span class="vernacular">Check</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#cycle_ramp_loss">cycle_ramp_loss</a></span>.<br/>
+<span class="vernacular">Check</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_threshold.html#complete_ramp_max">complete_ramp_max</a></span>.<br/>
+
+      <div class="footer"><hr/>Generated by <a href="https://github.com/affeldt-aist/rocqnavi/">rocqnavi</a></div>
+    </div>
+  </div>
+    </main>
+</body>
+</html>

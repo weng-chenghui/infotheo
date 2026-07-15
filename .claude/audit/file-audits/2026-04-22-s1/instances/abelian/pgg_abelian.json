@@ -1,0 +1,268 @@
+{
+  "findings": [
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/abelian/pgg_abelian.v",
+      "line_start": 154,
+      "line_end": 154,
+      "lemma_name": "cyclic_search_space_le",
+      "severity": "warning",
+      "evidence_quote": "Lemma cyclic_search_space_le (L : nat) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/abelian/pgg_abelian.v",
+      "line_start": 167,
+      "line_end": 167,
+      "lemma_name": "cyclic_starts_2_uniq",
+      "severity": "warning",
+      "evidence_quote": "Lemma cyclic_starts_2_uniq : uniq cyclic_starts_2.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/abelian/pgg_abelian.v",
+      "line_start": 45,
+      "line_end": 45,
+      "lemma_name": "shift_fun",
+      "severity": "error",
+      "evidence_quote": "Definition shift_fun (i : 'I_N) : 'I_N :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/abelian/pgg_abelian.v",
+      "line_start": 48,
+      "line_end": 48,
+      "lemma_name": "unshift_fun",
+      "severity": "error",
+      "evidence_quote": "Definition unshift_fun (i : 'I_N) : 'I_N :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/abelian/pgg_abelian.v",
+      "line_start": 51,
+      "line_end": 51,
+      "lemma_name": "shift_unshiftK",
+      "severity": "error",
+      "evidence_quote": "Lemma shift_unshiftK : cancel shift_fun unshift_fun.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/abelian/pgg_abelian.v",
+      "line_start": 58,
+      "line_end": 58,
+      "lemma_name": "shift_fun_inj",
+      "severity": "error",
+      "evidence_quote": "Lemma shift_fun_inj : injective shift_fun.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/abelian/pgg_abelian.v",
+      "line_start": 63,
+      "line_end": 63,
+      "lemma_name": "ncycleE",
+      "severity": "error",
+      "evidence_quote": "Lemma ncycleE (i : 'I_N) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/abelian/pgg_abelian.v",
+      "line_start": 79,
+      "line_end": 79,
+      "lemma_name": "ncycle_expN",
+      "severity": "error",
+      "evidence_quote": "Lemma ncycle_expN : (ncycle ^+ N = 1 :> {perm 'I_N})%g.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/abelian/pgg_abelian.v",
+      "line_start": 116,
+      "line_end": 116,
+      "lemma_name": "incl_morph",
+      "severity": "error",
+      "evidence_quote": "Definition incl_morph : {morphism G >-> {perm 'I_N}} :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/abelian/pgg_abelian.v",
+      "line_start": 119,
+      "line_end": 119,
+      "lemma_name": "Cyclic_PGGTypes",
+      "severity": "error",
+      "evidence_quote": "Definition Cyclic_PGGTypes := @MkPGG gT N.-1 G.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/abelian/pgg_abelian.v",
+      "line_start": 126,
+      "line_end": 126,
+      "lemma_name": "tnth_cyclic_sigmas",
+      "severity": "error",
+      "evidence_quote": "Lemma tnth_cyclic_sigmas (i : 'I_1) : tnth cyclic_sigmas i = sigma.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/abelian/pgg_abelian.v",
+      "line_start": 129,
+      "line_end": 129,
+      "lemma_name": "cyclic_sigmas_gen",
+      "severity": "error",
+      "evidence_quote": "Lemma cyclic_sigmas_gen :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/abelian/pgg_abelian.v",
+      "line_start": 164,
+      "line_end": 164,
+      "lemma_name": "cyclic_starts_2",
+      "severity": "error",
+      "evidence_quote": "Definition cyclic_starts_2 : 2.-tuple 'I_N :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/abelian/pgg_abelian.v",
+      "line_start": 167,
+      "line_end": 167,
+      "lemma_name": "cyclic_starts_2_uniq",
+      "severity": "error",
+      "evidence_quote": "Lemma cyclic_starts_2_uniq : uniq cyclic_starts_2.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/abelian/pgg_abelian.v",
+      "line_start": 170,
+      "line_end": 170,
+      "lemma_name": "Cyclic_PGG_2",
+      "severity": "error",
+      "evidence_quote": "Definition Cyclic_PGG_2 : PGGInterface M :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/abelian/pgg_abelian.v",
+      "line_start": 188,
+      "line_end": 188,
+      "lemma_name": "NCycle_PGG_2",
+      "severity": "error",
+      "evidence_quote": "Definition NCycle_PGG_2 : PGGInterface M :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/abelian/pgg_abelian.v",
+      "line_start": 208,
+      "line_end": 208,
+      "lemma_name": "dt_even_lt",
+      "severity": "error",
+      "evidence_quote": "Lemma dt_even_lt (i : 'I_Tg) : (val i).*2 < N.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/abelian/pgg_abelian.v",
+      "line_start": 211,
+      "line_end": 211,
+      "lemma_name": "dt_odd_lt",
+      "severity": "error",
+      "evidence_quote": "Lemma dt_odd_lt (i : 'I_Tg) : (val i).*2.+1 < N.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/abelian/pgg_abelian.v",
+      "line_start": 214,
+      "line_end": 214,
+      "lemma_name": "dt_gen",
+      "severity": "error",
+      "evidence_quote": "Definition dt_gen (i : 'I_Tg) : {perm 'I_N} :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/abelian/pgg_abelian.v",
+      "line_start": 219,
+      "line_end": 219,
+      "lemma_name": "dt_gen_tupleE",
+      "severity": "error",
+      "evidence_quote": "Lemma dt_gen_tupleE (i : 'I_Tg) : tnth dt_gen_tuple i = dt_gen i.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": null,
+  "exit_code": 2
+}

@@ -1,0 +1,99 @@
+{
+  "findings": [
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/s5x5/s5x5_mixing.v",
+      "line_start": 482,
+      "line_end": 482,
+      "lemma_name": "s5_lazy_alpha_sq_eq",
+      "severity": "warning",
+      "evidence_quote": "Lemma s5_lazy_alpha_sq_eq :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/s5x5/s5x5_mixing.v",
+      "line_start": 623,
+      "line_end": 623,
+      "lemma_name": "s5x5_gen_pile1_action",
+      "severity": "warning",
+      "evidence_quote": "Lemma s5x5_gen_pile1_action (k : 'I_8) (s : 'I_5) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/s5x5/s5x5_mixing.v",
+      "line_start": 669,
+      "line_end": 669,
+      "lemma_name": "s5x5_rho_pile1_eq",
+      "severity": "warning",
+      "evidence_quote": "Lemma s5x5_rho_pile1_eq (L : nat) (s : 'I_5) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/s5x5/s5x5_mixing.v",
+      "line_start": 729,
+      "line_end": 729,
+      "lemma_name": "s5x5_gen_pile2_action",
+      "severity": "warning",
+      "evidence_quote": "Lemma s5x5_gen_pile2_action (k : 'I_8) (s : 'I_5) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/s5x5/s5x5_mixing.v",
+      "line_start": 778,
+      "line_end": 778,
+      "lemma_name": "s5x5_rho_pile2_eq",
+      "severity": "warning",
+      "evidence_quote": "Lemma s5x5_rho_pile2_eq (L : nat) (s : 'I_5) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/s5x5/s5x5_mixing.v",
+      "line_start": 871,
+      "line_end": 871,
+      "lemma_name": "var_dist_uniform_pile1_uniform10",
+      "severity": "warning",
+      "evidence_quote": "Lemma var_dist_uniform_pile1_uniform10 :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/s5x5/s5x5_mixing.v",
+      "line_start": 901,
+      "line_end": 901,
+      "lemma_name": "var_dist_uniform_pile2_uniform10",
+      "severity": "warning",
+      "evidence_quote": "Lemma var_dist_uniform_pile2_uniform10 :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": null,
+  "exit_code": 0
+}

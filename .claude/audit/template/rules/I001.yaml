@@ -1,0 +1,22 @@
+id: I001
+category: naming
+title: "Name breaks MathComp grammar without a `Naming:` justification in the preceding comment"
+severity: error
+enabled: true
+stage_mode: stage1_only
+authority:
+  - mathcomp-CONTRIBUTING#naming-conventions
+  - peer-feedback-2026-04
+fast_check:
+  kind: naming_conformance_or_justify
+scope: changed_lemmas
+fix_hint: |
+  Either rename the identifier to follow MathComp grammar `mainSymbol_suffixes(_condition)?`
+  using a canonical suffix from AUTHORITY.md (for example `_ge0`, `_card`,
+  `_inj`, `_P`, `_E`, `_I`), or keep the name and add a `Naming:` tag in
+  the preceding comment, e.g.:
+    (** my_proof_works — ...
+        Kind: helper.
+        Naming: intentional; the name mirrors the upstream Python reference
+        module. *)
+exceptions: []

@@ -1,0 +1,789 @@
+
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Module dsdp_syntax_demo</title>
+<meta name="description" content="Documentation of Coq module Infotheo Documentation" />
+<link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/markdown-it/dist/markdown-it.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/markdown-it-texmath/texmath.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/darkmode-js@1.5.7/lib/darkmode-js.min.js"></script>
+<link href="rocqnavi.css" rel="stylesheet" type="text/css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script type="text/javascript" src="rocqnavi.js"> </script>
+</head>
+
+<body onload="init()">
+
+  <main>
+    <div class="sidebar">
+      <h2>Files</h2>
+      <li><details id="infotheo"><summary>infotheo</summary>
+          <ul>
+          <li><details id="infotheo.du2002"><summary>du2002</summary>
+          <ul>
+          <li><a href="infotheo.du2002.spp_entropy.html">spp_entropy</a></li>
+<li><a href="infotheo.du2002.spp_interface.html">spp_interface</a></li>
+<li><a href="infotheo.du2002.spp_pismc.html">spp_pismc</a></li>
+<li><a href="infotheo.du2002.spp_proba.html">spp_proba</a></li>
+<li><a href="infotheo.du2002.spp_program.html">spp_program</a></li>
+<li><a href="infotheo.du2002.spp_proof.html">spp_proof</a></li>
+<li><a href="infotheo.du2002.spp_session_types.html">spp_session_types</a></li>
+<li><a href="infotheo.du2002.spp_tactics.html">spp_tactics</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.dumas2017dual"><summary>dumas2017dual</summary>
+          <ul>
+          <li><details id="infotheo.dumas2017dual.dsdp"><summary>dsdp</summary>
+          <ul>
+          <li><a href="infotheo.dumas2017dual.dsdp.dsdp_correctness.html">dsdp_correctness</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_entropy.html">dsdp_entropy</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_entropy_trace.html">dsdp_entropy_trace</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_interface.html">dsdp_interface</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_pismc.html">dsdp_pismc</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_program.html">dsdp_program</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_security.html">dsdp_security</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_session_types.html">dsdp_session_types</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_syntax_demo.html">dsdp_syntax_demo</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.dumas2017dual.entropy_fiber"><summary>entropy_fiber</summary>
+          <ul>
+          <li><a href="infotheo.dumas2017dual.entropy_fiber.entropy_fiber.html">entropy_fiber</a></li>
+<li><a href="infotheo.dumas2017dual.entropy_fiber.entropy_fiber_zpq.html">entropy_fiber_zpq</a></li>
+<li><a href="infotheo.dumas2017dual.entropy_fiber.linear_fiber_zpq.html">linear_fiber_zpq</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.dumas2017dual.lib"><summary>lib</summary>
+          <ul>
+          <li><a href="infotheo.dumas2017dual.lib.extra_algebra.html">extra_algebra</a></li>
+<li><a href="infotheo.dumas2017dual.lib.extra_entropy.html">extra_entropy</a></li>
+<li><a href="infotheo.dumas2017dual.lib.extra_proba.html">extra_proba</a></li>
+<li><a href="infotheo.dumas2017dual.lib.rouche_capelli.html">rouche_capelli</a></li>
+          </ul>
+          </details>
+          </li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.ecc_classic"><summary>ecc_classic</summary>
+          <ul>
+          <li><a href="infotheo.ecc_classic.alternant.html">alternant</a></li>
+<li><a href="infotheo.ecc_classic.bch.html">bch</a></li>
+<li><a href="infotheo.ecc_classic.cyclic_code.html">cyclic_code</a></li>
+<li><a href="infotheo.ecc_classic.decoding.html">decoding</a></li>
+<li><a href="infotheo.ecc_classic.grs.html">grs</a></li>
+<li><a href="infotheo.ecc_classic.hamming_code.html">hamming_code</a></li>
+<li><a href="infotheo.ecc_classic.linearcode.html">linearcode</a></li>
+<li><a href="infotheo.ecc_classic.mceliece.html">mceliece</a></li>
+<li><a href="infotheo.ecc_classic.poly_decoding.html">poly_decoding</a></li>
+<li><a href="infotheo.ecc_classic.reed_solomon.html">reed_solomon</a></li>
+<li><a href="infotheo.ecc_classic.repcode.html">repcode</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.ecc_modern"><summary>ecc_modern</summary>
+          <ul>
+          <li><a href="infotheo.ecc_modern.checksum.html">checksum</a></li>
+<li><a href="infotheo.ecc_modern.degree_profile.html">degree_profile</a></li>
+<li><a href="infotheo.ecc_modern.ldpc.html">ldpc</a></li>
+<li><a href="infotheo.ecc_modern.ldpc_algo.html">ldpc_algo</a></li>
+<li><a href="infotheo.ecc_modern.ldpc_algo_proof.html">ldpc_algo_proof</a></li>
+<li><a href="infotheo.ecc_modern.ldpc_erasure.html">ldpc_erasure</a></li>
+<li><a href="infotheo.ecc_modern.max_subset.html">max_subset</a></li>
+<li><a href="infotheo.ecc_modern.stopping_set.html">stopping_set</a></li>
+<li><a href="infotheo.ecc_modern.subgraph_partition.html">subgraph_partition</a></li>
+<li><a href="infotheo.ecc_modern.summary.html">summary</a></li>
+<li><a href="infotheo.ecc_modern.summary_tanner.html">summary_tanner</a></li>
+<li><a href="infotheo.ecc_modern.tanner.html">tanner</a></li>
+<li><a href="infotheo.ecc_modern.tanner_partition.html">tanner_partition</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.homomorphic_encryption"><summary>homomorphic_encryption</summary>
+          <ul>
+          <li><details id="infotheo.homomorphic_encryption.benaloh1994"><summary>benaloh1994</summary>
+          <ul>
+          <li><a href="infotheo.homomorphic_encryption.benaloh1994.benaloh_ahe.html">benaloh_ahe</a></li>
+<li><a href="infotheo.homomorphic_encryption.benaloh1994.benaloh_enc.html">benaloh_enc</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.homomorphic_encryption.idealized"><summary>idealized</summary>
+          <ul>
+          <li><a href="infotheo.homomorphic_encryption.idealized.idealized_ahe.html">idealized_ahe</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.homomorphic_encryption.paillier1999"><summary>paillier1999</summary>
+          <ul>
+          <li><a href="infotheo.homomorphic_encryption.paillier1999.paillier_ahe.html">paillier_ahe</a></li>
+<li><a href="infotheo.homomorphic_encryption.paillier1999.paillier_enc.html">paillier_enc</a></li>
+          </ul>
+          </details>
+          </li>
+<li><a href="infotheo.homomorphic_encryption.ahe_enc.html">ahe_enc</a></li>
+<li><a href="infotheo.homomorphic_encryption.ahe_monoid.html">ahe_monoid</a></li>
+<li><a href="infotheo.homomorphic_encryption.enc_dec.html">enc_dec</a></li>
+<li><a href="infotheo.homomorphic_encryption.he_types.html">he_types</a></li>
+<li><a href="infotheo.homomorphic_encryption.homomorphic_encryption.html">homomorphic_encryption</a></li>
+<li><a href="infotheo.homomorphic_encryption.key_type.html">key_type</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.information_theory"><summary>information_theory</summary>
+          <ul>
+          <li><a href="infotheo.information_theory.aep.html">aep</a></li>
+<li><a href="infotheo.information_theory.binary_symmetric_channel.html">binary_symmetric_channel</a></li>
+<li><a href="infotheo.information_theory.channel.html">channel</a></li>
+<li><a href="infotheo.information_theory.channel_code.html">channel_code</a></li>
+<li><a href="infotheo.information_theory.channel_coding_converse.html">channel_coding_converse</a></li>
+<li><a href="infotheo.information_theory.channel_coding_direct.html">channel_coding_direct</a></li>
+<li><a href="infotheo.information_theory.conditional_divergence.html">conditional_divergence</a></li>
+<li><a href="infotheo.information_theory.entropy.html">entropy</a></li>
+<li><a href="infotheo.information_theory.entropy_convex.html">entropy_convex</a></li>
+<li><a href="infotheo.information_theory.erasure_channel.html">erasure_channel</a></li>
+<li><a href="infotheo.information_theory.error_exponent.html">error_exponent</a></li>
+<li><a href="infotheo.information_theory.joint_typ_seq.html">joint_typ_seq</a></li>
+<li><a href="infotheo.information_theory.jtypes.html">jtypes</a></li>
+<li><a href="infotheo.information_theory.kraft.html">kraft</a></li>
+<li><a href="infotheo.information_theory.pproba.html">pproba</a></li>
+<li><a href="infotheo.information_theory.shannon_fano.html">shannon_fano</a></li>
+<li><a href="infotheo.information_theory.source_code.html">source_code</a></li>
+<li><a href="infotheo.information_theory.source_coding_fl_converse.html">source_coding_fl_converse</a></li>
+<li><a href="infotheo.information_theory.source_coding_fl_direct.html">source_coding_fl_direct</a></li>
+<li><a href="infotheo.information_theory.source_coding_vl_converse.html">source_coding_vl_converse</a></li>
+<li><a href="infotheo.information_theory.source_coding_vl_direct.html">source_coding_vl_direct</a></li>
+<li><a href="infotheo.information_theory.string_entropy.html">string_entropy</a></li>
+<li><a href="infotheo.information_theory.success_decode_bound.html">success_decode_bound</a></li>
+<li><a href="infotheo.information_theory.typ_seq.html">typ_seq</a></li>
+<li><a href="infotheo.information_theory.types.html">types</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.lib"><summary>lib</summary>
+          <ul>
+          <li><a href="infotheo.lib.bigop_ext.html">bigop_ext</a></li>
+<li><a href="infotheo.lib.binary_entropy_function.html">binary_entropy_function</a></li>
+<li><a href="infotheo.lib.classical_sets_ext.html">classical_sets_ext</a></li>
+<li><a href="infotheo.lib.coqRE.html">coqRE</a></li>
+<li><a href="infotheo.lib.derive_ext.html">derive_ext</a></li>
+<li><a href="infotheo.lib.dft.html">dft</a></li>
+<li><a href="infotheo.lib.euclid.html">euclid</a></li>
+<li><a href="infotheo.lib.f2.html">f2</a></li>
+<li><a href="infotheo.lib.hamming.html">hamming</a></li>
+<li><a href="infotheo.lib.natbin.html">natbin</a></li>
+<li><a href="infotheo.lib.num_occ.html">num_occ</a></li>
+<li><a href="infotheo.lib.poly_ext.html">poly_ext</a></li>
+<li><a href="infotheo.lib.realType_ext.html">realType_ext</a></li>
+<li><a href="infotheo.lib.realType_ln.html">realType_ln</a></li>
+<li><a href="infotheo.lib.ssr_ext.html">ssr_ext</a></li>
+<li><a href="infotheo.lib.ssralg_ext.html">ssralg_ext</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.probability"><summary>probability</summary>
+          <ul>
+          <li><a href="infotheo.probability.bayes.html">bayes</a></li>
+<li><a href="infotheo.probability.convex.html">convex</a></li>
+<li><a href="infotheo.probability.convex_equiv.html">convex_equiv</a></li>
+<li><a href="infotheo.probability.convex_stone.html">convex_stone</a></li>
+<li><a href="infotheo.probability.divergence.html">divergence</a></li>
+<li><a href="infotheo.probability.fdist.html">fdist</a></li>
+<li><a href="infotheo.probability.fsdist.html">fsdist</a></li>
+<li><a href="infotheo.probability.graphoid.html">graphoid</a></li>
+<li><a href="infotheo.probability.jensen.html">jensen</a></li>
+<li><a href="infotheo.probability.jfdist_cond.html">jfdist_cond</a></li>
+<li><a href="infotheo.probability.log_sum.html">log_sum</a></li>
+<li><a href="infotheo.probability.necset.html">necset</a></li>
+<li><a href="infotheo.probability.partition_inequality.html">partition_inequality</a></li>
+<li><a href="infotheo.probability.pinsker.html">pinsker</a></li>
+<li><a href="infotheo.probability.proba.html">proba</a></li>
+<li><a href="infotheo.probability.variation_dist.html">variation_dist</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.robust"><summary>robust</summary>
+          <ul>
+          <li><a href="infotheo.robust.robustmean.html">robustmean</a></li>
+<li><a href="infotheo.robust.weightedmean.html">weightedmean</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.smc"><summary>smc</summary>
+          <ul>
+          <li><a href="infotheo.smc.graded_resource.html">graded_resource</a></li>
+<li><a href="infotheo.smc.pismc.html">pismc</a></li>
+<li><a href="infotheo.smc.smc_interpreter.html">smc_interpreter</a></li>
+<li><a href="infotheo.smc.smc_session_types.html">smc_session_types</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.toy_examples"><summary>toy_examples</summary>
+          <ul>
+          <li><a href="infotheo.toy_examples.conditional_entropy.html">conditional_entropy</a></li>
+<li><a href="infotheo.toy_examples.expected_value_variance.html">expected_value_variance</a></li>
+<li><a href="infotheo.toy_examples.expected_value_variance_ordn.html">expected_value_variance_ordn</a></li>
+<li><a href="infotheo.toy_examples.expected_value_variance_tuple.html">expected_value_variance_tuple</a></li>
+          </ul>
+          </details>
+          </li>
+<li><a href="infotheo._check_sigs.html">_check_sigs</a></li>
+<li><a href="infotheo._depgraph_extract.html">_depgraph_extract</a></li>
+<li><a href="infotheo._test_star2.html">_test_star2</a></li>
+<li><a href="infotheo.test_sri.html">test_sri</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="pgg_reconstruct"><summary>pgg_reconstruct</summary>
+          <ul>
+          <li><a href="pgg_reconstruct.ag_code.html">ag_code</a></li>
+<li><a href="pgg_reconstruct.ag_massey_bridge.html">ag_massey_bridge</a></li>
+<li><a href="pgg_reconstruct.ag_multiplicative.html">ag_multiplicative</a></li>
+<li><a href="pgg_reconstruct.algebraic_rigidity.html">algebraic_rigidity</a></li>
+<li><a href="pgg_reconstruct.coord_perm_compatible.html">coord_perm_compatible</a></li>
+<li><a href="pgg_reconstruct.cover_genus0.html">cover_genus0</a></li>
+<li><a href="pgg_reconstruct.cover_genus1.html">cover_genus1</a></li>
+<li><a href="pgg_reconstruct.cover_genus2.html">cover_genus2</a></li>
+<li><a href="pgg_reconstruct.cover_tradeoff.html">cover_tradeoff</a></li>
+<li><a href="pgg_reconstruct.covering_scheme.html">covering_scheme</a></li>
+<li><a href="pgg_reconstruct.hyperelliptic_code.html">hyperelliptic_code</a></li>
+<li><a href="pgg_reconstruct.lagrange.html">lagrange</a></li>
+<li><a href="pgg_reconstruct.massey.html">massey</a></li>
+<li><a href="pgg_reconstruct.pgg_assignment.html">pgg_assignment</a></li>
+<li><a href="pgg_reconstruct.pgg_covering_correctness.html">pgg_covering_correctness</a></li>
+<li><a href="pgg_reconstruct.pgg_deck_pairing.html">pgg_deck_pairing</a></li>
+<li><a href="pgg_reconstruct.pgg_sharing_framework.html">pgg_sharing_framework</a></li>
+<li><a href="pgg_reconstruct.pgg_sum_mod.html">pgg_sum_mod</a></li>
+<li><a href="pgg_reconstruct.pgg_threshold.html">pgg_threshold</a></li>
+<li><a href="pgg_reconstruct.pgl_bound.html">pgl_bound</a></li>
+<li><a href="pgg_reconstruct.rigidity_monster_instance.html">rigidity_monster_instance</a></li>
+<li><a href="pgg_reconstruct.rigidity_s5_instance.html">rigidity_s5_instance</a></li>
+<li><a href="pgg_reconstruct.rigidity_star_instance.html">rigidity_star_instance</a></li>
+<li><a href="pgg_reconstruct.rs_massey_bridge.html">rs_massey_bridge</a></li>
+<li><a href="pgg_reconstruct.rs_privacy.html">rs_privacy</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="pgg_smc"><summary>pgg_smc</summary>
+          <ul>
+          <li><a href="pgg_smc.abelian_word_collapse.html">abelian_word_collapse</a></li>
+<li><a href="pgg_smc.free_group_ball.html">free_group_ball</a></li>
+<li><a href="pgg_smc.perm_uniform.html">perm_uniform</a></li>
+<li><a href="pgg_smc.pgg_abelian.html">pgg_abelian</a></li>
+<li><a href="pgg_smc.pgg_abelian.html">pgg_abelian</a></li>
+<li><a href="pgg_smc.pgg_abelian_collapse.html">pgg_abelian_collapse</a></li>
+<li><a href="pgg_smc.pgg_collusion_bound.html">pgg_collusion_bound</a></li>
+<li><a href="pgg_smc.pgg_correctness.html">pgg_correctness</a></li>
+<li><a href="pgg_smc.pgg_free.html">pgg_free</a></li>
+<li><a href="pgg_smc.pgg_interface.html">pgg_interface</a></li>
+<li><a href="pgg_smc.pgg_lfree.html">pgg_lfree</a></li>
+<li><a href="pgg_smc.pgg_nonabelian.html">pgg_nonabelian</a></li>
+<li><a href="pgg_smc.pgg_pismc.html">pgg_pismc</a></li>
+<li><a href="pgg_smc.pgg_program.html">pgg_program</a></li>
+<li><a href="pgg_smc.pgg_raag.html">pgg_raag</a></li>
+<li><a href="pgg_smc.pgg_raag_cartier_foata.html">pgg_raag_cartier_foata</a></li>
+<li><a href="pgg_smc.pgg_raag_clique.html">pgg_raag_clique</a></li>
+<li><a href="pgg_smc.pgg_raag_path.html">pgg_raag_path</a></li>
+<li><a href="pgg_smc.pgg_raag_s5.html">pgg_raag_s5</a></li>
+<li><a href="pgg_smc.pgg_raag_star.html">pgg_raag_star</a></li>
+<li><a href="pgg_smc.pgg_security.html">pgg_security</a></li>
+<li><a href="pgg_smc.pgg_session_types.html">pgg_session_types</a></li>
+<li><a href="pgg_smc.pgg_word_analysis.html">pgg_word_analysis</a></li>
+<li><a href="pgg_smc.test_cf.html">test_cf</a></li>
+<li><a href="pgg_smc.test_cf2.html">test_cf2</a></li>
+<li><a href="pgg_smc.test_cf3.html">test_cf3</a></li>
+<li><a href="pgg_smc.test_sri.html">test_sri</a></li>
+<li><a href="pgg_smc.test_sri2.html">test_sri2</a></li>
+          </ul>
+          </details>
+          </li>
+    </div>
+
+  <div class="coq">
+
+    <div class="content">
+      <p>
+        <a href="./index.html">Top</a>
+        
+      </p>
+      <h1 class="title">Module dsdp_syntax_demo</h1>
+<pre class="ssrdoc">
+
+Demo: Custom Entry Syntax for DSDP Programs
+
+This file demonstrates using Coq custom entries to achieve paper-like
+syntax for secure multiparty computation protocols.
+
+Target syntax:
+  {| Init (v₁, u₁, u₂, u₃, r₂, r₃) · Recv⟨B⟩ λ c₂ · Send⟨B⟩ a₂ · Ret r |}
+
+How to type special characters:
+
+Middle dot · (U+00B7) for sequencing:
+  - macOS: Option + Shift + 9
+  - Windows: Alt + 0183 (numpad)
+  - Linux: Ctrl+Shift+U, 00b7, Enter
+  - Or copy-paste: ·
+
+Full-width space 　 (U+3000) for Init separator:
+  - macOS: Switch to CJK input, press Space; or Character Viewer
+  - Windows: Alt + 12288 (numpad) or Character Map
+  - Linux: Ctrl+Shift+U, 3000, Enter
+  - Or copy-paste: 　
+
+Unicode angle brackets ⟨⟩ (U+27E8, U+27E9) for Send/Recv:
+  - macOS: Character Viewer, search "angle bracket"
+  - Linux: Ctrl+Shift+U, 27e8/27e9, Enter
+  - Or copy-paste: ⟨ ⟩
+  - ASCII alternative: &lt; &gt; also works
+
+</pre>
+<br/>
+<span class="gallina-kwd">Set</span><span class="vernacular"> Implicit</span><span class="vernacular"> Arguments</span>.<br/>
+<span class="vernacular">Unset</span><span class="vernacular"> Strict</span><span class="vernacular"> Implicit</span>.<br/>
+<br/>
+<h1> Minimal proc type (self-contained for demo) </h1>
+<br/>
+<span class="vernacular">Section</span><span class="id"> proc_type</span>.<br/>
+<span class="vernacular">Variable</span><span class="id"> data</span><span class="id"> :</span><span class="gallina-kwd"> Type</span>.<br/>
+<br/>
+<span class="vernacular">Inductive</span><span class="id"> proc</span><span class="id"> :</span><span class="gallina-kwd"> Type</span><span class="id"> :=</span><br/>
+&nbsp;&nbsp;<span class="id">|</span><span class="id"> PInit</span><span class="id"> :</span><span class="id"> data</span><span class="id"> -&gt;</span><span class="id"> proc</span><span class="id"> -&gt;</span><span class="id"> proc</span><br/>
+&nbsp;&nbsp;<span class="id">|</span><span class="id"> PSend</span><span class="id"> :</span><span class="id"> nat</span><span class="id"> -&gt;</span><span class="id"> data</span><span class="id"> -&gt;</span><span class="id"> proc</span><span class="id"> -&gt;</span><span class="id"> proc</span><br/>
+&nbsp;&nbsp;<span class="id">|</span><span class="id"> PRecv</span><span class="id"> :</span><span class="id"> nat</span><span class="id"> -&gt;</span> (<span class="id">data</span><span class="id"> -&gt;</span><span class="id"> proc</span>)<span class="id"> -&gt;</span><span class="id"> proc</span><br/>
+&nbsp;&nbsp;<span class="id">|</span><span class="id"> PRet</span><span class="id"> :</span><span class="id"> data</span><span class="id"> -&gt;</span><span class="id"> proc</span><br/>
+&nbsp;&nbsp;<span class="id">|</span><span class="id"> PFinish</span><span class="id"> :</span><span class="id"> proc</span><br/>
+&nbsp;&nbsp;<span class="id">|</span><span class="id"> PFail</span><span class="id"> :</span><span class="id"> proc</span>.<br/>
+<br/>
+<span class="vernacular">End</span><span class="id"> proc_type</span>.<br/>
+<br/>
+<span class="vernacular">Arguments</span><span class="id"> PFinish</span><span class="id"> {data}</span>.<br/>
+<span class="vernacular">Arguments</span><span class="id"> PFail</span><span class="id"> {data}</span>.<br/>
+<br/>
+<br/>
+<h1> Scope and Custom Entry Declaration </h1>
+<br/>
+<span class="vernacular">Declare</span><span class="vernacular"> Scope</span><span class="id"> dsdp_scope</span>.<br/>
+<span class="vernacular">Declare</span><span class="id"> Custom</span><span class="id"> Entry</span><span class="id"> dsdp</span>.<br/>
+<br/>
+<h1> Entry/Exit Notations </h1>
+<br/>
+<span class="vernacular">Notation</span> <span class="id">&quot;{| e |}&quot;</span><span class="id"> :=</span><span class="id"> e</span> (<span class="id">e</span><span class="id"> custom</span><span class="id"> dsdp</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 99</span>)<span class="id"> :</span><span class="id"> dsdp_scope</span>.<br/>
+<br/>
+<span class="vernacular">Notation</span> <span class="id">&quot;'PROC' e 'END'&quot;</span><span class="id"> :=</span><span class="id"> e</span> (<span class="id">e</span><span class="id"> custom</span><span class="id"> dsdp</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 99</span>)<span class="id"> :</span><span class="id"> dsdp_scope</span>.<br/>
+<br/>
+<span class="vernacular">Local</span><span class="vernacular"> Open</span><span class="vernacular"> Scope</span><span class="id"> dsdp_scope</span>.<br/>
+<br/>
+<h1> Basic Constructs </h1>
+<br/>
+<span class="vernacular">Notation</span> <span class="id">&quot;'Finish'&quot;</span><span class="id"> :=</span><span class="id"> PFinish</span> (<span class="gallina-kwd">in</span><span class="id"> custom</span><span class="id"> dsdp</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 0</span>).<br/>
+<br/>
+<span class="vernacular">Notation</span> <span class="id">&quot;'Ret' x&quot;</span><span class="id"> :=</span> (<span class="id">PRet</span><span class="id"> x</span>) <br/>
+&nbsp;&nbsp;(<span class="gallina-kwd">in</span><span class="id"> custom</span><span class="id"> dsdp</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 80,</span><span class="id"> x</span><span class="id"> constr</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 0</span>).<br/>
+<br/>
+<span class="vernacular">Notation</span> <span class="id">&quot;'Fail'&quot;</span><span class="id"> :=</span><span class="id"> PFail</span> (<span class="gallina-kwd">in</span><span class="id"> custom</span><span class="id"> dsdp</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 0</span>).<br/>
+<br/>
+<h1> Sequencing with · (middle dot) </h1>
+<br/>
+<span class="vernacular">Notation</span> <span class="id">&quot;'Init' x · P&quot;</span><span class="id"> :=</span> (<span class="id">PInit</span><span class="id"> x</span><span class="id"> P</span>)<br/>
+&nbsp;&nbsp;(<span class="gallina-kwd">in</span><span class="id"> custom</span><span class="id"> dsdp</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 85,</span><span class="id"> x</span><span class="id"> constr</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 0,</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="id">P</span><span class="id"> custom</span><span class="id"> dsdp</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 85,</span><span class="id"> right</span><span class="id"> associativity</span>).<br/>
+<br/>
+<span class="vernacular">Notation</span> <span class="id">&quot;'Send&lt;' n '&gt;' x · P&quot;</span><span class="id"> :=</span> (<span class="id">PSend</span><span class="id"> n</span><span class="id"> x</span><span class="id"> P</span>)<br/>
+&nbsp;&nbsp;(<span class="gallina-kwd">in</span><span class="id"> custom</span><span class="id"> dsdp</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 85,</span><span class="id"> n</span><span class="id"> constr</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 0,</span><span class="id"> x</span><span class="id"> constr</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 0,</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="id">P</span><span class="id"> custom</span><span class="id"> dsdp</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 85,</span><span class="id"> right</span><span class="id"> associativity</span>).<br/>
+<br/>
+<span class="vernacular">Notation</span> <span class="id">&quot;'Send⟨' n '⟩' x · P&quot;</span><span class="id"> :=</span> (<span class="id">PSend</span><span class="id"> n</span><span class="id"> x</span><span class="id"> P</span>)<br/>
+&nbsp;&nbsp;(<span class="gallina-kwd">in</span><span class="id"> custom</span><span class="id"> dsdp</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 85,</span><span class="id"> n</span><span class="id"> constr</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 0,</span><span class="id"> x</span><span class="id"> constr</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 0,</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="id">P</span><span class="id"> custom</span><span class="id"> dsdp</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 85,</span><span class="id"> right</span><span class="id"> associativity</span>).<br/>
+<br/>
+<span class="vernacular">Notation</span> <span class="id">&quot;'Recv&lt;' n '&gt;' 'λ' x · P&quot;</span><span class="id"> :=</span> (<span class="id">PRecv</span><span class="id"> n</span> (<span class="gallina-kwd">fun</span><span class="id"> x</span><span class="id"> =&gt;</span><span class="id"> P</span>))<br/>
+&nbsp;&nbsp;(<span class="gallina-kwd">in</span><span class="id"> custom</span><span class="id"> dsdp</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 85,</span><span class="id"> n</span><span class="id"> constr</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 0,</span><span class="id"> x</span><span class="id"> name,</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="id">P</span><span class="id"> custom</span><span class="id"> dsdp</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 85,</span><span class="id"> right</span><span class="id"> associativity</span>).<br/>
+<br/>
+<span class="vernacular">Notation</span> <span class="id">&quot;'Recv⟨' n '⟩' 'λ' x · P&quot;</span><span class="id"> :=</span> (<span class="id">PRecv</span><span class="id"> n</span> (<span class="gallina-kwd">fun</span><span class="id"> x</span><span class="id"> =&gt;</span><span class="id"> P</span>))<br/>
+&nbsp;&nbsp;(<span class="gallina-kwd">in</span><span class="id"> custom</span><span class="id"> dsdp</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 85,</span><span class="id"> n</span><span class="id"> constr</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 0,</span><span class="id"> x</span><span class="id"> name,</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="id">P</span><span class="id"> custom</span><span class="id"> dsdp</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 85,</span><span class="id"> right</span><span class="id"> associativity</span>).<br/>
+<br/>
+<span class="vernacular">Notation</span> <span class="id">&quot;'Recv&lt;' n '&gt;' 'fun' x '=&gt;' P&quot;</span><span class="id"> :=</span> (<span class="id">PRecv</span><span class="id"> n</span> (<span class="gallina-kwd">fun</span><span class="id"> x</span><span class="id"> =&gt;</span><span class="id"> P</span>))<br/>
+&nbsp;&nbsp;(<span class="gallina-kwd">in</span><span class="id"> custom</span><span class="id"> dsdp</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 85,</span><span class="id"> n</span><span class="id"> constr</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 0,</span><span class="id"> x</span><span class="id"> name,</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="id">P</span><span class="id"> custom</span><span class="id"> dsdp</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 85,</span><span class="id"> right</span><span class="id"> associativity</span>).<br/>
+<br/>
+<span class="vernacular">Notation</span> <span class="id">&quot;'Recv⟨' n '⟩' 'fun' x '=&gt;' P&quot;</span><span class="id"> :=</span> (<span class="id">PRecv</span><span class="id"> n</span> (<span class="gallina-kwd">fun</span><span class="id"> x</span><span class="id"> =&gt;</span><span class="id"> P</span>))<br/>
+&nbsp;&nbsp;(<span class="gallina-kwd">in</span><span class="id"> custom</span><span class="id"> dsdp</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 85,</span><span class="id"> n</span><span class="id"> constr</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 0,</span><span class="id"> x</span><span class="id"> name,</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="id">P</span><span class="id"> custom</span><span class="id"> dsdp</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 85,</span><span class="id"> right</span><span class="id"> associativity</span>).<br/>
+<br/>
+<h1> Recv_dec and Recv_enc - specialized receive operations </h1>
+<br/>
+<br/>
+<span class="vernacular">Definition</span><span class="id"> PRecv_dec</span><span class="id"> {data</span><span class="id"> :</span><span class="id"> Type}</span> (<span class="id">dec</span><span class="id"> :</span><span class="id"> data</span><span class="id"> -&gt;</span><span class="id"> data</span><span class="id"> -&gt;</span><span class="id"> option</span><span class="id"> data</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">n</span><span class="id"> :</span><span class="id"> nat</span>) (<span class="id">dk</span><span class="id"> :</span><span class="id"> data</span>) (<span class="id">f</span><span class="id"> :</span><span class="id"> data</span><span class="id"> -&gt;</span><span class="id"> proc</span><span class="id"> data</span>)<span class="id"> :</span><span class="id"> proc</span><span class="id"> data</span><span class="id"> :=</span><br/>
+&nbsp;&nbsp;<span class="id">PRecv</span><span class="id"> n</span> (<span class="gallina-kwd">fun</span><span class="id"> x</span><span class="id"> =&gt;</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">match</span><span class="id"> dec</span><span class="id"> dk</span><span class="id"> x</span><span class="gallina-kwd"> with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">|</span><span class="id"> Some</span><span class="id"> v</span><span class="id"> =&gt;</span><span class="id"> f</span><span class="id"> v</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">|</span><span class="id"> None</span><span class="id"> =&gt;</span><span class="id"> PFail</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">end</span>).<br/>
+<br/>
+<span class="vernacular">Definition</span><span class="id"> PRecv_enc</span><span class="id"> {data</span><span class="id"> :</span><span class="id"> Type}</span> (<span class="id">n</span><span class="id"> :</span><span class="id"> nat</span>) (<span class="id">f</span><span class="id"> :</span><span class="id"> data</span><span class="id"> -&gt;</span><span class="id"> proc</span><span class="id"> data</span>)<span class="id"> :</span><span class="id"> proc</span><span class="id"> data</span><span class="id"> :=</span><br/>
+&nbsp;&nbsp;<span class="id">PRecv</span><span class="id"> n</span><span class="id"> f</span>.  <br/>
+<br/>
+<span class="vernacular">Notation</span> <span class="id">&quot;'Recv_dec&lt;' n '&gt;' dec dk 'λ' x · P&quot;</span><span class="id"> :=</span> (<span class="id">PRecv_dec</span><span class="id"> dec</span><span class="id"> n</span><span class="id"> dk</span> (<span class="gallina-kwd">fun</span><span class="id"> x</span><span class="id"> =&gt;</span><span class="id"> P</span>))<br/>
+&nbsp;&nbsp;(<span class="gallina-kwd">in</span><span class="id"> custom</span><span class="id"> dsdp</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 85,</span><span class="id"> n</span><span class="id"> constr</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 0,</span> <br/>
+&nbsp;&nbsp;&nbsp;<span class="id">dec</span><span class="id"> constr</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 0,</span><span class="id"> dk</span><span class="id"> constr</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 0,</span><span class="id"> x</span><span class="id"> name,</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="id">P</span><span class="id"> custom</span><span class="id"> dsdp</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 85,</span><span class="id"> right</span><span class="id"> associativity</span>).<br/>
+<br/>
+<span class="vernacular">Notation</span> <span class="id">&quot;'Recv_dec⟨' n '⟩' dec dk 'λ' x · P&quot;</span><span class="id"> :=</span> (<span class="id">PRecv_dec</span><span class="id"> dec</span><span class="id"> n</span><span class="id"> dk</span> (<span class="gallina-kwd">fun</span><span class="id"> x</span><span class="id"> =&gt;</span><span class="id"> P</span>))<br/>
+&nbsp;&nbsp;(<span class="gallina-kwd">in</span><span class="id"> custom</span><span class="id"> dsdp</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 85,</span><span class="id"> n</span><span class="id"> constr</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 0,</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="id">dec</span><span class="id"> constr</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 0,</span><span class="id"> dk</span><span class="id"> constr</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 0,</span><span class="id"> x</span><span class="id"> name,</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="id">P</span><span class="id"> custom</span><span class="id"> dsdp</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 85,</span><span class="id"> right</span><span class="id"> associativity</span>).<br/>
+<br/>
+<span class="vernacular">Notation</span> <span class="id">&quot;'Recv_enc&lt;' n '&gt;' 'λ' x · P&quot;</span><span class="id"> :=</span> (<span class="id">PRecv_enc</span><span class="id"> n</span> (<span class="gallina-kwd">fun</span><span class="id"> x</span><span class="id"> =&gt;</span><span class="id"> P</span>))<br/>
+&nbsp;&nbsp;(<span class="gallina-kwd">in</span><span class="id"> custom</span><span class="id"> dsdp</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 85,</span><span class="id"> n</span><span class="id"> constr</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 0,</span><span class="id"> x</span><span class="id"> name,</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="id">P</span><span class="id"> custom</span><span class="id"> dsdp</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 85,</span><span class="id"> right</span><span class="id"> associativity</span>).<br/>
+<br/>
+<span class="vernacular">Notation</span> <span class="id">&quot;'Recv_enc⟨' n '⟩' 'λ' x · P&quot;</span><span class="id"> :=</span> (<span class="id">PRecv_enc</span><span class="id"> n</span> (<span class="gallina-kwd">fun</span><span class="id"> x</span><span class="id"> =&gt;</span><span class="id"> P</span>))<br/>
+&nbsp;&nbsp;(<span class="gallina-kwd">in</span><span class="id"> custom</span><span class="id"> dsdp</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 85,</span><span class="id"> n</span><span class="id"> constr</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 0,</span><span class="id"> x</span><span class="id"> name,</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="id">P</span><span class="id"> custom</span><span class="id"> dsdp</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 85,</span><span class="id"> right</span><span class="id"> associativity</span>).<br/>
+<br/>
+<h1> Multi-variable Init </h1>
+<br/>
+<span class="vernacular">Notation</span> <span class="id">&quot;'Init' x '　' .. '　' y · P&quot;</span><span class="id"> :=</span> (<span class="id">PInit</span><span class="id"> x</span> .. (<span class="id">PInit</span><span class="id"> y</span><span class="id"> P</span>) ..)<br/>
+&nbsp;&nbsp;(<span class="gallina-kwd">in</span><span class="id"> custom</span><span class="id"> dsdp</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 85,</span> <br/>
+&nbsp;&nbsp;&nbsp;<span class="id">x</span><span class="id"> constr</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 0,</span><span class="id"> y</span><span class="id"> constr</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 0,</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="id">P</span><span class="id"> custom</span><span class="id"> dsdp</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 85,</span><span class="id"> right</span><span class="id"> associativity</span>).<br/>
+<span class="vernacular">Notation</span> <span class="id">&quot;'Init' x '　' .. '　' y ; P&quot;</span><span class="id"> :=</span> (<span class="id">PInit</span><span class="id"> x</span> .. (<span class="id">PInit</span><span class="id"> y</span><span class="id"> P</span>) ..)<br/>
+&nbsp;&nbsp;(<span class="gallina-kwd">in</span><span class="id"> custom</span><span class="id"> dsdp</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 85,</span> <br/>
+&nbsp;&nbsp;&nbsp;<span class="id">x</span><span class="id"> constr</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 0,</span><span class="id"> y</span><span class="id"> constr</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 0,</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="id">P</span><span class="id"> custom</span><span class="id"> dsdp</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 85,</span><span class="id"> right</span><span class="id"> associativity</span>).<br/>
+<br/>
+<span class="vernacular">Notation</span> <span class="id">&quot;'Init' '(' x ',' .. ',' y ')' · P&quot;</span><span class="id"> :=</span> (<span class="id">PInit</span><span class="id"> x</span> .. (<span class="id">PInit</span><span class="id"> y</span><span class="id"> P</span>) ..)<br/>
+&nbsp;&nbsp;(<span class="gallina-kwd">in</span><span class="id"> custom</span><span class="id"> dsdp</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 85,</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="id">x</span><span class="id"> constr</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 0,</span><span class="id"> y</span><span class="id"> constr</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 0,</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="id">P</span><span class="id"> custom</span><span class="id"> dsdp</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 85,</span><span class="id"> right</span><span class="id"> associativity</span>).<br/>
+<span class="vernacular">Notation</span> <span class="id">&quot;'Init' '(' x ',' .. ',' y ')' ; P&quot;</span><span class="id"> :=</span> (<span class="id">PInit</span><span class="id"> x</span> .. (<span class="id">PInit</span><span class="id"> y</span><span class="id"> P</span>) ..)<br/>
+&nbsp;&nbsp;(<span class="gallina-kwd">in</span><span class="id"> custom</span><span class="id"> dsdp</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 85,</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="id">x</span><span class="id"> constr</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 0,</span><span class="id"> y</span><span class="id"> constr</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 0,</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="id">P</span><span class="id"> custom</span><span class="id"> dsdp</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 85,</span><span class="id"> right</span><span class="id"> associativity</span>).<br/>
+<br/>
+<br/>
+<h1> Variable reference </h1>
+<br/>
+<span class="vernacular">Notation</span> <span class="id">&quot;x&quot;</span><span class="id"> :=</span><span class="id"> x</span> (<span class="gallina-kwd">in</span><span class="id"> custom</span><span class="id"> dsdp</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 0,</span><span class="id"> x</span><span class="id"> ident</span>).<br/>
+<br/>
+<pre class="ssrdoc">
+(** * ASCII Fallback Notations (semicolon instead of middle dot)
+</pre>
+<br/>
+<span class="vernacular">Notation</span> <span class="id">&quot;'Init' x ; P&quot;</span><span class="id"> :=</span> (<span class="id">PInit</span><span class="id"> x</span><span class="id"> P</span>)<br/>
+&nbsp;&nbsp;(<span class="gallina-kwd">in</span><span class="id"> custom</span><span class="id"> dsdp</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 85,</span><span class="id"> x</span><span class="id"> constr</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 0,</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="id">P</span><span class="id"> custom</span><span class="id"> dsdp</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 85,</span><span class="id"> right</span><span class="id"> associativity</span>).<br/>
+<br/>
+<span class="vernacular">Notation</span> <span class="id">&quot;'Send&lt;' n '&gt;' v ; P&quot;</span><span class="id"> :=</span> (<span class="id">PSend</span><span class="id"> n</span><span class="id"> v</span><span class="id"> P</span>)<br/>
+&nbsp;&nbsp;(<span class="gallina-kwd">in</span><span class="id"> custom</span><span class="id"> dsdp</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 85,</span><span class="id"> n</span><span class="id"> constr</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 0,</span><span class="id"> v</span><span class="id"> constr</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 0,</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="id">P</span><span class="id"> custom</span><span class="id"> dsdp</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 85,</span><span class="id"> right</span><span class="id"> associativity</span>).<br/>
+<br/>
+<span class="vernacular">Notation</span> <span class="id">&quot;'Send⟨' n '⟩' v ; P&quot;</span><span class="id"> :=</span> (<span class="id">PSend</span><span class="id"> n</span><span class="id"> v</span><span class="id"> P</span>)<br/>
+&nbsp;&nbsp;(<span class="gallina-kwd">in</span><span class="id"> custom</span><span class="id"> dsdp</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 85,</span><span class="id"> n</span><span class="id"> constr</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 0,</span><span class="id"> v</span><span class="id"> constr</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 0,</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="id">P</span><span class="id"> custom</span><span class="id"> dsdp</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 85,</span><span class="id"> right</span><span class="id"> associativity</span>).<br/>
+<br/>
+<span class="vernacular">Notation</span> <span class="id">&quot;'Recv&lt;' n '&gt;' 'λ' x ; P&quot;</span><span class="id"> :=</span> (<span class="id">PRecv</span><span class="id"> n</span> (<span class="gallina-kwd">fun</span><span class="id"> x</span><span class="id"> =&gt;</span><span class="id"> P</span>))<br/>
+&nbsp;&nbsp;(<span class="gallina-kwd">in</span><span class="id"> custom</span><span class="id"> dsdp</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 85,</span><span class="id"> n</span><span class="id"> constr</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 0,</span><span class="id"> x</span><span class="id"> name,</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="id">P</span><span class="id"> custom</span><span class="id"> dsdp</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 85,</span><span class="id"> right</span><span class="id"> associativity</span>).<br/>
+<br/>
+<span class="vernacular">Notation</span> <span class="id">&quot;'Recv⟨' n '⟩' 'λ' x ; P&quot;</span><span class="id"> :=</span> (<span class="id">PRecv</span><span class="id"> n</span> (<span class="gallina-kwd">fun</span><span class="id"> x</span><span class="id"> =&gt;</span><span class="id"> P</span>))<br/>
+&nbsp;&nbsp;(<span class="gallina-kwd">in</span><span class="id"> custom</span><span class="id"> dsdp</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 85,</span><span class="id"> n</span><span class="id"> constr</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 0,</span><span class="id"> x</span><span class="id"> name,</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="id">P</span><span class="id"> custom</span><span class="id"> dsdp</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 85,</span><span class="id"> right</span><span class="id"> associativity</span>).<br/>
+<br/>
+<span class="vernacular">Notation</span> <span class="id">&quot;'Recv_dec&lt;' n '&gt;' dec dk 'λ' x ; P&quot;</span><span class="id"> :=</span> (<span class="id">PRecv_dec</span><span class="id"> dec</span><span class="id"> n</span><span class="id"> dk</span> (<span class="gallina-kwd">fun</span><span class="id"> x</span><span class="id"> =&gt;</span><span class="id"> P</span>))<br/>
+&nbsp;&nbsp;(<span class="gallina-kwd">in</span><span class="id"> custom</span><span class="id"> dsdp</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 85,</span><span class="id"> n</span><span class="id"> constr</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 0,</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="id">dec</span><span class="id"> constr</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 0,</span><span class="id"> dk</span><span class="id"> constr</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 0,</span><span class="id"> x</span><span class="id"> name,</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="id">P</span><span class="id"> custom</span><span class="id"> dsdp</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 85,</span><span class="id"> right</span><span class="id"> associativity</span>).<br/>
+<br/>
+<span class="vernacular">Notation</span> <span class="id">&quot;'Recv_enc&lt;' n '&gt;' 'λ' x ; P&quot;</span><span class="id"> :=</span> (<span class="id">PRecv_enc</span><span class="id"> n</span> (<span class="gallina-kwd">fun</span><span class="id"> x</span><span class="id"> =&gt;</span><span class="id"> P</span>))<br/>
+&nbsp;&nbsp;(<span class="gallina-kwd">in</span><span class="id"> custom</span><span class="id"> dsdp</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 85,</span><span class="id"> n</span><span class="id"> constr</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 0,</span><span class="id"> x</span><span class="id"> name,</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="id">P</span><span class="id"> custom</span><span class="id"> dsdp</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 85,</span><span class="id"> right</span><span class="id"> associativity</span>).<br/>
+<br/>
+<br/>
+<pre class="ssrdoc">
+(** * TESTS
+</pre>
+<br/>
+<span class="vernacular">Section</span><span class="id"> tests</span>.<br/>
+<br/>
+<span class="vernacular">Variable</span><span class="id"> data</span><span class="id"> :</span><span class="gallina-kwd"> Type</span>.<br/>
+<span class="vernacular">Variables</span> (<span class="id">v1</span><span class="id"> v2</span><span class="id"> v3</span><span class="id"> :</span><span class="id"> data</span>).<br/>
+<br/>
+<div class="doc">Test 1: Simple Finish </div>
+<span class="vernacular">Definition</span><span class="id"> test_finish</span><span class="id"> :</span><span class="id"> proc</span><span class="id"> data</span><span class="id"> :=</span><span class="id"> {|</span><span class="id"> Finish</span><span class="id"> |}</span>.<br/>
+<br/>
+<div class="doc">Test 2: Simple Ret </div>
+<span class="vernacular">Definition</span><span class="id"> test_ret</span><span class="id"> :</span><span class="id"> proc</span><span class="id"> data</span><span class="id"> :=</span><span class="id"> {|</span><span class="id"> Ret</span><span class="id"> v1</span><span class="id"> |}</span>.<br/>
+<br/>
+<div class="doc">Test 3: Single Init with · sequencing </div>
+<span class="vernacular">Definition</span><span class="id"> test_init_one</span><span class="id"> :</span><span class="id"> proc</span><span class="id"> data</span><span class="id"> :=</span><span class="id"> {|</span><span class="id"> Init</span><span class="id"> v1</span><span class="id"> ·</span><span class="id"> Finish</span><span class="id"> |}</span>.<br/>
+<br/>
+<div class="doc">Test 4: Multiple Init - chained with · </div>
+<span class="vernacular">Definition</span><span class="id"> test_init_chained</span><span class="id"> :</span><span class="id"> proc</span><span class="id"> data</span><span class="id"> :=</span> <br/>
+&nbsp;&nbsp;<span class="id">{|</span><span class="id"> Init</span><span class="id"> v1</span><span class="id"> ·</span><span class="id"> Init</span><span class="id"> v2</span><span class="id"> ·</span><span class="id"> Init</span><span class="id"> v3</span><span class="id"> ·</span><span class="id"> Finish</span><span class="id"> |}</span>.<br/>
+<br/>
+<div class="doc">Test 5: Multiple Init using 　 (full-width space U+3000) </div>
+<span class="vernacular">Definition</span><span class="id"> test_init_space</span><span class="id"> :</span><span class="id"> proc</span><span class="id"> data</span><span class="id"> :=</span><span class="id"> {|</span><span class="id"> Init</span><span class="id"> v1</span><span class="id"> 　</span><span class="id"> v2</span><span class="id"> 　</span><span class="id"> v3</span><span class="id"> ·</span><span class="id"> Finish</span><span class="id"> |}</span>.<br/>
+<br/>
+<div class="doc">Test 6: Multiple Init using tuple syntax Init (x, y, z) </div>
+<span class="vernacular">Definition</span><span class="id"> test_init_tuple</span><span class="id"> :</span><span class="id"> proc</span><span class="id"> data</span><span class="id"> :=</span><span class="id"> {|</span><span class="id"> Init</span> (<span class="id">v1,</span><span class="id"> v2,</span><span class="id"> v3</span>)<span class="id"> ·</span><span class="id"> Finish</span><span class="id"> |}</span>.<br/>
+<br/>
+<div class="doc">Test 7: Send with · </div>
+<span class="vernacular">Definition</span><span class="id"> test_send</span><span class="id"> :</span><span class="id"> proc</span><span class="id"> data</span><span class="id"> :=</span><span class="id"> {|</span><span class="id"> Init</span><span class="id"> v1</span><span class="id"> ·</span><span class="id"> Send&lt;0&gt;</span><span class="id"> v1</span><span class="id"> ·</span><span class="id"> Finish</span><span class="id"> |}</span>.<br/>
+<br/>
+<div class="doc">Test 8: Recv with λ binder </div>
+<span class="vernacular">Definition</span><span class="id"> test_recv_lambda</span><span class="id"> :</span><span class="id"> proc</span><span class="id"> data</span><span class="id"> :=</span><span class="id"> {|</span><span class="id"> Recv&lt;0&gt;</span><span class="id"> λ</span><span class="id"> x</span><span class="id"> ·</span><span class="id"> Ret</span><span class="id"> x</span><span class="id"> |}</span>.<br/>
+<br/>
+<div class="doc">Test 9: Recv with fun binder (alternative) </div>
+<span class="vernacular">Definition</span><span class="id"> test_recv_fun</span><span class="id"> :</span><span class="id"> proc</span><span class="id"> data</span><span class="id"> :=</span><span class="id"> {|</span><span class="id"> Recv&lt;0&gt;</span><span class="gallina-kwd"> fun</span><span class="id"> x</span><span class="id"> =&gt;</span><span class="id"> Ret</span><span class="id"> x</span><span class="id"> |}</span>.<br/>
+<br/>
+<div class="doc">Test 10: Combining Init, Send, Recv </div>
+<span class="vernacular">Definition</span><span class="id"> test_combined</span><span class="id"> :</span><span class="id"> proc</span><span class="id"> data</span><span class="id"> :=</span> <br/>
+&nbsp;&nbsp;<span class="id">{|</span><span class="id"> Init</span><span class="id"> v1</span><span class="id"> ·</span><span class="id"> Send&lt;1&gt;</span><span class="id"> v1</span><span class="id"> ·</span><span class="id"> Recv&lt;1&gt;</span><span class="id"> λ</span><span class="id"> x</span><span class="id"> ·</span><span class="id"> Ret</span><span class="id"> x</span><span class="id"> |}</span>.<br/>
+<br/>
+<div class="doc">Test 11: Using ASCII delimiter </div>
+<span class="vernacular">Definition</span><span class="id"> test_ascii</span><span class="id"> :</span><span class="id"> proc</span><span class="id"> data</span><span class="id"> :=</span><span class="id"> PROC</span><span class="id"> Init</span><span class="id"> v1</span><span class="id"> ·</span><span class="id"> Finish</span><span class="id"> END</span>.<br/>
+<br/>
+<div class="doc">Verify the desugaring is correct </div>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> test_init_space_eq</span><span class="id"> :</span><span class="id"> test_init_space</span><span class="id"> =</span><span class="id"> PInit</span><span class="id"> v1</span> (<span class="id">PInit</span><span class="id"> v2</span> (<span class="id">PInit</span><span class="id"> v3</span><span class="id"> PFinish</span>)).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id"> reflexivity</span>. Qed.</div></details>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> test_init_tuple_eq</span><span class="id"> :</span><span class="id"> test_init_tuple</span><span class="id"> =</span><span class="id"> test_init_space</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id"> reflexivity</span>. Qed.</div></details>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> test_init_chained_eq</span><span class="id"> :</span><span class="id"> test_init_chained</span><span class="id"> =</span><span class="id"> test_init_space</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id"> reflexivity</span>. Qed.</div></details>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> test_recv_lambda_eq</span><span class="id"> :</span><span class="id"> test_recv_lambda</span><span class="id"> =</span><span class="id"> PRecv</span><span class="id"> 0</span> (<span class="gallina-kwd">fun</span><span class="id"> x</span><span class="id"> =&gt;</span><span class="id"> PRet</span><span class="id"> x</span>).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id"> reflexivity</span>. Qed.</div></details>
+<br/>
+<span class="vernacular">End</span><span class="id"> tests</span>.<br/>
+<br/>
+<pre class="ssrdoc">
+(** * Tests for Recv_dec and Recv_enc
+</pre>
+<br/>
+<span class="vernacular">Section</span><span class="id"> recv_dec_enc_tests</span>.<br/>
+<br/>
+<span class="vernacular">Variable</span><span class="id"> data</span><span class="id"> :</span><span class="gallina-kwd"> Type</span>.<br/>
+<span class="vernacular">Variable</span><span class="id"> decrypt</span><span class="id"> :</span><span class="id"> data</span><span class="id"> -&gt;</span><span class="id"> data</span><span class="id"> -&gt;</span><span class="id"> option</span><span class="id"> data</span>.<br/>
+<span class="vernacular">Variables</span> (<span class="id">v1</span><span class="id"> dk</span><span class="id"> :</span><span class="id"> data</span>).<br/>
+<br/>
+<div class="doc">Test 12: Recv_dec - receive and decrypt </div>
+<span class="vernacular">Definition</span><span class="id"> test_recv_dec</span><span class="id"> :</span><span class="id"> proc</span><span class="id"> data</span><span class="id"> :=</span> <br/>
+&nbsp;&nbsp;<span class="id">{|</span><span class="id"> Recv_dec&lt;0&gt;</span><span class="id"> decrypt</span><span class="id"> dk</span><span class="id"> λ</span><span class="id"> x</span><span class="id"> ·</span><span class="id"> Ret</span><span class="id"> x</span><span class="id"> |}</span>.<br/>
+<br/>
+<div class="doc">Test 13: Recv_enc - receive encrypted </div>
+<span class="vernacular">Definition</span><span class="id"> test_recv_enc</span><span class="id"> :</span><span class="id"> proc</span><span class="id"> data</span><span class="id"> :=</span> <br/>
+&nbsp;&nbsp;<span class="id">{|</span><span class="id"> Recv_enc&lt;0&gt;</span><span class="id"> λ</span><span class="id"> x</span><span class="id"> ·</span><span class="id"> Ret</span><span class="id"> x</span><span class="id"> |}</span>.<br/>
+<br/>
+<div class="doc">Test 14: Combined with Init and Send </div>
+<span class="vernacular">Definition</span><span class="id"> test_dsdp_like</span><span class="id"> :</span><span class="id"> proc</span><span class="id"> data</span><span class="id"> :=</span><br/>
+&nbsp;&nbsp;<span class="id">{|</span><span class="id"> Init</span> (<span class="id">dk,</span><span class="id"> v1</span>)<span class="id"> ·</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">Recv_enc&lt;1&gt;</span><span class="id"> λ</span><span class="id"> c</span><span class="id"> ·</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">Send&lt;1&gt;</span><span class="id"> c</span><span class="id"> ·</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">Recv_dec&lt;2&gt;</span><span class="id"> decrypt</span><span class="id"> dk</span><span class="id"> λ</span><span class="id"> result</span><span class="id"> ·</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">Ret</span><span class="id"> result</span><span class="id"> |}</span>.<br/>
+<br/>
+<div class="doc">Verify the desugaring is correct </div>
+<span class="vernacular">Lemma</span><span class="id"> test_recv_dec_eq</span><span class="id"> :</span><span class="id"> test_recv_dec</span><span class="id"> =</span> <br/>
+&nbsp;&nbsp;<span class="id">PRecv</span><span class="id"> 0</span> (<span class="gallina-kwd">fun</span><span class="id"> x</span><span class="id"> =&gt;</span><span class="gallina-kwd"> match</span><span class="id"> decrypt</span><span class="id"> dk</span><span class="id"> x</span><span class="gallina-kwd"> with</span><span class="id"> Some</span><span class="id"> v</span><span class="id"> =&gt;</span><span class="id"> PRet</span><span class="id"> v</span><span class="id"> |</span><span class="id"> None</span><span class="id"> =&gt;</span><span class="id"> PFail</span><span class="gallina-kwd"> end</span>).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id"> reflexivity</span>. Qed.</div></details>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> test_recv_enc_eq</span><span class="id"> :</span><span class="id"> test_recv_enc</span><span class="id"> =</span><span class="id"> PRecv</span><span class="id"> 0</span> (<span class="gallina-kwd">fun</span><span class="id"> x</span><span class="id"> =&gt;</span><span class="id"> PRet</span><span class="id"> x</span>).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id"> reflexivity</span>. Qed.</div></details>
+<br/>
+<span class="vernacular">End</span><span class="id"> recv_dec_enc_tests</span>.<br/>
+<br/>
+<pre class="ssrdoc">
+(** * Tests for data wrapper shorthand notations
+</pre>
+<br/>
+<span class="vernacular">Section</span><span class="id"> wrapper_tests</span>.<br/>
+<br/>
+<div class="doc">Test data wrapper shorthand notations: #x -&gt; (k x), *'x -&gt; (d x), $x -&gt; (e x)
+    
+    In real DSDP, these are defined as:
+      Definition d x : data := inl (inl x).
+      Definition e x : data := inl (inr x).  
+      Definition k x : data := inr x.
+    
+    For this demo, we use identity wrappers </div>
+<br/>
+<span class="vernacular">Variable</span><span class="id"> T</span><span class="id"> :</span><span class="gallina-kwd"> Type</span>.<br/>
+<br/>
+<span class="vernacular">Definition</span><span class="id"> k_wrap</span> (<span class="id">x</span><span class="id"> :</span><span class="id"> T</span>)<span class="id"> :</span><span class="id"> T</span><span class="id"> :=</span><span class="id"> x</span>.<br/>
+<span class="vernacular">Definition</span><span class="id"> d_wrap</span> (<span class="id">x</span><span class="id"> :</span><span class="id"> T</span>)<span class="id"> :</span><span class="id"> T</span><span class="id"> :=</span><span class="id"> x</span>.<br/>
+<span class="vernacular">Definition</span><span class="id"> e_wrap</span> (<span class="id">x</span><span class="id"> :</span><span class="id"> T</span>)<span class="id"> :</span><span class="id"> T</span><span class="id"> :=</span><span class="id"> x</span>.<br/>
+<br/>
+<span class="vernacular">Local</span><span class="vernacular"> Notation</span> <span class="id">&quot;# x&quot;</span><span class="id"> :=</span> (<span class="id">k_wrap</span><span class="id"> x</span>) (<span class="gallina-kwd">at</span><span class="id"> level</span><span class="id"> 0,</span><span class="id"> x</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 0</span>).<br/>
+<span class="vernacular">Local</span><span class="vernacular"> Notation</span> <span class="id">&quot;&amp; x&quot;</span><span class="id"> :=</span> (<span class="id">d_wrap</span><span class="id"> x</span>) (<span class="gallina-kwd">at</span><span class="id"> level</span><span class="id"> 0,</span><span class="id"> x</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 0</span>).  <br/>
+<span class="vernacular">Local</span><span class="vernacular"> Notation</span> <span class="id">&quot;$ x&quot;</span><span class="id"> :=</span> (<span class="id">e_wrap</span><span class="id"> x</span>) (<span class="gallina-kwd">at</span><span class="id"> level</span><span class="id"> 0,</span><span class="id"> x</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 0</span>).<br/>
+<br/>
+<span class="vernacular">Variables</span> (<span class="id">dk</span><span class="id"> v1</span><span class="id"> v2</span><span class="id"> a</span><span class="id"> :</span><span class="id"> T</span>).<br/>
+<br/>
+<div class="doc">Test 15: '#x' for key wrapper </div>
+<span class="vernacular">Definition</span><span class="id"> test_key_wrapper</span><span class="id"> :</span><span class="id"> proc</span><span class="id"> T</span><span class="id"> :=</span><span class="id"> {|</span><span class="id"> Init</span><span class="id"> #dk</span><span class="id"> ·</span><span class="id"> Finish</span><span class="id"> |}</span>.<br/>
+<br/>
+<div class="doc">Test 16: '&amp;x' for data wrapper </div>
+<span class="vernacular">Definition</span><span class="id"> test_data_wrapper</span><span class="id"> :</span><span class="id"> proc</span><span class="id"> T</span><span class="id"> :=</span><span class="id"> {|</span><span class="id"> Init</span><span class="id"> &amp;v1</span><span class="id"> ·</span><span class="id"> Finish</span><span class="id"> |}</span>.<br/>
+<br/>
+<div class="doc">Test 17: '$x' for encrypted wrapper </div>
+<span class="vernacular">Definition</span><span class="id"> test_enc_wrapper</span><span class="id"> :</span><span class="id"> proc</span><span class="id"> T</span><span class="id"> :=</span><span class="id"> {|</span><span class="id"> Init</span><span class="id"> $a</span><span class="id"> ·</span><span class="id"> Finish</span><span class="id"> |}</span>.<br/>
+<br/>
+<div class="doc">Test 18: Combined wrappers with tuple-style Init </div>
+<span class="vernacular">Definition</span><span class="id"> test_wrappers_combined</span><span class="id"> :</span><span class="id"> proc</span><span class="id"> T</span><span class="id"> :=</span><br/>
+&nbsp;&nbsp;<span class="id">{|</span><span class="id"> Init</span> (<span class="id">#dk,</span><span class="id"> &amp;v1,</span><span class="id"> &amp;v2</span>)<span class="id"> ·</span><span class="id"> Send&lt;0&gt;</span><span class="id"> $a</span><span class="id"> ·</span><span class="id"> Finish</span><span class="id"> |}</span>.<br/>
+<br/>
+<div class="doc">Test 19: Combined wrappers with full-width space Init </div>
+<span class="vernacular">Definition</span><span class="id"> test_wrappers_fullwidth</span><span class="id"> :</span><span class="id"> proc</span><span class="id"> T</span><span class="id"> :=</span><br/>
+&nbsp;&nbsp;<span class="id">{|</span><span class="id"> Init</span><span class="id"> #dk　&amp;v1　&amp;v2</span><span class="id"> ·</span><span class="id"> Send&lt;0&gt;</span><span class="id"> $a</span><span class="id"> ·</span><span class="id"> Finish</span><span class="id"> |}</span>.<br/>
+<br/>
+<div class="doc">Verify desugaring </div>
+<span class="vernacular">Lemma</span><span class="id"> test_key_wrapper_eq</span><span class="id"> :</span><span class="id"> test_key_wrapper</span><span class="id"> =</span><span class="id"> PInit</span> (<span class="id">k_wrap</span><span class="id"> dk</span>)<span class="id"> PFinish</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id"> reflexivity</span>. Qed.</div></details>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> test_data_wrapper_eq</span><span class="id"> :</span><span class="id"> test_data_wrapper</span><span class="id"> =</span><span class="id"> PInit</span> (<span class="id">d_wrap</span><span class="id"> v1</span>)<span class="id"> PFinish</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id"> reflexivity</span>. Qed.</div></details>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> test_enc_wrapper_eq</span><span class="id"> :</span><span class="id"> test_enc_wrapper</span><span class="id"> =</span><span class="id"> PInit</span> (<span class="id">e_wrap</span><span class="id"> a</span>)<span class="id"> PFinish</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id"> reflexivity</span>. Qed.</div></details>
+<br/>
+<span class="vernacular">End</span><span class="id"> wrapper_tests</span>.<br/>
+<br/>
+<pre class="ssrdoc">
+(** * Example: Simple Two-Party Protocol
+</pre>
+<br/>
+<span class="vernacular">Section</span><span class="id"> two_party_example</span>.<br/>
+<br/>
+<span class="vernacular">Variable</span><span class="id"> msg</span><span class="id"> :</span><span class="gallina-kwd"> Type</span>.<br/>
+<span class="vernacular">Variable</span><span class="id"> secret</span><span class="id"> :</span><span class="id"> msg</span>.<br/>
+<br/>
+<span class="vernacular">Definition</span><span class="id"> partyA</span><span class="id"> :</span><span class="id"> proc</span><span class="id"> msg</span><span class="id"> :=</span><br/>
+&nbsp;&nbsp;<span class="id">{|</span><span class="id"> Init</span><span class="id"> secret</span><span class="id"> ·</span><span class="id"> Send&lt;1&gt;</span><span class="id"> secret</span><span class="id"> ·</span><span class="id"> Recv&lt;1&gt;</span><span class="id"> λ</span><span class="id"> response</span><span class="id"> ·</span><span class="id"> Ret</span><span class="id"> response</span><span class="id"> |}</span>.<br/>
+<br/>
+<span class="vernacular">Definition</span><span class="id"> partyB</span><span class="id"> :</span><span class="id"> proc</span><span class="id"> msg</span><span class="id"> :=</span><br/>
+&nbsp;&nbsp;<span class="id">{|</span><span class="id"> Recv&lt;0&gt;</span><span class="id"> λ</span><span class="id"> x</span><span class="id"> ·</span><span class="id"> Send&lt;0&gt;</span><span class="id"> x</span><span class="id"> ·</span><span class="id"> Finish</span><span class="id"> |}</span>.<br/>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> partyA_structure</span><span class="id"> :</span> <br/>
+&nbsp;&nbsp;<span class="id">partyA</span><span class="id"> =</span><span class="id"> PInit</span><span class="id"> secret</span> (<span class="id">PSend</span><span class="id"> 1</span><span class="id"> secret</span> (<span class="id">PRecv</span><span class="id"> 1</span> (<span class="gallina-kwd">fun</span><span class="id"> response</span><span class="id"> =&gt;</span><span class="id"> PRet</span><span class="id"> response</span>))).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id"> reflexivity</span>. Qed.</div></details>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> partyB_structure</span><span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="id">partyB</span><span class="id"> =</span><span class="id"> PRecv</span><span class="id"> 0</span> (<span class="gallina-kwd">fun</span><span class="id"> x</span><span class="id"> =&gt;</span><span class="id"> PSend</span><span class="id"> 0</span><span class="id"> x</span><span class="id"> PFinish</span>).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id"> reflexivity</span>. Qed.</div></details>
+<br/>
+<span class="vernacular">End</span><span class="id"> two_party_example</span>.<br/>
+<br/>
+<pre class="ssrdoc">
+(** * Comparison: Unicode vs ASCII Syntax
+</pre>
+<br/>
+<span class="vernacular">Section</span><span class="id"> unicode_vs_ascii</span>.<br/>
+<br/>
+<span class="vernacular">Variable</span><span class="id"> T</span><span class="id"> :</span><span class="gallina-kwd"> Type</span>.<br/>
+<span class="vernacular">Variables</span> (<span class="id">dk</span><span class="id"> v1</span><span class="id"> v2</span><span class="id"> v3</span><span class="id"> a</span><span class="id"> b</span><span class="id"> :</span><span class="id"> T</span>).<br/>
+<br/>
+<span class="vernacular">Definition</span><span class="id"> kw</span> (<span class="id">x</span><span class="id"> :</span><span class="id"> T</span>)<span class="id"> :</span><span class="id"> T</span><span class="id"> :=</span><span class="id"> x</span>.<br/>
+<span class="vernacular">Definition</span><span class="id"> dw</span> (<span class="id">x</span><span class="id"> :</span><span class="id"> T</span>)<span class="id"> :</span><span class="id"> T</span><span class="id"> :=</span><span class="id"> x</span>.<br/>
+<span class="vernacular">Definition</span><span class="id"> ew</span> (<span class="id">x</span><span class="id"> :</span><span class="id"> T</span>)<span class="id"> :</span><span class="id"> T</span><span class="id"> :=</span><span class="id"> x</span>.<br/>
+<br/>
+<span class="vernacular">Local</span><span class="vernacular"> Notation</span> <span class="id">&quot;# x&quot;</span><span class="id"> :=</span> (<span class="id">kw</span><span class="id"> x</span>) (<span class="gallina-kwd">at</span><span class="id"> level</span><span class="id"> 0,</span><span class="id"> x</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 0</span>).<br/>
+<span class="vernacular">Local</span><span class="vernacular"> Notation</span> <span class="id">&quot;&amp; x&quot;</span><span class="id"> :=</span> (<span class="id">dw</span><span class="id"> x</span>) (<span class="gallina-kwd">at</span><span class="id"> level</span><span class="id"> 0,</span><span class="id"> x</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 0</span>).<br/>
+<span class="vernacular">Local</span><span class="vernacular"> Notation</span> <span class="id">&quot;$ x&quot;</span><span class="id"> :=</span> (<span class="id">ew</span><span class="id"> x</span>) (<span class="gallina-kwd">at</span><span class="id"> level</span><span class="id"> 0,</span><span class="id"> x</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 0</span>).<br/>
+<br/>
+<br/>
+<span class="vernacular">Definition</span><span class="id"> example_unicode</span><span class="id"> :</span><span class="id"> proc</span><span class="id"> T</span><span class="id"> :=</span><br/>
+&nbsp;&nbsp;<span class="id">{|</span><span class="id"> Init</span><span class="id"> #dk　&amp;v1　&amp;v2</span><span class="id"> ·</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">Send⟨1⟩</span><span class="id"> $a</span><span class="id"> ·</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">Recv⟨2⟩</span><span class="id"> λ</span><span class="id"> x</span><span class="id"> ·</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">Send⟨1⟩</span><span class="id"> $b</span><span class="id"> ·</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">Finish</span><span class="id"> |}</span>.<br/>
+<br/>
+<br/>
+<span class="vernacular">Definition</span><span class="id"> example_ascii</span><span class="id"> :</span><span class="id"> proc</span><span class="id"> T</span><span class="id"> :=</span><br/>
+&nbsp;&nbsp;<span class="id">{|</span><span class="id"> Init</span> (<span class="id">#dk,</span><span class="id"> &amp;v1,</span><span class="id"> &amp;v2</span>)<span class="id"> ;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">Send&lt;1&gt;</span><span class="id"> $a</span><span class="id"> ;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">Recv&lt;2&gt;</span><span class="gallina-kwd"> fun</span><span class="id"> x</span><span class="id"> =&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">Send&lt;1&gt;</span><span class="id"> $b</span><span class="id"> ;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">Finish</span><span class="id"> |}</span>.<br/>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> unicode_ascii_eq</span><span class="id"> :</span><span class="id"> example_unicode</span><span class="id"> =</span><span class="id"> example_ascii</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id"> reflexivity</span>. Qed.</div></details>
+<br/>
+<br/>
+<span class="vernacular">Definition</span><span class="id"> example_mixed</span><span class="id"> :</span><span class="id"> proc</span><span class="id"> T</span><span class="id"> :=</span><br/>
+&nbsp;&nbsp;<span class="id">{|</span><span class="id"> Init</span> (<span class="id">#dk,</span><span class="id"> &amp;v1,</span><span class="id"> &amp;v2</span>)<span class="id"> ;</span>      <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">Send⟨1⟩</span><span class="id"> $a</span><span class="id"> ·</span>                <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">Recv&lt;2&gt;</span><span class="id"> λ</span><span class="id"> x</span><span class="id"> ;</span>               <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">Send&lt;1&gt;</span><span class="id"> $b</span><span class="id"> ·</span>                <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">Finish</span><span class="id"> |}</span>.<br/>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> mixed_eq</span><span class="id"> :</span><span class="id"> example_mixed</span><span class="id"> =</span><span class="id"> example_unicode</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id"> reflexivity</span>. Qed.</div></details>
+<br/>
+<span class="vernacular">End</span><span class="id"> unicode_vs_ascii</span>.<br/>
+<br/>
+<pre class="ssrdoc">
+(** * Summary of Available Syntax
+</pre>
+<br/>
+
+      <div class="footer"><hr/>Generated by <a href="https://github.com/affeldt-aist/rocqnavi/">rocqnavi</a></div>
+    </div>
+  </div>
+    </main>
+</body>
+</html>

@@ -1,0 +1,28 @@
+{
+  "entities": [
+    {
+      "body": "Lemma bad_pose : forall n : nat, 0 < n.+1.\nProof.\nmove=> n.\npose proof (ltn0Sn n) as Hn.\nexact: Hn.\nQed.",
+      "file": ".claude/audit/fixtures/bad/A001.v",
+      "header": "Lemma bad_pose : forall n : nat, 0 < n.+1.",
+      "kind": "Lemma",
+      "line_end": 7,
+      "line_start": 2,
+      "name": "bad_pose",
+      "preceding_comment": "(* Fixture: triggers A001. Do NOT compile. *)",
+      "preceding_comment_present": true,
+      "touched_header": true,
+      "touched_lines": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ]
+    }
+  ],
+  "touched_files": [
+    ".claude/audit/fixtures/bad/A001.v"
+  ],
+  "unanchored_hunks": []
+}

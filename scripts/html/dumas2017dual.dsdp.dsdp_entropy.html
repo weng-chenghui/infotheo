@@ -1,0 +1,1202 @@
+
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Module dsdp_entropy</title>
+<meta name="description" content="Documentation of Coq module Infotheo Documentation" />
+<link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/markdown-it/dist/markdown-it.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/markdown-it-texmath/texmath.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/darkmode-js@1.5.7/lib/darkmode-js.min.js"></script>
+<link href="rocqnavi.css" rel="stylesheet" type="text/css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script type="text/javascript" src="rocqnavi.js"> </script>
+</head>
+
+<body onload="init()">
+
+  <main>
+    <div class="sidebar">
+      <h2>Files</h2>
+      <li><details id="infotheo"><summary>infotheo</summary>
+          <ul>
+          <li><details id="infotheo.du2002"><summary>du2002</summary>
+          <ul>
+          <li><a href="infotheo.du2002.spp_entropy.html">spp_entropy</a></li>
+<li><a href="infotheo.du2002.spp_interface.html">spp_interface</a></li>
+<li><a href="infotheo.du2002.spp_pismc.html">spp_pismc</a></li>
+<li><a href="infotheo.du2002.spp_proba.html">spp_proba</a></li>
+<li><a href="infotheo.du2002.spp_program.html">spp_program</a></li>
+<li><a href="infotheo.du2002.spp_proof.html">spp_proof</a></li>
+<li><a href="infotheo.du2002.spp_session_types.html">spp_session_types</a></li>
+<li><a href="infotheo.du2002.spp_tactics.html">spp_tactics</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.dumas2017dual"><summary>dumas2017dual</summary>
+          <ul>
+          <li><details id="infotheo.dumas2017dual.dsdp"><summary>dsdp</summary>
+          <ul>
+          <li><a href="infotheo.dumas2017dual.dsdp.dsdp_correctness.html">dsdp_correctness</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_entropy.html">dsdp_entropy</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_entropy_trace.html">dsdp_entropy_trace</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_interface.html">dsdp_interface</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_pismc.html">dsdp_pismc</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_program.html">dsdp_program</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_security.html">dsdp_security</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_session_types.html">dsdp_session_types</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_syntax_demo.html">dsdp_syntax_demo</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.dumas2017dual.entropy_fiber"><summary>entropy_fiber</summary>
+          <ul>
+          <li><a href="infotheo.dumas2017dual.entropy_fiber.entropy_fiber.html">entropy_fiber</a></li>
+<li><a href="infotheo.dumas2017dual.entropy_fiber.entropy_fiber_zpq.html">entropy_fiber_zpq</a></li>
+<li><a href="infotheo.dumas2017dual.entropy_fiber.linear_fiber_zpq.html">linear_fiber_zpq</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.dumas2017dual.lib"><summary>lib</summary>
+          <ul>
+          <li><a href="infotheo.dumas2017dual.lib.extra_algebra.html">extra_algebra</a></li>
+<li><a href="infotheo.dumas2017dual.lib.extra_entropy.html">extra_entropy</a></li>
+<li><a href="infotheo.dumas2017dual.lib.extra_proba.html">extra_proba</a></li>
+<li><a href="infotheo.dumas2017dual.lib.rouche_capelli.html">rouche_capelli</a></li>
+          </ul>
+          </details>
+          </li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.ecc_classic"><summary>ecc_classic</summary>
+          <ul>
+          <li><a href="infotheo.ecc_classic.alternant.html">alternant</a></li>
+<li><a href="infotheo.ecc_classic.bch.html">bch</a></li>
+<li><a href="infotheo.ecc_classic.cyclic_code.html">cyclic_code</a></li>
+<li><a href="infotheo.ecc_classic.decoding.html">decoding</a></li>
+<li><a href="infotheo.ecc_classic.grs.html">grs</a></li>
+<li><a href="infotheo.ecc_classic.hamming_code.html">hamming_code</a></li>
+<li><a href="infotheo.ecc_classic.linearcode.html">linearcode</a></li>
+<li><a href="infotheo.ecc_classic.mceliece.html">mceliece</a></li>
+<li><a href="infotheo.ecc_classic.poly_decoding.html">poly_decoding</a></li>
+<li><a href="infotheo.ecc_classic.reed_solomon.html">reed_solomon</a></li>
+<li><a href="infotheo.ecc_classic.repcode.html">repcode</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.ecc_modern"><summary>ecc_modern</summary>
+          <ul>
+          <li><a href="infotheo.ecc_modern.checksum.html">checksum</a></li>
+<li><a href="infotheo.ecc_modern.degree_profile.html">degree_profile</a></li>
+<li><a href="infotheo.ecc_modern.ldpc.html">ldpc</a></li>
+<li><a href="infotheo.ecc_modern.ldpc_algo.html">ldpc_algo</a></li>
+<li><a href="infotheo.ecc_modern.ldpc_algo_proof.html">ldpc_algo_proof</a></li>
+<li><a href="infotheo.ecc_modern.ldpc_erasure.html">ldpc_erasure</a></li>
+<li><a href="infotheo.ecc_modern.max_subset.html">max_subset</a></li>
+<li><a href="infotheo.ecc_modern.stopping_set.html">stopping_set</a></li>
+<li><a href="infotheo.ecc_modern.subgraph_partition.html">subgraph_partition</a></li>
+<li><a href="infotheo.ecc_modern.summary.html">summary</a></li>
+<li><a href="infotheo.ecc_modern.summary_tanner.html">summary_tanner</a></li>
+<li><a href="infotheo.ecc_modern.tanner.html">tanner</a></li>
+<li><a href="infotheo.ecc_modern.tanner_partition.html">tanner_partition</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.homomorphic_encryption"><summary>homomorphic_encryption</summary>
+          <ul>
+          <li><details id="infotheo.homomorphic_encryption.benaloh1994"><summary>benaloh1994</summary>
+          <ul>
+          <li><a href="infotheo.homomorphic_encryption.benaloh1994.benaloh_ahe.html">benaloh_ahe</a></li>
+<li><a href="infotheo.homomorphic_encryption.benaloh1994.benaloh_enc.html">benaloh_enc</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.homomorphic_encryption.idealized"><summary>idealized</summary>
+          <ul>
+          <li><a href="infotheo.homomorphic_encryption.idealized.idealized_ahe.html">idealized_ahe</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.homomorphic_encryption.paillier1999"><summary>paillier1999</summary>
+          <ul>
+          <li><a href="infotheo.homomorphic_encryption.paillier1999.paillier_ahe.html">paillier_ahe</a></li>
+<li><a href="infotheo.homomorphic_encryption.paillier1999.paillier_enc.html">paillier_enc</a></li>
+          </ul>
+          </details>
+          </li>
+<li><a href="infotheo.homomorphic_encryption.ahe_enc.html">ahe_enc</a></li>
+<li><a href="infotheo.homomorphic_encryption.ahe_monoid.html">ahe_monoid</a></li>
+<li><a href="infotheo.homomorphic_encryption.enc_dec.html">enc_dec</a></li>
+<li><a href="infotheo.homomorphic_encryption.he_types.html">he_types</a></li>
+<li><a href="infotheo.homomorphic_encryption.homomorphic_encryption.html">homomorphic_encryption</a></li>
+<li><a href="infotheo.homomorphic_encryption.key_type.html">key_type</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.information_theory"><summary>information_theory</summary>
+          <ul>
+          <li><a href="infotheo.information_theory.aep.html">aep</a></li>
+<li><a href="infotheo.information_theory.binary_symmetric_channel.html">binary_symmetric_channel</a></li>
+<li><a href="infotheo.information_theory.channel.html">channel</a></li>
+<li><a href="infotheo.information_theory.channel_code.html">channel_code</a></li>
+<li><a href="infotheo.information_theory.channel_coding_converse.html">channel_coding_converse</a></li>
+<li><a href="infotheo.information_theory.channel_coding_direct.html">channel_coding_direct</a></li>
+<li><a href="infotheo.information_theory.conditional_divergence.html">conditional_divergence</a></li>
+<li><a href="infotheo.information_theory.entropy.html">entropy</a></li>
+<li><a href="infotheo.information_theory.entropy_convex.html">entropy_convex</a></li>
+<li><a href="infotheo.information_theory.erasure_channel.html">erasure_channel</a></li>
+<li><a href="infotheo.information_theory.error_exponent.html">error_exponent</a></li>
+<li><a href="infotheo.information_theory.joint_typ_seq.html">joint_typ_seq</a></li>
+<li><a href="infotheo.information_theory.jtypes.html">jtypes</a></li>
+<li><a href="infotheo.information_theory.kraft.html">kraft</a></li>
+<li><a href="infotheo.information_theory.pproba.html">pproba</a></li>
+<li><a href="infotheo.information_theory.shannon_fano.html">shannon_fano</a></li>
+<li><a href="infotheo.information_theory.source_code.html">source_code</a></li>
+<li><a href="infotheo.information_theory.source_coding_fl_converse.html">source_coding_fl_converse</a></li>
+<li><a href="infotheo.information_theory.source_coding_fl_direct.html">source_coding_fl_direct</a></li>
+<li><a href="infotheo.information_theory.source_coding_vl_converse.html">source_coding_vl_converse</a></li>
+<li><a href="infotheo.information_theory.source_coding_vl_direct.html">source_coding_vl_direct</a></li>
+<li><a href="infotheo.information_theory.string_entropy.html">string_entropy</a></li>
+<li><a href="infotheo.information_theory.success_decode_bound.html">success_decode_bound</a></li>
+<li><a href="infotheo.information_theory.typ_seq.html">typ_seq</a></li>
+<li><a href="infotheo.information_theory.types.html">types</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.lib"><summary>lib</summary>
+          <ul>
+          <li><a href="infotheo.lib.bigop_ext.html">bigop_ext</a></li>
+<li><a href="infotheo.lib.binary_entropy_function.html">binary_entropy_function</a></li>
+<li><a href="infotheo.lib.classical_sets_ext.html">classical_sets_ext</a></li>
+<li><a href="infotheo.lib.coqRE.html">coqRE</a></li>
+<li><a href="infotheo.lib.derive_ext.html">derive_ext</a></li>
+<li><a href="infotheo.lib.dft.html">dft</a></li>
+<li><a href="infotheo.lib.euclid.html">euclid</a></li>
+<li><a href="infotheo.lib.f2.html">f2</a></li>
+<li><a href="infotheo.lib.hamming.html">hamming</a></li>
+<li><a href="infotheo.lib.natbin.html">natbin</a></li>
+<li><a href="infotheo.lib.num_occ.html">num_occ</a></li>
+<li><a href="infotheo.lib.poly_ext.html">poly_ext</a></li>
+<li><a href="infotheo.lib.realType_ext.html">realType_ext</a></li>
+<li><a href="infotheo.lib.realType_ln.html">realType_ln</a></li>
+<li><a href="infotheo.lib.ssr_ext.html">ssr_ext</a></li>
+<li><a href="infotheo.lib.ssralg_ext.html">ssralg_ext</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.probability"><summary>probability</summary>
+          <ul>
+          <li><a href="infotheo.probability.bayes.html">bayes</a></li>
+<li><a href="infotheo.probability.convex.html">convex</a></li>
+<li><a href="infotheo.probability.convex_equiv.html">convex_equiv</a></li>
+<li><a href="infotheo.probability.convex_stone.html">convex_stone</a></li>
+<li><a href="infotheo.probability.divergence.html">divergence</a></li>
+<li><a href="infotheo.probability.fdist.html">fdist</a></li>
+<li><a href="infotheo.probability.fsdist.html">fsdist</a></li>
+<li><a href="infotheo.probability.graphoid.html">graphoid</a></li>
+<li><a href="infotheo.probability.jensen.html">jensen</a></li>
+<li><a href="infotheo.probability.jfdist_cond.html">jfdist_cond</a></li>
+<li><a href="infotheo.probability.log_sum.html">log_sum</a></li>
+<li><a href="infotheo.probability.necset.html">necset</a></li>
+<li><a href="infotheo.probability.partition_inequality.html">partition_inequality</a></li>
+<li><a href="infotheo.probability.pinsker.html">pinsker</a></li>
+<li><a href="infotheo.probability.proba.html">proba</a></li>
+<li><a href="infotheo.probability.variation_dist.html">variation_dist</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.robust"><summary>robust</summary>
+          <ul>
+          <li><a href="infotheo.robust.robustmean.html">robustmean</a></li>
+<li><a href="infotheo.robust.weightedmean.html">weightedmean</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.smc"><summary>smc</summary>
+          <ul>
+          <li><a href="infotheo.smc.graded_resource.html">graded_resource</a></li>
+<li><a href="infotheo.smc.pismc.html">pismc</a></li>
+<li><a href="infotheo.smc.smc_interpreter.html">smc_interpreter</a></li>
+<li><a href="infotheo.smc.smc_session_types.html">smc_session_types</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.toy_examples"><summary>toy_examples</summary>
+          <ul>
+          <li><a href="infotheo.toy_examples.conditional_entropy.html">conditional_entropy</a></li>
+<li><a href="infotheo.toy_examples.expected_value_variance.html">expected_value_variance</a></li>
+<li><a href="infotheo.toy_examples.expected_value_variance_ordn.html">expected_value_variance_ordn</a></li>
+<li><a href="infotheo.toy_examples.expected_value_variance_tuple.html">expected_value_variance_tuple</a></li>
+          </ul>
+          </details>
+          </li>
+<li><a href="infotheo._check_sigs.html">_check_sigs</a></li>
+<li><a href="infotheo._depgraph_extract.html">_depgraph_extract</a></li>
+<li><a href="infotheo._test_star2.html">_test_star2</a></li>
+<li><a href="infotheo.test_sri.html">test_sri</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="pgg_reconstruct"><summary>pgg_reconstruct</summary>
+          <ul>
+          <li><a href="pgg_reconstruct.ag_code.html">ag_code</a></li>
+<li><a href="pgg_reconstruct.ag_massey_bridge.html">ag_massey_bridge</a></li>
+<li><a href="pgg_reconstruct.ag_multiplicative.html">ag_multiplicative</a></li>
+<li><a href="pgg_reconstruct.algebraic_rigidity.html">algebraic_rigidity</a></li>
+<li><a href="pgg_reconstruct.coord_perm_compatible.html">coord_perm_compatible</a></li>
+<li><a href="pgg_reconstruct.cover_genus0.html">cover_genus0</a></li>
+<li><a href="pgg_reconstruct.cover_genus1.html">cover_genus1</a></li>
+<li><a href="pgg_reconstruct.cover_genus2.html">cover_genus2</a></li>
+<li><a href="pgg_reconstruct.cover_tradeoff.html">cover_tradeoff</a></li>
+<li><a href="pgg_reconstruct.covering_scheme.html">covering_scheme</a></li>
+<li><a href="pgg_reconstruct.hyperelliptic_code.html">hyperelliptic_code</a></li>
+<li><a href="pgg_reconstruct.lagrange.html">lagrange</a></li>
+<li><a href="pgg_reconstruct.massey.html">massey</a></li>
+<li><a href="pgg_reconstruct.pgg_assignment.html">pgg_assignment</a></li>
+<li><a href="pgg_reconstruct.pgg_covering_correctness.html">pgg_covering_correctness</a></li>
+<li><a href="pgg_reconstruct.pgg_deck_pairing.html">pgg_deck_pairing</a></li>
+<li><a href="pgg_reconstruct.pgg_sharing_framework.html">pgg_sharing_framework</a></li>
+<li><a href="pgg_reconstruct.pgg_sum_mod.html">pgg_sum_mod</a></li>
+<li><a href="pgg_reconstruct.pgg_threshold.html">pgg_threshold</a></li>
+<li><a href="pgg_reconstruct.pgl_bound.html">pgl_bound</a></li>
+<li><a href="pgg_reconstruct.rigidity_monster_instance.html">rigidity_monster_instance</a></li>
+<li><a href="pgg_reconstruct.rigidity_s5_instance.html">rigidity_s5_instance</a></li>
+<li><a href="pgg_reconstruct.rigidity_star_instance.html">rigidity_star_instance</a></li>
+<li><a href="pgg_reconstruct.rs_massey_bridge.html">rs_massey_bridge</a></li>
+<li><a href="pgg_reconstruct.rs_privacy.html">rs_privacy</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="pgg_smc"><summary>pgg_smc</summary>
+          <ul>
+          <li><a href="pgg_smc.abelian_word_collapse.html">abelian_word_collapse</a></li>
+<li><a href="pgg_smc.free_group_ball.html">free_group_ball</a></li>
+<li><a href="pgg_smc.perm_uniform.html">perm_uniform</a></li>
+<li><a href="pgg_smc.pgg_abelian.html">pgg_abelian</a></li>
+<li><a href="pgg_smc.pgg_abelian.html">pgg_abelian</a></li>
+<li><a href="pgg_smc.pgg_abelian_collapse.html">pgg_abelian_collapse</a></li>
+<li><a href="pgg_smc.pgg_collusion_bound.html">pgg_collusion_bound</a></li>
+<li><a href="pgg_smc.pgg_correctness.html">pgg_correctness</a></li>
+<li><a href="pgg_smc.pgg_free.html">pgg_free</a></li>
+<li><a href="pgg_smc.pgg_interface.html">pgg_interface</a></li>
+<li><a href="pgg_smc.pgg_lfree.html">pgg_lfree</a></li>
+<li><a href="pgg_smc.pgg_nonabelian.html">pgg_nonabelian</a></li>
+<li><a href="pgg_smc.pgg_pismc.html">pgg_pismc</a></li>
+<li><a href="pgg_smc.pgg_program.html">pgg_program</a></li>
+<li><a href="pgg_smc.pgg_raag.html">pgg_raag</a></li>
+<li><a href="pgg_smc.pgg_raag_cartier_foata.html">pgg_raag_cartier_foata</a></li>
+<li><a href="pgg_smc.pgg_raag_clique.html">pgg_raag_clique</a></li>
+<li><a href="pgg_smc.pgg_raag_path.html">pgg_raag_path</a></li>
+<li><a href="pgg_smc.pgg_raag_s5.html">pgg_raag_s5</a></li>
+<li><a href="pgg_smc.pgg_raag_star.html">pgg_raag_star</a></li>
+<li><a href="pgg_smc.pgg_security.html">pgg_security</a></li>
+<li><a href="pgg_smc.pgg_session_types.html">pgg_session_types</a></li>
+<li><a href="pgg_smc.pgg_word_analysis.html">pgg_word_analysis</a></li>
+<li><a href="pgg_smc.test_cf.html">test_cf</a></li>
+<li><a href="pgg_smc.test_cf2.html">test_cf2</a></li>
+<li><a href="pgg_smc.test_cf3.html">test_cf3</a></li>
+<li><a href="pgg_smc.test_sri.html">test_sri</a></li>
+<li><a href="pgg_smc.test_sri2.html">test_sri2</a></li>
+          </ul>
+          </details>
+          </li>
+    </div>
+
+  <div class="coq">
+
+    <div class="content">
+      <p>
+        <a href="./index.html">Top</a>
+        
+      </p>
+      <h1 class="title">Module dsdp_entropy</h1>
+<span class="vernacular">From</span><span class="id"> HB</span><span class="vernacular"> Require</span><span class="vernacular"> Import</span><span class="id"> structures</span>.<br/>
+<span class="vernacular">From</span><span class="id"> mathcomp</span><span class="vernacular"> Require</span><span class="vernacular"> Import</span><span class="id"> all_boot</span><span class="id"> all_order</span><span class="id"> all_algebra</span><span class="id"> fingroup</span><span class="id"> finalg</span><span class="id"> matrix</span>.<br/>
+<span class="vernacular">From</span><span class="id"> mathcomp</span><span class="vernacular"> Require</span><span class="vernacular"> Import</span><span class="id"> ring</span><span class="id"> boolp</span><span class="id"> finmap</span><span class="id"> matrix</span><span class="id"> lra</span><span class="id"> reals</span>.<br/>
+<span class="vernacular">Require</span><span class="vernacular"> Import</span><span class="id"> realType_ext</span><span class="id"> realType_ln</span><span class="id"> ssr_ext</span><span class="id"> ssralg_ext</span><span class="id"> bigop_ext</span><span class="id"> fdist</span>.<br/>
+<span class="vernacular">Require</span><span class="vernacular"> Import</span><span class="id"> proba</span><span class="id"> jfdist_cond</span><span class="id"> entropy</span><span class="id"> graphoid</span><span class="id"> smc_interpreter</span><span class="id"> spp_tactics</span>.<br/>
+<span class="vernacular">Require</span><span class="vernacular"> Import</span><span class="id"> spp_proba</span><span class="id"> homomorphic_encryption</span><span class="id"> entropy_fiber</span>.<br/>
+<span class="vernacular">Require</span><span class="vernacular"> Import</span><span class="id"> entropy_fiber_zpq</span>.  <br/>
+<span class="vernacular">Require</span><span class="vernacular"> Import</span><span class="id"> extra_algebra</span><span class="id"> extra_proba</span><span class="id"> extra_entropy</span>.<br/>
+<span class="vernacular">Require</span><span class="vernacular"> Import</span><span class="id"> dsdp_program</span>.<br/>
+<span class="vernacular">Require</span><span class="vernacular"> Import</span><span class="id"> linear_fiber_zpq</span>.<br/>
+<br/>
+<span class="vernacular">Import</span><span class="id"> GRing</span>.<span class="id">Theory</span>.<br/>
+<span class="vernacular">Import</span><span class="id"> Num</span>.<span class="id">Theory</span>.<br/>
+<br/>
+<pre class="ssrdoc">
+
+Formalization of:
+
+Dumas, J. G., Lafourcade, P., Orfila, J. B., &amp; Puys, M. (2017).
+Dual protocols for private multi-party matrix multiplication
+and trust computations.
+Computers &amp; security, 71, 51-70.
+
+</pre>
+<br/>
+<span class="gallina-kwd">Set</span><span class="vernacular"> Implicit</span><span class="vernacular"> Arguments</span>.<br/>
+<span class="vernacular">Unset</span><span class="vernacular"> Strict</span><span class="vernacular"> Implicit</span>.<br/>
+<span class="vernacular">Import</span><span class="id"> Prenex</span><span class="vernacular"> Implicits</span>.<br/>
+<br/>
+<span class="vernacular">Local</span><span class="vernacular"> Open</span><span class="vernacular"> Scope</span><span class="id"> ring_scope</span>.<br/>
+<span class="vernacular">Local</span><span class="vernacular"> Open</span><span class="vernacular"> Scope</span><span class="id"> reals_ext_scope</span>.<br/>
+<span class="vernacular">Local</span><span class="vernacular"> Open</span><span class="vernacular"> Scope</span><span class="id"> proba_scope</span>.<br/>
+<span class="vernacular">Local</span><span class="vernacular"> Open</span><span class="vernacular"> Scope</span><span class="id"> fdist_scope</span>.<br/>
+<span class="vernacular">Local</span><span class="vernacular"> Open</span><span class="vernacular"> Scope</span><span class="id"> entropy_scope</span>.<br/>
+<span class="vernacular">Local</span><span class="vernacular"> Open</span><span class="vernacular"> Scope</span><span class="id"> vec_ext_scope</span>.<br/>
+<br/>
+<span class="vernacular">Reserved</span><span class="vernacular"> Notation</span> <span class="id">&quot;u *h w&quot;</span> (<span class="gallina-kwd">at</span><span class="id"> level</span><span class="id"> 40</span>).<br/>
+<span class="vernacular">Reserved</span><span class="vernacular"> Notation</span> <span class="id">&quot;u ^h w&quot;</span> (<span class="gallina-kwd">at</span><span class="id"> level</span><span class="id"> 40</span>).<br/>
+<br/>
+<span class="vernacular">Section</span><span class="id"> dsdp_entropy</span>.<br/>
+<br/>
+<span class="vernacular">Context</span><span class="id"> {R</span><span class="id"> :</span><span class="id"> realType}</span>.<br/>
+<span class="vernacular">Variables</span> (<span class="id">p_minus_2</span><span class="id"> q_minus_2</span><span class="id"> :</span><span class="id"> nat</span>).<br/>
+<span class="vernacular">Local</span><span class="vernacular"> Notation</span><span class="id"> p</span><span class="id"> :=</span><span class="id"> p_minus_2</span>.<span class="id">+2</span>.<br/>
+<span class="vernacular">Local</span><span class="vernacular"> Notation</span><span class="id"> q</span><span class="id"> :=</span><span class="id"> q_minus_2</span>.<span class="id">+2</span>.<br/>
+<span class="vernacular">Hypothesis</span><span class="id"> prime_p</span><span class="id"> :</span><span class="id"> prime</span><span class="id"> p</span>.<br/>
+<span class="vernacular">Hypothesis</span><span class="id"> prime_q</span><span class="id"> :</span><span class="id"> prime</span><span class="id"> q</span>.<br/>
+<span class="vernacular">Hypothesis</span><span class="id"> coprime_pq</span><span class="id"> :</span><span class="id"> coprime</span><span class="id"> p</span><span class="id"> q</span>.<br/>
+<span class="vernacular">Local</span><span class="vernacular"> Notation</span><span class="id"> m</span><span class="id"> :=</span> (<span class="id">p</span><span class="id"> *</span><span class="id"> q</span>).<br/>
+<span class="vernacular">Local</span><span class="vernacular"> Notation</span><span class="id"> msg</span><span class="id"> :=</span><span class="id"> 'Z_m</span>.<br/>
+<br/>
+<span class="vernacular">Definition</span><span class="id"> dsdp_fiber</span> (<span class="id">u1</span><span class="id"> u2</span><span class="id"> u3</span><span class="id"> v1</span><span class="id"> s</span><span class="id"> :</span><span class="id"> msg</span>)<span class="id"> :</span><span class="id"> {set</span><span class="id"> msg</span><span class="id"> *</span><span class="id"> msg}</span><span class="id"> :=</span><br/>
+&nbsp;&nbsp;<span class="id">linear_fiber_2d</span><span class="id"> u2</span><span class="id"> u3</span> (<span class="id">s</span><span class="id"> -</span><span class="id"> u1</span><span class="id"> *</span><span class="id"> v1</span>)<span class="id">%R</span>.<br/>
+<br/>
+<span class="vernacular">Variable</span><span class="id"> T</span><span class="id"> :</span><span class="id"> finType</span>.<br/>
+<span class="vernacular">Variable</span><span class="id"> P</span><span class="id"> :</span><span class="id"> R</span>.<span class="id">-fdist</span><span class="id"> T</span>.<br/>
+<span class="vernacular">Variables</span> (<span class="id">V1</span><span class="id"> V2</span><span class="id"> V3</span><span class="id"> U1</span><span class="id"> U2</span><span class="id"> U3</span><span class="id"> S</span><span class="id"> :</span><span class="id"> {RV</span><span class="id"> P</span><span class="id"> -&gt;</span><span class="id"> msg}</span>).<br/>
+<span class="vernacular">Let</span><span class="id"> CondRV</span><span class="id"> :</span><span class="id"> {RV</span><span class="id"> P</span><span class="id"> -&gt;</span> (<span class="id">msg</span><span class="id"> *</span><span class="id"> msg</span><span class="id"> *</span><span class="id"> msg</span><span class="id"> *</span><span class="id"> msg</span><span class="id"> *</span><span class="id"> msg</span>)<span class="id">}</span><span class="id"> :=</span><br/>
+&nbsp;&nbsp;<span class="id">[%</span><span class="id"> V1,</span><span class="id"> U1,</span><span class="id"> U2,</span><span class="id"> U3,</span><span class="id"> S]</span>.<br/>
+<span class="vernacular">Let</span><span class="id"> VarRV</span><span class="id"> :</span><span class="id"> {RV</span><span class="id"> P</span><span class="id"> -&gt;</span> (<span class="id">msg</span><span class="id"> *</span><span class="id"> msg</span>)<span class="id">}</span><span class="id"> :=</span><span class="id"> [%V2,</span><span class="id"> V3]</span>.<br/>
+<br/>
+<span class="vernacular">Let</span><span class="id"> card_msg</span><span class="id"> :</span><span class="id"> #|msg|</span><span class="id"> =</span><span class="id"> m</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="gallina-kwd"> by</span><span class="id"> rewrite</span><span class="id"> card_ord</span><span class="id"> Zp_cast</span>. Qed.</div></details>
+<br/>
+<span class="vernacular">Let</span><span class="id"> card_msg_pair</span><span class="id"> :</span><span class="id"> #|</span>((<span class="id">msg</span><span class="id"> *</span><span class="id"> msg</span>)<span class="id">%type</span><span class="id"> :</span><span class="id"> finType</span>)<span class="id">|</span><span class="id"> =</span> (<span class="id">m</span><span class="id"> ^</span><span class="id"> 2</span>)<span class="id">%N</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="gallina-kwd"> by</span><span class="id"> rewrite</span><span class="id"> card_prod</span><span class="id"> !card_msg</span><span class="id"> expnS</span><span class="id"> expn1</span>. Qed.</div></details>
+<br/>
+<span class="vernacular">Definition</span><span class="id"> dsdp_constraint</span> (<span class="id">cond</span><span class="id"> :</span><span class="id"> msg</span><span class="id"> *</span><span class="id"> msg</span><span class="id"> *</span><span class="id"> msg</span><span class="id"> *</span><span class="id"> msg</span><span class="id"> *</span><span class="id"> msg</span>)<br/>
+&nbsp;&nbsp;(<span class="id">var</span><span class="id"> :</span><span class="id"> msg</span><span class="id"> *</span><span class="id"> msg</span>)<span class="id"> :</span><span class="gallina-kwd"> Prop</span><span class="id"> :=</span><br/>
+&nbsp;&nbsp;<span class="gallina-kwd">let</span><span class="id"> '</span>(<span class="id">v1,</span><span class="id"> u1,</span><span class="id"> u2,</span><span class="id"> u3,</span><span class="id"> s</span>)<span class="id"> :=</span><span class="id"> cond</span><span class="gallina-kwd"> in</span><br/>
+&nbsp;&nbsp;<span class="gallina-kwd">let</span><span class="id"> '</span>(<span class="id">v2,</span><span class="id"> v3</span>)<span class="id"> :=</span><span class="id"> var</span><span class="gallina-kwd"> in</span><br/>
+&nbsp;&nbsp;(<span class="id">s</span><span class="id"> -</span><span class="id"> u1</span><span class="id"> *</span><span class="id"> v1</span><span class="id"> =</span><span class="id"> u2</span><span class="id"> *</span><span class="id"> v2</span><span class="id"> +</span><span class="id"> u3</span><span class="id"> *</span><span class="id"> v3</span>)<span class="id">%R</span>.<br/>
+<br/>
+<span class="vernacular">Hypothesis</span><span class="id"> constraint_holds</span><span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="gallina-kwd">forall</span><span class="id"> t,</span><span class="id"> dsdp_constraint</span> (<span class="id">CondRV</span><span class="id"> t</span>) (<span class="id">VarRV</span><span class="id"> t</span>).<br/>
+<br/>
+<br/>
+<br/>
+<span class="vernacular">Hypothesis</span><span class="id"> VarRV_uniform</span><span class="id"> :</span><span class="id"> `p_</span><span class="id"> VarRV</span><span class="id"> =</span><span class="id"> fdist_uniform</span><span class="id"> card_msg_pair</span>.<br/>
+<span class="vernacular">Hypothesis</span><span class="id"> VarRV_indep_inputs</span><span class="id"> :</span><span class="id"> P</span><span class="id"> |=</span><span class="id"> [%V1,</span><span class="id"> U1,</span><span class="id"> U2,</span><span class="id"> U3]</span><span class="id"> _|_</span><span class="id"> VarRV</span>.<br/>
+<br/>
+<br/>
+<span class="vernacular">Let</span><span class="id"> InputRV</span><span class="id"> :</span><span class="id"> {RV</span><span class="id"> P</span><span class="id"> -&gt;</span> (<span class="id">msg</span><span class="id"> *</span><span class="id"> msg</span><span class="id"> *</span><span class="id"> msg</span><span class="id"> *</span><span class="id"> msg</span>)<span class="id">}</span><span class="id"> :=</span><span class="id"> [%V1,</span><span class="id"> U1,</span><span class="id"> U2,</span><span class="id"> U3]</span>.<br/>
+<br/>
+<span class="vernacular">Let</span><span class="id"> dsdp_fiber_fn</span> (<span class="id">cond</span><span class="id"> :</span><span class="id"> msg</span><span class="id"> *</span><span class="id"> msg</span><span class="id"> *</span><span class="id"> msg</span><span class="id"> *</span><span class="id"> msg</span><span class="id"> *</span><span class="id"> msg</span>)<span class="id"> :</span><span class="id"> {set</span><span class="id"> msg</span><span class="id"> *</span><span class="id"> msg}</span><span class="id"> :=</span><br/>
+&nbsp;&nbsp;<span class="gallina-kwd">let</span><span class="id"> '</span>(<span class="id">v1,</span><span class="id"> u1,</span><span class="id"> u2,</span><span class="id"> u3,</span><span class="id"> s</span>)<span class="id"> :=</span><span class="id"> cond</span><span class="gallina-kwd"> in</span><span class="id"> dsdp_fiber</span><span class="id"> u1</span><span class="id"> u2</span><span class="id"> u3</span><span class="id"> v1</span><span class="id"> s</span>.<br/>
+<br/>
+<span class="vernacular">Let</span><span class="id"> dsdp_proj_input</span> (<span class="id">cond</span><span class="id"> :</span><span class="id"> msg</span><span class="id"> *</span><span class="id"> msg</span><span class="id"> *</span><span class="id"> msg</span><span class="id"> *</span><span class="id"> msg</span><span class="id"> *</span><span class="id"> msg</span>)<span class="id"> :</span><span class="id"> msg</span><span class="id"> *</span><span class="id"> msg</span><span class="id"> *</span><span class="id"> msg</span><span class="id"> *</span><span class="id"> msg</span><span class="id"> :=</span><br/>
+&nbsp;&nbsp;<span class="gallina-kwd">let</span><span class="id"> '</span>(<span class="id">v1,</span><span class="id"> u1,</span><span class="id"> u2,</span><span class="id"> u3,</span><span class="id"> _</span>)<span class="id"> :=</span><span class="id"> cond</span><span class="gallina-kwd"> in</span> (<span class="id">v1,</span><span class="id"> u1,</span><span class="id"> u2,</span><span class="id"> u3</span>).<br/>
+<br/>
+<span class="vernacular">Let</span><span class="id"> constraint_fiber_dsdp</span><span class="id"> :</span><span class="gallina-kwd"> forall</span><span class="id"> t,</span><span class="id"> VarRV</span><span class="id"> t</span><span class="id"> \in</span><span class="id"> dsdp_fiber_fn</span> (<span class="id">CondRV</span><span class="id"> t</span>).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id">move=&gt;</span><span class="id"> t</span>.<br/>
+<span class="id">rewrite</span><span class="id"> /dsdp_fiber_fn</span><span class="id"> /dsdp_fiber</span><span class="id"> /linear_fiber_2d</span><span class="id"> inE</span><span class="id"> /=</span>.<br/>
+<span class="id">apply/eqP</span>.<br/>
+<span class="id">move:</span> (<span class="id">constraint_holds</span><span class="id"> t</span>).<br/>
+<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> /dsdp_constraint</span><span class="id"> /CondRV</span><span class="id"> /VarRV</span><span class="id"> /=</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="vernacular">Let</span><span class="id"> InputRV_proj_dsdp</span><span class="id"> :</span><span class="gallina-kwd"> forall</span><span class="id"> t,</span><span class="id"> InputRV</span><span class="id"> t</span><span class="id"> =</span><span class="id"> dsdp_proj_input</span> (<span class="id">CondRV</span><span class="id"> t</span>).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="gallina-kwd"> by</span><span class="id"> move=&gt;</span><span class="id"> t</span>. Qed.</div></details>
+<br/>
+<span class="vernacular">Let</span><span class="id"> joint_eq_input_dsdp</span><span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="gallina-kwd">forall</span> (<span class="id">cond</span><span class="id"> :</span><span class="id"> msg</span><span class="id"> *</span><span class="id"> msg</span><span class="id"> *</span><span class="id"> msg</span><span class="id"> *</span><span class="id"> msg</span><span class="id"> *</span><span class="id"> msg</span>) (<span class="id">var</span><span class="id"> :</span><span class="id"> msg</span><span class="id"> *</span><span class="id"> msg</span>)<span class="id">,</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">var</span><span class="id"> \in</span><span class="id"> dsdp_fiber_fn</span><span class="id"> cond</span><span class="id"> -&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">`Pr[[%VarRV,</span><span class="id"> CondRV]</span><span class="id"> =</span> (<span class="id">var,</span><span class="id"> cond</span>)<span class="id">]</span><span class="id"> =</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">`Pr[[%VarRV,</span><span class="id"> InputRV]</span><span class="id"> =</span> (<span class="id">var,</span><span class="id"> dsdp_proj_input</span><span class="id"> cond</span>)<span class="id">]</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id">move=&gt;</span><span class="id"> [[[[v1</span><span class="id"> u1]</span><span class="id"> u2]</span><span class="id"> u3]</span><span class="id"> s]</span><span class="id"> [v2</span><span class="id"> v3]</span><span class="id"> /=</span><span class="id"> Hin_fiber</span>.<br/>
+<span class="comment">(*&nbsp;Both&nbsp;sides&nbsp;count&nbsp;the&nbsp;same&nbsp;events&nbsp;because&nbsp;S&nbsp;is&nbsp;determined&nbsp;by&nbsp;the&nbsp;constraint&nbsp;*)</span><br/>
+<span class="id">rewrite</span><span class="id"> !pfwd1E</span>.<br/>
+<span class="id">congr</span><span class="id"> Pr</span>.<br/>
+<span class="id">apply/setP</span><span class="id"> =&gt;</span><span class="id"> t0</span>.<br/>
+<span class="id">rewrite</span><span class="id"> !inE</span><span class="id"> /=</span><span class="id"> !xpair_eqE</span>.<br/>
+<span class="id">apply/idP/idP</span><span class="id"> =&gt;</span><span class="id"> H</span>.<br/>
+<span class="id">-</span> <span class="comment">(*&nbsp;LHS&nbsp;-&gt;&nbsp;RHS:&nbsp;drop&nbsp;S&nbsp;and&nbsp;rearrange&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id">move/and3P:</span><span class="id"> H</span><span class="id"> =&gt;</span><span class="id"> [Hvar</span><span class="id"> Hinput</span><span class="id"> Hs]</span>.<br/>
+&nbsp;&nbsp;<span class="id">move/andP:</span><span class="id"> Hinput</span><span class="id"> =&gt;</span><span class="id"> [Hinput3</span><span class="id"> Hu3]</span>.<br/>
+&nbsp;&nbsp;<span class="id">move/andP:</span><span class="id"> Hinput3</span><span class="id"> =&gt;</span><span class="id"> [Hinput2</span><span class="id"> Hu2]</span>.<br/>
+&nbsp;&nbsp;<span class="id">move/andP:</span><span class="id"> Hinput2</span><span class="id"> =&gt;</span><span class="id"> [Hv1</span><span class="id"> Hu1]</span>.<br/>
+&nbsp;&nbsp;<span class="id">apply/and3P</span>.<br/>
+&nbsp;&nbsp;<span class="id">split</span><span class="id"> =&gt;</span><span class="id"> //</span>.<br/>
+&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> Hv1</span><span class="id"> Hu1</span><span class="id"> Hu2</span>.<br/>
+<span class="id">-</span> <span class="comment">(*&nbsp;RHS&nbsp;-&gt;&nbsp;LHS:&nbsp;derive&nbsp;S=s&nbsp;from&nbsp;constraint&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id">move/and3P:</span><span class="id"> H</span><span class="id"> =&gt;</span><span class="id"> [Hvar</span><span class="id"> Hinput3</span><span class="id"> Hu3]</span>.<br/>
+&nbsp;&nbsp;<span class="id">move/andP:</span><span class="id"> Hinput3</span><span class="id"> =&gt;</span><span class="id"> [Hinput2</span><span class="id"> Hu2]</span>.<br/>
+&nbsp;&nbsp;<span class="id">move/andP:</span><span class="id"> Hinput2</span><span class="id"> =&gt;</span><span class="id"> [Hv1</span><span class="id"> Hu1]</span>.<br/>
+&nbsp;&nbsp;<span class="id">apply/and3P</span>.<br/>
+&nbsp;&nbsp;<span class="id">split</span><span class="id"> =&gt;</span><span class="id"> //</span>.<br/>
+&nbsp;&nbsp;<span class="id">+</span><span class="gallina-kwd"> by</span><span class="id"> rewrite</span><span class="id"> Hv1</span><span class="id"> Hu1</span><span class="id"> Hu2</span><span class="id"> Hu3</span>.<br/>
+&nbsp;&nbsp;<span class="id">+</span> <span class="comment">(*&nbsp;S&nbsp;t0&nbsp;=&nbsp;s&nbsp;follows&nbsp;from&nbsp;the&nbsp;constraint&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">move/andP:</span><span class="id"> Hvar</span><span class="id"> =&gt;</span><span class="id"> [/eqP</span><span class="id"> Hv2_eq</span><span class="id"> /eqP</span><span class="id"> Hv3_eq]</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">move/eqP:</span><span class="id"> Hv1</span><span class="id"> =&gt;</span><span class="id"> Hv1_eq</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">move/eqP:</span><span class="id"> Hu1</span><span class="id"> =&gt;</span><span class="id"> Hu1_eq</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">move/eqP:</span><span class="id"> Hu2</span><span class="id"> =&gt;</span><span class="id"> Hu2_eq</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">move/eqP:</span><span class="id"> Hu3</span><span class="id"> =&gt;</span><span class="id"> Hu3_eq</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">move:</span> (<span class="id">constraint_holds</span><span class="id"> t0</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> /dsdp_constraint</span><span class="id"> /CondRV</span><span class="id"> /VarRV</span><span class="id"> /=</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> Hv1_eq</span><span class="id"> Hu1_eq</span><span class="id"> Hu2_eq</span><span class="id"> Hu3_eq</span><span class="id"> Hv2_eq</span><span class="id"> Hv3_eq</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">move=&gt;</span><span class="id"> Hconstr</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">move:</span><span class="id"> Hin_fiber</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> /dsdp_fiber_fn</span><span class="id"> /dsdp_fiber</span><span class="id"> /linear_fiber_2d</span><span class="id"> inE</span><span class="id"> /=</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">move=&gt;</span><span class="id"> /eqP</span><span class="id"> Hfiber_eq</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply/eqP</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">have</span><span class="id"> Heq:</span><span class="id"> S</span><span class="id"> t0</span><span class="id"> -</span><span class="id"> u1</span><span class="id"> *</span><span class="id"> v1</span><span class="id"> =</span><span class="id"> s</span><span class="id"> -</span><span class="id"> u1</span><span class="id"> *</span><span class="id"> v1</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> Hconstr</span><span class="id"> Hfiber_eq</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> move:</span><span class="id"> Heq</span><span class="id"> =&gt;</span><span class="id"> /</span>(<span class="id">f_equal</span> (<span class="gallina-kwd">fun</span><span class="id"> x</span><span class="id"> =&gt;</span><span class="id"> x</span><span class="id"> +</span><span class="id"> u1</span><span class="id"> *</span><span class="id"> v1</span>))<span class="id">;</span><span class="id"> rewrite</span><span class="id"> !subrK</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> dsdp_fiber_card</span> (<span class="id">u1</span><span class="id"> u2</span><span class="id"> u3</span><span class="id"> v1</span><span class="id"> s</span><span class="id"> :</span><span class="id"> msg</span>)<span class="id"> :</span><br/>
+&nbsp;&nbsp;(<span class="id">0</span><span class="id"> &lt;</span><span class="id"> u3</span>)<span class="id">%N</span><span class="id"> -&gt;</span> (<span class="id">u3</span><span class="id"> &lt;</span><span class="id"> minn</span><span class="id"> p</span><span class="id"> q</span>)<span class="id">%N</span><span class="id"> -&gt;</span><br/>
+&nbsp;&nbsp;<span class="id">#|dsdp_fiber</span><span class="id"> u1</span><span class="id"> u2</span><span class="id"> u3</span><span class="id"> v1</span><span class="id"> s|</span><span class="id"> =</span><span class="id"> m</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id">move=&gt;</span><span class="id"> Hu3_pos</span><span class="id"> Hu3_lt</span>.<br/>
+<span class="id">rewrite</span><span class="id"> /dsdp_fiber</span><span class="id"> /linear_fiber_2d</span>.<br/>
+<span class="id">exact:</span> (<span class="id">linear_fiber_2d_card</span><span class="id"> prime_p</span><span class="id"> prime_q</span>).<br/>
+Qed.</div></details>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> Pr_dsdp_nosol_eq0</span> (<span class="id">u1</span><span class="id"> u2</span><span class="id"> u3</span><span class="id"> v1</span><span class="id"> s</span><span class="id"> :</span><span class="id"> msg</span>) (<span class="id">v2</span><span class="id"> v3</span><span class="id"> :</span><span class="id"> msg</span>)<span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="id">`Pr[CondRV</span><span class="id"> =</span> (<span class="id">v1,</span><span class="id"> u1,</span><span class="id"> u2,</span><span class="id"> u3,</span><span class="id"> s</span>)<span class="id">]</span><span class="id"> !=</span><span class="id"> 0</span><span class="id"> -&gt;</span><br/>
+&nbsp;&nbsp;(<span class="id">v2,</span><span class="id"> v3</span>)<span class="id"> \notin</span><span class="id"> dsdp_fiber</span><span class="id"> u1</span><span class="id"> u2</span><span class="id"> u3</span><span class="id"> v1</span><span class="id"> s</span><span class="id"> -&gt;</span><br/>
+&nbsp;&nbsp;<span class="id">`Pr[</span><span class="id"> VarRV</span><span class="id"> =</span> (<span class="id">v2,</span><span class="id"> v3</span>)<span class="id"> |</span><span class="id"> CondRV</span><span class="id"> =</span> (<span class="id">v1,</span><span class="id"> u1,</span><span class="id"> u2,</span><span class="id"> u3,</span><span class="id"> s</span>)<span class="id"> ]</span><span class="id"> =</span><span class="id"> 0</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id">move=&gt;</span><span class="id"> Hcond_pos</span><span class="id"> Hnot_solution</span>.<br/>
+<span class="comment">(*&nbsp;Define&nbsp;constraint&nbsp;as&nbsp;fiber&nbsp;membership&nbsp;*)</span><br/>
+<span class="id">set</span><span class="id"> constraint</span><span class="id"> :=</span><span class="gallina-kwd"> fun</span> (<span class="id">conds</span><span class="id"> :</span><span class="id"> msg</span><span class="id"> *</span><span class="id"> msg</span><span class="id"> *</span><span class="id"> msg</span><span class="id"> *</span><span class="id"> msg</span><span class="id"> *</span><span class="id"> msg</span>)<br/>
+&nbsp;&nbsp;(<span class="id">vals</span><span class="id"> :</span><span class="id"> msg</span><span class="id"> *</span><span class="id"> msg</span>)<span class="id"> =&gt;</span><br/>
+&nbsp;&nbsp;<span class="gallina-kwd">let</span><span class="id"> '</span>(<span class="id">v1,</span><span class="id"> u1,</span><span class="id"> u2,</span><span class="id"> u3,</span><span class="id"> s</span>)<span class="id"> :=</span><span class="id"> conds</span><span class="gallina-kwd"> in</span><br/>
+&nbsp;&nbsp;<span class="gallina-kwd">let</span><span class="id"> '</span>(<span class="id">v2,</span><span class="id"> v3</span>)<span class="id"> :=</span><span class="id"> vals</span><span class="gallina-kwd"> in</span><br/>
+&nbsp;&nbsp;(<span class="id">v2,</span><span class="id"> v3</span>)<span class="id"> \in</span><span class="id"> dsdp_fiber</span><span class="id"> u1</span><span class="id"> u2</span><span class="id"> u3</span><span class="id"> v1</span><span class="id"> s</span>.<br/>
+<span class="id">have</span><span class="id"> Hconstraint:</span><span class="gallina-kwd"> forall</span><span class="id"> t,</span><span class="id"> constraint</span> (<span class="id">CondRV</span><span class="id"> t</span>) (<span class="id">VarRV</span><span class="id"> t</span>).<br/>
+&nbsp;&nbsp;<span class="id">move=&gt;</span><span class="id"> t</span>.<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> /constraint</span><span class="id"> /=</span>.<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> /dsdp_fiber</span><span class="id"> /linear_fiber_2d</span><span class="id"> inE</span><span class="id"> /=</span>.<br/>
+&nbsp;&nbsp;<span class="id">apply/eqP</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;constraint_holds&nbsp;gives:&nbsp;s&nbsp;-&nbsp;u1*v1&nbsp;=&nbsp;u2*v2&nbsp;+&nbsp;u3*v3&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;We&nbsp;need:&nbsp;u2*v2&nbsp;+&nbsp;u3*v3&nbsp;=&nbsp;s&nbsp;-&nbsp;u1*v1&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id">move:</span> (<span class="id">constraint_holds</span><span class="id"> t</span>).<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> /dsdp_constraint</span><span class="id"> /CondRV</span><span class="id"> /VarRV</span><span class="id"> /=</span>.<br/>
+&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> move=&gt;</span><span class="id"> -&gt;</span>.<br/>
+<span class="gallina-kwd">by</span><span class="id"> rewrite</span> (<span class="id">cond_prob_zero_outside_constraint</span><span class="id"> Hconstraint</span><span class="id"> Hcond_pos</span>).<br/>
+Qed.</div></details>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> Pr_dsdp_sol_uniform</span> (<span class="id">u1</span><span class="id"> u2</span><span class="id"> u3</span><span class="id"> v1</span><span class="id"> s</span><span class="id"> :</span><span class="id"> msg</span>) (<span class="id">v2</span><span class="id"> v3</span><span class="id"> :</span><span class="id"> msg</span>)<span class="id"> :</span><br/>
+&nbsp;&nbsp;(<span class="id">0</span><span class="id"> &lt;</span><span class="id"> u3</span>)<span class="id">%N</span><span class="id"> -&gt;</span> (<span class="id">u3</span><span class="id"> &lt;</span><span class="id"> minn</span><span class="id"> p</span><span class="id"> q</span>)<span class="id">%N</span><span class="id"> -&gt;</span><br/>
+&nbsp;&nbsp;<span class="id">`Pr[CondRV</span><span class="id"> =</span> (<span class="id">v1,</span><span class="id"> u1,</span><span class="id"> u2,</span><span class="id"> u3,</span><span class="id"> s</span>)<span class="id">]</span><span class="id"> !=</span><span class="id"> 0</span><span class="id"> -&gt;</span><br/>
+&nbsp;&nbsp;(<span class="id">v2,</span><span class="id"> v3</span>)<span class="id"> \in</span><span class="id"> dsdp_fiber</span><span class="id"> u1</span><span class="id"> u2</span><span class="id"> u3</span><span class="id"> v1</span><span class="id"> s</span><span class="id"> -&gt;</span><br/>
+&nbsp;&nbsp;<span class="id">`Pr[</span><span class="id"> VarRV</span><span class="id"> =</span> (<span class="id">v2,</span><span class="id"> v3</span>)<span class="id"> |</span><span class="id"> CondRV</span><span class="id"> =</span> (<span class="id">v1,</span><span class="id"> u1,</span><span class="id"> u2,</span><span class="id"> u3,</span><span class="id"> s</span>)<span class="id"> ]</span><span class="id"> =</span><span class="id"> m%:R^-1</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id">move=&gt;</span><span class="id"> Hu3_pos</span><span class="id"> Hu3_lt</span><span class="id"> Hcond_pos</span><span class="id"> Hin</span>.<br/>
+<span class="comment">(*&nbsp;Fiber&nbsp;cardinality&nbsp;=&nbsp;m&nbsp;*)</span><br/>
+<span class="id">have</span><span class="id"> Hcard:</span><span class="id"> #|dsdp_fiber</span><span class="id"> u1</span><span class="id"> u2</span><span class="id"> u3</span><span class="id"> v1</span><span class="id"> s|</span><span class="id"> =</span><span class="id"> m</span>.<br/>
+&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> apply:</span><span class="id"> dsdp_fiber_card</span>.<br/>
+<span class="comment">(*&nbsp;Apply&nbsp;cPr_uniform_fiber&nbsp;from&nbsp;entropy_fiber_zpq.v.<br/>
+&nbsp;&nbsp;&nbsp;The&nbsp;card_msg_pair&nbsp;parameter&nbsp;is&nbsp;now&nbsp;implicit&nbsp;and&nbsp;accepts&nbsp;any&nbsp;proof.&nbsp;*)</span><br/>
+<span class="id">have</span><span class="id"> Hcpr</span><span class="id"> :=</span><span class="id"> @cPr_uniform_fiber</span><span class="id"> R</span><span class="id"> p_minus_2</span><span class="id"> q_minus_2</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">T</span><span class="id"> P</span><span class="id"> VarRV</span> (<span class="id">msg</span><span class="id"> *</span><span class="id"> msg</span><span class="id"> *</span><span class="id"> msg</span><span class="id"> *</span><span class="id"> msg</span>)<span class="id">%type</span><span class="id"> InputRV</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">msg</span><span class="id"> *</span><span class="id"> msg</span><span class="id"> *</span><span class="id"> msg</span><span class="id"> *</span><span class="id"> msg</span><span class="id"> *</span><span class="id"> msg</span>)<span class="id">%type</span><span class="id"> CondRV</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">dsdp_fiber_fn</span><span class="id"> dsdp_proj_input</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">constraint_fiber_dsdp</span><span class="id"> InputRV_proj_dsdp</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">card_msg_pair</span><span class="id"> VarRV_uniform</span><span class="id"> VarRV_indep_inputs</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">joint_eq_input_dsdp</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">v1,</span><span class="id"> u1,</span><span class="id"> u2,</span><span class="id"> u3,</span><span class="id"> s</span>) (<span class="id">v2,</span><span class="id"> v3</span>)<span class="id"> Hcond_pos</span><span class="id"> Hin</span>.<br/>
+<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> Hcpr</span><span class="id"> /=</span><span class="id"> Hcard</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> dsdp_centropy1_uniform</span> (<span class="id">v1</span><span class="id"> u1</span><span class="id"> u2</span><span class="id"> u3</span><span class="id"> s</span><span class="id"> :</span><span class="id"> msg</span>)<span class="id"> :</span><br/>
+&nbsp;&nbsp;(<span class="id">0</span><span class="id"> &lt;</span><span class="id"> u3</span>)<span class="id">%N</span><span class="id"> -&gt;</span> (<span class="id">u3</span><span class="id"> &lt;</span><span class="id"> minn</span><span class="id"> p</span><span class="id"> q</span>)<span class="id">%N</span><span class="id"> -&gt;</span><br/>
+&nbsp;&nbsp;<span class="id">`Pr[CondRV</span><span class="id"> =</span> (<span class="id">v1,</span><span class="id"> u1,</span><span class="id"> u2,</span><span class="id"> u3,</span><span class="id"> s</span>)<span class="id">]</span><span class="id"> !=</span><span class="id"> 0</span><span class="id"> -&gt;</span><br/>
+&nbsp;&nbsp;<span class="id">`H[</span><span class="id"> VarRV</span><span class="id"> |</span><span class="id"> CondRV</span><span class="id"> =</span> (<span class="id">v1,</span><span class="id"> u1,</span><span class="id"> u2,</span><span class="id"> u3,</span><span class="id"> s</span>)<span class="id"> ]</span><span class="id"> =</span><span class="id"> log</span> (<span class="id">m%:R</span><span class="id"> :</span><span class="id"> R</span>).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id">move=&gt;</span><span class="id"> Hu3_pos</span><span class="id"> Hu3_lt</span><span class="id"> Hcond_pos</span>.<br/>
+<span class="comment">(*&nbsp;Fiber&nbsp;cardinality&nbsp;=&nbsp;m&nbsp;*)</span><br/>
+<span class="id">have</span><span class="id"> card_m</span><span class="id"> :</span><span class="id"> #|dsdp_fiber</span><span class="id"> u1</span><span class="id"> u2</span><span class="id"> u3</span><span class="id"> v1</span><span class="id"> s|</span><span class="id"> =</span><span class="id"> m</span>.<br/>
+&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> apply:</span><span class="id"> dsdp_fiber_card</span>.<br/>
+<span class="comment">(*&nbsp;Build&nbsp;uniform&nbsp;hypothesis&nbsp;using&nbsp;Pr_dsdp_sol_uniform&nbsp;*)</span><br/>
+<span class="id">have</span><span class="id"> Hsol_unif:</span><span class="gallina-kwd"> forall</span><span class="id"> pair</span><span class="id"> :</span><span class="id"> msg</span><span class="id"> *</span><span class="id"> msg,</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">pair</span><span class="id"> \in</span><span class="id"> dsdp_fiber</span><span class="id"> u1</span><span class="id"> u2</span><span class="id"> u3</span><span class="id"> v1</span><span class="id"> s</span><span class="id"> -&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">`Pr[VarRV</span><span class="id"> =</span><span class="id"> pair</span><span class="id"> |</span><span class="id"> CondRV</span><span class="id"> =</span> (<span class="id">v1,</span><span class="id"> u1,</span><span class="id"> u2,</span><span class="id"> u3,</span><span class="id"> s</span>)<span class="id">]</span><span class="id"> =</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">#|dsdp_fiber</span><span class="id"> u1</span><span class="id"> u2</span><span class="id"> u3</span><span class="id"> v1</span><span class="id"> s|%:R^-1</span>.<br/>
+&nbsp;&nbsp;<span class="id">move=&gt;</span><span class="id"> [v2</span><span class="id"> v3]</span><span class="id"> Hin</span>.<br/>
+&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span> (<span class="id">Pr_dsdp_sol_uniform</span><span class="id"> Hu3_pos</span><span class="id"> Hu3_lt</span><span class="id"> Hcond_pos</span><span class="id"> Hin</span>)<span class="id"> card_m</span>.<br/>
+<span class="comment">(*&nbsp;Build&nbsp;zero-outside&nbsp;hypothesis&nbsp;using&nbsp;Pr_dsdp_nosol_eq0&nbsp;*)</span><br/>
+<span class="id">have</span><span class="id"> Hnonsol_zero:</span><span class="gallina-kwd"> forall</span><span class="id"> pair</span><span class="id"> :</span><span class="id"> msg</span><span class="id"> *</span><span class="id"> msg,</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">pair</span><span class="id"> \notin</span><span class="id"> dsdp_fiber</span><span class="id"> u1</span><span class="id"> u2</span><span class="id"> u3</span><span class="id"> v1</span><span class="id"> s</span><span class="id"> -&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">`Pr[VarRV</span><span class="id"> =</span><span class="id"> pair</span><span class="id"> |</span><span class="id"> CondRV</span><span class="id"> =</span> (<span class="id">v1,</span><span class="id"> u1,</span><span class="id"> u2,</span><span class="id"> u3,</span><span class="id"> s</span>)<span class="id">]</span><span class="id"> =</span><span class="id"> 0</span>.<br/>
+&nbsp;&nbsp;<span class="id">move=&gt;</span><span class="id"> [v2</span><span class="id"> v3]</span><span class="id"> Hnotin</span>.<br/>
+&nbsp;&nbsp;<span class="id">exact:</span><span class="id"> Pr_dsdp_nosol_eq0</span>.<br/>
+<span class="comment">(*&nbsp;Apply&nbsp;general&nbsp;lemma&nbsp;*)</span><br/>
+<span class="id">rewrite</span> (<span class="id">@centropy1_uniform_over_set</span><span class="id"> R</span><span class="id"> T</span><span class="id"> P</span><span class="id"> _</span><span class="id"> _</span><span class="id"> VarRV</span><span class="id"> CondRV</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">dsdp_fiber</span><span class="id"> u1</span><span class="id"> u2</span><span class="id"> u3</span><span class="id"> v1</span><span class="id"> s</span>) (<span class="id">v1,</span><span class="id"> u1,</span><span class="id"> u2,</span><span class="id"> u3,</span><span class="id"> s</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">Hcond_pos</span><span class="id"> Hsol_unif</span><span class="id"> Hnonsol_zero</span>)<span class="id">;</span><span class="id"> first</span><span class="gallina-kwd"> by</span><span class="id"> rewrite</span><span class="id"> card_m</span>.<br/>
+<span class="comment">(*&nbsp;Prove&nbsp;fiber&nbsp;cardinality&nbsp;is&nbsp;positive:&nbsp;m&nbsp;=&nbsp;p*q&nbsp;&gt;&nbsp;0&nbsp;since&nbsp;p,&nbsp;q&nbsp;are&nbsp;primes&nbsp;*)</span><br/>
+<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> card_m</span><span class="id"> muln_gt0</span><span class="id"> prime_gt0</span><span class="id"> //</span><span class="id"> prime_gt0</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="vernacular">Theorem</span><span class="id"> dsdp_centropy_uniform</span><span class="id"> :</span><br/>
+&nbsp;&nbsp;(<span class="gallina-kwd">forall</span><span class="id"> t,</span> (<span class="id">0</span><span class="id"> &lt;</span><span class="id"> U3</span><span class="id"> t</span>)<span class="id">%N</span>)<span class="id"> -&gt;</span><br/>
+&nbsp;&nbsp;(<span class="gallina-kwd">forall</span><span class="id"> t,</span> (<span class="id">U3</span><span class="id"> t</span><span class="id"> &lt;</span><span class="id"> minn</span><span class="id"> p</span><span class="id"> q</span>)<span class="id">%N</span>)<span class="id"> -&gt;</span><br/>
+&nbsp;&nbsp;<span class="id">`H</span>(<span class="id">VarRV</span><span class="id"> |</span><span class="id"> CondRV</span>)<span class="id"> =</span><span class="id"> log</span> (<span class="id">m%:R</span><span class="id"> :</span><span class="id"> R</span>).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id">move=&gt;</span><span class="id"> HU3_pos</span><span class="id"> HU3_lt</span>.<br/>
+<span class="comment">(*&nbsp;Expand&nbsp;conditional&nbsp;entropy&nbsp;as&nbsp;weighted&nbsp;sum&nbsp;*)</span><br/>
+<span class="id">rewrite</span><span class="id"> centropy_RVE'</span><span class="id"> /=</span>.<br/>
+<span class="comment">(*&nbsp;Transform&nbsp;each&nbsp;term&nbsp;in&nbsp;the&nbsp;sum&nbsp;*)</span><br/>
+<span class="id">transitivity</span> (<span class="id">\sum_</span>(<span class="id">a</span><span class="id"> :</span><span class="id"> msg</span><span class="id"> *</span><span class="id"> msg</span><span class="id"> *</span><span class="id"> msg</span><span class="id"> *</span><span class="id"> msg</span><span class="id"> *</span><span class="id"> msg</span>) <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">`Pr[</span><span class="id"> CondRV</span><span class="id"> =</span><span class="id"> a</span><span class="id"> ]</span><span class="id"> *</span><span class="id"> log</span> (<span class="id">m%:R</span><span class="id"> :</span><span class="id"> R</span>)).<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;Show&nbsp;each&nbsp;term&nbsp;equals&nbsp;Pr[...]&nbsp;*&nbsp;log(m)&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id">apply:</span><span class="id"> eq_bigr</span><span class="id"> =&gt;</span><span class="id"> []</span><span class="id"> []</span><span class="id"> []</span><span class="id"> []</span><span class="id"> []</span><span class="id"> v1</span><span class="id"> u1</span><span class="id"> u2</span><span class="id"> u3</span><span class="id"> s</span><span class="id"> H</span>.<br/>
+&nbsp;&nbsp;<span class="id">have</span><span class="id"> [-&gt;|Hcond_pos]</span><span class="id"> :=</span><span class="id"> eqVneq</span> (<span class="id">`Pr[CondRV</span><span class="id"> =</span> (<span class="id">v1,</span><span class="id"> u1,</span><span class="id"> u2,</span><span class="id"> u3,</span><span class="id"> s</span>)<span class="id">]</span>)<span class="id"> 0</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> !mul0r</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;Get&nbsp;u3&nbsp;positivity&nbsp;from&nbsp;HU3_pos&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id">have</span><span class="id"> Hu3_pos:</span> (<span class="id">0</span><span class="id"> &lt;</span><span class="id"> u3</span>)<span class="id">%N</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">move/pfwd1_neq0:</span><span class="id"> Hcond_pos</span><span class="id"> =&gt;</span><span class="id"> [t</span><span class="id"> [Ht</span><span class="id"> _]]</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">move:</span><span class="id"> Ht;</span><span class="id"> rewrite</span><span class="id"> inE</span><span class="id"> =&gt;</span><span class="id"> /eqP</span><span class="id"> Ht</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">have</span><span class="id"> HU3t</span><span class="id"> :</span><span class="id"> U3</span><span class="id"> t</span><span class="id"> =</span><span class="id"> u3</span><span class="gallina-kwd"> by</span><span class="id"> case:</span><span class="id"> Ht</span><span class="id"> =&gt;</span><span class="id"> _</span><span class="id"> _</span><span class="id"> _</span><span class="id"> -&gt;</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> -HU3t;</span><span class="id"> apply:</span><span class="id"> HU3_pos</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;Get&nbsp;u3&nbsp;&lt;&nbsp;min(p,q)&nbsp;from&nbsp;HU3_lt&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id">have</span><span class="id"> Hu3_lt:</span> (<span class="id">u3</span><span class="id"> &lt;</span><span class="id"> minn</span><span class="id"> p</span><span class="id"> q</span>)<span class="id">%N</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">move/pfwd1_neq0:</span><span class="id"> Hcond_pos</span><span class="id"> =&gt;</span><span class="id"> [t</span><span class="id"> [Ht</span><span class="id"> _]]</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">move:</span><span class="id"> Ht;</span><span class="id"> rewrite</span><span class="id"> inE</span><span class="id"> =&gt;</span><span class="id"> /eqP</span><span class="id"> Ht</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">have</span><span class="id"> HU3t</span><span class="id"> :</span><span class="id"> U3</span><span class="id"> t</span><span class="id"> =</span><span class="id"> u3</span><span class="gallina-kwd"> by</span><span class="id"> case:</span><span class="id"> Ht</span><span class="id"> =&gt;</span><span class="id"> _</span><span class="id"> _</span><span class="id"> _</span><span class="id"> -&gt;</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> -HU3t;</span><span class="id"> apply:</span><span class="id"> HU3_lt</span>.<br/>
+&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span> (<span class="id">dsdp_centropy1_uniform</span><span class="id"> Hu3_pos</span><span class="id"> Hu3_lt</span><span class="id"> Hcond_pos</span>).<br/>
+<span class="id">under</span><span class="id"> eq_bigr</span><span class="id"> do</span><span class="id"> rewrite</span><span class="id"> mulrC</span>.<br/>
+<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> -big_distrr</span><span class="id"> /=</span><span class="id"> sum_pfwd1</span><span class="id"> mulr1</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="vernacular">Section</span><span class="id"> dsdp_var_entropy</span>.<br/>
+<br/>
+<span class="vernacular">Let</span><span class="id"> m_gt1</span><span class="id"> :</span> (<span class="id">1</span><span class="id"> &lt;</span><span class="id"> m</span>)<span class="id">%N</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="comment">(*&nbsp;p&nbsp;&gt;=&nbsp;2,&nbsp;q&nbsp;&gt;=&nbsp;2,&nbsp;so&nbsp;p&nbsp;*&nbsp;q&nbsp;&gt;=&nbsp;4&nbsp;&gt;&nbsp;1&nbsp;*)</span><br/>
+<span class="id">have</span><span class="id"> Hp2:</span> (<span class="id">1</span><span class="id"> &lt;</span><span class="id"> p</span>)<span class="id">%N</span><span class="gallina-kwd"> by</span><span class="id"> []</span>.<br/>
+<span class="id">have</span><span class="id"> Hq2:</span> (<span class="id">1</span><span class="id"> &lt;</span><span class="id"> q</span>)<span class="id">%N</span><span class="gallina-kwd"> by</span><span class="id"> []</span>.<br/>
+<span class="gallina-kwd">by</span><span class="id"> rewrite</span> (<span class="id">ltn_trans</span><span class="id"> Hp2</span>)<span class="id"> //</span><span class="id"> -{1}</span>(<span class="id">muln1</span><span class="id"> p</span>)<span class="id"> ltn_pmul2l</span><span class="id"> //</span><span class="id"> ltnS</span>.<br/>
+Qed.</div></details>
+<br/>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> dsdp_var_entropy</span><span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="id">`p_VarRV</span><span class="id"> =</span><span class="id"> fdist_uniform</span><span class="id"> card_msg_pair</span><span class="id"> -&gt;</span><br/>
+&nbsp;&nbsp;<span class="id">`H</span><span class="id"> `p_VarRV</span><span class="id"> =</span><span class="id"> log</span> (<span class="id">m%:R</span><span class="id"> *</span><span class="id"> m%:R</span><span class="id"> :</span><span class="id"> R</span>).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id">move-&gt;</span>.<br/>
+<span class="id">rewrite</span><span class="id"> entropy_uniform</span><span class="id"> card_prod</span><span class="id"> !card_msg</span>.<br/>
+<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> natrM</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="vernacular">End</span><span class="id"> dsdp_var_entropy</span>.<br/>
+<br/>
+<span class="vernacular">End</span><span class="id"> dsdp_entropy</span>.<br/>
+<br/>
+<br/>
+<br/>
+<span class="vernacular">Section</span><span class="id"> dsdp_entropy_n</span>.<br/>
+<br/>
+<span class="vernacular">Context</span><span class="id"> {R</span><span class="id"> :</span><span class="id"> realType}</span>.<br/>
+<span class="vernacular">Variables</span> (<span class="id">p_minus_2</span><span class="id"> q_minus_2</span><span class="id"> :</span><span class="id"> nat</span>).<br/>
+<span class="vernacular">Local</span><span class="vernacular"> Notation</span><span class="id"> p</span><span class="id"> :=</span><span class="id"> p_minus_2</span>.<span class="id">+2</span>.<br/>
+<span class="vernacular">Local</span><span class="vernacular"> Notation</span><span class="id"> q</span><span class="id"> :=</span><span class="id"> q_minus_2</span>.<span class="id">+2</span>.<br/>
+<span class="vernacular">Hypothesis</span><span class="id"> prime_p</span><span class="id"> :</span><span class="id"> prime</span><span class="id"> p</span>.<br/>
+<span class="vernacular">Hypothesis</span><span class="id"> prime_q</span><span class="id"> :</span><span class="id"> prime</span><span class="id"> q</span>.<br/>
+<span class="vernacular">Hypothesis</span><span class="id"> coprime_pq</span><span class="id"> :</span><span class="id"> coprime</span><span class="id"> p</span><span class="id"> q</span>.<br/>
+<span class="vernacular">Local</span><span class="vernacular"> Notation</span><span class="id"> m</span><span class="id"> :=</span> (<span class="id">p</span><span class="id"> *</span><span class="id"> q</span>).<br/>
+<span class="vernacular">Local</span><span class="vernacular"> Notation</span><span class="id"> msg</span><span class="id"> :=</span><span class="id"> 'Z_m</span>.<br/>
+<br/>
+<span class="vernacular">Variable</span><span class="id"> n_relay</span><span class="id"> :</span><span class="id"> nat</span>.<br/>
+<br/>
+<span class="vernacular">Variable</span><span class="id"> T</span><span class="id"> :</span><span class="id"> finType</span>.<br/>
+<span class="vernacular">Variable</span><span class="id"> P</span><span class="id"> :</span><span class="id"> R</span>.<span class="id">-fdist</span><span class="id"> T</span>.<br/>
+<br/>
+<span class="vernacular">Let</span><span class="id"> m_gt0</span><span class="id"> :</span> (<span class="id">0</span><span class="id"> &lt;</span><span class="id"> m</span>)<span class="id">%N</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="gallina-kwd"> by</span><span class="id"> rewrite</span><span class="id"> muln_gt0</span><span class="id"> prime_gt0</span><span class="id"> //</span><span class="id"> prime_gt0</span>. Qed.</div></details>
+<br/>
+<span class="vernacular">Let</span><span class="id"> card_ffun_msg</span><span class="id"> :</span><span class="id"> #|{ffun</span><span class="id"> 'I_n_relay</span>.<span class="id">+1</span><span class="id"> -&gt;</span><span class="id"> msg}|</span><span class="id"> =</span> (<span class="id">m</span><span class="id"> ^</span><span class="id"> n_relay</span>.<span class="id">+1</span>).<span class="id">-1</span>.<span class="id">+1</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="gallina-kwd"> by</span><span class="id"> rewrite</span><span class="id"> prednK</span><span class="id"> ?expn_gt0</span><span class="id"> ?m_gt0</span><span class="id"> //</span><span class="id"> card_ffun</span><span class="id"> !card_ord</span><span class="id"> Zp_cast</span>. Qed.</div></details>
+<br/>
+<span class="vernacular">Definition</span><span class="id"> dsdp_fiber_n</span> (<span class="id">u_rel</span><span class="id"> :</span><span class="id"> {ffun</span><span class="id"> 'I_n_relay</span>.<span class="id">+1</span><span class="id"> -&gt;</span><span class="id"> msg}</span>) (<span class="id">target</span><span class="id"> :</span><span class="id"> msg</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">:</span><span class="id"> {set</span><span class="id"> {ffun</span><span class="id"> 'I_n_relay</span>.<span class="id">+1</span><span class="id"> -&gt;</span><span class="id"> msg}}</span><span class="id"> :=</span><br/>
+&nbsp;&nbsp;<span class="id">@linear_fiber_nd</span><span class="id"> p_minus_2</span><span class="id"> q_minus_2</span><span class="id"> n_relay</span><span class="id"> u_rel</span><span class="id"> target</span>.<br/>
+<br/>
+<span class="vernacular">Let</span><span class="id"> CondT_n</span><span class="id"> :=</span> (<span class="id">msg</span><span class="id"> *</span><span class="id"> msg</span><span class="id"> *</span><span class="id"> {ffun</span><span class="id"> 'I_n_relay</span>.<span class="id">+1</span><span class="id"> -&gt;</span><span class="id"> msg}</span><span class="id"> *</span><span class="id"> msg</span>)<span class="id">%type</span>.<br/>
+<span class="vernacular">Let</span><span class="id"> InputT_n</span><span class="id"> :=</span> (<span class="id">msg</span><span class="id"> *</span><span class="id"> msg</span><span class="id"> *</span><span class="id"> {ffun</span><span class="id"> 'I_n_relay</span>.<span class="id">+1</span><span class="id"> -&gt;</span><span class="id"> msg}</span>)<span class="id">%type</span>.<br/>
+<br/>
+<span class="vernacular">Variable</span><span class="id"> VarRV</span><span class="id"> :</span><span class="id"> {RV</span><span class="id"> P</span><span class="id"> -&gt;</span><span class="id"> {ffun</span><span class="id"> 'I_n_relay</span>.<span class="id">+1</span><span class="id"> -&gt;</span><span class="id"> msg}}</span>.<br/>
+<span class="vernacular">Variable</span><span class="id"> CondRV</span><span class="id"> :</span><span class="id"> {RV</span><span class="id"> P</span><span class="id"> -&gt;</span><span class="id"> CondT_n}</span>.<br/>
+<span class="vernacular">Variable</span><span class="id"> InputRV</span><span class="id"> :</span><span class="id"> {RV</span><span class="id"> P</span><span class="id"> -&gt;</span><span class="id"> InputT_n}</span>.<br/>
+<br/>
+<span class="vernacular">Let</span><span class="id"> dsdp_fiber_fn_n</span> (<span class="id">cond</span><span class="id"> :</span><span class="id"> CondT_n</span>)<span class="id"> :</span><span class="id"> {set</span><span class="id"> {ffun</span><span class="id"> 'I_n_relay</span>.<span class="id">+1</span><span class="id"> -&gt;</span><span class="id"> msg}}</span><span class="id"> :=</span><br/>
+&nbsp;&nbsp;<span class="gallina-kwd">let</span><span class="id"> '</span>(<span class="id">v0,</span><span class="id"> u0,</span><span class="id"> u_rel,</span><span class="id"> s</span>)<span class="id"> :=</span><span class="id"> cond</span><span class="gallina-kwd"> in</span><br/>
+&nbsp;&nbsp;<span class="id">dsdp_fiber_n</span><span class="id"> u_rel</span> (<span class="id">s</span><span class="id"> -</span><span class="id"> u0</span><span class="id"> *</span><span class="id"> v0</span>).<br/>
+<br/>
+<span class="vernacular">Let</span><span class="id"> dsdp_proj_input_n</span> (<span class="id">cond</span><span class="id"> :</span><span class="id"> CondT_n</span>)<span class="id"> :</span><span class="id"> InputT_n</span><span class="id"> :=</span><br/>
+&nbsp;&nbsp;<span class="gallina-kwd">let</span><span class="id"> '</span>(<span class="id">v0,</span><span class="id"> u0,</span><span class="id"> u_rel,</span><span class="id"> _</span>)<span class="id"> :=</span><span class="id"> cond</span><span class="gallina-kwd"> in</span> (<span class="id">v0,</span><span class="id"> u0,</span><span class="id"> u_rel</span>).<br/>
+<br/>
+<span class="vernacular">Hypothesis</span><span class="id"> constraint_fiber_n</span><span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="gallina-kwd">forall</span><span class="id"> t,</span><span class="id"> VarRV</span><span class="id"> t</span><span class="id"> \in</span><span class="id"> dsdp_fiber_fn_n</span> (<span class="id">CondRV</span><span class="id"> t</span>).<br/>
+<br/>
+<span class="vernacular">Hypothesis</span><span class="id"> InputRV_proj_n</span><span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="gallina-kwd">forall</span><span class="id"> t,</span><span class="id"> InputRV</span><span class="id"> t</span><span class="id"> =</span><span class="id"> dsdp_proj_input_n</span> (<span class="id">CondRV</span><span class="id"> t</span>).<br/>
+<br/>
+<span class="vernacular">Hypothesis</span><span class="id"> VarRV_uniform_n</span><span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="id">`p_</span><span class="id"> VarRV</span><span class="id"> =</span><span class="id"> fdist_uniform</span><span class="id"> card_ffun_msg</span>.<br/>
+<br/>
+<span class="vernacular">Hypothesis</span><span class="id"> VarRV_indep_inputs_n</span><span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="id">P</span><span class="id"> |=</span><span class="id"> InputRV</span><span class="id"> _|_</span><span class="id"> VarRV</span>.<br/>
+<br/>
+<span class="vernacular">Hypothesis</span><span class="id"> joint_eq_input_n</span><span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="gallina-kwd">forall</span> (<span class="id">cond</span><span class="id"> :</span><span class="id"> CondT_n</span>) (<span class="id">var</span><span class="id"> :</span><span class="id"> {ffun</span><span class="id"> 'I_n_relay</span>.<span class="id">+1</span><span class="id"> -&gt;</span><span class="id"> msg}</span>)<span class="id">,</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">var</span><span class="id"> \in</span><span class="id"> dsdp_fiber_fn_n</span><span class="id"> cond</span><span class="id"> -&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">`Pr[[%VarRV,</span><span class="id"> CondRV]</span><span class="id"> =</span> (<span class="id">var,</span><span class="id"> cond</span>)<span class="id">]</span><span class="id"> =</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">`Pr[[%VarRV,</span><span class="id"> InputRV]</span><span class="id"> =</span> (<span class="id">var,</span><span class="id"> dsdp_proj_input_n</span><span class="id"> cond</span>)<span class="id">]</span>.<br/>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> dsdp_fiber_card_n</span> (<span class="id">v0</span><span class="id"> u0</span><span class="id"> s</span><span class="id"> :</span><span class="id"> msg</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">u_rel</span><span class="id"> :</span><span class="id"> {ffun</span><span class="id"> 'I_n_relay</span>.<span class="id">+1</span><span class="id"> -&gt;</span><span class="id"> msg}</span>)<span class="id"> :</span><br/>
+&nbsp;&nbsp;(<span class="id">0</span><span class="id"> &lt;</span><span class="id"> val</span> (<span class="id">u_rel</span><span class="id"> ord_max</span>))<span class="id">%N</span><span class="id"> -&gt;</span><br/>
+&nbsp;&nbsp;(<span class="id">val</span> (<span class="id">u_rel</span><span class="id"> ord_max</span>)<span class="id"> &lt;</span><span class="id"> minn</span><span class="id"> p</span><span class="id"> q</span>)<span class="id">%N</span><span class="id"> -&gt;</span><br/>
+&nbsp;&nbsp;<span class="id">#|dsdp_fiber_fn_n</span> (<span class="id">v0,</span><span class="id"> u0,</span><span class="id"> u_rel,</span><span class="id"> s</span>)<span class="id">|</span><span class="id"> =</span> (<span class="id">m</span><span class="id"> ^</span><span class="id"> n_relay</span>)<span class="id">%N</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id">move=&gt;</span><span class="id"> Hu_pos</span><span class="id"> Hu_lt</span>.<br/>
+<span class="id">rewrite</span><span class="id"> /dsdp_fiber_fn_n</span><span class="id"> /dsdp_fiber_n</span>.<br/>
+<span class="id">have</span><span class="id"> Heta</span><span class="id"> :</span><span class="id"> linear_fiber_nd</span><span class="id"> u_rel</span> (<span class="id">s</span><span class="id"> -</span><span class="id"> u0</span><span class="id"> *</span><span class="id"> v0</span>)<span class="id"> =</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">@linear_fiber_nd</span><span class="id"> p_minus_2</span><span class="id"> q_minus_2</span><span class="id"> n_relay</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="gallina-kwd">fun</span><span class="id"> i</span><span class="id"> =&gt;</span><span class="id"> u_rel</span><span class="id"> i</span>) (<span class="id">s</span><span class="id"> -</span><span class="id"> u0</span><span class="id"> *</span><span class="id"> v0</span>)<span class="gallina-kwd"> by</span><span class="id"> []</span>.<br/>
+<span class="id">rewrite</span><span class="id"> Heta</span>.<br/>
+<span class="id">apply</span><span class="id"> linear_fiber_nd_card</span><span class="id"> =&gt;</span><span class="id"> //</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> dsdp_centropy1_uniform_n</span> (<span class="id">v0</span><span class="id"> u0</span><span class="id"> s</span><span class="id"> :</span><span class="id"> msg</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">u_rel</span><span class="id"> :</span><span class="id"> {ffun</span><span class="id"> 'I_n_relay</span>.<span class="id">+1</span><span class="id"> -&gt;</span><span class="id"> msg}</span>)<span class="id"> :</span><br/>
+&nbsp;&nbsp;(<span class="id">0</span><span class="id"> &lt;</span><span class="id"> val</span> (<span class="id">u_rel</span><span class="id"> ord_max</span>))<span class="id">%N</span><span class="id"> -&gt;</span><br/>
+&nbsp;&nbsp;(<span class="id">val</span> (<span class="id">u_rel</span><span class="id"> ord_max</span>)<span class="id"> &lt;</span><span class="id"> minn</span><span class="id"> p</span><span class="id"> q</span>)<span class="id">%N</span><span class="id"> -&gt;</span><br/>
+&nbsp;&nbsp;<span class="id">`Pr[CondRV</span><span class="id"> =</span> (<span class="id">v0,</span><span class="id"> u0,</span><span class="id"> u_rel,</span><span class="id"> s</span>)<span class="id">]</span><span class="id"> !=</span><span class="id"> 0</span><span class="id"> -&gt;</span><br/>
+&nbsp;&nbsp;<span class="id">`H[</span><span class="id"> VarRV</span><span class="id"> |</span><span class="id"> CondRV</span><span class="id"> =</span> (<span class="id">v0,</span><span class="id"> u0,</span><span class="id"> u_rel,</span><span class="id"> s</span>)<span class="id"> ]</span><span class="id"> =</span><span class="id"> log</span> ((<span class="id">m</span><span class="id"> ^</span><span class="id"> n_relay</span>)<span class="id">%:R</span><span class="id"> :</span><span class="id"> R</span>).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id">move=&gt;</span><span class="id"> Hu_pos</span><span class="id"> Hu_lt</span><span class="id"> Hcond_pos</span>.<br/>
+<span class="id">have</span><span class="id"> Hcard</span><span class="id"> :=</span><span class="id"> @dsdp_fiber_card_n</span><span class="id"> v0</span><span class="id"> u0</span><span class="id"> s</span><span class="id"> u_rel</span><span class="id"> Hu_pos</span><span class="id"> Hu_lt</span>.<br/>
+<span class="comment">(*&nbsp;Build&nbsp;uniform&nbsp;hypothesis&nbsp;using&nbsp;gen_cPr_uniform_fiber&nbsp;*)</span><br/>
+<span class="id">have</span><span class="id"> Hsol_unif:</span><span class="gallina-kwd"> forall</span><span class="id"> w</span><span class="id"> :</span><span class="id"> {ffun</span><span class="id"> 'I_n_relay</span>.<span class="id">+1</span><span class="id"> -&gt;</span><span class="id"> msg},</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">w</span><span class="id"> \in</span><span class="id"> dsdp_fiber_fn_n</span> (<span class="id">v0,</span><span class="id"> u0,</span><span class="id"> u_rel,</span><span class="id"> s</span>)<span class="id"> -&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">`Pr[VarRV</span><span class="id"> =</span><span class="id"> w</span><span class="id"> |</span><span class="id"> CondRV</span><span class="id"> =</span> (<span class="id">v0,</span><span class="id"> u0,</span><span class="id"> u_rel,</span><span class="id"> s</span>)<span class="id">]</span><span class="id"> =</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">#|dsdp_fiber_fn_n</span> (<span class="id">v0,</span><span class="id"> u0,</span><span class="id"> u_rel,</span><span class="id"> s</span>)<span class="id">|%:R^-1</span>.<br/>
+&nbsp;&nbsp;<span class="id">move=&gt;</span><span class="id"> w</span><span class="id"> Hin</span>.<br/>
+&nbsp;&nbsp;<span class="id">have</span><span class="id"> Hcpr</span><span class="id"> :=</span><span class="id"> @gen_cPr_uniform_fiber</span><span class="id"> R</span><span class="id"> T</span><span class="id"> P</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">{ffun</span><span class="id"> 'I_n_relay</span>.<span class="id">+1</span><span class="id"> -&gt;</span><span class="id"> msg}</span><span class="id"> :</span><span class="id"> finType</span>)<span class="id"> _</span><span class="id"> card_ffun_msg</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">VarRV</span><span class="id"> InputT_n</span><span class="id"> InputRV</span><span class="id"> CondT_n</span><span class="id"> CondRV</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">dsdp_fiber_fn_n</span><span class="id"> dsdp_proj_input_n</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">constraint_fiber_n</span><span class="id"> InputRV_proj_n</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">VarRV_uniform_n</span><span class="id"> VarRV_indep_inputs_n</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">joint_eq_input_n</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">v0,</span><span class="id"> u0,</span><span class="id"> u_rel,</span><span class="id"> s</span>)<span class="id"> w</span><span class="id"> Hcond_pos</span><span class="id"> Hin</span>.<br/>
+&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> []</span>.<br/>
+<span class="comment">(*&nbsp;Build&nbsp;zero-outside&nbsp;hypothesis&nbsp;*)</span><br/>
+<span class="id">have</span><span class="id"> Hnonsol_zero:</span><span class="gallina-kwd"> forall</span><span class="id"> w</span><span class="id"> :</span><span class="id"> {ffun</span><span class="id"> 'I_n_relay</span>.<span class="id">+1</span><span class="id"> -&gt;</span><span class="id"> msg},</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">w</span><span class="id"> \notin</span><span class="id"> dsdp_fiber_fn_n</span> (<span class="id">v0,</span><span class="id"> u0,</span><span class="id"> u_rel,</span><span class="id"> s</span>)<span class="id"> -&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">`Pr[VarRV</span><span class="id"> =</span><span class="id"> w</span><span class="id"> |</span><span class="id"> CondRV</span><span class="id"> =</span> (<span class="id">v0,</span><span class="id"> u0,</span><span class="id"> u_rel,</span><span class="id"> s</span>)<span class="id">]</span><span class="id"> =</span><span class="id"> 0</span>.<br/>
+&nbsp;&nbsp;<span class="id">move=&gt;</span><span class="id"> w</span><span class="id"> Hnotin</span>.<br/>
+&nbsp;&nbsp;<span class="id">set</span><span class="id"> constraint</span><span class="id"> :=</span><span class="gallina-kwd"> fun</span><span class="id"> c</span><span class="id"> v</span><span class="id"> =&gt;</span><span class="id"> v</span><span class="id"> \in</span><span class="id"> dsdp_fiber_fn_n</span><span class="id"> c</span>.<br/>
+&nbsp;&nbsp;<span class="id">exact:</span> (<span class="id">cond_prob_zero_outside_constraint</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">constraint</span><span class="id"> :=</span><span class="id"> constraint</span>)<span class="id"> constraint_fiber_n</span><span class="id"> Hcond_pos</span><span class="id"> Hnotin</span>).<br/>
+<span class="id">rewrite</span> (<span class="id">@centropy1_uniform_over_set</span><span class="id"> R</span><span class="id"> T</span><span class="id"> P</span><span class="id"> _</span><span class="id"> _</span><span class="id"> VarRV</span><span class="id"> CondRV</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">dsdp_fiber_fn_n</span> (<span class="id">v0,</span><span class="id"> u0,</span><span class="id"> u_rel,</span><span class="id"> s</span>)) (<span class="id">v0,</span><span class="id"> u0,</span><span class="id"> u_rel,</span><span class="id"> s</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">Hcond_pos</span><span class="id"> Hsol_unif</span><span class="id"> Hnonsol_zero</span>)<span class="id">;</span><span class="id"> first</span><span class="gallina-kwd"> by</span><span class="id"> rewrite</span><span class="id"> Hcard</span>.<br/>
+<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> Hcard</span><span class="id"> expn_gt0</span><span class="id"> m_gt0</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="vernacular">Let</span><span class="id"> u_of_cond</span> (<span class="id">c</span><span class="id"> :</span><span class="id"> CondT_n</span>)<span class="id"> :</span><span class="id"> {ffun</span><span class="id"> 'I_n_relay</span>.<span class="id">+1</span><span class="id"> -&gt;</span><span class="id"> msg}</span><span class="id"> :=</span><br/>
+&nbsp;&nbsp;<span class="gallina-kwd">let</span><span class="id"> '</span>(<span class="id">_,</span><span class="id"> _,</span><span class="id"> u_rel,</span><span class="id"> _</span>)<span class="id"> :=</span><span class="id"> c</span><span class="gallina-kwd"> in</span><span class="id"> u_rel</span>.<br/>
+<br/>
+<span class="vernacular">Theorem</span><span class="id"> dsdp_centropy_uniform_n</span><span class="id"> :</span><br/>
+&nbsp;&nbsp;(<span class="gallina-kwd">forall</span><span class="id"> t,</span> (<span class="id">0</span><span class="id"> &lt;</span><span class="id"> val</span> (<span class="id">u_of_cond</span> (<span class="id">CondRV</span><span class="id"> t</span>)<span class="id"> ord_max</span>))<span class="id">%N</span>)<span class="id"> -&gt;</span><br/>
+&nbsp;&nbsp;(<span class="gallina-kwd">forall</span><span class="id"> t,</span> (<span class="id">val</span> (<span class="id">u_of_cond</span> (<span class="id">CondRV</span><span class="id"> t</span>)<span class="id"> ord_max</span>)<span class="id"> &lt;</span><span class="id"> minn</span><span class="id"> p</span><span class="id"> q</span>)<span class="id">%N</span>)<span class="id"> -&gt;</span><br/>
+&nbsp;&nbsp;<span class="id">`H</span>(<span class="id">VarRV</span><span class="id"> |</span><span class="id"> CondRV</span>)<span class="id"> =</span><span class="id"> log</span> ((<span class="id">m</span><span class="id"> ^</span><span class="id"> n_relay</span>)<span class="id">%:R</span><span class="id"> :</span><span class="id"> R</span>).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id">move=&gt;</span><span class="id"> HU_pos</span><span class="id"> HU_lt</span>.<br/>
+<span class="id">rewrite</span><span class="id"> centropy_RVE'</span><span class="id"> /=</span>.<br/>
+<span class="id">transitivity</span> (<span class="id">\sum_</span>(<span class="id">a</span><span class="id"> :</span><span class="id"> CondT_n</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">`Pr[</span><span class="id"> CondRV</span><span class="id"> =</span><span class="id"> a</span><span class="id"> ]</span><span class="id"> *</span><span class="id"> log</span> ((<span class="id">m</span><span class="id"> ^</span><span class="id"> n_relay</span>)<span class="id">%:R</span><span class="id"> :</span><span class="id"> R</span>)).<br/>
+&nbsp;&nbsp;<span class="id">apply:</span><span class="id"> eq_bigr</span><span class="id"> =&gt;</span><span class="id"> []</span><span class="id"> [[[v0</span><span class="id"> u0]</span><span class="id"> u_rel]</span><span class="id"> s]</span><span class="id"> _</span>.<br/>
+&nbsp;&nbsp;<span class="id">have</span><span class="id"> [-&gt;|Hcond_pos]</span><span class="id"> :=</span><span class="id"> eqVneq</span> (<span class="id">`Pr[CondRV</span><span class="id"> =</span> (<span class="id">v0,</span><span class="id"> u0,</span><span class="id"> u_rel,</span><span class="id"> s</span>)<span class="id">]</span>)<span class="id"> 0</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> !mul0r</span>.<br/>
+&nbsp;&nbsp;<span class="id">have</span><span class="id"> Hu_pos:</span> (<span class="id">0</span><span class="id"> &lt;</span><span class="id"> val</span> (<span class="id">u_rel</span><span class="id"> ord_max</span>))<span class="id">%N</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">move/pfwd1_neq0:</span><span class="id"> Hcond_pos</span><span class="id"> =&gt;</span><span class="id"> [t</span><span class="id"> [Ht</span><span class="id"> _]]</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">move:</span><span class="id"> Ht;</span><span class="id"> rewrite</span><span class="id"> inE</span><span class="id"> =&gt;</span><span class="id"> /eqP</span><span class="id"> Ht</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">have</span><span class="id"> :=</span><span class="id"> HU_pos</span><span class="id"> t;</span><span class="id"> rewrite</span><span class="id"> Ht</span><span class="id"> /=</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> []</span>.<br/>
+&nbsp;&nbsp;<span class="id">have</span><span class="id"> Hu_lt:</span> (<span class="id">val</span> (<span class="id">u_rel</span><span class="id"> ord_max</span>)<span class="id"> &lt;</span><span class="id"> minn</span><span class="id"> p</span><span class="id"> q</span>)<span class="id">%N</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">move/pfwd1_neq0:</span><span class="id"> Hcond_pos</span><span class="id"> =&gt;</span><span class="id"> [t</span><span class="id"> [Ht</span><span class="id"> _]]</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">move:</span><span class="id"> Ht;</span><span class="id"> rewrite</span><span class="id"> inE</span><span class="id"> =&gt;</span><span class="id"> /eqP</span><span class="id"> Ht</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">have</span><span class="id"> :=</span><span class="id"> HU_lt</span><span class="id"> t;</span><span class="id"> rewrite</span><span class="id"> Ht</span><span class="id"> /=</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> []</span>.<br/>
+&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span> (<span class="id">dsdp_centropy1_uniform_n</span><span class="id"> Hu_pos</span><span class="id"> Hu_lt</span><span class="id"> Hcond_pos</span>).<br/>
+<span class="id">under</span><span class="id"> eq_bigr</span><span class="id"> do</span><span class="id"> rewrite</span><span class="id"> mulrC</span>.<br/>
+<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> -big_distrr</span><span class="id"> /=</span><span class="id"> sum_pfwd1</span><span class="id"> mulr1</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="vernacular">End</span><span class="id"> dsdp_entropy_n</span>.<br/>
+<br/>
+<br/>
+<br/>
+<span class="vernacular">Section</span><span class="id"> dsdp_privacy_analysis</span>.<br/>
+<br/>
+<span class="vernacular">Context</span><span class="id"> {R</span><span class="id"> :</span><span class="id"> realType}</span>.<br/>
+<span class="vernacular">Variable</span><span class="id"> T</span><span class="id"> :</span><span class="id"> finType</span>.<br/>
+<span class="vernacular">Variable</span><span class="id"> P</span><span class="id"> :</span><span class="id"> R</span>.<span class="id">-fdist</span><span class="id"> T</span>.<br/>
+<br/>
+<span class="vernacular">Hypothesis</span><span class="id"> neg_self_indep</span><span class="id"> :</span><span class="gallina-kwd"> forall</span> (<span class="id">TA</span><span class="id"> :</span><span class="id"> finType</span>)<br/>
+&nbsp;&nbsp;(<span class="id">A</span><span class="id"> :</span><span class="id"> {RV</span><span class="id"> P</span><span class="id"> -&gt;</span><span class="id"> TA}</span>)<span class="id">,</span><span class="id"> ~</span><span class="id"> P</span><span class="id"> |=</span><span class="id"> A</span><span class="id"> _|_</span><span class="id"> A</span>.<br/>
+<br/>
+<span class="vernacular">Variables</span> (<span class="id">p_minus_2</span><span class="id"> q_minus_2</span><span class="id"> :</span><span class="id"> nat</span>).<br/>
+<span class="vernacular">Local</span><span class="vernacular"> Notation</span><span class="id"> p</span><span class="id"> :=</span><span class="id"> p_minus_2</span>.<span class="id">+2</span>.<br/>
+<span class="vernacular">Local</span><span class="vernacular"> Notation</span><span class="id"> q</span><span class="id"> :=</span><span class="id"> q_minus_2</span>.<span class="id">+2</span>.<br/>
+<span class="vernacular">Hypothesis</span><span class="id"> prime_p</span><span class="id"> :</span><span class="id"> prime</span><span class="id"> p</span>.<br/>
+<span class="vernacular">Hypothesis</span><span class="id"> prime_q</span><span class="id"> :</span><span class="id"> prime</span><span class="id"> q</span>.<br/>
+<span class="vernacular">Hypothesis</span><span class="id"> coprime_pq</span><span class="id"> :</span><span class="id"> coprime</span><span class="id"> p</span><span class="id"> q</span>.<br/>
+<span class="vernacular">Local</span><span class="vernacular"> Notation</span><span class="id"> m</span><span class="id"> :=</span> (<span class="id">p</span><span class="id"> *</span><span class="id"> q</span>).<br/>
+<br/>
+<span class="vernacular">Local</span><span class="vernacular"> Notation</span><span class="id"> msg</span><span class="id"> :=</span><span class="id"> 'Z_m</span>.<br/>
+<br/>
+<span class="vernacular">Let</span><span class="id"> m_gt1</span><span class="id"> :</span> (<span class="id">1</span><span class="id"> &lt;</span><span class="id"> m</span>)<span class="id">%N</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id">have</span><span class="id"> Hp2:</span> (<span class="id">1</span><span class="id"> &lt;</span><span class="id"> p</span>)<span class="id">%N</span><span class="gallina-kwd"> by</span><span class="id"> []</span>.<br/>
+<span class="id">have</span><span class="id"> Hq2:</span> (<span class="id">1</span><span class="id"> &lt;</span><span class="id"> q</span>)<span class="id">%N</span><span class="gallina-kwd"> by</span><span class="id"> []</span>.<br/>
+<span class="gallina-kwd">by</span><span class="id"> rewrite</span> (<span class="id">ltn_trans</span><span class="id"> Hp2</span>)<span class="id"> //</span><span class="id"> -{1}</span>(<span class="id">muln1</span><span class="id"> p</span>)<span class="id"> ltn_pmul2l</span><span class="id"> //</span><span class="id"> ltnS</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="vernacular">Let</span><span class="id"> card_msg</span><span class="id"> :</span><span class="id"> #|msg|</span><span class="id"> =</span><span class="id"> m</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="gallina-kwd"> by</span><span class="id"> rewrite</span><span class="id"> card_ord</span><span class="id"> Zp_cast</span>. Qed.</div></details>
+<br/>
+<span class="vernacular">Let</span><span class="id"> card_msg_pair</span><span class="id"> :</span><span class="id"> #|</span>((<span class="id">msg</span><span class="id"> *</span><span class="id"> msg</span>)<span class="id">%type</span><span class="id"> :</span><span class="id"> finType</span>)<span class="id">|</span><span class="id"> =</span> (<span class="id">m</span><span class="id"> ^</span><span class="id"> 2</span>)<span class="id">%N</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="gallina-kwd"> by</span><span class="id"> rewrite</span><span class="id"> card_prod</span><span class="id"> !card_msg</span><span class="id"> expnS</span><span class="id"> expn1</span>. Qed.</div></details>
+<br/>
+<span class="vernacular">Let</span><span class="id"> encT</span><span class="id"> :=</span><span class="id"> party_enc</span><span class="id"> party_id</span><span class="id"> msg</span>.<br/>
+<span class="vernacular">Let</span><span class="id"> pkeyT</span><span class="id"> :=</span><span class="id"> party_pkey</span><span class="id"> party_id</span><span class="id"> msg</span>.<br/>
+<br/>
+<span class="vernacular">Let</span><span class="id"> alice</span><span class="id"> :</span><span class="id"> party_id</span><span class="id"> :=</span><span class="id"> Alice</span>.<br/>
+<span class="vernacular">Let</span><span class="id"> bob</span><span class="id"> :</span><span class="id"> party_id</span><span class="id"> :=</span><span class="id"> Bob</span>.<br/>
+<span class="vernacular">Let</span><span class="id"> charlie</span><span class="id"> :</span><span class="id"> party_id</span><span class="id"> :=</span><span class="id"> Charlie</span>.<br/>
+<br/>
+<span class="vernacular">Let</span><span class="id"> data</span><span class="id"> :=</span> (<span class="id">msg</span><span class="id"> +</span><span class="id"> encT</span><span class="id"> +</span><span class="id"> pkeyT</span>)<span class="id">%type</span>.<br/>
+<span class="vernacular">Let</span><span class="id"> d</span><span class="id"> x</span><span class="id"> :</span><span class="id"> data</span><span class="id"> :=</span><span class="id"> inl</span> (<span class="id">inl</span><span class="id"> x</span>).<br/>
+<span class="vernacular">Let</span><span class="id"> e</span><span class="id"> x</span><span class="id"> :</span><span class="id"> data</span><span class="id"> :=</span><span class="id"> inl</span> (<span class="id">inr</span><span class="id"> x</span>).<br/>
+<span class="vernacular">Let</span><span class="id"> k</span><span class="id"> x</span><span class="id"> :</span><span class="id"> data</span><span class="id"> :=</span><span class="id"> inr</span><span class="id"> x</span>.<br/>
+<br/>
+<span class="vernacular">Notation</span> <span class="id">&quot;u *h w&quot;</span><span class="id"> :=</span> (<span class="id">party_Emul</span><span class="id"> u</span><span class="id"> w</span>).<br/>
+<span class="vernacular">Notation</span> <span class="id">&quot;u ^h w&quot;</span><span class="id"> :=</span> (<span class="id">party_Epow</span><span class="id"> u</span><span class="id"> w</span>).<br/>
+<br/>
+<span class="vernacular">Hypothesis</span><span class="id"> E_enc_unif</span><span class="id"> :</span><span class="gallina-kwd"> forall</span> (<span class="id">T0</span><span class="id"> :</span><span class="id"> finType</span>) (<span class="id">P0</span><span class="id"> :</span><span class="id"> R</span>.<span class="id">-fdist</span><span class="id"> T0</span>)<br/>
+&nbsp;&nbsp;(<span class="id">A</span><span class="id"> :</span><span class="id"> finType</span>) (<span class="id">p</span><span class="id"> :</span><span class="id"> party_id</span>) (<span class="id">X</span><span class="id"> :</span><span class="id"> {RV</span><span class="id"> P0</span><span class="id"> -&gt;</span><span class="id"> p</span>.<span class="id">-enc</span><span class="id"> A}</span>) (<span class="id">n</span><span class="id"> :</span><span class="id"> nat</span>)<br/>
+&nbsp;&nbsp;(<span class="id">card_A</span><span class="id"> :</span><span class="id"> #|A|</span><span class="id"> =</span><span class="id"> n</span>.<span class="id">+1</span>)<span class="id">,</span><br/>
+&nbsp;&nbsp;<span class="id">`p_X</span><span class="id"> =</span><span class="id"> fdist_uniform</span> (<span class="id">card_enc_for'</span><span class="id"> p</span><span class="id"> card_A</span>).<br/>
+<br/>
+<span class="vernacular">Hypothesis</span><span class="id"> E_enc_inde</span><span class="id"> :</span><span class="gallina-kwd"> forall</span> (<span class="id">A</span><span class="id"> B</span><span class="id"> :</span><span class="id"> finType</span>) (<span class="id">p</span><span class="id"> :</span><span class="id"> party_id</span>)<br/>
+&nbsp;&nbsp;(<span class="id">X</span><span class="id"> :</span><span class="id"> {RV</span><span class="id"> P</span><span class="id"> -&gt;</span><span class="id"> p</span>.<span class="id">-enc</span><span class="id"> A}</span>) (<span class="id">Y</span><span class="id"> :</span><span class="id"> {RV</span><span class="id"> P</span><span class="id"> -&gt;</span><span class="id"> B}</span>)<span class="id">,</span><br/>
+&nbsp;&nbsp;<span class="id">P</span><span class="id"> |=</span><span class="id"> X</span><span class="id"> _|_</span><span class="id"> Y</span>.<br/>
+<br/>
+<br/>
+<span class="vernacular">Record</span><span class="id"> dsdp_random_inputs</span><span class="id"> :=</span><br/>
+&nbsp;&nbsp;<span class="id">DSDPRandomInputs</span><span class="id"> {</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">Dk_a</span><span class="id"> :</span><span class="id"> {RV</span><span class="id"> P</span><span class="id"> -&gt;</span><span class="id"> Alice</span>.<span class="id">-key</span><span class="id"> Dec</span><span class="id"> msg};</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">Dk_b</span><span class="id"> :</span><span class="id"> {RV</span><span class="id"> P</span><span class="id"> -&gt;</span><span class="id"> Bob</span>.<span class="id">-key</span><span class="id"> Dec</span><span class="id"> msg};</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">Dk_c</span><span class="id"> :</span><span class="id"> {RV</span><span class="id"> P</span><span class="id"> -&gt;</span><span class="id"> Charlie</span>.<span class="id">-key</span><span class="id"> Dec</span><span class="id"> msg};</span><br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">V1</span><span class="id"> :</span><span class="id"> {RV</span><span class="id"> P</span><span class="id"> -&gt;</span><span class="id"> msg};</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">V2</span><span class="id"> :</span><span class="id"> {RV</span><span class="id"> P</span><span class="id"> -&gt;</span><span class="id"> msg};</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">V3</span><span class="id"> :</span><span class="id"> {RV</span><span class="id"> P</span><span class="id"> -&gt;</span><span class="id"> msg};</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">U1</span><span class="id"> :</span><span class="id"> {RV</span><span class="id"> P</span><span class="id"> -&gt;</span><span class="id"> msg};</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">U2</span><span class="id"> :</span><span class="id"> {RV</span><span class="id"> P</span><span class="id"> -&gt;</span><span class="id"> msg};</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">U3</span><span class="id"> :</span><span class="id"> {RV</span><span class="id"> P</span><span class="id"> -&gt;</span><span class="id"> msg};</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">R2</span><span class="id"> :</span><span class="id"> {RV</span><span class="id"> P</span><span class="id"> -&gt;</span><span class="id"> msg};</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">R3</span><span class="id"> :</span><span class="id"> {RV</span><span class="id"> P</span><span class="id"> -&gt;</span><span class="id"> msg};</span><br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">alice_indep</span><span class="id"> :</span><span class="id"> P</span><span class="id"> |=</span><span class="id"> [%</span><span class="id"> Dk_a,</span><span class="id"> V1,</span><span class="id"> U1,</span><span class="id"> U2,</span><span class="id"> U3,</span><span class="id"> R2,</span><span class="id"> R3]</span><span class="id"> _|_</span><span class="id"> [%V2,</span><span class="id"> V3];</span><br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">alice_V1_indep_randoms</span><span class="id"> :</span><span class="id"> P</span><span class="id"> |=</span><span class="id"> V1</span><span class="id"> _|_</span><span class="id"> [%U1,</span><span class="id"> U2,</span><span class="id"> U3,</span><span class="id"> R2,</span><span class="id"> R3];</span><br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">pV1_unif</span><span class="id"> :</span><span class="id"> `p_</span><span class="id"> V1</span><span class="id"> =</span><span class="id"> fdist_uniform</span><span class="id"> card_msg;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">pV2_unif</span><span class="id"> :</span><span class="id"> `p_</span><span class="id"> V2</span><span class="id"> =</span><span class="id"> fdist_uniform</span><span class="id"> card_msg;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">pV3_unif</span><span class="id"> :</span><span class="id"> `p_</span><span class="id"> V3</span><span class="id"> =</span><span class="id"> fdist_uniform</span><span class="id"> card_msg;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">pV2V3_unif</span><span class="id"> :</span><span class="id"> `p_</span><span class="id"> [%</span><span class="id"> V2,</span><span class="id"> V3]</span><span class="id"> =</span><span class="id"> fdist_uniform</span><span class="id"> card_msg_pair;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">pU2_unif</span><span class="id"> :</span><span class="id"> `p_</span><span class="id"> U2</span><span class="id"> =</span><span class="id"> fdist_uniform</span><span class="id"> card_msg;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">pU3_unif</span><span class="id"> :</span><span class="id"> `p_</span><span class="id"> U3</span><span class="id"> =</span><span class="id"> fdist_uniform</span><span class="id"> card_msg;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">pR2_unif</span><span class="id"> :</span><span class="id"> `p_</span><span class="id"> R2</span><span class="id"> =</span><span class="id"> fdist_uniform</span><span class="id"> card_msg;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">pR3_unif</span><span class="id"> :</span><span class="id"> `p_</span><span class="id"> R3</span><span class="id"> =</span><span class="id"> fdist_uniform</span><span class="id"> card_msg;</span><br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">V3_U3_indep_V1</span><span class="id"> :</span><span class="id"> P</span><span class="id"> |=</span><span class="id"> [%V3,</span><span class="id"> U3]</span><span class="id"> _|_</span><span class="id"> V1;</span><br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">R3_indep_VU3_V1</span><span class="id"> :</span><span class="id"> P</span><span class="id"> |=</span><span class="id"> R3</span><span class="id"> _|_</span><span class="id"> [%V3</span><span class="id"> \*</span><span class="id"> U3,</span><span class="id"> V1];</span><br/>
+<span class="id">}</span>.<br/>
+<br/>
+<span class="vernacular">Variable</span><span class="id"> inputs</span><span class="id"> :</span><span class="id"> dsdp_random_inputs</span>.<br/>
+<br/>
+<span class="vernacular">Let</span><span class="id"> Dk_a</span><span class="id"> :=</span><span class="id"> Dk_a</span><span class="id"> inputs</span>.<br/>
+<span class="vernacular">Let</span><span class="id"> Dk_b</span><span class="id"> :=</span><span class="id"> Dk_b</span><span class="id"> inputs</span>.<br/>
+<span class="vernacular">Let</span><span class="id"> Dk_c</span><span class="id"> :=</span><span class="id"> Dk_c</span><span class="id"> inputs</span>.<br/>
+<span class="vernacular">Let</span><span class="id"> V1</span><span class="id"> :=</span><span class="id"> V1</span><span class="id"> inputs</span>.<br/>
+<span class="vernacular">Let</span><span class="id"> V2</span><span class="id"> :=</span><span class="id"> V2</span><span class="id"> inputs</span>.<br/>
+<span class="vernacular">Let</span><span class="id"> V3</span><span class="id"> :=</span><span class="id"> V3</span><span class="id"> inputs</span>.<br/>
+<span class="vernacular">Let</span><span class="id"> U1</span><span class="id"> :=</span><span class="id"> U1</span><span class="id"> inputs</span>.<br/>
+<span class="vernacular">Let</span><span class="id"> U2</span><span class="id"> :=</span><span class="id"> U2</span><span class="id"> inputs</span>.<br/>
+<span class="vernacular">Let</span><span class="id"> U3</span><span class="id"> :=</span><span class="id"> U3</span><span class="id"> inputs</span>.<br/>
+<span class="vernacular">Let</span><span class="id"> R2</span><span class="id"> :=</span><span class="id"> R2</span><span class="id"> inputs</span>.<br/>
+<span class="vernacular">Let</span><span class="id"> R3</span><span class="id"> :=</span><span class="id"> R3</span><span class="id"> inputs</span>.<br/>
+<span class="vernacular">Let</span><span class="id"> VU2</span><span class="id"> :</span><span class="id"> {RV</span><span class="id"> P</span><span class="id"> -&gt;</span><span class="id"> msg}</span><span class="id"> :=</span><span class="id"> V2</span><span class="id"> \*</span><span class="id"> U2</span>.<br/>
+<span class="vernacular">Let</span><span class="id"> VU3</span><span class="id"> :</span><span class="id"> {RV</span><span class="id"> P</span><span class="id"> -&gt;</span><span class="id"> msg}</span><span class="id"> :=</span><span class="id"> V3</span><span class="id"> \*</span><span class="id"> U3</span>.<br/>
+<span class="vernacular">Let</span><span class="id"> D2</span> <span class="id"> :</span><span class="id"> {RV</span><span class="id"> P</span><span class="id"> -&gt;</span><span class="id"> msg}</span><span class="id"> :=</span><span class="id"> VU2</span><span class="id"> \+</span><span class="id"> R2</span>.<br/>
+<span class="vernacular">Let</span><span class="id"> VU3R</span><span class="id"> :</span><span class="id"> {RV</span><span class="id"> P</span><span class="id"> -&gt;</span><span class="id"> msg}</span><span class="id"> :=</span><span class="id"> VU3</span><span class="id"> \+</span><span class="id"> R3</span>.<br/>
+<span class="vernacular">Let</span><span class="id"> D3</span><span class="id"> :</span><span class="id"> {RV</span><span class="id"> P</span><span class="id"> -&gt;</span><span class="id"> msg}</span><span class="id"> :=</span><span class="id"> VU3R</span><span class="id"> \+</span><span class="id"> D2</span>.<br/>
+<span class="vernacular">Let</span><span class="id"> S</span><span class="id"> :</span><span class="id"> {RV</span><span class="id"> P</span><span class="id"> -&gt;</span><span class="id"> msg}</span><span class="id"> :=</span><span class="id"> D3</span><span class="id"> \-</span><span class="id"> R2</span><span class="id"> \-</span><span class="id"> R3</span><span class="id"> \+</span><span class="id"> U1</span><span class="id"> \*</span><span class="id"> V1</span>.<br/>
+<br/>
+<span class="vernacular">Let</span><span class="id"> E_alice_d3</span><span class="id"> :</span><span class="id"> {RV</span><span class="id"> P</span><span class="id"> -&gt;</span><span class="id"> Alice</span>.<span class="id">-enc</span><span class="id"> msg}</span><span class="id"> :=</span><span class="id"> E'</span><span class="id"> alice</span><span class="id"> `o</span><span class="id"> D3</span>.<br/>
+<span class="vernacular">Let</span><span class="id"> E_charlie_v3</span><span class="id"> :</span><span class="id"> {RV</span><span class="id"> P</span><span class="id"> -&gt;</span><span class="id"> Charlie</span>.<span class="id">-enc</span><span class="id"> msg}</span><span class="id"> :=</span><span class="id"> E'</span><span class="id"> charlie</span><span class="id"> `o</span><span class="id"> V3</span>.<br/>
+<span class="vernacular">Let</span><span class="id"> E_bob_v2</span><span class="id"> :</span><span class="id"> {RV</span><span class="id"> P</span><span class="id"> -&gt;</span><span class="id"> Bob</span>.<span class="id">-enc</span><span class="id"> msg}</span><span class="id"> :=</span><span class="id"> E'</span><span class="id"> bob</span><span class="id"> `o</span><span class="id"> V2</span>.<br/>
+<br/>
+<span class="vernacular">Let</span><span class="id"> alice_inputsT</span><span class="id"> :=</span> (<span class="id">Alice</span>.<span class="id">-key</span><span class="id"> Dec</span><span class="id"> msg</span><span class="id"> *</span><span class="id"> msg</span><span class="id"> *</span><span class="id"> msg</span><span class="id"> *</span><span class="id"> msg</span><span class="id"> *</span><br/>
+&nbsp;&nbsp;<span class="id">msg</span><span class="id"> *</span><span class="id"> msg</span><span class="id"> *</span><span class="id"> msg</span>)<span class="id">%type</span>.<br/>
+<span class="vernacular">Let</span><span class="id"> AliceInputsView</span><span class="id"> :</span><span class="id"> {RV</span><span class="id"> P</span><span class="id"> -&gt;</span><span class="id"> alice_inputsT}</span><span class="id"> :=</span><br/>
+&nbsp;&nbsp;<span class="id">[%</span><span class="id"> Dk_a,</span><span class="id"> V1,</span><span class="id"> U1,</span><span class="id"> U2,</span><span class="id"> U3,</span><span class="id"> R2,</span><span class="id"> R3]</span>.<br/>
+<br/>
+<span class="vernacular">Hypothesis</span><span class="id"> AliceInputsView_indep_V2</span><span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="id">P</span><span class="id"> |=</span><span class="id"> AliceInputsView</span><span class="id"> _|_</span><span class="id"> V2</span>.<br/>
+<br/>
+<span class="vernacular">Section</span><span class="id"> alice_privacy_analysis</span>.<br/>
+<br/>
+<span class="vernacular">Hypothesis</span><span class="id"> inde_Echarlie</span><span class="id"> :</span><span class="id"> P</span><span class="id"> |=</span><span class="id"> AliceInputsView</span><span class="id"> _|_</span><span class="id"> E_charlie_v3</span>.<br/>
+<span class="vernacular">Hypothesis</span><span class="id"> inde_Ebob</span><span class="id"> :</span><span class="id"> P</span><span class="id"> |=</span><span class="id"> AliceInputsView</span><span class="id"> _|_</span><span class="id"> E_bob_v2</span>.<br/>
+<br/>
+<span class="vernacular">Let</span><span class="id"> alice_view_valuesT</span><span class="id"> :=</span> (<span class="id">Alice</span>.<span class="id">-key</span><span class="id"> Dec</span><span class="id"> msg</span><span class="id"> *</span><span class="id"> msg</span><span class="id"> *</span><span class="id"> msg</span><span class="id"> *</span><span class="id"> msg</span><span class="id"> *</span><span class="id"> msg</span><span class="id"> *</span><span class="id"> msg</span><span class="id"> *</span><br/>
+&nbsp;&nbsp;<span class="id">msg</span><span class="id"> *</span><span class="id"> msg</span><span class="id"> *</span><span class="id"> Alice</span>.<span class="id">-enc</span><span class="id"> msg</span><span class="id"> *</span><span class="id"> Charlie</span>.<span class="id">-enc</span><span class="id"> msg</span><span class="id"> *</span><span class="id"> Bob</span>.<span class="id">-enc</span><span class="id"> msg</span>)<span class="id">%type</span>.<br/>
+<br/>
+<span class="vernacular">Let</span><span class="id"> AliceView</span><span class="id"> :</span><span class="id"> {RV</span><span class="id"> P</span><span class="id"> -&gt;</span><span class="id"> alice_view_valuesT}</span><span class="id"> :=</span><br/>
+&nbsp;&nbsp;<span class="id">[%</span><span class="id"> Dk_a,</span><span class="id"> S,</span><span class="id"> V1,</span><span class="id"> U1,</span><span class="id"> U2,</span><span class="id"> U3,</span><span class="id"> R2,</span><span class="id"> R3,</span><span class="id"> E_alice_d3,</span><span class="id"> E_charlie_v3,</span><span class="id"> E_bob_v2]</span>.<br/>
+<br/>
+<br/>
+<span class="vernacular">Local</span><span class="vernacular"> Definition</span><span class="id"> Dec_view</span><span class="id"> :</span><span class="id"> {RV</span><span class="id"> P</span><span class="id"> -&gt;</span> (<span class="id">alice_inputsT</span><span class="id"> *</span><span class="id"> msg</span>)<span class="id">}</span><span class="id"> :=</span><br/>
+&nbsp;&nbsp;<span class="id">[%</span><span class="id"> Dk_a,</span><span class="id"> S,</span><span class="id"> V1,</span><span class="id"> U1,</span><span class="id"> U2,</span><span class="id"> U3,</span><span class="id"> R2,</span><span class="id"> R3]</span>.<br/>
+<span class="vernacular">Local</span><span class="vernacular"> Definition</span><span class="id"> Eqn1_view</span><span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="id">{RV</span><span class="id"> P</span><span class="id"> -&gt;</span> (<span class="id">alice_inputsT</span><span class="id"> *</span><span class="id"> msg</span><span class="id"> *</span><span class="id"> Alice</span>.<span class="id">-enc</span><span class="id"> msg</span><span class="id"> *</span><span class="id"> Charlie</span>.<span class="id">-enc</span><span class="id"> msg</span>)<span class="id">}</span><br/>
+&nbsp;&nbsp;<span class="id">:=</span><span class="id"> [%</span><span class="id"> Dec_view,</span><span class="id"> E_alice_d3,</span><span class="id"> E_charlie_v3]</span>.<br/>
+<span class="vernacular">Local</span><span class="vernacular"> Definition</span><span class="id"> Eqn2_view</span><span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="id">{RV</span><span class="id"> P</span><span class="id"> -&gt;</span> (<span class="id">alice_inputsT</span><span class="id"> *</span><span class="id"> msg</span><span class="id"> *</span><span class="id"> Alice</span>.<span class="id">-enc</span><span class="id"> msg</span>)<span class="id">}</span><span class="id"> :=</span><br/>
+&nbsp;&nbsp;<span class="id">[%</span><span class="id"> Dec_view,</span><span class="id"> E_alice_d3]</span>.<br/>
+&nbsp;<br/>
+<span class="vernacular">Hypothesis</span><span class="id"> Pr_AliceView_neq0</span><span class="id"> :</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">forall</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">x</span><span class="id"> :</span><span class="id"> alice_inputsT</span><span class="id"> *</span><span class="id"> msg</span><span class="id"> *</span><span class="id"> Alice</span>.<span class="id">-enc</span><span class="id"> msg</span><span class="id"> *</span><span class="id"> Charlie</span>.<span class="id">-enc</span><span class="id"> msg</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">e</span><span class="id"> :</span><span class="id"> Bob</span>.<span class="id">-enc</span><span class="id"> msg</span>)<span class="id">,</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">`Pr[</span><span class="id"> [%</span><span class="id"> Dec_view,</span><span class="id"> E_alice_d3,</span><span class="id"> E_charlie_v3,</span><span class="id"> E_bob_v2]</span><span class="id"> =</span> (<span class="id">x,</span><span class="id"> e</span>)<span class="id"> ]</span><span class="id"> !=</span><span class="id"> 0</span>.<br/>
+<br/>
+<span class="vernacular">Hypothesis</span><span class="id"> Pr_Eqn1View_neq0</span><span class="id"> :</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">forall</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">x</span><span class="id"> :</span><span class="id"> alice_inputsT</span><span class="id"> *</span><span class="id"> msg</span><span class="id"> *</span><span class="id"> Alice</span>.<span class="id">-enc</span><span class="id"> msg</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">e</span><span class="id"> :</span><span class="id"> Charlie</span>.<span class="id">-enc</span><span class="id"> msg</span>)<span class="id">,</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">`Pr[</span><span class="id"> [%</span><span class="id"> Dec_view,</span><span class="id"> E_alice_d3,</span><span class="id"> E_charlie_v3]</span><span class="id"> =</span> (<span class="id">x,</span><span class="id"> e</span>)<span class="id"> ]</span><span class="id"> !=</span><span class="id"> 0</span>.<br/>
+<br/>
+<span class="vernacular">Hypothesis</span><span class="id"> Pr_Eqn2View_neq0</span><span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="gallina-kwd">forall</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">x</span><span class="id"> :</span> (<span class="id">alice_inputsT</span><span class="id"> *</span><span class="id"> msg</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">e</span><span class="id"> :</span><span class="id"> Alice</span>.<span class="id">-enc</span><span class="id"> msg</span>)<span class="id">,</span><br/>
+&nbsp;&nbsp;<span class="id">`Pr[</span><span class="id"> [%</span><span class="id"> Dec_view,</span><span class="id"> E_alice_d3]</span><span class="id"> =</span> (<span class="id">x,</span><span class="id"> e</span>)<span class="id"> ]</span><span class="id"> !=</span><span class="id"> 0</span>.<br/>
+<br/>
+<span class="vernacular">Hypothesis</span><span class="id"> AliceInputView_indep_V2</span><span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="id">P</span><span class="id"> |=</span><span class="id"> AliceInputsView</span><span class="id"> _|_</span><span class="id"> V2</span>.<br/>
+<br/>
+<br/>
+<span class="vernacular">Section</span><span class="id"> semi_honest_case_analysis</span>.<br/>
+<br/>
+<span class="vernacular">Let</span><span class="id"> S_compE</span><span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="gallina-kwd">let</span><span class="id"> f</span><span class="id"> :=</span> (<span class="gallina-kwd">fun</span><span class="id"> o</span><span class="id"> =&gt;</span><span class="gallina-kwd"> let</span><span class="id"> '</span>(<span class="id">u2,</span><span class="id"> u3,</span><span class="id"> v2,</span><span class="id"> v3,</span><span class="id"> v1,</span><span class="id"> u1</span>)<span class="id"> :=</span><span class="id"> o</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">in</span><span class="id"> u2</span><span class="id"> *</span><span class="id"> v2</span><span class="id"> +</span><span class="id"> u3</span><span class="id"> *</span><span class="id"> v3</span><span class="id"> +</span><span class="id"> v1</span><span class="id"> *</span><span class="id"> u1</span>)<span class="gallina-kwd"> in</span><br/>
+&nbsp;&nbsp;<span class="id">S</span><span class="id"> =</span><span class="id"> f</span><span class="id"> `o</span><span class="id"> [%</span><span class="id"> U2,</span><span class="id"> U3,</span><span class="id"> V2,</span><span class="id"> V3,</span><span class="id"> V1,</span><span class="id"> U1]</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id">rewrite</span><span class="id"> /comp_RV</span><span class="id"> /S</span><span class="id"> /D3</span><span class="id"> /VU3R</span><span class="id"> /D2</span><span class="id"> /VU3</span><span class="id"> /VU2</span><span class="id"> /add_RV</span>.<br/>
+<span class="id">apply:</span><span class="id"> boolp</span>.<span class="id">funext</span><span class="id"> =&gt;</span><span class="id"> i</span><span class="id"> //=</span>.<br/>
+<span class="id">ring</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="vernacular">Section</span><span class="id"> functional_determination</span>.<br/>
+<br/>
+<br/>
+<span class="vernacular">Definition</span><span class="id"> compute_v3</span> (<span class="id">o</span><span class="id"> :</span> (<span class="id">msg</span><span class="id"> *</span><span class="id"> msg</span><span class="id"> *</span><span class="id"> msg</span><span class="id"> *</span><span class="id"> msg</span><span class="id"> *</span><span class="id"> msg</span><span class="id"> *</span><span class="id"> msg</span>))<span class="id"> :</span><span class="id"> msg</span><span class="id"> :=</span><br/>
+&nbsp;&nbsp;<span class="gallina-kwd">let</span><span class="id"> '</span>(<span class="id">v1_val,</span><span class="id"> u1_val,</span><span class="id"> u2_val,</span><span class="id"> u3_val,</span><span class="id"> s_val,</span><span class="id"> v2_val</span>)<span class="id"> :=</span><span class="id"> o</span><span class="gallina-kwd"> in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">s_val</span><span class="id"> -</span><span class="id"> u2_val</span><span class="id"> *</span><span class="id"> v2_val</span><span class="id"> -</span><span class="id"> u1_val</span><span class="id"> *</span><span class="id"> v1_val</span>)<span class="id"> /</span><span class="id"> u3_val</span>.<br/>
+<br/>
+<br/>
+<span class="vernacular">Hypothesis</span><span class="id"> U3_coprime_m</span><span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="gallina-kwd">forall</span><span class="id"> t,</span><span class="id"> coprime</span> (<span class="id">val</span> (<span class="id">U3</span><span class="id"> t</span>))<span class="id"> m</span>.<br/>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> U3_nonzero</span><span class="id"> :</span><span class="gallina-kwd"> forall</span><span class="id"> t,</span><span class="id"> U3</span><span class="id"> t</span><span class="id"> !=</span><span class="id"> 0</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id">move=&gt;</span><span class="id"> t</span>.<br/>
+<span class="id">have</span><span class="id"> Hcoprime</span><span class="id"> :=</span><span class="id"> U3_coprime_m</span><span class="id"> t</span>.<br/>
+<span class="id">case</span><span class="id"> Hval:</span> (<span class="id">val</span> (<span class="id">U3</span><span class="id"> t</span>))<span class="id"> =&gt;</span><span class="id"> [|n]</span><span class="id"> //</span>.<br/>
+<span class="comment">(*&nbsp;If&nbsp;val&nbsp;=&nbsp;0,&nbsp;derive&nbsp;contradiction&nbsp;from&nbsp;coprime&nbsp;0&nbsp;m&nbsp;*)</span><br/>
+<span class="id">exfalso</span>.<br/>
+<span class="id">move:</span><span class="id"> Hcoprime;</span><span class="id"> rewrite</span><span class="id"> Hval</span><span class="id"> /coprime</span><span class="id"> gcd0n</span><span class="id"> =&gt;</span><span class="id"> /eqP</span><span class="id"> Hm1</span>.<br/>
+<span class="comment">(*&nbsp;m&nbsp;=&nbsp;1&nbsp;but&nbsp;m&nbsp;=&nbsp;m_minus_2.+2&nbsp;&gt;=&nbsp;2,&nbsp;contradiction&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> []</span>.<br/>
+<span class="id">apply/eqP</span><span class="id"> =&gt;</span><span class="id"> H</span>.<br/>
+<span class="id">move:</span><span class="id"> Hval;</span><span class="id"> rewrite</span><span class="id"> H</span>.<br/>
+<span class="gallina-kwd">by</span><span class="id"> []</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> V3_determined</span><span class="id"> :</span><span class="id"> V3</span><span class="id"> =</span><span class="id"> compute_v3</span><span class="id"> `o</span><span class="id"> [%</span><span class="id"> V1,</span><span class="id"> U1,</span><span class="id"> U2,</span><span class="id"> U3,</span><span class="id"> S,</span><span class="id"> V2]</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="comment">(*&nbsp;Goal:&nbsp;V3&nbsp;=&nbsp;compute_v3&nbsp;`o&nbsp;[%&nbsp;V1,&nbsp;U1,&nbsp;U2,&nbsp;U3,&nbsp;S,&nbsp;V2]&nbsp;*)</span><br/>
+<span class="id">rewrite</span><span class="id"> S_compE</span><span class="id"> /compute_v3</span><span class="id"> /comp_RV</span><span class="id"> /=</span>.<br/>
+<span class="comment">(*&nbsp;Goal:&nbsp;V3&nbsp;=&nbsp;fun&nbsp;i&nbsp;=&gt;&nbsp;(S&nbsp;i&nbsp;-&nbsp;U2&nbsp;i&nbsp;*&nbsp;V2&nbsp;i&nbsp;-&nbsp;U1&nbsp;i&nbsp;*&nbsp;V1&nbsp;i)&nbsp;/&nbsp;U3&nbsp;i&nbsp;*)</span><br/>
+<span class="id">apply/boolp</span>.<span class="id">funext</span><span class="id"> =&gt;</span><span class="id"> i</span><span class="id"> /=</span>.<br/>
+<span class="comment">(*&nbsp;Goal:&nbsp;V3&nbsp;i&nbsp;=&nbsp;(U2*V2&nbsp;+&nbsp;U3*V3&nbsp;+&nbsp;V1*U1&nbsp;-&nbsp;U2*V2&nbsp;-&nbsp;U1*V1)&nbsp;/&nbsp;U3&nbsp;i&nbsp;<br/>
+&nbsp;&nbsp;&nbsp;Note:&nbsp;S&nbsp;i&nbsp;expanded&nbsp;to&nbsp;U2*V2&nbsp;+&nbsp;U3*V3&nbsp;+&nbsp;V1*U1&nbsp;from&nbsp;S_compE&nbsp;*)</span><br/>
+<br/>
+<span class="comment">(*&nbsp;===&nbsp;Step&nbsp;1:&nbsp;Show&nbsp;U3&nbsp;i&nbsp;is&nbsp;a&nbsp;unit&nbsp;in&nbsp;'Z_m&nbsp;===&nbsp;*)</span><br/>
+<span class="id">have</span><span class="id"> HU3_unit:</span> (<span class="id">U3</span><span class="id"> i</span>)<span class="id"> \is</span><span class="id"> a</span><span class="id"> GRing</span>.<span class="id">unit</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;U3&nbsp;i&nbsp;:&nbsp;'Z_m,&nbsp;need&nbsp;to&nbsp;show&nbsp;it's&nbsp;a&nbsp;unit&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;Use:&nbsp;x&nbsp;\is&nbsp;unit&nbsp;in&nbsp;'Z_m&nbsp;iff&nbsp;coprime&nbsp;m&nbsp;(val&nbsp;x)&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> -[U3</span><span class="id"> i]natr_Zp</span><span class="id"> unitZpE</span><span class="id"> //</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;Goal:&nbsp;coprime&nbsp;m&nbsp;(val&nbsp;(U3&nbsp;i))&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> coprime_sym</span> (<span class="id">U3_coprime_m</span><span class="id"> i</span>).<br/>
+<br/>
+<span class="comment">(*&nbsp;===&nbsp;Step&nbsp;2:&nbsp;Simplify&nbsp;numerator&nbsp;to&nbsp;U3*V3&nbsp;===&nbsp;*)</span><br/>
+<span class="comment">(*&nbsp;The&nbsp;numerator:&nbsp;U2*V2&nbsp;+&nbsp;U3*V3&nbsp;+&nbsp;V1*U1&nbsp;-&nbsp;U2*V2&nbsp;-&nbsp;U1*V1&nbsp;=&nbsp;U3*V3&nbsp;*)</span><br/>
+<span class="id">have</span><span class="id"> Hnum</span><span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="id">U2</span><span class="id"> i</span><span class="id"> *</span><span class="id"> V2</span><span class="id"> i</span><span class="id"> +</span><span class="id"> U3</span><span class="id"> i</span><span class="id"> *</span><span class="id"> V3</span><span class="id"> i</span><span class="id"> +</span><span class="id"> V1</span><span class="id"> i</span><span class="id"> *</span><span class="id"> U1</span><span class="id"> i</span><span class="id"> -</span><br/>
+&nbsp;&nbsp;<span class="id">U2</span><span class="id"> i</span><span class="id"> *</span><span class="id"> V2</span><span class="id"> i</span><span class="id"> -</span><span class="id"> U1</span><span class="id"> i</span><span class="id"> *</span><span class="id"> V1</span><span class="id"> i</span><span class="id"> =</span><br/>
+&nbsp;&nbsp;<span class="id">U3</span><span class="id"> i</span><span class="id"> *</span><span class="id"> V3</span><span class="id"> i</span><span class="gallina-kwd"> by</span><span class="id"> ring</span>.<br/>
+<span class="id">rewrite</span><span class="id"> Hnum</span>.<br/>
+<br/>
+<span class="comment">(*&nbsp;===&nbsp;Step&nbsp;3:&nbsp;Show&nbsp;V3&nbsp;=&nbsp;U3*V3&nbsp;/&nbsp;U3&nbsp;using&nbsp;unit&nbsp;inverse&nbsp;property&nbsp;===&nbsp;*)</span><br/>
+<span class="comment">(*&nbsp;Goal:&nbsp;V3&nbsp;i&nbsp;=&nbsp;U3&nbsp;i&nbsp;*&nbsp;V3&nbsp;i&nbsp;/&nbsp;U3&nbsp;i&nbsp;*)</span><br/>
+<span class="comment">(*&nbsp;In&nbsp;comRing:&nbsp;U3&nbsp;*&nbsp;V3&nbsp;=&nbsp;V3&nbsp;*&nbsp;U3,&nbsp;then&nbsp;V3&nbsp;*&nbsp;U3&nbsp;/&nbsp;U3&nbsp;=<br/>
+&nbsp;&nbsp;&nbsp;V3&nbsp;*&nbsp;(U3&nbsp;/&nbsp;U3)&nbsp;=&nbsp;V3&nbsp;*&nbsp;1&nbsp;=&nbsp;V3&nbsp;*)</span><br/>
+<span class="id">rewrite</span><span class="id"> [U3</span><span class="id"> i</span><span class="id"> *</span><span class="id"> _]mulrC</span>.<br/>
+<span class="comment">(*&nbsp;Goal:&nbsp;V3&nbsp;i&nbsp;=&nbsp;V3&nbsp;i&nbsp;*&nbsp;U3&nbsp;i&nbsp;/&nbsp;U3&nbsp;i&nbsp;*)</span><br/>
+<span class="comment">(*&nbsp;x&nbsp;*&nbsp;y&nbsp;/&nbsp;y&nbsp;=&nbsp;x&nbsp;*&nbsp;(y&nbsp;/&nbsp;y)&nbsp;=&nbsp;x&nbsp;*&nbsp;1&nbsp;=&nbsp;x&nbsp;*)</span><br/>
+<span class="id">rewrite</span><span class="id"> -mulrA</span>.<br/>
+<span class="comment">(*&nbsp;Goal:&nbsp;V3&nbsp;i&nbsp;=&nbsp;V3&nbsp;i&nbsp;*&nbsp;(U3&nbsp;i&nbsp;/&nbsp;U3&nbsp;i)&nbsp;*)</span><br/>
+<span class="id">rewrite</span><span class="id"> divrr</span><span class="id"> //</span>.<br/>
+<span class="comment">(*&nbsp;Goal:&nbsp;V3&nbsp;i&nbsp;=&nbsp;V3&nbsp;i&nbsp;*&nbsp;1&nbsp;*)</span><br/>
+<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> mulr1</span>.<br/>
+Qed.</div></details>
+<br/>
+<br/>
+<h1> Fundamental Principle of Constraint-Based Security
+    
+    When an auxiliary variable is functionally determined by a secret
+    and a constraint, the joint entropy equals the secret's entropy alone.
+    This formalizes the principle that "knowing possible solution pairs
+    gives exactly the same information as knowing the constraint on the secret."
+    
+    This principle underlies many MPC protocols where:
+    - <code class="bracket"><span class="id">V2</span></code> is the secret to protect
+    - <code class="bracket"><span class="id">V3</span></code> is an auxiliary/helper variable
+    - <code class="bracket"><span class="id">S</span>, <span class="id">U2</span>, <span class="id">U3</span></code> form a constraint linking them
+    - Given constraint, <code class="bracket"><span class="id">v3</span></code> is determined by <code class="bracket"><span class="id">V2</span></code> (or vice versa)
+</h1>
+<span class="vernacular">Lemma</span><span class="id"> V3_determined_centropy_v2</span><span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="id">`H</span>(<span class="id">[%</span><span class="id"> V2,</span><span class="id"> V3]</span><span class="id"> |</span><span class="id"> [%</span><span class="id"> V1,</span><span class="id"> U1,</span><span class="id"> U2,</span><span class="id"> U3,</span><span class="id"> S]</span>)<span class="id"> =</span><span class="id"> `H</span>(<span class="id">V2</span><span class="id"> |</span><span class="id"> [%</span><span class="id"> V1,</span><span class="id"> U1,</span><span class="id"> U2,</span><span class="id"> U3,</span><span class="id"> S]</span>).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id">have</span><span class="id"> -&gt;:</span><span class="id"> `H</span>(<span class="id">[%</span><span class="id"> V2,</span><span class="id"> V3]</span><span class="id"> |</span><span class="id"> [%</span><span class="id"> V1,</span><span class="id"> U1,</span><span class="id"> U2,</span><span class="id"> U3,</span><span class="id"> S]</span>)<span class="id"> =</span><br/>
+&nbsp;&nbsp;<span class="id">`H</span>(<span class="id">[%</span><span class="id"> V1,</span><span class="id"> U1,</span><span class="id"> U2,</span><span class="id"> U3,</span><span class="id"> S],</span><span class="id"> [%</span><span class="id"> V2,</span><span class="id"> V3]</span>)<span class="id"> -</span><span class="id"> `H</span><span class="id"> `p_</span><span class="id"> [%</span><span class="id"> V1,</span><span class="id"> U1,</span><span class="id"> U2,</span><span class="id"> U3,</span><span class="id"> S]</span>.<br/>
+&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> chain_rule_RV</span><span class="id"> addrAC</span><span class="id"> subrr</span><span class="id"> add0r</span>.<br/>
+<span class="id">rewrite</span><span class="id"> V3_determined</span>.<br/>
+<span class="id">have</span><span class="id"> -&gt;:</span><span class="id"> `H</span>(<span class="id">[%</span><span class="id"> V1,</span><span class="id"> U1,</span><span class="id"> U2,</span><span class="id"> U3,</span><span class="id"> S],</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">[%</span><span class="id"> V2,</span><span class="id"> compute_v3</span><span class="id"> `o</span><span class="id"> [%</span><span class="id"> V1,</span><span class="id"> U1,</span><span class="id"> U2,</span><span class="id"> U3,</span><span class="id"> S,</span><span class="id"> V2]]</span>)<span class="id"> =</span><br/>
+&nbsp;&nbsp;<span class="id">`H</span><span class="id"> `p_[%</span><span class="id"> V1,</span><span class="id"> U1,</span><span class="id"> U2,</span><span class="id"> U3,</span><span class="id"> S,</span><span class="id"> V2]</span>.<br/>
+&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> joint_entropy_RVA</span><span class="id"> joint_entropy_RV_comp</span>.<br/>
+<span class="id">have</span><span class="id"> -&gt;:</span><span class="id"> `H</span>(<span class="id"> V2</span><span class="id"> |</span><span class="id"> [%</span><span class="id"> V1,</span><span class="id"> U1,</span><span class="id"> U2,</span><span class="id"> U3,</span><span class="id"> S]</span>)<span class="id"> =</span><br/>
+&nbsp;&nbsp;<span class="id">`H</span>(<span class="id">[%</span><span class="id"> V1,</span><span class="id"> U1,</span><span class="id"> U2,</span><span class="id"> U3,</span><span class="id"> S],</span><span class="id"> V2</span>)<span class="id"> -</span><span class="id"> `H</span><span class="id"> `p_</span><span class="id"> [%</span><span class="id"> V1,</span><span class="id"> U1,</span><span class="id"> U2,</span><span class="id"> U3,</span><span class="id"> S]</span>.<br/>
+&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> chain_rule_RV</span><span class="id"> addrAC</span><span class="id"> subrr</span><span class="id"> add0r</span>.<br/>
+<span class="gallina-kwd">by</span><span class="id"> []</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="vernacular">End</span><span class="id"> functional_determination</span>.<br/>
+<br/>
+<span class="vernacular">Hypothesis</span><span class="id"> U3_coprime_m</span><span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="gallina-kwd">forall</span><span class="id"> t,</span><span class="id"> coprime</span> (<span class="id">val</span> (<span class="id">U3</span><span class="id"> t</span>))<span class="id"> m</span>.<br/>
+<br/>
+<span class="vernacular">Hypothesis</span><span class="id"> cinde_V2V3</span><span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="id">P</span><span class="id"> |=</span><span class="id"> [%</span><span class="id"> Dk_a,</span><span class="id"> R2,</span><span class="id"> R3]</span><span class="id"> _|_</span><span class="id"> [%</span><span class="id"> V2,</span><span class="id"> V3]</span><span class="id"> |</span><span class="id"> [%</span><span class="id"> V1,</span><span class="id"> U1,</span><span class="id"> U2,</span><span class="id"> U3,</span><span class="id"> S]</span>.<br/>
+<br/>
+<span class="vernacular">Hypothesis</span><span class="id"> cinde_V2</span><span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="id">P</span><span class="id"> |=</span><span class="id"> [%</span><span class="id"> Dk_a,</span><span class="id"> R2,</span><span class="id"> R3]</span><span class="id"> _|_</span><span class="id"> V2</span><span class="id"> |</span><span class="id"> [%</span><span class="id"> V1,</span><span class="id"> U1,</span><span class="id"> U2,</span><span class="id"> U3,</span><span class="id"> S]</span>.<br/>
+<br/>
+<span class="vernacular">Hypothesis</span><span class="id"> V3_determined</span><span class="id"> :</span> <br/>
+&nbsp;&nbsp;<span class="id">V3</span><span class="id"> =</span><span class="id"> compute_v3</span><span class="id"> `o</span><span class="id"> [%</span><span class="id"> V1,</span><span class="id"> U1,</span><span class="id"> U2,</span><span class="id"> U3,</span><span class="id"> S,</span><span class="id"> V2]</span>.<br/>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> alice_view_to_cond</span> (<span class="id">A</span><span class="id"> :</span><span class="id"> finType</span>) (<span class="id">Xvar</span><span class="id"> :</span><span class="id"> {RV</span><span class="id"> P</span><span class="id"> -&gt;</span><span class="id"> A}</span>)<span class="id"> :</span><br/>
+&nbsp;&nbsp;(<span class="id">P</span><span class="id"> |=</span><span class="id"> [%</span><span class="id"> Dk_a,</span><span class="id"> R2,</span><span class="id"> R3]</span><span class="id"> _|_</span><span class="id"> Xvar</span><span class="id"> |</span><span class="id"> [%</span><span class="id"> V1,</span><span class="id"> U1,</span><span class="id"> U2,</span><span class="id"> U3,</span><span class="id"> S]</span>)<span class="id"> -&gt;</span><br/>
+&nbsp;&nbsp;<span class="id">`H</span>(<span class="id">Xvar</span><span class="id"> |</span><span class="id"> AliceView</span>)<span class="id"> =</span><span class="id"> `H</span>(<span class="id">Xvar</span><span class="id"> |</span><span class="id"> [%</span><span class="id"> V1,</span><span class="id"> U1,</span><span class="id"> U2,</span><span class="id"> U3,</span><span class="id"> S]</span>).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id">move=&gt;</span><span class="id"> cinde_X</span>.<br/>
+<span class="id">rewrite</span><span class="id"> /AliceView</span>.<br/>
+<span class="id">rewrite</span> (<span class="id">E_enc_ce_contract</span><span class="id"> E_enc_unif</span><span class="id"> E_enc_inde</span><span class="id"> Xvar</span><span class="id"> card_msg</span>)<span class="id">;</span><span class="id"> last</span><span class="id"> exact:</span><span class="id"> Pr_AliceView_neq0</span>.<br/>
+<span class="id">rewrite</span> (<span class="id">E_enc_ce_contract</span><span class="id"> E_enc_unif</span><span class="id"> E_enc_inde</span><span class="id"> Xvar</span><span class="id"> card_msg</span>)<span class="id">;</span><span class="id"> last</span><span class="id"> exact:</span><span class="id"> Pr_Eqn1View_neq0</span>.<br/>
+<span class="id">rewrite</span> (<span class="id">E_enc_ce_contract</span><span class="id"> E_enc_unif</span><span class="id"> E_enc_inde</span><span class="id"> Xvar</span><span class="id"> card_msg</span>)<span class="id">;</span><span class="id"> last</span><span class="id"> exact:</span><span class="id"> Pr_Eqn2View_neq0</span>.<br/>
+<span class="id">have</span><span class="id"> H_reorder:</span><span class="id"> `H</span>(<span class="id">Xvar</span><span class="id"> |</span><span class="id"> [%</span><span class="id"> Dk_a,</span><span class="id"> S,</span><span class="id"> V1,</span><span class="id"> U1,</span><span class="id"> U2,</span><span class="id"> U3,</span><span class="id"> R2,</span><span class="id"> R3]</span>)<span class="id"> =</span><br/>
+&nbsp;&nbsp;<span class="id">`H</span>(<span class="id">Xvar</span><span class="id"> |</span><span class="id"> [%</span><span class="id"> Dk_a,</span><span class="id"> R2,</span><span class="id"> R3,</span><span class="id"> V1,</span><span class="id"> U1,</span><span class="id"> U2,</span><span class="id"> U3,</span><span class="id"> S]</span>).<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> /centropy_RV</span><span class="id"> /centropy</span><span class="id"> /=</span><span class="id"> !snd_RV2</span>.<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span> (<span class="id">reindex</span> (<span class="gallina-kwd">fun</span><span class="id"> '</span>(<span class="id">dk_a',</span><span class="id"> r2',</span><span class="id"> r3',</span><span class="id"> v1',</span><span class="id"> u1',</span><span class="id"> u2',</span><span class="id"> u3',</span><span class="id"> s'</span>)<span class="id"> =&gt;</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">dk_a',</span><span class="id"> s',</span><span class="id"> v1',</span><span class="id"> u1',</span><span class="id"> u2',</span><span class="id"> u3',</span><span class="id"> r2',</span><span class="id"> r3'</span>)))<span class="id">/=</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply:</span><span class="id"> eq_bigr</span><span class="id"> =&gt;</span><span class="id"> []</span><span class="id"> []</span><span class="id"> []</span><span class="id"> []</span><span class="id"> []</span><span class="id"> []</span><span class="id"> []</span><span class="id"> []</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">dk_a'</span><span class="id"> s'</span><span class="id"> v1'</span><span class="id"> u1'</span><span class="id"> u2'</span><span class="id"> u3'</span><span class="id"> r2'</span><span class="id"> r3'</span><span class="id"> _</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">congr</span> (_<span class="id"> *</span><span class="id"> _</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> !dist_of_RVE</span><span class="id"> !pfwd1E;</span><span class="id"> congr</span><span class="id"> Pr;</span><span class="id"> apply/setP</span><span class="id"> =&gt;</span><span class="id"> u;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> !inE</span><span class="id"> /=</span><span class="id"> !xpair_eqE;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> -[andb]/GRing</span>.<span class="id">mul;</span><span class="id"> ring</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> /centropy1;</span><span class="id"> congr</span> (<span class="id">-</span><span class="id"> _</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> /jcPr</span><span class="id"> !snd_RV2</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply:</span><span class="id"> eq_bigr</span><span class="id"> =&gt;</span><span class="id"> a</span><span class="id"> _</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> /jcPr</span><span class="id"> !setX1</span><span class="id"> !Pr_set1</span><span class="id"> !dist_of_RVE</span><span class="id"> !pfwd1E</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">congr</span> (_<span class="id"> *</span><span class="id"> _</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">f_equal</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> congr</span><span class="id"> Pr;</span><span class="id"> apply/setP</span><span class="id"> =&gt;</span><span class="id"> u;</span><span class="id"> rewrite</span><span class="id"> !inE</span><span class="id"> /=</span><span class="id"> !xpair_eqE;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> -[andb]/GRing</span>.<span class="id">mul;</span><span class="id"> ring</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> f_equal;</span><span class="id"> congr</span><span class="id"> Pr;</span><span class="id"> apply/setP</span><span class="id"> =&gt;</span><span class="id"> u;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> !inE</span><span class="id"> /=</span><span class="id"> !xpair_eqE;</span><span class="id"> rewrite</span><span class="id"> -[andb]/GRing</span>.<span class="id">mul;</span><span class="id"> ring</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">congr</span><span class="id"> log</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">f_equal</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> congr</span><span class="id"> Pr;</span><span class="id"> apply/setP</span><span class="id"> =&gt;</span><span class="id"> u;</span><span class="id"> rewrite</span><span class="id"> !inE</span><span class="id"> /=</span><span class="id"> !xpair_eqE;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> -[andb]/GRing</span>.<span class="id">mul;</span><span class="id"> ring</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">f_equal</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> congr</span><span class="id"> Pr;</span><span class="id"> apply/setP</span><span class="id"> =&gt;</span><span class="id"> u;</span><span class="id"> rewrite</span><span class="id"> !inE</span><span class="id"> /=</span><span class="id"> !xpair_eqE;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> -[andb]/GRing</span>.<span class="id">mul;</span><span class="id"> ring</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="gallina-kwd"> exists</span> (<span class="gallina-kwd">fun</span><span class="id"> '</span>(<span class="id">dk_a',</span><span class="id"> s',</span><span class="id"> v1',</span><span class="id"> u1',</span><span class="id"> u2',</span><span class="id"> u3',</span><span class="id"> r2',</span><span class="id"> r3'</span>)<span class="id"> =&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">dk_a',</span><span class="id"> r2',</span><span class="id"> r3',</span><span class="id"> v1',</span><span class="id"> u1',</span><span class="id"> u2',</span><span class="id"> u3',</span><span class="id"> s'</span>)) <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">=&gt;</span><span class="id"> []</span><span class="id"> []</span><span class="id"> []</span><span class="id"> []</span> <span class="id"> []</span><span class="id"> []</span><span class="id"> []</span><span class="id"> []</span><span class="id"> dk_a'</span><span class="id"> v1'</span><span class="id"> u1'</span><span class="id"> r2'</span><span class="id"> r3'</span><span class="id"> u2'</span><span class="id"> u3'</span><span class="id"> s'</span>.<br/>
+<span class="id">rewrite</span><span class="id"> H_reorder</span>.<br/>
+<span class="id">have</span><span class="id"> H_assoc:</span><span class="id"> `H</span>(<span class="id">Xvar</span><span class="id"> |</span><span class="id"> [%</span><span class="id"> Dk_a,</span><span class="id"> R2,</span><span class="id"> R3,</span><span class="id"> V1,</span><span class="id"> U1,</span><span class="id"> U2,</span><span class="id"> U3,</span><span class="id"> S]</span> )<span class="id"> =</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">`H</span>(<span class="id">Xvar</span><span class="id"> |</span><span class="id"> [%</span><span class="id"> [%</span><span class="id"> Dk_a,</span><span class="id"> R2,</span><span class="id"> R3],</span><span class="id"> [%</span><span class="id"> V1,</span><span class="id"> U1,</span><span class="id"> U2,</span><span class="id"> U3,</span><span class="id"> S]]</span> ).<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> /centropy_RV</span><span class="id"> /centropy</span><span class="id"> /=</span><span class="id"> !snd_RV2</span>.<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span> (<span class="id">reindex</span> (<span class="gallina-kwd">fun</span><span class="id"> '</span>(<span class="id">o,</span> (<span class="id">v1,</span><span class="id"> u1,</span><span class="id"> u2,</span><span class="id"> u3,</span><span class="id"> s</span>))<span class="id"> =&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">o,</span><span class="id"> v1,</span><span class="id"> u1,</span><span class="id"> u2,</span><span class="id"> u3,</span><span class="id"> s</span>)))<span class="id"> /=</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply:</span><span class="id"> eq_bigr</span><span class="id"> =&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">[]</span><span class="id"> []</span><span class="id"> []</span><span class="id"> []</span><span class="id"> dk_a'</span><span class="id"> r2'</span><span class="id"> r3'</span><span class="id"> []</span><span class="id"> []</span><span class="id"> []</span><span class="id"> []</span><span class="id"> v1'</span><span class="id"> u1'</span><span class="id"> u2'</span><span class="id"> u3'</span><span class="id"> s'</span><span class="id"> _</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">congr</span> (_<span class="id"> *</span><span class="id"> _</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> !dist_of_RVE</span><span class="id"> !pfwd1E</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> congr</span><span class="id"> Pr;</span><span class="id"> apply/setP</span><span class="id"> =&gt;</span><span class="id"> u;</span><span class="id"> rewrite</span><span class="id"> !inE</span><span class="id"> /=</span><span class="id"> !xpair_eqE;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> -[andb]/GRing</span>.<span class="id">mul;</span><span class="id"> ring</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> /centropy1;</span><span class="id"> congr</span> (<span class="id">-</span><span class="id"> _</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> /jcPr</span><span class="id"> !snd_RV2</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply:</span><span class="id"> eq_bigr</span><span class="id"> =&gt;</span><span class="id"> a</span><span class="id"> _</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> /jcPr</span><span class="id"> !setX1</span><span class="id"> !Pr_set1</span><span class="id"> !dist_of_RVE</span><span class="id"> !pfwd1E</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">congr</span> (_<span class="id"> *</span><span class="id"> _</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">f_equal</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> congr</span><span class="id"> Pr;</span><span class="id"> apply/setP</span><span class="id"> =&gt;</span><span class="id"> u;</span><span class="id"> rewrite</span><span class="id"> !inE</span><span class="id"> /=</span><span class="id"> !xpair_eqE;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> -[andb]/GRing</span>.<span class="id">mul;</span><span class="id"> ring</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">f_equal</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> congr</span><span class="id"> Pr;</span><span class="id"> apply/setP</span><span class="id"> =&gt;</span><span class="id"> u;</span><span class="id"> rewrite</span><span class="id"> !inE</span><span class="id"> /=</span><span class="id"> !xpair_eqE;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> -[andb]/GRing</span>.<span class="id">mul;</span><span class="id"> ring</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">congr</span><span class="id"> log</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">f_equal</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> congr</span><span class="id"> Pr;</span><span class="id"> apply/setP</span><span class="id"> =&gt;</span><span class="id"> u;</span><span class="id"> rewrite</span><span class="id"> !inE</span><span class="id"> /=</span><span class="id"> !xpair_eqE;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> -[andb]/GRing</span>.<span class="id">mul;</span><span class="id"> ring</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">f_equal</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> congr</span><span class="id"> Pr;</span><span class="id"> apply/setP</span><span class="id"> =&gt;</span><span class="id"> u;</span><span class="id"> rewrite</span><span class="id"> !inE</span><span class="id"> /=</span><span class="id"> !xpair_eqE;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> -[andb]/GRing</span>.<span class="id">mul;</span><span class="id"> ring</span>.<br/>
+&nbsp;&nbsp;<span class="gallina-kwd">exists</span> (<span class="gallina-kwd">fun</span><span class="id"> '</span>(<span class="id">o,</span><span class="id"> v1,</span><span class="id"> u1,</span><span class="id"> u2,</span><span class="id"> u3,</span><span class="id"> s</span>)<span class="id"> =&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">o,</span> (<span class="id">v1,</span><span class="id"> u1,</span><span class="id"> u2,</span><span class="id"> u3,</span><span class="id"> s</span>))).<br/>
+&nbsp;&nbsp;<span class="id">-</span><span class="gallina-kwd"> by</span><span class="id"> move=&gt;</span><span class="id"> []</span><span class="id"> o</span><span class="id"> []</span><span class="id"> []</span><span class="id"> []</span><span class="id"> []</span><span class="id"> a1</span><span class="id"> a2</span><span class="id"> a3</span><span class="id"> a4</span><span class="id"> a5</span>.<br/>
+&nbsp;&nbsp;<span class="id">-</span><span class="gallina-kwd"> by</span><span class="id"> move=&gt;</span><span class="id"> []</span><span class="id"> []</span><span class="id"> []</span><span class="id"> []</span><span class="id"> []</span><span class="id"> []</span><span class="id"> []</span><span class="id"> []</span><span class="id"> a1</span><span class="id"> a2</span><span class="id"> a3</span><span class="id"> a4</span><span class="id"> a5</span><span class="id"> o1</span><span class="id"> o2</span><span class="id"> o3</span>.<br/>
+<span class="id">rewrite</span><span class="id"> H_assoc</span>.<br/>
+<span class="id">exact:</span> (<span class="id">cinde_centropy_eq</span><span class="id"> cinde_X</span>).<br/>
+Qed.</div></details>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> joint_centropy_reduction</span><span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="id">`H</span>(<span class="id">[%</span><span class="id"> V2,</span><span class="id"> V3]</span><span class="id"> |</span><span class="id"> AliceView</span> )<span class="id"> =</span><span class="id"> `H</span>(<span class="id">V2</span><span class="id"> |</span><span class="id"> AliceView</span>).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id">rewrite</span> (<span class="id">alice_view_to_cond</span><span class="id"> cinde_V2V3</span>) (<span class="id">alice_view_to_cond</span><span class="id"> cinde_V2</span>).<br/>
+<span class="id">apply:</span><span class="id"> V3_determined_centropy_v2</span>.<br/>
+<span class="id">exact:</span><span class="id"> U3_coprime_m</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="vernacular">End</span><span class="id"> semi_honest_case_analysis</span>.<br/>
+<br/>
+<span class="vernacular">End</span><span class="id"> alice_privacy_analysis</span>.<br/>
+<br/>
+<span class="vernacular">End</span><span class="id"> dsdp_privacy_analysis</span>.<br/>
+<br/>
+<br/>
+
+      <div class="footer"><hr/>Generated by <a href="https://github.com/affeldt-aist/rocqnavi/">rocqnavi</a></div>
+    </div>
+  </div>
+    </main>
+</body>
+</html>

@@ -1,0 +1,63 @@
+{
+  "findings": [
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/s5x5/s5x5_pile.v",
+      "line_start": 38,
+      "line_end": 38,
+      "lemma_name": "s5x5_preserves_pile1_proved",
+      "severity": "warning",
+      "evidence_quote": "Lemma s5x5_preserves_pile1_proved :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/s5x5/s5x5_pile.v",
+      "line_start": 72,
+      "line_end": 72,
+      "lemma_name": "s5x5_preserves_pile2_proved",
+      "severity": "warning",
+      "evidence_quote": "Lemma s5x5_preserves_pile2_proved :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "S998",
+      "file": "rocq-audit",
+      "line_start": 1,
+      "line_end": 1,
+      "severity": "warning",
+      "evidence_quote": "agent rc=1: ",
+      "closeness": "near",
+      "explanation": "Stage 2 call failed for chunk 0; see logs.",
+      "fix_sketch": "Retry the commit. If repeated, check agent configuration.",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": {
+    "entity_count": 2,
+    "chunk_count": 1,
+    "chunk_size": 3,
+    "workers_used": 1,
+    "tokens_used": 0,
+    "tokens_cap": 20000000,
+    "wall_ms_used": 3383,
+    "wall_ms_cap": 1800000,
+    "deferred_chunks": 0,
+    "stop_reason": "clean",
+    "estimated_usd": 0.0,
+    "model": "sonnet"
+  },
+  "exit_code": 0
+}

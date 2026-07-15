@@ -1,0 +1,47 @@
+{
+  "findings": [
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/pgg_threshold.v",
+      "line_start": 54,
+      "line_end": 54,
+      "lemma_name": "rc_N",
+      "severity": "error",
+      "evidence_quote": "Definition rc_N (rc : RampConfig) : nat := (rc_N' rc).+1.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/pgg_threshold.v",
+      "line_start": 286,
+      "line_end": 286,
+      "lemma_name": "ramp_config_threshold",
+      "severity": "error",
+      "evidence_quote": "Theorem ramp_config_threshold (C : {set 'I_T}) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/pgg_threshold.v",
+      "line_start": 293,
+      "line_end": 293,
+      "lemma_name": "ramp_config_mono",
+      "severity": "error",
+      "evidence_quote": "Theorem ramp_config_mono (C C' : {set 'I_T}) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": null,
+  "exit_code": 2
+}

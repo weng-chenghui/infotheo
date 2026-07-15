@@ -1,0 +1,112 @@
+{
+  "findings": [
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 1058,
+      "line_end": 1058,
+      "lemma_name": "pos_eq_sneg_range",
+      "severity": "warning",
+      "evidence_quote": "Lemma pos_eq_sneg_range Tg r L :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 1069,
+      "line_end": 1069,
+      "lemma_name": "neg_eq_spos_sub",
+      "severity": "warning",
+      "evidence_quote": "Lemma neg_eq_spos_sub Tg r L :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 1121,
+      "line_end": 1121,
+      "lemma_name": "clique_traces_aux_inv_abelian",
+      "severity": "warning",
+      "evidence_quote": "Lemma clique_traces_aux_inv_abelian Tg n memo :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 1213,
+      "line_end": 1213,
+      "lemma_name": "cartier_foata_check_free3",
+      "severity": "warning",
+      "evidence_quote": "Lemma cartier_foata_check_free3 :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 1224,
+      "line_end": 1224,
+      "lemma_name": "cartier_foata_check_abelian3",
+      "severity": "warning",
+      "evidence_quote": "Lemma cartier_foata_check_abelian3 :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 1235,
+      "line_end": 1235,
+      "lemma_name": "cartier_foata_check_path3",
+      "severity": "warning",
+      "evidence_quote": "Lemma cartier_foata_check_path3 :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 1246,
+      "line_end": 1246,
+      "lemma_name": "cartier_foata_check_star3",
+      "severity": "warning",
+      "evidence_quote": "Lemma cartier_foata_check_star3 :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 1257,
+      "line_end": 1257,
+      "lemma_name": "cartier_foata_check_abelian4",
+      "severity": "warning",
+      "evidence_quote": "Lemma cartier_foata_check_abelian4 :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": null,
+  "exit_code": 0
+}

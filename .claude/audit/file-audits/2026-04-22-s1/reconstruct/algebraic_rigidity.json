@@ -1,0 +1,165 @@
+{
+  "findings": [
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/reconstruct/algebraic_rigidity.v",
+      "line_start": 226,
+      "line_end": 226,
+      "lemma_name": "security_witness_endpoint_inj",
+      "severity": "warning",
+      "evidence_quote": "Definition security_witness_endpoint_inj (L : nat)",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/reconstruct/algebraic_rigidity.v",
+      "line_start": 257,
+      "line_end": 257,
+      "lemma_name": "security_witness_from_bound",
+      "severity": "warning",
+      "evidence_quote": "Definition security_witness_from_bound (L : nat)",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/reconstruct/algebraic_rigidity.v",
+      "line_start": 266,
+      "line_end": 266,
+      "lemma_name": "security_witness_with_exact",
+      "severity": "warning",
+      "evidence_quote": "Definition security_witness_with_exact (L : nat)",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/reconstruct/algebraic_rigidity.v",
+      "line_start": 317,
+      "line_end": 317,
+      "lemma_name": "ar_search_gap_tradeoff",
+      "severity": "warning",
+      "evidence_quote": "Lemma ar_search_gap_tradeoff (L : nat) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/reconstruct/algebraic_rigidity.v",
+      "line_start": 332,
+      "line_end": 332,
+      "lemma_name": "ar_large_group_forces_gap",
+      "severity": "warning",
+      "evidence_quote": "Lemma ar_large_group_forces_gap :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/reconstruct/algebraic_rigidity.v",
+      "line_start": 383,
+      "line_end": 383,
+      "lemma_name": "ar_search_space_chain",
+      "severity": "warning",
+      "evidence_quote": "Lemma ar_search_space_chain (L : nat) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/algebraic_rigidity.v",
+      "line_start": 193,
+      "line_end": 193,
+      "lemma_name": "security_witness_fiber",
+      "severity": "error",
+      "evidence_quote": "Definition security_witness_fiber (L : nat)",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/algebraic_rigidity.v",
+      "line_start": 226,
+      "line_end": 226,
+      "lemma_name": "security_witness_endpoint_inj",
+      "severity": "error",
+      "evidence_quote": "Definition security_witness_endpoint_inj (L : nat)",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/algebraic_rigidity.v",
+      "line_start": 257,
+      "line_end": 257,
+      "lemma_name": "security_witness_from_bound",
+      "severity": "error",
+      "evidence_quote": "Definition security_witness_from_bound (L : nat)",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/algebraic_rigidity.v",
+      "line_start": 266,
+      "line_end": 266,
+      "lemma_name": "security_witness_with_exact",
+      "severity": "error",
+      "evidence_quote": "Definition security_witness_with_exact (L : nat)",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/algebraic_rigidity.v",
+      "line_start": 488,
+      "line_end": 488,
+      "lemma_name": "certified_from_witness",
+      "severity": "error",
+      "evidence_quote": "Definition certified_from_witness",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "I001",
+      "file": "pgg-smc/reconstruct/algebraic_rigidity.v",
+      "line_start": 332,
+      "line_end": 332,
+      "lemma_name": "ar_large_group_forces_gap",
+      "severity": "error",
+      "evidence_quote": "Lemma ar_large_group_forces_gap :",
+      "stage": "stage1",
+      "reason": "five or more underscore-separated components without a canonical MathComp suffix",
+      "stages": [
+        "stage1"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": null,
+  "exit_code": 2
+}

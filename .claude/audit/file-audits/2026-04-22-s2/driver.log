@@ -1,0 +1,6 @@
+audit_batch.sh: --force set; skipping rocqworker/pet concurrency guard.
+audit_batch.sh: Stage 2 token cap hit (S996) while auditing lib/perm_uniform.v. Halting. Re-run with --resume once the cap resets.
+audit_batch.sh: done. manifest at /Users/cheng-huiweng/Projects/coq/infotheo-pgg/.claude/audit/file-audits/2026-04-22-s2/manifest.tsv
+audit_batch.sh: --force set; skipping rocqworker/pet concurrency guard.
+resumed: skipping security/pgg_weighted_entropy.v
+audit_batch.sh: done. manifest at /Users/cheng-huiweng/Projects/coq/infotheo-pgg/.claude/audit/file-audits/2026-04-22-s2/manifest.tsv

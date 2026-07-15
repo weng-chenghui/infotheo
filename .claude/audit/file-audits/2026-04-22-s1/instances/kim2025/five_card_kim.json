@@ -1,0 +1,320 @@
+{
+  "findings": [
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/kim2025/five_card_kim.v",
+      "line_start": 254,
+      "line_end": 254,
+      "lemma_name": "fc_kim_schreier_diag",
+      "severity": "warning",
+      "evidence_quote": "Lemma fc_kim_schreier_diag (x : 'I_5) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/kim2025/five_card_kim.v",
+      "line_start": 270,
+      "line_end": 270,
+      "lemma_name": "fc_kim_row_stochastic",
+      "severity": "warning",
+      "evidence_quote": "Lemma fc_kim_row_stochastic (x : 'I_5) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/kim2025/five_card_kim.v",
+      "line_start": 275,
+      "line_end": 275,
+      "lemma_name": "fc_kim_col_stochastic",
+      "severity": "warning",
+      "evidence_quote": "Lemma fc_kim_col_stochastic (y : 'I_5) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/kim2025/five_card_kim.v",
+      "line_start": 296,
+      "line_end": 296,
+      "lemma_name": "fc_kim_schreier_offdiag",
+      "severity": "warning",
+      "evidence_quote": "Lemma fc_kim_schreier_offdiag (x y : 'I_5) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/kim2025/five_card_kim.v",
+      "line_start": 312,
+      "line_end": 312,
+      "lemma_name": "fc_kim_doubly_stochastic",
+      "severity": "warning",
+      "evidence_quote": "Lemma fc_kim_doubly_stochastic :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/kim2025/five_card_kim.v",
+      "line_start": 367,
+      "line_end": 367,
+      "lemma_name": "kim_spectral_gap_pos",
+      "severity": "warning",
+      "evidence_quote": "Lemma kim_spectral_gap_pos : 0 < kim_spectral_gap.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/kim2025/five_card_kim.v",
+      "line_start": 370,
+      "line_end": 370,
+      "lemma_name": "kim_spectral_gap_le1",
+      "severity": "warning",
+      "evidence_quote": "Lemma kim_spectral_gap_le1 : kim_spectral_gap <= 1.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/kim2025/five_card_kim.v",
+      "line_start": 425,
+      "line_end": 425,
+      "lemma_name": "kim_var_dist_exact",
+      "severity": "warning",
+      "evidence_quote": "Lemma kim_var_dist_exact (L : nat) (s : 'I_5) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/kim2025/five_card_kim.v",
+      "line_start": 464,
+      "line_end": 464,
+      "lemma_name": "fc_kim_security_witness",
+      "severity": "warning",
+      "evidence_quote": "Definition fc_kim_security_witness (L : nat) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/kim2025/five_card_kim.v",
+      "line_start": 477,
+      "line_end": 477,
+      "lemma_name": "kim_slev_at_zero",
+      "severity": "warning",
+      "evidence_quote": "Lemma kim_slev_at_zero : eps = 0 -> kim_slev = 0.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/kim2025/five_card_kim.v",
+      "line_start": 480,
+      "line_end": 480,
+      "lemma_name": "kim_bound_at_zero",
+      "severity": "warning",
+      "evidence_quote": "Lemma kim_bound_at_zero (L : nat) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/kim2025/five_card_kim.v",
+      "line_start": 486,
+      "line_end": 486,
+      "lemma_name": "kim_security_at_zero",
+      "severity": "warning",
+      "evidence_quote": "Lemma kim_security_at_zero (L : nat) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/kim2025/five_card_kim.v",
+      "line_start": 515,
+      "line_end": 515,
+      "lemma_name": "fc_kim_security_bound",
+      "severity": "warning",
+      "evidence_quote": "Lemma fc_kim_security_bound (eps : R)",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/kim2025/five_card_kim.v",
+      "line_start": 163,
+      "line_end": 163,
+      "lemma_name": "kim_weight_gt0",
+      "severity": "error",
+      "evidence_quote": "Lemma kim_weight_gt0 (k : 'I_5) : 0 < kim_weight_fun k.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/kim2025/five_card_kim.v",
+      "line_start": 177,
+      "line_end": 177,
+      "lemma_name": "kim_weight_ge0",
+      "severity": "error",
+      "evidence_quote": "Lemma kim_weight_ge0 : forall k : 'I_5, 0 <= kim_weight_fun k.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/kim2025/five_card_kim.v",
+      "line_start": 180,
+      "line_end": 180,
+      "lemma_name": "kim_weight_sum1",
+      "severity": "error",
+      "evidence_quote": "Lemma kim_weight_sum1 : \\sum_(k in 'I_5) kim_weight_fun k = 1.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/kim2025/five_card_kim.v",
+      "line_start": 214,
+      "line_end": 214,
+      "lemma_name": "kim_weight_dist",
+      "severity": "error",
+      "evidence_quote": "Definition kim_weight_dist : R.-fdist 'I_5 :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/kim2025/five_card_kim.v",
+      "line_start": 217,
+      "line_end": 217,
+      "lemma_name": "kim_weight_distE",
+      "severity": "error",
+      "evidence_quote": "Lemma kim_weight_distE (k : 'I_5) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/kim2025/five_card_kim.v",
+      "line_start": 351,
+      "line_end": 351,
+      "lemma_name": "kim_slev_ge0",
+      "severity": "error",
+      "evidence_quote": "Lemma kim_slev_ge0 : 0 <= kim_slev.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/kim2025/five_card_kim.v",
+      "line_start": 354,
+      "line_end": 354,
+      "lemma_name": "kim_slev_lt1",
+      "severity": "error",
+      "evidence_quote": "Lemma kim_slev_lt1 : kim_slev < 1.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/kim2025/five_card_kim.v",
+      "line_start": 367,
+      "line_end": 367,
+      "lemma_name": "kim_spectral_gap_pos",
+      "severity": "error",
+      "evidence_quote": "Lemma kim_spectral_gap_pos : 0 < kim_spectral_gap.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/kim2025/five_card_kim.v",
+      "line_start": 370,
+      "line_end": 370,
+      "lemma_name": "kim_spectral_gap_le1",
+      "severity": "error",
+      "evidence_quote": "Lemma kim_spectral_gap_le1 : kim_spectral_gap <= 1.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/kim2025/five_card_kim.v",
+      "line_start": 480,
+      "line_end": 480,
+      "lemma_name": "kim_bound_at_zero",
+      "severity": "error",
+      "evidence_quote": "Lemma kim_bound_at_zero (L : nat) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/kim2025/five_card_kim.v",
+      "line_start": 486,
+      "line_end": 486,
+      "lemma_name": "kim_security_at_zero",
+      "severity": "error",
+      "evidence_quote": "Lemma kim_security_at_zero (L : nat) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": null,
+  "exit_code": 2
+}

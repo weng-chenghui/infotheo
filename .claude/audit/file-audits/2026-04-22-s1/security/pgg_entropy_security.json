@@ -1,0 +1,114 @@
+{
+  "findings": [
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/security/pgg_entropy_security.v",
+      "line_start": 194,
+      "line_end": 194,
+      "lemma_name": "entropy_fdistmap_uniform_supp",
+      "severity": "warning",
+      "evidence_quote": "Lemma entropy_fdistmap_uniform_supp :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/security/pgg_entropy_security.v",
+      "line_start": 441,
+      "line_end": 441,
+      "lemma_name": "var_dist_from_fiber_entropy",
+      "severity": "warning",
+      "evidence_quote": "Lemma var_dist_from_fiber_entropy (s : 'I_N) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/security/pgg_entropy_security.v",
+      "line_start": 684,
+      "line_end": 684,
+      "lemma_name": "joint_entropy_le_log_words",
+      "severity": "warning",
+      "evidence_quote": "Lemma joint_entropy_le_log_words :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/security/pgg_entropy_security.v",
+      "line_start": 161,
+      "line_end": 161,
+      "lemma_name": "entropy_uniform_supp",
+      "severity": "error",
+      "evidence_quote": "Lemma entropy_uniform_supp :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/security/pgg_entropy_security.v",
+      "line_start": 194,
+      "line_end": 194,
+      "lemma_name": "entropy_fdistmap_uniform_supp",
+      "severity": "error",
+      "evidence_quote": "Lemma entropy_fdistmap_uniform_supp :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/security/pgg_entropy_security.v",
+      "line_start": 559,
+      "line_end": 559,
+      "lemma_name": "security_witness_from_entropy",
+      "severity": "error",
+      "evidence_quote": "Definition security_witness_from_entropy",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "I001",
+      "file": "pgg-smc/security/pgg_entropy_security.v",
+      "line_start": 441,
+      "line_end": 441,
+      "lemma_name": "var_dist_from_fiber_entropy",
+      "severity": "error",
+      "evidence_quote": "Lemma var_dist_from_fiber_entropy (s : 'I_N) :",
+      "stage": "stage1",
+      "reason": "five or more underscore-separated components without a canonical MathComp suffix",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "I001",
+      "file": "pgg-smc/security/pgg_entropy_security.v",
+      "line_start": 684,
+      "line_end": 684,
+      "lemma_name": "joint_entropy_le_log_words",
+      "severity": "error",
+      "evidence_quote": "Lemma joint_entropy_le_log_words :",
+      "stage": "stage1",
+      "reason": "five or more underscore-separated components without a canonical MathComp suffix",
+      "stages": [
+        "stage1"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": null,
+  "exit_code": 2
+}

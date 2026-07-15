@@ -1,0 +1,1 @@
+- [Bloat patterns in interpreter.tex](bloat-patterns-interpreter.md) — K12 revision-round accretions: restriction-triple restatement, soundness coda, determinism gloss, "eliminates entirely", benefit wind-up

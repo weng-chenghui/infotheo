@@ -1,0 +1,50 @@
+{
+  "findings": [
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/reconstruct/cover_genus2.v",
+      "line_start": 87,
+      "line_end": 87,
+      "lemma_name": "genus2_ramif_ge_nbr",
+      "severity": "warning",
+      "evidence_quote": "Lemma genus2_ramif_ge_nbr : (5 <= ramif2)%N.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "S998",
+      "file": "rocq-audit",
+      "line_start": 1,
+      "line_end": 1,
+      "severity": "warning",
+      "evidence_quote": "agent rc=1: ",
+      "closeness": "near",
+      "explanation": "Stage 2 call failed for chunk 1; see logs.",
+      "fix_sketch": "Retry the commit. If repeated, check agent configuration.",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": {
+    "entity_count": 50,
+    "chunk_count": 8,
+    "chunk_size": 7,
+    "workers_used": 4,
+    "tokens_used": 0,
+    "tokens_cap": 20000000,
+    "wall_ms_used": 7439,
+    "wall_ms_cap": 1800000,
+    "deferred_chunks": 0,
+    "stop_reason": "clean",
+    "estimated_usd": 0.0,
+    "model": "sonnet"
+  },
+  "exit_code": 0
+}

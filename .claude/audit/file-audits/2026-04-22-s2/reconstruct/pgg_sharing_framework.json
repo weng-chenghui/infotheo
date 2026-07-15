@@ -1,0 +1,102 @@
+{
+  "findings": [
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/reconstruct/pgg_sharing_framework.v",
+      "line_start": 144,
+      "line_end": 144,
+      "lemma_name": "sum_mod_valid_pred",
+      "severity": "warning",
+      "evidence_quote": "Definition sum_mod_valid_pred (s : 'I_N) (shares : T.-tuple 'I_N) : Prop :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/reconstruct/pgg_sharing_framework.v",
+      "line_start": 152,
+      "line_end": 152,
+      "lemma_name": "sum_mod_scheme_correct",
+      "severity": "warning",
+      "evidence_quote": "Lemma sum_mod_scheme_correct (s : 'I_N) (shares : T.-tuple 'I_N) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/reconstruct/pgg_sharing_framework.v",
+      "line_start": 166,
+      "line_end": 166,
+      "lemma_name": "sum_mod_scheme_private",
+      "severity": "warning",
+      "evidence_quote": "Lemma sum_mod_scheme_private (s1 s2 : 'I_N)",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/reconstruct/pgg_sharing_framework.v",
+      "line_start": 192,
+      "line_end": 192,
+      "lemma_name": "sum_mod_encode_valid",
+      "severity": "warning",
+      "evidence_quote": "Lemma sum_mod_encode_valid (s : 'I_N) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/reconstruct/pgg_sharing_framework.v",
+      "line_start": 272,
+      "line_end": 272,
+      "lemma_name": "pgg_hidden_invariant_perm",
+      "severity": "warning",
+      "evidence_quote": "Lemma pgg_hidden_invariant_perm (s : 'I_N) (P : gT)",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "S998",
+      "file": "rocq-audit",
+      "line_start": 1,
+      "line_end": 1,
+      "severity": "warning",
+      "evidence_quote": "agent rc=1: ",
+      "closeness": "near",
+      "explanation": "Stage 2 call failed for chunk 0; see logs.",
+      "fix_sketch": "Retry the commit. If repeated, check agent configuration.",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": {
+    "entity_count": 32,
+    "chunk_count": 8,
+    "chunk_size": 4,
+    "workers_used": 4,
+    "tokens_used": 0,
+    "tokens_cap": 20000000,
+    "wall_ms_used": 8383,
+    "wall_ms_cap": 1800000,
+    "deferred_chunks": 0,
+    "stop_reason": "clean",
+    "estimated_usd": 0.0,
+    "model": "sonnet"
+  },
+  "exit_code": 0
+}

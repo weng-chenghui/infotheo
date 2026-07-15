@@ -1,0 +1,73 @@
+{
+  "findings": [
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/reconstruct/cover_genus2.v",
+      "line_start": 81,
+      "line_end": 81,
+      "lemma_name": "genus2_ramif_ge_nbr",
+      "severity": "warning",
+      "evidence_quote": "Lemma genus2_ramif_ge_nbr : (5 <= ramif2)%N.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/cover_genus2.v",
+      "line_start": 68,
+      "line_end": 68,
+      "lemma_name": "genus2_hurwitz",
+      "severity": "error",
+      "evidence_quote": "Lemma genus2_hurwitz :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/cover_genus2.v",
+      "line_start": 89,
+      "line_end": 89,
+      "lemma_name": "genus2_data",
+      "severity": "error",
+      "evidence_quote": "Definition genus2_data : CoveringData M := {|",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/cover_genus2.v",
+      "line_start": 241,
+      "line_end": 241,
+      "lemma_name": "ts2_perm_compatible",
+      "severity": "error",
+      "evidence_quote": "Lemma ts2_perm_compatible :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/cover_genus2.v",
+      "line_start": 249,
+      "line_end": 249,
+      "lemma_name": "genus2_covering",
+      "severity": "error",
+      "evidence_quote": "Definition genus2_covering : CoveringScheme M := {|",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": null,
+  "exit_code": 2
+}

@@ -1,0 +1,138 @@
+{
+  "findings": [
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/s5x5/s5x5_mixing.v",
+      "line_start": 800,
+      "line_end": 800,
+      "lemma_name": "s5_lazy_tnth'_0",
+      "severity": "error",
+      "evidence_quote": "Lemma s5_lazy_tnth'_0 :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/s5x5/s5x5_mixing.v",
+      "line_start": 803,
+      "line_end": 803,
+      "lemma_name": "s5_lazy_tnth'_1",
+      "severity": "error",
+      "evidence_quote": "Lemma s5_lazy_tnth'_1 :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/s5x5/s5x5_mixing.v",
+      "line_start": 806,
+      "line_end": 806,
+      "lemma_name": "s5_lazy_tnth'_2",
+      "severity": "error",
+      "evidence_quote": "Lemma s5_lazy_tnth'_2 :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/s5x5/s5x5_mixing.v",
+      "line_start": 809,
+      "line_end": 809,
+      "lemma_name": "s5_lazy_tnth'_3",
+      "severity": "error",
+      "evidence_quote": "Lemma s5_lazy_tnth'_3 :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/s5x5/s5x5_mixing.v",
+      "line_start": 812,
+      "line_end": 812,
+      "lemma_name": "s5_lazy_tnth'_4",
+      "severity": "error",
+      "evidence_quote": "Lemma s5_lazy_tnth'_4 :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/s5x5/s5x5_mixing.v",
+      "line_start": 816,
+      "line_end": 816,
+      "lemma_name": "s5_lazy_tnth'_5",
+      "severity": "error",
+      "evidence_quote": "Lemma s5_lazy_tnth'_5 :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/s5x5/s5x5_mixing.v",
+      "line_start": 820,
+      "line_end": 820,
+      "lemma_name": "s5_lazy_tnth'_6",
+      "severity": "error",
+      "evidence_quote": "Lemma s5_lazy_tnth'_6 :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/s5x5/s5x5_mixing.v",
+      "line_start": 824,
+      "line_end": 824,
+      "lemma_name": "s5_lazy_tnth'_7",
+      "severity": "error",
+      "evidence_quote": "Lemma s5_lazy_tnth'_7 :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/s5x5/s5x5_mixing.v",
+      "line_start": 829,
+      "line_end": 829,
+      "lemma_name": "s5_lazy_count_eq'",
+      "severity": "error",
+      "evidence_quote": "Lemma s5_lazy_count_eq' (i j : 'I_5) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/s5x5/s5x5_mixing.v",
+      "line_start": 846,
+      "line_end": 846,
+      "lemma_name": "s5_lazy_Q_eq_swap",
+      "severity": "error",
+      "evidence_quote": "Lemma s5_lazy_Q_eq_swap (R : realType) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": null,
+  "exit_code": 2
+}

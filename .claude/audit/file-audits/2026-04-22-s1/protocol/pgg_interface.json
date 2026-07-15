@@ -1,0 +1,633 @@
+{
+  "findings": [
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/protocol/pgg_interface.v",
+      "line_start": 176,
+      "line_end": 176,
+      "lemma_name": "search_space_le_words",
+      "severity": "warning",
+      "evidence_quote": "Lemma search_space_le_words (L : nat) : search_space L <= Tg ^ L.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/protocol/pgg_interface.v",
+      "line_start": 188,
+      "line_end": 188,
+      "lemma_name": "weval_inj_search_space",
+      "severity": "warning",
+      "evidence_quote": "Lemma weval_inj_search_space (L : nat) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/protocol/pgg_interface.v",
+      "line_start": 216,
+      "line_end": 216,
+      "lemma_name": "gen_inj_weval_inj1",
+      "severity": "warning",
+      "evidence_quote": "Lemma gen_inj_weval_inj1 :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/protocol/pgg_interface.v",
+      "line_start": 227,
+      "line_end": 227,
+      "lemma_name": "gen_inj_weval_inj1_search_space",
+      "severity": "warning",
+      "evidence_quote": "Lemma gen_inj_weval_inj1_search_space :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/protocol/pgg_interface.v",
+      "line_start": 359,
+      "line_end": 359,
+      "lemma_name": "compute_in_dealt_hand",
+      "severity": "warning",
+      "evidence_quote": "Lemma compute_in_dealt_hand (W : seq gT) (P : gT) (i : 'I_T) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/protocol/pgg_interface.v",
+      "line_start": 425,
+      "line_end": 425,
+      "lemma_name": "gen_starts_2_uniq",
+      "severity": "warning",
+      "evidence_quote": "Lemma gen_starts_2_uniq : uniq gen_starts_2.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/protocol/pgg_interface.v",
+      "line_start": 88,
+      "line_end": 88,
+      "lemma_name": "endpointM",
+      "severity": "error",
+      "evidence_quote": "Lemma endpointM (g h : gT) (s : 'I_N) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/protocol/pgg_interface.v",
+      "line_start": 93,
+      "line_end": 93,
+      "lemma_name": "endpoint1",
+      "severity": "error",
+      "evidence_quote": "Lemma endpoint1 (s : 'I_N) : endpoint 1 s = s.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/protocol/pgg_interface.v",
+      "line_start": 96,
+      "line_end": 96,
+      "lemma_name": "endpoint_inj",
+      "severity": "error",
+      "evidence_quote": "Lemma endpoint_inj (g : gT) : injective (endpoint g).",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/protocol/pgg_interface.v",
+      "line_start": 99,
+      "line_end": 99,
+      "lemma_name": "endpointV",
+      "severity": "error",
+      "evidence_quote": "Lemma endpointV (g : gT) (s : 'I_N) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/protocol/pgg_interface.v",
+      "line_start": 119,
+      "line_end": 119,
+      "lemma_name": "perm_endpoint",
+      "severity": "error",
+      "evidence_quote": "Definition perm_endpoint (sigma : {perm 'I_N}) (s : 'I_N) : 'I_N :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/protocol/pgg_interface.v",
+      "line_start": 161,
+      "line_end": 161,
+      "lemma_name": "achievable_sub",
+      "severity": "error",
+      "evidence_quote": "Lemma achievable_sub (L : nat) : achievable L \\subset G.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/protocol/pgg_interface.v",
+      "line_start": 196,
+      "line_end": 196,
+      "lemma_name": "weval_injB",
+      "severity": "error",
+      "evidence_quote": "Definition weval_injB (L : nat) : bool :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/protocol/pgg_interface.v",
+      "line_start": 199,
+      "line_end": 199,
+      "lemma_name": "weval_injP",
+      "severity": "error",
+      "evidence_quote": "Lemma weval_injP (L : nat) : reflect (weval_inj L) (weval_injB L).",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/protocol/pgg_interface.v",
+      "line_start": 216,
+      "line_end": 216,
+      "lemma_name": "gen_inj_weval_inj1",
+      "severity": "error",
+      "evidence_quote": "Lemma gen_inj_weval_inj1 :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/protocol/pgg_interface.v",
+      "line_start": 227,
+      "line_end": 227,
+      "lemma_name": "gen_inj_weval_inj1_search_space",
+      "severity": "error",
+      "evidence_quote": "Lemma gen_inj_weval_inj1_search_space :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/protocol/pgg_interface.v",
+      "line_start": 240,
+      "line_end": 240,
+      "lemma_name": "pgg_dtype_eqb",
+      "severity": "error",
+      "evidence_quote": "Definition pgg_dtype_eqb (d1 d2 : pgg_dtype) : bool :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/protocol/pgg_interface.v",
+      "line_start": 248,
+      "line_end": 248,
+      "lemma_name": "pgg_dtype_eqP",
+      "severity": "error",
+      "evidence_quote": "Lemma pgg_dtype_eqP : Equality.axiom pgg_dtype_eqb.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/protocol/pgg_interface.v",
+      "line_start": 266,
+      "line_end": 266,
+      "lemma_name": "pgg_data_dtype",
+      "severity": "error",
+      "evidence_quote": "Definition pgg_data_dtype {N} (d : pgg_data N) : pgg_dtype :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/protocol/pgg_interface.v",
+      "line_start": 273,
+      "line_end": 273,
+      "lemma_name": "from_sheet",
+      "severity": "error",
+      "evidence_quote": "Definition from_sheet {N} (d : pgg_data N) : option ('I_N) :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/protocol/pgg_interface.v",
+      "line_start": 276,
+      "line_end": 276,
+      "lemma_name": "from_hand",
+      "severity": "error",
+      "evidence_quote": "Definition from_hand {N} (d : pgg_data N) : option (seq ('I_N)) :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/protocol/pgg_interface.v",
+      "line_start": 279,
+      "line_end": 279,
+      "lemma_name": "from_idx",
+      "severity": "error",
+      "evidence_quote": "Definition from_idx {N} (d : pgg_data N) : option nat :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/protocol/pgg_interface.v",
+      "line_start": 282,
+      "line_end": 282,
+      "lemma_name": "from_sheet_PGG_sheet",
+      "severity": "error",
+      "evidence_quote": "Lemma from_sheet_PGG_sheet {N} (i : 'I_N) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/protocol/pgg_interface.v",
+      "line_start": 286,
+      "line_end": 286,
+      "lemma_name": "from_hand_PGG_hand",
+      "severity": "error",
+      "evidence_quote": "Lemma from_hand_PGG_hand {N} (s : seq ('I_N)) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/protocol/pgg_interface.v",
+      "line_start": 290,
+      "line_end": 290,
+      "lemma_name": "from_idx_PGG_idx",
+      "severity": "error",
+      "evidence_quote": "Lemma from_idx_PGG_idx {N} (n : nat) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/protocol/pgg_interface.v",
+      "line_start": 327,
+      "line_end": 327,
+      "lemma_name": "start_sheet_inj",
+      "severity": "error",
+      "evidence_quote": "Lemma start_sheet_inj : injective start_sheet.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/protocol/pgg_interface.v",
+      "line_start": 338,
+      "line_end": 338,
+      "lemma_name": "start_sheets",
+      "severity": "error",
+      "evidence_quote": "Definition start_sheets : {set 'I_N} :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/protocol/pgg_interface.v",
+      "line_start": 341,
+      "line_end": 341,
+      "lemma_name": "card_start_sheets",
+      "severity": "error",
+      "evidence_quote": "Lemma card_start_sheets : #|start_sheets| = T.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/protocol/pgg_interface.v",
+      "line_start": 347,
+      "line_end": 347,
+      "lemma_name": "perm_table",
+      "severity": "error",
+      "evidence_quote": "Definition perm_table (W : seq gT) : seq {perm 'I_N} :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/protocol/pgg_interface.v",
+      "line_start": 350,
+      "line_end": 350,
+      "lemma_name": "dealt_hand",
+      "severity": "error",
+      "evidence_quote": "Definition dealt_hand (W : seq gT) (i : 'I_T) : seq ('I_N) :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/protocol/pgg_interface.v",
+      "line_start": 353,
+      "line_end": 353,
+      "lemma_name": "compute",
+      "severity": "error",
+      "evidence_quote": "Definition compute (P : gT) (i : 'I_T) : 'I_N :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/protocol/pgg_interface.v",
+      "line_start": 356,
+      "line_end": 356,
+      "lemma_name": "endpoints",
+      "severity": "error",
+      "evidence_quote": "Definition endpoints (P : gT) : T.-tuple 'I_N :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/protocol/pgg_interface.v",
+      "line_start": 359,
+      "line_end": 359,
+      "lemma_name": "compute_in_dealt_hand",
+      "severity": "error",
+      "evidence_quote": "Lemma compute_in_dealt_hand (W : seq gT) (P : gT) (i : 'I_T) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/protocol/pgg_interface.v",
+      "line_start": 366,
+      "line_end": 366,
+      "lemma_name": "endpointsE",
+      "severity": "error",
+      "evidence_quote": "Lemma endpointsE (P : gT) (i : 'I_T) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/protocol/pgg_interface.v",
+      "line_start": 370,
+      "line_end": 370,
+      "lemma_name": "endpoint_starts_uniq",
+      "severity": "error",
+      "evidence_quote": "Lemma endpoint_starts_uniq (g : gT) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/protocol/pgg_interface.v",
+      "line_start": 405,
+      "line_end": 405,
+      "lemma_name": "gen_incl_morph",
+      "severity": "error",
+      "evidence_quote": "Definition gen_incl_morph : {morphism G >-> {perm 'I_N}} :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/protocol/pgg_interface.v",
+      "line_start": 408,
+      "line_end": 408,
+      "lemma_name": "Gen_PGGTypes",
+      "severity": "error",
+      "evidence_quote": "Definition Gen_PGGTypes := @MkPGG gT N.-1 G.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/protocol/pgg_interface.v",
+      "line_start": 413,
+      "line_end": 413,
+      "lemma_name": "gen_sigmas_gen",
+      "severity": "error",
+      "evidence_quote": "Lemma gen_sigmas_gen :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/protocol/pgg_interface.v",
+      "line_start": 422,
+      "line_end": 422,
+      "lemma_name": "gen_starts_2",
+      "severity": "error",
+      "evidence_quote": "Definition gen_starts_2 : 2.-tuple 'I_N :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/protocol/pgg_interface.v",
+      "line_start": 425,
+      "line_end": 425,
+      "lemma_name": "gen_starts_2_uniq",
+      "severity": "error",
+      "evidence_quote": "Lemma gen_starts_2_uniq : uniq gen_starts_2.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/protocol/pgg_interface.v",
+      "line_start": 428,
+      "line_end": 428,
+      "lemma_name": "Gen_PGG_2",
+      "severity": "error",
+      "evidence_quote": "Definition Gen_PGG_2 : PGGInterface M :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/protocol/pgg_interface.v",
+      "line_start": 445,
+      "line_end": 445,
+      "lemma_name": "gen_starts_T_size",
+      "severity": "error",
+      "evidence_quote": "Lemma gen_starts_T_size : size (map (widen_ord HT) (enum 'I_T)) == T.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/protocol/pgg_interface.v",
+      "line_start": 450,
+      "line_end": 450,
+      "lemma_name": "gen_starts_T_uniq",
+      "severity": "error",
+      "evidence_quote": "Lemma gen_starts_T_uniq : uniq gen_starts_T.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/protocol/pgg_interface.v",
+      "line_start": 456,
+      "line_end": 456,
+      "lemma_name": "Gen_PGG_T",
+      "severity": "error",
+      "evidence_quote": "Definition Gen_PGG_T : PGGInterface M :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/protocol/pgg_interface.v",
+      "line_start": 471,
+      "line_end": 471,
+      "lemma_name": "gen_map_size",
+      "severity": "error",
+      "evidence_quote": "Lemma gen_map_size : size (map gen (enum 'I_T.+1)) == T.+1.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/protocol/pgg_interface.v",
+      "line_start": 476,
+      "line_end": 476,
+      "lemma_name": "gen_tuple_ofE",
+      "severity": "error",
+      "evidence_quote": "Lemma gen_tuple_ofE (i : 'I_T.+1) : tnth gen_tuple_of i = gen i.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/protocol/pgg_interface.v",
+      "line_start": 491,
+      "line_end": 491,
+      "lemma_name": "tperm_disjoint_comm",
+      "severity": "error",
+      "evidence_quote": "Lemma tperm_disjoint_comm (fT : finType) (a b c d : fT) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "I001",
+      "file": "pgg-smc/protocol/pgg_interface.v",
+      "line_start": 227,
+      "line_end": 227,
+      "lemma_name": "gen_inj_weval_inj1_search_space",
+      "severity": "error",
+      "evidence_quote": "Lemma gen_inj_weval_inj1_search_space :",
+      "stage": "stage1",
+      "reason": "five or more underscore-separated components without a canonical MathComp suffix",
+      "stages": [
+        "stage1"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": null,
+  "exit_code": 2
+}

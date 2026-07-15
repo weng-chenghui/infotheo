@@ -1,0 +1,47 @@
+{
+  "findings": [
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/security/pgg_weighted_words.v",
+      "line_start": 64,
+      "line_end": 64,
+      "lemma_name": "rho_from_words_weighted",
+      "severity": "warning",
+      "evidence_quote": "Definition rho_from_words_weighted : R.-fdist {perm 'I_N} :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/security/pgg_weighted_words.v",
+      "line_start": 129,
+      "line_end": 129,
+      "lemma_name": "word_weighted_is_uniform",
+      "severity": "warning",
+      "evidence_quote": "Lemma word_weighted_is_uniform :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/security/pgg_weighted_words.v",
+      "line_start": 142,
+      "line_end": 142,
+      "lemma_name": "rho_weighted_is_uniform",
+      "severity": "warning",
+      "evidence_quote": "Lemma rho_weighted_is_uniform :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": null,
+  "exit_code": 0
+}

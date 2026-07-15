@@ -1,0 +1,570 @@
+
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Module graded_resource</title>
+<meta name="description" content="Documentation of Coq module Infotheo Documentation" />
+<link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/markdown-it/dist/markdown-it.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/markdown-it-texmath/texmath.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/darkmode-js@1.5.7/lib/darkmode-js.min.js"></script>
+<link href="rocqnavi.css" rel="stylesheet" type="text/css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script type="text/javascript" src="rocqnavi.js"> </script>
+</head>
+
+<body onload="init()">
+
+  <main>
+    <div class="sidebar">
+      <h2>Files</h2>
+      <li><details id="infotheo"><summary>infotheo</summary>
+          <ul>
+          <li><details id="infotheo.du2002"><summary>du2002</summary>
+          <ul>
+          <li><a href="infotheo.du2002.spp_entropy.html">spp_entropy</a></li>
+<li><a href="infotheo.du2002.spp_interface.html">spp_interface</a></li>
+<li><a href="infotheo.du2002.spp_pismc.html">spp_pismc</a></li>
+<li><a href="infotheo.du2002.spp_proba.html">spp_proba</a></li>
+<li><a href="infotheo.du2002.spp_program.html">spp_program</a></li>
+<li><a href="infotheo.du2002.spp_proof.html">spp_proof</a></li>
+<li><a href="infotheo.du2002.spp_session_types.html">spp_session_types</a></li>
+<li><a href="infotheo.du2002.spp_tactics.html">spp_tactics</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.dumas2017dual"><summary>dumas2017dual</summary>
+          <ul>
+          <li><details id="infotheo.dumas2017dual.dsdp"><summary>dsdp</summary>
+          <ul>
+          <li><a href="infotheo.dumas2017dual.dsdp.dsdp_correctness.html">dsdp_correctness</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_entropy.html">dsdp_entropy</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_entropy_trace.html">dsdp_entropy_trace</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_interface.html">dsdp_interface</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_pismc.html">dsdp_pismc</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_program.html">dsdp_program</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_security.html">dsdp_security</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_session_types.html">dsdp_session_types</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_syntax_demo.html">dsdp_syntax_demo</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.dumas2017dual.entropy_fiber"><summary>entropy_fiber</summary>
+          <ul>
+          <li><a href="infotheo.dumas2017dual.entropy_fiber.entropy_fiber.html">entropy_fiber</a></li>
+<li><a href="infotheo.dumas2017dual.entropy_fiber.entropy_fiber_zpq.html">entropy_fiber_zpq</a></li>
+<li><a href="infotheo.dumas2017dual.entropy_fiber.linear_fiber_zpq.html">linear_fiber_zpq</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.dumas2017dual.lib"><summary>lib</summary>
+          <ul>
+          <li><a href="infotheo.dumas2017dual.lib.extra_algebra.html">extra_algebra</a></li>
+<li><a href="infotheo.dumas2017dual.lib.extra_entropy.html">extra_entropy</a></li>
+<li><a href="infotheo.dumas2017dual.lib.extra_proba.html">extra_proba</a></li>
+<li><a href="infotheo.dumas2017dual.lib.rouche_capelli.html">rouche_capelli</a></li>
+          </ul>
+          </details>
+          </li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.ecc_classic"><summary>ecc_classic</summary>
+          <ul>
+          <li><a href="infotheo.ecc_classic.alternant.html">alternant</a></li>
+<li><a href="infotheo.ecc_classic.bch.html">bch</a></li>
+<li><a href="infotheo.ecc_classic.cyclic_code.html">cyclic_code</a></li>
+<li><a href="infotheo.ecc_classic.decoding.html">decoding</a></li>
+<li><a href="infotheo.ecc_classic.grs.html">grs</a></li>
+<li><a href="infotheo.ecc_classic.hamming_code.html">hamming_code</a></li>
+<li><a href="infotheo.ecc_classic.linearcode.html">linearcode</a></li>
+<li><a href="infotheo.ecc_classic.mceliece.html">mceliece</a></li>
+<li><a href="infotheo.ecc_classic.poly_decoding.html">poly_decoding</a></li>
+<li><a href="infotheo.ecc_classic.reed_solomon.html">reed_solomon</a></li>
+<li><a href="infotheo.ecc_classic.repcode.html">repcode</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.ecc_modern"><summary>ecc_modern</summary>
+          <ul>
+          <li><a href="infotheo.ecc_modern.checksum.html">checksum</a></li>
+<li><a href="infotheo.ecc_modern.degree_profile.html">degree_profile</a></li>
+<li><a href="infotheo.ecc_modern.ldpc.html">ldpc</a></li>
+<li><a href="infotheo.ecc_modern.ldpc_algo.html">ldpc_algo</a></li>
+<li><a href="infotheo.ecc_modern.ldpc_algo_proof.html">ldpc_algo_proof</a></li>
+<li><a href="infotheo.ecc_modern.ldpc_erasure.html">ldpc_erasure</a></li>
+<li><a href="infotheo.ecc_modern.max_subset.html">max_subset</a></li>
+<li><a href="infotheo.ecc_modern.stopping_set.html">stopping_set</a></li>
+<li><a href="infotheo.ecc_modern.subgraph_partition.html">subgraph_partition</a></li>
+<li><a href="infotheo.ecc_modern.summary.html">summary</a></li>
+<li><a href="infotheo.ecc_modern.summary_tanner.html">summary_tanner</a></li>
+<li><a href="infotheo.ecc_modern.tanner.html">tanner</a></li>
+<li><a href="infotheo.ecc_modern.tanner_partition.html">tanner_partition</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.homomorphic_encryption"><summary>homomorphic_encryption</summary>
+          <ul>
+          <li><details id="infotheo.homomorphic_encryption.benaloh1994"><summary>benaloh1994</summary>
+          <ul>
+          <li><a href="infotheo.homomorphic_encryption.benaloh1994.benaloh_ahe.html">benaloh_ahe</a></li>
+<li><a href="infotheo.homomorphic_encryption.benaloh1994.benaloh_enc.html">benaloh_enc</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.homomorphic_encryption.idealized"><summary>idealized</summary>
+          <ul>
+          <li><a href="infotheo.homomorphic_encryption.idealized.idealized_ahe.html">idealized_ahe</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.homomorphic_encryption.paillier1999"><summary>paillier1999</summary>
+          <ul>
+          <li><a href="infotheo.homomorphic_encryption.paillier1999.paillier_ahe.html">paillier_ahe</a></li>
+<li><a href="infotheo.homomorphic_encryption.paillier1999.paillier_enc.html">paillier_enc</a></li>
+          </ul>
+          </details>
+          </li>
+<li><a href="infotheo.homomorphic_encryption.ahe_enc.html">ahe_enc</a></li>
+<li><a href="infotheo.homomorphic_encryption.ahe_monoid.html">ahe_monoid</a></li>
+<li><a href="infotheo.homomorphic_encryption.enc_dec.html">enc_dec</a></li>
+<li><a href="infotheo.homomorphic_encryption.he_types.html">he_types</a></li>
+<li><a href="infotheo.homomorphic_encryption.homomorphic_encryption.html">homomorphic_encryption</a></li>
+<li><a href="infotheo.homomorphic_encryption.key_type.html">key_type</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.information_theory"><summary>information_theory</summary>
+          <ul>
+          <li><a href="infotheo.information_theory.aep.html">aep</a></li>
+<li><a href="infotheo.information_theory.binary_symmetric_channel.html">binary_symmetric_channel</a></li>
+<li><a href="infotheo.information_theory.channel.html">channel</a></li>
+<li><a href="infotheo.information_theory.channel_code.html">channel_code</a></li>
+<li><a href="infotheo.information_theory.channel_coding_converse.html">channel_coding_converse</a></li>
+<li><a href="infotheo.information_theory.channel_coding_direct.html">channel_coding_direct</a></li>
+<li><a href="infotheo.information_theory.conditional_divergence.html">conditional_divergence</a></li>
+<li><a href="infotheo.information_theory.entropy.html">entropy</a></li>
+<li><a href="infotheo.information_theory.entropy_convex.html">entropy_convex</a></li>
+<li><a href="infotheo.information_theory.erasure_channel.html">erasure_channel</a></li>
+<li><a href="infotheo.information_theory.error_exponent.html">error_exponent</a></li>
+<li><a href="infotheo.information_theory.joint_typ_seq.html">joint_typ_seq</a></li>
+<li><a href="infotheo.information_theory.jtypes.html">jtypes</a></li>
+<li><a href="infotheo.information_theory.kraft.html">kraft</a></li>
+<li><a href="infotheo.information_theory.pproba.html">pproba</a></li>
+<li><a href="infotheo.information_theory.shannon_fano.html">shannon_fano</a></li>
+<li><a href="infotheo.information_theory.source_code.html">source_code</a></li>
+<li><a href="infotheo.information_theory.source_coding_fl_converse.html">source_coding_fl_converse</a></li>
+<li><a href="infotheo.information_theory.source_coding_fl_direct.html">source_coding_fl_direct</a></li>
+<li><a href="infotheo.information_theory.source_coding_vl_converse.html">source_coding_vl_converse</a></li>
+<li><a href="infotheo.information_theory.source_coding_vl_direct.html">source_coding_vl_direct</a></li>
+<li><a href="infotheo.information_theory.string_entropy.html">string_entropy</a></li>
+<li><a href="infotheo.information_theory.success_decode_bound.html">success_decode_bound</a></li>
+<li><a href="infotheo.information_theory.typ_seq.html">typ_seq</a></li>
+<li><a href="infotheo.information_theory.types.html">types</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.lib"><summary>lib</summary>
+          <ul>
+          <li><a href="infotheo.lib.bigop_ext.html">bigop_ext</a></li>
+<li><a href="infotheo.lib.binary_entropy_function.html">binary_entropy_function</a></li>
+<li><a href="infotheo.lib.classical_sets_ext.html">classical_sets_ext</a></li>
+<li><a href="infotheo.lib.coqRE.html">coqRE</a></li>
+<li><a href="infotheo.lib.derive_ext.html">derive_ext</a></li>
+<li><a href="infotheo.lib.dft.html">dft</a></li>
+<li><a href="infotheo.lib.euclid.html">euclid</a></li>
+<li><a href="infotheo.lib.f2.html">f2</a></li>
+<li><a href="infotheo.lib.hamming.html">hamming</a></li>
+<li><a href="infotheo.lib.natbin.html">natbin</a></li>
+<li><a href="infotheo.lib.num_occ.html">num_occ</a></li>
+<li><a href="infotheo.lib.poly_ext.html">poly_ext</a></li>
+<li><a href="infotheo.lib.realType_ext.html">realType_ext</a></li>
+<li><a href="infotheo.lib.realType_ln.html">realType_ln</a></li>
+<li><a href="infotheo.lib.ssr_ext.html">ssr_ext</a></li>
+<li><a href="infotheo.lib.ssralg_ext.html">ssralg_ext</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.probability"><summary>probability</summary>
+          <ul>
+          <li><a href="infotheo.probability.bayes.html">bayes</a></li>
+<li><a href="infotheo.probability.convex.html">convex</a></li>
+<li><a href="infotheo.probability.convex_equiv.html">convex_equiv</a></li>
+<li><a href="infotheo.probability.convex_stone.html">convex_stone</a></li>
+<li><a href="infotheo.probability.divergence.html">divergence</a></li>
+<li><a href="infotheo.probability.fdist.html">fdist</a></li>
+<li><a href="infotheo.probability.fsdist.html">fsdist</a></li>
+<li><a href="infotheo.probability.graphoid.html">graphoid</a></li>
+<li><a href="infotheo.probability.jensen.html">jensen</a></li>
+<li><a href="infotheo.probability.jfdist_cond.html">jfdist_cond</a></li>
+<li><a href="infotheo.probability.log_sum.html">log_sum</a></li>
+<li><a href="infotheo.probability.necset.html">necset</a></li>
+<li><a href="infotheo.probability.partition_inequality.html">partition_inequality</a></li>
+<li><a href="infotheo.probability.pinsker.html">pinsker</a></li>
+<li><a href="infotheo.probability.proba.html">proba</a></li>
+<li><a href="infotheo.probability.variation_dist.html">variation_dist</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.robust"><summary>robust</summary>
+          <ul>
+          <li><a href="infotheo.robust.robustmean.html">robustmean</a></li>
+<li><a href="infotheo.robust.weightedmean.html">weightedmean</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.smc"><summary>smc</summary>
+          <ul>
+          <li><a href="infotheo.smc.graded_resource.html">graded_resource</a></li>
+<li><a href="infotheo.smc.pismc.html">pismc</a></li>
+<li><a href="infotheo.smc.smc_interpreter.html">smc_interpreter</a></li>
+<li><a href="infotheo.smc.smc_session_types.html">smc_session_types</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.toy_examples"><summary>toy_examples</summary>
+          <ul>
+          <li><a href="infotheo.toy_examples.conditional_entropy.html">conditional_entropy</a></li>
+<li><a href="infotheo.toy_examples.expected_value_variance.html">expected_value_variance</a></li>
+<li><a href="infotheo.toy_examples.expected_value_variance_ordn.html">expected_value_variance_ordn</a></li>
+<li><a href="infotheo.toy_examples.expected_value_variance_tuple.html">expected_value_variance_tuple</a></li>
+          </ul>
+          </details>
+          </li>
+<li><a href="infotheo._check_sigs.html">_check_sigs</a></li>
+<li><a href="infotheo._depgraph_extract.html">_depgraph_extract</a></li>
+<li><a href="infotheo._test_star2.html">_test_star2</a></li>
+<li><a href="infotheo.test_sri.html">test_sri</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="pgg_reconstruct"><summary>pgg_reconstruct</summary>
+          <ul>
+          <li><a href="pgg_reconstruct.ag_code.html">ag_code</a></li>
+<li><a href="pgg_reconstruct.ag_massey_bridge.html">ag_massey_bridge</a></li>
+<li><a href="pgg_reconstruct.ag_multiplicative.html">ag_multiplicative</a></li>
+<li><a href="pgg_reconstruct.algebraic_rigidity.html">algebraic_rigidity</a></li>
+<li><a href="pgg_reconstruct.coord_perm_compatible.html">coord_perm_compatible</a></li>
+<li><a href="pgg_reconstruct.cover_genus0.html">cover_genus0</a></li>
+<li><a href="pgg_reconstruct.cover_genus1.html">cover_genus1</a></li>
+<li><a href="pgg_reconstruct.cover_genus2.html">cover_genus2</a></li>
+<li><a href="pgg_reconstruct.cover_tradeoff.html">cover_tradeoff</a></li>
+<li><a href="pgg_reconstruct.covering_scheme.html">covering_scheme</a></li>
+<li><a href="pgg_reconstruct.hyperelliptic_code.html">hyperelliptic_code</a></li>
+<li><a href="pgg_reconstruct.lagrange.html">lagrange</a></li>
+<li><a href="pgg_reconstruct.massey.html">massey</a></li>
+<li><a href="pgg_reconstruct.pgg_assignment.html">pgg_assignment</a></li>
+<li><a href="pgg_reconstruct.pgg_covering_correctness.html">pgg_covering_correctness</a></li>
+<li><a href="pgg_reconstruct.pgg_deck_pairing.html">pgg_deck_pairing</a></li>
+<li><a href="pgg_reconstruct.pgg_sharing_framework.html">pgg_sharing_framework</a></li>
+<li><a href="pgg_reconstruct.pgg_sum_mod.html">pgg_sum_mod</a></li>
+<li><a href="pgg_reconstruct.pgg_threshold.html">pgg_threshold</a></li>
+<li><a href="pgg_reconstruct.pgl_bound.html">pgl_bound</a></li>
+<li><a href="pgg_reconstruct.rigidity_monster_instance.html">rigidity_monster_instance</a></li>
+<li><a href="pgg_reconstruct.rigidity_s5_instance.html">rigidity_s5_instance</a></li>
+<li><a href="pgg_reconstruct.rigidity_star_instance.html">rigidity_star_instance</a></li>
+<li><a href="pgg_reconstruct.rs_massey_bridge.html">rs_massey_bridge</a></li>
+<li><a href="pgg_reconstruct.rs_privacy.html">rs_privacy</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="pgg_smc"><summary>pgg_smc</summary>
+          <ul>
+          <li><a href="pgg_smc.abelian_word_collapse.html">abelian_word_collapse</a></li>
+<li><a href="pgg_smc.free_group_ball.html">free_group_ball</a></li>
+<li><a href="pgg_smc.perm_uniform.html">perm_uniform</a></li>
+<li><a href="pgg_smc.pgg_abelian.html">pgg_abelian</a></li>
+<li><a href="pgg_smc.pgg_abelian.html">pgg_abelian</a></li>
+<li><a href="pgg_smc.pgg_abelian_collapse.html">pgg_abelian_collapse</a></li>
+<li><a href="pgg_smc.pgg_collusion_bound.html">pgg_collusion_bound</a></li>
+<li><a href="pgg_smc.pgg_correctness.html">pgg_correctness</a></li>
+<li><a href="pgg_smc.pgg_free.html">pgg_free</a></li>
+<li><a href="pgg_smc.pgg_interface.html">pgg_interface</a></li>
+<li><a href="pgg_smc.pgg_lfree.html">pgg_lfree</a></li>
+<li><a href="pgg_smc.pgg_nonabelian.html">pgg_nonabelian</a></li>
+<li><a href="pgg_smc.pgg_pismc.html">pgg_pismc</a></li>
+<li><a href="pgg_smc.pgg_program.html">pgg_program</a></li>
+<li><a href="pgg_smc.pgg_raag.html">pgg_raag</a></li>
+<li><a href="pgg_smc.pgg_raag_cartier_foata.html">pgg_raag_cartier_foata</a></li>
+<li><a href="pgg_smc.pgg_raag_clique.html">pgg_raag_clique</a></li>
+<li><a href="pgg_smc.pgg_raag_path.html">pgg_raag_path</a></li>
+<li><a href="pgg_smc.pgg_raag_s5.html">pgg_raag_s5</a></li>
+<li><a href="pgg_smc.pgg_raag_star.html">pgg_raag_star</a></li>
+<li><a href="pgg_smc.pgg_security.html">pgg_security</a></li>
+<li><a href="pgg_smc.pgg_session_types.html">pgg_session_types</a></li>
+<li><a href="pgg_smc.pgg_word_analysis.html">pgg_word_analysis</a></li>
+<li><a href="pgg_smc.test_cf.html">test_cf</a></li>
+<li><a href="pgg_smc.test_cf2.html">test_cf2</a></li>
+<li><a href="pgg_smc.test_cf3.html">test_cf3</a></li>
+<li><a href="pgg_smc.test_sri.html">test_sri</a></li>
+<li><a href="pgg_smc.test_sri2.html">test_sri2</a></li>
+          </ul>
+          </details>
+          </li>
+    </div>
+
+  <div class="coq">
+
+    <div class="content">
+      <p>
+        <a href="./index.html">Top</a>
+        
+      </p>
+      <h1 class="title">Module graded_resource</h1>
+<span class="vernacular">From</span><span class="id"> HB</span><span class="vernacular"> Require</span><span class="vernacular"> Import</span><span class="id"> structures</span>.<br/>
+<span class="vernacular">From</span><span class="id"> mathcomp</span><span class="vernacular"> Require</span><span class="vernacular"> Import</span><span class="id"> all_boot</span><span class="id"> all_order</span>.<br/>
+<br/>
+<div class="ssrdoc md">
+# Graded Resource Mixins for Termination Proofs
+
+Generic mixins that abstract over nat-indexed type families, enabling
+reuse of termination proofs across multiple indexed types.
+
+## Architecture: Current vs Ideal
+
+### Current Architecture (with erased interpreter)
+
+  The current `interp` operates on erased processes (`proc`), losing
+  type information. Resource tracking requires post-hoc reconstruction:
+
+  ```
+  proc (erased) ──&gt; interp ──&gt; proc (erased)
+                                 │
+                                 └──&gt; reconstruct aproc (case analysis)
+                                      ├── fuel bound ✓
+                                      └── senv bound ✓ (but coupled!)
+  ```
+
+  Limitation: Adding a new resource requires extending the reconstruction
+  with more case analysis. Resources cannot be tracked independently.
+
+### Ideal Architecture (with typed interpreter)
+
+  A typed interpreter preserving `aproc` indices would enable independent
+  resource tracking via separate mixin instances:
+
+  ```
+  aproc (typed) ──&gt; typed_interp ──&gt; aproc (typed)
+                                      │
+                                      ├── fuel: isStepDecreasing instance
+                                      ├── senv: isStepDecreasing instance
+                                      └── new_resource: isStepDecreasing
+  ```
+
+  Benefits:
+  - Each resource has its own isStepDecreasing instance
+  - Resources are tracked independently and can be composed
+  - Adding new resources doesn't require modifying existing proofs
+
+## Current Status
+
+  This file provides forward-looking infrastructure:
+  - isNatGraded, isStepDecreasing, isDecomposableInterp mixins are ready
+  - sum_level_decreases generalizes collection-level termination
+  - Generic termination lemmas (suffices_generic, fuel_suffices_alt)
+
+  To fully utilize this infrastructure, a typed interpreter is needed.
+  Until then, fuel_senv_decreases in smc_session_types.v couples the
+  resources via case analysis reconstruction.
+
+## Mixins Provided
+
+  isNatGraded T         - T is a nat-indexed type family with base and down
+  isStepDecreasing B    - step on B decreases level (context type as field)
+  isDecomposableInterp S - interpreter decomposes along nat addition
+
+## Usage Pattern (with typed interpreter)
+
+  1. Define a nat-indexed type family T : nat -&gt; Type
+  2. Create isNatGraded instance (base case and step-down)
+  3. Define bundle type B (e.g., sigT T or existing record)
+  4. Create isStepDecreasing instance with level function
+  5. Apply generic termination lemmas
+  6. Each resource gets its own instance, tracked independently
+
+</div>
+<br/>
+<span class="gallina-kwd">Set</span><span class="vernacular"> Implicit</span><span class="vernacular"> Arguments</span>.<br/>
+<span class="vernacular">Unset</span><span class="vernacular"> Strict</span><span class="vernacular"> Implicit</span>.<br/>
+<span class="vernacular">Import</span><span class="id"> Prenex</span><span class="vernacular"> Implicits</span>.<br/>
+<br/>
+<pre class="ssrdoc">
+(** * isNatGraded: Nat-Indexed Type Family
+</pre>
+<br/>
+<span class="id">HB</span>.<span class="id">mixin</span><span class="vernacular"> Record</span><span class="id"> isNatGraded</span> (<span class="id">T</span><span class="id"> :</span><span class="id"> nat</span><span class="id"> -&gt;</span><span class="gallina-kwd"> Type</span>)<span class="id"> :=</span><span class="id"> {</span><br/>
+&nbsp;&nbsp;<span class="id">base</span><span class="id"> :</span><span class="id"> T</span><span class="id"> 0</span><span class="id"> ;</span><br/>
+&nbsp;&nbsp;<span class="id">down</span><span class="id"> :</span><span class="gallina-kwd"> forall</span><span class="id"> n,</span><span class="id"> T</span><span class="id"> n</span>.<span class="id">+1</span><span class="id"> -&gt;</span><span class="id"> T</span><span class="id"> n</span><span class="id"> ;</span><br/>
+<span class="id">}</span>.<br/>
+<br/>
+<span class="id">HB</span>.<span class="id">structure</span><span class="vernacular"> Definition</span><span class="id"> NatGraded</span><span class="id"> :=</span><span class="id"> {</span><span class="id"> T</span><span class="id"> of</span><span class="id"> isNatGraded</span><span class="id"> T</span><span class="id"> }</span>.<br/>
+<br/>
+<pre class="ssrdoc">
+(** * isStepDecreasing: Step Operation Respects Level Grading
+</pre>
+<br/>
+<span class="id">HB</span>.<span class="id">mixin</span><span class="vernacular"> Record</span><span class="id"> isStepDecreasing</span> (<span class="id">B</span><span class="id"> :</span><span class="gallina-kwd"> Type</span>)<span class="id"> :=</span><span class="id"> {</span><br/>
+&nbsp;&nbsp;<span class="id">step_ctx</span><span class="id"> :</span><span class="gallina-kwd"> Type</span><span class="id"> ;</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="id">level</span><span class="id"> :</span><span class="id"> B</span><span class="id"> -&gt;</span><span class="id"> nat</span><span class="id"> ;</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="id">step_bundle</span><span class="id"> :</span><span class="id"> B</span><span class="id"> -&gt;</span><span class="id"> step_ctx</span><span class="id"> -&gt;</span><span class="id"> B</span><span class="id"> *</span><span class="id"> nat</span><span class="id"> ;</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="id">step_decreases_subproof</span><span class="id"> :</span><span class="gallina-kwd"> forall</span><span class="id"> b</span><span class="id"> c,</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">level</span> (<span class="id">step_bundle</span><span class="id"> b</span><span class="id"> c</span>).<span class="id">1</span><span class="id"> +</span> (<span class="id">step_bundle</span><span class="id"> b</span><span class="id"> c</span>).<span class="id">2</span><span class="id"> &lt;=</span><span class="id"> level</span><span class="id"> b</span><span class="id"> ;</span><br/>
+<span class="id">}</span>.<br/>
+<br/>
+<span class="id">HB</span>.<span class="id">structure</span><span class="vernacular"> Definition</span><span class="id"> StepDecreasing</span><span class="id"> :=</span><span class="id"> {</span><span class="id"> B</span><span class="id"> of</span><span class="id"> isStepDecreasing</span><span class="id"> B</span><span class="id"> }</span>.<br/>
+<br/>
+<pre class="ssrdoc">
+(** * Sum Level Decreasing: Lifting Single-Bundle to Collection
+</pre>
+<br/>
+<br/>
+<span class="vernacular">Section</span><span class="id"> SumDecreasing</span>.<br/>
+<br/>
+<span class="vernacular">Variable</span><span class="id"> B</span><span class="id"> :</span><span class="gallina-kwd"> Type</span>.<br/>
+<span class="vernacular">Variable</span><span class="id"> level</span><span class="id"> :</span><span class="id"> B</span><span class="id"> -&gt;</span><span class="id"> nat</span>.<br/>
+<span class="vernacular">Variable</span><span class="id"> step_ctx</span><span class="id"> :</span><span class="gallina-kwd"> Type</span>.<br/>
+<span class="vernacular">Variable</span><span class="id"> step_bundle</span><span class="id"> :</span><span class="id"> B</span><span class="id"> -&gt;</span><span class="id"> step_ctx</span><span class="id"> -&gt;</span><span class="id"> B</span><span class="id"> *</span><span class="id"> nat</span>.<br/>
+<span class="vernacular">Variable</span><span class="id"> default_b</span><span class="id"> :</span><span class="id"> B</span>.<br/>
+<span class="vernacular">Variable</span><span class="id"> default_c</span><span class="id"> :</span><span class="id"> step_ctx</span>.<br/>
+<br/>
+<span class="vernacular">Hypothesis</span><span class="id"> step_decreases</span><span class="id"> :</span><span class="gallina-kwd"> forall</span><span class="id"> b</span><span class="id"> c,</span><br/>
+&nbsp;&nbsp;<span class="id">level</span> (<span class="id">step_bundle</span><span class="id"> b</span><span class="id"> c</span>).<span class="id">1</span><span class="id"> +</span> (<span class="id">step_bundle</span><span class="id"> b</span><span class="id"> c</span>).<span class="id">2</span><span class="id"> &lt;=</span><span class="id"> level</span><span class="id"> b</span>.<br/>
+<br/>
+<span class="vernacular">Definition</span><span class="id"> stepped_levels</span> (<span class="id">bs</span><span class="id"> :</span><span class="id"> seq</span><span class="id"> B</span>) (<span class="id">cs</span><span class="id"> :</span><span class="id"> seq</span><span class="id"> step_ctx</span>)<span class="id"> :</span><span class="id"> nat</span><span class="id"> :=</span><br/>
+&nbsp;&nbsp;<span class="id">\sum_</span>(<span class="id">i</span><span class="id"> &lt;</span><span class="id"> size</span><span class="id"> bs</span>)<span class="id"> level</span> (<span class="id">step_bundle</span> (<span class="id">nth</span><span class="id"> default_b</span><span class="id"> bs</span><span class="id"> i</span>) (<span class="id">nth</span><span class="id"> default_c</span><span class="id"> cs</span><span class="id"> i</span>)).<span class="id">1</span>.<br/>
+<br/>
+<span class="vernacular">Definition</span><span class="id"> original_levels</span> (<span class="id">bs</span><span class="id"> :</span><span class="id"> seq</span><span class="id"> B</span>)<span class="id"> :</span><span class="id"> nat</span><span class="id"> :=</span><br/>
+&nbsp;&nbsp;<span class="id">\sum_</span>(<span class="id">i</span><span class="id"> &lt;</span><span class="id"> size</span><span class="id"> bs</span>)<span class="id"> level</span> (<span class="id">nth</span><span class="id"> default_b</span><span class="id"> bs</span><span class="id"> i</span>).<br/>
+<br/>
+<span class="vernacular">Definition</span><span class="id"> total_progress</span> (<span class="id">bs</span><span class="id"> :</span><span class="id"> seq</span><span class="id"> B</span>) (<span class="id">cs</span><span class="id"> :</span><span class="id"> seq</span><span class="id"> step_ctx</span>)<span class="id"> :</span><span class="id"> nat</span><span class="id"> :=</span><br/>
+&nbsp;&nbsp;<span class="id">\sum_</span>(<span class="id">i</span><span class="id"> &lt;</span><span class="id"> size</span><span class="id"> bs</span>) (<span class="id">step_bundle</span> (<span class="id">nth</span><span class="id"> default_b</span><span class="id"> bs</span><span class="id"> i</span>) (<span class="id">nth</span><span class="id"> default_c</span><span class="id"> cs</span><span class="id"> i</span>)).<span class="id">2</span>.<br/>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> sum_step_decreases</span> (<span class="id">bs</span><span class="id"> :</span><span class="id"> seq</span><span class="id"> B</span>) (<span class="id">cs</span><span class="id"> :</span><span class="id"> seq</span><span class="id"> step_ctx</span>)<span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="id">stepped_levels</span><span class="id"> bs</span><span class="id"> cs</span><span class="id"> +</span><span class="id"> total_progress</span><span class="id"> bs</span><span class="id"> cs</span><span class="id"> &lt;=</span><span class="id"> original_levels</span><span class="id"> bs</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id">rewrite</span><span class="id"> /stepped_levels</span><span class="id"> /total_progress</span><span class="id"> /original_levels</span><span class="id"> -big_split</span><span class="id"> /=</span>.<br/>
+<span class="id">apply:</span><span class="id"> leq_sum</span><span class="id"> =&gt;</span><span class="id"> i</span><span class="id"> _</span>.<br/>
+<span class="id">exact:</span><span class="id"> step_decreases</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> sum_level_decreases</span> (<span class="id">bs</span><span class="id"> :</span><span class="id"> seq</span><span class="id"> B</span>) (<span class="id">cs</span><span class="id"> :</span><span class="id"> seq</span><span class="id"> step_ctx</span>)<span class="id"> :</span><br/>
+&nbsp;&nbsp;(<span class="gallina-kwd">exists</span><span class="id"> k,</span><span class="id"> k</span><span class="id"> &lt;</span><span class="id"> size</span><span class="id"> bs</span><span class="id"> /\</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">step_bundle</span> (<span class="id">nth</span><span class="id"> default_b</span><span class="id"> bs</span><span class="id"> k</span>) (<span class="id">nth</span><span class="id"> default_c</span><span class="id"> cs</span><span class="id"> k</span>)).<span class="id">2</span><span class="id"> =</span><span class="id"> 1</span>)<span class="id"> -&gt;</span><br/>
+&nbsp;&nbsp;<span class="id">stepped_levels</span><span class="id"> bs</span><span class="id"> cs</span><span class="id"> &lt;</span><span class="id"> original_levels</span><span class="id"> bs</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id">case=&gt;</span><span class="id"> k</span><span class="id"> [Hk</span><span class="id"> Hprog]</span>.<br/>
+<span class="id">have</span><span class="id"> Hsum</span><span class="id"> :=</span><span class="id"> sum_step_decreases</span><span class="id"> bs</span><span class="id"> cs</span>.<br/>
+<span class="comment">(*&nbsp;total_progress&nbsp;&gt;=&nbsp;1&nbsp;because&nbsp;process&nbsp;k&nbsp;made&nbsp;progress&nbsp;*)</span><br/>
+<span class="id">have</span><span class="id"> Hprog_pos</span><span class="id"> :</span><span class="id"> 0</span><span class="id"> &lt;</span><span class="id"> total_progress</span><span class="id"> bs</span><span class="id"> cs</span>.<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> /total_progress</span> (<span class="id">bigD1</span> (<span class="id">Ordinal</span><span class="id"> Hk</span>))<span class="id"> //=</span>.<br/>
+&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> addn_gt0</span><span class="id"> Hprog</span><span class="id"> orTb</span>.<br/>
+<span class="comment">(*&nbsp;From&nbsp;Hsum:&nbsp;stepped&nbsp;+&nbsp;progress&nbsp;&lt;=&nbsp;original,&nbsp;and&nbsp;Hprog_pos:&nbsp;0&nbsp;&lt;&nbsp;progress,<br/>
+&nbsp;&nbsp;&nbsp;we&nbsp;derive:&nbsp;stepped&nbsp;&lt;&nbsp;stepped&nbsp;+&nbsp;progress&nbsp;&lt;=&nbsp;original,&nbsp;hence&nbsp;stepped&nbsp;&lt;&nbsp;original.<br/>
+&nbsp;&nbsp;&nbsp;Using:&nbsp;a&nbsp;&lt;&nbsp;a&nbsp;+&nbsp;b&nbsp;(when&nbsp;0&nbsp;&lt;&nbsp;b),&nbsp;and&nbsp;a&nbsp;+&nbsp;b&nbsp;&lt;=&nbsp;c&nbsp;implies&nbsp;a&nbsp;&lt;&nbsp;c&nbsp;by&nbsp;leq_trans&nbsp;*)</span><br/>
+<span class="id">have</span><span class="id"> Hlt</span><span class="id"> :</span><span class="id"> stepped_levels</span><span class="id"> bs</span><span class="id"> cs</span><span class="id"> &lt;</span><span class="id"> stepped_levels</span><span class="id"> bs</span><span class="id"> cs</span><span class="id"> +</span><span class="id"> total_progress</span><span class="id"> bs</span><span class="id"> cs</span>.<br/>
+&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> -addn1</span><span class="id"> leq_add2l</span>.<br/>
+<span class="id">apply</span><span class="id"> leq_trans</span><span class="gallina-kwd"> with</span> (<span class="id">n</span><span class="id"> :=</span><span class="id"> stepped_levels</span><span class="id"> bs</span><span class="id"> cs</span><span class="id"> +</span><span class="id"> total_progress</span><span class="id"> bs</span><span class="id"> cs</span>).<br/>
+<span class="id">-</span><span class="id"> exact</span><span class="id"> Hlt</span>.<br/>
+<span class="id">-</span><span class="id"> exact</span><span class="id"> Hsum</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> sum_level_decreases_has</span> (<span class="id">bs</span><span class="id"> :</span><span class="id"> seq</span><span class="id"> B</span>) (<span class="id">cs</span><span class="id"> :</span><span class="id"> seq</span><span class="id"> step_ctx</span>)<span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="id">has</span> (<span class="gallina-kwd">fun</span><span class="id"> k</span><span class="id"> =&gt;</span> (<span class="id">step_bundle</span> (<span class="id">nth</span><span class="id"> default_b</span><span class="id"> bs</span><span class="id"> k</span>) (<span class="id">nth</span><span class="id"> default_c</span><span class="id"> cs</span><span class="id"> k</span>)).<span class="id">2</span><span class="id"> ==</span><span class="id"> 1</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">iota</span><span class="id"> 0</span> (<span class="id">size</span><span class="id"> bs</span>))<span class="id"> -&gt;</span><br/>
+&nbsp;&nbsp;<span class="id">stepped_levels</span><span class="id"> bs</span><span class="id"> cs</span><span class="id"> &lt;</span><span class="id"> original_levels</span><span class="id"> bs</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id">move/hasP</span><span class="id"> =&gt;</span><span class="id"> [k]</span>.<br/>
+<span class="id">rewrite</span><span class="id"> mem_iota</span><span class="id"> add0n</span><span class="id"> =&gt;</span><span class="id"> /andP</span><span class="id"> [_</span><span class="id"> Hk]</span><span class="id"> /eqP</span><span class="id"> Hprog</span>.<br/>
+<span class="id">apply:</span><span class="id"> sum_level_decreases</span>.<br/>
+<span class="gallina-kwd">by</span><span class="gallina-kwd"> exists</span><span class="id"> k</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="vernacular">End</span><span class="id"> SumDecreasing</span>.<br/>
+<br/>
+<pre class="ssrdoc">
+(** * isDecomposableInterp: Interpreter Decomposes Along Addition
+</pre>
+<br/>
+<span class="id">HB</span>.<span class="id">mixin</span><span class="vernacular"> Record</span><span class="id"> isDecomposableInterp</span> (<span class="id">S</span><span class="id"> :</span><span class="gallina-kwd"> Type</span>)<span class="id"> :=</span><span class="id"> {</span><br/>
+&nbsp;&nbsp;<span class="id">run</span><span class="id"> :</span><span class="id"> nat</span><span class="id"> -&gt;</span><span class="id"> S</span><span class="id"> -&gt;</span><span class="id"> S</span><span class="id"> ;</span><br/>
+&nbsp;&nbsp;<span class="id">runD</span><span class="id"> :</span><span class="gallina-kwd"> forall</span><span class="id"> n</span><span class="id"> m</span><span class="id"> s,</span><span class="id"> run</span> (<span class="id">n</span><span class="id"> +</span><span class="id"> m</span>)<span class="id"> s</span><span class="id"> =</span><span class="id"> run</span><span class="id"> m</span> (<span class="id">run</span><span class="id"> n</span><span class="id"> s</span>)<span class="id"> ;</span><br/>
+&nbsp;&nbsp;<span class="id">run0</span><span class="id"> :</span><span class="gallina-kwd"> forall</span><span class="id"> s,</span><span class="id"> run</span><span class="id"> 0</span><span class="id"> s</span><span class="id"> =</span><span class="id"> s</span><span class="id"> ;</span><br/>
+<span class="id">}</span>.<br/>
+<br/>
+<span class="id">HB</span>.<span class="id">structure</span><span class="vernacular"> Definition</span><span class="id"> DecomposableInterp</span><span class="id"> :=</span><span class="id"> {</span><span class="id"> S</span><span class="id"> of</span><span class="id"> isDecomposableInterp</span><span class="id"> S</span><span class="id"> }</span>.<br/>
+<br/>
+<pre class="ssrdoc">
+(** * Generic Termination Lemmas
+</pre>
+<br/>
+<br/>
+<span class="vernacular">Section</span><span class="id"> GenericTermination</span>.<br/>
+<br/>
+<span class="vernacular">Variable</span><span class="id"> S</span><span class="id"> :</span><span class="id"> DecomposableInterp</span>.<span class="id">type</span>.<br/>
+<br/>
+<span class="vernacular">Variable</span><span class="id"> total_level</span><span class="id"> :</span><span class="id"> S</span><span class="id"> -&gt;</span><span class="id"> nat</span>.<br/>
+<br/>
+<span class="vernacular">Variable</span><span class="id"> is_quiescent</span><span class="id"> :</span><span class="id"> S</span><span class="id"> -&gt;</span><span class="id"> bool</span>.<br/>
+<br/>
+<span class="vernacular">Hypothesis</span><span class="id"> quiescent_fixed</span><span class="id"> :</span><span class="gallina-kwd"> forall</span><span class="id"> s,</span><span class="id"> is_quiescent</span><span class="id"> s</span><span class="id"> -&gt;</span><span class="id"> run</span><span class="id"> 1</span><span class="id"> s</span><span class="id"> =</span><span class="id"> s</span>.<br/>
+<br/>
+<span class="vernacular">Hypothesis</span><span class="id"> fuel_leads_to_quiescence</span><span class="id"> :</span><span class="gallina-kwd"> forall</span><span class="id"> h</span><span class="id"> s,</span><br/>
+&nbsp;&nbsp;<span class="id">h</span><span class="id"> &gt;=</span><span class="id"> total_level</span><span class="id"> s</span><span class="id"> -&gt;</span><span class="id"> is_quiescent</span> (<span class="id">run</span><span class="id"> h</span><span class="id"> s</span>).<br/>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> quiescent_run_id</span><span class="id"> n</span><span class="id"> s</span><span class="id"> :</span><span class="id"> is_quiescent</span><span class="id"> s</span><span class="id"> -&gt;</span><span class="id"> run</span><span class="id"> n</span><span class="id"> s</span><span class="id"> =</span><span class="id"> s</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id">elim:</span><span class="id"> n</span><span class="id"> =&gt;</span><span class="id"> [|n</span><span class="id"> IH]</span><span class="id"> Hq</span>.<br/>
+&nbsp;&nbsp;<span class="id">exact:</span><span class="id"> run0</span>.<br/>
+<span class="id">have</span><span class="id"> -&gt;</span><span class="id"> :</span><span class="id"> n</span>.<span class="id">+1</span><span class="id"> =</span><span class="id"> 1</span><span class="id"> +</span><span class="id"> n</span><span class="gallina-kwd"> by</span><span class="id"> rewrite</span><span class="id"> add1n</span>.<br/>
+<span class="id">rewrite</span><span class="id"> runD</span> (<span class="id">quiescent_fixed</span><span class="id"> Hq</span>).<br/>
+<span class="id">exact:</span><span class="id"> IH</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> suffices_generic</span><span class="id"> h</span><span class="id"> s</span><span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="id">h</span><span class="id"> &gt;=</span><span class="id"> total_level</span><span class="id"> s</span><span class="id"> -&gt;</span><br/>
+&nbsp;&nbsp;<span class="id">run</span><span class="id"> h</span><span class="id"> s</span><span class="id"> =</span><span class="id"> run</span> (<span class="id">total_level</span><span class="id"> s</span>)<span class="id"> s</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id">move=&gt;</span><span class="id"> Hh</span>.<br/>
+<span class="id">have</span><span class="id"> -&gt;</span><span class="id"> :</span><span class="id"> h</span><span class="id"> =</span><span class="id"> total_level</span><span class="id"> s</span><span class="id"> +</span> (<span class="id">h</span><span class="id"> -</span><span class="id"> total_level</span><span class="id"> s</span>)<span class="gallina-kwd"> by</span><span class="id"> rewrite</span><span class="id"> subnKC</span>.<br/>
+<span class="id">rewrite</span><span class="id"> runD</span>.<br/>
+<span class="id">apply:</span><span class="id"> quiescent_run_id</span>.<br/>
+<span class="id">exact:</span><span class="id"> fuel_leads_to_quiescence</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> fuel_suffices_alt</span><span class="id"> h</span><span class="id"> n0</span><span class="id"> s</span><span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="id">h</span><span class="id"> &gt;=</span><span class="id"> n0</span><span class="id"> -&gt;</span><br/>
+&nbsp;&nbsp;<span class="id">is_quiescent</span> (<span class="id">run</span><span class="id"> n0</span><span class="id"> s</span>)<span class="id"> -&gt;</span><br/>
+&nbsp;&nbsp;<span class="id">run</span><span class="id"> h</span><span class="id"> s</span><span class="id"> =</span><span class="id"> run</span><span class="id"> n0</span><span class="id"> s</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id">move=&gt;</span><span class="id"> Hh</span><span class="id"> Hq</span>.<br/>
+<span class="id">have</span><span class="id"> -&gt;</span><span class="id"> :</span><span class="id"> h</span><span class="id"> =</span><span class="id"> n0</span><span class="id"> +</span> (<span class="id">h</span><span class="id"> -</span><span class="id"> n0</span>)<span class="gallina-kwd"> by</span><span class="id"> rewrite</span><span class="id"> subnKC</span>.<br/>
+<span class="id">rewrite</span><span class="id"> runD</span>.<br/>
+<span class="id">exact:</span><span class="id"> quiescent_run_id</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="vernacular">End</span><span class="id"> GenericTermination</span>.<br/>
+
+      <div class="footer"><hr/>Generated by <a href="https://github.com/affeldt-aist/rocqnavi/">rocqnavi</a></div>
+    </div>
+  </div>
+    </main>
+</body>
+</html>

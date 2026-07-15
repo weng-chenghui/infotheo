@@ -1,0 +1,151 @@
+{
+  "findings": [
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/rs_massey_bridge.v",
+      "line_start": 48,
+      "line_end": 48,
+      "lemma_name": "transport_valid",
+      "severity": "error",
+      "evidence_quote": "Definition transport_valid (s : B) (shares : T'.+1.-tuple B) : Prop :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/rs_massey_bridge.v",
+      "line_start": 51,
+      "line_end": 51,
+      "lemma_name": "transport_recon",
+      "severity": "error",
+      "evidence_quote": "Definition transport_recon (shares : T'.+1.-tuple B) : B :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/rs_massey_bridge.v",
+      "line_start": 54,
+      "line_end": 54,
+      "lemma_name": "transport_correct",
+      "severity": "error",
+      "evidence_quote": "Lemma transport_correct (s : B) (shares : T'.+1.-tuple B) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/rs_massey_bridge.v",
+      "line_start": 61,
+      "line_end": 61,
+      "lemma_name": "transport_private",
+      "severity": "error",
+      "evidence_quote": "Lemma transport_private (s1 s2 : B) (shares : T'.+1.-tuple B)",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/rs_massey_bridge.v",
+      "line_start": 87,
+      "line_end": 87,
+      "lemma_name": "transport_encode",
+      "severity": "error",
+      "evidence_quote": "Definition transport_encode (s : B) : T'.+1.-tuple B :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/rs_massey_bridge.v",
+      "line_start": 90,
+      "line_end": 90,
+      "lemma_name": "transport_encode_valid",
+      "severity": "error",
+      "evidence_quote": "Lemma transport_encode_valid (s : B) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/rs_massey_bridge.v",
+      "line_start": 101,
+      "line_end": 101,
+      "lemma_name": "transport_scheme",
+      "severity": "error",
+      "evidence_quote": "Definition transport_scheme : ThresholdScheme B B :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/rs_massey_bridge.v",
+      "line_start": 106,
+      "line_end": 106,
+      "lemma_name": "transport_exact",
+      "severity": "error",
+      "evidence_quote": "Lemma transport_exact :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/rs_massey_bridge.v",
+      "line_start": 177,
+      "line_end": 177,
+      "lemma_name": "ofFK",
+      "severity": "error",
+      "evidence_quote": "Lemma ofFK : cancel ofF toF.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/rs_massey_bridge.v",
+      "line_start": 180,
+      "line_end": 180,
+      "lemma_name": "toFK",
+      "severity": "error",
+      "evidence_quote": "Lemma toFK : cancel toF ofF.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/rs_massey_bridge.v",
+      "line_start": 187,
+      "line_end": 187,
+      "lemma_name": "rs_genus0_exact",
+      "severity": "error",
+      "evidence_quote": "Lemma rs_genus0_exact :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": null,
+  "exit_code": 2
+}

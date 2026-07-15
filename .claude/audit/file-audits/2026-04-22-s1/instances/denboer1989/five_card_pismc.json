@@ -1,0 +1,125 @@
+{
+  "findings": [
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/denboer1989/five_card_pismc.v",
+      "line_start": 115,
+      "line_end": 115,
+      "lemma_name": "fc_ts_encode_valid",
+      "severity": "warning",
+      "evidence_quote": "Lemma fc_ts_encode_valid (s : bool) : fc_ts_valid s (fc_ts_encode s).",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/denboer1989/five_card_pismc.v",
+      "line_start": 69,
+      "line_end": 69,
+      "lemma_name": "fc_bob",
+      "severity": "error",
+      "evidence_quote": "Definition fc_bob (b : bool) : sproc fc_dtype fc_data bob_idx :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/denboer1989/five_card_pismc.v",
+      "line_start": 72,
+      "line_end": 72,
+      "lemma_name": "fc_dealer",
+      "severity": "error",
+      "evidence_quote": "Definition fc_dealer (a b : bool) (k : nat) (Hk : k < 5)",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/denboer1989/five_card_pismc.v",
+      "line_start": 84,
+      "line_end": 84,
+      "lemma_name": "fc_verifier",
+      "severity": "error",
+      "evidence_quote": "Definition fc_verifier : sproc fc_dtype fc_data verifier_idx :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/denboer1989/five_card_pismc.v",
+      "line_start": 149,
+      "line_end": 149,
+      "lemma_name": "fc_witness_size",
+      "severity": "error",
+      "evidence_quote": "Lemma fc_witness_size (s : bool) (i : nat) (v : bool) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/denboer1989/five_card_pismc.v",
+      "line_start": 153,
+      "line_end": 153,
+      "lemma_name": "fc_witness_tup",
+      "severity": "error",
+      "evidence_quote": "Definition fc_witness_tup (s : bool) (i : 'I_5) (v : bool) : 5.-tuple bool :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/denboer1989/five_card_pismc.v",
+      "line_start": 156,
+      "line_end": 156,
+      "lemma_name": "fc_witness_val",
+      "severity": "error",
+      "evidence_quote": "Lemma fc_witness_val s (i : 'I_5) v :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/denboer1989/five_card_pismc.v",
+      "line_start": 160,
+      "line_end": 160,
+      "lemma_name": "fc_witness_valid",
+      "severity": "error",
+      "evidence_quote": "Lemma fc_witness_valid s (i : 'I_5) v :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/denboer1989/five_card_pismc.v",
+      "line_start": 167,
+      "line_end": 167,
+      "lemma_name": "fc_witness_tnth",
+      "severity": "error",
+      "evidence_quote": "Lemma fc_witness_tnth s (i : 'I_5) v :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": null,
+  "exit_code": 2
+}

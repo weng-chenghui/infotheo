@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://infotheo-pgg/audit/auditor-response.schema.json",
+  "title": "rocq-auditor response",
+  "type": "object",
+  "required": ["findings", "passed"],
+  "additionalProperties": false,
+  "properties": {
+    "passed": { "type": "boolean" },
+    "tokens_used": { "type": "integer", "minimum": 0 },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["rule_id", "file", "line_start", "line_end", "severity", "evidence_quote", "closeness", "explanation", "fix_sketch", "confidence"],
+        "additionalProperties": false,
+        "properties": {
+          "rule_id": { "type": "string", "pattern": "^[A-Z][0-9]{3}$" },
+          "file": { "type": "string" },
+          "line_start": { "type": "integer", "minimum": 1 },
+          "line_end": { "type": "integer", "minimum": 1 },
+          "lemma_name": { "type": "string" },
+          "severity": { "type": "string", "enum": ["error", "warning", "info"] },
+          "evidence_quote": { "type": "string" },
+          "closeness": { "type": "string", "enum": ["idiomatic", "near", "far"] },
+          "explanation": { "type": "string" },
+          "fix_sketch": { "type": "string" },
+          "confidence": { "type": "string", "enum": ["high", "medium", "low"] },
+          "kernel_contract": {
+            "type": "object",
+            "required": ["name"],
+            "properties": {
+              "name": { "type": "string", "enum": ["unused_hypothesis", "goal_closed_at_line"] },
+              "parameters": { "type": "object" }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,271 @@
+{
+  "findings": [
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 517,
+      "line_end": 517,
+      "lemma_name": "all_pairs_false_neq",
+      "severity": "warning",
+      "evidence_quote": "Lemma all_pairs_false_neq (s : seq nat) (a b : nat) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1",
+        "stage2"
+      ],
+      "explanation": "Stage 1 flagged the four-component name. Stage 2 upgrade: the main symbol is `all_pairs_comm_sorted` (the function whose value is characterised). The trailing tokens `false` (predicate argument value) and `neq` (distinctness condition) are neither in the MathComp suffix table nor the condition-prefix allowlist. MathComp grammar for a boolean-false conclusion with a negation hypothesis would use suffix `F` for the false result and `N` for the `a != b` condition, yielding something like `all_pairs_comm_sorted_falseN`. The token `neq` mimics English prose rather than the terse MathComp suffix vocabulary.",
+      "fix_sketch": "Rename to `all_pairs_comm_sorted_falseN` (main symbol `all_pairs_comm_sorted`, `false` specifying the predicate, `N` for the `a != b` condition) or to `all_pairs_comm_sortedFN` if the false-result suffix should come last. Update the Used-by cite in the preceding comment of `empty_clique_countk`."
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 596,
+      "line_end": 596,
+      "lemma_name": "clique_traces_aux_inv",
+      "severity": "warning",
+      "evidence_quote": "Lemma clique_traces_aux_inv Tg n memo :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 711,
+      "line_end": 711,
+      "lemma_name": "filter_iota_head_even",
+      "severity": "warning",
+      "evidence_quote": "Lemma filter_iota_head_even L :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 720,
+      "line_end": 720,
+      "lemma_name": "filter_iota_head_odd",
+      "severity": "warning",
+      "evidence_quote": "Lemma filter_iota_head_odd L :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 830,
+      "line_end": 830,
+      "lemma_name": "sumn_shift_even_to_odd_gen",
+      "severity": "warning",
+      "evidence_quote": "Lemma sumn_shift_even_to_odd_gen (g : nat -> nat) m M :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 848,
+      "line_end": 848,
+      "lemma_name": "sumn_shift_odd_to_even_gen",
+      "severity": "warning",
+      "evidence_quote": "Lemma sumn_shift_odd_to_even_gen (g : nat -> nat) m M :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 517,
+      "line_end": 519,
+      "lemma_name": "all_pairs_false_neq",
+      "severity": "warning",
+      "evidence_quote": "all_pairs_comm_sorted (fun _ _ => false) s = false",
+      "closeness": "near",
+      "explanation": "The conclusion is the boolean equation `all_pairs_comm_sorted (fun _ _ => false) s = false`. By AUTHORITY.md the canonical suffix for a `= false` conclusion is `F` (boolean false). The suffix `neq` encodes the hypothesis `a != b` but is not a standard MathComp condition suffix; MathComp uses `N` for boolean negation. The name therefore carries two non-canonical tokens where the grammar expects `<mainSymbol>F_N` or `<mainSymbol>_falseN`.",
+      "fix_sketch": "Rename to `all_pairs_comm_sorted_falseN` (suffix `F`-via-`false` for the false conclusion, `N` for the negation condition `a != b`). If the full main symbol is too long, consider `allPairsF_neq` with a Naming justification in the preceding comment.",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 533,
+      "line_end": 534,
+      "lemma_name": "empty_clique_countk",
+      "severity": "warning",
+      "evidence_quote": "clique_count Tg k (fun _ _ => false) = 0",
+      "closeness": "near",
+      "explanation": "The conclusion is `clique_count Tg k (fun _ _ => false) = 0`. By AUTHORITY.md the canonical suffix for a result equal to zero is `0` (or `_eq0`). The final component `k` in `empty_clique_countk` names the universally-quantified size parameter rather than encoding a semantic role, which deviates from `(condition_)?mainSymbol_suffixes(_condition)?`. An idiomatic name places the zero-result suffix last: `clique_count_empty0` or `empty_clique_count0`.",
+      "fix_sketch": "Rename to `empty_clique_count0` (condition `empty` for the trivially-false predicate, main symbol `clique_count`, suffix `0` for the zero result). Update call sites in `clique_step_free` (body lines ~573 and ~578) and the Used-by cite in the preceding comment.",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 720,
+      "line_end": 722,
+      "lemma_name": "filter_iota_head_odd",
+      "severity": "warning",
+      "evidence_quote": "Lemma filter_iota_head_odd L :\n  [seq k <- iota 0 L.+1 | odd k] = [seq k <- iota 1 L | odd k].",
+      "closeness": "near",
+      "explanation": "Stage 1 already flagged F001 (four underscore components) on this name. G001 adds a separate suffix-mismatch dimension: the statement is an equation (lhs = rhs) whose MathComp-idiomatic suffix should be `_E`, but the name terminates with `_odd`, which is a discriminating condition, not a semantic-role suffix. The name thereby fails on two axes: component count (F001) and missing equational suffix (G001). The `_odd` fragment is a legitimate condition descriptor but should appear before the role suffix, not as the final component.",
+      "fix_sketch": "Rename to `filter_iota_odd_headE` (condition `_odd` precedes the role suffix `E`) or, if the four-component structure is unavoidable, at minimum append `E`: `filter_iota_head_oddE`. Update all call sites (sneg_eq_tail, sneg_unfold body, pos_eq_sneg_range).",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 729,
+      "line_end": 732,
+      "lemma_name": "sumn_filter_map",
+      "severity": "warning",
+      "evidence_quote": "Lemma sumn_filter_map {A : eqType} (p : pred A) (f : A -> nat) (s : seq A) :\n  sumn [seq f x | x <- [seq x <- s | p x]] =\n  sumn [seq (if p x then f x else 0) | x <- s].",
+      "closeness": "near",
+      "explanation": "The statement is an equation (`sumn [...] = sumn [...]`), placing this lemma in the equational-rewrite class whose MathComp suffix is `E` (AUTHORITY.md suffix table). The current name ends with `_map`, which describes an operand rather than the semantic role. A reader searching for equational rewrites on `sumn` by suffix convention will not find this lemma. The name has three underscore components (below the F001 threshold of four), so Stage 1 did not flag it; the suffix mismatch is purely a G001 concern.",
+      "fix_sketch": "Rename to `sumn_filter_mapE` (preserve the operand description, append role suffix) or the more compact `sumn_filterE` if `_map` is considered implicit from the `seq` context. Update call sites: `spos_unfold` body (line 741), `sneg_unfold` body (line 750), `pos_eq_sneg_range` body (line 1062), `neg_eq_spos_sub` body (line 1073).",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 738,
+      "line_end": 741,
+      "lemma_name": "spos_unfold",
+      "severity": "warning",
+      "evidence_quote": "Lemma spos_unfold n r L :\n  spos n r L = sumn [seq (if ~~ odd k then 'C(n, k) * 'C(L - k + r, r) else 0)\n                     | k <- iota 0 L.+1].",
+      "closeness": "near",
+      "explanation": "The statement is a definitional equation `spos n r L = sumn [...]`, a rewrite that eliminates the filter by inlining the predicate as a conditional. The canonical MathComp suffix for such equational rewrites is `E` (AUTHORITY.md: \"E — elimination / equational rewrite\"). `_unfold` is not in the canonical suffix table; it is an English verb describing what the lemma does rather than signalling its logical role. Readers navigating by the `_E` convention will miss it.",
+      "fix_sketch": "Rename to `spos_E` (canonical minimal form) or `spos_unfoldE` if preserving the informal descriptor is desired. Update call sites: `spos_split` (line 762), `spos0` (line 890), `spos_pascal` (line 990), `neg_eq_spos_sub` (line 1073 via spos_split).",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 747,
+      "line_end": 750,
+      "lemma_name": "sneg_unfold",
+      "severity": "warning",
+      "evidence_quote": "Lemma sneg_unfold n r L :\n  sneg n r L = sumn [seq (if odd k then 'C(n, k) * 'C(L - k + r, r) else 0)\n                     | k <- iota 0 L.+1].",
+      "closeness": "near",
+      "explanation": "Symmetric case to `spos_unfold`. The statement `sneg n r L = sumn [...]` is an equational rewrite whose canonical MathComp suffix is `E`. The suffix `_unfold` is not in the AUTHORITY.md suffix table and does not signal the semantic role to readers searching by convention. Both `spos_unfold` and `sneg_unfold` should be renamed in tandem so the suffix is consistent across the spos/sneg pair.",
+      "fix_sketch": "Rename to `sneg_E` (canonical) or `sneg_unfoldE` (preserving the informal descriptor). Rename in tandem with `spos_unfold` -> `spos_E` for consistency. Update call sites: `sneg_eq_tail` body (line 775), `sneg0` (line 904), `sneg_pascal` (line 1002), `pos_eq_sneg_range` (line 1062 via sneg_eq_tail).",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 810,
+      "line_end": 810,
+      "lemma_name": "sumn_map_eq",
+      "severity": "warning",
+      "evidence_quote": "Lemma sumn_map_eq (f g : nat -> nat) m M :",
+      "closeness": "near",
+      "explanation": "The statement is `sumn [seq f k | k <- iota m M] = sumn [seq g k | k <- iota m M]`, an equational rewrite lemma. AUTHORITY.md maps the role 'equational rewrite / elimination' to suffix `E`, not `eq`. The suffix `eq` does not appear in the canonical MathComp suffix table; `_eq` is a Lean/Coq-stdlib convention that is out of place in a MathComp/Infotheo codebase. The name should be `sumn_map_E` to conform to the grammar `mainSymbol_suffix` where suffix `E` signals an equational rewrite. Stage 1 did not flag this name under F001 (component count boundary); this finding is Stage 2 G001 only and is not a duplicate.",
+      "fix_sketch": "Rename `sumn_map_eq` to `sumn_map_E`. Search the file for all call sites with `sumn_map_eq` and update them. No Naming: justification is present in the preceding comment, so the rename is required rather than a waiver.",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 556,
+      "line_end": 564,
+      "lemma_name": "sumn_map_0",
+      "severity": "warning",
+      "evidence_quote": "(* Helper: sumn of all-zero map is 0 *)",
+      "closeness": "near",
+      "explanation": "KIND is present (Helper). WHAT is present (paraphrase 'sumn of all-zero map is 0'). WHY is absent: no motivation is stated. The suffix `0` is not in the MathComp algebraic-law waiver list (_A, _AC, _ACA, _C, _CA, _K, _D, _I, _V, _X, _Xn, _Xz, _Mn, _Z), so WHY is not waived. USED_BY is absent: for a helper, at least one downstream consumer must be named. From the manifest body of `clique_step_free`, `sumn_map_0` is invoked twice (`apply: sumn_map_0 => k.` at the even-index sum reduction and at the odd-index sum reduction), confirming `clique_step_free` as the downstream consumer with high confidence.",
+      "fix_sketch": "(** sumn_map_0 — the sum of a mapped sequence is zero whenever every image is zero.\n    Kind: helper.\n    Why: used by clique_step_free to collapse both the even-index and odd-index\n         clique-count sums to zero when the commutation predicate is identically false.\n    Used by: clique_step_free. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 565,
+      "line_end": 595,
+      "lemma_name": "clique_step_free",
+      "severity": "warning",
+      "evidence_quote": "(* clique_step for empty graph = Tg * previous element *)",
+      "closeness": "far",
+      "explanation": "KIND is absent: the comment does not classify this as helper or main. WHAT is present ('clique_step for empty graph = Tg * previous element'). WHY is absent: no motivation is stated and the WHAT clause does not name a downstream consumer crisply, so the waiver does not apply. USED_BY is absent in the comment text, but grep confirms `clique_step_free` is called at lines 607 and 619 (inside `clique_traces_aux_inv`), so the downstream consumer is `clique_traces_aux_inv`. Three of four checklist parts fail.",
+      "fix_sketch": "(** clique_step_free — for the empty commutation graph (predicate identically false),\n    clique_step reduces to Tg times the last element of the memo table.\n    Kind: helper.\n    Why: drives the inductive step of clique_traces_aux_inv, showing that each\n         extension of the memo multiplies by Tg when no commutation pairs exist.\n    Used by: clique_traces_aux_inv. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "S998",
+      "file": "rocq-audit",
+      "line_start": 1,
+      "line_end": 1,
+      "severity": "warning",
+      "evidence_quote": "schema violation: None is not of type 'object'",
+      "closeness": "near",
+      "explanation": "Stage 2 call failed for chunk 1; see logs.",
+      "fix_sketch": "Retry the commit. If repeated, check agent configuration.",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": {
+    "entity_count": 27,
+    "chunk_count": 7,
+    "chunk_size": 4,
+    "workers_used": 4,
+    "tokens_used": 659381,
+    "tokens_cap": 20000000,
+    "wall_ms_used": 331462,
+    "wall_ms_cap": 1800000,
+    "deferred_chunks": 0,
+    "stop_reason": "clean",
+    "estimated_usd": 3.9563,
+    "model": "sonnet"
+  },
+  "exit_code": 0
+}

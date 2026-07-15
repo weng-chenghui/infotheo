@@ -1,0 +1,176 @@
+{
+  "findings": [
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 141,
+      "line_end": 142,
+      "lemma_name": "star3_cc0",
+      "severity": "warning",
+      "evidence_quote": "Lemma star3_cc0 : clique_count 4 0 (star_comm_nat 3) = 1.",
+      "closeness": "near",
+      "explanation": "The statement shape is an equation (`clique_count 4 0 (star_comm_nat 3) = 1`); per AUTHORITY.md the canonical suffix for equational rewrites is `E`. The suffix `cc0` bundles an unregistered main-symbol abbreviation (`cc` for clique_count) with a positional index (`0`). Neither component is a MathComp canonical suffix. The trailing `0` in MathComp conventionally denotes ring/nat zero or an empty-set result, which conflicts with the actual value `= 1`. If the indexed-series naming is intentional, a `Naming:` justification is required per AUTHORITY.md.",
+      "fix_sketch": "Option A (E suffix, indexed): Lemma star3_clique0_E : clique_count 4 0 (star_comm_nat 3) = 1.\nOption B (keep series, add justification):\n(** star3_cc0 — ...\n    Naming: cc<k> is a local indexed-series convention for clique-count spot-checks; not a MathComp semantic suffix. *)\nLemma star3_cc0 : ...",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 148,
+      "line_end": 149,
+      "lemma_name": "star3_cc1",
+      "severity": "warning",
+      "evidence_quote": "Lemma star3_cc1 : clique_count 4 1 (star_comm_nat 3) = 4.",
+      "closeness": "near",
+      "explanation": "Same suffix-mismatch as star3_cc0. The statement is an equation; canonical MathComp suffix is `E`. `cc1` is a non-standard suffix combining an unregistered abbreviation with a positional index. The `1` suffix in MathComp conventionally denotes ring/nat/group one, not the integer 1 as a clique-size argument.",
+      "fix_sketch": "Option A: Lemma star3_clique1_E : clique_count 4 1 (star_comm_nat 3) = 4.\nOption B: add Naming: justification to the preceding comment if the indexed series style is deliberate across the whole star3_cc* family.",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 155,
+      "line_end": 156,
+      "lemma_name": "star3_cc2",
+      "severity": "warning",
+      "evidence_quote": "Lemma star3_cc2 : clique_count 4 2 (star_comm_nat 3) = 3.",
+      "closeness": "near",
+      "explanation": "Same suffix-mismatch pattern as star3_cc0 and star3_cc1. Equational statement; canonical suffix is `E`. `cc2` is not in the AUTHORITY.md suffix table.",
+      "fix_sketch": "Option A: Lemma star3_clique2_E : clique_count 4 2 (star_comm_nat 3) = 3.\nOption B: add Naming: justification in the preceding comment.",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 162,
+      "line_end": 163,
+      "lemma_name": "star3_cc3",
+      "severity": "warning",
+      "evidence_quote": "Lemma star3_cc3 : clique_count 4 3 (star_comm_nat 3) = 0.",
+      "closeness": "near",
+      "explanation": "Same suffix-mismatch pattern. Equational statement with result `= 0`; canonical suffix is `E`. Note additionally that `_0` in MathComp denotes ring/nat zero or an empty-set property, which would be misleading here since the index `3` (3-clique count) happens to equal 0 by coincidence, not because this is a structural zero-element result.",
+      "fix_sketch": "Option A: Lemma star3_clique3_E : clique_count 4 3 (star_comm_nat 3) = 0.\nOption B: add Naming: justification in the preceding comment documenting the cc<k> local convention.",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 141,
+      "line_end": 147,
+      "lemma_name": "star3_cc0",
+      "severity": "warning",
+      "evidence_quote": "(* ---- Clique counts for star K_{1,3} (4 generators) ---- *)",
+      "closeness": "far",
+      "explanation": "The preceding comment is a section-separator banner describing the entire group of star3_cc* lemmas, not a per-entity docstring for star3_cc0 specifically. It fails all four H002 checklist parts: (1) KIND is absent; (2) WHAT provides no paraphrase of the specific statement `clique_count 4 0 (star_comm_nat 3) = 1`; (3) WHY gives no motivation; (4) because KIND is unknown, USED_BY applicability cannot be determined. The immediately-following lemmas star3_cc1 through star3_cc3 each carry a proper per-lemma `(** ... Kind: example. *)` block; star3_cc0 is the only one missing the equivalent.",
+      "fix_sketch": "(** star3_cc0 — vm_compute check: the star K_{1,3} has exactly 1 nullary clique (the unique 0-clique).\n    Kind: example.\n    Why: verifies the k=0 base value of the clique-count series for K_{1,3}.\n*)\nLemma star3_cc0 : clique_count 4 0 (star_comm_nat 3) = 1.",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 221,
+      "line_end": 221,
+      "lemma_name": "path3_cc0",
+      "severity": "warning",
+      "evidence_quote": "(* ---- Clique counts for path on 3 generators ---- *)",
+      "closeness": "far",
+      "explanation": "The only comment attached to path3_cc0 is the section divider above it; the block that would match the sibling `path3_cc1/cc2/cc3` Kind:example template never appears for path3_cc0. Checklist: (1) Kind — no classification (helper/main/example/etc.) is given; (2) What — 'Clique counts for path on 3 generators' describes the surrounding topic rather than paraphrasing the specific statement `clique_count 3 0 path_comm_nat = 1`; (3) Why — no motivation for this individual vm_compute check. Note that path3_cc1..path3_cc3 each carry the expected `Kind: example` block placed between the previous Qed and the next Lemma, so path3_cc0 is the only lemma in the series whose doc block is missing.",
+      "fix_sketch": "Insert a per-lemma doc block immediately above `Lemma path3_cc0`, mirroring the siblings, e.g.:\n\n(** path3_cc0 — vm_compute check: on the path P_3 the only size-0 clique is the empty set.\n    Kind: example. *)\n\nThe section divider may remain on the line above the new doc block.",
+      "confidence": "high",
+      "stage": "stage2",
+      "escalated_model": "opus",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 247,
+      "line_end": 247,
+      "lemma_name": "star3_ct0",
+      "severity": "warning",
+      "evidence_quote": "(* ---- Trace counts: star K_{1,3} ---- *)",
+      "closeness": "far",
+      "explanation": "The preceding comment is a section-divider header, not a description of star3_ct0. Failed parts: Kind (no classification such as example/helper/main), What (no paraphrase of the statement clique_traces 4 0 (star_comm_nat 3) = 1), Why (no motivation). The sibling lemmas star3_ct1/ct2/ct3 each carry a proper '(** star3_ctN — ... Kind: example. *)' block; star3_ct0 is the only one without one because the section divider was treated as its preceding comment.",
+      "fix_sketch": "Insert a dedicated block above Lemma star3_ct0, keeping the section divider above it:\n(** star3_ct0 — vm_compute trace count m_0 = 1 for star K_{1,3}.\n    Kind: example.\n*)\nLemma star3_ct0 : clique_traces 4 0 (star_comm_nat 3) = 1.",
+      "confidence": "high",
+      "stage": "stage2",
+      "escalated_model": "opus",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 269,
+      "line_end": 275,
+      "lemma_name": "star3_ntB0",
+      "severity": "warning",
+      "evidence_quote": "(* Cross-check with n_traces_natB *)",
+      "closeness": "far",
+      "explanation": "Failed parts: (1) KIND — the comment does not classify the entity as helper/main/example/etc., while the adjacent sibling lemmas (star3_ntB1/2/3) are explicitly marked `Kind: example`; (2) WHAT — the comment does not paraphrase the statement `n_traces_natB 4 0 (star_comm_nat 3) = 1`; it only labels the section; (3) WHY — no motivation is given (e.g. agreement with `clique_traces` at L=0 for K_{1,3}), whereas the sibling comments crisply state it.",
+      "fix_sketch": "Replace with a block matching the sibling lemmas, e.g.:\n(** star3_ntB0 — cross-check: n_traces_natB agrees with clique_traces at\n    L=0 for K_{1,3}.\n    Kind: example.\n*)",
+      "confidence": "high",
+      "stage": "stage2",
+      "escalated_model": "opus",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "S998",
+      "file": "rocq-audit",
+      "line_start": 1,
+      "line_end": 1,
+      "severity": "warning",
+      "evidence_quote": "result field not JSON: ```json\n{\n  \"passed\": true,\n  \"findings\": [\n    {\n      \"rule_id\": \"H002\",\n      \"file\": \"pgg-smc/groups/pgg_raag_clique.v\",\n      \"line_start\": 295,\n      \"line_end\": 296,\n      \"lemma_name\": \"free3_",
+      "closeness": "near",
+      "explanation": "Stage 2 call failed for chunk 6; see logs.",
+      "fix_sketch": "Retry the commit. If repeated, check agent configuration.",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": {
+    "entity_count": 25,
+    "chunk_count": 7,
+    "chunk_size": 4,
+    "workers_used": 4,
+    "tokens_used": 568478,
+    "tokens_cap": 20000000,
+    "wall_ms_used": 137015,
+    "wall_ms_cap": 1800000,
+    "deferred_chunks": 0,
+    "stop_reason": "clean",
+    "estimated_usd": 3.4109,
+    "model": "sonnet"
+  },
+  "exit_code": 0
+}

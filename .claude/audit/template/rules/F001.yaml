@@ -1,0 +1,32 @@
+id: F001
+category: naming
+title: "Lemma/Theorem/Fact/Definition name does not follow MathComp grammar"
+severity: warning
+enabled: true
+stage_mode: both
+authority:
+  - mathcomp-CONTRIBUTING#naming-conventions
+  - Roosterize-2021
+fast_pattern:
+  pattern: '^[ \t]*(?:Lemma|Theorem|Fact|Corollary|Proposition|Definition|Fixpoint)[ \t]+[a-z][a-z0-9]*(?:_[a-z0-9]+){3,}[ \t]'
+  ignore_in_comments: true
+  file_glob: '*.v'
+agent_prompt: |
+  Stage 1 flags declaration names whose lowercase underscore-separated
+  structure has four or more components. Stage 2 confirms whether the
+  composition drifts from `mainSymbol_suffixes(_condition)?`. For each
+  candidate:
+    - Identify the likely main symbol and the suffix chain.
+    - Consult AUTHORITY.md's suffix table to check whether each suffix is
+      canonical (`_ge0`, `_card`, `_P`, `_E`, `_I`, `_A`, and so on).
+    - If the name contains a legitimate prefix like `in_`, `mem_`, or
+      `card_`, emit `closeness: idiomatic` and do not block.
+    - When drift is present, propose two idiomatic alternatives: a
+      snake_case composition with a meaningful suffix and a CamelCase form.
+scope: changed_hunks
+fix_hint: "MathComp uses `mainSymbol_suffix(_condition)?`. A purely lowercase, four-or-more-underscore name usually means the main symbol was not identified. Rename to `<mainSymbol>_<suffixes>` (for example `schreier_transition_ge0`) or to camelCase (`schreierTransition`). Consult AUTHORITY.md for the suffix table."
+exceptions:
+  - '^in_'
+  - '^mem_'
+  - '^card_'
+  - '_of_'

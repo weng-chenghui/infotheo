@@ -1,0 +1,106 @@
+{
+  "findings": [
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 1381,
+      "line_end": 1386,
+      "lemma_name": "path4_ntB_check",
+      "severity": "warning",
+      "evidence_quote": "Lemma path4_ntB_check :",
+      "closeness": "near",
+      "explanation": "The suffix '_check' is not in the MathComp canonical suffix table (AUTHORITY.md). The statement shape is equational ([seq ...] = [:: 1; 4; 13; 40]), whose standard suffix is 'E'. Using '_check' as a suffix obscures the semantic role for readers who search by suffix convention. If the intent is a vm_compute sanity entry rather than a reusable equation lemma, the preferred pattern is to classify it as 'example' in the comment and add a Naming justification for the non-canonical suffix.",
+      "fix_sketch": "Option 1 (rename): 'path4_ntB_E' for an equation-style lemma.\nOption 2 (justify in-place): keep the name and add to the preceding comment:\n    Naming: intentional; '_check' marks a vm_compute sanity entry\n    not intended as a rewrite lemma.",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 1387,
+      "line_end": 1393,
+      "lemma_name": "star3_ntB_check",
+      "severity": "warning",
+      "evidence_quote": "Lemma star3_ntB_check :",
+      "closeness": "near",
+      "explanation": "The suffix '_check' is not in the MathComp canonical suffix table (AUTHORITY.md). The statement is equational ([seq ...] = [:: 1; 4; 13; 40]), for which 'E' is the standard suffix. The same analysis as path4_ntB_check applies: '_check' is a descriptive but non-canonical suffix that should either be replaced or justified with a Naming line.",
+      "fix_sketch": "Option 1 (rename): 'star3_ntB_E' for an equation-style lemma.\nOption 2 (justify in-place): keep the name and add to the preceding comment:\n    Naming: intentional; '_check' marks a vm_compute sanity entry\n    not intended as a rewrite lemma.",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 1375,
+      "line_end": 1380,
+      "lemma_name": "table_T4_abelian",
+      "severity": "warning",
+      "evidence_quote": "(** table_T4_abelian — vm_compute verification of the abelian row of the\n    T = 4 growth-rate comparison table.\n    Kind: example.\n*)",
+      "closeness": "near",
+      "explanation": "WHY is missing. The comment correctly supplies Kind (example) and a statement paraphrase, but contains no motivation explaining why this example is included or what property it validates. The WHY waiver in AUTHORITY.md applies only to algebraic-law suffixes (_A, _C, _K, _D, _I, _V, _X, _Xn, _Xz, _Mn, _Z) and to canonical/notation/coercion/instance kinds. The kind 'example' is not in the waiver list, so WHY is required.",
+      "fix_sketch": "(** table_T4_abelian — vm_compute verification of the abelian row of the\n    T = 4 growth-rate comparison table.\n    Kind: example.\n    Why: sanity-checks that clique_traces 4 on the complete-commutation\n    graph reproduces the expected binomial coefficients C(L+3,3) for\n    L in 0..5, cross-validating the closed-form formula before it is\n    used in the growth-rate comparison. *)",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 1381,
+      "line_end": 1386,
+      "lemma_name": "path4_ntB_check",
+      "severity": "warning",
+      "evidence_quote": "(* Cross-check: n_traces_natB for path P_4 matches the clique prediction *)",
+      "closeness": "far",
+      "explanation": "KIND and WHY are both missing. 'Cross-check:' is a task annotation, not a classification from the accepted taxonomy (helper/main/canonical/notation/coercion/instance/example/interface). The WHAT is incomplete: it names the subject (n_traces_natB for P_4) but omits the equation values and the comparison basis. WHY is absent and no waiver applies: the name carries no algebraic-law suffix and the WHAT clause does not name a downstream use-site.",
+      "fix_sketch": "(** path4_ntB_check — vm_compute cross-check that n_traces_natB 4 on\n    path P_4 yields [1; 4; 13; 40] for L in 0..3.\n    Kind: example.\n    Why: paired with star3_ntB_check to confirm that P_4 and K_{1,3}\n    share the same trace-count sequence, verifying the Cartier-Foata\n    duality claim made in the surrounding comment block. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 1387,
+      "line_end": 1393,
+      "lemma_name": "star3_ntB_check",
+      "severity": "warning",
+      "evidence_quote": "(* Cross-check: n_traces_natB for star K_{1,3} matches *)",
+      "closeness": "far",
+      "explanation": "KIND and WHY are both missing. 'Cross-check:' is a task annotation, not a kind classification. The WHAT is incomplete: 'matches' does not state what value is matched or what the comparison basis is. WHY is absent; the name carries no algebraic-law suffix and the WHAT clause does not name a downstream consumer. No waiver applies.",
+      "fix_sketch": "(** star3_ntB_check — vm_compute cross-check that n_traces_natB 4 on\n    star K_{1,3} yields [1; 4; 13; 40] for L in 0..3.\n    Kind: example.\n    Why: pairs with path4_ntB_check to confirm the Cartier-Foata\n    theorem: P_4 and K_{1,3} share the same clique polynomial and\n    therefore the same trace-count sequence. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": {
+    "entity_count": 3,
+    "chunk_count": 1,
+    "chunk_size": 3,
+    "workers_used": 1,
+    "tokens_used": 39591,
+    "tokens_cap": 20000000,
+    "wall_ms_used": 105984,
+    "wall_ms_cap": 1800000,
+    "deferred_chunks": 0,
+    "stop_reason": "clean",
+    "estimated_usd": 0.2375,
+    "model": "sonnet"
+  },
+  "exit_code": 0
+}

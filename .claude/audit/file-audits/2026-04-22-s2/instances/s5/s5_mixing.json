@@ -1,0 +1,76 @@
+{
+  "findings": [
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/s5/s5_mixing.v",
+      "line_start": 95,
+      "line_end": 95,
+      "lemma_name": "path_gen_tuple_3_invol",
+      "severity": "warning",
+      "evidence_quote": "Lemma path_gen_tuple_3_invol :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/s5/s5_mixing.v",
+      "line_start": 156,
+      "line_end": 156,
+      "lemma_name": "s5_sos_lower_triangular",
+      "severity": "warning",
+      "evidence_quote": "Definition s5_sos_lower_triangular : seq (seq rat) :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/s5/s5_mixing.v",
+      "line_start": 178,
+      "line_end": 178,
+      "lemma_name": "s5_sos_diagonal_nonneg",
+      "severity": "warning",
+      "evidence_quote": "Lemma s5_sos_diagonal_nonneg : forall k,",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "S998",
+      "file": "rocq-audit",
+      "line_start": 1,
+      "line_end": 1,
+      "severity": "warning",
+      "evidence_quote": "agent rc=1: ",
+      "closeness": "near",
+      "explanation": "Stage 2 call failed for chunk 0; see logs.",
+      "fix_sketch": "Retry the commit. If repeated, check agent configuration.",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": {
+    "entity_count": 14,
+    "chunk_count": 5,
+    "chunk_size": 3,
+    "workers_used": 4,
+    "tokens_used": 0,
+    "tokens_cap": 20000000,
+    "wall_ms_used": 6006,
+    "wall_ms_cap": 1800000,
+    "deferred_chunks": 0,
+    "stop_reason": "clean",
+    "estimated_usd": 0.0,
+    "model": "sonnet"
+  },
+  "exit_code": 0
+}

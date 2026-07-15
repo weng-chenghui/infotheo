@@ -1,0 +1,69 @@
+{
+  "fingerprint": "1144322dd21a4bcf",
+  "bad": {
+    "findings": [
+      {
+        "rule_id": "S998",
+        "file": "rocq-audit",
+        "line_start": 1,
+        "line_end": 1,
+        "severity": "warning",
+        "evidence_quote": "schema violation: None is not of type 'object'",
+        "closeness": "near",
+        "explanation": "Stage 2 call failed for chunk 0; see logs.",
+        "fix_sketch": "Retry the commit. If repeated, check agent configuration.",
+        "confidence": "high",
+        "stage": "stage2"
+      }
+    ],
+    "tokens_used": 0,
+    "budget": {
+      "entity_count": 1,
+      "chunk_count": 1,
+      "chunk_size": 3,
+      "workers_used": 1,
+      "tokens_used": 0,
+      "tokens_cap": 75000,
+      "wall_ms_used": 88116,
+      "wall_ms_cap": 600000,
+      "deferred_chunks": 0,
+      "stop_reason": "clean",
+      "estimated_usd": 0.0,
+      "model": "sonnet"
+    },
+    "stage2_incomplete": false
+  },
+  "good": {
+    "findings": [
+      {
+        "rule_id": "S996",
+        "file": "rocq-audit",
+        "line_start": 1,
+        "line_end": 1,
+        "severity": "error",
+        "evidence_quote": "per_commit_token_cap 75000 reached",
+        "closeness": "near",
+        "explanation": "Stage 2 halted: token_cap reached after partial run. 0 chunks deferred. Stage 1 findings still apply, but Stage 2 is incomplete; the commit is blocked so the operator raises the cap or acknowledges the gap.",
+        "fix_sketch": "Split the commit, raise the relevant cap, or re-run with ROCQ_AUDIT_WALL_SECONDS / ROCQ_AUDIT_TOKEN_CAP.",
+        "confidence": "high",
+        "stage": "stage2"
+      }
+    ],
+    "tokens_used": 85589,
+    "budget": {
+      "entity_count": 1,
+      "chunk_count": 1,
+      "chunk_size": 3,
+      "workers_used": 1,
+      "tokens_used": 85589,
+      "tokens_cap": 75000,
+      "wall_ms_used": 102692,
+      "wall_ms_cap": 600000,
+      "deferred_chunks": 0,
+      "stop_reason": "token_cap",
+      "estimated_usd": 0.5135,
+      "model": "sonnet"
+    },
+    "stage2_incomplete": true
+  }
+}

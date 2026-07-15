@@ -1,0 +1,47 @@
+{
+  "findings": [
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/reconstruct/pgg_dealer_bridge.v",
+      "line_start": 64,
+      "line_end": 64,
+      "lemma_name": "dealer_words_epsilon_bound",
+      "severity": "warning",
+      "evidence_quote": "Lemma dealer_words_epsilon_bound (s : 'I_N) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/pgg_dealer_bridge.v",
+      "line_start": 52,
+      "line_end": 52,
+      "lemma_name": "dealer_words_correct",
+      "severity": "error",
+      "evidence_quote": "Theorem dealer_words_correct",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/pgg_dealer_bridge.v",
+      "line_start": 64,
+      "line_end": 64,
+      "lemma_name": "dealer_words_epsilon_bound",
+      "severity": "error",
+      "evidence_quote": "Lemma dealer_words_epsilon_bound (s : 'I_N) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": null,
+  "exit_code": 2
+}

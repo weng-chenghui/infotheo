@@ -1,0 +1,542 @@
+
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Module pgg_sharing_framework</title>
+<meta name="description" content="Documentation of Coq module Infotheo Documentation" />
+<link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/markdown-it/dist/markdown-it.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/markdown-it-texmath/texmath.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/darkmode-js@1.5.7/lib/darkmode-js.min.js"></script>
+<link href="rocqnavi.css" rel="stylesheet" type="text/css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script type="text/javascript" src="rocqnavi.js"> </script>
+</head>
+
+<body onload="init()">
+
+  <main>
+    <div class="sidebar">
+      <h2>Files</h2>
+      <li><details id="infotheo"><summary>infotheo</summary>
+          <ul>
+          <li><details id="infotheo.du2002"><summary>du2002</summary>
+          <ul>
+          <li><a href="infotheo.du2002.spp_entropy.html">spp_entropy</a></li>
+<li><a href="infotheo.du2002.spp_interface.html">spp_interface</a></li>
+<li><a href="infotheo.du2002.spp_pismc.html">spp_pismc</a></li>
+<li><a href="infotheo.du2002.spp_proba.html">spp_proba</a></li>
+<li><a href="infotheo.du2002.spp_program.html">spp_program</a></li>
+<li><a href="infotheo.du2002.spp_proof.html">spp_proof</a></li>
+<li><a href="infotheo.du2002.spp_session_types.html">spp_session_types</a></li>
+<li><a href="infotheo.du2002.spp_tactics.html">spp_tactics</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.dumas2017dual"><summary>dumas2017dual</summary>
+          <ul>
+          <li><details id="infotheo.dumas2017dual.dsdp"><summary>dsdp</summary>
+          <ul>
+          <li><a href="infotheo.dumas2017dual.dsdp.dsdp_correctness.html">dsdp_correctness</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_entropy.html">dsdp_entropy</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_entropy_trace.html">dsdp_entropy_trace</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_interface.html">dsdp_interface</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_pismc.html">dsdp_pismc</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_program.html">dsdp_program</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_security.html">dsdp_security</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_session_types.html">dsdp_session_types</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_syntax_demo.html">dsdp_syntax_demo</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.dumas2017dual.entropy_fiber"><summary>entropy_fiber</summary>
+          <ul>
+          <li><a href="infotheo.dumas2017dual.entropy_fiber.entropy_fiber.html">entropy_fiber</a></li>
+<li><a href="infotheo.dumas2017dual.entropy_fiber.entropy_fiber_zpq.html">entropy_fiber_zpq</a></li>
+<li><a href="infotheo.dumas2017dual.entropy_fiber.linear_fiber_zpq.html">linear_fiber_zpq</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.dumas2017dual.lib"><summary>lib</summary>
+          <ul>
+          <li><a href="infotheo.dumas2017dual.lib.extra_algebra.html">extra_algebra</a></li>
+<li><a href="infotheo.dumas2017dual.lib.extra_entropy.html">extra_entropy</a></li>
+<li><a href="infotheo.dumas2017dual.lib.extra_proba.html">extra_proba</a></li>
+<li><a href="infotheo.dumas2017dual.lib.rouche_capelli.html">rouche_capelli</a></li>
+          </ul>
+          </details>
+          </li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.ecc_classic"><summary>ecc_classic</summary>
+          <ul>
+          <li><a href="infotheo.ecc_classic.alternant.html">alternant</a></li>
+<li><a href="infotheo.ecc_classic.bch.html">bch</a></li>
+<li><a href="infotheo.ecc_classic.cyclic_code.html">cyclic_code</a></li>
+<li><a href="infotheo.ecc_classic.decoding.html">decoding</a></li>
+<li><a href="infotheo.ecc_classic.grs.html">grs</a></li>
+<li><a href="infotheo.ecc_classic.hamming_code.html">hamming_code</a></li>
+<li><a href="infotheo.ecc_classic.linearcode.html">linearcode</a></li>
+<li><a href="infotheo.ecc_classic.mceliece.html">mceliece</a></li>
+<li><a href="infotheo.ecc_classic.poly_decoding.html">poly_decoding</a></li>
+<li><a href="infotheo.ecc_classic.reed_solomon.html">reed_solomon</a></li>
+<li><a href="infotheo.ecc_classic.repcode.html">repcode</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.ecc_modern"><summary>ecc_modern</summary>
+          <ul>
+          <li><a href="infotheo.ecc_modern.checksum.html">checksum</a></li>
+<li><a href="infotheo.ecc_modern.degree_profile.html">degree_profile</a></li>
+<li><a href="infotheo.ecc_modern.ldpc.html">ldpc</a></li>
+<li><a href="infotheo.ecc_modern.ldpc_algo.html">ldpc_algo</a></li>
+<li><a href="infotheo.ecc_modern.ldpc_algo_proof.html">ldpc_algo_proof</a></li>
+<li><a href="infotheo.ecc_modern.ldpc_erasure.html">ldpc_erasure</a></li>
+<li><a href="infotheo.ecc_modern.max_subset.html">max_subset</a></li>
+<li><a href="infotheo.ecc_modern.stopping_set.html">stopping_set</a></li>
+<li><a href="infotheo.ecc_modern.subgraph_partition.html">subgraph_partition</a></li>
+<li><a href="infotheo.ecc_modern.summary.html">summary</a></li>
+<li><a href="infotheo.ecc_modern.summary_tanner.html">summary_tanner</a></li>
+<li><a href="infotheo.ecc_modern.tanner.html">tanner</a></li>
+<li><a href="infotheo.ecc_modern.tanner_partition.html">tanner_partition</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.homomorphic_encryption"><summary>homomorphic_encryption</summary>
+          <ul>
+          <li><details id="infotheo.homomorphic_encryption.benaloh1994"><summary>benaloh1994</summary>
+          <ul>
+          <li><a href="infotheo.homomorphic_encryption.benaloh1994.benaloh_ahe.html">benaloh_ahe</a></li>
+<li><a href="infotheo.homomorphic_encryption.benaloh1994.benaloh_enc.html">benaloh_enc</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.homomorphic_encryption.idealized"><summary>idealized</summary>
+          <ul>
+          <li><a href="infotheo.homomorphic_encryption.idealized.idealized_ahe.html">idealized_ahe</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.homomorphic_encryption.paillier1999"><summary>paillier1999</summary>
+          <ul>
+          <li><a href="infotheo.homomorphic_encryption.paillier1999.paillier_ahe.html">paillier_ahe</a></li>
+<li><a href="infotheo.homomorphic_encryption.paillier1999.paillier_enc.html">paillier_enc</a></li>
+          </ul>
+          </details>
+          </li>
+<li><a href="infotheo.homomorphic_encryption.ahe_enc.html">ahe_enc</a></li>
+<li><a href="infotheo.homomorphic_encryption.ahe_monoid.html">ahe_monoid</a></li>
+<li><a href="infotheo.homomorphic_encryption.enc_dec.html">enc_dec</a></li>
+<li><a href="infotheo.homomorphic_encryption.he_types.html">he_types</a></li>
+<li><a href="infotheo.homomorphic_encryption.homomorphic_encryption.html">homomorphic_encryption</a></li>
+<li><a href="infotheo.homomorphic_encryption.key_type.html">key_type</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.information_theory"><summary>information_theory</summary>
+          <ul>
+          <li><a href="infotheo.information_theory.aep.html">aep</a></li>
+<li><a href="infotheo.information_theory.binary_symmetric_channel.html">binary_symmetric_channel</a></li>
+<li><a href="infotheo.information_theory.channel.html">channel</a></li>
+<li><a href="infotheo.information_theory.channel_code.html">channel_code</a></li>
+<li><a href="infotheo.information_theory.channel_coding_converse.html">channel_coding_converse</a></li>
+<li><a href="infotheo.information_theory.channel_coding_direct.html">channel_coding_direct</a></li>
+<li><a href="infotheo.information_theory.conditional_divergence.html">conditional_divergence</a></li>
+<li><a href="infotheo.information_theory.entropy.html">entropy</a></li>
+<li><a href="infotheo.information_theory.entropy_convex.html">entropy_convex</a></li>
+<li><a href="infotheo.information_theory.erasure_channel.html">erasure_channel</a></li>
+<li><a href="infotheo.information_theory.error_exponent.html">error_exponent</a></li>
+<li><a href="infotheo.information_theory.joint_typ_seq.html">joint_typ_seq</a></li>
+<li><a href="infotheo.information_theory.jtypes.html">jtypes</a></li>
+<li><a href="infotheo.information_theory.kraft.html">kraft</a></li>
+<li><a href="infotheo.information_theory.pproba.html">pproba</a></li>
+<li><a href="infotheo.information_theory.shannon_fano.html">shannon_fano</a></li>
+<li><a href="infotheo.information_theory.source_code.html">source_code</a></li>
+<li><a href="infotheo.information_theory.source_coding_fl_converse.html">source_coding_fl_converse</a></li>
+<li><a href="infotheo.information_theory.source_coding_fl_direct.html">source_coding_fl_direct</a></li>
+<li><a href="infotheo.information_theory.source_coding_vl_converse.html">source_coding_vl_converse</a></li>
+<li><a href="infotheo.information_theory.source_coding_vl_direct.html">source_coding_vl_direct</a></li>
+<li><a href="infotheo.information_theory.string_entropy.html">string_entropy</a></li>
+<li><a href="infotheo.information_theory.success_decode_bound.html">success_decode_bound</a></li>
+<li><a href="infotheo.information_theory.typ_seq.html">typ_seq</a></li>
+<li><a href="infotheo.information_theory.types.html">types</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.lib"><summary>lib</summary>
+          <ul>
+          <li><a href="infotheo.lib.bigop_ext.html">bigop_ext</a></li>
+<li><a href="infotheo.lib.binary_entropy_function.html">binary_entropy_function</a></li>
+<li><a href="infotheo.lib.classical_sets_ext.html">classical_sets_ext</a></li>
+<li><a href="infotheo.lib.coqRE.html">coqRE</a></li>
+<li><a href="infotheo.lib.derive_ext.html">derive_ext</a></li>
+<li><a href="infotheo.lib.dft.html">dft</a></li>
+<li><a href="infotheo.lib.euclid.html">euclid</a></li>
+<li><a href="infotheo.lib.f2.html">f2</a></li>
+<li><a href="infotheo.lib.hamming.html">hamming</a></li>
+<li><a href="infotheo.lib.natbin.html">natbin</a></li>
+<li><a href="infotheo.lib.num_occ.html">num_occ</a></li>
+<li><a href="infotheo.lib.poly_ext.html">poly_ext</a></li>
+<li><a href="infotheo.lib.realType_ext.html">realType_ext</a></li>
+<li><a href="infotheo.lib.realType_ln.html">realType_ln</a></li>
+<li><a href="infotheo.lib.ssr_ext.html">ssr_ext</a></li>
+<li><a href="infotheo.lib.ssralg_ext.html">ssralg_ext</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.probability"><summary>probability</summary>
+          <ul>
+          <li><a href="infotheo.probability.bayes.html">bayes</a></li>
+<li><a href="infotheo.probability.convex.html">convex</a></li>
+<li><a href="infotheo.probability.convex_equiv.html">convex_equiv</a></li>
+<li><a href="infotheo.probability.convex_stone.html">convex_stone</a></li>
+<li><a href="infotheo.probability.divergence.html">divergence</a></li>
+<li><a href="infotheo.probability.fdist.html">fdist</a></li>
+<li><a href="infotheo.probability.fsdist.html">fsdist</a></li>
+<li><a href="infotheo.probability.graphoid.html">graphoid</a></li>
+<li><a href="infotheo.probability.jensen.html">jensen</a></li>
+<li><a href="infotheo.probability.jfdist_cond.html">jfdist_cond</a></li>
+<li><a href="infotheo.probability.log_sum.html">log_sum</a></li>
+<li><a href="infotheo.probability.necset.html">necset</a></li>
+<li><a href="infotheo.probability.partition_inequality.html">partition_inequality</a></li>
+<li><a href="infotheo.probability.pinsker.html">pinsker</a></li>
+<li><a href="infotheo.probability.proba.html">proba</a></li>
+<li><a href="infotheo.probability.variation_dist.html">variation_dist</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.robust"><summary>robust</summary>
+          <ul>
+          <li><a href="infotheo.robust.robustmean.html">robustmean</a></li>
+<li><a href="infotheo.robust.weightedmean.html">weightedmean</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.smc"><summary>smc</summary>
+          <ul>
+          <li><a href="infotheo.smc.graded_resource.html">graded_resource</a></li>
+<li><a href="infotheo.smc.pismc.html">pismc</a></li>
+<li><a href="infotheo.smc.smc_interpreter.html">smc_interpreter</a></li>
+<li><a href="infotheo.smc.smc_session_types.html">smc_session_types</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.toy_examples"><summary>toy_examples</summary>
+          <ul>
+          <li><a href="infotheo.toy_examples.conditional_entropy.html">conditional_entropy</a></li>
+<li><a href="infotheo.toy_examples.expected_value_variance.html">expected_value_variance</a></li>
+<li><a href="infotheo.toy_examples.expected_value_variance_ordn.html">expected_value_variance_ordn</a></li>
+<li><a href="infotheo.toy_examples.expected_value_variance_tuple.html">expected_value_variance_tuple</a></li>
+          </ul>
+          </details>
+          </li>
+<li><a href="infotheo._check_sigs.html">_check_sigs</a></li>
+<li><a href="infotheo._depgraph_extract.html">_depgraph_extract</a></li>
+<li><a href="infotheo._test_star2.html">_test_star2</a></li>
+<li><a href="infotheo.test_sri.html">test_sri</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="pgg_reconstruct"><summary>pgg_reconstruct</summary>
+          <ul>
+          <li><a href="pgg_reconstruct.ag_code.html">ag_code</a></li>
+<li><a href="pgg_reconstruct.ag_massey_bridge.html">ag_massey_bridge</a></li>
+<li><a href="pgg_reconstruct.ag_multiplicative.html">ag_multiplicative</a></li>
+<li><a href="pgg_reconstruct.algebraic_rigidity.html">algebraic_rigidity</a></li>
+<li><a href="pgg_reconstruct.coord_perm_compatible.html">coord_perm_compatible</a></li>
+<li><a href="pgg_reconstruct.cover_genus0.html">cover_genus0</a></li>
+<li><a href="pgg_reconstruct.cover_genus1.html">cover_genus1</a></li>
+<li><a href="pgg_reconstruct.cover_genus2.html">cover_genus2</a></li>
+<li><a href="pgg_reconstruct.cover_tradeoff.html">cover_tradeoff</a></li>
+<li><a href="pgg_reconstruct.covering_scheme.html">covering_scheme</a></li>
+<li><a href="pgg_reconstruct.hyperelliptic_code.html">hyperelliptic_code</a></li>
+<li><a href="pgg_reconstruct.lagrange.html">lagrange</a></li>
+<li><a href="pgg_reconstruct.massey.html">massey</a></li>
+<li><a href="pgg_reconstruct.pgg_assignment.html">pgg_assignment</a></li>
+<li><a href="pgg_reconstruct.pgg_covering_correctness.html">pgg_covering_correctness</a></li>
+<li><a href="pgg_reconstruct.pgg_deck_pairing.html">pgg_deck_pairing</a></li>
+<li><a href="pgg_reconstruct.pgg_sharing_framework.html">pgg_sharing_framework</a></li>
+<li><a href="pgg_reconstruct.pgg_sum_mod.html">pgg_sum_mod</a></li>
+<li><a href="pgg_reconstruct.pgg_threshold.html">pgg_threshold</a></li>
+<li><a href="pgg_reconstruct.pgl_bound.html">pgl_bound</a></li>
+<li><a href="pgg_reconstruct.rigidity_monster_instance.html">rigidity_monster_instance</a></li>
+<li><a href="pgg_reconstruct.rigidity_s5_instance.html">rigidity_s5_instance</a></li>
+<li><a href="pgg_reconstruct.rigidity_star_instance.html">rigidity_star_instance</a></li>
+<li><a href="pgg_reconstruct.rs_massey_bridge.html">rs_massey_bridge</a></li>
+<li><a href="pgg_reconstruct.rs_privacy.html">rs_privacy</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="pgg_smc"><summary>pgg_smc</summary>
+          <ul>
+          <li><a href="pgg_smc.abelian_word_collapse.html">abelian_word_collapse</a></li>
+<li><a href="pgg_smc.free_group_ball.html">free_group_ball</a></li>
+<li><a href="pgg_smc.perm_uniform.html">perm_uniform</a></li>
+<li><a href="pgg_smc.pgg_abelian.html">pgg_abelian</a></li>
+<li><a href="pgg_smc.pgg_abelian.html">pgg_abelian</a></li>
+<li><a href="pgg_smc.pgg_abelian_collapse.html">pgg_abelian_collapse</a></li>
+<li><a href="pgg_smc.pgg_collusion_bound.html">pgg_collusion_bound</a></li>
+<li><a href="pgg_smc.pgg_correctness.html">pgg_correctness</a></li>
+<li><a href="pgg_smc.pgg_free.html">pgg_free</a></li>
+<li><a href="pgg_smc.pgg_interface.html">pgg_interface</a></li>
+<li><a href="pgg_smc.pgg_lfree.html">pgg_lfree</a></li>
+<li><a href="pgg_smc.pgg_nonabelian.html">pgg_nonabelian</a></li>
+<li><a href="pgg_smc.pgg_pismc.html">pgg_pismc</a></li>
+<li><a href="pgg_smc.pgg_program.html">pgg_program</a></li>
+<li><a href="pgg_smc.pgg_raag.html">pgg_raag</a></li>
+<li><a href="pgg_smc.pgg_raag_cartier_foata.html">pgg_raag_cartier_foata</a></li>
+<li><a href="pgg_smc.pgg_raag_clique.html">pgg_raag_clique</a></li>
+<li><a href="pgg_smc.pgg_raag_path.html">pgg_raag_path</a></li>
+<li><a href="pgg_smc.pgg_raag_s5.html">pgg_raag_s5</a></li>
+<li><a href="pgg_smc.pgg_raag_star.html">pgg_raag_star</a></li>
+<li><a href="pgg_smc.pgg_security.html">pgg_security</a></li>
+<li><a href="pgg_smc.pgg_session_types.html">pgg_session_types</a></li>
+<li><a href="pgg_smc.pgg_word_analysis.html">pgg_word_analysis</a></li>
+<li><a href="pgg_smc.test_cf.html">test_cf</a></li>
+<li><a href="pgg_smc.test_cf2.html">test_cf2</a></li>
+<li><a href="pgg_smc.test_cf3.html">test_cf3</a></li>
+<li><a href="pgg_smc.test_sri.html">test_sri</a></li>
+<li><a href="pgg_smc.test_sri2.html">test_sri2</a></li>
+          </ul>
+          </details>
+          </li>
+    </div>
+
+  <div class="coq">
+
+    <div class="content">
+      <p>
+        <a href="./index.html">Top</a>
+        
+      </p>
+      <h1 class="title">Module pgg_sharing_framework</h1>
+<pre class="ssrdoc">
+PGG-SMC: Abstract Secret Sharing Framework
+
+The PGG-SMC framework has two orthogonal layers: security (monodromy walk)
+and threshold (secret sharing). This file makes the threshold layer
+abstract via a ThresholdScheme interface and a compatibility predicate that
+links it to the monodromy representation.
+
+Design rationale — why axiomatize:
+  The reconstruction correctness theorem and the security-threshold
+  tradeoff (in cover_tradeoff.v) depend only on three properties of the
+  sharing scheme: correctness (ts_correct), privacy (ts_private), and
+  compatibility with monodromy (ts_perm_compatible). These properties
+  hold for any AG code on any curve of any genus, so the proofs are
+  parametric in ThresholdScheme. Concrete curve arithmetic is unnecessary.
+
+Section 1 -- Abstract interface:
+  ThresholdScheme secretT shareT == record bundling:
+    - T parties, k threshold
+    - validity predicate, reconstruction function
+    - correctness and privacy axioms
+
+Section 2 -- Compatibility:
+  ts_perm_compatible perm ts == reordering shares by perm g preserves
+    reconstruction. Satisfiable for monodromy groups (coordinate perm).
+
+Section 3 -- Sum-mod-N instance:
+  sum_mod_scheme N' T' == ThresholdScheme wrapping existing sum-mod-N
+</pre>
+<br/>
+<span class="vernacular">From</span><span class="id"> mathcomp</span><span class="vernacular"> Require</span><span class="vernacular"> Import</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssreflect">ssreflect</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrbool">ssrbool</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrfun">ssrfun</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.eqtype">eqtype</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat">ssrnat</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.seq">seq</a></span>.<br/>
+<span class="vernacular">From</span><span class="id"> mathcomp</span><span class="vernacular"> Require</span><span class="vernacular"> Import</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype">fintype</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple">tuple</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.finfun">finfun</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.finset">finset</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.fingroup.fingroup">fingroup</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.fingroup.perm">perm</a></span>.<br/>
+<span class="vernacular">From</span><span class="id"> mathcomp</span><span class="vernacular"> Require</span><span class="vernacular"> Import</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.fingroup.morphism">morphism</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.bigop">bigop</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.div">div</a></span>.<br/>
+<span class="vernacular">From</span><span class="id"> pgg_smc</span><span class="vernacular"> Require</span><span class="vernacular"> Import</span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_interface.html">pgg_interface</a></span>.<br/>
+<span class="vernacular">From</span><span class="id"> pgg_reconstruct</span><span class="vernacular"> Require</span><span class="vernacular"> Import</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sum_mod.html">pgg_sum_mod</a></span>.<br/>
+<br/>
+<span class="gallina-kwd">Set</span><span class="vernacular"> Implicit</span><span class="vernacular"> Arguments</span>.<br/>
+<span class="vernacular">Unset</span><span class="vernacular"> Strict</span><span class="vernacular"> Implicit</span>.<br/>
+<span class="vernacular">Import</span><span class="id"> Prenex</span><span class="vernacular"> Implicits</span>.<br/>
+<br/>
+<pre class="ssrdoc">
+    Section 1: Abstract Secret Sharing Scheme
+</pre>
+<br/>
+<span class="vernacular">Record</span><span class="id"> </span><span id="ThresholdScheme" class="id"><a name="ThresholdScheme" class="">ThresholdScheme</a></span> (<span id="secretT:1" class="id"><a name="secretT:1" class="">secretT</a></span><span class="id"> </span><span id="shareT:2" class="id"><a name="shareT:2" class="">shareT</a></span><span class="id"> :</span><span class="gallina-kwd"> Type</span>)<span class="id"> :=</span><span class="id"> MkThresholdScheme</span><span class="id"> {</span><br/>
+&nbsp;&nbsp;<span id="ts_T'" class="id"><a name="ts_T'" class="">ts_T'</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Datatypes.html#nat">nat</a></span><span class="id"> ;</span><br/>
+&nbsp;&nbsp;<span id="ts_k'" class="id"><a name="ts_k'" class="">ts_k'</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Datatypes.html#nat">nat</a></span><span class="id"> ;</span><br/>
+&nbsp;&nbsp;<span id="ts_valid" class="id"><a name="ts_valid" class="">ts_valid</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#secretT:1">secretT</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#::type_scope:x_'-&gt;'_x"> -&gt;</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#::type_scope:x_'-&gt;'_x"> </a></span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#ts_T':4">ts_T'</a></span>.<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#bda89d73ec4a8f23ae92b565ffb5aaa6">+1</a></span>.<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#::type_scope:x_'.-tuple'">-tuple</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#::type_scope:x_'.-tuple'"> shareT</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#::type_scope:x_'-&gt;'_x"> -&gt;</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#::type_scope:x_'-&gt;'_x"> </a></span><span class="gallina-kwd">Prop</span><span class="id"> ;</span><br/>
+&nbsp;&nbsp;<span id="ts_recon" class="id"><a name="ts_recon" class="">ts_recon</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#ts_T':4">ts_T'</a></span>.<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#bda89d73ec4a8f23ae92b565ffb5aaa6">+1</a></span>.<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#::type_scope:x_'.-tuple'">-tuple</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#::type_scope:x_'.-tuple'"> shareT</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#::type_scope:x_'-&gt;'_x"> -&gt;</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#::type_scope:x_'-&gt;'_x"> </a></span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#secretT:1">secretT</a></span><span class="id"> ;</span><br/>
+&nbsp;&nbsp;<span id="ts_correct" class="id"><a name="ts_correct" class="">ts_correct</a></span><span class="id"> :</span><span class="gallina-kwd"> forall</span> (<span id="s:8" class="id"><a name="s:8" class="">s</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#secretT:1">secretT</a></span>) (<span id="shares:9" class="id"><a name="shares:9" class="">shares</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#ts_T':4">ts_T'</a></span>.<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#bda89d73ec4a8f23ae92b565ffb5aaa6">+1</a></span>.<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#::type_scope:x_'.-tuple'">-tuple</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#::type_scope:x_'.-tuple'"> shareT</a></span>)<span class="id">,</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#ts_valid:6">ts_valid</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#s:8">s</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#shares:9">shares</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#::type_scope:x_'-&gt;'_x"> -&gt;</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#ts_recon:7">ts_recon</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#shares:9">shares</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> =</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> </a></span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#s:8">s</a></span><span class="id"> ;</span><br/>
+&nbsp;&nbsp;<span id="ts_private" class="id"><a name="ts_private" class="">ts_private</a></span><span class="id"> :</span><span class="gallina-kwd"> forall</span> (<span id="s1:11" class="id"><a name="s1:11" class="">s1</a></span><span class="id"> </span><span id="s2:12" class="id"><a name="s2:12" class="">s2</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#secretT:1">secretT</a></span>) (<span id="shares:13" class="id"><a name="shares:13" class="">shares</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#ts_T':4">ts_T'</a></span>.<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#bda89d73ec4a8f23ae92b565ffb5aaa6">+1</a></span>.<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#::type_scope:x_'.-tuple'">-tuple</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#::type_scope:x_'.-tuple'"> shareT</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span id="C:14" class="id"><a name="C:14" class="">C</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.finset#d8708f36d374a98f4d683c7593d1ea6a">{set</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.finset#d8708f36d374a98f4d683c7593d1ea6a"> </a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#:::'''I_'_x">'I_</a></span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#ts_T':4">ts_T'</a></span>.<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#bda89d73ec4a8f23ae92b565ffb5aaa6">+1</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.finset#d8708f36d374a98f4d683c7593d1ea6a">}</a></span>)<span class="id">,</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#234f50e13366f794cd6877cf832a5935">#|</a></span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#C:14">C</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#234f50e13366f794cd6877cf832a5935">|</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#::nat_scope:x_'&lt;'_x"> &lt;</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#::nat_scope:x_'&lt;'_x"> </a></span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#ts_k':5">ts_k'</a></span>.<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#bda89d73ec4a8f23ae92b565ffb5aaa6">+1</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#::type_scope:x_'-&gt;'_x"> -&gt;</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#ts_valid:6">ts_valid</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#s1:11">s1</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#shares:13">shares</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#::type_scope:x_'-&gt;'_x"> -&gt;</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#a883bdd010993579f99d60b3775bcf54">exists</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#a883bdd010993579f99d60b3775bcf54"> </a></span><span id="shares':15" class="id"><a name="shares':15" class="">shares'</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#ts_T':4">ts_T'</a></span>.<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#bda89d73ec4a8f23ae92b565ffb5aaa6">+1</a></span>.<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#::type_scope:x_'.-tuple'">-tuple</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#::type_scope:x_'.-tuple'"> shareT</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#a883bdd010993579f99d60b3775bcf54">,</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#ts_valid:6">ts_valid</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#s2:12">s2</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#shares':15">shares'</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#ba2b0e492d2b4675a0acf3ea92aabadd"> /\</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="gallina-kwd">forall</span><span class="id"> </span><span id="i:16" class="id"><a name="i:16" class="">i</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#:::'''I_'_x">'I_</a></span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#ts_T':4">ts_T'</a></span>.<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#bda89d73ec4a8f23ae92b565ffb5aaa6">+1</a></span><span class="id">,</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#i:16">i</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrbool.html#b09457274bcb94927e289b8a9e9cd3f7"> \in</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrbool.html#b09457274bcb94927e289b8a9e9cd3f7"> </a></span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#C:14">C</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#::type_scope:x_'-&gt;'_x"> -&gt;</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#::type_scope:x_'-&gt;'_x"> </a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#tnth">tnth</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#shares':15">shares'</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#i:16">i</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> =</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> </a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#tnth">tnth</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#shares:13">shares</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#i:16">i</a></span>)<span class="id"> ;</span><br/>
+<span class="id">}</span>.<br/>
+<br/>
+<span class="vernacular">Arguments</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#ts_T'">ts_T'</a></span><span class="id"> {secretT</span><span class="id"> shareT}</span>.<br/>
+<span class="vernacular">Arguments</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#ts_k'">ts_k'</a></span><span class="id"> {secretT</span><span class="id"> shareT}</span>.<br/>
+<span class="vernacular">Arguments</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#ts_valid">ts_valid</a></span><span class="id"> {secretT</span><span class="id"> shareT}</span>.<br/>
+<span class="vernacular">Arguments</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#ts_recon">ts_recon</a></span><span class="id"> {secretT</span><span class="id"> shareT}</span>.<br/>
+<span class="vernacular">Arguments</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#ts_correct">ts_correct</a></span><span class="id"> {secretT</span><span class="id"> shareT}</span>.<br/>
+<span class="vernacular">Arguments</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#ts_private">ts_private</a></span><span class="id"> {secretT</span><span class="id"> shareT}</span>.<br/>
+<br/>
+<span class="vernacular">Definition</span><span class="id"> </span><span id="ts_T" class="id"><a name="ts_T" class="">ts_T</a></span><span class="id"> {</span><span id="sT:18" class="id"><a name="sT:18" class="">sT</a></span><span class="id"> </span><span id="shT:19" class="id"><a name="shT:19" class="">shT</a></span><span class="id"> :</span><span class="id"> Type}</span> (<span id="ts:20" class="id"><a name="ts:20" class="">ts</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#ThresholdScheme">ThresholdScheme</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#sT:18">sT</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#shT:19">shT</a></span>)<span class="id"> :</span><span class="id"> </span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Datatypes.html#nat">nat</a></span><span class="id"> :=</span><br/>
+&nbsp;&nbsp;(<span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#ts_T'">ts_T'</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#ts:20">ts</a></span>).<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#bda89d73ec4a8f23ae92b565ffb5aaa6">+1</a></span>.<br/>
+<br/>
+<span class="vernacular">Definition</span><span class="id"> </span><span id="ts_k" class="id"><a name="ts_k" class="">ts_k</a></span><span class="id"> {</span><span id="sT:21" class="id"><a name="sT:21" class="">sT</a></span><span class="id"> </span><span id="shT:22" class="id"><a name="shT:22" class="">shT</a></span><span class="id"> :</span><span class="id"> Type}</span> (<span id="ts:23" class="id"><a name="ts:23" class="">ts</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#ThresholdScheme">ThresholdScheme</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#sT:21">sT</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#shT:22">shT</a></span>)<span class="id"> :</span><span class="id"> </span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Datatypes.html#nat">nat</a></span><span class="id"> :=</span><br/>
+&nbsp;&nbsp;(<span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#ts_k'">ts_k'</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#ts:23">ts</a></span>).<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#bda89d73ec4a8f23ae92b565ffb5aaa6">+1</a></span>.<br/>
+<br/>
+<pre class="ssrdoc">
+    Section 2: Coordinate-Permutation Compatibility
+</pre>
+<br/>
+<span class="vernacular">Section</span><span class="id"> compatibility</span>.<br/>
+<br/>
+<span class="vernacular">Variables</span> (<span id="compatibility.gT" class="id"><a name="compatibility.gT" class="">gT</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.fingroup.fingroup#FinGroup.Exports.finGroupType">finGroupType</a></span>) (<span id="compatibility.G" class="id"><a name="compatibility.G" class="">G</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.fingroup.fingroup#dd8cd2228f051940101d045bfdffe2d9">{group</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.fingroup.fingroup#dd8cd2228f051940101d045bfdffe2d9"> </a></span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#gT:25">gT</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.fingroup.fingroup#dd8cd2228f051940101d045bfdffe2d9">}</a></span>).<br/>
+<span class="vernacular">Variables</span> (<span id="compatibility.secretT" class="id"><a name="compatibility.secretT" class="">secretT</a></span><span class="id"> </span><span id="compatibility.shareT" class="id"><a name="compatibility.shareT" class="">shareT</a></span><span class="id"> :</span><span class="gallina-kwd"> Type</span>).<br/>
+<span class="vernacular">Variable</span><span class="id"> </span><span id="compatibility.ts" class="id"><a name="compatibility.ts" class="">ts</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#ThresholdScheme">ThresholdScheme</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#compatibility.secretT">secretT</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#compatibility.shareT">shareT</a></span>.<br/>
+<br/>
+<span class="vernacular">Let</span><span class="id"> </span><span id="compatibility.T" class="id"><a name="compatibility.T" class="">T</a></span><span class="id"> :=</span> (<span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#ts_T'">ts_T'</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#compatibility.ts">ts</a></span>).<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#bda89d73ec4a8f23ae92b565ffb5aaa6">+1</a></span>.<br/>
+<br/>
+<span class="vernacular">Definition</span><span class="id"> </span><span id="ts_perm_compatible" class="id"><a name="ts_perm_compatible" class="">ts_perm_compatible</a></span> (<span id="perm:34" class="id"><a name="perm:34" class="">perm</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#compatibility.gT">gT</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#::type_scope:x_'-&gt;'_x"> -&gt;</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#::type_scope:x_'-&gt;'_x"> </a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.fingroup.perm#683bed2e43e8b9b52492c89e618e34b6">{perm</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.fingroup.perm#683bed2e43e8b9b52492c89e618e34b6"> </a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#:::'''I_'_x">'I_</a></span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#compatibility.T">T</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.fingroup.perm#683bed2e43e8b9b52492c89e618e34b6">}</a></span>)<span class="id"> :</span><span class="gallina-kwd"> Prop</span><span class="id"> :=</span><br/>
+&nbsp;&nbsp;<span class="gallina-kwd">forall</span> (<span id="g:35" class="id"><a name="g:35" class="">g</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#compatibility.gT">gT</a></span>) (<span id="s:36" class="id"><a name="s:36" class="">s</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#compatibility.secretT">secretT</a></span>) (<span id="shares:37" class="id"><a name="shares:37" class="">shares</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#compatibility.T">T</a></span>.<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#::type_scope:x_'.-tuple'">-tuple</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#::type_scope:x_'.-tuple'"> shareT</a></span>)<span class="id">,</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#g:35">g</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrbool.html#b09457274bcb94927e289b8a9e9cd3f7"> \in</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrbool.html#b09457274bcb94927e289b8a9e9cd3f7"> </a></span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#compatibility.G">G</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#::type_scope:x_'-&gt;'_x"> -&gt;</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#ts_valid">ts_valid</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#compatibility.ts">ts</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#s:36">s</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#shares:37">shares</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#::type_scope:x_'-&gt;'_x"> -&gt;</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#ts_recon">ts_recon</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#compatibility.ts">ts</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#9d5b9af75768e306a1218aacdf8c3490">[tuple</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#9d5b9af75768e306a1218aacdf8c3490"> </a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#tnth">tnth</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#shares:37">shares</a></span> (<span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#perm:34">perm</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#g:35">g</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#i:38">i</a></span>)<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#9d5b9af75768e306a1218aacdf8c3490"> |</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#9d5b9af75768e306a1218aacdf8c3490"> </a></span><span id="i:38" class="id"><a name="i:38" class="">i</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#9d5b9af75768e306a1218aacdf8c3490"> &lt;</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#9d5b9af75768e306a1218aacdf8c3490"> </a></span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#compatibility.T">T</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#9d5b9af75768e306a1218aacdf8c3490">]</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> =</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> </a></span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#s:36">s</a></span>.<br/>
+<br/>
+<span class="vernacular">End</span><span class="id"> compatibility</span>.<br/>
+<br/>
+<span class="vernacular">Arguments</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#ts_perm_compatible">ts_perm_compatible</a></span><span class="id"> {gT</span><span class="id"> G</span><span class="id"> secretT</span><span class="id"> shareT}</span>.<br/>
+<br/>
+<pre class="ssrdoc">
+    Section 3: Sum-mod-N Instance
+</pre>
+<br/>
+<span class="vernacular">Section</span><span class="id"> sum_mod_instance</span>.<br/>
+<br/>
+<span class="vernacular">Variable</span><span class="id"> </span><span id="sum_mod_instance.N'" class="id"><a name="sum_mod_instance.N'" class="">N'</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Datatypes.html#nat">nat</a></span>.<br/>
+<span class="vernacular">Let</span><span class="id"> </span><span id="sum_mod_instance.N" class="id"><a name="sum_mod_instance.N" class="">N</a></span><span class="id"> :=</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#sum_mod_instance.N'">N'</a></span>.<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#bc63483175fac06bcd5541a5e9093b18">+2</a></span>.<br/>
+<br/>
+<span class="vernacular">Variable</span><span class="id"> </span><span id="sum_mod_instance.T'" class="id"><a name="sum_mod_instance.T'" class="">T'</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Datatypes.html#nat">nat</a></span>.<br/>
+<span class="vernacular">Let</span><span class="id"> </span><span id="sum_mod_instance.T" class="id"><a name="sum_mod_instance.T" class="">T</a></span><span class="id"> :=</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#sum_mod_instance.T'">T'</a></span>.<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#bda89d73ec4a8f23ae92b565ffb5aaa6">+1</a></span>.<br/>
+<br/>
+<span class="vernacular">Definition</span><span class="id"> </span><span id="sum_mod_recon" class="id"><a name="sum_mod_recon" class="">sum_mod_recon</a></span> (<span id="shares:43" class="id"><a name="shares:43" class="">shares</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#sum_mod_instance.T">T</a></span>.<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#::type_scope:x_'.-tuple'">-tuple</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#::type_scope:x_'.-tuple'"> 'I_N</a></span>)<span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#:::'''I_'_x">'I_</a></span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#sum_mod_instance.N">N</a></span><span class="id"> :=</span><br/>
+&nbsp;&nbsp;<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#Ordinal">Ordinal</a></span> (<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.div#ltn_pmod">ltn_pmod</a></span> (<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.bigop#e383fcd76deb34dd09a423262c4c7429">\sum_</a></span>(<span id="i:46" class="id"><span id="i:45" class="id"><span id="i:44" class="id"><a name="i:46" class="">i</a></span></span></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.bigop#e383fcd76deb34dd09a423262c4c7429"> &lt;</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.bigop#e383fcd76deb34dd09a423262c4c7429"> </a></span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#sum_mod_instance.T">T</a></span>) (<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#tnth">tnth</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#shares:43">shares</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#i:44">i</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Datatypes.html#nat">nat</a></span>)) (<span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrbool.html#isT">isT</a></span><span class="id"> :</span><span class="id"> 0</span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#::nat_scope:x_'&lt;'_x"> &lt;</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#::nat_scope:x_'&lt;'_x"> </a></span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#sum_mod_instance.N">N</a></span>)).<br/>
+<br/>
+<span class="vernacular">Definition</span><span class="id"> </span><span id="sum_mod_valid_pred" class="id"><a name="sum_mod_valid_pred" class="">sum_mod_valid_pred</a></span> (<span id="s:47" class="id"><a name="s:47" class="">s</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#:::'''I_'_x">'I_</a></span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#sum_mod_instance.N">N</a></span>) (<span id="shares:48" class="id"><a name="shares:48" class="">shares</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#sum_mod_instance.T">T</a></span>.<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#::type_scope:x_'.-tuple'">-tuple</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#::type_scope:x_'.-tuple'"> 'I_N</a></span>)<span class="id"> :</span><span class="gallina-kwd"> Prop</span><span class="id"> :=</span><br/>
+&nbsp;&nbsp;(<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.bigop#e383fcd76deb34dd09a423262c4c7429">\sum_</a></span>(<span id="i:51" class="id"><span id="i:50" class="id"><span id="i:49" class="id"><a name="i:51" class="">i</a></span></span></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.bigop#e383fcd76deb34dd09a423262c4c7429"> &lt;</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.bigop#e383fcd76deb34dd09a423262c4c7429"> </a></span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#sum_mod_instance.T">T</a></span>) (<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#tnth">tnth</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#shares:48">shares</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#i:49">i</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Datatypes.html#nat">nat</a></span>))<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.div#e3d79e08e7e529cc9ef532e000103386"> %%</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.div#e3d79e08e7e529cc9ef532e000103386"> </a></span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#sum_mod_instance.N">N</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#b8b2ebc8e1a8b9aa935c0702efb5dccf"> =</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#b8b2ebc8e1a8b9aa935c0702efb5dccf"> </a></span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#s:47">s</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#b8b2ebc8e1a8b9aa935c0702efb5dccf"> :&gt;</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#b8b2ebc8e1a8b9aa935c0702efb5dccf"> </a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Datatypes.html#nat">nat</a></span>.<br/>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> </span><span id="sum_mod_scheme_correct" class="id"><a name="sum_mod_scheme_correct" class="">sum_mod_scheme_correct</a></span> (<span id="s:52" class="id"><a name="s:52" class="">s</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#:::'''I_'_x">'I_</a></span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#sum_mod_instance.N">N</a></span>) (<span id="shares:53" class="id"><a name="shares:53" class="">shares</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#sum_mod_instance.T">T</a></span>.<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#::type_scope:x_'.-tuple'">-tuple</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#::type_scope:x_'.-tuple'"> 'I_N</a></span>)<span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#sum_mod_valid_pred">sum_mod_valid_pred</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#s:52">s</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#shares:53">shares</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#::type_scope:x_'-&gt;'_x"> -&gt;</a></span><br/>
+&nbsp;&nbsp;<span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#sum_mod_recon">sum_mod_recon</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#shares:53">shares</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> =</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> </a></span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#s:52">s</a></span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id">rewrite</span><span class="id"> /</span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#sum_mod_valid_pred">sum_mod_valid_pred</a></span><span class="id"> /</span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#sum_mod_recon">sum_mod_recon</a></span><span class="id"> =&gt;</span><span class="id"> Hvalid</span>.<br/>
+<span class="gallina-kwd">by</span><span class="id"> apply:</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.eqtype#val_inj">val_inj</a></span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> </span><span id="sum_mod_scheme_private" class="id"><a name="sum_mod_scheme_private" class="">sum_mod_scheme_private</a></span> (<span id="s1:54" class="id"><a name="s1:54" class="">s1</a></span><span class="id"> </span><span id="s2:55" class="id"><a name="s2:55" class="">s2</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#:::'''I_'_x">'I_</a></span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#sum_mod_instance.N">N</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span id="shares:56" class="id"><a name="shares:56" class="">shares</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#sum_mod_instance.T">T</a></span>.<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#::type_scope:x_'.-tuple'">-tuple</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#::type_scope:x_'.-tuple'"> 'I_N</a></span>) (<span id="C:57" class="id"><a name="C:57" class="">C</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.finset#d8708f36d374a98f4d683c7593d1ea6a">{set</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.finset#d8708f36d374a98f4d683c7593d1ea6a"> </a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#:::'''I_'_x">'I_</a></span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#sum_mod_instance.T">T</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.finset#d8708f36d374a98f4d683c7593d1ea6a">}</a></span>)<span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#234f50e13366f794cd6877cf832a5935">#|</a></span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#C:57">C</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#234f50e13366f794cd6877cf832a5935">|</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#::nat_scope:x_'&lt;'_x"> &lt;</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#::nat_scope:x_'&lt;'_x"> </a></span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#sum_mod_instance.T">T</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#::type_scope:x_'-&gt;'_x"> -&gt;</a></span><br/>
+&nbsp;&nbsp;<span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#sum_mod_valid_pred">sum_mod_valid_pred</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#s1:54">s1</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#shares:56">shares</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#::type_scope:x_'-&gt;'_x"> -&gt;</a></span><br/>
+&nbsp;&nbsp;<span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#a883bdd010993579f99d60b3775bcf54">exists</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#a883bdd010993579f99d60b3775bcf54"> </a></span><span id="shares':58" class="id"><a name="shares':58" class="">shares'</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#sum_mod_instance.T">T</a></span>.<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#::type_scope:x_'.-tuple'">-tuple</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#::type_scope:x_'.-tuple'"> 'I_N</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#a883bdd010993579f99d60b3775bcf54">,</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#sum_mod_valid_pred">sum_mod_valid_pred</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#s2:55">s2</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#shares':58">shares'</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#ba2b0e492d2b4675a0acf3ea92aabadd"> /\</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="gallina-kwd">forall</span><span class="id"> </span><span id="i:59" class="id"><a name="i:59" class="">i</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#:::'''I_'_x">'I_</a></span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#sum_mod_instance.T">T</a></span><span class="id">,</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#i:59">i</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrbool.html#b09457274bcb94927e289b8a9e9cd3f7"> \in</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrbool.html#b09457274bcb94927e289b8a9e9cd3f7"> </a></span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#C:57">C</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#::type_scope:x_'-&gt;'_x"> -&gt;</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#::type_scope:x_'-&gt;'_x"> </a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#tnth">tnth</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#shares':58">shares'</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#i:59">i</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> =</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> </a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#tnth">tnth</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#shares:56">shares</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#i:59">i</a></span>).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id">move=&gt;</span><span class="id"> HC</span><span class="id"> Hvalid</span>.<br/>
+<span class="id">have</span><span class="id"> Hpsni</span><span class="id"> :=</span><span class="id"> @</span><span class="id"><a href="pgg_reconstruct.pgg_sum_mod.html#partial_sum_no_info">partial_sum_no_info</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#sum_mod_instance.N'">N'</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#sum_mod_instance.T'">T'</a></span><span class="id"> shares</span> (<span class="id">1</span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.fingroup.perm#683bed2e43e8b9b52492c89e618e34b6">{perm</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.fingroup.perm#683bed2e43e8b9b52492c89e618e34b6"> </a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#:::'''I_'_x">'I_</a></span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#sum_mod_instance.N">N</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.fingroup.perm#683bed2e43e8b9b52492c89e618e34b6">}</a></span>)<span class="id"> C</span><span class="id"> s1</span><span class="id"> s2</span><span class="id"> HC</span>.<br/>
+<span class="id">have</span><span class="id"> Hvalid'</span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sum_mod.html#sum_mod_valid">sum_mod_valid</a></span><span class="id"> shares</span><span class="id"> s1</span><span class="gallina-kwd"> by</span><span class="id"> rewrite</span><span class="id"> /</span><span class="id"><a href="pgg_reconstruct.pgg_sum_mod.html#sum_mod_valid">sum_mod_valid</a></span><span class="id"> /</span><span class="id"><a href="pgg_reconstruct.pgg_sum_mod.html#sheets_sum">sheets_sum</a></span>.<br/>
+<span class="id">have</span><span class="id"> [shares'</span><span class="id"> [Hv'</span><span class="id"> [Hagree</span><span class="id"> _]]]</span><span class="id"> :=</span><span class="id"> Hpsni</span><span class="id"> Hvalid'</span>.<br/>
+<span class="gallina-kwd">exists</span><span class="id"> shares';</span><span class="id"> split;</span><span class="id"> last</span><span class="id"> exact:</span><span class="id"> Hagree</span>.<br/>
+<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> /</span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#sum_mod_valid_pred">sum_mod_valid_pred</a></span><span class="id"> /</span><span class="id"><a href="pgg_reconstruct.pgg_sum_mod.html#sheets_sum">sheets_sum</a></span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="vernacular">Definition</span><span class="id"> </span><span id="sum_mod_scheme" class="id"><a name="sum_mod_scheme" class="">sum_mod_scheme</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#ThresholdScheme">ThresholdScheme</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#:::'''I_'_x">'I_</a></span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#sum_mod_instance.N">N</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#:::'''I_'_x">'I_</a></span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#sum_mod_instance.N">N</a></span><span class="id"> :=</span><br/>
+&nbsp;&nbsp;<span class="id">@</span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#MkThresholdScheme">MkThresholdScheme</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#:::'''I_'_x">'I_</a></span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#sum_mod_instance.N">N</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#:::'''I_'_x">'I_</a></span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#sum_mod_instance.N">N</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#sum_mod_instance.T'">T'</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#sum_mod_instance.T'">T'</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#sum_mod_valid_pred">sum_mod_valid_pred</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#sum_mod_recon">sum_mod_recon</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#sum_mod_scheme_correct">sum_mod_scheme_correct</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#sum_mod_scheme_private">sum_mod_scheme_private</a></span>.<br/>
+<br/>
+<span class="vernacular">End</span><span class="id"> sum_mod_instance</span>.<br/>
+<br/>
+<span class="vernacular">Arguments</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#sum_mod_scheme">sum_mod_scheme</a></span><span class="id"> {N'</span><span class="id"> T'}</span>.<br/>
+<br/>
+<pre class="ssrdoc">
+    Section 4: Protocol Integration
+</pre>
+<br/>
+<span class="vernacular">Definition</span><span class="id"> </span><span id="cast_tuple" class="id"><a name="cast_tuple" class="">cast_tuple</a></span><span class="id"> {</span><span id="A:60" class="id"><a name="A:60" class="">A</a></span><span class="id"> :</span><span class="id"> Type}</span><span class="id"> {</span><span id="n:61" class="id"><a name="n:61" class="">n</a></span><span class="id"> </span><span id="m:62" class="id"><a name="m:62" class="">m</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Datatypes.html#nat">nat</a></span><span class="id">}</span> (<span id="H:63" class="id"><a name="H:63" class="">H</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#n:61">n</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> =</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> </a></span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#m:62">m</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span id="t:64" class="id"><a name="t:64" class="">t</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#n:61">n</a></span>.<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#::type_scope:x_'.-tuple'">-tuple</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#::type_scope:x_'.-tuple'"> A</a></span>)<span class="id"> :</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#m:62">m</a></span>.<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#::type_scope:x_'.-tuple'">-tuple</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#::type_scope:x_'.-tuple'"> A</a></span><span class="id"> :=</span><br/>
+&nbsp;&nbsp;<span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#eq_rect">eq_rect</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#n:61">n</a></span> (<span class="gallina-kwd">fun</span><span class="id"> </span><span id="k:65" class="id"><a name="k:65" class="">k</a></span><span class="id"> =&gt;</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#k:65">k</a></span>.<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#::type_scope:x_'.-tuple'">-tuple</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#::type_scope:x_'.-tuple'"> A</a></span>)<span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#t:64">t</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#m:62">m</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#H:63">H</a></span>.<br/>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> </span><span id="tnth_cast_tuple" class="id"><a name="tnth_cast_tuple" class="">tnth_cast_tuple</a></span><span class="id"> {</span><span id="A:66" class="id"><a name="A:66" class="">A</a></span><span class="id"> :</span><span class="id"> Type}</span><span class="id"> {</span><span id="n:67" class="id"><a name="n:67" class="">n</a></span><span class="id"> </span><span id="m:68" class="id"><a name="m:68" class="">m</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Datatypes.html#nat">nat</a></span><span class="id">}</span> (<span id="H:69" class="id"><a name="H:69" class="">H</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#n:67">n</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> =</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> </a></span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#m:68">m</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span id="t:70" class="id"><a name="t:70" class="">t</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#n:67">n</a></span>.<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#::type_scope:x_'.-tuple'">-tuple</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#::type_scope:x_'.-tuple'"> A</a></span>) (<span id="i:71" class="id"><a name="i:71" class="">i</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#:::'''I_'_x">'I_</a></span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#m:68">m</a></span>)<span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#tnth">tnth</a></span> (<span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#cast_tuple">cast_tuple</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#H:69">H</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#t:70">t</a></span>)<span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#i:71">i</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> =</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> </a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#tnth">tnth</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#t:70">t</a></span> (<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#cast_ord">cast_ord</a></span> (<span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrfun.html#esym">esym</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#H:69">H</a></span>)<span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#i:71">i</a></span>).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id">subst</span><span class="id"> m</span>.<br/>
+<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> /</span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#cast_tuple">cast_tuple</a></span><span class="id"> /=</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#cast_ord_id">cast_ord_id</a></span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="vernacular">Section</span><span class="id"> pgg_protocol_secret</span>.<br/>
+<br/>
+<span class="vernacular">Variable</span><span class="id"> </span><span id="pgg_protocol_secret.M" class="id"><a name="pgg_protocol_secret.M" class="">M</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_interface.html#MonodromyRepr.Exports.MonodromyReprType">MonodromyReprType</a></span>.<br/>
+<span class="vernacular">Variable</span><span class="id"> </span><span id="pgg_protocol_secret.PI" class="id"><a name="pgg_protocol_secret.PI" class="">PI</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_interface.html#PGGInterface">PGGInterface</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#pgg_protocol_secret.M">M</a></span>.<br/>
+<br/>
+<span class="vernacular">Let</span><span class="id"> </span><span id="pgg_protocol_secret.gT" class="id"><a name="pgg_protocol_secret.gT" class="">gT</a></span><span class="id"> :=</span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_interface.html#pgg_gT">pgg_gT</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#pgg_protocol_secret.M">M</a></span>.<br/>
+<span class="vernacular">Let</span><span class="id"> </span><span id="pgg_protocol_secret.N" class="id"><a name="pgg_protocol_secret.N" class="">N</a></span><span class="id"> :=</span> (<span class="id"><a href="pgg_smc.pgg_interface.html#pgg_N'">pgg_N'</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#pgg_protocol_secret.M">M</a></span>).<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#bda89d73ec4a8f23ae92b565ffb5aaa6">+1</a></span>.<br/>
+<span class="vernacular">Let</span><span class="id"> </span><span id="pgg_protocol_secret.T" class="id"><a name="pgg_protocol_secret.T" class="">T</a></span><span class="id"> :=</span> (<span class="id"><a href="pgg_smc.pgg_interface.html#pi_T'">pi_T'</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#pgg_protocol_secret.PI">PI</a></span>).<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#bda89d73ec4a8f23ae92b565ffb5aaa6">+1</a></span>.<br/>
+<span class="vernacular">Let</span><span class="id"> </span><span id="pgg_protocol_secret.rho" class="id"><a name="pgg_protocol_secret.rho" class="">rho</a></span><span class="id"> :=</span><span class="id"> @</span><span class="id"><a href="pgg_smc.pgg_interface.html#pgg_rho">pgg_rho</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#pgg_protocol_secret.M">M</a></span>.<br/>
+<span class="vernacular">Let</span><span class="id"> </span><span id="pgg_protocol_secret.starts" class="id"><a name="pgg_protocol_secret.starts" class="">starts</a></span><span class="id"> :=</span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_interface.html#pi_starts">pi_starts</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#pgg_protocol_secret.PI">PI</a></span>.<br/>
+<br/>
+<span class="vernacular">Variable</span><span class="id"> </span><span id="pgg_protocol_secret.ts" class="id"><a name="pgg_protocol_secret.ts" class="">ts</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#ThresholdScheme">ThresholdScheme</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#:::'''I_'_x">'I_</a></span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#pgg_protocol_secret.N">N</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#:::'''I_'_x">'I_</a></span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#pgg_protocol_secret.N">N</a></span>.<br/>
+<span class="vernacular">Hypothesis</span><span class="id"> </span><span id="pgg_protocol_secret.HT" class="id"><a name="pgg_protocol_secret.HT" class="">HT</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#ts_T'">ts_T'</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#pgg_protocol_secret.ts">ts</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> =</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> </a></span><span class="id"><a href="pgg_smc.pgg_interface.html#pi_T'">pi_T'</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#pgg_protocol_secret.PI">PI</a></span>.<br/>
+<br/>
+<span class="vernacular">Let</span><span class="id"> </span><span id="pgg_protocol_secret.sT" class="id"><a name="pgg_protocol_secret.sT" class="">sT</a></span><span class="id"> :=</span> (<span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#ts_T'">ts_T'</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#pgg_protocol_secret.ts">ts</a></span>).<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#bda89d73ec4a8f23ae92b565ffb5aaa6">+1</a></span>.<br/>
+<br/>
+<span class="vernacular">Definition</span><span class="id"> </span><span id="pgg_recon" class="id"><a name="pgg_recon" class="">pgg_recon</a></span> (<span id="eps:80" class="id"><a name="eps:80" class="">eps</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#pgg_protocol_secret.T">T</a></span>.<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#::type_scope:x_'.-tuple'">-tuple</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#::type_scope:x_'.-tuple'"> 'I_N</a></span>)<span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#:::'''I_'_x">'I_</a></span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#pgg_protocol_secret.N">N</a></span><span class="id"> :=</span><br/>
+&nbsp;&nbsp;<span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#ts_recon">ts_recon</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#pgg_protocol_secret.ts">ts</a></span> (<span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#cast_tuple">cast_tuple</a></span> (<span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrfun.html#esym">esym</a></span> (<span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrfun.html#congr1">congr1</a></span><span class="id"> </span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Datatypes.html#S">S</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#pgg_protocol_secret.HT">HT</a></span>))<span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#eps:80">eps</a></span>).<br/>
+<br/>
+<span class="vernacular">Definition</span><span class="id"> </span><span id="pgg_recon_endpoints" class="id"><a name="pgg_recon_endpoints" class="">pgg_recon_endpoints</a></span> (<span id="P:81" class="id"><a name="P:81" class="">P</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#pgg_protocol_secret.gT">gT</a></span>)<span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#:::'''I_'_x">'I_</a></span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#pgg_protocol_secret.N">N</a></span><span class="id"> :=</span><br/>
+&nbsp;&nbsp;<span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#pgg_recon">pgg_recon</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#9d5b9af75768e306a1218aacdf8c3490">[tuple</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#9d5b9af75768e306a1218aacdf8c3490"> </a></span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#pgg_protocol_secret.rho">rho</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#P:81">P</a></span> (<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#tnth">tnth</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#pgg_protocol_secret.starts">starts</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#i:82">i</a></span>)<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#9d5b9af75768e306a1218aacdf8c3490"> |</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#9d5b9af75768e306a1218aacdf8c3490"> </a></span><span id="i:82" class="id"><a name="i:82" class="">i</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#9d5b9af75768e306a1218aacdf8c3490"> &lt;</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#9d5b9af75768e306a1218aacdf8c3490"> </a></span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#pgg_protocol_secret.T">T</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#9d5b9af75768e306a1218aacdf8c3490">]</a></span>.<br/>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> </span><span id="pgg_secret_invariant_perm" class="id"><a name="pgg_secret_invariant_perm" class="">pgg_secret_invariant_perm</a></span> (<span id="s:83" class="id"><a name="s:83" class="">s</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#:::'''I_'_x">'I_</a></span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#pgg_protocol_secret.N">N</a></span>) (<span id="P:84" class="id"><a name="P:84" class="">P</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#pgg_protocol_secret.gT">gT</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span id="perm:85" class="id"><a name="perm:85" class="">perm</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#pgg_protocol_secret.gT">gT</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#::type_scope:x_'-&gt;'_x"> -&gt;</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#::type_scope:x_'-&gt;'_x"> </a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.fingroup.perm#683bed2e43e8b9b52492c89e618e34b6">{perm</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.fingroup.perm#683bed2e43e8b9b52492c89e618e34b6"> </a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#:::'''I_'_x">'I_</a></span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#pgg_protocol_secret.sT">sT</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.fingroup.perm#683bed2e43e8b9b52492c89e618e34b6">}</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span id="G_stable:88" class="id"><a name="G_stable:88" class="">G_stable</a></span><span class="id"> :</span><span class="gallina-kwd"> forall</span><span class="id"> </span><span id="g:86" class="id"><a name="g:86" class="">g</a></span><span class="id">,</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#g:86">g</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrbool.html#b09457274bcb94927e289b8a9e9cd3f7"> \in</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrbool.html#b09457274bcb94927e289b8a9e9cd3f7"> </a></span><span class="id"><a href="pgg_smc.pgg_interface.html#pgg_G">pgg_G</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#pgg_protocol_secret.M">M</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#::type_scope:x_'-&gt;'_x"> -&gt;</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">forall</span><span class="id"> </span><span id="i:87" class="id"><a name="i:87" class="">i</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#:::'''I_'_x">'I_</a></span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#pgg_protocol_secret.sT">sT</a></span><span class="id">,</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#pgg_protocol_secret.rho">rho</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#g:86">g</a></span> (<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#tnth">tnth</a></span> (<span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#cast_tuple">cast_tuple</a></span> (<span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrfun.html#esym">esym</a></span> (<span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrfun.html#congr1">congr1</a></span><span class="id"> </span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Datatypes.html#S">S</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#pgg_protocol_secret.HT">HT</a></span>))<span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#pgg_protocol_secret.starts">starts</a></span>)<span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#i:87">i</a></span>)<span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> =</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#tnth">tnth</a></span> (<span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#cast_tuple">cast_tuple</a></span> (<span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrfun.html#esym">esym</a></span> (<span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrfun.html#congr1">congr1</a></span><span class="id"> </span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Datatypes.html#S">S</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#pgg_protocol_secret.HT">HT</a></span>))<span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#pgg_protocol_secret.starts">starts</a></span>) (<span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#perm:85">perm</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#g:86">g</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#i:87">i</a></span>))<span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#P:84">P</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrbool.html#b09457274bcb94927e289b8a9e9cd3f7"> \in</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrbool.html#b09457274bcb94927e289b8a9e9cd3f7"> </a></span><span class="id"><a href="pgg_smc.pgg_interface.html#pgg_G">pgg_G</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#pgg_protocol_secret.M">M</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#::type_scope:x_'-&gt;'_x"> -&gt;</a></span><br/>
+&nbsp;&nbsp;<span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#ts_valid">ts_valid</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#pgg_protocol_secret.ts">ts</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#s:83">s</a></span> (<span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#cast_tuple">cast_tuple</a></span> (<span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrfun.html#esym">esym</a></span> (<span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrfun.html#congr1">congr1</a></span><span class="id"> </span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Datatypes.html#S">S</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#pgg_protocol_secret.HT">HT</a></span>))<span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#pgg_protocol_secret.starts">starts</a></span>)<span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#::type_scope:x_'-&gt;'_x"> -&gt;</a></span><br/>
+&nbsp;&nbsp;<span class="id">@</span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#ts_perm_compatible">ts_perm_compatible</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#pgg_protocol_secret.gT">gT</a></span> (<span class="id"><a href="pgg_smc.pgg_interface.html#pgg_G">pgg_G</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#pgg_protocol_secret.M">M</a></span>)<span class="id"> _</span><span class="id"> _</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#pgg_protocol_secret.ts">ts</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#perm:85">perm</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#::type_scope:x_'-&gt;'_x"> -&gt;</a></span><br/>
+&nbsp;&nbsp;<span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#pgg_recon_endpoints">pgg_recon_endpoints</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#P:84">P</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> =</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> </a></span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#s:83">s</a></span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id">move=&gt;</span><span class="id"> PG</span><span class="id"> Hvalid</span><span class="id"> Hperm</span>.<br/>
+<span class="id">rewrite</span><span class="id"> /</span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#pgg_recon_endpoints">pgg_recon_endpoints</a></span><span class="id"> /</span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#pgg_recon">pgg_recon</a></span>.<br/>
+<span class="id">have</span><span class="id"> -&gt;</span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#cast_tuple">cast_tuple</a></span> (<span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrfun.html#esym">esym</a></span> (<span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrfun.html#congr1">congr1</a></span><span class="id"> </span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Datatypes.html#S">S</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#pgg_protocol_secret.HT">HT</a></span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#9d5b9af75768e306a1218aacdf8c3490">[tuple</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#9d5b9af75768e306a1218aacdf8c3490"> </a></span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#pgg_protocol_secret.rho">rho</a></span><span class="id"> P</span> (<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#tnth">tnth</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#pgg_protocol_secret.starts">starts</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#i:89">i</a></span>)<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#9d5b9af75768e306a1218aacdf8c3490"> |</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#9d5b9af75768e306a1218aacdf8c3490"> </a></span><span id="i:89" class="id"><a name="i:89" class="">i</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#9d5b9af75768e306a1218aacdf8c3490"> &lt;</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#9d5b9af75768e306a1218aacdf8c3490"> </a></span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#pgg_protocol_secret.T">T</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#9d5b9af75768e306a1218aacdf8c3490">]</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> =</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#9d5b9af75768e306a1218aacdf8c3490">[tuple</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#9d5b9af75768e306a1218aacdf8c3490"> </a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#tnth">tnth</a></span> (<span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#cast_tuple">cast_tuple</a></span> (<span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrfun.html#esym">esym</a></span> (<span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrfun.html#congr1">congr1</a></span><span class="id"> </span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Datatypes.html#S">S</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#pgg_protocol_secret.HT">HT</a></span>))<span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#pgg_protocol_secret.starts">starts</a></span>) (<span class="id">perm</span><span class="id"> P</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#i:90">i</a></span>)<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#9d5b9af75768e306a1218aacdf8c3490"> |</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#9d5b9af75768e306a1218aacdf8c3490"> </a></span><span id="i:90" class="id"><a name="i:90" class="">i</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#9d5b9af75768e306a1218aacdf8c3490"> &lt;</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#9d5b9af75768e306a1218aacdf8c3490"> </a></span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#pgg_protocol_secret.sT">sT</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#9d5b9af75768e306a1218aacdf8c3490">]</a></span>.<br/>
+&nbsp;&nbsp;<span class="id">apply:</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#eq_from_tnth">eq_from_tnth</a></span><span class="id"> =&gt;</span><span class="id"> i</span>.<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#tnth_cast_tuple">tnth_cast_tuple</a></span><span class="id"> !</span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#tnth_mktuple">tnth_mktuple</a></span>.<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> -</span>(<span class="id">G_stable</span><span class="id"> P</span><span class="id"> PG</span><span class="id"> i</span>).<br/>
+&nbsp;&nbsp;<span class="id">congr</span> (<span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#pgg_protocol_secret.rho">rho</a></span><span class="id"> P</span><span class="id"> _</span>).<br/>
+&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#tnth_cast_tuple">tnth_cast_tuple</a></span>.<br/>
+<span class="id">exact:</span><span class="id"> Hperm</span><span class="id"> PG</span><span class="id"> Hvalid</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="vernacular">End</span><span class="id"> pgg_protocol_secret</span>.<br/>
+
+      <div class="footer"><hr/>Generated by <a href="https://github.com/affeldt-aist/rocqnavi/">rocqnavi</a></div>
+    </div>
+  </div>
+    </main>
+</body>
+</html>

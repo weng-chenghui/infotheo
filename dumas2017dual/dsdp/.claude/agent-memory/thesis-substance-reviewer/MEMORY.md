@@ -1,0 +1,1 @@
+- [SSProve chapter grounding facts](reference_ssprove_grounding_facts.md) — Verified cite keys, macros, formal lemma names, and the CertiCrypt-mis-cited-as-EasyCrypt trap for chapters/ssprove.tex

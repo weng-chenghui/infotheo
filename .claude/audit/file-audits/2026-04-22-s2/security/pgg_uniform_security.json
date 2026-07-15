@@ -1,0 +1,122 @@
+{
+  "findings": [
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/security/pgg_uniform_security.v",
+      "line_start": 167,
+      "line_end": 169,
+      "lemma_name": "endpoint_bound",
+      "severity": "warning",
+      "evidence_quote": "Lemma endpoint_bound (s : 'I_N) :\n  (var_dist (fdistmap (eval_at s) rho_uniform)\n            (fdist_uniform (card_ord N)) <= 0)%O.",
+      "closeness": "near",
+      "explanation": "The suffix `bound` does not appear in the MathComp standard suffix table (AUTHORITY.md). The statement's semantic role is a non-positivity inequality `x <= 0`; the canonical MathComp suffix for this shape is `_le0` or `_wn` (weak non-positive). `bound` is a generic English noun that does not signal the theorem's role to library readers scanning by suffix convention.",
+      "fix_sketch": "Rename to `endpoint_le0` (suffix `_le0` for `... <= 0`). Update the call site in `uniform_security_witness` at line 183 and any other callers in the file.",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/security/pgg_uniform_security.v",
+      "line_start": 176,
+      "line_end": 178,
+      "lemma_name": "endpoint_exact",
+      "severity": "warning",
+      "evidence_quote": "Lemma endpoint_exact (s : 'I_N) :\n  var_dist (fdistmap (eval_at s) rho_uniform)\n           (fdist_uniform (card_ord N)) = 0.",
+      "closeness": "near",
+      "explanation": "The suffix `exact` is not in the MathComp standard suffix table (AUTHORITY.md). The statement is an equation to 0 (`var_dist ... = 0`); the canonical MathComp suffix for this shape is `_eq0`. `exact` is a colloquial adjective conveying \"exact equality\" rather than a structured suffix that encodes the theorem's semantic role.",
+      "fix_sketch": "Rename to `endpoint_eq0` (MathComp suffix for `f x = 0`). Update the call site inside `@MkSecurityExact` in `uniform_security_witness` at line 184.",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/security/pgg_uniform_security.v",
+      "line_start": 167,
+      "line_end": 175,
+      "lemma_name": "endpoint_bound",
+      "severity": "warning",
+      "evidence_quote": "(* The endpoint bound: var_dist = 0 <= 0 *)",
+      "closeness": "near",
+      "explanation": "The preceding comment fails two of the four H002 checklist parts. (1) KIND: no classification of `helper` or `main` is present. (2) WHY: no motivation explaining why this bound is needed is given. The suffix `bound` is not a MathComp algebraic-law suffix, so WHY is not waived. USED_BY is also absent; if Kind is helper (likely, given the downstream use in `uniform_security_witness`) a consumer must be cited.",
+      "fix_sketch": "(** endpoint_bound — the variational distance from the endpoint pushforward to the uniform distribution is non-positive, hence zero.\n    Kind: helper.\n    Why: satisfies the epsilon-bound field of MkSecurityWitness, grounding the 0-epsilon security claim.\n    Used by: uniform_security_witness. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/security/pgg_uniform_security.v",
+      "line_start": 176,
+      "line_end": 181,
+      "lemma_name": "endpoint_exact",
+      "severity": "warning",
+      "evidence_quote": "(* The exact endpoint equality: var_dist = 0 *)",
+      "closeness": "near",
+      "explanation": "The preceding comment fails two of the four H002 checklist parts. (1) KIND: no classification (`helper` or `main`) is stated. (2) WHY: no motivation explaining why the exact-equality form is needed alongside `endpoint_bound` is given. `exact` is not an algebraic-law suffix, so WHY is not waived. USED_BY is absent; if Kind is helper a downstream consumer must be cited.",
+      "fix_sketch": "(** endpoint_exact — the variational distance from the endpoint pushforward to the uniform distribution equals exactly 0.\n    Kind: helper.\n    Why: populates the MkSecurityExact field inside uniform_security_witness, providing the stronger exact-equality certificate.\n    Used by: uniform_security_witness. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/security/pgg_uniform_security.v",
+      "line_start": 182,
+      "line_end": 189,
+      "lemma_name": "uniform_security_witness",
+      "severity": "warning",
+      "evidence_quote": "(* The SecurityWitness with epsilon = 0 and exact equality *)",
+      "closeness": "near",
+      "explanation": "The preceding comment fails two of the four H002 checklist parts for a multi-line non-Local Definition. (1) KIND: no classification is present; plausible choices are `main` (headline construction of the file) or `instance`. (2) WHY: no motivation naming what downstream context consumes this witness is given. Since the WHAT clause does not name a downstream use-site crisply, WHY is not waived even for a `main` classification.",
+      "fix_sketch": "(** uniform_security_witness — constructs a SecurityWitness for the uniform distribution, certifying epsilon = 0 with both a bound proof and an exact-equality certificate.\n    Kind: main.\n    Why: exported as the top-level security certificate for the PGG uniform-security theorem; instantiates the SecurityWitness interface for callers that verify 0-epsilon security. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "S998",
+      "file": "rocq-audit",
+      "line_start": 1,
+      "line_end": 1,
+      "severity": "warning",
+      "evidence_quote": "result field not JSON: {\"passed\":true,\"findings\":[{\"rule_id\":\"G001\",\"file\":\"pgg-smc/security/pgg_uniform_security.v\",\"line_start\":85,\"line_end\":85,\"lemma_name\":\"var_dist_self\",\"severity\":\"warning\",\"evidence_quote\":\"Lemma va",
+      "closeness": "near",
+      "explanation": "Stage 2 call failed for chunk 1; see logs.",
+      "fix_sketch": "Retry the commit. If repeated, check agent configuration.",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": {
+    "entity_count": 27,
+    "chunk_count": 7,
+    "chunk_size": 4,
+    "workers_used": 4,
+    "tokens_used": 178219,
+    "tokens_cap": 20000000,
+    "wall_ms_used": 157474,
+    "wall_ms_cap": 1800000,
+    "deferred_chunks": 0,
+    "stop_reason": "clean",
+    "estimated_usd": 1.0693,
+    "model": "sonnet"
+  },
+  "exit_code": 0
+}

@@ -1,0 +1,7 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{k+kn}{Definition} \PYG{n}{sum\PYGZus{}fuel} \PYG{o}{(}\PYG{n}{ps} \PYG{o}{:} \PYG{n}{seq} \PYG{n}{aproc}\PYG{o}{)} \PYG{o}{:} \PYG{n}{nat} \PYG{o}{:=}
+  \PYG{n}{foldr} \PYG{o}{(}\PYG{k}{fun} \PYG{n}{p} \PYG{n}{acc} \PYG{o}{=\PYGZgt{}} \PYG{n}{aproc\PYGZus{}fuel} \PYG{n}{p} \PYG{o}{+} \PYG{n}{acc}\PYG{o}{)} \PYG{l+m+mi}{0} \PYG{n}{ps}\PYG{o}{.}
+
+\PYG{k+kn}{Definition} \PYG{n}{run\PYGZus{}sprocs} \PYG{o}{(}\PYG{n}{aps} \PYG{o}{:} \PYG{n}{seq} \PYG{n}{aproc}\PYG{o}{)} \PYG{o}{:=}
+  \PYG{n}{run\PYGZus{}interp} \PYG{o}{[\PYGZgt{}} \PYG{n}{aps}\PYG{o}{]} \PYG{o}{(}\PYG{n}{erase\PYGZus{}aprocs} \PYG{n}{aps}\PYG{o}{)}\PYG{o}{.}
+\end{MintedVerbatim}

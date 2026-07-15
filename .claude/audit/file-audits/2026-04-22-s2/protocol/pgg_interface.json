@@ -1,0 +1,356 @@
+{
+  "findings": [
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/protocol/pgg_interface.v",
+      "line_start": 203,
+      "line_end": 203,
+      "lemma_name": "search_space_le_words",
+      "severity": "warning",
+      "evidence_quote": "Lemma search_space_le_words (L : nat) : search_space L <= Tg ^ L.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/protocol/pgg_interface.v",
+      "line_start": 215,
+      "line_end": 215,
+      "lemma_name": "weval_inj_search_space",
+      "severity": "warning",
+      "evidence_quote": "Lemma weval_inj_search_space (L : nat) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/protocol/pgg_interface.v",
+      "line_start": 254,
+      "line_end": 272,
+      "lemma_name": "gen_inj_weval_inj1",
+      "severity": "warning",
+      "evidence_quote": "Lemma gen_inj_weval_inj1 :",
+      "stage": "stage1",
+      "stages": [
+        "stage1",
+        "stage2"
+      ],
+      "explanation": "Stage 1 flagged this name at line 254. Stage 2 upgrade over the full entity span 254–272: the name has four underscore-separated components (gen / inj / weval / inj1) and can be parsed as (condition: gen_inj)(main symbol: weval_inj)(nat-argument suffix: 1), which maps onto the MathComp grammar pattern (condition_)?mainSymbol_suffix. However, the preceding comment contains no Naming: justification line. AUTHORITY.md requires any declaration whose underscore count would otherwise trigger F001 or I001 to carry a Naming: line in the preceding comment block. Without that waiver the name is borderline non-conforming. The Stage 1 flag at the declaration line is therefore confirmed at medium confidence.",
+      "fix_sketch": "Option A — add a Naming: line in the existing preceding comment:\n(** gen_inj_weval_inj1 — injective generators force word evaluation at length 1 to be injective.\n    Kind: helper.\n    Why: bridges the simple hypothesis on generators to the general [weval_inj] predicate.\n    Used by: gen_inj_weval_inj1_search_space.\n    Naming: parsed as (gen_inj condition)(weval_inj main symbol)(1 nat-argument suffix); four-component form is intentional.\n*)\n\nOption B — rename to weval_inj1_of_gen_inj, exploiting the _of_ allowlisted exception in F001, and update the single call site in gen_inj_weval_inj1_search_space."
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/protocol/pgg_interface.v",
+      "line_start": 273,
+      "line_end": 273,
+      "lemma_name": "gen_inj_weval_inj1_search_space",
+      "severity": "warning",
+      "evidence_quote": "Lemma gen_inj_weval_inj1_search_space :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/protocol/pgg_interface.v",
+      "line_start": 477,
+      "line_end": 477,
+      "lemma_name": "compute_in_dealt_hand",
+      "severity": "warning",
+      "evidence_quote": "Lemma compute_in_dealt_hand (W : seq gT) (P : gT) (i : 'I_T) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/protocol/pgg_interface.v",
+      "line_start": 573,
+      "line_end": 573,
+      "lemma_name": "gen_starts_2_uniq",
+      "severity": "warning",
+      "evidence_quote": "Lemma gen_starts_2_uniq : uniq gen_starts_2.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/protocol/pgg_interface.v",
+      "line_start": 175,
+      "line_end": 175,
+      "lemma_name": "sigmas_in_G",
+      "severity": "warning",
+      "evidence_quote": "Lemma sigmas_in_G (i : 'I_Tg) : tnth sigmas i \\in G.",
+      "closeness": "near",
+      "explanation": "The suffix '_in_G' does not appear in the MathComp suffix table (AUTHORITY.md). The statement is a membership fact (tnth sigmas i ∈ G). MathComp conventions use the 'mem_' prefix for membership lemmas not obtained by predicate unfolding: e.g. 'mem_head', 'mem_sigmas'. The suffix '_in_G' reads as a free-form descriptor rather than a canonical suffix, obscuring the lemma's role in a search-by-suffix workflow.",
+      "fix_sketch": "Rename to 'mem_sigmas' (mem_<main-symbol> pattern) or 'tnth_sigmas_mem'. Update the 'Used by: sigmas_in_G' cite in achievable_sub's comment accordingly.",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/protocol/pgg_interface.v",
+      "line_start": 203,
+      "line_end": 203,
+      "lemma_name": "search_space_le_words",
+      "severity": "warning",
+      "evidence_quote": "Lemma search_space_le_words (L : nat) : search_space L <= Tg ^ L.",
+      "closeness": "near",
+      "explanation": "The statement is an inequality (search_space L <= Tg ^ L). Stage 1 F001 already flagged the four-component shape; this G001 finding adds that the suffix 'le_words' does not match any entry in AUTHORITY.md's suffix table. The descriptive fragment '_words' is a content noun, not a role suffix. For a nat-exponentiation upper bound, MathComp would prefer a suffix from the inequality family such as 'search_space_leXL' (Xn suffix for nat exponentiation) or restructure as 'search_space_ub'.",
+      "fix_sketch": "Consider 'search_space_leXL' (Xn denotes nat exponentiation per AUTHORITY.md) or 'search_space_le_card_tuple' tying the bound explicitly to card_tuple. Infotheo-internal convention could also accept 'search_space_ub' as a descriptive variant.",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/protocol/pgg_interface.v",
+      "line_start": 215,
+      "line_end": 216,
+      "lemma_name": "weval_inj_search_space",
+      "severity": "warning",
+      "evidence_quote": "Lemma weval_inj_search_space (L : nat) :\n  weval_inj L -> search_space L = Tg ^ L.",
+      "closeness": "near",
+      "explanation": "The statement is a conditional equation (weval_inj L -> search_space L = Tg ^ L). MathComp convention for an equational rewrite is the 'E' suffix. The current name ends in '_search_space', which reads as a main symbol rather than a suffix, making the lemma's role (proving an equation) invisible to suffix-based search. Stage 1 F001 already flagged the four-component shape; this G001 finding adds the suffix-role mismatch.",
+      "fix_sketch": "Rename to 'search_space_E' (with the weval_inj L hypothesis as an explicit argument or hypothesis variable) or 'weval_inj_card_E'. Update call sites.",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/protocol/pgg_interface.v",
+      "line_start": 413,
+      "line_end": 413,
+      "lemma_name": "start_sheet_inj",
+      "severity": "warning",
+      "evidence_quote": "Lemma start_sheet_inj : injective start_sheet.",
+      "closeness": "near",
+      "explanation": "The suffix `_inj` is not in the canonical MathComp suffix table. For lemmas whose statement is `injective f`, AUTHORITY.md prescribes the single-letter suffix `I` (e.g., `start_sheetI` or `start_sheet_I`). The semantic role — injectivity — is correctly identified; only the suffix form deviates from the MathComp grammar.",
+      "fix_sketch": "Rename `start_sheet_inj` to `start_sheetI` (treating `start_sheet` as the main symbol). Update the `Used by: card_start_sheets` cite in the preceding comment and the `exact: start_sheet_inj` call-site inside `card_start_sheets` to `exact: start_sheetI`.",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/protocol/pgg_interface.v",
+      "line_start": 477,
+      "line_end": 486,
+      "lemma_name": "compute_in_dealt_hand",
+      "severity": "warning",
+      "evidence_quote": "Lemma compute_in_dealt_hand (W : seq gT) (P : gT) (i : 'I_T) :\n  P \\in W -> compute P i \\in dealt_hand W i.",
+      "closeness": "near",
+      "explanation": "The conclusion is a membership statement `compute P i \\in dealt_hand W i`. MathComp's naming grammar uses the `mem_` prefix for membership lemmas (e.g. `mem_head`, `mem_dealt_hand`) or places the container as the main symbol with the element as a condition. The current name `compute_in_dealt_hand` uses an English connective phrase `_in_` that is not idiomatic MathComp—`in_` is reserved for predicate-unfolding rules (AUTHORITY.md §Membership). Stage 1 flagged the structural F001 violation; this finding upgrades to a semantic G001 dimension: the suffix/prefix role does not match the statement shape.",
+      "fix_sketch": "Rename to `compute_mem_dealt_hand` (main symbol `dealt_hand`, prefix `mem_` signals membership) or `dealt_hand_compute` (container first, omit the membership particle and let the statement convey it). Either keeps the four-component count below the F001 threshold.",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/protocol/pgg_interface.v",
+      "line_start": 167,
+      "line_end": 168,
+      "lemma_name": "achievable",
+      "severity": "warning",
+      "evidence_quote": "(* Set of achievable group elements from words of length L *)",
+      "closeness": "near",
+      "explanation": "Kind classification is absent (helper/main/canonical not stated). Why motivation is absent and not waived: no algebraic-law suffix, Kind is not canonical/notation/coercion/instance, and the What clause does not name a downstream use-site. If Kind resolves to helper, Used-by must also be named.",
+      "fix_sketch": "(** achievable — image of word_eval over pgg_word L; the set of group elements reachable by generator words of length L.\n    Kind: helper.\n    Why: feeds search_space (#|achievable L|) and achievable_sub (achievable L \\subset G).\n    Used by: search_space, achievable_sub. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/protocol/pgg_interface.v",
+      "line_start": 171,
+      "line_end": 172,
+      "lemma_name": "search_space",
+      "severity": "warning",
+      "evidence_quote": "(* Search space size *)",
+      "closeness": "near",
+      "explanation": "Kind classification is absent. The What clause '(* Search space size *)' is minimal and does not paraphrase the definition body (#|achievable L|) with enough specificity. Why is absent and not waived (no algebraic-law suffix, Kind unestablished, What clause does not name a downstream use-site). Used-by is required if Kind resolves to helper.",
+      "fix_sketch": "(** search_space — cardinality of achievable L; counts distinct group elements reachable by L-letter generator words.\n    Kind: helper.\n    Why: appears in search_space_leG and search_space_le_words as the bounded quantity.\n    Used by: search_space_leG, search_space_le_words, weval_inj_search_space. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/protocol/pgg_interface.v",
+      "line_start": 175,
+      "line_end": 181,
+      "lemma_name": "sigmas_in_G",
+      "severity": "warning",
+      "evidence_quote": "(* Upper bound: achievable ⊆ G *)",
+      "closeness": "far",
+      "explanation": "The preceding comment '(* Upper bound: achievable ⊆ G *)' describes achievable_sub (line 188), not sigmas_in_G. sigmas_in_G proves 'tnth sigmas i \\in G' — membership of a single generator element in G. What therefore fails: the comment paraphrases a different lemma entirely. Kind is absent and Why is absent.",
+      "fix_sketch": "(** sigmas_in_G — each generator tnth sigmas i belongs to the ambient group G.\n    Kind: helper.\n    Why: membership fact consumed by achievable_sub to establish achievable L \\subset G via mem_gen.\n    Used by: achievable_sub. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/protocol/pgg_interface.v",
+      "line_start": 196,
+      "line_end": 200,
+      "lemma_name": "search_space_leG",
+      "severity": "warning",
+      "evidence_quote": "(* Upper bound: search space ≤ |G| *)",
+      "closeness": "near",
+      "explanation": "Kind classification is absent. Why is absent and not waived: no algebraic-law suffix, Kind is unestablished, and the What clause does not name a downstream use-site crisply.",
+      "fix_sketch": "(** search_space_leG — the search space is at most the order of the ambient group G.\n    Kind: helper.\n    Why: establishes that exhaustive word-search over achievable L is bounded by |G|.\n    Used by: <downstream lemma>. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/protocol/pgg_interface.v",
+      "line_start": 203,
+      "line_end": 208,
+      "lemma_name": "search_space_le_words",
+      "severity": "warning",
+      "evidence_quote": "(* Upper bound: search space ≤ T^L (number of words) *)",
+      "closeness": "near",
+      "explanation": "Kind classification is absent. Why is absent and not waived (no algebraic-law suffix, Kind unestablished, What clause does not name a downstream use-site).",
+      "fix_sketch": "(** search_space_le_words — search_space L ≤ Tg^L; distinct reachable elements are at most the total number of L-letter words.\n    Kind: helper.\n    Why: companion to search_space_leG; together they sandwich the search space between cardinality bounds.\n    Used by: <downstream lemma>. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/protocol/pgg_interface.v",
+      "line_start": 211,
+      "line_end": 212,
+      "lemma_name": "weval_inj",
+      "severity": "warning",
+      "evidence_quote": "(* Word-eval injectivity: word evaluation is injective on L-words *)",
+      "closeness": "near",
+      "explanation": "Kind classification is absent. Why is absent and not waived (no algebraic-law suffix, Kind unestablished). The What clause is present but Used-by is not cited; required if Kind resolves to helper.",
+      "fix_sketch": "(** weval_inj — Prop asserting that word_eval is injective on pgg_word L.\n    Kind: helper.\n    Why: injectivity hypothesis required by card_imset in weval_inj_search_space.\n    Used by: weval_inj_search_space, weval_injB, weval_injP. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/protocol/pgg_interface.v",
+      "line_start": 215,
+      "line_end": 221,
+      "lemma_name": "weval_inj_search_space",
+      "severity": "warning",
+      "evidence_quote": "(* Word-eval injective generators achieve the maximal search space T^L *)",
+      "closeness": "near",
+      "explanation": "Kind classification is absent. Why is absent and not waived (no algebraic-law suffix, Kind unestablished, What clause does not name a specific downstream consumer).",
+      "fix_sketch": "(** weval_inj_search_space — assuming word_eval is injective, search_space L = Tg^L.\n    Kind: main.\n    Why: key equality connecting generator injectivity to full T^L-word coverage; enables complexity bounds.\n    Used by: <downstream lemma>. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/protocol/pgg_interface.v",
+      "line_start": 477,
+      "line_end": 486,
+      "lemma_name": "compute_in_dealt_hand",
+      "severity": "warning",
+      "evidence_quote": "(** compute_in_dealt_hand — if [P] appears in [W], player [i]'s computed\n    endpoint under [P] lies in the hand dealt to [i].\n    Kind: helper.\n    Why: correctness link between [compute] and [dealt_hand] used by the player program.\n    Used by: card-exchange player correctness proofs.\n*)",
+      "closeness": "near",
+      "explanation": "Kind (helper) and What and Why are present. USED_BY fails: 'card-exchange player correctness proofs' is descriptive prose, not a resolvable identifier. AUTHORITY.md requires the comment to name at least one downstream consumer identifier. A repo-wide Grep for `compute_in_dealt_hand` finds the declaration in `pgg_program.v` (line 58) but that file re-declares the same lemma rather than citing it as a downstream consumer; no call site that uses the interface version was located. The cite must be a specific lemma name (e.g. `player_i_exchange_correct`).",
+      "fix_sketch": "Replace 'Used by: card-exchange player correctness proofs.' with 'Used by: <specific_lemma_name>.' where <specific_lemma_name> is an identifier that can be verified by Grep. If the downstream consumer does not yet exist, change Kind to `main` or add a TODO with the planned caller.",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/protocol/pgg_interface.v",
+      "line_start": 487,
+      "line_end": 495,
+      "lemma_name": "endpointsE",
+      "severity": "warning",
+      "evidence_quote": "(** endpointsE — component-wise evaluation of [endpoints] reduces to [rho P (start i)].\n    Kind: main.\n*)",
+      "closeness": "near",
+      "explanation": "Kind (main) and What ('component-wise evaluation of [endpoints] reduces to [rho P (start i)]') are present. WHY is absent. Per AUTHORITY.md and H002, Why is waived only for algebraic-law suffixes (_A, _AC, _ACA, _C, _CA, _K, _D, _I, _V, _X, _Xn, _Xz, _Mn, _Z), for Kind canonical/notation/coercion/instance, or when the What clause already names a downstream use-site crisply. Suffix `_E` (equational rewrite) is NOT in the waiver list, Kind is `main` (not a non-lemma category), and the What clause names no downstream use-site. A one-sentence motivation is required.",
+      "fix_sketch": "Add a Why line, e.g.: 'Why: enables pointwise unfolding of [endpoints] in proofs about individual player output positions.' If this lemma is the primary computational characterisation of [endpoints], note which downstream lemma depends on this reduction.",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "S998",
+      "file": "rocq-audit",
+      "line_start": 1,
+      "line_end": 1,
+      "severity": "warning",
+      "evidence_quote": "result field not JSON: ```json\n{\n  \"passed\": false,\n  \"findings\": [\n    {\n      \"rule_id\": \"H002\",\n      \"file\": \"pgg-smc/protocol/pgg_interface.v\",\n      \"line_start\": 163,\n      \"line_end\": 166,\n      \"lemma_name\": \"word_",
+      "closeness": "near",
+      "explanation": "Stage 2 call failed for chunk 1; see logs.",
+      "fix_sketch": "Retry the commit. If repeated, check agent configuration.",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": {
+    "entity_count": 97,
+    "chunk_count": 10,
+    "chunk_size": 10,
+    "workers_used": 4,
+    "tokens_used": 544110,
+    "tokens_cap": 20000000,
+    "wall_ms_used": 443060,
+    "wall_ms_cap": 1800000,
+    "deferred_chunks": 0,
+    "stop_reason": "clean",
+    "estimated_usd": 3.2647,
+    "model": "sonnet"
+  },
+  "exit_code": 0
+}

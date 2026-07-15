@@ -1,0 +1,69 @@
+{
+  "fingerprint": "10bd207ea7342efc",
+  "bad": {
+    "findings": [
+      {
+        "rule_id": "S998",
+        "file": "rocq-audit",
+        "line_start": 1,
+        "line_end": 1,
+        "severity": "warning",
+        "evidence_quote": "result field not JSON: ```json\n{\n  \"passed\": false,\n  \"findings\": [\n    {\n      \"rule_id\": \"H002\",\n      \"file\": \".claude/audit/fixtures/bad/H002.v\",\n      \"line_start\": 3,\n      \"line_end\": 5,\n      \"lemma_name\": \"helper_n",
+        "closeness": "near",
+        "explanation": "Stage 2 call failed for chunk 0; see logs.",
+        "fix_sketch": "Retry the commit. If repeated, check agent configuration.",
+        "confidence": "high",
+        "stage": "stage2"
+      }
+    ],
+    "tokens_used": 0,
+    "budget": {
+      "entity_count": 1,
+      "chunk_count": 1,
+      "chunk_size": 3,
+      "workers_used": 1,
+      "tokens_used": 0,
+      "tokens_cap": 75000,
+      "wall_ms_used": 106811,
+      "wall_ms_cap": 600000,
+      "deferred_chunks": 0,
+      "stop_reason": "clean",
+      "estimated_usd": 0.0,
+      "model": "sonnet"
+    },
+    "stage2_incomplete": false
+  },
+  "good": {
+    "findings": [
+      {
+        "rule_id": "S998",
+        "file": "rocq-audit",
+        "line_start": 1,
+        "line_end": 1,
+        "severity": "warning",
+        "evidence_quote": "result field not JSON: ```json\n{\n  \"passed\": true,\n  \"findings\": [\n    {\n      \"rule_id\": \"G001\",\n      \"file\": \".claude/audit/fixtures/good/H002.v\",\n      \"line_start\": 7,\n      \"line_end\": 8,\n      \"lemma_name\": \"helper_f",
+        "closeness": "near",
+        "explanation": "Stage 2 call failed for chunk 0; see logs.",
+        "fix_sketch": "Retry the commit. If repeated, check agent configuration.",
+        "confidence": "high",
+        "stage": "stage2"
+      }
+    ],
+    "tokens_used": 0,
+    "budget": {
+      "entity_count": 1,
+      "chunk_count": 1,
+      "chunk_size": 3,
+      "workers_used": 1,
+      "tokens_used": 0,
+      "tokens_cap": 75000,
+      "wall_ms_used": 70134,
+      "wall_ms_cap": 600000,
+      "deferred_chunks": 0,
+      "stop_reason": "clean",
+      "estimated_usd": 0.0,
+      "model": "sonnet"
+    },
+    "stage2_incomplete": false
+  }
+}

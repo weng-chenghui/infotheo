@@ -1,0 +1,326 @@
+{
+  "findings": [
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 442,
+      "line_end": 448,
+      "lemma_name": "all_pairs_comm_nil",
+      "severity": "warning",
+      "evidence_quote": "Lemma all_pairs_comm_nil comm : all_pairs_comm_sorted comm [::] = true.",
+      "stage": "stage1",
+      "stages": [
+        "stage1",
+        "stage2"
+      ],
+      "explanation": "Stage 1 flagged the declaration line (442). Upgrading with closeness-to-target analysis: the name has four underscore-separated lowercase components (all, pairs, comm, nil). The `_nil` condition suffix is recognizable and appears in MathComp (e.g., `perm_nil`, `path_nil`), but the base `all_pairs_comm` is itself a three-component compound, making the full name unwieldy. MathComp grammar expects a single main symbol plus one or two canonical suffixes; a compound predicate name should be aliased so the lemma name remains two or three components: e.g., if `all_pairs_comm_sorted` were aliased as `pairwise_comm`, the lemma would become `pairwise_comm_nil` — two components with an idiomatic condition suffix.",
+      "fix_sketch": "Introduce a shorter alias for `all_pairs_comm_sorted` (e.g., `pairwise_comm`) and rename this lemma to `pairwise_comm_nil` or `pairwise_comm0`. If renaming the predicate is out of scope, add a `Naming:` line in the comment justifying the compound name."
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 302,
+      "line_end": 308,
+      "lemma_name": "free3_ct1",
+      "severity": "warning",
+      "evidence_quote": "Lemma free3_ct1 : clique_traces 3 1 (fun _ _ => false) = 3.",
+      "closeness": "near",
+      "explanation": "The statement is an equation (LHS = RHS); MathComp convention assigns suffix E to equational evaluation lemmas. The suffix 'ct1' abbreviates 'clique_traces, parameter 1' and is not a canonical MathComp suffix. Per AUTHORITY.md the main symbol is the head of the LHS, here 'clique_traces'; the suffix '1' in MathComp denotes ring/nat/group one, not a sequence counter. The combination 'free3_ct1' drifts from 'mainSymbol_suffixes(_condition)?' toward opaque abbreviation.",
+      "fix_sketch": "Two idiomatic alternatives: 'clique_traces_free3_1_E' (main symbol, condition, equation suffix) or 'free_clique_traces_1_E' if the free-group context is the leading concept. 'ct' as an abbreviation for 'clique_traces' is non-standard.",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 309,
+      "line_end": 315,
+      "lemma_name": "free3_ct2",
+      "severity": "warning",
+      "evidence_quote": "Lemma free3_ct2 : clique_traces 3 2 (fun _ _ => false) = 9.",
+      "closeness": "near",
+      "explanation": "Same pattern as free3_ct1. The suffix 'ct2' is an abbreviation, not a canonical MathComp suffix. The statement is an equation; the expected suffix per AUTHORITY.md is E. The numeric '2' component is used as a sequence index rather than denoting ring/nat two.",
+      "fix_sketch": "Two idiomatic alternatives: 'clique_traces_free3_2_E' or 'free_clique_traces_2_E'.",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 316,
+      "line_end": 319,
+      "lemma_name": "free3_ct3",
+      "severity": "warning",
+      "evidence_quote": "Lemma free3_ct3 : clique_traces 3 3 (fun _ _ => false) = 27.",
+      "closeness": "near",
+      "explanation": "Same pattern as free3_ct1/ct2. The suffix 'ct3' is an abbreviation, not a canonical MathComp suffix. The statement is an equation; the expected suffix is E.",
+      "fix_sketch": "Two idiomatic alternatives: 'clique_traces_free3_3_E' or 'free_clique_traces_3_E'.",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 320,
+      "line_end": 324,
+      "lemma_name": "free3_ntB2",
+      "severity": "warning",
+      "evidence_quote": "Lemma free3_ntB2 : n_traces_natB 3 2 (fun _ _ => false) = 9.",
+      "closeness": "near",
+      "explanation": "The suffix 'ntB2' encodes an abbreviation of 'n_traces_natB' with parameter '2'. In AUTHORITY.md's suffix table 'B' denotes subtraction; using it here to abbreviate a function name creates a false semantic signal. The statement is an equation; the expected suffix is E. The main symbol is 'n_traces_natB'; the '2' component is a sequence index rather than a canonical numeric suffix.",
+      "fix_sketch": "Two idiomatic alternatives: 'n_traces_natB_free3_2_E' (explicit suffix) or 'free_n_traces_natB_2_E'. The 'B' in 'ntB2' is particularly misleading as it conflicts with the subtraction suffix in the MathComp table.",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 413,
+      "line_end": 432,
+      "lemma_name": "subseqs_k_size",
+      "severity": "warning",
+      "evidence_quote": "Lemma subseqs_k_size k s t : t \\in subseqs_k k s -> size t = k.",
+      "closeness": "near",
+      "explanation": "The conclusion is `size t = k`, so `size` is the head symbol of the right-hand side and MathComp convention places it as a prefix: the canonical form is `size_subseqs_k`. The current suffix `_size` is descriptive but is not a single-letter entry in the AUTHORITY.md suffix table and inverts the standard prefix order used throughout MathComp (e.g., `size_cat`, `size_map`, `size_filter`). The statement is an equational result (`= k`), so an `E` suffix would also be acceptable: `subseqs_k_sizeE`, but the prefix form is more idiomatic when the main symbol is `size`.",
+      "fix_sketch": "Rename to `size_subseqs_k` following `mainSymbol_suffixes` grammar where `size` is the head of the conclusion, consistent with `size_cat` and `size_map`. Alternatively, if `subseqs_k` is the main symbol, use the canonical equational suffix: `subseqs_k_sizeE`.",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 320,
+      "line_end": 324,
+      "lemma_name": "free3_ntB2",
+      "severity": "error",
+      "evidence_quote": "(* Cross-check *)",
+      "closeness": "far",
+      "explanation": "The preceding comment for free3_ntB2 is a generic section-separator marker that never mentions this entity, its statement, or its purpose. It satisfies the raw character-count threshold but qualifies as a structural annotation that never describes this specific lemma. Under AUTHORITY.md's comment template a preceding comment must at minimum classify the entity and paraphrase its statement; '(* Cross-check *)' does neither.",
+      "fix_sketch": "(** free3_ntB2 — n_traces_natB 3 2 (fun _ _ => false) evaluates to 9 (= 3^2) for the free group on 3 generators.\n    Kind: example.\n    Why: cross-checks that n_traces_natB agrees with clique_traces on the free graph at m=2.\n*)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 302,
+      "line_end": 308,
+      "lemma_name": "free3_ct1",
+      "severity": "warning",
+      "evidence_quote": "(** free3_ct1 — vm_compute trace count m_1 = 3 for the free group on 3\n    generators.\n    Kind: example.\n*)",
+      "closeness": "near",
+      "explanation": "KIND (example) and WHAT are present. WHY is absent. AUTHORITY.md waives Why only for algebraic-law suffixes (_A, _C, _K, _D, _I, etc.), for canonical/notation/coercion/instance kinds, or when the What clause already names a downstream use-site crisply. 'example' is not in the waiver list, and the What clause names no downstream consumer. A brief motivation — e.g. that this sanity-checks clique_traces against 3^1 — is expected.",
+      "fix_sketch": "Add a 'Why: validates that clique_traces 3 1 = 3^1, serving as a sanity check for the trace-count formula at depth 1.' line to the comment block.",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 309,
+      "line_end": 315,
+      "lemma_name": "free3_ct2",
+      "severity": "warning",
+      "evidence_quote": "(** free3_ct2 — vm_compute trace count m_2 = 9 for the free group on 3\n    generators (matches 3^2).\n    Kind: example.\n*)",
+      "closeness": "near",
+      "explanation": "KIND (example) and WHAT are present. WHY is absent. AUTHORITY.md does not waive Why for 'example' kind. A one-line motivation explaining what 3^2 = 9 cross-checks would satisfy the requirement.",
+      "fix_sketch": "Add 'Why: validates that clique_traces 3 2 = 3^2, confirming exponential growth of trace counts at depth 2.' to the comment block.",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 316,
+      "line_end": 319,
+      "lemma_name": "free3_ct3",
+      "severity": "warning",
+      "evidence_quote": "(** free3_ct3 — vm_compute trace count m_3 = 27 for the free group on 3\n    generators (matches 3^3).\n    Kind: example.\n*)",
+      "closeness": "near",
+      "explanation": "KIND (example) and WHAT are present. WHY is absent. AUTHORITY.md does not waive Why for 'example' kind. A one-line motivation is expected.",
+      "fix_sketch": "Add 'Why: validates that clique_traces 3 3 = 3^3, confirming the trace-count formula at depth 3.' to the comment block.",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 320,
+      "line_end": 324,
+      "lemma_name": "free3_ntB2",
+      "severity": "warning",
+      "evidence_quote": "(* Cross-check *)",
+      "closeness": "far",
+      "explanation": "All three required checklist parts fail. (1) KIND — no classification (helper, main, example, etc.) is present. (2) WHAT — no paraphrase of the statement 'n_traces_natB 3 2 (fun _ _ => false) = 9'. (3) WHY — no motivation explaining what this computation validates or why it is placed here. USED_BY is waived because Kind is not established as helper.",
+      "fix_sketch": "(** free3_ntB2 — n_traces_natB 3 2 (fun _ _ => false) evaluates to 9 (= 3^2).\n    Kind: example.\n    Why: validates that n_traces_natB agrees with clique_traces for the free-graph case at depth 2.\n*)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 364,
+      "line_end": 374,
+      "lemma_name": "abelian3_ntB3",
+      "severity": "warning",
+      "evidence_quote": "(** abelian3_ntB3 — cross-check: n_traces_natB for the abelian case at L=3\n    matches clique_traces = 10.\n    Kind: example.\n*)",
+      "closeness": "near",
+      "explanation": "The comment has Kind (example) and What (L=3 gives 10), but Why is absent. Per H002, Why is waived only when the entity name carries a MathComp algebraic-law suffix, when Kind is canonical/notation/coercion/instance, or when the What clause names a downstream use-site crisply. Kind: example does not qualify for any waiver, and the What clause does not name a downstream consumer. Compare the sibling abelian3_ntB2 comment, which carries an explicit 'Why: vm_compute sanity check that n_traces_natB tracks the abelian closed form, complementing abelian3_ct2 / abelian3_ntB3.' A parallel Why is required here.",
+      "fix_sketch": "(** abelian3_ntB3 — cross-check: n_traces_natB for the abelian case at L=3\n    matches clique_traces = 10.\n    Kind: example.\n    Why: vm_compute sanity check that n_traces_natB tracks the abelian\n    closed form at L=3, complementing abelian3_ntB2 / abelian3_ct3.\n*)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 381,
+      "line_end": 386,
+      "lemma_name": "path3_ct1",
+      "severity": "warning",
+      "evidence_quote": "(** path3_ct1 — vm_compute trace count m_1 = 3 for the path P_3.\n    Kind: example.\n*)",
+      "closeness": "near",
+      "explanation": "The comment has Kind (example) and What (m_1 = 3 for P_3), but Why is absent. The same waiver analysis applies as for abelian3_ntB3: Kind: example is not in the canonical waiver list (canonical/notation/coercion/instance), the name carries no algebraic-law suffix, and the What clause does not name a downstream consumer. Compare the sibling path3_ct0, whose comment carries 'Why: base case of the path recurrence m_L = 3*m_{L-1} - m_{L-2}, paired with path3_ct1 / path3_ct2 / path3_ct3.' A parallel Why is required.",
+      "fix_sketch": "(** path3_ct1 — vm_compute trace count m_1 = 3 for the path graph P_3.\n    Kind: example.\n    Why: second data point of the path recurrence m_L = 3*m_{L-1} - m_{L-2},\n    paired with path3_ct0 / path3_ct2 / path3_ct3.\n*)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 397,
+      "line_end": 397,
+      "lemma_name": "path3_ntB2",
+      "severity": "warning",
+      "evidence_quote": "(* Cross-check *)",
+      "closeness": "far",
+      "explanation": "The preceding comment fails three of the four H002 parts. KIND: missing — no classification (helper/main/example/canonical/...) is given. WHAT: missing — the comment does not paraphrase the statement `n_traces_natB 3 2 path_comm_nat = 8`; the phrase 'Cross-check' only labels the section heading, not the lemma. WHY: missing — no motivation for why this specific equation is asserted. USED_BY is not required because Kind is not declared as helper (and would be waived if classified as example). This comment does not meet the four-part content checklist for a Lemma; the neighbouring lemmas (path3_ct2, path3_ct3, path3_ntB3) all carry the richer '— <paraphrase>. Kind: example.' template, making this outlier salient.",
+      "fix_sketch": "Replace `(* Cross-check *)` with a template matching the neighbouring lemmas, for example:\n(** path3_ntB2 — n_traces_natB for the path P_3 at L=2 equals 8 (cross-check against clique_traces).\n    Kind: example.\n*)",
+      "confidence": "high",
+      "stage": "stage2",
+      "escalated_model": "opus",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 413,
+      "line_end": 432,
+      "lemma_name": "subseqs_k_size",
+      "severity": "warning",
+      "evidence_quote": "(* --- Helper lemma: size of elements in subseqs_k --- *)",
+      "closeness": "far",
+      "explanation": "The preceding comment identifies Kind (helper) and provides a minimal WHAT paraphrase ('size of elements in subseqs_k'), but WHY is entirely absent and USED_BY is absent — both required for a helper entity. No downstream consumer is named, so a reader cannot trace where this helper is consumed. The waiver conditions do not apply: no algebraic-law suffix, Kind is helper, and WHAT does not name a downstream use-site.",
+      "fix_sketch": "(** subseqs_k_size — every element t of `subseqs_k k s` has size exactly k.\n    Kind: helper.\n    Why: needed to verify that clique candidates drawn from subseqs_k k have\n         the correct vertex count; used by the inductive step of clique_count.\n    Used by: <downstream lemma name>. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 442,
+      "line_end": 448,
+      "lemma_name": "all_pairs_comm_nil",
+      "severity": "warning",
+      "evidence_quote": "(** all_pairs_comm_nil — the empty sequence trivially satisfies the\n    pairwise-commuting predicate.\n    Kind: helper.\n    Used by: clique_count0 and downstream base-case reasoning.\n*)",
+      "closeness": "near",
+      "explanation": "KIND (helper) and WHAT (empty sequence satisfies the pairwise-commuting predicate) are present. USED_BY names clique_count0. WHY is absent: the comment does not explain what the base case enables or why this result must be stated separately. The waiver conditions do not apply: `_nil` is not an algebraic-law suffix; Kind is helper, not canonical/notation/coercion/instance; and WHAT does not name a downstream use-site crisply enough to serve as motivation.",
+      "fix_sketch": "(** all_pairs_comm_nil — the empty sequence trivially satisfies the\n    pairwise-commuting predicate (all_pairs_comm_sorted comm [::] = true).\n    Kind: helper.\n    Why: provides the base case for the clique-count recurrence; without it\n         clique_count0 cannot reduce the empty-subsequence list to one clique.\n    Used by: clique_count0 and downstream base-case reasoning.\n*)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 449,
+      "line_end": 457,
+      "lemma_name": "subseqs_k0",
+      "severity": "warning",
+      "evidence_quote": "(** subseqs_k0 — the only zero-length subsequence is the empty one.\n    Kind: helper.\n    Used by: clique_count0, empty_clique_countk, size_subseqs_k base case.\n*)",
+      "closeness": "near",
+      "explanation": "KIND (helper), WHAT (subseqs_k 0 s = [:: [::]]), and USED_BY (clique_count0, empty_clique_countk, size_subseqs_k) are all present. WHY is absent: no motivation is given for why this equational base case is stated here rather than inline. The waiver conditions do not apply: `0` is a ring/nat-zero suffix in the table but only waives WHY for algebraic-law suffixes in the algebraic-law group (_A, _C, _K, etc.); Kind is helper, not a non-helper category.",
+      "fix_sketch": "(** subseqs_k0 — `subseqs_k 0 s = [:: [::]]` for any sequence s: the only\n    zero-length subsequence is the empty list.\n    Kind: helper.\n    Why: base case of the subseqs_k length recurrence and of the clique-count\n         reduction to exactly one empty clique at depth 0.\n    Used by: clique_count0, empty_clique_countk, size_subseqs_k base case.\n*)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "S998",
+      "file": "rocq-audit",
+      "line_start": 1,
+      "line_end": 1,
+      "severity": "warning",
+      "evidence_quote": "result field not JSON: ```json\n{\n  \"passed\": false,\n  \"findings\": [\n    {\n      \"rule_id\": \"H002\",\n      \"file\": \"pgg-smc/groups/pgg_raag_clique.v\",\n      \"line_start\": 505,\n      \"line_end\": 509,\n      \"lemma_name\": \"mem_s",
+      "closeness": "near",
+      "explanation": "Stage 2 call failed for chunk 6; see logs.",
+      "fix_sketch": "Retry the commit. If repeated, check agent configuration.",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": {
+    "entity_count": 25,
+    "chunk_count": 7,
+    "chunk_size": 4,
+    "workers_used": 4,
+    "tokens_used": 442487,
+    "tokens_cap": 20000000,
+    "wall_ms_used": 285717,
+    "wall_ms_cap": 1800000,
+    "deferred_chunks": 0,
+    "stop_reason": "clean",
+    "estimated_usd": 2.6549,
+    "model": "sonnet"
+  },
+  "exit_code": 2
+}

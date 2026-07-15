@@ -1,0 +1,47 @@
+{
+  "findings": [
+    {
+      "rule_id": "A002",
+      "file": "pgg-smc/reconstruct/ag_code.v",
+      "line_start": 144,
+      "line_end": 144,
+      "lemma_name": "ag_not_trivial",
+      "severity": "error",
+      "evidence_quote": "apply/negP => /eqP/(f_equal (fun m : 'rV_k => m 0 (Ordinal Hk))).",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/reconstruct/ag_code.v",
+      "line_start": 155,
+      "line_end": 155,
+      "lemma_name": "ag_min_dist_lb",
+      "severity": "warning",
+      "evidence_quote": "Lemma ag_min_dist_lb : n - (k + g - 1) <= min_dist ag_not_trivial.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/reconstruct/ag_code.v",
+      "line_start": 171,
+      "line_end": 171,
+      "lemma_name": "ag_min_dist_ge2",
+      "severity": "warning",
+      "evidence_quote": "Lemma ag_min_dist_ge2 : k + g < n -> 1 < min_dist ag_not_trivial.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": null,
+  "exit_code": 2
+}

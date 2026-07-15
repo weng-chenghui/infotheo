@@ -1,0 +1,403 @@
+{
+  "findings": [
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/protocol/card_exchange_pismc.v",
+      "line_start": 273,
+      "line_end": 273,
+      "lemma_name": "exchange_dealer_from_words",
+      "severity": "warning",
+      "evidence_quote": "Definition exchange_dealer_from_words (L : nat)",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/protocol/card_exchange_pismc.v",
+      "line_start": 344,
+      "line_end": 349,
+      "lemma_name": "test_starts_2_uniq",
+      "severity": "warning",
+      "evidence_quote": "Lemma test_starts_2_uniq : uniq test_starts_2.",
+      "stage": "stage1",
+      "stages": [
+        "stage1",
+        "stage2"
+      ],
+      "explanation": "Stage 1 already flagged test_starts_2_uniq at line 344. Stage 2 confirms closeness near: the name decomposes into four underscore-separated components (test / starts / 2 / uniq). The numeric component `2` is an instance-index, not a canonical MathComp suffix from AUTHORITY.md. MathComp grammar expects mainSymbol_suffixes(_condition)?; the `_uniq` tail is idiomatic (cf. sort_uniq, perm_uniq) but embedding the variant number as a bare component between the main symbol and the suffix deviates from the grammar. The main symbol should absorb the instance number so that the suffix is the final component.",
+      "fix_sketch": "Option A: Lemma test_starts2_uniq : uniq test_starts_2.  (* fuse the variant numeral into the main symbol, yielding mainSymbol_suffix pattern *)\nOption B: Lemma starts_2_uniq : uniq test_starts_2.  (* drop the generic `test_` prefix and keep starts_2 as the main symbol *)"
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/protocol/card_exchange_pismc.v",
+      "line_start": 391,
+      "line_end": 391,
+      "lemma_name": "dealer_player0_dual_2",
+      "severity": "warning",
+      "evidence_quote": "Lemma dealer_player0_dual_2 : channels_dual ap_dealer_2 ap_player0_2.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/protocol/card_exchange_pismc.v",
+      "line_start": 397,
+      "line_end": 397,
+      "lemma_name": "dealer_player1_dual_2",
+      "severity": "warning",
+      "evidence_quote": "Lemma dealer_player1_dual_2 : channels_dual ap_dealer_2 ap_player1_2.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/protocol/card_exchange_pismc.v",
+      "line_start": 403,
+      "line_end": 403,
+      "lemma_name": "dealer_verifier_dual_2",
+      "severity": "warning",
+      "evidence_quote": "Lemma dealer_verifier_dual_2 : channels_dual ap_dealer_2 ap_verifier_2.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/protocol/card_exchange_pismc.v",
+      "line_start": 409,
+      "line_end": 409,
+      "lemma_name": "player0_player1_dual_2",
+      "severity": "warning",
+      "evidence_quote": "Lemma player0_player1_dual_2 : channels_dual ap_player0_2 ap_player1_2.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/protocol/card_exchange_pismc.v",
+      "line_start": 415,
+      "line_end": 415,
+      "lemma_name": "player0_verifier_dual_2",
+      "severity": "warning",
+      "evidence_quote": "Lemma player0_verifier_dual_2 : channels_dual ap_player0_2 ap_verifier_2.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/protocol/card_exchange_pismc.v",
+      "line_start": 421,
+      "line_end": 421,
+      "lemma_name": "player1_verifier_dual_2",
+      "severity": "warning",
+      "evidence_quote": "Lemma player1_verifier_dual_2 : channels_dual ap_player1_2 ap_verifier_2.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/protocol/card_exchange_pismc.v",
+      "line_start": 472,
+      "line_end": 472,
+      "lemma_name": "dealer_player0_dual_gen",
+      "severity": "warning",
+      "evidence_quote": "Lemma dealer_player0_dual_gen : channels_dual ap_dealer_gen ap_player0_gen.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/protocol/card_exchange_pismc.v",
+      "line_start": 478,
+      "line_end": 478,
+      "lemma_name": "dealer_player1_dual_gen",
+      "severity": "warning",
+      "evidence_quote": "Lemma dealer_player1_dual_gen : channels_dual ap_dealer_gen ap_player1_gen.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/protocol/card_exchange_pismc.v",
+      "line_start": 484,
+      "line_end": 484,
+      "lemma_name": "dealer_verifier_dual_gen",
+      "severity": "warning",
+      "evidence_quote": "Lemma dealer_verifier_dual_gen : channels_dual ap_dealer_gen ap_verifier_gen.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/protocol/card_exchange_pismc.v",
+      "line_start": 490,
+      "line_end": 490,
+      "lemma_name": "player0_player1_dual_gen",
+      "severity": "warning",
+      "evidence_quote": "Lemma player0_player1_dual_gen : channels_dual ap_player0_gen ap_player1_gen.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/protocol/card_exchange_pismc.v",
+      "line_start": 496,
+      "line_end": 496,
+      "lemma_name": "player0_verifier_dual_gen",
+      "severity": "warning",
+      "evidence_quote": "Lemma player0_verifier_dual_gen : channels_dual ap_player0_gen ap_verifier_gen.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/protocol/card_exchange_pismc.v",
+      "line_start": 502,
+      "line_end": 502,
+      "lemma_name": "player1_verifier_dual_gen",
+      "severity": "warning",
+      "evidence_quote": "Lemma player1_verifier_dual_gen : channels_dual ap_player1_gen ap_verifier_gen.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/protocol/card_exchange_pismc.v",
+      "line_start": 522,
+      "line_end": 522,
+      "lemma_name": "dealer_player0_dual_mon",
+      "severity": "warning",
+      "evidence_quote": "Definition dealer_player0_dual_mon :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/protocol/card_exchange_pismc.v",
+      "line_start": 528,
+      "line_end": 528,
+      "lemma_name": "dealer_player1_dual_mon",
+      "severity": "warning",
+      "evidence_quote": "Definition dealer_player1_dual_mon :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/protocol/card_exchange_pismc.v",
+      "line_start": 534,
+      "line_end": 534,
+      "lemma_name": "dealer_verifier_dual_mon",
+      "severity": "warning",
+      "evidence_quote": "Definition dealer_verifier_dual_mon :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/protocol/card_exchange_pismc.v",
+      "line_start": 540,
+      "line_end": 540,
+      "lemma_name": "player0_player1_dual_mon",
+      "severity": "warning",
+      "evidence_quote": "Definition player0_player1_dual_mon :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/protocol/card_exchange_pismc.v",
+      "line_start": 546,
+      "line_end": 546,
+      "lemma_name": "player0_verifier_dual_mon",
+      "severity": "warning",
+      "evidence_quote": "Definition player0_verifier_dual_mon :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/protocol/card_exchange_pismc.v",
+      "line_start": 552,
+      "line_end": 552,
+      "lemma_name": "player1_verifier_dual_mon",
+      "severity": "warning",
+      "evidence_quote": "Definition player1_verifier_dual_mon :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/protocol/card_exchange_pismc.v",
+      "line_start": 273,
+      "line_end": 273,
+      "lemma_name": "exchange_dealer_from_words",
+      "severity": "warning",
+      "evidence_quote": "Definition exchange_dealer_from_words (L : nat)",
+      "closeness": "near",
+      "explanation": "The suffix '_from_words' is not in the canonical MathComp suffix table (AUTHORITY.md). The suffix '_w' conventionally marks a word-argument variant; '_from_words' reads as a prose description of the parameter source rather than a semantic-role token. Stage 1 (F001) already flagged the four-component structure; this G001 finding adds that the chosen suffix conflicts with the convention that suffixes encode theorem shape (e.g. _E equation, _I injectivity, _w word argument). The definition is an adapter from word-tuples to the permutation-level exchange_dealer, so the semantic role is 'word-argument variant', which maps closest to the _w suffix.",
+      "fix_sketch": "Option 1 (canonical suffix): rename to exchange_dealer_w and add 'Naming: _w marks the word-tuple parameter variant; see AUTHORITY.md.' in the preceding comment.\nOption 2 (keep descriptive name): add 'Naming: _from_words is intentional; it distinguishes the word-evaluation wrapper from the permutation-level exchange_dealer.' in the existing preceding comment block.\nOption 3: drop the suffix entirely and rely on the type signature (L.-tuple 'I_Tg vs seq gT) to distinguish the two definitions.",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/protocol/card_exchange_pismc.v",
+      "line_start": 210,
+      "line_end": 210,
+      "lemma_name": "exchange_dealer",
+      "severity": "warning",
+      "evidence_quote": "(* Dealer program for T players.\n   Phase 1 (ForList): deal hand(W, j) = [rho(w)(s_j) | w in W] to player j.\n   Phase 2 (ForList): announce selection index P_idx to all players.\n   The two ForList loops separate hand dealing (DT_Hand) from\n   index announcement (DT_Idx) to keep session types uniform per loop. *)",
+      "closeness": "near",
+      "explanation": "The preceding comment lacks (1) KIND classification — none of the required tokens (helper, main, canonical, notation, coercion, instance, example, interface) appears. WHAT is adequately described (phases 1 and 2). WHY is marginal: 'to keep session types uniform per loop' explains a structural choice but does not state why this definition exists in the protocol or who consumes it. Because KIND is absent, whether USED_BY is required cannot be determined.",
+      "fix_sketch": "(** exchange_dealer — deals hand W to each player j and announces selection index P_idx to all.\n    Kind: helper.\n    Why: implements the dealer role in the PGG card-exchange piSMC protocol;\n    the two-phase ForList structure keeps DT_Hand and DT_Idx session types uniform.\n    Used by: <top-level correctness or security lemma that assembles the three roles>. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/protocol/card_exchange_pismc.v",
+      "line_start": 227,
+      "line_end": 227,
+      "lemma_name": "exchange_player",
+      "severity": "warning",
+      "evidence_quote": "(* Player i: receive dealt hand and selection index from dealer.\n   Look up entry P_idx in hand to get card position rho(w_{P_idx})(s_i).\n   Reveal this single card position to the verifier.\n   nth ord0 is the default for out-of-bounds (never hit if P_idx < |W|). *)",
+      "closeness": "near",
+      "explanation": "The preceding comment lacks (1) KIND classification and (2) WHY — no motivation for why this definition is needed, nor any downstream consumer named. WHAT is present (receive/lookup/reveal behaviour is clearly described). Because KIND is undeclared, USED_BY requirement is ambiguous; if Kind is helper, a downstream consumer name is required.",
+      "fix_sketch": "(** exchange_player — player i receives its dealt hand and selection index from the dealer,\n    looks up card position rho(w_{P_idx})(s_i), and reveals it to the verifier.\n    Kind: helper.\n    Why: implements the player role in the PGG card-exchange piSMC protocol;\n    the nth-ord0 default is safe because P_idx < |W| is guaranteed at call sites.\n    Used by: <top-level protocol assembly lemma>. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/protocol/card_exchange_pismc.v",
+      "line_start": 237,
+      "line_end": 237,
+      "lemma_name": "exchange_verifier",
+      "severity": "warning",
+      "evidence_quote": "(* Verifier: observe card position from each player into the Init buffer.\n   After the loop, the buffer contains [rho(w)(s_0), ..., rho(w)(s_{T-1})].\n   Reconstruction (applying recon to these T values) happens outside piSMC. *)",
+      "closeness": "near",
+      "explanation": "The preceding comment lacks (1) KIND classification and (2) WHY — the comment describes buffer contents and notes that reconstruction is external, but does not state why this definition is needed or which higher-level proof depends on it. WHAT is adequately described.",
+      "fix_sketch": "(** exchange_verifier — verifier program that observes one card position per player into the Init buffer,\n    producing [rho(w)(s_0), ..., rho(w)(s_{T-1})] for the reconstruction step.\n    Kind: helper.\n    Why: implements the verifier role in the PGG card-exchange piSMC protocol;\n    the buffer layout it produces is the input contract for the reconstruction\n    lemma applied outside piSMC.\n    Used by: <reconstruction lemma or top-level correctness theorem>. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/protocol/card_exchange_pismc.v",
+      "line_start": 296,
+      "line_end": 298,
+      "lemma_name": "id_perm_morphM",
+      "severity": "warning",
+      "evidence_quote": "(* Identity morphism on permutation group *)",
+      "closeness": "near",
+      "explanation": "The preceding comment for id_perm_morphM fails three of the four H002 checklist parts. (1) KIND: no classification keyword (helper, main, instance, etc.) is present. (2) WHY: no motivation is stated; the suffix `morphM` is not in the algebraic-law waiver list (_A, _AC, _ACA, _C, _CA, _K, _D, _I, _V, _X, _Xn, _Xz, _Mn, _Z), so motivation is required. (3) USED_BY: the lemma is a helper consumed by id_perm_morph at line 305, but no Kind: helper declaration and no Used-by cite appear. Only WHAT is marginally covered by the phrase 'Identity morphism on permutation group', which loosely paraphrases the morphism-compatibility statement.",
+      "fix_sketch": "(** id_perm_morphM — the identity function is a group-homomorphism on the full permutation group: {in G &, {morph (@id gT) : x y / (x * y)%g}}.\n    Kind: helper.\n    Why: required by id_perm_morph to construct the Morphism record via the Morphism constructor.\n    Used by: id_perm_morph. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/protocol/card_exchange_pismc.v",
+      "line_start": 366,
+      "line_end": 370,
+      "lemma_name": "ap_dealer_2",
+      "severity": "warning",
+      "evidence_quote": "(* Wrap as aprocs for duality checking *)",
+      "closeness": "near",
+      "explanation": "The comment immediately preceding ap_dealer_2 is a generic section banner rather than a description of this entity. Failed parts: KIND (no classifier such as example/helper/main or equivalent synonym is present); WHAT (the text does not paraphrase ap_dealer_2's role as the dealer-side aproc wrapper; it describes the surrounding group of definitions generically as 'wrap as aprocs'). The three sibling definitions (ap_player0_2, ap_player1_2, ap_verifier_2) all carry dedicated `(** name — ... Kind: example. *)` blocks; ap_dealer_2 is the only one inheriting the section banner.",
+      "fix_sketch": "Insert a dedicated block in the established template immediately above line 366, e.g.:\n(** ap_dealer_2 — dealer program as an [aproc] for duality checking (T=2).\n    Kind: example.\n*)\nLeave the `(* Wrap as aprocs for duality checking *)` banner above the new block if the section-level grouping comment is still desired.",
+      "confidence": "high",
+      "stage": "stage2",
+      "escalated_model": "opus",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "S998",
+      "file": "rocq-audit",
+      "line_start": 1,
+      "line_end": 1,
+      "severity": "warning",
+      "evidence_quote": "result field not JSON: ```json\n{\n  \"passed\": true,\n  \"findings\": [\n    {\n      \"rule_id\": \"H002\",\n      \"file\": \"pgg-smc/protocol/card_exchange_pismc.v\",\n      \"line_start\": 403,\n      \"line_end\": 408,\n      \"lemma_name\": \"",
+      "closeness": "near",
+      "explanation": "Stage 2 call failed for chunk 5; see logs.",
+      "fix_sketch": "Retry the commit. If repeated, check agent configuration.",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": {
+    "entity_count": 126,
+    "chunk_count": 13,
+    "chunk_size": 10,
+    "workers_used": 4,
+    "tokens_used": 748653,
+    "tokens_cap": 20000000,
+    "wall_ms_used": 623463,
+    "wall_ms_cap": 1800000,
+    "deferred_chunks": 0,
+    "stop_reason": "clean",
+    "estimated_usd": 4.4919,
+    "model": "sonnet"
+  },
+  "exit_code": 0
+}

@@ -1,0 +1,357 @@
+{
+  "total": 1997,
+  "main": 38,
+  "sub": 1959,
+  "matched": 1997,
+  "unmatched": 0,
+  "succ": 1208,
+  "fail": 778,
+  "unknown": 11,
+  "by_tool": {
+    "rocq_compile_file": {
+      "n": 64,
+      "fail": 29,
+      "succ": 35
+    },
+    "rocq_start": {
+      "n": 315,
+      "succ": 177,
+      "fail": 137,
+      "unknown": 1
+    },
+    "rocq_check": {
+      "n": 1300,
+      "fail": 436,
+      "succ": 863,
+      "unknown": 1
+    },
+    "rocq_query": {
+      "n": 150,
+      "fail": 150
+    },
+    "rocq_compile": {
+      "n": 29,
+      "succ": 27,
+      "fail": 2
+    },
+    "rocq_toc": {
+      "n": 4,
+      "succ": 4
+    },
+    "rocq_step_multi": {
+      "n": 114,
+      "unknown": 9,
+      "succ": 102,
+      "fail": 3
+    },
+    "rocq_assumptions": {
+      "n": 21,
+      "fail": 21
+    },
+    "rocq_verify": {},
+    "rocq_notations": {}
+  },
+  "err_cat": {
+    "Syntax/parse": 122,
+    "Other": 163,
+    "Reference/theorem not found": 97,
+    "No node at point": 245,
+    "Proof-state (apply/unify/unfinished)": 49,
+    "Restart-through-Load": 5,
+    "Timeout": 53,
+    "Focus discipline": 43,
+    "Notation ambiguity": 1
+  },
+  "defect_cat": {
+    "operator-usage": 166,
+    "ambiguous": 260,
+    "tool-defect": 245,
+    "legitimate-proof-state": 49,
+    "tool-defect/edge": 5,
+    "tool-defect/infra": 53
+  },
+  "timeouts": {
+    "rocq_start": 38,
+    "rocq_query": 5,
+    "rocq_assumptions": 2,
+    "rocq_check": 7,
+    "rocq_step_multi": 1
+  },
+  "force_restart": 80,
+  "daily": {
+    "2026-05-13": [
+      490,
+      352
+    ],
+    "2026-05-14": [
+      474,
+      275
+    ],
+    "2026-05-15": [
+      135,
+      92
+    ],
+    "2026-05-19": [
+      19,
+      14
+    ],
+    "2026-05-22": [
+      15,
+      0
+    ],
+    "2026-05-23": [
+      13,
+      13
+    ],
+    "2026-05-24": [
+      11,
+      5
+    ],
+    "2026-05-25": [
+      11,
+      0
+    ],
+    "2026-05-28": [
+      38,
+      24
+    ],
+    "2026-06-01": [
+      2,
+      3
+    ]
+  },
+  "lat_median": {
+    "rocq_compile_file": 5.54,
+    "rocq_start": 0.28,
+    "rocq_check": 0.024,
+    "rocq_query": 0.144,
+    "rocq_compile": 5.239,
+    "rocq_toc": 0.157,
+    "rocq_step_multi": 0.05,
+    "rocq_assumptions": 0.135
+  },
+  "lat_p90": {
+    "rocq_compile_file": 6.939,
+    "rocq_start": 30.1,
+    "rocq_check": 0.066,
+    "rocq_query": 5.045,
+    "rocq_compile": 6.105,
+    "rocq_toc": 0.481,
+    "rocq_step_multi": 0.272,
+    "rocq_assumptions": 6.684
+  },
+  "top_sessions": [
+    [
+      "sprightly-finding-robin",
+      [
+        1500,
+        905
+      ]
+    ],
+    [
+      "read-plan-claude-plans-sprightly-finding-vast-coral",
+      [
+        324,
+        193
+      ]
+    ],
+    [
+      "transient-juggling-flurry",
+      [
+        130,
+        88
+      ]
+    ],
+    [
+      "so-according-to-what-fluttering-goose",
+      [
+        33,
+        19
+      ]
+    ],
+    [
+      "(no slug)",
+      [
+        5,
+        1
+      ]
+    ],
+    [
+      "focus-on-the-rstep-squishy-alpaca",
+      [
+        5,
+        2
+      ]
+    ]
+  ],
+  "by_agent_type": [
+    [
+      "rocq-prover",
+      [
+        1880,
+        1127
+      ]
+    ],
+    [
+      "rocq:proof-golfer",
+      [
+        79,
+        61
+      ]
+    ],
+    [
+      "(main thread, direct)",
+      [
+        38,
+        20
+      ]
+    ]
+  ],
+  "recovery": {
+    "different input, same tool": 193,
+    "switched tool": 106,
+    "retry from_state": 416,
+    "force_restart": 49,
+    "abandoned (no further rocq call)": 14
+  },
+  "stuck_top": [
+    [
+      "read-plan-claude-plans-sprightly-finding-vast-coral",
+      10
+    ],
+    [
+      "sprightly-finding-robin",
+      8
+    ],
+    [
+      "sprightly-finding-robin",
+      6
+    ],
+    [
+      "sprightly-finding-robin",
+      6
+    ],
+    [
+      "sprightly-finding-robin",
+      6
+    ],
+    [
+      "sprightly-finding-robin",
+      6
+    ],
+    [
+      "sprightly-finding-robin",
+      6
+    ],
+    [
+      "read-plan-claude-plans-sprightly-finding-vast-coral",
+      6
+    ],
+    [
+      "transient-juggling-flurry",
+      6
+    ],
+    [
+      "transient-juggling-flurry",
+      6
+    ],
+    [
+      "sprightly-finding-robin",
+      5
+    ],
+    [
+      "sprightly-finding-robin",
+      5
+    ],
+    [
+      "sprightly-finding-robin",
+      5
+    ],
+    [
+      "sprightly-finding-robin",
+      5
+    ],
+    [
+      "sprightly-finding-robin",
+      5
+    ]
+  ],
+  "step_multi": {
+    "call_n": 114,
+    "call_succ": 102,
+    "tac_n": 389,
+    "tac_succ": 160
+  },
+  "tool_cat": {
+    "rocq_compile_file": {
+      "Syntax/parse": 13,
+      "Other": 13,
+      "Proof-state (apply/unify/unfinished)": 2,
+      "Reference/theorem not found": 1
+    },
+    "rocq_check": {
+      "Other": 146,
+      "Reference/theorem not found": 78,
+      "Syntax/parse": 109,
+      "Proof-state (apply/unify/unfinished)": 47,
+      "Restart-through-Load": 5,
+      "Focus discipline": 43,
+      "Timeout": 7,
+      "Notation ambiguity": 1
+    },
+    "rocq_query": {
+      "No node at point": 145,
+      "Timeout": 5
+    },
+    "rocq_start": {
+      "No node at point": 81,
+      "Reference/theorem not found": 18,
+      "Timeout": 38
+    },
+    "rocq_assumptions": {
+      "No node at point": 19,
+      "Timeout": 2
+    },
+    "rocq_step_multi": {
+      "Timeout": 1,
+      "Other": 2
+    },
+    "rocq_compile": {
+      "Other": 2
+    }
+  },
+  "tool_defect": {
+    "rocq_compile_file": {
+      "operator-usage": 13,
+      "ambiguous": 14,
+      "legitimate-proof-state": 2
+    },
+    "rocq_check": {
+      "ambiguous": 224,
+      "operator-usage": 153,
+      "legitimate-proof-state": 47,
+      "tool-defect/edge": 5,
+      "tool-defect/infra": 7
+    },
+    "rocq_query": {
+      "tool-defect": 145,
+      "tool-defect/infra": 5
+    },
+    "rocq_start": {
+      "tool-defect": 81,
+      "ambiguous": 18,
+      "tool-defect/infra": 38
+    },
+    "rocq_assumptions": {
+      "tool-defect": 19,
+      "tool-defect/infra": 2
+    },
+    "rocq_step_multi": {
+      "tool-defect/infra": 1,
+      "ambiguous": 2
+    },
+    "rocq_compile": {
+      "ambiguous": 2
+    }
+  }
+}

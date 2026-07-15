@@ -1,0 +1,37 @@
+id: E001
+category: overlong_proofs
+title: "Proof continues past the line where the goal is already closed"
+severity: warning
+enabled: true
+stage_mode: stage2_only
+authority:
+  - peer-feedback-2026-03
+agent_prompt: |
+  Read the proof body. Identify candidate terminator lines: any line that
+  ends with `by`, `done`, `exact`, `exact:`, or an apply sequence that the
+  context suggests would close the goal (`apply: <lemma>` whose conclusion
+  matches the goal shape).
+
+  When such a candidate exists mid-body followed by further tactic lines,
+  flag the span from the candidate's next line through the final `Qed.`
+  or `Defined.` as potentially redundant.
+
+  Attach `kernel_contract: goal_closed_at_line` with parameter
+  `{ "line": <absolute line of the candidate terminator> }`. Tier K will
+  open a rocq-mcp session at that line, run `Show.`, and verify no goals
+  remain. A refuted finding is dropped.
+
+  Do NOT flag:
+  - Proofs that legitimately decompose into multiple subgoals closed by
+    successive `by`s; the closer you flagged is for one subgoal, not the
+    whole proof.
+  - Proofs inside a `Proof using ...` scope where the trailing tactics are
+    annotations, not subgoal resolution.
+
+  Evidence must quote the candidate terminator line and the trailing
+  tactics.
+scope: changed_lemmas
+kernel_contract:
+  name: goal_closed_at_line
+fix_hint: "If Tier K confirms the goal closed at the candidate line, delete the trailing tactics and replace with `Qed.` or `by <candidate>.`. If multiple subgoals are involved, split into bullets so the structure is explicit."
+exceptions: []

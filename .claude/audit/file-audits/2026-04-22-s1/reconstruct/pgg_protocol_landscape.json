@@ -1,0 +1,322 @@
+{
+  "findings": [
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/reconstruct/pgg_protocol_landscape.v",
+      "line_start": 169,
+      "line_end": 169,
+      "lemma_name": "genus0_requires_small_group",
+      "severity": "warning",
+      "evidence_quote": "Lemma genus0_requires_small_group (cs : CoveringScheme M)",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/reconstruct/pgg_protocol_landscape.v",
+      "line_start": 175,
+      "line_end": 175,
+      "lemma_name": "large_group_minimum_gap",
+      "severity": "warning",
+      "evidence_quote": "Corollary large_group_minimum_gap (cs : CoveringScheme M)",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/reconstruct/pgg_protocol_landscape.v",
+      "line_start": 215,
+      "line_end": 215,
+      "lemma_name": "group_forces_minimum_genus",
+      "severity": "warning",
+      "evidence_quote": "Lemma group_forces_minimum_genus (cs : CoveringScheme M) (g : nat) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/reconstruct/pgg_protocol_landscape.v",
+      "line_start": 296,
+      "line_end": 296,
+      "lemma_name": "ar_security_per_position",
+      "severity": "warning",
+      "evidence_quote": "Lemma ar_security_per_position (s : 'I_N) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/reconstruct/pgg_protocol_landscape.v",
+      "line_start": 323,
+      "line_end": 323,
+      "lemma_name": "ar_large_group_forces_genus",
+      "severity": "warning",
+      "evidence_quote": "Lemma ar_large_group_forces_genus :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/reconstruct/pgg_protocol_landscape.v",
+      "line_start": 448,
+      "line_end": 448,
+      "lemma_name": "ar_var_dist_from_entropy",
+      "severity": "warning",
+      "evidence_quote": "Lemma ar_var_dist_from_entropy (s : 'I_N) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/pgg_protocol_landscape.v",
+      "line_start": 119,
+      "line_end": 119,
+      "lemma_name": "security_per_position",
+      "severity": "error",
+      "evidence_quote": "Lemma security_per_position (sw : SecurityWitness R M) (s : 'I_N) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/pgg_protocol_landscape.v",
+      "line_start": 124,
+      "line_end": 124,
+      "lemma_name": "complexity_from_group",
+      "severity": "error",
+      "evidence_quote": "Lemma complexity_from_group (L : nat) : (@search_space M L <= #|G|)%N.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/pgg_protocol_landscape.v",
+      "line_start": 139,
+      "line_end": 139,
+      "lemma_name": "genus0_option",
+      "severity": "error",
+      "evidence_quote": "Theorem genus0_option (cs : CoveringScheme M) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/pgg_protocol_landscape.v",
+      "line_start": 144,
+      "line_end": 144,
+      "lemma_name": "genus1_universal_option",
+      "severity": "error",
+      "evidence_quote": "Theorem genus1_universal_option (cs : CoveringScheme M) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/pgg_protocol_landscape.v",
+      "line_start": 153,
+      "line_end": 153,
+      "lemma_name": "gap_from_genus",
+      "severity": "error",
+      "evidence_quote": "Theorem gap_from_genus (cs : CoveringScheme M) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/pgg_protocol_landscape.v",
+      "line_start": 169,
+      "line_end": 169,
+      "lemma_name": "genus0_requires_small_group",
+      "severity": "error",
+      "evidence_quote": "Lemma genus0_requires_small_group (cs : CoveringScheme M)",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/pgg_protocol_landscape.v",
+      "line_start": 175,
+      "line_end": 175,
+      "lemma_name": "large_group_minimum_gap",
+      "severity": "error",
+      "evidence_quote": "Corollary large_group_minimum_gap (cs : CoveringScheme M)",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/pgg_protocol_landscape.v",
+      "line_start": 185,
+      "line_end": 185,
+      "lemma_name": "landscape_tradeoff",
+      "severity": "error",
+      "evidence_quote": "Theorem landscape_tradeoff (cs : CoveringScheme M)",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/pgg_protocol_landscape.v",
+      "line_start": 215,
+      "line_end": 215,
+      "lemma_name": "group_forces_minimum_genus",
+      "severity": "error",
+      "evidence_quote": "Lemma group_forces_minimum_genus (cs : CoveringScheme M) (g : nat) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/pgg_protocol_landscape.v",
+      "line_start": 229,
+      "line_end": 229,
+      "lemma_name": "higher_genus_landscape",
+      "severity": "error",
+      "evidence_quote": "Theorem higher_genus_landscape (cs : CoveringScheme M) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/pgg_protocol_landscape.v",
+      "line_start": 254,
+      "line_end": 254,
+      "lemma_name": "protocol_correct_unbundled",
+      "severity": "error",
+      "evidence_quote": "Lemma protocol_correct_unbundled",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/pgg_protocol_landscape.v",
+      "line_start": 296,
+      "line_end": 296,
+      "lemma_name": "ar_security_per_position",
+      "severity": "error",
+      "evidence_quote": "Lemma ar_security_per_position (s : 'I_N) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/pgg_protocol_landscape.v",
+      "line_start": 303,
+      "line_end": 303,
+      "lemma_name": "ar_genus0_exact",
+      "severity": "error",
+      "evidence_quote": "Lemma ar_genus0_exact :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/pgg_protocol_landscape.v",
+      "line_start": 308,
+      "line_end": 308,
+      "lemma_name": "ar_genus1_gap2",
+      "severity": "error",
+      "evidence_quote": "Lemma ar_genus1_gap2 :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/pgg_protocol_landscape.v",
+      "line_start": 316,
+      "line_end": 316,
+      "lemma_name": "ar_hurwitz",
+      "severity": "error",
+      "evidence_quote": "Lemma ar_hurwitz :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/pgg_protocol_landscape.v",
+      "line_start": 323,
+      "line_end": 323,
+      "lemma_name": "ar_large_group_forces_genus",
+      "severity": "error",
+      "evidence_quote": "Lemma ar_large_group_forces_genus :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "I001",
+      "file": "pgg-smc/reconstruct/pgg_protocol_landscape.v",
+      "line_start": 323,
+      "line_end": 323,
+      "lemma_name": "ar_large_group_forces_genus",
+      "severity": "error",
+      "evidence_quote": "Lemma ar_large_group_forces_genus :",
+      "stage": "stage1",
+      "reason": "five or more underscore-separated components without a canonical MathComp suffix",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "I001",
+      "file": "pgg-smc/reconstruct/pgg_protocol_landscape.v",
+      "line_start": 448,
+      "line_end": 448,
+      "lemma_name": "ar_var_dist_from_entropy",
+      "severity": "error",
+      "evidence_quote": "Lemma ar_var_dist_from_entropy (s : 'I_N) :",
+      "stage": "stage1",
+      "reason": "five or more underscore-separated components without a canonical MathComp suffix",
+      "stages": [
+        "stage1"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": null,
+  "exit_code": 2
+}

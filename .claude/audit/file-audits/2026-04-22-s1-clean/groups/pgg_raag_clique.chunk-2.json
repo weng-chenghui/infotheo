@@ -1,0 +1,86 @@
+{
+  "findings": [
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 517,
+      "line_end": 517,
+      "lemma_name": "all_pairs_false_neq",
+      "severity": "warning",
+      "evidence_quote": "Lemma all_pairs_false_neq (s : seq nat) (a b : nat) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 596,
+      "line_end": 596,
+      "lemma_name": "clique_traces_aux_inv",
+      "severity": "warning",
+      "evidence_quote": "Lemma clique_traces_aux_inv Tg n memo :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 711,
+      "line_end": 711,
+      "lemma_name": "filter_iota_head_even",
+      "severity": "warning",
+      "evidence_quote": "Lemma filter_iota_head_even L :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 720,
+      "line_end": 720,
+      "lemma_name": "filter_iota_head_odd",
+      "severity": "warning",
+      "evidence_quote": "Lemma filter_iota_head_odd L :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 830,
+      "line_end": 830,
+      "lemma_name": "sumn_shift_even_to_odd_gen",
+      "severity": "warning",
+      "evidence_quote": "Lemma sumn_shift_even_to_odd_gen (g : nat -> nat) m M :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 848,
+      "line_end": 848,
+      "lemma_name": "sumn_shift_odd_to_even_gen",
+      "severity": "warning",
+      "evidence_quote": "Lemma sumn_shift_odd_to_even_gen (g : nat -> nat) m M :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": null,
+  "exit_code": 0
+}

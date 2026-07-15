@@ -1,0 +1,86 @@
+{
+  "findings": [
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/protocol/pgg_interface.v",
+      "line_start": 203,
+      "line_end": 203,
+      "lemma_name": "search_space_le_words",
+      "severity": "warning",
+      "evidence_quote": "Lemma search_space_le_words (L : nat) : search_space L <= Tg ^ L.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/protocol/pgg_interface.v",
+      "line_start": 215,
+      "line_end": 215,
+      "lemma_name": "weval_inj_search_space",
+      "severity": "warning",
+      "evidence_quote": "Lemma weval_inj_search_space (L : nat) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/protocol/pgg_interface.v",
+      "line_start": 254,
+      "line_end": 254,
+      "lemma_name": "gen_inj_weval_inj1",
+      "severity": "warning",
+      "evidence_quote": "Lemma gen_inj_weval_inj1 :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/protocol/pgg_interface.v",
+      "line_start": 273,
+      "line_end": 273,
+      "lemma_name": "gen_inj_weval_inj1_search_space",
+      "severity": "warning",
+      "evidence_quote": "Lemma gen_inj_weval_inj1_search_space :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/protocol/pgg_interface.v",
+      "line_start": 477,
+      "line_end": 477,
+      "lemma_name": "compute_in_dealt_hand",
+      "severity": "warning",
+      "evidence_quote": "Lemma compute_in_dealt_hand (W : seq gT) (P : gT) (i : 'I_T) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/protocol/pgg_interface.v",
+      "line_start": 573,
+      "line_end": 573,
+      "lemma_name": "gen_starts_2_uniq",
+      "severity": "warning",
+      "evidence_quote": "Lemma gen_starts_2_uniq : uniq gen_starts_2.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": null,
+  "exit_code": 0
+}

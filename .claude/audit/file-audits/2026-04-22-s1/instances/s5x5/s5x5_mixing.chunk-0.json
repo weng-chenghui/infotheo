@@ -1,0 +1,494 @@
+{
+  "findings": [
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/s5x5/s5x5_mixing.v",
+      "line_start": 58,
+      "line_end": 58,
+      "lemma_name": "s5_lazy_gen_invol",
+      "severity": "warning",
+      "evidence_quote": "Lemma s5_lazy_gen_invol :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/s5x5/s5x5_mixing.v",
+      "line_start": 101,
+      "line_end": 101,
+      "lemma_name": "s5_lazy_tnth_0",
+      "severity": "warning",
+      "evidence_quote": "Lemma s5_lazy_tnth_0 : tnth s5_lazy_gen_tuple (Ordinal (n:=8) (m:=0) erefl) = tperm o0 o1.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/s5x5/s5x5_mixing.v",
+      "line_start": 103,
+      "line_end": 103,
+      "lemma_name": "s5_lazy_tnth_1",
+      "severity": "warning",
+      "evidence_quote": "Lemma s5_lazy_tnth_1 : tnth s5_lazy_gen_tuple (Ordinal (n:=8) (m:=1) erefl) = tperm o1 o2.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/s5x5/s5x5_mixing.v",
+      "line_start": 105,
+      "line_end": 105,
+      "lemma_name": "s5_lazy_tnth_2",
+      "severity": "warning",
+      "evidence_quote": "Lemma s5_lazy_tnth_2 : tnth s5_lazy_gen_tuple (Ordinal (n:=8) (m:=2) erefl) = tperm o2 o3.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/s5x5/s5x5_mixing.v",
+      "line_start": 107,
+      "line_end": 107,
+      "lemma_name": "s5_lazy_tnth_3",
+      "severity": "warning",
+      "evidence_quote": "Lemma s5_lazy_tnth_3 : tnth s5_lazy_gen_tuple (Ordinal (n:=8) (m:=3) erefl) = tperm o3 o4.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/s5x5/s5x5_mixing.v",
+      "line_start": 109,
+      "line_end": 109,
+      "lemma_name": "s5_lazy_tnth_4",
+      "severity": "warning",
+      "evidence_quote": "Lemma s5_lazy_tnth_4 : tnth s5_lazy_gen_tuple (Ordinal (n:=8) (m:=4) erefl) = 1%g.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/s5x5/s5x5_mixing.v",
+      "line_start": 111,
+      "line_end": 111,
+      "lemma_name": "s5_lazy_tnth_5",
+      "severity": "warning",
+      "evidence_quote": "Lemma s5_lazy_tnth_5 : tnth s5_lazy_gen_tuple (Ordinal (n:=8) (m:=5) erefl) = 1%g.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/s5x5/s5x5_mixing.v",
+      "line_start": 113,
+      "line_end": 113,
+      "lemma_name": "s5_lazy_tnth_6",
+      "severity": "warning",
+      "evidence_quote": "Lemma s5_lazy_tnth_6 : tnth s5_lazy_gen_tuple (Ordinal (n:=8) (m:=6) erefl) = 1%g.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/s5x5/s5x5_mixing.v",
+      "line_start": 115,
+      "line_end": 115,
+      "lemma_name": "s5_lazy_tnth_7",
+      "severity": "warning",
+      "evidence_quote": "Lemma s5_lazy_tnth_7 : tnth s5_lazy_gen_tuple (Ordinal (n:=8) (m:=7) erefl) = 1%g.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/s5x5/s5x5_mixing.v",
+      "line_start": 119,
+      "line_end": 119,
+      "lemma_name": "path_gen_3_tnth_0",
+      "severity": "warning",
+      "evidence_quote": "Lemma path_gen_3_tnth_0 :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/s5x5/s5x5_mixing.v",
+      "line_start": 125,
+      "line_end": 125,
+      "lemma_name": "path_gen_3_tnth_1",
+      "severity": "warning",
+      "evidence_quote": "Lemma path_gen_3_tnth_1 :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/s5x5/s5x5_mixing.v",
+      "line_start": 131,
+      "line_end": 131,
+      "lemma_name": "path_gen_3_tnth_2",
+      "severity": "warning",
+      "evidence_quote": "Lemma path_gen_3_tnth_2 :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/s5x5/s5x5_mixing.v",
+      "line_start": 137,
+      "line_end": 137,
+      "lemma_name": "path_gen_3_tnth_3",
+      "severity": "warning",
+      "evidence_quote": "Lemma path_gen_3_tnth_3 :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/s5x5/s5x5_mixing.v",
+      "line_start": 146,
+      "line_end": 146,
+      "lemma_name": "schreier_gen_count_eq_sum",
+      "severity": "warning",
+      "evidence_quote": "Lemma schreier_gen_count_eq_sum (m n' : nat) (sigmas : (m.+1).-tuple {perm 'I_n'.+2})",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/s5x5/s5x5_mixing.v",
+      "line_start": 186,
+      "line_end": 186,
+      "lemma_name": "s5_lazy_count_eq",
+      "severity": "warning",
+      "evidence_quote": "Lemma s5_lazy_count_eq (i j : 'I_5) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/s5x5/s5x5_mixing.v",
+      "line_start": 247,
+      "line_end": 247,
+      "lemma_name": "var_dist_le_2",
+      "severity": "warning",
+      "evidence_quote": "Lemma var_dist_le_2 (A : finType) (P Q : R.-fdist A) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/s5x5/s5x5_mixing.v",
+      "line_start": 261,
+      "line_end": 261,
+      "lemma_name": "var_dist_fdistmap_inj",
+      "severity": "warning",
+      "evidence_quote": "Lemma var_dist_fdistmap_inj (A B : finType) (f : A -> B) (P Q : R.-fdist A) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/s5x5/s5x5_mixing.v",
+      "line_start": 58,
+      "line_end": 58,
+      "lemma_name": "s5_lazy_gen_invol",
+      "severity": "error",
+      "evidence_quote": "Lemma s5_lazy_gen_invol :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/s5x5/s5x5_mixing.v",
+      "line_start": 103,
+      "line_end": 103,
+      "lemma_name": "s5_lazy_tnth_1",
+      "severity": "error",
+      "evidence_quote": "Lemma s5_lazy_tnth_1 : tnth s5_lazy_gen_tuple (Ordinal (n:=8) (m:=1) erefl) = tperm o1 o2.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/s5x5/s5x5_mixing.v",
+      "line_start": 105,
+      "line_end": 105,
+      "lemma_name": "s5_lazy_tnth_2",
+      "severity": "error",
+      "evidence_quote": "Lemma s5_lazy_tnth_2 : tnth s5_lazy_gen_tuple (Ordinal (n:=8) (m:=2) erefl) = tperm o2 o3.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/s5x5/s5x5_mixing.v",
+      "line_start": 107,
+      "line_end": 107,
+      "lemma_name": "s5_lazy_tnth_3",
+      "severity": "error",
+      "evidence_quote": "Lemma s5_lazy_tnth_3 : tnth s5_lazy_gen_tuple (Ordinal (n:=8) (m:=3) erefl) = tperm o3 o4.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/s5x5/s5x5_mixing.v",
+      "line_start": 109,
+      "line_end": 109,
+      "lemma_name": "s5_lazy_tnth_4",
+      "severity": "error",
+      "evidence_quote": "Lemma s5_lazy_tnth_4 : tnth s5_lazy_gen_tuple (Ordinal (n:=8) (m:=4) erefl) = 1%g.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/s5x5/s5x5_mixing.v",
+      "line_start": 111,
+      "line_end": 111,
+      "lemma_name": "s5_lazy_tnth_5",
+      "severity": "error",
+      "evidence_quote": "Lemma s5_lazy_tnth_5 : tnth s5_lazy_gen_tuple (Ordinal (n:=8) (m:=5) erefl) = 1%g.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/s5x5/s5x5_mixing.v",
+      "line_start": 113,
+      "line_end": 113,
+      "lemma_name": "s5_lazy_tnth_6",
+      "severity": "error",
+      "evidence_quote": "Lemma s5_lazy_tnth_6 : tnth s5_lazy_gen_tuple (Ordinal (n:=8) (m:=6) erefl) = 1%g.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/s5x5/s5x5_mixing.v",
+      "line_start": 115,
+      "line_end": 115,
+      "lemma_name": "s5_lazy_tnth_7",
+      "severity": "error",
+      "evidence_quote": "Lemma s5_lazy_tnth_7 : tnth s5_lazy_gen_tuple (Ordinal (n:=8) (m:=7) erefl) = 1%g.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/s5x5/s5x5_mixing.v",
+      "line_start": 125,
+      "line_end": 125,
+      "lemma_name": "path_gen_3_tnth_1",
+      "severity": "error",
+      "evidence_quote": "Lemma path_gen_3_tnth_1 :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/s5x5/s5x5_mixing.v",
+      "line_start": 131,
+      "line_end": 131,
+      "lemma_name": "path_gen_3_tnth_2",
+      "severity": "error",
+      "evidence_quote": "Lemma path_gen_3_tnth_2 :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/s5x5/s5x5_mixing.v",
+      "line_start": 137,
+      "line_end": 137,
+      "lemma_name": "path_gen_3_tnth_3",
+      "severity": "error",
+      "evidence_quote": "Lemma path_gen_3_tnth_3 :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/s5x5/s5x5_mixing.v",
+      "line_start": 231,
+      "line_end": 231,
+      "lemma_name": "s5_lazy_alpha_R_ge0",
+      "severity": "error",
+      "evidence_quote": "Lemma s5_lazy_alpha_R_ge0 : 0 <= s5_lazy_alpha_R.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/s5x5/s5x5_mixing.v",
+      "line_start": 238,
+      "line_end": 238,
+      "lemma_name": "s5_lazy_alpha_R_le1",
+      "severity": "error",
+      "evidence_quote": "Lemma s5_lazy_alpha_R_le1 : s5_lazy_alpha_R <= 1.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/s5x5/s5x5_mixing.v",
+      "line_start": 306,
+      "line_end": 306,
+      "lemma_name": "Q_lazy_mul_v",
+      "severity": "error",
+      "evidence_quote": "Lemma Q_lazy_mul_v (v : 'cV[R]_5) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/s5x5/s5x5_mixing.v",
+      "line_start": 314,
+      "line_end": 314,
+      "lemma_name": "Q_lazy_symm",
+      "severity": "error",
+      "evidence_quote": "Lemma Q_lazy_symm : Q_lazy^T = Q_lazy.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "I001",
+      "file": "pgg-smc/instances/s5x5/s5x5_mixing.v",
+      "line_start": 119,
+      "line_end": 119,
+      "lemma_name": "path_gen_3_tnth_0",
+      "severity": "error",
+      "evidence_quote": "Lemma path_gen_3_tnth_0 :",
+      "stage": "stage1",
+      "reason": "five or more underscore-separated components without a canonical MathComp suffix",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "I001",
+      "file": "pgg-smc/instances/s5x5/s5x5_mixing.v",
+      "line_start": 125,
+      "line_end": 125,
+      "lemma_name": "path_gen_3_tnth_1",
+      "severity": "error",
+      "evidence_quote": "Lemma path_gen_3_tnth_1 :",
+      "stage": "stage1",
+      "reason": "five or more underscore-separated components without a canonical MathComp suffix",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "I001",
+      "file": "pgg-smc/instances/s5x5/s5x5_mixing.v",
+      "line_start": 131,
+      "line_end": 131,
+      "lemma_name": "path_gen_3_tnth_2",
+      "severity": "error",
+      "evidence_quote": "Lemma path_gen_3_tnth_2 :",
+      "stage": "stage1",
+      "reason": "five or more underscore-separated components without a canonical MathComp suffix",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "I001",
+      "file": "pgg-smc/instances/s5x5/s5x5_mixing.v",
+      "line_start": 137,
+      "line_end": 137,
+      "lemma_name": "path_gen_3_tnth_3",
+      "severity": "error",
+      "evidence_quote": "Lemma path_gen_3_tnth_3 :",
+      "stage": "stage1",
+      "reason": "five or more underscore-separated components without a canonical MathComp suffix",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "I001",
+      "file": "pgg-smc/instances/s5x5/s5x5_mixing.v",
+      "line_start": 146,
+      "line_end": 146,
+      "lemma_name": "schreier_gen_count_eq_sum",
+      "severity": "error",
+      "evidence_quote": "Lemma schreier_gen_count_eq_sum (m n' : nat) (sigmas : (m.+1).-tuple {perm 'I_n'.+2})",
+      "stage": "stage1",
+      "reason": "five or more underscore-separated components without a canonical MathComp suffix",
+      "stages": [
+        "stage1"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": null,
+  "exit_code": 2
+}

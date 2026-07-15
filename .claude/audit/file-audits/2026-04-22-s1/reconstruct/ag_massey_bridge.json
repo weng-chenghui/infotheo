@@ -1,0 +1,60 @@
+{
+  "findings": [
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/ag_massey_bridge.v",
+      "line_start": 62,
+      "line_end": 62,
+      "lemma_name": "ag_massey",
+      "severity": "error",
+      "evidence_quote": "Definition ag_massey : ThresholdScheme F F :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/ag_massey_bridge.v",
+      "line_start": 73,
+      "line_end": 73,
+      "lemma_name": "ag_massey_gap",
+      "severity": "error",
+      "evidence_quote": "Lemma ag_massey_gap : ts_T ag_massey <= ts_k ag_massey + 2 * g.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/ag_massey_bridge.v",
+      "line_start": 94,
+      "line_end": 94,
+      "lemma_name": "ag_genus_scheme",
+      "severity": "error",
+      "evidence_quote": "Definition ag_genus_scheme : ThresholdScheme 'I_N 'I_N :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/ag_massey_bridge.v",
+      "line_start": 97,
+      "line_end": 97,
+      "lemma_name": "ag_genus_gap",
+      "severity": "error",
+      "evidence_quote": "Lemma ag_genus_gap :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": null,
+  "exit_code": 2
+}

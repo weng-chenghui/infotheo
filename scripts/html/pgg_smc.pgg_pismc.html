@@ -1,0 +1,567 @@
+
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Module pgg_pismc</title>
+<meta name="description" content="Documentation of Coq module Infotheo Documentation" />
+<link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/markdown-it/dist/markdown-it.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/markdown-it-texmath/texmath.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/darkmode-js@1.5.7/lib/darkmode-js.min.js"></script>
+<link href="rocqnavi.css" rel="stylesheet" type="text/css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script type="text/javascript" src="rocqnavi.js"> </script>
+</head>
+
+<body onload="init()">
+
+  <main>
+    <div class="sidebar">
+      <h2>Files</h2>
+      <li><details id="infotheo"><summary>infotheo</summary>
+          <ul>
+          <li><details id="infotheo.du2002"><summary>du2002</summary>
+          <ul>
+          <li><a href="infotheo.du2002.spp_entropy.html">spp_entropy</a></li>
+<li><a href="infotheo.du2002.spp_interface.html">spp_interface</a></li>
+<li><a href="infotheo.du2002.spp_pismc.html">spp_pismc</a></li>
+<li><a href="infotheo.du2002.spp_proba.html">spp_proba</a></li>
+<li><a href="infotheo.du2002.spp_program.html">spp_program</a></li>
+<li><a href="infotheo.du2002.spp_proof.html">spp_proof</a></li>
+<li><a href="infotheo.du2002.spp_session_types.html">spp_session_types</a></li>
+<li><a href="infotheo.du2002.spp_tactics.html">spp_tactics</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.dumas2017dual"><summary>dumas2017dual</summary>
+          <ul>
+          <li><details id="infotheo.dumas2017dual.dsdp"><summary>dsdp</summary>
+          <ul>
+          <li><a href="infotheo.dumas2017dual.dsdp.dsdp_correctness.html">dsdp_correctness</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_entropy.html">dsdp_entropy</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_entropy_trace.html">dsdp_entropy_trace</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_interface.html">dsdp_interface</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_pismc.html">dsdp_pismc</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_program.html">dsdp_program</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_security.html">dsdp_security</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_session_types.html">dsdp_session_types</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_syntax_demo.html">dsdp_syntax_demo</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.dumas2017dual.entropy_fiber"><summary>entropy_fiber</summary>
+          <ul>
+          <li><a href="infotheo.dumas2017dual.entropy_fiber.entropy_fiber.html">entropy_fiber</a></li>
+<li><a href="infotheo.dumas2017dual.entropy_fiber.entropy_fiber_zpq.html">entropy_fiber_zpq</a></li>
+<li><a href="infotheo.dumas2017dual.entropy_fiber.linear_fiber_zpq.html">linear_fiber_zpq</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.dumas2017dual.lib"><summary>lib</summary>
+          <ul>
+          <li><a href="infotheo.dumas2017dual.lib.extra_algebra.html">extra_algebra</a></li>
+<li><a href="infotheo.dumas2017dual.lib.extra_entropy.html">extra_entropy</a></li>
+<li><a href="infotheo.dumas2017dual.lib.extra_proba.html">extra_proba</a></li>
+<li><a href="infotheo.dumas2017dual.lib.rouche_capelli.html">rouche_capelli</a></li>
+          </ul>
+          </details>
+          </li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.ecc_classic"><summary>ecc_classic</summary>
+          <ul>
+          <li><a href="infotheo.ecc_classic.alternant.html">alternant</a></li>
+<li><a href="infotheo.ecc_classic.bch.html">bch</a></li>
+<li><a href="infotheo.ecc_classic.cyclic_code.html">cyclic_code</a></li>
+<li><a href="infotheo.ecc_classic.decoding.html">decoding</a></li>
+<li><a href="infotheo.ecc_classic.grs.html">grs</a></li>
+<li><a href="infotheo.ecc_classic.hamming_code.html">hamming_code</a></li>
+<li><a href="infotheo.ecc_classic.linearcode.html">linearcode</a></li>
+<li><a href="infotheo.ecc_classic.mceliece.html">mceliece</a></li>
+<li><a href="infotheo.ecc_classic.poly_decoding.html">poly_decoding</a></li>
+<li><a href="infotheo.ecc_classic.reed_solomon.html">reed_solomon</a></li>
+<li><a href="infotheo.ecc_classic.repcode.html">repcode</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.ecc_modern"><summary>ecc_modern</summary>
+          <ul>
+          <li><a href="infotheo.ecc_modern.checksum.html">checksum</a></li>
+<li><a href="infotheo.ecc_modern.degree_profile.html">degree_profile</a></li>
+<li><a href="infotheo.ecc_modern.ldpc.html">ldpc</a></li>
+<li><a href="infotheo.ecc_modern.ldpc_algo.html">ldpc_algo</a></li>
+<li><a href="infotheo.ecc_modern.ldpc_algo_proof.html">ldpc_algo_proof</a></li>
+<li><a href="infotheo.ecc_modern.ldpc_erasure.html">ldpc_erasure</a></li>
+<li><a href="infotheo.ecc_modern.max_subset.html">max_subset</a></li>
+<li><a href="infotheo.ecc_modern.stopping_set.html">stopping_set</a></li>
+<li><a href="infotheo.ecc_modern.subgraph_partition.html">subgraph_partition</a></li>
+<li><a href="infotheo.ecc_modern.summary.html">summary</a></li>
+<li><a href="infotheo.ecc_modern.summary_tanner.html">summary_tanner</a></li>
+<li><a href="infotheo.ecc_modern.tanner.html">tanner</a></li>
+<li><a href="infotheo.ecc_modern.tanner_partition.html">tanner_partition</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.homomorphic_encryption"><summary>homomorphic_encryption</summary>
+          <ul>
+          <li><details id="infotheo.homomorphic_encryption.benaloh1994"><summary>benaloh1994</summary>
+          <ul>
+          <li><a href="infotheo.homomorphic_encryption.benaloh1994.benaloh_ahe.html">benaloh_ahe</a></li>
+<li><a href="infotheo.homomorphic_encryption.benaloh1994.benaloh_enc.html">benaloh_enc</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.homomorphic_encryption.idealized"><summary>idealized</summary>
+          <ul>
+          <li><a href="infotheo.homomorphic_encryption.idealized.idealized_ahe.html">idealized_ahe</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.homomorphic_encryption.paillier1999"><summary>paillier1999</summary>
+          <ul>
+          <li><a href="infotheo.homomorphic_encryption.paillier1999.paillier_ahe.html">paillier_ahe</a></li>
+<li><a href="infotheo.homomorphic_encryption.paillier1999.paillier_enc.html">paillier_enc</a></li>
+          </ul>
+          </details>
+          </li>
+<li><a href="infotheo.homomorphic_encryption.ahe_enc.html">ahe_enc</a></li>
+<li><a href="infotheo.homomorphic_encryption.ahe_monoid.html">ahe_monoid</a></li>
+<li><a href="infotheo.homomorphic_encryption.enc_dec.html">enc_dec</a></li>
+<li><a href="infotheo.homomorphic_encryption.he_types.html">he_types</a></li>
+<li><a href="infotheo.homomorphic_encryption.homomorphic_encryption.html">homomorphic_encryption</a></li>
+<li><a href="infotheo.homomorphic_encryption.key_type.html">key_type</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.information_theory"><summary>information_theory</summary>
+          <ul>
+          <li><a href="infotheo.information_theory.aep.html">aep</a></li>
+<li><a href="infotheo.information_theory.binary_symmetric_channel.html">binary_symmetric_channel</a></li>
+<li><a href="infotheo.information_theory.channel.html">channel</a></li>
+<li><a href="infotheo.information_theory.channel_code.html">channel_code</a></li>
+<li><a href="infotheo.information_theory.channel_coding_converse.html">channel_coding_converse</a></li>
+<li><a href="infotheo.information_theory.channel_coding_direct.html">channel_coding_direct</a></li>
+<li><a href="infotheo.information_theory.conditional_divergence.html">conditional_divergence</a></li>
+<li><a href="infotheo.information_theory.entropy.html">entropy</a></li>
+<li><a href="infotheo.information_theory.entropy_convex.html">entropy_convex</a></li>
+<li><a href="infotheo.information_theory.erasure_channel.html">erasure_channel</a></li>
+<li><a href="infotheo.information_theory.error_exponent.html">error_exponent</a></li>
+<li><a href="infotheo.information_theory.joint_typ_seq.html">joint_typ_seq</a></li>
+<li><a href="infotheo.information_theory.jtypes.html">jtypes</a></li>
+<li><a href="infotheo.information_theory.kraft.html">kraft</a></li>
+<li><a href="infotheo.information_theory.pproba.html">pproba</a></li>
+<li><a href="infotheo.information_theory.shannon_fano.html">shannon_fano</a></li>
+<li><a href="infotheo.information_theory.source_code.html">source_code</a></li>
+<li><a href="infotheo.information_theory.source_coding_fl_converse.html">source_coding_fl_converse</a></li>
+<li><a href="infotheo.information_theory.source_coding_fl_direct.html">source_coding_fl_direct</a></li>
+<li><a href="infotheo.information_theory.source_coding_vl_converse.html">source_coding_vl_converse</a></li>
+<li><a href="infotheo.information_theory.source_coding_vl_direct.html">source_coding_vl_direct</a></li>
+<li><a href="infotheo.information_theory.string_entropy.html">string_entropy</a></li>
+<li><a href="infotheo.information_theory.success_decode_bound.html">success_decode_bound</a></li>
+<li><a href="infotheo.information_theory.typ_seq.html">typ_seq</a></li>
+<li><a href="infotheo.information_theory.types.html">types</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.lib"><summary>lib</summary>
+          <ul>
+          <li><a href="infotheo.lib.bigop_ext.html">bigop_ext</a></li>
+<li><a href="infotheo.lib.binary_entropy_function.html">binary_entropy_function</a></li>
+<li><a href="infotheo.lib.classical_sets_ext.html">classical_sets_ext</a></li>
+<li><a href="infotheo.lib.coqRE.html">coqRE</a></li>
+<li><a href="infotheo.lib.derive_ext.html">derive_ext</a></li>
+<li><a href="infotheo.lib.dft.html">dft</a></li>
+<li><a href="infotheo.lib.euclid.html">euclid</a></li>
+<li><a href="infotheo.lib.f2.html">f2</a></li>
+<li><a href="infotheo.lib.hamming.html">hamming</a></li>
+<li><a href="infotheo.lib.natbin.html">natbin</a></li>
+<li><a href="infotheo.lib.num_occ.html">num_occ</a></li>
+<li><a href="infotheo.lib.poly_ext.html">poly_ext</a></li>
+<li><a href="infotheo.lib.realType_ext.html">realType_ext</a></li>
+<li><a href="infotheo.lib.realType_ln.html">realType_ln</a></li>
+<li><a href="infotheo.lib.ssr_ext.html">ssr_ext</a></li>
+<li><a href="infotheo.lib.ssralg_ext.html">ssralg_ext</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.probability"><summary>probability</summary>
+          <ul>
+          <li><a href="infotheo.probability.bayes.html">bayes</a></li>
+<li><a href="infotheo.probability.convex.html">convex</a></li>
+<li><a href="infotheo.probability.convex_equiv.html">convex_equiv</a></li>
+<li><a href="infotheo.probability.convex_stone.html">convex_stone</a></li>
+<li><a href="infotheo.probability.divergence.html">divergence</a></li>
+<li><a href="infotheo.probability.fdist.html">fdist</a></li>
+<li><a href="infotheo.probability.fsdist.html">fsdist</a></li>
+<li><a href="infotheo.probability.graphoid.html">graphoid</a></li>
+<li><a href="infotheo.probability.jensen.html">jensen</a></li>
+<li><a href="infotheo.probability.jfdist_cond.html">jfdist_cond</a></li>
+<li><a href="infotheo.probability.log_sum.html">log_sum</a></li>
+<li><a href="infotheo.probability.necset.html">necset</a></li>
+<li><a href="infotheo.probability.partition_inequality.html">partition_inequality</a></li>
+<li><a href="infotheo.probability.pinsker.html">pinsker</a></li>
+<li><a href="infotheo.probability.proba.html">proba</a></li>
+<li><a href="infotheo.probability.variation_dist.html">variation_dist</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.robust"><summary>robust</summary>
+          <ul>
+          <li><a href="infotheo.robust.robustmean.html">robustmean</a></li>
+<li><a href="infotheo.robust.weightedmean.html">weightedmean</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.smc"><summary>smc</summary>
+          <ul>
+          <li><a href="infotheo.smc.graded_resource.html">graded_resource</a></li>
+<li><a href="infotheo.smc.pismc.html">pismc</a></li>
+<li><a href="infotheo.smc.smc_interpreter.html">smc_interpreter</a></li>
+<li><a href="infotheo.smc.smc_session_types.html">smc_session_types</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.toy_examples"><summary>toy_examples</summary>
+          <ul>
+          <li><a href="infotheo.toy_examples.conditional_entropy.html">conditional_entropy</a></li>
+<li><a href="infotheo.toy_examples.expected_value_variance.html">expected_value_variance</a></li>
+<li><a href="infotheo.toy_examples.expected_value_variance_ordn.html">expected_value_variance_ordn</a></li>
+<li><a href="infotheo.toy_examples.expected_value_variance_tuple.html">expected_value_variance_tuple</a></li>
+          </ul>
+          </details>
+          </li>
+<li><a href="infotheo._check_sigs.html">_check_sigs</a></li>
+<li><a href="infotheo._depgraph_extract.html">_depgraph_extract</a></li>
+<li><a href="infotheo._test_star2.html">_test_star2</a></li>
+<li><a href="infotheo.test_sri.html">test_sri</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="pgg_reconstruct"><summary>pgg_reconstruct</summary>
+          <ul>
+          <li><a href="pgg_reconstruct.ag_code.html">ag_code</a></li>
+<li><a href="pgg_reconstruct.ag_massey_bridge.html">ag_massey_bridge</a></li>
+<li><a href="pgg_reconstruct.ag_multiplicative.html">ag_multiplicative</a></li>
+<li><a href="pgg_reconstruct.algebraic_rigidity.html">algebraic_rigidity</a></li>
+<li><a href="pgg_reconstruct.coord_perm_compatible.html">coord_perm_compatible</a></li>
+<li><a href="pgg_reconstruct.cover_genus0.html">cover_genus0</a></li>
+<li><a href="pgg_reconstruct.cover_genus1.html">cover_genus1</a></li>
+<li><a href="pgg_reconstruct.cover_genus2.html">cover_genus2</a></li>
+<li><a href="pgg_reconstruct.cover_tradeoff.html">cover_tradeoff</a></li>
+<li><a href="pgg_reconstruct.covering_scheme.html">covering_scheme</a></li>
+<li><a href="pgg_reconstruct.hyperelliptic_code.html">hyperelliptic_code</a></li>
+<li><a href="pgg_reconstruct.lagrange.html">lagrange</a></li>
+<li><a href="pgg_reconstruct.massey.html">massey</a></li>
+<li><a href="pgg_reconstruct.pgg_assignment.html">pgg_assignment</a></li>
+<li><a href="pgg_reconstruct.pgg_covering_correctness.html">pgg_covering_correctness</a></li>
+<li><a href="pgg_reconstruct.pgg_deck_pairing.html">pgg_deck_pairing</a></li>
+<li><a href="pgg_reconstruct.pgg_sharing_framework.html">pgg_sharing_framework</a></li>
+<li><a href="pgg_reconstruct.pgg_sum_mod.html">pgg_sum_mod</a></li>
+<li><a href="pgg_reconstruct.pgg_threshold.html">pgg_threshold</a></li>
+<li><a href="pgg_reconstruct.pgl_bound.html">pgl_bound</a></li>
+<li><a href="pgg_reconstruct.rigidity_monster_instance.html">rigidity_monster_instance</a></li>
+<li><a href="pgg_reconstruct.rigidity_s5_instance.html">rigidity_s5_instance</a></li>
+<li><a href="pgg_reconstruct.rigidity_star_instance.html">rigidity_star_instance</a></li>
+<li><a href="pgg_reconstruct.rs_massey_bridge.html">rs_massey_bridge</a></li>
+<li><a href="pgg_reconstruct.rs_privacy.html">rs_privacy</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="pgg_smc"><summary>pgg_smc</summary>
+          <ul>
+          <li><a href="pgg_smc.abelian_word_collapse.html">abelian_word_collapse</a></li>
+<li><a href="pgg_smc.free_group_ball.html">free_group_ball</a></li>
+<li><a href="pgg_smc.perm_uniform.html">perm_uniform</a></li>
+<li><a href="pgg_smc.pgg_abelian.html">pgg_abelian</a></li>
+<li><a href="pgg_smc.pgg_abelian.html">pgg_abelian</a></li>
+<li><a href="pgg_smc.pgg_abelian_collapse.html">pgg_abelian_collapse</a></li>
+<li><a href="pgg_smc.pgg_collusion_bound.html">pgg_collusion_bound</a></li>
+<li><a href="pgg_smc.pgg_correctness.html">pgg_correctness</a></li>
+<li><a href="pgg_smc.pgg_free.html">pgg_free</a></li>
+<li><a href="pgg_smc.pgg_interface.html">pgg_interface</a></li>
+<li><a href="pgg_smc.pgg_lfree.html">pgg_lfree</a></li>
+<li><a href="pgg_smc.pgg_nonabelian.html">pgg_nonabelian</a></li>
+<li><a href="pgg_smc.pgg_pismc.html">pgg_pismc</a></li>
+<li><a href="pgg_smc.pgg_program.html">pgg_program</a></li>
+<li><a href="pgg_smc.pgg_raag.html">pgg_raag</a></li>
+<li><a href="pgg_smc.pgg_raag_cartier_foata.html">pgg_raag_cartier_foata</a></li>
+<li><a href="pgg_smc.pgg_raag_clique.html">pgg_raag_clique</a></li>
+<li><a href="pgg_smc.pgg_raag_path.html">pgg_raag_path</a></li>
+<li><a href="pgg_smc.pgg_raag_s5.html">pgg_raag_s5</a></li>
+<li><a href="pgg_smc.pgg_raag_star.html">pgg_raag_star</a></li>
+<li><a href="pgg_smc.pgg_security.html">pgg_security</a></li>
+<li><a href="pgg_smc.pgg_session_types.html">pgg_session_types</a></li>
+<li><a href="pgg_smc.pgg_word_analysis.html">pgg_word_analysis</a></li>
+<li><a href="pgg_smc.test_cf.html">test_cf</a></li>
+<li><a href="pgg_smc.test_cf2.html">test_cf2</a></li>
+<li><a href="pgg_smc.test_cf3.html">test_cf3</a></li>
+<li><a href="pgg_smc.test_sri.html">test_sri</a></li>
+<li><a href="pgg_smc.test_sri2.html">test_sri2</a></li>
+          </ul>
+          </details>
+          </li>
+    </div>
+
+  <div class="coq">
+
+    <div class="content">
+      <p>
+        <a href="./index.html">Top</a>
+        
+      </p>
+      <h1 class="title">Module pgg_pismc</h1>
+<span class="vernacular">From</span><span class="id"> HB</span><span class="vernacular"> Require</span><span class="vernacular"> Import</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for HB.structures">structures</a></span>.<br/>
+<span class="vernacular">From</span><span class="id"> mathcomp</span><span class="vernacular"> Require</span><span class="vernacular"> Import</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssreflect">ssreflect</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrbool">ssrbool</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrfun">ssrfun</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.eqtype">eqtype</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat">ssrnat</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.seq">seq</a></span>.<br/>
+<span class="vernacular">From</span><span class="id"> mathcomp</span><span class="vernacular"> Require</span><span class="vernacular"> Import</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype">fintype</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple">tuple</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.finfun">finfun</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.finset">finset</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.fingroup.fingroup">fingroup</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.fingroup.perm">perm</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.fingroup.morphism">morphism</a></span>.<br/>
+<span class="vernacular">Require</span><span class="vernacular"> Import</span><span class="id"> </span><span class="id"><a href="infotheo.smc.smc_interpreter.html">smc_interpreter</a></span><span class="id"> </span><span class="id"><a href="infotheo.smc.pismc.html">pismc</a></span><span class="id"> </span><span class="id"><a href="infotheo.smc.smc_session_types.html">smc_session_types</a></span>.<br/>
+<span class="vernacular">Require</span><span class="vernacular"> Import</span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_interface.html">pgg_interface</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_session_types.html">pgg_session_types</a></span>.<br/>
+<br/>
+<pre class="ssrdoc">
+PGG-SMC: piSMC Protocol Programs
+
+Session-typed protocol programs using \pi{...} notation for the
+covering-space MPC protocol:
+  pdealer parties W P_idx == dealer distributes shares and word index
+  pparty i                == party i computes and sends endpoint
+  precon parties          == reconstructor collects endpoints
+
+Send/Recv notation markers (inside custom pismc):
+  Send&lt;p&gt; &amp;x   sends sheet index x as DT_Sheet
+  Send&lt;p&gt; #x   sends share x as DT_Share
+  Send&lt;p&gt; $x   sends word index x as DT_Idx
+  Recv&lt;p&gt; &amp;x   receives DT_Sheet, binds x : 'I_N
+  Recv&lt;p&gt; #x   receives DT_Share, binds x : seq ('I_N)
+  Recv&lt;p&gt; $x   receives DT_Idx, binds x : nat
+</pre>
+<br/>
+<span class="gallina-kwd">Set</span><span class="vernacular"> Implicit</span><span class="vernacular"> Arguments</span>.<br/>
+<span class="vernacular">Unset</span><span class="vernacular"> Strict</span><span class="vernacular"> Implicit</span>.<br/>
+<span class="vernacular">Import</span><span class="id"> Prenex</span><span class="vernacular"> Implicits</span>.<br/>
+<br/>
+<span class="vernacular">Local</span><span class="vernacular"> Open</span><span class="vernacular"> Scope</span><span class="id"> pismc_scope</span>.<br/>
+<br/>
+<span class="vernacular">Section</span><span class="id"> pgg_pismc</span>.<br/>
+<br/>
+<span class="vernacular">Variable</span><span class="id"> </span><span id="pgg_pismc.M" class="id"><a name="pgg_pismc.M" class="">M</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_interface.html#MonodromyRepr.Exports.MonodromyReprType">MonodromyReprType</a></span>.<br/>
+<span class="vernacular">Variable</span><span class="id"> </span><span id="pgg_pismc.PI" class="id"><a name="pgg_pismc.PI" class="">PI</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_interface.html#PGGInterface">PGGInterface</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#pgg_pismc.M">M</a></span>.<br/>
+<br/>
+<span class="vernacular">Let</span><span class="id"> </span><span id="pgg_pismc.N" class="id"><a name="pgg_pismc.N" class="">N</a></span><span class="id"> :=</span> (<span class="id"><a href="pgg_smc.pgg_interface.html#pgg_N'">pgg_N'</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#pgg_pismc.M">M</a></span>).<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#bda89d73ec4a8f23ae92b565ffb5aaa6">+1</a></span>.<br/>
+<span class="vernacular">Let</span><span class="id"> </span><span id="pgg_pismc.T" class="id"><a name="pgg_pismc.T" class="">T</a></span><span class="id"> :=</span> (<span class="id"><a href="pgg_smc.pgg_interface.html#pi_T'">pi_T'</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#pgg_pismc.PI">PI</a></span>).<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#bda89d73ec4a8f23ae92b565ffb5aaa6">+1</a></span>.<br/>
+<span class="vernacular">Let</span><span class="id"> </span><span id="pgg_pismc.gT" class="id"><a name="pgg_pismc.gT" class="">gT</a></span><span class="id"> :=</span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_interface.html#pgg_gT">pgg_gT</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#pgg_pismc.M">M</a></span>.<br/>
+<span class="vernacular">Let</span><span class="id"> </span><span id="pgg_pismc.rho" class="id"><a name="pgg_pismc.rho" class="">rho</a></span><span class="id"> :=</span><span class="id"> @</span><span class="id"><a href="pgg_smc.pgg_interface.html#pgg_rho">pgg_rho</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#pgg_pismc.M">M</a></span>.<br/>
+<span class="vernacular">Let</span><span class="id"> </span><span id="pgg_pismc.starts" class="id"><a name="pgg_pismc.starts" class="">starts</a></span><span class="id"> :=</span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_interface.html#pi_starts">pi_starts</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#pgg_pismc.PI">PI</a></span>.<br/>
+<span class="vernacular">Let</span><span class="id"> </span><span id="pgg_pismc.data" class="id"><a name="pgg_pismc.data" class="">data</a></span><span class="id"> :=</span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_interface.html#pgg_data">pgg_data</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#pgg_pismc.N">N</a></span>.<br/>
+<br/>
+<span class="vernacular">Definition</span><span class="id"> </span><span id="dealer_idx" class="id"><a name="dealer_idx" class="">dealer_idx</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Datatypes.html#nat">nat</a></span><span class="id"> :=</span><span class="id"> 0</span>.<br/>
+<span class="vernacular">Definition</span><span class="id"> </span><span id="recon_idx" class="id"><a name="recon_idx" class="">recon_idx</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Datatypes.html#nat">nat</a></span><span class="id"> :=</span><span class="id"> 1</span>.<br/>
+<span class="vernacular">Definition</span><span class="id"> </span><span id="party_idx" class="id"><a name="party_idx" class="">party_idx</a></span> (<span id="i:5" class="id"><a name="i:5" class="">i</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#:::'''I_'_x">'I_</a></span><span class="id"><a href="pgg_smc.pgg_pismc.html#pgg_pismc.T">T</a></span>)<span class="id"> :</span><span class="id"> </span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Datatypes.html#nat">nat</a></span><span class="id"> :=</span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#i:5">i</a></span>.<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#bc63483175fac06bcd5541a5e9093b18">+2</a></span>.<br/>
+<br/>
+<span class="vernacular">Arguments</span><span class="id"> </span><span class="id"><a href="infotheo.smc.smc_session_types.html#sproc">sproc</a></span><span class="id"> dtype</span><span class="id"> data</span><span class="id"> party</span><span class="id"> {_}</span><span class="id"> {_}</span>.<br/>
+<br/>
+<span class="vernacular">Let</span><span class="id"> </span><span id="pgg_pismc.Send_sheet" class="id"><a name="pgg_pismc.Send_sheet" class="">Send_sheet</a></span><span class="id"> {</span><span id="party:6" class="id"><a name="party:6" class="">party</a></span><span class="id"> </span><span id="n:7" class="id"><a name="n:7" class="">n</a></span><span class="id"> </span><span id="env:8" class="id"><a name="env:8" class="">env</a></span><span class="id">}</span><span class="id"> :=</span><span class="id"> @</span><span class="id"><a href="pgg_smc.pgg_session_types.html#PGGSend_sheet">PGGSend_sheet</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#pgg_pismc.M">M</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#party:6">party</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#n:7">n</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#env:8">env</a></span>.<br/>
+<span class="vernacular">Let</span><span class="id"> </span><span id="pgg_pismc.Send_share" class="id"><a name="pgg_pismc.Send_share" class="">Send_share</a></span><span class="id"> {</span><span id="party:9" class="id"><a name="party:9" class="">party</a></span><span class="id"> </span><span id="n:10" class="id"><a name="n:10" class="">n</a></span><span class="id"> </span><span id="env:11" class="id"><a name="env:11" class="">env</a></span><span class="id">}</span><span class="id"> :=</span><span class="id"> @</span><span class="id"><a href="pgg_smc.pgg_session_types.html#PGGSend_share">PGGSend_share</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#pgg_pismc.M">M</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#party:9">party</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#n:10">n</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#env:11">env</a></span>.<br/>
+<span class="vernacular">Let</span><span class="id"> </span><span id="pgg_pismc.Send_idx" class="id"><a name="pgg_pismc.Send_idx" class="">Send_idx</a></span><span class="id"> {</span><span id="party:12" class="id"><a name="party:12" class="">party</a></span><span class="id"> </span><span id="n:13" class="id"><a name="n:13" class="">n</a></span><span class="id"> </span><span id="env:14" class="id"><a name="env:14" class="">env</a></span><span class="id">}</span><span class="id"> :=</span><span class="id"> @</span><span class="id"><a href="pgg_smc.pgg_session_types.html#PGGSend_idx">PGGSend_idx</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#pgg_pismc.M">M</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#party:12">party</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#n:13">n</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#env:14">env</a></span>.<br/>
+<span class="vernacular">Let</span><span class="id"> </span><span id="pgg_pismc.Recv_sheet" class="id"><a name="pgg_pismc.Recv_sheet" class="">Recv_sheet</a></span><span class="id"> {</span><span id="party:15" class="id"><a name="party:15" class="">party</a></span><span class="id"> </span><span id="n:16" class="id"><a name="n:16" class="">n</a></span><span class="id"> </span><span id="env:17" class="id"><a name="env:17" class="">env</a></span><span class="id">}</span><span class="id"> :=</span><span class="id"> @</span><span class="id"><a href="pgg_smc.pgg_session_types.html#PGGRecv_sheet">PGGRecv_sheet</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#pgg_pismc.M">M</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#party:15">party</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#n:16">n</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#env:17">env</a></span>.<br/>
+<span class="vernacular">Let</span><span class="id"> </span><span id="pgg_pismc.Recv_share" class="id"><a name="pgg_pismc.Recv_share" class="">Recv_share</a></span><span class="id"> {</span><span id="party:18" class="id"><a name="party:18" class="">party</a></span><span class="id"> </span><span id="n:19" class="id"><a name="n:19" class="">n</a></span><span class="id"> </span><span id="env:20" class="id"><a name="env:20" class="">env</a></span><span class="id">}</span><span class="id"> :=</span><span class="id"> @</span><span class="id"><a href="pgg_smc.pgg_session_types.html#PGGRecv_share">PGGRecv_share</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#pgg_pismc.M">M</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#party:18">party</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#n:19">n</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#env:20">env</a></span>.<br/>
+<span class="vernacular">Let</span><span class="id"> </span><span id="pgg_pismc.Recv_idx" class="id"><a name="pgg_pismc.Recv_idx" class="">Recv_idx</a></span><span class="id"> {</span><span id="party:21" class="id"><a name="party:21" class="">party</a></span><span class="id"> </span><span id="n:22" class="id"><a name="n:22" class="">n</a></span><span class="id"> </span><span id="env:23" class="id"><a name="env:23" class="">env</a></span><span class="id">}</span><span class="id"> :=</span><span class="id"> @</span><span class="id"><a href="pgg_smc.pgg_session_types.html#PGGRecv_idx">PGGRecv_idx</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#pgg_pismc.M">M</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#party:21">party</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#n:22">n</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#env:23">env</a></span>.<br/>
+<br/>
+<h1> Send notations — dtype marker selects the send function </h1>
+<br/>
+<span class="vernacular">Notation</span> <span id="9e66ed3e5fef2034c47734738398aaac" class="id"><a name="9e66ed3e5fef2034c47734738398aaac" class="">&quot;'Send&lt;' p '&gt;' '&amp;' x ; P&quot;</a></span><span class="id"> :=</span> (<span class="id"><a href="pgg_smc.pgg_pismc.html#pgg_pismc.Send_sheet">Send_sheet</a></span><span class="id"> p</span><span class="id"> x</span><span class="id"> P</span>)<br/>
+&nbsp;&nbsp;(<span class="gallina-kwd">in</span><span class="id"> custom</span><span class="id"> pismc</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 85,</span><span class="id"> p</span><span class="id"> constr</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 0,</span><span class="id"> x</span><span class="id"> constr</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 0,</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="id">P</span><span class="id"> custom</span><span class="id"> pismc</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 85,</span><span class="id"> right</span><span class="id"> associativity</span>).<br/>
+<br/>
+<span class="vernacular">Notation</span> <span id="4a1076697ecbb5c98f9554c492970976" class="id"><a name="4a1076697ecbb5c98f9554c492970976" class="">&quot;'Send&lt;' p '&gt;' '#' x ; P&quot;</a></span><span class="id"> :=</span> (<span class="id"><a href="pgg_smc.pgg_pismc.html#pgg_pismc.Send_share">Send_share</a></span><span class="id"> p</span><span class="id"> x</span><span class="id"> P</span>)<br/>
+&nbsp;&nbsp;(<span class="gallina-kwd">in</span><span class="id"> custom</span><span class="id"> pismc</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 85,</span><span class="id"> p</span><span class="id"> constr</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 0,</span><span class="id"> x</span><span class="id"> constr</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 0,</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="id">P</span><span class="id"> custom</span><span class="id"> pismc</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 85,</span><span class="id"> right</span><span class="id"> associativity</span>).<br/>
+<br/>
+<span class="vernacular">Notation</span> <span id="f7636aeae2d86aa396ef1da8d0d39c49" class="id"><a name="f7636aeae2d86aa396ef1da8d0d39c49" class="">&quot;'Send&lt;' p '&gt;' '$' x ; P&quot;</a></span><span class="id"> :=</span> (<span class="id"><a href="pgg_smc.pgg_pismc.html#pgg_pismc.Send_idx">Send_idx</a></span><span class="id"> p</span><span class="id"> x</span><span class="id"> P</span>)<br/>
+&nbsp;&nbsp;(<span class="gallina-kwd">in</span><span class="id"> custom</span><span class="id"> pismc</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 85,</span><span class="id"> p</span><span class="id"> constr</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 0,</span><span class="id"> x</span><span class="id"> constr</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 0,</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="id">P</span><span class="id"> custom</span><span class="id"> pismc</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 85,</span><span class="id"> right</span><span class="id"> associativity</span>).<br/>
+<br/>
+<h1> Recv notations — dtype marker selects the recv function </h1>
+<br/>
+<span class="vernacular">Local</span><span class="vernacular"> Notation</span> <span id="cc6b14b205277e01a2f5454d4735498f" class="id"><a name="cc6b14b205277e01a2f5454d4735498f" class="">&quot;'Recv&lt;' p '&gt;' '&amp;' x '=&gt;' P&quot;</a></span><span class="id"> :=</span><br/>
+&nbsp;&nbsp;(<span class="id"><a href="pgg_smc.pgg_pismc.html#pgg_pismc.Recv_sheet">Recv_sheet</a></span><span class="id"> p</span> (<span class="gallina-kwd">fun</span><span class="id"> </span><span id="x:24" class="id"><a name="x:24" class="">x</a></span><span class="id"> =&gt;</span><span class="id"> P</span>))<br/>
+&nbsp;&nbsp;(<span class="gallina-kwd">in</span><span class="id"> custom</span><span class="id"> pismc</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 85,</span><span class="id"> p</span><span class="id"> constr</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 0,</span><span class="id"> x</span><span class="id"> name,</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="id">P</span><span class="id"> custom</span><span class="id"> pismc</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 85,</span><span class="id"> right</span><span class="id"> associativity</span>).<br/>
+<br/>
+<span class="vernacular">Local</span><span class="vernacular"> Notation</span> <span id="78e6b389f724bbfc195152ce27e9e207" class="id"><a name="78e6b389f724bbfc195152ce27e9e207" class="">&quot;'Recv&lt;' p '&gt;' '#' x '=&gt;' P&quot;</a></span><span class="id"> :=</span><br/>
+&nbsp;&nbsp;(<span class="id"><a href="pgg_smc.pgg_pismc.html#pgg_pismc.Recv_share">Recv_share</a></span><span class="id"> p</span> (<span class="gallina-kwd">fun</span><span class="id"> </span><span id="x:25" class="id"><a name="x:25" class="">x</a></span><span class="id"> =&gt;</span><span class="id"> P</span>))<br/>
+&nbsp;&nbsp;(<span class="gallina-kwd">in</span><span class="id"> custom</span><span class="id"> pismc</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 85,</span><span class="id"> p</span><span class="id"> constr</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 0,</span><span class="id"> x</span><span class="id"> name,</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="id">P</span><span class="id"> custom</span><span class="id"> pismc</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 85,</span><span class="id"> right</span><span class="id"> associativity</span>).<br/>
+<br/>
+<span class="vernacular">Local</span><span class="vernacular"> Notation</span> <span id="512dcb5015cc1e1f796f93597e5015fa" class="id"><a name="512dcb5015cc1e1f796f93597e5015fa" class="">&quot;'Recv&lt;' p '&gt;' '$' x '=&gt;' P&quot;</a></span><span class="id"> :=</span><br/>
+&nbsp;&nbsp;(<span class="id"><a href="pgg_smc.pgg_pismc.html#pgg_pismc.Recv_idx">Recv_idx</a></span><span class="id"> p</span> (<span class="gallina-kwd">fun</span><span class="id"> </span><span id="x:26" class="id"><a name="x:26" class="">x</a></span><span class="id"> =&gt;</span><span class="id"> P</span>))<br/>
+&nbsp;&nbsp;(<span class="gallina-kwd">in</span><span class="id"> custom</span><span class="id"> pismc</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 85,</span><span class="id"> p</span><span class="id"> constr</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 0,</span><span class="id"> x</span><span class="id"> name,</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="id">P</span><span class="id"> custom</span><span class="id"> pismc</span><span class="gallina-kwd"> at</span><span class="id"> level</span><span class="id"> 85,</span><span class="id"> right</span><span class="id"> associativity</span>).<br/>
+<br/>
+<pre class="ssrdoc">
+(** * Environment Step Functions for ForList
+</pre>
+<br/>
+<span class="vernacular">Let</span><span class="id"> </span><span id="pgg_pismc.dealer_share_env" class="id"><a name="pgg_pismc.dealer_share_env" class="">dealer_share_env</a></span> (<span id="j:27" class="id"><a name="j:27" class="">j</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#:::'''I_'_x">'I_</a></span><span class="id"><a href="pgg_smc.pgg_pismc.html#pgg_pismc.T">T</a></span>) (<span id="env:28" class="id"><a name="env:28" class="">env</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="infotheo.smc.smc_session_types.html#senv">senv</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_interface.html#pgg_dtype">pgg_dtype</a></span>)<span class="id"> :=</span><br/>
+&nbsp;&nbsp;<span class="id"><a href="infotheo.smc.smc_session_types.html#senv_send">senv_send</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#env:28">env</a></span> (<span class="id"><a href="pgg_smc.pgg_pismc.html#party_idx">party_idx</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#j:27">j</a></span>)<span class="id"> </span><span class="id"><a href="pgg_smc.pgg_interface.html#DT_Share">DT_Share</a></span>.<br/>
+<br/>
+<span class="vernacular">Let</span><span class="id"> </span><span id="pgg_pismc.dealer_idx_env" class="id"><a name="pgg_pismc.dealer_idx_env" class="">dealer_idx_env</a></span> (<span id="j:29" class="id"><a name="j:29" class="">j</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#:::'''I_'_x">'I_</a></span><span class="id"><a href="pgg_smc.pgg_pismc.html#pgg_pismc.T">T</a></span>) (<span id="env:30" class="id"><a name="env:30" class="">env</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="infotheo.smc.smc_session_types.html#senv">senv</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_interface.html#pgg_dtype">pgg_dtype</a></span>)<span class="id"> :=</span><br/>
+&nbsp;&nbsp;<span class="id"><a href="infotheo.smc.smc_session_types.html#senv_send">senv_send</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#env:30">env</a></span> (<span class="id"><a href="pgg_smc.pgg_pismc.html#party_idx">party_idx</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#j:29">j</a></span>)<span class="id"> </span><span class="id"><a href="pgg_smc.pgg_interface.html#DT_Idx">DT_Idx</a></span>.<br/>
+<br/>
+<span class="vernacular">Let</span><span class="id"> </span><span id="pgg_pismc.recon_env_step" class="id"><a name="pgg_pismc.recon_env_step" class="">recon_env_step</a></span> (<span id="j:31" class="id"><a name="j:31" class="">j</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#:::'''I_'_x">'I_</a></span><span class="id"><a href="pgg_smc.pgg_pismc.html#pgg_pismc.T">T</a></span>) (<span id="env:32" class="id"><a name="env:32" class="">env</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="infotheo.smc.smc_session_types.html#senv">senv</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_interface.html#pgg_dtype">pgg_dtype</a></span>)<span class="id"> :=</span><br/>
+&nbsp;&nbsp;<span class="id"><a href="infotheo.smc.smc_session_types.html#senv_recv">senv_recv</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#env:32">env</a></span> (<span class="id"><a href="pgg_smc.pgg_pismc.html#party_idx">party_idx</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#j:31">j</a></span>)<span class="id"> </span><span class="id"><a href="pgg_smc.pgg_interface.html#DT_Sheet">DT_Sheet</a></span>.<br/>
+<br/>
+<pre class="ssrdoc">
+(** * PGG Protocol Programs
+</pre>
+<br/>
+<span class="vernacular">Definition</span><span class="id"> </span><span id="pdealer" class="id"><a name="pdealer" class="">pdealer</a></span> (<span id="parties:33" class="id"><a name="parties:33" class="">parties</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.seq#seq">seq</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#:::'''I_'_x">'I_</a></span><span class="id"><a href="pgg_smc.pgg_pismc.html#pgg_pismc.T">T</a></span>) (<span id="W:34" class="id"><a name="W:34" class="">W</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.seq#seq">seq</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#pgg_pismc.gT">gT</a></span>) (<span id="P_idx:35" class="id"><a name="P_idx:35" class="">P_idx</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Datatypes.html#nat">nat</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">:</span><span class="id"> </span><span class="id"><a href="infotheo.smc.smc_session_types.html#sproc">sproc</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_interface.html#pgg_dtype">pgg_dtype</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#pgg_pismc.data">data</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#dealer_idx">dealer_idx</a></span><span class="id"> :=</span><br/>
+&nbsp;&nbsp;<span class="id"><a href="infotheo.smc.pismc.html#71b0239092ac3f750ef276a7fd56974f">\pi{</a></span><span class="id"><a href="infotheo.smc.pismc.html#71b0239092ac3f750ef276a7fd56974f"> </a></span><span class="id"><a href="infotheo.smc.pismc.html#968a373438054a4b2b46333a3074b658">Init</a></span> (<span class="id">@</span><span class="id"><a href="pgg_smc.pgg_interface.html#PGG_idx">PGG_idx</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#pgg_pismc.N">N</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#P_idx:35">P_idx</a></span>)<span class="id"><a href="infotheo.smc.pismc.html#968a373438054a4b2b46333a3074b658"> ;</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="infotheo.smc.pismc.html#9c59a4c1884b186c3b8dfe9125bdbbd4">ForList</a></span><span class="id"><a href="infotheo.smc.pismc.html#9c59a4c1884b186c3b8dfe9125bdbbd4"> </a></span><span class="id"><a href="pgg_smc.pgg_pismc.html#parties:33">parties</a></span><span class="id"><a href="infotheo.smc.pismc.html#9c59a4c1884b186c3b8dfe9125bdbbd4"> step</a></span><span class="id"><a href="infotheo.smc.pismc.html#9c59a4c1884b186c3b8dfe9125bdbbd4"> </a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Datatypes.html#S">S</a></span><span class="id"><a href="infotheo.smc.pismc.html#9c59a4c1884b186c3b8dfe9125bdbbd4"> enstep</a></span><span class="id"><a href="infotheo.smc.pismc.html#9c59a4c1884b186c3b8dfe9125bdbbd4"> </a></span><span class="id"><a href="pgg_smc.pgg_pismc.html#pgg_pismc.dealer_share_env">dealer_share_env</a></span><span class="id"><a href="infotheo.smc.pismc.html#9c59a4c1884b186c3b8dfe9125bdbbd4"> as</a></span><span class="id"><a href="infotheo.smc.pismc.html#9c59a4c1884b186c3b8dfe9125bdbbd4"> </a></span><span id="j:36" class="id"><a name="j:36" class="">j</a></span><span class="id"><a href="infotheo.smc.pismc.html#9c59a4c1884b186c3b8dfe9125bdbbd4"> cont</a></span><span class="id"><a href="infotheo.smc.pismc.html#9c59a4c1884b186c3b8dfe9125bdbbd4"> </a></span><span id="k:37" class="id"><a name="k:37" class="">k</a></span><span class="id"><a href="infotheo.smc.pismc.html#9c59a4c1884b186c3b8dfe9125bdbbd4"> =&gt;</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="pgg_smc.pgg_pismc.html#4a1076697ecbb5c98f9554c492970976">Send&lt;</a></span>(<span class="id"><a href="pgg_smc.pgg_pismc.html#party_idx">party_idx</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#j:36">j</a></span>)<span class="id"><a href="pgg_smc.pgg_pismc.html#4a1076697ecbb5c98f9554c492970976">&gt;</a></span><span class="id"><a href="pgg_smc.pgg_pismc.html#4a1076697ecbb5c98f9554c492970976"> #</a></span>(<span class="id"><a href="pgg_smc.pgg_interface.html#share">share</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#pgg_pismc.PI">PI</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#W:34">W</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#j:36">j</a></span>)<span class="id"><a href="pgg_smc.pgg_pismc.html#4a1076697ecbb5c98f9554c492970976"> ;</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span id="k:39" class="id"><span id="k:38" class="id"><a name="k:39" class="">k</a></span></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="infotheo.smc.pismc.html#9c59a4c1884b186c3b8dfe9125bdbbd4">end</a></span><span class="id"><a href="infotheo.smc.pismc.html#9c59a4c1884b186c3b8dfe9125bdbbd4"> ;</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="infotheo.smc.pismc.html#9c59a4c1884b186c3b8dfe9125bdbbd4">ForList</a></span><span class="id"><a href="infotheo.smc.pismc.html#9c59a4c1884b186c3b8dfe9125bdbbd4"> </a></span><span class="id"><a href="pgg_smc.pgg_pismc.html#parties:33">parties</a></span><span class="id"><a href="infotheo.smc.pismc.html#9c59a4c1884b186c3b8dfe9125bdbbd4"> step</a></span><span class="id"><a href="infotheo.smc.pismc.html#9c59a4c1884b186c3b8dfe9125bdbbd4"> </a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Datatypes.html#S">S</a></span><span class="id"><a href="infotheo.smc.pismc.html#9c59a4c1884b186c3b8dfe9125bdbbd4"> enstep</a></span><span class="id"><a href="infotheo.smc.pismc.html#9c59a4c1884b186c3b8dfe9125bdbbd4"> </a></span><span class="id"><a href="pgg_smc.pgg_pismc.html#pgg_pismc.dealer_idx_env">dealer_idx_env</a></span><span class="id"><a href="infotheo.smc.pismc.html#9c59a4c1884b186c3b8dfe9125bdbbd4"> as</a></span><span class="id"><a href="infotheo.smc.pismc.html#9c59a4c1884b186c3b8dfe9125bdbbd4"> </a></span><span id="j:40" class="id"><a name="j:40" class="">j</a></span><span class="id"><a href="infotheo.smc.pismc.html#9c59a4c1884b186c3b8dfe9125bdbbd4"> cont</a></span><span class="id"><a href="infotheo.smc.pismc.html#9c59a4c1884b186c3b8dfe9125bdbbd4"> </a></span><span id="k:41" class="id"><a name="k:41" class="">k</a></span><span class="id"><a href="infotheo.smc.pismc.html#9c59a4c1884b186c3b8dfe9125bdbbd4"> =&gt;</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="pgg_smc.pgg_pismc.html#f7636aeae2d86aa396ef1da8d0d39c49">Send&lt;</a></span>(<span class="id"><a href="pgg_smc.pgg_pismc.html#party_idx">party_idx</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#j:40">j</a></span>)<span class="id"><a href="pgg_smc.pgg_pismc.html#f7636aeae2d86aa396ef1da8d0d39c49">&gt;</a></span><span class="id"><a href="pgg_smc.pgg_pismc.html#f7636aeae2d86aa396ef1da8d0d39c49"> $</a></span>(<span class="id"><a href="pgg_smc.pgg_pismc.html#P_idx:35">P_idx</a></span>)<span class="id"><a href="pgg_smc.pgg_pismc.html#f7636aeae2d86aa396ef1da8d0d39c49"> ;</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span id="k:43" class="id"><span id="k:42" class="id"><a name="k:43" class="">k</a></span></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="infotheo.smc.pismc.html#9c59a4c1884b186c3b8dfe9125bdbbd4">end</a></span><span class="id"><a href="infotheo.smc.pismc.html#9c59a4c1884b186c3b8dfe9125bdbbd4"> ;</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="infotheo.smc.pismc.html#:pismc::'Finish'">Finish</a></span><span class="id"><a href="infotheo.smc.pismc.html#71b0239092ac3f750ef276a7fd56974f"> }</a></span>.<br/>
+<br/>
+<span class="vernacular">Definition</span><span class="id"> </span><span id="pparty" class="id"><a name="pparty" class="">pparty</a></span> (<span id="i:44" class="id"><a name="i:44" class="">i</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#:::'''I_'_x">'I_</a></span><span class="id"><a href="pgg_smc.pgg_pismc.html#pgg_pismc.T">T</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">:</span><span class="id"> </span><span class="id"><a href="infotheo.smc.smc_session_types.html#sproc">sproc</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_interface.html#pgg_dtype">pgg_dtype</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#pgg_pismc.data">data</a></span> (<span class="id"><a href="pgg_smc.pgg_pismc.html#party_idx">party_idx</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#i:44">i</a></span>)<span class="id"> :=</span><br/>
+&nbsp;&nbsp;<span class="id"><a href="infotheo.smc.pismc.html#71b0239092ac3f750ef276a7fd56974f">\pi{</a></span><span class="id"><a href="infotheo.smc.pismc.html#71b0239092ac3f750ef276a7fd56974f"> </a></span><span class="id"><a href="pgg_smc.pgg_pismc.html#78e6b389f724bbfc195152ce27e9e207">Recv&lt;</a></span><span class="id"><a href="pgg_smc.pgg_pismc.html#dealer_idx">dealer_idx</a></span><span class="id"><a href="pgg_smc.pgg_pismc.html#78e6b389f724bbfc195152ce27e9e207">&gt;</a></span><span class="id"><a href="pgg_smc.pgg_pismc.html#78e6b389f724bbfc195152ce27e9e207"> #</a></span><span id="my_share:45" class="id"><a name="my_share:45" class="">my_share</a></span><span class="id"><a href="pgg_smc.pgg_pismc.html#78e6b389f724bbfc195152ce27e9e207"> =&gt;</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="pgg_smc.pgg_pismc.html#512dcb5015cc1e1f796f93597e5015fa">Recv&lt;</a></span><span class="id"><a href="pgg_smc.pgg_pismc.html#dealer_idx">dealer_idx</a></span><span class="id"><a href="pgg_smc.pgg_pismc.html#512dcb5015cc1e1f796f93597e5015fa">&gt;</a></span><span class="id"><a href="pgg_smc.pgg_pismc.html#512dcb5015cc1e1f796f93597e5015fa"> $</a></span><span id="word_idx:46" class="id"><a name="word_idx:46" class="">word_idx</a></span><span class="id"><a href="pgg_smc.pgg_pismc.html#512dcb5015cc1e1f796f93597e5015fa"> =&gt;</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="pgg_smc.pgg_pismc.html#9e66ed3e5fef2034c47734738398aaac">Send&lt;</a></span><span class="id"><a href="pgg_smc.pgg_pismc.html#recon_idx">recon_idx</a></span><span class="id"><a href="pgg_smc.pgg_pismc.html#9e66ed3e5fef2034c47734738398aaac">&gt;</a></span><span class="id"><a href="pgg_smc.pgg_pismc.html#9e66ed3e5fef2034c47734738398aaac"> &amp;</a></span>(<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.seq#nth">nth</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#ord0">ord0</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#my_share:45">my_share</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#word_idx:46">word_idx</a></span>)<span class="id"><a href="pgg_smc.pgg_pismc.html#9e66ed3e5fef2034c47734738398aaac"> ;</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="infotheo.smc.pismc.html#:pismc::'Finish'">Finish</a></span><span class="id"><a href="infotheo.smc.pismc.html#71b0239092ac3f750ef276a7fd56974f"> }</a></span>.<br/>
+<br/>
+<span class="vernacular">Definition</span><span class="id"> </span><span id="precon" class="id"><a name="precon" class="">precon</a></span> (<span id="parties:47" class="id"><a name="parties:47" class="">parties</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.seq#seq">seq</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#:::'''I_'_x">'I_</a></span><span class="id"><a href="pgg_smc.pgg_pismc.html#pgg_pismc.T">T</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">:</span><span class="id"> </span><span class="id"><a href="infotheo.smc.smc_session_types.html#sproc">sproc</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_interface.html#pgg_dtype">pgg_dtype</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#pgg_pismc.data">data</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#recon_idx">recon_idx</a></span><span class="id"> :=</span><br/>
+&nbsp;&nbsp;<span class="id"><a href="infotheo.smc.pismc.html#71b0239092ac3f750ef276a7fd56974f">\pi{</a></span><span class="id"><a href="infotheo.smc.pismc.html#71b0239092ac3f750ef276a7fd56974f"> </a></span><span class="id"><a href="infotheo.smc.pismc.html#9c59a4c1884b186c3b8dfe9125bdbbd4">ForList</a></span><span class="id"><a href="infotheo.smc.pismc.html#9c59a4c1884b186c3b8dfe9125bdbbd4"> </a></span><span class="id"><a href="pgg_smc.pgg_pismc.html#parties:47">parties</a></span><span class="id"><a href="infotheo.smc.pismc.html#9c59a4c1884b186c3b8dfe9125bdbbd4"> step</a></span> (<span class="gallina-kwd">fun</span><span class="id"> </span><span id="k:48" class="id"><a name="k:48" class="">k</a></span><span class="id"> =&gt;</span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#k:48">k</a></span>.<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#bc63483175fac06bcd5541a5e9093b18">+2</a></span>)<span class="id"><a href="infotheo.smc.pismc.html#9c59a4c1884b186c3b8dfe9125bdbbd4"> enstep</a></span><span class="id"><a href="infotheo.smc.pismc.html#9c59a4c1884b186c3b8dfe9125bdbbd4"> </a></span><span class="id"><a href="pgg_smc.pgg_pismc.html#pgg_pismc.recon_env_step">recon_env_step</a></span><span class="id"><a href="infotheo.smc.pismc.html#9c59a4c1884b186c3b8dfe9125bdbbd4"> as</a></span><span class="id"><a href="infotheo.smc.pismc.html#9c59a4c1884b186c3b8dfe9125bdbbd4"> </a></span><span id="j:49" class="id"><a name="j:49" class="">j</a></span><span class="id"><a href="infotheo.smc.pismc.html#9c59a4c1884b186c3b8dfe9125bdbbd4"> cont</a></span><span class="id"><a href="infotheo.smc.pismc.html#9c59a4c1884b186c3b8dfe9125bdbbd4"> </a></span><span id="k:50" class="id"><a name="k:50" class="">k</a></span><span class="id"><a href="infotheo.smc.pismc.html#9c59a4c1884b186c3b8dfe9125bdbbd4"> =&gt;</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="pgg_smc.pgg_pismc.html#cc6b14b205277e01a2f5454d4735498f">Recv&lt;</a></span>(<span class="id"><a href="pgg_smc.pgg_pismc.html#party_idx">party_idx</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#j:49">j</a></span>)<span class="id"><a href="pgg_smc.pgg_pismc.html#cc6b14b205277e01a2f5454d4735498f">&gt;</a></span><span class="id"><a href="pgg_smc.pgg_pismc.html#cc6b14b205277e01a2f5454d4735498f"> &amp;</a></span><span id="ep:51" class="id"><a name="ep:51" class="">ep</a></span><span class="id"><a href="pgg_smc.pgg_pismc.html#cc6b14b205277e01a2f5454d4735498f"> =&gt;</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="infotheo.smc.pismc.html#968a373438054a4b2b46333a3074b658">Init</a></span> (<span class="id"><a href="pgg_smc.pgg_interface.html#PGG_sheet">PGG_sheet</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#ep:51">ep</a></span>)<span class="id"><a href="infotheo.smc.pismc.html#968a373438054a4b2b46333a3074b658"> ;</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span id="k:53" class="id"><span id="k:52" class="id"><a name="k:53" class="">k</a></span></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="infotheo.smc.pismc.html#9c59a4c1884b186c3b8dfe9125bdbbd4">end</a></span><span class="id"><a href="infotheo.smc.pismc.html#9c59a4c1884b186c3b8dfe9125bdbbd4"> ;</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="infotheo.smc.pismc.html#:pismc::'Finish'">Finish</a></span><span class="id"><a href="infotheo.smc.pismc.html#71b0239092ac3f750ef276a7fd56974f"> }</a></span>.<br/>
+<br/>
+<span class="vernacular">End</span><span class="id"> pgg_pismc</span>.<br/>
+<br/>
+<span class="vernacular">Arguments</span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#pdealer">pdealer</a></span><span class="id"> {M}</span><span class="id"> PI</span>.<br/>
+<span class="vernacular">Arguments</span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#pparty">pparty</a></span><span class="id"> {M}</span><span class="id"> PI</span>.<br/>
+<span class="vernacular">Arguments</span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#precon">precon</a></span><span class="id"> {M}</span><span class="id"> PI</span>.<br/>
+<br/>
+<pre class="ssrdoc">
+(** * Session Type Duality Verification (Idealized, 2-party)
+</pre>
+<br/>
+<span class="vernacular">Section</span><span class="id"> pgg_idealized_duality</span>.<br/>
+<br/>
+<span class="vernacular">Variable</span><span class="id"> </span><span id="pgg_idealized_duality.n" class="id"><a name="pgg_idealized_duality.n" class="">n</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Datatypes.html#nat">nat</a></span>.<br/>
+<span class="vernacular">Let</span><span class="id"> </span><span id="pgg_idealized_duality.N" class="id"><a name="pgg_idealized_duality.N" class="">N</a></span><span class="id"> :=</span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#pgg_idealized_duality.n">n</a></span>.<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#bc63483175fac06bcd5541a5e9093b18">+2</a></span>.<br/>
+<span class="vernacular">Let</span><span class="id"> </span><span id="pgg_idealized_duality.gT" class="id"><a name="pgg_idealized_duality.gT" class="">gT</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.fingroup.fingroup#FinGroup.Exports.finGroupType">finGroupType</a></span><span class="id"> :=</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.fingroup.perm#683bed2e43e8b9b52492c89e618e34b6">{perm</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.fingroup.perm#683bed2e43e8b9b52492c89e618e34b6"> </a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#:::'''I_'_x">'I_</a></span><span class="id"><a href="pgg_smc.pgg_pismc.html#pgg_idealized_duality.N">N</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.fingroup.perm#683bed2e43e8b9b52492c89e618e34b6">}</a></span>.<br/>
+<span class="vernacular">Let</span><span class="id"> </span><span id="pgg_idealized_duality.G" class="id"><a name="pgg_idealized_duality.G" class="">G</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.fingroup.fingroup#dd8cd2228f051940101d045bfdffe2d9">{group</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.fingroup.fingroup#dd8cd2228f051940101d045bfdffe2d9"> </a></span><span class="id"><a href="pgg_smc.pgg_pismc.html#pgg_idealized_duality.gT">gT</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.fingroup.fingroup#dd8cd2228f051940101d045bfdffe2d9">}</a></span><span class="id"> :=</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.fingroup.fingroup#e98634a3dc0445a0bdea71fc5975bb33">[set:</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.fingroup.fingroup#e98634a3dc0445a0bdea71fc5975bb33"> </a></span><span class="id"><a href="pgg_smc.pgg_pismc.html#pgg_idealized_duality.gT">gT</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.fingroup.fingroup#e98634a3dc0445a0bdea71fc5975bb33">]</a></span>.<br/>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> </span><span id="id_perm_morphM" class="id"><a name="id_perm_morphM" class="">id_perm_morphM</a></span><span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrbool.html#b4f176550f5b849a7fbba2ee164934d3">{in</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrbool.html#b4f176550f5b849a7fbba2ee164934d3"> </a></span><span class="id"><a href="pgg_smc.pgg_pismc.html#pgg_idealized_duality.G">G</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrbool.html#b4f176550f5b849a7fbba2ee164934d3"> &amp;,</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrbool.html#b4f176550f5b849a7fbba2ee164934d3"> </a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrfun.html#e69c60b553f06d3463460a9f4cee3c01">{morph</a></span> (<span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrfun.html#45a828b3ff117087a21528e2941ace35">@id</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrfun.html#45a828b3ff117087a21528e2941ace35"> </a></span><span class="id"><a href="pgg_smc.pgg_pismc.html#pgg_idealized_duality.gT">gT</a></span>)<span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrfun.html#e69c60b553f06d3463460a9f4cee3c01"> :</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrfun.html#e69c60b553f06d3463460a9f4cee3c01"> </a></span><span id="x:58" class="id"><span id="x:56" class="id"><a name="x:58" class="">x</a></span></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrfun.html#e69c60b553f06d3463460a9f4cee3c01"> </a></span><span id="y:59" class="id"><span id="y:57" class="id"><a name="y:59" class="">y</a></span></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrfun.html#e69c60b553f06d3463460a9f4cee3c01"> /</a></span> (<span class="id"><a href="pgg_smc.pgg_pismc.html#x:56">x</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.monoid#8b8794efbfbae1b793d9cb62ce802285"> *</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.monoid#8b8794efbfbae1b793d9cb62ce802285"> </a></span><span class="id"><a href="pgg_smc.pgg_pismc.html#y:57">y</a></span>)<span class="id">%g</span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrfun.html#e69c60b553f06d3463460a9f4cee3c01">}</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrbool.html#b4f176550f5b849a7fbba2ee164934d3">}</a></span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="gallina-kwd"> by</span><span class="id"> []</span>. Qed.</div></details>
+<br/>
+<span class="vernacular">Definition</span><span class="id"> </span><span id="id_perm_morph" class="id"><a name="id_perm_morph" class="">id_perm_morph</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.fingroup.morphism#8a399d885a5b51d8b3b3ad681df3eb79">{morphism</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.fingroup.morphism#8a399d885a5b51d8b3b3ad681df3eb79"> </a></span><span class="id"><a href="pgg_smc.pgg_pismc.html#pgg_idealized_duality.G">G</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.fingroup.morphism#8a399d885a5b51d8b3b3ad681df3eb79"> &gt;-&gt;</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.fingroup.morphism#8a399d885a5b51d8b3b3ad681df3eb79"> </a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.fingroup.perm#683bed2e43e8b9b52492c89e618e34b6">{perm</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.fingroup.perm#683bed2e43e8b9b52492c89e618e34b6"> </a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#:::'''I_'_x">'I_</a></span><span class="id"><a href="pgg_smc.pgg_pismc.html#pgg_idealized_duality.N">N</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.fingroup.perm#683bed2e43e8b9b52492c89e618e34b6">}</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.fingroup.morphism#8a399d885a5b51d8b3b3ad681df3eb79">}</a></span><span class="id"> :=</span><br/>
+&nbsp;&nbsp;<span class="id"><a href="NOTFOUND the module url for mathcomp.fingroup.morphism#Morphism">Morphism</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#id_perm_morphM">id_perm_morphM</a></span>.<br/>
+<br/>
+<span class="vernacular">Definition</span><span class="id"> </span><span id="Idealized_PGGTypes" class="id"><a name="Idealized_PGGTypes" class="">Idealized_PGGTypes</a></span><span class="id"> :=</span><span class="id"> @</span><span class="id"><a href="pgg_smc.pgg_interface.html#MkPGG">MkPGG</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#pgg_idealized_duality.gT">gT</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#pgg_idealized_duality.N">N</a></span>.<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#::nat_scope:x_'.-1'">-1</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#pgg_idealized_duality.G">G</a></span>.<br/>
+<br/>
+<span class="vernacular">Definition</span><span class="id"> </span><span id="Idealized_isMonodromyRepr" class="id"><a name="Idealized_isMonodromyRepr" class="">Idealized_isMonodromyRepr</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_interface.html#isMonodromyRepr">isMonodromyRepr</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#Idealized_PGGTypes">Idealized_PGGTypes</a></span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id">constructor</span>.<br/>
+<span class="id">rewrite</span><span class="id"> /</span><span class="id"><a href="pgg_smc.pgg_pismc.html#Idealized_PGGTypes">Idealized_PGGTypes</a></span><span class="id"> /=</span>.<br/>
+<span class="id">exact:</span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#id_perm_morph">id_perm_morph</a></span>.<br/>
+Defined.</div></details>
+<br/>
+<span class="vernacular">Definition</span><span class="id"> </span><span id="Idealized_MonodromyRepr" class="id"><a name="Idealized_MonodromyRepr" class="">Idealized_MonodromyRepr</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_interface.html#MonodromyRepr.Exports.MonodromyReprType">MonodromyReprType</a></span><span class="id"> :=</span><br/>
+&nbsp;&nbsp;<span class="id">@</span><span class="id"><a href="pgg_smc.pgg_interface.html#MonodromyRepr.Pack">MonodromyRepr</a></span>.<span class="id"><a href="pgg_smc.pgg_interface.html#MonodromyRepr.Pack">Pack</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#Idealized_PGGTypes">Idealized_PGGTypes</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">@</span><span class="id"><a href="pgg_smc.pgg_interface.html#MonodromyRepr.Class">MonodromyRepr</a></span>.<span class="id"><a href="pgg_smc.pgg_interface.html#MonodromyRepr.Class">Class</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#Idealized_PGGTypes">Idealized_PGGTypes</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#Idealized_isMonodromyRepr">Idealized_isMonodromyRepr</a></span>).<br/>
+<br/>
+<span class="vernacular">Let</span><span class="id"> </span><span id="pgg_idealized_duality.M" class="id"><a name="pgg_idealized_duality.M" class="">M</a></span><span class="id"> :=</span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#Idealized_MonodromyRepr">Idealized_MonodromyRepr</a></span>.<br/>
+<br/>
+<span class="vernacular">Definition</span><span class="id"> </span><span id="test_starts_2" class="id"><a name="test_starts_2" class="">test_starts_2</a></span><span class="id"> :</span><span class="id"> 2</span>.<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#::type_scope:x_'.-tuple'">-tuple</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#::type_scope:x_'.-tuple'"> 'I_N</a></span><span class="id"> :=</span><br/>
+&nbsp;&nbsp;<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#44d42eed9f717544480811f482f3c650">[tuple</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#44d42eed9f717544480811f482f3c650"> </a></span><span class="id">@</span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#Ordinal">Ordinal</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#pgg_idealized_duality.N">N</a></span><span class="id"> 0</span><span class="id"> </span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrbool.html#isT">isT</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#44d42eed9f717544480811f482f3c650">;</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#44d42eed9f717544480811f482f3c650"> </a></span><span class="id">@</span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#Ordinal">Ordinal</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#pgg_idealized_duality.N">N</a></span><span class="id"> 1</span><span class="id"> </span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrbool.html#isT">isT</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#44d42eed9f717544480811f482f3c650">]</a></span>.<br/>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> </span><span id="test_starts_2_uniq" class="id"><a name="test_starts_2_uniq" class="">test_starts_2_uniq</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.seq#uniq">uniq</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#test_starts_2">test_starts_2</a></span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="gallina-kwd"> by</span><span class="id"> native_compute</span>. Qed.</div></details>
+<br/>
+<span class="vernacular">Definition</span><span class="id"> </span><span id="Test_PGG_2" class="id"><a name="Test_PGG_2" class="">Test_PGG_2</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_interface.html#PGGInterface">PGGInterface</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#pgg_idealized_duality.M">M</a></span><span class="id"> :=</span><br/>
+&nbsp;&nbsp;<span class="id">@</span><span class="id"><a href="pgg_smc.pgg_interface.html#MkPGGI">MkPGGI</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#pgg_idealized_duality.M">M</a></span><span class="id"> 1</span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#test_starts_2">test_starts_2</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#test_starts_2_uniq">test_starts_2_uniq</a></span>.<br/>
+<br/>
+<span class="vernacular">Let</span><span class="id"> </span><span id="pgg_idealized_duality.PI" class="id"><a name="pgg_idealized_duality.PI" class="">PI</a></span><span class="id"> :=</span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#Test_PGG_2">Test_PGG_2</a></span>.<br/>
+<span class="vernacular">Let</span><span class="id"> </span><span id="pgg_idealized_duality.data" class="id"><a name="pgg_idealized_duality.data" class="">data</a></span><span class="id"> :=</span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_interface.html#pgg_data">pgg_data</a></span> (<span class="id"><a href="pgg_smc.pgg_interface.html#pgg_N'">pgg_N'</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#pgg_idealized_duality.M">M</a></span>).<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#bda89d73ec4a8f23ae92b565ffb5aaa6">+1</a></span>.<br/>
+<br/>
+<span class="vernacular">Let</span><span class="id"> </span><span id="pgg_idealized_duality.parties_2" class="id"><a name="pgg_idealized_duality.parties_2" class="">parties_2</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.seq#seq">seq</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#:::'''I_'_x">'I_</a></span><span class="id">2</span><span class="id"> :=</span><br/>
+&nbsp;&nbsp;<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.seq#9e9281397dab83046645f1b62dbb2487">[::</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.seq#9e9281397dab83046645f1b62dbb2487"> </a></span><span class="id">@</span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#Ordinal">Ordinal</a></span><span class="id"> 2</span><span class="id"> 0</span><span class="id"> </span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrbool.html#isT">isT</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.seq#9e9281397dab83046645f1b62dbb2487">;</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.seq#9e9281397dab83046645f1b62dbb2487"> </a></span><span class="id">@</span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#Ordinal">Ordinal</a></span><span class="id"> 2</span><span class="id"> 1</span><span class="id"> </span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrbool.html#isT">isT</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.seq#9e9281397dab83046645f1b62dbb2487">]</a></span>.<br/>
+<br/>
+<span class="vernacular">Variables</span> (<span id="pgg_idealized_duality.W" class="id"><a name="pgg_idealized_duality.W" class="">W</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.seq#seq">seq</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.fingroup.perm#683bed2e43e8b9b52492c89e618e34b6">{perm</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.fingroup.perm#683bed2e43e8b9b52492c89e618e34b6"> </a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#:::'''I_'_x">'I_</a></span><span class="id"><a href="pgg_smc.pgg_pismc.html#pgg_idealized_duality.N">N</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.fingroup.perm#683bed2e43e8b9b52492c89e618e34b6">}</a></span>) (<span id="pgg_idealized_duality.P_idx" class="id"><a name="pgg_idealized_duality.P_idx" class="">P_idx</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Datatypes.html#nat">nat</a></span>).<br/>
+<br/>
+<span class="vernacular">Local</span><span class="vernacular"> Open</span><span class="vernacular"> Scope</span><span class="id"> sproc_scope</span>.<br/>
+<br/>
+<span class="vernacular">Definition</span><span class="id"> </span><span id="ap_dealer_2" class="id"><a name="ap_dealer_2" class="">ap_dealer_2</a></span><span class="id"> :=</span><br/>
+&nbsp;&nbsp;<span class="id"><a href="infotheo.smc.smc_session_types.html#mk_aproc">mk_aproc</a></span> (<span class="id"><a href="pgg_smc.pgg_pismc.html#pdealer">pdealer</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#pgg_idealized_duality.PI">PI</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#pgg_idealized_duality.parties_2">parties_2</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#pgg_idealized_duality.W">W</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#pgg_idealized_duality.P_idx">P_idx</a></span>).<br/>
+<span class="vernacular">Definition</span><span class="id"> </span><span id="ap_party0_2" class="id"><a name="ap_party0_2" class="">ap_party0_2</a></span><span class="id"> :=</span><br/>
+&nbsp;&nbsp;<span class="id"><a href="infotheo.smc.smc_session_types.html#mk_aproc">mk_aproc</a></span> (<span class="id"><a href="pgg_smc.pgg_pismc.html#pparty">pparty</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#pgg_idealized_duality.PI">PI</a></span> (<span class="id">@</span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#Ordinal">Ordinal</a></span><span class="id"> 2</span><span class="id"> 0</span><span class="id"> </span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrbool.html#isT">isT</a></span>)).<br/>
+<span class="vernacular">Definition</span><span class="id"> </span><span id="ap_party1_2" class="id"><a name="ap_party1_2" class="">ap_party1_2</a></span><span class="id"> :=</span><br/>
+&nbsp;&nbsp;<span class="id"><a href="infotheo.smc.smc_session_types.html#mk_aproc">mk_aproc</a></span> (<span class="id"><a href="pgg_smc.pgg_pismc.html#pparty">pparty</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#pgg_idealized_duality.PI">PI</a></span> (<span class="id">@</span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#Ordinal">Ordinal</a></span><span class="id"> 2</span><span class="id"> 1</span><span class="id"> </span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrbool.html#isT">isT</a></span>)).<br/>
+<span class="vernacular">Definition</span><span class="id"> </span><span id="ap_recon_2" class="id"><a name="ap_recon_2" class="">ap_recon_2</a></span><span class="id"> :=</span><br/>
+&nbsp;&nbsp;<span class="id"><a href="infotheo.smc.smc_session_types.html#mk_aproc">mk_aproc</a></span> (<span class="id"><a href="pgg_smc.pgg_pismc.html#precon">precon</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#pgg_idealized_duality.PI">PI</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#pgg_idealized_duality.parties_2">parties_2</a></span>).<br/>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> </span><span id="dealer_party0_dual_2" class="id"><a name="dealer_party0_dual_2" class="">dealer_party0_dual_2</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="infotheo.smc.smc_session_types.html#channels_dual">channels_dual</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#ap_dealer_2">ap_dealer_2</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#ap_party0_2">ap_party0_2</a></span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="gallina-kwd"> by</span><span class="id"> native_compute</span>. Qed.</div></details>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> </span><span id="dealer_party1_dual_2" class="id"><a name="dealer_party1_dual_2" class="">dealer_party1_dual_2</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="infotheo.smc.smc_session_types.html#channels_dual">channels_dual</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#ap_dealer_2">ap_dealer_2</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#ap_party1_2">ap_party1_2</a></span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="gallina-kwd"> by</span><span class="id"> native_compute</span>. Qed.</div></details>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> </span><span id="dealer_recon_dual_2" class="id"><a name="dealer_recon_dual_2" class="">dealer_recon_dual_2</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="infotheo.smc.smc_session_types.html#channels_dual">channels_dual</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#ap_dealer_2">ap_dealer_2</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#ap_recon_2">ap_recon_2</a></span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="gallina-kwd"> by</span><span class="id"> native_compute</span>. Qed.</div></details>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> </span><span id="party0_party1_dual_2" class="id"><a name="party0_party1_dual_2" class="">party0_party1_dual_2</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="infotheo.smc.smc_session_types.html#channels_dual">channels_dual</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#ap_party0_2">ap_party0_2</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#ap_party1_2">ap_party1_2</a></span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="gallina-kwd"> by</span><span class="id"> native_compute</span>. Qed.</div></details>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> </span><span id="party0_recon_dual_2" class="id"><a name="party0_recon_dual_2" class="">party0_recon_dual_2</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="infotheo.smc.smc_session_types.html#channels_dual">channels_dual</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#ap_party0_2">ap_party0_2</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#ap_recon_2">ap_recon_2</a></span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="gallina-kwd"> by</span><span class="id"> native_compute</span>. Qed.</div></details>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> </span><span id="party1_recon_dual_2" class="id"><a name="party1_recon_dual_2" class="">party1_recon_dual_2</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="infotheo.smc.smc_session_types.html#channels_dual">channels_dual</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#ap_party1_2">ap_party1_2</a></span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_pismc.html#ap_recon_2">ap_recon_2</a></span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="gallina-kwd"> by</span><span class="id"> native_compute</span>. Qed.</div></details>
+<br/>
+<span class="vernacular">End</span><span class="id"> pgg_idealized_duality</span>.<br/>
+
+      <div class="footer"><hr/>Generated by <a href="https://github.com/affeldt-aist/rocqnavi/">rocqnavi</a></div>
+    </div>
+  </div>
+    </main>
+</body>
+</html>

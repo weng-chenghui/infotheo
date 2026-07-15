@@ -1,0 +1,21 @@
+{
+  "findings": [
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/s5x5/pgg_s5x5.v",
+      "line_start": 139,
+      "line_end": 139,
+      "lemma_name": "s5x5_nt_L2",
+      "severity": "error",
+      "evidence_quote": "Lemma s5x5_nt_L2 : n_traces_natB 8 2 s5x5_comm_nat = 42.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": null,
+  "exit_code": 2
+}

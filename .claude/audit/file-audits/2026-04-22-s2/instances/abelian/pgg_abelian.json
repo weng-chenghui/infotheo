@@ -1,0 +1,63 @@
+{
+  "findings": [
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/abelian/pgg_abelian.v",
+      "line_start": 213,
+      "line_end": 213,
+      "lemma_name": "cyclic_search_space_le",
+      "severity": "warning",
+      "evidence_quote": "Lemma cyclic_search_space_le (L : nat) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/abelian/pgg_abelian.v",
+      "line_start": 235,
+      "line_end": 235,
+      "lemma_name": "cyclic_starts_2_uniq",
+      "severity": "warning",
+      "evidence_quote": "Lemma cyclic_starts_2_uniq : uniq cyclic_starts_2.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "S998",
+      "file": "rocq-audit",
+      "line_start": 1,
+      "line_end": 1,
+      "severity": "warning",
+      "evidence_quote": "agent rc=1: ",
+      "closeness": "near",
+      "explanation": "Stage 2 call failed for chunk 3; see logs.",
+      "fix_sketch": "Retry the commit. If repeated, check agent configuration.",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": {
+    "entity_count": 42,
+    "chunk_count": 7,
+    "chunk_size": 6,
+    "workers_used": 4,
+    "tokens_used": 0,
+    "tokens_cap": 20000000,
+    "wall_ms_used": 6799,
+    "wall_ms_cap": 1800000,
+    "deferred_chunks": 0,
+    "stop_reason": "clean",
+    "estimated_usd": 0.0,
+    "model": "sonnet"
+  },
+  "exit_code": 0
+}

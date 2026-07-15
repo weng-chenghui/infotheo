@@ -1,0 +1,164 @@
+{
+  "findings": [
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/denboer1989/five_card_security.v",
+      "line_start": 138,
+      "line_end": 138,
+      "lemma_name": "fc_pow_fix_zero",
+      "severity": "warning",
+      "evidence_quote": "Lemma fc_pow_fix_zero (k : nat) (s : 'I_5) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/denboer1989/five_card_security.v",
+      "line_start": 150,
+      "line_end": 150,
+      "lemma_name": "fc_fix_imp_id",
+      "severity": "warning",
+      "evidence_quote": "Lemma fc_fix_imp_id (g : {perm 'I_5}) (s : 'I_5) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/denboer1989/five_card_security.v",
+      "line_start": 294,
+      "line_end": 294,
+      "lemma_name": "fc_ts_recon_correct",
+      "severity": "warning",
+      "evidence_quote": "Lemma fc_ts_recon_correct (PI : PGGInterface FiveCard_M)",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/denboer1989/five_card_security.v",
+      "line_start": 88,
+      "line_end": 88,
+      "lemma_name": "fc_pow1",
+      "severity": "error",
+      "evidence_quote": "Lemma fc_pow1 (s : 'I_5) : val ((sigma ^+ 1) s) = (val s).+1 %% 5.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/denboer1989/five_card_security.v",
+      "line_start": 167,
+      "line_end": 167,
+      "lemma_name": "fc_eval_inj",
+      "severity": "error",
+      "evidence_quote": "Lemma fc_eval_inj (s : 'I_5) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/denboer1989/five_card_security.v",
+      "line_start": 189,
+      "line_end": 189,
+      "lemma_name": "fc_rhoG_eq",
+      "severity": "error",
+      "evidence_quote": "Lemma fc_rhoG_eq : [set rho x | x in G] = G.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/denboer1989/five_card_security.v",
+      "line_start": 203,
+      "line_end": 203,
+      "lemma_name": "fc_rhoG_regular",
+      "severity": "error",
+      "evidence_quote": "Lemma fc_rhoG_regular (s : 'I_5) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/denboer1989/five_card_security.v",
+      "line_start": 210,
+      "line_end": 210,
+      "lemma_name": "fc_rhoG_trans",
+      "severity": "error",
+      "evidence_quote": "Lemma fc_rhoG_trans (s : 'I_5) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/denboer1989/five_card_security.v",
+      "line_start": 220,
+      "line_end": 220,
+      "lemma_name": "fc_security_uniform",
+      "severity": "error",
+      "evidence_quote": "Definition fc_security_uniform : SecurityWitness R FiveCard_M :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/denboer1989/five_card_security.v",
+      "line_start": 223,
+      "line_end": 223,
+      "lemma_name": "fc_eps_zero",
+      "severity": "error",
+      "evidence_quote": "Lemma fc_eps_zero : sw_bound_eps fc_security_uniform = GRing.zero.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/denboer1989/five_card_security.v",
+      "line_start": 269,
+      "line_end": 269,
+      "lemma_name": "fc_threshold_witness",
+      "severity": "error",
+      "evidence_quote": "Definition fc_threshold_witness : ThresholdWitness FiveCard_M :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/denboer1989/five_card_security.v",
+      "line_start": 272,
+      "line_end": 272,
+      "lemma_name": "fc_rigidity",
+      "severity": "error",
+      "evidence_quote": "Definition fc_rigidity : AlgebraicRigidity R FiveCard_M :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": null,
+  "exit_code": 2
+}

@@ -1,0 +1,21 @@
+{
+  "findings": [
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/free_group_ball.v",
+      "line_start": 319,
+      "line_end": 319,
+      "lemma_name": "search_space_exp_growth",
+      "severity": "warning",
+      "evidence_quote": "Lemma search_space_exp_growth (r L : nat) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": null,
+  "exit_code": 0
+}

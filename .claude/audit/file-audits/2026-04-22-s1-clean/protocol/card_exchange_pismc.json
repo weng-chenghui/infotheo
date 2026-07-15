@@ -1,0 +1,268 @@
+{
+  "findings": [
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/protocol/card_exchange_pismc.v",
+      "line_start": 273,
+      "line_end": 273,
+      "lemma_name": "exchange_dealer_from_words",
+      "severity": "warning",
+      "evidence_quote": "Definition exchange_dealer_from_words (L : nat)",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/protocol/card_exchange_pismc.v",
+      "line_start": 344,
+      "line_end": 344,
+      "lemma_name": "test_starts_2_uniq",
+      "severity": "warning",
+      "evidence_quote": "Lemma test_starts_2_uniq : uniq test_starts_2.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/protocol/card_exchange_pismc.v",
+      "line_start": 391,
+      "line_end": 391,
+      "lemma_name": "dealer_player0_dual_2",
+      "severity": "warning",
+      "evidence_quote": "Lemma dealer_player0_dual_2 : channels_dual ap_dealer_2 ap_player0_2.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/protocol/card_exchange_pismc.v",
+      "line_start": 397,
+      "line_end": 397,
+      "lemma_name": "dealer_player1_dual_2",
+      "severity": "warning",
+      "evidence_quote": "Lemma dealer_player1_dual_2 : channels_dual ap_dealer_2 ap_player1_2.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/protocol/card_exchange_pismc.v",
+      "line_start": 403,
+      "line_end": 403,
+      "lemma_name": "dealer_verifier_dual_2",
+      "severity": "warning",
+      "evidence_quote": "Lemma dealer_verifier_dual_2 : channels_dual ap_dealer_2 ap_verifier_2.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/protocol/card_exchange_pismc.v",
+      "line_start": 409,
+      "line_end": 409,
+      "lemma_name": "player0_player1_dual_2",
+      "severity": "warning",
+      "evidence_quote": "Lemma player0_player1_dual_2 : channels_dual ap_player0_2 ap_player1_2.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/protocol/card_exchange_pismc.v",
+      "line_start": 415,
+      "line_end": 415,
+      "lemma_name": "player0_verifier_dual_2",
+      "severity": "warning",
+      "evidence_quote": "Lemma player0_verifier_dual_2 : channels_dual ap_player0_2 ap_verifier_2.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/protocol/card_exchange_pismc.v",
+      "line_start": 421,
+      "line_end": 421,
+      "lemma_name": "player1_verifier_dual_2",
+      "severity": "warning",
+      "evidence_quote": "Lemma player1_verifier_dual_2 : channels_dual ap_player1_2 ap_verifier_2.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/protocol/card_exchange_pismc.v",
+      "line_start": 472,
+      "line_end": 472,
+      "lemma_name": "dealer_player0_dual_gen",
+      "severity": "warning",
+      "evidence_quote": "Lemma dealer_player0_dual_gen : channels_dual ap_dealer_gen ap_player0_gen.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/protocol/card_exchange_pismc.v",
+      "line_start": 478,
+      "line_end": 478,
+      "lemma_name": "dealer_player1_dual_gen",
+      "severity": "warning",
+      "evidence_quote": "Lemma dealer_player1_dual_gen : channels_dual ap_dealer_gen ap_player1_gen.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/protocol/card_exchange_pismc.v",
+      "line_start": 484,
+      "line_end": 484,
+      "lemma_name": "dealer_verifier_dual_gen",
+      "severity": "warning",
+      "evidence_quote": "Lemma dealer_verifier_dual_gen : channels_dual ap_dealer_gen ap_verifier_gen.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/protocol/card_exchange_pismc.v",
+      "line_start": 490,
+      "line_end": 490,
+      "lemma_name": "player0_player1_dual_gen",
+      "severity": "warning",
+      "evidence_quote": "Lemma player0_player1_dual_gen : channels_dual ap_player0_gen ap_player1_gen.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/protocol/card_exchange_pismc.v",
+      "line_start": 496,
+      "line_end": 496,
+      "lemma_name": "player0_verifier_dual_gen",
+      "severity": "warning",
+      "evidence_quote": "Lemma player0_verifier_dual_gen : channels_dual ap_player0_gen ap_verifier_gen.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/protocol/card_exchange_pismc.v",
+      "line_start": 502,
+      "line_end": 502,
+      "lemma_name": "player1_verifier_dual_gen",
+      "severity": "warning",
+      "evidence_quote": "Lemma player1_verifier_dual_gen : channels_dual ap_player1_gen ap_verifier_gen.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/protocol/card_exchange_pismc.v",
+      "line_start": 522,
+      "line_end": 522,
+      "lemma_name": "dealer_player0_dual_mon",
+      "severity": "warning",
+      "evidence_quote": "Definition dealer_player0_dual_mon :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/protocol/card_exchange_pismc.v",
+      "line_start": 528,
+      "line_end": 528,
+      "lemma_name": "dealer_player1_dual_mon",
+      "severity": "warning",
+      "evidence_quote": "Definition dealer_player1_dual_mon :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/protocol/card_exchange_pismc.v",
+      "line_start": 534,
+      "line_end": 534,
+      "lemma_name": "dealer_verifier_dual_mon",
+      "severity": "warning",
+      "evidence_quote": "Definition dealer_verifier_dual_mon :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/protocol/card_exchange_pismc.v",
+      "line_start": 540,
+      "line_end": 540,
+      "lemma_name": "player0_player1_dual_mon",
+      "severity": "warning",
+      "evidence_quote": "Definition player0_player1_dual_mon :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/protocol/card_exchange_pismc.v",
+      "line_start": 546,
+      "line_end": 546,
+      "lemma_name": "player0_verifier_dual_mon",
+      "severity": "warning",
+      "evidence_quote": "Definition player0_verifier_dual_mon :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/protocol/card_exchange_pismc.v",
+      "line_start": 552,
+      "line_end": 552,
+      "lemma_name": "player1_verifier_dual_mon",
+      "severity": "warning",
+      "evidence_quote": "Definition player1_verifier_dual_mon :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": null,
+  "exit_code": 0
+}

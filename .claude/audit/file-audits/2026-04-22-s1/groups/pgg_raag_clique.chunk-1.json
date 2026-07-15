@@ -1,0 +1,255 @@
+{
+  "findings": [
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 314,
+      "line_end": 314,
+      "lemma_name": "all_pairs_comm_nil",
+      "severity": "warning",
+      "evidence_quote": "Lemma all_pairs_comm_nil comm : all_pairs_comm_sorted comm [::] = true.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 235,
+      "line_end": 235,
+      "lemma_name": "free3_ct1",
+      "severity": "error",
+      "evidence_quote": "Lemma free3_ct1 : clique_traces 3 1 (fun _ _ => false) = 3.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 238,
+      "line_end": 238,
+      "lemma_name": "free3_ct2",
+      "severity": "error",
+      "evidence_quote": "Lemma free3_ct2 : clique_traces 3 2 (fun _ _ => false) = 9.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 241,
+      "line_end": 241,
+      "lemma_name": "free3_ct3",
+      "severity": "error",
+      "evidence_quote": "Lemma free3_ct3 : clique_traces 3 3 (fun _ _ => false) = 27.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 253,
+      "line_end": 253,
+      "lemma_name": "abelian3_ct1",
+      "severity": "error",
+      "evidence_quote": "Lemma abelian3_ct1 : clique_traces 3 1 complete_comm_nat = 3.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 256,
+      "line_end": 256,
+      "lemma_name": "abelian3_ct2",
+      "severity": "error",
+      "evidence_quote": "Lemma abelian3_ct2 : clique_traces 3 2 complete_comm_nat = 6.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 259,
+      "line_end": 259,
+      "lemma_name": "abelian3_ct3",
+      "severity": "error",
+      "evidence_quote": "Lemma abelian3_ct3 : clique_traces 3 3 complete_comm_nat = 10.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 268,
+      "line_end": 268,
+      "lemma_name": "abelian3_ntB3",
+      "severity": "error",
+      "evidence_quote": "Lemma abelian3_ntB3 : n_traces_natB 3 3 complete_comm_nat = 10.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 276,
+      "line_end": 276,
+      "lemma_name": "path3_ct1",
+      "severity": "error",
+      "evidence_quote": "Lemma path3_ct1 : clique_traces 3 1 path_comm_nat = 3.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 279,
+      "line_end": 279,
+      "lemma_name": "path3_ct2",
+      "severity": "error",
+      "evidence_quote": "Lemma path3_ct2 : clique_traces 3 2 path_comm_nat = 8.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 282,
+      "line_end": 282,
+      "lemma_name": "path3_ct3",
+      "severity": "error",
+      "evidence_quote": "Lemma path3_ct3 : clique_traces 3 3 path_comm_nat = 21.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 289,
+      "line_end": 289,
+      "lemma_name": "path3_ntB3",
+      "severity": "error",
+      "evidence_quote": "Lemma path3_ntB3 : n_traces_natB 3 3 path_comm_nat = 21.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 314,
+      "line_end": 314,
+      "lemma_name": "all_pairs_comm_nil",
+      "severity": "error",
+      "evidence_quote": "Lemma all_pairs_comm_nil comm : all_pairs_comm_sorted comm [::] = true.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 317,
+      "line_end": 317,
+      "lemma_name": "subseqs_k0",
+      "severity": "error",
+      "evidence_quote": "Lemma subseqs_k0 s : subseqs_k 0 s = [:: [::]].",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 320,
+      "line_end": 320,
+      "lemma_name": "clique_count0",
+      "severity": "error",
+      "evidence_quote": "Lemma clique_count0 Tg comm : clique_count Tg 0 comm = 1.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 326,
+      "line_end": 326,
+      "lemma_name": "subseqs_k1",
+      "severity": "error",
+      "evidence_quote": "Lemma subseqs_k1 s : subseqs_k 1 s = [seq [:: x] | x <- s].",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 332,
+      "line_end": 332,
+      "lemma_name": "empty_clique_count1",
+      "severity": "error",
+      "evidence_quote": "Lemma empty_clique_count1 Tg :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 340,
+      "line_end": 340,
+      "lemma_name": "subseqs_k_subseq",
+      "severity": "error",
+      "evidence_quote": "Lemma subseqs_k_subseq k s t : t \\in subseqs_k k s -> subseq t s.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 350,
+      "line_end": 350,
+      "lemma_name": "mem_subseqs_k",
+      "severity": "error",
+      "evidence_quote": "Lemma mem_subseqs_k k s t :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": null,
+  "exit_code": 2
+}

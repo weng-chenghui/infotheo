@@ -1,0 +1,6 @@
+timestamp	file	chunk	lines	exit_code	errors	warnings	duration_s	note
+2026-04-23T00:11:27Z	groups/pgg_raag_clique.v	0	141-301	0	0	9	91	
+2026-04-23T00:12:58Z	groups/pgg_raag_clique.v	1	302-539	2	1	5	310	
+2026-04-23T00:18:08Z	groups/pgg_raag_clique.v	2	540-924	0	0	20	432	
+2026-04-23T00:25:20Z	groups/pgg_raag_clique.v	3	925-1371	0	0	16	385	
+2026-04-23T00:31:45Z	groups/pgg_raag_clique.v	4	1372-1390	0	0	4	100	

@@ -1,0 +1,35 @@
+id: H001
+category: formatting
+title: "Lemma, Theorem, Fact, Corollary, or Proposition lacks a preceding comment (or comment is degenerate)"
+severity: error
+enabled: true
+stage_mode: both
+authority:
+  - peer-feedback-2026-04
+  - coqdoc
+fast_check:
+  kind: missing_preceding_comment
+agent_prompt: |
+  Stage 1 detects missing preceding comments. Stage 2 detects degenerate
+  comments that passed Stage 1 only because a `(* ... *)` block was
+  physically present.
+
+  Evaluate the entity's `preceding_comment` field. Strip `(*`, `(**`, and
+  `*)` delimiters plus whitespace. Count informative characters and
+  alphabetic tokens (Unicode letters allowed, length at least three).
+
+  Emit H001 at severity `error` with `closeness: far` when ANY holds:
+  - fewer than ten characters after stripping;
+  - fewer than two alphabetic tokens of length three or more;
+  - content is only `TODO`, `FIXME`, `WIP`, `XXX`, `???`, or a single
+    word matching the entity identifier;
+  - content is a generic copyright/licence header that never mentions
+    this specific entity.
+
+  Otherwise do not emit H001. H002 will run the content check.
+
+  Include the stripped comment text as `evidence_quote`. Do NOT duplicate
+  Stage 1 findings that already reported this entity as uncommented.
+scope: changed_lemmas
+fix_hint: "Add a preceding `(* ... *)` comment, 1-5 lines of prose for Lemma/Theorem/Fact/Corollary/Proposition (1-10 for non-Local multi-line Definition/Fixpoint), stating the entity's conceptual role or the proof's key trick. See AUTHORITY.md 'Comment style' section for examples. Do not use stacked `Kind:` / `Why:` / `Used by:` slots."
+exceptions: []

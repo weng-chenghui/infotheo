@@ -1,0 +1,54 @@
+{
+  "findings": [
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/security/pgg_security_demo.v",
+      "line_start": 66,
+      "line_end": 80,
+      "lemma_name": "fiber_eps_scan",
+      "severity": "warning",
+      "evidence_quote": "(* Fiber epsilon scan: compute eps at each L in a list *)",
+      "closeness": "near",
+      "explanation": "The preceding comment fails two of the four H002 checklist parts. (1) KIND: no classification token (helper / main / canonical / etc.) is present. (2) WHY: no motivation is given; the waiver conditions do not apply — the name carries no algebraic-law suffix, the kind is not canonical/notation/coercion/instance, and the WHAT clause does not name a downstream use-site crisply. WHAT ('compute eps at each L in a list') marginally passes by paraphrasing the map body. USED_BY is conditional on KIND being confirmed as helper.",
+      "fix_sketch": "(** fiber_eps_scan — maps each L in Ls to the pair (L, raag_fiber_eps_nat desc L), returning the per-L epsilon values as a seq (nat * (nat * nat)).\n    Kind: helper.\n    Why: feeds downstream aggregation or reporting passes that need the full per-L epsilon scan.\n    Used by: <consumer name>. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "S998",
+      "file": "rocq-audit",
+      "line_start": 1,
+      "line_end": 1,
+      "severity": "warning",
+      "evidence_quote": "result field not JSON: ```json\n{\n  \"passed\": true,\n  \"findings\": [\n    {\n      \"rule_id\": \"H002\",\n      \"file\": \"pgg-smc/security/pgg_security_demo.v\",\n      \"line_start\": 36,\n      \"line_end\": 38,\n      \"lemma_name\": \"orbi",
+      "closeness": "near",
+      "explanation": "Stage 2 call failed for chunk 0; see logs.",
+      "fix_sketch": "Retry the commit. If repeated, check agent configuration.",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": {
+    "entity_count": 8,
+    "chunk_count": 3,
+    "chunk_size": 3,
+    "workers_used": 3,
+    "tokens_used": 37752,
+    "tokens_cap": 20000000,
+    "wall_ms_used": 110102,
+    "wall_ms_cap": 1800000,
+    "deferred_chunks": 0,
+    "stop_reason": "clean",
+    "estimated_usd": 0.2265,
+    "model": "sonnet"
+  },
+  "exit_code": 0
+}

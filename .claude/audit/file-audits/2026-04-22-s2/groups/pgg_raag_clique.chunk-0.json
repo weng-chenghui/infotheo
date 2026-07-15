@@ -1,0 +1,212 @@
+{
+  "findings": [
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 141,
+      "line_end": 142,
+      "lemma_name": "star3_cc0",
+      "severity": "warning",
+      "evidence_quote": "Lemma star3_cc0 : clique_count 4 0 (star_comm_nat 3) = 1.",
+      "closeness": "near",
+      "explanation": "The statement shape is an equation (`clique_count 4 0 (star_comm_nat 3) = 1`); per AUTHORITY.md the canonical suffix for equational rewrites is `E`. The suffix `cc0` bundles an unregistered main-symbol abbreviation (`cc` for clique_count) with a positional index (`0`). Neither component is a MathComp canonical suffix. The trailing `0` in MathComp conventionally denotes ring/nat zero or an empty-set result, which conflicts with the actual value `= 1`. If the indexed-series naming is intentional, a `Naming:` justification is required per AUTHORITY.md.",
+      "fix_sketch": "Option A (E suffix, indexed): Lemma star3_clique0_E : clique_count 4 0 (star_comm_nat 3) = 1.\nOption B (keep series, add justification):\n(** star3_cc0 — ...\n    Naming: cc<k> is a local indexed-series convention for clique-count spot-checks; not a MathComp semantic suffix. *)\nLemma star3_cc0 : ...",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 148,
+      "line_end": 149,
+      "lemma_name": "star3_cc1",
+      "severity": "warning",
+      "evidence_quote": "Lemma star3_cc1 : clique_count 4 1 (star_comm_nat 3) = 4.",
+      "closeness": "near",
+      "explanation": "Same suffix-mismatch as star3_cc0. The statement is an equation; canonical MathComp suffix is `E`. `cc1` is a non-standard suffix combining an unregistered abbreviation with a positional index. The `1` suffix in MathComp conventionally denotes ring/nat/group one, not the integer 1 as a clique-size argument.",
+      "fix_sketch": "Option A: Lemma star3_clique1_E : clique_count 4 1 (star_comm_nat 3) = 4.\nOption B: add Naming: justification to the preceding comment if the indexed series style is deliberate across the whole star3_cc* family.",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 155,
+      "line_end": 156,
+      "lemma_name": "star3_cc2",
+      "severity": "warning",
+      "evidence_quote": "Lemma star3_cc2 : clique_count 4 2 (star_comm_nat 3) = 3.",
+      "closeness": "near",
+      "explanation": "Same suffix-mismatch pattern as star3_cc0 and star3_cc1. Equational statement; canonical suffix is `E`. `cc2` is not in the AUTHORITY.md suffix table.",
+      "fix_sketch": "Option A: Lemma star3_clique2_E : clique_count 4 2 (star_comm_nat 3) = 3.\nOption B: add Naming: justification in the preceding comment.",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 162,
+      "line_end": 163,
+      "lemma_name": "star3_cc3",
+      "severity": "warning",
+      "evidence_quote": "Lemma star3_cc3 : clique_count 4 3 (star_comm_nat 3) = 0.",
+      "closeness": "near",
+      "explanation": "Same suffix-mismatch pattern. Equational statement with result `= 0`; canonical suffix is `E`. Note additionally that `_0` in MathComp denotes ring/nat zero or an empty-set property, which would be misleading here since the index `3` (3-clique count) happens to equal 0 by coincidence, not because this is a structural zero-element result.",
+      "fix_sketch": "Option A: Lemma star3_clique3_E : clique_count 4 3 (star_comm_nat 3) = 0.\nOption B: add Naming: justification in the preceding comment documenting the cc<k> local convention.",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 141,
+      "line_end": 147,
+      "lemma_name": "star3_cc0",
+      "severity": "warning",
+      "evidence_quote": "(* ---- Clique counts for star K_{1,3} (4 generators) ---- *)",
+      "closeness": "far",
+      "explanation": "The preceding comment is a section-separator banner describing the entire group of star3_cc* lemmas, not a per-entity docstring for star3_cc0 specifically. It fails all four H002 checklist parts: (1) KIND is absent; (2) WHAT provides no paraphrase of the specific statement `clique_count 4 0 (star_comm_nat 3) = 1`; (3) WHY gives no motivation; (4) because KIND is unknown, USED_BY applicability cannot be determined. The immediately-following lemmas star3_cc1 through star3_cc3 each carry a proper per-lemma `(** ... Kind: example. *)` block; star3_cc0 is the only one missing the equivalent.",
+      "fix_sketch": "(** star3_cc0 — vm_compute check: the star K_{1,3} has exactly 1 nullary clique (the unique 0-clique).\n    Kind: example.\n    Why: verifies the k=0 base value of the clique-count series for K_{1,3}.\n*)\nLemma star3_cc0 : clique_count 4 0 (star_comm_nat 3) = 1.",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 221,
+      "line_end": 221,
+      "lemma_name": "path3_cc0",
+      "severity": "warning",
+      "evidence_quote": "(* ---- Clique counts for path on 3 generators ---- *)",
+      "closeness": "far",
+      "explanation": "The preceding comment is a section divider rather than a per-entity block. It fails all four parts of H002: (1) Kind is unspecified (no helper/main/example classification for this specific lemma); (2) What is not paraphrased (no reference to the statement `clique_count 3 0 path_comm_nat = 1`, i.e. that the path P_3 has exactly one empty clique or equivalent); (3) Why is not given (no motivation, sanity-check rationale, or use-site); (4) Used-by is not applicable but the absence of Kind prevents waiver. The three sibling lemmas path3_cc1, path3_cc2, path3_cc3 each carry a dedicated `(** ... Kind: example. *)` block; path3_cc0 is the odd one out.",
+      "fix_sketch": "Insert a dedicated comment block between the section divider and the declaration, e.g.:\n\n(* ---- Clique counts for path on 3 generators ---- *)\n\n(** path3_cc0 — vm_compute check: the path P_3 has exactly one empty clique.\n    Kind: example.\n*)\nLemma path3_cc0 : clique_count 3 0 path_comm_nat = 1.",
+      "confidence": "medium",
+      "stage": "stage2",
+      "escalated_model": "opus",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 247,
+      "line_end": 247,
+      "lemma_name": "star3_ct0",
+      "severity": "warning",
+      "evidence_quote": "(* ---- Trace counts: star K_{1,3} ---- *)",
+      "closeness": "far",
+      "explanation": "The preceding comment is a batch section divider (`---- Trace counts: star K_{1,3} ----`) that introduces the topic but does not describe star3_ct0 specifically. Fails KIND (no `Kind:` classification nor synonym), WHAT (no paraphrase of `clique_traces 4 0 (star_comm_nat 3) = 1`), and WHY (no motivation). The author added proper per-lemma comments before star3_ct1/ct2/ct3 but not before the first lemma of the batch; insert one for star3_ct0 at the same indentation.",
+      "fix_sketch": "(** star3_ct0 — vm_compute trace count m_0 = 1 for star K_{1,3}.\n    Kind: example.\n*)\nLemma star3_ct0 : clique_traces 4 0 (star_comm_nat 3) = 1.",
+      "confidence": "high",
+      "stage": "stage2",
+      "escalated_model": "opus",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 253,
+      "line_end": 253,
+      "lemma_name": "star3_ct1",
+      "severity": "warning",
+      "evidence_quote": "star3_ct1 — vm_compute trace count m_1 = 4 for star K_{1,3}.\n    Kind: example.",
+      "closeness": "near",
+      "explanation": "KIND (`Kind: example`) and WHAT (paraphrase of the equation) are present. WHY is absent: no motivation is given and no downstream use-site is named in the WHAT clause. The H002 waiver list covers `canonical`, `notation`, `coercion`, `instance`, and algebraic-law suffixes; `example` is not waived. For a batch of vm_compute verification lemmas, a single-line motivation such as \"sanity-check the clique_traces enumeration for K_{1,3}\" restores compliance.",
+      "fix_sketch": "(** star3_ct1 — vm_compute trace count m_1 = 4 for star K_{1,3}.\n    Kind: example.\n    Why: sanity-check that clique_traces computes the expected enumeration for star K_{1,3}.\n*)",
+      "confidence": "medium",
+      "stage": "stage2",
+      "escalated_model": "opus",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 259,
+      "line_end": 259,
+      "lemma_name": "star3_ct2",
+      "severity": "warning",
+      "evidence_quote": "star3_ct2 — vm_compute trace count m_2 = 13 for star K_{1,3}.\n    Kind: example.",
+      "closeness": "near",
+      "explanation": "KIND and WHAT are present; WHY is absent. Same issue as star3_ct1: `Kind: example` is not on the H002 WHY-waiver list and the WHAT clause does not name a downstream consumer that would substitute for motivation. The sibling batch lemmas share this defect and can be fixed with one common Why line per lemma, or a single reference to the batch rationale.",
+      "fix_sketch": "(** star3_ct2 — vm_compute trace count m_2 = 13 for star K_{1,3}.\n    Kind: example.\n    Why: sanity-check that clique_traces computes the expected enumeration for star K_{1,3}.\n*)",
+      "confidence": "medium",
+      "stage": "stage2",
+      "escalated_model": "opus",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 265,
+      "line_end": 265,
+      "lemma_name": "star3_ct3",
+      "severity": "warning",
+      "evidence_quote": "star3_ct3 — vm_compute trace count m_3 = 40 for star K_{1,3}.\n    Kind: example.",
+      "closeness": "near",
+      "explanation": "KIND and WHAT are present; WHY is absent. Same defect class as star3_ct1 and star3_ct2. The four-lemma batch (ct0..ct3) would benefit from a shared Why line so each entity records why the specific value is expected (e.g., counting closed walks of length m in the commutation graph of star K_{1,3}).",
+      "fix_sketch": "(** star3_ct3 — vm_compute trace count m_3 = 40 for star K_{1,3}.\n    Kind: example.\n    Why: sanity-check that clique_traces computes the expected enumeration for star K_{1,3}.\n*)",
+      "confidence": "medium",
+      "stage": "stage2",
+      "escalated_model": "opus",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "S998",
+      "file": "rocq-audit",
+      "line_start": 1,
+      "line_end": 1,
+      "severity": "warning",
+      "evidence_quote": "result field not JSON: ```json\n{\n  \"passed\": false,\n  \"findings\": [\n    {\n      \"rule_id\": \"H002\",\n      \"file\": \"pgg-smc/groups/pgg_raag_clique.v\",\n      \"line_start\": 269,\n      \"line_end\": 270,\n      \"lemma_name\": \"star3",
+      "closeness": "near",
+      "explanation": "Stage 2 call failed for chunk 5; see logs.",
+      "fix_sketch": "Retry the commit. If repeated, check agent configuration.",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": {
+    "entity_count": 25,
+    "chunk_count": 7,
+    "chunk_size": 4,
+    "workers_used": 4,
+    "tokens_used": 482707,
+    "tokens_cap": 20000000,
+    "wall_ms_used": 348544,
+    "wall_ms_cap": 1800000,
+    "deferred_chunks": 0,
+    "stop_reason": "clean",
+    "estimated_usd": 2.8962,
+    "model": "sonnet"
+  },
+  "exit_code": 0
+}

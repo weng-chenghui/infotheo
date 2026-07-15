@@ -1,0 +1,73 @@
+{
+  "findings": [
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/ag_multiplicative.v",
+      "line_start": 42,
+      "line_end": 42,
+      "lemma_name": "hadamard",
+      "severity": "error",
+      "evidence_quote": "Definition hadamard (c1 c2 : 'rV[F]_n) : 'rV[F]_n :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/ag_multiplicative.v",
+      "line_start": 45,
+      "line_end": 45,
+      "lemma_name": "hadamard_comm",
+      "severity": "error",
+      "evidence_quote": "Lemma hadamard_comm (c1 c2 : 'rV[F]_n) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/ag_multiplicative.v",
+      "line_start": 49,
+      "line_end": 49,
+      "lemma_name": "hadamardE",
+      "severity": "error",
+      "evidence_quote": "Lemma hadamardE (c1 c2 : 'rV[F]_n) (i : 'I_n) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/ag_multiplicative.v",
+      "line_start": 123,
+      "line_end": 123,
+      "lemma_name": "hadamard_massey_codeword",
+      "severity": "error",
+      "evidence_quote": "Lemma hadamard_massey_codeword (s1 s2 : F)",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/ag_multiplicative.v",
+      "line_start": 217,
+      "line_end": 217,
+      "lemma_name": "ag_mult_scheme",
+      "severity": "error",
+      "evidence_quote": "Definition ag_mult_scheme : MultiplicativeScheme :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": null,
+  "exit_code": 2
+}

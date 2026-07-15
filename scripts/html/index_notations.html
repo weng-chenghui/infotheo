@@ -1,0 +1,763 @@
+
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Notations</title>
+<meta name="description" content="Documentation of Coq module Infotheo Documentation" />
+<link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/markdown-it/dist/markdown-it.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/markdown-it-texmath/texmath.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/darkmode-js@1.5.7/lib/darkmode-js.min.js"></script>
+<link href="rocqnavi.css" rel="stylesheet" type="text/css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script type="text/javascript" src="rocqnavi.js"> </script>
+</head>
+
+<body onload="init()">
+
+  <main>
+    <div class="sidebar">
+      <h2>Files</h2>
+      <li><details id="infotheo"><summary>infotheo</summary>
+          <ul>
+          <li><details id="infotheo.du2002"><summary>du2002</summary>
+          <ul>
+          <li><a href="infotheo.du2002.spp_entropy.html">spp_entropy</a></li>
+<li><a href="infotheo.du2002.spp_interface.html">spp_interface</a></li>
+<li><a href="infotheo.du2002.spp_pismc.html">spp_pismc</a></li>
+<li><a href="infotheo.du2002.spp_proba.html">spp_proba</a></li>
+<li><a href="infotheo.du2002.spp_program.html">spp_program</a></li>
+<li><a href="infotheo.du2002.spp_proof.html">spp_proof</a></li>
+<li><a href="infotheo.du2002.spp_session_types.html">spp_session_types</a></li>
+<li><a href="infotheo.du2002.spp_tactics.html">spp_tactics</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.dumas2017dual"><summary>dumas2017dual</summary>
+          <ul>
+          <li><details id="infotheo.dumas2017dual.dsdp"><summary>dsdp</summary>
+          <ul>
+          <li><a href="infotheo.dumas2017dual.dsdp.dsdp_correctness.html">dsdp_correctness</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_entropy.html">dsdp_entropy</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_entropy_trace.html">dsdp_entropy_trace</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_interface.html">dsdp_interface</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_pismc.html">dsdp_pismc</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_program.html">dsdp_program</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_security.html">dsdp_security</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_session_types.html">dsdp_session_types</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_syntax_demo.html">dsdp_syntax_demo</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.dumas2017dual.entropy_fiber"><summary>entropy_fiber</summary>
+          <ul>
+          <li><a href="infotheo.dumas2017dual.entropy_fiber.entropy_fiber.html">entropy_fiber</a></li>
+<li><a href="infotheo.dumas2017dual.entropy_fiber.entropy_fiber_zpq.html">entropy_fiber_zpq</a></li>
+<li><a href="infotheo.dumas2017dual.entropy_fiber.linear_fiber_zpq.html">linear_fiber_zpq</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.dumas2017dual.lib"><summary>lib</summary>
+          <ul>
+          <li><a href="infotheo.dumas2017dual.lib.extra_algebra.html">extra_algebra</a></li>
+<li><a href="infotheo.dumas2017dual.lib.extra_entropy.html">extra_entropy</a></li>
+<li><a href="infotheo.dumas2017dual.lib.extra_proba.html">extra_proba</a></li>
+<li><a href="infotheo.dumas2017dual.lib.rouche_capelli.html">rouche_capelli</a></li>
+          </ul>
+          </details>
+          </li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.ecc_classic"><summary>ecc_classic</summary>
+          <ul>
+          <li><a href="infotheo.ecc_classic.alternant.html">alternant</a></li>
+<li><a href="infotheo.ecc_classic.bch.html">bch</a></li>
+<li><a href="infotheo.ecc_classic.cyclic_code.html">cyclic_code</a></li>
+<li><a href="infotheo.ecc_classic.decoding.html">decoding</a></li>
+<li><a href="infotheo.ecc_classic.grs.html">grs</a></li>
+<li><a href="infotheo.ecc_classic.hamming_code.html">hamming_code</a></li>
+<li><a href="infotheo.ecc_classic.linearcode.html">linearcode</a></li>
+<li><a href="infotheo.ecc_classic.mceliece.html">mceliece</a></li>
+<li><a href="infotheo.ecc_classic.poly_decoding.html">poly_decoding</a></li>
+<li><a href="infotheo.ecc_classic.reed_solomon.html">reed_solomon</a></li>
+<li><a href="infotheo.ecc_classic.repcode.html">repcode</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.ecc_modern"><summary>ecc_modern</summary>
+          <ul>
+          <li><a href="infotheo.ecc_modern.checksum.html">checksum</a></li>
+<li><a href="infotheo.ecc_modern.degree_profile.html">degree_profile</a></li>
+<li><a href="infotheo.ecc_modern.ldpc.html">ldpc</a></li>
+<li><a href="infotheo.ecc_modern.ldpc_algo.html">ldpc_algo</a></li>
+<li><a href="infotheo.ecc_modern.ldpc_algo_proof.html">ldpc_algo_proof</a></li>
+<li><a href="infotheo.ecc_modern.ldpc_erasure.html">ldpc_erasure</a></li>
+<li><a href="infotheo.ecc_modern.max_subset.html">max_subset</a></li>
+<li><a href="infotheo.ecc_modern.stopping_set.html">stopping_set</a></li>
+<li><a href="infotheo.ecc_modern.subgraph_partition.html">subgraph_partition</a></li>
+<li><a href="infotheo.ecc_modern.summary.html">summary</a></li>
+<li><a href="infotheo.ecc_modern.summary_tanner.html">summary_tanner</a></li>
+<li><a href="infotheo.ecc_modern.tanner.html">tanner</a></li>
+<li><a href="infotheo.ecc_modern.tanner_partition.html">tanner_partition</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.homomorphic_encryption"><summary>homomorphic_encryption</summary>
+          <ul>
+          <li><details id="infotheo.homomorphic_encryption.benaloh1994"><summary>benaloh1994</summary>
+          <ul>
+          <li><a href="infotheo.homomorphic_encryption.benaloh1994.benaloh_ahe.html">benaloh_ahe</a></li>
+<li><a href="infotheo.homomorphic_encryption.benaloh1994.benaloh_enc.html">benaloh_enc</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.homomorphic_encryption.idealized"><summary>idealized</summary>
+          <ul>
+          <li><a href="infotheo.homomorphic_encryption.idealized.idealized_ahe.html">idealized_ahe</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.homomorphic_encryption.paillier1999"><summary>paillier1999</summary>
+          <ul>
+          <li><a href="infotheo.homomorphic_encryption.paillier1999.paillier_ahe.html">paillier_ahe</a></li>
+<li><a href="infotheo.homomorphic_encryption.paillier1999.paillier_enc.html">paillier_enc</a></li>
+          </ul>
+          </details>
+          </li>
+<li><a href="infotheo.homomorphic_encryption.ahe_enc.html">ahe_enc</a></li>
+<li><a href="infotheo.homomorphic_encryption.ahe_monoid.html">ahe_monoid</a></li>
+<li><a href="infotheo.homomorphic_encryption.enc_dec.html">enc_dec</a></li>
+<li><a href="infotheo.homomorphic_encryption.he_types.html">he_types</a></li>
+<li><a href="infotheo.homomorphic_encryption.homomorphic_encryption.html">homomorphic_encryption</a></li>
+<li><a href="infotheo.homomorphic_encryption.key_type.html">key_type</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.information_theory"><summary>information_theory</summary>
+          <ul>
+          <li><a href="infotheo.information_theory.aep.html">aep</a></li>
+<li><a href="infotheo.information_theory.binary_symmetric_channel.html">binary_symmetric_channel</a></li>
+<li><a href="infotheo.information_theory.channel.html">channel</a></li>
+<li><a href="infotheo.information_theory.channel_code.html">channel_code</a></li>
+<li><a href="infotheo.information_theory.channel_coding_converse.html">channel_coding_converse</a></li>
+<li><a href="infotheo.information_theory.channel_coding_direct.html">channel_coding_direct</a></li>
+<li><a href="infotheo.information_theory.conditional_divergence.html">conditional_divergence</a></li>
+<li><a href="infotheo.information_theory.entropy.html">entropy</a></li>
+<li><a href="infotheo.information_theory.entropy_convex.html">entropy_convex</a></li>
+<li><a href="infotheo.information_theory.erasure_channel.html">erasure_channel</a></li>
+<li><a href="infotheo.information_theory.error_exponent.html">error_exponent</a></li>
+<li><a href="infotheo.information_theory.joint_typ_seq.html">joint_typ_seq</a></li>
+<li><a href="infotheo.information_theory.jtypes.html">jtypes</a></li>
+<li><a href="infotheo.information_theory.kraft.html">kraft</a></li>
+<li><a href="infotheo.information_theory.pproba.html">pproba</a></li>
+<li><a href="infotheo.information_theory.shannon_fano.html">shannon_fano</a></li>
+<li><a href="infotheo.information_theory.source_code.html">source_code</a></li>
+<li><a href="infotheo.information_theory.source_coding_fl_converse.html">source_coding_fl_converse</a></li>
+<li><a href="infotheo.information_theory.source_coding_fl_direct.html">source_coding_fl_direct</a></li>
+<li><a href="infotheo.information_theory.source_coding_vl_converse.html">source_coding_vl_converse</a></li>
+<li><a href="infotheo.information_theory.source_coding_vl_direct.html">source_coding_vl_direct</a></li>
+<li><a href="infotheo.information_theory.string_entropy.html">string_entropy</a></li>
+<li><a href="infotheo.information_theory.success_decode_bound.html">success_decode_bound</a></li>
+<li><a href="infotheo.information_theory.typ_seq.html">typ_seq</a></li>
+<li><a href="infotheo.information_theory.types.html">types</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.lib"><summary>lib</summary>
+          <ul>
+          <li><a href="infotheo.lib.bigop_ext.html">bigop_ext</a></li>
+<li><a href="infotheo.lib.binary_entropy_function.html">binary_entropy_function</a></li>
+<li><a href="infotheo.lib.classical_sets_ext.html">classical_sets_ext</a></li>
+<li><a href="infotheo.lib.coqRE.html">coqRE</a></li>
+<li><a href="infotheo.lib.derive_ext.html">derive_ext</a></li>
+<li><a href="infotheo.lib.dft.html">dft</a></li>
+<li><a href="infotheo.lib.euclid.html">euclid</a></li>
+<li><a href="infotheo.lib.f2.html">f2</a></li>
+<li><a href="infotheo.lib.hamming.html">hamming</a></li>
+<li><a href="infotheo.lib.natbin.html">natbin</a></li>
+<li><a href="infotheo.lib.num_occ.html">num_occ</a></li>
+<li><a href="infotheo.lib.poly_ext.html">poly_ext</a></li>
+<li><a href="infotheo.lib.realType_ext.html">realType_ext</a></li>
+<li><a href="infotheo.lib.realType_ln.html">realType_ln</a></li>
+<li><a href="infotheo.lib.ssr_ext.html">ssr_ext</a></li>
+<li><a href="infotheo.lib.ssralg_ext.html">ssralg_ext</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.probability"><summary>probability</summary>
+          <ul>
+          <li><a href="infotheo.probability.bayes.html">bayes</a></li>
+<li><a href="infotheo.probability.convex.html">convex</a></li>
+<li><a href="infotheo.probability.convex_equiv.html">convex_equiv</a></li>
+<li><a href="infotheo.probability.convex_stone.html">convex_stone</a></li>
+<li><a href="infotheo.probability.divergence.html">divergence</a></li>
+<li><a href="infotheo.probability.fdist.html">fdist</a></li>
+<li><a href="infotheo.probability.fsdist.html">fsdist</a></li>
+<li><a href="infotheo.probability.graphoid.html">graphoid</a></li>
+<li><a href="infotheo.probability.jensen.html">jensen</a></li>
+<li><a href="infotheo.probability.jfdist_cond.html">jfdist_cond</a></li>
+<li><a href="infotheo.probability.log_sum.html">log_sum</a></li>
+<li><a href="infotheo.probability.necset.html">necset</a></li>
+<li><a href="infotheo.probability.partition_inequality.html">partition_inequality</a></li>
+<li><a href="infotheo.probability.pinsker.html">pinsker</a></li>
+<li><a href="infotheo.probability.proba.html">proba</a></li>
+<li><a href="infotheo.probability.variation_dist.html">variation_dist</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.robust"><summary>robust</summary>
+          <ul>
+          <li><a href="infotheo.robust.robustmean.html">robustmean</a></li>
+<li><a href="infotheo.robust.weightedmean.html">weightedmean</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.smc"><summary>smc</summary>
+          <ul>
+          <li><a href="infotheo.smc.graded_resource.html">graded_resource</a></li>
+<li><a href="infotheo.smc.pismc.html">pismc</a></li>
+<li><a href="infotheo.smc.smc_interpreter.html">smc_interpreter</a></li>
+<li><a href="infotheo.smc.smc_session_types.html">smc_session_types</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.toy_examples"><summary>toy_examples</summary>
+          <ul>
+          <li><a href="infotheo.toy_examples.conditional_entropy.html">conditional_entropy</a></li>
+<li><a href="infotheo.toy_examples.expected_value_variance.html">expected_value_variance</a></li>
+<li><a href="infotheo.toy_examples.expected_value_variance_ordn.html">expected_value_variance_ordn</a></li>
+<li><a href="infotheo.toy_examples.expected_value_variance_tuple.html">expected_value_variance_tuple</a></li>
+          </ul>
+          </details>
+          </li>
+<li><a href="infotheo._check_sigs.html">_check_sigs</a></li>
+<li><a href="infotheo._depgraph_extract.html">_depgraph_extract</a></li>
+<li><a href="infotheo._test_star2.html">_test_star2</a></li>
+<li><a href="infotheo.test_sri.html">test_sri</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="pgg_reconstruct"><summary>pgg_reconstruct</summary>
+          <ul>
+          <li><a href="pgg_reconstruct.ag_code.html">ag_code</a></li>
+<li><a href="pgg_reconstruct.ag_massey_bridge.html">ag_massey_bridge</a></li>
+<li><a href="pgg_reconstruct.ag_multiplicative.html">ag_multiplicative</a></li>
+<li><a href="pgg_reconstruct.algebraic_rigidity.html">algebraic_rigidity</a></li>
+<li><a href="pgg_reconstruct.coord_perm_compatible.html">coord_perm_compatible</a></li>
+<li><a href="pgg_reconstruct.cover_genus0.html">cover_genus0</a></li>
+<li><a href="pgg_reconstruct.cover_genus1.html">cover_genus1</a></li>
+<li><a href="pgg_reconstruct.cover_genus2.html">cover_genus2</a></li>
+<li><a href="pgg_reconstruct.cover_tradeoff.html">cover_tradeoff</a></li>
+<li><a href="pgg_reconstruct.covering_scheme.html">covering_scheme</a></li>
+<li><a href="pgg_reconstruct.hyperelliptic_code.html">hyperelliptic_code</a></li>
+<li><a href="pgg_reconstruct.lagrange.html">lagrange</a></li>
+<li><a href="pgg_reconstruct.massey.html">massey</a></li>
+<li><a href="pgg_reconstruct.pgg_assignment.html">pgg_assignment</a></li>
+<li><a href="pgg_reconstruct.pgg_covering_correctness.html">pgg_covering_correctness</a></li>
+<li><a href="pgg_reconstruct.pgg_deck_pairing.html">pgg_deck_pairing</a></li>
+<li><a href="pgg_reconstruct.pgg_sharing_framework.html">pgg_sharing_framework</a></li>
+<li><a href="pgg_reconstruct.pgg_sum_mod.html">pgg_sum_mod</a></li>
+<li><a href="pgg_reconstruct.pgg_threshold.html">pgg_threshold</a></li>
+<li><a href="pgg_reconstruct.pgl_bound.html">pgl_bound</a></li>
+<li><a href="pgg_reconstruct.rigidity_monster_instance.html">rigidity_monster_instance</a></li>
+<li><a href="pgg_reconstruct.rigidity_s5_instance.html">rigidity_s5_instance</a></li>
+<li><a href="pgg_reconstruct.rigidity_star_instance.html">rigidity_star_instance</a></li>
+<li><a href="pgg_reconstruct.rs_massey_bridge.html">rs_massey_bridge</a></li>
+<li><a href="pgg_reconstruct.rs_privacy.html">rs_privacy</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="pgg_smc"><summary>pgg_smc</summary>
+          <ul>
+          <li><a href="pgg_smc.abelian_word_collapse.html">abelian_word_collapse</a></li>
+<li><a href="pgg_smc.free_group_ball.html">free_group_ball</a></li>
+<li><a href="pgg_smc.perm_uniform.html">perm_uniform</a></li>
+<li><a href="pgg_smc.pgg_abelian.html">pgg_abelian</a></li>
+<li><a href="pgg_smc.pgg_abelian.html">pgg_abelian</a></li>
+<li><a href="pgg_smc.pgg_abelian_collapse.html">pgg_abelian_collapse</a></li>
+<li><a href="pgg_smc.pgg_collusion_bound.html">pgg_collusion_bound</a></li>
+<li><a href="pgg_smc.pgg_correctness.html">pgg_correctness</a></li>
+<li><a href="pgg_smc.pgg_free.html">pgg_free</a></li>
+<li><a href="pgg_smc.pgg_interface.html">pgg_interface</a></li>
+<li><a href="pgg_smc.pgg_lfree.html">pgg_lfree</a></li>
+<li><a href="pgg_smc.pgg_nonabelian.html">pgg_nonabelian</a></li>
+<li><a href="pgg_smc.pgg_pismc.html">pgg_pismc</a></li>
+<li><a href="pgg_smc.pgg_program.html">pgg_program</a></li>
+<li><a href="pgg_smc.pgg_raag.html">pgg_raag</a></li>
+<li><a href="pgg_smc.pgg_raag_cartier_foata.html">pgg_raag_cartier_foata</a></li>
+<li><a href="pgg_smc.pgg_raag_clique.html">pgg_raag_clique</a></li>
+<li><a href="pgg_smc.pgg_raag_path.html">pgg_raag_path</a></li>
+<li><a href="pgg_smc.pgg_raag_s5.html">pgg_raag_s5</a></li>
+<li><a href="pgg_smc.pgg_raag_star.html">pgg_raag_star</a></li>
+<li><a href="pgg_smc.pgg_security.html">pgg_security</a></li>
+<li><a href="pgg_smc.pgg_session_types.html">pgg_session_types</a></li>
+<li><a href="pgg_smc.pgg_word_analysis.html">pgg_word_analysis</a></li>
+<li><a href="pgg_smc.test_cf.html">test_cf</a></li>
+<li><a href="pgg_smc.test_cf2.html">test_cf2</a></li>
+<li><a href="pgg_smc.test_cf3.html">test_cf3</a></li>
+<li><a href="pgg_smc.test_sri.html">test_sri</a></li>
+<li><a href="pgg_smc.test_sri2.html">test_sri2</a></li>
+          </ul>
+          </details>
+          </li>
+    </div>
+
+  <div class="coq">
+
+    <div class="content">
+      <p>
+        <a href="./index.html">Top</a>
+        
+      </p>
+      <h1 class="title">Notations</h1>
+<table><tbody>
+<tr><td>Files</td>
+<td><a href="index_file_A.html">A</a></td><td><a href="index_file_B.html">B</a></td><td><a href="index_file_C.html">C</a></td><td><a href="index_file_D.html">D</a></td><td><a href="index_file_E.html">E</a></td><td><a href="index_file_F.html">F</a></td><td><a href="index_file_G.html">G</a></td><td><a href="index_file_H.html">H</a></td><td><a href="index_file_I.html">I</a></td><td><a href="index_file_J.html">J</a></td><td><a href="index_file_K.html">K</a></td><td><a href="index_file_L.html">L</a></td><td><a href="index_file_M.html">M</a></td><td><a href="index_file_N.html">N</a></td><td>O</td><td><a href="index_file_P.html">P</a></td><td>Q</td><td><a href="index_file_R.html">R</a></td><td><a href="index_file_S.html">S</a></td><td><a href="index_file_T.html">T</a></td><td>U</td><td><a href="index_file_V.html">V</a></td><td><a href="index_file_W.html">W</a></td><td>X</td><td>Y</td><td>Z</td><td><a href="index_file__.html">_</a></td></tr>
+<tr><td>Definitions</td>
+<td><a href="index_def_A.html">A</a></td><td><a href="index_def_B.html">B</a></td><td><a href="index_def_C.html">C</a></td><td><a href="index_def_D.html">D</a></td><td><a href="index_def_E.html">E</a></td><td><a href="index_def_F.html">F</a></td><td><a href="index_def_G.html">G</a></td><td><a href="index_def_H.html">H</a></td><td><a href="index_def_I.html">I</a></td><td><a href="index_def_J.html">J</a></td><td><a href="index_def_K.html">K</a></td><td><a href="index_def_L.html">L</a></td><td><a href="index_def_M.html">M</a></td><td><a href="index_def_N.html">N</a></td><td><a href="index_def_O.html">O</a></td><td><a href="index_def_P.html">P</a></td><td><a href="index_def_Q.html">Q</a></td><td><a href="index_def_R.html">R</a></td><td><a href="index_def_S.html">S</a></td><td><a href="index_def_T.html">T</a></td><td><a href="index_def_U.html">U</a></td><td><a href="index_def_V.html">V</a></td><td><a href="index_def_W.html">W</a></td><td><a href="index_def_X.html">X</a></td><td>Y</td><td><a href="index_def_Z.html">Z</a></td><td>_</td></tr>
+<tr><td>Lemmas</td>
+<td><a href="index_prf_A.html">A</a></td><td><a href="index_prf_B.html">B</a></td><td><a href="index_prf_C.html">C</a></td><td><a href="index_prf_D.html">D</a></td><td><a href="index_prf_E.html">E</a></td><td><a href="index_prf_F.html">F</a></td><td><a href="index_prf_G.html">G</a></td><td><a href="index_prf_H.html">H</a></td><td><a href="index_prf_I.html">I</a></td><td><a href="index_prf_J.html">J</a></td><td><a href="index_prf_K.html">K</a></td><td><a href="index_prf_L.html">L</a></td><td><a href="index_prf_M.html">M</a></td><td><a href="index_prf_N.html">N</a></td><td><a href="index_prf_O.html">O</a></td><td><a href="index_prf_P.html">P</a></td><td><a href="index_prf_Q.html">Q</a></td><td><a href="index_prf_R.html">R</a></td><td><a href="index_prf_S.html">S</a></td><td><a href="index_prf_T.html">T</a></td><td><a href="index_prf_U.html">U</a></td><td><a href="index_prf_V.html">V</a></td><td><a href="index_prf_W.html">W</a></td><td><a href="index_prf_X.html">X</a></td><td>Y</td><td><a href="index_prf_Z.html">Z</a></td><td>_</td></tr>
+<tr><td>Abbreviations</td>
+<td><a href="index_abbrev_A.html">A</a></td><td><a href="index_abbrev_B.html">B</a></td><td><a href="index_abbrev_C.html">C</a></td><td><a href="index_abbrev_D.html">D</a></td><td><a href="index_abbrev_E.html">E</a></td><td><a href="index_abbrev_F.html">F</a></td><td><a href="index_abbrev_G.html">G</a></td><td><a href="index_abbrev_H.html">H</a></td><td><a href="index_abbrev_I.html">I</a></td><td><a href="index_abbrev_J.html">J</a></td><td>K</td><td><a href="index_abbrev_L.html">L</a></td><td><a href="index_abbrev_M.html">M</a></td><td><a href="index_abbrev_N.html">N</a></td><td><a href="index_abbrev_O.html">O</a></td><td><a href="index_abbrev_P.html">P</a></td><td><a href="index_abbrev_Q.html">Q</a></td><td><a href="index_abbrev_R.html">R</a></td><td><a href="index_abbrev_S.html">S</a></td><td>T</td><td>U</td><td>V</td><td><a href="index_abbrev_W.html">W</a></td><td>X</td><td>Y</td><td>Z</td><td>_</td></tr>
+<tr><td>Global Index</td>
+<td><a href="index_global_A.html">A</a></td><td><a href="index_global_B.html">B</a></td><td><a href="index_global_C.html">C</a></td><td><a href="index_global_D.html">D</a></td><td><a href="index_global_E.html">E</a></td><td><a href="index_global_F.html">F</a></td><td><a href="index_global_G.html">G</a></td><td><a href="index_global_H.html">H</a></td><td><a href="index_global_I.html">I</a></td><td><a href="index_global_J.html">J</a></td><td><a href="index_global_K.html">K</a></td><td><a href="index_global_L.html">L</a></td><td><a href="index_global_M.html">M</a></td><td><a href="index_global_N.html">N</a></td><td><a href="index_global_O.html">O</a></td><td><a href="index_global_P.html">P</a></td><td><a href="index_global_Q.html">Q</a></td><td><a href="index_global_R.html">R</a></td><td><a href="index_global_S.html">S</a></td><td><a href="index_global_T.html">T</a></td><td><a href="index_global_U.html">U</a></td><td><a href="index_global_V.html">V</a></td><td><a href="index_global_W.html">W</a></td><td><a href="index_global_X.html">X</a></td><td><a href="index_global_Y.html">Y</a></td><td><a href="index_global_Z.html">Z</a></td><td><a href="index_global__.html">_</a></td></tr>
+<tr><td><a href="index_notations.html">Notations</a></td></tr></tbody></table><h2>no scope</h2><a href="infotheo.dumas2017dual.dsdp.dsdp_syntax_demo.html#0d0e4e4c4bd23efd0efaba120af5d0e3"><span class="notation-symbol">#</span> </a> [not, in infotheo.dumas2017dual.dsdp.dsdp_syntax_demo] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.dumas2017dual.dsdp.dsdp_syntax_demo.html#26fc5b4b9ca47f837196ffae771ebc30"><span class="notation-symbol">#</span> </a> [not, in infotheo.dumas2017dual.dsdp.dsdp_syntax_demo] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.dumas2017dual.dsdp.dsdp_syntax_demo.html#c7c1851f415e981f33657b4a5d57c362"><span class="notation-symbol">$</span> </a> [not, in infotheo.dumas2017dual.dsdp.dsdp_syntax_demo] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.dumas2017dual.dsdp.dsdp_syntax_demo.html#a6b64ab16c9050693c875e2dc90f5b39"><span class="notation-symbol">$</span> </a> [not, in infotheo.dumas2017dual.dsdp.dsdp_syntax_demo] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.dumas2017dual.dsdp.dsdp_syntax_demo.html#unicode_vs_ascii.:::'&amp;'_x"><span class="notation-symbol">&</span> </a> [not, in infotheo.dumas2017dual.dsdp.dsdp_syntax_demo] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.dumas2017dual.dsdp.dsdp_syntax_demo.html#wrapper_tests.:::'&amp;'_x"><span class="notation-symbol">&</span> </a> [not, in infotheo.dumas2017dual.dsdp.dsdp_syntax_demo] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_classic.linearcode.html#Syslcode.systematic_lcode_def.:::'''A'"><span class="notation-symbol">'A</span></a> [not, in infotheo.ecc_classic.linearcode] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_classic.linearcode.html#syslcode_properties.:::'''D'"><span class="notation-symbol">'D</span></a> [not, in infotheo.ecc_classic.linearcode] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_classic.linearcode.html#Syslcode.systematic_lcode_def.:::'''D'"><span class="notation-symbol">'D</span></a> [not, in infotheo.ecc_classic.linearcode] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_modern.tanner_partition.html#tanner_partition.:::'''F'"><span class="notation-symbol">'F</span></a> [not, in infotheo.ecc_modern.tanner_partition] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_modern.tanner_partition.html#acyclic_tanner_rel.:::'''F'"><span class="notation-symbol">'F</span></a> [not, in infotheo.ecc_modern.tanner_partition] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_modern.tanner_partition.html#tanner_rel_no_hypo.:::'''F'"><span class="notation-symbol">'F</span></a> [not, in infotheo.ecc_modern.tanner_partition] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_modern.tanner.html#next_graph.:::'''F'"><span class="notation-symbol">'F</span></a> [not, in infotheo.ecc_modern.tanner] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_modern.summary_tanner.html#dprojs_subgraph_acyclic.:::'''F'"><span class="notation-symbol">'F</span></a> [not, in infotheo.ecc_modern.summary_tanner] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_modern.summary_tanner.html#dprojs_subgraph.:::'''F'"><span class="notation-symbol">'F</span></a> [not, in infotheo.ecc_modern.summary_tanner] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_modern.stopping_set.html#erasures_SP_BEC.:::'''F'"><span class="notation-symbol">'F</span></a> [not, in infotheo.ecc_modern.stopping_set] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_modern.stopping_set.html#subset_erasures.:::'''F'"><span class="notation-symbol">'F</span></a> [not, in infotheo.ecc_modern.stopping_set] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_modern.stopping_set.html#stopset_cols_starblank.:::'''F'"><span class="notation-symbol">'F</span></a> [not, in infotheo.ecc_modern.stopping_set] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_modern.stopping_set.html#PCM_instance.:::'''F'"><span class="notation-symbol">'F</span></a> [not, in infotheo.ecc_modern.stopping_set] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_modern.ldpc_erasure.html#SumProdBEC_algo.:::'''F'"><span class="notation-symbol">'F</span></a> [not, in infotheo.ecc_modern.ldpc_erasure] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_modern.ldpc_erasure.html#mxSumProd_def.:::'''F'"><span class="notation-symbol">'F</span></a> [not, in infotheo.ecc_modern.ldpc_erasure] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_modern.ldpc_erasure.html#SumProd_algo_mxStar.:::'''F'"><span class="notation-symbol">'F</span></a> [not, in infotheo.ecc_modern.ldpc_erasure] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_modern.ldpc_algo_proof.html#AlgoProof.:::'''F'"><span class="notation-symbol">'F</span></a> [not, in infotheo.ecc_modern.ldpc_algo_proof] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_modern.ldpc.html#ldpc_approx_algo.:::'''F'"><span class="notation-symbol">'F</span></a> [not, in infotheo.ecc_modern.ldpc] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_modern.ldpc.html#sum_prod_correctness.:::'''F'"><span class="notation-symbol">'F</span></a> [not, in infotheo.ecc_modern.ldpc] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_modern.ldpc.html#alpha_beta.:::'''F'"><span class="notation-symbol">'F</span></a> [not, in infotheo.ecc_modern.ldpc] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_modern.ldpc.html#DMC_sub_vec_Fnext_Vgraph.:::'''F'"><span class="notation-symbol">'F</span></a> [not, in infotheo.ecc_modern.ldpc] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_modern.tanner_partition.html#222b8d3db817391d47546db9ba838081"><span class="notation-symbol">'F(</span> <span class="notation-symbol">,</span> <span class="notation-symbol">)</span></a> [not, in infotheo.ecc_modern.tanner_partition] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_modern.tanner_partition.html#059cbdb0fdf6f9b9ccdf1df516a0afc5"><span class="notation-symbol">'F(</span> <span class="notation-symbol">,</span> <span class="notation-symbol">)</span></a> [not, in infotheo.ecc_modern.tanner_partition] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_modern.tanner_partition.html#981f88cc7a616d3acf7f5dfa383bd541"><span class="notation-symbol">'F(</span> <span class="notation-symbol">,</span> <span class="notation-symbol">)</span></a> [not, in infotheo.ecc_modern.tanner_partition] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_modern.tanner.html#7e677b3b355de2a09d6dbf1ffa105b05"><span class="notation-symbol">'F(</span> <span class="notation-symbol">,</span> <span class="notation-symbol">)</span></a> [not, in infotheo.ecc_modern.tanner] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_modern.summary_tanner.html#50af3da7857a00336dca95e6bf734473"><span class="notation-symbol">'F(</span> <span class="notation-symbol">,</span> <span class="notation-symbol">)</span></a> [not, in infotheo.ecc_modern.summary_tanner] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_modern.summary_tanner.html#e40246e3cf1d0439e99942548670909c"><span class="notation-symbol">'F(</span> <span class="notation-symbol">,</span> <span class="notation-symbol">)</span></a> [not, in infotheo.ecc_modern.summary_tanner] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_modern.ldpc_algo_proof.html#f7a1422ac1e6dd0a149339cab9f70b82"><span class="notation-symbol">'F(</span> <span class="notation-symbol">,</span> <span class="notation-symbol">)</span></a> [not, in infotheo.ecc_modern.ldpc_algo_proof] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_modern.ldpc.html#bc4ca1fe0afad6269c0e83a32aa84839"><span class="notation-symbol">'F(</span> <span class="notation-symbol">,</span> <span class="notation-symbol">)</span></a> [not, in infotheo.ecc_modern.ldpc] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_modern.ldpc.html#3b49ac5a0156179794fe7eed3b4d654a"><span class="notation-symbol">'F(</span> <span class="notation-symbol">,</span> <span class="notation-symbol">)</span></a> [not, in infotheo.ecc_modern.ldpc] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_modern.ldpc.html#21c3fa333556c1d7e94106e1121afb16"><span class="notation-symbol">'F(</span> <span class="notation-symbol">,</span> <span class="notation-symbol">)</span></a> [not, in infotheo.ecc_modern.ldpc] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_classic.mceliece.html#McEliece.mceliece.:::'''G'"><span class="notation-symbol">'G</span></a> [not, in infotheo.ecc_classic.mceliece] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_classic.linearcode.html#syslcode_properties.:::'''G'"><span class="notation-symbol">'G</span></a> [not, in infotheo.ecc_classic.linearcode] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_classic.linearcode.html#Syslcode.systematic_lcode_def.:::'''G'"><span class="notation-symbol">'G</span></a> [not, in infotheo.ecc_classic.linearcode] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_classic.mceliece.html#McEliece.mceliece.:::'''H'"><span class="notation-symbol">'H</span></a> [not, in infotheo.ecc_classic.mceliece] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_classic.linearcode.html#syslcode_properties.:::'''H'"><span class="notation-symbol">'H</span></a> [not, in infotheo.ecc_classic.linearcode] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_classic.linearcode.html#Syslcode.systematic_lcode_def.:::'''H'"><span class="notation-symbol">'H</span></a> [not, in infotheo.ecc_classic.linearcode] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_modern.tanner_partition.html#tanner_partition.:::'''V'"><span class="notation-symbol">'V</span></a> [not, in infotheo.ecc_modern.tanner_partition] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_modern.tanner_partition.html#acyclic_tanner_rel.:::'''V'"><span class="notation-symbol">'V</span></a> [not, in infotheo.ecc_modern.tanner_partition] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_modern.tanner_partition.html#tanner_rel_no_hypo.:::'''V'"><span class="notation-symbol">'V</span></a> [not, in infotheo.ecc_modern.tanner_partition] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_modern.tanner.html#subscript_set.:::'''V'"><span class="notation-symbol">'V</span></a> [not, in infotheo.ecc_modern.tanner] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_modern.tanner.html#next_graph.:::'''V'"><span class="notation-symbol">'V</span></a> [not, in infotheo.ecc_modern.tanner] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_modern.summary_tanner.html#dprojs_subsubgraph_acyclic.:::'''V'"><span class="notation-symbol">'V</span></a> [not, in infotheo.ecc_modern.summary_tanner] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_modern.summary_tanner.html#dprojs_subsubgraph.:::'''V'"><span class="notation-symbol">'V</span></a> [not, in infotheo.ecc_modern.summary_tanner] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_modern.summary_tanner.html#dprojs_subgraph_acyclic.:::'''V'"><span class="notation-symbol">'V</span></a> [not, in infotheo.ecc_modern.summary_tanner] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_modern.summary_tanner.html#dprojs_subgraph.:::'''V'"><span class="notation-symbol">'V</span></a> [not, in infotheo.ecc_modern.summary_tanner] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_modern.stopping_set.html#erasures_SP_BEC.:::'''V'"><span class="notation-symbol">'V</span></a> [not, in infotheo.ecc_modern.stopping_set] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_modern.stopping_set.html#subset_erasures.:::'''V'"><span class="notation-symbol">'V</span></a> [not, in infotheo.ecc_modern.stopping_set] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_modern.stopping_set.html#stopset_cols_starblank.:::'''V'"><span class="notation-symbol">'V</span></a> [not, in infotheo.ecc_modern.stopping_set] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_modern.ldpc_erasure.html#mxSumProd_def.:::'''V'"><span class="notation-symbol">'V</span></a> [not, in infotheo.ecc_modern.ldpc_erasure] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_modern.ldpc_algo_proof.html#AlgoProof.:::'''V'"><span class="notation-symbol">'V</span></a> [not, in infotheo.ecc_modern.ldpc_algo_proof] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_modern.ldpc.html#ldpc_approx_algo.:::'''V'"><span class="notation-symbol">'V</span></a> [not, in infotheo.ecc_modern.ldpc] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_modern.ldpc.html#sum_prod_correctness.:::'''V'"><span class="notation-symbol">'V</span></a> [not, in infotheo.ecc_modern.ldpc] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_modern.ldpc.html#alpha_beta.:::'''V'"><span class="notation-symbol">'V</span></a> [not, in infotheo.ecc_modern.ldpc] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_modern.ldpc.html#DMC_sub_vec_Fnext_Vgraph.:::'''V'"><span class="notation-symbol">'V</span></a> [not, in infotheo.ecc_modern.ldpc] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_modern.checksum.html#post_proba_checksubsum.:::'''V'"><span class="notation-symbol">'V</span></a> [not, in infotheo.ecc_modern.checksum] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_modern.tanner_partition.html#32b6cbc0df5a0d5a022734acb21a6268"><span class="notation-symbol">'V(</span> <span class="notation-symbol">,</span> <span class="notation-symbol">)</span></a> [not, in infotheo.ecc_modern.tanner_partition] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_modern.tanner_partition.html#6228b900b29e5c9ac17f9a0e065919d5"><span class="notation-symbol">'V(</span> <span class="notation-symbol">,</span> <span class="notation-symbol">)</span></a> [not, in infotheo.ecc_modern.tanner_partition] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_modern.tanner_partition.html#42a1cfeaf4323e7039cf17f8ac510b59"><span class="notation-symbol">'V(</span> <span class="notation-symbol">,</span> <span class="notation-symbol">)</span></a> [not, in infotheo.ecc_modern.tanner_partition] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_modern.tanner.html#a2701ace0802a1bdae46f1cd2ef510fc"><span class="notation-symbol">'V(</span> <span class="notation-symbol">,</span> <span class="notation-symbol">)</span></a> [not, in infotheo.ecc_modern.tanner] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_modern.summary_tanner.html#be80bf52213b73ec0e91c301e14285a9"><span class="notation-symbol">'V(</span> <span class="notation-symbol">,</span> <span class="notation-symbol">)</span></a> [not, in infotheo.ecc_modern.summary_tanner] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_modern.summary_tanner.html#d0024241ddbf04842ceadeafc706542a"><span class="notation-symbol">'V(</span> <span class="notation-symbol">,</span> <span class="notation-symbol">)</span></a> [not, in infotheo.ecc_modern.summary_tanner] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_modern.ldpc_algo_proof.html#f1e40dbbb425eb10f87b8ba2e6c4e0fe"><span class="notation-symbol">'V(</span> <span class="notation-symbol">,</span> <span class="notation-symbol">)</span></a> [not, in infotheo.ecc_modern.ldpc_algo_proof] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_modern.ldpc.html#e1a6449455dbb4c14801b97505160cbe"><span class="notation-symbol">'V(</span> <span class="notation-symbol">,</span> <span class="notation-symbol">)</span></a> [not, in infotheo.ecc_modern.ldpc] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_modern.ldpc.html#ece3f179f9b003f7337a2eaa88d8bf6c"><span class="notation-symbol">'V(</span> <span class="notation-symbol">,</span> <span class="notation-symbol">)</span></a> [not, in infotheo.ecc_modern.ldpc] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_modern.ldpc.html#c272f1cae4e2e0ca9a5df392d7fee94c"><span class="notation-symbol">'V(</span> <span class="notation-symbol">,</span> <span class="notation-symbol">)</span></a> [not, in infotheo.ecc_modern.ldpc] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_classic.cyclic_code.html#cyclic_code_generator.:::'''cgen'"><span class="notation-symbol">'cgen</span></a> [not, in infotheo.ecc_classic.cyclic_code] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.lib.bigop_ext.html#0fa03e55f52d53de0ed9bf86c497aaf0"><span class="notation-symbol">*%M</span></a> [not, in infotheo.lib.bigop_ext] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.homomorphic_encryption.benaloh1994.benaloh_ahe.html#9914ee4a3382d7cc0ee6295ef365dacd"><span class="notation-symbol">*m</span></a> [not, in infotheo.homomorphic_encryption.benaloh1994.benaloh_ahe] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.homomorphic_encryption.benaloh1994.benaloh_ahe.html#62c4fc40dc11a5aa34b897c2ef9cd1b6"><span class="notation-symbol">*r</span></a> [not, in infotheo.homomorphic_encryption.benaloh1994.benaloh_ahe] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.lib.bigop_ext.html#ece91fb69d20dc0f557794f8fc59eaed"><span class="notation-symbol">+%M</span></a> [not, in infotheo.lib.bigop_ext] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.lib.ssr_ext.html#a758b382f5fa4a647b9f5a0258f20883"><span class="notation-symbol">+%S</span></a> [not, in infotheo.lib.ssr_ext] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.lib.ssr_ext.html#e81771779d50737cbd8fe9299c164958"><span class="notation-symbol">-%S</span></a> [not, in infotheo.lib.ssr_ext] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.probability.pinsker.html#Pinsker.:::'0'"><span class="notation-symbol">0</span></a> [not, in infotheo.probability.pinsker] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.probability.partition_inequality.html#:::'0'"><span class="notation-symbol">0</span></a> [not, in infotheo.probability.partition_inequality] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.lib.ssr_ext.html#finset_ext.setY_lemmas.:::'0'"><span class="notation-symbol">0</span></a> [not, in infotheo.lib.ssr_ext] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.probability.pinsker.html#Pinsker.:::'1'"><span class="notation-symbol">1</span></a> [not, in infotheo.probability.pinsker] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.probability.partition_inequality.html#:::'1'"><span class="notation-symbol">1</span></a> [not, in infotheo.probability.partition_inequality] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.information_theory.kraft.html#kraft_code.:::'C'"><span class="notation-symbol">C</span></a> [not, in infotheo.information_theory.kraft] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.dumas2017dual.dsdp.dsdp_pismc.html#smc_dsdp_program.:::'E&lt;'_x_'&gt;'_x_x"><span class="notation-symbol">E<</span> <span class="notation-symbol">></span> </a> [not, in infotheo.dumas2017dual.dsdp.dsdp_pismc] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.homomorphic_encryption.benaloh1994.benaloh_ahe.html#753a697484b90e8d954b17b0f335717f"><span class="notation-symbol">E[</span> <span class="notation-symbol">]</span></a> [not, in infotheo.homomorphic_encryption.benaloh1994.benaloh_ahe] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.homomorphic_encryption.ahe_enc.html#943683b2f926df7a2df60979ea02f788"><span class="notation-symbol">E[</span> <span class="notation-symbol">]</span></a> [not, in infotheo.homomorphic_encryption.ahe_enc] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.dumas2017dual.dsdp.dsdp_syntax_demo.html#:dsdp::'Fail'"><span class="notation-symbol">Fail</span></a> [not, in infotheo.dumas2017dual.dsdp.dsdp_syntax_demo] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.smc.pismc.html#:pismc::'Finish'"><span class="notation-symbol">Finish</span></a> [not, in infotheo.smc.pismc] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.dumas2017dual.dsdp.dsdp_syntax_demo.html#:dsdp::'Finish'"><span class="notation-symbol">Finish</span></a> [not, in infotheo.dumas2017dual.dsdp.dsdp_syntax_demo] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.smc.pismc.html#27a38b1c098e64c7d6c4786f97d89686"><span class="notation-symbol">ForEach</span> <span class="notation-symbol">as</span> <span class="notation-symbol">,</span> <span class="notation-symbol">=></span> <span class="notation-symbol">;</span> </a> [not, in infotheo.smc.pismc] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.smc.pismc.html#e2ac34dca00654a63d76c845a3754d69"><span class="notation-symbol">ForEach</span> <span class="notation-symbol">step</span> <span class="notation-symbol">as</span> <span class="notation-symbol">,</span> <span class="notation-symbol">=></span> <span class="notation-symbol">;</span> </a> [not, in infotheo.smc.pismc] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.smc.pismc.html#670dae75feceb77a7ac0d1bd746b749c"><span class="notation-symbol">ForEach</span> <span class="notation-symbol">step</span> <span class="notation-symbol">enstep</span> <span class="notation-symbol">as</span> <span class="notation-symbol">,</span> <span class="notation-symbol">=></span> <span class="notation-symbol">;</span> </a> [not, in infotheo.smc.pismc] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.smc.pismc.html#b84bf238223056b45c46c3fb6e1ba93e"><span class="notation-symbol">ForList</span> <span class="notation-symbol">step</span> <span class="notation-symbol">enstep</span> <span class="notation-symbol">as</span> <span class="notation-symbol">,</span> <span class="notation-symbol">=></span> <span class="notation-symbol">;</span> </a> [not, in infotheo.smc.pismc] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.smc.pismc.html#9c59a4c1884b186c3b8dfe9125bdbbd4"><span class="notation-symbol">ForList</span> <span class="notation-symbol">step</span> <span class="notation-symbol">enstep</span> <span class="notation-symbol">as</span> <span class="notation-symbol">cont</span> <span class="notation-symbol">=></span> <span class="notation-symbol">end</span> <span class="notation-symbol">;</span> </a> [not, in infotheo.smc.pismc] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.smc.pismc.html#968a373438054a4b2b46333a3074b658"><span class="notation-symbol">Init</span> <span class="notation-symbol">(</span> <span class="notation-symbol">,</span> <span class="notation-symbol">..</span> <span class="notation-symbol">,</span> <span class="notation-symbol">)</span> <span class="notation-symbol">;</span> </a> [not, in infotheo.smc.pismc] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.dumas2017dual.dsdp.dsdp_syntax_demo.html#9211a94103021da0e342d025b305e7e1"><span class="notation-symbol">Init</span> <span class="notation-symbol">(</span> <span class="notation-symbol">,</span> <span class="notation-symbol">..</span> <span class="notation-symbol">,</span> <span class="notation-symbol">)</span> <span class="notation-symbol">;</span> </a> [not, in infotheo.dumas2017dual.dsdp.dsdp_syntax_demo] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.dumas2017dual.dsdp.dsdp_syntax_demo.html#b8ffa3c4b373d6dada5844d91ac7b739"><span class="notation-symbol">Init</span> <span class="notation-symbol">(</span> <span class="notation-symbol">,</span> <span class="notation-symbol">..</span> <span class="notation-symbol">,</span> <span class="notation-symbol">)</span> <span class="notation-symbol">·</span> </a> [not, in infotheo.dumas2017dual.dsdp.dsdp_syntax_demo] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.smc.pismc.html#669ecc68d1ba4a13899dce35a6e257a6"><span class="notation-symbol">Init</span> <span class="notation-symbol">;</span> </a> [not, in infotheo.smc.pismc] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.dumas2017dual.dsdp.dsdp_syntax_demo.html#62fd9af5d267b3f65aff7c9639efca77"><span class="notation-symbol">Init</span> <span class="notation-symbol">;</span> </a> [not, in infotheo.dumas2017dual.dsdp.dsdp_syntax_demo] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.dumas2017dual.dsdp.dsdp_syntax_demo.html#54d0861b78e0c12da6516f3eeeb788f0"><span class="notation-symbol">Init</span> <span class="notation-symbol">·</span> </a> [not, in infotheo.dumas2017dual.dsdp.dsdp_syntax_demo] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.dumas2017dual.dsdp.dsdp_syntax_demo.html#4c877e0c56812bccbc7867bc177b0397"><span class="notation-symbol">Init</span> <span class="notation-symbol">　</span> <span class="notation-symbol">..</span> <span class="notation-symbol">　</span> <span class="notation-symbol">;</span> </a> [not, in infotheo.dumas2017dual.dsdp.dsdp_syntax_demo] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.dumas2017dual.dsdp.dsdp_syntax_demo.html#a5f154f15b92138c04c34f1141a90484"><span class="notation-symbol">Init</span> <span class="notation-symbol">　</span> <span class="notation-symbol">..</span> <span class="notation-symbol">　</span> <span class="notation-symbol">·</span> </a> [not, in infotheo.dumas2017dual.dsdp.dsdp_syntax_demo] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.information_theory.source_coding_vl_direct.html#E_Leng_Cw_Lemma.:::'L_not_typ'"><span class="notation-symbol">L_not_typ</span></a> [not, in infotheo.information_theory.source_coding_vl_direct] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.information_theory.source_coding_vl_direct.html#Enc_Dec.:::'L_not_typ'"><span class="notation-symbol">L_not_typ</span></a> [not, in infotheo.information_theory.source_coding_vl_direct] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.information_theory.source_coding_vl_direct.html#E_Leng_Cw_Lemma.:::'L_typ'"><span class="notation-symbol">L_typ</span></a> [not, in infotheo.information_theory.source_coding_vl_direct] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.information_theory.source_coding_vl_direct.html#Enc_Dec.:::'L_typ'"><span class="notation-symbol">L_typ</span></a> [not, in infotheo.information_theory.source_coding_vl_direct] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.information_theory.source_coding_vl_converse.html#v_scode_converse'_1tuple.:::'Nmax'"><span class="notation-symbol">Nmax</span></a> [not, in infotheo.information_theory.source_coding_vl_converse] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.information_theory.source_coding_vl_converse.html#v_scode_converse'_1tuple.:::'PN'"><span class="notation-symbol">PN</span></a> [not, in infotheo.information_theory.source_coding_vl_converse] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.du2002.spp_pismc.html#2a91e2ebc0c05b8ecb72aa321e5418d9"><span class="notation-symbol">Recv<</span> <span class="notation-symbol">></span> <span class="notation-symbol">!</span> <span class="notation-symbol">=></span> </a> [not, in infotheo.du2002.spp_pismc] (<span class="warning">no scope</span>)<br>
+<a href="pgg_smc.pgg_pismc.html#78e6b389f724bbfc195152ce27e9e207"><span class="notation-symbol">Recv<</span> <span class="notation-symbol">></span> <span class="notation-symbol">#</span> <span class="notation-symbol">=></span> </a> [not, in pgg_smc.pgg_pismc] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.dumas2017dual.dsdp.dsdp_pismc.html#b64b3a8fd2b28cea7c9c707636f9f7fb"><span class="notation-symbol">Recv<</span> <span class="notation-symbol">></span> <span class="notation-symbol">#</span> <span class="notation-symbol">=></span> </a> [not, in infotheo.dumas2017dual.dsdp.dsdp_pismc] (<span class="warning">no scope</span>)<br>
+<a href="pgg_smc.pgg_pismc.html#512dcb5015cc1e1f796f93597e5015fa"><span class="notation-symbol">Recv<</span> <span class="notation-symbol">></span> <span class="notation-symbol">$</span> <span class="notation-symbol">=></span> </a> [not, in pgg_smc.pgg_pismc] (<span class="warning">no scope</span>)<br>
+<a href="pgg_smc.pgg_pismc.html#cc6b14b205277e01a2f5454d4735498f"><span class="notation-symbol">Recv<</span> <span class="notation-symbol">></span> <span class="notation-symbol">&</span> <span class="notation-symbol">=></span> </a> [not, in pgg_smc.pgg_pismc] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.du2002.spp_pismc.html#62760718dbeeddfa8f1ff185319d7c87"><span class="notation-symbol">Recv<</span> <span class="notation-symbol">></span> <span class="notation-symbol">&</span> <span class="notation-symbol">=></span> </a> [not, in infotheo.du2002.spp_pismc] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.dumas2017dual.dsdp.dsdp_syntax_demo.html#04c7ffe72eabb60760ca3174b46c6ce5"><span class="notation-symbol">Recv<</span> <span class="notation-symbol">></span> <span class="notation-symbol">fun</span> <span class="notation-symbol">=></span> </a> [not, in infotheo.dumas2017dual.dsdp.dsdp_syntax_demo] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.dumas2017dual.dsdp.dsdp_syntax_demo.html#529f2af5bec63d154ec20191281485e0"><span class="notation-symbol">Recv<</span> <span class="notation-symbol">></span> <span class="notation-symbol">λ</span> <span class="notation-symbol">;</span> </a> [not, in infotheo.dumas2017dual.dsdp.dsdp_syntax_demo] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.dumas2017dual.dsdp.dsdp_syntax_demo.html#c1c95d9c2b81d29f331e5cae15d0f8cb"><span class="notation-symbol">Recv<</span> <span class="notation-symbol">></span> <span class="notation-symbol">λ</span> <span class="notation-symbol">·</span> </a> [not, in infotheo.dumas2017dual.dsdp.dsdp_syntax_demo] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.dumas2017dual.dsdp.dsdp_pismc.html#1ec2a0bf2c7c26b4e45c3a5185022600"><span class="notation-symbol">Recv<</span> <span class="notation-symbol">></span> <span class="notation-symbol">=></span> </a> [not, in infotheo.dumas2017dual.dsdp.dsdp_pismc] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.dumas2017dual.dsdp.dsdp_syntax_demo.html#b0727fc60f856b19af7bccc2df4c4132"><span class="notation-symbol">Recv_dec<</span> <span class="notation-symbol">></span> <span class="notation-symbol">λ</span> <span class="notation-symbol">;</span> </a> [not, in infotheo.dumas2017dual.dsdp.dsdp_syntax_demo] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.dumas2017dual.dsdp.dsdp_syntax_demo.html#6157ad0937e80981a5c42186fe724108"><span class="notation-symbol">Recv_dec<</span> <span class="notation-symbol">></span> <span class="notation-symbol">λ</span> <span class="notation-symbol">·</span> </a> [not, in infotheo.dumas2017dual.dsdp.dsdp_syntax_demo] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.dumas2017dual.dsdp.dsdp_syntax_demo.html#b9873465fdcc0e2d36a3d07e42c48d74"><span class="notation-symbol">Recv_dec⟨</span> <span class="notation-symbol">⟩</span> <span class="notation-symbol">λ</span> <span class="notation-symbol">·</span> </a> [not, in infotheo.dumas2017dual.dsdp.dsdp_syntax_demo] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.dumas2017dual.dsdp.dsdp_syntax_demo.html#ecf00048a4fe4196034dc00ba7690c6c"><span class="notation-symbol">Recv_enc<</span> <span class="notation-symbol">></span> <span class="notation-symbol">λ</span> <span class="notation-symbol">;</span> </a> [not, in infotheo.dumas2017dual.dsdp.dsdp_syntax_demo] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.dumas2017dual.dsdp.dsdp_syntax_demo.html#87dd466cb21274aa1b3d4ad58e0593b4"><span class="notation-symbol">Recv_enc<</span> <span class="notation-symbol">></span> <span class="notation-symbol">λ</span> <span class="notation-symbol">·</span> </a> [not, in infotheo.dumas2017dual.dsdp.dsdp_syntax_demo] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.dumas2017dual.dsdp.dsdp_syntax_demo.html#c122d2257f11bc31d0267a6dd662ccb6"><span class="notation-symbol">Recv_enc⟨</span> <span class="notation-symbol">⟩</span> <span class="notation-symbol">λ</span> <span class="notation-symbol">·</span> </a> [not, in infotheo.dumas2017dual.dsdp.dsdp_syntax_demo] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.dumas2017dual.dsdp.dsdp_syntax_demo.html#7375688c5a432e1c89745b539d0ae93c"><span class="notation-symbol">Recv⟨</span> <span class="notation-symbol">⟩</span> <span class="notation-symbol">fun</span> <span class="notation-symbol">=></span> </a> [not, in infotheo.dumas2017dual.dsdp.dsdp_syntax_demo] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.dumas2017dual.dsdp.dsdp_syntax_demo.html#7dc44703e7e63ee430e296706e255d9d"><span class="notation-symbol">Recv⟨</span> <span class="notation-symbol">⟩</span> <span class="notation-symbol">λ</span> <span class="notation-symbol">;</span> </a> [not, in infotheo.dumas2017dual.dsdp.dsdp_syntax_demo] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.dumas2017dual.dsdp.dsdp_syntax_demo.html#3bc2c740b290621873e96d68e356fd5f"><span class="notation-symbol">Recv⟨</span> <span class="notation-symbol">⟩</span> <span class="notation-symbol">λ</span> <span class="notation-symbol">·</span> </a> [not, in infotheo.dumas2017dual.dsdp.dsdp_syntax_demo] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.du2002.spp_pismc.html#fc62ca84a41eeaebc5f31895cd494edc"><span class="notation-symbol">Ret</span> <span class="notation-symbol">!</span> </a> [not, in infotheo.du2002.spp_pismc] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.du2002.spp_pismc.html#spp_pismc_programs.:pismc::'Ret'_'&amp;'_x"><span class="notation-symbol">Ret</span> <span class="notation-symbol">&</span> </a> [not, in infotheo.du2002.spp_pismc] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.smc.pismc.html#:pismc::'Ret'_x"><span class="notation-symbol">Ret</span> </a> [not, in infotheo.smc.pismc] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.dumas2017dual.dsdp.dsdp_syntax_demo.html#:dsdp::'Ret'_x"><span class="notation-symbol">Ret</span> </a> [not, in infotheo.dumas2017dual.dsdp.dsdp_syntax_demo] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.du2002.spp_pismc.html#0f3ad69a0306bc8d1ef00b727be755a4"><span class="notation-symbol">Send<</span> <span class="notation-symbol">></span> <span class="notation-symbol">!</span> <span class="notation-symbol">;</span> </a> [not, in infotheo.du2002.spp_pismc] (<span class="warning">no scope</span>)<br>
+<a href="pgg_smc.pgg_pismc.html#4a1076697ecbb5c98f9554c492970976"><span class="notation-symbol">Send<</span> <span class="notation-symbol">></span> <span class="notation-symbol">#</span> <span class="notation-symbol">;</span> </a> [not, in pgg_smc.pgg_pismc] (<span class="warning">no scope</span>)<br>
+<a href="pgg_smc.pgg_pismc.html#f7636aeae2d86aa396ef1da8d0d39c49"><span class="notation-symbol">Send<</span> <span class="notation-symbol">></span> <span class="notation-symbol">$</span> <span class="notation-symbol">;</span> </a> [not, in pgg_smc.pgg_pismc] (<span class="warning">no scope</span>)<br>
+<a href="pgg_smc.pgg_pismc.html#9e66ed3e5fef2034c47734738398aaac"><span class="notation-symbol">Send<</span> <span class="notation-symbol">></span> <span class="notation-symbol">&</span> <span class="notation-symbol">;</span> </a> [not, in pgg_smc.pgg_pismc] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.du2002.spp_pismc.html#6d5072412ddafc8209567413cf3470c4"><span class="notation-symbol">Send<</span> <span class="notation-symbol">></span> <span class="notation-symbol">&</span> <span class="notation-symbol">;</span> </a> [not, in infotheo.du2002.spp_pismc] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.dumas2017dual.dsdp.dsdp_syntax_demo.html#54f70f98512684901e380713765a6fd7"><span class="notation-symbol">Send<</span> <span class="notation-symbol">></span> <span class="notation-symbol">;</span> </a> [not, in infotheo.dumas2017dual.dsdp.dsdp_syntax_demo] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.dumas2017dual.dsdp.dsdp_pismc.html#9f1e78d94351509e303910ee0a1c5ec0"><span class="notation-symbol">Send<</span> <span class="notation-symbol">></span> <span class="notation-symbol">;</span> </a> [not, in infotheo.dumas2017dual.dsdp.dsdp_pismc] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.dumas2017dual.dsdp.dsdp_syntax_demo.html#601e7d2a362f07a5be59014c896659e9"><span class="notation-symbol">Send<</span> <span class="notation-symbol">></span> <span class="notation-symbol">·</span> </a> [not, in infotheo.dumas2017dual.dsdp.dsdp_syntax_demo] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.dumas2017dual.dsdp.dsdp_syntax_demo.html#30a2862141e2bc3157ea4e172badde4d"><span class="notation-symbol">Send⟨</span> <span class="notation-symbol">⟩</span> <span class="notation-symbol">;</span> </a> [not, in infotheo.dumas2017dual.dsdp.dsdp_syntax_demo] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.dumas2017dual.dsdp.dsdp_syntax_demo.html#fa31097a31b4ea668603debe5b4c5b03"><span class="notation-symbol">Send⟨</span> <span class="notation-symbol">⟩</span> <span class="notation-symbol">·</span> </a> [not, in infotheo.dumas2017dual.dsdp.dsdp_syntax_demo] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.probability.proba.html#87264a65c999d09a99c9803fd86754c7"><span class="notation-symbol">[%</span> <span class="notation-symbol">,</span> <span class="notation-symbol">,</span> <span class="notation-symbol">..</span> <span class="notation-symbol">,</span> <span class="notation-symbol">]</span></a> [not, in infotheo.probability.proba] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.probability.convex.html#1cfce7ba5b6b5793def691dec93dd347"><span class="notation-symbol">[</span> <span class="notation-symbol">point</span> <span class="notation-symbol">of</span> <span class="notation-symbol">]</span></a> [not, in infotheo.probability.convex] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.probability.convex.html#ae7e16f29824e782eb93491edcfef20e"><span class="notation-symbol">[</span> <span class="notation-symbol">point</span> <span class="notation-symbol">of</span> <span class="notation-symbol">]</span></a> [not, in infotheo.probability.convex] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.probability.convex.html#033405595322fa17841dfc7a4282df87"><span class="notation-symbol">[</span> <span class="notation-symbol">weight</span> <span class="notation-symbol">of</span> <span class="notation-symbol">]</span></a> [not, in infotheo.probability.convex] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.probability.convex.html#3f6e804e854acc9e3fedb09ddac6ffd4"><span class="notation-symbol">[</span> <span class="notation-symbol">weight</span> <span class="notation-symbol">of</span> <span class="notation-symbol">]</span></a> [not, in infotheo.probability.convex] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.smc.smc_session_types.html#05b9377989363f9490e685393d6a3000"><span class="notation-symbol">[></span> <span class="notation-symbol">]</span></a> [not, in infotheo.smc.smc_session_types] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.probability.jfdist_cond.html#8f59b03bc2df2b346d197aef147009c2"><span class="notation-symbol">\Pr_[</span> <span class="notation-symbol">|</span> <span class="notation-symbol">]</span></a> [not, in infotheo.probability.jfdist_cond] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_classic.reed_solomon.html#c9ab38a3458c956de06d7d9c9a9c657c"><span class="notation-symbol">\RSomega_(</span> <span class="notation-symbol">,</span> <span class="notation-symbol">)</span></a> [not, in infotheo.ecc_classic.reed_solomon] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_classic.reed_solomon.html#593665e5a4b0ae4c02493a180fd23eb8"><span class="notation-symbol">\RSomega_(</span> <span class="notation-symbol">,</span> <span class="notation-symbol">)</span></a> [not, in infotheo.ecc_classic.reed_solomon] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_classic.reed_solomon.html#56b04d9834a1ab27d8c88762a73eef0f"><span class="notation-symbol">\RSsynp_(</span> <span class="notation-symbol">,</span> <span class="notation-symbol">,</span> <span class="notation-symbol">)</span></a> [not, in infotheo.ecc_classic.reed_solomon] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_classic.reed_solomon.html#c7783d0ff4a4048fea4d4688b3be207d"><span class="notation-symbol">\RSsynp_(</span> <span class="notation-symbol">,</span> <span class="notation-symbol">,</span> <span class="notation-symbol">)</span></a> [not, in infotheo.ecc_classic.reed_solomon] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_modern.checksum.html#4aba77b0d9e3ee8aa31dfa7c02653e53"><span class="notation-symbol">\delta</span></a> [not, in infotheo.ecc_modern.checksum] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_classic.reed_solomon.html#7a9dcad402bbe74adfa11d70a2c940d1"><span class="notation-symbol">\gen_(</span> <span class="notation-symbol">,</span> <span class="notation-symbol">)</span></a> [not, in infotheo.ecc_classic.reed_solomon] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.probability.necset.html#51e5fcff13de2a140cbed94d73437527"><span class="notation-symbol">\lub_</span> <span class="notation-symbol">(</span> <span class="notation-symbol"><</span> <span class="notation-symbol">)</span> </a> [not, in infotheo.probability.necset] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_classic.poly_decoding.html#79f82b246066fbcf73d1b249efa0f6e0"><span class="notation-symbol">\omega_(</span> <span class="notation-symbol">,</span> <span class="notation-symbol">,</span> <span class="notation-symbol">)</span></a> [not, in infotheo.ecc_classic.poly_decoding] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.lib.bigop_ext.html#0e6958eb1c776e11ea38fc1cbdd52b9d"><span class="notation-symbol">\rmax_</span> <span class="notation-symbol">(</span> <span class="notation-symbol"><-</span> <span class="notation-symbol">)</span> </a> [not, in infotheo.lib.bigop_ext] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.lib.bigop_ext.html#dadb51f6108c4f0235d7518b9e992e80"><span class="notation-symbol">\rmax_</span> <span class="notation-symbol">(</span> <span class="notation-symbol">in</span> <span class="notation-symbol">)</span> </a> [not, in infotheo.lib.bigop_ext] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_classic.poly_decoding.html#84a48675daa93ed7a1fccefd6757e187"><span class="notation-symbol">\sigma_(</span> <span class="notation-symbol">,</span> <span class="notation-symbol">)</span></a> [not, in infotheo.ecc_classic.poly_decoding] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_classic.poly_decoding.html#6b6533b8e9f51bada3e3ab19a393a6af"><span class="notation-symbol">\sigma_(</span> <span class="notation-symbol">,</span> <span class="notation-symbol">,</span> <span class="notation-symbol">)</span></a> [not, in infotheo.ecc_classic.poly_decoding] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.probability.convex.html#317e7907259b480761a75c2307ce2c10"><span class="notation-symbol">\ssum_</span> <span class="notation-symbol">(</span> <span class="notation-symbol">:</span> <span class="notation-symbol">)</span> </a> [not, in infotheo.probability.convex] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.probability.convex.html#0389d1c81288f78881dac744967d5831"><span class="notation-symbol">\ssum_</span> <span class="notation-symbol">(</span> <span class="notation-symbol">:</span> <span class="notation-symbol">)</span> </a> [not, in infotheo.probability.convex] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.probability.convex.html#e21f252f49e6326f87bb6f76d35b5d48"><span class="notation-symbol">\ssum_</span> <span class="notation-symbol">(</span> <span class="notation-symbol"><</span> <span class="notation-symbol">)</span> </a> [not, in infotheo.probability.convex] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.probability.convex.html#3a77826053047b06d76737800f518591"><span class="notation-symbol">\ssum_</span> <span class="notation-symbol">(</span> <span class="notation-symbol"><</span> <span class="notation-symbol">)</span> </a> [not, in infotheo.probability.convex] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.probability.convex.html#db3c986d69f3152bfc559a84d5a115a1"><span class="notation-symbol">\ssum_</span> <span class="notation-symbol">(</span> <span class="notation-symbol"><</span> <span class="notation-symbol">|</span> <span class="notation-symbol">)</span> </a> [not, in infotheo.probability.convex] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.probability.convex.html#2a8244bbad5c5ac7d89f1dc68f9e385f"><span class="notation-symbol">\ssum_</span> <span class="notation-symbol">(</span> <span class="notation-symbol"><</span> <span class="notation-symbol">|</span> <span class="notation-symbol">)</span> </a> [not, in infotheo.probability.convex] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.probability.convex.html#c4c0ac46691f5c78b557a2fd5a8db0ba"><span class="notation-symbol">\ssum_</span> <span class="notation-symbol">(</span> <span class="notation-symbol"><-</span> <span class="notation-symbol">)</span> </a> [not, in infotheo.probability.convex] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.probability.convex.html#efb879cbf972a19daad19ae0d25c034f"><span class="notation-symbol">\ssum_</span> <span class="notation-symbol">(</span> <span class="notation-symbol"><-</span> <span class="notation-symbol">)</span> </a> [not, in infotheo.probability.convex] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.probability.convex.html#43191f1226c99efb15b736dcb5aede90"><span class="notation-symbol">\ssum_</span> <span class="notation-symbol">(</span> <span class="notation-symbol"><-</span> <span class="notation-symbol">|</span> <span class="notation-symbol">)</span> </a> [not, in infotheo.probability.convex] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.probability.convex.html#9dbb27fe806fc81179265e7251a94451"><span class="notation-symbol">\ssum_</span> <span class="notation-symbol">(</span> <span class="notation-symbol">|</span> <span class="notation-symbol">)</span> </a> [not, in infotheo.probability.convex] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.probability.convex.html#3a11e2307943b6b2e20262385c175bb7"><span class="notation-symbol">\ssum_</span> <span class="notation-symbol">(</span> <span class="notation-symbol">|</span> <span class="notation-symbol">)</span> </a> [not, in infotheo.probability.convex] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.probability.convex.html#3db567cbfff16b951eab29b69304b293"><span class="notation-symbol">\ssum_</span> </a> [not, in infotheo.probability.convex] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.probability.convex.html#987c94e0fc377e824d75bbe51c68ca8f"><span class="notation-symbol">\ssum_</span> </a> [not, in infotheo.probability.convex] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.probability.log_sum.html#2dbb71d2927203cb2542d9dc60fdc9d0"><span class="notation-symbol">\sum_{</span> <span class="notation-symbol">}</span> </a> [not, in infotheo.probability.log_sum] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.homomorphic_encryption.benaloh1994.benaloh_ahe.html#b5fd05f4e2fd9dd2e1e4c64383ba2c99"><span class="notation-symbol">^r</span></a> [not, in infotheo.homomorphic_encryption.benaloh1994.benaloh_ahe] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.information_theory.channel.html#50fc7e478a440142d3ab41dae98bc44b"><span class="notation-symbol">`Ch</span></a> [not, in infotheo.information_theory.channel] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.information_theory.channel.html#23fbc3437386827ef45886730f5dc969"><span class="notation-symbol">`Ch*</span></a> [not, in infotheo.information_theory.channel] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.probability.proba.html#fbc8212ffd5606b6d221ca2062136a11"><span class="notation-symbol">`E_[</span> <span class="notation-symbol">|</span> <span class="notation-symbol">]</span></a> [not, in infotheo.probability.proba] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_modern.summary_tanner.html#20951c3c2b060da9e97b1640e32f6829"><span class="notation-symbol">`F</span></a> [not, in infotheo.ecc_modern.summary_tanner] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_modern.summary_tanner.html#c88ce9fb4e71dea6d21f86f358869eb7"><span class="notation-symbol">`F</span></a> [not, in infotheo.ecc_modern.summary_tanner] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_modern.stopping_set.html#497d23147291bd2f3deea6e7b6bf0772"><span class="notation-symbol">`F</span></a> [not, in infotheo.ecc_modern.stopping_set] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_modern.stopping_set.html#0ebbcf5b5a56440b58141a46a112485b"><span class="notation-symbol">`F</span></a> [not, in infotheo.ecc_modern.stopping_set] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_modern.stopping_set.html#d9c4b521ede8041b9e8fe860c419a724"><span class="notation-symbol">`F</span></a> [not, in infotheo.ecc_modern.stopping_set] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_modern.stopping_set.html#b9c1688f3d2608bd33dd03414aadaaa9"><span class="notation-symbol">`F</span></a> [not, in infotheo.ecc_modern.stopping_set] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_modern.stopping_set.html#92e0c6bd27bec712c6b91a64752c9342"><span class="notation-symbol">`F</span></a> [not, in infotheo.ecc_modern.stopping_set] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_modern.stopping_set.html#7830e54246993ccf75b3888d0dfcd51d"><span class="notation-symbol">`F</span></a> [not, in infotheo.ecc_modern.stopping_set] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_modern.ldpc_erasure.html#a161c7e9080f93e5d7a83c84736bd03c"><span class="notation-symbol">`F</span></a> [not, in infotheo.ecc_modern.ldpc_erasure] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_modern.summary_tanner.html#5d01cac53616a35ee72d9c05cd81984c"><span class="notation-symbol">`F(</span> <span class="notation-symbol">,</span> <span class="notation-symbol">)</span></a> [not, in infotheo.ecc_modern.summary_tanner] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_modern.summary_tanner.html#1393d96a7ea8518f5ca3d249bb30c822"><span class="notation-symbol">`F(</span> <span class="notation-symbol">,</span> <span class="notation-symbol">)</span></a> [not, in infotheo.ecc_modern.summary_tanner] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.information_theory.entropy.html#dcce1648088283820dd0e40ab37ae085"><span class="notation-symbol">`H</span></a> [not, in infotheo.information_theory.entropy] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.information_theory.entropy.html#b4738e15014d494097a19b84db21663f"><span class="notation-symbol">`H(</span> <span class="notation-symbol">|</span> <span class="notation-symbol">)</span></a> [not, in infotheo.information_theory.entropy] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.information_theory.entropy.html#d7e677e6e4a7e026a213e6ce95821a3c"><span class="notation-symbol">`H[</span> <span class="notation-symbol">|</span> <span class="notation-symbol">=</span> <span class="notation-symbol">]</span></a> [not, in infotheo.information_theory.entropy] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.information_theory.joint_typ_seq.html#d6f482473ebe6ad7807a170a6d5d0845"><span class="notation-symbol">`JTS</span></a> [not, in infotheo.information_theory.joint_typ_seq] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.probability.proba.html#1afb686116d77ddf5ee335ea11271e67"><span class="notation-symbol">`Pr[</span> <span class="notation-symbol">=</span> <span class="notation-symbol">]</span></a> [not, in infotheo.probability.proba] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.probability.proba.html#eab6806f7e1b7fb890f4638afe1767f7"><span class="notation-symbol">`Pr[</span> <span class="notation-symbol">=</span> <span class="notation-symbol">|</span> <span class="notation-symbol">=</span> <span class="notation-symbol">]</span></a> [not, in infotheo.probability.proba] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.probability.proba.html#af4d87d7d7073877a2a9f55faf758c0b"><span class="notation-symbol">`Pr[</span> <span class="notation-symbol">\in</span> <span class="notation-symbol">]</span></a> [not, in infotheo.probability.proba] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.probability.proba.html#3db62ad8668caeff5a943648b196d76a"><span class="notation-symbol">`Pr[</span> <span class="notation-symbol">\in</span> <span class="notation-symbol">|</span> <span class="notation-symbol">\in</span> <span class="notation-symbol">]</span></a> [not, in infotheo.probability.proba] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.probability.proba.html#befd02c005ab7530b91270fef9b9c5bf"><span class="notation-symbol">`Pr_[</span> <span class="notation-symbol">|</span> <span class="notation-symbol">]</span></a> [not, in infotheo.probability.proba] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.probability.fdist.html#f38159d38483941a2791a3ae81de8f41"><span class="notation-symbol">`U</span> </a> [not, in infotheo.probability.fdist] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_modern.stopping_set.html#44c31b9bd84e4e6bfa1a9935c4a7e271"><span class="notation-symbol">`V</span></a> [not, in infotheo.ecc_modern.stopping_set] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_modern.stopping_set.html#5bbb9ec7c9f42b29ed8be47b12800f64"><span class="notation-symbol">`V</span></a> [not, in infotheo.ecc_modern.stopping_set] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_modern.stopping_set.html#412c88e2fef09516193213757c936658"><span class="notation-symbol">`V</span></a> [not, in infotheo.ecc_modern.stopping_set] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_modern.summary_tanner.html#1ae91b17130af734c1dec1757fbd4e77"><span class="notation-symbol">`V(</span> <span class="notation-symbol">,</span> <span class="notation-symbol">)</span></a> [not, in infotheo.ecc_modern.summary_tanner] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_modern.summary_tanner.html#b561de86a5b0888f26c29a779c5e9c07"><span class="notation-symbol">`V(</span> <span class="notation-symbol">,</span> <span class="notation-symbol">)</span></a> [not, in infotheo.ecc_modern.summary_tanner] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.robust.robustmean.html#262f3f3084319fa0d768cbcdb0b60a44"><span class="notation-symbol">`V_[</span> <span class="notation-symbol">|</span> <span class="notation-symbol">]</span></a> [not, in infotheo.robust.robustmean] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.probability.proba.html#acabe72d937085e9883b65b31701f820"><span class="notation-symbol">`p_</span> </a> [not, in infotheo.probability.proba] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_modern.ldpc.html#sum_prod_correctness.:::'alpha'"><span class="notation-symbol">alpha</span></a> [not, in infotheo.ecc_modern.ldpc] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_modern.ldpc.html#sum_prod_correctness.:::'beta'"><span class="notation-symbol">beta</span></a> [not, in infotheo.ecc_modern.ldpc] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.probability.variation_dist.html#564d40234b599399ed2750914f61f9ab"><span class="notation-symbol">d(</span> <span class="notation-symbol">,</span> <span class="notation-symbol">)</span></a> [not, in infotheo.probability.variation_dist] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.dumas2017dual.dsdp.dsdp_interface.html#:::'d_of'_x"><span class="notation-symbol">d_of</span> </a> [not, in infotheo.dumas2017dual.dsdp.dsdp_interface] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.dumas2017dual.dsdp.dsdp_interface.html#:::'data_of'_x"><span class="notation-symbol">data_of</span> </a> [not, in infotheo.dumas2017dual.dsdp.dsdp_interface] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.information_theory.channel_code.html#a0b0a203c50d7fefefdac8d96db119d9"><span class="notation-symbol">e(</span> <span class="notation-symbol">,</span> <span class="notation-symbol">)</span></a> [not, in infotheo.information_theory.channel_code] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.dumas2017dual.dsdp.dsdp_interface.html#:::'e_of'_x"><span class="notation-symbol">e_of</span> </a> [not, in infotheo.dumas2017dual.dsdp.dsdp_interface] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.information_theory.channel_code.html#7638dcd1476b4fef7498c13f8c7704ab"><span class="notation-symbol">echa(</span> <span class="notation-symbol">,</span> <span class="notation-symbol">)</span></a> [not, in infotheo.information_theory.channel_code] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.homomorphic_encryption.homomorphic_encryption.html#b27a5fcdbcaa5d2398060270e3bf8caa"><span class="notation-symbol">n(</span> <span class="notation-symbol">)</span></a> [not, in infotheo.homomorphic_encryption.homomorphic_encryption] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.information_theory.source_coding_vl_direct.html#variable_length_source_coding.:::'n0'"><span class="notation-symbol">n0</span></a> [not, in infotheo.information_theory.source_coding_vl_direct] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.dumas2017dual.dsdp.dsdp_interface.html#:::'priv_key_of'_x"><span class="notation-symbol">priv_key_of</span> </a> [not, in infotheo.dumas2017dual.dsdp.dsdp_interface] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.lib.realType_ext.html#:::'prob'_x"><span class="notation-symbol">prob</span> </a> [not, in infotheo.lib.realType_ext] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.dumas2017dual.dsdp.dsdp_interface.html#:::'pub_key_of'_x"><span class="notation-symbol">pub_key_of</span> </a> [not, in infotheo.dumas2017dual.dsdp.dsdp_interface] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.lib.euclid.html#euclid_stop.:::'q'"><span class="notation-symbol">q</span></a> [not, in infotheo.lib.euclid] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.lib.euclid.html#euclid_lemma.:::'r'"><span class="notation-symbol">r</span></a> [not, in infotheo.lib.euclid] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.lib.euclid.html#euclid_stop.:::'r'"><span class="notation-symbol">r</span></a> [not, in infotheo.lib.euclid] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_classic.reed_solomon.html#RS_decoding_procedure.:::'r'"><span class="notation-symbol">r</span></a> [not, in infotheo.ecc_classic.reed_solomon] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.information_theory.channel_code.html#330e8cd19d66eb53d4bff2c671e05e7b"><span class="notation-symbol">scha(</span> <span class="notation-symbol">,</span> <span class="notation-symbol">)</span></a> [not, in infotheo.information_theory.channel_code] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.information_theory.kraft.html#kraft_code.:::'sigma'"><span class="notation-symbol">sigma</span></a> [not, in infotheo.information_theory.kraft] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.lib.euclid.html#euclid_lemma.:::'u'"><span class="notation-symbol">u</span></a> [not, in infotheo.lib.euclid] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.lib.euclid.html#euclid_lemma.:::'v'"><span class="notation-symbol">v</span></a> [not, in infotheo.lib.euclid] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.lib.euclid.html#euclid_stop.:::'v'"><span class="notation-symbol">v</span></a> [not, in infotheo.lib.euclid] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_classic.reed_solomon.html#RS_decoding_procedure.:::'v'"><span class="notation-symbol">v</span></a> [not, in infotheo.ecc_classic.reed_solomon] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_classic.bch.html#decoding_using_euclid.:::'v'"><span class="notation-symbol">v</span></a> [not, in infotheo.ecc_classic.bch] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.information_theory.kraft.html#kraft_cond_implies_prefix.:::'w'"><span class="notation-symbol">w</span></a> [not, in infotheo.information_theory.kraft] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.information_theory.kraft.html#kraft_code.:::'w'"><span class="notation-symbol">w</span></a> [not, in infotheo.information_theory.kraft] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.probability.proba.html#b112faf9ffd6c18790d82c6523326d2d"><span class="notation-symbol">{</span> <span class="notation-symbol">RV</span> <span class="notation-symbol">-></span> <span class="notation-symbol">}</span></a> [not, in infotheo.probability.proba] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.probability.fsdist.html#647de7b0fea75c7e5bea1d0629366115"><span class="notation-symbol">{</span> <span class="notation-symbol">dist</span> <span class="notation-symbol">}</span></a> [not, in infotheo.probability.fsdist] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.probability.necset.html#3461d6a3358ba6a67cedc48f9db9c598"><span class="notation-symbol">{</span> <span class="notation-symbol">necset</span> <span class="notation-symbol">}</span></a> [not, in infotheo.probability.necset] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.lib.realType_ext.html#6572990c5ddbbc0c21dc1cf00db2e467"><span class="notation-symbol">{</span> <span class="notation-symbol">oprob</span> <span class="notation-symbol">}</span></a> [not, in infotheo.lib.realType_ext] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.lib.realType_ext.html#1bcee8346a93ec2dfdfdc48f83279490"><span class="notation-symbol">{</span> <span class="notation-symbol">prob</span> <span class="notation-symbol">}</span></a> [not, in infotheo.lib.realType_ext] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.smc.pismc.html#:pismc::x"> </a> [not, in infotheo.smc.pismc] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.dumas2017dual.dsdp.dsdp_syntax_demo.html#:dsdp::x"> </a> [not, in infotheo.dumas2017dual.dsdp.dsdp_syntax_demo] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.robust.weightedmean.html#f2eff498e485c570446937affc0e36f4"> <span class="notation-symbol">!=?</span> </a> [not, in infotheo.robust.weightedmean] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.probability.necset.html#b528ad96a1a2d8f1d74a503ff31bba2d"> <span class="notation-symbol">%:ne</span></a> [not, in infotheo.probability.necset] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.lib.realType_ext.html#ddda92e2a557d8f150a68a6de5faa61d"> <span class="notation-symbol">%:opr</span></a> [not, in infotheo.lib.realType_ext] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.lib.realType_ext.html#637192754899eed3a58b6ead9781904c"> <span class="notation-symbol">%:pr</span></a> [not, in infotheo.lib.realType_ext] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.homomorphic_encryption.benaloh1994.benaloh_ahe.html#2bb85fce16f00b09f46cd14989988314"> <span class="notation-symbol">(.)</span> </a> [not, in infotheo.homomorphic_encryption.benaloh1994.benaloh_ahe] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.homomorphic_encryption.ahe_enc.html#4c5be0c3a8c12030da79c2b3bd7946d5"> <span class="notation-symbol">(.)</span> </a> [not, in infotheo.homomorphic_encryption.ahe_enc] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.homomorphic_encryption.benaloh1994.benaloh_ahe.html#3d7a1f2c3abcc262b1d80104c4efe7b9"> <span class="notation-symbol">(^)</span> </a> [not, in infotheo.homomorphic_encryption.benaloh1994.benaloh_ahe] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.homomorphic_encryption.ahe_enc.html#6ddae746cf285c53f4fd5b535032e861"> <span class="notation-symbol">(^)</span> </a> [not, in infotheo.homomorphic_encryption.ahe_enc] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.probability.convex.html#a96fc79077c83ef4cd31c9b7e745fbf6"> <span class="notation-symbol">*'</span> </a> [not, in infotheo.probability.convex] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.probability.convex.html#a2f5ec734605d5778758db6b1e0a548b"> <span class="notation-symbol">*:</span> </a> [not, in infotheo.probability.convex] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.du2002.spp_proof.html#44f70a6e3bc89e22fd4a297cb2b23436"> <span class="notation-symbol">*d</span> </a> [not, in infotheo.du2002.spp_proof] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.du2002.spp_proof.html#0cf3a558e476eb65aaac414e52cd72cd"> <span class="notation-symbol">*d</span> </a> [not, in infotheo.du2002.spp_proof] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.du2002.spp_proof.html#f6645dee50ede64b935d27cd66e25236"> <span class="notation-symbol">*d</span> </a> [not, in infotheo.du2002.spp_proof] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.du2002.spp_program.html#f6b383b8d89878a91a0a71fedf8635fb"> <span class="notation-symbol">*d</span> </a> [not, in infotheo.du2002.spp_program] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.du2002.spp_pismc.html#37ed4daa5f91b734f8093d5232d9845f"> <span class="notation-symbol">*d</span> </a> [not, in infotheo.du2002.spp_pismc] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.du2002.spp_entropy.html#a7f2f1f3720a8f2552a2e3cd4941dd93"> <span class="notation-symbol">*d</span> </a> [not, in infotheo.du2002.spp_entropy] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.dumas2017dual.dsdp.dsdp_program.html#1da0e7f336e6b6b85827b65682cb7410"> <span class="notation-symbol">*h</span> </a> [not, in infotheo.dumas2017dual.dsdp.dsdp_program] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.dumas2017dual.dsdp.dsdp_pismc.html#077736f65ca96f04020d48f5cf4f7ac7"> <span class="notation-symbol">*h</span> </a> [not, in infotheo.dumas2017dual.dsdp.dsdp_pismc] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.dumas2017dual.dsdp.dsdp_entropy_trace.html#723a129dec83e68df2951a4730665a6c"> <span class="notation-symbol">*h</span> </a> [not, in infotheo.dumas2017dual.dsdp.dsdp_entropy_trace] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.dumas2017dual.dsdp.dsdp_entropy.html#44adbf192ab7754ca8906a7fd650b385"> <span class="notation-symbol">*h</span> </a> [not, in infotheo.dumas2017dual.dsdp.dsdp_entropy] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.homomorphic_encryption.ahe_enc.html#eb8c567c695a8c5c059a57eaa6a518a3"> <span class="notation-symbol">*r</span> </a> [not, in infotheo.homomorphic_encryption.ahe_enc] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.probability.convex.html#a686ff7e734da4aef42dc745df2773c9"> <span class="notation-symbol">+'</span> </a> [not, in infotheo.probability.convex] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_classic.poly_decoding.html#2029e051d6588e9b8122cc10eed05753"> <span class="notation-symbol">.-'rV[</span> <span class="notation-symbol">]_</span> </a> [not, in infotheo.ecc_classic.poly_decoding] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.probability.fsdist.html#:::x_'.-dist'_x"> <span class="notation-symbol">.-dist</span> </a> [not, in infotheo.probability.fsdist] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.information_theory.pproba.html#:::x_'.-receivable'_x"> <span class="notation-symbol">.-receivable</span> </a> [not, in infotheo.information_theory.pproba] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.lib.realType_ext.html#3051acced15ca4c0409f0cf22cc760a9"> <span class="notation-symbol">.~</span></a> [not, in infotheo.lib.realType_ext] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.information_theory.string_entropy.html#c390e72123d236d73a4fa8664774b750"> <span class="notation-symbol">/:R</span> </a> [not, in infotheo.information_theory.string_entropy] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.lib.ssr_ext.html#a61ff6bf0b0b5db2309389b977df7028"> <span class="notation-symbol">:+:</span> </a> [not, in infotheo.lib.ssr_ext] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.lib.ssr_ext.html#f337e452c04f0f043f97a5d69b247fd5"> <span class="notation-symbol">:+:</span> </a> [not, in infotheo.lib.ssr_ext] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.probability.convex_equiv.html#NaryToBin.:::x_'&lt;&amp;'_x_'&amp;&gt;'_x"> <span class="notation-symbol"><&</span> <span class="notation-symbol">&></span> </a> [not, in infotheo.probability.convex_equiv] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.probability.convex_equiv.html#NaryToBin.instance.:::x_'&lt;&amp;'_x_'&amp;&gt;'_x"> <span class="notation-symbol"><&</span> <span class="notation-symbol">&></span> </a> [not, in infotheo.probability.convex_equiv] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.robust.weightedmean.html#bounding_empirical_variance.:::x_'&lt;'_x_'&lt;'_x_':&gt;'_x"> <span class="notation-symbol"><</span> <span class="notation-symbol"><</span> <span class="notation-symbol">:></span> </a> [not, in infotheo.robust.weightedmean] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.robust.weightedmean.html#fca64c1a53d600e2c4359102d48aa624"> <span class="notation-symbol"><</span> <span class="notation-symbol"><=</span> <span class="notation-symbol">:></span> </a> [not, in infotheo.robust.weightedmean] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.robust.weightedmean.html#542562784c58ad1d61ff18db2f7c987c"> <span class="notation-symbol"><=</span> <span class="notation-symbol"><</span> <span class="notation-symbol">:></span> </a> [not, in infotheo.robust.weightedmean] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.robust.weightedmean.html#a54cb49b34fa29da38d5c5394c71a41c"> <span class="notation-symbol"><=</span> <span class="notation-symbol"><=</span> <span class="notation-symbol">:></span> </a> [not, in infotheo.robust.weightedmean] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_modern.ldpc_erasure.html#0712db871d573d1cefe6838630d379de"> <span class="notation-symbol"><=*</span> </a> [not, in infotheo.ecc_modern.ldpc_erasure] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.robust.weightedmean.html#bda2db261b3d9c2f14064c86fb7903c2"> <span class="notation-symbol"><=?</span> </a> [not, in infotheo.robust.weightedmean] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_modern.ldpc_erasure.html#7119a811de7371de1f8433d9590f2ad1"> <span class="notation-symbol"><=l</span> </a> [not, in infotheo.ecc_modern.ldpc_erasure] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_modern.ldpc_erasure.html#b2e7aa44c90d1d8c95123f2960df2a9c"> <span class="notation-symbol"><=m</span> </a> [not, in infotheo.ecc_modern.ldpc_erasure] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.probability.necset.html#e2d22539500c2cf01a72d90ae5b7f065"> <span class="notation-symbol"><|</span> <span class="notation-symbol">|>:</span> </a> [not, in infotheo.probability.necset] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.du2002.spp_proof.html#02c901fa0895f776a16c748607c33e99"> <span class="notation-symbol">\*d</span> </a> [not, in infotheo.du2002.spp_proof] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.du2002.spp_proof.html#b7b86d00fcf1c1ae75fb1c5bf463b3ad"> <span class="notation-symbol">\*d</span> </a> [not, in infotheo.du2002.spp_proof] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.du2002.spp_entropy.html#0807d01a9c6589eb1d7d7fda2bfcbd89"> <span class="notation-symbol">\*d</span> </a> [not, in infotheo.du2002.spp_entropy] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.dumas2017dual.dsdp.dsdp_security.html#a74521e5f55e3476bd4ff35ff37a6a14"> <span class="notation-symbol">\+</span> </a> [not, in infotheo.dumas2017dual.dsdp.dsdp_security] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.lib.dft.html#0989bc304fb8cfa688ece76d47472247"> <span class="notation-symbol">^`_</span> </a> [not, in infotheo.lib.dft] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_classic.reed_solomon.html#a92aa2d36267e6f02e362c84f6b94226"> <span class="notation-symbol">^`_</span> </a> [not, in infotheo.ecc_classic.reed_solomon] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.ecc_classic.cyclic_code.html#52ca96083f2113fbcf0cbe7b91b4c5e2"> <span class="notation-symbol">^`_</span> </a> [not, in infotheo.ecc_classic.cyclic_code] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.dumas2017dual.dsdp.dsdp_program.html#a4a7a4e590c7755b0acd33e61b162d02"> <span class="notation-symbol">^h</span> </a> [not, in infotheo.dumas2017dual.dsdp.dsdp_program] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.dumas2017dual.dsdp.dsdp_pismc.html#d6ce81e7a30d173343f6ce94d3f3d32f"> <span class="notation-symbol">^h</span> </a> [not, in infotheo.dumas2017dual.dsdp.dsdp_pismc] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.dumas2017dual.dsdp.dsdp_entropy_trace.html#0d551b76edb687fed03460f77bb45ac1"> <span class="notation-symbol">^h</span> </a> [not, in infotheo.dumas2017dual.dsdp.dsdp_entropy_trace] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.dumas2017dual.dsdp.dsdp_entropy.html#e536846c8a3d653010282d0bfd575dcf"> <span class="notation-symbol">^h</span> </a> [not, in infotheo.dumas2017dual.dsdp.dsdp_entropy] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.homomorphic_encryption.ahe_enc.html#4df85937fe754de4292b4538fed8bb76"> <span class="notation-symbol">^r</span> </a> [not, in infotheo.homomorphic_encryption.ahe_enc] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.probability.jfdist_cond.html#1f55600015658fe83449a9503792215c"> <span class="notation-symbol">`(|</span> <span class="notation-symbol">)</span></a> [not, in infotheo.probability.jfdist_cond] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.lib.ssr_ext.html#43064000af43b887a065a18755b49733"> <span class="notation-symbol">`*</span> </a> [not, in infotheo.lib.ssr_ext] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.lib.realType_ext.html#2d7ffffaaa230b2304e22e4907064098"> <span class="notation-symbol">`<<</span> </a> [not, in infotheo.lib.realType_ext] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.lib.realType_ext.html#72cb2ff24455594afe4f2c649aa4be0d"> <span class="notation-symbol">`<<</span> </a> [not, in infotheo.lib.realType_ext] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.information_theory.kraft.html#adb88e8c852ca16fb8593162cad94e1f"> <span class="notation-symbol">``_</span> </a> [not, in infotheo.information_theory.kraft] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.information_theory.kraft.html#081dbe84a9daebd63344c9b4837b48e1"> <span class="notation-symbol">``_</span> </a> [not, in infotheo.information_theory.kraft] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.information_theory.kraft.html#0b2f3e41fd4a92fa4247ca6270d28b6a"> <span class="notation-symbol">``_</span> </a> [not, in infotheo.information_theory.kraft] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.lib.hamming.html#63eb4ce6bac6bc44fdfc74ab9759f77f"> <span class="notation-symbol">`b_</span> </a> [not, in infotheo.lib.hamming] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.probability.proba.html#2cc6980a4178dc3e137982dbfea67c52"> <span class="notation-symbol">`o</span> </a> [not, in infotheo.probability.proba] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.homomorphic_encryption.benaloh1994.benaloh_ahe.html#7fca826e9a7a702dc2eb86dd1cb6ac36"> <span class="notation-symbol">{<</span> <span class="notation-symbol">;</span> <span class="notation-symbol">>}</span> </a> [not, in infotheo.homomorphic_encryption.benaloh1994.benaloh_ahe] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.homomorphic_encryption.ahe_enc.html#68ffd7ff31a3c214f2dcba0f6eb865fc"> <span class="notation-symbol">{<</span> <span class="notation-symbol">;</span> <span class="notation-symbol">>}</span> </a> [not, in infotheo.homomorphic_encryption.ahe_enc] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.homomorphic_encryption.benaloh1994.benaloh_ahe.html#d8c66f4f53b533a400c03ea5b86c42da"> <span class="notation-symbol">{[</span> <span class="notation-symbol">;</span> <span class="notation-symbol">]}</span> </a> [not, in infotheo.homomorphic_encryption.benaloh1994.benaloh_ahe] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.homomorphic_encryption.ahe_enc.html#09a19bb95d44966c4bafa8757a44ac17"> <span class="notation-symbol">{[</span> <span class="notation-symbol">;</span> <span class="notation-symbol">]}</span> </a> [not, in infotheo.homomorphic_encryption.ahe_enc] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.lib.ssr_ext.html#91b428f53cd078edb7b71f1640c5e1a9"> <span class="notation-symbol">×</span> </a> [not, in infotheo.lib.ssr_ext] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.du2002.spp_proba.html#fb081ce023ce84c73fdb83ead1e6e97a"> <span class="notation-symbol">×</span> </a> [not, in infotheo.du2002.spp_proba] (<span class="warning">no scope</span>)<br>
+<a href="infotheo.du2002.spp_proba.html#9bf63181aa03b14db3a765515f02900e"> <span class="notation-symbol">×</span> </a> [not, in infotheo.du2002.spp_proba] (<span class="warning">no scope</span>)<h2>bch_scope</h2><a href="infotheo.ecc_classic.bch.html#8d164f7a502f6454b10caeb4ec942d4a"><span class="notation-symbol">\BCHomega_(</span> <span class="notation-symbol">,</span> <span class="notation-symbol">)</span></a> [not, in infotheo.ecc_classic.bch] (in bch_scope)<br>
+<a href="infotheo.ecc_classic.bch.html#72f58aa8a15d8924267bcdaba87a15dc"><span class="notation-symbol">\BCHsynp_(</span> <span class="notation-symbol">,</span> <span class="notation-symbol">,</span> <span class="notation-symbol">)</span></a> [not, in infotheo.ecc_classic.bch] (in bch_scope)<h2>bec_scope</h2><a href="infotheo.ecc_modern.ldpc_erasure.html#47c260504b769989f2a98ee8d58f109e"> <span class="notation-symbol">BEC(</span> <span class="notation-symbol">)</span> </a> [not, in infotheo.ecc_modern.ldpc_erasure] (in bec_scope)<h2>channel_code_scope</h2><a href="infotheo.information_theory.channel_code.html#ddac121f25dac053294e48d3f46ebfbe"><span class="notation-symbol">e(</span> <span class="notation-symbol">,</span> <span class="notation-symbol">)</span></a> [not, in infotheo.information_theory.channel_code] (in channel_code_scope)<br>
+<a href="infotheo.information_theory.channel_code.html#8d9b826e62eb685bf8bc9136d929f7d7"><span class="notation-symbol">echa(</span> <span class="notation-symbol">,</span> <span class="notation-symbol">)</span></a> [not, in infotheo.information_theory.channel_code] (in channel_code_scope)<br>
+<a href="infotheo.information_theory.channel_code.html#55e07899a9b3a43e2b1f25be59cb50d6"><span class="notation-symbol">scha(</span> <span class="notation-symbol">,</span> <span class="notation-symbol">)</span></a> [not, in infotheo.information_theory.channel_code] (in channel_code_scope)<h2>channel_scope</h2><a href="infotheo.information_theory.channel.html#85047f775f48469880be6cb0b87359df"><span class="notation-symbol">`Ch(</span> <span class="notation-symbol">,</span> <span class="notation-symbol">)</span></a> [not, in infotheo.information_theory.channel] (in channel_scope)<br>
+<a href="infotheo.information_theory.channel.html#fbdab5646323b40645f102bbf72add25"><span class="notation-symbol">`Ch*(</span> <span class="notation-symbol">,</span> <span class="notation-symbol">)</span></a> [not, in infotheo.information_theory.channel] (in channel_scope)<br>
+<a href="infotheo.information_theory.channel.html#b29d468b97f5609a2c7d0e6f7912706e"><span class="notation-symbol">`H(</span> <span class="notation-symbol">,</span> <span class="notation-symbol">)</span></a> [not, in infotheo.information_theory.channel] (in channel_scope)<br>
+<a href="infotheo.information_theory.channel.html#64a0fbe0371c81a3a5350adfe17a5eb6"><span class="notation-symbol">`H(</span> <span class="notation-symbol">`o</span> <span class="notation-symbol">)</span></a> [not, in infotheo.information_theory.channel] (in channel_scope)<br>
+<a href="infotheo.information_theory.channel.html#bbb4cd417024e3eabb5695edcd8a1753"><span class="notation-symbol">`H(</span> <span class="notation-symbol">|</span> <span class="notation-symbol">)</span></a> [not, in infotheo.information_theory.channel] (in channel_scope)<br>
+<a href="infotheo.information_theory.channel.html#3627ed3fd3b451894875d95caae0e3db"><span class="notation-symbol">`I(</span> <span class="notation-symbol">,</span> <span class="notation-symbol">)</span></a> [not, in infotheo.information_theory.channel] (in channel_scope)<br>
+<a href="infotheo.information_theory.channel.html#279f9e7be1304ad6f93d6163f12c67e9"><span class="notation-symbol">`O(</span> <span class="notation-symbol">,</span> <span class="notation-symbol">)</span></a> [not, in infotheo.information_theory.channel] (in channel_scope)<br>
+<a href="infotheo.information_theory.channel.html#33d752df092a5cfa6288ffca010ec175"> <span class="notation-symbol">`(</span> <span class="notation-symbol">|</span> <span class="notation-symbol">)</span></a> [not, in infotheo.information_theory.channel] (in channel_scope)<br>
+<a href="infotheo.information_theory.channel.html#801b34426b98dc1711b17161d750d4ec"> <span class="notation-symbol">``(</span> <span class="notation-symbol">|</span> <span class="notation-symbol">)</span></a> [not, in infotheo.information_theory.channel] (in channel_scope)<br>
+<a href="infotheo.information_theory.channel.html#41e88927da609be641e0904fc3e02bc1"> <span class="notation-symbol">``(|</span> <span class="notation-symbol">)</span></a> [not, in infotheo.information_theory.channel] (in channel_scope)<br>
+<a href="infotheo.information_theory.channel.html#c9fca44ab810353da95d8dfd3dde583d"> <span class="notation-symbol">``^</span> </a> [not, in infotheo.information_theory.channel] (in channel_scope)<h2>convex_scope</h2><a href="infotheo.probability.convex.html#e6082a3d25c94c20e2e552d8d45f63eb"><span class="notation-symbol"><$>_</span> </a> [not, in infotheo.probability.convex] (in convex_scope)<br>
+<a href="infotheo.probability.convex_equiv.html#::convex_scope:'&lt;&amp;&gt;_'_x_x"><span class="notation-symbol"><&>_</span> </a> [not, in infotheo.probability.convex_equiv] (in convex_scope)<br>
+<a href="infotheo.probability.convex.html#ee712a5a13325e3f0cab9e645bc32e94"><span class="notation-symbol"><|>_</span> </a> [not, in infotheo.probability.convex] (in convex_scope)<br>
+<a href="infotheo.probability.necset.html#a6c451de6d6f2873dae46f083126437a"><span class="notation-symbol">{</span> <span class="notation-symbol">Biglub_affine</span> <span class="notation-symbol">-></span> <span class="notation-symbol">}</span></a> [not, in infotheo.probability.necset] (in convex_scope)<br>
+<a href="infotheo.probability.necset.html#de25306e536bae813464f679a0be1e4b"><span class="notation-symbol">{</span> <span class="notation-symbol">Biglub_morph</span> <span class="notation-symbol">-></span> <span class="notation-symbol">}</span></a> [not, in infotheo.probability.necset] (in convex_scope)<br>
+<a href="infotheo.probability.convex.html#d5aae6b47bc88b6cb7afdb11d1e8b480"><span class="notation-symbol">{</span> <span class="notation-symbol">affine</span> <span class="notation-symbol">-></span> <span class="notation-symbol">}</span></a> [not, in infotheo.probability.convex] (in convex_scope)<br>
+<a href="infotheo.probability.convex.html#7111ca52a8239c41520dc73a7adfae1a"><span class="notation-symbol">{</span> <span class="notation-symbol">concave</span> <span class="notation-symbol">-></span> <span class="notation-symbol">}</span></a> [not, in infotheo.probability.convex] (in convex_scope)<br>
+<a href="infotheo.probability.convex.html#f2f836b8bde8bfe4e4201ba39eef8d41"><span class="notation-symbol">{</span> <span class="notation-symbol">convex</span> <span class="notation-symbol">-></span> <span class="notation-symbol">}</span></a> [not, in infotheo.probability.convex] (in convex_scope)<br>
+<a href="infotheo.probability.convex.html#d02ca1038dd4c48f739ec2b2ed1c0c79"><span class="notation-symbol">{</span> <span class="notation-symbol">convex_set</span> <span class="notation-symbol">}</span></a> [not, in infotheo.probability.convex] (in convex_scope)<br>
+<a href="infotheo.probability.necset.html#2117e0be275d4cf66e802c4a48afb50b"><span class="notation-symbol">{</span> <span class="notation-symbol">necset</span> <span class="notation-symbol">}</span></a> [not, in infotheo.probability.necset] (in convex_scope)<br>
+<a href="infotheo.probability.necset.html#1e4b53123b7dd6349b9fea01fc7819f8"> <span class="notation-symbol">:<|</span> <span class="notation-symbol">|>:</span> </a> [not, in infotheo.probability.necset] (in convex_scope)<br>
+<a href="infotheo.probability.convex.html#515280232a0776f02aa884f5266603fe"> <span class="notation-symbol"><|</span> <span class="notation-symbol">|></span> </a> [not, in infotheo.probability.convex] (in convex_scope)<br>
+<a href="infotheo.probability.necset.html#2b315141740a31f84a8e825213f78e10"> <span class="notation-symbol"><|</span> <span class="notation-symbol">|>:</span> </a> [not, in infotheo.probability.necset] (in convex_scope)<h2>cyclic_code_scope</h2><a href="infotheo.ecc_classic.cyclic_code.html#72578a9c9f7beaca19d50f747ffab23f"><span class="notation-symbol">'cgen[</span> <span class="notation-symbol">]</span></a> [not, in infotheo.ecc_classic.cyclic_code] (in cyclic_code_scope)<br>
+<a href="infotheo.ecc_classic.cyclic_code.html#98889dd8a9b7d25f058c913d17de5127"><span class="notation-symbol">'pgen[</span> <span class="notation-symbol">]</span></a> [not, in infotheo.ecc_classic.cyclic_code] (in cyclic_code_scope)<br>
+<a href="infotheo.ecc_classic.cyclic_code.html#dcac32064ab7403924f32281ee63d036"><span class="notation-symbol">`[</span> <span class="notation-symbol">]_</span> </a> [not, in infotheo.ecc_classic.cyclic_code] (in cyclic_code_scope)<h2>dft_scope</h2><a href="infotheo.lib.dft.html#028c1a3e74d961a202074b9d814fcc99"> <span class="notation-symbol">^`_(</span> <span class="notation-symbol">,</span> <span class="notation-symbol">)</span></a> [not, in infotheo.lib.dft] (in dft_scope)<h2>divergence_scope</h2><a href="infotheo.probability.divergence.html#9c66e56f0569ce8543d0d3c49729b601"><span class="notation-symbol">D(</span> <span class="notation-symbol">||</span> <span class="notation-symbol">)</span></a> [not, in infotheo.probability.divergence] (in divergence_scope)<br>
+<a href="infotheo.information_theory.conditional_divergence.html#f7d5205a9d02a5591f429c09b80dddb2"><span class="notation-symbol">D(</span> <span class="notation-symbol">||</span> <span class="notation-symbol">|</span> <span class="notation-symbol">)</span></a> [not, in infotheo.information_theory.conditional_divergence] (in divergence_scope)<br>
+<a href="infotheo.information_theory.conditional_divergence.html#e0e6e5c11ac4b01d0e586b8cf8c6aaad"> <span class="notation-symbol">|-</span> <span class="notation-symbol"><<</span> </a> [not, in infotheo.information_theory.conditional_divergence] (in divergence_scope)<br>
+<a href="infotheo.information_theory.conditional_divergence.html#de61c04d4ef1c558b1815b4fb7ec1381"> <span class="notation-symbol">|-</span> <span class="notation-symbol"><<b</span> </a> [not, in infotheo.information_theory.conditional_divergence] (in divergence_scope)<h2>dsdp_scope</h2><a href="infotheo.dumas2017dual.dsdp.dsdp_syntax_demo.html#::dsdp_scope:'PROC'_x_'END'"><span class="notation-symbol">PROC</span> <span class="notation-symbol">END</span></a> [not, in infotheo.dumas2017dual.dsdp.dsdp_syntax_demo] (in dsdp_scope)<br>
+<a href="infotheo.dumas2017dual.dsdp.dsdp_syntax_demo.html#e3068ac97c248537a35c8da3a1885a15"><span class="notation-symbol">{|</span> <span class="notation-symbol">|}</span></a> [not, in infotheo.dumas2017dual.dsdp.dsdp_syntax_demo] (in dsdp_scope)<h2>ecc_scope</h2><a href="infotheo.ecc_classic.decoding.html#::ecc_scope:x_'.-BDD'_x"> <span class="notation-symbol">.-BDD</span> </a> [not, in infotheo.ecc_classic.decoding] (in ecc_scope)<h2>emul_scope</h2><a href="infotheo.homomorphic_encryption.ahe_monoid.html#::emul_scope:'1'"><span class="notation-symbol">1</span></a> [not, in infotheo.homomorphic_encryption.ahe_monoid] (in emul_scope)<br>
+<a href="infotheo.homomorphic_encryption.ahe_monoid.html#268bc447c38ef1616a21b7f6eb825a37"><span class="notation-symbol">\Emul[</span> <span class="notation-symbol">]_</span> <span class="notation-symbol">(</span> <span class="notation-symbol"><</span> <span class="notation-symbol">)</span> </a> [not, in infotheo.homomorphic_encryption.ahe_monoid] (in emul_scope)<br>
+<a href="infotheo.homomorphic_encryption.ahe_monoid.html#e8319faa0b45fa0428e557f44d990eff"><span class="notation-symbol">\Emul[</span> <span class="notation-symbol">]_</span> <span class="notation-symbol">(</span> <span class="notation-symbol"><</span> <span class="notation-symbol">|</span> <span class="notation-symbol">)</span> </a> [not, in infotheo.homomorphic_encryption.ahe_monoid] (in emul_scope)<br>
+<a href="infotheo.homomorphic_encryption.ahe_monoid.html#b04eef5b50405c2468084fb02ccfed75"><span class="notation-symbol">\Emul[</span> <span class="notation-symbol">]_</span> <span class="notation-symbol">(</span> <span class="notation-symbol"><-</span> <span class="notation-symbol">)</span> </a> [not, in infotheo.homomorphic_encryption.ahe_monoid] (in emul_scope)<br>
+<a href="infotheo.homomorphic_encryption.ahe_monoid.html#ef6e6ba996d0e3c68a7157adae3c40ab"><span class="notation-symbol">\Emul[</span> <span class="notation-symbol">]_</span> <span class="notation-symbol">(</span> <span class="notation-symbol"><-</span> <span class="notation-symbol">|</span> <span class="notation-symbol">)</span> </a> [not, in infotheo.homomorphic_encryption.ahe_monoid] (in emul_scope)<br>
+<a href="infotheo.homomorphic_encryption.ahe_monoid.html#65e0a389e285ac83f82dc3d9f4bd3acf"> <span class="notation-symbol">(.)</span> </a> [not, in infotheo.homomorphic_encryption.ahe_monoid] (in emul_scope)<h2>entropy_scope</h2><a href="infotheo.information_theory.entropy.html#618798a03c612f6ea0cef204ac76a1de"><span class="notation-symbol">`H</span></a> [not, in infotheo.information_theory.entropy] (in entropy_scope)<br>
+<a href="infotheo.information_theory.entropy.html#6bc9dad295c23455c4cf4cdb60849794"><span class="notation-symbol">`H(</span> <span class="notation-symbol">,</span> <span class="notation-symbol">)</span></a> [not, in infotheo.information_theory.entropy] (in entropy_scope)<br>
+<a href="infotheo.information_theory.entropy.html#1bfb30d4fd63c2d43c97e202e1958a6a"><span class="notation-symbol">`I(</span> <span class="notation-symbol">;</span> <span class="notation-symbol">)</span></a> [not, in infotheo.information_theory.entropy] (in entropy_scope)<h2>fdist_scope</h2><a href="infotheo.robust.weightedmean.html#ace7319b60c40bb8a888ede7917d5f1a"><span class="notation-symbol">{</span> <span class="notation-symbol">fdist</span> <span class="notation-symbol">}</span></a> [not, in infotheo.robust.weightedmean] (in fdist_scope)<br>
+<a href="infotheo.probability.fdist.html#ace7319b60c40bb8a888ede7917d5f1a"><span class="notation-symbol">{</span> <span class="notation-symbol">fdist</span> <span class="notation-symbol">}</span></a> [not, in infotheo.probability.fdist] (in fdist_scope)<br>
+<a href="infotheo.information_theory.channel.html#ace7319b60c40bb8a888ede7917d5f1a"><span class="notation-symbol">{</span> <span class="notation-symbol">fdist</span> <span class="notation-symbol">}</span></a> [not, in infotheo.information_theory.channel] (in fdist_scope)<br>
+<a href="infotheo.probability.fdist.html#::fdist_scope:x_'.-fdist'_x"> <span class="notation-symbol">.-fdist</span> </a> [not, in infotheo.probability.fdist] (in fdist_scope)<br>
+<a href="infotheo.probability.fdist.html#b4ccf1ddd9ab85280dfd59fe330e72b6"> <span class="notation-symbol"><|</span> <span class="notation-symbol">|></span> </a> [not, in infotheo.probability.fdist] (in fdist_scope)<br>
+<a href="infotheo.probability.fdist.html#1e374e8dfe87b76d4db709374d25b02e"> <span class="notation-symbol">>>=</span> </a> [not, in infotheo.probability.fdist] (in fdist_scope)<br>
+<a href="infotheo.probability.fdist.html#ce7ef0bfb0b9b83549e1c26fa3cfb70b"> <span class="notation-symbol">@^-1</span> </a> [not, in infotheo.probability.fdist] (in fdist_scope)<br>
+<a href="infotheo.probability.fdist.html#43fc81d937a6c7c2aa2bfe761b435deb"> <span class="notation-symbol">`1</span></a> [not, in infotheo.probability.fdist] (in fdist_scope)<br>
+<a href="infotheo.probability.fdist.html#001b18603c99bb06c7f60b39efe9dea2"> <span class="notation-symbol">`2</span></a> [not, in infotheo.probability.fdist] (in fdist_scope)<br>
+<a href="infotheo.probability.fdist.html#41984d75880ba2822093ea89112816c3"> <span class="notation-symbol">`X</span> </a> [not, in infotheo.probability.fdist] (in fdist_scope)<br>
+<a href="infotheo.probability.fdist.html#b36f86593390736ad1fe0540871140ca"> <span class="notation-symbol">`^</span> </a> [not, in infotheo.probability.fdist] (in fdist_scope)<br>
+<a href="infotheo.probability.fdist.html#e048e05fdded88102a0b713325edcb1b"> <span class="notation-symbol">`x</span> </a> [not, in infotheo.probability.fdist] (in fdist_scope)<h2>fsdist_scope</h2><a href="infotheo.probability.fsdist.html#31e83550d06ce1503cc650145bdd23e7"> <span class="notation-symbol"><|</span> <span class="notation-symbol">|></span> </a> [not, in infotheo.probability.fsdist] (in fsdist_scope)<br>
+<a href="infotheo.probability.fsdist.html#c7fc5e2fd36a832a0e04a99017412d30"> <span class="notation-symbol">>>=</span> </a> [not, in infotheo.probability.fsdist] (in fsdist_scope)<h2>jtyp_seq_scope</h2><a href="infotheo.information_theory.joint_typ_seq.html#78931d249a623841652b4771be53d0d1"><span class="notation-symbol">`JTS</span></a> [not, in infotheo.information_theory.joint_typ_seq] (in jtyp_seq_scope)<h2>latt_scope</h2><a href="infotheo.probability.necset.html#496e6803966cff460720d93b5e9eb931"><span class="notation-symbol">|_|</span> </a> [not, in infotheo.probability.necset] (in latt_scope)<br>
+<a href="infotheo.probability.necset.html#a7cf748e90ce38ae52bd4f5f8b49b2ed"> <span class="notation-symbol">[+]</span> </a> [not, in infotheo.probability.necset] (in latt_scope)<h2>letter_scope</h2><a href="infotheo.ecc_modern.ldpc_erasure.html#b9129e4be1dd01b9a8e0ecd6c139f252"> <span class="notation-symbol"><=*</span> </a> [not, in infotheo.ecc_modern.ldpc_erasure] (in letter_scope)<br>
+<a href="infotheo.ecc_modern.ldpc_erasure.html#f95653f8ef87bbeefa173a8dbf0e332e"> <span class="notation-symbol"><=l</span> </a> [not, in infotheo.ecc_modern.ldpc_erasure] (in letter_scope)<br>
+<a href="infotheo.ecc_modern.ldpc_erasure.html#6fcadefd8808f5950577d1703e8e114f"> <span class="notation-symbol"><=m</span> </a> [not, in infotheo.ecc_modern.ldpc_erasure] (in letter_scope)<h2>min_scope</h2><a href="infotheo.lib.bigop_ext.html#1e91b24773a8599b4c6edbd131dc3a36"><span class="notation-symbol">\min^</span> <span class="notation-symbol">_(</span> <span class="notation-symbol">in</span> <span class="notation-symbol">)</span> </a> [not, in infotheo.lib.bigop_ext] (in min_scope)<h2>num_occ_scope</h2><a href="infotheo.lib.num_occ.html#36fca834a1e44532868a838b6469f6ec"><span class="notation-symbol">N(</span> <span class="notation-symbol">,</span> <span class="notation-symbol">|</span> <span class="notation-symbol">,</span> <span class="notation-symbol">)</span></a> [not, in infotheo.lib.num_occ] (in num_occ_scope)<br>
+<a href="infotheo.lib.num_occ.html#5fcab458e9a28ec28d96bd6669c01fbe"><span class="notation-symbol">N(</span> <span class="notation-symbol">|</span> <span class="notation-symbol">)</span></a> [not, in infotheo.lib.num_occ] (in num_occ_scope)<h2>ordered_convex_scope</h2><a href="infotheo.probability.convex.html#2847abef5ee174872b96a45f0a38b193"><span class="notation-symbol">\opp{</span> <span class="notation-symbol">}</span></a> [not, in infotheo.probability.convex] (in ordered_convex_scope)<h2>pismc_scope</h2><a href="infotheo.du2002.spp_pismc.html#619b9dca48666bbb89b8db49e2f78ca5"><span class="notation-symbol">!</span> </a> [not, in infotheo.du2002.spp_pismc] (in pismc_scope)<br>
+<a href="infotheo.dumas2017dual.dsdp.dsdp_pismc.html#f7081e687c1b7ec43109b82799cd38d3"><span class="notation-symbol">#</span> </a> [not, in infotheo.dumas2017dual.dsdp.dsdp_pismc] (in pismc_scope)<br>
+<a href="infotheo.dumas2017dual.dsdp.dsdp_pismc.html#b12f05eb112aef62e750ba438a8a685b"><span class="notation-symbol">$</span> </a> [not, in infotheo.dumas2017dual.dsdp.dsdp_pismc] (in pismc_scope)<br>
+<a href="infotheo.dumas2017dual.dsdp.dsdp_pismc.html#smc_dsdp_program.::pismc_scope:'&amp;'_x"><span class="notation-symbol">&</span> </a> [not, in infotheo.dumas2017dual.dsdp.dsdp_pismc] (in pismc_scope)<br>
+<a href="infotheo.du2002.spp_pismc.html#spp_pismc_programs.::pismc_scope:'&amp;'_x"><span class="notation-symbol">&</span> </a> [not, in infotheo.du2002.spp_pismc] (in pismc_scope)<br>
+<a href="infotheo.smc.pismc.html#71b0239092ac3f750ef276a7fd56974f"><span class="notation-symbol">\pi{</span> <span class="notation-symbol">}</span></a> [not, in infotheo.smc.pismc] (in pismc_scope)<h2>proba_scope</h2><a href="infotheo.probability.proba.html#8691e167021b2fac06f14b98d8ded1db"><span class="notation-symbol">T`*</span> </a> [not, in infotheo.probability.proba] (in proba_scope)<br>
+<a href="infotheo.probability.jfdist_cond.html#ae5db583b54537ed2ee59f791b6037bb"><span class="notation-symbol">\Pr_</span> <span class="notation-symbol">[</span> <span class="notation-symbol">|</span> <span class="notation-symbol">]</span></a> [not, in infotheo.probability.jfdist_cond] (in proba_scope)<br>
+<a href="infotheo.probability.proba.html#ed396f416a373788e55937288fb440e1"><span class="notation-symbol">`--</span> </a> [not, in infotheo.probability.proba] (in proba_scope)<br>
+<a href="infotheo.probability.proba.html#5a63ec97e49d200e143f23a117731d92"><span class="notation-symbol">`E</span></a> [not, in infotheo.probability.proba] (in proba_scope)<br>
+<a href="infotheo.probability.proba.html#adb1d34e015dce29af62db340bbd0286"><span class="notation-symbol">`Pr[</span> <span class="notation-symbol"><=</span> <span class="notation-symbol">]</span></a> [not, in infotheo.probability.proba] (in proba_scope)<br>
+<a href="infotheo.probability.proba.html#77f0776c5f6c924edf88271362cf2587"><span class="notation-symbol">`Pr[</span> <span class="notation-symbol">=</span> <span class="notation-symbol">]</span></a> [not, in infotheo.probability.proba] (in proba_scope)<br>
+<a href="infotheo.probability.proba.html#448975a18008091405054030f53909d1"><span class="notation-symbol">`Pr[</span> <span class="notation-symbol">=</span> <span class="notation-symbol">|</span> <span class="notation-symbol">=</span> <span class="notation-symbol">]</span></a> [not, in infotheo.probability.proba] (in proba_scope)<br>
+<a href="infotheo.probability.proba.html#6d88c17ed08bc0998462767113dce872"><span class="notation-symbol">`Pr[</span> <span class="notation-symbol">=</span> <span class="notation-symbol">|</span> <span class="notation-symbol">\in</span> <span class="notation-symbol">]</span></a> [not, in infotheo.probability.proba] (in proba_scope)<br>
+<a href="infotheo.probability.proba.html#9e54e3ccf6abbe6c8ef6dd550c39b6e2"><span class="notation-symbol">`Pr[</span> <span class="notation-symbol">>=</span> <span class="notation-symbol">]</span></a> [not, in infotheo.probability.proba] (in proba_scope)<br>
+<a href="infotheo.probability.proba.html#f86e9d5db873a683244e0e63a093decb"><span class="notation-symbol">`Pr[</span> <span class="notation-symbol">\in</span> <span class="notation-symbol">]</span></a> [not, in infotheo.probability.proba] (in proba_scope)<br>
+<a href="infotheo.probability.proba.html#f508eee05e46ce747f4dcf6175129a15"><span class="notation-symbol">`Pr[</span> <span class="notation-symbol">\in</span> <span class="notation-symbol">|</span> <span class="notation-symbol">=</span> <span class="notation-symbol">]</span></a> [not, in infotheo.probability.proba] (in proba_scope)<br>
+<a href="infotheo.probability.proba.html#303589161c0314967d73530a5e5b6e87"><span class="notation-symbol">`Pr[</span> <span class="notation-symbol">\in</span> <span class="notation-symbol">|</span> <span class="notation-symbol">\in</span> <span class="notation-symbol">]</span></a> [not, in infotheo.probability.proba] (in proba_scope)<br>
+<a href="infotheo.probability.proba.html#c2c09c62f75f1c441ef91a99edec6fd8"><span class="notation-symbol">`Pr_</span> <span class="notation-symbol">[</span> <span class="notation-symbol">|</span> <span class="notation-symbol">]</span></a> [not, in infotheo.probability.proba] (in proba_scope)<br>
+<a href="infotheo.probability.proba.html#c7a4904f3d060a494e43ad1a77d88c00"><span class="notation-symbol">`V</span></a> [not, in infotheo.probability.proba] (in proba_scope)<br>
+<a href="infotheo.robust.robustmean.html#964c18c6c61b25178ae33d781785d0c7"><span class="notation-symbol">`V_[</span> <span class="notation-symbol">|</span> <span class="notation-symbol">]</span></a> [not, in infotheo.robust.robustmean] (in proba_scope)<br>
+<a href="infotheo.probability.proba.html#b1d42561b80fff220abf0868d8ff2627"><span class="notation-symbol">`log</span> </a> [not, in infotheo.probability.proba] (in proba_scope)<br>
+<a href="infotheo.probability.proba.html#3f5bbf0eeec0f2fadda0645a30787378"><span class="notation-symbol">`p_</span> </a> [not, in infotheo.probability.proba] (in proba_scope)<br>
+<a href="infotheo.probability.proba.html#8fe87352e8bd617fea784762bca86e00"><span class="notation-symbol">{</span> <span class="notation-symbol">RV</span> <span class="notation-symbol">-></span> <span class="notation-symbol">}</span></a> [not, in infotheo.probability.proba] (in proba_scope)<br>
+<a href="infotheo.probability.fsdist.html#8d5e148605bacf2fa7cb55654ca7f799"><span class="notation-symbol">{</span> <span class="notation-symbol">dist</span> <span class="notation-symbol">}</span></a> [not, in infotheo.probability.fsdist] (in proba_scope)<br>
+<a href="infotheo.information_theory.pproba.html#1e558d4868ab825e4e0184e94a5852f5"> <span class="notation-symbol">'_</span> <span class="notation-symbol">`^^</span> <span class="notation-symbol">(</span> <span class="notation-symbol">|</span> <span class="notation-symbol">)</span></a> [not, in infotheo.information_theory.pproba] (in proba_scope)<br>
+<a href="infotheo.information_theory.pproba.html#1e558d4868ab825e4e0184e94a5852f5"> <span class="notation-symbol">'_</span> <span class="notation-symbol">`^^</span> <span class="notation-symbol">(</span> <span class="notation-symbol">|</span> <span class="notation-symbol">)</span></a> [not, in infotheo.information_theory.pproba] (in proba_scope)<br>
+<a href="infotheo.probability.proba.html#f9e9ea1dac2d561c98aa9daf65c0af30"> <span class="notation-symbol">\=</span> <span class="notation-symbol">@+</span> </a> [not, in infotheo.probability.proba] (in proba_scope)<br>
+<a href="infotheo.probability.proba.html#7ef6747ac10af187bd983816ae6c4e9d"> <span class="notation-symbol">\=sum</span> </a> [not, in infotheo.probability.proba] (in proba_scope)<br>
+<a href="infotheo.probability.proba.html#5704a1d24e7e32221d7a975d38aad4a5"> <span class="notation-symbol">\=sum</span> </a> [not, in infotheo.probability.proba] (in proba_scope)<br>
+<a href="infotheo.probability.proba.html#61df296e01221903e42cb42f5d07ed98"> <span class="notation-symbol">_|_</span> <span class="notation-symbol">|</span> </a> [not, in infotheo.probability.proba] (in proba_scope)<br>
+<a href="infotheo.probability.proba.html#6c9dd003b11e32cff9b53d1e213c5753"> <span class="notation-symbol">`*</span> </a> [not, in infotheo.probability.proba] (in proba_scope)<br>
+<a href="infotheo.probability.proba.html#ad56e66cba328c868bd22eb73b59aaae"> <span class="notation-symbol">`*:</span> </a> [not, in infotheo.probability.proba] (in proba_scope)<br>
+<a href="infotheo.probability.proba.html#f593b148714e459104236336f4354b24"> <span class="notation-symbol">`*T</span></a> [not, in infotheo.probability.proba] (in proba_scope)<br>
+<a href="infotheo.probability.proba.html#d04dc111213d8fb5fd92674e82ff0086"> <span class="notation-symbol">`*cst</span> </a> [not, in infotheo.probability.proba] (in proba_scope)<br>
+<a href="infotheo.probability.proba.html#b58ab32fcbd4640d180ac9af8cade987"> <span class="notation-symbol">`+</span> </a> [not, in infotheo.probability.proba] (in proba_scope)<br>
+<a href="infotheo.du2002.spp_proba.html#b58ab32fcbd4640d180ac9af8cade987"> <span class="notation-symbol">`+</span> </a> [not, in infotheo.du2002.spp_proba] (in proba_scope)<br>
+<a href="infotheo.probability.proba.html#c1a124f83336947c3a03d520ccd280af"> <span class="notation-symbol">`+cst</span> </a> [not, in infotheo.probability.proba] (in proba_scope)<br>
+<a href="infotheo.probability.proba.html#46e0fa64443395d2d75b4a3347c97718"> <span class="notation-symbol">`-</span> </a> [not, in infotheo.probability.proba] (in proba_scope)<br>
+<a href="infotheo.probability.proba.html#c29fdc5c75f10f54d7cb7d5a4bd425b1"> <span class="notation-symbol">`-</span> </a> [not, in infotheo.probability.proba] (in proba_scope)<br>
+<a href="infotheo.probability.proba.html#4f0eb16db53d2455b24b93c7e9f16e54"> <span class="notation-symbol">`-cst</span> </a> [not, in infotheo.probability.proba] (in proba_scope)<br>
+<a href="infotheo.probability.proba.html#4575ec1b0b49fe7079726c58c079c0f9"> <span class="notation-symbol">`/</span> </a> [not, in infotheo.probability.proba] (in proba_scope)<br>
+<a href="infotheo.probability.proba.html#fcad49e90c66bc3092b4ceff11a64f43"> <span class="notation-symbol">`^2</span></a> [not, in infotheo.probability.proba] (in proba_scope)<br>
+<a href="infotheo.information_theory.pproba.html#284a789109fd2a33abb841e49445c407"> <span class="notation-symbol">`^^</span> <span class="notation-symbol">(</span> <span class="notation-symbol">|</span> <span class="notation-symbol">)</span></a> [not, in infotheo.information_theory.pproba] (in proba_scope)<br>
+<a href="infotheo.probability.proba.html#682c1486174cfd51fb2b3db1653efd0c"> <span class="notation-symbol">`cst*</span> </a> [not, in infotheo.probability.proba] (in proba_scope)<br>
+<a href="infotheo.probability.proba.html#692dbaad63b60d12442dfe847b7254f4"> <span class="notation-symbol">|=</span> <span class="notation-symbol">_|_</span> </a> [not, in infotheo.probability.proba] (in proba_scope)<br>
+<a href="infotheo.probability.proba.html#c6c13ab1c696f1a730ace82bdef68e61"> <span class="notation-symbol">|=</span> <span class="notation-symbol">_|_</span> <span class="notation-symbol">|</span> </a> [not, in infotheo.probability.proba] (in proba_scope)<h2>proc_scope</h2><a href="infotheo.smc.smc_interpreter.html#3849a65476238a5f8067b5e38af1f64c"><span class="notation-symbol">[procs</span> <span class="notation-symbol">;</span> <span class="notation-symbol">..</span> <span class="notation-symbol">;</span> <span class="notation-symbol">]</span></a> [not, in infotheo.smc.smc_interpreter] (in proc_scope)<h2>reals_ext_scope</h2><a href="infotheo.lib.realType_ext.html#939ea13e994a54dbeec2dbc01540151a"><span class="notation-symbol">+|</span> <span class="notation-symbol">|</span></a> [not, in infotheo.lib.realType_ext] (in reals_ext_scope)<br>
+<a href="infotheo.lib.realType_ext.html#2f62db35178453748021d4c34720fc82"><span class="notation-symbol">[</span> <span class="notation-symbol">p_of</span> <span class="notation-symbol">,</span> <span class="notation-symbol">]</span></a> [not, in infotheo.lib.realType_ext] (in reals_ext_scope)<br>
+<a href="infotheo.lib.realType_ext.html#18cfebcbde2931c1ca863e4e53903f12"><span class="notation-symbol">[</span> <span class="notation-symbol">q_of</span> <span class="notation-symbol">,</span> <span class="notation-symbol">]</span></a> [not, in infotheo.lib.realType_ext] (in reals_ext_scope)<br>
+<a href="infotheo.lib.realType_ext.html#f8afe09a08ea4f6cddae3fbcfa0f1f3b"><span class="notation-symbol">[</span> <span class="notation-symbol">r_of</span> <span class="notation-symbol">,</span> <span class="notation-symbol">]</span></a> [not, in infotheo.lib.realType_ext] (in reals_ext_scope)<br>
+<a href="infotheo.lib.realType_ext.html#f472286486c9d0d7f50ee5c59a8a4b12"><span class="notation-symbol">[</span> <span class="notation-symbol">s_of</span> <span class="notation-symbol">,</span> <span class="notation-symbol">]</span></a> [not, in infotheo.lib.realType_ext] (in reals_ext_scope)<br>
+<a href="infotheo.information_theory.source_coding_fl_converse.html#c5d2777895e721954188da36382178b8"><span class="notation-symbol">max(</span> <span class="notation-symbol">,</span> <span class="notation-symbol">)</span></a> [not, in infotheo.information_theory.source_coding_fl_converse] (in reals_ext_scope)<br>
+<a href="infotheo.lib.realType_ext.html#6455d9cdee66fab41201a6006aff52be"> <span class="notation-symbol">`<<</span> </a> [not, in infotheo.lib.realType_ext] (in reals_ext_scope)<br>
+<a href="infotheo.lib.realType_ext.html#eed3722889a52664df91d23fb4a45f1c"> <span class="notation-symbol">`<<b</span> </a> [not, in infotheo.lib.realType_ext] (in reals_ext_scope)<h2>scaled_scope</h2><a href="infotheo.probability.convex.html#9e8a98a0aec9cee9d330b62986d1e517"> <span class="notation-symbol">*:</span> </a> [not, in infotheo.probability.convex] (in scaled_scope)<h2>set_scope</h2><a href="infotheo.ecc_modern.degree_profile.html#4dd50c26615e14fbeff4f9776c7e8e48"><span class="notation-symbol">[</span> <span class="notation-symbol">node</span> <span class="notation-symbol">$</span> <span class="notation-symbol">|</span> <span class="notation-symbol">]</span></a> [not, in infotheo.ecc_modern.degree_profile] (in set_scope)<br>
+<a href="infotheo.lib.ssr_ext.html#dc2312b445cefe5154d72c71c36b35ce"> <span class="notation-symbol">`*</span> </a> [not, in infotheo.lib.ssr_ext] (in set_scope)<h2>source_code_scope</h2><a href="infotheo.information_theory.source_code.html#111c32338ee568244b5bbaacdd696c2d"><span class="notation-symbol">esrc(</span> <span class="notation-symbol">,</span> <span class="notation-symbol">)</span></a> [not, in infotheo.information_theory.source_code] (in source_code_scope)<h2>sproc_scope</h2><a href="infotheo.smc.smc_session_types.html#6560d1f8e8fb8adab4ee20aae7682e9a"><span class="notation-symbol">[aprocs</span> <span class="notation-symbol">;</span> <span class="notation-symbol">..</span> <span class="notation-symbol">;</span> <span class="notation-symbol">]</span></a> [not, in infotheo.smc.smc_session_types] (in sproc_scope)<h2>ssripat_scope</h2><a href="infotheo.robust.robustmean.html#e9dfdac6fe6c5efcff25f3032b770ed8"><span class="notation-symbol">[conj]</span></a> [not, in infotheo.robust.robustmean] (in ssripat_scope)<h2>summary_scope</h2><a href="infotheo.ecc_modern.summary.html#81f17f379119375b9412dee0ef4bb6c2"><span class="notation-symbol">\sum_</span> <span class="notation-symbol">(</span> <span class="notation-symbol">=</span> <span class="notation-symbol">[~</span> <span class="notation-symbol">]</span> <span class="notation-symbol">)</span> </a> [not, in infotheo.ecc_modern.summary] (in summary_scope)<br>
+<a href="infotheo.ecc_modern.summary.html#3d7e2ec87dfdc8fea29e80c108ca97e7"><span class="notation-symbol">\sum_</span> <span class="notation-symbol">(</span> <span class="notation-symbol">=</span> <span class="notation-symbol">[~</span> <span class="notation-symbol">]</span> <span class="notation-symbol">|</span> <span class="notation-symbol">)</span> </a> [not, in infotheo.ecc_modern.summary] (in summary_scope)<h2>tuple_ext_scope</h2><a href="infotheo.lib.ssr_ext.html#8fae36a7d1704fe4b3a07e5a2cc387f8"> <span class="notation-symbol">!_</span> </a> [not, in infotheo.lib.ssr_ext] (in tuple_ext_scope)<h2>typ_seq_scope</h2><a href="infotheo.information_theory.typ_seq.html#03663c252e12c6372cf17efb8bd30f63"><span class="notation-symbol">`TS</span></a> [not, in infotheo.information_theory.typ_seq] (in typ_seq_scope)<h2>type_scope</h2><a href="infotheo.homomorphic_encryption.homomorphic_encryption.html#5d36b9f08aacd28e22eb06fec84d7f3b"><span class="notation-symbol">{</span> <span class="notation-symbol">enc_for</span> <span class="notation-symbol">of</span> <span class="notation-symbol">}</span></a> [not, in infotheo.homomorphic_encryption.homomorphic_encryption] (in type_scope)<br>
+<a href="infotheo.robust.weightedmean.html#::type_scope:x_'.-RV'_x"> <span class="notation-symbol">.-RV</span> </a> [not, in infotheo.robust.weightedmean] (in type_scope)<br>
+<a href="infotheo.robust.weightedmean.html#0144c0b64fb96b6ad585cd6102eec0a1"> <span class="notation-symbol">.-RV</span> <span class="notation-symbol">\o</span> </a> [not, in infotheo.robust.weightedmean] (in type_scope)<br>
+<a href="infotheo.homomorphic_encryption.homomorphic_encryption.html#::type_scope:x_'.-enc'"> <span class="notation-symbol">.-enc</span></a> [not, in infotheo.homomorphic_encryption.homomorphic_encryption] (in type_scope)<br>
+<a href="infotheo.homomorphic_encryption.homomorphic_encryption.html#::type_scope:x_'.-key'_x"> <span class="notation-symbol">.-key</span> </a> [not, in infotheo.homomorphic_encryption.homomorphic_encryption] (in type_scope)<h2>types_scope</h2><a href="infotheo.information_theory.types.html#fee7812272a6ce03dd6a1cf3ca04a90b"><span class="notation-symbol">P_</span> <span class="notation-symbol">(</span> <span class="notation-symbol">)</span></a> [not, in infotheo.information_theory.types] (in types_scope)<br>
+<a href="infotheo.information_theory.jtypes.html#d01e0e446a03f3f2540540d2b4f592c6"><span class="notation-symbol">P_</span> <span class="notation-symbol">(</span> <span class="notation-symbol">,</span> <span class="notation-symbol">)</span></a> [not, in infotheo.information_theory.jtypes] (in types_scope)<br>
+<a href="infotheo.information_theory.types.html#9fafb5d9dc59902e86d35093e1b3e0a8"><span class="notation-symbol">T_{</span> <span class="notation-symbol">}</span></a> [not, in infotheo.information_theory.types] (in types_scope)<br>
+<a href="infotheo.information_theory.jtypes.html#4e7b30740ede0bf27bf977507d2bab9f"><span class="notation-symbol">\nu^{</span> <span class="notation-symbol">}</span> <span class="notation-symbol">(</span> <span class="notation-symbol">)</span></a> [not, in infotheo.information_theory.jtypes] (in types_scope)<br>
+<a href="infotheo.information_theory.jtypes.html#b6e22a069a3b855e8156bbbb05d9015a"><span class="notation-symbol">\nu_</span> <span class="notation-symbol">^{</span> <span class="notation-symbol">,</span> <span class="notation-symbol">}</span> <span class="notation-symbol">(</span> <span class="notation-symbol">)</span></a> [not, in infotheo.information_theory.jtypes] (in types_scope)<br>
+<a href="infotheo.information_theory.jtypes.html#6db7cfc89071e013f19d5e1715cd9972"><span class="notation-symbol">`tO(</span> <span class="notation-symbol">)</span></a> [not, in infotheo.information_theory.jtypes] (in types_scope)<br>
+<a href="infotheo.information_theory.jtypes.html#::types_scope:x_'.-shell'_x"> <span class="notation-symbol">.-shell</span> </a> [not, in infotheo.information_theory.jtypes] (in types_scope)<br>
+<a href="infotheo.information_theory.types.html#::types_scope:x_'.-typed_code'_x"> <span class="notation-symbol">.-typed_code</span> </a> [not, in infotheo.information_theory.types] (in types_scope)<h2>variation_distance_scope</h2><a href="infotheo.probability.variation_dist.html#8947d413caf6ddff3cb68cdb083e08ef"><span class="notation-symbol">d(</span> <span class="notation-symbol">,</span> <span class="notation-symbol">)</span></a> [not, in infotheo.probability.variation_dist] (in variation_distance_scope)<h2>vec_ext_scope</h2><a href="infotheo.lib.ssralg_ext.html#396b6af77152f1c39f90ed28dbddb283"> <span class="notation-symbol">\#</span> </a> [not, in infotheo.lib.ssralg_ext] (in vec_ext_scope)<br>
+<a href="infotheo.lib.ssralg_ext.html#7e18fb73bc3ea7fa5ad6624e6536f0fe"> <span class="notation-symbol">`[</span> <span class="notation-symbol">:=</span> <span class="notation-symbol">]</span></a> [not, in infotheo.lib.ssralg_ext] (in vec_ext_scope)<br>
+<a href="infotheo.lib.ssralg_ext.html#2e641b86fa4afc176bf8302a66585901"> <span class="notation-symbol">``_</span> </a> [not, in infotheo.lib.ssralg_ext] (in vec_ext_scope)
+      <div class="footer"><hr/>Generated by <a href="https://github.com/affeldt-aist/rocqnavi/">rocqnavi</a></div>
+    </div>
+  </div>
+    </main>
+</body>
+</html>

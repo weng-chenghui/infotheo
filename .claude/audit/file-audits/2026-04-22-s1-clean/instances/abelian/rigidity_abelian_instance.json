@@ -1,0 +1,47 @@
+{
+  "findings": [
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/abelian/rigidity_abelian_instance.v",
+      "line_start": 80,
+      "line_end": 80,
+      "lemma_name": "abel_s1_neq_s2",
+      "severity": "warning",
+      "evidence_quote": "Lemma abel_s1_neq_s2 : abel_s1 != abel_s2.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/abelian/rigidity_abelian_instance.v",
+      "line_start": 122,
+      "line_end": 122,
+      "lemma_name": "abel_perm_endpoint_inj1",
+      "severity": "warning",
+      "evidence_quote": "Lemma abel_perm_endpoint_inj1 :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/abelian/rigidity_abelian_instance.v",
+      "line_start": 145,
+      "line_end": 145,
+      "lemma_name": "abel_security_witness_direct_1",
+      "severity": "warning",
+      "evidence_quote": "Definition abel_security_witness_direct_1 : SecurityWitness R R_abel :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": null,
+  "exit_code": 0
+}

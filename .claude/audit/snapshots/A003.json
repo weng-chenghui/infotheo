@@ -1,0 +1,113 @@
+{
+  "fingerprint": "7c5428a97b87bd0f",
+  "bad": {
+    "findings": [
+      {
+        "rule_id": "A003",
+        "file": ".claude/audit/fixtures/bad/A003.v",
+        "line_start": 4,
+        "line_end": 4,
+        "lemma_name": "bad_auto",
+        "severity": "warning",
+        "evidence_quote": "auto.",
+        "closeness": "far",
+        "explanation": "The bare `auto.` on line 4 is a standalone terminator. SSReflect style mandates `done.` or a specific named tactic so readers can identify which lemma or strategy closed the goal. `auto.` is opaque and hides the proof obligation structure. MathComp CONTRIBUTING \u00a7proofs lists `done`, `trivial`, `exact`, or a named tactic as the preferred terminators; bare `auto.` does not appear in the approved list. Stage 1 did not flag this line, so this is the primary finding.",
+        "fix_sketch": "Replace `auto.` with `done.` or `by [].`. If the goal requires arithmetic, use `by apply: leq0n.` or a specific applicable lemma name.",
+        "confidence": "high",
+        "stage": "stage2"
+      },
+      {
+        "rule_id": "G001",
+        "file": ".claude/audit/fixtures/bad/A003.v",
+        "line_start": 2,
+        "line_end": 2,
+        "lemma_name": "bad_auto",
+        "severity": "warning",
+        "evidence_quote": "Lemma bad_auto : 0 <= 1.",
+        "closeness": "near",
+        "explanation": "The lemma name `bad_auto` splits as main symbol `bad` plus suffix `_auto`. Neither component is canonical. The suffix `_auto` does not appear in the MathComp suffix table (AUTHORITY.md): it is not `E` (equation), `P` (reflection), `I` (injectivity), `ge0` (non-negativity), `_card`, etc. The statement `0 <= 1` expresses a positivity inequality; the expected idiomatic name would carry `_ge0` or, for a specific pair, a form like `leq01`. The main symbol `bad` is a generic drift token with no mathematical meaning.",
+        "fix_sketch": "Two idiomatic alternatives: (1) `leq01` \u2014 concise, names the two operands; (2) `zero_leq_one` \u2014 verbose but self-documenting. If the fixture must stay recognisably non-idiomatic for testing purposes, add `(* Naming: intentional; this is a bad-fixture demonstrating A003. *)` inline on the declaration line per AUTHORITY.md naming-justification conventions.",
+        "confidence": "medium",
+        "stage": "stage2"
+      },
+      {
+        "rule_id": "H002",
+        "file": ".claude/audit/fixtures/bad/A003.v",
+        "line_start": 1,
+        "line_end": 2,
+        "lemma_name": "bad_auto",
+        "severity": "warning",
+        "evidence_quote": "Fixture: triggers A003. Do NOT compile.",
+        "closeness": "near",
+        "explanation": "The comment is present and non-degenerate (passes H001), but fails three of the four content-checklist parts. (1) KIND missing: no classification as `helper`, `main`, `example`, or equivalent synonym appears. (2) WHAT missing: the comment names the triggered rule but provides no mathematical paraphrase of the statement `0 <= 1`. (3) WHY missing: `Do NOT compile` is an operational instruction, not a motivation; no algebraic-law suffix waiver applies (`_auto` is not in the waiver list), and the WHAT clause does not name a downstream use-site crisply. USED_BY is not checked because Kind was not established as `helper`.",
+        "fix_sketch": "(** bad_auto \u2014 0 is at most 1 (trivial nat inequality).\n    Kind: example.\n    Why: fixture for rule A003; demonstrates a bare `auto.` terminator that\n    the audit should flag. Do NOT compile outside the fixture test harness.\n *)",
+        "confidence": "medium",
+        "stage": "stage2"
+      }
+    ],
+    "tokens_used": 37815,
+    "budget": {
+      "entity_count": 1,
+      "chunk_count": 1,
+      "chunk_size": 3,
+      "workers_used": 1,
+      "tokens_used": 37815,
+      "tokens_cap": 75000,
+      "wall_ms_used": 68449,
+      "wall_ms_cap": 600000,
+      "deferred_chunks": 0,
+      "stop_reason": "clean",
+      "estimated_usd": 0.2269,
+      "model": "sonnet"
+    },
+    "stage2_incomplete": false
+  },
+  "good": {
+    "findings": [
+      {
+        "rule_id": "G001",
+        "file": ".claude/audit/fixtures/good/A003.v",
+        "line_start": 2,
+        "line_end": 2,
+        "lemma_name": "good_done",
+        "severity": "warning",
+        "evidence_quote": "Lemma good_done : 0 <= 1.",
+        "closeness": "near",
+        "explanation": "The suffix `done` is not a canonical MathComp suffix per AUTHORITY.md. The statement `0 <= 1` is an inequality/non-negativity fact; the idiomatic suffix table prescribes `_ge0` or `_le0` for such a shape (or a full rename to something like `leq_0_1`). The word `done` misleadingly evokes the SSReflect terminator tactic rather than describing the lemma's semantic role.",
+        "fix_sketch": "Rename to `zero_leq1`, `leq_0_1`, or `leq01` to match the inequality semantic role. If the fixture name is intentional to keep tests readable, add `(* Naming: intentional fixture label; not a production lemma. *)` above the declaration.",
+        "confidence": "medium",
+        "stage": "stage2"
+      },
+      {
+        "rule_id": "H002",
+        "file": ".claude/audit/fixtures/good/A003.v",
+        "line_start": 1,
+        "line_end": 2,
+        "lemma_name": "good_done",
+        "severity": "warning",
+        "evidence_quote": "(* Fixture: no A003 violation. Do NOT compile. *)",
+        "closeness": "near",
+        "explanation": "The preceding comment is a fixture-marker annotation that fails all four required parts of the H002 checklist: (1) KIND \u2014 no classification (helper/main/example/etc.); (2) WHAT \u2014 no paraphrase of the statement `0 <= 1`; (3) WHY \u2014 no motivation (not waived: name carries no algebraic-law suffix and Kind is unclassified); (4) USED_BY \u2014 not applicable until Kind is determined, but if Kind were helper no consumer is named. WHY waiver does not apply because `done` is not an algebraic-law suffix.",
+        "fix_sketch": "Replace with a minimal compliant comment, e.g.:\n(** good_done \u2014 0 is at most 1.\n    Kind: example.\n    Why: fixture demonstrating that `done.` satisfies A003 (no bare auto/tauto/intuition).\n*)\nAlternatively, since this is an audit fixture, add `Kind: example` and a one-line What to satisfy the checklist with minimal prose.",
+        "confidence": "medium",
+        "stage": "stage2"
+      }
+    ],
+    "tokens_used": 38130,
+    "budget": {
+      "entity_count": 1,
+      "chunk_count": 1,
+      "chunk_size": 3,
+      "workers_used": 1,
+      "tokens_used": 38130,
+      "tokens_cap": 75000,
+      "wall_ms_used": 82289,
+      "wall_ms_cap": 600000,
+      "deferred_chunks": 0,
+      "stop_reason": "clean",
+      "estimated_usd": 0.2288,
+      "model": "sonnet"
+    },
+    "stage2_incomplete": false
+  }
+}

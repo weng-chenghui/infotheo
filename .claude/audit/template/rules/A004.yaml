@@ -1,0 +1,20 @@
+id: A004
+category: deprecated_tactics
+title: "assert is non-idiomatic in SSReflect proofs; prefer have"
+severity: warning
+enabled: true
+stage_mode: both
+authority:
+  - mathcomp-CONTRIBUTING#proofs
+fast_pattern:
+  pattern: '^[ \t]*assert[ \t]*\('
+  ignore_in_comments: true
+  file_glob: '*.v'
+agent_prompt: |
+  Flag `assert (...) as <H>` and explain that `have <H> : <P>` (optionally
+  followed by `by <tac>`) is the SSReflect equivalent. When the body of
+  the assert uses a bracket-grouped proof `{ <tac> }`, warn that SSReflect
+  forbids `{` grouping and recommend bullets (`-`, `+`, `*`) instead.
+scope: changed_hunks
+fix_hint: "Replace `assert (P) as H.` with `have H : P.` (or `have H : P by ...`). `have` is SSReflect's native forward-reasoning primitive."
+exceptions: []

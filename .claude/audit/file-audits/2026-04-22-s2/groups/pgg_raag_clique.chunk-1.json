@@ -1,0 +1,137 @@
+{
+  "findings": [
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 423,
+      "line_end": 423,
+      "lemma_name": "all_pairs_comm_nil",
+      "severity": "warning",
+      "evidence_quote": "Lemma all_pairs_comm_nil comm : all_pairs_comm_sorted comm [::] = true.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 352,
+      "line_end": 358,
+      "lemma_name": "abelian3_ntB2",
+      "severity": "error",
+      "evidence_quote": "(* Cross-check *)",
+      "closeness": "far",
+      "explanation": "The preceding comment is a bare label ('Cross-check') that does not name the entity, paraphrase the statement, declare Kind, or provide motivation. Per AUTHORITY.md, every touched Lemma must carry a preceding block covering classification and statement summary. The comment is content-free relative to the entity and functions only as an informal section marker; it is effectively degenerate for H001 purposes, analogous to the 'generic header that never mentions this specific entity' clause.",
+      "fix_sketch": "Replace the bare label with a per-entity block, for example: '(** abelian3_ntB2 — n_traces_natB 3 2 complete_comm_nat evaluates to 6 (abelian/complete case at L=3, p=2). Kind: example. *)' placed immediately above the Lemma line.",
+      "confidence": "medium",
+      "stage": "stage2",
+      "escalated_model": "opus",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 364,
+      "line_end": 369,
+      "lemma_name": "path3_ct0",
+      "severity": "error",
+      "evidence_quote": "(* ---- Trace counts: path (3 generators) ---- *)",
+      "closeness": "far",
+      "explanation": "The preceding comment is a section divider that labels a block of upcoming lemmas but never mentions this specific entity (path3_ct0) and does not paraphrase its statement, declare Kind, or give motivation. This matches the spirit of H001's 'generic header that never mentions this specific entity' criterion: the comment is generic to a section rather than descriptive of the lemma.",
+      "fix_sketch": "Keep the section divider on its own line if desired, then insert a per-lemma block above the Lemma: '(** path3_ct0 — clique_traces for L=3, m=0 on path_comm_nat evaluates to 1 (empty trace count for the path P_3). Kind: example. *)'.",
+      "confidence": "medium",
+      "stage": "stage2",
+      "escalated_model": "opus",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 412,
+      "line_end": 422,
+      "lemma_name": "filter_pred1T",
+      "severity": "error",
+      "evidence_quote": "(* --- Empty graph: clique_count Tg 0 = 1, clique_count Tg 1 = Tg --- *)",
+      "closeness": "far",
+      "explanation": "The only physically preceding comment (line 412) is a section-separator banner for the 'Empty graph' block. It names `clique_count Tg 0` and `clique_count Tg 1` but never mentions `filter_pred1T`, its type signature, or its role. Per AUTHORITY.md, a comment that is a generic header that never mentions the specific entity is degenerate and triggers H001 at error severity. `filter_pred1T` is a Lemma and is always in scope for H001.",
+      "fix_sketch": "(** filter_pred1T — filtering a singleton [:: x] under predicate p returns [:: x] whenever p x holds.\n    Kind: helper.\n    Why: collapses the singleton filter that arises after rewriting with subseqs_k0 in clique_count0.\n    Used by: clique_count0 (line 441-442). *)\nLemma filter_pred1T (T : Type) (p : pred T) (x : T) :\n  p x -> [seq s <- [:: x] | p s] = [:: x].",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 400,
+      "line_end": 413,
+      "lemma_name": "subseqs_k_size",
+      "severity": "warning",
+      "evidence_quote": "(* --- Helper lemma: size of elements in subseqs_k --- *)",
+      "closeness": "near",
+      "explanation": "The preceding comment identifies KIND (helper) and WHAT (size of elements in subseqs_k). However WHY is absent: no motivation clause explains why this result is needed. USED_BY is also absent: Kind is helper, so a downstream consumer is required. A verified consumer exists at line 540 of the same file (`have Hsz := subseqs_k_size Hs`) but is not cited. Per AUTHORITY.md, the comment template for helpers must cover motivation and downstream consumers.",
+      "fix_sketch": "(** subseqs_k_size — every element t of `subseqs_k k s` has `size t = k`.\n    Kind: helper.\n    Why: needed to discharge size constraints when unfolding `subseqs_k` membership in downstream lemmas.\n    Used by: the size-bounding step at line 540 (`have Hsz := subseqs_k_size Hs`). *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 486,
+      "line_end": 490,
+      "lemma_name": "mem_subseqs_k",
+      "severity": "warning",
+      "evidence_quote": "(** mem_subseqs_k — converse of subseqs_k_subseq: every subsequence of s of\n    size k is enumerated by subseqs_k k s.\n    Kind: helper.\n    Used by: completeness arguments for clique enumeration.\n*)",
+      "closeness": "near",
+      "explanation": "Two parts of the H002 checklist fail. (1) WHY is absent: the comment contains no motivation statement explaining why this result is needed — phrases such as 'needed for', 'enables', or 'bridges' are missing; the algebraic-law-suffix waiver does not apply (_k is not in the MathComp waiver list), and the WHAT clause ('converse of subseqs_k_subseq') does not name a downstream use-site crisply enough to trigger the WHAT-based waiver. (2) USED_BY cites 'completeness arguments for clique enumeration', which is a prose description rather than a concrete Rocq identifier; the H002 rule requires at least one downstream consumer identifier so the auditor can verify existence via Grep. Confidence is medium because the comment is otherwise substantive and the kind/what parts are satisfied.",
+      "fix_sketch": "(** mem_subseqs_k — converse of subseqs_k_subseq: every subsequence of s of\n    size k is enumerated by subseqs_k k s.\n    Kind: helper.\n    Why: required to prove completeness of the clique enumeration; without\n         the forward direction (mem -> subseqs_k) the enumeration-based\n         counting argument cannot be closed.\n    Used by: <specific_lemma_name_here>.\n*)",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "S998",
+      "file": "rocq-audit",
+      "line_start": 1,
+      "line_end": 1,
+      "severity": "warning",
+      "evidence_quote": "result field not JSON: ```json\n{\n  \"passed\": true,\n  \"findings\": [\n    {\n      \"rule_id\": \"H002\",\n      \"file\": \"pgg-smc/groups/pgg_raag_clique.v\",\n      \"line_start\": 376,\n      \"line_end\": 381,\n      \"lemma_name\": \"path3_",
+      "closeness": "near",
+      "explanation": "Stage 2 call failed for chunk 3; see logs.",
+      "fix_sketch": "Retry the commit. If repeated, check agent configuration.",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": {
+    "entity_count": 25,
+    "chunk_count": 7,
+    "chunk_size": 4,
+    "workers_used": 4,
+    "tokens_used": 389960,
+    "tokens_cap": 20000000,
+    "wall_ms_used": 272304,
+    "wall_ms_cap": 1800000,
+    "deferred_chunks": 0,
+    "stop_reason": "clean",
+    "estimated_usd": 2.3398,
+    "model": "sonnet"
+  },
+  "exit_code": 2
+}

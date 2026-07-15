@@ -1,0 +1,70 @@
+{
+  "fingerprint": "0aa77ef041d4db37",
+  "bad": {
+    "findings": [
+      {
+        "rule_id": "F001",
+        "file": ".claude/audit/fixtures/bad/F001.v",
+        "line_start": 2,
+        "line_end": 2,
+        "lemma_name": "schreier_transition_entry_ge0",
+        "severity": "warning",
+        "evidence_quote": "Lemma schreier_transition_entry_ge0 : forall n, 0 <= n.",
+        "closeness": "far",
+        "explanation": "The name `schreier_transition_entry_ge0` has four underscore-separated components: `schreier`, `transition`, `entry`, `ge0`. While `_ge0` is a canonical AUTHORITY.md suffix for non-negativity (`0 <= x`), the component `entry` is not a canonical MathComp suffix per AUTHORITY.md's suffix table and functions as a spurious connector between the putative main symbol and the tail suffix. The composition drifts from `mainSymbol_suffixes(_condition)?`: the main symbol is ambiguous between `schreier` and `schreier_transition`, and `_entry_` does not refine operand or shape in any recognised way. No F001 exception applies (`^in_`, `^mem_`, `^card_`, `_of_` are absent).",
+        "fix_sketch": "Option 1: drop the non-canonical connector \u2014 `schreier_transition_ge0`. Option 2: camelCase main symbol \u2014 `schreierTransition_ge0`. If `entry` is the intended main symbol, restructure as `entry_ge0` or `transition_entry_ge0` with `entry` as the explicit main symbol.",
+        "confidence": "high",
+        "stage": "stage2"
+      },
+      {
+        "rule_id": "H002",
+        "file": ".claude/audit/fixtures/bad/F001.v",
+        "line_start": 1,
+        "line_end": 1,
+        "lemma_name": "schreier_transition_entry_ge0",
+        "severity": "warning",
+        "evidence_quote": "(* Fixture: triggers F001. Do NOT compile. *)",
+        "closeness": "far",
+        "explanation": "The preceding comment is a fixture meta-annotation that fails three of the four H002 checklist parts. (1) KIND absent: no classification (helper / main / canonical / etc.) appears. (2) WHAT absent: the comment does not paraphrase the statement `forall n, 0 <= n`; it only labels the file as a test fixture for rule F001. (3) WHY absent: no motivation is given, and the name's tail suffix `_ge0` does not appear in the algebraic-law waiver list (_A, _AC, _ACA, _C, _CA, _K, _D, _I, _V, _X, _Xn, _Xz, _Mn, _Z), so the waiver does not apply. USED_BY is not evaluated because Kind was not established as helper.",
+        "fix_sketch": "Replace with a structured block, for example:\n(** schreier_transition_entry_ge0 \u2014 for all n : nat, 0 <= n.\n    Kind: helper.\n    Why: bad fixture demonstrating F001 name-grammar violation; exercised by the audit lint pipeline.\n    Used by: F001 fixture test. *)",
+        "confidence": "high",
+        "stage": "stage2"
+      }
+    ],
+    "tokens_used": 38441,
+    "budget": {
+      "entity_count": 1,
+      "chunk_count": 1,
+      "chunk_size": 3,
+      "workers_used": 1,
+      "tokens_used": 38441,
+      "tokens_cap": 75000,
+      "wall_ms_used": 79209,
+      "wall_ms_cap": 600000,
+      "deferred_chunks": 0,
+      "stop_reason": "clean",
+      "estimated_usd": 0.2307,
+      "model": "sonnet"
+    },
+    "stage2_incomplete": false
+  },
+  "good": {
+    "findings": [],
+    "tokens_used": 36675,
+    "budget": {
+      "entity_count": 1,
+      "chunk_count": 1,
+      "chunk_size": 3,
+      "workers_used": 1,
+      "tokens_used": 36675,
+      "tokens_cap": 75000,
+      "wall_ms_used": 52780,
+      "wall_ms_cap": 600000,
+      "deferred_chunks": 0,
+      "stop_reason": "clean",
+      "estimated_usd": 0.2201,
+      "model": "sonnet"
+    },
+    "stage2_incomplete": false
+  }
+}

@@ -1,0 +1,887 @@
+
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Module smc_interpreter</title>
+<meta name="description" content="Documentation of Coq module Infotheo Documentation" />
+<link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/markdown-it/dist/markdown-it.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/markdown-it-texmath/texmath.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/darkmode-js@1.5.7/lib/darkmode-js.min.js"></script>
+<link href="rocqnavi.css" rel="stylesheet" type="text/css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script type="text/javascript" src="rocqnavi.js"> </script>
+</head>
+
+<body onload="init()">
+
+  <main>
+    <div class="sidebar">
+      <h2>Files</h2>
+      <li><details id="infotheo"><summary>infotheo</summary>
+          <ul>
+          <li><details id="infotheo.du2002"><summary>du2002</summary>
+          <ul>
+          <li><a href="infotheo.du2002.spp_entropy.html">spp_entropy</a></li>
+<li><a href="infotheo.du2002.spp_interface.html">spp_interface</a></li>
+<li><a href="infotheo.du2002.spp_pismc.html">spp_pismc</a></li>
+<li><a href="infotheo.du2002.spp_proba.html">spp_proba</a></li>
+<li><a href="infotheo.du2002.spp_program.html">spp_program</a></li>
+<li><a href="infotheo.du2002.spp_proof.html">spp_proof</a></li>
+<li><a href="infotheo.du2002.spp_session_types.html">spp_session_types</a></li>
+<li><a href="infotheo.du2002.spp_tactics.html">spp_tactics</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.dumas2017dual"><summary>dumas2017dual</summary>
+          <ul>
+          <li><details id="infotheo.dumas2017dual.dsdp"><summary>dsdp</summary>
+          <ul>
+          <li><a href="infotheo.dumas2017dual.dsdp.dsdp_correctness.html">dsdp_correctness</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_entropy.html">dsdp_entropy</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_entropy_trace.html">dsdp_entropy_trace</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_interface.html">dsdp_interface</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_pismc.html">dsdp_pismc</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_program.html">dsdp_program</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_security.html">dsdp_security</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_session_types.html">dsdp_session_types</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_syntax_demo.html">dsdp_syntax_demo</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.dumas2017dual.entropy_fiber"><summary>entropy_fiber</summary>
+          <ul>
+          <li><a href="infotheo.dumas2017dual.entropy_fiber.entropy_fiber.html">entropy_fiber</a></li>
+<li><a href="infotheo.dumas2017dual.entropy_fiber.entropy_fiber_zpq.html">entropy_fiber_zpq</a></li>
+<li><a href="infotheo.dumas2017dual.entropy_fiber.linear_fiber_zpq.html">linear_fiber_zpq</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.dumas2017dual.lib"><summary>lib</summary>
+          <ul>
+          <li><a href="infotheo.dumas2017dual.lib.extra_algebra.html">extra_algebra</a></li>
+<li><a href="infotheo.dumas2017dual.lib.extra_entropy.html">extra_entropy</a></li>
+<li><a href="infotheo.dumas2017dual.lib.extra_proba.html">extra_proba</a></li>
+<li><a href="infotheo.dumas2017dual.lib.rouche_capelli.html">rouche_capelli</a></li>
+          </ul>
+          </details>
+          </li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.ecc_classic"><summary>ecc_classic</summary>
+          <ul>
+          <li><a href="infotheo.ecc_classic.alternant.html">alternant</a></li>
+<li><a href="infotheo.ecc_classic.bch.html">bch</a></li>
+<li><a href="infotheo.ecc_classic.cyclic_code.html">cyclic_code</a></li>
+<li><a href="infotheo.ecc_classic.decoding.html">decoding</a></li>
+<li><a href="infotheo.ecc_classic.grs.html">grs</a></li>
+<li><a href="infotheo.ecc_classic.hamming_code.html">hamming_code</a></li>
+<li><a href="infotheo.ecc_classic.linearcode.html">linearcode</a></li>
+<li><a href="infotheo.ecc_classic.mceliece.html">mceliece</a></li>
+<li><a href="infotheo.ecc_classic.poly_decoding.html">poly_decoding</a></li>
+<li><a href="infotheo.ecc_classic.reed_solomon.html">reed_solomon</a></li>
+<li><a href="infotheo.ecc_classic.repcode.html">repcode</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.ecc_modern"><summary>ecc_modern</summary>
+          <ul>
+          <li><a href="infotheo.ecc_modern.checksum.html">checksum</a></li>
+<li><a href="infotheo.ecc_modern.degree_profile.html">degree_profile</a></li>
+<li><a href="infotheo.ecc_modern.ldpc.html">ldpc</a></li>
+<li><a href="infotheo.ecc_modern.ldpc_algo.html">ldpc_algo</a></li>
+<li><a href="infotheo.ecc_modern.ldpc_algo_proof.html">ldpc_algo_proof</a></li>
+<li><a href="infotheo.ecc_modern.ldpc_erasure.html">ldpc_erasure</a></li>
+<li><a href="infotheo.ecc_modern.max_subset.html">max_subset</a></li>
+<li><a href="infotheo.ecc_modern.stopping_set.html">stopping_set</a></li>
+<li><a href="infotheo.ecc_modern.subgraph_partition.html">subgraph_partition</a></li>
+<li><a href="infotheo.ecc_modern.summary.html">summary</a></li>
+<li><a href="infotheo.ecc_modern.summary_tanner.html">summary_tanner</a></li>
+<li><a href="infotheo.ecc_modern.tanner.html">tanner</a></li>
+<li><a href="infotheo.ecc_modern.tanner_partition.html">tanner_partition</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.homomorphic_encryption"><summary>homomorphic_encryption</summary>
+          <ul>
+          <li><details id="infotheo.homomorphic_encryption.benaloh1994"><summary>benaloh1994</summary>
+          <ul>
+          <li><a href="infotheo.homomorphic_encryption.benaloh1994.benaloh_ahe.html">benaloh_ahe</a></li>
+<li><a href="infotheo.homomorphic_encryption.benaloh1994.benaloh_enc.html">benaloh_enc</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.homomorphic_encryption.idealized"><summary>idealized</summary>
+          <ul>
+          <li><a href="infotheo.homomorphic_encryption.idealized.idealized_ahe.html">idealized_ahe</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.homomorphic_encryption.paillier1999"><summary>paillier1999</summary>
+          <ul>
+          <li><a href="infotheo.homomorphic_encryption.paillier1999.paillier_ahe.html">paillier_ahe</a></li>
+<li><a href="infotheo.homomorphic_encryption.paillier1999.paillier_enc.html">paillier_enc</a></li>
+          </ul>
+          </details>
+          </li>
+<li><a href="infotheo.homomorphic_encryption.ahe_enc.html">ahe_enc</a></li>
+<li><a href="infotheo.homomorphic_encryption.ahe_monoid.html">ahe_monoid</a></li>
+<li><a href="infotheo.homomorphic_encryption.enc_dec.html">enc_dec</a></li>
+<li><a href="infotheo.homomorphic_encryption.he_types.html">he_types</a></li>
+<li><a href="infotheo.homomorphic_encryption.homomorphic_encryption.html">homomorphic_encryption</a></li>
+<li><a href="infotheo.homomorphic_encryption.key_type.html">key_type</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.information_theory"><summary>information_theory</summary>
+          <ul>
+          <li><a href="infotheo.information_theory.aep.html">aep</a></li>
+<li><a href="infotheo.information_theory.binary_symmetric_channel.html">binary_symmetric_channel</a></li>
+<li><a href="infotheo.information_theory.channel.html">channel</a></li>
+<li><a href="infotheo.information_theory.channel_code.html">channel_code</a></li>
+<li><a href="infotheo.information_theory.channel_coding_converse.html">channel_coding_converse</a></li>
+<li><a href="infotheo.information_theory.channel_coding_direct.html">channel_coding_direct</a></li>
+<li><a href="infotheo.information_theory.conditional_divergence.html">conditional_divergence</a></li>
+<li><a href="infotheo.information_theory.entropy.html">entropy</a></li>
+<li><a href="infotheo.information_theory.entropy_convex.html">entropy_convex</a></li>
+<li><a href="infotheo.information_theory.erasure_channel.html">erasure_channel</a></li>
+<li><a href="infotheo.information_theory.error_exponent.html">error_exponent</a></li>
+<li><a href="infotheo.information_theory.joint_typ_seq.html">joint_typ_seq</a></li>
+<li><a href="infotheo.information_theory.jtypes.html">jtypes</a></li>
+<li><a href="infotheo.information_theory.kraft.html">kraft</a></li>
+<li><a href="infotheo.information_theory.pproba.html">pproba</a></li>
+<li><a href="infotheo.information_theory.shannon_fano.html">shannon_fano</a></li>
+<li><a href="infotheo.information_theory.source_code.html">source_code</a></li>
+<li><a href="infotheo.information_theory.source_coding_fl_converse.html">source_coding_fl_converse</a></li>
+<li><a href="infotheo.information_theory.source_coding_fl_direct.html">source_coding_fl_direct</a></li>
+<li><a href="infotheo.information_theory.source_coding_vl_converse.html">source_coding_vl_converse</a></li>
+<li><a href="infotheo.information_theory.source_coding_vl_direct.html">source_coding_vl_direct</a></li>
+<li><a href="infotheo.information_theory.string_entropy.html">string_entropy</a></li>
+<li><a href="infotheo.information_theory.success_decode_bound.html">success_decode_bound</a></li>
+<li><a href="infotheo.information_theory.typ_seq.html">typ_seq</a></li>
+<li><a href="infotheo.information_theory.types.html">types</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.lib"><summary>lib</summary>
+          <ul>
+          <li><a href="infotheo.lib.bigop_ext.html">bigop_ext</a></li>
+<li><a href="infotheo.lib.binary_entropy_function.html">binary_entropy_function</a></li>
+<li><a href="infotheo.lib.classical_sets_ext.html">classical_sets_ext</a></li>
+<li><a href="infotheo.lib.coqRE.html">coqRE</a></li>
+<li><a href="infotheo.lib.derive_ext.html">derive_ext</a></li>
+<li><a href="infotheo.lib.dft.html">dft</a></li>
+<li><a href="infotheo.lib.euclid.html">euclid</a></li>
+<li><a href="infotheo.lib.f2.html">f2</a></li>
+<li><a href="infotheo.lib.hamming.html">hamming</a></li>
+<li><a href="infotheo.lib.natbin.html">natbin</a></li>
+<li><a href="infotheo.lib.num_occ.html">num_occ</a></li>
+<li><a href="infotheo.lib.poly_ext.html">poly_ext</a></li>
+<li><a href="infotheo.lib.realType_ext.html">realType_ext</a></li>
+<li><a href="infotheo.lib.realType_ln.html">realType_ln</a></li>
+<li><a href="infotheo.lib.ssr_ext.html">ssr_ext</a></li>
+<li><a href="infotheo.lib.ssralg_ext.html">ssralg_ext</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.probability"><summary>probability</summary>
+          <ul>
+          <li><a href="infotheo.probability.bayes.html">bayes</a></li>
+<li><a href="infotheo.probability.convex.html">convex</a></li>
+<li><a href="infotheo.probability.convex_equiv.html">convex_equiv</a></li>
+<li><a href="infotheo.probability.convex_stone.html">convex_stone</a></li>
+<li><a href="infotheo.probability.divergence.html">divergence</a></li>
+<li><a href="infotheo.probability.fdist.html">fdist</a></li>
+<li><a href="infotheo.probability.fsdist.html">fsdist</a></li>
+<li><a href="infotheo.probability.graphoid.html">graphoid</a></li>
+<li><a href="infotheo.probability.jensen.html">jensen</a></li>
+<li><a href="infotheo.probability.jfdist_cond.html">jfdist_cond</a></li>
+<li><a href="infotheo.probability.log_sum.html">log_sum</a></li>
+<li><a href="infotheo.probability.necset.html">necset</a></li>
+<li><a href="infotheo.probability.partition_inequality.html">partition_inequality</a></li>
+<li><a href="infotheo.probability.pinsker.html">pinsker</a></li>
+<li><a href="infotheo.probability.proba.html">proba</a></li>
+<li><a href="infotheo.probability.variation_dist.html">variation_dist</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.robust"><summary>robust</summary>
+          <ul>
+          <li><a href="infotheo.robust.robustmean.html">robustmean</a></li>
+<li><a href="infotheo.robust.weightedmean.html">weightedmean</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.smc"><summary>smc</summary>
+          <ul>
+          <li><a href="infotheo.smc.graded_resource.html">graded_resource</a></li>
+<li><a href="infotheo.smc.pismc.html">pismc</a></li>
+<li><a href="infotheo.smc.smc_interpreter.html">smc_interpreter</a></li>
+<li><a href="infotheo.smc.smc_session_types.html">smc_session_types</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.toy_examples"><summary>toy_examples</summary>
+          <ul>
+          <li><a href="infotheo.toy_examples.conditional_entropy.html">conditional_entropy</a></li>
+<li><a href="infotheo.toy_examples.expected_value_variance.html">expected_value_variance</a></li>
+<li><a href="infotheo.toy_examples.expected_value_variance_ordn.html">expected_value_variance_ordn</a></li>
+<li><a href="infotheo.toy_examples.expected_value_variance_tuple.html">expected_value_variance_tuple</a></li>
+          </ul>
+          </details>
+          </li>
+<li><a href="infotheo._check_sigs.html">_check_sigs</a></li>
+<li><a href="infotheo._depgraph_extract.html">_depgraph_extract</a></li>
+<li><a href="infotheo._test_star2.html">_test_star2</a></li>
+<li><a href="infotheo.test_sri.html">test_sri</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="pgg_reconstruct"><summary>pgg_reconstruct</summary>
+          <ul>
+          <li><a href="pgg_reconstruct.ag_code.html">ag_code</a></li>
+<li><a href="pgg_reconstruct.ag_massey_bridge.html">ag_massey_bridge</a></li>
+<li><a href="pgg_reconstruct.ag_multiplicative.html">ag_multiplicative</a></li>
+<li><a href="pgg_reconstruct.algebraic_rigidity.html">algebraic_rigidity</a></li>
+<li><a href="pgg_reconstruct.coord_perm_compatible.html">coord_perm_compatible</a></li>
+<li><a href="pgg_reconstruct.cover_genus0.html">cover_genus0</a></li>
+<li><a href="pgg_reconstruct.cover_genus1.html">cover_genus1</a></li>
+<li><a href="pgg_reconstruct.cover_genus2.html">cover_genus2</a></li>
+<li><a href="pgg_reconstruct.cover_tradeoff.html">cover_tradeoff</a></li>
+<li><a href="pgg_reconstruct.covering_scheme.html">covering_scheme</a></li>
+<li><a href="pgg_reconstruct.hyperelliptic_code.html">hyperelliptic_code</a></li>
+<li><a href="pgg_reconstruct.lagrange.html">lagrange</a></li>
+<li><a href="pgg_reconstruct.massey.html">massey</a></li>
+<li><a href="pgg_reconstruct.pgg_assignment.html">pgg_assignment</a></li>
+<li><a href="pgg_reconstruct.pgg_covering_correctness.html">pgg_covering_correctness</a></li>
+<li><a href="pgg_reconstruct.pgg_deck_pairing.html">pgg_deck_pairing</a></li>
+<li><a href="pgg_reconstruct.pgg_sharing_framework.html">pgg_sharing_framework</a></li>
+<li><a href="pgg_reconstruct.pgg_sum_mod.html">pgg_sum_mod</a></li>
+<li><a href="pgg_reconstruct.pgg_threshold.html">pgg_threshold</a></li>
+<li><a href="pgg_reconstruct.pgl_bound.html">pgl_bound</a></li>
+<li><a href="pgg_reconstruct.rigidity_monster_instance.html">rigidity_monster_instance</a></li>
+<li><a href="pgg_reconstruct.rigidity_s5_instance.html">rigidity_s5_instance</a></li>
+<li><a href="pgg_reconstruct.rigidity_star_instance.html">rigidity_star_instance</a></li>
+<li><a href="pgg_reconstruct.rs_massey_bridge.html">rs_massey_bridge</a></li>
+<li><a href="pgg_reconstruct.rs_privacy.html">rs_privacy</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="pgg_smc"><summary>pgg_smc</summary>
+          <ul>
+          <li><a href="pgg_smc.abelian_word_collapse.html">abelian_word_collapse</a></li>
+<li><a href="pgg_smc.free_group_ball.html">free_group_ball</a></li>
+<li><a href="pgg_smc.perm_uniform.html">perm_uniform</a></li>
+<li><a href="pgg_smc.pgg_abelian.html">pgg_abelian</a></li>
+<li><a href="pgg_smc.pgg_abelian.html">pgg_abelian</a></li>
+<li><a href="pgg_smc.pgg_abelian_collapse.html">pgg_abelian_collapse</a></li>
+<li><a href="pgg_smc.pgg_collusion_bound.html">pgg_collusion_bound</a></li>
+<li><a href="pgg_smc.pgg_correctness.html">pgg_correctness</a></li>
+<li><a href="pgg_smc.pgg_free.html">pgg_free</a></li>
+<li><a href="pgg_smc.pgg_interface.html">pgg_interface</a></li>
+<li><a href="pgg_smc.pgg_lfree.html">pgg_lfree</a></li>
+<li><a href="pgg_smc.pgg_nonabelian.html">pgg_nonabelian</a></li>
+<li><a href="pgg_smc.pgg_pismc.html">pgg_pismc</a></li>
+<li><a href="pgg_smc.pgg_program.html">pgg_program</a></li>
+<li><a href="pgg_smc.pgg_raag.html">pgg_raag</a></li>
+<li><a href="pgg_smc.pgg_raag_cartier_foata.html">pgg_raag_cartier_foata</a></li>
+<li><a href="pgg_smc.pgg_raag_clique.html">pgg_raag_clique</a></li>
+<li><a href="pgg_smc.pgg_raag_path.html">pgg_raag_path</a></li>
+<li><a href="pgg_smc.pgg_raag_s5.html">pgg_raag_s5</a></li>
+<li><a href="pgg_smc.pgg_raag_star.html">pgg_raag_star</a></li>
+<li><a href="pgg_smc.pgg_security.html">pgg_security</a></li>
+<li><a href="pgg_smc.pgg_session_types.html">pgg_session_types</a></li>
+<li><a href="pgg_smc.pgg_word_analysis.html">pgg_word_analysis</a></li>
+<li><a href="pgg_smc.test_cf.html">test_cf</a></li>
+<li><a href="pgg_smc.test_cf2.html">test_cf2</a></li>
+<li><a href="pgg_smc.test_cf3.html">test_cf3</a></li>
+<li><a href="pgg_smc.test_sri.html">test_sri</a></li>
+<li><a href="pgg_smc.test_sri2.html">test_sri2</a></li>
+          </ul>
+          </details>
+          </li>
+    </div>
+
+  <div class="coq">
+
+    <div class="content">
+      <p>
+        <a href="./index.html">Top</a>
+        
+      </p>
+      <h1 class="title">Module smc_interpreter</h1>
+<span class="vernacular">From</span><span class="id"> HB</span><span class="vernacular"> Require</span><span class="vernacular"> Import</span><span class="id"> structures</span>.<br/>
+<span class="vernacular">From</span><span class="id"> mathcomp</span><span class="vernacular"> Require</span><span class="vernacular"> Import</span><span class="id"> all_boot</span><span class="id"> all_order</span><span class="id"> all_algebra</span><span class="id"> fingroup</span><span class="id"> finalg</span><span class="id"> ring</span>.<br/>
+<span class="vernacular">From</span><span class="id"> mathcomp</span><span class="vernacular"> Require</span><span class="vernacular"> Import</span><span class="id"> reals</span><span class="id"> finmap</span>.<br/>
+<span class="vernacular">Require</span><span class="vernacular"> Import</span><span class="id"> realType_ext</span><span class="id"> realType_ln</span><span class="id"> ssr_ext</span><span class="id"> ssralg_ext</span><span class="id"> bigop_ext</span><span class="id"> fdist</span>.<br/>
+<span class="vernacular">Require</span><span class="vernacular"> Import</span><span class="id"> proba</span><span class="id"> jfdist_cond</span><span class="id"> entropy</span><span class="id"> graphoid</span>.<br/>
+<br/>
+<div class="ssrdoc md">
+# Interpreter for Secure Multiparty Protocols
+
+Unindexed process type for simple interpretation.
+Session types and fuel are handled separately in smc_session_types.v.
+
+```
+               proc == unindexed process type
+  [procs p1;..;pn ] == pack processes into seq proc
+  interp_traces h ps == returns a tuple of traces of size &lt;= h
+```
+
+</div>
+<br/>
+<span class="vernacular">Reserved</span><span class="vernacular"> Notation</span> <span class="id">&quot;u *d w&quot;</span> (<span class="gallina-kwd">at</span><span class="id"> level</span><span class="id"> 40</span>).<br/>
+<span class="vernacular">Reserved</span><span class="vernacular"> Notation</span> <span class="id">&quot;u \*d w&quot;</span> (<span class="gallina-kwd">at</span><span class="id"> level</span><span class="id"> 40</span>).<br/>
+<br/>
+<span class="vernacular">Import</span><span class="id"> GRing</span>.<span class="id">Theory</span><span class="id"> Num</span>.<span class="id">Theory</span>.<br/>
+<br/>
+<span class="gallina-kwd">Set</span><span class="vernacular"> Implicit</span><span class="vernacular"> Arguments</span>.<br/>
+<span class="vernacular">Unset</span><span class="vernacular"> Strict</span><span class="vernacular"> Implicit</span>.<br/>
+<span class="vernacular">Import</span><span class="id"> Prenex</span><span class="vernacular"> Implicits</span>.<br/>
+<br/>
+<span class="vernacular">Local</span><span class="vernacular"> Open</span><span class="vernacular"> Scope</span><span class="id"> ring_scope</span>.<br/>
+<span class="vernacular">Local</span><span class="vernacular"> Open</span><span class="vernacular"> Scope</span><span class="id"> reals_ext_scope</span>.<br/>
+<span class="vernacular">Local</span><span class="vernacular"> Open</span><span class="vernacular"> Scope</span><span class="id"> proba_scope</span>.<br/>
+<span class="vernacular">Local</span><span class="vernacular"> Open</span><span class="vernacular"> Scope</span><span class="id"> fdist_scope</span>.<br/>
+<span class="vernacular">Local</span><span class="vernacular"> Open</span><span class="vernacular"> Scope</span><span class="id"> entropy_scope</span>.<br/>
+<span class="vernacular">Local</span><span class="vernacular"> Open</span><span class="vernacular"> Scope</span><span class="id"> vec_ext_scope</span>.<br/>
+<br/>
+<span class="vernacular">Section</span><span class="id"> interp</span>.<br/>
+<span class="vernacular">Variable</span><span class="id"> data</span><span class="id"> :</span><span class="gallina-kwd"> Type</span>.<br/>
+<br/>
+<span class="vernacular">Inductive</span><span class="id"> proc</span><span class="id"> :</span><span class="gallina-kwd"> Type</span><span class="id"> :=</span><br/>
+&nbsp;&nbsp;<span class="id">|</span><span class="id"> Init</span><span class="id"> :</span><span class="id"> data</span><span class="id"> -&gt;</span><span class="id"> proc</span><span class="id"> -&gt;</span><span class="id"> proc</span><br/>
+&nbsp;&nbsp;<span class="id">|</span><span class="id"> Send</span><span class="id"> :</span><span class="id"> nat</span><span class="id"> -&gt;</span><span class="id"> data</span><span class="id"> -&gt;</span><span class="id"> proc</span><span class="id"> -&gt;</span><span class="id"> proc</span><br/>
+&nbsp;&nbsp;<span class="id">|</span><span class="id"> Recv</span><span class="id"> :</span><span class="id"> nat</span><span class="id"> -&gt;</span> (<span class="id">data</span><span class="id"> -&gt;</span><span class="id"> proc</span>)<span class="id"> -&gt;</span><span class="id"> proc</span><br/>
+&nbsp;&nbsp;<span class="id">|</span><span class="id"> Ret</span><span class="id"> :</span><span class="id"> data</span><span class="id"> -&gt;</span><span class="id"> proc</span><br/>
+&nbsp;&nbsp;<span class="id">|</span><span class="id"> Finish</span><span class="id"> :</span><span class="id"> proc</span><br/>
+&nbsp;&nbsp;<span class="id">|</span><span class="vernacular"> Fail</span><span class="id"> :</span><span class="id"> proc</span>.<br/>
+<br/>
+<span class="vernacular">Definition</span><span class="id"> default_proc</span><span class="id"> :</span><span class="id"> proc</span><span class="id"> :=</span><span class="vernacular"> Fail</span>.<br/>
+<br/>
+<span class="vernacular">Definition</span><span class="id"> step</span> (<span class="id">ps</span><span class="id"> :</span><span class="id"> seq</span><span class="id"> proc</span>) (<span class="id">trace</span><span class="id"> :</span><span class="id"> seq</span><span class="id"> data</span>) (<span class="id">i</span><span class="id"> :</span><span class="id"> nat</span>)<span class="id"> :=</span><br/>
+&nbsp;&nbsp;<span class="gallina-kwd">let</span><span class="id"> p</span><span class="id"> :=</span><span class="id"> nth</span><span class="id"> default_proc</span><span class="id"> ps</span><span class="id"> i</span><span class="gallina-kwd"> in</span><br/>
+&nbsp;&nbsp;<span class="gallina-kwd">let</span><span class="id"> nop</span><span class="id"> :=</span> (<span class="id">p,</span><span class="id"> trace,</span><span class="id"> false</span>)<span class="gallina-kwd"> in</span><br/>
+&nbsp;&nbsp;<span class="gallina-kwd">match</span><span class="id"> p</span><span class="gallina-kwd"> with</span><br/>
+&nbsp;&nbsp;<span class="id">|</span><span class="id"> Recv</span><span class="id"> frm</span><span class="id"> f</span><span class="id"> =&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">match</span><span class="id"> nth</span><span class="id"> default_proc</span><span class="id"> ps</span><span class="id"> frm</span><span class="gallina-kwd"> with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">|</span><span class="id"> Send</span><span class="id"> dst</span><span class="id"> v</span><span class="id"> next</span><span class="id"> =&gt;</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">if</span><span class="id"> dst</span><span class="id"> ==</span><span class="id"> i</span><span class="gallina-kwd"> then</span> (<span class="id">f</span><span class="id"> v,</span><span class="id"> v::trace,</span><span class="id"> true</span>)<span class="gallina-kwd"> else</span><span class="id"> nop</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">|</span><span class="id"> _</span><span class="id"> =&gt;</span><span class="id"> nop</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">end</span><br/>
+&nbsp;&nbsp;<span class="id">|</span><span class="id"> Send</span><span class="id"> dst</span><span class="id"> w</span><span class="id"> next</span><span class="id"> =&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">match</span><span class="id"> nth</span><span class="id"> default_proc</span><span class="id"> ps</span><span class="id"> dst</span><span class="gallina-kwd"> with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">|</span><span class="id"> Recv</span><span class="id"> frm</span><span class="id"> f</span><span class="id"> =&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">if</span><span class="id"> frm</span><span class="id"> ==</span><span class="id"> i</span><span class="gallina-kwd"> then</span> (<span class="id">next,</span><span class="id"> trace,</span><span class="id"> true</span>)<span class="gallina-kwd"> else</span><span class="id"> nop</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">|</span><span class="id"> _</span><span class="id"> =&gt;</span><span class="id"> nop</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">end</span><br/>
+&nbsp;&nbsp;<span class="id">|</span><span class="id"> Init</span><span class="id"> d</span><span class="id"> next</span><span class="id"> =&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">next,</span><span class="id"> d::trace,</span><span class="id"> true</span>)<br/>
+&nbsp;&nbsp;<span class="id">|</span><span class="id"> Ret</span><span class="id"> d</span><span class="id"> =&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">Finish,</span><span class="id"> d</span><span class="id"> ::</span><span class="id"> trace,</span><span class="id"> true</span>)<br/>
+&nbsp;&nbsp;<span class="id">|</span><span class="id"> Finish</span><span class="id"> =&gt;</span><span class="id"> nop</span><br/>
+&nbsp;&nbsp;<span class="id">|</span><span class="vernacular"> Fail</span><span class="id"> =&gt;</span><span class="id"> nop</span><br/>
+&nbsp;&nbsp;<span class="gallina-kwd">end</span>.<br/>
+<br/>
+<span class="vernacular">Fixpoint</span><span class="id"> interp</span><span class="id"> h</span> (<span class="id">ps</span><span class="id"> :</span><span class="id"> seq</span><span class="id"> proc</span>) (<span class="id">traces</span><span class="id"> :</span><span class="id"> seq</span> (<span class="id">seq</span><span class="id"> data</span>))<span class="id"> :=</span><br/>
+&nbsp;&nbsp;<span class="gallina-kwd">if</span><span class="id"> h</span><span class="id"> is</span><span class="id"> h</span>.<span class="id">+1</span><span class="gallina-kwd"> then</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">let</span><span class="id"> ps_trs'</span><span class="id"> :=</span><span class="id"> [seq</span><span class="id"> step</span><span class="id"> ps</span> (<span class="id">nth</span><span class="id"> [::]</span><span class="id"> traces</span><span class="id"> i</span>)<span class="id"> i</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">|</span><span class="id"> i</span><span class="id"> &lt;-</span><span class="id"> iota</span><span class="id"> 0</span> (<span class="id">size</span><span class="id"> ps</span>)<span class="id">]</span><span class="gallina-kwd"> in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">if</span><span class="id"> has</span><span class="id"> snd</span><span class="id"> ps_trs'</span><span class="gallina-kwd"> then</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">let</span><span class="id"> ps'</span><span class="id"> :=</span><span class="id"> unzip1</span> (<span class="id">unzip1</span><span class="id"> ps_trs'</span>)<span class="gallina-kwd"> in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">let</span><span class="id"> trs'</span><span class="id"> :=</span><span class="id"> unzip2</span> (<span class="id">unzip1</span><span class="id"> ps_trs'</span>)<span class="gallina-kwd"> in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">interp</span><span class="id"> h</span><span class="id"> ps'</span><span class="id"> trs'</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">else</span> (<span class="id">ps,</span><span class="id"> traces</span>)<br/>
+&nbsp;&nbsp;<span class="gallina-kwd">else</span> (<span class="id">ps,</span><span class="id"> traces</span>).<br/>
+<br/>
+<span class="vernacular">Definition</span><span class="id"> run_interp</span><span class="id"> h</span><span class="id"> procs</span><span class="id"> :=</span><span class="id"> interp</span><span class="id"> h</span><span class="id"> procs</span> (<span class="id">nseq</span> (<span class="id">size</span><span class="id"> procs</span>)<span class="id"> [::]</span>).<br/>
+<br/>
+<span class="vernacular">Local</span><span class="vernacular"> Open</span><span class="vernacular"> Scope</span><span class="id"> tuple_ext_scope</span>.<br/>
+<span class="vernacular">Local</span><span class="vernacular"> Open</span><span class="vernacular"> Scope</span><span class="id"> fset_scope</span>.<br/>
+<br/>
+<span class="vernacular">Section</span><span class="id"> lens</span>.<br/>
+<span class="vernacular">Variables</span><span class="id"> n</span><span class="id"> m</span><span class="id"> :</span><span class="id"> nat</span>.<br/>
+<span class="vernacular">Definition</span><span class="id"> lens</span><span class="id"> :</span><span class="gallina-kwd"> Type</span><span class="id"> :=</span><span class="id"> m</span>.<span class="id">-tuple</span><span class="id"> 'I_n</span>.<br/>
+<span class="vernacular">Variables</span> (<span class="id">l</span><span class="id"> :</span><span class="id"> lens</span>) (<span class="id">T</span><span class="id"> :</span><span class="gallina-kwd"> Type</span>).<br/>
+<span class="vernacular">Definition</span><span class="id"> extract</span> (<span class="id">t</span><span class="id"> :</span><span class="id"> n</span>.<span class="id">-tuple</span><span class="id"> T</span>)<span class="id"> :=</span><span class="id"> map_tuple</span> (<span class="id">tnth</span><span class="id"> t</span>)<span class="id"> l</span>.<br/>
+<span class="vernacular">Definition</span><span class="id"> inject</span> (<span class="id">t</span><span class="id"> :</span><span class="id"> n</span>.<span class="id">-tuple</span><span class="id"> T</span>) (<span class="id">t'</span><span class="id"> :</span><span class="id"> m</span>.<span class="id">-tuple</span><span class="id"> T</span>)<span class="id"> :=</span><br/>
+&nbsp;&nbsp;<span class="id">[tuple</span><span class="id"> nth</span> (<span class="id">t</span><span class="id"> !_</span><span class="id"> i</span>)<span class="id"> t'</span> (<span class="id">index</span><span class="id"> i</span><span class="id"> l</span>)<span class="id"> |</span><span class="id"> i</span><span class="id"> &lt;</span><span class="id"> n]</span>.<br/>
+<span class="vernacular">End</span><span class="id"> lens</span>.<br/>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> map_extract</span><span class="id"> n</span><span class="id"> m</span><span class="id"> A</span><span class="id"> B</span> (<span class="id">l</span><span class="id"> :</span><span class="id"> lens</span><span class="id"> n</span><span class="id"> m</span>) (<span class="id">f</span><span class="id"> :</span><span class="id"> A</span><span class="id"> -&gt;</span><span class="id"> B</span>)<span class="id"> v</span><span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="id">map_tuple</span><span class="id"> f</span> (<span class="id">extract</span><span class="id"> l</span><span class="id"> v</span>)<span class="id"> =</span><span class="id"> extract</span><span class="id"> l</span> (<span class="id">map_tuple</span><span class="id"> f</span><span class="id"> v</span>).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="gallina-kwd"> by</span><span class="id"> apply:</span><span class="id"> eq_from_tnth</span><span class="id"> =&gt;</span><span class="id"> i;</span><span class="id"> rewrite</span><span class="id"> !tnth_map</span>. Qed.</div></details>
+<br/>
+<span class="vernacular">Inductive</span><span class="id"> rstep</span><span class="id"> {n}</span><span class="id"> :</span><span class="gallina-kwd"> forall</span><span class="id"> {m},</span><span class="id"> lens</span><span class="id"> n</span><span class="id"> m</span><span class="id"> -&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">m</span>.<span class="id">-tuple</span><span class="id"> proc</span><span class="id"> -&gt;</span><span class="id"> m</span>.<span class="id">-tuple</span><span class="id"> proc</span><span class="id"> -&gt;</span><span class="id"> m</span>.<span class="id">-tuple</span> (<span class="id">seq</span><span class="id"> data</span>)<span class="id"> -&gt;</span><span class="gallina-kwd"> Prop</span><span class="id"> :=</span><br/>
+&nbsp;&nbsp;<span class="id">|</span><span class="id"> rinit</span><span class="id"> i</span><span class="id"> x</span><span class="id"> p</span><span class="id"> :</span><span class="id"> rstep</span><span class="id"> [tuple</span><span class="id"> i]</span><span class="id"> [tuple</span><span class="id"> Init</span><span class="id"> x</span><span class="id"> p]</span><span class="id"> [tuple</span><span class="id"> p]</span><span class="id"> [tuple</span><span class="id"> [::</span><span class="id"> x]]</span><br/>
+&nbsp;&nbsp;<span class="id">|</span><span class="id"> rret</span><span class="id"> i</span><span class="id"> x</span><span class="id"> :</span><span class="id"> rstep</span><span class="id"> [tuple</span><span class="id"> i]</span><span class="id"> [tuple</span><span class="id"> Ret</span><span class="id"> x]</span><span class="id"> [tuple</span><span class="id"> Finish]</span><span class="id"> [tuple</span><span class="id"> [::</span><span class="id"> x]]</span><br/>
+&nbsp;&nbsp;<span class="id">|</span><span class="id"> rcomm</span><span class="id"> i</span><span class="id"> j</span><span class="id"> x</span><span class="id"> pi</span><span class="id"> pj</span><span class="id"> :</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rstep</span><span class="id"> [tuple</span><span class="id"> i;</span><span class="id"> j]</span><span class="id"> [tuple</span><span class="id"> Send</span><span class="id"> j</span><span class="id"> x</span><span class="id"> pi;</span><span class="id"> Recv</span><span class="id"> i</span><span class="id"> pj]</span><span class="id"> [tuple</span><span class="id"> pi;</span><span class="id"> pj</span><span class="id"> x]</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">[tuple</span><span class="id"> nil;</span><span class="id"> [::</span><span class="id"> x]]</span>.<br/>
+<br/>
+<span class="vernacular">Inductive</span><span class="id"> rsteps</span><span class="id"> {n}</span><span class="id"> :</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">n</span>.<span class="id">-tuple</span><span class="id"> proc</span><span class="id"> -&gt;</span><span class="id"> n</span>.<span class="id">-tuple</span><span class="id"> proc</span><span class="id"> -&gt;</span><span class="id"> n</span>.<span class="id">-tuple</span> (<span class="id">seq</span><span class="id"> data</span>)<span class="id"> -&gt;</span><span class="gallina-kwd"> Prop</span><span class="id"> :=</span><br/>
+&nbsp;&nbsp;<span class="id">|</span><span class="id"> rone</span><span class="id"> m</span> (<span class="id">l</span><span class="id"> :</span><span class="id"> lens</span><span class="id"> n</span><span class="id"> m</span>)<span class="id"> ps</span><span class="id"> ps'</span><span class="id"> traces</span><span class="id"> :</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rstep</span><span class="id"> l</span> (<span class="id">extract</span><span class="id"> l</span><span class="id"> ps</span>)<span class="id"> ps'</span><span class="id"> traces</span><span class="id"> -&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rsteps</span><span class="id"> ps</span> (<span class="id">inject</span><span class="id"> l</span><span class="id"> ps</span><span class="id"> ps'</span>) (<span class="id">inject</span><span class="id"> l</span><span class="id"> [tuple</span><span class="id"> nil</span><span class="id"> |</span><span class="id"> _</span><span class="id"> &lt;</span><span class="id"> n]</span><span class="id"> traces</span>)<br/>
+&nbsp;&nbsp;<span class="id">|</span><span class="id"> rrefl</span><span class="id"> ps</span><span class="id"> :</span><span class="id"> rsteps</span><span class="id"> ps</span><span class="id"> ps</span><span class="id"> [tuple</span><span class="id"> nil</span><span class="id"> |</span><span class="id"> _</span><span class="id"> &lt;</span><span class="id"> n]</span><br/>
+&nbsp;&nbsp;<span class="id">|</span><span class="id"> rtrans</span><span class="id"> ps1</span><span class="id"> ps2</span><span class="id"> ps3</span><span class="id"> tr1</span><span class="id"> tr2</span><span class="id"> tr3</span><span class="id"> :</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rsteps</span><span class="id"> ps1</span><span class="id"> ps2</span><span class="id"> tr1</span><span class="id"> -&gt;</span><span class="id"> rsteps</span><span class="id"> ps2</span><span class="id"> ps3</span><span class="id"> tr2</span><span class="id"> -&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">tr3</span><span class="id"> =</span><span class="id"> [tuple</span><span class="id"> tr2</span><span class="id"> !_</span><span class="id"> i</span><span class="id"> ++</span><span class="id"> tr1</span><span class="id"> !_</span><span class="id"> i</span><span class="id"> |</span><span class="id"> i</span><span class="id"> &lt;</span><span class="id"> n]</span><span class="id"> -&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rsteps</span><span class="id"> ps1</span><span class="id"> ps3</span><span class="id"> tr3</span>.<br/>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> step_complete</span><span class="id"> n</span><span class="id"> m</span> (<span class="id">l</span><span class="id"> :</span><span class="id"> lens</span><span class="id"> n</span><span class="id"> m</span>)<span class="id"> ps</span><span class="id"> ps'</span><span class="id"> traces'</span><span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="id">rstep</span><span class="id"> l</span> (<span class="id">extract</span><span class="id"> l</span><span class="id"> ps</span>)<span class="id"> ps'</span><span class="id"> traces'</span><span class="id"> -&gt;</span><br/>
+&nbsp;&nbsp;<span class="gallina-kwd">let</span><span class="id"> res</span><span class="id"> :=</span><span class="id"> extract</span><span class="id"> l</span><span class="id"> [tuple</span><span class="id"> step</span><span class="id"> ps</span><span class="id"> nil</span><span class="id"> i</span><span class="id"> |</span><span class="id"> i</span><span class="id"> &lt;</span><span class="id"> n]</span><span class="gallina-kwd"> in</span><br/>
+&nbsp;&nbsp;<span class="id">map_tuple</span> (<span class="gallina-kwd">fun</span><span class="id"> r</span><span class="id"> =&gt;</span><span class="id"> r</span>.<span class="id">1</span>.<span class="id">1</span>)<span class="id"> res</span><span class="id"> =</span><span class="id"> ps'</span><span class="id"> /\</span><br/>
+&nbsp;&nbsp;<span class="id">map_tuple</span> (<span class="gallina-kwd">fun</span><span class="id"> r</span><span class="id"> =&gt;</span><span class="id"> r</span>.<span class="id">1</span>.<span class="id">2</span>)<span class="id"> res</span><span class="id"> =</span><span class="id"> traces'</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id">move</span><span class="id"> Hps:</span> (<span class="id">extract</span><span class="id"> l</span><span class="id"> ps</span>)<span class="id"> =&gt;</span><span class="id"> psl</span><span class="id"> H</span>.<br/>
+<span class="id">case:</span><span class="id"> H</span><span class="id"> Hps</span><span class="id"> =&gt;</span><span class="id"> /=</span>.<br/>
+<span class="id">-</span><span class="id"> move=&gt;</span><span class="id"> i</span><span class="id"> x</span><span class="id"> p</span><span class="id"> []</span><span class="id"> Hps</span>.<br/>
+&nbsp;&nbsp;<span class="id">split;</span><span class="id"> apply</span><span class="id"> /val_inj;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> /=</span><span class="id"> tnth_mktuple</span><span class="id"> /=</span><span class="id"> /step</span><span class="id"> -tnth_nth</span><span class="id"> Hps</span>.<br/>
+<span class="id">-</span><span class="id"> move=&gt;</span><span class="id"> i</span><span class="id"> x</span><span class="id"> []</span><span class="id"> Hps</span>.<br/>
+&nbsp;&nbsp;<span class="id">split;</span><span class="id"> apply</span><span class="id"> /val_inj;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> /=</span><span class="id"> tnth_mktuple</span><span class="id"> /=</span><span class="id"> /step</span><span class="id"> -tnth_nth</span><span class="id"> Hps</span>.<br/>
+<span class="id">-</span><span class="id"> move=&gt;</span><span class="id"> i</span><span class="id"> j</span><span class="id"> x</span><span class="id"> pi</span><span class="id"> pj</span><span class="id"> []</span><span class="id"> Hi</span><span class="id"> Hj</span>.<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> !map_extract</span>.<br/>
+&nbsp;&nbsp;<span class="id">split;</span><span class="id"> apply</span><span class="id"> /val_inj;</span><span class="id"> congr</span> (<span class="id">[::</span><span class="id"> _;</span><span class="id"> _]</span>)<span class="id">;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> /=</span><span class="id"> tnth_map</span><span class="id"> tnth_mktuple</span><span class="id"> /=</span><span class="id"> /step;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> -tnth_nth</span> (<span class="id">Hi,Hj</span>)<span class="id"> -tnth_nth</span> (<span class="id">Hi,Hj</span>)<span class="id"> eqxx</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> comm_disjoint</span><span class="id"> n</span> (<span class="id">ps</span><span class="id"> :</span><span class="id"> n</span>.<span class="id">-tuple</span><span class="id"> proc</span>)<span class="id"> i</span><span class="id"> j</span><span class="id"> k</span><span class="id"> l</span><span class="id"> ps1</span><span class="id"> tr1</span><span class="id"> ps2</span><span class="id"> tr2</span><span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="id">rstep</span><span class="id"> [tuple</span><span class="id"> i;</span><span class="id"> j]</span> (<span class="id">extract</span><span class="id"> [tuple</span><span class="id"> i;</span><span class="id"> j]</span><span class="id"> ps</span>)<span class="id"> ps1</span><span class="id"> tr1</span><span class="id"> -&gt;</span><br/>
+&nbsp;&nbsp;<span class="id">rstep</span><span class="id"> [tuple</span><span class="id"> k;</span><span class="id"> l]</span> (<span class="id">extract</span><span class="id"> [tuple</span><span class="id"> k;</span><span class="id"> l]</span><span class="id"> ps</span>)<span class="id"> ps2</span><span class="id"> tr2</span><span class="id"> -&gt;</span><br/>
+&nbsp;&nbsp;(<span class="id">i</span><span class="id"> ==</span><span class="id"> k</span>)<span class="id"> /\</span> (<span class="id">j</span><span class="id"> ==</span><span class="id"> l</span>)<span class="id"> \/</span> (<span class="id">i</span><span class="id"> !=</span><span class="id"> k</span>)<span class="id"> /\</span> (<span class="id">j</span><span class="id"> !=</span><span class="id"> l</span>).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id">inversion</span><span class="id"> 1;</span><span class="id"> inversion</span><span class="id"> 1;</span><span class="id"> subst</span>.<br/>
+<span class="id">case/boolP:</span> (<span class="id">i</span><span class="id"> ==</span><span class="id"> k</span>)<span class="id"> =&gt;</span><span class="id"> ik;</span><span class="id"> [left</span><span class="id"> |</span><span class="id"> right];</span><span class="id"> split</span><span class="id"> =&gt;</span><span class="id"> //</span>.<br/>
+&nbsp;&nbsp;<span class="id">move:</span><span class="id"> H10;</span><span class="id"> rewrite</span> (<span class="id">tnth_nth</span><span class="vernacular"> Fail</span>)<span class="id"> -</span>(<span class="id">eqP</span><span class="id"> ik</span>)<span class="id"> -tnth_nth</span><span class="id"> -H3</span><span class="id"> =&gt;</span><span class="id"> -[lj]</span><span class="id"> _</span><span class="id"> _</span>.<br/>
+&nbsp;&nbsp;<span class="id">exact/eqP/val_inj</span>.<br/>
+<span class="id">apply:</span><span class="id"> contra</span><span class="id"> ik</span><span class="id"> =&gt;</span><span class="id"> /eqP</span><span class="id"> jl</span>.<br/>
+<span class="id">move:</span><span class="id"> H11;</span><span class="id"> rewrite</span> (<span class="id">tnth_nth</span><span class="vernacular"> Fail</span>)<span class="id"> -jl</span><span class="id"> -tnth_nth</span><span class="id"> -H4</span><span class="id"> =&gt;</span><span class="id"> -[ki]</span><span class="id"> _</span>.<br/>
+<span class="id">exact/eqP/val_inj</span>.<br/>
+Qed.</div></details>
+&nbsp;&nbsp;<br/>
+<span class="vernacular">Lemma</span><span class="id"> step_sound</span><span class="id"> n</span> (<span class="id">ps</span><span class="id"> :</span><span class="id"> n</span>.<span class="id">-tuple</span><span class="id"> proc</span>)<span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="gallina-kwd">let</span><span class="id"> res</span><span class="id"> :=</span><span class="id"> [tuple</span><span class="id"> step</span><span class="id"> ps</span><span class="id"> nil</span><span class="id"> i</span><span class="id"> |</span><span class="id"> i</span><span class="id"> &lt;</span><span class="id"> n]</span><span class="gallina-kwd"> in</span><br/>
+&nbsp;&nbsp;<span class="gallina-kwd">let</span><span class="id"> ps'</span><span class="id"> :=</span><span class="id"> map_tuple</span> (<span class="gallina-kwd">fun</span><span class="id"> r</span><span class="id"> =&gt;</span><span class="id"> r</span>.<span class="id">1</span>.<span class="id">1</span>)<span class="id"> res</span><span class="gallina-kwd"> in</span><br/>
+&nbsp;&nbsp;<span class="gallina-kwd">let</span><span class="id"> tr</span><span class="id"> :=</span><span class="id"> map_tuple</span> (<span class="gallina-kwd">fun</span><span class="id"> r</span><span class="id"> =&gt;</span><span class="id"> r</span>.<span class="id">1</span>.<span class="id">2</span>)<span class="id"> res</span><span class="gallina-kwd"> in</span><br/>
+&nbsp;&nbsp;<span class="id">rsteps</span><span class="id"> ps</span><span class="id"> ps'</span><span class="id"> tr</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id">pose</span><span class="id"> pss</span><span class="id"> :=</span><span class="id"> [fset</span><span class="id"> x</span><span class="id"> :</span><span class="id"> 'I_n</span><span class="id"> |</span><span class="id"> true]</span>.<br/>
+<span class="id">pose</span><span class="id"> res'</span> (<span class="id">s</span><span class="id"> :</span><span class="id"> {fset</span><span class="id"> 'I_n}</span>) (<span class="id">ps</span><span class="id"> :</span><span class="id"> n</span>.<span class="id">-tuple</span><span class="id"> proc</span>)<span class="id"> :=</span><br/>
+&nbsp;&nbsp;<span class="id">[tuple</span><span class="gallina-kwd"> if</span><span class="id"> i</span><span class="id"> \in</span><span class="id"> s</span><span class="gallina-kwd"> then</span><span class="id"> step</span><span class="id"> ps</span><span class="id"> [::]</span><span class="id"> i</span><span class="gallina-kwd"> else</span> (<span class="id">ps</span><span class="id"> !_</span><span class="id"> i,</span><span class="id"> nil,</span><span class="id"> false</span>)<span class="id"> |</span><span class="id"> i</span><span class="id"> &lt;</span><span class="id"> n]</span>.<br/>
+<span class="id">move=&gt;</span><span class="id"> res</span>.<br/>
+<span class="id">have</span><span class="id"> -&gt;</span><span class="id"> :</span><span class="id"> res</span><span class="id"> =</span><span class="id"> res'</span><span class="id"> pss</span><span class="id"> ps</span>.<br/>
+&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> apply:</span><span class="id"> eq_from_tnth</span><span class="id"> =&gt;</span><span class="id"> i;</span><span class="id"> rewrite</span><span class="id"> !tnth_mktuple</span><span class="id"> ifT</span><span class="id"> //</span><span class="id"> !inE</span>.<br/>
+<span class="id">have</span><span class="id"> :</span><span class="gallina-kwd"> forall</span><span class="id"> i</span><span class="id"> j</span><span class="id"> ps'</span><span class="id"> traces,</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rstep</span><span class="id"> [tuple</span><span class="id"> i;</span><span class="id"> j]</span> (<span class="id">extract</span><span class="id"> [tuple</span><span class="id"> i;</span><span class="id"> j]</span><span class="id"> ps</span>)<span class="id"> ps'</span><span class="id"> traces</span><span class="id"> -&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">i</span><span class="id"> \in</span><span class="id"> pss</span>)<span class="id"> =</span> (<span class="id">j</span><span class="id"> \in</span><span class="id"> pss</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> move=&gt;</span><span class="id"> *;</span><span class="id"> rewrite</span><span class="id"> !inE</span>.<br/>
+<span class="id">elim/finSet_rect:</span><span class="id"> pss</span><span class="id"> {res}</span><span class="id"> =&gt;</span><span class="id"> /=</span><span class="id"> pss</span><span class="id"> IH</span><span class="id"> Hpss</span>.<br/>
+<span class="id">case:</span> (<span class="id">fset_0Vmem</span><span class="id"> pss</span>)<span class="id"> =&gt;</span><span class="id"> [-&gt;</span><span class="id"> |</span><span class="id"> [i</span><span class="id"> Hi]]</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;Base&nbsp;case:&nbsp;empty&nbsp;set&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id">rewrite</span> (_<span class="id"> :</span><span class="id"> map_tuple</span><span class="id"> _</span><span class="id"> _</span><span class="id"> =</span><span class="id"> ps</span>)<span class="id">;</span><span class="id"> last</span><span class="id"> first</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> apply:</span><span class="id"> eq_from_tnth</span><span class="id"> =&gt;</span><span class="id"> i;</span><span class="id"> rewrite</span><span class="id"> tnth_map</span><span class="id"> !tnth_mktuple</span><span class="id"> inE</span>.<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span> (_<span class="id"> :</span><span class="id"> map_tuple</span><span class="id"> _</span><span class="id"> _</span><span class="id"> =</span><span class="id"> [tuple</span><span class="id"> nil</span><span class="id"> |</span><span class="id"> _</span><span class="id"> &lt;</span><span class="id"> n]</span>)<span class="id">;</span><span class="id"> last</span><span class="id"> first</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> apply:</span><span class="id"> eq_from_tnth</span><span class="id"> =&gt;</span><span class="id"> i;</span><span class="id"> rewrite</span><span class="id"> tnth_map</span><span class="id"> !tnth_mktuple</span><span class="id"> inE</span>.<br/>
+&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> constructor</span>.<br/>
+<span class="comment">(*&nbsp;Inductive&nbsp;case:&nbsp;i&nbsp;in&nbsp;pss&nbsp;*)</span><br/>
+<span class="id">case</span><span class="id"> Hpi:</span> (<span class="id">ps</span><span class="id"> !_</span><span class="id"> i</span>)<span class="id"> =&gt;</span><span class="id"> [x</span><span class="id"> p</span><span class="id"> |</span><span class="id"> j</span><span class="id"> x</span><span class="id"> p</span><span class="id"> |</span><span class="id"> j</span><span class="id"> f</span><span class="id"> |</span><span class="id"> x</span><span class="id"> ||]</span>.<br/>
+<span class="comment">(*&nbsp;Case&nbsp;Init&nbsp;x&nbsp;p&nbsp;*)</span><br/>
+<span class="id">-</span><span class="id"> pose</span><span class="id"> pss'</span><span class="id"> :=</span><span class="id"> pss</span><span class="id"> `\</span><span class="id"> i</span>.<br/>
+&nbsp;&nbsp;<span class="id">have</span><span class="id"> H':</span><span class="id"> pss'</span><span class="id"> `&lt;`</span><span class="id"> pss</span><span class="gallina-kwd"> by</span><span class="id"> apply:</span><span class="id"> fproperD1</span>.<br/>
+&nbsp;&nbsp;<span class="id">apply:</span> (<span class="id">rtrans</span> (<span class="id">IH</span><span class="id"> _</span><span class="id"> H'</span><span class="id"> _</span>))<span class="id">;</span><span class="id"> last</span><span class="id"> 3</span><span class="id"> first</span>.<br/>
+&nbsp;&nbsp;<span class="id">+</span><span class="id"> move=&gt;</span><span class="id"> k</span><span class="id"> j'</span><span class="id"> ps'</span><span class="id"> traces</span><span class="id"> H</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> !inE</span> (<span class="id">Hpss</span><span class="id"> _</span><span class="id"> _</span><span class="id"> _</span><span class="id"> _</span><span class="id"> H</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">have</span><span class="id"> [ki|_]</span><span class="id"> :=</span><span class="id"> eqVneq</span><span class="id"> k</span><span class="id"> i;</span><span class="id"> first</span><span class="gallina-kwd"> by</span><span class="id"> inversion</span><span class="id"> H;</span><span class="id"> subst;</span><span class="id"> rewrite</span><span class="id"> Hpi</span><span class="gallina-kwd"> in</span><span class="id"> H3</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">have</span><span class="id"> [ji|//]</span><span class="id"> :=</span><span class="id"> eqVneq</span><span class="id"> j'</span><span class="id"> i</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> inversion</span><span class="id"> H;</span><span class="id"> subst;</span><span class="id"> rewrite</span><span class="id"> Hpi</span><span class="gallina-kwd"> in</span><span class="id"> H4</span>.<br/>
+&nbsp;&nbsp;<span class="id">+</span><span class="id"> move:</span> (<span class="id">rinit</span><span class="id"> i</span><span class="id"> x</span><span class="id"> p</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">set</span><span class="id"> ps''</span><span class="id"> :=</span><span class="id"> map_tuple</span><span class="id"> _</span><span class="id"> _</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">have</span><span class="id"> -&gt;</span><span class="id"> :</span><span class="id"> [tuple</span><span class="id"> Init</span><span class="id"> x</span><span class="id"> p]</span><span class="id"> =</span><span class="id"> extract</span><span class="id"> [tuple</span><span class="id"> i]</span><span class="id"> ps''</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> apply/val_inj;</span><span class="id"> rewrite</span><span class="id"> /=</span><span class="id"> /ps''</span><span class="id"> tnth_map</span><span class="id"> tnth_mktuple</span><span class="id"> !inE</span><span class="id"> eqxx</span><span class="id"> /=</span><span class="id"> Hpi</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">move/rone</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">have</span><span class="id"> -&gt;</span><span class="id"> :</span><span class="id"> inject</span><span class="id"> [tuple</span><span class="id"> i]</span><span class="id"> ps''</span><span class="id"> [tuple</span><span class="id"> p]</span><span class="id"> =</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">map_tuple</span> (<span class="gallina-kwd">fun</span><span class="id"> r</span><span class="id"> :</span><span class="id"> proc</span><span class="id"> *</span><span class="id"> seq</span><span class="id"> data</span><span class="id"> *</span><span class="id"> bool</span><span class="id"> =&gt;</span><span class="id"> r</span>.<span class="id">1</span>.<span class="id">1</span>) (<span class="id">res'</span><span class="id"> pss</span><span class="id"> ps</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply:</span><span class="id"> eq_from_tnth</span><span class="id"> =&gt;</span><span class="id"> j';</span><span class="id"> rewrite</span><span class="id"> !</span>(<span class="id">tnth_mktuple,tnth_map</span>)<span class="id"> /=</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">case/boolP:</span> (<span class="id">i</span><span class="id"> ==</span><span class="id"> j'</span>)<span class="id"> =&gt;</span><span class="id"> [/eqP</span><span class="id"> &lt;-|ij]</span><span class="id"> /=</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> Hi</span><span class="id"> /step</span><span class="id"> -tnth_nth</span><span class="id"> Hpi</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> have</span><span class="id"> -&gt;</span><span class="id"> :</span> (<span class="id">j'</span><span class="id"> \in</span><span class="id"> pss'</span>)<span class="id"> =</span> (<span class="id">j'</span><span class="id"> \in</span><span class="id"> pss</span>)<span class="gallina-kwd"> by</span><span class="id"> rewrite</span><span class="id"> !inE</span><span class="id"> eq_sym</span><span class="id"> ij</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">exact</span>.<br/>
+&nbsp;&nbsp;<span class="id">+</span><span class="id"> apply:</span><span class="id"> eq_from_tnth</span><span class="id"> =&gt;</span><span class="id"> j';</span><span class="id"> rewrite</span><span class="id"> !</span>(<span class="id">tnth_mktuple,</span><span class="id"> tnth_map</span>)<span class="id"> /=</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">case/boolP:</span> (<span class="id">i</span><span class="id"> ==</span><span class="id"> j'</span>)<span class="id"> =&gt;</span><span class="id"> [/eqP</span><span class="id"> &lt;-|ij]</span><span class="id"> /=</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> Hi</span><span class="id"> !inE</span><span class="id"> eqxx</span><span class="id"> /=</span><span class="id"> /step</span><span class="id"> -tnth_nth</span><span class="id"> Hpi</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> have</span><span class="id"> -&gt;</span><span class="id"> :</span> (<span class="id">j'</span><span class="id"> \in</span><span class="id"> pss'</span>)<span class="id"> =</span> (<span class="id">j'</span><span class="id"> \in</span><span class="id"> pss</span>)<span class="gallina-kwd"> by</span><span class="id"> rewrite</span><span class="id"> !inE</span><span class="id"> eq_sym</span><span class="id"> ij</span>.<br/>
+<span class="comment">(*&nbsp;Case&nbsp;Send&nbsp;j&nbsp;x&nbsp;p&nbsp;*)</span><br/>
+<span class="id">-</span><span class="id"> have</span><span class="id"> [[pj</span><span class="id"> Hpj]|Hn]</span><span class="id"> :</span><span class="id"> decidable</span> (<span class="gallina-kwd">exists</span><span class="id"> pj,</span><span class="id"> nth</span><span class="vernacular"> Fail</span><span class="id"> ps</span><span class="id"> j</span><span class="id"> =</span><span class="id"> Recv</span><span class="id"> i</span><span class="id"> pj</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">case</span><span class="id"> Hpj:</span> (<span class="id">nth</span><span class="vernacular"> Fail</span><span class="id"> ps</span><span class="id"> j</span>)<span class="id"> =&gt;</span><span class="id"> [xj</span><span class="id"> pj</span><span class="id"> |</span><span class="id"> k</span><span class="id"> xj</span><span class="id"> pj</span><span class="id"> |</span><span class="id"> i'</span><span class="id"> pj</span><span class="id"> |</span><span class="id"> xj</span><span class="id"> ||];</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">try</span><span class="gallina-kwd"> by</span><span class="id"> right</span><span class="id"> =&gt;</span><span class="id"> -[pj']</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">case/boolP:</span> (<span class="id">i'</span><span class="id"> ==</span><span class="id"> i</span>)<span class="id"> =&gt;</span><span class="id"> [/eqP</span><span class="id"> -&gt;</span><span class="id"> |</span><span class="id"> i'i];</span><span class="id"> first</span><span class="gallina-kwd"> by</span><span class="id"> left;</span><span class="gallina-kwd"> exists</span><span class="id"> pj</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> right</span><span class="id"> =&gt;</span><span class="id"> -[pj']</span><span class="id"> []</span><span class="id"> /eqP;</span><span class="id"> move/negbTE:</span><span class="id"> i'i</span><span class="id"> =&gt;</span><span class="id"> -&gt;</span>.<br/>
+&nbsp;&nbsp;<span class="id">+</span> <span class="comment">(*&nbsp;Send-Recv&nbsp;communication&nbsp;case&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">have</span><span class="id"> jn:</span> (<span class="id">j</span><span class="id"> &lt;</span><span class="id"> n</span>)<span class="id">%N</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> ltnNge;</span><span class="id"> apply/negP</span><span class="id"> =&gt;</span><span class="id"> nj</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> nth_default</span><span class="id"> ?size_tuple</span><span class="id"> //</span><span class="gallina-kwd"> in</span><span class="id"> Hpj</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">case/boolP:</span> (<span class="id">i</span><span class="id"> ==</span><span class="id"> Ordinal</span><span class="id"> jn</span>)<span class="id"> =&gt;</span><span class="id"> ij</span><span class="id"> /=</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span> (<span class="id">eqP</span><span class="id"> ij</span>) (<span class="id">tnth_nth</span><span class="vernacular"> Fail</span>)<span class="id"> Hpj</span><span class="gallina-kwd"> in</span><span class="id"> Hpi</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">have</span><span class="id"> :=</span><span class="id"> rcomm</span><span class="id"> i</span> (<span class="id">Ordinal</span><span class="id"> jn</span>)<span class="id"> x</span><span class="id"> p</span><span class="id"> pj</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> (_<span class="id"> :</span><span class="id"> [tuple</span><span class="id"> Send</span><span class="id"> _</span><span class="id"> _</span><span class="id"> _;</span><span class="id"> _]</span><span class="id"> =</span><span class="id"> extract</span><span class="id"> [tuple</span><span class="id"> i;</span><span class="id"> Ordinal</span><span class="id"> jn]</span><span class="id"> ps</span>)<span class="id">;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">last</span><span class="gallina-kwd"> by</span><span class="id"> apply/val_inj</span><span class="id"> =&gt;</span><span class="id"> /=;</span><span class="id"> rewrite</span><span class="id"> Hpi</span> (<span class="id">tnth_nth</span><span class="vernacular"> Fail</span>)<span class="id"> Hpj</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">move=&gt;</span><span class="id"> Hr</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">have</span><span class="id"> Hj</span><span class="id"> :</span><span class="id"> Ordinal</span><span class="id"> jn</span><span class="id"> \in</span><span class="id"> pss</span><span class="gallina-kwd"> by</span><span class="id"> move/Hpss:</span><span class="id"> Hr</span><span class="id"> =&gt;</span><span class="id"> &lt;-</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">pose</span><span class="id"> pss'</span><span class="id"> :=</span><span class="id"> pss</span><span class="id"> `\</span><span class="id"> i</span><span class="id"> `\</span><span class="id"> Ordinal</span><span class="id"> jn</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">have</span><span class="id"> H':</span><span class="id"> pss'</span><span class="id"> `&lt;`</span><span class="id"> pss</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">exact/</span>(<span class="id">fsub_proper_trans</span> (<span class="id">B:=pss</span><span class="id"> `\</span><span class="id"> i</span>))<span class="id">/fproperD1/Hi/fsubD1set</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply:</span> (<span class="id">rtrans</span> (<span class="id">IH</span><span class="id"> _</span><span class="id"> H'</span><span class="id"> _</span>))<span class="id">;</span><span class="id"> last</span><span class="id"> 3</span><span class="id"> first</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">*</span><span class="id"> move=&gt;</span><span class="id"> k</span><span class="id"> k'</span><span class="id"> ps'</span><span class="id"> traces</span><span class="id"> H</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> !inE</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">case:</span> (<span class="id">comm_disjoint</span><span class="id"> Hr</span><span class="id"> H</span>)<span class="id"> =&gt;</span><span class="id"> -[]</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> move</span><span class="id"> =&gt;</span><span class="id"> /eqP</span><span class="id"> &lt;-</span><span class="id"> /eqP</span><span class="id"> &lt;-;</span><span class="id"> rewrite</span><span class="id"> !eqxx</span><span class="id"> !andbF</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> eq_sym</span> (<span class="id">eq_sym</span><span class="id"> _</span><span class="id"> k'</span>)<span class="id"> =&gt;</span><span class="id"> -&gt;</span><span class="id"> -&gt;</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">inversion</span><span class="id"> H;</span><span class="id"> subst</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">have</span><span class="id"> [kj|_]</span><span class="id"> :=</span><span class="id"> eqVneq</span><span class="id"> k</span> (<span class="id">Ordinal</span><span class="id"> jn</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> kj</span> (<span class="id">tnth_nth</span><span class="vernacular"> Fail</span>)<span class="id"> Hpj</span><span class="gallina-kwd"> in</span><span class="id"> H3</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">have</span><span class="id"> [k'i|_]</span><span class="id"> :=</span><span class="id"> eqVneq</span><span class="id"> k'</span><span class="id"> i;</span><span class="id"> first</span><span class="gallina-kwd"> by</span><span class="id"> rewrite</span><span class="id"> k'i</span><span class="id"> Hpi</span><span class="gallina-kwd"> in</span><span class="id"> H4</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">exact:</span> (<span class="id">Hpss</span><span class="id"> _</span><span class="id"> _</span><span class="id"> _</span><span class="id"> _</span><span class="id"> H</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">*</span><span class="id"> move:</span> (<span class="id">rcomm</span><span class="id"> i</span> (<span class="id">Ordinal</span><span class="id"> jn</span>)<span class="id"> x</span><span class="id"> p</span><span class="id"> pj</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">set</span><span class="id"> ps''</span><span class="id"> :=</span><span class="id"> map_tuple</span><span class="id"> _</span><span class="id"> _</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> (_<span class="id"> :</span><span class="id"> [tuple</span><span class="id"> Send</span><span class="id"> _</span><span class="id"> _</span><span class="id"> _;</span><span class="id"> _]</span><span class="id"> =</span><span class="id"> extract</span><span class="id"> [tuple</span><span class="id"> i;</span><span class="id"> Ordinal</span><span class="id"> jn]</span><span class="id"> ps''</span>)<span class="id">;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">last</span><span class="id"> first</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply/val_inj;</span><span class="id"> rewrite</span><span class="id"> /=/ps''</span><span class="id"> !</span>(<span class="id">tnth_mktuple,tnth_map</span>)<span class="id"> !inE</span><span class="id"> !eqxx</span><span class="id"> /=</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> andbF</span><span class="id"> Hpi</span> (<span class="id">tnth_nth</span><span class="vernacular"> Fail</span>)<span class="id"> Hpj</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">move/rone</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">have</span><span class="id"> -&gt;</span><span class="id"> :</span><span class="id"> inject</span><span class="id"> [tuple</span><span class="id"> i;</span><span class="id"> Ordinal</span><span class="id"> jn]</span><span class="id"> ps''</span><span class="id"> [tuple</span><span class="id"> p;</span><span class="id"> pj</span><span class="id"> x]</span><span class="id"> =</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">map_tuple</span> (<span class="gallina-kwd">fun</span><span class="id"> r</span><span class="id"> :</span><span class="id"> proc</span><span class="id"> *</span><span class="id"> seq</span><span class="id"> data</span><span class="id"> *</span><span class="id"> bool</span><span class="id"> =&gt;</span><span class="id"> r</span>.<span class="id">1</span>.<span class="id">1</span>) (<span class="id">res'</span><span class="id"> pss</span><span class="id"> ps</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply:</span><span class="id"> eq_from_tnth</span><span class="id"> =&gt;</span><span class="id"> k;</span><span class="id"> rewrite</span><span class="id"> !</span>(<span class="id">tnth_mktuple,tnth_map</span>)<span class="id"> /=</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">case/boolP:</span> (<span class="id">i</span><span class="id"> ==</span><span class="id"> k</span>)<span class="id"> =&gt;</span><span class="id"> [/eqP</span><span class="id"> &lt;-|ik]</span><span class="id"> /=</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> Hi</span><span class="id"> /step</span><span class="id"> -tnth_nth</span><span class="id"> Hpi</span><span class="id"> Hpj</span><span class="id"> eqxx</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">case/boolP:</span> (_<span class="id"> ==</span><span class="id"> _</span>)<span class="id"> =&gt;</span><span class="id"> jk</span><span class="id"> /=</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> -</span>(<span class="id">eqP</span><span class="id"> jk</span>)<span class="id"> Hj</span><span class="id"> /step</span><span class="id"> Hpj</span><span class="id"> -tnth_nth</span><span class="id"> Hpi</span><span class="id"> eqxx</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> !inE</span><span class="id"> eq_sym</span><span class="id"> jk</span><span class="id"> eq_sym</span><span class="id"> ik</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">exact</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">*</span><span class="id"> apply:</span><span class="id"> eq_from_tnth</span><span class="id"> =&gt;</span><span class="id"> k;</span><span class="id"> rewrite</span><span class="id"> !</span>(<span class="id">tnth_mktuple,</span><span class="id"> tnth_map</span>)<span class="id"> /=</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> !inE</span><span class="id"> !</span>(<span class="id">eq_sym</span><span class="id"> k</span>)<span class="id"> andbCA</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">have</span><span class="id"> [&lt;-</span><span class="id"> |</span><span class="id"> ik]</span><span class="id"> /=</span><span class="id"> :=</span><span class="id"> eqVneq</span><span class="id"> i</span><span class="id"> k</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> Hi</span><span class="id"> /step</span><span class="id"> -tnth_nth</span><span class="id"> Hpi</span><span class="id"> Hpj</span><span class="id"> eqxx</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">have</span><span class="id"> [&lt;-</span><span class="id"> |]</span><span class="id"> //=</span><span class="id"> :=</span><span class="id"> eqVneq</span> (<span class="id">Ordinal</span><span class="id"> jn</span>)<span class="id"> k</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> Hj</span><span class="id"> /step</span><span class="id"> Hpj</span><span class="id"> -tnth_nth</span><span class="id"> Hpi</span><span class="id"> eqxx</span>.<br/>
+&nbsp;&nbsp;<span class="id">+</span> <span class="comment">(*&nbsp;Send&nbsp;but&nbsp;no&nbsp;matching&nbsp;Recv&nbsp;-&nbsp;skip&nbsp;this&nbsp;process&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">pose</span><span class="id"> pss'</span><span class="id"> :=</span><span class="id"> pss</span><span class="id"> `\</span><span class="id"> i</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">have</span><span class="id"> H':</span><span class="id"> pss'</span><span class="id"> `&lt;`</span><span class="id"> pss</span><span class="gallina-kwd"> by</span><span class="id"> apply:</span><span class="id"> fproperD1</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">have</span><span class="id"> -&gt;</span><span class="id"> :</span><span class="id"> res'</span><span class="id"> pss</span><span class="id"> ps</span><span class="id"> =</span><span class="id"> res'</span><span class="id"> pss'</span><span class="id"> ps</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply:</span><span class="id"> eq_from_tnth</span><span class="id"> =&gt;</span><span class="id"> k</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> !tnth_mktuple</span><span class="id"> !inE</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">have</span><span class="id"> [-&gt;</span><span class="id"> |]</span><span class="id"> //=</span><span class="id"> :=</span><span class="id"> eqVneq</span><span class="id"> k</span><span class="id"> i</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> Hi</span><span class="id"> /step</span><span class="id"> -tnth_nth</span><span class="id"> Hpi</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">case</span><span class="id"> Hj:</span><span class="id"> nth</span><span class="id"> =&gt;</span><span class="id"> [||e</span><span class="id"> pj|||]</span><span class="id"> //</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">case:</span><span class="id"> ifP</span><span class="id"> =&gt;</span><span class="id"> ei</span><span class="id"> //</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> elim:</span><span class="id"> Hn;</span><span class="gallina-kwd"> exists</span><span class="id"> pj;</span><span class="id"> rewrite</span><span class="id"> -</span>(<span class="id">eqP</span><span class="id"> ei</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply:</span><span class="id"> IH</span><span class="id"> =&gt;</span><span class="id"> //</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">move=&gt;</span><span class="id"> a</span><span class="id"> b</span><span class="id"> ps'</span><span class="id"> traces</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> !inE</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">have</span><span class="id"> [-&gt;</span><span class="id"> |</span><span class="id"> ai]</span><span class="id"> :=</span><span class="id"> eqVneq</span><span class="id"> a</span><span class="id"> i;</span><span class="id"> have</span><span class="id"> [-&gt;</span><span class="id"> |</span><span class="id"> bi]</span><span class="id"> //</span><span class="id"> :=</span><span class="id"> eqVneq</span><span class="id"> b</span><span class="id"> i</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">*</span><span class="id"> inversion</span><span class="id"> 1;</span><span class="id"> subst</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">move:</span><span class="id"> H3;</span><span class="id"> rewrite</span><span class="id"> Hpi</span><span class="id"> =&gt;</span><span class="id"> -[bj]</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">elim:</span><span class="id"> Hn;</span><span class="gallina-kwd"> exists</span><span class="id"> pj</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> -bj</span><span class="id"> -tnth_nth</span><span class="id"> H4</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">*</span><span class="id"> inversion</span><span class="id"> 1;</span><span class="id"> subst</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> Hpi</span><span class="gallina-kwd"> in</span><span class="id"> H4</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">*</span><span class="id"> exact:</span><span class="id"> Hpss</span>.<br/>
+<span class="comment">(*&nbsp;Case&nbsp;Recv&nbsp;j&nbsp;f&nbsp;-&nbsp;symmetric&nbsp;to&nbsp;Send&nbsp;*)</span><br/>
+<span class="id">-</span><span class="id"> have</span><span class="id"> [[v</span><span class="id"> [pj'</span><span class="id"> Hpj]]|Hn]</span><span class="id"> :</span><span class="id"> decidable</span> (<span class="gallina-kwd">exists</span><span class="id"> v</span><span class="id"> pj',</span><span class="id"> nth</span><span class="vernacular"> Fail</span><span class="id"> ps</span><span class="id"> j</span><span class="id"> =</span><span class="id"> Send</span><span class="id"> i</span><span class="id"> v</span><span class="id"> pj'</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">case</span><span class="id"> Hpj:</span> (<span class="id">nth</span><span class="vernacular"> Fail</span><span class="id"> ps</span><span class="id"> j</span>)<span class="id"> =&gt;</span><span class="id"> [xj</span><span class="id"> qj</span><span class="id"> |</span><span class="id"> i'</span><span class="id"> xj</span><span class="id"> qj</span><span class="id"> |</span><span class="id"> k'</span><span class="id"> qj</span><span class="id"> |</span><span class="id"> xj</span><span class="id"> ||];</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">try</span><span class="gallina-kwd"> by</span><span class="id"> right</span><span class="id"> =&gt;</span><span class="id"> -[v]</span><span class="id"> [pj'']</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">case/boolP:</span> (<span class="id">i'</span><span class="id"> ==</span><span class="id"> i</span>)<span class="id"> =&gt;</span><span class="id"> [/eqP</span><span class="id"> -&gt;</span><span class="id"> |</span><span class="id"> i'i];</span><span class="id"> first</span><span class="gallina-kwd"> by</span><span class="id"> left;</span><span class="gallina-kwd"> exists</span><span class="id"> xj,</span><span class="id"> qj</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> right</span><span class="id"> =&gt;</span><span class="id"> -[v]</span><span class="id"> [pj'']</span><span class="id"> []</span><span class="id"> /eqP;</span><span class="id"> move/negbTE:</span><span class="id"> i'i</span><span class="id"> =&gt;</span><span class="id"> -&gt;</span>.<br/>
+&nbsp;&nbsp;<span class="id">+</span> <span class="comment">(*&nbsp;Recv-Send&nbsp;communication&nbsp;case&nbsp;-&nbsp;dual&nbsp;of&nbsp;Send-Recv&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">have</span><span class="id"> jn:</span> (<span class="id">j</span><span class="id"> &lt;</span><span class="id"> n</span>)<span class="id">%N</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> ltnNge;</span><span class="id"> apply/negP</span><span class="id"> =&gt;</span><span class="id"> nj</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> nth_default</span><span class="id"> ?size_tuple</span><span class="id"> //</span><span class="gallina-kwd"> in</span><span class="id"> Hpj</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">case/boolP:</span> (<span class="id">i</span><span class="id"> ==</span><span class="id"> Ordinal</span><span class="id"> jn</span>)<span class="id"> =&gt;</span><span class="id"> ij</span><span class="id"> /=</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span> (<span class="id">eqP</span><span class="id"> ij</span>) (<span class="id">tnth_nth</span><span class="vernacular"> Fail</span>)<span class="id"> Hpj</span><span class="gallina-kwd"> in</span><span class="id"> Hpi</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">move:</span> (<span class="id">rcomm</span> (<span class="id">Ordinal</span><span class="id"> jn</span>)<span class="id"> i</span><span class="id"> v</span><span class="id"> pj'</span><span class="id"> f</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> (_<span class="id"> :</span><span class="id"> [tuple</span><span class="id"> Send</span><span class="id"> _</span><span class="id"> _</span><span class="id"> _;</span><span class="id"> _]</span><span class="id"> =</span><span class="id"> extract</span><span class="id"> [tuple</span><span class="id"> Ordinal</span><span class="id"> jn;</span><span class="id"> i]</span><span class="id"> ps</span>)<span class="id">;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">last</span><span class="gallina-kwd"> by</span><span class="id"> apply/val_inj</span><span class="id"> =&gt;</span><span class="id"> /=;</span><span class="id"> rewrite</span> (<span class="id">tnth_nth</span><span class="vernacular"> Fail</span>)<span class="id"> Hpj</span><span class="id"> Hpi</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">move=&gt;</span><span class="id"> Hr</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">have</span><span class="id"> Hj</span><span class="id"> :</span><span class="id"> Ordinal</span><span class="id"> jn</span><span class="id"> \in</span><span class="id"> pss</span><span class="gallina-kwd"> by</span><span class="id"> move/Hpss:</span><span class="id"> Hr</span><span class="id"> =&gt;</span><span class="id"> -&gt;</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">pose</span><span class="id"> pss'</span><span class="id"> :=</span><span class="id"> pss</span><span class="id"> `\</span><span class="id"> i</span><span class="id"> `\</span><span class="id"> Ordinal</span><span class="id"> jn</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">have</span><span class="id"> H':</span><span class="id"> pss'</span><span class="id"> `&lt;`</span><span class="id"> pss</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">exact/</span>(<span class="id">fsub_proper_trans</span> (<span class="id">B:=pss</span><span class="id"> `\</span><span class="id"> i</span>))<span class="id">/fproperD1/Hi/fsubD1set</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply:</span> (<span class="id">rtrans</span> (<span class="id">IH</span><span class="id"> _</span><span class="id"> H'</span><span class="id"> _</span>))<span class="id">;</span><span class="id"> last</span><span class="id"> 3</span><span class="id"> first</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">*</span><span class="id"> move=&gt;</span><span class="id"> k</span><span class="id"> k'</span><span class="id"> ps''</span><span class="id"> traces</span><span class="id"> H</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> !inE</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">case:</span> (<span class="id">comm_disjoint</span><span class="id"> Hr</span><span class="id"> H</span>)<span class="id"> =&gt;</span><span class="id"> -[]</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> move</span><span class="id"> =&gt;</span><span class="id"> /eqP</span><span class="id"> &lt;-</span><span class="id"> /eqP</span><span class="id"> &lt;-;</span><span class="id"> rewrite</span><span class="id"> !eqxx</span><span class="id"> !andbF</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> eq_sym</span> (<span class="id">eq_sym</span><span class="id"> _</span><span class="id"> k'</span>)<span class="id"> =&gt;</span><span class="id"> -&gt;</span><span class="id"> -&gt;</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">inversion</span><span class="id"> H;</span><span class="id"> subst</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">have</span><span class="id"> [ki|_]</span><span class="id"> :=</span><span class="id"> eqVneq</span><span class="id"> k</span><span class="id"> i</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> ki</span><span class="id"> Hpi</span><span class="gallina-kwd"> in</span><span class="id"> H3</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">have</span><span class="id"> [k'j|_]</span><span class="id"> :=</span><span class="id"> eqVneq</span><span class="id"> k'</span> (<span class="id">Ordinal</span><span class="id"> jn</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> k'j</span> (<span class="id">tnth_nth</span><span class="vernacular"> Fail</span>)<span class="id"> Hpj</span><span class="gallina-kwd"> in</span><span class="id"> H4</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">exact:</span> (<span class="id">Hpss</span><span class="id"> _</span><span class="id"> _</span><span class="id"> _</span><span class="id"> _</span><span class="id"> H</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">*</span> <span class="comment">(*&nbsp;The&nbsp;reduction:&nbsp;Send&nbsp;j&nbsp;sends&nbsp;to&nbsp;Recv&nbsp;i&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">move:</span> (<span class="id">rcomm</span> (<span class="id">Ordinal</span><span class="id"> jn</span>)<span class="id"> i</span><span class="id"> v</span><span class="id"> pj'</span><span class="id"> f</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">set</span><span class="id"> ps''</span><span class="id"> :=</span><span class="id"> map_tuple</span><span class="id"> _</span><span class="id"> _</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> (_<span class="id"> :</span><span class="id"> [tuple</span><span class="id"> Send</span><span class="id"> _</span><span class="id"> _</span><span class="id"> _;</span><span class="id"> _]</span><span class="id"> =</span><span class="id"> extract</span><span class="id"> [tuple</span><span class="id"> Ordinal</span><span class="id"> jn;</span><span class="id"> i]</span><span class="id"> ps''</span>)<span class="id">;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">last</span><span class="id"> first</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply/val_inj;</span><span class="id"> rewrite</span><span class="id"> /=/ps''</span><span class="id"> !</span>(<span class="id">tnth_mktuple,tnth_map</span>)<span class="id"> !inE</span><span class="id"> !eqxx</span><span class="id"> /=</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span> (<span class="id">tnth_nth</span><span class="vernacular"> Fail</span>)<span class="id"> Hpj</span><span class="id"> ij</span><span class="id"> Hpi</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">move/rone</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">have</span><span class="id"> -&gt;</span><span class="id"> :</span><span class="id"> inject</span><span class="id"> [tuple</span><span class="id"> Ordinal</span><span class="id"> jn;</span><span class="id"> i]</span><span class="id"> ps''</span><span class="id"> [tuple</span><span class="id"> pj';</span><span class="id"> f</span><span class="id"> v]</span><span class="id"> =</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">map_tuple</span> (<span class="gallina-kwd">fun</span><span class="id"> r</span><span class="id"> :</span><span class="id"> proc</span><span class="id"> *</span><span class="id"> seq</span><span class="id"> data</span><span class="id"> *</span><span class="id"> bool</span><span class="id"> =&gt;</span><span class="id"> r</span>.<span class="id">1</span>.<span class="id">1</span>) (<span class="id">res'</span><span class="id"> pss</span><span class="id"> ps</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply:</span><span class="id"> eq_from_tnth</span><span class="id"> =&gt;</span><span class="id"> k;</span><span class="id"> rewrite</span><span class="id"> !</span>(<span class="id">tnth_mktuple,tnth_map</span>)<span class="id"> /=</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">case/boolP:</span> (<span class="id">Ordinal</span><span class="id"> jn</span><span class="id"> ==</span><span class="id"> k</span>)<span class="id"> =&gt;</span><span class="id"> [/eqP</span><span class="id"> &lt;-|jk]</span><span class="id"> /=</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> Hj</span><span class="id"> /step</span><span class="id"> Hpj</span><span class="id"> -tnth_nth</span><span class="id"> Hpi</span><span class="id"> eqxx</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">case/boolP:</span> (<span class="id">i</span><span class="id"> ==</span><span class="id"> k</span>)<span class="id"> =&gt;</span><span class="id"> [/eqP</span><span class="id"> &lt;-|ik]</span><span class="id"> /=</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> Hi</span><span class="id"> /step</span><span class="id"> -tnth_nth</span><span class="id"> Hpi</span><span class="id"> Hpj</span><span class="id"> eqxx</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> !inE</span><span class="id"> eq_sym</span><span class="id"> jk</span><span class="id"> eq_sym</span><span class="id"> ik</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">exact</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">*</span><span class="id"> apply:</span><span class="id"> eq_from_tnth</span><span class="id"> =&gt;</span><span class="id"> k;</span><span class="id"> rewrite</span><span class="id"> !</span>(<span class="id">tnth_mktuple,</span><span class="id"> tnth_map</span>)<span class="id"> /=</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> !inE</span><span class="id"> !</span>(<span class="id">eq_sym</span><span class="id"> k</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">have</span><span class="id"> [&lt;-</span><span class="id"> |</span><span class="id"> jk]</span><span class="id"> /=</span><span class="id"> :=</span><span class="id"> eqVneq</span> (<span class="id">Ordinal</span><span class="id"> jn</span>)<span class="id"> k</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> Hj</span><span class="id"> /step</span><span class="id"> Hpj</span><span class="id"> -tnth_nth</span><span class="id"> Hpi</span><span class="id"> eqxx</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">have</span><span class="id"> [&lt;-</span><span class="id"> |]</span><span class="id"> //=</span><span class="id"> :=</span><span class="id"> eqVneq</span><span class="id"> i</span><span class="id"> k</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> Hi</span><span class="id"> /step</span><span class="id"> -tnth_nth</span><span class="id"> Hpi</span><span class="id"> Hpj</span><span class="id"> eqxx</span>.<br/>
+&nbsp;&nbsp;<span class="id">+</span> <span class="comment">(*&nbsp;Recv&nbsp;but&nbsp;no&nbsp;matching&nbsp;Send&nbsp;-&nbsp;skip&nbsp;this&nbsp;process&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">pose</span><span class="id"> pss'</span><span class="id"> :=</span><span class="id"> pss</span><span class="id"> `\</span><span class="id"> i</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">have</span><span class="id"> H':</span><span class="id"> pss'</span><span class="id"> `&lt;`</span><span class="id"> pss</span><span class="gallina-kwd"> by</span><span class="id"> apply:</span><span class="id"> fproperD1</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">have</span><span class="id"> -&gt;</span><span class="id"> :</span><span class="id"> res'</span><span class="id"> pss</span><span class="id"> ps</span><span class="id"> =</span><span class="id"> res'</span><span class="id"> pss'</span><span class="id"> ps</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply:</span><span class="id"> eq_from_tnth</span><span class="id"> =&gt;</span><span class="id"> k</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> !tnth_mktuple</span><span class="id"> !inE</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">have</span><span class="id"> [-&gt;</span><span class="id"> |]</span><span class="id"> //=</span><span class="id"> :=</span><span class="id"> eqVneq</span><span class="id"> k</span><span class="id"> i</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> Hi</span><span class="id"> /step</span><span class="id"> -tnth_nth</span><span class="id"> Hpi</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">case</span><span class="id"> Hj:</span><span class="id"> nth</span><span class="id"> =&gt;</span><span class="id"> [|dst'</span><span class="id"> v'</span><span class="id"> pj'||||]</span><span class="id"> //</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">case:</span><span class="id"> ifP</span><span class="id"> =&gt;</span><span class="id"> ei</span><span class="id"> //</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> elim:</span><span class="id"> Hn;</span><span class="gallina-kwd"> exists</span><span class="id"> v',</span><span class="id"> pj';</span><span class="id"> rewrite</span><span class="id"> -</span>(<span class="id">eqP</span><span class="id"> ei</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply:</span><span class="id"> IH</span><span class="id"> =&gt;</span><span class="id"> //</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">move=&gt;</span><span class="id"> a</span><span class="id"> b</span><span class="id"> ps'</span><span class="id"> traces</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> !inE</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">have</span><span class="id"> [-&gt;</span><span class="id"> |</span><span class="id"> ai]</span><span class="id"> :=</span><span class="id"> eqVneq</span><span class="id"> a</span><span class="id"> i;</span><span class="id"> have</span><span class="id"> [-&gt;</span><span class="id"> |</span><span class="id"> bi]</span><span class="id"> //</span><span class="id"> :=</span><span class="id"> eqVneq</span><span class="id"> b</span><span class="id"> i</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">*</span> <span class="comment">(*&nbsp;a&nbsp;=&nbsp;i,&nbsp;b&nbsp;!=&nbsp;i:&nbsp;rstep&nbsp;would&nbsp;require&nbsp;i&nbsp;to&nbsp;have&nbsp;Send/Init/Ret,&nbsp;but&nbsp;it&nbsp;has&nbsp;Recv&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">inversion</span><span class="id"> 1;</span><span class="id"> subst</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;For&nbsp;rcomm,&nbsp;H3&nbsp;says&nbsp;ps&nbsp;!_&nbsp;i&nbsp;=&nbsp;Send&nbsp;_&nbsp;_&nbsp;_,&nbsp;contradicts&nbsp;Hpi:&nbsp;ps&nbsp;!_&nbsp;i&nbsp;=&nbsp;Recv&nbsp;_&nbsp;_&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> Hpi</span><span class="gallina-kwd"> in</span><span class="id"> H3</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">*</span><span class="id"> inversion</span><span class="id"> 1;</span><span class="id"> subst</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">move:</span><span class="id"> H4;</span><span class="id"> rewrite</span><span class="id"> Hpi</span><span class="id"> =&gt;</span><span class="id"> -[]</span><span class="id"> aj</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> (<span class="id">tnth_nth</span><span class="vernacular"> Fail</span>)<span class="id"> aj</span><span class="gallina-kwd"> in</span><span class="id"> H3</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> elim:</span><span class="id"> Hn;</span><span class="gallina-kwd"> exists</span><span class="id"> x,</span><span class="id"> pi</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">*</span><span class="id"> exact:</span><span class="id"> Hpss</span>.<br/>
+<span class="comment">(*&nbsp;Case&nbsp;Ret&nbsp;x&nbsp;*)</span><br/>
+<span class="id">-</span><span class="id"> pose</span><span class="id"> pss'</span><span class="id"> :=</span><span class="id"> pss</span><span class="id"> `\</span><span class="id"> i</span>.<br/>
+&nbsp;&nbsp;<span class="id">have</span><span class="id"> H':</span><span class="id"> pss'</span><span class="id"> `&lt;`</span><span class="id"> pss</span><span class="gallina-kwd"> by</span><span class="id"> apply:</span><span class="id"> fproperD1</span>.<br/>
+&nbsp;&nbsp;<span class="id">apply:</span> (<span class="id">rtrans</span> (<span class="id">IH</span><span class="id"> _</span><span class="id"> H'</span><span class="id"> _</span>))<span class="id">;</span><span class="id"> last</span><span class="id"> 3</span><span class="id"> first</span>.<br/>
+&nbsp;&nbsp;<span class="id">+</span><span class="id"> move=&gt;</span><span class="id"> k</span><span class="id"> j'</span><span class="id"> ps'</span><span class="id"> traces</span><span class="id"> H</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> !inE</span> (<span class="id">Hpss</span><span class="id"> _</span><span class="id"> _</span><span class="id"> _</span><span class="id"> _</span><span class="id"> H</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">have</span><span class="id"> [ki|_]</span><span class="id"> :=</span><span class="id"> eqVneq</span><span class="id"> k</span><span class="id"> i;</span><span class="id"> first</span><span class="gallina-kwd"> by</span><span class="id"> inversion</span><span class="id"> H;</span><span class="id"> subst;</span><span class="id"> rewrite</span><span class="id"> Hpi</span><span class="gallina-kwd"> in</span><span class="id"> H3</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">have</span><span class="id"> [ji|//]</span><span class="id"> :=</span><span class="id"> eqVneq</span><span class="id"> j'</span><span class="id"> i</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> inversion</span><span class="id"> H;</span><span class="id"> subst;</span><span class="id"> rewrite</span><span class="id"> Hpi</span><span class="gallina-kwd"> in</span><span class="id"> H4</span>.<br/>
+&nbsp;&nbsp;<span class="id">+</span><span class="id"> move:</span> (<span class="id">rret</span><span class="id"> i</span><span class="id"> x</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">set</span><span class="id"> ps''</span><span class="id"> :=</span><span class="id"> map_tuple</span><span class="id"> _</span><span class="id"> _</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">have</span><span class="id"> -&gt;</span><span class="id"> :</span><span class="id"> [tuple</span><span class="id"> Ret</span><span class="id"> x]</span><span class="id"> =</span><span class="id"> extract</span><span class="id"> [tuple</span><span class="id"> i]</span><span class="id"> ps''</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> apply/val_inj;</span><span class="id"> rewrite</span><span class="id"> /=</span><span class="id"> /ps''</span><span class="id"> tnth_map</span><span class="id"> tnth_mktuple</span><span class="id"> !inE</span><span class="id"> eqxx</span><span class="id"> /=</span><span class="id"> Hpi</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">move/rone</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">have</span><span class="id"> -&gt;</span><span class="id"> :</span><span class="id"> inject</span><span class="id"> [tuple</span><span class="id"> i]</span><span class="id"> ps''</span><span class="id"> [tuple</span><span class="id"> Finish]</span><span class="id"> =</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">map_tuple</span> (<span class="gallina-kwd">fun</span><span class="id"> r</span><span class="id"> :</span><span class="id"> proc</span><span class="id"> *</span><span class="id"> seq</span><span class="id"> data</span><span class="id"> *</span><span class="id"> bool</span><span class="id"> =&gt;</span><span class="id"> r</span>.<span class="id">1</span>.<span class="id">1</span>) (<span class="id">res'</span><span class="id"> pss</span><span class="id"> ps</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply:</span><span class="id"> eq_from_tnth</span><span class="id"> =&gt;</span><span class="id"> j';</span><span class="id"> rewrite</span><span class="id"> !</span>(<span class="id">tnth_mktuple,tnth_map</span>)<span class="id"> /=</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">case/boolP:</span> (<span class="id">i</span><span class="id"> ==</span><span class="id"> j'</span>)<span class="id"> =&gt;</span><span class="id"> [/eqP</span><span class="id"> &lt;-|ij]</span><span class="id"> /=</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> Hi</span><span class="id"> /step</span><span class="id"> -tnth_nth</span><span class="id"> Hpi</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> have</span><span class="id"> -&gt;</span><span class="id"> :</span> (<span class="id">j'</span><span class="id"> \in</span><span class="id"> pss'</span>)<span class="id"> =</span> (<span class="id">j'</span><span class="id"> \in</span><span class="id"> pss</span>)<span class="gallina-kwd"> by</span><span class="id"> rewrite</span><span class="id"> !inE</span><span class="id"> eq_sym</span><span class="id"> ij</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">exact</span>.<br/>
+&nbsp;&nbsp;<span class="id">+</span><span class="id"> apply:</span><span class="id"> eq_from_tnth</span><span class="id"> =&gt;</span><span class="id"> j';</span><span class="id"> rewrite</span><span class="id"> !</span>(<span class="id">tnth_mktuple,</span><span class="id"> tnth_map</span>)<span class="id"> /=</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">case/boolP:</span> (<span class="id">i</span><span class="id"> ==</span><span class="id"> j'</span>)<span class="id"> =&gt;</span><span class="id"> [/eqP</span><span class="id"> &lt;-|ij]</span><span class="id"> /=</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> Hi</span><span class="id"> !inE</span><span class="id"> eqxx</span><span class="id"> /=</span><span class="id"> /step</span><span class="id"> -tnth_nth</span><span class="id"> Hpi</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> have</span><span class="id"> -&gt;</span><span class="id"> :</span> (<span class="id">j'</span><span class="id"> \in</span><span class="id"> pss'</span>)<span class="id"> =</span> (<span class="id">j'</span><span class="id"> \in</span><span class="id"> pss</span>)<span class="gallina-kwd"> by</span><span class="id"> rewrite</span><span class="id"> !inE</span><span class="id"> eq_sym</span><span class="id"> ij</span>.<br/>
+<span class="comment">(*&nbsp;Case&nbsp;Finish&nbsp;-&nbsp;does&nbsp;nothing,&nbsp;just&nbsp;remove&nbsp;from&nbsp;set&nbsp;*)</span><br/>
+<span class="id">-</span><span class="id"> pose</span><span class="id"> pss'</span><span class="id"> :=</span><span class="id"> pss</span><span class="id"> `\</span><span class="id"> i</span>.<br/>
+&nbsp;&nbsp;<span class="id">have</span><span class="id"> H':</span><span class="id"> pss'</span><span class="id"> `&lt;`</span><span class="id"> pss</span><span class="gallina-kwd"> by</span><span class="id"> apply:</span><span class="id"> fproperD1</span>.<br/>
+&nbsp;&nbsp;<span class="id">have</span><span class="id"> -&gt;</span><span class="id"> :</span><span class="id"> res'</span><span class="id"> pss</span><span class="id"> ps</span><span class="id"> =</span><span class="id"> res'</span><span class="id"> pss'</span><span class="id"> ps</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply:</span><span class="id"> eq_from_tnth</span><span class="id"> =&gt;</span><span class="id"> k</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> !tnth_mktuple</span><span class="id"> !inE</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">have</span><span class="id"> [-&gt;</span><span class="id"> |]</span><span class="id"> //=</span><span class="id"> :=</span><span class="id"> eqVneq</span><span class="id"> k</span><span class="id"> i</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> Hi</span><span class="id"> /step</span><span class="id"> -tnth_nth</span><span class="id"> Hpi</span>.<br/>
+&nbsp;&nbsp;<span class="id">apply:</span><span class="id"> IH</span><span class="id"> =&gt;</span><span class="id"> //</span>.<br/>
+&nbsp;&nbsp;<span class="id">move=&gt;</span><span class="id"> a</span><span class="id"> b</span><span class="id"> ps'</span><span class="id"> traces</span>.<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> !inE</span>.<br/>
+&nbsp;&nbsp;<span class="id">have</span><span class="id"> [-&gt;</span><span class="id"> |</span><span class="id"> ai]</span><span class="id"> :=</span><span class="id"> eqVneq</span><span class="id"> a</span><span class="id"> i;</span><span class="id"> have</span><span class="id"> [-&gt;</span><span class="id"> |</span><span class="id"> bi]</span><span class="id"> //</span><span class="id"> :=</span><span class="id"> eqVneq</span><span class="id"> b</span><span class="id"> i</span>.<br/>
+&nbsp;&nbsp;<span class="id">+</span><span class="gallina-kwd"> by</span><span class="id"> inversion</span><span class="id"> 1;</span><span class="id"> subst;</span><span class="id"> rewrite</span><span class="id"> Hpi</span><span class="gallina-kwd"> in</span><span class="id"> H3</span>.<br/>
+&nbsp;&nbsp;<span class="id">+</span><span class="gallina-kwd"> by</span><span class="id"> inversion</span><span class="id"> 1;</span><span class="id"> subst;</span><span class="id"> rewrite</span><span class="id"> Hpi</span><span class="gallina-kwd"> in</span><span class="id"> H4</span>.<br/>
+&nbsp;&nbsp;<span class="id">+</span><span class="id"> exact:</span><span class="id"> Hpss</span>.<br/>
+<span class="comment">(*&nbsp;Case&nbsp;Fail&nbsp;-&nbsp;does&nbsp;nothing,&nbsp;just&nbsp;remove&nbsp;from&nbsp;set&nbsp;*)</span><br/>
+<span class="id">-</span><span class="id"> pose</span><span class="id"> pss'</span><span class="id"> :=</span><span class="id"> pss</span><span class="id"> `\</span><span class="id"> i</span>.<br/>
+&nbsp;&nbsp;<span class="id">have</span><span class="id"> H':</span><span class="id"> pss'</span><span class="id"> `&lt;`</span><span class="id"> pss</span><span class="gallina-kwd"> by</span><span class="id"> apply:</span><span class="id"> fproperD1</span>.<br/>
+&nbsp;&nbsp;<span class="id">have</span><span class="id"> -&gt;</span><span class="id"> :</span><span class="id"> res'</span><span class="id"> pss</span><span class="id"> ps</span><span class="id"> =</span><span class="id"> res'</span><span class="id"> pss'</span><span class="id"> ps</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply:</span><span class="id"> eq_from_tnth</span><span class="id"> =&gt;</span><span class="id"> k</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> !tnth_mktuple</span><span class="id"> !inE</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">have</span><span class="id"> [-&gt;</span><span class="id"> |]</span><span class="id"> //=</span><span class="id"> :=</span><span class="id"> eqVneq</span><span class="id"> k</span><span class="id"> i</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> Hi</span><span class="id"> /step</span><span class="id"> -tnth_nth</span><span class="id"> Hpi</span>.<br/>
+&nbsp;&nbsp;<span class="id">apply:</span><span class="id"> IH</span><span class="id"> =&gt;</span><span class="id"> //</span>.<br/>
+&nbsp;&nbsp;<span class="id">move=&gt;</span><span class="id"> a</span><span class="id"> b</span><span class="id"> ps'</span><span class="id"> traces</span>.<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> !inE</span>.<br/>
+&nbsp;&nbsp;<span class="id">have</span><span class="id"> [-&gt;</span><span class="id"> |</span><span class="id"> ai]</span><span class="id"> :=</span><span class="id"> eqVneq</span><span class="id"> a</span><span class="id"> i;</span><span class="id"> have</span><span class="id"> [-&gt;</span><span class="id"> |</span><span class="id"> bi]</span><span class="id"> //</span><span class="id"> :=</span><span class="id"> eqVneq</span><span class="id"> b</span><span class="id"> i</span>.<br/>
+&nbsp;&nbsp;<span class="id">+</span><span class="gallina-kwd"> by</span><span class="id"> inversion</span><span class="id"> 1;</span><span class="id"> subst;</span><span class="id"> rewrite</span><span class="id"> Hpi</span><span class="gallina-kwd"> in</span><span class="id"> H3</span>.<br/>
+&nbsp;&nbsp;<span class="id">+</span><span class="gallina-kwd"> by</span><span class="id"> inversion</span><span class="id"> 1;</span><span class="id"> subst;</span><span class="id"> rewrite</span><span class="id"> Hpi</span><span class="gallina-kwd"> in</span><span class="id"> H4</span>.<br/>
+&nbsp;&nbsp;<span class="id">+</span><span class="id"> exact:</span><span class="id"> Hpss</span>.<br/>
+Qed.</div></details>
+<span class="vernacular">End</span><span class="id"> interp</span>.<br/>
+<br/>
+<span class="vernacular">Arguments</span><span class="id"> Finish</span><span class="id"> {data}</span>.<br/>
+<span class="vernacular">Arguments</span><span class="vernacular"> Fail</span><span class="id"> {data}</span>.<br/>
+<span class="vernacular">Arguments</span><span class="id"> Init</span><span class="id"> {data}</span>.<br/>
+<span class="vernacular">Arguments</span><span class="id"> Send</span><span class="id"> {data}</span>.<br/>
+<span class="vernacular">Arguments</span><span class="id"> Recv</span><span class="id"> {data}</span>.<br/>
+<span class="vernacular">Arguments</span><span class="id"> Ret</span><span class="id"> {data}</span>.<br/>
+<br/>
+<span class="vernacular">Section</span><span class="id"> traces</span>.<br/>
+<span class="vernacular">Variable</span><span class="id"> data</span><span class="id"> :</span><span class="id"> eqType</span>.<br/>
+<span class="vernacular">Local</span><span class="vernacular"> Open</span><span class="vernacular"> Scope</span><span class="id"> nat_scope</span>.<br/>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> size_traces</span><span class="id"> h</span> (<span class="id">procs</span><span class="id"> :</span><span class="id"> seq</span> (<span class="id">proc</span><span class="id"> data</span>))<span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="gallina-kwd">forall</span><span class="id"> s,</span><span class="id"> s</span><span class="id"> \in</span> (<span class="id">run_interp</span><span class="id"> h</span><span class="id"> procs</span>).<span class="id">2</span><span class="id"> -&gt;</span><span class="id"> size</span><span class="id"> s</span><span class="id"> &lt;=</span><span class="id"> h</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id">clear</span>.<br/>
+<span class="id">pose</span><span class="id"> k</span><span class="id"> :=</span><span class="id"> h</span>.<br/>
+<span class="id">rewrite</span><span class="id"> -{2}/k</span><span class="id"> /run_interp</span>.<br/>
+<span class="id">set</span><span class="id"> traces</span><span class="id"> :=</span><span class="id"> nseq</span><span class="id"> _</span><span class="id"> _</span><span class="id"> =&gt;</span><span class="id"> /=</span>.<br/>
+<span class="id">have</span><span class="id"> Htr</span><span class="id"> :</span><span class="id"> {in</span><span class="id"> traces,</span><span class="gallina-kwd"> forall</span><span class="id"> s,</span><span class="id"> size</span><span class="id"> s</span><span class="id"> &lt;=</span><span class="id"> k</span><span class="id"> -</span><span class="id"> h}</span>.<br/>
+&nbsp;&nbsp;<span class="id">move=&gt;</span><span class="id"> s</span>.<br/>
+&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> mem_nseq</span><span class="id"> =&gt;</span><span class="id"> /andP[]</span><span class="id"> _</span><span class="id"> /eqP</span><span class="id"> -&gt;</span>.<br/>
+<span class="id">have</span><span class="id"> :</span><span class="id"> h</span><span class="id"> &lt;=</span><span class="id"> k</span><span class="gallina-kwd"> by</span><span class="id"> []</span>.<br/>
+<span class="id">elim:</span><span class="id"> h</span><span class="id"> k</span><span class="id"> procs</span><span class="id"> traces</span><span class="id"> Htr</span><span class="id"> =&gt;</span><span class="id"> [|</span><span class="id"> h</span><span class="id"> IH]</span><span class="id"> k</span><span class="id"> procs</span><span class="id"> traces</span><span class="id"> Htr</span><span class="id"> hk</span><span class="id"> /=</span>.<br/>
+&nbsp;&nbsp;<span class="id">move=&gt;</span><span class="id"> s</span><span class="id"> /Htr</span>.<br/>
+&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> subn0</span>.<br/>
+<span class="id">move=&gt;</span><span class="id"> s</span>.<br/>
+<span class="id">case:</span><span class="id"> ifP</span><span class="id"> =&gt;</span><span class="id"> H;</span><span class="id"> last</span><span class="gallina-kwd"> by</span><span class="id"> move/Htr/leq_trans;</span><span class="id"> apply;</span><span class="id"> rewrite</span><span class="id"> leq_subr</span>.<br/>
+<span class="id">move/IH;</span><span class="id"> apply;</span><span class="id"> last</span><span class="gallina-kwd"> by</span><span class="id"> apply/ltnW</span>.<br/>
+<span class="id">move=&gt;</span><span class="id"> /=</span><span class="id"> {}s</span>.<br/>
+<span class="id">rewrite</span><span class="id"> /unzip2</span><span class="id"> -2!map_comp</span>.<br/>
+<span class="id">case/mapP</span><span class="id"> =&gt;</span><span class="id"> i</span>.<br/>
+<span class="id">rewrite</span><span class="id"> mem_iota</span><span class="id"> add0n</span><span class="id"> /step</span><span class="id"> =&gt;</span><span class="id"> /andP[]</span><span class="id"> _</span><span class="id"> Hi</span><span class="id"> /=</span>.<br/>
+<span class="id">have</span><span class="id"> Hsz</span><span class="id"> :</span><span class="id"> size</span> (<span class="id">nth</span><span class="id"> [::]</span><span class="id"> traces</span><span class="id"> i</span>)<span class="id"> &lt;</span><span class="id"> k</span><span class="id"> -</span><span class="id"> h</span>.<br/>
+&nbsp;&nbsp;<span class="id">case/boolP:</span> (<span class="id">i</span><span class="id"> &lt;</span><span class="id"> size</span><span class="id"> traces</span>)<span class="id"> =&gt;</span><span class="id"> Hi'</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply/</span>(<span class="id">leq_ltn_trans</span> (<span class="id">Htr</span><span class="id"> _</span><span class="id"> _</span>)).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> mem_nth</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> subnS</span><span class="id"> prednK</span><span class="id"> //</span><span class="id"> leq_subRL</span><span class="id"> //</span><span class="id"> ?addn1</span><span class="id"> //</span><span class="id"> ltnW</span>.<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> nth_default</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> leq_subRL</span><span class="id"> ?addn1</span><span class="id"> //</span><span class="id"> ltnW</span>.<br/>
+&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> leqNgt</span>.<br/>
+<span class="id">set</span><span class="id"> p</span><span class="id"> :=</span><span class="id"> nth</span><span class="id"> _</span><span class="id"> _</span><span class="id"> _</span>.<br/>
+<span class="comment">(*&nbsp;Case&nbsp;on&nbsp;process&nbsp;type&nbsp;-&nbsp;6&nbsp;constructors:&nbsp;Init,&nbsp;Send,&nbsp;Recv,&nbsp;Ret,&nbsp;Finish,&nbsp;Fail&nbsp;*)</span><br/>
+<span class="id">case:</span><span class="id"> p</span><span class="id"> =&gt;</span><span class="id"> [d1</span><span class="id"> p1|dst1</span><span class="id"> d1</span><span class="id"> p1|frm1</span><span class="id"> f1|d1||]</span><span class="id"> /=</span>.<br/>
+<span class="comment">(*&nbsp;Init:&nbsp;s&nbsp;=&nbsp;d1&nbsp;::&nbsp;nth...&nbsp;-&gt;&nbsp;size&nbsp;s&nbsp;&lt;=&nbsp;k&nbsp;-&nbsp;h&nbsp;*)</span><br/>
+<span class="id">-</span><span class="gallina-kwd"> by</span><span class="id"> move=&gt;</span><span class="id"> -&gt;;</span><span class="id"> exact</span><span class="id"> Hsz</span>.<br/>
+<span class="comment">(*&nbsp;Send:&nbsp;nested&nbsp;match&nbsp;on&nbsp;destination&nbsp;*)</span><br/>
+<span class="id">-</span><span class="id"> move=&gt;</span><span class="id"> -&gt;</span>.<br/>
+&nbsp;&nbsp;<span class="id">case:</span> (<span class="id">nth</span><span class="id"> _</span><span class="id"> _</span><span class="id"> _</span>)<span class="id"> =&gt;</span><span class="id"> [d2</span><span class="id"> p2|dst2</span><span class="id"> d2</span><span class="id"> p2|frm2</span><span class="id"> f2|d2||]</span><span class="id"> /=;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">try</span><span class="id"> exact</span> (<span class="id">ltnW</span><span class="id"> Hsz</span>).<br/>
+&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> case:</span><span class="id"> ifP</span><span class="id"> =&gt;</span><span class="id"> _</span><span class="id"> /=;</span><span class="id"> exact</span> (<span class="id">ltnW</span><span class="id"> Hsz</span>).<br/>
+<span class="comment">(*&nbsp;Recv:&nbsp;nested&nbsp;match&nbsp;on&nbsp;source&nbsp;*)</span><br/>
+<span class="id">-</span><span class="id"> move=&gt;</span><span class="id"> -&gt;</span>.<br/>
+&nbsp;&nbsp;<span class="id">case:</span> (<span class="id">nth</span><span class="id"> _</span><span class="id"> _</span><span class="id"> _</span>)<span class="id"> =&gt;</span><span class="id"> [d2</span><span class="id"> p2|dst2</span><span class="id"> d2</span><span class="id"> p2|frm2</span><span class="id"> f2|d2||]</span><span class="id"> /=;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">try</span><span class="id"> exact</span> (<span class="id">ltnW</span><span class="id"> Hsz</span>).<br/>
+&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> case:</span><span class="id"> ifP</span><span class="id"> =&gt;</span><span class="id"> _</span><span class="id"> /=;</span><span class="id"> [exact</span><span class="id"> Hsz</span><span class="id"> |</span><span class="id"> exact</span> (<span class="id">ltnW</span><span class="id"> Hsz</span>)<span class="id">]</span>.<br/>
+<span class="comment">(*&nbsp;Ret:&nbsp;s&nbsp;=&nbsp;d1&nbsp;::&nbsp;nth...&nbsp;-&gt;&nbsp;size&nbsp;s&nbsp;&lt;=&nbsp;k&nbsp;-&nbsp;h&nbsp;*)</span><br/>
+<span class="id">-</span><span class="gallina-kwd"> by</span><span class="id"> move=&gt;</span><span class="id"> -&gt;;</span><span class="id"> exact</span><span class="id"> Hsz</span>.<br/>
+<span class="comment">(*&nbsp;Finish:&nbsp;s&nbsp;=&nbsp;nth...&nbsp;-&gt;&nbsp;size&nbsp;s&nbsp;&lt;=&nbsp;k&nbsp;-&nbsp;h&nbsp;*)</span><br/>
+<span class="id">-</span><span class="gallina-kwd"> by</span><span class="id"> move=&gt;</span><span class="id"> -&gt;;</span><span class="id"> exact</span> (<span class="id">ltnW</span><span class="id"> Hsz</span>).<br/>
+<span class="comment">(*&nbsp;Fail:&nbsp;s&nbsp;=&nbsp;nth...&nbsp;-&gt;&nbsp;size&nbsp;s&nbsp;&lt;=&nbsp;k&nbsp;-&nbsp;h&nbsp;*)</span><br/>
+<span class="id">-</span><span class="gallina-kwd"> by</span><span class="id"> move=&gt;</span><span class="id"> -&gt;;</span><span class="id"> exact</span> (<span class="id">ltnW</span><span class="id"> Hsz</span>).<br/>
+Qed.</div></details>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> size_interp</span><span class="id"> h</span> (<span class="id">procs</span><span class="id"> :</span><span class="id"> seq</span> (<span class="id">proc</span><span class="id"> data</span>)) (<span class="id">traces</span><span class="id"> :</span><span class="id"> seq</span> (<span class="id">seq</span><span class="id"> data</span>))<span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="id">size</span><span class="id"> procs</span><span class="id"> =</span><span class="id"> size</span><span class="id"> traces</span><span class="id"> -&gt;</span><br/>
+&nbsp;&nbsp;<span class="id">size</span> (<span class="id">interp</span><span class="id"> h</span><span class="id"> procs</span><span class="id"> traces</span>).<span class="id">1</span><span class="id"> =</span><span class="id"> size</span><span class="id"> procs</span><span class="id"> /\</span><br/>
+&nbsp;&nbsp;<span class="id">size</span> (<span class="id">interp</span><span class="id"> h</span><span class="id"> procs</span><span class="id"> traces</span>).<span class="id">2</span><span class="id"> =</span><span class="id"> size</span><span class="id"> procs</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id">elim:</span><span class="id"> h</span><span class="id"> procs</span><span class="id"> traces</span><span class="id"> =&gt;</span><span class="id"> //</span><span class="id"> h</span><span class="id"> IH</span><span class="id"> procs</span><span class="id"> traces</span><span class="id"> Hsz</span><span class="id"> /=</span>.<br/>
+<span class="id">case:</span><span class="id"> ifP</span><span class="id"> =&gt;</span><span class="id"> _</span><span class="id"> //</span>.<br/>
+<span class="id">rewrite</span><span class="id"> /unzip1</span><span class="id"> /unzip2</span><span class="id"> -!map_comp</span>.<br/>
+<span class="id">set</span><span class="id"> map1</span><span class="id"> :=</span><span class="id"> map</span><span class="id"> _</span><span class="id"> _</span>.<br/>
+<span class="id">set</span><span class="id"> map2</span><span class="id"> :=</span><span class="id"> map</span><span class="id"> _</span><span class="id"> _</span>.<br/>
+<span class="id">case:</span> (<span class="id">IH</span><span class="id"> map1</span><span class="id"> map2</span>).<br/>
+&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> !size_map</span>.<br/>
+<span class="id">move=&gt;</span><span class="id"> -&gt;</span><span class="id"> -&gt;</span>.<br/>
+<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> !size_map</span><span class="id"> size_iota</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> size_traces_nth</span><span class="id"> h</span> (<span class="id">procs</span><span class="id"> :</span><span class="id"> seq</span> (<span class="id">proc</span><span class="id"> data</span>)) (<span class="id">i</span><span class="id"> :</span><span class="id"> 'I_</span>(<span class="id">size</span><span class="id"> procs</span>))<span class="id"> :</span><br/>
+&nbsp;&nbsp;(<span class="id">size</span> (<span class="id">nth</span><span class="id"> [::]</span> (<span class="id">run_interp</span><span class="id"> h</span><span class="id"> procs</span>).<span class="id">2</span><span class="id"> i</span>)<span class="id"> &lt;=</span><span class="id"> h</span>)<span class="id">%N</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="gallina-kwd">by</span><span class="id"> apply/size_traces/mem_nth;</span><span class="id"> rewrite</span> (<span class="id">size_interp</span><span class="id"> _</span><span class="id"> _</span>).<span class="id">2</span><span class="id"> //</span><span class="id"> size_nseq</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="vernacular">Definition</span><span class="id"> interp_traces</span><span class="id"> h</span><span class="id"> procs</span><span class="id"> :</span> (<span class="id">size</span><span class="id"> procs</span>).<span class="id">-tuple</span> (<span class="id">h</span>.<span class="id">-bseq</span><span class="id"> data</span>)<span class="id"> :=</span><br/>
+&nbsp;&nbsp;<span class="id">[tuple</span><span class="id"> Bseq</span> (<span class="id">size_traces_nth</span><span class="id"> h</span><span class="id"> i</span>)<span class="id"> |</span><span class="id"> i</span><span class="id"> &lt;</span><span class="id"> size</span><span class="id"> procs]</span>.<br/>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> interp_traces_ok</span><span class="id"> h</span><span class="id"> procs</span><span class="id"> :</span><br/>
+&nbsp;<span class="id">map</span><span class="id"> val</span> (<span class="id">interp_traces</span><span class="id"> h</span><span class="id"> procs</span>)<span class="id"> =</span> (<span class="id">run_interp</span><span class="id"> h</span><span class="id"> procs</span>).<span class="id">2</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id">apply</span> (<span class="id">eq_from_nth</span> (<span class="id">x0:=[::]</span>)).<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> size_map</span><span class="id"> /=</span><span class="id"> size_map</span><span class="id"> size_enum_ord</span>.<br/>
+&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span> (<span class="id">size_interp</span><span class="id"> _</span><span class="id"> _</span>).<span class="id">2</span><span class="id"> ?size_nseq</span>.<br/>
+<span class="id">move=&gt;</span><span class="id"> i</span><span class="id"> Hi</span>.<br/>
+<span class="id">rewrite</span><span class="id"> size_map</span><span class="gallina-kwd"> in</span><span class="id"> Hi</span>.<br/>
+<span class="id">rewrite</span> (<span class="id">nth_map</span><span class="id"> [bseq]</span>)<span class="id"> //</span><span class="id"> /interp_traces</span>.<br/>
+<span class="id">rewrite</span><span class="id"> size_tuple</span><span class="gallina-kwd"> in</span><span class="id"> Hi</span>.<br/>
+<span class="gallina-kwd">by</span><span class="id"> rewrite</span> (_<span class="id"> :</span><span class="id"> i</span><span class="id"> =</span><span class="id"> Ordinal</span><span class="id"> Hi</span>)<span class="id"> //</span><span class="id"> nth_mktuple</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="vernacular">End</span><span class="id"> traces</span>.<br/>
+<br/>
+<span class="vernacular">Declare</span><span class="vernacular"> Scope</span><span class="id"> proc_scope</span>.<br/>
+<br/>
+<span class="vernacular">Notation</span> <span class="id">&quot;[procs p ; .. ; q ]&quot;</span><span class="id"> :=</span> <br/>
+&nbsp;&nbsp;(<span class="id">cons</span><span class="id"> p</span> .. (<span class="id">cons</span><span class="id"> q</span><span class="id"> nil</span>) ..)<br/>
+&nbsp;&nbsp;(<span class="gallina-kwd">at</span><span class="id"> level</span><span class="id"> 0</span>)<span class="id"> :</span><span class="id"> proc_scope</span>.<br/>
+<br/>
+<pre class="ssrdoc">
+(** * Termination Predicates
+</pre>
+<br/>
+<span class="vernacular">Section</span><span class="id"> termination</span>.<br/>
+<span class="vernacular">Variable</span><span class="id"> data</span><span class="id"> :</span><span class="gallina-kwd"> Type</span>.<br/>
+<br/>
+<span class="vernacular">Definition</span><span class="id"> is_final</span> (<span class="id">p</span><span class="id"> :</span><span class="id"> proc</span><span class="id"> data</span>)<span class="id"> :</span><span class="id"> bool</span><span class="id"> :=</span><br/>
+&nbsp;&nbsp;<span class="gallina-kwd">match</span><span class="id"> p</span><span class="gallina-kwd"> with</span><br/>
+&nbsp;&nbsp;<span class="id">|</span><span class="id"> Finish</span><span class="id"> =&gt;</span><span class="id"> true</span><br/>
+&nbsp;&nbsp;<span class="id">|</span><span class="vernacular"> Fail</span><span class="id"> =&gt;</span><span class="id"> true</span><br/>
+&nbsp;&nbsp;<span class="id">|</span><span class="id"> _</span><span class="id"> =&gt;</span><span class="id"> false</span><br/>
+&nbsp;&nbsp;<span class="gallina-kwd">end</span>.<br/>
+<br/>
+<span class="vernacular">Definition</span><span class="id"> all_final</span> (<span class="id">ps</span><span class="id"> :</span><span class="id"> seq</span> (<span class="id">proc</span><span class="id"> data</span>))<span class="id"> :</span><span class="id"> bool</span><span class="id"> :=</span><br/>
+&nbsp;&nbsp;<span class="id">all</span><span class="id"> is_final</span><span class="id"> ps</span>.<br/>
+<br/>
+<span class="vernacular">End</span><span class="id"> termination</span>.<br/>
+<br/>
+
+      <div class="footer"><hr/>Generated by <a href="https://github.com/affeldt-aist/rocqnavi/">rocqnavi</a></div>
+    </div>
+  </div>
+    </main>
+</body>
+</html>

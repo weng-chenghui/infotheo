@@ -1,0 +1,48 @@
+{
+  "findings": [
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/denboer1989/five_card_program.v",
+      "line_start": 108,
+      "line_end": 108,
+      "lemma_name": "fc_arrange_size_proof",
+      "severity": "warning",
+      "evidence_quote": "Lemma fc_arrange_size_proof (a b : bool) : size (fc_arrange a b) == 5.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/denboer1989/five_card_program.v",
+      "line_start": 68,
+      "line_end": 68,
+      "lemma_name": "fc_arrange_size",
+      "severity": "error",
+      "evidence_quote": "Lemma fc_arrange_size (a b : bool) : size (fc_arrange a b) = 5.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "I001",
+      "file": "pgg-smc/instances/denboer1989/five_card_program.v",
+      "line_start": 108,
+      "line_end": 108,
+      "lemma_name": "fc_arrange_size_proof",
+      "severity": "error",
+      "evidence_quote": "Lemma fc_arrange_size_proof (a b : bool) : size (fc_arrange a b) == 5.",
+      "stage": "stage1",
+      "reason": "redundant suffix `_proof` duplicates the declaration kind",
+      "stages": [
+        "stage1"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": null,
+  "exit_code": 2
+}

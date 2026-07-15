@@ -1,0 +1,60 @@
+{
+  "findings": [
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/security/pgg_mixing.v",
+      "line_start": 257,
+      "line_end": 257,
+      "lemma_name": "symm_ds_step_norm_sq_bound",
+      "severity": "warning",
+      "evidence_quote": "Lemma symm_ds_step_norm_sq_bound (v : 'cV[R]_N) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/security/pgg_mixing.v",
+      "line_start": 273,
+      "line_end": 273,
+      "lemma_name": "symm_ds_power_norm_sq_bound",
+      "severity": "warning",
+      "evidence_quote": "Lemma symm_ds_power_norm_sq_bound (L : nat) (v : 'cV[R]_N) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/security/pgg_mixing.v",
+      "line_start": 454,
+      "line_end": 454,
+      "lemma_name": "symm_ds_power_norm2_bound",
+      "severity": "warning",
+      "evidence_quote": "Lemma symm_ds_power_norm2_bound (L : nat) (v : 'cV[R]_N) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/security/pgg_mixing.v",
+      "line_start": 602,
+      "line_end": 602,
+      "lemma_name": "schreier_transition_doubly_stochastic_col",
+      "severity": "warning",
+      "evidence_quote": "Lemma schreier_transition_doubly_stochastic_col (j : 'I_N) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": null,
+  "exit_code": 0
+}

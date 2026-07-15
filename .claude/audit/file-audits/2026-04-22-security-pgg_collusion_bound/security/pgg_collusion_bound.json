@@ -1,0 +1,138 @@
+{
+  "findings": [
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/security/pgg_collusion_bound.v",
+      "line_start": 111,
+      "line_end": 111,
+      "lemma_name": "var_dist_uniform_supp",
+      "severity": "warning",
+      "evidence_quote": "Lemma var_dist_uniform_supp :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/security/pgg_collusion_bound.v",
+      "line_start": 505,
+      "line_end": 505,
+      "lemma_name": "rho_from_words_uniform_supp",
+      "severity": "warning",
+      "evidence_quote": "Lemma rho_from_words_uniform_supp :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/security/pgg_collusion_bound.v",
+      "line_start": 588,
+      "line_end": 588,
+      "lemma_name": "weval_inj_fiber_le1",
+      "severity": "warning",
+      "evidence_quote": "Lemma weval_inj_fiber_le1 (Hlfree : @weval_inj M L) (g : {perm 'I_N}) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/security/pgg_collusion_bound.v",
+      "line_start": 597,
+      "line_end": 597,
+      "lemma_name": "weval_inj_fiber_card1",
+      "severity": "warning",
+      "evidence_quote": "Lemma weval_inj_fiber_card1 (Hlfree : @weval_inj M L) (g : {perm 'I_N}) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/security/pgg_collusion_bound.v",
+      "line_start": 687,
+      "line_end": 687,
+      "lemma_name": "fdistmap_uniform_supp_inj",
+      "severity": "warning",
+      "evidence_quote": "Lemma fdistmap_uniform_supp_inj :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/security/pgg_collusion_bound.v",
+      "line_start": 784,
+      "line_end": 784,
+      "lemma_name": "perm_endpoint_image_card",
+      "severity": "warning",
+      "evidence_quote": "Lemma perm_endpoint_image_card (s : 'I_N) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/security/pgg_collusion_bound.v",
+      "line_start": 799,
+      "line_end": 799,
+      "lemma_name": "perm_endpoint_image_pos",
+      "severity": "warning",
+      "evidence_quote": "Lemma perm_endpoint_image_pos (s : 'I_N) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/security/pgg_collusion_bound.v",
+      "line_start": 818,
+      "line_end": 818,
+      "lemma_name": "var_dist_endpoint_direct",
+      "severity": "warning",
+      "evidence_quote": "Theorem var_dist_endpoint_direct (s : 'I_N) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/security/pgg_collusion_bound.v",
+      "line_start": 868,
+      "line_end": 868,
+      "lemma_name": "var_dist_fdistmap_balanced",
+      "severity": "warning",
+      "evidence_quote": "Lemma var_dist_fdistmap_balanced :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/security/pgg_collusion_bound.v",
+      "line_start": 964,
+      "line_end": 964,
+      "lemma_name": "var_dist_fdistmap_unbalanced",
+      "severity": "warning",
+      "evidence_quote": "Lemma var_dist_fdistmap_unbalanced :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": null,
+  "exit_code": 0
+}

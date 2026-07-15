@@ -1,0 +1,245 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{hyperref}
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+\title{Survey: Computational Security as a Precondition for Information-Theoretic Security}
+\date{}
+
+\begin{document}
+\maketitle
+
+The security notion where \textbf{computational security (HE) is a necessary precondition for information-theoretic security to hold} maps closely to several well-studied concepts in cryptography. Here are the most relevant papers and paradigms:
+
+\section{Everlasting Security (closest match)}
+
+\textbf{M\"uller-Quade \& Unruh, ``Long-Term Security and Universal Composability'' (TCC 2007, Journal of Cryptology 2010)}
+
+This is the most directly relevant concept. Their definition explicitly captures:
+
+\begin{itemize}
+  \item \textbf{Computational assumptions hold during protocol execution} (e.g., HE is secure)
+  \item \textbf{After execution, privacy is information-theoretic} --- even if computational assumptions later break (e.g., quantum computers), the secrets remain hidden
+\end{itemize}
+
+This matches DSDP's pattern exactly: during the protocol, Alice can't decrypt the individual HE ciphertexts (computational assumption). Given that, the aggregate information she sees (one equation, multiple unknowns) is IT-secure. Even if HE is broken \emph{after} the protocol finishes, the transcript alone doesn't reveal the individual values because Alice only saw the underdetermined system.
+
+\begin{itemize}
+  \item Long-Term Security and Universal Composability~\cite{MullerQuadeUnruh2007}
+  \item Journal version~\cite{MullerQuadeUnruh2010}
+\end{itemize}
+
+\textbf{Follow-up:} Everlasting Multi-party Computation (CRYPTO 2013)~\cite{Unruh2013} extends this to full MPC.
+
+\section{SPDZ Preprocessing Model (structural match)}
+
+\textbf{Damg\r{a}rd, Pastro, Smart, Zakarias, ``Multiparty Computation from Somewhat Homomorphic Encryption'' (CRYPTO 2012)}
+
+SPDZ uses exactly the architecture DSDP describes:
+
+\begin{itemize}
+  \item \textbf{Preprocessing phase}: uses somewhat homomorphic encryption (computational assumption) to generate correlated randomness (Beaver triples as secret shares)
+  \item \textbf{Online phase}: uses \emph{only information-theoretic primitives} (additive secret sharing + MACs) --- no cryptographic operations at all
+\end{itemize}
+
+The IT security of the online phase is \textbf{conditional} on the preprocessing being correct (which relies on the SHE computational assumption). If an adversary could break the SHE during preprocessing, they could learn the Beaver triples and break the online phase's IT security.
+
+This is the same pattern: \textbf{computational security (SHE) $\Rightarrow$ correlated randomness is hidden $\Rightarrow$ IT-secure computation}.
+
+\begin{itemize}
+  \item SPDZ paper~\cite{SPDZ2012eprint}
+  \item SPDZ (SpringerLink)~\cite{SPDZ2012springer}
+\end{itemize}
+
+\section{Related Concepts}
+
+\textbf{Leakage-Resilient Cryptography}: DSDP's mention of ``bounded leakage'' connects to this area. A key result is that IT security requires secrets to have sufficient \emph{information-theoretic} min-entropy even after leakage --- computational min-entropy alone is not always sufficient. See~\cite{LeakageUnprovability2020}.
+
+\textbf{MPC vs.\ SFE separation} (Hirt, Maurer, Zikas, ASIACRYPT 2008): Characterizes exactly when IT vs.\ computational security is achievable for different adversary structures~\cite{HirtMaurerZikas2008}.
+
+\section{IT-Secure in the $\mathcal{F}_{\mathrm{HE}}$-Hybrid Model}
+
+DSDP's security notion is \textbf{not} everlasting security, because the HE ciphertexts remain part of Alice's view (the transcript). If HE is ever broken, Alice can decrypt the individual values and the IT security collapses. Everlasting security~\cite{MullerQuadeUnruh2007,MullerQuadeUnruh2010} requires that privacy holds information-theoretically even if computational assumptions break \emph{after} execution --- a strictly stronger guarantee.
+
+The correct characterization of DSDP's security uses the \textbf{$\mathcal{F}$-hybrid model} from Canetti's Universally Composable (UC) security framework~\cite{Canetti2001,Canetti2020}.
+
+\paragraph{Notation.}
+The calligraphic letter~$\mathcal{F}$ stands for \emph{ideal Functionality}: an imaginary trusted third party (modeled as an interactive Turing machine) that captures \emph{what} a cryptographic primitive should do, abstracting away \emph{how} it does it~\cite[Sec.~4: Defining Security of Protocols]{Canetti2020}. For example, $\mathcal{F}_{\mathrm{HE}}$ is the ideal functionality for homomorphic encryption (a trusted party that perfectly encrypts and decrypts, so ciphertexts leak nothing), and $\mathcal{F}_{\mathrm{prep}}$ is the ideal functionality for SPDZ preprocessing (a trusted party that honestly distributes Beaver triples, MAC shares, and input masks).
+
+\paragraph{The $\mathcal{F}$-hybrid model.}
+In the \emph{$\mathcal{F}$-hybrid model}~\cite[Sec.~5: Modular Composition]{Canetti2020}, parties execute a real protocol~$\pi$ while having access to an ideal functionality~$\mathcal{F}$ as a trusted subroutine. That is, whenever the protocol needs to invoke the primitive (e.g., encrypt a value), it sends the request to~$\mathcal{F}$ instead of running a concrete scheme. Security proved in the $\mathcal{F}$-hybrid model is \emph{conditional} on~$\mathcal{F}$ being available.
+
+\paragraph{The Universal Composition Theorem.}
+If a concrete protocol~$\rho$ \emph{UC-realizes}~$\mathcal{F}$ (i.e., no environment can distinguish running~$\rho$ from interacting with~$\mathcal{F}$), then by the \emph{Universal Composition Theorem}~\cite[Theorem~5.1]{Canetti2020}, one can replace every call to~$\mathcal{F}$ with an instance of~$\rho$ without degrading security. This yields the two-step proof pattern:
+
+One proves security in two steps:
+
+\begin{enumerate}
+  \item \textbf{IT step (hybrid model):} Replace the HE scheme with an ideal functionality $\mathcal{F}_{\mathrm{HE}}$ that perfectly hides encrypted values. In this model, Alice's view consists only of the function output (an underdetermined system of equations). Since the solution sets are uniformly distributed, the protocol is \emph{information-theoretically secure in the $\mathcal{F}_{\mathrm{HE}}$-hybrid model}.
+  \item \textbf{Computational step (composition):} Show that the concrete HE scheme UC-realizes $\mathcal{F}_{\mathrm{HE}}$ under a computational assumption (e.g., LWE, DCR). By the UC composition theorem~\cite{Canetti2001}, the composed protocol is \emph{computationally secure} in the real model.
+\end{enumerate}
+
+This two-step proof structure is exactly the pattern used by SPDZ~\cite{SPDZ2012springer}: the online phase is IT-secure in the $\mathcal{F}_{\mathrm{prep}}$-hybrid model; the preprocessing phase computationally realizes $\mathcal{F}_{\mathrm{prep}}$ using SHE.
+
+\medskip
+
+\noindent\textbf{Terminology summary:}
+
+\begin{center}
+\begin{tabular}{l l}
+  \hline
+  What is described & Standard term \\
+  \hline
+  Overall protocol security & \textbf{Computational security} \\
+  IT part, conditional on HE being ideal & \textbf{IT-secure in the $\mathcal{F}_{\mathrm{HE}}$-hybrid model} \\
+  Stronger notion (IT even if HE breaks later) & \textbf{Everlasting security}~\cite{MullerQuadeUnruh2007} \\
+  \hline
+\end{tabular}
+\end{center}
+
+\section{Summary}
+
+DSDP should \textbf{not} be called ``information-theoretically secure'' without qualification. The protocol is \textbf{computationally secure} overall. The conditional IT guarantee is properly described as being \textbf{information-theoretically secure in the $\mathcal{F}_{\mathrm{HE}}$-hybrid model}~\cite{Canetti2001}, meaning that if one models HE as an ideal functionality, the remaining protocol leaks nothing beyond the function output, even to computationally unbounded adversaries.
+
+The \textbf{SPDZ protocol family}~\cite{SPDZ2012springer} is the most prominent practical instantiation of this pattern, using HE for preprocessing and IT-secure techniques for the online phase. The protocol proceeds as follows.
+
+\subsection*{Step 1: Setup}
+
+All parties jointly hold a \emph{global MAC key} $\alpha \in \mathbb{F}_p$, additively shared as $\alpha = \alpha_1 + \cdots + \alpha_n$. Every secret value~$x$ in the computation is represented by an \emph{authenticated sharing} $\langle x \rangle$, consisting of:
+\begin{itemize}
+  \item Additive shares: each party~$P_i$ holds $x_i$ such that $x = x_1 + \cdots + x_n$.
+  \item MAC shares: each party~$P_i$ holds $\gamma_i$ such that $\gamma_1 + \cdots + \gamma_n = \alpha \cdot x$.
+\end{itemize}
+
+\subsection*{Step 2: Preprocessing phase (computational --- uses SHE)}
+
+This phase generates correlated randomness \emph{independent of the actual inputs}:
+
+\begin{enumerate}
+  \item \textbf{Key generation:} Parties run a distributed key generation protocol for a somewhat homomorphic encryption (SHE) scheme (e.g., BGV~\cite{BGV2014}), producing a common public key and individual secret key shares.
+  \item \textbf{Beaver triple generation:} To produce a triple $(\langle a \rangle, \langle b \rangle, \langle c \rangle)$ with $c = a \cdot b$:
+  \begin{enumerate}
+    \item Each party encrypts a random additive share of~$a$ and~$b$ under the common public key.
+    \item Using the \emph{homomorphic} properties of SHE, the parties compute an encryption of $c = a \cdot b$ from the encrypted shares --- without decrypting.
+    \item A distributed decryption protocol produces additive shares of~$c$ (and the corresponding MAC shares).
+  \end{enumerate}
+  \item \textbf{Sacrificing (triple verification):} Triples are paired up. A random challenge~$r$ is chosen; the parties open $\rho = r \cdot b - \hat{b}$ and check $\tau = r \cdot c - \hat{c} - \rho \cdot a \stackrel{?}{=} 0$. One triple is ``sacrificed'' to verify the other. A cheating adversary is caught with probability $1 - 1/|\mathbb{F}_p|$.
+  \item \textbf{Input masks:} For each input wire, a random authenticated value $\langle r \rangle$ is generated, with the plaintext~$r$ revealed only to the party providing that input.
+\end{enumerate}
+
+\noindent\textbf{Security:} This phase relies on the \emph{computational} assumption that SHE is IND-CPA secure (e.g., based on Ring-LWE). If an adversary could break SHE, it could learn the Beaver triples and the MAC key, destroying all subsequent security.
+
+\subsection*{Step 3: Online phase (IT-secure --- no cryptographic operations)}
+
+Given the preprocessed material, the actual computation uses only \emph{field arithmetic and communication}:
+
+\begin{enumerate}
+  \item \textbf{Input:} Party~$P_i$ with private input~$x$ broadcasts $\varepsilon = x - r$, where $\langle r \rangle$ is the preprocessed mask. All parties update their shares: $P_i$ sets $x_i := \varepsilon + r_i$; others set $x_j := r_j$. This yields $\langle x \rangle$ without revealing~$x$.
+  \item \textbf{Addition:} To compute $\langle x + y \rangle$ from $\langle x \rangle$ and $\langle y \rangle$, each party locally adds its shares. \emph{No communication.}
+  \item \textbf{Multiplication (Beaver's technique):} To compute $\langle x \cdot y \rangle$ from $\langle x \rangle$, $\langle y \rangle$, and a preprocessed triple $(\langle a \rangle, \langle b \rangle, \langle c \rangle)$:
+  \begin{enumerate}
+    \item Open $\varepsilon = x - a$ and $\delta = y - b$ to all parties.
+    \item Each party locally computes its share of $x \cdot y = c + \varepsilon \cdot b + \delta \cdot a + \varepsilon \cdot \delta$.
+  \end{enumerate}
+  The opened values $\varepsilon$ and $\delta$ are \emph{uniformly random} (masked by the random $a$, $b$), so they reveal nothing about~$x$ or~$y$.
+  \item \textbf{Output (MAC verification):} To reveal a value~$x$, all parties broadcast their shares~$x_i$ to reconstruct~$x$. Then each party~$P_i$ computes $\sigma_i = \gamma_i - \alpha_i \cdot x$ and the parties jointly verify $\sum_i \sigma_i \stackrel{?}{=} 0$. A corrupted party that altered its share by~$e$ would need to guess $\alpha \cdot e$, which succeeds with probability $1/|\mathbb{F}_p|$.
+\end{enumerate}
+
+\noindent\textbf{Security:} Every value opened during the online phase ($\varepsilon$, $\delta$) is uniformly random over~$\mathbb{F}_p$. The additive shares are IT-secure: any coalition of fewer than~$n$ parties sees a uniform distribution. The MAC check is IT-secure: forging requires guessing the global key~$\alpha$. \emph{No computational assumption is used} --- the security relies entirely on the uniformity of field elements and the information-theoretic properties of additive secret sharing.
+
+\subsection*{Step 4: Why this is ``IT-secure in the $\mathcal{F}_{\mathrm{prep}}$-hybrid model''}
+
+If one replaces Step~2 with an ideal functionality $\mathcal{F}_{\mathrm{prep}}$ that honestly distributes Beaver triples, random masks, and MAC shares, then Steps~3--4 are \emph{information-theoretically secure against any adversary corrupting up to $n-1$ parties}, even with unbounded computation. The overall protocol is computationally secure because realizing $\mathcal{F}_{\mathrm{prep}}$ requires SHE (a computational assumption).
+
+\section{How DSDP's Bounded Leakage Fits the $\mathcal{F}_{\mathrm{HE}}$-Hybrid Story}
+
+For protocols such as DSDP, the output~$S = u_1 v_1 + u_2 v_2 + u_3 v_3$ is revealed to a distinguished party, Alice, and it depends on other parties' inputs. The zero-leakage equality $H(V_2 \mid \mathit{AliceView}) = H(V_2)$ (i.e., perfect secrecy) is therefore too strong to ask for the \emph{joint} $(V_2, V_3)$, since the protocol output~$S$ necessarily leaks information about the pair.
+
+In the original work, Dumas et al.~\cite{dumas2017dual} argue security via two separate lemmas:
+\begin{itemize}
+  \item \textbf{Lemma~5 (underdetermination):} Alice holds only one linear equation in $(n{-}1)$ unknowns and therefore cannot deduce other parties' private inputs.
+  \item \textbf{Lemma~7 (simulation):} A simulator is constructed whose output is computationally indistinguishable from the real view.
+\end{itemize}
+
+\noindent
+Our formalization in \texttt{dsdp\_security.v} does not construct a simulator (Lemma~7), but it does not ignore Lemma~7's assumption either. Instead, it \textbf{internalizes} Lemma~7's semantic security assumption as ideal-functionality hypotheses (\texttt{E\_enc\_unif}, \texttt{E\_enc\_inde}), and then \textbf{formalizes the IT argument} (Lemma~5) within the resulting $\mathcal{F}_{\mathrm{HE}}$-hybrid model.
+
+\subsection*{The $\mathcal{F}_{\mathrm{HE}}$-hybrid assumptions in the formalization}
+
+The hypotheses \texttt{E\_enc\_unif} and \texttt{E\_enc\_inde} in \texttt{dsdp\_entropy.v} state:
+\begin{enumerate}
+  \item Fresh ciphertexts are uniformly distributed over the ciphertext space.
+  \item Fresh ciphertexts are independent of all other random variables.
+\end{enumerate}
+These are the information-theoretic idealizations of the \textbf{semantic security} assumed in Lemma~7 of~\cite{dumas2017dual}. For probabilistic encryption schemes such as Benaloh or Paillier, the same plaintext encrypted with different randomness yields different ciphertexts: $\mathrm{Enc}(x; r_1) \neq \mathrm{Enc}(x; r_2)$. Semantic security (IND-CPA) guarantees that no PPT adversary can distinguish $\mathrm{Enc}(x; r)$ from $\mathrm{Enc}(0; r')$. In the $\mathcal{F}_{\mathrm{HE}}$-hybrid model, we \emph{idealize} this computational guarantee:
+\begin{itemize}
+  \item \texttt{E\_enc\_unif} idealizes IND-CPA: ciphertexts are literally uniform (not merely computationally indistinguishable from uniform).
+  \item \texttt{E\_enc\_inde} idealizes the randomized encryption property: even if party~$P$ generates and fully knows a plaintext~$X$, the ciphertext $C = \mathrm{Enc}(X; r)$ is independent of~$X$, because the encryption randomness~$r$ masks the relationship.
+\end{itemize}
+Under these two hypotheses, ciphertexts carry \emph{zero information} about plaintexts in the IT sense: conditioning on ciphertexts does not change the conditional entropy of any other variable. This is why \texttt{alice\_view\_to\_cond} can strip all encryption terms from Alice's view --- they are information-theoretically useless. The formalization therefore works in the $\mathcal{F}_{\mathrm{HE}}$-hybrid model, even though it does not use UC terminology explicitly.
+
+\subsection*{Proof structure: stripping encryption, then IT argument}
+
+The proof of \texttt{dsdp\_security\_bounded\_leakage} proceeds in two layers:
+
+\begin{enumerate}
+  \item \textbf{Strip encryption (= assume $\mathcal{F}_{\mathrm{HE}}$):}
+  The lemma \texttt{alice\_view\_to\_cond} uses \texttt{E\_enc\_unif} and \texttt{E\_enc\_inde} to remove all three encryption terms ($E_{\mathrm{alice}}(D_3)$, $E_{\mathrm{charlie}}(V_3)$, $E_{\mathrm{bob}}(V_2)$) from Alice's view, yielding:
+  \[
+    H(V_2 \mid \mathit{AliceView}) = H(V_2 \mid V_1, U_1, U_2, U_3, S).
+  \]
+  This step is valid \emph{only if} the encryption is ideal --- i.e., in the $\mathcal{F}_{\mathrm{HE}}$-hybrid model.
+
+  \item \textbf{IT argument (= Lemma~5, underdetermination):}
+  Given the plaintext view $(V_1, U_1, U_2, U_3, S)$, the constraint $S = u_1 v_1 + u_2 v_2 + u_3 v_3$ defines one linear equation in two unknowns $(V_2, V_3)$ over $\mathbb{Z}/m\mathbb{Z}$. By the Chinese Remainder Theorem and invertibility of $U_3$, the fiber has exactly~$m$ solutions, uniformly distributed. Therefore:
+  \[
+    H(V_2, V_3 \mid V_1, U_1, U_2, U_3, S) = \log m.
+  \]
+  Since $V_3$ is determined by $V_2$ and the constraint (\texttt{V3\_determined}), the chain rule gives $H(V_2 \mid V_1, U_1, U_2, U_3, S) = \log m$.
+\end{enumerate}
+
+\subsection*{The bounded leakage guarantee}
+
+Combining both layers:
+\[
+  H(V_2 \mid \mathit{AliceView}) = \log m = H(V_2).
+\]
+Since $V_2$ is uniform over $\mathbb{Z}/m\mathbb{Z}$ with $H(V_2) = \log m$, this means $I(V_2; \mathit{AliceView}) = 0$: \textbf{zero mutual information} about $V_2$. Alice gains no information about Bob's individual input beyond the protocol output~$S$.
+
+The ``bounded leakage'' refers to the \emph{joint} $(V_2, V_3)$:
+\[
+  H(V_2, V_3) = 2\log m, \qquad H(V_2, V_3 \mid \mathit{AliceView}) = \log m.
+\]
+So $\log m$ bits leak about the pair --- but these correspond exactly to the protocol output~$S$, which Alice is \emph{supposed} to learn. This is the expected, unavoidable leakage from the function output, not a security violation.
+
+\subsection*{Bob and Charlie: zero leakage via one-time-pad}
+
+For Bob and Charlie, the formalization proves \emph{full independence} (zero leakage), not merely bounded leakage:
+\begin{align*}
+  &P \models \mathit{BobView} \perp\!\!\!\perp V_1, \quad P \models \mathit{BobView} \perp\!\!\!\perp V_3, \\
+  &P \models \mathit{CharlieView} \perp\!\!\!\perp V_1, \quad P \models \mathit{CharlieView} \perp\!\!\!\perp V_2.
+\end{align*}
+These follow from one-time-pad masking (via \texttt{lemma\_3\_5'}) and the $\mathcal{F}_{\mathrm{HE}}$ assumptions, without needing the underdetermination argument.
+
+\subsection*{Corrected paragraph}
+
+The original claim to ``unify'' Lemma~5 (underdetermination) and Lemma~7 (simulation) via bounded leakage is not accurate. Instead:
+
+\begin{quote}
+  Our formalization clarifies the relationship between these two arguments using the \emph{ideal-functionality hybrid model}, a standard concept from secure multi-party computation. In Canetti's Universally Composable (UC) security framework~\cite{Canetti2001,Canetti2020}, an \emph{ideal functionality}~$\mathcal{F}$ is an imaginary trusted third party that captures what a cryptographic primitive should do. A protocol proved secure in the \emph{$\mathcal{F}$-hybrid model} assumes access to~$\mathcal{F}$ as a subroutine; the UC Composition Theorem then guarantees that replacing~$\mathcal{F}$ with any concrete scheme that UC-realizes it preserves security. For example, the SPDZ protocol family~\cite{SPDZ2012springer} proves its online phase information-theoretically secure in the $\mathcal{F}_{\mathrm{prep}}$-hybrid model (assuming ideal preprocessing), while the preprocessing phase computationally realizes $\mathcal{F}_{\mathrm{prep}}$ using somewhat homomorphic encryption.
+
+  We formalize DSDP's security in an analogous $\mathcal{F}_{\mathrm{HE}}$-hybrid model,
+  where $\mathcal{F}_{\mathrm{HE}}$ is the ideal functionality for homomorphic encryption.
+  Lemma~7 of~\cite{dumas2017dual} constructs a simulator ``by assuming the semantic security of the cryptosystem~$E$''.
+  The encryption hypotheses (\texttt{E\_enc\_unif}, \texttt{E\_enc\_inde}) express the same assumption in information-theoretic terms: ciphertexts are uniform and independent of the plaintext.
+  
+  Under these hypotheses, ciphertexts carry zero information
+  --- conditioning on them does not change the conditional entropy of any other variable --- allowing us to strip them from Alice's view.
+  The bounded leakage result $H(V_2, V_3 \mid \mathit{AliceView}) = \log m$ then follows from the algebraic structure alone (one equation, two unknowns, uniform fiber of size~$m$), formalizing Dumas et al.'s underdetermination argument (Lemma~5 in~\cite{dumas2017dual}). The formalization does not construct a simulator (Lemma~7); instead, Lemma~7's semantic security assumption is internalized as the $\mathcal{F}_{\mathrm{HE}}$-hybrid hypotheses, and the IT argument subsumes the underdetermination reasoning.
+\end{quote}
+
+\bibliographystyle{alpha}
+\bibliography{security_notion_survey_references}
+
+\end{document}

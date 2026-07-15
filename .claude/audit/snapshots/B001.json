@@ -1,0 +1,114 @@
+{
+  "fingerprint": "caef3391d529867e",
+  "bad": {
+    "findings": [
+      {
+        "rule_id": "B001",
+        "file": ".claude/audit/fixtures/bad/B001.v",
+        "line_start": 5,
+        "line_end": 5,
+        "lemma_name": "bad_boolP",
+        "severity": "warning",
+        "evidence_quote": "have [/eqP ab|ab] := boolP (a == b).",
+        "closeness": "far",
+        "explanation": "The proof uses the verbose `have [/eqP h|h] := boolP (X == Y)` idiom to split on equality of two nats. MathComp provides `eqVneq` as the canonical eq-or-not splitter: `case: (eqVneq a b) => ab` produces two subgoals with `ab : a = b` and `ab : a != b` respectively, advertising the semantics directly without an intermediate `boolP`/`eqP` view chain.",
+        "fix_sketch": "Replace `have [/eqP ab|ab] := boolP (a == b).` with `case: (eqVneq a b) => ab.` \u2014 produces the same two subgoals (`ab : a = b`, then `ab : a != b`), one fewer view, and matches MathComp's canonical equal-or-not pattern.",
+        "confidence": "high",
+        "stage": "stage2",
+        "escalated_model": "opus"
+      },
+      {
+        "rule_id": "H001",
+        "file": ".claude/audit/fixtures/bad/B001.v",
+        "line_start": 2,
+        "line_end": 2,
+        "lemma_name": "bad_boolP",
+        "severity": "error",
+        "evidence_quote": "(* Fixture: triggers B001. Do NOT compile. *)",
+        "closeness": "far",
+        "explanation": "The only preceding comment is a generic fixture banner that does not describe the lemma `bad_boolP`. It fails the H001 degeneracy check: the stripped content (\"Fixture: triggers B001. Do NOT compile.\") never mentions the entity identifier or its statement, and functions as a file/test header rather than a per-lemma comment.",
+        "fix_sketch": "Add a dedicated `(** bad_boolP \u2014 for nats, equality is decidable (a = b \\/ a <> b). Kind: example (fixture for B001). Why: demonstrates the verbose boolP/eqP split that B001 targets. *)` block immediately above the `Lemma` line.",
+        "confidence": "medium",
+        "stage": "stage2",
+        "escalated_model": "opus"
+      },
+      {
+        "rule_id": "H002",
+        "file": ".claude/audit/fixtures/bad/B001.v",
+        "line_start": 2,
+        "line_end": 2,
+        "lemma_name": "bad_boolP",
+        "severity": "warning",
+        "evidence_quote": "(* Fixture: triggers B001. Do NOT compile. *)",
+        "closeness": "far",
+        "explanation": "Even if the fixture banner were treated as the preceding comment, it fails the four-part checklist: (1) KIND \u2014 no classification (helper/main/example/etc.); (2) WHAT \u2014 no paraphrase of `forall a b : nat, a = b \\/ a <> b`; (3) WHY \u2014 no motivation beyond 'triggers B001'; USED_BY is not required since this is not a helper.",
+        "fix_sketch": "(** bad_boolP \u2014 decidable equality on nat expressed as `a = b \\/ a <> b`.\\n    Kind: example (B001 fixture).\\n    Why: demonstrates the verbose `have [/eqP h|h] := boolP (_ == _)` pattern that B001 flags; the good fixture rewrites it with `case: (eqVneq ...)`. *)",
+        "confidence": "medium",
+        "stage": "stage2",
+        "escalated_model": "opus"
+      },
+      {
+        "rule_id": "S996",
+        "file": "rocq-audit",
+        "line_start": 1,
+        "line_end": 1,
+        "severity": "error",
+        "evidence_quote": "per_commit_token_cap 75000 reached",
+        "closeness": "near",
+        "explanation": "Stage 2 halted: token_cap reached after partial run. 0 chunks deferred. Stage 1 findings still apply, but Stage 2 is incomplete; the commit is blocked so the operator raises the cap or acknowledges the gap.",
+        "fix_sketch": "Split the commit, raise the relevant cap, or re-run with ROCQ_AUDIT_WALL_SECONDS / ROCQ_AUDIT_TOKEN_CAP.",
+        "confidence": "high",
+        "stage": "stage2"
+      }
+    ],
+    "tokens_used": 86624,
+    "budget": {
+      "entity_count": 1,
+      "chunk_count": 1,
+      "chunk_size": 3,
+      "workers_used": 1,
+      "tokens_used": 86624,
+      "tokens_cap": 75000,
+      "wall_ms_used": 97314,
+      "wall_ms_cap": 600000,
+      "deferred_chunks": 0,
+      "stop_reason": "token_cap",
+      "estimated_usd": 0.5197,
+      "model": "sonnet"
+    },
+    "stage2_incomplete": true
+  },
+  "good": {
+    "findings": [
+      {
+        "rule_id": "S998",
+        "file": "rocq-audit",
+        "line_start": 1,
+        "line_end": 1,
+        "severity": "warning",
+        "evidence_quote": "result field not JSON: ```json\n{\n  \"passed\": false,\n  \"findings\": [\n    {\n      \"rule_id\": \"H002\",\n      \"file\": \".claude/audit/fixtures/good/B001.v\",\n      \"line_start\": 1,\n      \"line_end\": 2,\n      \"lemma_name\": \"good_eq",
+        "closeness": "near",
+        "explanation": "Stage 2 call failed for chunk 0; see logs.",
+        "fix_sketch": "Retry the commit. If repeated, check agent configuration.",
+        "confidence": "high",
+        "stage": "stage2"
+      }
+    ],
+    "tokens_used": 0,
+    "budget": {
+      "entity_count": 1,
+      "chunk_count": 1,
+      "chunk_size": 3,
+      "workers_used": 1,
+      "tokens_used": 0,
+      "tokens_cap": 75000,
+      "wall_ms_used": 59096,
+      "wall_ms_cap": 600000,
+      "deferred_chunks": 0,
+      "stop_reason": "clean",
+      "estimated_usd": 0.0,
+      "model": "sonnet"
+    },
+    "stage2_incomplete": false
+  }
+}

@@ -1,0 +1,72 @@
+% pgg-itp-macros.sty
+% Local macros for ITP 2026 PGG card cryptography paper
+%
+% Usage: \usepackage{pgg-itp-macros}
+
+\ProvidesPackage{pgg-itp-macros}
+
+% ========== PGG Framework ==========
+\newcommand{\pgg}{\textsc{PGG}}
+\newcommand{\PGG}{\textsc{PGG}}
+
+% ========== Distance & Entropy ==========
+\newcommand{\dTV}{d_{\mathrm{TV}}}
+\newcommand{\vardist}{\dTV}
+\newcommand{\Ent}{H}
+\newcommand{\Hmin}{H_\infty}
+
+% ========== Word Evaluation ==========
+\newcommand{\weval}{\mathrm{weval}}
+\newcommand{\Ach}{\mathrm{Ach}}
+
+% ========== Groups ==========
+\newcommand{\OC}{\mathrm{OC}}
+\providecommand{\SN}{S_N}
+\newcommand{\PGL}{\mathrm{PGL}}
+
+% ========== Fiber & Covering ==========
+\newcommand{\fib}{\mathrm{fib}}
+\newcommand{\genus}{\mathrm{genus}}
+
+% ========== Adversary & Protocol ==========
+\newcommand{\Adv}{\mathcal{A}}
+\newcommand{\Chal}{\mathcal{C}}
+
+% ========== Spectral Gap ==========
+\newcommand{\gap}{\lambda}
+\newcommand{\gapS}{\lambda_S}
+
+% ========== Monodromies ==========
+\newcommand{\mono}{\mathrm{mono}}
+
+% ========== Protocol Components ==========
+\newcommand{\dealer}{\mathrm{dealer}}
+\newcommand{\player}[1]{\mathrm{player}_{#1}}
+\newcommand{\verif}{\mathrm{verif}}
+
+% ========== Card Symbols ==========
+\newcommand{\card}[1]{\mathtt{c}_{#1}}
+\newcommand{\pos}[1]{\mathtt{p}_{#1}}
+
+% ========== System Names ==========
+\newcommand{\Rocq}{\textsc{Rocq}}
+\newcommand{\MathComp}{\textsc{MathComp}}
+\newcommand{\HB}{\textsc{HB}}
+\newcommand{\piSMC}{$\pi$\textsc{SMC}}
+
+% ========== Math Operators ==========
+\newcommand{\kap}{\kappa}
+\newcommand{\eps}{\varepsilon}
+
+% ========== Special Sets & Structures ==========
+\newcommand{\Zpq}{\mathbb{Z}/pq\mathbb{Z}}
+\newcommand{\Zp}{\mathbb{Z}/p\mathbb{Z}}
+\newcommand{\Zq}{\mathbb{Z}/q\mathbb{Z}}
+\newcommand{\Zn}{\mathbb{Z}/n\mathbb{Z}}
+
+% ========== Bibliography Keys (for consistency) ==========
+% denBoer1989, mizukiSone2009, shinagawaNuida2019,
+% bayerDiaconis1992, diaconis1988, ceccheriniSilberstein2008,
+% ssprove2022, kochWalzer2019
+
+\endinput

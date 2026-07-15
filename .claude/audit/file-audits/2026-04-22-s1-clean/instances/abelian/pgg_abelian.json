@@ -1,0 +1,34 @@
+{
+  "findings": [
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/abelian/pgg_abelian.v",
+      "line_start": 213,
+      "line_end": 213,
+      "lemma_name": "cyclic_search_space_le",
+      "severity": "warning",
+      "evidence_quote": "Lemma cyclic_search_space_le (L : nat) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/abelian/pgg_abelian.v",
+      "line_start": 235,
+      "line_end": 235,
+      "lemma_name": "cyclic_starts_2_uniq",
+      "severity": "warning",
+      "evidence_quote": "Lemma cyclic_starts_2_uniq : uniq cyclic_starts_2.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": null,
+  "exit_code": 0
+}

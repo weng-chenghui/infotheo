@@ -1,0 +1,112 @@
+{
+  "fingerprint": "4ded68902e6e8ee8",
+  "bad": {
+    "findings": [
+      {
+        "rule_id": "G001",
+        "file": ".claude/audit/fixtures/bad/G001.v",
+        "line_start": 2,
+        "line_end": 3,
+        "lemma_name": "fooP",
+        "severity": "warning",
+        "evidence_quote": "Lemma fooP : 1 + 1 = 2.",
+        "closeness": "far",
+        "explanation": "The suffix `P` signals a boolean-reflection lemma (`reflect P b`) per AUTHORITY.md. The statement `1 + 1 = 2` is a Prop equation, not a reflection. The canonical MathComp suffix for an equational rewrite is `E`. The mismatch is clear: `P` promises a reflect-shaped statement; the body delivers `lhs = rhs`.",
+        "fix_sketch": "Rename to `Lemma foo_E : 1 + 1 = 2.`",
+        "confidence": "high",
+        "stage": "stage2"
+      },
+      {
+        "rule_id": "G001",
+        "file": ".claude/audit/fixtures/bad/G001.v",
+        "line_start": 5,
+        "line_end": 6,
+        "lemma_name": "schreier_gen_count_lemma",
+        "severity": "warning",
+        "evidence_quote": "Lemma schreier_gen_count_lemma : forall n, n = n.",
+        "closeness": "far",
+        "explanation": "The suffix `_lemma` is a redundant kind-suffix. It does not appear in the AUTHORITY.md suffix table and encodes no semantic role \u2014 it merely restates that the entity is a lemma. The statement `forall n, n = n` is an identity equation; the canonical suffix for an equational rewrite is `_E`. Dropping `_lemma` and applying a meaningful suffix is required.",
+        "fix_sketch": "Rename to `schreier_gen_count_E` (equation suffix) or to the plain `schreier_gen_count` if no suffix is semantically justified for this trivial identity.",
+        "confidence": "high",
+        "stage": "stage2"
+      },
+      {
+        "rule_id": "F001",
+        "file": ".claude/audit/fixtures/bad/G001.v",
+        "line_start": 5,
+        "line_end": 6,
+        "lemma_name": "schreier_gen_count_lemma",
+        "severity": "warning",
+        "evidence_quote": "Lemma schreier_gen_count_lemma : forall n, n = n.",
+        "closeness": "far",
+        "explanation": "The name `schreier_gen_count_lemma` has four underscore-separated lowercase components (`schreier`, `gen`, `count`, `lemma`), meeting the F001 threshold of four-or-more components. None of the F001 exceptions (`^in_`, `^mem_`, `^card_`, `_of_`) apply. The main symbol is unclear; pure snake-case with a non-canonical tail hides the semantic role. Per AUTHORITY.md the grammar is `mainSymbol_suffixes(_condition)?`.",
+        "fix_sketch": "Identify the main symbol: either `schreier_gen_count` (three components, borderline acceptable if `count` is the main symbol) with a canonical suffix appended, or collapse to camelCase `schreierGenCount`. Example idiomatic renames: `schreier_gen_count_E` (equation), `schreierGenCount` (camelCase).",
+        "confidence": "high",
+        "stage": "stage2"
+      },
+      {
+        "rule_id": "H001",
+        "file": ".claude/audit/fixtures/bad/G001.v",
+        "line_start": 5,
+        "line_end": 6,
+        "lemma_name": "schreier_gen_count_lemma",
+        "severity": "error",
+        "evidence_quote": "",
+        "closeness": "far",
+        "explanation": "Lemma `schreier_gen_count_lemma` at line 5 has no preceding comment block. Walking upward from line 5: line 4 is blank; line 3 is `Proof. by []. Qed.` belonging to the prior lemma `fooP`. No comment block is reachable before a non-comment, non-blank line. Per AUTHORITY.md every Lemma must carry a preceding `(** ... *)` block covering classification, statement summary, motivation, and downstream consumers. Stage 1 findings list is empty, so this is not a duplication.",
+        "fix_sketch": "Add immediately above line 5:\n(** schreier_gen_count_lemma \u2014 every n equals itself (nat reflexivity).\n    Kind: helper.\n    Why: <motivation>.\n    Used by: <downstream consumer>. *)",
+        "confidence": "high",
+        "stage": "stage2"
+      },
+      {
+        "rule_id": "H002",
+        "file": ".claude/audit/fixtures/bad/G001.v",
+        "line_start": 1,
+        "line_end": 2,
+        "lemma_name": "fooP",
+        "severity": "warning",
+        "evidence_quote": "(* Fixture: triggers G001. Do NOT compile. *)",
+        "closeness": "far",
+        "explanation": "The preceding comment for `fooP` is a generic fixture-file header describing the file's test purpose, not the lemma. All four H002 checklist parts fail. (1) KIND: no helper/main/canonical/example classification is present. (2) WHAT: the comment does not paraphrase `1 + 1 = 2`; mentioning `G001` is a rule-ID reference, not a statement summary. (3) WHY: no motivation is given; WHY is not waived because `P` is not an algebraic-law suffix and the WHAT clause does not name a downstream use-site. (4) USED_BY: Kind is undetermined so cannot confirm the omission is acceptable.",
+        "fix_sketch": "Replace the fixture header above `fooP` with a lemma-specific block:\n(** fooP \u2014 1+1 equals 2; fixture demonstrating the G001 suffix-mismatch rule.\n    Kind: example.\n    Why: exercises G001 detection in the audit fixture suite. *)",
+        "confidence": "high",
+        "stage": "stage2"
+      }
+    ],
+    "tokens_used": 41165,
+    "budget": {
+      "entity_count": 1,
+      "chunk_count": 1,
+      "chunk_size": 3,
+      "workers_used": 1,
+      "tokens_used": 41165,
+      "tokens_cap": 75000,
+      "wall_ms_used": 102350,
+      "wall_ms_cap": 600000,
+      "deferred_chunks": 0,
+      "stop_reason": "clean",
+      "estimated_usd": 0.247,
+      "model": "sonnet"
+    },
+    "stage2_incomplete": false
+  },
+  "good": {
+    "findings": [],
+    "tokens_used": 36855,
+    "budget": {
+      "entity_count": 1,
+      "chunk_count": 1,
+      "chunk_size": 3,
+      "workers_used": 1,
+      "tokens_used": 36855,
+      "tokens_cap": 75000,
+      "wall_ms_used": 64659,
+      "wall_ms_cap": 600000,
+      "deferred_chunks": 0,
+      "stop_reason": "clean",
+      "estimated_usd": 0.2211,
+      "model": "sonnet"
+    },
+    "stage2_incomplete": false
+  }
+}

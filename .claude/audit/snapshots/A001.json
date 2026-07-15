@@ -1,0 +1,113 @@
+{
+  "fingerprint": "b1123339a8eba048",
+  "bad": {
+    "findings": [
+      {
+        "rule_id": "A001",
+        "file": ".claude/audit/fixtures/bad/A001.v",
+        "line_start": 5,
+        "line_end": 5,
+        "lemma_name": "bad_pose",
+        "severity": "error",
+        "evidence_quote": "pose proof (ltn0Sn n) as Hn.",
+        "closeness": "far",
+        "explanation": "The tactic `pose proof (ltn0Sn n) as Hn.` is Ltac1-era and does not compose with SSReflect's view infrastructure (`move/`, `apply:`, `move=>`). Per MathComp CONTRIBUTING \u00a7proofs, the idiomatic replacement is `have Hn := ltn0Sn n.` (or the annotated form `have Hn : 0 < n.+1 := ltn0Sn n.`). The `have` form is a term-level forward-reasoning primitive that integrates cleanly with the SSReflect proof flow and allows further view applications.",
+        "fix_sketch": "Replace `pose proof (ltn0Sn n) as Hn.` with:\n  have Hn := ltn0Sn n.\nor, with explicit type annotation:\n  have Hn : 0 < n.+1 := ltn0Sn n.\nThe remainder of the proof (`exact: Hn.`) is unchanged.",
+        "confidence": "high",
+        "stage": "stage2"
+      },
+      {
+        "rule_id": "H002",
+        "file": ".claude/audit/fixtures/bad/A001.v",
+        "line_start": 1,
+        "line_end": 2,
+        "lemma_name": "bad_pose",
+        "severity": "warning",
+        "evidence_quote": "(* Fixture: triggers A001. Do NOT compile. *)",
+        "closeness": "far",
+        "explanation": "The preceding comment fails three of the four H002 checklist parts. (1) KIND absent: no classification (helper/main/canonical/etc.) is given. (2) WHAT absent: the comment does not paraphrase the statement `forall n : nat, 0 < n.+1`; it only identifies the file as a trigger fixture. (3) WHY absent: no motivation is provided; the WHY waiver does not apply because `bad_pose` carries no MathComp algebraic-law suffix. (4) USED_BY: not required until Kind is established as helper, but no downstream consumer is named.",
+        "fix_sketch": "(** bad_pose \u2014 0 < n.+1 for every natural n (positivity of successors).\n    Kind: helper.\n    Why: fixture demonstrating A001 (pose proof antipattern); consumed by the audit lint pipeline.\n    Used by: audit lint pipeline / A001 fixture tests. *)\nLemma bad_pose : forall n : nat, 0 < n.+1.",
+        "confidence": "medium",
+        "stage": "stage2"
+      },
+      {
+        "rule_id": "G001",
+        "file": ".claude/audit/fixtures/bad/A001.v",
+        "line_start": 2,
+        "line_end": 2,
+        "lemma_name": "bad_pose",
+        "severity": "warning",
+        "evidence_quote": "Lemma bad_pose : forall n : nat, 0 < n.+1.",
+        "closeness": "far",
+        "explanation": "The suffix `pose` in `bad_pose` is not a canonical MathComp suffix per AUTHORITY.md. The statement `forall n : nat, 0 < n.+1` is a strict positivity result; the expected MathComp suffix family is `_gt0` (strict lower bound by zero). The component `bad` is a generic drift token with no relation to the main symbol. A conforming name would be `succn_gt0` (main symbol `succn`, suffix `_gt0`) or `ltn0Sn_alt` if this is intentionally aliasing the standard library lemma of the same shape.",
+        "fix_sketch": "Rename to `succn_gt0` (reflecting `0 < n.+1` directly) or `ltn0Sn_alt` (if aliasing the standard `ltn0Sn`). Update any call sites outside this fixture file if the rename is applied.",
+        "confidence": "medium",
+        "stage": "stage2"
+      }
+    ],
+    "tokens_used": 38943,
+    "budget": {
+      "entity_count": 1,
+      "chunk_count": 1,
+      "chunk_size": 3,
+      "workers_used": 1,
+      "tokens_used": 38943,
+      "tokens_cap": 75000,
+      "wall_ms_used": 72585,
+      "wall_ms_cap": 600000,
+      "deferred_chunks": 0,
+      "stop_reason": "clean",
+      "estimated_usd": 0.2337,
+      "model": "sonnet"
+    },
+    "stage2_incomplete": false
+  },
+  "good": {
+    "findings": [
+      {
+        "rule_id": "G001",
+        "file": ".claude/audit/fixtures/good/A001.v",
+        "line_start": 2,
+        "line_end": 2,
+        "lemma_name": "good_have",
+        "severity": "warning",
+        "evidence_quote": "Lemma good_have : forall n : nat, 0 < n.+1.",
+        "closeness": "near",
+        "explanation": "The declared name `good_have` uses `have` as its tail component. `have` does not appear in the MathComp suffix table in AUTHORITY.md and does not describe the semantic role of the statement. The statement shape `0 < n.+1` is a strict-positivity fact; the canonical suffix would be `_gt0` (cf. MathComp's `ltn0Sn`) or the whole name could mirror the wrapped lemma. The name was chosen to advertise the tactic idiom rather than mathematical content, which is non-idiomatic in a MathComp identifier regardless of the fixture context.",
+        "fix_sketch": "Option 1: rename to `ltn0Sn_n` (shadows the MathComp lemma being used). Option 2: rename to `n_Sn_gt0`. Option 3: keep `good_have` but add an inline justification \u2014 `(* Naming: intentional; fixture demonstrating the have tactic idiom for the A001 audit rule. *)` \u2014 so future audit runs suppress this finding via the Naming-waiver path.",
+        "confidence": "medium",
+        "stage": "stage2"
+      },
+      {
+        "rule_id": "H002",
+        "file": ".claude/audit/fixtures/good/A001.v",
+        "line_start": 1,
+        "line_end": 1,
+        "lemma_name": "good_have",
+        "severity": "warning",
+        "evidence_quote": "(* Fixture: no A001 violation. Do NOT compile. *)",
+        "closeness": "near",
+        "explanation": "The physically-preceding comment is a file-level fixture annotation, not a per-lemma documentation block. Three of the four H002 parts fail. (1) KIND absent: no classification as helper, main, or equivalent is present. (2) WHAT absent: the comment describes the fixture's audit role but never paraphrases the mathematical statement `0 < n.+1`. (3) WHY absent: no motivation is given; `good_have` does not carry a MathComp algebraic-law suffix (_A, _C, _K, _D, _I, _V, _X, _Mn, _Z), so the waiver does not apply. USED_BY is not required until Kind is established as helper.",
+        "fix_sketch": "(** good_have \u2014 0 is strictly less than n.+1 for every nat n.\n    Kind: helper (audit fixture for A001).\n    Why: demonstrates the idiomatic `have H := term` form required by the A001 good-fixture test.\n    Used by: audit fixture test suite (.claude/audit/fixtures/good/A001.v). *)",
+        "confidence": "medium",
+        "stage": "stage2"
+      }
+    ],
+    "tokens_used": 38878,
+    "budget": {
+      "entity_count": 1,
+      "chunk_count": 1,
+      "chunk_size": 3,
+      "workers_used": 1,
+      "tokens_used": 38878,
+      "tokens_cap": 75000,
+      "wall_ms_used": 81345,
+      "wall_ms_cap": 600000,
+      "deferred_chunks": 0,
+      "stop_reason": "clean",
+      "estimated_usd": 0.2333,
+      "model": "sonnet"
+    },
+    "stage2_incomplete": false
+  }
+}

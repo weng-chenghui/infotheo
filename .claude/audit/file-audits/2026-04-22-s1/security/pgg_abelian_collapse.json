@@ -1,0 +1,47 @@
+{
+  "findings": [
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/security/pgg_abelian_collapse.v",
+      "line_start": 48,
+      "line_end": 48,
+      "lemma_name": "one_eval_determines_perm",
+      "severity": "warning",
+      "evidence_quote": "Lemma one_eval_determines_perm (g1 g2 : gT) (s : 'I_N) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/security/pgg_abelian_collapse.v",
+      "line_start": 87,
+      "line_end": 87,
+      "lemma_name": "abelian_adversary_full_recovery",
+      "severity": "warning",
+      "evidence_quote": "Lemma abelian_adversary_full_recovery (w1 w2 : pgg_word M L) (s : 'I_N) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/security/pgg_abelian_collapse.v",
+      "line_start": 48,
+      "line_end": 48,
+      "lemma_name": "one_eval_determines_perm",
+      "severity": "error",
+      "evidence_quote": "Lemma one_eval_determines_perm (g1 g2 : gT) (s : 'I_N) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": null,
+  "exit_code": 2
+}

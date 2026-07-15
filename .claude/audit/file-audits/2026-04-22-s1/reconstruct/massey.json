@@ -1,0 +1,294 @@
+{
+  "findings": [
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/reconstruct/massey.v",
+      "line_start": 344,
+      "line_end": 344,
+      "lemma_name": "mds_min_dist_eq",
+      "severity": "warning",
+      "evidence_quote": "Lemma mds_min_dist_eq : d = (n - k + 1)%N.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/massey.v",
+      "line_start": 43,
+      "line_end": 43,
+      "lemma_name": "tuple_to_rV",
+      "severity": "error",
+      "evidence_quote": "Definition tuple_to_rV (t : m.-tuple F) : 'rV[F]_m :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/massey.v",
+      "line_start": 46,
+      "line_end": 46,
+      "lemma_name": "rV_to_tuple",
+      "severity": "error",
+      "evidence_quote": "Definition rV_to_tuple (v : 'rV[F]_m) : m.-tuple F :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/massey.v",
+      "line_start": 49,
+      "line_end": 49,
+      "lemma_name": "rV_to_tupleK",
+      "severity": "error",
+      "evidence_quote": "Lemma rV_to_tupleK (v : 'rV[F]_m) : tuple_to_rV (rV_to_tuple v) = v.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/massey.v",
+      "line_start": 52,
+      "line_end": 52,
+      "lemma_name": "tuple_to_rVK",
+      "severity": "error",
+      "evidence_quote": "Lemma tuple_to_rVK (t : m.-tuple F) : rV_to_tuple (tuple_to_rV t) = t.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/massey.v",
+      "line_start": 58,
+      "line_end": 58,
+      "lemma_name": "tuple_to_rV_tnth",
+      "severity": "error",
+      "evidence_quote": "Lemma tuple_to_rV_tnth (t : m.-tuple F) (i : 'I_m) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/massey.v",
+      "line_start": 85,
+      "line_end": 85,
+      "lemma_name": "massey_codeword0",
+      "severity": "error",
+      "evidence_quote": "Lemma massey_codeword0 (s : F) (shares : 'rV[F]_n'.+1) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/massey.v",
+      "line_start": 99,
+      "line_end": 99,
+      "lemma_name": "massey_codewordS",
+      "severity": "error",
+      "evidence_quote": "Lemma massey_codewordS (s : F) (shares : 'rV[F]_n'.+1) (j : 'I_n'.+1) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/massey.v",
+      "line_start": 148,
+      "line_end": 148,
+      "lemma_name": "massey_reconstruct_correct",
+      "severity": "error",
+      "evidence_quote": "Lemma massey_reconstruct_correct (s : F) (shares : 'rV[F]_n'.+1) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/massey.v",
+      "line_start": 188,
+      "line_end": 188,
+      "lemma_name": "lift_coalition",
+      "severity": "error",
+      "evidence_quote": "Definition lift_coalition (coal : {set 'I_n'.+1}) : {set 'I_n} :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/massey.v",
+      "line_start": 191,
+      "line_end": 191,
+      "lemma_name": "lift_share_inj",
+      "severity": "error",
+      "evidence_quote": "Lemma lift_share_inj : injective lift_share.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/massey.v",
+      "line_start": 194,
+      "line_end": 194,
+      "lemma_name": "lift_coalition_card",
+      "severity": "error",
+      "evidence_quote": "Lemma lift_coalition_card (coal : {set 'I_n'.+1}) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/massey.v",
+      "line_start": 198,
+      "line_end": 198,
+      "lemma_name": "ord0_notin_lift",
+      "severity": "error",
+      "evidence_quote": "Lemma ord0_notin_lift (coal : {set 'I_n'.+1}) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/massey.v",
+      "line_start": 206,
+      "line_end": 206,
+      "lemma_name": "card_S_bound",
+      "severity": "error",
+      "evidence_quote": "Lemma card_S_bound (coal : {set 'I_n'.+1}) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/massey.v",
+      "line_start": 262,
+      "line_end": 262,
+      "lemma_name": "massey_encode",
+      "severity": "error",
+      "evidence_quote": "Definition massey_encode (s : F) : 'rV[F]_n'.+1 :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/massey.v",
+      "line_start": 266,
+      "line_end": 266,
+      "lemma_name": "massey_encode_codeword",
+      "severity": "error",
+      "evidence_quote": "Lemma massey_encode_codeword (s : F) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/massey.v",
+      "line_start": 283,
+      "line_end": 283,
+      "lemma_name": "massey_recon_tuple",
+      "severity": "error",
+      "evidence_quote": "Definition massey_recon_tuple (shares : n'.+1.-tuple F) : F :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/massey.v",
+      "line_start": 286,
+      "line_end": 286,
+      "lemma_name": "massey_correct_tuple",
+      "severity": "error",
+      "evidence_quote": "Lemma massey_correct_tuple (s : F) (shares : n'.+1.-tuple F) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/massey.v",
+      "line_start": 291,
+      "line_end": 291,
+      "lemma_name": "massey_private_tuple",
+      "severity": "error",
+      "evidence_quote": "Lemma massey_private_tuple (s1 s2 : F) (shares : n'.+1.-tuple F)",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/massey.v",
+      "line_start": 308,
+      "line_end": 308,
+      "lemma_name": "massey_encode_tuple",
+      "severity": "error",
+      "evidence_quote": "Definition massey_encode_tuple (s : F) : n'.+1.-tuple F :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/massey.v",
+      "line_start": 311,
+      "line_end": 311,
+      "lemma_name": "massey_encode_valid",
+      "severity": "error",
+      "evidence_quote": "Lemma massey_encode_valid (s : F) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/massey.v",
+      "line_start": 318,
+      "line_end": 318,
+      "lemma_name": "massey_scheme",
+      "severity": "error",
+      "evidence_quote": "Definition massey_scheme : ThresholdScheme F F :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": null,
+  "exit_code": 2
+}

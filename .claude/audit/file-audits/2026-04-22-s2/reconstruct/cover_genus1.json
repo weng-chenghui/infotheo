@@ -1,0 +1,76 @@
+{
+  "findings": [
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/reconstruct/cover_genus1.v",
+      "line_start": 85,
+      "line_end": 85,
+      "lemma_name": "genus1_ramif_ge_nbr",
+      "severity": "warning",
+      "evidence_quote": "Lemma genus1_ramif_ge_nbr : (3 <= ramif1)%N.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/reconstruct/cover_genus1.v",
+      "line_start": 463,
+      "line_end": 463,
+      "lemma_name": "ts_g_perm_compatible",
+      "severity": "warning",
+      "evidence_quote": "Lemma ts_g_perm_compatible :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/reconstruct/cover_genus1.v",
+      "line_start": 492,
+      "line_end": 492,
+      "lemma_name": "higher_genus_gap_bound",
+      "severity": "warning",
+      "evidence_quote": "Lemma higher_genus_gap_bound :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "S998",
+      "file": "rocq-audit",
+      "line_start": 1,
+      "line_end": 1,
+      "severity": "warning",
+      "evidence_quote": "agent rc=1: ",
+      "closeness": "near",
+      "explanation": "Stage 2 call failed for chunk 3; see logs.",
+      "fix_sketch": "Retry the commit. If repeated, check agent configuration.",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": {
+    "entity_count": 97,
+    "chunk_count": 10,
+    "chunk_size": 10,
+    "workers_used": 4,
+    "tokens_used": 0,
+    "tokens_cap": 20000000,
+    "wall_ms_used": 9811,
+    "wall_ms_cap": 1800000,
+    "deferred_chunks": 0,
+    "stop_reason": "clean",
+    "estimated_usd": 0.0,
+    "model": "sonnet"
+  },
+  "exit_code": 0
+}

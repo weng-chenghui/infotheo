@@ -1,0 +1,19 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{c}{(*}\PYG{c}{ Pack session\PYGZhy{}typed processes with automatic fuel extraction }\PYG{c}{*)}
+\PYG{k+kn}{Definition} \PYG{n}{procs} \PYG{o}{:=} \PYG{o}{[}\PYG{n}{aprocs} \PYG{n}{palice}\PYG{o}{;} \PYG{n}{pbob}\PYG{o}{;} \PYG{n}{pcharlie}\PYG{o}{]}\PYG{o}{.}
+
+\PYG{c}{(*}\PYG{c}{ Termination: inferred fuel is sufficient }\PYG{c}{*)}
+\PYG{k+kn}{Lemma} \PYG{n}{dsdp\PYGZus{}terminates} \PYG{o}{:}
+  \PYG{n}{all\PYGZus{}final} \PYG{o}{(}\PYG{n}{run\PYGZus{}sprocs} \PYG{n}{procs}\PYG{o}{)}\PYG{o}{.}\PYG{l+m+mi}{1}\PYG{o}{.}
+\PYG{k+kn}{Proof}\PYG{o}{.} \PYG{k+kp}{reflexivity}\PYG{o}{.} \PYG{k+kn}{Qed}\PYG{o}{.}
+
+\PYG{c}{(*}\PYG{c}{ Duality: all channel pairs are compatible }\PYG{c}{*)}
+\PYG{k+kn}{Lemma} \PYG{n}{alice\PYGZus{}bob\PYGZus{}dual} \PYG{o}{:} \PYG{n}{channels\PYGZus{}dual} \PYG{n}{aproc\PYGZus{}alice} \PYG{n}{aproc\PYGZus{}bob} \PYG{o}{=} \PYG{n+nb+bp}{true}\PYG{o}{.}
+\PYG{k+kn}{Proof}\PYG{o}{.} \PYG{k+kp}{by} \PYG{k}{native\PYGZus{}compute}\PYG{o}{.} \PYG{k+kn}{Qed}\PYG{o}{.}
+
+\PYG{k+kn}{Lemma} \PYG{n}{alice\PYGZus{}charlie\PYGZus{}dual} \PYG{o}{:} \PYG{n}{channels\PYGZus{}dual} \PYG{n}{aproc\PYGZus{}alice} \PYG{n}{aproc\PYGZus{}charlie} \PYG{o}{=} \PYG{n+nb+bp}{true}\PYG{o}{.}
+\PYG{k+kn}{Proof}\PYG{o}{.} \PYG{k+kp}{by} \PYG{k}{native\PYGZus{}compute}\PYG{o}{.} \PYG{k+kn}{Qed}\PYG{o}{.}
+
+\PYG{k+kn}{Lemma} \PYG{n}{bob\PYGZus{}charlie\PYGZus{}dual} \PYG{o}{:} \PYG{n}{channels\PYGZus{}dual} \PYG{n}{aproc\PYGZus{}bob} \PYG{n}{aproc\PYGZus{}charlie} \PYG{o}{=} \PYG{n+nb+bp}{true}\PYG{o}{.}
+\PYG{k+kn}{Proof}\PYG{o}{.} \PYG{k+kp}{by} \PYG{k}{native\PYGZus{}compute}\PYG{o}{.} \PYG{k+kn}{Qed}\PYG{o}{.}
+\end{MintedVerbatim}

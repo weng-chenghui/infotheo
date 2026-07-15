@@ -1,0 +1,73 @@
+{
+  "findings": [
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/reconstruct/pgg_sum_mod.v",
+      "line_start": 82,
+      "line_end": 82,
+      "lemma_name": "sum_mod_single_sheet",
+      "severity": "warning",
+      "evidence_quote": "Lemma sum_mod_single_sheet :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/reconstruct/pgg_sum_mod.v",
+      "line_start": 137,
+      "line_end": 137,
+      "lemma_name": "id_preserves_sum_mod",
+      "severity": "warning",
+      "evidence_quote": "Lemma id_preserves_sum_mod :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/reconstruct/pgg_sum_mod.v",
+      "line_start": 144,
+      "line_end": 144,
+      "lemma_name": "comp_preserves_sum_mod",
+      "severity": "warning",
+      "evidence_quote": "Lemma comp_preserves_sum_mod (sigma1 sigma2 : {perm 'I_N}) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/reconstruct/pgg_sum_mod.v",
+      "line_start": 258,
+      "line_end": 258,
+      "lemma_name": "partial_sum_no_info",
+      "severity": "warning",
+      "evidence_quote": "Lemma partial_sum_no_info :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/pgg_sum_mod.v",
+      "line_start": 82,
+      "line_end": 82,
+      "lemma_name": "sum_mod_single_sheet",
+      "severity": "error",
+      "evidence_quote": "Lemma sum_mod_single_sheet :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": null,
+  "exit_code": 2
+}

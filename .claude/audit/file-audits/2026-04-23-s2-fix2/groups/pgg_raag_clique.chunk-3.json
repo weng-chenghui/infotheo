@@ -1,0 +1,520 @@
+{
+  "findings": [
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 1077,
+      "line_end": 1077,
+      "lemma_name": "pos_eq_sneg_range",
+      "severity": "warning",
+      "evidence_quote": "Lemma pos_eq_sneg_range Tg r L :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 1088,
+      "line_end": 1088,
+      "lemma_name": "neg_eq_spos_sub",
+      "severity": "warning",
+      "evidence_quote": "Lemma neg_eq_spos_sub Tg r L :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 1140,
+      "line_end": 1140,
+      "lemma_name": "clique_traces_aux_inv_abelian",
+      "severity": "warning",
+      "evidence_quote": "Lemma clique_traces_aux_inv_abelian Tg n memo :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 1193,
+      "line_end": 1194,
+      "lemma_name": "free_growth_check",
+      "severity": "warning",
+      "evidence_quote": "Lemma free_growth_check : [seq clique_traces 3 L (fun _ _ => false) | L <- iota 0 5]",
+      "closeness": "near",
+      "explanation": "The name free_growth_check has three underscore-separated lowercase components. The suffix _check does not appear in the MathComp canonical suffix table (AUTHORITY.md). The composition reads as condition_mainSymbol_informalSuffix rather than the canonical mainSymbol_suffixes(_condition)? grammar. Stage 1 flagged sibling lemmas cartier_foata_check_free3 and cartier_foata_check_abelian3 in the same file for the same pattern; this lemma was not in the staged diff at the time but exhibits the same drift.",
+      "fix_sketch": "Rename to free_growth_E (equation suffix per AUTHORITY.md) or clique_traces_free3_E. For a consistent family, use free_growth_E / abelian_growth_E / star3_growth_E.",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 1198,
+      "line_end": 1199,
+      "lemma_name": "abelian_growth_check",
+      "severity": "warning",
+      "evidence_quote": "Lemma abelian_growth_check : [seq clique_traces 3 L complete_comm_nat | L <- iota 0 5]",
+      "closeness": "near",
+      "explanation": "The name abelian_growth_check has three underscore-separated lowercase components. The suffix _check does not appear in the MathComp canonical suffix table (AUTHORITY.md). Composition does not follow mainSymbol_suffixes(_condition)?. The same drift was flagged by Stage 1 for cartier_foata_check_abelian3 and cartier_foata_check_abelian4 in this file.",
+      "fix_sketch": "Rename to abelian_growth_E or clique_traces_abelian3_E.",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 1209,
+      "line_end": 1211,
+      "lemma_name": "star3_growth_check",
+      "severity": "warning",
+      "evidence_quote": "Lemma star3_growth_check :\n  [seq clique_traces 4 L (star_comm_nat 3) | L <- iota 0 6]",
+      "closeness": "near",
+      "explanation": "The name star3_growth_check has three underscore-separated components and the suffix _check is not canonical per AUTHORITY.md. The composition does not follow mainSymbol_suffixes(_condition)?. Stage 1 flagged cartier_foata_check_star3 in the same file for the same family.",
+      "fix_sketch": "Rename to star3_growth_E or clique_traces_star3_E.",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 1244,
+      "line_end": 1244,
+      "lemma_name": "cartier_foata_check_free3",
+      "severity": "warning",
+      "evidence_quote": "Lemma cartier_foata_check_free3 :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 1255,
+      "line_end": 1255,
+      "lemma_name": "cartier_foata_check_abelian3",
+      "severity": "warning",
+      "evidence_quote": "Lemma cartier_foata_check_abelian3 :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 1266,
+      "line_end": 1266,
+      "lemma_name": "cartier_foata_check_path3",
+      "severity": "warning",
+      "evidence_quote": "Lemma cartier_foata_check_path3 :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 1277,
+      "line_end": 1277,
+      "lemma_name": "cartier_foata_check_star3",
+      "severity": "warning",
+      "evidence_quote": "Lemma cartier_foata_check_star3 :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 1288,
+      "line_end": 1288,
+      "lemma_name": "cartier_foata_check_abelian4",
+      "severity": "warning",
+      "evidence_quote": "Lemma cartier_foata_check_abelian4 :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 939,
+      "line_end": 939,
+      "lemma_name": "spos_pascal_core",
+      "severity": "warning",
+      "evidence_quote": "Lemma spos_pascal_core n r L :",
+      "closeness": "near",
+      "explanation": "The statement is an equation of the form `sumn [...] = sumn [...] + sumn [...]`, whose idiomatic MathComp suffix per AUTHORITY.md's suffix table is `E` (equation / rewrite). The tail `_core` is a generic drift token describing the lemma's role as a building block rather than its semantic shape, so a reader searching by suffix convention gets no signal about what the lemma proves. The name also exceeds three lowercase underscore-separated components without a canonical suffix.",
+      "fix_sketch": "Rename to reflect the equational role, e.g. `spos_pascalE_core` (main symbol `spos_pascal`, suffix `E`, condition `_core`) or the more idiomatic `spos_pascal_decompE`. If `_core` is meant to indicate a helper step toward a headline `spos_pascal`, collapse to `spos_pascalE` and make the headline lemma the `_pascal` entry point.",
+      "confidence": "medium",
+      "stage": "stage2",
+      "escalated_model": "opus",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 971,
+      "line_end": 971,
+      "lemma_name": "sneg_pascal_core",
+      "severity": "warning",
+      "evidence_quote": "Lemma sneg_pascal_core n r L :",
+      "closeness": "near",
+      "explanation": "Same drift as `spos_pascal_core`. The statement is an equation `sumn [...] = sumn [...] + sumn [...]`, so the MathComp suffix convention asks for `E`. The actual tail `_core` is generic and does not match the semantic role declared by the suffix table in AUTHORITY.md.",
+      "fix_sketch": "Rename to `sneg_pascalE_core` or preferably `sneg_pascalE` to signal the equational rewrite. Coordinate with `spos_pascal_core` so the pair remains visually parallel.",
+      "confidence": "medium",
+      "stage": "stage2",
+      "escalated_model": "opus",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 1077,
+      "line_end": 1081,
+      "lemma_name": "pos_eq_sneg_range",
+      "severity": "warning",
+      "evidence_quote": "Lemma pos_eq_sneg_range Tg r L :\n  sumn [seq 'C(Tg, k) * 'C(L - k + r, r)\n       | k <- [seq k <- iota 1 L | odd k]] =\n  sneg Tg r L.",
+      "closeness": "near",
+      "explanation": "The conclusion is equational (lhs = sneg Tg r L), so the canonical MathComp suffix per AUTHORITY.md is E. The name embeds _eq_ as a mid-name connector rather than placing the E suffix at the tail. The grammar mainSymbol_suffix(_condition)? requires the suffix to appear after the main symbol, not interpolated between two symbols. Stage 1 already flagged F001 at the declaration line for the four-component shape; this G001 finding is at the distinct suffix-semantics scope: the suffix mismatch applies regardless of component count.",
+      "fix_sketch": "Rename to `sneg_rangeE` (main symbol sneg_range, suffix E) or `pos_sneg_rangeE` if the parity-condition prefix is considered part of the main symbol. Coordinate the rename with the paired neg_eq_spos_sub: both names should resolve to the same suffix discipline. Update the call site at clique_step_abelian line 1124.",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 1088,
+      "line_end": 1092,
+      "lemma_name": "neg_eq_spos_sub",
+      "severity": "warning",
+      "evidence_quote": "Lemma neg_eq_spos_sub Tg r L :\n  sumn [seq 'C(Tg, k) * 'C(L - k + r, r)\n       | k <- [seq k <- iota 1 L | ~~ odd k]] =\n  spos Tg r L - 'C(L + r, r).",
+      "closeness": "near",
+      "explanation": "The conclusion is equational (lhs = spos Tg r L - 'C(L+r, r)), so the canonical MathComp suffix is E. The name places _eq_ mid-name rather than using the terminating E suffix. AUTHORITY.md maps equational rewrites to the E suffix in the mainSymbol_suffix(_condition)? grammar. Stage 1 already flagged F001 at the declaration line; this G001 finding addresses the suffix-role mismatch specifically.",
+      "fix_sketch": "Rename to `spos_sub_negE` (main symbol spos_sub, suffix E, condition neg) to mirror a corrected pos_sneg_rangeE. Update the call site at clique_step_abelian line 1124.",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 1100,
+      "line_end": 1103,
+      "lemma_name": "clique_step_abelian",
+      "severity": "warning",
+      "evidence_quote": "Lemma clique_step_abelian Tg memo :\n  0 < Tg -> 0 < size memo ->\n  (forall i, i < size memo -> nth 0 memo i = 'C(i + Tg.-1, Tg.-1)) ->\n  clique_step Tg complete_comm_nat memo = 'C(size memo + Tg.-1, Tg.-1).",
+      "closeness": "near",
+      "explanation": "The principal conclusion is equational (clique_step ... = 'C(size memo + Tg.-1, Tg.-1)), so per AUTHORITY.md the MathComp suffix for this semantic role is E. The name carries abelian as a condition suffix but has no E suffix at all. The grammar mainSymbol_suffix(_condition)? would yield clique_stepE_abelian or clique_step_E_abelian. The missing E suffix means readers searching for equational rewrite lemmas by suffix will not find this lemma. Stage 1 did not flag this name (three components, below the F001 threshold), so this is a pure G001 finding.",
+      "fix_sketch": "Rename to `clique_stepE_abelian` (suffix E placed immediately after main symbol, condition abelian at tail). Alternatively `clique_step_abelianE` is accepted by some Infotheo conventions but places the equational marker after the condition, which is less canonical. Update the two call sites in clique_traces_aux_inv_abelian (lines 1152 and 1162).",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 1193,
+      "line_end": 1195,
+      "lemma_name": "free_growth_check",
+      "severity": "warning",
+      "evidence_quote": "Lemma free_growth_check : [seq clique_traces 3 L (fun _ _ => false) | L <- iota 0 5]\n  = [:: 1; 3; 9; 27; 81].",
+      "closeness": "near",
+      "explanation": "The statement is a list equation (lhs = rhs). Per AUTHORITY.md the canonical suffix for equational rewrites is _E. The suffix _check carries no recognized semantic role in the MathComp suffix table and does not advertise the equational shape. Proposed rename: free_growth_E. If the intent is to express 3^L growth, free_traces_pow_E would also be idiomatic.",
+      "fix_sketch": "Rename free_growth_check to free_growth_E. Apply consistently across the check family: abelian_growth_E, star3_growth_E, path3_growth_E.",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 1198,
+      "line_end": 1200,
+      "lemma_name": "abelian_growth_check",
+      "severity": "warning",
+      "evidence_quote": "Lemma abelian_growth_check : [seq clique_traces 3 L complete_comm_nat | L <- iota 0 5]\n  = [:: 1; 3; 6; 10; 15].",
+      "closeness": "near",
+      "explanation": "The statement is a list equation (lhs = rhs). The canonical suffix for equational rewrites per AUTHORITY.md is _E. The suffix _check is informal and does not appear in the MathComp suffix table. Proposed rename: abelian_growth_E.",
+      "fix_sketch": "Rename abelian_growth_check to abelian_growth_E.",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 1209,
+      "line_end": 1212,
+      "lemma_name": "star3_growth_check",
+      "severity": "warning",
+      "evidence_quote": "Lemma star3_growth_check :\n  [seq clique_traces 4 L (star_comm_nat 3) | L <- iota 0 6]\n  = [:: 1; 4; 13; 40; 121; 364].",
+      "closeness": "near",
+      "explanation": "The statement is a list equation (lhs = rhs). The canonical suffix for equational rewrites per AUTHORITY.md is _E. The suffix _check is informal and does not appear in the MathComp suffix table. Proposed rename: star3_growth_E.",
+      "fix_sketch": "Rename star3_growth_check to star3_growth_E.",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 1215,
+      "line_end": 1218,
+      "lemma_name": "path3_growth_check",
+      "severity": "warning",
+      "evidence_quote": "Lemma path3_growth_check :\n  [seq clique_traces 3 L path_comm_nat | L <- iota 0 6]\n  = [:: 1; 3; 8; 21; 55; 144].",
+      "closeness": "near",
+      "explanation": "The suffix `_check` does not appear in the canonical MathComp suffix table in AUTHORITY.md. The statement is a list equality, whose MathComp suffix would be `_E`. The main symbol appears to be `clique_traces` or `path3_traces`. The current name communicates intent informally but deviates from the `mainSymbol_suffix(_condition)?` grammar. Stage 1 did not flag this name (only 3 underscore-separated components), but G001 applies at the semantic level.",
+      "fix_sketch": "Rename to `clique_traces_path3_E` (equation suffix), or if the intent is concrete verification, rename to `clique_traces_path3_example` and add `Kind: example` to the comment.",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 1244,
+      "line_end": 1248,
+      "lemma_name": "cartier_foata_check_free3",
+      "severity": "warning",
+      "evidence_quote": "Lemma cartier_foata_check_free3 :\n  [seq (clique_traces 3 L (fun _ _ => false) ==\n        n_traces_natB 3 L (fun _ _ => false)) | L <- iota 0 5]\n  = nseq 5 true.",
+      "closeness": "near",
+      "explanation": "Stage 1 flagged this name under F001 at line 1244. Upgrading with semantic analysis: `_check_free3` uses `_check` as a suffix chain component, which is absent from the canonical MathComp suffix table in AUTHORITY.md. The statement is a boolean list equality (all entries true), functioning as a concrete verification. The main symbol is the Cartier-Foata agreement between `clique_traces` and `n_traces_natB`; `free3` identifies the free commutation graph with Tg=3. This is within the file's consistent `_check_*` naming pattern for example lemmas, but the pattern itself is non-canonical.",
+      "fix_sketch": "Rename to `cartierFoata_free3_E` or `clique_traces_natB_agree_free3` for MathComp conformance. Alternatively, retain the name and ensure the preceding comment carries `Kind: example` as the sibling lemmas already do.",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 1255,
+      "line_end": 1259,
+      "lemma_name": "cartier_foata_check_abelian3",
+      "severity": "warning",
+      "evidence_quote": "Lemma cartier_foata_check_abelian3 :\n  [seq (clique_traces 3 L complete_comm_nat ==\n        n_traces_natB 3 L complete_comm_nat) | L <- iota 0 5]\n  = nseq 5 true.",
+      "closeness": "near",
+      "explanation": "Stage 1 flagged this name under F001 at line 1255. Upgrading with semantic analysis: `_check_abelian3` uses the non-canonical suffix `_check`. The statement is a boolean list equality. The comment correctly identifies Kind: example and the deviation from MathComp grammar is mild given the consistent file-level pattern. The name is near-idiomatic within this codebase's verification suite.",
+      "fix_sketch": "Rename to `cartierFoata_abelian3_E` or `clique_traces_natB_agree_abelian3` for strict MathComp suffix conformance. No change is required if the project adopts `_check_*` as a local convention for example lemmas and documents it in AUTHORITY.md.",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 1266,
+      "line_end": 1270,
+      "lemma_name": "cartier_foata_check_path3",
+      "severity": "warning",
+      "evidence_quote": "Lemma cartier_foata_check_path3 :\n  [seq (clique_traces 3 L path_comm_nat ==\n        n_traces_natB 3 L path_comm_nat) | L <- iota 0 5]\n  = nseq 5 true.",
+      "closeness": "near",
+      "explanation": "Stage 1 flagged this name under F001 at line 1266. Upgrading with semantic analysis: `_check_path3` uses the non-canonical suffix `_check`. The statement is a boolean list equality. The comment correctly identifies Kind: example with a clear WHAT paraphrase; the naming deviation is mild and consistent with the file's verification-lemma suite.",
+      "fix_sketch": "Rename to `cartierFoata_path3_E` for MathComp conformance, or retain with the existing Kind: example comment as the deviation is well-documented.",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 939,
+      "line_end": 939,
+      "lemma_name": "spos_pascal_core",
+      "severity": "warning",
+      "evidence_quote": "(* Core identity for spos_pascal: decomposes even-parity sum using\n   Pascal's rule C(n+1,k) = C(n,k) + C(n,k-1) and reindexing. *)",
+      "closeness": "near",
+      "explanation": "KIND: missing. The comment uses the phrase `core identity for spos_pascal`, which implies a helper role but does not assert it with any of the accepted classifications (`helper`, `main`, `canonical`, `notation`, `coercion`, `instance`, `example`, `interface`) or their synonyms. WHAT: present — the paraphrase `decomposes even-parity sum using Pascal's rule` covers the shape. WHY: only implicit via `for spos_pascal`; waiver does not apply because the name has no algebraic-law suffix and Kind is not one of the non-helper waiver categories. USED_BY: `spos_pascal` is named; this is a verifiable cite if Kind were classified as helper.",
+      "fix_sketch": "(** spos_pascal_core — decomposes the even-parity sum via Pascal's rule\n    C(n.+1,k) = C(n,k) + C(n,k.-1) and reindexing.\n    Kind: helper.\n    Why: splits the spos recurrence so spos_pascal can conclude by induction.\n    Used by: spos_pascal. *)",
+      "confidence": "medium",
+      "stage": "stage2",
+      "escalated_model": "opus",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 971,
+      "line_end": 971,
+      "lemma_name": "sneg_pascal_core",
+      "severity": "warning",
+      "evidence_quote": "(* Core identity for sneg_pascal: decomposes odd-parity sum using\n   Pascal's rule and reindexing. *)",
+      "closeness": "near",
+      "explanation": "KIND: missing, same as `spos_pascal_core` — `core identity for sneg_pascal` does not use any accepted classification token or synonym. WHAT: present. WHY: only implicit. USED_BY: `sneg_pascal` named but unverified without a Kind-as-helper declaration. The Why waiver does not apply (no algebraic-law suffix, Kind not in the waiver set).",
+      "fix_sketch": "(** sneg_pascal_core — decomposes the odd-parity sum via Pascal's rule\n    and reindexing.\n    Kind: helper.\n    Why: splits the sneg recurrence so sneg_pascal can conclude by induction.\n    Used by: sneg_pascal. *)",
+      "confidence": "medium",
+      "stage": "stage2",
+      "escalated_model": "opus",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 1167,
+      "line_end": 1167,
+      "lemma_name": "clique_traces_abelian",
+      "severity": "warning",
+      "evidence_quote": "(** clique_traces_abelian — closed form for the abelian clique trace count:\n    under complete_comm_nat, clique_traces Tg L equals 'C(L + Tg.-1, Tg.-1).\n    Kind: main.\n*)",
+      "closeness": "near",
+      "explanation": "Kind (main) and What are present. Why is absent. For Kind: main, the Why waiver (AUTHORITY.md §Comment template) applies only when the name carries an algebraic-law suffix or the What clause already names a downstream use-site crisply; neither condition holds here. The comment should state why this closed form is needed and which entities consume it.",
+      "fix_sketch": "(** clique_traces_abelian — closed form for the abelian clique trace count:\n    under complete_comm_nat, clique_traces Tg L equals 'C(L + Tg.-1, Tg.-1).\n    Kind: main.\n    Why: primary combinatorial growth result for completely-commuting\n    generators; consumed by abelian_growth_check and downstream\n    growth-rate derivations.\n*)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 1198,
+      "line_end": 1198,
+      "lemma_name": "abelian_growth_check",
+      "severity": "warning",
+      "evidence_quote": "(* Abelian: C(L+Tg-1, Tg-1) for Tg=3 gives C(L+2,2) *)",
+      "closeness": "far",
+      "explanation": "Three of four H002 checklist parts fail. (1) KIND absent: no classification (helper/main/example/…) is stated. (2) WHAT insufficient: the comment is a formula note about C(L+Tg-1,Tg-1) for Tg=3; it does not paraphrase the actual lemma statement, which asserts [seq clique_traces 3 L complete_comm_nat | L <- iota 0 5] = [:: 1; 3; 6; 10; 15]. (3) WHY absent: no motivation is given. Used-by assessment is deferred until Kind is established; if Kind is example, Used-by would be optional.",
+      "fix_sketch": "(** abelian_growth_check — vm_compute sanity check that for Tg=3 under\n    complete_comm_nat, [seq clique_traces 3 L complete_comm_nat | L <- iota 0 5]\n    equals [:: 1; 3; 6; 10; 15] (the binomial numbers C(L+2,2)).\n    Kind: example.\n    Why: guards the abelian closed form of clique_traces_abelian against\n    regressions; paired with free_growth_check and star3_growth_check.\n*)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 1215,
+      "line_end": 1218,
+      "lemma_name": "path3_growth_check",
+      "severity": "warning",
+      "evidence_quote": "(* Path on 3: m_L satisfies m_L = 3*m_{L-1} - m_{L-2} *)",
+      "closeness": "near",
+      "explanation": "The preceding comment fails two parts of the H002 checklist. (1) KIND: no classification (helper/main/example) is present. (2) WHAT: the comment paraphrases a recurrence relation rather than the lemma's actual statement, which is that `[seq clique_traces 3 L path_comm_nat | L <- iota 0 6] = [:: 1; 3; 8; 21; 55; 144]` — six concrete trace counts verified by vm_compute. WHY and USED_BY are not required if Kind is example.",
+      "fix_sketch": "(** path3_growth_check — the first six clique-trace counts for the path-3 commutation graph are [1; 3; 8; 21; 55; 144], verified by vm_compute.\n    Kind: example.\n    Why: confirms numerically that the Fibonacci-like recurrence m_L = 3*m_{L-1} - m_{L-2} holds for the path graph. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 1244,
+      "line_end": 1248,
+      "lemma_name": "cartier_foata_check_free3",
+      "severity": "warning",
+      "evidence_quote": "(* vm_compute verification of cartier_foata for all concrete instances *)",
+      "closeness": "far",
+      "explanation": "The preceding comment is a section-level block comment, not specific to `cartier_foata_check_free3`. It fails three parts of the H002 checklist. (1) KIND: no classification (helper/main/example). (2) WHAT: 'all concrete instances' is too generic — it names neither the free commutation relation (`fun _ _ => false`), Tg=3, nor the L range 0..4. (3) WHY: no motivation for this specific instance. The immediately following comment for `cartier_foata_check_abelian3` is a correct model for what this comment should say.",
+      "fix_sketch": "(** cartier_foata_check_free3 — vm_compute sanity check that clique_traces and n_traces_natB agree on the free commutation graph (no generators commute) with Tg = 3, L in 0..4.\n    Kind: example.\n    Why: confirms the Cartier-Foata identity holds in the degenerate case where the commutation graph has no edges. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 1332,
+      "line_end": 1340,
+      "lemma_name": "table_T4_free",
+      "severity": "warning",
+      "evidence_quote": "(* Verify the T=4 comparison table *)",
+      "closeness": "far",
+      "explanation": "The preceding comment is a generic section-header note that does not describe table_T4_free specifically. Failed parts: (1) KIND — no classification (helper/main/example/etc.); (2) WHAT — the comment does not paraphrase the statement that clique_traces 4 L (fun _ _ => false) over L in 0..5 equals [::1;4;16;64;256;1024]; (3) WHY — no motivation is given for why this particular sanity table is recorded. Cross-referenced against entity.body: the comment clearly applies to the whole table block rather than this lemma.",
+      "fix_sketch": "(** table_T4_free — vm_compute verification of the free-monoid row (4^L) of the T = 4 growth-rate comparison table, for L in 0..5.\n    Kind: example.\n    Why: pins down the 4^L baseline that the star and abelian comparison rows are contrasted against. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "escalated_model": "opus",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "S998",
+      "file": "rocq-audit",
+      "line_start": 1,
+      "line_end": 1,
+      "severity": "warning",
+      "evidence_quote": "schema violation: None is not of type 'object'",
+      "closeness": "near",
+      "explanation": "Stage 2 call failed for chunk 6; see logs.",
+      "fix_sketch": "Retry the commit. If repeated, check agent configuration.",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": {
+    "entity_count": 26,
+    "chunk_count": 7,
+    "chunk_size": 4,
+    "workers_used": 4,
+    "tokens_used": 833487,
+    "tokens_cap": 20000000,
+    "wall_ms_used": 375140,
+    "wall_ms_cap": 1800000,
+    "deferred_chunks": 0,
+    "stop_reason": "clean",
+    "estimated_usd": 5.0009,
+    "model": "sonnet"
+  },
+  "exit_code": 0
+}

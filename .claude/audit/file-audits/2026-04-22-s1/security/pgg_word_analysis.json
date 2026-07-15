@@ -1,0 +1,262 @@
+{
+  "findings": [
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/security/pgg_word_analysis.v",
+      "line_start": 62,
+      "line_end": 62,
+      "lemma_name": "comm_pair_count_bound",
+      "severity": "warning",
+      "evidence_quote": "Lemma comm_pair_count_bound (L : nat) (w : pgg_word M L) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/security/pgg_word_analysis.v",
+      "line_start": 170,
+      "line_end": 170,
+      "lemma_name": "comm_pair_count_zero_adj_swap",
+      "severity": "warning",
+      "evidence_quote": "Lemma comm_pair_count_zero_adj_swap (L : nat) (w1 w2 : pgg_word M L) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/security/pgg_word_analysis.v",
+      "line_start": 185,
+      "line_end": 185,
+      "lemma_name": "comm_pair_count_zero_adj_swap_sym",
+      "severity": "warning",
+      "evidence_quote": "Lemma comm_pair_count_zero_adj_swap_sym (L : nat) (w1 w2 : pgg_word M L) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/security/pgg_word_analysis.v",
+      "line_start": 196,
+      "line_end": 196,
+      "lemma_name": "comm_pair_count_zero_root",
+      "severity": "warning",
+      "evidence_quote": "Lemma comm_pair_count_zero_root (L : nat) (w : pgg_word M L) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/security/pgg_word_analysis.v",
+      "line_start": 217,
+      "line_end": 217,
+      "lemma_name": "comm_pair_count_zero_singleton",
+      "severity": "warning",
+      "evidence_quote": "Lemma comm_pair_count_zero_singleton (L : nat)",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/security/pgg_word_analysis.v",
+      "line_start": 237,
+      "line_end": 237,
+      "lemma_name": "comm_pair_count_full_comm",
+      "severity": "warning",
+      "evidence_quote": "Lemma comm_pair_count_full_comm (L' : nat) (w : pgg_word M L'.+1) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/security/pgg_word_analysis.v",
+      "line_start": 260,
+      "line_end": 260,
+      "lemma_name": "adj_swap_comm_pair_diff",
+      "severity": "warning",
+      "evidence_quote": "Lemma adj_swap_comm_pair_diff (L : nat) (w1 w2 : pgg_word M L) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/security/pgg_word_analysis.v",
+      "line_start": 521,
+      "line_end": 521,
+      "lemma_name": "zero_comm_pair_traces",
+      "severity": "warning",
+      "evidence_quote": "Lemma zero_comm_pair_traces (L : nat) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/security/pgg_word_analysis.v",
+      "line_start": 534,
+      "line_end": 534,
+      "lemma_name": "zero_comm_words_are_traces",
+      "severity": "warning",
+      "evidence_quote": "Lemma zero_comm_words_are_traces (L : nat) (w : pgg_word M L) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/security/pgg_word_analysis.v",
+      "line_start": 76,
+      "line_end": 76,
+      "lemma_name": "edge_count_sym",
+      "severity": "error",
+      "evidence_quote": "Lemma edge_count_sym : edge_count =",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/security/pgg_word_analysis.v",
+      "line_start": 351,
+      "line_end": 351,
+      "lemma_name": "card_pgg_word_succ",
+      "severity": "error",
+      "evidence_quote": "Lemma card_pgg_word_succ (L : nat) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/security/pgg_word_analysis.v",
+      "line_start": 415,
+      "line_end": 415,
+      "lemma_name": "fiber_count_card",
+      "severity": "error",
+      "evidence_quote": "Lemma fiber_count_card (a b : T) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "I001",
+      "file": "pgg-smc/security/pgg_word_analysis.v",
+      "line_start": 170,
+      "line_end": 170,
+      "lemma_name": "comm_pair_count_zero_adj_swap",
+      "severity": "error",
+      "evidence_quote": "Lemma comm_pair_count_zero_adj_swap (L : nat) (w1 w2 : pgg_word M L) :",
+      "stage": "stage1",
+      "reason": "five or more underscore-separated components without a canonical MathComp suffix",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "I001",
+      "file": "pgg-smc/security/pgg_word_analysis.v",
+      "line_start": 185,
+      "line_end": 185,
+      "lemma_name": "comm_pair_count_zero_adj_swap_sym",
+      "severity": "error",
+      "evidence_quote": "Lemma comm_pair_count_zero_adj_swap_sym (L : nat) (w1 w2 : pgg_word M L) :",
+      "stage": "stage1",
+      "reason": "five or more underscore-separated components without a canonical MathComp suffix",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "I001",
+      "file": "pgg-smc/security/pgg_word_analysis.v",
+      "line_start": 196,
+      "line_end": 196,
+      "lemma_name": "comm_pair_count_zero_root",
+      "severity": "error",
+      "evidence_quote": "Lemma comm_pair_count_zero_root (L : nat) (w : pgg_word M L) :",
+      "stage": "stage1",
+      "reason": "five or more underscore-separated components without a canonical MathComp suffix",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "I001",
+      "file": "pgg-smc/security/pgg_word_analysis.v",
+      "line_start": 217,
+      "line_end": 217,
+      "lemma_name": "comm_pair_count_zero_singleton",
+      "severity": "error",
+      "evidence_quote": "Lemma comm_pair_count_zero_singleton (L : nat)",
+      "stage": "stage1",
+      "reason": "five or more underscore-separated components without a canonical MathComp suffix",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "I001",
+      "file": "pgg-smc/security/pgg_word_analysis.v",
+      "line_start": 237,
+      "line_end": 237,
+      "lemma_name": "comm_pair_count_full_comm",
+      "severity": "error",
+      "evidence_quote": "Lemma comm_pair_count_full_comm (L' : nat) (w : pgg_word M L'.+1) :",
+      "stage": "stage1",
+      "reason": "five or more underscore-separated components without a canonical MathComp suffix",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "I001",
+      "file": "pgg-smc/security/pgg_word_analysis.v",
+      "line_start": 260,
+      "line_end": 260,
+      "lemma_name": "adj_swap_comm_pair_diff",
+      "severity": "error",
+      "evidence_quote": "Lemma adj_swap_comm_pair_diff (L : nat) (w1 w2 : pgg_word M L) :",
+      "stage": "stage1",
+      "reason": "five or more underscore-separated components without a canonical MathComp suffix",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "I001",
+      "file": "pgg-smc/security/pgg_word_analysis.v",
+      "line_start": 534,
+      "line_end": 534,
+      "lemma_name": "zero_comm_words_are_traces",
+      "severity": "error",
+      "evidence_quote": "Lemma zero_comm_words_are_traces (L : nat) (w : pgg_word M L) :",
+      "stage": "stage1",
+      "reason": "five or more underscore-separated components without a canonical MathComp suffix",
+      "stages": [
+        "stage1"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": null,
+  "exit_code": 2
+}

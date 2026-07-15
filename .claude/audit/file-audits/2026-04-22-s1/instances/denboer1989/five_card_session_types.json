@@ -1,0 +1,99 @@
+{
+  "findings": [
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/denboer1989/five_card_session_types.v",
+      "line_start": 39,
+      "line_end": 39,
+      "lemma_name": "fc_dtype_eqb",
+      "severity": "error",
+      "evidence_quote": "Definition fc_dtype_eqb (d1 d2 : fc_dtype) : bool :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/denboer1989/five_card_session_types.v",
+      "line_start": 46,
+      "line_end": 46,
+      "lemma_name": "fc_dtype_eqP",
+      "severity": "error",
+      "evidence_quote": "Lemma fc_dtype_eqP : Equality.axiom fc_dtype_eqb.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/denboer1989/five_card_session_types.v",
+      "line_start": 59,
+      "line_end": 59,
+      "lemma_name": "fc_data_dtype",
+      "severity": "error",
+      "evidence_quote": "Definition fc_data_dtype (d : fc_data) : fc_dtype :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/denboer1989/five_card_session_types.v",
+      "line_start": 65,
+      "line_end": 65,
+      "lemma_name": "from_card",
+      "severity": "error",
+      "evidence_quote": "Definition from_card (d : fc_data) : option bool :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/denboer1989/five_card_session_types.v",
+      "line_start": 68,
+      "line_end": 68,
+      "lemma_name": "from_commit",
+      "severity": "error",
+      "evidence_quote": "Definition from_commit (d : fc_data) : option (seq bool) :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/denboer1989/five_card_session_types.v",
+      "line_start": 71,
+      "line_end": 71,
+      "lemma_name": "from_card_FC_card",
+      "severity": "error",
+      "evidence_quote": "Lemma from_card_FC_card (v : bool) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/denboer1989/five_card_session_types.v",
+      "line_start": 75,
+      "line_end": 75,
+      "lemma_name": "from_commit_FC_commit",
+      "severity": "error",
+      "evidence_quote": "Lemma from_commit_FC_commit (cs : seq bool) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": null,
+  "exit_code": 2
+}

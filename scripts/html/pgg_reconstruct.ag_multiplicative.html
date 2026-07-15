@@ -1,0 +1,548 @@
+
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Module ag_multiplicative</title>
+<meta name="description" content="Documentation of Coq module Infotheo Documentation" />
+<link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/markdown-it/dist/markdown-it.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/markdown-it-texmath/texmath.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/darkmode-js@1.5.7/lib/darkmode-js.min.js"></script>
+<link href="rocqnavi.css" rel="stylesheet" type="text/css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script type="text/javascript" src="rocqnavi.js"> </script>
+</head>
+
+<body onload="init()">
+
+  <main>
+    <div class="sidebar">
+      <h2>Files</h2>
+      <li><details id="infotheo"><summary>infotheo</summary>
+          <ul>
+          <li><details id="infotheo.du2002"><summary>du2002</summary>
+          <ul>
+          <li><a href="infotheo.du2002.spp_entropy.html">spp_entropy</a></li>
+<li><a href="infotheo.du2002.spp_interface.html">spp_interface</a></li>
+<li><a href="infotheo.du2002.spp_pismc.html">spp_pismc</a></li>
+<li><a href="infotheo.du2002.spp_proba.html">spp_proba</a></li>
+<li><a href="infotheo.du2002.spp_program.html">spp_program</a></li>
+<li><a href="infotheo.du2002.spp_proof.html">spp_proof</a></li>
+<li><a href="infotheo.du2002.spp_session_types.html">spp_session_types</a></li>
+<li><a href="infotheo.du2002.spp_tactics.html">spp_tactics</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.dumas2017dual"><summary>dumas2017dual</summary>
+          <ul>
+          <li><details id="infotheo.dumas2017dual.dsdp"><summary>dsdp</summary>
+          <ul>
+          <li><a href="infotheo.dumas2017dual.dsdp.dsdp_correctness.html">dsdp_correctness</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_entropy.html">dsdp_entropy</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_entropy_trace.html">dsdp_entropy_trace</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_interface.html">dsdp_interface</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_pismc.html">dsdp_pismc</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_program.html">dsdp_program</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_security.html">dsdp_security</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_session_types.html">dsdp_session_types</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_syntax_demo.html">dsdp_syntax_demo</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.dumas2017dual.entropy_fiber"><summary>entropy_fiber</summary>
+          <ul>
+          <li><a href="infotheo.dumas2017dual.entropy_fiber.entropy_fiber.html">entropy_fiber</a></li>
+<li><a href="infotheo.dumas2017dual.entropy_fiber.entropy_fiber_zpq.html">entropy_fiber_zpq</a></li>
+<li><a href="infotheo.dumas2017dual.entropy_fiber.linear_fiber_zpq.html">linear_fiber_zpq</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.dumas2017dual.lib"><summary>lib</summary>
+          <ul>
+          <li><a href="infotheo.dumas2017dual.lib.extra_algebra.html">extra_algebra</a></li>
+<li><a href="infotheo.dumas2017dual.lib.extra_entropy.html">extra_entropy</a></li>
+<li><a href="infotheo.dumas2017dual.lib.extra_proba.html">extra_proba</a></li>
+<li><a href="infotheo.dumas2017dual.lib.rouche_capelli.html">rouche_capelli</a></li>
+          </ul>
+          </details>
+          </li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.ecc_classic"><summary>ecc_classic</summary>
+          <ul>
+          <li><a href="infotheo.ecc_classic.alternant.html">alternant</a></li>
+<li><a href="infotheo.ecc_classic.bch.html">bch</a></li>
+<li><a href="infotheo.ecc_classic.cyclic_code.html">cyclic_code</a></li>
+<li><a href="infotheo.ecc_classic.decoding.html">decoding</a></li>
+<li><a href="infotheo.ecc_classic.grs.html">grs</a></li>
+<li><a href="infotheo.ecc_classic.hamming_code.html">hamming_code</a></li>
+<li><a href="infotheo.ecc_classic.linearcode.html">linearcode</a></li>
+<li><a href="infotheo.ecc_classic.mceliece.html">mceliece</a></li>
+<li><a href="infotheo.ecc_classic.poly_decoding.html">poly_decoding</a></li>
+<li><a href="infotheo.ecc_classic.reed_solomon.html">reed_solomon</a></li>
+<li><a href="infotheo.ecc_classic.repcode.html">repcode</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.ecc_modern"><summary>ecc_modern</summary>
+          <ul>
+          <li><a href="infotheo.ecc_modern.checksum.html">checksum</a></li>
+<li><a href="infotheo.ecc_modern.degree_profile.html">degree_profile</a></li>
+<li><a href="infotheo.ecc_modern.ldpc.html">ldpc</a></li>
+<li><a href="infotheo.ecc_modern.ldpc_algo.html">ldpc_algo</a></li>
+<li><a href="infotheo.ecc_modern.ldpc_algo_proof.html">ldpc_algo_proof</a></li>
+<li><a href="infotheo.ecc_modern.ldpc_erasure.html">ldpc_erasure</a></li>
+<li><a href="infotheo.ecc_modern.max_subset.html">max_subset</a></li>
+<li><a href="infotheo.ecc_modern.stopping_set.html">stopping_set</a></li>
+<li><a href="infotheo.ecc_modern.subgraph_partition.html">subgraph_partition</a></li>
+<li><a href="infotheo.ecc_modern.summary.html">summary</a></li>
+<li><a href="infotheo.ecc_modern.summary_tanner.html">summary_tanner</a></li>
+<li><a href="infotheo.ecc_modern.tanner.html">tanner</a></li>
+<li><a href="infotheo.ecc_modern.tanner_partition.html">tanner_partition</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.homomorphic_encryption"><summary>homomorphic_encryption</summary>
+          <ul>
+          <li><details id="infotheo.homomorphic_encryption.benaloh1994"><summary>benaloh1994</summary>
+          <ul>
+          <li><a href="infotheo.homomorphic_encryption.benaloh1994.benaloh_ahe.html">benaloh_ahe</a></li>
+<li><a href="infotheo.homomorphic_encryption.benaloh1994.benaloh_enc.html">benaloh_enc</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.homomorphic_encryption.idealized"><summary>idealized</summary>
+          <ul>
+          <li><a href="infotheo.homomorphic_encryption.idealized.idealized_ahe.html">idealized_ahe</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.homomorphic_encryption.paillier1999"><summary>paillier1999</summary>
+          <ul>
+          <li><a href="infotheo.homomorphic_encryption.paillier1999.paillier_ahe.html">paillier_ahe</a></li>
+<li><a href="infotheo.homomorphic_encryption.paillier1999.paillier_enc.html">paillier_enc</a></li>
+          </ul>
+          </details>
+          </li>
+<li><a href="infotheo.homomorphic_encryption.ahe_enc.html">ahe_enc</a></li>
+<li><a href="infotheo.homomorphic_encryption.ahe_monoid.html">ahe_monoid</a></li>
+<li><a href="infotheo.homomorphic_encryption.enc_dec.html">enc_dec</a></li>
+<li><a href="infotheo.homomorphic_encryption.he_types.html">he_types</a></li>
+<li><a href="infotheo.homomorphic_encryption.homomorphic_encryption.html">homomorphic_encryption</a></li>
+<li><a href="infotheo.homomorphic_encryption.key_type.html">key_type</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.information_theory"><summary>information_theory</summary>
+          <ul>
+          <li><a href="infotheo.information_theory.aep.html">aep</a></li>
+<li><a href="infotheo.information_theory.binary_symmetric_channel.html">binary_symmetric_channel</a></li>
+<li><a href="infotheo.information_theory.channel.html">channel</a></li>
+<li><a href="infotheo.information_theory.channel_code.html">channel_code</a></li>
+<li><a href="infotheo.information_theory.channel_coding_converse.html">channel_coding_converse</a></li>
+<li><a href="infotheo.information_theory.channel_coding_direct.html">channel_coding_direct</a></li>
+<li><a href="infotheo.information_theory.conditional_divergence.html">conditional_divergence</a></li>
+<li><a href="infotheo.information_theory.entropy.html">entropy</a></li>
+<li><a href="infotheo.information_theory.entropy_convex.html">entropy_convex</a></li>
+<li><a href="infotheo.information_theory.erasure_channel.html">erasure_channel</a></li>
+<li><a href="infotheo.information_theory.error_exponent.html">error_exponent</a></li>
+<li><a href="infotheo.information_theory.joint_typ_seq.html">joint_typ_seq</a></li>
+<li><a href="infotheo.information_theory.jtypes.html">jtypes</a></li>
+<li><a href="infotheo.information_theory.kraft.html">kraft</a></li>
+<li><a href="infotheo.information_theory.pproba.html">pproba</a></li>
+<li><a href="infotheo.information_theory.shannon_fano.html">shannon_fano</a></li>
+<li><a href="infotheo.information_theory.source_code.html">source_code</a></li>
+<li><a href="infotheo.information_theory.source_coding_fl_converse.html">source_coding_fl_converse</a></li>
+<li><a href="infotheo.information_theory.source_coding_fl_direct.html">source_coding_fl_direct</a></li>
+<li><a href="infotheo.information_theory.source_coding_vl_converse.html">source_coding_vl_converse</a></li>
+<li><a href="infotheo.information_theory.source_coding_vl_direct.html">source_coding_vl_direct</a></li>
+<li><a href="infotheo.information_theory.string_entropy.html">string_entropy</a></li>
+<li><a href="infotheo.information_theory.success_decode_bound.html">success_decode_bound</a></li>
+<li><a href="infotheo.information_theory.typ_seq.html">typ_seq</a></li>
+<li><a href="infotheo.information_theory.types.html">types</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.lib"><summary>lib</summary>
+          <ul>
+          <li><a href="infotheo.lib.bigop_ext.html">bigop_ext</a></li>
+<li><a href="infotheo.lib.binary_entropy_function.html">binary_entropy_function</a></li>
+<li><a href="infotheo.lib.classical_sets_ext.html">classical_sets_ext</a></li>
+<li><a href="infotheo.lib.coqRE.html">coqRE</a></li>
+<li><a href="infotheo.lib.derive_ext.html">derive_ext</a></li>
+<li><a href="infotheo.lib.dft.html">dft</a></li>
+<li><a href="infotheo.lib.euclid.html">euclid</a></li>
+<li><a href="infotheo.lib.f2.html">f2</a></li>
+<li><a href="infotheo.lib.hamming.html">hamming</a></li>
+<li><a href="infotheo.lib.natbin.html">natbin</a></li>
+<li><a href="infotheo.lib.num_occ.html">num_occ</a></li>
+<li><a href="infotheo.lib.poly_ext.html">poly_ext</a></li>
+<li><a href="infotheo.lib.realType_ext.html">realType_ext</a></li>
+<li><a href="infotheo.lib.realType_ln.html">realType_ln</a></li>
+<li><a href="infotheo.lib.ssr_ext.html">ssr_ext</a></li>
+<li><a href="infotheo.lib.ssralg_ext.html">ssralg_ext</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.probability"><summary>probability</summary>
+          <ul>
+          <li><a href="infotheo.probability.bayes.html">bayes</a></li>
+<li><a href="infotheo.probability.convex.html">convex</a></li>
+<li><a href="infotheo.probability.convex_equiv.html">convex_equiv</a></li>
+<li><a href="infotheo.probability.convex_stone.html">convex_stone</a></li>
+<li><a href="infotheo.probability.divergence.html">divergence</a></li>
+<li><a href="infotheo.probability.fdist.html">fdist</a></li>
+<li><a href="infotheo.probability.fsdist.html">fsdist</a></li>
+<li><a href="infotheo.probability.graphoid.html">graphoid</a></li>
+<li><a href="infotheo.probability.jensen.html">jensen</a></li>
+<li><a href="infotheo.probability.jfdist_cond.html">jfdist_cond</a></li>
+<li><a href="infotheo.probability.log_sum.html">log_sum</a></li>
+<li><a href="infotheo.probability.necset.html">necset</a></li>
+<li><a href="infotheo.probability.partition_inequality.html">partition_inequality</a></li>
+<li><a href="infotheo.probability.pinsker.html">pinsker</a></li>
+<li><a href="infotheo.probability.proba.html">proba</a></li>
+<li><a href="infotheo.probability.variation_dist.html">variation_dist</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.robust"><summary>robust</summary>
+          <ul>
+          <li><a href="infotheo.robust.robustmean.html">robustmean</a></li>
+<li><a href="infotheo.robust.weightedmean.html">weightedmean</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.smc"><summary>smc</summary>
+          <ul>
+          <li><a href="infotheo.smc.graded_resource.html">graded_resource</a></li>
+<li><a href="infotheo.smc.pismc.html">pismc</a></li>
+<li><a href="infotheo.smc.smc_interpreter.html">smc_interpreter</a></li>
+<li><a href="infotheo.smc.smc_session_types.html">smc_session_types</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.toy_examples"><summary>toy_examples</summary>
+          <ul>
+          <li><a href="infotheo.toy_examples.conditional_entropy.html">conditional_entropy</a></li>
+<li><a href="infotheo.toy_examples.expected_value_variance.html">expected_value_variance</a></li>
+<li><a href="infotheo.toy_examples.expected_value_variance_ordn.html">expected_value_variance_ordn</a></li>
+<li><a href="infotheo.toy_examples.expected_value_variance_tuple.html">expected_value_variance_tuple</a></li>
+          </ul>
+          </details>
+          </li>
+<li><a href="infotheo._check_sigs.html">_check_sigs</a></li>
+<li><a href="infotheo._depgraph_extract.html">_depgraph_extract</a></li>
+<li><a href="infotheo._test_star2.html">_test_star2</a></li>
+<li><a href="infotheo.test_sri.html">test_sri</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="pgg_reconstruct"><summary>pgg_reconstruct</summary>
+          <ul>
+          <li><a href="pgg_reconstruct.ag_code.html">ag_code</a></li>
+<li><a href="pgg_reconstruct.ag_massey_bridge.html">ag_massey_bridge</a></li>
+<li><a href="pgg_reconstruct.ag_multiplicative.html">ag_multiplicative</a></li>
+<li><a href="pgg_reconstruct.algebraic_rigidity.html">algebraic_rigidity</a></li>
+<li><a href="pgg_reconstruct.coord_perm_compatible.html">coord_perm_compatible</a></li>
+<li><a href="pgg_reconstruct.cover_genus0.html">cover_genus0</a></li>
+<li><a href="pgg_reconstruct.cover_genus1.html">cover_genus1</a></li>
+<li><a href="pgg_reconstruct.cover_genus2.html">cover_genus2</a></li>
+<li><a href="pgg_reconstruct.cover_tradeoff.html">cover_tradeoff</a></li>
+<li><a href="pgg_reconstruct.covering_scheme.html">covering_scheme</a></li>
+<li><a href="pgg_reconstruct.hyperelliptic_code.html">hyperelliptic_code</a></li>
+<li><a href="pgg_reconstruct.lagrange.html">lagrange</a></li>
+<li><a href="pgg_reconstruct.massey.html">massey</a></li>
+<li><a href="pgg_reconstruct.pgg_assignment.html">pgg_assignment</a></li>
+<li><a href="pgg_reconstruct.pgg_covering_correctness.html">pgg_covering_correctness</a></li>
+<li><a href="pgg_reconstruct.pgg_deck_pairing.html">pgg_deck_pairing</a></li>
+<li><a href="pgg_reconstruct.pgg_sharing_framework.html">pgg_sharing_framework</a></li>
+<li><a href="pgg_reconstruct.pgg_sum_mod.html">pgg_sum_mod</a></li>
+<li><a href="pgg_reconstruct.pgg_threshold.html">pgg_threshold</a></li>
+<li><a href="pgg_reconstruct.pgl_bound.html">pgl_bound</a></li>
+<li><a href="pgg_reconstruct.rigidity_monster_instance.html">rigidity_monster_instance</a></li>
+<li><a href="pgg_reconstruct.rigidity_s5_instance.html">rigidity_s5_instance</a></li>
+<li><a href="pgg_reconstruct.rigidity_star_instance.html">rigidity_star_instance</a></li>
+<li><a href="pgg_reconstruct.rs_massey_bridge.html">rs_massey_bridge</a></li>
+<li><a href="pgg_reconstruct.rs_privacy.html">rs_privacy</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="pgg_smc"><summary>pgg_smc</summary>
+          <ul>
+          <li><a href="pgg_smc.abelian_word_collapse.html">abelian_word_collapse</a></li>
+<li><a href="pgg_smc.free_group_ball.html">free_group_ball</a></li>
+<li><a href="pgg_smc.perm_uniform.html">perm_uniform</a></li>
+<li><a href="pgg_smc.pgg_abelian.html">pgg_abelian</a></li>
+<li><a href="pgg_smc.pgg_abelian.html">pgg_abelian</a></li>
+<li><a href="pgg_smc.pgg_abelian_collapse.html">pgg_abelian_collapse</a></li>
+<li><a href="pgg_smc.pgg_collusion_bound.html">pgg_collusion_bound</a></li>
+<li><a href="pgg_smc.pgg_correctness.html">pgg_correctness</a></li>
+<li><a href="pgg_smc.pgg_free.html">pgg_free</a></li>
+<li><a href="pgg_smc.pgg_interface.html">pgg_interface</a></li>
+<li><a href="pgg_smc.pgg_lfree.html">pgg_lfree</a></li>
+<li><a href="pgg_smc.pgg_nonabelian.html">pgg_nonabelian</a></li>
+<li><a href="pgg_smc.pgg_pismc.html">pgg_pismc</a></li>
+<li><a href="pgg_smc.pgg_program.html">pgg_program</a></li>
+<li><a href="pgg_smc.pgg_raag.html">pgg_raag</a></li>
+<li><a href="pgg_smc.pgg_raag_cartier_foata.html">pgg_raag_cartier_foata</a></li>
+<li><a href="pgg_smc.pgg_raag_clique.html">pgg_raag_clique</a></li>
+<li><a href="pgg_smc.pgg_raag_path.html">pgg_raag_path</a></li>
+<li><a href="pgg_smc.pgg_raag_s5.html">pgg_raag_s5</a></li>
+<li><a href="pgg_smc.pgg_raag_star.html">pgg_raag_star</a></li>
+<li><a href="pgg_smc.pgg_security.html">pgg_security</a></li>
+<li><a href="pgg_smc.pgg_session_types.html">pgg_session_types</a></li>
+<li><a href="pgg_smc.pgg_word_analysis.html">pgg_word_analysis</a></li>
+<li><a href="pgg_smc.test_cf.html">test_cf</a></li>
+<li><a href="pgg_smc.test_cf2.html">test_cf2</a></li>
+<li><a href="pgg_smc.test_cf3.html">test_cf3</a></li>
+<li><a href="pgg_smc.test_sri.html">test_sri</a></li>
+<li><a href="pgg_smc.test_sri2.html">test_sri2</a></li>
+          </ul>
+          </details>
+          </li>
+    </div>
+
+  <div class="coq">
+
+    <div class="content">
+      <p>
+        <a href="./index.html">Top</a>
+        
+      </p>
+      <h1 class="title">Module ag_multiplicative</h1>
+<pre class="ssrdoc">
+AG Code Multiplicative Property (Issue #41)
+
+The Hadamard (coordinatewise) product of two AG codewords from C(D,G)
+and C(D,G') lies in C(D,G+G'). This is the algebraic foundation for
+multiplicative secret sharing: multiplying shares locally corresponds to
+evaluating the product of the underlying functions, yielding a codeword
+in a code with doubled degree parameter.
+
+  hadamard c1 c2  == coordinatewise product of row vectors
+  ag_multiplicative == axiomatized: C(D,k) * C(D,k) \subset C(D,2k)
+  MultiplicativeScheme == record bundling base/doubled ThresholdSchemes
+    with proof that Hadamard of valid shares produces valid doubled shares
+  ag_mult_scheme  == MultiplicativeScheme from AG codes via Massey
+</pre>
+<br/>
+<span class="vernacular">From</span><span class="id"> HB</span><span class="vernacular"> Require</span><span class="vernacular"> Import</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for HB.structures">structures</a></span>.<br/>
+<span class="vernacular">From</span><span class="id"> mathcomp</span><span class="vernacular"> Require</span><span class="vernacular"> Import</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.ssreflect.all_ssreflect">all_ssreflect</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.ssralg">ssralg</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.finalg">finalg</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.zmodp">zmodp</a></span>.<br/>
+<span class="vernacular">From</span><span class="id"> mathcomp</span><span class="vernacular"> Require</span><span class="vernacular"> Import</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.fingroup.fingroup">fingroup</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix">matrix</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.mxalgebra">mxalgebra</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.vector">vector</a></span>.<br/>
+<span class="vernacular">Require</span><span class="vernacular"> Import</span><span class="id"> </span><span class="id"><a href="infotheo.lib.ssr_ext.html">ssr_ext</a></span><span class="id"> </span><span class="id"><a href="infotheo.lib.ssralg_ext.html">ssralg_ext</a></span><span class="id"> </span><span class="id"><a href="infotheo.lib.hamming.html">hamming</a></span><span class="id"> </span><span class="id"><a href="infotheo.ecc_classic.linearcode.html">linearcode</a></span>.<br/>
+<span class="vernacular">From</span><span class="id"> pgg_reconstruct</span><span class="vernacular"> Require</span><span class="vernacular"> Import</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html">pgg_sharing_framework</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.massey.html">massey</a></span><br/>
+&nbsp;&nbsp;<span class="id"><a href="pgg_reconstruct.ag_code.html">ag_code</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_massey_bridge.html">ag_massey_bridge</a></span>.<br/>
+<br/>
+<span class="gallina-kwd">Set</span><span class="vernacular"> Implicit</span><span class="vernacular"> Arguments</span>.<br/>
+<span class="vernacular">Unset</span><span class="vernacular"> Strict</span><span class="vernacular"> Implicit</span>.<br/>
+<span class="vernacular">Import</span><span class="id"> Prenex</span><span class="vernacular"> Implicits</span>.<br/>
+<br/>
+<span class="vernacular">Import</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.ssralg#GRing.Theory">GRing</a></span>.<span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.ssralg#GRing.Theory">Theory</a></span>.<br/>
+<span class="vernacular">Open</span><span class="vernacular"> Scope</span><span class="id"> ring_scope</span>.<br/>
+<br/>
+<pre class="ssrdoc">
+    Section 1: Hadamard (Coordinatewise) Product
+</pre>
+<br/>
+<span class="vernacular">Section</span><span class="id"> hadamard</span>.<br/>
+<br/>
+<span class="vernacular">Variable</span><span class="id"> </span><span id="hadamard.F" class="id"><a name="hadamard.F" class="">F</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.ssralg#GRing.Field.Exports.fieldType">fieldType</a></span>.<br/>
+<span class="vernacular">Variable</span><span class="id"> </span><span id="hadamard.n" class="id"><a name="hadamard.n" class="">n</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Datatypes.html#nat">nat</a></span>.<br/>
+<br/>
+<span class="vernacular">Definition</span><span class="id"> </span><span id="hadamard" class="id"><a name="hadamard" class="">hadamard</a></span> (<span id="c1:5" class="id"><a name="c1:5" class="">c1</a></span><span class="id"> </span><span id="c2:6" class="id"><a name="c2:6" class="">c2</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#928a892a0c1438777aeb17535aec0378">'rV[</a></span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#hadamard.F">F</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#928a892a0c1438777aeb17535aec0378">]_</a></span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#hadamard.n">n</a></span>)<span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#928a892a0c1438777aeb17535aec0378">'rV[</a></span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#hadamard.F">F</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#928a892a0c1438777aeb17535aec0378">]_</a></span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#hadamard.n">n</a></span><span class="id"> :=</span><br/>
+&nbsp;&nbsp;<span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#e008ec0beb9d729fd1ef8df8b1024615">\row_</a></span>(<span id="i:7" class="id"><a name="i:7" class="">i</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#e008ec0beb9d729fd1ef8df8b1024615"> &lt;</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#e008ec0beb9d729fd1ef8df8b1024615"> </a></span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#hadamard.n">n</a></span>) (<span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#c1:5">c1</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#ord0">ord0</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#i:7">i</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.ssralg#2d0cfb150261028f4ebd2ba355623dcc"> *</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.ssralg#2d0cfb150261028f4ebd2ba355623dcc"> </a></span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#c2:6">c2</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#ord0">ord0</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#i:7">i</a></span>).<br/>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> </span><span id="hadamard_comm" class="id"><a name="hadamard_comm" class="">hadamard_comm</a></span> (<span id="c1:8" class="id"><a name="c1:8" class="">c1</a></span><span class="id"> </span><span id="c2:9" class="id"><a name="c2:9" class="">c2</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#928a892a0c1438777aeb17535aec0378">'rV[</a></span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#hadamard.F">F</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#928a892a0c1438777aeb17535aec0378">]_</a></span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#hadamard.n">n</a></span>)<span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#hadamard">hadamard</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#c1:8">c1</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#c2:9">c2</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> =</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> </a></span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#hadamard">hadamard</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#c2:9">c2</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#c1:8">c1</a></span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="gallina-kwd"> by</span><span class="id"> apply/</span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#rowP">rowP</a></span><span class="id"> =&gt;</span><span class="id"> i;</span><span class="id"> rewrite</span><span class="id"> !</span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#mxE">mxE</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.ssralg#GRing.Theory.mulrC">mulrC</a></span>. Qed.</div></details>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> </span><span id="hadamardE" class="id"><a name="hadamardE" class="">hadamardE</a></span> (<span id="c1:10" class="id"><a name="c1:10" class="">c1</a></span><span class="id"> </span><span id="c2:11" class="id"><a name="c2:11" class="">c2</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#928a892a0c1438777aeb17535aec0378">'rV[</a></span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#hadamard.F">F</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#928a892a0c1438777aeb17535aec0378">]_</a></span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#hadamard.n">n</a></span>) (<span id="i:12" class="id"><a name="i:12" class="">i</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#:::'''I_'_x">'I_</a></span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#hadamard.n">n</a></span>)<span class="id"> :</span><br/>
+&nbsp;&nbsp;(<span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#hadamard">hadamard</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#c1:10">c1</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#c2:11">c2</a></span>)<span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#ord0">ord0</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#i:12">i</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> =</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> </a></span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#c1:10">c1</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#ord0">ord0</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#i:12">i</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.ssralg#2d0cfb150261028f4ebd2ba355623dcc"> *</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.ssralg#2d0cfb150261028f4ebd2ba355623dcc"> </a></span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#c2:11">c2</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#ord0">ord0</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#i:12">i</a></span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="gallina-kwd"> by</span><span class="id"> rewrite</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#mxE">mxE</a></span>. Qed.</div></details>
+<br/>
+<span class="vernacular">End</span><span class="id"> hadamard</span>.<br/>
+<br/>
+<pre class="ssrdoc">
+    Section 2: Multiplicative Property for AG Codes (axiomatized)
+</pre>
+<br/>
+<span class="vernacular">Section</span><span class="id"> ag_multiplicative_sect</span>.<br/>
+<br/>
+<span class="vernacular">Variable</span><span class="id"> </span><span id="ag_multiplicative_sect.F" class="id"><a name="ag_multiplicative_sect.F" class="">F</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.finalg#FinRing.Field.Exports.finFieldType">finFieldType</a></span>.<br/>
+<span class="vernacular">Variable</span><span class="id"> </span><span id="ag_multiplicative_sect.n" class="id"><a name="ag_multiplicative_sect.n" class="">n</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Datatypes.html#nat">nat</a></span>.<br/>
+<br/>
+<span class="vernacular">Variables</span> (<span id="ag_multiplicative_sect.k_1" class="id"><a name="ag_multiplicative_sect.k_1" class="">k_1</a></span><span class="id"> </span><span id="ag_multiplicative_sect.k_2" class="id"><a name="ag_multiplicative_sect.k_2" class="">k_2</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Datatypes.html#nat">nat</a></span>).<br/>
+<span class="vernacular">Variable</span><span class="id"> </span><span id="ag_multiplicative_sect.ev_k" class="id"><a name="ag_multiplicative_sect.ev_k" class="">ev_k</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#9c0a062cce31174bb4a1f05fb9cee844">'M[</a></span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_multiplicative_sect.F">F</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#9c0a062cce31174bb4a1f05fb9cee844">]_</a></span>(<span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_multiplicative_sect.k_1">k_1</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#9c0a062cce31174bb4a1f05fb9cee844">,</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#9c0a062cce31174bb4a1f05fb9cee844"> </a></span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_multiplicative_sect.n">n</a></span>).<br/>
+<span class="vernacular">Variable</span><span class="id"> </span><span id="ag_multiplicative_sect.ev_2k" class="id"><a name="ag_multiplicative_sect.ev_2k" class="">ev_2k</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#9c0a062cce31174bb4a1f05fb9cee844">'M[</a></span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_multiplicative_sect.F">F</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#9c0a062cce31174bb4a1f05fb9cee844">]_</a></span>(<span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_multiplicative_sect.k_2">k_2</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#9c0a062cce31174bb4a1f05fb9cee844">,</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#9c0a062cce31174bb4a1f05fb9cee844"> </a></span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_multiplicative_sect.n">n</a></span>).<br/>
+<br/>
+<span class="vernacular">Hypothesis</span><span class="id"> </span><span id="ag_multiplicative_sect.ag_mult" class="id"><a name="ag_multiplicative_sect.ag_mult" class="">ag_mult</a></span><span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="gallina-kwd">forall</span><span class="id"> </span><span id="c1:25" class="id"><a name="c1:25" class="">c1</a></span><span class="id"> </span><span id="c2:26" class="id"><a name="c2:26" class="">c2</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#928a892a0c1438777aeb17535aec0378">'rV[</a></span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_multiplicative_sect.F">F</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#928a892a0c1438777aeb17535aec0378">]_</a></span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_multiplicative_sect.n">n</a></span><span class="id">,</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#c1:25">c1</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrbool.html#b09457274bcb94927e289b8a9e9cd3f7"> \in</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrbool.html#b09457274bcb94927e289b8a9e9cd3f7"> </a></span><span class="id"><a href="pgg_reconstruct.ag_code.html#ag_code">ag_code</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_multiplicative_sect.ev_k">ev_k</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#::type_scope:x_'-&gt;'_x"> -&gt;</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#::type_scope:x_'-&gt;'_x"> </a></span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#c2:26">c2</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrbool.html#b09457274bcb94927e289b8a9e9cd3f7"> \in</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrbool.html#b09457274bcb94927e289b8a9e9cd3f7"> </a></span><span class="id"><a href="pgg_reconstruct.ag_code.html#ag_code">ag_code</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_multiplicative_sect.ev_k">ev_k</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#::type_scope:x_'-&gt;'_x"> -&gt;</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#hadamard">hadamard</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#c1:25">c1</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#c2:26">c2</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrbool.html#b09457274bcb94927e289b8a9e9cd3f7"> \in</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrbool.html#b09457274bcb94927e289b8a9e9cd3f7"> </a></span><span class="id"><a href="pgg_reconstruct.ag_code.html#ag_code">ag_code</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_multiplicative_sect.ev_2k">ev_2k</a></span>.<br/>
+<br/>
+<span class="vernacular">End</span><span class="id"> ag_multiplicative_sect</span>.<br/>
+<br/>
+<pre class="ssrdoc">
+    Section 3: MultiplicativeScheme Record
+</pre>
+<br/>
+<br/>
+<span class="vernacular">Section</span><span class="id"> mult_scheme_def</span>.<br/>
+<br/>
+<span class="vernacular">Variable</span><span class="id"> </span><span id="mult_scheme_def.F" class="id"><a name="mult_scheme_def.F" class="">F</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.finalg#FinRing.Field.Exports.finFieldType">finFieldType</a></span>.<br/>
+<br/>
+<span class="vernacular">Record</span><span class="id"> </span><span id="MultiplicativeScheme" class="id"><a name="MultiplicativeScheme" class="">MultiplicativeScheme</a></span><span class="id"> :=</span><span class="id"> {</span><br/>
+&nbsp;&nbsp;<span id="ms_base" class="id"><a name="ms_base" class="">ms_base</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#ThresholdScheme">ThresholdScheme</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#mult_scheme_def.F">F</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#mult_scheme_def.F">F</a></span><span class="id"> ;</span><br/>
+&nbsp;&nbsp;<span id="ms_doubled" class="id"><a name="ms_doubled" class="">ms_doubled</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#ThresholdScheme">ThresholdScheme</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#mult_scheme_def.F">F</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#mult_scheme_def.F">F</a></span><span class="id"> ;</span><br/>
+&nbsp;&nbsp;<span id="ms_T_eq" class="id"><a name="ms_T_eq" class="">ms_T_eq</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#ts_T'">ts_T'</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ms_base:32">ms_base</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> =</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> </a></span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#ts_T'">ts_T'</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ms_doubled:33">ms_doubled</a></span><span class="id"> ;</span><br/>
+&nbsp;&nbsp;<span id="ms_mult" class="id"><a name="ms_mult" class="">ms_mult</a></span><span class="id"> :</span><span class="gallina-kwd"> forall</span> (<span id="s1:35" class="id"><a name="s1:35" class="">s1</a></span><span class="id"> </span><span id="s2:36" class="id"><a name="s2:36" class="">s2</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#mult_scheme_def.F">F</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span id="shares1:37" class="id"><a name="shares1:37" class="">shares1</a></span><span class="id"> </span><span id="shares2:38" class="id"><a name="shares2:38" class="">shares2</a></span><span class="id"> :</span> (<span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#ts_T'">ts_T'</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ms_base:32">ms_base</a></span>).<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#bda89d73ec4a8f23ae92b565ffb5aaa6">+1</a></span>.<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#::type_scope:x_'.-tuple'">-tuple</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#::type_scope:x_'.-tuple'"> F</a></span>)<span class="id">,</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#ts_valid">ts_valid</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ms_base:32">ms_base</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#s1:35">s1</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#shares1:37">shares1</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#::type_scope:x_'-&gt;'_x"> -&gt;</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#ts_valid">ts_valid</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ms_base:32">ms_base</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#s2:36">s2</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#shares2:38">shares2</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#::type_scope:x_'-&gt;'_x"> -&gt;</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#ts_valid">ts_valid</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ms_doubled:33">ms_doubled</a></span> (<span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#s1:35">s1</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.ssralg#2d0cfb150261028f4ebd2ba355623dcc"> *</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.ssralg#2d0cfb150261028f4ebd2ba355623dcc"> </a></span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#s2:36">s2</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#cast_tuple">cast_tuple</a></span> (<span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrfun.html#congr1">congr1</a></span><span class="id"> </span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Datatypes.html#S">S</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ms_T_eq:34">ms_T_eq</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#9d5b9af75768e306a1218aacdf8c3490">[tuple</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#9d5b9af75768e306a1218aacdf8c3490"> </a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#tnth">tnth</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#shares1:37">shares1</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#i:39">i</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.ssralg#2d0cfb150261028f4ebd2ba355623dcc"> *</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.ssralg#2d0cfb150261028f4ebd2ba355623dcc"> </a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#tnth">tnth</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#shares2:38">shares2</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#i:39">i</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#9d5b9af75768e306a1218aacdf8c3490"> |</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#9d5b9af75768e306a1218aacdf8c3490"> </a></span><span id="i:39" class="id"><a name="i:39" class="">i</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#9d5b9af75768e306a1218aacdf8c3490"> &lt;</a></span> (<span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#ts_T'">ts_T'</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ms_base:32">ms_base</a></span>).<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#bda89d73ec4a8f23ae92b565ffb5aaa6">+1</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#9d5b9af75768e306a1218aacdf8c3490">]</a></span>)<span class="id"> ;</span><br/>
+<span class="id">}</span>.<br/>
+<br/>
+<span class="vernacular">End</span><span class="id"> mult_scheme_def</span>.<br/>
+<br/>
+<span class="vernacular">Arguments</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#MultiplicativeScheme">MultiplicativeScheme</a></span><span class="id"> {F}</span>.<br/>
+<br/>
+<pre class="ssrdoc">
+    Section 4: Hadamard-Massey Bridge
+</pre>
+<br/>
+<br/>
+<span class="vernacular">Section</span><span class="id"> hadamard_massey</span>.<br/>
+<br/>
+<span class="vernacular">Variable</span><span class="id"> </span><span id="hadamard_massey.F" class="id"><a name="hadamard_massey.F" class="">F</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.finalg#FinRing.Field.Exports.finFieldType">finFieldType</a></span>.<br/>
+<span class="vernacular">Variable</span><span class="id"> </span><span id="hadamard_massey.n'" class="id"><a name="hadamard_massey.n'" class="">n'</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Datatypes.html#nat">nat</a></span>.<br/>
+<span class="vernacular">Let</span><span class="id"> </span><span id="hadamard_massey.n" class="id"><a name="hadamard_massey.n" class="">n</a></span><span class="id"> :=</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#hadamard_massey.n'">n'</a></span>.<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#bc63483175fac06bcd5541a5e9093b18">+2</a></span>.<br/>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> </span><span id="hadamard_massey_codeword" class="id"><a name="hadamard_massey_codeword" class="">hadamard_massey_codeword</a></span> (<span id="s1:45" class="id"><a name="s1:45" class="">s1</a></span><span class="id"> </span><span id="s2:46" class="id"><a name="s2:46" class="">s2</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#hadamard_massey.F">F</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span id="sh1:47" class="id"><a name="sh1:47" class="">sh1</a></span><span class="id"> </span><span id="sh2:48" class="id"><a name="sh2:48" class="">sh2</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#928a892a0c1438777aeb17535aec0378">'rV[</a></span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#hadamard_massey.F">F</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#928a892a0c1438777aeb17535aec0378">]_</a></span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#hadamard_massey.n'">n'</a></span>.<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#bda89d73ec4a8f23ae92b565ffb5aaa6">+1</a></span>)<span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#hadamard">hadamard</a></span> (<span class="id"><a href="pgg_reconstruct.massey.html#massey_codeword">massey_codeword</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#s1:45">s1</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#sh1:47">sh1</a></span>) (<span class="id"><a href="pgg_reconstruct.massey.html#massey_codeword">massey_codeword</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#s2:46">s2</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#sh2:48">sh2</a></span>)<span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> =</a></span><br/>
+&nbsp;&nbsp;<span class="id"><a href="pgg_reconstruct.massey.html#massey_codeword">massey_codeword</a></span> (<span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#s1:45">s1</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.ssralg#2d0cfb150261028f4ebd2ba355623dcc"> *</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.ssralg#2d0cfb150261028f4ebd2ba355623dcc"> </a></span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#s2:46">s2</a></span>) (<span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#hadamard">hadamard</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#sh1:47">sh1</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#sh2:48">sh2</a></span>).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id">apply/</span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#rowP">rowP</a></span><span class="id"> =&gt;</span><span class="id"> i;</span><span class="id"> rewrite</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#hadamardE">hadamardE</a></span>.<br/>
+<span class="id">case:</span> (<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#unliftP">unliftP</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#ord0">ord0</a></span><span class="id"> i</span>)<span class="id"> =&gt;</span><span class="id"> [j</span><span class="id"> -&gt;|-&gt;]</span>.<br/>
+<span class="id">-</span><span class="gallina-kwd"> by</span><span class="id"> rewrite</span><span class="id"> !</span><span class="id"><a href="pgg_reconstruct.massey.html#massey_codewordS">massey_codewordS</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#hadamardE">hadamardE</a></span>.<br/>
+<span class="id">-</span><span class="gallina-kwd"> by</span><span class="id"> rewrite</span><span class="id"> !</span><span class="id"><a href="pgg_reconstruct.massey.html#massey_codeword0">massey_codeword0</a></span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="vernacular">End</span><span class="id"> hadamard_massey</span>.<br/>
+<br/>
+<pre class="ssrdoc">
+    Section 5: AG Multiplicative Scheme Construction
+</pre>
+<br/>
+<span class="vernacular">Section</span><span class="id"> ag_mult_scheme_sect</span>.<br/>
+<br/>
+<span class="vernacular">Variable</span><span class="id"> </span><span id="ag_mult_scheme_sect.F" class="id"><a name="ag_mult_scheme_sect.F" class="">F</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.finalg#FinRing.Field.Exports.finFieldType">finFieldType</a></span>.<br/>
+<span class="vernacular">Variable</span><span class="id"> </span><span id="ag_mult_scheme_sect.n''" class="id"><a name="ag_mult_scheme_sect.n''" class="">n''</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Datatypes.html#nat">nat</a></span>.<br/>
+<span class="vernacular">Let</span><span class="id"> </span><span id="ag_mult_scheme_sect.n" class="id"><a name="ag_mult_scheme_sect.n" class="">n</a></span><span class="id"> :=</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.n''">n''</a></span>.<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#bc63483175fac06bcd5541a5e9093b18">+2</a></span>.<br/>
+<br/>
+<span class="vernacular">Variables</span> (<span id="ag_mult_scheme_sect.k" class="id"><a name="ag_mult_scheme_sect.k" class="">k</a></span><span class="id"> </span><span id="ag_mult_scheme_sect.g" class="id"><a name="ag_mult_scheme_sect.g" class="">g</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Datatypes.html#nat">nat</a></span>).<br/>
+<span class="vernacular">Variable</span><span class="id"> </span><span id="ag_mult_scheme_sect.ev" class="id"><a name="ag_mult_scheme_sect.ev" class="">ev</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#9c0a062cce31174bb4a1f05fb9cee844">'M[</a></span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.F">F</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#9c0a062cce31174bb4a1f05fb9cee844">]_</a></span>(<span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.k">k</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#9c0a062cce31174bb4a1f05fb9cee844">,</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#9c0a062cce31174bb4a1f05fb9cee844"> </a></span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.n">n</a></span>).<br/>
+<br/>
+<span class="vernacular">Hypothesis</span><span class="id"> </span><span id="ag_mult_scheme_sect.ev_rank" class="id"><a name="ag_mult_scheme_sect.ev_rank" class="">ev_rank</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.mxalgebra#b8af73c258a533909a2acba13114d67c">\rank</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.mxalgebra#b8af73c258a533909a2acba13114d67c"> </a></span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.ev">ev</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> =</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> </a></span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.k">k</a></span>.<br/>
+<span class="vernacular">Hypothesis</span><span class="id"> </span><span id="ag_mult_scheme_sect.Hk" class="id"><a name="ag_mult_scheme_sect.Hk" class="">Hk</a></span><span class="id"> :</span><span class="id"> 0</span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#::nat_scope:x_'&lt;'_x"> &lt;</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#::nat_scope:x_'&lt;'_x"> </a></span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.k">k</a></span>.<br/>
+<span class="vernacular">Hypothesis</span><span class="id"> </span><span id="ag_mult_scheme_sect.Hkn" class="id"><a name="ag_mult_scheme_sect.Hkn" class="">Hkn</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.k">k</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#cb53cf0ee22c036a03b4a9281c68b5a3"> &lt;=</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#cb53cf0ee22c036a03b4a9281c68b5a3"> </a></span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.n">n</a></span>.<br/>
+<span class="vernacular">Hypothesis</span><span class="id"> </span><span id="ag_mult_scheme_sect.Hkg" class="id"><a name="ag_mult_scheme_sect.Hkg" class="">Hkg</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.g">g</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#::nat_scope:x_'&lt;'_x"> &lt;</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#::nat_scope:x_'&lt;'_x"> </a></span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.k">k</a></span>.<br/>
+<span class="vernacular">Hypothesis</span><span class="id"> </span><span id="ag_mult_scheme_sect.Hkgn" class="id"><a name="ag_mult_scheme_sect.Hkgn" class="">Hkgn</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.k">k</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#0dacc1786c5ba797d47dd85006231633"> +</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#0dacc1786c5ba797d47dd85006231633"> </a></span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.g">g</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#::nat_scope:x_'&lt;'_x"> &lt;</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#::nat_scope:x_'&lt;'_x"> </a></span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.n">n</a></span>.<br/>
+<span class="vernacular">Hypothesis</span><span class="id"> </span><span id="ag_mult_scheme_sect.goppa_wt" class="id"><a name="ag_mult_scheme_sect.goppa_wt" class="">goppa_wt</a></span><span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="gallina-kwd">forall</span><span class="id"> </span><span id="m:69" class="id"><a name="m:69" class="">m</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#928a892a0c1438777aeb17535aec0378">'rV[</a></span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.F">F</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#928a892a0c1438777aeb17535aec0378">]_</a></span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.k">k</a></span><span class="id">,</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#m:69">m</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.eqtype#c385a484ee9d1b4e0615924561a9b75e"> !=</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.eqtype#c385a484ee9d1b4e0615924561a9b75e"> </a></span><span class="id">0</span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#::type_scope:x_'-&gt;'_x"> -&gt;</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#::type_scope:x_'-&gt;'_x"> </a></span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.n">n</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#::nat_scope:x_'-'_x"> -</a></span> (<span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.k">k</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#0dacc1786c5ba797d47dd85006231633"> +</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#0dacc1786c5ba797d47dd85006231633"> </a></span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.g">g</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#::nat_scope:x_'-'_x"> -</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#::nat_scope:x_'-'_x"> </a></span><span class="id">1</span>)<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#cb53cf0ee22c036a03b4a9281c68b5a3"> &lt;=</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#cb53cf0ee22c036a03b4a9281c68b5a3"> </a></span><span class="id"><a href="infotheo.lib.hamming.html#wH">wH</a></span> (<span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#m:69">m</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#b2b431de65e6c1e23c1ae3a60262ea15"> *m</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#b2b431de65e6c1e23c1ae3a60262ea15"> </a></span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.ev">ev</a></span>).<br/>
+<span class="vernacular">Hypothesis</span><span class="id"> </span><span id="ag_mult_scheme_sect.ag_priv_surj" class="id"><a name="ag_mult_scheme_sect.ag_priv_surj" class="">ag_priv_surj</a></span><span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="gallina-kwd">forall</span> (<span id="S:72" class="id"><a name="S:72" class="">S</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.finset#d8708f36d374a98f4d683c7593d1ea6a">{set</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.finset#d8708f36d374a98f4d683c7593d1ea6a"> </a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#:::'''I_'_x">'I_</a></span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.n">n</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.finset#d8708f36d374a98f4d683c7593d1ea6a">}</a></span>) (<span id="target:73" class="id"><a name="target:73" class="">target</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#928a892a0c1438777aeb17535aec0378">'rV[</a></span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.F">F</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#928a892a0c1438777aeb17535aec0378">]_</a></span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.n">n</a></span>)<span class="id">,</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#234f50e13366f794cd6877cf832a5935">#|</a></span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#S:72">S</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#234f50e13366f794cd6877cf832a5935">|</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#::nat_scope:x_'&lt;'_x"> &lt;</a></span> (<span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.k">k</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#::nat_scope:x_'-'_x"> -</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#::nat_scope:x_'-'_x"> </a></span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.g">g</a></span>).<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#::nat_scope:x_'.-1'">-1</a></span>.<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#bc63483175fac06bcd5541a5e9093b18">+2</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#::type_scope:x_'-&gt;'_x"> -&gt;</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#a883bdd010993579f99d60b3775bcf54">exists</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#a883bdd010993579f99d60b3775bcf54"> </a></span><span id="c:74" class="id"><a name="c:74" class="">c</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#928a892a0c1438777aeb17535aec0378">'rV[</a></span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.F">F</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#928a892a0c1438777aeb17535aec0378">]_</a></span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.n">n</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#a883bdd010993579f99d60b3775bcf54">,</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#a883bdd010993579f99d60b3775bcf54"> </a></span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#c:74">c</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrbool.html#b09457274bcb94927e289b8a9e9cd3f7"> \in</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrbool.html#b09457274bcb94927e289b8a9e9cd3f7"> </a></span><span class="id"><a href="pgg_reconstruct.ag_code.html#ag_code">ag_code</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.ev">ev</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#ba2b0e492d2b4675a0acf3ea92aabadd"> /\</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#ba2b0e492d2b4675a0acf3ea92aabadd"> </a></span><span class="id"><a href="infotheo.ecc_classic.linearcode.html#vproj">vproj</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#c:74">c</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#S:72">S</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> =</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> </a></span><span class="id"><a href="infotheo.ecc_classic.linearcode.html#vproj">vproj</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#target:73">target</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#S:72">S</a></span>.<br/>
+<br/>
+<span class="vernacular">Variable</span><span class="id"> </span><span id="ag_mult_scheme_sect.k2" class="id"><a name="ag_mult_scheme_sect.k2" class="">k2</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Datatypes.html#nat">nat</a></span>.<br/>
+<span class="vernacular">Variable</span><span class="id"> </span><span id="ag_mult_scheme_sect.ev_2k" class="id"><a name="ag_mult_scheme_sect.ev_2k" class="">ev_2k</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#9c0a062cce31174bb4a1f05fb9cee844">'M[</a></span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.F">F</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#9c0a062cce31174bb4a1f05fb9cee844">]_</a></span>(<span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.k2">k2</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#9c0a062cce31174bb4a1f05fb9cee844">,</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#9c0a062cce31174bb4a1f05fb9cee844"> </a></span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.n">n</a></span>).<br/>
+<br/>
+<span class="vernacular">Hypothesis</span><span class="id"> </span><span id="ag_mult_scheme_sect.ev_2k_rank" class="id"><a name="ag_mult_scheme_sect.ev_2k_rank" class="">ev_2k_rank</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.mxalgebra#b8af73c258a533909a2acba13114d67c">\rank</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.mxalgebra#b8af73c258a533909a2acba13114d67c"> </a></span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.ev_2k">ev_2k</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> =</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> </a></span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.k2">k2</a></span>.<br/>
+<span class="vernacular">Hypothesis</span><span class="id"> </span><span id="ag_mult_scheme_sect.Hk2" class="id"><a name="ag_mult_scheme_sect.Hk2" class="">Hk2</a></span><span class="id"> :</span><span class="id"> 0</span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#::nat_scope:x_'&lt;'_x"> &lt;</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#::nat_scope:x_'&lt;'_x"> </a></span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.k2">k2</a></span>.<br/>
+<span class="vernacular">Hypothesis</span><span class="id"> </span><span id="ag_mult_scheme_sect.Hk2n" class="id"><a name="ag_mult_scheme_sect.Hk2n" class="">Hk2n</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.k2">k2</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#cb53cf0ee22c036a03b4a9281c68b5a3"> &lt;=</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#cb53cf0ee22c036a03b4a9281c68b5a3"> </a></span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.n">n</a></span>.<br/>
+<span class="vernacular">Variable</span><span class="id"> </span><span id="ag_mult_scheme_sect.g2" class="id"><a name="ag_mult_scheme_sect.g2" class="">g2</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Datatypes.html#nat">nat</a></span>.<br/>
+<span class="vernacular">Hypothesis</span><span class="id"> </span><span id="ag_mult_scheme_sect.Hk2g" class="id"><a name="ag_mult_scheme_sect.Hk2g" class="">Hk2g</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.g2">g2</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#::nat_scope:x_'&lt;'_x"> &lt;</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#::nat_scope:x_'&lt;'_x"> </a></span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.k2">k2</a></span>.<br/>
+<span class="vernacular">Hypothesis</span><span class="id"> </span><span id="ag_mult_scheme_sect.Hk2gn" class="id"><a name="ag_mult_scheme_sect.Hk2gn" class="">Hk2gn</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.k2">k2</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#0dacc1786c5ba797d47dd85006231633"> +</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#0dacc1786c5ba797d47dd85006231633"> </a></span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.g2">g2</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#::nat_scope:x_'&lt;'_x"> &lt;</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#::nat_scope:x_'&lt;'_x"> </a></span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.n">n</a></span>.<br/>
+<span class="vernacular">Hypothesis</span><span class="id"> </span><span id="ag_mult_scheme_sect.goppa_2k_wt" class="id"><a name="ag_mult_scheme_sect.goppa_2k_wt" class="">goppa_2k_wt</a></span><span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="gallina-kwd">forall</span><span class="id"> </span><span id="m:93" class="id"><a name="m:93" class="">m</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#928a892a0c1438777aeb17535aec0378">'rV[</a></span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.F">F</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#928a892a0c1438777aeb17535aec0378">]_</a></span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.k2">k2</a></span><span class="id">,</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#m:93">m</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.eqtype#c385a484ee9d1b4e0615924561a9b75e"> !=</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.eqtype#c385a484ee9d1b4e0615924561a9b75e"> </a></span><span class="id">0</span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#::type_scope:x_'-&gt;'_x"> -&gt;</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#::type_scope:x_'-&gt;'_x"> </a></span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.n">n</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#::nat_scope:x_'-'_x"> -</a></span> (<span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.k2">k2</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#0dacc1786c5ba797d47dd85006231633"> +</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#0dacc1786c5ba797d47dd85006231633"> </a></span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.g2">g2</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#::nat_scope:x_'-'_x"> -</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#::nat_scope:x_'-'_x"> </a></span><span class="id">1</span>)<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#cb53cf0ee22c036a03b4a9281c68b5a3"> &lt;=</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#cb53cf0ee22c036a03b4a9281c68b5a3"> </a></span><span class="id"><a href="infotheo.lib.hamming.html#wH">wH</a></span> (<span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#m:93">m</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#b2b431de65e6c1e23c1ae3a60262ea15"> *m</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#b2b431de65e6c1e23c1ae3a60262ea15"> </a></span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.ev_2k">ev_2k</a></span>).<br/>
+<span class="vernacular">Hypothesis</span><span class="id"> </span><span id="ag_mult_scheme_sect.ag_2k_priv_surj" class="id"><a name="ag_mult_scheme_sect.ag_2k_priv_surj" class="">ag_2k_priv_surj</a></span><span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="gallina-kwd">forall</span> (<span id="S:96" class="id"><a name="S:96" class="">S</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.finset#d8708f36d374a98f4d683c7593d1ea6a">{set</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.finset#d8708f36d374a98f4d683c7593d1ea6a"> </a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#:::'''I_'_x">'I_</a></span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.n">n</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.finset#d8708f36d374a98f4d683c7593d1ea6a">}</a></span>) (<span id="target:97" class="id"><a name="target:97" class="">target</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#928a892a0c1438777aeb17535aec0378">'rV[</a></span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.F">F</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#928a892a0c1438777aeb17535aec0378">]_</a></span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.n">n</a></span>)<span class="id">,</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#234f50e13366f794cd6877cf832a5935">#|</a></span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#S:96">S</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#234f50e13366f794cd6877cf832a5935">|</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#::nat_scope:x_'&lt;'_x"> &lt;</a></span> (<span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.k2">k2</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#::nat_scope:x_'-'_x"> -</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#::nat_scope:x_'-'_x"> </a></span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.g2">g2</a></span>).<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#::nat_scope:x_'.-1'">-1</a></span>.<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#bc63483175fac06bcd5541a5e9093b18">+2</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#::type_scope:x_'-&gt;'_x"> -&gt;</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#a883bdd010993579f99d60b3775bcf54">exists</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#a883bdd010993579f99d60b3775bcf54"> </a></span><span id="c:98" class="id"><a name="c:98" class="">c</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#928a892a0c1438777aeb17535aec0378">'rV[</a></span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.F">F</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#928a892a0c1438777aeb17535aec0378">]_</a></span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.n">n</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#a883bdd010993579f99d60b3775bcf54">,</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#a883bdd010993579f99d60b3775bcf54"> </a></span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#c:98">c</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrbool.html#b09457274bcb94927e289b8a9e9cd3f7"> \in</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrbool.html#b09457274bcb94927e289b8a9e9cd3f7"> </a></span><span class="id"><a href="pgg_reconstruct.ag_code.html#ag_code">ag_code</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.ev_2k">ev_2k</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#ba2b0e492d2b4675a0acf3ea92aabadd"> /\</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#ba2b0e492d2b4675a0acf3ea92aabadd"> </a></span><span class="id"><a href="infotheo.ecc_classic.linearcode.html#vproj">vproj</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#c:98">c</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#S:96">S</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> =</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> </a></span><span class="id"><a href="infotheo.ecc_classic.linearcode.html#vproj">vproj</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#target:97">target</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#S:96">S</a></span>.<br/>
+<br/>
+<span class="vernacular">Hypothesis</span><span class="id"> </span><span id="ag_mult_scheme_sect.ag_mult" class="id"><a name="ag_mult_scheme_sect.ag_mult" class="">ag_mult</a></span><span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="gallina-kwd">forall</span><span class="id"> </span><span id="c1:101" class="id"><a name="c1:101" class="">c1</a></span><span class="id"> </span><span id="c2:102" class="id"><a name="c2:102" class="">c2</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#928a892a0c1438777aeb17535aec0378">'rV[</a></span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.F">F</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#928a892a0c1438777aeb17535aec0378">]_</a></span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.n">n</a></span><span class="id">,</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#c1:101">c1</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrbool.html#b09457274bcb94927e289b8a9e9cd3f7"> \in</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrbool.html#b09457274bcb94927e289b8a9e9cd3f7"> </a></span><span class="id"><a href="pgg_reconstruct.ag_code.html#ag_code">ag_code</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.ev">ev</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#::type_scope:x_'-&gt;'_x"> -&gt;</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#::type_scope:x_'-&gt;'_x"> </a></span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#c2:102">c2</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrbool.html#b09457274bcb94927e289b8a9e9cd3f7"> \in</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrbool.html#b09457274bcb94927e289b8a9e9cd3f7"> </a></span><span class="id"><a href="pgg_reconstruct.ag_code.html#ag_code">ag_code</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.ev">ev</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#::type_scope:x_'-&gt;'_x"> -&gt;</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#hadamard">hadamard</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#c1:101">c1</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#c2:102">c2</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrbool.html#b09457274bcb94927e289b8a9e9cd3f7"> \in</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrbool.html#b09457274bcb94927e289b8a9e9cd3f7"> </a></span><span class="id"><a href="pgg_reconstruct.ag_code.html#ag_code">ag_code</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.ev_2k">ev_2k</a></span>.<br/>
+<br/>
+<span class="vernacular">Hypothesis</span><span class="id"> </span><span id="ag_mult_scheme_sect.HT_eq" class="id"><a name="ag_mult_scheme_sect.HT_eq" class="">HT_eq</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#ts_T'">ts_T'</a></span> (<span class="id"><a href="pgg_reconstruct.ag_massey_bridge.html#ag_massey">ag_massey</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.ev_rank">ev_rank</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.Hk">Hk</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.Hkn">Hkn</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.Hkgn">Hkgn</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.goppa_wt">goppa_wt</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.ag_priv_surj">ag_priv_surj</a></span>)<span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> =</a></span><br/>
+&nbsp;&nbsp;<span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#ts_T'">ts_T'</a></span> (<span class="id"><a href="pgg_reconstruct.ag_massey_bridge.html#ag_massey">ag_massey</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.ev_2k_rank">ev_2k_rank</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.Hk2">Hk2</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.Hk2n">Hk2n</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.Hk2gn">Hk2gn</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.goppa_2k_wt">goppa_2k_wt</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.ag_2k_priv_surj">ag_2k_priv_surj</a></span>).<br/>
+<br/>
+<span class="vernacular">Let</span><span class="id"> </span><span id="ag_mult_scheme_sect.base" class="id"><a name="ag_mult_scheme_sect.base" class="">base</a></span><span class="id"> :=</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_massey_bridge.html#ag_massey">ag_massey</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.ev_rank">ev_rank</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.Hk">Hk</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.Hkn">Hkn</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.Hkgn">Hkgn</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.goppa_wt">goppa_wt</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.ag_priv_surj">ag_priv_surj</a></span>.<br/>
+<span class="vernacular">Let</span><span class="id"> </span><span id="ag_mult_scheme_sect.doubled" class="id"><a name="ag_mult_scheme_sect.doubled" class="">doubled</a></span><span class="id"> :=</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_massey_bridge.html#ag_massey">ag_massey</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.ev_2k_rank">ev_2k_rank</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.Hk2">Hk2</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.Hk2n">Hk2n</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.Hk2gn">Hk2gn</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.goppa_2k_wt">goppa_2k_wt</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.ag_2k_priv_surj">ag_2k_priv_surj</a></span>.<br/>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> </span><span id="ag_massey_mult" class="id"><a name="ag_massey_mult" class="">ag_massey_mult</a></span> (<span id="s1:107" class="id"><a name="s1:107" class="">s1</a></span><span class="id"> </span><span id="s2:108" class="id"><a name="s2:108" class="">s2</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.F">F</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span id="shares1:109" class="id"><a name="shares1:109" class="">shares1</a></span><span class="id"> </span><span id="shares2:110" class="id"><a name="shares2:110" class="">shares2</a></span><span class="id"> :</span> (<span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#ts_T'">ts_T'</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.base">base</a></span>).<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#bda89d73ec4a8f23ae92b565ffb5aaa6">+1</a></span>.<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#::type_scope:x_'.-tuple'">-tuple</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#::type_scope:x_'.-tuple'"> F</a></span>)<span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#ts_valid">ts_valid</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.base">base</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#s1:107">s1</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#shares1:109">shares1</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#::type_scope:x_'-&gt;'_x"> -&gt;</a></span><br/>
+&nbsp;&nbsp;<span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#ts_valid">ts_valid</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.base">base</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#s2:108">s2</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#shares2:110">shares2</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#::type_scope:x_'-&gt;'_x"> -&gt;</a></span><br/>
+&nbsp;&nbsp;<span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#ts_valid">ts_valid</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.doubled">doubled</a></span> (<span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#s1:107">s1</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.ssralg#2d0cfb150261028f4ebd2ba355623dcc"> *</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.ssralg#2d0cfb150261028f4ebd2ba355623dcc"> </a></span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#s2:108">s2</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#cast_tuple">cast_tuple</a></span> (<span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrfun.html#congr1">congr1</a></span><span class="id"> </span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Datatypes.html#S">S</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.HT_eq">HT_eq</a></span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#9d5b9af75768e306a1218aacdf8c3490">[tuple</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#9d5b9af75768e306a1218aacdf8c3490"> </a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#tnth">tnth</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#shares1:109">shares1</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#i:111">i</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.ssralg#2d0cfb150261028f4ebd2ba355623dcc"> *</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.ssralg#2d0cfb150261028f4ebd2ba355623dcc"> </a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#tnth">tnth</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#shares2:110">shares2</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#i:111">i</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#9d5b9af75768e306a1218aacdf8c3490"> |</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#9d5b9af75768e306a1218aacdf8c3490"> </a></span><span id="i:111" class="id"><a name="i:111" class="">i</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#9d5b9af75768e306a1218aacdf8c3490"> &lt;</a></span> (<span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#ts_T'">ts_T'</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.base">base</a></span>).<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#bda89d73ec4a8f23ae92b565ffb5aaa6">+1</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#9d5b9af75768e306a1218aacdf8c3490">]</a></span>).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id">move=&gt;</span><span class="id"> Hv1</span><span class="id"> Hv2</span>.<br/>
+<span class="id">rewrite</span><span class="id"> /</span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#ts_valid">ts_valid</a></span><span class="id"> /=</span><span class="id"> /</span><span class="id"><a href="pgg_reconstruct.massey.html#massey_valid_tuple">massey_valid_tuple</a></span>.<br/>
+<span class="id">have</span><span class="id"> -&gt;</span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrfun.html#congr1">congr1</a></span><span class="id"> </span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Datatypes.html#S">S</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.HT_eq">HT_eq</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> =</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> </a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrfun.html#erefl">erefl</a></span><span class="id"> _</span><span class="gallina-kwd"> by</span><span class="id"> exact:</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.eqtype#eq_irrelevance">eq_irrelevance</a></span>.<br/>
+<span class="id">rewrite</span><span class="id"> /</span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#cast_tuple">cast_tuple</a></span><span class="id"> /=</span>.<br/>
+<span class="id">have</span><span class="id"> -&gt;</span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.massey.html#tuple_to_rV">tuple_to_rV</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#9d5b9af75768e306a1218aacdf8c3490">[tuple</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#9d5b9af75768e306a1218aacdf8c3490"> </a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#tnth">tnth</a></span><span class="id"> shares1</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#i:112">i</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.ssralg#2d0cfb150261028f4ebd2ba355623dcc"> *</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.ssralg#2d0cfb150261028f4ebd2ba355623dcc"> </a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#tnth">tnth</a></span><span class="id"> shares2</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#i:112">i</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#9d5b9af75768e306a1218aacdf8c3490"> |</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#9d5b9af75768e306a1218aacdf8c3490"> </a></span><span id="i:112" class="id"><a name="i:112" class="">i</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#9d5b9af75768e306a1218aacdf8c3490"> &lt;</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#9d5b9af75768e306a1218aacdf8c3490"> </a></span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.n''">n''</a></span>.<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#bda89d73ec4a8f23ae92b565ffb5aaa6">+1</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#9d5b9af75768e306a1218aacdf8c3490">]</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a">=</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> </a></span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#hadamard">hadamard</a></span> (<span class="id"><a href="pgg_reconstruct.massey.html#tuple_to_rV">tuple_to_rV</a></span><span class="id"> shares1</span>) (<span class="id"><a href="pgg_reconstruct.massey.html#tuple_to_rV">tuple_to_rV</a></span><span class="id"> shares2</span>).<br/>
+&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> apply/</span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#rowP">rowP</a></span><span class="id"> =&gt;</span><span class="id"> i;</span><span class="id"> rewrite</span><span class="id"> !</span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#mxE">mxE</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#tnth_mktuple">tnth_mktuple</a></span>.<br/>
+<span class="id">rewrite</span><span class="id"> -</span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#hadamard_massey_codeword">hadamard_massey_codeword</a></span>.<br/>
+<span class="id">exact:</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.ag_mult">ag_mult</a></span><span class="id"> Hv1</span><span class="id"> Hv2</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="vernacular">Definition</span><span class="id"> </span><span id="ag_mult_scheme" class="id"><a name="ag_mult_scheme" class="">ag_mult_scheme</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#MultiplicativeScheme">MultiplicativeScheme</a></span><span class="id"> :=</span><br/>
+&nbsp;&nbsp;<span class="id">{|</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ms_base">ms_base</a></span><span class="id"> :=</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.base">base</a></span><span class="id"> ;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ms_doubled">ms_doubled</a></span><span class="id"> :=</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.doubled">doubled</a></span><span class="id"> ;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ms_T_eq">ms_T_eq</a></span><span class="id"> :=</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_mult_scheme_sect.HT_eq">HT_eq</a></span><span class="id"> ;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ms_mult">ms_mult</a></span><span class="id"> :=</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ag_massey_mult">ag_massey_mult</a></span><span class="id"> |}</span>.<br/>
+<br/>
+<span class="vernacular">End</span><span class="id"> ag_mult_scheme_sect</span>.<br/>
+<br/>
+<pre class="ssrdoc">
+    Section 6: Strong Multiplication Threshold (axiomatized)
+</pre>
+<br/>
+<span class="vernacular">Section</span><span class="id"> strong_mult</span>.<br/>
+<br/>
+<span class="vernacular">Variable</span><span class="id"> </span><span id="strong_mult.F" class="id"><a name="strong_mult.F" class="">F</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.finalg#FinRing.Field.Exports.finFieldType">finFieldType</a></span>.<br/>
+<br/>
+<span class="vernacular">Variable</span><span class="id"> </span><span id="strong_mult.ms" class="id"><a name="strong_mult.ms" class="">ms</a></span><span class="id"> :</span><span class="id"> @</span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#MultiplicativeScheme">MultiplicativeScheme</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#strong_mult.F">F</a></span>.<br/>
+<br/>
+<span class="vernacular">Hypothesis</span><span class="id"> </span><span id="strong_mult.strong_mult_threshold" class="id"><a name="strong_mult.strong_mult_threshold" class="">strong_mult_threshold</a></span><span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#ts_T">ts_T</a></span> (<span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ms_base">ms_base</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#strong_mult.ms">ms</a></span>)<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#cb53cf0ee22c036a03b4a9281c68b5a3"> &lt;=</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#cb53cf0ee22c036a03b4a9281c68b5a3"> </a></span><span class="id">2</span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#ea2ff3d561159081cea6fb2e8113cc54"> *</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#ea2ff3d561159081cea6fb2e8113cc54"> </a></span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#ts_k">ts_k</a></span> (<span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ms_base">ms_base</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#strong_mult.ms">ms</a></span>)<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#0dacc1786c5ba797d47dd85006231633"> +</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#0dacc1786c5ba797d47dd85006231633"> </a></span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#ts_k">ts_k</a></span> (<span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#ms_doubled">ms_doubled</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_multiplicative.html#strong_mult.ms">ms</a></span>).<br/>
+<br/>
+<span class="vernacular">End</span><span class="id"> strong_mult</span>.<br/>
+
+      <div class="footer"><hr/>Generated by <a href="https://github.com/affeldt-aist/rocqnavi/">rocqnavi</a></div>
+    </div>
+  </div>
+    </main>
+</body>
+</html>

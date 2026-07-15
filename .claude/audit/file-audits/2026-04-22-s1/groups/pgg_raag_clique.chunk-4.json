@@ -1,0 +1,21 @@
+{
+  "findings": [
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 987,
+      "line_end": 987,
+      "lemma_name": "table_T4_abelian",
+      "severity": "error",
+      "evidence_quote": "Lemma table_T4_abelian :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": null,
+  "exit_code": 2
+}

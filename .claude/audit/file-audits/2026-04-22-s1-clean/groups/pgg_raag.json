@@ -1,0 +1,229 @@
+{
+  "findings": [
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_raag.v",
+      "line_start": 98,
+      "line_end": 98,
+      "lemma_name": "foata_depth_at_ext",
+      "severity": "warning",
+      "evidence_quote": "Lemma foata_depth_at_ext comm1 comm2 prev x :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_raag.v",
+      "line_start": 288,
+      "line_end": 288,
+      "lemma_name": "word_eval_adj_swap",
+      "severity": "warning",
+      "evidence_quote": "Lemma word_eval_adj_swap L (w1 w2 : pgg_word M L) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_raag.v",
+      "line_start": 410,
+      "line_end": 410,
+      "lemma_name": "adj_swap_sym_sym",
+      "severity": "warning",
+      "evidence_quote": "Lemma adj_swap_sym_sym L : symmetric (@adj_swap_sym L).",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_raag.v",
+      "line_start": 414,
+      "line_end": 414,
+      "lemma_name": "search_space_le_traces",
+      "severity": "warning",
+      "evidence_quote": "Lemma search_space_le_traces L : @search_space M L <= n_traces L.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_raag.v",
+      "line_start": 443,
+      "line_end": 443,
+      "lemma_name": "raag_weval_inj_search_space",
+      "severity": "warning",
+      "evidence_quote": "Lemma raag_weval_inj_search_space L :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_raag.v",
+      "line_start": 468,
+      "line_end": 468,
+      "lemma_name": "n_traces_le_words",
+      "severity": "warning",
+      "evidence_quote": "Lemma n_traces_le_words L : n_traces L <= Tg ^ L.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_raag.v",
+      "line_start": 492,
+      "line_end": 492,
+      "lemma_name": "empty_comm_adj_swap",
+      "severity": "warning",
+      "evidence_quote": "Lemma empty_comm_adj_swap L (w1 w2 : pgg_word M L) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_raag.v",
+      "line_start": 627,
+      "line_end": 627,
+      "lemma_name": "inv_count_zero_sorted",
+      "severity": "warning",
+      "evidence_quote": "Lemma inv_count_zero_sorted L (w : pgg_word M L) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_raag.v",
+      "line_start": 667,
+      "line_end": 667,
+      "lemma_name": "inv_count_swap_lt",
+      "severity": "warning",
+      "evidence_quote": "Lemma inv_count_swap_lt L' (k : 'I_L') (w : pgg_word M L'.+1) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_raag.v",
+      "line_start": 780,
+      "line_end": 780,
+      "lemma_name": "full_comm_connect_sorted",
+      "severity": "warning",
+      "evidence_quote": "Lemma full_comm_connect_sorted L",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_raag.v",
+      "line_start": 910,
+      "line_end": 910,
+      "lemma_name": "full_comm_trace_iff_perm",
+      "severity": "warning",
+      "evidence_quote": "Lemma full_comm_trace_iff_perm L (w1 w2 : pgg_word M L) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_raag.v",
+      "line_start": 937,
+      "line_end": 937,
+      "lemma_name": "indep_adj_swap_false",
+      "severity": "warning",
+      "evidence_quote": "Lemma indep_adj_swap_false (I : {set 'I_Tg}) L (w1 w2 : pgg_word M L) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_raag.v",
+      "line_start": 962,
+      "line_end": 962,
+      "lemma_name": "indep_set_traces_lb",
+      "severity": "warning",
+      "evidence_quote": "Lemma indep_set_traces_lb (I : {set 'I_Tg}) (L : nat) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_raag.v",
+      "line_start": 1053,
+      "line_end": 1053,
+      "lemma_name": "word_eval_perm_eq",
+      "severity": "warning",
+      "evidence_quote": "Lemma word_eval_perm_eq L (w1 w2 : pgg_word M L) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_raag.v",
+      "line_start": 1065,
+      "line_end": 1065,
+      "lemma_name": "indep_set_singleton_traces",
+      "severity": "warning",
+      "evidence_quote": "Lemma indep_set_singleton_traces (I : {set 'I_Tg}) (L : nat)",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_raag.v",
+      "line_start": 1099,
+      "line_end": 1099,
+      "lemma_name": "indep_set_word_eval_inj",
+      "severity": "warning",
+      "evidence_quote": "Lemma indep_set_word_eval_inj (I : {set 'I_Tg}) (L : nat) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_raag.v",
+      "line_start": 1136,
+      "line_end": 1136,
+      "lemma_name": "raag_search_space_1",
+      "severity": "warning",
+      "evidence_quote": "Lemma raag_search_space_1 : @search_space R 1 = Tg.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": null,
+  "exit_code": 0
+}

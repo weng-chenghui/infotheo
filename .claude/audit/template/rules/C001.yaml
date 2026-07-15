@@ -1,0 +1,41 @@
+id: C001
+category: opaque_signatures
+title: "Inductive or Record has opaque nested-dependent header"
+severity: warning
+enabled: true
+stage_mode: stage2_only
+authority:
+  - peer-feedback-2026-03
+  - mathcomp-CONTRIBUTING
+agent_prompt: |
+  Flag `Inductive` and `Record` declarations where the header nests dependent
+  types in a way that obscures the arity or the intended semantic role.
+
+  Typical offending shape:
+    Inductive enc_contractible {C : finType} (Z : {RV P -> C}) (target : R)
+        : forall {A : finType}, {RV P -> A} -> Prop := ...
+  The `forall {A : finType}` inside the header makes the arity implicit and
+  forces readers to compute the kind of the predicate mentally. Two fixes
+  that conform:
+    1. Give the arity explicitly: `: forall (A : finType) (X : {RV P -> A}), Prop`
+       and drop the curly brace.
+    2. Refactor to a named arity alias:
+         Definition EncArity := forall (A : finType), {RV P -> A} -> Prop.
+         Inductive enc_contractible ... : EncArity := ...
+
+  Also flag Records with nested dependent fields whose dependencies are not
+  explained in sibling comments, or Records where three or more fields have
+  unnamed dependent binders such as `forall x y, P x y -> Q x y`.
+
+  Do NOT flag:
+  - Declarations that already have an `Arity` comment above them.
+  - Well-known MathComp structures such as `perm`, `subType`, or anything
+    defined via `HB.structure`.
+  - Short two-line declarations whose full type fits on the declaration
+    line without line wrap.
+
+  For each finding: quote the header, explain which segment is opaque, and
+  sketch both a refactor and an in-place annotation.
+scope: changed_lemmas
+fix_hint: "Give the arity of the Inductive header explicitly, or extract it into a named `Definition ...Arity := ...`. Add a one-line comment above the declaration describing each named index."
+exceptions: []

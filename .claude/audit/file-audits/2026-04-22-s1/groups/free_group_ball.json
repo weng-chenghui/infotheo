@@ -1,0 +1,164 @@
+{
+  "findings": [
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/free_group_ball.v",
+      "line_start": 265,
+      "line_end": 265,
+      "lemma_name": "search_space_exp_growth",
+      "severity": "warning",
+      "evidence_quote": "Lemma search_space_exp_growth (r L : nat) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/groups/free_group_ball.v",
+      "line_start": 53,
+      "line_end": 53,
+      "lemma_name": "letter_inv_lt",
+      "severity": "error",
+      "evidence_quote": "Lemma letter_inv_lt (i : nat) : i < alpha -> letter_inv i < alpha.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/groups/free_group_ball.v",
+      "line_start": 56,
+      "line_end": 56,
+      "lemma_name": "letter_invK",
+      "severity": "error",
+      "evidence_quote": "Lemma letter_invK (i : nat) : i < alpha -> letter_inv (letter_inv i) = i.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/groups/free_group_ball.v",
+      "line_start": 66,
+      "line_end": 66,
+      "lemma_name": "letter_inv_neq",
+      "severity": "error",
+      "evidence_quote": "Lemma letter_inv_neq (i : nat) : i < alpha -> letter_inv i != i.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/groups/free_group_ball.v",
+      "line_start": 105,
+      "line_end": 105,
+      "lemma_name": "sphere_size_1",
+      "severity": "error",
+      "evidence_quote": "Lemma sphere_size_1 : sphere_size 1 = alpha.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/groups/free_group_ball.v",
+      "line_start": 108,
+      "line_end": 108,
+      "lemma_name": "sphere_size_S",
+      "severity": "error",
+      "evidence_quote": "Lemma sphere_size_S (k : nat) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/groups/free_group_ball.v",
+      "line_start": 126,
+      "line_end": 126,
+      "lemma_name": "ball_size",
+      "severity": "error",
+      "evidence_quote": "Definition ball_size (L : nat) : nat :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/groups/free_group_ball.v",
+      "line_start": 129,
+      "line_end": 129,
+      "lemma_name": "ball_size_0",
+      "severity": "error",
+      "evidence_quote": "Lemma ball_size_0 : ball_size 0 = 1.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/groups/free_group_ball.v",
+      "line_start": 132,
+      "line_end": 132,
+      "lemma_name": "ball_size_S",
+      "severity": "error",
+      "evidence_quote": "Lemma ball_size_S (L : nat) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/groups/free_group_ball.v",
+      "line_start": 136,
+      "line_end": 136,
+      "lemma_name": "ball_size_ge1",
+      "severity": "error",
+      "evidence_quote": "Lemma ball_size_ge1 (L : nat) : 0 < ball_size L.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/groups/free_group_ball.v",
+      "line_start": 189,
+      "line_end": 189,
+      "lemma_name": "alpha_gt1",
+      "severity": "error",
+      "evidence_quote": "Lemma alpha_gt1 : 1 < alpha.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/groups/free_group_ball.v",
+      "line_start": 192,
+      "line_end": 192,
+      "lemma_name": "q_gt0",
+      "severity": "error",
+      "evidence_quote": "Lemma q_gt0 : 0 < q.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": null,
+  "exit_code": 2
+}

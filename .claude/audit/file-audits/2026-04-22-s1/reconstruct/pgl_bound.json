@@ -1,0 +1,73 @@
+{
+  "findings": [
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/reconstruct/pgl_bound.v",
+      "line_start": 77,
+      "line_end": 77,
+      "lemma_name": "scalar_pred_group_set",
+      "severity": "warning",
+      "evidence_quote": "Lemma scalar_pred_group_set : group_set [set u : {'GL_2[F]} | scalar_pred u].",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/reconstruct/pgl_bound.v",
+      "line_start": 94,
+      "line_end": 94,
+      "lemma_name": "scalar_gl2_subset_center",
+      "severity": "warning",
+      "evidence_quote": "Lemma scalar_gl2_subset_center : scalar_gl2 \\subset 'Z(gl2 F).",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/reconstruct/pgl_bound.v",
+      "line_start": 117,
+      "line_end": 117,
+      "lemma_name": "scalar_unit_in_gl",
+      "severity": "warning",
+      "evidence_quote": "Lemma scalar_unit_in_gl (a : {unit F}) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/reconstruct/pgl_bound.v",
+      "line_start": 240,
+      "line_end": 240,
+      "lemma_name": "pgl2_5_eq_s5",
+      "severity": "warning",
+      "evidence_quote": "Lemma pgl2_5_eq_s5 : pgl_card 5 = #|[set: 'S_5]|.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/pgl_bound.v",
+      "line_start": 77,
+      "line_end": 77,
+      "lemma_name": "scalar_pred_group_set",
+      "severity": "error",
+      "evidence_quote": "Lemma scalar_pred_group_set : group_set [set u : {'GL_2[F]} | scalar_pred u].",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": null,
+  "exit_code": 2
+}

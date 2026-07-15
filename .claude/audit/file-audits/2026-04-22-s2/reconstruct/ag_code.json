@@ -1,0 +1,63 @@
+{
+  "findings": [
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/reconstruct/ag_code.v",
+      "line_start": 155,
+      "line_end": 155,
+      "lemma_name": "ag_min_dist_lb",
+      "severity": "warning",
+      "evidence_quote": "Lemma ag_min_dist_lb : n - (k + g - 1) <= min_dist ag_not_trivial.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/reconstruct/ag_code.v",
+      "line_start": 171,
+      "line_end": 171,
+      "lemma_name": "ag_min_dist_ge2",
+      "severity": "warning",
+      "evidence_quote": "Lemma ag_min_dist_ge2 : k + g < n -> 1 < min_dist ag_not_trivial.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "S998",
+      "file": "rocq-audit",
+      "line_start": 1,
+      "line_end": 1,
+      "severity": "warning",
+      "evidence_quote": "agent rc=1: ",
+      "closeness": "near",
+      "explanation": "Stage 2 call failed for chunk 3; see logs.",
+      "fix_sketch": "Retry the commit. If repeated, check agent configuration.",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": {
+    "entity_count": 16,
+    "chunk_count": 6,
+    "chunk_size": 3,
+    "workers_used": 4,
+    "tokens_used": 0,
+    "tokens_cap": 20000000,
+    "wall_ms_used": 6651,
+    "wall_ms_cap": 1800000,
+    "deferred_chunks": 0,
+    "stop_reason": "clean",
+    "estimated_usd": 0.0,
+    "model": "sonnet"
+  },
+  "exit_code": 0
+}

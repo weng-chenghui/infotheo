@@ -1,0 +1,177 @@
+{
+  "findings": [
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/reconstruct/pgg_sharing_framework.v",
+      "line_start": 127,
+      "line_end": 127,
+      "lemma_name": "sum_mod_valid_pred",
+      "severity": "warning",
+      "evidence_quote": "Definition sum_mod_valid_pred (s : 'I_N) (shares : T.-tuple 'I_N) : Prop :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/reconstruct/pgg_sharing_framework.v",
+      "line_start": 130,
+      "line_end": 130,
+      "lemma_name": "sum_mod_scheme_correct",
+      "severity": "warning",
+      "evidence_quote": "Lemma sum_mod_scheme_correct (s : 'I_N) (shares : T.-tuple 'I_N) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/reconstruct/pgg_sharing_framework.v",
+      "line_start": 138,
+      "line_end": 138,
+      "lemma_name": "sum_mod_scheme_private",
+      "severity": "warning",
+      "evidence_quote": "Lemma sum_mod_scheme_private (s1 s2 : 'I_N)",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/reconstruct/pgg_sharing_framework.v",
+      "line_start": 158,
+      "line_end": 158,
+      "lemma_name": "sum_mod_encode_valid",
+      "severity": "warning",
+      "evidence_quote": "Lemma sum_mod_encode_valid (s : 'I_N) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/reconstruct/pgg_sharing_framework.v",
+      "line_start": 227,
+      "line_end": 227,
+      "lemma_name": "pgg_hidden_invariant_perm",
+      "severity": "warning",
+      "evidence_quote": "Lemma pgg_hidden_invariant_perm (s : 'I_N) (P : gT)",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/pgg_sharing_framework.v",
+      "line_start": 75,
+      "line_end": 75,
+      "lemma_name": "ts_recon_encode",
+      "severity": "error",
+      "evidence_quote": "Lemma ts_recon_encode {sT shT : Type} (ts : ThresholdScheme sT shT) (s : sT) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/pgg_sharing_framework.v",
+      "line_start": 79,
+      "line_end": 79,
+      "lemma_name": "ts_T",
+      "severity": "error",
+      "evidence_quote": "Definition ts_T {sT shT : Type} (ts : ThresholdScheme sT shT) : nat :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/pgg_sharing_framework.v",
+      "line_start": 82,
+      "line_end": 82,
+      "lemma_name": "ts_k",
+      "severity": "error",
+      "evidence_quote": "Definition ts_k {sT shT : Type} (ts : ThresholdScheme sT shT) : nat :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/pgg_sharing_framework.v",
+      "line_start": 130,
+      "line_end": 130,
+      "lemma_name": "sum_mod_scheme_correct",
+      "severity": "error",
+      "evidence_quote": "Lemma sum_mod_scheme_correct (s : 'I_N) (shares : T.-tuple 'I_N) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/pgg_sharing_framework.v",
+      "line_start": 138,
+      "line_end": 138,
+      "lemma_name": "sum_mod_scheme_private",
+      "severity": "error",
+      "evidence_quote": "Lemma sum_mod_scheme_private (s1 s2 : 'I_N)",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/pgg_sharing_framework.v",
+      "line_start": 158,
+      "line_end": 158,
+      "lemma_name": "sum_mod_encode_valid",
+      "severity": "error",
+      "evidence_quote": "Lemma sum_mod_encode_valid (s : 'I_N) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/pgg_sharing_framework.v",
+      "line_start": 171,
+      "line_end": 171,
+      "lemma_name": "sum_mod_scheme",
+      "severity": "error",
+      "evidence_quote": "Definition sum_mod_scheme : ThresholdScheme 'I_N 'I_N :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/pgg_sharing_framework.v",
+      "line_start": 193,
+      "line_end": 193,
+      "lemma_name": "tnth_cast_tuple",
+      "severity": "error",
+      "evidence_quote": "Lemma tnth_cast_tuple {A : Type} {n m : nat} (H : n = m)",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": null,
+  "exit_code": 2
+}

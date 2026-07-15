@@ -1,0 +1,73 @@
+{
+  "findings": [
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/reconstruct/hyperelliptic_code.v",
+      "line_start": 215,
+      "line_end": 215,
+      "lemma_name": "hyp_zero_to_root",
+      "severity": "warning",
+      "evidence_quote": "Lemma hyp_zero_to_root (A B : {poly F}) (i : 'I_n) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/reconstruct/hyperelliptic_code.v",
+      "line_start": 272,
+      "line_end": 272,
+      "lemma_name": "hyp_goppa_wt_mdeg",
+      "severity": "warning",
+      "evidence_quote": "Theorem hyp_goppa_wt_mdeg :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/hyperelliptic_code.v",
+      "line_start": 47,
+      "line_end": 47,
+      "lemma_name": "size_sqr",
+      "severity": "error",
+      "evidence_quote": "Lemma size_sqr (p : {poly R}) : p != 0 -> size (p ^+ 2) = (size p).*2.-1.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/hyperelliptic_code.v",
+      "line_start": 312,
+      "line_end": 312,
+      "lemma_name": "hyp_goppa_wt",
+      "severity": "error",
+      "evidence_quote": "Theorem hyp_goppa_wt :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/hyperelliptic_code.v",
+      "line_start": 365,
+      "line_end": 365,
+      "lemma_name": "dual_min_dist",
+      "severity": "error",
+      "evidence_quote": "Theorem dual_min_dist :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": null,
+  "exit_code": 2
+}

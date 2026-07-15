@@ -1,0 +1,484 @@
+{
+  "findings": [
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/security/pgg_entropy_security_demo.v",
+      "line_start": 64,
+      "line_end": 64,
+      "lemma_name": "monster_security_from_entropy",
+      "severity": "warning",
+      "evidence_quote": "Definition monster_security_from_entropy : SecurityWitness R R_monster :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/security/pgg_entropy_security_demo.v",
+      "line_start": 68,
+      "line_end": 68,
+      "lemma_name": "monster_entropy_eps_perfect",
+      "severity": "warning",
+      "evidence_quote": "Lemma monster_entropy_eps_perfect :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/security/pgg_entropy_security_demo.v",
+      "line_start": 160,
+      "line_end": 160,
+      "lemma_name": "oc_one_le_two_log2",
+      "severity": "warning",
+      "evidence_quote": "Lemma oc_one_le_two_log2 (R : realType) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1",
+        "stage2"
+      ],
+      "explanation": "Stage 1 flagged this by the 4+ underscore-component heuristic, but the preceding comment carries an explicit `Naming:` justification consistent with the AUTHORITY.md escape hatch: 'five components state the numeric content (1 le 2 log2); an abbreviation would obscure the constants.' The name parses as `oc_` (instance prefix) + a concrete numeric claim `one_le_two_log2`. Per the authority, a Naming-line justification converts a grammar-drift name into an acceptable one.",
+      "fix_sketch": "No change required: the Naming: justification on the preceding comment satisfies the AUTHORITY.md clause for non-conforming names. If a rename is still desired for consistency, consider `oc_log2_bound` or `oc_gap_ge1`."
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/security/pgg_entropy_security_demo.v",
+      "line_start": 195,
+      "line_end": 195,
+      "lemma_name": "oc_entropy_witness_2",
+      "severity": "warning",
+      "evidence_quote": "Definition oc_entropy_witness_2 : EntropyWitness R R_oc :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/security/pgg_entropy_security_demo.v",
+      "line_start": 202,
+      "line_end": 202,
+      "lemma_name": "oc_security_from_entropy",
+      "severity": "warning",
+      "evidence_quote": "Definition oc_security_from_entropy : SecurityWitness R R_oc :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/security/pgg_entropy_security_demo.v",
+      "line_start": 208,
+      "line_end": 208,
+      "lemma_name": "oc_entropy_vs_combinatorial",
+      "severity": "warning",
+      "evidence_quote": "Lemma oc_entropy_vs_combinatorial :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/security/pgg_entropy_security_demo.v",
+      "line_start": 244,
+      "line_end": 244,
+      "lemma_name": "oc_entropy_witness_L",
+      "severity": "warning",
+      "evidence_quote": "Definition oc_entropy_witness_L : EntropyWitness R R_oc :=",
+      "closeness": "near",
+      "explanation": "Four underscore-separated components (oc, entropy, witness, L). The trailing L encodes a section parameter but is not a canonical MathComp suffix per AUTHORITY.md. Main symbol is ambiguous between entropy_witness and witness; oc is an instance qualifier and L is a parameter index. MathComp grammar requires mainSymbol_suffixes(_condition)? with suffixes from the authority table. Stage 1 did not flag this line; evaluating independently per Stage 2 mandate.",
+      "fix_sketch": "Rename to oc_entropy_witness (dropping the L parameter suffix if the Section already binds L) or entropyWitness_oc with a separate L parameter comment. If disambiguation requires the L suffix, add a Naming: justification comment.",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/security/pgg_entropy_security_demo.v",
+      "line_start": 250,
+      "line_end": 250,
+      "lemma_name": "oc_security_from_entropy_L",
+      "severity": "warning",
+      "evidence_quote": "Definition oc_security_from_entropy_L : SecurityWitness R R_oc :=",
+      "closeness": "far",
+      "explanation": "Five components (oc, security, from, entropy, L) with the connective from that is not in the MathComp exceptions list; only _of_ is allowlisted per F001.exceptions. The from connector mirrors _of_ semantically but does not match the approved form. The name drifts toward generic English snake_case rather than mainSymbol_suffixes. Stage 1 did not flag this line; evaluating independently.",
+      "fix_sketch": "Rename to oc_security_witness_of_entropy_L or oc_security_witness_L (placing the main symbol security_witness first with instance qualifier). Alternatively oc_securityWitness_L in camelCase main-symbol style. Add Naming: justification if the from connector is intentional.",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/security/pgg_entropy_security_demo.v",
+      "line_start": 55,
+      "line_end": 61,
+      "lemma_name": "monster_entropy_perfect",
+      "severity": "warning",
+      "evidence_quote": "fiber_entropy (R:=R) monster_Lstar monster_sigmas s = log monster_n.+2%:R",
+      "closeness": "near",
+      "explanation": "The statement is an equation (lhs = rhs) whose main symbol is fiber_entropy. Per AUTHORITY.md the canonical suffix for an equational rewrite lemma is '_E'. The suffix '_perfect' is domain vocabulary (perfect entropy) and does not appear in the MathComp suffix table; a reader searching for fiber_entropy lemmas by suffix would not find this via the _E convention. Suggested rename: monster_fiber_entropy_E (with a Naming: comment if 'perfect' must be retained for domain legibility).",
+      "fix_sketch": "(* Option 1 — strict MathComp: *)\nLemma monster_fiber_entropy_E (s : 'I_monster_n.+2) :\n  fiber_entropy (R:=R) monster_Lstar monster_sigmas s = log monster_n.+2%:R.\n(* Option 2 — retain domain term with Naming annotation: *)\n(** ... Naming: '_perfect' is intentional; signals the perfect-entropy\n    property used in the security reduction rather than a generic rewrite. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/security/pgg_entropy_security_demo.v",
+      "line_start": 68,
+      "line_end": 74,
+      "lemma_name": "monster_entropy_eps_perfect",
+      "severity": "warning",
+      "evidence_quote": "sw_bound_eps monster_security_from_entropy = 0",
+      "closeness": "near",
+      "explanation": "The statement is an equation of the form f x = 0. Per AUTHORITY.md the canonical suffix for ring/nat zero in an equational context is '_eq0' or the bare '0' suffix (e.g. foo_eps0 or foo_eps_eq0). The suffix '_eps_perfect' bundles a domain qualifier ('perfect') with the epsilon symbol in a non-standard way; '_perfect' is not in the suffix table. Stage 1 already flagged F001 at line 68 for name length; this G001 finding adds the semantic-suffix mismatch diagnosis. Suggested rename: monster_eps0 or monster_security_eps_eq0.",
+      "fix_sketch": "(* Option 1 — concise MathComp zero suffix: *)\nLemma monster_eps0 : sw_bound_eps monster_security_from_entropy = 0.\n(* Option 2 — more descriptive with correct suffix: *)\nLemma monster_security_eps_eq0 : sw_bound_eps monster_security_from_entropy = 0.\n(* If the 'perfect' label must be retained, add a Naming: line in the preceding comment. *)",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/security/pgg_entropy_security_demo.v",
+      "line_start": 254,
+      "line_end": 256,
+      "lemma_name": "oc_convergence_perfect",
+      "severity": "warning",
+      "evidence_quote": "Lemma oc_convergence_perfect :\n  H_min = log 4%:R ->\n  sw_bound_eps oc_security_from_entropy_L = 0.",
+      "closeness": "near",
+      "explanation": "Statement shape is condition -> equation where the equation head is sw_bound_eps and the conclusion is sw_bound_eps ... = 0. The appropriate suffix for x = 0 per AUTHORITY.md is _0 or _eq0. The current suffix perfect describes the condition (perfect security) rather than the equation role. MathComp convention places the main symbol first and the condition last: mainSymbol_0_condition or mainSymbol_eq0_of_condition.",
+      "fix_sketch": "Rename to oc_sw_bound_eps_eq0 (condition implicit in statement) or oc_sw_bound_eps_0_of_perfect (condition explicit as trailing qualifier) to match the mainSymbol_suffix(_condition)? grammar per AUTHORITY.md.",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/security/pgg_entropy_security_demo.v",
+      "line_start": 98,
+      "line_end": 105,
+      "lemma_name": "monster_leakage_short_L",
+      "severity": "error",
+      "evidence_quote": "(* Leakage = D(P_s || U_N) *)",
+      "closeness": "far",
+      "explanation": "The preceding comment contains only one alphabetic token of length three or more ('Leakage'); all other symbols are single-letter identifiers inside a formula. The H001 degeneracy test requires at least two alphabetic tokens of length >=3, so this comment counts as degenerate even though a block is physically present. The inline formula is informative to a domain reader, but the rule is quantitative and this comment does not carry Kind, motivation, or downstream consumer prose.",
+      "fix_sketch": "(** monster_leakage_short_L — at every sheet s, the leakage log N - H(P_s) equals the KL divergence D(P_s || U_N).\n    Kind: main.\n    Why: packages the entropy gap as a KL divergence so downstream EntropyWitness consumers can cite it directly. *)",
+      "confidence": "medium",
+      "stage": "stage2",
+      "escalated_model": "opus",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/security/pgg_entropy_security_demo.v",
+      "line_start": 50,
+      "line_end": 53,
+      "lemma_name": "monster_entropy_witness_Lstar",
+      "severity": "warning",
+      "evidence_quote": "(* EntropyWitness via pe_inj *)",
+      "closeness": "far",
+      "explanation": "The preceding comment '(* EntropyWitness via pe_inj *)' fails three of the four H002 checklist parts. (1) KIND: no classification word (helper/main/canonical/instance) is present. (2) WHAT: the phrase 'EntropyWitness via pe_inj' names the result type and construction method but does not paraphrase the statement — it does not say that this term witnesses injectivity of the entropy function at parameter Lstar. (3) WHY: no motivation is given; the suffix carries no algebraic-law waiver. USED_BY: the consumer monster_security_from_entropy is present in the same file and could be cited.",
+      "fix_sketch": "(** monster_entropy_witness_Lstar — constructs an EntropyWitness for R_monster\n    by certifying that weval and perm_endpoint are both injective at Lstar.\n    Kind: helper.\n    Why: feeds monster_security_from_entropy and thereby enables the\n         entropy-to-security reduction for the monster instance.\n    Used by: monster_security_from_entropy. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/security/pgg_entropy_security_demo.v",
+      "line_start": 55,
+      "line_end": 61,
+      "lemma_name": "monster_entropy_perfect",
+      "severity": "warning",
+      "evidence_quote": "(* Perfect entropy: H(P_s) = log N at every sheet *)",
+      "closeness": "near",
+      "explanation": "The preceding comment passes WHAT ('H(P_s) = log N at every sheet' paraphrases the equational conclusion) but fails two parts. (1) KIND: no classification word (helper or main) appears. (2) WHY: no motivation is given; the suffix '_perfect' carries no algebraic-law waiver and the WHAT clause does not name a downstream use-site.",
+      "fix_sketch": "(** monster_entropy_perfect — fiber_entropy at Lstar equals log(monster_n+2) for every sheet s.\n    Kind: helper.\n    Why: establishes the perfect-entropy hypothesis consumed by\n         monster_entropy_eps_perfect to derive eps = 0.\n    Used by: monster_entropy_eps_perfect (via monster_entropy_witness_Lstar). *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/security/pgg_entropy_security_demo.v",
+      "line_start": 64,
+      "line_end": 65,
+      "lemma_name": "monster_security_from_entropy",
+      "severity": "warning",
+      "evidence_quote": "(* SecurityWitness via entropy pipeline *)",
+      "closeness": "far",
+      "explanation": "The preceding comment fails three H002 parts. (1) KIND: no classification word present. (2) WHAT: 'SecurityWitness via entropy pipeline' names the result type and construction route but does not paraphrase the statement — it does not say that this term is a SecurityWitness for R_monster obtained by lifting monster_entropy_witness_Lstar. (3) WHY: no motivation given; no algebraic-law suffix waiver applies. USED_BY: the consumer monster_entropy_eps_perfect is in the same file.",
+      "fix_sketch": "(** monster_security_from_entropy — SecurityWitness for R_monster obtained by\n    lifting monster_entropy_witness_Lstar through security_witness_from_entropy.\n    Kind: helper.\n    Why: provides the SecurityWitness argument required by\n         monster_entropy_eps_perfect to close the eps = 0 goal.\n    Used by: monster_entropy_eps_perfect. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/security/pgg_entropy_security_demo.v",
+      "line_start": 68,
+      "line_end": 74,
+      "lemma_name": "monster_entropy_eps_perfect",
+      "severity": "warning",
+      "evidence_quote": "(* eps = 0 under saturation *)",
+      "closeness": "near",
+      "explanation": "The preceding comment passes WHAT ('eps = 0 under saturation' is a crisp paraphrase of sw_bound_eps ... = 0) but fails two parts. (1) KIND: no classification word present. (2) WHY: no motivation is given; '_eps_perfect' carries no algebraic-law suffix waiver and WHAT does not name a downstream use-site.",
+      "fix_sketch": "(** monster_entropy_eps_perfect — sw_bound_eps for monster_security_from_entropy equals 0.\n    Kind: main (closes the perfect-secrecy certificate for the monster instance).\n    Why: the saturation hypothesis Hsat (2^Lstar = N) forces subrr to close\n         the arithmetic goal, yielding a zero statistical advantage. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/security/pgg_entropy_security_demo.v",
+      "line_start": 93,
+      "line_end": 97,
+      "lemma_name": "monster_entropy_short_L",
+      "severity": "warning",
+      "evidence_quote": "(* H(P_s) = log(2^L) at every sheet when pe_inj holds *)",
+      "closeness": "near",
+      "explanation": "KIND: missing — the comment does not classify the lemma as helper, main, canonical, notation, coercion, instance, example, or interface. WHY: missing — no motivation is given; the suffix _L is not one of the MathComp algebraic-law suffixes that waive Why, and no Kind was declared that would waive it. WHAT: present (the equation is paraphrased). USED_BY: not required because Kind is not 'helper'.",
+      "fix_sketch": "(** monster_entropy_short_L — when pe_inj holds, the fiber entropy H(P_s) equals log (2^L) at every sheet s.\n    Kind: main.\n    Why: feeds the EntropyWitness packaging for R_monster; establishes that each fiber achieves the short-secret entropy target. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "escalated_model": "opus",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/security/pgg_entropy_security_demo.v",
+      "line_start": 98,
+      "line_end": 106,
+      "lemma_name": "monster_leakage_short_L",
+      "severity": "warning",
+      "evidence_quote": "(* Leakage = D(P_s || U_N) *)",
+      "closeness": "near",
+      "explanation": "KIND: missing — no classification token. WHY: missing — no motivation; the suffix _L is not an algebraic-law suffix, and no Kind is declared that would waive Why. WHAT: present (the leakage formula is paraphrased). USED_BY: not required because Kind is not 'helper'. H001 also fires on this comment as degenerate; H002 is emitted separately per one-finding-per-(rule,entity,evidence) policy.",
+      "fix_sketch": "(** monster_leakage_short_L — leakage log N - H(P_s) at each sheet coincides with the KL divergence D(P_s || U_N).\n    Kind: main.\n    Why: lets EntropyWitness consumers read the security margin as a KL divergence to the uniform distribution over N sheets. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "escalated_model": "opus",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/security/pgg_entropy_security_demo.v",
+      "line_start": 109,
+      "line_end": 110,
+      "lemma_name": "monster_security_short_L",
+      "severity": "warning",
+      "evidence_quote": "(* SecurityWitness: eps = sqrt(2*(log N - log(2^L))) *)",
+      "closeness": "near",
+      "explanation": "Preceding comment is a one-line section label. Failed parts: (1) KIND — no classification; (2) WHY — no explanation of why this definition exists and what downstream consumes it. WHAT is present (the eps formula paraphrases the witness payload).",
+      "fix_sketch": "(** monster_security_short_L — SecurityWitness derived from monster_entropy_witness_short_L, bounding eps by sqrt(2*(log N - log(2^L))).\n    Kind: instance.\n    Why: exposes the monster-instance security-from-entropy composition so the demo section can cite a single named witness. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "escalated_model": "opus",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/security/pgg_entropy_security_demo.v",
+      "line_start": 164,
+      "line_end": 165,
+      "lemma_name": "oc_combinatorial_eps",
+      "severity": "warning",
+      "evidence_quote": "(* sw_bound_eps(oc_security_witness_2) = 1 by definition of\n   security_witness_fiber applied to oc_endpoint_bound_fiber (eps=1). *)",
+      "closeness": "near",
+      "explanation": "Failed parts: (1) KIND — no helper/main classification; (4) USED_BY — if this lemma is a helper, it should name its downstream consumer. WHAT is present (the equation sw_bound_eps = 1) and WHY is argued by appeal to the underlying construction. Without a Kind tag the reader cannot tell whether this lemma is a headline result or a plumbing step.",
+      "fix_sketch": "(** oc_combinatorial_eps — sw_bound_eps of the OC(2,3) combinatorial security witness at L=2 is 1.\n    Kind: helper.\n    Why: pins the combinatorial baseline so oc_entropy_vs_combinatorial can contrast the entropy-derived eps with the fiber-counting eps.\n    Used by: oc_entropy_vs_combinatorial. *)",
+      "confidence": "medium",
+      "stage": "stage2",
+      "escalated_model": "opus",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/security/pgg_entropy_security_demo.v",
+      "line_start": 187,
+      "line_end": 190,
+      "lemma_name": "oc_entropy_bound",
+      "severity": "warning",
+      "evidence_quote": "(* Entropy lower bound from axiom *)",
+      "closeness": "near",
+      "explanation": "Comment paraphrases the statement (What is present) but fails Kind (no helper/main/canonical/... classification), Why (no motivation), and Used-by (Kind is undeclared so we cannot determine whether the downstream-cite obligation applies). The name carries no algebraic-law suffix, so Why is not waived. The proof discharges the goal by an axiom, suggesting this is a helper bridging the axiom to the witness pipeline; that role should be made explicit.",
+      "fix_sketch": "(** oc_entropy_bound — log 2 is a uniform lower bound on `H(P_s s) for every sheet s.\n    Kind: helper.\n    Why: feeds oc_entropy_witness_2 / oc_security_from_entropy via entropy_witness_from_rho.\n    Used by: oc_entropy_witness_2. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "escalated_model": "opus",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/security/pgg_entropy_security_demo.v",
+      "line_start": 195,
+      "line_end": 201,
+      "lemma_name": "oc_entropy_witness_2",
+      "severity": "warning",
+      "evidence_quote": "(** oc_entropy_witness_2 — entropy witness for the OC instance at L = 2.\n    Kind: example.\n*)",
+      "closeness": "near",
+      "explanation": "Kind (example) and What (entropy witness for OC at L=2) are present, but Why is missing. The H002 waiver list for Why covers canonical/notation/coercion/instance Kinds and algebraic-law suffixes; `example` is not on that list. The comment should explain why the L=2 witness exists (e.g., it is the entropy-pipeline ingredient consumed by oc_security_from_entropy and compared against the combinatorial bound).",
+      "fix_sketch": "(** oc_entropy_witness_2 — entropy witness for the OC instance at L = 2.\n    Kind: example.\n    Why: assembles oc_entropy_bound into the EntropyWitness shape consumed by\n    security_witness_from_entropy and the combinatorial-vs-entropy comparison. *)",
+      "confidence": "medium",
+      "stage": "stage2",
+      "escalated_model": "opus",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/security/pgg_entropy_security_demo.v",
+      "line_start": 202,
+      "line_end": 207,
+      "lemma_name": "oc_security_from_entropy",
+      "severity": "warning",
+      "evidence_quote": "(* SecurityWitness via entropy pipeline *)",
+      "closeness": "near",
+      "explanation": "Comment is a single-noun-phrase header. Kind (helper/main/example/instance) is absent, Why is absent, and there is no statement-paraphrase that would name a downstream use-site. Since this Definition is consumed immediately afterwards by oc_entropy_vs_combinatorial, it is presumably a helper and the Used-by cite is required as well.",
+      "fix_sketch": "(** oc_security_from_entropy — SecurityWitness for R_oc derived from oc_entropy_witness_2 via the entropy pipeline.\n    Kind: helper.\n    Why: the entropy bound on the sheet distributions yields a SecurityWitness that the combinatorial bound is then compared against.\n    Used by: oc_entropy_vs_combinatorial. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "escalated_model": "opus",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/security/pgg_entropy_security_demo.v",
+      "line_start": 208,
+      "line_end": 220,
+      "lemma_name": "oc_entropy_vs_combinatorial",
+      "severity": "warning",
+      "evidence_quote": "(* Combinatorial bound (eps=1) is tighter than entropy bound (eps=sqrt 2).\n   eps_combinatorial = 1, eps_entropy = sqrt(2*(log 4 - log 2)) = sqrt 2.\n   Since 1 <= sqrt 2, the combinatorial bound is tighter. *)",
+      "closeness": "near",
+      "explanation": "What is well covered (the comment derives both bounds and explains the inequality numerically). Kind is missing: a reader cannot tell at a glance whether this is a main result of the demo, a helper consumed elsewhere, or a stand-alone example. Why is implicit at best — the comment compares numbers but does not state why this comparison is exposed as a top-level Lemma. As an `oc_entropy` section result it reads like a `main`/`example` summary; that should be declared.",
+      "fix_sketch": "(** oc_entropy_vs_combinatorial — the OC combinatorial epsilon (=1) bounds the entropy-derived epsilon (=sqrt 2) from below.\n    Kind: example (headline comparison of the two security pipelines for OC at L=2).\n    Why: documents that, on this instance, the combinatorial route is tighter, justifying its use in the downstream security claim.\n*)",
+      "confidence": "high",
+      "stage": "stage2",
+      "escalated_model": "opus",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/security/pgg_entropy_security_demo.v",
+      "line_start": 244,
+      "line_end": 249,
+      "lemma_name": "oc_entropy_witness_L",
+      "severity": "warning",
+      "evidence_quote": "(** oc_entropy_witness_L — parametric entropy witness for the OC instance at arbitrary word length L.\n    Kind: example.\n*)",
+      "closeness": "near",
+      "explanation": "KIND present (example). WHAT present (parametric entropy witness for the OC instance at arbitrary word length L). WHY absent: no explanation of what this witness enables or who consumes it. Kind example is not in the WHY-waiver list (canonical, notation, coercion, instance) per AUTHORITY.md. The WHAT clause does not name a downstream use-site crisply enough to trigger the secondary waiver. USED_BY is optional since Kind is not helper.",
+      "fix_sketch": "(** oc_entropy_witness_L — parametric entropy witness for the OC instance at arbitrary word length L.\n    Kind: example.\n    Why: demonstrates EntropyWitness instantiation for the OC group at any word length L; consumed by oc_security_from_entropy_L.\n*)",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/security/pgg_entropy_security_demo.v",
+      "line_start": 250,
+      "line_end": 253,
+      "lemma_name": "oc_security_from_entropy_L",
+      "severity": "warning",
+      "evidence_quote": "(** oc_security_from_entropy_L — parametric security witness for OC obtained from the L-indexed entropy witness via Pinsker.\n    Kind: example.\n*)",
+      "closeness": "near",
+      "explanation": "KIND present (example). WHAT present. WHY absent: the comment does not explain what the security witness enables or name a downstream consumer. Kind example is not in the WHY-waiver list per AUTHORITY.md. The WHAT clause names the derivation mechanism (via Pinsker) but not a downstream use-site. USED_BY is optional since Kind is not helper.",
+      "fix_sketch": "(** oc_security_from_entropy_L — parametric security witness for OC obtained from the L-indexed entropy witness via Pinsker.\n    Kind: example.\n    Why: shows SecurityWitness for the OC instance follows from entropy lower bounds at any word length L; consumed by oc_convergence_perfect.\n*)",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/security/pgg_entropy_security_demo.v",
+      "line_start": 254,
+      "line_end": 262,
+      "lemma_name": "oc_convergence_perfect",
+      "severity": "warning",
+      "evidence_quote": "(* When H_min reaches log N = log 4, perfect security *)",
+      "closeness": "far",
+      "explanation": "KIND absent: no classification (helper, main, example, or equivalent). WHAT only partially present: the phrase 'When H_min reaches log N = log 4, perfect security' alludes to the result but does not paraphrase the formal statement sw_bound_eps oc_security_from_entropy_L = 0. WHY absent: no motivation given for the lemma. Three of four checklist parts fail.",
+      "fix_sketch": "(** oc_convergence_perfect — when H_min equals log 4, the security bound sw_bound_eps collapses to zero.\n    Kind: main.\n    Why: establishes the perfect-security limit of the OC entropy-based construction, closing the convergence section.\n*)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "S998",
+      "file": "rocq-audit",
+      "line_start": 1,
+      "line_end": 1,
+      "severity": "warning",
+      "evidence_quote": "agent rc=1: ",
+      "closeness": "near",
+      "explanation": "Stage 2 call failed for chunk 6; see logs.",
+      "fix_sketch": "Retry the commit. If repeated, check agent configuration.",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": {
+    "entity_count": 41,
+    "chunk_count": 7,
+    "chunk_size": 6,
+    "workers_used": 4,
+    "tokens_used": 549802,
+    "tokens_cap": 20000000,
+    "wall_ms_used": 365493,
+    "wall_ms_cap": 1800000,
+    "deferred_chunks": 0,
+    "stop_reason": "clean",
+    "estimated_usd": 3.2988,
+    "model": "sonnet"
+  },
+  "exit_code": 2
+}

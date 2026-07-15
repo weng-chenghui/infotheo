@@ -1,0 +1,127 @@
+id: H002
+category: formatting
+title: "Comment uses templated slots, stale crossrefs, type restatement, exceeds budget, or describes only mechanism"
+severity: warning   # promoted to error in Stage 3 after migration
+# Disabled 2026-07-15. Two reasons:
+#  1. Cost with no payoff: pins `model: opus`, ships a ~100-line agent_prompt
+#     per chunk, and its output is a generated prose comment rewrite budgeted
+#     up to 25 lines. 564 historical findings.
+#  2. Superseded standard: the "purposive framing first" mandate below
+#     contradicts the current terse mathcomp-qbs statement-comment style (a
+#     declarative statement of what the object IS, one sentence where
+#     possible, motivation and roadmap excluded). This rule's authority
+#     (peer-feedback-2026-04, -2026-05-purposive-framing) predates that.
+# Re-enabling means reconciling the agent_prompt with the terse style first.
+enabled: false
+stage_mode: stage2_only
+model: opus   # quality bar; MECHANISM_ONLY detector + prose rewrite need the stronger model
+authority:
+  - peer-feedback-2026-04
+  - peer-feedback-2026-05-prose-style
+  - peer-feedback-2026-05-purposive-framing
+agent_prompt: |
+  Evaluate the entity's `preceding_comment` against five mechanical
+  detectors. Emit ONE finding per entity with every violated check
+  enumerated in `explanation`. Severity is set by the rule YAML, not
+  by this prompt.
+
+  Skip entirely when any holds:
+  - the preceding_comment is empty (H001 handles missing comments);
+  - the entity kind is not Lemma/Theorem/Fact/Corollary/Proposition,
+    non-Local multi-line Definition/Fixpoint, or Hypothesis/Variable.
+
+  The five detectors:
+
+  1. TEMPLATE_SLOTS — the comment contains two or more of the literal
+     tokens `Kind:`, `Why:`, `Used by:` each on its own line as a
+     stacked-slot block. A single inline mention is fine. NOTE: the
+     `Naming:` slot is INTENTIONALLY EXCLUDED from this count —
+     AUTHORITY.md's naming-conformance section requires a `Naming:`
+     line for F001/G001-flagged identifiers and rejecting it here
+     would create a contradiction. So only `Kind:`, `Why:`, `Used by:`
+     count toward the "two or more" threshold.
+
+  2. STALE_CROSSREF — the comment cites one of:
+     - a plan file path matching `~/.claude/plans/[^ ]+\.md`;
+     - an absolute line number matching `\(line [0-9]+\)` or
+       `[A-Za-z_]+\.v:[0-9]+`;
+     - a plan-task token matching `\b[TUVW][0-9]+\b` IN a task
+       context (token followed by `:` OR preceded by one of
+       "per", "implements", "closes", "Task", "task"). Without the
+       task-context anchor, the regex `\b[TUVW][0-9]+\b` would
+       false-positive on math symbols such as `V2`, `U3`, `R3`,
+       `D2`, `D3`, `VU2`, `VU3`, `VU3R`, `T0`, `W1`, etc., that
+       appear in legitimate prose across this project's `.v` files
+       (dsdp_security.v, dsdp_entropy.v, linear_fiber_zpq.v).
+     The plan-letter set `[TUVW]` is the historical plan-task prefix
+     in this project; extend if a new prefix gets adopted.
+
+  3. TYPE_RESTATEMENT — the first sentence of the comment merely
+     paraphrases `entity.header` (the type signature). Apply a
+     token-overlap heuristic: tokenise both into content words (drop
+     stopwords and punctuation), and flag when ≥ 70% of the header's
+     content tokens reappear in the comment's first sentence.
+
+  4. OVER_LENGTH — the comment exceeds the prose budget:
+     - Lemma / Theorem / Fact / Corollary / Proposition: 8 non-blank
+       lines maximum.
+     - Hypothesis / Variable: 25 non-blank lines maximum. Section
+       parameters often need rich narrative (proof chains, intent
+       that downstream proofs depend on); the budget reflects that.
+     - Non-Local multi-line Definition / Fixpoint: 15 non-blank
+       lines maximum.
+
+  5. MECHANISM_ONLY — the first 200 characters of preceding_comment
+     match BOTH conditions (case-insensitive, loose word-boundary):
+
+     (a) mechanism anchor: one or more of these stop-phrases
+         appears:
+           "proof reduces", "reduces to", "reduces directly",
+           "by induction", "by case", "case analysis",
+           "directly to", "obligation", "obligations", "unifies",
+           "side-condition", "side condition", "tactic",
+           "cancellation bijection", "routes through",
+           "discharges", "unfolds", "lifts to", "by reflexivity",
+           "trivially follows", "by simpl", "by exact",
+           "by destruct";
+
+     (b) architecture-framing absence: FEWER than 2 of these
+         architecture/purposive nouns appear in the first 200 chars:
+           bridge, bridging, adversary, predictor, witness,
+           package, interface, carrier, scheme, chain, game,
+           framework, protocol, system, instance, role, module,
+           pipeline, anchor, guess, space, leaked, residual,
+           AHE, SSProve, MathComp, IND-CPA, V_2, V_3, secrecy.
+
+     The detector is "inverted": fires only when the comment is
+     BOTH mechanism-anchored AND purposive-noun-poor. This avoids
+     false-positives on prose comments that mention proof tactics
+     alongside architectural framing (e.g., "Bijection bridging X
+     and Y. The proof reduces to enum_rankK" has both an anchor
+     and 2+ architecture nouns, so it does NOT fire).
+
+     When MECHANISM_ONLY is the only detector firing, set
+     `closeness: near` and `confidence: medium`. When detectors 1-4
+     fire alongside, MECHANISM_ONLY is still reported in
+     `explanation` but `closeness` reflects the worst of all
+     firing detectors.
+
+     The architecture-noun list is project-flavoured (AHE, SSProve,
+     IND-CPA, V_2, V_3 are dsdp-specific). Other projects adopting
+     this rule should extend the list via the rule's `exceptions`
+     field or by editing this `agent_prompt`.
+
+  Output: one finding per entity. `evidence_quote` is the comment
+  text (truncated to the first 200 characters if longer).
+  `explanation` lists every failed detector in order, citing the
+  regex match, count, or stop-phrase match. `fix_sketch` must
+  propose a 1-8 line (Lemma) / 1-15 line (Definition) / 1-25 line
+  (Hypothesis) prose rewrite addressing all enumerated violations.
+  For MECHANISM_ONLY specifically, lead with a purposive sentence
+  (role / rationale / alternative) and reserve mechanism-detail for
+  a second sentence — and only when the mechanics carry
+  architectural meaning. See AUTHORITY.md "Purposive framing first"
+  and the three-tier example for shape.
+scope: changed_lemmas
+fix_hint: "Rewrite as 1-8 line prose (or 1-15 for Definition, 1-25 for Hypothesis) leading with purposive framing (role, rationale, alternative). Drop stacked Kind:/Why:/Used by: slots; drop plan-file refs, plan-task tokens, absolute line numbers; do not restate the type signature; do not lead with proof-tactic mechanics."
+exceptions: []

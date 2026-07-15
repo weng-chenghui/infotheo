@@ -1,0 +1,74 @@
+timestamp	file	chunk	lines	exit_code	errors	warnings	duration_s	note
+2026-04-22T13:17:30Z	lib/perm_uniform.v			0	0	0	1	
+2026-04-22T13:17:31Z	protocol/pgg_session_types.v			0	0	0	0	
+2026-04-22T13:17:31Z	protocol/card_exchange_pismc.v			0	0	20	0	fragile-no-tier-k
+2026-04-22T13:17:31Z	protocol/pgg_interface.v			0	0	6	0	
+2026-04-22T13:17:31Z	groups/pgg_raag_path.v			0	0	1	1	
+2026-04-22T13:17:32Z	groups/free_group_ball.v			0	0	1	0	
+2026-04-22T13:17:32Z	groups/pgg_weval_inj.v			0	0	4	0	
+2026-04-22T13:17:32Z	groups/pgg_raag.v			0	0	17	0	
+2026-04-22T13:17:32Z	groups/pgg_raag_clique.v	0	141-301	0	0	0	1	
+2026-04-22T13:17:33Z	groups/pgg_raag_clique.v	1	302-516	0	0	1	0	
+2026-04-22T13:17:33Z	groups/pgg_raag_clique.v	2	517-901	0	0	6	0	
+2026-04-22T13:17:33Z	groups/pgg_raag_clique.v	3	902-1336	0	0	8	1	
+2026-04-22T13:17:34Z	groups/pgg_raag_clique.v	4	1337-1355	0	0	0	0	
+2026-04-22T13:17:34Z	security/pgg_security_demo.v			0	0	0	0	
+2026-04-22T13:17:34Z	security/pgg_weighted_entropy.v			0	0	1	0	
+2026-04-22T13:17:34Z	security/pgg_abelian_collapse.v			0	0	2	1	
+2026-04-22T13:17:35Z	security/pgg_security_solver.v			0	0	3	0	
+2026-04-22T13:17:35Z	security/pgg_weighted_words.v			0	0	3	0	
+2026-04-22T13:17:35Z	security/pgg_uniform_security.v			0	0	0	1	
+2026-04-22T13:17:36Z	security/pgg_schreier.v			0	0	4	0	
+2026-04-22T13:17:36Z	security/pgg_entropy_security_demo.v			0	0	6	0	fragile-no-tier-k
+2026-04-22T13:17:36Z	security/pgg_entropy_security.v			0	0	3	0	
+2026-04-22T13:17:36Z	security/pgg_security.v			0	0	0	1	
+2026-04-22T13:17:37Z	security/pgg_schreier_weighted.v			0	0	7	0	
+2026-04-22T13:17:37Z	security/pgg_word_analysis.v			0	0	9	0	
+2026-04-22T13:17:37Z	security/pgg_mixing.v			0	0	4	0	
+2026-04-22T13:17:37Z	security/pgg_collusion_bound.v			0	0	10	1	
+2026-04-22T13:17:38Z	reconstruct/ag_massey_bridge.v			0	0	0	0	
+2026-04-22T13:17:38Z	reconstruct/pgg_dealer_bridge.v			0	0	1	0	
+2026-04-22T13:17:38Z	reconstruct/rs_privacy.v			0	0	2	0	
+2026-04-22T13:17:38Z	reconstruct/ag_multiplicative.v			0	0	0	1	
+2026-04-22T13:17:39Z	reconstruct/pgg_covering_correctness.v			0	0	0	0	
+2026-04-22T13:17:39Z	reconstruct/cover_genus0.v			0	0	1	0	
+2026-04-22T13:17:39Z	reconstruct/cover_genus2.v			0	0	1	0	
+2026-04-22T13:17:39Z	reconstruct/pgg_sharing_framework.v			0	0	5	0	
+2026-04-22T13:17:40Z	reconstruct/algebraic_rigidity.v			0	0	6	0	
+2026-04-22T13:17:40Z	reconstruct/cover_genus1.v			0	0	3	0	
+2026-04-22T13:17:40Z	reconstruct/covering_scheme.v			0	0	1	0	
+2026-04-22T13:17:40Z	reconstruct/ag_code.v			0	0	2	1	
+2026-04-22T13:17:41Z	reconstruct/cover_tradeoff.v			0	0	4	0	
+2026-04-22T13:17:41Z	reconstruct/rs_massey_bridge.v			0	0	0	0	
+2026-04-22T13:17:41Z	reconstruct/lagrange.v			0	0	2	1	
+2026-04-22T13:17:42Z	reconstruct/pgg_deck_pairing.v			0	0	1	0	
+2026-04-22T13:17:42Z	reconstruct/pgg_sum_mod.v			0	0	4	0	
+2026-04-22T13:17:42Z	reconstruct/coord_perm_compatible.v			0	0	3	0	
+2026-04-22T13:17:42Z	reconstruct/rs_code_5sheets.v			0	0	1	1	
+2026-04-22T13:17:43Z	reconstruct/hyperelliptic_code.v			0	0	2	0	
+2026-04-22T13:17:43Z	reconstruct/pgg_landscape_demo.v			0	0	2	0	fragile-no-tier-k
+2026-04-22T13:17:43Z	reconstruct/pgl_bound.v			0	0	4	0	
+2026-04-22T13:17:43Z	reconstruct/product_threshold.v			0	0	1	1	
+2026-04-22T13:17:44Z	reconstruct/pgg_threshold.v			0	0	0	0	
+2026-04-22T13:17:44Z	reconstruct/pgg_assignment.v			0	0	2	0	
+2026-04-22T13:17:44Z	reconstruct/massey.v			0	0	1	0	
+2026-04-22T13:17:44Z	reconstruct/pgg_protocol_landscape.v			0	0	6	0	
+2026-04-22T13:17:44Z	instances/abelian/rigidity_abelian_instance.v			0	0	3	1	
+2026-04-22T13:17:45Z	instances/abelian/pgg_abelian.v			0	0	2	0	
+2026-04-22T13:17:45Z	instances/abelian/abelian_word_collapse.v			0	0	7	0	
+2026-04-22T13:17:45Z	instances/denboer1989/five_card_session_types.v			0	0	0	0	
+2026-04-22T13:17:45Z	instances/denboer1989/five_card_program.v			0	0	1	1	
+2026-04-22T13:17:46Z	instances/denboer1989/five_card_group.v			0	0	0	0	
+2026-04-22T13:17:46Z	instances/denboer1989/five_card_pismc.v			0	0	1	0	
+2026-04-22T13:17:46Z	instances/denboer1989/five_card_security.v			0	0	3	0	
+2026-04-22T13:17:46Z	instances/kim2025/rigidity_kim_instance.v			0	0	1	1	
+2026-04-22T13:17:47Z	instances/kim2025/five_card_kim.v			0	0	13	0	
+2026-04-22T13:17:47Z	instances/s5/pgg_raag_s5.v			0	0	0	0	
+2026-04-22T13:17:47Z	instances/s5/rigidity_s5_instance.v			0	0	7	0	
+2026-04-22T13:17:47Z	instances/s5/s5_mixing.v			0	0	3	1	
+2026-04-22T13:17:48Z	instances/s5x5/s5x5_pile.v			0	0	2	0	
+2026-04-22T13:17:48Z	instances/s5x5/pgg_s5x5.v			0	0	0	0	
+2026-04-22T13:17:48Z	instances/s5x5/rigidity_s5x5_instance.v			0	0	6	0	
+2026-04-22T13:17:48Z	instances/s5x5/s5x5_mixing.v	0	64-396	0	0	17	0	
+2026-04-22T13:17:49Z	instances/s5x5/s5x5_mixing.v	1	397-946	0	0	7	0	
+2026-04-22T13:17:49Z	instances/s5x5/s5x5_mixing.v	2	947-1141	0	0	0	0	

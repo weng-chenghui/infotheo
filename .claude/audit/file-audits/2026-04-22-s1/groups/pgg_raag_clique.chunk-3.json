@@ -1,0 +1,347 @@
+{
+  "findings": [
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 766,
+      "line_end": 766,
+      "lemma_name": "pos_eq_sneg_range",
+      "severity": "warning",
+      "evidence_quote": "Lemma pos_eq_sneg_range Tg r L :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 772,
+      "line_end": 772,
+      "lemma_name": "neg_eq_spos_sub",
+      "severity": "warning",
+      "evidence_quote": "Lemma neg_eq_spos_sub Tg r L :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 807,
+      "line_end": 807,
+      "lemma_name": "clique_traces_aux_inv_abelian",
+      "severity": "warning",
+      "evidence_quote": "Lemma clique_traces_aux_inv_abelian Tg n memo :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 895,
+      "line_end": 895,
+      "lemma_name": "cartier_foata_check_free3",
+      "severity": "warning",
+      "evidence_quote": "Lemma cartier_foata_check_free3 :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 901,
+      "line_end": 901,
+      "lemma_name": "cartier_foata_check_abelian3",
+      "severity": "warning",
+      "evidence_quote": "Lemma cartier_foata_check_abelian3 :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 907,
+      "line_end": 907,
+      "lemma_name": "cartier_foata_check_path3",
+      "severity": "warning",
+      "evidence_quote": "Lemma cartier_foata_check_path3 :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 913,
+      "line_end": 913,
+      "lemma_name": "cartier_foata_check_star3",
+      "severity": "warning",
+      "evidence_quote": "Lemma cartier_foata_check_star3 :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 919,
+      "line_end": 919,
+      "lemma_name": "cartier_foata_check_abelian4",
+      "severity": "warning",
+      "evidence_quote": "Lemma cartier_foata_check_abelian4 :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 640,
+      "line_end": 640,
+      "lemma_name": "sneg0",
+      "severity": "error",
+      "evidence_quote": "Lemma sneg0 r L : sneg 0 r L = 0.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 647,
+      "line_end": 647,
+      "lemma_name": "binSn",
+      "severity": "error",
+      "evidence_quote": "Lemma binSn n k : 0 < k ->",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 715,
+      "line_end": 715,
+      "lemma_name": "spos_pascal",
+      "severity": "error",
+      "evidence_quote": "Lemma spos_pascal n r L :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 722,
+      "line_end": 722,
+      "lemma_name": "sneg_pascal",
+      "severity": "error",
+      "evidence_quote": "Lemma sneg_pascal n r L :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 729,
+      "line_end": 729,
+      "lemma_name": "spos_inv",
+      "severity": "error",
+      "evidence_quote": "Lemma spos_inv n r L : n <= r ->",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 758,
+      "line_end": 758,
+      "lemma_name": "spos_eq_sneg",
+      "severity": "error",
+      "evidence_quote": "Lemma spos_eq_sneg n L :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 766,
+      "line_end": 766,
+      "lemma_name": "pos_eq_sneg_range",
+      "severity": "error",
+      "evidence_quote": "Lemma pos_eq_sneg_range Tg r L :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 772,
+      "line_end": 772,
+      "lemma_name": "neg_eq_spos_sub",
+      "severity": "error",
+      "evidence_quote": "Lemma neg_eq_spos_sub Tg r L :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 778,
+      "line_end": 778,
+      "lemma_name": "clique_step_abelian",
+      "severity": "error",
+      "evidence_quote": "Lemma clique_step_abelian Tg memo :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 807,
+      "line_end": 807,
+      "lemma_name": "clique_traces_aux_inv_abelian",
+      "severity": "error",
+      "evidence_quote": "Lemma clique_traces_aux_inv_abelian Tg n memo :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 830,
+      "line_end": 830,
+      "lemma_name": "clique_traces_abelian",
+      "severity": "error",
+      "evidence_quote": "Lemma clique_traces_abelian Tg L :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 901,
+      "line_end": 901,
+      "lemma_name": "cartier_foata_check_abelian3",
+      "severity": "error",
+      "evidence_quote": "Lemma cartier_foata_check_abelian3 :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 907,
+      "line_end": 907,
+      "lemma_name": "cartier_foata_check_path3",
+      "severity": "error",
+      "evidence_quote": "Lemma cartier_foata_check_path3 :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 913,
+      "line_end": 913,
+      "lemma_name": "cartier_foata_check_star3",
+      "severity": "error",
+      "evidence_quote": "Lemma cartier_foata_check_star3 :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 919,
+      "line_end": 919,
+      "lemma_name": "cartier_foata_check_abelian4",
+      "severity": "error",
+      "evidence_quote": "Lemma cartier_foata_check_abelian4 :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 968,
+      "line_end": 968,
+      "lemma_name": "path4_comm_nat",
+      "severity": "error",
+      "evidence_quote": "Definition path4_comm_nat (i j : nat) : bool :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 971,
+      "line_end": 971,
+      "lemma_name": "table_T4_path",
+      "severity": "error",
+      "evidence_quote": "Lemma table_T4_path :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "I001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 807,
+      "line_end": 807,
+      "lemma_name": "clique_traces_aux_inv_abelian",
+      "severity": "error",
+      "evidence_quote": "Lemma clique_traces_aux_inv_abelian Tg n memo :",
+      "stage": "stage1",
+      "reason": "five or more underscore-separated components without a canonical MathComp suffix",
+      "stages": [
+        "stage1"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": null,
+  "exit_code": 2
+}

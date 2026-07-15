@@ -1,0 +1,206 @@
+{
+  "findings": [
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/kim2025/five_card_kim.v",
+      "line_start": 275,
+      "line_end": 275,
+      "lemma_name": "fc_kim_schreier_diag",
+      "severity": "warning",
+      "evidence_quote": "Lemma fc_kim_schreier_diag (x : 'I_5) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/kim2025/five_card_kim.v",
+      "line_start": 291,
+      "line_end": 291,
+      "lemma_name": "fc_kim_row_stochastic",
+      "severity": "warning",
+      "evidence_quote": "Lemma fc_kim_row_stochastic (x : 'I_5) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/kim2025/five_card_kim.v",
+      "line_start": 296,
+      "line_end": 296,
+      "lemma_name": "fc_kim_col_stochastic",
+      "severity": "warning",
+      "evidence_quote": "Lemma fc_kim_col_stochastic (y : 'I_5) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/kim2025/five_card_kim.v",
+      "line_start": 317,
+      "line_end": 317,
+      "lemma_name": "fc_kim_schreier_offdiag",
+      "severity": "warning",
+      "evidence_quote": "Lemma fc_kim_schreier_offdiag (x y : 'I_5) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/kim2025/five_card_kim.v",
+      "line_start": 333,
+      "line_end": 333,
+      "lemma_name": "fc_kim_doubly_stochastic",
+      "severity": "warning",
+      "evidence_quote": "Lemma fc_kim_doubly_stochastic :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/kim2025/five_card_kim.v",
+      "line_start": 403,
+      "line_end": 403,
+      "lemma_name": "kim_spectral_gap_pos",
+      "severity": "warning",
+      "evidence_quote": "Lemma kim_spectral_gap_pos : 0 < kim_spectral_gap.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/kim2025/five_card_kim.v",
+      "line_start": 411,
+      "line_end": 411,
+      "lemma_name": "kim_spectral_gap_le1",
+      "severity": "warning",
+      "evidence_quote": "Lemma kim_spectral_gap_le1 : kim_spectral_gap <= 1.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/kim2025/five_card_kim.v",
+      "line_start": 466,
+      "line_end": 466,
+      "lemma_name": "kim_var_dist_exact",
+      "severity": "warning",
+      "evidence_quote": "Lemma kim_var_dist_exact (L : nat) (s : 'I_5) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/kim2025/five_card_kim.v",
+      "line_start": 505,
+      "line_end": 505,
+      "lemma_name": "fc_kim_security_witness",
+      "severity": "warning",
+      "evidence_quote": "Definition fc_kim_security_witness (L : nat) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/kim2025/five_card_kim.v",
+      "line_start": 518,
+      "line_end": 518,
+      "lemma_name": "kim_slev_at_zero",
+      "severity": "warning",
+      "evidence_quote": "Lemma kim_slev_at_zero : eps = 0 -> kim_slev = 0.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/kim2025/five_card_kim.v",
+      "line_start": 526,
+      "line_end": 526,
+      "lemma_name": "kim_bound_at_zero",
+      "severity": "warning",
+      "evidence_quote": "Lemma kim_bound_at_zero (L : nat) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/kim2025/five_card_kim.v",
+      "line_start": 537,
+      "line_end": 537,
+      "lemma_name": "kim_security_at_zero",
+      "severity": "warning",
+      "evidence_quote": "Lemma kim_security_at_zero (L : nat) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/kim2025/five_card_kim.v",
+      "line_start": 566,
+      "line_end": 566,
+      "lemma_name": "fc_kim_security_bound",
+      "severity": "warning",
+      "evidence_quote": "Lemma fc_kim_security_bound (eps : R)",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "S998",
+      "file": "rocq-audit",
+      "line_start": 1,
+      "line_end": 1,
+      "severity": "warning",
+      "evidence_quote": "agent rc=1: ",
+      "closeness": "near",
+      "explanation": "Stage 2 call failed for chunk 3; see logs.",
+      "fix_sketch": "Retry the commit. If repeated, check agent configuration.",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": {
+    "entity_count": 48,
+    "chunk_count": 8,
+    "chunk_size": 6,
+    "workers_used": 4,
+    "tokens_used": 0,
+    "tokens_cap": 20000000,
+    "wall_ms_used": 6523,
+    "wall_ms_cap": 1800000,
+    "deferred_chunks": 0,
+    "stop_reason": "clean",
+    "estimated_usd": 0.0,
+    "model": "sonnet"
+  },
+  "exit_code": 0
+}

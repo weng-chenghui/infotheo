@@ -1,0 +1,21 @@
+{
+  "findings": [
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/reconstruct/rs_code_5sheets.v",
+      "line_start": 55,
+      "line_end": 55,
+      "lemma_name": "expr_2_mod_5",
+      "severity": "warning",
+      "evidence_quote": "Lemma expr_2_mod_5 (k : nat) : (2%:R : GF 0 prime5) ^+ k = (2^k %% 5)%:R.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": null,
+  "exit_code": 0
+}

@@ -1,0 +1,308 @@
+{
+  "findings": [
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/security/pgg_security_solver.v",
+      "line_start": 104,
+      "line_end": 104,
+      "lemma_name": "epsilon_endpoint_rat_consistent",
+      "severity": "warning",
+      "evidence_quote": "Lemma epsilon_endpoint_rat_consistent (Tg N L : nat) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/security/pgg_security_solver.v",
+      "line_start": 109,
+      "line_end": 109,
+      "lemma_name": "epsilon_endpoint_rat_sp_consistent",
+      "severity": "warning",
+      "evidence_quote": "Lemma epsilon_endpoint_rat_sp_consistent Tg N L :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/security/pgg_security_solver.v",
+      "line_start": 586,
+      "line_end": 586,
+      "lemma_name": "check_perm_endpoint_inj",
+      "severity": "warning",
+      "evidence_quote": "Definition check_perm_endpoint_inj (desc : GroupDesc) (L : nat) : bool :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/security/pgg_security_solver.v",
+      "line_start": 72,
+      "line_end": 72,
+      "lemma_name": "solve_L",
+      "severity": "error",
+      "evidence_quote": "Definition solve_L (Tg N eps_n eps_d : nat) : option nat :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/security/pgg_security_solver.v",
+      "line_start": 109,
+      "line_end": 109,
+      "lemma_name": "epsilon_endpoint_rat_sp_consistent",
+      "severity": "error",
+      "evidence_quote": "Lemma epsilon_endpoint_rat_sp_consistent Tg N L :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/security/pgg_security_solver.v",
+      "line_start": 122,
+      "line_end": 122,
+      "lemma_name": "sp_consistent_endpoint",
+      "severity": "error",
+      "evidence_quote": "Lemma sp_consistent_endpoint Tg N L :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/security/pgg_security_solver.v",
+      "line_start": 134,
+      "line_end": 134,
+      "lemma_name": "solve_consistent",
+      "severity": "error",
+      "evidence_quote": "Lemma solve_consistent c p : solve c = Some p -> sp_consistent p.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/security/pgg_security_solver.v",
+      "line_start": 155,
+      "line_end": 155,
+      "lemma_name": "star_to_generic",
+      "severity": "error",
+      "evidence_quote": "Definition star_to_generic (sp : StarParams) : SecurityParams :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/security/pgg_security_solver.v",
+      "line_start": 163,
+      "line_end": 163,
+      "lemma_name": "star_solve",
+      "severity": "error",
+      "evidence_quote": "Definition star_solve (c : StarConstraint) : option StarParams :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/security/pgg_security_solver.v",
+      "line_start": 292,
+      "line_end": 292,
+      "lemma_name": "eval_word",
+      "severity": "error",
+      "evidence_quote": "Definition eval_word (gens : nat -> nat -> nat) (w : seq nat) (x : nat)",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/security/pgg_security_solver.v",
+      "line_start": 296,
+      "line_end": 296,
+      "lemma_name": "word_fingerprint",
+      "severity": "error",
+      "evidence_quote": "Definition word_fingerprint (N : nat) (gens : nat -> nat -> nat)",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/security/pgg_security_solver.v",
+      "line_start": 300,
+      "line_end": 300,
+      "lemma_name": "check_weval_inj",
+      "severity": "error",
+      "evidence_quote": "Definition check_weval_inj (N Tg L : nat) (gens : nat -> nat -> nat)",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/security/pgg_security_solver.v",
+      "line_start": 342,
+      "line_end": 342,
+      "lemma_name": "star_comm'",
+      "severity": "error",
+      "evidence_quote": "Definition star_comm' (m i j : nat) : bool :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/security/pgg_security_solver.v",
+      "line_start": 345,
+      "line_end": 345,
+      "lemma_name": "star_desc",
+      "severity": "error",
+      "evidence_quote": "Definition star_desc (m : nat) : GroupDesc :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/security/pgg_security_solver.v",
+      "line_start": 353,
+      "line_end": 353,
+      "lemma_name": "path_comm'",
+      "severity": "error",
+      "evidence_quote": "Definition path_comm' (i j : nat) : bool :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/security/pgg_security_solver.v",
+      "line_start": 356,
+      "line_end": 356,
+      "lemma_name": "path_desc",
+      "severity": "error",
+      "evidence_quote": "Definition path_desc (n : nat) : GroupDesc :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/security/pgg_security_solver.v",
+      "line_start": 365,
+      "line_end": 365,
+      "lemma_name": "disjoint_desc",
+      "severity": "error",
+      "evidence_quote": "Definition disjoint_desc (k : nat) : GroupDesc :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/security/pgg_security_solver.v",
+      "line_start": 375,
+      "line_end": 375,
+      "lemma_name": "oc_comm'",
+      "severity": "error",
+      "evidence_quote": "Definition oc_comm' (p i j : nat) : bool :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/security/pgg_security_solver.v",
+      "line_start": 378,
+      "line_end": 378,
+      "lemma_name": "oc_desc",
+      "severity": "error",
+      "evidence_quote": "Definition oc_desc (k p : nat) : GroupDesc :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/security/pgg_security_solver.v",
+      "line_start": 388,
+      "line_end": 388,
+      "lemma_name": "cyclic_desc",
+      "severity": "error",
+      "evidence_quote": "Definition cyclic_desc (n : nat) : GroupDesc :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/security/pgg_security_solver.v",
+      "line_start": 463,
+      "line_end": 463,
+      "lemma_name": "group_template",
+      "severity": "error",
+      "evidence_quote": "Definition group_template (desc : GroupDesc) (default_L : nat)",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/security/pgg_security_solver.v",
+      "line_start": 492,
+      "line_end": 492,
+      "lemma_name": "cyclic_template",
+      "severity": "error",
+      "evidence_quote": "Definition cyclic_template (n : nat) := group_template (cyclic_desc n) 1.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "I001",
+      "file": "pgg-smc/security/pgg_security_solver.v",
+      "line_start": 109,
+      "line_end": 109,
+      "lemma_name": "epsilon_endpoint_rat_sp_consistent",
+      "severity": "error",
+      "evidence_quote": "Lemma epsilon_endpoint_rat_sp_consistent Tg N L :",
+      "stage": "stage1",
+      "reason": "five or more underscore-separated components without a canonical MathComp suffix",
+      "stages": [
+        "stage1"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": null,
+  "exit_code": 2
+}

@@ -1,0 +1,89 @@
+{
+  "findings": [
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 1378,
+      "line_end": 1380,
+      "lemma_name": "path4_ntB_check",
+      "severity": "warning",
+      "evidence_quote": "Lemma path4_ntB_check :\n  [seq n_traces_natB 4 L path4_comm_nat | L <- iota 0 4]\n  = [:: 1; 4; 13; 40].",
+      "closeness": "near",
+      "explanation": "The statement is a concrete list equation (lhs = rhs). Per the MathComp suffix table in AUTHORITY.md, an equational rewrite or computational identity should carry suffix _E. The suffix _check is not in the canonical suffix table; it reads as a generic drift token. Proposed idiomatic rename: path4_ntB_E (suffix E for equation) or, if the emphasis is that this is a spot-check example rather than a reusable rewrite lemma, use the Kind: example classification and acknowledge the deviation with a Naming: line.",
+      "fix_sketch": "Option 1 (idiomatic rename): `Lemma path4_ntB_E : ...` with suffix E signalling the equation role.\nOption 2 (retain name with justification): add `Naming: intentional; _check signals a computational spot-check, not a reusable rewrite.` to the preceding comment block.",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 1384,
+      "line_end": 1386,
+      "lemma_name": "star3_ntB_check",
+      "severity": "warning",
+      "evidence_quote": "Lemma star3_ntB_check :\n  [seq n_traces_natB 4 L (star_comm_nat 3) | L <- iota 0 4]\n  = [:: 1; 4; 13; 40].",
+      "closeness": "near",
+      "explanation": "Same mismatch as path4_ntB_check. The statement is a list equation; the canonical suffix for an equational statement is _E. The suffix _check is absent from AUTHORITY.md's suffix table. The parallel structure with path4_ntB_check makes a consistent rename desirable.",
+      "fix_sketch": "Option 1: `Lemma star3_ntB_E : ...`\nOption 2: keep _check and add `Naming: intentional; _check signals a computational spot-check, not a reusable rewrite.` to the preceding comment.",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 1377,
+      "line_end": 1378,
+      "lemma_name": "path4_ntB_check",
+      "severity": "warning",
+      "evidence_quote": "(* Cross-check: n_traces_natB for path P_4 matches the clique prediction *)",
+      "closeness": "near",
+      "explanation": "The preceding comment fails two of the four H002 parts. (1) KIND is absent: the comment does not classify the lemma as helper, main, example, or any accepted synonym. (2) WHY is absent and cannot be waived because Kind is not stated; the waiver for 'example' requires the comment to assert that classification first. WHAT is marginally present ('n_traces_natB for path P_4 matches the clique prediction') but reads as a vague cross-check note rather than a crisp equational paraphrase of the statement. USED_BY is not required until Kind is resolved.",
+      "fix_sketch": "(** path4_ntB_check — n_traces_natB for path P_4 with T=4 equals [1;4;13;40] (vm_compute verification).\n    Kind: example.\n    Why: cross-checks the clique-polynomial prediction for P_4; together with star3_ntB_check confirms the Cartier-Foata coincidence.\n*)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 1383,
+      "line_end": 1384,
+      "lemma_name": "star3_ntB_check",
+      "severity": "warning",
+      "evidence_quote": "(* Cross-check: n_traces_natB for star K_{1,3} matches *)",
+      "closeness": "near",
+      "explanation": "Same structural failures as path4_ntB_check. (1) KIND is absent. (2) WHY is absent and not waivable without a stated Kind. WHAT is present only in skeleton form ('n_traces_natB for star K_{1,3} matches') without stating the concrete computed sequence. USED_BY not assessed until Kind is determined.",
+      "fix_sketch": "(** star3_ntB_check — n_traces_natB for star K_{1,3} with T=4 equals [1;4;13;40] (vm_compute verification).\n    Kind: example.\n    Why: paired with path4_ntB_check to confirm that P_4 and K_{1,3} produce identical trace-count sequences, as the Cartier-Foata theorem predicts.\n*)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": {
+    "entity_count": 3,
+    "chunk_count": 1,
+    "chunk_size": 3,
+    "workers_used": 1,
+    "tokens_used": 39552,
+    "tokens_cap": 20000000,
+    "wall_ms_used": 99956,
+    "wall_ms_cap": 1800000,
+    "deferred_chunks": 0,
+    "stop_reason": "clean",
+    "estimated_usd": 0.2373,
+    "model": "sonnet"
+  },
+  "exit_code": 0
+}

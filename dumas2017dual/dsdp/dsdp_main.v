@@ -22,18 +22,19 @@
        learns nothing about Bob's input V2 (R2 one-time-pad masking)  [3-party]
 
    Corrupted-Alice secrecy (indcpa_hopping axis), the guessing triangle  [3-party]
-     dsdp_alice_view_advantage_le : AdvantageE <= 2 * epsilon_cpa
+     dsdp_alice_view_advantage_le : AdvantageE <= 2 * epsilon_cpa AHE
      dsdp_alice_guess_ideal_le : guess <= 1/m (all-zero endpoint)
-     dsdp_alice_guess_advantage_le : AdvantageE <= 2 * epsilon_cpa
-     dsdp_alice_guess_real_le : guess <= 1/m + 2 * epsilon_cpa
-     dsdp_alice_unpredictability_ge : H_unp >= log m - log (1 + 2 m epsilon_cpa)
+     dsdp_alice_guess_advantage_le : AdvantageE <= 2 * epsilon_cpa AHE
+     dsdp_alice_guess_real_le : guess <= 1/m + 2 * epsilon_cpa AHE
+     dsdp_alice_unpredictability_ge : H_unp >= log m - log (1 + 2 m
+       epsilon_cpa AHE)
 
    Simulation-based security (simulation axis; average-case: honest inputs
    sampled uniformly in-game)  [3-party]
      dsdp_alice_simulation_secure : AdvantageE real (Sim ∘ Ideal)
-       <= 2 * epsilon_cpa
+       <= 2 * epsilon_cpa AHE
      dsdp_alice_view_statdist_le : statdist(real view law, simulated view
-       law) <= 2 * epsilon_cpa *)
+       law) <= 2 * epsilon_cpa AHE *)
 
 From HB Require Import structures.
 From mathcomp Require Import all_boot all_order all_algebra fingroup finalg.
@@ -118,14 +119,15 @@ Example dsdp_experiment_hops : count_obs_hops (corrupted_view dsdp_experiment) =
 Proof. by []. Qed.
 
 (* dsdp_alice_view_advantage_le — every adversary's advantage between DSDP's real
-   corrupted-Alice game and its all-zero endpoint is at most 2 * epsilon_cpa: the
-   generic bound [dsdp_indcpa_secrecy] (any experiment's real-vs-all-zero advantage
-   is at most its hop count times epsilon_cpa) at hop count two. [dsdp_experiment]
+   corrupted-Alice game and its all-zero endpoint is at most 2 * epsilon_cpa AHE:
+   the generic bound [dsdp_indcpa_secrecy] (any experiment's real-vs-all-zero
+   advantage is at most its hop count times [epsilon_cpa (exp_enc_scheme P)]) at
+   hop count two. [dsdp_experiment]
    is the DSDP instance of such a two-hop experiment, its corrupted-Alice trace
    having exactly two encryption hops ([dsdp_experiment_hops]).  [3-party] *)
 Theorem dsdp_alice_view_advantage_le (Adv : dsdp_indcpa_adversary dsdp_experiment) :
   AdvantageE (real_game dsdp_experiment) (zero_game dsdp_experiment) (adv_package Adv)
-    <= 2%:R * epsilon_cpa.
+    <= 2%:R * epsilon_cpa AHE.
 Proof.
 have H := dsdp_indcpa_secrecy Adv.
 by rewrite dsdp_experiment_hops in H.
@@ -713,7 +715,8 @@ exact: (guess_fdist_success_le msg_to_finK guess_lossless card_renc_neq
 Qed.
 
 (* dsdp_alice_guess_advantage_le — the reduction distinguisher's advantage is at
-   most [2 * epsilon_cpa]: the output-exposing endpoint games add only the common
+   most [2 * epsilon_cpa AHE]: the output-exposing endpoint games add only the
+   common
    id_Sout_get oracle (no encryption hop), so the Part I IND-CPA bound applies.
    [3-party] *)
 Lemma dsdp_alice_guess_advantage_le
@@ -725,7 +728,7 @@ Lemma dsdp_alice_guess_advantage_le
     (Hoze : fseparate (locs predictor)
        (locs (oracle_zero_pkg renc_card rand_of_renc t_msg
                 chcipher_of_cipher pkey_of_party))) :
-  AdvantageE real_game game guess_reduction <= 2%:R * epsilon_cpa.
+  AdvantageE real_game game guess_reduction <= 2%:R * epsilon_cpa AHE.
 Proof.
 rewrite /real_game /game.
 eapply dsdp_advantage_derived_leak_S.
@@ -740,7 +743,8 @@ Qed.
 (* dsdp_alice_guess_real_le — Alice's probability of guessing the challenge
    secret V2 from her cipher view and the leaked scalar-product output S is at
    most 1/card_msg plus twice the IND-CPA advantage: the fiber bound 1/card_msg
-   at the all-zero endpoint, plus the 2 * epsilon_cpa cost of moving to the real
+   at the all-zero endpoint, plus the 2 * epsilon_cpa AHE cost of moving to the
+   real
    game.
    Naming: subject-prefixed [dsdp_alice_guess], with [real] naming the real
    endpoint game the probability is measured on and [_le] the upper bound.
@@ -757,7 +761,7 @@ Theorem dsdp_alice_guess_real_le
     (Hinj : injective (fun v : plain AHE => w_u3 * v)) :
   guess_sdistr_success_real renc_card rand_of_renc chmsg_of_msg
     chcipher_of_cipher pkey_of_party msg_of_idx rand0 seed predictor
-    <= card_msg%:R^-1 + 2%:R * epsilon_cpa.
+    <= card_msg%:R^-1 + 2%:R * epsilon_cpa AHE.
 Proof.
 have Hzero : guess_sdistr_success renc_card rand_of_renc chmsg_of_msg
     chcipher_of_cipher pkey_of_party msg_of_idx rand0 seed predictor
@@ -765,7 +769,7 @@ have Hzero : guess_sdistr_success renc_card rand_of_renc chmsg_of_msg
   by exact: (dsdp_alice_guess_ideal_le Hinj).
 apply: (@le_trans _ _ (guess_sdistr_success renc_card rand_of_renc chmsg_of_msg
     chcipher_of_cipher pkey_of_party msg_of_idx rand0 seed predictor
-    + 2%:R * epsilon_cpa)).
+    + 2%:R * epsilon_cpa AHE)).
 - rewrite addrC -lerBlDr.
   apply: (le_trans (ler_norm _)).
   rewrite guess_advantage_eq.
@@ -774,10 +778,10 @@ apply: (@le_trans _ _ (guess_sdistr_success renc_card rand_of_renc chmsg_of_msg
 Qed.
 
 (* dsdp_alice_unpredictability_ge — the entropy lower bound
-   [log card_msg - log (1 + 2 * card_msg * epsilon_cpa) <= Hunp_leak_S]:
+   [log card_msg - log (1 + 2 * card_msg * epsilon_cpa AHE) <= Hunp_leak_S]:
    the predictor's unpredictability entropy on the output-exposing real game is
    at least the closed-form bound, approaching [log card_msg] as
-   [epsilon_cpa -> 0].  [3-party] *)
+   [epsilon_cpa AHE -> 0].  [3-party] *)
 Theorem dsdp_alice_unpredictability_ge
     (cipher_of_chcipher : t_cipher -> cipher AHE)
     (chcipher_of_cipherK : cancel chcipher_of_cipher cipher_of_chcipher)
@@ -791,8 +795,8 @@ Theorem dsdp_alice_unpredictability_ge
     (Hpos : (0 < guess_sdistr_success_real renc_card rand_of_renc chmsg_of_msg
                 chcipher_of_cipher pkey_of_party msg_of_idx rand0 seed
                 predictor)%R)
-    (epsilon_cpa_ge0 : (0 <= epsilon_cpa)%R) :
-  (log card_msg%:R - log (1 + 2%:R * card_msg%:R * epsilon_cpa)
+    (epsilon_cpa_ge0 : (0 <= epsilon_cpa AHE)%R) :
+  (log card_msg%:R - log (1 + 2%:R * card_msg%:R * epsilon_cpa AHE)
      <= Hunp_leak_S renc_card rand_of_renc chmsg_of_msg chcipher_of_cipher
           pkey_of_party msg_of_idx rand0 seed predictor)%R.
 Proof.
@@ -803,13 +807,13 @@ have Hcard0 : (0 < card_msg)%N
 have Hpr_le :
     (guess_sdistr_success_real renc_card rand_of_renc chmsg_of_msg
        chcipher_of_cipher pkey_of_party msg_of_idx rand0 seed predictor
-     <= card_msg%:R^-1 + 2%:R * epsilon_cpa)%R
+     <= card_msg%:R^-1 + 2%:R * epsilon_cpa AHE)%R
   by apply: (dsdp_alice_guess_real_le chcipher_of_cipherK Hore Hoze Hinj).
 have Hinvm_pos : (0 < card_msg%:R^-1 :> R)%R
   by rewrite invr_gt0 ltr0n Hcard0.
-have Hbound_pos : (0 < card_msg%:R^-1 + 2%:R * epsilon_cpa :> R)%R
+have Hbound_pos : (0 < card_msg%:R^-1 + 2%:R * epsilon_cpa AHE :> R)%R
   by rewrite ltr_pwDl // mulr_ge0 //.
-rewrite -(log_id (m := card_msg) (eps := epsilon_cpa) Hcard0 epsilon_cpa_ge0).
+rewrite -(log_id (m := card_msg) (eps := epsilon_cpa AHE) Hcard0 epsilon_cpa_ge0).
 by rewrite lerN2 ler_log //.
 Qed.
 
@@ -834,7 +838,7 @@ Hypothesis card_renc_pos : (0 < card_renc)%N.
 
 (* dsdp_alice_simulation_secure — the output-exposing real game and the
    simulator composed with the ideal functionality are distinguished with
-   advantage at most [2 * epsilon_cpa] by any valid adversary whose locations
+   advantage at most [2 * epsilon_cpa AHE] by any valid adversary whose locations
    are disjoint from the protocol state and the real and zero encryption
    oracle location sets.  Average-case scope: the honest inputs v2, v3 are
    sampled uniformly in-game, by the real game on one side and the ideal
@@ -857,7 +861,7 @@ Theorem dsdp_alice_simulation_secure
     (dsdp_simulator_pkg renc_card rand_of_renc t_msg
        chcipher_of_cipher pkey_of_party msg_of_idx seed
      ∘ dsdp_ideal_pkg chmsg_of_msg msg_of_idx seed)
-    A <= 2%:R * epsilon_cpa.
+    A <= 2%:R * epsilon_cpa AHE.
 Proof.
 apply: (le_trans (Advantage_triangle _ _
   (zero_game_leak_S renc_card rand_of_renc chmsg_of_msg chcipher_of_cipher
@@ -876,7 +880,7 @@ have HX : AdvantageE
        pkey_of_party msg_of_idx rand0 seed)
     (zero_game_leak_S renc_card rand_of_renc chmsg_of_msg chcipher_of_cipher
        pkey_of_party msg_of_idx rand0 seed)
-    A <= 2%:R * epsilon_cpa
+    A <= 2%:R * epsilon_cpa AHE
   by eapply dsdp_advantage_derived_leak_S;
     [exact: chcipher_of_cipherK | exact: chmsg_of_msgK | exact: A_valid
      | exact: A_disj_state | exact: A_disj_ore | exact: A_disj_oze].
@@ -886,7 +890,8 @@ Qed.
 (* dsdp_alice_view_statdist_le — the statistical distance between the real
    corrupted-Alice view law (the cipher view together with the leaked output
    S, the (received-ciphers, leaked-output) marginal of Alice's view) and the
-   simulated one is at most [2 * epsilon_cpa].  Average-case scope: the honest
+   simulated one is at most [2 * epsilon_cpa AHE].  Average-case scope: the
+   honest
    inputs v2, v3 are sampled uniformly in-game, by the real game on one side
    and the ideal functionality on the other.
    Naming: subject-prefixed [dsdp_alice_view], with [statdist] naming the
@@ -902,7 +907,7 @@ Theorem dsdp_alice_view_statdist_le
        (dsdp_simulator_pkg renc_card rand_of_renc t_msg chcipher_of_cipher
           pkey_of_party msg_of_idx seed
         ∘ dsdp_ideal_pkg chmsg_of_msg msg_of_idx seed)))
-    <= 2%:R * epsilon_cpa.
+    <= 2%:R * epsilon_cpa AHE.
 Proof.
 have conv : forall (G : raw_package)
     (D : (cipher_list t_cipher * t_msg)%type -> bool),

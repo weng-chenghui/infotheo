@@ -1,0 +1,186 @@
+{
+  "findings": [
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_raag_path.v",
+      "line_start": 176,
+      "line_end": 176,
+      "lemma_name": "path_gen_inj_sigmas",
+      "severity": "warning",
+      "evidence_quote": "Lemma path_gen_inj_sigmas :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/groups/pgg_raag_path.v",
+      "line_start": 193,
+      "line_end": 219,
+      "lemma_name": "path_adj_noncommute",
+      "severity": "warning",
+      "evidence_quote": "Lemma path_adj_noncommute (Hm : 0 < m) :",
+      "closeness": "near",
+      "explanation": "The suffix `noncommute` does not appear in the canonical MathComp suffix table (AUTHORITY.md). The statement is a boolean non-equality `path_gen i0 * path_gen i1 != path_gen i1 * path_gen i0`. MathComp encodes boolean negation with the `N` suffix: the idiomatic form is `path_adj_commN` (negation of commutativity for adjacent generators) or `path_gen_commN`. The current suffix reads as a compound English word rather than a canonical one-letter or short code from the suffix table.",
+      "fix_sketch": "Rename to `path_adj_commN` (adj-commutativity boolean negation, N-suffix per AUTHORITY.md) or `path_gen_adj_commN`. Update the call site in path_G_nonabelian accordingly.",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/groups/pgg_raag_path.v",
+      "line_start": 220,
+      "line_end": 234,
+      "lemma_name": "path_G_nonabelian",
+      "severity": "warning",
+      "evidence_quote": "Lemma path_G_nonabelian : 0 < m ->",
+      "closeness": "near",
+      "explanation": "The suffix `nonabelian` does not appear in the canonical MathComp suffix table (AUTHORITY.md). The statement is `~~ abelian (pgg_G Path_PGGTypes)`, a boolean negation of the `abelian` predicate. MathComp convention uses the `N` suffix for boolean negation, giving `path_G_abelianN`. Additionally the uppercase `G` component is non-standard: MathComp uses lowercase `g` as a group-argument suffix; if `G` denotes the group object it belongs in the main symbol, not as a component separator.",
+      "fix_sketch": "Rename to `path_G_abelianN` (applying the canonical N-suffix for boolean negation of abelian) or `pgg_path_abelianN` if the full PGG group is considered the main symbol. Update the call site in any downstream callers.",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/groups/pgg_raag_path.v",
+      "line_start": 235,
+      "line_end": 250,
+      "lemma_name": "path_indep_pair",
+      "severity": "warning",
+      "evidence_quote": "Lemma path_indep_pair (Hm : 0 < m) :",
+      "closeness": "near",
+      "explanation": "The suffix `pair` does not appear in the canonical MathComp suffix table (AUTHORITY.md). The statement establishes that two distinct generators drawn from the adjacent pair {0,1} satisfy ~~ path_comm, i.e. they form an independent set. `pair` describes the witness structure rather than the theorem's semantic role. The semantic role is non-commutativity (N-suffix) or independence (no canonical suffix, but membership/predicate-unfolding convention applies). A more idiomatic name would be `path_adj_commN` or `path_indep_adj`.",
+      "fix_sketch": "Rename to `path_adj_commN_pair` (if the pair scope must be named explicitly) or simply `path_adj_commN` (canonical N-suffix for boolean negation of commutativity on adjacent generators). If `path_adj_noncommute` and `path_indep_pair` prove essentially the same fact at different generality levels, consider collapsing them and using a single canonical name.",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/groups/pgg_raag_path.v",
+      "line_start": 58,
+      "line_end": 62,
+      "lemma_name": "path_gen_tupleE",
+      "severity": "warning",
+      "evidence_quote": "(** path_gen_tupleE — the generator tuple reads back through tnth to the\n    raw path_gen constructor.\n    Kind: helper.\n    Used by: path_gen_inj_sigmas, path_Hcomm, path_adj_noncommute.\n*)",
+      "closeness": "near",
+      "explanation": "KIND (helper) and WHAT (statement paraphrase) and USED_BY (all three cites verified in the same file: path_gen_inj_sigmas at line 178, path_Hcomm at lines 159/164/185/189, path_adj_noncommute at lines 193/229) are present. WHY is absent and is not waived: the suffix _E is not in the algebraic-law waiver list (_A, _AC, _ACA, _C, _CA, _K, _D, _I, _V, _X, _Xn, _Xz, _Mn, _Z); Kind is helper (not canonical/notation/coercion/instance); and the WHAT clause does not name a downstream use-site crisply. AUTHORITY.md requires motivation unless one of those waivers applies.",
+      "fix_sketch": "Add a Why line such as: 'Why: required by path_gen_inj_sigmas and path_Hcomm to unfold the tnth-based tuple representation into the direct path_gen form before rewriting.' Full template:\n(** path_gen_tupleE — the generator tuple reads back through tnth to the\n    raw path_gen constructor.\n    Kind: helper.\n    Why: required by path_gen_inj_sigmas, path_Hcomm, and path_adj_noncommute\n         to rewrite from the tuple representation to the direct constructor.\n    Used by: path_gen_inj_sigmas, path_Hcomm, path_adj_noncommute.\n*)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/groups/pgg_raag_path.v",
+      "line_start": 63,
+      "line_end": 100,
+      "lemma_name": "path_gen_inj",
+      "severity": "warning",
+      "evidence_quote": "(* --- Generator injectivity --- *)",
+      "closeness": "far",
+      "explanation": "The preceding comment is a section-separator banner that does not document this specific lemma. All four H002 parts fail. KIND: absent — the banner names no classification (helper/main/etc.). WHAT: absent — '--- Generator injectivity ---' is a section label, not a paraphrase of 'injective path_gen'; AUTHORITY.md requires 'mere restatement of the identifier is insufficient' and this does not even do that. WHY: absent — not waived (no algebraic-law suffix; 'path_gen_inj' ends with _inj which is not in the waiver list; Kind not established as canonical/notation/etc.). USED_BY: absent — path_gen_inj is used at line 178 in the same file (in the proof of path_gen_inj_sigmas) but is not cited. Because Kind is unestablished, USED_BY is conditionally required; if Kind is confirmed as helper, citation of path_gen_inj_sigmas is mandatory.",
+      "fix_sketch": "Replace the section banner with a documentation block, for example:\n(** path_gen_inj — the path-graph generator map is injective: path_gen i = path_gen j implies i = j.\n    Kind: helper.\n    Why: injectivity is a prerequisite for the PGGTypes instance construction and for\n         path_gen_inj_sigmas, which feeds isRAAG0.Build.\n    Used by: path_gen_inj_sigmas.\n*)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/groups/pgg_raag_path.v",
+      "line_start": 105,
+      "line_end": 111,
+      "lemma_name": "path_comm",
+      "severity": "warning",
+      "evidence_quote": "(* --- Commutativity relation --- *)",
+      "closeness": "far",
+      "explanation": "The preceding comment is a section-separator banner that does not document this specific Definition. Three H002 parts fail. KIND: absent — no classification provided; for a multi-line non-Local Definition H002 requires at least a classification. WHAT: absent — '--- Commutativity relation ---' is a section label and does not paraphrase the body 'fun i j => (1 < (val i - val j) + (val j - val i))%N', which encodes |i - j| >= 2 as a nat-arithmetic condition. WHY: absent — not waived (the definition is not a Lemma with an algebraic-law suffix; Kind is not canonical/notation/coercion/instance). USED_BY: not required unless Kind is established as helper; with Kind absent this cannot be determined, but path_comm is referenced throughout the file (lines 112, 120, 129, 160, 186, 237, 248, 270) making it a central definition.",
+      "fix_sketch": "Replace the section banner with a documentation block, for example:\n(** path_comm — the path-graph commutativity predicate: i and j commute iff |val i - val j| >= 2,\n    i.e., they are non-adjacent on the path graph.\n    Kind: interface (central relation used by the RAAG commutativity and isRAAG0 instance).\n    Why: encodes the RAAG commutativity constraint for path graphs; consumed by\n         path_comm_sym, path_comm_irrefl, path_Hcomm, and the isRAAG0.Build instance.\n*)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/groups/pgg_raag_path.v",
+      "line_start": 193,
+      "line_end": 219,
+      "lemma_name": "path_adj_noncommute",
+      "severity": "warning",
+      "evidence_quote": "(* --- Non-abelianity (via generic) --- *)",
+      "closeness": "far",
+      "explanation": "The preceding comment is a section-separator banner, not a documentation comment for path_adj_noncommute. It fails all four H002 checklist parts: (1) KIND absent — no helper/main classification; (2) WHAT absent — no paraphrase of the statement `path_gen i0 * path_gen i1 != path_gen i1 * path_gen i0`; (3) WHY absent — no motivation for why this non-commutativity witness is needed; (4) USED_BY cannot be assessed since Kind is unspecified. From the manifest, path_G_nonabelian's body calls `exact: path_adj_noncommute`, so a helper classification with a Used-by cite is the appropriate fix. AUTHORITY.md template requires at minimum Kind, a one-line statement summary, motivation, and downstream consumer for helpers.",
+      "fix_sketch": "(** path_adj_noncommute — the path generators at adjacent indices 0 and 1 do not commute: path_gen 0 * path_gen 1 != path_gen 1 * path_gen 0.\n    Kind: helper.\n    Why: provides the concrete non-commuting witness that path_G_nonabelian passes to gen_nonabelian.\n    Used by: path_G_nonabelian. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/groups/pgg_raag_path.v",
+      "line_start": 235,
+      "line_end": 250,
+      "lemma_name": "path_indep_pair",
+      "severity": "warning",
+      "evidence_quote": "(* --- Independent set: any adjacent pair {i, i+1} --- *)",
+      "closeness": "far",
+      "explanation": "The preceding comment is a section-separator banner, not a documentation comment for path_indep_pair. It fails all four H002 checklist parts: (1) KIND absent — no classification; (2) WHAT absent — no paraphrase of the statement that for i,j drawn from the set {Ordinal 0, Ordinal 1} with i != j, ~~ path_comm i j holds; (3) WHY absent — no motivation; (4) USED_BY cannot be assessed without a Kind classification. AUTHORITY.md requires all four parts for any non-trivial Lemma.",
+      "fix_sketch": "(** path_indep_pair — the two adjacent generators at indices 0 and 1 form an independent set: any two distinct elements of {0,1} satisfy ~~ path_comm.\n    Kind: helper.\n    Why: supplies the concrete independent-set witness required to discharge the isRAAG0 interface obligation.\n    Used by: <downstream HB instance or caller — verify via Grep>. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "S998",
+      "file": "rocq-audit",
+      "line_start": 1,
+      "line_end": 1,
+      "severity": "warning",
+      "evidence_quote": "result field not JSON: ```json\n{\n  \"passed\": true,\n  \"findings\": [\n    {\n      \"rule_id\": \"H002\",\n      \"file\": \"pgg-smc/groups/pgg_raag_path.v\",\n      \"line_start\": 37,\n      \"line_end\": 38,\n      \"lemma_name\": \"path_lo\",\n",
+      "closeness": "near",
+      "explanation": "Stage 2 call failed for chunk 1; see logs.",
+      "fix_sketch": "Retry the commit. If repeated, check agent configuration.",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": {
+    "entity_count": 25,
+    "chunk_count": 7,
+    "chunk_size": 4,
+    "workers_used": 4,
+    "tokens_used": 428266,
+    "tokens_cap": 20000000,
+    "wall_ms_used": 261300,
+    "wall_ms_cap": 1800000,
+    "deferred_chunks": 0,
+    "stop_reason": "clean",
+    "estimated_usd": 2.5696,
+    "model": "sonnet"
+  },
+  "exit_code": 0
+}

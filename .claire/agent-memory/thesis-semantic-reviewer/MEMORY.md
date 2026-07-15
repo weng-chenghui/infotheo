@@ -1,0 +1,2 @@
+- [Soundness warrant leakage into completeness paragraph](pattern_soundness_warrant_leakage.md) — interpreter.tex §3: soundness corollary habitually placed at end of completeness paragraph (P1 violation)
+- [Gap stated after contribution in motivation](pattern_gap_after_contribution.md) — interpreter.tex §1: gap claim follows contribution sentence, inverting E3 order

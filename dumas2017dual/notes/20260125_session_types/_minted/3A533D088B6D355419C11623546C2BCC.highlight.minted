@@ -1,0 +1,12 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{k+kn}{Fixpoint} \PYG{n}{dual} \PYG{o}{(}\PYG{n}{s} \PYG{o}{:} \PYG{n}{stype}\PYG{o}{)} \PYG{o}{:} \PYG{n}{stype} \PYG{o}{:=}
+  \PYG{k}{match} \PYG{n}{s} \PYG{k}{with}
+  \PYG{o}{|} \PYG{n}{STSend} \PYG{n}{d} \PYG{n}{k} \PYG{o}{=\PYGZgt{}} \PYG{n}{STRecv} \PYG{n}{d} \PYG{o}{(}\PYG{n}{dual} \PYG{n}{k}\PYG{o}{)}
+  \PYG{o}{|} \PYG{n}{STRecv} \PYG{n}{d} \PYG{n}{k} \PYG{o}{=\PYGZgt{}} \PYG{n}{STSend} \PYG{n}{d} \PYG{o}{(}\PYG{n}{dual} \PYG{n}{k}\PYG{o}{)}
+  \PYG{o}{|} \PYG{n}{STEnd} \PYG{o}{=\PYGZgt{}} \PYG{n}{STEnd}
+  \PYG{k}{end}\PYG{o}{.}
+
+\PYG{k+kn}{Definition} \PYG{n}{channels\PYGZus{}dual} \PYG{o}{(}\PYG{n}{ap1} \PYG{n}{ap2} \PYG{o}{:} \PYG{n}{aproc}\PYG{o}{)} \PYG{o}{:} \PYG{n}{bool} \PYG{o}{:=}
+  \PYG{n}{are\PYGZus{}dual} \PYG{o}{(}\PYG{n}{aproc\PYGZus{}stype} \PYG{n}{ap1} \PYG{o}{(}\PYG{n}{aproc\PYGZus{}party} \PYG{n}{ap2}\PYG{o}{)}\PYG{o}{)}
+           \PYG{o}{(}\PYG{n}{aproc\PYGZus{}stype} \PYG{n}{ap2} \PYG{o}{(}\PYG{n}{aproc\PYGZus{}party} \PYG{n}{ap1}\PYG{o}{)}\PYG{o}{)}\PYG{o}{.}
+\end{MintedVerbatim}

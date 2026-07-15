@@ -1,0 +1,61 @@
+{
+  "findings": [
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/security/pgg_weighted_entropy.v",
+      "line_start": 113,
+      "line_end": 113,
+      "lemma_name": "var_dist_from_weighted_entropy",
+      "severity": "warning",
+      "evidence_quote": "Lemma var_dist_from_weighted_entropy (s : 'I_N) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/security/pgg_weighted_entropy.v",
+      "line_start": 57,
+      "line_end": 57,
+      "lemma_name": "KL_div_uniform",
+      "severity": "error",
+      "evidence_quote": "Lemma KL_div_uniform :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/security/pgg_weighted_entropy.v",
+      "line_start": 113,
+      "line_end": 113,
+      "lemma_name": "var_dist_from_weighted_entropy",
+      "severity": "error",
+      "evidence_quote": "Lemma var_dist_from_weighted_entropy (s : 'I_N) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "I001",
+      "file": "pgg-smc/security/pgg_weighted_entropy.v",
+      "line_start": 113,
+      "line_end": 113,
+      "lemma_name": "var_dist_from_weighted_entropy",
+      "severity": "error",
+      "evidence_quote": "Lemma var_dist_from_weighted_entropy (s : 'I_N) :",
+      "stage": "stage1",
+      "reason": "five or more underscore-separated components without a canonical MathComp suffix",
+      "stages": [
+        "stage1"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": null,
+  "exit_code": 2
+}

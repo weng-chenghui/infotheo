@@ -1,0 +1,15 @@
+# Severity-escalation ledger and per-scope suppressions.
+# Empty by default. Add entries as peer-review surfaces exceptions.
+#
+# Format:
+#   suppressions:
+#     - rule_id: A001
+#       path: homomorphic_encryption/homomorphic_encryption.v
+#       reason: "kept for reviewer comparison during migration"
+#       expires: "2026-06-01"
+#
+# Warning-to-error escalations fire when a rule accumulates `fire_count`
+# hits across the repository history tracked by audit-history.sh.
+
+suppressions: []
+escalations: []

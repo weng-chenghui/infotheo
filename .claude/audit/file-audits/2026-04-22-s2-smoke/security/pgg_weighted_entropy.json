@@ -1,0 +1,51 @@
+{
+  "findings": [
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/security/pgg_weighted_entropy.v",
+      "line_start": 120,
+      "line_end": 120,
+      "lemma_name": "var_dist_from_weighted_entropy",
+      "severity": "warning",
+      "evidence_quote": "Lemma var_dist_from_weighted_entropy (s : 'I_N) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/security/pgg_weighted_entropy.v",
+      "line_start": 90,
+      "line_end": 93,
+      "lemma_name": "fiber_entropy_weighted",
+      "severity": "warning",
+      "evidence_quote": "(* The weighted endpoint entropy: given any distribution rho_dist over\n   permutations, the entropy of the pushforward through sigma |-> sigma(s)\n   measures how much information the endpoint reveals. *)",
+      "closeness": "near",
+      "explanation": "The preceding comment supplies a readable WHAT paraphrase but fails two checklist parts. (1) KIND — no classification word ('helper', 'main', 'canonical', or any accepted synonym) appears. (2) WHY — no motivation clause is present ('needed for', 'used by', 'enables', etc.). The Why waiver does not apply: this is not an algebraic-law suffix name, the declared Kind is not canonical/notation/coercion/instance, and the WHAT clause does not name a downstream use-site. USED_BY cannot be evaluated until KIND is established.",
+      "fix_sketch": "(** fiber_entropy_weighted — entropy of the fdistmap pushforward of rho_dist\n    through sigma |-> sigma(s); measures how much information the endpoint\n    reveals under a weighted permutation distribution.\n    Kind: helper.\n    Why: used by var_dist_from_weighted_entropy (Section var_dist_weighted_section)\n         as the entropy term in the Pinsker-bridge bound.\n    Used by: var_dist_from_weighted_entropy. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": {
+    "entity_count": 14,
+    "chunk_count": 5,
+    "chunk_size": 3,
+    "workers_used": 2,
+    "tokens_used": 333439,
+    "tokens_cap": 20000000,
+    "wall_ms_used": 131870,
+    "wall_ms_cap": 600000,
+    "deferred_chunks": 0,
+    "stop_reason": "clean",
+    "estimated_usd": 2.0006,
+    "model": "sonnet"
+  },
+  "exit_code": 0
+}

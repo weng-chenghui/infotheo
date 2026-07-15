@@ -1,0 +1,1 @@
+- [Recurring patterns](recurring_patterns.md) — Semantic patterns confirmed across thesis runs

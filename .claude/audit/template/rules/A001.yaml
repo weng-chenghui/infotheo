@@ -1,0 +1,25 @@
+id: A001
+category: deprecated_tactics
+title: "pose proof is non-idiomatic; prefer have"
+severity: error
+enabled: true
+stage_mode: both
+authority:
+  - mathcomp-CONTRIBUTING#proofs
+  - peer-feedback-2026-03
+fast_pattern:
+  pattern: '^[ \t]*pose proof\b'
+  ignore_in_comments: true
+  file_glob: '*.v'
+agent_prompt: |
+  Flag any use of `pose proof ... as <H>` in SSReflect proofs and explain
+  how the idiomatic `have <H> := ...` differs: `have` is a term-level
+  forward-reasoning primitive that composes with views (`move/`), while
+  `pose proof` is Ltac1-era and does not. Cite MathComp CONTRIBUTING under
+  `#proofs`. In the `fix_sketch`, offer both `have H := term` and
+  `have H : T := term` forms depending on whether the user wants type
+  annotation. Do NOT re-flag literal matches Stage 1 already reported at
+  the same line; instead, upgrade the finding with a closeness explanation.
+scope: changed_hunks
+fix_hint: "Replace `pose proof H as X.` with `have X := H.` (or a specialisation such as `have X := H a b.`)."
+exceptions: []

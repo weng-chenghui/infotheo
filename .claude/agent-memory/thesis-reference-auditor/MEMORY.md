@@ -1,0 +1,1 @@
+- [Thesis structural patterns](thesis-patterns.md) — Recurring reference patterns: alias labels on section lines; conclusions chapter section numbering collision; no sidenote-capture habit found

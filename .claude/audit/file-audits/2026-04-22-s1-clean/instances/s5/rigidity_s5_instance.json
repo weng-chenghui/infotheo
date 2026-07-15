@@ -1,0 +1,99 @@
+{
+  "findings": [
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/s5/rigidity_s5_instance.v",
+      "line_start": 83,
+      "line_end": 83,
+      "lemma_name": "s5_endpoint_bound_fiber",
+      "severity": "warning",
+      "evidence_quote": "Lemma s5_endpoint_bound_fiber :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/s5/rigidity_s5_instance.v",
+      "line_start": 155,
+      "line_end": 155,
+      "lemma_name": "s5_security_witness_1",
+      "severity": "warning",
+      "evidence_quote": "Definition s5_security_witness_1 : SecurityWitness R R_s5 :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/s5/rigidity_s5_instance.v",
+      "line_start": 201,
+      "line_end": 201,
+      "lemma_name": "s5_security_witness_schreier",
+      "severity": "warning",
+      "evidence_quote": "Definition s5_security_witness_schreier (L : nat) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/s5/rigidity_s5_instance.v",
+      "line_start": 234,
+      "line_end": 234,
+      "lemma_name": "s5_genus0_pgl_crypto",
+      "severity": "warning",
+      "evidence_quote": "Lemma s5_genus0_pgl_crypto :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/s5/rigidity_s5_instance.v",
+      "line_start": 246,
+      "line_end": 246,
+      "lemma_name": "s5_threshold_witness_concrete",
+      "severity": "warning",
+      "evidence_quote": "Definition s5_threshold_witness_concrete : ThresholdWitness R_s5 :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/s5/rigidity_s5_instance.v",
+      "line_start": 253,
+      "line_end": 253,
+      "lemma_name": "s5_rigidity_cryptographically_secure",
+      "severity": "warning",
+      "evidence_quote": "Definition s5_rigidity_cryptographically_secure : AlgebraicRigidity R R_s5 :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/s5/rigidity_s5_instance.v",
+      "line_start": 345,
+      "line_end": 345,
+      "lemma_name": "s5_ts_recon_correct",
+      "severity": "warning",
+      "evidence_quote": "Lemma s5_ts_recon_correct (PI : PGGInterface R_s5)",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": null,
+  "exit_code": 0
+}

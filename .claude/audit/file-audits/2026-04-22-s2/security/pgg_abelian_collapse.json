@@ -1,0 +1,191 @@
+{
+  "findings": [
+    {
+      "rule_id": "D001",
+      "file": "pgg-smc/security/pgg_abelian_collapse.v",
+      "line_start": 83,
+      "line_end": 87,
+      "lemma_name": "word_eval_in_G",
+      "severity": "warning",
+      "evidence_quote": "Hypothesis Habel : abelian G.",
+      "closeness": "near",
+      "explanation": "Hypothesis Habel (Section abelian_collapse, line 75: `Hypothesis Habel : abelian G.`) does not appear anywhere in the proof body of word_eval_in_G, whose proof is `apply: (subsetP (achievable_sub M L)). by apply/imsetP; exists w.`. A repo-wide Grep for `Habel` finds only the declaration at line 75; it is referenced by no other entity in the Section (abelian_adversary_full_recovery uses Hreg, not Habel; abelian_security_collapse uses abelian_search_space_bound with no visible Habel reference). Tier K should confirm the proof closes without Habel.",
+      "fix_sketch": "If Tier K confirms Habel is unused across the entire Section, remove the `Hypothesis Habel : abelian G.` declaration from Section abelian_collapse. If the abelian property is needed for a future lemma, re-introduce it when that lemma is added.",
+      "confidence": "medium",
+      "kernel_contract": {
+        "name": "unused_hypothesis",
+        "parameters": {
+          "hypothesis": "Habel"
+        }
+      },
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/security/pgg_abelian_collapse.v",
+      "line_start": 53,
+      "line_end": 53,
+      "lemma_name": "one_eval_determines_perm",
+      "severity": "warning",
+      "evidence_quote": "Lemma one_eval_determines_perm (g1 g2 : gT) (s : 'I_N) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/security/pgg_abelian_collapse.v",
+      "line_start": 83,
+      "line_end": 83,
+      "lemma_name": "word_eval_in_G",
+      "severity": "warning",
+      "evidence_quote": "Lemma word_eval_in_G (w : pgg_word M L) : word_eval w \\in G.",
+      "closeness": "near",
+      "explanation": "The name `word_eval_in_G` has four underscore-separated components: `word`, `eval`, `in`, `G`. Stage 1 did not emit an F001 finding for line 83 (the declaration was touched but not a diff line); Stage 2 evaluates it independently. None of the F001 exception prefixes (`^in_`, `^mem_`, `^card_`, `_of_`) apply. The MathComp grammar `mainSymbol_suffixes(_condition)?` expects `_in_G` to either be a canonical suffix or a named condition; `_in_G` is neither. The four-component structure signals naming drift.",
+      "fix_sketch": "Rename to `word_eval_mem` or `mem_word_eval` (two components, canonical membership prefix). Alternatively, if the group G must be explicit, use `word_eval_inG` (no underscore before `G`) to reduce the component count.",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/security/pgg_abelian_collapse.v",
+      "line_start": 92,
+      "line_end": 92,
+      "lemma_name": "abelian_adversary_full_recovery",
+      "severity": "warning",
+      "evidence_quote": "Lemma abelian_adversary_full_recovery (w1 w2 : pgg_word M L) (s : 'I_N) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/security/pgg_abelian_collapse.v",
+      "line_start": 83,
+      "line_end": 83,
+      "lemma_name": "word_eval_in_G",
+      "severity": "warning",
+      "evidence_quote": "Lemma word_eval_in_G (w : pgg_word M L) : word_eval w \\in G.",
+      "closeness": "near",
+      "explanation": "The statement is a membership predicate: `word_eval w \\in G`. The suffix `_in_G` is not in the canonical MathComp suffix table (AUTHORITY.md). The MathComp `in_` prefix convention signals predicate-unfolding for membership lemmas (`in_cons`, `in_set`), but here `_in_G` is placed internally as though it were a condition suffix, while the conclusion IS the membership fact. For codomain-membership results, MathComp uses the `mem_` prefix (`mem_word_eval`) or the `_sub` suffix when proving a subset relationship. The proposed fix reduces the four-component name to a canonical two-component one.",
+      "fix_sketch": "Option 1: rename to `word_eval_mem` (main symbol `word_eval`, membership suffix `_mem`). Option 2: rename to `mem_word_eval` (mem_ prefix convention). Update call site at line 96: `word_eval_in_G w1` -> `word_eval_mem w1` (or `mem_word_eval w1`).",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/security/pgg_abelian_collapse.v",
+      "line_start": 92,
+      "line_end": 94,
+      "lemma_name": "abelian_adversary_full_recovery",
+      "severity": "warning",
+      "evidence_quote": "Lemma abelian_adversary_full_recovery (w1 w2 : pgg_word M L) (s : 'I_N) :\n  endpoint (word_eval w1) s = endpoint (word_eval w2) s ->\n  word_eval w1 = word_eval w2.",
+      "closeness": "far",
+      "explanation": "The statement is a textbook injectivity lemma of the form `f w1 = f w2 -> w1 = w2` (specialised through the `endpoint _ s` projection). MathComp's suffix table maps this semantic role to the suffix `I` (or the snake_case variant `_inj`). The chosen tail `_recovery` is narrative, not a grammar suffix, and together with `adversary_full` reads as a four-token noun phrase rather than `mainSymbol_suffixes(_condition)?`. A user searching the library for the injectivity of `word_eval` through `endpoint` will not find this lemma by suffix convention.",
+      "fix_sketch": "Rename to `word_eval_endpoint_inj` (snake_case: main symbol `word_eval`, modifier `endpoint`, semantic suffix `_inj`) or `word_evalEndpointI` in camelCase. Keep a one-line comment that preserves the adversary/recovery framing for human readers. Update the single call site once the rename lands.",
+      "confidence": "high",
+      "stage": "stage2",
+      "escalated_model": "opus",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/security/pgg_abelian_collapse.v",
+      "line_start": 82,
+      "line_end": 87,
+      "lemma_name": "word_eval_in_G",
+      "severity": "warning",
+      "evidence_quote": "(* Helper: word_eval produces elements of G *)",
+      "closeness": "near",
+      "explanation": "The comment satisfies KIND ('Helper') and WHAT ('word_eval produces elements of G' is a crisp paraphrase of `word_eval w \\in G`). Two parts are absent. (1) WHY: no motivation clause is present; the name carries no algebraic-law suffix and the What clause does not name a downstream use-site, so the waiver does not apply. (2) USED_BY: Kind is helper, so at least one downstream consumer must be named; Grep confirms `abelian_adversary_full_recovery` calls `word_eval_in_G w1` and `word_eval_in_G w2` at line 96 of the same file, but the comment does not cite it.",
+      "fix_sketch": "(** word_eval_in_G — for any PGG word w of length L, word_eval w is a member of G.\n    Kind: helper.\n    Why: supplies group-membership witnesses required by Hreg inside abelian_adversary_full_recovery.\n    Used by: abelian_adversary_full_recovery. *)",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/security/pgg_abelian_collapse.v",
+      "line_start": 92,
+      "line_end": 99,
+      "lemma_name": "abelian_adversary_full_recovery",
+      "severity": "warning",
+      "evidence_quote": "Item 4: Adversary seeing one endpoint determines the group element.\n   For words w1, w2: if endpoint(word_eval w1)(s) = endpoint(word_eval w2)(s),\n   then word_eval w1 = word_eval w2.",
+      "closeness": "near",
+      "explanation": "WHAT is covered (the block paraphrases the statement both in security language and in symbolic form). KIND is missing: the comment does not classify the lemma as helper/main/etc.; the `Item 4` marker is a TODO-style index, not a classification. USED-BY is missing: if this is a helper feeding the `abelian_security_collapse` theorem below, the comment should name that consumer so readers can traverse the proof tree by grep. WHY is only marginal; the cryptographic gloss restates the statement rather than explaining why this particular injectivity is needed.",
+      "fix_sketch": "(** abelian_adversary_full_recovery — `word_eval` is determined by its endpoint at `s` (injectivity through `endpoint _ s`).\n    Kind: helper.\n    Why: the security-collapse bound reduces adversary success to counting `word_eval` images; injectivity through a single endpoint lets us equate words from a single observation.\n    Used by: abelian_security_collapse (via abelian_search_space_bound). *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "escalated_model": "opus",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/security/pgg_abelian_collapse.v",
+      "line_start": 100,
+      "line_end": 102,
+      "lemma_name": "abelian_security_collapse",
+      "severity": "warning",
+      "evidence_quote": "Security collapse: search space bounded by frequency vector count",
+      "closeness": "near",
+      "explanation": "WHAT is covered (the one-liner paraphrases the `search_space M L <= 'C(L + pgg_ngens', pgg_ngens')` bound as a frequency-vector count). KIND is missing: there is no `main`/`helper` classification or synonym, so downstream readers cannot tell at a glance whether this is the headline result of the file or a stepping stone. WHY is missing and not waived: the name carries no algebraic-law suffix (`_A`, `_C`, `_K`, ...), Kind is not canonical/notation/coercion/instance, and the WHAT clause does not name the downstream use-site. Given that `abelian_security_collapse` is the closing Theorem of `Section abelian_collapse`, it is almost certainly the main result; the comment should say so and motivate the collapse (e.g. abelian commutation forces the adversary's search space down to counting frequency multisets).",
+      "fix_sketch": "(** abelian_security_collapse — in the abelian regime, the adversary's search space is bounded by the number of frequency vectors `'C(L + pgg_ngens', pgg_ngens')`.\n    Kind: main.\n    Why: abelianness identifies words up to frequency multiset, so `word_eval` factors through the multinomial count; this is the file's headline security statement, consumed by the top-level collapse bound in the calling proof. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "escalated_model": "opus",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "S998",
+      "file": "rocq-audit",
+      "line_start": 1,
+      "line_end": 1,
+      "severity": "warning",
+      "evidence_quote": "result field not JSON: ```json\n{\n  \"passed\": false,\n  \"findings\": [\n    {\n      \"rule_id\": \"F001\",\n      \"file\": \"pgg-smc/security/pgg_abelian_collapse.v\",\n      \"line_start\": 53,\n      \"line_end\": 56,\n      \"lemma_name\": \"",
+      "closeness": "near",
+      "explanation": "Stage 2 call failed for chunk 1; see logs.",
+      "fix_sketch": "Retry the commit. If repeated, check agent configuration.",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": {
+    "entity_count": 17,
+    "chunk_count": 6,
+    "chunk_size": 3,
+    "workers_used": 4,
+    "tokens_used": 324661,
+    "tokens_cap": 20000000,
+    "wall_ms_used": 237046,
+    "wall_ms_cap": 1800000,
+    "deferred_chunks": 0,
+    "stop_reason": "clean",
+    "estimated_usd": 1.948,
+    "model": "sonnet"
+  },
+  "exit_code": 0
+}

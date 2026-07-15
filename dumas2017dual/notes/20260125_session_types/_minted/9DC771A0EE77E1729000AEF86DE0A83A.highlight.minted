@@ -1,0 +1,11 @@
+\begin{MintedVerbatim}[commandchars=\\\{\},codes={\catcode`\$=3\catcode`\^=7\catcode`\_=8\relax}]
+\PYG{k+kn}{Fixpoint} \PYG{n}{erase} \PYG{o}{\PYGZob{}}\PYG{n}{party} \PYG{n}{n} \PYG{n}{env}\PYG{o}{\PYGZcb{}} \PYG{o}{(}\PYG{n}{p} \PYG{o}{:} \PYG{n}{sproc} \PYG{n}{party} \PYG{n}{n} \PYG{n}{env}\PYG{o}{)} \PYG{o}{:} \PYG{n}{proc} \PYG{o}{:=}
+  \PYG{k}{match} \PYG{n}{p} \PYG{k}{with}
+  \PYG{o}{|} \PYG{n}{SFinish} \PYG{o}{=\PYGZgt{}} \PYG{n}{Finish}
+  \PYG{o}{|} \PYG{n}{SRet} \PYG{n}{d} \PYG{o}{=\PYGZgt{}} \PYG{n}{Ret} \PYG{n}{d}
+  \PYG{o}{|} \PYG{n}{SInit} \PYG{n}{d} \PYG{n}{k} \PYG{o}{=\PYGZgt{}} \PYG{n}{Init} \PYG{n}{d} \PYG{o}{(}\PYG{n}{erase} \PYG{n}{k}\PYG{o}{)}
+  \PYG{o}{|} \PYG{n}{SSend} \PYG{n}{dst} \PYG{o}{\PYGZus{}} \PYG{n}{d} \PYG{n}{k} \PYG{o}{=\PYGZgt{}} \PYG{n}{Send} \PYG{n}{dst} \PYG{n}{d} \PYG{o}{(}\PYG{n}{erase} \PYG{n}{k}\PYG{o}{)}
+  \PYG{o}{|} \PYG{n}{SRecv} \PYG{n}{src} \PYG{o}{\PYGZus{}} \PYG{n}{f} \PYG{o}{=\PYGZgt{}} \PYG{n}{Recv} \PYG{n}{src} \PYG{o}{(}\PYG{k}{fun} \PYG{n}{d} \PYG{o}{=\PYGZgt{}} \PYG{n}{erase} \PYG{o}{(}\PYG{n}{f} \PYG{n}{d}\PYG{o}{)}\PYG{o}{)}
+  \PYG{o}{|} \PYG{n}{SFail} \PYG{o}{=\PYGZgt{}} \PYG{k+kn}{Fail}
+  \PYG{k}{end}\PYG{o}{.}
+\end{MintedVerbatim}

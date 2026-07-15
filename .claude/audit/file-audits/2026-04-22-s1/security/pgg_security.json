@@ -1,0 +1,125 @@
+{
+  "findings": [
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/security/pgg_security.v",
+      "line_start": 25,
+      "line_end": 25,
+      "lemma_name": "isqrt",
+      "severity": "error",
+      "evidence_quote": "Definition isqrt (n : nat) : nat := isqrt_aux n 0 n.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/security/pgg_security.v",
+      "line_start": 36,
+      "line_end": 36,
+      "lemma_name": "isqrt_aux_ge",
+      "severity": "error",
+      "evidence_quote": "Lemma isqrt_aux_ge fuel k n : k <= isqrt_aux fuel k n.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/security/pgg_security.v",
+      "line_start": 43,
+      "line_end": 43,
+      "lemma_name": "isqrt_aux_upper",
+      "severity": "error",
+      "evidence_quote": "Lemma isqrt_aux_upper fuel k n :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/security/pgg_security.v",
+      "line_start": 55,
+      "line_end": 55,
+      "lemma_name": "isqrt_aux_largest",
+      "severity": "error",
+      "evidence_quote": "Lemma isqrt_aux_largest fuel k n m :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/security/pgg_security.v",
+      "line_start": 82,
+      "line_end": 82,
+      "lemma_name": "isqrt_upper",
+      "severity": "error",
+      "evidence_quote": "Lemma isqrt_upper n : n < (isqrt n).+1 ^ 2.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/security/pgg_security.v",
+      "line_start": 85,
+      "line_end": 85,
+      "lemma_name": "isqrt_monotone",
+      "severity": "error",
+      "evidence_quote": "Lemma isqrt_monotone m n : m <= n -> isqrt m <= isqrt n.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/security/pgg_security.v",
+      "line_start": 98,
+      "line_end": 98,
+      "lemma_name": "isqrt_expn",
+      "severity": "error",
+      "evidence_quote": "Lemma isqrt_expn k : k <= isqrt (k ^ 2).",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/security/pgg_security.v",
+      "line_start": 116,
+      "line_end": 116,
+      "lemma_name": "kappa_gt0",
+      "severity": "error",
+      "evidence_quote": "Lemma kappa_gt0 : 0 < kappa.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/security/pgg_security.v",
+      "line_start": 128,
+      "line_end": 128,
+      "lemma_name": "grover_mitigation",
+      "severity": "error",
+      "evidence_quote": "Theorem grover_mitigation (L : nat) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": null,
+  "exit_code": 2
+}

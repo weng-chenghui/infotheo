@@ -1,0 +1,333 @@
+{
+  "findings": [
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/security/pgg_schreier.v",
+      "line_start": 182,
+      "line_end": 192,
+      "lemma_name": "schreier_transition_entry_ge0",
+      "severity": "warning",
+      "evidence_quote": "Lemma schreier_transition_entry_ge0 (i j : 'I_N) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1",
+        "stage2"
+      ],
+      "explanation": "Stage 1 (F001) flagged four underscore-separated components. Stage 2 confirms: the tail suffix `_ge0` is canonical MathComp for non-negativity (AUTHORITY.md suffix table), but the intermediate component `_entry_` is redundant. The head predicate is `schreier_transition`; the parameters `i j` already scope the statement to a single matrix entry, so `_entry_` adds no semantic information. The canonical composition is `schreier_transition_ge0` following the pattern `mainSymbol_suffix` documented in AUTHORITY.md. The deviation is `near`, not `far`, because the suffix chain is otherwise correct.",
+      "fix_sketch": "Rename to `schreier_transition_ge0`. The `(i j : 'I_N)` parameters already restrict the scope to a single entry; the `_entry_` connector is implied and should be dropped."
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/security/pgg_schreier.v",
+      "line_start": 334,
+      "line_end": 350,
+      "lemma_name": "security_witness_schreier_asymptotic",
+      "severity": "warning",
+      "evidence_quote": "Definition security_witness_schreier_asymptotic (sc : SchreierCertificate)",
+      "stage": "stage1",
+      "stages": [
+        "stage1",
+        "stage2"
+      ],
+      "explanation": "Stage 1 flagged the four-component name at the declaration line (334-334). Stage 2 confirms drift: the name `security_witness_schreier_asymptotic` stacks `security_witness`, `schreier`, and `asymptotic` as plain underscore components. Neither `_schreier` nor `_asymptotic` appears in AUTHORITY.md's suffix table; both are conceptual descriptors rather than role suffixes. The return type is `SecurityAsymptotic`; a grammar-conformant name would put the main symbol first and use a shorter qualifier. Upgrading Stage 1's literal flag with this closeness-to-target analysis at the full entity span.",
+      "fix_sketch": "Option 1 — treat `schreier` as main symbol: `schreier_asymptotic` (matches the return type `SecurityAsymptotic`). Option 2 — keep the algorithm qualifier: `schreier_security_asymptotic`. Option 3 — camelCase: `schreierSecurityAsymptotic`. Verify call sites (notably `security_witness_schreier` at line 358) after renaming."
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/security/pgg_schreier.v",
+      "line_start": 466,
+      "line_end": 466,
+      "lemma_name": "word_eval_cons_endpoint",
+      "severity": "warning",
+      "evidence_quote": "Lemma word_eval_cons_endpoint (L : nat) (i : 'I_Tg) (w : L.-tuple 'I_Tg)",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/security/pgg_schreier.v",
+      "line_start": 476,
+      "line_end": 476,
+      "lemma_name": "schreier_walk_eq_endpoint",
+      "severity": "warning",
+      "evidence_quote": "Lemma schreier_walk_eq_endpoint : forall (L : nat)",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/security/pgg_schreier.v",
+      "line_start": 193,
+      "line_end": 193,
+      "lemma_name": "schreier_transition_stochastic",
+      "severity": "warning",
+      "evidence_quote": "Lemma schreier_transition_stochastic (i : 'I_N) :",
+      "closeness": "near",
+      "explanation": "The statement is `\\sum_j schreier_transition i j = 1`, an equation LHS = RHS. AUTHORITY.md assigns suffix `E` to equational rewrites and suffix `1` for unit-valued results. The suffix `_stochastic` is a domain descriptor with no entry in the MathComp suffix table; a reader scanning the library by suffix cannot infer the statement's shape. The idiomatic alternatives are `schreier_transition_row1` (row sum equals the unit) or `schreier_transition_rowE` (equational rewrite for row i).",
+      "fix_sketch": "Rename to `schreier_transition_row1` (preferred: explicit about the value 1) or `schreier_transition_rowE`. Update the comment reference in the body of schreier_transition (line 180-181) and any call sites.",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/security/pgg_schreier.v",
+      "line_start": 385,
+      "line_end": 386,
+      "lemma_name": "schreier_epsilon_decreasing",
+      "severity": "warning",
+      "evidence_quote": "Lemma schreier_epsilon_decreasing (sc : SchreierCertificate) (L1 L2 : nat) :\n  (L1 <= L2)%N -> schreier_epsilon sc L2 <= schreier_epsilon sc L1.",
+      "closeness": "near",
+      "explanation": "The suffix `_decreasing` is descriptive English and is absent from the canonical MathComp suffix table in AUTHORITY.md. The statement `(L1 <= L2) -> schreier_epsilon sc L2 <= schreier_epsilon sc L1` is an antitone (non-increasing) monotonicity result. AUTHORITY.md lists `w` for non-strict / weak monotony; the idiomatic form would be `schreier_epsilon_geW` (the value is ge-weakly monotone: larger L gives a smaller-or-equal bound) or `schreier_epsilonW`. The suffix `_decreasing` is near-canonical in that it communicates the role correctly but uses a plain English adjective rather than the suffix abbreviation the table prescribes.",
+      "fix_sketch": "Rename to `schreier_epsilon_geW` (antitone weak monotony: f(L2) <= f(L1) when L1 <= L2) or `schreier_epsilonW` (dropping direction from the name and letting the statement speak). Update the call site `exact: schreier_epsilon_decreasing` in `security_monotone` at line 411.",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/security/pgg_schreier.v",
+      "line_start": 399,
+      "line_end": 407,
+      "lemma_name": "security_monotone",
+      "severity": "warning",
+      "evidence_quote": "Lemma security_monotone (sc : SchreierCertificate)\n    (L1 L2 : nat)\n    (HL : (L1 <= L2)%N) :\n  forall (s : 'I_N),\n  var_dist (fdistmap (fun sigma : {perm 'I_N} => sigma s)\n                     (rho_from_words L2 sigmas))\n           (fdist_uniform (card_ord N))\n  <= schreier_epsilon sc L1.",
+      "closeness": "near",
+      "explanation": "The suffix `_monotone` is a plain English adjective absent from the AUTHORITY.md suffix table. The statement is a weakening result: a certificate valid at L1 also bounds the mixing at any L2 >= L1. AUTHORITY.md lists `w` for non-strict/weak monotony. The idiomatic MathComp name would be `security_W` or `securityW`. The current name is near-canonical: the semantic role is clear but the token `monotone` replaces the prescribed single-letter suffix `W`.",
+      "fix_sketch": "Rename to `security_W` following MathComp's `W` suffix for weak monotone results. If the name is exported and changing it is disruptive, add `(* Naming: _monotone retained for readability; canonical form would be security_W. *)` to the preceding comment.",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/security/pgg_schreier.v",
+      "line_start": 451,
+      "line_end": 453,
+      "lemma_name": "word_eval_cons",
+      "severity": "warning",
+      "evidence_quote": "Lemma word_eval_cons (L : nat) (i : 'I_Tg) (w : L.-tuple 'I_Tg) :\n  @word_eval M L.+1 [tuple of i :: w] =\n  (tnth sigmas i * @word_eval M L w)%g.",
+      "closeness": "near",
+      "explanation": "The lemma's statement is an equational rewrite (lhs = rhs form). Per AUTHORITY.md the canonical suffix for an equational rewrite is `E`. The suffix `cons` is not in the MathComp suffix table; it describes a structural argument (cons-constructor) rather than the semantic role (equation). The idiomatic name would be `word_eval_consE`, following the pattern of `tnthS`, `big_ord_recl`, and similar cons/head lemmas in MathComp that append the structural discriminant before the role suffix.",
+      "fix_sketch": "Rename `word_eval_cons` → `word_eval_consE`. Update the two downstream callers named in the preceding comment: `word_eval_cons_endpoint` (body `by rewrite word_eval_cons permM`) and `schreier_walk_eq_endpoint` (body `rewrite word_eval_cons_endpoint`).",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/security/pgg_schreier.v",
+      "line_start": 466,
+      "line_end": 469,
+      "lemma_name": "word_eval_cons_endpoint",
+      "severity": "warning",
+      "evidence_quote": "Lemma word_eval_cons_endpoint (L : nat) (i : 'I_Tg) (w : L.-tuple 'I_Tg)\n    (s : 'I_N) :\n  @word_eval M L.+1 [tuple of i :: w] s =\n  @word_eval M L w (tnth sigmas i s).",
+      "closeness": "near",
+      "explanation": "Stage 1 (F001) flagged the four-component shape; this is the G001 suffix-semantics companion. The statement is an equational rewrite (`lhs s = rhs` form). The suffix `endpoint` is not in the MathComp suffix table and names a geometric concept rather than the proof-theoretic role. The suffix `_eq` (absent here but present in the parent `schreier_walk_eq_endpoint`) is also non-standard; MathComp spells this role `E`. Idiomatic candidates: `word_eval_consE_pt` (equation, pointwise) or simply fold this into `word_eval_consE` with `s` universally quantified, eliminating the need for a separate lemma since the proof is `by rewrite word_eval_cons permM`.",
+      "fix_sketch": "Option A: Rename to `word_eval_cons_ptE` to signal pointwise equational form. Option B: Eliminate the lemma by inlining `rewrite word_eval_cons permM` at the single call site in `schreier_walk_eq_endpoint`. Update the preceding comment's `Used by` field accordingly.",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/security/pgg_schreier.v",
+      "line_start": 476,
+      "line_end": 481,
+      "lemma_name": "schreier_walk_eq_endpoint",
+      "severity": "warning",
+      "evidence_quote": "Lemma schreier_walk_eq_endpoint : forall (L : nat)\n    (s x : 'I_N),\n  (schreier_transition R sigmas ^+ L) s x =\n  fdistmap (fun sigma : {perm 'I_N} => sigma s)\n           (@rho_from_words R _ m L sigmas) x.",
+      "closeness": "near",
+      "explanation": "Stage 1 (F001) flagged the four-component shape; this is the G001 suffix-semantics companion. The statement is an equational rewrite between matrix-power entries and an fdistmap expression. Per AUTHORITY.md the canonical suffix for such a rewrite is `E`. The component `eq` is a spelled-out version of `E` (non-standard; MathComp uses the single-letter suffix) and `endpoint` is a domain word rather than a suffix from the canonical table. The idiomatic name would be `schreier_walk_E` (if the main symbol is the walk) or `schreier_transitionE` (if the main symbol is `schreier_transition`). The preceding comment classifies this as `Kind: main`, which does not waive the naming convention.",
+      "fix_sketch": "Option A: `schreier_transitionE` — main symbol is `schreier_transition`, suffix `E` signals equational form; matches the pattern of `mxE`, `fdistmapE`, etc. that appear inside its own proof. Option B: `schreier_walk_E` if the intended main symbol is the walk abstraction. Update the single preceding-comment self-reference and any downstream callers.",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/security/pgg_schreier.v",
+      "line_start": 174,
+      "line_end": 177,
+      "lemma_name": "schreier_gen_count",
+      "severity": "warning",
+      "evidence_quote": "(* Count how many generators map x to y: #{i : sigma_i(x) = y} *)",
+      "closeness": "near",
+      "explanation": "WHAT is present ('Count how many generators map x to y'). Missing parts: (1) KIND — no classification as helper/main/canonical; (2) WHY — no motivation explaining that this count serves as the numerator of schreier_transition; (3) USED_BY — required when Kind is helper; schreier_gen_count is a helper whose consumer schreier_transition appears at line 178 (body: `schreier_gen_count i j`).",
+      "fix_sketch": "(** schreier_gen_count — counts the number of generators in sigmas that map x to y, i.e., #{i : 'I_Tg | sigma_i(x) = y}.\n    Kind: helper.\n    Why: provides the numerator for the Schreier transition matrix entry at (x,y).\n    Used by: schreier_transition. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/security/pgg_schreier.v",
+      "line_start": 178,
+      "line_end": 181,
+      "lemma_name": "schreier_transition",
+      "severity": "warning",
+      "evidence_quote": "(* The transition matrix: Q(x,y) = schreier_gen_count(x,y) / Tg *)",
+      "closeness": "near",
+      "explanation": "WHAT is present (equational formula for Q(x,y)). Missing parts: (1) KIND — no classification; as the central object of Section schreier_transition this would be `main` or `canonical`; (2) WHY — no motivation naming downstream lemmas or the security argument that consumes this matrix.",
+      "fix_sketch": "(** schreier_transition — the row-stochastic transition matrix of the Schreier random walk; entry (i,j) equals schreier_gen_count(i,j) / Tg.\n    Kind: main (central definition of this section).\n    Why: used by schreier_transition_entry_ge0 and schreier_transition_stochastic to establish that this matrix is a valid probability transition kernel. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/security/pgg_schreier.v",
+      "line_start": 182,
+      "line_end": 192,
+      "lemma_name": "schreier_transition_entry_ge0",
+      "severity": "warning",
+      "evidence_quote": "(* All entries are non-negative *)",
+      "closeness": "near",
+      "explanation": "WHAT is present ('all entries are non-negative'). Missing parts: (1) KIND — no classification; (2) WHY — `_ge0` is not in the AUTHORITY.md algebraic-law waiver list (_A, _AC, _ACA, _C, _CA, _K, _D, _I, _V, _X, _Xn, _Xz, _Mn, _Z), so motivation is required; no downstream consumer is named.",
+      "fix_sketch": "(** schreier_transition_entry_ge0 — every entry of schreier_transition is non-negative: 0 <= schreier_transition i j.\n    Kind: helper.\n    Why: non-negativity side condition needed to verify schreier_transition is a valid stochastic matrix. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/security/pgg_schreier.v",
+      "line_start": 193,
+      "line_end": 226,
+      "lemma_name": "schreier_transition_stochastic",
+      "severity": "warning",
+      "evidence_quote": "(* Each row sums to 1 (row-stochastic).\n   Proof: for each generator sigma_k and sheet x, there is exactly one y\n   such that sigma_k(x) = y (namely y = sigma_k(x)). So the total\n   count across all y is Tg. *)",
+      "closeness": "near",
+      "explanation": "WHAT is present ('each row sums to 1'). Missing parts: (1) KIND — no classification as helper or main; (2) WHY — the comment gives a proof sketch (HOW the result holds) but not WHY the result is needed downstream; no consuming lemma or theorem is named. The WHY waiver for algebraic-law suffixes does not apply: `_stochastic` is not in the AUTHORITY.md waiver list.",
+      "fix_sketch": "(** schreier_transition_stochastic — the Schreier transition matrix is row-stochastic: for every row i, the sum of all entries equals 1.\n    Kind: main.\n    Why: establishes that schreier_transition is a valid probability transition kernel; required by the spectral-gap bound argument in Section spectral_gap_def. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/security/pgg_schreier.v",
+      "line_start": 334,
+      "line_end": 350,
+      "lemma_name": "security_witness_schreier_asymptotic",
+      "severity": "warning",
+      "evidence_quote": "(* SecurityWitness from Schreier certificate at any L.\n   NOTE: weval_inj IS needed here -- it is required by SecurityWitness\n   (to ensure rho_from_words is a valid distribution over achievable\n   permutations). The Schreier spectral bound itself doesn't need it,\n   but the downstream SecurityWitness construction does. *)",
+      "closeness": "near",
+      "explanation": "The preceding comment is a NOTE block explaining a dependency constraint, not the structured comment required by AUTHORITY.md. Three parts of the H002 checklist fail: (1) KIND — no classification (helper or main) is stated anywhere in the block; (2) WHY — the NOTE explains why `weval_inj` is retained but does not state why this Definition itself exists in the proof architecture; (3) USED_BY — no downstream consumer identifier is named (the NOTE refers to 'downstream SecurityWitness construction' without naming the identifier; `security_witness_schreier` at line 351 is the obvious consumer but is not cited). WHAT is partially present ('SecurityWitness from Schreier certificate at any L') but is not a crisp statement paraphrase of the return type.",
+      "fix_sketch": "(** security_witness_schreier_asymptotic — constructs a SecurityAsymptotic record from a Schreier spectral certificate, using a fixed exponential decay bound parameterised by sc_lambda_gap.\n    Kind: helper.\n    Why: provides the asymptotic convergence certificate required to fill the SecurityWitness.asymptotic field in security_witness_schreier.\n    Used by: security_witness_schreier. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/security/pgg_schreier.v",
+      "line_start": 365,
+      "line_end": 384,
+      "lemma_name": "schreier_epsilon_ge0",
+      "severity": "warning",
+      "evidence_quote": "(* Epsilon is non-negative *)",
+      "closeness": "near",
+      "explanation": "The comment is non-degenerate and passes H001 (22 characters, three alphabetic tokens of length >= 3: 'Epsilon', 'non', 'negative'). H002 checklist: (1) KIND — absent; no helper/main classification. (2) WHAT — 'Epsilon is non-negative' is an adequate paraphrase of `0 <= schreier_epsilon sc L`; passes. (3) WHY — absent and not waived: `_ge0` does not appear in the algebraic-law suffix waiver list (_A, _AC, _ACA, _C, _CA, _K, _D, _I, _V, _X, _Xn, _Xz, _Mn, _Z), and the WHAT clause does not name a downstream use-site crisply enough to trigger the use-site waiver. (4) USED_BY — absent; Kind not stated, but given the proof context this is almost certainly a helper, making USED_BY required.",
+      "fix_sketch": "(** schreier_epsilon_ge0 — the Schreier epsilon bound is non-negative for all certificates and word lengths.\n    Kind: helper.\n    Why: non-negativity is required when schreier_epsilon is used as a probability distance bound; callers need this to discharge side conditions in security arguments.\n    Used by: <downstream lemma name>. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/security/pgg_schreier.v",
+      "line_start": 385,
+      "line_end": 386,
+      "lemma_name": "schreier_epsilon_decreasing",
+      "severity": "warning",
+      "evidence_quote": "(* The UPPER BOUND schreier_epsilon is monotonically decreasing in L.\n   sqrt(N) * r^L2 <= sqrt(N) * r^L1 when 0 <= r < 1, L1 <= L2.\n   Follows from r^(a+b) = r^a * r^b and r^b <= 1 for 0 <= r <= 1.\n\n   IMPORTANT: the actual var_dist (exact variational distance) is NOT\n   monotonic in L. ...\n   This lemma is about the envelope, not the exact value. The envelope\n   is eventually tight (both converge to 0 geometrically). *)",
+      "closeness": "near",
+      "explanation": "WHAT and WHY are present and well-written. Two parts fail the checklist. (1) KIND: the comment does not classify the entity as helper or main. The lemma is consumed directly by `security_monotone` in the same file (line 411: `exact: schreier_epsilon_decreasing`), establishing it as a helper. (2) USED_BY: required when Kind is helper; `security_monotone` is the verifiable downstream consumer — same-file grep confirms the call at line 411, confidence high.",
+      "fix_sketch": "Add classification and consumer to the existing block, e.g.: `(** schreier_epsilon_decreasing — the spectral upper bound schreier_epsilon is antitone in L: ...(keep existing text)... Kind: helper. Why: (keep existing IMPORTANT note). Used by: security_monotone. *)`.",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/security/pgg_schreier.v",
+      "line_start": 399,
+      "line_end": 407,
+      "lemma_name": "security_monotone",
+      "severity": "warning",
+      "evidence_quote": "(* Monotone security: if secure at L1, at least as secure at L2 >= L1 *)",
+      "closeness": "near",
+      "explanation": "WHAT is present ('if secure at L1, at least as secure at L2 >= L1'). Two parts fail. (1) KIND: the comment does not classify the entity as helper or main. (2) WHY: no motivation explaining why the result is needed downstream. The WHY waiver does not apply: the lemma name carries no algebraic-law suffix from AUTHORITY.md and Kind is unspecified. If Kind is main, WHY is required; if Kind is helper, USED_BY is additionally required.",
+      "fix_sketch": "Expand to: `(** security_monotone — a Schreier certificate valid at round L1 also bounds var_dist at every L2 >= L1. Kind: main. Why: lets callers apply one certificate across all round counts above the certified threshold; avoids re-certifying at each L. *)`.",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "S998",
+      "file": "rocq-audit",
+      "line_start": 1,
+      "line_end": 1,
+      "severity": "warning",
+      "evidence_quote": "schema violation: None is not of type 'object'",
+      "closeness": "near",
+      "explanation": "Stage 2 call failed for chunk 3; see logs.",
+      "fix_sketch": "Retry the commit. If repeated, check agent configuration.",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": {
+    "entity_count": 35,
+    "chunk_count": 7,
+    "chunk_size": 5,
+    "workers_used": 4,
+    "tokens_used": 246778,
+    "tokens_cap": 20000000,
+    "wall_ms_used": 210134,
+    "wall_ms_cap": 1800000,
+    "deferred_chunks": 0,
+    "stop_reason": "clean",
+    "estimated_usd": 1.4807,
+    "model": "sonnet"
+  },
+  "exit_code": 0
+}

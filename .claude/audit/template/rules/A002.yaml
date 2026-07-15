@@ -1,0 +1,69 @@
+id: A002
+category: deprecated_tactics
+title: "f_equal is non-idiomatic; prefer goal-level congr (congr1 is only a fallback)"
+severity: error
+enabled: true
+stage_mode: both
+authority:
+  - mathcomp-CONTRIBUTING#proofs
+  - peer-feedback-2026-03
+  - peer-feedback-2026-04
+fast_pattern:
+  pattern: '(^|[ \t;(/,])f_equal(2|3|_dep)?\b'
+  ignore_in_comments: true
+  file_glob: '*.v'
+agent_prompt: |
+  Flag every `f_equal`, `f_equal2`, `f_equal3`, `f_equal_dep` occurrence.
+  The only fully acceptable fix is a goal-level `congr <head>`
+  restructuring. `congr1`, `congr2`, `congr3`, and `congr_dep` are
+  aliases for the flagged `f_equal` family (`Definition congr1 := f_equal`
+  in MathComp's `ssrfun`); swapping to them satisfies the regex but
+  realises none of the compression benefit and must be treated as a
+  fallback, not a fix.
+
+  For each finding, produce the explanation in this order:
+
+  1. Recommend the restructuring. Show a concrete goal-level sketch:
+     what to `pose`, what to `rewrite`, then `congr <head>` (for
+     example `congr (_ + _)`, `congr S`, `congr pair`, or a more
+     specific congruence lemma: `eq_big`, `eq_map`, `eq_ffun`,
+     `congr_fin_img`, `congr_bigr`). Use the surrounding tactic
+     context — if the equality enters as a view, propose hoisting it
+     via `have H : ... by ...; rewrite H; congr <head>`.
+  2. Only if restructuring is genuinely infeasible, note the fallback:
+     `/(congr1 f)` (or `/(congr2 f g)`, `/(congr3 ...)`, `/(congr_dep ...)`).
+     Infeasibility must be justified in the finding's explanation —
+     typical grounds are: the equality is produced by an opaque library
+     lemma whose statement cannot be hoisted without duplicating the
+     proof; dependent-type subtleties prevent `congr` from elaborating;
+     or the head symbol is a non-matchable pattern. Do not default to
+     the fallback; require evidence that goal-level `congr` was
+     considered.
+
+  Form-aware discriminator:
+  * Tactic form (`f_equal.`, `apply: f_equal`) is always a candidate
+    for direct goal-level `congr <head>` replacement — the goal is
+    already in place. No justified fallback is expected.
+  * View form (`/(f_equal f)`, `move/(f_equal f)`) needs an explicit
+    restructuring proposal; only if that proposal fails under the
+    observed tactic context may the finding recommend `/(congr1 f)`.
+
+  False positives to dismiss: identifiers that contain `f_equal` as a
+  substring (handled by the regex via its preceding-character class);
+  `Check f_equal.` or `About f_equal.` probes inside comments or
+  test-only files.
+scope: changed_hunks
+fix_hint: |
+  Default fix (required unless justified otherwise): restructure the proof
+  so the equality appears at goal level, then apply `congr <head>` (for
+  example `congr (_ + _)`, `congr S`, or a more specific lemma such as
+  `apply: eq_big`, `apply: eq_map`, `apply: eq_ffun`). `congr` discharges
+  every argument of the head symbol in one step.
+
+  Fallback (only when restructuring is genuinely infeasible; justify in
+  the fix message): replace the view `/(f_equal f)` with `/(congr1 f)`
+  (or `congr2`/`congr3`/`congr_dep`). `congr1` is a ssrfun alias for
+  `f_equal`, so this rename alone does not achieve the rule's intent;
+  it is accepted only when goal-level `congr` has been considered and
+  ruled out.
+exceptions: []

@@ -1,0 +1,76 @@
+{
+  "findings": [
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/reconstruct/coord_perm_compatible.v",
+      "line_start": 63,
+      "line_end": 63,
+      "lemma_name": "coord_perm_compatible_id",
+      "severity": "warning",
+      "evidence_quote": "Lemma coord_perm_compatible_id (F : finFieldType) (n : nat) (C : Lcode0.t F n) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/reconstruct/coord_perm_compatible.v",
+      "line_start": 176,
+      "line_end": 176,
+      "lemma_name": "massey_codeword_col_perm",
+      "severity": "warning",
+      "evidence_quote": "Lemma massey_codeword_col_perm (s : F) (shares : 'rV[F]_n'.+1) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/reconstruct/coord_perm_compatible.v",
+      "line_start": 206,
+      "line_end": 206,
+      "lemma_name": "massey_recon_col_perm",
+      "severity": "warning",
+      "evidence_quote": "Lemma massey_recon_col_perm (s : F) (shares : 'rV[F]_n'.+1) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "S998",
+      "file": "rocq-audit",
+      "line_start": 1,
+      "line_end": 1,
+      "severity": "warning",
+      "evidence_quote": "agent rc=1: ",
+      "closeness": "near",
+      "explanation": "Stage 2 call failed for chunk 3; see logs.",
+      "fix_sketch": "Retry the commit. If repeated, check agent configuration.",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": {
+    "entity_count": 52,
+    "chunk_count": 8,
+    "chunk_size": 7,
+    "workers_used": 4,
+    "tokens_used": 0,
+    "tokens_cap": 20000000,
+    "wall_ms_used": 6437,
+    "wall_ms_cap": 1800000,
+    "deferred_chunks": 0,
+    "stop_reason": "clean",
+    "estimated_usd": 0.0,
+    "model": "sonnet"
+  },
+  "exit_code": 0
+}

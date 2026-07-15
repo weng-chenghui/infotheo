@@ -1,0 +1,21 @@
+{
+  "findings": [
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/denboer1989/five_card_program.v",
+      "line_start": 119,
+      "line_end": 119,
+      "lemma_name": "fc_arrange_size_proof",
+      "severity": "warning",
+      "evidence_quote": "Lemma fc_arrange_size_proof (a b : bool) : size (fc_arrange a b) == 5.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": null,
+  "exit_code": 0
+}

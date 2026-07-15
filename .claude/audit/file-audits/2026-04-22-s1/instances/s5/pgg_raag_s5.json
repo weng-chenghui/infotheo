@@ -1,0 +1,47 @@
+{
+  "findings": [
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/s5/pgg_raag_s5.v",
+      "line_start": 42,
+      "line_end": 42,
+      "lemma_name": "s5_gens_agree",
+      "severity": "error",
+      "evidence_quote": "Lemma s5_gens_agree (i : 'I_4) (x : 'I_5) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/s5/pgg_raag_s5.v",
+      "line_start": 63,
+      "line_end": 63,
+      "lemma_name": "s5_nt_L2",
+      "severity": "error",
+      "evidence_quote": "Lemma s5_nt_L2 : n_traces_natB 4 2 path_comm_nat = 13.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/s5/pgg_raag_s5.v",
+      "line_start": 66,
+      "line_end": 66,
+      "lemma_name": "s5_nt_L3",
+      "severity": "error",
+      "evidence_quote": "Lemma s5_nt_L3 : n_traces_natB 4 3 path_comm_nat = 40.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": null,
+  "exit_code": 2
+}

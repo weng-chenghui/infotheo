@@ -1,0 +1,373 @@
+{
+  "findings": [
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 543,
+      "line_end": 543,
+      "lemma_name": "all_pairs_false_neq",
+      "severity": "warning",
+      "evidence_quote": "Lemma all_pairs_false_neq (s : seq nat) (a b : nat) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 622,
+      "line_end": 622,
+      "lemma_name": "clique_traces_aux_inv",
+      "severity": "warning",
+      "evidence_quote": "Lemma clique_traces_aux_inv Tg n memo :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 737,
+      "line_end": 745,
+      "lemma_name": "filter_iota_head_even",
+      "severity": "warning",
+      "evidence_quote": "Lemma filter_iota_head_even L :",
+      "stage": "stage1",
+      "stages": [
+        "stage1",
+        "stage2"
+      ],
+      "explanation": "Stage 1 flagged the four-component structure at the declaration line. Stage 2 confirms and adds semantic context: the four components `filter`, `iota`, `head`, `even` do not resolve to a canonical MathComp main-symbol + suffix pair. Per AUTHORITY.md, the lemma grammar is `(condition_)?mainSymbol_suffixes(_condition)?`. The statement is an equation; MathComp convention requires a trailing `E`. The current name reads as a prose description rather than a grammar-derived identifier.",
+      "fix_sketch": "Rename to `filter_even_iota0_E` (main symbol `filter`, condition `even`, operand `iota0`, suffix `E`) or `iota_even_filter_head_E`. Update call sites."
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 746,
+      "line_end": 746,
+      "lemma_name": "filter_iota_head_odd",
+      "severity": "warning",
+      "evidence_quote": "Lemma filter_iota_head_odd L :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 856,
+      "line_end": 856,
+      "lemma_name": "sumn_shift_even_to_odd_gen",
+      "severity": "warning",
+      "evidence_quote": "Lemma sumn_shift_even_to_odd_gen (g : nat -> nat) m M :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 874,
+      "line_end": 874,
+      "lemma_name": "sumn_shift_odd_to_even_gen",
+      "severity": "warning",
+      "evidence_quote": "Lemma sumn_shift_odd_to_even_gen (g : nat -> nat) m M :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 543,
+      "line_end": 545,
+      "lemma_name": "all_pairs_false_neq",
+      "severity": "warning",
+      "evidence_quote": "Lemma all_pairs_false_neq (s : seq nat) (a b : nat) :\n  a \\in s -> b \\in s -> a != b ->\n  all_pairs_comm_sorted (fun _ _ => false) s = false.",
+      "closeness": "near",
+      "explanation": "The trailing component `neq` describes an input hypothesis condition (`a != b`) rather than the conclusion. The conclusion is `all_pairs_comm_sorted (fun _ _ => false) s = false`, a boolean-false statement. Per AUTHORITY.md §Standard-suffixes, the canonical suffix for boolean false is `F` (or `f`). A name whose suffix reflects the conclusion — `all_pairs_comm_false` or `all_pairs_comm_sorted_false` — would be more idiomatic. Stage 1 (F001) already flagged the four-component structure; this G001 finding adds the semantic-role dimension: the suffix `neq` is misattributed to the conclusion when it belongs to a hypothesis.",
+      "fix_sketch": "Rename to `all_pairs_comm_false` (main symbol `all_pairs_comm`, boolean-false suffix) or `all_pairs_comm_sorted_false`. Update the `Used by: all_pairs_false_neq` cite in `empty_clique_countk`'s preceding comment accordingly.",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 559,
+      "line_end": 560,
+      "lemma_name": "empty_clique_countk",
+      "severity": "warning",
+      "evidence_quote": "Lemma empty_clique_countk Tg k :\n  2 <= k -> clique_count Tg k (fun _ _ => false) = 0.",
+      "closeness": "near",
+      "explanation": "The trailing `k` in `empty_clique_countk` is a parameter-name token rather than a canonical MathComp suffix. The conclusion is `clique_count Tg k (fun _ _ => false) = 0`; per AUTHORITY.md §Standard-suffixes, the suffix for 'ring/nat zero or empty set' is `0`. An idiomatic name would be `empty_clique_count0` (main symbol `empty_clique_count` or `clique_count`, condition prefix `empty_`, suffix `0`) or `clique_count_empty0`. The current name bundles the argument label `k` into the identifier, obscuring the conclusion shape that MathComp readers rely on when searching by suffix.",
+      "fix_sketch": "Rename to `empty_clique_count0` (drop `k`, append `0`). If the lower-bound condition `2 <= k` must be encoded, consider `clique_count_empty_ge20`. Update the `Used by: empty_clique_countk` cite in `clique_step_free`'s comment.",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 622,
+      "line_end": 622,
+      "lemma_name": "clique_traces_aux_inv",
+      "severity": "warning",
+      "evidence_quote": "Lemma clique_traces_aux_inv Tg n memo :",
+      "closeness": "near",
+      "explanation": "The statement is an equational rewrite (`clique_traces_aux Tg (fun _ _ => false) n memo = memo ++ [seq Tg ^ (size memo + i) | i <- iota 0 n]`). Per AUTHORITY.md the canonical suffix for equational rewrites is `E`. The suffix `_inv` does not appear in the MathComp suffix table and reads as 'invariant', a meta-description of the proof technique rather than a signal of the lemma's semantic role. The correct idiomatic form is `clique_traces_aux_E` (or `clique_traces_auxE` if the main symbol is taken to be `clique_traces_aux`). Stage 1 already flagged F001 at this line for the four-component shape; this finding upgrades the analysis with the semantic-role dimension.",
+      "fix_sketch": "Rename to `clique_traces_aux_E` and update the call site at line 659 (`rewrite clique_traces_aux_inv` → `rewrite clique_traces_aux_E`). If the 'free' specialisation is important to advertise, a condition clause gives `clique_traces_aux_free_E`.",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 671,
+      "line_end": 671,
+      "lemma_name": "all_pairs_complete",
+      "severity": "warning",
+      "evidence_quote": "Lemma all_pairs_complete (s : seq nat) :",
+      "closeness": "near",
+      "explanation": "The statement is `uniq s -> all_pairs_comm_sorted complete_comm_nat s`, a direct Prop implication establishing that the complete commutation relation satisfies `all_pairs_comm_sorted`. The suffix `_complete` is absent from the AUTHORITY.md suffix table. The intended reading — 'for the complete graph' — is a condition clause. MathComp convention places a condition clause either as a prefix (`complete_all_pairs_comm_sorted`) or at the tail after the structural suffix. Because the statement has no structural suffix (no equation, no reflection, no injectivity), the name obscures the main symbol `all_pairs_comm_sorted`. A restructured name would expose the main symbol and the condition more clearly.",
+      "fix_sketch": "Option A (condition-at-tail): `all_pairs_comm_sorted_complete`. Option B (condition-at-prefix): `complete_all_pairs_comm_sorted`. Update the call site at line 707 (`apply: all_pairs_complete` → `apply: all_pairs_comm_sorted_complete`).",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 700,
+      "line_end": 702,
+      "lemma_name": "complete_clique_count",
+      "severity": "warning",
+      "evidence_quote": "clique_count Tg k complete_comm_nat = 'C(Tg, k).",
+      "closeness": "near",
+      "explanation": "The statement is an equation (lhs = rhs). Per AUTHORITY.md, equational rewrites should carry suffix `E`. The name `complete_clique_count` has three components — `complete`, `clique`, `count` — with no canonical MathComp suffix at the tail. The main symbol is `clique_count`; `complete` is a condition qualifier. The missing `E` suffix means callers searching by the suffix convention cannot discover this lemma as an equational rewrite.",
+      "fix_sketch": "Rename to `clique_count_complete_E` (condition-prefixed form) or `complete_clique_count_E` (append the suffix). Update call sites.",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 737,
+      "line_end": 739,
+      "lemma_name": "filter_iota_head_even",
+      "severity": "warning",
+      "evidence_quote": "[seq k <- iota 0 L.+1 | ~~ odd k] = 0 :: [seq k <- iota 1 L | ~~ odd k].",
+      "closeness": "near",
+      "explanation": "The statement is an equation (lhs = rhs). Per AUTHORITY.md, equational rewrites take suffix `E`. The name `filter_iota_head_even` has four lowercase components with no recognised MathComp suffix at the tail. `even` is not in the canonical suffix table; it is a condition qualifier. The semantic role is a head-element unfold, squarely matching suffix `E`.",
+      "fix_sketch": "Rename to `filter_even_iota0_E`. If the leading-zero fact is the salient insight, `filter_iota0_even_headE` is an alternative. Update call sites.",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 899,
+      "line_end": 900,
+      "lemma_name": "spos_L0",
+      "severity": "warning",
+      "evidence_quote": "Lemma spos_L0 n r : spos n r 0 = 'C(r, r).",
+      "closeness": "near",
+      "explanation": "The statement is an equational rewrite (`spos n r 0 = 'C(r, r)`), so the canonical MathComp suffix is `E` (or simply `_0` indicating evaluation at zero). The chosen suffix `L0` conflates the parameter name `L` (the third positional argument in `spos0 r L`) with the suffix token `L` from the MathComp suffix table, which means 'left-hand of a relation'. No left-relation semantics appear here. The `L` component is a file-local mnemonic for the third argument, not an authority-listed suffix. Per AUTHORITY.md suffix table, `0` alone conveys 'at zero'; `L` carries a different canonical meaning. The idiomatic name would be `spos_0` (parallel to `spos0` for the n=0 boundary) or `spos_r0` to distinguish the zero is in the third position.",
+      "fix_sketch": "Rename to `spos_0` (suffix `0`: evaluation of spos at the third argument = 0). If disambiguation from `spos0` is needed, use `spos_L_0` with an explicit `Naming:` line, or restructure both boundary lemmas under a consistent scheme. Update Used-by cites in `spos_inv` accordingly.",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 906,
+      "line_end": 907,
+      "lemma_name": "sneg_L0",
+      "severity": "warning",
+      "evidence_quote": "Lemma sneg_L0 n r : sneg n r 0 = 0.",
+      "closeness": "near",
+      "explanation": "Same suffix issue as `spos_L0`. The statement `sneg n r 0 = 0` is an equational rewrite; the canonical suffix is `E` or `_0`. The suffix `L0` re-uses the parameter name `L` (visible in companion lemma `spos0 r L`) as a suffix token, but `L` in AUTHORITY.md means 'left-hand of a relation', which does not apply here. The two consecutive boundary lemmas would ideally both carry the `_0` suffix; `sneg_0` is the idiomatic form.",
+      "fix_sketch": "Rename to `sneg_0`. If the `L` mnemonic is important for readers, add a `Naming:` line in the preceding comment: `Naming: _L0 signals the third positional argument (named L in spos0) takes value 0; _0 alone is the canonical MathComp form.` Update Used-by cites in `spos_inv`.",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 582,
+      "line_end": 583,
+      "lemma_name": "sumn_map_0",
+      "severity": "warning",
+      "evidence_quote": "(* Helper: sumn of all-zero map is 0 *)",
+      "closeness": "near",
+      "explanation": "The preceding comment states Kind ('Helper') and gives a terse What ('sumn of all-zero map is 0'), but fails two H002 checklist parts. (1) WHY is absent: no motivation explains why this helper exists in this file. The WHY waiver does not apply — `sumn_map_0` carries no algebraic-law suffix and the WHAT clause does not name a downstream use-site. (2) USED-BY is absent: Kind is 'helper', so a downstream consumer identifier is required per AUTHORITY.md. `clique_step_free` in the same file calls `sumn_map_0` at lines 600 and 613 and is the verified consumer.",
+      "fix_sketch": "(** sumn_map_0 — sumn of a map that sends every in-sequence element to 0\n    equals 0.\n    Kind: helper.\n    Why: used to collapse the even-indexed and odd-indexed clique-count\n         partial sums in clique_step_free when the commutation relation\n         is constantly false.\n    Used by: clique_step_free. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 591,
+      "line_end": 593,
+      "lemma_name": "clique_step_free",
+      "severity": "warning",
+      "evidence_quote": "(* clique_step for empty graph = Tg * previous element *)",
+      "closeness": "near",
+      "explanation": "The preceding comment provides a partial What ('clique_step for empty graph = Tg * previous element') but fails three H002 checklist parts. (1) KIND is absent: no classification (helper/main) is stated. (2) WHY is absent: no motivation is given; the WHY waiver does not apply because the lemma carries no algebraic-law suffix and the WHAT clause does not name a downstream consumer. (3) USED-BY cannot be assessed without Kind, but if Kind is helper a consumer must be named. The comment also uses plain `(*` rather than the recommended coqdoc `(**` block per AUTHORITY.md §Comment-template.",
+      "fix_sketch": "(** clique_step_free — for the empty commutation graph,\n    clique_step Tg (fun _ _ => false) memo = Tg * nth 0 memo (size memo - 1).\n    Kind: helper.\n    Why: collapses the clique-step recurrence for the free RAAG to a\n         scalar multiplication by Tg, enabling the Tg^L power derivation\n         in clique_traces_free.\n    Used by: <clique_traces_free or the invariant lemma that follows>. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 621,
+      "line_end": 621,
+      "lemma_name": "clique_traces_aux_inv",
+      "severity": "warning",
+      "evidence_quote": "(* Invariant: clique_traces_aux extends memo with powers of Tg *)",
+      "closeness": "far",
+      "explanation": "Three of the four AUTHORITY.md content requirements are absent. (1) KIND: 'Invariant' is not a recognised classification token; accepted values are helper, main, canonical, notation, coercion, instance, example, interface and their synonyms. The comment does not classify the entity. (2) WHY: no motivation is given; the lemma is directly consumed by `clique_traces_free` at line 659 (Grep confirmed, same file) but the comment does not state this dependency. (3) USED_BY: no downstream consumer is named despite Kind being a helper role. WHAT is partially present — 'extends memo with powers of Tg' loosely paraphrases the equational conclusion.",
+      "fix_sketch": "(** clique_traces_aux_inv — `clique_traces_aux Tg (fun _ _ => false) n memo` equals\n    `memo ++ [seq Tg ^ (size memo + i) | i <- iota 0 n]`.\n    Kind: helper.\n    Why: provides the induction invariant that `clique_traces_free` collapses\n         to obtain `clique_traces Tg L (fun _ _ => false) = Tg ^ L`.\n    Used by: clique_traces_free. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 670,
+      "line_end": 670,
+      "lemma_name": "all_pairs_complete",
+      "severity": "warning",
+      "evidence_quote": "(* All distinct pairs commute in a complete graph *)",
+      "closeness": "far",
+      "explanation": "Three of the four AUTHORITY.md content requirements are absent. (1) KIND: no classification token is present; the comment does not say helper, main, or any accepted synonym. (2) WHY: no motivation is stated; the lemma is consumed by `complete_clique_count` at line 707 to discharge the `all_pairs_comm_sorted` sub-goal (Grep confirmed, same file), but this is not mentioned. (3) USED_BY: no downstream consumer is named. WHAT is present — 'All distinct pairs commute in a complete graph' paraphrases `uniq s -> all_pairs_comm_sorted complete_comm_nat s` adequately.",
+      "fix_sketch": "(** all_pairs_complete — for any duplicate-free sequence s, every pair of distinct\n    elements satisfies complete_comm_nat, i.e. all_pairs_comm_sorted holds.\n    Kind: helper.\n    Why: discharges the all_pairs_comm_sorted sub-goal inside complete_clique_count,\n         which counts k-cliques in the complete commutation graph.\n    Used by: complete_clique_count. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 700,
+      "line_end": 716,
+      "lemma_name": "complete_clique_count",
+      "severity": "warning",
+      "evidence_quote": "(** complete_clique_count — in the complete commutation graph on Tg\n    vertices, the k-clique count is C(Tg, k).\n    Kind: helper.\n    Used by: clique_step_abelian, which drives clique_traces_abelian.\n*)",
+      "closeness": "near",
+      "explanation": "KIND (helper) and WHAT ('the k-clique count is C(Tg, k)') are present. USED_BY names `clique_step_abelian` and `clique_traces_abelian`. WHY (motivation — why this result is needed in the proof) is absent. The WHAT clause describes a mathematical fact but does not name a downstream use-site crisply, so the WHY waiver does not apply. No algebraic-law suffix is present on the name. The downstream cites `clique_step_abelian` and `clique_traces_abelian` could not be Grep-verified in this read-only pass; USED_BY confidence is low.",
+      "fix_sketch": "Add a Why line:\n(** complete_clique_count — in the complete commutation graph on Tg\n    vertices, the k-clique count is C(Tg, k).\n    Kind: helper.\n    Why: bridges the complete-graph specialisation to the binomial\n         coefficient form consumed by the abelian clique recurrence.\n    Used by: clique_step_abelian, which drives clique_traces_abelian.\n*)",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 717,
+      "line_end": 724,
+      "lemma_name": "spos",
+      "severity": "warning",
+      "evidence_quote": "(* Alternating-sum decomposition of the binomial inversion identity.\n   spos n r L = Sum_{k even, 0<=k<=L} C(n,k) * C(L-k+r, r)\n   sneg n r L = Sum_{k odd,  0<=k<=L} C(n,k) * C(L-k+r, r)\n   The key identity: spos n.+1 n L.+1 = sneg n.+1 n L.+1\n   which implies the clique recurrence with c_k = C(Tg,k). *)",
+      "closeness": "near",
+      "explanation": "WHAT ('spos n r L = Sum_{k even,...}') and WHY ('which implies the clique recurrence') are present. KIND is absent: the block comment classifies neither `spos` as helper, main, canonical, nor any accepted synonym. The block also describes `sneg` jointly and uses a plain `(* *)` marker rather than the `(** *)` coqdoc marker. Per AUTHORITY.md, the recommended template requires explicit Kind classification. Because Kind is unknown, whether USED_BY is required cannot be determined.",
+      "fix_sketch": "Add a dedicated `(** ... *)` block for `spos` with an explicit Kind line:\n(** spos — even-index partial sum: Sum_{k even, 0<=k<=L} C(n,k)*C(L-k+r,r).\n    Kind: helper.\n    Why: even half of the alternating-sum decomposition; the identity\n         spos n.+1 n L.+1 = sneg n.+1 n L.+1 drives the abelian clique\n         recurrence.\n    Used by: spos_split.\n*)",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 737,
+      "line_end": 745,
+      "lemma_name": "filter_iota_head_even",
+      "severity": "warning",
+      "evidence_quote": "(** filter_iota_head_even — unfold the head of the even-filtered iota 0\n    L.+1 into 0 :: tail.\n    Kind: helper.\n    Used by: spos_split and the spos/sneg Pascal decomposition.\n*)",
+      "closeness": "near",
+      "explanation": "KIND (helper) and WHAT ('unfold the head of the even-filtered iota 0 L.+1 into 0 :: tail') are present. USED_BY cites `spos_split`; the cite could not be Grep-verified in this read-only pass (confidence: low). WHY is absent: no motivation is given for why the head-unfolding is needed. Kind is helper, so the algebraic-law suffix waiver does not apply; the WHAT clause names the mathematical content but not a downstream use-site, so the WHAT-based waiver does not apply.",
+      "fix_sketch": "Add a Why line:\n(** filter_iota_head_even — the even filter of iota 0 L.+1 has leading term 0\n    followed by the even filter of iota 1 L.\n    Kind: helper.\n    Why: peels the leading even term so that spos_split can separate the k=0\n         contribution from the tail sum in the Pascal decomposition.\n    Used by: spos_split.\n*)",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "S998",
+      "file": "rocq-audit",
+      "line_start": 1,
+      "line_end": 1,
+      "severity": "warning",
+      "evidence_quote": "result field not JSON: ```json\n{\n  \"passed\": true,\n  \"findings\": [\n    {\n      \"rule_id\": \"G001\",\n      \"file\": \"pgg-smc/groups/pgg_raag_clique.v\",\n      \"line_start\": 746,\n      \"line_end\": 748,\n      \"lemma_name\": \"filter",
+      "closeness": "near",
+      "explanation": "Stage 2 call failed for chunk 3; see logs.",
+      "fix_sketch": "Retry the commit. If repeated, check agent configuration.",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": {
+    "entity_count": 27,
+    "chunk_count": 7,
+    "chunk_size": 4,
+    "workers_used": 4,
+    "tokens_used": 623731,
+    "tokens_cap": 20000000,
+    "wall_ms_used": 405843,
+    "wall_ms_cap": 1800000,
+    "deferred_chunks": 0,
+    "stop_reason": "clean",
+    "estimated_usd": 3.7424,
+    "model": "sonnet"
+  },
+  "exit_code": 0
+}

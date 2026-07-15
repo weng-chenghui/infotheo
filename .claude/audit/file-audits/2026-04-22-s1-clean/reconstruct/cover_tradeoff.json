@@ -1,0 +1,60 @@
+{
+  "findings": [
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/reconstruct/cover_tradeoff.v",
+      "line_start": 65,
+      "line_end": 65,
+      "lemma_name": "more_ramif_more_genus",
+      "severity": "warning",
+      "evidence_quote": "Lemma more_ramif_more_genus (cd1 cd2 : CoveringData M) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/reconstruct/cover_tradeoff.v",
+      "line_start": 90,
+      "line_end": 90,
+      "lemma_name": "search_space_le_group",
+      "severity": "warning",
+      "evidence_quote": "Lemma search_space_le_group (L : nat) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/reconstruct/cover_tradeoff.v",
+      "line_start": 143,
+      "line_end": 143,
+      "lemma_name": "large_group_forces_gap",
+      "severity": "warning",
+      "evidence_quote": "Lemma large_group_forces_gap (cs : CoveringScheme M)",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/reconstruct/cover_tradeoff.v",
+      "line_start": 204,
+      "line_end": 204,
+      "lemma_name": "pgl_bound_eq_pgl_card",
+      "severity": "warning",
+      "evidence_quote": "Lemma pgl_bound_eq_pgl_card (M : GeneratedMonodromyReprType) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": null,
+  "exit_code": 0
+}

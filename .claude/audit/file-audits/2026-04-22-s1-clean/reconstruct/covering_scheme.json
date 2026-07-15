@@ -1,0 +1,21 @@
+{
+  "findings": [
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/reconstruct/covering_scheme.v",
+      "line_start": 154,
+      "line_end": 154,
+      "lemma_name": "higher_genus_wider_gap",
+      "severity": "warning",
+      "evidence_quote": "Lemma higher_genus_wider_gap (cs1 cs2 : CoveringScheme M) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": null,
+  "exit_code": 0
+}

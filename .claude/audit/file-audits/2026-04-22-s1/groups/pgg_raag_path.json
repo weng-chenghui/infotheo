@@ -1,0 +1,164 @@
+{
+  "findings": [
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_raag_path.v",
+      "line_start": 138,
+      "line_end": 138,
+      "lemma_name": "path_gen_inj_sigmas",
+      "severity": "warning",
+      "evidence_quote": "Lemma path_gen_inj_sigmas :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/groups/pgg_raag_path.v",
+      "line_start": 40,
+      "line_end": 40,
+      "lemma_name": "path_hi",
+      "severity": "error",
+      "evidence_quote": "Definition path_hi (i : 'I_T) : 'I_N :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/groups/pgg_raag_path.v",
+      "line_start": 49,
+      "line_end": 49,
+      "lemma_name": "path_gen_tupleE",
+      "severity": "error",
+      "evidence_quote": "Lemma path_gen_tupleE (i : 'I_T) : tnth path_gen_tuple i = path_gen i.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/groups/pgg_raag_path.v",
+      "line_start": 99,
+      "line_end": 99,
+      "lemma_name": "path_comm_sym",
+      "severity": "error",
+      "evidence_quote": "Lemma path_comm_sym : symmetric path_comm.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/groups/pgg_raag_path.v",
+      "line_start": 102,
+      "line_end": 102,
+      "lemma_name": "path_comm_irrefl",
+      "severity": "error",
+      "evidence_quote": "Lemma path_comm_irrefl : irreflexive path_comm.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/groups/pgg_raag_path.v",
+      "line_start": 105,
+      "line_end": 105,
+      "lemma_name": "path_comm_dist2",
+      "severity": "error",
+      "evidence_quote": "Lemma path_comm_dist2 (i j : 'I_T) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/groups/pgg_raag_path.v",
+      "line_start": 110,
+      "line_end": 110,
+      "lemma_name": "path_dist_neq",
+      "severity": "error",
+      "evidence_quote": "Lemma path_dist_neq (a b : nat) : (a - b) + (b - a) >= 2 -> a != b.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/groups/pgg_raag_path.v",
+      "line_start": 113,
+      "line_end": 113,
+      "lemma_name": "path_dist_neqS",
+      "severity": "error",
+      "evidence_quote": "Lemma path_dist_neqS (a b : nat) : (a - b) + (b - a) >= 2 -> a != b.+1.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/groups/pgg_raag_path.v",
+      "line_start": 121,
+      "line_end": 121,
+      "lemma_name": "path_Hcomm",
+      "severity": "error",
+      "evidence_quote": "Lemma path_Hcomm : forall i j : 'I_T,",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/groups/pgg_raag_path.v",
+      "line_start": 142,
+      "line_end": 142,
+      "lemma_name": "path_Hcomm_sigmas",
+      "severity": "error",
+      "evidence_quote": "Lemma path_Hcomm_sigmas : forall i j : 'I_T,",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/groups/pgg_raag_path.v",
+      "line_start": 171,
+      "line_end": 171,
+      "lemma_name": "path_G_nonabelian",
+      "severity": "error",
+      "evidence_quote": "Lemma path_G_nonabelian : 0 < m ->",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/groups/pgg_raag_path.v",
+      "line_start": 204,
+      "line_end": 204,
+      "lemma_name": "path_traces_lb",
+      "severity": "error",
+      "evidence_quote": "Lemma path_traces_lb (L : nat) : 0 < m ->",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": null,
+  "exit_code": 2
+}

@@ -1,0 +1,60 @@
+{
+  "findings": [
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/security/pgg_schreier.v",
+      "line_start": 182,
+      "line_end": 182,
+      "lemma_name": "schreier_transition_entry_ge0",
+      "severity": "warning",
+      "evidence_quote": "Lemma schreier_transition_entry_ge0 (i j : 'I_N) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/security/pgg_schreier.v",
+      "line_start": 334,
+      "line_end": 334,
+      "lemma_name": "security_witness_schreier_asymptotic",
+      "severity": "warning",
+      "evidence_quote": "Definition security_witness_schreier_asymptotic (sc : SchreierCertificate)",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/security/pgg_schreier.v",
+      "line_start": 466,
+      "line_end": 466,
+      "lemma_name": "word_eval_cons_endpoint",
+      "severity": "warning",
+      "evidence_quote": "Lemma word_eval_cons_endpoint (L : nat) (i : 'I_Tg) (w : L.-tuple 'I_Tg)",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/security/pgg_schreier.v",
+      "line_start": 476,
+      "line_end": 476,
+      "lemma_name": "schreier_walk_eq_endpoint",
+      "severity": "warning",
+      "evidence_quote": "Lemma schreier_walk_eq_endpoint : forall (L : nat)",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": null,
+  "exit_code": 0
+}

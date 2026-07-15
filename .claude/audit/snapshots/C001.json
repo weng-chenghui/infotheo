@@ -1,0 +1,56 @@
+{
+  "fingerprint": "48d40969bc6c4786",
+  "bad": {
+    "findings": [
+      {
+        "rule_id": "C001",
+        "file": ".claude/audit/fixtures/bad/C001.v",
+        "line_start": 2,
+        "line_end": 3,
+        "lemma_name": "enc_contractible",
+        "severity": "warning",
+        "evidence_quote": "Inductive enc_contractible {C : finType} (Z : {RV P -> C}) (target : R)\n    : forall {A : finType}, {RV P -> A} -> Prop :=",
+        "closeness": "far",
+        "explanation": "The Inductive return-type uses `forall {A : finType}` with an implicit curly-brace binder. This makes the arity invisible at the declaration site: a reader cannot determine without implicit-argument elaboration whether the predicate is indexed by `A` alone or by the pair `(A, X)`. AUTHORITY.md \u00a7C001 requires either (1) an explicit binder \u2014 `forall (A : finType), {RV P -> A} -> Prop` \u2014 or (2) a named arity alias extracted before the declaration. No preceding `Arity:` comment is present to suppress this finding.",
+        "fix_sketch": "Option 1 \u2014 explicit binder (in-place):\n  Inductive enc_contractible {C : finType} (Z : {RV P -> C}) (target : R)\n      : forall (A : finType), {RV P -> A} -> Prop :=\n    | ec_base : forall (A : finType) (X : {RV P -> A}),\n        `H(Z | X) = target -> enc_contractible Z target X.\n\nOption 2 \u2014 named arity alias:\n  Definition EncContractibleArity :=\n    forall (A : finType), {RV P -> A} -> Prop.\n  Inductive enc_contractible {C : finType} (Z : {RV P -> C}) (target : R)\n      : EncContractibleArity :=\n    | ec_base : forall (A : finType) (X : {RV P -> A}),\n        `H(Z | X) = target -> enc_contractible Z target X.\n\nOr add a suppressing comment:\n  (* Arity: predicate over RV P -> A, parameterised by sink alphabet A. *)",
+        "confidence": "high",
+        "stage": "stage2"
+      }
+    ],
+    "tokens_used": 37558,
+    "budget": {
+      "entity_count": 1,
+      "chunk_count": 1,
+      "chunk_size": 3,
+      "workers_used": 1,
+      "tokens_used": 37558,
+      "tokens_cap": 75000,
+      "wall_ms_used": 58815,
+      "wall_ms_cap": 600000,
+      "deferred_chunks": 0,
+      "stop_reason": "clean",
+      "estimated_usd": 0.2254,
+      "model": "sonnet"
+    },
+    "stage2_incomplete": false
+  },
+  "good": {
+    "findings": [],
+    "tokens_used": 33989,
+    "budget": {
+      "entity_count": 1,
+      "chunk_count": 1,
+      "chunk_size": 3,
+      "workers_used": 1,
+      "tokens_used": 33989,
+      "tokens_cap": 75000,
+      "wall_ms_used": 5809,
+      "wall_ms_cap": 600000,
+      "deferred_chunks": 0,
+      "stop_reason": "clean",
+      "estimated_usd": 0.2039,
+      "model": "sonnet"
+    },
+    "stage2_incomplete": false
+  }
+}

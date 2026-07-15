@@ -1,0 +1,401 @@
+{
+  "findings": [
+    {
+      "rule_id": "D001",
+      "file": "pgg-smc/groups/free_group_ball.v",
+      "line_start": 158,
+      "line_end": 159,
+      "lemma_name": "ball_size",
+      "severity": "warning",
+      "evidence_quote": "Definition ball_size (L : nat) : nat :=\n  \\sum_(k < L.+1) sphere_size r k.",
+      "closeness": "near",
+      "explanation": "Section `ball_size_def` (line 149) declares `Hypothesis Hr : 0 < r.` (line 152) in the same Section as `ball_size`. The definition body references `r` (the Variable) but contains no textual occurrence of `Hr`. If the kernel confirms that `Hr` is not consumed by the proof term, it is provably unused and should be removed from the Section or moved to the lemmas that actually need it.",
+      "fix_sketch": "If Tier K confirms, remove `Hypothesis Hr : 0 < r.` from Section `ball_size_def` or scope it to only those lemmas that need it (e.g. `ball_size_ge1` which calls `lia` to resolve positivity).",
+      "confidence": "medium",
+      "kernel_contract": {
+        "name": "unused_hypothesis",
+        "parameters": {
+          "hypothesis": "Hr",
+          "entity": "ball_size",
+          "section": "ball_size_def",
+          "file": "pgg-smc/groups/free_group_ball.v"
+        }
+      },
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "D001",
+      "file": "pgg-smc/groups/free_group_ball.v",
+      "line_start": 165,
+      "line_end": 166,
+      "lemma_name": "ball_size_0",
+      "severity": "warning",
+      "evidence_quote": "Lemma ball_size_0 : ball_size 0 = 1.\nProof. by rewrite /ball_size big_ord_recl big_ord0. Qed.",
+      "closeness": "near",
+      "explanation": "Section `ball_size_def` declares `Hypothesis Hr : 0 < r.` (line 152). Neither the statement `ball_size 0 = 1` nor the proof `by rewrite /ball_size big_ord_recl big_ord0` references `Hr`. The proof closes by pure rewriting without any positivity appeal, so `Hr` is a candidate for being provably unused in this lemma.",
+      "fix_sketch": "If Tier K confirms Hr is unused, scope Hr to only the lemmas that require it (e.g. `ball_size_ge1`) or remove it from the Section.",
+      "confidence": "high",
+      "kernel_contract": {
+        "name": "unused_hypothesis",
+        "parameters": {
+          "hypothesis": "Hr",
+          "entity": "ball_size_0",
+          "section": "ball_size_def",
+          "file": "pgg-smc/groups/free_group_ball.v"
+        }
+      },
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/free_group_ball.v",
+      "line_start": 319,
+      "line_end": 319,
+      "lemma_name": "search_space_exp_growth",
+      "severity": "warning",
+      "evidence_quote": "Lemma search_space_exp_growth (r L : nat) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1",
+        "stage2"
+      ],
+      "explanation": "Stage 1 flagged the four-component shape; Stage 2 upgrades with a closeness-to-target explanation. The name `search_space_exp_growth` decomposes into four underscore-separated lowercase components: `search`, `space`, `exp`, `growth`. Per AUTHORITY.md §Lemma-naming-grammar the pattern is `mainSymbol_suffixes(_condition)?`. The suffix chain `exp_growth` does not reduce to any canonical entry in the AUTHORITY.md suffix table: `_growth` is not listed, and `_exp` is not a standard suffix either. The main symbol is likely `search_space`, which already occupies two components, leaving two non-canonical descriptor tokens that accumulate into generic snake_case drift.",
+      "fix_sketch": "Rename to `search_space_expn_le` (main symbol `search_space`, suffix `expn_le` communicating exponential and the inequality direction) or, following the MathComp convention of naming by the smaller quantity, `leq_expn_search_space`. Both reduce to a two-token suffix that avoids the four-component drift."
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/groups/free_group_ball.v",
+      "line_start": 250,
+      "line_end": 255,
+      "lemma_name": "ball_size_sum",
+      "severity": "warning",
+      "evidence_quote": "Lemma ball_size_sum (L : nat) :\n  ball_size r L = 1 + alpha * \\sum_(k < L) q ^ k.",
+      "closeness": "near",
+      "explanation": "The statement is an equational rewrite (ball_size r L = rhs with head symbol ball_size). AUTHORITY.md suffix table assigns _E to equational rewrites. The name ball_size_sum uses _sum, which is descriptive of the right-hand side's shape rather than the lemma's logical role. Idiomatic MathComp rename: ball_size_E (or ball_sizeE without the separator before the single-letter suffix per AUTHORITY.md: 'Add an underscore before a suffix that begins with a one-letter lowercase identifier' — E is uppercase, so ball_sizeE is preferred).",
+      "fix_sketch": "Rename to ball_sizeE. Update the call site on line 265 (rewrite ball_size_sum -> rewrite ball_sizeE) and on line 278, 288 similarly.",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/groups/free_group_ball.v",
+      "line_start": 259,
+      "line_end": 268,
+      "lemma_name": "ball_size_formula",
+      "severity": "warning",
+      "evidence_quote": "Lemma ball_size_formula (L : nat) :\n  0 < L ->\n  q.-1 * (ball_size r L - 1) = alpha * (q ^ L - 1).",
+      "closeness": "near",
+      "explanation": "The statement (modulo the hypothesis 0 < L) is an equation with head symbol mul on both sides. AUTHORITY.md assigns suffix _E to equational rewrites. The suffix _formula is not in the standard MathComp suffix table and reads as an informal description rather than a role indicator. Since ball_sizeE is proposed for ball_size_sum, a disambiguating name such as ball_size_geomE (geometric-series equational form) or ball_size_mulE (multiplicative equational form) follows the mainSymbol_suffixes pattern and preserves uniqueness.",
+      "fix_sketch": "Rename to ball_size_geomE or ball_size_mulE. Update the downstream comment at lines 257-258 accordingly.",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/groups/free_group_ball.v",
+      "line_start": 273,
+      "line_end": 275,
+      "lemma_name": "ball_size_div",
+      "severity": "warning",
+      "evidence_quote": "ball_size r L = 1 + alpha * ((q ^ L - 1) %/ q.-1)",
+      "closeness": "near",
+      "explanation": "The statement is an equational rewrite (`lhs = rhs`). Per AUTHORITY.md §Standard-suffixes, the canonical suffix for an equational rewrite is `E`. The name `ball_size_div` uses `_div` as the suffix. `D` in the AUTHORITY.md table means predicate/set difference or addition — not division — and `_div` as a standalone suffix is absent from the table entirely. The suffix describes the content colloquially ('division form') rather than advertising the semantic role (equation).",
+      "fix_sketch": "Rename to `ball_size_divE` to preserve the content descriptor while adding the canonical equational suffix, or to `ball_size_E` if the division form is the sole equational presentation. Update call sites.",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/groups/free_group_ball.v",
+      "line_start": 284,
+      "line_end": 284,
+      "lemma_name": "ball_size_lower",
+      "severity": "warning",
+      "evidence_quote": "Lemma ball_size_lower (L : nat) : q ^ L <= ball_size r L.",
+      "closeness": "near",
+      "explanation": "The statement is an inequality asserting a lower bound `q^L <= ball_size r L`. The suffix `_lower` does not appear in the AUTHORITY.md suffix table. MathComp convention expresses such bounds either with a `leq_` prefix (e.g., `leq_expn_ball_size`) or a `_ge` / `_geq` suffix. The word `lower` is English prose with no canonical MathComp grammar token mapping.",
+      "fix_sketch": "Rename to `leq_expn_ball_size` (reads directly as `q^L <= ball_size`) or `ball_size_geq_expn`. Either form makes the inequality direction legible from the identifier alone.",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/groups/free_group_ball.v",
+      "line_start": 319,
+      "line_end": 320,
+      "lemma_name": "search_space_exp_growth",
+      "severity": "warning",
+      "evidence_quote": "(r.*2 - 1) ^ L <= 1 + r.*2 * (\\sum_(k < L) (r.*2 - 1) ^ k)",
+      "closeness": "far",
+      "explanation": "The statement is an inequality. The suffix chain `exp_growth` does not appear in the AUTHORITY.md suffix table; `_growth` has no canonical meaning and `_exp` is absent. The semantic role is an inequality lower-bounding a geometric sum by an exponential, for which MathComp convention uses a `leq_` prefix or a `_le` / `_ge` suffix.",
+      "fix_sketch": "Rename to `leq_expn_search_space` or `search_space_expn_le`, both of which follow `leq_<smaller>_<larger>` or `<mainSymbol>_<canonical-suffix>` patterns from AUTHORITY.md.",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/groups/free_group_ball.v",
+      "line_start": 67,
+      "line_end": 82,
+      "lemma_name": "letter_invK",
+      "severity": "warning",
+      "evidence_quote": "(** letter_invK — letter inversion is involutive on the alphabet.\n    Kind: helper.\n    Used by: reduced-word reasoning that relies on letter_inv being an\n             involution; underlies later sphere/ball bijection arguments.\n*)",
+      "closeness": "near",
+      "explanation": "USED_BY fails: Kind is declared `helper`, which requires naming at least one downstream consumer identifier, but the comment only names concepts (\"reduced-word reasoning\", \"sphere/ball bijection arguments\") without citing specific lemma names. Why is waived because `_K` is an algebraic-law suffix (cancellation/involution). Kind and What parts are satisfied.",
+      "fix_sketch": "Replace the Used-by line with concrete consumer identifiers, e.g.:\n(** letter_invK — letter inversion is involutive on the alphabet.\n    Kind: helper.\n    Used by: sphere_size_S, ball_size_S (or the specific lemmas that invoke it).\n*)",
+      "confidence": "medium",
+      "stage": "stage2",
+      "escalated_model": "opus",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/groups/free_group_ball.v",
+      "line_start": 99,
+      "line_end": 108,
+      "lemma_name": "reduced",
+      "severity": "warning",
+      "evidence_quote": "(* A word is reduced if no adjacent letters are inverses *)",
+      "closeness": "near",
+      "explanation": "KIND fails: the comment block contains no classification tag (helper/main/canonical/notation/coercion/instance/example/interface) and no synonym thereof. WHAT is satisfied (the comment paraphrases the definition). WHY is waived because this is a non-lemma kind (Fixpoint). USED_BY is not required since Kind is not declared helper.",
+      "fix_sketch": "Promote the single-line comment to a structured block, e.g.:\n(** reduced — boolean predicate: a word has no adjacent letter/inverse pair.\n    Kind: main (primary predicate used to define the sphere and ball).\n*)\nAlternatively, if this is a helper for later sphere/ball lemmas, tag Kind: helper and add a Used-by line.",
+      "confidence": "high",
+      "stage": "stage2",
+      "escalated_model": "opus",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/groups/free_group_ball.v",
+      "line_start": 109,
+      "line_end": 113,
+      "lemma_name": "sphere_size",
+      "severity": "warning",
+      "evidence_quote": "(* sphere_size r k.+1 = 2r * (2r-1)^k *)",
+      "closeness": "near",
+      "explanation": "The preceding comment of this multi-line non-Local Definition paraphrases only the recurrence case (WHAT partially present) but does not declare KIND (helper/main/canonical/notation/coercion/instance/example/interface) and does not give WHY. `sphere_size` carries no algebraic-law suffix, so WHY is not waived. The base case `0 => 1` is also uncovered by the paraphrase.",
+      "fix_sketch": "(** sphere_size — size of the sphere of radius k in the free group on r generators: 1 at radius 0, and alpha * (alpha - 1)^(k-1) for positive radii.\n    Kind: main (combinatorial definition used throughout the ball-growth section).\n    Why: encapsulates the count of reduced words of exact length k, which the ball-size formulae sum over. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "escalated_model": "opus",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/groups/free_group_ball.v",
+      "line_start": 119,
+      "line_end": 119,
+      "lemma_name": "sphere_size_0",
+      "severity": "warning",
+      "evidence_quote": "(* Key recurrence: each reduced word of length k extends to exactly\n   (2r - 1) reduced words of length k+1 (all letters except the inverse\n   of the last letter). The first letter has 2r choices. *)",
+      "closeness": "far",
+      "explanation": "The preceding comment describes the sphere-size recurrence (the content of sphere_size_S), not the statement of sphere_size_0 (`sphere_size 0 = 1`). KIND is missing (no helper/main/canonical classification), WHAT fails (no paraphrase of sphere_size_0's equation; the prose is about the k -> k+1 step), WHY is missing and not waived (`_0` is not in the waived algebraic-law suffix list), and USED_BY is absent. The misattribution suggests the recurrence comment was intended for sphere_size itself and sphere_size_0 was left without its own documentation.",
+      "fix_sketch": "(** sphere_size_0 — the sphere of radius 0 in the free group contains exactly the identity: sphere_size 0 = 1.\n    Kind: helper.\n    Why: base case for the ball-size formula's inductive sum.\n    Used by: ball_size_formula. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "escalated_model": "opus",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/groups/free_group_ball.v",
+      "line_start": 161,
+      "line_end": 165,
+      "lemma_name": "ball_size_0",
+      "severity": "warning",
+      "evidence_quote": "(** ball_size_0 — only the empty word sits inside the radius-0 ball.\n    Kind: helper.\n    Used by: ball_size_ge1 and base case of inductive ball growth proofs.\n*)",
+      "closeness": "near",
+      "explanation": "The comment satisfies KIND (helper) and WHAT (paraphrase of ball_size 0 = 1) and USED_BY (ball_size_ge1 verified in same file at line 181). However the WHY part is absent: there is no sentence explaining why this base-case equation is needed (e.g. 'needed to start the induction in ball_size_S-based proofs', 'closes the L=0 case for ball_size_lower'). WHY is not waived here: the suffix _0 is not an algebraic-law suffix, Kind is helper, and the WHAT clause does not name a downstream use-site.",
+      "fix_sketch": "Add a Why line such as: `Why: provides the base case (L = 0) for inductive arguments on ball_size; used by ball_size_ge1 to establish non-emptiness at radius 0.`\n\nFull revised comment:\n(** ball_size_0 — only the empty word sits inside the radius-0 ball.\n    Kind: helper.\n    Why: base case for inductive arguments on ball_size; ball_size_ge1\n         reduces to this at L = 0.\n    Used by: ball_size_ge1 and base case of inductive ball growth proofs.\n*)",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/groups/free_group_ball.v",
+      "line_start": 173,
+      "line_end": 180,
+      "lemma_name": "ball_size_S",
+      "severity": "warning",
+      "evidence_quote": "(** ball_size_S — step form: the (L+1)-ball is the L-ball plus the outer\n    sphere of radius L+1.\n    Kind: helper.\n    Used by: inductive reasoning on ball growth and the closed-form proofs.\n*)",
+      "closeness": "near",
+      "explanation": "USED_BY fails: the Kind is helper, which requires naming at least one downstream consumer identifier, but the Used-by clause only gives a category description (\"inductive reasoning on ball growth and the closed-form proofs\") without citing a specific Lemma/Theorem name. The sibling entity ball_size_ge1 names ball_size_lower directly, which is the pattern expected here. Kind, What, and Why are satisfied.",
+      "fix_sketch": "Replace the Used-by line with concrete identifiers, e.g. `Used by: ball_size_lower (inductive step), ball_size_formula (closed form).` Grep confirms both exist in this file (lines 284 and 243).",
+      "confidence": "medium",
+      "stage": "stage2",
+      "escalated_model": "opus",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/groups/free_group_ball.v",
+      "line_start": 193,
+      "line_end": 209,
+      "lemma_name": "geom_series_nat",
+      "severity": "warning",
+      "evidence_quote": "(* (q - 1) * sum_{k=0}^{L} q^k = q^{L+1} - 1, for q >= 1 *)",
+      "closeness": "far",
+      "explanation": "The preceding comment covers WHAT (the equation) but fails KIND (no classification among helper/main/canonical/...), fails WHY (no motivation), and fails USED_BY (if this is a helper, no downstream consumer identifier is cited). Grep shows the lemma is consumed by geom_series_div (line 217) and at line 267, so a cite is available.",
+      "fix_sketch": "Expand to the authority template, e.g. `(** geom_series_nat — (q-1) * Σ_{k≤L} q^k = q^{L+1} - 1 for q ≥ 1.\n    Kind: helper.\n    Why: step lemma used to derive the divisive closed form without leaving nat.\n    Used by: geom_series_div, ball_size_formula. *)`",
+      "confidence": "high",
+      "stage": "stage2",
+      "escalated_model": "opus",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/groups/free_group_ball.v",
+      "line_start": 210,
+      "line_end": 227,
+      "lemma_name": "geom_series_div",
+      "severity": "warning",
+      "evidence_quote": "(* Variant: sum_{k=0}^{L} q^k = (q^{L+1} - 1) / (q - 1), for q >= 2 *)",
+      "closeness": "far",
+      "explanation": "The preceding single-line comment covers WHAT (the equation) but fails KIND (no classification), fails WHY (\"Variant\" is not a motivation, it is a relation to the sibling lemma), and, if Kind is helper, fails USED_BY (no downstream identifier named). Grep confirms the lemma is consumed at line 279 of this file.",
+      "fix_sketch": "Replace with `(** geom_series_div — Σ_{k≤L} q^k = (q^{L+1} - 1) / (q - 1) for q ≥ 2.\n    Kind: helper.\n    Why: divisive closed form of geom_series_nat, consumed when the ball-size bound is stated as a quotient rather than a product.\n    Used by: ball_size_div (line 279). *)`",
+      "confidence": "high",
+      "stage": "stage2",
+      "escalated_model": "opus",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/groups/free_group_ball.v",
+      "line_start": 249,
+      "line_end": 255,
+      "lemma_name": "ball_size_sum",
+      "severity": "warning",
+      "evidence_quote": "(* ball_size r L = 1 + alpha * sum_{k=0}^{L-1} q^k *)",
+      "closeness": "near",
+      "explanation": "The preceding comment fails two of the four H002 checklist items. (1) KIND is absent: no classification ('helper', 'main', or equivalent) is given. (2) WHY is absent and not waived: ball_size_sum carries no algebraic-law suffix, its Kind is unidentified (so the canonical/notation/coercion/instance waiver does not apply), and the WHAT clause does not name a downstream use-site crisply. WHAT is marginally satisfied by the informal mathematical restatement, but a prose paraphrase of the lemma's semantic role is needed.",
+      "fix_sketch": "(** ball_size_sum — ball_size r L equals 1 + alpha * sum_{k<L} q^k (summation form).\n    Kind: helper.\n    Why: provides the equational rewrite consumed by ball_size_formula and ball_size_div\n         to apply geom_series_nat and geom_series_div.\n    Used by: ball_size_formula, ball_size_div, ball_size_lower. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/groups/free_group_ball.v",
+      "line_start": 273,
+      "line_end": 275,
+      "lemma_name": "ball_size_div",
+      "severity": "warning",
+      "evidence_quote": "(* Division form for display:\n   ball_size r L = 1 + alpha * (q^L - 1) / (q - 1)\n   i.e., 1 + 2r * ((2r-1)^L - 1) / (2r - 2) *)",
+      "closeness": "near",
+      "explanation": "WHAT is present (the comment restates the equation). Failing parts: (1) KIND — no classification as helper or main; (2) WHY — no motivation explaining which downstream result consumes this equational form. The `_div` suffix is not a MathComp algebraic-law suffix per AUTHORITY.md so the WHY waiver does not apply. USED_BY is deferred until KIND is confirmed as helper.",
+      "fix_sketch": "(** ball_size_div — ball_size r L equals 1 + alpha * (q^L - 1) / (q-1) (closed division form).\n    Kind: helper.\n    Why: provides the display-friendly equational form; consumed by <downstream-lemma>.\n    Used by: <downstream-lemma>. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/groups/free_group_ball.v",
+      "line_start": 284,
+      "line_end": 284,
+      "lemma_name": "ball_size_lower",
+      "severity": "warning",
+      "evidence_quote": "(* Exponential lower bound: ball_size r L >= q^L = (2r-1)^L *)",
+      "closeness": "near",
+      "explanation": "WHAT is present (the one-line comment paraphrases the bound). Failing parts: (1) KIND — no classification as helper or main; (2) WHY — no motivation naming which downstream lemma uses this lower bound. The `_lower` suffix is not an algebraic-law suffix per AUTHORITY.md so the WHY waiver does not apply.",
+      "fix_sketch": "(** ball_size_lower — q^L <= ball_size r L for all L (exponential lower bound on free-group ball size).\n    Kind: helper.\n    Why: feeds search_space_exp_growth, which bounds the word-eval search space.\n    Used by: search_space_exp_growth. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/groups/free_group_ball.v",
+      "line_start": 319,
+      "line_end": 327,
+      "lemma_name": "search_space_exp_growth",
+      "severity": "warning",
+      "evidence_quote": "(* For word-eval injective generators with branching factor Tg = 2r,\n   the search space is Tg^L by weval_inj_search_space.\n   ...\n   Exponential growth: ball_size r L >= (2r-1)^L for r >= 2. *)",
+      "closeness": "near",
+      "explanation": "WHY is present (the comment provides conceptual motivation about the word-eval search space). Failing parts: (1) KIND — no classification as helper or main; (2) WHAT — the comment discusses the conceptual context and cites ball_size growth, but does not directly paraphrase the formal statement `(r.*2 - 1)^L <= 1 + r.*2 * (sum_(k < L) (r.*2 - 1)^k)`. The final line refers to `ball_size r L >= (2r-1)^L`, which is the conclusion of `ball_size_lower`, not of this lemma.",
+      "fix_sketch": "(** search_space_exp_growth — for r > 1, (2r-1)^L <= 1 + 2r * sum_{k<L} (2r-1)^k (exponential lower bound on word-eval search space).\n    Kind: main.\n    Why: establishes that the search space grows at least exponentially with word length L; bridges ball_size_lower to the weval_inj setting. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "S998",
+      "file": "rocq-audit",
+      "line_start": 1,
+      "line_end": 1,
+      "severity": "warning",
+      "evidence_quote": "result field not JSON: ```json\n{\n  \"passed\": false,\n  \"findings\": [\n    {\n      \"rule_id\": \"D001\",\n      \"file\": \"pgg-smc/groups/free_group_ball.v\",\n      \"line_start\": 51,\n      \"line_end\": 51,\n      \"lemma_name\": \"letter_",
+      "closeness": "near",
+      "explanation": "Stage 2 call failed for chunk 0; see logs.",
+      "fix_sketch": "Retry the commit. If repeated, check agent configuration.",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": {
+    "entity_count": 31,
+    "chunk_count": 8,
+    "chunk_size": 4,
+    "workers_used": 4,
+    "tokens_used": 1112096,
+    "tokens_cap": 20000000,
+    "wall_ms_used": 412018,
+    "wall_ms_cap": 1800000,
+    "deferred_chunks": 0,
+    "stop_reason": "clean",
+    "estimated_usd": 6.6726,
+    "model": "sonnet"
+  },
+  "exit_code": 0
+}

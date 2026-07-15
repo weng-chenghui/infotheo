@@ -1,0 +1,89 @@
+{
+  "findings": [
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/reconstruct/pgg_sum_mod.v",
+      "line_start": 87,
+      "line_end": 87,
+      "lemma_name": "sum_mod_single_sheet",
+      "severity": "warning",
+      "evidence_quote": "Lemma sum_mod_single_sheet :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/reconstruct/pgg_sum_mod.v",
+      "line_start": 142,
+      "line_end": 142,
+      "lemma_name": "id_preserves_sum_mod",
+      "severity": "warning",
+      "evidence_quote": "Lemma id_preserves_sum_mod :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/reconstruct/pgg_sum_mod.v",
+      "line_start": 149,
+      "line_end": 149,
+      "lemma_name": "comp_preserves_sum_mod",
+      "severity": "warning",
+      "evidence_quote": "Lemma comp_preserves_sum_mod (sigma1 sigma2 : {perm 'I_N}) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/reconstruct/pgg_sum_mod.v",
+      "line_start": 263,
+      "line_end": 263,
+      "lemma_name": "partial_sum_no_info",
+      "severity": "warning",
+      "evidence_quote": "Lemma partial_sum_no_info :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "S998",
+      "file": "rocq-audit",
+      "line_start": 1,
+      "line_end": 1,
+      "severity": "warning",
+      "evidence_quote": "agent rc=1: ",
+      "closeness": "near",
+      "explanation": "Stage 2 call failed for chunk 0; see logs.",
+      "fix_sketch": "Retry the commit. If repeated, check agent configuration.",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": {
+    "entity_count": 45,
+    "chunk_count": 8,
+    "chunk_size": 6,
+    "workers_used": 4,
+    "tokens_used": 0,
+    "tokens_cap": 20000000,
+    "wall_ms_used": 6848,
+    "wall_ms_cap": 1800000,
+    "deferred_chunks": 0,
+    "stop_reason": "clean",
+    "estimated_usd": 0.0,
+    "model": "sonnet"
+  },
+  "exit_code": 0
+}

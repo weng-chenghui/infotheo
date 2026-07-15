@@ -1,0 +1,490 @@
+{
+  "findings": [
+    {
+      "rule_id": "A002",
+      "file": "pgg-smc/lib/perm_uniform.v",
+      "line_start": 130,
+      "line_end": 130,
+      "lemma_name": "card_prescribed",
+      "severity": "error",
+      "evidence_quote": "by rewrite Him card_ord => /(f_equal (subn^~ k)); rewrite addKn.",
+      "closeness": "far",
+      "explanation": "The view `/(f_equal (subn^~ k))` uses Coq's built-in `f_equal`. MathComp's SSReflect idiom is `congr`, which is term-level and composes with views. Here the view is applied to an equality `#|_| + k = N`; the principled replacement is a congruence view such as `/(congr1 (subn^~ k))` or a direct `apply/eqP; rewrite -subn_eq0 ...` rewrite chain. Using `f_equal` inside a view pipeline is visibly non-SSReflect in an otherwise SSReflect-style proof.",
+      "fix_sketch": "Replace `/(f_equal (subn^~ k))` with `/(congr1 (subn^~ k))`, or restructure the final step with `apply: (canRL (addKn k))` / explicit `subnK` rewrite to avoid the view altogether.",
+      "confidence": "high",
+      "stage": "stage2",
+      "escalated_model": "opus",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "A002",
+      "file": "pgg-smc/lib/perm_uniform.v",
+      "line_start": 380,
+      "line_end": 380,
+      "lemma_name": "card_remaining",
+      "severity": "error",
+      "evidence_quote": "by move/(f_equal (subn^~ k)); rewrite addKn.",
+      "closeness": "near",
+      "explanation": "f_equal is used as a view term inside move/(f_equal (subn^~ k)). Stage 1 did not catch this instance because the f_equal token is preceded by ( rather than a space, tab, or semicolon. The use is genuine: f_equal (subn^~ k) has type forall x y : nat, x = y -> x - k = y - k and is being used as a move/ view to rewrite an equality hypothesis. The MathComp idiomatic replacement is congr1, which has the same type (forall (A B : Type) (f : A -> B) (x y : A), x = y -> f x = f y) and is the SSReflect-native congruence lemma. Using f_equal as a term is a lesser offense than using the f_equal tactic, but it still imports non-MathComp vocabulary into an otherwise idiomatic proof. See MathComp CONTRIBUTING#proofs.",
+      "fix_sketch": "Replace move/(f_equal (subn^~ k)) with move/(congr1 (subn^~ k)). Both terms have the same type and the replacement is a one-token change with identical proof-term structure.",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "B001",
+      "file": "pgg-smc/lib/perm_uniform.v",
+      "line_start": 71,
+      "line_end": 71,
+      "lemma_name": "Sn_k_transitive",
+      "severity": "warning",
+      "evidence_quote": "case: (boolP (w == v ord_max)) => [/eqP wvk|wvk].",
+      "closeness": "near",
+      "explanation": "This is the same verbose `boolP`-based equal-or-not split that B001 targets, merely phrased with `case:` instead of `have`. The boolean being decided is the equality `w == v ord_max`, so the canonical MathComp idiom `case: (eqVneq w (v ord_max)) => wvk` is more direct, advertises the semantics, and avoids the intermediate `eqP` view step.",
+      "fix_sketch": "Replace with `case: (eqVneq w (v ord_max)) => wvk.`; the first branch gives `wvk : w = v ord_max`, the second gives `wvk : w != v ord_max`.",
+      "confidence": "medium",
+      "stage": "stage2",
+      "escalated_model": "opus",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "D001",
+      "file": "pgg-smc/lib/perm_uniform.v",
+      "line_start": 149,
+      "line_end": 153,
+      "lemma_name": "s_ext",
+      "severity": "warning",
+      "evidence_quote": "Variable v : 'I_k -> 'I_N.",
+      "closeness": "near",
+      "explanation": "In Section prescribed_value (line 139), Variable v (line 146) is declared but does not appear anywhere in the body of s_ext (lines 149-153). The body pattern is 'fun i => match unlift ord_max i with | Some j => s j | None => s_new end', which references s and k (via 'I_k.+1) but never v. The parallel Variable s is used; v is the counterpart declared for v_ext. Because s_ext and v_ext share the same Section, Rocq will not generalize v over s_ext at Section close, so this is not a correctness issue, but it signals that the two definitions could be housed in separate, leaner Sections.",
+      "fix_sketch": "Split Section prescribed_value into two sub-sections: one for s-related definitions (Variable s only) and one for v-related definitions (Variable v only), or verify via Tier K that v is genuinely unused and remove it from s_ext's scope.",
+      "confidence": "medium",
+      "kernel_contract": {
+        "name": "unused_hypothesis",
+        "parameters": {
+          "hypothesis": "v",
+          "entity": "s_ext",
+          "section": "prescribed_value"
+        }
+      },
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "D001",
+      "file": "pgg-smc/lib/perm_uniform.v",
+      "line_start": 159,
+      "line_end": 163,
+      "lemma_name": "v_ext",
+      "severity": "warning",
+      "evidence_quote": "Variable s : 'I_k -> 'I_N.",
+      "closeness": "near",
+      "explanation": "In Section prescribed_value (line 139), Variable s (line 145) is declared but does not appear anywhere in the body of v_ext (lines 159-163). The body pattern is 'fun i => match unlift ord_max i with | Some j => v j | None => v_new end', which references v and k (via 'I_k.+1) but never s. Rocq will not generalize s over v_ext at Section close, making s a phantom in v_ext's definition scope. The parallel Variable v is used.",
+      "fix_sketch": "Either split the Section so each variable is in scope only for the definitions that use it, or add an explicit comment explaining that s and v are co-declared for conceptual symmetry. Tier K will confirm the non-use.",
+      "confidence": "medium",
+      "kernel_contract": {
+        "name": "unused_hypothesis",
+        "parameters": {
+          "hypothesis": "s",
+          "entity": "v_ext",
+          "section": "prescribed_value"
+        }
+      },
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/lib/perm_uniform.v",
+      "line_start": 92,
+      "line_end": 95,
+      "lemma_name": "prescribed_coset",
+      "severity": "warning",
+      "evidence_quote": "Lemma prescribed_coset (k : nat) (s v : 'I_k -> 'I_N) (tau : {perm 'I_N}) :\n  injective s -> injective v -> (k <= N)%N ->\n  tau \\in prescribed s v ->\n  prescribed s v = Sym (~: (s @: setT)) :* tau.",
+      "closeness": "near",
+      "explanation": "The statement is an equational rewrite `prescribed s v = Sym (~: (s @: setT)) :* tau`. Per the MathComp suffix table, equational rewrites take suffix `E`, so the idiomatic name is `prescribed_cosetE` (or `prescribedE_coset` if the intended main symbol is `prescribed`). The current name reads as a predicate or property rather than a rewrite lemma, which misleads users who search by suffix convention.",
+      "fix_sketch": "Rename to `prescribed_cosetE` to signal the equational role, or to `prescribedE` with a `_coset` condition suffix if `prescribed` is the main symbol. Update call sites accordingly.",
+      "confidence": "medium",
+      "stage": "stage2",
+      "escalated_model": "opus",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/lib/perm_uniform.v",
+      "line_start": 169,
+      "line_end": 169,
+      "lemma_name": "s_ext_inj",
+      "severity": "warning",
+      "evidence_quote": "Lemma s_ext_inj (s_new : 'I_N) :",
+      "closeness": "near",
+      "explanation": "The lemma proves injectivity of s_ext: the statement shape is `injective s -> ... -> injective (s_ext s_new)`. Per AUTHORITY.md suffix table, the canonical suffix for injectivity is `I`, yielding `s_ext_I`. The name uses the verbose English word `_inj` instead of the single-letter canonical suffix.",
+      "fix_sketch": "Rename `s_ext_inj` to `s_ext_I`. Update the call site in `prescribed_value_count` (`exact: s_ext_I.`) and the `Used by:` field in the comment of `v_ext_inj`.",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/lib/perm_uniform.v",
+      "line_start": 188,
+      "line_end": 188,
+      "lemma_name": "v_ext_inj",
+      "severity": "warning",
+      "evidence_quote": "Lemma v_ext_inj (v_new : 'I_N) :",
+      "closeness": "near",
+      "explanation": "The lemma proves injectivity of v_ext: statement shape is `injective v -> ... -> injective (v_ext v_new)`. Per AUTHORITY.md suffix table the canonical suffix for injectivity is `I`, yielding `v_ext_I`. The name uses the verbose English word `_inj` instead.",
+      "fix_sketch": "Rename `v_ext_inj` to `v_ext_I`. Update the call site in `prescribed_value_count` (`exact: v_ext_I.`).",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/lib/perm_uniform.v",
+      "line_start": 205,
+      "line_end": 205,
+      "lemma_name": "prescribed_extend",
+      "severity": "warning",
+      "evidence_quote": "Lemma prescribed_extend (s_new v_new : 'I_N) :",
+      "closeness": "near",
+      "explanation": "The statement is an equation `[set sigma in prescribed s v | sigma s_new == v_new] = prescribed (s_ext s_new) (v_ext v_new)`. Per AUTHORITY.md, equational rewrites take suffix `E`. The suffix `extend` is an operational description of what the extension does, not a canonical MathComp semantic suffix signalling an equational form.",
+      "fix_sketch": "Rename to `prescribed_extE` or `prescribed_ext_E` to signal the equational role. Alternatively, if the name is intended to describe the operation rather than the statement shape, add a `Naming:` line to the comment: `Naming: operational name preferred over suffix E for readability at call sites.`",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/lib/perm_uniform.v",
+      "line_start": 228,
+      "line_end": 228,
+      "lemma_name": "prescribed_value_count",
+      "severity": "warning",
+      "evidence_quote": "Lemma prescribed_value_count (s_new v_new : 'I_N) :",
+      "closeness": "near",
+      "explanation": "The statement is a cardinality equation `#|[set sigma in prescribed s v | sigma s_new == v_new]| = (N - k.+1)`!`. Per AUTHORITY.md, cardinality results use suffix `_card`. The suffix `_count` is an informal English word not present in the canonical suffix table; the idiomatic name for a `#|...|`-equation would end in `_card`.",
+      "fix_sketch": "Rename to `prescribed_fiber_card` or `prescribed_card` (if no clash). The `card_` prefix form is also allowlisted: `card_prescribed_fiber` would be idiomatic and exempt from F001.",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/lib/perm_uniform.v",
+      "line_start": 242,
+      "line_end": 242,
+      "lemma_name": "prescribed_ratio",
+      "severity": "warning",
+      "evidence_quote": "Lemma prescribed_ratio :",
+      "closeness": "near",
+      "explanation": "The statement is an arithmetic equation `((N - k.+1)`! * (N - k) = (N - k)`!)%N`. Per AUTHORITY.md, equational identities use suffix `E`. The suffix `ratio` is an informal description of the application context (ratio = 1/(N-k)), not a canonical MathComp semantic suffix. The name does not identify the main symbol (factorial `fact` or `!`).",
+      "fix_sketch": "Option A: extract the arithmetic identity as `factS_pred_E : (n`!.+1 * n = n`!) %N` and call it here. Option B: rename inline to `prescribed_factS_E` with a `Naming:` note explaining the contextual choice.",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/lib/perm_uniform.v",
+      "line_start": 347,
+      "line_end": 347,
+      "lemma_name": "perm_cond_zero",
+      "severity": "warning",
+      "evidence_quote": "Lemma perm_cond_zero (s_new : 'I_N) (v_new : 'I_N) :",
+      "closeness": "near",
+      "explanation": "The lemma's conclusion is `Pr[...] = (0 : R)`, a zero-value equation. The MathComp suffix table in AUTHORITY.md assigns the suffix 0 (not the English word zero) to ring/nat zero results. The name perm_cond_zero spells out the English word rather than using the canonical numeric digit suffix. The idiomatic name is perm_cond0, which matches the mainSymbol_suffixes pattern with terminal suffix 0. The _zero form is not listed in the MathComp suffix table and is not a recognised algebraic-law suffix.",
+      "fix_sketch": "Rename perm_cond_zero to perm_cond0. Update the one call site in collusion_zero (line 407: apply: perm_cond_zero => //. becomes apply: perm_cond0 => //.).",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/lib/perm_uniform.v",
+      "line_start": 401,
+      "line_end": 401,
+      "lemma_name": "collusion_zero",
+      "severity": "warning",
+      "evidence_quote": "Lemma collusion_zero (s_new : 'I_N) (v_new : 'I_N) :",
+      "closeness": "near",
+      "explanation": "The lemma's conclusion is `Pr[...] = (0 : R)`. The MathComp suffix table designates 0 (digit) for ring/nat zero results. The name collusion_zero uses the plain-English word zero as a trailing component. The idiomatic name is collusion0, following the same pattern as canonical MathComp lemmas such as addr0, mulr0, and similar. The _zero form is not in the suffix table.",
+      "fix_sketch": "Rename collusion_zero to collusion0. If the rename would clash with an existing MathComp lemma in scope, a qualifying condition prefix is acceptable: e.g. collusion_Pr0.",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/lib/perm_uniform.v",
+      "line_start": 274,
+      "line_end": 274,
+      "lemma_name": "card_permT_N",
+      "severity": "error",
+      "evidence_quote": "(* Cardinality of S_N *)",
+      "closeness": "far",
+      "explanation": "The preceding comment contains only one alphabetic token of length three or more ('Cardinality'); 'of' is length 2 and 'S'/'N' are each length 1. Per the H001 degeneracy heuristic (fewer than two alphabetic tokens of length >=3), this block does not meet the usable-comment bar even though it mentions the mathematical object. Escalation upgrade: the comment is informative in spirit, but the heuristic is explicit and the Lemma kind is in-scope for H001.",
+      "fix_sketch": "Replace the single-line (* Cardinality of S_N *) with a block following AUTHORITY.md, e.g. '(** card_permT_N — #|{perm ''I_N}| = N!. Kind: helper. Why: supplies the cardinality required to build fdist_uniform on permutations. Used by: perm_fdist. *)'.",
+      "confidence": "medium",
+      "stage": "stage2",
+      "escalated_model": "opus",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/lib/perm_uniform.v",
+      "line_start": 34,
+      "line_end": 39,
+      "lemma_name": "prescribed",
+      "severity": "warning",
+      "evidence_quote": "(* Permutations that map s(i) to v(i) for all i < k *)",
+      "closeness": "near",
+      "explanation": "Failed parts: KIND and WHY. KIND: the comment does not classify the entity (no helper/main/canonical/notation/coercion/instance/example/interface phrasing). WHY: no motivation is given and no waiver applies — the name carries no MathComp algebraic-law suffix, no declared canonical/notation/coercion/instance Kind is present, and the description does not name a downstream use-site crisply. WHAT is covered (the comment paraphrases `prescribed` as the set of permutations σ with σ(s i) = v i). USED_BY is not required because KIND is not declared as helper.",
+      "fix_sketch": "(** prescribed — set of permutations σ : 'I_N → 'I_N with σ(s i) = v i for all i < k.\n    Kind: canonical (definition used by prescribedP and the k-transitivity / cardinality chain).\n    Why: encodes the prescribed-image constraint that the counting arguments in Sn_k_transitive and the cardinality lemmas rely on. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "escalated_model": "opus",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/lib/perm_uniform.v",
+      "line_start": 58,
+      "line_end": 58,
+      "lemma_name": "Sn_k_transitive",
+      "severity": "warning",
+      "evidence_quote": "Lemma 1: S_N acts k-transitively: given injective s and v, there exists sigma with sigma(s_i) = v_i for all i",
+      "closeness": "near",
+      "explanation": "Comment covers WHAT (paraphrases the existential statement) but fails KIND (no `helper`/`main`/etc. classification) and WHY (no motivation; no downstream cite; suffix is not an algebraic-law waiver). USED_BY is conditional on KIND being `helper`; because KIND is absent, the cite is also missing for the likely helper role.",
+      "fix_sketch": "Add a block such as:\n(** Sn_k_transitive — for injective s, v : 'I_k -> 'I_N with k <= N, there exists sigma in S_N sending s to v pointwise.\n    Kind: helper.\n    Why: supplies the witness tau used by card_prescribed to reduce |prescribed s v| to the index computation.\n    Used by: card_prescribed. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "escalated_model": "opus",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/lib/perm_uniform.v",
+      "line_start": 92,
+      "line_end": 92,
+      "lemma_name": "prescribed_coset",
+      "severity": "warning",
+      "evidence_quote": "Lemma 2: prescribed k s v is a right coset of Sym(~: im s)",
+      "closeness": "near",
+      "explanation": "Comment covers WHAT (paraphrases `prescribed s v = Sym(~: im s) :* tau`) but fails KIND (no classification) and WHY (no motivation; name does not carry an algebraic-law suffix waiver). USED_BY is conditional on KIND.",
+      "fix_sketch": "Add:\n(** prescribed_coset — prescribed s v equals the right coset Sym(~: (s @: setT)) :* tau for any tau realising the prescription.\n    Kind: helper.\n    Why: card_prescribed reduces the cardinality count by rewriting through this coset identity.\n    Used by: card_prescribed. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "escalated_model": "opus",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/lib/perm_uniform.v",
+      "line_start": 117,
+      "line_end": 117,
+      "lemma_name": "card_prescribed",
+      "severity": "warning",
+      "evidence_quote": "Lemma 3: |prescribed k s v| = (N - k)!",
+      "closeness": "near",
+      "explanation": "Comment covers WHAT (gives the cardinality equation) but fails KIND (no classification) and WHY (no motivation; `card_` prefix is not among the waived algebraic-law suffixes). If this lemma is the file's headline result its role should be declared; if it is a helper, the downstream consumer must be named per USED_BY.",
+      "fix_sketch": "Add:\n(** card_prescribed — the prescribed set has cardinality (N - k)!.\n    Kind: main (counting lemma exported to the uniform-permutation probability file).\n    Why: downstream probability calculations require a closed form for #|prescribed s v|. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "escalated_model": "opus",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/lib/perm_uniform.v",
+      "line_start": 149,
+      "line_end": 153,
+      "lemma_name": "s_ext",
+      "severity": "warning",
+      "evidence_quote": "(* Extending s and v with one more prescribed value *)",
+      "closeness": "far",
+      "explanation": "The preceding comment for s_ext is missing all four required parts. KIND: no classification (helper/main/etc.) is stated. WHAT: the comment describes 'extending s and v' but s_ext only extends s; the paraphrase is imprecise and does not mention the function's type ('I_k.+1 -> 'I_N) or the mechanism (unlift ord_max). WHY: no motivation explaining why this definition is needed. USED_BY: no downstream consumers are named; as a helper, this is required. By contrast, the immediately following v_ext has a fully compliant comment block.",
+      "fix_sketch": "(** s_ext — extend an indexed family s : 'I_k -> 'I_N by one more value at ord_max.\n    Kind: helper.\n    Why: provides the k+1 step of the extension so prescribed_extend can state\n         uniformly that adding a fresh (s_new, v_new) pair preserves the prescribed property.\n    Used by: s_ext_inj, prescribed_extend. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/lib/perm_uniform.v",
+      "line_start": 205,
+      "line_end": 205,
+      "lemma_name": "prescribed_extend",
+      "severity": "warning",
+      "evidence_quote": "(* The set of sigma in prescribed(s,v) with sigma(s_new) = v_new\n   equals prescribed(s',v') with k+1 constraints *)",
+      "closeness": "near",
+      "explanation": "Three H002 parts fail. (1) KIND: no classification word (helper/main/canonical/etc.) is present. (2) WHY: no motivation is stated; the result is consumed by `prescribed_value_count` in the same file (`rewrite prescribed_extend //` visible in the manifest body) but this is not mentioned. (3) USED_BY: no downstream consumer is named; `prescribed_value_count` is confirmed in the same file from the manifest, so the cite is verifiable at confidence=high.",
+      "fix_sketch": "(** prescribed_extend — the fiber {sigma in prescribed s v | sigma s_new = v_new} equals prescribed (s_ext s_new) (v_ext v_new).\n    Kind: helper.\n    Why: reduces the k+1 inductive step of prescribed_value_count to the extended domain.\n    Used by: prescribed_value_count. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/lib/perm_uniform.v",
+      "line_start": 228,
+      "line_end": 228,
+      "lemma_name": "prescribed_value_count",
+      "severity": "warning",
+      "evidence_quote": "(* Lemma 4: counting prescribed values *)",
+      "closeness": "near",
+      "explanation": "Three H002 parts fail. (1) KIND: 'Lemma 4:' is a sequential label, not a Kind classification (helper/main/etc.); no synonym is present. (2) WHY: no motivation or downstream use-site is stated. (3) USED_BY: no consumer named; since Kind is unresolved the requirement is uncertain but the comment provides no cite. Downstream caller not confirmable from this chunk alone; confidence on USED_BY sub-point is low.",
+      "fix_sketch": "(** prescribed_value_count — cardinality of {sigma in prescribed s v | sigma s_new = v_new} equals (N - k.+1)`!.\n    Kind: helper.\n    Why: k+1 inductive step for the uniform-permutation cardinality count.\n    Used by: <downstream lemma>. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/lib/perm_uniform.v",
+      "line_start": 242,
+      "line_end": 242,
+      "lemma_name": "prescribed_ratio",
+      "severity": "warning",
+      "evidence_quote": "(* Corollary: ratio gives 1/(N-k) *)",
+      "closeness": "near",
+      "explanation": "Two H002 parts fail. (1) KIND: 'Corollary:' is used as a sequential label, not a Kind classification; no synonym (helper/main/etc.) is present. (2) WHY: no motivation or downstream consumer is mentioned. USED_BY cannot be confirmed from this chunk; confidence on that sub-point is low.",
+      "fix_sketch": "(** prescribed_ratio — factorial identity (N - k.+1)`! * (N - k) = (N - k)`!.\n    Kind: helper.\n    Why: closes the ratio step in <downstream lemma>.\n    Used by: <downstream lemma>. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/lib/perm_uniform.v",
+      "line_start": 274,
+      "line_end": 274,
+      "lemma_name": "card_permT_N",
+      "severity": "warning",
+      "evidence_quote": "(* Cardinality of S_N *)",
+      "closeness": "near",
+      "explanation": "Failed parts: KIND (no helper/main/canonical/notation/coercion/instance/example/interface classification or synonym); WHY (no motivation explaining why this cardinality is proved here). WHY is not waived: the name suffix '_N' is not an algebraic-law suffix (_A/_C/_K/_D/_I/_V/_X/_Xn/_Xz/_Mn/_Z), the Kind is not canonical/notation/coercion/instance (it is absent), and the WHAT clause does not name a downstream use-site. WHAT is present (the comment paraphrases the statement as a cardinality claim). USED_BY is not required until KIND is established; the lemma is in fact consumed by perm_fdist on line 282, so the helper classification is natural.",
+      "fix_sketch": "Replace with '(** card_permT_N — #|{perm ''I_N}| = N!. Kind: helper. Why: gives the size of the permutation group so fdist_uniform can build a uniform distribution on {perm ''I_N}. Used by: perm_fdist. *)'.",
+      "confidence": "high",
+      "stage": "stage2",
+      "escalated_model": "opus",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/lib/perm_uniform.v",
+      "line_start": 293,
+      "line_end": 294,
+      "lemma_name": "Pr_prescribed",
+      "severity": "warning",
+      "evidence_quote": "(* Probability of the prescribed event *)",
+      "closeness": "far",
+      "explanation": "Preceding comment fails multiple parts of the four-part checklist. KIND: no classification token (no helper/main/canonical/notation/coercion/instance/example/interface nor any accepted synonym). WHY: no motivation is given and no waiver applies (suffix `_prescribed` is not a MathComp algebraic-law suffix, and no Kind is declared, so the canonical/notation/coercion/instance waiver cannot trigger; the comment also names no downstream use-site). USED_BY: since Kind is absent, the helper-vs-main distinction cannot be verified from the comment; if this lemma is a helper (it is consumed by Pr_prescribed_ne0 and perm_cond_uniform in this file), a downstream cite is required. WHAT is borderline but acceptable as a topic paraphrase of `Pr perm_fdist obs_set = ...`.",
+      "fix_sketch": "Replace with a block such as: `(** Pr_prescribed — the uniform probability of the prescribed event equals ((N-k)! / N!).\n    Kind: helper.\n    Why: used to normalise the conditional-probability computation in perm_cond_uniform.\n    Used by: Pr_prescribed_ne0, perm_cond_uniform. *)`",
+      "confidence": "high",
+      "stage": "stage2",
+      "escalated_model": "opus",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/lib/perm_uniform.v",
+      "line_start": 315,
+      "line_end": 316,
+      "lemma_name": "perm_cond_uniform",
+      "severity": "warning",
+      "evidence_quote": "(* Main result: conditional probability *)",
+      "closeness": "near",
+      "explanation": "KIND is acceptable: `Main result` serves as a `main` classification. WHAT is too terse: `conditional probability` names the topic but does not paraphrase the statement `Pr[target | obs_set] = (N - k)^-1` — a crisp equational summary is expected per AUTHORITY.md. WHY is missing: no motivation is given and no waiver applies (suffix `_uniform` is not a MathComp algebraic-law suffix; Kind is `main`, which is not waived by the canonical/notation/coercion/instance rule; the WHAT clause does not name a downstream use-site crisply). USED_BY is not required because Kind is main rather than helper.",
+      "fix_sketch": "Replace with: `(** perm_cond_uniform — conditional on the prescribed event, the probability that sigma sends s_new to an unused v_new equals 1/(N-k).\n    Kind: main.\n    Why: this is the uniform-conditional-update lemma consumed by the permutation SMC modules; it justifies the one-slot resampling step. *)`",
+      "confidence": "high",
+      "stage": "stage2",
+      "escalated_model": "opus",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/lib/perm_uniform.v",
+      "line_start": 347,
+      "line_end": 347,
+      "lemma_name": "perm_cond_zero",
+      "severity": "warning",
+      "evidence_quote": "(* Conditional probability is zero for already-assigned values *)",
+      "closeness": "near",
+      "explanation": "The preceding comment covers WHAT (it paraphrases the statement as 'conditional probability is zero for already-assigned values') but fails two required parts. (1) KIND is absent: the comment carries no classification word equivalent to helper, main, canonical, or any accepted synonym. (2) WHY is absent: no motivation is given for why this result is needed. The name perm_cond_zero does not carry a MathComp algebraic-law suffix that would waive the WHY requirement, and the WHAT clause does not name a downstream use-site crisply enough to substitute. USED_BY cannot be assessed until KIND is determined; if the kind resolves to helper, collusion_zero (line 401) is the downstream consumer.",
+      "fix_sketch": "(** perm_cond_zero — conditional probability is zero when the target output value is already assigned to another position.\n    Kind: helper.\n    Why: used by collusion_zero to handle the already-assigned branch of Proposition 4's case split.\n    Used by: collusion_zero. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": {
+    "entity_count": 40,
+    "chunk_count": 8,
+    "chunk_size": 5,
+    "workers_used": 4,
+    "tokens_used": 795613,
+    "tokens_cap": 20000000,
+    "wall_ms_used": 356511,
+    "wall_ms_cap": 1800000,
+    "deferred_chunks": 0,
+    "stop_reason": "clean",
+    "estimated_usd": 4.7737,
+    "model": "sonnet"
+  },
+  "exit_code": 2
+}

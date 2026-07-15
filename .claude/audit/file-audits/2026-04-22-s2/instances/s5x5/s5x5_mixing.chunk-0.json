@@ -1,0 +1,258 @@
+{
+  "findings": [
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/s5x5/s5x5_mixing.v",
+      "line_start": 64,
+      "line_end": 64,
+      "lemma_name": "s5_lazy_gen_invol",
+      "severity": "warning",
+      "evidence_quote": "Lemma s5_lazy_gen_invol :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/s5x5/s5x5_mixing.v",
+      "line_start": 107,
+      "line_end": 107,
+      "lemma_name": "s5_lazy_tnth_0",
+      "severity": "warning",
+      "evidence_quote": "Lemma s5_lazy_tnth_0 : tnth s5_lazy_gen_tuple (Ordinal (n:=8) (m:=0) erefl) = tperm o0 o1.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/s5x5/s5x5_mixing.v",
+      "line_start": 113,
+      "line_end": 113,
+      "lemma_name": "s5_lazy_tnth_1",
+      "severity": "warning",
+      "evidence_quote": "Lemma s5_lazy_tnth_1 : tnth s5_lazy_gen_tuple (Ordinal (n:=8) (m:=1) erefl) = tperm o1 o2.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/s5x5/s5x5_mixing.v",
+      "line_start": 119,
+      "line_end": 119,
+      "lemma_name": "s5_lazy_tnth_2",
+      "severity": "warning",
+      "evidence_quote": "Lemma s5_lazy_tnth_2 : tnth s5_lazy_gen_tuple (Ordinal (n:=8) (m:=2) erefl) = tperm o2 o3.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/s5x5/s5x5_mixing.v",
+      "line_start": 125,
+      "line_end": 125,
+      "lemma_name": "s5_lazy_tnth_3",
+      "severity": "warning",
+      "evidence_quote": "Lemma s5_lazy_tnth_3 : tnth s5_lazy_gen_tuple (Ordinal (n:=8) (m:=3) erefl) = tperm o3 o4.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/s5x5/s5x5_mixing.v",
+      "line_start": 131,
+      "line_end": 131,
+      "lemma_name": "s5_lazy_tnth_4",
+      "severity": "warning",
+      "evidence_quote": "Lemma s5_lazy_tnth_4 : tnth s5_lazy_gen_tuple (Ordinal (n:=8) (m:=4) erefl) = 1%g.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/s5x5/s5x5_mixing.v",
+      "line_start": 137,
+      "line_end": 137,
+      "lemma_name": "s5_lazy_tnth_5",
+      "severity": "warning",
+      "evidence_quote": "Lemma s5_lazy_tnth_5 : tnth s5_lazy_gen_tuple (Ordinal (n:=8) (m:=5) erefl) = 1%g.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/s5x5/s5x5_mixing.v",
+      "line_start": 143,
+      "line_end": 143,
+      "lemma_name": "s5_lazy_tnth_6",
+      "severity": "warning",
+      "evidence_quote": "Lemma s5_lazy_tnth_6 : tnth s5_lazy_gen_tuple (Ordinal (n:=8) (m:=6) erefl) = 1%g.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/s5x5/s5x5_mixing.v",
+      "line_start": 149,
+      "line_end": 149,
+      "lemma_name": "s5_lazy_tnth_7",
+      "severity": "warning",
+      "evidence_quote": "Lemma s5_lazy_tnth_7 : tnth s5_lazy_gen_tuple (Ordinal (n:=8) (m:=7) erefl) = 1%g.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/s5x5/s5x5_mixing.v",
+      "line_start": 158,
+      "line_end": 158,
+      "lemma_name": "path_gen_3_tnth_0",
+      "severity": "warning",
+      "evidence_quote": "Lemma path_gen_3_tnth_0 :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/s5x5/s5x5_mixing.v",
+      "line_start": 169,
+      "line_end": 169,
+      "lemma_name": "path_gen_3_tnth_1",
+      "severity": "warning",
+      "evidence_quote": "Lemma path_gen_3_tnth_1 :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/s5x5/s5x5_mixing.v",
+      "line_start": 180,
+      "line_end": 180,
+      "lemma_name": "path_gen_3_tnth_2",
+      "severity": "warning",
+      "evidence_quote": "Lemma path_gen_3_tnth_2 :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/s5x5/s5x5_mixing.v",
+      "line_start": 191,
+      "line_end": 191,
+      "lemma_name": "path_gen_3_tnth_3",
+      "severity": "warning",
+      "evidence_quote": "Lemma path_gen_3_tnth_3 :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/s5x5/s5x5_mixing.v",
+      "line_start": 204,
+      "line_end": 204,
+      "lemma_name": "schreier_gen_count_eq_sum",
+      "severity": "warning",
+      "evidence_quote": "Lemma schreier_gen_count_eq_sum (m n' : nat) (sigmas : (m.+1).-tuple {perm 'I_n'.+2})",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/s5x5/s5x5_mixing.v",
+      "line_start": 244,
+      "line_end": 244,
+      "lemma_name": "s5_lazy_count_eq",
+      "severity": "warning",
+      "evidence_quote": "Lemma s5_lazy_count_eq (i j : 'I_5) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/s5x5/s5x5_mixing.v",
+      "line_start": 315,
+      "line_end": 315,
+      "lemma_name": "var_dist_le_2",
+      "severity": "warning",
+      "evidence_quote": "Lemma var_dist_le_2 (A : finType) (P Q : R.-fdist A) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/s5x5/s5x5_mixing.v",
+      "line_start": 329,
+      "line_end": 329,
+      "lemma_name": "var_dist_fdistmap_inj",
+      "severity": "warning",
+      "evidence_quote": "Lemma var_dist_fdistmap_inj (A B : finType) (f : A -> B) (P Q : R.-fdist A) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "S998",
+      "file": "rocq-audit",
+      "line_start": 1,
+      "line_end": 1,
+      "severity": "warning",
+      "evidence_quote": "agent rc=1: ",
+      "closeness": "near",
+      "explanation": "Stage 2 call failed for chunk 1; see logs.",
+      "fix_sketch": "Retry the commit. If repeated, check agent configuration.",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": {
+    "entity_count": 28,
+    "chunk_count": 7,
+    "chunk_size": 4,
+    "workers_used": 4,
+    "tokens_used": 0,
+    "tokens_cap": 20000000,
+    "wall_ms_used": 6773,
+    "wall_ms_cap": 1800000,
+    "deferred_chunks": 0,
+    "stop_reason": "clean",
+    "estimated_usd": 0.0,
+    "model": "sonnet"
+  },
+  "exit_code": 0
+}

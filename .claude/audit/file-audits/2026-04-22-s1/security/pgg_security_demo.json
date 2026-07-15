@@ -1,0 +1,34 @@
+{
+  "findings": [
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/security/pgg_security_demo.v",
+      "line_start": 50,
+      "line_end": 50,
+      "lemma_name": "orbit_of",
+      "severity": "error",
+      "evidence_quote": "Definition orbit_of (desc : RAAGDesc) (s : nat) : seq nat :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/security/pgg_security_demo.v",
+      "line_start": 53,
+      "line_end": 53,
+      "lemma_name": "is_transitive",
+      "severity": "error",
+      "evidence_quote": "Definition is_transitive (desc : RAAGDesc) : bool :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": null,
+  "exit_code": 2
+}

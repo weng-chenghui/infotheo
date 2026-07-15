@@ -1,0 +1,152 @@
+{
+  "findings": [
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/s5/s5_mixing.v",
+      "line_start": 77,
+      "line_end": 77,
+      "lemma_name": "path_gen_tuple_3_invol",
+      "severity": "warning",
+      "evidence_quote": "Lemma path_gen_tuple_3_invol :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/s5/s5_mixing.v",
+      "line_start": 138,
+      "line_end": 138,
+      "lemma_name": "s5_sos_lower_triangular",
+      "severity": "warning",
+      "evidence_quote": "Definition s5_sos_lower_triangular : seq (seq rat) :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/s5/s5_mixing.v",
+      "line_start": 160,
+      "line_end": 160,
+      "lemma_name": "s5_sos_diagonal_nonneg",
+      "severity": "warning",
+      "evidence_quote": "Lemma s5_sos_diagonal_nonneg : forall k,",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/s5/s5_mixing.v",
+      "line_start": 55,
+      "line_end": 55,
+      "lemma_name": "s5_alpha_R_ge0",
+      "severity": "error",
+      "evidence_quote": "Lemma s5_alpha_R_ge0 (R : realType) : 0 <= s5_alpha_R R.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/s5/s5_mixing.v",
+      "line_start": 61,
+      "line_end": 61,
+      "lemma_name": "s5_alpha_R_le1",
+      "severity": "error",
+      "evidence_quote": "Lemma s5_alpha_R_le1 (R : realType) : s5_alpha_R R <= 1.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/s5/s5_mixing.v",
+      "line_start": 67,
+      "line_end": 67,
+      "lemma_name": "s5_alpha_R_lt1",
+      "severity": "error",
+      "evidence_quote": "Lemma s5_alpha_R_lt1 (R : realType) : s5_alpha_R R < 1.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/s5/s5_mixing.v",
+      "line_start": 209,
+      "line_end": 209,
+      "lemma_name": "s5_gap_R_pos",
+      "severity": "error",
+      "evidence_quote": "Lemma s5_gap_R_pos (R : realType) : 0 < s5_gap_R R.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/s5/s5_mixing.v",
+      "line_start": 215,
+      "line_end": 215,
+      "lemma_name": "s5_gap_R_le1",
+      "severity": "error",
+      "evidence_quote": "Lemma s5_gap_R_le1 (R : realType) : s5_gap_R R <= 1.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/s5/s5_mixing.v",
+      "line_start": 221,
+      "line_end": 221,
+      "lemma_name": "s5_gap_R_one_minus",
+      "severity": "error",
+      "evidence_quote": "Lemma s5_gap_R_one_minus (R : realType) : 1 - s5_gap_R R = s5_alpha_R R.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/s5/s5_mixing.v",
+      "line_start": 224,
+      "line_end": 224,
+      "lemma_name": "s5_spectral_convergence_gap",
+      "severity": "error",
+      "evidence_quote": "Lemma s5_spectral_convergence_gap",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "I001",
+      "file": "pgg-smc/instances/s5/s5_mixing.v",
+      "line_start": 77,
+      "line_end": 77,
+      "lemma_name": "path_gen_tuple_3_invol",
+      "severity": "error",
+      "evidence_quote": "Lemma path_gen_tuple_3_invol :",
+      "stage": "stage1",
+      "reason": "five or more underscore-separated components without a canonical MathComp suffix",
+      "stages": [
+        "stage1"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": null,
+  "exit_code": 2
+}

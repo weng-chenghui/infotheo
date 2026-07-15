@@ -1,0 +1,747 @@
+
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Module entropy_convex</title>
+<meta name="description" content="Documentation of Coq module Infotheo Documentation" />
+<link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/markdown-it/dist/markdown-it.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/markdown-it-texmath/texmath.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/darkmode-js@1.5.7/lib/darkmode-js.min.js"></script>
+<link href="rocqnavi.css" rel="stylesheet" type="text/css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script type="text/javascript" src="rocqnavi.js"> </script>
+</head>
+
+<body onload="init()">
+
+  <main>
+    <div class="sidebar">
+      <h2>Files</h2>
+      <li><details id="infotheo"><summary>infotheo</summary>
+          <ul>
+          <li><details id="infotheo.du2002"><summary>du2002</summary>
+          <ul>
+          <li><a href="infotheo.du2002.spp_entropy.html">spp_entropy</a></li>
+<li><a href="infotheo.du2002.spp_interface.html">spp_interface</a></li>
+<li><a href="infotheo.du2002.spp_pismc.html">spp_pismc</a></li>
+<li><a href="infotheo.du2002.spp_proba.html">spp_proba</a></li>
+<li><a href="infotheo.du2002.spp_program.html">spp_program</a></li>
+<li><a href="infotheo.du2002.spp_proof.html">spp_proof</a></li>
+<li><a href="infotheo.du2002.spp_session_types.html">spp_session_types</a></li>
+<li><a href="infotheo.du2002.spp_tactics.html">spp_tactics</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.dumas2017dual"><summary>dumas2017dual</summary>
+          <ul>
+          <li><details id="infotheo.dumas2017dual.dsdp"><summary>dsdp</summary>
+          <ul>
+          <li><a href="infotheo.dumas2017dual.dsdp.dsdp_correctness.html">dsdp_correctness</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_entropy.html">dsdp_entropy</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_entropy_trace.html">dsdp_entropy_trace</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_interface.html">dsdp_interface</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_pismc.html">dsdp_pismc</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_program.html">dsdp_program</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_security.html">dsdp_security</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_session_types.html">dsdp_session_types</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_syntax_demo.html">dsdp_syntax_demo</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.dumas2017dual.entropy_fiber"><summary>entropy_fiber</summary>
+          <ul>
+          <li><a href="infotheo.dumas2017dual.entropy_fiber.entropy_fiber.html">entropy_fiber</a></li>
+<li><a href="infotheo.dumas2017dual.entropy_fiber.entropy_fiber_zpq.html">entropy_fiber_zpq</a></li>
+<li><a href="infotheo.dumas2017dual.entropy_fiber.linear_fiber_zpq.html">linear_fiber_zpq</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.dumas2017dual.lib"><summary>lib</summary>
+          <ul>
+          <li><a href="infotheo.dumas2017dual.lib.extra_algebra.html">extra_algebra</a></li>
+<li><a href="infotheo.dumas2017dual.lib.extra_entropy.html">extra_entropy</a></li>
+<li><a href="infotheo.dumas2017dual.lib.extra_proba.html">extra_proba</a></li>
+<li><a href="infotheo.dumas2017dual.lib.rouche_capelli.html">rouche_capelli</a></li>
+          </ul>
+          </details>
+          </li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.ecc_classic"><summary>ecc_classic</summary>
+          <ul>
+          <li><a href="infotheo.ecc_classic.alternant.html">alternant</a></li>
+<li><a href="infotheo.ecc_classic.bch.html">bch</a></li>
+<li><a href="infotheo.ecc_classic.cyclic_code.html">cyclic_code</a></li>
+<li><a href="infotheo.ecc_classic.decoding.html">decoding</a></li>
+<li><a href="infotheo.ecc_classic.grs.html">grs</a></li>
+<li><a href="infotheo.ecc_classic.hamming_code.html">hamming_code</a></li>
+<li><a href="infotheo.ecc_classic.linearcode.html">linearcode</a></li>
+<li><a href="infotheo.ecc_classic.mceliece.html">mceliece</a></li>
+<li><a href="infotheo.ecc_classic.poly_decoding.html">poly_decoding</a></li>
+<li><a href="infotheo.ecc_classic.reed_solomon.html">reed_solomon</a></li>
+<li><a href="infotheo.ecc_classic.repcode.html">repcode</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.ecc_modern"><summary>ecc_modern</summary>
+          <ul>
+          <li><a href="infotheo.ecc_modern.checksum.html">checksum</a></li>
+<li><a href="infotheo.ecc_modern.degree_profile.html">degree_profile</a></li>
+<li><a href="infotheo.ecc_modern.ldpc.html">ldpc</a></li>
+<li><a href="infotheo.ecc_modern.ldpc_algo.html">ldpc_algo</a></li>
+<li><a href="infotheo.ecc_modern.ldpc_algo_proof.html">ldpc_algo_proof</a></li>
+<li><a href="infotheo.ecc_modern.ldpc_erasure.html">ldpc_erasure</a></li>
+<li><a href="infotheo.ecc_modern.max_subset.html">max_subset</a></li>
+<li><a href="infotheo.ecc_modern.stopping_set.html">stopping_set</a></li>
+<li><a href="infotheo.ecc_modern.subgraph_partition.html">subgraph_partition</a></li>
+<li><a href="infotheo.ecc_modern.summary.html">summary</a></li>
+<li><a href="infotheo.ecc_modern.summary_tanner.html">summary_tanner</a></li>
+<li><a href="infotheo.ecc_modern.tanner.html">tanner</a></li>
+<li><a href="infotheo.ecc_modern.tanner_partition.html">tanner_partition</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.homomorphic_encryption"><summary>homomorphic_encryption</summary>
+          <ul>
+          <li><details id="infotheo.homomorphic_encryption.benaloh1994"><summary>benaloh1994</summary>
+          <ul>
+          <li><a href="infotheo.homomorphic_encryption.benaloh1994.benaloh_ahe.html">benaloh_ahe</a></li>
+<li><a href="infotheo.homomorphic_encryption.benaloh1994.benaloh_enc.html">benaloh_enc</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.homomorphic_encryption.idealized"><summary>idealized</summary>
+          <ul>
+          <li><a href="infotheo.homomorphic_encryption.idealized.idealized_ahe.html">idealized_ahe</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.homomorphic_encryption.paillier1999"><summary>paillier1999</summary>
+          <ul>
+          <li><a href="infotheo.homomorphic_encryption.paillier1999.paillier_ahe.html">paillier_ahe</a></li>
+<li><a href="infotheo.homomorphic_encryption.paillier1999.paillier_enc.html">paillier_enc</a></li>
+          </ul>
+          </details>
+          </li>
+<li><a href="infotheo.homomorphic_encryption.ahe_enc.html">ahe_enc</a></li>
+<li><a href="infotheo.homomorphic_encryption.ahe_monoid.html">ahe_monoid</a></li>
+<li><a href="infotheo.homomorphic_encryption.enc_dec.html">enc_dec</a></li>
+<li><a href="infotheo.homomorphic_encryption.he_types.html">he_types</a></li>
+<li><a href="infotheo.homomorphic_encryption.homomorphic_encryption.html">homomorphic_encryption</a></li>
+<li><a href="infotheo.homomorphic_encryption.key_type.html">key_type</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.information_theory"><summary>information_theory</summary>
+          <ul>
+          <li><a href="infotheo.information_theory.aep.html">aep</a></li>
+<li><a href="infotheo.information_theory.binary_symmetric_channel.html">binary_symmetric_channel</a></li>
+<li><a href="infotheo.information_theory.channel.html">channel</a></li>
+<li><a href="infotheo.information_theory.channel_code.html">channel_code</a></li>
+<li><a href="infotheo.information_theory.channel_coding_converse.html">channel_coding_converse</a></li>
+<li><a href="infotheo.information_theory.channel_coding_direct.html">channel_coding_direct</a></li>
+<li><a href="infotheo.information_theory.conditional_divergence.html">conditional_divergence</a></li>
+<li><a href="infotheo.information_theory.entropy.html">entropy</a></li>
+<li><a href="infotheo.information_theory.entropy_convex.html">entropy_convex</a></li>
+<li><a href="infotheo.information_theory.erasure_channel.html">erasure_channel</a></li>
+<li><a href="infotheo.information_theory.error_exponent.html">error_exponent</a></li>
+<li><a href="infotheo.information_theory.joint_typ_seq.html">joint_typ_seq</a></li>
+<li><a href="infotheo.information_theory.jtypes.html">jtypes</a></li>
+<li><a href="infotheo.information_theory.kraft.html">kraft</a></li>
+<li><a href="infotheo.information_theory.pproba.html">pproba</a></li>
+<li><a href="infotheo.information_theory.shannon_fano.html">shannon_fano</a></li>
+<li><a href="infotheo.information_theory.source_code.html">source_code</a></li>
+<li><a href="infotheo.information_theory.source_coding_fl_converse.html">source_coding_fl_converse</a></li>
+<li><a href="infotheo.information_theory.source_coding_fl_direct.html">source_coding_fl_direct</a></li>
+<li><a href="infotheo.information_theory.source_coding_vl_converse.html">source_coding_vl_converse</a></li>
+<li><a href="infotheo.information_theory.source_coding_vl_direct.html">source_coding_vl_direct</a></li>
+<li><a href="infotheo.information_theory.string_entropy.html">string_entropy</a></li>
+<li><a href="infotheo.information_theory.success_decode_bound.html">success_decode_bound</a></li>
+<li><a href="infotheo.information_theory.typ_seq.html">typ_seq</a></li>
+<li><a href="infotheo.information_theory.types.html">types</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.lib"><summary>lib</summary>
+          <ul>
+          <li><a href="infotheo.lib.bigop_ext.html">bigop_ext</a></li>
+<li><a href="infotheo.lib.binary_entropy_function.html">binary_entropy_function</a></li>
+<li><a href="infotheo.lib.classical_sets_ext.html">classical_sets_ext</a></li>
+<li><a href="infotheo.lib.coqRE.html">coqRE</a></li>
+<li><a href="infotheo.lib.derive_ext.html">derive_ext</a></li>
+<li><a href="infotheo.lib.dft.html">dft</a></li>
+<li><a href="infotheo.lib.euclid.html">euclid</a></li>
+<li><a href="infotheo.lib.f2.html">f2</a></li>
+<li><a href="infotheo.lib.hamming.html">hamming</a></li>
+<li><a href="infotheo.lib.natbin.html">natbin</a></li>
+<li><a href="infotheo.lib.num_occ.html">num_occ</a></li>
+<li><a href="infotheo.lib.poly_ext.html">poly_ext</a></li>
+<li><a href="infotheo.lib.realType_ext.html">realType_ext</a></li>
+<li><a href="infotheo.lib.realType_ln.html">realType_ln</a></li>
+<li><a href="infotheo.lib.ssr_ext.html">ssr_ext</a></li>
+<li><a href="infotheo.lib.ssralg_ext.html">ssralg_ext</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.probability"><summary>probability</summary>
+          <ul>
+          <li><a href="infotheo.probability.bayes.html">bayes</a></li>
+<li><a href="infotheo.probability.convex.html">convex</a></li>
+<li><a href="infotheo.probability.convex_equiv.html">convex_equiv</a></li>
+<li><a href="infotheo.probability.convex_stone.html">convex_stone</a></li>
+<li><a href="infotheo.probability.divergence.html">divergence</a></li>
+<li><a href="infotheo.probability.fdist.html">fdist</a></li>
+<li><a href="infotheo.probability.fsdist.html">fsdist</a></li>
+<li><a href="infotheo.probability.graphoid.html">graphoid</a></li>
+<li><a href="infotheo.probability.jensen.html">jensen</a></li>
+<li><a href="infotheo.probability.jfdist_cond.html">jfdist_cond</a></li>
+<li><a href="infotheo.probability.log_sum.html">log_sum</a></li>
+<li><a href="infotheo.probability.necset.html">necset</a></li>
+<li><a href="infotheo.probability.partition_inequality.html">partition_inequality</a></li>
+<li><a href="infotheo.probability.pinsker.html">pinsker</a></li>
+<li><a href="infotheo.probability.proba.html">proba</a></li>
+<li><a href="infotheo.probability.variation_dist.html">variation_dist</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.robust"><summary>robust</summary>
+          <ul>
+          <li><a href="infotheo.robust.robustmean.html">robustmean</a></li>
+<li><a href="infotheo.robust.weightedmean.html">weightedmean</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.smc"><summary>smc</summary>
+          <ul>
+          <li><a href="infotheo.smc.graded_resource.html">graded_resource</a></li>
+<li><a href="infotheo.smc.pismc.html">pismc</a></li>
+<li><a href="infotheo.smc.smc_interpreter.html">smc_interpreter</a></li>
+<li><a href="infotheo.smc.smc_session_types.html">smc_session_types</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.toy_examples"><summary>toy_examples</summary>
+          <ul>
+          <li><a href="infotheo.toy_examples.conditional_entropy.html">conditional_entropy</a></li>
+<li><a href="infotheo.toy_examples.expected_value_variance.html">expected_value_variance</a></li>
+<li><a href="infotheo.toy_examples.expected_value_variance_ordn.html">expected_value_variance_ordn</a></li>
+<li><a href="infotheo.toy_examples.expected_value_variance_tuple.html">expected_value_variance_tuple</a></li>
+          </ul>
+          </details>
+          </li>
+<li><a href="infotheo._check_sigs.html">_check_sigs</a></li>
+<li><a href="infotheo._depgraph_extract.html">_depgraph_extract</a></li>
+<li><a href="infotheo._test_star2.html">_test_star2</a></li>
+<li><a href="infotheo.test_sri.html">test_sri</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="pgg_reconstruct"><summary>pgg_reconstruct</summary>
+          <ul>
+          <li><a href="pgg_reconstruct.ag_code.html">ag_code</a></li>
+<li><a href="pgg_reconstruct.ag_massey_bridge.html">ag_massey_bridge</a></li>
+<li><a href="pgg_reconstruct.ag_multiplicative.html">ag_multiplicative</a></li>
+<li><a href="pgg_reconstruct.algebraic_rigidity.html">algebraic_rigidity</a></li>
+<li><a href="pgg_reconstruct.coord_perm_compatible.html">coord_perm_compatible</a></li>
+<li><a href="pgg_reconstruct.cover_genus0.html">cover_genus0</a></li>
+<li><a href="pgg_reconstruct.cover_genus1.html">cover_genus1</a></li>
+<li><a href="pgg_reconstruct.cover_genus2.html">cover_genus2</a></li>
+<li><a href="pgg_reconstruct.cover_tradeoff.html">cover_tradeoff</a></li>
+<li><a href="pgg_reconstruct.covering_scheme.html">covering_scheme</a></li>
+<li><a href="pgg_reconstruct.hyperelliptic_code.html">hyperelliptic_code</a></li>
+<li><a href="pgg_reconstruct.lagrange.html">lagrange</a></li>
+<li><a href="pgg_reconstruct.massey.html">massey</a></li>
+<li><a href="pgg_reconstruct.pgg_assignment.html">pgg_assignment</a></li>
+<li><a href="pgg_reconstruct.pgg_covering_correctness.html">pgg_covering_correctness</a></li>
+<li><a href="pgg_reconstruct.pgg_deck_pairing.html">pgg_deck_pairing</a></li>
+<li><a href="pgg_reconstruct.pgg_sharing_framework.html">pgg_sharing_framework</a></li>
+<li><a href="pgg_reconstruct.pgg_sum_mod.html">pgg_sum_mod</a></li>
+<li><a href="pgg_reconstruct.pgg_threshold.html">pgg_threshold</a></li>
+<li><a href="pgg_reconstruct.pgl_bound.html">pgl_bound</a></li>
+<li><a href="pgg_reconstruct.rigidity_monster_instance.html">rigidity_monster_instance</a></li>
+<li><a href="pgg_reconstruct.rigidity_s5_instance.html">rigidity_s5_instance</a></li>
+<li><a href="pgg_reconstruct.rigidity_star_instance.html">rigidity_star_instance</a></li>
+<li><a href="pgg_reconstruct.rs_massey_bridge.html">rs_massey_bridge</a></li>
+<li><a href="pgg_reconstruct.rs_privacy.html">rs_privacy</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="pgg_smc"><summary>pgg_smc</summary>
+          <ul>
+          <li><a href="pgg_smc.abelian_word_collapse.html">abelian_word_collapse</a></li>
+<li><a href="pgg_smc.free_group_ball.html">free_group_ball</a></li>
+<li><a href="pgg_smc.perm_uniform.html">perm_uniform</a></li>
+<li><a href="pgg_smc.pgg_abelian.html">pgg_abelian</a></li>
+<li><a href="pgg_smc.pgg_abelian.html">pgg_abelian</a></li>
+<li><a href="pgg_smc.pgg_abelian_collapse.html">pgg_abelian_collapse</a></li>
+<li><a href="pgg_smc.pgg_collusion_bound.html">pgg_collusion_bound</a></li>
+<li><a href="pgg_smc.pgg_correctness.html">pgg_correctness</a></li>
+<li><a href="pgg_smc.pgg_free.html">pgg_free</a></li>
+<li><a href="pgg_smc.pgg_interface.html">pgg_interface</a></li>
+<li><a href="pgg_smc.pgg_lfree.html">pgg_lfree</a></li>
+<li><a href="pgg_smc.pgg_nonabelian.html">pgg_nonabelian</a></li>
+<li><a href="pgg_smc.pgg_pismc.html">pgg_pismc</a></li>
+<li><a href="pgg_smc.pgg_program.html">pgg_program</a></li>
+<li><a href="pgg_smc.pgg_raag.html">pgg_raag</a></li>
+<li><a href="pgg_smc.pgg_raag_cartier_foata.html">pgg_raag_cartier_foata</a></li>
+<li><a href="pgg_smc.pgg_raag_clique.html">pgg_raag_clique</a></li>
+<li><a href="pgg_smc.pgg_raag_path.html">pgg_raag_path</a></li>
+<li><a href="pgg_smc.pgg_raag_s5.html">pgg_raag_s5</a></li>
+<li><a href="pgg_smc.pgg_raag_star.html">pgg_raag_star</a></li>
+<li><a href="pgg_smc.pgg_security.html">pgg_security</a></li>
+<li><a href="pgg_smc.pgg_session_types.html">pgg_session_types</a></li>
+<li><a href="pgg_smc.pgg_word_analysis.html">pgg_word_analysis</a></li>
+<li><a href="pgg_smc.test_cf.html">test_cf</a></li>
+<li><a href="pgg_smc.test_cf2.html">test_cf2</a></li>
+<li><a href="pgg_smc.test_cf3.html">test_cf3</a></li>
+<li><a href="pgg_smc.test_sri.html">test_sri</a></li>
+<li><a href="pgg_smc.test_sri2.html">test_sri2</a></li>
+          </ul>
+          </details>
+          </li>
+    </div>
+
+  <div class="coq">
+
+    <div class="content">
+      <p>
+        <a href="./index.html">Top</a>
+        
+      </p>
+      <h1 class="title">Module entropy_convex</h1>
+<span class="vernacular">From</span><span class="id"> HB</span><span class="vernacular"> Require</span><span class="vernacular"> Import</span><span class="id"> structures</span>.<br/>
+<span class="vernacular">From</span><span class="id"> mathcomp</span><span class="vernacular"> Require</span><span class="vernacular"> Import</span><span class="id"> all_ssreflect</span><span class="id"> ssralg</span><span class="id"> ssrnum</span><span class="id"> matrix</span><span class="id"> interval</span>.<br/>
+<span class="vernacular">From</span><span class="id"> mathcomp</span><span class="vernacular"> Require</span><span class="vernacular"> Import</span><span class="id"> ring</span>.<br/>
+<span class="vernacular">From</span><span class="id"> mathcomp</span><span class="vernacular"> Require</span><span class="id"> boolp</span>.<br/>
+<span class="vernacular">From</span><span class="id"> mathcomp</span><span class="vernacular"> Require</span><span class="vernacular"> Import</span><span class="id"> unstable</span><span class="id"> mathcomp_extra</span><span class="id"> reals</span>.<br/>
+<span class="vernacular">From</span><span class="id"> mathcomp</span><span class="vernacular"> Require</span><span class="vernacular"> Import</span><span class="id"> interval_inference</span><span class="id"> set_interval</span>.<br/>
+<span class="vernacular">From</span><span class="id"> mathcomp</span><span class="vernacular"> Require</span><span class="vernacular"> Import</span><span class="id"> functions</span><span class="id"> topology</span><span class="id"> normedtype</span><span class="id"> realfun</span><span class="id"> derive</span><span class="id"> exp</span>.<br/>
+<span class="vernacular">From</span><span class="id"> mathcomp</span><span class="vernacular"> Require</span><span class="id"> convex</span>.<br/>
+<span class="vernacular">Require</span><span class="vernacular"> Import</span><span class="id"> ssr_ext</span><span class="id"> ssralg_ext</span><span class="id"> bigop_ext</span><span class="id"> realType_ext</span><span class="id"> realType_ln</span>.<br/>
+<span class="vernacular">Require</span><span class="vernacular"> Import</span><span class="id"> derive_ext</span><span class="id"> fdist</span><span class="id"> jfdist_cond</span><span class="id"> entropy</span><span class="id"> convex</span>.<br/>
+<span class="vernacular">Require</span><span class="vernacular"> Import</span><span class="id"> binary_entropy_function</span><span class="id"> log_sum</span><span class="id"> divergence</span>.<br/>
+<br/>
+<div class="ssrdoc md">
+# Elements of Information Theory (cont'd)
+
+This file contains a formalization of the section 2.7 of:
+- Thomas M. Cover, Joy A. Thomas, Elements of Information Theory, Wiley,
+  2005
+Lemmas:
+- divergence restricted to dominated pairs is a convex function; it's
+  actually not a restriction since div is meaningful only on dominated
+  pairs (`convex_div`)
+- convexity of relative entropy (thm 2.7.2) (`convex_relative_entropy`)
+- entropy is concave (thm 2.7.3) (`entropy_concave`)
+- the mutual information is concave w.r.t. its first argument (thm 2.7.4)
+  (`mutual_information_concave`)
+- the mutual information is convex w.r.t. its second argument (thm 2.7.4)
+  (`mutual_information_convex`)
+
+```
+          dom_pair A == type of dominated pairs, i.e., a pair of
+                        distributions (d, e) s.t. d &lt;&lt; e
+        avg_dom_pair == TODO
+    uncurry_dom_pair == TODO
+```
+</div>
+<br/>
+<span class="gallina-kwd">Set</span><span class="vernacular"> Implicit</span><span class="vernacular"> Arguments</span>.<br/>
+<span class="vernacular">Unset</span><span class="vernacular"> Strict</span><span class="vernacular"> Implicit</span>.<br/>
+<span class="vernacular">Import</span><span class="id"> Prenex</span><span class="vernacular"> Implicits</span>.<br/>
+<br/>
+<span class="vernacular">Local</span><span class="vernacular"> Open</span><span class="vernacular"> Scope</span><span class="id"> ring_scope</span>.<br/>
+<span class="vernacular">Local</span><span class="vernacular"> Open</span><span class="vernacular"> Scope</span><span class="id"> reals_ext_scope</span>.<br/>
+<span class="vernacular">Local</span><span class="vernacular"> Open</span><span class="vernacular"> Scope</span><span class="id"> fdist_scope</span>.<br/>
+<span class="vernacular">Local</span><span class="vernacular"> Open</span><span class="vernacular"> Scope</span><span class="id"> convex_scope</span>.<br/>
+<span class="vernacular">Local</span><span class="vernacular"> Open</span><span class="vernacular"> Scope</span><span class="id"> entropy_scope</span>.<br/>
+<br/>
+<span class="vernacular">Import</span><span class="id"> Order</span>.<span class="id">POrderTheory</span><span class="id"> GRing</span>.<span class="id">Theory</span><span class="id"> Num</span>.<span class="id">Theory</span>.<br/>
+<br/>
+<span class="vernacular">Import</span><span class="id"> numFieldNormedType</span>.<span class="vernacular">Exports</span>.<br/>
+<br/>
+<span class="vernacular">Section</span><span class="id"> entropy_log_div</span>.<br/>
+<span class="vernacular">Variable</span><span class="id"> R</span><span class="id"> :</span><span class="id"> realType</span>.<br/>
+<span class="vernacular">Variables</span> (<span class="id">A</span><span class="id"> :</span><span class="id"> finType</span>) (<span class="id">p</span><span class="id"> :</span><span class="id"> R</span>.<span class="id">-fdist</span><span class="id"> A</span>) (<span class="id">n</span><span class="id"> :</span><span class="id"> nat</span>) (<span class="id">An1</span><span class="id"> :</span><span class="id"> #|A|</span><span class="id"> =</span><span class="id"> n</span>.<span class="id">+1</span>).<br/>
+<span class="vernacular">Let</span><span class="id"> u</span><span class="id"> :=</span><span class="id"> @fdist_uniform</span><span class="id"> R</span><span class="id"> _</span><span class="id"> _</span><span class="id"> An1</span>.<br/>
+<br/>
+<span class="vernacular">Local</span><span class="vernacular"> Open</span><span class="vernacular"> Scope</span><span class="id"> divergence_scope</span>.<br/>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> entropy_log_div</span><span class="id"> :</span><span class="id"> entropy</span><span class="id"> p</span><span class="id"> =</span><span class="id"> log</span><span class="id"> #|A|%:R</span><span class="id"> -</span><span class="id"> D</span>(<span class="id">p</span><span class="id"> ||</span><span class="id"> u</span>).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id">rewrite</span><span class="id"> /entropy</span><span class="id"> /div</span>.<br/>
+<span class="id">evar</span> (<span class="id">RHS</span><span class="id"> :</span><span class="id"> A</span><span class="id"> -&gt;</span><span class="id"> R</span>).<br/>
+<span class="id">have</span><span class="id"> H</span><span class="id"> a</span><span class="id"> :</span><span class="id"> p</span><span class="id"> a</span><span class="id"> *</span><span class="id"> log</span> (<span class="id">p</span><span class="id"> a</span><span class="id"> /</span><span class="id"> u</span><span class="id"> a</span>)<span class="id"> =</span><span class="id"> RHS</span><span class="id"> a</span>.<br/>
+&nbsp;&nbsp;<span class="id">have:=</span><span class="id"> FDist</span>.<span class="id">ge0</span><span class="id"> p</span><span class="id"> a</span>.<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> le_eqVlt=&gt;</span><span class="id"> /orP</span><span class="id"> [/eqP</span><span class="id"> H|H];</span><span class="id"> last</span><span class="id"> first</span>.<br/>
+&nbsp;&nbsp;<span class="id">-</span><span class="id"> rewrite</span><span class="id"> fdist_uniformE</span><span class="id"> invrK</span><span class="id"> logM//;</span><span class="id"> last</span><span class="gallina-kwd"> by</span><span class="id"> rewrite</span><span class="id"> An1</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> mulrDr</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> instantiate</span> (<span class="id">RHS</span><span class="id"> :=</span><span class="gallina-kwd"> fun</span><span class="id"> a</span><span class="id"> =&gt;</span><span class="id"> p</span><span class="id"> a</span><span class="id"> *</span><span class="id"> log</span> (<span class="id">p</span><span class="id"> a</span>)<span class="id"> +</span><span class="id"> p</span><span class="id"> a</span><span class="id"> *</span><span class="id"> log</span><span class="id"> #|A|%:R</span>).<br/>
+&nbsp;&nbsp;<span class="id">-</span><span class="gallina-kwd"> by</span><span class="id"> rewrite</span><span class="id"> /RHS</span><span class="id"> -H</span><span class="id"> /=</span><span class="id"> 3!mul0r</span><span class="id"> add0r</span>.<br/>
+<span class="id">have</span><span class="id"> -&gt;</span><span class="id"> :</span><span class="id"> \sum_</span>(<span class="id">a</span><span class="gallina-kwd"> in</span><span class="id"> A</span>)<span class="id"> p</span><span class="id"> a</span><span class="id"> *</span><span class="id"> log</span> (<span class="id">p</span><span class="id"> a</span><span class="id"> /</span><span class="id"> u</span><span class="id"> a</span>)<span class="id"> =</span><span class="id"> \sum_</span>(<span class="id">a</span><span class="gallina-kwd"> in</span><span class="id"> A</span>)<span class="id"> RHS</span><span class="id"> a</span>.<br/>
+&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> move</span><span class="id"> :</span><span class="id"> H;</span><span class="id"> rewrite</span><span class="id"> /RHS</span><span class="id"> =&gt;</span><span class="id"> H;</span><span class="id"> exact:</span><span class="id"> eq_bigr</span>.<br/>
+<span class="id">rewrite</span><span class="id"> /RHS</span><span class="id"> big_split</span><span class="id"> /=</span><span class="id"> -big_distrl</span><span class="id"> /=</span> (<span class="id">FDist</span>.<span class="id">f1</span><span class="id"> p</span>)<span class="id"> mul1r</span>.<br/>
+<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> opprD</span><span class="id"> addrC</span><span class="id"> -addrA</span><span class="id"> addNr</span><span class="id"> addr0</span>.<br/>
+Qed.</div></details>
+<span class="vernacular">End</span><span class="id"> entropy_log_div</span>.<br/>
+<br/>
+<span class="vernacular">Section</span><span class="id"> dominated_pair</span>.<br/>
+<span class="vernacular">Variable</span><span class="id"> R</span><span class="id"> :</span><span class="id"> realType</span>.<br/>
+<span class="vernacular">Variable</span><span class="id"> A</span><span class="id"> :</span><span class="id"> finType</span>.<br/>
+<span class="vernacular">Implicit</span><span class="id"> Types</span><span class="id"> p</span><span class="id"> q</span><span class="id"> :</span><span class="id"> {prob</span><span class="id"> R}</span>.<br/>
+<br/>
+<span class="vernacular">Definition</span><span class="id"> dom_pair</span><span class="id"> :=</span><span class="id"> {d</span><span class="id"> :</span><span class="id"> R</span>.<span class="id">-fdist</span><span class="id"> A</span><span class="id"> *</span><span class="id"> {fdist</span><span class="id"> A}</span><span class="id"> |</span><span class="id"> d</span>.<span class="id">1</span><span class="id"> `&lt;&lt;</span><span class="id"> d</span>.<span class="id">2}</span>.<br/>
+<br/>
+<span class="id">HB</span>.<span class="id">instance</span><span class="vernacular"> Definition</span><span class="id"> _</span><span class="id"> :=</span><span class="id"> boolp</span>.<span class="id">gen_eqMixin</span><span class="id"> dom_pair</span>.<br/>
+<span class="id">HB</span>.<span class="id">instance</span><span class="vernacular"> Definition</span><span class="id"> _</span><span class="id"> :=</span><span class="id"> boolp</span>.<span class="id">gen_choiceMixin</span><span class="id"> dom_pair</span>.<br/>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> dom_conv</span><span class="id"> p</span> (<span class="id">x</span><span class="id"> y</span><span class="id"> u</span><span class="id"> v</span><span class="id"> :</span><span class="id"> {fdist</span><span class="id"> A}</span>)<span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="id">x</span><span class="id"> `&lt;&lt;</span><span class="id"> y</span><span class="id"> -&gt;</span><span class="id"> u</span><span class="id"> `&lt;&lt;</span><span class="id"> v</span><span class="id"> -&gt;</span><span class="id"> x</span><span class="id"> &lt;|</span><span class="id"> p</span><span class="id"> |&gt;</span><span class="id"> u</span><span class="id"> `&lt;&lt;</span><span class="id"> y</span><span class="id"> &lt;|</span><span class="id"> p</span><span class="id"> |&gt;</span><span class="id"> v</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id">move=&gt;</span><span class="id"> /dominatesP</span><span class="id"> xy</span><span class="id"> /dominatesP</span><span class="id"> uv;</span><span class="id"> apply/dominatesP</span><span class="id"> =&gt;</span><span class="id"> a</span>.<br/>
+<span class="id">rewrite</span><span class="id"> !fdist_convE</span>.<br/>
+<span class="id">move/eqP;</span><span class="id"> rewrite</span><span class="id"> paddr_eq0;</span><span class="id"> [|exact/mulr_ge0</span><span class="id"> |exact/mulr_ge0]</span>.<br/>
+<span class="id">rewrite</span><span class="id"> !mulf_eq0=&gt;</span><span class="id"> /andP</span><span class="id"> [/orP</span><span class="id"> [/eqP</span><span class="id"> -&gt;|/eqP</span><span class="id"> /xy</span><span class="id"> -&gt;]]</span>.<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> onem0</span> (<span class="id">negPf</span> (<span class="id">oner_neq0</span><span class="id"> _</span>))<span class="id"> /=</span><span class="id"> =&gt;</span><span class="id"> /eqP</span><span class="id"> /uv</span><span class="id"> -&gt;</span>.<br/>
+&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> mul0r</span><span class="id"> mulr0</span><span class="id"> addr0</span>.<br/>
+<span class="gallina-kwd">by</span><span class="id"> case/orP=&gt;</span><span class="id"> [/eqP</span><span class="id"> -&gt;</span><span class="id"> |</span><span class="id"> /eqP</span><span class="id"> /uv</span><span class="id"> -&gt;];</span><span class="id"> rewrite</span><span class="id"> ?</span>(<span class="id">mul0r,</span><span class="id"> mulr0,</span><span class="id"> addr0</span>).<br/>
+Qed.</div></details>
+<br/>
+<span class="vernacular">Definition</span><span class="id"> avg_dom_pair</span><span class="id"> p</span> (<span class="id">x</span><span class="id"> y</span><span class="id"> :</span><span class="id"> dom_pair</span>)<span class="id"> :</span><span class="id"> dom_pair</span><span class="id"> :=</span><br/>
+&nbsp;&nbsp;<span class="gallina-kwd">let</span><span class="id"> ab</span><span class="id"> :=</span><span class="id"> proj1_sig</span><span class="id"> x</span><span class="gallina-kwd"> in</span><br/>
+&nbsp;&nbsp;<span class="gallina-kwd">let</span><span class="id"> b_dom_a</span><span class="id"> :=</span><span class="id"> proj2_sig</span><span class="id"> x</span><span class="gallina-kwd"> in</span><br/>
+&nbsp;&nbsp;<span class="gallina-kwd">let</span><span class="id"> cd</span><span class="id"> :=</span><span class="id"> proj1_sig</span><span class="id"> y</span><span class="gallina-kwd"> in</span><br/>
+&nbsp;&nbsp;<span class="gallina-kwd">let</span><span class="id"> d_dom_c</span><span class="id"> :=</span><span class="id"> proj2_sig</span><span class="id"> y</span><span class="gallina-kwd"> in</span><br/>
+&nbsp;&nbsp;<span class="id">exist</span><span class="id"> _</span> (<span class="id">ab</span><span class="id"> &lt;|</span><span class="id"> p</span><span class="id"> |&gt;</span><span class="id"> cd</span>) (<span class="id">dom_conv</span><span class="id"> p</span><span class="id"> b_dom_a</span><span class="id"> d_dom_c</span>).<br/>
+<br/>
+<span class="vernacular">Definition</span><span class="id"> uncurry_dom_pair</span><br/>
+&nbsp;&nbsp;<span class="id">U</span> (<span class="id">f</span><span class="id"> :</span><span class="id"> {fdist</span><span class="id"> A}</span><span class="id"> -&gt;</span><span class="id"> {fdist</span><span class="id"> A}</span><span class="id"> -&gt;</span><span class="id"> U</span>) (<span class="id">x</span><span class="id"> :</span><span class="id"> dom_pair</span>)<span class="id"> :</span><span class="id"> U</span><span class="id"> :=</span><br/>
+&nbsp;&nbsp;<span class="id">f</span> (<span class="id">sval</span><span class="id"> x</span>).<span class="id">1</span> (<span class="id">sval</span><span class="id"> x</span>).<span class="id">2</span>.<br/>
+<br/>
+<span class="vernacular">Let</span><span class="id"> avg</span><span class="id"> :=</span><span class="id"> avg_dom_pair</span>.<br/>
+<br/>
+<span class="vernacular">Let</span><span class="id"> avg1</span><span class="id"> x</span><span class="id"> y</span><span class="id"> :</span><span class="id"> avg</span><span class="id"> 1%:i01</span><span class="id"> x</span><span class="id"> y</span><span class="id"> =</span><span class="id"> x</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="gallina-kwd"> by</span><span class="id"> rewrite</span><span class="id"> /avg;</span><span class="id"> case</span><span class="id"> x</span><span class="id"> =&gt;</span><span class="id"> x0</span><span class="id"> H</span><span class="id"> /=;</span><span class="id"> exact/boolp</span>.<span class="id">eq_exist/conv1</span>. Qed.</div></details>
+<br/>
+<span class="vernacular">Let</span><span class="id"> avgI</span><span class="id"> p</span><span class="id"> x</span><span class="id"> :</span><span class="id"> avg</span><span class="id"> p</span><span class="id"> x</span><span class="id"> x</span><span class="id"> =</span><span class="id"> x</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="gallina-kwd"> by</span><span class="id"> rewrite</span><span class="id"> /avg;</span><span class="id"> case</span><span class="id"> x</span><span class="id"> =&gt;</span><span class="id"> x0</span><span class="id"> H</span><span class="id"> /=;</span><span class="id"> exact/boolp</span>.<span class="id">eq_exist/convmm</span>. Qed.</div></details>
+<br/>
+<span class="vernacular">Let</span><span class="id"> avgC</span><span class="id"> p</span><span class="id"> x</span><span class="id"> y</span><span class="id"> :</span><span class="id"> avg</span><span class="id"> p</span><span class="id"> x</span><span class="id"> y</span><span class="id"> =</span><span class="id"> avg</span><span class="id"> p%:num</span>.<span class="id">~%:i01</span><span class="id"> y</span><span class="id"> x</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="gallina-kwd"> by</span><span class="id"> rewrite</span><span class="id"> /avg;</span><span class="id"> exact/boolp</span>.<span class="id">eq_exist/convC</span>. Qed.</div></details>
+<br/>
+<span class="vernacular">Let</span><span class="id"> avgA</span><span class="id"> p</span><span class="id"> q</span><span class="id"> x</span><span class="id"> y</span><span class="id"> z</span><span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="id">avg</span><span class="id"> p</span><span class="id"> x</span> (<span class="id">avg</span><span class="id"> q</span><span class="id"> y</span><span class="id"> z</span>)<span class="id"> =</span><span class="id"> avg</span><span class="id"> [s_of</span><span class="id"> p,</span><span class="id"> q]</span> (<span class="id">avg</span><span class="id"> [r_of</span><span class="id"> p,</span><span class="id"> q]</span><span class="id"> x</span><span class="id"> y</span>)<span class="id"> z</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="gallina-kwd"> by</span><span class="id"> rewrite</span><span class="id"> /avg</span><span class="id"> /=;</span><span class="id"> exact/boolp</span>.<span class="id">eq_exist/convA</span>. Qed.</div></details>
+<br/>
+<span class="id">HB</span>.<span class="id">instance</span><span class="vernacular"> Definition</span><span class="id"> _</span><span class="id"> :=</span><span class="id"> @isConvexSpace</span>.<span class="id">Build</span><span class="id"> R</span><span class="id"> dom_pair</span><br/>
+&nbsp;&nbsp;<span class="id">avg</span><span class="id"> avg1</span><span class="id"> avgI</span><span class="id"> avgC</span><span class="id"> avgA</span>.<br/>
+<br/>
+<span class="vernacular">End</span><span class="id"> dominated_pair</span>.<br/>
+<br/>
+<span class="vernacular">Section</span><span class="id"> divergence_convex</span>.<br/>
+<span class="vernacular">Local</span><span class="vernacular"> Open</span><span class="vernacular"> Scope</span><span class="id"> divergence_scope</span>.<br/>
+<span class="vernacular">Variable</span><span class="id"> R</span><span class="id"> :</span><span class="id"> realType</span>.<br/>
+<span class="vernacular">Variables</span><span class="id"> A</span><span class="id"> :</span><span class="id"> finType</span>.<br/>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> convex_div</span><span class="id"> :</span><span class="id"> convex_function</span> (<span class="id">uncurry_dom_pair</span> (<span class="id">@div</span><span class="id"> R</span><span class="id"> A</span>)).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id">move=&gt;</span><span class="id"> [x</span><span class="id"> Hx]</span><span class="id"> [y</span><span class="id"> Hy]</span><span class="id"> p</span><span class="id"> /=;</span><span class="id"> rewrite</span><span class="id"> /uncurry_dom_pair</span><span class="id"> /=</span>.<br/>
+<span class="id">rewrite</span><span class="id"> /convex_function_at/=</span><span class="id"> avgRE</span><span class="id"> 2!big_distrr</span><span class="id"> /=</span><span class="id"> -big_split</span><span class="id"> /=</span><span class="id"> /div</span>.<br/>
+<span class="id">have</span><span class="id"> [-&gt;|p0]</span><span class="id"> :=</span><span class="id"> eqVneq</span><span class="id"> p</span><span class="id"> 0%:i01</span>.<br/>
+&nbsp;&nbsp;<span class="id">apply/eqW/eq_bigr=&gt;</span><span class="id"> a</span><span class="id"> _</span><span class="id"> /=</span>.<br/>
+&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> !conv0</span><span class="id"> mul0r</span><span class="id"> add0r</span><span class="id"> onem0</span><span class="id"> mul1r</span>.<br/>
+<span class="id">have</span><span class="id"> [/onem_eq0</span><span class="id"> p1|t0]</span><span class="id"> :=</span><span class="id"> eqVneq</span><span class="id"> p%:num</span>.<span class="id">~</span><span class="id"> 0</span>.<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span> (_<span class="id"> :</span><span class="id"> p</span><span class="id"> =</span><span class="id"> 1%:i01</span>)<span class="id">//;</span><span class="id"> last</span><span class="gallina-kwd"> by</span><span class="id"> apply/val_inj</span>.<br/>
+&nbsp;&nbsp;<span class="id">apply/eqW/eq_bigr=&gt;</span><span class="id"> a</span><span class="id"> _</span><span class="id"> /=</span>.<br/>
+&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> !conv1</span><span class="id"> mul1r</span><span class="id"> onem1</span><span class="id"> mul0r</span><span class="id"> addr0</span>.<br/>
+<span class="id">have</span><span class="id"> quv</span> (<span class="id">q</span><span class="id"> u</span><span class="id"> v</span><span class="id"> :</span><span class="id"> R</span>)<span class="id"> :</span><span class="id"> q</span><span class="id"> !=</span><span class="id"> 0</span><span class="id"> -&gt;</span><span class="id"> q</span><span class="id"> *</span><span class="id"> u</span><span class="id"> /</span> (<span class="id">q</span><span class="id"> *</span><span class="id"> v</span>)<span class="id"> =</span><span class="id"> u</span><span class="id"> /</span><span class="id"> v</span>.<br/>
+&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> move=&gt;</span><span class="id"> ?;</span><span class="id"> rewrite</span><span class="id"> invfM</span><span class="id"> mulrACA</span><span class="id"> divff//</span><span class="id"> mul1r</span>.<br/>
+<span class="id">apply:</span><span class="id"> ler_sum</span><span class="id"> =&gt;</span><span class="id"> a</span><span class="id"> _;</span><span class="id"> rewrite</span><span class="id"> 2!fdist_convE</span>.<br/>
+<span class="id">have</span><span class="id"> [y2a0|y2a0]</span><span class="id"> :=</span><span class="id"> eqVneq</span> (<span class="id">y</span>.<span class="id">2</span><span class="id"> a</span>)<span class="id"> 0</span>.<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> y2a0</span> (_<span class="id"> :</span><span class="id"> y</span>.<span class="id">1</span><span class="id"> a</span><span class="id"> =</span><span class="id"> 0</span>)<span class="id"> ?</span>(<span class="id">mulR0,addR0,mul0R</span>)<span class="id">;</span><span class="id"> last</span><span class="id"> first</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> move/dominatesP</span><span class="id"> :</span><span class="id"> Hy;</span><span class="id"> exact</span>.<br/>
+&nbsp;&nbsp;<span class="id">have</span><span class="id"> [x2a0|x2a0]</span><span class="id"> :=</span><span class="id"> eqVneq</span> (<span class="id">x</span>.<span class="id">2</span><span class="id"> a</span>)<span class="id"> 0</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> (_<span class="id"> :</span><span class="id"> x</span>.<span class="id">1</span><span class="id"> a</span><span class="id"> =</span><span class="id"> 0</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> ?</span>(<span class="id">mul0r,mulr0,addr0</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">exact/</span>((<span class="id">dominatesP</span><span class="id"> _</span><span class="id"> _</span>).<span class="id">1</span><span class="id"> Hx</span>).<br/>
+&nbsp;&nbsp;<span class="id">apply/eqW;</span><span class="id"> rewrite</span><span class="id"> !mulrA</span><span class="id"> !</span>(<span class="id">mul0r,mulr0,addr0</span>)<span class="id">;</span><span class="id"> congr</span> (_<span class="id"> *</span><span class="id"> _</span><span class="id"> *</span><span class="id"> ln</span><span class="id"> _</span><span class="id"> *</span><span class="id"> _</span>).<br/>
+&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> quv</span>.<br/>
+<span class="id">have</span><span class="id"> [x2a0|x2a0]</span><span class="id"> :=</span><span class="id"> eqVneq</span> (<span class="id">x</span>.<span class="id">2</span><span class="id"> a</span>)<span class="id"> 0</span>.<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> x2a0</span> (_<span class="id"> :</span><span class="id"> x</span>.<span class="id">1</span><span class="id"> a</span><span class="id"> =</span><span class="id"> 0</span>)<span class="id">//</span><span class="id"> ?</span>(<span class="id">mulR0,add0R,mul0R</span>)<span class="id">;</span><span class="id"> last</span><span class="id"> first</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> move/dominatesP</span><span class="id"> :</span><span class="id"> Hx;</span><span class="id"> exact</span>.<br/>
+&nbsp;&nbsp;<span class="id">apply/eqW;</span><span class="id"> rewrite</span><span class="id"> !</span>(<span class="id">mulrA,</span><span class="id"> mulr0,</span><span class="id"> mul0r,</span><span class="id"> add0r</span>)<span class="id">;</span><span class="id"> congr</span> (_<span class="id"> *</span><span class="id"> _</span><span class="id"> *</span><span class="id"> ln</span><span class="id"> _</span><span class="id"> *</span><span class="id"> _</span>).<br/>
+&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> quv</span>.<br/>
+<span class="id">set</span><span class="id"> h</span><span class="id"> :</span><span class="id"> {fdist</span><span class="id"> A}</span><span class="id"> -&gt;</span><span class="id"> {fdist</span><span class="id"> A}</span><span class="id"> -&gt;</span><span class="id"> {ffun</span><span class="id"> 'I_2</span><span class="id"> -&gt;</span><span class="id"> R}</span><span class="id"> :=</span><span class="gallina-kwd"> fun</span><span class="id"> p1</span><span class="id"> p2</span><span class="id"> =&gt;</span><span class="id"> [ffun</span><span class="id"> i</span><span class="id"> =&gt;</span><br/>
+&nbsp;&nbsp;<span class="id">[eta</span> (<span class="id">fun=&gt;</span><span class="id"> 0</span>)<span class="gallina-kwd"> with</span><span class="id"> ord0</span><span class="id"> |-&gt;</span><span class="id"> p%:num</span><span class="id"> *</span><span class="id"> p1</span><span class="id"> a,</span><span class="id"> lift</span><span class="id"> ord0</span><span class="id"> ord0</span><span class="id"> |-&gt;</span><span class="id"> p%:num</span>.<span class="id">~</span><span class="id"> *</span><span class="id"> p2</span><span class="id"> a]</span><span class="id"> i]</span>.<br/>
+<span class="id">have</span><span class="id"> hdom</span><span class="id"> :</span><span class="id"> h</span><span class="id"> x</span>.<span class="id">1</span><span class="id"> y</span>.<span class="id">1</span><span class="id"> `&lt;&lt;</span><span class="id"> h</span><span class="id"> x</span>.<span class="id">2</span><span class="id"> y</span>.<span class="id">2</span>.<br/>
+&nbsp;&nbsp;<span class="id">apply/dominatesP</span><span class="id"> =&gt;</span><span class="id"> i;</span><span class="id"> rewrite</span><span class="id"> /h</span><span class="id"> /=</span><span class="id"> !ffunE;</span><span class="id"> case:</span><span class="id"> ifPn</span><span class="id"> =&gt;</span><span class="id"> _</span><span class="id"> /eqP</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> mulf_eq0</span> (<span class="id">negPf</span><span class="id"> x2a0</span>)<span class="id"> orbF</span><span class="id"> =&gt;</span><span class="id"> /eqP</span><span class="id"> -&gt;;</span><span class="id"> rewrite</span><span class="id"> mul0r</span>.<br/>
+&nbsp;&nbsp;<span class="id">case:</span><span class="id"> ifPn</span><span class="id"> =&gt;</span><span class="id"> //</span><span class="id"> _</span>.<br/>
+&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> mulf_eq0</span> (<span class="id">negPf</span><span class="id"> y2a0</span>)<span class="id"> orbF</span><span class="id"> =&gt;</span><span class="id"> /eqP</span><span class="id"> -&gt;;</span><span class="id"> rewrite</span><span class="id"> mul0r</span>.<br/>
+<span class="id">have</span><span class="id"> h0</span><span class="id"> p1</span><span class="id"> p2</span><span class="id"> :</span><span class="id"> [forall</span><span class="id"> i,</span><span class="id"> 0</span><span class="id"> &lt;=</span><span class="id"> h</span><span class="id"> p1</span><span class="id"> p2</span><span class="id"> i]</span>.<br/>
+&nbsp;&nbsp;<span class="id">apply/forallP=&gt;</span><span class="id"> ?;</span><span class="id"> rewrite</span><span class="id"> /h</span><span class="id"> /=</span><span class="id"> ffunE</span>.<br/>
+&nbsp;&nbsp;<span class="id">case:</span><span class="id"> ifPn</span><span class="id"> =&gt;</span><span class="id"> [_</span><span class="id"> |</span><span class="id"> _];</span><span class="id"> first</span><span class="id"> exact/mulr_ge0</span>.<br/>
+&nbsp;&nbsp;<span class="id">case:</span><span class="id"> ifPn</span><span class="id"> =&gt;</span><span class="id"> [_</span><span class="id"> |];</span><span class="id"> last</span><span class="gallina-kwd"> by</span><span class="id"> move=&gt;*;</span><span class="id"> exact:</span><span class="id"> lexx</span>.<br/>
+&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> apply/mulr_ge0</span><span class="id"> =&gt;</span><span class="id"> //;</span><span class="id"> exact/onem_ge0/le1</span>.<br/>
+<span class="id">have</span><span class="id"> h01</span> (<span class="id">x0</span><span class="id"> :</span><span class="id"> 'I_2</span>)<span class="id"> :</span><span class="id"> 0</span><span class="id"> &lt;=</span><span class="id"> h</span><span class="id"> x</span>.<span class="id">1</span><span class="id"> y</span>.<span class="id">1</span><span class="id"> x0</span>.<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> /=</span><span class="id"> /h</span><span class="id"> ffunE/=;</span><span class="id"> case:</span><span class="id"> ifPn</span><span class="id"> =&gt;</span><span class="id"> _;</span><span class="id"> first</span><span class="id"> exact:</span><span class="id"> mulr_ge0</span>.<br/>
+&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> case:</span><span class="id"> ifPn</span><span class="id"> =&gt;</span><span class="id"> //</span><span class="id"> _;</span><span class="id"> exact:</span><span class="id"> mulr_ge0</span>.<br/>
+<span class="id">have</span><span class="id"> h02</span> (<span class="id">x0</span><span class="id"> :</span><span class="id"> 'I_2</span>)<span class="id"> :</span><span class="id"> 0</span><span class="id"> &lt;=</span><span class="id"> h</span><span class="id"> x</span>.<span class="id">2</span><span class="id"> y</span>.<span class="id">2</span><span class="id"> x0</span>.<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> /=</span><span class="id"> /h</span><span class="id"> ffunE/=;</span><span class="id"> case:</span><span class="id"> ifPn</span><span class="id"> =&gt;</span><span class="id"> _;</span><span class="id"> first</span><span class="id"> exact:</span><span class="id"> mulr_ge0</span>.<br/>
+&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> case:</span><span class="id"> ifPn</span><span class="id"> =&gt;</span><span class="id"> //</span><span class="id"> _;</span><span class="id"> exact:</span><span class="id"> mulr_ge0</span>.<br/>
+<span class="id">have</span><span class="id"> :=</span><span class="id"> @log_sum</span><span class="id"> _</span><span class="id"> _</span><span class="id"> setT</span> (<span class="id">h</span><span class="id"> x</span>.<span class="id">1</span><span class="id"> y</span>.<span class="id">1</span>) (<span class="id">h</span><span class="id"> x</span>.<span class="id">2</span><span class="id"> y</span>.<span class="id">2</span>)<span class="id"> h01</span><span class="id"> h02</span><span class="id"> hdom</span>.<br/>
+<span class="id">rewrite</span><span class="id"> !big_set</span><span class="id"> !big_mkcond</span><span class="id"> !big_ord_recl</span><span class="id"> !big_ord0</span><span class="id"> /=</span><span class="id"> !addr0</span>.<br/>
+<span class="id">rewrite</span><span class="id"> /h</span><span class="id"> /=</span><span class="id"> !ffunE</span><span class="id"> /=</span><span class="id"> =&gt;</span><span class="id"> /le_trans;</span><span class="id"> apply</span>.<br/>
+<span class="id">apply/eqW;</span><span class="id"> rewrite</span><span class="id"> !mulrA</span>.<br/>
+<span class="gallina-kwd">by</span><span class="id"> congr</span> (_<span class="id"> *</span><span class="id"> _</span><span class="id"> *</span><span class="id"> ln</span><span class="id"> _</span><span class="id"> *</span><span class="id"> _</span><span class="id"> +</span><span class="id"> _</span><span class="id"> *</span><span class="id"> _</span><span class="id"> *</span><span class="id"> ln</span><span class="id"> _</span><span class="id"> *</span><span class="id"> _</span>)<span class="id">;</span><span class="id"> rewrite</span><span class="id"> quv</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> convex_relative_entropy</span> (<span class="id">p1</span><span class="id"> p2</span><span class="id"> q1</span><span class="id"> q2</span><span class="id"> :</span><span class="id"> {fdist</span><span class="id"> A}</span>) (<span class="id">r</span><span class="id"> :</span><span class="id"> {prob</span><span class="id"> R}</span>)<span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="id">p1</span><span class="id"> `&lt;&lt;</span><span class="id"> q1</span><span class="id"> -&gt;</span><span class="id"> p2</span><span class="id"> `&lt;&lt;</span><span class="id"> q2</span><span class="id"> -&gt;</span><br/>
+&nbsp;&nbsp;<span class="id">D</span>(<span class="id">p1</span><span class="id"> &lt;|</span><span class="id"> r</span><span class="id"> |&gt;</span><span class="id"> p2</span><span class="id"> ||</span><span class="id"> q1</span><span class="id"> &lt;|</span><span class="id"> r</span><span class="id"> |&gt;</span><span class="id"> q2</span>)<span class="id"> &lt;=</span><span class="id"> D</span>(<span class="id">p1</span><span class="id"> ||</span><span class="id"> q1</span>)<span class="id"> &lt;|</span><span class="id"> r</span><span class="id"> |&gt;</span><span class="id"> D</span>(<span class="id">p2</span><span class="id"> ||</span><span class="id"> q2</span>).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id">move=&gt;</span><span class="id"> pq1</span><span class="id"> pq2</span>.<br/>
+<span class="id">exact/</span>(<span class="id">convex_div</span> (<span class="id">exist</span><span class="id"> _</span> (<span class="id">p1,</span><span class="id"> q1</span>)<span class="id"> pq1</span>) (<span class="id">exist</span><span class="id"> _</span> (<span class="id">p2,</span><span class="id"> q2</span>)<span class="id"> pq2</span>)).<br/>
+Qed.</div></details>
+<br/>
+<span class="vernacular">End</span><span class="id"> divergence_convex</span>.<br/>
+<br/>
+<span class="vernacular">Section</span><span class="id"> entropy_concave</span>.<br/>
+<span class="vernacular">Local</span><span class="vernacular"> Open</span><span class="vernacular"> Scope</span><span class="id"> divergence_scope</span>.<br/>
+<span class="vernacular">Variable</span><span class="id"> R</span><span class="id"> :</span><span class="id"> realType</span>.<br/>
+<span class="vernacular">Variable</span><span class="id"> A</span><span class="id"> :</span><span class="id"> finType</span>.<br/>
+<span class="vernacular">Hypothesis</span><span class="id"> cardA_gt0</span><span class="id"> :</span> (<span class="id">0</span><span class="id"> &lt;</span><span class="id"> #|A|</span>)<span class="id">%nat</span>.<br/>
+<br/>
+<span class="vernacular">Let</span><span class="id"> cardApredS</span><span class="id"> :</span><span class="id"> #|A|</span><span class="id"> =</span><span class="id"> #|A|</span>.<span class="id">-1</span>.<span class="id">+1</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="gallina-kwd"> by</span><span class="id"> rewrite</span><span class="id"> prednK</span>. Qed.</div></details>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> entropy_concave</span><span class="id"> :</span><span class="id"> concave_function</span> (<span class="gallina-kwd">fun</span><span class="id"> P</span><span class="id"> :</span><span class="id"> R</span>.<span class="id">-fdist</span><span class="id"> A</span><span class="id"> =&gt;</span><span class="id"> `H</span><span class="id"> P</span><span class="id"> :</span><span class="id"> R^o</span>).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id">apply:</span><span class="id"> RNconcave_function</span><span class="id"> =&gt;</span><span class="id"> p</span><span class="id"> q</span><span class="id"> t;</span><span class="id"> rewrite</span><span class="id"> /convex_function_at</span>.<br/>
+<span class="id">rewrite</span><span class="id"> !</span>(<span class="id">entropy_log_div</span><span class="id"> _</span><span class="id"> cardApredS</span>)<span class="id"> [in</span><span class="id"> X</span><span class="gallina-kwd"> in</span><span class="id"> _</span><span class="id"> &lt;=</span><span class="id"> X]avgRE</span>.<br/>
+<span class="id">rewrite</span><span class="id"> !opprD</span><span class="id"> !mulrDr</span><span class="id"> addrACA</span><span class="id"> -mulrDl</span><span class="id"> add_onemK</span><span class="id"> mul1r</span><span class="id"> lerD</span><span class="id"> ?lexx//</span><span class="id"> !opprK</span>.<br/>
+<span class="id">have</span><span class="id"> :=</span><span class="id"> convex_relative_entropy</span><span class="id"> t</span> (<span class="id">dom_by_uniform</span><span class="id"> p</span><span class="id"> cardApredS</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">dom_by_uniform</span><span class="id"> q</span><span class="id"> cardApredS</span>).<br/>
+<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> convmm</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="vernacular">End</span><span class="id"> entropy_concave</span>.<br/>
+<br/>
+<span class="vernacular">Module</span><span class="id"> entropy_concave_alternative_proof_binary_case</span>.<br/>
+<span class="vernacular">Import</span><span class="id"> classical_sets</span>.<br/>
+<br/>
+<span class="vernacular">Section</span><span class="id"> realType</span>.<br/>
+<span class="vernacular">Variable</span><span class="id"> R</span><span class="id"> :</span><span class="id"> realType</span>.<br/>
+<span class="vernacular">Local</span><span class="vernacular"> Notation</span><span class="id"> H2</span><span class="id"> :=</span> (<span class="id">@H2</span><span class="id"> R^o</span><span class="id"> :</span><span class="id"> R^o</span><span class="id"> -&gt;</span><span class="id"> R^o</span>).<br/>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> concavity_of_entropy_x_le_y</span><span class="id"> x</span><span class="id"> y</span> (<span class="id">t</span><span class="id"> :</span><span class="id"> {prob</span><span class="id"> R}</span>)<span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="id">x</span><span class="id"> \in</span><span class="id"> `]0,</span><span class="id"> 1[%classic</span><span class="id"> -&gt;</span><span class="id"> y</span><span class="id"> \in</span><span class="id"> `]0,</span><span class="id"> 1[%classic</span><span class="id"> -&gt;</span><span class="id"> x</span><span class="id"> &lt;</span><span class="id"> y</span><span class="id"> -&gt;</span><br/>
+&nbsp;&nbsp;<span class="id">concave_function_at</span><span class="id"> H2</span><span class="id"> x</span><span class="id"> y</span><span class="id"> t</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id">move=&gt;</span><span class="id"> x01</span><span class="id"> y01</span><span class="id"> xy</span>.<br/>
+<span class="id">have</span><span class="id"> zxycc01</span><span class="id"> z</span><span class="id"> :</span><span class="id"> z</span><span class="id"> \in</span><span class="id"> `[x,</span><span class="id"> y]%classic</span><span class="id"> -&gt;</span><span class="id"> z</span><span class="id"> \in</span><span class="id"> `]0,</span><span class="id"> 1[%classic</span>.<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> !inE</span>.<br/>
+&nbsp;&nbsp;<span class="id">have:=</span><span class="id"> x01;</span><span class="id"> rewrite</span><span class="id"> inE</span>.<br/>
+&nbsp;&nbsp;<span class="id">move/subset_itv_oo_oc/andP=&gt;</span><span class="id"> []</span><span class="id"> /subset_itvr=&gt;</span><span class="id"> +</span><span class="id"> _</span><span class="id"> =&gt;</span><span class="id"> /[apply]</span>.<br/>
+&nbsp;&nbsp;<span class="id">have:=</span><span class="id"> y01;</span><span class="id"> rewrite</span><span class="id"> inE</span>.<br/>
+&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> move/subset_itv_oo_co/andP=&gt;</span><span class="id"> []</span><span class="id"> _</span><span class="id"> /subset_itvl</span><span class="id"> /[apply]</span><span class="id"> z01</span>.<br/>
+<span class="id">have</span><span class="id"> zxyoo01</span><span class="id"> z</span><span class="id"> :</span><span class="id"> z</span><span class="id"> \in</span><span class="id"> `]x,</span><span class="id"> y[%classic</span><span class="id"> -&gt;</span><span class="id"> z</span><span class="id"> \in</span><span class="id"> `]0,</span><span class="id"> 1[%classic</span>.<br/>
+&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> move=&gt;</span><span class="id"> /[1!inE]</span><span class="id"> zxy;</span><span class="id"> apply:</span><span class="id"> zxycc01;</span><span class="id"> rewrite</span><span class="id"> inE;</span><span class="id"> apply/subset_itv_oo_cc</span>.<br/>
+<span class="id">have</span><span class="id"> cnH2:</span><span class="id"> {within</span><span class="id"> `[x,</span><span class="id"> y],</span><span class="id"> continuous</span> (<span class="id">-</span><span class="id"> H2</span>)<span class="id">}%classic</span>.<br/>
+&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> apply:</span><span class="id"> continuous_in_subspaceT=&gt;</span><span class="id"> z</span><span class="id"> /zxycc01</span><span class="id"> /continuous_H2</span><span class="id"> /continuousN</span>.<br/>
+<span class="id">apply/RNconcave_function_at</span>.<br/>
+<span class="id">rewrite</span><span class="id"> /convex_function_at</span><span class="id"> /=</span>.<br/>
+<span class="id">rewrite</span><span class="id"> -!mc_convRE</span>.<br/>
+<span class="id">apply:</span> (<span class="id">@analysis</span>.<span class="id">convex</span>.<span class="id">second_derivative_convex</span><span class="id"> _</span> (<span class="gallina-kwd">fun</span><span class="id"> z</span><span class="id"> =&gt;</span><span class="id"> -</span> (<span class="id">H2</span><span class="id"> z</span>))).<br/>
+<span class="id">-</span><span class="id"> move=&gt;</span><span class="id"> z</span><span class="id"> xzy</span>.<br/>
+&nbsp;&nbsp;<span class="id">have/zxyoo01</span><span class="id"> z01:</span><span class="id"> z</span><span class="id"> \in</span><span class="id"> `]x,</span><span class="id"> y[%classic</span><span class="gallina-kwd"> by</span><span class="id"> rewrite</span><span class="id"> inE</span>.<br/>
+&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> DDnH2E//</span><span class="id"> DDnH2_nonneg</span>.<br/>
+<span class="id">-</span><span class="id"> have:=</span><span class="id"> cnH2</span><span class="id"> =&gt;</span><span class="id"> /</span>(<span class="id">continuous_within_itvP</span><span class="id"> _</span><span class="id"> xy</span>).<br/>
+&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> case</span>.<br/>
+<span class="id">-</span><span class="id"> have:=</span><span class="id"> cnH2</span><span class="id"> =&gt;</span><span class="id"> /</span>(<span class="id">continuous_within_itvP</span><span class="id"> _</span><span class="id"> xy</span>).<br/>
+&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> case</span>.<br/>
+<span class="id">-</span><span class="id"> move=&gt;</span><span class="id"> z;</span><span class="id"> rewrite</span><span class="id"> -inE</span><span class="id"> =&gt;</span><span class="id"> /zxyoo01</span><span class="id"> z01</span>.<br/>
+&nbsp;&nbsp;<span class="id">exact/derivable_nH2</span>.<br/>
+<span class="id">-</span><span class="id"> move=&gt;</span><span class="id"> z;</span><span class="id"> rewrite</span><span class="id"> -inE</span><span class="id"> =&gt;</span><span class="id"> /zxyoo01</span><span class="id"> z01</span>.<br/>
+&nbsp;&nbsp;<span class="id">exact/derivable_DnH2</span>.<br/>
+<span class="id">-</span><span class="id"> exact:</span><span class="id"> ltW</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> concavity_of_entropy</span><span class="id"> :</span><span class="id"> concave_function_in</span><span class="id"> uniti</span><span class="id"> H2</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id">rewrite</span><span class="id"> /concave_function_in</span><span class="id"> =&gt;</span><span class="id"> x</span><span class="id"> y</span><span class="id"> t</span><span class="id"> Hx</span><span class="id"> Hy</span>.<br/>
+<span class="id">apply:</span><span class="id"> RNconcave_function_at</span>.<br/>
+<span class="comment">(*&nbsp;wlogをつかう.&nbsp;convex_function_symのためにtを戻し,&nbsp;*)</span><br/>
+<span class="id">move:</span><span class="id"> t</span>.<br/>
+<span class="comment">(*&nbsp;不等号のひとつを固定してwlogする&nbsp;*)</span><br/>
+<span class="id">wlog</span><span class="id"> :</span><span class="id"> x</span><span class="id"> y</span><span class="id"> Hx</span><span class="id"> Hy</span><span class="id"> /</span><span class="id"> x</span><span class="id"> &lt;</span><span class="id"> y</span>.<br/>
+&nbsp;&nbsp;<span class="id">move=&gt;</span><span class="id"> H</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;全順序性で場合分け&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id">have</span><span class="id"> [xy|]</span><span class="id"> :=</span><span class="id"> ltrP</span><span class="id"> x</span><span class="id"> y;</span><span class="id"> first</span><span class="id"> exact:</span><span class="id"> H</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;x&nbsp;=&nbsp;y&nbsp;の場合はかんたん*)</span><br/>
+&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> le_eqVlt=&gt;</span><span class="id"> /orP</span><span class="id"> [/eqP</span><span class="id"> -&gt;|yx];</span><span class="id"> first</span><span class="id"> exact:</span><span class="id"> convex_function_atxx</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;逆の場合は対称性を使う&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id">apply:</span><span class="id"> convex_function_sym</span><span class="id"> =&gt;</span><span class="id"> //</span><span class="id"> t0</span>.<br/>
+&nbsp;&nbsp;<span class="id">exact:</span><span class="id"> H</span>.<br/>
+<span class="gallina-kwd">by</span><span class="id"> move=&gt;</span><span class="id"> *;</span><span class="id"> exact/R_convex_function_atN</span><span class="id"> /concavity_of_entropy_x_le_y</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="vernacular">End</span><span class="id"> realType</span>.<br/>
+<br/>
+<span class="vernacular">End</span><span class="id"> entropy_concave_alternative_proof_binary_case</span>.<br/>
+<br/>
+<span class="vernacular">Section</span><span class="id"> mutual_information_concave</span>.<br/>
+<span class="vernacular">Local</span><span class="vernacular"> Open</span><span class="vernacular"> Scope</span><span class="id"> fdist_scope</span>.<br/>
+<span class="vernacular">Variables</span> (<span class="id">R</span><span class="id"> :</span><span class="id"> realType</span>) (<span class="id">A</span><span class="id"> B</span><span class="id"> :</span><span class="id"> finType</span>) (<span class="id">W</span><span class="id"> :</span><span class="id"> A</span><span class="id"> -&gt;</span><span class="id"> R</span>.<span class="id">-fdist</span><span class="id"> B</span>).<br/>
+<span class="vernacular">Hypothesis</span><span class="id"> B_not_empty</span><span class="id"> :</span> (<span class="id">0</span><span class="id"> &lt;</span><span class="id"> #|B|</span>)<span class="id">%nat</span>.<br/>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> mutual_information_concave</span><span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="id">concave_function</span> (<span class="gallina-kwd">fun</span><span class="id"> P</span><span class="id"> :</span><span class="id"> {fdist</span><span class="id"> A}</span><span class="id"> =&gt;</span><span class="id"> mutual_info</span> (<span class="id">P</span><span class="id"> `X</span><span class="id"> W</span>)).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id">suff</span><span class="id"> :</span><span class="id"> concave_function</span><br/>
+&nbsp;&nbsp;(<span class="gallina-kwd">fun</span><span class="id"> P</span><span class="id"> :</span><span class="id"> {fdist</span><span class="id"> A}</span><span class="id"> =&gt;</span><span class="gallina-kwd"> let</span><span class="id"> PQ</span><span class="id"> :=</span><span class="id"> fdistX</span> (<span class="id">P</span><span class="id"> `X</span><span class="id"> W</span>)<span class="gallina-kwd"> in</span><span class="id"> `H</span><span class="id"> PQ`1</span><span class="id"> -</span><span class="id"> centropy</span><span class="id"> PQ</span><span class="id"> :</span><span class="id"> R^o</span>).<br/>
+&nbsp;&nbsp;<span class="id">set</span><span class="id"> f</span><span class="id"> :=</span><span class="gallina-kwd"> fun</span><span class="id"> _</span><span class="id"> =&gt;</span><span class="id"> _</span>. <span class="id">set</span><span class="id"> g</span><span class="id"> :=</span><span class="gallina-kwd"> fun</span><span class="id"> _</span><span class="id"> =&gt;</span><span class="id"> _</span>.<br/>
+&nbsp;&nbsp;<span class="id">suff</span><span class="id"> -&gt;</span><span class="id"> :</span><span class="id"> f</span><span class="id"> =</span><span class="id"> g</span><span class="gallina-kwd"> by</span><span class="id"> []</span>.<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> boolp</span>.<span class="id">funeqE</span><span class="id"> =&gt;</span><span class="id"> d</span>.<br/>
+&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> {}/f</span><span class="id"> {}/g</span><span class="id"> /=</span><span class="id"> -mutual_infoEcentropy1</span><span class="id"> -mutual_info_sym</span>.<br/>
+<span class="id">apply:</span><span class="id"> R_concave_functionB</span>.<br/>
+&nbsp;&nbsp;<span class="id">have</span><span class="id"> /RNconvex_function</span><span class="id"> concave_H</span><span class="id"> :=</span><span class="id"> @entropy_concave</span><span class="id"> R</span><span class="id"> B</span><span class="id"> B_not_empty</span>.<br/>
+&nbsp;&nbsp;<span class="id">apply:</span><span class="id"> R_concave_functionN</span><span class="id"> =&gt;</span><span class="id"> p</span><span class="id"> q</span><span class="id"> t</span><span class="id"> /=</span>.<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> /convex_function_at</span><span class="id"> 3!fdistX1</span>.<br/>
+&nbsp;&nbsp;<span class="id">apply:</span><span class="id"> le_trans</span> (<span class="id">concave_H</span> (<span class="id">p</span><span class="id"> `X</span><span class="id"> W</span>)<span class="id">`2</span> (<span class="id">q</span><span class="id"> `X</span><span class="id"> W</span>)<span class="id">`2</span><span class="id"> t</span>).<br/>
+&nbsp;&nbsp;<span class="id">under</span><span class="id"> eq_bigr</span><span class="id"> do</span><span class="id"> rewrite</span><span class="id"> fdist_prod2_conv</span>.<br/>
+&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> lexx</span>.<br/>
+<span class="id">suff</span><span class="id"> :</span><span class="id"> affine</span> (<span class="gallina-kwd">fun</span><span class="id"> x</span><span class="id"> :</span><span class="id"> {fdist</span><span class="id"> A}</span><span class="id"> =&gt;</span><span class="id"> centropy</span> (<span class="id">fdistX</span> (<span class="id">x</span><span class="id"> `X</span><span class="id"> W</span>))<span class="id"> :</span><span class="id"> R^o</span>).<br/>
+&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> case/affine_functionP</span>.<br/>
+<span class="id">move=&gt;</span><span class="id"> t</span><span class="id"> p</span><span class="id"> q</span>.<br/>
+<span class="id">rewrite</span><span class="id"> /=</span><span class="id"> avgRE</span><span class="id"> /centropy</span><span class="id"> /centropy1</span>.<br/>
+<span class="id">rewrite</span><span class="id"> 2!big_distrr</span><span class="id"> -big_split</span><span class="id"> /=;</span><span class="id"> apply:</span><span class="id"> eq_bigr</span><span class="id"> =&gt;</span><span class="id"> a</span><span class="id"> _</span>.<br/>
+<span class="id">rewrite</span><span class="id"> !fdistX2</span><span class="id"> !fdist_fstE</span><span class="id"> !mulrN</span><span class="id"> -opprD;</span><span class="id"> congr</span> (<span class="id">-</span><span class="id"> _</span>).<br/>
+<span class="id">rewrite</span><span class="id"> !big_distrr</span><span class="id"> -big_split</span><span class="id"> /=;</span><span class="id"> apply:</span><span class="id"> eq_bigr</span><span class="id"> =&gt;</span><span class="id"> b</span><span class="id"> _</span>.<br/>
+<span class="id">rewrite</span><span class="id"> !big_distrl</span><span class="id"> !big_distrr</span><span class="id"> -big_split</span><span class="id"> /=;</span><span class="id"> apply:</span><span class="id"> eq_bigr</span><span class="id"> =&gt;</span><span class="id"> b0</span><span class="id"> _</span>.<br/>
+<span class="id">rewrite</span><span class="id"> !fdist_prodE</span><span class="id"> /=</span><span class="id"> fdist_convE</span><span class="id"> /=</span><span class="id"> !</span>(<span class="id">mulrA</span><span class="id"> t%:num</span>)<span class="id"> !</span>(<span class="id">mulrA</span><span class="id"> t%:num</span>.<span class="id">~</span>).<br/>
+<span class="id">have</span><span class="id"> [Hp|Hp]</span><span class="id"> :=</span><span class="id"> eqVneq</span> (<span class="id">t%:num</span><span class="id"> *</span><span class="id"> p</span><span class="id"> a</span>)<span class="id"> 0</span>.<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> Hp</span><span class="id"> ?</span>(<span class="id">add0R,mul0R</span>).<br/>
+&nbsp;&nbsp;<span class="id">have</span><span class="id"> [-&gt;|/eqP</span><span class="id"> Hq]</span><span class="id"> :=</span><span class="id"> eqVneq</span> (<span class="id">t%:num</span>.<span class="id">~</span><span class="id"> *</span><span class="id"> q</span><span class="id"> a</span>)<span class="id"> 0</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> ?</span>(<span class="id">mul0r,add0r</span>).<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> jcPr_fdistX_prod</span><span class="id"> /=;</span><span class="id"> last</span><span class="id"> first</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> fdist_convE</span><span class="id"> Hp</span><span class="id"> add0r</span>.<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> !mul0r</span><span class="id"> !add0r;</span><span class="id"> congr</span> (_<span class="id"> *</span><span class="id"> _</span>).<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> jcPr_fdistX_prod//;</span><span class="id"> apply/eqP;</span><span class="id"> move/eqP:</span><span class="id"> Hq;</span><span class="id"> apply:</span><span class="id"> contraNN</span>.<br/>
+&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> move/eqP-&gt;;</span><span class="id"> rewrite</span><span class="id"> mulr0</span>.<br/>
+<span class="id">have</span><span class="id"> [Hq|Hq]</span><span class="id"> :=</span><span class="id"> eqVneq</span> (<span class="id">t%:num</span>.<span class="id">~</span><span class="id"> *</span><span class="id"> q</span><span class="id"> a</span>)<span class="id"> 0</span>.<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> Hq</span><span class="id"> !</span>(<span class="id">mul0r,addr0</span>).<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> jcPr_fdistX_prod;</span><span class="id"> last</span><span class="id"> first</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> fdist_convE</span><span class="id"> Hq</span><span class="id"> addr0;</span><span class="id"> apply/eqP</span>.<br/>
+&nbsp;&nbsp;<span class="id">congr</span> (_<span class="id"> *</span><span class="id"> _</span>).<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> jcPr_fdistX_prod//;</span><span class="id"> apply/eqP;</span><span class="id"> move:</span><span class="id"> Hp;</span><span class="id"> apply:</span><span class="id"> contraNN</span>.<br/>
+&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> move/eqP-&gt;;</span><span class="id"> rewrite</span><span class="id"> mulr0</span>.<br/>
+<span class="id">rewrite</span><span class="id"> jcPr_fdistX_prod;</span><span class="id"> last</span><span class="id"> first</span>.<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> fdist_convE</span>.<br/>
+&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> apply/eqP;</span><span class="id"> rewrite</span><span class="id"> paddr_eq0//</span><span class="id"> ?</span>(<span class="id">negPf</span><span class="id"> Hp</span>)<span class="id"> ?</span>(<span class="id">negPf</span><span class="id"> Hq</span>)<span class="id">//;</span><span class="id"> exact:</span><span class="id"> mulr_ge0</span>.<br/>
+<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> !jcPr_fdistX_prod</span><span class="id"> ?mulrDl//;</span><span class="id"> apply/eqP;</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="id">[move:</span><span class="id"> Hq</span><span class="id"> |</span><span class="id"> move:</span><span class="id"> Hp];</span><span class="id"> apply:</span><span class="id"> contraNN</span><span class="id"> =&gt;</span><span class="id"> /eqP</span><span class="id"> -&gt;;</span><span class="id"> rewrite</span><span class="id"> mulr0</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="vernacular">End</span><span class="id"> mutual_information_concave</span>.<br/>
+<br/>
+<span class="vernacular">Section</span><span class="id"> mutual_information_convex</span>.<br/>
+<span class="vernacular">Local</span><span class="vernacular"> Open</span><span class="vernacular"> Scope</span><span class="id"> divergence_scope</span>.<br/>
+<span class="vernacular">Local</span><span class="vernacular"> Open</span><span class="vernacular"> Scope</span><span class="id"> fdist_scope</span>.<br/>
+<span class="vernacular">Variables</span> (<span class="id">R</span><span class="id"> :</span><span class="id"> realType</span>) (<span class="id">A</span><span class="id"> B</span><span class="id"> :</span><span class="id"> finType</span>) (<span class="id">P</span><span class="id"> :</span><span class="id"> R</span>.<span class="id">-fdist</span><span class="id"> A</span>).<br/>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> mutual_information_convex</span><span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="id">convex_function</span> (<span class="gallina-kwd">fun</span><span class="id"> W</span><span class="id"> :</span><span class="id"> A</span><span class="id"> -&gt;</span><span class="id"> R</span>.<span class="id">-fdist</span><span class="id"> B</span><span class="id"> =&gt;</span><span class="id"> mutual_info</span> (<span class="id">P</span><span class="id"> `X</span><span class="id"> W</span>)).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id">move=&gt;</span><span class="id"> /=</span><span class="id"> p1yx</span><span class="id"> p2yx</span><span class="id"> t</span>.<br/>
+<span class="id">pose</span><span class="id"> p1xy</span><span class="id"> :=</span><span class="id"> P</span><span class="id"> `X</span><span class="id"> p1yx</span>.<br/>
+<span class="id">pose</span><span class="id"> p2xy</span><span class="id"> :=</span><span class="id"> P</span><span class="id"> `X</span><span class="id"> p2yx</span>.<br/>
+<span class="id">pose</span><span class="id"> p1</span><span class="id"> :=</span><span class="id"> p1xy`2</span>.<br/>
+<span class="id">pose</span><span class="id"> p2</span><span class="id"> :=</span><span class="id"> p2xy`2</span>.<br/>
+<span class="id">pose</span><span class="id"> plambdayx</span><span class="id"> :=</span><span class="gallina-kwd"> fun</span><span class="id"> a</span><span class="id"> =&gt;</span><span class="id"> p1yx</span><span class="id"> a</span><span class="id"> &lt;|</span><span class="id"> t</span><span class="id"> |&gt;</span><span class="id"> p2yx</span><span class="id"> a</span>.<br/>
+<span class="id">pose</span><span class="id"> plambdaxy</span><span class="id"> :=</span><span class="id"> P</span><span class="id"> `X</span><span class="id"> plambdayx</span>.<br/>
+<span class="id">pose</span><span class="id"> plambday</span><span class="id"> :=</span><span class="id"> plambdaxy`2</span>.<br/>
+<span class="id">pose</span><span class="id"> qlambdaxy</span><span class="id"> :=</span><span class="id"> P</span><span class="id"> `x</span><span class="id"> plambday</span>.<br/>
+<span class="id">pose</span><span class="id"> q1xy</span><span class="id"> :=</span><span class="id"> P</span><span class="id"> `x</span><span class="id"> p1</span>.<br/>
+<span class="id">pose</span><span class="id"> q2xy</span><span class="id"> :=</span><span class="id"> P</span><span class="id"> `x</span><span class="id"> p2</span>.<br/>
+<span class="id">rewrite</span><span class="id"> /convex_function_at</span>.<br/>
+<span class="id">have</span><span class="id"> -&gt;</span><span class="id"> :</span><span class="id"> mutual_info</span> (<span class="id">P</span><span class="id"> `X</span> (<span class="gallina-kwd">fun</span><span class="id"> x</span><span class="id"> =&gt;</span><span class="id"> p1yx</span><span class="id"> x</span><span class="id"> &lt;|</span><span class="id"> t</span><span class="id"> |&gt;</span><span class="id"> p2yx</span><span class="id"> x</span>))<span class="id"> =</span><span class="id"> D</span>(<span class="id">plambdaxy</span><span class="id"> ||</span><span class="id"> qlambdaxy</span>).<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> mutual_infoE0</span><span class="id"> /div</span><span class="id"> pair_big</span><span class="id"> /=;</span><span class="id"> apply:</span><span class="id"> eq_bigr</span><span class="id"> =&gt;</span><span class="id"> -[a</span><span class="id"> b]</span><span class="id"> _</span><span class="id"> /=</span>.<br/>
+&nbsp;&nbsp;<span class="id">congr</span> (_<span class="id"> *</span><span class="id"> log</span> (_<span class="id"> /</span><span class="id"> _</span>)).<br/>
+&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> /qlambdaxy</span><span class="id"> fdist_prodE</span><span class="id"> /=</span><span class="id"> fdist_prod1</span>.<br/>
+<span class="id">have</span><span class="id"> -&gt;</span><span class="id"> :</span><span class="id"> qlambdaxy</span><span class="id"> =</span><span class="id"> q1xy</span><span class="id"> &lt;|</span><span class="id"> t</span><span class="id"> |&gt;</span><span class="id"> q2xy</span>.<br/>
+&nbsp;&nbsp;<span class="id">apply/fdist_ext</span><span class="id"> =&gt;</span><span class="id"> -[a</span><span class="id"> b]</span>.<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> !fdist_prodE</span><span class="id"> !fdist_convE</span><span class="id"> /=</span><span class="id"> /q1xy</span><span class="id"> /q2xy</span><span class="id"> !fdist_prodE</span><span class="id"> /=</span><span class="id"> /p1</span><span class="id"> /plambday</span>.<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> !fdist_sndE</span><span class="id"> !big_distrr</span><span class="id"> /=</span><span class="id"> -big_split</span><span class="id"> /=;</span><span class="id"> apply:</span><span class="id"> eq_bigr</span><span class="id"> =&gt;</span><span class="id"> a0</span><span class="id"> _</span>.<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> /plambdaxy</span><span class="id"> /=</span><span class="id"> !fdist_prodE</span><span class="id"> /=</span><span class="id"> /p1xy</span><span class="id"> /plambdayx</span><span class="id"> fdist_convE</span><span class="id"> /=</span>.<br/>
+&nbsp;&nbsp;<span class="id">ring</span>.<br/>
+<span class="id">have</span><span class="id"> -&gt;</span><span class="id"> :</span><span class="id"> plambdaxy</span><span class="id"> =</span><span class="id"> p1xy</span><span class="id"> &lt;|</span><span class="id"> t</span><span class="id"> |&gt;</span><span class="id"> p2xy</span>.<br/>
+&nbsp;&nbsp;<span class="id">apply/fdist_ext</span><span class="id"> =&gt;</span><span class="id"> -[a</span><span class="id"> b]</span>.<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> !fdist_prodE</span><span class="id"> !fdist_convE</span><span class="id"> /=</span><span class="id"> /p1xy</span><span class="id"> /p2xy</span><span class="id"> !fdist_prodE</span><span class="id"> /=</span>.<br/>
+&nbsp;&nbsp;<span class="id">ring</span>.<br/>
+<span class="id">have</span><span class="id"> -&gt;</span><span class="id"> :</span><span class="id"> mutual_info</span> (<span class="id">P</span><span class="id"> `X</span><span class="id"> p1yx</span>)<span class="id"> =</span><span class="id"> D</span>(<span class="id">p1xy</span><span class="id"> ||</span><span class="id"> q1xy</span>).<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> mutual_infoE0</span><span class="id"> /div</span><span class="id"> pair_big</span><span class="id"> /=;</span><span class="id"> apply:</span><span class="id"> eq_bigr</span><span class="id"> =&gt;</span><span class="id"> -[a</span><span class="id"> b]</span><span class="id"> _</span><span class="id"> /=</span>.<br/>
+&nbsp;&nbsp;<span class="id">congr</span> (_<span class="id"> *</span><span class="id"> log</span> (_<span class="id"> /</span><span class="id"> _</span>)).<br/>
+&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> /q1xy</span><span class="id"> fdist_prodE</span><span class="id"> /=</span><span class="id"> fdist_prod1</span>.<br/>
+<span class="id">have</span><span class="id"> -&gt;</span><span class="id"> :</span><span class="id"> mutual_info</span> (<span class="id">P</span><span class="id"> `X</span><span class="id"> p2yx</span>)<span class="id"> =</span><span class="id"> D</span>(<span class="id">p2xy</span><span class="id"> ||</span><span class="id"> q2xy</span>).<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> mutual_infoE0</span><span class="id"> /div</span><span class="id"> pair_big</span><span class="id"> /=;</span><span class="id"> apply:</span><span class="id"> eq_bigr</span><span class="id"> =&gt;</span><span class="id"> -[a</span><span class="id"> b]</span><span class="id"> _</span><span class="id"> /=</span>.<br/>
+&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> congr</span> (_<span class="id"> *</span><span class="id"> log</span> (_<span class="id"> /</span><span class="id"> _</span>))<span class="id">;</span><span class="id"> rewrite</span><span class="id"> /q2xy</span><span class="id"> fdist_prodE</span><span class="id"> fdist_prod1</span>.<br/>
+<span class="id">apply:</span><span class="id"> convex_relative_entropy</span>.<br/>
+<span class="id">-</span><span class="id"> apply/dominatesP</span><span class="id"> =&gt;</span><span class="id"> -[a</span><span class="id"> b]</span>.<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> /q1xy</span><span class="id"> /p1xy</span><span class="id"> fdist_prodE</span><span class="id"> /=</span>.<br/>
+&nbsp;&nbsp;<span class="id">move/eqP;</span><span class="id"> rewrite</span><span class="id"> mulf_eq0</span><span class="id"> /p1</span><span class="id"> /p1xy</span><span class="id"> =&gt;</span><span class="id"> /orP</span><span class="id"> -[/eqP|/eqP]</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> fdist_prodE</span><span class="id"> =&gt;</span><span class="id"> -&gt;;</span><span class="id"> rewrite</span><span class="id"> /=</span><span class="id"> mul0r</span>.<br/>
+&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> fdist_sndE</span><span class="id"> =&gt;</span><span class="id"> /psumr_eq0P</span><span class="id"> -&gt;</span>.<br/>
+<span class="id">-</span><span class="id"> apply/dominatesP</span><span class="id"> =&gt;</span><span class="id"> -[a</span><span class="id"> b]</span>.<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> /q1xy</span><span class="id"> /p1xy</span><span class="id"> fdist_prodE</span><span class="id"> /=</span>.<br/>
+&nbsp;&nbsp;<span class="id">move/eqP;</span><span class="id"> rewrite</span><span class="id"> mulf_eq0</span><span class="id"> /p1</span><span class="id"> /p1xy</span><span class="id"> =&gt;</span><span class="id"> /orP</span><span class="id"> -[/eqP|/eqP]</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> fdist_prodE</span><span class="id"> =&gt;</span><span class="id"> -&gt;;</span><span class="id"> rewrite</span><span class="id"> mul0r</span>.<br/>
+&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> fdist_sndE</span><span class="id"> =&gt;</span><span class="id"> /psumr_eq0P</span><span class="id"> /=</span><span class="id"> -&gt;</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="vernacular">End</span><span class="id"> mutual_information_convex</span>.<br/>
+
+      <div class="footer"><hr/>Generated by <a href="https://github.com/affeldt-aist/rocqnavi/">rocqnavi</a></div>
+    </div>
+  </div>
+    </main>
+</body>
+</html>

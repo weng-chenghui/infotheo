@@ -1,0 +1,490 @@
+
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Module rs_privacy</title>
+<meta name="description" content="Documentation of Coq module Infotheo Documentation" />
+<link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/markdown-it/dist/markdown-it.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/markdown-it-texmath/texmath.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/darkmode-js@1.5.7/lib/darkmode-js.min.js"></script>
+<link href="rocqnavi.css" rel="stylesheet" type="text/css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script type="text/javascript" src="rocqnavi.js"> </script>
+</head>
+
+<body onload="init()">
+
+  <main>
+    <div class="sidebar">
+      <h2>Files</h2>
+      <li><details id="infotheo"><summary>infotheo</summary>
+          <ul>
+          <li><details id="infotheo.du2002"><summary>du2002</summary>
+          <ul>
+          <li><a href="infotheo.du2002.spp_entropy.html">spp_entropy</a></li>
+<li><a href="infotheo.du2002.spp_interface.html">spp_interface</a></li>
+<li><a href="infotheo.du2002.spp_pismc.html">spp_pismc</a></li>
+<li><a href="infotheo.du2002.spp_proba.html">spp_proba</a></li>
+<li><a href="infotheo.du2002.spp_program.html">spp_program</a></li>
+<li><a href="infotheo.du2002.spp_proof.html">spp_proof</a></li>
+<li><a href="infotheo.du2002.spp_session_types.html">spp_session_types</a></li>
+<li><a href="infotheo.du2002.spp_tactics.html">spp_tactics</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.dumas2017dual"><summary>dumas2017dual</summary>
+          <ul>
+          <li><details id="infotheo.dumas2017dual.dsdp"><summary>dsdp</summary>
+          <ul>
+          <li><a href="infotheo.dumas2017dual.dsdp.dsdp_correctness.html">dsdp_correctness</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_entropy.html">dsdp_entropy</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_entropy_trace.html">dsdp_entropy_trace</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_interface.html">dsdp_interface</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_pismc.html">dsdp_pismc</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_program.html">dsdp_program</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_security.html">dsdp_security</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_session_types.html">dsdp_session_types</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_syntax_demo.html">dsdp_syntax_demo</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.dumas2017dual.entropy_fiber"><summary>entropy_fiber</summary>
+          <ul>
+          <li><a href="infotheo.dumas2017dual.entropy_fiber.entropy_fiber.html">entropy_fiber</a></li>
+<li><a href="infotheo.dumas2017dual.entropy_fiber.entropy_fiber_zpq.html">entropy_fiber_zpq</a></li>
+<li><a href="infotheo.dumas2017dual.entropy_fiber.linear_fiber_zpq.html">linear_fiber_zpq</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.dumas2017dual.lib"><summary>lib</summary>
+          <ul>
+          <li><a href="infotheo.dumas2017dual.lib.extra_algebra.html">extra_algebra</a></li>
+<li><a href="infotheo.dumas2017dual.lib.extra_entropy.html">extra_entropy</a></li>
+<li><a href="infotheo.dumas2017dual.lib.extra_proba.html">extra_proba</a></li>
+<li><a href="infotheo.dumas2017dual.lib.rouche_capelli.html">rouche_capelli</a></li>
+          </ul>
+          </details>
+          </li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.ecc_classic"><summary>ecc_classic</summary>
+          <ul>
+          <li><a href="infotheo.ecc_classic.alternant.html">alternant</a></li>
+<li><a href="infotheo.ecc_classic.bch.html">bch</a></li>
+<li><a href="infotheo.ecc_classic.cyclic_code.html">cyclic_code</a></li>
+<li><a href="infotheo.ecc_classic.decoding.html">decoding</a></li>
+<li><a href="infotheo.ecc_classic.grs.html">grs</a></li>
+<li><a href="infotheo.ecc_classic.hamming_code.html">hamming_code</a></li>
+<li><a href="infotheo.ecc_classic.linearcode.html">linearcode</a></li>
+<li><a href="infotheo.ecc_classic.mceliece.html">mceliece</a></li>
+<li><a href="infotheo.ecc_classic.poly_decoding.html">poly_decoding</a></li>
+<li><a href="infotheo.ecc_classic.reed_solomon.html">reed_solomon</a></li>
+<li><a href="infotheo.ecc_classic.repcode.html">repcode</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.ecc_modern"><summary>ecc_modern</summary>
+          <ul>
+          <li><a href="infotheo.ecc_modern.checksum.html">checksum</a></li>
+<li><a href="infotheo.ecc_modern.degree_profile.html">degree_profile</a></li>
+<li><a href="infotheo.ecc_modern.ldpc.html">ldpc</a></li>
+<li><a href="infotheo.ecc_modern.ldpc_algo.html">ldpc_algo</a></li>
+<li><a href="infotheo.ecc_modern.ldpc_algo_proof.html">ldpc_algo_proof</a></li>
+<li><a href="infotheo.ecc_modern.ldpc_erasure.html">ldpc_erasure</a></li>
+<li><a href="infotheo.ecc_modern.max_subset.html">max_subset</a></li>
+<li><a href="infotheo.ecc_modern.stopping_set.html">stopping_set</a></li>
+<li><a href="infotheo.ecc_modern.subgraph_partition.html">subgraph_partition</a></li>
+<li><a href="infotheo.ecc_modern.summary.html">summary</a></li>
+<li><a href="infotheo.ecc_modern.summary_tanner.html">summary_tanner</a></li>
+<li><a href="infotheo.ecc_modern.tanner.html">tanner</a></li>
+<li><a href="infotheo.ecc_modern.tanner_partition.html">tanner_partition</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.homomorphic_encryption"><summary>homomorphic_encryption</summary>
+          <ul>
+          <li><details id="infotheo.homomorphic_encryption.benaloh1994"><summary>benaloh1994</summary>
+          <ul>
+          <li><a href="infotheo.homomorphic_encryption.benaloh1994.benaloh_ahe.html">benaloh_ahe</a></li>
+<li><a href="infotheo.homomorphic_encryption.benaloh1994.benaloh_enc.html">benaloh_enc</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.homomorphic_encryption.idealized"><summary>idealized</summary>
+          <ul>
+          <li><a href="infotheo.homomorphic_encryption.idealized.idealized_ahe.html">idealized_ahe</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.homomorphic_encryption.paillier1999"><summary>paillier1999</summary>
+          <ul>
+          <li><a href="infotheo.homomorphic_encryption.paillier1999.paillier_ahe.html">paillier_ahe</a></li>
+<li><a href="infotheo.homomorphic_encryption.paillier1999.paillier_enc.html">paillier_enc</a></li>
+          </ul>
+          </details>
+          </li>
+<li><a href="infotheo.homomorphic_encryption.ahe_enc.html">ahe_enc</a></li>
+<li><a href="infotheo.homomorphic_encryption.ahe_monoid.html">ahe_monoid</a></li>
+<li><a href="infotheo.homomorphic_encryption.enc_dec.html">enc_dec</a></li>
+<li><a href="infotheo.homomorphic_encryption.he_types.html">he_types</a></li>
+<li><a href="infotheo.homomorphic_encryption.homomorphic_encryption.html">homomorphic_encryption</a></li>
+<li><a href="infotheo.homomorphic_encryption.key_type.html">key_type</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.information_theory"><summary>information_theory</summary>
+          <ul>
+          <li><a href="infotheo.information_theory.aep.html">aep</a></li>
+<li><a href="infotheo.information_theory.binary_symmetric_channel.html">binary_symmetric_channel</a></li>
+<li><a href="infotheo.information_theory.channel.html">channel</a></li>
+<li><a href="infotheo.information_theory.channel_code.html">channel_code</a></li>
+<li><a href="infotheo.information_theory.channel_coding_converse.html">channel_coding_converse</a></li>
+<li><a href="infotheo.information_theory.channel_coding_direct.html">channel_coding_direct</a></li>
+<li><a href="infotheo.information_theory.conditional_divergence.html">conditional_divergence</a></li>
+<li><a href="infotheo.information_theory.entropy.html">entropy</a></li>
+<li><a href="infotheo.information_theory.entropy_convex.html">entropy_convex</a></li>
+<li><a href="infotheo.information_theory.erasure_channel.html">erasure_channel</a></li>
+<li><a href="infotheo.information_theory.error_exponent.html">error_exponent</a></li>
+<li><a href="infotheo.information_theory.joint_typ_seq.html">joint_typ_seq</a></li>
+<li><a href="infotheo.information_theory.jtypes.html">jtypes</a></li>
+<li><a href="infotheo.information_theory.kraft.html">kraft</a></li>
+<li><a href="infotheo.information_theory.pproba.html">pproba</a></li>
+<li><a href="infotheo.information_theory.shannon_fano.html">shannon_fano</a></li>
+<li><a href="infotheo.information_theory.source_code.html">source_code</a></li>
+<li><a href="infotheo.information_theory.source_coding_fl_converse.html">source_coding_fl_converse</a></li>
+<li><a href="infotheo.information_theory.source_coding_fl_direct.html">source_coding_fl_direct</a></li>
+<li><a href="infotheo.information_theory.source_coding_vl_converse.html">source_coding_vl_converse</a></li>
+<li><a href="infotheo.information_theory.source_coding_vl_direct.html">source_coding_vl_direct</a></li>
+<li><a href="infotheo.information_theory.string_entropy.html">string_entropy</a></li>
+<li><a href="infotheo.information_theory.success_decode_bound.html">success_decode_bound</a></li>
+<li><a href="infotheo.information_theory.typ_seq.html">typ_seq</a></li>
+<li><a href="infotheo.information_theory.types.html">types</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.lib"><summary>lib</summary>
+          <ul>
+          <li><a href="infotheo.lib.bigop_ext.html">bigop_ext</a></li>
+<li><a href="infotheo.lib.binary_entropy_function.html">binary_entropy_function</a></li>
+<li><a href="infotheo.lib.classical_sets_ext.html">classical_sets_ext</a></li>
+<li><a href="infotheo.lib.coqRE.html">coqRE</a></li>
+<li><a href="infotheo.lib.derive_ext.html">derive_ext</a></li>
+<li><a href="infotheo.lib.dft.html">dft</a></li>
+<li><a href="infotheo.lib.euclid.html">euclid</a></li>
+<li><a href="infotheo.lib.f2.html">f2</a></li>
+<li><a href="infotheo.lib.hamming.html">hamming</a></li>
+<li><a href="infotheo.lib.natbin.html">natbin</a></li>
+<li><a href="infotheo.lib.num_occ.html">num_occ</a></li>
+<li><a href="infotheo.lib.poly_ext.html">poly_ext</a></li>
+<li><a href="infotheo.lib.realType_ext.html">realType_ext</a></li>
+<li><a href="infotheo.lib.realType_ln.html">realType_ln</a></li>
+<li><a href="infotheo.lib.ssr_ext.html">ssr_ext</a></li>
+<li><a href="infotheo.lib.ssralg_ext.html">ssralg_ext</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.probability"><summary>probability</summary>
+          <ul>
+          <li><a href="infotheo.probability.bayes.html">bayes</a></li>
+<li><a href="infotheo.probability.convex.html">convex</a></li>
+<li><a href="infotheo.probability.convex_equiv.html">convex_equiv</a></li>
+<li><a href="infotheo.probability.convex_stone.html">convex_stone</a></li>
+<li><a href="infotheo.probability.divergence.html">divergence</a></li>
+<li><a href="infotheo.probability.fdist.html">fdist</a></li>
+<li><a href="infotheo.probability.fsdist.html">fsdist</a></li>
+<li><a href="infotheo.probability.graphoid.html">graphoid</a></li>
+<li><a href="infotheo.probability.jensen.html">jensen</a></li>
+<li><a href="infotheo.probability.jfdist_cond.html">jfdist_cond</a></li>
+<li><a href="infotheo.probability.log_sum.html">log_sum</a></li>
+<li><a href="infotheo.probability.necset.html">necset</a></li>
+<li><a href="infotheo.probability.partition_inequality.html">partition_inequality</a></li>
+<li><a href="infotheo.probability.pinsker.html">pinsker</a></li>
+<li><a href="infotheo.probability.proba.html">proba</a></li>
+<li><a href="infotheo.probability.variation_dist.html">variation_dist</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.robust"><summary>robust</summary>
+          <ul>
+          <li><a href="infotheo.robust.robustmean.html">robustmean</a></li>
+<li><a href="infotheo.robust.weightedmean.html">weightedmean</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.smc"><summary>smc</summary>
+          <ul>
+          <li><a href="infotheo.smc.graded_resource.html">graded_resource</a></li>
+<li><a href="infotheo.smc.pismc.html">pismc</a></li>
+<li><a href="infotheo.smc.smc_interpreter.html">smc_interpreter</a></li>
+<li><a href="infotheo.smc.smc_session_types.html">smc_session_types</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.toy_examples"><summary>toy_examples</summary>
+          <ul>
+          <li><a href="infotheo.toy_examples.conditional_entropy.html">conditional_entropy</a></li>
+<li><a href="infotheo.toy_examples.expected_value_variance.html">expected_value_variance</a></li>
+<li><a href="infotheo.toy_examples.expected_value_variance_ordn.html">expected_value_variance_ordn</a></li>
+<li><a href="infotheo.toy_examples.expected_value_variance_tuple.html">expected_value_variance_tuple</a></li>
+          </ul>
+          </details>
+          </li>
+<li><a href="infotheo._check_sigs.html">_check_sigs</a></li>
+<li><a href="infotheo._depgraph_extract.html">_depgraph_extract</a></li>
+<li><a href="infotheo._test_star2.html">_test_star2</a></li>
+<li><a href="infotheo.test_sri.html">test_sri</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="pgg_reconstruct"><summary>pgg_reconstruct</summary>
+          <ul>
+          <li><a href="pgg_reconstruct.ag_code.html">ag_code</a></li>
+<li><a href="pgg_reconstruct.ag_massey_bridge.html">ag_massey_bridge</a></li>
+<li><a href="pgg_reconstruct.ag_multiplicative.html">ag_multiplicative</a></li>
+<li><a href="pgg_reconstruct.algebraic_rigidity.html">algebraic_rigidity</a></li>
+<li><a href="pgg_reconstruct.coord_perm_compatible.html">coord_perm_compatible</a></li>
+<li><a href="pgg_reconstruct.cover_genus0.html">cover_genus0</a></li>
+<li><a href="pgg_reconstruct.cover_genus1.html">cover_genus1</a></li>
+<li><a href="pgg_reconstruct.cover_genus2.html">cover_genus2</a></li>
+<li><a href="pgg_reconstruct.cover_tradeoff.html">cover_tradeoff</a></li>
+<li><a href="pgg_reconstruct.covering_scheme.html">covering_scheme</a></li>
+<li><a href="pgg_reconstruct.hyperelliptic_code.html">hyperelliptic_code</a></li>
+<li><a href="pgg_reconstruct.lagrange.html">lagrange</a></li>
+<li><a href="pgg_reconstruct.massey.html">massey</a></li>
+<li><a href="pgg_reconstruct.pgg_assignment.html">pgg_assignment</a></li>
+<li><a href="pgg_reconstruct.pgg_covering_correctness.html">pgg_covering_correctness</a></li>
+<li><a href="pgg_reconstruct.pgg_deck_pairing.html">pgg_deck_pairing</a></li>
+<li><a href="pgg_reconstruct.pgg_sharing_framework.html">pgg_sharing_framework</a></li>
+<li><a href="pgg_reconstruct.pgg_sum_mod.html">pgg_sum_mod</a></li>
+<li><a href="pgg_reconstruct.pgg_threshold.html">pgg_threshold</a></li>
+<li><a href="pgg_reconstruct.pgl_bound.html">pgl_bound</a></li>
+<li><a href="pgg_reconstruct.rigidity_monster_instance.html">rigidity_monster_instance</a></li>
+<li><a href="pgg_reconstruct.rigidity_s5_instance.html">rigidity_s5_instance</a></li>
+<li><a href="pgg_reconstruct.rigidity_star_instance.html">rigidity_star_instance</a></li>
+<li><a href="pgg_reconstruct.rs_massey_bridge.html">rs_massey_bridge</a></li>
+<li><a href="pgg_reconstruct.rs_privacy.html">rs_privacy</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="pgg_smc"><summary>pgg_smc</summary>
+          <ul>
+          <li><a href="pgg_smc.abelian_word_collapse.html">abelian_word_collapse</a></li>
+<li><a href="pgg_smc.free_group_ball.html">free_group_ball</a></li>
+<li><a href="pgg_smc.perm_uniform.html">perm_uniform</a></li>
+<li><a href="pgg_smc.pgg_abelian.html">pgg_abelian</a></li>
+<li><a href="pgg_smc.pgg_abelian.html">pgg_abelian</a></li>
+<li><a href="pgg_smc.pgg_abelian_collapse.html">pgg_abelian_collapse</a></li>
+<li><a href="pgg_smc.pgg_collusion_bound.html">pgg_collusion_bound</a></li>
+<li><a href="pgg_smc.pgg_correctness.html">pgg_correctness</a></li>
+<li><a href="pgg_smc.pgg_free.html">pgg_free</a></li>
+<li><a href="pgg_smc.pgg_interface.html">pgg_interface</a></li>
+<li><a href="pgg_smc.pgg_lfree.html">pgg_lfree</a></li>
+<li><a href="pgg_smc.pgg_nonabelian.html">pgg_nonabelian</a></li>
+<li><a href="pgg_smc.pgg_pismc.html">pgg_pismc</a></li>
+<li><a href="pgg_smc.pgg_program.html">pgg_program</a></li>
+<li><a href="pgg_smc.pgg_raag.html">pgg_raag</a></li>
+<li><a href="pgg_smc.pgg_raag_cartier_foata.html">pgg_raag_cartier_foata</a></li>
+<li><a href="pgg_smc.pgg_raag_clique.html">pgg_raag_clique</a></li>
+<li><a href="pgg_smc.pgg_raag_path.html">pgg_raag_path</a></li>
+<li><a href="pgg_smc.pgg_raag_s5.html">pgg_raag_s5</a></li>
+<li><a href="pgg_smc.pgg_raag_star.html">pgg_raag_star</a></li>
+<li><a href="pgg_smc.pgg_security.html">pgg_security</a></li>
+<li><a href="pgg_smc.pgg_session_types.html">pgg_session_types</a></li>
+<li><a href="pgg_smc.pgg_word_analysis.html">pgg_word_analysis</a></li>
+<li><a href="pgg_smc.test_cf.html">test_cf</a></li>
+<li><a href="pgg_smc.test_cf2.html">test_cf2</a></li>
+<li><a href="pgg_smc.test_cf3.html">test_cf3</a></li>
+<li><a href="pgg_smc.test_sri.html">test_sri</a></li>
+<li><a href="pgg_smc.test_sri2.html">test_sri2</a></li>
+          </ul>
+          </details>
+          </li>
+    </div>
+
+  <div class="coq">
+
+    <div class="content">
+      <p>
+        <a href="./index.html">Top</a>
+        
+      </p>
+      <h1 class="title">Module rs_privacy</h1>
+<pre class="ssrdoc">
+Reed-Solomon Privacy via Lagrange Interpolation
+
+This file proves Massey's privacy_surj hypothesis for Reed-Solomon codes:
+for any set S of coordinates with |S| &lt; d_perp (dual distance), any
+target values on S can be achieved by some RS codeword.
+
+For MDS codes (including RS), d_perp = k + 1 where k = dim(C).
+The proof uses Lagrange interpolation: given target values at |S| &lt;= k
+positions, interpolate a polynomial of degree &lt; k, then show its
+evaluation vector is an RS codeword.
+
+  rs_privacy_surj == the main result: privacy surjectivity for RS codes
+</pre>
+<br/>
+<span class="vernacular">From</span><span class="id"> mathcomp</span><span class="vernacular"> Require</span><span class="vernacular"> Import</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.ssreflect.all_ssreflect">all_ssreflect</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.ssralg">ssralg</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.finalg">finalg</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.poly">poly</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.polydiv">polydiv</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.solvable.cyclic">cyclic</a></span>.<br/>
+<span class="vernacular">From</span><span class="id"> mathcomp</span><span class="vernacular"> Require</span><span class="vernacular"> Import</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.fingroup.perm">perm</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix">matrix</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.mxpoly">mxpoly</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.vector">vector</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.mxalgebra">mxalgebra</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.zmodp">zmodp</a></span>.<br/>
+<span class="vernacular">Require</span><span class="vernacular"> Import</span><span class="id"> </span><span class="id"><a href="infotheo.lib.ssr_ext.html">ssr_ext</a></span><span class="id"> </span><span class="id"><a href="infotheo.lib.ssralg_ext.html">ssralg_ext</a></span><span class="id"> </span><span class="id"><a href="infotheo.lib.hamming.html">hamming</a></span><span class="id"> </span><span class="id"><a href="infotheo.ecc_classic.linearcode.html">linearcode</a></span><span class="id"> </span><span class="id"><a href="infotheo.lib.dft.html">dft</a></span>.<br/>
+<span class="vernacular">Require</span><span class="vernacular"> Import</span><span class="id"> </span><span class="id"><a href="infotheo.ecc_classic.reed_solomon.html">reed_solomon</a></span>.<br/>
+<span class="vernacular">From</span><span class="id"> pgg_reconstruct</span><span class="vernacular"> Require</span><span class="vernacular"> Import</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.lagrange.html">lagrange</a></span>.<br/>
+<br/>
+<span class="gallina-kwd">Set</span><span class="vernacular"> Implicit</span><span class="vernacular"> Arguments</span>.<br/>
+<span class="vernacular">Unset</span><span class="vernacular"> Strict</span><span class="vernacular"> Implicit</span>.<br/>
+<span class="vernacular">Import</span><span class="id"> Prenex</span><span class="vernacular"> Implicits</span>.<br/>
+<br/>
+<span class="vernacular">Import</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.ssralg#GRing.Theory">GRing</a></span>.<span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.ssralg#GRing.Theory">Theory</a></span>.<br/>
+<span class="vernacular">Open</span><span class="vernacular"> Scope</span><span class="id"> ring_scope</span>.<br/>
+<br/>
+<pre class="ssrdoc">
+    Section 1: Evaluation Map for RS Codes
+</pre>
+<br/>
+<span class="vernacular">Section</span><span class="id"> rs_eval</span>.<br/>
+<br/>
+<span class="vernacular">Variable</span><span class="id"> </span><span id="rs_eval.F" class="id"><a name="rs_eval.F" class="">F</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.finalg#FinRing.Field.Exports.finFieldType">finFieldType</a></span>.<br/>
+<span class="vernacular">Variable</span><span class="id"> </span><span id="rs_eval.a" class="id"><a name="rs_eval.a" class="">a</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#rs_eval.F">F</a></span>.<br/>
+<span class="vernacular">Variable</span><span class="id"> </span><span id="rs_eval.n'" class="id"><a name="rs_eval.n'" class="">n'</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Datatypes.html#nat">nat</a></span>.<br/>
+<span class="vernacular">Let</span><span class="id"> </span><span id="rs_eval.n" class="id"><a name="rs_eval.n" class="">n</a></span><span class="id"> :=</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#rs_eval.n'">n'</a></span>.<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#bda89d73ec4a8f23ae92b565ffb5aaa6">+1</a></span>.<br/>
+<span class="vernacular">Variable</span><span class="id"> </span><span id="rs_eval.d" class="id"><a name="rs_eval.d" class="">d</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Datatypes.html#nat">nat</a></span>.<br/>
+<br/>
+<span class="vernacular">Hypothesis</span><span class="id"> </span><span id="rs_eval.dn" class="id"><a name="rs_eval.dn" class="">dn</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="infotheo.ecc_classic.reed_solomon.html#RS.redundancy_ub">RS</a></span>.<span class="id"><a href="infotheo.ecc_classic.reed_solomon.html#RS.redundancy_ub">redundancy_ub</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#rs_eval.d">d</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#rs_eval.n">n</a></span>.<br/>
+<span class="vernacular">Hypothesis</span><span class="id"> </span><span id="rs_eval.a_prim" class="id"><a name="rs_eval.a_prim" class="">a_prim</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#rs_eval.n">n</a></span>.<span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.poly#::ring_scope:x_'.-primitive_root'">-primitive_root</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.poly#::ring_scope:x_'.-primitive_root'"> a</a></span>.<br/>
+<br/>
+<span class="vernacular">Let</span><span class="id"> </span><span id="rs_eval.a_neq0" class="id"><a name="rs_eval.a_neq0" class="">a_neq0</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#rs_eval.a">a</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.eqtype#c385a484ee9d1b4e0615924561a9b75e"> !=</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.eqtype#c385a484ee9d1b4e0615924561a9b75e"> </a></span><span class="id">0</span><span class="id"> :=</span><span class="id"> </span><span class="id"><a href="infotheo.lib.dft.html#primitive_uroot_neq0">primitive_uroot_neq0</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#rs_eval.a_prim">a_prim</a></span>.<br/>
+<span class="vernacular">Let</span><span class="id"> </span><span id="rs_eval.a_not_uroot_on" class="id"><a name="rs_eval.a_not_uroot_on" class="">a_not_uroot_on</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="infotheo.lib.dft.html#not_uroot_on">not_uroot_on</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#rs_eval.a">a</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#rs_eval.n">n</a></span><span class="id"> :=</span><span class="id"> </span><span class="id"><a href="infotheo.lib.dft.html#prim_root_not_uroot_on">prim_root_not_uroot_on</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#rs_eval.a_prim">a_prim</a></span>.<br/>
+<br/>
+<span class="vernacular">Let</span><span class="id"> </span><span id="rs_eval.C" class="id"><a name="rs_eval.C" class="">C</a></span><span class="id"> :=</span><span class="id"> </span><span class="id"><a href="infotheo.ecc_classic.reed_solomon.html#RS.code">RS</a></span>.<span class="id"><a href="infotheo.ecc_classic.reed_solomon.html#RS.code">code</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#rs_eval.a">a</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#rs_eval.n">n</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#rs_eval.d">d</a></span>.<br/>
+<br/>
+<span class="vernacular">Definition</span><span class="id"> </span><span id="poly_eval_rV" class="id"><a name="poly_eval_rV" class="">poly_eval_rV</a></span> (<span id="p:13" class="id"><a name="p:13" class="">p</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.poly#da9f755b2dd01d49956ac8b6f40c9c5d">{poly</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.poly#da9f755b2dd01d49956ac8b6f40c9c5d"> </a></span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#rs_eval.F">F</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.poly#da9f755b2dd01d49956ac8b6f40c9c5d">}</a></span>)<span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#928a892a0c1438777aeb17535aec0378">'rV[</a></span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#rs_eval.F">F</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#928a892a0c1438777aeb17535aec0378">]_</a></span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#rs_eval.n">n</a></span><span class="id"> :=</span><br/>
+&nbsp;&nbsp;<span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#e008ec0beb9d729fd1ef8df8b1024615">\row_</a></span>(<span id="i:14" class="id"><a name="i:14" class="">i</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#e008ec0beb9d729fd1ef8df8b1024615"> &lt;</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#e008ec0beb9d729fd1ef8df8b1024615"> </a></span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#rs_eval.n">n</a></span>)<span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#e008ec0beb9d729fd1ef8df8b1024615"> </a></span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#p:13">p</a></span>.<span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.poly#e4361ce58e4de0a4b9786d0011b61316">[</a></span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#rs_eval.a">a</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.ssralg#663140372ac3b275aae871b74b140513"> ^+</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.ssralg#663140372ac3b275aae871b74b140513"> </a></span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#i:14">i</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.poly#e4361ce58e4de0a4b9786d0011b61316">]</a></span>.<br/>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> </span><span id="poly_eval_in_code" class="id"><a name="poly_eval_in_code" class="">poly_eval_in_code</a></span> (<span id="p:15" class="id"><a name="p:15" class="">p</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.poly#da9f755b2dd01d49956ac8b6f40c9c5d">{poly</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.poly#da9f755b2dd01d49956ac8b6f40c9c5d"> </a></span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#rs_eval.F">F</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.poly#da9f755b2dd01d49956ac8b6f40c9c5d">}</a></span>)<span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.seq#size">size</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#p:15">p</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#cb53cf0ee22c036a03b4a9281c68b5a3"> &lt;=</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#cb53cf0ee22c036a03b4a9281c68b5a3"> </a></span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#rs_eval.n">n</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#::nat_scope:x_'-'_x"> -</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#::nat_scope:x_'-'_x"> </a></span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#rs_eval.d">d</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#::type_scope:x_'-&gt;'_x"> -&gt;</a></span><br/>
+&nbsp;&nbsp;<span class="id"><a href="pgg_reconstruct.rs_privacy.html#poly_eval_rV">poly_eval_rV</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#p:15">p</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrbool.html#b09457274bcb94927e289b8a9e9cd3f7"> \in</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrbool.html#b09457274bcb94927e289b8a9e9cd3f7"> </a></span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#rs_eval.C">C</a></span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id">move=&gt;</span><span class="id"> Hsize</span>.<br/>
+<span class="comment">(*&nbsp;Decompose&nbsp;p&nbsp;into&nbsp;monomials&nbsp;and&nbsp;use&nbsp;linearity&nbsp;*)</span><br/>
+<span class="id">have</span><span class="id"> Hdecomp</span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#poly_eval_rV">poly_eval_rV</a></span><span class="id"> p</span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> =</a></span><br/>
+&nbsp;&nbsp;<span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.ssralg#784f0af919f467115774be372bf0dbd7">\sum_</a></span>(<span id="k:18" class="id"><span id="k:17" class="id"><span id="k:16" class="id"><a name="k:18" class="">k</a></span></span></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.ssralg#784f0af919f467115774be372bf0dbd7"> &lt;</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.ssralg#784f0af919f467115774be372bf0dbd7"> </a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.seq#size">size</a></span><span class="id"> p</span>)<span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.ssralg#784f0af919f467115774be372bf0dbd7"> </a></span><span class="id">p</span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.ssralg#82d810f9f90b79e8fe98d90a63070c32">`_</a></span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#k:16">k</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.ssralg#3b05480e39db306e67fadbc79d394529"> *:</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.ssralg#3b05480e39db306e67fadbc79d394529"> </a></span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#poly_eval_rV">poly_eval_rV</a></span> (<span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.poly#e809881bcf0cc80f806c17b9ef433187">'X^</a></span>(<span class="id"><a href="pgg_reconstruct.rs_privacy.html#k:16">k</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Datatypes.html#nat">nat</a></span>)<span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.poly#da9f755b2dd01d49956ac8b6f40c9c5d">{poly</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.poly#da9f755b2dd01d49956ac8b6f40c9c5d"> </a></span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#rs_eval.F">F</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.poly#da9f755b2dd01d49956ac8b6f40c9c5d">}</a></span>).<br/>
+&nbsp;&nbsp;<span class="id">apply/</span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#rowP">rowP</a></span><span class="id"> =&gt;</span><span class="id"> j;</span><span class="id"> rewrite</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#mxE">mxE</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#summxE">summxE</a></span>.<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.poly#horner_coef">horner_coef</a></span><span class="id">;</span><span class="id"> apply:</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.bigop#eq_bigr">eq_bigr</a></span><span class="id"> =&gt;</span><span class="id"> k</span><span class="id"> _</span>.<br/>
+&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#mxE">mxE</a></span><span class="id"> /</span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#poly_eval_rV">poly_eval_rV</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#mxE">mxE</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.poly#hornerXn">hornerXn</a></span>.<br/>
+<span class="id">rewrite</span><span class="id"> Hdecomp</span>.<br/>
+<span class="id">apply:</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.ssralg#GRing.Theory.rpred_sum">rpred_sum</a></span><span class="id"> =&gt;</span><span class="id"> /=</span><span class="id"> k</span><span class="id"> _</span>.<br/>
+<span class="id">apply:</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.ssralg#GRing.Theory.rpredZ">rpredZ</a></span>.<br/>
+<span class="comment">(*&nbsp;Show&nbsp;poly_eval_rV&nbsp;('X^k)&nbsp;\in&nbsp;C&nbsp;for&nbsp;k&nbsp;&lt;&nbsp;size&nbsp;p&nbsp;&lt;=&nbsp;n&nbsp;-&nbsp;d&nbsp;*)</span><br/>
+<span class="id">rewrite</span><span class="id"> </span><span class="id"><a href="infotheo.ecc_classic.linearcode.html#mem_kernel_syndrome0">mem_kernel_syndrome0</a></span><span class="id"> -</span><span class="id"><a href="infotheo.ecc_classic.reed_solomon.html#RS.codebook_syndrome">RS</a></span>.<span class="id"><a href="infotheo.ecc_classic.reed_solomon.html#RS.codebook_syndrome">codebook_syndrome</a></span><span class="id"> //</span>.<br/>
+<span class="id">rewrite</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.finset#inE">inE</a></span><span class="id">;</span><span class="id"> apply/</span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#forallP">forallP</a></span><span class="id"> =&gt;</span><span class="id"> /=</span><span class="id"> t;</span><span class="id"> apply/</span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrbool.html#implyP">implyP</a></span><span class="id"> =&gt;</span><span class="id"> Ht</span>.<br/>
+<span class="id">apply/</span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.eqtype#eqP">eqP</a></span>.<br/>
+<span class="id">have</span><span class="id"> Htn</span><span class="id"> :</span> (<span class="id">t</span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Datatypes.html#nat">nat</a></span>)<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#::nat_scope:x_'&lt;'_x"> &lt;</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#::nat_scope:x_'&lt;'_x"> </a></span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#rs_eval.n">n</a></span><span class="id"> :=</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#leq_trans">leq_trans</a></span> (<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#ltn_ord">ltn_ord</a></span><span class="id"> t</span>)<span class="id"> </span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#rs_eval.dn">dn</a></span>.<br/>
+<span class="id">rewrite</span><span class="id"> </span><span class="id"><a href="infotheo.lib.dft.html#fdcoorE">fdcoorE</a></span>.<br/>
+<span class="id">rewrite</span> (<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.bigop#eq_bigr">eq_bigr</a></span> (<span class="gallina-kwd">fun</span><span class="id"> </span><span id="j:21" class="id"><span id="j:20" class="id"><span id="j:19" class="id"><a name="j:21" class="">j</a></span></span></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#:::'''I_'_x">'I_</a></span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#rs_eval.n">n</a></span><span class="id"> =&gt;</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#rs_eval.a">a</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.ssralg#663140372ac3b275aae871b74b140513"> ^+</a></span> (<span class="id"><a href="pgg_reconstruct.rs_privacy.html#j:19">j</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#ea2ff3d561159081cea6fb2e8113cc54"> *</a></span> ((<span class="id">k</span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Datatypes.html#nat">nat</a></span>)<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#0dacc1786c5ba797d47dd85006231633"> +</a></span> (<span class="id">t</span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Datatypes.html#nat">nat</a></span>)))))<span class="id">;</span><span class="id"> last</span><span class="id"> first</span>.<br/>
+&nbsp;&nbsp;<span class="id">move=&gt;</span><span class="id"> j</span><span class="id"> _;</span><span class="id"> rewrite</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#mxE">mxE</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.poly#hornerXn">hornerXn</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#mxE">mxE</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#inordK">inordK</a></span><span class="id"> //</span>.<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> -</span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.ssralg#GRing.Theory.exprM">exprM</a></span><span class="id"> -</span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.ssralg#GRing.Theory.exprM">exprM</a></span><span class="id"> -</span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.ssralg#GRing.Theory.exprD">exprD</a></span>.<br/>
+&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> congr</span> (<span class="id"><a href="pgg_reconstruct.rs_privacy.html#rs_eval.a">a</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.ssralg#663140372ac3b275aae871b74b140513"> ^+</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.ssralg#663140372ac3b275aae871b74b140513"> </a></span>_)<span class="id">;</span><span class="id"> rewrite</span> (<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#mulnC">mulnC</a></span> (<span class="id">t</span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Datatypes.html#nat">nat</a></span>)<span class="id"> j</span>)<span class="id"> -</span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#mulnDr">mulnDr</a></span>.<br/>
+<span class="id">rewrite</span> (<span class="id"><a href="infotheo.lib.dft.html#primitive_is_principal">primitive_is_principal</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#rs_eval.a_prim">a_prim</a></span>)<span class="id">;</span><span class="id"> first</span><span class="gallina-kwd"> by</span><span class="id"> []</span>.<br/>
+<span class="id">apply/</span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrbool.html#andP">andP</a></span><span class="id">;</span><span class="id"> split</span>.<br/>
+<span class="id">-</span><span class="gallina-kwd"> by</span><span class="id"> rewrite</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#addn_gt0">addn_gt0</a></span><span class="id"> Ht</span><span class="id"> </span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrbool.html#orbT">orbT</a></span>.<br/>
+<span class="id">-</span><span class="id"> have</span><span class="id"> Hk_lt</span><span class="id"> :</span> (<span class="id">k</span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Datatypes.html#nat">nat</a></span>)<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#::nat_scope:x_'&lt;'_x"> &lt;</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#::nat_scope:x_'&lt;'_x"> </a></span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#rs_eval.n">n</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#::nat_scope:x_'-'_x"> -</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#::nat_scope:x_'-'_x"> </a></span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#rs_eval.d">d</a></span><span class="id"> :=</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#leq_trans">leq_trans</a></span> (<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#ltn_ord">ltn_ord</a></span><span class="id"> k</span>)<span class="id"> Hsize</span>.<br/>
+&nbsp;&nbsp;<span class="id">have</span><span class="id"> Hkd</span><span class="id"> :</span> (<span class="id">k</span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Datatypes.html#nat">nat</a></span>)<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#0dacc1786c5ba797d47dd85006231633"> +</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#0dacc1786c5ba797d47dd85006231633"> </a></span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#rs_eval.d">d</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#::nat_scope:x_'&lt;'_x"> &lt;</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#::nat_scope:x_'&lt;'_x"> </a></span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#rs_eval.n">n</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> move:</span><span class="id"> Hk_lt;</span><span class="id"> rewrite</span><span class="id"> -</span>(<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#ltn_add2r">ltn_add2r</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#rs_eval.d">d</a></span>)<span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#subnK">subnK</a></span><span class="id"> //</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#ltnW">ltnW</a></span>.<br/>
+&nbsp;&nbsp;<span class="id">have</span><span class="id"> Htd</span><span class="id"> :</span> (<span class="id">t</span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Datatypes.html#nat">nat</a></span>)<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#cb53cf0ee22c036a03b4a9281c68b5a3"> &lt;=</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#cb53cf0ee22c036a03b4a9281c68b5a3"> </a></span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#rs_eval.d">d</a></span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> move:</span> (<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#ltn_ord">ltn_ord</a></span><span class="id"> t</span>)<span class="id">;</span><span class="id"> rewrite</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#ltnS">ltnS</a></span>.<br/>
+&nbsp;&nbsp;<span class="id">exact:</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#leq_ltn_trans">leq_ltn_trans</a></span> (<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#leq_add">leq_add</a></span> (<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#leqnn">leqnn</a></span><span class="id"> _</span>)<span class="id"> Htd</span>)<span class="id"> Hkd</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="vernacular">End</span><span class="id"> rs_eval</span>.<br/>
+<br/>
+<pre class="ssrdoc">
+    Section 2: Privacy Surjectivity for RS/MDS Codes
+</pre>
+<br/>
+<span class="vernacular">Section</span><span class="id"> rs_privacy</span>.<br/>
+<br/>
+<span class="vernacular">Variables</span> (<span id="rs_privacy.q" class="id"><a name="rs_privacy.q" class="">q</a></span><span class="id"> </span><span id="rs_privacy.m'" class="id"><a name="rs_privacy.m'" class="">m'</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Datatypes.html#nat">nat</a></span>).<br/>
+<span class="vernacular">Hypothesis</span><span class="id"> </span><span id="rs_privacy.primeq" class="id"><a name="rs_privacy.primeq" class="">primeq</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.prime#prime">prime</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#rs_privacy.q">q</a></span>.<br/>
+<span class="vernacular">Let</span><span class="id"> </span><span id="rs_privacy.F" class="id"><a name="rs_privacy.F" class="">F</a></span><span class="id"> :=</span><span class="id"> </span><span class="id"><a href="infotheo.lib.ssralg_ext.html#GF">GF</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#rs_privacy.m'">m'</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#rs_privacy.primeq">primeq</a></span>.<br/>
+<span class="vernacular">Variable</span><span class="id"> </span><span id="rs_privacy.a" class="id"><a name="rs_privacy.a" class="">a</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#rs_privacy.F">F</a></span>.<br/>
+<span class="vernacular">Variable</span><span class="id"> </span><span id="rs_privacy.n'" class="id"><a name="rs_privacy.n'" class="">n'</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Datatypes.html#nat">nat</a></span>.<br/>
+<span class="vernacular">Let</span><span class="id"> </span><span id="rs_privacy.n" class="id"><a name="rs_privacy.n" class="">n</a></span><span class="id"> :=</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#rs_privacy.n'">n'</a></span>.<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#bda89d73ec4a8f23ae92b565ffb5aaa6">+1</a></span>.<br/>
+<span class="vernacular">Variable</span><span class="id"> </span><span id="rs_privacy.d" class="id"><a name="rs_privacy.d" class="">d</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Datatypes.html#nat">nat</a></span>.<br/>
+<br/>
+<span class="vernacular">Hypothesis</span><span class="id"> </span><span id="rs_privacy.dn" class="id"><a name="rs_privacy.dn" class="">dn</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="infotheo.ecc_classic.reed_solomon.html#RS.redundancy_ub">RS</a></span>.<span class="id"><a href="infotheo.ecc_classic.reed_solomon.html#RS.redundancy_ub">redundancy_ub</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#rs_privacy.d">d</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#rs_privacy.n">n</a></span>.<br/>
+<span class="vernacular">Hypothesis</span><span class="id"> </span><span id="rs_privacy.qn" class="id"><a name="rs_privacy.qn" class="">qn</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrbool.html#b3ebd0deddd84fd60e149cb5ef719351">~~</a></span> (<span class="id"><a href="pgg_reconstruct.rs_privacy.html#rs_privacy.q">q</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.div#bde82eab2fe4a0799bc2419e587505d4"> %|</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.div#bde82eab2fe4a0799bc2419e587505d4"> </a></span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#rs_privacy.n">n</a></span>)<span class="id">%nat</span>.<br/>
+<span class="vernacular">Hypothesis</span><span class="id"> </span><span id="rs_privacy.an" class="id"><a name="rs_privacy.an" class="">an</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#rs_privacy.n">n</a></span>.<span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.poly#::ring_scope:x_'.-primitive_root'">-primitive_root</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.poly#::ring_scope:x_'.-primitive_root'"> a</a></span>.<br/>
+<br/>
+<span class="vernacular">Let</span><span class="id"> </span><span id="rs_privacy.a_neq0" class="id"><a name="rs_privacy.a_neq0" class="">a_neq0</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#rs_privacy.a">a</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.eqtype#c385a484ee9d1b4e0615924561a9b75e"> !=</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.eqtype#c385a484ee9d1b4e0615924561a9b75e"> </a></span><span class="id">0</span><span class="id"> :=</span><span class="id"> </span><span class="id"><a href="infotheo.lib.dft.html#primitive_uroot_neq0">primitive_uroot_neq0</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#rs_privacy.an">an</a></span>.<br/>
+<span class="vernacular">Let</span><span class="id"> </span><span id="rs_privacy.a_nuroot" class="id"><a name="rs_privacy.a_nuroot" class="">a_nuroot</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="infotheo.lib.dft.html#not_uroot_on">not_uroot_on</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#rs_privacy.a">a</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#rs_privacy.n">n</a></span><span class="id"> :=</span><span class="id"> </span><span class="id"><a href="infotheo.lib.dft.html#prim_root_not_uroot_on">prim_root_not_uroot_on</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#rs_privacy.an">an</a></span>.<br/>
+<br/>
+<span class="vernacular">Let</span><span class="id"> </span><span id="rs_privacy.C" class="id"><a name="rs_privacy.C" class="">C</a></span><span class="id"> :=</span><span class="id"> </span><span class="id"><a href="infotheo.ecc_classic.reed_solomon.html#RS.code">RS</a></span>.<span class="id"><a href="infotheo.ecc_classic.reed_solomon.html#RS.code">code</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#rs_privacy.a">a</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#rs_privacy.n">n</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#rs_privacy.d">d</a></span>.<br/>
+<span class="vernacular">Let</span><span class="id"> </span><span id="rs_privacy.C_nt" class="id"><a name="rs_privacy.C_nt" class="">C_nt</a></span><span class="id"> :=</span><span class="id"> </span><span class="id"><a href="infotheo.ecc_classic.reed_solomon.html#RS_not_trivial">RS_not_trivial</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#rs_privacy.a">a</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#rs_privacy.dn">dn</a></span>.<br/>
+<br/>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> </span><span id="rs_privacy_surj" class="id"><a name="rs_privacy_surj" class="">rs_privacy_surj</a></span><span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="gallina-kwd">forall</span> (<span id="S:40" class="id"><a name="S:40" class="">S</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.finset#d8708f36d374a98f4d683c7593d1ea6a">{set</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.finset#d8708f36d374a98f4d683c7593d1ea6a"> </a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#:::'''I_'_x">'I_</a></span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#rs_privacy.n">n</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.finset#d8708f36d374a98f4d683c7593d1ea6a">}</a></span>) (<span id="target:41" class="id"><a name="target:41" class="">target</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#928a892a0c1438777aeb17535aec0378">'rV[</a></span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#rs_privacy.F">F</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#928a892a0c1438777aeb17535aec0378">]_</a></span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#rs_privacy.n">n</a></span>)<span class="id">,</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#234f50e13366f794cd6877cf832a5935">#|</a></span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#S:40">S</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#234f50e13366f794cd6877cf832a5935">|</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#::nat_scope:x_'&lt;'_x"> &lt;</a></span> (<span class="id"><a href="pgg_reconstruct.rs_privacy.html#rs_privacy.n">n</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#::nat_scope:x_'-'_x"> -</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#::nat_scope:x_'-'_x"> </a></span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#rs_privacy.d">d</a></span>).<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#bda89d73ec4a8f23ae92b565ffb5aaa6">+1</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#::type_scope:x_'-&gt;'_x"> -&gt;</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#a883bdd010993579f99d60b3775bcf54">exists</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#a883bdd010993579f99d60b3775bcf54"> </a></span><span id="c:42" class="id"><a name="c:42" class="">c</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#928a892a0c1438777aeb17535aec0378">'rV[</a></span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#rs_privacy.F">F</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#928a892a0c1438777aeb17535aec0378">]_</a></span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#rs_privacy.n">n</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#a883bdd010993579f99d60b3775bcf54">,</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#a883bdd010993579f99d60b3775bcf54"> </a></span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#c:42">c</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrbool.html#b09457274bcb94927e289b8a9e9cd3f7"> \in</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrbool.html#b09457274bcb94927e289b8a9e9cd3f7"> </a></span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#rs_privacy.C">C</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#ba2b0e492d2b4675a0acf3ea92aabadd"> /\</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#ba2b0e492d2b4675a0acf3ea92aabadd"> </a></span><span class="id"><a href="infotheo.ecc_classic.linearcode.html#vproj">vproj</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#c:42">c</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#S:40">S</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> =</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> </a></span><span class="id"><a href="infotheo.ecc_classic.linearcode.html#vproj">vproj</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#target:41">target</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#S:40">S</a></span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id">move=&gt;</span><span class="id"> S</span><span class="id"> target</span><span class="id"> HS</span>.<br/>
+<span class="id">set</span><span class="id"> sS</span><span class="id"> :=</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#234f50e13366f794cd6877cf832a5935">#|</a></span><span class="id">S</span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#234f50e13366f794cd6877cf832a5935">|</a></span>.<br/>
+<span class="comment">(*&nbsp;Build&nbsp;tuples&nbsp;via&nbsp;mktuple&nbsp;for&nbsp;clean&nbsp;tnth&nbsp;access&nbsp;*)</span><br/>
+<span class="id">pose</span><span class="id"> pts</span><span class="id"> :</span><span class="id"> sS</span>.<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#::type_scope:x_'.-tuple'">-tuple</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#::type_scope:x_'.-tuple'"> F</a></span><span class="id"> :=</span><br/>
+&nbsp;&nbsp;<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#mktuple">mktuple</a></span> (<span class="gallina-kwd">fun</span><span class="id"> </span><span id="j:43" class="id"><a name="j:43" class="">j</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#:::'''I_'_x">'I_</a></span><span class="id">sS</span><span class="id"> =&gt;</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#rs_privacy.a">a</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.ssralg#663140372ac3b275aae871b74b140513"> ^+</a></span> (<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#enum_val">enum_val</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#j:43">j</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Datatypes.html#nat">nat</a></span>)<span class="id"> :</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#rs_privacy.F">F</a></span>).<br/>
+<span class="id">pose</span><span class="id"> vals</span><span class="id"> :</span><span class="id"> sS</span>.<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#::type_scope:x_'.-tuple'">-tuple</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#::type_scope:x_'.-tuple'"> F</a></span><span class="id"> :=</span><br/>
+&nbsp;&nbsp;<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#mktuple">mktuple</a></span> (<span class="gallina-kwd">fun</span><span class="id"> </span><span id="j:44" class="id"><a name="j:44" class="">j</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#:::'''I_'_x">'I_</a></span><span class="id">sS</span><span class="id"> =&gt;</span><span class="id"> target</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#ord0">ord0</a></span> (<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#enum_val">enum_val</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#j:44">j</a></span>)).<br/>
+<span class="comment">(*&nbsp;Show&nbsp;points&nbsp;are&nbsp;distinct&nbsp;*)</span><br/>
+<span class="id">have</span><span class="id"> Huniq</span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.seq#uniq">uniq</a></span><span class="id"> pts</span>.<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> /pts</span><span class="id"> /=</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.seq#map_inj_uniq">map_inj_uniq</a></span><span class="id"> ?</span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#enum_uniq">enum_uniq</a></span><span class="id"> //</span>.<br/>
+&nbsp;&nbsp;<span class="id">move=&gt;</span><span class="id"> x</span><span class="id"> y</span><span class="id"> Heq;</span><span class="id"> apply:</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#enum_val_inj">enum_val_inj</a></span>.<br/>
+&nbsp;&nbsp;<span class="id">apply:</span> (<span class="id"><a href="infotheo.lib.dft.html#rVexp_inj">rVexp_inj</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#rs_privacy.a_neq0">a_neq0</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#rs_privacy.a_nuroot">a_nuroot</a></span>).<br/>
+&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> !</span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.finfun#ffunE">ffunE</a></span><span class="id"> !</span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#mxE">mxE</a></span>.<br/>
+<span class="comment">(*&nbsp;Interpolate&nbsp;*)</span><br/>
+<span class="id">pose</span><span class="id"> p</span><span class="id"> :=</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.lagrange.html#lagrange_interp">lagrange_interp</a></span><span class="id"> pts</span><span class="id"> vals</span>.<br/>
+<span class="comment">(*&nbsp;Degree&nbsp;bound&nbsp;*)</span><br/>
+<span class="id">have</span><span class="id"> Hsize</span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.seq#size">size</a></span><span class="id"> p</span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#cb53cf0ee22c036a03b4a9281c68b5a3"> &lt;=</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#cb53cf0ee22c036a03b4a9281c68b5a3"> </a></span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#rs_privacy.n">n</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#::nat_scope:x_'-'_x"> -</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#::nat_scope:x_'-'_x"> </a></span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#rs_privacy.d">d</a></span>.<br/>
+&nbsp;&nbsp;<span class="id">apply:</span> (<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#leq_trans">leq_trans</a></span> (<span class="id"><a href="pgg_reconstruct.lagrange.html#lagrange_interp_size">lagrange_interp_size</a></span><span class="id"> pts</span><span class="id"> vals</span>)).<br/>
+&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> -</span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#ltnS">ltnS</a></span>.<br/>
+<span class="comment">(*&nbsp;Build&nbsp;the&nbsp;codeword&nbsp;*)</span><br/>
+<span class="gallina-kwd">exists</span> (<span class="id"><a href="pgg_reconstruct.rs_privacy.html#poly_eval_rV">poly_eval_rV</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#rs_privacy.a">a</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#rs_privacy.n'">n'</a></span><span class="id"> p</span>).<br/>
+<span class="id">split</span>.<br/>
+<span class="id">-</span><span class="id"> exact:</span> (<span class="id">@</span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#poly_eval_in_code">poly_eval_in_code</a></span><span class="id"> _</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#rs_privacy.a">a</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#rs_privacy.n'">n'</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#rs_privacy.d">d</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#rs_privacy.dn">dn</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#rs_privacy.an">an</a></span><span class="id"> p</span><span class="id"> Hsize</span>).<br/>
+<span class="id">-</span><span class="id"> apply/</span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#rowP">rowP</a></span><span class="id"> =&gt;</span><span class="id"> i;</span><span class="id"> rewrite</span><span class="id"> !</span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#mxE">mxE</a></span>.<br/>
+&nbsp;&nbsp;<span class="id">case:</span><span class="id"> </span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrbool.html#ifPn">ifPn</a></span><span class="id"> =&gt;</span><span class="id"> Hi;</span><span class="id"> last</span><span class="gallina-kwd"> by</span><span class="id"> []</span>.<br/>
+&nbsp;&nbsp;<span class="id">set</span><span class="id"> j</span><span class="id"> :=</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#enum_rank_in">enum_rank_in</a></span><span class="id"> Hi</span><span class="id"> i</span>.<br/>
+&nbsp;&nbsp;<span class="id">have</span><span class="id"> Hj</span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#enum_val">enum_val</a></span><span class="id"> j</span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> =</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> </a></span><span class="id">i</span><span class="gallina-kwd"> by</span><span class="id"> rewrite</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#enum_rankK_in">enum_rankK_in</a></span>.<br/>
+&nbsp;&nbsp;<span class="id">have</span><span class="id"> -&gt;</span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#rs_privacy.a">a</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.ssralg#663140372ac3b275aae871b74b140513"> ^+</a></span> (<span class="id">i</span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Datatypes.html#nat">nat</a></span>)<span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> =</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> </a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#tnth">tnth</a></span><span class="id"> pts</span><span class="id"> j</span><span class="gallina-kwd"> by</span><span class="id"> rewrite</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#tnth_mktuple">tnth_mktuple</a></span><span class="id"> Hj</span>.<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.lagrange.html#lagrange_interp_eval">lagrange_interp_eval</a></span><span class="id"> //</span>.<br/>
+&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#tnth_mktuple">tnth_mktuple</a></span><span class="id"> Hj</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> </span><span id="rs_privacy_surj_massey" class="id"><a name="rs_privacy_surj_massey" class="">rs_privacy_surj_massey</a></span> (<span id="Hd2:45" class="id"><a name="Hd2:45" class="">Hd2</a></span><span class="id"> :</span><span class="id"> 1</span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#::nat_scope:x_'&lt;'_x"> &lt;</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#::nat_scope:x_'&lt;'_x"> </a></span><span class="id"><a href="infotheo.ecc_classic.linearcode.html#min_dist">min_dist</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#rs_privacy.C_nt">C_nt</a></span>)<span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="gallina-kwd">forall</span> (<span id="S:46" class="id"><a name="S:46" class="">S</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.finset#d8708f36d374a98f4d683c7593d1ea6a">{set</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.finset#d8708f36d374a98f4d683c7593d1ea6a"> </a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#:::'''I_'_x">'I_</a></span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#rs_privacy.n">n</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.finset#d8708f36d374a98f4d683c7593d1ea6a">}</a></span>) (<span id="target:47" class="id"><a name="target:47" class="">target</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#928a892a0c1438777aeb17535aec0378">'rV[</a></span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#rs_privacy.F">F</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#928a892a0c1438777aeb17535aec0378">]_</a></span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#rs_privacy.n">n</a></span>)<span class="id">,</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#234f50e13366f794cd6877cf832a5935">#|</a></span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#S:46">S</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#234f50e13366f794cd6877cf832a5935">|</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#::nat_scope:x_'&lt;'_x"> &lt;</a></span> (<span class="id"><a href="pgg_reconstruct.rs_privacy.html#rs_privacy.n">n</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#::nat_scope:x_'-'_x"> -</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#::nat_scope:x_'-'_x"> </a></span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#rs_privacy.d">d</a></span>)<span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#::type_scope:x_'-&gt;'_x"> -&gt;</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#a883bdd010993579f99d60b3775bcf54">exists</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#a883bdd010993579f99d60b3775bcf54"> </a></span><span id="c:48" class="id"><a name="c:48" class="">c</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#928a892a0c1438777aeb17535aec0378">'rV[</a></span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#rs_privacy.F">F</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#928a892a0c1438777aeb17535aec0378">]_</a></span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#rs_privacy.n">n</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#a883bdd010993579f99d60b3775bcf54">,</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#a883bdd010993579f99d60b3775bcf54"> </a></span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#c:48">c</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrbool.html#b09457274bcb94927e289b8a9e9cd3f7"> \in</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrbool.html#b09457274bcb94927e289b8a9e9cd3f7"> </a></span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#rs_privacy.C">C</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#ba2b0e492d2b4675a0acf3ea92aabadd"> /\</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#ba2b0e492d2b4675a0acf3ea92aabadd"> </a></span><span class="id"><a href="infotheo.ecc_classic.linearcode.html#vproj">vproj</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#c:48">c</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#S:46">S</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> =</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> </a></span><span class="id"><a href="infotheo.ecc_classic.linearcode.html#vproj">vproj</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#target:47">target</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#S:46">S</a></span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id">move=&gt;</span><span class="id"> S</span><span class="id"> target</span><span class="id"> HS</span>.<br/>
+<span class="id">apply:</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.rs_privacy.html#rs_privacy_surj">rs_privacy_surj</a></span>.<br/>
+<span class="id">exact:</span> (<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#ltn_trans">ltn_trans</a></span><span class="id"> HS</span> (<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#ltnSn">ltnSn</a></span><span class="id"> _</span>)).<br/>
+Qed.</div></details>
+<br/>
+<span class="vernacular">End</span><span class="id"> rs_privacy</span>.<br/>
+
+      <div class="footer"><hr/>Generated by <a href="https://github.com/affeldt-aist/rocqnavi/">rocqnavi</a></div>
+    </div>
+  </div>
+    </main>
+</body>
+</html>

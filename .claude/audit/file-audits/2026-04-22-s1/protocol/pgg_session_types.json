@@ -1,0 +1,34 @@
+{
+  "findings": [
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/protocol/pgg_session_types.v",
+      "line_start": 89,
+      "line_end": 89,
+      "lemma_name": "PGGRet",
+      "severity": "error",
+      "evidence_quote": "Definition PGGRet {party : nat} (x : data)",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/protocol/pgg_session_types.v",
+      "line_start": 93,
+      "line_end": 93,
+      "lemma_name": "PGGFinish",
+      "severity": "error",
+      "evidence_quote": "Definition PGGFinish {party : nat}",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": null,
+  "exit_code": 2
+}

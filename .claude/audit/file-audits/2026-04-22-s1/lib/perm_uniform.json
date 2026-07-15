@@ -1,0 +1,138 @@
+{
+  "findings": [
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/lib/perm_uniform.v",
+      "line_start": 37,
+      "line_end": 37,
+      "lemma_name": "prescribedP",
+      "severity": "error",
+      "evidence_quote": "Lemma prescribedP k (s v : 'I_k -> 'I_N) (sigma : {perm 'I_N}) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/lib/perm_uniform.v",
+      "line_start": 43,
+      "line_end": 43,
+      "lemma_name": "prescribed0",
+      "severity": "error",
+      "evidence_quote": "Lemma prescribed0 (s v : 'I_0 -> 'I_N) : prescribed s v = [set: {perm 'I_N}].",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/lib/perm_uniform.v",
+      "line_start": 148,
+      "line_end": 148,
+      "lemma_name": "v_ext",
+      "severity": "error",
+      "evidence_quote": "Definition v_ext (v_new : 'I_N) : 'I_k.+1 -> 'I_N :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/lib/perm_uniform.v",
+      "line_start": 154,
+      "line_end": 154,
+      "lemma_name": "s_ext_inj",
+      "severity": "error",
+      "evidence_quote": "Lemma s_ext_inj (s_new : 'I_N) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/lib/perm_uniform.v",
+      "line_start": 169,
+      "line_end": 169,
+      "lemma_name": "v_ext_inj",
+      "severity": "error",
+      "evidence_quote": "Lemma v_ext_inj (v_new : 'I_N) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/lib/perm_uniform.v",
+      "line_start": 248,
+      "line_end": 248,
+      "lemma_name": "N_pos",
+      "severity": "error",
+      "evidence_quote": "Lemma N_pos : (0 < N)%N. Proof. by []. Qed.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/lib/perm_uniform.v",
+      "line_start": 281,
+      "line_end": 281,
+      "lemma_name": "Pr_prescribed_ne0",
+      "severity": "error",
+      "evidence_quote": "Lemma Pr_prescribed_ne0 : Pr perm_fdist obs_set != (0 : R)%R.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/lib/perm_uniform.v",
+      "line_start": 343,
+      "line_end": 343,
+      "lemma_name": "card_remaining",
+      "severity": "error",
+      "evidence_quote": "Lemma card_remaining : #|remaining_values| = (N - k)%N.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/lib/perm_uniform.v",
+      "line_start": 352,
+      "line_end": 352,
+      "lemma_name": "collusion_uniform",
+      "severity": "error",
+      "evidence_quote": "Lemma collusion_uniform (s_new : 'I_N) (v_new : 'I_N) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/lib/perm_uniform.v",
+      "line_start": 362,
+      "line_end": 362,
+      "lemma_name": "collusion_zero",
+      "severity": "error",
+      "evidence_quote": "Lemma collusion_zero (s_new : 'I_N) (v_new : 'I_N) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": null,
+  "exit_code": 2
+}

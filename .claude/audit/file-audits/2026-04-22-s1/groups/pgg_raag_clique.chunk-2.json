@@ -1,0 +1,400 @@
+{
+  "findings": [
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 371,
+      "line_end": 371,
+      "lemma_name": "all_pairs_false_neq",
+      "severity": "warning",
+      "evidence_quote": "Lemma all_pairs_false_neq (s : seq nat) (a b : nat) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 444,
+      "line_end": 444,
+      "lemma_name": "clique_traces_aux_inv",
+      "severity": "warning",
+      "evidence_quote": "Lemma clique_traces_aux_inv Tg n memo :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 534,
+      "line_end": 534,
+      "lemma_name": "filter_iota_head_even",
+      "severity": "warning",
+      "evidence_quote": "Lemma filter_iota_head_even L :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 538,
+      "line_end": 538,
+      "lemma_name": "filter_iota_head_odd",
+      "severity": "warning",
+      "evidence_quote": "Lemma filter_iota_head_odd L :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 600,
+      "line_end": 600,
+      "lemma_name": "sumn_shift_even_to_odd_gen",
+      "severity": "warning",
+      "evidence_quote": "Lemma sumn_shift_even_to_odd_gen (g : nat -> nat) m M :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 608,
+      "line_end": 608,
+      "lemma_name": "sumn_shift_odd_to_even_gen",
+      "severity": "warning",
+      "evidence_quote": "Lemma sumn_shift_odd_to_even_gen (g : nat -> nat) m M :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 371,
+      "line_end": 371,
+      "lemma_name": "all_pairs_false_neq",
+      "severity": "error",
+      "evidence_quote": "Lemma all_pairs_false_neq (s : seq nat) (a b : nat) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 381,
+      "line_end": 381,
+      "lemma_name": "empty_clique_countk",
+      "severity": "error",
+      "evidence_quote": "Lemma empty_clique_countk Tg k :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 472,
+      "line_end": 472,
+      "lemma_name": "clique_traces_free",
+      "severity": "error",
+      "evidence_quote": "Lemma clique_traces_free Tg L :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 497,
+      "line_end": 497,
+      "lemma_name": "size_subseqs_k",
+      "severity": "error",
+      "evidence_quote": "Lemma size_subseqs_k k s :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 506,
+      "line_end": 506,
+      "lemma_name": "complete_clique_count",
+      "severity": "error",
+      "evidence_quote": "Lemma complete_clique_count Tg k :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 527,
+      "line_end": 527,
+      "lemma_name": "sneg",
+      "severity": "error",
+      "evidence_quote": "Definition sneg (n r L : nat) : nat :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 534,
+      "line_end": 534,
+      "lemma_name": "filter_iota_head_even",
+      "severity": "error",
+      "evidence_quote": "Lemma filter_iota_head_even L :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 538,
+      "line_end": 538,
+      "lemma_name": "filter_iota_head_odd",
+      "severity": "error",
+      "evidence_quote": "Lemma filter_iota_head_odd L :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 542,
+      "line_end": 542,
+      "lemma_name": "sumn_filter_map",
+      "severity": "error",
+      "evidence_quote": "Lemma sumn_filter_map {A : eqType} (p : pred A) (f : A -> nat) (s : seq A) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 547,
+      "line_end": 547,
+      "lemma_name": "spos_unfold",
+      "severity": "error",
+      "evidence_quote": "Lemma spos_unfold n r L :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 552,
+      "line_end": 552,
+      "lemma_name": "sneg_unfold",
+      "severity": "error",
+      "evidence_quote": "Lemma sneg_unfold n r L :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 557,
+      "line_end": 557,
+      "lemma_name": "spos_split",
+      "severity": "error",
+      "evidence_quote": "Lemma spos_split n r L :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 566,
+      "line_end": 566,
+      "lemma_name": "sneg_eq_tail",
+      "severity": "error",
+      "evidence_quote": "Lemma sneg_eq_tail n r L :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 576,
+      "line_end": 576,
+      "lemma_name": "sumn_map_add",
+      "severity": "error",
+      "evidence_quote": "Lemma sumn_map_add {A : Type} (f g : A -> nat) (s : seq A) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 581,
+      "line_end": 581,
+      "lemma_name": "sumn_map_split",
+      "severity": "error",
+      "evidence_quote": "Lemma sumn_map_split (f g h : nat -> nat) m M :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 591,
+      "line_end": 591,
+      "lemma_name": "sumn_map_eq",
+      "severity": "error",
+      "evidence_quote": "Lemma sumn_map_eq (f g : nat -> nat) m M :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 600,
+      "line_end": 600,
+      "lemma_name": "sumn_shift_even_to_odd_gen",
+      "severity": "error",
+      "evidence_quote": "Lemma sumn_shift_even_to_odd_gen (g : nat -> nat) m M :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 608,
+      "line_end": 608,
+      "lemma_name": "sumn_shift_odd_to_even_gen",
+      "severity": "error",
+      "evidence_quote": "Lemma sumn_shift_odd_to_even_gen (g : nat -> nat) m M :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 616,
+      "line_end": 616,
+      "lemma_name": "sumn_iota_map0",
+      "severity": "error",
+      "evidence_quote": "Lemma sumn_iota_map0 (f : nat -> nat) m M :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 625,
+      "line_end": 625,
+      "lemma_name": "spos_L0",
+      "severity": "error",
+      "evidence_quote": "Lemma spos_L0 n r : spos n r 0 = 'C(r, r).",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 628,
+      "line_end": 628,
+      "lemma_name": "sneg_L0",
+      "severity": "error",
+      "evidence_quote": "Lemma sneg_L0 n r : sneg n r 0 = 0.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 631,
+      "line_end": 631,
+      "lemma_name": "spos0",
+      "severity": "error",
+      "evidence_quote": "Lemma spos0 r L : spos 0 r L = 'C(L + r, r).",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "I001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 600,
+      "line_end": 600,
+      "lemma_name": "sumn_shift_even_to_odd_gen",
+      "severity": "error",
+      "evidence_quote": "Lemma sumn_shift_even_to_odd_gen (g : nat -> nat) m M :",
+      "stage": "stage1",
+      "reason": "five or more underscore-separated components without a canonical MathComp suffix",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "I001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 608,
+      "line_end": 608,
+      "lemma_name": "sumn_shift_odd_to_even_gen",
+      "severity": "error",
+      "evidence_quote": "Lemma sumn_shift_odd_to_even_gen (g : nat -> nat) m M :",
+      "stage": "stage1",
+      "reason": "five or more underscore-separated components without a canonical MathComp suffix",
+      "stages": [
+        "stage1"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": null,
+  "exit_code": 2
+}

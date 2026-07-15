@@ -1,0 +1,3 @@
+- [SSProve advantage conventions](reference_ssprove_advantage_conventions.md) — Advantage_link orientation, link/∘ caller direction, and the DSDP adversary-naming map (predictor=A, guessing_challenger=guess)
+- [DSDP triangle adversary mismatch](project_dsdp_triangle_adversary.md) — dsdp.tex:678 triangle display uses guess∘A but cited lemma holds for bare A; recurring guess-wrapper conflation
+- [SSProve chapter displays verified](reference_ssprove_chapter_displays.md) — ssprove.tex triangle (62-64) and Advantage_link (82-86) match pkg_advantage.v; open M1 (A undefined at first use) + M3/precision nits

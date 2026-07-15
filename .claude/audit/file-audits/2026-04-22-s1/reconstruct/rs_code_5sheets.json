@@ -1,0 +1,99 @@
+{
+  "findings": [
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/reconstruct/rs_code_5sheets.v",
+      "line_start": 45,
+      "line_end": 45,
+      "lemma_name": "expr_2_mod_5",
+      "severity": "warning",
+      "evidence_quote": "Lemma expr_2_mod_5 (k : nat) : (2%:R : GF 0 prime5) ^+ k = (2^k %% 5)%:R.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/rs_code_5sheets.v",
+      "line_start": 31,
+      "line_end": 31,
+      "lemma_name": "char_GF5",
+      "severity": "error",
+      "evidence_quote": "Lemma char_GF5 : (5%:R : GF 0 prime5) = 0.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/rs_code_5sheets.v",
+      "line_start": 34,
+      "line_end": 34,
+      "lemma_name": "card_GF5",
+      "severity": "error",
+      "evidence_quote": "Lemma card_GF5 : #|GF 0 prime5| = 5.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/rs_code_5sheets.v",
+      "line_start": 75,
+      "line_end": 75,
+      "lemma_name": "prim_root_prim4_GF5",
+      "severity": "error",
+      "evidence_quote": "Lemma prim_root_prim4_GF5 : 4.-primitive_root (2%:R : GF 0 prime5).",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/rs_code_5sheets.v",
+      "line_start": 105,
+      "line_end": 105,
+      "lemma_name": "qn5_4",
+      "severity": "error",
+      "evidence_quote": "Lemma qn5_4 : ~~ (5 %| 4)%N. Proof. by []. Qed.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/rs_code_5sheets.v",
+      "line_start": 113,
+      "line_end": 113,
+      "lemma_name": "trivial_sigma_fix0",
+      "severity": "error",
+      "evidence_quote": "Lemma trivial_sigma_fix0 (M : MonodromyReprType) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/rs_code_5sheets.v",
+      "line_start": 123,
+      "line_end": 123,
+      "lemma_name": "trivial_sigma_auto",
+      "severity": "error",
+      "evidence_quote": "Lemma trivial_sigma_auto (M : MonodromyReprType) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": null,
+  "exit_code": 2
+}

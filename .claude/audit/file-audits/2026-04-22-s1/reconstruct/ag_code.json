@@ -1,0 +1,151 @@
+{
+  "findings": [
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/reconstruct/ag_code.v",
+      "line_start": 114,
+      "line_end": 114,
+      "lemma_name": "ag_min_dist_lb",
+      "severity": "warning",
+      "evidence_quote": "Lemma ag_min_dist_lb : n - (k + g - 1) <= min_dist ag_not_trivial.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/reconstruct/ag_code.v",
+      "line_start": 125,
+      "line_end": 125,
+      "lemma_name": "ag_min_dist_ge2",
+      "severity": "warning",
+      "evidence_quote": "Lemma ag_min_dist_ge2 : k + g < n -> 1 < min_dist ag_not_trivial.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/ag_code.v",
+      "line_start": 40,
+      "line_end": 40,
+      "lemma_name": "ag_code",
+      "severity": "error",
+      "evidence_quote": "Definition ag_code : Lcode0.t F n :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/ag_code.v",
+      "line_start": 43,
+      "line_end": 43,
+      "lemma_name": "ag_code_eval",
+      "severity": "error",
+      "evidence_quote": "Lemma ag_code_eval (m : 'rV[F]_k) : m *m ev \\in ag_code.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/ag_code.v",
+      "line_start": 49,
+      "line_end": 49,
+      "lemma_name": "ag_code_memP",
+      "severity": "error",
+      "evidence_quote": "Lemma ag_code_memP (c : 'rV[F]_n) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/ag_code.v",
+      "line_start": 57,
+      "line_end": 57,
+      "lemma_name": "dim_ag_code",
+      "severity": "error",
+      "evidence_quote": "Lemma dim_ag_code : \\rank ev = k -> \\dim ag_code = k.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/ag_code.v",
+      "line_start": 87,
+      "line_end": 87,
+      "lemma_name": "ag_mulmx_inj",
+      "severity": "error",
+      "evidence_quote": "Lemma ag_mulmx_inj : forall m1 m2 : 'rV[F]_k,",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/ag_code.v",
+      "line_start": 95,
+      "line_end": 95,
+      "lemma_name": "ag_mulmx_neq0",
+      "severity": "error",
+      "evidence_quote": "Lemma ag_mulmx_neq0 (m : 'rV[F]_k) : m != 0 -> m *m ev != 0.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/ag_code.v",
+      "line_start": 102,
+      "line_end": 102,
+      "lemma_name": "ag_not_trivial",
+      "severity": "error",
+      "evidence_quote": "Lemma ag_not_trivial : not_trivial (ag_code ev).",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/ag_code.v",
+      "line_start": 114,
+      "line_end": 114,
+      "lemma_name": "ag_min_dist_lb",
+      "severity": "error",
+      "evidence_quote": "Lemma ag_min_dist_lb : n - (k + g - 1) <= min_dist ag_not_trivial.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/ag_code.v",
+      "line_start": 125,
+      "line_end": 125,
+      "lemma_name": "ag_min_dist_ge2",
+      "severity": "error",
+      "evidence_quote": "Lemma ag_min_dist_ge2 : k + g < n -> 1 < min_dist ag_not_trivial.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": null,
+  "exit_code": 2
+}

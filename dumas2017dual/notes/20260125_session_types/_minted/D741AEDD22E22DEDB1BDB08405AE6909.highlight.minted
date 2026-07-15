@@ -1,0 +1,11 @@
+\begin{MintedVerbatim}[commandchars=\\\{\},codes={\catcode`\$=3\catcode`\^=7\catcode`\_=8\relax}]
+\PYG{k+kn}{Inductive} \PYG{n}{sproc} \PYG{o}{(}\PYG{n}{party} \PYG{o}{:} \PYG{n}{nat}\PYG{o}{)} \PYG{o}{:} \PYG{n}{nat} \PYG{esc}{$\to$} \PYG{n}{senv} \PYG{esc}{$\to$} \PYG{k+kt}{Type} \PYG{o}{:=}
+\PYG{o}{|} \PYG{n}{SFinish} \PYG{o}{:} \PYG{n}{sproc} \PYG{n}{party} \PYG{l+m+mi}{1} \PYG{n}{senv\PYGZus{}end}
+\PYG{o}{|} \PYG{n}{SRet}    \PYG{o}{:} \PYG{n}{data} \PYG{esc}{$\to$} \PYG{n}{sproc} \PYG{n}{party} \PYG{l+m+mi}{2} \PYG{n}{senv\PYGZus{}end}
+\PYG{o}{|} \PYG{n}{SInit}   \PYG{o}{:} \PYG{esc}{$\forall$} \PYG{n}{n} \PYG{n}{env}\PYG{o}{,} \PYG{n}{data} \PYG{esc}{$\to$} \PYG{n}{sproc} \PYG{n}{party} \PYG{n}{n} \PYG{n}{env} \PYG{esc}{$\to$} \PYG{n}{sproc} \PYG{n}{party} \PYG{o}{(}\PYG{n}{n}\PYG{o}{.}\PYG{o}{+}\PYG{l+m+mi}{1}\PYG{o}{)} \PYG{n}{env}
+\PYG{o}{|} \PYG{n}{SSend}   \PYG{o}{:} \PYG{esc}{$\forall$} \PYG{n}{n} \PYG{n}{env} \PYG{n}{dst} \PYG{n}{dt}\PYG{o}{,} \PYG{n}{data} \PYG{esc}{$\to$} \PYG{n}{sproc} \PYG{n}{party} \PYG{n}{n} \PYG{n}{env} \PYG{esc}{$\to$}
+              \PYG{n}{sproc} \PYG{n}{party} \PYG{o}{(}\PYG{n}{n}\PYG{o}{.}\PYG{o}{+}\PYG{l+m+mi}{1}\PYG{o}{)} \PYG{o}{(}\PYG{n}{senv\PYGZus{}send} \PYG{n}{env} \PYG{n}{dst} \PYG{n}{dt}\PYG{o}{)}
+\PYG{o}{|} \PYG{n}{SRecv}   \PYG{o}{:} \PYG{esc}{$\forall$} \PYG{n}{n} \PYG{n}{env} \PYG{n}{src} \PYG{n}{dt}\PYG{o}{,} \PYG{o}{(}\PYG{n}{data} \PYG{esc}{$\to$} \PYG{n}{sproc} \PYG{n}{party} \PYG{n}{n} \PYG{n}{env}\PYG{o}{)} \PYG{esc}{$\to$}
+              \PYG{n}{sproc} \PYG{n}{party} \PYG{o}{(}\PYG{n}{n}\PYG{o}{.}\PYG{o}{+}\PYG{l+m+mi}{1}\PYG{o}{)} \PYG{o}{(}\PYG{n}{senv\PYGZus{}recv} \PYG{n}{env} \PYG{n}{src} \PYG{n}{dt}\PYG{o}{)}
+\PYG{o}{|} \PYG{n}{SFail}   \PYG{o}{:} \PYG{esc}{$\forall$} \PYG{n}{n} \PYG{n}{env}\PYG{o}{,} \PYG{n}{sproc} \PYG{n}{party} \PYG{n}{n} \PYG{n}{env}\PYG{o}{.}
+\end{MintedVerbatim}

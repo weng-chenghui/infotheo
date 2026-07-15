@@ -1,0 +1,6 @@
+timestamp	file	chunk	lines	exit_code	errors	warnings	duration_s	note
+2026-04-22T23:10:43Z	groups/pgg_weval_inj.v			DRY	0	0	0	
+2026-04-22T23:10:48Z	groups/pgg_weval_inj.v			0	0	23	408	
+2026-04-22T23:17:46Z	groups/pgg_raag.v			2	6	47	158	
+2026-04-22T23:20:29Z	groups/pgg_raag_clique.v	0	141-301	0	0	8	113	
+2026-04-22T23:22:22Z	groups/pgg_raag_clique.v	1	302-535	2	1	17	287	

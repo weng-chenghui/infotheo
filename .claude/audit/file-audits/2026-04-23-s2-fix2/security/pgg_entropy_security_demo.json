@@ -1,0 +1,235 @@
+{
+  "findings": [
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/security/pgg_entropy_security_demo.v",
+      "line_start": 64,
+      "line_end": 64,
+      "lemma_name": "monster_security_from_entropy",
+      "severity": "warning",
+      "evidence_quote": "Definition monster_security_from_entropy : SecurityWitness R R_monster :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/security/pgg_entropy_security_demo.v",
+      "line_start": 68,
+      "line_end": 68,
+      "lemma_name": "monster_entropy_eps_perfect",
+      "severity": "warning",
+      "evidence_quote": "Lemma monster_entropy_eps_perfect :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/security/pgg_entropy_security_demo.v",
+      "line_start": 169,
+      "line_end": 169,
+      "lemma_name": "oc_one_le_two_log2",
+      "severity": "warning",
+      "evidence_quote": "Lemma oc_one_le_two_log2 (R : realType) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/security/pgg_entropy_security_demo.v",
+      "line_start": 204,
+      "line_end": 204,
+      "lemma_name": "oc_entropy_witness_2",
+      "severity": "warning",
+      "evidence_quote": "Definition oc_entropy_witness_2 : EntropyWitness R R_oc :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/security/pgg_entropy_security_demo.v",
+      "line_start": 211,
+      "line_end": 211,
+      "lemma_name": "oc_security_from_entropy",
+      "severity": "warning",
+      "evidence_quote": "Definition oc_security_from_entropy : SecurityWitness R R_oc :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/security/pgg_entropy_security_demo.v",
+      "line_start": 217,
+      "line_end": 217,
+      "lemma_name": "oc_entropy_vs_combinatorial",
+      "severity": "warning",
+      "evidence_quote": "Lemma oc_entropy_vs_combinatorial :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/security/pgg_entropy_security_demo.v",
+      "line_start": 55,
+      "line_end": 61,
+      "lemma_name": "monster_entropy_perfect",
+      "severity": "warning",
+      "evidence_quote": "fiber_entropy (R:=R) monster_Lstar monster_sigmas s = log monster_n.+2%:R",
+      "closeness": "near",
+      "explanation": "The statement is an equation (lhs = rhs) whose main symbol is fiber_entropy. Per AUTHORITY.md the canonical suffix for an equational rewrite lemma is '_E'. The suffix '_perfect' is domain vocabulary (perfect entropy) and does not appear in the MathComp suffix table; a reader searching for fiber_entropy lemmas by suffix would not find this via the _E convention. Suggested rename: monster_fiber_entropy_E (with a Naming: comment if 'perfect' must be retained for domain legibility).",
+      "fix_sketch": "(* Option 1 — strict MathComp: *)\nLemma monster_fiber_entropy_E (s : 'I_monster_n.+2) :\n  fiber_entropy (R:=R) monster_Lstar monster_sigmas s = log monster_n.+2%:R.\n(* Option 2 — retain domain term with Naming annotation: *)\n(** ... Naming: '_perfect' is intentional; signals the perfect-entropy\n    property used in the security reduction rather than a generic rewrite. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/security/pgg_entropy_security_demo.v",
+      "line_start": 68,
+      "line_end": 74,
+      "lemma_name": "monster_entropy_eps_perfect",
+      "severity": "warning",
+      "evidence_quote": "sw_bound_eps monster_security_from_entropy = 0",
+      "closeness": "near",
+      "explanation": "The statement is an equation of the form f x = 0. Per AUTHORITY.md the canonical suffix for ring/nat zero in an equational context is '_eq0' or the bare '0' suffix (e.g. foo_eps0 or foo_eps_eq0). The suffix '_eps_perfect' bundles a domain qualifier ('perfect') with the epsilon symbol in a non-standard way; '_perfect' is not in the suffix table. Stage 1 already flagged F001 at line 68 for name length; this G001 finding adds the semantic-suffix mismatch diagnosis. Suggested rename: monster_eps0 or monster_security_eps_eq0.",
+      "fix_sketch": "(* Option 1 — concise MathComp zero suffix: *)\nLemma monster_eps0 : sw_bound_eps monster_security_from_entropy = 0.\n(* Option 2 — more descriptive with correct suffix: *)\nLemma monster_security_eps_eq0 : sw_bound_eps monster_security_from_entropy = 0.\n(* If the 'perfect' label must be retained, add a Naming: line in the preceding comment. *)",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/security/pgg_entropy_security_demo.v",
+      "line_start": 50,
+      "line_end": 53,
+      "lemma_name": "monster_entropy_witness_Lstar",
+      "severity": "warning",
+      "evidence_quote": "(* EntropyWitness via pe_inj *)",
+      "closeness": "far",
+      "explanation": "The preceding comment '(* EntropyWitness via pe_inj *)' fails three of the four H002 checklist parts. (1) KIND: no classification word (helper/main/canonical/instance) is present. (2) WHAT: the phrase 'EntropyWitness via pe_inj' names the result type and construction method but does not paraphrase the statement — it does not say that this term witnesses injectivity of the entropy function at parameter Lstar. (3) WHY: no motivation is given; the suffix carries no algebraic-law waiver. USED_BY: the consumer monster_security_from_entropy is present in the same file and could be cited.",
+      "fix_sketch": "(** monster_entropy_witness_Lstar — constructs an EntropyWitness for R_monster\n    by certifying that weval and perm_endpoint are both injective at Lstar.\n    Kind: helper.\n    Why: feeds monster_security_from_entropy and thereby enables the\n         entropy-to-security reduction for the monster instance.\n    Used by: monster_security_from_entropy. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/security/pgg_entropy_security_demo.v",
+      "line_start": 55,
+      "line_end": 61,
+      "lemma_name": "monster_entropy_perfect",
+      "severity": "warning",
+      "evidence_quote": "(* Perfect entropy: H(P_s) = log N at every sheet *)",
+      "closeness": "near",
+      "explanation": "The preceding comment passes WHAT ('H(P_s) = log N at every sheet' paraphrases the equational conclusion) but fails two parts. (1) KIND: no classification word (helper or main) appears. (2) WHY: no motivation is given; the suffix '_perfect' carries no algebraic-law waiver and the WHAT clause does not name a downstream use-site.",
+      "fix_sketch": "(** monster_entropy_perfect — fiber_entropy at Lstar equals log(monster_n+2) for every sheet s.\n    Kind: helper.\n    Why: establishes the perfect-entropy hypothesis consumed by\n         monster_entropy_eps_perfect to derive eps = 0.\n    Used by: monster_entropy_eps_perfect (via monster_entropy_witness_Lstar). *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/security/pgg_entropy_security_demo.v",
+      "line_start": 64,
+      "line_end": 65,
+      "lemma_name": "monster_security_from_entropy",
+      "severity": "warning",
+      "evidence_quote": "(* SecurityWitness via entropy pipeline *)",
+      "closeness": "far",
+      "explanation": "The preceding comment fails three H002 parts. (1) KIND: no classification word present. (2) WHAT: 'SecurityWitness via entropy pipeline' names the result type and construction route but does not paraphrase the statement — it does not say that this term is a SecurityWitness for R_monster obtained by lifting monster_entropy_witness_Lstar. (3) WHY: no motivation given; no algebraic-law suffix waiver applies. USED_BY: the consumer monster_entropy_eps_perfect is in the same file.",
+      "fix_sketch": "(** monster_security_from_entropy — SecurityWitness for R_monster obtained by\n    lifting monster_entropy_witness_Lstar through security_witness_from_entropy.\n    Kind: helper.\n    Why: provides the SecurityWitness argument required by\n         monster_entropy_eps_perfect to close the eps = 0 goal.\n    Used by: monster_entropy_eps_perfect. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/security/pgg_entropy_security_demo.v",
+      "line_start": 68,
+      "line_end": 74,
+      "lemma_name": "monster_entropy_eps_perfect",
+      "severity": "warning",
+      "evidence_quote": "(* eps = 0 under saturation *)",
+      "closeness": "near",
+      "explanation": "The preceding comment passes WHAT ('eps = 0 under saturation' is a crisp paraphrase of sw_bound_eps ... = 0) but fails two parts. (1) KIND: no classification word present. (2) WHY: no motivation is given; '_eps_perfect' carries no algebraic-law suffix waiver and WHAT does not name a downstream use-site.",
+      "fix_sketch": "(** monster_entropy_eps_perfect — sw_bound_eps for monster_security_from_entropy equals 0.\n    Kind: main (closes the perfect-secrecy certificate for the monster instance).\n    Why: the saturation hypothesis Hsat (2^Lstar = N) forces subrr to close\n         the arithmetic goal, yielding a zero statistical advantage. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/security/pgg_entropy_security_demo.v",
+      "line_start": 92,
+      "line_end": 93,
+      "lemma_name": "monster_entropy_short_L",
+      "severity": "warning",
+      "evidence_quote": "(* H(P_s) = log(2^L) at every sheet when pe_inj holds *)",
+      "closeness": "near",
+      "explanation": "Preceding comment satisfies WHAT (paraphrases the equation fiber_entropy ... = log (2^L)%:R) but fails KIND and WHY. No classification token (helper/main/canonical/notation/coercion/instance/example/interface) is present. No motivation or downstream consumer is named; the suffix _short_L is not an algebraic-law suffix (_A/_C/_K/_D/_I/...), Kind is not a waiver category (canonical/notation/coercion/instance), and the WHAT clause does not crisply name a downstream use-site, so WHY is not waived. USED_BY is not required because Kind is not asserted as helper.",
+      "fix_sketch": "Expand the single-line comment into the template block:\n(** monster_entropy_short_L — at every sheet s, the fiber entropy equals log(2^L) whenever the per-sheet injectivity hypothesis holds.\n    Kind: example.\n    Why: paired with monster_leakage_short_L and monster_security_short_L to instantiate fiber_entropy_injective for the monster-group demo in the short-L regime.\n*)",
+      "confidence": "medium",
+      "stage": "stage2",
+      "escalated_model": "opus",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "S998",
+      "file": "rocq-audit",
+      "line_start": 1,
+      "line_end": 1,
+      "severity": "warning",
+      "evidence_quote": "schema violation: None is not of type 'object'",
+      "closeness": "near",
+      "explanation": "Stage 2 call failed for chunk 3; see logs.",
+      "fix_sketch": "Retry the commit. If repeated, check agent configuration.",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": {
+    "entity_count": 41,
+    "chunk_count": 7,
+    "chunk_size": 6,
+    "workers_used": 4,
+    "tokens_used": 218131,
+    "tokens_cap": 20000000,
+    "wall_ms_used": 273554,
+    "wall_ms_cap": 1800000,
+    "deferred_chunks": 0,
+    "stop_reason": "clean",
+    "estimated_usd": 1.3088,
+    "model": "sonnet"
+  },
+  "exit_code": 0
+}

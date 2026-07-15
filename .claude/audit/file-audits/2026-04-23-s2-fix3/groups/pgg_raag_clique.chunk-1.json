@@ -1,0 +1,118 @@
+{
+  "findings": [
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 446,
+      "line_end": 446,
+      "lemma_name": "all_pairs_comm_nil",
+      "severity": "warning",
+      "evidence_quote": "Lemma all_pairs_comm_nil comm : all_pairs_comm_sorted comm [::] = true.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 401,
+      "line_end": 407,
+      "lemma_name": "path3_ntB2",
+      "severity": "error",
+      "evidence_quote": "(* Cross-check *)",
+      "closeness": "far",
+      "explanation": "The preceding comment '(* Cross-check *)' is a generic section-separator label that never mentions 'path3_ntB2' or its statement 'n_traces_natB 3 2 path_comm_nat = 8'. Whether 'Cross-check' is counted as one hyphenated compound token or two sub-tokens, the content is entirely generic and conveys no entity-specific information. It satisfies the spirit of the H001 degeneracy criterion: 'content is a generic label that never mentions this specific entity'. Per AUTHORITY.md, every Lemma must carry an immediately-preceding comment block with classification, statement summary, and motivation.",
+      "fix_sketch": "(** path3_ntB2 — n_traces_natB for path P_3 at length L=2 equals 8.\n    Kind: example.\n    Why: cross-checks that n_traces_natB agrees with clique_traces at the same parameter; both should return 8.\n*)",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 364,
+      "line_end": 367,
+      "lemma_name": "abelian3_ntB3",
+      "severity": "warning",
+      "evidence_quote": "(** abelian3_ntB3 — cross-check: n_traces_natB for the abelian case at L=3\n    matches clique_traces = 10.\n    Kind: example.\n*)",
+      "closeness": "near",
+      "explanation": "The preceding comment supplies KIND (example) and WHAT (L=3 cross-check equals 10) but omits WHY. The WHY waiver in AUTHORITY.md applies only to algebraic-law suffixes (_A, _C, _K, etc.), or to Kind canonical/notation/coercion/instance; 'example' is not in the waiver list. The suffix 'ntB3' is not an algebraic-law suffix. Compare the sibling comment for abelian3_ntB2, which supplies a WHY clause ('vm_compute sanity check that n_traces_natB tracks the abelian closed form, complementing abelian3_ct2 / abelian3_ntB3'). abelian3_ntB3's comment is missing the equivalent motivation.",
+      "fix_sketch": "Add a Why line such as:\n    Why: vm_compute sanity check that n_traces_natB tracks the abelian closed form at L=3, complementing abelian3_ntB2 (L=2) and abelian3_ct3.",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 388,
+      "line_end": 390,
+      "lemma_name": "path3_ct1",
+      "severity": "warning",
+      "evidence_quote": "(** path3_ct1 — vm_compute trace count m_1 = 3 for the path P_3.\n    Kind: example.\n*)",
+      "closeness": "near",
+      "explanation": "The preceding comment supplies KIND (example) and WHAT (m_1 = 3 for P_3) but omits WHY. The WHY waiver does not apply: 'ct1' is not an algebraic-law suffix and Kind=example is not in the canonical/notation/coercion/instance waiver list. The sibling comment for path3_ct0 supplies a WHY clause referencing the path recurrence m_L = 3*m_{L-1} - m_{L-2} and naming paired lemmas; path3_ct1's comment lacks the equivalent motivation.",
+      "fix_sketch": "Add a Why line such as:\n    Why: step-1 check of the path recurrence m_L = 3*m_{L-1} - m_{L-2},\n    paired with path3_ct0 / path3_ct2 / path3_ct3.",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/groups/pgg_raag_clique.v",
+      "line_start": 401,
+      "line_end": 407,
+      "lemma_name": "path3_ntB2",
+      "severity": "warning",
+      "evidence_quote": "(* Cross-check *)",
+      "closeness": "far",
+      "explanation": "The comment fails all four content parts. (1) KIND is absent: no classification (helper / main / example / …) appears. (2) WHAT is absent: no paraphrase of the statement 'n_traces_natB 3 2 path_comm_nat = 8'. (3) WHY is absent: no motivation is given; the WHY waiver applies only to algebraic-law suffixes or to Kind canonical/notation/coercion/instance — none of which hold here. (4) USED_BY: not required because Kind is not stated as helper, but the absence of KIND makes this moot.",
+      "fix_sketch": "(** path3_ntB2 — n_traces_natB for path P_3 at length L=2 equals 8.\n    Kind: example.\n    Why: cross-checks that n_traces_natB agrees with clique_traces at this parameter (both should be 8).\n*)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "S998",
+      "file": "rocq-audit",
+      "line_start": 1,
+      "line_end": 1,
+      "severity": "warning",
+      "evidence_quote": "result field not JSON: ```json\n{\n  \"passed\": true,\n  \"findings\": [\n    {\n      \"rule_id\": \"H002\",\n      \"file\": \"pgg-smc/groups/pgg_raag_clique.v\",\n      \"line_start\": 329,\n      \"line_end\": 329,\n      \"lemma_name\": \"abelia",
+      "closeness": "near",
+      "explanation": "Stage 2 call failed for chunk 1; see logs.",
+      "fix_sketch": "Retry the commit. If repeated, check agent configuration.",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": {
+    "entity_count": 25,
+    "chunk_count": 7,
+    "chunk_size": 4,
+    "workers_used": 4,
+    "tokens_used": 166398,
+    "tokens_cap": 20000000,
+    "wall_ms_used": 309397,
+    "wall_ms_cap": 1800000,
+    "deferred_chunks": 0,
+    "stop_reason": "clean",
+    "estimated_usd": 0.9984,
+    "model": "sonnet"
+  },
+  "exit_code": 2
+}

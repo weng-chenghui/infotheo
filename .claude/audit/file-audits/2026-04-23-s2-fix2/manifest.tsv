@@ -1,0 +1,10 @@
+timestamp	file	chunk	lines	exit_code	errors	warnings	duration_s	note
+2026-04-22T23:33:25Z	groups/pgg_raag.v			0	0	43	238	
+2026-04-22T23:37:23Z	lib/perm_uniform.v			0	0	23	371	
+2026-04-22T23:43:34Z	groups/pgg_raag_clique.v	0	141-301	0	0	9	137	
+2026-04-22T23:45:51Z	groups/pgg_raag_clique.v	1	302-535	2	1	17	78	
+2026-04-22T23:47:09Z	groups/pgg_raag_clique.v	2	536-920	0	0	22	227	
+2026-04-22T23:50:56Z	groups/pgg_raag_clique.v	3	921-1367	0	0	31	375	
+2026-04-22T23:57:11Z	groups/pgg_raag_clique.v	4	1368-1386	0	0	1	103	
+2026-04-22T23:58:54Z	security/pgg_security_solver.v			0	0	30	450	
+2026-04-23T00:06:24Z	security/pgg_entropy_security_demo.v			0	0	14	274	fragile-no-tier-k

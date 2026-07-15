@@ -1,0 +1,1 @@
+- [Thesis scope patterns](project_scope_patterns.md) — Recurring scope-discipline patterns in the aplas2024-poster thesis

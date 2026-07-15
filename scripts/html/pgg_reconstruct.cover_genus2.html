@@ -1,0 +1,550 @@
+
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Module cover_genus2</title>
+<meta name="description" content="Documentation of Coq module Infotheo Documentation" />
+<link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/markdown-it/dist/markdown-it.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/markdown-it-texmath/texmath.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/darkmode-js@1.5.7/lib/darkmode-js.min.js"></script>
+<link href="rocqnavi.css" rel="stylesheet" type="text/css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script type="text/javascript" src="rocqnavi.js"> </script>
+</head>
+
+<body onload="init()">
+
+  <main>
+    <div class="sidebar">
+      <h2>Files</h2>
+      <li><details id="infotheo"><summary>infotheo</summary>
+          <ul>
+          <li><details id="infotheo.du2002"><summary>du2002</summary>
+          <ul>
+          <li><a href="infotheo.du2002.spp_entropy.html">spp_entropy</a></li>
+<li><a href="infotheo.du2002.spp_interface.html">spp_interface</a></li>
+<li><a href="infotheo.du2002.spp_pismc.html">spp_pismc</a></li>
+<li><a href="infotheo.du2002.spp_proba.html">spp_proba</a></li>
+<li><a href="infotheo.du2002.spp_program.html">spp_program</a></li>
+<li><a href="infotheo.du2002.spp_proof.html">spp_proof</a></li>
+<li><a href="infotheo.du2002.spp_session_types.html">spp_session_types</a></li>
+<li><a href="infotheo.du2002.spp_tactics.html">spp_tactics</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.dumas2017dual"><summary>dumas2017dual</summary>
+          <ul>
+          <li><details id="infotheo.dumas2017dual.dsdp"><summary>dsdp</summary>
+          <ul>
+          <li><a href="infotheo.dumas2017dual.dsdp.dsdp_correctness.html">dsdp_correctness</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_entropy.html">dsdp_entropy</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_entropy_trace.html">dsdp_entropy_trace</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_interface.html">dsdp_interface</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_pismc.html">dsdp_pismc</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_program.html">dsdp_program</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_security.html">dsdp_security</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_session_types.html">dsdp_session_types</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_syntax_demo.html">dsdp_syntax_demo</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.dumas2017dual.entropy_fiber"><summary>entropy_fiber</summary>
+          <ul>
+          <li><a href="infotheo.dumas2017dual.entropy_fiber.entropy_fiber.html">entropy_fiber</a></li>
+<li><a href="infotheo.dumas2017dual.entropy_fiber.entropy_fiber_zpq.html">entropy_fiber_zpq</a></li>
+<li><a href="infotheo.dumas2017dual.entropy_fiber.linear_fiber_zpq.html">linear_fiber_zpq</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.dumas2017dual.lib"><summary>lib</summary>
+          <ul>
+          <li><a href="infotheo.dumas2017dual.lib.extra_algebra.html">extra_algebra</a></li>
+<li><a href="infotheo.dumas2017dual.lib.extra_entropy.html">extra_entropy</a></li>
+<li><a href="infotheo.dumas2017dual.lib.extra_proba.html">extra_proba</a></li>
+<li><a href="infotheo.dumas2017dual.lib.rouche_capelli.html">rouche_capelli</a></li>
+          </ul>
+          </details>
+          </li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.ecc_classic"><summary>ecc_classic</summary>
+          <ul>
+          <li><a href="infotheo.ecc_classic.alternant.html">alternant</a></li>
+<li><a href="infotheo.ecc_classic.bch.html">bch</a></li>
+<li><a href="infotheo.ecc_classic.cyclic_code.html">cyclic_code</a></li>
+<li><a href="infotheo.ecc_classic.decoding.html">decoding</a></li>
+<li><a href="infotheo.ecc_classic.grs.html">grs</a></li>
+<li><a href="infotheo.ecc_classic.hamming_code.html">hamming_code</a></li>
+<li><a href="infotheo.ecc_classic.linearcode.html">linearcode</a></li>
+<li><a href="infotheo.ecc_classic.mceliece.html">mceliece</a></li>
+<li><a href="infotheo.ecc_classic.poly_decoding.html">poly_decoding</a></li>
+<li><a href="infotheo.ecc_classic.reed_solomon.html">reed_solomon</a></li>
+<li><a href="infotheo.ecc_classic.repcode.html">repcode</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.ecc_modern"><summary>ecc_modern</summary>
+          <ul>
+          <li><a href="infotheo.ecc_modern.checksum.html">checksum</a></li>
+<li><a href="infotheo.ecc_modern.degree_profile.html">degree_profile</a></li>
+<li><a href="infotheo.ecc_modern.ldpc.html">ldpc</a></li>
+<li><a href="infotheo.ecc_modern.ldpc_algo.html">ldpc_algo</a></li>
+<li><a href="infotheo.ecc_modern.ldpc_algo_proof.html">ldpc_algo_proof</a></li>
+<li><a href="infotheo.ecc_modern.ldpc_erasure.html">ldpc_erasure</a></li>
+<li><a href="infotheo.ecc_modern.max_subset.html">max_subset</a></li>
+<li><a href="infotheo.ecc_modern.stopping_set.html">stopping_set</a></li>
+<li><a href="infotheo.ecc_modern.subgraph_partition.html">subgraph_partition</a></li>
+<li><a href="infotheo.ecc_modern.summary.html">summary</a></li>
+<li><a href="infotheo.ecc_modern.summary_tanner.html">summary_tanner</a></li>
+<li><a href="infotheo.ecc_modern.tanner.html">tanner</a></li>
+<li><a href="infotheo.ecc_modern.tanner_partition.html">tanner_partition</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.homomorphic_encryption"><summary>homomorphic_encryption</summary>
+          <ul>
+          <li><details id="infotheo.homomorphic_encryption.benaloh1994"><summary>benaloh1994</summary>
+          <ul>
+          <li><a href="infotheo.homomorphic_encryption.benaloh1994.benaloh_ahe.html">benaloh_ahe</a></li>
+<li><a href="infotheo.homomorphic_encryption.benaloh1994.benaloh_enc.html">benaloh_enc</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.homomorphic_encryption.idealized"><summary>idealized</summary>
+          <ul>
+          <li><a href="infotheo.homomorphic_encryption.idealized.idealized_ahe.html">idealized_ahe</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.homomorphic_encryption.paillier1999"><summary>paillier1999</summary>
+          <ul>
+          <li><a href="infotheo.homomorphic_encryption.paillier1999.paillier_ahe.html">paillier_ahe</a></li>
+<li><a href="infotheo.homomorphic_encryption.paillier1999.paillier_enc.html">paillier_enc</a></li>
+          </ul>
+          </details>
+          </li>
+<li><a href="infotheo.homomorphic_encryption.ahe_enc.html">ahe_enc</a></li>
+<li><a href="infotheo.homomorphic_encryption.ahe_monoid.html">ahe_monoid</a></li>
+<li><a href="infotheo.homomorphic_encryption.enc_dec.html">enc_dec</a></li>
+<li><a href="infotheo.homomorphic_encryption.he_types.html">he_types</a></li>
+<li><a href="infotheo.homomorphic_encryption.homomorphic_encryption.html">homomorphic_encryption</a></li>
+<li><a href="infotheo.homomorphic_encryption.key_type.html">key_type</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.information_theory"><summary>information_theory</summary>
+          <ul>
+          <li><a href="infotheo.information_theory.aep.html">aep</a></li>
+<li><a href="infotheo.information_theory.binary_symmetric_channel.html">binary_symmetric_channel</a></li>
+<li><a href="infotheo.information_theory.channel.html">channel</a></li>
+<li><a href="infotheo.information_theory.channel_code.html">channel_code</a></li>
+<li><a href="infotheo.information_theory.channel_coding_converse.html">channel_coding_converse</a></li>
+<li><a href="infotheo.information_theory.channel_coding_direct.html">channel_coding_direct</a></li>
+<li><a href="infotheo.information_theory.conditional_divergence.html">conditional_divergence</a></li>
+<li><a href="infotheo.information_theory.entropy.html">entropy</a></li>
+<li><a href="infotheo.information_theory.entropy_convex.html">entropy_convex</a></li>
+<li><a href="infotheo.information_theory.erasure_channel.html">erasure_channel</a></li>
+<li><a href="infotheo.information_theory.error_exponent.html">error_exponent</a></li>
+<li><a href="infotheo.information_theory.joint_typ_seq.html">joint_typ_seq</a></li>
+<li><a href="infotheo.information_theory.jtypes.html">jtypes</a></li>
+<li><a href="infotheo.information_theory.kraft.html">kraft</a></li>
+<li><a href="infotheo.information_theory.pproba.html">pproba</a></li>
+<li><a href="infotheo.information_theory.shannon_fano.html">shannon_fano</a></li>
+<li><a href="infotheo.information_theory.source_code.html">source_code</a></li>
+<li><a href="infotheo.information_theory.source_coding_fl_converse.html">source_coding_fl_converse</a></li>
+<li><a href="infotheo.information_theory.source_coding_fl_direct.html">source_coding_fl_direct</a></li>
+<li><a href="infotheo.information_theory.source_coding_vl_converse.html">source_coding_vl_converse</a></li>
+<li><a href="infotheo.information_theory.source_coding_vl_direct.html">source_coding_vl_direct</a></li>
+<li><a href="infotheo.information_theory.string_entropy.html">string_entropy</a></li>
+<li><a href="infotheo.information_theory.success_decode_bound.html">success_decode_bound</a></li>
+<li><a href="infotheo.information_theory.typ_seq.html">typ_seq</a></li>
+<li><a href="infotheo.information_theory.types.html">types</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.lib"><summary>lib</summary>
+          <ul>
+          <li><a href="infotheo.lib.bigop_ext.html">bigop_ext</a></li>
+<li><a href="infotheo.lib.binary_entropy_function.html">binary_entropy_function</a></li>
+<li><a href="infotheo.lib.classical_sets_ext.html">classical_sets_ext</a></li>
+<li><a href="infotheo.lib.coqRE.html">coqRE</a></li>
+<li><a href="infotheo.lib.derive_ext.html">derive_ext</a></li>
+<li><a href="infotheo.lib.dft.html">dft</a></li>
+<li><a href="infotheo.lib.euclid.html">euclid</a></li>
+<li><a href="infotheo.lib.f2.html">f2</a></li>
+<li><a href="infotheo.lib.hamming.html">hamming</a></li>
+<li><a href="infotheo.lib.natbin.html">natbin</a></li>
+<li><a href="infotheo.lib.num_occ.html">num_occ</a></li>
+<li><a href="infotheo.lib.poly_ext.html">poly_ext</a></li>
+<li><a href="infotheo.lib.realType_ext.html">realType_ext</a></li>
+<li><a href="infotheo.lib.realType_ln.html">realType_ln</a></li>
+<li><a href="infotheo.lib.ssr_ext.html">ssr_ext</a></li>
+<li><a href="infotheo.lib.ssralg_ext.html">ssralg_ext</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.probability"><summary>probability</summary>
+          <ul>
+          <li><a href="infotheo.probability.bayes.html">bayes</a></li>
+<li><a href="infotheo.probability.convex.html">convex</a></li>
+<li><a href="infotheo.probability.convex_equiv.html">convex_equiv</a></li>
+<li><a href="infotheo.probability.convex_stone.html">convex_stone</a></li>
+<li><a href="infotheo.probability.divergence.html">divergence</a></li>
+<li><a href="infotheo.probability.fdist.html">fdist</a></li>
+<li><a href="infotheo.probability.fsdist.html">fsdist</a></li>
+<li><a href="infotheo.probability.graphoid.html">graphoid</a></li>
+<li><a href="infotheo.probability.jensen.html">jensen</a></li>
+<li><a href="infotheo.probability.jfdist_cond.html">jfdist_cond</a></li>
+<li><a href="infotheo.probability.log_sum.html">log_sum</a></li>
+<li><a href="infotheo.probability.necset.html">necset</a></li>
+<li><a href="infotheo.probability.partition_inequality.html">partition_inequality</a></li>
+<li><a href="infotheo.probability.pinsker.html">pinsker</a></li>
+<li><a href="infotheo.probability.proba.html">proba</a></li>
+<li><a href="infotheo.probability.variation_dist.html">variation_dist</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.robust"><summary>robust</summary>
+          <ul>
+          <li><a href="infotheo.robust.robustmean.html">robustmean</a></li>
+<li><a href="infotheo.robust.weightedmean.html">weightedmean</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.smc"><summary>smc</summary>
+          <ul>
+          <li><a href="infotheo.smc.graded_resource.html">graded_resource</a></li>
+<li><a href="infotheo.smc.pismc.html">pismc</a></li>
+<li><a href="infotheo.smc.smc_interpreter.html">smc_interpreter</a></li>
+<li><a href="infotheo.smc.smc_session_types.html">smc_session_types</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.toy_examples"><summary>toy_examples</summary>
+          <ul>
+          <li><a href="infotheo.toy_examples.conditional_entropy.html">conditional_entropy</a></li>
+<li><a href="infotheo.toy_examples.expected_value_variance.html">expected_value_variance</a></li>
+<li><a href="infotheo.toy_examples.expected_value_variance_ordn.html">expected_value_variance_ordn</a></li>
+<li><a href="infotheo.toy_examples.expected_value_variance_tuple.html">expected_value_variance_tuple</a></li>
+          </ul>
+          </details>
+          </li>
+<li><a href="infotheo._check_sigs.html">_check_sigs</a></li>
+<li><a href="infotheo._depgraph_extract.html">_depgraph_extract</a></li>
+<li><a href="infotheo._test_star2.html">_test_star2</a></li>
+<li><a href="infotheo.test_sri.html">test_sri</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="pgg_reconstruct"><summary>pgg_reconstruct</summary>
+          <ul>
+          <li><a href="pgg_reconstruct.ag_code.html">ag_code</a></li>
+<li><a href="pgg_reconstruct.ag_massey_bridge.html">ag_massey_bridge</a></li>
+<li><a href="pgg_reconstruct.ag_multiplicative.html">ag_multiplicative</a></li>
+<li><a href="pgg_reconstruct.algebraic_rigidity.html">algebraic_rigidity</a></li>
+<li><a href="pgg_reconstruct.coord_perm_compatible.html">coord_perm_compatible</a></li>
+<li><a href="pgg_reconstruct.cover_genus0.html">cover_genus0</a></li>
+<li><a href="pgg_reconstruct.cover_genus1.html">cover_genus1</a></li>
+<li><a href="pgg_reconstruct.cover_genus2.html">cover_genus2</a></li>
+<li><a href="pgg_reconstruct.cover_tradeoff.html">cover_tradeoff</a></li>
+<li><a href="pgg_reconstruct.covering_scheme.html">covering_scheme</a></li>
+<li><a href="pgg_reconstruct.hyperelliptic_code.html">hyperelliptic_code</a></li>
+<li><a href="pgg_reconstruct.lagrange.html">lagrange</a></li>
+<li><a href="pgg_reconstruct.massey.html">massey</a></li>
+<li><a href="pgg_reconstruct.pgg_assignment.html">pgg_assignment</a></li>
+<li><a href="pgg_reconstruct.pgg_covering_correctness.html">pgg_covering_correctness</a></li>
+<li><a href="pgg_reconstruct.pgg_deck_pairing.html">pgg_deck_pairing</a></li>
+<li><a href="pgg_reconstruct.pgg_sharing_framework.html">pgg_sharing_framework</a></li>
+<li><a href="pgg_reconstruct.pgg_sum_mod.html">pgg_sum_mod</a></li>
+<li><a href="pgg_reconstruct.pgg_threshold.html">pgg_threshold</a></li>
+<li><a href="pgg_reconstruct.pgl_bound.html">pgl_bound</a></li>
+<li><a href="pgg_reconstruct.rigidity_monster_instance.html">rigidity_monster_instance</a></li>
+<li><a href="pgg_reconstruct.rigidity_s5_instance.html">rigidity_s5_instance</a></li>
+<li><a href="pgg_reconstruct.rigidity_star_instance.html">rigidity_star_instance</a></li>
+<li><a href="pgg_reconstruct.rs_massey_bridge.html">rs_massey_bridge</a></li>
+<li><a href="pgg_reconstruct.rs_privacy.html">rs_privacy</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="pgg_smc"><summary>pgg_smc</summary>
+          <ul>
+          <li><a href="pgg_smc.abelian_word_collapse.html">abelian_word_collapse</a></li>
+<li><a href="pgg_smc.free_group_ball.html">free_group_ball</a></li>
+<li><a href="pgg_smc.perm_uniform.html">perm_uniform</a></li>
+<li><a href="pgg_smc.pgg_abelian.html">pgg_abelian</a></li>
+<li><a href="pgg_smc.pgg_abelian.html">pgg_abelian</a></li>
+<li><a href="pgg_smc.pgg_abelian_collapse.html">pgg_abelian_collapse</a></li>
+<li><a href="pgg_smc.pgg_collusion_bound.html">pgg_collusion_bound</a></li>
+<li><a href="pgg_smc.pgg_correctness.html">pgg_correctness</a></li>
+<li><a href="pgg_smc.pgg_free.html">pgg_free</a></li>
+<li><a href="pgg_smc.pgg_interface.html">pgg_interface</a></li>
+<li><a href="pgg_smc.pgg_lfree.html">pgg_lfree</a></li>
+<li><a href="pgg_smc.pgg_nonabelian.html">pgg_nonabelian</a></li>
+<li><a href="pgg_smc.pgg_pismc.html">pgg_pismc</a></li>
+<li><a href="pgg_smc.pgg_program.html">pgg_program</a></li>
+<li><a href="pgg_smc.pgg_raag.html">pgg_raag</a></li>
+<li><a href="pgg_smc.pgg_raag_cartier_foata.html">pgg_raag_cartier_foata</a></li>
+<li><a href="pgg_smc.pgg_raag_clique.html">pgg_raag_clique</a></li>
+<li><a href="pgg_smc.pgg_raag_path.html">pgg_raag_path</a></li>
+<li><a href="pgg_smc.pgg_raag_s5.html">pgg_raag_s5</a></li>
+<li><a href="pgg_smc.pgg_raag_star.html">pgg_raag_star</a></li>
+<li><a href="pgg_smc.pgg_security.html">pgg_security</a></li>
+<li><a href="pgg_smc.pgg_session_types.html">pgg_session_types</a></li>
+<li><a href="pgg_smc.pgg_word_analysis.html">pgg_word_analysis</a></li>
+<li><a href="pgg_smc.test_cf.html">test_cf</a></li>
+<li><a href="pgg_smc.test_cf2.html">test_cf2</a></li>
+<li><a href="pgg_smc.test_cf3.html">test_cf3</a></li>
+<li><a href="pgg_smc.test_sri.html">test_sri</a></li>
+<li><a href="pgg_smc.test_sri2.html">test_sri2</a></li>
+          </ul>
+          </details>
+          </li>
+    </div>
+
+  <div class="coq">
+
+    <div class="content">
+      <p>
+        <a href="./index.html">Top</a>
+        
+      </p>
+      <h1 class="title">Module cover_genus2</h1>
+<pre class="ssrdoc">
+Genus-2 Covering: Hyperelliptic AG Code via CoveringScheme
+
+Demonstrates the wider threshold gap from a genus-2 hyperelliptic curve
+y^2 = f(x) with deg(f) = 5. The covering C -&gt; P^1 produces a
+(k, k+4)-threshold scheme, compared to (k, k+2) for genus-1.
+
+Axiomatized (curve-level facts, same boundary as genus-1):
+  1. ev_g2_encode — evaluation structure (A(x)+y*B(x) representation)
+  2. g2_dual_ev_encode — dual evaluation encoding
+  3. sigma_code_g2 + sigma_fix0_g2 + code_auto_g2 — code automorphisms
+     (ts2_perm_compatible is now DERIVED via massey_perm_compatible)
+
+Proved (via hyperelliptic_code.v):
+  - Goppa weight bound (resultant parity argument)
+  - Privacy (from dual minimum distance)
+  - ThresholdScheme construction (via Massey)
+  - Gap bound ts_T &lt;= ts_k + 4
+
+  genus2_data       == CoveringData with genus 2, base P^1
+  genus2_covering   == CoveringScheme with (k, k+4)-threshold
+  genus2_gap        == ts_T &lt;= ts_k + 4 for genus-2 covering
+  genus2_vs_genus1  == cd_genus = 2 (wider gap than genus-1)
+</pre>
+<br/>
+<span class="vernacular">From</span><span class="id"> mathcomp</span><span class="vernacular"> Require</span><span class="vernacular"> Import</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssreflect">ssreflect</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrbool">ssrbool</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrfun">ssrfun</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.eqtype">eqtype</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat">ssrnat</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.seq">seq</a></span>.<br/>
+<span class="vernacular">From</span><span class="id"> mathcomp</span><span class="vernacular"> Require</span><span class="vernacular"> Import</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype">fintype</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple">tuple</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.finfun">finfun</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.finset">finset</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.fingroup.fingroup">fingroup</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.fingroup.perm">perm</a></span>.<br/>
+<span class="vernacular">From</span><span class="id"> mathcomp</span><span class="vernacular"> Require</span><span class="vernacular"> Import</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.fingroup.morphism">morphism</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.bigop">bigop</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.div">div</a></span>.<br/>
+<span class="vernacular">From</span><span class="id"> mathcomp</span><span class="vernacular"> Require</span><span class="vernacular"> Import</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.ssralg">ssralg</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.finalg">finalg</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix">matrix</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.mxalgebra">mxalgebra</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.vector">vector</a></span>.<br/>
+<span class="vernacular">From</span><span class="id"> mathcomp</span><span class="vernacular"> Require</span><span class="vernacular"> Import</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.poly">poly</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.field.separable">separable</a></span>.<br/>
+<span class="vernacular">Require</span><span class="vernacular"> Import</span><span class="id"> </span><span class="id"><a href="infotheo.lib.ssr_ext.html">ssr_ext</a></span><span class="id"> </span><span class="id"><a href="infotheo.lib.ssralg_ext.html">ssralg_ext</a></span><span class="id"> </span><span class="id"><a href="infotheo.lib.hamming.html">hamming</a></span><span class="id"> </span><span class="id"><a href="infotheo.ecc_classic.linearcode.html">linearcode</a></span>.<br/>
+<span class="vernacular">From</span><span class="id"> pgg_smc</span><span class="vernacular"> Require</span><span class="vernacular"> Import</span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_interface.html">pgg_interface</a></span>.<br/>
+<span class="vernacular">From</span><span class="id"> pgg_reconstruct</span><span class="vernacular"> Require</span><span class="vernacular"> Import</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html">pgg_sharing_framework</a></span>.<br/>
+<span class="vernacular">From</span><span class="id"> pgg_reconstruct</span><span class="vernacular"> Require</span><span class="vernacular"> Import</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.covering_scheme.html">covering_scheme</a></span>.<br/>
+<span class="vernacular">From</span><span class="id"> pgg_reconstruct</span><span class="vernacular"> Require</span><span class="vernacular"> Import</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_code.html">ag_code</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.ag_massey_bridge.html">ag_massey_bridge</a></span>.<br/>
+<span class="vernacular">From</span><span class="id"> pgg_reconstruct</span><span class="vernacular"> Require</span><span class="vernacular"> Import</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.hyperelliptic_code.html">hyperelliptic_code</a></span>.<br/>
+<span class="vernacular">From</span><span class="id"> pgg_reconstruct</span><span class="vernacular"> Require</span><span class="vernacular"> Import</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.coord_perm_compatible.html">coord_perm_compatible</a></span>.<br/>
+<br/>
+<span class="gallina-kwd">Set</span><span class="vernacular"> Implicit</span><span class="vernacular"> Arguments</span>.<br/>
+<span class="vernacular">Unset</span><span class="vernacular"> Strict</span><span class="vernacular"> Implicit</span>.<br/>
+<span class="vernacular">Import</span><span class="id"> Prenex</span><span class="vernacular"> Implicits</span>.<br/>
+<br/>
+<span class="vernacular">Import</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.ssralg#GRing.Theory">GRing</a></span>.<span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.ssralg#GRing.Theory">Theory</a></span>.<br/>
+<span class="vernacular">Local</span><span class="vernacular"> Open</span><span class="vernacular"> Scope</span><span class="id"> ring_scope</span>.<br/>
+<br/>
+<pre class="ssrdoc">
+    Genus-2 Covering Data
+</pre>
+<br/>
+<span class="vernacular">Section</span><span class="id"> genus2</span>.<br/>
+<br/>
+<span class="vernacular">Variable</span><span class="id"> </span><span id="genus2.M" class="id"><a name="genus2.M" class="">M</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_interface.html#MonodromyRepr.Exports.MonodromyReprType">MonodromyReprType</a></span>.<br/>
+<span class="vernacular">Let</span><span class="id"> </span><span id="genus2.G" class="id"><a name="genus2.G" class="">G</a></span><span class="id"> :=</span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_interface.html#pgg_G">pgg_G</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.M">M</a></span>.<br/>
+<span class="vernacular">Let</span><span class="id"> </span><span id="genus2.N" class="id"><a name="genus2.N" class="">N</a></span><span class="id"> :=</span> (<span class="id"><a href="pgg_smc.pgg_interface.html#pgg_N'">pgg_N'</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.M">M</a></span>).<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#bda89d73ec4a8f23ae92b565ffb5aaa6">+1</a></span>.<br/>
+<span class="vernacular">Let</span><span class="id"> </span><span id="genus2.rho" class="id"><a name="genus2.rho" class="">rho</a></span><span class="id"> :=</span><span class="id"> @</span><span class="id"><a href="pgg_smc.pgg_interface.html#pgg_rho">pgg_rho</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.M">M</a></span>.<br/>
+<br/>
+<br/>
+<span class="vernacular">Hypothesis</span><span class="id"> </span><span id="genus2.HG" class="id"><a name="genus2.HG" class="">HG</a></span><span class="id"> :</span><span class="id"> 1</span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#::nat_scope:x_'&lt;'_x"> &lt;</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#::nat_scope:x_'&lt;'_x"> </a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#234f50e13366f794cd6877cf832a5935">#|</a></span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.G">G</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#234f50e13366f794cd6877cf832a5935">|</a></span>.<br/>
+<br/>
+<span class="vernacular">Let</span><span class="id"> </span><span id="genus2.ramif2" class="id"><a name="genus2.ramif2" class="">ramif2</a></span><span class="id"> :=</span> (<span class="id">2</span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#ea2ff3d561159081cea6fb2e8113cc54"> *</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#ea2ff3d561159081cea6fb2e8113cc54"> </a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#234f50e13366f794cd6877cf832a5935">#|</a></span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.G">G</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#234f50e13366f794cd6877cf832a5935">|</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#0dacc1786c5ba797d47dd85006231633"> +</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#0dacc1786c5ba797d47dd85006231633"> </a></span><span class="id">2</span>)<span class="id">%N</span>.<br/>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> </span><span id="genus2_hurwitz" class="id"><a name="genus2_hurwitz" class="">genus2_hurwitz</a></span><span class="id"> :</span><br/>
+&nbsp;&nbsp;(<span class="id">2</span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#ea2ff3d561159081cea6fb2e8113cc54"> *</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#ea2ff3d561159081cea6fb2e8113cc54"> </a></span><span class="id">2</span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#0dacc1786c5ba797d47dd85006231633"> +</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#0dacc1786c5ba797d47dd85006231633"> </a></span><span class="id">2</span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#ea2ff3d561159081cea6fb2e8113cc54"> *</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#ea2ff3d561159081cea6fb2e8113cc54"> </a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#234f50e13366f794cd6877cf832a5935">#|</a></span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.G">G</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#234f50e13366f794cd6877cf832a5935">|</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> =</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> </a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#234f50e13366f794cd6877cf832a5935">#|</a></span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.G">G</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#234f50e13366f794cd6877cf832a5935">|</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#ea2ff3d561159081cea6fb2e8113cc54"> *</a></span> (<span class="id">2</span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#ea2ff3d561159081cea6fb2e8113cc54"> *</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#ea2ff3d561159081cea6fb2e8113cc54"> </a></span><span class="id">0</span>)<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#0dacc1786c5ba797d47dd85006231633"> +</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#0dacc1786c5ba797d47dd85006231633"> </a></span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.ramif2">ramif2</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#0dacc1786c5ba797d47dd85006231633"> +</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#0dacc1786c5ba797d47dd85006231633"> </a></span><span class="id">2</span>)<span class="id">%N</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#muln0">muln0</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#muln0">muln0</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#add0n">add0n</a></span><span class="id"> /</span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.ramif2">ramif2</a></span><span class="id"> -</span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#addnA">addnA</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#addnC">addnC</a></span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="vernacular">Definition</span><span class="id"> </span><span id="genus2_data" class="id"><a name="genus2_data" class="">genus2_data</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.covering_scheme.html#CoveringData">CoveringData</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.M">M</a></span><span class="id"> :=</span><span class="id"> {|</span><br/>
+&nbsp;&nbsp;<span class="id"><a href="pgg_reconstruct.covering_scheme.html#cd_base_genus">cd_base_genus</a></span><span class="id"> :=</span><span class="id"> 0</span><span class="id"> ;</span><br/>
+&nbsp;&nbsp;<span class="id"><a href="pgg_reconstruct.covering_scheme.html#cd_n_branch">cd_n_branch</a></span>  <span class="id"> :=</span><span class="id"> 5</span><span class="id"> ;</span>   <br/>
+&nbsp;&nbsp;<span class="id"><a href="pgg_reconstruct.covering_scheme.html#cd_ramif">cd_ramif</a></span>     <span class="id"> :=</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.ramif2">ramif2</a></span><span class="id"> ;</span><br/>
+&nbsp;&nbsp;<span class="id"><a href="pgg_reconstruct.covering_scheme.html#cd_genus">cd_genus</a></span>     <span class="id"> :=</span><span class="id"> 2</span><span class="id"> ;</span><br/>
+&nbsp;&nbsp;<span class="id"><a href="pgg_reconstruct.covering_scheme.html#cd_hurwitz">cd_hurwitz</a></span>   <span class="id"> :=</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2_hurwitz">genus2_hurwitz</a></span><span class="id"> ;</span><br/>
+<span class="id">|}</span>.<br/>
+<br/>
+<pre class="ssrdoc">
+    AG Code on Genus-2 Hyperelliptic Curve
+</pre>
+<br/>
+<br/>
+<span class="vernacular">Variable</span><span class="id"> </span><span id="genus2.F_g2" class="id"><a name="genus2.F_g2" class="">F_g2</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.finalg#FinRing.Field.Exports.finFieldType">finFieldType</a></span>.<br/>
+<span class="vernacular">Hypothesis</span><span class="id"> </span><span id="genus2.HN_g2" class="id"><a name="genus2.HN_g2" class="">HN_g2</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.N">N</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> =</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> </a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#234f50e13366f794cd6877cf832a5935">#|</a></span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.F_g2">F_g2</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#234f50e13366f794cd6877cf832a5935">|</a></span>.<br/>
+<br/>
+<span class="vernacular">Variable</span><span class="id"> </span><span id="genus2.n''_g2" class="id"><a name="genus2.n''_g2" class="">n''_g2</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Datatypes.html#nat">nat</a></span>.<br/>
+<span class="vernacular">Hypothesis</span><span class="id"> </span><span id="genus2.Hn_g2" class="id"><a name="genus2.Hn_g2" class="">Hn_g2</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.n''_g2">n''_g2</a></span>.<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#bc63483175fac06bcd5541a5e9093b18">+2</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> =</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> </a></span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.N">N</a></span>.<br/>
+<br/>
+<span class="vernacular">Let</span><span class="id"> </span><span id="genus2.n_g2" class="id"><a name="genus2.n_g2" class="">n_g2</a></span><span class="id"> :=</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.n''_g2">n''_g2</a></span>.<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#bc63483175fac06bcd5541a5e9093b18">+2</a></span>.<br/>
+<br/>
+<span class="vernacular">Variable</span><span class="id"> </span><span id="genus2.k_g2" class="id"><a name="genus2.k_g2" class="">k_g2</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Datatypes.html#nat">nat</a></span>.<br/>
+<span class="vernacular">Let</span><span class="id"> </span><span id="genus2.g_g2" class="id"><a name="genus2.g_g2" class="">g_g2</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Datatypes.html#nat">nat</a></span><span class="id"> :=</span><span class="id"> 2</span>.<br/>
+<br/>
+<span class="vernacular">Variable</span><span class="id"> </span><span id="genus2.ev_g2" class="id"><a name="genus2.ev_g2" class="">ev_g2</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#9c0a062cce31174bb4a1f05fb9cee844">'M[</a></span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.F_g2">F_g2</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#9c0a062cce31174bb4a1f05fb9cee844">]_</a></span>(<span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.k_g2">k_g2</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#9c0a062cce31174bb4a1f05fb9cee844">,</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#9c0a062cce31174bb4a1f05fb9cee844"> </a></span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.n_g2">n_g2</a></span>).<br/>
+<br/>
+<span class="vernacular">Variable</span><span class="id"> </span><span id="genus2.curve_poly_g2" class="id"><a name="genus2.curve_poly_g2" class="">curve_poly_g2</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.poly#da9f755b2dd01d49956ac8b6f40c9c5d">{poly</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.poly#da9f755b2dd01d49956ac8b6f40c9c5d"> </a></span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.F_g2">F_g2</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.poly#da9f755b2dd01d49956ac8b6f40c9c5d">}</a></span>.<br/>
+<span class="vernacular">Hypothesis</span><span class="id"> </span><span id="genus2.curve_deg_g2" class="id"><a name="genus2.curve_deg_g2" class="">curve_deg_g2</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.seq#size">size</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.curve_poly_g2">curve_poly_g2</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> =</a></span> (<span class="id">2</span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#ea2ff3d561159081cea6fb2e8113cc54"> *</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#ea2ff3d561159081cea6fb2e8113cc54"> </a></span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.g_g2">g_g2</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#0dacc1786c5ba797d47dd85006231633"> +</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#0dacc1786c5ba797d47dd85006231633"> </a></span><span class="id">1</span>).<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#bda89d73ec4a8f23ae92b565ffb5aaa6">+1</a></span>.<br/>
+<span class="vernacular">Hypothesis</span><span class="id"> </span><span id="genus2.curve_sep_g2" class="id"><a name="genus2.curve_sep_g2" class="">curve_sep_g2</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.field.separable#separable_poly">separable_poly</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.curve_poly_g2">curve_poly_g2</a></span>.<br/>
+<br/>
+<span class="vernacular">Variable</span><span class="id"> </span><span id="genus2.pts_x_g2" class="id"><a name="genus2.pts_x_g2" class="">pts_x_g2</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.n_g2">n_g2</a></span>.<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#::type_scope:x_'.-tuple'">-tuple</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#::type_scope:x_'.-tuple'"> F_g2</a></span>.<br/>
+<span class="vernacular">Variable</span><span class="id"> </span><span id="genus2.pts_y_g2" class="id"><a name="genus2.pts_y_g2" class="">pts_y_g2</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.n_g2">n_g2</a></span>.<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#::type_scope:x_'.-tuple'">-tuple</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#::type_scope:x_'.-tuple'"> F_g2</a></span>.<br/>
+<span class="vernacular">Hypothesis</span><span class="id"> </span><span id="genus2.pts_on_curve_g2" class="id"><a name="genus2.pts_on_curve_g2" class="">pts_on_curve_g2</a></span><span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="gallina-kwd">forall</span><span class="id"> </span><span id="i:27" class="id"><a name="i:27" class="">i</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#:::'''I_'_x">'I_</a></span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.n_g2">n_g2</a></span><span class="id">,</span> (<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#tnth">tnth</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.pts_y_g2">pts_y_g2</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#i:27">i</a></span>)<span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.ssralg#663140372ac3b275aae871b74b140513"> ^+</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.ssralg#663140372ac3b275aae871b74b140513"> </a></span><span class="id">2</span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> =</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> </a></span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.curve_poly_g2">curve_poly_g2</a></span>.<span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.poly#e4361ce58e4de0a4b9786d0011b61316">[</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#tnth">tnth</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.pts_x_g2">pts_x_g2</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#i:27">i</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.poly#e4361ce58e4de0a4b9786d0011b61316">]</a></span>.<br/>
+<span class="vernacular">Hypothesis</span><span class="id"> </span><span id="genus2.pts_distinct_g2" class="id"><a name="genus2.pts_distinct_g2" class="">pts_distinct_g2</a></span><span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="gallina-kwd">forall</span><span class="id"> </span><span id="i:30" class="id"><a name="i:30" class="">i</a></span><span class="id"> </span><span id="j:31" class="id"><a name="j:31" class="">j</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#:::'''I_'_x">'I_</a></span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.n_g2">n_g2</a></span><span class="id">,</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#i:30">i</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.eqtype#c385a484ee9d1b4e0615924561a9b75e"> !=</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.eqtype#c385a484ee9d1b4e0615924561a9b75e"> </a></span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#j:31">j</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#::type_scope:x_'-&gt;'_x"> -&gt;</a></span><br/>
+&nbsp;&nbsp;(<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#tnth">tnth</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.pts_x_g2">pts_x_g2</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#i:30">i</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.eqtype#c385a484ee9d1b4e0615924561a9b75e"> !=</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.eqtype#c385a484ee9d1b4e0615924561a9b75e"> </a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#tnth">tnth</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.pts_x_g2">pts_x_g2</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#j:31">j</a></span>)<span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Datatypes.html#081ff67d3116402bb680e8692aa39185"> ||</a></span> (<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#tnth">tnth</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.pts_y_g2">pts_y_g2</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#i:30">i</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.eqtype#c385a484ee9d1b4e0615924561a9b75e"> !=</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.eqtype#c385a484ee9d1b4e0615924561a9b75e"> </a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#tnth">tnth</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.pts_y_g2">pts_y_g2</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#j:31">j</a></span>).<br/>
+<span class="vernacular">Hypothesis</span><span class="id"> </span><span id="genus2.pts_x_uniq_g2" class="id"><a name="genus2.pts_x_uniq_g2" class="">pts_x_uniq_g2</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.seq#uniq">uniq</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.pts_x_g2">pts_x_g2</a></span>.<br/>
+<br/>
+<span class="vernacular">Hypothesis</span><span class="id"> </span><span id="genus2.ev_g2_rank" class="id"><a name="genus2.ev_g2_rank" class="">ev_g2_rank</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.mxalgebra#b8af73c258a533909a2acba13114d67c">\rank</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.mxalgebra#b8af73c258a533909a2acba13114d67c"> </a></span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.ev_g2">ev_g2</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> =</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> </a></span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.k_g2">k_g2</a></span>.<br/>
+<span class="vernacular">Hypothesis</span><span class="id"> </span><span id="genus2.Hk_g2" class="id"><a name="genus2.Hk_g2" class="">Hk_g2</a></span><span class="id"> :</span><span class="id"> 0</span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#::nat_scope:x_'&lt;'_x"> &lt;</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#::nat_scope:x_'&lt;'_x"> </a></span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.k_g2">k_g2</a></span>.<br/>
+<span class="vernacular">Hypothesis</span><span class="id"> </span><span id="genus2.Hkn_g2" class="id"><a name="genus2.Hkn_g2" class="">Hkn_g2</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.k_g2">k_g2</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#cb53cf0ee22c036a03b4a9281c68b5a3"> &lt;=</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#cb53cf0ee22c036a03b4a9281c68b5a3"> </a></span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.n_g2">n_g2</a></span>.<br/>
+<span class="vernacular">Hypothesis</span><span class="id"> </span><span id="genus2.Hkg_g2" class="id"><a name="genus2.Hkg_g2" class="">Hkg_g2</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.g_g2">g_g2</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#::nat_scope:x_'&lt;'_x"> &lt;</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#::nat_scope:x_'&lt;'_x"> </a></span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.k_g2">k_g2</a></span>.        <br/>
+<span class="vernacular">Hypothesis</span><span class="id"> </span><span id="genus2.Hkgn_g2" class="id"><a name="genus2.Hkgn_g2" class="">Hkgn_g2</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.k_g2">k_g2</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#0dacc1786c5ba797d47dd85006231633"> +</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#0dacc1786c5ba797d47dd85006231633"> </a></span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.g_g2">g_g2</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#::nat_scope:x_'&lt;'_x"> &lt;</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#::nat_scope:x_'&lt;'_x"> </a></span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.n_g2">n_g2</a></span>. <br/>
+<br/>
+<span class="vernacular">Let</span><span class="id"> </span><span id="genus2.m_deg_g2" class="id"><a name="genus2.m_deg_g2" class="">m_deg_g2</a></span><span class="id"> :=</span> (<span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.k_g2">k_g2</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#0dacc1786c5ba797d47dd85006231633"> +</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#0dacc1786c5ba797d47dd85006231633"> </a></span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.g_g2">g_g2</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#::nat_scope:x_'-'_x"> -</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#::nat_scope:x_'-'_x"> </a></span><span class="id">1</span>)<span class="id">%N</span>.<br/>
+<span class="vernacular">Let</span><span class="id"> </span><span id="genus2.deg_f_g2" class="id"><a name="genus2.deg_f_g2" class="">deg_f_g2</a></span><span class="id"> :=</span> (<span class="id">2</span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#ea2ff3d561159081cea6fb2e8113cc54"> *</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#ea2ff3d561159081cea6fb2e8113cc54"> </a></span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.g_g2">g_g2</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#0dacc1786c5ba797d47dd85006231633"> +</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#0dacc1786c5ba797d47dd85006231633"> </a></span><span class="id">1</span>)<span class="id">%N</span>.<br/>
+<br/>
+<span class="vernacular">Hypothesis</span><span class="id"> </span><span id="genus2.Hdeg_f_le_g2" class="id"><a name="genus2.Hdeg_f_le_g2" class="">Hdeg_f_le_g2</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.deg_f_g2">deg_f_g2</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#cb53cf0ee22c036a03b4a9281c68b5a3"> &lt;=</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#cb53cf0ee22c036a03b4a9281c68b5a3"> </a></span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.m_deg_g2">m_deg_g2</a></span>.  <br/>
+<br/>
+<span class="vernacular">Hypothesis</span><span class="id"> </span><span id="genus2.ev_g2_encode" class="id"><a name="genus2.ev_g2_encode" class="">ev_g2_encode</a></span><span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="gallina-kwd">forall</span><span class="id"> </span><span id="v:48" class="id"><a name="v:48" class="">v</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#928a892a0c1438777aeb17535aec0378">'rV[</a></span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.F_g2">F_g2</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#928a892a0c1438777aeb17535aec0378">]_</a></span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.k_g2">k_g2</a></span><span class="id">,</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#v:48">v</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.eqtype#c385a484ee9d1b4e0615924561a9b75e"> !=</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.eqtype#c385a484ee9d1b4e0615924561a9b75e"> </a></span><span class="id">0</span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#::type_scope:x_'-&gt;'_x"> -&gt;</a></span><br/>
+&nbsp;&nbsp;<span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#a883bdd010993579f99d60b3775bcf54">exists</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#a883bdd010993579f99d60b3775bcf54"> </a></span><span id="A:49" class="id"><a name="A:49" class="">A</a></span><span class="id"> </span><span id="B:50" class="id"><a name="B:50" class="">B</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.poly#da9f755b2dd01d49956ac8b6f40c9c5d">{poly</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.poly#da9f755b2dd01d49956ac8b6f40c9c5d"> </a></span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.F_g2">F_g2</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.poly#da9f755b2dd01d49956ac8b6f40c9c5d">}</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#a883bdd010993579f99d60b3775bcf54">,</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;((<span class="id"><a href="pgg_reconstruct.cover_genus2.html#A:49">A</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.eqtype#c385a484ee9d1b4e0615924561a9b75e"> !=</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.eqtype#c385a484ee9d1b4e0615924561a9b75e"> </a></span><span class="id">0</span>)<span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Datatypes.html#081ff67d3116402bb680e8692aa39185"> ||</a></span> (<span class="id"><a href="pgg_reconstruct.cover_genus2.html#B:50">B</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.eqtype#c385a484ee9d1b4e0615924561a9b75e"> !=</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.eqtype#c385a484ee9d1b4e0615924561a9b75e"> </a></span><span class="id">0</span>))<span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#ba2b0e492d2b4675a0acf3ea92aabadd"> /\</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.seq#size">size</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#A:49">A</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#cb53cf0ee22c036a03b4a9281c68b5a3"> &lt;=</a></span> (<span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.m_deg_g2">m_deg_g2</a></span>.<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#1ecb2ec20b22101a31d2177b576c9a81">/2</a></span>).<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#bda89d73ec4a8f23ae92b565ffb5aaa6">+1</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#ba2b0e492d2b4675a0acf3ea92aabadd"> /\</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.seq#size">size</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#B:50">B</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#cb53cf0ee22c036a03b4a9281c68b5a3"> &lt;=</a></span> ((<span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.m_deg_g2">m_deg_g2</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#::nat_scope:x_'-'_x"> -</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#::nat_scope:x_'-'_x"> </a></span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.deg_f_g2">deg_f_g2</a></span>).<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#1ecb2ec20b22101a31d2177b576c9a81">/2</a></span>).<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#bda89d73ec4a8f23ae92b565ffb5aaa6">+1</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#ba2b0e492d2b4675a0acf3ea92aabadd"> /\</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">forall</span><span class="id"> </span><span id="i:51" class="id"><a name="i:51" class="">i</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#:::'''I_'_x">'I_</a></span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.n_g2">n_g2</a></span><span class="id">,</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id"><a href="pgg_reconstruct.cover_genus2.html#v:48">v</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#b2b431de65e6c1e23c1ae3a60262ea15"> *m</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#b2b431de65e6c1e23c1ae3a60262ea15"> </a></span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.ev_g2">ev_g2</a></span>)<span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#b2b431de65e6c1e23c1ae3a60262ea15"> ord0</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#i:51">i</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> =</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> </a></span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#A:49">A</a></span>.<span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.poly#e4361ce58e4de0a4b9786d0011b61316">[</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#tnth">tnth</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.pts_x_g2">pts_x_g2</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#i:51">i</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.poly#e4361ce58e4de0a4b9786d0011b61316">]</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.ssralg#c7f78cf1f6a5e4f664654f7d671ca752"> +</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.ssralg#c7f78cf1f6a5e4f664654f7d671ca752"> </a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#tnth">tnth</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.pts_y_g2">pts_y_g2</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#i:51">i</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.ssralg#2d0cfb150261028f4ebd2ba355623dcc"> *</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.ssralg#2d0cfb150261028f4ebd2ba355623dcc"> </a></span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#B:50">B</a></span>.<span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.poly#e4361ce58e4de0a4b9786d0011b61316">[</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#tnth">tnth</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.pts_x_g2">pts_x_g2</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#i:51">i</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.poly#e4361ce58e4de0a4b9786d0011b61316">]</a></span>.<br/>
+<br/>
+<span class="vernacular">Let</span><span class="id"> </span><span id="genus2.m_deg_dual_g2" class="id"><a name="genus2.m_deg_dual_g2" class="">m_deg_dual_g2</a></span><span class="id"> :=</span> (<span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.n_g2">n_g2</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#0dacc1786c5ba797d47dd85006231633"> +</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#0dacc1786c5ba797d47dd85006231633"> </a></span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.g_g2">g_g2</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#::nat_scope:x_'-'_x"> -</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#::nat_scope:x_'-'_x"> </a></span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.k_g2">k_g2</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#::nat_scope:x_'-'_x"> -</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#::nat_scope:x_'-'_x"> </a></span><span class="id">1</span>)<span class="id">%N</span>.<br/>
+<br/>
+<span class="vernacular">Hypothesis</span><span class="id"> </span><span id="genus2.g2_dual_ev_encode" class="id"><a name="genus2.g2_dual_ev_encode" class="">g2_dual_ev_encode</a></span><span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="gallina-kwd">forall</span><span class="id"> </span><span id="w:54" class="id"><a name="w:54" class="">w</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#928a892a0c1438777aeb17535aec0378">'rV[</a></span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.F_g2">F_g2</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#928a892a0c1438777aeb17535aec0378">]_</a></span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.n_g2">n_g2</a></span><span class="id">,</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#w:54">w</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.eqtype#c385a484ee9d1b4e0615924561a9b75e"> !=</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.eqtype#c385a484ee9d1b4e0615924561a9b75e"> </a></span><span class="id">0</span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#::type_scope:x_'-&gt;'_x"> -&gt;</a></span><br/>
+&nbsp;&nbsp;(<span class="gallina-kwd">forall</span><span class="id"> </span><span id="c:55" class="id"><a name="c:55" class="">c</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#928a892a0c1438777aeb17535aec0378">'rV[</a></span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.F_g2">F_g2</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#928a892a0c1438777aeb17535aec0378">]_</a></span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.n_g2">n_g2</a></span><span class="id">,</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#c:55">c</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrbool.html#b09457274bcb94927e289b8a9e9cd3f7"> \in</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrbool.html#b09457274bcb94927e289b8a9e9cd3f7"> </a></span><span class="id"><a href="pgg_reconstruct.ag_code.html#ag_code">ag_code</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.ev_g2">ev_g2</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#::type_scope:x_'-&gt;'_x"> -&gt;</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#::type_scope:x_'-&gt;'_x"> </a></span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#w:54">w</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#b2b431de65e6c1e23c1ae3a60262ea15"> *m</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#b2b431de65e6c1e23c1ae3a60262ea15"> </a></span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#c:55">c</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#21ca0474978189f352b592dccdd75860">^T</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> =</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> </a></span><span class="id">0</span>)<span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#::type_scope:x_'-&gt;'_x"> -&gt;</a></span><br/>
+&nbsp;&nbsp;<span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#a883bdd010993579f99d60b3775bcf54">exists</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#a883bdd010993579f99d60b3775bcf54"> </a></span><span id="A:56" class="id"><a name="A:56" class="">A</a></span><span class="id"> </span><span id="B:57" class="id"><a name="B:57" class="">B</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.poly#da9f755b2dd01d49956ac8b6f40c9c5d">{poly</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.poly#da9f755b2dd01d49956ac8b6f40c9c5d"> </a></span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.F_g2">F_g2</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.poly#da9f755b2dd01d49956ac8b6f40c9c5d">}</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#a883bdd010993579f99d60b3775bcf54">,</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;((<span class="id"><a href="pgg_reconstruct.cover_genus2.html#A:56">A</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.eqtype#c385a484ee9d1b4e0615924561a9b75e"> !=</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.eqtype#c385a484ee9d1b4e0615924561a9b75e"> </a></span><span class="id">0</span>)<span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Datatypes.html#081ff67d3116402bb680e8692aa39185"> ||</a></span> (<span class="id"><a href="pgg_reconstruct.cover_genus2.html#B:57">B</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.eqtype#c385a484ee9d1b4e0615924561a9b75e"> !=</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.eqtype#c385a484ee9d1b4e0615924561a9b75e"> </a></span><span class="id">0</span>))<span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#ba2b0e492d2b4675a0acf3ea92aabadd"> /\</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.seq#size">size</a></span> (<span class="id"><a href="pgg_reconstruct.hyperelliptic_code.html#hyp_resultant">hyp_resultant</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.curve_poly_g2">curve_poly_g2</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#A:56">A</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#B:57">B</a></span>)<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#cb53cf0ee22c036a03b4a9281c68b5a3"> &lt;=</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#cb53cf0ee22c036a03b4a9281c68b5a3"> </a></span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.m_deg_dual_g2">m_deg_dual_g2</a></span>.<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#bda89d73ec4a8f23ae92b565ffb5aaa6">+1</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#ba2b0e492d2b4675a0acf3ea92aabadd"> /\</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">forall</span><span class="id"> </span><span id="i:58" class="id"><a name="i:58" class="">i</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#:::'''I_'_x">'I_</a></span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.n_g2">n_g2</a></span><span class="id">,</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="pgg_reconstruct.cover_genus2.html#w:54">w</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#ord0">ord0</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#i:58">i</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> =</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> </a></span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#A:56">A</a></span>.<span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.poly#e4361ce58e4de0a4b9786d0011b61316">[</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#tnth">tnth</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.pts_x_g2">pts_x_g2</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#i:58">i</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.poly#e4361ce58e4de0a4b9786d0011b61316">]</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.ssralg#c7f78cf1f6a5e4f664654f7d671ca752"> +</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.ssralg#c7f78cf1f6a5e4f664654f7d671ca752"> </a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#tnth">tnth</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.pts_y_g2">pts_y_g2</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#i:58">i</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.ssralg#2d0cfb150261028f4ebd2ba355623dcc"> *</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.ssralg#2d0cfb150261028f4ebd2ba355623dcc"> </a></span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#B:57">B</a></span>.<span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.poly#e4361ce58e4de0a4b9786d0011b61316">[</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.tuple#tnth">tnth</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.pts_x_g2">pts_x_g2</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#i:58">i</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.poly#e4361ce58e4de0a4b9786d0011b61316">]</a></span>.<br/>
+<br/>
+<span class="vernacular">Hypothesis</span><span class="id"> </span><span id="genus2.Hparam_g2" class="id"><a name="genus2.Hparam_g2" class="">Hparam_g2</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.n_g2">n_g2</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#cb53cf0ee22c036a03b4a9281c68b5a3"> &lt;=</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#cb53cf0ee22c036a03b4a9281c68b5a3"> </a></span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.k_g2">k_g2</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#0dacc1786c5ba797d47dd85006231633"> +</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#0dacc1786c5ba797d47dd85006231633"> </a></span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.g_g2">g_g2</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#0dacc1786c5ba797d47dd85006231633"> +</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#0dacc1786c5ba797d47dd85006231633"> </a></span><span class="id">1</span>. <br/>
+<br/>
+<span class="vernacular">Let</span><span class="id"> </span><span id="genus2.goppa_g2_wt" class="id"><a name="genus2.goppa_g2_wt" class="">goppa_g2_wt</a></span><span class="id"> :</span><span class="gallina-kwd"> forall</span><span class="id"> </span><span id="m:63" class="id"><a name="m:63" class="">m</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#928a892a0c1438777aeb17535aec0378">'rV[</a></span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.F_g2">F_g2</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#928a892a0c1438777aeb17535aec0378">]_</a></span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.k_g2">k_g2</a></span><span class="id">,</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#m:63">m</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.eqtype#c385a484ee9d1b4e0615924561a9b75e"> !=</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.eqtype#c385a484ee9d1b4e0615924561a9b75e"> </a></span><span class="id">0</span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#::type_scope:x_'-&gt;'_x"> -&gt;</a></span><br/>
+&nbsp;&nbsp;<span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.n_g2">n_g2</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#::nat_scope:x_'-'_x"> -</a></span> (<span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.k_g2">k_g2</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#0dacc1786c5ba797d47dd85006231633"> +</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#0dacc1786c5ba797d47dd85006231633"> </a></span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.g_g2">g_g2</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#::nat_scope:x_'-'_x"> -</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#::nat_scope:x_'-'_x"> </a></span><span class="id">1</span>)<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#cb53cf0ee22c036a03b4a9281c68b5a3"> &lt;=</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#cb53cf0ee22c036a03b4a9281c68b5a3"> </a></span><span class="id"><a href="infotheo.lib.hamming.html#wH">wH</a></span> (<span class="id"><a href="pgg_reconstruct.cover_genus2.html#m:63">m</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#b2b431de65e6c1e23c1ae3a60262ea15"> *m</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#b2b431de65e6c1e23c1ae3a60262ea15"> </a></span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.ev_g2">ev_g2</a></span>).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id">move=&gt;</span><span class="id"> v</span><span class="id"> Hv</span>.<br/>
+<span class="id">exact:</span> (<span class="id">@</span><span class="id"><a href="pgg_reconstruct.hyperelliptic_code.html#hyp_goppa_wt_mdeg">hyp_goppa_wt_mdeg</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.F_g2">F_g2</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.g_g2">g_g2</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.curve_poly_g2">curve_poly_g2</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.curve_deg_g2">curve_deg_g2</a></span><br/>
+&nbsp;&nbsp;<span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.m_deg_g2">m_deg_g2</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.n''_g2">n''_g2</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.pts_x_g2">pts_x_g2</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.pts_y_g2">pts_y_g2</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.pts_on_curve_g2">pts_on_curve_g2</a></span><br/>
+&nbsp;&nbsp;<span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.pts_x_uniq_g2">pts_x_uniq_g2</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.Hdeg_f_le_g2">Hdeg_f_le_g2</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.k_g2">k_g2</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.ev_g2">ev_g2</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.ev_g2_encode">ev_g2_encode</a></span><span class="id"> v</span><span class="id"> Hv</span>).<br/>
+Qed.</div></details>
+<br/>
+<span class="vernacular">Let</span><span class="id"> </span><span id="genus2.ag_g2_priv_surj" class="id"><a name="genus2.ag_g2_priv_surj" class="">ag_g2_priv_surj</a></span><span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="gallina-kwd">forall</span> (<span id="S:64" class="id"><a name="S:64" class="">S</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.finset#d8708f36d374a98f4d683c7593d1ea6a">{set</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.finset#d8708f36d374a98f4d683c7593d1ea6a"> </a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#:::'''I_'_x">'I_</a></span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.n_g2">n_g2</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.finset#d8708f36d374a98f4d683c7593d1ea6a">}</a></span>) (<span id="target:65" class="id"><a name="target:65" class="">target</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#928a892a0c1438777aeb17535aec0378">'rV[</a></span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.F_g2">F_g2</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#928a892a0c1438777aeb17535aec0378">]_</a></span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.n_g2">n_g2</a></span>)<span class="id">,</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#234f50e13366f794cd6877cf832a5935">#|</a></span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#S:64">S</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#234f50e13366f794cd6877cf832a5935">|</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#::nat_scope:x_'&lt;'_x"> &lt;</a></span> (<span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.k_g2">k_g2</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#::nat_scope:x_'-'_x"> -</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#::nat_scope:x_'-'_x"> </a></span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.g_g2">g_g2</a></span>).<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#::nat_scope:x_'.-1'">-1</a></span>.<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#bc63483175fac06bcd5541a5e9093b18">+2</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#::type_scope:x_'-&gt;'_x"> -&gt;</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#a883bdd010993579f99d60b3775bcf54">exists</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#a883bdd010993579f99d60b3775bcf54"> </a></span><span id="c:66" class="id"><a name="c:66" class="">c</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#928a892a0c1438777aeb17535aec0378">'rV[</a></span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.F_g2">F_g2</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.algebra.matrix#928a892a0c1438777aeb17535aec0378">]_</a></span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.n_g2">n_g2</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#a883bdd010993579f99d60b3775bcf54">,</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="pgg_reconstruct.cover_genus2.html#c:66">c</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrbool.html#b09457274bcb94927e289b8a9e9cd3f7"> \in</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrbool.html#b09457274bcb94927e289b8a9e9cd3f7"> </a></span><span class="id"><a href="pgg_reconstruct.ag_code.html#ag_code">ag_code</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.ev_g2">ev_g2</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#ba2b0e492d2b4675a0acf3ea92aabadd"> /\</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#ba2b0e492d2b4675a0acf3ea92aabadd"> </a></span><span class="id"><a href="infotheo.ecc_classic.linearcode.html#vproj">vproj</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#c:66">c</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#S:64">S</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> =</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> </a></span><span class="id"><a href="infotheo.ecc_classic.linearcode.html#vproj">vproj</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#target:65">target</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#S:64">S</a></span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id">move=&gt;</span><span class="id"> S</span><span class="id"> target</span><span class="id"> HS</span>.<br/>
+<span class="id">exact:</span> (<span class="id"><a href="pgg_reconstruct.hyperelliptic_code.html#hyp_priv_surj">hyp_priv_surj</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.curve_deg_g2">curve_deg_g2</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.pts_on_curve_g2">pts_on_curve_g2</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.pts_x_uniq_g2">pts_x_uniq_g2</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.Hkgn_g2">Hkgn_g2</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.Hkg_g2">Hkg_g2</a></span><span class="id"> </span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrfun.html#erefl">erefl</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.g2_dual_ev_encode">g2_dual_ev_encode</a></span><span class="id"> target</span><span class="id"> HS</span>).<br/>
+Qed.</div></details>
+<br/>
+<span class="vernacular">Let</span><span class="id"> </span><span id="genus2.ts2" class="id"><a name="genus2.ts2" class="">ts2</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#ThresholdScheme">ThresholdScheme</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#:::'''I_'_x">'I_</a></span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.N">N</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#:::'''I_'_x">'I_</a></span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.N">N</a></span><span class="id"> :=</span><br/>
+&nbsp;&nbsp;<span class="id">@</span><span class="id"><a href="pgg_reconstruct.ag_massey_bridge.html#ag_genus_scheme">ag_genus_scheme</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.F_g2">F_g2</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.n''_g2">n''_g2</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.k_g2">k_g2</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.g_g2">g_g2</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.ev_g2">ev_g2</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.ev_g2_rank">ev_g2_rank</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.Hk_g2">Hk_g2</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.Hkn_g2">Hkn_g2</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.Hkgn_g2">Hkgn_g2</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.goppa_g2_wt">goppa_g2_wt</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.ag_g2_priv_surj">ag_g2_priv_surj</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.N">N</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.HN_g2">HN_g2</a></span>.<br/>
+<br/>
+<span class="vernacular">Let</span><span class="id"> </span><span id="genus2.ts2_gap" class="id"><a name="genus2.ts2_gap" class="">ts2_gap</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#ts_T">ts_T</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.ts2">ts2</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#cb53cf0ee22c036a03b4a9281c68b5a3"> &lt;=</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#cb53cf0ee22c036a03b4a9281c68b5a3"> </a></span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#ts_k">ts_k</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.ts2">ts2</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#0dacc1786c5ba797d47dd85006231633"> +</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#0dacc1786c5ba797d47dd85006231633"> </a></span><span class="id">2</span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#ea2ff3d561159081cea6fb2e8113cc54"> *</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#ea2ff3d561159081cea6fb2e8113cc54"> </a></span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.g_g2">g_g2</a></span><span class="id"> :=</span><br/>
+&nbsp;&nbsp;<span class="id">@</span><span class="id"><a href="pgg_reconstruct.ag_massey_bridge.html#ag_genus_gap">ag_genus_gap</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.F_g2">F_g2</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.n''_g2">n''_g2</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.k_g2">k_g2</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.g_g2">g_g2</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.ev_g2">ev_g2</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.ev_g2_rank">ev_g2_rank</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.Hk_g2">Hk_g2</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.Hkn_g2">Hkn_g2</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.Hkg_g2">Hkg_g2</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.Hkgn_g2">Hkgn_g2</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.goppa_g2_wt">goppa_g2_wt</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.ag_g2_priv_surj">ag_g2_priv_surj</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.Hparam_g2">Hparam_g2</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.N">N</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.HN_g2">HN_g2</a></span>.<br/>
+<br/>
+<span class="vernacular">Let</span><span class="id"> </span><span id="genus2.ts2_gap4" class="id"><a name="genus2.ts2_gap4" class="">ts2_gap4</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#ts_T">ts_T</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.ts2">ts2</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#cb53cf0ee22c036a03b4a9281c68b5a3"> &lt;=</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#cb53cf0ee22c036a03b4a9281c68b5a3"> </a></span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#ts_k">ts_k</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.ts2">ts2</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#0dacc1786c5ba797d47dd85006231633"> +</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#0dacc1786c5ba797d47dd85006231633"> </a></span><span class="id">4</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id"> exact:</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.ts2_gap">ts2_gap</a></span>. Qed.</div></details>
+<br/>
+<span class="vernacular">Variable</span><span class="id"> </span><span id="genus2.sigma_code_g2" class="id"><a name="genus2.sigma_code_g2" class="">sigma_code_g2</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_interface.html#pgg_gT">pgg_gT</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.M">M</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#::type_scope:x_'-&gt;'_x"> -&gt;</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#::type_scope:x_'-&gt;'_x"> </a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.fingroup.perm#683bed2e43e8b9b52492c89e618e34b6">{perm</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.fingroup.perm#683bed2e43e8b9b52492c89e618e34b6"> </a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#:::'''I_'_x">'I_</a></span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.n_g2">n_g2</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.fingroup.perm#683bed2e43e8b9b52492c89e618e34b6">}</a></span>.<br/>
+<br/>
+<span class="vernacular">Hypothesis</span><span class="id"> </span><span id="genus2.sigma_fix0_g2" class="id"><a name="genus2.sigma_fix0_g2" class="">sigma_fix0_g2</a></span><span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="gallina-kwd">forall</span><span class="id"> </span><span id="g:69" class="id"><a name="g:69" class="">g</a></span><span class="id">,</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#g:69">g</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrbool.html#b09457274bcb94927e289b8a9e9cd3f7"> \in</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrbool.html#b09457274bcb94927e289b8a9e9cd3f7"> </a></span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.G">G</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#::type_scope:x_'-&gt;'_x"> -&gt;</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#::type_scope:x_'-&gt;'_x"> </a></span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.sigma_code_g2">sigma_code_g2</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#g:69">g</a></span><span class="id"> </span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#ord0">ord0</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> =</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> </a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#ord0">ord0</a></span>.<br/>
+<br/>
+<span class="vernacular">Hypothesis</span><span class="id"> </span><span id="genus2.code_auto_g2" class="id"><a name="genus2.code_auto_g2" class="">code_auto_g2</a></span><span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="gallina-kwd">forall</span><span class="id"> </span><span id="g:72" class="id"><a name="g:72" class="">g</a></span><span class="id">,</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#g:72">g</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrbool.html#b09457274bcb94927e289b8a9e9cd3f7"> \in</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrbool.html#b09457274bcb94927e289b8a9e9cd3f7"> </a></span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.G">G</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#::type_scope:x_'-&gt;'_x"> -&gt;</a></span><br/>
+&nbsp;&nbsp;<span class="id"><a href="pgg_reconstruct.coord_perm_compatible.html#coord_perm_compatible">coord_perm_compatible</a></span> (<span class="id"><a href="pgg_reconstruct.ag_code.html#ag_code">ag_code</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.ev_g2">ev_g2</a></span>) (<span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.sigma_code_g2">sigma_code_g2</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#g:72">g</a></span>).<br/>
+<br/>
+<span class="vernacular">Let</span><span class="id"> </span><span id="genus2.ts2_perm" class="id"><a name="genus2.ts2_perm" class="">ts2_perm</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="pgg_smc.pgg_interface.html#pgg_gT">pgg_gT</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.M">M</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#::type_scope:x_'-&gt;'_x"> -&gt;</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#::type_scope:x_'-&gt;'_x"> </a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.fingroup.perm#683bed2e43e8b9b52492c89e618e34b6">{perm</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.fingroup.perm#683bed2e43e8b9b52492c89e618e34b6"> </a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.fintype#:::'''I_'_x">'I_</a></span>(<span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#ts_T'">ts_T'</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.ts2">ts2</a></span>).<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#bda89d73ec4a8f23ae92b565ffb5aaa6">+1</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.fingroup.perm#683bed2e43e8b9b52492c89e618e34b6">}</a></span><span class="id"> :=</span><br/>
+&nbsp;&nbsp;<span class="id"><a href="pgg_reconstruct.coord_perm_compatible.html#massey_share_perm">massey_share_perm</a></span> (<span class="id">G:=</span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.G">G</a></span>)<span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.sigma_fix0_g2">sigma_fix0_g2</a></span>.<br/>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> </span><span id="ts2_perm_compatible" class="id"><a name="ts2_perm_compatible" class="">ts2_perm_compatible</a></span><span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="id">@</span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#ts_perm_compatible">ts_perm_compatible</a></span><span class="id"> _</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.G">G</a></span><span class="id"> _</span><span class="id"> _</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.ts2">ts2</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.ts2_perm">ts2_perm</a></span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id">rewrite</span><span class="id"> /</span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.ts2">ts2</a></span><span class="id"> /=</span><span class="id"> /</span><span class="id"><a href="pgg_reconstruct.ag_massey_bridge.html#ag_genus_scheme">ag_genus_scheme</a></span><span class="id"> /</span><span class="id"><a href="pgg_reconstruct.ag_massey_bridge.html#ag_massey">ag_massey</a></span>.<br/>
+<span class="id">apply:</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.coord_perm_compatible.html#transport_perm_compatible">transport_perm_compatible</a></span>.<br/>
+<span class="id">exact:</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.coord_perm_compatible.html#massey_perm_compatible">massey_perm_compatible</a></span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="vernacular">Definition</span><span class="id"> </span><span id="genus2_covering" class="id"><a name="genus2_covering" class="">genus2_covering</a></span><span class="id"> :</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.covering_scheme.html#CoveringScheme">CoveringScheme</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.M">M</a></span><span class="id"> :=</span><span class="id"> {|</span><br/>
+&nbsp;&nbsp;<span class="id"><a href="pgg_reconstruct.covering_scheme.html#cs_data">cs_data</a></span>      <span class="id"> :=</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2_data">genus2_data</a></span><span class="id"> ;</span><br/>
+&nbsp;&nbsp;<span class="id"><a href="pgg_reconstruct.covering_scheme.html#cs_T'">cs_T'</a></span>        <span class="id"> :=</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#ts_T'">ts_T'</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.ts2">ts2</a></span><span class="id"> ;</span><br/>
+&nbsp;&nbsp;<span class="id"><a href="pgg_reconstruct.covering_scheme.html#cs_scheme">cs_scheme</a></span>    <span class="id"> :=</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.ts2">ts2</a></span><span class="id"> ;</span><br/>
+&nbsp;&nbsp;<span class="id"><a href="pgg_reconstruct.covering_scheme.html#cs_scheme_T">cs_scheme_T</a></span>  <span class="id"> :=</span><span class="id"> </span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.ssr.ssrfun.html#erefl">erefl</a></span><span class="id"> ;</span><br/>
+&nbsp;&nbsp;<span class="id"><a href="pgg_reconstruct.covering_scheme.html#cs_perm">cs_perm</a></span>      <span class="id"> :=</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.ts2_perm">ts2_perm</a></span><span class="id"> ;</span><br/>
+&nbsp;&nbsp;<span class="id"><a href="pgg_reconstruct.covering_scheme.html#cs_perm_compatible">cs_perm_compatible</a></span><span class="id"> :=</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#ts2_perm_compatible">ts2_perm_compatible</a></span><span class="id"> ;</span><br/>
+&nbsp;&nbsp;<span class="id"><a href="pgg_reconstruct.covering_scheme.html#cs_gap">cs_gap</a></span>       <span class="id"> :=</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.ts2_gap4">ts2_gap4</a></span><span class="id"> ;</span><br/>
+<span class="id">|}</span>.<br/>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> </span><span id="genus2_gap" class="id"><a name="genus2_gap" class="">genus2_gap</a></span><span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#ts_T">ts_T</a></span> (<span class="id"><a href="pgg_reconstruct.covering_scheme.html#cs_scheme">cs_scheme</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2_covering">genus2_covering</a></span>)<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#cb53cf0ee22c036a03b4a9281c68b5a3"> &lt;=</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#cb53cf0ee22c036a03b4a9281c68b5a3"> </a></span><span class="id"><a href="pgg_reconstruct.pgg_sharing_framework.html#ts_k">ts_k</a></span> (<span class="id"><a href="pgg_reconstruct.covering_scheme.html#cs_scheme">cs_scheme</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2_covering">genus2_covering</a></span>)<span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#0dacc1786c5ba797d47dd85006231633"> +</a></span><span class="id"><a href="NOTFOUND the module url for mathcomp.boot.ssrnat#0dacc1786c5ba797d47dd85006231633"> </a></span><span class="id">4</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id"> exact:</span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2.ts2_gap4">ts2_gap4</a></span>. Qed.</div></details>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> </span><span id="genus2_vs_genus1" class="id"><a name="genus2_vs_genus1" class="">genus2_vs_genus1</a></span><span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="id"><a href="pgg_reconstruct.covering_scheme.html#cd_genus">cd_genus</a></span> (<span class="id"><a href="pgg_reconstruct.covering_scheme.html#cs_data">cs_data</a></span><span class="id"> </span><span class="id"><a href="pgg_reconstruct.cover_genus2.html#genus2_covering">genus2_covering</a></span>)<span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> =</a></span><span class="id"><a href="https://rocq-prover.org/corelib/Corelib.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"> </a></span><span class="id">2</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="gallina-kwd"> by</span><span class="id"> []</span>. Qed.</div></details>
+<br/>
+<span class="vernacular">End</span><span class="id"> genus2</span>.<br/>
+
+      <div class="footer"><hr/>Generated by <a href="https://github.com/affeldt-aist/rocqnavi/">rocqnavi</a></div>
+    </div>
+  </div>
+    </main>
+</body>
+</html>

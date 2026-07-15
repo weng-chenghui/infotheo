@@ -1,0 +1,1280 @@
+
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Module bayes</title>
+<meta name="description" content="Documentation of Coq module Infotheo Documentation" />
+<link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/markdown-it/dist/markdown-it.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/markdown-it-texmath/texmath.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/darkmode-js@1.5.7/lib/darkmode-js.min.js"></script>
+<link href="rocqnavi.css" rel="stylesheet" type="text/css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script type="text/javascript" src="rocqnavi.js"> </script>
+</head>
+
+<body onload="init()">
+
+  <main>
+    <div class="sidebar">
+      <h2>Files</h2>
+      <li><details id="infotheo"><summary>infotheo</summary>
+          <ul>
+          <li><details id="infotheo.du2002"><summary>du2002</summary>
+          <ul>
+          <li><a href="infotheo.du2002.spp_entropy.html">spp_entropy</a></li>
+<li><a href="infotheo.du2002.spp_interface.html">spp_interface</a></li>
+<li><a href="infotheo.du2002.spp_pismc.html">spp_pismc</a></li>
+<li><a href="infotheo.du2002.spp_proba.html">spp_proba</a></li>
+<li><a href="infotheo.du2002.spp_program.html">spp_program</a></li>
+<li><a href="infotheo.du2002.spp_proof.html">spp_proof</a></li>
+<li><a href="infotheo.du2002.spp_session_types.html">spp_session_types</a></li>
+<li><a href="infotheo.du2002.spp_tactics.html">spp_tactics</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.dumas2017dual"><summary>dumas2017dual</summary>
+          <ul>
+          <li><details id="infotheo.dumas2017dual.dsdp"><summary>dsdp</summary>
+          <ul>
+          <li><a href="infotheo.dumas2017dual.dsdp.dsdp_correctness.html">dsdp_correctness</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_entropy.html">dsdp_entropy</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_entropy_trace.html">dsdp_entropy_trace</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_interface.html">dsdp_interface</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_pismc.html">dsdp_pismc</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_program.html">dsdp_program</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_security.html">dsdp_security</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_session_types.html">dsdp_session_types</a></li>
+<li><a href="infotheo.dumas2017dual.dsdp.dsdp_syntax_demo.html">dsdp_syntax_demo</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.dumas2017dual.entropy_fiber"><summary>entropy_fiber</summary>
+          <ul>
+          <li><a href="infotheo.dumas2017dual.entropy_fiber.entropy_fiber.html">entropy_fiber</a></li>
+<li><a href="infotheo.dumas2017dual.entropy_fiber.entropy_fiber_zpq.html">entropy_fiber_zpq</a></li>
+<li><a href="infotheo.dumas2017dual.entropy_fiber.linear_fiber_zpq.html">linear_fiber_zpq</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.dumas2017dual.lib"><summary>lib</summary>
+          <ul>
+          <li><a href="infotheo.dumas2017dual.lib.extra_algebra.html">extra_algebra</a></li>
+<li><a href="infotheo.dumas2017dual.lib.extra_entropy.html">extra_entropy</a></li>
+<li><a href="infotheo.dumas2017dual.lib.extra_proba.html">extra_proba</a></li>
+<li><a href="infotheo.dumas2017dual.lib.rouche_capelli.html">rouche_capelli</a></li>
+          </ul>
+          </details>
+          </li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.ecc_classic"><summary>ecc_classic</summary>
+          <ul>
+          <li><a href="infotheo.ecc_classic.alternant.html">alternant</a></li>
+<li><a href="infotheo.ecc_classic.bch.html">bch</a></li>
+<li><a href="infotheo.ecc_classic.cyclic_code.html">cyclic_code</a></li>
+<li><a href="infotheo.ecc_classic.decoding.html">decoding</a></li>
+<li><a href="infotheo.ecc_classic.grs.html">grs</a></li>
+<li><a href="infotheo.ecc_classic.hamming_code.html">hamming_code</a></li>
+<li><a href="infotheo.ecc_classic.linearcode.html">linearcode</a></li>
+<li><a href="infotheo.ecc_classic.mceliece.html">mceliece</a></li>
+<li><a href="infotheo.ecc_classic.poly_decoding.html">poly_decoding</a></li>
+<li><a href="infotheo.ecc_classic.reed_solomon.html">reed_solomon</a></li>
+<li><a href="infotheo.ecc_classic.repcode.html">repcode</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.ecc_modern"><summary>ecc_modern</summary>
+          <ul>
+          <li><a href="infotheo.ecc_modern.checksum.html">checksum</a></li>
+<li><a href="infotheo.ecc_modern.degree_profile.html">degree_profile</a></li>
+<li><a href="infotheo.ecc_modern.ldpc.html">ldpc</a></li>
+<li><a href="infotheo.ecc_modern.ldpc_algo.html">ldpc_algo</a></li>
+<li><a href="infotheo.ecc_modern.ldpc_algo_proof.html">ldpc_algo_proof</a></li>
+<li><a href="infotheo.ecc_modern.ldpc_erasure.html">ldpc_erasure</a></li>
+<li><a href="infotheo.ecc_modern.max_subset.html">max_subset</a></li>
+<li><a href="infotheo.ecc_modern.stopping_set.html">stopping_set</a></li>
+<li><a href="infotheo.ecc_modern.subgraph_partition.html">subgraph_partition</a></li>
+<li><a href="infotheo.ecc_modern.summary.html">summary</a></li>
+<li><a href="infotheo.ecc_modern.summary_tanner.html">summary_tanner</a></li>
+<li><a href="infotheo.ecc_modern.tanner.html">tanner</a></li>
+<li><a href="infotheo.ecc_modern.tanner_partition.html">tanner_partition</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.homomorphic_encryption"><summary>homomorphic_encryption</summary>
+          <ul>
+          <li><details id="infotheo.homomorphic_encryption.benaloh1994"><summary>benaloh1994</summary>
+          <ul>
+          <li><a href="infotheo.homomorphic_encryption.benaloh1994.benaloh_ahe.html">benaloh_ahe</a></li>
+<li><a href="infotheo.homomorphic_encryption.benaloh1994.benaloh_enc.html">benaloh_enc</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.homomorphic_encryption.idealized"><summary>idealized</summary>
+          <ul>
+          <li><a href="infotheo.homomorphic_encryption.idealized.idealized_ahe.html">idealized_ahe</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.homomorphic_encryption.paillier1999"><summary>paillier1999</summary>
+          <ul>
+          <li><a href="infotheo.homomorphic_encryption.paillier1999.paillier_ahe.html">paillier_ahe</a></li>
+<li><a href="infotheo.homomorphic_encryption.paillier1999.paillier_enc.html">paillier_enc</a></li>
+          </ul>
+          </details>
+          </li>
+<li><a href="infotheo.homomorphic_encryption.ahe_enc.html">ahe_enc</a></li>
+<li><a href="infotheo.homomorphic_encryption.ahe_monoid.html">ahe_monoid</a></li>
+<li><a href="infotheo.homomorphic_encryption.enc_dec.html">enc_dec</a></li>
+<li><a href="infotheo.homomorphic_encryption.he_types.html">he_types</a></li>
+<li><a href="infotheo.homomorphic_encryption.homomorphic_encryption.html">homomorphic_encryption</a></li>
+<li><a href="infotheo.homomorphic_encryption.key_type.html">key_type</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.information_theory"><summary>information_theory</summary>
+          <ul>
+          <li><a href="infotheo.information_theory.aep.html">aep</a></li>
+<li><a href="infotheo.information_theory.binary_symmetric_channel.html">binary_symmetric_channel</a></li>
+<li><a href="infotheo.information_theory.channel.html">channel</a></li>
+<li><a href="infotheo.information_theory.channel_code.html">channel_code</a></li>
+<li><a href="infotheo.information_theory.channel_coding_converse.html">channel_coding_converse</a></li>
+<li><a href="infotheo.information_theory.channel_coding_direct.html">channel_coding_direct</a></li>
+<li><a href="infotheo.information_theory.conditional_divergence.html">conditional_divergence</a></li>
+<li><a href="infotheo.information_theory.entropy.html">entropy</a></li>
+<li><a href="infotheo.information_theory.entropy_convex.html">entropy_convex</a></li>
+<li><a href="infotheo.information_theory.erasure_channel.html">erasure_channel</a></li>
+<li><a href="infotheo.information_theory.error_exponent.html">error_exponent</a></li>
+<li><a href="infotheo.information_theory.joint_typ_seq.html">joint_typ_seq</a></li>
+<li><a href="infotheo.information_theory.jtypes.html">jtypes</a></li>
+<li><a href="infotheo.information_theory.kraft.html">kraft</a></li>
+<li><a href="infotheo.information_theory.pproba.html">pproba</a></li>
+<li><a href="infotheo.information_theory.shannon_fano.html">shannon_fano</a></li>
+<li><a href="infotheo.information_theory.source_code.html">source_code</a></li>
+<li><a href="infotheo.information_theory.source_coding_fl_converse.html">source_coding_fl_converse</a></li>
+<li><a href="infotheo.information_theory.source_coding_fl_direct.html">source_coding_fl_direct</a></li>
+<li><a href="infotheo.information_theory.source_coding_vl_converse.html">source_coding_vl_converse</a></li>
+<li><a href="infotheo.information_theory.source_coding_vl_direct.html">source_coding_vl_direct</a></li>
+<li><a href="infotheo.information_theory.string_entropy.html">string_entropy</a></li>
+<li><a href="infotheo.information_theory.success_decode_bound.html">success_decode_bound</a></li>
+<li><a href="infotheo.information_theory.typ_seq.html">typ_seq</a></li>
+<li><a href="infotheo.information_theory.types.html">types</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.lib"><summary>lib</summary>
+          <ul>
+          <li><a href="infotheo.lib.bigop_ext.html">bigop_ext</a></li>
+<li><a href="infotheo.lib.binary_entropy_function.html">binary_entropy_function</a></li>
+<li><a href="infotheo.lib.classical_sets_ext.html">classical_sets_ext</a></li>
+<li><a href="infotheo.lib.coqRE.html">coqRE</a></li>
+<li><a href="infotheo.lib.derive_ext.html">derive_ext</a></li>
+<li><a href="infotheo.lib.dft.html">dft</a></li>
+<li><a href="infotheo.lib.euclid.html">euclid</a></li>
+<li><a href="infotheo.lib.f2.html">f2</a></li>
+<li><a href="infotheo.lib.hamming.html">hamming</a></li>
+<li><a href="infotheo.lib.natbin.html">natbin</a></li>
+<li><a href="infotheo.lib.num_occ.html">num_occ</a></li>
+<li><a href="infotheo.lib.poly_ext.html">poly_ext</a></li>
+<li><a href="infotheo.lib.realType_ext.html">realType_ext</a></li>
+<li><a href="infotheo.lib.realType_ln.html">realType_ln</a></li>
+<li><a href="infotheo.lib.ssr_ext.html">ssr_ext</a></li>
+<li><a href="infotheo.lib.ssralg_ext.html">ssralg_ext</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.probability"><summary>probability</summary>
+          <ul>
+          <li><a href="infotheo.probability.bayes.html">bayes</a></li>
+<li><a href="infotheo.probability.convex.html">convex</a></li>
+<li><a href="infotheo.probability.convex_equiv.html">convex_equiv</a></li>
+<li><a href="infotheo.probability.convex_stone.html">convex_stone</a></li>
+<li><a href="infotheo.probability.divergence.html">divergence</a></li>
+<li><a href="infotheo.probability.fdist.html">fdist</a></li>
+<li><a href="infotheo.probability.fsdist.html">fsdist</a></li>
+<li><a href="infotheo.probability.graphoid.html">graphoid</a></li>
+<li><a href="infotheo.probability.jensen.html">jensen</a></li>
+<li><a href="infotheo.probability.jfdist_cond.html">jfdist_cond</a></li>
+<li><a href="infotheo.probability.log_sum.html">log_sum</a></li>
+<li><a href="infotheo.probability.necset.html">necset</a></li>
+<li><a href="infotheo.probability.partition_inequality.html">partition_inequality</a></li>
+<li><a href="infotheo.probability.pinsker.html">pinsker</a></li>
+<li><a href="infotheo.probability.proba.html">proba</a></li>
+<li><a href="infotheo.probability.variation_dist.html">variation_dist</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.robust"><summary>robust</summary>
+          <ul>
+          <li><a href="infotheo.robust.robustmean.html">robustmean</a></li>
+<li><a href="infotheo.robust.weightedmean.html">weightedmean</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.smc"><summary>smc</summary>
+          <ul>
+          <li><a href="infotheo.smc.graded_resource.html">graded_resource</a></li>
+<li><a href="infotheo.smc.pismc.html">pismc</a></li>
+<li><a href="infotheo.smc.smc_interpreter.html">smc_interpreter</a></li>
+<li><a href="infotheo.smc.smc_session_types.html">smc_session_types</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="infotheo.toy_examples"><summary>toy_examples</summary>
+          <ul>
+          <li><a href="infotheo.toy_examples.conditional_entropy.html">conditional_entropy</a></li>
+<li><a href="infotheo.toy_examples.expected_value_variance.html">expected_value_variance</a></li>
+<li><a href="infotheo.toy_examples.expected_value_variance_ordn.html">expected_value_variance_ordn</a></li>
+<li><a href="infotheo.toy_examples.expected_value_variance_tuple.html">expected_value_variance_tuple</a></li>
+          </ul>
+          </details>
+          </li>
+<li><a href="infotheo._check_sigs.html">_check_sigs</a></li>
+<li><a href="infotheo._depgraph_extract.html">_depgraph_extract</a></li>
+<li><a href="infotheo._test_star2.html">_test_star2</a></li>
+<li><a href="infotheo.test_sri.html">test_sri</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="pgg_reconstruct"><summary>pgg_reconstruct</summary>
+          <ul>
+          <li><a href="pgg_reconstruct.ag_code.html">ag_code</a></li>
+<li><a href="pgg_reconstruct.ag_massey_bridge.html">ag_massey_bridge</a></li>
+<li><a href="pgg_reconstruct.ag_multiplicative.html">ag_multiplicative</a></li>
+<li><a href="pgg_reconstruct.algebraic_rigidity.html">algebraic_rigidity</a></li>
+<li><a href="pgg_reconstruct.coord_perm_compatible.html">coord_perm_compatible</a></li>
+<li><a href="pgg_reconstruct.cover_genus0.html">cover_genus0</a></li>
+<li><a href="pgg_reconstruct.cover_genus1.html">cover_genus1</a></li>
+<li><a href="pgg_reconstruct.cover_genus2.html">cover_genus2</a></li>
+<li><a href="pgg_reconstruct.cover_tradeoff.html">cover_tradeoff</a></li>
+<li><a href="pgg_reconstruct.covering_scheme.html">covering_scheme</a></li>
+<li><a href="pgg_reconstruct.hyperelliptic_code.html">hyperelliptic_code</a></li>
+<li><a href="pgg_reconstruct.lagrange.html">lagrange</a></li>
+<li><a href="pgg_reconstruct.massey.html">massey</a></li>
+<li><a href="pgg_reconstruct.pgg_assignment.html">pgg_assignment</a></li>
+<li><a href="pgg_reconstruct.pgg_covering_correctness.html">pgg_covering_correctness</a></li>
+<li><a href="pgg_reconstruct.pgg_deck_pairing.html">pgg_deck_pairing</a></li>
+<li><a href="pgg_reconstruct.pgg_sharing_framework.html">pgg_sharing_framework</a></li>
+<li><a href="pgg_reconstruct.pgg_sum_mod.html">pgg_sum_mod</a></li>
+<li><a href="pgg_reconstruct.pgg_threshold.html">pgg_threshold</a></li>
+<li><a href="pgg_reconstruct.pgl_bound.html">pgl_bound</a></li>
+<li><a href="pgg_reconstruct.rigidity_monster_instance.html">rigidity_monster_instance</a></li>
+<li><a href="pgg_reconstruct.rigidity_s5_instance.html">rigidity_s5_instance</a></li>
+<li><a href="pgg_reconstruct.rigidity_star_instance.html">rigidity_star_instance</a></li>
+<li><a href="pgg_reconstruct.rs_massey_bridge.html">rs_massey_bridge</a></li>
+<li><a href="pgg_reconstruct.rs_privacy.html">rs_privacy</a></li>
+          </ul>
+          </details>
+          </li>
+<li><details id="pgg_smc"><summary>pgg_smc</summary>
+          <ul>
+          <li><a href="pgg_smc.abelian_word_collapse.html">abelian_word_collapse</a></li>
+<li><a href="pgg_smc.free_group_ball.html">free_group_ball</a></li>
+<li><a href="pgg_smc.perm_uniform.html">perm_uniform</a></li>
+<li><a href="pgg_smc.pgg_abelian.html">pgg_abelian</a></li>
+<li><a href="pgg_smc.pgg_abelian.html">pgg_abelian</a></li>
+<li><a href="pgg_smc.pgg_abelian_collapse.html">pgg_abelian_collapse</a></li>
+<li><a href="pgg_smc.pgg_collusion_bound.html">pgg_collusion_bound</a></li>
+<li><a href="pgg_smc.pgg_correctness.html">pgg_correctness</a></li>
+<li><a href="pgg_smc.pgg_free.html">pgg_free</a></li>
+<li><a href="pgg_smc.pgg_interface.html">pgg_interface</a></li>
+<li><a href="pgg_smc.pgg_lfree.html">pgg_lfree</a></li>
+<li><a href="pgg_smc.pgg_nonabelian.html">pgg_nonabelian</a></li>
+<li><a href="pgg_smc.pgg_pismc.html">pgg_pismc</a></li>
+<li><a href="pgg_smc.pgg_program.html">pgg_program</a></li>
+<li><a href="pgg_smc.pgg_raag.html">pgg_raag</a></li>
+<li><a href="pgg_smc.pgg_raag_cartier_foata.html">pgg_raag_cartier_foata</a></li>
+<li><a href="pgg_smc.pgg_raag_clique.html">pgg_raag_clique</a></li>
+<li><a href="pgg_smc.pgg_raag_path.html">pgg_raag_path</a></li>
+<li><a href="pgg_smc.pgg_raag_s5.html">pgg_raag_s5</a></li>
+<li><a href="pgg_smc.pgg_raag_star.html">pgg_raag_star</a></li>
+<li><a href="pgg_smc.pgg_security.html">pgg_security</a></li>
+<li><a href="pgg_smc.pgg_session_types.html">pgg_session_types</a></li>
+<li><a href="pgg_smc.pgg_word_analysis.html">pgg_word_analysis</a></li>
+<li><a href="pgg_smc.test_cf.html">test_cf</a></li>
+<li><a href="pgg_smc.test_cf2.html">test_cf2</a></li>
+<li><a href="pgg_smc.test_cf3.html">test_cf3</a></li>
+<li><a href="pgg_smc.test_sri.html">test_sri</a></li>
+<li><a href="pgg_smc.test_sri2.html">test_sri2</a></li>
+          </ul>
+          </details>
+          </li>
+    </div>
+
+  <div class="coq">
+
+    <div class="content">
+      <p>
+        <a href="./index.html">Top</a>
+        
+      </p>
+      <h1 class="title">Module bayes</h1>
+<span class="vernacular">From</span><span class="id"> Coq</span><span class="vernacular"> Require</span><span class="vernacular"> Import</span><span class="id"> PeanoNat</span>.<br/>
+<span class="vernacular">From</span><span class="id"> mathcomp</span><span class="vernacular"> Require</span><span class="vernacular"> Import</span><span class="id"> all_ssreflect</span><span class="id"> ssralg</span><span class="id"> ssrnum</span><span class="id"> matrix</span><span class="id"> reals</span>.<br/>
+<span class="vernacular">From</span><span class="id"> mathcomp</span><span class="vernacular"> Require</span><span class="id"> boolp</span>.<br/>
+<span class="vernacular">Require</span><span class="vernacular"> Import</span><span class="id"> ssr_ext</span><span class="id"> ssralg_ext</span><span class="id"> bigop_ext</span><span class="id"> realType_ext</span>.<br/>
+<span class="vernacular">Require</span><span class="vernacular"> Import</span><span class="id"> fdist</span><span class="id"> proba</span>.<br/>
+<br/>
+<div class="ssrdoc md">
+WIP towards the proof of BN_factorization.
+
+Main definitions:
+- RV_equiv
+- univ_types / prod_types
+- preim_vars
+- cinde_preim
+- bayesian network (Koller &amp; Friedmann p 57)
+
+Main theorems:
+- cinde_preim_ok
+- prod_vars1
+- cinde_preim_equiv
+
+</div>
+<br/>
+<span class="vernacular">Local</span><span class="vernacular"> Open</span><span class="vernacular"> Scope</span><span class="id"> tuple_ext_scope</span>.<br/>
+<span class="vernacular">Local</span><span class="vernacular"> Open</span><span class="vernacular"> Scope</span><span class="id"> fdist_scope</span>.<br/>
+<span class="vernacular">Local</span><span class="vernacular"> Open</span><span class="vernacular"> Scope</span><span class="id"> proba_scope</span>.<br/>
+<span class="vernacular">Local</span><span class="vernacular"> Open</span><span class="vernacular"> Scope</span><span class="id"> ring_scope</span>.<br/>
+<br/>
+<span class="gallina-kwd">Set</span><span class="vernacular"> Implicit</span><span class="vernacular"> Arguments</span>.<br/>
+<span class="vernacular">Unset</span><span class="vernacular"> Strict</span><span class="vernacular"> Implicit</span>.<br/>
+<span class="vernacular">Import</span><span class="id"> Prenex</span><span class="vernacular"> Implicits</span>.<br/>
+<br/>
+<span class="vernacular">Import</span><span class="id"> Num</span>.<span class="id">Theory</span>.<br/>
+<span class="vernacular">Import</span><span class="id"> GRing</span>.<span class="id">Theory</span>.<br/>
+<br/>
+<span class="vernacular">Section</span><span class="id"> fin_img</span>.<br/>
+<span class="vernacular">Variables</span> (<span class="id">T</span><span class="id"> :</span><span class="id"> finType</span>) (<span class="id">S</span><span class="id"> :</span><span class="id"> eqType</span>) (<span class="id">f</span><span class="id"> :</span><span class="id"> T</span><span class="id"> -&gt;</span><span class="id"> S</span>).<br/>
+<br/>
+<span class="vernacular">Definition</span><span class="id"> Tfin_img</span><span class="id"> :=</span><span class="id"> 'I_</span>(<span class="id">size</span> (<span class="id">fin_img</span><span class="id"> f</span>)).<br/>
+<span class="vernacular">Definition</span><span class="id"> index_fin_img</span><span class="id"> x</span> (<span class="id">H</span><span class="id"> :</span><span class="id"> x</span><span class="id"> \in</span><span class="id"> fin_img</span><span class="id"> f</span>)<span class="id"> :</span><span class="id"> Tfin_img</span>.<br/>
+<span class="id">apply:</span> (<span class="id">@Ordinal</span><span class="id"> _</span> (<span class="id">index</span><span class="id"> x</span> (<span class="id">fin_img</span><span class="id"> f</span>))).<br/>
+<span class="id">abstract</span> (<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> index_mem</span>).<br/>
+<span class="vernacular">Definition</span><span class="id"> map_fin_img</span> (<span class="id">x</span><span class="id"> :</span><span class="id"> T</span>)<span class="id"> :</span><span class="id"> Tfin_img</span>.<br/>
+<span class="id">refine</span> (<span class="id">@index_fin_img</span> (<span class="id">f</span><span class="id"> x</span>)<span class="id"> _</span>).<br/>
+<span class="id">abstract</span> (<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> mem_undup</span><span class="id"> map_f</span><span class="id"> //</span><span class="id"> mem_enum</span>).<br/>
+<span class="vernacular">Definition</span><span class="id"> nth_fin_img</span> (<span class="id">i</span><span class="id"> :</span><span class="id"> Tfin_img</span>)<span class="id"> :</span><span class="id"> S</span><span class="id"> :=</span><span class="id"> tnth</span> (<span class="id">in_tuple</span> (<span class="id">fin_img</span><span class="id"> f</span>))<span class="id"> i</span>.<br/>
+<span class="vernacular">Definition</span><span class="id"> rev_fin_img</span> (<span class="id">i</span><span class="id"> :</span><span class="id"> Tfin_img</span>)<span class="id"> :</span><span class="id"> T</span>.<br/>
+<span class="id">refine</span> (<span class="id">iinv</span> (<span class="id">A:=predT</span>) (<span class="id">f:=f</span>) (<span class="id">y:=nth_fin_img</span><span class="id"> i</span>)<span class="id"> _</span>).<br/>
+<span class="id">abstract</span> (<span class="id">move/mem_nth:</span> (<span class="id">ltn_ord</span><span class="id"> i</span>)<span class="id">;</span><span class="id"> rewrite</span><span class="id"> -mem_undup;</span><span class="id"> exact</span>).<br/>
+<span class="vernacular">Lemma</span><span class="id"> nth_fin_imgK</span><span class="id"> x</span><span class="id"> :</span><span class="id"> nth_fin_img</span> (<span class="id">map_fin_img</span><span class="id"> x</span>)<span class="id"> =</span><span class="id"> f</span><span class="id"> x</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id">rewrite</span><span class="id"> /nth_fin_img</span><span class="id"> /index_fin_img</span><span class="id"> =&gt;</span><span class="id"> /=</span>.<br/>
+<span class="gallina-kwd">by</span><span class="id"> rewrite</span> (<span class="id">tnth_nth</span> (<span class="id">f</span><span class="id"> x</span>))<span class="id"> nth_index</span><span class="id"> //</span><span class="id"> mem_undup</span><span class="id"> map_f</span><span class="id"> //</span><span class="id"> mem_enum</span>.<br/>
+Qed.</div></details>
+<span class="vernacular">Lemma</span><span class="id"> rev_fin_imgK</span><span class="id"> i</span><span class="id"> :</span><span class="id"> map_fin_img</span> (<span class="id">rev_fin_img</span><span class="id"> i</span>)<span class="id"> =</span><span class="id"> i</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id">case:</span><span class="id"> i</span><span class="id"> =&gt;</span><span class="id"> i</span><span class="id"> isz;</span><span class="id"> apply:</span><span class="id"> val_inj</span><span class="id"> =&gt;</span><span class="id"> /=</span>.<br/>
+<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> f_iinv</span><span class="id"> nthK</span><span class="id"> //</span><span class="id"> undup_uniq</span>.<br/>
+Qed.</div></details>
+<span class="vernacular">Lemma</span><span class="id"> map_fin_imgK</span><span class="id"> x</span><span class="id"> :</span><span class="id"> f</span> (<span class="id">rev_fin_img</span> (<span class="id">map_fin_img</span><span class="id"> x</span>))<span class="id"> =</span><span class="id"> f</span><span class="id"> x</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="gallina-kwd"> by</span><span class="id"> rewrite</span><span class="id"> /rev_fin_img</span><span class="id"> f_iinv</span><span class="id"> nth_fin_imgK</span>. Qed.</div></details>
+<span class="vernacular">Lemma</span><span class="id"> fin_imgP</span><span class="id"> y</span><span class="id"> :</span><span class="id"> reflect</span> (<span class="gallina-kwd">exists</span><span class="id"> x</span><span class="id"> :</span><span class="id"> T,</span><span class="id"> y</span><span class="id"> =</span><span class="id"> f</span><span class="id"> x</span>) (<span class="id">y</span><span class="id"> \in</span><span class="id"> fin_img</span><span class="id"> f</span>).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id">rewrite</span><span class="id"> mem_undup;</span><span class="id"> apply/</span>(<span class="id">iffP</span><span class="id"> mapP</span>)<span class="id"> =&gt;</span><span class="id"> -[x]</span>.<br/>
+<span class="id">-</span><span class="id"> move=&gt;</span><span class="id"> _</span><span class="id"> -&gt;</span>. <span class="gallina-kwd">by</span><span class="gallina-kwd"> exists</span><span class="id"> x</span>.<br/>
+<span class="id">-</span><span class="id"> move=&gt;</span><span class="id"> -&gt;</span>. <span class="gallina-kwd">by</span><span class="gallina-kwd"> exists</span><span class="id"> x;</span><span class="id"> rewrite</span><span class="id"> //</span><span class="id"> mem_enum</span>.<br/>
+Qed.</div></details>
+<span class="vernacular">End</span><span class="id"> fin_img</span>.<br/>
+<br/>
+<span class="vernacular">Section</span><span class="id"> proba</span>. <br/>
+<span class="vernacular">Variables</span> (<span class="id">R</span><span class="id"> :</span><span class="id"> realType</span>) (<span class="id">U</span><span class="id"> :</span><span class="id"> finType</span>) (<span class="id">P</span><span class="id"> :</span><span class="id"> R</span>.<span class="id">-fdist</span><span class="id"> U</span>).<br/>
+<br/>
+<span class="vernacular">Definition</span><span class="id"> fdist_choice'</span><span class="id"> :</span><span class="id"> U</span>.<br/>
+<span class="id">move:</span> (<span class="id">fdist_card_neq0</span><span class="id"> P</span>).<br/>
+<span class="id">move</span><span class="id"> He:</span> (<span class="id">enum</span><span class="id"> U</span>)<span class="id"> =&gt;</span><span class="id"> [|u</span><span class="id"> l]</span><span class="id"> //</span>.<br/>
+<span class="id">move/</span>(<span class="id">f_equal</span><span class="id"> size</span>)<span class="id">:</span><span class="id"> He</span>.<br/>
+<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> -cardE</span><span class="id"> =&gt;</span><span class="id"> -&gt;</span>.<br/>
+<span class="vernacular">Definition</span><span class="id"> fdist_choice</span><span class="id"> :=</span><span class="vernacular"> Eval</span><span class="id"> hnf</span><span class="gallina-kwd"> in</span><span class="id"> fdist_choice'</span>.<br/>
+<br/>
+<span class="vernacular">Definition</span><span class="id"> rvar_choice</span> (<span class="id">A</span><span class="id"> :</span><span class="id"> eqType</span>) (<span class="id">X</span><span class="id"> :</span><span class="id"> {RV</span><span class="id"> P</span><span class="id"> -&gt;</span><span class="id"> A}</span>)<span class="id"> :=</span><span class="id"> X</span><span class="id"> fdist_choice</span>.<br/>
+<br/>
+<span class="vernacular">Section</span><span class="id"> RV_equiv</span>.<br/>
+<span class="vernacular">Variables</span><span class="id"> A</span><span class="id"> B</span><span class="id"> :</span><span class="id"> eqType</span>.<br/>
+<span class="vernacular">Variables</span> (<span class="id">X</span><span class="id"> :</span><span class="id"> {RV</span><span class="id"> P</span><span class="id"> -&gt;</span><span class="id"> A}</span>) (<span class="id">Y</span><span class="id"> :</span><span class="id"> {RV</span><span class="id"> P</span><span class="id"> -&gt;</span><span class="id"> B}</span>).<br/>
+<span class="vernacular">Definition</span><span class="id"> cancel_both</span> (<span class="id">fg</span><span class="id"> :</span> (<span class="id">A</span><span class="id"> -&gt;</span><span class="id"> B</span>)<span class="id"> *</span> (<span class="id">B</span><span class="id"> -&gt;</span><span class="id"> A</span>))<span class="id"> :=</span><br/>
+&nbsp;&nbsp;<span class="id">cancel</span><span class="id"> fg</span>.<span class="id">1</span><span class="id"> fg</span>.<span class="id">2</span><span class="id"> /\</span><span class="id"> cancel</span><span class="id"> fg</span>.<span class="id">2</span><span class="id"> fg</span>.<span class="id">1</span>.<br/>
+<br/>
+<span class="vernacular">Definition</span><span class="id"> RV_equiv</span><span class="id"> :=</span><span class="id"> {fg</span><span class="id"> |</span><span class="id"> cancel_both</span><span class="id"> fg</span><span class="id"> &amp;</span><span class="id"> Y</span><span class="id"> =1</span><span class="id"> fg</span>.<span class="id">1</span><span class="id"> \o</span><span class="id"> X}</span>.<br/>
+<span class="vernacular">End</span><span class="id"> RV_equiv</span>.<br/>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> RV_equivC</span> (<span class="id">A</span><span class="id"> B</span><span class="id"> :</span><span class="id"> eqType</span>) (<span class="id">X</span><span class="id"> :</span><span class="id"> {RV</span><span class="id"> P</span><span class="id"> -&gt;</span><span class="id"> A}</span>) (<span class="id">Y</span><span class="id"> :</span><span class="id"> {RV</span><span class="id"> P</span><span class="id"> -&gt;</span><span class="id"> B}</span>)<span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="id">RV_equiv</span><span class="id"> X</span><span class="id"> Y</span><span class="id"> -&gt;</span><span class="id"> RV_equiv</span><span class="id"> Y</span><span class="id"> X</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id">case=&gt;</span><span class="id"> -[f</span><span class="id"> g]</span><span class="id"> []/=</span><span class="id"> cfg</span><span class="id"> cgf</span><span class="id"> Hf</span>.<br/>
+<span class="gallina-kwd">exists</span> (<span class="id">g,f</span>)<span class="id"> =&gt;</span><span class="id"> //</span>.<br/>
+<span class="id">move=&gt;</span><span class="id"> u</span><span class="id"> /=</span>.<br/>
+<span class="id">move/</span>(<span class="id">f_equal</span><span class="id"> g</span>)<span class="id">:</span> (<span class="id">Hf</span><span class="id"> u</span>).<br/>
+<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> cfg</span>.<br/>
+Qed.</div></details>
+<span class="vernacular">End</span><span class="id"> proba</span>.<br/>
+<br/>
+<span class="vernacular">Section</span><span class="id"> univ_types</span>.<br/>
+<span class="vernacular">Variable</span><span class="id"> n</span><span class="id"> :</span><span class="id"> nat</span>.<br/>
+<span class="vernacular">Variable</span><span class="id"> types</span><span class="id"> :</span><span class="id"> 'I_n</span><span class="id"> -&gt;</span><span class="id"> eqType</span>.<br/>
+<span class="vernacular">Definition</span><span class="id"> univ_types</span><span class="id"> :</span><span class="id"> eqType</span><span class="id"> :=</span><br/>
+&nbsp;&nbsp;<span class="id">[the</span><span class="id"> eqType</span><span class="id"> of</span><span class="id"> {dffun</span><span class="gallina-kwd"> forall</span><span class="id"> i,</span><span class="id"> types</span><span class="id"> i}]</span>.<br/>
+<br/>
+<span class="vernacular">Section</span><span class="id"> prod_types</span>.<br/>
+<span class="vernacular">Variable</span><span class="id"> I</span><span class="id"> :</span><span class="id"> {set</span><span class="id"> 'I_n}</span>.<br/>
+<br/>
+<span class="vernacular">Definition</span><span class="id"> prod_types</span><span class="id"> :=</span><br/>
+&nbsp;&nbsp;<span class="id">[the</span><span class="id"> eqType</span><span class="id"> of</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="id">{dffun</span><span class="gallina-kwd"> forall</span><span class="id"> i</span><span class="id"> :</span><span class="id"> 'I_n,</span><span class="gallina-kwd"> if</span><span class="id"> i</span><span class="id"> \in</span><span class="id"> I</span><span class="gallina-kwd"> then</span><span class="id"> types</span><span class="id"> i</span><span class="gallina-kwd"> else</span><span class="id"> unit}]</span>.<br/>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> prod_types_app</span><span class="id"> i</span> (<span class="id">A</span><span class="id"> B</span><span class="id"> :</span><span class="id"> prod_types</span>)<span class="id"> :</span><span class="id"> A</span><span class="id"> =</span><span class="id"> B</span><span class="id"> -&gt;</span><span class="id"> A</span><span class="id"> i</span><span class="id"> =</span><span class="id"> B</span><span class="id"> i</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="gallina-kwd"> by</span><span class="id"> move=&gt;</span><span class="id"> -&gt;</span>. Qed.</div></details>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> prod_types_out</span> (<span class="id">i</span><span class="id"> :</span><span class="id"> 'I_n</span>) (<span class="id">A</span><span class="id"> B</span><span class="id"> :</span><span class="id"> prod_types</span>)<span class="id"> :</span><span class="id"> i</span><span class="id"> \notin</span><span class="id"> I</span><span class="id"> -&gt;</span><span class="id"> A</span><span class="id"> i</span><span class="id"> =</span><span class="id"> B</span><span class="id"> i</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id">move=&gt;</span><span class="id"> Hi</span>.<br/>
+<span class="id">move:</span> (<span class="id">A</span><span class="id"> i</span>) (<span class="id">B</span><span class="id"> i</span>).<br/>
+<span class="gallina-kwd">by</span><span class="id"> rewrite</span> (<span class="id">negbTE</span><span class="id"> Hi</span>)<span class="id"> =&gt;</span><span class="id"> -[]</span><span class="id"> []</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> prod_types_neq</span> (<span class="id">A</span><span class="id"> B</span><span class="id"> :</span><span class="id"> prod_types</span>)<span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="id">A</span><span class="id"> !=</span><span class="id"> B</span><span class="id"> -&gt;</span><span class="gallina-kwd"> exists</span><span class="id"> i,</span> (<span class="id">i</span><span class="id"> \in</span><span class="id"> I</span>)<span class="id"> &amp;&amp;</span> (<span class="id">A</span><span class="id"> i</span><span class="id"> !=</span><span class="id"> B</span><span class="id"> i</span>).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id">move=&gt;</span><span class="id"> AB</span>.<br/>
+<span class="id">case</span><span class="id"> /boolP:</span><span class="id"> [forall</span><span class="id"> i,</span><span class="id"> A</span><span class="id"> i</span><span class="id"> ==</span><span class="id"> B</span><span class="id"> i]</span>.<br/>
+&nbsp;&nbsp;<span class="id">move/forallP</span><span class="id"> =&gt;</span><span class="id"> /=</span><span class="id"> AB'</span>.<br/>
+&nbsp;&nbsp;<span class="id">elim:</span> (<span class="id">negP</span><span class="id"> AB</span>).<br/>
+&nbsp;&nbsp;<span class="id">apply/eqP/ffunP</span><span class="id"> =&gt;</span><span class="id"> /=</span><span class="id"> x</span>.<br/>
+&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> apply/eqP</span>.<br/>
+<span class="id">rewrite</span><span class="id"> negb_forall</span><span class="id"> =&gt;</span><span class="id"> /existsP</span><span class="id"> [x</span><span class="id"> Hx]</span>.<br/>
+<span class="gallina-kwd">exists</span><span class="id"> x</span>.<br/>
+<span class="id">rewrite</span><span class="id"> Hx</span>.<br/>
+<span class="id">case/boolP:</span> (<span class="id">x</span><span class="id"> \in</span><span class="id"> I</span>)<span class="id"> =&gt;</span><span class="id"> //=</span><span class="id"> xe</span>.<br/>
+<span class="id">elim:</span> (<span class="id">negP</span><span class="id"> Hx</span>).<br/>
+<span class="id">move:</span> (<span class="id">A</span><span class="id"> x</span>) (<span class="id">B</span><span class="id"> x</span>)<span class="id"> {AB</span><span class="id"> Hx}</span><span class="id"> =&gt;</span><span class="id"> /=</span>.<br/>
+<span class="gallina-kwd">by</span><span class="id"> rewrite</span> (<span class="id">negbTE</span><span class="id"> xe</span>)<span class="id"> =&gt;</span><span class="id"> -[]</span><span class="id"> []</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="vernacular">Definition</span><span class="id"> set_vals'</span> (<span class="id">v</span><span class="id"> :</span><span class="id"> prod_types</span>) (<span class="id">vals</span><span class="id"> :</span><span class="id"> univ_types</span>)<span class="id"> :</span><span class="id"> univ_types</span>.<br/>
+<span class="id">refine</span><span class="id"> [ffun</span><span class="id"> j</span><span class="id"> =&gt;</span><span class="id"> _]</span>.<br/>
+<span class="id">case:</span> (<span class="id">j</span><span class="id"> \in</span><span class="id"> I</span>) (<span class="id">v</span><span class="id"> j</span>)<span class="id"> =&gt;</span><span class="id"> a</span>.<br/>
+<span class="id">-</span><span class="id"> exact:</span><span class="id"> a</span>.<br/>
+<span class="id">-</span><span class="id"> exact:</span><span class="id"> vals</span><span class="id"> j</span>.<br/>
+<span class="vernacular">Definition</span><span class="id"> set_vals</span><span class="id"> :</span><span class="id"> prod_types</span><span class="id"> -&gt;</span><span class="id"> univ_types</span><span class="id"> -&gt;</span><span class="id"> univ_types</span><span class="id"> :=</span><br/>
+&nbsp;&nbsp;<span class="vernacular">Eval</span><span class="id"> hnf</span><span class="gallina-kwd"> in</span><span class="id"> set_vals'</span>.<br/>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> set_vals_hd</span><span class="id"> vs2</span> (<span class="id">v</span><span class="id"> :</span><span class="id"> prod_types</span>)<span class="id"> vs1</span><span class="id"> i</span><span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="id">i</span><span class="id"> \in</span><span class="id"> I</span><span class="id"> -&gt;</span><span class="id"> set_vals</span><span class="id"> v</span><span class="id"> vs1</span><span class="id"> i</span><span class="id"> =</span><span class="id"> set_vals</span><span class="id"> v</span><span class="id"> vs2</span><span class="id"> i</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id"> rewrite</span><span class="id"> !ffunE;</span><span class="gallina-kwd"> by</span><span class="id"> case:</span> (<span class="id">i</span><span class="id"> \in</span><span class="id"> I</span>) (<span class="id">v</span><span class="id"> i</span>). Qed.</div></details>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> set_vals_tl</span> (<span class="id">v</span><span class="id"> :</span><span class="id"> prod_types</span>)<span class="id"> vs</span><span class="id"> i</span><span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="id">i</span><span class="id"> \notin</span><span class="id"> I</span><span class="id"> -&gt;</span><span class="id"> set_vals</span><span class="id"> v</span><span class="id"> vs</span><span class="id"> i</span><span class="id"> =</span><span class="id"> vs</span><span class="id"> i</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id"> rewrite</span><span class="id"> !ffunE;</span><span class="gallina-kwd"> by</span><span class="id"> case:</span> (<span class="id">i</span><span class="id"> \in</span><span class="id"> I</span>) (<span class="id">v</span><span class="id"> i</span>). Qed.</div></details>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> set_vals_id</span> (<span class="id">v</span><span class="id"> :</span><span class="id"> prod_types</span>)<span class="id"> vs</span><span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="id">set_vals</span><span class="id"> v</span> (<span class="id">set_vals</span><span class="id"> v</span><span class="id"> vs</span>)<span class="id"> =</span><span class="id"> set_vals</span><span class="id"> v</span><span class="id"> vs</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id">apply/ffunP</span><span class="id"> =&gt;</span><span class="id"> i</span>.<br/>
+<span class="id">case/boolP:</span> (<span class="id">i</span><span class="id"> \in</span><span class="id"> I</span>)<span class="id"> =&gt;</span><span class="id"> [/set_vals_hd</span><span class="id"> |</span><span class="id"> /set_vals_tl</span><span class="id"> -&gt;];</span><span class="id"> exact</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="vernacular">Definition</span><span class="id"> prod_vals'</span> (<span class="id">vals</span><span class="id"> :</span><span class="id"> univ_types</span>)<span class="id"> :</span><span class="id"> prod_types</span>.<br/>
+<span class="id">refine</span><span class="id"> [ffun</span><span class="id"> i</span><span class="id"> =&gt;</span><span class="id"> _]</span>.<br/>
+<span class="id">move:</span> (<span class="id">vals</span><span class="id"> i</span>).<br/>
+<span class="id">case:</span> (<span class="id">i</span><span class="id"> \in</span><span class="id"> I</span>)<span class="id"> =&gt;</span><span class="id"> a</span>.<br/>
+<span class="id">-</span><span class="id"> exact:</span><span class="id"> a</span>.<br/>
+<span class="id">-</span><span class="id"> exact:</span><span class="id"> tt</span>.<br/>
+<span class="vernacular">Definition</span><span class="id"> prod_vals</span><span class="id"> vals</span><span class="id"> :</span><span class="id"> prod_types</span><span class="id"> :=</span><span class="vernacular"> Eval</span><span class="id"> hnf</span><span class="gallina-kwd"> in</span><span class="id"> prod_vals'</span><span class="id"> vals</span>.<br/>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> set_vals_prod_vals_id</span><span class="id"> vals</span><span class="id"> i</span><span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="id">set_vals</span> (<span class="id">prod_vals</span><span class="id"> vals</span>)<span class="id"> vals</span><span class="id"> i</span><span class="id"> =</span><span class="id"> vals</span><span class="id"> i</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id"> rewrite</span><span class="id"> !ffunE;</span><span class="gallina-kwd"> by</span><span class="id"> case:</span> (<span class="id">i</span><span class="id"> \in</span><span class="id"> _</span>) (<span class="id">vals</span><span class="id"> i</span>). Qed.</div></details>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> set_vals_prod_vals</span><span class="id"> vals</span><span class="id"> vals'</span><span class="id"> i</span><span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="id">i</span><span class="id"> \in</span><span class="id"> I</span><span class="id"> -&gt;</span><span class="id"> set_vals</span> (<span class="id">prod_vals</span><span class="id"> vals</span>)<span class="id"> vals'</span><span class="id"> i</span><span class="id"> =</span><span class="id"> vals</span><span class="id"> i</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id"> rewrite</span><span class="id"> !ffunE</span><span class="id"> =&gt;</span><span class="id"> ie</span>. <span class="id">move:</span> (<span class="id">vals</span><span class="id"> i</span>)<span class="id">;</span><span class="gallina-kwd"> by</span><span class="id"> rewrite</span><span class="id"> ie</span>. Qed.</div></details>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> prod_vals_eqP</span><span class="id"> vals1</span><span class="id"> vals2</span><span class="id"> i</span><span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="id">prod_vals</span><span class="id"> vals1</span><span class="id"> i</span><span class="id"> =</span><span class="id"> prod_vals</span><span class="id"> vals2</span><span class="id"> i</span><span class="id"> &lt;-&gt;</span> (<span class="id">i</span><span class="id"> \in</span><span class="id"> I</span><span class="id"> -&gt;</span><span class="id"> vals1</span><span class="id"> i</span><span class="id"> =</span><span class="id"> vals2</span><span class="id"> i</span>).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id">split;</span><span class="id"> rewrite</span><span class="id"> !ffunE;</span><span class="id"> case:</span> (<span class="id">i</span><span class="id"> \in</span><span class="id"> I</span>) (<span class="id">vals1</span><span class="id"> i</span>) (<span class="id">vals2</span><span class="id"> i</span>)<span class="id"> =&gt;</span><span class="id"> //</span><span class="id"> v1</span><span class="id"> v2;</span><span class="id"> exact</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> prod_vals_eq</span> (<span class="id">vals1</span><span class="id"> vals2</span><span class="id"> :</span><span class="id"> univ_types</span>)<span class="id"> i</span><span class="id"> :</span><br/>
+&nbsp;&nbsp;(<span class="id">i</span><span class="id"> \in</span><span class="id"> I</span><span class="id"> -&gt;</span><span class="id"> vals1</span><span class="id"> i</span><span class="id"> =</span><span class="id"> vals2</span><span class="id"> i</span>)<span class="id"> -&gt;</span><span class="id"> prod_vals</span><span class="id"> vals1</span><span class="id"> i</span><span class="id"> =</span><span class="id"> prod_vals</span><span class="id"> vals2</span><span class="id"> i</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id"> move=&gt;</span><span class="id"> Hi;</span><span class="id"> exact/prod_vals_eqP</span>. Qed.</div></details>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> set_vals_eq</span> (<span class="id">A</span><span class="id"> B</span><span class="id"> :</span><span class="id"> prod_types</span>)<span class="id"> vals</span><span class="id"> i</span><span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="id">set_vals</span><span class="id"> A</span><span class="id"> vals</span><span class="id"> i</span><span class="id"> ==</span><span class="id"> set_vals</span><span class="id"> B</span><span class="id"> vals</span><span class="id"> i</span><span class="id"> =</span> (<span class="id">A</span><span class="id"> i</span><span class="id"> ==</span><span class="id"> B</span><span class="id"> i</span>)<span class="id"> ||</span> (<span class="id">i</span><span class="id"> \notin</span><span class="id"> I</span>).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id">rewrite</span><span class="id"> !ffunE</span>.<br/>
+<span class="id">case:</span> (<span class="id">i</span><span class="id"> \in</span><span class="id"> I</span>) (<span class="id">A</span><span class="id"> i</span>) (<span class="id">B</span><span class="id"> i</span>)<span class="id"> =&gt;</span><span class="id"> a</span><span class="id"> b</span>.<br/>
+<span class="id">-</span><span class="gallina-kwd"> by</span><span class="id"> rewrite</span><span class="id"> orbF</span>.<br/>
+<span class="id">-</span><span class="gallina-kwd"> by</span><span class="id"> rewrite</span><span class="id"> eqxx</span><span class="id"> orbT</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> set_vals_inj</span> (<span class="id">A</span><span class="id"> B</span><span class="id"> :</span><span class="id"> prod_types</span>)<span class="id"> vals</span><span class="id"> i</span><span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="id">set_vals</span><span class="id"> A</span><span class="id"> vals</span><span class="id"> i</span><span class="id"> =</span><span class="id"> set_vals</span><span class="id"> B</span><span class="id"> vals</span><span class="id"> i</span><span class="id"> -&gt;</span><span class="id"> A</span><span class="id"> i</span><span class="id"> =</span><span class="id"> B</span><span class="id"> i</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id">set</span><span class="id"> goal</span><span class="id"> :=</span><span class="id"> _</span><span class="id"> -&gt;</span><span class="id"> _</span>.<br/>
+<span class="id">case/boolP:</span> (<span class="id">i</span><span class="id"> \in</span><span class="id"> I</span>)<span class="id"> =&gt;</span><span class="id"> Hi;</span><span class="id"> subst</span><span class="id"> goal</span>.<br/>
+&nbsp;&nbsp;<span class="id">move/eqP;</span><span class="id"> rewrite</span><span class="id"> set_vals_eq</span><span class="id"> orbC</span>.<br/>
+&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> move:</span> (<span class="id">A</span><span class="id"> i</span>) (<span class="id">B</span><span class="id"> i</span>)<span class="id">;</span><span class="id"> rewrite</span><span class="id"> Hi</span><span class="id"> =&gt;</span><span class="id"> a</span><span class="id"> b</span><span class="id"> /=</span><span class="id"> /eqP</span>.<br/>
+<span class="id">move=&gt;</span><span class="id"> _;</span><span class="id"> exact:</span><span class="id"> prod_types_out</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> prod_vals_set_vals</span> (<span class="id">A</span><span class="id"> :</span><span class="id"> prod_types</span>)<span class="id"> vals</span><span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="id">prod_vals</span> (<span class="id">set_vals</span><span class="id"> A</span><span class="id"> vals</span>)<span class="id"> =</span><span class="id"> A</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id">apply/ffunP</span><span class="id"> =&gt;</span><span class="id"> j</span>.<br/>
+<span class="id">apply:</span> (<span class="id">set_vals_inj</span> (<span class="id">vals</span><span class="id"> :=</span><span class="id"> vals</span>)).<br/>
+<span class="id">case/boolP:</span> (<span class="id">j</span><span class="id"> \in</span><span class="id"> I</span>)<span class="id"> =&gt;</span><span class="id"> Hj</span>.<br/>
+&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> set_vals_prod_vals</span>.<br/>
+<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> !set_vals_tl</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="vernacular">End</span><span class="id"> prod_types</span>.<br/>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> set_vals_prod_vals_join</span> (<span class="id">I</span><span class="id"> J</span><span class="id"> :</span><span class="id"> {set</span><span class="id"> 'I_n}</span>)<span class="id"> vals</span><span class="id"> vals'</span><span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="id">set_vals</span> (<span class="id">prod_vals</span><span class="id"> I</span><span class="id"> vals</span>) (<span class="id">set_vals</span> (<span class="id">prod_vals</span><span class="id"> J</span><span class="id"> vals</span>)<span class="id"> vals'</span>)<span class="id"> =</span><br/>
+&nbsp;&nbsp;<span class="id">set_vals</span> (<span class="id">prod_vals</span> (<span class="id">I</span><span class="id"> :|:</span><span class="id"> J</span>)<span class="id"> vals</span>)<span class="id"> vals'</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id">apply/ffunP</span><span class="id"> =&gt;</span><span class="id"> i</span>.<br/>
+<span class="id">case/boolP:</span> (<span class="id">i</span><span class="id"> \in</span><span class="id"> I</span>)<span class="id"> =&gt;</span><span class="id"> iI</span>.<br/>
+&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> !set_vals_prod_vals</span><span class="id"> //</span><span class="id"> inE</span><span class="id"> iI</span>.<br/>
+<span class="id">rewrite</span><span class="id"> set_vals_tl</span><span class="id"> //</span>.<br/>
+<span class="id">case/boolP:</span> (<span class="id">i</span><span class="id"> \in</span><span class="id"> J</span>)<span class="id"> =&gt;</span><span class="id"> iJ</span>.<br/>
+&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> !set_vals_prod_vals</span><span class="id"> //</span><span class="id"> inE</span><span class="id"> iJ</span><span class="id"> orbT</span>.<br/>
+<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> !set_vals_tl</span><span class="id"> //</span><span class="id"> inE</span><span class="id"> negb_or</span><span class="id"> iI</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> set_valsC</span><span class="id"> I</span><span class="id"> J</span> (<span class="id">A</span><span class="id"> :</span><span class="id"> prod_types</span><span class="id"> I</span>) (<span class="id">B</span><span class="id"> :</span><span class="id"> prod_types</span><span class="id"> J</span>)<span class="id"> V</span><span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="id">[disjoint</span><span class="id"> I</span><span class="id"> &amp;</span><span class="id"> J]</span><span class="id"> -&gt;</span><span class="id"> set_vals</span><span class="id"> A</span> (<span class="id">set_vals</span><span class="id"> B</span><span class="id"> V</span>)<span class="id"> =</span><span class="id"> set_vals</span><span class="id"> B</span> (<span class="id">set_vals</span><span class="id"> A</span><span class="id"> V</span>).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id">move/setDidPl/setP</span><span class="id"> =&gt;</span><span class="id"> Disj</span>.<br/>
+<span class="id">apply/ffunP</span><span class="id"> =&gt;</span><span class="id"> /=</span><span class="id"> i</span>.<br/>
+<span class="id">case/boolP:</span> (<span class="id">i</span><span class="id"> \in</span><span class="id"> I</span>)<span class="id"> =&gt;</span><span class="id"> iI</span>.<br/>
+&nbsp;&nbsp;<span class="id">move:</span> (<span class="id">Disj</span><span class="id"> i</span>)<span class="id">;</span><span class="id"> rewrite</span><span class="id"> inE</span><span class="id"> iI</span><span class="id"> andbT</span><span class="id"> =&gt;</span><span class="id"> /set_vals_tl</span><span class="id"> -&gt;</span>.<br/>
+&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span> (<span class="id">set_vals_hd</span><span class="id"> V</span>).<br/>
+<span class="id">case/boolP:</span> (<span class="id">i</span><span class="id"> \in</span><span class="id"> J</span>)<span class="id"> =&gt;</span><span class="id"> iJ</span>.<br/>
+&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> set_vals_tl</span><span class="id"> //;</span><span class="id"> apply:</span><span class="id"> set_vals_hd</span>.<br/>
+<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> !set_vals_tl</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="vernacular">Section</span><span class="id"> set_val</span>.<br/>
+<span class="vernacular">Definition</span><span class="id"> set_val</span> (<span class="id">i</span><span class="id"> :</span><span class="id"> 'I_n</span>) (<span class="id">v</span><span class="id"> :</span><span class="id"> types</span><span class="id"> i</span>) (<span class="id">vals</span><span class="id"> :</span><span class="id"> univ_types</span>)<span class="id"> :</span><span class="id"> univ_types</span><span class="id"> :=</span><br/>
+&nbsp;&nbsp;<span class="id">[ffun</span><span class="id"> j</span><span class="id"> :</span><span class="id"> 'I_n</span><span class="id"> =&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">match</span><span class="id"> Nat</span>.<span class="id">eq_dec</span><span class="id"> i</span><span class="id"> j</span><span class="gallina-kwd"> return</span><span class="id"> types</span><span class="id"> j</span><span class="gallina-kwd"> with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">|</span><span class="id"> left</span><span class="id"> ij</span><span class="id"> =&gt;</span><span class="id"> eq_rect</span><span class="id"> i</span> (<span class="gallina-kwd">fun</span><span class="id"> i</span><span class="id"> =&gt;</span> (<span class="id">types</span><span class="id"> i</span><span class="id"> :</span><span class="gallina-kwd"> Type</span>))<span class="id"> v</span><span class="id"> j</span> (<span class="id">ord_inj</span><span class="id"> ij</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">|</span><span class="id"> right</span><span class="id"> _</span><span class="id"> =&gt;</span><span class="id"> vals</span><span class="id"> j</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">end]</span>.<br/>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> eq_dec_refl</span><span class="id"> i</span><span class="id"> :</span><span class="id"> Nat</span>.<span class="id">eq_dec</span><span class="id"> i</span><span class="id"> i</span><span class="id"> =</span><span class="id"> left</span> (<span class="id">erefl</span><span class="id"> i</span>).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id">case:</span><span class="id"> Nat</span>.<span class="id">eq_dec</span><span class="id"> =&gt;</span><span class="id"> Hi;</span><span class="id"> last</span><span class="gallina-kwd"> by</span><span class="id"> elim</span><span class="id"> Hi</span>.<br/>
+<span class="id">congr</span><span class="id"> left;</span><span class="gallina-kwd"> by</span><span class="id"> rewrite</span> (<span class="id">Eqdep_dec</span>.<span class="id">UIP_refl_nat</span><span class="id"> _</span><span class="id"> Hi</span>).<br/>
+Qed.</div></details>
+<br/>
+<span class="vernacular">Definition</span><span class="id"> ord_eq_dec</span> (<span class="id">i</span><span class="id"> j</span><span class="id"> :</span><span class="id"> 'I_n</span>)<span class="id"> :</span><span class="id"> {i</span><span class="id"> =</span><span class="id"> j}+{i</span><span class="id"> &lt;&gt;</span><span class="id"> j}</span>.<br/>
+<span class="id">case</span> (<span class="id">Nat</span>.<span class="id">eq_dec</span><span class="id"> i</span><span class="id"> j</span>)<span class="id">;</span><span class="id"> intro</span><span class="id"> ij</span>.<br/>
+<span class="id">-</span><span class="id"> left;</span><span class="id"> now</span><span class="id"> apply:</span><span class="id"> ord_inj</span>.<br/>
+<span class="id">-</span><span class="id"> right;</span><span class="id"> intro</span><span class="id"> ij';</span><span class="id"> apply:</span><span class="id"> ij;</span><span class="id"> now</span><span class="id"> f_equal</span>.<br/>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> set_val_hd</span><span class="id"> i</span> (<span class="id">v</span><span class="id"> :</span><span class="id"> types</span><span class="id"> i</span>)<span class="id"> vs</span><span class="id"> :</span><span class="id"> set_val</span><span class="id"> v</span><span class="id"> vs</span><span class="id"> i</span><span class="id"> =</span><span class="id"> v</span>.<br/>
+<span class="id">rewrite</span><span class="id"> ffunE</span><span class="id"> eq_dec_refl</span><span class="id"> -Eqdep_dec</span>.<span class="id">eq_rect_eq_dec</span><span class="id"> //;</span><span class="id"> exact:</span><span class="id"> ord_eq_dec</span>.<br/>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> set_val_tl</span><span class="id"> i</span> (<span class="id">v</span><span class="id"> :</span><span class="id"> types</span><span class="id"> i</span>)<span class="id"> vs</span><span class="id"> j</span><span class="id"> :</span><span class="id"> i</span><span class="id"> &lt;&gt;</span><span class="id"> j</span><span class="id"> -&gt;</span><span class="id"> set_val</span><span class="id"> v</span><span class="id"> vs</span><span class="id"> j</span><span class="id"> =</span><span class="id"> vs</span><span class="id"> j</span>.<br/>
+<span class="id">rewrite</span><span class="id"> ffunE</span><span class="id"> =&gt;</span><span class="id"> nij;</span><span class="id"> case:</span><span class="id"> Nat</span>.<span class="id">eq_dec</span><span class="id"> =&gt;</span><span class="id"> ij</span><span class="id"> //;</span><span class="id"> elim</span><span class="id"> nij;</span><span class="id"> exact:</span><span class="id"> ord_inj</span>.<br/>
+<span class="vernacular">End</span><span class="id"> set_val</span>.<br/>
+<br/>
+<span class="vernacular">End</span><span class="id"> univ_types</span>.<br/>
+<br/>
+<br/>
+<span class="vernacular">Module</span><span class="id"> BN</span>.<br/>
+<span class="vernacular">Section</span><span class="id"> bn</span>.<br/>
+<span class="vernacular">Variables</span> (<span class="id">R</span><span class="id"> :</span><span class="id"> realType</span>) (<span class="id">U</span><span class="id"> :</span><span class="id"> finType</span>) (<span class="id">P</span><span class="id"> :</span><span class="id"> R</span>.<span class="id">-fdist</span><span class="id"> U</span>) (<span class="id">n</span><span class="id"> :</span><span class="id"> nat</span>).<br/>
+<br/>
+<span class="vernacular">Section</span><span class="id"> preim</span>.<br/>
+<span class="vernacular">Variable</span><span class="id"> types</span><span class="id"> :</span><span class="id"> 'I_n</span><span class="id"> -&gt;</span><span class="id"> eqType</span>.<br/>
+<span class="vernacular">Variable</span><span class="id"> vars</span><span class="id"> :</span><span class="gallina-kwd"> forall</span><span class="id"> i,</span><span class="id"> {RV</span><span class="id"> P</span><span class="id"> -&gt;</span><span class="id"> types</span><span class="id"> i}</span>.<br/>
+<br/>
+<span class="vernacular">Definition</span><span class="id"> vals0</span><span class="id"> :</span><span class="id"> univ_types</span><span class="id"> types</span><span class="id"> :=</span><span class="id"> [ffun</span><span class="id"> i</span><span class="id"> =&gt;</span><span class="id"> rvar_choice</span> (<span class="id">vars</span><span class="id"> i</span>)<span class="id">]</span>.<br/>
+<br/>
+<span class="vernacular">Definition</span><span class="id"> wrap_set_vals</span><span class="id"> I</span><span class="id"> :=</span><span class="id"> f_equal</span> (<span class="id">set_vals</span> (<span class="id">I:=I</span>)<span class="id"> ^~</span><span class="id"> vals0</span>).<br/>
+<br/>
+<span class="vernacular">Section</span><span class="id"> prod_vars</span>.<br/>
+<span class="vernacular">Variable</span><span class="id"> I</span><span class="id"> :</span><span class="id"> {set</span><span class="id"> 'I_n}</span>.<br/>
+<br/>
+<span class="vernacular">Definition</span><span class="id"> vals_at</span> (<span class="id">u</span><span class="id"> :</span><span class="id"> U</span>)<span class="id"> :</span><span class="id"> univ_types</span><span class="id"> types</span><span class="id"> :=</span><span class="id"> [ffun</span><span class="id"> i</span><span class="id"> =&gt;</span><span class="id"> vars</span><span class="id"> i</span><span class="id"> u]</span>.<br/>
+<br/>
+<span class="vernacular">Definition</span><span class="id"> prod_vars</span><span class="id"> :</span><span class="id"> {RV</span><span class="id"> P</span><span class="id"> -&gt;</span><span class="id"> prod_types</span><span class="id"> types</span><span class="id"> I}</span><span class="id"> :=</span><br/>
+&nbsp;&nbsp;<span class="gallina-kwd">fun</span><span class="id"> u</span><span class="id"> =&gt;</span><span class="id"> prod_vals</span><span class="id"> I</span> (<span class="id">vals_at</span><span class="id"> u</span>).<br/>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> set_vals_prod_vars</span><span class="id"> vals</span><span class="id"> u</span><span class="id"> i</span><span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="id">i</span><span class="id"> \in</span><span class="id"> I</span><span class="id"> -&gt;</span><span class="id"> set_vals</span> (<span class="id">prod_vars</span><span class="id"> u</span>)<span class="id"> vals</span><span class="id"> i</span><span class="id"> =</span><span class="id"> vars</span><span class="id"> i</span><span class="id"> u</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id"> move=&gt;</span><span class="id"> Hi;</span><span class="gallina-kwd"> by</span><span class="id"> rewrite</span><span class="id"> set_vals_prod_vals</span><span class="id"> //</span><span class="id"> ffunE</span>. Qed.</div></details>
+<span class="vernacular">End</span><span class="id"> prod_vars</span>.<br/>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> prod_vars_inter</span> (<span class="id">I</span><span class="id"> J</span><span class="id"> :</span><span class="id"> {set</span><span class="id"> 'I_n}</span>)<span class="id"> vals</span><span class="id"> i</span><span class="id"> u</span><span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="id">i</span><span class="id"> \in</span><span class="id"> I</span><span class="id"> -&gt;</span><span class="id"> i</span><span class="id"> \in</span><span class="id"> J</span><span class="id"> -&gt;</span><br/>
+&nbsp;&nbsp;<span class="id">set_vals</span> (<span class="id">prod_vars</span><span class="id"> I</span><span class="id"> u</span>)<span class="id"> vals</span><span class="id"> i</span><span class="id"> =</span><span class="id"> set_vals</span> (<span class="id">prod_vars</span><span class="id"> J</span><span class="id"> u</span>)<span class="id"> vals</span><span class="id"> i</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id"> move=&gt;</span><span class="id"> *;</span><span class="gallina-kwd"> by</span><span class="id"> rewrite</span><span class="id"> !set_vals_prod_vals</span>. Qed.</div></details>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> prod_vars1</span> (<span class="id">i</span><span class="id"> :</span><span class="id"> 'I_n</span>)<span class="id"> :</span><span class="id"> RV_equiv</span> (<span class="id">prod_vars</span><span class="id"> [set</span><span class="id"> i]</span>) (<span class="id">vars</span><span class="id"> i</span>).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="gallina-kwd">exists</span> ((<span class="gallina-kwd">fun</span><span class="id"> A</span><span class="id"> :</span><span class="id"> prod_types</span><span class="id"> types</span><span class="id"> [set</span><span class="id"> i]</span><span class="id"> =&gt;</span><span class="id"> set_vals</span><span class="id"> A</span><span class="id"> vals0</span><span class="id"> i</span>)<span class="id">,</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">prod_vals</span><span class="id"> [set</span><span class="id"> i]</span><span class="id"> \o</span><span class="id"> set_val</span> (<span class="id">i:=i</span>)<span class="id"> ^~</span><span class="id"> vals0</span>).<br/>
+&nbsp;&nbsp;<span class="id">split</span><span class="id"> =&gt;</span><span class="id"> x</span><span class="id"> /=</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply/ffunP</span><span class="id"> =&gt;</span><span class="id"> /=</span><span class="id"> j</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply:</span> (<span class="id">set_vals_inj</span> (<span class="id">vals</span><span class="id"> :=</span><span class="id"> vals0</span>)).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">case/boolP:</span> (<span class="id">j</span><span class="id"> \in</span><span class="id"> [set</span><span class="id"> i]</span>)<span class="id"> =&gt;</span><span class="id"> Hj;</span><span class="id"> last</span><span class="gallina-kwd"> by</span><span class="id"> rewrite</span><span class="id"> !set_vals_tl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> set_vals_prod_vals</span><span class="id"> //</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> inE</span><span class="gallina-kwd"> in</span><span class="id"> Hj</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">move/eqP:</span><span class="id"> Hj</span> (<span class="id">set_vals</span><span class="id"> _</span><span class="id"> _</span>)<span class="id"> =&gt;</span><span class="id"> -&gt;</span><span class="id"> v</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> set_val_hd</span>.<br/>
+&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> set_vals_prod_vals</span><span class="id"> ?inE</span><span class="id"> //</span><span class="id"> set_val_hd</span>.<br/>
+<span class="id">move=&gt;</span><span class="id"> u</span><span class="id"> /=</span>.<br/>
+<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> set_vals_prod_vars</span><span class="id"> //</span><span class="id"> inE</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> cancel_both_disjoint</span> (<span class="id">I</span><span class="id"> J</span><span class="id"> :</span><span class="id"> {set</span><span class="id"> 'I_n}</span>)<span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="id">[disjoint</span><span class="id"> I</span><span class="id"> &amp;</span><span class="id"> J]</span><span class="id"> -&gt;</span><br/>
+&nbsp;&nbsp;<span class="id">cancel_both</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;((<span class="gallina-kwd">fun</span><span class="id"> A</span><span class="id"> :</span><span class="id"> prod_types</span><span class="id"> types</span> (<span class="id">I</span><span class="id"> :|:</span><span class="id"> J</span>)<span class="id"> =&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">prod_vals</span><span class="id"> I</span> (<span class="id">set_vals</span><span class="id"> A</span><span class="id"> vals0</span>)<span class="id">,</span><span class="id"> prod_vals</span><span class="id"> J</span> (<span class="id">set_vals</span><span class="id"> A</span><span class="id"> vals0</span>)))<span class="id">,</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="gallina-kwd">fun</span><span class="id"> A</span><span class="id"> :</span><span class="id"> prod_types</span><span class="id"> types</span><span class="id"> I</span><span class="id"> *</span><span class="id"> prod_types</span><span class="id"> types</span><span class="id"> J</span><span class="id"> =&gt;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">prod_vals</span> (<span class="id">I</span><span class="id"> :|:</span><span class="id"> J</span>) (<span class="id">set_vals</span> (<span class="id">fst</span><span class="id"> A</span>) (<span class="id">set_vals</span> (<span class="id">snd</span><span class="id"> A</span>)<span class="id"> vals0</span>)))).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id">move=&gt;</span><span class="id"> Disj;</span><span class="id"> split</span><span class="id"> =&gt;</span><span class="id"> [A</span><span class="id"> |</span><span class="id"> [A</span><span class="id"> B]]</span><span class="id"> /=</span>.<br/>
+&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> set_vals_prod_vals_join</span><span class="id"> !prod_vals_set_vals</span>.<br/>
+<span class="id">congr</span><span class="id"> pair;</span><span class="id"> last</span><span class="id"> rewrite</span><span class="id"> setUC</span><span class="id"> set_valsC</span><span class="id"> //;</span><br/>
+<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> -set_vals_prod_vals_join</span><span class="id"> !prod_vals_set_vals</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> prod_vars_pair</span> (<span class="id">I</span><span class="id"> J</span><span class="id"> :</span><span class="id"> {set</span><span class="id"> 'I_n}</span>)<span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="id">[disjoint</span><span class="id"> I</span><span class="id"> &amp;</span><span class="id"> J]</span><span class="id"> -&gt;</span><br/>
+&nbsp;&nbsp;<span class="id">RV_equiv</span> (<span class="id">prod_vars</span> (<span class="id">I</span><span class="id"> :|:</span><span class="id"> J</span>))<span class="id"> [%</span><span class="id"> prod_vars</span><span class="id"> I,</span><span class="id"> prod_vars</span><span class="id"> J]</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id">move=&gt;</span><span class="id"> Disj</span>.<br/>
+<span class="id">esplit</span>. <span class="id">exact:</span><span class="id"> cancel_both_disjoint</span>.<br/>
+<span class="id">move=&gt;</span><span class="id"> u</span><span class="id"> /=</span>.<br/>
+<span class="id">congr</span><span class="id"> pair;</span><span class="id"> apply/ffunP</span><span class="id"> =&gt;</span><span class="id"> i;</span><span class="id"> apply:</span><span class="id"> prod_vals_eq</span><span class="id"> =&gt;</span><span class="id"> Hi;</span><br/>
+&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> set_vals_prod_vars</span><span class="id"> ?ffunE</span><span class="id"> //;</span><span class="gallina-kwd"> by</span><span class="id"> rewrite</span><span class="id"> inE</span><span class="id"> Hi</span><span class="id"> ?orbT</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="vernacular">Definition</span><span class="id"> preim_vars</span> (<span class="id">I</span><span class="id"> :</span><span class="id"> {set</span><span class="id"> 'I_n}</span>) (<span class="id">vals</span><span class="id"> :</span><span class="gallina-kwd"> forall</span><span class="id"> i,</span><span class="id"> types</span><span class="id"> i</span>)<span class="id"> :=</span><br/>
+&nbsp;&nbsp;<span class="id">\bigcap_</span>(<span class="id">i</span><span class="gallina-kwd"> in</span><span class="id"> I</span>)<span class="id"> finset</span> (<span class="id">vars</span><span class="id"> i</span><span class="id"> @^-1</span> (<span class="id">vals</span><span class="id"> i</span>)).<br/>
+<br/>
+<span class="vernacular">Definition</span><span class="id"> cinde_preim</span> (<span class="id">e</span><span class="id"> f</span><span class="id"> g</span><span class="id"> :</span><span class="id"> {set</span><span class="id"> 'I_n}</span>)<span class="id"> :=</span><br/>
+&nbsp;&nbsp;<span class="gallina-kwd">forall</span><span class="id"> vals</span><span class="id"> :</span><span class="id"> univ_types</span><span class="id"> types,</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">cinde_events</span><span class="id"> P</span> (<span class="id">preim_vars</span><span class="id"> e</span><span class="id"> vals</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">preim_vars</span><span class="id"> f</span><span class="id"> vals</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">preim_vars</span><span class="id"> g</span><span class="id"> vals</span>).<br/>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> cinde_eventsC</span><span class="id"> A</span> (<span class="id">Q</span><span class="id"> :</span><span class="id"> R</span>.<span class="id">-fdist</span><span class="id"> A</span>) (<span class="id">E</span><span class="id"> F</span><span class="id"> G</span><span class="id"> :</span><span class="id"> {set</span><span class="id"> A}</span>)<span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="id">cinde_events</span><span class="id"> Q</span><span class="id"> E</span><span class="id"> F</span><span class="id"> G</span><span class="id"> -&gt;</span><span class="id"> cinde_events</span><span class="id"> Q</span><span class="id"> F</span><span class="id"> E</span><span class="id"> G</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="gallina-kwd"> by</span><span class="id"> rewrite</span><span class="id"> /cinde_events</span><span class="id"> =&gt;</span><span class="id"> Hef;</span><span class="id"> rewrite</span><span class="id"> setIC</span><span class="id"> GRing</span>.<span class="id">mulrC</span>. Qed.</div></details>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> cinde_preimC</span> (<span class="id">e</span><span class="id"> f</span><span class="id"> g</span><span class="id"> :</span><span class="id"> {set</span><span class="id"> 'I_n}</span>)<span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="id">cinde_preim</span><span class="id"> e</span><span class="id"> f</span><span class="id"> g</span> <span class="id"> -&gt;</span><span class="id"> cinde_preim</span><span class="id"> f</span><span class="id"> e</span><span class="id"> g</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id"> move=&gt;</span><span class="id"> Hef</span><span class="id"> vals;</span><span class="id"> exact:</span><span class="id"> cinde_eventsC</span>. Qed.</div></details>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> preim_varsP</span>  (<span class="id">I</span><span class="id"> :</span><span class="id"> {set</span><span class="id"> 'I_n}</span>)<span class="id"> vals</span><span class="id"> u</span><span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="id">reflect</span> (<span class="gallina-kwd">forall</span><span class="id"> i,</span><span class="id"> i</span><span class="id"> \in</span><span class="id"> I</span><span class="id"> -&gt;</span><span class="id"> vars</span><span class="id"> i</span><span class="id"> u</span><span class="id"> =</span><span class="id"> vals</span><span class="id"> i</span>) (<span class="id">u</span><span class="id"> \in</span><span class="id"> preim_vars</span><span class="id"> I</span><span class="id"> vals</span>).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="gallina-kwd"> by</span><span class="id"> apply/</span>(<span class="id">iffP</span><span class="id"> bigcapP</span>)<span class="id"> =&gt;</span><span class="id"> H</span><span class="id"> i</span><span class="id"> /H;</span><span class="id"> rewrite</span><span class="id"> !inE</span><span class="id"> =&gt;</span><span class="id"> /eqP</span>. Qed.</div></details>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> preim_prod_vars</span> (<span class="id">g</span><span class="id"> :</span><span class="id"> {set</span><span class="id"> 'I_n}</span>) (<span class="id">C</span><span class="id"> :</span><span class="id"> prod_types</span><span class="id"> types</span><span class="id"> g</span>)<span class="id"> vals</span><span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="id">finset</span> (<span class="id">prod_vars</span><span class="id"> g</span><span class="id"> @^-1</span><span class="id"> C</span>)<span class="id"> =</span><span class="id"> preim_vars</span><span class="id"> g</span> (<span class="id">set_vals</span><span class="id"> C</span><span class="id"> vals</span>).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id">apply/setP</span><span class="id"> =&gt;</span><span class="id"> x;</span><span class="id"> rewrite</span><span class="id"> !inE</span>.<br/>
+<span class="id">apply/esym/preim_varsP;</span><span class="id"> case:</span><span class="id"> ifP</span>.<br/>
+<span class="id">-</span><span class="id"> move/eqP</span><span class="id"> =&gt;</span><span class="id"> &lt;-</span><span class="id"> i</span><span class="id"> ig</span>.<br/>
+&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> set_vals_prod_vals</span><span class="id"> //</span><span class="id"> ffunE</span>.<br/>
+<span class="id">-</span><span class="id"> move/negP</span><span class="id"> =&gt;</span><span class="id"> /=</span><span class="id"> Hf</span><span class="id"> Hcap;</span><span class="id"> elim:</span><span class="id"> Hf</span>.<br/>
+&nbsp;&nbsp;<span class="id">apply/eqP/ffunP</span><span class="id"> =&gt;</span><span class="id"> /=</span><span class="id"> i</span>.<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> /prod_vars</span> (<span class="id">prod_vals_eq</span> (<span class="id">vals2:=set_vals</span><span class="id"> C</span><span class="id"> vals</span>)).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> prod_vals_set_vals</span>.<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> ffunE;</span><span class="id"> exact:</span><span class="id"> Hcap</span>.<br/>
+Qed.</div></details>
+<br/>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> Rxx2</span> (<span class="id">x</span><span class="id"> :</span><span class="id"> R</span>)<span class="id"> :</span><span class="id"> x</span><span class="id"> =</span><span class="id"> x</span><span class="id"> *</span><span class="id"> x</span><span class="id"> -&gt;</span><span class="id"> x</span><span class="id"> =</span><span class="id"> 0</span><span class="id"> \/</span><span class="id"> x</span><span class="id"> =</span><span class="id"> 1</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id">case/boolP:</span> (<span class="id">x</span><span class="id"> ==</span><span class="id"> 0</span>)<span class="id"> =&gt;</span><span class="id"> Hx</span>.<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span> (<span class="id">eqP</span><span class="id"> Hx</span>)<span class="id">;</span><span class="gallina-kwd"> by</span><span class="id"> left</span>.<br/>
+<span class="id">move/</span>(<span class="id">f_equal</span> (<span class="id">GRing</span>.<span class="id">mul</span><span class="id"> ^~</span><span class="id"> x^-1</span>)).<br/>
+<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> mulrV</span><span class="id"> ?unitfE</span><span class="id"> //</span><span class="id"> -mulrA</span><span class="id"> mulrV</span><span class="id"> ?unitfE</span><span class="id"> //</span><span class="id"> mulr1</span><span class="id"> =&gt;</span><span class="id"> &lt;-;</span><span class="id"> right</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> cinde_preim_ok1</span> (<span class="id">i</span><span class="id"> j</span><span class="id"> k</span><span class="id"> :</span><span class="id"> 'I_n</span>)<span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="id">cinde_preim</span><span class="id"> [set</span><span class="id"> i]</span><span class="id"> [set</span><span class="id"> j]</span><span class="id"> [set</span><span class="id"> k]</span><span class="id"> &lt;-&gt;</span><span class="id"> P</span><span class="id"> |=</span> (<span class="id">vars</span><span class="id"> i</span>)<span class="id"> _|_</span> (<span class="id">vars</span><span class="id"> j</span>)<span class="id"> |</span> (<span class="id">vars</span><span class="id"> k</span>).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id">rewrite</span><span class="id"> /cinde_preim</span><span class="id"> /preim_vars</span>.<br/>
+<span class="id">split</span>.<br/>
+<span class="id">-</span><span class="id"> move=&gt;</span><span class="id"> Hpreim</span>.<br/>
+&nbsp;&nbsp;<span class="id">apply/cinde_RV_events</span><span class="id"> =&gt;</span><span class="id"> a</span><span class="id"> b</span><span class="id"> c</span>.<br/>
+&nbsp;&nbsp;<span class="id">set</span><span class="id"> vals</span><span class="id"> :=</span><span class="id"> set_val</span><span class="id"> a</span> (<span class="id">set_val</span><span class="id"> c</span> (<span class="id">set_val</span><span class="id"> b</span><span class="id"> vals0</span>)).<br/>
+&nbsp;&nbsp;<span class="id">have</span><span class="id"> vi</span><span class="id"> :</span><span class="id"> vals</span><span class="id"> i</span><span class="id"> =</span><span class="id"> a</span><span class="gallina-kwd"> by</span><span class="id"> rewrite</span><span class="id"> /vals</span><span class="id"> set_val_hd</span>.<br/>
+&nbsp;&nbsp;<span class="id">move:</span> (<span class="id">erefl</span><span class="id"> vals</span>)<span class="id"> {Hpreim}</span> (<span class="id">Hpreim</span><span class="id"> vals</span>).<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> {2}/vals</span><span class="id"> /cinde_events;</span><span class="id"> clearbody</span><span class="id"> vals</span>.<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> !big_set1</span>.<br/>
+&nbsp;&nbsp;<span class="id">wlog:</span><span class="id"> c</span><span class="id"> /</span><span class="id"> vals</span><span class="id"> k</span><span class="id"> =</span><span class="id"> c</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">case:</span> (<span class="id">ord_eq_dec</span><span class="id"> i</span><span class="id"> k</span>)<span class="id"> c</span><span class="id"> vi</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">move=&gt;</span><span class="id"> &lt;-</span><span class="id"> {k}</span><span class="id"> c</span><span class="id"> vi</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">case</span><span class="id"> ac:</span> (<span class="id">a</span><span class="id"> ==</span><span class="id"> c</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> -</span>(<span class="id">eqP</span><span class="id"> ac</span>)<span class="id">;</span><span class="id"> exact</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">move=&gt;</span><span class="id"> _</span><span class="id"> _</span><span class="id"> _</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> (<span class="id">proj2</span> (<span class="id">cPr_eq0P</span><span class="id"> _</span><span class="id"> _</span><span class="id"> _</span>))<span class="id">;</span><span class="id"> last</span><span class="id"> first</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply/Pr_set0P</span><span class="id"> =&gt;</span><span class="id"> u</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> !inE</span><span class="id"> =&gt;</span><span class="id"> /andP</span><span class="id"> []</span><span class="id"> /andP</span><span class="id"> []</span><span class="id"> /=</span><span class="id"> /eqP</span><span class="id"> -&gt;;</span><span class="id"> rewrite</span><span class="id"> ac</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> (<span class="id">proj2</span> (<span class="id">cPr_eq0P</span><span class="id"> _</span><span class="id"> _</span><span class="id"> _</span>))<span class="id">;</span><span class="id"> last</span><span class="id"> first</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply/Pr_set0P</span><span class="id"> =&gt;</span><span class="id"> u</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> !inE</span><span class="id"> =&gt;</span><span class="id"> /andP</span><span class="id"> []</span><span class="id"> /=</span><span class="id"> /eqP</span><span class="id"> -&gt;;</span><span class="id"> rewrite</span><span class="id"> ac</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> mul0r</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">move=&gt;</span><span class="id"> nik</span><span class="id"> c</span><span class="id"> vi</span><span class="id"> HG</span><span class="id"> Hvals;</span><span class="id"> apply:</span><span class="id"> HG</span><span class="id"> =&gt;</span><span class="id"> //</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> Hvals</span><span class="id"> set_val_tl</span><span class="id"> //</span><span class="id"> set_val_hd</span>.<br/>
+&nbsp;&nbsp;<span class="id">move=&gt;</span><span class="id"> vk</span>.<br/>
+&nbsp;&nbsp;<span class="id">wlog:</span><span class="id"> b</span><span class="id"> /</span><span class="id"> vals</span><span class="id"> j</span><span class="id"> =</span><span class="id"> b</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">case:</span> (<span class="id">ord_eq_dec</span><span class="id"> i</span><span class="id"> j</span>)<span class="id"> b</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">move=&gt;</span><span class="id"> &lt;-</span><span class="id"> {j}</span><span class="id"> b</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">case</span><span class="id"> ab:</span> (<span class="id">a</span><span class="id"> ==</span><span class="id"> b</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> -</span>(<span class="id">eqP</span><span class="id"> ab</span>)<span class="id">;</span><span class="id"> exact</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">move=&gt;</span><span class="id"> _</span><span class="id"> _</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> setIid</span><span class="id"> vi</span><span class="id"> vk</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">set</span><span class="id"> x</span><span class="id"> :=</span> (<span class="id">X</span><span class="gallina-kwd"> in</span><span class="id"> X</span><span class="id"> =</span><span class="id"> X</span><span class="id"> *</span><span class="id"> X</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">move/Rxx2</span><span class="id"> =&gt;</span><span class="id"> []</span><span class="id"> Hx</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> -/x</span><span class="id"> Hx</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> (<span class="id">proj2</span> (<span class="id">cPr_eq0P</span><span class="id"> _</span><span class="id"> _</span><span class="id"> _</span>))<span class="id"> ?GRing</span>.<span class="id">mul0r</span><span class="id"> //</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply/Pr_set0P</span><span class="id"> =&gt;</span><span class="id"> u</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> !inE</span><span class="id"> =&gt;</span><span class="id"> /andP</span><span class="id"> []</span><span class="id"> /andP</span><span class="id"> []</span><span class="id"> /=</span><span class="id"> /eqP</span><span class="id"> -&gt;;</span><span class="id"> rewrite</span><span class="id"> ab</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> /cPr</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">set</span><span class="id"> den</span><span class="id"> :=</span> (<span class="id">X</span><span class="gallina-kwd"> in</span><span class="id"> _</span><span class="id"> /</span><span class="id"> X</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">case/boolP:</span> (<span class="id">den</span><span class="id"> ==</span><span class="id"> 0</span>)<span class="id"> =&gt;</span><span class="id"> /eqP</span><span class="id"> Hden</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> setIC</span><span class="id"> Pr_domin_setI</span><span class="id"> //</span><span class="id"> setIC</span><span class="id"> Pr_domin_setI</span><span class="id"> //</span><span class="id"> !GRing</span>.<span class="id">mul0r</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">set</span><span class="id"> num</span><span class="id"> :=</span> (<span class="id">X</span><span class="gallina-kwd"> in</span><span class="id"> _</span><span class="id"> *</span> (<span class="id">X</span><span class="id"> /</span><span class="id"> _</span>)).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">case/boolP:</span> (<span class="id">num</span><span class="id"> ==</span><span class="id"> 0</span>)<span class="id"> =&gt;</span><span class="id"> /eqP</span><span class="id"> Hnum</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> -setIA</span><span class="id"> setIC</span><span class="id"> Pr_domin_setI</span><span class="id"> //</span><span class="id"> Hnum</span><span class="id"> !GRing</span>.<span class="id">mul0r</span><span class="id"> GRing</span>.<span class="id">mulr0</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">elim</span><span class="id"> Hnum</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply/Pr_set0P</span><span class="id"> =&gt;</span><span class="id"> u</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> !inE</span><span class="id"> =&gt;</span><span class="id"> /andP</span><span class="id"> []</span><span class="id"> /=</span><span class="id"> Hi</span><span class="id"> Hk</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">move:</span><span class="id"> Hx;</span><span class="id"> subst</span><span class="id"> x</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">move/</span>(<span class="id">f_equal</span> (<span class="id">GRing</span>.<span class="id">mul</span><span class="id"> ^~</span><span class="id"> den</span>)).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">move/eqP</span><span class="gallina-kwd"> in</span><span class="id"> Hden</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> /cPr</span><span class="id"> -mulrA</span><span class="id"> mulVr</span><span class="id"> ?unitfE</span><span class="id"> //</span><span class="id"> mulr1</span><span class="id"> mul1r</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">move/</span>(<span class="id">f_equal</span> (<span class="gallina-kwd">fun</span><span class="id"> x</span><span class="id"> =&gt;</span><span class="id"> den</span><span class="id"> -</span><span class="id"> x</span>)).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> subrr</span><span class="id"> setIC</span><span class="id"> -Pr_setD</span><span class="id"> =&gt;</span><span class="id"> /Pr_set0P/</span>(_<span class="id"> u</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> !inE</span> (<span class="id">eqP</span><span class="id"> Hi</span>)<span class="id"> Hk</span><span class="id"> eq_sym</span><span class="id"> ab;</span><span class="id"> exact</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">case:</span> (<span class="id">ord_eq_dec</span><span class="id"> k</span><span class="id"> j</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">move=&gt;</span><span class="id"> &lt;-</span><span class="id"> {j}</span><span class="id"> ik</span><span class="id"> b</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">case</span><span class="id"> bc:</span> (<span class="id">b</span><span class="id"> ==</span><span class="id"> c</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> (<span class="id">eqP</span><span class="id"> bc</span>)<span class="id">;</span><span class="id"> exact</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">move=&gt;</span><span class="id"> _</span><span class="id"> _</span><span class="id"> _</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> (<span class="id">proj2</span> (<span class="id">cPr_eq0P</span><span class="id"> _</span><span class="id"> _</span><span class="id"> _</span>))<span class="id">;</span><span class="id"> last</span><span class="id"> first</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply/Pr_set0P</span><span class="id"> =&gt;</span><span class="id"> u</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> !inE</span><span class="id"> =&gt;</span><span class="id"> /andP</span><span class="id"> []</span><span class="id"> /andP</span><span class="id"> []</span><span class="id"> _</span><span class="id"> /=</span><span class="id"> /eqP</span><span class="id"> -&gt;;</span><span class="id"> rewrite</span><span class="id"> bc</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> GRing</span>.<span class="id">mulrC</span> (<span class="id">proj2</span> (<span class="id">cPr_eq0P</span><span class="id"> _</span><span class="id"> _</span><span class="id"> _</span>))<span class="id"> ?GRing</span>.<span class="id">mul0r</span><span class="id"> //</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> apply/Pr_set0P</span><span class="id"> =&gt;</span><span class="id"> u;</span><span class="id"> rewrite</span><span class="id"> !inE</span><span class="id"> =&gt;</span><span class="id"> /andP</span><span class="id"> []</span><span class="id"> /=</span><span class="id"> /eqP</span><span class="id"> -&gt;;</span><span class="id"> rewrite</span><span class="id"> bc</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">move=&gt;</span><span class="id"> nkj</span><span class="id"> nij</span><span class="id"> b</span><span class="id"> HG</span><span class="id"> Hvals;</span><span class="id"> apply:</span><span class="id"> HG</span><span class="id"> =&gt;</span><span class="id"> //</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> Hvals</span><span class="id"> set_val_tl</span><span class="id"> //</span><span class="id"> set_val_tl</span><span class="id"> //</span><span class="id"> set_val_hd</span>.<br/>
+&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> vi</span><span class="id"> vk</span><span class="id"> =&gt;</span><span class="id"> -&gt;</span><span class="id"> _</span>.<br/>
+<span class="id">-</span><span class="id"> move=&gt;</span><span class="id"> Hdrv</span><span class="id"> vals</span>.<br/>
+&nbsp;&nbsp;<span class="id">move/cinde_RV_events/</span>(_ (<span class="id">vals</span><span class="id"> i</span>) (<span class="id">vals</span><span class="id"> j</span>) (<span class="id">vals</span><span class="id"> k</span>))<span class="id">:</span><span class="id"> Hdrv</span>.<br/>
+&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> !big_set1</span>.<br/>
+Qed.</div></details>
+<br/>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> preim_vars_set_vals_tl</span> (<span class="id">g</span><span class="id"> e</span><span class="id"> :</span><span class="id"> {set</span><span class="id"> 'I_n}</span>) (<span class="id">A</span><span class="id"> :</span><span class="id"> prod_types</span><span class="id"> types</span><span class="id"> e</span>)<span class="id"> vals</span><span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="id">e</span><span class="id"> :&amp;:</span><span class="id"> g</span><span class="id"> =</span><span class="id"> set0</span><span class="id"> -&gt;</span><br/>
+&nbsp;&nbsp;<span class="id">preim_vars</span><span class="id"> g</span> (<span class="id">set_vals</span><span class="id"> A</span><span class="id"> vals</span>)<span class="id"> =</span><span class="id"> preim_vars</span><span class="id"> g</span><span class="id"> vals</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id">move=&gt;</span><span class="id"> /setP</span><span class="id"> eg</span>.<br/>
+<span class="id">apply/eq_bigr</span><span class="id"> =&gt;</span><span class="id"> /=</span><span class="id"> i</span><span class="id"> ig</span>.<br/>
+<span class="id">apply/setP</span><span class="id"> =&gt;</span><span class="id"> u</span>.<br/>
+<span class="id">rewrite</span><span class="id"> !inE</span><span class="id"> set_vals_tl</span><span class="id"> //</span>.<br/>
+<span class="gallina-kwd">by</span><span class="id"> move:</span> (<span class="id">eg</span><span class="id"> i</span>)<span class="id">;</span><span class="id"> rewrite</span><span class="id"> !inE</span><span class="id"> ig</span><span class="id"> andbT</span><span class="id"> =&gt;</span><span class="id"> -&gt;</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> preim_inter</span> (<span class="id">T</span><span class="id"> S</span><span class="id"> :</span><span class="id"> eqType</span>) (<span class="id">e</span><span class="id"> :</span><span class="id"> U</span><span class="id"> -&gt;</span><span class="id"> T</span>) (<span class="id">g</span><span class="id"> :</span><span class="id"> U</span><span class="id"> -&gt;</span><span class="id"> S</span>) (<span class="id">A</span><span class="id"> :</span><span class="id"> T</span>) (<span class="id">C</span><span class="id"> :</span><span class="id"> S</span>)<span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="id">finset</span> (<span class="id">preim</span> (<span class="gallina-kwd">fun</span><span class="id"> x</span><span class="id"> =&gt;</span> (<span class="id">e</span><span class="id"> x,</span><span class="id"> g</span><span class="id"> x</span>)) (<span class="id">pred1</span> (<span class="id">A,</span><span class="id"> C</span>)))<span class="id"> =</span><br/>
+&nbsp;&nbsp;<span class="id">finset</span> (<span class="id">preim</span><span class="id"> e</span> (<span class="id">pred1</span><span class="id"> A</span>))<span class="id"> :&amp;:</span><span class="id"> finset</span> (<span class="id">preim</span><span class="id"> g</span> (<span class="id">pred1</span><span class="id"> C</span>)).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id">apply/setP</span><span class="id"> =&gt;</span><span class="id"> u;</span><span class="id"> rewrite</span><span class="id"> !inE</span>.<br/>
+<span class="id">apply/andP</span><span class="id"> =&gt;</span><span class="id"> /=</span>.<br/>
+<span class="gallina-kwd">by</span><span class="id"> case:</span><span class="id"> ifPn</span><span class="id"> =&gt;</span><span class="id"> [/andP</span><span class="id"> |</span><span class="id"> /negP</span><span class="id"> H</span><span class="id"> /andP</span><span class="id"> /H]</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> preim_vars_inter</span> (<span class="id">e</span><span class="id"> f</span><span class="id"> :</span><span class="id"> {set</span><span class="id"> 'I_n}</span>)<span class="id"> vals</span><span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="id">preim_vars</span> (<span class="id">e</span><span class="id"> :|:</span><span class="id"> f</span>)<span class="id"> vals</span><span class="id"> =</span><span class="id"> preim_vars</span><span class="id"> e</span><span class="id"> vals</span><span class="id"> :&amp;:</span><span class="id"> preim_vars</span><span class="id"> f</span><span class="id"> vals</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="gallina-kwd"> by</span><span class="id"> rewrite</span><span class="id"> /preim_vars</span><span class="id"> bigcap_setU</span>. Qed.</div></details>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> preim_vars_vals</span> (<span class="id">e</span><span class="id"> :</span><span class="id"> {set</span><span class="id"> 'I_n}</span>) (<span class="id">A</span><span class="id"> :</span><span class="id"> prod_types</span><span class="id"> types</span><span class="id"> e</span>)<span class="id"> vals1</span><span class="id"> vals2</span><span class="id"> :</span><br/>
+&nbsp;&nbsp;(<span class="gallina-kwd">forall</span><span class="id"> x,</span><span class="id"> x</span><span class="id"> \in</span><span class="id"> e</span><span class="id"> -&gt;</span><span class="id"> vals1</span><span class="id"> x</span><span class="id"> =</span><span class="id"> vals2</span><span class="id"> x</span>)<span class="id"> -&gt;</span><br/>
+&nbsp;&nbsp;<span class="id">preim_vars</span><span class="id"> e</span><span class="id"> vals1</span><span class="id"> =</span><span class="id"> preim_vars</span><span class="id"> e</span><span class="id"> vals2</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id">move=&gt;</span><span class="id"> Hvals</span>.<br/>
+<span class="id">apply/eq_bigr</span><span class="id"> =&gt;</span><span class="id"> /=</span><span class="id"> i</span><span class="id"> ie</span>.<br/>
+<span class="gallina-kwd">by</span><span class="id"> apply/setP</span><span class="id"> =&gt;</span><span class="id"> u;</span><span class="id"> rewrite</span><span class="id"> !inE</span><span class="id"> Hvals</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> disjoint_preim_vars</span> (<span class="id">e</span><span class="id"> f</span><span class="id"> :</span><span class="id"> {set</span><span class="id"> 'I_n}</span>) (<span class="id">A</span><span class="id"> B</span><span class="id"> :</span><span class="id"> prod_types</span><span class="id"> types</span><span class="id"> f</span>)<span class="id"> vals</span><span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="id">f</span><span class="id"> \subset</span><span class="id"> e</span><span class="id"> -&gt;</span><span class="id"> A</span><span class="id"> !=</span><span class="id"> B</span><span class="id"> -&gt;</span><br/>
+&nbsp;&nbsp;<span class="id">[disjoint</span><span class="id"> preim_vars</span><span class="id"> e</span> (<span class="id">set_vals</span><span class="id"> A</span><span class="id"> vals</span>)<span class="id"> &amp;</span><span class="id"> preim_vars</span><span class="id"> e</span> (<span class="id">set_vals</span><span class="id"> B</span><span class="id"> vals</span>)<span class="id">]</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id">move=&gt;</span><span class="id"> fe</span><span class="id"> AB</span>.<br/>
+<span class="id">rewrite</span><span class="id"> -setI_eq0</span>.<br/>
+<span class="id">apply/eqP/setP</span><span class="id"> =&gt;</span><span class="id"> u</span>.<br/>
+<span class="id">rewrite</span><span class="id"> !inE</span>.<br/>
+<span class="id">apply/negP</span><span class="id"> =&gt;</span><span class="id"> /andP</span><span class="id"> []</span><span class="id"> /preim_varsP</span><span class="id"> /=</span><span class="id"> HA</span><span class="id"> /preim_varsP</span><span class="id"> /=</span><span class="id"> HB</span>.<br/>
+<span class="id">case:</span> (<span class="id">prod_types_neq</span><span class="id"> AB</span>)<span class="id"> =&gt;</span><span class="id"> /=</span><span class="id"> i</span><span class="id"> /andP</span><span class="id"> [Hif</span><span class="id"> HAB]</span>.<br/>
+<span class="id">have</span><span class="id"> ie</span><span class="id"> :</span><span class="id"> i</span><span class="id"> \in</span><span class="id"> e</span><span class="gallina-kwd"> by</span><span class="id"> move/subsetP:</span><span class="id"> fe;</span><span class="id"> apply</span>.<br/>
+<span class="id">move/</span>(_<span class="id"> _</span><span class="id"> ie</span>)<span class="id">/eqP:</span><span class="id"> HB</span>.<br/>
+<span class="id">rewrite</span><span class="id"> HA</span><span class="id"> //</span><span class="id"> set_vals_eq</span><span class="id"> =&gt;</span><span class="id"> /orP</span><span class="id"> []</span><span class="id"> H</span>.<br/>
+<span class="id">-</span><span class="gallina-kwd"> by</span><span class="id"> rewrite</span><span class="id"> H</span><span class="gallina-kwd"> in</span><span class="id"> HAB</span>.<br/>
+<span class="id">-</span><span class="gallina-kwd"> by</span><span class="id"> rewrite</span><span class="id"> Hif</span><span class="gallina-kwd"> in</span><span class="id"> H</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> Pr_preim_vars_sub</span> (<span class="id">e</span><span class="id"> f</span><span class="id"> :</span><span class="id"> {set</span><span class="id"> 'I_n}</span>) (<span class="id">vals</span><span class="id"> :</span><span class="id"> univ_types</span><span class="id"> types</span>)<span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="id">f</span><span class="id"> \subset</span><span class="id"> e</span><span class="id"> -&gt;</span><br/>
+&nbsp;&nbsp;<span class="id">Pr</span><span class="id"> P</span> (<span class="id">preim_vars</span> (<span class="id">e</span><span class="id"> :\:</span><span class="id"> f</span>)<span class="id"> vals</span>)<span class="id"> =</span><br/>
+&nbsp;&nbsp;<span class="id">\sum_</span>(<span class="id">A</span><span class="id"> :</span><span class="id"> Tfin_img</span> (<span class="id">prod_vars</span><span class="id"> f</span>))<br/>
+&nbsp;&nbsp;&nbsp;<span class="id">Pr</span><span class="id"> P</span> (<span class="id">preim_vars</span><span class="id"> e</span> (<span class="id">set_vals</span> (<span class="id">nth_fin_img</span><span class="id"> A</span>)<span class="id"> vals</span>)).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id">rewrite</span><span class="id"> /Pr</span><span class="id"> =&gt;</span><span class="id"> fe</span>.<br/>
+<span class="id">rewrite</span><span class="id"> -partition_disjoint_bigcup;</span><span class="id"> last</span><span class="id"> first</span>.<br/>
+&nbsp;&nbsp;<span class="id">move=&gt;</span><span class="id"> /=</span><span class="id"> A</span><span class="id"> B</span>.<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> -</span>(<span class="id">tnth_uniq</span><span class="id"> A</span><span class="id"> B</span> (<span class="id">t:=in_tuple</span><span class="id"> _</span>))<span class="id"> ?undup_uniq</span><span class="id"> =&gt;</span><span class="id"> //</span><span class="id"> AB</span>.<br/>
+&nbsp;&nbsp;<span class="id">exact:</span><span class="id"> disjoint_preim_vars</span>.<br/>
+<span class="id">apply/eq_bigl</span><span class="id"> =&gt;</span><span class="id"> u</span>.<br/>
+<span class="id">apply/esym/bigcupP/</span>(<span class="id">equivPif</span><span class="id"> idP</span>).<br/>
+&nbsp;&nbsp;<span class="id">move=&gt;</span><span class="id"> [A</span><span class="id"> _</span><span class="id"> /preim_varsP</span><span class="id"> HA]</span>.<br/>
+&nbsp;&nbsp;<span class="id">apply/preim_varsP</span><span class="id"> =&gt;</span><span class="id"> /=</span><span class="id"> i</span><span class="id"> /setDP</span><span class="id"> [/HA</span><span class="id"> -&gt;</span><span class="id"> Hif]</span>.<br/>
+&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> set_vals_tl</span>.<br/>
+<span class="id">move=&gt;</span><span class="id"> /=</span><span class="id"> /preim_varsP</span><span class="id"> /=</span><span class="id"> Hu</span>.<br/>
+<span class="gallina-kwd">exists</span> (<span class="id">map_fin_img</span> (<span class="id">prod_vars</span><span class="id"> f</span>)<span class="id"> u</span>)<span class="id"> =&gt;</span><span class="id"> //</span>.<br/>
+<span class="id">apply/preim_varsP</span><span class="id"> =&gt;</span><span class="id"> /=</span><span class="id"> i</span><span class="id"> ie</span>.<br/>
+<span class="id">case/boolP:</span> (<span class="id">i</span><span class="id"> \in</span><span class="id"> f</span>)<span class="id"> =&gt;</span><span class="id"> Hif</span>.<br/>
+&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> nth_fin_imgK</span><span class="id"> set_vals_prod_vars</span>.<br/>
+<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> set_vals_tl</span><span class="id"> //</span><span class="id"> Hu</span><span class="id"> //</span><span class="id"> inE</span><span class="id"> Hif</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="vernacular">Ltac</span><span class="id"> cases_in</span><span class="id"> i</span><span class="id"> :=</span><br/>
+&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> ?inE;</span><span class="id"> do</span><span class="id"> !case:</span> (<span class="id">i</span><span class="id"> \in</span><span class="id"> _</span>)<span class="id"> =&gt;</span><span class="id"> //=;</span><br/>
+&nbsp;&nbsp;<span class="id">try</span><span class="gallina-kwd"> by</span><span class="id"> do!</span> (<span class="id">move/</span>(_<span class="id"> isT</span>)<span class="id"> =&gt;</span><span class="id"> //</span><span class="id"> ||</span><span class="id"> move=&gt;</span><span class="id"> _</span>).<br/>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> cinde_preim_sub</span> (<span class="id">e</span><span class="id"> e'</span><span class="id"> f</span><span class="id"> g</span><span class="id"> :</span><span class="id"> {set</span><span class="id"> 'I_n}</span>)<span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="id">e</span><span class="id"> :&amp;:</span> (<span class="id">f</span><span class="id"> :|:</span><span class="id"> g</span>)<span class="id"> \subset</span><span class="id"> e'</span><span class="id"> -&gt;</span><span class="id"> e'</span><span class="id"> \subset</span><span class="id"> e</span><span class="id"> -&gt;</span><br/>
+&nbsp;&nbsp;<span class="id">cinde_preim</span><span class="id"> e</span><span class="id"> f</span><span class="id"> g</span><span class="id"> -&gt;</span><span class="id"> cinde_preim</span><span class="id"> e'</span><span class="id"> f</span><span class="id"> g</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id">rewrite</span><span class="id"> /cinde_preim</span><span class="id"> =&gt;</span><span class="id"> ee'</span><span class="id"> e'e</span><span class="id"> Hef</span><span class="id"> vals</span>.<br/>
+<span class="id">have</span><span class="id"> ee'g</span><span class="id"> :</span> (<span class="id">e</span><span class="id"> :\:</span><span class="id"> e'</span>)<span class="id"> :&amp;:</span><span class="id"> g</span><span class="id"> =</span><span class="id"> set0</span>.<br/>
+&nbsp;&nbsp;<span class="id">apply/setP</span><span class="id"> =&gt;</span><span class="id"> i;</span><span class="id"> move/subsetP/</span>(_<span class="id"> i</span>)<span class="id">:</span><span class="id"> ee';</span><span class="gallina-kwd"> by</span><span class="id"> cases_in</span><span class="id"> i</span>.<br/>
+<span class="id">transitivity</span> (<span class="id">\sum_</span>(<span class="id">A</span><span class="id"> :</span><span class="id"> Tfin_img</span> (<span class="id">prod_vars</span> (<span class="id">e</span><span class="id"> :\:</span><span class="id"> e'</span>)))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">let</span><span class="id"> v</span><span class="id"> :=</span><span class="id"> set_vals</span> (<span class="id">nth_fin_img</span><span class="id"> A</span>)<span class="id"> vals</span><span class="gallina-kwd"> in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">`Pr_P[preim_vars</span><span class="id"> e</span><span class="id"> v</span><span class="id"> :&amp;:</span><span class="id"> preim_vars</span><span class="id"> f</span><span class="id"> v</span><span class="id"> |</span><span class="id"> preim_vars</span><span class="id"> g</span><span class="id"> v]</span>).<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> /cPr</span><span class="id"> -!preim_vars_inter</span>.<br/>
+&nbsp;&nbsp;<span class="id">have</span><span class="id"> -&gt;</span><span class="id"> :</span><span class="id"> e'</span><span class="id"> :|:</span><span class="id"> f</span><span class="id"> :|:</span><span class="id"> g</span><span class="id"> =</span> (<span class="id">e</span><span class="id"> :|:</span><span class="id"> f</span><span class="id"> :|:</span><span class="id"> g</span>)<span class="id"> :\:</span> (<span class="id">e</span><span class="id"> :\:</span><span class="id"> e'</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply/setP</span><span class="id"> =&gt;</span><span class="id"> i</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">move/subsetP/</span>(_<span class="id"> i</span>)<span class="id">:</span><span class="id"> e'e</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">move/subsetP/</span>(_<span class="id"> i</span>)<span class="id">:</span><span class="id"> ee'</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> cases_in</span><span class="id"> i</span>.<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> Pr_preim_vars_sub;</span><span class="id"> last</span><span class="gallina-kwd"> by</span><span class="id"> apply/subsetP=&gt;</span><span class="id"> i;</span><span class="id"> cases_in</span><span class="id"> i</span>.<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> big_distrl;</span><span class="id"> apply:</span><span class="id"> eq_bigr</span><span class="id"> =&gt;</span><span class="id"> A</span><span class="id"> _</span><span class="id"> /=</span>.<br/>
+&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> -!preim_vars_inter</span> (<span class="id">@preim_vars_set_vals_tl</span><span class="id"> g</span>).<br/>
+<span class="id">under</span><span class="id"> eq_bigr</span><span class="id"> =&gt;</span><span class="id"> A</span><span class="id"> _</span><span class="id"> /=</span>.<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> Hef</span> (<span class="id">@preim_vars_set_vals_tl</span><span class="id"> g</span>)<span class="id"> //</span> (<span class="id">@preim_vars_set_vals_tl</span><span class="id"> f</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">over</span>.<br/>
+&nbsp;&nbsp;<span class="id">apply/setP</span><span class="id"> =&gt;</span><span class="id"> i;</span><span class="id"> move/subsetP/</span>(_<span class="id"> i</span>)<span class="id">:</span><span class="id"> ee';</span><span class="gallina-kwd"> by</span><span class="id"> cases_in</span><span class="id"> i</span>.<br/>
+<span class="id">rewrite</span><span class="id"> -2!big_distrl</span><span class="id"> /=</span>.<br/>
+<span class="id">rewrite</span><span class="id"> [in</span><span class="id"> RHS]/cPr</span>.<br/>
+<span class="id">congr</span> (_<span class="id"> *</span><span class="id"> _</span><span class="id"> *</span><span class="id"> _</span>).<br/>
+<span class="id">rewrite</span><span class="id"> -preim_vars_inter</span>.<br/>
+<span class="id">have</span><span class="id"> -&gt;</span><span class="id"> :</span><span class="id"> e'</span><span class="id"> :|:</span><span class="id"> g</span><span class="id"> =</span> (<span class="id">e</span><span class="id"> :|:</span><span class="id"> g</span>)<span class="id"> :\:</span> (<span class="id">e</span><span class="id"> :\:</span><span class="id"> e'</span>).<br/>
+&nbsp;&nbsp;<span class="id">apply/setP</span><span class="id"> =&gt;</span><span class="id"> i</span>.<br/>
+&nbsp;&nbsp;<span class="id">move/subsetP/</span>(_<span class="id"> i</span>)<span class="id">:</span><span class="id"> e'e</span>.<br/>
+&nbsp;&nbsp;<span class="id">move/subsetP/</span>(_<span class="id"> i</span>)<span class="id">:</span><span class="id"> ee'</span>.<br/>
+&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> cases_in</span><span class="id"> i</span>.<br/>
+<span class="id">rewrite</span><span class="id"> Pr_preim_vars_sub;</span><span class="id"> last</span><span class="gallina-kwd"> by</span><span class="id"> apply/subsetP=&gt;</span><span class="id"> i;</span><span class="id"> cases_in</span><span class="id"> i</span>.<br/>
+<span class="id">apply:</span><span class="id"> eq_bigr</span><span class="id"> =&gt;</span><span class="id"> A</span><span class="id"> _</span>.<br/>
+<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> preim_vars_inter</span> (<span class="id">@preim_vars_set_vals_tl</span><span class="id"> g</span>)<span class="id"> //</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> cinde_preim_inter</span><span class="id"> e</span><span class="id"> f</span><span class="id"> g</span><span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="id">cinde_preim</span><span class="id"> e</span><span class="id"> f</span><span class="id"> g</span><span class="id"> -&gt;</span><span class="id"> cinde_preim</span> (<span class="id">e</span><span class="id"> :&amp;:</span><span class="id"> f</span>) (<span class="id">e</span><span class="id"> :&amp;:</span><span class="id"> f</span>)<span class="id"> g</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id">move=&gt;</span><span class="id"> Hp</span>.<br/>
+<span class="id">have</span><span class="id"> Hp2</span><span class="id"> :</span><span class="id"> cinde_preim</span> (<span class="id">e</span><span class="id"> :\:</span> (<span class="id">e</span><span class="id"> :\:</span><span class="id"> f</span><span class="id"> :\:</span><span class="id"> g</span>))<span class="id"> f</span><span class="id"> g</span>.<br/>
+&nbsp;&nbsp;<span class="id">apply:</span> (<span class="id">@cinde_preim_sub</span><span class="id"> e</span>)<span class="id"> =&gt;</span><span class="id"> //</span><span class="id"> ;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply/subsetP</span><span class="id"> =&gt;</span><span class="id"> j;</span><span class="gallina-kwd"> by</span><span class="id"> cases_in</span><span class="id"> j</span>.<br/>
+<span class="id">have</span><span class="id"> :</span><span class="id"> cinde_preim</span> (<span class="id">e</span><span class="id"> :\:</span> (<span class="id">e</span><span class="id"> :\:</span><span class="id"> f</span><span class="id"> :\:</span><span class="id"> g</span>)) (<span class="id">f</span><span class="id"> :\:</span> (<span class="id">f</span><span class="id"> :\:</span><span class="id"> e</span><span class="id"> :\:</span><span class="id"> g</span>))<span class="id"> g</span>.<br/>
+&nbsp;&nbsp;<span class="id">move/cinde_preimC</span><span class="gallina-kwd"> in</span><span class="id"> Hp2</span>.<br/>
+&nbsp;&nbsp;<span class="id">apply/cinde_preimC</span>.<br/>
+&nbsp;&nbsp;<span class="id">apply:</span> (<span class="id">@cinde_preim_sub</span><span class="id"> f</span>)<span class="id"> =&gt;</span><span class="id"> //</span><span class="id"> ;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply/subsetP</span><span class="id"> =&gt;</span><span class="id"> j;</span><span class="gallina-kwd"> by</span><span class="id"> cases_in</span><span class="id"> j</span>.<br/>
+<span class="id">move=&gt;</span><span class="id"> {}Hp</span><span class="id"> vals</span>.<br/>
+<span class="id">move/</span>(_<span class="id"> vals</span>)<span class="id">:</span><span class="id"> Hp</span>.<br/>
+<span class="id">rewrite</span><span class="id"> /cinde_events</span><span class="id"> /cPr</span><span class="id"> /Pr</span><span class="id"> -!preim_vars_inter</span>.<br/>
+<span class="id">rewrite</span> (_<span class="id"> :</span><span class="id"> _</span><span class="id"> :|:</span><span class="id"> g</span><span class="id"> =</span> (<span class="id">e</span><span class="id"> :&amp;:</span><span class="id"> f</span>)<span class="id"> :|:</span><span class="id"> g</span>)<span class="id">;</span><br/>
+&nbsp;&nbsp;<span class="id">last</span><span class="gallina-kwd"> by</span><span class="id"> apply/setP</span><span class="id"> =&gt;</span><span class="id"> j;</span><span class="id"> cases_in</span><span class="id"> j</span>.<br/>
+<span class="id">rewrite</span><span class="id"> 2!</span>(_<span class="id"> :</span><span class="id"> _</span><span class="id"> :\:</span><span class="id"> _</span><span class="id"> :|:</span><span class="id"> _</span><span class="id"> =</span> (<span class="id">e</span><span class="id"> :&amp;:</span><span class="id"> f</span>)<span class="id"> :|:</span><span class="id"> g</span>)<span class="id">;</span><br/>
+&nbsp;&nbsp;<span class="id">try</span><span class="gallina-kwd"> by</span><span class="id"> apply/setP</span><span class="id"> =&gt;</span><span class="id"> j;</span><span class="id"> cases_in</span><span class="id"> j</span>.<br/>
+<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> setUid</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="vernacular">Section</span><span class="id"> cinde_preim_lemmas</span>.<br/>
+<span class="vernacular">Variables</span><span class="id"> e</span><span class="id"> f</span><span class="id"> g</span><span class="id"> :</span><span class="id"> {set</span><span class="id"> 'I_n}</span>.<br/>
+<span class="vernacular">Variables</span> (<span class="id">A</span><span class="id"> :</span><span class="id"> prod_types</span><span class="id"> types</span><span class="id"> e</span>) (<span class="id">B</span><span class="id"> :</span><span class="id"> prod_types</span><span class="id"> types</span><span class="id"> f</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">C</span><span class="id"> :</span><span class="id"> prod_types</span><span class="id"> types</span><span class="id"> g</span>).<br/>
+<span class="vernacular">Lemma</span><span class="id"> cinde_events_vals</span><span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="id">[forall</span><span class="id"> i</span><span class="gallina-kwd"> in</span> (<span class="id">e</span><span class="id"> :&amp;:</span><span class="id"> g</span>)<span class="id">,</span><span class="id"> set_vals</span><span class="id"> C</span><span class="id"> vals0</span><span class="id"> i</span><span class="id"> ==</span><span class="id"> set_vals</span><span class="id"> A</span><span class="id"> vals0</span><span class="id"> i]</span><span class="id"> \/</span><br/>
+&nbsp;&nbsp;<span class="id">cinde_events</span><span class="id"> P</span> (<span class="id">finset</span> (<span class="id">prod_vars</span><span class="id"> e</span><span class="id"> @^-1</span><span class="id"> A</span>)) (<span class="id">finset</span> (<span class="id">prod_vars</span><span class="id"> f</span><span class="id"> @^-1</span><span class="id"> B</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">finset</span> (<span class="id">prod_vars</span><span class="id"> g</span><span class="id"> @^-1</span><span class="id"> C</span>)).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id">case</span><span class="id"> /boolP:</span><span class="id"> [forall</span><span class="id"> i</span><span class="gallina-kwd"> in</span> (<span class="id">e</span><span class="id"> :&amp;:</span><span class="id"> g</span>)<span class="id">,</span><span class="id"> _]</span>.<br/>
+&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> left</span>.<br/>
+<span class="id">rewrite</span><span class="id"> negb_forall</span><span class="id"> =&gt;</span><span class="id"> /existsP</span><span class="id"> [i]</span>.<br/>
+<span class="id">rewrite</span><span class="id"> inE</span><span class="id"> negb_imply</span><span class="id"> =&gt;</span><span class="id"> /andP</span><span class="id"> []</span><span class="id"> /andP</span><span class="id"> [Hie</span><span class="id"> Hig]</span><span class="id"> /eqP</span><span class="id"> Hvi</span>.<br/>
+<span class="id">right;</span><span class="id"> rewrite</span><span class="id"> /cinde_events</span>.<br/>
+<span class="id">rewrite</span> (<span class="id">proj2</span> (<span class="id">cPr_eq0P</span><span class="id"> _</span><span class="id"> _</span><span class="id"> _</span>))<span class="id">;</span><span class="id"> last</span><span class="id"> first</span>.<br/>
+&nbsp;&nbsp;<span class="id">apply/Pr_set0P</span><span class="id"> =&gt;</span><span class="id"> u;</span><span class="id"> rewrite</span><span class="id"> !inE</span><span class="id"> =&gt;</span><span class="id"> Hprod;</span><span class="id"> elim:</span><span class="id"> Hvi</span>.<br/>
+&nbsp;&nbsp;<span class="id">case/andP:</span><span class="id"> Hprod</span><span class="id"> =&gt;</span><span class="id"> /andP[]</span><span class="id"> /eqP</span><span class="id"> &lt;-</span><span class="id"> _</span><span class="id"> /eqP</span><span class="id"> &lt;-;</span><span class="id"> exact:</span><span class="id"> prod_vars_inter</span>.<br/>
+<span class="id">rewrite</span> (<span class="id">proj2</span> (<span class="id">cPr_eq0P</span><span class="id"> _</span><span class="id"> _</span><span class="id"> _</span>))<span class="id"> ?GRing</span>.<span class="id">mul0r</span><span class="id"> //</span>.<br/>
+<span class="id">apply/Pr_set0P</span><span class="id"> =&gt;</span><span class="id"> u;</span><span class="id"> rewrite</span><span class="id"> !inE</span><span class="id"> =&gt;</span><span class="id"> Hprod;</span><span class="id"> elim:</span><span class="id"> Hvi</span>.<br/>
+<span class="id">case/andP:</span><span class="id"> Hprod</span><span class="id"> =&gt;</span><span class="id"> /eqP</span><span class="id"> &lt;-</span><span class="id"> /eqP</span><span class="id"> &lt;-;</span><span class="id"> exact:</span><span class="id"> prod_vars_inter</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> cinde_events_cPr1</span> (<span class="id">i</span><span class="id"> :</span><span class="id"> 'I_n</span>)<span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="gallina-kwd">let</span><span class="id"> vals</span><span class="id"> :=</span><span class="id"> set_vals</span><span class="id"> C</span> (<span class="id">set_vals</span><span class="id"> A</span> (<span class="id">set_vals</span><span class="id"> B</span><span class="id"> vals0</span>))<span class="gallina-kwd"> in</span><br/>
+&nbsp;&nbsp;(<span class="gallina-kwd">forall</span><span class="id"> x</span><span class="id"> :</span><span class="id"> 'I_n,</span><span class="id"> x</span><span class="id"> \in</span><span class="id"> e</span><span class="id"> -&gt;</span><span class="id"> vals</span><span class="id"> x</span><span class="id"> =</span><span class="id"> set_vals</span><span class="id"> A</span><span class="id"> vals0</span><span class="id"> x</span>)<span class="id"> -&gt;</span><br/>
+&nbsp;&nbsp;<span class="id">i</span><span class="id"> \in</span><span class="id"> e</span><span class="id"> -&gt;</span><span class="id"> i</span><span class="id"> \in</span><span class="id"> f</span><span class="id"> -&gt;</span><span class="id"> i</span><span class="id"> \notin</span><span class="id"> g</span><span class="id"> -&gt;</span><br/>
+&nbsp;&nbsp;<span class="id">set_vals</span><span class="id"> A</span><span class="id"> vals0</span><span class="id"> i</span><span class="id"> &lt;&gt;</span><span class="id"> set_vals</span><span class="id"> B</span><span class="id"> vals0</span><span class="id"> i</span><span class="id"> -&gt;</span><br/>
+&nbsp;&nbsp;<span class="id">`Pr_P[</span>(<span class="id">preim_vars</span> (<span class="id">e</span><span class="id"> :&amp;:</span><span class="id"> f</span>)<span class="id"> vals</span>)<span class="id"> |</span> (<span class="id">preim_vars</span><span class="id"> g</span><span class="id"> vals</span>)<span class="id">]</span><span class="id"> =</span><span class="id"> 1</span><span class="id"> -&gt;</span><br/>
+&nbsp;&nbsp;<span class="id">cinde_events</span><span class="id"> P</span><span class="id"> [set</span><span class="id"> x</span><span class="id"> |</span><span class="id"> preim</span> (<span class="id">prod_vars</span><span class="id"> e</span>) (<span class="id">pred1</span><span class="id"> A</span>)<span class="id"> x]</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">[set</span><span class="id"> x</span><span class="id"> |</span><span class="id"> preim</span> (<span class="id">prod_vars</span><span class="id"> f</span>) (<span class="id">pred1</span><span class="id"> B</span>)<span class="id"> x]</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">[set</span><span class="id"> x</span><span class="id"> |</span><span class="id"> preim</span> (<span class="id">prod_vars</span><span class="id"> g</span>) (<span class="id">pred1</span><span class="id"> C</span>)<span class="id"> x]</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id">move=&gt;</span><span class="id"> vals</span><span class="id"> He</span><span class="id"> Hie</span><span class="id"> Hif</span><span class="id"> Hig</span><span class="id"> Hvi</span>.<br/>
+<span class="id">rewrite</span><span class="id"> /cinde_events</span><span class="id"> /cPr</span>.<br/>
+<span class="id">set</span><span class="id"> den</span><span class="id"> :=</span> (<span class="id">X</span><span class="gallina-kwd"> in</span><span class="id"> _</span><span class="id"> /</span><span class="id"> X</span>).<br/>
+<span class="id">case/boolP:</span> (<span class="id">den</span><span class="id"> ==</span><span class="id"> 0</span>)<span class="id"> =&gt;</span><span class="id"> [/eqP|]</span><span class="id"> Hden</span>.<br/>
+&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> setIC</span><span class="id"> Pr_domin_setI</span><span class="id"> //</span><span class="id"> ?mul0r</span><span class="id"> =&gt;</span><span class="id"> /esym/eqP;</span><span class="id"> rewrite</span><span class="id"> oner_eq0</span>.<br/>
+<span class="id">set</span><span class="id"> num</span><span class="id"> :=</span><span class="id"> Pr</span><span class="id"> _</span><span class="id"> _</span><span class="id"> =&gt;</span><span class="id"> Hnum</span>.<br/>
+<span class="id">have</span><span class="id"> {}Hnum</span><span class="id"> :</span><span class="id"> num</span><span class="id"> =</span><span class="id"> den</span>.<br/>
+&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> -[RHS]mul1r</span><span class="id"> -Hnum</span><span class="id"> -mulrA</span><span class="id"> mulVf</span><span class="id"> ?mulr1</span>.<br/>
+<span class="id">rewrite</span><span class="id"> -Hnum</span><span class="gallina-kwd"> in</span><span class="id"> Hden</span>.<br/>
+<span class="id">rewrite</span> (<span class="id">proj2</span> (<span class="id">Pr_set0P</span><span class="id"> _</span><span class="id"> _</span>))<span class="id">;</span><span class="id"> last</span><span class="id"> first</span>.<br/>
+&nbsp;&nbsp;<span class="id">move=&gt;</span><span class="id"> u;</span><span class="id"> rewrite</span><span class="id"> !inE</span><span class="id"> =&gt;</span><span class="id"> /andP[]</span><span class="id"> /andP[]</span><span class="id"> /eqP</span><span class="id"> HA</span><span class="id"> /eqP</span><span class="id"> HB</span>.<br/>
+&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> -HA</span><span class="id"> -HB</span><span class="id"> !set_vals_prod_vars</span><span class="gallina-kwd"> in</span><span class="id"> Hvi</span>.<br/>
+<span class="id">suff</span><span class="id"> :</span><span class="id"> `Pr_P[finset</span> (<span class="id">prod_vars</span><span class="id"> f</span><span class="id"> @^-1</span><span class="id"> B</span>)<span class="id"> |</span><span class="id"> finset</span> (<span class="id">prod_vars</span><span class="id"> g</span><span class="id"> @^-1</span><span class="id"> C</span>)<span class="id">]</span><span class="id"> =</span><span class="id"> 0</span>.<br/>
+&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> /cPr</span><span class="id"> =&gt;</span><span class="id"> -&gt;;</span><span class="id"> rewrite</span><span class="id"> GRing</span>.<span class="id">mulr0</span><span class="id"> GRing</span>.<span class="id">mul0r</span>.<br/>
+<span class="comment">(*&nbsp;prove&nbsp;incompatibility&nbsp;between&nbsp;B&nbsp;and&nbsp;C&nbsp;*)</span><br/>
+<span class="id">apply/cPr_eq0P/Pr_set0P</span><span class="id"> =&gt;</span><span class="id"> u</span>.<br/>
+<span class="id">rewrite</span><span class="id"> !inE</span><span class="id"> =&gt;</span><span class="id"> /andP</span><span class="id"> []</span><span class="id"> /eqP</span><span class="id"> HB</span><span class="id"> /eqP</span><span class="id"> HC</span>.<br/>
+<span class="id">move:</span><span class="id"> Hnum;</span><span class="id"> rewrite</span><span class="id"> /den</span>.<br/>
+<span class="id">have</span><span class="id"> -&gt;</span><span class="id"> :</span><span class="id"> g</span><span class="id"> =</span> (<span class="id">e</span><span class="id"> :&amp;:</span><span class="id"> f</span><span class="id"> :|:</span><span class="id"> g</span>)<span class="id"> :\:</span> ((<span class="id">e</span><span class="id"> :&amp;:</span><span class="id"> f</span>)<span class="id"> :\:</span><span class="id"> g</span>).<br/>
+&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> apply/setP</span><span class="id"> =&gt;</span><span class="id"> j;</span><span class="id"> cases_in</span><span class="id"> j</span>.<br/>
+<span class="id">rewrite</span><span class="id"> Pr_preim_vars_sub;</span><span class="id"> last</span><span class="gallina-kwd"> by</span><span class="id"> apply/subsetP</span><span class="id"> =&gt;</span><span class="id"> j;</span><span class="id"> cases_in</span><span class="id"> j</span>.<br/>
+<span class="id">have</span><span class="id"> :</span><span class="id"> prod_vals</span> ((<span class="id">e</span><span class="id"> :&amp;:</span><span class="id"> f</span>)<span class="id"> :\:</span><span class="id"> g</span>)<span class="id"> vals</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">\in</span><span class="id"> fin_img</span> (<span class="id">prod_vars</span> ((<span class="id">e</span><span class="id"> :&amp;:</span><span class="id"> f</span>)<span class="id"> :\:</span><span class="id"> g</span>)).<br/>
+&nbsp;&nbsp;<span class="id">case/boolP:</span> (_<span class="id"> \in</span><span class="id"> _</span>)<span class="id"> =&gt;</span><span class="id"> //</span><span class="id"> /negP</span><span class="id"> HA</span>.<br/>
+&nbsp;&nbsp;<span class="id">elim:</span> (<span class="id">negP</span><span class="id"> Hden</span>)<span class="id">;</span><span class="id"> rewrite</span><span class="id"> /num</span><span class="id"> -preim_vars_inter</span>.<br/>
+&nbsp;&nbsp;<span class="id">have</span><span class="id"> -&gt;</span><span class="id"> :</span><span class="id"> e</span><span class="id"> :&amp;:</span><span class="id"> f</span><span class="id"> :|:</span><span class="id"> g</span><span class="id"> =</span> (<span class="id">e</span><span class="id"> :&amp;:</span><span class="id"> f</span><span class="id"> :\:</span><span class="id"> g</span>)<span class="id"> :|:</span><span class="id"> g</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply/setP</span><span class="id"> =&gt;</span><span class="id"> k;</span><span class="gallina-kwd"> by</span><span class="id"> cases_in</span><span class="id"> k</span>.<br/>
+&nbsp;&nbsp;<span class="id">apply/eqP/Pr_set0P</span><span class="id"> =&gt;</span><span class="id"> v</span>.<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> preim_vars_inter</span><span class="id"> inE</span><span class="id"> =&gt;</span><span class="id"> /andP</span><span class="id"> [/preim_varsP</span><span class="id"> /=</span><span class="id"> HA']</span>.<br/>
+&nbsp;&nbsp;<span class="id">elim:</span><span class="id"> HA;</span><span class="id"> apply/fin_imgP</span>.<br/>
+&nbsp;&nbsp;<span class="gallina-kwd">exists</span><span class="id"> v;</span><span class="id"> apply/ffunP</span><span class="id"> =&gt;</span><span class="id"> k</span>.<br/>
+&nbsp;&nbsp;<span class="id">apply/prod_vals_eq</span><span class="id"> =&gt;</span><span class="id"> /HA'</span><span class="id"> &lt;-</span>.<br/>
+&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> ffunE</span>.<br/>
+<span class="id">case/fin_imgP</span><span class="id"> =&gt;</span><span class="id"> v</span><span class="id"> Hv</span><span class="id"> {Hden}</span>.<br/>
+<span class="id">set</span><span class="id"> a</span><span class="id"> :=</span><span class="id"> map_fin_img</span> (<span class="id">prod_vars</span> ((<span class="id">e</span><span class="id"> :&amp;:</span><span class="id"> f</span>)<span class="id"> :\:</span><span class="id"> g</span>))<span class="id"> v</span>.<br/>
+<span class="id">rewrite</span> (<span class="id">bigD1</span><span class="id"> a</span>)<span class="id"> //=</span><span class="id"> nth_fin_imgK</span><span class="id"> -Hv</span>.<br/>
+<span class="id">rewrite</span><span class="id"> /num</span> (<span class="id">@preim_vars_vals</span><span class="id"> _</span> (<span class="id">prod_vals</span> (<span class="id">e</span><span class="id"> :&amp;:</span><span class="id"> f</span><span class="id"> :|:</span><span class="id"> g</span>)<span class="id"> vals</span>)<span class="id"> _</span><span class="id"> vals</span>)<span class="id">;</span><br/>
+&nbsp;&nbsp;<span class="id">last</span><span class="gallina-kwd"> by</span><span class="id"> move=&gt;</span><span class="id"> j;</span><span class="id"> rewrite</span><span class="id"> set_vals_prod_vals_id</span>.<br/>
+<span class="id">rewrite</span><span class="id"> -preim_vars_inter</span><span class="id"> addrC</span><span class="id"> =&gt;</span><span class="id"> /eqP</span>.<br/>
+<span class="id">rewrite</span><span class="id"> -subr_eq</span><span class="id"> subrr</span><span class="id"> =&gt;</span><span class="id"> /eqP/esym</span><span class="id"> Hnum</span>.<br/>
+<span class="id">have</span><span class="id"> :</span><span class="id"> Pr</span><span class="id"> P</span> (<span class="id">preim_vars</span> (<span class="id">e</span><span class="id"> :&amp;:</span><span class="id"> f</span><span class="id"> :|:</span><span class="id"> g</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">set_vals</span> (<span class="id">prod_vals</span> (<span class="id">e</span><span class="id"> :&amp;:</span><span class="id"> f</span><span class="id"> :\:</span><span class="id"> g</span>) (<span class="id">set_vals</span><span class="id"> B</span><span class="id"> vals</span>))<span class="id"> vals</span>))<span class="id"> =</span><span class="id"> 0</span>.<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span> (_<span class="id"> :</span><span class="id"> prod_vals</span><span class="id"> _</span><span class="id"> _</span><span class="id"> =</span><span class="id"> prod_vars</span> (<span class="id">e</span><span class="id"> :&amp;:</span><span class="id"> f</span><span class="id"> :\:</span><span class="id"> g</span>)<span class="id"> u</span>)<span class="id">;</span><span class="id"> last</span><span class="id"> first</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply/ffunP</span><span class="id"> =&gt;</span><span class="id"> k;</span><span class="id"> apply/prod_vals_eq</span><span class="id"> =&gt;</span><span class="id"> Hk</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> -HB</span><span class="id"> set_vals_prod_vars</span><span class="id"> ?ffunE</span><span class="id"> //</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">move:</span><span class="id"> Hk;</span><span class="id"> cases_in</span><span class="id"> k</span>.<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> -</span>(<span class="id">@nth_fin_imgK</span><span class="id"> U</span>).<br/>
+&nbsp;&nbsp;<span class="id">move/psumr_eq0P:</span><span class="id"> Hnum;</span><span class="id"> apply;</span><span class="id"> first</span><span class="gallina-kwd"> by</span><span class="id"> move=&gt;</span><span class="id"> /=</span><span class="id"> *;</span><span class="id"> exact:</span><span class="id"> Pr_ge0</span>.<br/>
+&nbsp;&nbsp;<span class="id">apply/eqP</span><span class="id"> =&gt;</span><span class="id"> /</span>(<span class="id">f_equal</span> (<span class="gallina-kwd">fun</span><span class="id"> x</span><span class="id"> =&gt;</span><span class="id"> nth_fin_img</span><span class="id"> x</span>)).<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> !nth_fin_imgK</span><span class="id"> =&gt;</span><span class="id"> /</span>(<span class="id">prod_types_app</span><span class="id"> i</span>)<span class="id"> /prod_vals_eqP</span><span class="id"> Hi</span>.<br/>
+&nbsp;&nbsp;<span class="id">elim:</span><span class="id"> Hvi;</span><span class="id"> rewrite</span><span class="id"> -He</span><span class="id"> //</span>.<br/>
+&nbsp;&nbsp;<span class="id">have</span><span class="id"> iefg</span><span class="id"> :</span><span class="id"> i</span><span class="id"> \in</span><span class="id"> e</span><span class="id"> :&amp;:</span><span class="id"> f</span><span class="id"> :\:</span><span class="id"> g</span><span class="gallina-kwd"> by</span><span class="id"> move:</span><span class="id"> Hif</span><span class="id"> Hig</span><span class="id"> Hie;</span><span class="id"> cases_in</span><span class="id"> i</span>.<br/>
+&nbsp;&nbsp;<span class="id">move/</span>(<span class="id">prod_types_app</span><span class="id"> i</span>)<span class="id">/prod_vals_eqP:</span><span class="id"> Hv</span><span class="id"> =&gt;</span><span class="id"> -&gt;</span><span class="id"> //</span>.<br/>
+&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> -HB</span><span class="id"> set_vals_prod_vars</span><span class="id"> //</span><span class="id"> -Hi</span><span class="id"> //</span><span class="id"> ffunE</span>.<br/>
+<span class="id">move/Pr_set0P;</span><span class="id"> apply</span>.<br/>
+<span class="id">apply/preim_varsP</span><span class="id"> =&gt;</span><span class="id"> j</span><span class="id"> Hj</span>.<br/>
+<span class="id">case/boolP:</span> (<span class="id">j</span><span class="id"> \in</span><span class="id"> g</span>)<span class="id"> =&gt;</span><span class="id"> jg</span>.<br/>
+&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> set_vals_tl</span><span class="id"> ?inE</span><span class="id"> ?jg</span><span class="id"> //</span><span class="id"> /vals</span><span class="id"> -HC</span><span class="id"> set_vals_prod_vars</span>.<br/>
+<span class="id">rewrite</span><span class="id"> inE</span> (<span class="id">negbTE</span><span class="id"> jg</span>)<span class="id"> orbF</span><span class="gallina-kwd"> in</span><span class="id"> Hj</span>.<br/>
+<span class="id">rewrite</span><span class="id"> -HB</span><span class="id"> set_vals_prod_vals</span><span class="id"> ?set_vals_prod_vars</span><span class="id"> //</span>.<br/>
+&nbsp;&nbsp;<span class="id">move:</span><span class="id"> Hj;</span><span class="gallina-kwd"> by</span><span class="id"> rewrite</span><span class="id"> inE</span><span class="id"> =&gt;</span><span class="id"> /andP[]</span>.<br/>
+<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> inE</span><span class="id"> Hj</span><span class="id"> jg</span>.<br/>
+Qed.</div></details>
+<span class="vernacular">End</span><span class="id"> cinde_preim_lemmas</span>.<br/>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> cinde_preim_ok</span> (<span class="id">e</span><span class="id"> f</span><span class="id"> g</span><span class="id"> :</span><span class="id"> {set</span><span class="id"> 'I_n}</span>)<span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="id">cinde_preim</span><span class="id"> e</span><span class="id"> f</span><span class="id"> g</span><span class="id"> &lt;-&gt;</span><span class="id"> P</span><span class="id"> |=</span><span class="id"> prod_vars</span><span class="id"> e</span><span class="id"> _|_</span><span class="id"> prod_vars</span><span class="id"> f</span><span class="id"> |</span> (<span class="id">prod_vars</span><span class="id"> g</span>).<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id">split</span>.<br/>
+<span class="id">-</span><span class="id"> move=&gt;</span><span class="id"> Hpreim</span>.<br/>
+&nbsp;&nbsp;<span class="id">apply/cinde_RV_events</span><span class="id"> =&gt;</span><span class="id"> A</span><span class="id"> B</span><span class="id"> C</span>.<br/>
+&nbsp;&nbsp;<span class="id">set</span><span class="id"> vals</span><span class="id"> :=</span><span class="id"> set_vals</span><span class="id"> C</span> (<span class="id">set_vals</span><span class="id"> A</span> (<span class="id">set_vals</span><span class="id"> B</span><span class="id"> vals0</span>)).<br/>
+&nbsp;&nbsp;<span class="id">case</span><span class="id"> /boolP:</span><span class="id"> [forall</span><span class="id"> i</span><span class="gallina-kwd"> in</span><span class="id"> e,</span><span class="id"> vals</span><span class="id"> i</span><span class="id"> ==</span><span class="id"> set_vals</span><span class="id"> A</span><span class="id"> vals0</span><span class="id"> i];</span><span class="id"> last</span><span class="id"> first</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">case:</span> (<span class="id">cinde_events_vals</span><span class="id"> A</span><span class="id"> B</span><span class="id"> C</span>)<span class="id"> =&gt;</span><span class="id"> //</span><span class="id"> /forallP</span><span class="id"> Heg</span><span class="id"> /negP;</span><span class="id"> elim</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply/forallP</span><span class="id"> =&gt;</span><span class="id"> i;</span><span class="id"> apply/implyP</span><span class="id"> =&gt;</span><span class="id"> Hie</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">case</span><span class="id"> /boolP:</span> (<span class="id">i</span><span class="id"> \in</span><span class="id"> g</span>)<span class="id"> =&gt;</span><span class="id"> Hig;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">last</span><span class="gallina-kwd"> by</span><span class="id"> rewrite</span><span class="id"> /vals</span><span class="id"> set_vals_tl</span><span class="id"> //</span> (<span class="id">set_vals_hd</span><span class="id"> vals0</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> /vals</span> (<span class="id">set_vals_hd</span><span class="id"> vals0</span>)<span class="id"> //</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">move/implyP:</span> (<span class="id">Heg</span><span class="id"> i</span>)<span class="id">;</span><span class="id"> rewrite</span><span class="id"> inE</span><span class="id"> Hie;</span><span class="id"> exact</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;A&nbsp;and&nbsp;C&nbsp;are&nbsp;compatible&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id">move/forallP</span><span class="id"> =&gt;</span><span class="id"> /=</span><span class="id"> He</span>.<br/>
+&nbsp;&nbsp;<span class="id">have</span><span class="id"> {}He</span><span class="id"> x</span><span class="id"> Hx</span><span class="id"> :=</span><span class="id"> eqP</span> (<span class="id">implyP</span> (<span class="id">He</span><span class="id"> x</span>)<span class="id"> Hx</span>).<br/>
+&nbsp;&nbsp;<span class="id">case</span><span class="id"> /boolP:</span><span class="id"> [forall</span><span class="id"> i</span><span class="gallina-kwd"> in</span><span class="id"> f,</span><span class="id"> vals</span><span class="id"> i</span><span class="id"> ==</span><span class="id"> set_vals</span><span class="id"> B</span><span class="id"> vals0</span><span class="id"> i]</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;A/C&nbsp;and&nbsp;B&nbsp;are&nbsp;compatible&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">move/forallP</span><span class="id"> =&gt;</span><span class="id"> /=</span><span class="id"> Hf</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">have</span><span class="id"> {}Hf</span><span class="id"> x</span><span class="id"> Hx</span><span class="id"> :=</span><span class="id"> eqP</span> (<span class="id">implyP</span> (<span class="id">Hf</span><span class="id"> x</span>)<span class="id"> Hx</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">move:</span> (<span class="id">Hpreim</span><span class="id"> vals</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span> (<span class="id">preim_vars_vals</span><span class="id"> _</span><span class="id"> He</span>)<span class="id"> //</span> (<span class="id">preim_vars_vals</span><span class="id"> _</span><span class="id"> Hf</span>)<span class="id"> //</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> /cinde_events</span><span class="id"> -!preim_prod_vars</span><span class="id"> -!preim_inter</span>.<br/>
+&nbsp;&nbsp;<span class="id">move/cinde_preimC</span><span class="gallina-kwd"> in</span><span class="id"> Hpreim</span>.<br/>
+&nbsp;&nbsp;<span class="id">move=&gt;</span><span class="id"> HB;</span><span class="id"> apply:</span><span class="id"> cinde_eventsC</span>.<br/>
+&nbsp;&nbsp;<span class="id">case:</span> (<span class="id">cinde_events_vals</span><span class="id"> B</span><span class="id"> A</span><span class="id"> C</span>)<span class="id"> HB</span><span class="id"> =&gt;</span><span class="id"> //</span><span class="id"> /forallP</span><span class="id"> Hfg</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;A/C&nbsp;and&nbsp;B&nbsp;are&nbsp;incompatible&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> negb_forall</span><span class="id"> =&gt;</span><span class="id"> /existsP</span><span class="id"> [i]</span>.<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> negb_imply</span><span class="id"> /vals</span><span class="id"> =&gt;</span><span class="id"> /andP</span><span class="id"> [Hif]</span>.<br/>
+&nbsp;&nbsp;<span class="id">case</span><span class="id"> /boolP:</span> (<span class="id">i</span><span class="id"> \in</span><span class="id"> g</span>)<span class="id"> =&gt;</span><span class="id"> Hig</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;B&nbsp;and&nbsp;C&nbsp;are&nbsp;incompatible&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">move:</span> (<span class="id">Hfg</span><span class="id"> i</span>)<span class="id">;</span><span class="id"> rewrite</span><span class="id"> inE</span><span class="id"> Hif</span><span class="id"> Hig</span><span class="id"> /=</span><span class="id"> =&gt;</span><span class="id"> /eqP</span><span class="id"> &lt;-</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span> (<span class="id">set_vals_hd</span><span class="id"> vals0</span>)<span class="id"> //</span><span class="id"> eqxx</span>.<br/>
+&nbsp;&nbsp;<span class="id">case</span><span class="id"> /boolP:</span> (<span class="id">i</span><span class="id"> \in</span><span class="id"> e</span>)<span class="id"> =&gt;</span><span class="id"> Hie;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">last</span><span class="gallina-kwd"> by</span><span class="id"> rewrite</span><span class="id"> set_vals_tl</span><span class="id"> //</span><span class="id"> set_vals_tl</span><span class="id"> //</span><span class="id"> eqxx</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;A&nbsp;and&nbsp;B&nbsp;are&nbsp;incompatible&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> set_vals_tl</span><span class="id"> //</span> (<span class="id">set_vals_hd</span><span class="id"> vals0</span>)<span class="id"> //</span><span class="id"> =&gt;</span><span class="id"> /eqP</span><span class="id"> Hvi</span>.<br/>
+&nbsp;&nbsp;<span class="id">apply/cinde_eventsC</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;Reduce&nbsp;to&nbsp;intersection&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id">move/cinde_preimC/cinde_preim_inter/</span>(_<span class="id"> vals</span>)<span class="id">:</span><span class="id"> Hpreim</span>.<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> {1}/cinde_events</span><span class="id"> -!preim_vars_inter</span><span class="id"> setUid</span><span class="id"> /=</span>.<br/>
+&nbsp;&nbsp;<span class="id">case/Rxx2</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;cPr&nbsp;=&nbsp;0&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">move/cPr_eq0P/Pr_set0P</span><span class="id"> =&gt;</span><span class="id"> Hx</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">have</span><span class="id"> HAC</span><span class="id"> :</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">Pr</span><span class="id"> P</span> (<span class="id">finset</span> (<span class="id">prod_vars</span><span class="id"> e</span><span class="id"> @^-1</span><span class="id"> A</span>)<span class="id"> :&amp;:</span><span class="id"> finset</span> (<span class="id">prod_vars</span><span class="id"> g</span><span class="id"> @^-1</span><span class="id"> C</span>))<span class="id"> =</span><span class="id"> 0</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply/Pr_set0P</span><span class="id"> =&gt;</span><span class="id"> u</span><span class="id"> Hu;</span><span class="id"> apply:</span><span class="id"> Hx</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> -preim_vars_inter;</span><span class="id"> apply/preim_varsP</span><span class="id"> =&gt;</span><span class="id"> j</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">move:</span><span class="id"> Hu;</span><span class="id"> rewrite</span><span class="id"> !inE</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> /vals</span><span class="id"> =&gt;</span><span class="id"> /andP[]</span><span class="id"> /eqP</span><span class="id"> &lt;-</span><span class="id"> /eqP</span><span class="id"> &lt;-</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">case/boolP:</span> (<span class="id">j</span><span class="id"> \in</span><span class="id"> g</span>)<span class="id"> =&gt;</span><span class="id"> jg</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> set_vals_prod_vars</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">case/boolP:</span> (<span class="id">j</span><span class="id"> \in</span><span class="id"> e</span>)<span class="id"> =&gt;</span><span class="id"> //</span><span class="id"> je</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> set_vals_tl</span><span class="id"> //</span><span class="id"> set_vals_prod_vars</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> /cinde_events</span> (<span class="id">proj2</span> (<span class="id">cPr_eq0P</span><span class="id"> _</span><span class="id"> _</span><span class="id"> _</span>)).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span> (<span class="id">proj2</span> (<span class="id">cPr_eq0P</span><span class="id"> _</span><span class="id"> _</span><span class="id"> _</span>))<span class="id"> //</span><span class="id"> GRing</span>.<span class="id">mul0r</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply/Pr_set0P</span><span class="id"> =&gt;</span><span class="id"> u</span><span class="id"> Hu</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">apply:</span> (<span class="id">proj1</span> (<span class="id">Pr_set0P</span><span class="id"> _</span><span class="id"> _</span>)<span class="id"> HAC</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">move:</span><span class="id"> Hu;</span><span class="gallina-kwd"> by</span><span class="id"> rewrite</span><span class="id"> !inE</span><span class="id"> =&gt;</span><span class="id"> /andP[]</span><span class="id"> /andP[]</span><span class="id"> -&gt;</span><span class="id"> _</span><span class="id"> -&gt;</span>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;cPr&nbsp;=&nbsp;1&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id">exact:</span> (<span class="id">cinde_events_cPr1</span> (<span class="id">i:=i</span>)).<br/>
+<span class="id">-</span><span class="id"> move=&gt;</span><span class="id"> Hdrv</span><span class="id"> vals</span>.<br/>
+&nbsp;&nbsp;<span class="id">move/cinde_RV_events:</span><span class="id"> Hdrv</span>.<br/>
+&nbsp;&nbsp;<span class="id">move/</span>(_ (<span class="id">prod_vals</span><span class="id"> e</span><span class="id"> vals</span>) (<span class="id">prod_vals</span><span class="id"> f</span><span class="id"> vals</span>) (<span class="id">prod_vals</span><span class="id"> g</span><span class="id"> vals</span>)).<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> -</span>(<span class="id">preim_vars_vals</span> (<span class="id">prod_vals</span><span class="id"> e</span><span class="id"> vals</span>) (<span class="id">set_vals_prod_vals</span><span class="id"> _</span><span class="id"> vals</span>)).<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> -</span>(<span class="id">preim_vars_vals</span> (<span class="id">prod_vals</span><span class="id"> f</span><span class="id"> vals</span>) (<span class="id">set_vals_prod_vals</span><span class="id"> _</span><span class="id"> vals</span>)).<br/>
+&nbsp;&nbsp;<span class="id">rewrite</span><span class="id"> -</span>(<span class="id">preim_vars_vals</span> (<span class="id">prod_vals</span><span class="id"> g</span><span class="id"> vals</span>) (<span class="id">set_vals_prod_vals</span><span class="id"> _</span><span class="id"> vals</span>)).<br/>
+&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> -!preim_prod_vars</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="vernacular">Section</span><span class="id"> Imap</span>.<br/>
+<span class="vernacular">Variable</span><span class="id"> parent</span><span class="id"> :</span><span class="id"> rel</span><span class="id"> 'I_n</span>.<br/>
+<br/>
+<span class="vernacular">Definition</span><span class="id"> topological</span><span class="id"> :=</span><span class="gallina-kwd"> forall</span><span class="id"> i</span><span class="id"> j</span><span class="id"> :</span><span class="id"> 'I_n,</span><span class="id"> parent</span><span class="id"> i</span><span class="id"> j</span><span class="id"> -&gt;</span> (<span class="id">i</span><span class="id"> &lt;</span><span class="id"> j</span>)<span class="id">%nat</span>.<br/>
+<br/>
+<span class="vernacular">Definition</span><span class="id"> independence</span> (<span class="id">i</span><span class="id"> j</span><span class="id"> :</span><span class="id"> 'I_n</span>)<span class="id"> :=</span><br/>
+&nbsp;&nbsp;<span class="id">~~</span><span class="id"> closure</span><span class="id"> parent</span><span class="id"> [set</span><span class="id"> i]</span><span class="id"> j</span><span class="id"> -&gt;</span><br/>
+&nbsp;&nbsp;<span class="gallina-kwd">let</span><span class="id"> parents</span><span class="id"> :=</span><span class="id"> [set</span><span class="id"> k</span><span class="id"> |</span><span class="id"> closure</span><span class="id"> parent</span><span class="id"> [set</span><span class="id"> k]</span><span class="id"> i]</span><span class="gallina-kwd"> in</span><br/>
+&nbsp;&nbsp;<span class="id">cinde_preim</span><span class="id"> [set</span><span class="id"> i]</span><span class="id"> [set</span><span class="id"> j]</span><span class="id"> parents</span>.<br/>
+<span class="vernacular">End</span><span class="id"> Imap</span>.<br/>
+<br/>
+<br/>
+<span class="vernacular">Record</span><span class="id"> t</span><span class="id"> :=</span><span class="id"> mkBN</span><br/>
+&nbsp;&nbsp;<span class="id">{</span><span class="id"> parent:</span><span class="id"> rel</span><span class="id"> 'I_n;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">topo:</span><span class="id"> topological</span><span class="id"> parent;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id">indep:</span><span class="gallina-kwd"> forall</span><span class="id"> i</span><span class="id"> j,</span><span class="id"> independence</span><span class="id"> parent</span><span class="id"> i</span><span class="id"> j</span><br/>
+&nbsp;&nbsp;<span class="id">}</span>.<br/>
+<span class="vernacular">End</span><span class="id"> preim</span>.<br/>
+<br/>
+<span class="vernacular">Section</span><span class="id"> equiv</span>.<br/>
+<span class="vernacular">Variables</span><span class="id"> types1</span><span class="id"> types2</span><span class="id"> :</span><span class="id"> 'I_n</span><span class="id"> -&gt;</span><span class="id"> finType</span>.<br/>
+<span class="vernacular">Variable</span><span class="id"> vars1</span><span class="id"> :</span><span class="gallina-kwd"> forall</span><span class="id"> i,</span><span class="id"> {RV</span><span class="id"> P</span><span class="id"> -&gt;</span><span class="id"> types1</span><span class="id"> i}</span>.<br/>
+<span class="vernacular">Variable</span><span class="id"> vars2</span><span class="id"> :</span><span class="gallina-kwd"> forall</span><span class="id"> i,</span><span class="id"> {RV</span><span class="id"> P</span><span class="id"> -&gt;</span><span class="id"> types2</span><span class="id"> i}</span>.<br/>
+<span class="vernacular">Hypothesis</span><span class="id"> varsE</span><span class="id"> :</span><span class="gallina-kwd"> forall</span><span class="id"> i,</span><span class="id"> RV_equiv</span> (<span class="id">vars1</span><span class="id"> i</span>) (<span class="id">vars2</span><span class="id"> i</span>).<br/>
+<br/>
+<span class="vernacular">Definition</span><span class="id"> vals1to2</span> (<span class="id">vals1</span><span class="id"> :</span><span class="id"> univ_types</span><span class="id"> types1</span>)<span class="id"> :</span><span class="id"> univ_types</span><span class="id"> types2</span><br/>
+&nbsp;<span class="id">:=</span><span class="id"> [ffun</span><span class="id"> i</span><span class="id"> =&gt;</span> (<span class="id">sval</span> (<span class="id">varsE</span><span class="id"> i</span>)).<span class="id">1</span> (<span class="id">vals1</span><span class="id"> i</span>)<span class="id">]</span>.<br/>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> preim_vars12</span> (<span class="id">I</span><span class="id"> :</span><span class="id"> {set</span><span class="id"> 'I_n}</span>) (<span class="id">vals1</span><span class="id"> :</span><span class="id"> univ_types</span><span class="id"> types1</span>)<span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="id">preim_vars</span><span class="id"> vars2</span><span class="id"> I</span> (<span class="id">vals1to2</span><span class="id"> vals1</span>)<span class="id"> =</span><span class="id"> preim_vars</span><span class="id"> vars1</span><span class="id"> I</span><span class="id"> vals1</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id">rewrite</span><span class="id"> /preim_vars</span>.<br/>
+<span class="id">apply/setP</span><span class="id"> =&gt;</span><span class="id"> v</span>.<br/>
+<span class="id">apply/preim_varsP;</span><span class="id"> case:</span><span class="id"> ifP</span><span class="id"> =&gt;</span><span class="id"> /preim_varsP</span><span class="id"> /=</span><span class="id"> H1</span>.<br/>
+<span class="id">-</span><span class="id"> move=&gt;</span><span class="id"> i</span><span class="id"> iI;</span><span class="id"> rewrite</span><span class="id"> ffunE</span>.<br/>
+&nbsp;&nbsp;<span class="id">move/H1:</span> (<span class="id">iI</span>).<br/>
+&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> case:</span><span class="id"> varsE</span><span class="id"> =&gt;</span><span class="id"> -[f</span><span class="id"> g]</span><span class="id"> [/=</span><span class="id"> fK</span><span class="id"> gK]</span><span class="id"> /</span>(_<span class="id"> v</span>)<span class="id"> -&gt;</span><span class="id"> &lt;-</span>.<br/>
+<span class="id">-</span><span class="id"> move=&gt;</span><span class="id"> Hv;</span><span class="id"> elim:</span><span class="id"> H1</span><span class="id"> =&gt;</span><span class="id"> /=</span><span class="id"> i</span><span class="id"> iI</span>.<br/>
+&nbsp;&nbsp;<span class="id">move/Hv:</span> (<span class="id">iI</span>)<span class="id">;</span><span class="id"> rewrite</span><span class="id"> ffunE</span>.<br/>
+&nbsp;&nbsp;<span class="id">case:</span><span class="id"> varsE</span><span class="id"> =&gt;</span><span class="id"> -[f</span><span class="id"> g]</span><span class="id"> [/=</span><span class="id"> fK</span><span class="id"> gK]</span><span class="id"> /</span>(_<span class="id"> v</span>)<span class="id"> -&gt;</span><span class="id"> /</span>(<span class="id">f_equal</span><span class="id"> g</span>).<br/>
+&nbsp;&nbsp;<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> !fK</span><span class="id"> =&gt;</span><span class="id"> -&gt;</span>.<br/>
+Qed.</div></details>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> cinde_preim_equiv1</span> (<span class="id">I</span><span class="id"> J</span><span class="id"> K</span><span class="id"> :</span><span class="id"> {set</span><span class="id"> 'I_n}</span>)<span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="id">cinde_preim</span><span class="id"> vars2</span><span class="id"> I</span><span class="id"> J</span><span class="id"> K</span><span class="id"> -&gt;</span><span class="id"> cinde_preim</span><span class="id"> vars1</span><span class="id"> I</span><span class="id"> J</span><span class="id"> K</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id">rewrite</span><span class="id"> /cinde_preim</span><span class="id"> =&gt;</span><span class="id"> CI</span><span class="id"> vals1</span>.<br/>
+<span class="id">move:</span> (<span class="id">CI</span> (<span class="id">vals1to2</span><span class="id"> vals1</span>)).<br/>
+<span class="gallina-kwd">by</span><span class="id"> rewrite</span><span class="id"> !preim_vars12</span>.<br/>
+Qed.</div></details>
+<span class="vernacular">End</span><span class="id"> equiv</span>.<br/>
+<br/>
+<span class="vernacular">Lemma</span><span class="id"> cinde_preim_equiv</span> (<span class="id">types1</span><span class="id"> types2</span><span class="id"> :</span><span class="id"> 'I_n</span><span class="id"> -&gt;</span><span class="id"> finType</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">vars1</span><span class="id"> :</span><span class="gallina-kwd"> forall</span><span class="id"> i</span><span class="id"> :</span><span class="id"> 'I_n,</span><span class="id"> {RV</span><span class="id"> P</span><span class="id"> -&gt;</span><span class="id"> types1</span><span class="id"> i}</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id">vars2</span><span class="id"> :</span><span class="gallina-kwd"> forall</span><span class="id"> i</span><span class="id"> :</span><span class="id"> 'I_n,</span><span class="id"> {RV</span><span class="id"> P</span><span class="id"> -&gt;</span><span class="id"> types2</span><span class="id"> i}</span>)<span class="id"> I</span><span class="id"> J</span><span class="id"> K</span><span class="id"> :</span><br/>
+&nbsp;&nbsp;(<span class="gallina-kwd">forall</span><span class="id"> i</span><span class="id"> :</span><span class="id"> 'I_n,</span><span class="id"> RV_equiv</span> (<span class="id">vars1</span><span class="id"> i</span>) (<span class="id">vars2</span><span class="id"> i</span>))<span class="id"> -&gt;</span><br/>
+&nbsp;&nbsp;<span class="id">cinde_preim</span><span class="id"> vars1</span><span class="id"> I</span><span class="id"> J</span><span class="id"> K</span><span class="id"> &lt;-&gt;</span><span class="id"> cinde_preim</span><span class="id"> vars2</span><span class="id"> I</span><span class="id"> J</span><span class="id"> K</span>.<br/>
+<details>
+<summary class="toggleproof">Proof.</summary>
+<div class="proofscript">
+<span class="id"> split;</span><span class="id"> apply:</span><span class="id"> cinde_preim_equiv1</span><span class="id"> =&gt;</span><span class="id"> //</span><span class="id"> i;</span><span class="gallina-kwd"> by</span><span class="id"> apply:</span><span class="id"> RV_equivC</span>. Qed.</div></details>
+<br/>
+<span class="vernacular">End</span><span class="id"> bn</span>.<br/>
+<span class="vernacular">End</span><span class="id"> BN</span>.<br/>
+<br/>
+<span class="vernacular">Section</span><span class="vernacular"> Factorization</span>.<br/>
+<span class="vernacular">Import</span><span class="id"> BN</span>.<br/>
+<span class="vernacular">Variables</span> (<span class="id">R</span><span class="id"> :</span><span class="id"> realType</span>) (<span class="id">U</span><span class="id"> :</span><span class="id"> finType</span>) (<span class="id">P</span><span class="id"> :</span><span class="id"> R</span>.<span class="id">-fdist</span><span class="id"> U</span>) (<span class="id">n</span><span class="id"> :</span><span class="id"> nat</span>).<br/>
+<span class="vernacular">Variable</span><span class="id"> types</span><span class="id"> :</span><span class="id"> 'I_n</span><span class="id"> -&gt;</span><span class="id"> finType</span>.<br/>
+<span class="vernacular">Variable</span><span class="id"> vars</span><span class="id"> :</span><span class="gallina-kwd"> forall</span><span class="id"> i,</span><span class="id"> {RV</span><span class="id"> P</span><span class="id"> -&gt;</span><span class="id"> types</span><span class="id"> i}</span>.<br/>
+<span class="vernacular">Variable</span><span class="id"> bn</span><span class="id"> :</span><span class="id"> t</span><span class="id"> vars</span>.<br/>
+<br/>
+<span class="vernacular">Theorem</span><span class="id"> BN_factorization</span><span class="id"> vals</span><span class="id"> :</span><br/>
+&nbsp;&nbsp;<span class="id">Pr</span><span class="id"> P</span> (<span class="id">preim_vars</span><span class="id"> vars</span><span class="id"> setT</span><span class="id"> vals</span>)<span class="id"> =</span><br/>
+&nbsp;&nbsp;<span class="id">\prod_</span>(<span class="id">i</span><span class="id"> &lt;</span><span class="id"> n</span>)<br/>
+&nbsp;&nbsp;&nbsp;<span class="gallina-kwd">let</span><span class="id"> parents</span><span class="id"> :=</span><span class="id"> [set</span><span class="id"> k</span><span class="id"> |</span><span class="id"> closure</span> (<span class="id">parent</span><span class="id"> bn</span>)<span class="id"> [set</span><span class="id"> k]</span><span class="id"> i]</span><span class="gallina-kwd"> in</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="id">`Pr_</span><span class="id"> P</span><span class="id"> [</span><span class="id"> preim_vars</span><span class="id"> vars</span><span class="id"> [set</span><span class="id"> i]</span><span class="id"> vals</span><span class="id"> |</span><span class="id"> preim_vars</span><span class="id"> vars</span><span class="id"> parents</span><span class="id"> vals</span><span class="id"> ]</span>.<br/>
+<br/>
+<span class="vernacular">End</span><span class="vernacular"> Factorization</span>.<br/>
+
+      <div class="footer"><hr/>Generated by <a href="https://github.com/affeldt-aist/rocqnavi/">rocqnavi</a></div>
+    </div>
+  </div>
+    </main>
+</body>
+</html>

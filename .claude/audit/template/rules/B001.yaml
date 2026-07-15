@@ -1,0 +1,23 @@
+id: B001
+category: verbose_idioms
+title: "have [/eqP h|h] := boolP (X == Y) is verbose; prefer case: (eqVneq X Y)"
+severity: warning
+enabled: true
+stage_mode: both
+authority:
+  - mathcomp-CONTRIBUTING#proofs
+  - peer-feedback-2026-03
+fast_pattern:
+  pattern: 'have\s+\[\s*/eqP'
+  ignore_in_comments: true
+  file_glob: '*.v'
+agent_prompt: |
+  Flag the pattern `have [/eqP <h>|<h>] := boolP (X == Y)` and explain that
+  `case: (eqVneq X Y) => <h>` is the canonical MathComp equal-or-not split:
+  it produces two subgoals with `h : X = Y` and `h : X != Y` respectively
+  and advertises the semantics without an intermediate view step. Allow
+  the `boolP` idiom when the split is on a non-equality boolean, noting
+  the legitimate pattern.
+scope: changed_hunks
+fix_hint: "Replace `have [/eqP h|h] := boolP (X == Y).` with `case: (eqVneq X Y) => h.`, which is the canonical MathComp eq-or-not split."
+exceptions: []

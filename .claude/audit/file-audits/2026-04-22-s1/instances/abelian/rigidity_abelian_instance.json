@@ -1,0 +1,152 @@
+{
+  "findings": [
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/abelian/rigidity_abelian_instance.v",
+      "line_start": 72,
+      "line_end": 72,
+      "lemma_name": "abel_s1_neq_s2",
+      "severity": "warning",
+      "evidence_quote": "Lemma abel_s1_neq_s2 : abel_s1 != abel_s2.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/abelian/rigidity_abelian_instance.v",
+      "line_start": 109,
+      "line_end": 109,
+      "lemma_name": "abel_perm_endpoint_inj1",
+      "severity": "warning",
+      "evidence_quote": "Lemma abel_perm_endpoint_inj1 :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/abelian/rigidity_abelian_instance.v",
+      "line_start": 127,
+      "line_end": 127,
+      "lemma_name": "abel_security_witness_direct_1",
+      "severity": "warning",
+      "evidence_quote": "Definition abel_security_witness_direct_1 : SecurityWitness R R_abel :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/abelian/rigidity_abelian_instance.v",
+      "line_start": 64,
+      "line_end": 64,
+      "lemma_name": "abel_s2",
+      "severity": "error",
+      "evidence_quote": "Definition abel_s2 : {perm 'I_4} :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/abelian/rigidity_abelian_instance.v",
+      "line_start": 68,
+      "line_end": 68,
+      "lemma_name": "abel_sigmas",
+      "severity": "error",
+      "evidence_quote": "Definition abel_sigmas : 2.-tuple {perm 'I_4} :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/abelian/rigidity_abelian_instance.v",
+      "line_start": 80,
+      "line_end": 80,
+      "lemma_name": "abel_sigmas_distinct",
+      "severity": "error",
+      "evidence_quote": "Lemma abel_sigmas_distinct :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/abelian/rigidity_abelian_instance.v",
+      "line_start": 127,
+      "line_end": 127,
+      "lemma_name": "abel_security_witness_direct_1",
+      "severity": "error",
+      "evidence_quote": "Definition abel_security_witness_direct_1 : SecurityWitness R R_abel :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/abelian/rigidity_abelian_instance.v",
+      "line_start": 171,
+      "line_end": 171,
+      "lemma_name": "abel_threshold_witness",
+      "severity": "error",
+      "evidence_quote": "Definition abel_threshold_witness : ThresholdWitness R_abel :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/abelian/rigidity_abelian_instance.v",
+      "line_start": 174,
+      "line_end": 174,
+      "lemma_name": "abel_rigidity",
+      "severity": "error",
+      "evidence_quote": "Definition abel_rigidity : AlgebraicRigidity R R_abel :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/abelian/rigidity_abelian_instance.v",
+      "line_start": 185,
+      "line_end": 185,
+      "lemma_name": "abel_tradeoff",
+      "severity": "error",
+      "evidence_quote": "Lemma abel_tradeoff :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "I001",
+      "file": "pgg-smc/instances/abelian/rigidity_abelian_instance.v",
+      "line_start": 127,
+      "line_end": 127,
+      "lemma_name": "abel_security_witness_direct_1",
+      "severity": "error",
+      "evidence_quote": "Definition abel_security_witness_direct_1 : SecurityWitness R R_abel :=",
+      "stage": "stage1",
+      "reason": "five or more underscore-separated components without a canonical MathComp suffix",
+      "stages": [
+        "stage1"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": null,
+  "exit_code": 2
+}

@@ -1,0 +1,84 @@
+{
+  "fingerprint": "60e87a9d5d0dc0e1",
+  "bad": {
+    "findings": [
+      {
+        "rule_id": "A002",
+        "file": ".claude/audit/fixtures/bad/A002.v",
+        "line_start": 8,
+        "line_end": 9,
+        "lemma_name": "bad_fequal_tactic",
+        "severity": "error",
+        "evidence_quote": "f_equal.\nexact: eq_ab.",
+        "closeness": "far",
+        "explanation": "Tactic form: `f_equal.` decomposes the goal `S a = S b` into the subgoal `a = b`, which is then closed by `exact: eq_ab.`. This is the canonical case where goal-level `congr S.` is directly applicable: the head symbol is `S` (= `Nat.succ`), and `congr S.` discharges the equality in one step, making `exact: eq_ab.` the sole remaining closer. No restructuring is needed; the goal is already in the right shape. Per AUTHORITY.md \u00a7Tactics-to-prefer, `congr f` is the preferred replacement for `f_equal`. No fallback to `congr1` is justified here.",
+        "fix_sketch": "move=> a b eq_ab.\ncongr S.\nexact: eq_ab.\n\nOr more tersely:\nmove=> a b ->.\ndone.",
+        "confidence": "high",
+        "stage": "stage2"
+      },
+      {
+        "rule_id": "A002",
+        "file": ".claude/audit/fixtures/bad/A002.v",
+        "line_start": 15,
+        "line_end": 15,
+        "lemma_name": "bad_fequal_view",
+        "severity": "error",
+        "evidence_quote": "move=> n m /(f_equal (fun z => z - 1)).",
+        "closeness": "far",
+        "explanation": "View form: `/(f_equal (fun z => z - 1))` applies `f_equal` as a SSReflect view, converting a hypothesis `n = m` into `n - 1 = m - 1`. Per A002, the required fix is a goal-level restructuring that avoids the view entirely. The goal `n = m -> n - 1 = m - 1` can be discharged by intro-rewrite: `move=> n m ->.` closes both the antecedent and the consequent at once because `->` rewrites the goal, leaving the syntactically identical `m - 1 = m - 1` which `done.` closes. Alternatively, `move=> n m Hnm; rewrite Hnm; congr (_ - 1).` makes the `congr` step explicit. Neither approach requires `f_equal` in view form. The `/(congr1 f)` fallback is not justified: goal-level rewriting is straightforwardly applicable here.",
+        "fix_sketch": "(* Option 1: intro-rewrite closes the goal outright. *)\nmove=> n m ->.\ndone.\n\n(* Option 2: explicit congr at goal level. *)\nmove=> n m Hnm.\nrewrite Hnm; congr (_ - 1).",
+        "confidence": "high",
+        "stage": "stage2"
+      },
+      {
+        "rule_id": "A002",
+        "file": ".claude/audit/fixtures/bad/A002.v",
+        "line_start": 23,
+        "line_end": 23,
+        "lemma_name": "bad_fequal_arity",
+        "severity": "error",
+        "evidence_quote": "apply: f_equal2; by [].",
+        "closeness": "far",
+        "explanation": "`f_equal2` decomposes `a + b = c + d` into two subgoals `a = c` and `b = d`, both closed by `by []` from `Hac` and `Hbd` respectively. The idiomatic replacement is `congr (_ + _).` which achieves the same decomposition in one goal-level tactic; the two subgoals are then closed by `exact: Hac.` and `exact: Hbd.`, or the whole proof can be closed by `rewrite Hac Hbd.` with no subgoal split at all. `apply: f_equal2` is the tactic form and goal-level `congr` is directly applicable; no fallback to `congr2` is justified. Per AUTHORITY.md \u00a7Tactics-to-prefer, `congr f` discharges every argument of the head symbol at once.",
+        "fix_sketch": "(* Option 1: rewrite closes without subgoal split. *)\nmove=> a b c d Hac Hbd.\nrewrite Hac Hbd.\n\n(* Option 2: explicit goal-level congr. *)\nmove=> a b c d Hac Hbd.\ncongr (_ + _).\n- exact: Hac.\n- exact: Hbd.",
+        "confidence": "high",
+        "stage": "stage2"
+      }
+    ],
+    "tokens_used": 39924,
+    "budget": {
+      "entity_count": 1,
+      "chunk_count": 1,
+      "chunk_size": 3,
+      "workers_used": 1,
+      "tokens_used": 39924,
+      "tokens_cap": 75000,
+      "wall_ms_used": 100141,
+      "wall_ms_cap": 600000,
+      "deferred_chunks": 0,
+      "stop_reason": "clean",
+      "estimated_usd": 0.2395,
+      "model": "sonnet"
+    },
+    "stage2_incomplete": false
+  },
+  "good": {
+    "findings": [],
+    "tokens_used": 34229,
+    "budget": {
+      "entity_count": 1,
+      "chunk_count": 1,
+      "chunk_size": 3,
+      "workers_used": 1,
+      "tokens_used": 34229,
+      "tokens_cap": 75000,
+      "wall_ms_used": 5357,
+      "wall_ms_cap": 600000,
+      "deferred_chunks": 0,
+      "stop_reason": "clean",
+      "estimated_usd": 0.2054,
+      "model": "sonnet"
+    },
+    "stage2_incomplete": false
+  }
+}

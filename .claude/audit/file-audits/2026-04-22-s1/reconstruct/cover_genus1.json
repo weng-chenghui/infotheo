@@ -1,0 +1,151 @@
+{
+  "findings": [
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/reconstruct/cover_genus1.v",
+      "line_start": 79,
+      "line_end": 79,
+      "lemma_name": "genus1_ramif_ge_nbr",
+      "severity": "warning",
+      "evidence_quote": "Lemma genus1_ramif_ge_nbr : (3 <= ramif1)%N.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/reconstruct/cover_genus1.v",
+      "line_start": 429,
+      "line_end": 429,
+      "lemma_name": "ts_g_perm_compatible",
+      "severity": "warning",
+      "evidence_quote": "Lemma ts_g_perm_compatible :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/reconstruct/cover_genus1.v",
+      "line_start": 447,
+      "line_end": 447,
+      "lemma_name": "higher_genus_gap_bound",
+      "severity": "warning",
+      "evidence_quote": "Lemma higher_genus_gap_bound :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/cover_genus1.v",
+      "line_start": 66,
+      "line_end": 66,
+      "lemma_name": "genus1_hurwitz",
+      "severity": "error",
+      "evidence_quote": "Lemma genus1_hurwitz :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/cover_genus1.v",
+      "line_start": 86,
+      "line_end": 86,
+      "lemma_name": "genus1_data",
+      "severity": "error",
+      "evidence_quote": "Definition genus1_data : CoveringData M := {|",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/cover_genus1.v",
+      "line_start": 238,
+      "line_end": 238,
+      "lemma_name": "ts1_perm_compatible",
+      "severity": "error",
+      "evidence_quote": "Lemma ts1_perm_compatible :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/cover_genus1.v",
+      "line_start": 246,
+      "line_end": 246,
+      "lemma_name": "genus1_covering",
+      "severity": "error",
+      "evidence_quote": "Definition genus1_covering : CoveringScheme M := {|",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/cover_genus1.v",
+      "line_start": 292,
+      "line_end": 292,
+      "lemma_name": "higher_genus_data",
+      "severity": "error",
+      "evidence_quote": "Definition higher_genus_data : CoveringData M := {|",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/cover_genus1.v",
+      "line_start": 429,
+      "line_end": 429,
+      "lemma_name": "ts_g_perm_compatible",
+      "severity": "error",
+      "evidence_quote": "Lemma ts_g_perm_compatible :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/cover_genus1.v",
+      "line_start": 437,
+      "line_end": 437,
+      "lemma_name": "higher_genus_covering",
+      "severity": "error",
+      "evidence_quote": "Definition higher_genus_covering : CoveringScheme M := {|",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/cover_genus1.v",
+      "line_start": 447,
+      "line_end": 447,
+      "lemma_name": "higher_genus_gap_bound",
+      "severity": "error",
+      "evidence_quote": "Lemma higher_genus_gap_bound :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": null,
+  "exit_code": 2
+}

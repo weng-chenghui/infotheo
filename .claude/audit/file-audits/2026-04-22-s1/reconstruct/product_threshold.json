@@ -1,0 +1,192 @@
+{
+  "findings": [
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/reconstruct/product_threshold.v",
+      "line_start": 380,
+      "line_end": 380,
+      "lemma_name": "product_sum_mod_perm_compatible",
+      "severity": "warning",
+      "evidence_quote": "Lemma product_sum_mod_perm_compatible :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/product_threshold.v",
+      "line_start": 61,
+      "line_end": 61,
+      "lemma_name": "split_secret",
+      "severity": "error",
+      "evidence_quote": "Definition split_secret (s : 'I_N) : 'I_N1 * 'I_N2 :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/product_threshold.v",
+      "line_start": 69,
+      "line_end": 69,
+      "lemma_name": "combine_splitK",
+      "severity": "error",
+      "evidence_quote": "Lemma combine_splitK (s : 'I_N) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/product_threshold.v",
+      "line_start": 120,
+      "line_end": 120,
+      "lemma_name": "embed_pile2_proof",
+      "severity": "error",
+      "evidence_quote": "Lemma embed_pile2_proof (x : 'I_N2) : N1 + val x < N.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/product_threshold.v",
+      "line_start": 123,
+      "line_end": 123,
+      "lemma_name": "embed_pile2",
+      "severity": "error",
+      "evidence_quote": "Definition embed_pile2 (x : 'I_N2) : 'I_N :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/product_threshold.v",
+      "line_start": 126,
+      "line_end": 126,
+      "lemma_name": "project_pile1",
+      "severity": "error",
+      "evidence_quote": "Definition project_pile1 (x : 'I_N) : 'I_N1 :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/product_threshold.v",
+      "line_start": 129,
+      "line_end": 129,
+      "lemma_name": "project_pile2",
+      "severity": "error",
+      "evidence_quote": "Definition project_pile2 (x : 'I_N) : 'I_N2 :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/product_threshold.v",
+      "line_start": 142,
+      "line_end": 142,
+      "lemma_name": "pile1_shares",
+      "severity": "error",
+      "evidence_quote": "Definition pile1_shares (sh : T.-tuple 'I_N) : T1.-tuple 'I_N1 :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/product_threshold.v",
+      "line_start": 146,
+      "line_end": 146,
+      "lemma_name": "pile2_shares",
+      "severity": "error",
+      "evidence_quote": "Definition pile2_shares (sh : T.-tuple 'I_N) : T2.-tuple 'I_N2 :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/product_threshold.v",
+      "line_start": 157,
+      "line_end": 157,
+      "lemma_name": "product_recon",
+      "severity": "error",
+      "evidence_quote": "Definition product_recon (sh : T.-tuple 'I_N) : 'I_N :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/product_threshold.v",
+      "line_start": 162,
+      "line_end": 162,
+      "lemma_name": "product_encode",
+      "severity": "error",
+      "evidence_quote": "Definition product_encode (s : 'I_N) : T.-tuple 'I_N :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/reconstruct/product_threshold.v",
+      "line_start": 331,
+      "line_end": 331,
+      "lemma_name": "product_scheme",
+      "severity": "error",
+      "evidence_quote": "Definition product_scheme : ThresholdScheme 'I_N 'I_N :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "I001",
+      "file": "pgg-smc/reconstruct/product_threshold.v",
+      "line_start": 120,
+      "line_end": 120,
+      "lemma_name": "embed_pile2_proof",
+      "severity": "error",
+      "evidence_quote": "Lemma embed_pile2_proof (x : 'I_N2) : N1 + val x < N.",
+      "stage": "stage1",
+      "reason": "redundant suffix `_proof` duplicates the declaration kind",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "I001",
+      "file": "pgg-smc/reconstruct/product_threshold.v",
+      "line_start": 380,
+      "line_end": 380,
+      "lemma_name": "product_sum_mod_perm_compatible",
+      "severity": "error",
+      "evidence_quote": "Lemma product_sum_mod_perm_compatible :",
+      "stage": "stage1",
+      "reason": "five or more underscore-separated components without a canonical MathComp suffix",
+      "stages": [
+        "stage1"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": null,
+  "exit_code": 2
+}

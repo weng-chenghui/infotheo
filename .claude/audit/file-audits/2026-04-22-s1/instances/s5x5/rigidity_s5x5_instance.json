@@ -1,0 +1,151 @@
+{
+  "findings": [
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/s5x5/rigidity_s5x5_instance.v",
+      "line_start": 87,
+      "line_end": 87,
+      "lemma_name": "s5x5_endpoint_bound_fiber",
+      "severity": "warning",
+      "evidence_quote": "Lemma s5x5_endpoint_bound_fiber :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/s5x5/rigidity_s5x5_instance.v",
+      "line_start": 178,
+      "line_end": 178,
+      "lemma_name": "s5x5_security_witness_1",
+      "severity": "warning",
+      "evidence_quote": "Definition s5x5_security_witness_1 : SecurityWitness R R_s5x5 :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/s5x5/rigidity_s5x5_instance.v",
+      "line_start": 249,
+      "line_end": 249,
+      "lemma_name": "s5x5_security_witness_schreier",
+      "severity": "warning",
+      "evidence_quote": "Definition s5x5_security_witness_schreier (L : nat) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/s5x5/rigidity_s5x5_instance.v",
+      "line_start": 295,
+      "line_end": 295,
+      "lemma_name": "s5x5_n_branch_le",
+      "severity": "warning",
+      "evidence_quote": "Lemma s5x5_n_branch_le : (6 <= 28804)%N. Proof. by []. Qed.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/s5x5/rigidity_s5x5_instance.v",
+      "line_start": 396,
+      "line_end": 396,
+      "lemma_name": "s5x5_ts_recon_correct",
+      "severity": "warning",
+      "evidence_quote": "Lemma s5x5_ts_recon_correct (PI : PGGInterface R_s5x5)",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/instances/s5x5/rigidity_s5x5_instance.v",
+      "line_start": 435,
+      "line_end": 435,
+      "lemma_name": "s5x5_rigidity_cryptographically_secure",
+      "severity": "warning",
+      "evidence_quote": "Definition s5x5_rigidity_cryptographically_secure : AlgebraicRigidity R R_s5x5 :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/s5x5/rigidity_s5x5_instance.v",
+      "line_start": 87,
+      "line_end": 87,
+      "lemma_name": "s5x5_endpoint_bound_fiber",
+      "severity": "error",
+      "evidence_quote": "Lemma s5x5_endpoint_bound_fiber :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/s5x5/rigidity_s5x5_instance.v",
+      "line_start": 297,
+      "line_end": 297,
+      "lemma_name": "s5x5_covering_data",
+      "severity": "error",
+      "evidence_quote": "Definition s5x5_covering_data : CoveringData R_s5x5 :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/s5x5/rigidity_s5x5_instance.v",
+      "line_start": 322,
+      "line_end": 322,
+      "lemma_name": "s5x5_perm_compatible",
+      "severity": "error",
+      "evidence_quote": "Lemma s5x5_perm_compatible :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/s5x5/rigidity_s5x5_instance.v",
+      "line_start": 328,
+      "line_end": 328,
+      "lemma_name": "s5x5_covering",
+      "severity": "error",
+      "evidence_quote": "Definition s5x5_covering : CoveringScheme R_s5x5 := {|",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/instances/s5x5/rigidity_s5x5_instance.v",
+      "line_start": 377,
+      "line_end": 377,
+      "lemma_name": "s5x5_tradeoff",
+      "severity": "error",
+      "evidence_quote": "Lemma s5x5_tradeoff :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": null,
+  "exit_code": 2
+}

@@ -1,0 +1,528 @@
+{
+  "findings": [
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/security/pgg_security_solver.v",
+      "line_start": 119,
+      "line_end": 119,
+      "lemma_name": "epsilon_endpoint_rat_consistent",
+      "severity": "warning",
+      "evidence_quote": "Lemma epsilon_endpoint_rat_consistent (Tg N L : nat) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/security/pgg_security_solver.v",
+      "line_start": 130,
+      "line_end": 130,
+      "lemma_name": "epsilon_endpoint_rat_sp_consistent",
+      "severity": "warning",
+      "evidence_quote": "Lemma epsilon_endpoint_rat_sp_consistent Tg N L :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/security/pgg_security_solver.v",
+      "line_start": 691,
+      "line_end": 691,
+      "lemma_name": "check_perm_endpoint_inj",
+      "severity": "warning",
+      "evidence_quote": "Definition check_perm_endpoint_inj (desc : GroupDesc) (L : nat) : bool :=",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/security/pgg_security_solver.v",
+      "line_start": 691,
+      "line_end": 691,
+      "lemma_name": "check_perm_endpoint_inj",
+      "severity": "warning",
+      "evidence_quote": "Definition check_perm_endpoint_inj (desc : GroupDesc) (L : nat) : bool :=",
+      "closeness": "near",
+      "explanation": "The `check_` prefix is not a canonical MathComp prefix or suffix. AUTHORITY.md's suffix table has no `check_` entry; in MathComp a boolean that decides a property is named by the property itself, not by a verb. The semantic role is testing injectivity of `perm_endpoint` on `achievable(L)`, which maps to the `I` suffix or a boolean form `_injb`. The four-component shape `check_perm_endpoint_inj` also drifts from the `mainSymbol_suffixes` grammar: `check_` plays neither a main-symbol nor a canonical-suffix role. Stage 1 already flagged this entity under F001; this G001 finding upgrades with a suffix-role explanation.",
+      "fix_sketch": "Option 1: `perm_endpoint_injb` — three components, drops the verb prefix, `_b` marks the boolean decision procedure. Option 2: `perm_endpoint_inj` — three components, relying on the `: bool` return type to signal the decision procedure. Both follow `mainSymbol_suffix` with the injectivity semantic role from AUTHORITY.md.",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/security/pgg_security_solver.v",
+      "line_start": 699,
+      "line_end": 699,
+      "lemma_name": "fiber_entropy_summary",
+      "severity": "warning",
+      "evidence_quote": "Definition fiber_entropy_summary (desc : GroupDesc) (L : nat)",
+      "closeness": "near",
+      "explanation": "The `_summary` suffix does not appear in AUTHORITY.md's canonical suffix table and carries no standard semantic role signal (equation, injectivity, cardinality, non-negativity, etc.). The definition returns `nat * nat * bool` encoding three related quantities. A MathComp-idiomatic name would either use a descriptive noun without a narrative label (`fiber_entropy_data`, `fiberEntropyTriple`) or factor the three fields into separately named canonical definitions. `_summary` reads as a narrative prose label rather than a mathematical role indicator.",
+      "fix_sketch": "Option 1: `fiber_entropy_data` — neutral three-component name, drops the prose label `_summary`. Option 2: `fiberEntropyStats` in camelCase if the tuple interface is kept. Option 3: factor into `achievable_size`, `perm_endpoint_unevenness`, and `check_perm_endpoint_inj`, removing the need for the combined tuple entirely.",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/security/pgg_security_solver.v",
+      "line_start": 42,
+      "line_end": 43,
+      "lemma_name": "sp_consistent",
+      "severity": "warning",
+      "evidence_quote": "(* Consistency: the epsilon matches the endpoint formula 2*(N-Tg^L)/N *)",
+      "closeness": "near",
+      "explanation": "Preceding comment paraphrases the statement (What is present) but is missing Kind and Why. The classification (helper/main/...) is not stated, and no motivation for why this predicate exists is given. Used-by is optional because Kind is not declared as helper.",
+      "fix_sketch": "(** sp_consistent — checks that the SecurityParams' epsilon pair satisfies the endpoint cross-product equation 2*(N - Tg^L) * ed = en * N.\n    Kind: helper (or main if this is the top-level specification).\n    Why: <state why sp_consistent is needed, e.g. 'pre-condition for sp_consistent_endpoint and later consistency lemmas'>.\n    Used by: <downstream consumer>. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "escalated_model": "opus",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/security/pgg_security_solver.v",
+      "line_start": 51,
+      "line_end": 52,
+      "lemma_name": "epsilon_endpoint_rat",
+      "severity": "warning",
+      "evidence_quote": "(* Endpoint-level epsilon as rational: 2*(N - Tg^L) / N *)",
+      "closeness": "near",
+      "explanation": "Preceding comment gives a crisp What (endpoint-level epsilon as rational). It omits Kind and Why. No classification (helper/main/...) and no motivation. Used-by is optional when Kind is not declared helper.",
+      "fix_sketch": "(** epsilon_endpoint_rat — numerator/denominator encoding of the endpoint-level epsilon 2*(N - Tg^L)/N, saturating to (0,1) when Tg^L > N.\n    Kind: helper.\n    Why: canonical rational form consumed by sp_consistent, solve_L_aux, and epsilon_endpoint_rat_consistent.\n    Used by: solve_L_aux, solve, epsilon_endpoint_rat_consistent. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "escalated_model": "opus",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/security/pgg_security_solver.v",
+      "line_start": 60,
+      "line_end": 63,
+      "lemma_name": "solve_L_aux",
+      "severity": "warning",
+      "evidence_quote": "(* Search for smallest L such that epsilon(L) <= eps_n/eps_d.\n   i.e., 2*(N - Tg^L)/N <= eps_n/eps_d\n   i.e., 2*(N - Tg^L) * eps_d <= eps_n * N *)",
+      "closeness": "near",
+      "explanation": "Comment paraphrases the mathematical inequality being searched (What) but omits Kind and Why. The classification (helper) and motivation (why the fuel-bounded search is introduced here rather than delegated) are not stated. Used-by is optional unless Kind is declared helper.",
+      "fix_sketch": "(** solve_L_aux — fuel-bounded recursive search: returns the smallest L (starting from the accumulator) for which 2*(N - Tg^L) * eps_d <= eps_n * N, or None if fuel is exhausted.\n    Kind: helper.\n    Why: fuel-parameterised core of solve_L; separated so that the exposed solve_L can fix a default budget while keeping the recursion total.\n    Used by: solve_L. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "escalated_model": "opus",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/security/pgg_security_solver.v",
+      "line_start": 91,
+      "line_end": 92,
+      "lemma_name": "solve",
+      "severity": "warning",
+      "evidence_quote": "(* Single entry point *)",
+      "closeness": "far",
+      "explanation": "The comment is present and non-degenerate (so H001 passes) but fails three of the four H002 parts. Kind is not declared (likely 'main'). What is inadequate: 'Single entry point' does not paraphrase the statement, which dispatches on Constraint (FixL, FixEps, FixEpsTg, FixEpsL) and returns option SecurityParams. Why is absent: no motivation for the dispatcher or for the under-determined cases returning None. Used-by is optional when Kind is not helper.",
+      "fix_sketch": "(** solve — dispatches on Constraint and returns option SecurityParams: FixL builds directly from (L, Tg, N); FixEps calls solve_L to find L; FixEpsTg and FixEpsL are under-determined and return None.\n    Kind: main (the file's entry point for constraint-driven security-parameter synthesis).\n    Why: single top-level surface over the Constraint DSL so downstream callers need not know the individual solver paths.\n    Used by: solver clients and star_solve. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "escalated_model": "opus",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/security/pgg_security_solver.v",
+      "line_start": 185,
+      "line_end": 189,
+      "lemma_name": "star_to_generic",
+      "severity": "warning",
+      "evidence_quote": "Used by: star-graph demo instances in this file.",
+      "closeness": "near",
+      "explanation": "USED_BY fails: the preceding comment classifies this Definition as `helper`, so H002 requires the Used-by clause to name at least one downstream consumer identifier. The cite `star-graph demo instances in this file` is a prose description rather than an identifier. Grep across pgg-smc confirms no call site beyond the definition itself (only matches are the comment at line 185 and the Definition header at line 190). Either the cited consumer does not exist, in which case star_to_generic may be an unused helper to drop, or a concrete consumer exists and should be named. KIND, WHAT, and WHY parts of the comment are fine.",
+      "fix_sketch": "Replace `Used by: star-graph demo instances in this file.` with a specific identifier, e.g. `Used by: <downstream_lemma_or_def>.`. If no downstream consumer exists in the module, drop the Definition or reclassify `Kind: example` / `Kind: interface` to waive the USED_BY requirement.",
+      "confidence": "medium",
+      "stage": "stage2",
+      "escalated_model": "opus",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/security/pgg_security_solver.v",
+      "line_start": 198,
+      "line_end": 202,
+      "lemma_name": "star_solve",
+      "severity": "warning",
+      "evidence_quote": "Used by: star-graph demo instances.",
+      "closeness": "near",
+      "explanation": "USED_BY fails: the preceding comment classifies this Definition as `helper`, which requires the Used-by clause to name at least one downstream consumer identifier. `star-graph demo instances` is prose, not an identifier. Grep shows the only downstream references are `Eval vm_compute in star_solve (...)` probes in the same file (lines 242-247), which are evaluation demos rather than proof-library consumers. Either cite those demo labels explicitly or reclassify `Kind: example` (which waives USED_BY). KIND, WHAT, and WHY are otherwise covered.",
+      "fix_sketch": "Either rewrite the Used-by line to name the concrete consumer(s), e.g. `Used by: vm_compute demos at lines 242-247.`, or change the kind to `Kind: example.` / `Kind: interface.` so the USED_BY clause is no longer required.",
+      "confidence": "medium",
+      "stage": "stage2",
+      "escalated_model": "opus",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/security/pgg_security_solver.v",
+      "line_start": 284,
+      "line_end": 285,
+      "lemma_name": "eps_lt2",
+      "severity": "warning",
+      "evidence_quote": "(* Is epsilon < 2? (i.e., strictly better than trivial) *)",
+      "closeness": "near",
+      "explanation": "The comment provides a WHAT paraphrase (epsilon < 2, nontrivial bound) but is missing two required H002 parts. (1) KIND: no classification of helper/main/example is given. (2) WHY: no motivation explaining why this predicate is needed or what proof or computation consumes it. Grep confirms the only callers in this file are Eval vm_compute demonstration lines (296, 301); no downstream lemma or definition calls eps_lt2, so the correct Kind may be 'example' rather than 'helper', in which case USED_BY is not required — but KIND and WHY must still appear. If Kind is 'example', WHY may still be waived only when the WHAT clause already names the use-site crisply, which it does not here.",
+      "fix_sketch": "Replace the comment with:\n(** eps_lt2 — boolean test: is epsilon (as numerator/denominator pair er) strictly less than 2, i.e., er.1 < 2 * er.2?\n    Kind: example (screening predicate used only in Eval vm_compute demonstrations).\n    Why: provides a readable vm_compute-evaluable condition to verify that an instance's security bound is nontrivial before manual inspection. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/security/pgg_security_solver.v",
+      "line_start": 288,
+      "line_end": 289,
+      "lemma_name": "eps_lt1",
+      "severity": "warning",
+      "evidence_quote": "(* Is epsilon < 1? (i.e., d_TV < 1/2) *)",
+      "closeness": "near",
+      "explanation": "The comment provides a WHAT paraphrase (epsilon < 1, i.e., d_TV < 1/2) but is missing two required H002 parts. (1) KIND: no classification of helper/main/example is given. (2) WHY: no motivation explaining why this predicate exists or what consumes it. Grep confirms callers are Eval vm_compute demonstrations only (lines 297-299, 302); no downstream lemma or definition references eps_lt1. As with eps_lt2, the appropriate Kind is likely 'example'.",
+      "fix_sketch": "Replace the comment with:\n(** eps_lt1 — boolean test: is epsilon (as numerator/denominator pair er) strictly less than 1, i.e., er.1 < er.2 (equivalently, d_TV < 1/2)?\n    Kind: example (screening predicate used only in Eval vm_compute demonstrations).\n    Why: provides a readable vm_compute-evaluable condition to verify that an instance achieves better-than-random-guessing security. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/security/pgg_security_solver.v",
+      "line_start": 292,
+      "line_end": 293,
+      "lemma_name": "eps_eq0",
+      "severity": "warning",
+      "evidence_quote": "(* Is epsilon = 0? (perfect security) *)",
+      "closeness": "near",
+      "explanation": "The comment provides a WHAT paraphrase (epsilon = 0, perfect security) but is missing two required H002 parts. (1) KIND: no classification is given. (2) WHY: no motivation. Grep confirms callers are Eval vm_compute demonstrations only (line 300); no downstream lemma or definition references eps_eq0. Appropriate Kind is likely 'example'. Note that the name eps_eq0 correctly uses the MathComp _eq0 suffix (zero comparison), so no G001 finding applies here.",
+      "fix_sketch": "Replace the comment with:\n(** eps_eq0 — boolean test: is epsilon exactly zero, i.e., er.1 == 0 (perfect security)?\n    Kind: example (screening predicate used only in Eval vm_compute demonstrations).\n    Why: provides a readable vm_compute-evaluable condition to certify zero-epsilon (perfect-security) instances at the nat level. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/security/pgg_security_solver.v",
+      "line_start": 397,
+      "line_end": 401,
+      "lemma_name": "star_gens",
+      "severity": "warning",
+      "evidence_quote": "(* Star(m): center (gen 0) + m leaves, Tg = m+1, N = m+3\n   gen 0: swap(0, 1), gen i (i>0): swap(2, i+2) *)",
+      "closeness": "near",
+      "explanation": "The preceding comment is a family-block section header that explains the Star(m) encoding and the action of `gens`, but it is attached to the first entity in the block (star_gens) and fails three of the four H002 parts. KIND: no classification as helper/main/canonical is stated. WHY: no motivation is given for star_gens specifically (why this function exists in the pipeline). USED_BY: since star_gens is a helper feeding star_desc, the downstream consumer must be named; the current block header is silent. The WHAT clause is partially covered by the `gen 0: swap(0, 1), gen i (i>0): swap(2, i+2)` paraphrase.",
+      "fix_sketch": "Keep the block header, but insert an H002-shaped block above star_gens: `(** star_gens — generator function for Star(m): gen 0 swaps (0,1); gen i (i>0) swaps (2, i+2).\n    Kind: helper.\n    Why: nat-level encoding of the Star family's generators, fed through star_desc into the generic solver.\n    Used by: star_desc. *)`",
+      "confidence": "medium",
+      "stage": "stage2",
+      "escalated_model": "opus",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/security/pgg_security_solver.v",
+      "line_start": 419,
+      "line_end": 420,
+      "lemma_name": "path_gens",
+      "severity": "warning",
+      "evidence_quote": "(* Path(n): adjacent transpositions, Tg = n+1, N = n+2\n   gen i: swap(i, i+1) *)",
+      "closeness": "near",
+      "explanation": "The preceding comment is a block header for the Path(n) family that is attached to path_gens. It paraphrases the WHAT (gen i swaps i and i+1) but misses KIND (no helper/main classification), WHY (no motivation for path_gens specifically), and USED_BY (helper consumers such as path_desc are not named). The sibling path_comm' and path_desc entities in this file already follow the template, so path_gens is the outlier.",
+      "fix_sketch": "Insert above path_gens: `(** path_gens — generator function for Path(n): gen i swaps i and i.+1.\n    Kind: helper.\n    Why: nat-level encoding of the adjacent transpositions of Path(n), consumed by path_desc.\n    Used by: path_desc. *)`",
+      "confidence": "medium",
+      "stage": "stage2",
+      "escalated_model": "opus",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/security/pgg_security_solver.v",
+      "line_start": 438,
+      "line_end": 440,
+      "lemma_name": "disjoint_gens",
+      "severity": "warning",
+      "evidence_quote": "(* Disjoint(k): k disjoint transpositions, Tg = k, N = 2*k\n   gen i: swap(2*i, 2*i+1), all generators commute *)",
+      "closeness": "near",
+      "explanation": "The preceding comment is a family-block header attached to disjoint_gens. WHAT is partially covered (gen i swaps 2*i and 2*i+1). KIND, WHY, and USED_BY are absent. Because disjoint_gens is a helper feeding a disjoint_desc (mirrored from star_desc / path_desc), the downstream consumer should be named per AUTHORITY.md.",
+      "fix_sketch": "Insert above disjoint_gens: `(** disjoint_gens — generator function for Disjoint(k): gen i swaps 2*i and (2*i).+1.\n    Kind: helper.\n    Why: nat-level encoding of k fully commuting disjoint transpositions; consumed by the disjoint family's GroupDesc packaging.\n    Used by: disjoint_desc. *)`",
+      "confidence": "medium",
+      "stage": "stage2",
+      "escalated_model": "opus",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/security/pgg_security_solver.v",
+      "line_start": 451,
+      "line_end": 459,
+      "lemma_name": "oc_gens",
+      "severity": "warning",
+      "evidence_quote": "(* OC(k,p): k overlapping p-cycles, Tg = k, N = k + p - 1\n   gen i: p-cycle on {i, ..., i+p-1} *)",
+      "closeness": "near",
+      "explanation": "The preceding comment is a family-level section header, not an entity-specific comment for `oc_gens`. It fails three of the four H002 parts: (1) KIND is absent — no classification such as `helper` or `main` appears; (2) WHY is absent — no motivation is given for this specific function as opposed to the OC family in general; (3) USED_BY is absent — no downstream consumer identifier is cited. The WHAT part is borderline: `gen i: p-cycle on {i, ..., i+p-1}` describes the mathematical object but does not paraphrase what the Rocq function `oc_gens (p i x : nat) : nat` computes.",
+      "fix_sketch": "(** oc_gens — applies the i-th generator of OC(k,p) to sheet x: acts as the p-cycle on {i, ..., i+p-1}, rotating x to x+1 within that window and wrapping the last element back to i; identity outside the window.\n    Kind: helper.\n    Why: provides the concrete generator action consumed by oc_desc, which packages it into the GroupDesc shape expected by the generic solver pipeline.\n    Used by: oc_desc. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/security/pgg_security_solver.v",
+      "line_start": 472,
+      "line_end": 480,
+      "lemma_name": "cyclic_gens",
+      "severity": "warning",
+      "evidence_quote": "(* Cyclic(n): single n-cycle generator, Tg = 1, N = n\n   gen 0: x -> (x+1) mod n *)",
+      "closeness": "near",
+      "explanation": "The preceding comment is a family-level section header, not an entity-specific comment for `cyclic_gens`. It fails three H002 parts: (1) KIND is absent — no classification appears; (2) WHY is absent — no motivation is given for this function specifically; (3) USED_BY is absent — no downstream consumer identifier is cited. The WHAT part is borderline: `gen 0: x -> (x+1) mod n` describes the mathematical action informally but does not paraphrase the Rocq function signature `cyclic_gens (n i x : nat) : nat` or its guard on `i == 0`.",
+      "fix_sketch": "(** cyclic_gens — applies generator i of Cyclic(n) to sheet x: when i = 0 and x < n, maps x to x+1 (or to 0 if x+1 = n), acting as a single n-cycle; is the identity for any other generator index or out-of-range sheet.\n    Kind: helper.\n    Why: generator action for the degenerate one-generator cyclic family; consumed by cyclic_desc to build a GroupDesc that exercises the vacuous-commutativity code path in the solver.\n    Used by: cyclic_desc. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/security/pgg_security_solver.v",
+      "line_start": 497,
+      "line_end": 501,
+      "lemma_name": "achievable_fps",
+      "severity": "warning",
+      "evidence_quote": "(* Achievable fingerprints: distinct word evaluations *)",
+      "closeness": "near",
+      "explanation": "The preceding comment for `achievable_fps` fails three H002 parts: (1) KIND is absent — no classification such as `helper` appears; (2) WHY is absent — no motivation connecting this function to its caller is given; (3) USED_BY is absent — no downstream consumer identifier is cited. The WHAT part is present but too compressed: `distinct word evaluations` does not explain the roles of the `desc` and `L` parameters nor how `word_fingerprint` and `enum_words` compose to produce the result.",
+      "fix_sketch": "(** achievable_fps — enumerates the distinct sheet-permutation fingerprints reachable by any word of length at most L drawn from the generators recorded in `desc`; duplicates are collapsed by `undup`.\n    Kind: helper.\n    Why: provides the achievable-fingerprint set that `fiber_eps_nat` uses to count fibre sizes and compute the worst-case variation distance for `desc`.\n    Used by: fiber_eps_nat. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/security/pgg_security_solver.v",
+      "line_start": 502,
+      "line_end": 507,
+      "lemma_name": "endpoint_count",
+      "severity": "warning",
+      "evidence_quote": "(* Count how many achievable elements map sheet s to endpoint x *)",
+      "closeness": "near",
+      "explanation": "WHAT passes: the comment paraphrases the function concisely. KIND is absent: no helper/main/canonical classification appears. WHY is absent and not waived: the name carries no algebraic-law suffix, the implied Kind is not canonical/notation/coercion/instance, and the WHAT clause does not name a downstream use-site, so none of the three waiver conditions in AUTHORITY.md apply.",
+      "fix_sketch": "(** endpoint_count — counts how many achievable fiber-path sequences map sheet s to endpoint x.\n    Kind: helper.\n    Why: used by vardist_num to compute per-endpoint frequency for the variation-distance numerator.\n    Used by: vardist_num. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/security/pgg_security_solver.v",
+      "line_start": 508,
+      "line_end": 514,
+      "lemma_name": "vardist_num",
+      "severity": "warning",
+      "evidence_quote": "(* Var_dist numerator for sheet s:\n   sum_{x=0}^{N-1} |N * count(x) - total|\n   where |a - b| = (a - b) + (b - a) in nat arithmetic *)",
+      "closeness": "near",
+      "explanation": "WHAT passes (equational paraphrase of the summation is present). KIND is absent. WHY is absent and not waived: the third line 'where |a - b| = (a - b) + (b - a) in nat arithmetic' is an implementation note on the nat absolute-value encoding, not a motivation for why the definition exists. No algebraic-law suffix; Kind is not canonical/coercion/instance; WHAT does not name a downstream use-site.",
+      "fix_sketch": "(** vardist_num — variation-distance numerator for sheet s: sum_{x} |N·count(x) − total| with absolute value encoded as (a−b)+(b−a) in nat arithmetic.\n    Kind: helper.\n    Why: per-sheet numerator aggregated by worst_vardist to form the epsilon fraction in fiber_eps_nat.\n    Used by: worst_vardist. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/security/pgg_security_solver.v",
+      "line_start": 515,
+      "line_end": 518,
+      "lemma_name": "worst_vardist",
+      "severity": "warning",
+      "evidence_quote": "(* Worst-case vardist numerator over all sheets *)",
+      "closeness": "near",
+      "explanation": "WHAT passes ('Worst-case vardist numerator over all sheets' paraphrases the foldr-maxn computation). KIND is absent. WHY is absent and not waived: no algebraic-law suffix, Kind is not canonical/coercion/instance, WHAT does not name a downstream use-site.",
+      "fix_sketch": "(** worst_vardist — worst-case variation-distance numerator across all sheets, computed as the maximum of per-sheet vardist_num values via foldr maxn.\n    Kind: helper.\n    Why: aggregates sheet-level variation distances; used by fiber_eps_nat as the numerator before fraction reduction.\n    Used by: fiber_eps_nat. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/security/pgg_security_solver.v",
+      "line_start": 519,
+      "line_end": 526,
+      "lemma_name": "reduce_frac",
+      "severity": "warning",
+      "evidence_quote": "(* Reduce a fraction by GCD *)",
+      "closeness": "near",
+      "explanation": "WHAT passes ('Reduce a fraction by GCD' is a crisp paraphrase). KIND is absent. WHY is absent and not waived: no algebraic-law suffix, Kind is not canonical/coercion/instance, WHAT does not name a downstream use-site. The comment also omits the degenerate gcd=0 case handled by the match.",
+      "fix_sketch": "(** reduce_frac — reduces the fraction n/d to lowest terms by dividing both by gcd(n,d); returns (0,1) for the degenerate case where gcd is 0.\n    Kind: helper.\n    Why: normalises the epsilon fraction produced by fiber_eps_nat so callers can compare rationals without spurious common factors.\n    Used by: fiber_eps_nat. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/security/pgg_security_solver.v",
+      "line_start": 527,
+      "line_end": 559,
+      "lemma_name": "fiber_eps_nat",
+      "severity": "warning",
+      "evidence_quote": "(* fiber_eps_nat: worst-case endpoint var_dist as (numerator, denominator)\n   Input: GroupDesc + L -> Output: worst-case (eps_num, eps_den) *)",
+      "closeness": "near",
+      "explanation": "WHAT passes (the output shape as a reduced (num, den) pair is described). KIND is absent: no helper/main or other recognised classification. WHY is absent: 'Input: GroupDesc + L -> Output: worst-case (eps_num, eps_den)' restates the type signature rather than explaining the motivation or naming the downstream consumer. WHAT does not name a downstream use-site, so the WHY waiver does not apply.",
+      "fix_sketch": "(** fiber_eps_nat — worst-case endpoint variation-distance as a GCD-reduced fraction (eps_num, eps_den), computed from a GroupDesc and word length L.\n    Kind: helper.\n    Why: primary epsilon oracle consumed by group_template; determines whether a candidate parameter set meets the target security bound.\n    Used by: group_template. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/security/pgg_security_solver.v",
+      "line_start": 600,
+      "line_end": 681,
+      "lemma_name": "dealer_solve",
+      "severity": "warning",
+      "evidence_quote": "(* Top-level dealer entry point *)",
+      "closeness": "far",
+      "explanation": "Three of the four H002 checklist parts fail. KIND: 'entry point' is not one of the accepted classifications (helper, main, canonical, notation, coercion, instance, example, interface); 'entry point' is informal prose, not a recognised kind token. WHAT: the comment does not paraphrase the return type (option SecurityParams) or what gt_solve does when applied to the two arguments. WHY: no motivation is stated; who calls dealer_solve, what property it guarantees, and why it delegates to gt_solve are all omitted. USED_BY is not assessed because KIND is not established.",
+      "fix_sketch": "(** dealer_solve — applies gt_solve to synthesise SecurityParams from a GroupTemplate and a SecuritySpec; returns None when no parameters satisfy the spec constraints.\n    Kind: main.\n    Why: the sole public entry point for the security-parameter solver; all vm_compute demonstrations in this file call this function directly. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/security/pgg_security_solver.v",
+      "line_start": 682,
+      "line_end": 686,
+      "lemma_name": "fiber_unevenness",
+      "severity": "warning",
+      "evidence_quote": "(* Fiber unevenness indicator for sheet s:\n   Σ_{x} c_x * (c_x - 1) where c_x = endpoint_count fps s x.\n   This is 0 iff all fibers are singletons (perm_endpoint injective). *)",
+      "closeness": "near",
+      "explanation": "KIND is absent; the comment does not classify the definition as helper, main, or another accepted kind. WHAT is adequately paraphrased by the formula and the zero-value characterisation. WHY is borderline absent: 'This is 0 iff all fibers are singletons (perm_endpoint injective)' describes when the value is zero but does not state what downstream entity requires this computation or why the definition was introduced here. Because KIND is missing, USED_BY applicability cannot be assessed; however the manifest shows worst_unevenness (line 687-690) calls fiber_unevenness directly, so a cite is available.",
+      "fix_sketch": "(** fiber_unevenness — Σ_{x} c_x*(c_x-1) over endpoint-count values for sheet s; equals 0 iff all fibers are singletons (perm_endpoint injective on sheet s).\n    Kind: helper.\n    Why: summand of worst_unevenness; isolating per-sheet computation keeps worst_unevenness readable as a foldr.\n    Used by: worst_unevenness. *)",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/security/pgg_security_solver.v",
+      "line_start": 687,
+      "line_end": 690,
+      "lemma_name": "worst_unevenness",
+      "severity": "warning",
+      "evidence_quote": "(* Worst-case fiber unevenness over all sheets *)",
+      "closeness": "far",
+      "explanation": "KIND is absent. WHAT is marginally present ('Worst-case fiber unevenness over all sheets' briefly paraphrases foldr maxn 0 over fiber_unevenness values) but does not name the parameter N or explain the sheet range. WHY is absent: no downstream consumer is named and the motivation for a worst-case aggregation versus per-sheet values is not stated. Stage1 findings show check_perm_endpoint_inj is defined at line 691, immediately after this definition, and likely consumes worst_unevenness; a USED_BY cite to that definition is available.",
+      "fix_sketch": "(** worst_unevenness — maximum of fiber_unevenness over sheets 0..N-1; equals 0 iff perm_endpoint is injective on all N sheets.\n    Kind: helper.\n    Why: aggregates per-sheet fiber quality into a single indicator consumed by check_perm_endpoint_inj to decide global injectivity.\n    Used by: check_perm_endpoint_inj. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/security/pgg_security_solver.v",
+      "line_start": 691,
+      "line_end": 698,
+      "lemma_name": "check_perm_endpoint_inj",
+      "severity": "warning",
+      "evidence_quote": "(* Is perm_endpoint injective on achievable(L)? (all fibers are singletons) *)",
+      "closeness": "near",
+      "explanation": "WHAT is present: the comment paraphrases the boolean check adequately. KIND is absent: the comment does not classify the definition as helper or main. WHY is absent: no motivation states which downstream consumer calls this checker or why a standalone boolean is preferable to inlining the `== 0` test at each call site. WHY is not waived: `check_perm_endpoint_inj` carries no MathComp algebraic-law suffix and the WHAT clause names only the predicate semantics, not a downstream use-site.",
+      "fix_sketch": "(** check_perm_endpoint_inj — boolean decision: perm_endpoint is injective on achievable(L) iff all fibers are singletons (worst_unevenness = 0).\n    Kind: helper.\n    Why: used by fiber_entropy_summary to populate the is_injective flag; callers use the flag to decide whether H = log(total) holds exactly.\n    Used by: fiber_entropy_summary. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/security/pgg_security_solver.v",
+      "line_start": 699,
+      "line_end": 728,
+      "lemma_name": "fiber_entropy_summary",
+      "severity": "warning",
+      "evidence_quote": "(* Fiber entropy summary: (total, worst_unevenness, is_injective)\n   - total = |achievable(L)| = Tg^L when weval_inj\n   - worst_unevenness = 0 iff perm_endpoint injective → H = log(total)\n   - For exact H when unevenness > 0, use type-level fiber_entropy *)",
+      "closeness": "near",
+      "explanation": "WHAT is present: the three tuple components are explained field by field. KIND is absent: no classification as helper or main. WHY is absent: the comment describes what the fields mean but does not state the purpose of exposing a combined triple or which downstream context requires all three fields together. WHY is not waived: no algebraic-law suffix is present and the WHAT clause does not name a downstream use-site crisply.",
+      "fix_sketch": "(** fiber_entropy_summary — computes (total, worst_unevenness, is_injective) for the perm_endpoint fiber structure over achievable(L).\n    Kind: helper.\n    Why: provides a single vm_compute-friendly triple for callers that need the full fiber picture before selecting which entropy formula applies; used by the vm_compute demonstrations and downstream entropy-bound lemmas.\n    Used by: Eval vm_compute demonstrations; downstream entropy bound arguments. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": {
+    "entity_count": 51,
+    "chunk_count": 8,
+    "chunk_size": 7,
+    "workers_used": 4,
+    "tokens_used": 1159116,
+    "tokens_cap": 20000000,
+    "wall_ms_used": 449686,
+    "wall_ms_cap": 1800000,
+    "deferred_chunks": 0,
+    "stop_reason": "clean",
+    "estimated_usd": 6.9547,
+    "model": "sonnet"
+  },
+  "exit_code": 0
+}

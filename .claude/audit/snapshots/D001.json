@@ -1,0 +1,97 @@
+{
+  "fingerprint": "d81a977b28d3d32f",
+  "bad": {
+    "findings": [
+      {
+        "rule_id": "D001",
+        "file": ".claude/audit/fixtures/bad/D001.v",
+        "line_start": 4,
+        "line_end": 4,
+        "lemma_name": "foo_ge0",
+        "severity": "warning",
+        "evidence_quote": "Hypothesis n_gt1 : 1 < n.",
+        "closeness": "far",
+        "explanation": "In Section Foo, the hypothesis n_gt1 is declared on line 4 but the body of foo_ge0 (Proof. by apply: ltn0Sn. Qed.) does not reference it. The closer ltn0Sn discharges the goal 0 < n.+1 directly from the successor structure and needs neither n_gt1 nor any other local assumption. Per AUTHORITY.md (MathComp section-discharge convention), a Section hypothesis that is never used by the entity's proof term is dead weight and should be dropped or relocated.",
+        "fix_sketch": "Remove `Hypothesis n_gt1 : 1 < n.` from Section Foo, or move it to a Section that actually consumes it. If it is being kept for a sibling lemma not shown here, document the dependency in a comment so the Section-close generalisation is intentional.",
+        "confidence": "high",
+        "kernel_contract": {
+          "name": "unused_hypothesis",
+          "parameters": {
+            "hypothesis": "n_gt1"
+          }
+        },
+        "stage": "stage2",
+        "escalated_model": "opus"
+      },
+      {
+        "rule_id": "D001",
+        "file": ".claude/audit/fixtures/bad/D001.v",
+        "line_start": 5,
+        "line_end": 5,
+        "lemma_name": "foo_ge0",
+        "severity": "warning",
+        "evidence_quote": "Hypothesis n_gt0 : 0 < n.",
+        "closeness": "far",
+        "explanation": "In Section Foo, the hypothesis n_gt0 is declared on line 5 but the body of foo_ge0 (Proof. by apply: ltn0Sn. Qed.) does not reference it. ltn0Sn closes 0 < n.+1 without any assumption on n, so n_gt0 is never consumed by the proof term. Per AUTHORITY.md (MathComp section-discharge convention), unused Hypotheses in the same Section as the entity should be removed or relocated.",
+        "fix_sketch": "Remove `Hypothesis n_gt0 : 0 < n.` from Section Foo, or move it to a Section that actually consumes it. If it is retained for a sibling result, add a comment explaining why it is declared at this level.",
+        "confidence": "high",
+        "kernel_contract": {
+          "name": "unused_hypothesis",
+          "parameters": {
+            "hypothesis": "n_gt0"
+          }
+        },
+        "stage": "stage2",
+        "escalated_model": "opus"
+      },
+      {
+        "rule_id": "S996",
+        "file": "rocq-audit",
+        "line_start": 1,
+        "line_end": 1,
+        "severity": "error",
+        "evidence_quote": "per_commit_token_cap 75000 reached",
+        "closeness": "near",
+        "explanation": "Stage 2 halted: token_cap reached after partial run. 0 chunks deferred. Stage 1 findings still apply, but Stage 2 is incomplete; the commit is blocked so the operator raises the cap or acknowledges the gap.",
+        "fix_sketch": "Split the commit, raise the relevant cap, or re-run with ROCQ_AUDIT_WALL_SECONDS / ROCQ_AUDIT_TOKEN_CAP.",
+        "confidence": "high",
+        "stage": "stage2"
+      }
+    ],
+    "tokens_used": 87765,
+    "budget": {
+      "entity_count": 1,
+      "chunk_count": 1,
+      "chunk_size": 3,
+      "workers_used": 1,
+      "tokens_used": 87765,
+      "tokens_cap": 75000,
+      "wall_ms_used": 118541,
+      "wall_ms_cap": 600000,
+      "deferred_chunks": 0,
+      "stop_reason": "token_cap",
+      "estimated_usd": 0.5266,
+      "model": "sonnet"
+    },
+    "stage2_incomplete": true
+  },
+  "good": {
+    "findings": [],
+    "tokens_used": 33935,
+    "budget": {
+      "entity_count": 1,
+      "chunk_count": 1,
+      "chunk_size": 3,
+      "workers_used": 1,
+      "tokens_used": 33935,
+      "tokens_cap": 75000,
+      "wall_ms_used": 4960,
+      "wall_ms_cap": 600000,
+      "deferred_chunks": 0,
+      "stop_reason": "clean",
+      "estimated_usd": 0.2036,
+      "model": "sonnet"
+    },
+    "stage2_incomplete": false
+  }
+}

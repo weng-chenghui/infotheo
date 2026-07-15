@@ -1,0 +1,6 @@
+\begin{MintedVerbatim}[commandchars=\\\{\},codes={\catcode`\$=3\catcode`\^=7\catcode`\_=8\relax}]
+\PYG{k+kn}{Inductive} \PYG{n}{stype} \PYG{o}{:} \PYG{k+kt}{Type} \PYG{o}{:=}
+\PYG{o}{|} \PYG{n}{STSend} \PYG{o}{:} \PYG{n}{dtype} \PYG{esc}{$\to$} \PYG{n}{stype} \PYG{esc}{$\to$} \PYG{n}{stype}   \PYG{c}{(*}\PYG{c}{ !d.S \PYGZhy{} send data of kind d }\PYG{c}{*)}
+\PYG{o}{|} \PYG{n}{STRecv} \PYG{o}{:} \PYG{n}{dtype} \PYG{esc}{$\to$} \PYG{n}{stype} \PYG{esc}{$\to$} \PYG{n}{stype}   \PYG{c}{(*}\PYG{c}{ ?d.S \PYGZhy{} receive data of kind d }\PYG{c}{*)}
+\PYG{o}{|} \PYG{n}{STEnd}  \PYG{o}{:} \PYG{n}{stype}\PYG{o}{.}                    \PYG{c}{(*}\PYG{c}{ session finished }\PYG{c}{*)}
+\end{MintedVerbatim}

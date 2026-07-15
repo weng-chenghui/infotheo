@@ -1,0 +1,407 @@
+{
+  "findings": [
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_weval_inj.v",
+      "line_start": 182,
+      "line_end": 182,
+      "lemma_name": "map_val_tuple_inj",
+      "severity": "warning",
+      "evidence_quote": "Lemma map_val_tuple_inj (L : nat) (w1 w2 : @pgg_word M L) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_weval_inj.v",
+      "line_start": 195,
+      "line_end": 195,
+      "lemma_name": "map_val_in_all_words",
+      "severity": "warning",
+      "evidence_quote": "Lemma map_val_in_all_words (L : nat) (w : @pgg_word M L) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_weval_inj.v",
+      "line_start": 231,
+      "line_end": 242,
+      "lemma_name": "weval_inj_inst_search_space",
+      "severity": "warning",
+      "evidence_quote": "Naming: the five underscore-separated components describe the namespace\n            (weval_inj) and the concrete object (inst = instance of\n            search_space); the exported user-facing name must mention both\n            the hypothesis kind and the conclusion quantity.",
+      "closeness": "idiomatic",
+      "explanation": "Stage 1 flagged the five-component name weval_inj_inst_search_space at line 242. The preceding comment block (lines 231–241) carries a Naming: justification per AUTHORITY.md, explaining that the five underscore-separated components are intentional: weval_inj names the namespace and inst_search_space names the specific conclusion quantity. This is a valid AUTHORITY.md waiver; the naming deviation does not block the commit.",
+      "fix_sketch": "No change required. The Naming: line in the preceding comment is a valid waiver under AUTHORITY.md. If the name is later revised, weval_inj_search_spaceE or weval_inj_inst_spaceE would be closer to canonical MathComp grammar (main symbol weval_inj_search_space with suffix E for the equation).",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage1",
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_weval_inj.v",
+      "line_start": 397,
+      "line_end": 397,
+      "lemma_name": "oc_search_space_2",
+      "severity": "warning",
+      "evidence_quote": "Lemma oc_search_space_2 : @search_space OC_PGGTypes 2 = 4.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/groups/pgg_weval_inj.v",
+      "line_start": 83,
+      "line_end": 84,
+      "lemma_name": "weval_inj_natB",
+      "severity": "warning",
+      "evidence_quote": "Definition weval_inj_natB (N Tg L : nat) (gens : nat -> nat -> nat) : bool :=\n  uniq (map (word_fp N gens) (all_words Tg L)).",
+      "closeness": "near",
+      "explanation": "The uppercase `B` suffix in MathComp denotes subtraction (see AUTHORITY.md suffix table: `B | subtraction`). Here the author uses `B` to signal that the definition is boolean-valued. The idiomatic suffix for a boolean argument or boolean-valued analogue is lowercase `b`. Using uppercase `B` creates a false signal that this definition involves subtraction. The nat-distinguishing segment is justified (there is a group-level `weval_inj`), but the boolean signal should be `b`.",
+      "fix_sketch": "Rename to `weval_inj_natb` (lowercase `b`). This matches the MathComp convention where lowercase `b` marks the boolean computational counterpart of a Prop-level assertion. Update the downstream cite in the `weval_inj_of_natB` comment and the definition of `weval_inj_of_natB` itself.",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/groups/pgg_weval_inj.v",
+      "line_start": 92,
+      "line_end": 93,
+      "lemma_name": "map_uniq_injective",
+      "severity": "warning",
+      "evidence_quote": "Lemma map_uniq_injective (T1 T2 : eqType) (f : T1 -> T2) (xs : seq T1) (a b : T1) :\n  uniq (map f xs) -> a \\in xs -> b \\in xs -> f a = f b -> a = b.",
+      "closeness": "near",
+      "explanation": "The suffix `injective` spells out the English word for the injectivity semantic role. MathComp's canonical suffix table (AUTHORITY.md) uses `I` for injectivity (`f x = f y -> x = y`). The expanded English suffix diverges from the `mainSymbol_suffixes` grammar that readers use to search by role. The statement `uniq (map f xs) -> ... -> f a = f b -> a = b` is an injectivity lemma conditioned on `uniq (map f xs)`, so the main symbol is `uniq_map` or `map_uniq` and the role suffix is `I`.",
+      "fix_sketch": "Two idiomatic alternatives:\n1. `Lemma map_uniq_I` — condition `uniq (map f xs)`, conclusion `f a = f b -> a = b`.\n2. `Lemma uniq_map_inj` — less preferred; `inj` is not a canonical MathComp suffix either but is widely understood.\nPrefer option 1: `map_uniq_I`.",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/groups/pgg_weval_inj.v",
+      "line_start": 356,
+      "line_end": 363,
+      "lemma_name": "oc_gens_agree",
+      "severity": "warning",
+      "evidence_quote": "Lemma oc_gens_agree (i : 'I_2) (x : 'I_oc_N) :\n  oc_gens_nat (val i) (val x) = val (tnth oc_sigmas i x).",
+      "closeness": "near",
+      "explanation": "The statement of oc_gens_agree is an equation (oc_gens_nat (val i) (val x) = val (tnth oc_sigmas i x)). Per AUTHORITY.md suffix table, equational rewrites take the suffix E. The suffix 'agree' is a natural-language description that does not appear in the canonical suffix table and gives no structural signal to a reader searching by suffix convention. The main symbol could be read as 'oc_gens' (yielding oc_gens_E) or 'oc_gens_nat' (yielding oc_gens_nat_E).",
+      "fix_sketch": "Rename to `oc_gens_E` (if oc_gens is the main symbol, dropping the nat qualifier) or `oc_gens_nat_E` (preserving the nat-level emphasis). Update call sites including oc_weval_inj2 via weval_inj_of_natB as cited in the preceding comment.",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/groups/pgg_weval_inj.v",
+      "line_start": 364,
+      "line_end": 375,
+      "lemma_name": "oc_s0_order3",
+      "severity": "warning",
+      "evidence_quote": "Lemma oc_s0_order3 : (oc_s0 ^+ 3 = 1 :> {perm 'I_oc_N})%g.",
+      "closeness": "near",
+      "explanation": "The statement of oc_s0_order3 is the equation oc_s0 ^+ 3 = 1. Per AUTHORITY.md, the canonical suffix for an equational identity is E. The suffix 'order3' encodes a semantic interpretation (order divides 3) rather than the structural form of the conclusion, and the embedded literal '3' is non-canonical (canonical suffixes are symbolic tokens from the AUTHORITY.md table, not numeric constants). In MathComp's group library, facts of the form x ^+ n = 1 are named by the exponent and the equational suffix: compare expg_order, mulg1E patterns.",
+      "fix_sketch": "Rename to `oc_s0_expg3` (equation form: the result of raising oc_s0 to the third power) following the E-suffix convention, or to `oc_s0_expg3_eq1` for maximum clarity. If the cyclic-order semantics must be preserved in the name, add a comment: (* Naming: encodes the order-3 fact as x^3=1; kept for searchability. *)",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/groups/pgg_weval_inj.v",
+      "line_start": 57,
+      "line_end": 62,
+      "lemma_name": "all_words",
+      "severity": "error",
+      "evidence_quote": "(* ========================================================================== *)",
+      "closeness": "far",
+      "explanation": "The preceding comment for the multi-line Fixpoint `all_words` is a horizontal-rule separator with zero alphabetic tokens and zero informative characters. It fails the H001 degeneracy test (fewer than two alphabetic tokens of length ≥ 3, fewer than 10 informative characters after stripping delimiters). AUTHORITY.md requires every non-Local multi-line Fixpoint to carry a comment that classifies it, paraphrases the statement, and (for helpers) names consumers. A section separator placed immediately before a declaration is not a substitute.",
+      "fix_sketch": "Replace the separator with a proper coqdoc block:\n(** all_words — enumerate all length-L words over an alphabet of size Tg.\n    Kind: helper.\n    Why: produces the search space that weval_inj_natB maps fingerprints over.\n    Used by: weval_inj_natB. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/groups/pgg_weval_inj.v",
+      "line_start": 364,
+      "line_end": 375,
+      "lemma_name": "oc_s0_order3",
+      "severity": "error",
+      "evidence_quote": "(* Order 3 *)",
+      "closeness": "far",
+      "explanation": "The preceding comment for oc_s0_order3 is degenerate. After stripping delimiters the content is 'Order 3', which is 7 characters (below the 10-character threshold) and contains only one alphabetic token of length ≥ 3 ('Order'; '3' is not alphabetic). Both H001 degeneracy criteria are met. The comment does not classify the lemma (helper/main/…), paraphrase the statement, nor provide motivation. Stage 1 passed because a comment block was physically present; Stage 2 detects the degeneracy.",
+      "fix_sketch": "Replace `(* Order 3 *)` with a full block per AUTHORITY.md template:\n(** oc_s0_order3 — the first OC generator satisfies oc_s0 ^+ 3 = 1 in {perm 'I_oc_N}.\n    Kind: helper.\n    Why: establishes that oc_s0 has order dividing 3; needed for the\n         OC instance's word-length bound.\n    Used by: <downstream lemma names>. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/groups/pgg_weval_inj.v",
+      "line_start": 57,
+      "line_end": 62,
+      "lemma_name": "all_words",
+      "severity": "warning",
+      "evidence_quote": "(* ========================================================================== *)",
+      "closeness": "far",
+      "explanation": "Degenerate comment (handled by H001 finding above). Listing here for completeness: KIND absent, WHAT absent, WHY absent, USED_BY absent. All four parts fail.",
+      "fix_sketch": "See H001 fix_sketch above — the replacement comment covers all four parts.",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/groups/pgg_weval_inj.v",
+      "line_start": 143,
+      "line_end": 143,
+      "lemma_name": "eval_foldl_agree",
+      "severity": "warning",
+      "evidence_quote": "(* Key lemma 1: foldl on nat matches foldl on ordinals *)",
+      "closeness": "near",
+      "explanation": "The single-line comment paraphrases WHAT ('foldl on nat matches foldl on ordinals') but (1) does not classify KIND: 'Key lemma 1' is not in the accepted taxonomy (helper, main, canonical, notation, coercion, instance, example, interface); (2) provides no WHY motivation; (3) names no USED_BY consumer even though the lemma is plainly a helper feeding the subsequent chain (word_eval_foldl, eval_word_agree). WHY is not waived: the name carries no algebraic-law suffix, and the comment does not crisply name a downstream use-site.",
+      "fix_sketch": "(** eval_foldl_agree - foldl of gens_nat over (map val ws) from (val x) coincides with val (foldl tnth-sigmas ws x).\n    Kind: helper.\n    Why: nat/ordinal bridge used to reconcile eval_word_nat with word_eval.\n    Used by: eval_word_agree. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "escalated_model": "opus",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/groups/pgg_weval_inj.v",
+      "line_start": 151,
+      "line_end": 151,
+      "lemma_name": "word_eval_foldl",
+      "severity": "warning",
+      "evidence_quote": "(* Key lemma 2: word_eval equals foldl over the tuple *)",
+      "closeness": "near",
+      "explanation": "WHAT clause present ('word_eval equals foldl over the tuple') but KIND is not classified (the 'Key lemma 2' phrasing is outside the accepted taxonomy) and WHY motivation is absent. No USED_BY is named for what the proof body shows is a helper rewriting word_eval into a foldl form so it can be matched against eval_foldl_agree.",
+      "fix_sketch": "(** word_eval_foldl - word_eval L w x equals foldl (tnth sigmas) over (tval w) starting at x.\n    Kind: helper.\n    Why: restates word_eval as a left fold so it can be composed with eval_foldl_agree in eval_word_agree.\n    Used by: eval_word_agree. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "escalated_model": "opus",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/groups/pgg_weval_inj.v",
+      "line_start": 174,
+      "line_end": 174,
+      "lemma_name": "eval_word_agree",
+      "severity": "warning",
+      "evidence_quote": "(* Combine: eval_word_nat agrees with word_eval *)",
+      "closeness": "near",
+      "explanation": "The 'Combine:' prefix is not an accepted KIND. WHAT paraphrase is adequate. No WHY and no USED_BY are given. The lemma is clearly a combining helper (proof is one line stitching the two key lemmas), so USED_BY naming the downstream consumer is required under H002.",
+      "fix_sketch": "(** eval_word_agree - eval_word_nat on (map val (tval w)) from (val x) equals val (word_eval w x).\n    Kind: helper.\n    Why: combines eval_foldl_agree and word_eval_foldl so nat-level word evaluation round-trips through word_eval.\n    Used by: weval_inj_of_natB. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "escalated_model": "opus",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/groups/pgg_weval_inj.v",
+      "line_start": 182,
+      "line_end": 182,
+      "lemma_name": "map_val_tuple_inj",
+      "severity": "warning",
+      "evidence_quote": "(* map val is injective on pgg_word *)",
+      "closeness": "near",
+      "explanation": "Comment provides only a WHAT paraphrase. KIND is not classified; WHY motivation is missing; USED_BY is absent. Based on the surrounding proof context this is a helper feeding weval_inj_of_natB, but that is not stated in the comment. The adjacent lemma map_val_in_all_words (lines 195-203) shows the expected full template and is the local standard to match.",
+      "fix_sketch": "(** map_val_tuple_inj - two pgg_words with identical nat-projection are equal.\n    Kind: helper.\n    Why: lifts val_inj from ordinals to tuples so the nat-projection is a faithful fingerprint of a word.\n    Used by: weval_inj_of_natB. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "escalated_model": "opus",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/groups/pgg_weval_inj.v",
+      "line_start": 204,
+      "line_end": 204,
+      "lemma_name": "weval_inj_of_natB",
+      "severity": "warning",
+      "evidence_quote": "(* Main reflection lemma *)",
+      "closeness": "near",
+      "explanation": "KIND is present ('Main' maps to 'main'). WHAT is absent: the comment does not paraphrase the statement, which establishes that weval_inj_natB N Tg L gens_nat implies @weval_inj M L; 'reflection lemma' is not a paraphrase of the conversion direction or the types involved. WHY is absent: no motivation is given explaining why this nat-boolean conversion lemma is needed, which downstream consumers call it, or how it fits into the proof strategy (e.g., enabling vm_compute discharge of the abstract injectivity hypothesis). The WHY waiver for algebraic-law suffixes does not apply here; the name carries no such suffix.",
+      "fix_sketch": "(** weval_inj_of_natB — if word-eval injectivity holds in the nat-boolean encoding (weval_inj_natB N Tg L gens_nat), then @weval_inj M L holds for the abstract PGG model.\n    Kind: main.\n    Why: allows callers to discharge @weval_inj by a vm_compute check on the concrete nat-boolean representation rather than reasoning about the abstract PGG model directly.\n    Used by: <downstream lemma name>. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/groups/pgg_weval_inj.v",
+      "line_start": 287,
+      "line_end": 288,
+      "lemma_name": "oc_s1_fun",
+      "severity": "warning",
+      "evidence_quote": "(* sigma_1 = (1 2 3): the 3-cycle mapping 1->2->3->1 *)",
+      "closeness": "near",
+      "explanation": "The preceding comment provides a useful WHAT paraphrase ('3-cycle mapping 1->2->3->1') but is missing KIND. Without a Kind declaration, the WHY waiver for canonical/coercion/instance kinds cannot be applied, so WHY is also absent. USED_BY is not strictly required unless Kind is 'helper', but the omission of Kind leaves the entity under-classified. Failed parts: KIND (absent), WHY (absent; waived only if Kind were declared 'canonical').",
+      "fix_sketch": "Replace the comment with:\n(** oc_s1_fun — the raw function underlying the 3-cycle sigma_1 = (1 2 3): maps 1->2->3->1 and fixes 0.\n    Kind: canonical.\n    Why: passed to perm via can_inj oc_s1K to build oc_s1 : {perm 'I_oc_N}.\n*)",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/groups/pgg_weval_inj.v",
+      "line_start": 317,
+      "line_end": 318,
+      "lemma_name": "oc_sigmas_size",
+      "severity": "warning",
+      "evidence_quote": "(* Generator tuple *)",
+      "closeness": "far",
+      "explanation": "The preceding comment '(* Generator tuple *)' is a section-header label, not a lemma-specific description. It fails all four H002 content checks. KIND: absent (no helper/main/canonical classification). WHAT: absent (does not paraphrase the statement 'size [:: oc_s0; oc_s1] == 2'). WHY: absent and not waived (no algebraic-law suffix, no stated canonical kind). USED_BY: 'oc_sigmas' at line 325 uses this lemma as a Tuple argument and is confirmed in the same file, but it is not cited in the comment; required when Kind is helper.",
+      "fix_sketch": "Replace the section comment with an entity-specific block, e.g.:\n(** oc_sigmas_size — the generator list [:: oc_s0; oc_s1] has size exactly 2.\n    Kind: helper.\n    Why: supplies the size proof required by the Tuple constructor in oc_sigmas.\n    Used by: oc_sigmas. *)\nLemma oc_sigmas_size : size [:: oc_s0; oc_s1] == 2.",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/groups/pgg_weval_inj.v",
+      "line_start": 345,
+      "line_end": 355,
+      "lemma_name": "oc_gens_nat",
+      "severity": "warning",
+      "evidence_quote": "(* Nat-level generator function for vm_compute *)",
+      "closeness": "near",
+      "explanation": "The preceding comment is non-degenerate (H001 passes: 43 chars, multiple alphabetic tokens) but fails the H002 KIND check. The phrase 'Nat-level generator function for vm_compute' does not classify the definition as helper, main, canonical, notation, coercion, instance, example, or interface. WHAT is marginally present ('generator function'). WHY is marginally present ('for vm_compute'). Because KIND is absent it cannot be determined whether USED_BY is required; if the definition is a helper (as the downstream comment for oc_gens_agree implies), a concrete Used-by cite is also owed.",
+      "fix_sketch": "Expand the comment:\n(** oc_gens_nat — nat-level analogue of oc_sigmas, enabling vm_compute-based reflection.\n    Kind: helper.\n    Why: provides a decision procedure for oc_gens_agree and weval_inj_of_natB.\n    Used by: oc_gens_agree. *)",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/groups/pgg_weval_inj.v",
+      "line_start": 383,
+      "line_end": 383,
+      "lemma_name": "oc_noncommute",
+      "severity": "warning",
+      "evidence_quote": "(* Non-commutativity *)",
+      "closeness": "far",
+      "explanation": "Failed parts: KIND (no helper/main/canonical classification present); WHAT (the phrase 'Non-commutativity' labels the topic but does not paraphrase the statement `oc_s0 * oc_s1 != oc_s1 * oc_s0`); WHY (no motivation, and the `_noncommute` suffix is not one of the algebraic-law waiver suffixes); USED_BY (no downstream consumer identifier named; Kind not declared so helper status cannot be resolved).",
+      "fix_sketch": "(** oc_noncommute — the two generators oc_s0 and oc_s1 of the overlapping-3-cycles instance do not commute.\n    Kind: helper.\n    Why: required to certify that the generated subgroup is non-abelian, which feeds <downstream lemma>.\n    Used by: <downstream consumer>. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "escalated_model": "opus",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/groups/pgg_weval_inj.v",
+      "line_start": 390,
+      "line_end": 390,
+      "lemma_name": "oc_weval_inj2",
+      "severity": "warning",
+      "evidence_quote": "(* Word-eval injectivity via nat-level boolean decision + vm_compute *)",
+      "closeness": "near",
+      "explanation": "Failed parts: KIND (no helper/main/instance classification); WHY (the comment only describes the implementation technique `nat-level boolean decision + vm_compute` but gives no motivation for why this L=2 instance is needed); USED_BY (no downstream consumer identifier named). WHAT is partially carried by 'Word-eval injectivity' but the comment does not state that this is the specialisation to L=2 of `@weval_inj OC_PGGTypes`.",
+      "fix_sketch": "(** oc_weval_inj2 — @weval_inj OC_PGGTypes holds at L = 2 for the overlapping-3-cycles instance.\n    Kind: helper (instance specialisation; proof discharged by vm_compute on the nat-level boolean decision).\n    Why: discharges the injectivity premise of oc_search_space_2, which collapses the L=2 search bound to a constant.\n    Used by: oc_search_space_2. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "escalated_model": "opus",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/groups/pgg_weval_inj.v",
+      "line_start": 397,
+      "line_end": 397,
+      "lemma_name": "oc_search_space_2",
+      "severity": "warning",
+      "evidence_quote": "(* Search space instantiation *)",
+      "closeness": "far",
+      "explanation": "Failed parts: KIND (no classification; this looks like a main instance result but is not declared as such); WHAT (does not paraphrase the concrete equation `@search_space OC_PGGTypes 2 = 4`); WHY (no motivation given for the instantiation); USED_BY (no downstream consumer identifier named).",
+      "fix_sketch": "(** oc_search_space_2 — @search_space OC_PGGTypes 2 reduces to 4.\n    Kind: main (public L = 2 specialisation for the overlapping-3-cycles instance).\n    Why: provides the concrete enumeration bound consumed by the L = 2 search driver, avoiding the generic `m.+1 ^ L` upper bound.\n    Used by: <downstream search driver>. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "escalated_model": "opus",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "S998",
+      "file": "rocq-audit",
+      "line_start": 1,
+      "line_end": 1,
+      "severity": "warning",
+      "evidence_quote": "result field not JSON: ```json\n{\"passed\":true,\"findings\":[{\"rule_id\":\"H002\",\"file\":\"pgg-smc/groups/pgg_weval_inj.v\",\"line_start\":257,\"line_end\":264,\"lemma_name\":\"oc_s0_fun\",\"severity\":\"warning\",\"evidence_quote\":\"(* sigma_0 ",
+      "closeness": "near",
+      "explanation": "Stage 2 call failed for chunk 4; see logs.",
+      "fix_sketch": "Retry the commit. If repeated, check agent configuration.",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": {
+    "entity_count": 46,
+    "chunk_count": 8,
+    "chunk_size": 6,
+    "workers_used": 4,
+    "tokens_used": 991497,
+    "tokens_cap": 20000000,
+    "wall_ms_used": 492714,
+    "wall_ms_cap": 1800000,
+    "deferred_chunks": 0,
+    "stop_reason": "clean",
+    "estimated_usd": 5.949,
+    "model": "sonnet"
+  },
+  "exit_code": 2
+}

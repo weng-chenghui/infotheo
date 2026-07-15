@@ -1,0 +1,872 @@
+{
+  "findings": [
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_raag.v",
+      "line_start": 98,
+      "line_end": 98,
+      "lemma_name": "foata_depth_at_ext",
+      "severity": "warning",
+      "evidence_quote": "Lemma foata_depth_at_ext comm1 comm2 prev x :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_raag.v",
+      "line_start": 288,
+      "line_end": 288,
+      "lemma_name": "word_eval_adj_swap",
+      "severity": "warning",
+      "evidence_quote": "Lemma word_eval_adj_swap L (w1 w2 : pgg_word M L) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_raag.v",
+      "line_start": 410,
+      "line_end": 410,
+      "lemma_name": "adj_swap_sym_sym",
+      "severity": "warning",
+      "evidence_quote": "Lemma adj_swap_sym_sym L : symmetric (@adj_swap_sym L).",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_raag.v",
+      "line_start": 414,
+      "line_end": 414,
+      "lemma_name": "search_space_le_traces",
+      "severity": "warning",
+      "evidence_quote": "Lemma search_space_le_traces L : @search_space M L <= n_traces L.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_raag.v",
+      "line_start": 443,
+      "line_end": 443,
+      "lemma_name": "raag_weval_inj_search_space",
+      "severity": "warning",
+      "evidence_quote": "Lemma raag_weval_inj_search_space L :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_raag.v",
+      "line_start": 468,
+      "line_end": 468,
+      "lemma_name": "n_traces_le_words",
+      "severity": "warning",
+      "evidence_quote": "Lemma n_traces_le_words L : n_traces L <= Tg ^ L.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_raag.v",
+      "line_start": 492,
+      "line_end": 492,
+      "lemma_name": "empty_comm_adj_swap",
+      "severity": "warning",
+      "evidence_quote": "Lemma empty_comm_adj_swap L (w1 w2 : pgg_word M L) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_raag.v",
+      "line_start": 627,
+      "line_end": 627,
+      "lemma_name": "inv_count_zero_sorted",
+      "severity": "warning",
+      "evidence_quote": "Lemma inv_count_zero_sorted L (w : pgg_word M L) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_raag.v",
+      "line_start": 667,
+      "line_end": 667,
+      "lemma_name": "inv_count_swap_lt",
+      "severity": "warning",
+      "evidence_quote": "Lemma inv_count_swap_lt L' (k : 'I_L') (w : pgg_word M L'.+1) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_raag.v",
+      "line_start": 780,
+      "line_end": 780,
+      "lemma_name": "full_comm_connect_sorted",
+      "severity": "warning",
+      "evidence_quote": "Lemma full_comm_connect_sorted L",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_raag.v",
+      "line_start": 910,
+      "line_end": 910,
+      "lemma_name": "full_comm_trace_iff_perm",
+      "severity": "warning",
+      "evidence_quote": "Lemma full_comm_trace_iff_perm L (w1 w2 : pgg_word M L) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1",
+        "stage2"
+      ],
+      "explanation": "Stage 1 flagged the five-component name. Stage 2 confirms the preceding comment carries a `Naming:` justification that meets the AUTHORITY.md naming-conformance exception. The rationale ('shortening either side obscures the statement') is concrete and acceptable. No commit block.",
+      "fix_sketch": "No change needed. The Naming: line satisfies the naming-conformance exception per AUTHORITY.md."
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_raag.v",
+      "line_start": 937,
+      "line_end": 937,
+      "lemma_name": "indep_adj_swap_false",
+      "severity": "warning",
+      "evidence_quote": "Lemma indep_adj_swap_false (I : {set 'I_Tg}) L (w1 w2 : pgg_word M L) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_raag.v",
+      "line_start": 962,
+      "line_end": 962,
+      "lemma_name": "indep_set_traces_lb",
+      "severity": "warning",
+      "evidence_quote": "Lemma indep_set_traces_lb (I : {set 'I_Tg}) (L : nat) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_raag.v",
+      "line_start": 1053,
+      "line_end": 1053,
+      "lemma_name": "word_eval_perm_eq",
+      "severity": "warning",
+      "evidence_quote": "Lemma word_eval_perm_eq L (w1 w2 : pgg_word M L) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_raag.v",
+      "line_start": 1065,
+      "line_end": 1065,
+      "lemma_name": "indep_set_singleton_traces",
+      "severity": "warning",
+      "evidence_quote": "Lemma indep_set_singleton_traces (I : {set 'I_Tg}) (L : nat)",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_raag.v",
+      "line_start": 1099,
+      "line_end": 1099,
+      "lemma_name": "indep_set_word_eval_inj",
+      "severity": "warning",
+      "evidence_quote": "Lemma indep_set_word_eval_inj (I : {set 'I_Tg}) (L : nat) :",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_raag.v",
+      "line_start": 1136,
+      "line_end": 1136,
+      "lemma_name": "raag_search_space_1",
+      "severity": "warning",
+      "evidence_quote": "Lemma raag_search_space_1 : @search_space R 1 = Tg.",
+      "stage": "stage1",
+      "stages": [
+        "stage1"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_raag.v",
+      "line_start": 1862,
+      "line_end": 1862,
+      "lemma_name": "nat_swap_chain_to_trace_equiv",
+      "severity": "warning",
+      "evidence_quote": "Let nat_swap_chain_to_trace_equiv L (ws : seq (seq nat)) (w0 : @pgg_word M L) :",
+      "closeness": "near",
+      "explanation": "The identifier `nat_swap_chain_to_trace_equiv` has six underscore-separated lowercase components without a canonical MathComp suffix. The `_to_` connective is non-idiomatic; MathComp typically uses `_E` for equational bridges or names the bridge after a head symbol such as `trace_equivP` (when reflective) or `trace_equiv_of_swap_chain`. The composition mainSymbol_suffixes is unclear: is the main symbol `trace_equiv` or `nat_swap_chain`?",
+      "fix_sketch": "Two idiomatic options: (a) snake_case with a suffix like `trace_equiv_of_nat_chain` or `trace_equivE_nat`; (b) camelCase like `natChainTraceEquiv`. If the intent is a coercion-like converter, a `trace_equivP` or `_of_nat_chain` form would clarify the role.",
+      "confidence": "low",
+      "stage": "stage2",
+      "escalated_model": "opus",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "F001",
+      "file": "pgg-smc/groups/pgg_raag.v",
+      "line_start": 2024,
+      "line_end": 2024,
+      "lemma_name": "fnf_adj_swap",
+      "severity": "warning",
+      "evidence_quote": "Let fnf_adj_swap L (w1 w2 : @pgg_word M L) :",
+      "closeness": "near",
+      "explanation": "Name has three underscore components but matches `mainSymbol_suffixes` pattern: `fnf` is the main symbol and `adj_swap` describes the hypothesis shape (adjacent swap). Borderline idiomatic; acceptable.",
+      "fix_sketch": "Keep fnf_adj_swap; or rename to fnf_swap or fnf_adjE if the E-form is preferred.",
+      "confidence": "low",
+      "stage": "stage2",
+      "escalated_model": "opus",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/groups/pgg_raag.v",
+      "line_start": 468,
+      "line_end": 468,
+      "lemma_name": "n_traces_le_words",
+      "severity": "warning",
+      "evidence_quote": "Lemma n_traces_le_words L : n_traces L <= Tg ^ L.",
+      "closeness": "near",
+      "explanation": "The statement 'n_traces L <= Tg ^ L' is an inequality whose main symbol is 'n_traces'. The suffix '_le_words' is not in the canonical suffix table; 'words' is an informal gloss for 'Tg^L'. There is no canonical single-letter suffix for inequality upper bounds, but MathComp idiom favors naming the bounding expression: 'n_traces_leq_expTg' or 'n_traces_expTg_leq'. Stage 1 flagged F001; G001 identifies the non-canonical suffix composition. Alternatives: 'n_traces_leq_exp' or restructured as 'expTg_n_traces_geq'.",
+      "fix_sketch": "Rename to 'n_traces_leq_expTg' (main symbol 'n_traces', informal 'leq' for the inequality direction, object 'expTg' naming the upper bound). Or use 'n_traces_ub_expTg' if a non-standard 'ub' suffix is documented in the file header.",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/groups/pgg_raag.v",
+      "line_start": 492,
+      "line_end": 492,
+      "lemma_name": "empty_comm_adj_swap",
+      "severity": "warning",
+      "evidence_quote": "Lemma empty_comm_adj_swap L (w1 w2 : pgg_word M L) :",
+      "closeness": "far",
+      "explanation": "The conclusion is 'adj_swap w1 w2 = false' under a hypothesis (no generators commute). In MathComp the canonical suffix for a boolean-false conclusion is 'F', and the condition typically follows the main symbol+suffix. The current name places the condition ('empty_comm') before the main symbol ('adj_swap') with no suffix, violating the grammar 'mainSymbol_suffixes(_condition)'. Stage 1 flagged F001 for structural arity; this G001 finding is the semantic-role analysis.",
+      "fix_sketch": "Rename to 'adj_swap_empty_commF' (condition as tail) or 'adj_swapF' with the no-comm hypothesis as a standard parameter label. Idiomatic alternative: 'adj_swap_no_commF'.",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/groups/pgg_raag.v",
+      "line_start": 627,
+      "line_end": 627,
+      "lemma_name": "inv_count_zero_sorted",
+      "severity": "warning",
+      "evidence_quote": "Lemma inv_count_zero_sorted L (w : pgg_word M L) :",
+      "closeness": "near",
+      "explanation": "The statement '(inv_count w == 0) = sorted leq (map val (val w))' is a boolean equational rewrite: left side equals right side. The canonical suffix for such a rewrite lemma is 'E'. The current name embeds 'zero' and 'sorted' as free components rather than using the suffix table. Stage 1 flagged F001 for structural arity; G001 identifies the missing 'E' suffix. Main symbol: 'inv_count'. Proposed idiomatic name: 'inv_count0E' (combining the '0' suffix for zero with 'E' for equational rewrite).",
+      "fix_sketch": "Rename to 'inv_count0E'. The '0' suffix signals the zero value and 'E' signals the equational form, following MathComp conventions (cf. 'eq0E', 'sum0E').",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/groups/pgg_raag.v",
+      "line_start": 667,
+      "line_end": 671,
+      "lemma_name": "inv_count_swap_lt",
+      "severity": "warning",
+      "evidence_quote": "inv_count (@swap_word L'.+1 k w) < inv_count w.",
+      "closeness": "near",
+      "explanation": "The statement is a strict-less-than inequality. AUTHORITY.md's suffix table has no `lt` entry; numeric-comparison results conventionally use conditions expressed as `_gt0`, `_ge0`, or restate the main symbol comparison. The suffix `lt` is a value literal rather than a canonical MathComp shape descriptor. Idiomatic alternatives: `inv_count_swap_lt` → `inv_count_swapB_gt` (swap reduces) or keep `lt` with a Naming: justification if it is an accepted project convention.",
+      "fix_sketch": "Either add a Naming: justification acknowledging that `lt` is used as an informal suffix, or rename to `inv_count_swap_ltP` if a reflection lemma, or `inv_count_swap_lt` with explicit comment. Confidence: medium — `lt` is widely understood even if not in the canonical table.",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/groups/pgg_raag.v",
+      "line_start": 829,
+      "line_end": 831,
+      "lemma_name": "full_comm_traces",
+      "severity": "warning",
+      "evidence_quote": "n_traces L = 'C(L + Tg.-1, Tg.-1).",
+      "closeness": "near",
+      "explanation": "The statement is an equation `n_traces L = 'C(...)`. Per AUTHORITY.md, equational rewrites carry suffix `E`. The name `full_comm_traces` ends in `traces` (the main symbol), signalling topic but not shape. The idiomatic form is `n_traces_full_commE` or `n_traces_abelianE`, placing the main symbol first followed by the condition and the `E` suffix.",
+      "fix_sketch": "Rename to `n_traces_full_commE` or `n_traces_abelian`. Update call sites (visible in this file at `full_comm_trace_iff_perm` body and `indep_set_traces_lb`). Add a Naming: justification if the descriptive form is intentional.",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/groups/pgg_raag.v",
+      "line_start": 937,
+      "line_end": 940,
+      "lemma_name": "indep_adj_swap_false",
+      "severity": "warning",
+      "evidence_quote": "adj_swap w1 w2 = false.",
+      "closeness": "near",
+      "explanation": "The statement concludes `adj_swap w1 w2 = false`. AUTHORITY.md assigns `F`/`f` to boolean false. The name ends in `false` (a value literal), not the conventional `F` suffix. Additionally the statement could be rephrased as `~~ adj_swap w1 w2` with suffix `N` (boolean negation). Idiomatic: `adj_swap_indepF` or `indep_adj_swapN`.",
+      "fix_sketch": "Rename to `indep_adj_swap_F` (boolean-false suffix) or restructure the conclusion as `~~ adj_swap w1 w2` and name it `indep_adj_swapN`. Update the two call sites in `indep_set_traces_lb` and `indep_set_singleton_traces`.",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/groups/pgg_raag.v",
+      "line_start": 962,
+      "line_end": 964,
+      "lemma_name": "indep_set_traces_lb",
+      "severity": "warning",
+      "evidence_quote": "#|I| ^ L <= n_traces L.",
+      "closeness": "near",
+      "explanation": "The statement is a weak inequality `#|I|^L <= n_traces L`. AUTHORITY.md's suffix table has no `lb` entry; the nearest canonical suffixes for a `<=` result are `w` (weak monotony) or an explicit `_leq` convention. The `lb` abbreviation is understood but non-canonical. A Naming: justification would resolve the ambiguity.",
+      "fix_sketch": "Add `Naming: lb is used as an informal lower-bound suffix; the canonical form would be n_traces_indep_leq.` in the preceding comment, or rename to `n_traces_indep_leq` and update call sites.",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/groups/pgg_raag.v",
+      "line_start": 1053,
+      "line_end": 1055,
+      "lemma_name": "word_eval_perm_eq",
+      "severity": "warning",
+      "evidence_quote": "perm_eq (val w1) (val w2) -> word_eval w1 = word_eval w2.",
+      "closeness": "near",
+      "explanation": "The conclusion is an equation `word_eval w1 = word_eval w2` under hypothesis `perm_eq (val w1) (val w2)`. AUTHORITY.md assigns suffix `E` to equational rewrites. The name ends in `perm_eq`, which names the hypothesis rather than the conclusion shape. Idiomatic: `word_eval_perm_eqE` or, with the condition first, `perm_eq_word_eval`.",
+      "fix_sketch": "Rename to `word_eval_perm_eqE` to advertise the equational conclusion, or `perm_eq_word_evalE`. Update the single call site in `full_comm_trace_iff_perm`.",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/groups/pgg_raag.v",
+      "line_start": 1065,
+      "line_end": 1068,
+      "lemma_name": "indep_set_singleton_traces",
+      "severity": "warning",
+      "evidence_quote": "trace_equiv w1 w2 -> w1 = w2.",
+      "closeness": "near",
+      "explanation": "The statement proves that `trace_equiv w1 w2` implies `w1 = w2` under independence conditions — this is an injectivity result. AUTHORITY.md assigns suffix `I` to injectivity. The name ends in `traces` (the domain), not an injectivity suffix. Idiomatic: `trace_equiv_indep_I` or `indep_trace_equivI`.",
+      "fix_sketch": "Rename to `indep_trace_equivI` or `trace_equivI_indep_set`. Update the call site in `indep_set_word_eval_inj`.",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/groups/pgg_raag.v",
+      "line_start": 2105,
+      "line_end": 2105,
+      "lemma_name": "fnf_trace",
+      "severity": "warning",
+      "evidence_quote": "Let fnf_trace L (w1 w2 : @pgg_word M L) :",
+      "closeness": "near",
+      "explanation": "The lemma statement is an implication `trace_equiv w1 w2 -> fnf w1 = fnf w2` (invariance under trace equivalence), not a rewrite equation. A more MathComp-idiomatic suffix would indicate role: consider `fnf_trace_equiv` or document the orientation clearly. Name currently reads as `mainSymbol_<operand>` which is acceptable but does not advertise that it is the invariance direction paired with `fnf_sep`.",
+      "fix_sketch": "Consider renaming to `fnf_trace_equiv` or documenting orientation in the comment block. Alternatively, keep the name and add a header comment clarifying that fnf_trace is the invariance direction and fnf_sep is the separation direction.",
+      "confidence": "low",
+      "stage": "stage2",
+      "escalated_model": "opus",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "G001",
+      "file": "pgg-smc/groups/pgg_raag.v",
+      "line_start": 2118,
+      "line_end": 2118,
+      "lemma_name": "fnf_sep",
+      "severity": "warning",
+      "evidence_quote": "Let fnf_sep L (w1 w2 : @pgg_word M L) :",
+      "closeness": "near",
+      "explanation": "The statement is `fnf w1 = fnf w2 -> trace_equiv w1 w2`. Naming this `_sep` (separation) is a local convention; a more conventional MathComp role suffix would be `_inj` (if one reads fnf as injective modulo trace_equiv). Since trace_equiv is not `=`, strict `I` does not apply; `_sep` is acceptable but non-standard.",
+      "fix_sketch": "Consider `fnf_inj_trace` or keep `_sep` with an explanatory comment pairing it with `fnf_trace`.",
+      "confidence": "low",
+      "stage": "stage2",
+      "escalated_model": "opus",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/groups/pgg_raag.v",
+      "line_start": 1418,
+      "line_end": 1438,
+      "lemma_name": "foata_inv_zero",
+      "severity": "error",
+      "evidence_quote": "",
+      "closeness": "far",
+      "explanation": "The Let definition `foata_inv_zero` has no preceding comment block (preceding_comment_present is false). Per AUTHORITY.md, every Lemma/Theorem/Fact/Corollary/Proposition and multi-line non-Local Definition/Fixpoint must carry a preceding comment block covering kind, statement summary, motivation, and (for helpers) downstream consumers. While `Let` bindings are typically section-local helpers, this entity spans 21 lines with substantive proof content and warrants a header comment to explain its role.",
+      "fix_sketch": "Add a preceding (** ... *) block: (** foota_inv_zero — if foata_inv crel w = 0 then foata_pairs is sorted by dv_leq.\\n    Kind: helper.\\n    Why: bridges the inversion-count zero condition to the sortedness invariant used in foata_nf_sound.\\n    Used by: foata_nf_sound (or other downstream caller). *)",
+      "confidence": "medium",
+      "stage": "stage2",
+      "escalated_model": "opus",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/groups/pgg_raag.v",
+      "line_start": 1586,
+      "line_end": 1796,
+      "lemma_name": "foata_inv_swap_lt",
+      "severity": "error",
+      "evidence_quote": "",
+      "closeness": "far",
+      "explanation": "The Let definition `foata_inv_swap_lt` has no preceding comment block (preceding_comment_present is false). This is a 211-line proof of a substantive technical lemma about strict decrease of foata_inv under an adjacent swap at a descent, which is the central termination argument for foata_nf_sound. AUTHORITY.md requires a comment block for entities of this scope.",
+      "fix_sketch": "Add a preceding (** ... *) block: (** foata_inv_swap_lt — swapping an adjacent commuting descent strictly decreases the foata inversion count.\\n    Kind: helper.\\n    Why: provides the well-founded measure that drives termination of foata_nf_sound's induction.\\n    Used by: foata_nf_sound. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "escalated_model": "opus",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/groups/pgg_raag.v",
+      "line_start": 2105,
+      "line_end": 2117,
+      "lemma_name": "fnf_trace",
+      "severity": "error",
+      "evidence_quote": "",
+      "closeness": "far",
+      "explanation": "The Let `fnf_trace` has no preceding comment block. A comment describing kind, statement, motivation, and downstream consumer is required.",
+      "fix_sketch": "Add a preceding comment, e.g.:\n(** fnf_trace — trace_equiv w1 w2 implies fnf w1 = fnf w2.\n    Kind: helper.\n    Why: one direction of the fnf/trace-equiv bijection used by n_traces_of_natB.\n    Used by: n_traces_of_natB. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "escalated_model": "opus",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/groups/pgg_raag.v",
+      "line_start": 2277,
+      "line_end": 2297,
+      "lemma_name": "all_words_mem'",
+      "severity": "error",
+      "evidence_quote": "",
+      "closeness": "far",
+      "explanation": "The Let `all_words_mem'` has no preceding comment block. Required for Lemma-family entities and multi-line non-Local Definitions.",
+      "fix_sketch": "Add a preceding comment, e.g.:\n(** all_words_mem' — membership in all_words Tg' L is equivalent to size = L and all entries < Tg'.\n    Kind: helper.\n    Why: bridges the seq-nat enumeration to the tuple enumeration.\n    Used by: all_words_perm_tuples. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "escalated_model": "opus",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/groups/pgg_raag.v",
+      "line_start": 2298,
+      "line_end": 2329,
+      "lemma_name": "all_words_perm_tuples",
+      "severity": "error",
+      "evidence_quote": "",
+      "closeness": "far",
+      "explanation": "The Let `all_words_perm_tuples` has no preceding comment block.",
+      "fix_sketch": "Add a preceding comment, e.g.:\n(** all_words_perm_tuples — all_words Tg L is a permutation of the sequence of val-maps of enum pgg_word.\n    Kind: helper.\n    Why: bridges the nat-level enumeration to the ordinal-tuple enumeration in n_traces_of_natB.\n    Used by: n_traces_of_natB. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "escalated_model": "opus",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H001",
+      "file": "pgg-smc/groups/pgg_raag.v",
+      "line_start": 2364,
+      "line_end": 2383,
+      "lemma_name": "size_undup_perm_eq",
+      "severity": "error",
+      "evidence_quote": "",
+      "closeness": "far",
+      "explanation": "The Let `size_undup_perm_eq` has no preceding comment block.",
+      "fix_sketch": "Add a preceding comment, e.g.:\n(** size_undup_perm_eq — perm_eq s1 s2 implies size (undup s1) = size (undup s2).\n    Kind: helper.\n    Why: lifts perm_eq through undup for the n_traces_of_natB cardinality argument.\n    Used by: n_traces_of_natB. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "escalated_model": "opus",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/groups/pgg_raag.v",
+      "line_start": 250,
+      "line_end": 250,
+      "lemma_name": "adj_swap",
+      "severity": "warning",
+      "evidence_quote": "(* --- adj_swap: one adjacent commuting swap --- *)",
+      "closeness": "far",
+      "explanation": "Preceding comment is a section-separator banner, not a structured doc block. Failed parts: KIND (no classification — not labelled helper/main/canonical/notation/coercion/instance), WHY (no motivation; AUTHORITY.md waives Why only for canonical/notation/coercion/instance or algebraic-law suffixes, neither of which applies to a bare Definition of a relation). WHAT is present (the comment names the definition and its intent). This is a multi-line non-Local Definition (body spans lines 250–259), so H002 applies.",
+      "fix_sketch": "(** adj_swap — one adjacent commuting swap: w1 ~ w2 iff there exists k such that tnth w1 k and tnth w1 k.+1 commute and w2 = swap_word k w1.\n    Kind: canonical.\n    Why: primitive step of the Cartier–Foata trace equivalence used by trace_equiv and word_eval_adj_swap.\n*)",
+      "confidence": "high",
+      "stage": "stage2",
+      "escalated_model": "opus",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/groups/pgg_raag.v",
+      "line_start": 287,
+      "line_end": 287,
+      "lemma_name": "word_eval_adj_swap",
+      "severity": "warning",
+      "evidence_quote": "(* Swapping adjacent commuting generators preserves word_eval *)",
+      "closeness": "far",
+      "explanation": "Preceding comment is a one-line informal banner on a Lemma. Failed parts: KIND (no helper/main classification), WHY (no motivation — the lemma is the engine used by word_eval_trace, which is not stated), USED_BY (absent; the consumer word_eval_trace (same file, line 397) is not cited, yet this is clearly a helper given that word_eval_trace's own comment already names it via 'Used by: search_space_le_traces, raag_weval_inj_search_space' as the onward chain). WHAT is present. Why is not waived: the lemma name carries no algebraic-law suffix and Kind is not canonical/notation/coercion/instance.",
+      "fix_sketch": "(** word_eval_adj_swap — if w1 and w2 differ by a single adjacent commuting swap then word_eval w1 = word_eval w2.\n    Kind: helper.\n    Why: base step of the connect-induction in word_eval_trace; isolates the Hprod adjacent-swap-in-bigop argument.\n    Used by: word_eval_trace.\n*)",
+      "confidence": "high",
+      "stage": "stage2",
+      "escalated_model": "opus",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/groups/pgg_raag.v",
+      "line_start": 409,
+      "line_end": 409,
+      "lemma_name": "adj_swap_sym_sym",
+      "severity": "warning",
+      "evidence_quote": "(* adj_swap_sym is symmetric *)",
+      "closeness": "far",
+      "explanation": "Preceding comment is a one-line banner. Failed parts: KIND (no classification), WHY (no motivation), USED_BY (absent; the consumer search_space_le_traces at line 414 depends on `sym_connect_sym (@adj_swap_sym_sym L)`). WHAT is present (the banner paraphrases the statement). Why is not waived: the `_sym` tail is not one of the recognised algebraic-law suffixes (_A, _AC, _ACA, _C, _CA, _K, _D, _I, _V, _X, _Xn, _Xz, _Mn, _Z).",
+      "fix_sketch": "(** adj_swap_sym_sym — adj_swap_sym is a symmetric relation.\n    Kind: helper.\n    Why: required to invoke sym_connect_sym and rootP on trace_equiv, which drive the search-space/trace bound.\n    Used by: search_space_le_traces, raag_weval_inj_search_space.\n*)",
+      "confidence": "high",
+      "stage": "stage2",
+      "escalated_model": "opus",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/groups/pgg_raag.v",
+      "line_start": 413,
+      "line_end": 413,
+      "lemma_name": "search_space_le_traces",
+      "severity": "warning",
+      "evidence_quote": "(* Search space bounded by number of traces *)",
+      "closeness": "near",
+      "explanation": "Preceding comment is a one-line banner on a Lemma. Failed parts: KIND (no helper/main classification; given the file structure this is plausibly a main bound, but the comment does not say so), WHY (no motivation connecting the bound to its use). WHAT is present and crisp. USED_BY is only required if Kind is helper; the name suggests a main result consumed by raag_weval_inj_search_space. Why is not waived: the `_le` suffix is a relation marker, not an algebraic-law suffix, and Kind is not canonical/notation/coercion/instance.",
+      "fix_sketch": "(** search_space_le_traces — the reachable image of word_eval is bounded by the number of trace-equivalence classes: search_space L <= n_traces L.\n    Kind: main.\n    Why: first half of the reduction completed by raag_weval_inj_search_space; realises the inclusion image(word_eval) ⊆ image(word_eval ∘ root e).\n*)",
+      "confidence": "high",
+      "stage": "stage2",
+      "escalated_model": "opus",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/groups/pgg_raag.v",
+      "line_start": 428,
+      "line_end": 428,
+      "lemma_name": "raag_weval_inj",
+      "severity": "warning",
+      "evidence_quote": "(* RAAG word-eval injectivity: word_eval injective on trace classes *)",
+      "closeness": "near",
+      "explanation": "Preceding comment is a one-line banner on a multi-line non-Local Definition (body spans lines 429–430). Failed parts: KIND (no classification — 'canonical'/'interface' would fit but neither is stated), WHY (no motivation for why this predicate is isolated rather than proved outright). WHAT is present. Why is not waived: Kind is neither declared as canonical/notation/coercion/instance nor does the WHAT clause name a specific downstream use-site crisply beyond 'trace classes'. Note that Kind=interface (abstract predicate consumed as a hypothesis) would waive Why only if explicitly stated.",
+      "fix_sketch": "(** raag_weval_inj — assertion that word_eval is injective modulo trace equivalence on pgg_word M L.\n    Kind: interface.\n    Why: packaged as a hypothesis so that consumers (raag_weval_inj_search_space and onward RAAG-security reductions) can cite the named property without committing to a specific proof; the proof is discharged per-instance.\n*)",
+      "confidence": "medium",
+      "stage": "stage2",
+      "escalated_model": "opus",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/groups/pgg_raag.v",
+      "line_start": 468,
+      "line_end": 480,
+      "lemma_name": "n_traces_le_words",
+      "severity": "warning",
+      "evidence_quote": "(* Upper bound: n_traces <= Tg^L *)",
+      "closeness": "near",
+      "explanation": "KIND is absent — no classification as helper or main. WHY is absent — no motivation explaining why this bound is stated separately from search_space_chain. The WHAT ('Upper bound: n_traces <= Tg^L') adequately paraphrases the statement, so only KIND and WHY are missing. WHY is not waived: '_le_words' is not an algebraic-law suffix.",
+      "fix_sketch": "(** n_traces_le_words — n_traces L is bounded above by Tg^L, the total word count.\n    Kind: helper.\n    Why: upper half of the search_space_chain sandwich; feeds search_space_chain directly.\n    Used by: search_space_chain. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/groups/pgg_raag.v",
+      "line_start": 492,
+      "line_end": 508,
+      "lemma_name": "empty_comm_adj_swap",
+      "severity": "warning",
+      "evidence_quote": "(* Empty comm -> n_traces = Tg^L (free case) *)",
+      "closeness": "far",
+      "explanation": "The preceding comment describes the next lemma (empty_comm_traces: n_traces L = Tg^L) and has no relationship to empty_comm_adj_swap whose statement is 'adj_swap w1 w2 = false'. All four parts fail: KIND absent, WHAT wrong (misattributed to empty_comm_traces), WHY absent, USED_BY absent (helper).",
+      "fix_sketch": "(** empty_comm_adj_swap — when no two generators commute, adj_swap always returns false.\n    Kind: helper.\n    Why: the key sub-lemma enabling empty_comm_traces: with adj_swap trivially false,\n         the connect relation collapses to equality.\n    Used by: empty_comm_traces. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/groups/pgg_raag.v",
+      "line_start": 544,
+      "line_end": 573,
+      "lemma_name": "swap_word_perm",
+      "severity": "warning",
+      "evidence_quote": "(* --- Helper: adj_swap preserves perm_eq --- *)",
+      "closeness": "far",
+      "explanation": "The comment describes adj_swap_perm (the following lemma), not swap_word_perm. swap_word_perm states that swap_word (a concrete tuple permutation) preserves perm_eq. WHAT is wrong (misattributed), WHY is absent, USED_BY is absent. KIND ('Helper') is textually present but refers to the wrong lemma. All substantive parts fail for this entity.",
+      "fix_sketch": "(** swap_word_perm — applying swap_word to a word yields a perm_eq-equivalent tuple.\n    Kind: helper.\n    Why: provides the perm_eq witness that adj_swap_perm lifts to the swap relation.\n    Used by: adj_swap_perm. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/groups/pgg_raag.v",
+      "line_start": 600,
+      "line_end": 616,
+      "lemma_name": "not_sorted_descent",
+      "severity": "warning",
+      "evidence_quote": "(* --- Helper: unsorted sequence has adjacent descent --- *)",
+      "closeness": "near",
+      "explanation": "KIND ('Helper') and WHAT ('unsorted sequence has adjacent descent') are present and adequate. WHY is absent — no explanation of which lemma consumes this existence result. USED_BY is absent (required for helpers). WHY is not waived: the name carries no algebraic-law suffix.",
+      "fix_sketch": "(** not_sorted_descent — if a nat sequence has length > 1 and is not sorted by leq,\n    there exists an adjacent pair i, i+1 where s[i] > s[i+1].\n    Kind: helper.\n    Why: supplies the descent witness driving the inductive step in inv_count_swap_lt.\n    Used by: inv_count_swap_lt. *)",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/groups/pgg_raag.v",
+      "line_start": 617,
+      "line_end": 626,
+      "lemma_name": "inv_count",
+      "severity": "warning",
+      "evidence_quote": "(* --- Helper: inversion count for well-founded induction --- *)",
+      "closeness": "near",
+      "explanation": "KIND ('Helper') and WHAT ('inversion count for well-founded induction') are present; WHY is implicit in 'for well-founded induction', which names the technique rather than the downstream lemma. USED_BY is absent (required for helpers). A concrete consumer name must be cited.",
+      "fix_sketch": "(** inv_count — count the number of inversions in a word: pairs (i < j) where w[j] < w[i].\n    Kind: helper.\n    Why: termination measure for the bubble-sort argument in full_comm_connect_sorted.\n    Used by: inv_count_zero_sorted, inv_count_swap_lt, full_comm_connect_sorted. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/groups/pgg_raag.v",
+      "line_start": 667,
+      "line_end": 671,
+      "lemma_name": "inv_count_swap_lt",
+      "severity": "warning",
+      "evidence_quote": "(* Swapping an adjacent descent decreases inv_count *)",
+      "closeness": "near",
+      "explanation": "WHAT is present (swapping an adjacent descent decreases the inversion count). KIND is absent — readers cannot distinguish a helper from a main result. WHY is also absent — no downstream consumer or motivation is stated. As a termination argument used by `full_comm_connect_sorted`, this is a helper and USED_BY is required.",
+      "fix_sketch": "(** inv_count_swap_lt — swapping an adjacent descent strictly decreases the inversion count.\n    Kind: helper.\n    Why: provides the strict decrease needed for well-founded induction on inv_count in full_comm_connect_sorted.\n    Used by: full_comm_connect_sorted. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/groups/pgg_raag.v",
+      "line_start": 780,
+      "line_end": 783,
+      "lemma_name": "full_comm_connect_sorted",
+      "severity": "warning",
+      "evidence_quote": "(* --- Full comm: every word connects to a sorted word --- *)",
+      "closeness": "near",
+      "explanation": "WHAT is present (every word connects to a sorted word under full commutativity). KIND is absent. WHY is absent. The section-divider dash style does not substitute for a structured coqdoc block. If this is a helper for `full_comm_traces`, USED_BY is also required.",
+      "fix_sketch": "(** full_comm_connect_sorted — under full commutativity, every word connects via adjacent swaps to a sorted word.\n    Kind: helper.\n    Why: provides the sorted canonical-form existence needed by full_comm_traces and full_comm_trace_iff_perm.\n    Used by: full_comm_traces, full_comm_trace_iff_perm. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/groups/pgg_raag.v",
+      "line_start": 829,
+      "line_end": 831,
+      "lemma_name": "full_comm_traces",
+      "severity": "warning",
+      "evidence_quote": "(* Full comm -> n_traces = 'C(L + Tg.-1, Tg.-1) (abelian case) *)",
+      "closeness": "near",
+      "explanation": "WHAT is present (the binomial closed form). KIND is absent. WHY is absent — for a main result, motivation should explain the significance or downstream use. A plain arrow-notation comment does not substitute for a structured block.",
+      "fix_sketch": "(** full_comm_traces — when all distinct generators commute, n_traces L equals the binomial coefficient C(L+Tg-1, Tg-1).\n    Kind: main.\n    Why: the abelian closed form for trace count; used as the exact upper bound in full-commutativity PGG instances. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/groups/pgg_raag.v",
+      "line_start": 937,
+      "line_end": 940,
+      "lemma_name": "indep_adj_swap_false",
+      "severity": "warning",
+      "evidence_quote": "(* Independent set lower bound on traces *)",
+      "closeness": "far",
+      "explanation": "The preceding comment describes the following section (`indep_set_traces_lb`), not this lemma. `indep_adj_swap_false` proves that I-words cannot be adjacent-swapped (`adj_swap w1 w2 = false`), yet the comment says 'Independent set lower bound on traces'. KIND, WHAT, WHY, and USED_BY are all absent for this lemma. A comment misattributed to a different lemma is worse than a missing comment.",
+      "fix_sketch": "Insert a dedicated comment above `indep_adj_swap_false`:\n(** indep_adj_swap_false — for an independent-set word w1, adj_swap w1 w2 = false for any w2.\n    Kind: helper.\n    Why: establishes that I-words are isolated under adj_swap; used by indep_set_traces_lb and indep_set_singleton_traces.\n    Used by: indep_set_traces_lb, indep_set_singleton_traces. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/groups/pgg_raag.v",
+      "line_start": 1053,
+      "line_end": 1060,
+      "lemma_name": "word_eval_perm_eq",
+      "severity": "warning",
+      "evidence_quote": "Used by: full_comm instance-specific arguments that reduce a word to a\n             sorted representative before evaluating.",
+      "closeness": "near",
+      "explanation": "KIND (helper) and WHAT are present. USED_BY cites a description ('full_comm instance-specific arguments') rather than a specific downstream lemma identifier. AUTHORITY.md requires at least one verifiable consumer identifier for helpers. Cannot verify via Grep without a concrete name. WHY is implicitly covered by the WHAT clause.",
+      "fix_sketch": "Replace the USED_BY description with a concrete lemma name: 'Used by: <lemma_identifier>'. If no single downstream lemma exists yet, write 'Used by: TBD — caller not yet committed' and upgrade on the next commit.",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/groups/pgg_raag.v",
+      "line_start": 1065,
+      "line_end": 1067,
+      "lemma_name": "indep_set_singleton_traces",
+      "severity": "warning",
+      "evidence_quote": "(* Independent set generators have singleton trace classes:\n   no two distinct I-words are trace-equivalent. *)",
+      "closeness": "near",
+      "explanation": "WHAT is present. KIND is absent. If this is a helper (as suggested by its use in `indep_set_word_eval_inj`), USED_BY is also required.",
+      "fix_sketch": "(** indep_set_singleton_traces — for words over an independent set I, trace_equiv w1 w2 implies w1 = w2.\n    Kind: helper.\n    Why: injectivity on I-words needed to lift word_eval injectivity in indep_set_word_eval_inj.\n    Used by: indep_set_word_eval_inj. *)",
+      "confidence": "high",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    },
+    {
+      "rule_id": "H002",
+      "file": "pgg-smc/groups/pgg_raag.v",
+      "line_start": 1099,
+      "line_end": 1101,
+      "lemma_name": "indep_set_word_eval_inj",
+      "severity": "warning",
+      "evidence_quote": "(* Charney's theorem (finite analog): independent set generators\n   with raag_weval_inj give word_eval injectivity on I-words *)",
+      "closeness": "near",
+      "explanation": "WHAT is present. KIND uses non-standard vocabulary ('Charney's theorem') rather than the required `main`/`helper` taxonomy from AUTHORITY.md. WHY is also absent — no motivation or downstream context is stated.",
+      "fix_sketch": "(** indep_set_word_eval_inj — for I-words over an independent set, word_eval is injective when raag_weval_inj holds.\n    Kind: main.\n    Why: the finite Charney-type injectivity theorem; the principal application theorem for independent-set PGG lower-bound arguments. *)",
+      "confidence": "medium",
+      "stage": "stage2",
+      "stages": [
+        "stage2"
+      ]
+    }
+  ],
+  "stage2_incomplete": false,
+  "tier_k_unavailable": false,
+  "budget": {
+    "entity_count": 99,
+    "chunk_count": 10,
+    "chunk_size": 10,
+    "workers_used": 4,
+    "tokens_used": 887524,
+    "tokens_cap": 20000000,
+    "wall_ms_used": 157717,
+    "wall_ms_cap": 1800000,
+    "deferred_chunks": 0,
+    "stop_reason": "clean",
+    "estimated_usd": 5.3251,
+    "model": "sonnet"
+  },
+  "exit_code": 2
+}
