@@ -27,6 +27,9 @@ MODULES=(
   dumas2017dual/lib/extra_proba.v
   # The main-results file: every headline theorem, with its full proof.
   dumas2017dual/dsdp/dsdp_main.v
+  # The simulation axis: the ideal functionality, the simulator, and the
+  # factorization the simulation-security chapter (security.tex) cites.
+  dumas2017dual/dsdp/simulation/dsdp_simulator.v
 )
 
 echo "[1/3] blueprint HTML + dependency graph (plastex)"
