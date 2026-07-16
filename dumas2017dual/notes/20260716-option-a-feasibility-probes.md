@@ -1,8 +1,50 @@
 # Option A feasibility probes: can the derivation reliably produce the output game?
 
 Date: 2026-07-16
-Status: probe spec, pending review. NOT a build.
+Status: SUPERSEDED by adversarial audit (2026-07-16). Do not run P1-P7 as written.
+See "Audit outcome" below.
 Related: 20260715-blueprint-v2-design.md (the derivation gap, §"routes")
+
+## Audit outcome (2026-07-16) — two FATALs, spec not run
+
+Two adversarial audits (logic + technical), both verified against code:
+
+1. **FATAL — wrong fallback baseline.** The seeded trace
+   `dsdp_alice_obs_leak_S_seeded` writes its output directly in fiber form
+   `u1*v1 + u2*v2 + u3*v3` (no `HE_dec`, no placeholder). `denote_output_termE`
+   denotes it to `dsdp_output` **definitionally** (no bridge). The security
+   result `dsdp_alice_guess_ideal_le` (guess <= 1/m) is **Qed today** on it. So a
+   bridge-death does NOT fall to "Option B, no code" -- the seeded trace is an
+   already-proved, bridge-free baseline that dominates. The decision tree's top
+   row was wrong.
+2. **FATAL — wrong protocol topology.** The chain is Alice -> Bob -> Charlie ->
+   Alice, not Alice -> Charlie. `pbob` does the homomorphic combine and forwards
+   to Charlie (`dsdp_pismc.v:117-124`); `pcharlie` receives from Bob
+   (`dsdp_pismc.v:127-133`). Deriving `g` needs TWO responders run in sequence,
+   not "run pcharlie on Alice's outputs". P5/P7's "small connector" was
+   calibrated on a topology that does not exist. (Positive: `g` IS under Alice's
+   key, so `dec_alice(g)` cancels; route 1 is not dead for the key reason.)
+
+Also confirmed: P4's "trivial" v1/u1 fix over-captures name 50 (`term_value_names`
+descends into `HE_dec`); P3 is near-certain FAIL (the fiber layer is hard-wired
+to the seeded tree by `gc_eq`'s `vm_compute`); the feasibility bar is too
+syntactic to catch a well-formed-but-wrong `g`; P1's leaf list names
+`dsdp_is_correct`, which is the Idealized (identity-encryption) instance and
+useless as the abstract bridge's leaf.
+
+**Reframing the audits force:** the security bound is already proved (seeded
+trace). Route 1 buys only a provenance claim (output derived + certified
+faithful), and is now understood as a LARGE build (two-responder symbolic
+execution + new dec-form S-determination + a homomorphic-decryption bridge whose
+leaves are not ready + re-proving the fiber layer). The real decision is not
+"is route 1 feasible" but "does the thesis's derivation claim require the output
+channel to be derived, or is a scoped 'ciphertext channel derived; output value
+supplied in fiber form' honest enough". Pending user decision.
+
+---
+
+## Original spec below (retained for the probe designs; premises now corrected above)
+
 
 ## The decision this probe set informs
 
