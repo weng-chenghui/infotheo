@@ -20,6 +20,13 @@ view is derived from the one protocol program that already defines the
 protocol's behaviour, rather than written by hand. The full bound is
 $1/m + 2\,\epscpa$.
 
+The single-hop IND-CPA advantage is a function $\epscpaof{\cdot}$ of the
+encryption scheme: each scheme carries its own bound, so a scheme that returns
+its plaintext has $\epscpaof{E}=1$ while a secure scheme has it negligible. All
+bounds below are for DSDP's fixed scheme $E$, and $\epscpa$ abbreviates
+$\epscpaof{E}$; the generic back-end theorems, which range over every scheme,
+keep the argument explicit.
+
 The two channels split the blueprint into two parts. Part~I derives the game
 from the program and bounds the ciphertext channel by $2\,\epscpa$, every choice
 the argument depends on gathered in one record from which a generic theorem
@@ -419,10 +426,11 @@ to the final bound.
   \rocq{infotheo.homomorphic_encryption.indcpa_ror.epsilon_cpa,
        infotheo.homomorphic_encryption.indcpa_ror.enc_ind_cpa_real_or_zero}
   \rocqok
-  The scheme's assumed IND-CPA real-or-zero advantage. Any adversary's advantage
-  between the real-encryption oracle and the zero-encryption oracle is at most
-  $\epscpa$. This is the one cryptographic assumption the chain rests on.
-  \[ \AdvE(\Oreal, \Ozero, A) \le \epscpa \]
+  A scheme $E$'s assumed IND-CPA real-or-zero advantage bound. For every scheme
+  and every adversary, the advantage between the real-encryption oracle and the
+  zero-encryption oracle is at most $\epscpaof{E}$. This is the one cryptographic
+  assumption the chain rests on.
+  \[ \forall E,\quad \AdvE(\Oreal, \Ozero, A) \le \epscpaof{E} \]
 \end{definition}
 
 \begin{definition}[One-hop oracle routing]
@@ -458,8 +466,9 @@ to the final bound.
   \rocq{infotheo.dumas2017dual.dsdp.symbolic_game.dsdp_game_code.advantage_hop}
   \rocqok
   Two adjacent rungs of the ladder differ at a single hop, so their advantage is
-  at most the single-hop IND-CPA bound $\epscpa$.
-  \[ \AdvE(\sem{g^{(i)}}, \sem{g^{(i+1)}}, A) \le \epscpa \]
+  at most the single-hop IND-CPA bound $\epscpaof{E}$ of the scheme $E$ the game
+  denotes into.
+  \[ \AdvE(\sem{g^{(i)}}, \sem{g^{(i+1)}}, A) \le \epscpaof{E} \]
 \end{lemma}
 \begin{proof}
   \uses{lem:hop_equiv,def:indcpa_assumption,def:hybrid_endpoints}
@@ -481,7 +490,7 @@ to the final bound.
   \rocq{infotheo.dumas2017dual.dsdp.symbolic_game.dsdp_game_code.advantage_sum_ladder_le}
   \rocqok
   A contiguous block of rungs costs at most one IND-CPA query per rung.
-  \[ \text{a block of } n{+}1 \text{ rungs} \ \le\ (n{+}1)\,\epscpa \]
+  \[ \text{a block of } n{+}1 \text{ rungs} \ \le\ (n{+}1)\,\epscpaof{E} \]
 \end{lemma}
 \begin{proof}
   \uses{lem:advantage_hop,def:hybrid_ladder}
@@ -493,10 +502,10 @@ to the final bound.
   \label{thm:advantage_le}
   \rocq{infotheo.dumas2017dual.dsdp.symbolic_game.dsdp_game_code.advantage_le}
   \rocqok
-  For any game code, every valid adversary's advantage between the real and
-  all-zero denoted games is at most the number of encryption hops times
-  $\epscpa$.
-  \[ \AdvE(\sem{g^{(0)}},\sem{g^{(\nhops(g))}},A) \ \le\ |\sites(g)|\,\epscpa \]
+  For any game code and any scheme $E$, every valid adversary's advantage between
+  the real and all-zero denoted games is at most the number of encryption hops
+  times $\epscpaof{E}$.
+  \[ \AdvE(\sem{g^{(0)}},\sem{g^{(\nhops(g))}},A) \ \le\ |\sites(g)|\,\epscpaof{E} \]
 \end{theorem}
 \begin{proof}
   \uses{lem:advantage_sum_ladder_le,def:hybrid_endpoints,def:denote_game}
@@ -560,8 +569,9 @@ to the final bound.
   \rocqok
   For every secrecy-problem record and every valid adversary, the advantage
   between the real game and the all-zero game is at most the corrupted view's hop
-  count times $\epscpa$.
-  \[ \AdvE(\real(P), \zero(P), A) \ \le\ \nhops(\view(P))\,\epscpa \]
+  count times the record scheme's bound $\epscpaof{E_P}$, where $E_P$ is the
+  scheme the record $P$ carries.
+  \[ \AdvE(\real(P), \zero(P), A) \ \le\ \nhops(\view(P))\,\epscpaof{E_P} \]
 \end{theorem}
 \begin{proof}
   \uses{thm:advantage_le,lem:count_hops_adequacy,def:corrupted_view,def:games,def:adversary}
