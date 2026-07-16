@@ -151,19 +151,32 @@ load-bearing, clustering to ~6-8 nodes:
 
 ---
 
-## Bucket C — the coverage checker (check_coverage.py) [DECIDE/FIX]
+## Bucket C — the coverage checker (check_coverage.py) [DONE 2026-07-17]
 
-- (v) Multi-name `\rocq{a, b}` regex bug: the character class excludes `,`, so
-  22 multi-name nodes (60 of 98 names) are invisible; 51 exclude entries are
-  false waivers, and 5 dangling refs were hidden by it.
-- (v) `DECL_KW` omits `Parameter`, so `epsilon_cpa` is invisible to the ratchet.
-- (v) The checker is currently RED (5 dsdp_main uncovered + the phantom `exact`
-  from ssreflect tactic brackets). Nothing has been enforcing the ratchet.
-- (v) Two stale waivers (`relay_privacy_n` gone; `guess_sdistr_success_real`
-  alive but the `dsdp_main:` entry stale).
-- Decision needed: fix the regex checker in place (multi-name, `Parameter`, the
-  constructor false-positive) and keep the exclude-list model, or replace it.
-  Given B3, do NOT pursue the glob chain-walker.
+Fixed in place (kept the exclude-list model; did NOT pursue the glob
+chain-walker):
+- Multi-name `\rocq{a, b}` blocks now parsed (ROCQ_BLOCK_RE + ROCQ_NAME_RE):
+  blueprint coverage 38 -> 93 names.
+- `Parameter` added to DECL_KW; verified `epsilon_cpa` is now declared AND cited
+  (covered, not silently waived), so the ratchet guards it.
+- CTOR_RE scoped to Inductive/Variant bodies (ctor_names): the phantom `exact`
+  from ssreflect bullets is gone, and real constructors (e.g. AO_recv_output)
+  are still picked up.
+- 5 dangling refs fixed in it_bound_bridge.tex (S_output_cell->Sout_cell,
+  id_s_get->id_Sout_get, guess_advantage_le->dsdp_main.dsdp_alice_guess_advantage_le,
+  Pr_fst_agree_locs/Pr_fst_closed -> convert.dsdp_convert).
+- Exclude list reconciled: 4 pending security headlines added under a comment,
+  stale `relay_privacy_n` and `dsdp_main:guess_sdistr_success_real` removed,
+  `dsdp_alice_guess_advantage_le` removed (now cited).
+- Checker GREEN: `OK code=343 blueprint=93 excl=250`.
+
+Follow-ups this created:
+- [A7] Add `dsdp/convert/dsdp_convert.v` to MODULES (with `core/dsdp_interface.v`,
+  `core/dsdp_pismc.v`). The 2 Pr_fst refs now point there but it is out of
+  MODULES, so their coqdoc buttons 404 until it is added and coqdoc'd.
+- [hygiene, non-blocking] ~57 exclude entries are now redundant (covered by the
+  newly-visible multi-name nodes). Remove them so the waiver list stops hiding
+  covered declarations. Not required for green.
 
 ---
 

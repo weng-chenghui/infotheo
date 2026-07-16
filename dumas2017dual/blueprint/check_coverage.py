@@ -26,18 +26,43 @@ SRC_DIR = os.path.join(HERE, "src")
 # Declaration keywords whose name we require a blueprint node for.
 DECL_KW = (
     "Theorem|Lemma|Corollary|Proposition|Fact|Remark|Example|"
-    "Definition|Fixpoint|CoFixpoint|Record|Inductive|Variant|Instance|Axiom"
+    "Definition|Fixpoint|CoFixpoint|Record|Inductive|Variant|Instance|Axiom|"
+    "Parameter"
 )
+_MODIFIERS = r"(?:(?:Local|Global|Program|Polymorphic|Monomorphic|Private|Export)[ \t]+)*"
 DECL_RE = re.compile(
     r"(?m)^[ \t]*(?:#\[[^\]]*\][ \t\n]*)?"
-    r"(?:(?:Local|Global|Program|Polymorphic|Monomorphic|Private|Export)[ \t]+)*"
-    r"(?:" + DECL_KW + r")[ \t\n]+([A-Za-z_][A-Za-z0-9_']*)"
+    + _MODIFIERS
+    + r"(?:" + DECL_KW + r")[ \t\n]+([A-Za-z_][A-Za-z0-9_']*)"
 )
-# Inductive/Variant constructor heads: a `| Name ...` line whose head is not a
-# match-arm (no `=>` before the next colon/newline). Blueprint nodes may point
-# at constructors, so they count as declared.
+# Inductive/Variant constructor heads: a `| Name ...` line inside an
+# Inductive/Variant body (see ctor_names). A plain `| Name` regex over the whole
+# file also matches ssreflect tactic bullets like `| exact: H`, minting phantom
+# declarations; scoping to inductive bodies removes that class.
 CTOR_RE = re.compile(r"(?m)^[ \t]*\|[ \t]*([A-Za-z_][A-Za-z0-9_']*)\b(?![^\n:]*=>)")
-ROCQ_RE = re.compile(r"\\rocq\{(infotheo\.[A-Za-z0-9_.]+)\}")
+# A Coq sentence ends at `.` followed by whitespace or EOF (a qualified name's
+# dot is followed by a letter, so it is not a split point).
+SENT_SPLIT_RE = re.compile(r"\.(?=\s|$)")
+INDUCTIVE_HEAD_RE = re.compile(
+    r"\s*(?:#\[[^\]]*\][ \t\n]*)?" + _MODIFIERS + r"(?:Inductive|Variant)\b"
+)
+# A \rocq node may list several names: \rocq{infotheo.a, infotheo.b}, possibly
+# across lines. Capture the whole brace block, then every infotheo.* name in it.
+ROCQ_BLOCK_RE = re.compile(r"\\rocq\{([^}]*)\}")
+ROCQ_NAME_RE = re.compile(r"infotheo\.[A-Za-z0-9_.]+")
+
+
+def ctor_names(src):
+    """Constructor heads declared in Inductive/Variant bodies only.
+
+    Splits comment-stripped source into Coq sentences and runs CTOR_RE only on
+    those beginning with Inductive/Variant, so proof-body bullets never match.
+    """
+    names = set()
+    for sent in SENT_SPLIT_RE.split(src):
+        if INDUCTIVE_HEAD_RE.match(sent):
+            names |= set(CTOR_RE.findall(sent))
+    return names
 
 
 def strip_comments(text):
@@ -118,7 +143,7 @@ def main():
             sys.exit("check_coverage: scoped module missing on disk: %s" % rel)
         with open(path) as f:
             src = strip_comments(f.read())
-        idents = set(DECL_RE.findall(src)) | set(CTOR_RE.findall(src))
+        idents = set(DECL_RE.findall(src)) | ctor_names(src)
         lname = module_logical_name(rel)
         declared[lname] = idents
         basename_of[lname] = os.path.basename(rel)[:-2]
@@ -131,7 +156,9 @@ def main():
         if not fn.endswith(".tex"):
             continue
         with open(os.path.join(SRC_DIR, fn)) as f:
-            for full in ROCQ_RE.findall(f.read()):
+            text = f.read()
+        for block in ROCQ_BLOCK_RE.findall(text):
+            for full in ROCQ_NAME_RE.findall(block):
                 lname, _, ident = full.rpartition(".")
                 if lname not in declared:
                     continue                         # ref outside scope: not ours

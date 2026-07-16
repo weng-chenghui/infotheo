@@ -237,14 +237,22 @@ dsdp_indcpa_advantage:hop_equiv_real_leak_S
 dsdp_indcpa_advantage:hop_equiv_zero_leak_S
 dsdp_indcpa_advantage:real_game_leak_S
 dsdp_indcpa_advantage:zero_game_leak_S
-dsdp_main:dsdp_alice_guess_advantage_le
+# dsdp_main security headlines: documented in the security-story chapters, which
+# are pending (Bucket B, see notes/20260717-blueprint-revision-list.md). Each
+# leaves this list when its chapter lands. This is a scope-vs-claim gap: the
+# checker scopes dsdp_main.v, the current document covers only the
+# auto-derivation (ciphertext) subset.
+# Reconciled 2026-07-17: dropped dsdp_alice_guess_advantage_le (now cited by
+# lem:guess_advantage_le) and the stale guess_sdistr_success_real / relay_privacy_n.
 dsdp_main:dsdp_alice_unpredictability_ge
 dsdp_main:dsdp_centropy_uniform
 dsdp_main:dsdp_centropy_uniform_n
-dsdp_main:guess_sdistr_success_real
-dsdp_main:relay_privacy_n
 dsdp_main:bob_privacy_V1
 dsdp_main:charlie_privacy_V1
+dsdp_main:bob_privacy_V3
+dsdp_main:charlie_privacy_V2
+dsdp_main:dsdp_alice_simulation_secure
+dsdp_main:dsdp_alice_view_statdist_le
 dsdp_main:BobView_indep_V1
 dsdp_main:CharlieView_indep_V1
 dsdp_main:US_compromised_leaks_V2
