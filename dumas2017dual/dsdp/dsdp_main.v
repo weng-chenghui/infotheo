@@ -179,8 +179,12 @@ Hypothesis VarRV_indep_inputs : P |= [%V1, U1, U2, U3] _|_ VarRV.
 
 Let InputRV : {RV P -> (msg * msg * msg * msg)} := [%V1, U1, U2, U3].
 
-(* dsdp_centropy_uniform — conditioning on Alice's view (V1, U1, U2, U3, S),
-   the relay private inputs (V2, V3) retain log m bits of uncertainty.  [3-party] *)
+(* dsdp_centropy_uniform — conditioning on Alice's inputs and the output
+   (V1, U1, U2, U3, S), the plaintext residual (not Alice's full view, which
+   also carries her key, masks, and the ciphertext hops), the relay private
+   inputs (V2, V3) retain log m bits of uncertainty. The counting axis
+   conditions on plaintexts only; the ciphertext-carrying view is the SSProve
+   leg's business (the guessing triangle).  [3-party] *)
 Theorem dsdp_centropy_uniform :
   (forall t, (0 < U3 t)%N) ->
   (forall t, (U3 t < minn p q)%N) ->
