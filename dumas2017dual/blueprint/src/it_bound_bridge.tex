@@ -162,9 +162,11 @@ $2\,\epscpa$ carries over unchanged.
   \rocq{infotheo.dumas2017dual.dsdp.symbolic_game.dsdp_game_derivation.lower_obs}
   \rocqok
   \uses{def:lower_obs,def:alice_obs_output}
-  The lowering pass maps the output reception to the resolved output term
-  written to a dedicated output cell, reusing the existing put statement, so
-  $\mathsf{game\_code}$ is not extended and no new hop is introduced.
+  The lowering pass maps the output reception to the resolved output term written
+  to a dedicated output cell by the dedicated output-write statement
+  $\mathsf{put}_S$ (a distinct game-code constructor,
+  Definition~\ref{def:embedding}). It is not an encryption hop, so the hop count
+  is unchanged.
   \[ \mathsf{recvOut}(S) \;\mapsto\; \mathsf{put}_{S}(S) \]
 \end{definition}
 
@@ -486,9 +488,11 @@ full bound $1/m + 2\,\epscpa$.
   \uses{lem:guess_success_sdistr_eq_fdist,lem:guess_fdist_success_le}
   % proof: rewrite Prexp(zero_S) by the connector guess_success_sdistr_eq_fdist,
   %   then guess_fdist_success_le.
-  At the output-exposing all-zero endpoint, the predictor guesses $V_2$ with
-  probability at most $1/m$.
-  \[ \Prexp(\zero_S) \le 1/m \]
+  When the third weight $u_3$ acts injectively (so the fiber has $m$ points), at
+  the output-exposing all-zero endpoint the predictor guesses $V_2$ with
+  probability at most $1/m$. The bound also carries the predictor's losslessness
+  and the cardinality and marshalling side-conditions of the guessing layer.
+  \[ u_3 \text{ injective} \;\Longrightarrow\; \Prexp(\zero_S) \le 1/m \]
 \end{theorem}
 
 \begin{lemma}[Computational distance between the experiments]
@@ -500,11 +504,13 @@ full bound $1/m + 2\,\epscpa$.
   % proof: guess_advantage_eq slides the fixed predictor out of the par
   %   (Advantage_par); guess_advantage_le then applies dsdp_advantage_derived_leak_S
   %   (eapply, since apply: delta-unfolds the linked games).
-  The success probabilities of the experiment on the real and all-zero games
-  differ by at most $2\,\epscpa$: the challenger-wrapped predictor is a valid
-  adversary, to which the Part~II computational distance
-  (Lemma~\ref{lem:dsdp_advantage_derived_leak_S}) applies.
-  \[ \lvert\,\Prexp(\real_S) - \Prexp(\zero_S)\,\rvert \le 2\,\epscpa \]
+  The success-probability difference on the real and all-zero games equals the
+  advantage of the challenger-wrapped predictor, a valid adversary, and that
+  advantage is at most $2\,\epscpa$ by the Part~II computational distance
+  (Lemma~\ref{lem:dsdp_advantage_derived_leak_S}). The equality is one lemma and
+  the bound another.
+  \[ \lvert\,\Prexp(\real_S) - \Prexp(\zero_S)\,\rvert
+        = \AdvE(\real_S, \zero_S, \text{pred}) \le 2\,\epscpa \]
 \end{lemma}
 
 \begin{theorem}[Full secrecy by composition]
@@ -514,7 +520,9 @@ full bound $1/m + 2\,\epscpa$.
   \uses{thm:guess_sdistr_success_le,lem:guess_advantage_le}
   % proof: triangle Prexp(real_S) <= Prexp(zero_S) + |Prexp(real_S) - Prexp(zero_S)|,
   %   then the endpoint bound (1/m) and the computational distance (2*epsilon_cpa).
-  Against the output-exposing real game, the predictor guesses $V_2$ with
+  When $u_3$ acts injectively, and for a predictor whose locations are disjoint
+  from the two encryption oracles' state (the marshalling round-trips cancelling),
+  the predictor guesses $V_2$ against the output-exposing real game with
   probability at most $1/m + 2\,\epscpa$.
-  \[ \Prexp(\real_S) \le 1/m + 2\,\epscpa \]
+  \[ u_3 \text{ injective} \;\Longrightarrow\; \Prexp(\real_S) \le 1/m + 2\,\epscpa \]
 \end{theorem}

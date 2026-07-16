@@ -144,13 +144,16 @@ challenges, the order the viewed ciphertexts leak, and the two cardinalities. Th
 generality lives in the back end, whose bound applies to whatever game the record
 produces.
 
-Each entry below links to its Rocq declaration through its Rocq button. An
-entry's colour records its formalization status: green for proved declarations,
-and blue dashed for declarations under construction. Part~I is green throughout.
-Part~II is the construction that exposes the output $S$, transports the fiber
-bound to the denoted game, and composes the two channels; its entries are blue
-until built. The dependency graph draws the whole chain from the control record
-to the final bound.
+Each entry below links to its Rocq declaration through its Rocq button. Every
+entry is proved: both parts are green, Part~I bounding the ciphertext channel and
+Part~II exposing the output $S$, transporting the fiber bound to the denoted game,
+and composing the two channels. One caveat qualifies the green: the probabilistic
+nodes, those stating an advantage or a game probability, inherit a single
+\texttt{Admitted} lemma from an upstream library, $\mathrm{interchange\_psum}$ in
+mathcomp's experimental reals (a Tonelli exchange for non-negative summable
+series, not part of DSDP). The pure-syntax derivation nodes and the
+information-theoretic fiber nodes do not. The dependency graph draws the whole
+chain from the control record to the final bound.
 
 \part{Ciphertext privacy by derived game-hopping}
 
@@ -317,12 +320,13 @@ to the final bound.
   A deep embedding. Homomorphic terms cover variables, constants, encryption,
   decryption, homomorphic addition, the scalar action, and ring operations.
   Straight-line game code covers sampling, the challenge write, let-binding, the
-  encryption hop, and the return. The encryption hop is the only hoppable
-  statement.
+  encryption hop, a dedicated output write $\mathsf{put}_S$
+  (Definition~\ref{def:lower_obs_output}), and the return. The encryption hop is
+  the only hoppable statement.
   \[ t ::= x \mid k \mid \Enc(p,t,r) \mid \Dec(p,t) \mid t\hadd t \mid t\hmul t
         \mid t{+}t \mid t{-}t \mid t{\cdot}t \]
-  \[ g ::= \mathsf{smp}(c,g) \mid \mathsf{put}(t,g) \mid \mathsf{let}(t,g)
-        \mid \mathsf{hop}(p,t,g) \mid \mathsf{ret}(\bar t) \]
+  \[ g ::= \mathsf{smp}(c,g) \mid \mathsf{put}(t,g) \mid \mathsf{put}_S(t,g)
+        \mid \mathsf{let}(t,g) \mid \mathsf{hop}(p,t,g) \mid \mathsf{ret}(\bar t) \]
 \end{definition}
 
 \begin{definition}[Resolving names to positions]
