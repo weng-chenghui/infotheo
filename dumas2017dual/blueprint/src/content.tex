@@ -287,12 +287,12 @@ lowers.
   \rocq{infotheo.dumas2017dual.dsdp.symbolic_game.dsdp_game_derivation.collect_samples}
   \rocqok
   \uses{def:alice_obs}
-  Scan the walked observations for their free scalar and randomness names in
-  first-appearance order, excluding the walk's own bound result names, and emit
-  one sample action per name, tagged as a plaintext scalar or an encryption
-  randomness by where the name occurs.
-  \[ \samples(\tau) = [\, \mathsf{smp}_\bullet(c,x) \mid x \in \mathrm{fv}(\tau) \,]
-        \ \text{in first-appearance order} \]
+  Scan the walked observations left to right for their free scalar and randomness
+  names, excluding the walk's own bound result names, and emit all the scalar
+  samples first, then all the randomness samples, each group in the order its
+  names first appear.
+  \[ \samples(w) = [\, \mathsf{smp}_v(c,x) \mid x \in \mathrm{fv}_v(w) \,]
+        \cat [\, \mathsf{smp}_r(c,x) \mid x \in \mathrm{fv}_r(w) \,] \]
 \end{definition}
 
 \begin{definition}[The whole corrupted-view trace]
