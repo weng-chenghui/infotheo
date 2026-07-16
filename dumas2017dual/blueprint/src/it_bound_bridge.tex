@@ -190,10 +190,13 @@ $2\,\epscpa$ carries over unchanged.
        infotheo.dumas2017dual.dsdp.indcpa_hopping.dsdp_indcpa_advantage.zero_game_leak_S}
   \rocqok
   \uses{def:denote_game_leak_S,def:games}
-  The real and all-zero games of the DSDP problem
-  (Definition~\ref{def:games}) denoted from the output-exposing derivation. Each
-  exposes the ciphertexts and the output $S$. Write $\real_S$ and $\zero_S$ for
-  the two.
+  The derived ciphertext games (Definition~\ref{def:games}) with the output write
+  adjoined: each exposes the four ciphertexts and the scalar-product output $S$.
+  The ciphertext structure is derived from the program; the output value is
+  supplied directly in fiber form, $S = u_1 v_1 + u_2 v_2 + u_3 v_3$, the value
+  Alice's decryption computes by the protocol's correctness. Adjoining $S$ is a
+  common deterministic post-processing, adding no encryption hop. Write $\real_S$
+  and $\zero_S$ for the two.
   \[ \view = \big(\,[\,a_1,a_2,c_2,c_3\,],\ S\,\big),\qquad
         S = u_1 v_1 + u_2 v_2 + u_3 v_3 \]
 \end{definition}

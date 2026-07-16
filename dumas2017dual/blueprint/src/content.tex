@@ -15,9 +15,10 @@ leaks through two channels, and the blueprint bounds each and composes them. The
 ciphertexts she receives leak computationally, bounded by $2\,\epscpa$ from the
 scheme's IND-CPA assumption. The scalar-product output $S$ she decrypts leaks
 information-theoretically, bounded by $1/m$ from a fiber-counting argument that
-no assumption can improve. Both bounds read off one corrupted view, and that
-view is derived from the one protocol program that already defines the
-protocol's behaviour, rather than written by hand. The full bound is
+no assumption can improve. The ciphertext side of the corrupted view is derived
+from the one protocol program that already defines the protocol's behaviour,
+rather than written by hand; the output side is the scalar product, supplied in
+that form and bounded information-theoretically. The full bound is
 $1/m + 2\,\epscpa$.
 
 The single-hop IND-CPA advantage is a function $\epscpaof{\cdot}$ of the
@@ -27,21 +28,26 @@ bounds below are for DSDP's fixed scheme $E$, and $\epscpa$ abbreviates
 $\epscpaof{E}$; the generic back-end theorems, which range over every scheme,
 keep the argument explicit.
 
-The two channels split the blueprint into two parts. Part~I derives the game
-from the program and bounds the ciphertext channel by $2\,\epscpa$, every choice
-the argument depends on gathered in one record from which a generic theorem
-reads off the advantage. It is the worked instance of the derivation framework
-developed in the thesis part on the derived game. Part~II continues the same
-derivation to the decryption Alice performs, exposing $S$, and bounds the output
-channel by $1/m$ by citing the information-theoretic fiber theorems through one
-probability identity, then composes the two bounds.
+The two channels split the blueprint into two parts, and the derivation covers
+one of them. Part~I derives the ciphertext game from the program and bounds the
+ciphertext channel by $2\,\epscpa$, every choice the argument depends on gathered
+in one record from which a generic theorem reads off the advantage. It is the
+worked instance of the derivation framework developed in the thesis part on the
+derived game. Part~II is a different tool. The output $S$ is the plaintext scalar
+product $u_1v_1+u_2v_2+u_3v_3$, supplied directly in that form; its $1/m$ bound is
+information-theoretic, a fiber-counting argument citing the Infotheo theorems
+through one probability identity, and carries no encryption assumption. Part~II
+then composes that $1/m$ with the Part~I $2\,\epscpa$ across the triangle
+inequality.
 
 Game hopping reduces a protocol's ciphertext privacy to a chain of IND-CPA swaps
 costing $k\,\epscpa$ for $k$ hops. The method takes the chain of games as given,
 and someone writes that chain once per protocol: the real game, every
-intermediate game, and the oracle each hop calls. For DSDP the hand-written
-chain runs to several thousand lines. The derivation here removes that
-hand-writing.
+intermediate game, and the oracle each hop calls. That hand-writing is the
+error-prone part, and it is what the derivation removes. The back end that
+consumes the derived game is protocol-generic and amortizes across protocols; the
+per-protocol cost is the symbolic reading of the program together with a small
+record of declared game configuration.
 
 The derivation rests on a single idea. The protocol's procedures are written
 once over an interface that names the message carriers and the homomorphic
