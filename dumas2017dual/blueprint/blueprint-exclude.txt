@@ -340,3 +340,18 @@ indcpa_ror:oracle_encrypt_zero
 indcpa_ror:oracle_encrypt_zero_pkg
 indcpa_ror:party_of_nat
 indcpa_ror:sample_to_renc
+# dsdp_convert: the output-secrecy chain cites Pr_fst_agree_locs and
+# Pr_fst_closed; the module's other connector lemmas are internal.
+dsdp_convert:Pr_code_preserves
+dsdp_convert:Pr_fst_map
+dsdp_convert:Pr_fst_put_invariant
+dsdp_convert:Pr_sdistr_to_fdist
+dsdp_convert:dlet_const_unit
+dsdp_convert:dlet_dmargin_eq
+dsdp_convert:dmargin_comp
+dsdp_convert:dmargin_fst_const
+dsdp_convert:eq_in_dlet
+dsdp_convert:fdistmap_bij_unif
+dsdp_convert:mean1_eq1
+dsdp_convert:sdistr_to_fdist
+dsdp_convert:sdistr_to_fdistE
