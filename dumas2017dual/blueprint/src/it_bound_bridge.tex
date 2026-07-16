@@ -110,15 +110,17 @@ joins them (Theorem~\ref{thm:dsdp_alice_secrecy_leak_S}):
 \chapter{Extending the derivation to Alice's decryption}
 \label{ch:deriving_output}
 
-In the protocol Alice receives the masked aggregate, decrypts it, and removes
-her masks to read the scalar-product output $S=U_1V_1+U_2V_2+U_3V_3$. The Part~I
-walk stops one reception short of this decrypt
-(Definition~\ref{def:walk_obs}), so the derived view exposes only the
-ciphertexts. This chapter continues the same walk across that decrypt-reception,
-lowers and denotes the new observation, and so the derived endpoint game exposes
-$S$ alongside the ciphertexts. Adjoining $S$ to both endpoints is a common
-deterministic post-processing: it adds no encryption hop, so the Part~I bound
-$2\,\epscpa$ carries over unchanged.
+In the protocol Alice receives the masked aggregate, decrypts it, and removes her
+masks to read the scalar-product output $S=U_1V_1+U_2V_2+U_3V_3$. The Part~I walk
+stops when its ciphertext-response stream runs out
+(Definition~\ref{def:walk_obs}), so the derived view exposes only the ciphertexts.
+This chapter is the machinery that carries the view to the decrypt: it adds an
+output reception, lowers it to a dedicated output write, and denotes it. One thing
+the derivation cannot supply is the decrypted value itself, since the received
+aggregate is a party's response, not a fresh sample; so the live endpoint games
+write $S$ in fiber form directly, the value the decrypt computes by the protocol's
+correctness. Adjoining $S$ adds no encryption hop, so the Part~I bound
+$2\,\epscpaof{E}$ carries over unchanged.
 
 \begin{definition}[Output reception]
   \label{def:alice_obs_output}

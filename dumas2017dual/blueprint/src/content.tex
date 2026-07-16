@@ -222,8 +222,7 @@ ciphertexts.
   \rocq{infotheo.dumas2017dual.dsdp.symbolic_game.dsdp_symbolic_exec.dsdp_observed_combines_eq}
   \rocqok
   Running the corrupted program against placeholder receptions, the two messages
-  it returns compute to the two homomorphic assemblies $a_1$ and $a_2$. These
-  fall out of the program and are not written by hand.
+  it returns compute to the two homomorphic assemblies $a_1$ and $a_2$.
   \[ a_1 = (u_2 \hmul c_2) \hadd \Enc_{pk_B}(r_2), \qquad
         a_2 = (u_3 \hmul c_3) \hadd \Enc_{pk_C}(r_3) \]
 \end{lemma}
@@ -277,11 +276,10 @@ lowers.
   Walk the corrupted program against the received hop ciphertexts. At each
   reception read the sending party and the encrypted secret off the ciphertext
   shape and emit a reception bound to a fresh result name. At each send emit an
-  assembly of its message. For the ciphertext channel the walk stops at the
-  decrypt-reception and at termination; Part~II
-  (Chapter~\ref{ch:deriving_output}) continues it across that decrypt-reception
-  to expose the output. On receiving $\Enc_p(s)$ it emits $\mathsf{recv}(p,s,n)$
-  and recurses at $n{+}1$.
+  assembly of its message. The walk stops when the received-response stream runs
+  out; for the ciphertext channel that stream is the two hop ciphertexts, so it
+  stops after the two receptions. On receiving $\Enc_p(s)$ it emits
+  $\mathsf{recv}(p,s,n)$ and recurses at $n{+}1$.
 \end{definition}
 
 \begin{definition}[Synthesising the sample prefix]
@@ -332,8 +330,7 @@ lowers.
   \rocqok
   \uses{def:obs_of_procs,def:palice_sym,def:received_hops,def:sender_programs}
   The DSDP instance of the whole-trace observer, with the challenge fixed to
-  Bob's secret and the leak ordering assemblies before receptions. Nothing in it
-  is hand-written.
+  Bob's secret and the leak ordering assemblies before receptions.
   \[ \tau_{\mathrm{DSDP}} = \mathrm{obs}(P_A, [c_2,c_3], v_2,\
         \mathrm{comb}\cat\mathrm{recv}) \]
 \end{definition}
@@ -416,8 +413,7 @@ disappear and only the structure survives.
   \rocq{infotheo.dumas2017dual.dsdp.symbolic_game.dsdp_game_derivation.count_hops_game_of_trace}
   \rocqok
   Lowering neither creates nor drops hops, so the game-side hop count of a
-  lowered trace equals its protocol-side count. This ties the ladder length to
-  the protocol structure.
+  lowered trace equals its protocol-side count.
   \[ \nhops(\gtrace(\tau)) = \nhops(\tau) \]
 \end{lemma}
 \begin{proof}
@@ -673,7 +669,7 @@ the record's fields.
   \uses{def:secrecy_problem,def:palice_sym,def:received_hops,def:sender_programs}
   The record at the DSDP corrupted-Alice model: the corrupted program, the
   derived hop stream, and the challenge fixed to Bob's secret, together with a
-  supplied scheme and marshalling. This is the whole input a researcher provides.
+  supplied scheme and marshalling.
   \[ P_{\mathrm{DSDP}} = (\, P_A, [c_2,c_3], v_2,\ \mathrm{comb}\cat\mathrm{recv},
         c_m, c_r \,;\ E, \dots \,) \]
 \end{definition}
@@ -722,9 +718,10 @@ the record's fields.
   generic theorem.
 \end{proof}
 
-% Part II: continue the SAME derivation across Alice's decrypt-receive to expose
-% the output S, build the absolute-Pr guessing layer on the DERIVED endpoint
-% game, transport the Infotheo fiber 1/m through one probability identity, and
-% compose with the Part I 2*epsilon_cpa.  See it_bound_bridge.tex.
-\part{Output secrecy and the full bound}
+% The output-secrecy leg: the output value S is supplied in fiber form (= what
+% Alice's decryption computes, by correctness), the absolute-Pr guessing layer is
+% built on the endpoint game, the Infotheo fiber 1/m is transported through one
+% probability identity, and the result composes with the Part I 2*epsilon_cpa AHE.
+% A different tool from the ciphertext-channel game-hopping.  See it_bound_bridge.
+\part{The output-secrecy leg}
 \input{it_bound_bridge}
