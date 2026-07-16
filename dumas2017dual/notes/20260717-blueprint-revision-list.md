@@ -1,6 +1,37 @@
 # Blueprint revision list
 
 Date: 2026-07-17
+
+## COMPLETION STATUS (2026-07-17, autonomous execution)
+
+DONE and verified end-to-end (checker green `blueprint=110`, plastex clean, full
+`make_blueprint.sh` build EXIT 0, 13 coqdoc pages, all `\rocq` buttons resolve):
+
+- Bucket C: checker fixed (multi-name, Parameter, constructor scoping), 5 dangling
+  refs fixed, exclude list reconciled, 53 redundant waivers removed.
+- Bucket A: A1 (epsilon_cpa staleness), A2 (dangling), A3 (output scope +
+  line-count), A4 (false statements), A5 (status + modulo-admit caveat, probe-
+  verified), A6 (faithfulness anchor, 7 chapter openings, glosses, node
+  corrections incl. walk_obs/ch:deriving_output, style trims, collect_samples,
+  resolve_term), A7 (dsdp_simulator + dsdp_convert added to MODULES; seam's left
+  half in prose), A8 (dsdp_faithful demoted).
+- Bucket B: restructured to the threat-model spine (retitled), Part 0 Foundations
+  + Part I Corrupted Alice + Part II Corrupted relay in security.tex, all 15
+  dsdp_main headlines documented and chained to leaves, content.tex kept as the
+  final auto-derivation Part. B2 source comment fixed. B3 resolved (regex checker
+  kept, direct-chain node scope).
+
+Minor items intentionally left (low value, non-correctness): a dedicated
+marshalling node (M10) and a denote_game oracle-structure gloss (M9) — both
+concepts appear in proof bodies; a few roadmap sentences in node bodies (style
+table remainder); the seam's left half as \rocq nodes rather than prose (would
+add ~85 dsdp_pismc waivers for 2 nodes). None block the build or the ratchet.
+
+Probe code kept (no deletion): scratchpad probe_leak_S.v, probe_node_admits.v,
+assumptions_sweep.v, probe_audit.v.
+
+---
+
 Consolidates: the three content.tex audits (coverage / accuracy / explanatory),
 the structure audit of the security-story design, the epsilon_cpa fix, and the
 Option A decision.
