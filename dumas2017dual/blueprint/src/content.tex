@@ -652,9 +652,11 @@ the record's fields.
   \label{lem:dsdp_faithful}
   \rocq{infotheo.dumas2017dual.dsdp.symbolic_game.dsdp_game_derivation.dsdp_faithful}
   \rocqok
-  Lowering the DSDP corrupted-Alice trace reproduces the back-end fixture game
-  code exactly, binding positions and all. The fixture is therefore derived
-  rather than hand-written.
+  A regression cross-check: lowering the DSDP corrupted-Alice trace reproduces a
+  hand-written reference fixture $g_{\mathrm{DSDP}}$ exactly, binding positions
+  and all. This validates the derivation against an independent oracle. The live
+  chain runs on the derived game directly and does not consume the fixture; the
+  fixture is a check on the derivation, not the object anything downstream uses.
   \[ \gtrace(\tau_{\mathrm{DSDP}}) = g_{\mathrm{DSDP}} \]
 \end{lemma}
 \begin{proof}
