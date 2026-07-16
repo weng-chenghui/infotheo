@@ -366,8 +366,10 @@ disappear and only the structure survives.
   \rocqok
   \uses{def:embedding}
   Rewrite a named term into the positional form the denotation expects, replacing
-  each name by its binding position. Only order survives, so the particular names
-  disappear from the lowered code.
+  each name by its binding position. Here $\Gamma = (\Gamma_v, \Gamma_r)$ is the
+  pair of value and randomness name environments, and $\mathrm{idx}(x,\Gamma_v)$
+  is $x$'s position counted from the most recently bound name. Only order
+  survives, so the particular names disappear from the lowered code.
   \[ \mathsf{res}_\Gamma(x) = \mathrm{idx}(x,\Gamma_v), \qquad
         \mathsf{res}_\Gamma(\Enc(p,t,r)) =
         \Enc(p, \mathsf{res}_\Gamma(t), \mathrm{idx}(r,\Gamma_r)) \]
