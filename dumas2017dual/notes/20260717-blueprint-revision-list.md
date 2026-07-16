@@ -139,6 +139,35 @@ load-bearing, clustering to ~6-8 nodes:
   such. `u3 in (0,min(p,q))` is a magnitude restriction (~sqrt(m) of m weights);
   state it. `predictor_locs_disj` is security-critical, not hygiene.
 
+### B0 — execution decisions (2026-07-17, autonomous)
+
+Structural choices made while building Bucket B, recorded for review:
+
+- **Restructure in place, no blueprint_v1 move.** The user's early instruction was
+  "move to blueprint_v1, create new with infra copied" IF the current blueprint
+  does not match. But the later decision reuses content.tex as the final
+  Auto-derivation Part ("auto-derivation more like a final part"), and this
+  session substantially corrected content.tex. So nothing is discarded; the
+  security-story Parts are added before the (kept, corrected) Auto-derivation
+  Part in the same blueprint/ directory. If a clean v1 archive is wanted instead,
+  this is the point to say so.
+- **Node scope per chapter (resolves B3 / the ~506-vs-150 tension):** document each
+  headline's DIRECT chain of mathematically meaningful lemmas (~3-8 nodes),
+  citing library and deep-plumbing facts as black-box leaves in prose. NOT the
+  transitive closure (~506/1891, dominated by library plumbing). This is the
+  ~150-node reading, which is what "chain to the leaves" means for a reader.
+- **Title:** "SMC-DSDP: A Machine-Checked Security Analysis".
+- **Parts:** 0 Foundations (protocol, views, threat models, correctness) / I
+  Corrupted Alice (semi-honest; includes the degenerate-query tightness case,
+  formerly mis-called "malicious") / II Corrupted relay / final Auto-derivation
+  (content.tex + it_bound_bridge.tex).
+- **MODULES additions as chapters need them:** dsdp_correctness (Part 0),
+  dsdp_simulator + smc/ssprove_ext_* (simulation chapters), dsdp_malicious_dotp
+  (tightness chapter), entropy_fiber / extra_entropy (entropy chapters). Each
+  brings its non-documented decls into scope, waived under a comment.
+- **Hypothesis blocks** from `About <thm>` off the .vo (100% recall), verified
+  per the A5/M7 probe approach.
+
 ### B3 — tooling for the security chapters [DECIDE]
 - The chain-walker (D3) and generated-hypothesis-block (D2) ideas were REFUTED
   (.glob misses autorewrite/hint/canonical deps; push_val on-chain; scope

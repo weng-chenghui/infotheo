@@ -244,17 +244,13 @@ dsdp_indcpa_advantage:zero_game_leak_S
 # auto-derivation (ciphertext) subset.
 # Reconciled 2026-07-17: dropped dsdp_alice_guess_advantage_le (now cited by
 # lem:guess_advantage_le) and the stale guess_sdistr_success_real / relay_privacy_n.
+# Corrupted-relay chapters landed 2026-07-17 (security.tex), so the four relay
+# headlines and their two support lemmas are documented and removed from here.
 dsdp_main:dsdp_alice_unpredictability_ge
 dsdp_main:dsdp_centropy_uniform
 dsdp_main:dsdp_centropy_uniform_n
-dsdp_main:bob_privacy_V1
-dsdp_main:charlie_privacy_V1
-dsdp_main:bob_privacy_V3
-dsdp_main:charlie_privacy_V2
 dsdp_main:dsdp_alice_simulation_secure
 dsdp_main:dsdp_alice_view_statdist_le
-dsdp_main:BobView_indep_V1
-dsdp_main:CharlieView_indep_V1
 dsdp_main:US_compromised_leaks_V2
 dsdp_main:US_n_compromised_leaks_secret
 dsdp_symbolic_exec:a1_observed

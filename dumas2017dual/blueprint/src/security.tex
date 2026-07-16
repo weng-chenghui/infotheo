@@ -1,0 +1,176 @@
+% The security-story Parts of the SMC-DSDP blueprint: Foundations, Corrupted
+% Alice, Corrupted relay. The final Auto-derivation Part is content.tex +
+% it_bound_bridge.tex, input after this file.
+%
+% Each security chapter states one headline theorem of dsdp_main.v and chains it
+% to its leaves: a standing-hypotheses block (what the bound assumes), the
+% statement, its direct dependencies as nodes, and the library/plumbing facts it
+% rests on cited as black-box leaves in prose. Node bodies are terse declarative
+% statements, per the mathcomp-qbs standard.
+
+\chapter{The corrupted-Alice and corrupted-relay security of DSDP}
+
+DSDP is a three-party protocol that computes the scalar product of private input
+vectors held by Alice, Bob, and Charlie without revealing them. This blueprint
+presents its security against a single semi-honest corrupted party, proved in
+Rocq. The analysis has three threat models: a corrupted Alice, who both receives
+the ciphertext traffic and decrypts the output; a corrupted relay (Bob or
+Charlie), who forwards masked ciphertexts; and, as the tightness boundary of the
+corrupted-Alice case, a corrupted Alice who fixes her query to a coordinate
+vector and reads a relay's input directly.
+
+The headline theorems live in \texttt{dsdp\_main.v}. Each chapter below takes one
+of them and chains it to its leaves, opening with the hypotheses the bound
+actually assumes so an over-hypothesised or vacuous bound is visible on the page.
+The two proof techniques are kept distinct: the corrupted-Alice ciphertext
+channel is bounded by SSProve game-hopping under the IND-CPA assumption, and the
+output and relay channels are bounded information-theoretically by conditional
+entropy and fiber-counting, which need no cryptographic assumption. The final
+part of the blueprint documents the auto-derivation that generates the SSProve
+ciphertext game from the one protocol program.
+
+\part{Foundations}
+
+\chapter{The protocol, its views, and the threat models}
+
+The protocol runs on the ring $\mathbb{Z}_{pq}$ with $p,q$ distinct primes, so the
+message space $\mathsf{msg} = \mathbb{Z}_{pq}$ has $m = pq$ elements. Each party
+holds a private input and a private multiplier; the protocol computes
+$S = u_1 v_1 + u_2 v_2 + u_3 v_3$ and returns it to Alice.
+
+\begin{definition}[The message flow]
+  \label{def:protocol_flow}
+  \rocqok
+  % library: the party programs palice/pbob/pcharlie live in core/dsdp_pismc.v,
+  %   cited in prose (not in the coqdoc MODULES scope).
+  The three parties exchange messages in a ring. Bob and Charlie each send Alice a
+  head ciphertext of their own input. Alice sends Bob two homomorphic assemblies
+  $a_1, a_2$; Bob decrypts, combines them with Charlie's contribution, and
+  forwards the aggregate to Charlie; Charlie decrypts, re-encrypts the total under
+  Alice's key, and returns it. Alice decrypts and removes her masks to read $S$.
+  \[ \text{Alice} \to \text{Bob} \to \text{Charlie} \to \text{Alice} \]
+\end{definition}
+
+\begin{definition}[Party views]
+  \label{def:party_views}
+  \rocqok
+  A corrupted party's view is everything it sees: its own key and inputs, the
+  ciphertexts it receives, and, for Alice, the decrypted output $S$. Alice's view
+  carries her key, her inputs and masks, the output $S$, and the three ciphertext
+  hops; a relay's view carries its key, its own input, and the ciphertexts it
+  forwards.
+\end{definition}
+
+\begin{lemma}[Protocol correctness]
+  \label{lem:dsdp_is_correct}
+  \rocqok
+  % library: dsdp_is_correct (core/dsdp_correctness.v), dsdp_result_correct
+  %   (counting/dsdp_entropy_trace.v). Cited in prose; not in MODULES scope.
+  The protocol computes the scalar product: the value Alice reads equals
+  $u_1 v_1 + u_2 v_2 + u_3 v_3$. Security without this is empty, since a protocol
+  returning a constant is trivially private; correctness is what makes the private
+  quantity the intended one.
+  \[ \text{Alice's output} = u_1 v_1 + u_2 v_2 + u_3 v_3 \]
+\end{lemma}
+
+\part{Corrupted relay}
+
+A corrupted relay forwards masked ciphertexts and never decrypts a peer's input in
+the clear. Each relay's whole view is a deterministic image of quantities
+independent of the input in question, so conditioning on the view leaves that
+input uniform: full $\log m$ bits of uncertainty, hence strictly positive secrecy.
+The masking is information-theoretic (a fresh one-time pad), so these bounds carry
+no cryptographic assumption.
+
+\chapter{A relay learns nothing about Alice's input}
+
+\begin{theorem}[Relay privacy of $V_1$]
+  \label{thm:bob_privacy_V1}
+  \rocq{infotheo.dumas2017dual.dsdp.dsdp_main.bob_privacy_V1,
+       infotheo.dumas2017dual.dsdp.dsdp_main.charlie_privacy_V1}
+  \rocqok
+  \uses{def:party_views}
+  Assuming Alice's input $V_1$ is a priori uniform and each relay's data is
+  independent of $V_1$, the relay's view carries the full $\log m$ bits of
+  uncertainty about $V_1$, which is positive. Alice's input enters no message a
+  relay sees, so a corrupted relay learns nothing about it.
+  \[ \HH(V_1 \mid \mathrm{RelayView}) = \log m > 0 \]
+\end{theorem}
+\begin{proof}
+  \uses{lem:relay_view_indep_V1}
+  \rocqok
+  The view is independent of $V_1$ (Lemma~\ref{lem:relay_view_indep_V1}), so
+  conditioning does not change the entropy of the a-priori-uniform $V_1$, which is
+  $\log m$; positivity is $\log m > \log 1 = 0$.
+\end{proof}
+
+\begin{lemma}[The relay view is independent of $V_1$]
+  \label{lem:relay_view_indep_V1}
+  \rocq{infotheo.dumas2017dual.dsdp.dsdp_main.BobView_indep_V1,
+       infotheo.dumas2017dual.dsdp.dsdp_main.CharlieView_indep_V1}
+  \rocqok
+  Each relay's view is a deterministic image (its key, its input, the forwarded
+  ciphertexts) of data assumed independent of $V_1$, hence independent of $V_1$.
+  \[ \mathrm{RelayView} \perp V_1 \]
+\end{lemma}
+\begin{proof}
+  \rocqok
+  Push the assumed input-independence through the deterministic view map
+  (\texttt{inde\_RV\_comp}, an Infotheo library fact).
+\end{proof}
+
+\chapter{Bob learns nothing about Charlie's input}
+
+\begin{theorem}[Bob's view hides $V_3$]
+  \label{thm:bob_privacy_V3}
+  \rocq{infotheo.dumas2017dual.dsdp.dsdp_main.bob_privacy_V3}
+  \rocqok
+  \uses{def:party_views}
+  With $V_3$ and the mask $R_3$ a priori uniform and independent as stated, Bob's
+  view carries the full $\log m$ bits of uncertainty about Charlie's input $V_3$.
+  The Charlie-ciphertext Bob forwards carries $V_3 U_3 + R_3$, masked by Alice's
+  fresh one-time pad $R_3$, so Bob's view is independent of $V_3$.
+  \[ \HH(V_3 \mid \mathrm{BobView}) = \log m > 0 \]
+\end{theorem}
+\begin{proof}
+  \uses{lem:one_time_pad}
+  \rocqok
+  The masked term $V_3 U_3 + R_3$ is independent of $V_3$ by the one-time-pad
+  lemma (Lemma~\ref{lem:one_time_pad}); assembling this with Bob's clean data
+  through the graphoid mixing rule gives $\mathrm{BobView} \perp V_3$, and the
+  entropy computation follows as before.
+\end{proof}
+
+\chapter{Charlie learns nothing about Bob's input}
+
+\begin{theorem}[Charlie's view hides $V_2$]
+  \label{thm:charlie_privacy_V2}
+  \rocq{infotheo.dumas2017dual.dsdp.dsdp_main.charlie_privacy_V2}
+  \rocqok
+  \uses{def:party_views}
+  With $V_2$ and the mask $R_2$ a priori uniform and independent as stated,
+  Charlie's view carries the full $\log m$ bits of uncertainty about Bob's input
+  $V_2$. Charlie's decrypted aggregate $D_3$ carries $V_2 U_2$ masked by Alice's
+  fresh pad $R_2$, so the ciphertext Charlie returns to Alice is independent of
+  $V_2$.
+  \[ \HH(V_2 \mid \mathrm{CharlieView}) = \log m > 0 \]
+\end{theorem}
+\begin{proof}
+  \uses{lem:one_time_pad}
+  \rocqok
+  The pad $R_2$ hides $V_2 U_2$; a second pad argument passes $D_3 = V_2 U_2 + R_2
+  + \dots$ to independence of $V_2$, and the mixing rule assembles Charlie's full
+  view, leaving $V_2$ uniform.
+\end{proof}
+
+\begin{lemma}[One-time-pad masking]
+  \label{lem:one_time_pad}
+  \rocqok
+  % library: lemma_3_5' (the du2002 one-time-pad / secret-sharing fact), cited as
+  %   a black-box leaf. Used by the two relay-secrecy chapters above.
+  A value masked by a fresh uniform pad independent of it is independent of that
+  value: $X + R$ with $R$ uniform and $R \perp X$ makes $X + R$ independent of
+  $X$. This is the information-theoretic core of the relay-secrecy bounds and
+  needs no cryptographic assumption.
+  \[ R \text{ uniform},\ R \perp X \;\Longrightarrow\; (X + R) \perp X \]
+\end{lemma}
