@@ -30,6 +30,9 @@ MODULES=(
   # The simulation axis: the ideal functionality, the simulator, and the
   # factorization the simulation-security chapter (security.tex) cites.
   dumas2017dual/dsdp/simulation/dsdp_simulator.v
+  # The SSProve<->Infotheo connector: the footprint-frame lemmas the
+  # output-secrecy chain (it_bound_bridge.tex) cites.
+  dumas2017dual/dsdp/convert/dsdp_convert.v
 )
 
 echo "[1/3] blueprint HTML + dependency graph (plastex)"
