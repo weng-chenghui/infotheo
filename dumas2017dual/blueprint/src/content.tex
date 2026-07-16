@@ -14,8 +14,9 @@ encryption. This blueprint presents its corrupted-Alice secrecy. Alice's view
 leaks through two channels, and the blueprint bounds each and composes them. The
 ciphertexts she receives leak computationally, bounded by $2\,\epscpa$ from the
 scheme's IND-CPA assumption. The scalar-product output $S$ she decrypts leaks
-information-theoretically, bounded by $1/m$ from a fiber-counting argument that
-no assumption can improve. The ciphertext side of the corrupted view is derived
+information-theoretically, bounded by $1/m$, with $m$ the size of the message
+space $\mathbb{Z}_{pq}$, from a fiber-counting argument that no assumption can
+improve. The ciphertext side of the corrupted view is derived
 from the one protocol program that already defines the protocol's behaviour,
 rather than written by hand; the output side is the scalar product, supplied in
 that form and bounded information-theoretically. The full bound is
@@ -165,6 +166,14 @@ chain from the control record to the final bound.
 
 \chapter{The symbolic protocol model}
 
+The derivation begins by reading the protocol's procedures a second way. They are
+written once over an interface that names the message carriers and the
+homomorphic operations and leaves their laws open; the concrete reading fills it
+with a real scheme, the symbolic reading with a free term algebra. This chapter
+sets up the symbolic reading and runs the parties under it, so the messages a
+corrupted party sends fall out as ordinary syntactic data rather than opaque
+ciphertexts.
+
 \begin{definition}[Symbolic interpretation of the protocol]
   \label{def:symbolic_interface}
   \rocq{infotheo.dumas2017dual.dsdp.symbolic_game.dsdp_symbolic_exec.Symbolic_DSDP_Interface,
@@ -184,8 +193,13 @@ chain from the control record to the final bound.
   \rocqok
   \uses{def:symbolic_interface}
   The corrupted party Alice, run at the symbolic interpretation with named
-  inputs. Running it is the derivation step for the messages Alice returns. Its
-  leaked scalars are $u_2,r_2,u_3,r_3$ and its mask randomness $r_{a1},r_{a2}$.
+  inputs. It is literally $\mathsf{palice}$ at the symbolic interface: the same
+  program term the verified protocol runs, only its interface instance differs.
+  This is what makes the derivation faithful --- the game is derived from the
+  program that already carries the protocol's correctness, termination, and
+  duality proofs, not from a transcription. Running it is the derivation step for
+  the messages Alice returns. Its leaked scalars are $u_2,r_2,u_3,r_3$ and its
+  mask randomness $r_{a1},r_{a2}$.
 \end{definition}
 
 \begin{definition}[Sender programs and the challenge secret]
@@ -232,6 +246,13 @@ chain from the control record to the final bound.
 \end{definition}
 
 \chapter{Deriving the corrupted view}
+
+The symbolic run of the previous chapter produces the messages Alice sends. This
+chapter turns her whole interaction into a first-order trace: a straight-line
+list of the actions in her view. Walking her program against the received
+ciphertexts emits one observation per step, a sample prefix is synthesised from
+the free names, and the two assemble into the trace the rest of the derivation
+lowers.
 
 \begin{definition}[Corrupted-view observations]
   \label{def:alice_obs}
@@ -318,6 +339,12 @@ chain from the control record to the final bound.
 
 \chapter{Lowering the view to reified game code}
 
+The trace of the previous chapter names its values and randomness. The back end
+that denotes the game expects positions, not names. This chapter defines the
+reified game-code syntax and the lowering pass that folds the named trace into
+it, replacing each name by its binding position, so the particular names
+disappear and only the structure survives.
+
 \begin{definition}[Reified terms and game code]
   \label{def:embedding}
   \rocq{infotheo.dumas2017dual.dsdp.symbolic_game.dsdp_game_code.he_term,
@@ -400,6 +427,13 @@ chain from the control record to the final bound.
 
 \chapter{Denotation into SSProve}
 
+The lowered game code of the previous chapter is still syntax. This chapter
+evaluates it into an \ssprove{} package: samples become draws, terms are
+evaluated against the concrete scheme, and each encryption hop draws its
+randomness inline so it couples one-to-one with the IND-CPA oracle. Replacing the
+secret of a prefix of hops by the canonical zero gives the family of hybrid
+endpoints the next chapter's ladder runs between.
+
 \begin{definition}[Denotation into a package]
   \label{def:denote_game}
   \rocq{infotheo.dumas2017dual.dsdp.symbolic_game.dsdp_game_code.denote_he,
@@ -430,6 +464,13 @@ chain from the control record to the final bound.
 \end{definition}
 
 \chapter{The IND-CPA hybrid bound}
+
+The previous chapter denoted the game and named its hybrid endpoints. This
+chapter bounds the distance between them. The quantity is the \ssprove{}
+advantage $\AdvE(G_0,G_1,A)$, the absolute difference between the probabilities
+that a distinguisher $A$ returns true against $G_0$ and against $G_1$. The chapter
+rests it on one assumption, the single-hop IND-CPA bound, and telescopes the
+ladder of endpoints into a bound of the hop count times that assumption.
 
 \begin{definition}[Single-hop IND-CPA bound]
   \label{def:indcpa_assumption}
@@ -527,6 +568,14 @@ chain from the control record to the final bound.
 
 \chapter{The control record and the generic theorem}
 
+The previous chapters ran a fixed corrupted party. This chapter parameterizes the
+whole chain over one record that gathers every choice it depends on: the
+corrupted program, the received ciphertexts, the challenge secret, the leak
+order, the cardinalities, and the concrete scheme with its marshalling. From one
+record the corrupted view, the two endpoint games, and the hop count are all
+projections, and a single generic theorem bounds every valid adversary's
+advantage by the hop count times the scheme's IND-CPA bound.
+
 \begin{definition}[The secrecy-problem record]
   \label{def:secrecy_problem}
   \rocq{infotheo.dumas2017dual.dsdp.symbolic_game.dsdp_game_derivation.dsdp_indcpa_experiment}
@@ -592,6 +641,12 @@ chain from the control record to the final bound.
 \end{proof}
 
 \chapter{The DSDP instance}
+
+The generic theorem holds for any record. This chapter fills the record with
+DSDP: the corrupted-Alice program, the derived hop stream, and the challenge
+fixed to Bob's secret. The hop count computes to two, so the generic bound reads
+off as $2\,\epscpa$ for DSDP's scheme, the whole researcher-supplied input being
+the record's fields.
 
 \begin{lemma}[The derived game matches the fixture]
   \label{lem:dsdp_faithful}
