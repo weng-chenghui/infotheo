@@ -170,8 +170,8 @@ $2\,\epscpa$ carries over unchanged.
 
 \begin{definition}[Denoting the output and exposing it]
   \label{def:denote_game_leak_S}
-  \rocq{infotheo.dumas2017dual.dsdp.symbolic_game.dsdp_game_code.S_output_cell,
-       infotheo.dumas2017dual.dsdp.symbolic_game.dsdp_game_code.id_s_get,
+  \rocq{infotheo.dumas2017dual.dsdp.symbolic_game.dsdp_game_code.Sout_cell,
+       infotheo.dumas2017dual.dsdp.symbolic_game.dsdp_game_code.id_Sout_get,
        infotheo.dumas2017dual.dsdp.symbolic_game.dsdp_game_code.denote_game_leak_S}
   \rocqok
   \uses{def:denote_game,def:lower_obs_output}
@@ -337,8 +337,8 @@ full bound $1/m + 2\,\epscpa$.
 
 \begin{lemma}[Footprint of valid code]
   \label{lem:Pr_fst_agree_locs}
-  \rocq{infotheo.dumas2017dual.dsdp.indcpa_hopping.dsdp_guess_fiber.Pr_fst_agree_locs,
-       infotheo.dumas2017dual.dsdp.indcpa_hopping.dsdp_guess_fiber.Pr_fst_closed}
+  \rocq{infotheo.dumas2017dual.dsdp.convert.dsdp_convert.Pr_fst_agree_locs,
+       infotheo.dumas2017dual.dsdp.convert.dsdp_convert.Pr_fst_closed}
   \rocqok
   \uses{lem:exist_pr_code}
   % proof: induction on valid_code; the get/put cases touch only L, the op case
@@ -494,7 +494,7 @@ full bound $1/m + 2\,\epscpa$.
 \begin{lemma}[Computational distance between the experiments]
   \label{lem:guess_advantage_le}
   \rocq{infotheo.dumas2017dual.dsdp.indcpa_hopping.dsdp_guess_fiber.guess_advantage_eq,
-       infotheo.dumas2017dual.dsdp.indcpa_hopping.dsdp_guess_fiber.guess_advantage_le}
+       infotheo.dumas2017dual.dsdp.dsdp_main.dsdp_alice_guess_advantage_le}
   \rocqok
   \uses{def:guessing_experiment_leak_S,lem:dsdp_advantage_derived_leak_S,def:relational_advantage}
   % proof: guess_advantage_eq slides the fixed predictor out of the par
