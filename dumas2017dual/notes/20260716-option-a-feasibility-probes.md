@@ -1,9 +1,55 @@
 # Option A feasibility probes: can the derivation reliably produce the output game?
 
 Date: 2026-07-16
-Status: SUPERSEDED by adversarial audit (2026-07-16). Do not run P1-P7 as written.
-See "Audit outcome" below.
+Status: RESOLVED. Option A/route 1 declined. Probes not run (spec refuted by
+audit). Decision below.
 Related: 20260715-blueprint-v2-design.md (the derivation gap, §"routes")
+
+## Decision (2026-07-16): decline route 1, scope auto-derivation to the ciphertext channel
+
+Not building Option A. The auto-derivation feature is scoped to the ciphertext
+channel, which is its purpose and where it is complete; the output channel is
+handled by a different proof technique.
+
+**Rationale (a principled boundary, not a hole).** The two legs use two tools:
+
+- Ciphertext channel: SSProve game-hopping, IND-CPA reductions, the hybrid
+  ladder. Complex and error-prone. Auto-derivation from the piSMC programs is
+  exactly the point here, and it is complete (`obs_of_procs` derives the samples,
+  receptions, and homomorphic combines; `dsdp_faithful`, `obs_of_procs_dsdp`,
+  `dsdp_experiment_hops` verify it).
+- Output channel: the output S is the plaintext scalar product
+  `u1*v1 + u2*v2 + u3*v3`, simple to state; its substantive bound (1/m) is
+  Infotheo fiber-counting. Verified different tool: `dsdp_alice_guess_ideal_le`'s
+  proof crosses to the Infotheo side (`guess_success_sdistr_eq_fdist`) then
+  applies the fiber bound (`guess_fdist_success_le`), and the Print Assumptions
+  sweep shows it is the one headline carrying NO IND-CPA axiom.
+
+So the output game does not need to be auto-derived: its trace is a simple
+hand-supplied scalar product, and the hard part is proved by Infotheo, not by
+SSProve game synthesis. Route 1 (two-responder symbolic execution + dec-form
+S-determination + homomorphic-decryption bridge + fiber-layer re-proof) would buy
+only that the output trace is machine-produced instead of hand-written, which is
+not a thesis requirement given the tools split.
+
+**Consequence for the blueprint (resolves the G1 FATAL from the derivation-gap
+audit).** The blueprint must NOT claim the output game is derived. Instead:
+
+- The auto-derivation Part is scoped to the ciphertext channel: from the piSMC
+  programs, `obs_of_procs` generates the SSProve game (real, proved).
+- Output secrecy is presented as an Infotheo fiber-counting argument (a different
+  tool), over a hand-supplied output trace stating the scalar product; the 1/m is
+  information-theoretic.
+- Drop the line-count claim. The value of auto-derivation is that the complex
+  SSProve game half is not hand-written, not a line saving (it is a 9% increase).
+
+The security results (guess <= 1/m + 2*epsilon_cpa AHE, the entropy and
+simulation headlines) are all already proved on the existing seeded trace and are
+unaffected.
+
+---
+
+## Audit context (why the probes were not run) below
 
 ## Audit outcome (2026-07-16) — two FATALs, spec not run
 
