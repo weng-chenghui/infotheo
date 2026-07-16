@@ -244,15 +244,37 @@ dsdp_indcpa_advantage:zero_game_leak_S
 # auto-derivation (ciphertext) subset.
 # Reconciled 2026-07-17: dropped dsdp_alice_guess_advantage_le (now cited by
 # lem:guess_advantage_le) and the stale guess_sdistr_success_real / relay_privacy_n.
-# Corrupted-relay chapters landed 2026-07-17 (security.tex), so the four relay
-# headlines and their two support lemmas are documented and removed from here.
-dsdp_main:dsdp_alice_unpredictability_ge
-dsdp_main:dsdp_centropy_uniform
-dsdp_main:dsdp_centropy_uniform_n
-dsdp_main:dsdp_alice_simulation_secure
-dsdp_main:dsdp_alice_view_statdist_le
-dsdp_main:US_compromised_leaks_V2
-dsdp_main:US_n_compromised_leaks_secret
+# All dsdp_main security headlines are now documented in the security-story
+# chapters (security.tex, landed 2026-07-17): the corrupted-relay Part and the
+# corrupted-Alice Part cover every headline, so none remain waived here.
+#
+# dsdp_simulator: the simulation chapter cites dsdp_adv_sim_le and
+# dsdp_simulator_factorization; the module's other declarations (the packages,
+# the resolution/mass-1 support, the test adversary) are internal to that axis
+# and not blueprint nodes.
+dsdp_simulator:I_dsdp_ideal
+dsdp_simulator:denote_run_lossless_heap
+dsdp_simulator:dsdp_adm
+dsdp_simulator:dsdp_ideal_pkg
+dsdp_simulator:dsdp_simulator_pkg
+dsdp_simulator:id_ideal_run
+dsdp_simulator:resolve_denote_game_leak_S_Sout
+dsdp_simulator:resolve_denote_game_leak_S_run
+dsdp_simulator:sample_cards_msg_renc
+dsdp_simulator:sample_cards_msg_renc_all_real
+dsdp_simulator:sample_cards_msg_renc_all_zero
+dsdp_simulator:sim_view_body
+dsdp_simulator:test_adversary
+dsdp_simulator:valid_sim_view_body
+dsdp_simulator:view_mass1_denote
+dsdp_simulator:view_op
+dsdp_simulator:view_pair_challenger
+dsdp_simulator:view_real_mass1
+dsdp_simulator:view_resolve_eq
+dsdp_simulator:view_resolved
+dsdp_simulator:view_resolved_denote
+dsdp_simulator:view_simulated_mass1
+dsdp_simulator:view_zero_mass1
 dsdp_symbolic_exec:a1_observed
 dsdp_symbolic_exec:a2_observed
 dsdp_symbolic_exec:decode_sym

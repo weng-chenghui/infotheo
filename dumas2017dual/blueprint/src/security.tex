@@ -73,6 +73,215 @@ $S = u_1 v_1 + u_2 v_2 + u_3 v_3$ and returns it to Alice.
   \[ \text{Alice's output} = u_1 v_1 + u_2 v_2 + u_3 v_3 \]
 \end{lemma}
 
+\part{Corrupted Alice}
+
+Alice is the party the analysis works hardest on: she receives every ciphertext
+and she decrypts the output. Her secrecy has two channels. The output she decrypts
+is the scalar product, and conditioned on it a relay's input stays uniform over a
+fiber of $m$ points, an information-theoretic bound. The ciphertexts she receives
+are bounded computationally by the derived game-hopping of the final part. The two
+compose to the full bound $1/m + 2\,\epscpaof{E}$. The part closes with the
+tightness boundary: the fiber bound needs Alice's third weight to act invertibly,
+and the degenerate query that violates it lets Alice read a relay's input outright.
+
+\chapter{What the output alone reveals: the plaintext residual}
+
+\begin{theorem}[Residual uncertainty of the relay inputs]
+  \label{thm:dsdp_centropy_uniform}
+  \rocq{infotheo.dumas2017dual.dsdp.dsdp_main.dsdp_centropy_uniform}
+  \rocqok
+  \uses{def:party_views,lem:dsdp_is_correct}
+  Conditioned on Alice's inputs and the decrypted output $(V_1,U_1,U_2,U_3,S)$ ---
+  the plaintext residual, not her full ciphertext-carrying view --- and assuming
+  the relay pair $(V_2,V_3)$ is a priori uniform and independent of the inputs, the
+  relay inputs retain $\log m$ bits of uncertainty, provided Alice's third weight
+  satisfies $0 < U_3 < \min(p,q)$.
+  \[ \HH(V_2, V_3 \mid V_1,U_1,U_2,U_3,S) = \log m \]
+\end{theorem}
+\begin{proof}
+  \uses{lem:dsdp_fiber_uniform}
+  \rocqok
+  Each conditioning value fixes a fiber of the scalar-product constraint on which
+  $(V_2,V_3)$ is uniform (Lemma~\ref{lem:dsdp_fiber_uniform}); the conditional
+  entropy is then $\log$ of the fiber size, which is $m$.
+\end{proof}
+
+\begin{lemma}[Fiber uniformity of the DSDP solution]
+  \label{lem:dsdp_fiber_uniform}
+  \rocq{infotheo.dumas2017dual.dsdp.counting.dsdp_entropy.Pr_dsdp_sol_uniform_ring,
+       infotheo.dumas2017dual.dsdp.counting.dsdp_entropy.dsdp_fiber_card_ring}
+  \rocqok
+  When the multiplier $U_3$ acts injectively, the solution set of the DSDP
+  constraint has exactly $m$ points, and each solution has conditional probability
+  $1/m$ given the inputs and the output. This is the counting fact both the
+  entropy bound and the guessing bound consume.
+  \[ \#\lvert\mathrm{fiber}\rvert = m,\qquad
+        \Pr[(V_2,V_3)=(v_2,v_3)\mid \mathrm{cond}] = 1/m \]
+\end{lemma}
+\begin{proof}
+  \rocqok
+  Over a commutative ring the fiber is the image of the ring under $v \mapsto U_3
+  v$, of size $\#R = m$; conditional uniformity follows from the joint uniformity
+  and independence hypotheses (the route-F Infotheo fiber theorems).
+\end{proof}
+
+\begin{theorem}[N-party residual]
+  \label{thm:dsdp_centropy_uniform_n}
+  \rocq{infotheo.dumas2017dual.dsdp.dsdp_main.dsdp_centropy_uniform_n}
+  \rocqok
+  The same argument at $n$ relays: conditioned on the N-party view, the relay
+  inputs retain $\log(m^n)$ bits, one full message of uncertainty per relay
+  dimension. It is a generic lemma over abstract variables satisfying the fiber,
+  projection, uniformity, independence, and joint-marginal hypotheses; no N-party
+  DSDP program instance is supplied.
+  \[ \HH(V_0,\dots,V_{n} \mid \mathrm{view}) = \log(m^{n}) \]
+\end{theorem}
+
+\chapter{Computational secrecy of the ciphertext channel}
+
+The ciphertexts Alice receives are bounded by the derived game-hopping developed
+in the final part. This chapter records the corrupted-Alice results that the
+derivation delivers; their construction and proof are the subject of
+Part~\ref{part:autoderiv} (the final part).
+
+\begin{theorem}[Ciphertext-view advantage]
+  \label{thm:alice_view_advantage}
+  \rocq{infotheo.dumas2017dual.dsdp.dsdp_main.dsdp_alice_view_advantage_le}
+  \rocqok
+  \uses{def:party_views}
+  Every valid adversary distinguishes DSDP's real corrupted-Alice game from its
+  all-zero endpoint with advantage at most $2\,\epscpaof{E}$, twice the scheme's
+  IND-CPA bound, because the corrupted-Alice view has exactly two encryption hops.
+  \[ \AdvE(\real, \zero, A) \le 2\,\epscpaof{E} \]
+\end{theorem}
+
+\begin{theorem}[Guessing the challenge secret, real game]
+  \label{thm:alice_guess_real}
+  \rocq{infotheo.dumas2017dual.dsdp.dsdp_main.dsdp_alice_guess_real_le,
+       infotheo.dumas2017dual.dsdp.dsdp_main.dsdp_alice_guess_ideal_le,
+       infotheo.dumas2017dual.dsdp.dsdp_main.dsdp_alice_guess_advantage_le}
+  \rocqok
+  \uses{thm:alice_view_advantage,lem:dsdp_fiber_uniform}
+  Reading the ciphertext view and the leaked output $S$, and when $U_3$ acts
+  injectively, Alice guesses Bob's secret $V_2$ with probability at most
+  $1/m + 2\,\epscpaof{E}$: the fiber bound $1/m$ at the all-zero endpoint plus the
+  $2\,\epscpaof{E}$ cost of moving to the real game. The two legs join by the
+  triangle inequality.
+  \[ \Pr[\mathrm{guess} = V_2] \le 1/m + 2\,\epscpaof{E} \]
+\end{theorem}
+
+\begin{theorem}[Unpredictability entropy]
+  \label{thm:alice_unpredictability}
+  \rocq{infotheo.dumas2017dual.dsdp.dsdp_main.dsdp_alice_unpredictability_ge}
+  \rocqok
+  \uses{thm:alice_guess_real}
+  Equivalently in entropy form, the predictor's unpredictability entropy on the
+  output-exposing real game is at least $\log m - \log(1 + 2m\,\epscpaof{E})$,
+  approaching the full $\log m$ as $\epscpaof{E} \to 0$.
+  \[ \Hunp \ge \log m - \log\!\big(1 + 2m\,\epscpaof{E}\big) \]
+\end{theorem}
+
+\chapter{Simulation-based security}
+\label{ch:simulation}
+
+The corrupted-Alice view can be produced by a simulator that never sees the honest
+inputs, up to the same $2\,\epscpaof{E}$. The scope is average-case: the honest
+inputs $v_2, v_3$ are sampled uniformly in-game, by the real game on one side and
+by the ideal functionality on the other, rather than quantified over all input
+vectors.
+
+\begin{theorem}[Bounded simulation security]
+  \label{thm:alice_simulation_secure}
+  \rocq{infotheo.dumas2017dual.dsdp.dsdp_main.dsdp_alice_simulation_secure,
+       infotheo.dumas2017dual.dsdp.simulation.dsdp_simulator.dsdp_adv_sim_le}
+  \rocqok
+  \uses{def:party_views,thm:alice_view_advantage}
+  The output-exposing real game and the simulator composed with the ideal
+  functionality are distinguished with advantage at most $2\,\epscpaof{E}$ by any
+  valid admissible adversary. The simulator fabricates the four-cipher view from
+  encryptions of zero and fresh samples; the honest inputs and $S$ have no path
+  into it, a type-level allowed-information witness.
+  \[ \AdvE(\real_S,\ \Sim \circ \Ideal,\ A) \le 2\,\epscpaof{E} \]
+\end{theorem}
+\begin{proof}
+  \uses{lem:simulator_factorization}
+  \rocqok
+  Triangle through the all-zero endpoint: the real-to-zero distance is
+  $2\,\epscpaof{E}$ (Part~\ref{part:autoderiv}), and the zero endpoint is perfectly
+  equivalent to the simulated ideal (Lemma~\ref{lem:simulator_factorization}).
+\end{proof}
+
+\begin{lemma}[Simulator factorization]
+  \label{lem:simulator_factorization}
+  \rocq{infotheo.dumas2017dual.dsdp.simulation.dsdp_simulator.dsdp_simulator_factorization}
+  \rocqok
+  The output-exposing all-zero endpoint game is perfectly equivalent, with no
+  epsilon term, to the simulator composed with the ideal functionality.
+  \[ \zero_S \;\approx_0\; \Sim \circ \Ideal \]
+\end{lemma}
+
+\begin{theorem}[View-law statistical distance]
+  \label{thm:alice_view_statdist}
+  \rocq{infotheo.dumas2017dual.dsdp.dsdp_main.dsdp_alice_view_statdist_le}
+  \rocqok
+  \uses{thm:alice_simulation_secure}
+  The statistical distance between the real corrupted-Alice view law (the received
+  ciphers together with the leaked output $S$) and the simulated one is at most
+  $2\,\epscpaof{E}$, same average-case scope.
+  \[ \statdist(\text{real view law},\ \text{simulated view law}) \le
+        2\,\epscpaof{E} \]
+\end{theorem}
+
+\begin{remark}[Worst-case simulation: open]
+  \label{rem:worstcase_sim}
+  \rocqok
+  % blue frontier node: the standard, input-quantified simulation statement is not
+  %   proved; only the uniform-average is. Recorded to make the gap visible.
+  The standard simulation-security statement quantifies over every input vector:
+  for all $v_2, v_3$, the real game is indistinguishable from the simulated ideal.
+  This blueprint proves the uniform-average. The worst-case statement is open; it
+  would parameterize the ideal by the inputs and re-prove the factorization per
+  input, with the simulator unchanged.
+\end{remark}
+
+\chapter{Tightness: the degenerate query}
+
+The fiber bound of the first chapter needs Alice's third weight $U_3$ to act
+invertibly. That hypothesis is tight, not cosmetic: it excludes exactly the query
+$U_2 = 1, U_3 = 0$, which is a legal semi-honest input choice, and under it Alice
+reads a relay's input outright. These theorems are the boundary of the
+corrupted-Alice case, not a separate malicious threat model.
+
+\begin{theorem}[A degenerate query leaks Bob's input]
+  \label{thm:US_compromised_leaks_V2}
+  \rocq{infotheo.dumas2017dual.dsdp.dsdp_main.US_compromised_leaks_V2}
+  \rocqok
+  \uses{def:party_views,thm:dsdp_centropy_uniform}
+  Fixing her query to the first coordinate ($U_2 = 1$, $U_3 = 0$), Alice reads
+  Bob's private input $V_2$ off her view: the protocol output lies in her view and
+  equals $V_2$, so its conditional entropy collapses to zero. This is exactly the
+  case the fiber bound's injectivity hypothesis excludes, where $1/m$ is false.
+  \[ U_2 = 1,\ U_3 = 0 \;\Longrightarrow\; \HH(V_2 \mid \mathrm{AliceView}) = 0 \]
+\end{theorem}
+\begin{proof}
+  \uses{thm:US_n_compromised_leaks_secret}
+  \rocqok
+  The 3-party instance of the N-party leakage theorem at $n=1$
+  (Theorem~\ref{thm:US_n_compromised_leaks_secret}), with the query the first
+  coordinate vector.
+\end{proof}
+
+\begin{theorem}[N-party degenerate-query leakage]
+  \label{thm:US_n_compromised_leaks_secret}
+  \rocq{infotheo.dumas2017dual.dsdp.dsdp_main.US_n_compromised_leaks_secret}
+  \rocqok
+  With her query fixed to the first coordinate vector, and the protocol output a
+  function of her view, relay party one's input becomes a deterministic image of
+  Alice's view, so its conditional entropy is zero. The query is a legal input, so
+  this is a semi-honest corruption, not a protocol deviation.
+  \[ \mathrm{query} = e_1 \;\Longrightarrow\; \HH(V_{S,0} \mid \mathrm{View}) = 0 \]
+\end{theorem}
+
 \part{Corrupted relay}
 
 A corrupted relay forwards masked ciphertexts and never decrypts a peer's input in
