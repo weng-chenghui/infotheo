@@ -262,6 +262,46 @@ Lemma bob_view_commute v a b :
   `Pr[ [% x1, x2] = (a, b) ] != 0 ->
   `Pr[ BobView = v | [% x1, x2] = (a, b) ]
     = \sum_(y in TX) `Pr[ y2 = y ] * bob_simulator b y v.
-Proof. Admitted.
+Proof.
+move=> HK.
+case: v => [[[[v1 v2] v3] v4] v5].
+(* y2 is independent of Bob's inputs (x1, x2), from the exported fact by
+   coordinate projection. *)
+have Hindep : P |= [% x1, x2] _|_ y2.
+  have := y2_indep inputs.
+  pose f := fun (w : (VX * VX * VX * VX * TX)%type) =>
+    let '(xb, _, xa, _, _) := w in (xa, xb).
+  pose g := fun (w : TX) => w.
+  by apply_inde_rv_comp f g.
+(* The y2 Dirac factor of bob_simulator collapses the sum to y = v5. *)
+have -> : \sum_(y in TX) `Pr[ y2 = y ] * bob_simulator b y (v1, v2, v3, v4, v5)
+        = `Pr[ y2 = v5 ] * bob_simulator b v5 (v1, v2, v3, v4, v5).
+  rewrite (bigD1 v5) //= big1 ?addr0 // => y Hy.
+  by rewrite /bob_simulator !fdist_prodE !fdist1E /=
+     [(v5 == y)]eq_sym (negbTE Hy) !mulr0.
+rewrite cpr_eqE.
+(* BobView determines y2, so appending the y2 = v5 constraint to the key
+   leaves the joint event unchanged. *)
+have HA : pfwd1 [% BobView, [% x1, x2]] (v1, v2, v3, v4, v5, (a, b))
+        = pfwd1 [% BobView, [% x1, x2, y2]] (v1, v2, v3, v4, v5, (a, b, v5)).
+  rewrite !pfwd1E; congr (Pr P _).
+  apply/setP => u; rewrite !inE !xpair_eqE.
+  by case: (x2 u == v1); case: (s2 u == v2); case: (x1' u == v3);
+     case: (r2 u == v4); case: (y2 u == v5); case: (x1 u == a);
+     case: (x2 u == b).
+(* On the (x1, x2, y2) = (a, b, v5) conditioning the numerator factors into
+   the simulator law by R4; on zero mass it is dominated. *)
+have HB : pfwd1 [% BobView, [% x1, x2, y2]] (v1, v2, v3, v4, v5, (a, b, v5))
+        = bob_simulator b v5 (v1, v2, v3, v4, v5)
+          * pfwd1 [% x1, x2, y2] (a, b, v5).
+  case: (altP (pfwd1 [% x1, x2, y2] (a, b, v5) =P 0)) => HK3.
+    by rewrite HK3 mulr0 pfwd1_domin_RV1.
+  by rewrite -cpr_eqE_mul (@bob_view_cond_sim (v1, v2, v3, v4, v5) a b v5 HK3).
+(* Conditioning y2 on the key returns its marginal by independence. *)
+have Hy2 : pfwd1 [% x1, x2, y2] (a, b, v5) / pfwd1 [% x1, x2] (a, b)
+         = `Pr[ y2 = v5 ].
+  by rewrite (Hindep (a, b) v5) (mulrC (pfwd1 [% x1, x2] (a, b))) mulfK.
+by rewrite HA HB -mulrA Hy2 mulrC.
+Qed.
 
 End bob_simulator_def.
