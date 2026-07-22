@@ -309,7 +309,7 @@ rewrite -(neg_RV_dist_eq (py2_unif inputs)).
 exact: (py2_unif inputs).
 Qed.
 
-Let x2s2_x1'_indepP : P |= [% x2, s2] _|_ x1'.
+Lemma x2s2_x1'_indepP : P |= [% x2, s2] _|_ x1'.
 Proof.
 have x1_s1_indep : P |= x1 _|_ s1.
   have H := x1_indep inputs.
@@ -369,10 +369,10 @@ pose g := fun (ws : TX) => ws.
 by apply_inde_rv_comp f g.
 Qed.
 
-Let x1x2s2x1'r2_y2_indepP :=
-  x1x2s2x1'r2_y2_indep x2s2x1s1r2_y2_indep.
+Lemma x1x2s2x1'r2_y2_indepP : P |= [% x1, [%x2, s2, x1', r2]] _|_ y2.
+Proof. exact: (x1x2s2x1'r2_y2_indep x2s2x1s1r2_y2_indep). Qed.
 
-Let x1x2s2x1'_r2_indep :
+Lemma x1x2s2x1'_r2_indep :
   P |= [% x1, [% x2, s2, x1']] _|_ r2.
 Proof.
 rewrite inde_RV_sym /r2 sub_RV_eq.
@@ -387,7 +387,7 @@ pose g := fun (ws : TX) => ws.
 by apply_inde_rv_comp f g.
 Qed.
 
-Let x2s2x1'_r2_indep : P |= [% x2, s2, x1'] _|_ r2.
+Lemma x2s2x1'_r2_indep : P |= [% x2, s2, x1'] _|_ r2.
 Proof.
 have := x1x2s2x1'_r2_indep.
 pose f := fun vs : (VX * (VX * VX * VX)) =>
@@ -425,7 +425,7 @@ pose g := fun (ws : VX) => ws.
 by apply_inde_rv_comp g f.
 Qed.
 
-Let x2s2_x1_indep : P |= [%x2, s2] _|_ x1.
+Lemma x2s2_x1_indep : P |= [%x2, s2] _|_ x1.
 move : (x1_indep inputs).
 pose f := fun vs : (VX * VX * VX * TX * TX) =>
   let '(xb, sa, sb, ra, yb) := vs in (xb, sb).
