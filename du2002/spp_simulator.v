@@ -172,13 +172,90 @@ Qed.
 Lemma bob_view_cond_sim v a b y :
   `Pr[ [% x1, x2, y2] = (a, b, y) ] != 0 ->
   `Pr[ BobView = v | [% x1, x2, y2] = (a, b, y) ] = bob_simulator b y v.
-Proof. Admitted.
+Proof.
+move=> HK.
+case: v => [[[[v1 v2] v3] v4] v5].
+rewrite cpr_eqE /bob_simulator !fdist_prodE !fdist1E /=.
+(* Conditioning the pad block on Bob's key cancels the denominator by
+   independence, leaving the pad law: a product of uniforms. *)
+have Hpad : pfwd1 [% s2, x1', r2, [% x1, x2, y2]] (v2, v3, v4, (a, b, y))
+    / pfwd1 [% x1, x2, y2] (a, b, y) = unif_VX v2 * unif_VX v3 * unif_TX v4.
+  rewrite -dist_of_RVE (dist_inde_rv_prod bob_pads_indep) fdist_prodE.
+  rewrite [`p_ [% x1, x2, y2] _]dist_of_RVE mulfK //.
+  by rewrite bob_pads_law !fdist_prodE.
+(* The numerator factors: the shared coordinates x2, y2 collapse to Dirac
+   indicators, leaving the pad block joint with the key. *)
+have Hnum : pfwd1 [% BobView, [% x1, x2, y2]] (v1, v2, v3, v4, v5, (a, b, y))
+  = (v1 == b)%:R * (v5 == y)%:R
+    * pfwd1 [% s2, x1', r2, [% x1, x2, y2]] (v2, v3, v4, (a, b, y)).
+  case: (altP (v1 =P b)) => [Eb|Eb]; last first.
+    rewrite mul0r mul0r pfwd1E (_ : finset _ = set0) ?Pr_set0 //.
+    apply/setP => u; rewrite !inE.
+    apply/negbTE; apply: contra Eb.
+    rewrite !xpair_eqE.
+    move=> /andP[/andP[/andP[/andP[/andP[HA1 _] _] _] _]
+                 /andP[/andP[_ HB2] _]].
+    by rewrite -(eqP HA1) (eqP HB2) eqxx.
+  case: (altP (v5 =P y)) => [Ey|Ey]; last first.
+    rewrite mulr0 mul0r pfwd1E (_ : finset _ = set0) ?Pr_set0 //.
+    apply/setP => u; rewrite !inE.
+    apply/negbTE; apply: contra Ey.
+    rewrite !xpair_eqE.
+    move=> /andP[/andP[_ HA5] /andP[_ HB3]].
+    by rewrite -(eqP HA5) (eqP HB3) eqxx.
+  rewrite mul1r mul1r Eb Ey !pfwd1E; congr (Pr P _).
+  apply/setP => u; rewrite !inE !xpair_eqE.
+  by case: (x2 u == b); case: (s2 u == v2); case: (x1' u == v3);
+     case: (r2 u == v4); case: (y2 u == y); case: (x1 u == a).
+rewrite Hnum -mulrA Hpad; ring.
+Qed.
 
 (* R4': the view law conditioned on Bob's inputs (x2, y2) is the simulator. *)
 Lemma bob_view_cond_sim_xy v b y :
   `Pr[ [% x2, y2] = (b, y) ] != 0 ->
   `Pr[ BobView = v | [% x2, y2] = (b, y) ] = bob_simulator b y v.
-Proof. Admitted.
+Proof.
+move=> HK.
+case: v => [[[[v1 v2] v3] v4] v5].
+rewrite cpr_eqE /bob_simulator !fdist_prodE !fdist1E /=.
+(* Dropping x1 from R2 keeps the pad block independent of Bob's inputs. *)
+have Hpads2 : P |= [% s2, x1', r2] _|_ [% x2, y2].
+  have := bob_pads_indep.
+  pose f := fun (w : (VX * VX * TX)%type) => w.
+  pose g := fun (w : (VX * VX * TX)%type) => let '(_, xb, yb) := w in (xb, yb).
+  by apply_inde_rv_comp f g.
+(* Conditioning the pad block on Bob's inputs cancels the denominator by
+   independence, leaving the pad law: a product of uniforms. *)
+have Hpad : pfwd1 [% s2, x1', r2, [% x2, y2]] (v2, v3, v4, (b, y))
+    / pfwd1 [% x2, y2] (b, y) = unif_VX v2 * unif_VX v3 * unif_TX v4.
+  rewrite -dist_of_RVE (dist_inde_rv_prod Hpads2) fdist_prodE.
+  rewrite [`p_ [% x2, y2] _]dist_of_RVE mulfK //.
+  by rewrite bob_pads_law !fdist_prodE.
+(* The numerator factors: the shared coordinates x2, y2 collapse to Dirac
+   indicators, leaving the pad block joint with Bob's inputs. *)
+have Hnum : pfwd1 [% BobView, [% x2, y2]] (v1, v2, v3, v4, v5, (b, y))
+  = (v1 == b)%:R * (v5 == y)%:R
+    * pfwd1 [% s2, x1', r2, [% x2, y2]] (v2, v3, v4, (b, y)).
+  case: (altP (v1 =P b)) => [Eb|Eb]; last first.
+    rewrite mul0r mul0r pfwd1E (_ : finset _ = set0) ?Pr_set0 //.
+    apply/setP => u; rewrite !inE.
+    apply/negbTE; apply: contra Eb.
+    rewrite !xpair_eqE.
+    move=> /andP[/andP[/andP[/andP[/andP[HA1 _] _] _] _] /andP[HB1 _]].
+    by rewrite -(eqP HA1) (eqP HB1) eqxx.
+  case: (altP (v5 =P y)) => [Ey|Ey]; last first.
+    rewrite mulr0 mul0r pfwd1E (_ : finset _ = set0) ?Pr_set0 //.
+    apply/setP => u; rewrite !inE.
+    apply/negbTE; apply: contra Ey.
+    rewrite !xpair_eqE.
+    move=> /andP[/andP[_ HA5] /andP[_ HB2]].
+    by rewrite -(eqP HA5) (eqP HB2) eqxx.
+  rewrite mul1r mul1r Eb Ey !pfwd1E; congr (Pr P _).
+  apply/setP => u; rewrite !inE !xpair_eqE.
+  by case: (x2 u == b); case: (s2 u == v2); case: (x1' u == v3);
+     case: (r2 u == v4); case: (y2 u == y).
+rewrite Hnum -mulrA Hpad; ring.
+Qed.
 
 (* R6: the input-indexed commutation (the triangle equation). *)
 Lemma bob_view_commute v a b :
