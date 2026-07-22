@@ -62,12 +62,12 @@ Let x1' : {RV P -> VX} := x1 \+ s1.
 Let r2 : {RV P -> TX} := (s1 \*d s2) \- r1.
 Let BobView := [% x2, s2, x1', r2, y2].
 
-(* R1: the simulator law, coordinate order (x2, s2, x1', r2, y2). *)
+(* The simulator law, coordinate order (x2, s2, x1', r2, y2). *)
 Definition bob_simulator (xb : VX) (yb : TX)
   : R.-fdist ((((VX * VX) * VX) * TX) * TX) :=
   ((((fdist1 xb) `x unif_VX) `x unif_VX) `x unif_TX) `x (fdist1 yb).
 
-(* R5: the extraction edge projects BobView onto Bob's inputs (x2, y2). *)
+(* The extraction edge projects BobView onto Bob's inputs (x2, y2). *)
 Definition bob_ext (v : (((VX * VX) * VX) * TX) * TX) : VX * TX :=
   (v.1.1.1.1, v.2).
 
@@ -75,7 +75,7 @@ Definition bob_ext (v : (((VX * VX) * VX) * TX) * TX) : VX * TX :=
 Lemma bob_ext_ok : bob_ext \o BobView = [% x2, y2].
 Proof. by apply/boolp.funext => t. Qed.
 
-(* R2: the pad block is independent of both parties' inputs and Bob's output
+(* The pad block is independent of both parties' inputs and Bob's output
    share, so the simulator's law does not depend on Alice's input x1. *)
 Lemma bob_pads_indep : P |= [% s2, x1', r2] _|_ [% x1, x2, y2].
 Proof.
@@ -131,7 +131,7 @@ apply/cinde_RV_unit.
 exact: (contraction A1 A2).
 Qed.
 
-(* R3: the pad block's law is a product of uniforms. *)
+(* The pad block's law is a product of uniforms. *)
 Lemma bob_pads_law :
   `p_ [% s2, x1', r2] = (unif_VX `x unif_VX) `x unif_TX.
 Proof.
@@ -169,7 +169,7 @@ rewrite (dist_inde_rv_prod s2x1'_r2_indep) (dist_inde_rv_prod s2_x1'_indep).
 by rewrite (ps2_unif inputs) px1'_unif pr2_unif /unif_VX /unif_TX.
 Qed.
 
-(* R4: the view law conditioned on (x1, x2, y2) is the simulator law. *)
+(* The view law conditioned on (x1, x2, y2) is the simulator law. *)
 Lemma bob_view_cond_sim v a b y :
   `Pr[ [% x1, x2, y2] = (a, b, y) ] != 0 ->
   `Pr[ BobView = v | [% x1, x2, y2] = (a, b, y) ] = bob_simulator b y v.
@@ -211,7 +211,7 @@ have Hnum : pfwd1 [% BobView, [% x1, x2, y2]] (v1, v2, v3, v4, v5, (a, b, y))
 by rewrite Hnum -mulrA Hpad; ring.
 Qed.
 
-(* R4': the view law conditioned on Bob's inputs (x2, y2) is the simulator. *)
+(* The view law conditioned on Bob's inputs (x2, y2) is the simulator. *)
 Lemma bob_view_cond_sim_xy v b y :
   `Pr[ [% x2, y2] = (b, y) ] != 0 ->
   `Pr[ BobView = v | [% x2, y2] = (b, y) ] = bob_simulator b y v.
@@ -219,7 +219,8 @@ Proof.
 move=> HK.
 case: v => [[[[v1 v2] v3] v4] v5].
 rewrite cpr_eqE /bob_simulator !fdist_prodE !fdist1E /=.
-(* Dropping x1 from R2 keeps the pad block independent of Bob's inputs. *)
+(* Dropping x1 from bob_pads_indep keeps the pad block independent of Bob's
+   inputs. *)
 have Hpads2 : P |= [% s2, x1', r2] _|_ [% x2, y2].
   have := bob_pads_indep.
   pose f := fun (w : (VX * VX * TX)%type) => w.
@@ -258,7 +259,7 @@ have Hnum : pfwd1 [% BobView, [% x2, y2]] (v1, v2, v3, v4, v5, (b, y))
 by rewrite Hnum -mulrA Hpad; ring.
 Qed.
 
-(* R6: the input-indexed commutation (the triangle equation). *)
+(* The input-indexed commutation (the triangle equation). *)
 Lemma bob_view_commute v a b :
   `Pr[ [% x1, x2] = (a, b) ] != 0 ->
   `Pr[ BobView = v | [% x1, x2] = (a, b) ]
@@ -291,7 +292,7 @@ have HA : pfwd1 [% BobView, [% x1, x2]] (v1, v2, v3, v4, v5, (a, b))
      case: (r2 u == v4); case: (y2 u == v5); case: (x1 u == a);
      case: (x2 u == b).
 (* On the (x1, x2, y2) = (a, b, v5) conditioning the numerator factors into
-   the simulator law by R4; on zero mass it is dominated. *)
+   the simulator law by bob_view_cond_sim; on zero mass it is dominated. *)
 have HB : pfwd1 [% BobView, [% x1, x2, y2]] (v1, v2, v3, v4, v5, (a, b, v5))
         = bob_simulator b v5 (v1, v2, v3, v4, v5)
           * pfwd1 [% x1, x2, y2] (a, b, v5).
