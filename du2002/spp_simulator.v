@@ -45,12 +45,10 @@ Let VX := 'rV[TX]_n.
 
 Notation "u \*d w" := (dotproduct_rv u w).
 
-Lemma card_TX : #|TX| = m.+2.
-Proof. by rewrite card_ord. Qed.
-
-Let q := (m.+2 ^ n).-1.
-Lemma card_VX : #|VX| = q.+1.
-Proof. by rewrite prednK ?expn_gt0// /VX card_mx card_TX mul1n. Qed.
+(* The uniform laws over VX and TX, built from spp_proof's cardinalities so
+   the fdist_uniform proof term matches the record's uniformity fields. *)
+Let unif_VX : R.-fdist VX := fdist_uniform (card_VX n m).
+Let unif_TX : R.-fdist TX := fdist_uniform (card_TX m).
 
 Variable inputs : scalar_product_random_inputs n m P.
 
@@ -67,8 +65,7 @@ Let BobView := [% x2, s2, x1', r2, y2].
 (* R1: the simulator law, coordinate order (x2, s2, x1', r2, y2). *)
 Definition bob_simulator (xb : VX) (yb : TX)
   : R.-fdist ((((VX * VX) * VX) * TX) * TX) :=
-  ((((fdist1 xb) `x (fdist_uniform card_VX)) `x (fdist_uniform card_VX))
-      `x (fdist_uniform card_TX)) `x (fdist1 yb).
+  ((((fdist1 xb) `x unif_VX) `x unif_VX) `x unif_TX) `x (fdist1 yb).
 
 (* R5: the extraction edge projects BobView onto Bob's inputs (x2, y2). *)
 Definition bob_ext (v : (((VX * VX) * VX) * TX) * TX) : VX * TX :=
@@ -83,10 +80,42 @@ Proof. Admitted.
 
 (* R3: the pad block's law is a product of uniforms. *)
 Lemma bob_pads_law :
-  `p_ [% s2, x1', r2]
-    = ((fdist_uniform card_VX) `x (fdist_uniform card_VX))
-        `x (fdist_uniform card_TX).
-Proof. Admitted.
+  `p_ [% s2, x1', r2] = (unif_VX `x unif_VX) `x unif_TX.
+Proof.
+have s2_x1'_indep : P |= s2 _|_ x1'.
+  exact: (RV2_inde_RV_snd (x2s2_x1'_indepP inputs)).
+have s2x1'_r2_indep : P |= [% s2, x1'] _|_ r2.
+  have := x2s2x1'_r2_indep inputs.
+  pose f := fun (v : (VX * VX * VX)%type) => let '(_, b, c) := v in (b, c).
+  pose g := fun (w : TX) => w.
+  by apply_inde_rv_comp f g.
+have x1_s1_indep : P |= x1 _|_ s1.
+  have H := x1_indep inputs.
+  rewrite inde_RV_sym in H.
+  move: H.
+  pose f := fun (vs : (VX * VX * VX * TX * TX)%type) =>
+    let '(_, sa, _, _, _) := vs in sa.
+  pose g := fun (ws : VX) => ws.
+  by apply_inde_rv_comp g f.
+have s1_s2_indep : P |= s1 _|_ s2.
+  have := s2_indep inputs.
+  pose f := fun (vs : (VX * VX * VX * TX * TX)%type) =>
+    let '(_, sa, _, _, _) := vs in sa.
+  pose g := fun (ws : VX) => ws.
+  by apply_inde_rv_comp f g.
+have s1s2_r1_indep : P |= [% s1, s2] _|_ r1.
+  have := r1_indep inputs.
+  pose f := fun (vs : (VX * VX * VX * TX * VX)%type) =>
+    let '(_, sa, _, _, sb) := vs in (sa, sb).
+  pose g := fun (ws : TX) => ws.
+  by apply_inde_rv_comp f g.
+have px1'_unif : `p_ x1' = fdist_uniform (card_VX n m).
+  exact: (add_RV_unif x1 s1 (card_VX n m) (ps1_unif inputs) x1_s1_indep).
+have pr2_unif : `p_ r2 = fdist_uniform (card_TX m).
+  exact: (ps1_dot_s2_r_unif (pr1_unif inputs) s1_s2_indep s1s2_r1_indep).
+rewrite (dist_inde_rv_prod s2x1'_r2_indep) (dist_inde_rv_prod s2_x1'_indep).
+by rewrite (ps2_unif inputs) px1'_unif pr2_unif /unif_VX /unif_TX.
+Qed.
 
 (* R4: the view law conditioned on (x1, x2, y2) is the simulator law. *)
 Lemma bob_view_cond_sim v a b y :
