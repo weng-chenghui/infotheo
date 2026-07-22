@@ -76,7 +76,58 @@ Proof. by apply/boolp.funext => t. Qed.
 
 (* R2: the pad block is independent of Bob's inputs and the output share. *)
 Lemma bob_pads_indep : P |= [% s2, x1', r2] _|_ [% x1, x2, y2].
-Proof. Admitted.
+Proof.
+(* Four leaf independences.  L3 is the s1 one-time-pad step: x1' = x1 \+ s1
+   with s1 uniform makes x1' independent of (x1, x2, s2); L1, L2, L4 come
+   from the exported record and padding facts by coordinate projection. *)
+have L4 : P |= [% x1, x2] _|_ s2.
+  have := s2_indep inputs.
+  pose f := fun (v : (VX * VX * VX * TX * TX)%type) =>
+    let '(xb, _, xa, _, _) := v in (xa, xb).
+  pose g := fun (w : VX) => w.
+  by apply_inde_rv_comp f g.
+have L3 : P |= x1' _|_ [% x1, x2, s2].
+  rewrite /x1'.
+  apply: (@lemma_3_5' _ _ _ _ _ _ _ _ _ _ (card_VX n m)); last first.
+    exact: (ps1_unif inputs).
+  have := s1_indep inputs.
+  move/inde_RV_sym.
+  pose f := fun (w : VX) => w.
+  pose g := fun (v : (VX * VX * VX * TX * TX)%type) =>
+    let '(xb, sb, xa, _, _) := v in (xa, (xa, xb, sb)).
+  by apply_inde_rv_comp f g.
+have L2 : P |= [% [% x1, x2], [% s2, x1'] ] _|_ r2.
+  have := x1x2s2x1'_r2_indep inputs.
+  pose f := fun (v : (VX * (VX * VX * VX))%type) =>
+    let '(xa, (xb, sb, xa')) := v in ((xa, xb), (sb, xa')).
+  pose g := fun (w : TX) => w.
+  by apply_inde_rv_comp f g.
+have L1 : P |= [% [% s2, x1', r2], [% x1, x2] ] _|_ y2.
+  have := x1x2s2x1'r2_y2_indepP inputs.
+  pose f := fun (v : (VX * (VX * VX * VX * TX))%type) =>
+    let '(xa, (xb, sb, xa', rb)) := v in ((sb, xa', rb), (xa, xb)).
+  pose g := fun (w : TX) => w.
+  by apply_inde_rv_comp f g.
+(* Graphoid assembly conditioned on the unit RV: layer x1', then r2, then y2
+   onto (x1, x2) with contraction and weak_union. *)
+have BC1 : [% x1, x2] _|_ x1' | [% unit_RV P, s2].
+  apply: symmetry; apply: weak_union.
+  by apply/cinde_RV_unit; exact: L3.
+have BC2 : [% x1, x2] _|_ s2 | unit_RV P.
+  by apply/cinde_RV_unit; exact: L4.
+have BC : [% x1, x2] _|_ [% s2, x1'] | unit_RV P.
+  exact: (contraction BC1 BC2).
+have B1 : [% x1, x2] _|_ r2 | [% unit_RV P, [% s2, x1'] ].
+  apply: symmetry; apply: weak_union; apply: symmetry.
+  by apply/cinde_RV_unit; exact: L2.
+have A2 : [% s2, x1', r2] _|_ [% x1, x2] | unit_RV P.
+  apply: symmetry; exact: (contraction B1 BC).
+have A1 : [% s2, x1', r2] _|_ y2 | [% unit_RV P, [% x1, x2] ].
+  apply: symmetry; apply: weak_union; apply: symmetry.
+  by apply/cinde_RV_unit; exact: L1.
+apply/cinde_RV_unit.
+exact: (contraction A1 A2).
+Qed.
 
 (* R3: the pad block's law is a product of uniforms. *)
 Lemma bob_pads_law :
