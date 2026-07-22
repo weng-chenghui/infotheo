@@ -309,6 +309,7 @@ rewrite -(neg_RV_dist_eq (py2_unif inputs)).
 exact: (py2_unif inputs).
 Qed.
 
+(* [x2, s2] is independent of the masked input x1' = x1 + s1. *)
 Lemma x2s2_x1'_indepP : P |= [% x2, s2] _|_ x1'.
 Proof.
 have x1_s1_indep : P |= x1 _|_ s1.
@@ -369,9 +370,11 @@ pose g := fun (ws : TX) => ws.
 by apply_inde_rv_comp f g.
 Qed.
 
+(* The pre-output view [x1, x2, s2, x1', r2] is independent of y2. *)
 Lemma x1x2s2x1'r2_y2_indepP : P |= [% x1, [%x2, s2, x1', r2]] _|_ y2.
 Proof. exact: (x1x2s2x1'r2_y2_indep x2s2x1s1r2_y2_indep). Qed.
 
+(* [x1, x2, s2, x1'] is independent of r2 = s1 .*d s2 - r1. *)
 Lemma x1x2s2x1'_r2_indep :
   P |= [% x1, [% x2, s2, x1']] _|_ r2.
 Proof.
@@ -387,6 +390,7 @@ pose g := fun (ws : TX) => ws.
 by apply_inde_rv_comp f g.
 Qed.
 
+(* [x2, s2, x1'] is independent of r2. *)
 Lemma x2s2x1'_r2_indep : P |= [% x2, s2, x1'] _|_ r2.
 Proof.
 have := x1x2s2x1'_r2_indep.
@@ -425,7 +429,7 @@ pose g := fun (ws : VX) => ws.
 by apply_inde_rv_comp g f.
 Qed.
 
-Lemma x2s2_x1_indep : P |= [%x2, s2] _|_ x1.
+Let x2s2_x1_indep : P |= [%x2, s2] _|_ x1.
 move : (x1_indep inputs).
 pose f := fun vs : (VX * VX * VX * TX * TX) =>
   let '(xb, sa, sb, ra, yb) := vs in (xb, sb).

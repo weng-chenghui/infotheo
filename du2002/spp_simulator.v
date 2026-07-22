@@ -17,7 +17,7 @@ Require Import spp_interface spp_program spp_pismc spp_proof.
 (* bob_ext            == projection of a BobView value onto (x2, y2)          *)
 (* ```                                                                        *)
 (*                                                                            *)
-(* Mechanizes the on-paper (o) steps of fig:infotheo:spp-triangle (Bob side). *)
+(* Mechanizes the on-paper steps of fig:infotheo:spp-triangle (Bob side). *)
 (*                                                                            *)
 (******************************************************************************)
 
@@ -59,7 +59,7 @@ Let s2 := s2 inputs.
 Let r1 := r1 inputs.
 Let y2 := y2 inputs.
 Let x1' : {RV P -> VX} := x1 \+ s1.
-Let r2  : {RV P -> TX} := (s1 \*d s2) \- r1.
+Let r2 : {RV P -> TX} := (s1 \*d s2) \- r1.
 Let BobView := [% x2, s2, x1', r2, y2].
 
 (* R1: the simulator law, coordinate order (x2, s2, x1', r2, y2). *)
@@ -71,10 +71,12 @@ Definition bob_simulator (xb : VX) (yb : TX)
 Definition bob_ext (v : (((VX * VX) * VX) * TX) * TX) : VX * TX :=
   (v.1.1.1.1, v.2).
 
+(* bob_ext post-composed with BobView recovers Bob's inputs (x2, y2). *)
 Lemma bob_ext_ok : bob_ext \o BobView = [% x2, y2].
 Proof. by apply/boolp.funext => t. Qed.
 
-(* R2: the pad block is independent of Bob's inputs and the output share. *)
+(* R2: the pad block is independent of both parties' inputs and Bob's output
+   share, so the simulator's law does not depend on Alice's input x1. *)
 Lemma bob_pads_indep : P |= [% s2, x1', r2] _|_ [% x1, x2, y2].
 Proof.
 (* Four leaf independences.  L3 is the s1 one-time-pad step: x1' = x1 \+ s1
@@ -141,9 +143,8 @@ have s2x1'_r2_indep : P |= [% s2, x1'] _|_ r2.
   pose g := fun (w : TX) => w.
   by apply_inde_rv_comp f g.
 have x1_s1_indep : P |= x1 _|_ s1.
-  have H := x1_indep inputs.
-  rewrite inde_RV_sym in H.
-  move: H.
+  have := x1_indep inputs.
+  move/inde_RV_sym.
   pose f := fun (vs : (VX * VX * VX * TX * TX)%type) =>
     let '(_, sa, _, _, _) := vs in sa.
   pose g := fun (ws : VX) => ws.
@@ -207,7 +208,7 @@ have Hnum : pfwd1 [% BobView, [% x1, x2, y2]] (v1, v2, v3, v4, v5, (a, b, y))
   apply/setP => u; rewrite !inE !xpair_eqE.
   by case: (x2 u == b); case: (s2 u == v2); case: (x1' u == v3);
      case: (r2 u == v4); case: (y2 u == y); case: (x1 u == a).
-rewrite Hnum -mulrA Hpad; ring.
+by rewrite Hnum -mulrA Hpad; ring.
 Qed.
 
 (* R4': the view law conditioned on Bob's inputs (x2, y2) is the simulator. *)
@@ -254,7 +255,7 @@ have Hnum : pfwd1 [% BobView, [% x2, y2]] (v1, v2, v3, v4, v5, (b, y))
   apply/setP => u; rewrite !inE !xpair_eqE.
   by case: (x2 u == b); case: (s2 u == v2); case: (x1' u == v3);
      case: (r2 u == v4); case: (y2 u == y).
-rewrite Hnum -mulrA Hpad; ring.
+by rewrite Hnum -mulrA Hpad; ring.
 Qed.
 
 (* R6: the input-indexed commutation (the triangle equation). *)
@@ -296,7 +297,7 @@ have HB : pfwd1 [% BobView, [% x1, x2, y2]] (v1, v2, v3, v4, v5, (a, b, v5))
           * pfwd1 [% x1, x2, y2] (a, b, v5).
   case: (altP (pfwd1 [% x1, x2, y2] (a, b, v5) =P 0)) => HK3.
     by rewrite HK3 mulr0 pfwd1_domin_RV1.
-  by rewrite -cpr_eqE_mul (@bob_view_cond_sim (v1, v2, v3, v4, v5) a b v5 HK3).
+  by rewrite -cpr_eqE_mul (bob_view_cond_sim (v1, v2, v3, v4, v5) HK3).
 (* Conditioning y2 on the key returns its marginal by independence. *)
 have Hy2 : pfwd1 [% x1, x2, y2] (a, b, v5) / pfwd1 [% x1, x2] (a, b)
          = `Pr[ y2 = v5 ].
