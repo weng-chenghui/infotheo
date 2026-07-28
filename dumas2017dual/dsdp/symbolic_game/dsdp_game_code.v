@@ -870,19 +870,18 @@ Qed.
 
 (* ------------------------------------------------------------------ *)
 (* Single-rung IND-CPA advantage bound: adjacent hybrid-ladder rungs   *)
-(* are at most epsilon_cpa AHE apart.                                   *)
+(* are at most one per-site IND-CPA reduction advantage apart.         *)
 (* ------------------------------------------------------------------ *)
 
-(* advantage_hop — one rung of the hybrid ladder costs at most
-   epsilon_cpa AHE: any adversary's SSProve advantage between ladder rungs i and
-   i+1 is bounded by the IND-CPA hardness parameter.  Mirrors
-   advantage_hop_real_h1 of
-   dsdp_security_indcpa.v: Advantage_triangle_chain inserts the two oracle-routed
-   shim intermediates [denote_game_shim (zero_hop_prefix i gc) i ∘ oracle_real]
-   and [… ∘ oracle_zero]; hop_equiv_real and hop_equiv_zero zero the two outer
+(* advantage_hop — any adversary's SSProve advantage between hybrid-ladder
+   rungs i and i+1 is at most the IND-CPA real-or-zero advantage of the
+   reduction [A ∘ denote_game_shim (zero_hop_prefix i gc) i].
+   Advantage_triangle_chain inserts the two oracle-routed shim intermediates
+   [denote_game_shim (zero_hop_prefix i gc) i ∘ oracle_real] and
+   [… ∘ oracle_zero]; hop_equiv_real and hop_equiv_zero zero the two outer
    perfect-equivalence hops; Advantage_link folds the shim into the adversary so
-   the cryptographic middle hop is exactly enc_ind_cpa_real_or_zero at the
-   reduction [A ∘ denote_game_shim (zero_hop_prefix i gc) i]. *)
+   the cryptographic middle hop is exactly [indcpa_epsilon] at that
+   reduction. *)
 Lemma advantage_hop
     (LA : Locations) (A : raw_package) (gc : game_code) (i : nat)
     (A_valid : ValidPackage LA game_iface A_export A)
@@ -891,7 +890,9 @@ Lemma advantage_hop
     (A_disj_oze : fseparate LA oracle_zero_pkg.(locs)) :
   AdvantageE (denote_game (zero_hop_prefix i gc))
              (denote_game (zero_hop_prefix i.+1 gc)) A
-    <= epsilon_cpa AHE.
+    <= indcpa_epsilon AHE Renc card_renc renc_card rand_of_renc t_msg t_cipher
+         msg_of_chmsg chcipher_of_cipher pkey_of_party
+         (A ∘ denote_game_shim (zero_hop_prefix i gc) i).
 Proof.
 have triangle_ineq :=
   Advantage_triangle_chain (denote_game (zero_hop_prefix i gc) : raw_package)
@@ -901,29 +902,25 @@ have triangle_ineq :=
 cbn [advantage_sum] in triangle_ineq.
 rewrite ?addrA in triangle_ineq.
 apply: (le_trans triangle_ineq).
-clear triangle_ineq.
-erewrite hop_equiv_real by ssprove_valid.
-erewrite hop_equiv_zero by ssprove_valid.
-rewrite GRing.add0r GRing.addr0.
-rewrite -Advantage_link.
-apply: (enc_ind_cpa_real_or_zero AHE Renc card_renc renc_card
-          rand_of_renc t_msg t_cipher msg_of_chmsg
-          chcipher_of_cipher pkey_of_party).
+erewrite hop_equiv_real, hop_equiv_zero by ssprove_valid.
+by rewrite GRing.add0r GRing.addr0 -Advantage_link.
 Qed.
 
 (* ------------------------------------------------------------------ *)
 (* Telescoping advantage bound: a contiguous block of ladder rungs     *)
-(* costs at most one epsilon_cpa AHE per rung.                         *)
+(* costs one IND-CPA reduction advantage per rung.                     *)
 (* ------------------------------------------------------------------ *)
 
 (* advantage_sum_ladder_le — the advantage_sum over the [start+1 .. start+n]
    intermediate rungs, bracketed by rungs [start] and [start+n+1], is bounded by
-   [n.+1] copies of epsilon_cpa AHE.  This is the telescoping that turns
-   Advantage_triangle_chain's fold into the per-rung IND-CPA bound.  Proved by
-   induction on the rung count n: the base case is a single advantage_hop; the
-   step splits advantage_sum's leading term off via advantage_hop and folds the
-   tail through the induction hypothesis, the endpoint indices realigning by
-   addSnnS.  Used by advantage_le.
+   the sum of the per-rung IND-CPA advantages of the [n.+1] reductions
+   [A ∘ denote_game_shim (zero_hop_prefix (start + l) gc) (start + l)].
+   This is the telescoping that turns Advantage_triangle_chain's fold into
+   the per-rung IND-CPA bound.  Proved by induction on the rung count n: the
+   base case is a single advantage_hop; the step peels the leading rung off
+   both advantage_sum and the ordinal sum (big_ord_recl) and folds the tail
+   through the induction hypothesis, the endpoint and summand indices
+   realigning by addSnnS.  Used by advantage_le.
    Naming: advantage_sum_<shape>_le names a telescoping bound on advantage_sum
    (the SSProve fold of AdvantageE terms), following the file's SSProve
    advantage-lemma convention; not a MathComp algebraic property. *)
@@ -937,13 +934,19 @@ Lemma advantage_sum_ladder_le
   advantage_sum (denote_game (zero_hop_prefix start gc))
     [seq (denote_game (zero_hop_prefix l gc) : raw_package) | l <- iota start.+1 n]
     (denote_game (zero_hop_prefix (start + n.+1) gc)) A
-    <= n.+1 %:R * epsilon_cpa AHE.
+    <= \sum_(l < n.+1)
+         indcpa_epsilon AHE Renc card_renc renc_card rand_of_renc t_msg t_cipher
+           msg_of_chmsg chcipher_of_cipher pkey_of_party
+           (A ∘ denote_game_shim (zero_hop_prefix (start + l) gc)
+                  (start + l)).
 Proof.
 elim=> [|n IHn] start.
-- cbn [iota map advantage_sum]. rewrite addn1 mul1r. by apply: advantage_hop.
-- cbn [iota map advantage_sum]. rewrite mulrSr mulrDl mul1r addrC. apply: lerD.
-  + rewrite -addSnnS. exact: IHn.
-  + by apply: advantage_hop.
+- cbn [iota map advantage_sum]; rewrite big_ord1 addn0 addn1.
+  exact: advantage_hop.
+- cbn [iota map advantage_sum]; rewrite big_ord_recl addn0.
+  apply: lerD; first exact: advantage_hop.
+  rewrite -addSnnS; under eq_bigr do rewrite -addSnnS.
+  exact: IHn.
 Qed.
 
 (* advantage_self_zero — the SSProve advantage between a game and itself is zero
@@ -958,18 +961,18 @@ Proof. by rewrite /AdvantageE subrr normr0. Qed.
 
 (* ------------------------------------------------------------------ *)
 (* Full hybrid-ladder advantage bound: the real-to-all-zero distance   *)
-(* is at most (number of hops) * epsilon_cpa AHE.                      *)
+(* is at most the sum of the per-site IND-CPA reduction advantages.    *)
 (* ------------------------------------------------------------------ *)
 
 (* advantage_le — the SSProve advantage of any adversary distinguishing the
-   real game from the all-zero game is bounded by [size (hop_sites gc)] copies
-   of epsilon_cpa AHE, i.e. one IND-CPA cost per GC_enc_hop site.  Mirrors
-   advantage_game_real_game_enc_zero of dsdp_security_indcpa.v generalised to an
-   arbitrary game_code: Advantage_triangle_chain inserts the hybrid_ladder rungs,
-   the empty ladder collapses to advantage_self_zero, and the non-empty ladder
-   telescopes through advantage_sum_ladder_le into [count_hops gc] single-rung
-   bounds.  size (hop_sites gc) = count_hops gc since hop_sites enumerates
-   [iota 0 (count_hops gc)]. *)
+   real game from the all-zero game is bounded by the sum, over the
+   [size (hop_sites gc)] GC_enc_hop sites, of the IND-CPA real-or-zero
+   advantage of the site reduction [A ∘ denote_game_shim
+   (zero_hop_prefix l gc) l].  Advantage_triangle_chain inserts the
+   hybrid_ladder rungs, the empty ladder collapses to advantage_self_zero, and
+   the non-empty ladder telescopes through advantage_sum_ladder_le into
+   [count_hops gc] single-rung bounds.  size (hop_sites gc) = count_hops gc
+   since hop_sites enumerates [iota 0 (count_hops gc)]. *)
 Lemma advantage_le
     (LA : Locations) (A : raw_package) (gc : game_code)
     (A_valid : ValidPackage LA game_iface A_export A)
@@ -977,21 +980,21 @@ Lemma advantage_le
     (A_disj_ore : fseparate LA oracle_real_pkg.(locs))
     (A_disj_oze : fseparate LA oracle_zero_pkg.(locs)) :
   AdvantageE (denote_game (all_real gc)) (denote_game (all_zero gc)) A
-    <= (size (hop_sites gc))%:R * epsilon_cpa AHE.
+    <= \sum_(l < size (hop_sites gc))
+         indcpa_epsilon AHE Renc card_renc renc_card rand_of_renc t_msg t_cipher
+           msg_of_chmsg chcipher_of_cipher pkey_of_party
+           (A ∘ denote_game_shim (zero_hop_prefix l gc) l).
 Proof.
 rewrite /all_real /all_zero /hop_sites size_iota.
 case Hch: (count_hops gc) => [|m].
-- by rewrite advantage_self_zero mul0r.
+- by rewrite advantage_self_zero big_ord0.
 - have tri :=
     Advantage_triangle_chain (denote_game (zero_hop_prefix 0 gc) : raw_package)
       (hybrid_ladder gc)
       (denote_game (zero_hop_prefix m.+1 gc) : raw_package) A.
   apply: (le_trans tri).
   rewrite /hybrid_ladder Hch subn1 succnK.
-  apply: advantage_sum_ladder_le.
-  + exact: A_disj_state.
-  + exact: A_disj_ore.
-  + exact: A_disj_oze.
+  exact: advantage_sum_ladder_le.
 Qed.
 
 (* ------------------------------------------------------------------ *)
@@ -1050,19 +1053,24 @@ Definition game_code_dsdp : game_code :=
 (* hop_sites_game_code_dsdp — back-end validation: the fixture has exactly two
    encryption hops (the Bob-to-Alice c2 and Charlie-to-Alice c3 slots), so its
    hybrid ladder enumerates two addressable sites.  Computational ([reflexivity]
-   through [size_iota] / [count_hops]); pins the [2] in
-   [advantage_game_code_dsdp_le]. *)
+   through [size_iota] / [count_hops]); it is what lets
+   [advantage_game_code_dsdp_le] expand its bound into two explicit
+   summands. *)
 Lemma hop_sites_game_code_dsdp : size (hop_sites game_code_dsdp) = 2.
 Proof. by []. Qed.
 
 (* advantage_game_code_dsdp_le — headline back-end validation: any
    adversary's SSProve advantage distinguishing the real DSDP corrupted-Alice
-   game (derived from the fixture) from its all-zero endpoint is at most
-   [2 * epsilon_cpa AHE], one IND-CPA cost per encryption hop.  Specialises
-   the generic [advantage_le] to [game_code_dsdp] and rewrites
-   [size (hop_sites game_code_dsdp)] to [2] via [hop_sites_game_code_dsdp];
-   the four premises are exactly [advantage_le]'s adversary well-formedness
-   and state-disjointness hypotheses. *)
+   game (derived from the fixture) from its all-zero endpoint is at most the
+   sum of the two per-hop IND-CPA reduction advantages, at sites 0 and 1.
+   Specialises the generic [advantage_le] to [game_code_dsdp], rewrites
+   [size (hop_sites game_code_dsdp)] to [2] via [hop_sites_game_code_dsdp],
+   and expands the two-element ordinal sum; the four premises are exactly
+   [advantage_le]'s adversary well-formedness and state-disjointness
+   hypotheses.
+   Naming: [advantage] names the AdvantageE being bounded, [game_code_dsdp] the
+   fixture it is instantiated at, and [_le] the upper bound; the file's SSProve
+   advantage-lemma convention, not a MathComp algebraic property. *)
 Lemma advantage_game_code_dsdp_le
     (LA : Locations) (A : raw_package)
     (A_valid : ValidPackage LA game_iface A_export A)
@@ -1071,11 +1079,16 @@ Lemma advantage_game_code_dsdp_le
     (A_disj_oze : fseparate LA oracle_zero_pkg.(locs)) :
   AdvantageE (denote_game (all_real game_code_dsdp))
              (denote_game (all_zero game_code_dsdp)) A
-    <= 2%:R * epsilon_cpa AHE.
+    <= indcpa_epsilon AHE Renc card_renc renc_card rand_of_renc t_msg t_cipher
+         msg_of_chmsg chcipher_of_cipher pkey_of_party
+         (A ∘ denote_game_shim (zero_hop_prefix 0 game_code_dsdp) 0)
+     + indcpa_epsilon AHE Renc card_renc renc_card rand_of_renc t_msg t_cipher
+         msg_of_chmsg chcipher_of_cipher pkey_of_party
+         (A ∘ denote_game_shim (zero_hop_prefix 1 game_code_dsdp) 1).
 Proof.
 have H := advantage_le game_code_dsdp A_valid A_disj_state A_disj_ore
   A_disj_oze.
-rewrite hop_sites_game_code_dsdp in H.
+rewrite hop_sites_game_code_dsdp big_ord_recl big_ord1 in H.
 exact: H.
 Qed.
 

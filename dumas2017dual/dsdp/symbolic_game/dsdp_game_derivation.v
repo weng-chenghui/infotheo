@@ -3,7 +3,8 @@
    The back end (dsdp_game_code.v) lowers a reified [game_code] AST to an
    SSProve [package] and proves the generic hybrid-ladder bound
    [advantage_le : AdvantageE (denote_game (all_real gc)) (denote_game
-   (all_zero gc)) A <= (size (hop_sites gc)) * epsilon_cpa AHE].  Its
+   (all_zero gc)) A <= \sum_(l < size (hop_sites gc)) indcpa_epsilon … (A
+   ∘ denote_game_shim (zero_hop_prefix l gc) l)].  Its
    [game_code_dsdp] was a HAND-BUILT fixture standing in for the AST a
    symbolic execution of the piSMC source should emit.
 
@@ -206,7 +207,8 @@ Proof. elim: obs venv renv => [|o rest IH] venv renv //=; case: o => //= *; rewr
 
 (* count_hops_game_of_trace — the IND-CPA ladder length of the derived game is
    exactly the number of hoppable receptions in the trace.  This is what ties
-   the [k * epsilon_cpa AHE] bound's [k] to the protocol structure generically.
+   the summation range of the per-hop reduction bound to the protocol structure
+   generically.
    Naming: the [mainSymbol_argument] form [count_hops] of [game_of_trace]
    (cf. MathComp [size_map] / [count_map]); the five underscore segments are
    the two multi-word identifiers [count_hops] and [game_of_trace], not grammar
@@ -684,28 +686,41 @@ Record dsdp_indcpa_adversary (P : dsdp_indcpa_experiment) := {
 
 (* dsdp_indcpa_secrecy_le — the one-record IND-CPA secrecy bound, GENERIC over
    any problem [P]: every valid adversary's advantage distinguishing the real
-   game from its all-zero endpoint is at most [count_obs_hops (corrupted_view
-   P)] times [epsilon_cpa (exp_enc_scheme P)].  Proved via the back end's
-   [advantage_le] (bridging [count_obs_hops] to [size (hop_sites ...)] then
-   [eapply advantage_le]), NOT the [game_code_dsdp]-specific
-   [advantage_game_code_dsdp_le], which times out for an abstract [P].  The
-   DSDP [2 * epsilon_cpa AHE] bound is the [dsdp_derived_game_advantage_le]
-   corollary. *)
+   game from its all-zero endpoint is at most the sum, over the
+   [count_obs_hops (corrupted_view P)] encryption hops of the corrupted view,
+   of the IND-CPA real-or-zero advantage of the site reduction
+   [adv_package Adv ∘ denote_game_shim … (zero_hop_prefix l …) l].
+   Proved via the back end's [advantage_le] (bridging [count_obs_hops] to
+   [size (hop_sites ...)] then [eapply advantage_le]), NOT the
+   [game_code_dsdp]-specific [advantage_game_code_dsdp_le], which times out for
+   an abstract [P].  The two-summand DSDP bound is the
+   [dsdp_derived_game_advantage_le] corollary. *)
 Theorem dsdp_indcpa_secrecy_le (P : dsdp_indcpa_experiment)
     (Adv : dsdp_indcpa_adversary P) :
   AdvantageE (real_game P) (zero_game P) (adv_package Adv)
-    <= (count_obs_hops (corrupted_view P))%:R * epsilon_cpa (exp_enc_scheme P).
+    <= \sum_(l < count_obs_hops (corrupted_view P))
+         indcpa_epsilon (exp_enc_scheme P) (exp_rand_carrier P)
+           (exp_card_randomness P) (exp_rand_carrier_card P)
+           P.(exp_rand_of_carrier) (exp_choice_msg_type P)
+           (exp_choice_cipher_type P) P.(exp_plain_of_choice_msg)
+           P.(exp_choice_cipher_of_cipher) (exp_pub_key_of_party P)
+           (adv_package Adv
+            ∘ denote_game_shim (exp_rand_carrier_card P)
+                P.(exp_rand_of_carrier) P.(exp_choice_msg_of_plain)
+                P.(exp_choice_cipher_of_cipher)
+                P.(exp_cipher_of_choice_cipher) (exp_pub_key_of_party P)
+                P.(exp_msg_of_index) (exp_fallback_rand P)
+                (zero_hop_prefix l (game_of_trace (corrupted_view P))) l).
 Proof.
-rewrite /real_game /zero_game /game_of_problem.
 have Hcnt : count_obs_hops (corrupted_view P)
     = size (hop_sites (game_of_trace (corrupted_view P)))
   by rewrite -count_hops_game_of_trace /hop_sites size_iota.
-rewrite Hcnt.
+rewrite /real_game /zero_game /game_of_problem Hcnt.
 eapply advantage_le.
-3: apply: (adv_valid Adv).
-1: apply: (P.(exp_choice_cipher_of_cipherK)).
-1: apply: (P.(exp_choice_msg_of_plainK)).
-1: apply: (adv_disjoint_from_protocol_state Adv).
-1: apply: (adv_disjoint_from_real_oracle Adv).
-1: apply: (adv_disjoint_from_zero_oracle Adv).
+3: exact: (adv_valid Adv).
+1: exact: (P.(exp_choice_cipher_of_cipherK)).
+1: exact: (P.(exp_choice_msg_of_plainK)).
+1: exact: (adv_disjoint_from_protocol_state Adv).
+1: exact: (adv_disjoint_from_real_oracle Adv).
+1: exact: (adv_disjoint_from_zero_oracle Adv).
 Qed.
