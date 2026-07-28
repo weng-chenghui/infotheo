@@ -205,11 +205,12 @@ shape of the second summand does not touch it.
 `log_id` (`dsdp_guess_fiber.v:1772`) states
 `- log (m%:R^-1 + 2%:R * eps) = log m%:R - log (1 + 2%:R * m%:R * eps)`. The factor 2 is
 baked into the statement, and the new bound is not of that shape. The factor plays no
-role in the proof. The generalization compiles against the project switch:
+role in the proof. The generalization compiles against the project switch, and is
+renamed and restated per the naming audit below:
 
 ```coq
-Lemma log_id_gen (m : nat) (d : R) : (0 < m)%N -> (0 <= d)%R ->
-  (- log (m%:R^-1 + d) = log m%:R - log (1 + m%:R * d))%R.
+Local Lemma logVD (m : nat) (d : R) : (0 < m)%N -> (0 <= d)%R ->
+  (log (m%:R^-1 + d) = log (1 + m%:R * d) - log m%:R)%R.
 ```
 
 Same proof skeleton, with `mulrAC` replaced by `[(m%:R * d)%R]mulrC` before `mulfK`.
@@ -289,6 +290,112 @@ consumer (`dsdp_adv_sim_le`, `dsdp_simulator.v:279`), this is recorded and accep
 
 Blueprint references `dsdp_adv_sim_le` (`security.tex:196`), whose name does not change.
 
+## Naming audit
+
+Every identifier this design creates or changes, checked against
+`mathcomp-skills/reference.md` §10 (`mainSymbol_suffixes`), §11 (abbreviation table),
+§13 (definitions are `snake_case`), §18 (auxiliary results are `Local` / `Let` / `Fact`).
+Deviations are listed as numbered exceptions with their reason.
+
+### Created
+
+| Name | Kind | Verdict | Rule |
+|---|---|---|---|
+| `indcpa_advantage` | Definition | accept, exception E3 | §13 `snake_case`; §10 "avoid overly generic names" satisfied by the `indcpa` qualifier, since bare `advantage` would collide in meaning with SSProve's `Advantage` / `AdvantageE` |
+| `logVD` | Lemma | replaces the proposed `log_id_gen` | §10, §11 |
+
+`log_id_gen` is rejected on two counts. `_gen` for "generalized" is not in the §11
+abbreviation table and has no precedent. And the inherited `id` misreads: in
+`mainSymbol_suffixes` position `id` denotes the identity function, not "an identity
+equation", so `log_id` was already misnamed and generalizing it should not carry the
+defect forward.
+
+The replacement follows head-of-LHS with shape suffixes: main symbol `log`, `V` for the
+inverse in the argument, `D` for the addition (§11 arithmetic table), no underscore
+before a capital chain (§10 underscore rule).
+
+Stated so the name matches the equation, with the negation moved to the caller:
+
+```coq
+Lemma logVD (m : nat) (d : R) : (0 < m)%N -> (0 <= d)%R ->
+  (log (m%:R^-1 + d) = log (1 + m%:R * d) - log m%:R)%R.
+```
+
+The current `log_id` puts a leading `- ` on the LHS, which forces the name to describe a
+negated `log` rather than a `log`. `dsdp_alice_unpredictability_entropy_ge` applies
+`oppr` itself, one extra rewrite. Per §18 this is an auxiliary algebraic identity and
+should be `Local Lemma` in `dsdp_guess_fiber.v`, which `log_id` currently is not.
+
+### Changed
+
+| Before | After | Verdict | Rule |
+|---|---|---|---|
+| `adm` | `locs_disjoint` | accept | §13 `snake_case`; `locs` is SSProve's own package field name, not a coinage |
+| `dsdp_adm` | `dsdp_locs_disjoint` | accept, exception E1 | as above, subject-prefixed |
+| `log_id` | `logVD` | accept | see above |
+
+### Committed earlier in this line of work, re-audited here
+
+| Name | Verdict | Rule |
+|---|---|---|
+| `dsdp_alice_guess_V2_zero_le` | accept, exceptions E1 and E2 | `_le` is standard |
+| `dsdp_alice_guess_V2_real_le` | accept, exceptions E1 and E2 | as above |
+| `dsdp_alice_unpredictability_entropy_ge` | accept, exception E1 | `_ge` is standard |
+
+### Exceptions
+
+**E1. Subject prefix instead of head-symbol-first.** §10 puts the statement's head
+symbol first, which for `dsdp_alice_guess_V2_real_le` would give
+`guess_sdistr_success_real_le`. The project instead prefixes by the corrupted party.
+Reason: `dsdp_main.v` is a headline index whose entries are read as a list, and every
+head symbol in it is already a long compound (`guess_sdistr_success_real`,
+`Hunp_leak_S`, `centropy`). Subject-first is what makes that list scannable, and the
+convention is established across `bob_privacy_V1`, `bob_privacy_V3`,
+`charlie_privacy_V2`, `dsdp_centropy_uniform`, `US_compromised_leaks_V2`. Changing it
+would be a whole-file renaming unrelated to this design.
+
+**E2. Capitalized `V2` inside a `snake_case` identifier.** §13 requires `snake_case`.
+`V2` and `V3` are the protocol's input variables from Dumas 2017, preserved in their
+paper form. Precedent: `bob_privacy_V3`, `charlie_privacy_V2`. The same applies to the
+`_leak_S` suffix throughout, where `S` is the protocol's scalar-product output.
+
+**E3. `indcpa_advantage` rather than SSProve's `<primitive>_epsilon` idiom.** The
+SSProve examples name this quantity `prf_epsilon` (`PRF.v:323`) and `prg_epsilon`
+(`StretchPRG.v:167`). Reason for deviating: the entire point of this design is that the
+quantity is not a constant, and `epsilon` is the word that misleads readers into
+thinking it is. `advantage` names what the definition actually computes and matches its
+body, `AdvantageE`.
+
+### Pre-existing violations noticed while auditing, not fixed here
+
+`advantage_gc_dsdp` (`dsdp_game_code.v:1064`) abbreviates `game_code` to `gc`, which
+strips meaning. `hop_sites`, `zero_hop_prefix`, `count_hops` are fine. Fixing
+`advantage_gc_dsdp` touches a lemma this design already restates, so it is a candidate
+for Phase 5, but it is a separate naming decision and is recorded rather than assumed.
+
+## Proof workflow
+
+Every proof obligation in this design is discharged through the Rocq skill stack, not by
+hand-editing tactic scripts.
+
+- **`mathcomp-skills`** is consulted before writing any tactic. `templates.md` for a
+  goal shape, `phrasebook.md` for an intent, `proof-development.md` for the
+  inspect-search-battery-commit loop, `errors.md` for any `coqc` message. The bigop work
+  in Phases 5 and 6 specifically wants `reference.md` §34 and §34.7.
+- **`rocq:autoprove`** drives the multi-cycle proving for each converted lemma, with its
+  hard stop rules. The ladder inductions are the cycles most likely to need it.
+- Live iteration uses the rocq-mcp loop rather than repeated `coqc`: warm the imports
+  once via `rocq_start preamble=...`, find a winner with `rocq_step_multi` without
+  advancing state, commit it with `rocq_check`, extract `proof_tactics`.
+- `rocq_assumptions` is run per converted headline, which is also how the Phase 7
+  allowlist is generated.
+- `rocq-auditor` Stage 2 remains a mandatory pre-commit gate for every phase that adds
+  an identifier or a proof body. Phases that are pure deletion or mechanical rename
+  (Phases 1, 2, and the deletion half of Phase 7) use `ROCQ_AUDIT_BYPASS=1`.
+- The bundled `audit-quick.sh` `PostToolUse` hook fires on each edited `.v` file. Its
+  findings are advisory, but the 80-column rule (§1) will bite: `indcpa_advantage` terms
+  carry full parameter lists, so restated statements need deliberate line breaking.
+
 ## Costs
 
 1. Headline statements grow. `2 * epsilon_cpa AHE` becomes two `indcpa_advantage` terms
@@ -321,8 +428,8 @@ blueprint node at `security.tex:224-231` and any `\uses` pointing at
 `thm:alice_view_statdist`. Doing this first shrinks the surface every later phase must
 convert.
 
-**Phase 3. Add `indcpa_advantage` and generalize `log_id`.** Definition plus
-`log_id_gen`, nothing consumes them yet. Build green.
+**Phase 3. Add `indcpa_advantage` and replace `log_id` with `logVD`.** Definition plus
+the generalized identity, nothing consumes them yet. Build green.
 
 **Phase 4. `adv_sim_le` signature.** `eps : raw_package -> R` in
 `smc/ssprove_ext_simulator.v`, with `dsdp_adv_sim_le` passing a constant function so the
