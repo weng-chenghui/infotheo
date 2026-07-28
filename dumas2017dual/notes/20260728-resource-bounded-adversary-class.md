@@ -2,7 +2,16 @@
 
 Date: 2026-07-28
 Branch base: `itp2026-dumas2017dual`
-Status: design approved, not implemented
+Status: SUPERSEDED, not implemented.
+
+An adversarial review found this design unsound. A global `Parameter` cannot be
+instantiated, so the subsumption argument below is false. The development is
+non-asymptotic, so the only meaningful resource classes are fixed budgets, and those are
+not closed under `link`, `par`, or `ID`, making the three closure axioms false.
+`dsdp_alice_view_statdist_le` cannot be guarded without assuming every Boolean function
+is efficiently computable. Replaced by `20260728-reduction-form-security-statements.md`,
+which removes `epsilon_cpa` entirely and therefore needs no adversary class. Kept as a
+record of the rejected approach and the reasons.
 
 ## Problem
 
