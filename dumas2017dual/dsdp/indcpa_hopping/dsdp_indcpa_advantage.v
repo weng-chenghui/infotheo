@@ -9,8 +9,8 @@
    given a concrete homomorphic encryption scheme and the marshalling between
    its plaintexts/ciphertexts and SSProve choice types.
 
-   The DSDP instance [dsdp_experiment] of [dsdp_indcpa_experiment] and the
-   headline [dsdp_alice_view_advantage_le] are in [dsdp_main]; the generic engine
+   The DSDP instance [dsdp_experiment] of [dsdp_indcpa_experiment] and
+   [dsdp_alice_view_advantage_le] are in [dsdp_main]; the generic engine
    [dsdp_indcpa_secrecy_le] is in [dsdp_game_derivation]. *)
 
 From HB Require Import structures.
@@ -52,7 +52,7 @@ Import PackageNotation.
 Notation R := SSProve.Crypt.Axioms.R.
 
 (* ------------------------------------------------------------------ *)
-(* Capstone: the IND-CPA bound holds for the DERIVED game.             *)
+(* The two-reduction IND-CPA bound on the DERIVED game.                *)
 (* ------------------------------------------------------------------ *)
 
 (* dsdp_derived_game_advantage_le — the DSDP corollary of

@@ -21,9 +21,8 @@
      charlie_privacy_V2 : H(V2 | CharlieView) = log m > 0: a corrupted Charlie
        learns nothing about Bob's input V2 (R2 one-time-pad masking)  [3-party]
 
-   Corrupted-Alice secrecy (indcpa_hopping axis), the guessing triangle  [3-party]
-     dsdp_alice_view_advantage_le : AdvantageE <= the sum of the two per-hop
-       IND-CPA reduction advantages
+   Corrupted-Alice secrecy (indcpa_hopping axis), guessing triangle  [3-party]
+     dsdp_alice_view_advantage_le : AdvantageE <= eps_0 + eps_1
      dsdp_alice_guess_V2_zero_le : guess <= 1/m (all-zero endpoint)
      dsdp_alice_guess_advantage_le : AdvantageE <= eps_0 + eps_1
      dsdp_alice_guess_V2_real_le : guess <= 1/m + (eps_0 + eps_1)
