@@ -40,6 +40,9 @@ how the SSProve case studies state their results. Evidence from
   with `ValidPackage` and `fseparate` as the only side conditions.
 - `PRF.v:325` keeps `statistical_gap` as an unreduced information-theoretic summand
   alongside the reduction terms. Same shape as the DSDP `1/m` leg.
+- `MACCCA.v:440` and `SymmRatchet.v:430` name this quantity at an IND-CPA game pair
+  `cpa_epsilon := Advantage CPA_EVAL` and `cpa_epsilon := Advantage CTXT`. That is the
+  direct analogue of what this design introduces.
 - `KEMDEM.v:861` and `StretchPRG.v:169` have the same form.
 - No example states an unproven security assumption. The `Parameter`s that do occur
   (34 across `OVN.v`, `SigmaProtocol.v`, `Schnorr.v`, `RandomOracle.v`, for instance
@@ -93,7 +96,7 @@ In `homomorphic_encryption/indcpa_ror.v`, after `End indcpa_ror.` at `:231`, rep
 the deleted `Parameter` and `Axiom`:
 
 ```coq
-Definition indcpa_advantage
+Definition indcpa_epsilon
     (AHE : AHEncType) (Renc : finType) (card_renc : nat)
     (renc_card : #|Renc| = card_renc) (rand_of_renc : Renc -> rand AHE)
     (t_msg t_cipher : choice_type)
@@ -119,7 +122,7 @@ The argument list matches what the current `apply:` at `dsdp_game_code.v:909` an
 `msg_of_chmsg : t_msg -> plain AHE`; the opposite-direction `chmsg_of_msg` is consumed
 by `denote_game` and `denote_game_shim`, on the other side of `∘`.
 
-Because `indcpa_advantage` takes `renc_card : #|Renc| = card_renc` and the oracles use
+Because `indcpa_epsilon` takes `renc_card : #|Renc| = card_renc` and the oracles use
 it under `cast_ord`, headline bounds become proof-relevant in that argument. This is
 harmless by `eq_irrelevance` on `nat`, but statement-identity checks must compare proof
 terms, not just printed forms. Likewise `denote_game_shim_leak_S` is a `package` whose
@@ -136,7 +139,7 @@ Lemma advantage_hop_leak_S ... :
   AdvantageE
     (denote_game_leak_S ... (zero_hop_prefix i gc))
     (denote_game_leak_S ... (zero_hop_prefix i.+1 gc)) A
-  <= indcpa_advantage ... (A ∘ denote_game_shim_leak_S (zero_hop_prefix i gc) i).
+  <= indcpa_epsilon ... (A ∘ denote_game_shim_leak_S (zero_hop_prefix i gc) i).
 ```
 
 The goal after `rewrite -Advantage_link` is closed by `exact: lexx`, not `reflexivity`,
@@ -149,14 +152,17 @@ whose axiom application is at `:909`.
 `<= n.+1%:R * epsilon_cpa AHE`. It becomes
 
 ```coq
-  <= \sum_(l < n.+1) indcpa_advantage ...
+  <= \sum_(l < n.+1) indcpa_epsilon ...
        (A ∘ denote_game_shim_leak_S (zero_hop_prefix (start + l) gc) (start + l)).
 ```
 
 The sum covers sites `start .. start + n`, exactly the `n+1` rungs, so there is no
 off-by-one.
 
-The split must use `big_ord_recl`, not `big_ord_recr`. `advantage_sum` peels the head
+The split probably wants `big_ord_recl` rather than `big_ord_recr`, but this must be
+probed before it is relied on, because SSProve's own structurally similar ladder proof
+uses `big_ord_recr` (`PRFPRG.v:348`, in `hyb_security_based_on_prf`). The argument for
+`recl` here: `advantage_sum` peels the head
 (`pkg_advantage.v:197-201`), and both ladder proofs apply `IHn` at `start.+1` via
 `rewrite -addSnnS` (`dsdp_indcpa_advantage.v:318-320`, `dsdp_game_code.v:944-946`).
 `big_ord_recr` peels the last site and would need `IHn` at `start`, which a head-peeling
@@ -189,8 +195,8 @@ summands:
 Theorem dsdp_alice_guess_V2_real_le ... :
   guess_sdistr_success_real ...
   <= card_msg%:R^-1
-     + indcpa_advantage ... (guess_reduction ∘ shim_0)
-     + indcpa_advantage ... (guess_reduction ∘ shim_1).
+     + indcpa_epsilon ... (guess_reduction ∘ shim_0)
+     + indcpa_epsilon ... (guess_reduction ∘ shim_1).
 ```
 
 `dsdp_alice_guess_V2_zero_le` keeps a byte-identical statement. The Infotheo bridge is
@@ -205,24 +211,33 @@ shape of the second summand does not touch it.
 `log_id` (`dsdp_guess_fiber.v:1772`) states
 `- log (m%:R^-1 + 2%:R * eps) = log m%:R - log (1 + 2%:R * m%:R * eps)`. The factor 2 is
 baked into the statement, and the new bound is not of that shape. The factor plays no
-role in the proof. The generalization compiles against the project switch, and is
-renamed and restated per the naming audit below:
+role in the proof, and a generalization over a plain `d` compiles against the project
+switch, with `mulrAC` replaced by `[(m%:R * d)%R]mulrC` before `mulfK`.
 
-```coq
-Local Lemma logVD (m : nat) (d : R) : (0 < m)%N -> (0 <= d)%R ->
-  (log (m%:R^-1 + d) = log (1 + m%:R * d) - log m%:R)%R.
-```
+The naming audit rejects keeping this as a named lemma at all. `log_id` squats on the
+live `log_id_cmp` / `log_id_eq` / `log_id_diff` family
+(`lib/realType_ln.v:239`, `probability/divergence.v:55, 63`) where `id` really is the
+identity function, and no suffix chain in the `logK` / `logV` / `logM` / `logDiv` family
+(`lib/realType_ln.v:188, 191, 194, 227`) can name the generalized statement, because
+unlike every member of that family its suffixes would not determine the right-hand side.
+That is evidence the statement is an unfactored composite.
 
-Same proof skeleton, with `mulrAC` replaced by `[(m%:R * d)%R]mulrC` before `mulfK`.
+Preferred: delete it and expand at the call site. `addf_div`
+(`mathcomp/algebra/ssralg.v:4768`) turns `m%:R^-1 + x` into a single quotient, `divr1`
+cleans up, and `logDiv` finishes. Two rewrites where a lemma used to be, and §18 wants
+auxiliary results minimized. Fallback if the call site is unreadable: `Local Lemma
+log_invD (m : nat) (x : R)`, underscore before the lowercase `inv` per §10, binder `x`
+per §14, which assigns `d` to naturals.
+
 `dsdp_alice_unpredictability_entropy_ge` (`dsdp_main.v:789`) becomes
 `log card_msg - log (1 + card_msg * (adv_0 + adv_1)) <= Hunp_leak_S`, still approaching
 `log card_msg` as the advantages vanish.
 
 Its hypothesis `epsilon_cpa_ge0` (`dsdp_main.v:800`) becomes provable, since
-`indcpa_advantage` is a `normr`, so `sumr_ge0` and `normr_ge0` discharge it. Delete the
+`indcpa_epsilon` is a `normr`, so `sumr_ge0` and `normr_ge0` discharge it. Delete the
 hypothesis rather than restating it.
 
-### `adv_sim_le` needs an adversary-indexed bound
+### `advantage_sim_le` needs an adversary-indexed bound
 
 `adv_sim_le` (`smc/ssprove_ext_simulator.v:42`) binds `eps : R` before the adversary:
 
@@ -232,10 +247,23 @@ Definition adv_sim_le (Real Ideal Sim : raw_package) (eps : R) : Prop :=
     AdvantageE Real (Sim ∘ Ideal) A <= eps.
 ```
 
-A reduction bound depends on `A` and cannot be stored in a slot that cannot see it. The
-signature becomes `eps : raw_package -> R` with conclusion `<= eps A`, the shape
-SSProve's `adv_equiv` already uses (`pkg_advantage.v:86-93`). `adv_sim_le_from_endpoint`
-(`:53`) and `adv_sim_le_reduction` (`:73`) adapt, the latter concluding `<= eps (A ∘ T)`.
+A reduction bound depends on `A` and cannot be stored in a slot that cannot see it. It
+becomes `bound : raw_package -> R` with conclusion `<= bound A`, the shape SSProve's
+`adv_equiv` already uses (`pkg_advantage.v:86-93`). The three lemmas are renamed off the
+overloaded `adv` at the same time, per the naming audit:
+
+```coq
+Context (E : Interface) (admissible : Locations -> raw_package -> Prop).
+
+Definition advantage_sim_le (Real Ideal Sim : raw_package)
+    (bound : raw_package -> R) : Prop :=
+  forall (LA : Locations) (A : raw_package),
+    ValidPackage LA E A_export A -> admissible LA A ->
+    AdvantageE Real (Sim ∘ Ideal) A <= bound A.
+```
+
+`advantage_sim_le_from_endpoint` (`:53`) and `advantage_sim_le_reduction` (`:73`) adapt,
+the latter concluding `<= bound (A ∘ T)`.
 
 ### Deletions
 
@@ -248,8 +276,8 @@ no `_CoqProject` file consumes it. Delete the lemma but keep the directory:
 `advantage_idealized_eq1` (`:143`) states
 `AdvantageE idealized_oracle_real idealized_oracle_zero idealized_distinguisher = 1`,
 which under the new design is definitionally
-`indcpa_advantage idealized_ahe_f2 ... idealized_distinguisher = 1`. Restated in those
-terms it becomes the vacuity guard for the new functional, proving `indcpa_advantage` is
+`indcpa_epsilon idealized_ahe_f2 ... idealized_distinguisher = 1`. Restated in those
+terms it becomes the vacuity guard for the new functional, proving `indcpa_epsilon` is
 not identically zero. The file header at `:5`, `:40`, `:42`, `:75`, `:84` is rewritten to
 explain why no constant bound is used at all.
 
@@ -272,106 +300,129 @@ superseded spec is not created, because its intended contents cease to exist.
 
 ### Rename
 
-| Before | After | Type before | Type after |
-|---|---|---|---|
-| `adm` (`smc/ssprove_ext_simulator.v:36`) | `locs_disjoint` | `Locations -> raw_package -> Prop` | `Locations -> Prop` |
-| `dsdp_adm` (`dsdp_simulator.v:225`) | `dsdp_locs_disjoint` | `Locations -> raw_package -> Prop` | `Locations -> Prop` |
+| Before | After | Type change |
+|---|---|---|
+| `adm` (`smc/ssprove_ext_simulator.v:36`) | `admissible` | none, stays `Locations -> raw_package -> Prop` |
+| `dsdp_adm` (`dsdp_simulator.v:225`) | `dsdp_locs_disjoint` | drops to `Locations -> Prop` |
+| `adv_sim_le`, `_from_endpoint`, `_reduction` (`:42, 53, 73`) | `advantage_sim_le`, `_from_endpoint`, `_reduction` | `eps : R` becomes `bound : raw_package -> R` |
+| `dsdp_adv_sim_le` (`dsdp_simulator.v:279`) | `dsdp_advantage_sim_le` | as above |
+| `gc_dsdp`, `hop_sites_gc_dsdp`, `advantage_gc_dsdp` (`dsdp_game_code.v:1029, 1053, 1064`) | `game_code_dsdp`, `hop_sites_game_code_dsdp`, `advantage_game_code_dsdp_le` | none |
+| `dsdp_advantage_derived`, `_leak_S` (`dsdp_indcpa_advantage.v:63, 405`) | `dsdp_derived_game_advantage_le`, `_leak_S` | none |
+| `dsdp_indcpa_secrecy` (`dsdp_game_derivation.v:691`) | `dsdp_indcpa_secrecy_le` | none |
+| `dsdp_alice_simulation_secure` (`dsdp_main.v:850`) | `dsdp_alice_simulation_advantage_le` | none |
+| `advantage_idealized_eq1` (`idealized_indcpa.v:143`) | `indcpa_epsilon_idealized_eq1` | restated over `indcpa_epsilon` |
 
-Occurrences: `smc/ssprove_ext_simulator.v` 9, `dsdp_simulator.v` 5,
+The abstract parameter keeps both its arity and a deliberately unspecific name.
+`smc/ssprove_ext_simulator.v:36` is a `Context` parameter, not a definition, so naming it
+after its one current instantiation would make a generic file assert a property it does
+not know. `advantage_sim_le_reduction` (`:73`, with its binder at `:78`) genuinely uses
+the package argument in `admissible LAT (A ∘ T)`. DSDP instantiates with
+`fun LA _ => dsdp_locs_disjoint LA`, which puts the ignored argument at the one place
+where it is genuinely ignored.
+
+`adm` occurrences: `smc/ssprove_ext_simulator.v` 9, `dsdp_simulator.v` 5,
 `probe_p5_skeletons.v` 15 (11 bare `adm` plus 4 `dsdp_adm`). The probe file is absent
 from `_CoqProject` and is updated only to avoid leaving contradictory vocabulary.
 
-`adv_sim_le_reduction` (`ssprove_ext_simulator.v:73`, with the `AT_adm` binder at `:78`)
-genuinely uses the package argument. Under `dsdp_adm` the body ignores it, so
-`adm LAT (A ∘ T)` and `dsdp_locs_disjoint LAT` are interchangeable at the sole
-instantiation, and the arity drop is sound there. The generic lemma loses the ability to
-express a package-dependent location condition. Since `adv_sim_le` has exactly one
-consumer (`dsdp_adv_sim_le`, `dsdp_simulator.v:279`), this is recorded and accepted.
-
-Blueprint references `dsdp_adv_sim_le` (`security.tex:196`), whose name does not change.
+Blueprint `security.tex:196` cites `dsdp_adv_sim_le` and must be updated in the same
+phase as that rename.
 
 ## Naming audit
 
-Every identifier this design creates or changes, checked against
-`mathcomp-skills/reference.md` §10 (`mainSymbol_suffixes`), §11 (abbreviation table),
-§13 (definitions are `snake_case`), §18 (auxiliary results are `Local` / `Let` / `Fact`).
-Deviations are listed as numbered exceptions with their reason.
+Every identifier this design creates, renames, or whose statement it changes, checked
+against `mathcomp-skills/reference.md` §10 (`mainSymbol_suffixes`, underscore rule,
+head-of-LHS, avoid overly generic), §11 (abbreviation table), §13 (definitions are
+`snake_case`), §14 (binder names), §18 (auxiliary results are `Local` / `Let` / `Fact`),
+and against the project rules: strict `snake_case` except paper-form variables, no
+semantic-stripping abbreviations, SSProve-extension identifiers follow SSProve house
+style where that does not conflict.
+
+A restated lemma is in scope even when its name is unchanged, because a name can stop
+describing its statement.
 
 ### Created
 
 | Name | Kind | Verdict | Rule |
 |---|---|---|---|
-| `indcpa_advantage` | Definition | accept, exception E3 | §13 `snake_case`; §10 "avoid overly generic names" satisfied by the `indcpa` qualifier, since bare `advantage` would collide in meaning with SSProve's `Advantage` / `AdvantageE` |
-| `logVD` | Lemma | replaces the proposed `log_id_gen` | §10, §11 |
+| `indcpa_epsilon` | Definition | accept | §13 `snake_case`; matches SSProve's `cpa_epsilon` (`MACCCA.v:440`, `SymmRatchet.v:430`), which names exactly this quantity at exactly this game pair |
 
-`log_id_gen` is rejected on two counts. `_gen` for "generalized" is not in the §11
-abbreviation table and has no precedent. And the inherited `id` misreads: in
-`mainSymbol_suffixes` position `id` denotes the identity function, not "an identity
-equation", so `log_id` was already misnamed and generalizing it should not carry the
-defect forward.
+An earlier draft proposed `indcpa_advantage` on the grounds that `epsilon` connotes a
+constant. That reason does not survive its own evidence. Upstream's `_epsilon` names are
+already adversary-indexed, as this spec's own Approach section shows by citing
+`PRF.v:323`, so the misreading feared does not occur in the corpus being deviated from.
+The draft also kept `eps` for the adversary-indexed bound in `adv_sim_le`, which made
+the objection incoherent. Both are resolved: `indcpa_epsilon` here, `bound` there.
 
-The replacement follows head-of-LHS with shape suffixes: main symbol `log`, `V` for the
-inverse in the argument, `D` for the addition (§11 arithmetic table), no underscore
-before a capital chain (§10 underscore rule).
+An earlier draft also proposed `logVD` for the generalized `log_id`. Rejected. The repo
+owns `logK` / `logV` / `logM` / `logDiv` (`lib/realType_ln.v:188, 191, 194, 227`), and in
+every member the suffix chain determines the right-hand side, which `logVD` would not.
+Next to `logV` it would misparse as a variant about `log` of an inverse. Its argument's
+head operation is `+` with the inverse nested, so even on its own scheme the chain reads
+outside-in as `DV`. The statement is deleted rather than renamed, per the Design section.
 
-Stated so the name matches the equation, with the negation moved to the caller:
-
-```coq
-Lemma logVD (m : nat) (d : R) : (0 < m)%N -> (0 <= d)%R ->
-  (log (m%:R^-1 + d) = log (1 + m%:R * d) - log m%:R)%R.
-```
-
-The current `log_id` puts a leading `- ` on the LHS, which forces the name to describe a
-negated `log` rather than a `log`. `dsdp_alice_unpredictability_entropy_ge` applies
-`oppr` itself, one extra rewrite. Per §18 this is an auxiliary algebraic identity and
-should be `Local Lemma` in `dsdp_guess_fiber.v`, which `log_id` currently is not.
-
-### Changed
+### Renamed
 
 | Before | After | Verdict | Rule |
 |---|---|---|---|
-| `adm` | `locs_disjoint` | accept | §13 `snake_case`; `locs` is SSProve's own package field name, not a coinage |
-| `dsdp_adm` | `dsdp_locs_disjoint` | accept, exception E1 | as above, subject-prefixed |
-| `log_id` | `logVD` | accept | see above |
+| `adm` (abstract `Context` param) | `admissible` | accept | §10; an abstract parameter must not be named after its one instantiation |
+| `dsdp_adm` | `dsdp_locs_disjoint` | accept | §13; `locs` is SSProve's own record field (`pkg_core_definition.v:615`), not a coinage; `disjoint` is SSProve's own gloss of `fseparate` (`fmap_extra.v:26`) |
+| `adv_sim_le` and its two lemmas | `advantage_sim_le`, `_from_endpoint`, `_reduction` | accept | project abbreviation ban; `adv` is overloaded in-repo, meaning *adversary* in `adv_package` / `adv_valid` / `adv_locations` (`dsdp_game_derivation.v:675-678`) and *advantage* here |
+| `dsdp_adv_sim_le` | `dsdp_advantage_sim_le` | accept | as above |
+| `eps` binder | `bound` | accept | consistency with the `indcpa_epsilon` decision above |
+| `gc_dsdp`, `hop_sites_gc_dsdp`, `advantage_gc_dsdp` | `game_code_dsdp`, `hop_sites_game_code_dsdp`, `advantage_game_code_dsdp_le` | accept | project abbreviation ban; `gc` strips `game_code`. Not `dsdp_game_code`, which collides with the module name. `_le` added per §10 |
+| `dsdp_advantage_derived`, `_leak_S` | `dsdp_derived_game_advantage_le`, `_leak_S` | accept | §10; a `<=` statement whose every sibling carries `_le`. `derived` survives, qualifying the auto-derived game per `dsdp_indcpa_advantage.v:56` |
+| `dsdp_indcpa_secrecy` | `dsdp_indcpa_secrecy_le` | accept | §10; `<=` statement with no shape suffix |
+| `dsdp_alice_simulation_secure` | `dsdp_alice_simulation_advantage_le` | accept | §10; `secure` is a claim word, the statement is `AdvantageE _ _ _ <= _` |
+| `advantage_idealized_eq1` | `indcpa_epsilon_idealized_eq1` | accept | §10 head-of-LHS; restating it over `indcpa_epsilon` changes the LHS head |
+| `log_id` | deleted | accept | see Created above |
 
-### Committed earlier in this line of work, re-audited here
+### Restated, name kept
 
 | Name | Verdict | Rule |
 |---|---|---|
-| `dsdp_alice_guess_V2_zero_le` | accept, exceptions E1 and E2 | `_le` is standard |
-| `dsdp_alice_guess_V2_real_le` | accept, exceptions E1 and E2 | as above |
-| `dsdp_alice_unpredictability_entropy_ge` | accept, exception E1 | `_ge` is standard |
+| `advantage_hop`, `advantage_hop_leak_S` | accept | §10; LHS head and the `hop` shape are unchanged, and the name never claimed a bound shape |
+| `advantage_sum_ladder_le`, `_leak_S` | accept | §10 head-of-LHS; the LHS head remains SSProve's `advantage_sum` (`pkg_advantage.v:197`). The right-hand side becoming a `\sum` is a second, different sum, which is a readability cost recorded here rather than a naming error |
+| `advantage_le`, `advantage_le_leak_S` | accept | §10 |
+| `dsdp_alice_guess_V2_zero_le`, `_real_le` | accept, exception E2 | §10; `_le` standard |
+| `dsdp_alice_unpredictability_entropy_ge` | accept | §10; `_ge` standard |
+| `dsdp_alice_view_advantage_le`, `dsdp_alice_guess_advantage_le` | accept | §10 |
+
+`dsdp_alice_guess_V2_real_le` does carry one §10 deviation not covered by any exception:
+`guess` truncates the statement's head symbol `guess_sdistr_success_real`. Recorded and
+tolerated, since spelling it out would make an already long headline unreadable and the
+truncation is unambiguous inside the `dsdp_alice_guess` family.
+
+### Binders and local names introduced by this design
+
+`shim_0` and `shim_1` appear in the Headline shape display purely as abbreviations for
+`denote_game_shim_leak_S (zero_hop_prefix i gc) i` at `i = 0, 1`. They are display
+shorthand for this document and must not become identifiers. Same for `adv_0`, `adv_1`,
+which would additionally re-import the overloaded `adv`. Where the sum is written out at
+the DSDP instance, the terms are spelled in full.
+
+If the fallback `log_invD` is taken, its binder is `x : R`, not `d : R`. §14 assigns `d`
+to naturals and integers, and ring elements to `x, y, z, u, v, w`.
 
 ### Exceptions
 
-**E1. Subject prefix instead of head-symbol-first.** §10 puts the statement's head
-symbol first, which for `dsdp_alice_guess_V2_real_le` would give
-`guess_sdistr_success_real_le`. The project instead prefixes by the corrupted party.
-Reason: `dsdp_main.v` is a headline index whose entries are read as a list, and every
-head symbol in it is already a long compound (`guess_sdistr_success_real`,
-`Hunp_leak_S`, `centropy`). Subject-first is what makes that list scannable, and the
-convention is established across `bob_privacy_V1`, `bob_privacy_V3`,
-`charlie_privacy_V2`, `dsdp_centropy_uniform`, `US_compromised_leaks_V2`. Changing it
-would be a whole-file renaming unrelated to this design.
+**E1 was withdrawn.** An earlier draft claimed the subject prefix in `dsdp_alice_*`
+deviates from §10's head-symbol-first rule. It does not. §10's "avoid overly generic
+names", with PR #1624 preferring `hoelder_conjugate` over `conjugate`, endorses theory
+qualifiers, and `dsdp_alice_` is exactly that form. There was nothing to excuse.
 
-**E2. Capitalized `V2` inside a `snake_case` identifier.** §13 requires `snake_case`.
-`V2` and `V3` are the protocol's input variables from Dumas 2017, preserved in their
-paper form. Precedent: `bob_privacy_V3`, `charlie_privacy_V2`. The same applies to the
-`_leak_S` suffix throughout, where `S` is the protocol's scalar-product output.
+**E2. Capitalized `V2` inside a `snake_case` identifier.** Backed by the written project
+rule that variables carrying a math-notation name from the source paper keep their paper
+form, not by preference. `V2` and `V3` are the protocol's inputs in Dumas 2017 and `S` is
+its scalar-product output, so `_leak_S` is the same case. Precedent: `bob_privacy_V3`
+(`dsdp_main.v:573`), `charlie_privacy_V2` (`:636`).
 
-**E3. `indcpa_advantage` rather than SSProve's `<primitive>_epsilon` idiom.** The
-SSProve examples name this quantity `prf_epsilon` (`PRF.v:323`) and `prg_epsilon`
-(`StretchPRG.v:167`). Reason for deviating: the entire point of this design is that the
-quantity is not a constant, and `epsilon` is the word that misleads readers into
-thinking it is. `advantage` names what the definition actually computes and matches its
-body, `AdvantageE`.
+**E3 was withdrawn.** See the `indcpa_epsilon` entry above.
 
-### Pre-existing violations noticed while auditing, not fixed here
+### Noticed, out of scope
 
-`advantage_gc_dsdp` (`dsdp_game_code.v:1064`) abbreviates `game_code` to `gc`, which
-strips meaning. `hop_sites`, `zero_hop_prefix`, `count_hops` are fine. Fixing
-`advantage_gc_dsdp` touches a lemma this design already restates, so it is a candidate
-for Phase 5, but it is a separate naming decision and is recorded rather than assumed.
+`advantage_self_zero` (`dsdp_game_code.v:955`) concludes `= 0` and would be `_eq0` in
+mathcomp. `Hunp_leak_S` is a capital-prefixed abbreviation. Neither statement is changed
+by this design, so neither is renamed here.
 
 ## Proof workflow
 
@@ -393,12 +444,12 @@ hand-editing tactic scripts.
   an identifier or a proof body. Phases that are pure deletion or mechanical rename
   (Phases 1, 2, and the deletion half of Phase 7) use `ROCQ_AUDIT_BYPASS=1`.
 - The bundled `audit-quick.sh` `PostToolUse` hook fires on each edited `.v` file. Its
-  findings are advisory, but the 80-column rule (§1) will bite: `indcpa_advantage` terms
+  findings are advisory, but the 80-column rule (§1) will bite: `indcpa_epsilon` terms
   carry full parameter lists, so restated statements need deliberate line breaking.
 
 ## Costs
 
-1. Headline statements grow. `2 * epsilon_cpa AHE` becomes two `indcpa_advantage` terms
+1. Headline statements grow. `2 * epsilon_cpa AHE` becomes two `indcpa_epsilon` terms
    carrying full parameter lists. Generic ladder lemmas carry a `\sum` rather than a
    product, and right-hand sides now embed validity proof terms.
 2. The ladder induction moves from arithmetic on a constant multiple to `bigop`
@@ -407,19 +458,28 @@ hand-editing tactic scripts.
    The claim that these terms are small under a standard assumption moves from a formal
    axiom to a cited sentence, as `StretchPRG.v:165` does.
 4. `idealized_indcpa.v` loses its headline and keeps a rewritten one.
-5. `adv_sim_le` loses package-dependent location conditions.
-6. One headline is deleted outright.
+5. One headline is deleted outright.
+6. Ten identifier families are renamed, several of them cited across `notes/` and one
+   (`dsdp_adv_sim_le`) cited by the blueprint.
 
 Not a cost: no result becomes unreachable. Every current bound is recovered by anyone
-supplying a bound on `indcpa_advantage` for their scheme and adversary class, and the
+supplying a bound on `indcpa_epsilon` for their scheme and adversary class, and the
 current statement is the special case where that bound is a constant.
 
 ## Phases
 
 Each phase builds clean and is committed before the next begins, except where noted.
 
-**Phase 1. Rename.** `adm` to `locs_disjoint`, `dsdp_adm` to `dsdp_locs_disjoint`, arity
-dropped, `adv_sim_le_reduction` adjusted, probe file updated. Independent of the rest.
+**Phase 1. Renames, no statement changes.** Every rename in the naming audit's Renamed
+table except `advantage_idealized_eq1`, which is tied to Phase 7's restatement, and
+`log_id`, whose deletion is Phase 3. So: `adm` to `admissible` (arity unchanged),
+`dsdp_adm` to `dsdp_locs_disjoint` (arity dropped, instantiated as
+`fun LA _ => dsdp_locs_disjoint LA`), the `adv_sim_le` trio to `advantage_sim_le`, the
+`gc_dsdp` trio to `game_code_dsdp`, `dsdp_advantage_derived` and `_leak_S` to
+`dsdp_derived_game_advantage_le`, `dsdp_indcpa_secrecy` to `_le`,
+`dsdp_alice_simulation_secure` to `dsdp_alice_simulation_advantage_le`, probe file
+updated. Blueprint `security.tex:196` cites `dsdp_adv_sim_le` and is edited here. Pure
+renaming, so `ROCQ_AUDIT_BYPASS=1`, and `check_coverage.py` must pass before the commit.
 
 **Phase 2. Delete the statdist headline.** Remove `dsdp_alice_view_statdist_le`, its
 `Require` at `dsdp_main.v:58`, the header index entry at `:36`, `view_real_mass1` and
@@ -428,28 +488,32 @@ blueprint node at `security.tex:224-231` and any `\uses` pointing at
 `thm:alice_view_statdist`. Doing this first shrinks the surface every later phase must
 convert.
 
-**Phase 3. Add `indcpa_advantage` and replace `log_id` with `logVD`.** Definition plus
-the generalized identity, nothing consumes them yet. Build green.
+**Phase 3. Add `indcpa_epsilon` and retire `log_id`.** The definition, plus expanding
+`log_id`'s single call site into `addf_div` / `divr1` / `logDiv`. If that call site reads
+badly, keep `Local Lemma log_invD` instead. Nothing consumes `indcpa_epsilon` yet.
 
-**Phase 4. `adv_sim_le` signature.** `eps : raw_package -> R` in
-`smc/ssprove_ext_simulator.v`, with `dsdp_adv_sim_le` passing a constant function so the
-phase compiles before the bounds change.
+**Phase 4. `advantage_sim_le` signature.** `bound : raw_package -> R` in
+`smc/ssprove_ext_simulator.v`, with `dsdp_advantage_sim_le` passing a constant function
+so the phase compiles before the bounds change.
+
+Phases 5 onward use the post-Phase-1 names.
 
 **Phase 5. Chain I.** Restate `advantage_hop`, `advantage_sum_ladder_le`,
-`advantage_le`, `advantage_gc_dsdp` (`dsdp_game_code.v:886, 930, 973, 1064`) and
-`dsdp_indcpa_secrecy` (`dsdp_game_derivation.v:691`), then `dsdp_advantage_derived`
-(`dsdp_indcpa_advantage.v:63`) and `dsdp_alice_view_advantage_le` (`dsdp_main.v:128`).
+`advantage_le`, `advantage_game_code_dsdp_le` (`dsdp_game_code.v:886, 930, 973, 1064`)
+and `dsdp_indcpa_secrecy_le` (`dsdp_game_derivation.v:691`), then
+`dsdp_derived_game_advantage_le` (`dsdp_indcpa_advantage.v:63`) and
+`dsdp_alice_view_advantage_le` (`dsdp_main.v:128`).
 
 **Phase 6. Chain II.** Same for `advantage_hop_leak_S`,
 `advantage_sum_ladder_le_leak_S`, `advantage_le_leak_S`,
-`dsdp_advantage_derived_leak_S` (`dsdp_indcpa_advantage.v:249, 294, 329, 405`), then
-`dsdp_adv_sim_le` (`dsdp_simulator.v:279`) and the four remaining `dsdp_main.v`
-headlines at `:726, 756, 789, 850`.
+`dsdp_derived_game_advantage_le_leak_S` (`dsdp_indcpa_advantage.v:249, 294, 329, 405`),
+then `dsdp_advantage_sim_le` (`dsdp_simulator.v:279`) and the four remaining
+`dsdp_main.v` headlines at `:726, 756, 789, 850`.
 
 **Phase 7. Delete the axiom.** Remove `epsilon_cpa`, `enc_ind_cpa_real_or_zero`, the
-trailing `Check`, and `epsilon_cpa_idealized_ge1`, and restate
-`advantage_idealized_eq1`. This phase cannot compile until every consumer is converted,
-which is what proves the axiom was never needed.
+trailing `Check`, and `epsilon_cpa_idealized_ge1`, and restate `advantage_idealized_eq1`
+as `indcpa_epsilon_idealized_eq1`. This phase cannot compile until every consumer is
+converted, which is what proves the axiom was never needed.
 
 This phase also edits `blueprint/src/content.tex:476-477`, a `\rocq{}` node citing both
 deleted declarations. `check_coverage.py` fails the moment the declarations disappear,
@@ -489,5 +553,5 @@ intermediate state compilable. Phase 7 failing to compile signals a missed consu
 headline. Unrelated to this work and predating it, but it belongs in any honest account
 of what the development assumes. Worth its own note.
 
-Connecting `indcpa_advantage` at Paillier to DCR is separate work. The interface for it
-is exactly the `indcpa_advantage` terms this design exposes.
+Connecting `indcpa_epsilon` at Paillier to DCR is separate work. The interface for it
+is exactly the `indcpa_epsilon` terms this design exposes.
