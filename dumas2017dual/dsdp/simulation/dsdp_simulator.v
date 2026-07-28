@@ -272,10 +272,12 @@ Qed.
 
 (* dsdp_advantage_sim_le — the output-exposing real game is
    bounded-simulation secure against dsdp_ideal_pkg with simulator
-   dsdp_simulator_pkg over the dsdp_locs_disjoint class, with the constant
-   bound [fun _ => 2 * epsilon_cpa AHE].
-   Average-case scope: the honest inputs v2, v3 are sampled inside the
-   ideal package. *)
+   dsdp_simulator_pkg over the dsdp_locs_disjoint class, with the
+   adversary-indexed bound sending A to the sum of the IND-CPA real-or-zero
+   advantages of its two site reductions, at hop sites 0 and 1.  Average-case
+   scope: the honest inputs v2, v3 are sampled inside the ideal package.
+   Naming: subject-prefixed [dsdp], with [advantage_sim] naming the
+   simulation-security predicate and [_le] the upper bound. *)
 Lemma dsdp_advantage_sim_le
     (cipher_of_chcipher : t_cipher -> cipher AHE)
     (chcipher_of_cipherK : cancel chcipher_of_cipher cipher_of_chcipher) :
@@ -284,7 +286,23 @@ Lemma dsdp_advantage_sim_le
     (real_game_leak_S renc_card rand_of_renc chmsg_of_msg chcipher_of_cipher
        pkey_of_party msg_of_idx rand0 seed)
     dsdp_ideal_pkg dsdp_simulator_pkg
-    (fun _ : raw_package => 2%:R * epsilon_cpa AHE).
+    (fun A : raw_package =>
+       indcpa_epsilon AHE Renc card_renc renc_card rand_of_renc t_msg t_cipher
+         msg_of_chmsg chcipher_of_cipher pkey_of_party
+         (A ∘ denote_game_shim_leak_S renc_card rand_of_renc chmsg_of_msg
+                chcipher_of_cipher cipher_of_chcipher pkey_of_party
+                msg_of_idx rand0 seed
+                (zero_hop_prefix 0
+                   (game_of_trace_seeded dsdp_weight_names
+                      (dsdp_alice_obs_leak_S_seeded card_msg card_renc))) 0)
+     + indcpa_epsilon AHE Renc card_renc renc_card rand_of_renc t_msg t_cipher
+         msg_of_chmsg chcipher_of_cipher pkey_of_party
+         (A ∘ denote_game_shim_leak_S renc_card rand_of_renc chmsg_of_msg
+                chcipher_of_cipher cipher_of_chcipher pkey_of_party
+                msg_of_idx rand0 seed
+                (zero_hop_prefix 1
+                   (game_of_trace_seeded dsdp_weight_names
+                      (dsdp_alice_obs_leak_S_seeded card_msg card_renc))) 1)).
 Proof.
 apply: (advantage_sim_le_from_endpoint
   (Endpoint := zero_game_leak_S renc_card rand_of_renc chmsg_of_msg

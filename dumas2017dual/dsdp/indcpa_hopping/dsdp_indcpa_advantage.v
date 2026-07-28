@@ -4,10 +4,10 @@
    advantage between the real derived game and its all-zero endpoint by the
    sum of the IND-CPA real-or-zero advantages of the two per-hop reductions.
    Its output-exposing analogue [dsdp_derived_game_advantage_le_leak_S] bounds
-   the corresponding distance between the wider seeded games by
-   [2 * epsilon_cpa AHE].  Both are given a concrete homomorphic encryption
-   scheme and the marshalling between its plaintexts/ciphertexts and SSProve
-   choice types.
+   the corresponding distance between the wider seeded games by the sum of the
+   advantages of the two reductions built from the wider denotation.  Both are
+   given a concrete homomorphic encryption scheme and the marshalling between
+   its plaintexts/ciphertexts and SSProve choice types.
 
    The DSDP instance [dsdp_experiment] of [dsdp_indcpa_experiment] and the
    headline [dsdp_alice_view_advantage_le] are in [dsdp_main]; the generic engine
@@ -148,8 +148,8 @@ Qed.
 (* exposes a third (id_Sout_get) reveal-oracle goal at every rung,         *)
 (* discharged exactly as the id_v2_get goal.  Each *_leak_S lemma below *)
 (* mirrors the Part I lemma of the same name with id_Sout_get carried      *)
-(* alongside id_v2_get, and states its bound as a scalar multiple of    *)
-(* epsilon_cpa AHE where Part I sums per-reduction indcpa_epsilon terms.*)
+(* alongside id_v2_get, and states its bound as the same sum of         *)
+(* per-reduction indcpa_epsilon terms, over the wider denotation.        *)
 (* ------------------------------------------------------------------ *)
 
 Section dsdp_game_code_leak_S.
@@ -264,10 +264,11 @@ simplify_eq_rel m.
 Qed.
 
 (* advantage_hop_leak_S — one rung of the output-exposing hybrid ladder costs at
-   most epsilon_cpa AHE.  Same Advantage_triangle_chain / Advantage_link
-   skeleton as advantage_hop with the leak_S endpoints, closed by
-   enc_ind_cpa_real_or_zero where advantage_hop stops at the per-reduction
-   indcpa_epsilon. *)
+   most the IND-CPA real-or-zero advantage of the reduction
+   [A ∘ denote_game_shim_leak_S (zero_hop_prefix i gc) i].
+   Naming: [advantage] names the AdvantageE being bounded, [hop] the single
+   ladder rung and [_leak_S] the output-exposing denotation, in the SSProve
+   advantage-lemma convention of the Part I ladder. *)
 Lemma advantage_hop_leak_S
     (LA : Locations) (A : raw_package) (gc : game_code) (i : nat)
     (A_valid : ValidPackage LA (game_iface_leak_S t_msg t_cipher) A_export A)
@@ -283,8 +284,12 @@ Lemma advantage_hop_leak_S
        pkey_of_party msg_of_idx rand0 seed (zero_hop_prefix i gc))
     (denote_game_leak_S renc_card rand_of_renc chmsg_of_msg chcipher_of_cipher
        pkey_of_party msg_of_idx rand0 seed (zero_hop_prefix i.+1 gc)) A
-    <= epsilon_cpa AHE.
+    <= indcpa_epsilon AHE Renc card_renc renc_card rand_of_renc t_msg t_cipher
+         msg_of_chmsg chcipher_of_cipher pkey_of_party
+         (A ∘ denote_game_shim_leak_S (zero_hop_prefix i gc) i).
 Proof.
+(* Same Advantage_triangle_chain / Advantage_link skeleton as advantage_hop,
+   with the leak_S endpoints. *)
 have triangle_ineq :=
   Advantage_triangle_chain
     (denote_game_leak_S renc_card rand_of_renc chmsg_of_msg chcipher_of_cipher
@@ -300,20 +305,16 @@ have triangle_ineq :=
 cbn [advantage_sum] in triangle_ineq.
 rewrite ?addrA in triangle_ineq.
 apply: (le_trans triangle_ineq).
-clear triangle_ineq.
-erewrite hop_equiv_real_leak_S by ssprove_valid.
-erewrite hop_equiv_zero_leak_S by ssprove_valid.
-rewrite GRing.add0r GRing.addr0.
-rewrite -Advantage_link.
-apply: (enc_ind_cpa_real_or_zero AHE Renc card_renc renc_card
-          rand_of_renc t_msg t_cipher msg_of_chmsg
-          chcipher_of_cipher pkey_of_party).
+erewrite hop_equiv_real_leak_S, hop_equiv_zero_leak_S by ssprove_valid.
+by rewrite GRing.add0r GRing.addr0 -Advantage_link.
 Qed.
 
 (* advantage_sum_ladder_le_leak_S — a contiguous block of n+1 output-exposing
-   ladder rungs costs at most n+1 copies of epsilon_cpa AHE.  Same telescoping
-   as advantage_sum_ladder_le, splitting a scalar multiple of epsilon_cpa AHE
-   in place of peeling an ordinal sum of per-reduction advantages. *)
+   ladder rungs costs at most the sum of the IND-CPA advantages of the n+1
+   reductions [A ∘ denote_game_shim_leak_S (zero_hop_prefix (start + l) gc)
+   (start + l)].
+   Naming: advantage_sum_<shape>_le names a telescoping bound on advantage_sum,
+   with [_leak_S] the output-exposing denotation. *)
 Lemma advantage_sum_ladder_le_leak_S
     (LA : Locations) (A : raw_package) (gc : game_code)
     (A_valid : ValidPackage LA (game_iface_leak_S t_msg t_cipher) A_export A)
@@ -333,24 +334,32 @@ Lemma advantage_sum_ladder_le_leak_S
             (zero_hop_prefix l gc) : raw_package) | l <- iota start.+1 n]
     (denote_game_leak_S renc_card rand_of_renc chmsg_of_msg chcipher_of_cipher
        pkey_of_party msg_of_idx rand0 seed (zero_hop_prefix (start + n.+1) gc)) A
-    <= n.+1 %:R * epsilon_cpa AHE.
+    <= \sum_(l < n.+1)
+         indcpa_epsilon AHE Renc card_renc renc_card rand_of_renc t_msg t_cipher
+           msg_of_chmsg chcipher_of_cipher pkey_of_party
+           (A ∘ denote_game_shim_leak_S (zero_hop_prefix (start + l) gc)
+                  (start + l)).
 Proof.
+(* Induction on the rung count: the step peels the leading rung off both
+   advantage_sum and the ordinal sum (big_ord_recl), the endpoint and summand
+   indices realigning by addSnnS. *)
 elim=> [|n IHn] start.
-- cbn [iota map advantage_sum]. rewrite addn1 mul1r.
-  by apply: advantage_hop_leak_S.
-- cbn [iota map advantage_sum]. rewrite mulrSr mulrDl mul1r addrC. apply: lerD.
-  + rewrite -addSnnS. exact: IHn.
-  + by apply: advantage_hop_leak_S.
+- cbn [iota map advantage_sum]; rewrite big_ord1 addn0 addn1.
+  exact: advantage_hop_leak_S.
+- cbn [iota map advantage_sum]; rewrite big_ord_recl addn0.
+  apply: lerD; first exact: advantage_hop_leak_S.
+  rewrite -addSnnS; under eq_bigr do rewrite -addSnnS.
+  exact: IHn.
 Qed.
 
 (* advantage_le_leak_S — the output-exposing counterpart of advantage_le over
    the same hybrid ladder: any adversary's advantage distinguishing the
-   output-exposing real game from its all-zero endpoint is at most
-   [size (hop_sites gc)] copies of epsilon_cpa AHE, the scalar form of
-   advantage_le's per-reduction sum.
-   The empty ladder collapses to advantage_self_zero (reused from Part I,
-   generic over raw_package); the non-empty ladder telescopes through
-   advantage_sum_ladder_le_leak_S. *)
+   output-exposing real game from its all-zero endpoint is at most the sum,
+   over the [size (hop_sites gc)] encryption-hop sites, of the IND-CPA
+   real-or-zero advantage of the site reduction
+   [A ∘ denote_game_shim_leak_S (zero_hop_prefix l gc) l].
+   Naming: [advantage] names the AdvantageE being bounded, [_le] the upper
+   bound and [_leak_S] the output-exposing denotation. *)
 Lemma advantage_le_leak_S
     (LA : Locations) (A : raw_package) (gc : game_code)
     (A_valid : ValidPackage LA (game_iface_leak_S t_msg t_cipher) A_export A)
@@ -366,11 +375,17 @@ Lemma advantage_le_leak_S
        pkey_of_party msg_of_idx rand0 seed (all_real gc))
     (denote_game_leak_S renc_card rand_of_renc chmsg_of_msg chcipher_of_cipher
        pkey_of_party msg_of_idx rand0 seed (all_zero gc)) A
-    <= (size (hop_sites gc))%:R * epsilon_cpa AHE.
+    <= \sum_(l < size (hop_sites gc))
+         indcpa_epsilon AHE Renc card_renc renc_card rand_of_renc t_msg t_cipher
+           msg_of_chmsg chcipher_of_cipher pkey_of_party
+           (A ∘ denote_game_shim_leak_S (zero_hop_prefix l gc) l).
 Proof.
+(* The empty ladder collapses to advantage_self_zero (reused from Part I,
+   generic over raw_package); the non-empty ladder telescopes through
+   advantage_sum_ladder_le_leak_S. *)
 rewrite /all_real /all_zero /hop_sites size_iota.
 case Hch: (count_hops gc) => [|m].
-- by rewrite advantage_self_zero mul0r.
+- by rewrite advantage_self_zero big_ord0.
 - have tri :=
     Advantage_triangle_chain
       (denote_game_leak_S renc_card rand_of_renc chmsg_of_msg chcipher_of_cipher
@@ -382,10 +397,7 @@ case Hch: (count_hops gc) => [|m].
          pkey_of_party msg_of_idx rand0 seed (zero_hop_prefix m.+1 gc) : raw_package) A.
   apply: (le_trans tri).
   rewrite Hch subn1 succnK.
-  apply: advantage_sum_ladder_le_leak_S.
-  + exact: A_disj_state.
-  + exact: A_disj_ore.
-  + exact: A_disj_oze.
+  exact: advantage_sum_ladder_le_leak_S.
 Qed.
 
 End dsdp_game_code_leak_S.
@@ -423,10 +435,11 @@ Definition zero_game_leak_S
 (* dsdp_derived_game_advantage_le_leak_S — the output-exposing analogue of
    [dsdp_derived_game_advantage_le]: any valid adversary distinguishing the
    output-exposing real game from its all-zero endpoint has advantage at most
-   [2 * epsilon_cpa AHE].  The output cell adds the common id_Sout_get oracle but
-   no encryption hop, so the ladder length is Part I's; [advantage_le_leak_S]
-   gives [size (hop_sites …) * epsilon_cpa AHE] and the hop count reduces to 2 by
-   [count_hops_game_of_trace_seeded] and [dsdp_obs_hops_leak_S_seeded]. *)
+   the sum of the IND-CPA real-or-zero advantages of the two site reductions,
+   at hop sites 0 and 1.
+   Naming: subject-prefixed [dsdp], with [derived_game] naming the game pair the
+   advantage is measured on, [_le] the upper bound and [_leak_S] the
+   output-exposing denotation. *)
 Lemma dsdp_derived_game_advantage_le_leak_S
     (AHE : AHEncType) (Renc : finType) (card_renc : nat)
     (renc_card : #|Renc| = card_renc) (rand_of_renc : Renc -> rand AHE)
@@ -452,16 +465,37 @@ Lemma dsdp_derived_game_advantage_le_leak_S
        pkey_of_party msg_of_idx rand0 seed)
     (zero_game_leak_S renc_card rand_of_renc chmsg_of_msg chcipher_of_cipher
        pkey_of_party msg_of_idx rand0 seed)
-    A <= 2%:R * epsilon_cpa AHE.
+    A
+    <= indcpa_epsilon AHE Renc card_renc renc_card rand_of_renc t_msg t_cipher
+         msg_of_chmsg chcipher_of_cipher pkey_of_party
+         (A ∘ denote_game_shim_leak_S renc_card rand_of_renc chmsg_of_msg
+                chcipher_of_cipher cipher_of_chcipher pkey_of_party
+                msg_of_idx rand0 seed
+                (zero_hop_prefix 0
+                   (game_of_trace_seeded dsdp_weight_names
+                      (dsdp_alice_obs_leak_S_seeded card_msg card_renc))) 0)
+     + indcpa_epsilon AHE Renc card_renc renc_card rand_of_renc t_msg t_cipher
+         msg_of_chmsg chcipher_of_cipher pkey_of_party
+         (A ∘ denote_game_shim_leak_S renc_card rand_of_renc chmsg_of_msg
+                chcipher_of_cipher cipher_of_chcipher pkey_of_party
+                msg_of_idx rand0 seed
+                (zero_hop_prefix 1
+                   (game_of_trace_seeded dsdp_weight_names
+                      (dsdp_alice_obs_leak_S_seeded card_msg card_renc))) 1).
 Proof.
+(* The output cell adds the common id_Sout_get oracle but no encryption hop, so
+   the ladder length is Part I's: advantage_le_leak_S gives the per-site sum and
+   the hop count reduces to 2 by count_hops_game_of_trace_seeded and
+   dsdp_obs_hops_leak_S_seeded. *)
 rewrite /real_game_leak_S /zero_game_leak_S.
-have Hsz : size (hop_sites
-    (game_of_trace_seeded dsdp_weight_names (dsdp_alice_obs_leak_S_seeded card_msg card_renc))) = 2
+have Hsz : size (hop_sites (game_of_trace_seeded dsdp_weight_names
+    (dsdp_alice_obs_leak_S_seeded card_msg card_renc))) = 2
   by rewrite /hop_sites size_iota count_hops_game_of_trace_seeded
              dsdp_obs_hops_leak_S_seeded.
-have H := advantage_le_leak_S chcipher_of_cipherK chmsg_of_msgK msg_of_idx rand0 seed
-  (game_of_trace_seeded dsdp_weight_names (dsdp_alice_obs_leak_S_seeded card_msg card_renc))
+have H := advantage_le_leak_S chcipher_of_cipherK chmsg_of_msgK msg_of_idx rand0
+  seed (game_of_trace_seeded dsdp_weight_names
+    (dsdp_alice_obs_leak_S_seeded card_msg card_renc))
   A_valid A_disj_state A_disj_ore A_disj_oze.
-rewrite Hsz in H.
+rewrite Hsz big_ord_recl big_ord1 in H.
 exact: H.
 Qed.
