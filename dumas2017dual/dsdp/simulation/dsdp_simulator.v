@@ -272,8 +272,8 @@ Qed.
 
 (* dsdp_advantage_sim_le — the output-exposing real game is
    bounded-simulation secure against dsdp_ideal_pkg with simulator
-   dsdp_simulator_pkg over the dsdp_locs_disjoint class, with bound
-   [2 * epsilon_cpa AHE].
+   dsdp_simulator_pkg over the dsdp_locs_disjoint class, with the constant
+   bound [fun _ => 2 * epsilon_cpa AHE].
    Average-case scope: the honest inputs v2, v3 are sampled inside the
    ideal package. *)
 Lemma dsdp_advantage_sim_le
@@ -284,7 +284,7 @@ Lemma dsdp_advantage_sim_le
     (real_game_leak_S renc_card rand_of_renc chmsg_of_msg chcipher_of_cipher
        pkey_of_party msg_of_idx rand0 seed)
     dsdp_ideal_pkg dsdp_simulator_pkg
-    (2%:R * epsilon_cpa AHE).
+    (fun _ : raw_package => 2%:R * epsilon_cpa AHE).
 Proof.
 apply: (advantage_sim_le_from_endpoint
   (Endpoint := zero_game_leak_S renc_card rand_of_renc chmsg_of_msg
