@@ -1,13 +1,13 @@
 (** IND-CPA real-or-zero hypothesis as an SSProve reduction-package interface.
 
     Per the audited plan at ~/.claude/plans/sprightly-finding-robin.md, Task 05.
-    The file declares the IND-CPA real-or-zero hypothesis
-    [enc_ind_cpa_real_or_zero] for the AHE scheme used by DSDP.  Two oracle
-    packages [oracle_encrypt_real] and [oracle_encrypt_zero] expose a single
+    The file defines the IND-CPA real-or-zero advantage functional
+    [indcpa_epsilon] for the AHE scheme used by DSDP.  Two oracle packages
+    [oracle_encrypt_real] and [oracle_encrypt_zero] expose a single
     encryption operation parametric in [party_id]: the real oracle returns
     [Enc pk_p m r] for a fresh [r], the zero oracle returns [Enc pk_p 0 r']
-    for a fresh [r'].  The hypothesis bounds the [AdvantageE] of any adversary
-    discriminating these two oracles by [epsilon_cpa AHE].
+    for a fresh [r'].  [indcpa_epsilon] is the [AdvantageE] of a given
+    reduction package discriminating these two oracles.
 
     Design commitments (Rocq audit, plan section "Design commitments"):
     - Commitment 1: encryption randomness is a finType ([Renc]), with an
@@ -16,12 +16,12 @@
     - Commitment 5: the real-type binder for [AdvantageE] is pinned to
       [SSProve.Crypt.Axioms.R] via a [Notation R].
 
-    The hypothesis ships with no proof: it is the cryptographic assumption
-    that replaces the false IT idealisation [E_enc_inde] from
-    [homomorphic_encryption.v].  Downstream consumers (Tasks 06-08) supply
-    concrete adversaries via [predictor_via_oracle_charlie] and [predictor_via_oracle_bob] and
-    feed them through this hypothesis using the SSProve [ssprove triangle]
-    idiom from [theories/Crypt/examples/PRF.v]. *)
+    [indcpa_epsilon] carries no bound of its own: it names the advantage that
+    replaces the false IT idealisation [E_enc_inde] from
+    [homomorphic_encryption.v].  Downstream consumers supply concrete
+    reductions via [predictor_via_oracle_charlie] and
+    [predictor_via_oracle_bob] and chain them with the SSProve
+    [ssprove triangle] idiom from [theories/Crypt/examples/PRF.v]. *)
 
 From HB Require Import structures.
 From mathcomp Require Import all_boot all_order all_algebra reals.
@@ -49,9 +49,9 @@ Import PackageNotation.
     Kind: canonical.
     Why: Design Commitment 5 of the Rocq audit.  [AdvantageE] returns a value
     in the [R : realType] declared at [SSProve.Crypt.Axioms.R]; pinning it
-    here keeps the [epsilon_cpa : R] and the [AdvantageE _ _ _ <= epsilon_cpa]
-    comparison in the same realType.
-    Used by: enc_ind_cpa_real_or_zero, downstream IND-CPA hops. *)
+    here keeps [indcpa_epsilon : R] and every comparison against it in the
+    same realType.
+    Used by: indcpa_epsilon, downstream IND-CPA hops. *)
 Notation R := SSProve.Crypt.Axioms.R.
 
 Section indcpa_ror.
@@ -144,7 +144,7 @@ Definition id_oracle_encrypt : nat := 42.
     two packages to share an export interface, otherwise their composition
     with the adversary is ill-typed.  This is the shared signature.
     Used by: oracle_encrypt_real_pkg, oracle_encrypt_zero_pkg,
-    enc_ind_cpa_real_or_zero. *)
+    indcpa_epsilon. *)
 Definition oracle_encrypt_iface : Interface :=
   [interface
     #val #[ id_oracle_encrypt ] : 'nat × msg → cipher
@@ -169,7 +169,7 @@ Definition party_of_nat (n : nat) : party_id := nat_to_party_id n.
     Why: one half of the IND-CPA real-or-zero hypothesis.  Models the real
     encryption oracle that the IND-CPA reduction uses to populate the
     ciphertext slots of the DSDP protocol view.
-    Used by: oracle_encrypt_real, enc_ind_cpa_real_or_zero. *)
+    Used by: oracle_encrypt_real, indcpa_epsilon. *)
 Definition oracle_encrypt_real_pkg :
   package
     [interface]
@@ -194,7 +194,7 @@ Definition oracle_encrypt_real_pkg :
     Why: the other half of the IND-CPA real-or-zero hypothesis.  Models
     the ideal world in which every ciphertext slot is independent of the
     plaintext modulo the encryption-randomness law.
-    Used by: oracle_encrypt_zero, enc_ind_cpa_real_or_zero. *)
+    Used by: oracle_encrypt_zero, indcpa_epsilon. *)
 Definition oracle_encrypt_zero_pkg :
   package
     [interface]
@@ -215,16 +215,16 @@ Definition oracle_encrypt_zero_pkg :
     [raw_package], the form [AdvantageE] expects.
     Kind: canonical.
     Why: [AdvantageE] in [pkg_advantage.v:79] is stated over [raw_package],
-    so we project the package to its raw form for use in the hypothesis.
-    Used by: enc_ind_cpa_real_or_zero. *)
+    so we project the package to its raw form.
+    Used by: indcpa_epsilon. *)
 Definition oracle_encrypt_real : raw_package :=
   pack oracle_encrypt_real_pkg.
 
 (** oracle_encrypt_zero — the zero-encryption oracle as a [raw_package].
     Kind: canonical.
     Why: companion to [oracle_encrypt_real] for the [AdvantageE] call in
-    [enc_ind_cpa_real_or_zero].
-    Used by: enc_ind_cpa_real_or_zero. *)
+    [indcpa_epsilon].
+    Used by: indcpa_epsilon. *)
 Definition oracle_encrypt_zero : raw_package :=
   pack oracle_encrypt_zero_pkg.
 
@@ -248,50 +248,9 @@ Definition indcpa_epsilon
        t_msg t_cipher chcipher_of_cipher pkey_of_party)
     reduction.
 
-(** epsilon_cpa AHE — the IND-CPA real-or-zero advantage bound of [AHE].
-    Kind: canonical.
-    Why per-scheme: the hypothesis below quantifies over every [AHEncType].
-    A bare constant bounds them all at once, including schemes that return
-    the plaintext, whose advantage is 1 ([epsilon_cpa_idealized_ge1],
-    [idealized/idealized_indcpa.v]); it is then forced to
-    [1 <= epsilon_cpa], leaving every [_ <= 2 * epsilon_cpa] bound vacuous.
-    Used by: enc_ind_cpa_real_or_zero, downstream advantage_bound theorems. *)
-Parameter epsilon_cpa : AHEncType -> reals.Real.sort R.
-
-(** enc_ind_cpa_real_or_zero — the IND-CPA real-or-zero hypothesis.
-    For every AHE scheme, encryption randomness carrier, message and
-    ciphertext carriers, public-key map, and every adversary [reduction],
-    the SSProve advantage of distinguishing [oracle_encrypt_real] from
-    [oracle_encrypt_zero] is at most [epsilon_cpa AHE].
-    Kind: main.
-    Why: the realistic encryption assumption replacing the false IT
-    idealisation [E_enc_inde] from [homomorphic_encryption.v:281].  Stated
-    at the top level (outside the Section) so Section parameters are
-    universally quantified and the hypothesis is visible to downstream
-    files via [Require Import indcpa_ror.].
-    Used by: dsdp_game_code.v:908 (advantage_hop),
-    dsdp_indcpa_advantage.v:284 (advantage_hop_leak_S). *)
-Axiom enc_ind_cpa_real_or_zero :
-  forall (AHE : AHEncType) (Renc : finType) (index_renc : nat)
-         (renc_card : #|Renc| = index_renc)
-         (rand_of_renc : Renc -> rand AHE)
-         (t_msg t_cipher : choice_type)
-         (msg_of_chmsg : t_msg -> plain AHE)
-         (chcipher_of_cipher : cipher AHE -> t_cipher)
-         (pkey_of_party : party_id -> pub_key AHE)
-         (reduction : raw_package),
-    AdvantageE
-      (oracle_encrypt_real AHE Renc index_renc renc_card rand_of_renc
-         t_msg t_cipher msg_of_chmsg chcipher_of_cipher pkey_of_party)
-      (oracle_encrypt_zero AHE Renc index_renc renc_card rand_of_renc
-         t_msg t_cipher chcipher_of_cipher pkey_of_party)
-      reduction <= epsilon_cpa AHE.
-
 (** Task 05 verification: both oracle packages type-check as SSProve
-    [package _ _ _], and the IND-CPA hypothesis type-checks against
-    [AdvantageE] from [pkg_advantage.v]. *)
+    [package _ _ _]. *)
 Check oracle_encrypt_real.
 Check oracle_encrypt_zero.
 Check oracle_encrypt_real_pkg.
 Check oracle_encrypt_zero_pkg.
-Check @enc_ind_cpa_real_or_zero.

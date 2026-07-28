@@ -471,16 +471,14 @@ that a distinguisher $A$ returns true against $G_0$ and against $G_1$. The chapt
 rests it on one assumption, the single-hop IND-CPA bound, and telescopes the
 ladder of endpoints into a bound of the hop count times that assumption.
 
-\begin{definition}[Single-hop IND-CPA bound]
+\begin{definition}[Single-hop IND-CPA advantage]
   \label{def:indcpa_assumption}
-  \rocq{infotheo.homomorphic_encryption.indcpa_ror.epsilon_cpa,
-       infotheo.homomorphic_encryption.indcpa_ror.enc_ind_cpa_real_or_zero}
+  \rocq{infotheo.homomorphic_encryption.indcpa_ror.indcpa_epsilon}
   \rocqok
-  A scheme $E$'s assumed IND-CPA real-or-zero advantage bound. For every scheme
-  and every adversary, the advantage between the real-encryption oracle and the
-  zero-encryption oracle is at most $\epscpaof{E}$. This is the one cryptographic
-  assumption the chain rests on.
-  \[ \forall E,\quad \AdvE(\Oreal, \Ozero, A) \le \epscpaof{E} \]
+  The IND-CPA real-or-zero advantage of a reduction $R$ against a scheme $E$:
+  the \ssprove{} advantage of $R$ between the real-encryption oracle and the
+  zero-encryption oracle of $E$.
+  \[ \epscpaof{E,R} \;=\; \AdvE(\Oreal, \Ozero, R) \]
 \end{definition}
 
 \begin{definition}[One-hop oracle routing]

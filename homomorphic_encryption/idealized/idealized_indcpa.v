@@ -1,10 +1,9 @@
-(** The IND-CPA real-or-zero advantage bound of the idealized scheme.
+(** The IND-CPA real-or-zero advantage of the idealized scheme.
 
     [idealized_enc pk m r = m] returns its plaintext, so a single oracle query
     separates [oracle_encrypt_real] from [oracle_encrypt_zero] with certainty
-    and [enc_ind_cpa_real_or_zero] forces [1 <= epsilon_cpa] at that scheme.
-    Collapsing [epsilon_cpa] back to one constant shared by every [AHEncType]
-    therefore contradicts any bound below 1. *)
+    and [indcpa_epsilon] at that scheme and that adversary equals 1.  No
+    constant below 1 bounds [indcpa_epsilon] uniformly in [AHEncType]. *)
 
 From HB Require Import structures.
 From mathcomp Require Import all_boot all_order all_algebra reals distr realsum.
@@ -37,9 +36,9 @@ Notation R := SSProve.Crypt.Axioms.R.
 (** idealized_ahe_f2 — the idealized scheme of [idealized_ahe.v] over the
     plaintext space ['F_2], packed as an [AHEncType].
     Kind: canonical.
-    Why: [enc_ind_cpa_real_or_zero] and [epsilon_cpa] are indexed by an
-    [AHEncType]; ['F_2] is the smallest plaintext space with [1 != 0].
-    Used by: epsilon_cpa_idealized_ge1. *)
+    Why: [indcpa_epsilon] is indexed by an [AHEncType]; ['F_2] is the
+    smallest plaintext space with [1 != 0].
+    Used by: indcpa_epsilon_idealized_eq1. *)
 Definition idealized_ahe_f2 : AHEncType :=
   @AHEnc.Pack (Idealized_HETypes 'F_2)
     (@AHEnc.Class (Idealized_HETypes 'F_2)
@@ -72,7 +71,7 @@ Proof. exact: card_ord. Qed.
 (** idealized_oracle_real — the IND-CPA real oracle of [indcpa_ror.v]
     instantiated at [idealized_ahe_f2], ['bool] messages and ciphertexts.
     Kind: canonical.
-    Used by: advantage_idealized_eq1, epsilon_cpa_idealized_ge1. *)
+    Used by: indcpa_epsilon_idealized_eq1. *)
 Definition idealized_oracle_real : raw_package :=
   oracle_encrypt_real idealized_ahe_f2 'I_1 1 idealized_renc_card
     idealized_rand_of_renc 'bool 'bool idealized_msg_of_chmsg
@@ -81,7 +80,7 @@ Definition idealized_oracle_real : raw_package :=
 (** idealized_oracle_zero — the IND-CPA zero oracle of [indcpa_ror.v]
     instantiated at [idealized_ahe_f2], ['bool] messages and ciphertexts.
     Kind: canonical.
-    Used by: advantage_idealized_eq1, epsilon_cpa_idealized_ge1. *)
+    Used by: indcpa_epsilon_idealized_eq1. *)
 Definition idealized_oracle_zero : raw_package :=
   oracle_encrypt_zero idealized_ahe_f2 'I_1 1 idealized_renc_card
     idealized_rand_of_renc 'bool 'bool idealized_chcipher_of_cipher
@@ -92,20 +91,21 @@ Definition idealized_oracle_zero : raw_package :=
     Kind: main.
     Why: [idealized_oracle_real] answers [enc _ 1 _ = 1], marshalled to [true];
     [idealized_oracle_zero] answers [enc _ 0 _ = 0], marshalled to [false].
-    Used by: advantage_idealized_eq1. *)
+    Used by: indcpa_epsilon_idealized_eq1. *)
 Definition idealized_distinguisher_pkg :
   package (oracle_encrypt_iface 'bool 'bool) A_export :=
   [package emptym ;
     #def #[ 0%N ] (_ : 'unit) : 'bool
     {
-      #import {sig #[ id_oracle_encrypt ] : 'nat × 'bool → 'bool } as call_enc ;;
+      #import {sig #[ id_oracle_encrypt ] : 'nat × 'bool → 'bool }
+        as call_enc ;;
       c ← call_enc (0%N, true) ;;
       ret c
     }
   ].
 
-(** idealized_distinguisher — [idealized_distinguisher_pkg] as a [raw_package],
-    the form [AdvantageE] expects. *)
+(** idealized_distinguisher — [idealized_distinguisher_pkg] as a
+    [raw_package], the form [AdvantageE] expects. *)
 Definition idealized_distinguisher : raw_package :=
   pack idealized_distinguisher_pkg.
 
@@ -138,24 +138,16 @@ rewrite /idealized_chcipher_of_cipher /= Pr_fst_sample.
 by rewrite Pr_fst_ret dletC pr_predT dunit1E /= mulr0.
 Qed.
 
-(** advantage_idealized_eq1 — the distinguisher separates the two idealized
-    oracles with advantage exactly 1. *)
-Lemma advantage_idealized_eq1 :
-  AdvantageE idealized_oracle_real idealized_oracle_zero
+(** indcpa_epsilon_idealized_eq1 — the IND-CPA real-or-zero advantage of the
+    idealized scheme at [idealized_distinguisher] is 1.
+    Naming: subject-prefixed by [indcpa_epsilon]; [idealized] names the
+    scheme instance and [eq1] the value it takes. *)
+Lemma indcpa_epsilon_idealized_eq1 :
+  indcpa_epsilon idealized_ahe_f2 'I_1 1 idealized_renc_card
+    idealized_rand_of_renc 'bool 'bool idealized_msg_of_chmsg
+    idealized_chcipher_of_cipher idealized_pkey_of_party
     idealized_distinguisher = 1%R.
 Proof.
-by rewrite /AdvantageE pr_idealized_real pr_idealized_zero subr0 normr1.
-Qed.
-
-(** epsilon_cpa_idealized_ge1 — the IND-CPA real-or-zero bound of the idealized
-    scheme is at least 1.
-    Kind: main.
-    Why: pins [epsilon_cpa] as a per-scheme quantity.  One constant shared by
-    every [AHEncType] would have to bound the idealized scheme too, and then
-    every [_ <= 2 * epsilon_cpa] bound is vacuous.
-    Used by: regression guard on the [epsilon_cpa] signature. *)
-Lemma epsilon_cpa_idealized_ge1 : 1 <= epsilon_cpa idealized_ahe_f2.
-Proof.
-rewrite -advantage_idealized_eq1 /idealized_oracle_real /idealized_oracle_zero.
-exact: enc_ind_cpa_real_or_zero.
+by rewrite /indcpa_epsilon /AdvantageE pr_idealized_real pr_idealized_zero
+  subr0 normr1.
 Qed.
