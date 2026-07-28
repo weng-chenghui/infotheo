@@ -5,14 +5,14 @@
 % scalar-product output S, builds the absolute-Pr guessing layer on the DERIVED
 % endpoint game, transports the Infotheo fiber 1/m to that game by reflecting
 % the experiment's samples and framing out the opaque predictor, and composes
-% with the Part I 2*epsilon_cpa.
+% with the Part I two-reduction IND-CPA sum.
 %
 % Colour / status convention (same as content.tex):
 %   \rocqok + \rocq{...}  green : EXISTS in the formalization, cited as a black box.
 % The whole output-channel chain is committed and machine-checked; every node is
 % green.  Chapter ref{ch:deriving_output}: the derivation extension and the
-% S-exposing games + 2*epsilon_cpa.  Chapter ref{ch:guessing_experiment}: the
-% guessing experiment and the connector.  Chapter ref{ch:it_bound}: the footprint
+% S-exposing games + the two-reduction sum.  Chapter ref{ch:guessing_experiment}:
+% the guessing experiment and the connector.  Chapter ref{ch:it_bound}: the footprint
 % frame, the sample reflection, the output-determined guess kernel and
 % guess _|_ V2 | S, the route-F fiber bound, and the triangle composition.
 %
@@ -94,18 +94,21 @@ forming an advantage.
 \textbf{The two legs and their join.} The output channel splits into one
 absolute leg and one relational leg, joined by the triangle inequality. The
 absolute leg bounds the all-zero endpoint's standalone probability by $1/m$
-(Theorem~\ref{thm:guess_sdistr_success_le}); the relational leg keeps
-the real-to-zero distance inside the advantage world at $2\,\epscpa$
-(Lemma~\ref{lem:guess_advantage_le}). One term is a single-game probability
-and the other a difference of two, which is why the triangle inequality is what
-joins them (Theorem~\ref{thm:dsdp_alice_secrecy_leak_S}):
+(Theorem~\ref{thm:guess_sdistr_success_le}); the relational leg keeps the
+real-to-zero distance inside the advantage world at $\varepsilon_0+\varepsilon_1$
+(Lemma~\ref{lem:guess_advantage_le}), where
+$\varepsilon_i = \epscpaof{E,\, \text{pred} \circ \shimof{i}}$ is the IND-CPA
+advantage against DSDP's scheme $E$ of the reduction the predictor induces on
+encryption hop $i$. One term is a single-game probability and the other a
+difference of two, which is why the triangle inequality is what joins them
+(Theorem~\ref{thm:dsdp_alice_secrecy_leak_S}):
 \[ \underbrace{\Prexp(\real_S)}_{\text{absolute}}
    \;\le\;
    \underbrace{\Prexp(\zero_S)}_{\le\, 1/m\ \text{(absolute leg)}}
    \;+\;
    \underbrace{\bigl|\,\Prexp(\real_S) - \Prexp(\zero_S)\,\bigr|}
-             _{\le\, 2\,\epscpa\ \text{(relational leg)}}
-   \;\le\; 1/m + 2\,\epscpa. \]
+             _{\le\, \varepsilon_0+\varepsilon_1\ \text{(relational leg)}}
+   \;\le\; 1/m + \varepsilon_0 + \varepsilon_1. \]
 
 \chapter{Extending the derivation to Alice's decryption}
 \label{ch:deriving_output}
@@ -119,8 +122,8 @@ output reception, lowers it to a dedicated output write, and denotes it. One thi
 the derivation cannot supply is the decrypted value itself, since the received
 aggregate is a party's response, not a fresh sample; so the live endpoint games
 write $S$ in fiber form directly, the value the decrypt computes by the protocol's
-correctness. Adjoining $S$ adds no encryption hop, so the Part~I bound
-$2\,\epscpaof{E}$ carries over unchanged.
+correctness. Adjoining $S$ adds no encryption hop, so the Part~I two-reduction
+bound carries over unchanged.
 
 \begin{definition}[Output reception]
   \label{def:alice_obs_output}
@@ -209,9 +212,10 @@ $2\,\epscpaof{E}$ carries over unchanged.
   \rocqok
   \uses{def:games_leak_s,thm:dsdp_secure}
   The advantage between the output-exposing real and all-zero games is at most
-  $2\,\epscpa$, the Part~I bound (Theorem~\ref{thm:dsdp_secure}). The $S$-oracle
-  rides the hybrid ladder exactly as the $V_2$-oracle does.
-  \[ \AdvE(\,\real_S,\ \zero_S,\ A\,) \le 2\,\epscpa \]
+  the sum of the IND-CPA advantages of the adversary's two hop reductions, the
+  Part~I bound (Theorem~\ref{thm:dsdp_secure}). The $S$-oracle rides the hybrid
+  ladder exactly as the $V_2$-oracle does.
+  \[ \AdvE(\,\real_S,\ \zero_S,\ A\,) \le \epshopsum{A} \]
 \end{lemma}
 
 \chapter{The output-secrecy guessing experiment}
@@ -304,7 +308,8 @@ $(\guess,V_2)$ joint. This chapter reflects the experiment's samples into an
 explicit distribution, proves that conditional independence through an
 output-determined guess kernel, instantiates the route-F fiber bound, and pushes
 the resulting $1/m$ through the connector and the computational distance to the
-full bound $1/m + 2\,\epscpa$.
+full bound $1/m + \varepsilon_0 + \varepsilon_1$, with $\varepsilon_0$ and
+$\varepsilon_1$ the IND-CPA advantages of the predictor's two hop reductions.
 
 \section{Reused Infotheo facts (route F)}
 
@@ -512,11 +517,13 @@ full bound $1/m + 2\,\epscpa$.
   %   (eapply, since apply: delta-unfolds the linked games).
   The success-probability difference on the real and all-zero games equals the
   advantage of the challenger-wrapped predictor, a valid adversary, and that
-  advantage is at most $2\,\epscpa$ by the Part~II computational distance
+  advantage is at most the sum of the IND-CPA advantages of the predictor's two
+  hop reductions by the Part~II computational distance
   (Lemma~\ref{lem:dsdp_advantage_derived_leak_S}). The equality is one lemma and
   the bound another.
   \[ \lvert\,\Prexp(\real_S) - \Prexp(\zero_S)\,\rvert
-        = \AdvE(\real_S, \zero_S, \text{pred}) \le 2\,\epscpa \]
+        = \AdvE(\real_S, \zero_S, \text{pred})
+        \le \epshopsum{\text{pred}} \]
 \end{lemma}
 
 \begin{theorem}[Full secrecy by composition]
@@ -525,10 +532,13 @@ full bound $1/m + 2\,\epscpa$.
   \rocqok
   \uses{thm:guess_sdistr_success_le,lem:guess_advantage_le}
   % proof: triangle Prexp(real_S) <= Prexp(zero_S) + |Prexp(real_S) - Prexp(zero_S)|,
-  %   then the endpoint bound (1/m) and the computational distance (2*epsilon_cpa).
+  %   then the endpoint bound (1/m) and the computational distance (the two
+  %   hop-reduction advantages).
   When $u_3$ acts injectively, and for a predictor whose locations are disjoint
   from the two encryption oracles' state (the marshalling round-trips cancelling),
   the predictor guesses $V_2$ against the output-exposing real game with
-  probability at most $1/m + 2\,\epscpa$.
-  \[ u_3 \text{ injective} \;\Longrightarrow\; \Prexp(\real_S) \le 1/m + 2\,\epscpa \]
+  probability at most $1/m$ plus the sum of the IND-CPA advantages of its two hop
+  reductions.
+  \[ u_3 \text{ injective} \;\Longrightarrow\;
+        \Prexp(\real_S) \le 1/m + \epshopsum{\text{pred}} \]
 \end{theorem}

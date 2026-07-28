@@ -1,27 +1,22 @@
-(** IND-CPA real-or-zero hypothesis as an SSProve reduction-package interface.
+(** The IND-CPA real-or-zero advantage functional.
 
-    Per the audited plan at ~/.claude/plans/sprightly-finding-robin.md, Task 05.
-    The file defines the IND-CPA real-or-zero advantage functional
-    [indcpa_epsilon] for the AHE scheme used by DSDP.  Two oracle packages
-    [oracle_encrypt_real] and [oracle_encrypt_zero] expose a single
-    encryption operation parametric in [party_id]: the real oracle returns
-    [Enc pk_p m r] for a fresh [r], the zero oracle returns [Enc pk_p 0 r']
-    for a fresh [r'].  [indcpa_epsilon] is the [AdvantageE] of a given
-    reduction package discriminating these two oracles.
+    Two oracle packages [oracle_encrypt_real] and [oracle_encrypt_zero]
+    export one encryption operation parametric in [party_id]: on a query
+    [(p, m)] the real oracle answers [enc pk_p m r] and the zero oracle
+    answers [enc pk_p 0 r'], each for freshly sampled randomness.
+    [indcpa_epsilon] applied to a reduction package is the [AdvantageE] of
+    that package distinguishing the two oracles.
 
-    Design commitments (Rocq audit, plan section "Design commitments"):
-    - Commitment 1: encryption randomness is a finType ([Renc]), with an
-      index [index_renc : nat] for [sample uniform].  The file is parametric
-      over [AHE : AHEncType] and these two carriers.
-    - Commitment 5: the real-type binder for [AdvantageE] is pinned to
+    Design commitments (Rocq audit):
+    - Commitment 1: encryption randomness is a finType [Renc] with an index
+      [index_renc : nat] for [sample uniform]; the file is parametric over
+      [AHE : AHEncType] and these two carriers.
+    - Commitment 5: the real-type binder of [AdvantageE] is pinned to
       [SSProve.Crypt.Axioms.R] via a [Notation R].
 
-    [indcpa_epsilon] carries no bound of its own: it names the advantage that
-    replaces the false IT idealisation [E_enc_inde] from
-    [homomorphic_encryption.v].  Downstream consumers supply concrete
-    reductions via [predictor_via_oracle_charlie] and
-    [predictor_via_oracle_bob] and chain them with the SSProve
-    [ssprove triangle] idiom from [theories/Crypt/examples/PRF.v]. *)
+    Every computational bound downstream is an [indcpa_epsilon] of an
+    explicitly constructed reduction, so no scheme-independent constant
+    bounding it is assumed anywhere. *)
 
 From HB Require Import structures.
 From mathcomp Require Import all_boot all_order all_algebra reals.
@@ -166,9 +161,9 @@ Definition party_of_nat (n : nat) : party_id := nat_to_party_id n.
     [enc (pkey_of_party (party_of_nat p)) m r], wrapped into the SSProve
     cipher carrier via [chcipher_of_cipher].
     Kind: main.
-    Why: one half of the IND-CPA real-or-zero hypothesis.  Models the real
-    encryption oracle that the IND-CPA reduction uses to populate the
-    ciphertext slots of the DSDP protocol view.
+    Why: the real half of the real-or-zero pair.  Models the encryption
+    oracle that an IND-CPA reduction uses to populate the ciphertext slots
+    of the DSDP protocol view.
     Used by: oracle_encrypt_real, indcpa_epsilon. *)
 Definition oracle_encrypt_real_pkg :
   package
@@ -191,9 +186,9 @@ Definition oracle_encrypt_real_pkg :
     uniformly from [Renc], and returns the AHE ciphertext of the additive
     identity [0_R : plain AHE] under [pkey_of_party (party_of_nat p)].
     Kind: main.
-    Why: the other half of the IND-CPA real-or-zero hypothesis.  Models
-    the ideal world in which every ciphertext slot is independent of the
-    plaintext modulo the encryption-randomness law.
+    Why: the zero half of the real-or-zero pair.  Models the ideal world in
+    which every ciphertext slot is independent of the plaintext modulo the
+    encryption-randomness law.
     Used by: oracle_encrypt_zero, indcpa_epsilon. *)
 Definition oracle_encrypt_zero_pkg :
   package
@@ -248,8 +243,7 @@ Definition indcpa_epsilon
        t_msg t_cipher chcipher_of_cipher pkey_of_party)
     reduction.
 
-(** Task 05 verification: both oracle packages type-check as SSProve
-    [package _ _ _]. *)
+(** Both oracle packages type-check as SSProve [package _ _ _]. *)
 Check oracle_encrypt_real.
 Check oracle_encrypt_zero.
 Check oracle_encrypt_real_pkg.

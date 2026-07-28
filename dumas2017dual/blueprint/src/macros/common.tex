@@ -8,8 +8,13 @@
 \newtheorem{definition}[theorem]{Definition}
 
 % Notation used in the statements below.
-\newcommand{\epscpa}{\varepsilon_{\mathrm{cpa}}}          % ε of DSDP's fixed scheme
-\newcommand{\epscpaof}[1]{\varepsilon_{\mathrm{cpa}}(#1)} % ε of a named scheme
+% ε of a scheme and a reduction package, written \epscpaof{E, R}.
+\newcommand{\epscpaof}[1]{\varepsilon_{\mathrm{cpa}}(#1)}
+% One-hop oracle routing at a site: \shimof{i} routes hop i through the oracle.
+\newcommand{\shimof}[1]{\mathrm{shim}_{#1}}
+% The two hop reductions a distinguisher induces on DSDP's two encryption hops,
+% and the sum of their advantages against DSDP's fixed scheme E.
+\newcommand{\epshopsum}[1]{\epscpaof{E,\, #1 \circ \shimof{0}} + \epscpaof{E,\, #1 \circ \shimof{1}}}
 \newcommand{\counthops}{\mathrm{hops}}
 \newcommand{\AdvE}{\mathsf{Adv}}
 \newcommand{\Enc}{\mathsf{Enc}}

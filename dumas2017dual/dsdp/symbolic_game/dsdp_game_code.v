@@ -916,7 +916,8 @@ Qed.
    the sum of the per-rung IND-CPA advantages of the [n.+1] reductions
    [A ∘ denote_game_shim (zero_hop_prefix (start + l) gc) (start + l)].
    This is the telescoping that turns Advantage_triangle_chain's fold into
-   the per-rung IND-CPA bound.  Proved by induction on the rung count n: the
+   the per-rung IND-CPA reduction bound.  Proved by induction on the rung
+   count n: the
    base case is a single advantage_hop; the step peels the leading rung off
    both advantage_sum and the ordinal sum (big_ord_recl) and folds the tail
    through the induction hypothesis, the endpoint and summand indices

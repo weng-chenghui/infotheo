@@ -1,9 +1,10 @@
 (** The IND-CPA real-or-zero advantage of the idealized scheme.
 
-    [idealized_enc pk m r = m] returns its plaintext, so a single oracle query
-    separates [oracle_encrypt_real] from [oracle_encrypt_zero] with certainty
-    and [indcpa_epsilon] at that scheme and that adversary equals 1.  No
-    constant below 1 bounds [indcpa_epsilon] uniformly in [AHEncType]. *)
+    [idealized_enc pk m r = m] returns its plaintext, so one oracle query
+    separates [oracle_encrypt_real] from [oracle_encrypt_zero] with
+    certainty and [indcpa_epsilon] at that scheme and that adversary equals
+    1.  Hence [indcpa_epsilon] is not identically zero, and no constant
+    below 1 bounds it uniformly in [AHEncType]. *)
 
 From HB Require Import structures.
 From mathcomp Require Import all_boot all_order all_algebra reals distr realsum.
@@ -34,11 +35,7 @@ Import PackageNotation.
 Notation R := SSProve.Crypt.Axioms.R.
 
 (** idealized_ahe_f2 — the idealized scheme of [idealized_ahe.v] over the
-    plaintext space ['F_2], packed as an [AHEncType].
-    Kind: canonical.
-    Why: [indcpa_epsilon] is indexed by an [AHEncType]; ['F_2] is the
-    smallest plaintext space with [1 != 0].
-    Used by: indcpa_epsilon_idealized_eq1. *)
+    plaintext space ['F_2], packed as an [AHEncType]. *)
 Definition idealized_ahe_f2 : AHEncType :=
   @AHEnc.Pack (Idealized_HETypes 'F_2)
     (@AHEnc.Class (Idealized_HETypes 'F_2)
@@ -68,19 +65,15 @@ Definition idealized_rand_of_renc (_ : 'I_1) : rand idealized_ahe_f2 := 0%R.
 Lemma idealized_renc_card : #|'I_1| = 1%N.
 Proof. exact: card_ord. Qed.
 
-(** idealized_oracle_real — the IND-CPA real oracle of [indcpa_ror.v]
-    instantiated at [idealized_ahe_f2], ['bool] messages and ciphertexts.
-    Kind: canonical.
-    Used by: indcpa_epsilon_idealized_eq1. *)
+(** idealized_oracle_real — the real oracle of [indcpa_ror.v] instantiated
+    at [idealized_ahe_f2], ['bool] messages and ciphertexts. *)
 Definition idealized_oracle_real : raw_package :=
   oracle_encrypt_real idealized_ahe_f2 'I_1 1 idealized_renc_card
     idealized_rand_of_renc 'bool 'bool idealized_msg_of_chmsg
     idealized_chcipher_of_cipher idealized_pkey_of_party.
 
-(** idealized_oracle_zero — the IND-CPA zero oracle of [indcpa_ror.v]
-    instantiated at [idealized_ahe_f2], ['bool] messages and ciphertexts.
-    Kind: canonical.
-    Used by: indcpa_epsilon_idealized_eq1. *)
+(** idealized_oracle_zero — the zero oracle of [indcpa_ror.v] instantiated
+    at [idealized_ahe_f2], ['bool] messages and ciphertexts. *)
 Definition idealized_oracle_zero : raw_package :=
   oracle_encrypt_zero idealized_ahe_f2 'I_1 1 idealized_renc_card
     idealized_rand_of_renc 'bool 'bool idealized_chcipher_of_cipher
@@ -88,10 +81,9 @@ Definition idealized_oracle_zero : raw_package :=
 
 (** idealized_distinguisher_pkg — the adversary that queries the encryption
     oracle once on the message [true] and returns the reply.
-    Kind: main.
-    Why: [idealized_oracle_real] answers [enc _ 1 _ = 1], marshalled to [true];
-    [idealized_oracle_zero] answers [enc _ 0 _ = 0], marshalled to [false].
-    Used by: indcpa_epsilon_idealized_eq1. *)
+    [idealized_oracle_real] answers [enc _ 1 _ = 1], marshalled to [true];
+    [idealized_oracle_zero] answers [enc _ 0 _ = 0], marshalled to
+    [false]. *)
 Definition idealized_distinguisher_pkg :
   package (oracle_encrypt_iface 'bool 'bool) A_export :=
   [package emptym ;

@@ -15,39 +15,47 @@
 DSDP is a three-party scalar-product protocol built on additively homomorphic
 encryption. This blueprint presents its corrupted-Alice secrecy. Alice's view
 leaks through two channels, and the blueprint bounds each and composes them. The
-ciphertexts she receives leak computationally, bounded by $2\,\epscpa$ from the
-scheme's IND-CPA assumption. The scalar-product output $S$ she decrypts leaks
-information-theoretically, bounded by $1/m$, with $m$ the size of the message
+ciphertexts she receives leak computationally, bounded by the IND-CPA advantages
+of the two reductions a distinguisher induces on the scheme, one per encryption
+hop. The scalar-product output $S$ she decrypts leaks information-theoretically,
+bounded by $1/m$, with $m$ the size of the message
 space $\mathbb{Z}_{pq}$, from a fiber-counting argument that no assumption can
 improve. The ciphertext side of the corrupted view is derived
 from the one protocol program that already defines the protocol's behaviour,
 rather than written by hand; the output side is the scalar product, supplied in
-that form and bounded information-theoretically. The full bound is
-$1/m + 2\,\epscpa$.
+that form and bounded information-theoretically. The full bound, for a
+distinguisher $A$, is $1/m + \epshopsum{A}$.
 
-The single-hop IND-CPA advantage is a function $\epscpaof{\cdot}$ of the
-encryption scheme: each scheme carries its own bound, so a scheme that returns
-its plaintext has $\epscpaof{E}=1$ while a secure scheme has it negligible. All
-bounds below are for DSDP's fixed scheme $E$, and $\epscpa$ abbreviates
-$\epscpaof{E}$; the generic back-end theorems, which range over every scheme,
-keep the argument explicit.
+The single-hop IND-CPA advantage is a function $\epscpaof{E,R}$ of an encryption
+scheme $E$ and a reduction package $R$: the \ssprove{} advantage of $R$ between
+the real-encryption and the zero-encryption oracle of $E$. Every computational
+bound below is such an advantage at an explicitly constructed reduction, so no
+scheme-independent constant bounding it appears anywhere; a scheme that returns
+its plaintext admits a reduction reaching $1$. For a concrete scheme, that these
+advantages are small is a cryptographic assumption about the scheme, recorded in
+prose here rather than as a formal hypothesis. All bounds below are for DSDP's
+fixed scheme $E$: a distinguisher $A$ against a DSDP game induces one hop
+reduction $A \circ \shimof{i}$ per encryption hop, and $\epshopsum{A}$
+abbreviates the sum of the advantages of the two of them.
 
 The two channels split the blueprint into two parts, and the derivation covers
 one of them. Part~I derives the ciphertext game from the program and bounds the
-ciphertext channel by $2\,\epscpa$, every choice the argument depends on gathered
-in one record from which a generic theorem reads off the advantage. It is the
-worked instance of the derivation framework developed in the thesis part on the
-derived game. Part~II is a different tool. The output $S$ is the plaintext scalar
+ciphertext channel by $\epshopsum{A}$, every choice the argument depends on
+gathered in one record from which a generic theorem reads off the advantage. It
+is the worked instance of the derivation framework developed in the thesis part
+on the derived game. Part~II is a different tool. The output $S$ is the plaintext
+scalar
 product $u_1v_1+u_2v_2+u_3v_3$, supplied directly in that form; its $1/m$ bound is
 information-theoretic, a fiber-counting argument citing the Infotheo theorems
 through one probability identity, and carries no encryption assumption. Part~II
-then composes that $1/m$ with the Part~I $2\,\epscpa$ across the triangle
+then composes that $1/m$ with the Part~I two-reduction sum across the triangle
 inequality.
 
 Game hopping reduces a protocol's ciphertext privacy to a chain of IND-CPA swaps
-costing $k\,\epscpa$ for $k$ hops. The method takes the chain of games as given,
-and someone writes that chain once per protocol: the real game, every
-intermediate game, and the oracle each hop calls. That hand-writing is the
+costing one reduction advantage per hop, $k$ of them for $k$ hops. The method
+takes the chain of games as given, and someone writes that chain once per
+protocol: the real game, every intermediate game, and the oracle each hop calls.
+That hand-writing is the
 error-prone part, and it is what the derivation removes. The back end that
 consumes the derived game is protocol-generic and amortizes across protocols; the
 per-protocol cost is the symbolic reading of the program together with a small
@@ -68,9 +76,10 @@ lowers the corrupted party's whole view to a first-order game syntax, a
 straight-line list of samples, cell writes, encryptions, and homomorphic
 assemblies. The back end denotes that syntax into an SSProve game and bounds the
 adversary's advantage with one lemma that holds for every well-formed game in the
-syntax. That bound is the number of encryption hops the game contains times the
-single-hop IND-CPA advantage $\epscpa$. The walk that produces the view runs to
-the decryption Alice performs, so the same denoted game also exposes the
+syntax. That bound is a sum, over the encryption hops the game contains, of the
+IND-CPA advantage of the reduction routing that hop through the oracle. The walk
+that produces the view runs to the decryption Alice performs, so the same denoted
+game also exposes the
 scalar-product output $S$; reading the second channel off that output is the
 subject of Part~II.
 
@@ -94,10 +103,10 @@ subject of Part~II.
 \node[box] (denote) at (4.4,-1.0) {Denotation into \ssprove{}};
 \node[box] (game)   at (4.4,-2.45) {\ssprove{} game (ciphertexts and output $S$)};
 \node[box, text width=3.2cm] (ladder) at (1.9,-4.0) {Hybrid ladder, $k$ IND-CPA hops};
-\node[box, text width=3.2cm] (bound)  at (1.9,-5.6) {Computational bound $2\,\epscpa$};
+\node[box, text width=3.2cm] (bound)  at (1.9,-5.6) {Computational bound $\varepsilon_0 + \varepsilon_1$};
 \node[box, text width=3.2cm] (leak)   at (6.9,-4.0) {Output leak $S$ (derived decrypt-receive)};
 \node[box, text width=3.2cm] (fiber)  at (6.9,-5.6) {Guessing experiment, fiber bound $1/m$};
-\node[box, text width=4.6cm] (compose) at (4.4,-7.2) {Full corrupted-Alice secrecy $1/m + 2\,\epscpa$};
+\node[box, text width=4.6cm] (compose) at (4.4,-7.2) {Full corrupted-Alice secrecy $1/m + \varepsilon_0 + \varepsilon_1$};
 
 \draw (procs) -- (conc);
 \draw (procs) -- (symb);
@@ -129,9 +138,12 @@ trace, and one control record supplies the declared fields. Together they form
 the observation trace, which the front end lowers to the reified game. The back
 end denotes that game into \ssprove{}, exposing both the received ciphertexts and
 the decrypted output $S$. The ciphertext channel (left, Part~I) is bounded
-through a hybrid ladder of $k$ IND-CPA hops, generically $k\,\epscpa$ and
-$2\,\epscpa$ for DSDP. The output channel (right, Part~II) is bounded by the
-fiber argument $1/m$. The two compose to $1/m + 2\,\epscpa$.}
+through a hybrid ladder of $k$ IND-CPA hops, generically one reduction advantage
+per hop and $\varepsilon_0 + \varepsilon_1$ for DSDP's two hops, where
+$\varepsilon_i = \epscpaof{E,\, A \circ \shimof{i}}$ is the IND-CPA advantage of
+the reduction a distinguisher $A$ induces on hop $i$. The output channel (right,
+Part~II) is bounded by the fiber argument $1/m$. The two compose to
+$1/m + \varepsilon_0 + \varepsilon_1$.}
 \label{fig:bp:architecture}
 \end{figure}
 
@@ -141,9 +153,9 @@ the order the viewed ciphertexts leak, and the two sample-domain sizes, together
 with the concrete scheme and its marshalling into SSProve choice types. From this
 one record the corrupted view, the real game, the all-zero game, and the hop
 count are all projections, and a single generic theorem bounds every valid
-adversary's advantage by the hop count times $\epscpa$. The DSDP instance fills
-the record, its hop count computes to two, and the bound reads off as
-$2\,\epscpa$.
+adversary's advantage by the sum, over the hops, of its site reductions'
+advantages. The DSDP instance fills the record, its hop count computes to two,
+and the bound reads off as $\epshopsum{A}$.
 
 The scope is precise. The computation and the whole observation trace are derived
 from the program. The sampled scalars and randomness, the receptions read off
@@ -468,8 +480,8 @@ The previous chapter denoted the game and named its hybrid endpoints. This
 chapter bounds the distance between them. The quantity is the \ssprove{}
 advantage $\AdvE(G_0,G_1,A)$, the absolute difference between the probabilities
 that a distinguisher $A$ returns true against $G_0$ and against $G_1$. The chapter
-rests it on one assumption, the single-hop IND-CPA bound, and telescopes the
-ladder of endpoints into a bound of the hop count times that assumption.
+telescopes the ladder of endpoints into a sum, over the encryption hops, of the
+IND-CPA advantages of the reductions that route one hop through the oracle.
 
 \begin{definition}[Single-hop IND-CPA advantage]
   \label{def:indcpa_assumption}
@@ -488,7 +500,7 @@ ladder of endpoints into a bound of the hop count times that assumption.
   \uses{def:denote_game,def:indcpa_assumption}
   Route exactly one encryption hop through the IND-CPA encryption oracle, leaving
   every other statement identical to the direct denotation. Composing it with the
-  real or zero oracle reproduces one rung of the ladder. Write $\mathrm{shim}_i(g)$
+  real or zero oracle reproduces one rung of the ladder. Write $\shimof{i}(g)$
   for the shim that routes hop $i$ through the oracle and inlines the rest.
 \end{definition}
 
@@ -514,14 +526,16 @@ ladder of endpoints into a bound of the hop count times that assumption.
   \rocq{infotheo.dumas2017dual.dsdp.symbolic_game.dsdp_game_code.advantage_hop}
   \rocqok
   Two adjacent rungs of the ladder differ at a single hop, so their advantage is
-  at most the single-hop IND-CPA bound $\epscpaof{E}$ of the scheme $E$ the game
-  denotes into.
-  \[ \AdvE(\sem{g^{(i)}}, \sem{g^{(i+1)}}, A) \le \epscpaof{E} \]
+  at most the IND-CPA advantage, against the scheme $E$ the game denotes into, of
+  the reduction that routes hop $i$ through the oracle.
+  \[ \AdvE(\sem{g^{(i)}}, \sem{g^{(i+1)}}, A)
+       \le \epscpaof{E,\, A \circ \shimof{i}(g)} \]
 \end{lemma}
 \begin{proof}
   \uses{lem:hop_equiv,def:indcpa_assumption,def:hybrid_endpoints}
   \rocqok
-  By a triangle chain through the two shim compositions, then the IND-CPA bound.
+  By a triangle chain through the two shim compositions, then folding the shim
+  into the adversary so the middle hop is that reduction's advantage.
 \end{proof}
 
 \begin{definition}[The hybrid ladder]
@@ -537,8 +551,9 @@ ladder of endpoints into a bound of the hop count times that assumption.
   \label{lem:advantage_sum_ladder_le}
   \rocq{infotheo.dumas2017dual.dsdp.symbolic_game.dsdp_game_code.advantage_sum_ladder_le}
   \rocqok
-  A contiguous block of rungs costs at most one IND-CPA query per rung.
-  \[ \text{a block of } n{+}1 \text{ rungs} \ \le\ (n{+}1)\,\epscpaof{E} \]
+  A contiguous block of rungs costs at most one hop-reduction advantage per rung.
+  \[ \text{a block of } n{+}1 \text{ rungs starting at } s
+       \ \le\ \sum_{l < n+1} \epscpaof{E,\, A \circ \shimof{s+l}(g)} \]
 \end{lemma}
 \begin{proof}
   \uses{lem:advantage_hop,def:hybrid_ladder}
@@ -551,9 +566,10 @@ ladder of endpoints into a bound of the hop count times that assumption.
   \rocq{infotheo.dumas2017dual.dsdp.symbolic_game.dsdp_game_code.advantage_le}
   \rocqok
   For any game code and any scheme $E$, every valid adversary's advantage between
-  the real and all-zero denoted games is at most the number of encryption hops
-  times $\epscpaof{E}$.
-  \[ \AdvE(\sem{g^{(0)}},\sem{g^{(\nhops(g))}},A) \ \le\ |\sites(g)|\,\epscpaof{E} \]
+  the real and all-zero denoted games is at most the sum, over the encryption hop
+  sites, of the IND-CPA advantages of the site reductions.
+  \[ \AdvE(\sem{g^{(0)}},\sem{g^{(\nhops(g))}},A)
+       \ \le\ \sum_{l < |\sites(g)|} \epscpaof{E,\, A \circ \shimof{l}(g)} \]
 \end{theorem}
 \begin{proof}
   \uses{lem:advantage_sum_ladder_le,def:hybrid_endpoints,def:denote_game}
@@ -571,7 +587,8 @@ corrupted program, the received ciphertexts, the challenge secret, the leak
 order, the cardinalities, and the concrete scheme with its marshalling. From one
 record the corrupted view, the two endpoint games, and the hop count are all
 projections, and a single generic theorem bounds every valid adversary's
-advantage by the hop count times the scheme's IND-CPA bound.
+advantage by the sum, over the hops, of the IND-CPA advantages of its site
+reductions against the record's scheme.
 
 \begin{definition}[The secrecy-problem record]
   \label{def:secrecy_problem}
@@ -624,10 +641,12 @@ advantage by the hop count times the scheme's IND-CPA bound.
   \rocq{infotheo.dumas2017dual.dsdp.symbolic_game.dsdp_game_derivation.dsdp_indcpa_secrecy_le}
   \rocqok
   For every secrecy-problem record and every valid adversary, the advantage
-  between the real game and the all-zero game is at most the corrupted view's hop
-  count times the record scheme's bound $\epscpaof{E_P}$, where $E_P$ is the
-  scheme the record $P$ carries.
-  \[ \AdvE(\real(P), \zero(P), A) \ \le\ \nhops(\view(P))\,\epscpaof{E_P} \]
+  between the real game and the all-zero game is at most the sum, over the
+  corrupted view's encryption hops, of the IND-CPA advantages of the site
+  reductions against the scheme $E_P$ the record $P$ carries.
+  \[ \AdvE(\real(P), \zero(P), A) \ \le\
+        \sum_{l < \nhops(\view(P))}
+          \epscpaof{E_P,\, A \circ \shimof{l}(\gtrace(\view(P)))} \]
 \end{theorem}
 \begin{proof}
   \uses{thm:advantage_le,lem:count_hops_adequacy,def:corrupted_view,def:games,def:adversary}
@@ -642,8 +661,8 @@ advantage by the hop count times the scheme's IND-CPA bound.
 The generic theorem holds for any record. This chapter fills the record with
 DSDP: the corrupted-Alice program, the derived hop stream, and the challenge
 fixed to Bob's secret. The hop count computes to two, so the generic bound reads
-off as $2\,\epscpa$ for DSDP's scheme, the whole researcher-supplied input being
-the record's fields.
+off as the two-summand $\epshopsum{A}$ for DSDP's scheme, the whole
+researcher-supplied input being the record's fields.
 
 \begin{lemma}[The derived game matches the fixture]
   \label{lem:dsdp_faithful}
@@ -693,9 +712,9 @@ the record's fields.
   \rocq{infotheo.dumas2017dual.dsdp.dsdp_main.dsdp_alice_view_advantage_le}
   \rocqok
   Every valid adversary's advantage between the real and all-zero DSDP games is
-  at most $2\,\epscpa$.
+  at most the sum of the IND-CPA advantages of its two hop reductions.
   \[ \AdvE(\real(P_{\mathrm{DSDP}}), \zero(P_{\mathrm{DSDP}}), A) \ \le\
-        2\,\epscpa \]
+        \epshopsum{A} \]
 \end{theorem}
 \begin{proof}
   \uses{thm:generic_secrecy,def:dsdp_experiment,lem:dsdp_experiment_hops}
@@ -708,8 +727,9 @@ the record's fields.
   \label{cor:dsdp_advantage_derived}
   \rocq{infotheo.dumas2017dual.dsdp.indcpa_hopping.dsdp_indcpa_advantage.dsdp_derived_game_advantage_le}
   \rocqok
-  The same $2\,\epscpa$ bound stated directly over the denoted games, packaging
+  The same two-summand bound stated directly over the denoted games, packaging
   the loose arguments into the record.
+  \[ \AdvE(\sem{g^{(0)}}_E, \sem{g^{(2)}}_E, A) \ \le\ \epshopsum{A} \]
 \end{corollary}
 \begin{proof}
   \uses{thm:generic_secrecy,def:dsdp_experiment}
@@ -721,7 +741,7 @@ the record's fields.
 % The output-secrecy leg: the output value S is supplied in fiber form (= what
 % Alice's decryption computes, by correctness), the absolute-Pr guessing layer is
 % built on the endpoint game, the Infotheo fiber 1/m is transported through one
-% probability identity, and the result composes with the Part I 2*epsilon_cpa AHE.
+% probability identity, and the result composes with the Part I two-reduction sum.
 % A different tool from the ciphertext-channel game-hopping.  See it_bound_bridge.
 \part{The output-secrecy leg}
 \input{it_bound_bridge}

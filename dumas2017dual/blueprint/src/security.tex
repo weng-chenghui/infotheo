@@ -80,7 +80,9 @@ and she decrypts the output. Her secrecy has two channels. The output she decryp
 is the scalar product, and conditioned on it a relay's input stays uniform over a
 fiber of $m$ points, an information-theoretic bound. The ciphertexts she receives
 are bounded computationally by the derived game-hopping of the final part. The two
-compose to the full bound $1/m + 2\,\epscpaof{E}$. The part closes with the
+compose to the full bound $1/m + \epshopsum{A}$ for a distinguisher $A$, where
+each summand is the IND-CPA advantage against DSDP's scheme $E$ of the reduction
+$A$ induces on one of the two encryption hops. The part closes with the
 tightness boundary: the fiber bound needs Alice's third weight to act invertibly,
 and the degenerate query that violates it lets Alice read a relay's input outright.
 
@@ -149,10 +151,11 @@ Part~\ref{part:autoderiv} (the final part).
   \rocq{infotheo.dumas2017dual.dsdp.dsdp_main.dsdp_alice_view_advantage_le}
   \rocqok
   \uses{def:party_views}
-  Every valid adversary distinguishes DSDP's real corrupted-Alice game from its
-  all-zero endpoint with advantage at most $2\,\epscpaof{E}$, twice the scheme's
-  IND-CPA bound, because the corrupted-Alice view has exactly two encryption hops.
-  \[ \AdvE(\real, \zero, A) \le 2\,\epscpaof{E} \]
+  Every valid adversary $A$ distinguishes DSDP's real corrupted-Alice game from
+  its all-zero endpoint with advantage at most the sum of the IND-CPA advantages
+  of the two reductions $A$ induces, one per encryption hop of the
+  corrupted-Alice view.
+  \[ \AdvE(\real, \zero, A) \le \epshopsum{A} \]
 \end{theorem}
 
 \begin{theorem}[Guessing the challenge secret, real game]
@@ -163,11 +166,11 @@ Part~\ref{part:autoderiv} (the final part).
   \rocqok
   \uses{thm:alice_view_advantage,lem:dsdp_fiber_uniform}
   Reading the ciphertext view and the leaked output $S$, and when $U_3$ acts
-  injectively, Alice guesses Bob's secret $V_2$ with probability at most
-  $1/m + 2\,\epscpaof{E}$: the fiber bound $1/m$ at the all-zero endpoint plus the
-  $2\,\epscpaof{E}$ cost of moving to the real game. The two legs join by the
-  triangle inequality.
-  \[ \Pr[\mathrm{guess} = V_2] \le 1/m + 2\,\epscpaof{E} \]
+  injectively, the predictor $A$ guesses Bob's secret $V_2$ with probability at
+  most $1/m + \epshopsum{A}$: the fiber bound $1/m$ at the all-zero endpoint plus
+  the cost of moving to the real game, the advantages of $A$'s two hop
+  reductions. The two legs join by the triangle inequality.
+  \[ \Pr[\mathrm{guess} = V_2] \le 1/m + \epshopsum{A} \]
 \end{theorem}
 
 \begin{theorem}[Unpredictability entropy]
@@ -175,17 +178,18 @@ Part~\ref{part:autoderiv} (the final part).
   \rocq{infotheo.dumas2017dual.dsdp.dsdp_main.dsdp_alice_unpredictability_entropy_ge}
   \rocqok
   \uses{thm:alice_guess_real}
-  Equivalently in entropy form, the predictor's unpredictability entropy on the
-  output-exposing real game is at least $\log m - \log(1 + 2m\,\epscpaof{E})$,
-  approaching the full $\log m$ as $\epscpaof{E} \to 0$.
-  \[ \Hunp \ge \log m - \log\!\big(1 + 2m\,\epscpaof{E}\big) \]
+  Equivalently in entropy form, the predictor $A$'s unpredictability entropy on
+  the output-exposing real game is at least
+  $\log m - \log\!\big(1 + m\,(\epshopsum{A})\big)$, approaching the full
+  $\log m$ as the two hop-reduction advantages vanish.
+  \[ \Hunp \ge \log m - \log\!\big(1 + m\,(\epshopsum{A})\big) \]
 \end{theorem}
 
 \chapter{Simulation-based security}
 \label{ch:simulation}
 
 The corrupted-Alice view can be produced by a simulator that never sees the honest
-inputs, up to the same $2\,\epscpaof{E}$. The scope is average-case: the honest
+inputs, up to the same two-reduction sum. The scope is average-case: the honest
 inputs $v_2, v_3$ are sampled uniformly in-game, by the real game on one side and
 by the ideal functionality on the other, rather than quantified over all input
 vectors.
@@ -196,18 +200,19 @@ vectors.
        infotheo.dumas2017dual.dsdp.simulation.dsdp_simulator.dsdp_advantage_sim_le}
   \rocqok
   \uses{def:party_views,thm:alice_view_advantage}
-  The output-exposing real game and the simulator composed with the ideal
-  functionality are distinguished with advantage at most $2\,\epscpaof{E}$ by any
-  valid admissible adversary. The simulator fabricates the four-cipher view from
-  encryptions of zero and fresh samples; the honest inputs and $S$ have no path
-  into it, a type-level allowed-information witness.
-  \[ \AdvE(\real_S,\ \Sim \circ \Ideal,\ A) \le 2\,\epscpaof{E} \]
+  Any valid admissible adversary $A$ distinguishes the output-exposing real game
+  from the simulator composed with the ideal functionality with advantage at most
+  the sum of the IND-CPA advantages of its two hop reductions. The simulator
+  fabricates the four-cipher view from encryptions of zero and fresh samples; the
+  honest inputs and $S$ have no path into it, a type-level allowed-information
+  witness.
+  \[ \AdvE(\real_S,\ \Sim \circ \Ideal,\ A) \le \epshopsum{A} \]
 \end{theorem}
 \begin{proof}
   \uses{lem:simulator_factorization}
   \rocqok
   Triangle through the all-zero endpoint: the real-to-zero distance is
-  $2\,\epscpaof{E}$ (Part~\ref{part:autoderiv}), and the zero endpoint is perfectly
+  $\epshopsum{A}$ (Part~\ref{part:autoderiv}), and the zero endpoint is perfectly
   equivalent to the simulated ideal (Lemma~\ref{lem:simulator_factorization}).
 \end{proof}
 
