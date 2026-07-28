@@ -22,7 +22,8 @@
        learns nothing about Bob's input V2 (R2 one-time-pad masking)  [3-party]
 
    Corrupted-Alice secrecy (indcpa_hopping axis), the guessing triangle  [3-party]
-     dsdp_alice_view_advantage_le : AdvantageE <= 2 * epsilon_cpa AHE
+     dsdp_alice_view_advantage_le : AdvantageE <= the sum of the two per-hop
+       IND-CPA reduction advantages
      dsdp_alice_guess_V2_zero_le : guess <= 1/m (all-zero endpoint)
      dsdp_alice_guess_advantage_le : AdvantageE <= 2 * epsilon_cpa AHE
      dsdp_alice_guess_V2_real_le : guess <= 1/m + 2 * epsilon_cpa AHE
@@ -115,19 +116,41 @@ Definition dsdp_experiment : dsdp_indcpa_experiment :=
 Example dsdp_experiment_hops : count_obs_hops (corrupted_view dsdp_experiment) = 2.
 Proof. by []. Qed.
 
-(* dsdp_alice_view_advantage_le — every adversary's advantage between DSDP's real
-   corrupted-Alice game and its all-zero endpoint is at most 2 * epsilon_cpa AHE:
-   the generic bound [dsdp_indcpa_secrecy_le] (any experiment's real-vs-all-zero
-   advantage is at most its hop count times [epsilon_cpa (exp_enc_scheme P)]) at
-   hop count two. [dsdp_experiment]
-   is the DSDP instance of such a two-hop experiment, its corrupted-Alice trace
-   having exactly two encryption hops ([dsdp_experiment_hops]).  [3-party] *)
-Theorem dsdp_alice_view_advantage_le (Adv : dsdp_indcpa_adversary dsdp_experiment) :
-  AdvantageE (real_game dsdp_experiment) (zero_game dsdp_experiment) (adv_package Adv)
-    <= 2%:R * epsilon_cpa AHE.
+(* dsdp_alice_view_advantage_le — every adversary's advantage between DSDP's
+   real corrupted-Alice game and its all-zero endpoint is at most the sum of
+   the IND-CPA real-or-zero advantages of its two per-hop reductions: the
+   generic bound [dsdp_indcpa_secrecy_le] (any experiment's real-vs-all-zero
+   advantage is at most the sum of its per-hop reduction advantages) at hop
+   count two.  [dsdp_experiment] is the DSDP instance of such a two-hop
+   experiment, its corrupted-Alice trace having exactly two encryption hops
+   ([dsdp_experiment_hops]).
+   Naming: subject-prefixed [dsdp_alice], with [view] naming the corrupted-view
+   game pair the advantage is measured on and [_le] the upper bound.
+   [3-party] *)
+Theorem dsdp_alice_view_advantage_le
+    (Adv : dsdp_indcpa_adversary dsdp_experiment) :
+  AdvantageE (real_game dsdp_experiment) (zero_game dsdp_experiment)
+             (adv_package Adv)
+    <= indcpa_epsilon AHE Renc card_renc renc_card rand_of_renc t_msg t_cipher
+         msg_of_chmsg chcipher_of_cipher pkey_of_party
+         (adv_package Adv
+          ∘ denote_game_shim renc_card rand_of_renc chmsg_of_msg
+              chcipher_of_cipher cipher_of_chcipher pkey_of_party
+              msg_of_idx rand0
+              (zero_hop_prefix 0
+                 (game_of_trace (corrupted_view dsdp_experiment))) 0)
+     + indcpa_epsilon AHE Renc card_renc renc_card rand_of_renc t_msg t_cipher
+         msg_of_chmsg chcipher_of_cipher pkey_of_party
+         (adv_package Adv
+          ∘ denote_game_shim renc_card rand_of_renc chmsg_of_msg
+              chcipher_of_cipher cipher_of_chcipher pkey_of_party
+              msg_of_idx rand0
+              (zero_hop_prefix 1
+                 (game_of_trace (corrupted_view dsdp_experiment))) 1).
 Proof.
 have H := dsdp_indcpa_secrecy_le Adv.
-by rewrite dsdp_experiment_hops in H.
+rewrite dsdp_experiment_hops big_ord_recl big_ord1 in H.
+exact: H.
 Qed.
 
 End dsdp_alice_indcpa.
@@ -717,8 +740,8 @@ Qed.
 
 (* dsdp_alice_guess_advantage_le — the reduction distinguisher's advantage is at
    most [2 * epsilon_cpa AHE]: the output-exposing endpoint games add only the
-   common
-   id_Sout_get oracle (no encryption hop), so the Part I IND-CPA bound applies.
+   common id_Sout_get oracle and no encryption hop, so
+   [dsdp_derived_game_advantage_le_leak_S] applies at the two-hop count.
    [3-party] *)
 Lemma dsdp_alice_guess_advantage_le
     (cipher_of_chcipher : t_cipher -> cipher AHE)
