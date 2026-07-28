@@ -219,16 +219,12 @@ dsdp_simulator:sample_cards_msg_renc
 dsdp_simulator:sample_cards_msg_renc_all_real
 dsdp_simulator:sample_cards_msg_renc_all_zero
 dsdp_simulator:sim_view_body
-dsdp_simulator:test_adversary
 dsdp_simulator:valid_sim_view_body
 dsdp_simulator:view_mass1_denote
 dsdp_simulator:view_op
 dsdp_simulator:view_pair_challenger
-dsdp_simulator:view_real_mass1
-dsdp_simulator:view_resolve_eq
 dsdp_simulator:view_resolved
 dsdp_simulator:view_resolved_denote
-dsdp_simulator:view_simulated_mass1
 dsdp_simulator:view_zero_mass1
 dsdp_symbolic_exec:a1_observed
 dsdp_symbolic_exec:a2_observed
