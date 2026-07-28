@@ -1,15 +1,15 @@
 (* DSDP corrupted-Alice IND-CPA advantage — the loose-argument advantage bounds.
 
-   [dsdp_advantage_derived] and its output-exposing variant
-   [dsdp_advantage_derived_leak_S] bound a corrupted-Alice adversary's advantage
-   between the real derived game and its all-zero endpoint by
+   [dsdp_derived_game_advantage_le] and its output-exposing variant
+   [dsdp_derived_game_advantage_le_leak_S] bound a corrupted-Alice adversary's
+   advantage between the real derived game and its all-zero endpoint by
    [2 * epsilon_cpa AHE],
    given a concrete homomorphic encryption scheme and the marshalling between its
    plaintexts/ciphertexts and SSProve choice types.
 
    The DSDP instance [dsdp_experiment] of [dsdp_indcpa_experiment] and the
    headline [dsdp_alice_view_advantage_le] are in [dsdp_main]; the generic engine
-   [dsdp_indcpa_secrecy] is in [dsdp_game_derivation]. *)
+   [dsdp_indcpa_secrecy_le] is in [dsdp_game_derivation]. *)
 
 From HB Require Import structures.
 From mathcomp Require Import all_boot all_order all_algebra fingroup finalg.
@@ -53,14 +53,15 @@ Notation R := SSProve.Crypt.Axioms.R.
 (* Capstone: the IND-CPA bound holds for the DERIVED game.             *)
 (* ------------------------------------------------------------------ *)
 
-(* dsdp_advantage_derived — the DSDP corollary of [dsdp_indcpa_secrecy]: any
-   adversary's advantage distinguishing the real derived game from its all-zero
-   endpoint is at most [2 * epsilon_cpa AHE].  Parameters and premises mirror the
-   loose-argument back-end interface verbatim; the proof packages the loose
-   arguments into a [dsdp_indcpa_experiment] and a [dsdp_indcpa_adversary],
-   instantiates the generic [dsdp_indcpa_secrecy], and reduces the packaged
-   instance's [count_obs_hops (corrupted_view ...)] to [2]. *)
-Lemma dsdp_advantage_derived
+(* dsdp_derived_game_advantage_le — the DSDP corollary of
+   [dsdp_indcpa_secrecy_le]: any adversary's advantage distinguishing the real
+   derived game from its all-zero endpoint is at most [2 * epsilon_cpa AHE].
+   Parameters and premises mirror the loose-argument back-end interface
+   verbatim; the proof packages the loose arguments into a
+   [dsdp_indcpa_experiment] and a [dsdp_indcpa_adversary], instantiates the
+   generic [dsdp_indcpa_secrecy_le], and reduces the packaged instance's
+   [count_obs_hops (corrupted_view ...)] to [2]. *)
+Lemma dsdp_derived_game_advantage_le
     (AHE : AHEncType) (Renc : finType) (card_renc : nat)
     (renc_card : #|Renc| = card_renc) (rand_of_renc : Renc -> rand AHE)
     (t_msg t_cipher : choice_type) (msg_of_chmsg : t_msg -> plain AHE)
@@ -113,7 +114,7 @@ pose P : dsdp_indcpa_experiment :=
      exp_fallback_rand := rand0 |}.
 pose Adv : dsdp_indcpa_adversary P :=
   @Build_dsdp_indcpa_adversary P LA A A_valid A_disj_state A_disj_ore A_disj_oze.
-have H := dsdp_indcpa_secrecy Adv.
+have H := dsdp_indcpa_secrecy_le Adv.
 move: H; by [].
 Qed.
 
@@ -395,14 +396,14 @@ Definition zero_game_leak_S
     pkey_of_party msg_of_idx rand0 seed
     (all_zero (game_of_trace_seeded dsdp_weight_names (dsdp_alice_obs_leak_S_seeded card_msg card_renc))).
 
-(* dsdp_advantage_derived_leak_S — the output-exposing analogue of
-   [dsdp_advantage_derived]: any valid adversary distinguishing the
+(* dsdp_derived_game_advantage_le_leak_S — the output-exposing analogue of
+   [dsdp_derived_game_advantage_le]: any valid adversary distinguishing the
    output-exposing real game from its all-zero endpoint has advantage at most
    [2 * epsilon_cpa AHE].  The output cell adds the common id_Sout_get oracle but
    no encryption hop, so the bound is the Part I bound; [advantage_le_leak_S]
    gives [size (hop_sites …) * epsilon_cpa AHE] and the hop count reduces to 2 by
    [count_hops_game_of_trace] and [dsdp_obs_hops_leak_S]. *)
-Lemma dsdp_advantage_derived_leak_S
+Lemma dsdp_derived_game_advantage_le_leak_S
     (AHE : AHEncType) (Renc : finType) (card_renc : nat)
     (renc_card : #|Renc| = card_renc) (rand_of_renc : Renc -> rand AHE)
     (t_msg t_cipher : choice_type) (msg_of_chmsg : t_msg -> plain AHE)

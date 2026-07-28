@@ -43,34 +43,35 @@ Notation R := SSProve.Crypt.Axioms.R.
 
 Section bounded_simulation.
 
-(* adv_sim_le E adm Real Ideal Sim eps — bounded simulation security relative
-   to the admissible-adversary class adm: every valid, admissible adversary
-   distinguishes the real package from the simulator composed with the ideal
-   package with advantage at most eps. *)
-Definition adv_sim_le (E : Interface) (adm : Locations -> raw_package -> Prop)
+(* adv_sim_le E admissible Real Ideal Sim eps — bounded simulation security
+   relative to the admissible-adversary class admissible: every valid,
+   admissible adversary distinguishes the real package from the simulator
+   composed with the ideal package with advantage at most eps. *)
+Definition adv_sim_le (E : Interface)
+    (admissible : Locations -> raw_package -> Prop)
     (Real Ideal Sim : raw_package) (eps : R) : Prop :=
   forall (LA : Locations) (A : raw_package),
-    ValidPackage LA E A_export A -> adm LA A ->
+    ValidPackage LA E A_export A -> admissible LA A ->
     AdvantageE Real (Sim ∘ Ideal) A <= eps.
 
 (* Simulates_from_endpoint — a real-versus-endpoint advantage bound of eps and
    a perfect equivalence between the endpoint and the simulated ideal package
    give bounded simulation security with bound eps. *)
 Lemma Simulates_from_endpoint
-    (E : Interface) (adm : Locations -> raw_package -> Prop)
+    (E : Interface) (admissible : Locations -> raw_package -> Prop)
     (Real Endpoint Ideal Sim : raw_package) (eps : R)
     (Hgame : forall (LA : Locations) (A : raw_package),
-       ValidPackage LA E A_export A -> adm LA A ->
+       ValidPackage LA E A_export A -> admissible LA A ->
        AdvantageE Real Endpoint A <= eps)
     (Hsim : forall (LA : Locations) (A : raw_package),
-       ValidPackage LA E A_export A -> adm LA A ->
+       ValidPackage LA E A_export A -> admissible LA A ->
        AdvantageE Endpoint (Sim ∘ Ideal) A = 0) :
-  adv_sim_le E adm Real Ideal Sim eps.
+  adv_sim_le E admissible Real Ideal Sim eps.
 Proof.
-move=> LA A A_valid A_adm.
+move=> LA A A_valid A_admissible.
 apply: (le_trans (Advantage_triangle Real (Sim ∘ Ideal) Endpoint A)).
-rewrite (Hsim LA A A_valid A_adm) addr0.
-exact: (Hgame LA A A_valid A_adm).
+rewrite (Hsim LA A A_valid A_admissible) addr0.
+exact: (Hgame LA A A_valid A_admissible).
 Qed.
 
 (* Simulates_reduction — bounded simulation security transports across a
@@ -78,12 +79,12 @@ Qed.
    [A ∘ T], the advantage of A against the T-linked real and simulated ideal
    packages is at most eps.  Admissibility must be closed under [A ∘ T]. *)
 Lemma Simulates_reduction
-    (E : Interface) (adm : Locations -> raw_package -> Prop)
+    (E : Interface) (admissible : Locations -> raw_package -> Prop)
     (Real Ideal Sim : raw_package) (eps : R)
-    (Hsim : adv_sim_le E adm Real Ideal Sim eps)
+    (Hsim : adv_sim_le E admissible Real Ideal Sim eps)
     (T A : raw_package) (LAT : Locations)
     (AT_valid : ValidPackage LAT E A_export (A ∘ T))
-    (AT_adm : adm LAT (A ∘ T)) :
+    (AT_admissible : admissible LAT (A ∘ T)) :
   AdvantageE (T ∘ Real) (T ∘ Sim ∘ Ideal) A <= eps.
 Proof.
 rewrite -Advantage_link.
@@ -190,10 +191,10 @@ Lemma dsdp_simulator_factorization :
 Proof.
 Admitted.
 
-(* dsdp_adm — the DSDP admissibility class: the adversary locations are
-   disjoint from the protocol state and from the real and zero encryption
+(* dsdp_locs_disjoint — the DSDP admissibility class: the adversary locations
+   are disjoint from the protocol state and from the real and zero encryption
    oracle locations. *)
-Definition dsdp_adm (LA : Locations) (A : raw_package) : Prop :=
+Definition dsdp_locs_disjoint (LA : Locations) (A : raw_package) : Prop :=
   fseparate LA (protocol_state t_msg) /\
   fseparate LA (locs (oracle_real_pkg renc_card rand_of_renc msg_of_chmsg
                         chcipher_of_cipher pkey_of_party)) /\
@@ -203,11 +204,11 @@ Definition dsdp_adm (LA : Locations) (A : raw_package) : Prop :=
 (* dsdp_simulation_secure — the output-exposing real game is
    bounded-simulation secure against dsdp_ideal_pkg with simulator
    dsdp_simulator_pkg, over the
-   dsdp_adm class, with bound [2 * epsilon_cpa]. *)
+   dsdp_locs_disjoint class, with bound [2 * epsilon_cpa]. *)
 Lemma dsdp_simulation_secure
     (cipher_of_chcipher : t_cipher -> cipher AHE)
     (chcipher_of_cipherK : cancel chcipher_of_cipher cipher_of_chcipher) :
-  adv_sim_le (game_iface_leak_S t_msg t_cipher) dsdp_adm
+  adv_sim_le (game_iface_leak_S t_msg t_cipher) dsdp_locs_disjoint
     (real_game_leak_S renc_card rand_of_renc chmsg_of_msg chcipher_of_cipher
        pkey_of_party msg_of_idx rand0 seed)
     dsdp_ideal_pkg dsdp_simulator_pkg
@@ -217,7 +218,7 @@ apply: (Simulates_from_endpoint
   (Endpoint := zero_game_leak_S renc_card rand_of_renc chmsg_of_msg
      chcipher_of_cipher pkey_of_party msg_of_idx rand0 seed)).
 - move=> LA A A_valid [Hstate [Hore Hoze]].
-  eapply dsdp_advantage_derived_leak_S.
+  eapply dsdp_derived_game_advantage_le_leak_S.
   + exact: chcipher_of_cipherK.
   + exact: chmsg_of_msgK.
   + exact: A_valid.

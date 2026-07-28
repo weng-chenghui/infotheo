@@ -55,7 +55,7 @@ Notation R := SSProve.Crypt.Axioms.R.
 
 Section dsdp_guess_fiber.
 (* The concrete scheme and marshalling fixed by the output-exposing endpoint
-   games (same parameters as dsdp_advantage_derived_leak_S). *)
+   games (same parameters as dsdp_derived_game_advantage_le_leak_S). *)
 Variables (AHE : AHEncType) (Renc : finType) (card_renc : nat)
   (renc_card : #|Renc| = card_renc) (rand_of_renc : Renc -> rand AHE)
   (t_msg t_cipher : choice_type)

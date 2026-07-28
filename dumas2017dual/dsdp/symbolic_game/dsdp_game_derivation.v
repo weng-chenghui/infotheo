@@ -3,17 +3,17 @@
    The back end (dsdp_game_code.v) lowers a reified [game_code] AST to an
    SSProve [package] and proves the generic hybrid-ladder bound
    [advantage_le : AdvantageE (denote_game (all_real gc)) (denote_game
-   (all_zero gc)) A <= (size (hop_sites gc)) * epsilon_cpa AHE].  Its [gc_dsdp]
-   was a HAND-BUILT fixture standing in for the AST a symbolic execution of
-   the piSMC source should emit.
+   (all_zero gc)) A <= (size (hop_sites gc)) * epsilon_cpa AHE].  Its
+   [game_code_dsdp] was a HAND-BUILT fixture standing in for the AST a
+   symbolic execution of the piSMC source should emit.
 
    This file replaces that hand-build with a DERIVATION: a corrupted-Alice
    observation trace ([dsdp_alice_obs]) at the protocol-action abstraction
    level, lowered to [game_code] by a generic pass ([game_of_trace]) that
    synthesises the canonical sample prefix and assigns de Bruijn indices.  The
-   headline result [dsdp_faithful] shows the pass reproduces [gc_dsdp]
-   exactly, and [dsdp_advantage_derived] transports the back-end IND-CPA bound
-   onto the derived game.
+   headline result [dsdp_faithful] shows the pass reproduces
+   [game_code_dsdp] exactly, and [dsdp_derived_game_advantage_le] transports
+   the back-end IND-CPA bound onto the derived game.
 
    Design note (the [Symbolic_AHEnc] finType wall, RESOLVED).  The design doc
    named a symbolic [AHEncType] instance over [he_term] to re-run the
@@ -494,18 +494,20 @@ Definition dsdp_alice_obs (card_msg card_renc : nat) : seq alice_obs :=
     (fun combines recvs => combines ++ recvs) card_msg card_renc.
 
 (* dsdp_faithful — headline of the front end: the generic lowering pass applied
-   to the DSDP corrupted-Alice trace reproduces the back-end fixture [gc_dsdp]
-   EXACTLY (de Bruijn indices and all), by full computation ([index] on the
-   concrete name lists).  The fixture is therefore DERIVED, not hand-written:
-   any property proved of [gc_dsdp] now holds of [game_of_trace dsdp_alice_obs].
-   ([gc_dsdp]'s discharged argument order is [card_renc] then [card_msg].) *)
+   to the DSDP corrupted-Alice trace reproduces the back-end fixture
+   [game_code_dsdp] EXACTLY (de Bruijn indices and all), by full computation
+   ([index] on the concrete name lists).  The fixture is therefore DERIVED,
+   not hand-written: any property proved of [game_code_dsdp] now holds of
+   [game_of_trace dsdp_alice_obs].  ([game_code_dsdp]'s discharged argument
+   order is [card_renc] then [card_msg].) *)
 Lemma dsdp_faithful (card_msg card_renc : nat) :
-  game_of_trace (dsdp_alice_obs card_msg card_renc) = gc_dsdp card_renc card_msg.
+  game_of_trace (dsdp_alice_obs card_msg card_renc)
+  = game_code_dsdp card_renc card_msg.
 Proof. by []. Qed.
 
 (* dsdp_obs_hops — the DSDP trace has exactly two hoppable receptions (Bob's
    c2 and Charlie's c3), so via [count_hops_game_of_trace] the derived game's
-   ladder has two rungs, matching [hop_sites_gc_dsdp]. *)
+   ladder has two rungs, matching [hop_sites_game_code_dsdp]. *)
 Lemma dsdp_obs_hops (card_msg card_renc : nat) :
   count_obs_hops (dsdp_alice_obs card_msg card_renc) = 2.
 Proof. by []. Qed.
@@ -680,15 +682,16 @@ Record dsdp_indcpa_adversary (P : dsdp_indcpa_experiment) := {
   adv_disjoint_from_zero_oracle : fseparate adv_locations (zero_oracle_P P).(locs) ;
 }.
 
-(* dsdp_indcpa_secrecy — the one-record IND-CPA secrecy bound, GENERIC over any
-   problem [P]: every valid adversary's advantage distinguishing the real game
-   from its all-zero endpoint is at most [count_obs_hops (corrupted_view P)] times
-   [epsilon_cpa (exp_enc_scheme P)].  Proved via the back end's [advantage_le]
-   (bridging [count_obs_hops] to [size (hop_sites ...)] then [eapply
-   advantage_le]), NOT the [gc_dsdp]-specific [advantage_gc_dsdp], which times
-   out for an abstract [P].  The DSDP [2 * epsilon_cpa AHE] bound is the
-   [dsdp_advantage_derived] corollary. *)
-Theorem dsdp_indcpa_secrecy (P : dsdp_indcpa_experiment)
+(* dsdp_indcpa_secrecy_le — the one-record IND-CPA secrecy bound, GENERIC over
+   any problem [P]: every valid adversary's advantage distinguishing the real
+   game from its all-zero endpoint is at most [count_obs_hops (corrupted_view
+   P)] times [epsilon_cpa (exp_enc_scheme P)].  Proved via the back end's
+   [advantage_le] (bridging [count_obs_hops] to [size (hop_sites ...)] then
+   [eapply advantage_le]), NOT the [game_code_dsdp]-specific
+   [advantage_game_code_dsdp_le], which times out for an abstract [P].  The
+   DSDP [2 * epsilon_cpa AHE] bound is the [dsdp_derived_game_advantage_le]
+   corollary. *)
+Theorem dsdp_indcpa_secrecy_le (P : dsdp_indcpa_experiment)
     (Adv : dsdp_indcpa_adversary P) :
   AdvantageE (real_game P) (zero_game P) (adv_package Adv)
     <= (count_obs_hops (corrupted_view P))%:R * epsilon_cpa (exp_enc_scheme P).
