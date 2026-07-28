@@ -169,7 +169,6 @@ dsdp_guess_fiber:Hunp_leak_S
 dsdp_guess_fiber:id_guess
 dsdp_guess_fiber:ir1_rv
 dsdp_guess_fiber:ir2_rv
-dsdp_guess_fiber:log_id
 dsdp_guess_fiber:o
 dsdp_guess_fiber:Pr_fdistmap_pre
 dsdp_guess_fiber:real_game_valid
@@ -276,6 +275,7 @@ extra_proba:pr_eq_comp_constraint_tail
 extra_proba:PrX_fstRV
 extra_proba:sum_cPr_eq
 indcpa_ror:id_oracle_encrypt
+indcpa_ror:indcpa_epsilon
 indcpa_ror:oracle_encrypt_iface
 indcpa_ror:oracle_encrypt_real
 indcpa_ror:oracle_encrypt_real_pkg
