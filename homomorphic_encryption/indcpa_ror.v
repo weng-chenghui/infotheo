@@ -16,7 +16,17 @@
 
     Every computational bound downstream is an [indcpa_epsilon] of an
     explicitly constructed reduction, so no scheme-independent constant
-    bounding it is assumed anywhere. *)
+    bounding it is assumed anywhere.
+
+    Stating bounds as the advantage of an explicit reduction, rather than
+    as a multiple of an assumed per-scheme constant, follows the SSProve
+    case studies (theories/Crypt/examples/): PRF.v defines
+    [prf_epsilon A := Advantage EVAL A] and bounds [Advantage IND_CPA A]
+    by reduction terms [prf_epsilon (A ∘ MOD_CPA_ff_pkg)] plus an
+    unreduced statistical summand; MACCCA.v and SymmRatchet.v name the
+    same quantity at an IND-CPA game pair [cpa_epsilon := Advantage
+    CPA_EVAL]; none of the examples assumes an unproven advantage
+    bound. *)
 
 From HB Require Import structures.
 From mathcomp Require Import all_boot all_order all_algebra reals.
