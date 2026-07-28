@@ -1,0 +1,65 @@
+% Alignment of the reduction-form statement discipline with the SSProve
+% case studies. Prose chapter: no theorem nodes, no \rocq{} citations.
+% Spec: notes/20260729-ssprove-alignment-chapter.md.
+
+\chapter{Alignment with the \ssprove{} case studies}
+\label{ch:ssprove_alignment}
+
+Every computational bound in this development is the advantage of an
+explicitly constructed reduction, written $\epscpaof{E,R}$. This is the
+statement style of \ssprove{}'s own case studies. The table below records
+the correspondence row by row. \ssprove{} sources are cited by file and
+identifier against \texttt{coq-ssprove} 0.3.1, directory
+\texttt{theories/Crypt/examples/}.
+
+\begin{center}
+\begin{tabular}{p{0.30\linewidth}p{0.30\linewidth}p{0.32\linewidth}}
+\textbf{\ssprove{} precedent} & \textbf{Pattern} & \textbf{This development} \\
+\hline
+\texttt{PRF.v}, \texttt{prf\_epsilon} &
+the advantage bound is a function of the adversary &
+\texttt{indcpa\_epsilon}, Definition~\ref{def:indcpa_assumption} \\
+\hline
+\texttt{PRF.v}, \texttt{security\_based\_on\_prf} &
+the security theorem bounds an advantage by a sum of reduction advantages
+(plus one statistical summand), with package validity and state
+disjointness as the only side conditions &
+Theorem~\ref{thm:alice_view_advantage}, a sum of two reduction advantages
+under the same side conditions \\
+\hline
+\texttt{PRF.v}, \texttt{statistical\_gap} &
+an information-theoretic summand stands beside the reduction terms &
+the $1/m$ fiber bound, discharged in closed form
+(Theorem~\ref{thm:guess_sdistr_success_le}) and composed into
+Theorem~\ref{thm:alice_guess_real} \\
+\hline
+\texttt{MACCCA.v} and \texttt{SymmRatchet.v}, \texttt{cpa\_epsilon} &
+the name of this quantity at an IND-CPA game pair, in the left--right
+(\texttt{CPA\_EVAL}) and real-or-random (\texttt{CTXT}) variants &
+the name \texttt{indcpa\_epsilon}, at a real-or-zero pair \\
+\hline
+\texttt{PRFPRG.v}, \texttt{hyb\_security\_based\_on\_prf} &
+a hybrid ladder is bounded by a sum over its rungs &
+Lemma~\ref{lem:advantage_sum_ladder_le},
+Theorem~\ref{thm:advantage_le} \\
+\hline
+\texttt{StretchPRG.v}, the comment at \texttt{prg\_epsilon} (repeated at
+the epsilon definitions of \texttt{PRFPRG.v}, \texttt{MACCCA.v},
+\texttt{SymmRatchet.v}) &
+negligibility of an assumed primitive's advantage is recorded in prose at
+its definition &
+the smallness sentence in the derivation overview,
+Chapter~\ref{ch:derivation_overview} \\
+\end{tabular}
+\end{center}
+
+Every hypothesis appearing in those case studies supplies algebraic or
+interface data: the \texttt{Parameter} declarations of \texttt{Schnorr.v},
+\texttt{SigmaProtocol.v}, \texttt{OVN.v}, \texttt{RandomOracle.v} and the
+\texttt{Assumptions/} modules declare groups, generators and their facts,
+relations, and algorithm carriers, for instance
+\texttt{gT :\ finGroupType}. Every advantage bound enters as a proved
+statement. This development follows the same discipline: every axiom in its
+trust base is upstream, recorded beside the derivation overview
+(Chapter~\ref{ch:derivation_overview}) and listed per headline in the
+repository note \texttt{notes/20260729-headline-assumptions-allowlist.md}.
