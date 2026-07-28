@@ -98,7 +98,6 @@ smc/smc_session_types.v
 smc/pismc.v
 smc/pismc_to_ssprove.v
 smc/ssprove_ext_lossless.v
-smc/ssprove_ext_statdist.v
 smc/ssprove_ext_simulator.v
 smc/ssprove_ext_lossless_heap.v
 du2002/spp_tactics.v

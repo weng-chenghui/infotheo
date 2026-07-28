@@ -32,9 +32,7 @@
    Simulation-based security (simulation axis; average-case: honest inputs
    sampled uniformly in-game)  [3-party]
      dsdp_alice_simulation_advantage_le : AdvantageE real (Sim ∘ Ideal)
-       <= 2 * epsilon_cpa AHE
-     dsdp_alice_view_statdist_le : statdist(real view law, simulated view
-       law) <= 2 * epsilon_cpa AHE *)
+       <= 2 * epsilon_cpa AHE *)
 
 From HB Require Import structures.
 From mathcomp Require Import all_boot all_order all_algebra fingroup finalg.
@@ -55,7 +53,6 @@ Require Import entropy_fiber.
 Require Import homomorphic_encryption indcpa_ror.
 Require Import dsdp_program dsdp_entropy dsdp_pismc.
 Require Import smc.ssprove_ext_lossless.
-Require Import smc.ssprove_ext_statdist.
 Require Import dsdp_game_code dsdp_symbolic_exec dsdp_game_derivation.
 Require Import dsdp_indcpa_advantage dsdp_convert dsdp_guess_fiber.
 Require Import dsdp_malicious_dotp dsdp_simulator.
@@ -837,8 +834,6 @@ Variable seed : denv AHE.
 Variable msg_of_chmsg : t_msg -> plain AHE.
 Hypothesis chmsg_of_msgK : cancel chmsg_of_msg msg_of_chmsg.
 Hypothesis card_renc_neq : card_renc != card_msg.
-Hypothesis card_msg_pos : (0 < card_msg)%N.
-Hypothesis card_renc_pos : (0 < card_renc)%N.
 
 (* dsdp_alice_simulation_advantage_le — the output-exposing real game and
    the simulator composed with the ideal functionality are distinguished with
@@ -889,50 +884,6 @@ have HX : AdvantageE
     [exact: chcipher_of_cipherK | exact: chmsg_of_msgK | exact: A_valid
      | exact: A_disj_state | exact: A_disj_ore | exact: A_disj_oze].
 by lra.
-Qed.
-
-(* dsdp_alice_view_statdist_le — the statistical distance between the real
-   corrupted-Alice view law (the cipher view together with the leaked output
-   S, the (received-ciphers, leaked-output) marginal of Alice's view) and the
-   simulated one is at most [2 * epsilon_cpa AHE].  Average-case scope: the
-   honest
-   inputs v2, v3 are sampled uniformly in-game, by the real game on one side
-   and the ideal functionality on the other.
-   Naming: subject-prefixed [dsdp_alice_view], with [statdist] naming the
-   statistical-distance quantity and [_le] the upper bound.  [3-party] *)
-Theorem dsdp_alice_view_statdist_le
-    (cipher_of_chcipher : t_cipher -> cipher AHE)
-    (chcipher_of_cipherK : cancel chcipher_of_cipher cipher_of_chcipher) :
-  statdist
-    (Pr_fst (view_resolved t_msg t_cipher
-       (real_game_leak_S renc_card rand_of_renc chmsg_of_msg
-          chcipher_of_cipher pkey_of_party msg_of_idx rand0 seed)))
-    (Pr_fst (view_resolved t_msg t_cipher
-       (dsdp_simulator_pkg renc_card rand_of_renc t_msg chcipher_of_cipher
-          pkey_of_party msg_of_idx seed
-        ∘ dsdp_ideal_pkg chmsg_of_msg msg_of_idx seed)))
-    <= 2%:R * epsilon_cpa AHE.
-Proof.
-have conv : forall (G : raw_package)
-    (D : (cipher_list t_cipher * t_msg)%type -> bool),
-  distr.pr (Pr_fst (view_resolved t_msg t_cipher G)) D
-  = distr.mu (pkg_advantage.Pr (test_adversary D ∘ G)) true
-  by move=> G D;
-     rewrite Pr_Pr_fst view_resolve_eq distr.dmargin_psumE /distr.pr;
-     apply: eq_psum => x; rewrite eqb_id.
-rewrite -(statdist_test_max _ _
-  (view_real_mass1 renc_card rand_of_renc chmsg_of_msg chcipher_of_cipher
-     pkey_of_party msg_of_idx rand0 seed card_renc_neq card_msg_pos
-     card_renc_pos)
-  (view_simulated_mass1 renc_card rand_of_renc chmsg_of_msg chcipher_of_cipher
-     pkey_of_party msg_of_idx seed card_msg_pos card_renc_pos)).
-rewrite !conv.
-apply: (le_trans (ler_norm _)).
-set Dstar := (fun t => distr.mu _ t < distr.mu _ t).
-rewrite -/(AdvantageE _ _ (test_adversary Dstar)).
-eapply dsdp_alice_simulation_advantage_le;
-  [exact: chcipher_of_cipherK | exact: (pack_valid (test_adversary Dstar))
-   | exact: fseparate0m | exact: fseparate0m | exact: fseparate0m].
 Qed.
 
 End dsdp_alice_simulation.

@@ -220,18 +220,6 @@ vectors.
   \[ \zero_S \;\approx_0\; \Sim \circ \Ideal \]
 \end{lemma}
 
-\begin{theorem}[View-law statistical distance]
-  \label{thm:alice_view_statdist}
-  \rocq{infotheo.dumas2017dual.dsdp.dsdp_main.dsdp_alice_view_statdist_le}
-  \rocqok
-  \uses{thm:alice_simulation_secure}
-  The statistical distance between the real corrupted-Alice view law (the received
-  ciphers together with the leaked output $S$) and the simulated one is at most
-  $2\,\epscpaof{E}$, same average-case scope.
-  \[ \statdist(\text{real view law},\ \text{simulated view law}) \le
-        2\,\epscpaof{E} \]
-\end{theorem}
-
 \begin{remark}[Worst-case simulation: open]
   \label{rem:worstcase_sim}
   \rocqok
