@@ -205,7 +205,7 @@ $2\,\epscpaof{E}$ carries over unchanged.
 
 \begin{lemma}[Computational distance, output-exposing games]
   \label{lem:dsdp_advantage_derived_leak_S}
-  \rocq{infotheo.dumas2017dual.dsdp.indcpa_hopping.dsdp_indcpa_advantage.dsdp_advantage_derived_leak_S}
+  \rocq{infotheo.dumas2017dual.dsdp.indcpa_hopping.dsdp_indcpa_advantage.dsdp_derived_game_advantage_le_leak_S}
   \rocqok
   \uses{def:games_leak_s,thm:dsdp_secure}
   The advantage between the output-exposing real and all-zero games is at most
@@ -507,7 +507,8 @@ full bound $1/m + 2\,\epscpa$.
   \rocqok
   \uses{def:guessing_experiment_leak_S,lem:dsdp_advantage_derived_leak_S,def:relational_advantage}
   % proof: guess_advantage_eq slides the fixed predictor out of the par
-  %   (Advantage_par); guess_advantage_le then applies dsdp_advantage_derived_leak_S
+  %   (Advantage_par); guess_advantage_le then applies
+  %   dsdp_derived_game_advantage_le_leak_S
   %   (eapply, since apply: delta-unfolds the linked games).
   The success-probability difference on the real and all-zero games equals the
   advantage of the challenger-wrapped predictor, a valid adversary, and that

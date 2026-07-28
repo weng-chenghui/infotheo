@@ -22,7 +22,7 @@ dsdp_entropy:dsdp_var_entropy
 dsdp_entropy:Pr_dsdp_nosol_eq0
 dsdp_entropy:Pr_dsdp_sol_uniform
 dsdp_entropy:S_determined
-dsdp_game_code:advantage_gc_dsdp
+dsdp_game_code:advantage_game_code_dsdp_le
 dsdp_game_code:advantage_self_zero
 dsdp_game_code:as_cipher
 dsdp_game_code:as_plain
@@ -46,9 +46,9 @@ dsdp_game_code:denote_v2_get_body
 dsdp_game_code:denote_v2_get_valid
 dsdp_game_code:denv
 dsdp_game_code:empty_denv
+dsdp_game_code:game_code_dsdp
 dsdp_game_code:game_iface
 dsdp_game_code:game_iface_leak_S
-dsdp_game_code:gc_dsdp
 dsdp_game_code:GC_enc_hop
 dsdp_game_code:GC_let
 dsdp_game_code:GC_put
@@ -67,7 +67,7 @@ dsdp_game_code:HE_epow
 dsdp_game_code:HE_mul
 dsdp_game_code:HE_sub
 dsdp_game_code:HE_var
-dsdp_game_code:hop_sites_gc_dsdp
+dsdp_game_code:hop_sites_game_code_dsdp
 dsdp_game_code:i
 dsdp_game_code:id_game_run
 dsdp_game_code:id_v2_get
@@ -203,13 +203,13 @@ dsdp_indcpa_advantage:hop_equiv_zero_leak_S
 # chapters (security.tex, landed 2026-07-17): the corrupted-relay Part and the
 # corrupted-Alice Part cover every headline, so none remain waived here.
 #
-# dsdp_simulator: the simulation chapter cites dsdp_adv_sim_le and
+# dsdp_simulator: the simulation chapter cites dsdp_advantage_sim_le and
 # dsdp_simulator_factorization; the module's other declarations (the packages,
 # the resolution/mass-1 support, the test adversary) are internal to that axis
 # and not blueprint nodes.
 dsdp_simulator:I_dsdp_ideal
 dsdp_simulator:denote_run_lossless_heap
-dsdp_simulator:dsdp_adm
+dsdp_simulator:dsdp_locs_disjoint
 dsdp_simulator:dsdp_ideal_pkg
 dsdp_simulator:dsdp_simulator_pkg
 dsdp_simulator:id_ideal_run

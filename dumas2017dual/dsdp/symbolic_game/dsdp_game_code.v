@@ -999,10 +999,11 @@ Qed.
 (* pipeline on the corrupted-Alice view of the 3-party DSDP protocol.  *)
 (* ------------------------------------------------------------------ *)
 
-(* gc_dsdp — a TEMPORARY FIXTURE game_code standing in for the output the
-   future symbolic-to-game front end will emit for the DSDP corrupted-Alice
-   view.  It is NOT a hand-written SSProve game: the actual game is the derived
-   [denote_game (all_real gc_dsdp)] (whose body mirrors [game_real] of
+(* game_code_dsdp — a TEMPORARY FIXTURE game_code standing in for the output
+   the future symbolic-to-game front end will emit for the DSDP
+   corrupted-Alice view.  It is NOT a hand-written SSProve game: the actual
+   game is the derived
+   [denote_game (all_real game_code_dsdp)] (whose body mirrors [game_real] of
    dsdp_security_indcpa.v).  This fixture exists only to exercise the back end
    (denote_run / count_hops / hop_sites / all_real / all_zero / advantage_le)
    end-to-end on a concrete two-encryption-hop instance, until the symbolic
@@ -1024,9 +1025,9 @@ Qed.
    - [GC_let (HE_emul (HE_epow c2 iU2) (HE_enc 1 iR2 ra1))] = a1;
    - [GC_let (HE_emul (HE_epow c3 iU3) (HE_enc 2 iR3 ra2))] = a2;
    - [GC_ret [a1; a2; c2; c3]] leaks the four Alice-visible ciphertext slots.
-   Its two [GC_enc_hop] nodes give [count_hops gc_dsdp = 2], the validation
-   target of [hop_sites_gc_dsdp]. *)
-Definition gc_dsdp : game_code :=
+   Its two [GC_enc_hop] nodes give [count_hops game_code_dsdp = 2], the
+   validation target of [hop_sites_game_code_dsdp]. *)
+Definition game_code_dsdp : game_code :=
   (* iV2 iV3 iU2 iR2 iU3 iR3 *)
   GC_sample card_msg (GC_sample card_msg (GC_sample card_msg
   (GC_sample card_msg (GC_sample card_msg (GC_sample card_msg
@@ -1046,32 +1047,35 @@ Definition gc_dsdp : game_code :=
   (GC_ret [:: HE_var 1 ; HE_var 0 ; HE_var 3 ; HE_var 2 ])
   )))))))))))).
 
-(* hop_sites_gc_dsdp — back-end validation: the fixture has exactly two
+(* hop_sites_game_code_dsdp — back-end validation: the fixture has exactly two
    encryption hops (the Bob-to-Alice c2 and Charlie-to-Alice c3 slots), so its
    hybrid ladder enumerates two addressable sites.  Computational ([reflexivity]
-   through [size_iota] / [count_hops]); pins the [2] in [advantage_gc_dsdp]. *)
-Lemma hop_sites_gc_dsdp : size (hop_sites gc_dsdp) = 2.
+   through [size_iota] / [count_hops]); pins the [2] in
+   [advantage_game_code_dsdp_le]. *)
+Lemma hop_sites_game_code_dsdp : size (hop_sites game_code_dsdp) = 2.
 Proof. by []. Qed.
 
-(* advantage_gc_dsdp — headline back-end validation: any adversary's SSProve
-   advantage distinguishing the real DSDP corrupted-Alice game (derived from the
-   fixture) from its all-zero endpoint is at most [2 * epsilon_cpa AHE], one
-   IND-CPA
-   cost per encryption hop.  Specialises the generic [advantage_le] to [gc_dsdp]
-   and rewrites [size (hop_sites gc_dsdp)] to [2] via [hop_sites_gc_dsdp]; the
-   four premises are exactly [advantage_le]'s adversary well-formedness and
-   state-disjointness hypotheses. *)
-Lemma advantage_gc_dsdp
+(* advantage_game_code_dsdp_le — headline back-end validation: any
+   adversary's SSProve advantage distinguishing the real DSDP corrupted-Alice
+   game (derived from the fixture) from its all-zero endpoint is at most
+   [2 * epsilon_cpa AHE], one IND-CPA cost per encryption hop.  Specialises
+   the generic [advantage_le] to [game_code_dsdp] and rewrites
+   [size (hop_sites game_code_dsdp)] to [2] via [hop_sites_game_code_dsdp];
+   the four premises are exactly [advantage_le]'s adversary well-formedness
+   and state-disjointness hypotheses. *)
+Lemma advantage_game_code_dsdp_le
     (LA : Locations) (A : raw_package)
     (A_valid : ValidPackage LA game_iface A_export A)
     (A_disj_state : fseparate LA protocol_state)
     (A_disj_ore : fseparate LA oracle_real_pkg.(locs))
     (A_disj_oze : fseparate LA oracle_zero_pkg.(locs)) :
-  AdvantageE (denote_game (all_real gc_dsdp)) (denote_game (all_zero gc_dsdp)) A
+  AdvantageE (denote_game (all_real game_code_dsdp))
+             (denote_game (all_zero game_code_dsdp)) A
     <= 2%:R * epsilon_cpa AHE.
 Proof.
-have H := advantage_le gc_dsdp A_valid A_disj_state A_disj_ore A_disj_oze.
-rewrite hop_sites_gc_dsdp in H.
+have H := advantage_le game_code_dsdp A_valid A_disj_state A_disj_ore
+  A_disj_oze.
+rewrite hop_sites_game_code_dsdp in H.
 exact: H.
 Qed.
 

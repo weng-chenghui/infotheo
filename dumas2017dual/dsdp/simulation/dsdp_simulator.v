@@ -8,8 +8,8 @@
    [dsdp_simulator_pkg] imports the ideal interface and exports
    [game_iface_leak_S]: [sim_view_body] rebuilds the four-cipher corrupted view
    from the ideal run alone, so v2 / v3 / S have no path into the fabricated
-   view — the type-level allowed-information witness.  [dsdp_adm] is the DSDP
-   admissibility class.
+   view — the type-level allowed-information witness.  [dsdp_locs_disjoint]
+   is the DSDP admissibility class.
 
    The cell writes and the reveal-oracle None fallbacks here mirror the real
    denotation [denote_run]'s GC_put / GC_put_output cases and
@@ -219,10 +219,10 @@ Definition dsdp_simulator_pkg :
     }
   ].
 
-(* dsdp_adm — the DSDP admissibility class: the adversary locations are
-   disjoint from the protocol state and from the real and zero encryption
-   oracle location sets. *)
-Definition dsdp_adm (LA : Locations) (A : raw_package) : Prop :=
+(* dsdp_locs_disjoint — the adversary-location side condition: LA is disjoint
+   from the protocol state and from the real and zero encryption oracle
+   location sets. *)
+Definition dsdp_locs_disjoint (LA : Locations) : Prop :=
   fseparate LA (protocol_state t_msg) /\
   fseparate LA (locs (oracle_real_pkg renc_card rand_of_renc msg_of_chmsg
                         chcipher_of_cipher pkey_of_party)) /\
@@ -270,26 +270,27 @@ simplify_eq_rel m.
   by case: stored => [v|]; apply: r_ret.
 Qed.
 
-(* dsdp_adv_sim_le — the output-exposing real game is
+(* dsdp_advantage_sim_le — the output-exposing real game is
    bounded-simulation secure against dsdp_ideal_pkg with simulator
-   dsdp_simulator_pkg over the dsdp_adm class, with bound
+   dsdp_simulator_pkg over the dsdp_locs_disjoint class, with bound
    [2 * epsilon_cpa AHE].
    Average-case scope: the honest inputs v2, v3 are sampled inside the
    ideal package. *)
-Lemma dsdp_adv_sim_le
+Lemma dsdp_advantage_sim_le
     (cipher_of_chcipher : t_cipher -> cipher AHE)
     (chcipher_of_cipherK : cancel chcipher_of_cipher cipher_of_chcipher) :
-  adv_sim_le (game_iface_leak_S t_msg t_cipher) dsdp_adm
+  advantage_sim_le (game_iface_leak_S t_msg t_cipher)
+    (fun LA _ => dsdp_locs_disjoint LA)
     (real_game_leak_S renc_card rand_of_renc chmsg_of_msg chcipher_of_cipher
        pkey_of_party msg_of_idx rand0 seed)
     dsdp_ideal_pkg dsdp_simulator_pkg
     (2%:R * epsilon_cpa AHE).
 Proof.
-apply: (adv_sim_le_from_endpoint
+apply: (advantage_sim_le_from_endpoint
   (Endpoint := zero_game_leak_S renc_card rand_of_renc chmsg_of_msg
      chcipher_of_cipher pkey_of_party msg_of_idx rand0 seed)).
 - move=> LA A A_valid [Hstate [Hore Hoze]].
-  eapply dsdp_advantage_derived_leak_S.
+  eapply dsdp_derived_game_advantage_le_leak_S.
   + exact: chcipher_of_cipherK.
   + exact: chmsg_of_msgK.
   + exact: A_valid.

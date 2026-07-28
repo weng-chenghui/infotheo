@@ -31,7 +31,7 @@
 
    Simulation-based security (simulation axis; average-case: honest inputs
    sampled uniformly in-game)  [3-party]
-     dsdp_alice_simulation_secure : AdvantageE real (Sim ∘ Ideal)
+     dsdp_alice_simulation_advantage_le : AdvantageE real (Sim ∘ Ideal)
        <= 2 * epsilon_cpa AHE
      dsdp_alice_view_statdist_le : statdist(real view law, simulated view
        law) <= 2 * epsilon_cpa AHE *)
@@ -120,7 +120,7 @@ Proof. by []. Qed.
 
 (* dsdp_alice_view_advantage_le — every adversary's advantage between DSDP's real
    corrupted-Alice game and its all-zero endpoint is at most 2 * epsilon_cpa AHE:
-   the generic bound [dsdp_indcpa_secrecy] (any experiment's real-vs-all-zero
+   the generic bound [dsdp_indcpa_secrecy_le] (any experiment's real-vs-all-zero
    advantage is at most its hop count times [epsilon_cpa (exp_enc_scheme P)]) at
    hop count two. [dsdp_experiment]
    is the DSDP instance of such a two-hop experiment, its corrupted-Alice trace
@@ -129,7 +129,7 @@ Theorem dsdp_alice_view_advantage_le (Adv : dsdp_indcpa_adversary dsdp_experimen
   AdvantageE (real_game dsdp_experiment) (zero_game dsdp_experiment) (adv_package Adv)
     <= 2%:R * epsilon_cpa AHE.
 Proof.
-have H := dsdp_indcpa_secrecy Adv.
+have H := dsdp_indcpa_secrecy_le Adv.
 by rewrite dsdp_experiment_hops in H.
 Qed.
 
@@ -735,7 +735,7 @@ Lemma dsdp_alice_guess_advantage_le
   AdvantageE real_game game guess_reduction <= 2%:R * epsilon_cpa AHE.
 Proof.
 rewrite /real_game /game.
-eapply dsdp_advantage_derived_leak_S.
+eapply dsdp_derived_game_advantage_le_leak_S.
 - exact: chcipher_of_cipherK.
 - exact: chmsg_of_msgK.
 - exact: guess_reduction_valid.
@@ -840,14 +840,14 @@ Hypothesis card_renc_neq : card_renc != card_msg.
 Hypothesis card_msg_pos : (0 < card_msg)%N.
 Hypothesis card_renc_pos : (0 < card_renc)%N.
 
-(* dsdp_alice_simulation_secure — the output-exposing real game and the
-   simulator composed with the ideal functionality are distinguished with
+(* dsdp_alice_simulation_advantage_le — the output-exposing real game and
+   the simulator composed with the ideal functionality are distinguished with
    advantage at most [2 * epsilon_cpa AHE] by any valid adversary whose locations
    are disjoint from the protocol state and the real and zero encryption
    oracle location sets.  Average-case scope: the honest inputs v2, v3 are
    sampled uniformly in-game, by the real game on one side and the ideal
    functionality on the other.  [3-party] *)
-Theorem dsdp_alice_simulation_secure
+Theorem dsdp_alice_simulation_advantage_le
     (cipher_of_chcipher : t_cipher -> cipher AHE)
     (chcipher_of_cipherK : cancel chcipher_of_cipher cipher_of_chcipher)
     (LA : Locations) (A : raw_package)
@@ -885,7 +885,7 @@ have HX : AdvantageE
     (zero_game_leak_S renc_card rand_of_renc chmsg_of_msg chcipher_of_cipher
        pkey_of_party msg_of_idx rand0 seed)
     A <= 2%:R * epsilon_cpa AHE
-  by eapply dsdp_advantage_derived_leak_S;
+  by eapply dsdp_derived_game_advantage_le_leak_S;
     [exact: chcipher_of_cipherK | exact: chmsg_of_msgK | exact: A_valid
      | exact: A_disj_state | exact: A_disj_ore | exact: A_disj_oze].
 by lra.
@@ -930,7 +930,7 @@ rewrite !conv.
 apply: (le_trans (ler_norm _)).
 set Dstar := (fun t => distr.mu _ t < distr.mu _ t).
 rewrite -/(AdvantageE _ _ (test_adversary Dstar)).
-eapply dsdp_alice_simulation_secure;
+eapply dsdp_alice_simulation_advantage_le;
   [exact: chcipher_of_cipherK | exact: (pack_valid (test_adversary Dstar))
    | exact: fseparate0m | exact: fseparate0m | exact: fseparate0m].
 Qed.
