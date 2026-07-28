@@ -1,1 +1,2 @@
 - [Interpreter chapter conventions](interpreter_conventions.md) — proc/rstep/step_sound terminology map, active_senders vs reducible distinction, q-macros for constructors
+- [SPP-triangle conventions](spp_triangle_conventions.md) — fig:infotheo:spp-triangle macros (Sim/View, inline FinStoch), two-sense "commutation", corrupted-Bob-only mechanization scope, Iwamoto 5.6 as context cite
