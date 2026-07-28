@@ -782,7 +782,9 @@ Qed.
    [log card_msg - log (1 + 2 * card_msg * epsilon_cpa AHE) <= Hunp_leak_S]:
    the predictor's unpredictability entropy on the output-exposing real game is
    at least the closed-form bound, approaching [log card_msg] as
-   [epsilon_cpa AHE -> 0].  [3-party] *)
+   [epsilon_cpa AHE -> 0].
+   Naming: subject-prefixed [dsdp_alice], with [unpredictability_entropy]
+   naming [Hunp_leak_S] and [_ge] the lower bound.  [3-party] *)
 Theorem dsdp_alice_unpredictability_entropy_ge
     (cipher_of_chcipher : t_cipher -> cipher AHE)
     (chcipher_of_cipherK : cancel chcipher_of_cipher cipher_of_chcipher)
@@ -802,20 +804,15 @@ Theorem dsdp_alice_unpredictability_entropy_ge
           pkey_of_party msg_of_idx rand0 seed predictor)%R.
 Proof.
 rewrite /Hunp_leak_S.
-have Hcard0 : (0 < card_msg)%N
-  by have [gm _ _] := Hmsg_bij;
-     rewrite -[card_msg]card_ord; apply/card_gt0P; exists (gm 0%R).
-have Hpr_le :
-    (guess_sdistr_success_real renc_card rand_of_renc chmsg_of_msg
-       chcipher_of_cipher pkey_of_party msg_of_idx rand0 seed predictor
-     <= card_msg%:R^-1 + 2%:R * epsilon_cpa AHE)%R
-  by apply: (dsdp_alice_guess_V2_real_le chcipher_of_cipherK Hore Hoze Hinj).
-have Hinvm_pos : (0 < card_msg%:R^-1 :> R)%R
-  by rewrite invr_gt0 ltr0n Hcard0.
-have Hbound_pos : (0 < card_msg%:R^-1 + 2%:R * epsilon_cpa AHE :> R)%R
-  by rewrite ltr_pwDl // mulr_ge0 //.
-rewrite -(log_id (m := card_msg) (eps := epsilon_cpa AHE) Hcard0 epsilon_cpa_ge0).
-by rewrite lerN2 ler_log //.
+have Hcard_pos : (0 < card_msg%:R :> R)%R
+  by have [gm _ _] := Hmsg_bij; rewrite ltr0n -[card_msg]card_ord;
+     apply/card_gt0P; exists (gm 0%R).
+have Hnum_pos : (0 < 1 + 2%:R * card_msg%:R * epsilon_cpa AHE :> R)%R
+  by exact: ltr_pwDl ltr01
+    (mulr_ge0 (mulr_ge0 (ler0n _ 2) (ler0n _ _)) epsilon_cpa_ge0).
+rewrite lerNr opprB -logDiv // ler_log ?posrE ?divr_gt0 //
+  mulrDl mul1r mulrAC (mulfK (lt0r_neq0 Hcard_pos)).
+exact: (dsdp_alice_guess_V2_real_le chcipher_of_cipherK Hore Hoze Hinj).
 Qed.
 
 End dsdp_alice_guess.

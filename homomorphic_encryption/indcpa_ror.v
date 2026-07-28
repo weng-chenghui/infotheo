@@ -230,6 +230,24 @@ Definition oracle_encrypt_zero : raw_package :=
 
 End indcpa_ror.
 
+(** indcpa_epsilon — the IND-CPA real-or-zero advantage of [reduction]: the
+    [AdvantageE] of distinguishing [oracle_encrypt_real] from
+    [oracle_encrypt_zero]. *)
+Definition indcpa_epsilon
+    (AHE : AHEncType) (Renc : finType) (index_renc : nat)
+    (renc_card : #|Renc| = index_renc) (rand_of_renc : Renc -> rand AHE)
+    (t_msg t_cipher : choice_type)
+    (msg_of_chmsg : t_msg -> plain AHE)
+    (chcipher_of_cipher : cipher AHE -> t_cipher)
+    (pkey_of_party : party_id -> pub_key AHE)
+    (reduction : raw_package) : R :=
+  AdvantageE
+    (oracle_encrypt_real AHE Renc index_renc renc_card rand_of_renc
+       t_msg t_cipher msg_of_chmsg chcipher_of_cipher pkey_of_party)
+    (oracle_encrypt_zero AHE Renc index_renc renc_card rand_of_renc
+       t_msg t_cipher chcipher_of_cipher pkey_of_party)
+    reduction.
+
 (** epsilon_cpa AHE — the IND-CPA real-or-zero advantage bound of [AHE].
     Kind: canonical.
     Why per-scheme: the hypothesis below quantifies over every [AHEncType].
