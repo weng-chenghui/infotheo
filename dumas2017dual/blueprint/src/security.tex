@@ -157,8 +157,8 @@ Part~\ref{part:autoderiv} (the final part).
 
 \begin{theorem}[Guessing the challenge secret, real game]
   \label{thm:alice_guess_real}
-  \rocq{infotheo.dumas2017dual.dsdp.dsdp_main.dsdp_alice_guess_real_le,
-       infotheo.dumas2017dual.dsdp.dsdp_main.dsdp_alice_guess_ideal_le,
+  \rocq{infotheo.dumas2017dual.dsdp.dsdp_main.dsdp_alice_guess_V2_real_le,
+       infotheo.dumas2017dual.dsdp.dsdp_main.dsdp_alice_guess_V2_zero_le,
        infotheo.dumas2017dual.dsdp.dsdp_main.dsdp_alice_guess_advantage_le}
   \rocqok
   \uses{thm:alice_view_advantage,lem:dsdp_fiber_uniform}
@@ -172,7 +172,7 @@ Part~\ref{part:autoderiv} (the final part).
 
 \begin{theorem}[Unpredictability entropy]
   \label{thm:alice_unpredictability}
-  \rocq{infotheo.dumas2017dual.dsdp.dsdp_main.dsdp_alice_unpredictability_ge}
+  \rocq{infotheo.dumas2017dual.dsdp.dsdp_main.dsdp_alice_unpredictability_entropy_ge}
   \rocqok
   \uses{thm:alice_guess_real}
   Equivalently in entropy form, the predictor's unpredictability entropy on the

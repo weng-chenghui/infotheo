@@ -488,7 +488,7 @@ full bound $1/m + 2\,\epscpa$.
 
 \begin{theorem}[Information-theoretic bound at the endpoint]
   \label{thm:guess_sdistr_success_le}
-  \rocq{infotheo.dumas2017dual.dsdp.dsdp_main.dsdp_alice_guess_ideal_le}
+  \rocq{infotheo.dumas2017dual.dsdp.dsdp_main.dsdp_alice_guess_V2_zero_le}
   \rocqok
   \uses{lem:guess_success_sdistr_eq_fdist,lem:guess_fdist_success_le}
   % proof: rewrite Prexp(zero_S) by the connector guess_success_sdistr_eq_fdist,
@@ -520,7 +520,7 @@ full bound $1/m + 2\,\epscpa$.
 
 \begin{theorem}[Full secrecy by composition]
   \label{thm:dsdp_alice_secrecy_leak_S}
-  \rocq{infotheo.dumas2017dual.dsdp.dsdp_main.dsdp_alice_guess_real_le}
+  \rocq{infotheo.dumas2017dual.dsdp.dsdp_main.dsdp_alice_guess_V2_real_le}
   \rocqok
   \uses{thm:guess_sdistr_success_le,lem:guess_advantage_le}
   % proof: triangle Prexp(real_S) <= Prexp(zero_S) + |Prexp(real_S) - Prexp(zero_S)|,

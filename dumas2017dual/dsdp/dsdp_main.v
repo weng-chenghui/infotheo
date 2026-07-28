@@ -23,10 +23,10 @@
 
    Corrupted-Alice secrecy (indcpa_hopping axis), the guessing triangle  [3-party]
      dsdp_alice_view_advantage_le : AdvantageE <= 2 * epsilon_cpa AHE
-     dsdp_alice_guess_ideal_le : guess <= 1/m (all-zero endpoint)
+     dsdp_alice_guess_V2_zero_le : guess <= 1/m (all-zero endpoint)
      dsdp_alice_guess_advantage_le : AdvantageE <= 2 * epsilon_cpa AHE
-     dsdp_alice_guess_real_le : guess <= 1/m + 2 * epsilon_cpa AHE
-     dsdp_alice_unpredictability_ge : H_unp >= log m - log (1 + 2 m
+     dsdp_alice_guess_V2_real_le : guess <= 1/m + 2 * epsilon_cpa AHE
+     dsdp_alice_unpredictability_entropy_ge : H_unp >= log m - log (1 + 2 m
        epsilon_cpa AHE)
 
    Simulation-based security (simulation axis; average-case: honest inputs
@@ -702,11 +702,11 @@ Let guess_reduction : raw_package :=
   guessing_challenger t_msg t_cipher
     ∘ par (pack predictor) (ID (game_iface_leak_S t_msg t_cipher)).
 
-(* dsdp_alice_guess_ideal_le — the SSProve-side success probability of the
+(* dsdp_alice_guess_V2_zero_le — the SSProve-side success probability of the
    all-zero guessing experiment is at most 1/card_msg: the connector
    [guess_success_sdistr_eq_fdist] crosses to the Infotheo side, then the fiber
    bound [guess_fdist_success_le].  [3-party] *)
-Lemma dsdp_alice_guess_ideal_le :
+Lemma dsdp_alice_guess_V2_zero_le :
   injective (fun v : plain AHE => w_u3 * v) ->
   guess_sdistr_success renc_card rand_of_renc chmsg_of_msg chcipher_of_cipher
     pkey_of_party msg_of_idx rand0 seed predictor <= card_msg%:R^-1.
@@ -744,7 +744,7 @@ eapply dsdp_advantage_derived_leak_S.
 - exact: Hoze.
 Qed.
 
-(* dsdp_alice_guess_real_le — Alice's probability of guessing the challenge
+(* dsdp_alice_guess_V2_real_le — Alice's probability of guessing the challenge
    secret V2 from her cipher view and the leaked scalar-product output S is at
    most 1/card_msg plus twice the IND-CPA advantage: the fiber bound 1/card_msg
    at the all-zero endpoint, plus the 2 * epsilon_cpa AHE cost of moving to the
@@ -753,7 +753,7 @@ Qed.
    Naming: subject-prefixed [dsdp_alice_guess], with [real] naming the real
    endpoint game the probability is measured on and [_le] the upper bound.
    [3-party] *)
-Theorem dsdp_alice_guess_real_le
+Theorem dsdp_alice_guess_V2_real_le
     (cipher_of_chcipher : t_cipher -> cipher AHE)
     (chcipher_of_cipherK : cancel chcipher_of_cipher cipher_of_chcipher)
     (Hore : fseparate (locs predictor)
@@ -770,7 +770,7 @@ Proof.
 have Hzero : guess_sdistr_success renc_card rand_of_renc chmsg_of_msg
     chcipher_of_cipher pkey_of_party msg_of_idx rand0 seed predictor
     <= card_msg%:R^-1
-  by exact: (dsdp_alice_guess_ideal_le Hinj).
+  by exact: (dsdp_alice_guess_V2_zero_le Hinj).
 apply: (@le_trans _ _ (guess_sdistr_success renc_card rand_of_renc chmsg_of_msg
     chcipher_of_cipher pkey_of_party msg_of_idx rand0 seed predictor
     + 2%:R * epsilon_cpa AHE)).
@@ -781,12 +781,12 @@ apply: (@le_trans _ _ (guess_sdistr_success renc_card rand_of_renc chmsg_of_msg
 - by rewrite lerD2r.
 Qed.
 
-(* dsdp_alice_unpredictability_ge — the entropy lower bound
+(* dsdp_alice_unpredictability_entropy_ge — the entropy lower bound
    [log card_msg - log (1 + 2 * card_msg * epsilon_cpa AHE) <= Hunp_leak_S]:
    the predictor's unpredictability entropy on the output-exposing real game is
    at least the closed-form bound, approaching [log card_msg] as
    [epsilon_cpa AHE -> 0].  [3-party] *)
-Theorem dsdp_alice_unpredictability_ge
+Theorem dsdp_alice_unpredictability_entropy_ge
     (cipher_of_chcipher : t_cipher -> cipher AHE)
     (chcipher_of_cipherK : cancel chcipher_of_cipher cipher_of_chcipher)
     (Hore : fseparate (locs predictor)
@@ -812,7 +812,7 @@ have Hpr_le :
     (guess_sdistr_success_real renc_card rand_of_renc chmsg_of_msg
        chcipher_of_cipher pkey_of_party msg_of_idx rand0 seed predictor
      <= card_msg%:R^-1 + 2%:R * epsilon_cpa AHE)%R
-  by apply: (dsdp_alice_guess_real_le chcipher_of_cipherK Hore Hoze Hinj).
+  by apply: (dsdp_alice_guess_V2_real_le chcipher_of_cipherK Hore Hoze Hinj).
 have Hinvm_pos : (0 < card_msg%:R^-1 :> R)%R
   by rewrite invr_gt0 ltr0n Hcard0.
 have Hbound_pos : (0 < card_msg%:R^-1 + 2%:R * epsilon_cpa AHE :> R)%R
