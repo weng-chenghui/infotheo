@@ -102,7 +102,8 @@ short). Derived RVs:
 
 ```
 Definition Sout : {RV alice_sample_fdist -> plain AHE} :=
-  dsdp_output w_v1 w_u1 w_u2 w_u3 `o [% V2, V3].
+  uncurry2 (dsdp_output w_v1 w_u1 w_u2 w_u3) `o [% V2, V3].
+  (* curried head needs the uncurried composition idiom, probe C2 *)
 Definition E_bob_v2     : {RV alice_sample_fdist -> t_cipher} :=
   (* chcipher_of_cipher (enc (pkey_of_party Bob) V2 (rand_of_renc Rho2)) *)
 Definition E_charlie_v3 : {RV alice_sample_fdist -> t_cipher} :=
@@ -182,11 +183,29 @@ average-case scope per section 1):
 D : plain AHE * plain AHE * dsdp_alice_viewT -> bool   (* (v2, v3, view) *)
 ```
 
-Resampling lemma (the load-bearing product fact, audit F6): for a
-coordinate `Rho` read by no component of `Ctx`, the law of
-`[% Ctx, chcipher_of_cipher `o (enc pk v) `o (rand_of_renc `o Rho)]` equals
-`` `p_ Ctx >>= fun c => fdistmap (pair c) (enc_fdist pk v) ``. Candidate
-name `enc_slot_resampleE` (equation suffix); fixed at implementation.
+Resampling lemma (the load-bearing product fact, audit F6; generalized per
+probe correction C1 — a fixed plaintext is too weak, since the hop's
+challenge plaintext `V2` is itself a context coordinate). For a coordinate
+`Rho` read by no component of `Ctx` and a context-reading slot map
+`k : ctxT -> Renc -> t_cipher` (a LEMMA binder, not a section `Variable`,
+so both arms instantiate it):
+
+```
+Lemma enc_slot_resampleE k :
+  `p_ [% Ctx, (fun t => k (Ctx t) (Rho t)) : {RV _ -> t_cipher}]
+    = (`p_ Ctx) `X (fun a => fdistmap (k a) (`p_ Rho)).
+```
+
+(kernel `fdist_prod` `` `X ``, probe-verified provable monadically via
+`fdist_prod_bindE`/`fdistmap_bind`/`fdist_prod1`/`fdistmap_comp`; the
+`>>=` form is a one-line corollary.) Supporting glue toolkit, probe-verified
+absent from infotheo and ~30 lines total: `fdist_prod_bindE`
+(`Q `X W = Q >>= fun a => fdistmap (pair a) (W a)`), `fdistmap_bind`
+(map-bind swap, via `fdistbindA`), `Pr_fdistmap_bool`
+(`Pr (fdistmap D m) [set true] = Pr m [set t | D t]`), `fdist_prod2`
+(`(Q1 `x Q2)`2 = Q2`), plus coordinate-law and independence helpers
+(`fdist_prod1`, `prod_dist_inde_RV`, `inde_dist_of_RV2`). `eq_fdistbind` /
+`eq_fdistmap` do not exist: use `congr` + `boolp.funext`.
 
 Hop reductions and hop equalities (audit F7: equalities, not `<=` — the
 same proof, and a mis-typed view can no longer yield a vacuously true
@@ -238,17 +257,22 @@ audit F11):
 
 ```
 Lemma guess_all_zero_le_invm (g : dsdp_alice_viewT -> plain AHE) :
-  `Pr[ (g `o AliceView_all_zero) = V2 ] <= (#|plain AHE|%:R)^-1.
+  Pr alice_sample_fdist [set t | (g `o AliceView_all_zero) t == V2 t]
+    <= (#|plain AHE|%:R)^-1.
 ```
 
-No entropy detour: the chain is conditional-law all the way.
+Statement form per probe C3: `` `Pr[ X = a ] `` is `pfwd1` with a value on
+the right — there is no RV-versus-RV form — so guess events are stated as
+`Pr _ [set t | _ t == _ t]`, exactly what `cinde_diagonal_bound` produces
+(cf. `dsdp_guess_fiber.v:226`). No entropy detour: the chain is
+conditional-law all the way.
 
 ## 6. Headlines
 
 ```
 Theorem dsdp_alice_guess_fdist_V2_real_le
     (g : dsdp_alice_viewT -> plain AHE) :
-  `Pr[ (g `o AliceView) = V2 ]
+  Pr alice_sample_fdist [set t | (g `o AliceView) t == V2 t]
     <= (#|plain AHE|%:R)^-1
        + indcpa_fdist_epsilon (pkey_of_party Bob)
            (hop0_reduction (distinguisher_of_guess g))
@@ -256,9 +280,11 @@ Theorem dsdp_alice_guess_fdist_V2_real_le
            (hop1_reduction (distinguisher_of_guess g)).
 
 Theorem dsdp_alice_unpredictability_fdist_ge (g)
-    (Hpos : 0 < `Pr[ (g `o AliceView) = V2 ]) :
+    (Hpos : 0 < Pr alice_sample_fdist
+                   [set t | (g `o AliceView) t == V2 t]) :
   log (#|plain AHE|%:R) - log (1 + #|plain AHE|%:R * (eps0 g + eps1 g))
-    <= - log `Pr[ (g `o AliceView) = V2 ].
+    <= - log (Pr alice_sample_fdist
+                [set t | (g `o AliceView) t == V2 t]).
 
 Definition dsdp_alice_simulator (s : plain AHE) :
     R.-fdist dsdp_alice_viewT :=
@@ -359,8 +385,9 @@ distinct.
 - The ~250-line P-swap re-proof of the `dsdp_guess_fiber.v:1419-1685`
   chain is mechanical but sensitive to tuple-shape mismatches; keep the
   view tuple nesting identical to the fiber chain's conditioning tuple.
-- infotheo product-glue gaps: a local product-coordinate toolkit section
-  may still be needed for the resampling lemma; reusable, acceptable.
+- infotheo product-glue toolkit: confirmed needed and confirmed small
+  (probe C8, ~30 lines: the four glue lemmas of section 4 plus coordinate
+  law/independence helpers); reusable, acceptable.
 - `dsdp_alice_simulator`'s slot layout must match `dsdp_alice_viewT`
   nesting exactly; fixed at implementation together with
   `enc_slot_resampleE`.
@@ -381,8 +408,23 @@ distinct.
 - Statement comments: declarative first sentence + trailing `Naming:`
   paragraph (model: `dsdp_main.v:750-755`); no status/meta narration in
   rendered positions.
-- RV algebra notations: `\*`, `\+`, `const_RV`, `` `o `` (no `*o`; `\o`
-  only for plain functions); fdist bind `>>=` in `fdist_scope`.
+- RV algebra notations (probe C4): infotheo's backticked only-parsing
+  family `` `+ ``, `` `* ``, `` `+cst ``, `` `*cst `` etc., `const_RV`,
+  `` `o `` (no `*o`, no `\*`/`\+` — those are function-level ops; `\o` only
+  for plain functions); fdist bind `>>=` in `fdist_scope`.
+- Any auxiliary abstract ring carrying RV arithmetic must be
+  `finComNzRingType`, or canonical-structure resolution fails (probe C5);
+  `plain AHE` already is one.
+- Immediately after the `indcpa_fdist_adversary` record:
+  `Arguments adv_choose : clear implicits.` (likewise `adv_plain`,
+  `adv_decide`) — `Set Implicit Arguments` otherwise makes the record
+  argument implicit and the sketched applications fail (probe C6).
+- Applying `Pr_dsdp_sol_uniform_ring`: supply our own
+  `#|(R * R)%type : finType| = _.-1.+1` equation and close the
+  uniformity premise with `congr fdist_uniform; exact: eq_irrelevance`
+  (its exported premise names a section-`Let` subproof); `apply:` leaves
+  the three hypotheses as goals in declaration order — use `-` bullets
+  (probe C7).
 - Pre-commit: record-field disjointness check (`indcpa_fdist_adversary`
   fields vs `dsdp_indcpa_adversary`'s), rocq-auditor Stage 2 as usual.
 
@@ -397,6 +439,13 @@ distinct.
 - Audits already applied to this spec: adversarial soundness (verdict
   NO-GO -> fixes folded in), mathcomp naming/style (all renames folded
   in). Findings log below.
+- Probe-compiled (2026-07-29, kept at
+  `<session scratchpad>/probe_infotheo_leg.v`, 43 declarations, exit 0,
+  boolp-trio axioms only): P1 signatures, P2 resampling (product + bind +
+  context-dependent-slot forms), P3 hop-arm change-of-variables and
+  `|real - zero|` equality, P4 `Pr_dsdp_sol_uniform_ring` applicability,
+  P5 `cinde_RV_comp` ∘ `cinde_diagonal_bound` chain. Corrections C1-C8
+  folded into sections 3, 4, 5, 6, 9, 10.
 
 ## 12. Audit resolution log
 
@@ -418,6 +467,14 @@ distinct.
 | F14 fidelity remark model-dependent | decrypt-on-receive note (sections 1, 3) |
 | F15 nonexistent notations | sketches corrected (`dsdp_output `o`, `>>=`, no `*o`) |
 | Naming audit W1-W12, table | all renames adopted (section 7); false precedents removed |
+| C1 fixed-plaintext resample lemma too weak for the hops | generalized to context-reading slot map `k`, lemma binder (section 4) |
+| C2 curried `dsdp_output` composition | `uncurry2` idiom (section 3) |
+| C3 no RV-vs-RV `` `Pr[ _ = _ ] `` form | guess statements as `Pr _ [set t \| _ t == _ t]` (sections 5, 6) |
+| C4 `\*`/`\+` are not RV notations | backticked only-parsing family (section 10) |
+| C5 RV arithmetic needs `finComNzRingType` | convention noted (section 10) |
+| C6 record projections get implicit record arg | `Arguments ... : clear implicits.` (section 10) |
+| C7 exported subproof in fiber lemma's premise | `eq_irrelevance` discharge + bullet discipline (section 10) |
+| C8 glue toolkit scope | four named glue lemmas + helpers, ~30 lines (sections 4, 9) |
 
 ## 13. Out of scope
 
