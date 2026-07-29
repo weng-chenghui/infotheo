@@ -161,4 +161,33 @@ Notation AliceView_all_zero := (AliceView_zero_prefix 2).
 Definition E_bob_v2 := hop0_cipher 0.
 Definition E_charlie_v3 := hop1_cipher 0.
 
+Definition enc_fdist (pk : pub_key AHE) (v : plain AHE) :
+    R.-fdist t_cipher :=
+  fdistmap (fun r => chcipher_of_cipher (enc pk v (rand_of_renc r)))
+           (fdist_uniform card_renc).
+
+Record indcpa_fdist_adversary := {
+  adv_context : finType ;
+  adv_choose : R.-fdist adv_context ;
+  adv_plain : adv_context -> plain AHE ;
+  adv_decide : adv_context -> t_cipher -> bool }.
+
+Arguments adv_choose : clear implicits.
+Arguments adv_plain : clear implicits.
+Arguments adv_decide : clear implicits.
+
+Definition indcpa_fdist_success_real (pk : pub_key AHE)
+    (adv : indcpa_fdist_adversary) : R :=
+  Pr (adv_choose adv >>= (fun c => fdistmap (adv_decide adv c)
+                                     (enc_fdist pk (adv_plain adv c))))
+     [set true].
+Definition indcpa_fdist_success_zero (pk : pub_key AHE)
+    (adv : indcpa_fdist_adversary) : R :=
+  Pr (adv_choose adv >>= (fun c => fdistmap (adv_decide adv c)
+                                     (enc_fdist pk 0)))
+     [set true].
+Definition indcpa_fdist_epsilon (pk : pub_key AHE)
+    (adv : indcpa_fdist_adversary) : R :=
+  `| indcpa_fdist_success_real pk adv - indcpa_fdist_success_zero pk adv |.
+
 End dsdp_alice_infotheo_secrecy.
