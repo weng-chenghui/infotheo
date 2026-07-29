@@ -834,4 +834,38 @@ apply: Order.POrderTheory.le_trans (lerB (Order.POrderTheory.lexx _) Hzero) _.
 exact: Order.POrderTheory.le_trans (ler_norm _) (ler_distD _ _ _).
 Qed.
 
+(* The advantage against Bob's key of the hop-0 reduction of the distinguisher
+   associated with a predictor. *)
+Let eps0 (g : dsdp_alice_viewT -> plain AHE) : R :=
+  indcpa_fdist_epsilon (pkey_of_party Bob)
+    (hop0_reduction (distinguisher_of_guess g)).
+
+(* The advantage against Charlie's key of the hop-1 reduction of the
+   distinguisher associated with a predictor. *)
+Let eps1 (g : dsdp_alice_viewT -> plain AHE) : R :=
+  indcpa_fdist_epsilon (pkey_of_party Charlie)
+    (hop1_reduction (distinguisher_of_guess g)).
+
+(* The negative logarithm of the success probability of a predictor reading
+   Alice's real view is at least log #|plain AHE| minus the logarithm of one
+   plus #|plain AHE| times the sum of the two hop advantages. *)
+Theorem dsdp_alice_unpredictability_fdist_ge
+    (g : dsdp_alice_viewT -> plain AHE)
+    (Hpos : 0 < Pr alice_sample_fdist
+                  [set t | (g `o AliceView) t == V2 t]) :
+  log (#|plain AHE|%:R)
+    - log (1 + #|plain AHE|%:R * (eps0 g + eps1 g))
+  <= - log (Pr alice_sample_fdist
+              [set t | (g `o AliceView) t == V2 t]).
+Proof.
+have Hcard_pos : (0 < #|plain AHE|%:R :> R) by rewrite ltr0n card_plain_gt0.
+have Heps_ge0 : 0 <= eps0 g + eps1 g
+  by rewrite addr_ge0 // /eps0 /eps1 /indcpa_fdist_epsilon normr_ge0.
+have Hnum_pos : (0 < 1 + #|plain AHE|%:R * (eps0 g + eps1 g) :> R)
+  by exact: ltr_pwDl ltr01 (mulr_ge0 (ler0n _ _) Heps_ge0).
+rewrite lerNr opprB -logDiv // ler_log ?posrE ?divr_gt0 //.
+rewrite mulrDl mul1r mulrAC (divff (lt0r_neq0 Hcard_pos)) mul1r addrA.
+exact: dsdp_alice_guess_fdist_V2_real_le.
+Qed.
+
 End dsdp_alice_infotheo_secrecy.
