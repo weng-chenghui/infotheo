@@ -150,8 +150,13 @@ Require Import dsdp_program dsdp_entropy.
 (*                              key                                           *)
 (*       AliceCombineCharlie == Alice's outgoing combine addressed to         *)
 (*                              Charlie's key                                 *)
-(*        AliceDecryptedRecv == the plaintext of Alice's final                *)
+(*            AliceRecvPlain == the plaintext of Alice's final                *)
 (*                              decrypt-on-receive                            *)
+(*             AliceViewFull == Alice's four real observables: the reduced    *)
+(*                              view, the two combines and that plaintext     *)
+(*        alice_view_full_ok == those four observables assemble into the      *)
+(*                              reconstruction of the full view from the      *)
+(*                              reduced view                                  *)
 (* ```                                                                        *)
 (*                                                                            *)
 (* Scope. The statements are average-case over the honest inputs V2 and V3,   *)
@@ -1369,42 +1374,58 @@ Definition alice_view_full_of (v : dsdp_alice_viewT) :
   let recv_plain := s - w_u1 * w_v1 + r2 + r3 in
   (v, combine_bob, combine_charlie, recv_plain).
 
-(* Alice's combine addressed to Bob's key: the ciphertext she received from Bob
-   raised to her second weight, times an encryption of her first mask. *)
+(* Alice's outgoing combine toward Bob's key, replaying her real protocol step:
+   the ciphertext she received from Bob raised to her second weight, times an
+   encryption of her first mask.  Used by alice_view_full_ok. *)
 Definition AliceCombineBob : {RV alice_sample_fdist -> cipher AHE} :=
   fun t => Emul
     (Epow (enc (pkey_of_party Bob) (V2 t) (rand_of_renc (Rho2 t))) w_u2)
     (enc (pkey_of_party Bob) (R2 t) (rand_of_renc (RA1 t))).
 
-(* Alice's combine addressed to Charlie's key: the ciphertext she received from
-   Charlie raised to her third weight, times an encryption of her second
-   mask. *)
+(* Alice's outgoing combine toward Charlie's key, the symmetric counterpart of
+   AliceCombineBob: the ciphertext she received from Charlie raised to her
+   third weight, times an encryption of her second mask.  Used by
+   alice_view_full_ok. *)
 Definition AliceCombineCharlie : {RV alice_sample_fdist -> cipher AHE} :=
   fun t => Emul
     (Epow (enc (pkey_of_party Charlie) (V3 t) (rand_of_renc (Rho3 t))) w_u3)
     (enc (pkey_of_party Charlie) (R3 t) (rand_of_renc (RA2 t))).
 
-(* The plaintext Alice obtains from her final decrypt-on-receive: the two
-   weighted inputs of the other parties plus her two masks. *)
-Definition AliceDecryptedRecv : {RV alice_sample_fdist -> plain AHE} :=
+(* The plaintext Alice recovers at her final decrypt-on-receive step: the two
+   weighted inputs of the other parties plus her two masks.  The last of the
+   four observables alice_view_full_ok assembles.
+   Naming: Owner-Verb-Noun, parallel to AliceCombineBob and
+   AliceCombineCharlie; [Plain] is the AHE plaintext carrier. *)
+Definition AliceRecvPlain : {RV alice_sample_fdist -> plain AHE} :=
   fun t => w_u2 * V2 t + w_u3 * V3 t + R2 t + R3 t.
 
-(* The full corrupted-Alice view is a deterministic image of the reduced
-   view.
+(* Alice's four real observables: her reduced view, her two outgoing combines,
+   and the plaintext of her final decrypt-on-receive. *)
+Definition AliceViewFull :
+    {RV alice_sample_fdist ->
+       (dsdp_alice_viewT * cipher AHE * cipher AHE * plain AHE)%type} :=
+  [% AliceView, AliceCombineBob, AliceCombineCharlie, AliceRecvPlain].
+
+(* Alice's four real observables assemble into the reconstruction of the full
+   view from the reduced view.
    Naming: [_ok] marks the correctness lemma of [alice_view_full_of], after
    the [bob_ext] and [bob_ext_ok] pair. *)
 Lemma alice_view_full_ok :
   (fun t => alice_view_full_of (AliceView t))
   = (fun t => (AliceView t, AliceCombineBob t, AliceCombineCharlie t,
-               AliceDecryptedRecv t)).
+               AliceRecvPlain t)).
 Proof.
 apply/boolp.funext => t.
 rewrite /alice_view_full_of /AliceCombineBob /AliceCombineCharlie
-        /AliceDecryptedRecv /= !chcipher_of_cipherK.
+        /AliceRecvPlain /= !chcipher_of_cipherK.
 congr (_, _, _, _).
 rewrite /Sout /comp_RV /dsdp_output /=.
 ring.
 Qed.
+
+(* Alice's full view is the reconstruction applied to her reduced view. *)
+Lemma alice_view_fullE : AliceViewFull = (alice_view_full_of \o AliceView).
+Proof. exact: esym alice_view_full_ok. Qed.
 
 (* A predictor reading Alice's full real view matches Bob's input with
    probability at most 1/#|plain AHE| plus the advantages of the two hop
@@ -1414,8 +1435,7 @@ Qed.
 Corollary dsdp_alice_guess_fdist_full_le
     (g' : dsdp_alice_viewT * cipher AHE * cipher AHE * plain AHE
           -> plain AHE) :
-  Pr alice_sample_fdist
-     [set t | ((g' \o alice_view_full_of) `o AliceView) t == V2 t]
+  Pr alice_sample_fdist [set t | (g' `o AliceViewFull) t == V2 t]
     <= #|plain AHE|%:R^-1
        + indcpa_fdist_epsilon (pkey_of_party Bob)
            (hop0_reduction
@@ -1423,6 +1443,9 @@ Corollary dsdp_alice_guess_fdist_full_le
        + indcpa_fdist_epsilon (pkey_of_party Charlie)
            (hop1_reduction
               (distinguisher_of_guess (g' \o alice_view_full_of))).
-Proof. exact: dsdp_alice_guess_fdist_V2_real_le. Qed.
+Proof.
+rewrite alice_view_fullE.
+exact: dsdp_alice_guess_fdist_V2_real_le.
+Qed.
 
 End dsdp_alice_infotheo_secrecy.
