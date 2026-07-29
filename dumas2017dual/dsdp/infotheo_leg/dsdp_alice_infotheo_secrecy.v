@@ -868,4 +868,261 @@ rewrite mulrDl mul1r mulrAC (divff (lt0r_neq0 Hcard_pos)) mul1r addrA.
 exact: dsdp_alice_guess_fdist_V2_real_le.
 Qed.
 
+(* The pushforward of a product distribution along a pair of coordinate maps is
+   the product of the pushforwards. *)
+Lemma fdistmap_prod (A1 A2 B1 B2 : finType) (Q1 : R.-fdist A1)
+    (Q2 : R.-fdist A2) (f1 : A1 -> B1) (f2 : A2 -> B2) :
+  fdistmap (fun a : (A1 * A2)%type => (f1 a.1, f2 a.2)) (Q1 `x Q2)
+  = (fdistmap f1 Q1) `x (fdistmap f2 Q2).
+Proof.
+apply/fdist_ext => -[b1 b2]; rewrite fdist_prodE !fdistmapE.
+rewrite big_distrl /=.
+rewrite (eq_bigr (fun i => \sum_(a in preim f2 (pred1 b2)) (Q1 i * Q2 a)));
+  last by move=> i _; rewrite big_distrr.
+rewrite pair_big /=.
+apply: eq_big => [[a1 a2]|[a1 a2] _] /=.
+  by rewrite !inE /= xpair_eqE.
+by rewrite fdist_prodE.
+Qed.
+
+(* The pushforward of a product distribution along a map acting only on the
+   second coordinate keeps the first factor. *)
+Lemma fdistmap_prodr (A1 A2 B2 : finType) (Q1 : R.-fdist A1)
+    (Q2 : R.-fdist A2) (f2 : A2 -> B2) :
+  fdistmap (fun a : (A1 * A2)%type => (a.1, f2 a.2)) (Q1 `x Q2)
+  = Q1 `x (fdistmap f2 Q2).
+Proof.
+have -> : (fun a : (A1 * A2)%type => (a.1, f2 a.2))
+        = (fun a : (A1 * A2)%type => (idfun a.1, f2 a.2)) by [].
+by rewrite fdistmap_prod fdistmap_id.
+Qed.
+
+(* The law a simulator produces from a value of the leaked output: uniform
+   masks, uniform combine randomness, that output, and an encryption of zero
+   under each of the two other parties' keys. *)
+Definition dsdp_alice_simulator (s : plain AHE) :
+    R.-fdist dsdp_alice_viewT :=
+  ((((fdist_uniform card_plain_pair) `x (fdist_uniform card_renc_pair))
+      `x (fdist1 s))
+     `x (enc_fdist (pkey_of_party Bob) 0))
+    `x (enc_fdist (pkey_of_party Charlie) 0).
+
+(* The spectator coordinates with the two encryption randomnesses last. *)
+Definition alice_spectator_pre2T : finType :=
+  ((plain AHE * plain AHE) * (Renc * Renc) * Renc * Renc)%type.
+
+Definition AliceSpectatorPre2 :
+    {RV alice_sample_fdist -> alice_spectator_pre2T} :=
+  fun t => (t.1.1.2, t.2, t.1.2.1, t.1.2.2).
+
+(* The reordering of the spectator coordinates that separates the two
+   encryption randomnesses. *)
+Definition alice_spectator_regroup (c : alice_spectator_preT) :
+    alice_spectator_pre2T := (c.1.1, c.2, c.1.2.1, c.1.2.2).
+
+(* The reordered spectator coordinates are the image of the spectator
+   coordinates under the reordering. *)
+Lemma alice_spectator_regroupE :
+  AliceSpectatorPre2 = alice_spectator_regroup `o AliceSpectatorPre.
+Proof. by []. Qed.
+
+Let card_masks_ra :
+  #|(((plain AHE * plain AHE) * (Renc * Renc))%type : finType)|
+  = #|(((plain AHE * plain AHE) * (Renc * Renc))%type : finType)|.-1.+1.
+Proof.
+by rewrite prednK // !card_prod !muln_gt0 card_plain_gt0 card_renc_gt0.
+Qed.
+
+Let card_masks_ra_rho :
+  #|(((plain AHE * plain AHE) * (Renc * Renc) * Renc)%type : finType)|
+  = #|(((plain AHE * plain AHE) * (Renc * Renc) * Renc)%type : finType)|.-1.+1.
+Proof.
+by rewrite prednK // !card_prod !muln_gt0 card_plain_gt0 card_renc_gt0.
+Qed.
+
+Let card_spectator_pre2 :
+  #|alice_spectator_pre2T| = #|alice_spectator_pre2T|.-1.+1.
+Proof.
+by rewrite prednK // /alice_spectator_pre2T !card_prod !muln_gt0 card_plain_gt0
+           card_renc_gt0.
+Qed.
+
+(* The reordered spectator coordinates are uniform. *)
+Lemma spectator_pre2_uniformE :
+  `p_ AliceSpectatorPre2 = fdist_uniform card_spectator_pre2.
+Proof.
+have -> : `p_ AliceSpectatorPre2
+        = fdistmap alice_spectator_regroup (`p_ AliceSpectatorPre).
+  by rewrite alice_spectator_regroupE /dist_of_RV fdistmap_comp.
+rewrite spectator_pre_uniformE.
+apply: (fdistmap_bij_uniform card_spectator_pre card_spectator_pre2).
+exists (fun d : alice_spectator_pre2T => (d.1.1.1, (d.1.2, d.2), d.1.1.2)).
+  by move=> [[[r2 r3] [rho2 rho3]] [ra1 ra2]].
+by move=> [[[[r2 r3] [ra1 ra2]] rho2] rho3].
+Qed.
+
+(* The spectator rebuilt from the reordered spectator coordinates. *)
+Definition alice_spectator_prod (c : alice_spectator_pre2T) :
+    ((plain AHE * plain AHE) * (Renc * Renc) * t_cipher * t_cipher)%type :=
+  (c.1.1.1, c.1.1.2,
+   chcipher_of_cipher (enc (pkey_of_party Bob) 0 (rand_of_renc c.1.2)),
+   chcipher_of_cipher (enc (pkey_of_party Charlie) 0 (rand_of_renc c.2))).
+
+(* The spectator is the image of the reordered spectator coordinates under the
+   zero-plaintext encryptions. *)
+Lemma alice_spectator_prodE :
+  AliceSpectator = alice_spectator_prod `o AliceSpectatorPre2.
+Proof.
+by apply/boolp.funext => -[[[[v2 v3] [r2 r3]] [rho2 rho3]] [ra1 ra2]].
+Qed.
+
+(* The law of the spectator is the product of the mask law, the combine
+   randomness law and the two zero-plaintext encryption laws. *)
+Lemma alice_spectator_law :
+  `p_ AliceSpectator
+  = ((((fdist_uniform card_plain_pair) `x (fdist_uniform card_renc_pair))
+        `x (enc_fdist (pkey_of_party Bob) 0))
+       `x (enc_fdist (pkey_of_party Charlie) 0)).
+Proof.
+have -> : `p_ AliceSpectator
+        = fdistmap alice_spectator_prod (`p_ AliceSpectatorPre2).
+  by rewrite alice_spectator_prodE /dist_of_RV fdistmap_comp.
+rewrite spectator_pre2_uniformE.
+rewrite (fdist_uniform_prod card_masks_ra_rho card_renc card_spectator_pre2).
+rewrite (fdist_uniform_prod card_masks_ra card_renc card_masks_ra_rho).
+rewrite (fdist_uniform_prod card_plain_pair card_renc_pair card_masks_ra).
+have -> : alice_spectator_prod
+  = (fun c : alice_spectator_pre2T =>
+       ((fun b : ((plain AHE * plain AHE) * (Renc * Renc) * Renc)%type =>
+           (b.1, chcipher_of_cipher
+                   (enc (pkey_of_party Bob) 0 (rand_of_renc b.2)))) c.1,
+        chcipher_of_cipher
+          (enc (pkey_of_party Charlie) 0 (rand_of_renc c.2)))).
+  by apply/boolp.funext => -[[[m ra] rho2] rho3].
+rewrite (fdistmap_prod _ _
+  (fun b : ((plain AHE * plain AHE) * (Renc * Renc) * Renc)%type =>
+     (b.1, chcipher_of_cipher
+             (enc (pkey_of_party Bob) 0 (rand_of_renc b.2))))
+  (fun r : Renc => chcipher_of_cipher
+                     (enc (pkey_of_party Charlie) 0 (rand_of_renc r)))).
+by rewrite (fdistmap_prodr _ _
+  (fun r : Renc => chcipher_of_cipher
+                     (enc (pkey_of_party Bob) 0 (rand_of_renc r)))).
+Qed.
+
+(* The spectator slots of a value of Alice's view. *)
+Definition alice_spectator_of_view (v : dsdp_alice_viewT) :
+    ((plain AHE * plain AHE) * (Renc * Renc) * t_cipher * t_cipher)%type :=
+  (v.1.1.1.1, v.1.1.1.2, v.1.2, v.2).
+
+(* On a conditioning event that determines the leaked output, the joint mass of
+   Alice's all-zero view splits into the leaked-output indicator times the joint
+   mass of the spectator. *)
+Lemma alice_view_all_zero_pfwd1E (BT : finType)
+    (W : {RV alice_sample_fdist -> BT}) (v : dsdp_alice_viewT) (w : BT)
+    (s : plain AHE) :
+  (forall t, W t = w -> Sout t = s) ->
+  pfwd1 [% AliceView_all_zero, W] (v, w)
+  = (v.1.1.2 == s)%:R
+    * pfwd1 [% AliceSpectator, W] (alice_spectator_of_view v, w).
+Proof.
+move=> HW.
+case: v => [[[[m ra] sv] c2] c3] /=.
+rewrite /alice_spectator_of_view /=.
+case: (altP (sv =P s)) => [->|Hne]; last first.
+  rewrite mul0r pfwd1E (_ : finset _ = set0) ?Pr_set0 //.
+  apply/setP => t; rewrite !inE.
+  apply/negbTE; apply: contra Hne.
+  rewrite !xpair_eqE.
+  move=> /andP[/andP[/andP[/andP[_ Hsv] _] _] Hw].
+  by rewrite -(eqP Hsv) (HW t (eqP Hw)).
+rewrite mul1r !pfwd1E; congr (Pr _ _).
+apply/setP => t; rewrite !inE !xpair_eqE.
+case Ew : (W t == w); last by rewrite !andbF.
+have HS : Sout t = s by exact: (HW t (eqP Ew)).
+by rewrite HS eqxx !andbT.
+Qed.
+
+(* Conditioned on the two secret inputs, Alice's all-zero view follows the
+   simulator law fed the leaked output of those inputs. *)
+Lemma dsdp_alice_view_cond_sim (v : dsdp_alice_viewT) (v2 v3 : plain AHE) :
+  `Pr[ [% V2, V3] = (v2, v3) ] != 0 ->
+  `Pr[ AliceView_all_zero = v | [% V2, V3] = (v2, v3) ]
+    = dsdp_alice_simulator (dsdp_output w_v1 w_u1 w_u2 w_u3 v2 v3) v.
+Proof.
+move=> Hvv.
+have Hnum : pfwd1 [% AliceView_all_zero, [% V2, V3]] (v, (v2, v3))
+  = (v.1.1.2 == dsdp_output w_v1 w_u1 w_u2 w_u3 v2 v3)%:R
+    * pfwd1 [% AliceSpectator, [% V2, V3]]
+        (alice_spectator_of_view v, (v2, v3)).
+  by apply: alice_view_all_zero_pfwd1E => t; rewrite /Sout /comp_RV => ->.
+rewrite cpr_eqE Hnum (alice_spectator_indep _ _) mulrA mulfK //.
+rewrite -dist_of_RVE alice_spectator_law.
+case: v Hnum => [[[[m ra] sv] c2] c3] _.
+rewrite /alice_spectator_of_view /dsdp_alice_simulator !fdist_prodE fdist1E /=.
+ring.
+Qed.
+
+(* Conditioned on the leaked output, Alice's all-zero view follows the simulator
+   law fed that output. *)
+Corollary dsdp_alice_view_cond_sim_S (v : dsdp_alice_viewT)
+    (s : plain AHE) :
+  `Pr[ Sout = s ] != 0 ->
+  `Pr[ AliceView_all_zero = v | Sout = s ] = dsdp_alice_simulator s v.
+Proof.
+move=> Hs.
+have Hind : alice_sample_fdist |= AliceSpectator _|_ Sout.
+  exact: (inde_RV_comp idfun (uncurry (dsdp_output w_v1 w_u1 w_u2 w_u3))
+            alice_spectator_indep).
+have Hnum : pfwd1 [% AliceView_all_zero, Sout] (v, s)
+  = (v.1.1.2 == s)%:R
+    * pfwd1 [% AliceSpectator, Sout] (alice_spectator_of_view v, s).
+  by apply: alice_view_all_zero_pfwd1E => t ->.
+rewrite cpr_eqE Hnum (Hind _ _) mulrA mulfK //.
+rewrite -dist_of_RVE alice_spectator_law.
+case: v Hnum => [[[[m ra] sv] c2] c3] _.
+rewrite /alice_spectator_of_view /dsdp_alice_simulator !fdist_prodE fdist1E /=.
+ring.
+Qed.
+
+(* The ideal-world joint law of the two secret inputs and a simulated view: the
+   honest input law bound to the simulator fed the leaked output. *)
+Definition alice_ideal_joint :
+    R.-fdist (plain AHE * plain AHE * dsdp_alice_viewT) :=
+  `p_ [% V2, V3] >>= (fun vv =>
+     fdistmap (fun v => (vv.1, vv.2, v))
+       (dsdp_alice_simulator (dsdp_output w_v1 w_u1 w_u2 w_u3 vv.1 vv.2))).
+
+(* The ideal-world joint law is the joint law of the two secret inputs and
+   Alice's all-zero view. *)
+Lemma alice_ideal_jointE :
+  alice_ideal_joint = `p_ [% V2, V3, AliceView_all_zero].
+Proof.
+apply/fdist_ext => -[[v2 v3] v].
+rewrite fdistbindE (bigD1 (v2, v3)) //= big1 ?addr0; last first.
+  move=> [w2 w3] Hne; rewrite [X in _ * X]fdistmapE big1 ?mulr0 // => a.
+  by rewrite !inE /= xpair_eqE (negbTE Hne).
+rewrite [X in _ * X]fdistmapE (big_pred1 v); last first.
+  by move=> a; rewrite !inE /= xpair_eqE eqxx.
+rewrite !dist_of_RVE [RHS]pfwd1_pairC /unstable.swap /=.
+case: (altP (`Pr[ [% V2, V3] = (v2, v3) ] =P 0)) => H0.
+  by rewrite H0 mul0r pfwd1_domin_RV1.
+by rewrite -[RHS]cpr_eqE_mul (dsdp_alice_view_cond_sim v H0) mulrC.
+Qed.
+
+(* A distinguisher separates the real joint law of the two secret inputs and
+   Alice's view from the ideal-world joint law by at most the sum of the
+   advantages of the two hop reductions. *)
+Theorem dsdp_alice_sim_advantage_fdist_le
+    (D : plain AHE * plain AHE * dsdp_alice_viewT -> bool) :
+  `| Pr (`p_ [% V2, V3, AliceView_zero_prefix 0]) [set x | D x]
+     - Pr (fdistmap D alice_ideal_joint) [set true] |
+  <= indcpa_fdist_epsilon (pkey_of_party Bob) (hop0_reduction D)
+     + indcpa_fdist_epsilon (pkey_of_party Charlie) (hop1_reduction D).
+Proof.
+rewrite Pr_fdistmap_bool alice_ideal_jointE.
+rewrite -hop0_advantageE -hop1_advantageE.
+exact: ler_distD.
+Qed.
+
 End dsdp_alice_infotheo_secrecy.
