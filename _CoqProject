@@ -136,6 +136,7 @@ dumas2017dual/dsdp/core/dsdp_pismc.v
 dumas2017dual/dsdp/core/dsdp_correctness.v
 dumas2017dual/dsdp/counting/dsdp_entropy_trace.v
 dumas2017dual/dsdp/counting/dsdp_entropy.v
+dumas2017dual/dsdp/infotheo_leg/dsdp_alice_infotheo_secrecy.v
 dumas2017dual/dsdp/counting/dsdp_malicious_dotp.v
 dumas2017dual/dsdp/symbolic_game/dsdp_game_code.v
 dumas2017dual/dsdp/symbolic_game/dsdp_symbolic_exec.v
