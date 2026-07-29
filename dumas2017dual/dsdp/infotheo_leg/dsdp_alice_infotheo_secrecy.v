@@ -351,4 +351,162 @@ have Hctx : alice_sample_fdist |= Hop1Ctx _|_ Rho3.
 by rewrite (inde_dist_of_RV2 Hctx) rho3_uniformE.
 Qed.
 
+(* The inputs and the view rebuilt from a hop-0 context and a ciphertext in
+   the hop-0 slot. *)
+Definition hop0_assemble (c : hop0_ctxT) (ch : t_cipher) :
+    plain AHE * plain AHE * dsdp_alice_viewT :=
+  let: (vv, masks, ra, rho3) := c in
+  (vv.1, vv.2,
+   (masks, ra, dsdp_output w_v1 w_u1 w_u2 w_u3 vv.1 vv.2, ch,
+    chcipher_of_cipher
+      (enc (pkey_of_party Charlie) vv.2 (rand_of_renc rho3)))).
+
+(* The inputs and the view rebuilt from a hop-1 context and a ciphertext in
+   the hop-1 slot. *)
+Definition hop1_assemble (c : hop1_ctxT) (ch : t_cipher) :
+    plain AHE * plain AHE * dsdp_alice_viewT :=
+  let: (vv, masks, ra, c2zero) := c in
+  (vv.1, vv.2,
+   (masks, ra, dsdp_output w_v1 w_u1 w_u2 w_u3 vv.1 vv.2, c2zero, ch)).
+
+(* The adversary that challenges Bob's key on the first input and runs the
+   distinguisher on the view rebuilt around the challenge. *)
+Definition hop0_reduction
+    (D : plain AHE * plain AHE * dsdp_alice_viewT -> bool) :
+    indcpa_fdist_adversary :=
+  {| adv_context := hop0_ctxT ;
+     adv_choose := `p_ Hop0Ctx ;
+     adv_plain := fun c => c.1.1.1.1 ;
+     adv_decide := fun c ch => D (hop0_assemble c ch) |}.
+
+(* The adversary that challenges Charlie's key on the second input and runs
+   the distinguisher on the view rebuilt around the challenge. *)
+Definition hop1_reduction
+    (D : plain AHE * plain AHE * dsdp_alice_viewT -> bool) :
+    indcpa_fdist_adversary :=
+  {| adv_context := hop1_ctxT ;
+     adv_choose := `p_ Hop1Ctx ;
+     adv_plain := fun c => c.1.1.1.2 ;
+     adv_decide := fun c ch => D (hop1_assemble c ch) |}.
+
+(* The distinguisher on the real view is the hop-0 reduction facing an
+   encryption of the first input. *)
+Lemma hop0_real_armE (D : plain AHE * plain AHE * dsdp_alice_viewT -> bool) :
+  Pr (`p_ [% V2, V3, AliceView_zero_prefix 0]) [set x | D x]
+    = indcpa_fdist_success_real (pkey_of_party Bob) (hop0_reduction D).
+Proof.
+have Hslot :
+  `p_ [% Hop0Ctx, hop0_cipher 0]
+    = (`p_ Hop0Ctx) `X (fun c : hop0_ctxT =>
+        fdistmap (fun r => chcipher_of_cipher
+                    (enc (pkey_of_party Bob) c.1.1.1.1 (rand_of_renc r)))
+                 (fdist_uniform card_renc))
+  := enc_slot_resampleE _ hop0_ctx_prod.
+rewrite -Pr_fdistmap_bool /indcpa_fdist_success_real /=.
+have -> : fdistmap D (`p_ [% V2, V3, AliceView_zero_prefix 0])
+        = fdistmap (fun p : (hop0_ctxT * t_cipher)%type =>
+                      D (hop0_assemble p.1 p.2))
+                   (`p_ [% Hop0Ctx, hop0_cipher 0]).
+  rewrite /dist_of_RV !fdistmap_comp; congr fdistmap.
+  by apply/boolp.funext => -[[[[v2 v3] [r2 r3]] [rho2 rho3]] [ra1 ra2]].
+rewrite Hslot fdist_prod_bindE fdistmap_bind.
+congr (Pr _ _); congr (_ >>= _); apply/boolp.funext => c.
+by rewrite /enc_fdist !fdistmap_comp.
+Qed.
+
+(* The distinguisher on the view with a zeroed hop-0 slot is the hop-0
+   reduction facing an encryption of zero. *)
+Lemma hop0_zero_armE (D : plain AHE * plain AHE * dsdp_alice_viewT -> bool) :
+  Pr (`p_ [% V2, V3, AliceView_zero_prefix 1]) [set x | D x]
+    = indcpa_fdist_success_zero (pkey_of_party Bob) (hop0_reduction D).
+Proof.
+have Hslot :
+  `p_ [% Hop0Ctx, hop0_cipher 1]
+    = (`p_ Hop0Ctx) `X (fun _ : hop0_ctxT =>
+        fdistmap (fun r => chcipher_of_cipher
+                    (enc (pkey_of_party Bob) 0 (rand_of_renc r)))
+                 (fdist_uniform card_renc))
+  := enc_slot_resampleE _ hop0_ctx_prod.
+rewrite -Pr_fdistmap_bool /indcpa_fdist_success_zero /=.
+have -> : fdistmap D (`p_ [% V2, V3, AliceView_zero_prefix 1])
+        = fdistmap (fun p : (hop0_ctxT * t_cipher)%type =>
+                      D (hop0_assemble p.1 p.2))
+                   (`p_ [% Hop0Ctx, hop0_cipher 1]).
+  rewrite /dist_of_RV !fdistmap_comp; congr fdistmap.
+  by apply/boolp.funext => -[[[[v2 v3] [r2 r3]] [rho2 rho3]] [ra1 ra2]].
+rewrite Hslot fdist_prod_bindE fdistmap_bind.
+congr (Pr _ _); congr (_ >>= _); apply/boolp.funext => c.
+by rewrite /enc_fdist !fdistmap_comp.
+Qed.
+
+(* Zeroing the hop-0 slot of the view moves the distinguishing probability by
+   the advantage of the hop-0 reduction against Bob's key. *)
+Lemma hop0_advantageE (D : plain AHE * plain AHE * dsdp_alice_viewT -> bool) :
+  `| Pr (`p_ [% V2, V3, AliceView_zero_prefix 0]) [set x | D x]
+     - Pr (`p_ [% V2, V3, AliceView_zero_prefix 1]) [set x | D x] |
+  = indcpa_fdist_epsilon (pkey_of_party Bob) (hop0_reduction D).
+Proof.
+by rewrite /indcpa_fdist_epsilon hop0_real_armE hop0_zero_armE.
+Qed.
+
+(* The distinguisher on the view with a zeroed hop-0 slot is the hop-1
+   reduction facing an encryption of the second input. *)
+Lemma hop1_real_armE (D : plain AHE * plain AHE * dsdp_alice_viewT -> bool) :
+  Pr (`p_ [% V2, V3, AliceView_zero_prefix 1]) [set x | D x]
+    = indcpa_fdist_success_real (pkey_of_party Charlie) (hop1_reduction D).
+Proof.
+have Hslot :
+  `p_ [% Hop1Ctx, hop1_cipher 1]
+    = (`p_ Hop1Ctx) `X (fun c : hop1_ctxT =>
+        fdistmap (fun r => chcipher_of_cipher
+                    (enc (pkey_of_party Charlie) c.1.1.1.2 (rand_of_renc r)))
+                 (fdist_uniform card_renc))
+  := enc_slot_resampleE _ hop1_ctx_prod.
+rewrite -Pr_fdistmap_bool /indcpa_fdist_success_real /=.
+have -> : fdistmap D (`p_ [% V2, V3, AliceView_zero_prefix 1])
+        = fdistmap (fun p : (hop1_ctxT * t_cipher)%type =>
+                      D (hop1_assemble p.1 p.2))
+                   (`p_ [% Hop1Ctx, hop1_cipher 1]).
+  rewrite /dist_of_RV !fdistmap_comp; congr fdistmap.
+  by apply/boolp.funext => -[[[[v2 v3] [r2 r3]] [rho2 rho3]] [ra1 ra2]].
+rewrite Hslot fdist_prod_bindE fdistmap_bind.
+congr (Pr _ _); congr (_ >>= _); apply/boolp.funext => c.
+by rewrite /enc_fdist !fdistmap_comp.
+Qed.
+
+(* The distinguisher on the all-zero view is the hop-1 reduction facing an
+   encryption of zero. *)
+Lemma hop1_zero_armE (D : plain AHE * plain AHE * dsdp_alice_viewT -> bool) :
+  Pr (`p_ [% V2, V3, AliceView_zero_prefix 2]) [set x | D x]
+    = indcpa_fdist_success_zero (pkey_of_party Charlie) (hop1_reduction D).
+Proof.
+have Hslot :
+  `p_ [% Hop1Ctx, hop1_cipher 2]
+    = (`p_ Hop1Ctx) `X (fun _ : hop1_ctxT =>
+        fdistmap (fun r => chcipher_of_cipher
+                    (enc (pkey_of_party Charlie) 0 (rand_of_renc r)))
+                 (fdist_uniform card_renc))
+  := enc_slot_resampleE _ hop1_ctx_prod.
+rewrite -Pr_fdistmap_bool /indcpa_fdist_success_zero /=.
+have -> : fdistmap D (`p_ [% V2, V3, AliceView_zero_prefix 2])
+        = fdistmap (fun p : (hop1_ctxT * t_cipher)%type =>
+                      D (hop1_assemble p.1 p.2))
+                   (`p_ [% Hop1Ctx, hop1_cipher 2]).
+  rewrite /dist_of_RV !fdistmap_comp; congr fdistmap.
+  by apply/boolp.funext => -[[[[v2 v3] [r2 r3]] [rho2 rho3]] [ra1 ra2]].
+rewrite Hslot fdist_prod_bindE fdistmap_bind.
+congr (Pr _ _); congr (_ >>= _); apply/boolp.funext => c.
+by rewrite /enc_fdist !fdistmap_comp.
+Qed.
+
+(* Zeroing the hop-1 slot of the view moves the distinguishing probability by
+   the advantage of the hop-1 reduction against Charlie's key. *)
+Lemma hop1_advantageE (D : plain AHE * plain AHE * dsdp_alice_viewT -> bool) :
+  `| Pr (`p_ [% V2, V3, AliceView_zero_prefix 1]) [set x | D x]
+     - Pr (`p_ [% V2, V3, AliceView_zero_prefix 2]) [set x | D x] |
+  = indcpa_fdist_epsilon (pkey_of_party Charlie) (hop1_reduction D).
+Proof.
+by rewrite /indcpa_fdist_epsilon hop1_real_armE hop1_zero_armE.
+Qed.
+
 End dsdp_alice_infotheo_secrecy.
