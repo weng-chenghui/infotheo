@@ -26,3 +26,4 @@ extraction/sumprod.mli
 
 # Cache
 .nra.cache
+rocq_mcp_cache_*.v
