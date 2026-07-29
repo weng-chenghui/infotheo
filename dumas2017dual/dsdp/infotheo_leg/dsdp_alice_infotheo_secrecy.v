@@ -105,4 +105,60 @@ Variable pkey_of_party : party_id -> pub_key AHE.
 Variables (w_v1 w_u1 w_u2 w_u3 : plain AHE).
 Hypothesis w_u3_inj : injective (fun v : plain AHE => w_u3 * v).
 
+Let card_plain_gt0 : (0 < #|plain AHE|)%N.
+Proof. by apply/card_gt0P; exists 0; rewrite inE. Qed.
+Let card_plain : #|plain AHE| = #|plain AHE|.-1.+1.
+Proof. by rewrite prednK. Qed.
+Let card_plain_pair :
+  #|((plain AHE * plain AHE)%type : finType)|
+    = (#|plain AHE| * #|plain AHE|)%N.-1.+1.
+Proof. by rewrite card_prod prednK // muln_gt0 card_plain_gt0. Qed.
+Let card_renc_pair :
+  #|((Renc * Renc)%type : finType)|
+    = (index_renc.+1 * index_renc.+1)%N.-1.+1.
+Proof. by rewrite card_prod card_renc. Qed.
+
+Definition dsdp_alice_sampleT : finType :=
+  ((plain AHE * plain AHE) * (plain AHE * plain AHE)
+   * (Renc * Renc) * (Renc * Renc))%type.
+
+Definition alice_sample_fdist : R.-fdist dsdp_alice_sampleT :=
+  (((fdist_uniform card_plain_pair) `x (fdist_uniform card_plain_pair))
+     `x (fdist_uniform card_renc_pair)) `x (fdist_uniform card_renc_pair).
+
+Definition V2 : {RV alice_sample_fdist -> plain AHE} := fun t => t.1.1.1.1.
+Definition V3 : {RV alice_sample_fdist -> plain AHE} := fun t => t.1.1.1.2.
+Definition R2 : {RV alice_sample_fdist -> plain AHE} := fun t => t.1.1.2.1.
+Definition R3 : {RV alice_sample_fdist -> plain AHE} := fun t => t.1.1.2.2.
+Definition Rho2 : {RV alice_sample_fdist -> Renc} := fun t => t.1.2.1.
+Definition Rho3 : {RV alice_sample_fdist -> Renc} := fun t => t.1.2.2.
+Definition RA1 : {RV alice_sample_fdist -> Renc} := fun t => t.2.1.
+Definition RA2 : {RV alice_sample_fdist -> Renc} := fun t => t.2.2.
+
+Definition Sout : {RV alice_sample_fdist -> plain AHE} :=
+  uncurry (dsdp_output w_v1 w_u1 w_u2 w_u3) `o [% V2, V3].
+
+Definition hop0_cipher (i : nat) : {RV alice_sample_fdist -> t_cipher} :=
+  fun t => chcipher_of_cipher
+    (enc (pkey_of_party Bob) (if (0 < i)%N then 0 else V2 t)
+         (rand_of_renc (Rho2 t))).
+Definition hop1_cipher (i : nat) : {RV alice_sample_fdist -> t_cipher} :=
+  fun t => chcipher_of_cipher
+    (enc (pkey_of_party Charlie) (if (1 < i)%N then 0 else V3 t)
+         (rand_of_renc (Rho3 t))).
+
+Definition dsdp_alice_viewT : finType :=
+  ((plain AHE * plain AHE) * (Renc * Renc) * plain AHE
+   * t_cipher * t_cipher)%type.
+
+Definition AliceView_zero_prefix (i : nat) :
+    {RV alice_sample_fdist -> dsdp_alice_viewT} :=
+  [% [% R2, R3], [% RA1, RA2], Sout, hop0_cipher i, hop1_cipher i].
+
+Notation AliceView := (AliceView_zero_prefix 0).
+Notation AliceView_all_zero := (AliceView_zero_prefix 2).
+
+Definition E_bob_v2 := hop0_cipher 0.
+Definition E_charlie_v3 := hop1_cipher 0.
+
 End dsdp_alice_infotheo_secrecy.
