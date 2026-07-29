@@ -785,4 +785,53 @@ exact: (cinde_RV_comp (fun sp s => g (alice_view_of_spectator (sp, s)))
           alice_spectator_cinde).
 Qed.
 
+(* The mass a pushforward puts on a set is the mass its source puts on the
+   preimage of that set. *)
+Lemma Pr_fdistmap_pre {Rr : realType} {A B : finType} (h : A -> B)
+    (p : FDist.t Rr A) (E : {set B}) :
+  Pr (fdistmap h p) E = Pr p [set a | h a \in E].
+Proof.
+rewrite /Pr (partition_big h (mem E)) /=; last by move=> a; rewrite inE.
+apply: eq_bigr => b bE; rewrite fdistmapE.
+by apply: eq_bigl => a; rewrite inE [in RHS]andb_idl // => /eqP ->.
+Qed.
+
+(* The distinguisher that accepts when a predictor reading the view slot of its
+   input returns the first input. *)
+Definition distinguisher_of_guess (g : dsdp_alice_viewT -> plain AHE) :
+    plain AHE * plain AHE * dsdp_alice_viewT -> bool :=
+  fun x => g x.2 == x.1.1.
+
+(* The event that a predictor matches Bob's input is the acceptance event of
+   the associated distinguisher on the joint law of the inputs and the view. *)
+Lemma guess_event_jointE (g : dsdp_alice_viewT -> plain AHE) (i : nat) :
+  Pr alice_sample_fdist
+     [set t | (g `o AliceView_zero_prefix i) t == V2 t]
+  = Pr (`p_ [% V2, V3, AliceView_zero_prefix i])
+       [set x | distinguisher_of_guess g x].
+Proof.
+rewrite /dist_of_RV Pr_fdistmap_pre.
+by apply: eq_bigl => t; rewrite !inE.
+Qed.
+
+(* A predictor reading Alice's real view matches Bob's input with probability at
+   most 1/#|plain AHE| plus the advantages of the two hop reductions. *)
+Theorem dsdp_alice_guess_fdist_V2_real_le
+    (g : dsdp_alice_viewT -> plain AHE) :
+  Pr alice_sample_fdist [set t | (g `o AliceView) t == V2 t]
+    <= #|plain AHE|%:R^-1
+       + indcpa_fdist_epsilon (pkey_of_party Bob)
+           (hop0_reduction (distinguisher_of_guess g))
+       + indcpa_fdist_epsilon (pkey_of_party Charlie)
+           (hop1_reduction (distinguisher_of_guess g)).
+Proof.
+have Hzero : Pr (`p_ [% V2, V3, AliceView_all_zero])
+                [set x | distinguisher_of_guess g x]
+             <= #|plain AHE|%:R^-1.
+  by rewrite -guess_event_jointE; exact: guess_all_zero_le_invm.
+rewrite guess_event_jointE -hop0_advantageE -hop1_advantageE -addrA -lerBlDl.
+apply: Order.POrderTheory.le_trans (lerB (Order.POrderTheory.lexx _) Hzero) _.
+exact: Order.POrderTheory.le_trans (ler_norm _) (ler_distD _ _ _).
+Qed.
+
 End dsdp_alice_infotheo_secrecy.
