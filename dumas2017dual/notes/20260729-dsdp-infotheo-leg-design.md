@@ -476,6 +476,23 @@ distinct.
 | C7 exported subproof in fiber lemma's premise | `eq_irrelevance` discharge + bullet discipline (section 10) |
 | C8 glue toolkit scope | four named glue lemmas + helpers, ~30 lines (sections 4, 9) |
 
+## 12b. Post-implementation naming addendum (2026-07-29)
+
+Identifiers added during implementation beyond section 7 (all follow the
+same precedent discipline; final auditor pass PASS):
+
+- Glue: `fdist_prod_bindE`, `fdistmap_bind`, `Pr_fdistmap_bool`,
+  `fdist_prod2`, `fdist_uniform_prod`, `fdistmap_bij_uniform`,
+  `fdistmap_prod`, `fdistmap_prodr`, `inde_RV_of_prod`, `Pr_fdistmap_pre`,
+  `cpr_eq_drop_indep` (local restatement).
+- Structure: `alice_sample_fdistE`, `Hop0Ctx`/`Hop1Ctx` + `hop*_ctx_prod`
+  chain, `AliceSpectatorPre(2)`, `alice_spectator_*` family,
+  `guess_event_jointE`, `alice_view_all_zero_pfwd1E`, `alice_ideal_jointE`.
+- Task 11: `alice_view_full_of`, `AliceCombineBob`, `AliceCombineCharlie`,
+  `AliceRecvPlain`, `AliceViewFull`, `alice_view_fullE`,
+  `alice_view_full_ok`, `dsdp_alice_guess_fdist_full_le`.
+- Header table has 58 rows (section 10's ~20 was an underestimate).
+
 ## 13. Out of scope
 
 - RSLR / any PPT internalization; asymptotic (security-parameter-indexed)
