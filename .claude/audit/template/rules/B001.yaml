@@ -8,7 +8,7 @@ authority:
   - mathcomp-CONTRIBUTING#proofs
   - peer-feedback-2026-03
 fast_pattern:
-  pattern: 'have\s+\[\s*/eqP'
+  pattern: '\bhave\s*\[\s*/eqP|\bhave\s*\[[^\]]*\]\s*:=\s*eqVneq\b'
   ignore_in_comments: true
   file_glob: '*.v'
 agent_prompt: |
