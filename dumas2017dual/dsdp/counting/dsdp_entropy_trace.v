@@ -89,6 +89,11 @@ Variables (rb1 rb2 rc1 rc2 ra1 ra2 : randT).
 Variables (dk_a : priv_keyT) (dk_b : priv_keyT) (dk_c : priv_keyT).
 
 (* Protocol traces - now include randomness in encryption calls *)
+(* Randomness arguments follow the executed run: a combine's randomness is
+   the homomorphic combination of its arguments' randomness, per
+   [dsdp_run_traces_encE] of dsdp_alice_trace_link.v.  Bob's Charlie-key
+   entry carries Alice's second combine, whose randomness derives from
+   Charlie's rc1 and Alice's ra2, not from Bob's rb2. *)
 Definition dsdp_traces : dsdp_tracesT :=
   [tuple
      [bseq d (v3 * u3 + r3 + (v2 * u2 + r2) - r2 - r3 + u1 * v1);
@@ -96,9 +101,11 @@ Definition dsdp_traces : dsdp_tracesT :=
            e (E charlie v3 rc1);
            e (E bob v2 rb1);
            d r3; d r2; d u3; d u2; d u1; d v1; k dk_a];
-     [bseq e (E charlie (v3 * u3 + r3) rb2);
-           e (E bob (v2 * u2 + r2) ra1); d v2; k dk_b];
-     [bseq e (E charlie (v3 * u3 + r3 + (v2 * u2 + r2)) rb2); d v3; k dk_c]].
+     [bseq e (E charlie (v3 * u3 + r3) (rand_mul (rand_pow rc1 u3) ra2));
+           e (E bob (v2 * u2 + r2) (rand_mul (rand_pow rb1 u2) ra1));
+           d v2; k dk_b];
+     [bseq e (E charlie (v3 * u3 + r3 + (v2 * u2 + r2))
+             (rand_mul (rand_mul (rand_pow rc1 u3) ra2) rb2)); d v3; k dk_c]].
 
 (* Protocol correctness is now proved algebraically using ring arithmetic.
    The final result S = v3*u3 + r3 + (v2*u2 + r2) - r2 - r3 + u1*v1
