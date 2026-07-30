@@ -287,3 +287,112 @@ Lemma dsdp_run_traces_encE :
 Proof. by rewrite dsdp_run_traces_ok !Epow_encE !Emul_encE. Qed.
 
 End dsdp_alice_trace_link.
+
+(* Keep every parameter of the standard proc list explicit, so that the
+   per-sample instantiation is positional and independent of
+   implicit-argument inference. *)
+Arguments dsdp_procs_std : clear implicits.
+
+Section dsdp_alice_trace_rv.
+Context {R : realType}.
+Variables (AHE : AHEncType) (Renc : finType) (index_renc : nat).
+Hypothesis card_renc : #|Renc| = index_renc.+1.
+Variable rand_of_renc : Renc -> rand AHE.
+Variables (t_cipher : finType) (chcipher_of_cipher : cipher AHE -> t_cipher).
+Variables (w_v1 w_u1 w_u2 w_u3 : plain AHE).
+Hypothesis w_u3_inj : injective (fun v : plain AHE => w_u3 * v).
+Variables (dk_a dk_b dk_c : priv_key AHE).
+Variables (w_rb2 w_rc2 : Renc).
+
+(* The declarations discharged by the preceding section and by the leg take
+   these parameters explicitly; the abbreviations pin them once. *)
+Local Notation DI := (Standard_DSDP_Interface AHE).
+Local Notation pkey_of_dk := (pkey_of_dk dk_a dk_b dk_c).
+Local Notation dsdp_trace_dataT := (dsdp_trace_dataT AHE t_cipher).
+Local Notation V2 := (V2 (R:=R) (AHE:=AHE) card_renc).
+Local Notation V3 := (V3 (R:=R) (AHE:=AHE) card_renc).
+Local Notation R2 := (R2 (R:=R) (AHE:=AHE) card_renc).
+Local Notation R3 := (R3 (R:=R) (AHE:=AHE) card_renc).
+Local Notation Rho2 := (Rho2 (R:=R) (AHE:=AHE) card_renc).
+Local Notation Rho3 := (Rho3 (R:=R) (AHE:=AHE) card_renc).
+Local Notation RA1 := (RA1 (R:=R) (AHE:=AHE) card_renc).
+Local Notation RA2 := (RA2 (R:=R) (AHE:=AHE) card_renc).
+Local Notation Sout :=
+  (Sout (R:=R) (AHE:=AHE) card_renc w_v1 w_u1 w_u2 w_u3).
+Local Notation AliceView_zero_prefix i :=
+  (AliceView_zero_prefix (R:=R) (AHE:=AHE) card_renc rand_of_renc
+     chcipher_of_cipher pkey_of_dk w_v1 w_u1 w_u2 w_u3 i).
+Local Notation AliceView := (AliceView_zero_prefix 0).
+Local Notation indcpa_fdist_epsilon :=
+  (indcpa_fdist_epsilon (R:=R) (AHE:=AHE) card_renc rand_of_renc
+     chcipher_of_cipher).
+Local Notation hop0_reduction :=
+  (hop0_reduction (R:=R) (AHE:=AHE) card_renc rand_of_renc
+     chcipher_of_cipher pkey_of_dk w_v1 w_u1 w_u2 w_u3).
+Local Notation hop1_reduction :=
+  (hop1_reduction (R:=R) (AHE:=AHE) card_renc rand_of_renc
+     chcipher_of_cipher pkey_of_dk w_v1 w_u1 w_u2 w_u3).
+
+(* Alice's executed trace read off a value of her reduced view: the leaked
+   output, Charlie's re-encryption of it, the two received ciphertexts, the
+   two masks, the four weights, and the erased key mark. *)
+Definition dsdp_trace_of_view (v : dsdp_alice_viewT AHE Renc t_cipher) :
+    15.-bseq dsdp_trace_dataT :=
+  [bseq inl (inl (inl v.1.1.2));
+        inl (inl (inr (chcipher_of_cipher
+          (enc (pkey_of_dk Alice)
+               (v.1.1.2 - w_u1 * w_v1 + v.1.1.1.1.1 + v.1.1.1.1.2)
+               (rand_of_renc w_rc2)))));
+        inl (inl (inr v.2));
+        inl (inl (inr v.1.2));
+        inl (inl (inl v.1.1.1.1.2));
+        inl (inl (inl v.1.1.1.1.1));
+        inl (inl (inl w_u3)); inl (inl (inl w_u2));
+        inl (inl (inl w_u1)); inl (inl (inl w_v1));
+        inl (inr tt)].
+
+(* The three piSMC programs at the coordinates of one sample. *)
+Definition dsdp_procs_of_sample (s : dsdp_alice_sampleT AHE Renc) :
+    seq (proc (di_data DI)) :=
+  dsdp_procs_std AHE Renc rand_of_renc w_v1 w_u1 w_u2 w_u3 dk_a dk_b dk_c
+    w_rb2 w_rc2 (V2 s) (V3 s) (R2 s) (R3 s) (rand_of_renc (Rho2 s))
+    (rand_of_renc (Rho3 s)) (rand_of_renc (RA1 s)) (rand_of_renc (RA2 s)).
+
+(* Fuel bounds the encoded trace, since encoding preserves length. *)
+Let size_alice_trace (s : dsdp_alice_sampleT AHE Renc) :
+  (size (map (trace_data_of_di_data chcipher_of_cipher)
+           (nth [::] (run_interp 15 (dsdp_procs_of_sample s)).2 0)) <= 15)%N.
+Proof. by rewrite size_map; exact: size_traces_nth. Qed.
+
+(* Alice's encoded executed trace as a random variable on the sample
+   space. *)
+Definition AliceTrace :
+    {RV (alice_sample_fdist (R:=R) AHE card_renc) ->
+     15.-bseq dsdp_trace_dataT} :=
+  fun s => Bseq (size_alice_trace s).
+
+(* The leaked output the run computes is Alice's view slot. *)
+Let Sout_runE (s : dsdp_alice_sampleT AHE Renc) :
+  V3 s * w_u3 + R3 s + (V2 s * w_u2 + R2 s) - R2 s - R3 s + w_u1 * w_v1
+  = Sout s.
+Proof. by rewrite /Sout /comp_RV /dsdp_output /=; ring. Qed.
+
+(* The plaintext Charlie re-encrypts is the leaked output net of Alice's own
+   term and masks. *)
+Let recrypt_plainE (s : dsdp_alice_sampleT AHE Renc) :
+  V3 s * w_u3 + R3 s + (V2 s * w_u2 + R2 s)
+  = Sout s - w_u1 * w_v1 + R2 s + R3 s.
+Proof. by rewrite /Sout /comp_RV /dsdp_output /=; ring. Qed.
+
+(* The trace the interpreter produces for Alice is the deterministic image of
+   her reduced view. *)
+Lemma dsdp_trace_of_viewE :
+  AliceTrace = dsdp_trace_of_view `o AliceView.
+Proof.
+apply: boolp.funext => s; apply/val_inj.
+rewrite /AliceTrace; move: (size_alice_trace s).
+rewrite /dsdp_procs_of_sample dsdp_run_traces_ok.
+by move=> ?; rewrite /= Sout_runE recrypt_plainE.
+Qed.
+
+End dsdp_alice_trace_rv.
