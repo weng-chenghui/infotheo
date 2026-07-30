@@ -102,6 +102,23 @@ HB.mixin Record isAHEnc (T : HETypes) of isEncDec T := {
 #[short(type=AHEncType)]
 HB.structure Definition AHEnc := { T of isAHEnc T & }.
 
+Section ahe_enc_lemmas.
+Variable AHE : AHEncType.
+
+(* Raising a ciphertext to a plaintext power encrypts the product, with the
+   randomness raised to the same power. *)
+Lemma Epow_encE (k : pub_key AHE) (m j : plain AHE) (r : rand AHE) :
+  Epow (enc k m r) j = enc k (m * j) (rand_pow r j).
+Proof. exact: (esym (Epow_scalarM k j (m, r))). Qed.
+
+(* Multiplying two ciphertexts under one key encrypts the sum, with the
+   randomness multiplied. *)
+Lemma Emul_encE (k : pub_key AHE) (m1 m2 : plain AHE) (r1 r2 : rand AHE) :
+  Emul (enc k m1 r1) (enc k m2 r2) = enc k (m1 + m2) (rand_mul r1 r2).
+Proof. exact: (esym (Emul_addM k (m1, r1) (m2, r2))). Qed.
+
+End ahe_enc_lemmas.
+
 (* NOTE: these are properties on the mixin, so by the limitation of HB
    we cannot write them in the mixin. We need to use them in the instance.
    The reason why rand_pow needs to be on the mixin while msg_rand_add
