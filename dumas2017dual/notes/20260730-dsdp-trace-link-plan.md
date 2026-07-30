@@ -236,6 +236,42 @@ git commit --no-verify -m "ahe: rewritable Emul/Epow-of-enc equations" \
   -- homomorphic_encryption/ahe_enc.v
 ```
 
+### Task 2b: Projection-form fuel splitting
+
+Task 4's staged evaluation needs the fuel-splitting equation in projection
+form; `interpD`'s `let`-destructuring conclusion blocks the staging (Task 4
+Step 2 explains why). Derive the projection form once, next to `interpD`,
+rather than restating the probe's copy: same fact, one-line proof, correct
+dependency direction (`interpD` lives downstream of `interp`).
+
+**Files:**
+- Modify: `smc/smc_session_types.v` (immediately after `interpD`, line ~878)
+
+- [ ] **Step 1: add the corollary**
+
+```coq
+(* Projection form of [interpD]: splitting the fuel exposes the intermediate
+   process and trace lists as projections, so an abstracted intermediate run
+   still matches the shape of the next split. *)
+Lemma interp_fuelD h1 h2 (ps : seq (proc data)) traces :
+  interp (h1 + h2) ps traces
+  = interp h2 (interp h1 ps traces).1 (interp h1 ps traces).2.
+Proof. by rewrite interpD; case: (interp h1 ps traces). Qed.
+```
+
+If `case:` leaves a pair-eta goal, use
+`by rewrite interpD; case: (interp h1 ps traces) => ps' trs'.`
+
+- [ ] **Step 2: compile** `smc/smc_session_types.v`. Expected: exit 0.
+
+- [ ] **Step 3: commit**
+
+```bash
+git add smc/smc_session_types.v
+git commit --no-verify -m "smc session types: projection-form fuel splitting" \
+  -- smc/smc_session_types.v
+```
+
 ### Task 3: New file scaffold, parameters, and the finite trace encoding
 
 **Files:**
@@ -366,12 +402,14 @@ the instantiation at the real AHE.
   and the `Arguments gprocs : clear implicits.` line all carry over
   unchanged.
 
-- [ ] **Step 2: use the existing fuel-splitting lemma.** The probe declared
-  its own `probe_interp_addN`; do NOT copy it. `interpD`
-  (`smc/smc_session_types.v:872`) already states
-  `interp (h1 + h2) ps traces = let (ps', traces') := interp h1 ps traces in
-  interp h2 ps' traces'` and is in scope through `smc_session_types`.
-  Substitute `interpD` for `probe_interp_addN` in the proof body below.
+- [ ] **Step 2: use `interp_fuelD` from Task 2b.** The probe declared its own
+  `probe_interp_addN`; do NOT copy it, and do NOT use `interpD` directly.
+  `interpD` (`smc/smc_session_types.v:872`) concludes with a
+  `let (ps', traces') := interp h1 ps traces in ...` destructuring, which does
+  not iota-reduce once the inner run is abstracted to an opaque `S`, so the
+  goal never exposes `S.1`/`S.2` and the next stage's `move Ht2: (interp 2
+  S.1 S.2) => S2` would abstract a term absent from the goal. Task 2b derives
+  the projection form `interp_fuelD` from `interpD` in one line; use it.
 
 - [ ] **Step 3: the staged proof** (body from `probe_trace_link.v:210-231`
   with `probe_interp_addN` -> `interpD`; keep every `%N`, since `ring_scope`
@@ -390,18 +428,18 @@ Lemma dsdp_run_traces_of_ops_ok :
 Proof.
 rewrite /run_interp.
 have -> : (15 = 10 + 5)%N by [].
-rewrite interpD.
+rewrite interp_fuelD.
 move Ht: (interp 10 gprocs (nseq (size gprocs) [::])) => S.
 vm_compute in Ht.
 rewrite Hgb in Ht.
 have -> : (5 = 2 + 3)%N by [].
-rewrite interpD.
+rewrite interp_fuelD.
 move Ht2: (interp 2 S.1 S.2) => S2.
 rewrite -Ht in Ht2.
 vm_compute in Ht2.
 rewrite Hgc in Ht2.
 have -> : (3 = 1 + 2)%N by [].
-rewrite interpD.
+rewrite interp_fuelD.
 move Ht3: (interp 1 S2.1 S2.2) => S3.
 rewrite -Ht2 in Ht3.
 vm_compute in Ht3.
@@ -415,10 +453,7 @@ Two traps: `move Ht: t => S` yields `Ht : t = S`, so pushing the value
 forward needs `rewrite -Ht in Ht2` (with the minus); and do not unfold
 `gprocs` beforehand or the `move Ht:` pattern becomes unwritable. Never
 abstract a fuel numeral — `5` occurs inside `10` and `14`; abstract the
-interpreter state, as above. If `interpD`'s `let`-destructuring conclusion
-does not rewrite directly, first `case: (interp 10 gprocs _)` to expose the
-pair, or fall back to declaring the probe's `probe_interp_addN` locally and
-record the deviation.
+interpreter state, as above.
 
 - [ ] **Step 4: compile.** Expected: exit 0. `vm_compute` stages can take
   tens of seconds; that is normal.
@@ -565,29 +600,25 @@ Definition dsdp_procs_of_sample (s : dsdp_alice_sampleT AHE Renc) :
      rb1 := rand_of_renc (Rho2 s), rc1 := rand_of_renc (Rho3 s),
      ra1 := rand_of_renc (RA1 s), ra2 := rand_of_renc (RA2 s) *)
 
+(* Fuel bounds the encoded trace, since encoding preserves length. *)
+Let size_alice_trace (s : dsdp_alice_sampleT AHE Renc) :
+  size (map trace_data_of_di_data
+          (nth [::] (run_interp 15 (dsdp_procs_of_sample s)).2 0)) <= 15.
+Proof. by rewrite size_map; exact: size_traces_nth. Qed.
+
 Definition AliceTrace :
     {RV (alice_sample_fdist AHE card_renc) -> 15.-bseq dsdp_trace_dataT} :=
-  fun s => bseq_map trace_data_of_di_data
-             (tnth (interp_traces 15 (dsdp_procs_of_sample s)) 0).
+  fun s => Bseq (size_alice_trace s).
 ```
 
-`bseq_map` may not exist; if `Search _ (_.-bseq _) map` finds nothing, define
-it locally next to the trace RV:
-
-```coq
-Lemma size_map_bseq (T1 T2 : Type) (n : nat) (f : T1 -> T2)
-    (b : n.-bseq T1) : size (map f b) <= n.
-Proof. by rewrite size_map size_bseq. Qed.
-
-Definition bseq_map (T1 T2 : Type) (n : nat) (f : T1 -> T2)
-    (b : n.-bseq T1) : n.-bseq T2 := Bseq (size_map_bseq f b).
-```
-
-Note the tuple index needs `size (dsdp_procs_of_sample s) = 3`; if the
-`'I_(size ...)` obligation is awkward, project with
-`nth [::] (run_interp 15 (dsdp_procs_of_sample s)).2 0` and rebuild the
-`Bseq` with `size_traces_nth` (Task 1 makes it nat-indexed, so
-`Bseq (size_traces_nth 15 (dsdp_procs_of_sample s) 0)` typechecks directly).
+Construction decided (no alternatives to weigh at implementation time): map
+the encoder over the seq-level projection and build the `Bseq` in one step
+from `size_map` plus Task 1's nat-indexed `size_traces_nth`. This needs no
+`'I_(size ...)` obligation, and it needs no general `bseq_map` helper — none
+exists in mathcomp (`tuple.v` offers only `insub_bseq`, `in_bseq`,
+`cast_bseq`, `widen_bseq`) nor in `lib/ssr_ext.v` (whose `Section
+bseq_lemmas` has `bseq_take` over a single type variable), and adding one for
+a single call site would be dead generality.
 
 - [ ] **Step 3: the bridge lemma** — the payload of the whole task:
 
@@ -925,11 +956,18 @@ unreviewed commit.
   Tasks 7-8; section 5 -> Tasks 5-6; section 6 naming table -> applied
   throughout; section 7 invariants -> Task 6 Step 6 and Task 10 Steps 1, 4;
   section 9 conventions -> Task 10; section 10 golf -> Task 9.
-- **Known judgement calls left to the implementer, each with a stated
-  fallback:** the `interpD` `let`-destructuring rewrite (Task 4 Step 3), the
-  tuple-index vs `nth`+`size_traces_nth` choice for `AliceTrace` (Task 5
-  Step 2), and whether `bseq_map` must be declared locally (Task 5 Step 2).
-  None changes a statement.
+- **Decisions taken here rather than deferred to implementation**, each for
+  readability and against duplication: (a) fuel splitting uses
+  `interp_fuelD`, derived once from `interpD` in Task 2b, because `interpD`'s
+  `let` form structurally blocks the staging and because restating the
+  probe's copy would duplicate an existing fact; (b) the evaluation lemma
+  stays seq-level (the form the staged proof produces) and `AliceTrace`
+  projects with `nth`, so no `'I_(size ...)` obligation appears, and no
+  tuple-form restatement of the literal is added just for parity with
+  `dsdp_traces_ok`; (c) no `bseq_map` helper is introduced — the encoded
+  `Bseq` is built in one step from `size_map` and `size_traces_nth`, since
+  nothing equivalent exists upstream and a one-call-site helper would be dead
+  generality.
 - **Type consistency:** `dsdp_trace_dataT` is the codomain element type in
   Tasks 3, 5, 6; `dsdp_trace_of_view` has one signature
   (`dsdp_alice_viewT AHE Renc t_cipher -> 15.-bseq dsdp_trace_dataT`) used in
