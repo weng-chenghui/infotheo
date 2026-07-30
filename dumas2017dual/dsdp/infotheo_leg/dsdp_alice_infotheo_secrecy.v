@@ -799,15 +799,9 @@ Lemma alice_VarRV_cond_uniform (s v2 v3 : plain AHE) :
      | [% V1c, U1c, U2c, U3c, Sout] = (w_v1, w_u1, w_u2, w_u3, s) ]
   = #|plain AHE|%:R^-1.
 Proof.
-move=> Hcond Hin.
-apply: (@Pr_dsdp_sol_uniform_ring _ (plain AHE) _ alice_sample_fdist
-          V1c V2 V3 U1c U2c U3c Sout).
-- exact: alice_constraint_holds.
-- by rewrite alice_var_uniform; congr fdist_uniform; exact: eq_irrelevance.
-- exact: alice_var_indep.
-- exact: w_u3_inj.
-- exact: Hcond.
-- exact: Hin.
+apply: Pr_dsdp_sol_uniform_ring => //; last exact: alice_var_indep.
+  exact: alice_constraint_holds.
+by rewrite alice_var_uniform; congr fdist_uniform; exact: eq_irrelevance.
 Qed.
 
 (* A conditioning coordinate independent of the numerator pair drops out of the
@@ -821,11 +815,10 @@ Lemma cpr_eq_drop_indep {Rr : realType} {U : finType} {P : FDist.t Rr U}
   P |= W _|_ [% X, Y] ->
   `Pr[ X = a | [% W, Y] = (w, y) ] = `Pr[ X = a | Y = y ].
 Proof.
-move=> Hw Hindep.
-rewrite !cpr_eqE.
-have HWY : P |= W _|_ Y by exact: (inde_RV_comp idfun snd Hindep).
-rewrite (pfwd1_pairCA X W Y a w y) (Hindep w (a, y)) (HWY w y).
-by rewrite invfM mulrACA (mulfV Hw) mul1r.
+move=> Hw Hindep; rewrite !cpr_eqE.
+have HWY : P |= W _|_ Y := inde_RV_comp idfun snd Hindep.
+by rewrite (pfwd1_pairCA X W Y a w y) (Hindep w (a, y)) (HWY w y) invfM
+           mulrACA (mulfV Hw) mul1r.
 Qed.
 
 (* Conditioned on the leaked output alone, Bob's input is uniform on the
@@ -835,8 +828,8 @@ Lemma alice_V2_cond_Sout (a s : plain AHE) :
   `Pr[ V2 = a | Sout = s ] = #|plain AHE|%:R^-1.
 Proof.
 move=> Hs.
-have Hbij : bijective (fun v : plain AHE => w_u3 * v) by apply: inj_card_bij.
-case: Hbij => g Hg1 Hg2.
+have [g _ Hg2] : bijective (fun v : plain AHE => w_u3 * v)
+  by apply: inj_card_bij.
 pose v3star := g (s - w_u1 * w_v1 - w_u2 * a).
 have Hfib : (a, v3star) \in dsdp_fiber_ring w_u1 w_u2 w_u3 w_v1 s
   by rewrite inE /=; apply/eqP; rewrite /v3star Hg2; ring.
@@ -844,34 +837,22 @@ have Hnum : pfwd1 [% V2, Sout] (a, s)
           = pfwd1 [% [% V2, V3], Sout] ((a, v3star), s).
   rewrite !pfwd1E; congr (Pr _ _).
   apply/setP => t; rewrite !inE /= !xpair_eqE.
-  case Hva: (V2 t == a) => //=.
-  move/eqP: Hva => Hva.
-  have HsEq : (Sout t == s) = (V3 t == v3star).
-    rewrite /Sout /comp_RV /dsdp_output /= Hva.
-    have -> : s = w_u1 * w_v1 + w_u2 * a + w_u3 * v3star
-      by rewrite /v3star Hg2; ring.
-    by rewrite (inj_eq (addrI _)) (inj_eq w_u3_inj).
-  by rewrite HsEq andbb.
+  case: (V2 t =P a) => [Hva|_] //=.
+  suff -> : (Sout t == s) = (V3 t == v3star) by rewrite andbb.
+  rewrite /Sout /comp_RV /dsdp_output /= Hva.
+  have -> : s = w_u1 * w_v1 + w_u2 * a + w_u3 * v3star
+    by rewrite /v3star Hg2; ring.
+  by rewrite (inj_eq (addrI _)) (inj_eq w_u3_inj).
+have Hcond_eq : pfwd1 [% V1c, U1c, U2c, U3c, Sout] (w_v1, w_u1, w_u2, w_u3, s)
+              = `Pr[ Sout = s ]
+  := pfwd1_RV2_compl Sout (fun=> (w_v1, w_u1, w_u2, w_u3)) s.
 have HcwN : `Pr[ [% V1c, U1c, U2c, U3c] = (w_v1, w_u1, w_u2, w_u3) ] != 0.
-  rewrite alice_inputs_constE pfwd1E.
-  have -> : finset (preim (const_RV alice_sample_fdist
-                             (w_v1, w_u1, w_u2, w_u3))
-                     (pred1 (w_v1, w_u1, w_u2, w_u3))) = [set: _].
-    by apply/setP => t; rewrite !inE /= const_RVE eqxx.
-  by rewrite Pr_setT oner_neq0.
+  by apply: contra_neq Hs => /(pfwd1_domin_RV2 Sout s); rewrite -Hcond_eq.
 have Hind : alice_sample_fdist
               |= [% V1c, U1c, U2c, U3c] _|_ [% [% V2, V3], Sout]
   by rewrite alice_inputs_constE; exact: inde_const_RV.
-have Hcond_eq :
-  `Pr[ [% V1c, U1c, U2c, U3c, Sout] = (w_v1, w_u1, w_u2, w_u3, s) ]
-  = `Pr[ Sout = s ].
-  rewrite alice_inputs_constE !pfwd1E; congr (Pr _ _).
-  by apply/setP => t; rewrite !inE /= !xpair_eqE !eqxx.
-rewrite cpr_eqE Hnum -cpr_eqE.
-rewrite -(cpr_eq_drop_indep (a, v3star) s HcwN Hind).
-apply: alice_VarRV_cond_uniform.
-- by rewrite Hcond_eq.
-- exact: Hfib.
+rewrite cpr_eqE Hnum -cpr_eqE -(cpr_eq_drop_indep (a, v3star) s HcwN Hind).
+by apply: alice_VarRV_cond_uniform; rewrite ?Hcond_eq.
 Qed.
 
 (* Conditioned on the leaked output, Bob's input takes any given value with
@@ -879,32 +860,29 @@ Qed.
 Lemma alice_V2_cond_le (a s : plain AHE) :
   `Pr[ V2 = a | Sout = s ] <= #|plain AHE|%:R^-1.
 Proof.
-case: (eqVneq `Pr[ Sout = s ] 0) => [H0 | Hn0].
-- by rewrite cpr_eqE H0 invr0 mulr0 invr_ge0 ler0n.
-- by rewrite (alice_V2_cond_Sout a Hn0).
+have [H0|Hn0] := eqVneq `Pr[ Sout = s ] 0.
+  by rewrite cpr_eqE H0 invr0 mulr0 invr_ge0 ler0n.
+by rewrite (alice_V2_cond_Sout a Hn0).
 Qed.
 
 (* The leaked output is uniform on the plaintext space. *)
 Lemma Sout_uniform : `p_ Sout = fdist_uniform card_plain.
 Proof.
-have Hm : (#|plain AHE|%:R : R) != 0 by rewrite pnatr_eq0 -lt0n card_plain_gt0.
 have -> : `p_ Sout
         = fdistmap (uncurry (dsdp_output w_v1 w_u1 w_u2 w_u3)) (`p_ [% V2, V3]).
   by rewrite /dist_of_RV fdistmap_comp.
-rewrite alice_var_uniform.
-apply/fdist_ext => s.
+rewrite alice_var_uniform; apply/fdist_ext => s.
 rewrite fdistmapE fdist_uniformE.
 under eq_bigr do rewrite fdist_uniformE.
-rewrite sumr_const.
 have Hcard : #|preim (uncurry (dsdp_output w_v1 w_u1 w_u2 w_u3)) (pred1 s)|
            = #|plain AHE|.
   rewrite -(dsdp_fiber_card_ring w_u1 w_u2 w_v1 s w_u3_inj).
-  apply: eq_card => vv.
-  rewrite !inE /= /dsdp_output.
+  apply: eq_card => vv; rewrite !inE /= /dsdp_output.
   case: vv => v2 v3 /=; rewrite -subr_eq0 -[RHS]subr_eq0.
   by have -> : w_u1 * w_v1 + w_u2 * v2 + w_u3 * v3 - s
              = w_u2 * v2 + w_u3 * v3 - (s - w_u1 * w_v1) by ring.
-by rewrite Hcard -[LHS]mulr_natr card_prod natrM invfM -mulrA mulVf // mulr1.
+rewrite sumr_const Hcard -[LHS]mulr_natr card_prod natrM invfM -mulrA.
+by rewrite mulVf ?mulr1 // pnatr_eq0 -lt0n card_plain_gt0.
 Qed.
 
 (* Everything Alice's all-zero view carries besides the leaked output. *)
