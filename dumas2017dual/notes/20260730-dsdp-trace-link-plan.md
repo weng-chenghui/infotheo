@@ -1054,7 +1054,37 @@ unreviewed commit.
 
 ---
 
-## RESUME HERE (state as of the pause, 2026-07-30)
+## STATUS: complete (2026-07-30)
+
+All ten tasks are done and committed. Task 10 finished at `3abbfad3` (style
+pass and the gated commit, `rocq-auditor` Stage 2 PASS on both that commit and
+the earlier header checkpoint `cb98f4a6`), followed by `0faa2136`, which
+settled the two questions the execution deferred:
+
+- The trace headline's closer spells the leg's eight section parameters again.
+  The bare `exact:` precedent inside the leg does not transfer: those uses sit
+  INSIDE `Section dsdp_alice_infotheo_secrecy`, where the parameters are
+  ambient, whereas this file's use is after discharge, where all eight are in
+  the type. The in-file sibling `guess_trace_all_zero_le_invm` already spells
+  them, so the short form was an avoidable asymmetry in a file whose purpose
+  is making the leg correspondence legible.
+- The `Scope.` paragraph's two pieces of process narration ("remains a
+  follow-up", "This retires the fidelity remark to the contrary") are gone,
+  restated as declarative facts about what the file proves.
+
+Open follow-ups, none blocking: an F001 warning on `dsdp_run_traces_ok`
+(recommendation is NOT to rename — the header table, the thesis sidenote and
+another lemma's `Naming:` sentence all reference it — but to close it with a
+`Naming:` sentence), and a delimiter inconsistency among the file's `Naming:`
+lines (backticks versus plain text versus the upstream leg's `[brackets]`).
+
+Tooling caveat worth carrying forward: the pre-commit gate's Stage 1 is
+DIFF-SCOPED, and on `3abbfad3` its "touched entities" were hunk neighbours
+rather than the declarations whose findings the commit fixed. "The gate
+passed" is therefore weaker evidence than it looks; the whole-file
+`audit-file.sh --file` run is the real check.
+
+## Superseded: RESUME HERE (state at the 2026-07-30 pause)
 
 Tasks 1-9 are committed. Task 7 is `2fb21954`; Task 8 is `79d6b5a` in the
 thesis repo (`~/Projects/phd-thesis`); the golf batches end at `32ad73f4`;
