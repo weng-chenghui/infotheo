@@ -881,6 +881,14 @@ case: h2 {IH} => //= h2.
 by rewrite (negbTE Hfin).
 Qed.
 
+(* Projection form of [interpD]: splitting the fuel exposes the intermediate
+   process and trace lists as projections, so an abstracted intermediate run
+   still matches the shape of the next split. *)
+Lemma interp_fuelD h1 h2 (ps : seq (proc data)) traces :
+  interp (h1 + h2) ps traces
+  = interp h2 (interp h1 ps traces).1 (interp h1 ps traces).2.
+Proof. by rewrite interpD; case: (interp h1 ps traces). Qed.
+
 (* The number of processes is preserved by interpretation.
    Proof: By induction on fuel h. The step function maps over processes,
    preserving the list size. *)
