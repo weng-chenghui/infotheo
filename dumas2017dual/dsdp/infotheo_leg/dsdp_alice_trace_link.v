@@ -130,15 +130,14 @@ Require Import dsdp_alice_infotheo_secrecy.
 (* formalization. The forward randomness w_rb2 and the re-encryption          *)
 (* randomness w_rc2 are universally quantified parameters rather than         *)
 (* averaged sample coordinates, so the bounds hold at every value of the two, *)
-(* including an adversarially chosen one, and imply the averaged bounds; a    *)
-(* single reduction whose epsilon averages w_rc2 remains a follow-up.         *)
+(* including an adversarially chosen one, and imply the averaged bounds. The  *)
+(* epsilons here are per-value, not averages over w_rc2.                      *)
 (*                                                                            *)
-(* Charlie-side re-encryption randomness does reach Alice's trace: the        *)
+(* Charlie-side re-encryption randomness reaches Alice's trace: the           *)
 (* interpreter's step traces the datum a party receives rather than the       *)
 (* argument its continuation is applied to (smc/smc_interpreter.v), so the    *)
 (* ciphertext under Alice's key carrying rand_of_renc w_rc2 is one of her     *)
-(* eleven trace entries. This retires the fidelity remark to the contrary in  *)
-(* the specification of the infotheo leg.                                     *)
+(* eleven trace entries.                                                      *)
 (******************************************************************************)
 
 Import Order.TTheory GRing.Theory Num.Def Num.Theory.
@@ -647,7 +646,10 @@ Theorem dsdp_alice_guess_fdist_trace_V2_real_le
            (hop1_reduction
               (distinguisher_of_guess (g \o dsdp_trace_of_view))).
 Proof.
-by rewrite dsdp_trace_of_viewE; exact: dsdp_alice_guess_fdist_V2_real_le.
+rewrite dsdp_trace_of_viewE.
+exact: (dsdp_alice_guess_fdist_V2_real_le card_renc rand_of_renc
+          chcipher_of_cipher pkey_of_dk w_v1 w_u1 w_u2 w_u3_inj
+          (g \o dsdp_trace_of_view)).
 Qed.
 
 End dsdp_alice_trace_rv.
