@@ -126,9 +126,18 @@ by rewrite nth_nseq; case: ifP.
 Qed.
 ```
 
-`interp_traces` (line 310) and `interp_traces_ok` (line 315) keep their
-statements and bodies unchanged: `Bseq (size_traces_nth h i)` still
-elaborates because an `'I_(size procs)` coerces to `nat`.
+`interp_traces` and `interp_traces_ok` keep their STATEMENTS unchanged, but
+`interp_traces`'s body needs one edit (as built): the old
+`(i : 'I_(size procs))` argument was the inference channel for `procs`, so
+with a nat index the proc list must be spelled.
+
+```coq
+(* before *) [tuple Bseq (size_traces_nth h i) | i < size procs].
+(* after  *) [tuple Bseq (size_traces_nth h procs i) | i < size procs].
+```
+
+`interp_traces_ok`'s body needs no change, so Step 3's fallback variant is
+not used.
 
 - [ ] **Step 3: compile**
 
@@ -164,12 +173,13 @@ Local Open Scope nat_scope.
    at most h entries. *)
 Lemma size_traces h (procs : seq (proc data)) :
   forall s, s \in (run_interp h procs).2 -> size s <= h.
-Proof. by move=> s /nthP[i _ <-]; exact: size_traces_nth. Qed.
+Proof. by move=> s /(nthP [::])[i _ <-]; exact: size_traces_nth. Qed.
 
 End traces_eqType.
 ```
 
-If `nthP` needs an explicit default, write `/(nthP [::])[i _ <-]`.
+(As built: the bare `/nthP[i _ <-]` form fails with "Could not fill dependent
+hole in apply"; the explicit default `[::]` is required.)
 
 - [ ] **Step 5: compile the dependents (acceptance test)**
 
