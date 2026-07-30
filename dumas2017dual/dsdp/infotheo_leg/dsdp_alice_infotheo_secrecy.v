@@ -606,21 +606,15 @@ Lemma hop0_real_armE (D : plain AHE * plain AHE * dsdp_alice_viewT -> bool) :
   Pr (`p_ [% V2, V3, AliceView_zero_prefix 0]) [set x | D x]
     = indcpa_fdist_success_real (pkey_of_party Bob) (hop0_reduction D).
 Proof.
-have Hslot :
-  `p_ [% Hop0Ctx, hop0_cipher 0]
-    = (`p_ Hop0Ctx) `X (fun c : hop0_ctxT =>
-        fdistmap (fun r => chcipher_of_cipher
-                    (enc (pkey_of_party Bob) c.1.1.1.1 (rand_of_renc r)))
-                 (fdist_uniform card_renc))
-  := enc_slot_resampleE _ hop0_ctx_prod.
 rewrite -Pr_fdistmap_bool /indcpa_fdist_success_real /=.
 have -> : fdistmap D (`p_ [% V2, V3, AliceView_zero_prefix 0])
-        = fdistmap (fun p : (hop0_ctxT * t_cipher)%type =>
-                      D (hop0_assemble p.1 p.2))
+        = fdistmap (fun p : hop0_ctxT * t_cipher => D (hop0_assemble p.1 p.2))
                    (`p_ [% Hop0Ctx, hop0_cipher 0]).
   rewrite /dist_of_RV !fdistmap_comp; congr fdistmap.
   by apply/boolp.funext => -[[[[v2 v3] [r2 r3]] [rho2 rho3]] [ra1 ra2]].
-rewrite Hslot fdist_prod_bindE fdistmap_bind.
+rewrite (enc_slot_resampleE (fun (c : hop0_ctxT) r => chcipher_of_cipher
+  (enc (pkey_of_party Bob) c.1.1.1.1 (rand_of_renc r))) hop0_ctx_prod)
+        fdist_prod_bindE fdistmap_bind.
 congr (Pr _ _); congr (_ >>= _); apply/boolp.funext => c.
 by rewrite /enc_fdist !fdistmap_comp.
 Qed.
@@ -631,21 +625,15 @@ Lemma hop0_zero_armE (D : plain AHE * plain AHE * dsdp_alice_viewT -> bool) :
   Pr (`p_ [% V2, V3, AliceView_zero_prefix 1]) [set x | D x]
     = indcpa_fdist_success_zero (pkey_of_party Bob) (hop0_reduction D).
 Proof.
-have Hslot :
-  `p_ [% Hop0Ctx, hop0_cipher 1]
-    = (`p_ Hop0Ctx) `X (fun _ : hop0_ctxT =>
-        fdistmap (fun r => chcipher_of_cipher
-                    (enc (pkey_of_party Bob) 0 (rand_of_renc r)))
-                 (fdist_uniform card_renc))
-  := enc_slot_resampleE _ hop0_ctx_prod.
 rewrite -Pr_fdistmap_bool /indcpa_fdist_success_zero /=.
 have -> : fdistmap D (`p_ [% V2, V3, AliceView_zero_prefix 1])
-        = fdistmap (fun p : (hop0_ctxT * t_cipher)%type =>
-                      D (hop0_assemble p.1 p.2))
+        = fdistmap (fun p : hop0_ctxT * t_cipher => D (hop0_assemble p.1 p.2))
                    (`p_ [% Hop0Ctx, hop0_cipher 1]).
   rewrite /dist_of_RV !fdistmap_comp; congr fdistmap.
   by apply/boolp.funext => -[[[[v2 v3] [r2 r3]] [rho2 rho3]] [ra1 ra2]].
-rewrite Hslot fdist_prod_bindE fdistmap_bind.
+rewrite (enc_slot_resampleE (fun (_ : hop0_ctxT) r => chcipher_of_cipher
+  (enc (pkey_of_party Bob) 0 (rand_of_renc r))) hop0_ctx_prod)
+        fdist_prod_bindE fdistmap_bind.
 congr (Pr _ _); congr (_ >>= _); apply/boolp.funext => c.
 by rewrite /enc_fdist !fdistmap_comp.
 Qed.
@@ -666,21 +654,15 @@ Lemma hop1_real_armE (D : plain AHE * plain AHE * dsdp_alice_viewT -> bool) :
   Pr (`p_ [% V2, V3, AliceView_zero_prefix 1]) [set x | D x]
     = indcpa_fdist_success_real (pkey_of_party Charlie) (hop1_reduction D).
 Proof.
-have Hslot :
-  `p_ [% Hop1Ctx, hop1_cipher 1]
-    = (`p_ Hop1Ctx) `X (fun c : hop1_ctxT =>
-        fdistmap (fun r => chcipher_of_cipher
-                    (enc (pkey_of_party Charlie) c.1.1.1.2 (rand_of_renc r)))
-                 (fdist_uniform card_renc))
-  := enc_slot_resampleE _ hop1_ctx_prod.
 rewrite -Pr_fdistmap_bool /indcpa_fdist_success_real /=.
 have -> : fdistmap D (`p_ [% V2, V3, AliceView_zero_prefix 1])
-        = fdistmap (fun p : (hop1_ctxT * t_cipher)%type =>
-                      D (hop1_assemble p.1 p.2))
+        = fdistmap (fun p : hop1_ctxT * t_cipher => D (hop1_assemble p.1 p.2))
                    (`p_ [% Hop1Ctx, hop1_cipher 1]).
   rewrite /dist_of_RV !fdistmap_comp; congr fdistmap.
   by apply/boolp.funext => -[[[[v2 v3] [r2 r3]] [rho2 rho3]] [ra1 ra2]].
-rewrite Hslot fdist_prod_bindE fdistmap_bind.
+rewrite (enc_slot_resampleE (fun (c : hop1_ctxT) r => chcipher_of_cipher
+  (enc (pkey_of_party Charlie) c.1.1.1.2 (rand_of_renc r))) hop1_ctx_prod)
+        fdist_prod_bindE fdistmap_bind.
 congr (Pr _ _); congr (_ >>= _); apply/boolp.funext => c.
 by rewrite /enc_fdist !fdistmap_comp.
 Qed.
@@ -691,21 +673,15 @@ Lemma hop1_zero_armE (D : plain AHE * plain AHE * dsdp_alice_viewT -> bool) :
   Pr (`p_ [% V2, V3, AliceView_zero_prefix 2]) [set x | D x]
     = indcpa_fdist_success_zero (pkey_of_party Charlie) (hop1_reduction D).
 Proof.
-have Hslot :
-  `p_ [% Hop1Ctx, hop1_cipher 2]
-    = (`p_ Hop1Ctx) `X (fun _ : hop1_ctxT =>
-        fdistmap (fun r => chcipher_of_cipher
-                    (enc (pkey_of_party Charlie) 0 (rand_of_renc r)))
-                 (fdist_uniform card_renc))
-  := enc_slot_resampleE _ hop1_ctx_prod.
 rewrite -Pr_fdistmap_bool /indcpa_fdist_success_zero /=.
 have -> : fdistmap D (`p_ [% V2, V3, AliceView_zero_prefix 2])
-        = fdistmap (fun p : (hop1_ctxT * t_cipher)%type =>
-                      D (hop1_assemble p.1 p.2))
+        = fdistmap (fun p : hop1_ctxT * t_cipher => D (hop1_assemble p.1 p.2))
                    (`p_ [% Hop1Ctx, hop1_cipher 2]).
   rewrite /dist_of_RV !fdistmap_comp; congr fdistmap.
   by apply/boolp.funext => -[[[[v2 v3] [r2 r3]] [rho2 rho3]] [ra1 ra2]].
-rewrite Hslot fdist_prod_bindE fdistmap_bind.
+rewrite (enc_slot_resampleE (fun (_ : hop1_ctxT) r => chcipher_of_cipher
+  (enc (pkey_of_party Charlie) 0 (rand_of_renc r))) hop1_ctx_prod)
+        fdist_prod_bindE fdistmap_bind.
 congr (Pr _ _); congr (_ >>= _); apply/boolp.funext => c.
 by rewrite /enc_fdist !fdistmap_comp.
 Qed.
@@ -1208,27 +1184,13 @@ Proof.
 have -> : `p_ AliceSpectator
         = fdistmap alice_spectator_prod (`p_ AliceSpectatorPre2).
   by rewrite alice_spectator_prodE /dist_of_RV fdistmap_comp.
-rewrite spectator_pre2_uniformE.
-rewrite (fdist_uniform_prod card_masks_ra_rho card_renc card_spectator_pre2).
-rewrite (fdist_uniform_prod card_masks_ra card_renc card_masks_ra_rho).
-rewrite (fdist_uniform_prod card_plain_pair card_renc_pair card_masks_ra).
-have -> : alice_spectator_prod
-  = (fun c : alice_spectator_pre2T =>
-       ((fun b : ((plain AHE * plain AHE) * (Renc * Renc) * Renc)%type =>
-           (b.1, chcipher_of_cipher
-                   (enc (pkey_of_party Bob) 0 (rand_of_renc b.2)))) c.1,
-        chcipher_of_cipher
-          (enc (pkey_of_party Charlie) 0 (rand_of_renc c.2)))).
-  by apply/boolp.funext => -[[[m ra] rho2] rho3].
-rewrite (fdistmap_prod _ _
-  (fun b : ((plain AHE * plain AHE) * (Renc * Renc) * Renc)%type =>
-     (b.1, chcipher_of_cipher
-             (enc (pkey_of_party Bob) 0 (rand_of_renc b.2))))
-  (fun r : Renc => chcipher_of_cipher
-                     (enc (pkey_of_party Charlie) 0 (rand_of_renc r)))).
-by rewrite (fdistmap_prodr _ _
-  (fun r : Renc => chcipher_of_cipher
-                     (enc (pkey_of_party Bob) 0 (rand_of_renc r)))).
+rewrite spectator_pre2_uniformE
+        (fdist_uniform_prod card_masks_ra_rho card_renc card_spectator_pre2)
+        (fdist_uniform_prod card_masks_ra card_renc card_masks_ra_rho)
+        (fdist_uniform_prod card_plain_pair card_renc_pair card_masks_ra).
+rewrite /enc_fdist -!fdistmap_prodr -[X in _ = fdistmap _ (_ `x X)]fdistmap_id.
+rewrite -fdistmap_prod fdistmap_comp; congr fdistmap.
+by apply/boolp.funext => -[[[m ra] rho2] rho3].
 Qed.
 
 (* The spectator slots of a value of Alice's view. *)
@@ -1247,21 +1209,17 @@ Lemma alice_view_all_zero_pfwd1E (BT : finType)
   = (v.1.1.2 == s)%:R
     * pfwd1 [% AliceSpectator, W] (alice_spectator_of_view v, w).
 Proof.
-move=> HW.
-case: v => [[[[m ra] sv] c2] c3] /=.
+move=> HW; case: v => [[[[m ra] sv] c2] c3].
 rewrite /alice_spectator_of_view /=.
 case: (altP (sv =P s)) => [->|Hne]; last first.
   rewrite mul0r pfwd1E (_ : finset _ = set0) ?Pr_set0 //.
-  apply/setP => t; rewrite !inE.
-  apply/negbTE; apply: contra Hne.
-  rewrite !xpair_eqE.
-  move=> /andP[/andP[/andP[/andP[_ Hsv] _] _] Hw].
+  apply/setP => t; rewrite !inE; apply/negbTE; apply: contra Hne.
+  rewrite !xpair_eqE => /andP[/andP[/andP[/andP[_ Hsv] _] _] Hw].
   by rewrite -(eqP Hsv) (HW t (eqP Hw)).
 rewrite mul1r !pfwd1E; congr (Pr _ _).
 apply/setP => t; rewrite !inE !xpair_eqE.
 case Ew : (W t == w); last by rewrite !andbF.
-have HS : Sout t = s by exact: (HW t (eqP Ew)).
-by rewrite HS eqxx !andbT.
+by rewrite (HW t (eqP Ew)) eqxx !andbT.
 Qed.
 
 (* Conditioned on the two secret inputs, Alice's all-zero view follows the
@@ -1274,16 +1232,14 @@ Lemma dsdp_alice_view_cond_sim (v : dsdp_alice_viewT) (v2 v3 : plain AHE) :
     = dsdp_alice_simulator (dsdp_output w_v1 w_u1 w_u2 w_u3 v2 v3) v.
 Proof.
 move=> Hvv.
-have Hnum : pfwd1 [% AliceView_all_zero, [% V2, V3]] (v, (v2, v3))
-  = (v.1.1.2 == dsdp_output w_v1 w_u1 w_u2 w_u3 v2 v3)%:R
-    * pfwd1 [% AliceSpectator, [% V2, V3]]
-        (alice_spectator_of_view v, (v2, v3)).
-  by apply: alice_view_all_zero_pfwd1E => t; rewrite /Sout /comp_RV => ->.
-rewrite cpr_eqE Hnum (alice_spectator_indep _ _) mulrA mulfK //.
-rewrite -dist_of_RVE alice_spectator_law.
-case: v Hnum => [[[[m ra] sv] c2] c3] _.
+have HW t : [% V2, V3] t = (v2, v3) ->
+    Sout t = dsdp_output w_v1 w_u1 w_u2 w_u3 v2 v3.
+  by rewrite /Sout /comp_RV => ->.
+rewrite cpr_eqE (alice_view_all_zero_pfwd1E v HW) (alice_spectator_indep _ _).
+rewrite mulrA mulfK // -dist_of_RVE alice_spectator_law.
+case: v => [[[[m ra] sv] c2] c3].
 rewrite /alice_spectator_of_view /dsdp_alice_simulator !fdist_prodE fdist1E /=.
-ring.
+by ring.
 Qed.
 
 (* Conditioned on the leaked output, Alice's all-zero view follows the simulator
@@ -1297,15 +1253,11 @@ move=> Hs.
 have Hind : alice_sample_fdist |= AliceSpectator _|_ Sout.
   exact: (inde_RV_comp idfun (uncurry (dsdp_output w_v1 w_u1 w_u2 w_u3))
             alice_spectator_indep).
-have Hnum : pfwd1 [% AliceView_all_zero, Sout] (v, s)
-  = (v.1.1.2 == s)%:R
-    * pfwd1 [% AliceSpectator, Sout] (alice_spectator_of_view v, s).
-  by apply: alice_view_all_zero_pfwd1E => t ->.
-rewrite cpr_eqE Hnum (Hind _ _) mulrA mulfK //.
-rewrite -dist_of_RVE alice_spectator_law.
-case: v Hnum => [[[[m ra] sv] c2] c3] _.
+rewrite cpr_eqE (alice_view_all_zero_pfwd1E v (fun=> id)) (Hind _ _).
+rewrite mulrA mulfK // -dist_of_RVE alice_spectator_law.
+case: v => [[[[m ra] sv] c2] c3].
 rewrite /alice_spectator_of_view /dsdp_alice_simulator !fdist_prodE fdist1E /=.
-ring.
+by ring.
 Qed.
 
 (* The ideal-world joint law of the two secret inputs and a simulated view: the
@@ -1419,8 +1371,7 @@ apply/boolp.funext => t.
 rewrite /alice_view_full_of /AliceCombineBob /AliceCombineCharlie
         /AliceRecvPlain /= !chcipher_of_cipherK.
 congr (_, _, _, _).
-rewrite /Sout /comp_RV /dsdp_output /=.
-ring.
+by rewrite /Sout /comp_RV /dsdp_output /=; ring.
 Qed.
 
 (* Alice's full view is the reconstruction applied to her reduced view. *)
