@@ -257,8 +257,7 @@ Lemma dsdp_run_traces_ok :
                        (rand_of_renc w_rb2)));
           d v3; kd dk_c]].
 Proof.
-rewrite dsdp_procs_stdE /procs_of_ops.
-apply: dsdp_run_traces_of_ops_ok.
+rewrite dsdp_procs_stdE /procs_of_ops; apply: dsdp_run_traces_of_ops_ok.
 - exact: dec_combine_bob.
 - exact: dec_forward_charlie.
 - exact: dec_recrypt_alice.
@@ -382,7 +381,7 @@ Proof. by rewrite /Sout /comp_RV /dsdp_output /=; ring. Qed.
 Let recrypt_plainE (s : dsdp_alice_sampleT AHE Renc) :
   V3 s * w_u3 + R3 s + (V2 s * w_u2 + R2 s)
   = Sout s - w_u1 * w_v1 + R2 s + R3 s.
-Proof. by rewrite /Sout /comp_RV /dsdp_output /=; ring. Qed.
+Proof. by rewrite -Sout_runE; ring. Qed.
 
 (* The trace the interpreter produces for Alice is the deterministic image of
    her reduced view. *)
