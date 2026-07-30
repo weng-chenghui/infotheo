@@ -264,4 +264,26 @@ apply: dsdp_run_traces_of_ops_ok.
 - exact: dec_recrypt_alice.
 Qed.
 
+(* The same traces with every ciphertext normalised to a single encryption:
+   a combine's randomness is the homomorphic combination of the randomness of
+   its arguments. *)
+Lemma dsdp_run_traces_encE :
+  (run_interp 15 dsdp_procs_std).2 =
+  [:: [:: d (v3 * w_u3 + r3 + (v2 * w_u2 + r2) - r2 - r3 + w_u1 * w_v1);
+          e (enc (pkey_of_dk Alice)
+                 (v3 * w_u3 + r3 + (v2 * w_u2 + r2)) (rand_of_renc w_rc2));
+          e (enc (pkey_of_dk Charlie) v3 rc1);
+          e (enc (pkey_of_dk Bob) v2 rb1);
+          d r3; d r2; d w_u3; d w_u2; d w_u1; d w_v1; kd dk_a];
+      [:: e (enc (pkey_of_dk Charlie) (v3 * w_u3 + r3)
+                 (rand_mul (rand_pow rc1 w_u3) ra2));
+          e (enc (pkey_of_dk Bob) (v2 * w_u2 + r2)
+                 (rand_mul (rand_pow rb1 w_u2) ra1));
+          d v2; kd dk_b];
+      [:: e (enc (pkey_of_dk Charlie) (v3 * w_u3 + r3 + (v2 * w_u2 + r2))
+                 (rand_mul (rand_mul (rand_pow rc1 w_u3) ra2)
+                           (rand_of_renc w_rb2)));
+          d v3; kd dk_c]].
+Proof. by rewrite dsdp_run_traces_ok !Epow_encE !Emul_encE. Qed.
+
 End dsdp_alice_trace_link.
