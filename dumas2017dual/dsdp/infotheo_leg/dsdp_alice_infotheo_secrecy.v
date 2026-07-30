@@ -1044,12 +1044,10 @@ Lemma fdistmap_prod (A1 A2 B1 B2 : finType) (Q1 : R.-fdist A1)
   fdistmap (fun a : (A1 * A2)%type => (f1 a.1, f2 a.2)) (Q1 `x Q2)
   = (fdistmap f1 Q1) `x (fdistmap f2 Q2).
 Proof.
-apply/fdist_ext => -[b1 b2]; rewrite fdist_prodE !fdistmapE.
-rewrite big_distrl /=.
+apply/fdist_ext => -[b1 b2]; rewrite fdist_prodE !fdistmapE big_distrl /=.
 rewrite (eq_bigr (fun i => \sum_(a in preim f2 (pred1 b2)) (Q1 i * Q2 a)));
   last by move=> i _; rewrite big_distrr.
-rewrite pair_big /=.
-apply: eq_big => [[a1 a2]|[a1 a2] _] /=.
+rewrite pair_big /=; apply: eq_big => [[a1 a2]|[a1 a2] _] /=.
   by rewrite !inE /= xpair_eqE.
 by rewrite fdist_prodE.
 Qed.
@@ -1060,9 +1058,7 @@ Lemma fdistmap_prodr (A1 A2 B2 : finType) (Q1 : R.-fdist A1)
     (Q2 : R.-fdist A2) (f2 : A2 -> B2) :
   fdistmap (fun a : (A1 * A2)%type => (a.1, f2 a.2)) (Q1 `x Q2)
   = Q1 `x (fdistmap f2 Q2).
-Proof.
-by rewrite (fdistmap_prod Q1 Q2 idfun f2) fdistmap_id.
-Qed.
+Proof. by rewrite (fdistmap_prod Q1 Q2 idfun f2) fdistmap_id. Qed.
 
 (* The law a simulator produces from a value of the leaked output: uniform
    masks, uniform combine randomness, that output, and an encryption of zero
@@ -1182,15 +1178,15 @@ Lemma alice_view_all_zero_pfwd1E (BT : finType)
 Proof.
 move=> HW; case: v => [[[[m ra] sv] c2] c3].
 rewrite /alice_spectator_of_view /=.
-case: (altP (sv =P s)) => [->|Hne]; last first.
+have [->|Hne] := eqVneq sv s; last first.
   rewrite mul0r pfwd1E (_ : finset _ = set0) ?Pr_set0 //.
   apply/setP => t; rewrite !inE; apply/negbTE; apply: contra Hne.
   rewrite !xpair_eqE => /andP[/andP[/andP[/andP[_ Hsv] _] _] Hw].
   by rewrite -(eqP Hsv) (HW t (eqP Hw)).
 rewrite mul1r !pfwd1E; congr (Pr _ _).
 apply/setP => t; rewrite !inE !xpair_eqE.
-case Ew : (W t == w); last by rewrite !andbF.
-by rewrite (HW t (eqP Ew)) eqxx !andbT.
+case: (W t =P w) => [Ew|_]; last by rewrite !andbF.
+by rewrite (HW t Ew) eqxx !andbT.
 Qed.
 
 (* Conditioned on the two secret inputs, Alice's all-zero view follows the
@@ -1251,7 +1247,7 @@ rewrite fdistbindE (bigD1 (v2, v3)) //= big1 ?addr0; last first.
 rewrite [X in _ * X]fdistmapE (big_pred1 v); last first.
   by move=> a; rewrite !inE /= xpair_eqE eqxx.
 rewrite !dist_of_RVE [RHS]pfwd1_pairC /unstable.swap /=.
-case: (altP (`Pr[ [% V2, V3] = (v2, v3) ] =P 0)) => H0.
+have [H0|H0] := eqVneq `Pr[ [% V2, V3] = (v2, v3) ] 0.
   by rewrite H0 mul0r pfwd1_domin_RV1.
 by rewrite -[RHS]cpr_eqE_mul (dsdp_alice_view_cond_sim v H0) mulrC.
 Qed.
