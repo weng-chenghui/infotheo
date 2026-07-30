@@ -475,10 +475,7 @@ Theorem dsdp_alice_guess_fdist_trace_V2_real_le
            (hop1_reduction
               (distinguisher_of_guess (g \o dsdp_trace_of_view))).
 Proof.
-rewrite dsdp_trace_of_viewE.
-exact: (dsdp_alice_guess_fdist_V2_real_le card_renc rand_of_renc
-          chcipher_of_cipher pkey_of_dk w_v1 w_u1 w_u2 w_u3_inj
-          (g \o dsdp_trace_of_view)).
+by rewrite dsdp_trace_of_viewE; exact: dsdp_alice_guess_fdist_V2_real_le.
 Qed.
 
 End dsdp_alice_trace_rv.
