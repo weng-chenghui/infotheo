@@ -559,7 +559,38 @@ apply: dsdp_run_traces_of_ops_ok.
 Qed.
 ```
 
-- [ ] **Step 7: compile, then commit**
+- [ ] **Step 7: the single-encryption form of the run.** `dsdp_run_traces_ok`
+  leaves Bob's and Charlie's entries in homomorphic form (`Emul`/`Epow`).
+  Task 7 needs the normalized form, where every wire value is one `enc` whose
+  randomness is the homomorphic combination of its arguments' randomness, so
+  state it here as the citable ground truth (statement from
+  `probe_trace_link.v:427-440`, proof from `:442`):
+
+```coq
+(* The same traces with every ciphertext normalised to a single encryption:
+   a combine's randomness is the homomorphic combination of the randomness of
+   its arguments. *)
+Lemma dsdp_run_traces_encE :
+  (run_interp 15 dsdp_procs_std).2 =
+  [:: [:: d (v3 * w_u3 + r3 + (v2 * w_u2 + r2) - r2 - r3 + w_u1 * w_v1);
+          e (enc (pkey_of_dk Alice)
+                 (v3 * w_u3 + r3 + (v2 * w_u2 + r2)) (rand_of_renc w_rc2));
+          e (enc (pkey_of_dk Charlie) v3 rc1);
+          e (enc (pkey_of_dk Bob) v2 rb1);
+          d r3; d r2; d w_u3; d w_u2; d w_u1; d w_v1; kd dk_a];
+      [:: e (enc (pkey_of_dk Charlie) (v3 * w_u3 + r3)
+                 (rand_mul (rand_pow rc1 w_u3) ra2));
+          e (enc (pkey_of_dk Bob) (v2 * w_u2 + r2)
+                 (rand_mul (rand_pow rb1 w_u2) ra1));
+          d v2; kd dk_b];
+      [:: e (enc (pkey_of_dk Charlie) (v3 * w_u3 + r3 + (v2 * w_u2 + r2))
+                 (rand_mul (rand_mul (rand_pow rc1 w_u3) ra2)
+                           (rand_of_renc w_rb2)));
+          d v3; kd dk_c]].
+Proof. by rewrite dsdp_run_traces_ok !Epow_encE !Emul_encE. Qed.
+```
+
+- [ ] **Step 8: compile, then commit**
 
 ```bash
 git add dumas2017dual/dsdp/infotheo_leg/dsdp_alice_trace_link.v
@@ -571,6 +602,20 @@ git commit --no-verify -m "dsdp trace link: staged run evaluation at abstract AH
 
 **Files:**
 - Modify: `dumas2017dual/dsdp/infotheo_leg/dsdp_alice_trace_link.v`
+
+**Placement (verified, blocking if ignored):** `v2 v3 r2 r3 rb1 rc1 ra1 ra2`
+are `Variables` of `Section dsdp_alice_trace_link`, so nothing inside that
+section can instantiate them at `V2 s`, `R2 s`, ... Everything in this task
+and Task 6 goes AFTER `End dsdp_alice_trace_link.`, in a new
+`Section dsdp_alice_trace_rv` that re-declares the parameters it needs,
+mirroring the probe's own split. Precede it with
+`Arguments dsdp_procs_std : clear implicits.` so the per-sample application
+is positional. As discharged, `dsdp_procs_std` takes `[AHE Renc]` implicit
+then 18 explicit arguments in the order
+`rand_of_renc w_v1 w_u1 w_u2 w_u3 dk_a dk_b dk_c w_rb2 w_rc2 v2 v3 r2 r3
+rb1 rc1 ra1 ra2`; `dsdp_run_traces_ok` takes the same 18 and unifies them
+from the goal, so a bare `rewrite dsdp_run_traces_ok` works once
+`dsdp_procs_of_sample` is unfolded.
 
 - [ ] **Step 1: the trace read off a view value** (verbatim from
   `audit_corollary_route.v:58-70`, with `dataF` renamed to
@@ -630,7 +675,32 @@ exists in mathcomp (`tuple.v` offers only `insub_bseq`, `in_bseq`,
 bseq_lemmas` has `bseq_take` over a single type variable), and adding one for
 a single call site would be dead generality.
 
-- [ ] **Step 3: the bridge lemma** — the payload of the whole task:
+- [ ] **Step 3: the two ring identities the bridge needs.** `AliceTrace`'s
+  entries come out of `dsdp_run_traces_ok` in *run* form, while
+  `dsdp_trace_of_view` is necessarily in *view* form — the view carries
+  `Sout` but not `v2`/`v3`, so a run-form statement could not be a function
+  of the view at all. The gap at entries 0 and 1 is a ring identity, not
+  conversion, and `by []` does not close it (compile-verified). Name the two
+  identities so the bridge is one rewrite chain:
+
+```coq
+(* The leaked output the run computes is Alice's view slot. *)
+Let Sout_runE (s : dsdp_alice_sampleT AHE Renc) :
+  V3 s * w_u3 + R3 s + (V2 s * w_u2 + R2 s) - R2 s - R3 s + w_u1 * w_v1
+  = Sout s.
+Proof. by rewrite /Sout /comp_RV /dsdp_output /=; ring. Qed.
+
+(* The plaintext Charlie re-encrypts is the leaked output net of Alice's own
+   term and masks. *)
+Let recrypt_plainE (s : dsdp_alice_sampleT AHE Renc) :
+  V3 s * w_u3 + R3 s + (V2 s * w_u2 + R2 s)
+  = Sout s - w_u1 * w_v1 + R2 s + R3 s.
+Proof. by rewrite /Sout /comp_RV /dsdp_output /=; ring. Qed.
+```
+
+`` `o `` unfolds only with `/comp_RV` (not `/=`, not `/comp`).
+
+- [ ] **Step 4: the bridge lemma** — the payload of the whole task:
 
 ```coq
 (* The trace the interpreter produces for Alice is the deterministic image of
@@ -639,14 +709,14 @@ Lemma dsdp_trace_of_viewE :
   AliceTrace = dsdp_trace_of_view `o AliceView.
 Proof.
 apply: boolp.funext => s; apply/val_inj.
-by rewrite /AliceTrace /dsdp_procs_of_sample dsdp_run_traces_ok.
+by rewrite /AliceTrace /dsdp_procs_of_sample dsdp_run_traces_ok
+           Sout_runE recrypt_plainE.
 Qed.
 ```
 
-The `apply/val_inj` + `rewrite <evaluation lemma>` shape is the probe's
-(`probe_trace_link.v:567-588`, proved there in two lines). If the goal does
-not close, the residue is a `map`/`take` normalisation: finish with
-`by rewrite /trace_data_of_di_data /=`.
+`recrypt_plainE` rewrites under `chcipher_of_cipher (enc _ _ _)`, which
+`rewrite` reaches without a `congr`. If a residual entry remains, it is a
+`map`/`take` normalisation: append `/trace_data_of_di_data /=`.
 
 - [ ] **Step 4: compile, then commit**
 
@@ -812,14 +882,18 @@ In the third `bseq` (Charlie's trace), change
      (rand_mul (rand_mul (rand_pow rc1 u3) ra2) rb2))`.
 
 - [ ] **Step 2: add a source comment above the definition** recording the
-  provenance (non-rendered, so it may carry the rationale):
+  provenance (non-rendered, so it may carry the rationale). Cite the
+  single-encryption form, not the homomorphic one — `dsdp_run_traces_ok`
+  leaves Bob's and Charlie's entries as `Emul`/`Epow` applications, and it is
+  `dsdp_run_traces_encE` (Task 4 Step 7) that exhibits the randomness
+  arguments installed here:
 
 ```coq
 (* Randomness arguments follow the executed run: a combine's randomness is
    the homomorphic combination of its arguments' randomness, per
-   [dsdp_run_traces_ok] of dsdp_alice_trace_link.v.  Bob's Charlie-key entry
-   carries Alice's second combine, whose randomness derives from Charlie's
-   rc1 and Alice's ra2, not from Bob's rb2. *)
+   [dsdp_run_traces_encE] of dsdp_alice_trace_link.v.  Bob's Charlie-key
+   entry carries Alice's second combine, whose randomness derives from
+   Charlie's rc1 and Alice's ra2, not from Bob's rb2. *)
 ```
 
 - [ ] **Step 3: compile** `dumas2017dual/dsdp/counting/dsdp_entropy_trace.v`.
@@ -921,7 +995,11 @@ git commit --no-verify -m "dsdp trace link: golf proof bodies" \
 - [ ] **Step 2: statement-comment pass.** Every public
   Lemma/Theorem/Definition gets a declarative one-sentence comment, plus a
   trailing `Naming:` sentence only where a name needs defending. No status,
-  effort, or provenance narration in rendered positions.
+  effort, or provenance narration in rendered positions. One known fix: the
+  comment above the `decode` `Let` (Task 3 Step 3) describes a program alias
+  ("the piSMC programs, not the same-named ones of dsdp_program.v") while the
+  declaration is `@dec AHE`; move that sentence to `dsdp_procs_std` and give
+  `decode` its own one-liner.
 
 - [ ] **Step 3: style scan**
 
