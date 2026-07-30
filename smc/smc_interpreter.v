@@ -222,61 +222,35 @@ Arguments Recv {data}.
 Arguments Ret {data}.
 
 Section traces.
-Variable data : eqType.
+Variable data : Type.
 Local Open Scope nat_scope.
 
-(* Fuel bounds trace length: every trace produced in h rounds has at most
-   h entries, since each round appends at most one datum per party. *)
-Lemma size_traces h (procs : seq (proc data)) :
-  forall s, s \in (run_interp h procs).2 -> size s <= h.
+(* One step appends at most one datum to the party's trace. *)
+Lemma step_size_le (ps : seq (proc data)) (tr : seq data) (i : nat) :
+  size (step ps tr i).1.2 <= (size tr).+1.
 Proof.
-clear.
-pose k := h.
-rewrite -{2}/k /run_interp.
-set traces := nseq _ _ => /=.
-have Htr : {in traces, forall s, size s <= k - h}.
-  move=> s.
-  by rewrite mem_nseq => /andP[] _ /eqP ->.
-have : h <= k by [].
-elim: h k procs traces Htr => [| h IH] k procs traces Htr hk /=.
-  move=> s /Htr.
-  by rewrite subn0.
-move=> s.
-case: ifP => H; last by move/Htr/leq_trans; apply; rewrite leq_subr.
-move/IH; apply; last by apply/ltnW.
-move=> /= {}s.
-rewrite /unzip2 -2!map_comp.
-case/mapP => i.
-rewrite mem_iota add0n /step => /andP[] _ Hi /=.
-have Hsz : size (nth [::] traces i) < k - h.
-  case/boolP: (i < size traces) => Hi'.
-    apply/(leq_ltn_trans (Htr _ _)).
-      by rewrite mem_nth.
-    by rewrite subnS prednK // leq_subRL // ?addn1 // ltnW.
-  rewrite nth_default.
-    by rewrite leq_subRL ?addn1 // ltnW.
-  by rewrite leqNgt.
-set p := nth _ _ _.
-(* Case on process type - 6 constructors: Init, Send, Recv, Ret, Finish, Fail *)
-case: p => [d1 p1|dst1 d1 p1|frm1 f1|d1||] /=.
-(* Init: s = d1 :: nth... -> size s <= k - h *)
-- by move=> ->; exact Hsz.
-(* Send: nested match on destination *)
-- move=> ->.
-  case: (nth _ _ _) => [d2 p2|dst2 d2 p2|frm2 f2|d2||] /=;
-    try exact (ltnW Hsz).
-  by case: ifP => _ /=; exact (ltnW Hsz).
-(* Recv: nested match on source *)
-- move=> ->.
-  case: (nth _ _ _) => [d2 p2|dst2 d2 p2|frm2 f2|d2||] /=;
-    try exact (ltnW Hsz).
-  by case: ifP => _ /=; [exact Hsz | exact (ltnW Hsz)].
-(* Ret: s = d1 :: nth... -> size s <= k - h *)
-- by move=> ->; exact Hsz.
-(* Finish: s = nth... -> size s <= k - h *)
-- by move=> ->; exact (ltnW Hsz).
-(* Fail: s = nth... -> size s <= k - h *)
-- by move=> ->; exact (ltnW Hsz).
+rewrite /step.
+case: (nth _ ps i) => [d1 p1|dst1 d1 p1|frm1 f1|d1||] //=.
+- by case: (nth _ ps dst1) => [? ?|? ? ?|? ?|?||] //=; case: ifP.
+- by case: (nth _ ps frm1) => [? ?|? ? ?|? ?|?||] //=; case: ifP.
+Qed.
+
+(* Fuel bounds every party's trace length, stated by index instead of by
+   membership, hence without an eqType on the data carrier. *)
+Lemma size_interp_nth h (ps : seq (proc data)) (trs : seq (seq data)) k :
+  (forall i, size (nth [::] trs i) <= k) ->
+  forall i, size (nth [::] (interp h ps trs).2 i) <= k + h.
+Proof.
+elim: h k ps trs => [k ps trs Hk i|h IH k ps trs Hk i] /=;
+  first by rewrite addn0.
+case: ifP => _; last by apply: (leq_trans (Hk i)); rewrite leq_addr.
+rewrite addnS -addSn; apply: IH => j.
+rewrite /unzip2 /unzip1 -2!map_comp.
+case: (ltnP j (size ps)) => Hj; last first.
+  by rewrite nth_default // size_map size_iota.
+rewrite (nth_map 0) ?size_iota // nth_iota // add0n /=.
+apply: (leq_trans (step_size_le ps (nth [::] trs j) j)).
+by rewrite ltnS; exact: Hk.
 Qed.
 
 (* interp preserves the party count: process and trace lists keep the
@@ -297,18 +271,19 @@ move=> -> ->.
 by rewrite !size_map size_iota.
 Qed.
 
-(* Per-party form of size_traces: the i-th party's trace fits in h.
-   Supplies the size proof needed to package traces as bounded sequences. *)
-Lemma size_traces_nth h (procs : seq (proc data)) (i : 'I_(size procs)) :
-  (size (nth [::] (run_interp h procs).2 i) <= h)%N.
+(* Per-party fuel bound on trace length, supplying the size proof needed to
+   package traces as bounded sequences. *)
+Lemma size_traces_nth h (ps : seq (proc data)) (i : nat) :
+  size (nth [::] (run_interp h ps).2 i) <= h.
 Proof.
-by apply/size_traces/mem_nth; rewrite (size_interp _ _).2 // size_nseq.
+rewrite /run_interp -[h]add0n; apply: size_interp_nth => j.
+by rewrite nth_nseq; case: ifP.
 Qed.
 
 (* Final traces packaged as a tuple of length-bounded sequences, the form
    downstream entropy and security reasoning consumes. *)
 Definition interp_traces h procs : (size procs).-tuple (h.-bseq data) :=
-  [tuple Bseq (size_traces_nth h i) | i < size procs].
+  [tuple Bseq (size_traces_nth h procs i) | i < size procs].
 
 (* interp_traces is faithful: stripping the bounds recovers exactly the
    raw traces returned by run_interp. *)
@@ -326,6 +301,18 @@ by rewrite (_ : i = Ordinal Hi) // nth_mktuple.
 Qed.
 
 End traces.
+
+Section traces_eqType.
+Variable data : eqType.
+Local Open Scope nat_scope.
+
+(* Membership form of [size_traces_nth]: every trace produced in h rounds has
+   at most h entries. *)
+Lemma size_traces h (procs : seq (proc data)) :
+  forall s, s \in (run_interp h procs).2 -> size s <= h.
+Proof. by move=> s /(nthP [::])[i _ <-]; exact: size_traces_nth. Qed.
+
+End traces_eqType.
 
 (* Convenient notations for process lists *)
 Declare Scope proc_scope.
