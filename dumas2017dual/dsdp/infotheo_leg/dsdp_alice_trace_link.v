@@ -1,8 +1,3 @@
-(**md**************************************************************************)
-(* # DSDP corrupted-Alice secrecy at the executed piSMC trace                 *)
-(*                                                                            *)
-(* Documentation table completed in the final task.                           *)
-(******************************************************************************)
 From HB Require Import structures.
 From mathcomp Require Import all_boot all_order all_algebra fingroup finalg.
 From mathcomp Require Import ring boolp finmap matrix lra reals.
@@ -11,6 +6,140 @@ Require Import proba jfdist_cond entropy graphoid.
 Require Import smc_interpreter smc_session_types.
 Require Import homomorphic_encryption dsdp_interface dsdp_program dsdp_pismc.
 Require Import dsdp_alice_infotheo_secrecy.
+
+(**md**************************************************************************)
+(* # DSDP corrupted-Alice secrecy at the executed piSMC trace                 *)
+(*                                                                            *)
+(* The corrupted-Alice bound of dsdp_alice_infotheo_secrecy.v carried from a  *)
+(* hand-transcribed view to the trace the piSMC interpreter produces when the *)
+(* three DSDP programs are run at an abstract additively homomorphic scheme.  *)
+(* The fifteen-round run is evaluated symbolically in three stages whose      *)
+(* boundaries are the three decryptions of the protocol, so the contents of   *)
+(* the trace are a theorem rather than a hypothesis.                          *)
+(*                                                                            *)
+(* Charlie's re-encryption randomness and Bob's forward randomness are        *)
+(* parameters of the sections rather than coordinates of the sample space.    *)
+(* Alice's encoded trace is then a deterministic function of the view of      *)
+(* dsdp_alice_infotheo_secrecy.v, and each trace-level statement is a         *)
+(* corollary of the corresponding view-level result.                          *)
+(*                                                                            *)
+(* Headline results: dsdp_run_traces_ok computes the three traces of the run  *)
+(* at the standard interface of an abstract scheme;                           *)
+(* dsdp_alice_guess_fdist_trace_V2_real_le bounds the probability that a      *)
+(* predictor reading Alice's encoded trace returns Bob's input by one over    *)
+(* the cardinality of the plaintext space plus the real-or-zero advantages of *)
+(* two explicitly constructed reductions.                                     *)
+(*                                                                            *)
+(* ```                                                                        *)
+(*             gdp, gde, gdk == the injections of a plaintext, of a           *)
+(*                              ciphertext and of a private key into the      *)
+(*                              generic data carrier                          *)
+(*               gget_cipher == the partial read of a ciphertext out of that  *)
+(*                              carrier                                       *)
+(*                 gRecv_dec == a receive that decrypts the ciphertext it     *)
+(*                              reads under a private key                     *)
+(*                 gRecv_enc == a receive that keeps the ciphertext it reads  *)
+(*     DSDP_Interface_of_ops == the DSDP interface assembled from abstract    *)
+(*                              carriers and abstract operations              *)
+(*                    gprocs == the three DSDP programs at that interface     *)
+(* dsdp_run_traces_of_ops_ok == the traces of the fifteen-round run at        *)
+(*                              abstract operations, under the three          *)
+(*                              decryption equations of the run               *)
+(*                pkey_of_dk == each party's public key, read off that        *)
+(*                              party's private key                           *)
+(*          dsdp_trace_dataT == the finite image of the interpreter's data    *)
+(*                              carrier: plaintexts kept, ciphertexts         *)
+(*                              marshalled, both key sorts erased to marks    *)
+(*     trace_data_of_di_data == the encoding of one datum of the standard     *)
+(*                              interface into that image                     *)
+(*            dsdp_procs_std == the three programs at the standard interface  *)
+(*                              of an AHE scheme                              *)
+(*           dec_combine_bob == Bob's decryption of Alice's combine returns   *)
+(*                              his own input weighted by w_u2 and shifted by *)
+(*                              the mask r2                                   *)
+(*       dec_forward_charlie == Charlie's decryption of Bob's forward returns *)
+(*                              the two weighted inputs and the two masks     *)
+(*                              summed                                        *)
+(*         dec_recrypt_alice == Alice's decryption of Charlie's re-encryption *)
+(*                              returns that same sum                         *)
+(*           dsdp_procs_stdE == the abstract instance at the standard         *)
+(*                              interface is the standard instance            *)
+(*        dsdp_run_traces_ok == the traces of the fifteen-round standard run: *)
+(*                              eleven entries for Alice, four for Bob and    *)
+(*                              three for Charlie                             *)
+(*      dsdp_run_traces_encE == the same traces with every ciphertext         *)
+(*                              normalised to a single encryption, whose      *)
+(*                              randomness combines the randomness of the     *)
+(*                              arguments                                     *)
+(*        dsdp_trace_of_view == Alice's executed trace read off a value of    *)
+(*                              her reduced view                              *)
+(*      dsdp_procs_of_sample == the three programs at the coordinates of one  *)
+(*                              sample                                        *)
+(*                AliceTrace == Alice's encoded executed trace as a random    *)
+(*                              variable on the sample space                  *)
+(*       dsdp_trace_of_viewE == the trace the interpreter produces for Alice  *)
+(*                              is the deterministic image of her reduced     *)
+(*                              view                                          *)
+(*  AliceTrace_zero_prefix i == Alice's trace with its first i ciphertext     *)
+(*                              slots zeroed                                  *)
+(*       AliceTrace_all_zero == Alice's trace with both ciphertext slots      *)
+(*                              zeroed, AliceTrace_zero_prefix 2              *)
+(*  distinguisher_of_trace D == the view-level distinguisher reading the      *)
+(*                              trace of the view it is given through D       *)
+(*           trace_joint_PrE == a trace-level distinguishing probability is   *)
+(*                              the view-level distinguishing probability of  *)
+(*                              the lifted distinguisher                      *)
+(*     hop0_trace_advantageE == zeroing the Bob-key entry of the trace moves  *)
+(*                              the distinguishing probability by the         *)
+(*                              advantage of one explicit reduction against   *)
+(*                              Bob's key                                     *)
+(*     hop1_trace_advantageE == the same for the Charlie-key entry and        *)
+(*                              Charlie's key                                 *)
+(* guess_trace_all_zero_le_invm g ==                                          *)
+(*                              a predictor reading the all-zero trace        *)
+(*                              matches Bob's input with probability at most  *)
+(*                              one over the cardinality of the plaintext     *)
+(*                              space                                         *)
+(* dsdp_alice_guess_fdist_trace_V2_real_le ==                                 *)
+(*                              every predictor reading the trace the         *)
+(*                              interpreter produces for Alice matches Bob's  *)
+(*                              input with probability at most one over that  *)
+(*                              cardinality plus the advantages of the two    *)
+(*                              per-hop reductions                            *)
+(* ```                                                                        *)
+(*                                                                            *)
+(* The notation AliceTrace_all_zero abbreviates AliceTrace_zero_prefix 2,     *)
+(* matching AliceView_all_zero of the view ladder. It is declared inside      *)
+(* Section dsdp_alice_trace_rv and is local to it, as are DI and the          *)
+(* parameter-pinning abbreviations that section opens with.                   *)
+(*                                                                            *)
+(* Those abbreviations are Local Notation partial applications, each pinning  *)
+(* under its own name the parameters that the preceding section and the view  *)
+(* ladder discharge, for instance V2 for V2 (R:=R) (AHE:=AHE) card_renc.      *)
+(* Notation X := (X args) is not recursive, since the right-hand side         *)
+(* resolves against the constant, and rewrite /X still unfolds it.            *)
+(*                                                                            *)
+(* Scope. The statements are average-case over the honest inputs V2 and V3,   *)
+(* which are sampled uniformly inside the experiment. Each per-hop epsilon is *)
+(* a single-query advantage at a fixed key, a number related to but distinct  *)
+(* from the multi-query party-indexed oracle advantage of                     *)
+(* homomorphic_encryption/indcpa_ror.v. A bound here is informative to the    *)
+(* extent that its epsilons are small, and holds vacuously once they exceed   *)
+(* 1. The efficiency reading of the reductions stays on paper: the adversary  *)
+(* is a plain function record, and complexity is argued outside the           *)
+(* formalization. The forward randomness w_rb2 and the re-encryption          *)
+(* randomness w_rc2 are universally quantified parameters rather than         *)
+(* averaged sample coordinates, so the bounds hold at every value of the two, *)
+(* including an adversarially chosen one, and imply the averaged bounds; a    *)
+(* single reduction whose epsilon averages w_rc2 remains a follow-up.         *)
+(*                                                                            *)
+(* Charlie-side re-encryption randomness does reach Alice's trace: the        *)
+(* interpreter's step traces the datum a party receives rather than the       *)
+(* argument its continuation is applied to (smc/smc_interpreter.v), so the    *)
+(* ciphertext under Alice's key carrying rand_of_renc w_rc2 is one of her     *)
+(* eleven trace entries. This retires the fidelity remark to the contrary in  *)
+(* the specification of the infotheo leg.                                     *)
+(******************************************************************************)
 
 Import Order.TTheory GRing.Theory Num.Def Num.Theory.
 
@@ -37,20 +166,34 @@ Variable gepow : gcipherT -> gmsgT -> gcipherT.
 Variable gadd gsub gmul : gmsgT -> gmsgT -> gmsgT.
 Variable gdec : gprivT -> gcipherT -> option gmsgT.
 
+(* The injections of a plaintext, of a ciphertext and of a private key into
+   the generic data carrier, in the summand order the interface fixes. *)
 Definition gdp (x : gmsgT) : gdata := inl (inl (inl x)).
 Definition gde (x : gcipherT) : gdata := inl (inl (inr x)).
 Definition gdk (x : gprivT) : gdata := inl (inr x).
 
+(* The partial read of a ciphertext out of the generic data carrier, which is
+   the guard of the two cipher-carrying receives below. *)
 Definition gget_cipher (x : gdata) : option gcipherT :=
   if x is inl (inl (inr v)) then Some v else None.
 
+(* A receive whose guard decrypts under a private key the ciphertext it reads,
+   so that the continuation is applied to a plaintext. *)
 Definition gRecv_dec (frm : nat) (dk : gprivT) (f : gmsgT -> proc gdata)
     : proc gdata :=
   Recv_param gdata (obind (gdec dk) \o gget_cipher) frm f.
 
+(* A receive whose guard keeps the ciphertext it reads, so that the
+   continuation is applied to a ciphertext. *)
 Definition gRecv_enc (frm : nat) (f : gcipherT -> proc gdata) : proc gdata :=
   Recv_param gdata gget_cipher frm f.
 
+(* The DSDP interface assembled from abstract carriers and abstract
+   operations. The three protocol programs are written once against this
+   interface, and the evaluation lemma below holds at every instance of it,
+   the standard interface of an AHE scheme included.
+   Naming: the mixed form follows Standard_DSDP_Interface of
+   dsdp_interface.v. *)
 Definition DSDP_Interface_of_ops : DSDP_Interface := {|
   di_msgT := gmsgT ;
   di_cipherT := gcipherT ;
@@ -100,10 +243,13 @@ Let gpcharlie := @pcharlie DSDP_Interface_of_ops gdec gek gdkc gv3 grc1 grc2.
 Let gsaprocs : seq (aproc dsdp_dtype (di_data DSDP_Interface_of_ops)) :=
   [aprocs gpalice ; gpbob ; gpcharlie].
 
+(* The three DSDP programs at that interface, with their session-type
+   annotations erased, in the party order the interpreter indexes by. *)
 Definition gprocs : seq (proc (di_data DSDP_Interface_of_ops)) :=
   erase_aprocs gsaprocs.
 
-(* The raw traces of the fifteen-round run. *)
+(* The raw traces of the fifteen-round run at abstract carriers and abstract
+   operations, under the three decryption equations the openings need. *)
 Lemma dsdp_run_traces_of_ops_ok :
   (run_interp 15 gprocs).2 =
   [:: [:: gdp (gadd (gsub (gsub gm1 gr2) gr3) (gmul gu1 gv1));
@@ -158,7 +304,7 @@ Variables (dk_a dk_b dk_c : priv_key AHE).
 Variables (w_rb2 w_rc2 : Renc).
 
 (* Every party's public key is the one associated with its private key, so
-   [dec_correct] fires by conversion and no key hypothesis is needed. *)
+   dec_correct fires by conversion and no key hypothesis is needed. *)
 Definition pkey_of_dk (p : party_id) : pub_key AHE :=
   match p with
   | Alice => pub_of_priv dk_a
@@ -170,11 +316,16 @@ Definition pkey_of_dk (p : party_id) : pub_key AHE :=
 Let DI := Standard_DSDP_Interface AHE.
 
 (* The finite image of the interpreter's data carrier: plaintexts kept,
-   ciphertexts marshalled, both key sorts erased to marks.  Summand order
-   mirrors [std_data]'s msgT + encT + privT + pubT. *)
+   ciphertexts marshalled, both key sorts erased to marks. The summand order
+   mirrors std_data's msgT + encT + privT + pubT. *)
 Definition dsdp_trace_dataT : finType :=
   ((plain AHE + t_cipher) + unit + unit)%type.
 
+(* The encoding of one datum of the standard interface into that finite image,
+   applied entrywise to a trace so that a trace becomes a value of a finType
+   and a predictor on it can be quantified over.
+   Naming: the _of_ form of the conversion rule of dsdp_interface.v, naming
+   the source type it reads. *)
 Definition trace_data_of_di_data (x : di_data DI) : dsdp_trace_dataT :=
   match x with
   | inl (inl (inl m)) => inl (inl (inl m))
@@ -183,8 +334,7 @@ Definition trace_data_of_di_data (x : di_data DI) : dsdp_trace_dataT :=
   | inr _ => inr tt
   end.
 
-(* The single qualified reference in this file: the piSMC programs, not the
-   same-named ones of dsdp_program.v. *)
+(* The decryption the three programs perform on receive. *)
 Let decode : di_priv_keyT DI -> di_cipherT DI -> option (di_msgT DI) :=
   @dec AHE.
 
@@ -200,19 +350,25 @@ Let pbob_inst := @pbob DI decode pkey_of_dk dk_b v2 rb1 (rand_of_renc w_rb2).
 Let pcharlie_inst :=
   @pcharlie DI decode pkey_of_dk dk_c v3 rc1 (rand_of_renc w_rc2).
 
+(* The three piSMC programs of the DSDP protocol at the standard interface of
+   an AHE scheme, which is the program list every statement below runs.
+   Naming: the std suffix keeps the name clear of the two other dsdp_procs, of
+   dsdp_program.v and of dsdp_pismc.v, both in scope here. *)
 Definition dsdp_procs_std : seq (proc (di_data DI)) :=
   erase_aprocs [aprocs palice_inst ; pbob_inst ; pcharlie_inst].
 
 Let M2 : plain AHE := v2 * w_u2 + r2.
 Let M3 : plain AHE := v3 * w_u3 + r3 + (v2 * w_u2 + r2).
 
-(* Bob opens Alice's first combine. *)
+(* Bob opens Alice's first combine and reads his own input weighted by w_u2
+   and shifted by the mask r2. *)
 Lemma dec_combine_bob :
   dec dk_b (Emul (Epow (enc (pkey_of_dk Bob) v2 rb1) w_u2)
                  (enc (pkey_of_dk Bob) r2 ra1)) = Some M2.
 Proof. by rewrite Epow_encE Emul_encE dec_correct. Qed.
 
-(* Charlie opens Bob's forward. *)
+(* Charlie opens Bob's forward and reads the two weighted inputs and the two
+   masks summed. *)
 Lemma dec_forward_charlie :
   dec dk_c (Emul (Emul (Epow (enc (pkey_of_dk Charlie) v3 rc1) w_u3)
                        (enc (pkey_of_dk Charlie) r3 ra2))
@@ -220,7 +376,7 @@ Lemma dec_forward_charlie :
   = Some M3.
 Proof. by rewrite Epow_encE !Emul_encE dec_correct. Qed.
 
-(* Alice opens Charlie's re-encryption. *)
+(* Alice opens Charlie's re-encryption and reads that same sum. *)
 Lemma dec_recrypt_alice :
   dec dk_a (enc (pkey_of_dk Alice) M3 (rand_of_renc w_rc2)) = Some M3.
 Proof. exact: dec_correct. Qed.
@@ -233,11 +389,14 @@ Let procs_of_ops :=
          w_v1 v2 v3 w_u1 w_u2 w_u3 r2 r3
          rb1 (rand_of_renc w_rb2) rc1 (rand_of_renc w_rc2) ra1 ra2.
 
-(* The abstract instance at the standard interface IS the standard
-   instance. *)
+(* The abstract instance at the standard interface is the standard instance,
+   which is what carries the generic evaluation lemma to this file. *)
 Lemma dsdp_procs_stdE : dsdp_procs_std = procs_of_ops.
 Proof. by []. Qed.
 
+(* The traces of the fifteen-round run at the standard interface: eleven
+   entries for Alice, four for Bob and three for Charlie, each ciphertext in
+   the form the programs build it. *)
 Lemma dsdp_run_traces_ok :
   (run_interp 15 dsdp_procs_std).2 =
   [:: [:: d (v3 * w_u3 + r3 + (v2 * w_u2 + r2) - r2 - r3 + w_u1 * w_v1);
@@ -303,8 +462,11 @@ Hypothesis w_u3_inj : injective (fun v : plain AHE => w_u3 * v).
 Variables (dk_a dk_b dk_c : priv_key AHE).
 Variables (w_rb2 w_rc2 : Renc).
 
-(* The declarations discharged by the preceding section and by the leg take
-   these parameters explicitly; the abbreviations pin them once. *)
+(* The declarations discharged by the preceding section and by
+   dsdp_alice_infotheo_secrecy.v take these parameters explicitly. Each
+   abbreviation pins them once, under the name it abbreviates; the shadowing
+   is not recursive, since the right-hand side resolves against the
+   constant. *)
 Local Notation DI := (Standard_DSDP_Interface AHE).
 Local Notation pkey_of_dk := (pkey_of_dk dk_a dk_b dk_c).
 Local Notation dsdp_trace_dataT := (dsdp_trace_dataT AHE t_cipher).
@@ -394,12 +556,14 @@ rewrite /dsdp_procs_of_sample dsdp_run_traces_ok.
 by move=> ?; rewrite /= Sout_runE recrypt_plainE.
 Qed.
 
-(* The trace ladder: the leg's view ladder read as a trace. *)
+(* The trace ladder: the view ladder of dsdp_alice_infotheo_secrecy.v read as
+   a trace, its first i ciphertext slots encrypting zero. *)
 Definition AliceTrace_zero_prefix (i : nat) :
     {RV (alice_sample_fdist (R:=R) AHE card_renc) ->
      15.-bseq dsdp_trace_dataT} :=
   dsdp_trace_of_view \o AliceView_zero_prefix i.
 
+(* The endpoint of that ladder, where both ciphertext slots encrypt zero. *)
 Notation AliceTrace_all_zero := (AliceTrace_zero_prefix 2).
 
 (* A trace-level distinguisher read as a view-level one. *)
