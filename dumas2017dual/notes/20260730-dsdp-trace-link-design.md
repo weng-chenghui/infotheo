@@ -322,9 +322,16 @@ check and rocq-auditor Stage 2.
 
 Probe already done (P0-P3, file kept). Next: Opus soundness audit + Opus
 mathcomp naming audit on this spec, findings folded in, then writing-plans,
-then task-by-task implementation with per-task compile and commit, final
-commit through the audit gate. Every stated lemma `Qed`; `Print Assumptions`
-on the trace headline expected to be the boolp trio only.
+then task-by-task implementation with per-task compile and commit. Every
+stated lemma `Qed`; `Print Assumptions` on the trace headline expected to be
+the boolp trio only.
+
+The plan carries a mandatory `rocq:golf` stage after the last proving task
+and before the header/style task: proof bodies only, never a statement, an
+identifier, a statement comment, or the header table; re-verified by a full
+compile, a zero `Admitted`/`Abort`/`Axiom` grep, and unchanged
+`Print Assumptions` on the headline. The final commit goes through the
+rocq-auditor gate unbypassed.
 
 ## 12. Out of scope
 
