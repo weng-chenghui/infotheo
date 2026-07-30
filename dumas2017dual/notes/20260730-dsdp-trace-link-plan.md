@@ -1054,6 +1054,43 @@ unreviewed commit.
 
 ---
 
+## RESUME HERE (state as of the pause, 2026-07-30)
+
+Tasks 1-9 are committed. Task 7 is `2fb21954`; Task 8 is `79d6b5a` in the
+thesis repo (`~/Projects/phd-thesis`); the golf batches end at `32ad73f4`;
+notes end at `cb857857`, which is HEAD of
+`20260729-0028-reduction-form-security`.
+
+**Task 10 is partially done and UNCOMMITTED.** Steps 1 and 2 (the `(**md *)`
+header with its table and `Scope.` paragraph, plus the statement-comment pass)
+are in the working tree as 183 insertions / 19 deletions on
+`dumas2017dual/dsdp/infotheo_leg/dsdp_alice_trace_link.v`. Those edits are
+files on disk and survive a session ending; they do NOT survive
+`git checkout --` or `git reset --hard`, so do not run either on that path.
+
+To resume, in order:
+
+1. Verify the uncommitted edits: compile the file with the plan's command;
+   `grep -cE "Admitted|Abort|^Axiom"` = 0; `awk 'length > 80'` empty; and
+   confirm the diff touched no statement, identifier, `Notation` or proof body
+   (`git diff -U0 <file> | grep -E "^[-+](Lemma|Theorem|Definition|Let|Notation|Record)"`
+   must be empty).
+2. Finish Task 10 Steps 3-6: the mathcomp `audit-quick.sh` scan and the
+   80-column check, axiom hygiene on `dsdp_run_traces_ok` and
+   `dsdp_alice_guess_fdist_trace_V2_real_le`, the twelve-file recompile listed
+   in Step 5, then the final commit **without** `--no-verify`.
+3. The audit-quick findings listed in Task 10 Step 3 are all intentional: five
+   §22.1 "candidate useless `have ->`" (three fuel splits plus
+   `trace_joint_PrE`'s retyping), one §23 `boolp.funext`, and §25
+   `@`-applications inside `Let`/`Definition` bodies. Do not "fix" them.
+4. Open question for the gate reviewer, recorded in as-built note 6: Task 9
+   changed the headline's closer to rely on unification for the leg's eight
+   section parameters. The spelled four-line form is in `04bd5bef` if the
+   dependency should be visible.
+
+Nothing else is outstanding. Background agents do not survive a session, so
+this file plus the git history is the whole handoff.
+
 ## As-built notes (Tasks 1-6, all committed)
 
 Commits: `40742c47` (Task 1), `acf13a76` (2b), `7aa99212` (2), `eb130df2`
