@@ -395,4 +395,93 @@ rewrite /dsdp_procs_of_sample dsdp_run_traces_ok.
 by move=> ?; rewrite /= Sout_runE recrypt_plainE.
 Qed.
 
+(* The trace ladder: the leg's view ladder read as a trace. *)
+Definition AliceTrace_zero_prefix (i : nat) :
+    {RV (alice_sample_fdist (R:=R) AHE card_renc) ->
+     15.-bseq dsdp_trace_dataT} :=
+  dsdp_trace_of_view \o AliceView_zero_prefix i.
+
+Notation AliceTrace_all_zero := (AliceTrace_zero_prefix 2).
+
+(* A trace-level distinguisher read as a view-level one. *)
+Definition distinguisher_of_trace
+    (D : plain AHE * plain AHE * 15.-bseq dsdp_trace_dataT -> bool) :
+    plain AHE * plain AHE * dsdp_alice_viewT AHE Renc t_cipher -> bool :=
+  fun y => D (y.1.1, y.1.2, dsdp_trace_of_view y.2).
+
+(* A trace-level distinguishing probability is the view-level distinguishing
+   probability of the lifted distinguisher. *)
+Lemma trace_joint_PrE (i : nat)
+    (D : plain AHE * plain AHE * 15.-bseq dsdp_trace_dataT -> bool) :
+  Pr (`p_ [% V2, V3, AliceTrace_zero_prefix i]) [set x | D x]
+  = Pr (`p_ [% V2, V3, AliceView_zero_prefix i])
+       [set y | distinguisher_of_trace D y].
+Proof.
+rewrite /dist_of_RV.
+have -> : ([% V2, V3, AliceTrace_zero_prefix i]
+             : {RV _ -> (plain AHE * plain AHE
+                         * 15.-bseq dsdp_trace_dataT)%type})
+        = (fun y : (plain AHE * plain AHE
+                    * dsdp_alice_viewT AHE Renc t_cipher)%type =>
+             (y.1.1, y.1.2, dsdp_trace_of_view y.2))
+            \o [% V2, V3, AliceView_zero_prefix i] by [].
+rewrite -fdistmap_comp Pr_fdistmap_pre.
+by apply: eq_bigl => t; rewrite !inE.
+Qed.
+
+(* Zeroing the Bob-key entry of the trace moves the distinguishing
+   probability by the advantage of one explicit reduction against Bob's
+   key. *)
+Lemma hop0_trace_advantageE
+    (D : plain AHE * plain AHE * 15.-bseq dsdp_trace_dataT -> bool) :
+  `| Pr (`p_ [% V2, V3, AliceTrace_zero_prefix 0]) [set x | D x]
+     - Pr (`p_ [% V2, V3, AliceTrace_zero_prefix 1]) [set x | D x] |
+  = indcpa_fdist_epsilon (pkey_of_dk Bob)
+      (hop0_reduction (distinguisher_of_trace D)).
+Proof. by rewrite !trace_joint_PrE; exact: hop0_advantageE. Qed.
+
+(* Zeroing the Charlie-key entry does the same against Charlie's key. *)
+Lemma hop1_trace_advantageE
+    (D : plain AHE * plain AHE * 15.-bseq dsdp_trace_dataT -> bool) :
+  `| Pr (`p_ [% V2, V3, AliceTrace_zero_prefix 1]) [set x | D x]
+     - Pr (`p_ [% V2, V3, AliceTrace_zero_prefix 2]) [set x | D x] |
+  = indcpa_fdist_epsilon (pkey_of_dk Charlie)
+      (hop1_reduction (distinguisher_of_trace D)).
+Proof. by rewrite !trace_joint_PrE; exact: hop1_advantageE. Qed.
+
+(* A predictor reading the all-zero trace matches Bob's input with
+   probability at most one over the plaintext-space cardinality. *)
+Lemma guess_trace_all_zero_le_invm
+    (g : 15.-bseq dsdp_trace_dataT -> plain AHE) :
+  Pr (alice_sample_fdist (R:=R) AHE card_renc)
+     [set t | (g `o AliceTrace_all_zero) t == V2 t]
+    <= (#|plain AHE|%:R : R)^-1.
+Proof.
+rewrite /AliceTrace_zero_prefix.
+exact: (guess_all_zero_le_invm card_renc rand_of_renc chcipher_of_cipher
+          pkey_of_dk w_v1 w_u1 w_u2 w_u3_inj (g \o dsdp_trace_of_view)).
+Qed.
+
+(* Every predictor reading the trace the interpreter produces for Alice
+   matches Bob's input with probability at most one over the plaintext-space
+   cardinality plus the real-or-zero advantages of the two per-hop
+   reductions. *)
+Theorem dsdp_alice_guess_fdist_trace_V2_real_le
+    (g : 15.-bseq dsdp_trace_dataT -> plain AHE) :
+  Pr (alice_sample_fdist (R:=R) AHE card_renc)
+     [set t | (g `o AliceTrace) t == V2 t]
+    <= (#|plain AHE|%:R : R)^-1
+       + indcpa_fdist_epsilon (pkey_of_dk Bob)
+           (hop0_reduction
+              (distinguisher_of_guess (g \o dsdp_trace_of_view)))
+       + indcpa_fdist_epsilon (pkey_of_dk Charlie)
+           (hop1_reduction
+              (distinguisher_of_guess (g \o dsdp_trace_of_view))).
+Proof.
+rewrite dsdp_trace_of_viewE.
+exact: (dsdp_alice_guess_fdist_V2_real_le card_renc rand_of_renc
+          chcipher_of_cipher pkey_of_dk w_v1 w_u1 w_u2 w_u3_inj
+          (g \o dsdp_trace_of_view)).
+Qed.
+
 End dsdp_alice_trace_rv.
