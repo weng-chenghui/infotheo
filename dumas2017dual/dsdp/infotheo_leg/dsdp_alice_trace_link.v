@@ -424,8 +424,7 @@ have -> : ([% V2, V3, AliceTrace_zero_prefix i]
                     * dsdp_alice_viewT AHE Renc t_cipher)%type =>
              (y.1.1, y.1.2, dsdp_trace_of_view y.2))
             \o [% V2, V3, AliceView_zero_prefix i] by [].
-rewrite -fdistmap_comp Pr_fdistmap_pre.
-by apply: eq_bigl => t; rewrite !inE.
+by rewrite -fdistmap_comp Pr_fdistmap_pre; apply: eq_bigl => t; rewrite !inE.
 Qed.
 
 (* Zeroing the Bob-key entry of the trace moves the distinguishing
@@ -456,7 +455,6 @@ Lemma guess_trace_all_zero_le_invm
      [set t | (g `o AliceTrace_all_zero) t == V2 t]
     <= (#|plain AHE|%:R : R)^-1.
 Proof.
-rewrite /AliceTrace_zero_prefix.
 exact: (guess_all_zero_le_invm card_renc rand_of_renc chcipher_of_cipher
           pkey_of_dk w_v1 w_u1 w_u2 w_u3_inj (g \o dsdp_trace_of_view)).
 Qed.
