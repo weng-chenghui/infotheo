@@ -738,10 +738,9 @@ Lemma spectator_pre_pair_uniformE :
     = (fdist_uniform card_spectator_pre) `x (fdist_uniform card_plain_pair).
 Proof.
 rewrite -(fdist_uniform_prod card_spectator_pre card_plain_pair
-            card_spectator_pre_pair).
-rewrite /dist_of_RV alice_sample_fdistE.
+            card_spectator_pre_pair) /dist_of_RV alice_sample_fdistE.
 apply: (fdistmap_bij_uniform card_sample card_spectator_pre_pair).
-exists (fun p : (alice_spectator_preT * (plain AHE * plain AHE))%type =>
+exists (fun p : alice_spectator_preT * (plain AHE * plain AHE) =>
           (p.2, p.1.1.1, p.1.1.2, p.1.2)).
   by move=> [[[[v2 v3] [r2 r3]] [rho2 rho3]] [ra1 ra2]].
 by move=> [[[[r2 r3] [rho2 rho3]] [ra1 ra2]] [v2 v3]].
@@ -918,10 +917,9 @@ Qed.
 Lemma alice_spectator_indep_Sout :
   alice_sample_fdist |= AliceSpectator _|_ [% V2, Sout].
 Proof.
-exact: (inde_RV_comp idfun
-          (fun p : (plain AHE * plain AHE)%type =>
-             (p.1, uncurry (dsdp_output w_v1 w_u1 w_u2 w_u3) p))
-          alice_spectator_indep).
+exact: (inde_RV_comp idfun (fun p : plain AHE * plain AHE =>
+          (p.1, uncurry (dsdp_output w_v1 w_u1 w_u2 w_u3) p))
+        alice_spectator_indep).
 Qed.
 
 (* The spectator is conditionally independent of Bob's input given the leaked
@@ -948,13 +946,9 @@ Lemma guess_all_zero_le_invm (g : dsdp_alice_viewT -> plain AHE) :
   Pr alice_sample_fdist [set t | (g `o AliceView_all_zero) t == V2 t]
     <= #|plain AHE|%:R^-1.
 Proof.
-have -> : ((g `o AliceView_all_zero) : {RV alice_sample_fdist -> plain AHE})
-        = ((fun p => g (alice_view_of_spectator (p.1, p.2)))
-             `o [% AliceSpectator, Sout]).
-  by [].
-apply: (cinde_diagonal_bound (Z := Sout)); last exact: alice_V2_cond_le.
-exact: (cinde_RV_comp (fun sp s => g (alice_view_of_spectator (sp, s)))
-          alice_spectator_cinde).
+apply: (cinde_diagonal_bound
+          (cinde_RV_comp (fun sp s => g (alice_view_of_spectator (sp, s)))
+             alice_spectator_cinde)) => a c; exact: alice_V2_cond_le.
 Qed.
 
 (* The mass a pushforward puts on a set is the mass its source puts on the
@@ -982,8 +976,7 @@ Lemma guess_event_jointE (g : dsdp_alice_viewT -> plain AHE) (i : nat) :
   = Pr (`p_ [% V2, V3, AliceView_zero_prefix i])
        [set x | distinguisher_of_guess g x].
 Proof.
-rewrite /dist_of_RV Pr_fdistmap_pre.
-by apply: eq_bigl => t; rewrite !inE.
+by rewrite /dist_of_RV Pr_fdistmap_pre; apply: eq_bigl => t; rewrite !inE.
 Qed.
 
 (* A predictor reading Alice's real view matches Bob's input with probability at
