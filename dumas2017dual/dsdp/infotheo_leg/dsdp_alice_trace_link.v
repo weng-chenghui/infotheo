@@ -166,10 +166,14 @@ Variable gepow : gcipherT -> gmsgT -> gcipherT.
 Variable gadd gsub gmul : gmsgT -> gmsgT -> gmsgT.
 Variable gdec : gprivT -> gcipherT -> option gmsgT.
 
-(* The injections of a plaintext, of a ciphertext and of a private key into
-   the generic data carrier, in the summand order the interface fixes. *)
+(* The injection of a plaintext into the generic data carrier, in the summand
+   order the interface fixes. *)
 Definition gdp (x : gmsgT) : gdata := inl (inl (inl x)).
+
+(* The injection of a ciphertext into the generic data carrier. *)
 Definition gde (x : gcipherT) : gdata := inl (inl (inr x)).
+
+(* The injection of a private key into the generic data carrier. *)
 Definition gdk (x : gprivT) : gdata := inl (inr x).
 
 (* The partial read of a ciphertext out of the generic data carrier, which is
@@ -249,7 +253,9 @@ Definition gprocs : seq (proc (di_data DSDP_Interface_of_ops)) :=
   erase_aprocs gsaprocs.
 
 (* The raw traces of the fifteen-round run at abstract carriers and abstract
-   operations, under the three decryption equations the openings need. *)
+   operations, under the three decryption equations the openings need.
+   Naming: the `of_ops` infix separates this abstract-operation statement from
+   `dsdp_run_traces_ok`, the same equation at the standard AHE interface. *)
 Lemma dsdp_run_traces_of_ops_ok :
   (run_interp 15 gprocs).2 =
   [:: [:: gdp (gadd (gsub (gsub gm1 gr2) gr3) (gmul gu1 gv1));
@@ -612,7 +618,9 @@ Lemma hop1_trace_advantageE
 Proof. by rewrite !trace_joint_PrE; exact: hop1_advantageE. Qed.
 
 (* A predictor reading the all-zero trace matches Bob's input with
-   probability at most one over the plaintext-space cardinality. *)
+   probability at most one over the plaintext-space cardinality.
+   Naming: `trace` marks the trace-level guesser of the view-level
+   `guess_all_zero_le_invm`, whose bound `invm` this statement keeps. *)
 Lemma guess_trace_all_zero_le_invm
     (g : 15.-bseq dsdp_trace_dataT -> plain AHE) :
   Pr (alice_sample_fdist (R:=R) AHE card_renc)
