@@ -22,6 +22,125 @@ Local Open Scope ring_scope.
 Local Open Scope reals_ext_scope.
 Local Open Scope proba_scope.
 Local Open Scope fdist_scope.
+Local Open Scope proc_scope.
+Local Open Scope sproc_scope.
+
+Section dsdp_run_traces_of_ops.
+
+Variables (gmsgT gcipherT grandT gprivT gpubT : Type).
+
+Local Notation gdata := ((gmsgT + gcipherT + gprivT + gpubT)%type).
+
+Variable genc : gpubT -> gmsgT -> grandT -> gcipherT.
+Variable gemul : gcipherT -> gcipherT -> gcipherT.
+Variable gepow : gcipherT -> gmsgT -> gcipherT.
+Variable gadd gsub gmul : gmsgT -> gmsgT -> gmsgT.
+Variable gdec : gprivT -> gcipherT -> option gmsgT.
+
+Definition gdp (x : gmsgT) : gdata := inl (inl (inl x)).
+Definition gde (x : gcipherT) : gdata := inl (inl (inr x)).
+Definition gdk (x : gprivT) : gdata := inl (inr x).
+
+Definition gget_cipher (x : gdata) : option gcipherT :=
+  if x is inl (inl (inr v)) then Some v else None.
+
+Definition gRecv_dec (frm : nat) (dk : gprivT) (f : gmsgT -> proc gdata)
+    : proc gdata :=
+  Recv_param gdata (obind (gdec dk) \o gget_cipher) frm f.
+
+Definition gRecv_enc (frm : nat) (f : gcipherT -> proc gdata) : proc gdata :=
+  Recv_param gdata gget_cipher frm f.
+
+Definition DSDP_Interface_of_ops : DSDP_Interface := {|
+  di_msgT := gmsgT ;
+  di_cipherT := gcipherT ;
+  di_randT := grandT ;
+  di_priv_keyT := gprivT ;
+  di_pub_keyT := gpubT ;
+  di_data := gdata ;
+  di_data_of_plain := gdp ;
+  di_data_of_cipher := gde ;
+  di_data_of_priv_key := gdk ;
+  di_data_of_pub_key := fun x => inr x ;
+  di_get_cipher := gget_cipher ;
+  di_encrypt := genc ;
+  di_emul := gemul ;
+  di_epow := gepow ;
+  di_add := gadd ;
+  di_sub := gsub ;
+  di_mul := gmul ;
+  di_Recv_dec := gRecv_dec ;
+  di_Recv_enc := gRecv_enc |}.
+
+Variables (gdka gdkb gdkc : gprivT).
+Variable gek : party_id -> gpubT.
+Variables (gv1 gv2 gv3 gu1 gu2 gu3 gr2 gr3 : gmsgT).
+Variables (grb1 grb2 grc1 grc2 gra1 gra2 : grandT).
+Variables (gm1 gm2 gm3 : gmsgT).
+
+(* The four ciphertexts the run puts on the wire after the two openings. *)
+Local Notation gCb :=
+  (gemul (gepow (genc (gek Bob) gv2 grb1) gu2) (genc (gek Bob) gr2 gra1)).
+Local Notation gCc3 :=
+  (gemul (gepow (genc (gek Charlie) gv3 grc1) gu3)
+         (genc (gek Charlie) gr3 gra2)).
+Local Notation gCc := (gemul gCc3 (genc (gek Charlie) gm2 grb2)).
+Local Notation gCa := (genc (gek Alice) gm3 grc2).
+
+Hypothesis Hgb : gdec gdkb gCb = Some gm2.
+Hypothesis Hgc : gdec gdkc gCc = Some gm3.
+Hypothesis Hga : gdec gdka gCa = Some gm1.
+
+Let gpalice :=
+  @palice DSDP_Interface_of_ops gdec gek gdka gv1 gu1 gu2 gu3 gr2 gr3
+          gra1 gra2.
+Let gpbob := @pbob DSDP_Interface_of_ops gdec gek gdkb gv2 grb1 grb2.
+Let gpcharlie := @pcharlie DSDP_Interface_of_ops gdec gek gdkc gv3 grc1 grc2.
+
+Let gsaprocs : seq (aproc dsdp_dtype (di_data DSDP_Interface_of_ops)) :=
+  [aprocs gpalice ; gpbob ; gpcharlie].
+
+Definition gprocs : seq (proc (di_data DSDP_Interface_of_ops)) :=
+  erase_aprocs gsaprocs.
+
+(* The raw traces of the fifteen-round run. *)
+Lemma dsdp_run_traces_of_ops_ok :
+  (run_interp 15 gprocs).2 =
+  [:: [:: gdp (gadd (gsub (gsub gm1 gr2) gr3) (gmul gu1 gv1));
+          gde gCa;
+          gde (genc (gek Charlie) gv3 grc1);
+          gde (genc (gek Bob) gv2 grb1);
+          gdp gr3; gdp gr2; gdp gu3; gdp gu2; gdp gu1; gdp gv1; gdk gdka];
+      [:: gde gCc3; gde gCb; gdp gv2; gdk gdkb];
+      [:: gde gCc; gdp gv3; gdk gdkc]].
+Proof.
+rewrite /run_interp.
+have -> : (15 = 10 + 5)%N by [].
+rewrite interp_fuelD.
+move Ht: (interp 10 gprocs (nseq (size gprocs) [::])) => S.
+vm_compute in Ht.
+rewrite Hgb in Ht.
+have -> : (5 = 2 + 3)%N by [].
+rewrite interp_fuelD.
+move Ht2: (interp 2 S.1 S.2) => S2.
+rewrite -Ht in Ht2.
+vm_compute in Ht2.
+rewrite Hgc in Ht2.
+have -> : (3 = 1 + 2)%N by [].
+rewrite interp_fuelD.
+move Ht3: (interp 1 S2.1 S2.2) => S3.
+rewrite -Ht2 in Ht3.
+vm_compute in Ht3.
+rewrite Hga in Ht3.
+rewrite -Ht3.
+by vm_compute.
+Qed.
+
+End dsdp_run_traces_of_ops.
+
+(* Keep every parameter of the generic run explicit, so that instantiations
+   are positional and independent of implicit-argument inference. *)
+Arguments gprocs : clear implicits.
 
 Section dsdp_alice_trace_link.
 Context {R : realType}.
@@ -68,5 +187,81 @@ Definition trace_data_of_di_data (x : di_data DI) : dsdp_trace_dataT :=
    same-named ones of dsdp_program.v. *)
 Let decode : di_priv_keyT DI -> di_cipherT DI -> option (di_msgT DI) :=
   @dec AHE.
+
+Variables (v2 v3 r2 r3 : plain AHE) (rb1 rc1 ra1 ra2 : rand AHE).
+
+Let d := di_data_of_plain DI.
+Let e := di_data_of_cipher DI.
+Let kd := di_data_of_priv_key DI.
+
+Let palice_inst :=
+  @palice DI decode pkey_of_dk dk_a w_v1 w_u1 w_u2 w_u3 r2 r3 ra1 ra2.
+Let pbob_inst := @pbob DI decode pkey_of_dk dk_b v2 rb1 (rand_of_renc w_rb2).
+Let pcharlie_inst :=
+  @pcharlie DI decode pkey_of_dk dk_c v3 rc1 (rand_of_renc w_rc2).
+
+Definition dsdp_procs_std : seq (proc (di_data DI)) :=
+  erase_aprocs [aprocs palice_inst ; pbob_inst ; pcharlie_inst].
+
+Let M2 : plain AHE := v2 * w_u2 + r2.
+Let M3 : plain AHE := v3 * w_u3 + r3 + (v2 * w_u2 + r2).
+
+(* Bob opens Alice's first combine. *)
+Lemma dec_combine_bob :
+  dec dk_b (Emul (Epow (enc (pkey_of_dk Bob) v2 rb1) w_u2)
+                 (enc (pkey_of_dk Bob) r2 ra1)) = Some M2.
+Proof. by rewrite Epow_encE Emul_encE dec_correct. Qed.
+
+(* Charlie opens Bob's forward. *)
+Lemma dec_forward_charlie :
+  dec dk_c (Emul (Emul (Epow (enc (pkey_of_dk Charlie) v3 rc1) w_u3)
+                       (enc (pkey_of_dk Charlie) r3 ra2))
+                 (enc (pkey_of_dk Charlie) M2 (rand_of_renc w_rb2)))
+  = Some M3.
+Proof. by rewrite Epow_encE !Emul_encE dec_correct. Qed.
+
+(* Alice opens Charlie's re-encryption. *)
+Lemma dec_recrypt_alice :
+  dec dk_a (enc (pkey_of_dk Alice) M3 (rand_of_renc w_rc2)) = Some M3.
+Proof. exact: dec_correct. Qed.
+
+Let procs_of_ops :=
+  gprocs (plain AHE) (cipher AHE) (rand AHE) (priv_key AHE) (pub_key AHE)
+         (@enc AHE) (@Emul AHE) (@Epow AHE)
+         +%R (fun a b : plain AHE => a - b) *%R (@dec AHE)
+         dk_a dk_b dk_c pkey_of_dk
+         w_v1 v2 v3 w_u1 w_u2 w_u3 r2 r3
+         rb1 (rand_of_renc w_rb2) rc1 (rand_of_renc w_rc2) ra1 ra2.
+
+(* The abstract instance at the standard interface IS the standard
+   instance. *)
+Lemma dsdp_procs_stdE : dsdp_procs_std = procs_of_ops.
+Proof. by []. Qed.
+
+Lemma dsdp_run_traces_ok :
+  (run_interp 15 dsdp_procs_std).2 =
+  [:: [:: d (v3 * w_u3 + r3 + (v2 * w_u2 + r2) - r2 - r3 + w_u1 * w_v1);
+          e (enc (pkey_of_dk Alice)
+                 (v3 * w_u3 + r3 + (v2 * w_u2 + r2)) (rand_of_renc w_rc2));
+          e (enc (pkey_of_dk Charlie) v3 rc1);
+          e (enc (pkey_of_dk Bob) v2 rb1);
+          d r3; d r2; d w_u3; d w_u2; d w_u1; d w_v1; kd dk_a];
+      [:: e (Emul (Epow (enc (pkey_of_dk Charlie) v3 rc1) w_u3)
+                  (enc (pkey_of_dk Charlie) r3 ra2));
+          e (Emul (Epow (enc (pkey_of_dk Bob) v2 rb1) w_u2)
+                  (enc (pkey_of_dk Bob) r2 ra1));
+          d v2; kd dk_b];
+      [:: e (Emul (Emul (Epow (enc (pkey_of_dk Charlie) v3 rc1) w_u3)
+                        (enc (pkey_of_dk Charlie) r3 ra2))
+                  (enc (pkey_of_dk Charlie) (v2 * w_u2 + r2)
+                       (rand_of_renc w_rb2)));
+          d v3; kd dk_c]].
+Proof.
+rewrite dsdp_procs_stdE /procs_of_ops.
+apply: dsdp_run_traces_of_ops_ok.
+- exact: dec_combine_bob.
+- exact: dec_forward_charlie.
+- exact: dec_recrypt_alice.
+Qed.
 
 End dsdp_alice_trace_link.
