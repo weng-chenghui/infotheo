@@ -992,13 +992,10 @@ Theorem dsdp_alice_guess_fdist_V2_real_le
        + indcpa_fdist_epsilon (pkey_of_party Charlie)
            (hop1_reduction (distinguisher_of_guess g)).
 Proof.
-have Hzero : Pr (`p_ [% V2, V3, AliceView_all_zero])
-                [set x | distinguisher_of_guess g x]
-             <= #|plain AHE|%:R^-1.
-  by rewrite -guess_event_jointE; exact: guess_all_zero_le_invm.
 rewrite guess_event_jointE -hop0_advantageE -hop1_advantageE -addrA -lerBlDl.
-apply: le_trans (lerB (lexx _) Hzero) _.
-exact: le_trans (ler_norm _) (ler_distD _ _ _).
+apply: le_trans (lerB (lexx _) _) _; last first.
+  exact: le_trans (ler_norm _) (ler_distD _ _ _).
+by rewrite -guess_event_jointE; exact: guess_all_zero_le_invm.
 Qed.
 
 (* The advantage against Bob's key of the hop-0 reduction of the distinguisher
@@ -1028,10 +1025,9 @@ Theorem dsdp_alice_unpredictability_fdist_ge
               [set t | (g `o AliceView) t == V2 t]).
 Proof.
 have Hcard_pos : (0 < #|plain AHE|%:R :> R) by rewrite ltr0n card_plain_gt0.
-have Heps_ge0 : 0 <= eps0 g + eps1 g
+have Hnum_pos : (0 < 1 + #|plain AHE|%:R * (eps0 g + eps1 g) :> R).
+  apply: ltr_pwDl ltr01 (mulr_ge0 (ler0n _ _) _).
   by rewrite addr_ge0 // /eps0 /eps1 /indcpa_fdist_epsilon normr_ge0.
-have Hnum_pos : (0 < 1 + #|plain AHE|%:R * (eps0 g + eps1 g) :> R)
-  by exact: ltr_pwDl ltr01 (mulr_ge0 (ler0n _ _) Heps_ge0).
 rewrite lerNr opprB -logDiv // ler_log ?posrE ?divr_gt0 //.
 rewrite mulrDl mul1r mulrAC (divff (lt0r_neq0 Hcard_pos)) mul1r addrA.
 exact: dsdp_alice_guess_fdist_V2_real_le.
@@ -1265,8 +1261,7 @@ Theorem dsdp_alice_sim_advantage_fdist_le
   <= indcpa_fdist_epsilon (pkey_of_party Bob) (hop0_reduction D)
      + indcpa_fdist_epsilon (pkey_of_party Charlie) (hop1_reduction D).
 Proof.
-rewrite Pr_fdistmap_bool alice_ideal_jointE.
-rewrite -hop0_advantageE -hop1_advantageE.
+rewrite Pr_fdistmap_bool alice_ideal_jointE -hop0_advantageE -hop1_advantageE.
 exact: ler_distD.
 Qed.
 
@@ -1337,8 +1332,7 @@ Proof.
 apply/boolp.funext => t.
 rewrite /alice_view_full_of /AliceCombineBob /AliceCombineCharlie
         /AliceRecvPlain /= !chcipher_of_cipherK.
-congr (_, _, _, _).
-by rewrite /Sout /comp_RV /dsdp_output /=; ring.
+by congr (_, _, _, _); rewrite /Sout /comp_RV /dsdp_output /=; ring.
 Qed.
 
 (* Alice's full view is the reconstruction applied to her reduced view. *)
@@ -1362,8 +1356,7 @@ Corollary dsdp_alice_guess_fdist_full_le
            (hop1_reduction
               (distinguisher_of_guess (g' \o alice_view_full_of))).
 Proof.
-rewrite alice_view_fullE.
-exact: dsdp_alice_guess_fdist_V2_real_le.
+by rewrite alice_view_fullE; exact: dsdp_alice_guess_fdist_V2_real_le.
 Qed.
 
 End dsdp_alice_infotheo_secrecy.
