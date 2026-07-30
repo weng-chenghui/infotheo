@@ -859,7 +859,7 @@ Qed.
 Lemma alice_V2_cond_le (a s : plain AHE) :
   `Pr[ V2 = a | Sout = s ] <= #|plain AHE|%:R^-1.
 Proof.
-have [H0|Hn0] := eqVneq `Pr[ Sout = s ] 0.
+case: (eqVneq `Pr[ Sout = s ] 0) => [H0|Hn0].
   by rewrite cpr_eqE H0 invr0 mulr0 invr_ge0 ler0n.
 by rewrite (alice_V2_cond_Sout a Hn0).
 Qed.
@@ -946,9 +946,9 @@ Lemma guess_all_zero_le_invm (g : dsdp_alice_viewT -> plain AHE) :
   Pr alice_sample_fdist [set t | (g `o AliceView_all_zero) t == V2 t]
     <= #|plain AHE|%:R^-1.
 Proof.
-apply: (cinde_diagonal_bound
-          (cinde_RV_comp (fun sp s => g (alice_view_of_spectator (sp, s)))
-             alice_spectator_cinde)) => a c; exact: alice_V2_cond_le.
+by apply: (cinde_diagonal_bound
+             (cinde_RV_comp (fun sp s => g (alice_view_of_spectator (sp, s)))
+                alice_spectator_cinde)) => a c; exact: alice_V2_cond_le.
 Qed.
 
 (* The mass a pushforward puts on a set is the mass its source puts on the
@@ -1174,7 +1174,7 @@ Lemma alice_view_all_zero_pfwd1E (BT : finType)
 Proof.
 move=> HW; case: v => [[[[m ra] sv] c2] c3].
 rewrite /alice_spectator_of_view /=.
-have [->|Hne] := eqVneq sv s; last first.
+case: (eqVneq sv s) => [->|Hne]; last first.
   rewrite mul0r pfwd1E (_ : finset _ = set0) ?Pr_set0 //.
   apply/setP => t; rewrite !inE; apply/negbTE; apply: contra Hne.
   rewrite !xpair_eqE => /andP[/andP[/andP[/andP[_ Hsv] _] _] Hw].
@@ -1243,7 +1243,7 @@ rewrite fdistbindE (bigD1 (v2, v3)) //= big1 ?addr0; last first.
 rewrite [X in _ * X]fdistmapE (big_pred1 v); last first.
   by move=> a; rewrite !inE /= xpair_eqE eqxx.
 rewrite !dist_of_RVE [RHS]pfwd1_pairC /unstable.swap /=.
-have [H0|H0] := eqVneq `Pr[ [% V2, V3] = (v2, v3) ] 0.
+case: (eqVneq `Pr[ [% V2, V3] = (v2, v3) ] 0) => [H0|H0].
   by rewrite H0 mul0r pfwd1_domin_RV1.
 by rewrite -[RHS]cpr_eqE_mul (dsdp_alice_view_cond_sim v H0) mulrC.
 Qed.
