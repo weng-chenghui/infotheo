@@ -947,10 +947,27 @@ cd ~/Projects/phd-thesis && git add chapters/computational-privacy-dsdp.tex \
 - Modify: `dumas2017dual/dsdp/infotheo_leg/dsdp_alice_trace_link.v`
 
 - [ ] **Step 1: golf proof bodies only.** Never a statement, an identifier,
-  a statement comment, or the header table. Prime target is Task 4's staged
-  proof — but note the `move Ht:` / `vm_compute in Ht` staging is
-  load-bearing and must not be collapsed; golf the surrounding bookkeeping
-  only.
+  a statement comment, or the header table.
+
+  **Four patterns in this file are load-bearing and must NOT be collapsed**
+  (all four verified during Tasks 4-6; `audit-quick` flags the last one as a
+  candidate useless `have ->`, which it is not):
+  1. Task 4's `move Ht: ... => S` / `vm_compute in Ht` staging, including
+     every `rewrite -Ht in Ht2` and every `%N`.
+  2. The bridge's `move: (size_alice_trace s)` on its own line before the
+     `rewrite` line — collapsing them reinstates a dependent-type error,
+     because the `Bseq` size proof's type mentions the run being rewritten.
+  3. That same proof's `move=> ?` — ssreflect rejects `move=> _` here
+     ("`_size_alice_trace_` is used in conclusion").
+  4. `trace_joint_PrE`'s `have -> ... by []`, which retypes the joint random
+     variable as a composition so `fdistmap_comp` applies.
+
+  Also do not try to close the bridge "by conversion": `have -> : \val ... by
+  []`, `:= erefl`, and `rewrite /AliceTrace /=` all TIME OUT rather than
+  fail, because `\val` is the HB `isSub.val_subdef` projection and whnf of
+  the left-hand side forces evaluation of the whole run — the very blowup
+  that made Task 4 need staged `vm_compute`. After the run has been rewritten
+  to its literal list, a plain `/=` is instant.
 
 - [ ] **Step 2: re-verify** — full compile exit 0;
   `grep -cE "Admitted|Abort|^Axiom"` = 0; `awk 'length > 80'` empty;
@@ -978,7 +995,8 @@ git commit --no-verify -m "dsdp trace link: golf proof bodies" \
   `DSDP_Interface_of_ops`, `gprocs`, `dsdp_run_traces_of_ops_ok`,
   `dsdp_procs_std`, `dsdp_procs_stdE`, `dec_combine_bob`,
   `dec_forward_charlie`, `dec_recrypt_alice`, `dsdp_run_traces_ok`,
-  `dsdp_trace_of_view`, `bseq_map` if declared, `AliceTrace`,
+  `dsdp_run_traces_encE`, `dsdp_procs_of_sample`, `dsdp_trace_of_view`,
+  `AliceTrace`,
   `dsdp_trace_of_viewE`, `AliceTrace_zero_prefix`, `distinguisher_of_trace`,
   `trace_joint_PrE`, `hop0_trace_advantageE`, `hop1_trace_advantageE`,
   `guess_trace_all_zero_le_invm`,
@@ -1035,6 +1053,49 @@ not bypass. If Stage 2 fails with the known
 unreviewed commit.
 
 ---
+
+## As-built notes (Tasks 1-6, all committed)
+
+Commits: `40742c47` (Task 1), `acf13a76` (2b), `7aa99212` (2), `eb130df2`
+(3), `dcf1bb08` (4), `c66f68a6` (4 Step 7), `08080166` (5), `94d079bd` (6).
+The file is 487 lines, compiles in ~5 s, zero `Admitted`/`Abort`/`Axiom`.
+`dsdp_run_traces_ok` and `dsdp_run_traces_encE` are axiom-free ("Closed under
+the global context"); every other headline carries only the boolp trio.
+
+Corrections the execution forced, beyond those already folded into the task
+text above:
+
+1. **Post-discharge parameter pinning.** Tasks 5-6's blocks were written as
+   if the leg's and this file's definitions still carried their in-section
+   argument lists; after `End` they do not. Rather than re-spell arguments at
+   about forty sites (which also breaks 80 columns),
+   `Section dsdp_alice_trace_rv` opens with a block of self-shadowing
+   `Local Notation`s pinning the discharged parameters once, e.g.
+   `Local Notation V2 := (V2 (R:=R) (AHE:=AHE) card_renc).` and
+   `Local Notation AliceView_zero_prefix i := (AliceView_zero_prefix (R:=R)
+   ... i).` `Notation X := (X args)` is not recursive (the right-hand side
+   resolves against the constant) and `rewrite /Sout` still resolves through
+   the shadow. Both facts are compile-confirmed.
+2. **`%N` on the `size ... <= 15` obligation** — `ring_scope` is open, so a
+   bare `<=` elaborates into the order-theory sort and fails.
+3. **`alice_sample_fdist` needs `(R:=R)`** inside `{RV _ -> _}`: `R` is not
+   inferable there ("Cannot infer the implicit parameter R of `RV_of`").
+4. **The bridge proof needs the size proof generalized.** The planned rewrite
+   chain fails with a dependent-type error, because the `Bseq` size proof's
+   type mentions the run being rewritten. Working form:
+   `rewrite /AliceTrace; move: (size_alice_trace s).` then
+   `rewrite /dsdp_procs_of_sample dsdp_run_traces_ok.` then
+   `by move=> ?; rewrite /= Sout_runE recrypt_plainE.` Generalize BEFORE
+   unfolding `dsdp_procs_of_sample`, or the binder type keeps the folded proc
+   list and the evaluation lemma no longer matches it.
+5. **`trace_joint_PrE`'s lambda needs its domain annotation** (restored from
+   the audit probe; the plan had dropped it).
+6. **The leg's endpoint and headline take their section parameters
+   explicitly**, so their `exact:` applications spell
+   `card_renc rand_of_renc chcipher_of_cipher pkey_of_dk w_v1 w_u1 w_u2
+   w_u3_inj` before the guesser. `hop0_advantageE`/`hop1_advantageE` do
+   unify bare from the goal.
+7. `bseq_map` was never declared, as the self-review predicted.
 
 ## Self-review notes
 
