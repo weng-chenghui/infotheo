@@ -1090,12 +1090,25 @@ text above:
    list and the evaluation lemma no longer matches it.
 5. **`trace_joint_PrE`'s lambda needs its domain annotation** (restored from
    the audit probe; the plan had dropped it).
-6. **The leg's endpoint and headline take their section parameters
-   explicitly**, so their `exact:` applications spell
-   `card_renc rand_of_renc chcipher_of_cipher pkey_of_dk w_v1 w_u1 w_u2
-   w_u3_inj` before the guesser. `hop0_advantageE`/`hop1_advantageE` do
-   unify bare from the goal.
+6. **The leg's endpoint needs its section parameters spelled; the headline
+   does not** (corrected during Task 9). `guess_all_zero_le_invm` keeps the
+   explicit list, because its guesser argument `g \o dsdp_trace_of_view` is
+   not pinned by anything on the right-hand side and a bare `exact:` fails
+   with "Could not fill dependent hole". The headline closes as
+   `by rewrite dsdp_trace_of_viewE; exact: dsdp_alice_guess_fdist_V2_real_le.`
+   — every parameter is pinned by the goal and `w_u3_inj` comes from context,
+   which is the closer the leg itself uses for this lemma family. Trade-off
+   recorded: the short form would break silently if the leg's parameters were
+   reordered; the spelled 4-line form is in `04bd5bef` if a reviewer prefers
+   the dependency visible. `hop0_advantageE`/`hop1_advantageE` unify bare.
 7. `bseq_map` was never declared, as the self-review predicted.
+8. **Golf outcome (Task 9, commits between `04bd5bef` and Task 10):**
+   487 -> 481 lines, five bodies changed, none reverted. The low figure is
+   the honest one: most of the file is probe-verbatim code that was already
+   tight, and the largest proof is protected. `recrypt_plainE` now derives
+   from `Sout_runE` instead of re-unfolding three definitions. `Sout_runE`'s
+   `/=` was proved load-bearing (all six reduced unfold sets fail with "Not a
+   valid ring equation").
 
 ## Self-review notes
 
