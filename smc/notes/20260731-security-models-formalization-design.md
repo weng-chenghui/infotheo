@@ -2,9 +2,10 @@
 
 Date: 2026-07-31
 Branch base: `itp2026-dumas2017dual`
-Status: DRAFT under probe-first-spec; core probes P1-P5 all GO; probes D1
-(entropy miniature) and D4+D2 ('F_3 examples, log API) in flight; adversarial
-audits pending.
+Status: PROBED AND AUDITED. All seven probes (P1-P5, D1, D4+D2) GO, exit 0,
+zero axioms beyond the boolp baseline. Naming audit NO-GO resolved in-place;
+soundness audit GO with all blocking findings folded. Awaiting user review,
+then superpowers:writing-plans.
 
 ## 1. Goal and scope
 
@@ -59,7 +60,7 @@ Files (each listed in `_CoqProject`; `spp_bridge.v` after the du2002 block):
 | `smc/security_models/entropy_link.v` | Iwamoto direction (scope per §6) |
 | `smc/security_models/unpredictability.v` | T-relative H_unp composition |
 | `smc/security_models/examples_f3.v` | 'F_3 matrix examples + three-verdict toy |
-| `smc/security_models/spp_bridge.v` | SPP corrupted-Bob instance via `cond_law_to_bind` |
+| `smc/security_models/spp_bridge.v` | SPP corrupted-Bob instance via `dist_of_RV_bind` |
 
 Conventions: snake_case identifiers; ASCII notation only; `R : realType`
 section variable; `Local Open Scope fdist_scope` (load-bearing, probe P3
@@ -89,7 +90,7 @@ Probe fact folded in: `` `x `` is `` `X (fun _ => q) `` — the kernel product
 
 | chapter | artifact |
 |---|---|
-| def:smc:tv-distance | `statdist p q := 2%:R^-1 * \sum_b `\|p b - q b\|`; `statdist_ge0/sym/triangle`; max-over-events form optional (see ledger R-ev) |
+| def:smc:tv-distance | `statdist p q := 2%:R^-1 * \sum_b `\|p b - q b\|`; `statdist_ge0/sym/triangle`; the definition's embedded max-over-events equality is `statdist_test_max` modulo tester-event identification (map cell says so) |
 | distinguisher (game section) | `tester := {ffun B -> bool}`; `accept D p := Pr p [set b \| D b]`; `adv D p q` |
 | prop:smc:max-advantage | `statdist_test_le`, `statdist_test_max` (optimal tester `[ffun b => q b < p b]`) |
 | Delta_T (composition section) | `class_adv (T : {set tester}) p q := \big[Num.max/0]_(D in T) adv D p q` |
@@ -130,9 +131,9 @@ Section parameters: finTypes `X Yfull Y Xa Ya Bv Omega`; `f : X -> Y`;
 | def:smc:perfect-privacy | `perfect_privacy S := view_law =1 sim_view S`, `sim_view S x := allow x >>= S` (single-S quantifier order preserved by `=1`) |
 | eq:smc:simulation / def:smc:epsilon-privacy | `eps_privacy S eps := forall x, statdist (view_law x) (sim_view S x) <= eps` |
 | prop:smc:insecurity | `insecurity : allow x = allow x' -> view_law x != view_law x' -> ~ (exists S, perfect_privacy S)` |
-| prop:smc:worlds-compute-f | `real_route_f` (via `run_correct`), `ideal_route_f` (via `F_compat`) |
+| prop:smc:worlds-compute-f | `real_route_f` (via `run_correct`), `ideal_route_f` (via `F_compat`), `ideal_route_projx_f` (the second ideal route through `proj_X`, eq:smc:ideal-route-f's first equality; same `tensor_fdist1` + `fdistmap_comp` machinery) |
 | eq:smc:test-advantage | `test_adv D S := \big[Num.max/0]_x adv D (view_law x) (sim_view S x)` |
-| perfect/eps <-> forall D | `perfect_privacy_testP`, `eps_privacy_testP` (P5: consumed supports recorded; no extra hypotheses needed) |
+| perfect/eps <-> forall D | `perfect_privacy_testP`; `eps_privacy_testP` carries the necessary side condition `0 <= eps` (empty-X + negative-eps makes the untested direction false; the chapter states no such condition, the formal statement must) |
 | def:smc:hybrid | `hybrid_bound` (triangle-inequality instance; the hybrid law itself is instance-level data) |
 
 ### party_structure.v (probe P3, all GO)
@@ -195,9 +196,10 @@ four objects, not two):
   `information_theory/entropy.v` after the `cond_mutual_info` section
   (:1086), adding `Require Import graphoid` (legal: graphoid precedes
   entropy in `_CoqProject`);
-- `cinde_RV_factor` (`dumas2017dual/lib/extra_proba.v:529`) and
-  `fdist_proj23_RV3` (`extra_proba.v:239`) move to `probability/proba.v`
-  beside `fdist_proj13_RV3` (:955);
+- `cinde_RV_factor` (`dumas2017dual/lib/extra_proba.v:529`) with its
+  dependencies `marg_out_Y`/`marg_out_X`/`marg_Z_X` (:494/:516), plus
+  `cinde_RV_comp` (:465) and `fdist_proj23_RV3` (:239), move to
+  `probability/proba.v` beside `fdist_proj13_RV3` (:955);
 - `logr_eq1` (`dumas2017dual/lib/extra_algebra.v:37`) moves to
   `lib/realType_ln.v`;
 - the `extra_entropy.v` copies are DELETED (grep: zero clients outside
@@ -218,6 +220,18 @@ Two further D1 refinements adopted:
   Qed in the probe; `pfwd1_diag` at `proba.v:988` covers only `id`).
   It is generic and joins the upstreamed lemmas rather than staying
   private to `entropy_link.v`.
+- Honest-projection step (soundness-audit finding 2, LOCALIZED open
+  risk): probe D1 proves the FULL-INPUT form
+  (CI of view vs `input_rv` given allowed). The chapter's
+  eq:smc:entropy puts the honest pair (X_h, Y_h) on the left; under
+  deterministic F both honest coordinates are functions of the full
+  input, so the headline `perfect_privacy_centropy_eq` derives the
+  honest form from the full-input form via graphoid `symmetry` +
+  `cinde_RV_comp` (`extra_proba.v:465`, X ⊥ Y | Z implies
+  f(X,Z) ⊥ Y | Z at `f x a := (proj_xh x, proj_yh (F0 x))`). This one
+  step is unprobed at the carrier — the exact lemma, file, and
+  composite are pinned here, and the implementation task probes it
+  before the headline lands.
 
 ### unpredictability.v (probe D2 GO)
 
@@ -231,6 +245,16 @@ literally `log` (`lib/realType_ln.v:177`, `:= Log 2`); monotonicity is
 implication forms `log_le_probe` / `log_neg_probe` are Qed in
 `probe_examples_f3.v`.
 
+ACCEPTED UNPROBED SHAPE (soundness-audit finding 10; the one §3 item with
+no compiled miniature): the composition lemma itself — per-input induced
+testers `D_x := [pred b | pred_map b == sec x]`, the hypothesis that BOTH
+hops' induced testers lie in `T`, and the weighted-sum assembly under the
+joint prior — plus the positivity side condition
+`0 < p_ideal + e_game + e_sim` that `ler_log`'s `Num.pos` domain forces
+on `unp_entropy_ge`. These hypotheses are spelled here so the plan states
+them verbatim; the unpredictability.v task begins with a shape probe
+before the permanent statement lands.
+
 ### examples_f3.v (probe D4: all GO)
 
 | chapter | artifact |
@@ -238,7 +262,7 @@ implication forms `log_le_probe` / `log_neg_probe` are Qed in
 | ex:smc:dirac-matrix | `dirac_shiftE` on 'F_3 |
 | ex:smc:mask-matrix | `mask_chan`; `mask_chan_uniform_hides`; biased (1/2,1/4,1/4) `biased3`; `mask_chan_biased_leaks` |
 | ex:smc:ancilla-matrix | `draw_add_mask : fdistmap add (tensor (fdist1 x) m) = mask_chan m x` |
-| tab:smc:privacy-laws / fig:smc:privacy-instance | three-verdict toy: one masking kernel instance; uniform => `perfect_privacy`; biased => `eps_privacy` with eps = 6^-1 (D4c: value confirmed TRUE by computation, mutation with 4^-1 fails); no mask => `insecurity` witness |
+| tab:smc:privacy-laws / fig:smc:privacy-instance | three-verdict toy, an 'F_3 ANALOGUE of the chapter's 'F_29 instance (chapter: 1/2-at-0, 1/56-else, eps = 27/58; toy: (1/2,1/4,1/4), eps = 6^-1 — both are 1/2 - 1/#|F|; the map cell is labeled "F_3 analogue"): uniform => `perfect_privacy`; biased => `eps_privacy` (D4c: 6^-1 confirmed TRUE, mutation with 4^-1 fails); no mask => `insecurity` witness |
 
 D4 construction facts folded in: `biased3` is nested binary `fdist_conv`
 (`p <| w |> q`, `fdist.v:880-894`) over `fdist1`s — NOT `fdist_convn`
@@ -304,8 +328,10 @@ Notable probe findings already folded in:
 - P2 finding 7: for mass-1 laws the wrong-side optimal tester also attains the
   max; statement-level mutation would not catch it (proof-level mutation is
   the standard here).
-- P4 mut3: dropping the nonzero-mass guard in `cond_law_to_bind` is refuted by
-  a Qed two-point counterexample (strongest mutation form).
+- P4 mut3 (wording per soundness-audit finding 4): demanding the
+  conditional-law hypothesis at a SINGLE fibre only is refuted by a Qed
+  two-point counterexample (strongest mutation form); the guard-flip
+  variant is mut2, a compile-failure check.
 - P1 finding 7 / P3: axiom criterion is "zero axioms beyond the boolp trio
   baseline" (propositional_extensionality, functional_extensionality_dep,
   constructive_indefinite_description) — "closed under the global context" is
@@ -339,6 +365,23 @@ folded here, none invalidates a probe result):
 All other precedent line numbers verified live by the audit (one nit: the
 `fdist_conv` span is 880-895).
 
+Audit outcomes (both audits' evidence files kept in `.scratch/`):
+
+- Naming/precedent audit: NO-GO with five blocking findings, all folded
+  above (`audit_nam_scope.v`, `audit_nam_cross_section.v`).
+- Soundness audit: GO with three blocking findings, all folded above
+  (upstream closure completed with the marg helpers and `cinde_RV_comp`;
+  honest-projection step recorded as a localized probe obligation;
+  unpredictability composition recorded as the accepted unprobed shape
+  with its hypotheses spelled out). Tautology probes: `tensorE`,
+  `view_lawE`, `allowE`, `statdist_test_max`, `biased_uniform_eps` all
+  non-trivial (`audit_snd_tautology.v`). Quantifier-order and insecurity
+  non-vacuity compiled (`audit_snd_quantifier.v`). Randomized-F negative
+  certificate compiled (`audit_snd_randomized_F.v`). Statement-match
+  restatements checked against the chapter for every headline; the two
+  mismatches found (worlds-compute-f second route, 'F_29 vs 'F_3
+  example) are folded in section 3.
+
 ## 5. Soundness invariants
 
 - No new axiom or assumed constant; per-lemma criterion: zero axioms beyond
@@ -354,22 +397,41 @@ All other precedent line numbers verified live by the audit (one nit: the
   the three-verdict toy exhibits non-vacuity concretely.
 - Hypothesis-set satisfiability: probe P1's vacuity section discharges the
   kernel hypotheses at a concrete instance and proves a perfect-privacy
-  consequence; probe P3's concrete section does the same for the party layer.
+  consequence; probe P3's concrete section does the same for the party
+  layer. Both instances degenerate the probabilistic layer (Omega = 'I_1);
+  the non-degenerate witnesses are `audit_snd_quantifier.v` (per-input
+  simulability without a single simulator, plus a satisfiable
+  insecurity-hypothesis pair — prop:smc:insecurity is non-vacuous) and
+  `audit_snd_randomized_F.v`.
 - English-statement fidelity: each artifact row in §3 names its chapter
   label; the thesis-repo map extension cross-links both directions.
 
-## 6. Open decision (user): scope of the Iwamoto direction
+## 6. Scope of the Iwamoto direction (machine-checked; user may override)
 
 For randomized functionalities the view-only triangle does NOT imply
-`eq:smc:entropy` with `Y_{bar A}` on the left (the view correlates with
-honest outputs through the ancilla); Lindell/Iwamoto handle randomized F
-with a JOINT (view, output) simulation notion. Recommendation (in force
-unless the user overrides): formalize the direction for deterministic `F`
-(covers DSDP; coincides with the joint notion there), and flag the
-randomized case as a candidate prose caveat for the chapter (soundness
-audit to double-check against Iwamoto Thm 5.6 as cited). Alternative:
-strengthen the kernel's perfect privacy to the joint form — bigger surface,
-not needed by any current instance.
+`eq:smc:entropy` with the honest pair on the left. This is now
+MACHINE-CHECKED, not a conjecture: `audit_snd_randomized_F.v` (Qed, exit
+0) exhibits a randomized F whose per-input view-only triangle holds
+(`view_only_triangle`) while CI fails (`not_cinde_honest`) and
+`H(honest | view, allowed) = 0` (via `centropy_RV_comp0`,
+`entropy.v:498`) against `H(honest | allowed) = log 2`. The chapter's own
+definitions (def:smc:sim, eq:smc:simulation at security-models.tex:517-519)
+are view-only, while Iwamoto Def 5.2/(25) conditions on ALL parties'
+inputs-and-outputs (verbatim-verified against the KB slice, pp. 366-367)
+— a jointly-conditioned notion — and the chapter states the equivalence
+unrestricted while its own SPP functionality is randomized.
+
+Decisions:
+- Rocq side (in force unless the user overrides): `entropy_link.v` states
+  the direction for deterministic `F` (covers DSDP; coincides with the
+  joint notion there). The audit counterexample file is kept as the
+  negative certificate for the randomized case.
+- Thesis side (REQUIRED, promoted from candidate): the chapter's
+  IT-characterization paragraph (533-556) needs a caveat scoping the
+  equivalence to deterministic functionalities or restating it for the
+  joint (view, output) notion. Mitigation worth recording there: for SPP,
+  `y_a` is a function of `(x, y_b)`, so the joint form degenerates and
+  the mechanized input-entropy statement stays sound.
 
 ## 7. Deliverable in the thesis repo
 
