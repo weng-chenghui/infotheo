@@ -95,6 +95,13 @@ Probe fact folded in: `` `x `` is `` `X (fun _ => q) `` — the kernel product
 | Delta_T (composition section) | `class_adv (T : {set tester}) p q := \big[Num.max/0]_(D in T) adv D p q` |
 | prop:smc:composition | `class_adv_ge0/sym/xx/triangle/sub`; `class_adv_all` ties to `statdist` |
 | (separation, for testP) | `statdist_eq0 : (statdist p q == 0) = (p == q)` |
+| (headline supports) | `adv_ge0`, `adv_triangle` (one-liners via `normr_ge0` / `ler_distD`; consumed by the testP headlines and hybrid_bound) |
+| (live sibling) | `statdist_var_dist : statdist p q = 2^-1 * var_dist p q` — `var_dist` EXISTS at `probability/variation_dist.v:33` with `symmetric_var_dist`/`pos_var_dist`/`def_var_dist`/`leq_var_dist` (:37-:55); the equality is definitional (`by []`). statdist.v cites it and derives the overlapping support lemmas from it where shapes allow, instead of duplicating |
+
+Section plumbing (naming-audit finding 13): statdist.v declares
+`Variable B : finType` (explicit), NOT probe P2's `Context {B}` — with an
+implicit `B`, `tester` cannot be applied at `Bv` from privacy_kernel.v.
+This is the one recorded deviation from the verbatim-copy rule.
 
 Port note: the deleted `{distr}` development (`git show
 2bbc1714:smc/ssprove_ext_statdist.v`, copy at
@@ -149,7 +156,7 @@ Probe facts folded in: the sig-indexed dffun finType is canonical
 (`fintype.v:1509`, `[Finite of {x | P x} by <:]`); the extensionality lemma
 is `ffunP` (there is no `dffunP`).
 
-### entropy_link.v (probe D1 in flight; scope decision §6)
+### entropy_link.v (probe D1: both targets GO; scope decision §6)
 
 Kernel extended (sub-section) with honest-side projections `Xh Yh`,
 `proj_xh`, `proj_yh`, input prior `mu : R.-fdist X`, joint prior
@@ -162,30 +169,94 @@ Target (deterministic functionality):
 - `cinde_centropy_eq :` H(honest | view, allowed) = H(honest | allowed) in the
   repo's centropy notation.
 
-Missing library lemmas found by D1 become planned implementation work.
+Headline names (naming-audit finding 11): the entropy_link headline is
+`perfect_privacy_centropy_eq` (triangle-form intermediate:
+`triangle_centropy_eq`) — NOT `cinde_centropy_eq`, which would shadow the
+upstreamed generic lemma of that name.
 
-### unpredictability.v (probe D2 in flight)
+Probe D1 outcome (`probe_entropy_link_mini.v`, Qed at abstract finTypes):
+`triangle_cinde` via `cinde_RV_factor` + two pfwd1 helpers;
+the centropy equality is a one-liner because the CI-to-centropy link
+ALREADY EXISTS: `cinde_centropy_eq` at `dumas2017dual/lib/extra_entropy.v:126`
+(routed through `cinde_cond_mutual_info0`, same file line 73). Modern
+names: `cinde_RV` (proba.v; `cinde_rv` deprecated), `centropy_RV` with
+`` `H( Y | X ) `` in entropy_scope (`cond_entropy` deprecated); the file
+must `Local Open Scope entropy_scope`.
+
+Dependency-direction decision: `smc/security_models/` must not import the
+case-study directory `dumas2017dual/`. The plan therefore UPSTREAMS the
+route's case-study-local lemmas into a root-level shared location
+(target: `lib/` or `information_theory/`, fixed in the plan), with their
+current file re-exporting or its clients re-pointed:
+(naming-audit finding 12 fixes the targets, and the dependency closure is
+four objects, not two):
+- `cinde_cond_mutual_info0` + `cinde_centropy_eq`
+  (`dumas2017dual/lib/extra_entropy.v:73/:126`) move to
+  `information_theory/entropy.v` after the `cond_mutual_info` section
+  (:1086), adding `Require Import graphoid` (legal: graphoid precedes
+  entropy in `_CoqProject`);
+- `cinde_RV_factor` (`dumas2017dual/lib/extra_proba.v:529`) and
+  `fdist_proj23_RV3` (`extra_proba.v:239`) move to `probability/proba.v`
+  beside `fdist_proj13_RV3` (:955);
+- `logr_eq1` (`dumas2017dual/lib/extra_algebra.v:37`) moves to
+  `lib/realType_ln.v`;
+- the `extra_entropy.v` copies are DELETED (grep: zero clients outside
+  the file itself); root `lib/` was rejected as target (no probability
+  content there).
+Reason: all are generic information theory / probability; keeping them
+in the case-study lib would invert the infra-to-case-study dependency
+direction.
+
+Two further D1 refinements adopted:
+- The statements hold for an ARBITRARY joint prior
+  `d : R.-fdist (X * Omega)` — the product form `mu `x P_Omega` is
+  never used by the proofs. `entropy_link.v` states the lemmas at an
+  arbitrary `d`, with the product-prior form as the corollary the
+  chapter narrates.
+- The sole genuinely-new supporting statement is `pfwd1_pair_det`
+  (joint law of an RV with a deterministic function of it; 6 lines,
+  Qed in the probe; `pfwd1_diag` at `proba.v:988` covers only `id`).
+  It is generic and joins the upstreamed lemmas rather than staying
+  private to `entropy_link.v`.
+
+### unpredictability.v (probe D2 GO)
 
 T-relative form only. `sec : X -> Sec`; `predictor := {ffun Bv -> Sec}`;
 `pred_success` under the joint prior; `ideal_guess` from allowed information;
 composition lemma `pred_success <= ideal_guess + e_game + e_sim` via
 `class_adv` triangle + membership of induced testers in `T`; then
-`unp_entropy_ge` by log monotonicity (log identifier pinned by D2).
+`unp_entropy_ge` by log monotonicity. D2 pinned: the base-2 log is
+literally `log` (`lib/realType_ln.v:177`, `:= Log 2`); monotonicity is
+`ler_log` (`{in Num.pos &, {mono log : x y / x <= y}}`); the bare
+implication forms `log_le_probe` / `log_neg_probe` are Qed in
+`probe_examples_f3.v`.
 
-### examples_f3.v (probe D4 in flight)
+### examples_f3.v (probe D4: all GO)
 
 | chapter | artifact |
 |---|---|
 | ex:smc:dirac-matrix | `dirac_shiftE` on 'F_3 |
 | ex:smc:mask-matrix | `mask_chan`; `mask_chan_uniform_hides`; biased (1/2,1/4,1/4) `biased3`; `mask_chan_biased_leaks` |
 | ex:smc:ancilla-matrix | `draw_add_mask : fdistmap add (tensor (fdist1 x) m) = mask_chan m x` |
-| tab:smc:privacy-laws / fig:smc:privacy-instance | three-verdict toy: one masking kernel instance; uniform => `perfect_privacy`; biased => `eps_privacy` with eps = 6^-1 (D4c pins the value); no mask => `insecurity` witness |
+| tab:smc:privacy-laws / fig:smc:privacy-instance | three-verdict toy: one masking kernel instance; uniform => `perfect_privacy`; biased => `eps_privacy` with eps = 6^-1 (D4c: value confirmed TRUE by computation, mutation with 4^-1 fails); no mask => `insecurity` witness |
+
+D4 construction facts folded in: `biased3` is nested binary `fdist_conv`
+(`p <| w |> q`, `fdist.v:880-894`) over `fdist1`s — NOT `fdist_convn`
+(which needs a weight fdist on 'I_3, the same problem one level down);
+the weight literal `(2^-1 : R)%:pr` needs no side proof (`{i01 R}`
+canonicals, `realType_ext.v:225`). `#|'F_3| = 3` by `card_ord` (no
+`card_Fp` needed). Channel evaluation via a `mask_chanE` read-off lemma;
+`tensor_dirac_l : tensor (fdist1 x) m = fdistmap (pair x) m` makes
+`draw_add_mask` one `fdistmap_comp`.
 
 ### spp_bridge.v (probe P4 GO)
 
 Bridge point: `bob_view_cond_sim_xy` (conditioning on Bob's own `(x2, y2)`,
-i.e. exactly the allowed information) + `cond_law_to_bind` (probe P4, Qed, 6
-lines) give the RV-form factorization
+i.e. exactly the allowed information) + the probe-P4 lemma (Qed, 6 lines) —
+permanent name `dist_of_RV_bind` per naming-audit finding 3 (`_to_` is this
+development's conversion-FUNCTION idiom, cf. `party_to_kernel`; the
+conclusion's mainSymbols are `` `p_ `` = `dist_of_RV` and `>>=`) — give the
+RV-form factorization
 
     `p_ BobView = `p_ [% x2, y2] >>= (fun '(b, y) => bob_simulator b y)
 
@@ -193,6 +264,10 @@ as the machine-checked nu = Sim o allow (marginal form); the per-input form is
 `bob_view_cond_sim` itself. Both are recorded in the map. No du2002 file is
 edited; scratch is never imported (`.scratch` has no logical name — permanent
 files restate probe code verbatim).
+
+Build caveat (naming-audit finding 16): `du2002/spp_simulator.vo` is
+currently stale ("inconsistent assumptions over infotheo.smc.smc_interpreter");
+the spp_bridge task rebuilds the du2002 chain before compiling.
 
 ## 4. Claim ledger
 
@@ -213,8 +288,9 @@ Library objects:
 
 Proof shapes: S1-S13 all GO (P1: S1-S6; P2: S7-S9; P3: S10-S11; P4: S12 with
 the `{RV P -> B}` spelling correction; P5: S13, no added hypotheses).
-Pending: D1 (CI + centropy route), D2 (log API), D4 (biased fdist
-construction, eps = 6^-1 computation).
+D probes: D1 GO (CI + centropy route; upstreaming decision recorded in
+§3), D2 GO (`log` / `ler_log`), D4 GO (nested `fdist_conv` construction;
+eps = 6^-1 confirmed).
 
 Probe files (kept, never imported):
 `smc/security_models/.scratch/probe_finstoch_kernel.v`,
@@ -239,16 +315,29 @@ Notable probe findings already folded in:
   adv_ge0 are kept for prop:smc:composition itself, not for the headlines.
 - Pre-commit gate dry run on the probe set: all 145 errors are H001
   (statement comments) and F001/I001 (naming grammar) on scratch files —
-  style rules aimed at permanent code. Fold-in: the flagged names
-  (`statdist_test_le`, `statdist_test_max`, `perfect_privacy_testP`,
-  `eps_privacy_testP`, `cond_law_to_bind`, `stoch_comp_dirac_fdistmap`,
-  `c_in_adv_records`) are explicit inputs to the naming audit, which must
-  either bless them with a `Naming:` justification or rename them before
-  they enter permanent files. Statement comments are mandatory in the
-  permanent files (terse mathematical style per the statement-comment
+  style rules aimed at permanent code. Statement comments are mandatory in
+  the permanent files (terse mathematical style per the statement-comment
   rule); probes stay comment-light. The probe commit itself is bypassed
   (logged), since the same content re-enters the unbypassed gate when the
   permanent files land.
+
+Naming-audit resolutions (VERDICT was NO-GO; all five blocking findings
+folded here, none invalidates a probe result):
+
+| name | resolution |
+|---|---|
+| `statdist_test_le` / `statdist_test_max` | keep, one `Naming:` note on the pair (subject is `adv`; pair-naming groups both halves of prop:smc:max-advantage; port continuity with 2bbc1714) |
+| `perfect_privacy_testP` / `eps_privacy_testP` | keep, `Naming:` note (`P` = iff characterization, `ffunP`/`setP` precedent; `eps_` has repo precedent) |
+| `stoch_comp_dirac_fdistmap` | keep, `Naming:` note (LHS-shape-then-RHS-symbol, same pattern as `fdist1bind`) |
+| `cond_law_to_bind` | RENAMED `dist_of_RV_bind` |
+| entropy_link headline | RENAMED `perfect_privacy_centropy_eq` (avoid shadowing the upstreamed `cinde_centropy_eq`) |
+| `c_*` / `vac_*` instance families | RENAMED via named Modules (`Module identity_protocol` style) in the permanent files; bare prefixes are semantic-stripping |
+| `statdist` vs `var_dist` | acknowledged live sibling; bridging lemma mandatory (see statdist.v rows) |
+| `dirac` | no collision in the import closure today; `Naming:` note warns about mathcomp-analysis measure-theory `dirac` if imports ever widen |
+| `probe_p3_statdist.v` names | no collision (file not in `_CoqProject`, no logical path) |
+
+All other precedent line numbers verified live by the audit (one nit: the
+`fdist_conv` span is 880-895).
 
 ## 5. Soundness invariants
 
