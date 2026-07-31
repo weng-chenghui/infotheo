@@ -1,3 +1,0 @@
-\begin{MintedVerbatim}[commandchars=\\\{\}]
-\PYG{k+kn}{Definition} \PYG{n}{senv} \PYG{o}{:} \PYG{k+kt}{Type} \PYG{o}{:=} \PYG{n}{nat} \PYG{o}{\PYGZhy{}\PYGZgt{}} \PYG{n}{stype}\PYG{o}{.}
-\end{MintedVerbatim}

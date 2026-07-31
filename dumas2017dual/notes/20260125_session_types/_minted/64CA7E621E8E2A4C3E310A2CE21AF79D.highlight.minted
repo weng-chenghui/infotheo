@@ -1,4 +1,0 @@
-\begin{MintedVerbatim}[commandchars=\\\{\}]
-\PYG{k+kn}{Lemma} \PYG{n}{alice\PYGZus{}bob\PYGZus{}dual} \PYG{o}{:} \PYG{n}{channels\PYGZus{}dual} \PYG{n}{aproc\PYGZus{}alice} \PYG{n}{aproc\PYGZus{}bob} \PYG{o}{=} \PYG{n+nb+bp}{true}\PYG{o}{.}
-\PYG{k+kn}{Proof}\PYG{o}{.} \PYG{k+kp}{by} \PYG{k}{native\PYGZus{}compute}\PYG{o}{.} \PYG{k+kn}{Qed}\PYG{o}{.}
-\end{MintedVerbatim}

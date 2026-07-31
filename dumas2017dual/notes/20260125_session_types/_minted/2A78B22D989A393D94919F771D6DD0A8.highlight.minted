@@ -1,4 +1,0 @@
-\begin{MintedVerbatim}[commandchars=\\\{\},codes={\catcode`\$=3\catcode`\^=7\catcode`\_=8\relax}]
-\PYG{o}{|} \PYG{n}{SSend} \PYG{o}{:} \PYG{esc}{$\forall$} \PYG{n}{n} \PYG{n}{env} \PYG{n}{dst} \PYG{n}{dt}\PYG{o}{,} \PYG{n}{data} \PYG{esc}{$\to$} \PYG{n}{sproc} \PYG{n}{party} \PYG{n}{n} \PYG{n}{env} \PYG{esc}{$\to$}
-            \PYG{n}{sproc} \PYG{n}{party} \PYG{n}{n}\PYG{o}{.}\PYG{o}{+}\PYG{l+m+mi}{1} \PYG{o}{(}\PYG{n}{senv\PYGZus{}send} \PYG{n}{env} \PYG{n}{dst} \PYG{n}{dt}\PYG{o}{)}
-\end{MintedVerbatim}

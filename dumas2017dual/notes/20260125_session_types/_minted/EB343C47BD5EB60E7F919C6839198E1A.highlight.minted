@@ -1,9 +1,0 @@
-\begin{MintedVerbatim}[commandchars=\\\{\},codes={\catcode`\$=3\catcode`\^=7\catcode`\_=8\relax}]
-\PYG{k+kn}{Inductive} \PYG{n}{proc} \PYG{o}{:} \PYG{k+kt}{Type} \PYG{o}{:=}
-\PYG{o}{|} \PYG{n}{Init}   \PYG{o}{:} \PYG{n}{data} \PYG{esc}{$\to$} \PYG{n}{proc} \PYG{esc}{$\to$} \PYG{n}{proc}
-\PYG{o}{|} \PYG{n}{Send}   \PYG{o}{:} \PYG{esc}{$\mathbb{N}$} \PYG{esc}{$\to$} \PYG{n}{data} \PYG{esc}{$\to$} \PYG{n}{proc} \PYG{esc}{$\to$} \PYG{n}{proc}
-\PYG{o}{|} \PYG{n}{Recv}   \PYG{o}{:} \PYG{esc}{$\mathbb{N}$} \PYG{esc}{$\to$} \PYG{o}{(}\PYG{n}{data} \PYG{esc}{$\to$} \PYG{n}{proc}\PYG{o}{)} \PYG{esc}{$\to$} \PYG{n}{proc}
-\PYG{o}{|} \PYG{n}{Ret}    \PYG{o}{:} \PYG{n}{data} \PYG{esc}{$\to$} \PYG{n}{proc}
-\PYG{o}{|} \PYG{n}{Finish} \PYG{o}{:} \PYG{n}{proc}
-\PYG{o}{|} \PYG{k+kn}{Fail}   \PYG{o}{:} \PYG{n}{proc}\PYG{o}{.}
-\end{MintedVerbatim}

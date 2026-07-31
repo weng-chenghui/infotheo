@@ -1,6 +1,0 @@
-\begin{MintedVerbatim}[commandchars=\\\{\}]
-\PYG{k+kn}{Definition} \PYG{n}{pbob} \PYG{o}{:} \PYG{o}{@}\PYG{n}{sproc} \PYG{n}{dsdp\PYGZus{}dtype} \PYG{n}{data} \PYG{n}{bob\PYGZus{}idx} \PYG{o}{\PYGZus{}} \PYG{o}{\PYGZus{}} \PYG{o}{:=}
-  \PYG{o}{\PYGZob{}|} \PYG{n}{Init} \PYG{o}{\PYGZsh{}}\PYG{n}{dk} \PYG{o}{;}
-     \PYG{n}{Send}\PYG{o}{\PYGZlt{}}\PYG{n}{alice\PYGZus{}idx}\PYG{o}{\PYGZgt{}} \PYG{o}{(}\PYG{n}{E} \PYG{n}{bob} \PYG{n}{v2} \PYG{n}{rb1}\PYG{o}{)} \PYG{o}{;}
-     \PYG{n}{Finish} \PYG{o}{|\PYGZcb{}}\PYG{o}{.}
-\end{MintedVerbatim}

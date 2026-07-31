@@ -1,6 +1,0 @@
-\begin{MintedVerbatim}[commandchars=\\\{\}]
-\PYG{k+kn}{Notation} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{\PYGZsq{}Init\PYGZsq{} x ; P}\PYG{l+s+s2}{\PYGZdq{}} \PYG{o}{:=} \PYG{o}{(}\PYG{n}{SInit} \PYG{n}{x} \PYG{n}{P}\PYG{o}{)}\PYG{o}{.}
-\PYG{k+kn}{Notation} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{\PYGZsq{}Send\PYGZlt{}\PYGZsq{} p \PYGZsq{}\PYGZgt{}\PYGZsq{} x ; P}\PYG{l+s+s2}{\PYGZdq{}} \PYG{o}{:=} \PYG{o}{(}\PYG{n}{SSend} \PYG{n}{p} \PYG{n}{DT\PYGZus{}Enc} \PYG{n}{x} \PYG{n}{P}\PYG{o}{)}\PYG{o}{.}
-\PYG{k+kn}{Notation} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{\PYGZsq{}Recv\PYGZus{}dec\PYGZlt{}\PYGZsq{} p \PYGZsq{}\PYGZgt{}\PYGZsq{} dk \PYGZsq{}fun\PYGZsq{} x \PYGZsq{}=\PYGZgt{}\PYGZsq{} P}\PYG{l+s+s2}{\PYGZdq{}} \PYG{o}{:=} \PYG{o}{(}\PYG{n}{SRecv} \PYG{n}{p} \PYG{n}{DT\PYGZus{}Enc} \PYG{o}{..}\PYG{o}{.}\PYG{o}{)}\PYG{o}{.}
-\PYG{k+kn}{Notation} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{\PYGZsq{}Finish\PYGZsq{}}\PYG{l+s+s2}{\PYGZdq{}} \PYG{o}{:=} \PYG{n}{SFinish}\PYG{o}{.}
-\end{MintedVerbatim}

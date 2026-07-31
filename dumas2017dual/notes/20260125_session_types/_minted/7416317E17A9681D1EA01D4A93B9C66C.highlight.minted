@@ -1,4 +1,0 @@
-\begin{MintedVerbatim}[commandchars=\\\{\}]
-\PYG{k+kn}{Definition} \PYG{n}{senv\PYGZus{}send} \PYG{n}{env} \PYG{n}{dst} \PYG{n}{dt} \PYG{o}{:=}
-  \PYG{k}{fun} \PYG{n}{p} \PYG{o}{=\PYGZgt{}} \PYG{k}{if} \PYG{n}{p} \PYG{o}{=}\PYG{o}{=} \PYG{n}{dst} \PYG{k}{then} \PYG{n}{STSend} \PYG{n}{dt} \PYG{o}{(}\PYG{n}{env} \PYG{n}{p}\PYG{o}{)} \PYG{k}{else} \PYG{n}{env} \PYG{n}{p}\PYG{o}{.}
-\end{MintedVerbatim}
