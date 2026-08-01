@@ -1,7 +1,7 @@
 (* infotheo: information theory and error-correcting codes in Rocq            *)
 (* Copyright (C) 2025 infotheo authors, license: LGPL-2.1-or-later            *)
 From mathcomp Require Import all_boot all_order all_algebra reals lra.
-Require Import realType_ext realType_ln fdist proba entropy.
+Require Import realType_ext realType_ln fdist proba variation_dist entropy.
 Require Import finstoch statdist privacy_kernel.
 
 (**md**************************************************************************)
@@ -147,7 +147,7 @@ Qed.
    tab:smc:privacy-laws whose approximate row this value instantiates. *)
 Lemma biased_uniform_eps : statdist biased3 unif3 = 6%:R^-1.
 Proof.
-rewrite /statdist /unif3.
+rewrite /statdist /var_dist /unif3.
 under eq_bigr do rewrite fdist_uniformE card_F3.
 rewrite !big_ord_recl big_ord0.
 rewrite (_ : lift ord0 (lift ord0 ord0) = 1 + 1 :> F3); last exact/val_inj.
@@ -162,7 +162,7 @@ Qed.
 Lemma statdist_mask_chan (m : R.-fdist F3) (x : F3) :
   statdist (mask_chan m x) unif3 = statdist m unif3.
 Proof.
-rewrite /statdist; congr (_ * _).
+rewrite /statdist /var_dist; congr (_ * _).
 rewrite (reindex_inj (addrI x)) /=.
 by apply: eq_bigr => b _; rewrite mask_chanE addKr /unif3 !fdist_uniformE.
 Qed.
