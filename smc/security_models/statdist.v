@@ -60,7 +60,7 @@ Implicit Types p q r : R.-fdist B.
 Definition statdist p q : R := 2%:R^-1 * \sum_b `|p b - q b|.
 
 (* def:smc:tv-distance *)
-(* statdist is half of variation_dist's total-variation sum. *)
+(* statdist is half of var_dist's total-variation sum. *)
 Lemma statdist_var_dist p q : statdist p q = 2%:R^-1 * var_dist p q.
 Proof. by []. Qed.
 
@@ -152,8 +152,7 @@ Proof. by rewrite /accept /Pr sumrB. Qed.
 (* prop:smc:max-advantage *)
 (* The advantage of a tester is at most the statistical distance.
    Naming: pair naming with statdist_test_max; test = quantified over
-   testers; port continuity with the deleted ssprove_ext_statdist.v
-   (2bbc1714). *)
+   testers. *)
 Lemma statdist_test_le (D : tester) p q : adv D p q <= statdist p q.
 Proof.
 rewrite /adv accept_diff ler_norml; apply/andP; split; last exact: sum_diff_le.
@@ -177,8 +176,7 @@ Qed.
 (* prop:smc:max-advantage *)
 (* The statistical distance is the maximal advantage over all testers.
    Naming: pair naming with statdist_test_le; test = quantified over
-   testers; port continuity with the deleted ssprove_ext_statdist.v
-   (2bbc1714). *)
+   testers. *)
 Lemma statdist_test_max p q :
   \big[Num.max/0]_(D : tester) adv D p q = statdist p q.
 Proof.
