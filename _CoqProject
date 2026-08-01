@@ -94,6 +94,7 @@ toy_examples/conditional_entropy.v
 smc/security_models/finstoch.v
 smc/security_models/statdist.v
 smc/security_models/privacy_kernel.v
+smc/security_models/party_structure.v
 smc/smc_interpreter.v
 smc/smc_interpreter_sound.v
 smc/graded_resource.v
