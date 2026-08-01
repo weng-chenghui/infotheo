@@ -170,10 +170,14 @@ Target (deterministic functionality):
 - `cinde_centropy_eq :` H(honest | view, allowed) = H(honest | allowed) in the
   repo's centropy notation.
 
-Headline names (naming-audit finding 11): the entropy_link headline is
-`perfect_privacy_centropy_eq` (triangle-form intermediate:
-`triangle_centropy_eq`) — NOT `cinde_centropy_eq`, which would shadow the
-upstreamed generic lemma of that name.
+Headline names (naming-audit finding 11; amended by design B+ 2026-08-01):
+the entropy_link headline is the arbitrary-F iff, candidate name
+`perfect_privacy_centropyP` (final name passes the naming gate); the
+forward direction and the triangle-form intermediate keep
+`perfect_privacy_centropy_eq` / `triangle_centropy_eq` — NOT
+`cinde_centropy_eq`, which would shadow the upstreamed generic lemma of
+that name. Corollaries: deterministic-F and output-determined-F discharge
+lemmas, plus the DSDP simulator-existence derivation.
 
 Probe D1 outcome (`probe_entropy_link_mini.v`, Qed at abstract finTypes):
 `triangle_cinde` via `cinde_RV_factor` + two pfwd1 helpers;
@@ -421,17 +425,29 @@ inputs-and-outputs (verbatim-verified against the KB slice, pp. 366-367)
 — a jointly-conditioned notion — and the chapter states the equivalence
 unrestricted while its own SPP functionality is randomized.
 
-Decisions:
-- Rocq side (in force unless the user overrides): `entropy_link.v` states
-  the direction for deterministic `F` (covers DSDP; coincides with the
-  joint notion there). The audit counterexample file is kept as the
-  negative certificate for the randomized case.
-- Thesis side (REQUIRED, promoted from candidate): the chapter's
-  IT-characterization paragraph (533-556) needs a caveat scoping the
-  equivalence to deterministic functionalities or restating it for the
-  joint (view, output) notion. Mitigation worth recording there: for SPP,
-  `y_a` is a function of `(x, y_b)`, so the joint form degenerates and
-  the mechanized input-entropy statement stays sound.
+Decisions (SUPERSEDED 2026-08-01 by design B+, agreed with the user after
+the Broadbent-Karvonen reading; companion spec:
+`phd-thesis/docs/notes/20260801-security-models-output-independence-fix-design.md`):
+- Rocq side: `entropy_link.v` states the characterization at ARBITRARY `F`
+  as an iff (candidate name `perfect_privacy_centropyP`, `_testP` iff
+  precedent), with two explicit hypotheses replacing the deterministic-F
+  scope: simulator consistency (`out_A o Sim(a,y)` reads off `y`) and the
+  output-independence condition as a `cinde_RV` clause
+  (`view _|_ Y_h | (X, Y_A)`). Deterministic `F` (DSDP) and
+  output-determined `F` (SPP, `y_a = f(x) - y_b`) become corollaries that
+  discharge the condition structurally. NEW derived artifact: for DSDP the
+  converse direction turns the mechanized counting results into simulator
+  existence. New probe obligations before implementation: (a) mixture
+  conditioning under out_A-disjoint supports selects the component;
+  (b) the converse-direction Sim construction, including the off-support
+  consistency decision (support-restricted consistency vs an out_A
+  section). The audit counterexample file remains the negative certificate
+  showing the condition is not free.
+- Thesis side: the B+ fix (five touchpoints: condition + consistency +
+  iff theorem + corollaries into the IT-characterization block; matrix
+  example; BK citation correction at 1362-1372 — Thm 4.9 collapses the
+  adversary quantifier, not the honest wire; BK typing remark; Lindell
+  joint-pair sidenote). Detailed in the companion spec.
 
 ## 7. Deliverable in the thesis repo
 
