@@ -92,6 +92,7 @@ toy_examples/expected_value_variance_ordn.v
 toy_examples/expected_value_variance_tuple.v
 toy_examples/conditional_entropy.v
 smc/security_models/finstoch.v
+smc/security_models/statdist.v
 smc/smc_interpreter.v
 smc/smc_interpreter_sound.v
 smc/graded_resource.v
