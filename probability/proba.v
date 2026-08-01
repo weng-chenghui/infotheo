@@ -2416,6 +2416,29 @@ Qed.
 
 End cinde_RV_recode.
 
+Section cinde_RV_recode_inv.
+Context {R : realType} {U : finType} {P : R.-fdist U}.
+
+(* Conditional independence given an injective recoding of the conditioner is
+   conditional independence given the conditioner, the converse of
+   cinde_RV_recode. *)
+Lemma cinde_RV_recode_inv (A B C C' : finType) (X : {RV P -> A})
+    (Y : {RV P -> B}) (Z : {RV P -> C}) (phi : C -> C') :
+  injective phi -> P |= X _|_ Y | (phi `o Z) -> P |= X _|_ Y | Z.
+Proof.
+move=> phi_inj H a b c.
+have pfE : forall (E : finType) (W : {RV P -> E}) (e : E),
+    `Pr[ [% W, phi `o Z] = (e, phi c) ] = `Pr[ [% W, Z] = (e, c) ].
+  move=> E W e; rewrite !pfwd1E; congr (Pr P _).
+  by apply/setP => u; rewrite !inE /= !xpair_eqE (inj_eq phi_inj).
+have pZ : `Pr[ (phi `o Z) = phi c ] = `Pr[ Z = c ].
+  rewrite !pfwd1E; congr (Pr P _).
+  by apply/setP => u; rewrite !inE /= (inj_eq phi_inj).
+by have := H a b (phi c); rewrite !cpr_eqE !pfE pZ -!cpr_eqE.
+Qed.
+
+End cinde_RV_recode_inv.
+
 Section cinde_RV_factor.
 Context {R : realType}.
 Variables (U : finType) (P : R.-fdist U) (A B C : finType).
@@ -2482,6 +2505,125 @@ by apply/eqP; lra.
 Qed.
 
 End cinde_RV_factor.
+
+Section pfwd1_comp_sum.
+Context {R : realType} {U : finType} {P : R.-fdist U}.
+
+(* The law of a recoded variable paired with a spectator is the sum of the
+   laws over the fibre of the recoding. *)
+Lemma pfwd1_comp_sum (B C D : finType) (V : {RV P -> B}) (W : {RV P -> C})
+    (g : B -> D) (t : D) (w : C) :
+  `Pr[ [% (g `o V), W] = (t, w) ]
+  = \sum_(b in B | g b == t) `Pr[ [% V, W] = (b, w) ].
+Proof.
+rewrite -pr_in1.
+have -> : [% (g `o V), W] = ((fun p : B * C => (g p.1, p.2)) `o [% V, W]) by [].
+rewrite pr_in_comp'.
+have -> : (fun p : B * C => (g p.1, p.2)) @^-1: [set (t, w)]
+        = ((g @^-1: [set t]) `* [set w])%SET.
+  by apply/setP => -[b c]; rewrite !inE /= !xpair_eqE.
+rewrite pr_inE' /Pr big_setX /=.
+apply: eq_big => [b|b _]; first by rewrite !inE.
+by rewrite big_set1 dist_of_RVE.
+Qed.
+
+(* The same fibre sum with a further variable carried along. *)
+Lemma pfwd1_comp_sum2 (A B C D : finType) (X : {RV P -> A}) (Y : {RV P -> B})
+    (Z : {RV P -> C}) (g : B -> D) (a : A) (t : D) (c : C) :
+  `Pr[ [% [% X, (g `o Y)], Z] = ((a, t), c) ]
+  = \sum_(b in B | g b == t) `Pr[ [% [% X, Y], Z] = ((a, b), c) ].
+Proof.
+rewrite -pr_in1.
+have -> : [% [% X, (g `o Y)], Z]
+  = ((fun q : A * B * C => ((q.1.1, g q.1.2), q.2)) `o [% [% X, Y], Z]) by [].
+rewrite pr_in_comp'.
+have -> : (fun q : A * B * C => ((q.1.1, g q.1.2), q.2)) @^-1: [set ((a, t), c)]
+        = (([set a] `* (g @^-1: [set t])) `* [set c])%SET.
+  by apply/setP => -[[a0 b0] c0]; rewrite !inE /= !xpair_eqE.
+rewrite pr_inE' /Pr big_setX /= big_setX /=.
+rewrite big_set1 /=; apply: eq_big => [b|b _]; first by rewrite !inE.
+by rewrite big_set1 dist_of_RVE.
+Qed.
+
+End pfwd1_comp_sum.
+
+Section cinde_RV_comp_snd.
+Context {R : realType} {U : finType} {P : R.-fdist U}.
+
+(* Conditional independence given Z is preserved by any recoding of the second
+   variable. *)
+Lemma cinde_RV_comp_snd (A B C D : finType) (X : {RV P -> A}) (Y : {RV P -> B})
+    (Z : {RV P -> C}) (g : B -> D) :
+  P |= X _|_ Y | Z -> P |= X _|_ (g `o Y) | Z.
+Proof.
+move=> H a t c.
+rewrite [X in _ * X]cpr_eqE (pfwd1_comp_sum Y Z g) big_distrl /= big_distrr /=.
+rewrite cpr_eqE (pfwd1_comp_sum2 X Y Z g) big_distrl /=.
+by apply: eq_bigr => b _; rewrite -!cpr_eqE H.
+Qed.
+
+End cinde_RV_comp_snd.
+
+Section cinde_RV_cpr_drop.
+Context {R : realType} {U : finType} {P : R.-fdist U}.
+
+(* A variable conditionally independent of X given Z drops out of the
+   conditioning event of X. *)
+Lemma cinde_RV_cpr_drop (A B C : finType) (X : {RV P -> A}) (Y : {RV P -> B})
+    (Z : {RV P -> C}) (a : A) (b : B) (c : C) :
+  P |= X _|_ Y | Z -> `Pr[ [% Y, Z] = (b, c) ] != 0 ->
+  `Pr[ X = a | [% Y, Z] = (b, c) ] = `Pr[ X = a | Z = c ].
+Proof.
+move=> H Hbc.
+have Hc : `Pr[ Z = c ] != 0.
+  apply: contraNN Hbc => /eqP Hc0.
+  by apply/eqP; exact: (pfwd1_domin_RV1 Y b Hc0).
+have := H a b c; rewrite !cpr_eqE => Hcinde.
+have Hi : `Pr[ Z = c ]^-1 != 0 by rewrite invr_eq0.
+move: Hcinde; rewrite mulrA => /(mulIf Hi) HN.
+have -> : `Pr[ [% X, [% Y, Z]] = (a, (b, c)) ]
+        = `Pr[ [% [% X, Y], Z] = ((a, b), c) ].
+  rewrite !pfwd1E; congr (Pr P _); apply/setP => u; rewrite !inE /= !xpair_eqE.
+  by rewrite andbA.
+by rewrite HN mulfK.
+Qed.
+
+End cinde_RV_cpr_drop.
+
+Section cinde_RV_fun_conditioner.
+Context {R : realType} {U : finType} {P : R.-fdist U}.
+
+(* A variable that is a function of the conditioner is conditionally
+   independent of every variable given that conditioner. *)
+Lemma cinde_RV_fun_conditioner (A B C : finType) (X : {RV P -> A})
+    (Y : {RV P -> B}) (Z : {RV P -> C}) (h : C -> B) :
+  (forall u, Y u = h (Z u)) -> P |= X _|_ Y | Z.
+Proof.
+move=> HY a b c.
+have E1 : `Pr[ [% [% X, Y], Z] = ((a, b), c) ]
+        = (h c == b)%:R * `Pr[ [% X, Z] = (a, c) ].
+  rewrite !pfwd1E; have [Hb|Hb] := eqVneq (h c) b.
+    rewrite mul1r; congr (Pr P _); apply/setP => u; rewrite !inE /= !xpair_eqE.
+    case: (eqVneq (Z u) c) => [Hu|Hu]; last by rewrite !andbF.
+    by rewrite HY Hu Hb !eqxx !andbT.
+  rewrite mul0r /Pr; apply: big_pred0 => u; rewrite !inE /= !xpair_eqE.
+  case: (eqVneq (Z u) c) => [Hu|Hu]; last by rewrite !andbF.
+  by rewrite HY Hu (negbTE Hb) andbF.
+have E2 : `Pr[ [% Y, Z] = (b, c) ] = (h c == b)%:R * `Pr[ Z = c ].
+  rewrite !pfwd1E; have [Hb|Hb] := eqVneq (h c) b.
+    rewrite mul1r; congr (Pr P _); apply/setP => u; rewrite !inE /= !xpair_eqE.
+    case: (eqVneq (Z u) c) => [Hu|Hu]; last by rewrite andbF.
+    by rewrite HY Hu Hb eqxx.
+  rewrite mul0r /Pr; apply: big_pred0 => u; rewrite !inE /= !xpair_eqE.
+  case: (eqVneq (Z u) c) => [Hu|Hu]; last by rewrite andbF.
+  by rewrite HY Hu (negbTE Hb).
+rewrite !cpr_eqE E1 E2.
+have [Hc|Hc] := eqVneq (`Pr[ Z = c ]) 0.
+  by rewrite Hc invr0 !mulr0.
+by rewrite mulfK // -mulrA mulrC.
+Qed.
+
+End cinde_RV_fun_conditioner.
 
 Section independent_rv.
 Context {R : realType}.

@@ -1245,6 +1245,65 @@ Qed.
 
 End cinde_cond_mutual_info0.
 
+Section cond_mutual_info0_cinde.
+Context {R : realType} {U A B C : finType} {P : R.-fdist U}.
+Variables (X : {RV P -> A}) (Y : {RV P -> B}) (Z : {RV P -> C}).
+
+(* X and Y are conditionally independent given Z when their conditional
+   mutual information vanishes.
+   Naming: hypothesis-first, because the conclusion-first spelling is the name
+   of the forward lemma cinde_cond_mutual_info0 above, of which this is the
+   converse. *)
+Lemma cond_mutual_info0_cinde :
+  cond_mutual_info `p_[% X, Y, Z] = 0 -> P |= X _|_ Y | Z.
+Proof.
+move=> H0 a b c.
+have [Hc|Hc] := eqVneq (`Pr[ Z = c ]) 0.
+  by rewrite !cpr_eqE Hc invr0 !mulr0.
+have Hz : (`p_[% X, Y, Z])`2 c != 0 by rewrite snd_RV3 snd_RV2 dist_of_RVE.
+have Hcdiv : cdiv1 `p_[% X, Y, Z] c = 0.
+  have Hsum : \sum_(z in C) (`p_[% X, Y, Z])`2 z * cdiv1 `p_[% X, Y, Z] z = 0.
+    by rewrite -cond_mutual_infoE2.
+  have Hge : forall z : C, z \in C ->
+      0 <= (`p_[% X, Y, Z])`2 z * cdiv1 `p_[% X, Y, Z] z.
+    by move=> z _; rewrite mulr_ge0 //; exact: cdiv1_ge0.
+  have /eqP := psumr_eq0P Hge Hsum (isT : c \in C).
+  by rewrite mulf_eq0 (negbTE Hz) /= => /eqP.
+have Hc1 : (fdistX `p_[% X, Y, Z])`1 c != 0 by rewrite fdistX1.
+have Hc2 : (fdistX (fdist_proj13 `p_[% X, Y, Z]))`1 c != 0
+  by rewrite fdistX1 fdist_proj13_snd.
+have Hc3 : (fdistX (fdist_proj23 `p_[% X, Y, Z]))`1 c != 0
+  by rewrite fdistX1 fdist_proj23_snd.
+have Hdom : (fdistX `p_[% X, Y, Z])`(| c) `<<
+    ((fdistX (fdist_proj13 `p_[% X, Y, Z]))`(| c)) `x
+    ((fdistX (fdist_proj23 `p_[% X, Y, Z]))`(| c)).
+  apply/dominatesP => -[a0 b0].
+  rewrite fdist_prodE !jfdist_condE //= => /eqP; rewrite mulf_eq0 => /orP[|].
+  - rewrite /jcPr !setX1 !Pr_set1 !mulf_eq0 !fdistXI => /orP[/eqP|/eqP].
+      by move/fdist_proj13_domin => ->; rewrite mul0r.
+    by rewrite fdist_proj13_snd => ->; rewrite mulr0.
+  - rewrite /jcPr !setX1 !Pr_set1 mulf_eq0 !fdistXI => /orP[/eqP|/eqP].
+      by move/fdist_proj23_domin => ->; rewrite mul0r.
+    by rewrite fdist_proj23_snd => ->; rewrite mulr0.
+have Heq : (fdistX `p_[% X, Y, Z])`(| c) =
+    ((fdistX (fdist_proj13 `p_[% X, Y, Z]))`(| c)) `x
+    ((fdistX (fdist_proj23 `p_[% X, Y, Z]))`(| c)).
+  by apply/(div0P Hdom); rewrite -cdiv1_is_div.
+have Heqab : (fdistX `p_[% X, Y, Z])`(| c) (a, b)
+  = ((((fdistX (fdist_proj13 `p_[% X, Y, Z]))`(| c)) `x
+      ((fdistX (fdist_proj23 `p_[% X, Y, Z]))`(| c))) (a, b)) by rewrite Heq.
+move: Heqab; rewrite fdist_prodE !jfdist_condE //.
+rewrite !fdistXI /jcPr !setX1 !Pr_set1 /=.
+have -> : (fdist_proj13 `p_ [% X, Y, Z])`2 = `p_ Z.
+  by rewrite fdist_proj13_snd; apply/fdist_ext => x; rewrite snd_RV3 snd_RV2.
+have -> : (fdist_proj23 `p_ [% X, Y, Z])`2 = `p_ Z.
+  by rewrite fdist_proj23_snd; apply/fdist_ext => y; rewrite snd_RV3 snd_RV2.
+by rewrite fdist_proj13_RV3 fdist_proj23_RV3 snd_RV3 snd_RV2 !dist_of_RVE
+  -!cpr_eqE.
+Qed.
+
+End cond_mutual_info0_cinde.
+
 Section cinde_centropy_eq.
 Context {R : realType} {U A B C : finType} {P : R.-fdist U}.
 Variables (X : {RV P -> A}) (Y : {RV P -> B}) (Z : {RV P -> C}).
@@ -1268,6 +1327,26 @@ exact: H0.
 Qed.
 
 End cinde_centropy_eq.
+
+Section centropy_eq_cinde.
+Context {R : realType} {U A B C : finType} {P : R.-fdist U}.
+Variables (X : {RV P -> A}) (Y : {RV P -> B}) (Z : {RV P -> C}).
+
+(* X and Y are conditionally independent given Z when conditioning Y on the
+   pair (X, Z) leaves its conditional entropy given Z unchanged.
+   Naming: hypothesis-first, because the conclusion-first spelling is the name
+   of the forward lemma cinde_centropy_eq above, of which this is the
+   converse. *)
+Lemma centropy_eq_cinde :
+  `H( Y | [% X, Z] ) = `H( Y | Z ) -> P |= X _|_ Y | Z.
+Proof.
+move=> Heq; apply/cinde_RV_sym/cond_mutual_info0_cinde.
+move: Heq; rewrite /centropy_RV /cond_mutual_info /centropy.
+rewrite fdist_proj13_snd snd_RV3 snd_RV2 fdistA_RV3 snd_RV2 fdist_proj13_RV3.
+by rewrite snd_RV2 => ->; rewrite subrr.
+Qed.
+
+End centropy_eq_cinde.
 
 Section conditional_relative_entropy.
 Section def.

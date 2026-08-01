@@ -380,6 +380,20 @@ rewrite /Q jfdist_condE // fdistX_RV2.
 by rewrite jcPrE -cpr_inE' cpr_in1.
 Qed.
 
+(* The conditional law of a variable given an event of positive mass is the
+   conditional probability of that variable. *)
+Lemma jfdist_cond_cpr {R : realType} (U : finType) (P : R.-fdist U)
+    (B C : finType) (Z : {RV P -> C}) (V : {RV P -> B}) (z : C) (v : B) :
+  `Pr[ Z = z ] != 0 -> (`p_ [% Z, V]) `(| z ) v = `Pr[ V = v | Z = z ].
+Proof.
+move=> Hz.
+have Hz' : (`p_ [% Z, V])`1 z != 0 by rewrite fst_RV2 dist_of_RVE.
+rewrite (jfdist_condE Hz') /jcPr setX1 !Pr_set1 fdistXE fdistX2 fst_RV2.
+rewrite cpr_eqE dist_of_RVE; congr (_ / _).
+rewrite dist_of_RVE !pfwd1E; congr (Pr P _); apply/setP => u.
+by rewrite !inE /= !xpair_eqE andbC.
+Qed.
+
 Lemma jcPr_1 {R : realType} (A B : finType) (P : R.-fdist (A * B)) a : P`1 a != 0 ->
   \sum_(b in B) \Pr_(fdistX P)[ [set b] | [set a] ] = 1.
 Proof.
