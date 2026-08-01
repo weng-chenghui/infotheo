@@ -169,8 +169,9 @@ by apply_inde_rv_comp f g.
 Qed.
 
 (* The delivered share pair conditioned on a pair of inputs of positive mass
-   is the ideal share law at that pair, the instance of the delivery-law
-   condition delivery_law_ok of entropy_link.v.
+   is the ideal share law at that pair, the conditional-law form of the
+   delivery-law condition delivery_law_ok of entropy_link.v in the
+   single-prior SPP model.
    Naming: the _ok suffix carries over from that condition. *)
 Theorem spp_delivery_law_ok a b :
   `Pr[ [% x1, x2] = (a, b) ] != 0 ->
