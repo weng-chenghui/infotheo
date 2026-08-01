@@ -38,10 +38,10 @@ Require Import fdist finstoch statdist.
 (*               simulator == the type (Xa * Ya) -> R.-fdist Bv of            *)
 (*                            simulators                                      *)
 (*            sim_view S x == the simulated view law at the input x           *)
-(*        perfect_privacy S == the view law is the simulated view law         *)
+(*       perfect_privacy S == the view law is the simulated view law          *)
 (*              insecurity == inputs with equal allowed information and       *)
 (*                            distinct view laws admit no simulator           *)
-(*      eps_privacy S eps == the view law is within eps of the simulated      *)
+(*       eps_privacy S eps == the view law is within eps of the simulated     *)
 (*                            view law at every input                         *)
 (*            test_adv D S == the largest gap the tester D opens between the  *)
 (*                            two view laws over the inputs                   *)
@@ -135,8 +135,8 @@ Proof.
 by rewrite tensor_fdist1 fdistmap_comp -F_compat; apply: eq_fdistmap.
 Qed.
 
-(* eq:smc:ideal-route-f, first equality: the input-projection route through
-   the pair space computes the function. *)
+(* prop:smc:worlds-compute-f, eq:smc:ideal-route-f input-projection route *)
+(* The input-projection route through the pair space computes the function. *)
 Lemma ideal_route_projx_f (x : X) :
   fdistmap (fun xy : X * Yfull => f xy.1) (tensor (fdist1 x) (F x))
   = fdist1 (f x).
