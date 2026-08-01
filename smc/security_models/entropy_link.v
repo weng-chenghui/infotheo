@@ -637,8 +637,8 @@ Lemma output_independent_determined (g : X -> Ya -> Yh) :
   (forall e : X * Omega, proj_yh (run e) = g e.1 (proj_ya (run e))) ->
   output_independent.
 Proof.
-by move=> Hg;
-  apply: (cinde_RV_fun_conditioner view_rv (h := fun p => g p.1 p.2)).
+move=> Hg.
+by apply: (cinde_RV_fun_conditioner view_rv (h := fun p => g p.1 p.2)).
 Qed.
 
 End entropy_link.

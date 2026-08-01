@@ -127,7 +127,7 @@ Lemma real_route_f (x : X) :
   fdistmap (fun e => agg (run e)) (draw x) = fdist1 (f x).
 Proof.
 rewrite /draw tensor_fdist1 fdistmap_comp.
-by apply: fdistmap_cst_eq => w /=; exact: run_correct.
+by apply: eq_fdistmap_cst => w /=; exact: run_correct.
 Qed.
 
 (* prop:smc:worlds-compute-f *)
@@ -145,7 +145,7 @@ Qed.
 Lemma ideal_route_projx_f (x : X) :
   fdistmap (fun xy : X * Yfull => f xy.1) (tensor (fdist1 x) (F x))
   = fdist1 (f x).
-Proof. by rewrite tensor_fdist1 fdistmap_comp; apply: fdistmap_cst_eq. Qed.
+Proof. by rewrite tensor_fdist1 fdistmap_comp; apply: eq_fdistmap_cst. Qed.
 
 (* def:smc:sim, def:smc:simulator *)
 (* The two chapter readings are the same map: a function into distributions
