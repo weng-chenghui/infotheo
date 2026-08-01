@@ -53,9 +53,9 @@ Context {R : realType}.
 Definition stoch (A B : finType) := A -> R.-fdist B.
 
 (* def:smc:dirac *)
-(* The Dirac map of g sends a to the point mass at g a. *)
 (* mathcomp-analysis measure theory also names a Dirac measure `dirac`; that
    file is outside this import closure, so the two never collide here. *)
+(* The Dirac map of g sends a to the point mass at g a. *)
 Definition dirac (A B : finType) (g : A -> B) : stoch A B :=
   fun a => fdist1 (g a).
 
