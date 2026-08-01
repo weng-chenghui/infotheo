@@ -428,21 +428,28 @@ unrestricted while its own SPP functionality is randomized.
 Decisions (SUPERSEDED 2026-08-01 by design B+, agreed with the user after
 the Broadbent-Karvonen reading; companion spec:
 `phd-thesis/docs/notes/20260801-security-models-output-independence-fix-design.md`):
-- Rocq side: `entropy_link.v` states the characterization at ARBITRARY `F`
-  as an iff (candidate name `perfect_privacy_centropyP`, `_testP` iff
-  precedent), with two explicit hypotheses replacing the deterministic-F
-  scope: simulator consistency (`out_A o Sim(a,y)` reads off `y`) and the
-  output-independence condition as a `cinde_RV` clause
-  (`view _|_ Y_h | (X, Y_A)`). Deterministic `F` (DSDP) and
-  output-determined `F` (SPP, `y_a = f(x) - y_b`) become corollaries that
-  discharge the condition structurally. NEW derived artifact: for DSDP the
-  converse direction turns the mechanized counting results into simulator
-  existence. New probe obligations before implementation: (a) mixture
-  conditioning under out_A-disjoint supports selects the component;
-  (b) the converse-direction Sim construction, including the off-support
-  consistency decision (support-restricted consistency vs an out_A
-  section). The audit counterexample file remains the negative certificate
-  showing the condition is not free.
+- Rocq side (rev 2, IT-security expert audit folded — its six blocking
+  findings are recorded in the companion spec's §5): `entropy_link.v`
+  states the characterization at ARBITRARY `F` as an iff (candidate name
+  `perfect_privacy_centropyP`) under a FULL-SUPPORT input prior and THREE
+  hypotheses: H0 delivery-law correctness (real delivered outputs have law
+  `F(x)` per input — indispensable for the converse, compiled certificate
+  `audit_it_delivery_law.v` Part B), H1 the triangle with
+  SUPPORT-RESTRICTED simulator consistency (no out_A section), H2 the
+  `cinde_RV` output-independence clause in its zero-mass-robust product
+  form. A forward-only lemma needs H1 + H2 alone. Corollaries discharge H2
+  over the REAL delivery (real-deterministic delivery; output-determined
+  delivery `y_a = f(x) - y_b`). The DSDP simulator-existence derivation is
+  CONDITIONAL on five listed mechanized obligations (fiber count at the
+  allowed information, trace-link for the centropy leg, relay `Y_h`
+  singleton, Alice's per-party delivery correctness, the converse
+  construction). Upstream list +1: a CI-recoding lemma (CI invariant under
+  bijective recoding of the conditioning RV; the semigraphoid split needs
+  it to reach the `(X, Y_A)` nesting). Probe obligations: the product-form
+  mixture-conditioning lemma; the converse Sim construction; optionally a
+  non-vacuity witness with non-trivial `Y_A`. Negative certificates kept:
+  `audit_snd_randomized_F.v` (H2 not free) and `audit_it_delivery_law.v`
+  (H0 not free).
 - Thesis side: the B+ fix (five touchpoints: condition + consistency +
   iff theorem + corollaries into the IT-characterization block; matrix
   example; BK citation correction at 1362-1372 — Thm 4.9 collapses the
