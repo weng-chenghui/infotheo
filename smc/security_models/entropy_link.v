@@ -3,6 +3,7 @@
 From mathcomp Require Import all_ssreflect all_algebra reals.
 Require Import realType_ext realType_ln ssr_ext bigop_ext fdist proba.
 Require Import jfdist_cond entropy graphoid.
+Require Import finstoch privacy_kernel.
 
 (**md**************************************************************************)
 (* # The conditional-entropy characterization of perfect privacy              *)
@@ -45,6 +46,9 @@ Require Import jfdist_cond entropy graphoid.
 (*    output_independent_det == real-deterministic delivery discharges the    *)
 (*                              output-independence clause                    *)
 (* output_independent_determined == output-determined delivery discharges it  *)
+(*  triangle_perfect_privacyP == the privacy triangle at a simulator is the   *)
+(*                               perfect privacy of the privacy kernel at     *)
+(*                               that simulator                               *)
 (* ```                                                                        *)
 (*                                                                            *)
 (******************************************************************************)
@@ -428,3 +432,26 @@ by apply: (cinde_RV_fun_conditioner view_rv (h := fun p => g p.1 p.2)).
 Qed.
 
 End entropy_link.
+
+Section triangle_perfect_privacy.
+Context {R : realType}.
+Variables (X Yfull Xa Ya Bv Omega : finType).
+Variables (proj_xa : X -> Xa) (proj_ya : Yfull -> Ya).
+Variable F : X -> R.-fdist Yfull.
+Variable P_Omega : R.-fdist Omega.
+Variable view_at : X * Omega -> Bv.
+
+(* The privacy triangle at a simulator is the perfect privacy of the privacy
+   kernel at that simulator.
+   Naming: P = iff characterization, ffunP/setP precedent. *)
+Lemma triangle_perfect_privacyP (Sim : Xa * Ya -> R.-fdist Bv) :
+  triangle proj_xa proj_ya F P_Omega view_at Sim
+  <-> perfect_privacy proj_xa proj_ya F P_Omega view_at Sim.
+Proof.
+have hallow : forall x, allow proj_xa proj_ya F x
+    = fdistmap (fun yl : Yfull => (proj_xa x, proj_ya yl)) (F x).
+  by move=> x; rewrite /allow tensor_fdist1 fdistmap_comp.
+by split=> h x; move: (h x); rewrite /sim_view view_lawE hallow.
+Qed.
+
+End triangle_perfect_privacy.
