@@ -2,8 +2,8 @@ From HB Require Import structures.
 From mathcomp Require Import all_boot all_order all_algebra fingroup finalg.
 From mathcomp Require Import ring boolp finmap lra reals.
 Require Import realType_ext realType_ln ssr_ext ssralg_ext bigop_ext fdist.
-Require Import proba jfdist_cond entropy graphoid.
-Require Import extra_algebra extra_proba.
+Require Import proba jfdist_cond entropy.
+Require Import extra_proba.
 
 Import GRing.Theory.
 Import Num.Theory.
@@ -15,7 +15,6 @@ Import Num.Theory.
 (* This file contains entropy lemmas that are more general than               *)
 (* DSDP-specific:                                                             *)
 (*   - Entropy sum manipulation lemmas                                         *)
-(*   - Conditional independence / mutual information lemmas                    *)
 (*   - Zero entropy characterization lemmas                                    *)
 (*                                                                            *)
 (******************************************************************************)
@@ -55,91 +54,6 @@ by apply: eq_bigr => a /Hin ->.
 Qed.
 
 End entropy_sum.
-
-(* ========================================================================== *)
-(*            Conditional independence and mutual information                  *)
-(* ========================================================================== *)
-
-Section cinde_cond_mutual_info0.
-
-Context {R : realType}.
-Variables (T TX TY TZ : finType).
-Variable (P : R.-fdist T).
-Variables (X : {RV P -> TX}) (Y : {RV P -> TY}) (Z : {RV P -> TZ}).
-
-(* Conditional independence implies zero conditional mutual information:
-   If X ⊥ Y | Z, then I(X;Y|Z) = 0. This is the information-theoretic
-   characterization of conditional independence. *)
-Lemma cinde_cond_mutual_info0 :
-  P |= X _|_ Y | Z -> cond_mutual_info `p_[% X, Y, Z] = 0.
-Proof.
-move=> H_cinde.
-rewrite cond_mutual_infoE.
-apply/eqP.
-rewrite big1 //.
-case=> [[a b] c] _.
-rewrite //=.
-have [->|Habc_neq0] := eqVneq (`p_[% X, Y, Z] (a, b, c)) 0.
-  by rewrite mul0r.
-apply/eqP; rewrite mulf_eq0; apply/orP; right.
-apply/eqP.
-have H_pos: 0 < (\Pr_`p_ [% X, Y, Z][[set (a, b)] | [set c]] /
-              (\Pr_(fdist_proj13 `p_ [% X, Y, Z])[[set a] | [set c]] *
-               \Pr_(fdist_proj23 `p_ [% X, Y, Z])[[set b] | [set c]])).
-  rewrite divr_gt0; last first.
-  - apply: mulr_gt0.   
-    + rewrite -Pr_jcPr_gt0 lt0Pr setX1 Pr_set1.
-      by rewrite (fdist_proj13_dominN (b:=b)).
-    + rewrite -Pr_jcPr_gt0 lt0Pr setX1 Pr_set1.
-      by rewrite (fdist_proj23_dominN (a:=a)).
-  - rewrite -Pr_jcPr_gt0 lt0Pr setX1 Pr_set1.
-    exact: Habc_neq0.
-  - by [].
-rewrite (logr_eq1 H_pos).
-move: (H_cinde a b c); rewrite /cinde_RV => H_eq.
-have Hzne0: `Pr[Z = c] != 0.
-  apply: contra_neq Habc_neq0 => Hz0.
-  rewrite dist_of_RVE pfwd1_pairC.
-  by rewrite (pfwd1_domin_RV2 [%X, Y] (a,b) Hz0).
-rewrite cpr_eqE in H_eq.
-rewrite /jcPr !setX1 !Pr_set1.
-have ->: (fdist_proj13 `p_ [% X, Y, Z])`2 = `p_ Z.
-  by rewrite fdist_proj13_snd; apply/fdist_ext => x; rewrite snd_RV3 snd_RV2.
-have ->: (fdist_proj23 `p_ [% X, Y, Z])`2 = `p_ Z.
-  by rewrite fdist_proj23_snd; apply/fdist_ext => y; rewrite snd_RV3 snd_RV2.
-rewrite fdist_proj13_RV3 fdist_proj23_RV3.
-rewrite snd_RV3 snd_RV2 !dist_of_RVE -!cpr_eqE -H_eq cpr_eqE //=.
-rewrite dist_of_RVE in Habc_neq0.
-by field; rewrite ?Hzne0 ?Habc_neq0.
-Qed.
-
-End cinde_cond_mutual_info0.
-
-Section cinde_centropy_eq.
-
-Context {R : realType}.
-Variables (T TX TY TZ : finType).
-Variable (P : R.-fdist T).
-Variables (X : {RV P -> TX}) (Y : {RV P -> TY}) (Z : {RV P -> TZ}).
-
-(* Main result: conditional independence implies conditional entropy equality *)
-Lemma cinde_centropy_eq :
-  P |= X _|_ Y | Z -> `H(Y | [% X, Z]) = `H(Y | Z).
-Proof.
-move=> H_cinde.
-have H_cinde_sym: P |= Y _|_ X | Z by apply: symmetry.
-have : cond_mutual_info `p_[% Y, X, Z] = 0.
-  by rewrite (cinde_cond_mutual_info0 H_cinde_sym).
-rewrite /cond_mutual_info.
-move/eqP; rewrite subr_eq0; move/eqP.
-rewrite /centropy_RV /centropy.
-rewrite fdist_proj13_snd snd_RV3 snd_RV2 fdistA_RV3 snd_RV2 fdist_proj13_RV3.
-move => H0.
-symmetry.
-exact: H0.
-Qed.
-
-End cinde_centropy_eq.
 
 (* ========================================================================== *)
 (*                 Zero entropy characterization lemmas                        *)

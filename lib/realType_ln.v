@@ -260,6 +260,17 @@ rewrite /log /Log prednK// ltr_pM2r ?invr_gt0 ?ln2_gt0//.
 by rewrite ltr_ln ?posrE// (lt_trans _ a_b).
 Qed.
 
+(* On the positive reals, log vanishes exactly at 1. *)
+Lemma logr_eq1 x : 0 < x -> (log x = 0) <-> (x = 1).
+Proof.
+move=> Hpos; split.
+- move=> Hlog.
+  rewrite -[x]logK //.
+  by rewrite Hlog powRr0.
+- move=> ->.
+  exact: log1.
+Qed.
+
 End log.
 
 Section low_pow_natmul.
