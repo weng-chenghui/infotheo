@@ -27,7 +27,7 @@ Require Import fdist.
 (*                            transported map                                 *)
 (*            fdistmap_cst == the transport of a law along a constant map     *)
 (*                            with value b is fdist1 b                        *)
-(*         fdistmap_cst_eq == the transport of a law along a map pointwise    *)
+(*         eq_fdistmap_cst == the transport of a law along a map pointwise    *)
 (*                            equal to a constant b is fdist1 b               *)
 (*              tensor p q == the product distribution of p and q on A * B    *)
 (*                 tensorE == tensor p q (a, b) is p a * q b                  *)
@@ -90,7 +90,9 @@ Lemma dirac_comp (A B C : finType) (g : B -> C) (f : A -> B) :
   dirac (g \o f) =1 stoch_comp (dirac g) (dirac f).
 Proof. by move=> a; rewrite /stoch_comp /dirac fdist1bind. Qed.
 
-(* Naming: mainSymbol chain, stoch_comp of a dirac; RHS symbol fdistmap. *)
+(* Naming: intentional; the name leads with stoch_comp rather than with the
+   RHS head symbol fdistmap so that it files with the stoch_comp family of
+   this section, the chain then reading stoch_comp of a dirac is fdistmap. *)
 (* Composition with a Dirac map on the left is transport along the underlying
    function. *)
 Lemma stoch_comp_dirac_fdistmap (A B C : finType) (g : B -> C) (f : stoch A B) :
@@ -110,13 +112,13 @@ Qed.
 Lemma fdistmap_cst (A B : finType) (p : R.-fdist A) (b : B) :
   fdistmap (fun=> b) p = fdist1 b.
 Proof.
-by apply/fdist_ext => b';
-  rewrite /fdistmap fdistbindE -big_distrl/= FDist.f1 mul1r.
+apply/fdist_ext => b'.
+by rewrite /fdistmap fdistbindE -big_distrl/= FDist.f1 mul1r.
 Qed.
 
 (* The transport of a law along a map pointwise equal to the constant b is the
    point mass at b. *)
-Lemma fdistmap_cst_eq (A B : finType) (g : A -> B) (p : R.-fdist A) (b : B) :
+Lemma eq_fdistmap_cst (A B : finType) (g : A -> B) (p : R.-fdist A) (b : B) :
   g =1 (fun=> b) -> fdistmap g p = fdist1 b.
 Proof. by move=> gb; rewrite -(fdistmap_cst p b); apply: eq_fdistmap. Qed.
 
