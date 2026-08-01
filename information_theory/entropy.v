@@ -4,6 +4,7 @@ From mathcomp Require Import all_boot all_order all_algebra perm.
 From mathcomp Require Import interval_inference reals exp.
 Require Import ssr_ext ssralg_ext bigop_ext realType_ext realType_ln.
 Require Import fdist jfdist_cond proba binary_entropy_function divergence.
+Require Import graphoid.
 
 (**md**************************************************************************)
 (* # Elements of Information Theory                                           *)
@@ -1193,6 +1194,81 @@ Qed.
 End prop.
 
 End conditional_mutual_information.
+
+Section cinde_cond_mutual_info0.
+Context {R : realType} {U A B C : finType} {P : R.-fdist U}.
+Variables (X : {RV P -> A}) (Y : {RV P -> B}) (Z : {RV P -> C}).
+
+(* The conditional mutual information of X and Y given Z vanishes when X and
+   Y are conditionally independent given Z. *)
+Lemma cinde_cond_mutual_info0 :
+  P |= X _|_ Y | Z -> cond_mutual_info `p_[% X, Y, Z] = 0.
+Proof.
+move=> H_cinde.
+rewrite cond_mutual_infoE.
+apply/eqP.
+rewrite big1 //.
+case=> [[a b] c] _.
+rewrite //=.
+have [->|Habc_neq0] := eqVneq (`p_[% X, Y, Z] (a, b, c)) 0.
+  by rewrite mul0r.
+apply/eqP; rewrite mulf_eq0; apply/orP; right.
+apply/eqP.
+have H_pos: 0 < (\Pr_`p_ [% X, Y, Z][[set (a, b)] | [set c]] /
+              (\Pr_(fdist_proj13 `p_ [% X, Y, Z])[[set a] | [set c]] *
+               \Pr_(fdist_proj23 `p_ [% X, Y, Z])[[set b] | [set c]])).
+  rewrite divr_gt0; last first.
+  - apply: mulr_gt0.
+    + rewrite -Pr_jcPr_gt0 lt0Pr setX1 Pr_set1.
+      by rewrite (fdist_proj13_dominN (b:=b)).
+    + rewrite -Pr_jcPr_gt0 lt0Pr setX1 Pr_set1.
+      by rewrite (fdist_proj23_dominN (a:=a)).
+  - rewrite -Pr_jcPr_gt0 lt0Pr setX1 Pr_set1.
+    exact: Habc_neq0.
+  - by [].
+rewrite (logr_eq1 H_pos).
+move: (H_cinde a b c); rewrite /cinde_RV => H_eq.
+have Hzne0: `Pr[Z = c] != 0.
+  apply: contra_neq Habc_neq0 => Hz0.
+  rewrite dist_of_RVE pfwd1_pairC.
+  by rewrite (pfwd1_domin_RV2 [%X, Y] (a,b) Hz0).
+rewrite cpr_eqE in H_eq.
+rewrite /jcPr !setX1 !Pr_set1.
+have ->: (fdist_proj13 `p_ [% X, Y, Z])`2 = `p_ Z.
+  by rewrite fdist_proj13_snd; apply/fdist_ext => x; rewrite snd_RV3 snd_RV2.
+have ->: (fdist_proj23 `p_ [% X, Y, Z])`2 = `p_ Z.
+  by rewrite fdist_proj23_snd; apply/fdist_ext => y; rewrite snd_RV3 snd_RV2.
+rewrite fdist_proj13_RV3 fdist_proj23_RV3.
+rewrite snd_RV3 snd_RV2 !dist_of_RVE -!cpr_eqE -H_eq cpr_eqE //=.
+rewrite dist_of_RVE in Habc_neq0.
+by rewrite divff// mulf_neq0// invr_eq0.
+Qed.
+
+End cinde_cond_mutual_info0.
+
+Section cinde_centropy_eq.
+Context {R : realType} {U A B C : finType} {P : R.-fdist U}.
+Variables (X : {RV P -> A}) (Y : {RV P -> B}) (Z : {RV P -> C}).
+
+(* Conditioning Y on the pair (X, Z) leaves the conditional entropy of Y
+   given Z unchanged when X and Y are conditionally independent given Z. *)
+Lemma cinde_centropy_eq :
+  P |= X _|_ Y | Z -> `H(Y | [% X, Z]) = `H(Y | Z).
+Proof.
+move=> H_cinde.
+have H_cinde_sym: P |= Y _|_ X | Z by apply: symmetry.
+have : cond_mutual_info `p_[% Y, X, Z] = 0.
+  by rewrite (cinde_cond_mutual_info0 H_cinde_sym).
+rewrite /cond_mutual_info.
+move/eqP; rewrite subr_eq0; move/eqP.
+rewrite /centropy_RV /centropy.
+rewrite fdist_proj13_snd snd_RV3 snd_RV2 fdistA_RV3 snd_RV2 fdist_proj13_RV3.
+move=> H0.
+symmetry.
+exact: H0.
+Qed.
+
+End cinde_centropy_eq.
 
 Section conditional_relative_entropy.
 Section def.

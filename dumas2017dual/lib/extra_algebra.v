@@ -11,7 +11,6 @@ Import Num.Theory.
 (* General algebra lemmas used in dumas2017dual formalization                 *)
 (*                                                                            *)
 (* This file contains lemmas that are more general than DSDP-specific:        *)
-(*   - Log function lemmas                                                    *)
 (*   - Bigop lemmas                                                           *)
 (*   - Z/mZ unit characterization lemmas                                      *)
 (*                                                                            *)
@@ -22,31 +21,6 @@ Unset Strict Implicit.
 Import Prenex Implicits.
 
 Local Open Scope ring_scope.
-
-(* ========================================================================== *)
-(*                           Log function lemmas                               *)
-(* ========================================================================== *)
-
-Section log_extra.
-
-Context {R : realType}.
-
-(* log x = 0 iff x = 1 (for positive x).
-   This is fundamental for entropy calculations where log(prob) = 0 
-   implies the probability is 1 (certainty). *)
-Lemma logr_eq1 (x : R) : 0 < x -> (log x = 0) <-> (x = 1).
-Proof.
-move=> Hpos; split.
-- (* log x = 0 -> x = 1 *)
-  move=> Hlog.
-  rewrite -[x]logK //.
-  by rewrite Hlog exp.powRr0.
-- (* x = 1 -> log x = 0 *)
-  move=> ->.
-  exact: log1.
-Qed.
-
-End log_extra.
 
 (* ========================================================================== *)
 (*                           Bigop lemmas                                      *)
