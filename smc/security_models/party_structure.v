@@ -25,13 +25,13 @@ Require Import fdist privacy_kernel.
 (*                   y_all == the delivery space                              *)
 (*                exec_ctx == the execution context, a joint input with an    *)
 (*                            ancilla                                         *)
-(*              out_all s == the output read-off of a joint trace             *)
+(*               out_all s == the output read-off of a joint trace            *)
 (*              view_space == the adversary's share of the joint trace space  *)
 (*                   x_adv == the adversary's input space                     *)
 (*                   y_adv == the adversary's delivery space                  *)
-(*            proj_adv s == the adversary's share of a joint trace            *)
-(*          proj_x_adv x == the adversary's share of a joint input            *)
-(*          proj_y_adv y == the adversary's share of a delivery               *)
+(*              proj_adv s == the adversary's share of a joint trace          *)
+(*            proj_x_adv x == the adversary's share of a joint input          *)
+(*            proj_y_adv y == the adversary's share of a delivery             *)
 (*                    view == the view map, sending an execution context to   *)
 (*                            the adversary's share of the trace of the run   *)
 (*               out_adv b == the output read-off on the view space           *)
@@ -88,6 +88,10 @@ Definition exec_ctx := (x_all * Omega)%type.
 
 Variable trace_map : exec_ctx -> s_all.
 Variable out_i : forall i, Si i -> Yi i.
+
+(* Naming: intentional; throughout this file the in_ prefix abbreviates
+   input, pairing with out_ for output, and never marks a
+   membership-predicate unfold in the sense of in_cons. *)
 Variable in_i : forall i, Si i -> Xi i.
 Variable agg : y_all -> Y.
 Variable f : x_all -> Y.
@@ -97,7 +101,17 @@ Variable f : x_all -> Y.
    that party's trace. *)
 Definition out_all (s : s_all) : y_all := [ffun i => out_i (s i)].
 
+(* The aggregated output read-off of the trace of a run is the ideal
+   function of the inputs.
+   Naming: intentional; a model assumption of the diagram, named for the
+   property it assumes rather than by the E suffix that its equational
+   shape would otherwise take. *)
 Hypothesis correctness : forall e, agg (out_all (trace_map e)) = f e.1.
+
+(* The trace of a run records the initialized inputs.
+   Naming: intentional; a model assumption of the diagram, named for the
+   property it assumes rather than by the E suffix that its equational
+   shape would otherwise take. *)
 Hypothesis trace_records_inputs :
   forall e i, in_i (trace_map e i) = e.1 i.
 
@@ -148,7 +162,9 @@ Definition in_adv (b : view_space) : x_adv := [ffun j => in_i (b j)].
 
 (* eq:smc:readoff-square *)
 (* The output read-off after the trace projection is the delivery
-   projection after the output read-off. *)
+   projection after the output read-off.
+   Naming: the diagram-shape name of the blueprint node
+   eq:smc:readoff-square. *)
 Lemma readoff_square (s : s_all) :
   out_adv (proj_adv s) = proj_y_adv (out_all s).
 Proof. by apply/ffunP => j; rewrite !ffunE. Qed.
@@ -168,7 +184,8 @@ Definition reveals_output (p : y_adv -> Y) :=
 
 (* eq:smc:reveal-criterion *)
 (* A map revealing the output composed with the output read-off of the view
-   computes the ideal function on the inputs. *)
+   computes the ideal function on the inputs.
+   Naming: the chain name of the blueprint node eq:smc:reveal-criterion. *)
 Lemma reveal_chain (p : y_adv -> Y) (e : exec_ctx) :
   reveals_output p -> p (out_adv (view e)) = f e.1.
 Proof. by move=> pr; rewrite readoff_square pr correctness. Qed.
@@ -190,25 +207,26 @@ Section instance.
 Context {R : realType}.
 
 (* Every party's input, trace and output space is the two-point space. *)
-Definition family (i : 'I_3) : finType := 'I_2.
+Definition bit_space (i : 'I_3) : finType := 'I_2.
 
 (* The output read-off returns the party's trace unchanged. *)
-Definition out_map (i : 'I_3) : family i -> family i := id.
+Definition out_map (i : 'I_3) : bit_space i -> bit_space i := id.
 
-(* The input read-off returns the party's trace unchanged. *)
-Definition in_map (i : 'I_3) : family i -> family i := id.
+(* The input read-off returns the party's trace unchanged.
+   Naming: intentional; in_ abbreviates input and pairs with out_map. *)
+Definition in_map (i : 'I_3) : bit_space i -> bit_space i := id.
 
 (* The execution context pairs a joint input with a one-point ancilla. *)
-Definition ctx := exec_ctx family 'I_1.
+Definition execution_context := exec_ctx bit_space 'I_1.
 
 (* The trace of a run is the joint input. *)
-Definition trace (e : ctx) : s_all family := e.1.
+Definition trace (e : execution_context) : s_all bit_space := e.1.
 
 (* The aggregation returns party 0's delivered output. *)
-Definition aggregate (y : y_all family) : 'I_2 := y ord0.
+Definition aggregate (y : y_all bit_space) : 'I_2 := y ord0.
 
 (* The ideal function returns party 0's input. *)
-Definition ideal_function (x : x_all family) : 'I_2 := x ord0.
+Definition ideal_function (x : x_all bit_space) : 'I_2 := x ord0.
 
 (* The adversary holds parties 0 and 1. *)
 Definition adversary : {set 'I_3} := [set i : 'I_3 | (i < 2)%N].
@@ -217,32 +235,48 @@ Definition adversary : {set 'I_3} := [set i : 'I_3 | (i < 2)%N].
 Definition ancilla : R.-fdist 'I_1 := fdist1 ord0.
 
 (* The aggregated output read-off of the trace of a run is the ideal
-   function of the inputs. *)
-Lemma correctness (e : ctx) :
+   function of the inputs.
+   Naming: intentional; mirrors the section hypothesis correctness it
+   discharges and feeds to reveal_chain, the statement being an equation
+   that would otherwise take an E suffix. *)
+Lemma correctness (e : execution_context) :
   aggregate (out_all out_map (trace e)) = ideal_function e.1.
 Proof. by rewrite /aggregate /ideal_function ffunE. Qed.
 
-(* The trace of a run records the initialized inputs. *)
-Lemma trace_records_inputs (e : ctx) i : in_map (trace e i) = e.1 i.
+(* The trace of a run records the initialized inputs.
+   Naming: intentional; mirrors the section hypothesis
+   trace_records_inputs it discharges and feeds to in_adv_records, the
+   statement being an equation that would otherwise take an E suffix. *)
+Lemma trace_records_inputs (e : execution_context) i :
+  in_map (trace e i) = e.1 i.
 Proof. by []. Qed.
 
 (* eq:smc:readoff-square *)
-(* The read-off square at this instance. *)
-Lemma readoff_square_holds (s : s_all family) :
+(* The read-off square at this instance.
+   Naming: _holds separates the instance from the general lemma
+   readoff_square, which stays in scope inside the module. *)
+Lemma readoff_square_holds (s : s_all bit_space) :
   out_adv out_map (proj_adv adversary s)
   = proj_y_adv adversary (out_all out_map s).
 Proof. exact: readoff_square. Qed.
 
 (* def:smc:view *)
 (* The input read-off of the view returns the adversary's share of the
-   inputs at this instance. *)
-Lemma in_adv_records_holds (e : ctx) :
+   inputs at this instance.
+   Naming: the leading in_ is part of the read-off name in_adv rather
+   than the in_-unfold idiom, and _holds separates the instance from the
+   general lemma in_adv_records, which stays in scope inside the
+   module. *)
+Lemma in_adv_records_holds (e : execution_context) :
   in_adv in_map (view trace adversary e) = proj_x_adv adversary e.1.
 Proof. exact: (in_adv_records trace_records_inputs). Qed.
 
 (* eq:smc:reveal-criterion *)
-(* The revelation chain at this instance. *)
-Lemma reveal_chain_holds (p : y_adv family adversary -> 'I_2) (e : ctx) :
+(* The revelation chain at this instance.
+   Naming: _holds separates the instance from the general lemma
+   reveal_chain, which stays in scope inside the module. *)
+Lemma reveal_chain_holds (p : y_adv bit_space adversary -> 'I_2)
+    (e : execution_context) :
   reveals_output aggregate p ->
   p (out_adv out_map (view trace adversary e)) = ideal_function e.1.
 Proof. exact: (reveal_chain correctness). Qed.
@@ -250,7 +284,7 @@ Proof. exact: (reveal_chain correctness). Qed.
 (* def:smc:view-law *)
 (* The kernel's view law at this instance is the point mass at the view of
    the run with the one-point ancilla. *)
-Lemma party_view_lawE (x : x_all family) :
+Lemma party_view_lawE (x : x_all bit_space) :
   party_view_law ancilla trace adversary x
   = fdist1 (view trace adversary (x, ord0)).
 Proof. by rewrite /party_view_law view_lawE /ancilla fdistmap1. Qed.
