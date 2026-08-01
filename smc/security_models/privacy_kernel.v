@@ -38,7 +38,12 @@ Require Import fdist finstoch statdist.
 (*               simulator == the type (Xa * Ya) -> R.-fdist Bv of            *)
 (*                            simulators                                      *)
 (*            sim_view S x == the simulated view law at the input x           *)
+(*     factors_through h g == h is the composite of g with some stochastic    *)
+(*                            map, the factorization witness                  *)
 (*       perfect_privacy S == the view law is the simulated view law          *)
+(*        perfect_privacyP == the view law factors through the allowed        *)
+(*                            information exactly when some simulator         *)
+(*                            achieves perfect privacy                        *)
 (*              insecurity == inputs with equal allowed information and       *)
 (*                            distinct view laws admit no simulator           *)
 (*       eps_privacy S eps == the view law is within eps of the simulated     *)
@@ -155,10 +160,25 @@ Definition simulator := (Xa * Ya)%type -> R.-fdist Bv.
 Definition sim_view (S : simulator) (x : X) : R.-fdist Bv :=
   allow x >>= S.
 
+(* def:smc:factors-through *)
+(* A stochastic map h factors through a stochastic map g when some stochastic
+   map, the factorization witness, composes with g to give h. *)
+Definition factors_through (A B C : finType)
+    (h : stoch (R := R) A C) (g : stoch (R := R) A B) : Prop :=
+  exists s : stoch (R := R) B C, h =1 stoch_comp s g.
+
 (* def:smc:perfect-privacy *)
 (* A simulator achieves perfect privacy when the view law is the simulated
    view law at every input. *)
 Definition perfect_privacy (S : simulator) := view_law =1 sim_view S.
+
+(* def:smc:perfect-privacy *)
+(* The view law factors through the allowed information exactly when some
+   simulator achieves perfect privacy, the witness being that simulator.
+   Naming: P = iff characterization, ffunP/setP precedent. *)
+Lemma perfect_privacyP :
+  factors_through view_law allow <-> exists S, perfect_privacy S.
+Proof. by split=> -[S hS]; exists S. Qed.
 
 (* prop:smc:insecurity *)
 (* Two inputs with the same allowed information and distinct view laws admit
