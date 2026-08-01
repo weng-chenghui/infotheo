@@ -145,10 +145,8 @@ have step x : accept (guess_test pi (sec x)) (view_law x)
   rewrite addrC -lerBlDr.
   apply: le_trans (he x); apply: le_trans (class_adv_sup _ _ (hT (sec x))).
   exact: ler_norm.
-rewrite pred_successE /ideal_guess.
-have hsum : \sum_(x in X) P_X x * e_total = e_total.
-  by rewrite -big_distrl /= FDist.f1 mul1r.
-rewrite -hsum -big_split /=.
+rewrite pred_successE /ideal_guess -[e_total]mul1r -(FDist.f1 P_X) big_distrl.
+rewrite -big_split /=.
 by apply: ler_sum => x _; rewrite -mulrDr ler_wpM2l.
 Qed.
 

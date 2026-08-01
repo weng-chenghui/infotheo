@@ -90,9 +90,8 @@ Lemma statdist_eq0 p q : (statdist p q == 0) = (p == q).
 Proof.
 apply/idP/idP => [|/eqP ->]; last first.
   by apply/eqP; rewrite /statdist big1 ?mulr0// => b _; rewrite subrr normr0.
-rewrite /statdist mulf_eq0 invr_eq0 pnatr_eq0/= => /eqP H.
-apply/eqP/fdist_ext => b; apply/eqP; rewrite -subr_eq0 -normr_eq0.
-by apply/eqP; apply: (psumr_eq0P _ H).
+rewrite statdist_var_dist mulf_eq0 invr_eq0 pnatr_eq0/=.
+by move=> /eqP/def_var_dist ->.
 Qed.
 
 (* sec:smc:enriched-testing *)
@@ -210,9 +209,8 @@ Proof. by apply: eq_bigr => D _; rewrite /adv distrC. Qed.
 (* The class advantage of a law against itself is zero. *)
 Lemma class_advxx T p : class_adv T p p = 0.
 Proof.
-rewrite /class_adv (eq_bigr (fun=> 0)); last first.
-  by move=> D _; rewrite /adv subrr normr0.
-by elim/big_rec: _ => // D x _ ->; rewrite maxxx.
+rewrite /class_adv big1_idem //= ?maxxx// => D _.
+by rewrite /adv subrr normr0.
 Qed.
 
 (* prop:smc:composition *)

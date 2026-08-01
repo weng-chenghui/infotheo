@@ -211,10 +211,8 @@ Lemma perfect_privacy_testP (S : simulator) :
   perfect_privacy S <-> (forall D : tester Bv, test_adv D S = 0).
 Proof.
 split=> [hS D|hD x].
-  have hst (y : X) : statdist (view_law y) (sim_view S y) = 0.
-    by apply/eqP; rewrite statdist_eq0 (hS y) eqxx.
   rewrite /test_adv; apply: bigmax_eq_id => y _.
-  by rewrite -(hst y); exact: statdist_test_le.
+  by rewrite /adv hS subrr normr0.
 apply/eqP; rewrite -statdist_eq0 -statdist_test_max; apply/eqP.
 apply: bigmax_eq_id => D _.
 by rewrite -(hD D) /test_adv; exact: le_bigmax.

@@ -110,12 +110,8 @@ Qed.
 Lemma fdistmap_cst (A B : finType) (p : R.-fdist A) (b : B) :
   fdistmap (fun=> b) p = fdist1 b.
 Proof.
-apply/fdist_ext => b'; rewrite fdistmapE fdist1E.
-rewrite (eq_bigl (fun a : A => (a \in A) && (b == b'))); last first.
-  by move=> a; rewrite !inE.
-case: (altP (b =P b')) => [<-|nb].
-  by rewrite eqxx -(FDist.f1 p); apply: eq_bigl => a; rewrite andbT.
-by rewrite eq_sym (negbTE nb) big_pred0// => a; rewrite andbF.
+by apply/fdist_ext => b';
+  rewrite /fdistmap fdistbindE -big_distrl/= FDist.f1 mul1r.
 Qed.
 
 (* The transport of a law along a map pointwise equal to the constant b is the
@@ -140,14 +136,9 @@ Proof. by rewrite /tensor fdist_prodE. Qed.
 Lemma tensor_fdist1 (A B : finType) (a : A) (q : R.-fdist B) :
   tensor (fdist1 a) q = fdistmap (fun b => (a, b)) q.
 Proof.
-apply/fdist_ext => -[a' b']; rewrite tensorE fdistmapE.
-rewrite (eq_bigl (fun x : B => (x \in B) && ((a == a') && (x == b'))));
-  last by move=> x; rewrite !inE /= xpair_eqE.
-rewrite fdist1E; case: (altP (a =P a')) => [<-|na].
-  rewrite eqxx mul1r (eq_bigl (fun i : B => i == b')); last first.
-    by move=> i; rewrite inE.
-  by rewrite big_pred1_eq.
-by rewrite eq_sym (negbTE na) mul0r big_pred0// => i; rewrite (negbTE na).
+apply/fdist_ext => -[a' b']; rewrite tensorE fdistmapE fdist1E.
+under eq_bigl do rewrite !inE /= xpair_eqE.
+by rewrite big_mkcondl big_pred1_eq eq_sym mulr_natl mulrb.
 Qed.
 
 End stoch.

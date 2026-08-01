@@ -126,8 +126,7 @@ Let BobView := [% x2, s2, x1', r2, y2].
 Theorem spp_bob_factorization :
   `p_ BobView = `p_ [% x2, y2] >>= (fun ay => bob_simulator ay.1 ay.2).
 Proof.
-apply: dist_of_RV_bind => -[b y] Hby v.
-exact: bob_view_cond_sim_xy Hby.
+by apply: dist_of_RV_bind => -[b y] Hby v; exact: bob_view_cond_sim_xy.
 Qed.
 
 (* Alice's delivered share is the scalar product of the two inputs less
@@ -209,8 +208,7 @@ Qed.
 Theorem spp_delivery_law :
   `p_ [% y1, y2] = `p_ [% x1, x2] >>= (fun ab => spp_ideal_share_law ab.1 ab.2).
 Proof.
-apply: dist_of_RV_bind => -[a b] Hab v.
-exact: spp_delivery_law_ok Hab v.
+by apply: dist_of_RV_bind => -[a b] Hab v; exact: spp_delivery_law_ok.
 Qed.
 
 End spp_bob_bridge.

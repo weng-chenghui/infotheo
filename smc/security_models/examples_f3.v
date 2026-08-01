@@ -116,10 +116,7 @@ Definition biased3 : R.-fdist F3 :=
 (* ex:smc:mask-matrix *)
 (* The biased mask law gives one half to zero. *)
 Lemma biased3_0 : biased3 0 = 2^-1.
-Proof.
-rewrite /biased3 !fdist_convE !fdist1E /=.
-by rewrite mulr0 mulr0 addr0 mulr0 addr0 mulr1.
-Qed.
+Proof. by rewrite /biased3 !fdist_convE !fdist1E /= onemE; lra. Qed.
 
 (* ex:smc:mask-matrix *)
 (* The biased mask law gives one quarter to one. *)
