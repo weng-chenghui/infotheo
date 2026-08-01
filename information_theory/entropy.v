@@ -4,7 +4,6 @@ From mathcomp Require Import all_boot all_order all_algebra perm.
 From mathcomp Require Import interval_inference reals exp.
 Require Import ssr_ext ssralg_ext bigop_ext realType_ext realType_ln.
 Require Import fdist jfdist_cond proba binary_entropy_function divergence.
-Require Import graphoid.
 
 (**md**************************************************************************)
 (* # Elements of Information Theory                                           *)
@@ -1256,7 +1255,7 @@ Lemma cinde_centropy_eq :
   P |= X _|_ Y | Z -> `H(Y | [% X, Z]) = `H(Y | Z).
 Proof.
 move=> H_cinde.
-have H_cinde_sym: P |= Y _|_ X | Z by apply: symmetry.
+have H_cinde_sym: P |= Y _|_ X | Z by apply: cinde_RV_sym.
 have : cond_mutual_info `p_[% Y, X, Z] = 0.
   by rewrite (cinde_cond_mutual_info0 H_cinde_sym).
 rewrite /cond_mutual_info.
