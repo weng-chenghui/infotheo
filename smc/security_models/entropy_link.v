@@ -110,15 +110,12 @@ have Hdom : (fdistX `p_[% X, Y, Z])`(| c) `<<
     ((fdistX (fdist_proj23 `p_[% X, Y, Z]))`(| c)).
   apply/dominatesP => -[a0 b0].
   rewrite fdist_prodE !jfdist_condE //= => /eqP; rewrite mulf_eq0 => /orP[|].
-  - rewrite /jcPr !setX1 !Pr_set1 !mulf_eq0 => /orP[|].
-      rewrite !fdistXI => /eqP.
+  - rewrite /jcPr !setX1 !Pr_set1 !mulf_eq0 !fdistXI => /orP[/eqP|/eqP].
       by move/fdist_proj13_domin => ->; rewrite mul0r.
-    rewrite !fdistXI => /eqP.
     by rewrite fdist_proj13_snd => ->; rewrite mulr0.
-  - rewrite /jcPr !setX1 !Pr_set1 mulf_eq0 => /orP[|].
-      rewrite !fdistXI => /eqP.
+  - rewrite /jcPr !setX1 !Pr_set1 mulf_eq0 !fdistXI => /orP[/eqP|/eqP].
       by move/fdist_proj23_domin => ->; rewrite mul0r.
-    by rewrite !fdistXI fdist_proj23_snd => /eqP ->; rewrite mulr0.
+    by rewrite fdist_proj23_snd => ->; rewrite mulr0.
 have Heq : (fdistX `p_[% X, Y, Z])`(| c) =
     ((fdistX (fdist_proj13 `p_[% X, Y, Z]))`(| c)) `x
     ((fdistX (fdist_proj23 `p_[% X, Y, Z]))`(| c)).
@@ -355,23 +352,11 @@ Lemma pfwd1_input_pair (T : finType) (h : X * Omega -> T) (x : X) (t : T) :
   `Pr[ [% input_rv, (h : {RV d -> T})] = (x, t) ]
   = mu x * (fdistmap (fun w => h (x, w)) P_Omega) t.
 Proof.
-rewrite pfwd1E /Pr fdistmapE.
-rewrite (eq_bigl (fun p : X * Omega => (p.1 == x) && (h p == t))); last first.
-  by move=> p; rewrite inE /= xpair_eqE.
-transitivity (\sum_(x' : X) \sum_(w : Omega)
-    (if (x' == x) && (h (x', w) == t) then d (x', w) else 0)).
-  rewrite pair_bigA /= -big_mkcond /=; apply: eq_big => p.
-    by rewrite -surjective_pairing.
-  by rewrite -surjective_pairing.
-rewrite (bigD1 x) //=.
-have -> : \sum_(x' | x' != x)
-    \sum_(w : Omega) (if (x' == x) && (h (x', w) == t) then d (x', w) else 0)
-  = 0.
-  by apply: big1 => x' Hx'; apply: big1 => w _; rewrite (negbTE Hx').
-rewrite addr0 big_mkcond big_distrr /=.
-rewrite [RHS]big_mkcond /=; apply: eq_bigr => w _.
-rewrite eqxx /= inE /=.
-by case: ifP => _; rewrite // /d fdist_prodE.
+rewrite pfwd1E /Pr fdistmapE big_distrr /=.
+rewrite (reindex_onto (fun w : Omega => (x, w)) snd) /=; last first.
+  by move=> [x' w]; rewrite inE /= xpair_eqE => /andP[/eqP <- _].
+apply: eq_big => [w|w _]; last by rewrite /d fdist_prodE.
+by rewrite !inE /= !xpair_eqE !eqxx andbT.
 Qed.
 
 (* The joint law of the input with the adversary's delivered output. *)
@@ -569,10 +554,7 @@ have Hcond : forall (v : Bv) (x : X) (y : Ya),
     `Pr[ view_rv = v | [% input_rv, ya_rv] = (x, y) ]
     = `Pr[ view_rv = v | [% xa_rv, ya_rv] = (proj_xa x, y) ].
   move=> v x y Hxy; rewrite cpr_eqE Hev1 Hev2 -cpr_eqE.
-  have Hdec := decomposition CI.
-  apply: (@cinde_RV_cpr_drop R (X * Omega)%type d Bv Xh (Xa * Ya)%type
-    view_rv xh_rv [% xa_rv, ya_rv] v (proj_xh x) (proj_xa x, y) Hdec).
-  by rewrite -Hev2.
+  by apply: (cinde_RV_cpr_drop v (decomposition CI)); rewrite -Hev2.
 have Hoa : forall (y' : Ya) (z : Xa * Ya),
     `Pr[ [% (out_adv `o view_rv), [% xa_rv, ya_rv]] = (y', z) ]
     = `Pr[ [% ya_rv, [% xa_rv, ya_rv]] = (y', z) ].
@@ -647,10 +629,7 @@ Qed.
 Lemma output_independent_det (g : X -> Yh) :
   (forall e : X * Omega, proj_yh (run e) = g e.1) -> output_independent.
 Proof.
-move=> Hg.
-apply: (@cinde_RV_fun_conditioner R (X * Omega)%type d Bv Yh (X * Ya)%type
-  view_rv yh_rv [% input_rv, ya_rv] (fun p => g p.1)).
-by move=> u; exact: Hg.
+by move=> Hg; apply: (cinde_RV_fun_conditioner view_rv (h := fun p => g p.1)).
 Qed.
 
 (* Output-determined delivery discharges the condition. *)
@@ -658,10 +637,8 @@ Lemma output_independent_determined (g : X -> Ya -> Yh) :
   (forall e : X * Omega, proj_yh (run e) = g e.1 (proj_ya (run e))) ->
   output_independent.
 Proof.
-move=> Hg.
-apply: (@cinde_RV_fun_conditioner R (X * Omega)%type d Bv Yh (X * Ya)%type
-  view_rv yh_rv [% input_rv, ya_rv] (fun p => g p.1 p.2)).
-by move=> u; exact: Hg.
+by move=> Hg;
+  apply: (cinde_RV_fun_conditioner view_rv (h := fun p => g p.1 p.2)).
 Qed.
 
 End entropy_link.
