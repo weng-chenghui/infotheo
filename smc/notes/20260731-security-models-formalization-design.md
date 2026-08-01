@@ -2,10 +2,16 @@
 
 Date: 2026-07-31
 Branch base: `itp2026-dumas2017dual`
-Status: PROBED AND AUDITED. All seven probes (P1-P5, D1, D4+D2) GO, exit 0,
-zero axioms beyond the boolp baseline. Naming audit NO-GO resolved in-place;
-soundness audit GO with all blocking findings folded. Awaiting user review,
-then superpowers:writing-plans.
+Status: PROBED, AUDITED, PLANNED. All seven probes (P1-P5, D1, D4+D2) GO,
+exit 0, zero axioms beyond the boolp baseline; naming audit NO-GO resolved
+in-place; soundness audit GO folded; B+ rev 2 (IT-security expert audit)
+folded. Implementation plan:
+`smc/notes/20260801-security-models-implementation-plan.md` (tasks R1-R13).
+Construction choices locked in the plan: the kernel stays a Section (no
+record), the party layer instantiates it by section application, instance
+families live in Modules (`identity_protocol`, `three_party_identity`,
+`masking_verdicts`), upstreaming targets are fixed (R1/R2), and the golf
+pass runs as end-of-phase sweeps (R12).
 
 ## 1. Goal and scope
 
