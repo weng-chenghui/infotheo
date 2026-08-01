@@ -978,6 +978,13 @@ Proof.
 by rewrite /fdist_proj13 /fdist_snd /fdistA /dist_of_RV /fdistC12 !fdistmap_comp.
 Qed.
 
+(* The (Y, Z)-marginal of the law of the triple (X, Y, Z). *)
+Lemma fdist_proj23_RV3 : fdist_proj23 `p_[% X, Y, Z] = `p_[% Y, Z].
+Proof.
+by rewrite /fdist_proj23 /fdist_snd /fdistA /dist_of_RV /fdistC12
+  !fdistmap_comp.
+Qed.
+
 Lemma snd_RV3 : (`p_[% X, Y, Z])`2 = (`p_[% X, Z])`2.
 Proof. by rewrite -fdist_proj13_snd fdist_proj13_RV3. Qed.
 
@@ -1022,6 +1029,21 @@ transitivity (\sum_(a in ([% X, Z] @^-1: (E `* F)%set)) P a); last first.
 rewrite [in RHS]partition_big_preimset /=.
 apply: eq_big => // -[a c]; rewrite inE => /andP[/= aE cF].
 by rewrite fdistmapE.
+Qed.
+
+(* The joint law of a random variable and a deterministic function of it is
+   the law of the random variable restricted to the fibre of that function. *)
+Lemma pfwd1_pair_det {R : realType} (U TA TB : finType) (P : R.-fdist U)
+    (W : {RV P -> TA}) (Z : {RV P -> TB}) (g : TA -> TB) :
+  (forall u, Z u = g (W u)) ->
+  forall w z, `Pr[ [% W, Z] = (w, z) ] = (g w == z)%:R * `Pr[ W = w ].
+Proof.
+move=> Hg w z; rewrite !pfwd1E /Pr.
+case: (eqVneq (g w) z) => [<-|H].
+  rewrite mul1r; apply: eq_bigl => u.
+  by rewrite !inE /= xpair_eqE Hg; case: eqP => [->|]; rewrite ?eqxx.
+rewrite mul0r; apply: big_pred0 => u.
+by rewrite !inE /= xpair_eqE Hg; case: eqP => [->|] //=; rewrite (negbTE H).
 Qed.
 
 Section pr_pair.
@@ -2364,6 +2386,103 @@ Proof. by move=> H a b c; rewrite mulrC cpr_eq_pairC. Qed.
 End cinde_RV_sym.
 #[deprecated(since="infotheo 0.9.2", note="renamed to `cinde_RV_sym`")]
 Notation cinde_rv_sym := cinde_RV_sym (only parsing).
+
+Section cinde_RV_recode.
+Context {R : realType}.
+Variables (U : finType) (P : R.-fdist U) (A B C C' : finType).
+Variables (X : {RV P -> A}) (Y : {RV P -> B}) (Z : {RV P -> C}).
+
+(* Conditional independence given Z is conditional independence given any
+   injective recoding of Z. *)
+Lemma cinde_RV_recode (phi : C -> C') : injective phi ->
+  P |= X _|_ Y | Z -> P |= X _|_ Y | (phi \o Z).
+Proof.
+move=> phi_inj H a b c'.
+have pfE : forall (D : finType) (W : {RV P -> D}) (d : D) (c : C),
+    `Pr[ [% W, phi \o Z] = (d, phi c) ] = `Pr[ [% W, Z] = (d, c) ].
+  move=> D W d c; rewrite !pfwd1E; congr (Pr P _).
+  by apply/setP => u; rewrite !inE /= !xpair_eqE (inj_eq phi_inj).
+have pZ : forall c : C,
+    `Pr[ (phi \o Z : {RV P -> C'}) = phi c ] = `Pr[ Z = c ].
+  move=> c; rewrite !pfwd1E; congr (Pr P _).
+  by apply/setP => u; rewrite !inE /= (inj_eq phi_inj).
+case: (boolP [exists c, phi c == c']) => [/existsP[c /eqP <-]|].
+  by rewrite !cpr_eqE !pfE !pZ -!cpr_eqE; exact: H.
+move=> /existsPn Nc.
+have Hz : `Pr[ (phi \o Z : {RV P -> C'}) = c' ] = 0.
+  rewrite pfwd1E /Pr big_pred0 // => u.
+  by rewrite !inE /=; exact/negbTE/Nc.
+by rewrite !cpr_eqE Hz invr0 !mulr0.
+Qed.
+
+End cinde_RV_recode.
+
+Section cinde_RV_factor.
+Context {R : realType}.
+Variables (U : finType) (P : R.-fdist U) (A B C : finType).
+Variables (X : {RV P -> A}) (Y : {RV P -> B}) (Z : {RV P -> C}).
+
+(* The (X, Z) law is the (X, Y, Z) law summed over Y. *)
+Lemma marg_out_Y (a : A) (c : C) :
+  `Pr[ [% X, Z] = (a, c) ]
+  = \sum_(y <- fin_img Y) `Pr[ [% X, Y, Z] = (a, y, c) ].
+Proof.
+rewrite -pr_in1 (reasoning_by_cases _ Y).
+apply: eq_bigr => y _.
+rewrite setX1 pr_in1 !pfwd1E; congr (Pr P _).
+by apply/setP => t; rewrite !inE /= !xpair_eqE /= andbAC.
+Qed.
+
+(* The (Y, Z) law is the (X, Y, Z) law summed over X. *)
+Lemma marg_out_X (b : B) (c : C) :
+  `Pr[ [% Y, Z] = (b, c) ]
+  = \sum_(x <- fin_img X) `Pr[ [% X, Y, Z] = (x, b, c) ].
+Proof.
+rewrite -pr_in1 (reasoning_by_cases _ X).
+apply: eq_bigr => x _.
+rewrite setX1 pr_in1 !pfwd1E; congr (Pr P _).
+by apply/setP => t; rewrite !inE /= !xpair_eqE /= andbC andbA.
+Qed.
+
+(* The Z law is the (X, Z) law summed over X. *)
+Lemma marg_Z_X (c : C) :
+  `Pr[ Z = c ] = \sum_(x <- fin_img X) `Pr[ [% X, Z] = (x, c) ].
+Proof.
+rewrite -pr_in1 (reasoning_by_cases _ X).
+apply: eq_bigr => x _.
+rewrite setX1 pr_in1 !pfwd1E; congr (Pr P _).
+by apply/setP => t; rewrite !inE /= !xpair_eqE /= andbC.
+Qed.
+
+(* X and Y are conditionally independent given Z whenever the law of the
+   triple factors as a (Y, Z)-weight times a (Z, X)-kernel. *)
+Lemma cinde_RV_factor (f : B -> C -> R) (g : C -> A -> R) :
+  (forall x y z, `Pr[ [% X, Y, Z] = (x, y, z) ] = f y z * g z x) ->
+  P |= X _|_ Y | Z.
+Proof.
+move=> Hf a b c.
+pose HC := \sum_(y <- fin_img Y) f y c.
+pose KC := \sum_(x <- fin_img X) g c x.
+have EB : forall a0, `Pr[ [% X, Z] = (a0, c) ] = g c a0 * HC.
+  move=> a0; rewrite marg_out_Y /HC big_distrr /=.
+  by apply: eq_bigr => y _; rewrite Hf mulrC.
+have EC : `Pr[ [% Y, Z] = (b, c) ] = f b c * KC.
+  rewrite marg_out_X /KC big_distrr /=.
+  by apply: eq_bigr => x _; rewrite Hf.
+have ED : `Pr[ Z = c ] = KC * HC.
+  rewrite marg_Z_X.
+  under eq_bigr => x _ do rewrite EB.
+  by rewrite -big_distrl /=.
+rewrite !cpr_eqE Hf (EB a) EC ED.
+case: (eqVneq (KC * HC) 0) => [Hd|Hd].
+  by rewrite Hd invr0 !mulr0.
+have HKC : KC != 0 by apply: contraNN Hd => /eqP ->; rewrite mul0r.
+have HHC : HC != 0 by apply: contraNN Hd => /eqP ->; rewrite mulr0.
+rewrite mulf_div; apply/eqP; rewrite eqr_div ?mulf_neq0 //.
+by apply/eqP; lra.
+Qed.
+
+End cinde_RV_factor.
 
 Section independent_rv.
 Context {R : realType}.

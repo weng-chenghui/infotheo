@@ -234,16 +234,7 @@ Section perm_extra.
 Context {R : realType}.
 Variables (T : finType) (P : R.-fdist T).
 
-(* Projection of triple (X,Y,Z) onto (Y,Z) gives the joint distribution of (Y,Z).
-   This connects fdist_proj23 with the random variable notation. *)
-Lemma fdist_proj23_RV3 (TA TB TC : finType) 
-    (X : {RV P -> TA}) (Y : {RV P -> TB}) (Z : {RV P -> TC})
- : fdist_proj23 `p_[% X, Y, Z] = `p_[% Y, Z].
-Proof.
-by rewrite /fdist_proj23 /fdist_snd /fdistA /dist_of_RV /fdistC12 !fdistmap_comp.
-Qed.
-
-(* Swap 3rd and 4th components in 4-tuple probability: 
+(* Swap 3rd and 4th components in 4-tuple probability:
    Pr[(X,Y,Z,W)=(a,b,c,d)] = Pr[(X,Y,W,Z)=(a,b,d,c)].
    Used for reordering conditioning variables. *)
 Lemma pfwd1_pair4_swap34 (TA TB TC TD : finType) 
@@ -484,75 +475,6 @@ by rewrite cpr_eq_pairC (H a b c).
 Qed.
 
 End cinde_RV_comp_lemma.
-
-Section cinde_RV_factor_sec.
-Context {R : realType}.
-Variables (U : finType) (P : R.-fdist U) (A B C : finType).
-Variables (X : {RV P -> A}) (Y : {RV P -> B}) (Z : {RV P -> C}).
-
-(* The [%X, Z] law is the [%X, Y, Z] law summed over Y. *)
-Lemma marg_out_Y (a : A) (c : C) :
-  `Pr[ [% X, Z] = (a, c) ]
-  = \sum_(y <- fin_img Y) `Pr[ [% X, Y, Z] = (a, y, c) ].
-Proof.
-rewrite -pr_in1 (reasoning_by_cases _ Y).
-apply: eq_bigr => y _.
-rewrite setX1 pr_in1 !pfwd1E; congr (Pr P _).
-by apply/setP => t; rewrite !inE /= !xpair_eqE /= andbAC.
-Qed.
-
-(* The [%Y, Z] law is the [%X, Y, Z] law summed over X. *)
-Lemma marg_out_X (b : B) (c : C) :
-  `Pr[ [% Y, Z] = (b, c) ]
-  = \sum_(x <- fin_img X) `Pr[ [% X, Y, Z] = (x, b, c) ].
-Proof.
-rewrite -pr_in1 (reasoning_by_cases _ X).
-apply: eq_bigr => x _.
-rewrite setX1 pr_in1 !pfwd1E; congr (Pr P _).
-by apply/setP => t; rewrite !inE /= !xpair_eqE /= andbC andbA.
-Qed.
-
-(* The Z law is the [%X, Z] law summed over X. *)
-Lemma marg_Z_X (c : C) :
-  `Pr[ Z = c ] = \sum_(x <- fin_img X) `Pr[ [% X, Z] = (x, c) ].
-Proof.
-rewrite -pr_in1 (reasoning_by_cases _ X).
-apply: eq_bigr => x _.
-rewrite setX1 pr_in1 !pfwd1E; congr (Pr P _).
-by apply/setP => t; rewrite !inE /= !xpair_eqE /= andbC.
-Qed.
-
-(* [X _|_ Y | Z] whenever the joint law factors as a (Y, Z)-weight times a
-   (Z, X)-kernel: X and Y interact only through Z.  The randomized-kernel
-   counterpart of [cinde_RV_comp] (the predictor's guess kernel depends on the
-   conditioning view and S, never on V2). *)
-Lemma cinde_RV_factor (f : B -> C -> R) (g : C -> A -> R) :
-  (forall x y z, `Pr[ [% X, Y, Z] = (x, y, z) ] = f y z * g z x) ->
-  P |= X _|_ Y | Z.
-Proof.
-move=> Hf a b c.
-pose HC := \sum_(y <- fin_img Y) f y c.
-pose KC := \sum_(x <- fin_img X) g c x.
-have EB : forall a0, `Pr[ [% X, Z] = (a0, c) ] = g c a0 * HC.
-  move=> a0; rewrite marg_out_Y /HC big_distrr /=.
-  by apply: eq_bigr => y _; rewrite Hf mulrC.
-have EC : `Pr[ [% Y, Z] = (b, c) ] = f b c * KC.
-  rewrite marg_out_X /KC big_distrr /=.
-  by apply: eq_bigr => x _; rewrite Hf.
-have ED : `Pr[ Z = c ] = KC * HC.
-  rewrite marg_Z_X.
-  under eq_bigr => x _ do rewrite EB.
-  by rewrite -big_distrl /=.
-rewrite !cpr_eqE Hf (EB a) EC ED.
-case: (eqVneq (KC * HC) 0) => [Hd|Hd].
-  by rewrite Hd invr0 !mulr0.
-have HKC : KC != 0 by apply: contraNN Hd => /eqP ->; rewrite mul0r.
-have HHC : HC != 0 by apply: contraNN Hd => /eqP ->; rewrite mulr0.
-rewrite mulf_div; apply/eqP; rewrite eqr_div ?mulf_neq0 //.
-apply/eqP; ring.
-Qed.
-
-End cinde_RV_factor_sec.
 
 Section inde_const_RV_sec.
 Context {R : realType}.
