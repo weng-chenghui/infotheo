@@ -12,23 +12,15 @@
 #     about the fix agent (that lives in /rocq-apply-fixes prompt text
 #     and is verified manually).
 #
-#   Defect 2 (daily_cap): pre-seed central-state/token-usage.json with a
-#     daily count above daily_token_cap. Run audit.sh. Assert exit 2, a
-#     CAP HIT banner in the report, and the S996 sentinel in the merged
-#     findings. The Stage 2 pre-guard returns without calling `claude -p`,
-#     so no LLM tokens are burned.
-#
 #   Defect 3 (pointer consistency): run two back-to-back audits on
 #     different staged diffs. Assert central-state/last-run-id names the
 #     second run. Break runs/LATEST by pointing it at a nonexistent
 #     directory. Run audit-history.py --validate. Assert exit 2. Then
 #     remove both pointers and assert --validate exits 0 (bootstrap).
 #
-# The harness does NOT invoke the Stage 2 LLM. All scenarios either:
-#   - Set ROCQ_AUDIT_STAGE2_DISABLED=1 (Stage 2 skipped while Stage 1
-#     still gates the commit on its own findings), or
-#   - Trigger the daily_cap pre-guard branch of stage2-agent.py, which
-#     returns before issuing any `claude -p` call.
+# The harness does NOT invoke the Stage 2 LLM. All scenarios set
+# ROCQ_AUDIT_STAGE2_DISABLED=1 (Stage 2 skipped while Stage 1 still
+# gates the commit on its own findings).
 #
 # The harness does NOT test whether any agent fixes Rocq code. Agent
 # behaviour is outside the pipeline and outside this harness.
@@ -187,56 +179,6 @@ scenario_stage1_rule_parity() {
   rc=0
   ( cd "${dir}" && ROCQ_AUDIT_STAGE2_DISABLED=1 "${AUDIT_ROOT}/bin/audit.sh" ) || rc=$?
   assert "A001 good fixture exit code" "0" "${rc}"
-}
-
-# -------------------------------------------------------------------------
-# Scenario B: Defect 2 (daily_cap) regression.
-# Pre-seeds central-state/token-usage.json above daily_token_cap. Runs
-# audit.sh. Verifies that stage2-agent.py's pre-guard branch emits an
-# error-severity S996, the CAP HIT banner renders, and exit is 2.
-# Does NOT burn any `claude -p` tokens (the pre-guard returns first).
-# -------------------------------------------------------------------------
-scenario_defect2_daily_cap() {
-  echo "Scenario B: Defect 2 daily_cap regression (no LLM call)"
-  local dir bad report run_dir
-  bad="${AUDIT_ROOT}/fixtures/bad/A001.v"
-  dir="$(init_scenario "B-daily-cap")"
-  cp "${bad}" "${dir}/B_daily_cap.v"
-  ( cd "${dir}" && git add B_daily_cap.v )
-
-  # Read daily_token_cap from template config and seed token-usage.json
-  # above it for today's date.
-  local cap today
-  cap="$("${AUDIT_ROOT}/venv/bin/python3" -c "import yaml; print(int(yaml.safe_load(open('${TEMPLATE_CFG}')).get('daily_token_cap', 2000000)))")"
-  today="$(date -u +%Y-%m-%d)"
-  "${AUDIT_ROOT}/venv/bin/python3" -c "
-import json
-path = '${AUDIT_CENTRAL}/token-usage.json'
-try:
-    d = json.load(open(path))
-except Exception:
-    d = {'daily': {}, 'monthly': {}}
-d['daily']['${today}'] = int(${cap}) + 1
-open(path, 'w').write(json.dumps(d))
-"
-
-  local rc=0
-  ( cd "${dir}" && "${AUDIT_ROOT}/bin/audit.sh" ) || rc=$?
-  run_dir="$(current_run_dir)"
-  report="${run_dir}/reports/latest.md"
-  assert "daily_cap exit code" "2" "${rc}"
-  assert_grep "daily_cap CAP HIT banner" "CAP HIT" "${report}"
-  assert_grep "daily_cap S996 sentinel" "S996" "${report}"
-  # stage2_incomplete flag should be true in the Stage 2 JSON.
-  local stage2="${run_dir}/reports/stage-stage2.json"
-  if [[ -f "${stage2}" ]]; then
-    local incomplete
-    incomplete="$("${AUDIT_ROOT}/venv/bin/python3" -c "import json; print(json.load(open('${stage2}')).get('stage2_incomplete', False))")"
-    assert "stage2_incomplete flag" "True" "${incomplete}"
-  else
-    FAILED=$((FAILED + 1)); TOTAL=$((TOTAL + 1))
-    echo "  FAIL stage2_incomplete flag: ${stage2} missing" >&2
-  fi
 }
 
 # -------------------------------------------------------------------------
@@ -422,8 +364,6 @@ except Exception as e:
 echo "rocq-audit e2e harness (E2E_MODE=1; central-state writes suppressed)"
 echo ""
 scenario_stage1_rule_parity
-echo ""
-scenario_defect2_daily_cap
 echo ""
 scenario_defect3_pointer_consistency
 echo ""

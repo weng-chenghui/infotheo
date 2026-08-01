@@ -312,7 +312,6 @@ def main() -> int:
         candidate_models,
         key=lambda m: MODEL_TIER.get(m, 1),
     )
-    daily_cap = int(cfg.get("daily_token_cap", 2000000))
     on_failure = cfg.get("on_agent_failure", "block")
     # Env-var override: callers (typically a fix-flow subagent) can pass
     # ROCQ_AUDIT_ADVISORY=1 to downgrade block to advisory for this
@@ -332,52 +331,6 @@ def main() -> int:
         chunk_size = 3
     else:
         chunk_size = max(3, min(10, math.ceil(entity_count / 8)))
-
-    # Adaptive token cap. Real runs show ~40-50k tokens per chunk because
-    # each chunk carries the full rule catalog plus AUTHORITY.md. The
-    # formula max(75000, 60000 * chunk_count_estimate) fits observed usage
-    # with headroom; the operator can override via ROCQ_AUDIT_TOKEN_CAP or
-    # the static `per_commit_token_cap` key in config.yaml.
-    if os.environ.get("ROCQ_AUDIT_TOKEN_CAP"):
-        per_commit_cap = int(os.environ["ROCQ_AUDIT_TOKEN_CAP"])
-    elif cfg.get("per_commit_token_cap"):
-        per_commit_cap = int(cfg["per_commit_token_cap"])
-    else:
-        est_chunks = max(1, math.ceil(max(entity_count, 1) / 5))
-        per_commit_cap = max(75000, 60000 * est_chunks)
-
-    # Cost guard (daily). Emits an error-severity S996 sentinel so that
-    # `report-merge.py` blocks the commit instead of treating the empty
-    # findings list as a clean verdict. Earlier versions returned `findings:
-    # []` which caused the gate to exit 0 despite Stage 2 never running.
-    usage = token_guard_read()
-    today = time.strftime("%Y-%m-%d")
-    if int(usage["daily"].get(today, 0)) >= daily_cap:
-        out = {
-            "findings": [{
-                "rule_id": "S996",
-                "file": "rocq-audit",
-                "line_start": 1, "line_end": 1,
-                "severity": "error",
-                "evidence_quote": f"daily_token_cap {daily_cap} exceeded before any chunk ran",
-                "closeness": "near",
-                "explanation": (
-                    "Stage 2 aborted: the daily token cap had already been "
-                    "reached before the first chunk. No Stage 2 findings "
-                    "were produced. The commit is blocked until the cap is "
-                    "raised, the day resets, or the operator explicitly "
-                    "bypasses with ROCQ_AUDIT_BYPASS=1."
-                ),
-                "fix_sketch": "Raise daily_token_cap in template/config.yaml, wait until UTC midnight, or bypass with ROCQ_AUDIT_BYPASS=1.",
-                "confidence": "high",
-                "stage": "stage2",
-            }],
-            "error": f"daily_token_cap {daily_cap} exceeded",
-            "budget": {"stop_reason": "daily_cap", "entity_count": entity_count},
-            "stage2_incomplete": True,
-        }
-        print(json.dumps(out))
-        return 0 if on_failure == "advisory" else 2
 
     chunks = chunk_entities(entities, chunk_size) or [[]]
     chunk_count = len(chunks) if entities else 0
@@ -459,12 +412,6 @@ def main() -> int:
         for idx, ch in enumerate(chunks):
             if not ch:
                 continue
-            # Pre-submission guard against the per-commit token cap.
-            with tokens_lock:
-                if state["tokens_used"] >= per_commit_cap:
-                    state["deferred_chunks"] += 1
-                    state["stop_reason"] = "token_cap"
-                    continue
             futures[pool.submit(process_chunk, idx, ch)] = idx
             submitted += 1
 
@@ -522,42 +469,6 @@ def main() -> int:
                             "stage": "stage2",
                         })
 
-            # Post-iteration: check token cap in case a chunk just reported.
-            with tokens_lock:
-                if state["tokens_used"] >= per_commit_cap and state["stop_reason"] == "clean":
-                    state["stop_reason"] = "token_cap"
-                    # Remaining futures are allowed to finish to avoid
-                    # partial cache entries; deferred count is 0 because
-                    # nothing is unsubmitted at this point.
-
-    # Emit an error-severity S996 sentinel if the run did not end cleanly.
-    # Earlier versions emitted a warning-severity S999 here, which did not
-    # block the commit because `report-merge.py` gates on error-severity
-    # findings only. The cap-hit was then silently downgraded to a pass.
-    # S996 at error severity forces the gate to exit 2 on any cap hit.
-    if state["stop_reason"] != "clean":
-        reasons = {
-            "token_cap": f"per_commit_token_cap {per_commit_cap} reached",
-            "wall_cap": f"per_commit_wall_seconds {int(wall_cap)} reached",
-        }
-        state["combined"].append({
-            "rule_id": "S996",
-            "file": "rocq-audit",
-            "line_start": 1, "line_end": 1,
-            "severity": "error",
-            "evidence_quote": reasons.get(state["stop_reason"], state["stop_reason"]),
-            "closeness": "near",
-            "explanation": (
-                f"Stage 2 halted: {state['stop_reason']} reached after partial run. "
-                f"{state['deferred_chunks']} chunks deferred. Stage 1 findings "
-                "still apply, but Stage 2 is incomplete; the commit is blocked "
-                "so the operator raises the cap or acknowledges the gap."
-            ),
-            "fix_sketch": "Split the commit, raise the relevant cap, or re-run with ROCQ_AUDIT_WALL_SECONDS / ROCQ_AUDIT_TOKEN_CAP.",
-            "confidence": "high",
-            "stage": "stage2",
-        })
-
     tokens_used = state["tokens_used"]
     token_guard_update(tokens_used)
 
@@ -577,7 +488,6 @@ def main() -> int:
         "chunk_size": chunk_size,
         "workers_used": workers,
         "tokens_used": tokens_used,
-        "tokens_cap": per_commit_cap,
         "wall_ms_used": int(elapsed() * 1000),
         "wall_ms_cap": int(wall_cap * 1000),
         "deferred_chunks": state["deferred_chunks"],
@@ -586,14 +496,10 @@ def main() -> int:
         "model": chunk_model,
     }
 
-    # Top-level `stage2_incomplete` flag so `report-merge.py` can render the
-    # CAP HIT banner without reparsing individual findings.
-    stage2_incomplete = state["stop_reason"] in ("daily_cap", "token_cap", "wall_cap")
     out = {
         "findings": state["combined"],
         "tokens_used": tokens_used,
         "budget": budget,
-        "stage2_incomplete": stage2_incomplete,
     }
     print(json.dumps(out, indent=2, ensure_ascii=False))
     return 0

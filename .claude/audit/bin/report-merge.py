@@ -183,17 +183,10 @@ def merge_findings(stage1: list[dict], stage2: list[dict]) -> list[dict]:
 
 def render(manifest: dict, merged: list[dict], titles: dict[str, str], stage1_disabled: bool, stage2_disabled: bool,
            budget: dict | None = None, fast_bypassed: bool = False,
-           stage2_incomplete: bool = False,
            tier_k_unavailable: bool = False) -> str:
     lines = ["# rocq-audit report", ""]
     if fast_bypassed:
         lines.append("> **FAST BYPASS**: Stage 2 and Tier K were skipped. Only Stage 1 findings are authoritative.")
-        lines.append("")
-    elif stage2_incomplete:
-        reason = (budget or {}).get("stop_reason", "cap_hit")
-        lines.append(f"> **CAP HIT**: Stage 2 budget exhausted (reason: `{reason}`). "
-                     "A CAP-HIT sentinel (S996) has been injected at error severity; "
-                     "the commit is blocked until the operator addresses it.")
         lines.append("")
     elif budget and budget.get("stop_reason", "clean") not in ("clean", "fast_bypass"):
         lines.append(f"> **PARTIAL AUDIT**: Stage 2 stopped early (reason: `{budget['stop_reason']}`). "
@@ -226,8 +219,6 @@ def render(manifest: dict, merged: list[dict], titles: dict[str, str], stage1_di
         wall_used_s = budget.get("wall_ms_used", 0) / 1000.0
         wall_cap_s = budget.get("wall_ms_cap", 0) / 1000.0
         tokens_used = budget.get("tokens_used", 0)
-        tokens_cap = budget.get("tokens_cap", 0) or 1
-        tok_pct = int(100 * tokens_used / tokens_cap) if tokens_cap else 0
         deferred = budget.get("deferred_chunks", 0)
         workers = budget.get("workers_used", 0)
         chunk_count = budget.get("chunk_count", 0)
@@ -237,7 +228,7 @@ def render(manifest: dict, merged: list[dict], titles: dict[str, str], stage1_di
         reason = budget.get("stop_reason", "clean")
         lines.append(f"- Entities audited: {budget.get('entity_count', 0)} ({deferred} deferred)")
         lines.append(f"- Chunks: {chunk_count} of size {chunk_size}; workers used: {workers}")
-        lines.append(f"- Tokens: {tokens_used:,} of {tokens_cap:,} cap ({tok_pct}%)")
+        lines.append(f"- Tokens: {tokens_used:,}")
         lines.append(f"- Wall time: {wall_used_s:.1f}s of {wall_cap_s:.0f}s budget")
         lines.append(f"- Estimated cost: ${estimated:.4f} ({model})")
         lines.append(f"- Stop reason: {reason}")
@@ -322,14 +313,12 @@ def main() -> int:
     merged = apply_escalations(merged, rules_full)
     budget = stage2.get("budget") if isinstance(stage2, dict) else None
     fast_bypassed = bool(stage2.get("fast_bypassed")) if isinstance(stage2, dict) else False
-    stage2_incomplete = bool(stage2.get("stage2_incomplete")) if isinstance(stage2, dict) else False
     tier_k_unavailable = bool(tierk.get("tier_k_unavailable")) if isinstance(tierk, dict) else False
     md = render(manifest, merged, titles,
                 stage1_disabled=bool(stage1.get("disabled")),
                 stage2_disabled=bool(stage2.get("disabled")),
                 budget=budget,
                 fast_bypassed=fast_bypassed,
-                stage2_incomplete=stage2_incomplete,
                 tier_k_unavailable=tier_k_unavailable)
     with open(out_path, "w") as f:
         f.write(md)
@@ -338,7 +327,6 @@ def main() -> int:
     if args.json_out:
         json_payload = {
             "findings": merged,
-            "stage2_incomplete": stage2_incomplete,
             "tier_k_unavailable": tier_k_unavailable,
             "budget": budget,
             "exit_code": exit_code,

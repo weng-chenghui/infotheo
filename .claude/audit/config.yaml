@@ -1,5 +1,4 @@
 audit_model: sonnet
-daily_token_cap: 30000000
 escalation_model: opus
 excluded_paths:
 - _build/**
@@ -13,7 +12,6 @@ monthly_usd_cap: 50
 on_agent_failure: block
 on_agent_failure_reason: ''
 oscillation_log_ttl_days: 7
-per_commit_token_cap: 320000
 per_commit_wall_seconds: 600
 pricing:
   opus_input_per_mtok: 15

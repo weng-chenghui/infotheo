@@ -232,7 +232,7 @@ def run_fixture_test(rule: dict, refresh: bool, stage2_live: bool) -> list[str]:
 
     stage_mode = rule.get("stage_mode")
     if stage_mode == "sentinel":
-        # Driver-produced rules (e.g. S996 for Stage 2 cap hits). Fixtures
+        # Driver-produced rules (e.g. the S997/S998 sentinels). Fixtures
         # must exist for parity with other rules but no regex or agent pass
         # applies; the sentinel is emitted from inside stage2-agent.py.
         return errs

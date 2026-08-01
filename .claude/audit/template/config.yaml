@@ -1,5 +1,4 @@
 audit_model: sonnet
-daily_token_cap: 2000000
 escalation_model: opus
 excluded_paths:
 - _build/**

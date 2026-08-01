@@ -66,7 +66,6 @@ validate_int_range() {
 
 validate_int_range ROCQ_AUDIT_WORKERS          "${ROCQ_AUDIT_WORKERS:-}"        1     16
 validate_int_range ROCQ_AUDIT_CHUNK_SIZE       "${ROCQ_AUDIT_CHUNK_SIZE:-}"     1     20
-validate_int_range ROCQ_AUDIT_TOKEN_CAP        "${ROCQ_AUDIT_TOKEN_CAP:-}"      10000 1000000
 validate_int_range ROCQ_AUDIT_WALL_SECONDS     "${ROCQ_AUDIT_WALL_SECONDS:-}"   60    3600
 validate_int_range ROCQ_AUDIT_MAX_ATTEMPTS     "${ROCQ_AUDIT_MAX_ATTEMPTS:-}"   1     10
 
@@ -79,7 +78,6 @@ if [[ -n "${EDITMSG}" && -f "${EDITMSG}" ]]; then
   }
   T_WORKERS=$(parse_trailer "Rocq-Audit-Workers")
   T_CHUNK=$(parse_trailer "Rocq-Audit-Chunk-Size")
-  T_TOKEN=$(parse_trailer "Rocq-Audit-Token-Cap")
   T_WALL=$(parse_trailer "Rocq-Audit-Wall-Seconds")
   T_SKIP2=$(parse_trailer "Rocq-Audit-Skip-Stage2")
   for forbidden in Rocq-Audit-Skip-Stage1 Rocq-Audit-Skip-Tier0 Rocq-Audit-Skip-Attempts-Counter; do
@@ -90,7 +88,6 @@ if [[ -n "${EDITMSG}" && -f "${EDITMSG}" ]]; then
   done
   [[ -n "${T_WORKERS}" ]] && { validate_int_range "trailer Rocq-Audit-Workers" "${T_WORKERS}" 1 16; ROCQ_AUDIT_WORKERS="${T_WORKERS}"; }
   [[ -n "${T_CHUNK}" ]]   && { validate_int_range "trailer Rocq-Audit-Chunk-Size" "${T_CHUNK}" 1 20; ROCQ_AUDIT_CHUNK_SIZE="${T_CHUNK}"; }
-  [[ -n "${T_TOKEN}" ]]   && { validate_int_range "trailer Rocq-Audit-Token-Cap" "${T_TOKEN}" 10000 1000000; ROCQ_AUDIT_TOKEN_CAP="${T_TOKEN}"; }
   [[ -n "${T_WALL}" ]]    && { validate_int_range "trailer Rocq-Audit-Wall-Seconds" "${T_WALL}" 60 3600; ROCQ_AUDIT_WALL_SECONDS="${T_WALL}"; }
   if [[ -n "${T_SKIP2}" ]]; then
     case "${T_SKIP2,,}" in
@@ -103,12 +100,11 @@ fi
 
 OVERRIDE_NOTES=""
 [[ -n "${ROCQ_AUDIT_WORKERS:-}" ]]      && OVERRIDE_NOTES+="workers=${ROCQ_AUDIT_WORKERS} "
-[[ -n "${ROCQ_AUDIT_TOKEN_CAP:-}" ]]    && OVERRIDE_NOTES+="token_cap=${ROCQ_AUDIT_TOKEN_CAP} "
 [[ -n "${ROCQ_AUDIT_WALL_SECONDS:-}" ]] && OVERRIDE_NOTES+="wall_seconds=${ROCQ_AUDIT_WALL_SECONDS} "
 [[ -n "${ROCQ_AUDIT_CHUNK_SIZE:-}" ]]   && OVERRIDE_NOTES+="chunk_size=${ROCQ_AUDIT_CHUNK_SIZE} "
 [[ -n "${ROCQ_AUDIT_MAX_ATTEMPTS:-}" ]] && OVERRIDE_NOTES+="max_attempts=${ROCQ_AUDIT_MAX_ATTEMPTS} "
 
-export ROCQ_AUDIT_WORKERS ROCQ_AUDIT_CHUNK_SIZE ROCQ_AUDIT_TOKEN_CAP
+export ROCQ_AUDIT_WORKERS ROCQ_AUDIT_CHUNK_SIZE
 export ROCQ_AUDIT_WALL_SECONDS ROCQ_AUDIT_MAX_ATTEMPTS
 export ROCQ_AUDIT_ADVISORY ROCQ_AUDIT_FIX_FLOW
 
@@ -364,8 +360,9 @@ if [[ "${BYPASS}" == "fast" ]] || [[ "${MERGE_RC}" != "0" && "${BYPASS}" == "1" 
   if [[ "${E2E_MODE}" != "1" ]]; then
     {
       echo "bypass $(date -u +%FT%TZ) run=${RUN_ID} mode=${BYPASS} commit=${COMMIT_SHA} diff=${DIFF_HASH} overrides=${OVERRIDE_NOTES:-none}"
-      # Iterate BOTH Stage 1 and Stage 2 findings so an S996 cap-hit
-      # sentinel is preserved in the bypass audit trail, not just Stage 1.
+      # Iterate BOTH Stage 1 and Stage 2 findings so driver-produced
+      # sentinels (S997/S998) are preserved in the bypass audit trail,
+      # not just Stage 1.
       for p in "${STAGE1}" "${STAGE2}"; do
         "${VENV_PY}" -c "import json,sys; r=json.load(open(sys.argv[1])); [print('  rule=', f['rule_id'], 'file=', f['file'], 'line=', f['line_start']) for f in r.get('findings',[])]" "${p}" 2>/dev/null || true
       done
