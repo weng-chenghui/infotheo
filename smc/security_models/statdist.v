@@ -55,9 +55,9 @@ Variable B : finType.
 Implicit Types p q r : R.-fdist B.
 
 (* def:smc:tv-distance *)
-(* The statistical distance of two laws is half of the sum over B of the
-   absolute mass differences. *)
-Definition statdist p q : R := 2%:R^-1 * \sum_b `|p b - q b|.
+(* The statistical distance of two laws is var_dist normalized so that the
+   maximal distance is 1 instead of 2. *)
+Definition statdist p q : R := 2%:R^-1 * var_dist p q.
 
 (* def:smc:tv-distance *)
 (* statdist is half of var_dist's total-variation sum. *)
@@ -80,7 +80,7 @@ Proof. by rewrite !statdist_var_dist symmetric_var_dist. Qed.
 (* The statistical distance satisfies the triangle inequality. *)
 Lemma ler_statdistD p q r : statdist p q <= statdist p r + statdist r q.
 Proof.
-rewrite /statdist -mulrDr ler_pM2l ?invr_gt0 ?ltr0n// -big_split/=.
+rewrite /statdist /var_dist -mulrDr ler_pM2l ?invr_gt0 ?ltr0n// -big_split/=.
 by apply: ler_sum => b _; exact: ler_distD.
 Qed.
 
@@ -89,7 +89,8 @@ Qed.
 Lemma statdist_eq0 p q : (statdist p q == 0) = (p == q).
 Proof.
 apply/idP/idP => [|/eqP ->]; last first.
-  by apply/eqP; rewrite /statdist big1 ?mulr0// => b _; rewrite subrr normr0.
+  by apply/eqP; rewrite /statdist /var_dist big1 ?mulr0// => b _;
+    rewrite subrr normr0.
 rewrite statdist_var_dist mulf_eq0 invr_eq0 pnatr_eq0/=.
 by move=> /eqP/def_var_dist ->.
 Qed.
@@ -135,7 +136,7 @@ Local Lemma sum_diff_le p q (S : {set B}) :
   \sum_(b in S) (p b - q b) <= statdist p q.
 Proof.
 have h2 : (0 : R) < 2%:R by rewrite ltr0n.
-rewrite /statdist -(ler_pM2l h2) mulrA divff ?pnatr_eq0// mul1r.
+rewrite /statdist /var_dist -(ler_pM2l h2) mulrA divff ?pnatr_eq0// mul1r.
 rewrite mulr_natl mulr2n [X in _ <= X](bigID (mem S))/=.
 rewrite -[X in _ + X <= _](sum_diffC p q S).
 apply: lerD; apply: ler_sum => b _; first exact: ler_norm.
@@ -164,7 +165,7 @@ Qed.
 Local Lemma statdist_pos_part p q :
   statdist p q = \sum_(b in [set b | q b < p b]) (p b - q b).
 Proof.
-rewrite /statdist [X in _ * X](bigID (mem [set b | q b < p b]))/=.
+rewrite /statdist /var_dist [X in _ * X](bigID (mem [set b | q b < p b]))/=.
 rewrite [X in X + _](eq_bigr (fun b => p b - q b)); last first.
   by move=> b; rewrite inE => Hb; rewrite ger0_norm// subr_ge0 ltW.
 rewrite [X in _ + X](eq_bigr (fun b => q b - p b)); last first.
