@@ -116,6 +116,7 @@ du2002/spp_pismc.v
 du2002/spp_proof.v
 du2002/spp_simulator.v
 du2002/spp_session_types.v
+smc/security_models/spp_bridge.v
 homomorphic_encryption/key_type.v
 homomorphic_encryption/he_types.v
 homomorphic_encryption/enc_dec.v
