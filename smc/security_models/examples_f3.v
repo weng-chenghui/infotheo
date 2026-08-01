@@ -2,7 +2,7 @@
 (* Copyright (C) 2025 infotheo authors, license: LGPL-2.1-or-later            *)
 From mathcomp Require Import all_boot all_order all_algebra reals lra.
 Require Import realType_ext realType_ln fdist proba variation_dist entropy.
-Require Import finstoch statdist privacy_kernel.
+Require Import finstoch statdist privacy_kernel entropy_link.
 
 (**md**************************************************************************)
 (* # Worked examples of the privacy kernel                                    *)
@@ -16,7 +16,12 @@ Require Import finstoch statdist privacy_kernel.
 (* protocol both delivers to the honest party and shows to the adversary,     *)
 (* carries a view-only simulator while the view and the honest output are     *)
 (* conditionally dependent, so the conditional entropy of the honest output   *)
-(* drops from log 2 to 0 once the view joins the conditioning.                *)
+(* drops from log 2 to 0 once the view joins the conditioning.  A third       *)
+(* instance shares the sum of three private bits among three parties and      *)
+(* echoes one honest share into the view: the compatibility square, the       *)
+(* delivery law and an output-consistent privacy triangle hold, while the     *)
+(* view and the honest shares are conditionally dependent and the same        *)
+(* entropy drop occurs.                                                       *)
 (*                                                                            *)
 (* ```                                                                        *)
 (*                card_F3 == the three-element field has three points         *)
@@ -50,6 +55,15 @@ Require Import finstoch statdist privacy_kernel.
 (*                           and the honest output are conditionally          *)
 (*                           dependent and the conditional entropy of the     *)
 (*                           honest output drops from log 2 to 0              *)
+(*             share_leak == a three-party additive sharing of the sum of     *)
+(*                           three private bits whose protocol echoes one     *)
+(*                           honest share into the view, an instance          *)
+(*                           satisfying the compatibility square, the         *)
+(*                           delivery law and the privacy triangle at which   *)
+(*                           the view and the honest shares are               *)
+(*                           conditionally dependent and the conditional      *)
+(*                           entropy of the honest shares drops from log 2    *)
+(*                           to 0                                             *)
 (* ```                                                                        *)
 (*                                                                            *)
 (******************************************************************************)
@@ -479,3 +493,612 @@ Qed.
 
 End instance.
 End coin_leak.
+
+(* ex:smc:share-leak *)
+(* Three parties additively share the sum of three private bits over the
+   two-element field and the protocol shows the adversary, party one, the
+   share delivered to party two.  The compatibility square, the delivery law
+   and an output-consistent privacy triangle hold, while the view and the
+   honest shares are conditionally dependent given the input and the
+   adversary's share, and the conditional entropy of the honest shares drops
+   from log 2 to 0 once the view joins the conditioning.  The ideal
+   functionality is the standard three-party additive sharing, uniform on the
+   first two shares with the third completing the sum, fixed independently of
+   the leaking protocol.  Three parties are the minimum, since with two the
+   honest share is determined by the input and the adversary's share, the
+   hypothesis of output_independent_determined. *)
+Module share_leak.
+Section instance.
+Context {R : realType}.
+
+(* The two-element field. *)
+Let F2 : finType := 'F_2.
+
+(* The two-element field has two points. *)
+Lemma card_F2 : #|F2| = 2.
+Proof. by rewrite card_ord. Qed.
+
+(* The uniform law on the two-element field. *)
+Definition unif2 : R.-fdist F2 := fdist_uniform card_F2.
+
+(* The input space gives one private bit to each of the three parties. *)
+Let X3 := (F2 * F2 * F2)%type.
+
+(* The input space has eight points. *)
+Lemma card_X3 : #|(X3 : finType)| = 8.
+Proof. by rewrite !card_prod !card_F2. Qed.
+
+(* The prior on the input space is uniform.
+   Naming: mu is intentional, the thesis notation $\mu$ for the prior on the
+   input space. *)
+Definition mu : R.-fdist X3 := fdist_uniform card_X3.
+
+(* The ancilla law draws the two free shares as independent uniform bits. *)
+Definition P_Omega : R.-fdist (F2 * F2)%type := tensor unif2 unif2.
+
+(* The execution context pairs an input with the ancilla. *)
+Definition exec_law : R.-fdist (X3 * (F2 * F2))%type := tensor mu P_Omega.
+
+(* The function the protocol computes is the sum of the three private bits. *)
+Definition f_sum (x : X3) : F2 := x.1.1 + x.1.2 + x.2.
+
+(* The input of the execution. *)
+Definition input_rv : {RV exec_law -> X3} := fst.
+
+(* The private bit of the adversary, party one. *)
+Definition adv_input_rv : {RV exec_law -> F2} := fun e => e.1.1.1.
+
+(* The share delivered to the adversary. *)
+Definition y1_rv : {RV exec_law -> F2} := fun e => e.2.1.
+
+(* The share delivered to party two. *)
+Definition y2_rv : {RV exec_law -> F2} := fun e => e.2.2.
+
+(* The share delivered to party three completes the sum. *)
+Definition y3_rv : {RV exec_law -> F2} :=
+  fun e => f_sum e.1 - e.2.1 - e.2.2.
+
+(* The adversary observes its own bit, its own share and the share delivered
+   to party two. *)
+Definition view_rv := [% adv_input_rv, y1_rv, y2_rv].
+
+(* The shares delivered to the two honest parties. *)
+Definition honest_rv := [% y2_rv, y3_rv].
+
+(* The allowed information is the adversary's bit and its delivered share. *)
+Definition allow_rv := [% adv_input_rv, y1_rv].
+
+(* The conditioner is the input and the adversary's delivered share. *)
+Definition cond_rv := [% input_rv, y1_rv].
+
+(* The three delivered shares. *)
+Definition shares_rv := [% y1_rv, y2_rv, y3_rv].
+
+(* The simulator answers the allowed information together with a uniform bit
+   in the echoed slot. *)
+Definition sim : simulator (R := R) F2 F2 ((F2 * F2) * F2)%type :=
+  fun a => tensor (fdist1 a) unif2.
+
+(* The share map sends an ancilla to the two free shares and the share that
+   completes the sum at an input. *)
+Definition share_map (x : X3) (w : F2 * F2) : (F2 * F2) * F2 :=
+  ((w.1, w.2), f_sum x - w.1 - w.2).
+
+(* The ideal functionality at an input is the transport of the ancilla law
+   along the share map. *)
+Definition functionality (x : X3) : R.-fdist ((F2 * F2) * F2)%type :=
+  fdistmap (share_map x) P_Omega.
+
+(* The aggregation of three shares is their sum. *)
+Definition agg (s : (F2 * F2) * F2) : F2 := s.1.1 + s.1.2 + s.2.
+
+(* Every execution has mass one over thirty-two. *)
+Lemma exec_lawE u : exec_law u = 32%:R^-1.
+Proof.
+case: u => x [s t]; rewrite /exec_law /P_Omega !tensorE !fdist_uniformE.
+by rewrite card_X3 card_F2 -!invfM -!natrM.
+Qed.
+
+(* The probability of a value of a variable is the cardinality of the preimage
+   of that value over thirty-two. *)
+Lemma pfwd1_cardE (T' : finType) (Z : {RV exec_law -> T'}) (z : T') :
+  `Pr[ Z = z ] = #|finset (Z @^-1 z)|%:R * 32%:R^-1.
+Proof.
+rewrite pfwd1E /Pr; under eq_bigr do rewrite exec_lawE.
+by rewrite big_const iter_addr addr0 mulr_natl.
+Qed.
+
+(* A set of n points out of thirty-two has mass k^-1 when n times k is
+   thirty-two. *)
+Let count_mass (n k : nat) : (n * k)%N = 32%N -> n != 0%N ->
+  n%:R * 32%:R^-1 = (k%:R^-1 : R).
+Proof.
+by move=> <- n0; rewrite natrM invfM mulrA mulfV ?pnatr_eq0// mul1r.
+Qed.
+
+(* The conditioner has two preimage points at every value. *)
+Lemma card_preim_cond (x : X3) (s : F2) :
+  #|finset (cond_rv @^-1 (x, s))| = 2.
+Proof.
+have -> : finset (cond_rv @^-1 (x, s)) = setX [set x] (setX [set s] [set: F2]).
+  apply/setP => -[x' [s' t']].
+  by rewrite !inE !xpair_eqE /cond_rv /input_rv /y1_rv /= andbT.
+by rewrite !cardsX !cards1 cardsT card_F2.
+Qed.
+
+(* The view has four preimage points at every value. *)
+Lemma card_preim_view (v : (F2 * F2) * F2) :
+  #|finset (view_rv @^-1 v)| = 4.
+Proof.
+case: v => -[a s] t.
+have -> : finset (view_rv @^-1 ((a, s), t))
+        = setX (setX (setX [set a] [set: F2]) [set: F2]) (setX [set s] [set t]).
+  apply/setP => -[[[x1 x2] x3] [s' t']].
+  rewrite !inE !xpair_eqE /view_rv /adv_input_rv /y1_rv /y2_rv /=.
+  by rewrite !andbT andbA.
+by rewrite !cardsX !cards1 !cardsT !card_F2.
+Qed.
+
+(* The allowed information has eight preimage points at every value. *)
+Lemma card_preim_allow (a s : F2) :
+  #|finset (allow_rv @^-1 (a, s))| = 8.
+Proof.
+have -> : finset (allow_rv @^-1 (a, s))
+        = setX (setX (setX [set a] [set: F2]) [set: F2])
+               (setX [set s] [set: F2]).
+  apply/setP => -[[[x1 x2] x3] [s' t']].
+  by rewrite !inE !xpair_eqE /allow_rv /adv_input_rv /y1_rv /= !andbT.
+by rewrite !cardsX !cards1 !cardsT !card_F2.
+Qed.
+
+(* The input has four preimage points at every value. *)
+Lemma card_preim_input (x : X3) :
+  #|finset (input_rv @^-1 x)| = 4.
+Proof.
+have -> : finset (input_rv @^-1 x) = setX [set x] [set: (F2 * F2)%type].
+  by apply/setP => -[x' w]; rewrite !inE /input_rv /= andbT.
+by rewrite cardsX cards1 cardsT card_prod card_F2.
+Qed.
+
+(* The share delivered to party two has sixteen preimage points at every
+   value. *)
+Lemma card_preim_y2 (t : F2) : #|finset (y2_rv @^-1 t)| = 16.
+Proof.
+have -> : finset (y2_rv @^-1 t) = setX [set: X3] (setX [set: F2] [set t]).
+  by apply/setP => -[x [s' t']]; rewrite !inE /y2_rv /=.
+by rewrite !cardsX cards1 !cardsT card_X3 card_F2.
+Qed.
+
+(* The share delivered to party two and the conditioner have one preimage
+   point at every joint value. *)
+Lemma card_preim_y2_cond (t : F2) (x : X3) (s : F2) :
+  #|finset ([% y2_rv, cond_rv] @^-1 (t, (x, s)))| = 1.
+Proof.
+have -> : finset ([% y2_rv, cond_rv] @^-1 (t, (x, s))) = [set (x, (s, t))].
+  apply/setP => -[x' [s' t']].
+  by rewrite !inE !xpair_eqE /y2_rv /cond_rv /input_rv /y1_rv /= andbC andbA.
+by rewrite cards1.
+Qed.
+
+(* The conditioner takes each value with probability one over sixteen. *)
+Lemma pfwd1_cond (x : X3) (s : F2) :
+  `Pr[ cond_rv = (x, s) ] = 16%:R^-1.
+Proof. by rewrite pfwd1_cardE card_preim_cond; apply: count_mass. Qed.
+
+(* The view takes each value with probability one eighth. *)
+Lemma pfwd1_view (v : (F2 * F2) * F2) : `Pr[ view_rv = v ] = 8%:R^-1.
+Proof. by rewrite pfwd1_cardE card_preim_view; apply: count_mass. Qed.
+
+(* The allowed information takes each value with probability one quarter. *)
+Lemma pfwd1_allow (a s : F2) : `Pr[ allow_rv = (a, s) ] = 4%:R^-1.
+Proof. by rewrite pfwd1_cardE card_preim_allow; apply: count_mass. Qed.
+
+(* The input takes each value with probability one eighth. *)
+Lemma pfwd1_input (x : X3) : `Pr[ input_rv = x ] = 8%:R^-1.
+Proof. by rewrite pfwd1_cardE card_preim_input; apply: count_mass. Qed.
+
+(* The share delivered to party two takes each value with probability one
+   half. *)
+Lemma pfwd1_y2 (t : F2) : `Pr[ y2_rv = t ] = 2%:R^-1.
+Proof. by rewrite pfwd1_cardE card_preim_y2; apply: count_mass. Qed.
+
+(* The share delivered to party two and the conditioner take each joint value
+   with probability one over thirty-two. *)
+Lemma pfwd1_y2_cond (t : F2) (x : X3) (s : F2) :
+  `Pr[ [% y2_rv, cond_rv] = (t, (x, s)) ] = 32%:R^-1.
+Proof. by rewrite pfwd1_cardE card_preim_y2_cond mul1r. Qed.
+
+(* The all-zero input. *)
+Let x0 : X3 := (0, 0, 0).
+
+(* The execution at the all-zero input and the all-zero ancilla. *)
+Let pt0 : X3 * (F2 * F2)%type := (x0, (0, 0)).
+
+(* The sum of the all-zero input is zero. *)
+Let f_sum_x0 : f_sum x0 = 0.
+Proof. by rewrite /f_sum /= !addr0. Qed.
+
+(* The view, the honest shares and the conditioner have one preimage point at
+   the all-zero joint value. *)
+Let card_vh_cond :
+  #|finset ([% [% view_rv, honest_rv], cond_rv]
+              @^-1 ((((0, 0), 0), (0, 0)), (x0, 0)))| = 1.
+Proof.
+have -> : finset ([% [% view_rv, honest_rv], cond_rv]
+                    @^-1 ((((0, 0), 0), (0, 0)), (x0, 0))) = [set pt0].
+  apply/setP => -[x' [s' t']].
+  rewrite !inE !xpair_eqE /view_rv /honest_rv /cond_rv /adv_input_rv
+          /y1_rv /y2_rv /y3_rv /input_rv /=.
+  case: (eqVneq x' x0) => [->|xne]/=; last by rewrite andbF.
+  by case: (eqVneq s' 0) => [->|sne]//=; case: (eqVneq t' 0) => [->|tne]//=.
+by rewrite cards1.
+Qed.
+
+(* The view and the conditioner have one preimage point at the all-zero joint
+   value. *)
+Let card_v_cond :
+  #|finset ([% view_rv, cond_rv] @^-1 ((((0, 0), 0)), (x0, 0)))| = 1.
+Proof.
+have -> : finset ([% view_rv, cond_rv] @^-1 ((((0, 0), 0)), (x0, 0)))
+        = [set pt0].
+  apply/setP => -[x' [s' t']].
+  rewrite !inE !xpair_eqE /view_rv /cond_rv /adv_input_rv /y1_rv /y2_rv /=.
+  case: (eqVneq x' x0) => [->|xne]/=; last by rewrite andbF.
+  by rewrite andbAC andbb.
+by rewrite cards1.
+Qed.
+
+(* The honest shares and the conditioner have one preimage point at the
+   all-zero joint value. *)
+Let card_h_cond :
+  #|finset ([% honest_rv, cond_rv] @^-1 ((0, 0), (x0, 0)))| = 1.
+Proof.
+have -> : finset ([% honest_rv, cond_rv] @^-1 ((0, 0), (x0, 0))) = [set pt0].
+  apply/setP => -[x' [s' t']].
+  rewrite !inE !xpair_eqE /honest_rv /cond_rv /y2_rv /y3_rv /y1_rv /=.
+  case: (eqVneq x' x0) => [->|xne]/=; last by rewrite andbF.
+  rewrite f_sum_x0; case: (eqVneq s' 0) => [->|sne]/=; last by rewrite andbF.
+  by case: (eqVneq t' 0) => [->|tne]//=.
+by rewrite cards1.
+Qed.
+
+(* eq:smc:functionality-compat *)
+(* The aggregation of the ideal functionality is the point mass at the value
+   of the function. *)
+Lemma functionality_compat (x : X3) :
+  fdistmap agg (functionality x) = fdist1 (f_sum x).
+Proof.
+rewrite /functionality fdistmap_comp; apply: eq_fdistmap_cst => w /=.
+by rewrite /agg /share_map /= addrCA addrK subrK.
+Qed.
+
+(* The output read off a simulated view is the point mass at the delivered
+   share the simulator was handed. *)
+Lemma sim_consistent (a : F2 * F2) :
+  fdistmap (fun v : (F2 * F2) * F2 => v.1.2) (sim a) = fdist1 a.2.
+Proof. by rewrite /sim tensor_fdist1 fdistmap_comp; apply: eq_fdistmap_cst. Qed.
+
+(* On every positive-mass fibre of the conditioner the view law is the
+   simulator at the allowed information.
+   Naming: view_cond_sim mirrors bob_view_cond_sim_xy of the scalar-product
+   bridge, naming a conditional view law after the simulator it equals. *)
+Lemma view_cond_sim (x : X3) (s : F2) :
+  `Pr[ cond_rv = (x, s) ] != 0 ->
+  forall v, `Pr[ view_rv = v | cond_rv = (x, s) ] = sim (x.1.1, s) v.
+Proof.
+move=> _ [[a s'] t]; rewrite cpr_eqE pfwd1_cond invrK pfwd1_cardE.
+rewrite /sim tensorE fdist1E xpair_eqE fdist_uniformE card_F2.
+have -> : finset ([% view_rv, cond_rv] @^-1 (((a, s'), t), (x, s)))
+        = if (a == x.1.1) && (s' == s) then [set (x, (s, t))] else set0.
+  apply/setP => -[x' [s'' t']].
+  rewrite !inE !xpair_eqE /view_rv /cond_rv /adv_input_rv /y1_rv /y2_rv /=.
+  case: (eqVneq x' x) => [->|xne]/=; last first.
+    by rewrite andbF; case: ifP => _; rewrite !inE ?xpair_eqE ?(negbTE xne)//.
+  case: (eqVneq s'' s) => [->|sne]/=; last first.
+    by rewrite !andbF; case: ifP => _;
+      rewrite !inE ?xpair_eqE ?(negbTE sne) ?andbF//.
+  rewrite andbT; case: (eqVneq a x.1.1) => [ea|ane]/=; last by rewrite inE.
+  case: (eqVneq s' s) => [es|s'ne]/=; last by rewrite inE.
+  by rewrite !inE !xpair_eqE !eqxx.
+case: ifP => _; last by rewrite cards0 !mul0r.
+by rewrite cards1 mul1r mulrC div1r; apply: count_mass.
+Qed.
+
+(* The view law is the allowed-information law bound through the simulator.
+   Naming: _factorization names the >>= decomposition, mirroring
+   spp_bob_factorization of the scalar-product bridge. *)
+Lemma view_factorization :
+  `p_ view_rv = `p_ allow_rv >>= sim.
+Proof.
+apply/fdist_ext => -[[a s] t]; rewrite dist_of_RVE [RHS]fdistbindE pfwd1_view.
+rewrite (bigD1 (a, s))//= big1 ?addr0; last first.
+  move=> a' ane; rewrite /sim tensorE fdist1E.
+  by rewrite eq_sym (negbTE ane) mul0r mulr0.
+rewrite dist_of_RVE pfwd1_allow /sim tensorE fdist1E eqxx/=.
+by rewrite mul1r /unif2 fdist_uniformE card_F2 -invfM -natrM.
+Qed.
+
+(* On every positive-mass input the delivered shares follow the ideal
+   functionality.
+   Naming: the _ok suffix carries over from the delivery-law condition
+   delivery_law_ok of entropy_link.v, stated here in conditional form. *)
+Lemma delivery_law_ok (x : X3) :
+  `Pr[ input_rv = x ] != 0 ->
+  forall y, `Pr[ shares_rv = y | input_rv = x ] = functionality x y.
+Proof.
+move=> _ [[s t] u]; rewrite cpr_eqE pfwd1_input invrK pfwd1_cardE.
+rewrite /functionality fdistmapE.
+have -> : finset ([% shares_rv, input_rv] @^-1 (((s, t), u), x))
+        = if u == f_sum x - s - t then [set (x, (s, t))] else set0.
+  apply/setP => -[x' [s' t']].
+  rewrite !inE !xpair_eqE /shares_rv /input_rv /y1_rv /y2_rv /y3_rv /=.
+  case: (eqVneq x' x) => [->|xne]/=; last first.
+    by rewrite andbF; case: ifP => _; rewrite !inE ?xpair_eqE ?(negbTE xne)//.
+  rewrite andbT; case: (eqVneq s' s) => [->|sne]/=; last first.
+    by case: ifP => _; rewrite !inE ?xpair_eqE ?(negbTE sne) ?andbF//.
+  case: (eqVneq t' t) => [->|tne]/=; last first.
+    by case: ifP => _; rewrite !inE ?xpair_eqE ?(negbTE tne) ?andbF//.
+  by rewrite eq_sym; case: ifP => _; rewrite !inE ?xpair_eqE ?eqxx//.
+case: (eqVneq u (f_sum x - s - t)) => [->|une]/=; last first.
+  rewrite cards0 !mul0r; apply/esym/big_pred0 => -[w1 w2].
+  rewrite !inE /share_map !xpair_eqE /=; apply/negbTE.
+  by apply: contra une => /andP[/andP[/eqP-> /eqP->] h]; rewrite eq_sym.
+rewrite cards1 (big_pred1 (s, t)); last first.
+  move=> -[w1 w2]; rewrite !inE /share_map !xpair_eqE /=.
+  by case: (eqVneq w1 s) => [->|?]//=; case: (eqVneq w2 t) => [->|?]//=;
+    rewrite eqxx.
+by rewrite mul1r mulrC /P_Omega tensorE /unif2 !fdist_uniformE card_F2
+  -invfM -natrM; apply: count_mass.
+Qed.
+
+(* The view and the honest shares are conditionally dependent given the
+   conditioner. *)
+Lemma not_cinde_honest : ~ (exec_law |= view_rv _|_ honest_rv | cond_rv).
+Proof.
+move=> h; have := h ((0, 0), 0) (0, 0) (x0, 0); rewrite !cpr_eqE pfwd1_cond.
+rewrite (pfwd1_cardE [% view_rv, honest_rv, cond_rv]) card_vh_cond.
+rewrite (pfwd1_cardE [% view_rv, cond_rv]) card_v_cond.
+by rewrite (pfwd1_cardE [% honest_rv, cond_rv]) card_h_cond => h1; lra.
+Qed.
+
+(* def:smc:output-independence *)
+(* The view and the conditioner together determine the honest shares, so the
+   conditional entropy of the honest shares given both vanishes. *)
+Lemma centropy_view_honest0 :
+  `H( honest_rv | [% view_rv, cond_rv] ) = 0.
+Proof.
+exact: (centropy_RV_comp0 [% view_rv, cond_rv]
+  (fun p => (p.1.2, f_sum p.2.1 - p.2.2 - p.1.2))).
+Qed.
+
+(* The recoding sends the conditioner and the share of party two to the
+   conditioner and the honest shares. *)
+Definition recode (p : (X3 * F2) * F2) : (X3 * F2) * (F2 * F2) :=
+  (p.1, (p.2, f_sum p.1.1 - p.1.2 - p.2)).
+
+(* The recoding is injective. *)
+Lemma recode_inj : injective recode.
+Proof. by move=> [c t] [c' t'] [-> -> _]. Qed.
+
+(* The joint law of the conditioner and the honest shares is the transport
+   along the recoding of the joint law of the conditioner and the share of
+   party two.
+   Naming: joint_<variables>_<map> is intentional, the variables-first order
+   of this file, naming the joint law before the map that carries it. *)
+Lemma joint_cond_honest_recode :
+  `p_ [% cond_rv, honest_rv] = fdistmap recode (`p_ [% cond_rv, y2_rv]).
+Proof.
+by rewrite /dist_of_RV fdistmap_comp.
+Qed.
+
+(* The law of the share delivered to party two is uniform. *)
+Lemma y2_lawE : `p_ y2_rv = unif2.
+Proof.
+by apply/fdist_ext => t; rewrite dist_of_RVE pfwd1_y2 fdist_uniformE card_F2.
+Qed.
+
+(* The share delivered to party two and the conditioner are independent. *)
+Lemma joint_y2_cond :
+  `p_ [% y2_rv, cond_rv] = (`p_ y2_rv `x `p_ cond_rv)%fdist.
+Proof.
+apply/fdist_ext => -[t [x s]]; rewrite fdist_prodE !dist_of_RVE pfwd1_y2_cond.
+by rewrite pfwd1_y2 pfwd1_cond -invfM -natrM.
+Qed.
+
+(* Given the conditioner the share delivered to party two has conditional
+   entropy log 2. *)
+Lemma centropy_y2_cond : `H( y2_rv | cond_rv ) = log 2%:R :> R.
+Proof.
+have Hprod : `p_ [% y2_rv, cond_rv]
+  = ((`p_ [% y2_rv, cond_rv])`1 `x (`p_ [% y2_rv, cond_rv])`2)%fdist.
+  by rewrite fst_RV2 snd_RV2 joint_y2_cond.
+rewrite /centropy_RV (centropy_indep Hprod) fst_RV2 y2_lawE.
+by rewrite entropy_uniform card_F2.
+Qed.
+
+(* def:smc:output-independence *)
+(* Given the conditioner alone the honest shares have conditional entropy
+   log 2.
+   Naming: centropy_<conditioned>_<conditioner> is intentional, the
+   convention of this file naming a lemma after the variables it relates. *)
+Lemma centropy_honest_cond : `H( honest_rv | cond_rv ) = log 2%:R :> R.
+Proof.
+have hjoint : `H(cond_rv, honest_rv) = `H(cond_rv, y2_rv).
+  rewrite /joint_entropy_RV /joint_entropy joint_cond_honest_recode.
+  by rewrite (entropy_fdistmap _ recode_inj).
+move: (chain_rule_RV cond_rv honest_rv); rewrite hjoint.
+by rewrite (chain_rule_RV cond_rv y2_rv) => /addrI <-; exact: centropy_y2_cond.
+Qed.
+
+(* def:smc:output-independence *)
+(* The conditional entropy of the honest shares given the conditioner changes
+   when the view joins the conditioning.
+   Naming: centropy_<conditioner joined>_<conditioned>_neq is intentional, the
+   convention of this file naming a lemma after the variables it relates. *)
+Lemma centropy_view_honest_neq :
+  `H( honest_rv | [% view_rv, cond_rv] ) <> `H( honest_rv | cond_rv ).
+Proof.
+rewrite centropy_view_honest0 centropy_honest_cond log2.
+by move/eqP; rewrite eq_sym oner_eq0.
+Qed.
+
+(* The adversary's part of an input. *)
+Let proj_xa (x : X3) : F2 := x.1.1.
+
+(* The honest parties' part of an input. *)
+Let proj_xh (x : X3) : (F2 * F2)%type := (x.1.2, x.2).
+
+(* The adversary's part of the delivered shares. *)
+Let proj_ya (s : (F2 * F2) * F2) : F2 := s.1.1.
+
+(* The honest parties' part of the delivered shares. *)
+Let proj_yh (s : (F2 * F2) * F2) : (F2 * F2)%type := (s.1.2, s.2).
+
+(* The run of an execution delivers the three shares. *)
+Let run (e : X3 * (F2 * F2)%type) : (F2 * F2) * F2 := share_map e.1 e.2.
+
+(* The view at an execution. *)
+Let view_at (e : X3 * (F2 * F2)%type) : (F2 * F2) * F2 :=
+  ((e.1.1.1, e.2.1), e.2.2).
+
+(* The adversary's delivered share read off a view. *)
+Let out_adv (v : (F2 * F2) * F2) : F2 := v.1.2.
+
+(* The aggregation of the run recovers the function at every execution.
+   Naming: _correct marks agreement with the specified function, the
+   file's convention for specification-conformance statements. *)
+Lemma run_correct (e : X3 * (F2 * F2)%type) : agg (run e) = f_sum e.1.
+Proof.
+by case: e => x [w1 w2]; rewrite /agg /run /share_map/= addrCA addrK subrK.
+Qed.
+
+(* Every ancilla has mass one quarter. *)
+Let P_OmegaE (w : F2 * F2) : P_Omega w = 4%:R^-1.
+Proof.
+by case: w => w1 w2; rewrite /P_Omega tensorE /unif2 !fdist_uniformE card_F2
+  -invfM -natrM.
+Qed.
+
+(* The view kernel at an input is the ancilla law on the two shares the
+   adversary sees, at its own bit. *)
+Lemma view_kernelE (c a s t : F2) :
+  fdistmap (fun w : F2 * F2 => ((c, w.1), w.2)) P_Omega ((a, s), t)
+  = (c == a)%:R * 4%:R^-1.
+Proof.
+rewrite fdistmapE; case: (eqVneq c a) => [->|cne]/=; last first.
+  rewrite mul0r; apply: big_pred0 => -[w1 w2].
+  by rewrite !inE !xpair_eqE/= (negbTE cne).
+rewrite mul1r (big_pred1 (s, t)); first exact: P_OmegaE.
+by move=> -[w1 w2]; rewrite !inE !xpair_eqE/= eqxx.
+Qed.
+
+(* The allowed-information kernel at an input is the uniform law on the
+   adversary's share, at its own bit. *)
+Lemma allow_kernelE (c a s : F2) :
+  fdistmap (fun w : F2 * F2 => (c, w.1)) P_Omega (a, s) = (c == a)%:R * 2%:R^-1.
+Proof.
+have -> : fdistmap (fun w : F2 * F2 => (c, w.1)) P_Omega
+        = tensor (fdist1 c) unif2.
+  have <- : P_Omega`1 = unif2 by rewrite /P_Omega /tensor fdist_prod1.
+  by rewrite tensor_fdist1 /fdist_fst fdistmap_comp.
+by rewrite tensorE fdist1E eq_sym /unif2 fdist_uniformE card_F2.
+Qed.
+
+(* def:smc:perfect-privacy *)
+(* The view law at an input is the allowed-information law of that input bound
+   through the simulator.
+   Naming: _holds marks an instance proof of the named predicate; no
+   canonical suffix covers a Prop-valued instance lemma. *)
+Lemma triangle_holds :
+  triangle proj_xa proj_ya functionality P_Omega view_at sim.
+Proof.
+move=> x; apply/fdist_ext => -[[a s] t].
+have -> : fdistmap (fun yl => (proj_xa x, proj_ya yl)) (functionality x)
+        = fdistmap (fun w : F2 * F2 => (proj_xa x, w.1)) P_Omega.
+  by rewrite /functionality fdistmap_comp; apply: eq_fdistmap.
+rewrite [LHS]view_kernelE fdistbindE (bigD1 (a, s))//= big1 ?addr0; last first.
+  by move=> b bne; rewrite /sim tensorE fdist1E eq_sym (negbTE bne) mul0r mulr0.
+rewrite allow_kernelE /sim tensorE fdist1E eqxx mul1r.
+by rewrite /unif2 fdist_uniformE card_F2 -mulrA -invfM -natrM.
+Qed.
+
+(* The simulator achieves perfect privacy.
+   Naming: _holds marks an instance proof of the named predicate; no
+   canonical suffix covers a Prop-valued instance lemma. *)
+Lemma perfect_privacy_holds :
+  perfect_privacy proj_xa proj_ya functionality P_Omega view_at sim.
+Proof. exact/triangle_perfect_privacyP/triangle_holds. Qed.
+
+(* The execution at the all-zero input and the ancilla with a one in the
+   second slot. *)
+Let pt1 : X3 * (F2 * F2)%type := (x0, (0, 1)).
+
+(* Two executions sharing an input and an adversary share deliver different
+   honest shares. *)
+Let yh_differs : proj_yh (run pt0) <> proj_yh (run pt1).
+Proof.
+rewrite /proj_yh /run /share_map /pt0 /pt1 /=; apply/eqP.
+by rewrite xpair_eqE eq_sym oner_eq0.
+Qed.
+
+(* The honest shares are not a function of the input. *)
+Lemma not_output_det :
+  ~ (exists g : X3 -> (F2 * F2)%type, forall e, proj_yh (run e) = g e.1).
+Proof. by case=> g hg; apply: yh_differs; rewrite !hg. Qed.
+
+(* The honest shares are not a function of the input and the adversary's
+   delivered share. *)
+Lemma not_output_determined :
+  ~ (exists g : X3 -> F2 -> (F2 * F2)%type,
+       forall e, proj_yh (run e) = g e.1 (proj_ya (run e))).
+Proof. by case=> g hg; apply: yh_differs; rewrite !hg. Qed.
+
+(* The output read off the view of an execution is the adversary's delivered
+   share. *)
+Let readoff (e : X3 * (F2 * F2)%type) : out_adv (view_at e) = proj_ya (run e).
+Proof. by []. Qed.
+
+(* The prior has full support. *)
+Let mu_full (x : X3) : mu x != 0.
+Proof. by rewrite fdist_uniformE card_X3 invr_eq0 pnatr_eq0. Qed.
+
+(* The split of an input into the adversary's and the honest parties' parts is
+   injective. *)
+Let split_inj : injective (fun x => (proj_xa x, proj_xh x)).
+Proof.
+by move=> [[a b] c] [[a' b'] c']; rewrite /proj_xa /proj_xh /= => -[-> -> ->].
+Qed.
+
+(* The honest parties' part of the input. *)
+Let xh_rv : {RV exec_law -> (F2 * F2)%type} := proj_xh \o fst.
+
+(* The honest parties' part of the delivered shares. *)
+Let yh_rv : {RV exec_law -> (F2 * F2)%type} := fun e => proj_yh (run e).
+
+(* The adversary's part of the input. *)
+Let xa_rv : {RV exec_law -> F2} := proj_xa \o fst.
+
+(* The adversary's part of the delivered shares. *)
+Let ya_rv : {RV exec_law -> F2} := fun e => proj_ya (run e).
+
+(* The adversary's view. *)
+Let v_rv : {RV exec_law -> ((F2 * F2) * F2)%type} := view_at.
+
+(* eq:smc:entropy *)
+(* The conditional entropy of the honest parties' inputs and delivered shares
+   given the adversary's own changes when the view joins the conditioning.
+   Naming: chapter names the thesis equality eq:smc:entropy whose two sides
+   this lemma separates; the conditioned pair and the conditioner follow
+   that statement rather than the file's variable convention. *)
+Lemma centropy_chapter_neq :
+  `H( [% xh_rv, yh_rv] | [% v_rv, [% xa_rv, ya_rv]] )
+  <> `H( [% xh_rv, yh_rv] | [% xa_rv, ya_rv] ).
+Proof.
+move=> heq.
+have [Sim [_ _ hoi]] :=
+  centropy_to_sim readoff mu_full split_inj (fun=> erefl) heq.
+exact: not_cinde_honest hoi.
+Qed.
+
+End instance.
+End share_leak.
