@@ -287,7 +287,11 @@ def call_agent(prompt: str, model: str, schema: dict, budget_usd: float = 1.0, t
              "--agent", "rocq-auditor",
              "--model", model,
              "--output-format", "json",
-             "--json-schema", json.dumps(schema),
+             # The claude CLI's --json-schema validator rejects the
+             # draft-2020-12 "$schema" reference; strip meta keys.
+             "--json-schema", json.dumps(
+                 {k: v for k, v in schema.items()
+                  if k not in ("$schema", "$id")}),
              "--allowedTools", "Read,Grep,Glob",
              "--disallowedTools", "Edit,Write,Bash",
              "--disable-slash-commands",
