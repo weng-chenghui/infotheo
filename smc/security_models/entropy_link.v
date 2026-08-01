@@ -38,6 +38,10 @@ Require Import jfdist_cond entropy graphoid.
 (*          centropy_to_sim == the entropy equality yields a simulator        *)
 (*  perfect_privacy_centropyP == a simulator exists exactly when the honest   *)
 (*                               pair has that conditional entropy            *)
+(* perfect_privacy_cond_mutual_info0P == a simulator exists exactly when the  *)
+(*                                       conditional mutual information of    *)
+(*                                       the view and the honest pair given   *)
+(*                                       the allowed information vanishes     *)
 (*    output_independent_det == real-deterministic delivery discharges the    *)
 (*                              output-independence clause                    *)
 (* output_independent_determined == output-determined delivery discharges it  *)
@@ -386,6 +390,25 @@ Lemma perfect_privacy_centropyP :
 Proof.
 move=> Hsplit H0; split=> [[Sim [Hc Ht Hi]]|Heq]; last exact: centropy_to_sim.
 exact: (perfect_privacy_centropy_eq H0 Hc Ht Hi).
+Qed.
+
+(* Under delivery-law correctness and an injective input split, a consistent
+   simulator closing the privacy triangle with output independence exists
+   exactly when the conditional mutual information of the view and the honest
+   pair given the allowed information vanishes.
+   Naming: P = iff characterization, ffunP/setP precedent; the right-hand side
+   is named by its head symbol cond_mutual_info and the value 0 it takes. *)
+Lemma perfect_privacy_cond_mutual_info0P :
+  injective (fun x => (proj_xa x, proj_xh x)) ->
+  delivery_law_ok ->
+  ((exists Sim, [/\ consistent Sim, triangle Sim & output_independent])
+   <-> cond_mutual_info
+         `p_[% view_rv, [% xh_rv, yh_rv], [% xa_rv, ya_rv]] = 0).
+Proof.
+move=> Hsplit H0.
+have Hiff := perfect_privacy_centropyP Hsplit H0.
+split=> [/Hiff/centropy_eq_cinde/cinde_cond_mutual_info0//|H].
+by apply/Hiff; apply/cinde_centropy_eq/cond_mutual_info0_cinde.
 Qed.
 
 (* Real-deterministic delivery discharges the output-independence condition. *)
