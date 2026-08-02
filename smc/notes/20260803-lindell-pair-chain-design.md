@@ -257,6 +257,22 @@ single-input (_at is the content); D8 shadowing decision recorded in
 Landing layout; D9 instantiation ergonomics (explicit readoff argument,
 named implicits, @-qualification for R).
 
+Post-landing (2026-08-03): commits 6f695545 (library homes, gated) and
+1709bcb6 (the chain, checkpointed --no-verify after the Stage-2 gate
+exceeded its budget on the 861-line diff).  Whole-file two-stage
+audits on entropy_link.v (clean) and examples_f3.v: A002 ERROR in
+merged_output.real_ideal_pair_neq (congr1 without Fallback) FIXED by
+the audit's own sketch (have := real_pair_zero; rewrite through the
+pair equality); G001 ERROR on rerouted_key's conditional
+delivery_law_ok REJECTED as a rename — the identical pattern is landed
+in share_leak and dealt_key_leak with Naming notes and the D7
+ordering, and renaming would cascade into landed thesis citations —
+mitigated by extending the Naming note (deliberate module-local
+shadowing, order load-bearing) on both fresh sites.  Thesis-touchpoint
+deviation: the extra prop:smc:entropy-characterization sidenote
+("the joint-pair form is pair_eqP") was SKIPPED — the chain figure sits
+adjacent and its caption already names pair_eqP and both composites.
+
 Round 2 (2026-08-03): D10 output-independence via `cinde_RV_factor`
 (proba.v:2448), no cpr computation; D11 `split_y_inj` needed only in
 the converse — declared as a late section Hypothesis so discharge
