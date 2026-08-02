@@ -79,6 +79,46 @@ dealt_key_leak independence, masking_verdicts triangle — whose
 hand-derivation at examples_f3.v:411 is exactly pair_eq_triangle's
 contrapositive, now generalized).
 
+## Landing rename map (naming audit round 3, all accepted)
+
+Structure (N04, D8 ruling): the generic block lands as
+`Module pair_readoff` inside entropy_link.v (drop `_core` — status
+narration); every instance use site references it qualified; the landed
+examples_f3 `real_pair`/`ideal_pair`/`ideal_pair_of` family is
+UNCHANGED.  N03: the module gains
+`Definition pair_eq S := forall x, real_pair x = ideal_pair_of S x`
+so the `pair_eq_*` names have a real main symbol; headline statements
+go through it.
+
+| probe name | landing name | finding |
+|---|---|---|
+| `snd_real_pairE`, `fst_real_pairE`, `snd_ideal_pair_ofE`, `fst_ideal_pair_ofE` | `snd_marginal_real_pairE`, `fst_marginal_real_pairE`, `snd_marginal_ideal_pairE`, `fst_marginal_ideal_pairE` (one spelling with the landed family) | N01 BLOCKER |
+| `ideal_pair_atE` | DELETED (state the section folded; `ideal_pair_ofE` alone discharges the instances) | N02 BLOCKER |
+| `pair_eq_simP` | `pair_eqP` (fixed-S iff) | N18 |
+| `pair_eqP` (existential) | `exists_pair_eqP` (matches the file's exists_/not_exists_ prefixes) | N18 |
+| `pair_eq_delivery` | `pair_eq_delivery_law` | N16 |
+| `pair_eq_consistent_at` | `pair_eq_consistent_at_input` (the file spells the one-input sense out) | N15 |
+| `conditions_pair_eq` | KEPT (adjudicated over pair_eq_of_conditions; entropy.v's cinde_centropy_eq precedent) + Naming line | N17 |
+| `pfwd1_view_yh_cond`, `pfwd1_yh_cond_deliveryE` | `pfwd1_view_yh_input_ya`, `pfwd1_yh_input_ya_delivery` (`_cond` is reserved for cond_rv) | N05 |
+| `pfwd1_ev_eq` | `pfwd1_congr_preim`, HOME probability/proba.v beside pfwd1_congr_almost_sure | N06 |
+| `pfwd1_input_of_pair`, `pfwd1_view_yh_pairE` | `pfwd1_input_real_pair`, `pfwd1_view_yh_real_pair` | N19, N20 |
+| `eq_split_y` + Hypothesis `split_y_inj` | `Let split_y y := (proj_ya y, proj_yh y)`; lemma becomes `split_y_eqE` (inline if single-use) | N09, N10 |
+| `fdistmap_neq0_ex` | `fdistmap_neq0P` as a reflect, HOME probability/fdist.v after fdistmap_neq0 | N08 |
+| `fdistbind_supp_pred` | `fdistbind_neq0_pred`, HOME probability/fdist.v with the fdistbind block | N07 |
+| `fdistmap_supp_pred`, `fdistmap_supp_cst` | NOT LANDED — derived from fdistmap_neq0P at the use sites (derivations compile, audit_nam_redundancy.v) | N07/N08 |
+| `pair_eq_needs_split` | `conditions_pair_neq_without_split` | N11 |
+| Module `split_counterexample` | Module `merged_output` in examples_f3.v after rerouted_key (protocol-named like every sibling; header row + intro sentence required) | N12 |
+| `split_counterexample.S`, `.F` | `sim`, `functionality` | N13 |
+| `real_pair_at`, `real_pair_at_diag`, `ideal_pair_at` | `real_pair_zero`, `real_pair_diag_val`, `ideal_pair_val` (landed evaluation family) | N14 |
+| `real_ideal_pair_eq_via_conditions` | `real_ideal_pair_eq_holds`; the reverse round-trip lemma DROPPED (re-derives pair_eqP's output) | N23 |
+| `not_exists_pair_eq` (biased_key) | DROPPED (duplicates landed not_exists_ideal_pair) | N24 |
+| `exists_pair_eq` (rerouted_key) | `exists_ideal_pair` | N25 |
+
+Also at landing: Naming: lines per the audit's F001 obligation list
+(including the PROPOSED renames that newly trigger, and the
+pre-existing `real_ideal_pair_neq` in both modules — N22);
+`fdistmap_ideal_pair_ofE` kept with a Naming line (N21).
+
 ## Landing layout (decided)
 
 - Generic: `real_pair`, `ideal_pair_of`, L3-L7, K1-K6 into entropy_link.v's
