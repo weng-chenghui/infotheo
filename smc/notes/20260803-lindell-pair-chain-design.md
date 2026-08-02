@@ -22,15 +22,24 @@ entropy_link.v's section:
           & output_independent]
   pair_eqP : the exists-S packaging of both sides.
 
-After landing, the chain reads (every arrow a named Qed):
+After landing, the chain reads (every arrow a named Qed; CORRECTED per
+chain-audit F1 — delivery_law_ok is a conjunct of EVERY node below the
+first, because F does not occur in the entropy statement and the
+entropy equality alone cannot recover it; machine-checked refutation
+delivery_gap.centropy_needs_delivery in audit_chain_compose.v):
 
   Lindell joint equality (exists S, forall x, pair equality)
-    <->  [pair_eqP]
+    <->  [exists_pair_eqP]
   delivery_law_ok /\ exists S (consistent /\ triangle /\ output_indep)
-    <->  [perfect_privacy_centropyP; needs injective input split]
-  H(Xh,Yh | V, XA, YA) = H(Xh,Yh | XA, YA)
-    <->  [perfect_privacy_cond_mutual_info0P]
-  I((Xh,Yh); V | XA, YA) = 0
+    <->  [perfect_privacy_centropyP under the delivery conjunct]
+  delivery_law_ok /\ H(Xh,Yh | V, XA, YA) = H(Xh,Yh | XA, YA)
+    <->  [perfect_privacy_cond_mutual_info0P under the delivery conjunct]
+  delivery_law_ok /\ I((Xh,Yh); V | XA, YA) = 0
+
+The composed closed forms LAND alongside the edges (audit's
+chain_lindell_centropyP / chain_lindell_cmiP, renamed to the file's
+convention): `exists_pair_eq_centropyP` and
+`exists_pair_eq_cond_mutual_info0P`, both inside Module pair_readoff.
 
 with side edges: triangle <-> def:smc:perfect-privacy
 [triangle_perfect_privacyP]; both pairs concentrate on the read-off
@@ -149,10 +158,16 @@ pre-existing `real_ideal_pair_neq` in both modules — N22);
   delivery nor mu_full.  The converse of consistency-from-pair fails at
   dealt_key_leak (consistent + triangle + delivery, yet
   real_ideal_pair_neq).
-- Quantifier bridge: Lindell is per-input; the entropy end is drawn-input;
-  full support + injective INPUT split convert (perfect_privacy_centropyP
-  hypotheses).  pair_eqP itself is per-input on both sides and needs
-  neither; K5 introduces the OUTPUT split injectivity instead.
+- Quantifier bridge (CORRECTED per chain-audit F3/F4): the pair-equality
+  side is per-input, but the three-condition side already mixes in the
+  drawn input (consistent and output_independent are statements over
+  mu `x P_Omega), and the audit read the consumed hypotheses off the
+  discharged types: the forward direction of the top edge consumes
+  readoff ONLY; the converse consumes readoff + mu_full + split_y_inj
+  (+ delivery); the centropy edge consumes readoff + mu_full +
+  split_x_inj + delivery.  mu_full therefore sits on BOTH arrows, not
+  only the centropy one — the diagram caption and the thesis sentence
+  must say so.
 
 ## Whole-chain audit (user directive; after landing)
 
@@ -196,15 +211,37 @@ uncommitted dealt-key rewrite — these edits stack on it)
 
 ## Plan (one atomic task per commit)
 
-1. Round-2 probe (in flight, same agent as round 1).
-2. Fold back deviations; re-commit this spec.
-3. Naming + whole-chain soundness audits in parallel (audit prompts per
-   the section above); fold back; re-commit.
-4. Land: finstoch helpers commit; entropy_link generic section + module
-   instances commit; golf (bodies only); axioms; gate UNBYPASSED.
-5. Thesis: convention passage + chain diagram + sidenotes; build;
-   commit decision deferred to the user (the dealt-key rewrite is still
-   under review in the working tree).
+1. Round-2 probe — DONE.
+2. Fold back deviations — DONE (daa441ff).
+3. Naming + whole-chain soundness audits — DONE (both NO-GO folded:
+   rename map above, F1-F10 here); re-commit — this commit.
+4. Land, commit A (library homes): probability/fdist.v gains
+   `fdistmap_neq0P` (reflect, after fdistmap_neq0) and
+   `fdistbind_neq0_pred` (with the fdistbind block); probability/proba.v
+   gains `pfwd1_congr_preim` (beside pfwd1_congr_almost_sure);
+   compile the build closure; gate.
+5. Land, commit B: entropy_link.v Module pair_readoff (folded
+   statements, rename map, Naming lines, Let split_y, the F8-folded
+   necessity certificate stated self-contained with mu_full and
+   ~ split_y_inj inside the conjunction, composed closed forms
+   exists_pair_eq_centropyP / exists_pair_eq_cond_mutual_info0P);
+   examples_f3.v instances (renamed; Module merged_output after
+   rerouted_key with header row + intro sentence; F6 coverage:
+   rerouted_key gains the node-3/node-4 positive instances
+   (centropy_chapter_eq-style + cmi0), dealt_key_leak gains the
+   node-4 negative (cmi != 0, derived from centropy_chapter_neq) and
+   the two-line direct `not_exists_ideal_pair` via
+   pair_eq_output_independent's contrapositive (F7); N22 Naming lines
+   on the landed real_ideal_pair_neq pair); compile; golf (bodies
+   only); axioms; gate UNBYPASSED.
+6. Thesis: convention passage + chain diagram (delivery carried in
+   boxes 2-4 per F1; mu_full on both top arrows per F4; caption states
+   the perfect-case reading per F9 and the exact-equality vs
+   indistinguishability wording) + prop:smc:entropy-characterization
+   gains the injective-input-split clause (F5) + table footnote b
+   re-pointed at the direct dealt_key_leak.not_exists_ideal_pair (F7);
+   build; commit decision deferred to the user (the dealt-key rewrite
+   is still under review in the working tree).
 
 ## Deviations / findings folded back
 
