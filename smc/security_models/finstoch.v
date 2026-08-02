@@ -152,9 +152,8 @@ Qed.
 Lemma tensor_fdist1r (A B : finType) (p : R.-fdist A) (b : B) :
   tensor p (fdist1 b) = fdistmap (fun a => (a, b)) p.
 Proof.
-apply/fdist_ext => -[a' b']; rewrite tensorE fdistmapE fdist1E.
-under eq_bigl do rewrite !inE /= xpair_eqE.
-by rewrite big_mkcondr big_pred1_eq eq_sym mulr_natr mulrb.
+by rewrite /tensor -fdistX_prod -/(tensor (fdist1 b) p) tensor_fdist1 /fdistX
+   fdistmap_comp.
 Qed.
 
 (* Transport along a map commutes with a bind, the map moving inside the
