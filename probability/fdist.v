@@ -381,10 +381,9 @@ Lemma fdistbind_neq0_pred (p : fdist R A) (g : A -> fdist R B) (Q : pred B) :
   (forall a, p a != 0 -> forall b, g a b != 0 -> Q b) ->
   forall b, (p >>= g) b != 0 -> Q b.
 Proof.
-move=> hg b; apply: contraNT => hnQ; rewrite fdistbindE; apply/eqP.
-apply: big1 => a _; have [->|pa0] := eqVneq (p a) 0; first by rewrite mul0r.
-suff -> : g a b = 0 by rewrite mulr0.
-by apply/eqP; apply: contraNT hnQ; exact: hg.
+move=> hg b; apply: contraNT => hnQ; rewrite fdistbindE.
+apply/eqP/big1 => a _; have [->|pa0] := eqVneq (p a) 0; first by rewrite mul0r.
+by rewrite (eqP (contraNT (hg a pa0 b) hnQ)) mulr0.
 Qed.
 
 End fdistbind_prop.
@@ -440,11 +439,10 @@ Proof. by apply/contraNN => /eqP /fdistmap_eq0 /eqP. Qed.
 Lemma fdistmap_neq0P (f : A -> B) (d : fdist R A) (b : B) :
   reflect (exists2 a, f a = b & d a != 0) (fdistmap f d b != 0).
 Proof.
-apply: (iffP idP) => [h|[a fab da]]; last by rewrite -fab; exact: fdistmap_neq0.
+apply: (iffP idP) => [h|[a <- da]]; last exact: fdistmap_neq0.
 have /existsP[a /andP[/eqP fa da]] : [exists a, (f a == b) && (d a != 0)].
-  apply: contraNT h => /existsPn hall; rewrite fdistmapE; apply/eqP.
-  apply: big1 => a fab; apply/eqP; move: (hall a).
-  by rewrite (fab : f a == b)/= negbK.
+  apply: contraNT h => /existsPn hall; rewrite fdistmapE; apply/eqP/big1 => a.
+  by move=> fab; apply/eqP; move: (hall a); rewrite (fab : f a == b)/= negbK.
 by exists a.
 Qed.
 

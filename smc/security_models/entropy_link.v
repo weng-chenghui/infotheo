@@ -533,11 +533,9 @@ Qed.
 Lemma ideal_pair_ofE (Sim : Xa * Ya -> R.-fdist Bv) (x : X) (q : Bv * Yfull) :
   ideal_pair_of Sim x q = F x q.2 * Sim (proj_xa x, proj_ya q.2) q.1.
 Proof.
-case: q => v y; rewrite /ideal_pair_of fdistbindE (bigD1 y)//= big1 ?addr0;
-  last first.
-  move=> y' y'ne; rewrite tensorE fdist1E eq_sym (negbTE y'ne).
-  by rewrite mulr0 mulr0.
-by rewrite tensorE fdist1E eqxx mulr1.
+case: q => v y; rewrite /ideal_pair_of fdistbindE (bigD1 y)//= tensorE.
+rewrite fdist1E eqxx mulr1 big1 ?addr0// => y' y'ne.
+by rewrite tensorE fdist1E eq_sym (negbTE y'ne) mulr0 mulr0.
 Qed.
 
 (* At a simulator consistent on the support of the functionality, the ideal
@@ -549,13 +547,8 @@ Lemma ideal_pair_readoff (Sim : Xa * Ya -> R.-fdist Bv) (x : X) (v : Bv)
      fdistmap out_adv (Sim (proj_xa x, proj_ya y')) = fdist1 (proj_ya y')) ->
   ideal_pair_of Sim x (v, y) != 0 -> out_adv v = proj_ya y.
 Proof.
-move=> hcons h; apply/eqP; move: h; rewrite /ideal_pair_of.
-apply: (fdistbind_neq0_pred (Q := fun q : (Bv * Yfull)%type =>
-                                    out_adv q.1 == proj_ya q.2)).
-move=> y' hy' [v' y''] /=; rewrite tensorE fdist1E.
-have [->|y''ne] := eqVneq y'' y'; last by rewrite mulr0 eqxx.
-rewrite mulr1 => hSv; apply: contraNT hSv => hne; apply/eqP.
-exact: (sim_supp0 (hcons y' hy') hne).
+move=> hcons; rewrite ideal_pair_ofE/= mulf_eq0 negb_or => /andP[hF hSv].
+by apply/eqP; apply: contraNT hSv => /(sim_supp0 (hcons y hF))/eqP.
 Qed.
 
 (* At an input where the two joint laws agree, the simulator reads off to
@@ -569,16 +562,10 @@ Lemma pair_eq_consistent_at_input (Sim : Xa * Ya -> R.-fdist Bv) (x : X) :
 Proof.
 move=> hpair y /fdistmap_neq0P[y0 hy0 hFy0].
 have hread : forall v, Sim (proj_xa x, y) v != 0 -> out_adv v = y.
-  move=> v hSv; rewrite -hy0.
-  apply: (real_pair_readoff (x := x) (v := v) (y := y0)).
+  move=> v hSv; rewrite -hy0; apply: (real_pair_readoff (x := x)).
   by rewrite hpair ideal_pair_ofE/= hy0 mulf_neq0.
-apply/fdist_ext => y'; rewrite fdist1E.
-have [->|yne] := eqVneq y' y.
-  rewrite -[RHS](FDist.f1 (Sim (proj_xa x, y))) fdistmapE big_mkcond/=.
-  apply: eq_bigr => v _; case: ifP => // /negbT; rewrite inE/= => hne.
-  by apply/esym/eqP; apply: contraNT hne => /hread ->.
-have -> : (false%:R : R) = 0 by [].
-by apply/eqP; apply: contraNT yne => /fdistmap_neq0P[v /esym -> /hread ->].
+apply/eqP; rewrite -fdist1E1; apply/fdist1P => y' y'ne; apply/eqP.
+by apply: contraNT y'ne => /fdistmap_neq0P[v /esym -> /hread ->].
 Qed.
 
 (* Under delivery-law correctness, a simulator whose ideal joint law is the
@@ -588,9 +575,9 @@ Lemma pair_eq_consistent (Sim : Xa * Ya -> R.-fdist Bv) :
   consistent proj_xa proj_ya P_Omega run out_adv mu Sim.
 Proof.
 move=> hdel hpair a y; rewrite -dist_of_RVE /dist_of_RV.
-case/fdistmap_neq0P => -[x w] [/= hxa hya] hd.
-move: hd; rewrite fdist_prodE mulf_eq0 negb_or => /andP[hmu hPw].
-rewrite -hxa; apply: (pair_eq_consistent_at_input (hpair x)).
+case/fdistmap_neq0P => -[x w] [/= hxa hya].
+rewrite fdist_prodE mulf_eq0 negb_or => /andP[_ hPw]; rewrite -hxa.
+apply: (pair_eq_consistent_at_input (hpair x)).
 by rewrite -(hdel x) fdistmap_comp -hya; exact: fdistmap_neq0 hPw.
 Qed.
 
@@ -623,13 +610,9 @@ Lemma fst_marginal_ideal_pairE (Sim : Xa * Ya -> R.-fdist Bv) (x : X) :
   fdistmap fst (ideal_pair_of Sim x)
   = (fdistmap (fun yl => (proj_xa x, proj_ya yl)) (F x)) >>= Sim.
 Proof.
-have -> : (fdistmap (fun yl => (proj_xa x, proj_ya yl)) (F x)) >>= Sim
-        = F x >>= (fun y => Sim (proj_xa x, proj_ya y)).
-  rewrite /fdistmap fdistbindA; congr (fdistbind _ _).
-  by apply/boolp.funext => y; rewrite fdist1bind.
-rewrite /ideal_pair_of fdistmap_bind; congr (fdistbind _ _).
-apply/boolp.funext => y; rewrite tensor_fdist1r fdistmap_comp.
-by rewrite -[RHS]fdistmap_id; apply: eq_fdistmap.
+rewrite /ideal_pair_of fdistmap_bind [in RHS]/fdistmap fdistbindA.
+congr (fdistbind _ _); apply/boolp.funext => y; rewrite fdist1bind.
+by rewrite tensor_fdist1r fdistmap_comp -[RHS]fdistmap_id; apply: eq_fdistmap.
 Qed.
 
 (* The joint equality gives the delivery law.
@@ -694,12 +677,9 @@ Lemma pfwd1_view_yh_input_ya (Sim : Xa * Ya -> R.-fdist Bv) (v : Bv) (h : Yh)
     * Sim (proj_xa x, s) v.
 Proof.
 move=> hpair.
-transitivity (`Pr[ [% input_rv,
-  ((fun e => ((view_at e, proj_yh (run e)), proj_ya (run e)))
-     : {RV d -> ((Bv * Yh) * Ya)%type})] = (x, ((v, h), s)) ]).
-  apply: pfwd1_congr_preim => u; rewrite !xpair_eqE/=.
-  by case: (view_at u == v); case: (proj_yh (run u) == h);
-     case: (u.1 == x); case: (proj_ya (run u) == s).
+transitivity (`Pr[ [% input_rv, ((fun e => ((view_at e, proj_yh (run e)),
+  proj_ya (run e))) : {RV d -> ((Bv * Yh) * Ya)%type})] = (x, ((v, h), s)) ]).
+  by apply: pfwd1_congr_preim => u; rewrite !xpair_eqE/= andbCA.
 rewrite (pfwd1_input_real_pair
   (fun q : Bv * Yfull => ((q.1, proj_yh q.2), proj_ya q.2))).
 by rewrite hpair fdistmap_ideal_pair_ofE mulrA.
@@ -748,8 +728,7 @@ Proof.
 move=> hdel.
 transitivity (`Pr[ [% input_rv, (run : {RV d -> Yfull})] = (x, y) ]).
   apply: pfwd1_congr_preim => u; rewrite !xpair_eqE/= (split_y_eqE (run u) y).
-  by case: (proj_ya (run u) == proj_ya y); case: (proj_yh (run u) == proj_yh y);
-     case: (u.1 == x).
+  by rewrite andbCA [X in _ && X]andbC.
 by rewrite (pfwd1_input_pair P_Omega mu run) (hdel x).
 Qed.
 
@@ -766,8 +745,7 @@ Proof.
 transitivity (`Pr[ [% input_rv, ((fun e => (view_at e, run e))
                      : {RV d -> (Bv * Yfull)%type})] = (x, (v, y)) ]).
   apply: pfwd1_congr_preim => u; rewrite !xpair_eqE/= (split_y_eqE (run u) y).
-  by case: (view_at u == v); case: (proj_ya (run u) == proj_ya y);
-     case: (proj_yh (run u) == proj_yh y); case: (u.1 == x).
+  by rewrite andbCA -andbA [X in _ && (_ && X)]andbC.
 by rewrite (pfwd1_input_pair P_Omega mu (fun e => (view_at e, run e))).
 Qed.
 
@@ -783,8 +761,7 @@ Lemma conditions_pair_eq (Sim : Xa * Ya -> R.-fdist Bv) :
   pair_eq Sim.
 Proof.
 move=> hdel hcons htri hind x; apply/fdist_ext => -[v y].
-rewrite ideal_pair_ofE/=.
-have [hF|hF] := eqVneq (F x y) 0.
+rewrite ideal_pair_ofE/=; have [hF|hF] := eqVneq (F x y) 0.
   rewrite hF mul0r; apply: (fdistmap_eq0 (f := snd)).
   by rewrite snd_marginal_real_pairE (hdel x).
 have hC : `Pr[ [% input_rv, ya_rv] = (x, proj_ya y) ] != 0.
@@ -798,8 +775,7 @@ have h1 := hind v (proj_yh y) (x, proj_ya y).
 rewrite (triangle_cond_component readoff mu_full hdel hcons htri hC v)
         !cpr_eqE in h1.
 rewrite -[LHS](divfK hC) h1 -mulrA (divfK hC).
-rewrite (pfwd1_yh_input_ya_delivery _ _ hdel).
-by rewrite mulrCA; congr (_ * _); exact: mulrC.
+by rewrite (pfwd1_yh_input_ya_delivery _ _ hdel) mulrC mulrA.
 Qed.
 
 (* The joint equality at a simulator is the conjunction of the delivery law,
@@ -816,8 +792,7 @@ Proof.
 split=> [hpair|[hdel hcons htri hind]]; last exact: conditions_pair_eq.
 split; [exact: pair_eq_delivery_law hpair
        |exact: pair_eq_consistent (pair_eq_delivery_law hpair) hpair
-       |exact: pair_eq_triangle hpair
-       |exact: pair_eq_output_independent hpair].
+       |exact: pair_eq_triangle hpair|exact: pair_eq_output_independent hpair].
 Qed.
 
 (* A simulator making the two joint laws agree exists exactly when the
@@ -853,13 +828,10 @@ Lemma exists_pair_eq_centropyP :
       `H( [% xh_rv, yh_rv] | [% view_rv, [% xa_rv, ya_rv]] )
       = `H( [% xh_rv, yh_rv] | [% xa_rv, ya_rv] ).
 Proof.
-split=> [/exists_pair_eqP[hdel hsim]|[hdel hH]].
-  split=> //.
-  exact: (perfect_privacy_centropyP proj_yh readoff mu_full split_x_inj
-            hdel).1 hsim.
-apply/exists_pair_eqP; split=> //.
-exact: (perfect_privacy_centropyP proj_yh readoff mu_full split_x_inj
-          hdel).2 hH.
+have hP := perfect_privacy_centropyP proj_yh readoff mu_full split_x_inj.
+split=> [/exists_pair_eqP[hdel hsim]|[hdel hH]]; last first.
+  by apply/exists_pair_eqP; split=> //; apply: (hP _ _ hdel).2.
+by split=> //; apply: (hP _ _ hdel).1.
 Qed.
 
 (* A simulator making the two joint laws agree exists exactly when the
@@ -873,13 +845,11 @@ Lemma exists_pair_eq_cond_mutual_info0P :
   <-> delivery_law_ok F P_Omega run /\
       cond_mutual_info `p_[% view_rv, [% xh_rv, yh_rv], [% xa_rv, ya_rv]] = 0.
 Proof.
-split=> [/exists_pair_eqP[hdel hsim]|[hdel hI]].
-  split=> //.
-  exact: (perfect_privacy_cond_mutual_info0P proj_yh readoff mu_full
-            split_x_inj hdel).1 hsim.
-apply/exists_pair_eqP; split=> //.
-exact: (perfect_privacy_cond_mutual_info0P proj_yh readoff mu_full
-          split_x_inj hdel).2 hI.
+have hP := perfect_privacy_cond_mutual_info0P proj_yh readoff mu_full
+             split_x_inj.
+split=> [/exists_pair_eqP[hdel hsim]|[hdel hI]]; last first.
+  by apply/exists_pair_eqP; split=> //; apply: (hP _ _ hdel).2.
+by split=> //; apply: (hP _ _ hdel).1.
 Qed.
 
 End pair_readoff.
