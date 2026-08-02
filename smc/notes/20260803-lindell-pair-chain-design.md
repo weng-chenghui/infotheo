@@ -273,6 +273,22 @@ deviation: the extra prop:smc:entropy-characterization sidenote
 ("the joint-pair form is pair_eqP") was SKIPPED — the chain figure sits
 adjacent and its caption already names pair_eqP and both composites.
 
+FINAL (2026-08-03): whole-chain re-audit on the landed state returned
+GO.  The composed statements are matched by type ascription
+(landed exists_pair_eq_centropyP / _cond_mutual_info0P forced to the
+rebuilt-from-components statement, both elaborate); golf changed no
+statement (mechanical diff scan); all 33 thesis \coqin citations in
+the chain span resolve; node coverage is two-sided at every node.
+Residual minors, dispositions: R1 the 3<->4 arrow annotation composes
+through box 2 — cosmetic, the hypothesis-free entropy<->cmi step
+(centropy_eq_cinde + cinde_cond_mutual_info0 family) can be named on
+the arrow in a future thesis pass; R2 real_ideal_pair_eq_holds vs
+real_ideal_pair_eq duplicate-deletion hazard — N23's ruling stands,
+the statement comment carries the derived-route distinction; R3
+optionally land delivery_gap.centropy_needs_delivery beside
+merged_output to make the caption's F-freeness claim citable —
+recorded as an optional follow-up, the scratch witness is kept.
+
 Round 2 (2026-08-03): D10 output-independence via `cinde_RV_factor`
 (proba.v:2448), no cpr computation; D11 `split_y_inj` needed only in
 the converse — declared as a late section Hypothesis so discharge
