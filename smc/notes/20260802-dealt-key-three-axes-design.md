@@ -209,18 +209,30 @@ in .scratch/ as the mutation record).  Ledger (probe extension):
 | R10 | `real_ideal_pair_eq` | POSITIVE Joint cell: `real_pair x = ideal_pair x` for every x (A2: fdistmap_comp + eq_fdistmap route) |
 | R11 | axioms | boolp trio |
 
-## Row 3 supplements (masking_verdicts; probe extension)
+## Row 3 supplements (masking_verdicts; probed in probe_dealt_key_ext.v)
 
 - Triangle "fails" witness PINNED (A6): `masking_verdicts.insecurity_no_mask`
   — already the every-simulator form `~ (exists S, perfect_privacy ...)`.
-- NEW positive cells: `delivery_law_ok` and an output-independence
-  positive at the trivial output `'I_1` (names follow the module's local
-  vocabulary; deviations recorded at probe time).
-- NEW Joint refutation `not_exists_ideal_pair`: the output space is a
-  singleton, so the pair equality collapses to the view-marginal equality
-  and the refutation reduces to `insecurity_no_mask`.  Decision (A6):
-  formalize directly rather than downgrade the "Joint witnesses are
-  direct" rule.
+- Positive cells (probe D2/D3: instance-suffixed names per the module's
+  local vocabulary, and the predicate form takes `_holds` per F-05):
+  `delivery_law_holds_no_mask`, `output_independent_holds_no_mask`, plus
+  `run_correct_no_mask` for the Square cell (one-line addition at
+  landing; the landed `run_correct` covers the masked execution only).
+  Support definitions `plain_deliver` (the no-mask run; the landed
+  `deliver` is typed for the masked space) and `prior := unif3` (D6).
+- Joint refutation (probe D1 — the single-input form is FALSE): at the
+  trivial output `'I_1` the pair collapses to
+  `tensor (S (ord0, ord0)) (fdist1 ord0)`, so at any ONE input the
+  per-input Dirac simulator `S := fun=> fdist1 x` reproduces the real
+  pair exactly — machine-checked falsity certificate
+  `exists_ideal_pair_at_one_input_no_mask` (LANDS with the module: it is
+  the scope-of-validity companion the footnote's honesty rests on).  The
+  provable, landed refutation quantifies over inputs:
+  `not_exists_ideal_pair_no_mask :
+   ~ (exists S, forall x, real_pair x = ideal_pair_of S x)`,
+  reducing to `insecurity_no_mask` (which separates inputs 0 and 1).
+  Decision (A6, refined by D1): the row-3 Joint witness is direct but
+  necessarily CROSS-INPUT; the thesis footnote states this.
 
 ## The joint pair, formalized (footnotes for the Joint column)
 
@@ -244,11 +256,26 @@ pointwise; the baseline module proves the equality.
   every-simulator form through the output marginal;
 - R10 `real_ideal_pair_eq` (rerouted_key): the positive equality.
 
-Quantifier layering in the thesis footnotes (A3): row 1's every-simulator
-claim is carried by `centropy_chapter_neq` (via perfect_privacy_centropyP,
-whose `delivery_law_ok` hypothesis module 1 satisfies), with
-`real_ideal_pair_neq` as the direct pointwise instance; row 2 and row 3
-carry `not_exists_ideal_pair` directly.
+Quantifier layering in the thesis footnotes (A3, refined by probe D1):
+row 1's every-simulator claim is carried by `centropy_chapter_neq` (via
+perfect_privacy_centropyP, whose `delivery_law_ok` hypothesis module 1
+satisfies), with `real_ideal_pair_neq` as the direct pointwise instance;
+row 2 carries `not_exists_ideal_pair` at the single input x0 (the output
+marginal already fails there); row 3 carries
+`not_exists_ideal_pair_no_mask` in the all-input form, the strongest
+statement available at a trivial output (single-input simulation is
+possible there — `exists_ideal_pair_at_one_input_no_mask`).
+
+Probe-extension support layer (D4, D6, D8): two general helper lemmas
+`tensor_fdist1r : tensor p (fdist1 b) = fdistmap (fun a => (a, b)) p`
+and `fdistmap_bind : fdistmap g (m >>= k) = m >>= (fun a => fdistmap g
+(k a))` UPSTREAM to finstoch.v at landing (beside tensor_fdist1; both
+one-line proofs, needed by B18 and the row-3 marginals); marginal
+computations named on the F-10 pattern (`snd_marginal_real_pairE`,
+`snd_marginal_ideal_pairE`, `fst_marginal_real_pairE`,
+`fst_marginal_ideal_pairE`); `ideal_pairE` certifies
+`ideal_pair = ideal_pair_of sim` definitionally (`by []`), so the
+parameterization is conservative.
 
 ## Mutations (each must FAIL; falsity/positivity certificates kept)
 
@@ -411,15 +438,18 @@ security-models.tex, ex:smc:share-leak replaced by the dealt-key example:
     the named-simulator pointwise instance
   - (row 3, Triangle): \coqin{masking_verdicts.insecurity_no_mask}
     (already the every-simulator form)
-  - (row 3, Joint): \coqin{masking_verdicts.not_exists_ideal_pair}
-    (singleton output: the pair collapses to the view marginal)
+  - (row 3, Joint): \coqin{masking_verdicts.not_exists_ideal_pair_no_mask}
+    (all-input form — at the trivial output any single input is
+    simulatable, \coqin{exists_ideal_pair_at_one_input_no_mask}; the
+    failure is cross-input, exactly as in the triangle witness)
   Passing cells cited collectively in one sidenote:
   dealt_key_leak.{triangle_holds, delivery_law_ok, functionality_compat};
   biased_key.{triangle_holds, cinde_honest_holds, functionality_compat,
-  run_correct}; masking_verdicts.{delivery_law_ok + the independence
-  positive}; rerouted_key.{functionality_compat, triangle_holds,
-  delivery_law_ok, cinde_honest_holds, real_ideal_pair_eq} for the
-  baseline row — all landed identifiers, none from .scratch/ (F-19).
+  run_correct}; masking_verdicts.{run_correct_no_mask,
+  delivery_law_holds_no_mask, output_independent_holds_no_mask};
+  rerouted_key.{functionality_compat, triangle_holds, delivery_law_ok,
+  cinde_honest_holds, real_ideal_pair_eq} for the baseline row — all
+  landed identifiers, none from .scratch/ (F-19).
 - The hygiene remark (0db2939 lineage) survives in adapted form: masking
   discussion stays as prose; the pad-undelivered/secure-routing validity
   statement now points at \coqin{rerouted_key} (landed), not at mutA.
@@ -431,17 +461,25 @@ security-models.tex, ex:smc:share-leak replaced by the dealt-key example:
 
 ## Plan (one atomic task per commit)
 
-1. PROBE EXTENSION (rocq-prover, model Opus; .scratch/probe_dealt_key_ext.v):
-   B18 `ideal_pair_of` + `not_exists_ideal_pair`; the rerouted_key
-   positive set R1-R10 (building on mutA; A2's route for R10:
-   fdistmap_comp + eq_fdistmap); the masking_verdicts row-3 supplements
-   (positives + `not_exists_ideal_pair`).  Zero Admitted/Abort/Axiom;
-   Print Assumptions per target; compile against the local switch.
-2. Land the three modules + masking_verdicts extension in examples_f3.v
-   (statements verbatim from the probes MODULO the rename map above;
-   Naming: notes ported per F-07; header rows + intro sentences per
-   F-18); compile; golf (bodies only); axioms; gate UNBYPASSED; commit.
-3. Thesis example rewrite + checks table + intro paragraph; build with
+1. PROBE EXTENSION — DONE (probe_dealt_key_ext.v, 629 lines, compiles
+   clean, 31 targets on the boolp trio or stronger; deviations D1-D8
+   folded back above).
+2. finstoch.v upstreaming (D4): `tensor_fdist1r` + `fdistmap_bind`
+   beside `tensor_fdist1`, statements verbatim from the probe's
+   probe_helpers section; compile the build closure; gate; commit.
+3. Land in examples_f3.v: Module dealt_key_leak + Module biased_key
+   (statements verbatim from probe_dealt_key.v MODULO the rename map;
+   biased_key gains `ideal_pair_of`/`ideal_pairE`/marginals/
+   `not_exists_ideal_pair` from the ext probe), Module rerouted_key
+   (verbatim from the ext probe), masking_verdicts extension (the six
+   row-3 supplements INSIDE the existing module, so the ext probe's
+   `Require Import examples_f3` + `@masking_verdicts.*` qualifications
+   drop away); Naming: notes ported per F-07; header rows + intro
+   sentences per F-18; ORDERING (D7): each module states the
+   predicate-form `delivery_law_holds` BEFORE its `delivery_law_ok`,
+   or the local lemma shadows the entropy_link predicate; compile; golf
+   (bodies only); re-verify axioms; gate UNBYPASSED; commit.
+4. Thesis example rewrite + checks table + intro paragraph; build with
    the project Makefile; commit (blob-staged against in-flight user
    edits).
 
@@ -462,3 +500,21 @@ A7 3/16 vs 1/8; A8 ledgers renumbered one identifier per row; A9 probe
 coin names adopted; A10 necessity wording corrected; A11 entropy
 readings separated; A12 by-construction note; A13 Dirac-simulator
 acknowledgment in the caption.
+
+Probe extension (rev 3): D1 the row-3 single-input Joint refutation is
+FALSE (falsity certificate `exists_ideal_pair_at_one_input_no_mask`,
+Qed); the landed form is the all-input
+`not_exists_ideal_pair_no_mask`, and the thesis footnote states the
+cross-input nature — spec sections "Row 3 supplements", quantifier
+layering, and the footnote list rewritten accordingly.  D2/D3 row-3
+names instance-suffixed and `_holds` for the predicate form.  D4
+helpers `tensor_fdist1r`/`fdistmap_bind` upstream to finstoch.v (plan
+task 2).  D5 the ext probe imports the landed examples_f3, making the
+row-3 evidence about the actual landing target; at landing the
+supplements live inside masking_verdicts, so the qualifications drop.
+D6 marginal-lemma names on the F-10 pattern; `plain_deliver`/`prior`
+support definitions; `run_correct_no_mask` added for row 3's Square
+cell.  D7 delivery_law_holds-before-delivery_law_ok ordering recorded
+in plan task 3.  D8 `ideal_pairE` conservativity certificate added.
+R5 confirmed `by []` (rerouted_key also defines the functionality as
+the run pushforward, as module 1 does — A12 note applies to both).
