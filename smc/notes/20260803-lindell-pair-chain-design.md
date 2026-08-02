@@ -57,19 +57,27 @@ Round-1 rows (probed, Qed, axioms = boolp trio):
 | L10 | mutation: `sim_bad` off-diagonal witness + `not_readoff_without_consistency` (premise-free form is FALSE) | Qed falsity certificates |
 | L11 | vacuity discipline: `rerouted_key exists_pair_eq` (premise non-empty there) vs `biased_key not_exists_pair_eq` (vacuous there) | Qed both sides |
 
-Round-2 rows (in flight):
+Round-2 rows (probed, Qed; 51 targets, 49 boolp trio + 2 closed):
 
-| # | identifier | claim / passing criterion |
+| # | identifier | status / claim |
 |---|---|---|
-| K1 | `pair_eq_delivery` | pair equality -> delivery_law_ok (snd marginal) |
-| K2 | `pair_eq_triangle` | pair equality -> triangle S (fst marginal) |
-| K3 | `pair_eq_independent` | pair equality -> output_independent (S pulls out of the yh-sum) |
-| K4 | `triangle_cond_of_marginal` (name TBD) | triangle + consistent -> conditional view law at (x,s) = S (proj_xa x, s) at positive beta mass — the fiber-splitting keystone |
-| K5 | `pair_eq_of_conditions` | delivery + consistent + triangle + independent -> all-x pair equality; expected NEW hypothesis `split_y_inj : injective (fun y => (proj_ya y, proj_yh y))` (mirror of the input split in perfect_privacy_centropyP; holds at every instance) |
-| K6 | `pair_eq_simP`, `pair_eqP` | the iff packagings |
-| K7 | necessity certificate for split_y_inj | tiny carrier (Yfull='F_2, Ya=Yh=unit, view = the delivered bit, S uniform): all four conditions hold, pair equality fails |
-| K8 | cross-check | rerouted_key.real_ideal_pair_eq re-derived through K5 agrees with the landed direct proof |
-| K9 | axioms | boolp trio everywhere |
+| K1 | `pair_eq_delivery` (+ `snd_real_pairE`, `snd_ideal_pair_ofE`) | Qed; ideal side = fdistmap_bind + tensor_fdist1r + fdistbind1 |
+| K2 | `pair_eq_triangle` (+ `fst_real_pairE`, `fst_ideal_pair_ofE`) | Qed; collapses to entropy_link.triangle's RHS via fdistbindA + fdist1bind |
+| K3 | `pair_eq_output_independent` (+ `fdistmap_ideal_pair_ofE`, `pfwd1_view_yh_cond`) | Qed, FIVE lines via proba.v's `cinde_RV_factor` (D10) — no pointwise cpr computation |
+| K4 | fiber-splitting keystone | RESOLVED BY EXISTING LEMMA: `entropy_link.triangle_cond_component` is verbatim the needed statement; reused, nothing new lands |
+| K5 | `conditions_pair_eq` (+ `eq_split_y`, `pfwd1_yh_cond_deliveryE`, `pfwd1_view_yh_pairE`) | Qed; NEW hypothesis `split_y_inj : injective (fun y => (proj_ya y, proj_yh y))` confirmed needed, ONLY in this converse (D11); mu_full inherited from the section's standing hypotheses (D13) |
+| K6 | `pair_eq_simP`, `pair_eqP` | Qed, statement texts recorded in the probe report; delivery sits outside the existential in pair_eqP |
+| K7 | `split_counterexample.pair_eq_needs_split` | Qed FIRST ATTEMPT (D12): all four conditions + mu_full hold, split_y_inj fails, real pair (diagonal coin) <> ideal pair (product) at (true, false) |
+| K8 | `rerouted_key_probe.real_ideal_pair_eq_via_conditions` / `conditions_via_real_ideal_pair_eq` | Qed both directions; derived and landed direct proofs agree on the statement |
+| K9 | axioms | boolp trio everywhere (49) or closed under global context (2) |
+
+Forward direction is hypothesis-free relative to the section (neither
+split_y_inj nor mu_full); the converse needs mu_full (standing) +
+split_y_inj (new, necessity machine-checked).  The three forward
+contrapositives stay cited at the instances (biased_key delivery,
+dealt_key_leak independence, masking_verdicts triangle — whose
+hand-derivation at examples_f3.v:411 is exactly pair_eq_triangle's
+contrapositive, now generalized).
 
 ## Landing layout (decided)
 
@@ -172,4 +180,15 @@ single-input (_at is the content); D8 shadowing decision recorded in
 Landing layout; D9 instantiation ergonomics (explicit readoff argument,
 named implicits, @-qualification for R).
 
-Round 2: (pending probe report)
+Round 2 (2026-08-03): D10 output-independence via `cinde_RV_factor`
+(proba.v:2448), no cpr computation; D11 `split_y_inj` needed only in
+the converse — declared as a late section Hypothesis so discharge
+carries it only where used; D12 the necessity counterexample Qed'd on
+the first attempt (unit/bool carrier, view = the delivered bit, real
+pair diagonal vs ideal product); D13 mu_full inherited, not new — the
+honest scope line is "the converse holds under entropy_link's existing
+standing hypotheses plus split_y_inj"; D14 instances need `@m.f R` to
+pin the implicit realType; D15 section Lets are opaque to /= — rewrite
+/proj_ya /proj_yh before flattened intro patterns.  Probe-suggested
+name `conditions_pair_eq` (spec had `pair_eq_of_conditions`) — naming
+audit adjudicates.
