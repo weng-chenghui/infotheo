@@ -2655,6 +2655,17 @@ move=> H; rewrite !pfwd1E; apply: Pr_congr_almost_sure => u /H Hu.
 by rewrite !inE /= Hu.
 Qed.
 
+(* Two variables whose fibres at two values are the same set have the same mass
+   at those values.
+   Naming: main symbol pfwd1, congr for the congruence shape it shares with
+   pfwd1_congr_almost_sure, preim for the fibres the hypothesis compares. *)
+Lemma pfwd1_congr_preim (B B' : finType) (Y : {RV P -> B}) (Y' : {RV P -> B'})
+    (b : B) (b' : B') :
+  (forall u, (Y u == b) = (Y' u == b')) -> `Pr[ Y = b ] = `Pr[ Y' = b' ].
+Proof.
+by move=> H; rewrite !pfwd1E; congr (Pr P _); apply/setP => u; rewrite !inE.
+Qed.
+
 (* A variable that is a function of the conditioner at every point of positive
    mass is conditionally independent of every variable given that
    conditioner. *)
