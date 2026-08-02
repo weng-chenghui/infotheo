@@ -364,8 +364,7 @@ Proof. by move=> x; apply: eq_fdistmap_cst => w /=. Qed.
 Lemma output_independent_holds_no_mask :
   output_independent id id no_mask plain_view plain_deliver prior.
 Proof.
-by apply: (@output_independent_det R _ _ _ _ _ _ id id _
-  plain_view plain_deliver prior (fun=> ord0)) => e _.
+by apply: (output_independent_det id plain_view (g := fun=> ord0)).
 Qed.
 
 (* The real joint law of the view and the delivered outputs at an input.
@@ -422,9 +421,8 @@ Lemma exists_ideal_pair_at_one_input_no_mask (x : 'F_3) :
   exists S : simulator (R := R) 'I_1 'I_1 'F_3,
     real_pair x = ideal_pair_of S x.
 Proof.
-exists (fun=> fdist1 x); rewrite /real_pair /ideal_pair_of.
-rewrite /no_mask /functionality.
-by rewrite fdistmap1 fdist1bind tensor_fdist1 fdistmap1.
+exists (fun=> fdist1 x); rewrite /real_pair /ideal_pair_of /no_mask.
+by rewrite /functionality fdistmap1 fdist1bind tensor_fdist1 fdistmap1.
 Qed.
 
 End instance.
@@ -1668,13 +1666,8 @@ Lemma delivery_law_ok (x : X3) :
   `Pr[ input_rv = x ] != 0 ->
   forall y, `Pr[ outputs_rv = y | input_rv = x ] = functionality x y.
 Proof.
-move=> _ y; rewrite cpr_eqE pfwd1_input invrK.
-have -> : `Pr[ [% outputs_rv, input_rv] = (y, x) ]
-        = `Pr[ [% input_rv, outputs_rv] = (x, y) ].
-  rewrite !pfwd1E; congr (Pr _ _); apply/setP => u.
-  by rewrite !inE !xpair_eqE andbC.
-rewrite pfwd1_input_outputs /mu fdist_uniformE card_X3.
-by rewrite mulrAC mulVf ?pnatr_eq0// mul1r.
+move=> _ y; rewrite cpr_eqE pfwd1_input invrK pfwd1_pairC/= pfwd1_input_outputs.
+by rewrite /mu fdist_uniformE card_X3 mulrAC mulVf ?pnatr_eq0// mul1r.
 Qed.
 
 (* The view and the conditioner have two preimage points at a compatible
@@ -1721,8 +1714,7 @@ Lemma view_factorization : `p_ view_rv = `p_ allow_rv >>= sim.
 Proof.
 apply/fdist_ext => -[[a s] r]; rewrite dist_of_RVE [RHS]fdistbindE pfwd1_view.
 rewrite (bigD1 (a, s))//= big1 ?addr0; last first.
-  move=> b bne; rewrite /sim tensorE fdist1E.
-  by rewrite eq_sym (negbTE bne) mul0r mulr0.
+  by move=> b bne; rewrite /sim tensorE fdist1E eq_sym (negbTE bne) mul0r mulr0.
 rewrite dist_of_RVE pfwd1_allow /sim tensorE fdist1E eqxx/=.
 by rewrite mul1r /unif2 fdist_uniformE card_F2 -invfM -natrM.
 Qed.
@@ -1952,15 +1944,11 @@ Qed.
 Lemma allow_kernelE (c a s : F2) :
   fdistmap (fun w : Om => (c, w.1.1)) P_Omega (a, s) = (c == a)%:R * 2%:R^-1.
 Proof.
-rewrite fdistmapE; under eq_bigr do rewrite P_OmegaE.
-rewrite big_const iter_addr addr0 mulr_natl -cardsE.
-have -> : [set w in preim (fun w : Om => (c, w.1.1)) (pred1 (a, s))]
-        = if c == a then setX (setX [set s] [set: F2]) [set: F2] else set0.
-  apply/setP => -[[w1 w2] r]; rewrite !inE !xpair_eqE/=.
-  by case: (c == a); rewrite !inE ?andbT.
-case: (c == a); last by rewrite cards0 !mulr0n.
-rewrite !cardsX cards1 !cardsT card_F2 mulr1n.
-by rewrite -mulr_natl; lra.
+have -> : fdistmap (fun w : Om => (c, w.1.1)) P_Omega
+        = fdistmap (fun q : F2 => (c, q)) (((P_Omega)`1)`1).
+  by rewrite /fdist_fst !fdistmap_comp.
+rewrite /P_Omega /tensor !fdist_prod1 -tensor_fdist1 tensorE fdist1E eq_sym.
+by rewrite /unif2 fdist_uniformE card_F2.
 Qed.
 
 (* def:smc:perfect-privacy *)
@@ -2451,11 +2439,7 @@ Proof. by rewrite pfwd1_input fdist_uniformE card_X3 invr_eq0 pnatr_eq0. Qed.
 Lemma outputs_cond_real_law (x : X3) (y : Yfull) :
   `Pr[ outputs_rv = y | input_rv = x ] = real_law x y.
 Proof.
-rewrite cpr_eqE pfwd1_input.
-have -> : `Pr[ [% outputs_rv, input_rv] = (y, x) ]
-        = `Pr[ [% input_rv, outputs_rv] = (x, y) ].
-  rewrite !pfwd1E; congr (Pr _ _); apply/setP => u.
-  by rewrite !inE !xpair_eqE andbC.
+rewrite cpr_eqE pfwd1_input pfwd1_pairC/=.
 rewrite (pfwd1_input_pair P_Omega mu outputs_rv x y) mulrAC mulfV ?mul1r//.
 by rewrite /mu fdist_uniformE card_X3 invr_eq0 pnatr_eq0.
 Qed.
@@ -2733,11 +2717,7 @@ Lemma delivery_law_ok (x : X3) :
   `Pr[ input_rv = x ] != 0 ->
   forall y, `Pr[ outputs_rv = y | input_rv = x ] = functionality x y.
 Proof.
-move=> _ y; rewrite cpr_eqE pfwd1_input.
-have -> : `Pr[ [% outputs_rv, input_rv] = (y, x) ]
-        = `Pr[ [% input_rv, outputs_rv] = (x, y) ].
-  rewrite !pfwd1E; congr (Pr _ _); apply/setP => u.
-  by rewrite !inE !xpair_eqE andbC.
+move=> _ y; rewrite cpr_eqE pfwd1_input pfwd1_pairC/=.
 rewrite (pfwd1_input_pair P_Omega mu outputs_rv x y) mulrAC mulfV ?mul1r//.
 by rewrite /mu fdist_uniformE card_X3 invr_eq0 pnatr_eq0.
 Qed.
@@ -2790,7 +2770,9 @@ Definition real_pair (x : X3) : R.-fdist ((F2 * F2) * Yfull)%type :=
 Definition ideal_pair (x : X3) : R.-fdist ((F2 * F2) * Yfull)%type :=
   functionality x >>= (fun y => tensor (sim (proj_xa x, proj_ya y)) (fdist1 y)).
 
-(* The two joint laws agree at every input. *)
+(* The two joint laws agree at every input.
+   Naming: _eq marks the positive = counterpart of the flawed modules'
+   real_ideal_pair_neq; the pair keeps the opposition greppable. *)
 Lemma real_ideal_pair_eq (x : X3) : real_pair x = ideal_pair x.
 Proof.
 have -> : ideal_pair x
