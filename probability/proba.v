@@ -2625,6 +2625,81 @@ Qed.
 
 End cinde_RV_fun_conditioner.
 
+Section almost_sure_eq.
+Context {R : realType} {U : finType} {P : R.-fdist U}.
+
+(* Two events that agree at every point of positive mass have the same
+   probability. *)
+Lemma Pr_congr_almost_sure (E F : {set U}) :
+  (forall u, P u != 0 -> (u \in E) = (u \in F)) -> Pr P E = Pr P F.
+Proof.
+move=> H; rewrite /Pr big_mkcond [RHS]big_mkcond; apply: eq_bigr => u _.
+by case: (eqVneq (P u) 0) => [->|/H->]; rewrite ?if_same.
+Qed.
+
+(* On a finite carrier, a null exception set is equivalent to equality at every
+   point of positive mass. *)
+Lemma almost_sure_eqP (B : finType) (Y Y' : {RV P -> B}) :
+  Pr P [set u | Y u != Y' u] = 0 <-> (forall u, P u != 0 -> Y u = Y' u).
+Proof.
+rewrite Pr_set0P; split=> H u; last by rewrite inE; apply: contraNeq => /H->.
+by apply: contraNeq => Hne; apply/eqP/H; rewrite inE.
+Qed.
+
+(* Two variables that agree at every point of positive mass have the same point
+   masses. *)
+Lemma pfwd1_congr_almost_sure (B : finType) (Y Y' : {RV P -> B}) (b : B) :
+  (forall u, P u != 0 -> Y u = Y' u) -> `Pr[ Y = b ] = `Pr[ Y' = b ].
+Proof.
+move=> H; rewrite !pfwd1E; apply: Pr_congr_almost_sure => u /H Hu.
+by rewrite !inE /= Hu.
+Qed.
+
+(* A variable that is a function of the conditioner at every point of positive
+   mass is conditionally independent of every variable given that
+   conditioner. *)
+Lemma cinde_RV_fun_conditioner_almost_sure (A B C : finType)
+    (X : {RV P -> A}) (Y : {RV P -> B}) (Z : {RV P -> C}) (h : C -> B) :
+  (forall u, P u != 0 -> Y u = h (Z u)) -> P |= X _|_ Y | Z.
+Proof.
+move=> HY a b c; rewrite !cpr_eqE.
+have -> : `Pr[ [% [% X, Y], Z] = ((a, b), c) ]
+        = `Pr[ [% [% X, h \o Z], Z] = ((a, b), c) ].
+  by apply: pfwd1_congr_almost_sure; rewrite /RV2 /= => u /HY ->.
+have -> : `Pr[ [% Y, Z] = (b, c) ] = `Pr[ [% h \o Z, Z] = (b, c) ].
+  by apply: pfwd1_congr_almost_sure; rewrite /RV2 /= => u /HY ->.
+by rewrite -!cpr_eqE; apply: (cinde_RV_fun_conditioner X (h := h)).
+Qed.
+
+End almost_sure_eq.
+
+Section dist_of_RV_bind.
+Context {R : realType}.
+Variables (T : finType) (P : R.-fdist T).
+Variables (B K : finType).
+Variable V : {RV P -> B}.
+Variable Kv : {RV P -> K}.
+Variable k : K -> R.-fdist B.
+
+(* The law of a variable whose conditional law on every mass-carrying fibre
+   of a second variable is the kernel at that fibre is the law of the second
+   variable bound through the kernel.
+   Naming: mainSymbols of the conclusion, dist_of_RV for `p_ and bind for
+   >>=. *)
+Lemma dist_of_RV_bind :
+  (forall kk : K, `Pr[ Kv = kk ] != 0 ->
+     forall v : B, `Pr[ V = v | Kv = kk ] = k kk v) ->
+  `p_ V = `p_ Kv >>= k.
+Proof.
+move=> H; apply/fdist_ext => v; rewrite fdistbindE -(fst_RV2 V Kv) fdist_fstE.
+apply: eq_bigr => kk _; rewrite !dist_of_RVE.
+case: (eqVneq `Pr[ Kv = kk ] 0) => [Hz|Hnz].
+  by rewrite Hz mul0r pfwd1_domin_RV1.
+by rewrite -H // cpr_eqE mulrC divfK.
+Qed.
+
+End dist_of_RV_bind.
+
 Section independent_rv.
 Context {R : realType}.
 Variables (A : finType) (P : R.-fdist A) (TA TB : eqType).

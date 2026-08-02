@@ -21,10 +21,6 @@ Require Import spp_interface spp_program spp_pismc spp_proof spp_simulator.
 (* delivery-law equality between the real and the ideal share laws.           *)
 (*                                                                            *)
 (* ```                                                                        *)
-(*       dist_of_RV_bind == a variable whose conditional law on every         *)
-(*                          mass-carrying fibre of a second variable is a     *)
-(*                          kernel has the law of that second variable bound  *)
-(*                          through the kernel                               *)
 (* spp_bob_factorization == the corrupted-Bob view law is the law of Bob's    *)
 (*                          inputs bound through the simulator                *)
 (*       spp_alice_share == Alice's delivered share is the scalar product of  *)
@@ -56,36 +52,6 @@ Local Open Scope reals_ext_scope.
 Local Open Scope proba_scope.
 Local Open Scope fdist_scope.
 Local Open Scope vec_ext_scope.
-
-Section bridge_shape.
-Context {R : realType}.
-Variables (T : finType) (P : R.-fdist T).
-Variables (B K : finType).
-Variable V : {RV P -> B}.
-Variable Kv : {RV P -> K}.
-Variable k : K -> R.-fdist B.
-
-(* eq:smc:simulation *)
-(* The law of a variable whose conditional law on every mass-carrying fibre
-   of a second variable is the kernel at that fibre is the law of the second
-   variable bound through the kernel.
-   Naming: mainSymbols of the conclusion, dist_of_RV for `p_ and bind for
-   >>=; the conversion-function idiom _to_ is reserved in this development
-   for maps such as party_to_kernel. *)
-Lemma dist_of_RV_bind :
-  (forall kk : K, `Pr[ Kv = kk ] != 0 ->
-     forall v : B, `Pr[ V = v | Kv = kk ] = k kk v) ->
-  `p_ V = `p_ Kv >>= k.
-Proof.
-move=> H; apply/fdist_ext => v.
-rewrite fdistbindE -(fst_RV2 V Kv) fdist_fstE.
-apply: eq_bigr => kk _; rewrite !dist_of_RVE.
-case: (eqVneq `Pr[ Kv = kk ] 0) => [Hz|Hnz].
-  by rewrite Hz mul0r pfwd1_domin_RV1.
-by rewrite -H // cpr_eqE mulrC divfK.
-Qed.
-
-End bridge_shape.
 
 Section spp_bob_bridge.
 Context {R : realType}.
