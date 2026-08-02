@@ -33,6 +33,10 @@ Require Import fdist.
 (*                 tensorE == tensor p q (a, b) is p a * q b                  *)
 (*           tensor_fdist1 == tensor (fdist1 a) q is the transport of q       *)
 (*                            along b |-> (a, b)                              *)
+(*          tensor_fdist1r == tensor p (fdist1 b) is the transport of p       *)
+(*                            along a |-> (a, b)                              *)
+(*           fdistmap_bind == the transport of a bind is the bind of the      *)
+(*                            transported kernel                              *)
 (* ```                                                                        *)
 (*                                                                            *)
 (******************************************************************************)
@@ -142,5 +146,22 @@ apply/fdist_ext => -[a' b']; rewrite tensorE fdistmapE fdist1E.
 under eq_bigl do rewrite !inE /= xpair_eqE.
 by rewrite big_mkcondl big_pred1_eq eq_sym mulr_natl mulrb.
 Qed.
+
+(* A tensor with a Dirac right factor is the transport of the left factor
+   along the pairing with the Dirac point. *)
+Lemma tensor_fdist1r (A B : finType) (p : R.-fdist A) (b : B) :
+  tensor p (fdist1 b) = fdistmap (fun a => (a, b)) p.
+Proof.
+apply/fdist_ext => -[a' b']; rewrite tensorE fdistmapE fdist1E.
+under eq_bigl do rewrite !inE /= xpair_eqE.
+by rewrite big_mkcondr big_pred1_eq eq_sym mulr_natr mulrb.
+Qed.
+
+(* Transport along a map commutes with a bind, the map moving inside the
+   kernel. *)
+Lemma fdistmap_bind (A B C : finType) (m : R.-fdist A) (k : A -> R.-fdist B)
+    (g : B -> C) :
+  fdistmap g (m >>= k) = m >>= (fun a => fdistmap g (k a)).
+Proof. by rewrite /fdistmap fdistbindA. Qed.
 
 End stoch.
