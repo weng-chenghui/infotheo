@@ -16,7 +16,9 @@ Require Import finstoch privacy_kernel.
 (* output-independence clause, the honest pair has the same conditional       *)
 (* entropy given the adversary's allowed information with and without the     *)
 (* view; conversely, an injective input split turns that entropy equality     *)
-(* back into a simulator.                                                     *)
+(* back into a simulator.  Lindell's joint comparison of the real and the     *)
+(* ideal pair of a view with a delivered output is those same conditions      *)
+(* together with the delivery law, under an injective output split.           *)
 (*                                                                            *)
 (* ```                                                                        *)
 (*         delivery_law_ok == the real delivered outputs have the law the     *)
@@ -51,6 +53,33 @@ Require Import finstoch privacy_kernel.
 (*  triangle_perfect_privacyP == the privacy triangle at a simulator is the   *)
 (*                               perfect privacy of the privacy kernel at     *)
 (*                               that simulator                               *)
+(*            pair_readoff == Lindell's joint comparison of the real and the  *)
+(*                            ideal pair of a view with a delivered output    *)
+(*             real_pair x == the joint law of the view and the delivered     *)
+(*                            outputs at the input x                          *)
+(*     ideal_pair_of Sim x == the view Sim produces at the input x coupled    *)
+(*                            with the functionality draw it was handed       *)
+(*             pair_eq Sim == the two joint laws agree at every input         *)
+(*       real_pair_readoff == the real joint law is carried by the pairs      *)
+(*                            whose view reads off to the delivered output    *)
+(*      ideal_pair_readoff == a simulator consistent on the support of the    *)
+(*                            functionality carries the ideal joint law on    *)
+(*                            those pairs too                                 *)
+(*      conditions_pair_eq == the delivery law, a consistent simulator        *)
+(*                            closing the privacy triangle and output         *)
+(*                            independence give the joint equality            *)
+(*                 pair_eqP == the joint equality at a simulator is those     *)
+(*                             four conditions                                *)
+(*          exists_pair_eqP == the joint equality has a witness exactly when  *)
+(*                             the delivery law holds and some simulator      *)
+(*                             meets the other three conditions               *)
+(* exists_pair_eq_centropyP == the joint equality has a witness exactly when  *)
+(*                             the delivery law holds and the view leaves     *)
+(*                             the conditional entropy of the honest pair     *)
+(*                             unchanged                                      *)
+(* exists_pair_eq_cond_mutual_info0P == the joint equality has a witness      *)
+(*                             exactly when the delivery law holds and that   *)
+(*                             conditional mutual information vanishes        *)
 (* ```                                                                        *)
 (*                                                                            *)
 (******************************************************************************)
@@ -445,6 +474,416 @@ by apply: (cinde_RV_fun_conditioner_almost_sure view_rv (h := uncurry g)).
 Qed.
 
 End entropy_link.
+
+(* Lindell's joint comparison of the real and the ideal pair of a view with a
+   delivered output, at the execution context of entropy_link above. *)
+Module pair_readoff.
+Section pair_readoff.
+Context {R : realType}.
+Variables X Yfull Xa Ya Xh Yh Bv Omega : finType.
+Variables (proj_xa : X -> Xa) (proj_xh : X -> Xh).
+Variables (proj_ya : Yfull -> Ya) (proj_yh : Yfull -> Yh).
+Variable F : X -> R.-fdist Yfull.
+Variable P_Omega : R.-fdist Omega.
+Variables (view_at : X * Omega -> Bv) (run : X * Omega -> Yfull).
+Variable out_adv : Bv -> Ya.
+Hypothesis readoff : forall e, out_adv (view_at e) = proj_ya (run e).
+Variable mu : R.-fdist X.
+Hypothesis mu_full : forall x, mu x != 0.
+
+(* The joint prior on the execution context. *)
+Let d : R.-fdist (X * Omega)%type := (mu `x P_Omega)%fdist.
+
+(* The random variables of the execution context: the adversary's view, the
+   input, the delivered outputs and the two input projections. *)
+Let view_rv : {RV d -> Bv} := view_at.
+Let input_rv : {RV d -> X} := fst.
+Let ya_rv : {RV d -> Ya} := fun e => proj_ya (run e).
+Let yh_rv : {RV d -> Yh} := fun e => proj_yh (run e).
+Let xa_rv : {RV d -> Xa} := proj_xa \o fst.
+Let xh_rv : {RV d -> Xh} := proj_xh \o fst.
+
+(* The real joint law of the view and the delivered outputs at an input. *)
+Definition real_pair (x : X) : R.-fdist (Bv * Yfull)%type :=
+  fdistmap (fun w => (view_at (x, w), run (x, w))) P_Omega.
+
+(* The view a simulator produces coupled with the functionality draw it was
+   handed. *)
+Definition ideal_pair_of (Sim : Xa * Ya -> R.-fdist Bv) (x : X)
+    : R.-fdist (Bv * Yfull)%type :=
+  F x >>= (fun y => tensor (Sim (proj_xa x, proj_ya y)) (fdist1 y)).
+
+(* Lindell's joint comparison at a simulator: the two joint laws agree at
+   every input.
+   Naming: the predicate the pair_eq_ family decomposes, named by its two
+   sides real_pair and ideal_pair_of and the equality between them. *)
+Definition pair_eq (Sim : Xa * Ya -> R.-fdist Bv) :=
+  forall x, real_pair x = ideal_pair_of Sim x.
+
+(* The real joint law is carried by the pairs whose view reads off to the
+   delivered output. *)
+Lemma real_pair_readoff (x : X) (v : Bv) (y : Yfull) :
+  real_pair x (v, y) != 0 -> out_adv v = proj_ya y.
+Proof.
+by rewrite /real_pair => /fdistmap_neq0P[w [<- <-] _]; exact: readoff.
+Qed.
+
+(* The ideal joint law at a pair is the functionality mass times the simulator
+   mass at the allowed information. *)
+Lemma ideal_pair_ofE (Sim : Xa * Ya -> R.-fdist Bv) (x : X) (q : Bv * Yfull) :
+  ideal_pair_of Sim x q = F x q.2 * Sim (proj_xa x, proj_ya q.2) q.1.
+Proof.
+case: q => v y; rewrite /ideal_pair_of fdistbindE (bigD1 y)//= big1 ?addr0;
+  last first.
+  move=> y' y'ne; rewrite tensorE fdist1E eq_sym (negbTE y'ne).
+  by rewrite mulr0 mulr0.
+by rewrite tensorE fdist1E eqxx mulr1.
+Qed.
+
+(* At a simulator consistent on the support of the functionality, the ideal
+   joint law is carried by the pairs whose view reads off to the delivered
+   output. *)
+Lemma ideal_pair_readoff (Sim : Xa * Ya -> R.-fdist Bv) (x : X) (v : Bv)
+    (y : Yfull) :
+  (forall y', F x y' != 0 ->
+     fdistmap out_adv (Sim (proj_xa x, proj_ya y')) = fdist1 (proj_ya y')) ->
+  ideal_pair_of Sim x (v, y) != 0 -> out_adv v = proj_ya y.
+Proof.
+move=> hcons h; apply/eqP; move: h; rewrite /ideal_pair_of.
+apply: (fdistbind_neq0_pred (Q := fun q : (Bv * Yfull)%type =>
+                                    out_adv q.1 == proj_ya q.2)).
+move=> y' hy' [v' y''] /=; rewrite tensorE fdist1E.
+have [->|y''ne] := eqVneq y'' y'; last by rewrite mulr0 eqxx.
+rewrite mulr1 => hSv; apply: contraNT hSv => hne; apply/eqP.
+exact: (sim_supp0 (hcons y' hy') hne).
+Qed.
+
+(* At an input where the two joint laws agree, the simulator reads off to
+   every delivered output the functionality reaches at that input.
+   Naming: _at_input names the single input the premise is taken at, as
+   entropy_link spells out the conditioner of a one-point statement. *)
+Lemma pair_eq_consistent_at_input (Sim : Xa * Ya -> R.-fdist Bv) (x : X) :
+  real_pair x = ideal_pair_of Sim x ->
+  forall y, fdistmap proj_ya (F x) y != 0 ->
+  fdistmap out_adv (Sim (proj_xa x, y)) = fdist1 y.
+Proof.
+move=> hpair y /fdistmap_neq0P[y0 hy0 hFy0].
+have hread : forall v, Sim (proj_xa x, y) v != 0 -> out_adv v = y.
+  move=> v hSv; rewrite -hy0.
+  apply: (real_pair_readoff (x := x) (v := v) (y := y0)).
+  by rewrite hpair ideal_pair_ofE/= hy0 mulf_neq0.
+apply/fdist_ext => y'; rewrite fdist1E.
+have [->|yne] := eqVneq y' y.
+  rewrite -[RHS](FDist.f1 (Sim (proj_xa x, y))) fdistmapE big_mkcond/=.
+  apply: eq_bigr => v _; case: ifP => // /negbT; rewrite inE/= => hne.
+  by apply/esym/eqP; apply: contraNT hne => /hread ->.
+have -> : (false%:R : R) = 0 by [].
+by apply/eqP; apply: contraNT yne => /fdistmap_neq0P[v /esym -> /hread ->].
+Qed.
+
+(* Under delivery-law correctness, a simulator whose ideal joint law is the
+   real joint law at every input is consistent. *)
+Lemma pair_eq_consistent (Sim : Xa * Ya -> R.-fdist Bv) :
+  delivery_law_ok F P_Omega run -> pair_eq Sim ->
+  consistent proj_xa proj_ya P_Omega run out_adv mu Sim.
+Proof.
+move=> hdel hpair a y; rewrite -dist_of_RVE /dist_of_RV.
+case/fdistmap_neq0P => -[x w] [/= hxa hya] hd.
+move: hd; rewrite fdist_prodE mulf_eq0 negb_or => /andP[hmu hPw].
+rewrite -hxa; apply: (pair_eq_consistent_at_input (hpair x)).
+by rewrite -(hdel x) fdistmap_comp -hya; exact: fdistmap_neq0 hPw.
+Qed.
+
+(* The delivered-output marginal of the real joint law is the real delivered
+   law.
+   Naming: main symbol real_pair, snd_marginal for the marginal taken and E
+   for the closed form, the spelling of the landed pair family. *)
+Lemma snd_marginal_real_pairE (x : X) :
+  fdistmap snd (real_pair x) = fdistmap (fun w => run (x, w)) P_Omega.
+Proof. by rewrite /real_pair fdistmap_comp; apply: eq_fdistmap. Qed.
+
+(* The view marginal of the real joint law is the real view law. *)
+Lemma fst_marginal_real_pairE (x : X) :
+  fdistmap fst (real_pair x) = fdistmap (fun w => view_at (x, w)) P_Omega.
+Proof. by rewrite /real_pair fdistmap_comp; apply: eq_fdistmap. Qed.
+
+(* The delivered-output marginal of the ideal joint law is the ideal
+   functionality. *)
+Lemma snd_marginal_ideal_pairE (Sim : Xa * Ya -> R.-fdist Bv) (x : X) :
+  fdistmap snd (ideal_pair_of Sim x) = F x.
+Proof.
+rewrite /ideal_pair_of fdistmap_bind -[RHS]fdistbind1.
+congr (fdistbind _ _); apply/boolp.funext => y.
+by rewrite tensor_fdist1r fdistmap_comp; apply: eq_fdistmap_cst.
+Qed.
+
+(* The view marginal of the ideal joint law is the allowed-information law
+   bound through the simulator. *)
+Lemma fst_marginal_ideal_pairE (Sim : Xa * Ya -> R.-fdist Bv) (x : X) :
+  fdistmap fst (ideal_pair_of Sim x)
+  = (fdistmap (fun yl => (proj_xa x, proj_ya yl)) (F x)) >>= Sim.
+Proof.
+have -> : (fdistmap (fun yl => (proj_xa x, proj_ya yl)) (F x)) >>= Sim
+        = F x >>= (fun y => Sim (proj_xa x, proj_ya y)).
+  rewrite /fdistmap fdistbindA; congr (fdistbind _ _).
+  by apply/boolp.funext => y; rewrite fdist1bind.
+rewrite /ideal_pair_of fdistmap_bind; congr (fdistbind _ _).
+apply/boolp.funext => y; rewrite tensor_fdist1r fdistmap_comp.
+by rewrite -[RHS]fdistmap_id; apply: eq_fdistmap.
+Qed.
+
+(* The joint equality gives the delivery law.
+   Naming: main symbol pair_eq, the hypothesis the lemma consumes, then the
+   delivery_law_ok condition it concludes. *)
+Lemma pair_eq_delivery_law (Sim : Xa * Ya -> R.-fdist Bv) :
+  pair_eq Sim -> delivery_law_ok F P_Omega run.
+Proof.
+by move=> hpair x;
+   rewrite -snd_marginal_real_pairE hpair snd_marginal_ideal_pairE.
+Qed.
+
+(* The joint equality gives the privacy triangle. *)
+Lemma pair_eq_triangle (Sim : Xa * Ya -> R.-fdist Bv) :
+  pair_eq Sim -> triangle proj_xa proj_ya F P_Omega view_at Sim.
+Proof.
+by move=> hpair x;
+   rewrite -fst_marginal_real_pairE hpair fst_marginal_ideal_pairE.
+Qed.
+
+(* The joint law of the input with an observable of the real joint pair.
+   Naming: main symbol pfwd1, then the two random variables of the statement,
+   the second read off real_pair. *)
+Lemma pfwd1_input_real_pair (T : finType) (k : Bv * Yfull -> T) (x : X)
+    (t : T) :
+  `Pr[ [% input_rv, ((fun e => k (view_at e, run e)) : {RV d -> T})] = (x, t) ]
+  = mu x * fdistmap k (real_pair x) t.
+Proof.
+by rewrite (pfwd1_input_pair P_Omega mu (fun e => k (view_at e, run e)) x t)
+   /real_pair fdistmap_comp.
+Qed.
+
+(* The ideal joint law transported along the view, the honest delivered output
+   and the adversary delivered output.
+   Naming: main symbol fdistmap, the law it transports ideal_pair_of, and E
+   for the closed form. *)
+Lemma fdistmap_ideal_pair_ofE (Sim : Xa * Ya -> R.-fdist Bv) (x : X)
+    (v : Bv) (h : Yh) (s : Ya) :
+  fdistmap (fun q : Bv * Yfull => ((q.1, proj_yh q.2), proj_ya q.2))
+           (ideal_pair_of Sim x) ((v, h), s)
+  = (\sum_(y | (proj_ya y == s) && (proj_yh y == h)) F x y)
+    * Sim (proj_xa x, s) v.
+Proof.
+rewrite fdistmapE; under eq_bigr do rewrite ideal_pair_ofE.
+rewrite (reindex_onto (fun y : Yfull => (v, y)) snd)/=; last first.
+  by move=> [v' y]; rewrite unfold_in/= !xpair_eqE => /andP[/andP[/eqP -> _] _].
+rewrite big_distrl/=; apply: eq_big => y.
+  by rewrite eqxx andbT unfold_in/= !xpair_eqE eqxx/= andbC.
+by rewrite eqxx andbT unfold_in/= !xpair_eqE eqxx/= => /andP[_ /eqP ->].
+Qed.
+
+(* Under the joint equality the law of the view, the honest delivered output,
+   the input and the adversary delivered output factors through the
+   simulator.
+   Naming: main symbol pfwd1, then the four random variables of the statement
+   in the order they occur; _cond is reserved for cond_rv. *)
+Lemma pfwd1_view_yh_input_ya (Sim : Xa * Ya -> R.-fdist Bv) (v : Bv) (h : Yh)
+    (x : X) (s : Ya) :
+  pair_eq Sim ->
+  `Pr[ [% [% view_rv, yh_rv], [% input_rv, ya_rv]] = ((v, h), (x, s)) ]
+  = (mu x * \sum_(y | (proj_ya y == s) && (proj_yh y == h)) F x y)
+    * Sim (proj_xa x, s) v.
+Proof.
+move=> hpair.
+transitivity (`Pr[ [% input_rv,
+  ((fun e => ((view_at e, proj_yh (run e)), proj_ya (run e)))
+     : {RV d -> ((Bv * Yh) * Ya)%type})] = (x, ((v, h), s)) ]).
+  apply: pfwd1_congr_preim => u; rewrite !xpair_eqE/=.
+  by case: (view_at u == v); case: (proj_yh (run u) == h);
+     case: (u.1 == x); case: (proj_ya (run u) == s).
+rewrite (pfwd1_input_real_pair
+  (fun q : Bv * Yfull => ((q.1, proj_yh q.2), proj_ya q.2))).
+by rewrite hpair fdistmap_ideal_pair_ofE mulrA.
+Qed.
+
+(* The joint equality gives output independence.
+   Naming: main symbol pair_eq, the hypothesis the lemma consumes, then the
+   output_independent condition it concludes. *)
+Lemma pair_eq_output_independent (Sim : Xa * Ya -> R.-fdist Bv) :
+  pair_eq Sim -> output_independent proj_ya proj_yh P_Omega view_at run mu.
+Proof.
+move=> hpair; apply: (cinde_RV_factor
+  (f := fun (h : Yh) (c : X * Ya) =>
+          mu c.1 * \sum_(y | (proj_ya y == c.2) && (proj_yh y == h)) F c.1 y)
+  (g := fun (c : X * Ya) (v : Bv) => Sim (proj_xa c.1, c.2) v)).
+by move=> v h [x s]; exact: pfwd1_view_yh_input_ya.
+Qed.
+
+(* The split of a delivered output into the adversary's and the honest
+   parties' parts. *)
+Let split_y (y : Yfull) := (proj_ya y, proj_yh y).
+
+(* The delivered output is determined by its adversary and honest parts. *)
+Hypothesis split_y_inj : injective split_y.
+
+(* Two delivered outputs are equal exactly when their adversary parts and
+   their honest parts are.
+   Naming: main symbol split_y and E for the closed form its injectivity
+   gives the equality test. *)
+Lemma split_y_eqE (y1 y2 : Yfull) :
+  (y1 == y2) = (proj_ya y1 == proj_ya y2) && (proj_yh y1 == proj_yh y2).
+Proof.
+by rewrite -xpair_eqE -/(split_y y1) -/(split_y y2) (inj_eq split_y_inj).
+Qed.
+
+(* Under delivery-law correctness the honest delivered output paired with the
+   input and the adversary delivered output has the law of the input times the
+   ideal functionality.
+   Naming: main symbol pfwd1, the three random variables of the statement and
+   the delivery law the closed form consumes. *)
+Lemma pfwd1_yh_input_ya_delivery (x : X) (y : Yfull) :
+  delivery_law_ok F P_Omega run ->
+  `Pr[ [% yh_rv, [% input_rv, ya_rv]] = (proj_yh y, (x, proj_ya y)) ]
+  = mu x * F x y.
+Proof.
+move=> hdel.
+transitivity (`Pr[ [% input_rv, (run : {RV d -> Yfull})] = (x, y) ]).
+  apply: pfwd1_congr_preim => u; rewrite !xpair_eqE/= (split_y_eqE (run u) y).
+  by case: (proj_ya (run u) == proj_ya y); case: (proj_yh (run u) == proj_yh y);
+     case: (u.1 == x).
+by rewrite (pfwd1_input_pair P_Omega mu run) (hdel x).
+Qed.
+
+(* The view paired with the honest delivered output, the input and the
+   adversary delivered output has the law of the input times the real joint
+   law.
+   Naming: main symbol pfwd1, the four random variables of the statement and
+   the real_pair the closed form is stated in. *)
+Lemma pfwd1_view_yh_real_pair (x : X) (v : Bv) (y : Yfull) :
+  `Pr[ [% [% view_rv, yh_rv], [% input_rv, ya_rv]]
+       = ((v, proj_yh y), (x, proj_ya y)) ]
+  = mu x * real_pair x (v, y).
+Proof.
+transitivity (`Pr[ [% input_rv, ((fun e => (view_at e, run e))
+                     : {RV d -> (Bv * Yfull)%type})] = (x, (v, y)) ]).
+  apply: pfwd1_congr_preim => u; rewrite !xpair_eqE/= (split_y_eqE (run u) y).
+  by case: (view_at u == v); case: (proj_ya (run u) == proj_ya y);
+     case: (proj_yh (run u) == proj_yh y); case: (u.1 == x).
+by rewrite (pfwd1_input_pair P_Omega mu (fun e => (view_at e, run e))).
+Qed.
+
+(* The delivery law, a consistent simulator closing the privacy triangle and
+   output independence give the joint equality.
+   Naming: the consumed conditions come first and the conclusion pair_eq
+   second, the order of entropy.v's cinde_centropy_eq. *)
+Lemma conditions_pair_eq (Sim : Xa * Ya -> R.-fdist Bv) :
+  delivery_law_ok F P_Omega run ->
+  consistent proj_xa proj_ya P_Omega run out_adv mu Sim ->
+  triangle proj_xa proj_ya F P_Omega view_at Sim ->
+  output_independent proj_ya proj_yh P_Omega view_at run mu ->
+  pair_eq Sim.
+Proof.
+move=> hdel hcons htri hind x; apply/fdist_ext => -[v y].
+rewrite ideal_pair_ofE/=.
+have [hF|hF] := eqVneq (F x y) 0.
+  rewrite hF mul0r; apply: (fdistmap_eq0 (f := snd)).
+  by rewrite snd_marginal_real_pairE (hdel x).
+have hC : `Pr[ [% input_rv, ya_rv] = (x, proj_ya y) ] != 0.
+  rewrite (pfwd1_input_pair P_Omega mu (fun e => proj_ya (run e))).
+  apply: mulf_neq0; first exact: mu_full.
+  have -> : fdistmap (fun w => proj_ya (run (x, w))) P_Omega
+          = fdistmap proj_ya (F x) by rewrite -(hdel x) fdistmap_comp.
+  exact: fdistmap_neq0 hF.
+apply: (mulfI (mu_full x)); rewrite -pfwd1_view_yh_real_pair.
+have h1 := hind v (proj_yh y) (x, proj_ya y).
+rewrite (triangle_cond_component readoff mu_full hdel hcons htri hC v)
+        !cpr_eqE in h1.
+rewrite -[LHS](divfK hC) h1 -mulrA (divfK hC).
+rewrite (pfwd1_yh_input_ya_delivery _ _ hdel).
+by rewrite mulrCA; congr (_ * _); exact: mulrC.
+Qed.
+
+(* The joint equality at a simulator is the conjunction of the delivery law,
+   the consistency of that simulator, the privacy triangle at that simulator
+   and output independence.
+   Naming: P = iff characterization, ffunP/setP precedent. *)
+Lemma pair_eqP (Sim : Xa * Ya -> R.-fdist Bv) :
+  pair_eq Sim
+  <-> [/\ delivery_law_ok F P_Omega run,
+          consistent proj_xa proj_ya P_Omega run out_adv mu Sim,
+          triangle proj_xa proj_ya F P_Omega view_at Sim
+        & output_independent proj_ya proj_yh P_Omega view_at run mu].
+Proof.
+split=> [hpair|[hdel hcons htri hind]]; last exact: conditions_pair_eq.
+split; [exact: pair_eq_delivery_law hpair
+       |exact: pair_eq_consistent (pair_eq_delivery_law hpair) hpair
+       |exact: pair_eq_triangle hpair
+       |exact: pair_eq_output_independent hpair].
+Qed.
+
+(* A simulator making the two joint laws agree exists exactly when the
+   delivery law holds and some simulator is consistent, closes the privacy
+   triangle and has output independence.
+   Naming: the exists_ prefix of the file's existential statements, P = iff
+   characterization. *)
+Lemma exists_pair_eqP :
+  (exists Sim, pair_eq Sim)
+  <-> delivery_law_ok F P_Omega run /\
+      (exists Sim, [/\ consistent proj_xa proj_ya P_Omega run out_adv mu Sim,
+                       triangle proj_xa proj_ya F P_Omega view_at Sim
+                     & output_independent proj_ya proj_yh P_Omega view_at run
+                                          mu]).
+Proof.
+split=> [[Sim /pair_eqP[h1 h2 h3 h4]]|[hdel [Sim [hcons htri hind]]]].
+  by split=> //; exists Sim; split.
+by exists Sim; apply/pair_eqP; split.
+Qed.
+
+(* The split of an input into the adversary's and the honest parties' parts is
+   injective. *)
+Hypothesis split_x_inj : injective (fun x => (proj_xa x, proj_xh x)).
+
+(* A simulator making the two joint laws agree exists exactly when the
+   delivery law holds and the view leaves the conditional entropy of the
+   honest pair given the allowed information unchanged.
+   Naming: the exists_ prefix of the file's existential statements, the two
+   sides pair_eq and centropy, P = iff characterization. *)
+Lemma exists_pair_eq_centropyP :
+  (exists Sim, pair_eq Sim)
+  <-> delivery_law_ok F P_Omega run /\
+      `H( [% xh_rv, yh_rv] | [% view_rv, [% xa_rv, ya_rv]] )
+      = `H( [% xh_rv, yh_rv] | [% xa_rv, ya_rv] ).
+Proof.
+split=> [/exists_pair_eqP[hdel hsim]|[hdel hH]].
+  split=> //.
+  exact: (perfect_privacy_centropyP proj_yh readoff mu_full split_x_inj
+            hdel).1 hsim.
+apply/exists_pair_eqP; split=> //.
+exact: (perfect_privacy_centropyP proj_yh readoff mu_full split_x_inj
+          hdel).2 hH.
+Qed.
+
+(* A simulator making the two joint laws agree exists exactly when the
+   delivery law holds and the conditional mutual information of the view and
+   the honest pair given the allowed information vanishes.
+   Naming: the exists_ prefix of the file's existential statements, the two
+   sides pair_eq and cond_mutual_info with the value 0 it takes, P = iff
+   characterization. *)
+Lemma exists_pair_eq_cond_mutual_info0P :
+  (exists Sim, pair_eq Sim)
+  <-> delivery_law_ok F P_Omega run /\
+      cond_mutual_info `p_[% view_rv, [% xh_rv, yh_rv], [% xa_rv, ya_rv]] = 0.
+Proof.
+split=> [/exists_pair_eqP[hdel hsim]|[hdel hI]].
+  split=> //.
+  exact: (perfect_privacy_cond_mutual_info0P proj_yh readoff mu_full
+            split_x_inj hdel).1 hsim.
+apply/exists_pair_eqP; split=> //.
+exact: (perfect_privacy_cond_mutual_info0P proj_yh readoff mu_full
+          split_x_inj hdel).2 hI.
+Qed.
+
+End pair_readoff.
+End pair_readoff.
 
 Section triangle_perfect_privacy.
 Context {R : realType}.
