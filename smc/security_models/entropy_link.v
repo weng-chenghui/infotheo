@@ -43,9 +43,11 @@ Require Import finstoch privacy_kernel.
 (*                                       conditional mutual information of    *)
 (*                                       the view and the honest pair given   *)
 (*                                       the allowed information vanishes     *)
-(*    output_independent_det == real-deterministic delivery discharges the    *)
+(*    output_independent_det == real-deterministic delivery at every          *)
+(*                              execution of positive mass discharges the     *)
 (*                              output-independence clause                    *)
-(* output_independent_determined == output-determined delivery discharges it  *)
+(* output_independent_determined == output-determined delivery at every       *)
+(*                                  execution of positive mass discharges it  *)
 (*  triangle_perfect_privacyP == the privacy triangle at a simulator is the   *)
 (*                               perfect privacy of the privacy kernel at     *)
 (*                               that simulator                               *)
@@ -415,20 +417,31 @@ split=> [/Hiff/centropy_eq_cinde/cinde_cond_mutual_info0//|H].
 by apply/Hiff; apply/cinde_centropy_eq/cond_mutual_info0_cinde.
 Qed.
 
-(* Real-deterministic delivery discharges the output-independence condition. *)
+(* Delivery that is a function of the input at every execution of positive mass
+   discharges the output-independence condition.  Positive mass is mass under
+   the execution law mu `x P_Omega.  On a finite carrier, equality at every
+   point of positive mass and a null exception set are equivalent, as
+   almost_sure_eqP records.  That equivalence is a fact about finite
+   carriers. *)
 Lemma output_independent_det (g : X -> Yh) :
-  (forall e : X * Omega, proj_yh (run e) = g e.1) -> output_independent.
-Proof.
-by move=> Hg; apply: (cinde_RV_fun_conditioner view_rv (h := fun p => g p.1)).
-Qed.
-
-(* Output-determined delivery discharges the condition. *)
-Lemma output_independent_determined (g : X -> Ya -> Yh) :
-  (forall e : X * Omega, proj_yh (run e) = g e.1 (proj_ya (run e))) ->
+  (forall e : X * Omega, d e != 0 -> proj_yh (run e) = g e.1) ->
   output_independent.
 Proof.
 move=> Hg.
-by apply: (cinde_RV_fun_conditioner view_rv (h := fun p => g p.1 p.2)).
+by apply: (cinde_RV_fun_conditioner_almost_sure view_rv (h := g \o fst)).
+Qed.
+
+(* Delivery that is a function of the input and the adversary's delivered
+   output at every execution of positive mass discharges the condition.
+   Positive mass is mass under the execution law mu `x P_Omega, as in
+   output_independent_det. *)
+Lemma output_independent_determined (g : X -> Ya -> Yh) :
+  (forall e : X * Omega, d e != 0 ->
+     proj_yh (run e) = g e.1 (proj_ya (run e))) ->
+  output_independent.
+Proof.
+move=> Hg.
+by apply: (cinde_RV_fun_conditioner_almost_sure view_rv (h := uncurry g)).
 Qed.
 
 End entropy_link.

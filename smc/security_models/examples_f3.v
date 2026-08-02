@@ -599,6 +599,10 @@ case: u => x [s t]; rewrite /exec_law /P_Omega !tensorE !fdist_uniformE.
 by rewrite card_X3 card_F2 -!invfM -!natrM.
 Qed.
 
+(* Every execution has positive mass. *)
+Let exec_law_neq0 (e : X3 * (F2 * F2)%type) : exec_law e != 0.
+Proof. by rewrite exec_lawE invr_eq0 pnatr_eq0. Qed.
+
 (* The probability of a value of a variable is the cardinality of the preimage
    of that value over thirty-two. *)
 Lemma pfwd1_cardE (T' : finType) (Z : {RV exec_law -> T'}) (z : T') :
@@ -1041,17 +1045,26 @@ rewrite /proj_yh /run /share_map /pt0 /pt1 /=; apply/eqP.
 by rewrite xpair_eqE eq_sym oner_eq0.
 Qed.
 
-(* The honest shares are not a function of the input. *)
+(* No function of the input alone gives the honest shares at every execution of
+   positive mass. *)
 Lemma not_output_det :
-  ~ (exists g : X3 -> (F2 * F2)%type, forall e, proj_yh (run e) = g e.1).
-Proof. by case=> g hg; apply: yh_differs; rewrite !hg. Qed.
+  ~ (exists g : X3 -> (F2 * F2)%type,
+       forall e, exec_law e != 0 -> proj_yh (run e) = g e.1).
+Proof.
+by case=> g hg; apply: yh_differs;
+   rewrite (hg pt0 (exec_law_neq0 _)) (hg pt1 (exec_law_neq0 _)).
+Qed.
 
-(* The honest shares are not a function of the input and the adversary's
-   delivered share. *)
+(* No function of the input and the adversary's delivered share gives the
+   honest shares at every execution of positive mass. *)
 Lemma not_output_determined :
   ~ (exists g : X3 -> F2 -> (F2 * F2)%type,
-       forall e, proj_yh (run e) = g e.1 (proj_ya (run e))).
-Proof. by case=> g hg; apply: yh_differs; rewrite !hg. Qed.
+       forall e, exec_law e != 0 ->
+         proj_yh (run e) = g e.1 (proj_ya (run e))).
+Proof.
+by case=> g hg; apply: yh_differs;
+   rewrite (hg pt0 (exec_law_neq0 _)) (hg pt1 (exec_law_neq0 _)).
+Qed.
 
 (* The output read off the view of an execution is the adversary's delivered
    share. *)
