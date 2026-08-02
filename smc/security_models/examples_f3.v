@@ -1668,7 +1668,10 @@ Proof. by []. Qed.
 (* On every positive-mass input the delivered outputs follow the ideal
    functionality.
    Naming: the _ok suffix carries over from the delivery-law condition
-   delivery_law_ok of entropy_link.v, stated here in conditional form. *)
+   delivery_law_ok of entropy_link.v, stated here in conditional form;
+   the name deliberately shadows that predicate inside this module, as
+   in the sibling modules, so the predicate-form delivery_law_holds is
+   stated first — the declaration order is load-bearing. *)
 Lemma delivery_law_ok (x : X3) :
   `Pr[ input_rv = x ] != 0 ->
   forall y, `Pr[ outputs_rv = y | input_rv = x ] = functionality x y.
@@ -2130,9 +2133,7 @@ Proof. by move=> h; apply: real_ideal_pair_neq_at; rewrite h. Qed.
    pair_readoff.real_pair_readoff, here at this module's real_pair. *)
 Lemma real_pair_readoff (x : X3) (v : ((F2 * F2) * F2)%type) (y : Yfull) :
   real_pair x (v, y) != 0 -> out_adv v = proj_ya y.
-Proof.
-exact: (pair_readoff.real_pair_readoff readoff (P_Omega := P_Omega)).
-Qed.
+Proof. exact: (pair_readoff.real_pair_readoff readoff). Qed.
 
 (* A pair of positive mass under the ideal joint law couples a simulated view
    with the delivered share that view reads off to.
@@ -2141,9 +2142,7 @@ Qed.
 Lemma ideal_pair_readoff (x : X3) (v : ((F2 * F2) * F2)%type) (y : Yfull) :
   ideal_pair x (v, y) != 0 -> out_adv v = proj_ya y.
 Proof.
-apply: (pair_readoff.ideal_pair_readoff (proj_xa := proj_xa)
-          (proj_ya := proj_ya) (out_adv := out_adv) (F := functionality)
-          (Sim := sim) (x := x)).
+apply: (pair_readoff.ideal_pair_readoff (F := functionality) (Sim := sim)).
 by move=> y' _; exact: sim_consistent.
 Qed.
 
@@ -2629,9 +2628,7 @@ Qed.
    pair_readoff.real_pair_readoff, here at this module's real_pair. *)
 Lemma real_pair_readoff (x : X3) (v : (F2 * F2)%type) (y : Yfull) :
   real_pair x (v, y) != 0 -> out_adv v = proj_ya y.
-Proof.
-exact: (pair_readoff.real_pair_readoff readoff (P_Omega := P_Omega)).
-Qed.
+Proof. exact: (pair_readoff.real_pair_readoff readoff). Qed.
 
 (* A pair of positive mass under the ideal joint law couples a simulated view
    with the delivered share that view reads off to.
@@ -2640,9 +2637,7 @@ Qed.
 Lemma ideal_pair_readoff (x : X3) (v : (F2 * F2)%type) (y : Yfull) :
   ideal_pair x (v, y) != 0 -> out_adv v = proj_ya y.
 Proof.
-apply: (pair_readoff.ideal_pair_readoff (proj_xa := proj_xa)
-          (proj_ya := proj_ya) (out_adv := out_adv) (F := functionality)
-          (Sim := sim) (x := x)).
+apply: (pair_readoff.ideal_pair_readoff (F := functionality) (Sim := sim)).
 by move=> y' _; exact: sim_consistent.
 Qed.
 
@@ -2657,9 +2652,7 @@ Lemma ideal_pair_of_readoff (S : simulator (R := R) F2 F2 (F2 * F2)%type) :
     ideal_pair_of S x (v, y) != 0 -> out_adv v = proj_ya y.
 Proof.
 move=> hcons x v y.
-apply: (pair_readoff.ideal_pair_readoff (proj_xa := proj_xa)
-          (proj_ya := proj_ya) (out_adv := out_adv) (F := functionality)
-          (Sim := S) (x := x)).
+apply: (pair_readoff.ideal_pair_readoff (F := functionality) (Sim := S)).
 move=> y' _; apply: hcons; rewrite -dist_of_RVE /dist_of_RV.
 exact: fdistmap_neq0 (exec_law_neq0 (proj_xa x) (proj_ya y')).
 Qed.
@@ -2834,7 +2827,10 @@ Qed.
 (* On every positive-mass input the delivered outputs follow the ideal
    functionality.
    Naming: the _ok suffix carries over from the delivery-law condition
-   delivery_law_ok of entropy_link.v, stated here in conditional form. *)
+   delivery_law_ok of entropy_link.v, stated here in conditional form;
+   the name deliberately shadows that predicate inside this module, as
+   in the sibling modules, so the predicate-form delivery_law_holds is
+   stated first — the declaration order is load-bearing. *)
 Lemma delivery_law_ok (x : X3) :
   `Pr[ input_rv = x ] != 0 ->
   forall y, `Pr[ outputs_rv = y | input_rv = x ] = functionality x y.
@@ -2955,9 +2951,7 @@ Let v_rv : {RV exec_law -> (F2 * F2)%type} := view_at.
    pair_readoff.real_pair_readoff, here at this module's real_pair. *)
 Lemma real_pair_readoff (x : X3) (v : (F2 * F2)%type) (y : Yfull) :
   real_pair x (v, y) != 0 -> out_adv v = proj_ya y.
-Proof.
-exact: (pair_readoff.real_pair_readoff readoff (P_Omega := P_Omega)).
-Qed.
+Proof. exact: (pair_readoff.real_pair_readoff readoff). Qed.
 
 (* A pair of positive mass under the ideal joint law couples a simulated view
    with the delivered share that view reads off to.
@@ -2966,9 +2960,7 @@ Qed.
 Lemma ideal_pair_readoff (x : X3) (v : (F2 * F2)%type) (y : Yfull) :
   ideal_pair x (v, y) != 0 -> out_adv v = proj_ya y.
 Proof.
-apply: (pair_readoff.ideal_pair_readoff (proj_xa := proj_xa)
-          (proj_ya := proj_ya) (out_adv := out_adv) (F := functionality)
-          (Sim := sim) (x := x)).
+apply: (pair_readoff.ideal_pair_readoff (F := functionality) (Sim := sim)).
 by move=> y' _; exact: sim_consistent.
 Qed.
 
@@ -3174,9 +3166,7 @@ Qed.
    counterpart of rerouted_key's real_ideal_pair_eq. *)
 Lemma real_ideal_pair_neq : real_pair tt <> ideal_pair tt.
 Proof.
-move=> hEq; have := congr1 (fun p : R.-fdist (B2 * B2)%type => p (true, false))
-                      hEq.
-rewrite real_pair_zero ideal_pair_val => /esym/eqP.
+move=> hEq; have := real_pair_zero; rewrite hEq ideal_pair_val => /eqP.
 by rewrite invr_eq0 pnatr_eq0.
 Qed.
 
