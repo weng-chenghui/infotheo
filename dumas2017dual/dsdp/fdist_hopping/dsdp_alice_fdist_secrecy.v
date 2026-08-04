@@ -8,7 +8,7 @@ Require Import extra_algebra extra_proba extra_entropy.
 Require Import dsdp_program dsdp_entropy.
 
 (**md**************************************************************************)
-(* # DSDP corrupted-Alice secrecy, infotheo axis                              *)
+(* # DSDP corrupted-Alice secrecy, fdist axis                                 *)
 (*                                                                            *)
 (* Corrupted-Alice secrecy for the three-party DSDP protocol, proved in       *)
 (* infotheo over an explicit product sample space. The sample space carries   *)
@@ -251,7 +251,7 @@ Qed.
 
 End fdist_glue.
 
-Section dsdp_alice_infotheo_secrecy.
+Section dsdp_alice_fdist_secrecy.
 Context {R : realType}.
 Variables (AHE : AHEncType) (Renc : finType) (index_renc : nat).
 Hypothesis card_renc : #|Renc| = index_renc.+1.
@@ -1359,4 +1359,4 @@ Proof.
 by rewrite alice_view_fullE; exact: dsdp_alice_guess_fdist_V2_real_le.
 Qed.
 
-End dsdp_alice_infotheo_secrecy.
+End dsdp_alice_fdist_secrecy.

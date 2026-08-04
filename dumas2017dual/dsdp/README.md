@@ -23,6 +23,11 @@ basename and resolve by suffix.
   `dsdp_security_indcpa_fiber` (the composed bound
   `dsdp_alice_secrecy_leak_S <= 1/card_msg + 2*epsilon_cpa`).
 
+- **fdist_hopping/** — the SSProve-free game-hopping secrecy result over Infotheo distributions.
+  `dsdp_alice_fdist_secrecy` (the real-or-zero advantage `indcpa_fdist_epsilon`, the two hop
+  reductions, the guess / unpredictability / simulator-closeness headlines),
+  `dsdp_alice_trace_link` (the same bounds at the executed fifteen-round piSMC trace).
+
 - **counting/** — the information-theoretic / solution-counting leg.
   `dsdp_entropy` (fiber cardinality `dsdp_fiber_card`, conditional entropy `dsdp_centropy_uniform`),
   `dsdp_entropy_trace` (trace-based entropy), `dsdp_security` (per-party entropy bounds
