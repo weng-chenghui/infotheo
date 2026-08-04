@@ -5,12 +5,12 @@ Require Import realType_ext realType_ln ssr_ext ssralg_ext bigop_ext fdist.
 Require Import proba jfdist_cond entropy graphoid.
 Require Import smc_interpreter smc_session_types.
 Require Import homomorphic_encryption dsdp_interface dsdp_program dsdp_pismc.
-Require Import dsdp_alice_infotheo_secrecy.
+Require Import dsdp_alice_fdist_secrecy.
 
 (**md**************************************************************************)
 (* # DSDP corrupted-Alice secrecy at the executed piSMC trace                 *)
 (*                                                                            *)
-(* The corrupted-Alice bound of dsdp_alice_infotheo_secrecy.v carried from a  *)
+(* The corrupted-Alice bound of dsdp_alice_fdist_secrecy.v carried from a     *)
 (* hand-transcribed view to the trace the piSMC interpreter produces when the *)
 (* three DSDP programs are run at an abstract additively homomorphic scheme.  *)
 (* The fifteen-round run is evaluated symbolically in three stages whose      *)
@@ -20,7 +20,7 @@ Require Import dsdp_alice_infotheo_secrecy.
 (* Charlie's re-encryption randomness and Bob's forward randomness are        *)
 (* parameters of the sections rather than coordinates of the sample space.    *)
 (* Alice's encoded trace is then a deterministic function of the view of      *)
-(* dsdp_alice_infotheo_secrecy.v, and each trace-level statement is a         *)
+(* dsdp_alice_fdist_secrecy.v, and each trace-level statement is a            *)
 (* corollary of the corresponding view-level result.                          *)
 (*                                                                            *)
 (* Headline results: dsdp_run_traces_ok computes the three traces of the run  *)
@@ -468,7 +468,7 @@ Variables (dk_a dk_b dk_c : priv_key AHE).
 Variables (w_rb2 w_rc2 : Renc).
 
 (* The declarations discharged by the preceding section and by
-   dsdp_alice_infotheo_secrecy.v take these parameters explicitly. Each
+   dsdp_alice_fdist_secrecy.v take these parameters explicitly. Each
    abbreviation pins them once, under the name it abbreviates; the shadowing
    is not recursive, since the right-hand side resolves against the
    constant. *)
@@ -561,7 +561,7 @@ rewrite /dsdp_procs_of_sample dsdp_run_traces_ok.
 by move=> ?; rewrite /= Sout_runE recrypt_plainE.
 Qed.
 
-(* The trace ladder: the view ladder of dsdp_alice_infotheo_secrecy.v read as
+(* The trace ladder: the view ladder of dsdp_alice_fdist_secrecy.v read as
    a trace, its first i ciphertext slots encrypting zero. *)
 Definition AliceTrace_zero_prefix (i : nat) :
     {RV (alice_sample_fdist (R:=R) AHE card_renc) ->
