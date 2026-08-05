@@ -74,6 +74,9 @@ Require Import dsdp_program dsdp_entropy.
 (*              E_charlie_v3 == the Charlie-key ciphertext of V3              *)
 (*            enc_fdist pk v == the law of an encryption of v under pk with   *)
 (*                              uniform randomness                            *)
+(*                x <- m ; f == a sampling step of an experiment, the bind    *)
+(*                              of a distribution with a kernel               *)
+(*                     ret a == the Dirac distribution at a                   *)
 (*    indcpa_fdist_adversary == a single-query real-or-zero adversary: a      *)
 (*                              context law adv_choose over adv_context, a    *)
 (*                              challenge plaintext adv_plain read off the    *)
@@ -356,6 +359,16 @@ Definition enc_fdist (pk : pub_key AHE) (v : plain AHE) :
   fdistmap (fun r => chcipher_of_cipher (enc pk v (rand_of_renc r)))
            (fdist_uniform card_renc).
 
+(* A sampling step of an experiment, the bind of a distribution with a
+   kernel. *)
+Local Notation "x '<-' m ';' f" := (m >>= (fun x => f))
+  (at level 100, right associativity,
+   format "'[v' x  '<-'  m ;  '//' f ']'") : fdist_scope.
+
+(* The outcome of an experiment that samples nothing further, the Dirac
+   distribution at a value. *)
+Local Notation "'ret' a" := (fdist1 a) (at level 0) : fdist_scope.
+
 (* A single-query real-or-zero adversary: a law over a context type, a
    challenge plaintext read off the context, and a decision taken on the
    context and the challenge ciphertext. *)
@@ -375,9 +388,20 @@ Arguments adv_decide : clear implicits.
    [guess_sdistr_success_real]; [Pr_] is reserved for the lemma family. *)
 Definition indcpa_fdist_success_real (pk : pub_key AHE)
     (adv : indcpa_fdist_adversary) : R :=
-  Pr (adv_choose adv >>= (fun c => fdistmap (adv_decide adv c)
-                                     (enc_fdist pk (adv_plain adv c))))
+  Pr (c  <- adv_choose adv ;
+      ch <- enc_fdist pk (adv_plain adv c) ;
+      ret (adv_decide adv c ch))
      [set true].
+
+(* The real success probability as a bind of the context law with the
+   pushforward of the decision along the challenge law. *)
+Lemma indcpa_fdist_success_realE (pk : pub_key AHE)
+    (adv : indcpa_fdist_adversary) :
+  indcpa_fdist_success_real pk adv
+  = Pr (adv_choose adv >>= (fun c => fdistmap (adv_decide adv c)
+                                       (enc_fdist pk (adv_plain adv c))))
+       [set true].
+Proof. by []. Qed.
 
 (* The probability that the adversary accepts when the challenge encrypts
    zero.
@@ -385,12 +409,28 @@ Definition indcpa_fdist_success_real (pk : pub_key AHE)
    the lemma family. *)
 Definition indcpa_fdist_success_zero (pk : pub_key AHE)
     (adv : indcpa_fdist_adversary) : R :=
-  Pr (adv_choose adv >>= (fun c => fdistmap (adv_decide adv c)
-                                     (enc_fdist pk 0)))
+  Pr (c  <- adv_choose adv ;
+      ch <- enc_fdist pk 0 ;
+      ret (adv_decide adv c ch))
      [set true].
+
+(* The zero success probability as a bind of the context law with the
+   pushforward of the decision along the challenge law. *)
+Lemma indcpa_fdist_success_zeroE (pk : pub_key AHE)
+    (adv : indcpa_fdist_adversary) :
+  indcpa_fdist_success_zero pk adv
+  = Pr (adv_choose adv >>= (fun c => fdistmap (adv_decide adv c)
+                                       (enc_fdist pk 0)))
+       [set true].
+Proof. by []. Qed.
 
 (* The real-or-zero advantage of an adversary at a public key: the absolute
    gap between its two success probabilities. *)
+(* This is the assumption of reduction to computationally hard problem. *)
+(* To make the epsilon small,
+   NEED to assume the adversary cannot get the private key,
+   when every time this definition is used.
+*)
 Definition indcpa_fdist_epsilon (pk : pub_key AHE)
     (adv : indcpa_fdist_adversary) : R :=
   `| indcpa_fdist_success_real pk adv - indcpa_fdist_success_zero pk adv |.
@@ -606,7 +646,7 @@ Lemma hop0_real_armE (D : plain AHE * plain AHE * dsdp_alice_viewT -> bool) :
   Pr (`p_ [% V2, V3, AliceView_zero_prefix 0]) [set x | D x]
     = indcpa_fdist_success_real (pkey_of_party Bob) (hop0_reduction D).
 Proof.
-rewrite -Pr_fdistmap_bool /indcpa_fdist_success_real /=.
+rewrite -Pr_fdistmap_bool indcpa_fdist_success_realE /=.
 have -> : fdistmap D (`p_ [% V2, V3, AliceView_zero_prefix 0])
         = fdistmap (fun p : hop0_ctxT * t_cipher => D (hop0_assemble p.1 p.2))
                    (`p_ [% Hop0Ctx, hop0_cipher 0]).
@@ -625,7 +665,7 @@ Lemma hop0_zero_armE (D : plain AHE * plain AHE * dsdp_alice_viewT -> bool) :
   Pr (`p_ [% V2, V3, AliceView_zero_prefix 1]) [set x | D x]
     = indcpa_fdist_success_zero (pkey_of_party Bob) (hop0_reduction D).
 Proof.
-rewrite -Pr_fdistmap_bool /indcpa_fdist_success_zero /=.
+rewrite -Pr_fdistmap_bool indcpa_fdist_success_zeroE /=.
 have -> : fdistmap D (`p_ [% V2, V3, AliceView_zero_prefix 1])
         = fdistmap (fun p : hop0_ctxT * t_cipher => D (hop0_assemble p.1 p.2))
                    (`p_ [% Hop0Ctx, hop0_cipher 1]).
@@ -654,7 +694,7 @@ Lemma hop1_real_armE (D : plain AHE * plain AHE * dsdp_alice_viewT -> bool) :
   Pr (`p_ [% V2, V3, AliceView_zero_prefix 1]) [set x | D x]
     = indcpa_fdist_success_real (pkey_of_party Charlie) (hop1_reduction D).
 Proof.
-rewrite -Pr_fdistmap_bool /indcpa_fdist_success_real /=.
+rewrite -Pr_fdistmap_bool indcpa_fdist_success_realE /=.
 have -> : fdistmap D (`p_ [% V2, V3, AliceView_zero_prefix 1])
         = fdistmap (fun p : hop1_ctxT * t_cipher => D (hop1_assemble p.1 p.2))
                    (`p_ [% Hop1Ctx, hop1_cipher 1]).
@@ -673,7 +713,7 @@ Lemma hop1_zero_armE (D : plain AHE * plain AHE * dsdp_alice_viewT -> bool) :
   Pr (`p_ [% V2, V3, AliceView_zero_prefix 2]) [set x | D x]
     = indcpa_fdist_success_zero (pkey_of_party Charlie) (hop1_reduction D).
 Proof.
-rewrite -Pr_fdistmap_bool /indcpa_fdist_success_zero /=.
+rewrite -Pr_fdistmap_bool indcpa_fdist_success_zeroE /=.
 have -> : fdistmap D (`p_ [% V2, V3, AliceView_zero_prefix 2])
         = fdistmap (fun p : hop1_ctxT * t_cipher => D (hop1_assemble p.1 p.2))
                    (`p_ [% Hop1Ctx, hop1_cipher 2]).
