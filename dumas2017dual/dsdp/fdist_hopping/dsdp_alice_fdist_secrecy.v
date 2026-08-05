@@ -77,11 +77,11 @@ Require Import dsdp_program dsdp_entropy.
 (*                x <- m ; f == a sampling step of an experiment, the bind    *)
 (*                              of a distribution with a kernel               *)
 (*                     ret a == the Dirac distribution at a                   *)
-(*    indcpa_fdist_adversary == a single-query real-or-zero adversary: a      *)
-(*                              context law adv_choose over adv_context, a    *)
+(*    indcpa_fdist_adversary == a single-query real-or-zero adversary: a law  *)
+(*                              adv_choose over the state type adv_state, a   *)
 (*                              challenge plaintext adv_plain read off the    *)
-(*                              context, and a decision adv_decide on the     *)
-(*                              context and the challenge ciphertext          *)
+(*                              state, and a decision adv_decide on the state *)
+(*                              and the challenge ciphertext                  *)
 (* indcpa_fdist_success_real == the probability that the adversary accepts    *)
 (*                              when the challenge encrypts its chosen        *)
 (*                              plaintext                                     *)
@@ -89,22 +89,22 @@ Require Import dsdp_program dsdp_entropy.
 (*                              when the challenge encrypts zero              *)
 (*      indcpa_fdist_epsilon == the absolute gap between those two            *)
 (*                              probabilities                                 *)
-(*        enc_slot_resampleE == the law of a context paired with a slot       *)
-(*                              computed from the context and a coordinate    *)
-(*                              disjoint from the context factors as a kernel *)
+(*        enc_slot_resampleE == the law of a state paired with a slot         *)
+(*                              computed from the state and a coordinate      *)
+(*                              disjoint from the state factors as a kernel   *)
 (*                              resampling that coordinate                    *)
-(*        hop0_ctxT, Hop0Ctx == the side information of hop 0 and its random  *)
+(*    hop0_stateT, Hop0State == the adversary state of hop 0 and its random   *)
 (*                              variable                                      *)
-(*        hop1_ctxT, Hop1Ctx == the side information of hop 1 and its random  *)
+(*    hop1_stateT, Hop1State == the adversary state of hop 1 and its random   *)
 (*                              variable                                      *)
-(*                Hop1PreCtx == the hop-1 context before the hop-0 slot is    *)
+(*              Hop1PreState == the hop-1 state before the hop-0 slot is      *)
 (*                              encrypted                                     *)
-(*               hop1_ctx_of == the map carrying the hop-1 precontext to the  *)
-(*                              hop-1 context                                 *)
+(*             hop1_state_of == the map carrying the hop-1 prestate to the    *)
+(*                              hop-1 state                                   *)
 (*             hop0_assemble == the inputs and the view rebuilt from a hop-0  *)
-(*                              context and a ciphertext in the hop-0 slot    *)
+(*                              state and a ciphertext in the hop-0 slot      *)
 (*             hop1_assemble == the inputs and the view rebuilt from a hop-1  *)
-(*                              context and a ciphertext in the hop-1 slot    *)
+(*                              state and a ciphertext in the hop-1 slot      *)
 (*          hop0_reduction D == the reduction of a distinguisher D to Bob's   *)
 (*                              key                                           *)
 (*          hop1_reduction D == the reduction of a distinguisher D to         *)
@@ -369,14 +369,14 @@ Local Notation "x '<-' m ';' f" := (m >>= (fun x => f))
    distribution at a value. *)
 Local Notation "'ret' a" := (fdist1 a) (at level 0) : fdist_scope.
 
-(* A single-query real-or-zero adversary: a law over a context type, a
-   challenge plaintext read off the context, and a decision taken on the
-   context and the challenge ciphertext. *)
+(* A single-query real-or-zero adversary: a law over a state type, a
+   challenge plaintext read off the state, and a decision taken on the
+   state and the challenge ciphertext. *)
 Record indcpa_fdist_adversary := {
-  adv_context : finType ;
-  adv_choose : R.-fdist adv_context ;
-  adv_plain : adv_context -> plain AHE ;
-  adv_decide : adv_context -> t_cipher -> bool }.
+  adv_state : finType ;
+  adv_choose : R.-fdist adv_state ;
+  adv_plain : adv_state -> plain AHE ;
+  adv_decide : adv_state -> t_cipher -> bool }.
 
 Arguments adv_choose : clear implicits.
 Arguments adv_plain : clear implicits.
@@ -393,7 +393,7 @@ Definition indcpa_fdist_success_real (pk : pub_key AHE)
       ret (adv_decide adv c ch))
      [set true].
 
-(* The real success probability as a bind of the context law with the
+(* The real success probability as a bind of the state law with the
    pushforward of the decision along the challenge law. *)
 Lemma indcpa_fdist_success_realE (pk : pub_key AHE)
     (adv : indcpa_fdist_adversary) :
@@ -414,7 +414,7 @@ Definition indcpa_fdist_success_zero (pk : pub_key AHE)
       ret (adv_decide adv c ch))
      [set true].
 
-(* The zero success probability as a bind of the context law with the
+(* The zero success probability as a bind of the state law with the
    pushforward of the decision along the challenge law. *)
 Lemma indcpa_fdist_success_zeroE (pk : pub_key AHE)
     (adv : indcpa_fdist_adversary) :
@@ -435,23 +435,23 @@ Definition indcpa_fdist_epsilon (pk : pub_key AHE)
     (adv : indcpa_fdist_adversary) : R :=
   `| indcpa_fdist_success_real pk adv - indcpa_fdist_success_zero pk adv |.
 
-(* The law of a context paired with a slot computed from the context and a
-   coordinate disjoint from the context is the law of the context with the
+(* The law of a state paired with a slot computed from the state and a
+   coordinate disjoint from the state is the law of the state with the
    kernel that resamples the coordinate. *)
-Lemma enc_slot_resampleE (ctxT : finType) (Q : R.-fdist ctxT)
-    (Ctx : {RV alice_sample_fdist -> ctxT})
+Lemma enc_slot_resampleE (stateT : finType) (Q : R.-fdist stateT)
+    (State : {RV alice_sample_fdist -> stateT})
     (Rho : {RV alice_sample_fdist -> Renc})
-    (k : ctxT -> Renc -> t_cipher) :
-  `p_ [% Ctx, Rho] = Q `x (fdist_uniform card_renc) ->
-  `p_ [% Ctx, (fun t => k (Ctx t) (Rho t))
+    (k : stateT -> Renc -> t_cipher) :
+  `p_ [% State, Rho] = Q `x (fdist_uniform card_renc) ->
+  `p_ [% State, (fun t => k (State t) (Rho t))
         : {RV alice_sample_fdist -> t_cipher}]
     = Q `X (fun a => fdistmap (k a) (fdist_uniform card_renc)).
 Proof.
 move=> Hprod.
-have HL : `p_ [% Ctx, (fun t => k (Ctx t) (Rho t))
+have HL : `p_ [% State, (fun t => k (State t) (Rho t))
                 : {RV alice_sample_fdist -> t_cipher}]
-        = fdistmap (fun p : (ctxT * Renc)%type => (p.1, k p.1 p.2))
-                   (`p_ [% Ctx, Rho]).
+        = fdistmap (fun p : (stateT * Renc)%type => (p.1, k p.1 p.2))
+                   (`p_ [% State, Rho]).
   by rewrite /dist_of_RV fdistmap_comp.
 rewrite HL Hprod [in RHS]fdist_prod_bindE fdist_prod_bindE fdistmap_bind.
 congr (_ >>= _); apply/boolp.funext => a.
@@ -479,107 +479,107 @@ rewrite fdist_uniformE /alice_sample_fdist !fdist_prodE !fdist_uniformE.
 by rewrite -!invfM -!natrM /dsdp_alice_sampleT !card_prod.
 Qed.
 
-(* The side information of hop 0: the inputs, the masks, Alice's combine
+(* The adversary state of hop 0: the inputs, the masks, Alice's combine
    randomness, and the randomness of the hop-1 encryption. *)
-Definition hop0_ctxT : finType :=
+Definition hop0_stateT : finType :=
   ((plain AHE * plain AHE) * (plain AHE * plain AHE)
    * (Renc * Renc) * Renc)%type.
 
-(* The random variable of the hop-0 side information. *)
-Definition Hop0Ctx : {RV alice_sample_fdist -> hop0_ctxT} :=
+(* The random variable of the hop-0 adversary state. *)
+Definition Hop0State : {RV alice_sample_fdist -> hop0_stateT} :=
   fun t => (t.1.1.1, t.1.1.2, t.2, t.1.2.2).
 
-Let card_hop0_ctx_gt0 : (0 < #|hop0_ctxT|)%N.
+Let card_hop0_state_gt0 : (0 < #|hop0_stateT|)%N.
 Proof.
-by rewrite /hop0_ctxT !card_prod !muln_gt0 card_plain_gt0 card_renc_gt0.
+by rewrite /hop0_stateT !card_prod !muln_gt0 card_plain_gt0 card_renc_gt0.
 Qed.
 
-Let card_hop0_ctx : #|hop0_ctxT| = #|hop0_ctxT|.-1.+1.
+Let card_hop0_state : #|hop0_stateT| = #|hop0_stateT|.-1.+1.
 Proof. by rewrite prednK. Qed.
 
 Let card_hop0_pair :
-  #|((hop0_ctxT * Renc)%type : finType)|
-    = #|((hop0_ctxT * Renc)%type : finType)|.-1.+1.
+  #|((hop0_stateT * Renc)%type : finType)|
+    = #|((hop0_stateT * Renc)%type : finType)|.-1.+1.
 Proof.
-by rewrite prednK // card_prod muln_gt0 card_hop0_ctx_gt0 card_renc_gt0.
+by rewrite prednK // card_prod muln_gt0 card_hop0_state_gt0 card_renc_gt0.
 Qed.
 
-(* The hop-0 context and the hop-0 encryption randomness are jointly
+(* The hop-0 state and the hop-0 encryption randomness are jointly
    uniform. *)
 Lemma hop0_pair_uniformE :
-  `p_ [% Hop0Ctx, Rho2]
-    = (fdist_uniform card_hop0_ctx) `x (fdist_uniform card_renc).
+  `p_ [% Hop0State, Rho2]
+    = (fdist_uniform card_hop0_state) `x (fdist_uniform card_renc).
 Proof.
-rewrite -(fdist_uniform_prod card_hop0_ctx card_renc card_hop0_pair).
+rewrite -(fdist_uniform_prod card_hop0_state card_renc card_hop0_pair).
 rewrite /dist_of_RV alice_sample_fdistE.
 apply: (fdistmap_bij_uniform card_sample card_hop0_pair).
-exists (fun p : (hop0_ctxT * Renc)%type =>
+exists (fun p : (hop0_stateT * Renc)%type =>
           (p.1.1.1.1, p.1.1.1.2, (p.2, p.1.2), p.1.1.2)).
   by move=> [[[[v2 v3] [r2 r3]] [rho2 rho3]] [ra1 ra2]].
 by move=> [[[[[v2 v3] [r2 r3]] [ra1 ra2]] rho3] rho2].
 Qed.
 
-(* The hop-0 context is uniform. *)
-Lemma hop0_ctx_uniformE : `p_ Hop0Ctx = fdist_uniform card_hop0_ctx.
-Proof. by rewrite -(fst_RV2 Hop0Ctx Rho2) hop0_pair_uniformE fdist_prod1. Qed.
+(* The hop-0 state is uniform. *)
+Lemma hop0_state_uniformE : `p_ Hop0State = fdist_uniform card_hop0_state.
+Proof. by rewrite -(fst_RV2 Hop0State Rho2) hop0_pair_uniformE fdist_prod1. Qed.
 
 (* The hop-0 encryption randomness is uniform and independent of the hop-0
-   context. *)
-Lemma hop0_ctx_prod :
-  `p_ [% Hop0Ctx, Rho2] = (`p_ Hop0Ctx) `x (fdist_uniform card_renc).
-Proof. by rewrite hop0_ctx_uniformE hop0_pair_uniformE. Qed.
+   state. *)
+Lemma hop0_state_prod :
+  `p_ [% Hop0State, Rho2] = (`p_ Hop0State) `x (fdist_uniform card_renc).
+Proof. by rewrite hop0_state_uniformE hop0_pair_uniformE. Qed.
 
-(* The side information of hop 1: the inputs, the masks, Alice's combine
+(* The adversary state of hop 1: the inputs, the masks, Alice's combine
    randomness, and the hop-0 ciphertext of zero. *)
-Definition hop1_ctxT : finType :=
+Definition hop1_stateT : finType :=
   ((plain AHE * plain AHE) * (plain AHE * plain AHE)
    * (Renc * Renc) * t_cipher)%type.
 
-(* The random variable of the hop-1 side information. *)
-Definition Hop1Ctx : {RV alice_sample_fdist -> hop1_ctxT} :=
+(* The random variable of the hop-1 adversary state. *)
+Definition Hop1State : {RV alice_sample_fdist -> hop1_stateT} :=
   fun t => (t.1.1.1, t.1.1.2, t.2, hop0_cipher 1 t).
 
-(* The hop-1 side information with the randomness of the hop-0 encryption in
+(* The hop-1 adversary state with the randomness of the hop-0 encryption in
    place of the ciphertext it produces. *)
-Definition Hop1PreCtx : {RV alice_sample_fdist -> hop0_ctxT} :=
+Definition Hop1PreState : {RV alice_sample_fdist -> hop0_stateT} :=
   fun t => (t.1.1.1, t.1.1.2, t.2, t.1.2.1).
 
-(* The map carrying a hop-1 precontext to the hop-1 context, encrypting zero in
+(* The map carrying a hop-1 prestate to the hop-1 state, encrypting zero in
    the hop-0 slot. *)
-Definition hop1_ctx_of (c : hop0_ctxT) : hop1_ctxT :=
+Definition hop1_state_of (c : hop0_stateT) : hop1_stateT :=
   (c.1.1.1, c.1.1.2, c.1.2,
    chcipher_of_cipher (enc (pkey_of_party Bob) 0 (rand_of_renc c.2))).
 
-(* The hop-1 context is the image of the hop-1 precontext under the hop-0
+(* The hop-1 state is the image of the hop-1 prestate under the hop-0
    encryption of zero. *)
-Lemma hop1_ctx_ofE : Hop1Ctx = hop1_ctx_of `o Hop1PreCtx.
+Lemma hop1_state_ofE : Hop1State = hop1_state_of `o Hop1PreState.
 Proof. by []. Qed.
 
-(* The hop-1 precontext and the hop-1 encryption randomness are jointly
+(* The hop-1 prestate and the hop-1 encryption randomness are jointly
    uniform. *)
-Lemma hop1_prectx_pair_uniformE :
-  `p_ [% Hop1PreCtx, Rho3]
-    = (fdist_uniform card_hop0_ctx) `x (fdist_uniform card_renc).
+Lemma hop1_prestate_pair_uniformE :
+  `p_ [% Hop1PreState, Rho3]
+    = (fdist_uniform card_hop0_state) `x (fdist_uniform card_renc).
 Proof.
-rewrite -(fdist_uniform_prod card_hop0_ctx card_renc card_hop0_pair).
+rewrite -(fdist_uniform_prod card_hop0_state card_renc card_hop0_pair).
 rewrite /dist_of_RV alice_sample_fdistE.
 apply: (fdistmap_bij_uniform card_sample card_hop0_pair).
-exists (fun p : (hop0_ctxT * Renc)%type =>
+exists (fun p : (hop0_stateT * Renc)%type =>
           (p.1.1.1.1, p.1.1.1.2, (p.1.2, p.2), p.1.1.2)).
   by move=> [[[[v2 v3] [r2 r3]] [rho2 rho3]] [ra1 ra2]].
 by move=> [[[[[v2 v3] [r2 r3]] [ra1 ra2]] rho2] rho3].
 Qed.
 
-(* The hop-1 precontext is uniform. *)
-Lemma hop1_prectx_uniformE : `p_ Hop1PreCtx = fdist_uniform card_hop0_ctx.
+(* The hop-1 prestate is uniform. *)
+Lemma hop1_prestate_uniformE : `p_ Hop1PreState = fdist_uniform card_hop0_state.
 Proof.
-by rewrite -(fst_RV2 Hop1PreCtx Rho3) hop1_prectx_pair_uniformE fdist_prod1.
+by rewrite -(fst_RV2 Hop1PreState Rho3) hop1_prestate_pair_uniformE fdist_prod1.
 Qed.
 
 (* The hop-1 encryption randomness is uniform. *)
 Lemma rho3_uniformE : `p_ Rho3 = fdist_uniform card_renc.
 Proof.
-by rewrite -(snd_RV2 Hop1PreCtx Rho3) hop1_prectx_pair_uniformE fdist_prod2.
+by rewrite -(snd_RV2 Hop1PreState Rho3) hop1_prestate_pair_uniformE fdist_prod2.
 Qed.
 
 (* A joint law that factors as the product of its marginals is the law of an
@@ -590,21 +590,21 @@ Lemma inde_RV_of_prod (A B : finType)
 Proof. by move=> H a b; rewrite -!dist_of_RVE H fdist_prodE. Qed.
 
 (* The hop-1 encryption randomness is uniform and independent of the hop-1
-   context. *)
-Lemma hop1_ctx_prod :
-  `p_ [% Hop1Ctx, Rho3] = (`p_ Hop1Ctx) `x (fdist_uniform card_renc).
+   state. *)
+Lemma hop1_state_prod :
+  `p_ [% Hop1State, Rho3] = (`p_ Hop1State) `x (fdist_uniform card_renc).
 Proof.
-have Hpre : alice_sample_fdist |= Hop1PreCtx _|_ Rho3.
+have Hpre : alice_sample_fdist |= Hop1PreState _|_ Rho3.
   apply: inde_RV_of_prod.
-  by rewrite hop1_prectx_pair_uniformE hop1_prectx_uniformE rho3_uniformE.
-have Hctx : alice_sample_fdist |= Hop1Ctx _|_ Rho3.
-  by rewrite hop1_ctx_ofE; exact: (inde_RV_comp hop1_ctx_of idfun Hpre).
-by rewrite (inde_dist_of_RV2 Hctx) rho3_uniformE.
+  by rewrite hop1_prestate_pair_uniformE hop1_prestate_uniformE rho3_uniformE.
+have Hstate : alice_sample_fdist |= Hop1State _|_ Rho3.
+  by rewrite hop1_state_ofE; exact: (inde_RV_comp hop1_state_of idfun Hpre).
+by rewrite (inde_dist_of_RV2 Hstate) rho3_uniformE.
 Qed.
 
-(* The inputs and the view rebuilt from a hop-0 context and a ciphertext in
+(* The inputs and the view rebuilt from a hop-0 state and a ciphertext in
    the hop-0 slot. *)
-Definition hop0_assemble (c : hop0_ctxT) (ch : t_cipher) :
+Definition hop0_assemble (c : hop0_stateT) (ch : t_cipher) :
     plain AHE * plain AHE * dsdp_alice_viewT :=
   let: (vv, masks, ra, rho3) := c in
   (vv.1, vv.2,
@@ -612,9 +612,9 @@ Definition hop0_assemble (c : hop0_ctxT) (ch : t_cipher) :
     chcipher_of_cipher
       (enc (pkey_of_party Charlie) vv.2 (rand_of_renc rho3)))).
 
-(* The inputs and the view rebuilt from a hop-1 context and a ciphertext in
+(* The inputs and the view rebuilt from a hop-1 state and a ciphertext in
    the hop-1 slot. *)
-Definition hop1_assemble (c : hop1_ctxT) (ch : t_cipher) :
+Definition hop1_assemble (c : hop1_stateT) (ch : t_cipher) :
     plain AHE * plain AHE * dsdp_alice_viewT :=
   let: (vv, masks, ra, c2zero) := c in
   (vv.1, vv.2,
@@ -625,8 +625,8 @@ Definition hop1_assemble (c : hop1_ctxT) (ch : t_cipher) :
 Definition hop0_reduction
     (D : plain AHE * plain AHE * dsdp_alice_viewT -> bool) :
     indcpa_fdist_adversary :=
-  {| adv_context := hop0_ctxT ;
-     adv_choose := `p_ Hop0Ctx ;
+  {| adv_state := hop0_stateT ;
+     adv_choose := `p_ Hop0State ;
      adv_plain := fun c => c.1.1.1.1 ;
      adv_decide := fun c ch => D (hop0_assemble c ch) |}.
 
@@ -635,8 +635,8 @@ Definition hop0_reduction
 Definition hop1_reduction
     (D : plain AHE * plain AHE * dsdp_alice_viewT -> bool) :
     indcpa_fdist_adversary :=
-  {| adv_context := hop1_ctxT ;
-     adv_choose := `p_ Hop1Ctx ;
+  {| adv_state := hop1_stateT ;
+     adv_choose := `p_ Hop1State ;
      adv_plain := fun c => c.1.1.1.2 ;
      adv_decide := fun c ch => D (hop1_assemble c ch) |}.
 
@@ -648,12 +648,12 @@ Lemma hop0_real_armE (D : plain AHE * plain AHE * dsdp_alice_viewT -> bool) :
 Proof.
 rewrite -Pr_fdistmap_bool indcpa_fdist_success_realE /=.
 have -> : fdistmap D (`p_ [% V2, V3, AliceView_zero_prefix 0])
-        = fdistmap (fun p : hop0_ctxT * t_cipher => D (hop0_assemble p.1 p.2))
-                   (`p_ [% Hop0Ctx, hop0_cipher 0]).
+        = fdistmap (fun p : hop0_stateT * t_cipher => D (hop0_assemble p.1 p.2))
+                   (`p_ [% Hop0State, hop0_cipher 0]).
   rewrite /dist_of_RV !fdistmap_comp; congr fdistmap.
   by apply/boolp.funext => -[[[[v2 v3] [r2 r3]] [rho2 rho3]] [ra1 ra2]].
-rewrite (enc_slot_resampleE (fun (c : hop0_ctxT) r => chcipher_of_cipher
-  (enc (pkey_of_party Bob) c.1.1.1.1 (rand_of_renc r))) hop0_ctx_prod)
+rewrite (enc_slot_resampleE (fun (c : hop0_stateT) r => chcipher_of_cipher
+  (enc (pkey_of_party Bob) c.1.1.1.1 (rand_of_renc r))) hop0_state_prod)
         fdist_prod_bindE fdistmap_bind.
 congr (Pr _ _); congr (_ >>= _); apply/boolp.funext => c.
 by rewrite /enc_fdist !fdistmap_comp.
@@ -667,12 +667,12 @@ Lemma hop0_zero_armE (D : plain AHE * plain AHE * dsdp_alice_viewT -> bool) :
 Proof.
 rewrite -Pr_fdistmap_bool indcpa_fdist_success_zeroE /=.
 have -> : fdistmap D (`p_ [% V2, V3, AliceView_zero_prefix 1])
-        = fdistmap (fun p : hop0_ctxT * t_cipher => D (hop0_assemble p.1 p.2))
-                   (`p_ [% Hop0Ctx, hop0_cipher 1]).
+        = fdistmap (fun p : hop0_stateT * t_cipher => D (hop0_assemble p.1 p.2))
+                   (`p_ [% Hop0State, hop0_cipher 1]).
   rewrite /dist_of_RV !fdistmap_comp; congr fdistmap.
   by apply/boolp.funext => -[[[[v2 v3] [r2 r3]] [rho2 rho3]] [ra1 ra2]].
-rewrite (enc_slot_resampleE (fun (_ : hop0_ctxT) r => chcipher_of_cipher
-  (enc (pkey_of_party Bob) 0 (rand_of_renc r))) hop0_ctx_prod)
+rewrite (enc_slot_resampleE (fun (_ : hop0_stateT) r => chcipher_of_cipher
+  (enc (pkey_of_party Bob) 0 (rand_of_renc r))) hop0_state_prod)
         fdist_prod_bindE fdistmap_bind.
 congr (Pr _ _); congr (_ >>= _); apply/boolp.funext => c.
 by rewrite /enc_fdist !fdistmap_comp.
@@ -696,12 +696,12 @@ Lemma hop1_real_armE (D : plain AHE * plain AHE * dsdp_alice_viewT -> bool) :
 Proof.
 rewrite -Pr_fdistmap_bool indcpa_fdist_success_realE /=.
 have -> : fdistmap D (`p_ [% V2, V3, AliceView_zero_prefix 1])
-        = fdistmap (fun p : hop1_ctxT * t_cipher => D (hop1_assemble p.1 p.2))
-                   (`p_ [% Hop1Ctx, hop1_cipher 1]).
+        = fdistmap (fun p : hop1_stateT * t_cipher => D (hop1_assemble p.1 p.2))
+                   (`p_ [% Hop1State, hop1_cipher 1]).
   rewrite /dist_of_RV !fdistmap_comp; congr fdistmap.
   by apply/boolp.funext => -[[[[v2 v3] [r2 r3]] [rho2 rho3]] [ra1 ra2]].
-rewrite (enc_slot_resampleE (fun (c : hop1_ctxT) r => chcipher_of_cipher
-  (enc (pkey_of_party Charlie) c.1.1.1.2 (rand_of_renc r))) hop1_ctx_prod)
+rewrite (enc_slot_resampleE (fun (c : hop1_stateT) r => chcipher_of_cipher
+  (enc (pkey_of_party Charlie) c.1.1.1.2 (rand_of_renc r))) hop1_state_prod)
         fdist_prod_bindE fdistmap_bind.
 congr (Pr _ _); congr (_ >>= _); apply/boolp.funext => c.
 by rewrite /enc_fdist !fdistmap_comp.
@@ -715,12 +715,12 @@ Lemma hop1_zero_armE (D : plain AHE * plain AHE * dsdp_alice_viewT -> bool) :
 Proof.
 rewrite -Pr_fdistmap_bool indcpa_fdist_success_zeroE /=.
 have -> : fdistmap D (`p_ [% V2, V3, AliceView_zero_prefix 2])
-        = fdistmap (fun p : hop1_ctxT * t_cipher => D (hop1_assemble p.1 p.2))
-                   (`p_ [% Hop1Ctx, hop1_cipher 2]).
+        = fdistmap (fun p : hop1_stateT * t_cipher => D (hop1_assemble p.1 p.2))
+                   (`p_ [% Hop1State, hop1_cipher 2]).
   rewrite /dist_of_RV !fdistmap_comp; congr fdistmap.
   by apply/boolp.funext => -[[[[v2 v3] [r2 r3]] [rho2 rho3]] [ra1 ra2]].
-rewrite (enc_slot_resampleE (fun (_ : hop1_ctxT) r => chcipher_of_cipher
-  (enc (pkey_of_party Charlie) 0 (rand_of_renc r))) hop1_ctx_prod)
+rewrite (enc_slot_resampleE (fun (_ : hop1_stateT) r => chcipher_of_cipher
+  (enc (pkey_of_party Charlie) 0 (rand_of_renc r))) hop1_state_prod)
         fdist_prod_bindE fdistmap_bind.
 congr (Pr _ _); congr (_ >>= _); apply/boolp.funext => c.
 by rewrite /enc_fdist !fdistmap_comp.
