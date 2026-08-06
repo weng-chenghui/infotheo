@@ -1,7 +1,7 @@
 (* infotheo: information theory and error-correcting codes in Rocq            *)
 (* Copyright (C) 2025 infotheo authors, license: LGPL-2.1-or-later            *)
 From mathcomp Require Import all_boot ssralg reals.
-Require Import fdist.
+Require Import fdist fdist_extra.
 
 (**md**************************************************************************)
 (* # Finite stochastic maps                                                   *)
@@ -35,7 +35,6 @@ Require Import fdist.
 (*                            along b |-> (a, b)                              *)
 (*          tensor_fdist1r == tensor p (fdist1 b) is the transport of p       *)
 (*                            along a |-> (a, b)                              *)
-(*           fdistmap_bind == the transport of a bind is the bind of the      *)
 (*                            transported kernel                              *)
 (* ```                                                                        *)
 (*                                                                            *)
@@ -155,12 +154,5 @@ Proof.
 by rewrite /tensor -fdistX_prod -/(tensor (fdist1 b) p) tensor_fdist1 /fdistX
    fdistmap_comp.
 Qed.
-
-(* Transport along a map commutes with a bind, the map moving inside the
-   kernel. *)
-Lemma fdistmap_bind (A B C : finType) (m : R.-fdist A) (k : A -> R.-fdist B)
-    (g : B -> C) :
-  fdistmap g (m >>= k) = m >>= (fun a => fdistmap g (k a)).
-Proof. by rewrite /fdistmap fdistbindA. Qed.
 
 End stoch.

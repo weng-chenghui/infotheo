@@ -3,7 +3,7 @@ From mathcomp Require Import all_boot all_order all_algebra fingroup finalg.
 From mathcomp Require Import ring boolp finmap lra reals.
 Require Import realType_ext realType_ln ssr_ext ssralg_ext bigop_ext fdist.
 Require Import proba jfdist_cond entropy graphoid.
-Require Import extra_algebra.
+Require Import fdist_extra extra_algebra.
 
 Import GRing.Theory.
 Import Num.Theory.
@@ -607,12 +607,6 @@ congr (_ * _); rewrite fdistmapE (big_pred1 c) // => b.
 by rewrite !inE /= xpair_eqE eqxx.
 Qed.
 
-(* Pushing a map through a bind. *)
-Lemma fdistmap_bind (T1 T2 T3 : finType) (Q : R.-fdist T1)
-    (g : T1 -> R.-fdist T2) (h : T2 -> T3) :
-  fdistmap h (Q >>= g) = Q >>= (fun a => fdistmap h (g a)).
-Proof. by rewrite /fdistmap fdistbindA. Qed.
-
 (* The mass a boolean statistic puts on [true] is the probability of the
    corresponding event. *)
 Lemma Pr_fdistmap_bool (T : finType) (D : T -> bool) (m : R.-fdist T) :
@@ -621,13 +615,6 @@ Proof.
 rewrite Pr_set1 fdistmapE /Pr; apply: eq_bigl => t.
 by rewrite !inE /= eqb_id.
 Qed.
-
-(* The second marginal of a genuine product is the second factor.  Fills the
-   gap left by [fdist_prod1] (probability/fdist.v), which has no counterpart
-   for the second marginal. *)
-Lemma fdist_prod2 (T1 T2 : finType) (Q1 : R.-fdist T1)
-    (Q2 : R.-fdist T2) : (Q1 `x Q2)`2 = Q2.
-Proof. by rewrite -fdistX1 fdistX_prod fdist_prod1. Qed.
 
 (* A uniform distribution over a product is the product of uniforms. *)
 Lemma fdist_uniform_prod (T1 T2 : finType) (n1 n2 n12 : nat)
