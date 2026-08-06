@@ -642,7 +642,8 @@ Definition hop1_reduction
 
 (* The distinguisher on the real view is the hop-0 reduction facing an
    encryption of the first input. *)
-Lemma hop0_real_armE (D : plain AHE * plain AHE * dsdp_alice_viewT -> bool) :
+Lemma hop0_real_challengeE
+    (D : plain AHE * plain AHE * dsdp_alice_viewT -> bool) :
   Pr (`p_ [% V2, V3, AliceView_zero_prefix 0]) [set x | D x]
     = indcpa_fdist_success_real (pkey_of_party Bob) (hop0_reduction D).
 Proof.
@@ -661,7 +662,8 @@ Qed.
 
 (* The distinguisher on the view with a zeroed hop-0 slot is the hop-0
    reduction facing an encryption of zero. *)
-Lemma hop0_zero_armE (D : plain AHE * plain AHE * dsdp_alice_viewT -> bool) :
+Lemma hop0_zero_challengeE
+    (D : plain AHE * plain AHE * dsdp_alice_viewT -> bool) :
   Pr (`p_ [% V2, V3, AliceView_zero_prefix 1]) [set x | D x]
     = indcpa_fdist_success_zero (pkey_of_party Bob) (hop0_reduction D).
 Proof.
@@ -685,12 +687,13 @@ Lemma hop0_advantageE (D : plain AHE * plain AHE * dsdp_alice_viewT -> bool) :
      - Pr (`p_ [% V2, V3, AliceView_zero_prefix 1]) [set x | D x] |
   = indcpa_fdist_epsilon (pkey_of_party Bob) (hop0_reduction D).
 Proof.
-by rewrite /indcpa_fdist_epsilon hop0_real_armE hop0_zero_armE.
+by rewrite /indcpa_fdist_epsilon hop0_real_challengeE hop0_zero_challengeE.
 Qed.
 
 (* The distinguisher on the view with a zeroed hop-0 slot is the hop-1
    reduction facing an encryption of the second input. *)
-Lemma hop1_real_armE (D : plain AHE * plain AHE * dsdp_alice_viewT -> bool) :
+Lemma hop1_real_challengeE
+    (D : plain AHE * plain AHE * dsdp_alice_viewT -> bool) :
   Pr (`p_ [% V2, V3, AliceView_zero_prefix 1]) [set x | D x]
     = indcpa_fdist_success_real (pkey_of_party Charlie) (hop1_reduction D).
 Proof.
@@ -709,7 +712,8 @@ Qed.
 
 (* The distinguisher on the all-zero view is the hop-1 reduction facing an
    encryption of zero. *)
-Lemma hop1_zero_armE (D : plain AHE * plain AHE * dsdp_alice_viewT -> bool) :
+Lemma hop1_zero_challengeE
+    (D : plain AHE * plain AHE * dsdp_alice_viewT -> bool) :
   Pr (`p_ [% V2, V3, AliceView_zero_prefix 2]) [set x | D x]
     = indcpa_fdist_success_zero (pkey_of_party Charlie) (hop1_reduction D).
 Proof.
@@ -733,7 +737,7 @@ Lemma hop1_advantageE (D : plain AHE * plain AHE * dsdp_alice_viewT -> bool) :
      - Pr (`p_ [% V2, V3, AliceView_zero_prefix 2]) [set x | D x] |
   = indcpa_fdist_epsilon (pkey_of_party Charlie) (hop1_reduction D).
 Proof.
-by rewrite /indcpa_fdist_epsilon hop1_real_armE hop1_zero_armE.
+by rewrite /indcpa_fdist_epsilon hop1_real_challengeE hop1_zero_challengeE.
 Qed.
 
 (* Alice's own input as a constant random variable. *)
