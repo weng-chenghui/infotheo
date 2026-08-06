@@ -1,7 +1,7 @@
 (* infotheo: information theory and error-correcting codes in Rocq            *)
 (* Copyright (C) 2025 infotheo authors, license: LGPL-2.1-or-later            *)
 From mathcomp Require Import all_ssreflect all_algebra reals.
-Require Import realType_ext realType_ln ssr_ext bigop_ext fdist proba.
+Require Import realType_ext realType_ln ssr_ext bigop_ext fdist fdist_extra proba.
 Require Import jfdist_cond entropy graphoid.
 Require Import finstoch privacy_kernel.
 
