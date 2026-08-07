@@ -10,6 +10,7 @@
 \hypersetup{hidelinks}
 \usepackage{listings}
 \usepackage{microtype}
+\usepackage{needspace}
 \usepackage{xcolor}
 
 \newif\ifanonymous
@@ -342,6 +343,7 @@ to each of eight players. The players return their cards to the verifier. The
 verifier's endpoint sequence is the shuffled dealt arrangement. Orbit-class
 invariance and the encoder equation then give correctness.
 
+\Needspace{10\baselineskip}
 \begin{theorem}[Executed correctness\footnotemark]\label{thm:pgl-correctness}
 \footnotetext{Formalized in \path{pgg-smc/instances/pgl27/pgl27_run.v} as
 \coqin{pgl27\_run\_recovers}. The direct class-recovery counterpart is
