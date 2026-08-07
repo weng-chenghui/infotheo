@@ -559,7 +559,65 @@ copying.
 - Sentences stay short and direct.
 - The paper avoids em dashes, semicolons, prose asides in parentheses, and
   unexplained abbreviations.
-- Every drafted section receives a separate prose audit before it is accepted.
+- Every drafted section receives a separate AI-ism and prose audit before it
+  is accepted.
+
+## FORTE prose baseline and AI-ism gate
+
+The language baseline is the author's FORTE paper at
+`~/Projects/aplas2024-poster/forteApr22/forteApr22.tex`. The WADT paper keeps
+the same level of vocabulary and grammar. It may introduce new mathematical
+terms required by the PGL development, but it does not raise the surrounding
+language to a more ornate academic register.
+
+The reference paper supplies these positive rules:
+
+- Put the grammatical subject and main verb near the start of the sentence.
+- Give one main idea to each sentence.
+- Use direct verbs such as "define", "use", "prove", "show", "compare", and
+  "compute".
+- Introduce a technical term with a concrete explanation before relying on
+  it.
+- Lead into an equation or theorem with a plain sentence that states its
+  purpose.
+- Give each paragraph one job. Typical jobs are setting the problem, defining
+  an object, stating a result, explaining evidence, or marking a limitation.
+- Prefer a short sequence of connected sentences to one sentence with several
+  nested clauses.
+- Keep the exact mathematical term when a simpler substitute would change the
+  claim. Simplify the grammar around the term instead.
+
+The WADT paper follows the reference paper's language level rather than every
+surface habit in that source. It uses the current name Rocq. It follows this
+spec's solo-author voice policy. It also removes grammar errors, outdated
+terminology, and inflated wording that may occur in the reference draft.
+
+The AI-ism check is a mandatory detect-first gate. It runs after each section
+draft and once over the complete paper. The check reports exact spans before
+any prose is changed. It must flag:
+
+- generic openings that could introduce any paper
+- stock transitions such as "Moreover", "Furthermore", and "Consequently"
+  when the logical relation is not needed
+- claims of importance, novelty, robustness, or completeness that add no
+  checked fact
+- repeated three-part lists created for rhythm rather than content
+- repeated restatement of the same result in nearby sentences
+- excessive hedging and vague qualifiers
+- nominalizations where a direct verb gives the same meaning
+- sentences with several front-loaded or nested clauses
+- repeated paragraph endings that merely announce significance
+- repeated templates such as "This work", "This paper", or "It is worth
+  noting"
+- code identifiers in body prose
+- unexplained technical terms
+- em dashes, semicolons, and prose asides in parentheses
+
+The audit fixes plain prose only. It does not rewrite mathematics, citations,
+macro arguments, theorem statements, or `\coqin{}` content automatically.
+Each accepted fix must preserve every claim, hedge, quantifier, citation, and
+formula. A section is ready only when every finding is fixed or carries a
+specific reason for keeping it.
 
 ## Citation and submission checks
 
@@ -577,8 +635,9 @@ Before submission, the paper must pass these checks:
 5. Recount files, lines, main theorems, agents, tokens, and audit statistics.
 6. Verify every exact-model and finite-step-model label in the claim matrix.
 7. Regenerate the assumption report at the fixed submission commit.
-8. Run the paper prose audit, mathematical meaning audit, citation audit, and
-   cross-reference audit.
+8. Run the per-section AI-ism gates, the final whole-paper AI-ism audit, the
+   mathematical meaning audit, the citation audit, and the cross-reference
+   audit. Compare the final prose with the FORTE language baseline.
 9. Build from a clean checkout with the current official LNCS package.
 10. Check vector output, grayscale legibility, minimum text size, bibliography,
     disclosures, and artifact links.
