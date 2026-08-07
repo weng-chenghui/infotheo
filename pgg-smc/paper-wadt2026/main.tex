@@ -114,7 +114,151 @@ directions.
 
 \section{Protocol and Security Model}\label{sec:model}
 
+The framework describes a protocol by the data
+\begin{equation}
+  (G,\rho,\mu;R), \qquad U_G, \qquad \mu^{*L}.
+  \label{eq:model-data}
+\end{equation}
+Here $G$ is a finite shuffle group. The representation
+$\rho:G\to S_n$ acts on $n$ card positions. The law $\mu$ selects one
+generator letter, and $R$ is the real closed field used for probabilities.
+The law $U_G$ is uniform on $G$. The convolution $\mu^{*L}$ is the law of the
+group element obtained by evaluating $L$ independent letters.
+
+A dealer samples a secret $S$ and a valid dealt arrangement $D$. The action
+of a sampled shuffle $g$ produces the arrangement $\rho(g)D$. Player $i$
+observes a view $V_i$ derived from the card at position $i$. A coalition
+$C\subseteq\{0,\ldots,n-1\}$ observes the joint view
+\begin{equation}
+  V_C=(V_i)_{i\in C}.
+  \label{eq:coalition-view}
+\end{equation}
+The interpreter executes the dealer, player, and verifier processes. It
+records each value received by a process. The resulting record is the
+executed trace $T_i$, and $T_C=(T_i)_{i\in C}$ is the coalition trace. The
+verifier receives all endpoints and applies the decoder. It therefore learns
+$S$ by design.
+
+The primary exact law samples a uniform Boolean secret and uses one fixed
+representative $D_s$ for each secret $s$. It then samples an independent
+element $g\leftarrow U_G$. For the $\PG$ instance, this is the formal law
+named in the source as \coqin{pgl27P}. The representative is the formal orbit
+encoder.
+\footnote{The exact source objects are \coqin{pgl27P} and
+\coqin{orbit\_encode}.}
+The all-decks law instead samples a uniform valid arrangement in the selected
+secret class before it samples $g\leftarrow U_G$.
+\footnote{The robustness law is \coqin{pgl27P\_alldecks}.}
+Both exact execution laws use a uniform Boolean prior.
+
+The security theorems concern passive, honest-but-curious adversaries. A
+corrupted player follows the protocol and retains its view and executed
+trace. Exact coalition privacy states that $S$ and $V_C$ are independent.
+Exact trace privacy states
+\begin{equation}
+  H(S\mid T_C)=H(S).
+  \label{eq:trace-privacy}
+\end{equation}
+The PGL protocol has no private player inputs. Active deviation, security
+after the verifier's reveal, and composition across executions are outside
+the model.
+
+The finite-step model replaces $U_G$ by $\mu^{*L}$. I measure two laws $P$
+and $Q$ by the unhalved $L_1$ distance
+\begin{equation}
+  \lVert P-Q\rVert_1=\sum_x\lvert P(x)-Q(x)\rvert.
+  \label{eq:l1-definition}
+\end{equation}
+The repository calls Equation~\ref{eq:l1-definition} variation distance.
+The common halved total variation distance is
+\begin{equation}
+  d_{\mathrm{TV}}(P,Q)=\tfrac12\lVert P-Q\rVert_1.
+  \label{eq:tv-definition}
+\end{equation}
+Thus an $L_1$ bound of $2^{-40}$ gives a halved total variation bound of
+$2^{-41}$.
+
+Figure~\ref{fig:models} separates the proved paths for the two laws. The
+lower path reaches endpoint and product-law proximity. It does not reach an
+approximate security statement.
+\begin{figure}[t]
+  \centering
+  \begin{tikzpicture}[
+      node distance=7mm and 8mm,
+      box/.style={draw,rounded corners,align=center,inner sep=4pt,
+                  font=\small},
+      arr/.style={-{Latex[length=2mm]},thick}]
+    \node[box] (uniform) {uniform group law\\$U_G$};
+    \node[box,right=of uniform] (exact) {exact coalition view\\and trace theorems};
+    \draw[arr] (uniform) -- (exact);
+
+    \node[box,below=of uniform] (word) {five-letter word law\\$\mu^{*200}$};
+    \node[box,right=of word] (lone) {$L_1$ mixing\\certificate};
+    \node[box,right=of lone] (transfer) {endpoint and\\product-law transfers};
+    \draw[arr] (word) -- (lone);
+    \draw[arr] (lone) -- (transfer);
+  \end{tikzpicture}
+  \caption{The exact and finite-step proof paths. A transfer from the lower
+  path to approximate coalition-view or trace privacy remains future work.}
+  \label{fig:models}
+\end{figure}
+
 \section{Framework and Generic Theorems}\label{sec:framework}
+
+The group interface fixes the finite carrier $G$, the subgroup of allowed
+shuffles, and the permutation representation $\rho$. The interface also
+records the generator tuple used by word evaluation. Mathematical Components
+provides the finite-group and action structures~\cite{MathComp}. The protocol
+instance supplies proofs that the generators belong to $G$ and that the
+action preserves valid arrangements.
+
+The sharing interface packages an encoder, a validity predicate, and a full
+decoder. Its correctness condition says that decoding a valid encoded
+arrangement returns the secret. Its permutation condition says that an
+allowed shuffle does not change the decoded secret. The threshold record
+stores a privacy cutoff and a decoder that reads the full arrangement. It
+does not store a separate recovery threshold. For the PGL instance, the
+record therefore packages privacy through three cards and an eight-endpoint
+decoder. Section~\ref{sec:exact} proves the seven-card recovery fact outside
+that record.
+
+The operational layer represents the dealer, players, and verifier as
+processes. Its interpreter executes sends and receives and records process
+inputs. An endpoint projection extracts the verifier's final sequence. This
+layer connects an algebraic arrangement with the values that processes
+receive during a concrete run. It extends the trace-based interpreter from
+earlier work~\cite{WengEtAl2025}.
+
+The generic privacy theorem turns transitivity into view independence. Let
+$G$ act $k$-transitively on the card positions. If $C$ has at most $k$
+positions, then the coalition view under a uniform element of $G$ is
+independent of the dealt secret. The theorem applies to any valid encoder
+that the action preserves. For the main instance, $k=3$.
+
+The trace theorem carries view independence to execution. Suppose the
+interpreter's trace $T_C$ is a function of the mathematical view $V_C$. If
+$S$ and $V_C$ are independent, then
+\begin{equation}
+  H(S\mid T_C)=H(S).
+  \label{eq:view-to-trace}
+\end{equation}
+This theorem separates the probabilistic argument from evaluation of the
+interpreter. Each instance proves that its recorded trace equals the expected
+view, then applies Equation~\ref{eq:view-to-trace}.
+
+The weighted-word layer defines a distribution on generator letters and
+pushes the product law on words through group multiplication. It also maps a
+shuffle law to the distribution of each card endpoint. These definitions
+allow a group-level $L_1$ bound to pass to endpoints by data processing.
+
+Three small records package results for reuse. A monodromy profile combines a
+protocol interface, an endpoint-security witness, and a reconstruction plug.
+The witness stores a word law and an endpoint bound. The plug connects the
+sharing decoder to the group action.
+\footnote{The source records are \coqin{MonodromyProfile},
+\coqin{SecurityWitness}, and \coqin{ReconPlug}.}
+They organize instance data. The PGL proof chain below uses the underlying
+group, sharing, trace, and weighted-word theorems directly.
 
 \section{The \texorpdfstring{$\PG$}{PGL(2,7)} Construction}\label{sec:pgl}
 
