@@ -394,7 +394,7 @@ fixed representative $D_S$ and samples an independent shuffle $g\leftarrow
 U_G$. Three-transitivity gives independence for every coalition $C$ with
 $\lvert C\rvert\leq3$.
 
-\begin{theorem}[Fixed-representative exact privacy]
+\begin{theorem}[Exact privacy for the fixed dealer]
 Under the uniform Boolean prior, the fixed representative dealer, and an
 independent uniform $\PG$ shuffle,
 \[
@@ -538,17 +538,204 @@ and the interpreter.
 
 \section{Other Instances}\label{sec:instances}
 
+The repository contains four sibling instances. They exercise different
+parts of the framework. Table~\ref{tab:instances} records the proved
+coverage. Exact privacy in the table refers to the dealer law defined by each
+instance. Trace privacy refers to the executed trace of the stated corrupted
+players.
+
+\begin{table}[t]
+  \centering
+  \scriptsize
+  \setlength{\tabcolsep}{3pt}
+  \resizebox{\textwidth}{!}{%
+  \begin{tabular}{llllll}
+    \toprule
+    Instance & Recovery & Exact privacy & Trace privacy & Finite-step mixing & Trust base \\
+    \midrule
+    den Boer & five-card AND & one card & one player & exact after one uniform cut
+      & kernel, \coqin{boolp} \\
+    Kim & five-card AND & one card & one player & $L=7$, $L_1<2^{-40}$
+      & kernel, \coqin{boolp} \\
+    $S_5$ & additive 5-of-5 & fewer than five & one player
+      & $L=286$ spectral route & imported Rayleigh bound \\
+    $S_5\times S_5$ & two additive 5-of-5 shares
+      & fewer than five per pile & one player
+      & within-pile decay, global floor $1$ & inherited Rayleigh bound \\
+    $\PG$ & $(t,r,n)=(3,7,8)$ & coalitions of at most three
+      & coalitions of at most three & $L=200$, $L_1\leq2^{-40}$
+      & kernel, \coqin{boolp} \\
+    \bottomrule
+  \end{tabular}}
+  \caption{Coverage of the five protocol instances. The mixing column uses
+  the unhalved distance in Equation~\ref{eq:l1-definition}.}
+  \label{tab:instances}
+\end{table}
+
+Den Boer's instance samples a uniform cyclic cut. One cut therefore gives
+the exact endpoint law used by its single-card privacy proof. Kim's variant
+uses a biased cyclic cut~\cite{KimCetinkaya2025}. For bias $1/100$, the
+formal development proves in the kernel that seven repeated cuts put every
+single-card endpoint within $2^{-40}$ of uniform in unhalved $L_1$ distance.
+
+The $S_5$ instance uses additive sharing modulo five. Its endpoint mixing
+proof applies a spectral inequality at word length 286. The development
+imports the required Rayleigh bound as an axiom. The $S_5\times S_5$ instance
+uses two disjoint piles. It inherits the same Rayleigh premise for decay
+within either pile. A card never changes piles, so its distance from the
+uniform law on all ten positions cannot converge to zero. The formal global
+bound approaches the exact $L_1$ floor of one.
+
+The PGL instance adds coalition views, coalition traces, the recovery ramp,
+and the finite fiber certificate from Section~\ref{sec:mixing}. Its mixing
+result does not depend on the $S_5$ Rayleigh premise. These instances show
+which proofs use only the common interfaces and which proofs need
+instance-specific finite or spectral evidence.
+
 \section{Methodology and Artifact}\label{sec:method}
+
+The formalization reported here is fixed at the following git commit.
+\begin{center}
+  \small\coqin{ebdc77c7b63c98f344d2d31bc1fd9fac8ce69e51}
+\end{center}
+I built it on an arm64 system running macOS 26.5.1 with \Rocq{} 9.0.0,
+MathComp 2.5.0, and the development version of infotheo. The \Rocq{}
+executable was compiled with
+OCaml 4.14.2. The repository build is single threaded:
+\begin{verbatim}
+make -j1
+\end{verbatim}
+Single-threaded execution is needed because parallel \Rocq{} workers can use
+more memory than the target machine provides.
+
+The artifact uses a paper-specific theorem index. The index covers the PGL
+files, the four sibling instances in Table~\ref{tab:instances}, and the
+framework files used by displayed results. It excludes unrelated instance
+demonstrations. Tables~\ref{tab:pgl-source}, \ref{tab:recovery-source}, and
+\ref{tab:privacy-source} give the PGL part of that index in the paper. The
+artifact also records a claim matrix. Each row links a paper claim to its
+formal theorem, dealer law, shuffle law, adversary scope, and assumptions.
+
+Assumptions are reported per credited theorem with \coqin{Print Assumptions}.
+The PGL group, orbit, order, correctness, and recovery results are checked
+without additional axioms. The current probability, privacy, trace, and
+mixing results use propositional extensionality, dependent functional
+extensionality, and constructive indefinite description from the
+\coqin{boolp} stack. The PGL finite fiber counts and final inequality are
+evaluated inside \Rocq{} and checked by its kernel.
+
+The $S_5$ spectral theorem depends on an imported Rayleigh bound. Results in
+the larger rigidity file can also depend on stated group-order and
+curve-realization assumptions. The $S_5\times S_5$ mixing theorem inherits
+the Rayleigh premise. Its rigidity file has separate group-order and
+curve-realization assumptions. The artifact reports these dependencies on
+the exact theorem rows instead of assigning them to every result in the same
+file.
+
+One repository test file contains an admitted proof:
+\begin{center}
+  \small\coqin{pgg-smc/security/pgg\_schreier\_test.v}
+\end{center}
+The file is outside \coqin{\_CoqProject}. It is not a dependency of the
+reported build. The artifact lists it as excluded material. For the main
+finite-step theorem, a
+small scratch file imports the PGL mixing module and invokes
+\coqin{Print Assumptions pgl27\_word\_mixing}. The scratch file uses the
+repository's module flags and does not modify the formalization.
+
+The work used LLM-generated proof scripts and documentation drafts under
+human specification, review, and responsibility. The human author selected
+the research questions, wrote the mathematical specification, selected the
+claims, made acceptance decisions, verified citations, and approved the
+final text. The \Rocq{} kernel checks accepted proof terms. A separate audit
+checks that formal statements and paper claims remain aligned.
 
 \section{Related Work}\label{sec:related}
 
+Card-protocol verification has used both proof assistants and automated
+state-space search. Mizuki and Sone give formal models for card protocols and
+small constructions~\cite{MizukiSone2009,MizukiSone2012}. Koch, Schrempp,
+and Kirsten encode bounded protocol spaces for software bounded model
+checking~\cite{Koch2019}. Their method searches for protocols and checks
+finite lower bounds. The present development instead proves reusable
+group-action, execution, privacy, and mixing lemmas in \Rocq{}. The Kim
+instance also connects a biased shuffle model to a concrete finite-step
+bound~\cite{KimCetinkaya2025}.
+
+Group-based shuffle models appear in work on closed shuffles and graph
+automorphisms. Miyamoto and Shinagawa realize a uniformly chosen graph
+automorphism by pile-scramble shuffles~\cite{MiyamotoShinagawa2022}.
+Shinagawa and Miyamoto extend the construction to graphs and hypergraphs and
+give applications to cyclic group shuffles~\cite{ShinagawaMiyamoto2023}.
+These results describe physical protocols that implement structured uniform
+shuffle groups. The framework in this paper takes the finite group, its
+action, and its probability law as parameters. It then connects them to
+sharing and execution semantics. Single-shuffle constructions and their
+complexity consequences provide further examples of algebraic shuffle
+structure~\cite{ShinagawaNuida2021,ShinagawaNuida2025}.
+
+Machine-checked probability libraries contain results that can support
+mixing arguments. Karayel formalizes expander graphs, Cheeger's inequality,
+and random-walk tail bounds in Isabelle/HOL~\cite{Karayel2023}. Barthe,
+Gr\'egoire, Hsu, and Strub develop a relational program logic for couplings
+and apply it to rapid-mixing examples~\cite{BartheEtAl2017}. Standard
+mathematical treatments relate spectral information to convergence of
+finite Markov chains~\cite{LevinPeresWilmer2009}. The PGL proof uses another
+route. It counts the exact fibers of one finite word length and checks the
+resulting integer inequality. This choice gives a concrete bound without a
+general spectral development.
+
+Proof-assistant frameworks for cryptography include CertiCrypt, CryptHOL, and
+SSProve~\cite{CertiCrypt,CryptHOL,SSProve}. They support program semantics,
+probabilistic reasoning, or modular cryptographic proofs at different
+levels. The present work uses the MathComp and infotheo libraries for finite
+algebra, probability, independence, and entropy~\cite{MathComp,InfoTheo}.
+The earlier FORTE development supplies the interpreter and trace semantics
+used here~\cite{WengEtAl2025}. The current paper connects that operational
+foundation to group-parametric card shuffles and coalition traces.
+
 \section{Conclusion and Future Work}\label{sec:conclusion}
+
+I presented a group-parametric \Rocq{} framework for card-based protocols and
+instantiated it with the action of $\PG$ on eight positions. Under the exact
+uniform group law, the instance has executed correctness, recovery
+parameters $(3,7,8)$, and exact view and trace privacy for coalitions of at
+most three players. These security results use a uniform Boolean prior,
+passive adversaries, and the dealer laws stated in Section~\ref{sec:model}.
+The verifier learns the secret.
+
+For a finite shuffle implementation, a checked fiber certificate gives an
+unhalved $L_1$ distance of at most $2^{-40}$ after 200 generator letters.
+The same bound holds for every single-card endpoint and for a product with
+any Boolean secret prior. The formalization does not yet turn these
+distributional bounds into approximate coalition-view or trace privacy.
+
+The missing transport theorem should be developed as a separate two-model
+security result. It must relate the exact execution law and the finite-step
+execution law through the interpreter. Another direction is to connect
+bounded-width branching programs to group-based card protocols through
+Barrington's theorem~\cite{Barrington1989,DvorakKoucky2021}. This direction
+would make the workshop abstract's $\mathrm{NC}^1$ compilation proposal
+precise. Further work should add active and compositional security, building
+on models for active card protocols~\cite{KochFUN2021}. It should also
+compute quantitative leakage for reveal sets of four through six cards.
 
 \subsubsection*{Acknowledgements and AI-use statement.}
 
+The author used LLM-generated proof scripts and documentation drafts under
+human specification, review, and responsibility. The author retains
+responsibility for the mathematical specification, claims, citations, and
+final text.
+
 \subsubsection*{Disclosure of Interests.}
 
+The author declares no competing interests.
+
 \subsubsection*{Artifact availability.}
+
+The source, theorem index, claim matrix, assumption report, and build
+instructions accompany the submission artifact. The artifact fixes the
+formalization at the commit reported in Section~\ref{sec:method}.
 
 \bibliographystyle{splncs04}
 \bibliography{references}
