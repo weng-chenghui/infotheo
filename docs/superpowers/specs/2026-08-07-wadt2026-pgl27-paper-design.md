@@ -14,23 +14,30 @@ boundary.
 The deliverable is one LNCS paper for the WADT 2026 refereed
 post-proceedings. The submission deadline is 2026-09-17 and the notification
 date is 2026-10-29. The paper extends the abstract accepted and presented on
-2026-06-30 in Rennes. The abstract, slides, and source diagrams are in
+2026-06-30 in Rennes. That abstract used den Boer's protocol as its main case
+and proposed an S5 and Barrington compilation direction. The full paper keeps
+the same algebraic thesis and replaces the main case with the later PGL(2,7)
+development. The abstract, slides, and source diagrams are in
 `~/Projects/aplas2024-poster/wadtSep17/`.
 
 - Title: **Algebraic Specification of Card-Based Cryptographic Protocols in
   Rocq**.
-- Author: Cheng-Hui Weng, Nagoya University, solo.
+- Default author form: Cheng-Hui Weng, Nagoya University, solo. The LaTeX
+  front matter has an anonymized build switch until the chairs confirm the
+  review policy.
 - Funding information must be confirmed during drafting.
 - The bibliography style is `splncs04.bst` unless the current venue package
   says otherwise.
-- The `WengEtAl2025` entry must contain the real author list before any draft
-  is circulated.
+- The source `WengEtAl2025` entry already contains Cheng-Hui Weng, Reynald
+  Affeldt, Jacques Garrigue, and Takafumi Saikawa. Copy it without replacing
+  the authors with the anonymous placeholder used in the accepted LaTeX.
 
 The author will contact the chairs about the page rule. This design does not
 reduce the planned technical content or adopt a lower page target. The same
 message should also confirm how appendices count, whether the paper is
-anonymous, which template version is required, and which EasyChair track
-accepts the full paper.
+anonymous, which template version is required, which EasyChair track accepts
+the full paper, and whether the post-proceedings paper may replace the
+workshop abstract's den Boer case study with the PGL(2,7) results.
 
 ## Work boundary
 
@@ -75,8 +82,9 @@ The paper makes three technical contributions.
    and executed-trace secrecy for the PGL(2,7) protocol under the exact
    uniform shuffle model.
 3. It proves that a realistic 200-letter generator-word shuffle approaches
-   the exact uniform law. The law-level, single-card, and joint
-   secret-and-shuffle bounds are checked in Rocq.
+   the exact uniform law. One certificate establishes the law-level bound.
+   Rocq then transfers that bound to each single-card marginal and to the
+   product of any secret prior with the shuffle law.
 
 The LLM-assisted workflow is not a research contribution. It is reported in
 the methodology and AI-use disclosures so that the production process is
@@ -92,11 +100,29 @@ The ideal law is the uniform distribution `U_G` over the PGL(2,7) shuffle
 group. The exact view-independence and executed-trace secrecy theorems use this
 law.
 
+The primary exact execution law is `pgl27P`. It samples a uniform Boolean
+secret, uses the fixed representative `orbit_encode`, and samples an
+independent uniform element of the PGL(2,7) shuffle group. The main exact view
+and trace claims use this law and this uniform secret prior.
+
+The all-decks law `pgl27P_alldecks` also uses a uniform Boolean prior. It
+samples a uniform valid deck from the selected secret class before applying an
+independent uniform group element. Its view and trace results are robustness
+results, not the definition of the primary execution model.
+
+The shuffle-free deck model proves prior-generic view independence through
+`pgl27_view_indep_deck_prior`. The current trace theorems for that model still
+use the uniform Boolean prior. The paper states these prior and dealer choices
+at every security result.
+
 ### Realistic finite-step shuffle
 
 The executable law is the 200-fold generator-word law `mu^*200`. It samples a
 uniform 200-letter word over the chosen symmetric generator set and evaluates
-the word in the shuffle group.
+the word in the shuffle group. The alphabet has five letters. It consists of
+three PGL(2,7) generators and the two additional inverses needed to make the
+tuple symmetric. The certificate compares `5^200` words across 336 group
+fibers.
 
 ### Established bridge
 
@@ -118,14 +144,17 @@ is at most `2^-41`.
 
 The theorem `pgl27_endpoint_mixing` transfers the same L1 upper bound to every
 single-card marginal. The theorem `pgl27_joint_mixing` transfers it to the
-joint secret-and-shuffle law for any prior on the secret.
+product of any secret prior with the shuffle law. Independence is built into
+this product distribution. The theorem is not a statement about an executed
+protocol.
 
 ### Missing bridge
 
-The current development does not transport joint-law proximity through the
+The current development does not transport product-law proximity through the
 interpreter to an approximate view-privacy or approximate executed-trace
 secrecy theorem. The paper must not describe `2^-40` as a trace-secrecy bound.
-Section 6 ends by showing this missing arrow explicitly.
+It must also not describe `2^-40` as a coalition-privacy bound. Section 6 ends
+by showing this missing arrow explicitly.
 
 The relation between the models is therefore a main result of this paper at
 the distribution level. A general security-level bridge belongs to future
@@ -138,8 +167,9 @@ section.
 
 - The PGL(2,7) case is an empty-input, dealer-based sharing protocol.
 - Adversaries are passive and honest-but-curious.
-- A coalition of at most three players has exact view and trace privacy under
-  the uniform shuffle model.
+- Under `pgl27P`, a coalition of at most three players has exact view and trace
+  privacy for a uniform Boolean secret, a fixed encoded representative, and a
+  uniform PGL(2,7) shuffle.
 - The verifier receives the endpoints and learns the secret by design.
 - Post-reveal knowledge is outside the model.
 - Active deviation and composition across executions are outside the model.
@@ -147,13 +177,17 @@ section.
 - Seven revealed cards already determine the deck and its secret class.
 - Six revealed cards never determine the class.
 - Three or fewer revealed cards preserve exact privacy.
-- Four revealed cards can leak information. The development does not compute
-  the exact leakage for four through six reveals.
+- One specific four-card coalition has positive leakage, which makes the
+  privacy threshold three sharp. The development does not prove that every
+  four-card coalition leaks, and it does not compute exact leakage for four
+  through six reveals.
 
 The recovery description uses the ramp parameters
-`(t, r, n) = (3, 7, 8)`. The paper does not infer the recovery threshold from
-the `ThresholdScheme` record. For this instance, that record packages the
-privacy cutoff and an eight-endpoint decoder.
+`(t, r, n) = (3, 7, 8)`. The `ThresholdScheme` record has no recovery-threshold
+field. For this instance, it packages the privacy cutoff and an eight-endpoint
+decoder. The value `r = 7` comes from `pgl27_seven_reveal_class`, which proves
+determination from seven reveals rather than implementing a seven-card
+decoder.
 
 ## PGL(2,7) mathematical facts
 
@@ -172,9 +206,20 @@ The main theorem chain includes:
 - `pgl27_seven_reveal_determines`
 - `pgl27_seven_reveal_class`
 - `pgl27_six_reveal_ambiguous`
+- `pgl27_reveal_ambiguous`
 - `pgl27_view_indep` and its coalition variants
+- `pgl27_view_leakage_le`
+- `pgl27_view_dep_k4` and `pgl27_view_leak_k4`
+- `pgl27_view_indep_alldecks`
+- `pgl27_view_indep_deck_prior`
 - `pgl27_trace_secrecy`
 - `pgl27_coalition_trace_secrecy`
+- `pgl27_alldecks_trace_secrecy`
+- `pgl27_alldecks_coalition_secrecy`
+- `pgl27_deck_trace_secrecy`
+- `pgl27_deck_coalition_secrecy`
+- `pgl27_gen5_eq`
+- `pgl27_card`
 - `pgl27_word_mixing`
 - `pgl27_endpoint_mixing`
 - `pgl27_joint_mixing`
@@ -203,10 +248,17 @@ the abstract and introduction use a descriptive claim:
 > first-class parameters, instantiated with exact coalition and trace privacy
 > results and certified finite-step mixing bounds.
 
+The accepted workshop abstract used "first formalization" wording. The
+full-paper introduction is not drafted until an early full-text audit checks a
+narrowed version of that claim. If the audit supports the claim, the full
+paper preserves it with the verified scope. If the audit is inconclusive or
+finds prior work, the full paper replaces it with the descriptive wording
+above and states that the full paper sharpens the workshop abstract's scope.
+
 The words "first", "first refereed", and equivalent priority wording require
-a fresh full-text literature audit near the submission date. Any approved
-priority wording must be limited to the verified combination, not an
-individual axis.
+the early audit and a fresh check near the submission date. Any approved
+priority wording is limited to the verified combination, not an individual
+axis.
 
 The author's FORTE 2025 Rocq interpreter and trace-security work is a
 foundation of the trace component. It is cited as prior work, not presented as
@@ -217,7 +269,7 @@ new in this paper.
 The paper lives in this repository under:
 
 ```text
-pgg-smc/papers/wadt2026/
+pgg-smc/paper-wadt2026/
   main.tex
   sections/
     01-intro.tex
@@ -231,11 +283,18 @@ pgg-smc/papers/wadt2026/
     09-related-work.tex
     10-conclusion.tex
   figures/
+  artifact/
+    THEOREM_INDEX.md
+    CLAIM_MATRIX.md
+    ASSUMPTIONS.md
   references.bib
   wadt2026-macros.sty
   Makefile
   .gitignore
 ```
+
+The directory name is intentionally distinct from the existing
+`pgg-smc/paper/` project. The paper plan does not move or reuse that directory.
 
 The current official LNCS package supplies `llncs.cls` and
 `splncs04.bst`. The project does not copy an older class file from the slide
@@ -260,8 +319,8 @@ chairs reply.
 | 3 | Framework and generic theorems. Present only the components used by the main proof chain. | Sharing framework, transitivity privacy, trace secrecy, weighted words | 2.5 |
 | 4 | PGL(2,7) construction. Present the group action, orbit-class secret, the 28+42 split, and 3-transitivity. | `pgl27_group.v`, `pgl27_orbit.v` | 2 |
 | 5 | Exact-shuffle correctness and security. Present the ramp, recovery, coalition privacy, and executed-trace secrecy under `U_G`. | PGL run, recovery, secrecy, and trace files | 3 |
-| 6 | Finite-step approximation of the exact model. Present `mu^*200`, the L1 certificate, the endpoint and joint-law transfers, and the missing trace bridge. | `pgl27_mixing.v`, weighted-word framework | 2.5 |
-| 7 | Other instances. Compare recovery, exact privacy, trace privacy, mixing, and trust-base coverage. | `instances/` | 1.5 |
+| 6 | Finite-step approximation of the exact model. Present `mu^*200`, the L1 certificate, the endpoint and secret-prior product-law transfers, and the missing trace bridge. | `pgl27_mixing.v`, weighted-word framework | 2.5 |
+| 7 | Other instances. Compare recovery, exact privacy, trace privacy, mixing, and trust-base coverage. Include Kim's in-kernel `L = 7` result and distinguish it from the assumed-certificate routes for S5 and S5xS5. | `instances/` | 1.5 |
 | 8 | Methodology and artifact. Give reproduction data, the claim matrix, assumption reports, and AI-use methodology. | Git history, audit data, build metadata | 2 |
 | 9 | Related work. Organize the discussion by the four novelty axes. | Full-text verified sources | 1.5 |
 | 10 | Conclusion and future work. State the proven relation, the missing bridge, and the next research program. | Claim boundary and Section 6 | 1 |
@@ -278,14 +337,22 @@ The introduction follows a problem-first order.
 2. Existing mechanized work does not combine a reusable group-action model,
    executed-trace privacy, and a checked finite-step mixing certificate for a
    concrete card protocol.
-3. The paper introduces the framework and its five instances.
-4. The PGL(2,7) case gives the exact-model correctness, ramp, and privacy
+3. A continuity paragraph explains that the workshop abstract illustrated
+   the algebraic thesis with den Boer's protocol and S5. The PGL(2,7) case is
+   the later concrete realization of that thesis with a complete exact
+   security stack and a finite-step mixing certificate.
+4. The paper introduces the framework and its five instances.
+5. The PGL(2,7) case gives the exact-model correctness, ramp, and privacy
    results.
-5. The finite-step result compares the executable 200-letter law with the
+6. The finite-step result compares the executable 200-letter law with the
    exact uniform law.
-6. The introduction states that approximate executed-trace secrecy remains
+7. The sibling-instance summary notes that Kim's biased five-card protocol
+   already has an in-kernel `L = 7` finite-step bound. PGL is distinguished by
+   attaching a larger non-abelian mixing certificate to the full exact
+   security stack, not by being the development's only finite-step result.
+8. The introduction states that approximate executed-trace secrecy remains
    unproved.
-7. The final paragraph gives the paper organization.
+9. The final paragraph gives the paper organization.
 
 The introduction contains no LLM priority claim. The methodology appears only
 after the technical results.
@@ -339,6 +406,8 @@ The claim matrix records:
 
 - the prose claim
 - its model, either exact or finite-step
+- its dealer law
+- its secret prior
 - its evidence class
 - the exact source
 - the permitted wording
@@ -363,10 +432,39 @@ The artifact statement includes:
 - the source and method for effort accounting
 - the status of any external certificate
 
+The paper uses a paper-specific theorem index at
+`pgg-smc/paper-wadt2026/artifact/THEOREM_INDEX.md`. It is generated from the
+PGL instance, the four credited sibling instances, and the framework files
+that support displayed results. It does not reuse
+`pgg-smc/audit-inventory/THEOREM_INDEX.md`, because that index currently omits
+PGL and includes unrelated developments. The paper plan must define the exact
+roots before drafting Section 8. It must exclude the abelian, cyclic, monster,
+oc, and star instances from paper statistics.
+
 The paper distinguishes kernel-checked computation from an externally
-generated certificate that is only checked or assumed by the development. The
-S5 external Rayleigh certificate and group-order assumption are disclosed in
-the comparison table.
+generated certificate that is only checked or assumed by the development.
+"Checked in Rocq" means checked by the kernel modulo the assumptions reported
+for that exact theorem. For the PGL probability and mixing results, the
+expected trust base includes the three classical `boolp` axioms. Group, orbit,
+cardinality, and recovery results are expected to be closed under the global
+context.
+
+The assumption report is per credited theorem, not a tree-wide list. It must
+identify which S5 and S5xS5 results depend on the Rayleigh, group-order, or
+curve-realization assumptions. It must not imply that a credited result is
+axiom-free until its own `Print Assumptions` output confirms that fact.
+Conjectures and axioms in excluded framework demonstrations are listed
+separately as excluded material. They are not attributed to unrelated paper
+results.
+
+The repository contains `security/pgg_schreier_test.v` with an `Admitted`
+proof, but that file is outside `_CoqProject`. The artifact statement records
+this fact so that a repository search is not mistaken for a build dependency.
+
+For `pgl27_word_mixing`, the assumption report uses a small compile scratch
+file with the project's `-R` flags and a `Print Assumptions` command. It does
+not use `rocq_assumptions` through `rocq_query`, because that path timed out in
+the audit. This scratch probe is read-only with respect to the formalization.
 
 ## Methodology and AI-use disclosure
 
@@ -468,8 +566,10 @@ copying.
 Before submission, the paper must pass these checks:
 
 1. Verify every citation against the full source text.
-2. Fix the Koch, Schrempp, and Kirsten metadata. Choose either the ASIACRYPT
-   2019 publication or the NGC 2020 version and use one consistent bib entry.
+2. Verify the volume, year, pages, and publication metadata of the New
+   Generation Computing version of Koch, Schrempp, and Kirsten against the
+   publisher record. Then choose either that verified entry or the ASIACRYPT
+   2019 entry and use it consistently.
 3. Store the novelty report inside the repository with its query, date, source
    list, and verdicts.
 4. Repeat the novelty search near submission because the LLM formalization and
@@ -517,7 +617,7 @@ The desired theorem chain is:
 
 ```text
 finite-step shuffle mixing
-  -> joint-law proximity
+  -> secret-prior product-law proximity
   -> approximate view privacy
   -> approximate executed-trace secrecy
 ```
@@ -529,6 +629,8 @@ levels.
 
 Other future directions remain secondary:
 
+- completing the Barrington and NC1 compilation direction announced in the
+  workshop abstract
 - active security and compositional security
 - quantitative leakage for four through six revealed cards
 - algebraic-geometry recovery for feasible groups
