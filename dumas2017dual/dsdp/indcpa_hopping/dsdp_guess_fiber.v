@@ -1648,7 +1648,7 @@ Proof.
 move=> Hinj.
 apply: (le_trans _ (cinde_diagonal_bound guess_cinde_V2
                       (fun a c => @guess_V2_cond_le a c Hinj))).
-rewrite /guess_fdist_success guess_joint_fdist_marginal Pr_fdistmap_pre.
+rewrite /guess_fdist_success guess_joint_fdist_marginal Pr_fdistmap_preim.
 apply: subset_Pr; apply/subsetP => t.
 by rewrite !inE /= => /eqP Heq; rewrite /guess_rv /V2 Heq eqxx.
 Qed.

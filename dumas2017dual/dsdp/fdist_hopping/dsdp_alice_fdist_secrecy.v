@@ -910,7 +910,7 @@ Lemma guess_event_jointE (g : dsdp_alice_viewT -> plain AHE) (i : nat) :
   = Pr (`p_ [% V2, V3, AliceView_zero_prefix i])
        [set x | distinguisher_of_guess g x].
 Proof.
-by rewrite /dist_of_RV Pr_fdistmap_pre; apply: eq_bigl => t; rewrite !inE.
+by rewrite /dist_of_RV Pr_fdistmap_preim; apply: eq_bigl => t; rewrite !inE.
 Qed.
 
 (* A predictor reading Alice's real view matches Bob's input with probability at
