@@ -422,15 +422,13 @@ exists (fun p : (hop0_stateT * Renc)%type =>
 by move=> [[[[[v2 v3] [r2 r3]] [ra1 ra2]] rho3] rho2].
 Qed.
 
-(* The hop-0 state is uniform. *)
-Lemma hop0_state_uniformE : `p_ Hop0State = fdist_uniform card_hop0_state.
-Proof. by rewrite -(fst_RV2 Hop0State Rho2) hop0_pair_uniformE fdist_prod1. Qed.
-
 (* The hop-0 encryption randomness is uniform and independent of the hop-0
    state. *)
 Lemma hop0_state_prod :
   `p_ [% Hop0State, Rho2] = (`p_ Hop0State) `x (fdist_uniform card_renc).
-Proof. by rewrite hop0_state_uniformE hop0_pair_uniformE. Qed.
+Proof.
+by rewrite -(fst_RV2 Hop0State Rho2) !hop0_pair_uniformE fdist_prod1.
+Qed.
 
 (* The adversary state of hop 1: the inputs, the masks, Alice's combine
    randomness, and the hop-0 ciphertext of zero. *)
@@ -453,11 +451,6 @@ Definition hop1_state_of (c : hop0_stateT) : hop1_stateT :=
   (c.1.1.1, c.1.1.2, c.1.2,
    chcipher_of_cipher (enc (pkey_of_party Bob) 0 (rand_of_renc c.2))).
 
-(* The hop-1 state is the image of the hop-1 prestate under the hop-0
-   encryption of zero. *)
-Lemma hop1_state_ofE : Hop1State = hop1_state_of `o Hop1PreState.
-Proof. by []. Qed.
-
 (* The hop-1 prestate and the hop-1 encryption randomness are jointly
    uniform. *)
 Lemma hop1_prestate_pair_uniformE :
@@ -471,12 +464,6 @@ exists (fun p : (hop0_stateT * Renc)%type =>
           (p.1.1.1.1, p.1.1.1.2, (p.1.2, p.2), p.1.1.2)).
   by move=> [[[[v2 v3] [r2 r3]] [rho2 rho3]] [ra1 ra2]].
 by move=> [[[[[v2 v3] [r2 r3]] [ra1 ra2]] rho2] rho3].
-Qed.
-
-(* The hop-1 prestate is uniform. *)
-Lemma hop1_prestate_uniformE : `p_ Hop1PreState = fdist_uniform card_hop0_state.
-Proof.
-by rewrite -(fst_RV2 Hop1PreState Rho3) hop1_prestate_pair_uniformE fdist_prod1.
 Qed.
 
 (* The hop-1 encryption randomness is uniform. *)
@@ -499,9 +486,10 @@ Lemma hop1_state_prod :
 Proof.
 have Hpre : alice_sample_fdist |= Hop1PreState _|_ Rho3.
   apply: inde_RV_of_prod.
-  by rewrite hop1_prestate_pair_uniformE hop1_prestate_uniformE rho3_uniformE.
+  by rewrite hop1_prestate_pair_uniformE -(fst_RV2 Hop1PreState Rho3)
+             hop1_prestate_pair_uniformE fdist_prod1 rho3_uniformE.
 have Hstate : alice_sample_fdist |= Hop1State _|_ Rho3.
-  by rewrite hop1_state_ofE; exact: (inde_RV_comp hop1_state_of idfun Hpre).
+  exact: (inde_RV_comp hop1_state_of idfun Hpre).
 by rewrite (inde_dist_of_RV2 Hstate) rho3_uniformE.
 Qed.
 
@@ -724,11 +712,6 @@ Lemma alice_inputs_constE :
   = const_RV alice_sample_fdist (w_v1, w_u1, w_u2, w_u3).
 Proof. by apply: boolp.funext => t; rewrite /V1c /U1c /U2c /U3c !const_RVE. Qed.
 
-(* The protocol weights are independent of the two secret inputs. *)
-Lemma alice_var_indep :
-  alice_sample_fdist |= [% V1c, U1c, U2c, U3c] _|_ [% V2, V3].
-Proof. by rewrite alice_inputs_constE; exact: inde_const_RV. Qed.
-
 (* The protocol weights, the leaked output and the two secret inputs satisfy the
    DSDP linear constraint pointwise. *)
 Lemma alice_constraint_holds (t : dsdp_alice_sampleT) :
@@ -747,7 +730,8 @@ Lemma alice_VarRV_cond_uniform (s v2 v3 : plain AHE) :
      | [% V1c, U1c, U2c, U3c, Sout] = (w_v1, w_u1, w_u2, w_u3, s) ]
   = #|plain AHE|%:R^-1.
 Proof.
-apply: Pr_dsdp_sol_uniform_ring => //; last exact: alice_var_indep.
+apply: Pr_dsdp_sol_uniform_ring => //;
+  last by rewrite alice_inputs_constE; exact: inde_const_RV.
   exact: alice_constraint_holds.
 by rewrite alice_var_uniform; congr fdist_uniform; exact: eq_irrelevance.
 Qed.
@@ -809,29 +793,13 @@ Definition alice_spectator_of (c : alice_spectator_preT) :
    chcipher_of_cipher (enc (pkey_of_party Bob) 0 (rand_of_renc c.1.2.1)),
    chcipher_of_cipher (enc (pkey_of_party Charlie) 0 (rand_of_renc c.1.2.2))).
 
-(* The spectator is the image of the spectator coordinates under the
-   zero-plaintext encryptions. *)
-Lemma alice_spectator_ofE :
-  AliceSpectator = alice_spectator_of `o AliceSpectatorPre.
-Proof.
-by apply/boolp.funext => -[[[[v2 v3] [r2 r3]] [rho2 rho3]] [ra1 ra2]].
-Qed.
-
 (* The spectator is independent of the two secret inputs. *)
 Lemma alice_spectator_indep :
   alice_sample_fdist |= AliceSpectator _|_ [% V2, V3].
 Proof.
-rewrite alice_spectator_ofE.
+have -> : AliceSpectator = alice_spectator_of `o AliceSpectatorPre.
+  by apply/boolp.funext => -[[[[v2 v3] [r2 r3]] [rho2 rho3]] [ra1 ra2]].
 exact: (inde_RV_comp alice_spectator_of idfun spectator_pre_indep).
-Qed.
-
-(* The spectator is independent of Bob's input paired with the leaked output. *)
-Lemma alice_spectator_indep_Sout :
-  alice_sample_fdist |= AliceSpectator _|_ [% V2, Sout].
-Proof.
-exact: (inde_RV_comp idfun (fun p : plain AHE * plain AHE =>
-          (p.1, uncurry (dsdp_output w_v1 w_u1 w_u2 w_u3) p))
-        alice_spectator_indep).
 Qed.
 
 (* The spectator is conditionally independent of Bob's input given the leaked
@@ -840,7 +808,10 @@ Lemma alice_spectator_cinde :
   alice_sample_fdist |= AliceSpectator _|_ V2 | Sout.
 Proof.
 apply: cpr_prd_unit_RV; apply: weak_union.
-by apply/cinde_RV_unit; exact: alice_spectator_indep_Sout.
+apply/cinde_RV_unit.
+exact: (inde_RV_comp idfun (fun p : plain AHE * plain AHE =>
+          (p.1, uncurry (dsdp_output w_v1 w_u1 w_u2 w_u3) p))
+        alice_spectator_indep).
 Qed.
 
 (* Alice's all-zero view assembled from the spectator and the leaked output. *)
