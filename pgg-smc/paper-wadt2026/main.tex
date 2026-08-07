@@ -1,11 +1,13 @@
 \documentclass[runningheads]{llncs}
 \usepackage[T1]{fontenc}
 \usepackage{amsmath,amssymb,mathtools}
+\usepackage{array}
 \usepackage{booktabs}
 \usepackage{graphicx}
 \usepackage{tikz}
 \usetikzlibrary{arrows.meta,positioning}
 \usepackage{hyperref}
+\hypersetup{hidelinks}
 \usepackage{listings}
 \usepackage{microtype}
 \usepackage{xcolor}
@@ -18,6 +20,7 @@
 \newcommand{\PG}{\mathrm{PGL}(2,7)}
 \newcommand{\Unif}{U_G}
 \newcommand{\wordlaw}{\mu^{*L}}
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
 
 \title{Algebraic Specification of Card-Based Cryptographic Protocols in Rocq}
 \ifanonymous
@@ -281,9 +284,9 @@ For every $s\in\{0,1\}$, the encoded arrangement $D_s$ is valid and its
 four-subset has orbit class $s$.
 \end{theorem}
 
-The seventy four-subsets divide into two orbits. The smaller orbit consists
-of the equianharmonic subsets. The larger orbit consists of the harmonic
-subsets.
+The seventy subsets of size four divide into two orbits. The smaller orbit
+consists of the equianharmonic subsets. The larger orbit consists of the
+harmonic subsets.
 
 \begin{theorem}[Orbit split]\label{thm:orbit-split}
 The action of $\PG$ on the four-subsets of
@@ -546,27 +549,37 @@ players.
 
 \begin{table}[t]
   \centering
-  \scriptsize
-  \setlength{\tabcolsep}{3pt}
-  \resizebox{\textwidth}{!}{%
-  \begin{tabular}{llllll}
+  \small
+  \renewcommand{\arraystretch}{1.15}
+  \begin{tabular}{@{}L{.14\linewidth}L{.24\linewidth}
+                       L{.25\linewidth}L{.22\linewidth}@{}}
     \toprule
-    Instance & Recovery & Exact privacy & Trace privacy & Finite-step mixing & Trust base \\
+    Instance & Recovery & Exact privacy & Trace privacy \\
     \midrule
-    den Boer & five-card AND & one card & one player & exact after one uniform cut
-      & kernel, \coqin{boolp} \\
-    Kim & five-card AND & one card & one player & $L=7$, $L_1<2^{-40}$
-      & kernel, \coqin{boolp} \\
-    $S_5$ & additive 5-of-5 & fewer than five & one player
-      & $L=286$ spectral route & imported Rayleigh bound \\
+    den Boer & five-card AND & one card & one player \\
+    Kim & five-card AND & one card & one player \\
+    $S_5$ & additive 5-of-5 & fewer than five & one player \\
     $S_5\times S_5$ & two additive 5-of-5 shares
-      & fewer than five per pile & one player
-      & within-pile decay, global floor $1$ & inherited Rayleigh bound \\
+      & fewer than five per pile & one player \\
     $\PG$ & $(t,r,n)=(3,7,8)$ & coalitions of at most three
-      & coalitions of at most three & $L=200$, $L_1\leq2^{-40}$
-      & kernel, \coqin{boolp} \\
+      & coalitions of at most three \\
     \bottomrule
-  \end{tabular}}
+  \end{tabular}
+
+  \vspace{1ex}
+
+  \begin{tabular}{@{}L{.14\linewidth}L{.40\linewidth}L{.31\linewidth}@{}}
+    \toprule
+    Instance & Finite-step mixing & Trust base \\
+    \midrule
+    den Boer & exact after one uniform cut & kernel, \coqin{boolp} \\
+    Kim & $L=7$, $L_1<2^{-40}$ & kernel, \coqin{boolp} \\
+    $S_5$ & $L=286$ spectral route & imported Rayleigh bound \\
+    $S_5\times S_5$ & within-pile decay, global floor $1$
+      & inherited Rayleigh bound \\
+    $\PG$ & $L=200$, $L_1\leq2^{-40}$ & kernel, \coqin{boolp} \\
+    \bottomrule
+  \end{tabular}
   \caption{Coverage of the five protocol instances. The mixing column uses
   the unhalved distance in Equation~\ref{eq:l1-definition}.}
   \label{tab:instances}
@@ -608,18 +621,20 @@ make -j1
 Single-threaded execution is needed because parallel \Rocq{} workers can use
 more memory than the target machine provides.
 
-The artifact uses a paper-specific theorem index. The index covers the PGL
-files, the four sibling instances in Table~\ref{tab:instances}, and the
-framework files used by displayed results. It excludes unrelated instance
-demonstrations. Tables~\ref{tab:pgl-source}, \ref{tab:recovery-source}, and
-\ref{tab:privacy-source} give the PGL part of that index in the paper. The
-artifact also records a claim matrix. Each row links a paper claim to its
+Before submission, the companion artifact will include a paper-specific
+theorem index. The index will cover the PGL files, the four sibling instances
+in Table~\ref{tab:instances}, and the framework files used by displayed
+results. It will exclude unrelated instance demonstrations.
+Tables~\ref{tab:pgl-source}, \ref{tab:recovery-source}, and
+\ref{tab:privacy-source} give the PGL part of the planned index. The artifact
+will also include a claim matrix. Each row will link a paper claim to its
 formal theorem, dealer law, shuffle law, adversary scope, and assumptions.
 
-Assumptions are reported per credited theorem with \coqin{Print Assumptions}.
-The PGL group, orbit, order, correctness, and recovery results are checked
-without additional axioms. The current probability, privacy, trace, and
-mixing results use propositional extensionality, dependent functional
+Before submission, a per-theorem assumption report will be generated with
+\coqin{Print Assumptions}. The current source review gives the expected trust
+boundaries. The PGL group, orbit, order, correctness, and recovery results are
+checked without additional axioms. The current probability, privacy, trace,
+and mixing results use propositional extensionality, dependent functional
 extensionality, and constructive indefinite description from the
 \coqin{boolp} stack. The PGL finite fiber counts and final inequality are
 evaluated inside \Rocq{} and checked by its kernel.
@@ -628,27 +643,27 @@ The $S_5$ spectral theorem depends on an imported Rayleigh bound. Results in
 the larger rigidity file can also depend on stated group-order and
 curve-realization assumptions. The $S_5\times S_5$ mixing theorem inherits
 the Rayleigh premise. Its rigidity file has separate group-order and
-curve-realization assumptions. The artifact reports these dependencies on
-the exact theorem rows instead of assigning them to every result in the same
-file.
+curve-realization assumptions. The final report will attach these
+dependencies to the exact theorem rows instead of assigning them to every
+result in the same file.
 
 One repository test file contains an admitted proof:
 \begin{center}
   \small\coqin{pgg-smc/security/pgg\_schreier\_test.v}
 \end{center}
 The file is outside \coqin{\_CoqProject}. It is not a dependency of the
-reported build. The artifact lists it as excluded material. For the main
-finite-step theorem, a
-small scratch file imports the PGL mixing module and invokes
-\coqin{Print Assumptions pgl27\_word\_mixing}. The scratch file uses the
-repository's module flags and does not modify the formalization.
+reported build. The final artifact will list it as excluded material. To
+generate the row for the main finite-step theorem, the release procedure will
+compile a small scratch file that imports the PGL mixing module and invokes
+\coqin{Print Assumptions pgl27\_word\_mixing}. The scratch probe will use the
+repository's module flags and will not modify the formalization.
 
 The work used LLM-generated proof scripts and documentation drafts under
-human specification, review, and responsibility. The human author selected
-the research questions, wrote the mathematical specification, selected the
-claims, made acceptance decisions, verified citations, and approved the
-final text. The \Rocq{} kernel checks accepted proof terms. A separate audit
-checks that formal statements and paper claims remain aligned.
+human specification, review, and responsibility. The human author is
+responsible for the research questions, mathematical specification, claim
+selection, acceptance decisions, citation verification, and final text. The
+\Rocq{} kernel checks accepted proof terms. A separate audit checks that
+formal statements and paper claims remain aligned.
 
 \section{Related Work}\label{sec:related}
 
@@ -733,9 +748,10 @@ The author declares no competing interests.
 
 \subsubsection*{Artifact availability.}
 
-The source, theorem index, claim matrix, assumption report, and build
-instructions accompany the submission artifact. The artifact fixes the
-formalization at the commit reported in Section~\ref{sec:method}.
+The submission artifact will include the source, theorem index, claim matrix,
+per-theorem assumption report, excluded-test-file note, and build
+instructions. It will fix the formalization at the commit reported in
+Section~\ref{sec:method}.
 
 \bibliographystyle{splncs04}
 \bibliography{references}
