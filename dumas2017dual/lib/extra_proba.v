@@ -607,13 +607,23 @@ congr (_ * _); rewrite fdistmapE (big_pred1 c) // => b.
 by rewrite !inE /= xpair_eqE eqxx.
 Qed.
 
+(* The mass a pushforward puts on a set is the mass its source puts on the
+   preimage of that set. *)
+Lemma Pr_fdistmap_pre {Rr : realType} {A B : finType} (h : A -> B)
+    (p : FDist.t Rr A) (E : {set B}) :
+  Pr (fdistmap h p) E = Pr p [set a | h a \in E].
+Proof.
+rewrite /Pr (partition_big h (mem E)) /=; last by move=> a; rewrite inE.
+apply: eq_bigr => b bE; rewrite fdistmapE.
+by apply: eq_bigl => a; rewrite inE [in RHS]andb_idl // => /eqP ->.
+Qed.
+
 (* The mass a boolean statistic puts on [true] is the probability of the
-   corresponding event. *)
+   corresponding event, the [[set true]] case of [Pr_fdistmap_pre]. *)
 Lemma Pr_fdistmap_bool (T : finType) (D : T -> bool) (m : R.-fdist T) :
   Pr (fdistmap D m) [set true] = Pr m [set t | D t].
 Proof.
-rewrite Pr_set1 fdistmapE /Pr; apply: eq_bigl => t.
-by rewrite !inE /= eqb_id.
+by rewrite Pr_fdistmap_pre; apply: eq_bigl => t; rewrite !inE /= eqb_id.
 Qed.
 
 (* A uniform distribution over a product is the product of uniforms. *)
@@ -639,3 +649,26 @@ by rewrite fdist_uniformE (bij_eq_card bg).
 Qed.
 
 End fdist_glue.
+
+(* ========================================================================== *)
+(*                    Dropping an independent conditioner                      *)
+(* ========================================================================== *)
+
+Section cpr_eq_drop_indep_sec.
+
+(* A conditioning coordinate independent of the numerator pair may be dropped
+   from the conditioning view. *)
+Lemma cpr_eq_drop_indep {Rr : realType} {U : finType} {P : FDist.t Rr U}
+    {A B C : finType} (X : {RV P -> A}) (Y : {RV P -> B}) (W : {RV P -> C})
+    (a : A) (y : B) (w : C) :
+  `Pr[ W = w ] != 0 ->
+  P |= W _|_ [% X, Y] ->
+  `Pr[ X = a | [% W, Y] = (w, y) ] = `Pr[ X = a | Y = y ].
+Proof.
+move=> Hw Hindep; rewrite !cpr_eqE.
+have HWY : P |= W _|_ Y := inde_RV_comp idfun snd Hindep.
+by rewrite (pfwd1_pairCA X W Y a w y) (Hindep w (a, y)) (HWY w y) invfM
+           mulrACA (mulfV Hw) mul1r.
+Qed.
+
+End cpr_eq_drop_indep_sec.

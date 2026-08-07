@@ -14,8 +14,8 @@ Require Import fdist.
 (*               fdist_prod2 == the second marginal of a product is its       *)
 (*                              second factor, the counterpart of             *)
 (*                              fdist_prod1                                   *)
-(*             fdistmap_bind == a pushforward of a bind is the bind of the    *)
-(*                              pushforwards                                  *)
+(*             fdistmap_bind == the fdistmap/fdistbind commutation of the     *)
+(*                              fdist monad                                   *)
 (* ```                                                                        *)
 (*                                                                            *)
 (******************************************************************************)
@@ -36,9 +36,10 @@ Lemma fdist_prod2 (T1 T2 : finType) (Q1 : R.-fdist T1)
     (Q2 : R.-fdist T2) : (Q1 `x Q2)`2 = Q2.
 Proof. by rewrite -fdistX1 fdistX_prod fdist_prod1. Qed.
 
-(* A pushforward of a bind is the bind of the pushforwards.  Beyond
-   fdistbindA it supplies the fdistmap-headed form, on which rewrite's keyed
-   matching fires without delta-unfolding fdistmap across the goal. *)
+(* The fdistmap/fdistbind commutation of the fdist monad.  A convenience rather
+   than a necessity, though the obvious inline spelling does not substitute for
+   it: [rewrite /fdistmap fdistbindA] at a use site unfolds every [fdistmap] in
+   the goal, destroying the nested ones a later [fdistmap_comp] must match. *)
 Lemma fdistmap_bind (T1 T2 T3 : finType) (Q : R.-fdist T1)
     (g : T1 -> R.-fdist T2) (h : T2 -> T3) :
   fdistmap h (Q >>= g) = Q >>= (fun a => fdistmap h (g a)).

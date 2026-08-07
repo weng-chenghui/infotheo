@@ -223,23 +223,6 @@ Qed.
 Set Default Goal Selector "1".
 Set Bullet Behavior "None".
 
-(* fdistmap_bij_unif — a bijection carries a uniform distribution to the uniform
-   distribution on the (equicardinal) codomain. *)
-Lemma fdistmap_bij_unif (A B : finType) (f : A -> B) (nA nB : nat)
-    (cardA : #|A| = nA.+1) (cardB : #|B| = nB.+1) :
-  bijective f ->
-  fdistmap f (fdist_uniform cardA) = fdist_uniform cardB :> FDist.t R B.
-Proof.
-move=> [g fg gf].
-apply: fdist_ext => b.
-rewrite fdistmapE fdist_uniformE.
-rewrite (eq_bigl (pred1 (g b))); last first.
-  by move=> a; rewrite inE /=; apply/eqP/eqP => [Hf|->]; [rewrite -Hf fg|exact: gf].
-rewrite big_pred1_eq fdist_uniformE.
-have <- : #|A| = #|B| by apply: (bij_eq_card (f := f)); exists g.
-by [].
-Qed.
-
 (* mean1_eq1 — a weight [w] bounded in [[0,1]] whose [D]-mean is 1 (with [D]
    mass 1) equals 1 on the support of [D].  Normalizes the lossless predictor's
    mass out of the value-marginal. *)
