@@ -33,11 +33,10 @@
 
 \begin{abstract}
 Card-based protocols use physical cards to compute with
-information-theoretic security. Existing proofs and verification methods do
-not combine reusable group-action structure, privacy of executed traces, and
-checked finite-step mixing for a concrete protocol. I define a \Rocq{}
-framework that treats a finite group, its permutation action, and its shuffle
-law as first-class parameters. The main instance uses the action of
+information-theoretic security. I define a \Rocq{} framework that treats a
+finite group, its permutation action, and its shuffle law as first-class
+parameters. The framework connects group actions to executed traces and
+finite-step mixing. The main instance uses the action of
 $\PG$ on eight projective points. Under an exact uniform shuffle, the
 instance has exact correctness, recovery parameters $(t,r,n)=(3,7,8)$, and
 view and executed-trace privacy for coalitions of at most three players. These
@@ -67,11 +66,11 @@ computations~\cite{MizukiSone2009,MizukiSone2012,KochWalzerHartel2015}.
 Mechanized analysis must connect the physical operations to their probability
 laws. Koch, Schrempp, and Kirsten use software bounded model checking to
 search finite protocol spaces and check lower bounds~\cite{Koch2019}. Their
-method gives strong automation for a bounded state space. The development in
-this article instead uses a proof assistant to state reusable group actions,
-dealer laws, participant views, and executed traces. The target combination
-is a group-parametric model with exact trace privacy and a checked
-finite-step mixing bound.
+method automates checks over a bounded state space. The development in this
+article instead uses a proof assistant to state reusable group actions,
+dealer laws, participant views, and executed traces. It combines a
+group-parametric model with exact trace privacy and a checked finite-step
+mixing bound.
 
 The accepted workshop abstract illustrated this algebraic direction with den
 Boer's protocol and an $S_5$ development. It also identified Barrington's
@@ -142,13 +141,13 @@ $S$ by design.
 The primary exact law samples a uniform Boolean secret and uses one fixed
 representative $D_s$ for each secret $s$. It then samples an independent
 element $g\leftarrow U_G$. For the $\PG$ instance, this is the formal law
-named in the source as \coqin{pgl27P}. The representative is the formal orbit
+used by the main exact execution. The representative is the formal orbit
 encoder.
 \footnote{The exact source objects are \coqin{pgl27P} and
 \coqin{orbit\_encode}.}
 The all-decks law instead samples a uniform valid arrangement in the selected
 secret class before it samples $g\leftarrow U_G$.
-\footnote{The robustness law is \coqin{pgl27P\_alldecks}.}
+\footnote{The all-decks law is \coqin{pgl27P\_alldecks}.}
 Both exact execution laws use a uniform Boolean prior.
 
 The security theorems concern passive, honest-but-curious adversaries. A
@@ -219,8 +218,8 @@ allowed shuffle does not change the decoded secret. The threshold record
 stores a privacy cutoff and a decoder that reads the full arrangement. It
 does not store a separate recovery threshold. For the PGL instance, the
 record therefore packages privacy through three cards and an eight-endpoint
-decoder. Section~\ref{sec:exact} proves the seven-card recovery fact outside
-that record.
+decoder. A separate result in Section~\ref{sec:exact} proves recovery from
+seven cards.
 
 The operational layer represents the dealer, players, and verifier as
 processes. Its interpreter executes sends and receives and records process
@@ -355,9 +354,10 @@ The PGL construction has recovery parameters
 Coalitions of at most three positions have exact privacy. Some coalition of
 four positions has positive leakage. Every reveal set of at most six
 positions is compatible with both secrets. Every set of seven positions
-determines the secret class. The implemented decoder reads all eight
-endpoints.
+determines the secret class.
 \end{theorem}
+
+The implemented decoder reads all eight endpoints.
 
 The four-position result uses one fixed coalition, namely the four heart
 positions in the identity arrangement. The formal development proves that
@@ -476,7 +476,7 @@ as the original three generators.
 For a word length $L$, the shuffle law evaluates a uniform word in
 $\{0,1,2,3,4\}^L$. At $L=200$, the sample space contains $5^{200}$ words.
 The proof partitions these words into $336$ fibers, one for each group
-element. A binary-natural-number computation records the size of every
+element. A computation over binary naturals records the size of every
 fiber. The final arithmetic check sums the deviations of these fiber counts
 from $5^{200}/336$.
 
@@ -524,10 +524,10 @@ and~\ref{eq:product-transfer} transfer the one certificate in
 Equation~\ref{eq:pgl-mixing}. They are not separate mixing certificates.
 
 Under the halved convention in Equation~\ref{eq:tv-definition}, each of
-these bounds is at most $2^{-41}$ in total variation. The formal source names
-are \coqin{pgl27\_word\_mixing}, \coqin{pgl27\_endpoint\_mixing}, and
-\coqin{pgl27\_joint\_mixing}. The last name refers to the secret-prior
-product law in Equation~\ref{eq:product-transfer}.
+these bounds is at most $2^{-41}$ in total variation.
+\footnote{The source results are \coqin{pgl27\_word\_mixing},
+\coqin{pgl27\_endpoint\_mixing}, and \coqin{pgl27\_joint\_mixing}. The last
+result is the secret-prior product law in Equation~\ref{eq:product-transfer}.}
 
 The proved chain reaches group-law proximity, every single-card marginal,
 and the product with any secret prior. The development stops before a theorem
@@ -652,10 +652,9 @@ checks that formal statements and paper claims remain aligned.
 
 \section{Related Work}\label{sec:related}
 
-Card-protocol verification has used both proof assistants and automated
-state-space search. Mizuki and Sone give formal models for card protocols and
-small constructions~\cite{MizukiSone2009,MizukiSone2012}. Koch, Schrempp,
-and Kirsten encode bounded protocol spaces for software bounded model
+Research on card protocols includes small AND and XOR
+constructions~\cite{MizukiSone2009,MizukiSone2012}. Koch, Schrempp, and
+Kirsten encode bounded protocol spaces for software bounded model
 checking~\cite{Koch2019}. Their method searches for protocols and checks
 finite lower bounds. The present development instead proves reusable
 group-action, execution, privacy, and mixing lemmas in \Rocq{}. The Kim
@@ -670,9 +669,10 @@ give applications to cyclic group shuffles~\cite{ShinagawaMiyamoto2023}.
 These results describe physical protocols that implement structured uniform
 shuffle groups. The framework in this paper takes the finite group, its
 action, and its probability law as parameters. It then connects them to
-sharing and execution semantics. Single-shuffle constructions and their
-complexity consequences provide further examples of algebraic shuffle
-structure~\cite{ShinagawaNuida2021,ShinagawaNuida2025}.
+sharing and execution semantics. A single uniform closed shuffle suffices to
+compute any Boolean circuit~\cite{ShinagawaNuida2021}. A later compiler maps
+simple finite-runtime card protocols to private simultaneous-message
+protocols~\cite{ShinagawaNuida2025}.
 
 Machine-checked probability libraries contain results that can support
 mixing arguments. Karayel formalizes expander graphs, Cheeger's inequality,
