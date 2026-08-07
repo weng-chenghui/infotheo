@@ -1,0 +1,62 @@
+\documentclass[runningheads]{llncs}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb,mathtools}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{microtype}
+\usepackage{xcolor}
+
+\newif\ifanonymous
+\anonymoustrue
+
+\newcommand{\Rocq}{Rocq}
+\newcommand{\coqin}[1]{\texttt{#1}}
+\newcommand{\PG}{\mathrm{PGL}(2,7)}
+\newcommand{\Unif}{U_G}
+\newcommand{\wordlaw}{\mu^{*L}}
+
+\title{Algebraic Specification of Card-Based Cryptographic Protocols in Rocq}
+\ifanonymous
+  \author{Anonymous}
+  \institute{Submission to WADT 2026}
+\else
+  \author{Cheng-Hui Weng}
+  \institute{Nagoya University}
+\fi
+
+\begin{document}
+\maketitle
+
+\section{Introduction}\label{sec:introduction}
+
+\section{Protocol and Security Model}\label{sec:model}
+
+\section{Framework and Generic Theorems}\label{sec:framework}
+
+\section{The \texorpdfstring{$\PG$}{PGL(2,7)} Construction}\label{sec:pgl}
+
+\section{Correctness, Recovery, and Exact-Shuffle Privacy}\label{sec:exact}
+
+\section{Finite-Step Approximation of the Exact Model}\label{sec:mixing}
+
+\section{Other Instances}\label{sec:instances}
+
+\section{Methodology and Artifact}\label{sec:method}
+
+\section{Related Work}\label{sec:related}
+
+\section{Conclusion and Future Work}\label{sec:conclusion}
+
+\subsubsection*{Acknowledgements and AI-use statement.}
+
+\subsubsection*{Disclosure of Interests.}
+
+\subsubsection*{Artifact availability.}
+
+\bibliographystyle{splncs04}
+\bibliography{references}
+\end{document}
