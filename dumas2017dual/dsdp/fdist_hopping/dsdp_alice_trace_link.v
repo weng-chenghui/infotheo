@@ -81,26 +81,6 @@ Require Import dsdp_alice_fdist_secrecy.
 (*       dsdp_trace_of_viewE == the trace the interpreter produces for Alice  *)
 (*                              is the deterministic image of her reduced     *)
 (*                              view                                          *)
-(*  AliceTrace_zero_prefix i == Alice's trace with its first i ciphertext     *)
-(*                              slots zeroed                                  *)
-(*       AliceTrace_all_zero == Alice's trace with both ciphertext slots      *)
-(*                              zeroed, AliceTrace_zero_prefix 2              *)
-(*  distinguisher_of_trace D == the view-level distinguisher reading the      *)
-(*                              trace of the view it is given through D       *)
-(*           trace_joint_PrE == a trace-level distinguishing probability is   *)
-(*                              the view-level distinguishing probability of  *)
-(*                              the lifted distinguisher                      *)
-(*     hop0_trace_advantageE == zeroing the Bob-key entry of the trace moves  *)
-(*                              the distinguishing probability by the         *)
-(*                              advantage of one explicit reduction against   *)
-(*                              Bob's key                                     *)
-(*     hop1_trace_advantageE == the same for the Charlie-key entry and        *)
-(*                              Charlie's key                                 *)
-(* guess_trace_all_zero_le_invm g ==                                          *)
-(*                              a predictor reading the all-zero trace        *)
-(*                              matches Bob's input with probability at most  *)
-(*                              one over the cardinality of the plaintext     *)
-(*                              space                                         *)
 (* dsdp_alice_guess_fdist_trace_V2_real_le ==                                 *)
 (*                              every predictor reading the trace the         *)
 (*                              interpreter produces for Alice matches Bob's  *)
@@ -109,10 +89,8 @@ Require Import dsdp_alice_fdist_secrecy.
 (*                              per-hop reductions                            *)
 (* ```                                                                        *)
 (*                                                                            *)
-(* The notation AliceTrace_all_zero abbreviates AliceTrace_zero_prefix 2,     *)
-(* matching AliceView_all_zero of the view ladder. It is declared inside      *)
-(* Section dsdp_alice_trace_rv and is local to it, as are DI and the          *)
-(* parameter-pinning abbreviations that section opens with.                   *)
+(* DI and the parameter-pinning abbreviations that Section                    *)
+(* dsdp_alice_trace_rv opens with are Local Notations of that section.        *)
 (*                                                                            *)
 (* Those abbreviations are Local Notation partial applications, each pinning  *)
 (* under its own name the parameters that the preceding section and the view  *)
@@ -295,17 +273,10 @@ End dsdp_run_traces_of_ops.
 Arguments gprocs : clear implicits.
 
 Section dsdp_alice_trace_link.
-Context {R : realType}.
-Variables (AHE : AHEncType) (Renc : finType) (index_renc : nat).
-Hypothesis card_renc : #|Renc| = index_renc.+1.
+Variables (AHE : AHEncType) (Renc : finType).
 Variable rand_of_renc : Renc -> rand AHE.
-Variables (t_cipher : finType)
-          (chcipher_of_cipher : cipher AHE -> t_cipher)
-          (cipher_of_chcipher : t_cipher -> cipher AHE).
-Hypothesis chcipher_of_cipherK :
-  cancel chcipher_of_cipher cipher_of_chcipher.
+Variables (t_cipher : finType) (chcipher_of_cipher : cipher AHE -> t_cipher).
 Variables (w_v1 w_u1 w_u2 w_u3 : plain AHE).
-Hypothesis w_u3_inj : injective (fun v : plain AHE => w_u3 * v).
 Variables (dk_a dk_b dk_c : priv_key AHE).
 Variables (w_rb2 w_rc2 : Renc).
 
@@ -560,76 +531,6 @@ apply: boolp.funext => s; apply/val_inj.
 rewrite /AliceTrace; move: (size_alice_trace s).
 rewrite /dsdp_procs_of_sample dsdp_run_traces_ok.
 by move=> ?; rewrite /= Sout_runE recrypt_plainE.
-Qed.
-
-(* The trace ladder: the view ladder of dsdp_alice_fdist_secrecy.v read as
-   a trace, its first i ciphertext slots encrypting zero. *)
-Definition AliceTrace_zero_prefix (i : nat) :
-    {RV (alice_sample_fdist (R:=R) AHE card_renc) ->
-     15.-bseq dsdp_trace_dataT} :=
-  dsdp_trace_of_view \o AliceView_zero_prefix i.
-
-(* The endpoint of that ladder, where both ciphertext slots encrypt zero. *)
-Notation AliceTrace_all_zero := (AliceTrace_zero_prefix 2).
-
-(* A trace-level distinguisher read as a view-level one. *)
-Definition distinguisher_of_trace
-    (D : plain AHE * plain AHE * 15.-bseq dsdp_trace_dataT -> bool) :
-    plain AHE * plain AHE * dsdp_alice_viewT AHE Renc t_cipher -> bool :=
-  fun y => D (y.1.1, y.1.2, dsdp_trace_of_view y.2).
-
-(* A trace-level distinguishing probability is the view-level distinguishing
-   probability of the lifted distinguisher. *)
-Lemma trace_joint_PrE (i : nat)
-    (D : plain AHE * plain AHE * 15.-bseq dsdp_trace_dataT -> bool) :
-  Pr (`p_ [% V2, V3, AliceTrace_zero_prefix i]) [set x | D x]
-  = Pr (`p_ [% V2, V3, AliceView_zero_prefix i])
-       [set y | distinguisher_of_trace D y].
-Proof.
-rewrite /dist_of_RV.
-have -> : ([% V2, V3, AliceTrace_zero_prefix i]
-             : {RV _ -> (plain AHE * plain AHE
-                         * 15.-bseq dsdp_trace_dataT)%type})
-        = (fun y : (plain AHE * plain AHE
-                    * dsdp_alice_viewT AHE Renc t_cipher)%type =>
-             (y.1.1, y.1.2, dsdp_trace_of_view y.2))
-            \o [% V2, V3, AliceView_zero_prefix i] by [].
-by rewrite -fdistmap_comp Pr_fdistmap_preim; apply: eq_bigl => t;
-   rewrite !inE.
-Qed.
-
-(* Zeroing the Bob-key entry of the trace moves the distinguishing
-   probability by the advantage of one explicit reduction against Bob's
-   key. *)
-Lemma hop0_trace_advantageE
-    (D : plain AHE * plain AHE * 15.-bseq dsdp_trace_dataT -> bool) :
-  `| Pr (`p_ [% V2, V3, AliceTrace_zero_prefix 0]) [set x | D x]
-     - Pr (`p_ [% V2, V3, AliceTrace_zero_prefix 1]) [set x | D x] |
-  = indcpa_fdist_epsilon (pkey_of_dk Bob)
-      (hop0_reduction (distinguisher_of_trace D)).
-Proof. by rewrite !trace_joint_PrE; exact: hop0_advantageE. Qed.
-
-(* Zeroing the Charlie-key entry does the same against Charlie's key. *)
-Lemma hop1_trace_advantageE
-    (D : plain AHE * plain AHE * 15.-bseq dsdp_trace_dataT -> bool) :
-  `| Pr (`p_ [% V2, V3, AliceTrace_zero_prefix 1]) [set x | D x]
-     - Pr (`p_ [% V2, V3, AliceTrace_zero_prefix 2]) [set x | D x] |
-  = indcpa_fdist_epsilon (pkey_of_dk Charlie)
-      (hop1_reduction (distinguisher_of_trace D)).
-Proof. by rewrite !trace_joint_PrE; exact: hop1_advantageE. Qed.
-
-(* A predictor reading the all-zero trace matches Bob's input with
-   probability at most one over the plaintext-space cardinality.
-   Naming: `trace` marks the trace-level guesser of the view-level
-   `guess_all_zero_le_invm`, whose bound `invm` this statement keeps. *)
-Lemma guess_trace_all_zero_le_invm
-    (g : 15.-bseq dsdp_trace_dataT -> plain AHE) :
-  Pr (alice_sample_fdist (R:=R) AHE card_renc)
-     [set t | (g `o AliceTrace_all_zero) t == V2 t]
-    <= (#|plain AHE|%:R : R)^-1.
-Proof.
-exact: (guess_all_zero_le_invm card_renc rand_of_renc chcipher_of_cipher
-          pkey_of_dk w_v1 w_u1 w_u2 w_u3_inj (g \o dsdp_trace_of_view)).
 Qed.
 
 (* Every predictor reading the trace the interpreter produces for Alice
