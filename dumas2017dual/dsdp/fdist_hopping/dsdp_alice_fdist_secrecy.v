@@ -370,17 +370,8 @@ rewrite !fdistmap_comp.
 congr fdistmap; exact/boolp.funext.
 Qed.
 
-Let card_renc_gt0 : (0 < #|Renc|)%N.
-Proof. by rewrite card_renc. Qed.
-
-Let card_sample_gt0 : (0 < #|dsdp_alice_sampleT|)%N.
-Proof.
-by rewrite /dsdp_alice_sampleT !card_prod !muln_gt0 card_plain_gt0
-           card_renc_gt0.
-Qed.
-
 Let card_sample : #|dsdp_alice_sampleT| = #|dsdp_alice_sampleT|.-1.+1.
-Proof. by rewrite prednK. Qed.
+Proof. exact: fdist_card_prednK alice_sample_fdist. Qed.
 
 (* The sample space carries the uniform distribution. *)
 Lemma alice_sample_fdistE : alice_sample_fdist = fdist_uniform card_sample.
@@ -400,20 +391,13 @@ Definition hop0_stateT : finType :=
 Definition Hop0State : {RV alice_sample_fdist -> hop0_stateT} :=
   fun t => (t.1.1.1, t.1.1.2, t.2, t.1.2.2).
 
-Let card_hop0_state_gt0 : (0 < #|hop0_stateT|)%N.
-Proof.
-by rewrite /hop0_stateT !card_prod !muln_gt0 card_plain_gt0 card_renc_gt0.
-Qed.
-
 Let card_hop0_state : #|hop0_stateT| = #|hop0_stateT|.-1.+1.
-Proof. by rewrite prednK. Qed.
+Proof. exact: fdist_card_prednK (`p_ Hop0State). Qed.
 
 Let card_hop0_pair :
   #|((hop0_stateT * Renc)%type : finType)|
     = #|((hop0_stateT * Renc)%type : finType)|.-1.+1.
-Proof.
-by rewrite prednK // card_prod muln_gt0 card_hop0_state_gt0 card_renc_gt0.
-Qed.
+Proof. exact: fdist_card_prednK (`p_ [% Hop0State, Rho2]). Qed.
 
 (* The hop-0 state and the hop-0 encryption randomness are jointly
    uniform. *)
@@ -670,22 +654,14 @@ Definition AliceSpectatorPre :
     {RV alice_sample_fdist -> alice_spectator_preT} :=
   fun t => (t.1.1.2, t.1.2, t.2).
 
-Let card_spectator_pre_gt0 : (0 < #|alice_spectator_preT|)%N.
-Proof.
-by rewrite /alice_spectator_preT !card_prod !muln_gt0 card_plain_gt0
-           card_renc_gt0.
-Qed.
-
 Let card_spectator_pre :
   #|alice_spectator_preT| = #|alice_spectator_preT|.-1.+1.
-Proof. by rewrite prednK. Qed.
+Proof. exact: fdist_card_prednK (`p_ AliceSpectatorPre). Qed.
 
 Let card_spectator_pre_pair :
   #|((alice_spectator_preT * (plain AHE * plain AHE))%type : finType)|
   = #|((alice_spectator_preT * (plain AHE * plain AHE))%type : finType)|.-1.+1.
-Proof.
-by rewrite prednK // !card_prod !muln_gt0 card_plain_gt0 card_renc_gt0.
-Qed.
+Proof. exact: fdist_card_prednK (`p_ [% AliceSpectatorPre, [% V2, V3]]). Qed.
 
 (* The spectator coordinates and the secret input pair are jointly uniform. *)
 Lemma spectator_pre_pair_uniformE :
@@ -990,23 +966,18 @@ Definition alice_spectator_regroup (c : alice_spectator_preT) :
 Let card_masks_ra :
   #|(((plain AHE * plain AHE) * (Renc * Renc))%type : finType)|
   = #|(((plain AHE * plain AHE) * (Renc * Renc))%type : finType)|.-1.+1.
-Proof.
-by rewrite prednK // !card_prod !muln_gt0 card_plain_gt0 card_renc_gt0.
-Qed.
+Proof. exact: fdist_card_prednK (`p_ [% [% R2, R3], [% RA1, RA2]]). Qed.
 
 Let card_masks_ra_rho :
   #|(((plain AHE * plain AHE) * (Renc * Renc) * Renc)%type : finType)|
   = #|(((plain AHE * plain AHE) * (Renc * Renc) * Renc)%type : finType)|.-1.+1.
 Proof.
-by rewrite prednK // !card_prod !muln_gt0 card_plain_gt0 card_renc_gt0.
+exact: fdist_card_prednK (`p_ [% [% [% R2, R3], [% RA1, RA2]], Rho2]).
 Qed.
 
 Let card_spectator_pre2 :
   #|alice_spectator_pre2T| = #|alice_spectator_pre2T|.-1.+1.
-Proof.
-by rewrite prednK // /alice_spectator_pre2T !card_prod !muln_gt0 card_plain_gt0
-           card_renc_gt0.
-Qed.
+Proof. exact: fdist_card_prednK (`p_ AliceSpectatorPre2). Qed.
 
 (* The reordered spectator coordinates are uniform. *)
 Lemma spectator_pre2_uniformE :
