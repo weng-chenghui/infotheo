@@ -279,7 +279,9 @@ marked as hearts. Their positions form a four-subset of the projective line.
 The secret records which of the two $\PG$ orbits contains that subset. The
 encoder chooses one fixed valid arrangement from each class.
 
-\begin{theorem}[Orbit encoder]
+\begin{theorem}[Orbit encoder\footnotemark]
+\footnotetext{Formalized in \path{pgg-smc/instances/pgl27/pgl27_orbit.v} as
+\coqin{orbit\_encode\_deck} and \coqin{orbit\_encodeK}.}
 For every $s\in\{0,1\}$, the encoded arrangement $D_s$ is valid and its
 four-subset has orbit class $s$.
 \end{theorem}
@@ -297,7 +299,9 @@ harmonic orbit of size $42$.
 Privacy follows from the transitivity of the point action. Ordered tuples
 matter because a coalition observes card values at named positions.
 
-\begin{theorem}[Three-transitivity]\label{thm:three-transitive}
+\begin{theorem}[Three-transitivity\footnotemark]\label{thm:three-transitive}
+\footnotetext{Formalized in \path{pgg-smc/instances/pgl27/pgl27_group.v} as
+\coqin{pgl27\_3transitive}.}
 For any ordered triples $(x_1,x_2,x_3)$ and $(y_1,y_2,y_3)$ of distinct
 projective points, there is a $g\in\PG$ such that
 \[
@@ -338,7 +342,12 @@ to each of eight players. The players return their cards to the verifier. The
 verifier's endpoint sequence is the shuffled dealt arrangement. Orbit-class
 invariance and the encoder equation then give correctness.
 
-\begin{theorem}[Executed correctness]\label{thm:pgl-correctness}
+\begin{theorem}[Executed correctness\footnotemark]\label{thm:pgl-correctness}
+\footnotetext{Formalized in \path{pgg-smc/instances/pgl27/pgl27_run.v} as
+\coqin{pgl27\_run\_recovers}. The direct class-recovery counterpart is
+formalized in \path{pgg-smc/instances/pgl27/pgl27_trace.v} as
+\coqin{pgl27\_run\_recovers\_class}.}
+\par
 For every $s\in\{0,1\}$ and $g\in\PG$, decoding all eight verifier endpoints
 after the shuffle $g$ returns $s$.
 \end{theorem}
@@ -349,7 +358,14 @@ all eight card values once. Hence seven revealed positions determine the
 orbit class. By contrast, every set of at most six revealed positions is
 consistent with valid arrangements from both secret classes.
 
-\begin{theorem}[Recovery ramp]\label{thm:recovery-ramp}
+\begin{theorem}[Recovery ramp\footnotemark]\label{thm:recovery-ramp}
+\footnotetext{Formalized in \path{pgg-smc/instances/pgl27/pgl27_secrecy.v}
+as
+\coqin{pgl27\_view\_indep}, \coqin{pgl27\_view\_dep\_k4}, and
+\coqin{pgl27\_view\_leak\_k4}. The recovery counterparts are formalized in
+\path{pgg-smc/instances/pgl27/pgl27_recovery.v} as
+\coqin{pgl27\_reveal\_ambiguous} and
+\coqin{pgl27\_seven\_reveal\_class}.}
 The PGL construction has recovery parameters
 \[
   (t,r,n)=(3,7,8).
@@ -397,7 +413,12 @@ fixed representative $D_S$ and samples an independent shuffle $g\leftarrow
 U_G$. Three-transitivity gives independence for every coalition $C$ with
 $\lvert C\rvert\leq3$.
 
-\begin{theorem}[Exact privacy for the fixed dealer]
+\begin{theorem}[Exact privacy for the fixed dealer\footnotemark]
+\footnotetext{Formalized in \path{pgg-smc/instances/pgl27/pgl27_secrecy.v}
+as
+\coqin{pgl27\_view\_indep}. The trace counterpart is formalized in
+\path{pgg-smc/instances/pgl27/pgl27_trace.v} as
+\coqin{pgl27\_coalition\_trace\_secrecy}.}
 Under the uniform Boolean prior, the fixed representative dealer, and an
 independent uniform $\PG$ shuffle,
 \[
@@ -413,7 +434,12 @@ choice. It samples $S$ uniformly. Conditional on $S=s$, it samples a uniform
 valid arrangement of class $s$. It then applies an independent uniform
 $\PG$ shuffle.
 
-\begin{theorem}[All-decks exact privacy]
+\begin{theorem}[All-decks exact privacy\footnotemark]
+\footnotetext{Formalized in \path{pgg-smc/instances/pgl27/pgl27_secrecy.v}
+as
+\coqin{pgl27\_view\_indep\_alldecks}. The trace counterpart is formalized in
+\path{pgg-smc/instances/pgl27/pgl27_trace.v} as
+\coqin{pgl27\_alldecks\_coalition\_secrecy}.}
 Under the uniform Boolean prior, the uniform class-conditional deck dealer,
 and an independent uniform $\PG$ shuffle,
 \[
@@ -429,7 +455,12 @@ no later shuffle. For this shuffle-free deck law, view independence holds for
 every Boolean secret prior. The available executed-trace theorem uses the
 uniform Boolean prior. No prior-generic trace theorem is claimed.
 
-\begin{theorem}[Shuffle-free deck privacy]
+\begin{theorem}[Shuffle-free deck privacy\footnotemark]
+\footnotetext{Formalized in \path{pgg-smc/instances/pgl27/pgl27_secrecy.v}
+as
+\coqin{pgl27\_view\_indep\_deck\_prior}. The trace counterpart is formalized
+in \path{pgg-smc/instances/pgl27/pgl27_trace.v} as
+\coqin{pgl27\_deck\_coalition\_secrecy}.}
 For any Boolean prior, the uniform class-conditional deck gives
 $S\mathrel{\perp}V_C$ whenever $\lvert C\rvert\leq3$. Under the uniform
 Boolean prior, it also gives $H(S\mid T_C)=H(S)$.
@@ -483,7 +514,9 @@ element. A computation over binary naturals records the size of every
 fiber. The final arithmetic check sums the deviations of these fiber counts
 from $5^{200}/336$.
 
-\begin{theorem}[Finite-step shuffle bound]\label{thm:pgl-mixing}
+\begin{theorem}[Finite-step shuffle bound\footnotemark]\label{thm:pgl-mixing}
+\footnotetext{Formalized in \path{pgg-smc/instances/pgl27/pgl27_mixing.v} as
+\coqin{pgl27\_word\_mixing}.}
 Let $\mu$ be uniform on the five-letter symmetric generator tuple. Then
 \begin{equation}
   \left\lVert \mu^{*200}-U_G\right\rVert_1 \leq 2^{-40}.
