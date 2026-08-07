@@ -31,7 +31,86 @@
 \begin{document}
 \maketitle
 
+\begin{abstract}
+Card-based protocols use physical cards to compute with
+information-theoretic security. Existing proofs and verification methods do
+not combine reusable group-action structure, privacy of executed traces, and
+checked finite-step mixing for a concrete protocol. I define a \Rocq{}
+framework that treats a finite group, its permutation action, and its shuffle
+law as first-class parameters. The main instance uses the action of
+$\PG$ on eight projective points. Under an exact uniform shuffle, the
+instance has exact correctness, recovery parameters $(t,r,n)=(3,7,8)$, and
+view and executed-trace privacy for coalitions of at most three players. These
+privacy theorems assume a uniform Boolean secret, a fixed encoded
+representative, and passive adversaries. The verifier learns the secret.
+Active security, security after the reveal, and composition lie outside the
+model. For a finite implementation, I analyze a uniform word of length 200
+over five generator letters. A checked fiber-counting certificate proves that
+the resulting shuffle law is within unhalved $L_1$ distance $2^{-40}$ of the
+uniform group law. This finite-step theorem transfers to single-card
+marginals and to a product with any secret prior. It does not establish
+approximate coalition-view or executed-trace privacy. Four sibling instances
+show which algebraic, operational, privacy, and mixing arguments the framework
+reuses.
+\end{abstract}
+
 \section{Introduction}\label{sec:introduction}
+
+Card-based cryptography uses face-down physical cards to compute functions
+without computational assumptions. A shuffle hides a permutation, while a
+reveal exposes selected card faces. Information-theoretic security requires
+the resulting observation law to hide the protected secret. Den Boer's
+five-card protocol began this line of work~\cite{denBoer1989}. Later protocols
+reduced card counts and broadened the class of supported
+computations~\cite{MizukiSone2009,MizukiSone2012,KochWalzerHartel2015}.
+
+Mechanized analysis must connect the physical operations to their probability
+laws. Koch, Schrempp, and Kirsten use software bounded model checking to
+search finite protocol spaces and check lower bounds~\cite{Koch2019}. Their
+method gives strong automation for a bounded state space. The development in
+this article instead uses a proof assistant to state reusable group actions,
+dealer laws, participant views, and executed traces. The target combination
+is a group-parametric model with exact trace privacy and a checked
+finite-step mixing bound.
+
+The accepted workshop abstract illustrated this algebraic direction with den
+Boer's protocol and an $S_5$ development. It also identified Barrington's
+theorem as a route from bounded-width branching programs to card
+protocols~\cite{Barrington1989,DvorakKoucky2021}. The later $\PG$ instance
+now supplies the main case study. Barrington compilation remains future work
+and is not a result reported here.
+
+I make three technical contributions.
+\begin{itemize}
+\item I give a common \Rocq{} interface for a finite group, its permutation
+  action, the shuffle law, reconstruction, participant views, and executed
+  traces.
+\item I prove correctness, the recovery ramp, coalition-view privacy, and
+  executed-trace secrecy for the $\PG$ instance under an exact uniform
+  shuffle.
+\item I prove an unhalved $L_1$ bound between a 200-letter generator-word law
+  and the uniform group law. The proof also transfers the bound to card
+  endpoints and secret-prior product laws.
+\end{itemize}
+
+The exact and finite-step results concern two distinct laws. Exact privacy
+uses a uniform group element with a uniform Boolean secret and a fixed dealt
+representative. Finite-step mixing compares the generator-word law with that
+uniform group law. The current formalization stops at distributional
+proximity. It does not transport the bound through the protocol interpreter
+to approximate view or trace privacy. The protocol is dealer-based and has no
+private inputs. Adversaries are passive. The verifier receives all endpoints
+and learns the secret. Active deviations, post-reveal security, and
+composition across executions remain outside the model.
+
+Section~\ref{sec:model} fixes the two laws and the security scope.
+Section~\ref{sec:framework} presents the framework components used by the
+proofs. Sections~\ref{sec:pgl} and~\ref{sec:exact} give the $\PG$
+construction and its exact results. Section~\ref{sec:mixing} proves the
+finite-step bound. Sections~\ref{sec:instances}--\ref{sec:related} compare
+instances, report the methodology, and place the results among related work.
+Section~\ref{sec:conclusion} states the remaining bridge and other future
+directions.
 
 \section{Protocol and Security Model}\label{sec:model}
 
