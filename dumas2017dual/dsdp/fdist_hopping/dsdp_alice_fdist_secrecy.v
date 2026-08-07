@@ -95,6 +95,10 @@ Require Import dsdp_program dsdp_entropy.
 (*                              key                                           *)
 (*          hop1_reduction D == the reduction of a distinguisher D to         *)
 (*                              Charlie's key                                 *)
+(*            hop_challengeE == a distinguisher reading a view assembled      *)
+(*                              around one encrypted slot succeeds with the   *)
+(*                              probability of the reduction whose state      *)
+(*                              samples everything else                       *)
 (*        V1c, U1c, U2c, U3c == Alice's four protocol weights as constant     *)
 (*                              random variables                              *)
 (*      alice_spectator_preT == the sample coordinates Alice's view reads     *)
@@ -232,6 +236,10 @@ Definition RA2 : {RV alice_sample_fdist -> Renc} := fun t => t.2.2.
    [dsdp_guess_fiber.v]. *)
 Definition Sout : {RV alice_sample_fdist -> plain AHE} :=
   uncurry (dsdp_output w_v1 w_u1 w_u2 w_u3) `o [% V2, V3].
+
+(* The output written out at the protocol's weights. *)
+Lemma SoutE t : Sout t = w_u1 * w_v1 + w_u2 * V2 t + w_u3 * V3 t.
+Proof. by []. Qed.
 
 (* The Bob-key ciphertext slot of Alice's view, encrypting Bob's input at
    index 0 and zero at every larger index. *)
@@ -535,6 +543,40 @@ Definition hop1_reduction
      adv_plain := fun c => c.1.1.1.2 ;
      adv_decide := fun c ch => D (hop1_assemble c ch) |}.
 
+(* One rung of the hop ladder: a distinguisher reading a view assembled
+   around one encrypted slot succeeds with the probability of the reduction
+   whose state samples everything else. *)
+Lemma hop_challengeE (stateT : finType)
+    (State : {RV alice_sample_fdist -> stateT})
+    (Rho : {RV alice_sample_fdist -> Renc}) (pk : pub_key AHE)
+    (p : stateT -> plain AHE)
+    (asm : stateT -> t_cipher -> plain AHE * plain AHE * dsdp_alice_viewT)
+    (X : {RV alice_sample_fdist ->
+            (plain AHE * plain AHE * dsdp_alice_viewT)%type})
+    (D : plain AHE * plain AHE * dsdp_alice_viewT -> bool) :
+  `p_ [% State, Rho] = (`p_ State) `x (fdist_uniform card_renc) ->
+  (forall t, X t = asm (State t)
+     (chcipher_of_cipher (enc pk (p (State t)) (rand_of_renc (Rho t))))) ->
+  Pr (`p_ X) [set x | D x]
+  = Pr (`p_ State >>= (fun c => fdistmap (fun ch => D (asm c ch))
+                                  (enc_fdist pk (p c)))) [set true].
+Proof.
+move=> Hprod HX.
+rewrite -Pr_fdistmap_bool.
+have -> : fdistmap D (`p_ X)
+        = fdistmap (fun q : stateT * t_cipher => D (asm q.1 q.2))
+                   (`p_ [% State,
+                         (fun t => chcipher_of_cipher
+                            (enc pk (p (State t)) (rand_of_renc (Rho t))))
+                           : {RV alice_sample_fdist -> t_cipher}]).
+  rewrite /dist_of_RV !fdistmap_comp; congr fdistmap.
+  by apply/boolp.funext => t; rewrite /= HX.
+rewrite (enc_slot_resampleE (fun c r => chcipher_of_cipher
+  (enc pk (p c) (rand_of_renc r))) Hprod) fdist_prod_bindE fdistmap_bind.
+congr (Pr _ _); congr (_ >>= _); apply/boolp.funext => c.
+by rewrite /enc_fdist !fdistmap_comp.
+Qed.
+
 (* The distinguisher on the real view is the hop-0 reduction facing an
    encryption of the first input. *)
 Lemma hop0_real_challengeE
@@ -542,17 +584,11 @@ Lemma hop0_real_challengeE
   Pr (`p_ [% V2, V3, AliceView_zero_prefix 0]) [set x | D x]
     = indcpa_fdist_success_real (pkey_of_party Bob) (hop0_reduction D).
 Proof.
-rewrite -Pr_fdistmap_bool indcpa_fdist_success_realE /=.
-have -> : fdistmap D (`p_ [% V2, V3, AliceView_zero_prefix 0])
-        = fdistmap (fun p : hop0_stateT * t_cipher => D (hop0_assemble p.1 p.2))
-                   (`p_ [% Hop0State, hop0_cipher 0]).
-  rewrite /dist_of_RV !fdistmap_comp; congr fdistmap.
-  by apply/boolp.funext => -[[[[v2 v3] [r2 r3]] [rho2 rho3]] [ra1 ra2]].
-rewrite (enc_slot_resampleE (fun (c : hop0_stateT) r => chcipher_of_cipher
-  (enc (pkey_of_party Bob) c.1.1.1.1 (rand_of_renc r))) hop0_state_prod)
-        fdist_prod_bindE fdistmap_bind.
-congr (Pr _ _); congr (_ >>= _); apply/boolp.funext => c.
-by rewrite /enc_fdist !fdistmap_comp.
+rewrite (hop_challengeE (pk := pkey_of_party Bob)
+    (p := fun c : hop0_stateT => c.1.1.1.1)
+    (asm := hop0_assemble) D hop0_state_prod); last first.
+  by move=> -[[[[v2 v3] [r2 r3]] [rho2 rho3]] [ra1 ra2]].
+by rewrite indcpa_fdist_success_realE.
 Qed.
 
 (* The distinguisher on the view with a zeroed hop-0 slot is the hop-0
@@ -562,17 +598,11 @@ Lemma hop0_zero_challengeE
   Pr (`p_ [% V2, V3, AliceView_zero_prefix 1]) [set x | D x]
     = indcpa_fdist_success_zero (pkey_of_party Bob) (hop0_reduction D).
 Proof.
-rewrite -Pr_fdistmap_bool indcpa_fdist_success_zeroE /=.
-have -> : fdistmap D (`p_ [% V2, V3, AliceView_zero_prefix 1])
-        = fdistmap (fun p : hop0_stateT * t_cipher => D (hop0_assemble p.1 p.2))
-                   (`p_ [% Hop0State, hop0_cipher 1]).
-  rewrite /dist_of_RV !fdistmap_comp; congr fdistmap.
-  by apply/boolp.funext => -[[[[v2 v3] [r2 r3]] [rho2 rho3]] [ra1 ra2]].
-rewrite (enc_slot_resampleE (fun (_ : hop0_stateT) r => chcipher_of_cipher
-  (enc (pkey_of_party Bob) 0 (rand_of_renc r))) hop0_state_prod)
-        fdist_prod_bindE fdistmap_bind.
-congr (Pr _ _); congr (_ >>= _); apply/boolp.funext => c.
-by rewrite /enc_fdist !fdistmap_comp.
+rewrite (hop_challengeE (pk := pkey_of_party Bob)
+    (p := fun _ : hop0_stateT => 0)
+    (asm := hop0_assemble) D hop0_state_prod); last first.
+  by move=> -[[[[v2 v3] [r2 r3]] [rho2 rho3]] [ra1 ra2]].
+by rewrite indcpa_fdist_success_zeroE.
 Qed.
 
 (* Zeroing the hop-0 slot of the view moves the distinguishing probability by
@@ -592,17 +622,11 @@ Lemma hop1_real_challengeE
   Pr (`p_ [% V2, V3, AliceView_zero_prefix 1]) [set x | D x]
     = indcpa_fdist_success_real (pkey_of_party Charlie) (hop1_reduction D).
 Proof.
-rewrite -Pr_fdistmap_bool indcpa_fdist_success_realE /=.
-have -> : fdistmap D (`p_ [% V2, V3, AliceView_zero_prefix 1])
-        = fdistmap (fun p : hop1_stateT * t_cipher => D (hop1_assemble p.1 p.2))
-                   (`p_ [% Hop1State, hop1_cipher 1]).
-  rewrite /dist_of_RV !fdistmap_comp; congr fdistmap.
-  by apply/boolp.funext => -[[[[v2 v3] [r2 r3]] [rho2 rho3]] [ra1 ra2]].
-rewrite (enc_slot_resampleE (fun (c : hop1_stateT) r => chcipher_of_cipher
-  (enc (pkey_of_party Charlie) c.1.1.1.2 (rand_of_renc r))) hop1_state_prod)
-        fdist_prod_bindE fdistmap_bind.
-congr (Pr _ _); congr (_ >>= _); apply/boolp.funext => c.
-by rewrite /enc_fdist !fdistmap_comp.
+rewrite (hop_challengeE (pk := pkey_of_party Charlie)
+    (p := fun c : hop1_stateT => c.1.1.1.2)
+    (asm := hop1_assemble) D hop1_state_prod); last first.
+  by move=> -[[[[v2 v3] [r2 r3]] [rho2 rho3]] [ra1 ra2]].
+by rewrite indcpa_fdist_success_realE.
 Qed.
 
 (* The distinguisher on the all-zero view is the hop-1 reduction facing an
@@ -612,17 +636,11 @@ Lemma hop1_zero_challengeE
   Pr (`p_ [% V2, V3, AliceView_zero_prefix 2]) [set x | D x]
     = indcpa_fdist_success_zero (pkey_of_party Charlie) (hop1_reduction D).
 Proof.
-rewrite -Pr_fdistmap_bool indcpa_fdist_success_zeroE /=.
-have -> : fdistmap D (`p_ [% V2, V3, AliceView_zero_prefix 2])
-        = fdistmap (fun p : hop1_stateT * t_cipher => D (hop1_assemble p.1 p.2))
-                   (`p_ [% Hop1State, hop1_cipher 2]).
-  rewrite /dist_of_RV !fdistmap_comp; congr fdistmap.
-  by apply/boolp.funext => -[[[[v2 v3] [r2 r3]] [rho2 rho3]] [ra1 ra2]].
-rewrite (enc_slot_resampleE (fun (_ : hop1_stateT) r => chcipher_of_cipher
-  (enc (pkey_of_party Charlie) 0 (rand_of_renc r))) hop1_state_prod)
-        fdist_prod_bindE fdistmap_bind.
-congr (Pr _ _); congr (_ >>= _); apply/boolp.funext => c.
-by rewrite /enc_fdist !fdistmap_comp.
+rewrite (hop_challengeE (pk := pkey_of_party Charlie)
+    (p := fun _ : hop1_stateT => 0)
+    (asm := hop1_assemble) D hop1_state_prod); last first.
+  by move=> -[[[[v2 v3] [r2 r3]] [rho2 rho3]] [ra1 ra2]].
+by rewrite indcpa_fdist_success_zeroE.
 Qed.
 
 (* Zeroing the hop-1 slot of the view moves the distinguishing probability by
@@ -1196,20 +1214,13 @@ Definition AliceViewFull :
    view from the reduced view.
    Naming: [_ok] marks the correctness lemma of [alice_view_full_of], after
    the [bob_ext] and [bob_ext_ok] pair. *)
-Lemma alice_view_full_ok :
-  (fun t => alice_view_full_of (AliceView t))
-  = (fun t => (AliceView t, AliceCombineBob t, AliceCombineCharlie t,
-               AliceRecvPlain t)).
+Lemma alice_view_full_ok : AliceViewFull = alice_view_full_of \o AliceView.
 Proof.
 apply/boolp.funext => t.
-rewrite /alice_view_full_of /AliceCombineBob /AliceCombineCharlie
-        /AliceRecvPlain /= !chcipher_of_cipherK.
+rewrite /AliceViewFull /alice_view_full_of /AliceCombineBob
+        /AliceCombineCharlie /AliceRecvPlain /= !chcipher_of_cipherK.
 by congr (_, _, _, _); rewrite /Sout /comp_RV /dsdp_output /=; ring.
 Qed.
-
-(* Alice's full view is the reconstruction applied to her reduced view. *)
-Lemma alice_view_fullE : AliceViewFull = (alice_view_full_of \o AliceView).
-Proof. exact: esym alice_view_full_ok. Qed.
 
 (* A predictor reading Alice's full real view matches Bob's input with
    probability at most 1/#|plain AHE| plus the advantages of the two hop
@@ -1228,7 +1239,7 @@ Corollary dsdp_alice_guess_fdist_full_le
            (hop1_reduction
               (distinguisher_of_guess (g' \o alice_view_full_of))).
 Proof.
-by rewrite alice_view_fullE; exact: dsdp_alice_guess_fdist_V2_real_le.
+by rewrite alice_view_full_ok; exact: dsdp_alice_guess_fdist_V2_real_le.
 Qed.
 
 End dsdp_alice_fdist_secrecy.

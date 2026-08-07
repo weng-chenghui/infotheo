@@ -55,14 +55,6 @@ Require Import dsdp_alice_fdist_secrecy.
 (*                              interface into that image                     *)
 (*            dsdp_procs_std == the three programs at the standard interface  *)
 (*                              of an AHE scheme                              *)
-(*           dec_combine_bob == Bob's decryption of Alice's combine returns   *)
-(*                              his own input weighted by w_u2 and shifted by *)
-(*                              the mask r2                                   *)
-(*       dec_forward_charlie == Charlie's decryption of Bob's forward returns *)
-(*                              the two weighted inputs and the two masks     *)
-(*                              summed                                        *)
-(*         dec_recrypt_alice == Alice's decryption of Charlie's re-encryption *)
-(*                              returns that same sum                         *)
 (*           dsdp_procs_stdE == the abstract instance at the standard         *)
 (*                              interface is the standard instance            *)
 (*        dsdp_run_traces_ok == the traces of the fifteen-round standard run: *)
@@ -334,30 +326,6 @@ Let pcharlie_inst :=
 Definition dsdp_procs_std : seq (proc (di_data DI)) :=
   erase_aprocs [aprocs palice_inst ; pbob_inst ; pcharlie_inst].
 
-Let M2 : plain AHE := v2 * w_u2 + r2.
-Let M3 : plain AHE := v3 * w_u3 + r3 + (v2 * w_u2 + r2).
-
-(* Bob opens Alice's first combine and reads his own input weighted by w_u2
-   and shifted by the mask r2. *)
-Lemma dec_combine_bob :
-  dec dk_b (Emul (Epow (enc (pkey_of_dk Bob) v2 rb1) w_u2)
-                 (enc (pkey_of_dk Bob) r2 ra1)) = Some M2.
-Proof. by rewrite Epow_encE Emul_encE dec_correct. Qed.
-
-(* Charlie opens Bob's forward and reads the two weighted inputs and the two
-   masks summed. *)
-Lemma dec_forward_charlie :
-  dec dk_c (Emul (Emul (Epow (enc (pkey_of_dk Charlie) v3 rc1) w_u3)
-                       (enc (pkey_of_dk Charlie) r3 ra2))
-                 (enc (pkey_of_dk Charlie) M2 (rand_of_renc w_rb2)))
-  = Some M3.
-Proof. by rewrite Epow_encE !Emul_encE dec_correct. Qed.
-
-(* Alice opens Charlie's re-encryption and reads that same sum. *)
-Lemma dec_recrypt_alice :
-  dec dk_a (enc (pkey_of_dk Alice) M3 (rand_of_renc w_rc2)) = Some M3.
-Proof. exact: dec_correct. Qed.
-
 Let procs_of_ops :=
   gprocs (plain AHE) (cipher AHE) (rand AHE) (priv_key AHE) (pub_key AHE)
          (@enc AHE) (@Emul AHE) (@Epow AHE)
@@ -394,9 +362,9 @@ Lemma dsdp_run_traces_ok :
           d v3; kd dk_c]].
 Proof.
 rewrite dsdp_procs_stdE /procs_of_ops; apply: dsdp_run_traces_of_ops_ok.
-- exact: dec_combine_bob.
-- exact: dec_forward_charlie.
-- exact: dec_recrypt_alice.
+- by rewrite Epow_encE Emul_encE dec_correct.
+- by rewrite Epow_encE !Emul_encE dec_correct.
+- exact: dec_correct.
 Qed.
 
 (* The same traces with every ciphertext normalised to a single encryption:
@@ -513,14 +481,14 @@ Definition AliceTrace :
 Let Sout_runE (s : dsdp_alice_sampleT AHE Renc) :
   V3 s * w_u3 + R3 s + (V2 s * w_u2 + R2 s) - R2 s - R3 s + w_u1 * w_v1
   = Sout s.
-Proof. by rewrite /Sout /comp_RV /dsdp_output /=; ring. Qed.
+Proof. by rewrite SoutE; ring. Qed.
 
 (* The plaintext Charlie re-encrypts is the leaked output net of Alice's own
    term and masks. *)
 Let recrypt_plainE (s : dsdp_alice_sampleT AHE Renc) :
   V3 s * w_u3 + R3 s + (V2 s * w_u2 + R2 s)
   = Sout s - w_u1 * w_v1 + R2 s + R3 s.
-Proof. by rewrite -Sout_runE; ring. Qed.
+Proof. by rewrite SoutE; ring. Qed.
 
 (* The trace the interpreter produces for Alice is the deterministic image of
    her reduced view. *)
