@@ -262,7 +262,208 @@ group, sharing, trace, and weighted-word theorems directly.
 
 \section{The \texorpdfstring{$\PG$}{PGL(2,7)} Construction}\label{sec:pgl}
 
+Let $\mathbb{P}^1(\mathbb{F}_7)$ be the projective line over the field with
+seven elements. It has eight points. The group $\PG$ acts on these points by
+fractional linear transformations. The formal representation realizes this
+action as permutations of eight card positions. The generated group has
+order
+\begin{equation}
+  \lvert \PG\rvert=336.
+  \label{eq:pgl-order}
+\end{equation}
+
+Each valid arrangement contains eight distinct cards. Four card values are
+marked as hearts. Their positions form a four-subset of the projective line.
+The secret records which of the two $\PG$ orbits contains that subset. The
+encoder chooses one fixed valid arrangement from each class.
+
+\begin{theorem}[Orbit encoder]
+For every $s\in\{0,1\}$, the encoded arrangement $D_s$ is valid and its
+four-subset has orbit class $s$.
+\end{theorem}
+
+The seventy four-subsets divide into two orbits. The smaller orbit consists
+of the equianharmonic subsets. The larger orbit consists of the harmonic
+subsets.
+
+\begin{theorem}[Orbit split]\label{thm:orbit-split}
+The action of $\PG$ on the four-subsets of
+$\mathbb{P}^1(\mathbb{F}_7)$ has an equianharmonic orbit of size $28$ and a
+harmonic orbit of size $42$.
+\end{theorem}
+
+Privacy follows from the transitivity of the point action. Ordered tuples
+matter because a coalition observes card values at named positions.
+
+\begin{theorem}[Three-transitivity]\label{thm:three-transitive}
+For any ordered triples $(x_1,x_2,x_3)$ and $(y_1,y_2,y_3)$ of distinct
+projective points, there is a $g\in\PG$ such that
+\[
+  g(x_1)=y_1, \qquad g(x_2)=y_2, \qquad g(x_3)=y_3.
+\]
+\end{theorem}
+
+The formal proof enumerates generator words that send a fixed base triple to
+each distinct target triple. The kernel checks the resulting finite table.
+Theorem~\ref{thm:three-transitive} makes every ordered view of at most three
+positions uniform under $U_G$. It therefore supplies the group-theoretic
+premise for coalition privacy.
+
+\begin{table}[t]
+  \centering
+  \small
+  \begin{tabular}{ll}
+    \toprule
+    Mathematical statement & Rocq source name \\
+    \midrule
+    three-transitivity & \coqin{pgl27\_3transitive} \\
+    equianharmonic count & \coqin{orbit\_class\_split} \\
+    harmonic count & \coqin{orbit\_class\_split\_complement} \\
+    encoder returns its class & \coqin{orbit\_encodeK} \\
+    group order & \coqin{pgl27\_card} \\
+    \bottomrule
+  \end{tabular}
+  \caption{Source index for the PGL construction.}
+  \label{tab:pgl-source}
+\end{table}
+
 \section{Correctness, Recovery, and Exact-Shuffle Privacy}\label{sec:exact}
+
+\subsection{Correctness and Recovery}
+
+The interpreter deals $D_s$, applies an allowed shuffle, and sends one card
+to each of eight players. The players return their cards to the verifier. The
+verifier's endpoint sequence is the shuffled dealt arrangement. Orbit-class
+invariance and the encoder equation then give correctness.
+
+\begin{theorem}[Executed correctness]\label{thm:pgl-correctness}
+For every $s\in\{0,1\}$ and $g\in\PG$, decoding all eight verifier endpoints
+after the shuffle $g$ returns $s$.
+\end{theorem}
+
+Recovery has a finer threshold than the implemented decoder exposes. Any
+seven revealed positions determine the missing card because a valid deck uses
+all eight card values once. Hence seven revealed positions determine the
+orbit class. By contrast, every set of at most six revealed positions is
+consistent with valid arrangements from both secret classes.
+
+\begin{theorem}[Recovery ramp]\label{thm:recovery-ramp}
+The PGL construction has recovery parameters
+\[
+  (t,r,n)=(3,7,8).
+\]
+Coalitions of at most three positions have exact privacy. Some coalition of
+four positions has positive leakage. Every reveal set of at most six
+positions is compatible with both secrets. Every set of seven positions
+determines the secret class. The implemented decoder reads all eight
+endpoints.
+\end{theorem}
+
+The four-position result uses one fixed coalition, namely the four heart
+positions in the identity arrangement. The formal development proves that
+its view depends on the secret and that its mutual information with the
+secret is positive. This witness makes the privacy cutoff three sharp. It
+does not classify all four-position coalitions. The development also proves
+monotonicity of mutual information under inclusion, but it does not compute
+the leakage for all reveal sets of sizes four through six.
+
+\begin{table}[t]
+  \centering
+  \small
+  \begin{tabular}{ll}
+    \toprule
+    Mathematical statement & Rocq source name \\
+    \midrule
+    executed class recovery & \coqin{pgl27\_run\_recovers\_class} \\
+    seven cards determine the deck & \coqin{pgl27\_seven\_reveal\_determines} \\
+    seven cards determine the class & \coqin{pgl27\_seven\_reveal\_class} \\
+    six cards remain ambiguous & \coqin{pgl27\_six\_reveal\_ambiguous} \\
+    every reveal set of size at most six & \coqin{pgl27\_reveal\_ambiguous} \\
+    fixed four-card dependence & \coqin{pgl27\_view\_dep\_k4} \\
+    fixed four-card positive leakage & \coqin{pgl27\_view\_leak\_k4} \\
+    \bottomrule
+  \end{tabular}
+  \caption{Source index for correctness and recovery.}
+  \label{tab:recovery-source}
+\end{table}
+
+\subsection{Exact View and Trace Privacy}
+
+The main exact execution samples $S$ uniformly from $\{0,1\}$. It deals the
+fixed representative $D_S$ and samples an independent shuffle $g\leftarrow
+U_G$. Three-transitivity gives independence for every coalition $C$ with
+$\lvert C\rvert\leq3$.
+
+\begin{theorem}[Fixed-representative exact privacy]
+Under the uniform Boolean prior, the fixed representative dealer, and an
+independent uniform $\PG$ shuffle,
+\[
+  S\mathrel{\perp}V_C
+  \quad\text{and}\quad
+  H(S\mid T_C)=H(S)
+  \qquad\text{for every }\lvert C\rvert\leq3.
+\]
+\end{theorem}
+
+The all-decks dealer tests whether the fixed representative hides a special
+choice. It samples $S$ uniformly. Conditional on $S=s$, it samples a uniform
+valid arrangement of class $s$. It then applies an independent uniform
+$\PG$ shuffle.
+
+\begin{theorem}[All-decks exact privacy]
+Under the uniform Boolean prior, the uniform class-conditional deck dealer,
+and an independent uniform $\PG$ shuffle,
+\[
+  S\mathrel{\perp}V_C
+  \quad\text{and}\quad
+  H(S\mid T_C)=H(S)
+  \qquad\text{for every }\lvert C\rvert\leq3.
+\]
+\end{theorem}
+
+A third dealer samples a uniform valid deck in the chosen class and applies
+no later shuffle. For this shuffle-free deck law, view independence holds for
+every Boolean secret prior. The available executed-trace theorem uses the
+uniform Boolean prior. No prior-generic trace theorem is claimed.
+
+\begin{theorem}[Shuffle-free deck privacy]
+For any Boolean prior, the uniform class-conditional deck gives
+$S\mathrel{\perp}V_C$ whenever $\lvert C\rvert\leq3$. Under the uniform
+Boolean prior, it also gives $H(S\mid T_C)=H(S)$.
+\end{theorem}
+
+The probability, view, and trace theorems use three classical principles from
+the MathComp probability stack: propositional extensionality, dependent
+functional extensionality, and constructive indefinite description. The
+group, orbit, cardinality, correctness, and recovery results are closed under
+the global context. The \Rocq{} kernel checks all accepted proof terms,
+including finite computations performed by its virtual machine.
+
+\begin{table}[t]
+  \centering
+  \small
+  \begin{tabular}{p{.43\linewidth}p{.49\linewidth}}
+    \toprule
+    Dealer and result & Rocq source names \\
+    \midrule
+    fixed representative views &
+      \coqin{pgl27\_view\_indep}, \coqin{pgl27\_view\_leakage\_le} \\
+    fixed representative traces &
+      \coqin{pgl27\_trace\_secrecy},
+      \coqin{pgl27\_coalition\_trace\_secrecy} \\
+    all-decks views and traces &
+      \coqin{pgl27\_view\_indep\_alldecks},
+      \coqin{pgl27\_alldecks\_trace\_secrecy},
+      \coqin{pgl27\_alldecks\_coalition\_secrecy} \\
+    shuffle-free views and traces &
+      \coqin{pgl27\_view\_indep\_deck\_prior},
+      \coqin{pgl27\_deck\_trace\_secrecy},
+      \coqin{pgl27\_deck\_coalition\_secrecy} \\
+    \bottomrule
+  \end{tabular}
+  \caption{Source index for exact view and trace privacy.}
+  \label{tab:privacy-source}
+\end{table}
 
 \section{Finite-Step Approximation of the Exact Model}\label{sec:mixing}
 
