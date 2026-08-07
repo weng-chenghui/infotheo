@@ -594,7 +594,8 @@ have -> : ([% V2, V3, AliceTrace_zero_prefix i]
                     * dsdp_alice_viewT AHE Renc t_cipher)%type =>
              (y.1.1, y.1.2, dsdp_trace_of_view y.2))
             \o [% V2, V3, AliceView_zero_prefix i] by [].
-by rewrite -fdistmap_comp Pr_fdistmap_pre; apply: eq_bigl => t; rewrite !inE.
+by rewrite -fdistmap_comp Pr_fdistmap_preim; apply: eq_bigl => t;
+   rewrite !inE.
 Qed.
 
 (* Zeroing the Bob-key entry of the trace moves the distinguishing

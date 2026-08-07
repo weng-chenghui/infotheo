@@ -456,6 +456,15 @@ by rewrite !inE andb_idl //= => /eqP <-{b}; apply/imsetP; exists a.
 Qed.
 Arguments Pr_fdistmap {R} [A] [B] [f] [d] [E].
 
+Lemma Pr_fdistmap_preim {R : realType} (A B : finType) (f : A -> B)
+    (d : R.-fdist A) (E : {set B}) :
+  Pr (fdistmap f d) E = Pr d [set a | f a \in E].
+Proof.
+rewrite /Pr (partition_big f (mem E)) /=; last by move=> a; rewrite inE.
+apply: eq_bigr => b bE; rewrite fdistmapE.
+by apply: eq_bigl => a; rewrite inE [in RHS]andb_idl // => /eqP ->.
+Qed.
+
 Lemma Pr_fdist_prod {R : realType} (A B : finType) (P1 : R.-fdist A) (P2 : R.-fdist B)
   (E1 : {set A}) (E2 : {set B}) :
   Pr (P1 `x P2) ((E1 `*T) :&: (T`* E2)) = Pr (P1 `x P2) (E1 `*T) * Pr (P1 `x P2) (T`* E2).

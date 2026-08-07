@@ -581,12 +581,12 @@ End cinde_diagonal_bound_sec.
 (* Relocated from dumas2017dual/dsdp/fdist_hopping/dsdp_alice_fdist_secrecy.v,
    where they sat in a local [fdist_glue] section although none of them uses a
    DSDP section variable.  A probe against the loaded environment confirmed
-   that none of these six statements exists in infotheo, MathComp or
-   mathcomp-analysis: [Search] finds nothing for [fdistmap] over a bind, for
-   [(_ `x _)`2], for [fdist_uniform _ = _ `x _], for [fdistmap] over
-   [fdist_uniform], nor for [_ `X _ = _ >>= _]; the only Pr/fdistmap lemma is
-   [Pr_fdistmap] (probability/proba.v), which needs [injective] and states the
-   image direction, so it does not apply to a boolean statistic. *)
+   that none of these statements exists in infotheo, MathComp or
+   mathcomp-analysis: [Search] finds nothing for [fdist_uniform _ = _ `x _],
+   for [fdistmap] over [fdist_uniform], nor for [_ `X _ = _ >>= _].
+   The monad-only members of the original section now live in
+   probability/fdist_extra.v, and the preimage transport of [Pr] lives in
+   probability/proba.v as [Pr_fdistmap_preim]. *)
 
 Section fdist_glue.
 
@@ -607,23 +607,12 @@ congr (_ * _); rewrite fdistmapE (big_pred1 c) // => b.
 by rewrite !inE /= xpair_eqE eqxx.
 Qed.
 
-(* The mass a pushforward puts on a set is the mass its source puts on the
-   preimage of that set. *)
-Lemma Pr_fdistmap_pre {Rr : realType} {A B : finType} (h : A -> B)
-    (p : FDist.t Rr A) (E : {set B}) :
-  Pr (fdistmap h p) E = Pr p [set a | h a \in E].
-Proof.
-rewrite /Pr (partition_big h (mem E)) /=; last by move=> a; rewrite inE.
-apply: eq_bigr => b bE; rewrite fdistmapE.
-by apply: eq_bigl => a; rewrite inE [in RHS]andb_idl // => /eqP ->.
-Qed.
-
 (* The mass a boolean statistic puts on [true] is the probability of the
-   corresponding event, the [[set true]] case of [Pr_fdistmap_pre]. *)
+   corresponding event, the [[set true]] case of [Pr_fdistmap_preim]. *)
 Lemma Pr_fdistmap_bool (T : finType) (D : T -> bool) (m : R.-fdist T) :
   Pr (fdistmap D m) [set true] = Pr m [set t | D t].
 Proof.
-by rewrite Pr_fdistmap_pre; apply: eq_bigl => t; rewrite !inE /= eqb_id.
+by rewrite Pr_fdistmap_preim; apply: eq_bigl => t; rewrite !inE /= eqb_id.
 Qed.
 
 (* A uniform distribution over a product is the product of uniforms. *)

@@ -20,8 +20,6 @@ Require Import finstoch statdist privacy_kernel.
 (* entropy of the secret.                                                     *)
 (*                                                                            *)
 (* ```                                                                        *)
-(*      Pr_fdistmap_preim == the mass a transported law gives to a set is     *)
-(*                           the mass the source law gives to its preimage    *)
 (*             joint_draw == the law on the execution context that draws the  *)
 (*                           input from the prior and the ancilla from the    *)
 (*                           ancilla law                                      *)
@@ -54,22 +52,6 @@ Unset Strict Implicit.
 Import Prenex Implicits.
 Local Open Scope ring_scope.
 Local Open Scope fdist_scope.
-
-Section pr_transport.
-Context {R : realType}.
-
-(* The mass a transported law gives to a set is the mass the source law gives
-   to the preimage of that set. *)
-Lemma Pr_fdistmap_preim (A B : finType) (g : A -> B) (d : R.-fdist A)
-    (E : {set B}) :
-  Pr (fdistmap g d) E = Pr d [set a | g a \in E].
-Proof.
-rewrite /Pr (partition_big g (mem E)) /=; last by move=> a; rewrite inE.
-apply: eq_bigr => b bE; rewrite fdistmapE; apply: eq_bigl => a /=.
-by rewrite !inE andb_idl // => /eqP ->.
-Qed.
-
-End pr_transport.
 
 Section unpredictability.
 Context {R : realType}.
