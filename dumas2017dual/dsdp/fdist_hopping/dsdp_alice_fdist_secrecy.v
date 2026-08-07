@@ -58,8 +58,6 @@ Require Import dsdp_program dsdp_entropy.
 (*                 AliceView == Alice's real view, AliceView_zero_prefix 0    *)
 (*        AliceView_all_zero == Alice's view with both ciphertext slots       *)
 (*                              zeroed, AliceView_zero_prefix 2               *)
-(*                  E_bob_v2 == the Bob-key ciphertext of V2                  *)
-(*              E_charlie_v3 == the Charlie-key ciphertext of V3              *)
 (*            enc_fdist pk v == the law of an encryption of v under pk with   *)
 (*                              uniform randomness                            *)
 (*                x <- m ; f == a sampling step of an experiment, the bind    *)
@@ -264,11 +262,6 @@ Definition AliceView_zero_prefix (i : nat) :
 
 Notation AliceView := (AliceView_zero_prefix 0).
 Notation AliceView_all_zero := (AliceView_zero_prefix 2).
-
-(* The ciphertext of Bob's input under Bob's key. *)
-Definition E_bob_v2 := hop0_cipher 0.
-(* The ciphertext of Charlie's input under Charlie's key. *)
-Definition E_charlie_v3 := hop1_cipher 0.
 
 (* The law of an encryption of a plaintext under a public key, with uniform
    encryption randomness. *)
@@ -809,26 +802,6 @@ case: (eqVneq `Pr[ Sout = s ] 0) => [H0|Hn0].
 by rewrite (alice_V2_cond_Sout a Hn0).
 Qed.
 
-(* The leaked output is uniform on the plaintext space. *)
-Lemma Sout_uniform : `p_ Sout = fdist_uniform card_plain.
-Proof.
-have -> : `p_ Sout
-        = fdistmap (uncurry (dsdp_output w_v1 w_u1 w_u2 w_u3)) (`p_ [% V2, V3]).
-  by rewrite /dist_of_RV fdistmap_comp.
-rewrite alice_var_uniform; apply/fdist_ext => s.
-rewrite fdistmapE fdist_uniformE.
-under eq_bigr do rewrite fdist_uniformE.
-have Hcard : #|preim (uncurry (dsdp_output w_v1 w_u1 w_u2 w_u3)) (pred1 s)|
-           = #|plain AHE|.
-  rewrite -(dsdp_fiber_card_ring w_u1 w_u2 w_v1 s w_u3_inj).
-  apply: eq_card => vv; rewrite !inE /= /dsdp_output.
-  case: vv => v2 v3 /=; rewrite -subr_eq0 -[RHS]subr_eq0.
-  by have -> : w_u1 * w_v1 + w_u2 * v2 + w_u3 * v3 - s
-             = w_u2 * v2 + w_u3 * v3 - (s - w_u1 * w_v1) by ring.
-rewrite sumr_const Hcard -[LHS]mulr_natr card_prod natrM invfM -mulrA.
-by rewrite mulVf ?mulr1 // pnatr_eq0 -lt0n card_plain_gt0.
-Qed.
-
 (* Everything Alice's all-zero view carries besides the leaked output. *)
 Definition AliceSpectator :
     {RV alice_sample_fdist ->
@@ -1014,12 +987,6 @@ Definition AliceSpectatorPre2 :
 Definition alice_spectator_regroup (c : alice_spectator_preT) :
     alice_spectator_pre2T := (c.1.1, c.2, c.1.2.1, c.1.2.2).
 
-(* The reordered spectator coordinates are the image of the spectator
-   coordinates under the reordering. *)
-Lemma alice_spectator_regroupE :
-  AliceSpectatorPre2 = alice_spectator_regroup `o AliceSpectatorPre.
-Proof. by []. Qed.
-
 Let card_masks_ra :
   #|(((plain AHE * plain AHE) * (Renc * Renc))%type : finType)|
   = #|(((plain AHE * plain AHE) * (Renc * Renc))%type : finType)|.-1.+1.
@@ -1047,7 +1014,7 @@ Lemma spectator_pre2_uniformE :
 Proof.
 have -> : `p_ AliceSpectatorPre2
         = fdistmap alice_spectator_regroup (`p_ AliceSpectatorPre).
-  by rewrite alice_spectator_regroupE /dist_of_RV fdistmap_comp.
+  by rewrite /dist_of_RV fdistmap_comp.
 rewrite spectator_pre_uniformE.
 apply: (fdistmap_bij_uniform card_spectator_pre card_spectator_pre2).
 exists (fun d : alice_spectator_pre2T => (d.1.1.1, (d.1.2, d.2), d.1.1.2)).
