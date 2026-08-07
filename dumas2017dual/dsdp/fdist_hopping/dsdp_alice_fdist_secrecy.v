@@ -108,9 +108,6 @@ Require Import dsdp_program dsdp_entropy.
 (*                              coordinates                                   *)
 (*   alice_view_of_spectator == Alice's all-zero view assembled from the      *)
 (*                              spectator and the output                      *)
-(*           Pr_fdistmap_pre == the mass a pushforward puts on a set is the   *)
-(*                              mass its source puts on the preimage of that  *)
-(*                              set                                           *)
 (*  distinguisher_of_guess g == the distinguisher accepting when the          *)
 (*                              predictor g returns the first input of its    *)
 (*                              argument                                      *)
@@ -768,23 +765,6 @@ apply: Pr_dsdp_sol_uniform_ring => //; last exact: alice_var_indep.
 by rewrite alice_var_uniform; congr fdist_uniform; exact: eq_irrelevance.
 Qed.
 
-(* A conditioning coordinate independent of the numerator pair drops out of the
-   conditioning view.
-   Naming: [cpr_eq] names the conditional probability being rewritten, and
-   [drop_indep] the operation performed on it. *)
-Lemma cpr_eq_drop_indep {Rr : realType} {U : finType} {P : FDist.t Rr U}
-    {A B C : finType} (X : {RV P -> A}) (Y : {RV P -> B}) (W : {RV P -> C})
-    (a : A) (y : B) (w : C) :
-  `Pr[ W = w ] != 0 ->
-  P |= W _|_ [% X, Y] ->
-  `Pr[ X = a | [% W, Y] = (w, y) ] = `Pr[ X = a | Y = y ].
-Proof.
-move=> Hw Hindep; rewrite !cpr_eqE.
-have HWY : P |= W _|_ Y := inde_RV_comp idfun snd Hindep.
-by rewrite (pfwd1_pairCA X W Y a w y) (Hindep w (a, y)) (HWY w y) invfM
-           mulrACA (mulfV Hw) mul1r.
-Qed.
-
 (* Conditioned on the leaked output alone, Bob's input is uniform on the
    plaintext space. *)
 Lemma alice_V2_cond_Sout (a s : plain AHE) :
@@ -914,17 +894,6 @@ Proof.
 by apply: (cinde_diagonal_bound
              (cinde_RV_comp (fun sp s => g (alice_view_of_spectator (sp, s)))
                 alice_spectator_cinde)) => a c; exact: alice_V2_cond_le.
-Qed.
-
-(* The mass a pushforward puts on a set is the mass its source puts on the
-   preimage of that set. *)
-Lemma Pr_fdistmap_pre {Rr : realType} {A B : finType} (h : A -> B)
-    (p : FDist.t Rr A) (E : {set B}) :
-  Pr (fdistmap h p) E = Pr p [set a | h a \in E].
-Proof.
-rewrite /Pr (partition_big h (mem E)) /=; last by move=> a; rewrite inE.
-apply: eq_bigr => b bE; rewrite fdistmapE.
-by apply: eq_bigl => a; rewrite inE [in RHS]andb_idl // => /eqP ->.
 Qed.
 
 (* The distinguisher that accepts when a predictor reading the view slot of its

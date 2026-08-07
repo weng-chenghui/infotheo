@@ -814,24 +814,6 @@ Qed.
 
 Local Open Scope proba_scope.
 
-(* cpr_eq_drop_indep — a conditioning coordinate independent of the numerator
-   pair drops out of the conditioning view: if [W] is independent of [%X,Y], then
-   [`Pr[X = a | [%W,Y] = (w,y)] = `Pr[X = a | Y = y]].  General; placed here for
-   the open [proba_scope] (the [{RV _ -> _}] notation). *)
-Lemma cpr_eq_drop_indep {Rr : realType} {U : finType} {P : FDist.t Rr U}
-  {A B C : finType} (X : {RV P -> A}) (Y : {RV P -> B}) (W : {RV P -> C})
-  (a : A) (y : B) (w : C) :
-  `Pr[ W = w ] != 0 ->
-  P |= W _|_ [% X, Y] ->
-  `Pr[ X = a | [% W, Y] = (w, y) ] = `Pr[ X = a | Y = y ].
-Proof.
-move=> Hw Hindep.
-rewrite !cpr_eqE.
-have HWY : P |= W _|_ Y by exact: (inde_RV_comp idfun snd Hindep).
-rewrite (pfwd1_pairCA X W Y a w y) (Hindep w (a, y)) (HWY w y).
-by rewrite invfM mulrACA (mulfV Hw) mul1r.
-Qed.
-
 (* The four protocol weights Alice holds (seeded constants). *)
 Variables (w_v1 w_u1 w_u2 w_u3 : plain AHE).
 
@@ -1397,7 +1379,7 @@ have Htwoval : forall p : ('I_card_msg * 'I_card_msg)%type,
   rewrite -big_distrr /= (bigD1 a) //= eqxx big1 ?addr0;
     last by move=> i Hia; rewrite (negbTE Hia).
   by rewrite mulr1 -invfM -natrM.
-rewrite -(fdistmap_bij_unif card_pair card_plain_pair Hpairbij).
+rewrite -(fdistmap_bij_uniform card_pair card_plain_pair Hpairbij).
 apply: fdist_ext => u.
 rewrite sdistr_to_fdistE Hcore distr.dmargin_psumE fdistmapE Htwo.
 under eq_psum => x do rewrite Htwoval.
@@ -1499,17 +1481,6 @@ have Hcard : #|plain AHE| = card_msg by rewrite -(bij_eq_card Hmsg_bij) card_ord
 case: (eqVneq `Pr[ Sout = s ] 0) => [H0 | Hn0].
 - by rewrite cpr_eqE H0 invr0 mulr0 invr_ge0 ler0n.
 - by rewrite (guess_V2_cond_Sout a Hinj Hn0) Hcard lexx.
-Qed.
-
-(* Pr_fdistmap_pre — the pushforward probability of a set is the probability of
-   its preimage: [Pr (fdistmap g p) E = Pr p (g @^-1 E)].  General. *)
-Lemma Pr_fdistmap_pre {Rr : realType} {A B : finType} (g : A -> B)
-    (p : FDist.t Rr A) (E : {set B}) :
-  Pr (fdistmap g p) E = Pr p [set a | g a \in E].
-Proof.
-rewrite /Pr (partition_big g (mem E)) /=; last by move=> a; rewrite inE.
-apply: eq_bigr => b bE; rewrite fdistmapE.
-by apply: eq_bigl => a; rewrite inE [in RHS]andb_idl // => /eqP ->.
 Qed.
 
 (* view_distr — the cipher-list view marginal at the all-zero secrets; by
