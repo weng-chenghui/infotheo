@@ -519,6 +519,9 @@ Table~\ref{tab:source-index} indexes the formal sources for this section.
 
 \section{Correctness, Recovery, and Uniform-Shuffle Privacy}\label{sec:exact}
 
+This section follows the upper path of Figure~\ref{fig:models} and ends in
+Theorem A.
+
 \subsection{Correctness and Recovery}
 
 The interpreter deals $D_s$, applies an allowed shuffle, and sends one card
@@ -528,8 +531,7 @@ to each of eight players.\footnote{The dealer program is
 verifier's endpoint sequence is the shuffled dealt arrangement. Orbit-class
 invariance and the encoder equation then give correctness.
 
-\Needspace{10\baselineskip}
-\begin{theorem}[Executed correctness\footnotemark]\label{thm:pgl-correctness}
+\begin{proposition}[Executed correctness\footnotemark]\label{thm:pgl-correctness}
 \footnotetext{Formalized in \path{pgg-smc/instances/pgl27/pgl27_run.v} as
 \coqin{pgl27\_run\_recovers}. The direct class-recovery counterpart is
 formalized in \path{pgg-smc/instances/pgl27/pgl27_trace.v} as
@@ -537,7 +539,7 @@ formalized in \path{pgg-smc/instances/pgl27/pgl27_trace.v} as
 \par
 For every $s\in\{0,1\}$ and $g\in\PG$, decoding all eight verifier endpoints
 after the shuffle $g$ returns $s$.
-\end{theorem}
+\end{proposition}
 
 Correctness quantifies over every group element. It therefore holds with
 probability one under the uniform distribution and under any word distribution, and only
@@ -552,53 +554,54 @@ all eight card values once. Hence seven revealed positions determine the
 orbit class. By contrast, every set of at most six revealed positions is
 consistent with valid arrangements from both secret classes.
 
-\begin{theorem}[Recovery ramp\footnotemark]\label{thm:recovery-ramp}
-\footnotetext{Formalized in \path{pgg-smc/instances/pgl27/pgl27_secrecy.v}
-as
-\coqin{pgl27\_view\_indep}, \coqin{pgl27\_view\_dep\_k4}, and
-\coqin{pgl27\_view\_leak\_k4}. The recovery counterparts are formalized in
-\path{pgg-smc/instances/pgl27/pgl27_recovery.v} as
-\coqin{pgl27\_reveal\_ambiguous} and
-\coqin{pgl27\_seven\_reveal\_class}.}
-The PGL construction has recovery parameters
-\[
-  (t,r,n)=(3,7,8).
-\]
-Coalitions of at most three positions have perfect privacy. Some coalition of
-four positions has positive leakage. Every reveal set of at most six
-positions is compatible with both secrets. Every set of seven positions
-determines the secret class.
-\end{theorem}
+Three parameters summarize the instance. The privacy threshold $t$ is the
+largest coalition size with perfect privacy, the recovery threshold $r$ is
+the least number of revealed positions that always determines the secret
+class, and $n$ is the number of card positions.
+
+\begin{proposition}[Recovery ramp and sharpness\footnotemark]\label{thm:recovery-ramp}
+\footnotetext{Formalized in \path{pgg-smc/instances/pgl27/pgl27_recovery.v}
+as \coqin{pgl27\_reveal\_ambiguous} and
+\coqin{pgl27\_seven\_reveal\_class}, and in
+\path{pgg-smc/instances/pgl27/pgl27_secrecy.v} as
+\coqin{pgl27\_view\_dep\_k4} and \coqin{pgl27\_view\_leak\_k4}.}
+Every reveal set of at most six positions is compatible with valid
+arrangements from both secret classes, and every set of seven revealed
+positions determines the secret class. The view of the coalition of the
+four heart positions in the identity arrangement depends on the secret and
+has positive mutual information with it.
+\end{proposition}
+
+\begin{figure}[t]
+  \centering
+  \begin{tikzpicture}[every node/.style={font=\footnotesize},xscale=1.15]
+    \draw[-{Latex}] (-0.4,0) -- (8.6,0) node[right] {size};
+    \foreach \x in {0,...,8}
+      \draw (\x,-0.07) -- (\x,0.07) node[above=1pt] {\x};
+    \node[left] at (-0.5,-0.7) {coalition views};
+    \draw[very thick] (0,-0.7) -- (3,-0.7)
+      node[midway,below=2pt] {perfect privacy};
+    \node at (4,-0.7) {$\times$};
+    \node[below=2pt] at (4,-0.7) {leaking witness};
+    \node[left] at (-0.5,-1.7) {reveal sets};
+    \draw[very thick] (0,-1.7) -- (6,-1.7)
+      node[midway,below=2pt] {both classes possible};
+    \draw[very thick] (7,-1.7) -- (8,-1.7)
+      node[midway,below=2pt] {class determined};
+  \end{tikzpicture}
+  \caption{The recovery ramp $(t,r,n)=(3,7,8)$. The view track shows
+  perfect privacy for coalitions of at most three positions and the leaking
+  four-position witness. The reveal track shows ambiguity through six
+  positions and determination from seven.}
+  \label{fig:ramp}
+\end{figure}
 
 The implemented decoder reads all eight endpoints.
 
-The four-position result uses one fixed coalition, namely the four heart
-positions in the identity arrangement. The formal development proves that
-its view depends on the secret and that its mutual information with the
-secret is positive. This witness makes the privacy cutoff three sharp. It
+The witness coalition makes the privacy cutoff three sharp. It
 does not classify all four-position coalitions. The development also proves
 monotonicity of mutual information under inclusion, but it does not compute
 the leakage for all reveal sets of sizes four through six.
-
-\begin{table}[t]
-  \centering
-  \small
-  \begin{tabular}{ll}
-    \toprule
-    Mathematical statement & Rocq source name \\
-    \midrule
-    executed class recovery & \coqin{pgl27\_run\_recovers\_class} \\
-    seven cards determine the deck & \coqin{pgl27\_seven\_reveal\_determines} \\
-    seven cards determine the class & \coqin{pgl27\_seven\_reveal\_class} \\
-    six cards remain ambiguous & \coqin{pgl27\_six\_reveal\_ambiguous} \\
-    every reveal set of size at most six & \coqin{pgl27\_reveal\_ambiguous} \\
-    fixed four-card dependence & \coqin{pgl27\_view\_dep\_k4} \\
-    fixed four-card positive leakage & \coqin{pgl27\_view\_leak\_k4} \\
-    \bottomrule
-  \end{tabular}
-  \caption{Source index for correctness and recovery.}
-  \label{tab:recovery-source}
-\end{table}
 
 \subsection{Perfect View and Trace Privacy}
 
@@ -608,7 +611,7 @@ U_G$.\footnote{The execution distribution is \coqin{pgl27P} and the
 representative is the formal orbit encoder \coqin{orbit\_encode}.} Three-transitivity gives independence for every coalition $C$ with
 $\lvert C\rvert\leq3$.
 
-\begin{theorem}[Perfect privacy for the fixed dealer\footnotemark]
+\begin{proposition}[Perfect privacy for the fixed dealer\footnotemark]
 \footnotetext{Formalized in \path{pgg-smc/instances/pgl27/pgl27_secrecy.v}
 as
 \coqin{pgl27\_view\_indep}. The trace counterpart is formalized in
@@ -622,15 +625,16 @@ independent uniform $\PG$ shuffle,
   H(S\mid T_C)=H(S)
   \qquad\text{for every }\lvert C\rvert\leq3.
 \]
-\end{theorem}
+\end{proposition}
 
+Two further dealers act as robustness checks on the fixed representative.
 The all-decks dealer tests whether the fixed representative hides a special
 choice. It samples $S$ uniformly. Conditional on $S=s$, it samples a uniform
 valid arrangement of class $s$. It then applies an independent uniform
 $\PG$ shuffle.\footnote{The all-decks distribution is
 \coqin{pgl27P\_alldecks}.}
 
-\begin{theorem}[All-decks perfect privacy\footnotemark]
+\begin{proposition}[All-decks perfect privacy\footnotemark]
 \footnotetext{Formalized in \path{pgg-smc/instances/pgl27/pgl27_secrecy.v}
 as
 \coqin{pgl27\_view\_indep\_alldecks}. The trace counterpart is formalized in
@@ -644,14 +648,14 @@ and an independent uniform $\PG$ shuffle,
   H(S\mid T_C)=H(S)
   \qquad\text{for every }\lvert C\rvert\leq3.
 \]
-\end{theorem}
+\end{proposition}
 
 A third dealer samples a uniform valid deck in the chosen class and applies
 no later shuffle. For this shuffle-free deck distribution, view independence holds for
 every Boolean secret prior. The available executed-trace theorem uses the
 uniform Boolean prior. No prior-generic trace theorem is claimed.
 
-\begin{theorem}[Shuffle-free deck privacy\footnotemark]
+\begin{proposition}[Shuffle-free deck privacy\footnotemark]
 \footnotetext{Formalized in \path{pgg-smc/instances/pgl27/pgl27_secrecy.v}
 as
 \coqin{pgl27\_view\_indep\_deck\_prior}. The trace counterpart is formalized
@@ -660,40 +664,38 @@ in \path{pgg-smc/instances/pgl27/pgl27_trace.v} as
 For any Boolean prior, the uniform class-conditional deck gives
 $S\mathrel{\perp}V_C$ whenever $\lvert C\rvert\leq3$. Under the uniform
 Boolean prior, it also gives $H(S\mid T_C)=H(S)$.
-\end{theorem}
+\end{proposition}
 
-The probability, view, and trace theorems use three classical principles from
-the MathComp probability stack: propositional extensionality, dependent
-functional extensionality, and constructive indefinite description. The
-group, orbit, cardinality, correctness, and recovery results are closed under
-the global context. The \Rocq{} kernel checks all accepted proof terms,
-including finite computations performed by its virtual machine.
+The propositions of this section combine into the first headline theorem.
 
-\begin{table}[t]
-  \centering
-  \small
-  \begin{tabular}{p{.43\linewidth}p{.49\linewidth}}
-    \toprule
-    Dealer and result & Rocq source names \\
-    \midrule
-    fixed representative views &
-      \coqin{pgl27\_view\_indep}, \coqin{pgl27\_view\_leakage\_le} \\
-    fixed representative traces &
-      \coqin{pgl27\_trace\_secrecy},
-      \coqin{pgl27\_coalition\_trace\_secrecy} \\
-    all-decks views and traces &
-      \coqin{pgl27\_view\_indep\_alldecks},
-      \coqin{pgl27\_alldecks\_trace\_secrecy},
-      \coqin{pgl27\_alldecks\_coalition\_secrecy} \\
-    shuffle-free views and traces &
-      \coqin{pgl27\_view\_indep\_deck\_prior},
-      \coqin{pgl27\_deck\_trace\_secrecy},
-      \coqin{pgl27\_deck\_coalition\_secrecy} \\
-    \bottomrule
-  \end{tabular}
-  \caption{Source index for perfect view and trace privacy.}
-  \label{tab:privacy-source}
-\end{table}
+\begin{thmA}
+The $\PG$ instance recovers the secret from all eight endpoints for every
+group element.\footnotemark{} Under the uniform Boolean prior, the fixed
+representative dealer, and an independent uniform $\PG$ shuffle, the
+instance has recovery parameters
+\[
+  (t,r,n)=(3,7,8),
+\]
+and for every passive coalition $C$ with $\lvert C\rvert\leq3$,
+\[
+  S\mathrel{\perp}V_C
+  \quad\text{and}\quad
+  H(S\mid T_C)=H(S).
+\]
+\end{thmA}
+\footnotetext{This statement is the conjunction of the following formalized
+results: \coqin{pgl27\_run\_recovers} in
+\path{pgg-smc/instances/pgl27/pgl27_run.v}, \coqin{pgl27\_reveal\_ambiguous}
+and \coqin{pgl27\_seven\_reveal\_class} in
+\path{pgg-smc/instances/pgl27/pgl27_recovery.v},
+\coqin{pgl27\_view\_leak\_k4} and \coqin{pgl27\_view\_indep} in
+\path{pgg-smc/instances/pgl27/pgl27_secrecy.v}, and
+\coqin{pgl27\_coalition\_trace\_secrecy} in
+\path{pgg-smc/instances/pgl27/pgl27_trace.v}.}
+
+The trust base for these results is stated in
+Section~\ref{sec:instances}, and Table~\ref{tab:source-index} indexes the
+formal sources.
 
 \section{Word-Shuffle Approximation of the Uniform-Shuffle Model}\label{sec:mixing}
 
