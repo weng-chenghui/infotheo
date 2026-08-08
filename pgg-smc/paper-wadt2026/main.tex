@@ -680,11 +680,14 @@ instance-specific finite or spectral evidence.
 
 \section{Related Work}\label{sec:related}
 
-Research on card protocols includes small AND and XOR
-constructions~\cite{MizukiSone2009,MizukiSone2012}. Koch, Schrempp, and
-Kirsten encode bounded protocol spaces for software bounded model
-checking~\cite{Koch2019}. Their method searches for protocols and checks
-finite lower bounds. The present development instead proves reusable
+Den Boer introduced the first card-based cryptographic protocol with the
+five-card trick~\cite{denBoer1989}. The protocol uses five cards to compute
+the AND of two secret bits with perfect security. Later protocols reduced the
+number of cards and supported other functions~\cite{MizukiSone2009,MizukiSone2012,KochWalzerHartel2015}.
+
+Koch, Schrempp, and Kirsten encode bounded protocol spaces for software
+bounded model checking~\cite{Koch2019}. Their method searches for protocols
+and checks finite lower bounds. The present development proves reusable
 group-action, execution, privacy, and mixing lemmas in \Rocq{}. The Kim
 instance also connects a biased shuffle model to a concrete finite-step
 bound~\cite{KimCetinkaya2025}.
