@@ -39,10 +39,10 @@
 \begin{abstract}
 Card-based protocols use physical cards to compute with
 information-theoretic security. I define a \Rocq{} framework that treats a
-finite group, its permutation action, and its shuffle law as first-class
+finite group, its permutation action, and its shuffle distribution as first-class
 parameters. The framework connects group actions to executed traces and
 word-shuffle mixing. The main instance uses the action of
-$\PG$ on eight projective points. Under the uniform shuffle law, the
+$\PG$ on eight projective points. Under the uniform shuffle distribution, the
 instance has exact correctness, recovery parameters $(t,r,n)=(3,7,8)$, and
 perfect view and executed-trace privacy for coalitions of at most three players. These
 privacy theorems assume a uniform Boolean secret, a fixed encoded
@@ -50,11 +50,11 @@ representative, and passive adversaries. The verifier learns the secret.
 Active security, security after the reveal, and composition lie outside the
 model. For a finite implementation, I analyze a uniform word of length 200
 over five generator letters. A checked fiber-counting certificate proves that
-the resulting shuffle law is within unhalved $L_1$ distance $2^{-40}$ of the
-uniform group law. This word-shuffle theorem transfers to single-card
+the resulting shuffle distribution is within unhalved $L_1$ distance $2^{-40}$ of the
+uniform group distribution. This word-shuffle theorem transfers to single-card
 marginals and to a product with any secret prior. Transport theorems then
 bound approximate coalition-view and executed-trace privacy by $2^{-39}$
-under the word law. Four sibling instances
+under the word distribution. Four sibling instances
 show which algebraic, operational, privacy, and mixing arguments the framework
 reuses.
 \end{abstract}
@@ -64,18 +64,18 @@ reuses.
 Card-based cryptography uses face-down physical cards to compute functions
 without computational assumptions. A shuffle hides a permutation, while a
 reveal exposes selected card faces. Information-theoretic security requires
-the resulting observation law to hide the protected secret. Den Boer's
+the resulting observation distribution to hide the protected secret. Den Boer's
 five-card protocol began this line of work~\cite{denBoer1989}. Later protocols
 reduced card counts and broadened the class of supported
 computations~\cite{MizukiSone2009,MizukiSone2012,KochWalzerHartel2015}.
 
 Mechanized analysis must connect the physical operations to their probability
-laws. Koch, Schrempp, and Kirsten use software bounded model checking to
+distributions. Koch, Schrempp, and Kirsten use software bounded model checking to
 search finite protocol spaces and check lower bounds~\cite{Koch2019}. Their
 method automates checks over a bounded state space. The development\footnote{The companion artifact contains the source, theorem
 index, assumption report, and build instructions.} in this article instead
 uses a proof assistant to state reusable group actions,
-dealer laws, participant views, and executed traces. It combines a
+dealer distributions, participant views, and executed traces. It combines a
 group-parametric model with perfect trace privacy and a checked
 word-shuffle mixing bound.
 
@@ -89,28 +89,28 @@ and is not a result reported here.
 I make three technical contributions.
 \begin{itemize}
 \item I give a common \Rocq{} interface for a finite group, its permutation
-  action, the shuffle law, reconstruction, participant views, and executed
+  action, the shuffle distribution, reconstruction, participant views, and executed
   traces.
 \item I prove correctness, the recovery ramp, coalition-view privacy, and
   executed-trace secrecy for the $\PG$ instance under the uniform shuffle
-  law.
-\item I prove an unhalved $L_1$ bound between a 200-letter generator-word law
-  and the uniform group law. The proof also transfers the bound to card
-  endpoints and secret-prior product laws.
+  distribution.
+\item I prove an unhalved $L_1$ bound between a 200-letter generator-word distribution
+  and the uniform group distribution. The proof also transfers the bound to card
+  endpoints and secret-prior product distributions.
 \end{itemize}
 
-The uniform-shuffle and word-shuffle results concern two distinct laws.
+The uniform-shuffle and word-shuffle results concern two distinct distributions.
 Perfect privacy uses a uniform group element with a uniform Boolean secret
 and a fixed dealt representative. Word-shuffle mixing compares the
-generator-word law with that uniform group law. The formalization transports the resulting
+generator-word distribution with that uniform group distribution. The formalization transports the resulting
 distributional proximity through the protocol interpreter. Approximate
-coalition-view and executed-trace privacy hold under the word law with
+coalition-view and executed-trace privacy hold under the word distribution with
 error at most $2^{-39}$. The protocol is dealer-based and has no
 private inputs. Adversaries are passive. The verifier receives all endpoints
 and learns the secret. Active deviations, post-reveal security, and
 composition across executions remain outside the model.
 
-Section~\ref{sec:model} fixes the two laws and the security scope.
+Section~\ref{sec:model} fixes the two distributions and the security scope.
 Section~\ref{sec:framework} presents the framework components used by the
 proofs. Sections~\ref{sec:pgl} and~\ref{sec:exact} give the $\PG$
 construction and its uniform-shuffle results. Section~\ref{sec:mixing} proves the
@@ -127,9 +127,9 @@ The framework describes a protocol by the data
   \label{eq:model-data}
 \end{equation}
 Here $G$ is a finite shuffle group. The representation
-$\rho:G\to S_n$ acts on $n$ card positions. The law $\mu$ selects one
+$\rho:G\to S_n$ acts on $n$ card positions. The distribution $\mu$ selects one
 generator letter, and $R$ is the real closed field used for probabilities.
-The law $U_G$ is uniform on $G$. The convolution $\mu^{*L}$ is the law of the
+The distribution $U_G$ is uniform on $G$. The convolution $\mu^{*L}$ is the distribution of the
 group element obtained by evaluating $L$ independent letters.
 
 A dealer samples a secret $S$ and a valid dealt arrangement $D$. The action
@@ -146,17 +146,17 @@ executed trace $T_i$, and $T_C=(T_i)_{i\in C}$ is the coalition trace. The
 verifier receives all endpoints and applies the decoder. It therefore learns
 $S$ by design.
 
-The primary uniform-shuffle law samples a uniform Boolean secret and uses one fixed
+The primary uniform-shuffle distribution samples a uniform Boolean secret and uses one fixed
 representative $D_s$ for each secret $s$. It then samples an independent
-element $g\leftarrow U_G$. For the $\PG$ instance, this is the formal law
+element $g\leftarrow U_G$. For the $\PG$ instance, this is the formal distribution
 used by the main uniform-shuffle execution. The representative is the formal orbit
 encoder.
 \footnote{The uniform-shuffle source objects are \coqin{pgl27P} and
 \coqin{orbit\_encode}.}
-The all-decks law instead samples a uniform valid arrangement in the selected
+The all-decks distribution instead samples a uniform valid arrangement in the selected
 secret class before it samples $g\leftarrow U_G$.
-\footnote{The all-decks law is \coqin{pgl27P\_alldecks}.}
-Both uniform-shuffle execution laws use a uniform Boolean prior.
+\footnote{The all-decks distribution is \coqin{pgl27P\_alldecks}.}
+Both uniform-shuffle execution distributions use a uniform Boolean prior.
 
 The security theorems concern passive, honest-but-curious adversaries. A
 corrupted player follows the protocol and retains its view and executed
@@ -170,7 +170,7 @@ The PGL protocol has no private player inputs. Active deviation, security
 after the verifier's reveal, and composition across executions are outside
 the model.
 
-The word-shuffle model replaces $U_G$ by $\mu^{*L}$. I measure two laws $P$
+The word-shuffle model replaces $U_G$ by $\mu^{*L}$. I measure two distributions $P$
 and $Q$ by the unhalved $L_1$ distance
 \begin{equation}
   \lVert P-Q\rVert_1=\sum_x\lvert P(x)-Q(x)\rvert.
@@ -195,7 +195,7 @@ $\PG$ witness is the singleton cut list in \coqin{pgl27\_dealer\_run}.}
 The uniform-shuffle model makes the same assumption, since its single
 uniform shuffle is likewise unobserved.
 
-Figure~\ref{fig:models} separates the proved paths for the two laws. The
+Figure~\ref{fig:models} separates the proved paths for the two distributions. The
 lower path reaches approximate coalition-view and executed-trace privacy at
 $2^{-39}$.
 \begin{figure}[t]
@@ -206,13 +206,13 @@ $2^{-39}$.
       box/.style={draw,rounded corners,align=center,inner sep=4pt,
                   font=\small},
       arr/.style={-{Latex[length=2mm]},thick}]
-    \node[box] (uniform) {uniform group law\\$U_G$};
+    \node[box] (uniform) {uniform group\\distribution $U_G$};
     \node[box,right=of uniform] (exact) {perfect coalition view\\and trace theorems};
     \draw[arr] (uniform) -- (exact);
 
-    \node[box,below=of uniform] (word) {five-letter word law\\$\mu^{*200}$};
+    \node[box,below=of uniform] (word) {five-letter word\\distribution $\mu^{*200}$};
     \node[box,right=of word] (lone) {$L_1$ mixing\\certificate};
-    \node[box,right=of lone] (transfer) {endpoint and\\product-law transfers};
+    \node[box,right=of lone] (transfer) {endpoint and\\product-distribution transfers};
     \node[box,right=of transfer] (privacy)
       {coalition view and\\trace privacy at $2^{-39}$};
     \draw[arr] (word) -- (lone);
@@ -264,7 +264,7 @@ Components~\cite{MathComp}.
 \end{figure}
 
 \coqin{PGGInterface} gives the dealer, player, and verifier layout.
-\coqin{SecurityWitness} gives an endpoint bound for a shuffle law.
+\coqin{SecurityWitness} gives an endpoint bound for a shuffle distribution.
 \coqin{ReconPlug} connects the group action to a decoder.
 \coqin{MonodromyProfile} packages these three components.
 
@@ -411,7 +411,7 @@ after the shuffle $g$ returns $s$.
 \end{theorem}
 
 Correctness quantifies over every group element. It therefore holds with
-probability one under the uniform law and under any word law, and only
+probability one under the uniform distribution and under any word distribution, and only
 privacy carries an approximation error. A corollary instantiates the
 executed run at the evaluated 200-letter word.\footnote{The corollary is
 \coqin{pgl27\_word\_run\_recovers} in
@@ -516,7 +516,7 @@ and an independent uniform $\PG$ shuffle,
 \end{theorem}
 
 A third dealer samples a uniform valid deck in the chosen class and applies
-no later shuffle. For this shuffle-free deck law, view independence holds for
+no later shuffle. For this shuffle-free deck distribution, view independence holds for
 every Boolean secret prior. The available executed-trace theorem uses the
 uniform Boolean prior. No prior-generic trace theorem is claimed.
 
@@ -572,7 +572,7 @@ also contains the inverses of translation and scaling. Inversion is already
 self-inverse. The resulting tuple is symmetric and generates the same group
 as the original three generators.
 
-For a word length $L$, the shuffle law evaluates a uniform word in
+For a word length $L$, the shuffle distribution evaluates a uniform word in
 $\{0,1,2,3,4\}^L$. At $L=200$, the sample space contains $5^{200}$ words.
 The proof partitions these words into $336$ fibers, one for each group
 element. A computation over binary naturals records the size of every
@@ -605,12 +605,12 @@ The $L_1$ data-processing inequality gives, for every card $i$,
   \leq 2^{-40}.
   \label{eq:endpoint-transfer}
 \end{equation}
-The uniform group action makes the second endpoint law uniform on the eight
+The uniform group action makes the second endpoint distribution uniform on the eight
 positions.
 
 The second transfer adds a secret prior without changing the distance. Let
 $\pi$ be any distribution on Boolean secrets. Independence is built into the
-product laws, and
+product distributions, and
 \begin{equation}
   \left\lVert
     \pi\mathbin{\times}\mu^{*200}
@@ -620,7 +620,7 @@ product laws, and
   \label{eq:product-transfer}
 \end{equation}
 Equation~\ref{eq:product-transfer} compares two distributions on a secret
-and a shuffle. It is not an execution law. Equations~\ref{eq:endpoint-transfer}
+and a shuffle. It is not an execution distribution. Equations~\ref{eq:endpoint-transfer}
 and~\ref{eq:product-transfer} transfer the one certificate in
 Equation~\ref{eq:pgl-mixing}. They are not separate mixing certificates.
 
@@ -628,9 +628,9 @@ Under the halved convention in Equation~\ref{eq:tv-definition}, each of
 these bounds is at most $2^{-41}$ in total variation.
 \footnote{The source results are \coqin{pgl27\_word\_mixing},
 \coqin{pgl27\_endpoint\_mixing}, and \coqin{pgl27\_joint\_mixing}. The last
-result is the secret-prior product law in Equation~\ref{eq:product-transfer}.}
+result is the secret-prior product distribution in Equation~\ref{eq:product-transfer}.}
 
-The proved chain reaches group-law proximity, every single-card marginal,
+The proved chain reaches group-distribution proximity, every single-card marginal,
 and the product with any secret prior. Two transport theorems carry the
 certificate to the security observables.
 
@@ -652,25 +652,25 @@ $s$ and shuffle $g$,
 and the executed coalition trace satisfies the same bound.
 \end{theorem}
 
-The proof is a triangle inequality through the uniform group law. The
-coalition-view law under the uniform shuffle does not depend on the secret,
+The proof is a triangle inequality through the uniform group distribution. The
+coalition-view distribution under the uniform shuffle does not depend on the secret,
 by three-transitivity. The data-processing inequality applies the
 certificate in Equation~\ref{eq:pgl-mixing} on each side of the triangle. A
-companion theorem bounds the joint view-and-secret law under the word
+companion theorem bounds the joint view-and-secret distribution under the word
 shuffle against the product of its uniform-shuffle marginals by $2^{-40}$ at
 any Boolean prior.\footnote{The companion result is
 \coqin{pgl27\_view\_mixing}. It is an ideal-proximity statement, not the
 privacy definition.}
 
-The word-law privacy results cover the fixed representative dealer only,
+The word-shuffle privacy results cover the fixed representative dealer only,
 since the all-decks and shuffle-free dealers use different sample spaces
-that the product-law transfer does not reach.
+that the product-distribution transfer does not reach.
 
 \section{Other Instances}\label{sec:instances}
 
 The repository contains four sibling instances. They exercise different
 parts of the framework. Table~\ref{tab:instances} records the proved
-coverage. Perfect privacy in the table refers to the dealer law defined by each
+coverage. Perfect privacy in the table refers to the dealer distribution defined by each
 instance. Trace privacy refers to the executed trace of the stated corrupted
 players.
 
@@ -713,7 +713,7 @@ players.
 \end{table}
 
 Den Boer's instance samples a uniform cyclic cut. One cut therefore gives
-the exact endpoint law used by its single-card privacy proof. Kim's variant
+the exact endpoint distribution used by its single-card privacy proof. Kim's variant
 uses a biased cyclic cut~\cite{KimCetinkaya2025}. For bias $1/100$, the
 formal development proves in the kernel that seven repeated cuts put every
 single-card endpoint within $2^{-40}$ of uniform in unhalved $L_1$ distance.
@@ -723,7 +723,7 @@ proof applies a spectral inequality at word length 286. The development
 imports the required Rayleigh bound as an axiom. The $S_5\times S_5$ instance
 uses two disjoint piles. It inherits the same Rayleigh premise for decay
 within either pile. A card never changes piles, so its distance from the
-uniform law on all ten positions cannot converge to zero. The formal global
+uniform distribution on all ten positions cannot converge to zero. The formal global
 bound approaches the exact $L_1$ floor of one.
 
 The PGL instance adds coalition views, coalition traces, the recovery ramp,
@@ -754,7 +754,7 @@ Shinagawa and Miyamoto extend the construction to graphs and hypergraphs and
 give applications to cyclic group shuffles~\cite{ShinagawaMiyamoto2023}.
 These results describe physical protocols that implement structured uniform
 shuffle groups. The framework in this paper takes the finite group, its
-action, and its probability law as parameters. It then connects them to
+action, and its probability distribution as parameters. It then connects them to
 sharing and execution semantics. A single uniform closed shuffle suffices to
 compute any Boolean circuit~\cite{ShinagawaNuida2021}. A later compiler maps
 simple finite-runtime card protocols to private simultaneous-message
@@ -784,10 +784,10 @@ foundation to group-parametric card shuffles and coalition traces.
 
 I presented a group-parametric \Rocq{} framework for card-based protocols and
 instantiated it with the action of $\PG$ on eight positions. Under the
-uniform group law, the instance has executed correctness, recovery
+uniform group distribution, the instance has executed correctness, recovery
 parameters $(3,7,8)$, and perfect view and trace privacy for coalitions of at
 most three players. These security results use a uniform Boolean prior,
-passive adversaries, and the dealer laws stated in Section~\ref{sec:model}.
+passive adversaries, and the dealer distributions stated in Section~\ref{sec:model}.
 The verifier learns the secret.
 
 For a finite shuffle implementation, a checked fiber certificate gives an
@@ -797,10 +797,10 @@ any Boolean secret prior. Transport theorems turn these distributional
 bounds into approximate coalition-view and executed-trace privacy at
 $2^{-39}$.
 
-Two extensions of the word-law security results remain open. The entropy
+Two extensions of the word-shuffle security results remain open. The entropy
 form of approximate privacy needs a quantitative continuity modulus for the
 binary entropy function near one half. The all-decks and shuffle-free
-dealers need a word-law mixing statement on their own sample spaces. Another
+dealers need a word-shuffle mixing statement on their own sample spaces. Another
 direction is to connect
 bounded-width branching programs to group-based card protocols through
 Barrington's theorem~\cite{Barrington1989,DvorakKoucky2021}. This direction
