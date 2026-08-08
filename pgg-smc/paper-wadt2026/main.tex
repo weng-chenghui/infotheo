@@ -430,6 +430,11 @@ For finite distributions $P$ and $Q$ on $A$ and a map $f:A\to B$,
 
 \section{The \texorpdfstring{$\PG$}{PGL(2,7)} Construction}\label{sec:pgl}
 
+This section supplies the instance column of Table~\ref{tab:bridge}. The
+group is $\PG$, the action permutes the eight projective points, the
+shuffle distribution draws uniform generator letters, and the decoder reads
+the orbit class.
+
 Let $\mathbb{P}^1(\mathbb{F}_7)$ be the projective line over the field with
 seven elements. It has eight points. The group $\PG$ acts on these points by
 fractional linear transformations. The formal representation realizes this
@@ -444,31 +449,56 @@ Each valid arrangement contains eight distinct cards. Four card values are
 marked as hearts. Their positions form a four-subset of the projective line.
 The secret records which of the two $\PG$ orbits contains that subset. The
 encoder chooses one fixed valid arrangement from each class.
+Figure~\ref{fig:encoding} shows both representatives.
 
-\begin{theorem}[Orbit encoder\footnotemark]
+\begin{figure}[t]
+  \centering
+  \begin{tikzpicture}[every node/.style={font=\small},
+      card/.style={draw,minimum width=7mm,minimum height=9mm,inner sep=1pt},
+      heart/.style={card,fill=red!15}]
+    \node at (-1.3,0) {$D_0$};
+    \foreach \p/\c/\s in {0/0/heart,1/1/heart,2/2/heart,3/3/heart,
+                          4/4/card,5/5/card,6/6/card,7/7/card}
+      \node[\s] at (\p*0.85,0) {$\c$};
+    \node at (-1.3,-1.6) {$D_1$};
+    \foreach \p/\c/\s in {0/0/heart,1/1/heart,2/2/heart,3/4/card,
+                          4/3/heart,5/5/card,6/6/card,7/7/card}
+      \node[\s] at (\p*0.85,-1.6) {$\c$};
+    \foreach \p in {0,...,7}
+      \node[gray] at (\p*0.85,0.85) {\p};
+  \end{tikzpicture}
+  \caption{The two encoded representatives. Gray labels are card positions,
+  boxed numbers are card values, and shaded cards are the four hearts, the
+  values below four. The heart positions of $D_0$ form the harmonic subset
+  $\{0,1,2,3\}$ and those of $D_1$ form the equianharmonic subset
+  $\{0,1,2,4\}$. The secret is this orbit class.}
+  \label{fig:encoding}
+\end{figure}
+
+\begin{lemma}[Orbit encoder\footnotemark]
 \footnotetext{Formalized in \path{pgg-smc/instances/pgl27/pgl27_orbit.v} as
 \coqin{orbit\_encode\_deck} and \coqin{orbit\_encodeK}.}
 For every $s\in\{0,1\}$, the encoded arrangement $D_s$ is valid and its
 four-subset has orbit class $s$.
-\end{theorem}
+\end{lemma}
 
 The seventy subsets of size four divide into two orbits. The smaller orbit
 consists of the equianharmonic subsets. The larger orbit consists of the
 harmonic subsets.
 
-\begin{theorem}[Orbit split\footnotemark]\label{thm:orbit-split}
+\begin{lemma}[Orbit split\footnotemark]\label{thm:orbit-split}
 \footnotetext{Formalized in \path{pgg-smc/instances/pgl27/pgl27_orbit.v} as
 \coqin{subset\_class\_orbitE}, \coqin{orbit\_class\_split}, and
 \coqin{orbit\_class\_split\_complement}.}
 The action of $\PG$ on the four-subsets of
 $\mathbb{P}^1(\mathbb{F}_7)$ has an equianharmonic orbit of size $28$ and a
 harmonic orbit of size $42$.
-\end{theorem}
+\end{lemma}
 
 Privacy follows from the transitivity of the point action. Ordered tuples
 matter because a coalition observes card values at named positions.
 
-\begin{theorem}[Three-transitivity\footnotemark]\label{thm:three-transitive}
+\begin{lemma}[Three-transitivity\footnotemark]\label{thm:three-transitive}
 \footnotetext{Formalized in \path{pgg-smc/instances/pgl27/pgl27_group.v} as
 \coqin{pgl27\_3transitive}.}
 For any ordered triples $(x_1,x_2,x_3)$ and $(y_1,y_2,y_3)$ of distinct
@@ -476,38 +506,25 @@ projective points, there is a $g\in\PG$ such that
 \[
   g(x_1)=y_1, \qquad g(x_2)=y_2, \qquad g(x_3)=y_3.
 \]
-\end{theorem}
+\end{lemma}
 
 The formal proof enumerates generator words that send a fixed base triple to
 each distinct target triple. The kernel checks the resulting finite table.
-Theorem~\ref{thm:three-transitive} makes every ordered view of at most three
-positions uniform under $U_G$. It therefore supplies the group-theoretic
-premise for coalition privacy.
+Lemma~\ref{thm:three-transitive} makes every ordered view of at most three
+positions uniform under $U_G$. It discharges the hypothesis of
+Theorem~\ref{thm:generic-privacy} at $t=3$ and thereby supplies the
+group-theoretic premise for coalition privacy.
 
-\begin{table}[t]
-  \centering
-  \small
-  \begin{tabular}{ll}
-    \toprule
-    Mathematical statement & Rocq source name \\
-    \midrule
-    three-transitivity & \coqin{pgl27\_3transitive} \\
-    equianharmonic count & \coqin{orbit\_class\_split} \\
-    harmonic count & \coqin{orbit\_class\_split\_complement} \\
-    encoder returns its class & \coqin{orbit\_encodeK} \\
-    group order & \coqin{pgl27\_card} \\
-    \bottomrule
-  \end{tabular}
-  \caption{Source index for the PGL construction.}
-  \label{tab:pgl-source}
-\end{table}
+Table~\ref{tab:source-index} indexes the formal sources for this section.
 
 \section{Correctness, Recovery, and Uniform-Shuffle Privacy}\label{sec:exact}
 
 \subsection{Correctness and Recovery}
 
 The interpreter deals $D_s$, applies an allowed shuffle, and sends one card
-to each of eight players. The players return their cards to the verifier. The
+to each of eight players.\footnote{The dealer program is
+\coqin{exchange\_dealer} and the $\PG$ witness is the singleton cut list in
+\coqin{pgl27\_dealer\_run}.} The players return their cards to the verifier. The
 verifier's endpoint sequence is the shuffled dealt arrangement. Orbit-class
 invariance and the encoder equation then give correctness.
 
@@ -587,7 +604,8 @@ the leakage for all reveal sets of sizes four through six.
 
 The main uniform-shuffle execution samples $S$ uniformly from $\{0,1\}$. It deals the
 fixed representative $D_S$ and samples an independent shuffle $g\leftarrow
-U_G$. Three-transitivity gives independence for every coalition $C$ with
+U_G$.\footnote{The execution distribution is \coqin{pgl27P} and the
+representative is the formal orbit encoder \coqin{orbit\_encode}.} Three-transitivity gives independence for every coalition $C$ with
 $\lvert C\rvert\leq3$.
 
 \begin{theorem}[Perfect privacy for the fixed dealer\footnotemark]
@@ -609,7 +627,8 @@ independent uniform $\PG$ shuffle,
 The all-decks dealer tests whether the fixed representative hides a special
 choice. It samples $S$ uniformly. Conditional on $S=s$, it samples a uniform
 valid arrangement of class $s$. It then applies an independent uniform
-$\PG$ shuffle.
+$\PG$ shuffle.\footnote{The all-decks distribution is
+\coqin{pgl27P\_alldecks}.}
 
 \begin{theorem}[All-decks perfect privacy\footnotemark]
 \footnotetext{Formalized in \path{pgg-smc/instances/pgl27/pgl27_secrecy.v}
