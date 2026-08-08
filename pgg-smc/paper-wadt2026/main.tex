@@ -49,7 +49,7 @@ word-shuffle mixing. The main instance uses the action of
 $\PG$ on eight projective points. Under the uniform shuffle distribution, the
 instance has exact correctness, recovery parameters $(t,r,n)=(3,7,8)$, and
 perfect view and executed-trace privacy for coalitions of at most three players. These
-privacy theorems assume a uniform Boolean secret, a fixed encoded
+privacy results assume a uniform Boolean secret, a fixed encoded
 representative, and passive adversaries. The verifier learns the secret.
 Active security, security after the reveal, and composition lie outside the
 model. For a finite implementation, I analyze a uniform word of length 200
@@ -1006,19 +1006,19 @@ foundation to group-parametric card shuffles and coalition traces.
 
 \section{Conclusion and Future Work}\label{sec:conclusion}
 
-I presented a group-parametric \Rocq{} framework for card-based protocols and
-instantiated it with the action of $\PG$ on eight positions. Under the
-uniform group distribution, the instance has executed correctness, recovery
-parameters $(3,7,8)$, and perfect view and trace privacy for coalitions of at
-most three players. These security results use a uniform Boolean prior,
-passive adversaries, and the dealer distributions stated in Section~\ref{sec:model}.
-The verifier learns the secret.
+I presented a group-parametric \Rocq{} framework for card-based protocols
+and instantiated it with the action of $\PG$ on eight positions. Theorem A
+gives executed correctness, recovery parameters $(3,7,8)$, and perfect view
+and trace privacy for coalitions of at most three players under the uniform
+group distribution. These security results use a uniform Boolean prior, the
+fixed representative dealer, passive adversaries, and the dealer
+distributions stated in Section~\ref{sec:model}. The verifier learns the
+secret.
 
-For a finite shuffle implementation, a checked fiber certificate gives an
-unhalved $L_1$ distance of at most $2^{-40}$ after 200 generator letters.
-The same bound holds for every single-card endpoint and for a product with
-any Boolean secret prior. Transport theorems turn these distributional
-bounds into approximate coalition-view and executed-trace privacy at
+For a finite shuffle implementation, Theorem B gives an unhalved $L_1$
+distance of at most $2^{-40}$ after 200 generator letters, the same bound
+for every single-card endpoint and for a product with any Boolean secret
+prior, and approximate coalition-view and executed-trace bounds at
 $2^{-39}$.
 
 Two extensions of the word-shuffle security results remain open. The entropy
