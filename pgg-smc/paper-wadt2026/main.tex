@@ -835,6 +835,10 @@ coverage. Perfect privacy in the table refers to the dealer distribution defined
 instance. Trace privacy refers to the executed trace of the stated corrupted
 players.
 
+The PGL instance adds coalition views, coalition traces, the recovery ramp,
+and the finite fiber certificate from Section~\ref{sec:mixing}. Its mixing
+result does not depend on the $S_5$ Rayleigh premise.
+
 \begin{table}[t]
   \centering
   \small
@@ -896,14 +900,10 @@ within either pile. A card never changes piles, so its distance from the
 uniform distribution on all ten positions cannot converge to zero. The formal global
 bound approaches the exact $L_1$ floor of one.
 
-The PGL instance adds coalition views, coalition traces, the recovery ramp,
-and the finite fiber certificate from Section~\ref{sec:mixing}. Its mixing
-result does not depend on the $S_5$ Rayleigh premise.
-
-\begin{table}[t]
+\begin{table}[H]
   \centering
   \small
-  \begin{tabular}{p{.43\linewidth}p{.49\linewidth}}
+  \begin{tabular}{p{.40\linewidth}p{.50\linewidth}}
     \toprule
     Mathematical statement & Rocq source name \\
     \midrule
@@ -922,7 +922,7 @@ result does not depend on the $S_5$ Rayleigh premise.
     at most six cards remain ambiguous &
       \coqin{pgl27\_six\_reveal\_ambiguous},
       \coqin{pgl27\_reveal\_ambiguous} \\
-    fixed four-card dependence and leakage &
+    four-card dependence and leakage &
       \coqin{pgl27\_view\_dep\_k4}, \coqin{pgl27\_view\_leak\_k4} \\
     \midrule
     \multicolumn{2}{@{}l}{\emph{Privacy}} \\
