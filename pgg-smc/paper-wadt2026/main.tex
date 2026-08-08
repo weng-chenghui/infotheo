@@ -195,10 +195,11 @@ The exact model makes the same assumption, since its single uniform shuffle
 is likewise unobserved.
 
 Figure~\ref{fig:models} separates the proved paths for the two laws. The
-lower path reaches endpoint and product-law proximity. It does not reach an
-approximate security statement.
+lower path reaches approximate coalition-view and executed-trace privacy at
+$2^{-39}$.
 \begin{figure}[t]
   \centering
+  \resizebox{\linewidth}{!}{%
   \begin{tikzpicture}[
       node distance=7mm and 8mm,
       box/.style={draw,rounded corners,align=center,inner sep=4pt,
@@ -211,11 +212,14 @@ approximate security statement.
     \node[box,below=of uniform] (word) {five-letter word law\\$\mu^{*200}$};
     \node[box,right=of word] (lone) {$L_1$ mixing\\certificate};
     \node[box,right=of lone] (transfer) {endpoint and\\product-law transfers};
+    \node[box,right=of transfer] (privacy)
+      {coalition view and\\trace privacy at $2^{-39}$};
     \draw[arr] (word) -- (lone);
     \draw[arr] (lone) -- (transfer);
-  \end{tikzpicture}
-  \caption{The exact and finite-step proof paths. A transfer from the lower
-  path to approximate coalition-view or trace privacy remains future work.}
+    \draw[arr] (transfer) -- (privacy);
+  \end{tikzpicture}}
+  \caption{The exact and finite-step proof paths. The lower path transports
+  the mixing certificate to coalition-view and trace privacy.}
   \label{fig:models}
 \end{figure}
 
