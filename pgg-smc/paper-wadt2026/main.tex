@@ -6,7 +6,7 @@
 \usepackage{graphicx}
 \usepackage{float}
 \usepackage{tikz}
-\usetikzlibrary{arrows.meta,positioning}
+\usetikzlibrary{arrows.meta,positioning,decorations.pathreplacing}
 \usepackage{hyperref}
 \hypersetup{hidelinks}
 \usepackage{listings}
@@ -23,6 +23,10 @@
 \newcommand{\Unif}{U_G}
 \newcommand{\worddist}{\mu^{*L}}
 \newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+\spnewtheorem*{thmAinf}{Theorem A (informal)}{\bfseries}{\itshape}
+\spnewtheorem*{thmBinf}{Theorem B (informal)}{\bfseries}{\itshape}
+\spnewtheorem*{thmA}{Theorem A}{\bfseries}{\itshape}
+\spnewtheorem*{thmB}{Theorem B}{\bfseries}{\itshape}
 
 \title{Algebraic Specification of Card-Based Cryptographic Protocols in Rocq}
 \ifanonymous
@@ -79,14 +83,50 @@ dealer distributions, participant views, and executed traces. It combines a
 group-parametric model with perfect trace privacy and a checked
 word-shuffle mixing bound.
 
-The accepted workshop abstract illustrated this algebraic direction with den
-Boer's protocol and an $S_5$ development. It also identified Barrington's
-theorem as a route from bounded-width branching programs to card
-protocols~\cite{Barrington1989,DvorakKoucky2021}. The later $\PG$ instance
-now supplies the main case study. Barrington compilation remains future work
-and is not a result reported here.
+Two shuffle distributions organize the analysis. The uniform distribution on
+the shuffle group is the ideal object of the security proofs. No dealer
+samples a uniform group element in one physical move. A dealer instead
+repeats simple cuts, and the repeated cuts follow a word distribution over
+the generators of the group. The group parameters pay for this connection.
+Transitivity of the action yields coalition privacy, and generation by a
+small cut alphabet yields a finite implementable shuffle. The paper proves
+the security results in the ideal model and then proves that the word
+distribution approximates it.
 
-I make three technical contributions.
+Overall, this work contributes a group-parametric framework whose main
+instance carries two machine-checked security results.
+
+\begin{thmAinf}
+The $\PG$ instance recovers the secret from all eight endpoints for every
+group element. Under the uniform shuffle distribution, with a uniform
+Boolean secret and the fixed representative dealer, it has recovery
+parameters $(t,r,n)=(3,7,8)$ and perfect view and executed-trace privacy
+against every passive coalition of at most three
+players.\footnotemark
+\end{thmAinf}
+\footnotetext{Formal statement at the end of
+Section~\ref{sec:exact}. The constituent formalized results are
+\coqin{pgl27\_run\_recovers}, \coqin{pgl27\_reveal\_ambiguous},
+\coqin{pgl27\_seven\_reveal\_class}, \coqin{pgl27\_view\_leak\_k4},
+\coqin{pgl27\_view\_indep}, and \coqin{pgl27\_coalition\_trace\_secrecy} in
+\path{pgg-smc/instances/pgl27}.}
+
+\begin{thmBinf}
+The 200-letter word shuffle over the five generator letters is within
+unhalved $L_1$ distance $2^{-40}$ of the uniform shuffle distribution. For
+the fixed representative dealer, the coalition view distributions at the two
+secrets are within unhalved $L_1$ distance $2^{-39}$ for every passive
+coalition of at most three players, and the executed coalition traces
+satisfy the same bound. Executed correctness holds for every
+word.\footnotemark
+\end{thmBinf}
+\footnotetext{Formal statement at the end of
+Section~\ref{sec:mixing}. The constituent formalized results are
+\coqin{pgl27\_word\_mixing}, \coqin{pgl27\_word\_view\_indist},
+\coqin{pgl27\_word\_trace\_indist}, and \coqin{pgl27\_word\_run\_recovers} in
+\path{pgg-smc/instances/pgl27}.}
+
+There are three contributions in this work.
 \begin{itemize}
 \item I give a common \Rocq{} interface for a finite group, its permutation
   action, the shuffle distribution, reconstruction, participant views, and executed
@@ -99,27 +139,66 @@ I make three technical contributions.
   endpoints and secret-prior product distributions.
 \end{itemize}
 
-The uniform-shuffle and word-shuffle results concern two distinct distributions.
-Perfect privacy uses a uniform group element with a uniform Boolean secret
-and a fixed dealt representative. Word-shuffle mixing compares the
-generator-word distribution with that uniform group distribution. The formalization transports the resulting
-distributional proximity through the protocol interpreter. Approximate
-coalition-view and executed-trace privacy hold under the word distribution with
-error at most $2^{-39}$. The protocol is dealer-based and has no
-private inputs. Adversaries are passive. The verifier receives all endpoints
-and learns the secret. Active deviations, post-reveal security, and
-composition across executions remain outside the model.
-
-Section~\ref{sec:model} fixes the two distributions and the security scope.
-Section~\ref{sec:framework} presents the framework components used by the
-proofs. Sections~\ref{sec:pgl} and~\ref{sec:exact} give the $\PG$
-construction and its uniform-shuffle results. Section~\ref{sec:mixing} proves the
-word-shuffle bound. Section~\ref{sec:instances} compares the sibling instances.
-Section~\ref{sec:related} places the results among related work.
-Section~\ref{sec:conclusion} states the remaining extensions and other
-future directions.
+Section~\ref{sec:model} fixes the protocol flow, the two distributions, and
+the security scope. Section~\ref{sec:framework} presents the framework
+components used by the proofs. Sections~\ref{sec:pgl} and~\ref{sec:exact}
+give the $\PG$ construction and its uniform-shuffle results, ending in
+Theorem A. Section~\ref{sec:mixing} proves the word-shuffle results, ending
+in Theorem B. Section~\ref{sec:instances} compares the sibling instances and
+states the trust base. Section~\ref{sec:related} places the results among
+related work. Section~\ref{sec:conclusion} states the remaining extensions
+and other future directions.
 
 \section{Protocol and Security Model}\label{sec:model}
+
+A run of the protocol handles one secret bit and eight face-down cards. A
+dealer encodes the secret as a valid arrangement of the eight cards. The
+dealer then samples a shuffle from a finite group and rearranges the deck by
+its permutation action. Each of eight players receives the card at one
+position. The players reveal their cards to a verifier, and the verifier
+decodes the secret from the revealed arrangement. Figure~\ref{fig:run}
+shows this flow.
+
+\begin{figure}[H]
+  \centering
+  \resizebox{.92\linewidth}{!}{%
+  \begin{tikzpicture}[
+     actor/.style={draw,rounded corners,fill=blue!12,minimum width=16mm,
+       minimum height=7mm,font=\small\bfseries},
+     life/.style={dashed,gray!70},
+     msg/.style={-{Latex},thick},
+     act/.style={draw,rounded corners,fill=orange!14,inner sep=3pt,
+       align=center,font=\footnotesize},
+     lbl/.style={midway,above,font=\footnotesize}]
+    \node[actor] (D)  at (0,0)    {Dealer};
+    \node[actor] (P)  at (5.5,0)  {Players};
+    \node[actor] (V)  at (10.8,0) {Verifier};
+    \draw[decorate,decoration={brace,amplitude=5pt,raise=2pt}]
+      (4.2,0.45) -- (6.8,0.45)
+      node[midway,above=5pt,font=\footnotesize]{eight players, one card each};
+    \draw[life] (0,-0.4)    -- (0,-4.6);
+    \draw[life] (5.5,-0.4)  -- (5.5,-4.6);
+    \draw[life] (10.8,-0.4) -- (10.8,-4.6);
+    \node[act,anchor=west] at (0.15,-0.85)
+      {encode secret $s$\\ as the deck $D_s$};
+    \node[act,anchor=west] at (0.15,-1.95)
+      {sample a shuffle $g$,\\ rearrange to $\rho(g)D_s$};
+    \draw[msg] (0,-2.75) -- (5.5,-2.75) node[lbl]{deal one card per position};
+    \draw[msg] (5.5,-3.45) -- (10.8,-3.45) node[lbl]{reveal all cards};
+    \node[act,anchor=east] at (10.65,-4.15)
+      {decode the class of the\\ heart positions $\to s$};
+  \end{tikzpicture}}
+  \caption{One protocol run. The shuffle $g$ is drawn from the uniform
+  distribution $U_G$ in the uniform-shuffle model and from the word
+  distribution $\worddist$ in the word-shuffle model.}
+  \label{fig:run}
+\end{figure}
+
+Security rests on the shuffle alone. A player sees one card, and a
+coalition sees the cards at its positions. The shuffle spreads every small
+coalition view over many arrangements, and the privacy theorems make this
+spreading exact. The rest of this section states the same flow as
+probability distributions.
 
 The framework describes a protocol by the data
 \begin{equation}
@@ -146,17 +225,12 @@ executed trace $T_i$, and $T_C=(T_i)_{i\in C}$ is the coalition trace. The
 verifier receives all endpoints and applies the decoder. It therefore learns
 $S$ by design.
 
-The primary uniform-shuffle distribution samples a uniform Boolean secret and uses one fixed
-representative $D_s$ for each secret $s$. It then samples an independent
-element $g\leftarrow U_G$. For the $\PG$ instance, this is the formal distribution
-used by the main uniform-shuffle execution. The representative is the formal orbit
-encoder.
-\footnote{The uniform-shuffle source objects are \coqin{pgl27P} and
-\coqin{orbit\_encode}.}
-The all-decks distribution instead samples a uniform valid arrangement in the selected
-secret class before it samples $g\leftarrow U_G$.
-\footnote{The all-decks distribution is \coqin{pgl27P\_alldecks}.}
-Both uniform-shuffle execution distributions use a uniform Boolean prior.
+The primary execution distribution samples a uniform Boolean secret and
+deals one fixed representative arrangement $D_s$ for each secret $s$. It
+then applies an independent uniform shuffle. This fixed-representative
+dealer is the dealer of the headline theorems. An all-decks dealer instead
+samples a uniform valid arrangement in the selected secret class before the
+shuffle. Both execution distributions use a uniform Boolean prior.
 
 The security theorems concern passive, honest-but-curious adversaries. A
 corrupted player follows the protocol and retains its view and executed
@@ -166,11 +240,16 @@ Perfect trace privacy states
   H(S\mid T_C)=H(S).
   \label{eq:trace-privacy}
 \end{equation}
-The PGL protocol has no private player inputs. Active deviation, security
-after the verifier's reveal, and composition across executions are outside
-the model.
 
-The word-shuffle model replaces $U_G$ by $\mu^{*L}$. I measure two distributions $P$
+The protected object is a dealt secret, as in a secret-sharing
+scheme~\cite{Shamir1979}. The dealer holds the secret, the players hold
+card observations in place of shares, and privacy bounds what coalitions of
+curious players learn. The protocol has no private player inputs. Active
+deviation, security after the verifier's reveal, and composition across
+executions are outside the model.
+
+The word-shuffle model describes the dealer of Figure~\ref{fig:run}
+performing the shuffle as a sequence of physical cuts. It replaces $U_G$ by $\mu^{*L}$. I measure two distributions $P$
 and $Q$ by the unhalved $L_1$ distance
 \begin{equation}
   \lVert P-Q\rVert_1=\sum_x\lvert P(x)-Q(x)\rvert.
@@ -183,16 +262,16 @@ The common halved total variation distance is
   \label{eq:tv-definition}
 \end{equation}
 Thus an $L_1$ bound of $2^{-40}$ gives a halved total variation bound of
-$2^{-41}$.
+$2^{-41}$. In operational terms, a total variation bound of $2^{-41}$ means
+that no observer, whatever test they apply, distinguishes the word shuffle
+from the uniform shuffle with advantage above $2^{-41}$.
 
 The model observes the word shuffle only through its product. The dealer
 performs the 200 physical moves and no party records an intermediate
 arrangement. This assumption is structural in the formalization. The dealer
 process takes a list of alternative cuts and deals one hand per cut, so a
 word enters the execution only through its evaluated group
-element.\footnote{The dealer program is \coqin{exchange\_dealer} and the
-$\PG$ witness is the singleton cut list in \coqin{pgl27\_dealer\_run}.}
-The uniform-shuffle model makes the same assumption, since its single
+element. The uniform-shuffle model makes the same assumption, since its single
 uniform shuffle is likewise unobserved.
 
 Figure~\ref{fig:models} separates the proved paths for the two distributions. The
@@ -207,20 +286,21 @@ $2^{-39}$.
                   font=\small},
       arr/.style={-{Latex[length=2mm]},thick}]
     \node[box] (uniform) {uniform group\\distribution $U_G$};
-    \node[box,right=of uniform] (exact) {perfect coalition view\\and trace theorems};
+    \node[box,right=of uniform] (exact) {Theorem A: perfect view\\and trace privacy};
     \draw[arr] (uniform) -- (exact);
 
     \node[box,below=of uniform] (word) {five-letter word\\distribution $\mu^{*200}$};
     \node[box,right=of word] (lone) {$L_1$ mixing\\certificate};
     \node[box,right=of lone] (transfer) {endpoint and\\product-distribution transfers};
     \node[box,right=of transfer] (privacy)
-      {coalition view and\\trace privacy at $2^{-39}$};
+      {Theorem B: view and\\trace bounds at $2^{-39}$};
     \draw[arr] (word) -- (lone);
     \draw[arr] (lone) -- (transfer);
     \draw[arr] (transfer) -- (privacy);
   \end{tikzpicture}}
-  \caption{The uniform-shuffle and word-shuffle proof paths. The lower path transports
-  the mixing certificate to coalition-view and trace privacy.}
+  \caption{The two proof paths and the two headline theorems. The upper
+  path ends in Theorem A. The lower path transports the mixing certificate
+  to Theorem B.}
   \label{fig:models}
 \end{figure}
 
