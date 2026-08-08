@@ -311,7 +311,38 @@ $2^{-39}$.
 A protocol instance supplies an action, a shuffle-security bound, and a
 decoder. The framework packages these components and uses them in one
 executable protocol. Its finite algebraic structures use Mathematical
-Components~\cite{MathComp}.
+Components~\cite{MathComp}. The framework records carry the data of
+Equation~\ref{eq:model-data} into that executable protocol, and
+Table~\ref{tab:bridge} maps each datum to its record role and to the values
+the $\PG$ instance supplies.
+
+\begin{table}[t]
+  \centering
+  \small
+  \begin{tabular}{@{}L{.26\linewidth}L{.36\linewidth}L{.30\linewidth}@{}}
+    \toprule
+    Model datum & Record role & $\PG$ instance supplies \\
+    \midrule
+    layout of a run & dealer, player, and verifier processes & eight
+      players, one card each \\
+    $(G,\rho)$ with $\mu$ or $U_G$ & endpoint bound for the shuffle
+      distribution & three-transitive action, word bound \\
+    decoder & reconstruction against the action & orbit-class decoder \\
+    all of the above & one packaged protocol instance & the $\PG$ profile \\
+    \bottomrule
+  \end{tabular}
+  \caption{From model data to framework records. In the sources the four
+  roles are \coqin{PGGInterface}, \coqin{SecurityWitness},
+  \coqin{ReconPlug}, and \coqin{MonodromyProfile}.}
+  \label{tab:bridge}
+\end{table}
+
+A small process interpreter executes the layout record. It originates in
+the earlier FORTE development~\cite{WengEtAl2025} and produces the executed
+traces of Section~\ref{sec:model}. An instance supplies the third column of
+Table~\ref{tab:bridge} and receives the executable protocol together with
+the generic theorems below. Section~\ref{sec:pgl} is the worked
+instantiation.
 
 \begin{figure}[H]
   \centering
@@ -322,14 +353,14 @@ Components~\cite{MathComp}.
       sub/.style={draw,rounded corners,fill=green!8,align=center,inner sep=4pt,
                  font=\footnotesize},
       arr/.style={-{Latex[length=2mm]},thick}]
-    \node[rec] (mp) at (0,1.5) {\textbf{MonodromyProfile}};
-    \node[rec] (pi) at (-3.7,0) {\textbf{PGGInterface}\\protocol layout};
-    \node[rec] (sw) at (0,0) {\textbf{SecurityWitness}\\endpoint bound};
-    \node[rec] (rp) at (3.7,0) {\textbf{ReconPlug}\\reconstruction};
+    \node[rec] (mp) at (0,1.5) {\textbf{profile bundle}};
+    \node[rec] (pi) at (-3.7,0) {\textbf{protocol layout}\\dealer, players, verifier};
+    \node[rec] (sw) at (0,0) {\textbf{shuffle-security bound}\\endpoint bound};
+    \node[rec] (rp) at (3.7,0) {\textbf{reconstruction}\\group action to decoder};
     \node[sub] (se) at (0,-1.2)
-      {\textbf{SecurityExact}\\\textbf{SecurityAsymptotic}};
-    \node[sub] (ts) at (3.7,-1.05) {\textbf{ThresholdScheme}};
-    \node[sub] (ie) at (3.7,-1.8) {\textbf{InputEncoding}};
+      {exact and asymptotic\\security evidence};
+    \node[sub] (ts) at (3.7,-1.05) {threshold sharing};
+    \node[sub] (ie) at (3.7,-1.8) {input encoding};
     \draw[arr] (pi) -- (mp);
     \draw[arr] (sw) -- (mp);
     \draw[arr] (rp) -- (mp);
@@ -338,27 +369,28 @@ Components~\cite{MathComp}.
     \draw[arr] (ts) -- (rp);
   \end{tikzpicture}}
   \caption{Architecture of the group-parametric card-protocol framework.
-  Blue boxes denote the profile and its three component records. Green boxes
-  denote supporting records. Arrows denote dependencies.}
+  Blue boxes denote the profile bundle and its three component records
+  (\coqin{MonodromyProfile}, \coqin{PGGInterface}, \coqin{SecurityWitness},
+  \coqin{ReconPlug}). Green boxes denote supporting records
+  (\coqin{SecurityExact}, \coqin{SecurityAsymptotic},
+  \coqin{ThresholdScheme}, \coqin{InputEncoding}). Arrows denote
+  dependencies.}
   \label{fig:framework-architecture}
 \end{figure}
 
-\coqin{PGGInterface} gives the dealer, player, and verifier layout.
-\coqin{SecurityWitness} gives an endpoint bound for a shuffle distribution.
-\coqin{ReconPlug} connects the group action to a decoder.
-\coqin{MonodromyProfile} packages these three components.
-
 The supporting records refine individual components. Exact and asymptotic
-security records justify endpoint bounds. A threshold scheme supplies sharing
-and reconstruction data. An input encoding adds committed inputs when a
-protocol needs them.
-
-The records above specify one protocol instance. The next subsection turns
-from the architecture to the generic theorems derived from these records.
+security records justify endpoint bounds, a threshold scheme supplies
+sharing and reconstruction data, and an input encoding adds committed
+inputs when a protocol needs them. The next subsection states the generic
+theorems derived from these records.
 
 \subsection{Generic Theorems}
 
-\begin{theorem}[Generic coalition privacy\footnotemark]
+The first generic theorem yields coalition privacy from transitivity. An
+instance discharges its hypothesis by exhibiting a $t$-transitive action on
+decks of distinct cards, as Section~\ref{sec:pgl} does for $t=3$.
+
+\begin{theorem}[Generic coalition privacy\footnotemark]\label{thm:generic-privacy}
 \footnotetext{Formalized in \path{pgg-smc/reconstruct/transitivity_privacy.v} as
 \coqin{ttrans\_view\_indep\_gen}.}
 Let $G$ act $t$-transitively on the card positions. Let $S$ be a Boolean
@@ -369,6 +401,8 @@ cards. If $g$ is uniform on $G$, then
 \]
 for every coalition $C$ with $|C|\leq t$.
 \end{theorem}
+
+The second theorem moves view independence to executed traces.
 
 \begin{theorem}[Generic trace lifting\footnotemark]
 \footnotetext{Formalized in \path{pgg-smc/security/pgg_trace_secrecy.v} as
@@ -382,6 +416,9 @@ If $V$ is independent of $S$, then
 \end{equation}
 \end{theorem}
 
+The third theorem transfers a bound between shuffle distributions to any
+observable computed from them.
+
 \begin{theorem}[Data processing for finite distributions\footnotemark]
 \footnotetext{Formalized in \path{pgg-smc/security/pgg_collusion_bound.v} as
 \coqin{var\_dist\_fdistmap}.}
@@ -390,11 +427,6 @@ For finite distributions $P$ and $Q$ on $A$ and a map $f:A\to B$,
   \lVert f_*P-f_*Q\rVert_1\leq\lVert P-Q\rVert_1.
 \]
 \end{theorem}
-
-The first theorem supplies the perfect-privacy view argument used by the
-PGL instance.
-The second moves that result to an executed trace. The third transfers a
-group-level mixing bound to card endpoints.
 
 \section{The \texorpdfstring{$\PG$}{PGL(2,7)} Construction}\label{sec:pgl}
 
