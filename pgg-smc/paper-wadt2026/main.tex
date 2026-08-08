@@ -183,6 +183,16 @@ The common halved total variation distance is
 Thus an $L_1$ bound of $2^{-40}$ gives a halved total variation bound of
 $2^{-41}$.
 
+The model observes the word shuffle only through its product. The dealer
+performs the 200 physical moves and no party records an intermediate
+arrangement. This assumption is structural in the formalization. The dealer
+process takes a list of alternative cuts and deals one hand per cut, so a
+word enters the execution only through its evaluated group
+element.\footnote{The dealer program is \coqin{exchange\_dealer} and the
+$\PG$ witness is the singleton cut list in \coqin{pgl27\_dealer\_run}.}
+The exact model makes the same assumption, since its single uniform shuffle
+is likewise unobserved.
+
 Figure~\ref{fig:models} separates the proved paths for the two laws. The
 lower path reaches endpoint and product-law proximity. It does not reach an
 approximate security statement.
