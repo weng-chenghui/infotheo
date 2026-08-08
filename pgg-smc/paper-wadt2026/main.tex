@@ -699,6 +699,11 @@ formal sources.
 
 \section{Word-Shuffle Approximation of the Uniform-Shuffle Model}\label{sec:mixing}
 
+The word-shuffle model of Section~\ref{sec:model} replaces the uniform
+shuffle by the evaluated word of physical cuts. This section certifies that
+the two shuffle distributions are close and transports the certificate to
+the security observables, ending in Theorem B.
+
 The executable shuffle samples a word over five letters. Three letters are
 the projective translation, scaling, and inversion generators. The alphabet
 also contains the inverses of translation and scaling. Inversion is already
@@ -712,7 +717,7 @@ element. A computation over binary naturals records the size of every
 fiber. The final arithmetic check sums the deviations of these fiber counts
 from $5^{200}/336$.
 
-\begin{theorem}[Word-shuffle mixing bound\footnotemark]\label{thm:pgl-mixing}
+\begin{lemma}[Word-shuffle mixing bound\footnotemark]\label{thm:pgl-mixing}
 \footnotetext{Formalized in \path{pgg-smc/instances/pgl27/pgl27_mixing.v} as
 \coqin{pgl27\_word\_mixing}.}
 Let $\mu$ be uniform on the five-letter symmetric generator tuple. Then
@@ -720,7 +725,7 @@ Let $\mu$ be uniform on the five-letter symmetric generator tuple. Then
   \left\lVert \mu^{*200}-U_G\right\rVert_1 \leq 2^{-40}.
   \label{eq:pgl-mixing}
 \end{equation}
-\end{theorem}
+\end{lemma}
 
 Equation~\ref{eq:pgl-mixing} is one checked certificate. Its inputs are the
 five-letter generation theorem, the group order in
@@ -729,7 +734,11 @@ inequality. The certificate concerns the distribution of shuffle group
 elements.
 
 The first transfer maps each permutation to the endpoint of one fixed card.
-The $L_1$ data-processing inequality gives, for every card $i$,
+
+\begin{lemma}[Endpoint transfer\footnotemark]\label{lem:endpoint-transfer}
+\footnotetext{Formalized in \path{pgg-smc/instances/pgl27/pgl27_mixing.v}
+as \coqin{pgl27\_endpoint\_mixing}.}
+By the $L_1$ data-processing inequality, for every card position $i$,
 \begin{equation}
   \left\lVert
     (g\mapsto \rho(g)i)_\#\mu^{*200}
@@ -738,12 +747,17 @@ The $L_1$ data-processing inequality gives, for every card $i$,
   \leq 2^{-40}.
   \label{eq:endpoint-transfer}
 \end{equation}
-The uniform group action makes the second endpoint distribution uniform on the eight
-positions.
+\end{lemma}
 
-The second transfer adds a secret prior without changing the distance. Let
-$\pi$ be any distribution on Boolean secrets. Independence is built into the
-product distributions, and
+The uniform group action makes the second endpoint distribution uniform on the eight
+positions. The second transfer adds a secret prior without changing the
+distance.
+
+\begin{lemma}[Secret-prior product transfer\footnotemark]\label{lem:product-transfer}
+\footnotetext{Formalized in \path{pgg-smc/instances/pgl27/pgl27_mixing.v}
+as \coqin{pgl27\_joint\_mixing}.}
+Let $\pi$ be any distribution on Boolean secrets. Independence is built
+into the product distributions, and
 \begin{equation}
   \left\lVert
     \pi\mathbin{\times}\mu^{*200}
@@ -752,6 +766,8 @@ product distributions, and
   \leq 2^{-40}.
   \label{eq:product-transfer}
 \end{equation}
+\end{lemma}
+
 Equation~\ref{eq:product-transfer} compares two distributions on a secret
 and a shuffle. It is not an execution distribution. Equations~\ref{eq:endpoint-transfer}
 and~\ref{eq:product-transfer} transfer the one certificate in
@@ -759,21 +775,21 @@ Equation~\ref{eq:pgl-mixing}. They are not separate mixing certificates.
 
 Under the halved convention in Equation~\ref{eq:tv-definition}, each of
 these bounds is at most $2^{-41}$ in total variation.
-\footnote{The source results are \coqin{pgl27\_word\_mixing},
-\coqin{pgl27\_endpoint\_mixing}, and \coqin{pgl27\_joint\_mixing}. The last
-result is the secret-prior product distribution in Equation~\ref{eq:product-transfer}.}
 
-The proved chain reaches group-distribution proximity, every single-card marginal,
-and the product with any secret prior. Two transport theorems carry the
-certificate to the security observables.
+The proved chain reaches group-distribution proximity, every single-card
+marginal, and the product with any secret prior. Transport through the
+protocol interpreter turns the certificate into the second headline
+theorem.
 
-\begin{theorem}[Word-shuffle coalition privacy\footnotemark]\label{thm:word-privacy}
-\footnotetext{Formalized in
-\path{pgg-smc/instances/pgl27/pgl27_word_privacy.v} as
-\coqin{pgl27\_word\_view\_indist} and \coqin{pgl27\_word\_trace\_indist}.}
-For every coalition $C$ with $\lvert C\rvert\leq3$ and all secrets
-$s,s'\in\{0,1\}$, writing $V_C(s,g)$ for the coalition view at dealt secret
-$s$ and shuffle $g$,
+\begin{thmB}
+Let $\mu$ be uniform on the five-letter symmetric generator
+tuple.\footnotemark{} Then
+\[
+  \left\lVert \mu^{*200}-U_G\right\rVert_1 \leq 2^{-40}.
+\]
+For the fixed representative dealer, every passive coalition $C$ with
+$\lvert C\rvert\leq3$, and all secrets $s,s'\in\{0,1\}$, writing $V_C(s,g)$
+for the coalition view at dealt secret $s$ and shuffle $g$,
 \begin{equation}
   \left\lVert
     (g\mapsto V_C(s,g))_\#\mu^{*200}
@@ -782,8 +798,15 @@ $s$ and shuffle $g$,
   \leq 2^{-39},
   \label{eq:word-view-privacy}
 \end{equation}
-and the executed coalition trace satisfies the same bound.
-\end{theorem}
+and the executed coalition trace satisfies the same bound. Decoding all
+eight endpoints returns the dealt secret for every word.
+\end{thmB}
+\footnotetext{This statement is the conjunction of the following formalized
+results: \coqin{pgl27\_word\_mixing} in
+\path{pgg-smc/instances/pgl27/pgl27_mixing.v}, and
+\coqin{pgl27\_word\_view\_indist}, \coqin{pgl27\_word\_trace\_indist}, and
+\coqin{pgl27\_word\_run\_recovers} in
+\path{pgg-smc/instances/pgl27/pgl27_word_privacy.v}.}
 
 The proof is a triangle inequality through the uniform group distribution. The
 coalition-view distribution under the uniform shuffle does not depend on the secret,
@@ -797,7 +820,10 @@ privacy definition.}
 
 The word-shuffle privacy results cover the fixed representative dealer only,
 since the all-decks and shuffle-free dealers use different sample spaces
-that the product-distribution transfer does not reach.
+that the product-distribution transfer does not reach. The trust base for
+these results is stated in Section~\ref{sec:instances}, and the
+mixing-transfers group of Table~\ref{tab:source-index} indexes the formal
+sources.
 
 \section{Other Instances}\label{sec:instances}
 
