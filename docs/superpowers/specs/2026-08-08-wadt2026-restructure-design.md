@@ -27,7 +27,11 @@ preserved exactly; only structure, prose, and result levels change.
 | D7 | Abstract | One word-level edit only: "These privacy theorems" (line 49) becomes "These privacy results", since the referents become Propositions. Otherwise unchanged. |
 | D8 | New citation | Add Shamir, "How to share a secret", CACM 1979 to `references.bib` (currently absent). Verify via research-kb before citing. |
 | D9 | Sequence diagram | Adapt the Dealer/Players/Verifier lifeline TikZ diagram from `~/Projects/aplas2024-poster/wadtSep17/slides.tex` (the S5xS5 variant near line 398, the closest structural match: dealt secret, no player inputs) to PGL. Labels use reader-meaning vocabulary, never Rocq identifiers. Placed with `\begin{figure}[H]` (the `float` package is already loaded, main.tex line 7) so it renders before the formal data, which is the entire point of greg 132. Note the float-pressure interaction with the architecture figure's existing `[H]` at line 250. |
-| D10 | Architecture figure (`fig:framework-architecture`) relabeling | Boxes relabeled by role (protocol layout; shuffle-security bound; reconstruction; profile bundle; supporting records). Rocq record names move to the caption. Figure numbering after the insertion: sequence diagram = Fig. 1, `fig:models` = Fig. 2, `fig:framework-architecture` = Fig. 3. All in-text uses are `\ref`s, so renumbering is automatic. |
+| D10 | Architecture figure (`fig:framework-architecture`) relabeling | Boxes relabeled by role (protocol layout; shuffle-security bound; reconstruction; profile bundle; supporting records). Rocq record names move to the caption. Figure numbering after the insertions: sequence diagram = Fig. 1, `fig:models` = Fig. 2, `fig:framework-architecture` = Fig. 3, encoding example (D12) = Fig. 4, recovery ramp (D13) = Fig. 5. All in-text uses are `\ref`s, so renumbering is automatic. |
+| D11 | §3 bridge is a table, not a paragraph | The model-to-framework bridge is one lead sentence plus a table with columns: model datum from Eq. `eq:model-data` / record role / what the PGL instance supplies. The third column also does the work of §4's instantiation-mapping paragraph, which shrinks to one sentence pointing back at the table. |
+| D12 | Encoding example figure (§4) | New TikZ figure: the two encoded representatives D_0 and D_1 as eight card slots labeled by projective points, hearts marked on the four-subset, caption stating that the secret is the orbit class of the heart positions (equianharmonic versus harmonic). Fidelity requirement: the depicted decks must match the actual `orbit_encode` output in `pgl27_orbit.v`, checked at implementation. |
+| D13 | Recovery-ramp figure (§5) | New TikZ figure: a two-track number line over sizes 0..8. View track: perfect privacy for coalitions up to 3, the leaking fixed 4-coalition witness marked at 4. Reveal track: ambiguity through 6, class determination at 7, decoder reads 8. Makes (t,r,n)=(3,7,8) visible and makes the coalition-view versus reveal-set distinction explicit. |
+| D14 | Prose-run cap | No section may run more than three consecutive paragraphs without a displayed equation, figure, table, itemize, or theorem-family environment. §1 is allowed four before the informal A/B displays. Enforced as verification item 9. |
 
 ## 3. Theorem re-leveling table
 
@@ -119,9 +123,9 @@ claim with informal A and B, contributions, roadmap.
 
 | Change | Detail |
 |---|---|
-| New bridge paragraph | Maps Eq. model-data onto the records: the layout record carries the dealer, player, and verifier processes; the security-witness record carries the endpoint bound for the shuffle distribution; the reconstruction record carries the decoder against the action; the profile bundles the three. |
-| New interpreter paragraph | Two sentences: where the interpreter lives in the framework and its FORTE ancestry (cite WengEtAl2025 here, not only in related work). |
-| New instantiation-cost paragraph | What an instance must supply and what it gets back, forward-pointing to §4 as the worked instantiation. |
+| New bridge table (D11) | One lead sentence, then the table mapping each datum of Eq. `eq:model-data` to its record role and to what the PGL instance supplies: the layout record carries the dealer, player, and verifier processes, the security-witness record carries the endpoint bound for the shuffle distribution, the reconstruction record carries the decoder against the action, the profile bundles the three. Anchor: the table itself, followed directly by the architecture figure. |
+| New interpreter paragraph | Two sentences: where the interpreter lives in the framework and its FORTE ancestry (cite WengEtAl2025 here, not only in related work). Anchor: sits between the bridge table and the architecture figure. |
+| New instantiation-cost paragraph | What an instance must supply and what it gets back, forward-pointing to §4 as the worked instantiation and to the bridge table's third column. Anchor: the bridge table. |
 | Architecture figure relabeling (250–278) | Per D10. Boxes by role, Rocq names to caption. |
 | Generic theorems (295–331) | Distribute the post-hoc paragraph (328–331) into per-theorem lead-ins: before generic coalition privacy, one sentence on what the instance must discharge (t-transitivity, distinct cards) with a forward pointer to §4; before trace lifting, one sentence (moves view independence to executed traces); before data processing, one sentence (transfers a group-distribution bound to any observable). |
 
@@ -129,7 +133,8 @@ claim with informal A and B, contributions, roadmap.
 
 | Change | Detail |
 |---|---|
-| New opening paragraph | The instantiation mapping: G = PGL(2,7), rho = the action on the eight projective points, mu = uniform on the five-letter symmetric generator tuple, decoder = orbit-class decoder. One sentence linking back to the instantiation-cost paragraph of §3. |
+| New opening sentence | One sentence stating that this section supplies the third column of the §3 bridge table: G = PGL(2,7), rho = the action on the eight projective points, mu = uniform on the five-letter symmetric generator tuple, decoder = orbit-class decoder. Shrunk from a paragraph per D11. |
+| New encoding example figure (D12) | Placed after the encoder prose (344–348), before or after the orbit-encoder Lemma: D_0 and D_1 as card rows, hearts on the four-subset, caption gives secret = orbit class. Anchors the encoder Lemma and the orbit-split Lemma. |
 | Demotions | Orbit encoder, orbit split, three-transitivity become Lemmas with one-sentence lead-ins (existing bridges 357–359, 370–371 kept). |
 | Explicit discharge sentence | After the three-transitivity lemma: it discharges the hypothesis of the generic coalition-privacy theorem with t = 3 (strengthens 383–387). |
 | Table 389–405 | Removed here; content goes to the consolidated table (D2). One sentence referencing the merged table added. |
@@ -141,6 +146,7 @@ claim with informal A and B, contributions, roadmap.
 | New opening sentence | Ties to the upper path of the Fig. 2 map and announces Theorem A as the destination. |
 | Correctness (416–425), distribution-free remark (427–432) | Kept; correctness becomes a Proposition; `\Needspace` at 416 deleted or resized. |
 | Ramp (434–466) | Proposition restricted and retitled per D4, with the k=4 witness as a statement clause and an explicit definition of t, r, n; sharpness-witness prose (458–466) kept where not absorbed into the statement. |
+| New recovery-ramp figure (D13) | Placed next to the ramp Proposition. Compensates for the two tables this section loses to D2, so §5 does not become the only anchor-free section. |
 | Privacy propositions (488–546) | Existing lead-ins kept; three theorems become Propositions; robustness framing for all-decks and shuffle-free. |
 | Trust base (548–553) | Moved to §7 (D6); one-sentence pointer stays at section end. |
 | NEW Theorem A | Formal capstone at section end, per the re-leveling table, with one assembling sentence before it. |
@@ -173,6 +179,26 @@ Related work: unchanged. Conclusion: references to results renamed to
 Theorems A and B (literal text, per D1); content otherwise unchanged. The
 open-problem sentence at 814–816 (entropy form of approximate privacy) is
 kept and is consistent with B's distributional phrasing.
+
+## 5b. Non-prose anchor inventory
+
+Guarantee against prose-after-prose: every section's anchors after the
+restructure, with the gap each new element closes. New elements marked NEW.
+
+| Section | Anchors after restructure | Longest prose run | Notes |
+|---|---|---|---|
+| §1 | contributions itemize, informal A and B displays | 3 paragraphs (context, gap, why-two) before the displays | Within the D14 allowance of four. |
+| §2 | NEW sequence diagram (Fig. 1), Eq. model-data, Eq. coalition-view, Eq. trace-privacy, Eq. l1, Eq. tv, Fig. 2 map | 2–3 narrative paragraphs anchored by Fig. 1 | Already equation-rich. |
+| §3 | NEW bridge table (D11), Fig. 3 architecture, three Theorem environments | interpreter + instantiation-cost paragraphs between table and figure | Was the worst risk: three abstract prose paragraphs; the table absorbs one and anchors the other two. |
+| §4 | Eq. pgl-order, NEW encoding example figure (D12), three Lemma environments | 2 paragraphs | Example grounds the encoder and orbit-split Lemmas. |
+| §5 | two Proposition environments + NEW ramp figure (D13) in 5.1; three Propositions + Theorem A in 5.2 | sharpness prose (458–466) | Was made anchor-free by D2's table removal; D13 compensates. |
+| §6 | Eq. pgl-mixing, Eq. endpoint-transfer, Eq. product-transfer, three Lemmas, Theorem B | certificate-inputs + TV + chain paragraphs, each adjacent to a display | No new element needed. |
+| §7 | coverage table (two parts), NEW merged source table | per-instance paragraphs between tables | No new element needed. |
+| §8–9 | none (citation prose, conclusion) | full section | Conventional for related work and conclusion; exempt from D14. |
+
+Every new prose paragraph in the per-section tables above carries an
+"Anchor:" annotation naming the display, figure, or table it serves; a new
+paragraph with no nameable anchor is a spec violation, not a style choice.
 
 ## 6. Greg-note resolution map
 
@@ -230,3 +256,10 @@ All `\greg{}` commands are deleted once their items are implemented. The
 7. Greg-note sweep: `grep -c 'greg' main.tex` returns zero at the end.
 8. Prose-rule sweep over the diff: no em-dash, no semicolon, no parenthetical
    aside, no "law", in new or edited sentences.
+9. Prose-run sweep (D14): in the compiled PDF, no section of §§2–7 runs more
+   than three consecutive paragraphs without a displayed equation, figure,
+   table, itemize, or theorem-family environment; §1 is allowed four before
+   the informal displays; §§8–9 exempt.
+10. Example fidelity: the D12 card rows match the actual `orbit_encode`
+    output in `pgl27_orbit.v`, and the D13 ramp marks match the ramp
+    Proposition's clauses exactly (3, 4, 6, 7, 8).
