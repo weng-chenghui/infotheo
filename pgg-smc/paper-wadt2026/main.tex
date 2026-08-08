@@ -101,9 +101,10 @@ I make three technical contributions.
 The exact and finite-step results concern two distinct laws. Exact privacy
 uses a uniform group element with a uniform Boolean secret and a fixed dealt
 representative. Finite-step mixing compares the generator-word law with that
-uniform group law. The current formalization stops at distributional
-proximity. It does not transport the bound through the protocol interpreter
-to approximate view or trace privacy. The protocol is dealer-based and has no
+uniform group law. The formalization transports the resulting
+distributional proximity through the protocol interpreter. Approximate
+coalition-view and executed-trace privacy hold under the word law with
+error at most $2^{-39}$. The protocol is dealer-based and has no
 private inputs. Adversaries are passive. The verifier receives all endpoints
 and learns the secret. Active deviations, post-reveal security, and
 composition across executions remain outside the model.
@@ -114,8 +115,8 @@ proofs. Sections~\ref{sec:pgl} and~\ref{sec:exact} give the $\PG$
 construction and its exact results. Section~\ref{sec:mixing} proves the
 finite-step bound. Section~\ref{sec:instances} compares the sibling instances.
 Section~\ref{sec:related} places the results among related work.
-Section~\ref{sec:conclusion} states the remaining bridge and other future
-directions.
+Section~\ref{sec:conclusion} states the remaining extensions and other
+future directions.
 
 \section{Protocol and Security Model}\label{sec:model}
 
@@ -624,11 +625,36 @@ these bounds is at most $2^{-41}$ in total variation.
 result is the secret-prior product law in Equation~\ref{eq:product-transfer}.}
 
 The proved chain reaches group-law proximity, every single-card marginal,
-and the product with any secret prior. The development stops before a theorem
-about approximate coalition-view privacy. It also stops before a theorem
-about approximate executed-trace secrecy. Such results require a separate
-argument that transports distributional proximity through the coalition view
-and the interpreter.
+and the product with any secret prior. Two transport theorems carry the
+certificate to the security observables.
+
+\begin{theorem}[Word-shuffle coalition privacy\footnotemark]\label{thm:word-privacy}
+\footnotetext{Formalized in
+\path{pgg-smc/instances/pgl27/pgl27_word_privacy.v} as
+\coqin{pgl27\_word\_view\_indist} and \coqin{pgl27\_word\_trace\_indist}.}
+For every coalition $C$ with $\lvert C\rvert\leq3$ and all secrets
+$s,s'\in\{0,1\}$, writing $V_C(s,g)$ for the coalition view at dealt secret
+$s$ and shuffle $g$,
+\begin{equation}
+  \left\lVert
+    (g\mapsto V_C(s,g))_\#\mu^{*200}
+    -(g\mapsto V_C(s',g))_\#\mu^{*200}
+  \right\rVert_1
+  \leq 2^{-39},
+  \label{eq:word-view-privacy}
+\end{equation}
+and the executed coalition trace satisfies the same bound.
+\end{theorem}
+
+The proof is a triangle inequality through the uniform group law. The
+coalition-view law under the uniform shuffle does not depend on the secret,
+by three-transitivity. The data-processing inequality applies the
+certificate in Equation~\ref{eq:pgl-mixing} on each side of the triangle. A
+companion theorem bounds the joint view-and-secret law under the word
+shuffle against the product of its uniform-shuffle marginals by $2^{-40}$ at
+any Boolean prior.\footnote{The companion result is
+\coqin{pgl27\_view\_mixing}. It is an ideal-proximity statement, not the
+privacy definition.}
 
 \section{Other Instances}\label{sec:instances}
 
@@ -757,12 +783,15 @@ The verifier learns the secret.
 For a finite shuffle implementation, a checked fiber certificate gives an
 unhalved $L_1$ distance of at most $2^{-40}$ after 200 generator letters.
 The same bound holds for every single-card endpoint and for a product with
-any Boolean secret prior. The formalization does not yet turn these
-distributional bounds into approximate coalition-view or trace privacy.
+any Boolean secret prior. Transport theorems turn these distributional
+bounds into approximate coalition-view and executed-trace privacy at
+$2^{-39}$.
 
-The missing transport theorem should be developed as a separate two-model
-security result. It must relate the exact execution law and the finite-step
-execution law through the interpreter. Another direction is to connect
+Two extensions of the word-law security results remain open. The entropy
+form of approximate privacy needs a quantitative continuity modulus for the
+binary entropy function near one half. The all-decks and shuffle-free
+dealers need a word-law mixing statement on their own sample spaces. Another
+direction is to connect
 bounded-width branching programs to group-based card protocols through
 Barrington's theorem~\cite{Barrington1989,DvorakKoucky2021}. This direction
 would make the workshop abstract's $\mathrm{NC}^1$ compilation proposal
