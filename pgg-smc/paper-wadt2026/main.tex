@@ -70,8 +70,9 @@ computations~\cite{MizukiSone2009,MizukiSone2012,KochWalzerHartel2015}.
 Mechanized analysis must connect the physical operations to their probability
 laws. Koch, Schrempp, and Kirsten use software bounded model checking to
 search finite protocol spaces and check lower bounds~\cite{Koch2019}. Their
-method automates checks over a bounded state space. The development in this
-article instead uses a proof assistant to state reusable group actions,
+method automates checks over a bounded state space. The development\footnote{The companion artifact contains the source, theorem
+index, assumption report, and build instructions.} in this article instead
+uses a proof assistant to state reusable group actions,
 dealer laws, participant views, and executed traces. It combines a
 group-parametric model with exact trace privacy and a checked finite-step
 mixing bound.
@@ -110,8 +111,8 @@ Section~\ref{sec:model} fixes the two laws and the security scope.
 Section~\ref{sec:framework} presents the framework components used by the
 proofs. Sections~\ref{sec:pgl} and~\ref{sec:exact} give the $\PG$
 construction and its exact results. Section~\ref{sec:mixing} proves the
-finite-step bound. Sections~\ref{sec:instances}--\ref{sec:related} compare
-instances, report the methodology, and place the results among related work.
+finite-step bound. Section~\ref{sec:instances} compares the sibling instances.
+Section~\ref{sec:related} places the results among related work.
 Section~\ref{sec:conclusion} states the remaining bridge and other future
 directions.
 
@@ -677,66 +678,6 @@ result does not depend on the $S_5$ Rayleigh premise. These instances show
 which proofs use only the common interfaces and which proofs need
 instance-specific finite or spectral evidence.
 
-\section{Methodology and Artifact}\label{sec:method}
-
-The formalization reported here is fixed at the following git commit.
-\begin{center}
-  \small\coqin{ebdc77c7b63c98f344d2d31bc1fd9fac8ce69e51}
-\end{center}
-I built it on an arm64 system running macOS 26.5.1 with \Rocq{} 9.0.0,
-MathComp 2.5.0, and the development version of infotheo. The \Rocq{}
-executable was compiled with
-OCaml 4.14.2. The repository build is single threaded:
-\begin{verbatim}
-make -j1
-\end{verbatim}
-Single-threaded execution is needed because parallel \Rocq{} workers can use
-more memory than the target machine provides.
-
-Before submission, the companion artifact will include a paper-specific
-theorem index. The index will cover the PGL files, the four sibling instances
-in Table~\ref{tab:instances}, and the framework files used by displayed
-results. It will exclude unrelated instance demonstrations.
-Tables~\ref{tab:pgl-source}, \ref{tab:recovery-source}, and
-\ref{tab:privacy-source} give the PGL part of the planned index. The artifact
-will also include a claim matrix. Each row will link a paper claim to its
-formal theorem, dealer law, shuffle law, adversary scope, and assumptions.
-
-Before submission, a per-theorem assumption report will be generated with
-\coqin{Print Assumptions}. The current source review gives the expected trust
-boundaries. The PGL group, orbit, order, correctness, and recovery results are
-checked without additional axioms. The current probability, privacy, trace,
-and mixing results use propositional extensionality, dependent functional
-extensionality, and constructive indefinite description from the
-\coqin{boolp} stack. The PGL finite fiber counts and final inequality are
-evaluated inside \Rocq{} and checked by its kernel.
-
-The $S_5$ spectral theorem depends on an imported Rayleigh bound. Results in
-the larger rigidity file can also depend on stated group-order and
-curve-realization assumptions. The $S_5\times S_5$ mixing theorem inherits
-the Rayleigh premise. Its rigidity file has separate group-order and
-curve-realization assumptions. The final report will attach these
-dependencies to the exact theorem rows instead of assigning them to every
-result in the same file.
-
-One repository test file contains an admitted proof:
-\begin{center}
-  \small\coqin{pgg-smc/security/pgg\_schreier\_test.v}
-\end{center}
-The file is outside \coqin{\_CoqProject}. It is not a dependency of the
-reported build. The final artifact will list it as excluded material. To
-generate the row for the main finite-step theorem, the release procedure will
-compile a small scratch file that imports the PGL mixing module and invokes
-\coqin{Print Assumptions pgl27\_word\_mixing}. The scratch probe will use the
-repository's module flags and will not modify the formalization.
-
-The work used LLM-generated proof scripts and documentation drafts under
-human specification, review, and responsibility. The human author is
-responsible for the research questions, mathematical specification, claim
-selection, acceptance decisions, citation verification, and final text. The
-\Rocq{} kernel checks accepted proof terms. A separate audit checks that
-formal statements and paper claims remain aligned.
-
 \section{Related Work}\label{sec:related}
 
 Research on card protocols includes small AND and XOR
@@ -817,13 +758,6 @@ final text.
 \subsubsection*{Disclosure of Interests.}
 
 The author declares no competing interests.
-
-\subsubsection*{Artifact availability.}
-
-The submission artifact will include the source, theorem index, claim matrix,
-per-theorem assumption report, excluded-test-file note, and build
-instructions. It will fix the formalization at the commit reported in
-Section~\ref{sec:method}.
 
 \bibliographystyle{splncs04}
 \bibliography{references}
