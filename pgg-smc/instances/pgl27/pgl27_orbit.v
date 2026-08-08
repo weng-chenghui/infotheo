@@ -548,12 +548,12 @@ Lemma subset_class_invariant (g : pgg_gT pgl27_M) (S : {set 'I_8}) :
 Proof. by move=> /(subsetP G_sub_stabp)/stabpP. Qed.
 
 (* The word layer: generator indices act on codes by the tables above. *)
-Local Definition wgenn (i : nat) : nat -> nat :=
+Local Definition genn (i : nat) : nat -> nat :=
   if i == 0 then trn else if i == 1 then scn else invn.
 
 (* Application of a word, left to right, to a single code. *)
-Local Definition papply (w : seq nat) (a : nat) : nat :=
-  foldl (fun x i => wgenn i x) a w.
+Local Definition wapply (w : seq nat) (a : nat) : nat :=
+  foldl (fun x i => genn i x) a w.
 
 (* The generator perm selected by a word index. *)
 Local Definition gen_of (i : nat) : {perm 'I_8} :=
@@ -561,14 +561,14 @@ Local Definition gen_of (i : nat) : {perm 'I_8} :=
                    else if i == 1 then @Ordinal 3 1 isT
                    else @Ordinal 3 2 isT).
 
-(* A word folded into the composite shuffle permutation. *)
+(* The composite shuffle permutation of a word. *)
 Local Definition word_perm (w : seq nat) : {perm 'I_8} :=
-  foldl (fun g i => (g * gen_of i)%g) 1%g w.
+  (\prod_(i <- w) gen_of i)%g.
 
 Local Lemma gen_of_val (i : nat) (x : 'I_8) :
-  val (gen_of i x) = wgenn i (val x).
+  val (gen_of i x) = genn i (val x).
 Proof.
-rewrite /gen_of /wgenn; case: (i == 0); first exact: gen0_val.
+rewrite /gen_of /genn; case: (i == 0); first exact: gen0_val.
 by case: (i == 1); [exact: gen1_val | exact: gen2_val].
 Qed.
 
@@ -581,20 +581,14 @@ by exists (@Ordinal 3 2 isT).
 Qed.
 
 Local Lemma word_perm_mem (w : seq nat) : word_perm w \in pgg_G pgl27_M.
-Proof.
-rewrite /word_perm; elim: w 1%g (group1 (pgg_G pgl27_M)) => [|i w IH] g gG //=.
-by apply: IH; apply: groupM => //; exact: gen_of_mem.
-Qed.
+Proof. by apply: group_prod => i _; exact: gen_of_mem. Qed.
 
 Local Lemma word_perm_val (w : seq nat) (x : 'I_8) :
-  val (word_perm w x) = papply w (val x).
+  val (word_perm w x) = wapply w (val x).
 Proof.
-rewrite /word_perm /papply.
-have H : forall (w' : seq nat) (g : {perm 'I_8}) (y : 'I_8),
-    val (foldl (fun h i => (h * gen_of i)%g) g w' y)
-    = foldl (fun a i => wgenn i a) (val (g y)) w'.
-  by elim=> [|i w' IH] g y //=; rewrite IH permM gen_of_val.
-by rewrite H perm1.
+rewrite /word_perm /wapply; elim: w x => [|i w IH] x.
+  by rewrite big_nil perm1.
+by rewrite big_cons permM IH /= gen_of_val.
 Qed.
 
 (* -------------------------------------------------------------------------- *)
@@ -602,43 +596,46 @@ Qed.
 (* -------------------------------------------------------------------------- *)
 
 (* One generator step on a four-subset, in ascending canonical form. *)
-Local Definition sstep (i : nat) (L : seq nat) : seq nat :=
-  sort leq (map (wgenn i) L).
+Local Definition code_step (i : nat) (L : seq nat) : seq nat :=
+  sort leq (map (genn i) L).
 
 (* Fueled BFS over four-subsets, one carrying word per reached subset. *)
-Local Fixpoint set_bfs (fuel : nat) (seen : seq (seq nat * seq nat)) :
+Local Fixpoint code_bfs (fuel : nat) (seen : seq (seq nat * seq nat)) :
     seq (seq nat * seq nat) :=
   match fuel with
   | 0 => seen
-  | S f =>
+  | f.+1 =>
     let nxt := flatten
-      [seq [seq (sstep i Lw.1, rcons Lw.2 i)
+      [seq [seq (code_step i Lw.1, rcons Lw.2 i)
              | i <- [:: 0; 1; 2]] | Lw <- seen] in
     let add := foldl (fun acc Lw =>
       if has (fun sw : seq nat * seq nat => sw.1 == Lw.1) (seen ++ acc)
       then acc else rcons acc Lw) [::] nxt in
-    if size add == 0 then seen else set_bfs f (seen ++ add)
+    if nilp add then seen else code_bfs f (seen ++ add)
   end.
 
 (* The representative four-subset of each Boolean class, as a code list. *)
 Local Definition rep_list (b : bool) : seq nat :=
   if b then [:: 0; 1; 2; 4] else [:: 0; 1; 2; 3].
 
-Local Definition set_table (b : bool) : seq (seq nat * seq nat) :=
-  set_bfs 12 [:: (rep_list b, [::])].
+(* The BFS closure of the class representative.  Twelve rounds exceed the
+   diameter of the three-generator Cayley graph on the seventy four-subsets,
+   so the recursion stops on an empty round, not on exhausted fuel. *)
+Local Definition code_table (b : bool) : seq (seq nat * seq nat) :=
+  code_bfs 12 [:: (rep_list b, [::])].
 
 (* Every ascending four-list of verdict b carries a word from rep_list b.
    The check recomputes each word from scratch, so a BFS bookkeeping error
    cannot make it true. *)
-Local Definition set_table_ok (b : bool) : bool :=
+Local Definition code_table_ok (b : bool) : bool :=
   all (fun L => (nclass L == b) ==>
          has (fun sw : seq nat * seq nat =>
-                sort leq (map (papply sw.2) (rep_list b)) == L)
-             (set_table b))
+                sort leq (map (wapply sw.2) (rep_list b)) == L)
+             (code_table b))
       sorted4.
 
-Local Lemma set_table_okT : set_table_ok true. Proof. by vm_compute. Qed.
-Local Lemma set_table_okF : set_table_ok false. Proof. by vm_compute. Qed.
+Local Lemma code_table_okP (b : bool) : code_table_ok b.
+Proof. by case: b; vm_compute. Qed.
 
 (* -------------------------------------------------------------------------- *)
 (* From the code-level certificate to subsets of the projective line.         *)
@@ -647,13 +644,12 @@ Local Lemma set_table_okF : set_table_ok false. Proof. by vm_compute. Qed.
 (* The image of a code-coded subset is coded by the word applied codewise. *)
 Local Lemma word_perm_imset (w : seq nat) (L : seq nat) :
   all (fun n => (n < 8)%N) L ->
-  word_perm w @: list_to_set L = list_to_set (map (papply w) L).
+  word_perm w @: list_to_set L = list_to_set (map (wapply w) L).
 Proof.
-move=> HL; apply/setP => x; rewrite inE.
+move=> /allP HL; apply/setP => x; rewrite inE.
 apply/imsetP/mapP => [[y]|[a aL Ha]].
   by rewrite inE => yL ->; exists (val y); rewrite // word_perm_val.
-have Ha8 : (a < 8)%N by move/allP: HL => /(_ a aL).
-exists (Ordinal Ha8); first by rewrite inE.
+exists (Ordinal (HL a aL)); first by rewrite inE.
 by apply/val_inj; rewrite word_perm_val.
 Qed.
 
@@ -673,19 +669,16 @@ Qed.
 (* Every four-subset is a shuffle image of the representative of its class. *)
 Local Lemma subset_class_reach (S : {set 'I_8}) :
   #|S| = 4 ->
-  exists w : seq nat,
-    S = word_perm w @: list_to_set (rep_list (subset_class S)).
+  exists w, S = word_perm w @: list_to_set (rep_list (subset_class S)).
 Proof.
 move=> HcS.
-have Hcl : nclass (map val (enum S)) = subset_class S by rewrite subset_classE.
+have Hcl := esym (subset_classE S).
 have Hmem := sorted4_complete _ (asc4_val_enum S HcS).
-have Hok : set_table_ok (subset_class S).
-  by case: (subset_class S); [exact: set_table_okT | exact: set_table_okF].
 have H8 : all (fun n => (n < 8)%N) (rep_list (subset_class S))
   by case: (subset_class S).
-move: Hok => /allP/(_ _ Hmem)/implyP.
-rewrite Hcl eqxx => /(_ isT)/hasP[[L w] /= _ /eqP Hw].
-exists w; rewrite (word_perm_imset w _ H8).
+move: (code_table_okP (subset_class S)) => /allP/(_ _ Hmem)/implyP.
+rewrite Hcl eqxx => /(_ isT)/hasP[[_ w] /= _ /eqP Hw].
+exists w; rewrite (word_perm_imset _ _ H8).
 by rewrite -list_to_set_sort Hw list_to_setK.
 Qed.
 
@@ -712,8 +705,8 @@ Lemma subset_class_orbit (S T : {set 'I_8}) :
   (subset_class S = subset_class T <->
    exists g : pgg_gT pgl27_M, g \in pgg_G pgl27_M /\ T = g @: S).
 Proof.
-move=> HcS HcT; split => [Hcl|[g [gG ->]]]; last first.
-  by rewrite (subset_class_invariant _ _ gG).
+move=> HcS HcT; split=> [Hcl|[g [gG ->]]]; last first.
+  by rewrite subset_class_invariant.
 have [w1 Hw1] := subset_class_reach _ HcS.
 have [w2 Hw2] := subset_class_reach _ HcT.
 rewrite Hcl in Hw1.
@@ -732,11 +725,8 @@ Lemma subset_class_orbitE (S : {set 'I_8}) :
   = [set T : {set 'I_8} | (#|T| == 4) && (subset_class T == subset_class S)].
 Proof.
 move=> HcS; apply/setP => T; rewrite inE.
-apply/orbitP/andP => [[g gG <-]|[/eqP HcT /eqP Hcl]].
-  rewrite (card_imset _ perm_inj) HcS eqxx /=; split=> //; apply/eqP.
-  exact: (subset_class_invariant g S gG).
-have [g [gG ->]] : exists g : pgg_gT pgl27_M,
-    g \in pgg_G pgl27_M /\ T = g @: S
-  by apply/(subset_class_orbit S T HcS HcT); exact: (esym Hcl).
-by exists g.
+apply/orbitP/andP => [[g gG <-]|[/eqP HcT /eqP/esym Hcl]].
+  rewrite (card_imset _ perm_inj) HcS eqxx; split=> //; apply/eqP.
+  exact: (subset_class_invariant _ _ gG).
+by have [g [gG ->]] := iffLR (subset_class_orbit S T HcS HcT) Hcl; exists g.
 Qed.
