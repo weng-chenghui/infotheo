@@ -41,19 +41,20 @@ Card-based protocols use physical cards to compute with
 information-theoretic security. I define a \Rocq{} framework that treats a
 finite group, its permutation action, and its shuffle law as first-class
 parameters. The framework connects group actions to executed traces and
-finite-step mixing. The main instance uses the action of
-$\PG$ on eight projective points. Under an exact uniform shuffle, the
+word-shuffle mixing. The main instance uses the action of
+$\PG$ on eight projective points. Under the uniform shuffle law, the
 instance has exact correctness, recovery parameters $(t,r,n)=(3,7,8)$, and
-view and executed-trace privacy for coalitions of at most three players. These
+perfect view and executed-trace privacy for coalitions of at most three players. These
 privacy theorems assume a uniform Boolean secret, a fixed encoded
 representative, and passive adversaries. The verifier learns the secret.
 Active security, security after the reveal, and composition lie outside the
 model. For a finite implementation, I analyze a uniform word of length 200
 over five generator letters. A checked fiber-counting certificate proves that
 the resulting shuffle law is within unhalved $L_1$ distance $2^{-40}$ of the
-uniform group law. This finite-step theorem transfers to single-card
-marginals and to a product with any secret prior. It does not establish
-approximate coalition-view or executed-trace privacy. Four sibling instances
+uniform group law. This word-shuffle theorem transfers to single-card
+marginals and to a product with any secret prior. Transport theorems then
+bound approximate coalition-view and executed-trace privacy by $2^{-39}$
+under the word law. Four sibling instances
 show which algebraic, operational, privacy, and mixing arguments the framework
 reuses.
 \end{abstract}
@@ -75,8 +76,8 @@ method automates checks over a bounded state space. The development\footnote{The
 index, assumption report, and build instructions.} in this article instead
 uses a proof assistant to state reusable group actions,
 dealer laws, participant views, and executed traces. It combines a
-group-parametric model with exact trace privacy and a checked finite-step
-mixing bound.
+group-parametric model with perfect trace privacy and a checked
+word-shuffle mixing bound.
 
 The accepted workshop abstract illustrated this algebraic direction with den
 Boer's protocol and an $S_5$ development. It also identified Barrington's
@@ -91,17 +92,17 @@ I make three technical contributions.
   action, the shuffle law, reconstruction, participant views, and executed
   traces.
 \item I prove correctness, the recovery ramp, coalition-view privacy, and
-  executed-trace secrecy for the $\PG$ instance under an exact uniform
-  shuffle.
+  executed-trace secrecy for the $\PG$ instance under the uniform shuffle
+  law.
 \item I prove an unhalved $L_1$ bound between a 200-letter generator-word law
   and the uniform group law. The proof also transfers the bound to card
   endpoints and secret-prior product laws.
 \end{itemize}
 
-The exact and finite-step results concern two distinct laws. Exact privacy
-uses a uniform group element with a uniform Boolean secret and a fixed dealt
-representative. Finite-step mixing compares the generator-word law with that
-uniform group law. The formalization transports the resulting
+The uniform-shuffle and word-shuffle results concern two distinct laws.
+Perfect privacy uses a uniform group element with a uniform Boolean secret
+and a fixed dealt representative. Word-shuffle mixing compares the
+generator-word law with that uniform group law. The formalization transports the resulting
 distributional proximity through the protocol interpreter. Approximate
 coalition-view and executed-trace privacy hold under the word law with
 error at most $2^{-39}$. The protocol is dealer-based and has no
@@ -112,8 +113,8 @@ composition across executions remain outside the model.
 Section~\ref{sec:model} fixes the two laws and the security scope.
 Section~\ref{sec:framework} presents the framework components used by the
 proofs. Sections~\ref{sec:pgl} and~\ref{sec:exact} give the $\PG$
-construction and its exact results. Section~\ref{sec:mixing} proves the
-finite-step bound. Section~\ref{sec:instances} compares the sibling instances.
+construction and its uniform-shuffle results. Section~\ref{sec:mixing} proves the
+word-shuffle bound. Section~\ref{sec:instances} compares the sibling instances.
 Section~\ref{sec:related} places the results among related work.
 Section~\ref{sec:conclusion} states the remaining extensions and other
 future directions.
@@ -145,22 +146,22 @@ executed trace $T_i$, and $T_C=(T_i)_{i\in C}$ is the coalition trace. The
 verifier receives all endpoints and applies the decoder. It therefore learns
 $S$ by design.
 
-The primary exact law samples a uniform Boolean secret and uses one fixed
+The primary uniform-shuffle law samples a uniform Boolean secret and uses one fixed
 representative $D_s$ for each secret $s$. It then samples an independent
 element $g\leftarrow U_G$. For the $\PG$ instance, this is the formal law
-used by the main exact execution. The representative is the formal orbit
+used by the main uniform-shuffle execution. The representative is the formal orbit
 encoder.
-\footnote{The exact source objects are \coqin{pgl27P} and
+\footnote{The uniform-shuffle source objects are \coqin{pgl27P} and
 \coqin{orbit\_encode}.}
 The all-decks law instead samples a uniform valid arrangement in the selected
 secret class before it samples $g\leftarrow U_G$.
 \footnote{The all-decks law is \coqin{pgl27P\_alldecks}.}
-Both exact execution laws use a uniform Boolean prior.
+Both uniform-shuffle execution laws use a uniform Boolean prior.
 
 The security theorems concern passive, honest-but-curious adversaries. A
 corrupted player follows the protocol and retains its view and executed
-trace. Exact coalition privacy states that $S$ and $V_C$ are independent.
-Exact trace privacy states
+trace. Perfect coalition privacy states that $S$ and $V_C$ are independent.
+Perfect trace privacy states
 \begin{equation}
   H(S\mid T_C)=H(S).
   \label{eq:trace-privacy}
@@ -169,7 +170,7 @@ The PGL protocol has no private player inputs. Active deviation, security
 after the verifier's reveal, and composition across executions are outside
 the model.
 
-The finite-step model replaces $U_G$ by $\mu^{*L}$. I measure two laws $P$
+The word-shuffle model replaces $U_G$ by $\mu^{*L}$. I measure two laws $P$
 and $Q$ by the unhalved $L_1$ distance
 \begin{equation}
   \lVert P-Q\rVert_1=\sum_x\lvert P(x)-Q(x)\rvert.
@@ -191,8 +192,8 @@ process takes a list of alternative cuts and deals one hand per cut, so a
 word enters the execution only through its evaluated group
 element.\footnote{The dealer program is \coqin{exchange\_dealer} and the
 $\PG$ witness is the singleton cut list in \coqin{pgl27\_dealer\_run}.}
-The exact model makes the same assumption, since its single uniform shuffle
-is likewise unobserved.
+The uniform-shuffle model makes the same assumption, since its single
+uniform shuffle is likewise unobserved.
 
 Figure~\ref{fig:models} separates the proved paths for the two laws. The
 lower path reaches approximate coalition-view and executed-trace privacy at
@@ -206,7 +207,7 @@ $2^{-39}$.
                   font=\small},
       arr/.style={-{Latex[length=2mm]},thick}]
     \node[box] (uniform) {uniform group law\\$U_G$};
-    \node[box,right=of uniform] (exact) {exact coalition view\\and trace theorems};
+    \node[box,right=of uniform] (exact) {perfect coalition view\\and trace theorems};
     \draw[arr] (uniform) -- (exact);
 
     \node[box,below=of uniform] (word) {five-letter word law\\$\mu^{*200}$};
@@ -218,7 +219,7 @@ $2^{-39}$.
     \draw[arr] (lone) -- (transfer);
     \draw[arr] (transfer) -- (privacy);
   \end{tikzpicture}}
-  \caption{The exact and finite-step proof paths. The lower path transports
+  \caption{The uniform-shuffle and word-shuffle proof paths. The lower path transports
   the mixing certificate to coalition-view and trace privacy.}
   \label{fig:models}
 \end{figure}
@@ -310,7 +311,8 @@ For finite distributions $P$ and $Q$ on $A$ and a map $f:A\to B$,
 \]
 \end{theorem}
 
-The first theorem supplies the exact view argument used by the PGL instance.
+The first theorem supplies the perfect-privacy view argument used by the
+PGL instance.
 The second moves that result to an executed trace. The third transfers a
 group-level mixing bound to card endpoints.
 
@@ -388,7 +390,7 @@ premise for coalition privacy.
   \label{tab:pgl-source}
 \end{table}
 
-\section{Correctness, Recovery, and Exact-Shuffle Privacy}\label{sec:exact}
+\section{Correctness, Recovery, and Uniform-Shuffle Privacy}\label{sec:exact}
 
 \subsection{Correctness and Recovery}
 
@@ -433,7 +435,7 @@ The PGL construction has recovery parameters
 \[
   (t,r,n)=(3,7,8).
 \]
-Coalitions of at most three positions have exact privacy. Some coalition of
+Coalitions of at most three positions have perfect privacy. Some coalition of
 four positions has positive leakage. Every reveal set of at most six
 positions is compatible with both secrets. Every set of seven positions
 determines the secret class.
@@ -469,14 +471,14 @@ the leakage for all reveal sets of sizes four through six.
   \label{tab:recovery-source}
 \end{table}
 
-\subsection{Exact View and Trace Privacy}
+\subsection{Perfect View and Trace Privacy}
 
-The main exact execution samples $S$ uniformly from $\{0,1\}$. It deals the
+The main uniform-shuffle execution samples $S$ uniformly from $\{0,1\}$. It deals the
 fixed representative $D_S$ and samples an independent shuffle $g\leftarrow
 U_G$. Three-transitivity gives independence for every coalition $C$ with
 $\lvert C\rvert\leq3$.
 
-\begin{theorem}[Exact privacy for the fixed dealer\footnotemark]
+\begin{theorem}[Perfect privacy for the fixed dealer\footnotemark]
 \footnotetext{Formalized in \path{pgg-smc/instances/pgl27/pgl27_secrecy.v}
 as
 \coqin{pgl27\_view\_indep}. The trace counterpart is formalized in
@@ -497,7 +499,7 @@ choice. It samples $S$ uniformly. Conditional on $S=s$, it samples a uniform
 valid arrangement of class $s$. It then applies an independent uniform
 $\PG$ shuffle.
 
-\begin{theorem}[All-decks exact privacy\footnotemark]
+\begin{theorem}[All-decks perfect privacy\footnotemark]
 \footnotetext{Formalized in \path{pgg-smc/instances/pgl27/pgl27_secrecy.v}
 as
 \coqin{pgl27\_view\_indep\_alldecks}. The trace counterpart is formalized in
@@ -558,11 +560,11 @@ including finite computations performed by its virtual machine.
       \coqin{pgl27\_deck\_coalition\_secrecy} \\
     \bottomrule
   \end{tabular}
-  \caption{Source index for exact view and trace privacy.}
+  \caption{Source index for perfect view and trace privacy.}
   \label{tab:privacy-source}
 \end{table}
 
-\section{Finite-Step Approximation of the Exact Model}\label{sec:mixing}
+\section{Word-Shuffle Approximation of the Uniform-Shuffle Model}\label{sec:mixing}
 
 The executable shuffle samples a word over five letters. Three letters are
 the projective translation, scaling, and inversion generators. The alphabet
@@ -577,7 +579,7 @@ element. A computation over binary naturals records the size of every
 fiber. The final arithmetic check sums the deviations of these fiber counts
 from $5^{200}/336$.
 
-\begin{theorem}[Finite-step shuffle bound\footnotemark]\label{thm:pgl-mixing}
+\begin{theorem}[Word-shuffle mixing bound\footnotemark]\label{thm:pgl-mixing}
 \footnotetext{Formalized in \path{pgg-smc/instances/pgl27/pgl27_mixing.v} as
 \coqin{pgl27\_word\_mixing}.}
 Let $\mu$ be uniform on the five-letter symmetric generator tuple. Then
@@ -668,7 +670,7 @@ that the product-law transfer does not reach.
 
 The repository contains four sibling instances. They exercise different
 parts of the framework. Table~\ref{tab:instances} records the proved
-coverage. Exact privacy in the table refers to the dealer law defined by each
+coverage. Perfect privacy in the table refers to the dealer law defined by each
 instance. Trace privacy refers to the executed trace of the stated corrupted
 players.
 
@@ -679,7 +681,7 @@ players.
   \begin{tabular}{@{}L{.14\linewidth}L{.24\linewidth}
                        L{.25\linewidth}L{.22\linewidth}@{}}
     \toprule
-    Instance & Recovery & Exact privacy & Trace privacy \\
+    Instance & Recovery & Perfect privacy & Trace privacy \\
     \midrule
     den Boer & five-card AND & one card & one player \\
     Kim & five-card AND & one card & one player \\
@@ -695,7 +697,7 @@ players.
 
   \begin{tabular}{@{}L{.14\linewidth}L{.40\linewidth}L{.31\linewidth}@{}}
     \toprule
-    Instance & Finite-step mixing & Trust base \\
+    Instance & Word-shuffle mixing & Trust base \\
     \midrule
     den Boer & exact after one uniform cut & kernel, \coqin{boolp} \\
     Kim & $L=7$, $L_1<2^{-40}$ & kernel, \coqin{boolp} \\
@@ -742,7 +744,7 @@ Koch, Schrempp, and Kirsten encode bounded protocol spaces for software
 bounded model checking~\cite{Koch2019}. Their method searches for protocols
 and checks finite lower bounds. The present development proves reusable
 group-action, execution, privacy, and mixing lemmas in \Rocq{}. The Kim
-instance also connects a biased shuffle model to a concrete finite-step
+instance also connects a biased shuffle model to a concrete word-shuffle
 bound~\cite{KimCetinkaya2025}.
 
 Group-based shuffle models appear in work on closed shuffles and graph
@@ -781,9 +783,9 @@ foundation to group-parametric card shuffles and coalition traces.
 \section{Conclusion and Future Work}\label{sec:conclusion}
 
 I presented a group-parametric \Rocq{} framework for card-based protocols and
-instantiated it with the action of $\PG$ on eight positions. Under the exact
+instantiated it with the action of $\PG$ on eight positions. Under the
 uniform group law, the instance has executed correctness, recovery
-parameters $(3,7,8)$, and exact view and trace privacy for coalitions of at
+parameters $(3,7,8)$, and perfect view and trace privacy for coalitions of at
 most three players. These security results use a uniform Boolean prior,
 passive adversaries, and the dealer laws stated in Section~\ref{sec:model}.
 The verifier learns the secret.
