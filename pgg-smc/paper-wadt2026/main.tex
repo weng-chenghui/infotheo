@@ -403,6 +403,13 @@ For every $s\in\{0,1\}$ and $g\in\PG$, decoding all eight verifier endpoints
 after the shuffle $g$ returns $s$.
 \end{theorem}
 
+Correctness quantifies over every group element. It therefore holds with
+probability one under the uniform law and under any word law, and only
+privacy carries an approximation error. A corollary instantiates the
+executed run at the evaluated 200-letter word.\footnote{The corollary is
+\coqin{pgl27\_word\_run\_recovers} in
+\path{pgg-smc/instances/pgl27/pgl27_word_privacy.v}.}
+
 Recovery has a finer threshold than the implemented decoder exposes. Any
 seven revealed positions determine the missing card because a valid deck uses
 all eight card values once. Hence seven revealed positions determine the
