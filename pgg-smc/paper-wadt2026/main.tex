@@ -208,60 +208,94 @@ approximate security statement.
 
 \section{Framework and Generic Theorems}\label{sec:framework}
 
-The group interface fixes the finite carrier $G$, the subgroup of allowed
-shuffles, and the permutation representation $\rho$. The interface also
-records the generator tuple used by word evaluation. Mathematical Components
-provides the finite-group and action structures~\cite{MathComp}. The protocol
-instance supplies proofs that the generators belong to $G$ and that the
-action preserves valid arrangements.
+\subsection{Framework Architecture}
 
-The sharing interface packages an encoder, a validity predicate, and a full
-decoder. Its correctness condition says that decoding a valid encoded
-arrangement returns the secret. Its permutation condition says that an
-allowed shuffle does not change the decoded secret. The threshold record
-stores a privacy cutoff and a decoder that reads the full arrangement. It
-does not store a separate recovery threshold. For the PGL instance, the
-record therefore packages privacy through three cards and an eight-endpoint
-decoder. A separate result in Section~\ref{sec:exact} proves recovery from
-seven cards.
+A protocol instance supplies an action, a shuffle-security bound, and a
+decoder. The framework packages these components and uses them in one
+executable protocol. Its finite algebraic structures use Mathematical
+Components~\cite{MathComp}.
 
-The operational layer represents the dealer, players, and verifier as
-processes. Its interpreter executes sends and receives and records process
-inputs. An endpoint projection extracts the verifier's final sequence. This
-layer connects an algebraic arrangement with the values that processes
-receive during a concrete run. It extends the trace-based interpreter from
-earlier work~\cite{WengEtAl2025}.
+\begin{figure}[t]
+  \centering
+  \resizebox{\linewidth}{!}{%
+  \begin{tikzpicture}[
+      every node/.style={font=\small},
+      rec/.style={draw,rounded corners,fill=blue!8,align=center,inner sep=5pt},
+      sub/.style={draw,rounded corners,fill=green!8,align=center,inner sep=4pt,
+                 font=\footnotesize},
+      arr/.style={-{Latex[length=2mm]},thick}]
+    \node[rec] (mp) at (0,1.5) {\textbf{MonodromyProfile}};
+    \node[rec] (pi) at (-3.7,0) {\textbf{PGGInterface}\\protocol layout};
+    \node[rec] (sw) at (0,0) {\textbf{SecurityWitness}\\endpoint bound};
+    \node[rec] (rp) at (3.7,0) {\textbf{ReconPlug}\\reconstruction};
+    \node[sub] (se) at (0,-1.2)
+      {\textbf{SecurityExact}\\\textbf{SecurityAsymptotic}};
+    \node[sub] (ts) at (3.7,-1.05) {\textbf{ThresholdScheme}};
+    \node[sub] (ie) at (3.7,-1.8) {\textbf{InputEncoding}};
+    \draw[arr] (pi) -- (mp);
+    \draw[arr] (sw) -- (mp);
+    \draw[arr] (rp) -- (mp);
+    \draw[arr] (se) -- (sw);
+    \draw[arr] (ie) -- (ts);
+    \draw[arr] (ts) -- (rp);
+  \end{tikzpicture}}
+  \caption{Architecture of the group-parametric card-protocol framework.
+  Blue boxes denote the profile and its three component records. Green boxes
+  denote supporting records. Arrows denote dependencies.}
+  \label{fig:framework-architecture}
+\end{figure}
 
-The generic privacy theorem turns transitivity into view independence. Let
-$G$ act $k$-transitively on the card positions. If $C$ has at most $k$
-positions, then the coalition view under a uniform element of $G$ is
-independent of the dealt secret. The theorem applies to any valid encoder
-that the action preserves. For the main instance, $k=3$.
+\coqin{PGGInterface} gives the dealer, player, and verifier layout.
+\coqin{SecurityWitness} gives an endpoint bound for a shuffle law.
+\coqin{ReconPlug} connects the group action to a decoder.
+\coqin{MonodromyProfile} packages these three components.
 
-The trace theorem carries view independence to execution. Suppose the
-interpreter's trace $T_C$ is a function of the mathematical view $V_C$. If
-$S$ and $V_C$ are independent, then
+The supporting records refine individual components. Exact and asymptotic
+security records justify endpoint bounds. A threshold scheme supplies sharing
+and reconstruction data. An input encoding adds committed inputs when a
+protocol needs them.
+
+The records above specify one protocol instance. The next subsection turns
+from the architecture to the generic theorems derived from these records.
+
+\subsection{Generic Theorems}
+
+\begin{theorem}[Generic coalition privacy\footnotemark]
+\footnotetext{Formalized in \path{pgg-smc/reconstruct/transitivity_privacy.v} as
+\coqin{ttrans\_view\_indep\_gen}.}
+Let $G$ act $t$-transitively on the card positions. Let $S$ be a Boolean
+secret with any prior, and suppose that every encoded deck has distinct
+cards. If $g$ is uniform on $G$, then
+\[
+  S \mathrel{\perp\!\!\!\perp} V_C
+\]
+for every coalition $C$ with $|C|\leq t$.
+\end{theorem}
+
+\begin{theorem}[Generic trace lifting\footnotemark]
+\footnotetext{Formalized in \path{pgg-smc/security/pgg_trace_secrecy.v} as
+\coqin{trace\_secrecy\_of\_view}.}
+Let $S$, $V$, and $T$ be finite random variables. Suppose that
+$T=\tau(V)$ and that a map $\nu$ satisfies $\nu(\tau(v))=v$ for every $v$.
+If $V$ is independent of $S$, then
 \begin{equation}
-  H(S\mid T_C)=H(S).
+  H(S\mid T)=H(S).
   \label{eq:view-to-trace}
 \end{equation}
-This theorem separates the probabilistic argument from evaluation of the
-interpreter. Each instance proves that its recorded trace equals the expected
-view, then applies Equation~\ref{eq:view-to-trace}.
+\end{theorem}
 
-The weighted-word layer defines a distribution on generator letters and
-pushes the product law on words through group multiplication. It also maps a
-shuffle law to the distribution of each card endpoint. These definitions
-allow a group-level $L_1$ bound to pass to endpoints by data processing.
+\begin{theorem}[Data processing for finite distributions\footnotemark]
+\footnotetext{Formalized in \path{pgg-smc/security/pgg_collusion_bound.v} as
+\coqin{var\_dist\_fdistmap}.}
+For finite distributions $P$ and $Q$ on $A$ and a map $f:A\to B$,
+\[
+  \lVert f_*P-f_*Q\rVert_1\leq\lVert P-Q\rVert_1.
+\]
+\end{theorem}
 
-Three small records package results for reuse. A monodromy profile combines a
-protocol interface, an endpoint-security witness, and a reconstruction plug.
-The witness stores a word law and an endpoint bound. The plug connects the
-sharing decoder to the group action.
-\footnote{The source records are \coqin{MonodromyProfile},
-\coqin{SecurityWitness}, and \coqin{ReconPlug}.}
-They organize instance data. The PGL proof chain below uses the underlying
-group, sharing, trace, and weighted-word theorems directly.
+The first theorem supplies the exact view argument used by the PGL instance.
+The second moves that result to an executed trace. The third transfers a
+group-level mixing bound to card endpoints.
 
 \section{The \texorpdfstring{$\PG$}{PGL(2,7)} Construction}\label{sec:pgl}
 
