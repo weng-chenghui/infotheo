@@ -827,8 +827,10 @@ sources.
 
 \section{Other Instances}\label{sec:instances}
 
-The repository contains four sibling instances. They exercise different
-parts of the framework. Table~\ref{tab:instances} records the proved
+The framework's value shows in which arguments transfer across instances
+unchanged and which need instance-specific finite or spectral evidence.
+Four sibling instances exercise different parts of the framework alongside
+the $\PG$ instance, and Table~\ref{tab:instances} records the proved
 coverage. Perfect privacy in the table refers to the dealer distribution defined by each
 instance. Trace privacy refers to the executed trace of the stated corrupted
 players.
@@ -871,6 +873,15 @@ players.
   \label{tab:instances}
 \end{table}
 
+The probability, view, and trace results use three classical principles
+from the MathComp probability stack: propositional extensionality,
+dependent functional extensionality, and constructive indefinite
+description. The $S_5$ and $S_5\times S_5$ mixing bounds additionally
+import a Rayleigh-quotient premise as an axiom. The $\PG$ group, orbit,
+cardinality, correctness, and recovery results are closed under the global
+context. The \Rocq{} kernel checks all accepted proof terms, including
+finite computations performed by its virtual machine.
+
 Den Boer's instance samples a uniform cyclic cut. One cut therefore gives
 the exact endpoint distribution used by its single-card privacy proof. Kim's variant
 uses a biased cyclic cut~\cite{KimCetinkaya2025}. For bias $1/100$, the
@@ -887,9 +898,63 @@ bound approaches the exact $L_1$ floor of one.
 
 The PGL instance adds coalition views, coalition traces, the recovery ramp,
 and the finite fiber certificate from Section~\ref{sec:mixing}. Its mixing
-result does not depend on the $S_5$ Rayleigh premise. These instances show
-which proofs use only the common interfaces and which proofs need
-instance-specific finite or spectral evidence.
+result does not depend on the $S_5$ Rayleigh premise.
+
+\begin{table}[t]
+  \centering
+  \small
+  \begin{tabular}{p{.43\linewidth}p{.49\linewidth}}
+    \toprule
+    Mathematical statement & Rocq source name \\
+    \midrule
+    \multicolumn{2}{@{}l}{\emph{Construction}} \\
+    three-transitivity & \coqin{pgl27\_3transitive} \\
+    equianharmonic and harmonic counts & \coqin{orbit\_class\_split},
+      \coqin{orbit\_class\_split\_complement} \\
+    encoder returns its class & \coqin{orbit\_encodeK} \\
+    group order & \coqin{pgl27\_card} \\
+    \midrule
+    \multicolumn{2}{@{}l}{\emph{Correctness and recovery}} \\
+    executed class recovery & \coqin{pgl27\_run\_recovers\_class} \\
+    seven cards determine deck and class &
+      \coqin{pgl27\_seven\_reveal\_determines},
+      \coqin{pgl27\_seven\_reveal\_class} \\
+    at most six cards remain ambiguous &
+      \coqin{pgl27\_six\_reveal\_ambiguous},
+      \coqin{pgl27\_reveal\_ambiguous} \\
+    fixed four-card dependence and leakage &
+      \coqin{pgl27\_view\_dep\_k4}, \coqin{pgl27\_view\_leak\_k4} \\
+    \midrule
+    \multicolumn{2}{@{}l}{\emph{Privacy}} \\
+    fixed representative views &
+      \coqin{pgl27\_view\_indep}, \coqin{pgl27\_view\_leakage\_le} \\
+    fixed representative traces &
+      \coqin{pgl27\_trace\_secrecy},
+      \coqin{pgl27\_coalition\_trace\_secrecy} \\
+    all-decks views and traces &
+      \coqin{pgl27\_view\_indep\_alldecks},
+      \coqin{pgl27\_alldecks\_trace\_secrecy},
+      \coqin{pgl27\_alldecks\_coalition\_secrecy} \\
+    shuffle-free views and traces &
+      \coqin{pgl27\_view\_indep\_deck\_prior},
+      \coqin{pgl27\_deck\_trace\_secrecy},
+      \coqin{pgl27\_deck\_coalition\_secrecy} \\
+    \midrule
+    \multicolumn{2}{@{}l}{\emph{Mixing and transfers}} \\
+    word mixing certificate & \coqin{pgl27\_word\_mixing} \\
+    endpoint and product transfers &
+      \coqin{pgl27\_endpoint\_mixing}, \coqin{pgl27\_joint\_mixing} \\
+    word view and trace bounds &
+      \coqin{pgl27\_word\_view\_indist},
+      \coqin{pgl27\_word\_trace\_indist} \\
+    ideal-proximity companion & \coqin{pgl27\_view\_mixing} \\
+    word correctness & \coqin{pgl27\_word\_run\_recovers} \\
+    \bottomrule
+  \end{tabular}
+  \caption{Consolidated source index for the $\PG$ results, grouped by the
+  sections that prove them.}
+  \label{tab:source-index}
+\end{table}
 
 \section{Related Work}\label{sec:related}
 
