@@ -29,12 +29,6 @@
 (*   orbit_encodeK         == orbit_encode is a section of orbit_class        *)
 (*   orbit_class_split     == 28 of the 70 four-subsets are equianharmonic,   *)
 (*                            42 are harmonic (the two PGL(2,7) orbit sizes) *)
-(*   subset_class_invariant == subset_class is invariant under the image      *)
-(*                            action of any shuffle-group element             *)
-(*   subset_class_orbit    == two four-subsets share a class exactly when one *)
-(*                            is a shuffle image of the other                 *)
-(*   subset_class_orbitE   == the orbit of a four-subset under the shuffle    *)
-(*                            group is the class fiber it belongs to          *)
 (******************************************************************************)
 
 From HB Require Import structures.
@@ -545,7 +539,7 @@ Qed.
     orbit class. *)
 Lemma subset_class_invariant (g : pgg_gT pgl27_M) (S : {set 'I_8}) :
   g \in pgg_G pgl27_M -> subset_class (g @: S) = subset_class S.
-Proof. by move=> /(subsetP G_sub_stabp)/stabpP. Qed.
+Proof. by move=> gG; move/stabpP: (subsetP G_sub_stabp _ gG); apply. Qed.
 
 (* The word layer: generator indices act on codes by the tables above. *)
 Local Definition wgenn (i : nat) : nat -> nat :=
@@ -582,7 +576,9 @@ Qed.
 
 Local Lemma word_perm_mem (w : seq nat) : word_perm w \in pgg_G pgl27_M.
 Proof.
-rewrite /word_perm; elim: w 1%g (group1 (pgg_G pgl27_M)) => [|i w IH] g gG //=.
+rewrite /word_perm.
+have g1 : 1%g \in pgg_G pgl27_M by exact: group1.
+elim: w (1%g) g1 => [|i w IH] g gG //=.
 by apply: IH; apply: groupM => //; exact: gen_of_mem.
 Qed.
 
@@ -649,9 +645,10 @@ Local Lemma word_perm_imset (w : seq nat) (L : seq nat) :
   all (fun n => (n < 8)%N) L ->
   word_perm w @: list_to_set L = list_to_set (map (papply w) L).
 Proof.
-move=> HL; apply/setP => x; rewrite inE.
-apply/imsetP/mapP => [[y]|[a aL Ha]].
-  by rewrite inE => yL ->; exists (val y); rewrite // word_perm_val.
+move=> HL; apply/setP => x; apply/imsetP/idP => [[y]|Hx].
+  rewrite inE => yL ->; rewrite inE; apply/mapP.
+  by exists (val y); rewrite // word_perm_val.
+move: Hx; rewrite inE => /mapP[a aL Ha].
 have Ha8 : (a < 8)%N by move/allP: HL => /(_ a aL).
 exists (Ordinal Ha8); first by rewrite inE.
 by apply/val_inj; rewrite word_perm_val.
@@ -666,8 +663,9 @@ Proof. by apply/setP => i; rewrite !inE mem_sort. Qed.
 Local Lemma asc4_val_enum (S : {set 'I_8}) :
   #|S| = 4 -> asc4 (map val (enum S)).
 Proof.
-move=> HcS; rewrite /asc4 sorted_val_enum size_map -cardE HcS eqxx andbT.
-by apply/allP => n /mapP[i _ ->]; exact: ltn_ord.
+move=> HcS; rewrite /asc4 sorted_val_enum /=; apply/andP; split.
+  by apply/allP => n /mapP[i _ ->]; exact: ltn_ord.
+by rewrite size_map -cardE HcS.
 Qed.
 
 (* Every four-subset is a shuffle image of the representative of its class. *)
@@ -677,8 +675,9 @@ Local Lemma subset_class_reach (S : {set 'I_8}) :
     S = word_perm w @: list_to_set (rep_list (subset_class S)).
 Proof.
 move=> HcS.
+have AL : asc4 (map val (enum S)) by exact: asc4_val_enum.
 have Hcl : nclass (map val (enum S)) = subset_class S by rewrite subset_classE.
-have Hmem := sorted4_complete _ (asc4_val_enum S HcS).
+have Hmem := sorted4_complete _ AL.
 have Hok : set_table_ok (subset_class S).
   by case: (subset_class S); [exact: set_table_okT | exact: set_table_okF].
 have H8 : all (fun n => (n < 8)%N) (rep_list (subset_class S))
@@ -696,12 +695,16 @@ Qed.
 (* A product of shuffles acts by successive images. *)
 Local Lemma imsetM (g h : {perm 'I_8}) (A : {set 'I_8}) :
   (g * h)%g @: A = h @: (g @: A).
-Proof. exact: (actM 'P^*). Qed.
+Proof. by rewrite -imset_comp; apply: eq_imset => x; rewrite permM. Qed.
 
 (* The inverse shuffle undoes the image of a shuffle. *)
 Local Lemma perm_imsetK (g : {perm 'I_8}) (A : {set 'I_8}) :
   (g^-1)%g @: (g @: A) = A.
-Proof. exact: (actK 'P^*). Qed.
+Proof.
+apply/setP => x; apply/imsetP/idP => [[y /imsetP[z zA ->] ->]|xA].
+  by rewrite permK.
+by exists (g x); [apply/imsetP; exists x | rewrite permK].
+Qed.
 
 (** subset_class_orbit — two four-subsets of the projective line carry the
     same classifier value exactly when one is the shuffle image of the other.
@@ -733,10 +736,55 @@ Lemma subset_class_orbitE (S : {set 'I_8}) :
 Proof.
 move=> HcS; apply/setP => T; rewrite inE.
 apply/orbitP/andP => [[g gG <-]|[/eqP HcT /eqP Hcl]].
-  rewrite (card_imset _ perm_inj) HcS eqxx /=; split=> //; apply/eqP.
+  have ginj : injective g by exact: perm_inj.
+  rewrite (card_imset _ ginj) HcS eqxx /=; split=> //; apply/eqP.
   exact: (subset_class_invariant g S gG).
 have [g [gG ->]] : exists g : pgg_gT pgl27_M,
     g \in pgg_G pgl27_M /\ T = g @: S
   by apply/(subset_class_orbit S T HcS HcT); exact: (esym Hcl).
 by exists g.
 Qed.
+
+(* -------------------------------------------------------------------------- *)
+(* Probe-only checks, spec sections 6.5 and 6.6.                              *)
+(* -------------------------------------------------------------------------- *)
+
+(* 6.5: the two chosen representatives are four-subsets of the projective
+   line, and they carry opposite classifier values. *)
+Lemma rep_card_class :
+  [/\ #|list_to_set [:: 0; 1; 2; 4]| = 4,
+      #|list_to_set [:: 0; 1; 2; 3]| = 4,
+      subset_class (list_to_set [:: 0; 1; 2; 4]) = true &
+      subset_class (list_to_set [:: 0; 1; 2; 3]) = false].
+Proof.
+have A1 : asc4 [:: 0; 1; 2; 4] by vm_compute.
+have A2 : asc4 [:: 0; 1; 2; 3] by vm_compute.
+split.
+- exact: (card_list_to_set _ A1).
+- exact: (card_list_to_set _ A2).
+- by rewrite (subset_class_list_to_set _ A1); vm_compute.
+- by rewrite (subset_class_list_to_set _ A2); vm_compute.
+Qed.
+
+(* 6.6, at the level of the theorem rather than the certificate: the two
+   representatives are not shuffle-related.  The forward implication of
+   subset_class_orbit is therefore not vacuous, and the two fibers are two
+   distinct orbits rather than one. *)
+Lemma orbit_mutation_check :
+  ~ (exists g : pgg_gT pgl27_M,
+       g \in pgg_G pgl27_M /\
+       list_to_set [:: 0; 1; 2; 4] = g @: list_to_set [:: 0; 1; 2; 3]).
+Proof.
+case=> g [gG Heq].
+have A1 : asc4 [:: 0; 1; 2; 4] by vm_compute.
+have A2 : asc4 [:: 0; 1; 2; 3] by vm_compute.
+have Hinv := subset_class_invariant g (list_to_set [:: 0; 1; 2; 3]) gG.
+rewrite -Heq (subset_class_list_to_set _ A1) in Hinv.
+rewrite (subset_class_list_to_set _ A2) in Hinv.
+by move: Hinv; vm_compute.
+Qed.
+
+Print Assumptions subset_class_invariant.
+Print Assumptions subset_class_orbit.
+Print Assumptions subset_class_orbitE.
+Print Assumptions orbit_mutation_check.
