@@ -1,6 +1,6 @@
 # WADT2026 Architecture Section Expansion — Design Spec
 
-Date: 2026-08-09 (rev 9: D22 tightened to a single-standard policy — one L1 convention end to end, one footnote, all scattered convention remarks deleted)
+Date: 2026-08-09 (rev 10: five-card section made anchor-dense — committed-input flow diagram and case-by-case reveal-leakage figure from the poster Pencil node, every value a Qed lemma)
 Target: `pgg-smc/paper-wadt2026/main.tex`, Section 3.1 (Framework Architecture)
 Status: for user review
 
@@ -70,6 +70,8 @@ Every claim in the new prose is grounded in one of these. First check
 | Kim reuses den Boer's executed program (`kim_procs := den_boer_procs`, `kim_run_recovers` by `exact: den_boer_run_recovers`); `kim_trace_secrecy` | `kim_run.v:28,38-42`, `kim_trace.v:46` |
 | Section 7 paragraph to relocate: den Boer uniform-cut exactness and Kim seven-cut `2^-40` sentences | `main.tex:889-895` |
 | `var_dist(P,Q) = \sum_(a : A) abs(P a - Q a)` — unhalved, maximum 2 | `probability/variation_dist.v:33` |
+| Case-by-case reveal leakage, all Qed: `leak_k1 = 0`, `leak_k2_adj = 27/10 - (1/4)log 5 - (7/10)log 7` (about 0.154), `leak_k2_dist2` (about 0.119), `leak_k3` (about 0.487), `leak_k4`, `leak_k5`, cap `H_secret = 2 - (3/4)log 3` (about 0.811); decimals recomputed from the closed forms this session | `pgg-smc/instances/denboer1989/five_card_leakage.v:86,245,317,383,448,527,546` |
+| Poster Pencil node "denboerCards 2" (id `u6aAF5`, `pgg-smc/notes/may18aipv2026/poster.pen`) holds the six-row reveal-leakage card figure with the same values; `notes/` is untracked, so the paper figure is authored fresh in TikZ | screenshot inspected 2026-08-09 |
 | Paper's existing convention handling: unhalved L1 definition display and the halved total variation relation with the `2^-40` to `2^-41` conversion; "unhalved" wording at the abstract and introduction uses; a `2^-41` total variation sentence | `main.tex:253-265,57,116-118,137,777` |
 | `fig:framework-architecture` is labeled but never `\ref`ed in the current paper | grep of `main.tex` |
 
@@ -161,10 +163,10 @@ certificates), `mp_secretT` (type plumbing), the `CoveringScheme`/
 | D16 | `run_dealer` is removed from the framework section. It has zero consumers, its content model contradicts every executed dealer (the D15 falsity), and keeping it forced the audit's hedged wording. The paper's dealer story runs through `dealer_with_input_encoding`, which is what actually executes. |
 | D17 | The section `run_profile` in `pgg-smc/protocol/pgg_monodromy_profile.v` is renamed `protocol_of_profile`: the profile is the configuration plus its evidence, and the section yields the certified protocol it determines. Section names are file-local in Rocq, so the rename touches only the `Section`/`End` lines and the two same-file comment mentions (lines 13 and 46). The word "run" is reserved for the interpreter layer, which actually executes. |
 | D18 | Non-running members of the section are renamed `profile_*`: `run_k` to `profile_k`, `run_eps` to `profile_eps`, `run_anonymous` to `profile_anonymous`, `run_private` to `profile_private`, and the lemma `run_recovers` to `profile_recon_encode` (matching the `ts_recon_encode` round-trip naming one level down). The cast keeps `run_` (`run_party`, `run_verifier`, `run_recover` are the pieces that really run). Downstream: `run_k_pgl27`, `run_k_s5`, `run_k_s5x5`, `run_k_abel` become `profile_k_*` (the abel rename is build consistency only; the instance stays out of paper scope). The executed-layer `*_run_recovers` lemmas keep their names. All eight new names verified unused in the codebase (grep, 2026-08-09). |
-| D19 | A new top-level section "A First Instance: The Five-Card Family" (label `sec:fivecard`) is inserted between the framework section and the PGL construction. It presents den Boer and Kim as one record, `five_card_profile` at bias epsilon, with a compact second listing, the biased-distribution display, the epsilon-zero collapse, and the seven-cut kernel bound as a Proposition. All results stay at Lemma/Proposition level; Theorems A and B remain the only named theorems. Expected length 1 to 1.5 pages. Sections renumber automatically; the PGL construction becomes Section 5. |
+| D19 | A new top-level section "A First Instance: The Five-Card Family" (label `sec:fivecard`) is inserted between the framework section and the PGL construction, presenting den Boer and Kim as one record, `five_card_profile` at bias epsilon. The section is anchor-dense, never prose-heavy: two figures (the committed-input flow diagram and the case-by-case reveal-leakage figure), one listing, one display, one Proposition, with never more than two consecutive prose paragraphs. All results stay at Lemma/Proposition level; Theorems A and B remain the only named theorems. Expected length 2 to 2.5 pages. Sections renumber automatically; the PGL construction becomes Section 5. |
 | D20 | Section 7 (Other Instances) transfers its den Boer and Kim mixing prose (`main.tex:889-895`) to the new section; the consolidated instance table keeps all five rows, and the trust-base paragraph and the S5 and S5xS5 prose stay in Section 7. Section 7's opener sentence is adjusted so it introduces the two remaining sibling instances plus the table. |
 | D21 | Section 3.1's five-card forward references (mechanism-table caption, two-families paragraph) point at `sec:fivecard`; the new section's coda is the ramp sentence into the PGL construction, naming what the difficult instance adds: coalitions beyond one card via three-transitivity, an orbit-class secret, and certificates without `vm_compute` on the group. |
-| D22 | ONE distance standard from beginning to end: the $L_1$ distance $\lVert P-Q\rVert_1$, whose constants match the Rocq lemmas verbatim (infotheo `var_dist`, `variation_dist.v:33`). ONE footnote carries every convention remark; no scattered qualifiers. Edits: (a) delete EVERY occurrence of the word "unhalved" in the paper, grep-driven, wording becomes plain "$L_1$ distance" (known sites include the abstract at line 57, the introduction at 116, 118, 137, the model section lead-in at 253, and the sibling-instances sentence that D20 relocates; the sweep, not this list, is authoritative). (b) Delete the halved-convention block `main.tex:258-267`: the repository-name sentence, the `eq:tv-definition` display, the conversion sentence, and the operational-advantage sentences; their content moves into the footnote. (c) Delete the Section 6 sentence `main.tex:776-777` ("Under the halved convention ... $2^{-41}$ in total variation"), which references the deleted display. (d) The definition display `eq:l1-definition` (`main.tex:254-257`) stays as the body's only formal definition. (e) The footnote attaches to the first in-text bound, the informal Theorem B display in the introduction. Draft: "The $L_1$ distance is $\lVert P-Q\rVert_1=\sum_x\lvert P(x)-Q(x)\rvert$, called variation distance in the formal development, with maximum value 2. The common total variation distance is half of it. An $L_1$ bound of $2^{-40}$ therefore bounds every observer's distinguishing advantage by $2^{-41}$." (f) The abstract gains no footnote and simply says "$L_1$ distance". (g) The five-card F4 proposition and every other bound say "$L_1$ distance" with no re-explanation. No printed constant changes. |
+| D22 | ONE distance standard from beginning to end: the $L_1$ distance $\lVert P-Q\rVert_1$, whose constants match the Rocq lemmas verbatim (infotheo `var_dist`, `variation_dist.v:33`). ONE footnote carries every convention remark; no scattered qualifiers. Edits: (a) delete EVERY occurrence of the word "unhalved" in the paper, grep-driven, wording becomes plain "$L_1$ distance" (known sites include the abstract at line 57, the introduction at 116, 118, 137, the model section lead-in at 253, and the sibling-instances sentence that D20 relocates; the sweep, not this list, is authoritative). (b) Delete the halved-convention block `main.tex:258-267`: the repository-name sentence, the `eq:tv-definition` display, the conversion sentence, and the operational-advantage sentences; their content moves into the footnote. (c) Delete the Section 6 sentence `main.tex:776-777` ("Under the halved convention ... $2^{-41}$ in total variation"), which references the deleted display. (d) The definition display `eq:l1-definition` (`main.tex:254-257`) stays as the body's only formal definition. (e) The footnote attaches to the first in-text bound, the informal Theorem B display in the introduction. Draft: "The $L_1$ distance is $\lVert P-Q\rVert_1=\sum_x\lvert P(x)-Q(x)\rvert$, called variation distance in the formal development, with maximum value 2. The common total variation distance is half of it. An $L_1$ bound of $2^{-40}$ therefore bounds every observer's distinguishing advantage by $2^{-41}$." (f) The abstract gains no footnote and simply says "$L_1$ distance". (g) The five-card F6 proposition and every other bound say "$L_1$ distance" with no re-explanation. No printed constant changes. |
 
 ## Framework rename and cleanup: per-file changes (D16-D18)
 
@@ -398,18 +400,65 @@ lemma of the listing."
 ## New paper section: A First Instance — The Five-Card Family (D19-D21)
 
 Inserted after the framework section, before the PGL construction. Title "A
-First Instance: The Five-Card Family", label `sec:fivecard`. Block order:
+First Instance: The Five-Card Family", label `sec:fivecard`. Anchor-dense
+per D19 (two figures, one listing, one display, one proposition; at most two
+consecutive prose paragraphs anywhere). Block order:
 
 | # | Block | Anchor |
 |---|---|---|
 | F1 | Opener: the simplest instantiation of the framework; five cards, the cyclic group acting by rotation, the three-consecutive-hearts decoder; two classic protocols, one record | prose |
-| F2 | The filled record: compact listing of `five_card_profile` with a source footnote | second `lstlisting` |
-| F3 | The distribution family: biased-weight display plus the epsilon-zero collapse recovering den Boer | display |
-| F4 | Proposition: seven-cut security at bias 1/100, kernel-checked, below `2^-40` | proposition |
-| F5 | Correctness and trace privacy in one short paragraph; one executed program serves both members; committed inputs realize the function-evaluation family of Section 3.1 | prose |
-| F6 | Ramp coda (D21): what the PGL construction adds | prose |
+| F2 | Committed-input flow diagram: Alice and Bob commit card pairs, the dealer assembles and shuffles, the verifier reveals and announces the conjunction | figure (`fig:fivecard-run`) |
+| F3 | The filled record: compact listing of `five_card_profile` with a source footnote | second `lstlisting` |
+| F4 | The distribution family: biased-weight display plus the epsilon-zero collapse recovering den Boer | display |
+| F5 | Case-by-case reveal leakage: six reveal patterns as card rows with their exact mutual-information values, every value a Qed lemma | figure (`fig:fivecard-leakage`) |
+| F6 | Proposition: seven-cut security at bias 1/100, kernel-checked, below `2^-40` | proposition |
+| F7 | Correctness and trace privacy in one short paragraph; one executed program serves both members; committed inputs realize the function-evaluation family of Section 3.1 | prose |
+| F8 | Ramp coda (D21): what the PGL construction adds | prose |
 
-### F2: the listing
+### F2: the committed-input flow diagram
+
+The second sequence diagram of the paper, the committed-input counterpart of
+the run figure, and its caption says so ("the committed-input counterpart of
+Figure~\ref{fig:run}"). Content: actors Alice, Bob (braced "input
+committers"), Dealer, Verifier; messages "two cards encoding $a$", "two
+cards encoding $b$"; dealer actions "assemble the five-card deck", "draw the
+cut, deal"; message "shuffled deck, face down"; verifier action "reveal: are
+the three hearts consecutive"; closing message "announce $a\wedge b$".
+Author fresh in the paper's existing sequence-diagram TikZ style
+(`fig:run`); the talk's den Boer sequence frame
+(`aplas2024-poster/wadtSep17/slides.tex:339-396`) is the content reference.
+
+### F5: the case-by-case reveal-leakage figure
+
+Recreates the analysis of the poster Pencil node "denboerCards 2" (node
+`u6aAF5` in `pgg-smc/notes/may18aipv2026/poster.pen`; `notes/` is
+untracked, so the figure is authored fresh in TikZ, reusing the card-row
+style of the paper's encoding figure). Six rows, face-down cards as filled
+squares, revealed cards showing suit; right column gives the mutual
+information with the conjunction:
+
+| Revealed positions | Value (bits) | Lemma |
+|---|---|---|
+| position 0 (one club) | 0 | `leak_k1` |
+| positions 0,1 | about 0.154 | `leak_k2_adj` |
+| positions 0,2 | about 0.119 | `leak_k2_dist2` |
+| positions 0,1,2 | about 0.487 | `leak_k3` |
+| four positions | about 0.811 | `leak_k4` |
+| all five | about 0.811 | `leak_k5` |
+
+The cap is the secret's own entropy `H_secret` $= 2 - \tfrac34\log 3
+\approx 0.811$, since the conjunction is a quarter-biased bit. The figure
+footnote names all seven lemmas in
+`\path{pgg-smc/instances/denboer1989/five_card_leakage.v}` and states one
+closed form as a sample (`leak_k2_adj`: $\tfrac{27}{10} - \tfrac14\log 5 -
+\tfrac{7}{10}\log 7$). Accompanying prose (one paragraph): this is the
+$(k,T)$ ramp of the framework's threshold obligation made concrete, one
+card reveals nothing and the ramp climbs to the cap; the decimals are
+evaluations of the proven closed forms. Card patterns and position sets
+MUST match the `ViewA` sets of the lemmas and a valid den Boer encoding
+(three hearts, two clubs); verified at implementation against the source.
+
+### F3: the listing
 
 ```latex
 \begin{lstlisting}
@@ -425,7 +474,7 @@ Footnote on the lead-in sentence: `Formalized in
 \path{pgg-smc/instances/kim2025/five_card_family.v} as
 \coqin{five\_card\_profile}; the listing elides the three bias hypotheses.`
 
-### F3: the display and the collapse
+### F4: the display and the collapse
 
 Display:
 \[ w_\varepsilon(a^k) = \tfrac{1}{5}-\varepsilon \text{ if } k=0, \qquad
@@ -436,7 +485,7 @@ positive word length, which is the precise sense in which the unbiased member
 is den Boer's protocol. Footnote: `five_card_eps0_eq0` in
 `\path{pgg-smc/instances/kim2025/five_card_family.v}`.
 
-### F4: the proposition
+### F6: the proposition
 
 Statement (adapting the relocated Section 7 sentence, D20, with the D22
 wording): for bias $1/100$ and seven repeated cuts, every single-card
@@ -444,7 +493,7 @@ endpoint distribution is within $L_1$ distance $2^{-40}$ of uniform, and the
 kernel checks the computation. Footnote: `kim_bound_centi` and
 `kim_deal_centi_lt` in `\path{pgg-smc/instances/kim2025/five_card_kim.v}`.
 
-### F5: correctness and trace privacy
+### F7: correctness and trace privacy
 
 Content points: the two members share one executed program, so correctness
 transfers verbatim (`kim_procs := den_boer_procs`, `kim_run_recovers` by the
@@ -455,7 +504,7 @@ entropy equal to its plain entropy (`kim_trace_secrecy`, statement verified
 against `kim_trace.v:46-49`). Also relocates the den Boer uniform-cut
 exactness sentence (D20). Forward reference to the sibling-instances table.
 
-### F6: the ramp coda
+### F8: the ramp coda
 
 One short paragraph, per D21: the five-card family keeps the group cyclic
 and the deck small enough for kernel enumeration; the next sections
@@ -475,14 +524,14 @@ word certificates proven without computing in the group.
   source file per the mapping in Verification requirement 3.
 - Section 3.2 (Generic Theorems) body is unchanged. The only edit outside
   Section 3.1 is the preamble `\lstset` addition.
-- Expected page growth: about two and a half pages across both deliverables
-  (17 to about 19.5). No page constraint is in force.
+- Expected page growth: about three and a half pages across the deliverables
+  (17 to about 20.5). No page constraint is in force.
 
 ## Verification requirements
 
 1. `latexmk -g -pdf -halt-on-error -interaction=nonstopmode main.tex` exits 0;
    `grep -E "^!" main.log` empty; no undefined or multiply-defined references.
-2. Page count recorded before and after (expected 17 to about 19.5).
+2. Page count recorded before and after (expected 17 to about 20.5).
 3. Grep check, identifier to source file: `mp_M`, `mp_secretT`, `mp_PI`,
    `mp_security`, `mp_plug`, `run_party`, `run_verifier`, `run_recover`,
    `profile_eps`, `profile_k`, `profile_anonymous`, `profile_private`,
@@ -532,7 +581,10 @@ word certificates proven without computing in the group.
     `kim_bound_centi`, `kim_deal_centi_lt` in
     `pgg-smc/instances/kim2025/five_card_kim.v`; `kim_procs`,
     `kim_run_recovers` in `pgg-smc/instances/kim2025/kim_run.v`;
-    `kim_trace_secrecy` in `pgg-smc/instances/kim2025/kim_trace.v`.
+    `kim_trace_secrecy` in `pgg-smc/instances/kim2025/kim_trace.v`;
+    `leak_k1`, `leak_k2_adj`, `leak_k2_dist2`, `leak_k3`, `leak_k4`,
+    `leak_k5`, `H_secret` in
+    `pgg-smc/instances/denboer1989/five_card_leakage.v`.
 13. Renumbering integrity: after the section insertion, zero hard-coded
     section numbers in `main.tex` prose (grep for literal "Section" followed
     by a digit), every `\ref`/`\label` resolves, and the Theorems A and B
@@ -545,6 +597,13 @@ word certificates proven without computing in the group.
     two (spot-check every `2^{-40}`, `2^{-39}`, and `2^{-41}` site against
     the named lemma; `2^{-41}` should survive only inside the footnote);
     the footnote wording passes the style sweeps.
+15. Reveal-leakage figure fidelity (F5): each row's decimal is recomputed
+    from its lemma's closed form; each row's revealed-position set matches
+    the `ViewA` argument of its lemma; the shown card values form a valid
+    den Boer arrangement of three hearts and two clubs consistent with the
+    revealed positions; the flow diagram's messages match the executed
+    program roles of `den_boer_run.v`. Input sources: the lemma statements
+    in `five_card_leakage.v` and the inspected Pencil node.
 
 ## Out of scope
 
