@@ -157,48 +157,13 @@ and other future directions.
 
 \section{Protocol and Security Model}\label{sec:model}
 
-A run of the protocol handles one secret bit and eight face-down cards. A
-dealer encodes the secret as a valid arrangement of the eight cards. The
-dealer then samples a shuffle from a finite group and rearranges the deck by
-its permutation action. Each of eight players receives the card at one
-position. The players reveal their cards to a verifier, and the verifier
-decodes the secret from the revealed arrangement. Figure~\ref{fig:run}
-shows this flow.
-
-\begin{figure}[H]
-  \centering
-  \resizebox{.92\linewidth}{!}{%
-  \begin{tikzpicture}[
-     actor/.style={draw,rounded corners,fill=blue!12,minimum width=16mm,
-       minimum height=7mm,font=\small\bfseries},
-     life/.style={dashed,gray!70},
-     msg/.style={-{Latex},thick},
-     act/.style={draw,rounded corners,fill=orange!14,inner sep=3pt,
-       align=center,font=\footnotesize},
-     lbl/.style={midway,above,font=\footnotesize}]
-    \node[actor] (D)  at (0,0)    {Dealer};
-    \node[actor] (P)  at (5.5,0)  {Players};
-    \node[actor] (V)  at (10.8,0) {Verifier};
-    \draw[decorate,decoration={brace,amplitude=5pt,raise=2pt}]
-      (4.2,0.45) -- (6.8,0.45)
-      node[midway,above=5pt,font=\footnotesize]{eight players, one card each};
-    \draw[life] (0,-0.4)    -- (0,-4.6);
-    \draw[life] (5.5,-0.4)  -- (5.5,-4.6);
-    \draw[life] (10.8,-0.4) -- (10.8,-4.6);
-    \node[act,anchor=west] at (0.15,-0.85)
-      {encode secret $s$\\ as the deck $D_s$};
-    \node[act,anchor=west] at (0.15,-1.95)
-      {sample a shuffle $g$,\\ rearrange to $\rho(g)D_s$};
-    \draw[msg] (0,-2.75) -- (5.5,-2.75) node[lbl]{deal one card per position};
-    \draw[msg] (5.5,-3.45) -- (10.8,-3.45) node[lbl]{reveal all cards};
-    \node[act,anchor=east] at (10.65,-4.15)
-      {decode the class of the\\ heart positions $\to s$};
-  \end{tikzpicture}}
-  \caption{One protocol run. The shuffle $g$ is drawn from the uniform
-  distribution $U_G$ in the uniform-shuffle model and from the word
-  distribution $\worddist$ in the word-shuffle model.}
-  \label{fig:run}
-\end{figure}
+A run of the protocol handles one secret and a deck of face-down cards. A
+dealer encodes the secret as a valid arrangement of the deck. The dealer
+then samples a shuffle from a finite group and rearranges the deck by its
+permutation action. Each player receives the card at one position. The
+players reveal their cards to a verifier, and the verifier decodes the
+secret from the revealed arrangement. Each instance section shows its own
+run as a flow diagram.
 
 Security rests on the shuffle alone. A player sees one card, and a
 coalition sees the cards at its positions. The shuffle spreads every small
@@ -254,8 +219,8 @@ curious players learn. The protocol has no private player inputs. Active
 deviation, security after the verifier's reveal, and composition across
 executions are outside the model.
 
-The word-shuffle model describes the dealer of Figure~\ref{fig:run}
-performing the shuffle as a sequence of physical cuts. It replaces $U_G$ by $\mu^{*L}$. I measure two distributions $P$
+The word-shuffle model describes the dealer performing the shuffle as a
+sequence of physical cuts. It replaces $U_G$ by $\mu^{*L}$. I measure two distributions $P$
 and $Q$ by the $L_1$ distance
 \begin{equation}
   \lVert P-Q\rVert_1=\sum_x\lvert P(x)-Q(x)\rvert.
@@ -537,6 +502,44 @@ This section supplies the instance column of Table~\ref{tab:bridge}. The
 group is $\PG$, the action permutes the eight projective points, the
 shuffle distribution draws uniform generator letters, and the decoder reads
 the orbit class.
+
+\begin{figure}[H]
+  \centering
+  \resizebox{.92\linewidth}{!}{%
+  \begin{tikzpicture}[
+     actor/.style={draw,rounded corners,fill=blue!12,minimum width=16mm,
+       minimum height=7mm,font=\small\bfseries},
+     life/.style={dashed,gray!70},
+     msg/.style={-{Latex},thick},
+     act/.style={draw,rounded corners,fill=orange!14,inner sep=3pt,
+       align=center,font=\footnotesize},
+     lbl/.style={midway,above,font=\footnotesize}]
+    \node[actor] (D)  at (0,0)    {Dealer};
+    \node[actor] (P)  at (5.5,0)  {Players};
+    \node[actor] (V)  at (10.8,0) {Verifier};
+    \draw[decorate,decoration={brace,amplitude=5pt,raise=2pt}]
+      (4.2,0.45) -- (6.8,0.45)
+      node[midway,above=5pt,font=\footnotesize]{eight players, one card each};
+    \draw[life] (0,-0.4)    -- (0,-4.6);
+    \draw[life] (5.5,-0.4)  -- (5.5,-4.6);
+    \draw[life] (10.8,-0.4) -- (10.8,-4.6);
+    \node[act,anchor=west] at (0.15,-0.85)
+      {encode secret $s$\\ as the deck $D_s$};
+    \node[act,anchor=west] at (0.15,-1.95)
+      {sample a shuffle $g$,\\ rearrange to $\rho(g)D_s$};
+    \draw[msg] (0,-2.75) -- (5.5,-2.75) node[lbl]{deal one card per position};
+    \draw[msg] (5.5,-3.45) -- (10.8,-3.45) node[lbl]{reveal all cards};
+    \node[act,anchor=east] at (10.65,-4.15)
+      {decode the class of the\\ heart positions $\to s$};
+  \end{tikzpicture}}
+  \caption{One $\PG$ run: eight players, one card each, no player inputs,
+  and the verifier decodes the orbit class of the heart positions. The
+  shuffle $g$ is drawn from the uniform distribution $U_G$ in the
+  uniform-shuffle model and from the word distribution $\worddist$ in the
+  word-shuffle model. This is the no-input counterpart of
+  Figure~\ref{fig:fivecard-run}.}
+  \label{fig:run}
+\end{figure}
 
 Let $\mathbb{P}^1(\mathbb{F}_7)$ be the projective line over the field with
 seven elements. It has eight points. The group $\PG$ acts on these points by
