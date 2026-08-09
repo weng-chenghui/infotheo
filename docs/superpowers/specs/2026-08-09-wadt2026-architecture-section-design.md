@@ -447,8 +447,9 @@ Content points: the two members share one executed program, so correctness
 transfers verbatim (`kim_procs := den_boer_procs`, `kim_run_recovers` by the
 den Boer proof); the committed inputs of the two players realize the
 function-evaluation family of Section 3.1 with den Boer's input encoding; a
-single corrupted player's executed trace reveals nothing about the other
-input (`kim_trace_secrecy`). Also relocates the den Boer uniform-cut
+single corrupted player's executed trace leaves the secret's conditional
+entropy equal to its plain entropy (`kim_trace_secrecy`, statement verified
+against `kim_trace.v:46-49`). Also relocates the den Boer uniform-cut
 exactness sentence (D20). Forward reference to the sibling-instances table.
 
 ### F6: the ramp coda
