@@ -110,3 +110,10 @@ End witness.
     @main bound: coalitions of at most three cards are private, k = 4. *)
 Lemma profile_k_pgl27 (R : realType) : profile_k (pgl27_profile R) = 4.
 Proof. by []. Qed.
+
+(** profile_eps_pgl27 — the PGL(2,7) profile's security character is zero:
+    perfect single-position endpoint uniformity.
+    @main security: the eps read off pgl27_profile is 0. *)
+Lemma profile_eps_pgl27 (R : realType) :
+  @profile_eps R (pgl27_profile R) = 0%R.
+Proof. by []. Qed.

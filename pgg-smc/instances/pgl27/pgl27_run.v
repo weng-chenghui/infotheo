@@ -35,6 +35,7 @@ From pgg_smc Require Import pgl27_group pgl27_scheme pgl27_profile.
 From pgg_smc Require Import card_exchange_pismc pgg_input_commitment pgg_run.
 Require Import smc_interpreter pismc smc_session_types.
 From pgg_reconstruct Require Import covering_scheme pgg_sharing_framework.
+From pgg_smc Require Import pgg_monodromy_profile.
 
 Set Implicit Arguments.
 Unset Strict Implicit.
@@ -202,3 +203,25 @@ have Hgoal : forall (ep : seq 'I_(pgg_N' pgl27_M).+1)
 apply: Hgoal.
 exact: pgl27_endpoints.
 Qed.
+
+(** run_recover_pgl27 — the executed PGL(2,7) run decodes through the
+    profile's derived decoder.
+    @main architecture: the verifier's executed endpoints reconstruct the
+    dealt secret via run_recover of pgl27_profile, for any cut in the
+    group. *)
+Corollary run_recover_pgl27 (R : realType) (s : bool) (w0 : pgg_gT pgl27_M) :
+  w0 \in pgg_G pgl27_M ->
+  @run_recover R (pgl27_profile R)
+    (tcast (pgl27_endpoints_size s w0)
+       (in_tuple (endpoints_of_trace
+          (nth [::] (run_interp pgl27_fuel (pgl27_procs s w0)).2 1))))
+  = s.
+Proof. exact: pgl27_run_recovers. Qed.
+
+(** run_party_pgl27 — each executed PGL(2,7) player is the profile's derived
+    player role at its ordinal.
+    @main architecture: the instance's player processes coincide with
+    run_party of pgl27_profile. *)
+Corollary run_party_pgl27 (R : realType) (i : 'I_(pi_T' pgl27_PI).+1) :
+  @run_party R (pgl27_profile R) i = exchange_player pgl27_PI i.
+Proof. by []. Qed.
