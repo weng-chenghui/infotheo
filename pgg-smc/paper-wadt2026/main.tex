@@ -10,6 +10,7 @@
 \usepackage{hyperref}
 \hypersetup{hidelinks}
 \usepackage{listings}
+\lstset{basicstyle=\ttfamily\footnotesize,columns=fullflexible,keepspaces=true,breaklines=true,xleftmargin=2mm,aboveskip=2pt,belowskip=2pt}
 \usepackage{microtype}
 \usepackage{needspace}
 \usepackage{xcolor}
@@ -308,13 +309,15 @@ $2^{-39}$.
 
 \subsection{Framework Architecture}
 
-A protocol instance supplies an action, a shuffle-security bound, and a
-decoder. The framework packages these components and uses them in one
-executable protocol. Its finite algebraic structures use Mathematical
-Components~\cite{MathComp}. The framework records carry the data of
-Equation~\ref{eq:model-data} into that executable protocol, and
-Table~\ref{tab:bridge} maps each datum to its record role and to the values
-the $\PG$ instance supplies.
+An instance is specified by filling one record. The record type
+\coqin{MonodromyProfile} has five fields, and they carry the data of
+Equation~\ref{eq:model-data} into the executable protocol: the group with
+its action and generators, the secret type, the layout of a run, the
+shuffle-security bound, and the decoder. Here $R$ is the real closed field
+of Equation~\ref{eq:model-data}, not a protocol datum. The finite algebraic
+structures use Mathematical Components~\cite{MathComp}, and
+Table~\ref{tab:bridge} maps each model datum to its record role and to the
+values the $\PG$ instance supplies.
 
 \begin{table}[t]
   \centering
@@ -337,12 +340,116 @@ the $\PG$ instance supplies.
   \label{tab:bridge}
 \end{table}
 
+The central record and its derived protocol follow.\footnote{Formalized in
+\path{pgg-smc/protocol/pgg_monodromy_profile.v}. The listing elides
+argument types and implicit parameters.}
+
+\begin{lstlisting}
+Record MonodromyProfile (R : realType) := MkMonodromyProfile {
+  (* the group, its action, and its generators *)
+  mp_M        : MonodromyReprWithGeneratorType ;
+  mp_secretT  : Type ;                   (* secret type    *)
+  mp_PI       : PGGInterface mp_M ;      (* run layout     *)
+  mp_security : SecurityWitness R mp_M ; (* endpoint bound *)
+  mp_plug     : ReconPlug mp_M mp_secretT }. (* decoder    *)
+
+Section protocol_of_profile. (* the protocol of profile mp *)
+Definition run_party i    := exchange_player PI i.
+Definition run_verifier   := exchange_verifier PI players.
+Definition run_recover c  := ts_recon (rp_scheme plug) c.
+Definition profile_eps  : R  := sw_bound_eps (mp_security mp).
+Definition profile_k : nat   := ts_k (rp_scheme plug).
+Definition profile_anonymous := sw_bound (mp_security mp).
+Definition profile_private   := ts_private (rp_scheme plug).
+
+Lemma profile_recon_encode s :
+  run_recover (ts_encode (rp_scheme plug) s) = s.
+Proof. exact: ts_correct (ts_encode_valid (rp_scheme plug) s). Qed.
+\end{lstlisting}
+
+Filling the record means discharging three proof obligations.
+\begin{itemize}
+\item Every single card position lands close to uniform: \coqin{sw\_bound}
+  bounds the distance of each position's endpoint distribution from the
+  uniform distribution by \coqin{sw\_bound\_eps}.
+\item The threshold scheme recovers and hides: \coqin{ts\_correct} decodes
+  every valid share tuple to its secret, and \coqin{ts\_private} gives
+  every coalition below the threshold a share pattern that is equally
+  consistent with either secret.
+\item Reconstruction is shuffle-invariant: for any allowed shuffle and any
+  valid share tuple, \coqin{rp\_recon\_invariant} states that permuting the
+  shares by the shuffle leaves the recovered secret unchanged.
+\end{itemize}
+
+Once the record is filled, the \coqin{protocol\_of\_profile} section
+derives the players, the verifier, and the recovery map as definitions
+over the fields. It re-exports the certified characters and proves the
+round-trip correctness lemma \coqin{profile\_recon\_encode} in one line
+from the record's obligations, so no new proof obligation arises at wiring
+time. In the worked instance the players and the verifier are exactly the
+generic processes at its layout record, and the dealer is the same generic
+dealing program carrying the instance's own content readout. Each player
+coincides with the derived role, the correctness is restated through the
+shared decoder, and the characters are read off the shared
+definitions.\footnote{\coqin{run\_party\_pgl27} and
+\coqin{run\_recover\_pgl27} in
+\path{pgg-smc/instances/pgl27/pgl27_run.v}, \coqin{profile\_k\_pgl27} and
+\coqin{profile\_eps\_pgl27} in
+\path{pgg-smc/instances/pgl27/pgl27_profile.v}.} The threshold character
+has value four under the successor convention, so the largest private
+coalition size is three.
+
 A small process interpreter executes the layout record. It originates in
-the earlier FORTE development~\cite{WengEtAl2025} and produces the executed
-traces of Section~\ref{sec:model}. An instance supplies the third column of
-Table~\ref{tab:bridge} and receives the executable protocol together with
-the generic theorems below. Section~\ref{sec:pgl} is the worked
-instantiation.
+the earlier FORTE development~\cite{WengEtAl2025} and produces the
+executed traces of Section~\ref{sec:model}. The group, its action, and its
+shuffle distribution fix the dealing and the endpoint bound, and the
+decoder is an independent choice, so instances over the same group differ
+only in the reconstruction component.
+Figure~\ref{fig:framework-architecture} shows the dependencies.
+
+The record path certifies correctness, endpoint uniformity, and the
+sharing threshold. The coalition-view, trace, and word-shuffle privacy
+theorems of Sections~\ref{sec:exact} and~\ref{sec:mixing} are stated
+separately. They consume the transitivity of the action and the shuffle
+distribution directly, not the record fields. The two optional slots of
+the security witness encode the proof mechanism, and
+Table~\ref{tab:witness-mechanism} shows the realized combinations.
+Section~\ref{sec:pgl} is the difficult worked instantiation.
+
+\begin{table}[H]
+  \centering
+  \small
+  \begin{tabular}{@{}llL{.34\linewidth}L{.22\linewidth}@{}}
+    \toprule
+    Exact slot & Asymptotic slot & Mechanism & Realized by \\
+    \midrule
+    present & absent & exact equality at $\varepsilon=0$ under the uniform
+      group distribution & den Boer, $\PG$ \\
+    present & present & exact count with geometric decay in the word
+      length & Kim \\
+    absent & present & spectral certificate with an imported gap premise
+      & $S_5$, $S_5\times S_5$ \\
+    \bottomrule
+  \end{tabular}
+  \caption{Realized combinations of the security witness's two optional
+  slots. Section~\ref{sec:mixing} treats the word-shuffle counterpart of
+  the $\PG$ row, Section~\ref{sec:fivecard} proves the den Boer and Kim
+  rows, and Table~\ref{tab:instances} records the per-instance evidence.}
+  \label{tab:witness-mechanism}
+\end{table}
+
+With an \coqin{InputEncoding}, a commit prologue collects the players'
+inputs and assembles the dealt deck from them, so the same flow evaluates
+a function of committed inputs. The realized encoding is den Boer's. Its
+obligation \coqin{ie\_orbit} places equal-output inputs in one shuffle
+orbit, and its derived lemma \coqin{ie\_output\_correct} shows the
+shuffled layout reconstructs the output for every allowed shuffle. The Kim
+variant reuses the den Boer program unchanged. With an empty input list
+the prologue reduces by computation to the plain dealer, which is the
+secret-sharing case, and the $\PG$ instance passes exactly this empty
+list. Section~\ref{sec:fivecard} realizes the committed-input flow, and
+the instance table of Section~\ref{sec:instances} records the full
+landscape.
 
 \begin{figure}[H]
   \centering
@@ -374,15 +481,14 @@ instantiation.
   \coqin{ReconPlug}). Green boxes denote supporting records
   (\coqin{SecurityExact}, \coqin{SecurityAsymptotic},
   \coqin{ThresholdScheme}, \coqin{InputEncoding}). Arrows denote
-  dependencies.}
+  dependencies. Filling the three component records yields the derived
+  protocol roles, the certified characters, and the round-trip lemma of
+  the listing.}
   \label{fig:framework-architecture}
 \end{figure}
 
-The supporting records refine individual components. Exact and asymptotic
-security records justify endpoint bounds, a threshold scheme supplies
-sharing and reconstruction data, and an input encoding adds committed
-inputs when a protocol needs them. The next subsection states the generic
-theorems derived from these records.
+The next subsection states the generic theorems the framework supplies to
+every instance.
 
 \subsection{Generic Theorems}
 
