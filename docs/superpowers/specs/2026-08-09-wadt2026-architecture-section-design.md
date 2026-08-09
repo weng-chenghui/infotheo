@@ -1,6 +1,6 @@
 # WADT2026 Architecture Section Expansion — Design Spec
 
-Date: 2026-08-09 (rev 8: D22 fixes the distance-convention policy — unhalved L1 everywhere matching the code, with a convention footnote at the introduction's first use)
+Date: 2026-08-09 (rev 9: D22 tightened to a single-standard policy — one L1 convention end to end, one footnote, all scattered convention remarks deleted)
 Target: `pgg-smc/paper-wadt2026/main.tex`, Section 3.1 (Framework Architecture)
 Status: for user review
 
@@ -164,7 +164,7 @@ certificates), `mp_secretT` (type plumbing), the `CoveringScheme`/
 | D19 | A new top-level section "A First Instance: The Five-Card Family" (label `sec:fivecard`) is inserted between the framework section and the PGL construction. It presents den Boer and Kim as one record, `five_card_profile` at bias epsilon, with a compact second listing, the biased-distribution display, the epsilon-zero collapse, and the seven-cut kernel bound as a Proposition. All results stay at Lemma/Proposition level; Theorems A and B remain the only named theorems. Expected length 1 to 1.5 pages. Sections renumber automatically; the PGL construction becomes Section 5. |
 | D20 | Section 7 (Other Instances) transfers its den Boer and Kim mixing prose (`main.tex:889-895`) to the new section; the consolidated instance table keeps all five rows, and the trust-base paragraph and the S5 and S5xS5 prose stay in Section 7. Section 7's opener sentence is adjusted so it introduces the two remaining sibling instances plus the table. |
 | D21 | Section 3.1's five-card forward references (mechanism-table caption, two-families paragraph) point at `sec:fivecard`; the new section's coda is the ramp sentence into the PGL construction, naming what the difficult instance adds: coalitions beyond one card via three-transitivity, an orbit-class secret, and certificates without `vm_compute` on the group. |
-| D22 | Distance-convention policy: every printed bound stays in the code's unhalved L1 convention (infotheo `var_dist(P,Q) = sum_x abs(P x - Q x)`, maximum 2, `variation_dist.v:33`), so each constant matches its Rocq lemma verbatim; no constant is converted to halved total variation anywhere. A convention footnote is added at the FIRST in-text occurrence of the distance, the informal Theorem B display in the introduction (`main.tex:116-118`). Footnote draft: "The distance is the unhalved sum $\sum_x\lvert P(x)-Q(x)\rvert$, written \coqin{var\_dist} in the formal development, with maximum value 2. The common total variation distance is half of it. Every $L_1$ bound of $2^{-40}$ in this paper is therefore a total variation bound of $2^{-41}$." The abstract keeps the word "unhalved" and gains no footnote. The existing model-section displays (`main.tex:253-265`) and the Theorem A/B capstone wordings are unchanged; the five-card section's F4 proposition uses the same "unhalved $L_1$" wording and no re-explanation. |
+| D22 | ONE distance standard from beginning to end: the $L_1$ distance $\lVert P-Q\rVert_1$, whose constants match the Rocq lemmas verbatim (infotheo `var_dist`, `variation_dist.v:33`). ONE footnote carries every convention remark; no scattered qualifiers. Edits: (a) delete EVERY occurrence of the word "unhalved" in the paper, grep-driven, wording becomes plain "$L_1$ distance" (known sites include the abstract at line 57, the introduction at 116, 118, 137, the model section lead-in at 253, and the sibling-instances sentence that D20 relocates; the sweep, not this list, is authoritative). (b) Delete the halved-convention block `main.tex:258-267`: the repository-name sentence, the `eq:tv-definition` display, the conversion sentence, and the operational-advantage sentences; their content moves into the footnote. (c) Delete the Section 6 sentence `main.tex:776-777` ("Under the halved convention ... $2^{-41}$ in total variation"), which references the deleted display. (d) The definition display `eq:l1-definition` (`main.tex:254-257`) stays as the body's only formal definition. (e) The footnote attaches to the first in-text bound, the informal Theorem B display in the introduction. Draft: "The $L_1$ distance is $\lVert P-Q\rVert_1=\sum_x\lvert P(x)-Q(x)\rvert$, called variation distance in the formal development, with maximum value 2. The common total variation distance is half of it. An $L_1$ bound of $2^{-40}$ therefore bounds every observer's distinguishing advantage by $2^{-41}$." (f) The abstract gains no footnote and simply says "$L_1$ distance". (g) The five-card F4 proposition and every other bound say "$L_1$ distance" with no re-explanation. No printed constant changes. |
 
 ## Framework rename and cleanup: per-file changes (D16-D18)
 
@@ -438,11 +438,11 @@ is den Boer's protocol. Footnote: `five_card_eps0_eq0` in
 
 ### F4: the proposition
 
-Statement (adapting the relocated Section 7 sentence, D20): for bias
-$1/100$ and seven repeated cuts, every single-card endpoint distribution is
-within $2^{-40}$ of uniform in unhalved $L_1$ distance, and the kernel checks
-the computation. Footnote: `kim_bound_centi` and `kim_deal_centi_lt` in
-`\path{pgg-smc/instances/kim2025/five_card_kim.v}`.
+Statement (adapting the relocated Section 7 sentence, D20, with the D22
+wording): for bias $1/100$ and seven repeated cuts, every single-card
+endpoint distribution is within $L_1$ distance $2^{-40}$ of uniform, and the
+kernel checks the computation. Footnote: `kim_bound_centi` and
+`kim_deal_centi_lt` in `\path{pgg-smc/instances/kim2025/five_card_kim.v}`.
 
 ### F5: correctness and trace privacy
 
@@ -537,20 +537,24 @@ word certificates proven without computing in the group.
     section numbers in `main.tex` prose (grep for literal "Section" followed
     by a digit), every `\ref`/`\label` resolves, and the Theorems A and B
     literal-text mentions are untouched.
-14. Distance-convention check (D22): the convention footnote is present on
-    the introduction's first in-text distance occurrence; every displayed
-    bound site says "unhalved" or sits inside a `\lVert...\rVert_1` formula;
-    no constant in the paper differs from its Rocq counterpart by a factor
-    of two (spot-check every `2^{-40}`, `2^{-39}`, and `2^{-41}` site
-    against the named lemma); the footnote wording passes the style sweeps.
+14. Distance-convention check (D22): exactly one footnote mentions total
+    variation; zero occurrences of "unhalved", "halved", or "total
+    variation" anywhere else in the paper; the label `eq:tv-definition` is
+    gone and nothing references it; `eq:l1-definition` still resolves; no
+    constant in the paper differs from its Rocq counterpart by a factor of
+    two (spot-check every `2^{-40}`, `2^{-39}`, and `2^{-41}` site against
+    the named lemma; `2^{-41}` should survive only inside the footnote);
+    the footnote wording passes the style sweeps.
 
 ## Out of scope
 
 - Any edit to the model section, the generic-theorems subsection, the PGL
   construction and its two results sections, related work, and the
   conclusion, beyond the automatic renumbering the D19 insertion causes. The
-  single exception is the D22 convention footnote, the only edit to the
-  introduction.
+  single exception is D22, whose complete edit list (the grep-driven
+  "unhalved" sweep, the two deletions in the model and mixing sections, and
+  the one introduction footnote) is enumerated in the decision itself; D22
+  authorizes those edits and no others.
 - The sibling-instances section keeps its consolidated table (all five
   rows), its trust-base paragraph, and its S5 and S5xS5 prose; it loses only
   the den Boer and Kim mixing paragraph (D20) and gets an adjusted opener.
