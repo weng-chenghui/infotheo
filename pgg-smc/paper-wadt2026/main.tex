@@ -516,7 +516,7 @@ Figure~\ref{fig:fivecard-run} shows a run.
      msg/.style={-{Latex},thick},
      act/.style={draw,rounded corners,fill=orange!14,inner sep=3pt,
        align=center,font=\footnotesize},
-     lbl/.style={midway,above,font=\footnotesize}]
+     lbl/.style={midway,above,font=\footnotesize,fill=white,inner sep=1.5pt}]
     \node[actor] (A) at (0,0)    {Alice};
     \node[actor] (B) at (2.9,0)  {Bob};
     \node[actor] (D) at (6.6,0)  {Dealer};
@@ -545,7 +545,7 @@ Figure~\ref{fig:fivecard-run} shows a run.
     \draw[msg] (10.0,-4.35) -- (13.2,-4.35) node[lbl]{reveal all cards};
     \node[act,anchor=east] at (13.05,-5.0)
       {read: are the three hearts consecutive};
-    \draw[msg] (13.2,-5.5) -- (0,-5.5) node[lbl]{announce $a\wedge b$};
+    \draw[msg] (13.2,-5.5) -- (0,-5.5) node[lbl,pos=0.64]{announce $a\wedge b$};
   \end{tikzpicture}}
   \caption{One five-card run with committed inputs. The physical protocol
   commits each input bit as two face-down cards, and the formalization
@@ -553,6 +553,7 @@ Figure~\ref{fig:fivecard-run} shows a run.
   \label{fig:fivecard-run}
 \end{figure}
 
+\needspace{5\baselineskip}
 The central record and the profile that fills it
 follow.\footnote{Formalized in
 \path{pgg-smc/instances/kim2025/five_card_family.v} as
