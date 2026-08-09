@@ -10,7 +10,7 @@
 \usepackage{hyperref}
 \hypersetup{hidelinks}
 \usepackage{listings}
-\lstset{basicstyle=\ttfamily\footnotesize,columns=fullflexible,keepspaces=true,breaklines=true,xleftmargin=2mm,aboveskip=2pt,belowskip=2pt}
+\lstset{basicstyle=\ttfamily\footnotesize,columns=fullflexible,keepspaces=true,breaklines=true,xleftmargin=2mm,aboveskip=2pt,belowskip=6pt}
 \usepackage{microtype}
 \usepackage{needspace}
 \usepackage{xcolor}
@@ -344,6 +344,7 @@ The central record and its derived protocol follow.\footnote{Formalized in
 \path{pgg-smc/protocol/pgg_monodromy_profile.v}. The listing elides
 argument types and implicit parameters.}
 
+\needspace{7\baselineskip}
 \begin{lstlisting}
 Record MonodromyProfile (R : realType) := MkMonodromyProfile {
   (* the group, its action, and its generators *)
@@ -416,10 +417,11 @@ the security witness encode the proof mechanism, and
 Table~\ref{tab:witness-mechanism} shows the realized combinations.
 Section~\ref{sec:pgl} is the difficult worked instantiation.
 
-\begin{table}[H]
+\begin{table}[t]
+  \setlength{\tabcolsep}{6pt}
   \centering
   \small
-  \begin{tabular}{@{}llL{.34\linewidth}L{.22\linewidth}@{}}
+  \begin{tabular}{@{}llL{.32\linewidth}L{.20\linewidth}@{}}
     \toprule
     Exact slot & Asymptotic slot & Mechanism & Realized by \\
     \midrule
