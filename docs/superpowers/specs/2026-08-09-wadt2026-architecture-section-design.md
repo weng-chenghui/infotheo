@@ -1,6 +1,6 @@
 # WADT2026 Architecture Section Expansion — Design Spec
 
-Date: 2026-08-09 (rev 4: audits resolved; D14 adds the in-kernel-validated corollary `run_recover_pgl27` so the derived decoder has a real consumer)
+Date: 2026-08-09 (rev 5: D14 adds in-kernel-validated corollaries `run_recover_pgl27` and `run_party_pgl27`; D15 records why `run_verifier` and `run_dealer` get no examples)
 Target: `pgg-smc/paper-wadt2026/main.tex`, Section 3.1 (Framework Architecture)
 Status: for user review
 
@@ -50,7 +50,7 @@ Every claim in the new prose is grounded in one of these. First check
 | Generic input-commit dealer `dealer_with_input_encoding` | `pgg-smc/protocol/pgg_run.v:45-51` |
 | Realized witness combinations: den Boer present/absent at eps 0 (`uniform_security_witness`), Kim present/present (`fc_kim_security_witness`), S5 and S5xS5 absent/present (`s5_security_witness_schreier`, s5x5 witness), PGL present/absent at eps 0 under the uniform group distribution (`pgl27_security` over `pgl27_rho_dist`) | `pgg_uniform_security.v:186-190`, `five_card_kim.v:507-517`, `rigidity_s5_instance.v:200-207`, `rigidity_s5x5_instance.v:278-281`, `pgl27_profile.v:63,97-99` |
 | PGL profile value: `pgl27_profile = MkMonodromyProfile pgl27_M bool pgl27_PI pgl27_security pgl27_plug` | `pgg-smc/instances/pgl27/pgl27_profile.v:104-105` |
-| New corollary `run_recover_pgl27` (D14): statement and proof `exact: pgl27_run_recovers. Qed.` validated in-kernel via rocq-mcp preamble session over the compiled chain | this spec, New Rocq code section, 2026-08-09 |
+| New corollaries `run_recover_pgl27` (proof `exact: pgl27_run_recovers.`) and `run_party_pgl27` (proof `by [].`) validated in-kernel via rocq-mcp preamble session over the compiled chain; `run_verifier` equality fails elaboration (list-dependent session type), `run_dealer` equality is false (content readout) | this spec, New Rocq code section, 2026-08-09 |
 | `listings` package already loaded, no `\lstset` yet; `\coqin` = `\texttt`; no listing environment exists in the paper | `main.tex:12,21` |
 | `fig:framework-architecture` is labeled but never `\ref`ed in the current paper | grep of `main.tex` |
 
@@ -98,19 +98,19 @@ derivation):
   consume the word distribution and the transfer lemmas only. Theorem B's
   correctness clause reuses `ts_recon` of the scheme, as recorded above.
 
-Orphan honesty (per the load-bearing rule): `run_dealer`, `run_party`,
-`run_verifier`, `run_eps`, `run_anonymous`, `run_private`, and the generic
-`run_recovers` have no downstream consumers. `run_recover` gains one with
-this spec: the new corollary `run_recover_pgl27` (see New Rocq code below)
-restates the executed-trace correctness through the profile's derived
-decoder, validated in-kernel 2026-08-09. The prose therefore presents the
-`run_profile` section as the framework's uniform derivation and grounds it
-with the three facts that ARE load-bearing: the instance's executed players
-and verifier are the same `exchange_*` processes at its layout record, its
-executed-trace correctness is restated through the shared decoder
-(`run_recover_pgl27`), and `run_k` is read off per instance. No sentence may
-say the PGL instance obtains its dealer or verifier from `run_dealer` or
-`run_verifier`.
+Orphan honesty (per the load-bearing rule): `run_dealer`, `run_verifier`,
+`run_eps`, `run_anonymous`, `run_private`, and the generic `run_recovers`
+have no downstream consumers. `run_recover` and `run_party` gain consumers
+with this spec: the new corollaries `run_recover_pgl27` and `run_party_pgl27`
+(see New Rocq code below), both validated in-kernel 2026-08-09. The prose
+therefore presents the `run_profile` section as the framework's uniform
+derivation and grounds it with the facts that ARE load-bearing: each executed
+player coincides with the derived player role (`run_party_pgl27`), the
+verifier is the same generic process at the layout record (read off
+`pgl27_saprocs`), the executed-trace correctness is restated through the
+shared decoder (`run_recover_pgl27`), and `run_k` is read off per instance.
+No sentence may say the PGL instance obtains its dealer or verifier from
+`run_dealer` or `run_verifier` (D15 records why).
 
 Unrelated fields (never oversold): `sw_L` (bookkeeping tag), `sw_asymptotic`
 for the PGL instance (`None`; hosts Kim's, S5's, and S5xS5's decay
@@ -134,7 +134,8 @@ certificates), `mp_secretT` (type plumbing), the `CoveringScheme`/
 | D11 | Recovery modularity gets one explicit sentence: the group, its action, and its shuffle distribution fix the dealing and the endpoint bound, and the decoder is an independent choice, so instances over the same group differ only in the reconstruction component. |
 | D12 | The threshold character is named by meaning ("the largest private coalition size") and the successor convention is stated in the same sentence, so `run_k = 4` never collides with Theorem A's `t = 3` in the reader's head. |
 | D13 | The existing closing paragraph of Section 3.1 (`main.tex:381-385`) is removed, including its sentence "the generic theorems derived from these records", which the boundary sentence contradicts. Block 9 supplies the replacement bridge. |
-| D14 | One new Rocq corollary, `run_recover_pgl27`, is added to `pgg-smc/instances/pgl27/pgl27_run.v` so the paper's framework-usage claim has an in-repo consumer of the derived decoder. The statement and one-line proof are validated in-kernel (rocq-mcp preamble session, 2026-08-09). The `.v` commit runs the two-stage audit gate; the corollary carries a `@main architecture` role tag and the sibling-convention name (matching `run_k_pgl27`). |
+| D14 | Two new Rocq corollaries, `run_recover_pgl27` and `run_party_pgl27`, are added to `pgg-smc/instances/pgl27/pgl27_run.v` so the paper's framework-usage claims have in-repo consumers of the derived decoder and the derived player role. Both statements and one-line proofs are validated in-kernel (rocq-mcp preamble session, 2026-08-09). The `.v` commit runs the two-stage audit gate; the corollaries carry role tags and the sibling-convention names (matching `run_k_pgl27`). |
+| D15 | No example corollary for `run_verifier` or `run_dealer`, each for a verified reason recorded in the New Rocq code section: the verifier equality does not typecheck (session types depend on the player list, and `enum 'I_8` is not convertible to the instance's literal ordinal list, which exists precisely so `vm_compute` can reduce the dealer), and the dealer equality is false (the executed dealer carries the instance's content readout under a commit prologue, while `run_dealer` bakes `rp_content = id`). The paper's verifier and dealer sentences stay grounded by `pgl27_saprocs` and `pgl27_dealer_run` as prose observations. |
 
 ## New Section 3.1 structure
 
@@ -213,11 +214,12 @@ Content points, in order (at most 3 paragraphs):
    (orphan-honest, N1 wording): in the worked instance the players and the
    verifier are exactly the generic processes at its layout record, the dealer
    is the same generic dealing program carrying the instance's own content
-   readout, the executed-trace correctness is restated through the shared
-   decoder (footnote: `run_recover_pgl27` in
-   `\path{pgg-smc/instances/pgl27/pgl27_run.v}`), and the threshold character
-   is read off the shared definition, with value four under the successor
-   convention, so the largest private coalition size is three (D12 wording).
+   readout, each player coinciding with the derived role and the correctness
+   restated through the shared decoder (footnote: `run_party_pgl27` and
+   `run_recover_pgl27` in `\path{pgg-smc/instances/pgl27/pgl27_run.v}`), and
+   the threshold character is read off the shared definition, with value four
+   under the successor convention, so the largest private coalition size is
+   three (D12 wording).
 2. The small process interpreter that executes the layout originates in the
    earlier FORTE development (existing sentence, kept, citation kept). The
    executed traces of Section 2 are its output. Recovery-modularity sentence
@@ -282,15 +284,45 @@ Corollary run_recover_pgl27 (R : realType) (s : bool) (w0 : pgg_gT pgl27_M) :
 Proof. exact: pgl27_run_recovers. Qed.
 ```
 
+```coq
+(** run_party_pgl27 — each executed PGL(2,7) player is the profile's derived
+    player role at its ordinal.
+    @main architecture: the instance's player processes coincide with
+    run_party of pgl27_profile. *)
+Corollary run_party_pgl27 (R : realType) (i : 'I_(pi_T' pgl27_PI).+1) :
+  @run_party R (pgl27_profile R) i = exchange_player pgl27_PI i.
+Proof. by []. Qed.
+```
+
 Validation record: rocq-mcp preamble session over the compiled `.vo` chain
 (imports mirroring `pgl27_run.v` plus `pgl27_run` and
-`pgg_monodromy_profile`); `rocq_check` closed the goal with
-`exact: pgl27_run_recovers. Qed.` in 11 ms. The equality typechecks because
-`run_recover` at `pgl27_profile` unfolds definitionally to
-`ts_recon orbit_scheme` and `mp_secretT (pgl27_profile R)` to `bool`.
+`pgg_monodromy_profile`); `rocq_check` closed `run_recover_pgl27` with
+`exact: pgl27_run_recovers. Qed.` in 11 ms and `run_party_pgl27` with
+`by [].` in 6 ms. The equalities typecheck because `run_recover` at
+`pgl27_profile` unfolds definitionally to `ts_recon orbit_scheme`,
+`mp_secretT (pgl27_profile R)` to `bool`, and `run_party` to
+`exchange_player pgl27_PI`.
 
-The Block 5 grounding sentence cites this corollary in a footnote naming
-`\path{pgg-smc/instances/pgl27/pgl27_run.v}` and `run_recover_pgl27`.
+Rejected candidates, with the verified reasons (D15):
+
+- `run_verifier_pgl27` stating
+  `run_verifier (pgl27_profile R) = exchange_verifier pgl27_PI pgl27_players`
+  FAILS ELABORATION: the verifier's session type depends on the player list
+  (`iter (size players) ...` and a `fold_senv` over the list), `run_verifier`
+  uses `enum 'I_8`, and the instance uses the literal ordinal list of
+  `pgl27_run.v:54-56`, kept literal so the dealer reduces under `vm_compute`.
+  The two lists are extensionally equal but not convertible, so the equality
+  is not even well-typed. The only well-typed variant restates `run_verifier`
+  against `enum 'I_8`, a tautology with no evidential value, and a run-level
+  endpoint equivalence would be a fresh `vm_compute` proof of real cost.
+- `run_dealer_pgl27` as an equality with the executed dealer is FALSE:
+  `rp_content pgl27_plug = id` while `pgl27_dealer_run` deals
+  `tnth (ts_encode orbit_scheme s)` under the commit prologue (audit finding
+  N1).
+
+The Block 5 grounding sentence cites the two added corollaries in a footnote
+naming `\path{pgg-smc/instances/pgl27/pgl27_run.v}`, `run_recover_pgl27`,
+and `run_party_pgl27`.
 
 ### Block 8: figure caption extension
 
@@ -349,9 +381,9 @@ lemma of the listing."
    Input source for this verification: the corollary validated in the
    rocq-mcp preamble session of 2026-08-09 recorded in the New Rocq code
    section, re-run against the edited file.
-10. Grep check extension: `run_recover_pgl27` resolves in
-    `pgg-smc/instances/pgl27/pgl27_run.v` at implementation end, and the
-    paper footnote naming it matches that file.
+10. Grep check extension: `run_recover_pgl27` and `run_party_pgl27` resolve
+    in `pgg-smc/instances/pgl27/pgl27_run.v` at implementation end, and the
+    paper footnote naming them matches that file.
 
 ## Out of scope
 
