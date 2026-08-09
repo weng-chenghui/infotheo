@@ -44,7 +44,7 @@ Definition s5x5_profile (R : realType) : MonodromyProfile R :=
     (s5x5_security_witness_1 R) s5x5_plug.
 
 (** profile_k_s5x5 — the S_5 x S_5 plug's privacy threshold is 5.
-    @main bound: the product sum-mod scheme reconstructs per pile at k = 5,
-    read off the shared profile_k. *)
+    @main bound: coalitions below five in a pile learn nothing; k = 5 per
+    pile, read off the shared profile_k. *)
 Lemma profile_k_s5x5 (R : realType) : profile_k (s5x5_profile R) = 5.
 Proof. by []. Qed.

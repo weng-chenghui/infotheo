@@ -53,7 +53,7 @@ Definition s5_profile (R : realType) : MonodromyProfile R :=
     (s5_security_witness_schreier R 286) s5_plug.
 
 (** profile_k_s5 — the S_5 plug's privacy threshold is 5.
-    @main bound: contrast character against the abelian plug's k = 2, read
+    @main bound: contrast character against the den Boer plug's k = 2, read
     off the shared profile_k. *)
 Lemma profile_k_s5 (R : realType) : profile_k (s5_profile R) = 5.
 Proof. by []. Qed.

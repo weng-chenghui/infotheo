@@ -64,7 +64,7 @@ Definition abel_plug : ReconPlug (@Gen_PGGTypes 1 2 abel_sigmas) 'I_4 :=
 (** abel_profile — plug the abelian Z_2 x Z_2 (N = 4), paired with sum-mod.
     Kind: instance. What: the MonodromyProfile bundling Gen_PGG_2 abel_sigmas,
     the direct security witness, and abel_plug. Why: the insecure plug;
-    commuting generators, k = 2, the eps-floor contrast to the secure plugs.
+    commuting generators, k = 4, the eps-floor contrast to the secure plugs.
     Used-by: contrast demos. *)
 Definition abel_profile (R : realType) : MonodromyProfile R :=
   @MkMonodromyProfile R (@Gen_PGGTypes 1 2 abel_sigmas) 'I_4 (Gen_PGG_2 abel_sigmas)

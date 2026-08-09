@@ -10,13 +10,13 @@
 (*   mp_plug     the reconstruction plug: scheme + content + monodromy +       *)
 (*               full-group reconstruction invariance (see covering_scheme).   *)
 (*                                                                            *)
-(* The generic section protocol_of_profile builds the program from the profile *)
-(* (run_party/run_verifier are exchange_* at mp_PI, run_recover is the plug's  *)
-(* ts_recon), exposes the characters (profile_eps, profile_k), and proves the  *)
-(* three guarantees that CONSUME the fields:                                   *)
-(*   profile_anonymous  var_dist(sent distribution, uniform) <= profile_eps    *)
-(*   profile_private    fewer than profile_k shares are indistinguishable      *)
-(*   profile_recon_encode   the dealt secret is recovered                      *)
+(* The generic section protocol_of_profile builds the program from the profile*)
+(* (run_party/run_verifier are exchange_* at mp_PI, run_recover is the plug's *)
+(* ts_recon), exposes the characters (profile_eps, profile_k), and proves the *)
+(* three guarantees that CONSUME the fields:                                  *)
+(*   profile_anonymous    var_dist(sent distribution, uniform) <= profile_eps *)
+(*   profile_private      fewer than profile_k shares are indistinguishable   *)
+(*   profile_recon_encode the dealt secret is recovered                       *)
 (*                                                                            *)
 (* This record was relocated here from the wreath7 instance so that the core   *)
 (* protocol owns it; each instance supplies its own plug (s5_profile,          *)
@@ -42,10 +42,10 @@ Local Open Scope ring_scope.
 
 (** MonodromyProfile — one plug bundling a group's protocol characters.
     Kind: interface.
-    Why: a value of this type is "a plugged group"; the generic protocol_of_profile
-    section turns it into the shared piSMC program plus its security/privacy
-    characters. The reconstruction half is the ReconPlug, so correctness and
-    the dealer's content readout come from one field. *)
+    Why: a value of this type is "a plugged group"; the generic
+    protocol_of_profile section turns it into the shared piSMC program plus its
+    security/privacy characters. The reconstruction half is the ReconPlug, so
+    correctness and the dealer's content readout come from one field. *)
 Record MonodromyProfile (R : realType) := MkMonodromyProfile {
   mp_M        : MonodromyReprWithGeneratorType ;
   mp_secretT  : Type ;
