@@ -55,8 +55,12 @@ representative, and passive adversaries. The verifier learns the secret.
 Active security, security after the reveal, and composition lie outside the
 model. For a finite implementation, I analyze a uniform word of length 200
 over five generator letters. A checked fiber-counting certificate proves that
-the resulting shuffle distribution is within unhalved $L_1$ distance $2^{-40}$ of the
-uniform group distribution. This word-shuffle theorem transfers to single-card
+the resulting shuffle distribution is within $L_1$ distance $2^{-40}$ of the
+uniform group distribution.\footnote{The $L_1$ distance is
+$\lVert P-Q\rVert_1=\sum_x\lvert P(x)-Q(x)\rvert$, called variation
+distance in the formal development, with maximum value 2. The common total
+variation distance is half of it. An $L_1$ bound of $2^{-40}$ therefore
+bounds every observer's distinguishing advantage by $2^{-41}$.} This word-shuffle theorem transfers to single-card
 marginals and to a product with any secret prior. Transport theorems then
 bound approximate coalition-view and executed-trace privacy by $2^{-39}$
 under the word distribution. Four sibling instances
@@ -114,9 +118,9 @@ Section~\ref{sec:exact}. The constituent formalized results are
 
 \begin{thmBinf}
 The 200-letter word shuffle over the five generator letters is within
-unhalved $L_1$ distance $2^{-40}$ of the uniform shuffle distribution. For
+$L_1$ distance $2^{-40}$ of the uniform shuffle distribution. For
 the fixed representative dealer, the coalition view distributions at the two
-secrets are within unhalved $L_1$ distance $2^{-39}$ for every passive
+secrets are within $L_1$ distance $2^{-39}$ for every passive
 coalition of at most three players, and the executed coalition traces
 satisfy the same bound. Executed correctness holds for every
 word.\footnotemark
@@ -135,7 +139,7 @@ There are three contributions in this work.
 \item I prove correctness, the recovery ramp, coalition-view privacy, and
   executed-trace secrecy for the $\PG$ instance under the uniform shuffle
   distribution.
-\item I prove an unhalved $L_1$ bound between a 200-letter generator-word distribution
+\item I prove an $L_1$ bound between a 200-letter generator-word distribution
   and the uniform group distribution. The proof also transfers the bound to card
   endpoints and secret-prior product distributions.
 \end{itemize}
@@ -251,21 +255,11 @@ executions are outside the model.
 
 The word-shuffle model describes the dealer of Figure~\ref{fig:run}
 performing the shuffle as a sequence of physical cuts. It replaces $U_G$ by $\mu^{*L}$. I measure two distributions $P$
-and $Q$ by the unhalved $L_1$ distance
+and $Q$ by the $L_1$ distance
 \begin{equation}
   \lVert P-Q\rVert_1=\sum_x\lvert P(x)-Q(x)\rvert.
   \label{eq:l1-definition}
 \end{equation}
-The repository calls Equation~\ref{eq:l1-definition} variation distance.
-The common halved total variation distance is
-\begin{equation}
-  d_{\mathrm{TV}}(P,Q)=\tfrac12\lVert P-Q\rVert_1.
-  \label{eq:tv-definition}
-\end{equation}
-Thus an $L_1$ bound of $2^{-40}$ gives a halved total variation bound of
-$2^{-41}$. In operational terms, a total variation bound of $2^{-41}$ means
-that no observer, whatever test they apply, distinguishes the word shuffle
-from the uniform shuffle with advantage above $2^{-41}$.
 
 The model observes the word shuffle only through its product. The dealer
 performs the 200 physical moves and no party records an intermediate
@@ -881,9 +875,6 @@ and a shuffle. It is not an execution distribution. Equations~\ref{eq:endpoint-t
 and~\ref{eq:product-transfer} transfer the one certificate in
 Equation~\ref{eq:pgl-mixing}. They are not separate mixing certificates.
 
-Under the halved convention in Equation~\ref{eq:tv-definition}, each of
-these bounds is at most $2^{-41}$ in total variation.
-
 The proved chain reaches group-distribution proximity, every single-card
 marginal, and the product with any secret prior. Transport through the
 protocol interpreter turns the certificate into the second headline
@@ -981,7 +972,7 @@ result does not depend on the $S_5$ Rayleigh premise.
     \bottomrule
   \end{tabular}
   \caption{Coverage of the five protocol instances. The mixing column uses
-  the unhalved distance in Equation~\ref{eq:l1-definition}.}
+  the distance in Equation~\ref{eq:l1-definition}.}
   \label{tab:instances}
 \end{table}
 
@@ -998,7 +989,7 @@ Den Boer's instance samples a uniform cyclic cut. One cut therefore gives
 the exact endpoint distribution used by its single-card privacy proof. Kim's variant
 uses a biased cyclic cut~\cite{KimCetinkaya2025}. For bias $1/100$, the
 formal development proves in the kernel that seven repeated cuts put every
-single-card endpoint within $2^{-40}$ of uniform in unhalved $L_1$ distance.
+single-card endpoint within $2^{-40}$ of uniform in $L_1$ distance.
 
 The $S_5$ instance uses additive sharing modulo five. Its endpoint mixing
 proof applies a spectral inequality at word length 286. The development
@@ -1123,7 +1114,7 @@ fixed representative dealer, passive adversaries, and the dealer
 distributions stated in Section~\ref{sec:model}. The verifier learns the
 secret.
 
-For a finite shuffle implementation, Theorem B gives an unhalved $L_1$
+For a finite shuffle implementation, Theorem B gives an $L_1$
 distance of at most $2^{-40}$ after 200 generator letters, the same bound
 for every single-card endpoint and for a product with any Boolean secret
 prior, and approximate coalition-view and executed-trace bounds at
