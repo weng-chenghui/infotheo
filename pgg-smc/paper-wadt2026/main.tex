@@ -496,6 +496,178 @@ For finite distributions $P$ and $Q$ on $A$ and a map $f:A\to B$,
 \]
 \end{theorem}
 
+\section{A First Instance: The Five-Card Family}\label{sec:fivecard}
+
+The simplest instantiation of the framework covers two classic protocols
+with one record. Five cards carry the deck, the cyclic group $C_5$ acts by
+rotation, and the decoder reads whether the three hearts are consecutive.
+Den Boer's five-card protocol~\cite{denBoer1989} and the Kim and
+\c{C}etinkaya variant~\cite{KimCetinkaya2025} differ only in the dealing
+distribution, so one profile at bias $\varepsilon$ specifies both.
+Figure~\ref{fig:fivecard-run} shows a run.
+
+\begin{figure}[H]
+  \centering
+  \resizebox{.97\linewidth}{!}{%
+  \begin{tikzpicture}[
+     actor/.style={draw,rounded corners,fill=blue!12,minimum width=14mm,
+       minimum height=7mm,font=\small\bfseries},
+     life/.style={dashed,gray!70},
+     msg/.style={-{Latex},thick},
+     act/.style={draw,rounded corners,fill=orange!14,inner sep=3pt,
+       align=center,font=\footnotesize},
+     lbl/.style={midway,above,font=\footnotesize}]
+    \node[actor] (A) at (0,0)    {Alice};
+    \node[actor] (B) at (2.9,0)  {Bob};
+    \node[actor] (D) at (6.6,0)  {Dealer};
+    \node[actor] (P) at (10.0,0) {Players};
+    \node[actor] (V) at (13.2,0) {Verifier};
+    \draw[decorate,decoration={brace,amplitude=4pt,raise=2pt}]
+      (-0.8,0.45) -- (3.7,0.45)
+      node[midway,above=4pt,font=\footnotesize]{input committers};
+    \draw[decorate,decoration={brace,amplitude=4pt,raise=2pt}]
+      (8.9,0.45) -- (11.1,0.45)
+      node[midway,above=4pt,font=\footnotesize]{five players, one card each};
+    \draw[life] (0,-0.4)    -- (0,-5.6);
+    \draw[life] (2.9,-0.4)  -- (2.9,-5.6);
+    \draw[life] (6.6,-0.4)  -- (6.6,-5.6);
+    \draw[life] (10.0,-0.4) -- (10.0,-5.6);
+    \draw[life] (13.2,-0.4) -- (13.2,-5.6);
+    \draw[msg] (0,-0.8)  -- (6.6,-0.8)
+      node[lbl]{one card value committing $a$};
+    \draw[msg] (2.9,-1.5) -- (6.6,-1.5)
+      node[lbl]{one card value committing $b$};
+    \node[act,anchor=west] at (6.75,-2.2)
+      {assemble the five-card deck};
+    \node[act,anchor=west] at (6.75,-3.0)
+      {draw the cut, deal one card per player};
+    \draw[msg] (6.6,-3.7) -- (10.0,-3.7) node[lbl]{deal, face down};
+    \draw[msg] (10.0,-4.35) -- (13.2,-4.35) node[lbl]{reveal all cards};
+    \node[act,anchor=east] at (13.05,-5.0)
+      {read: are the three hearts consecutive};
+    \draw[msg] (13.2,-5.5) -- (0,-5.5) node[lbl]{announce $a\wedge b$};
+  \end{tikzpicture}}
+  \caption{One five-card run with committed inputs. The physical protocol
+  commits each input bit as two face-down cards, and the formalization
+  encodes each committed bit as one card value.}
+  \label{fig:fivecard-run}
+\end{figure}
+
+The central record and the profile that fills it
+follow.\footnote{Formalized in
+\path{pgg-smc/instances/kim2025/five_card_family.v} as
+\coqin{five\_card\_profile}; the listing elides the three bias
+hypotheses.}
+
+\begin{lstlisting}
+Definition five_card_profile (R : realType) (eps : R)
+    (* three bias hypotheses elided *) (L : nat) : MonodromyProfile R :=
+  @MkMonodromyProfile R FiveCardKim_M bool FiveCardKim_PI
+    (fc_kim_security_witness ... L) (* biased-cut witness    *)
+    five_card_plug.                 (* three-hearts decoder  *)
+\end{lstlisting}
+
+The dealing distribution is the biased cut
+\begin{equation}
+  w_\varepsilon(a^k)=\begin{cases}\tfrac{1}{5}-\varepsilon, & k=0,\\[2pt]
+  \tfrac{1}{5}+\tfrac{\varepsilon}{4}, & k=1,2,3,4,\end{cases}
+  \qquad -\tfrac{4}{5}<\varepsilon<\tfrac{1}{5}.
+  \label{eq:fivecard-weight}
+\end{equation}
+At bias zero the witness bound collapses to zero for any positive word
+length, which is the precise sense in which the unbiased member is den
+Boer's protocol.\footnote{\coqin{five\_card\_eps0\_eq0} in
+\path{pgg-smc/instances/kim2025/five_card_family.v}.}
+
+Figure~\ref{fig:fivecard-leakage} quantifies every reveal
+case.\footnote{\coqin{leak\_k1}, \coqin{leak\_k2\_adj},
+\coqin{leak\_k2\_dist2}, \coqin{leak\_k3}, \coqin{leak\_k4},
+\coqin{leak\_k5}, and the cap \coqin{H\_secret} in
+\path{pgg-smc/instances/denboer1989/five_card_leakage.v}. For example
+\coqin{leak\_k2\_adj} $=\tfrac{27}{10}-\tfrac14\log 5-\tfrac{7}{10}\log
+7$.} One revealed card carries no information about the conjunction, which
+is the information-theoretic counterpart of the scheme's privacy
+threshold, and the ramp climbs to the secret's own entropy
+$2-\tfrac34\log 3\approx 0.811$. The decimals are evaluations of the
+proven closed forms.
+
+\begin{figure}[H]
+  \centering
+  \begin{tikzpicture}[x=8.5mm,y=-11.5mm,
+     card/.style={draw,rounded corners=1pt,minimum width=6.5mm,
+       minimum height=8.5mm,font=\small},
+     down/.style={card,fill=blue!30!gray!60},
+     lab/.style={font=\small,anchor=west}]
+    \node[card] at (0,1) {$\clubsuit$};
+    \node[down] at (1,1) {}; \node[down] at (2,1) {};
+    \node[down] at (3,1) {}; \node[down] at (4,1) {};
+    \node[lab] at (4.8,1) {$0$ bits, nothing};
+    \node[card] at (0,2) {$\clubsuit$};
+    \node[card] at (1,2) {\textcolor{red}{$\heartsuit$}};
+    \node[down] at (2,2) {}; \node[down] at (3,2) {};
+    \node[down] at (4,2) {};
+    \node[lab] at (4.8,2) {$0.154$ bits};
+    \node[card] at (0,3) {$\clubsuit$};
+    \node[down] at (1,3) {};
+    \node[card] at (2,3) {\textcolor{red}{$\heartsuit$}};
+    \node[down] at (3,3) {}; \node[down] at (4,3) {};
+    \node[lab] at (4.8,3) {$0.119$ bits};
+    \node[card] at (0,4) {$\clubsuit$};
+    \node[card] at (1,4) {\textcolor{red}{$\heartsuit$}};
+    \node[card] at (2,4) {\textcolor{red}{$\heartsuit$}};
+    \node[down] at (3,4) {}; \node[down] at (4,4) {};
+    \node[lab] at (4.8,4) {$0.487$ bits};
+    \node[card] at (0,5) {$\clubsuit$};
+    \node[card] at (1,5) {\textcolor{red}{$\heartsuit$}};
+    \node[card] at (2,5) {\textcolor{red}{$\heartsuit$}};
+    \node[card] at (3,5) {\textcolor{red}{$\heartsuit$}};
+    \node[down] at (4,5) {};
+    \node[lab] at (4.8,5) {$0.811$ bits, the cap};
+    \node[card] at (0,6) {$\clubsuit$};
+    \node[card] at (1,6) {\textcolor{red}{$\heartsuit$}};
+    \node[card] at (2,6) {\textcolor{red}{$\heartsuit$}};
+    \node[card] at (3,6) {\textcolor{red}{$\heartsuit$}};
+    \node[card] at (4,6) {$\clubsuit$};
+    \node[lab] at (4.8,6) {$0.811$ bits, the cap};
+  \end{tikzpicture}
+  \caption{Mutual information between the revealed cards and the
+  conjunction, one machine-checked value per reveal pattern. The drawn
+  card faces are one illustrative arrangement, and the printed values
+  average over the whole distribution of arrangements.}
+  \label{fig:fivecard-leakage}
+\end{figure}
+
+\begin{proposition}[Seven-cut security at bias $1/100$\footnotemark]
+\label{prop:fivecard-mixing}
+\footnotetext{Formalized in
+\path{pgg-smc/instances/kim2025/five_card_kim.v} as
+\coqin{kim\_bound\_centi} and \coqin{kim\_deal\_centi\_lt}.}
+Let the shuffle distribution be the biased cut $w_{1/100}$ repeated seven
+times. Then every single-card endpoint distribution is within $L_1$
+distance $2^{-40}$ of uniform, and the kernel checks the computation.
+\end{proposition}
+
+The two members share one executed program, so correctness transfers
+verbatim. The Kim program is the den Boer program, and its recovery
+theorem is the den Boer proof reused.\footnote{\coqin{kim\_procs} and
+\coqin{kim\_run\_recovers} in
+\path{pgg-smc/instances/kim2025/kim_run.v}.} The committed inputs of the
+two players realize the function-evaluation flow of
+Section~\ref{sec:framework} with den Boer's input encoding. Den Boer's
+uniform cut gives the exact endpoint distribution after one shuffle, and a
+single corrupted player's executed trace leaves the secret's conditional
+entropy equal to its plain
+entropy.\footnote{\coqin{kim\_trace\_secrecy} in
+\path{pgg-smc/instances/kim2025/kim_trace.v}.}
+Table~\ref{tab:instances} in Section~\ref{sec:instances} records the full
+landscape.
+
+The five-card family keeps the group cyclic and the deck small enough for
+kernel enumeration. The next sections instantiate the same records where
+enumeration fails. The $\PG$ construction adds coalition privacy beyond
+one card via three-transitivity, an orbit-class secret, and word
+certificates proven without computing in the group.
+
 \section{The \texorpdfstring{$\PG$}{PGL(2,7)} Construction}\label{sec:pgl}
 
 This section supplies the instance column of Table~\ref{tab:bridge}. The
