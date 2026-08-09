@@ -56,11 +56,7 @@ Active security, security after the reveal, and composition lie outside the
 model. For a finite implementation, I analyze a uniform word of length 200
 over five generator letters. A checked fiber-counting certificate proves that
 the resulting shuffle distribution is within $L_1$ distance $2^{-40}$ of the
-uniform group distribution.\footnote{The $L_1$ distance is
-$\lVert P-Q\rVert_1=\sum_x\lvert P(x)-Q(x)\rvert$, called variation
-distance in the formal development, with maximum value 2. The common total
-variation distance is half of it. An $L_1$ bound of $2^{-40}$ therefore
-bounds every observer's distinguishing advantage by $2^{-41}$.} This word-shuffle theorem transfers to single-card
+uniform group distribution. This word-shuffle theorem transfers to single-card
 marginals and to a product with any secret prior. Transport theorems then
 bound approximate coalition-view and executed-trace privacy by $2^{-39}$
 under the word distribution. Four sibling instances
@@ -140,7 +136,12 @@ There are three contributions in this work.
   executed-trace secrecy for the $\PG$ instance under the uniform shuffle
   distribution.
 \item I prove an $L_1$ bound between a 200-letter generator-word distribution
-  and the uniform group distribution. The proof also transfers the bound to card
+  and the uniform group distribution.\footnote{The $L_1$ distance is
+  $\lVert P-Q\rVert_1=\sum_x\lvert P(x)-Q(x)\rvert$, called variation
+  distance in the formal development, with maximum value 2. The common total
+  variation distance is half of it. An $L_1$ bound of $2^{-40}$ therefore
+  bounds every observer's distinguishing advantage by $2^{-41}$.} The proof
+  also transfers the bound to card
   endpoints and secret-prior product distributions.
 \end{itemize}
 
