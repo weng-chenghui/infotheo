@@ -1,6 +1,6 @@
 # WADT2026 Architecture Section Expansion — Design Spec
 
-Date: 2026-08-09 (rev 10: five-card section made anchor-dense — committed-input flow diagram and case-by-case reveal-leakage figure from the poster Pencil node, every value a Qed lemma)
+Date: 2026-08-09 (rev 11: D23 moves the flow diagrams to the instances — the model section keeps no figure and generalizes, the committed-input flow leads in the five-card section, the no-input flow relocates into the PGL construction)
 Target: `pgg-smc/paper-wadt2026/main.tex`, Section 3.1 (Framework Architecture)
 Status: for user review
 
@@ -166,6 +166,7 @@ certificates), `mp_secretT` (type plumbing), the `CoveringScheme`/
 | D19 | A new top-level section "A First Instance: The Five-Card Family" (label `sec:fivecard`) is inserted between the framework section and the PGL construction, presenting den Boer and Kim as one record, `five_card_profile` at bias epsilon. The section is anchor-dense, never prose-heavy: two figures (the committed-input flow diagram and the case-by-case reveal-leakage figure), one listing, one display, one Proposition, with never more than two consecutive prose paragraphs. All results stay at Lemma/Proposition level; Theorems A and B remain the only named theorems. Expected length 2 to 2.5 pages. Sections renumber automatically; the PGL construction becomes Section 5. |
 | D20 | Section 7 (Other Instances) transfers its den Boer and Kim mixing prose (`main.tex:889-895`) to the new section; the consolidated instance table keeps all five rows, and the trust-base paragraph and the S5 and S5xS5 prose stay in Section 7. Section 7's opener sentence is adjusted so it introduces the two remaining sibling instances plus the table. |
 | D21 | Section 3.1's five-card forward references (mechanism-table caption, two-families paragraph) point at `sec:fivecard`; the new section's coda is the ramp sentence into the PGL construction, naming what the difficult instance adds: coalitions beyond one card via three-transitivity, an orbit-class secret, and certificates without `vm_compute` on the group. |
+| D23 | Flow-diagram placement follows the instances, not the model. Edits: (a) the model section loses its flow diagram and its instance specialization: the opening walkthrough is rewritten for a general run (n face-down cards, a dealer encoding the secret as a valid arrangement, T players receiving one card each, a verifier decoding from the revealed arrangement), with no instance numerals and no figure; the sentence "Figure~\ref{fig:run} shows this flow" is removed; the model section's anchors are its displays. (b) The existing `fig:run` TikZ relocates unchanged into the PGL construction section, near its start; its label is kept; its caption is extended to name the eight players and the orbit-class decode and to call it the no-input counterpart of Figure~\ref{fig:fivecard-run}. (c) The five-card section's `fig:fivecard-run` becomes the paper's first flow diagram; its caption does not reference `fig:run`. (d) Every `\ref{fig:run}` site is reread and rewritten where the relocation makes it read oddly, in particular the word-shuffle sentence "the dealer of Figure~\ref{fig:run} performing the shuffle" becomes "the dealer performing the shuffle". (e) Reading order invariant: exactly two flow diagrams in the paper, the committed-input flow first, the no-input flow second. |
 | D22 | ONE distance standard from beginning to end: the $L_1$ distance $\lVert P-Q\rVert_1$, whose constants match the Rocq lemmas verbatim (infotheo `var_dist`, `variation_dist.v:33`). ONE footnote carries every convention remark; no scattered qualifiers. Edits: (a) delete EVERY occurrence of the word "unhalved" in the paper, grep-driven, wording becomes plain "$L_1$ distance" (known sites include the abstract at line 57, the introduction at 116, 118, 137, the model section lead-in at 253, and the sibling-instances sentence that D20 relocates; the sweep, not this list, is authoritative). (b) Delete the halved-convention block `main.tex:258-267`: the repository-name sentence, the `eq:tv-definition` display, the conversion sentence, and the operational-advantage sentences; their content moves into the footnote. (c) Delete the Section 6 sentence `main.tex:776-777` ("Under the halved convention ... $2^{-41}$ in total variation"), which references the deleted display. (d) The definition display `eq:l1-definition` (`main.tex:254-257`) stays as the body's only formal definition. (e) The footnote attaches to the first in-text bound, the informal Theorem B display in the introduction. Draft: "The $L_1$ distance is $\lVert P-Q\rVert_1=\sum_x\lvert P(x)-Q(x)\rvert$, called variation distance in the formal development, with maximum value 2. The common total variation distance is half of it. An $L_1$ bound of $2^{-40}$ therefore bounds every observer's distinguishing advantage by $2^{-41}$." (f) The abstract gains no footnote and simply says "$L_1$ distance". (g) The five-card F6 proposition and every other bound say "$L_1$ distance" with no re-explanation. No printed constant changes. |
 
 ## Framework rename and cleanup: per-file changes (D16-D18)
@@ -417,9 +418,9 @@ consecutive prose paragraphs anywhere). Block order:
 
 ### F2: the committed-input flow diagram
 
-The second sequence diagram of the paper, the committed-input counterpart of
-the run figure, and its caption says so ("the committed-input counterpart of
-Figure~\ref{fig:run}"). Content: actors Alice, Bob (braced "input
+The FIRST flow diagram of the paper under D23; its caption does not
+reference the PGL run figure, which now comes later and is captioned as the
+no-input counterpart of this one. Content: actors Alice, Bob (braced "input
 committers"), Dealer, Verifier; messages "two cards encoding $a$", "two
 cards encoding $b$"; dealer actions "assemble the five-card deck", "draw the
 cut, deal"; message "shuffled deck, face down"; verifier action "reveal: are
@@ -604,16 +605,23 @@ word certificates proven without computing in the group.
     revealed positions; the flow diagram's messages match the executed
     program roles of `den_boer_run.v`. Input sources: the lemma statements
     in `five_card_leakage.v` and the inspected Pencil node.
+16. Flow-diagram placement check (D23): the model section contains no
+    figure and passes the prose-run cap after the removal; exactly two flow
+    diagrams exist, `fig:fivecard-run` before `fig:run` in page order;
+    every `\ref{fig:run}` site reads correctly after the relocation; the
+    model section's run description carries no instance numerals.
 
 ## Out of scope
 
 - Any edit to the model section, the generic-theorems subsection, the PGL
   construction and its two results sections, related work, and the
   conclusion, beyond the automatic renumbering the D19 insertion causes. The
-  single exception is D22, whose complete edit list (the grep-driven
-  "unhalved" sweep, the two deletions in the model and mixing sections, and
-  the one introduction footnote) is enumerated in the decision itself; D22
-  authorizes those edits and no others.
+  exceptions are D22 and D23, whose complete edit lists (the grep-driven
+  "unhalved" sweep, the two convention deletions in the model and mixing
+  sections, the one introduction footnote, the model-section generalization
+  with the figure relocation into the PGL construction section, and the
+  `\ref{fig:run}` reread) are enumerated in the decisions themselves; they
+  authorize those edits and no others.
 - The sibling-instances section keeps its consolidated table (all five
   rows), its trust-base paragraph, and its S5 and S5xS5 prose; it loses only
   the den Boer and Kim mixing paragraph (D20) and gets an adjusted opener.
