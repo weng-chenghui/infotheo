@@ -1,6 +1,6 @@
 # WADT2026 Architecture Section Expansion — Design Spec
 
-Date: 2026-08-09 (rev 7: D19-D21 add the new warm-up section "A First Instance: The Five-Card Family" between the framework and the PGL construction)
+Date: 2026-08-09 (rev 8: D22 fixes the distance-convention policy — unhalved L1 everywhere matching the code, with a convention footnote at the introduction's first use)
 Target: `pgg-smc/paper-wadt2026/main.tex`, Section 3.1 (Framework Architecture)
 Status: for user review
 
@@ -69,6 +69,8 @@ Every claim in the new prose is grounded in one of these. First check
 | Kernel-checked Kim numbers: `kim_bound_centi` (bias 1/100, length 7, spectral bound below `2^-40`) and `kim_deal_centi_lt` (variation distance of the 7-cut deal below `2^-40`) | `pgg-smc/instances/kim2025/five_card_kim.v:613,635` |
 | Kim reuses den Boer's executed program (`kim_procs := den_boer_procs`, `kim_run_recovers` by `exact: den_boer_run_recovers`); `kim_trace_secrecy` | `kim_run.v:28,38-42`, `kim_trace.v:46` |
 | Section 7 paragraph to relocate: den Boer uniform-cut exactness and Kim seven-cut `2^-40` sentences | `main.tex:889-895` |
+| `var_dist(P,Q) = \sum_(a : A) abs(P a - Q a)` — unhalved, maximum 2 | `probability/variation_dist.v:33` |
+| Paper's existing convention handling: unhalved L1 definition display and the halved total variation relation with the `2^-40` to `2^-41` conversion; "unhalved" wording at the abstract and introduction uses; a `2^-41` total variation sentence | `main.tex:253-265,57,116-118,137,777` |
 | `fig:framework-architecture` is labeled but never `\ref`ed in the current paper | grep of `main.tex` |
 
 ## Record-to-theorem boundary (honesty baseline)
@@ -162,6 +164,7 @@ certificates), `mp_secretT` (type plumbing), the `CoveringScheme`/
 | D19 | A new top-level section "A First Instance: The Five-Card Family" (label `sec:fivecard`) is inserted between the framework section and the PGL construction. It presents den Boer and Kim as one record, `five_card_profile` at bias epsilon, with a compact second listing, the biased-distribution display, the epsilon-zero collapse, and the seven-cut kernel bound as a Proposition. All results stay at Lemma/Proposition level; Theorems A and B remain the only named theorems. Expected length 1 to 1.5 pages. Sections renumber automatically; the PGL construction becomes Section 5. |
 | D20 | Section 7 (Other Instances) transfers its den Boer and Kim mixing prose (`main.tex:889-895`) to the new section; the consolidated instance table keeps all five rows, and the trust-base paragraph and the S5 and S5xS5 prose stay in Section 7. Section 7's opener sentence is adjusted so it introduces the two remaining sibling instances plus the table. |
 | D21 | Section 3.1's five-card forward references (mechanism-table caption, two-families paragraph) point at `sec:fivecard`; the new section's coda is the ramp sentence into the PGL construction, naming what the difficult instance adds: coalitions beyond one card via three-transitivity, an orbit-class secret, and certificates without `vm_compute` on the group. |
+| D22 | Distance-convention policy: every printed bound stays in the code's unhalved L1 convention (infotheo `var_dist(P,Q) = sum_x abs(P x - Q x)`, maximum 2, `variation_dist.v:33`), so each constant matches its Rocq lemma verbatim; no constant is converted to halved total variation anywhere. A convention footnote is added at the FIRST in-text occurrence of the distance, the informal Theorem B display in the introduction (`main.tex:116-118`). Footnote draft: "The distance is the unhalved sum $\sum_x\lvert P(x)-Q(x)\rvert$, written \coqin{var\_dist} in the formal development, with maximum value 2. The common total variation distance is half of it. Every $L_1$ bound of $2^{-40}$ in this paper is therefore a total variation bound of $2^{-41}$." The abstract keeps the word "unhalved" and gains no footnote. The existing model-section displays (`main.tex:253-265`) and the Theorem A/B capstone wordings are unchanged; the five-card section's F4 proposition uses the same "unhalved $L_1$" wording and no re-explanation. |
 
 ## Framework rename and cleanup: per-file changes (D16-D18)
 
@@ -534,12 +537,20 @@ word certificates proven without computing in the group.
     section numbers in `main.tex` prose (grep for literal "Section" followed
     by a digit), every `\ref`/`\label` resolves, and the Theorems A and B
     literal-text mentions are untouched.
+14. Distance-convention check (D22): the convention footnote is present on
+    the introduction's first in-text distance occurrence; every displayed
+    bound site says "unhalved" or sits inside a `\lVert...\rVert_1` formula;
+    no constant in the paper differs from its Rocq counterpart by a factor
+    of two (spot-check every `2^{-40}`, `2^{-39}`, and `2^{-41}` site
+    against the named lemma); the footnote wording passes the style sweeps.
 
 ## Out of scope
 
 - Any edit to the model section, the generic-theorems subsection, the PGL
   construction and its two results sections, related work, and the
-  conclusion, beyond the automatic renumbering the D19 insertion causes.
+  conclusion, beyond the automatic renumbering the D19 insertion causes. The
+  single exception is the D22 convention footnote, the only edit to the
+  introduction.
 - The sibling-instances section keeps its consolidated table (all five
   rows), its trust-base paragraph, and its S5 and S5xS5 prose; it loses only
   the den Boer and Kim mixing paragraph (D20) and gets an adjusted opener.
