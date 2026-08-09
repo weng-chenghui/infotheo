@@ -1,6 +1,6 @@
 # WADT2026 Architecture Section Expansion — Design Spec
 
-Date: 2026-08-09 (rev 11: D23 moves the flow diagrams to the instances — the model section keeps no figure and generalizes, the committed-input flow leads in the five-card section, the no-input flow relocates into the PGL construction)
+Date: 2026-08-09 (rev 12: audit delta findings 1-19 applied — den_boer_run_k added to the rename table, flow-diagram content matched to den_boer_run.v, scope constraints reconciled)
 Target: `pgg-smc/paper-wadt2026/main.tex`, Section 3.1 (Framework Architecture)
 Status: for user review
 
@@ -41,7 +41,7 @@ Every claim in the new prose is grounded in one of these. First check
 | `MonodromyProfile` fields: `mp_M`, `mp_secretT`, `mp_PI`, `mp_security`, `mp_plug` | `pgg-smc/protocol/pgg_monodromy_profile.v:50-57` |
 | Derived definitions `run_dealer`, `run_party`, `run_verifier`, `run_recover`, `run_eps`, `run_k`, `run_anonymous`, `run_private` in the `run_profile` section (pre-rename names, see D16-D18) | `pgg-smc/protocol/pgg_monodromy_profile.v:63-110` |
 | Derived lemma `run_recovers : run_recover (ts_encode (rp_scheme plug) s) = s`, proof `exact: ts_correct (ts_encode_valid ...)` (pre-rename name, `profile_recon_encode` after D18) | `pgg-smc/protocol/pgg_monodromy_profile.v:116-118` |
-| Consumer status (pre-rename names, see D16-D18): `run_k` is read off per instance (`run_k_pgl27 = 4` at `pgl27_profile.v:111`, siblings `run_k_s5`, `run_k_s5x5`, `run_k_abel`); the other `run_*` definitions and `run_recovers` have no downstream consumers | grep sweep 2026-08-09 |
+| Consumer status (pre-rename names, see D16-D18): `run_k` is read off per instance (`run_k_pgl27 = 4` at `pgl27_profile.v:111`, siblings `run_k_s5`, `run_k_s5x5`, `run_k_abel`, and `den_boer_run_k = 2` at `den_boer_profile.v:94`); the other `run_*` definitions and `run_recovers` have no downstream consumers | grep sweep 2026-08-09 |
 | All eight D17/D18 target names (`protocol_of_profile`, `profile_k`, `profile_eps`, `profile_anonymous`, `profile_private`, `profile_recon_encode`, `profile_eps_pgl27`, `profile_k_pgl27`) unused in the codebase | grep sweep 2026-08-09 |
 | The PGL executed program is the same generic processes at the profile's layout: `pgl27_dealer_run = dealer_with_input_encoding pgl27_PI (fun _ => tnth (ts_encode orbit_scheme s)) ...` with empty input list; `pgl27_saprocs` lists `exchange_verifier pgl27_PI` and eight `exchange_player pgl27_PI` | `pgg-smc/instances/pgl27/pgl27_run.v:63-83` |
 | `PGGInterface` fields: `pi_T'`, `pi_starts`, `pi_starts_uniq` | `pgg-smc/protocol/pgg_interface.v:379-383` |
@@ -63,12 +63,12 @@ Every claim in the new prose is grounded in one of these. First check
 | PGL profile value: `pgl27_profile = MkMonodromyProfile pgl27_M bool pgl27_PI pgl27_security pgl27_plug` | `pgg-smc/instances/pgl27/pgl27_profile.v:104-105` |
 | New corollaries `run_recover_pgl27` (proof `exact: pgl27_run_recovers.`), `run_party_pgl27` (proof `by [].`), and `profile_eps_pgl27` (proof `by [].`, validated pre-rename as `run_eps_pgl27 = 0%R`) validated in-kernel via rocq-mcp preamble session over the compiled chain; `run_verifier` equality fails elaboration (list-dependent session type), `run_dealer` equality is false (content readout) | this spec, New Rocq code section, 2026-08-09 |
 | `listings` package already loaded, no `\lstset` yet; `\coqin` = `\texttt`; no listing environment exists in the paper | `main.tex:12,21` |
-| `five_card_profile (R) (eps) Hlt Hgt Hspec (L) = MkMonodromyProfile FiveCardKim_M bool FiveCardKim_PI (fc_kim_security_witness ...) five_card_plug`; hypotheses `eps < 1/5`, `-4/5 < eps` | `pgg-smc/instances/kim2025/five_card_family.v:164-168` |
+| `five_card_profile (R) (eps) Hlt Hgt Hspec (L) = MkMonodromyProfile FiveCardKim_M bool FiveCardKim_PI (fc_kim_security_witness ...) five_card_plug`; three hypotheses `eps < 1/5`, `-4/5 < eps`, `|eps| < 4/5` | `pgg-smc/instances/kim2025/five_card_family.v:164-168` |
 | `five_card_eps0_eq0`: at bias 0 and any positive word length, `sw_bound_eps ... = 0` (den Boer recovered as the unbiased member) | `pgg-smc/instances/kim2025/five_card_family.v:180-185` |
 | Biased weight: `kim_weight_fun k = 1/5 - eps` at `k = 0`, `1/5 + eps/4` otherwise | `pgg-smc/instances/kim2025/five_card_kim.v:160-163` |
 | Kernel-checked Kim numbers: `kim_bound_centi` (bias 1/100, length 7, spectral bound below `2^-40`) and `kim_deal_centi_lt` (variation distance of the 7-cut deal below `2^-40`) | `pgg-smc/instances/kim2025/five_card_kim.v:613,635` |
 | Kim reuses den Boer's executed program (`kim_procs := den_boer_procs`, `kim_run_recovers` by `exact: den_boer_run_recovers`); `kim_trace_secrecy` | `kim_run.v:28,38-42`, `kim_trace.v:46` |
-| Section 7 paragraph to relocate: den Boer uniform-cut exactness and Kim seven-cut `2^-40` sentences | `main.tex:889-895` |
+| Section 7 paragraph to relocate: den Boer uniform-cut exactness and Kim seven-cut `2^-40` sentences | `main.tex:889-893` |
 | `var_dist(P,Q) = \sum_(a : A) abs(P a - Q a)` — unhalved, maximum 2 | `probability/variation_dist.v:33` |
 | Case-by-case reveal leakage, all Qed: `leak_k1 = 0`, `leak_k2_adj = 27/10 - (1/4)log 5 - (7/10)log 7` (about 0.154), `leak_k2_dist2` (about 0.119), `leak_k3` (about 0.487), `leak_k4`, `leak_k5`, cap `H_secret = 2 - (3/4)log 3` (about 0.811); decimals recomputed from the closed forms this session | `pgg-smc/instances/denboer1989/five_card_leakage.v:86,245,317,383,448,527,546` |
 | Poster Pencil node "denboerCards 2" (id `u6aAF5`, `pgg-smc/notes/may18aipv2026/poster.pen`) holds the six-row reveal-leakage card figure with the same values; `notes/` is untracked, so the paper figure is authored fresh in TikZ | screenshot inspected 2026-08-09 |
@@ -105,7 +105,7 @@ Record path (what the records carry into paper results):
   certifies single-position endpoint uniformity, re-exported as
   `profile_eps`/`profile_anonymous`.
 - `profile_k` and `profile_eps` are the shared characters read off per
-  instance (`profile_k_pgl27 = 4` and three siblings; `profile_eps_pgl27 = 0`).
+  instance (`profile_k_pgl27 = 4` and four siblings including `profile_k_denboer = 2`; `profile_eps_pgl27 = 0`).
 - `InputEncoding`: den Boer's committed evaluation only; the Kim variant
   reuses the den Boer program unchanged.
 
@@ -162,22 +162,23 @@ certificates), `mp_secretT` (type plumbing), the `CoveringScheme`/
 | D15 | No example corollary for `run_verifier` or the dealer, each for a verified reason recorded in the New Rocq code section: the verifier equality does not typecheck (session types depend on the player list, and `enum 'I_8` is not convertible to the instance's literal ordinal list, which exists precisely so `vm_compute` can reduce the dealer), and the dealer equality is false (the executed dealer carries the instance's content readout under a commit prologue, while `run_dealer` bakes `rp_content = id`). The paper's verifier and dealer sentences stay grounded by `pgl27_saprocs` and `pgl27_dealer_run` as prose observations. |
 | D16 | `run_dealer` is removed from the framework section. It has zero consumers, its content model contradicts every executed dealer (the D15 falsity), and keeping it forced the audit's hedged wording. The paper's dealer story runs through `dealer_with_input_encoding`, which is what actually executes. |
 | D17 | The section `run_profile` in `pgg-smc/protocol/pgg_monodromy_profile.v` is renamed `protocol_of_profile`: the profile is the configuration plus its evidence, and the section yields the certified protocol it determines. Section names are file-local in Rocq, so the rename touches only the `Section`/`End` lines and the two same-file comment mentions (lines 13 and 46). The word "run" is reserved for the interpreter layer, which actually executes. |
-| D18 | Non-running members of the section are renamed `profile_*`: `run_k` to `profile_k`, `run_eps` to `profile_eps`, `run_anonymous` to `profile_anonymous`, `run_private` to `profile_private`, and the lemma `run_recovers` to `profile_recon_encode` (matching the `ts_recon_encode` round-trip naming one level down). The cast keeps `run_` (`run_party`, `run_verifier`, `run_recover` are the pieces that really run). Downstream: `run_k_pgl27`, `run_k_s5`, `run_k_s5x5`, `run_k_abel` become `profile_k_*` (the abel rename is build consistency only; the instance stays out of paper scope). The executed-layer `*_run_recovers` lemmas keep their names. All eight new names verified unused in the codebase (grep, 2026-08-09). |
+| D18 | Non-running members of the section are renamed `profile_*`: `run_k` to `profile_k`, `run_eps` to `profile_eps`, `run_anonymous` to `profile_anonymous`, `run_private` to `profile_private`, and the lemma `run_recovers` to `profile_recon_encode` (matching the `ts_recon_encode` round-trip naming one level down). The cast keeps `run_` (`run_party`, `run_verifier`, `run_recover` are the pieces that really run). Downstream, five consumer files: `run_k_pgl27`, `run_k_s5`, `run_k_s5x5`, `run_k_abel` become `profile_k_*` (the abel rename is build consistency only; the instance stays out of paper scope), and den Boer's differently-patterned `den_boer_run_k` becomes `profile_k_denboer` explicitly, since a mechanical suffix rename would miss it. The executed-layer `*_run_recovers` lemmas keep their names. All eight new names verified unused in the codebase (grep, 2026-08-09). |
 | D19 | A new top-level section "A First Instance: The Five-Card Family" (label `sec:fivecard`) is inserted between the framework section and the PGL construction, presenting den Boer and Kim as one record, `five_card_profile` at bias epsilon. The section is anchor-dense, never prose-heavy: two figures (the committed-input flow diagram and the case-by-case reveal-leakage figure), one listing, one display, one Proposition, with never more than two consecutive prose paragraphs. All results stay at Lemma/Proposition level; Theorems A and B remain the only named theorems. Expected length 2 to 2.5 pages. Sections renumber automatically; the PGL construction becomes Section 5. |
-| D20 | Section 7 (Other Instances) transfers its den Boer and Kim mixing prose (`main.tex:889-895`) to the new section; the consolidated instance table keeps all five rows, and the trust-base paragraph and the S5 and S5xS5 prose stay in Section 7. Section 7's opener sentence is adjusted so it introduces the two remaining sibling instances plus the table. |
+| D20 | Section 7 (Other Instances) transfers its den Boer and Kim mixing prose (`main.tex:889-893`) to the new section; the consolidated instance table keeps all five rows, and the trust-base paragraph and the S5 and S5xS5 prose stay in Section 7. Section 7's opener sentence is adjusted so it introduces the two remaining sibling instances plus the table. |
 | D21 | Section 3.1's five-card forward references (mechanism-table caption, two-families paragraph) point at `sec:fivecard`; the new section's coda is the ramp sentence into the PGL construction, naming what the difficult instance adds: coalitions beyond one card via three-transitivity, an orbit-class secret, and certificates without `vm_compute` on the group. |
-| D23 | Flow-diagram placement follows the instances, not the model. Edits: (a) the model section loses its flow diagram and its instance specialization: the opening walkthrough is rewritten for a general run (n face-down cards, a dealer encoding the secret as a valid arrangement, T players receiving one card each, a verifier decoding from the revealed arrangement), with no instance numerals and no figure; the sentence "Figure~\ref{fig:run} shows this flow" is removed; the model section's anchors are its displays. (b) The existing `fig:run` TikZ relocates unchanged into the PGL construction section, near its start; its label is kept; its caption is extended to name the eight players and the orbit-class decode and to call it the no-input counterpart of Figure~\ref{fig:fivecard-run}. (c) The five-card section's `fig:fivecard-run` becomes the paper's first flow diagram; its caption does not reference `fig:run`. (d) Every `\ref{fig:run}` site is reread and rewritten where the relocation makes it read oddly, in particular the word-shuffle sentence "the dealer of Figure~\ref{fig:run} performing the shuffle" becomes "the dealer performing the shuffle". (e) Reading order invariant: exactly two flow diagrams in the paper, the committed-input flow first, the no-input flow second. |
-| D22 | ONE distance standard from beginning to end: the $L_1$ distance $\lVert P-Q\rVert_1$, whose constants match the Rocq lemmas verbatim (infotheo `var_dist`, `variation_dist.v:33`). ONE footnote carries every convention remark; no scattered qualifiers. Edits: (a) delete EVERY occurrence of the word "unhalved" in the paper, grep-driven, wording becomes plain "$L_1$ distance" (known sites include the abstract at line 57, the introduction at 116, 118, 137, the model section lead-in at 253, and the sibling-instances sentence that D20 relocates; the sweep, not this list, is authoritative). (b) Delete the halved-convention block `main.tex:258-267`: the repository-name sentence, the `eq:tv-definition` display, the conversion sentence, and the operational-advantage sentences; their content moves into the footnote. (c) Delete the Section 6 sentence `main.tex:776-777` ("Under the halved convention ... $2^{-41}$ in total variation"), which references the deleted display. (d) The definition display `eq:l1-definition` (`main.tex:254-257`) stays as the body's only formal definition. (e) The footnote attaches to the first in-text bound, the informal Theorem B display in the introduction. Draft: "The $L_1$ distance is $\lVert P-Q\rVert_1=\sum_x\lvert P(x)-Q(x)\rvert$, called variation distance in the formal development, with maximum value 2. The common total variation distance is half of it. An $L_1$ bound of $2^{-40}$ therefore bounds every observer's distinguishing advantage by $2^{-41}$." (f) The abstract gains no footnote and simply says "$L_1$ distance". (g) The five-card F6 proposition and every other bound say "$L_1$ distance" with no re-explanation. No printed constant changes. |
+| D22 | ONE distance standard from beginning to end: the $L_1$ distance $\lVert P-Q\rVert_1$, whose constants match the Rocq lemmas verbatim (infotheo `var_dist`, `variation_dist.v:33`). ONE footnote carries every convention remark; no scattered qualifiers. Edits: (a) delete EVERY occurrence of the word "unhalved" in the paper, grep-driven, wording becomes plain "$L_1$ distance" (known sites include the abstract at line 57, the introduction at 116, 118, 137, the model section lead-in at 253, and the sibling-instances sentence that D20 relocates, the `tab:instances` caption at 876, and the conclusion at 1018; the sweep, not this list, is authoritative). (b) Delete the halved-convention block `main.tex:258-267`: the repository-name sentence, the `eq:tv-definition` display, the conversion sentence, and the operational-advantage sentences; their content moves into the footnote. (c) Delete the Section 6 sentence `main.tex:776-777` ("Under the halved convention ... $2^{-41}$ in total variation"), which references the deleted display. (d) The definition display `eq:l1-definition` (`main.tex:254-257`) stays as the body's only formal definition. (e) The footnote attaches to the first in-text bound, the informal Theorem B display in the introduction. Draft: "The $L_1$ distance is $\lVert P-Q\rVert_1=\sum_x\lvert P(x)-Q(x)\rvert$, called variation distance in the formal development, with maximum value 2. The common total variation distance is half of it. An $L_1$ bound of $2^{-40}$ therefore bounds every observer's distinguishing advantage by $2^{-41}$." (f) The abstract gains no footnote and simply says "$L_1$ distance". (g) The five-card F6 proposition and every other bound say "$L_1$ distance" with no re-explanation. No printed constant changes. |
+| D23 | Flow-diagram placement follows the instances, not the model. Edits: (a) the model section loses its flow diagram and its instance specialization: the opening walkthrough is rewritten for a general run (n face-down cards, a dealer encoding the secret as a valid arrangement, T players receiving one card each, a verifier decoding from the revealed arrangement), with no instance numerals and no figure; the sentence "Figure~\ref{fig:run} shows this flow" is removed; the model section keeps `fig:models` and its displays as anchors. (b) The existing `fig:run` TikZ relocates unchanged into the PGL construction section, near its start; its label is kept; its caption is extended to name the eight players and the orbit-class decode and to call it the no-input counterpart of Figure~\ref{fig:fivecard-run}. (c) The five-card section's `fig:fivecard-run` becomes the paper's first flow diagram; its caption does not reference `fig:run`. (d) Every `\ref{fig:run}` site is reread and rewritten where the relocation makes it read oddly, in particular the word-shuffle sentence "the dealer of Figure~\ref{fig:run} performing the shuffle" becomes "the dealer performing the shuffle". (e) Reading order invariant: exactly two flow diagrams in the paper, the committed-input flow first, the no-input flow second. |
 
 ## Framework rename and cleanup: per-file changes (D16-D18)
 
 | File | Change |
 |---|---|
 | `pgg-smc/protocol/pgg_monodromy_profile.v` | `Section run_profile` and `End run_profile` become `protocol_of_profile`; comment mentions at lines 13 and 46 updated; `run_dealer` definition and its docstring deleted; `run_k`, `run_eps`, `run_anonymous`, `run_private`, `run_recovers` renamed per D18 with docstrings adjusted |
-| `pgg-smc/instances/pgl27/pgl27_profile.v` | `run_k_pgl27` becomes `profile_k_pgl27` (statement now `profile_k (pgl27_profile R) = 4`); new `profile_eps_pgl27` appended (D14) |
+| `pgg-smc/instances/pgl27/pgl27_profile.v` | `run_k_pgl27` becomes `profile_k_pgl27` (statement now `profile_k (pgl27_profile R) = 4`); new `profile_eps_pgl27` appended (D14); header index mention (line 19) and docstring (line 109) updated |
 | `pgg-smc/instances/s5/s5_profile.v` | `run_k_s5` becomes `profile_k_s5`; the two "shared run_k" comment lines updated |
 | `pgg-smc/instances/s5x5/s5x5_profile.v` | `run_k_s5x5` becomes `profile_k_s5x5`; comment updated |
 | `pgg-smc/instances/abelian/abel_profile.v` | `run_k_abel` becomes `profile_k_abel`; comment updated (build consistency only, out of paper scope) |
+| `pgg-smc/instances/denboer1989/den_boer_profile.v` | `den_boer_run_k` becomes `profile_k_denboer` (statement `profile_k (den_boer_profile R) = 2`); comment mentions at lines 91 and 93 updated |
 | `pgg-smc/instances/pgl27/pgl27_run.v` | import line added; `run_recover_pgl27` and `run_party_pgl27` appended (D14) |
 
 Ordering: the framework rename commit lands first and must leave the whole
@@ -280,7 +281,8 @@ Content points, in order (at most 3 paragraphs):
    directly, not the record fields." Then the folded lead-in for Block 6: "The
    two optional slots of the security witness encode the proof mechanism, and
    Table~\ref{tab:witness-mechanism} shows the realized combinations." Then
-   the existing forward reference to Section 4 as the worked instantiation.
+   the existing forward reference to the PGL construction section as the
+   difficult worked instantiation (label-based, `sec:pgl`).
 
 ### Block 6: proof-mechanism table
 
@@ -420,14 +422,21 @@ consecutive prose paragraphs anywhere). Block order:
 
 The FIRST flow diagram of the paper under D23; its caption does not
 reference the PGL run figure, which now comes later and is captioned as the
-no-input counterpart of this one. Content: actors Alice, Bob (braced "input
-committers"), Dealer, Verifier; messages "two cards encoding $a$", "two
-cards encoding $b$"; dealer actions "assemble the five-card deck", "draw the
-cut, deal"; message "shuffled deck, face down"; verifier action "reveal: are
-the three hearts consecutive"; closing message "announce $a\wedge b$".
-Author fresh in the paper's existing sequence-diagram TikZ style
-(`fig:run`); the talk's den Boer sequence frame
-(`aplas2024-poster/wadtSep17/slides.tex:339-396`) is the content reference.
+no-input counterpart of this one. Content, matching the executed program of
+`den_boer_run.v:140-146`: actors Alice, Bob (braced "input committers"),
+Dealer, Players (braced "five players, one card each"), Verifier; messages
+"one card value committing $a$" and "one card value committing $b$", since
+each party's commit sends exactly one sheet (`pgg_commit` with
+`encode_bool`, `pgg_input_commitment.v:67-69`, `five_card_program.v:147`);
+dealer actions "assemble the five-card deck", "draw the cut, deal one card
+per player"; message from players to verifier "reveal all cards"; verifier
+action "read: are the three hearts consecutive"; closing message "announce
+$a\wedge b$". Caption sentence: the physical protocol commits each input
+bit as two face-down cards, and the formalization encodes each committed
+bit as one card value. Author fresh in the paper's existing
+sequence-diagram TikZ style; the talk's den Boer sequence frame
+(`aplas2024-poster/wadtSep17/slides.tex:339-396`) is the layout reference
+only, since its message shapes differ.
 
 ### F5: the case-by-case reveal-leakage figure
 
@@ -444,27 +453,31 @@ information with the conjunction:
 | positions 0,1 | about 0.154 | `leak_k2_adj` |
 | positions 0,2 | about 0.119 | `leak_k2_dist2` |
 | positions 0,1,2 | about 0.487 | `leak_k3` |
-| four positions | about 0.811 | `leak_k4` |
-| all five | about 0.811 | `leak_k5` |
+| positions 0,1,2,3 | about 0.811 | `leak_k4` |
+| positions 0,1,2,3,4 | about 0.811 | `leak_k5` |
 
 The cap is the secret's own entropy `H_secret` $= 2 - \tfrac34\log 3
 \approx 0.811$, since the conjunction is a quarter-biased bit. The figure
 footnote names all seven lemmas in
 `\path{pgg-smc/instances/denboer1989/five_card_leakage.v}` and states one
 closed form as a sample (`leak_k2_adj`: $\tfrac{27}{10} - \tfrac14\log 5 -
-\tfrac{7}{10}\log 7$). Accompanying prose (one paragraph): this is the
-$(k,T)$ ramp of the framework's threshold obligation made concrete, one
-card reveals nothing and the ramp climbs to the cap; the decimals are
-evaluations of the proven closed forms. Card patterns and position sets
+\tfrac{7}{10}\log 7$). Accompanying prose (one paragraph): one revealed card carries no
+information about the conjunction, which is the information-theoretic
+counterpart of the scheme's privacy threshold, and the ramp climbs to the
+secret's own entropy; the decimals are evaluations of the proven closed
+forms. Card patterns and position sets
 MUST match the `ViewA` sets of the lemmas and a valid den Boer encoding
 (three hearts, two clubs); verified at implementation against the source.
+The figure caption states that the drawn card faces are one illustrative
+arrangement and that the printed values average over the whole
+distribution of arrangements.
 
 ### F3: the listing
 
 ```latex
 \begin{lstlisting}
-Definition five_card_profile (eps : R) (* bias bounds elided *)
-    (L : nat) : MonodromyProfile R :=
+Definition five_card_profile (R : realType) (eps : R)
+    (* three bias hypotheses elided *) (L : nat) : MonodromyProfile R :=
   @MkMonodromyProfile R FiveCardKim_M bool FiveCardKim_PI
     (fc_kim_security_witness ... L) (* biased-cut witness    *)
     five_card_plug.                 (* three-hearts decoder  *)
@@ -515,16 +528,17 @@ word certificates proven without computing in the group.
 
 ## Constraints
 
-- All of D10 (style rules) plus D11-D13.
+- All of D10 (style rules) plus the decisions D11-D23.
 - The honesty baseline, including the orphan-honesty rule: no sentence may
   claim that Theorems 1, 2, 3, A, or B are derived from the records, and no
-  sentence may say the worked instance obtains its roles from the `run_*`
-  definitions. Verified by re-reading the final prose against the
+  sentence may say the worked instance obtains its dealer or verifier from
+  the derived section. Verified by re-reading the final prose against the
   Record-to-theorem boundary section of this spec.
 - Every identifier in the listing and prose must appear verbatim in its
   source file per the mapping in Verification requirement 3.
-- Section 3.2 (Generic Theorems) body is unchanged. The only edit outside
-  Section 3.1 is the preamble `\lstset` addition.
+- Section 3.2 (Generic Theorems) body is unchanged. The only edits outside
+  Section 3.1 are those enumerated in D19 through D23 plus the preamble
+  `\lstset` addition.
 - Expected page growth: about three and a half pages across the deliverables
   (17 to about 20.5). No page constraint is in force.
 
@@ -556,7 +570,7 @@ word certificates proven without computing in the group.
    listing, display, and proposition).
 6. The boundary sentence is present, the wiring paragraph claims nothing
    beyond the honesty baseline, and no sentence attributes the instance's
-   roles to `run_*` definitions.
+   dealer or verifier to the derived section.
 7. The threshold appears only with the D12 wording (largest private coalition
    size three, character value four by the successor convention).
 8. Visual inspection of the compiled listing and both tables in the PDF (no
@@ -606,7 +620,8 @@ word certificates proven without computing in the group.
     program roles of `den_boer_run.v`. Input sources: the lemma statements
     in `five_card_leakage.v` and the inspected Pencil node.
 16. Flow-diagram placement check (D23): the model section contains no
-    figure and passes the prose-run cap after the removal; exactly two flow
+    flow diagram, keeps `fig:models`, and passes the prose-run cap after
+    the removal; exactly two flow
     diagrams exist, `fig:fivecard-run` before `fig:run` in page order;
     every `\ref{fig:run}` site reads correctly after the relocation; the
     model section's run description carries no instance numerals.
@@ -617,18 +632,19 @@ word certificates proven without computing in the group.
   construction and its two results sections, related work, and the
   conclusion, beyond the automatic renumbering the D19 insertion causes. The
   exceptions are D22 and D23, whose complete edit lists (the grep-driven
-  "unhalved" sweep, the two convention deletions in the model and mixing
-  sections, the one introduction footnote, the model-section generalization
+  "unhalved" sweep wherever it matches, the conclusion and the
+  sibling-instances table caption included, the two convention deletions in
+  the model and mixing sections, the one introduction footnote, the model-section generalization
   with the figure relocation into the PGL construction section, and the
   `\ref{fig:run}` reread) are enumerated in the decisions themselves; they
   authorize those edits and no others.
 - The sibling-instances section keeps its consolidated table (all five
   rows), its trust-base paragraph, and its S5 and S5xS5 prose; it loses only
-  the den Boer and Kim mixing paragraph (D20) and gets an adjusted opener.
+  the den Boer and Kim mixing paragraph (D20) and the word "unhalved" in
+  its table caption, and gets an adjusted opener.
 - The genus and covering-scheme narrative stays out of the paper.
 - No new named theorem environments; Theorems A and B unchanged; the
   five-card section uses the existing proposition environment.
-- Sibling instances (den Boer, Kim, S5, S5xS5) get no analogous
-  `run_recover_*` corollary in this spec; the paper's architecture section
-  cites only the worked instance. A parity sweep is a separate task if ever
-  wanted.
+- The S5, S5xS5, and abelian instances get no analogous framework-usage
+  corollaries in this spec; the five-card members' evidence is their own
+  section. A parity sweep is a separate task if ever wanted.
