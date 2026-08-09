@@ -1,6 +1,6 @@
 # WADT2026 Architecture Section Expansion — Design Spec
 
-Date: 2026-08-09 (rev 6: D16-D18 adopt the framework cleanup and rename — section `protocol_of_profile`, non-running items `profile_*`, `run_dealer` removed — plus three validated example corollaries)
+Date: 2026-08-09 (rev 7: D19-D21 add the new warm-up section "A First Instance: The Five-Card Family" between the framework and the PGL construction)
 Target: `pgg-smc/paper-wadt2026/main.tex`, Section 3.1 (Framework Architecture)
 Status: for user review
 
@@ -18,7 +18,14 @@ from `run_recovers` by D18) with a one-line proof. The paper's
 correctness and endpoint-uniformity theorems are the sharp executed-trace forms
 of these guarantees, proven over the interpreter's output at the same layout
 record; the coalition-privacy theorems are separate results proven from
-transitivity. Organization
+transitivity.
+
+Rev 7 adds a second deliverable: a new top-level section "A First Instance:
+The Five-Card Family" between the framework section and the PGL construction,
+presenting den Boer and Kim as one epsilon-parameterized profile
+(`five_card_profile`) — the simple worked instance before the difficult one.
+Its results stay at proposition level; Theorems A and B remain the paper's
+only named theorems. Organization
 follows the wadtSep17 slides
 (`/Users/cheng-huiweng/Projects/aplas2024-poster/wadtSep17/slides.tex`,
 frames "The specification: one MonodromyProfile", "SecurityWitness: certified
@@ -56,6 +63,12 @@ Every claim in the new prose is grounded in one of these. First check
 | PGL profile value: `pgl27_profile = MkMonodromyProfile pgl27_M bool pgl27_PI pgl27_security pgl27_plug` | `pgg-smc/instances/pgl27/pgl27_profile.v:104-105` |
 | New corollaries `run_recover_pgl27` (proof `exact: pgl27_run_recovers.`), `run_party_pgl27` (proof `by [].`), and `profile_eps_pgl27` (proof `by [].`, validated pre-rename as `run_eps_pgl27 = 0%R`) validated in-kernel via rocq-mcp preamble session over the compiled chain; `run_verifier` equality fails elaboration (list-dependent session type), `run_dealer` equality is false (content readout) | this spec, New Rocq code section, 2026-08-09 |
 | `listings` package already loaded, no `\lstset` yet; `\coqin` = `\texttt`; no listing environment exists in the paper | `main.tex:12,21` |
+| `five_card_profile (R) (eps) Hlt Hgt Hspec (L) = MkMonodromyProfile FiveCardKim_M bool FiveCardKim_PI (fc_kim_security_witness ...) five_card_plug`; hypotheses `eps < 1/5`, `-4/5 < eps` | `pgg-smc/instances/kim2025/five_card_family.v:164-168` |
+| `five_card_eps0_eq0`: at bias 0 and any positive word length, `sw_bound_eps ... = 0` (den Boer recovered as the unbiased member) | `pgg-smc/instances/kim2025/five_card_family.v:180-185` |
+| Biased weight: `kim_weight_fun k = 1/5 - eps` at `k = 0`, `1/5 + eps/4` otherwise | `pgg-smc/instances/kim2025/five_card_kim.v:160-163` |
+| Kernel-checked Kim numbers: `kim_bound_centi` (bias 1/100, length 7, spectral bound below `2^-40`) and `kim_deal_centi_lt` (variation distance of the 7-cut deal below `2^-40`) | `pgg-smc/instances/kim2025/five_card_kim.v:613,635` |
+| Kim reuses den Boer's executed program (`kim_procs := den_boer_procs`, `kim_run_recovers` by `exact: den_boer_run_recovers`); `kim_trace_secrecy` | `kim_run.v:28,38-42`, `kim_trace.v:46` |
+| Section 7 paragraph to relocate: den Boer uniform-cut exactness and Kim seven-cut `2^-40` sentences | `main.tex:889-895` |
 | `fig:framework-architecture` is labeled but never `\ref`ed in the current paper | grep of `main.tex` |
 
 ## Record-to-theorem boundary (honesty baseline)
@@ -129,7 +142,7 @@ certificates), `mp_secretT` (type plumbing), the `CoveringScheme`/
 | # | Decision |
 |---|---|
 | D1 | Approach: reorganize Section 3.1 as one subsection following the slides' arc; no new sub-subsections, no renumbering. |
-| D2 | One combined code listing: condensed `MonodromyProfile` record, the derived cast and `profile_*` characters (post-rename names), AND the derived lemma `profile_recon_encode` with its one-line proof (the fulfill-and-it-is-proved artifact). First and only listing in the paper. `\footnotesize` type. |
+| D2 | One combined code listing in Section 3.1: condensed `MonodromyProfile` record, the derived cast and `profile_*` characters (post-rename names), AND the derived lemma `profile_recon_encode` with its one-line proof (the fulfill-and-it-is-proved artifact). `\footnotesize` type. The five-card section adds the paper's second, shorter listing (D19); no others. |
 | D3 | Include the one-flow-two-families paragraph, introducing `InputEncoding` and the commit-prologue degeneration by computation. |
 | D4 | Wiring claims are bounded by the honesty baseline above, including the orphan-honesty rule. One boundary sentence states the record/theorem split explicitly in the paper. |
 | D5 | Symbol care: the paper's Equation 1 uses R for the real field; the recovery component is never written R (the slides' usage). The decoder stays "the decoder" or "the reconstruction component". |
@@ -146,6 +159,9 @@ certificates), `mp_secretT` (type plumbing), the `CoveringScheme`/
 | D16 | `run_dealer` is removed from the framework section. It has zero consumers, its content model contradicts every executed dealer (the D15 falsity), and keeping it forced the audit's hedged wording. The paper's dealer story runs through `dealer_with_input_encoding`, which is what actually executes. |
 | D17 | The section `run_profile` in `pgg-smc/protocol/pgg_monodromy_profile.v` is renamed `protocol_of_profile`: the profile is the configuration plus its evidence, and the section yields the certified protocol it determines. Section names are file-local in Rocq, so the rename touches only the `Section`/`End` lines and the two same-file comment mentions (lines 13 and 46). The word "run" is reserved for the interpreter layer, which actually executes. |
 | D18 | Non-running members of the section are renamed `profile_*`: `run_k` to `profile_k`, `run_eps` to `profile_eps`, `run_anonymous` to `profile_anonymous`, `run_private` to `profile_private`, and the lemma `run_recovers` to `profile_recon_encode` (matching the `ts_recon_encode` round-trip naming one level down). The cast keeps `run_` (`run_party`, `run_verifier`, `run_recover` are the pieces that really run). Downstream: `run_k_pgl27`, `run_k_s5`, `run_k_s5x5`, `run_k_abel` become `profile_k_*` (the abel rename is build consistency only; the instance stays out of paper scope). The executed-layer `*_run_recovers` lemmas keep their names. All eight new names verified unused in the codebase (grep, 2026-08-09). |
+| D19 | A new top-level section "A First Instance: The Five-Card Family" (label `sec:fivecard`) is inserted between the framework section and the PGL construction. It presents den Boer and Kim as one record, `five_card_profile` at bias epsilon, with a compact second listing, the biased-distribution display, the epsilon-zero collapse, and the seven-cut kernel bound as a Proposition. All results stay at Lemma/Proposition level; Theorems A and B remain the only named theorems. Expected length 1 to 1.5 pages. Sections renumber automatically; the PGL construction becomes Section 5. |
+| D20 | Section 7 (Other Instances) transfers its den Boer and Kim mixing prose (`main.tex:889-895`) to the new section; the consolidated instance table keeps all five rows, and the trust-base paragraph and the S5 and S5xS5 prose stay in Section 7. Section 7's opener sentence is adjusted so it introduces the two remaining sibling instances plus the table. |
+| D21 | Section 3.1's five-card forward references (mechanism-table caption, two-families paragraph) point at `sec:fivecard`; the new section's coda is the ramp sentence into the PGL construction, naming what the difficult instance adds: coalitions beyond one card via three-transitivity, an orbit-class secret, and certificates without `vm_compute` on the group. |
 
 ## Framework rename and cleanup: per-file changes (D16-D18)
 
@@ -252,8 +268,9 @@ Content points, in order (at most 3 paragraphs):
    (D11). `Figure~\ref{fig:framework-architecture}` reference (D8).
 3. Boundary sentence: "The record path certifies correctness, endpoint
    uniformity, and the sharing threshold. The coalition-view, trace, and
-   word-shuffle privacy theorems of Sections 5 and 6 are stated separately:
-   they consume the transitivity of the action and the shuffle distribution
+   word-shuffle privacy theorems of
+   Sections~\ref{sec:exact} and~\ref{sec:mixing} are stated separately: they
+   consume the transitivity of the action and the shuffle distribution
    directly, not the record fields." Then the folded lead-in for Block 6: "The
    two optional slots of the security witness encode the proof mechanism, and
    Table~\ref{tab:witness-mechanism} shows the realized combinations." Then
@@ -269,9 +286,10 @@ The table's label is `tab:witness-mechanism`.
 | present | present | exact count with geometric decay in the word length | Kim |
 | absent | present | spectral certificate with an imported gap premise | $S_5$, $S_5\times S_5$ |
 
-Table note (one sentence, in the caption): "Section 6 treats the word-shuffle
-counterpart of the $\PG$ row, and Table~\ref{tab:instances} records the
-per-instance mixing evidence." In LaTeX: a `tabular` in the paper's existing
+Table note (one sentence, in the caption): "Section~\ref{sec:mixing} treats
+the word-shuffle counterpart of the $\PG$ row,
+Section~\ref{sec:fivecard} proves the den Boer and Kim rows, and
+Table~\ref{tab:instances} records the per-instance evidence." In LaTeX: a `tabular` in the paper's existing
 table style; `Some`/`None` written as "present"/"absent".
 
 ### Block 7: two families
@@ -284,9 +302,11 @@ orbit, and whose derived lemma `ie_output_correct` shows the shuffled layout
 reconstructs the output for every allowed shuffle. The Kim variant reuses the
 den Boer program unchanged. With an empty input list the prologue reduces by
 computation to the plain dealer, which is the secret-sharing case, and the
-$\PG$ instance passes exactly this empty list. Forward reference to Section
-7's instance table. No parenthetical asides; the degeneration is attributed
-to the mechanism, not to a named lemma.
+$\PG$ instance passes exactly this empty list. Forward references: to
+Section~\ref{sec:fivecard} for the realized committed-input instance, and to
+the instance table of the sibling-instances section for the full landscape.
+No parenthetical asides; the degeneration is attributed to the mechanism, not
+to a named lemma.
 
 ### New Rocq code (validated in-kernel 2026-08-09)
 
@@ -372,6 +392,73 @@ Append to the existing caption: "Filling the three component records yields
 the derived protocol roles, the certified characters, and the round-trip
 lemma of the listing."
 
+## New paper section: A First Instance — The Five-Card Family (D19-D21)
+
+Inserted after the framework section, before the PGL construction. Title "A
+First Instance: The Five-Card Family", label `sec:fivecard`. Block order:
+
+| # | Block | Anchor |
+|---|---|---|
+| F1 | Opener: the simplest instantiation of the framework; five cards, the cyclic group acting by rotation, the three-consecutive-hearts decoder; two classic protocols, one record | prose |
+| F2 | The filled record: compact listing of `five_card_profile` with a source footnote | second `lstlisting` |
+| F3 | The distribution family: biased-weight display plus the epsilon-zero collapse recovering den Boer | display |
+| F4 | Proposition: seven-cut security at bias 1/100, kernel-checked, below `2^-40` | proposition |
+| F5 | Correctness and trace privacy in one short paragraph; one executed program serves both members; committed inputs realize the function-evaluation family of Section 3.1 | prose |
+| F6 | Ramp coda (D21): what the PGL construction adds | prose |
+
+### F2: the listing
+
+```latex
+\begin{lstlisting}
+Definition five_card_profile (eps : R) (* bias bounds elided *)
+    (L : nat) : MonodromyProfile R :=
+  @MkMonodromyProfile R FiveCardKim_M bool FiveCardKim_PI
+    (fc_kim_security_witness ... L) (* biased-cut witness    *)
+    five_card_plug.                 (* three-hearts decoder  *)
+\end{lstlisting}
+```
+
+Footnote on the lead-in sentence: `Formalized in
+\path{pgg-smc/instances/kim2025/five_card_family.v} as
+\coqin{five\_card\_profile}; the listing elides the three bias hypotheses.`
+
+### F3: the display and the collapse
+
+Display:
+\[ w_\varepsilon(a^k) = \tfrac{1}{5}-\varepsilon \text{ if } k=0, \qquad
+   \tfrac{1}{5}+\tfrac{\varepsilon}{4} \text{ otherwise}, \qquad
+   -\tfrac{4}{5} < \varepsilon < \tfrac{1}{5}. \]
+Following sentence: at bias zero the witness bound collapses to zero for any
+positive word length, which is the precise sense in which the unbiased member
+is den Boer's protocol. Footnote: `five_card_eps0_eq0` in
+`\path{pgg-smc/instances/kim2025/five_card_family.v}`.
+
+### F4: the proposition
+
+Statement (adapting the relocated Section 7 sentence, D20): for bias
+$1/100$ and seven repeated cuts, every single-card endpoint distribution is
+within $2^{-40}$ of uniform in unhalved $L_1$ distance, and the kernel checks
+the computation. Footnote: `kim_bound_centi` and `kim_deal_centi_lt` in
+`\path{pgg-smc/instances/kim2025/five_card_kim.v}`.
+
+### F5: correctness and trace privacy
+
+Content points: the two members share one executed program, so correctness
+transfers verbatim (`kim_procs := den_boer_procs`, `kim_run_recovers` by the
+den Boer proof); the committed inputs of the two players realize the
+function-evaluation family of Section 3.1 with den Boer's input encoding; a
+single corrupted player's executed trace reveals nothing about the other
+input (`kim_trace_secrecy`). Also relocates the den Boer uniform-cut
+exactness sentence (D20). Forward reference to the sibling-instances table.
+
+### F6: the ramp coda
+
+One short paragraph, per D21: the five-card family keeps the group cyclic
+and the deck small enough for kernel enumeration; the next sections
+instantiate the same records where enumeration fails, and add coalition
+privacy beyond one card via three-transitivity, an orbit-class secret, and
+word certificates proven without computing in the group.
+
 ## Constraints
 
 - All of D10 (style rules) plus D11-D13.
@@ -384,14 +471,14 @@ lemma of the listing."
   source file per the mapping in Verification requirement 3.
 - Section 3.2 (Generic Theorems) body is unchanged. The only edit outside
   Section 3.1 is the preamble `\lstset` addition.
-- Expected page growth: about one page (17 to 18). No page constraint is in
-  force.
+- Expected page growth: about two and a half pages across both deliverables
+  (17 to about 19.5). No page constraint is in force.
 
 ## Verification requirements
 
 1. `latexmk -g -pdf -halt-on-error -interaction=nonstopmode main.tex` exits 0;
    `grep -E "^!" main.log` empty; no undefined or multiply-defined references.
-2. Page count recorded before and after (expected 17 to 18).
+2. Page count recorded before and after (expected 17 to about 19.5).
 3. Grep check, identifier to source file: `mp_M`, `mp_secretT`, `mp_PI`,
    `mp_security`, `mp_plug`, `run_party`, `run_verifier`, `run_recover`,
    `profile_eps`, `profile_k`, `profile_anonymous`, `profile_private`,
@@ -406,11 +493,13 @@ lemma of the listing."
    `pgg-smc/reconstruct/input_encoding.v`; `exchange_dealer`,
    `exchange_player`, `exchange_verifier` in
    `pgg-smc/protocol/card_exchange_pismc.v:221,239,249`.
-4. Style sweeps on the changed region: no em-dash, no prose semicolon, no
-   "law", no parenthetical asides, no abbreviations.
-5. D10 prose-run check on the new Section 3.1: no run of more than 3
-   consecutive prose paragraphs (Block 5 is capped at 3 and is followed by
-   the Block 6 table).
+4. Style sweeps on the changed regions (Section 3.1 and the new five-card
+   section): no em-dash, no prose semicolon, no "law", no parenthetical
+   asides, no abbreviations.
+5. D10 prose-run check on the new Section 3.1 and the five-card section: no
+   run of more than 3 consecutive prose paragraphs (Block 5 is capped at 3
+   and is followed by the Block 6 table; the five-card section interleaves
+   listing, display, and proposition).
 6. The boundary sentence is present, the wiring paragraph claims nothing
    beyond the honesty baseline, and no sentence attributes the instance's
    roles to `run_*` definitions.
@@ -434,14 +523,28 @@ lemma of the listing."
     `run_k`, `run_anonymous`, `run_private`, `run_recovers` (standalone; the
     executed-layer `*_run_recovers` lemmas do not match at a word boundary),
     and `run_profile`.
+12. Five-card section greps: `five_card_profile`, `five_card_eps0_eq0` in
+    `pgg-smc/instances/kim2025/five_card_family.v`; `kim_weight_fun`,
+    `kim_bound_centi`, `kim_deal_centi_lt` in
+    `pgg-smc/instances/kim2025/five_card_kim.v`; `kim_procs`,
+    `kim_run_recovers` in `pgg-smc/instances/kim2025/kim_run.v`;
+    `kim_trace_secrecy` in `pgg-smc/instances/kim2025/kim_trace.v`.
+13. Renumbering integrity: after the section insertion, zero hard-coded
+    section numbers in `main.tex` prose (grep for literal "Section" followed
+    by a digit), every `\ref`/`\label` resolves, and the Theorems A and B
+    literal-text mentions are untouched.
 
 ## Out of scope
 
-- Any edit to Sections 2, 3.2, 4, 5, 6, 8, 9.
-- Section 7 gains no new content and loses none (the mechanism table
-  forward-references its existing table; Section 7's mixing sentences stay).
+- Any edit to the model section, the generic-theorems subsection, the PGL
+  construction and its two results sections, related work, and the
+  conclusion, beyond the automatic renumbering the D19 insertion causes.
+- The sibling-instances section keeps its consolidated table (all five
+  rows), its trust-base paragraph, and its S5 and S5xS5 prose; it loses only
+  the den Boer and Kim mixing paragraph (D20) and gets an adjusted opener.
 - The genus and covering-scheme narrative stays out of the paper.
-- No new theorem environments, no changes to Theorems A and B.
+- No new named theorem environments; Theorems A and B unchanged; the
+  five-card section uses the existing proposition environment.
 - Sibling instances (den Boer, Kim, S5, S5xS5) get no analogous
   `run_recover_*` corollary in this spec; the paper's architecture section
   cites only the worked instance. A parity sweep is a separate task if ever
