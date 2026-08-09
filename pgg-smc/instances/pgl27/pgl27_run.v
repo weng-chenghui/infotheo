@@ -19,6 +19,8 @@
 (* Key results:                                                               *)
 (*   pgl27_endpoints     == the collected endpoints are the dealt shares      *)
 (*   pgl27_run_recovers  == the executed run reconstructs the dealt secret    *)
+(*   run_recover_pgl27   == the run decodes via the profile's run_recover     *)
+(*   run_party_pgl27     == each player is the profile's run_party            *)
 (*                                                                            *)
 (* The implemented decoder reads all eight endpoints; seven already determine *)
 (* the class and six never do (pgl27_recovery.v). The secrecy statements of   *)
@@ -204,6 +206,10 @@ apply: Hgoal.
 exact: pgl27_endpoints.
 Qed.
 
+(******************************************************************************)
+(*     Framework-usage corollaries: derived roles consumed by this instance   *)
+(******************************************************************************)
+
 (** run_recover_pgl27 — the executed PGL(2,7) run decodes through the
     profile's derived decoder.
     @main architecture: the verifier's executed endpoints reconstruct the
@@ -218,10 +224,10 @@ Corollary run_recover_pgl27 (R : realType) (s : bool) (w0 : pgg_gT pgl27_M) :
   = s.
 Proof. exact: pgl27_run_recovers. Qed.
 
-(** run_party_pgl27 — each executed PGL(2,7) player is the profile's derived
-    player role at its ordinal.
-    @main architecture: the instance's player processes coincide with
-    run_party of pgl27_profile. *)
+(** run_party_pgl27 — the PGL(2,7) player role at each seat is the
+    profile's derived player.
+    @main architecture: the instance's player process at seat i coincides
+    with run_party of pgl27_profile. *)
 Corollary run_party_pgl27 (R : realType) (i : 'I_(pi_T' pgl27_PI).+1) :
   @run_party R (pgl27_profile R) i = exchange_player pgl27_PI i.
 Proof. by []. Qed.

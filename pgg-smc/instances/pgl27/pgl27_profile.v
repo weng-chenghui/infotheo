@@ -17,6 +17,7 @@
 (* Key results:                                                               *)
 (*   pgl27_point_uniform == the single-card pushforward is exactly uniform    *)
 (*   profile_k_pgl27     == the plug's privacy threshold is four              *)
+(*   profile_eps_pgl27   == the security character eps is zero                *)
 (******************************************************************************)
 
 From HB Require Import structures.
@@ -111,9 +112,9 @@ End witness.
 Lemma profile_k_pgl27 (R : realType) : profile_k (pgl27_profile R) = 4.
 Proof. by []. Qed.
 
-(** profile_eps_pgl27 — the PGL(2,7) profile's security character is zero:
-    perfect single-position endpoint uniformity.
-    @main security: the eps read off pgl27_profile is 0. *)
+(** profile_eps_pgl27 — the PGL(2,7) profile's security character is zero.
+    @main bound: the eps of pgl27_profile is 0; the single-card pushforward
+    of the uniform-over-the-group shuffle is exactly uniform. *)
 Lemma profile_eps_pgl27 (R : realType) :
   @profile_eps R (pgl27_profile R) = 0%R.
 Proof. by []. Qed.
