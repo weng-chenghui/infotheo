@@ -70,10 +70,11 @@ Definition abel_profile (R : realType) : MonodromyProfile R :=
   @MkMonodromyProfile R (@Gen_PGGTypes 1 2 abel_sigmas) 'I_4 (Gen_PGG_2 abel_sigmas)
     (abel_security_witness_direct_1 R) abel_plug.
 
-(** run_k_abel — the abelian plug's privacy threshold is 4 (one share per
-    sheet). Kind: example. What: run_k (abel_profile R) = 4. Why: contrast
-    character (vs the S_5 k = 5), read off the shared run_k. *)
-Lemma run_k_abel (R : realType) : run_k (abel_profile R) = 4.
+(** profile_k_abel — the abelian plug's privacy threshold is 4 (one share per
+    sheet).
+    @main bound: contrast character against the S_5 plug's k = 5, read off
+    the shared profile_k. *)
+Lemma profile_k_abel (R : realType) : profile_k (abel_profile R) = 4.
 Proof. by []. Qed.
 
 (** abel_gens_commute — the abelian plug's generators commute.

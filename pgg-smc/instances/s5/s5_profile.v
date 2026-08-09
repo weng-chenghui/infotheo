@@ -52,8 +52,8 @@ Definition s5_profile (R : realType) : MonodromyProfile R :=
   @MkMonodromyProfile R (@Gen_PGGTypes 3 3 (path_gen_tuple 3)) 'I_5 s5_PI
     (s5_security_witness_schreier R 286) s5_plug.
 
-(** run_k_s5 — the S_5 plug's privacy threshold is 5.
-    Kind: example. What: run_k (s5_profile R) = 5. Why: contrast character
-    (vs the abelian k = 2), read off the shared run_k. *)
-Lemma run_k_s5 (R : realType) : run_k (s5_profile R) = 5.
+(** profile_k_s5 — the S_5 plug's privacy threshold is 5.
+    @main bound: contrast character against the abelian plug's k = 2, read
+    off the shared profile_k. *)
+Lemma profile_k_s5 (R : realType) : profile_k (s5_profile R) = 5.
 Proof. by []. Qed.

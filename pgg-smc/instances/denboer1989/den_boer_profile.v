@@ -87,11 +87,11 @@ Lemma den_boer_perfect (R : realType) :
   sw_bound_eps (mp_security (den_boer_profile R)) = 0.
 Proof. by rewrite /= kim_security_at_zero. Qed.
 
-(** den_boer_run_k — the five-card plug's privacy threshold is 2.
-    @main architecture: run_k (den_boer_profile R) = 2; the contrast character
-    (any single revealed card leaks nothing about the AND, but two may), read off
-    the shared run_k of the five-card plug. *)
-Lemma den_boer_run_k (R : realType) : run_k (den_boer_profile R) = 2.
+(** profile_k_denboer — the five-card plug's privacy threshold is 2.
+    @main architecture: profile_k (den_boer_profile R) = 2; the contrast
+    character (any single revealed card leaks nothing about the AND, but two
+    may), read off the shared profile_k of the five-card plug. *)
+Lemma profile_k_denboer (R : realType) : profile_k (den_boer_profile R) = 2.
 Proof. by []. Qed.
 
 (******************************************************************************)

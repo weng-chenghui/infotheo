@@ -16,7 +16,7 @@
 (*                                                                            *)
 (* Key results:                                                               *)
 (*   pgl27_point_uniform == the single-card pushforward is exactly uniform    *)
-(*   run_k_pgl27         == the plug's privacy threshold is four              *)
+(*   profile_k_pgl27     == the plug's privacy threshold is four              *)
 (******************************************************************************)
 
 From HB Require Import structures.
@@ -106,7 +106,7 @@ Definition pgl27_profile : MonodromyProfile R :=
 
 End witness.
 
-(** run_k_pgl27 — the PGL(2,7) plug's privacy threshold is four.
+(** profile_k_pgl27 — the PGL(2,7) plug's privacy threshold is four.
     @main bound: coalitions of at most three cards are private, k = 4. *)
-Lemma run_k_pgl27 (R : realType) : run_k (pgl27_profile R) = 4.
+Lemma profile_k_pgl27 (R : realType) : profile_k (pgl27_profile R) = 4.
 Proof. by []. Qed.
