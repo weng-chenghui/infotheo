@@ -1,6 +1,6 @@
 # WADT2026 Architecture Section Expansion — Design Spec
 
-Date: 2026-08-09 (rev 2 after Opus audit, 22 findings applied)
+Date: 2026-08-09 (rev 3: Opus audit 22 findings applied, delta re-audit N1-N6 applied, verdict APPROVE WITH FIXES resolved)
 Target: `pgg-smc/paper-wadt2026/main.tex`, Section 3.1 (Framework Architecture)
 Status: for user review
 
@@ -11,9 +11,11 @@ architecture section: show how the framework records organize the specification
 of a card-based protocol, and present the fulfill-one-record feature. The
 feature, stated honestly: the `run_profile` section derives, for every completed
 `MonodromyProfile` value, the protocol roles, the certified characters, and the
-generic correctness lemma `run_recovers` with a one-line proof; the per-instance
-theorems of the paper are the sharp executed-trace forms of these guarantees,
-proven over the interpreter's output at the same layout record. Organization
+generic correctness lemma `run_recovers` with a one-line proof. The paper's
+correctness and endpoint-uniformity theorems are the sharp executed-trace forms
+of these guarantees, proven over the interpreter's output at the same layout
+record; the coalition-privacy theorems are separate results proven from
+transitivity. Organization
 follows the wadtSep17 slides
 (`/Users/cheng-huiweng/Projects/aplas2024-poster/wadtSep17/slides.tex`,
 frames "The specification: one MonodromyProfile", "SecurityWitness: certified
@@ -58,10 +60,12 @@ Rebuilt from the dependency trace of `pgl27_run.v`, `pgl27_secrecy.v`,
 claim only the following.
 
 Record path (what the records carry into paper results):
-- `pi_starts`/`pi_starts_uniq` fix the layout; every role of the executed run
-  is the generic `exchange_dealer`, `exchange_player`, `exchange_verifier`
-  applied at this interface (`pgl27_run.v:63-83`), so an instance writes no
-  process code. Correctness and the trace statements are over this layout.
+- `pi_starts`/`pi_starts_uniq` fix the layout; the players and the verifier of
+  the executed run are exactly the generic `exchange_player` and
+  `exchange_verifier` at this interface, and the dealer is the same generic
+  dealing program carrying the instance's own content readout
+  (`pgl27_run.v:63-83`), so an instance writes no process code. Correctness
+  and the trace statements are over this layout.
 - `ts_recon` of the plug's scheme reads the verifier endpoints in BOTH
   correctness results, uniform (`pgl27_run_recovers`) and word
   (`pgl27_word_run_recovers`); the proof closes by the scheme's reconstruction
@@ -136,7 +140,7 @@ closing paragraph per D13). Block order, each with its anchor:
 | 2 | Bridge table, unchanged content | table |
 | 3 | The combined listing (draft below); lead-in sentence carries the D7 footnote | new `lstlisting` |
 | 4 | Duties paragraph + enumerated list: the three proof obligations (drafts below) | itemize |
-| 5 | Wiring paragraphs: derived roles and characters with orphan-honest grounding, FORTE interpreter sentence, recovery-modularity sentence (D11), figure reference (D8), boundary sentence; the proof-mechanism lead-in folds into the final paragraph (D14-cap control) | prose, at most 3 paragraphs |
+| 5 | Wiring paragraphs: derived roles and characters with orphan-honest grounding, FORTE interpreter sentence, recovery-modularity sentence (D11), figure reference (D8), boundary sentence; the proof-mechanism lead-in folds into the final paragraph (D10 prose-run cap control) | prose, at most 3 paragraphs |
 | 6 | Proof-mechanism table | new small table |
 | 7 | Two-families paragraph (draft below) | prose |
 | 8 | Architecture figure, caption extended | existing figure |
@@ -147,28 +151,30 @@ closing paragraph per D13). Block order, each with its anchor:
 ### Block 3: the listing
 
 Lead-in sentence (carries the D7 footnote): "The central record and its
-derived protocol follow." The new table label is `tab:witness-mechanism`.
+derived protocol follow." All listing lines are at most 72 columns (N3).
 
 ```latex
 \begin{lstlisting}
 Record MonodromyProfile (R : realType) := MkMonodromyProfile {
-  mp_M        : MonodromyReprWithGeneratorType ; (* group, action, generators *)
-  mp_secretT  : Type ;                           (* secret type               *)
-  mp_PI       : PGGInterface mp_M ;              (* run layout                *)
-  mp_security : SecurityWitness R mp_M ;         (* endpoint bound            *)
-  mp_plug     : ReconPlug mp_M mp_secretT }.     (* decoder                   *)
+  (* the group, its action, and its generators *)
+  mp_M        : MonodromyReprWithGeneratorType ;
+  mp_secretT  : Type ;                   (* secret type    *)
+  mp_PI       : PGGInterface mp_M ;      (* run layout     *)
+  mp_security : SecurityWitness R mp_M ; (* endpoint bound *)
+  mp_plug     : ReconPlug mp_M mp_secretT }. (* decoder    *)
 
-Section run_profile.        (* derived for every profile mp *)
-Definition run_dealer      := exchange_dealer PI (rp_content plug) ...
-Definition run_party i     := exchange_player PI i.
-Definition run_verifier    := exchange_verifier PI players.
-Definition run_recover c   := ts_recon (rp_scheme plug) c.
-Definition run_eps  : R    := sw_bound_eps (mp_security mp).
-Definition run_k    : nat  := ts_k (rp_scheme plug).
-Definition run_anonymous   := sw_bound (mp_security mp).
-Definition run_private     := ts_private (rp_scheme plug).
+Section run_profile.     (* derived for every profile mp *)
+Definition run_dealer    := exchange_dealer PI (rp_content plug) ...
+Definition run_party i   := exchange_player PI i.
+Definition run_verifier  := exchange_verifier PI players.
+Definition run_recover c := ts_recon (rp_scheme plug) c.
+Definition run_eps  : R  := sw_bound_eps (mp_security mp).
+Definition run_k : nat   := ts_k (rp_scheme plug).
+Definition run_anonymous := sw_bound (mp_security mp).
+Definition run_private   := ts_private (rp_scheme plug).
 
-Lemma run_recovers s : run_recover (ts_encode (rp_scheme plug) s) = s.
+Lemma run_recovers s :
+  run_recover (ts_encode (rp_scheme plug) s) = s.
 Proof. exact: ts_correct (ts_encode_valid (rp_scheme plug) s). Qed.
 \end{lstlisting}
 ```
@@ -197,10 +203,12 @@ Content points, in order (at most 3 paragraphs):
    fields, re-exports the certified characters, and proves the round-trip
    correctness lemma `run_recovers` in one line from the record's obligations.
    No new proof obligation arises at wiring time. Grounding sentence
-   (orphan-honest): the worked instance executes exactly these generic
-   processes at its own layout record, and its threshold character is read off
-   the shared definition, with value four under the successor convention, so
-   the largest private coalition size is three (D12 wording).
+   (orphan-honest, N1 wording): in the worked instance the players and the
+   verifier are exactly the generic processes at its layout record, the dealer
+   is the same generic dealing program carrying the instance's own content
+   readout, and the threshold character is read off the shared definition,
+   with value four under the successor convention, so the largest private
+   coalition size is three (D12 wording).
 2. The small process interpreter that executes the layout originates in the
    earlier FORTE development (existing sentence, kept, citation kept). The
    executed traces of Section 2 are its output. Recovery-modularity sentence
@@ -216,6 +224,8 @@ Content points, in order (at most 3 paragraphs):
 
 ### Block 6: proof-mechanism table
 
+The table's label is `tab:witness-mechanism`.
+
 | `sw_exact` | `sw_asymptotic` | Mechanism | Realized by |
 |---|---|---|---|
 | present | absent | exact equality at eps 0 under the uniform group distribution | den Boer, $\PG$ |
@@ -223,7 +233,7 @@ Content points, in order (at most 3 paragraphs):
 | absent | present | spectral certificate with an imported gap premise | $S_5$, $S_5\times S_5$ |
 
 Table note (one sentence, in the caption): "Section 6 treats the word-shuffle
-counterpart of the $\PG$ row, and Table `tab:instances` records the
+counterpart of the $\PG$ row, and Table~\ref{tab:instances} records the
 per-instance mixing evidence." In LaTeX: a `tabular` in the paper's existing
 table style; `Some`/`None` written as "present"/"absent".
 
@@ -279,11 +289,10 @@ lemma of the listing."
    `ie_orbit`, `ie_output_correct` in
    `pgg-smc/reconstruct/input_encoding.v`; `exchange_dealer`,
    `exchange_player`, `exchange_verifier` in
-   `pgg-smc/protocol/pgg_interface.v` or `card_exchange_pismc.v` (locate at
-   implementation time and cite the actual definition site).
+   `pgg-smc/protocol/card_exchange_pismc.v:221,239,249`.
 4. Style sweeps on the changed region: no em-dash, no prose semicolon, no
    "law", no parenthetical asides, no abbreviations.
-5. D14 prose-run check on the new Section 3.1: no run of more than 3
+5. D10 prose-run check on the new Section 3.1: no run of more than 3
    consecutive prose paragraphs (Block 5 is capped at 3 and is followed by
    the Block 6 table).
 6. The boundary sentence is present, the wiring paragraph claims nothing
