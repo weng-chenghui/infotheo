@@ -53,13 +53,13 @@ perfect view and executed-trace privacy for coalitions of at most three players.
 privacy results assume a uniform Boolean secret, a fixed encoded
 representative, and passive adversaries. The verifier learns the secret.
 Active security, security after the reveal, and composition lie outside the
-model. For a finite implementation, I analyze a uniform word of length 200
+model. Because no single physical move samples a uniform group element, I
+analyze a finite implementation that draws a uniform word of length 200
 over five generator letters. A checked fiber-counting certificate proves that
 the resulting shuffle distribution is within $L_1$ distance $2^{-40}$ of the
 uniform group distribution. This word-shuffle theorem transfers to single-card
-marginals and to a product with any secret prior. Transport theorems then
-bound approximate coalition-view and executed-trace privacy by $2^{-39}$
-under the word distribution. A five-card family and two spectral siblings
+marginals and to a product with any secret prior. Transport theorems therefore bound approximate coalition-view and
+executed-trace privacy by $2^{-39}$ under the word distribution. A five-card family and two spectral siblings
 show which algebraic, operational, privacy, and mixing arguments the framework
 reuses.
 \end{abstract}
@@ -1369,22 +1369,23 @@ bound approaches the exact $L_1$ floor of one.
 Den Boer introduced the first card-based cryptographic protocol with the
 five-card trick~\cite{denBoer1989,KochFUN2021}. The protocol uses five cards
 to compute the AND of two secret bits with perfect security against passive
-participants. Later protocols reduced the
-number of cards and supported other functions~\cite{MizukiSone2009,MizukiSone2012,KochWalzerHartel2015}.
+participants. Although the security is already perfect against passive participants,
+later protocols reduced the number of cards and supported other
+functions~\cite{MizukiSone2009,MizukiSone2012,KochWalzerHartel2015}.
 
 Koch, Schrempp, and Kirsten encode bounded protocol spaces for software
 bounded model checking~\cite{Koch2019}. Their method searches for protocols
-and checks finite lower bounds. The present development proves reusable
-group-action, execution, privacy, and mixing lemmas in \Rocq{}. The Kim
+and checks finite lower bounds. The present development, however, proves reusable group-action,
+execution, privacy, and mixing lemmas in \Rocq{}. The Kim
 instance also connects a biased shuffle model to a concrete word-shuffle
 bound~\cite{KimCetinkaya2025}.
 
 Shinagawa gives a unified model in which a card protocol is specified by a
 deck and a set of operations~\cite{Shinagawa2021}. The model covers binary
-cards, regular polygon cards, and dihedral cards. It varies the card type
-and the allowed physical operations. The framework in this paper instead
-varies the finite group, its permutation action, the shuffle distribution,
-and the reconstruction map. It connects these parameters to executable
+cards, regular polygon cards, and dihedral cards. Although Shinagawa's model varies the card type and the allowed physical
+operations, the framework in this paper varies the finite group, its
+permutation action, the shuffle distribution, and the reconstruction
+map. It connects these parameters to executable
 traces and machine-checked privacy and mixing results.
 
 Group-based shuffle models appear in work on closed shuffles and graph
@@ -1404,16 +1405,17 @@ and random-walk tail bounds in Isabelle/HOL~\cite{Karayel2023}. Barthe,
 Gr\'egoire, Hsu, and Strub develop a relational program logic for couplings
 and apply it to rapid-mixing examples~\cite{BartheEtAl2017}. Standard
 mathematical treatments relate spectral information to convergence of
-finite Markov chains~\cite{LevinPeresWilmer2009}. The PGL proof uses another
-route. It counts the exact fibers of one finite word length and checks the
+finite Markov chains~\cite{LevinPeresWilmer2009}. The PGL proof, however, uses another route. It counts the exact fibers of one finite word length and checks the
 resulting integer inequality. This choice gives a concrete bound without a
 general spectral development.
 
 Proof-assistant frameworks for cryptography include CertiCrypt, CryptHOL, and
 SSProve~\cite{CertiCrypt,CryptHOL,SSProve}. They support program semantics,
 probabilistic reasoning, or modular cryptographic proofs at different
-levels. The present work uses the MathComp and infotheo libraries for finite
-algebra, probability, independence, and entropy~\cite{MathComp,InfoTheo}.
+levels. The present work, however, states information-theoretic bounds rather
+than game-based reductions, and it therefore uses the MathComp and
+infotheo libraries for finite algebra, probability, independence, and
+entropy~\cite{MathComp,InfoTheo}.
 The earlier FORTE development supplies the interpreter and trace semantics
 used here~\cite{WengEtAl2025}. The current paper connects that operational
 foundation to group-parametric card shuffles and coalition traces.
@@ -1427,17 +1429,21 @@ and trace privacy for coalitions of at most three players under the uniform
 group distribution. These security results use a uniform Boolean prior, the
 fixed representative dealer, passive adversaries, and the dealer
 distributions stated in Section~\ref{sec:model}. The verifier learns the
-secret.
+secret. Theorem~\ref{thm:generic-privacy} consumes only the
+three-transitive action, the fixed encoding into decks of distinct
+cards, and the uniform group distribution, and it therefore transfers to
+any instance that supplies these three inputs.
 
 For a finite shuffle implementation, Theorem B gives an $L_1$
 distance of at most $2^{-40}$ after 200 generator letters, the same bound
 for every single-card endpoint and for a product with any Boolean secret
 prior, and approximate coalition-view and executed-trace bounds at
-$2^{-39}$.
+$2^{-39}$. The word-shuffle model hence replaces the ideal uniform
+shuffle at a quantified and machine-checked cost.
 
-Two extensions of the word-shuffle security results remain open. The entropy
-form of approximate privacy needs a quantitative continuity modulus for the
-binary entropy function near one half. The all-decks and shuffle-free
+Two extensions of the word-shuffle security results remain open. The entropy form of approximate privacy needs a quantitative continuity
+modulus for the binary entropy function near one half in order to
+convert the $L_1$ bound into a conditional-entropy bound. The all-decks and shuffle-free
 dealers need a word-shuffle mixing statement on their own sample spaces. Another
 direction is to connect
 bounded-width branching programs to group-based card protocols through
