@@ -26,7 +26,8 @@ resolves all of them; the disposition table is at the end.
    mathematical "we". Existing "I define / I prove" sentences untouched.
    Scope clarification after audit (A17): the numeric example E21 is a
    mathematical statement and uses the impersonal "Let ... be" register,
-   with no "I" and no "we". PENDING USER CONFIRMATION.
+   with no "I" and no "we". User-confirmed 2026-08-10, together with the
+   E18 cut and the E12 move.
 5. After all changes land, the SAME skill check is re-run (same baseline,
    same panel) as the acceptance gate, supplemented by the two committed
    instruments in `tools/` (audit A10).
