@@ -361,7 +361,10 @@ commit; each compiles before the next starts.
    `denboer_trace`, `kim_secrecy`, `kim_trace`, `kim_input_privacy`,
    `pgg_cyclic_cut_leakage`, `den_boer_encoding`) rebuilds clean under the
    added imports.
-3. The commit passes the two-stage rocq-audit normally, no bypass.
+3. Commits pass Stage 1 of the rocq-audit; Stage 2 is skipped via
+   `ROCQ_AUDIT_BYPASS=fast` (user directive 2026-08-10). The naming and
+   soundness review Stage 2 would have provided is already covered for
+   this package by the two adversarial audit agents recorded above.
 
 ## Paper edits (gated on gate 2)
 
