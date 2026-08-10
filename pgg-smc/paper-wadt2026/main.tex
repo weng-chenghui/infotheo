@@ -606,7 +606,8 @@ Definition five_card_profile (R : realType) (eps : R)
     five_card_plug.                 (* three-hearts decoder  *)
 \end{lstlisting}
 
-The dealing distribution is the biased cut of Kim and \c{C}etinkaya
+The dealing distribution is the biased cut of Kim and \c{C}etinkaya,
+and I write $w_\varepsilon$ for it:
 \begin{equation}
   w_\varepsilon(a^k)=\begin{cases}\tfrac{1}{5}-\varepsilon, & k=0,\\[2pt]
   \tfrac{1}{5}+\tfrac{\varepsilon}{4}, & k=1,2,3,4,\end{cases}
@@ -618,18 +619,18 @@ length. The unbiased member is therefore den Boer's protocol in
 precisely this sense.\footnote{\coqin{five\_card\_eps0\_eq0} in
 \path{pgg-smc/instances/kim2025/five_card_family.v}.}
 
-The master theorem gives the exact leakage for every fixed reveal set.\footnote{The master theorem \coqin{leak\_view\_set} covers all
+What I call the master theorem gives the exact leakage for every fixed reveal set.\footnote{The master theorem \coqin{leak\_view\_set} covers all
 thirty-two position subsets, anchored by \coqin{leak\_k1},
 \coqin{leak\_k2\_adj}, \coqin{leak\_k2\_dist2}, \coqin{leak\_k3},
-\coqin{leak\_k3\_gap}, \coqin{leak\_k4}, \coqin{leak\_k5}, and the cap
-\coqin{H\_secret} in
+\coqin{leak\_k3\_gap}, \coqin{leak\_k4}, \coqin{leak\_k5}, and the secret's
+own entropy \coqin{H\_secret} in
 \path{pgg-smc/instances/denboer1989/five_card_leakage.v}. For example
 \coqin{leak\_k2\_adj} $=\tfrac{27}{10}-\tfrac14\log 5-\tfrac{7}{10}\log
 7$.} One revealed card carries no information about the conjunction, which
 is the information-theoretic counterpart of the scheme's privacy
 threshold, and the ramp climbs to the secret's own entropy
-$2-\tfrac34\log 3\approx 0.811$. The decimals are evaluations of the
-proven closed forms.
+$2-\tfrac34\log 3\approx 0.811$, which I call the cap. The decimals are
+evaluations of the proven closed forms.
 
 Figure~\ref{fig:fivecard-leakage} shows selected cases.
 
@@ -950,10 +951,11 @@ all eight card values once. Hence seven revealed positions determine the
 orbit class. By contrast, every set of at most six revealed positions is
 consistent with valid arrangements from both secret classes.
 
-Three parameters summarize the instance. The privacy threshold $t$ is the
-largest coalition size with perfect privacy, the recovery threshold $r$ is
-the least number of revealed positions that always determines the secret
-class, and $n$ is the number of card positions. I call the triple
+Three parameters summarize the instance. The privacy threshold $t$ is
+defined as the largest coalition size with perfect privacy, the recovery
+threshold $r$ is defined as the least number of revealed positions that
+always determines the secret class, and $n$ is the number of card
+positions. I call the triple
 $(t,r,n)$ the recovery ramp.
 
 \begin{proposition}[Recovery ramp and sharpness\footnotemark]\label{thm:recovery-ramp}
@@ -1060,7 +1062,8 @@ and an independent uniform $\PG$ shuffle,
 \end{proposition}
 
 A third dealer samples a uniform valid deck in the chosen class and applies
-no later shuffle. For this shuffle-free deck distribution, view independence holds for
+no later shuffle. I call the resulting distribution the shuffle-free deck
+distribution, and view independence holds under it for
 every Boolean secret prior. The available executed-trace theorem uses the
 uniform Boolean prior. No prior-generic trace theorem is claimed.
 
@@ -1142,7 +1145,8 @@ Let $\mu$ be uniform on the five-letter symmetric generator tuple. Then
 \end{equation}
 \end{lemma}
 
-Equation~\ref{eq:pgl-mixing} is one checked certificate. Its inputs are the
+Equation~\ref{eq:pgl-mixing} is one checked certificate, which I call
+the mixing certificate. Its inputs are the
 five-letter generation theorem, the group order in
 Equation~\ref{eq:pgl-order}, the $336$ fiber counts, and the final integer
 inequality. The certificate concerns the distribution of shuffle group
@@ -1150,7 +1154,8 @@ elements.
 
 A coalition observes card endpoints rather than group elements. The
 certificate therefore moves from the group to the endpoints first. The
-first transfer maps each permutation to the endpoint of one fixed card.
+first transfer, which I call the endpoint transfer, maps each
+permutation to the endpoint of one fixed card.
 
 \begin{lemma}[Endpoint transfer\footnotemark]\label{lem:endpoint-transfer}
 \footnotetext{Formalized in \path{pgg-smc/instances/pgl27/pgl27_mixing.v}
@@ -1203,8 +1208,8 @@ tuple.\footnotemark{} Then
   \left\lVert \mu^{*200}-U_G\right\rVert_1 \leq 2^{-40}.
 \]
 For the fixed representative dealer, every passive coalition $C$ with
-$\lvert C\rvert\leq3$, and all secrets $s,s'\in\{0,1\}$, writing $V_C(s,g)$
-for the coalition view at dealt secret $s$ and shuffle $g$,
+$\lvert C\rvert\leq3$, and all secrets $s,s'\in\{0,1\}$, where the coalition
+view at dealt secret $s$ and shuffle $g$ is denoted $V_C(s,g)$,
 \begin{equation}
   \left\lVert
     (g\mapsto V_C(s,g))_\#\mu^{*200}
@@ -1354,7 +1359,9 @@ result does not depend on the $S_5$ Rayleigh premise.
   \label{tab:instances}
 \end{table}
 
-The probability, view, and trace results use three classical principles
+The checker and the axioms that a result's verification rests on are
+called its trust base. The probability, view, and trace results use three
+classical principles
 from the MathComp probability stack: propositional extensionality,
 dependent functional extensionality, and constructive indefinite
 description. The $S_5$ and $S_5\times S_5$ mixing bounds additionally
