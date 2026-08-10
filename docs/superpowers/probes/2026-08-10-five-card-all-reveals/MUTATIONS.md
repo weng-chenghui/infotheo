@@ -116,6 +116,68 @@ the value and not the route.
 
 ---
 
+## probe_round2.v (Round 2)
+
+Method for this round: an interactive session is opened in preamble mode on
+the imports of `probe_round2.v`, every declaration of the file up to
+`leak_k3_gap` is replayed, and each perturbation is then submitted from that
+state. Nothing below is left in the `.v` file.
+
+### M7 — `adjacentE` classifies `{0, 2}` as adjacent
+
+Perturbation: the fifth disjunct of the right-hand side, the wrap pair
+`[&& b0, ~~ b1, ~~ b2, ~~ b3 & b4]` for `{0, 4}`, replaced by
+`[&& b0, ~~ b1, b2, ~~ b3 & ~~ b4]` for `{0, 2}`; proof script unchanged.
+
+```
+(in proof mutA): Attempt to save an incomplete proof
+(there are remaining open goals).
+```
+
+The 32-way boolean case bash no longer closes, and the residual goals are the
+bit patterns where the two formulas disagree, for instance at
+`b = (true, false, true, false, false)` the left-hand side computes to `false`
+while the mutated right-hand side computes to `true`.
+
+### M8 — the `{0, 3}` branch asserted equal to the adjacent two-card value
+
+Perturbation: the statement
+`` `I( Secret ; ViewS (setb5 true false false true false) ) `` set equal to
+`27%:R / 10%:R - 4%:R^-1 * log 5%:R - (7%:R / 10%:R) * log 7%:R`, with the
+branch's own chain (three `mutual_info_ViewT_sigma` steps, one
+`mutual_info_ViewT_rot`, `ViewT_ViewA`, `leak_k2_dist2`) unchanged.
+
+```
+5 / 2 - 3 / 20 * log 3 - 2^-1 * log 5 - 7 / 20 * log 7 =
+27 / 10 - 4^-1 * log 5 - 7 / 10 * log 7
+```
+
+The whole reduction chain runs to completion and delivers the distance-2
+value; only the claimed value is wrong, so the failure isolates the value and
+not the route. This is the wrap pair `{0, 3}` being at cyclic distance two,
+not one.
+
+### M9 — `leak {0, 3}` read off through the adjacent branch
+
+Perturbation: `leak (setb5 true false false true false)` proved by
+`leakE2adj` instead of `leakE2dist2`, adjacency side condition discharged by
+`rewrite adjacentE` as in the real branches.
+
+```
+[|| [&& true, false, ~~ false, ~~ true & ~~ false],
+    [&& ~~ true, false, false, ~~ true & ~~ false],
+    [&& ~~ true, ~~ false, false, true & ~~ false],
+    [&& ~~ true, ~~ false, ~~ false, true & false]
+  | [&& true, ~~ false, ~~ false, ~~ true & false]]
+```
+
+Every disjunct computes to `false`, so the side condition is unprovable and
+the adjacent closed form is unreachable for `{0, 3}`. The computational form
+`adjacentE` is therefore doing real classification work in the master proof,
+not merely restating `adjacent`.
+
+---
+
 ## Summary
 
 | # | File | Perturbation | Outcome |
@@ -126,3 +188,6 @@ the value and not the route.
 | M4 | probe_objects.v | `fc_leak_3gap` = 2-adjacent value | fails: unify 27/10-form with 6/5-form |
 | M5 | probe_shapes.v | `set5_branch_04` -> `[set 0; 3]` | fails: positions 3 and 4 both contradict |
 | M6 | probe_shapes.v | `leak_view_nil = 1` | fails: `0 = 1` |
+| M7 | probe_round2.v | `adjacentE` wrap disjunct swapped for `{0, 2}` | fails: case bash leaves open goals |
+| M8 | probe_round2.v | `{0, 3}` branch given the adjacent value | fails: 5/2-form vs 27/10-form |
+| M9 | probe_round2.v | `leak {0, 3}` via `leakE2adj` | fails: adjacency disjunction is `false` |

@@ -5,8 +5,10 @@ Target file: `pgg-smc/instances/denboer1989/five_card_leakage.v`.
 Paper target: `pgg-smc/paper-wadt2026/main.tex` (three loci, listed below).
 Status: probe round 1 complete (all rows GO); adversarial audits complete
 (soundness GO; naming NO-GO with nine blocking findings, all resolved
-below); probe round 2 (post-audit revisions) pending. This spec follows
-`/rocq-probe-first-spec`.
+below); probe round 2 complete (R1-R5 all GO; `probe_round2.v` compiles
+with the master theorem Qed over ALL 32 branches as real chains, single
+Admitted support `leak_k3_gap`). Ready for the user review gate, then the
+implementation plan. This spec follows `/rocq-probe-first-spec`.
 
 ## Goal
 
@@ -182,16 +184,34 @@ position seqs as in the existing file, `S : {set 'I_5}` for sets,
    the `enum_setb5`/`card_setb5` rewriting bridge, chains
    `mutual_info_ViewT_sigma` and `mutual_info_ViewT_rot` to a proven
    pattern lemma via `ViewT_ViewA`, and computes `leak` (adjacency by
-   `adjacentE`, the computational form on the five bits). All 32 chains
-   are real in the implementation; the probe's `leak_view_rest` escape
-   hatch is probe-only and never lands (naming audit F23).
+   `adjacentE`, the computational form on the five bits). Landed in
+   `probe_round2.v`: ALL 32 branches are real chains, Qed; the round-1
+   `leak_view_rest` escape hatch does not exist in round 2 (naming audit
+   F23 satisfied by construction).
 
-Supporting infrastructure (from the idP-opacity finding, probe round 1):
-`enum_val5`, `card_val5`, `card_setb5`, `enum_setb5` — `enum_tuple`,
-`#|S|` and set literals are conversion-blocked on the Qed-opaque `idP`
-inside `insub`, so branch computations go through these rewriting lemmas
-rather than `vm_compute` (necessity verified by the soundness audit's
-`Fail Check (erefl : #|[set p0]| = 1%N)`).
+Supporting infrastructure (probe rounds 1-2):
+- idP-opacity bridge: `enum_val5`, `card_val5`, `card_setb5`,
+  `enum_setb5` — `enum_tuple`, `#|S|` and set literals are
+  conversion-blocked on the Qed-opaque `idP` inside `insub`, so branch
+  computations go through these rewriting lemmas rather than
+  `vm_compute` (necessity verified by the soundness audit's
+  `Fail Check (erefl : #|[set p0]| = 1%N)`).
+- `val_fc_sigma_fun : val (fc_sigma_fun i) = (i.+1 %% 5)%N` (the name
+  `fc_sigma_funE` is taken by `five_card_program.v:128` and silently
+  shadows on import — round-2 finding); `fc_sigmaKV : cancel fc_sigma_inv
+  fc_sigma_fun`, absent from `five_card_group.v`, proved locally.
+- `map_tnth`: `[seq f (tnth t i) | i <- enum 'I_n] = [seq f j | j <- val t]`
+  — absorbs the `map_comp`/`map_tnth_enum`/`tval` matching frictions in
+  the bridge proof (round-2 finding).
+- `exists_ord5` (five-instance expansion of `[exists i : 'I_5, _]`, which
+  is idP-blocked) and `setb5_eq` (set equality as bit equality), feeding
+  `adjacentE`.
+- `leakE<n>` value lemmas reading `leak (setb5 …)` off `card_setb5` and
+  `adjacentE` per branch family.
+
+Residual name hazard, recorded: `adjacent` exists as a notation in
+`mathcomp.analysis.sequences`; it is unreachable from the destination
+file today, but importing `sequences` there later would clash.
 
 All new results live in `five_card_leakage.v`, same section, `Qed` only,
 boolp classical axioms only. The seven existing lemmas are not modified
@@ -220,15 +240,23 @@ Round 1 (all GO, probe files + audit evidence):
 | L15 | Paper loci: contribution bullet lines 138-139 (corrected from 137-138, soundness Finding 9), section sentence + footnote line 592, figure caption line 644 | grep, both audits | GO (corrected) |
 | L16 | The six anchors and `H_secret` are Qed with the claimed statements | five_card_leakage.v:86-546; consumed by the decomposition probe | GO |
 
-Round 2 (pending; pass criteria are compiles at the REAL imported carrier):
+Round 2 (complete; all verified at the REAL imported carrier; compile and
+assumption cone re-verified firsthand by the orchestrator):
 
-| # | Claim | What counts as passing |
-|---|---|---|
-| R1 | The rotation cluster rebuilt on `fc_sigma_fun`/`fc_sigma_inv`/`fc_sigmaK` (no `succ5`/`pred5`) compiles and `mutual_info_ViewT_sigma` is Qed | probe_round2.v Qed, zero Admitted in the cluster |
-| R2 | The general `ViewT_ViewA` bridge is Qed in the `Ordinal`-literal encoding, and the six existing `leak_k*` transfer through it | probe_round2.v Qed |
-| R3 | A distance-2 branch closes through a real chain, with `adjacentE` (computational adjacency on the five bits) Qed | probe_round2.v: `{0,2}`-orbit branch real, `adjacentE` Qed |
-| R4 | `ViewS S := ViewT (enum_tuple S)` typechecks directly (no `set_tuple` wrapper) | probe_round2.v |
-| R5 | Renamed identifiers are collision-free | naming audit sweep already confirms `leak`, `adjacent` free repo-wide; re-grep after round 2 |
+| # | Claim | Verdict | Evidence |
+|---|---|---|---|
+| R1 | Rotation cluster rebuilt on `fc_sigma_fun`/`fc_sigma_inv`/`fc_sigmaK`, no `succ5`/`pred5` | GO | `mutual_info_ViewT_sigma` Qed; `fc_sigmaKV` proved locally (absent upstream); zero Admitted in the cluster |
+| R2 | General `ViewT_ViewA` bridge in the `Ordinal`-literal encoding; all published `leak_k*` transfer through it | GO | one extra support `map_tnth` needed (matching friction, recorded above) |
+| R3 | Distance-2 branches close through real chains with `adjacentE` Qed | GO | both `{0,2}` (direct) and `{0,3}` (3 sigma steps + `rot_tuple 1` relabel) real; `adjacentE`'s five-disjunct formula Qed |
+| R4 | `ViewS S := ViewT (enum_tuple S)` direct | GO | no `set_tuple` wrapper |
+| R5 | Renamed identifiers collision-free | GO | one collision found and fixed (`fc_sigma_funE` → `val_fc_sigma_fun`); 41-name repo + library sweep otherwise clean; `adjacent` notation hazard recorded |
+
+Round-2 exceedance: `leak_view_set` Qed over ALL 32 branches as real
+chains (floor was 8); assumption cone = boolp trio + `leak_k3_gap` only.
+probe_round2.v: 33 Qed, 1 Admitted, 0 Abort/Axiom, 0 lines over 80
+columns. MUTATIONS.md round 2: M7 (adjacentE wrong wrap disjunct), M8
+({0,3} asserted at the adjacent value — route completes, value refuses),
+M9 (adjacency misread) — all confirmed failing.
 
 ## Soundness invariants
 
@@ -280,8 +308,10 @@ docs/superpowers/probes/2026-08-10-five-card-all-reveals/
   audit/                   — soundness-audit evidence (independent_enum.py,
                              audit_decomp_checks.v, audit_no_div.v,
                              audit_div_regression.v, audit_supports_real.v)
-  probe_round2.v           — round 2: R1-R5 at the real imported carrier;
-                             near-final implementation shape
+  probe_round2.v           — round 2 (landed): R1-R5 at the real imported
+                             carrier; 33 Qed, 1 Admitted (leak_k3_gap),
+                             all 32 master branches real; the plan's
+                             verbatim source
 ```
 
 Round-1 files are audit evidence and stay untouched; round 2 supersedes
@@ -332,20 +362,23 @@ unless stated; the finding numbers are the audit's):
 
 ## Implementation outline (the plan will quote probe_round2.v verbatim)
 
+With round 2 landing all 32 branches Qed, implementation reduces to two
+proof tasks plus transcription:
+
 1. Imports: `div`, `five_card_group`.
-2. `leak_k3_gap` by the `leak_k3` template with the fibre tables above.
-3. `injective_mutual_info_RV`; `rot_tuple_inj`.
-4. `cut_sigma`, `fdistmap` invariance from `fc_sigmaK`, `ViewT`,
-   `mutual_info_ViewT_sigma`, `mutual_info_ViewT_rot`.
-5. `leak_k0`.
-6. `ViewT_ViewA` (general bridge).
-7. `adjacent`, `adjacentE`, `leak`, `ViewS`, `setb5`, `setb5_onto`,
-   `enum_val5`/`card_val5`/`card_setb5`/`enum_setb5`,
-   `mutual_info_ViewS_ViewT`.
-8. `leak_view_set`, all 32 branches real (26 of them are new work beyond
-   the probes, using the demonstrated chain pattern; per-branch
-   brute-force enumeration is the fallback).
-9. Paper edits (below), after the `.vo` gate.
+2. `leak_k3_gap` by the `leak_k3` template with the fibre tables above —
+   the ONLY remaining new proof of substance (the probe's single Admitted).
+3. Transcribe probe_round2.v into `five_card_leakage.v`: the rotation
+   cluster, `injective_mutual_info_RV`, `rot_tuple_inj`, `leak_k0`,
+   `ViewT_ViewA`, `map_tnth`, `exists_ord5`/`setb5_eq`/`adjacentE`,
+   `adjacent`/`leak`/`ViewS`/`setb5`/`setb5_onto`, the idP bridge lemmas,
+   `mutual_info_ViewS_ViewT`, the `leakE<n>` value lemmas, and
+   `leak_view_set` with its 32 Qed chains — with declarative statement
+   comments and H-series role tags added at transcription (`@main
+   security` for `leak_view_set` and `leak_k3_gap`; `@composes`/`@intent`
+   for the rest; `@composes` targets resolve only once the names are in
+   the repo, so tags land with the code, not before).
+4. Paper edits (below), after the `.vo` gate.
 
 Every transcribed declaration gets a declarative statement comment plus
 its H-series role tag (`@main security` for `leak_view_set` and
@@ -386,13 +419,15 @@ commit; each compiles before the next starts.
 
 ## Risks
 
-- The 26 not-yet-probed master branches are mechanical applications of a
-  chain pattern demonstrated at every arity that occurs (soundness
-  Finding 7); per-branch brute-force enumeration bounds the damage of any
-  stuck branch.
+- Master-theorem branch risk is retired: all 32 chains are Qed in
+  probe_round2.v; transcription risk only.
 - The idP-opacity bridge is Qed and audited; no `vm_compute` on
   set-valued terms anywhere.
-- Stage-2 audit token caps: the work lands as a small number of
-  single-file commits, far under the daily cap.
+- `rewrite e !mutual_info_ViewT_sigma` in the branch chains uses `!` on a
+  non-arithmetic lemma bounded by the `map_tuple` nesting depth (max 4);
+  this is within the project's bounded-`!` allowance, not the forbidden
+  arithmetic pattern.
+- The `adjacent` notation hazard (mathcomp.analysis.sequences) is
+  recorded; no action unless that import ever reaches the file.
 - Lazy-eval hazards are low (20-outcome space); side conditions go
   premise-first regardless.
