@@ -676,6 +676,16 @@ $\tfrac65-\tfrac{9}{20}\log 3$ bits. The figure draws the consecutive
 case, and the gapped case has the same value. Only the two-card value
 depends on the pattern's shape.
 
+\begin{example}\label{ex:fivecard-shape}
+Let the reveal expose two of the five positions. Two adjacent positions
+reveal $0.154$ bits about the conjunction, and two positions at cyclic
+distance two reveal $0.119$ bits. Both decimals evaluate proven closed
+forms, for instance the adjacent value is
+$\tfrac{27}{10}-\tfrac14\log 5-\tfrac{7}{10}\log 7$. The shape stops
+mattering at three revealed cards, because the closed form there depends
+only on how many cards the reveal exposes.
+\end{example}
+
 \begin{proposition}[Seven-cut security at bias $1/100$\footnotemark]
 \label{prop:fivecard-mixing}
 \footnotetext{Formalized in
@@ -765,6 +775,62 @@ order
   \lvert \PG\rvert=336.
   \label{eq:pgl-order}
 \end{equation}
+
+Three fractional linear maps generate this action. They are the
+translation $z\mapsto z+1$, the scaling $z\mapsto 3z$, and the inversion
+$z\mapsto -1/z$.\footnote{The rows of Figure~\ref{fig:pgl-generators} are
+the permutation tables of the three maps, identified with them by
+\coqin{tr\_moebius}, \coqin{sc\_moebius}, and \coqin{inv\_moebius} in
+\path{pgg-smc/instances/pgl27/pgl27_group.v}.}
+Figure~\ref{fig:pgl-generators} shows each map as a rearrangement of the
+row of eight cards, one card per projective point. The executable shuffle
+of Section~\ref{sec:mixing} draws its letters from these three maps and
+from two inverses.
+
+\begin{figure}[H]
+  \centering
+  % Drawn at true document font sizes; the picture is never scaled.
+  \begin{tikzpicture}[every node/.style={font=\small},
+      card/.style={draw,minimum width=7mm,minimum height=9mm,inner sep=1pt}]
+    \foreach \p in {0,...,7}
+      \node[gray] at (\p*0.85,0.85) {\p};
+    \node at (-2.1,0) {$z\mapsto z$};
+    \foreach \p/\c in {0/0,1/1,2/2,3/3,4/4,5/5,6/6,7/\infty}
+      \node[card] at (\p*0.85,0) {$\c$};
+    \node at (-2.1,-1.2) {$z\mapsto z+1$};
+    \foreach \p/\c in {0/1,1/2,2/3,3/4,4/5,5/6,6/0,7/\infty}
+      \node[card] at (\p*0.85,-1.2) {$\c$};
+    \node at (-2.1,-2.4) {$z\mapsto 3z$};
+    \foreach \p/\c in {0/0,1/3,2/6,3/2,4/5,5/1,6/4,7/\infty}
+      \node[card] at (\p*0.85,-2.4) {$\c$};
+    \node at (-2.1,-3.6) {$z\mapsto -1/z$};
+    \foreach \p/\c in {0/\infty,1/6,2/3,3/2,4/5,5/4,6/1,7/0}
+      \node[card] at (\p*0.85,-3.6) {$\c$};
+  \end{tikzpicture}
+  \caption{The three generating maps acting on the row that places card
+  $z$ at position $z$. Gray labels are card positions. Position $i$ shows
+  the image point $g(i)$, the observation convention of
+  Section~\ref{sec:model}, with the point at infinity carried by position
+  seven. Figure~\ref{fig:encoding} draws the same row as the encoded
+  arrangement $D_0$ and writes its eighth card as the value $7$. The
+  order $336$ equals the number $8\cdot 7\cdot 6$ of ordered triples of
+  distinct points, so Lemma~\ref{thm:three-transitive} leaves exactly one
+  group element for each ordered destination.}
+  \label{fig:pgl-generators}
+\end{figure}
+
+\begin{example}\label{ex:pgl-letters}
+Let the deck be the identity assignment with card $z$ at position $z$.
+The translation map turns the row $(0,1,2,3,4,5,6,\infty)$ into
+$(1,2,3,4,5,6,0,\infty)$ because position $i$ shows the image $g(i)$.
+The scaling map fixes $0$ and $\infty$ and moves the six remaining
+points in one six-cycle. The inversion map is an involution. It
+exchanges $0$ with $\infty$, $1$ with $6$, $2$ with $3$, and $4$ with
+$5$. Words in the three maps reach every one of the $336$ group
+elements. Lemma~\ref{thm:three-transitive} below gives one such word for
+every ordered triple of distinct points, for example a word that carries
+$(0,1,2)$ to $(2,0,1)$.
+\end{example}
 
 Each valid arrangement contains eight distinct cards. Four card values are
 marked as hearts. Their positions form a four-subset of the projective line.
