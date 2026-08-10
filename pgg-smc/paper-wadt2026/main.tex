@@ -90,7 +90,7 @@ samples a uniform group element in one physical move. A dealer instead
 repeats simple cuts, and the repeated cuts follow what I call a word distribution over
 the generators of the group. The group parameters pay for this connection.
 Transitivity of the action yields coalition privacy, and generation by a
-small cut alphabet yields a finite implementable shuffle. In this paper I prove the security results in the ideal model and then
+small cut alphabet yields a finite implementable shuffle. In this paper I prove the security results in the uniform-shuffle model of Section~\ref{sec:model} and then
 prove that the word distribution approximates it.
 
 Overall, this work contributes a group-parametric framework whose main
@@ -133,7 +133,8 @@ There are four contributions in this work.
   traces.
 \item I verify the den Boer~\cite{denBoer1989} and the Kim and
   \c{C}etinkaya~\cite{KimCetinkaya2025} five-card protocols in \Rocq{} as
-  one profile at bias $\varepsilon$: executed-run correctness of the
+  one profile at bias $\varepsilon$, in the sense of
+  Section~\ref{sec:framework}: executed-run correctness of the
   conjunction output, exact mutual-information leakage values for every
   reveal pattern, executed-trace secrecy for a single corrupted player,
   den Boer's perfect dealing bound recovered at bias zero, and a
@@ -143,8 +144,8 @@ There are four contributions in this work.
   distribution.
 \item I prove an $L_1$ bound between a 200-letter generator-word distribution
   and the uniform group distribution.\footnote{The $L_1$ distance is
-  $\lVert P-Q\rVert_1=\sum_x\lvert P(x)-Q(x)\rvert$, called variation
-  distance in the formal development, with maximum value 2. The common total
+  $\lVert P-Q\rVert_1=\sum_x\lvert P(x)-Q(x)\rvert$, which is called
+  variation distance in the formal development, with maximum value 2. The common total
   variation distance is half of it. An $L_1$ bound of $2^{-40}$ therefore
   bounds every observer's distinguishing advantage by $2^{-41}$.} The proof
   also transfers the bound to card
@@ -204,8 +205,9 @@ $C\subseteq\{0,\ldots,n-1\}$ observes the joint view
   \label{eq:coalition-view}
 \end{equation}
 The interpreter executes the dealer, player, and verifier processes. It
-records each value received by a process. The resulting record is the
-executed trace $T_i$, and $T_C=(T_i)_{i\in C}$ is the coalition trace. The
+records each value received by a process. The resulting record is called the
+executed trace $T_i$, and $T_C=(T_i)_{i\in C}$ is called the coalition
+trace. The
 verifier receives all endpoints and applies the decoder. It therefore learns
 $S$ by design.
 
@@ -256,8 +258,10 @@ curious players learn. The protocol has no private player inputs. Active
 deviation, security after the verifier's reveal, and composition across
 executions are outside the model.
 
-A second model describes the dealer performing the shuffle as a
-sequence of physical cuts. I call this the word-shuffle model. It
+The model described so far applies one uniform group element, and I call
+it the uniform-shuffle model. A second model describes the dealer
+performing the shuffle as a sequence of physical cuts. I call this the
+word-shuffle model. It
 replaces $U_G$ by $\mu^{*L}$. I measure two distributions $P$
 and $Q$ by the $L_1$ distance
 \begin{equation}
@@ -411,7 +415,8 @@ values the $\PG$ instance supplies.
   \label{fig:framework-architecture}
 \end{figure}
 
-Packing these components in one profile keeps the participants, verifier,
+I call a filled \coqin{MonodromyProfile} a profile. Packing these
+components in one profile keeps the participants, verifier,
 recovery map, privacy threshold, and shuffle bound tied to the same
 instance. Each profile supplies proofs of the following three obligations.
 \begin{itemize}
@@ -433,8 +438,9 @@ dealing rule and endpoint bound. The reconstruction component chooses the
 decoder, so profiles over the same group can use different reconstruction
 schemes.
 
-The security witness can carry exact evidence, asymptotic evidence, or
-both. Table~\ref{tab:witness-mechanism} shows the combinations used by the
+The record that carries the shuffle distribution and its endpoint bound
+is called the security witness. It can carry exact evidence, asymptotic
+evidence, or both. Table~\ref{tab:witness-mechanism} shows the combinations used by the
 five instances in this paper. For example, the den Boer row fills only
 the exact slot, since one uniform cut already gives the exact endpoint
 distribution.
@@ -462,9 +468,10 @@ distribution.
   \label{tab:witness-mechanism}
 \end{table}
 
-With an \coqin{InputEncoding}, a commit prologue collects the players'
-inputs and assembles the dealt deck from them, so the same flow evaluates
-a function of committed inputs. The realized encoding is den Boer's. Its
+With an \coqin{InputEncoding}, the flow gains a phase that I call the
+commit prologue. It collects the players' inputs and assembles the dealt
+deck from them, so the same flow evaluates a function of committed
+inputs. The realized encoding is den Boer's. Its
 obligation \coqin{ie\_orbit} places equal-output inputs in one shuffle
 orbit, and its derived lemma \coqin{ie\_output\_correct} shows the
 shuffled layout reconstructs the output for every allowed shuffle. The Kim
