@@ -158,10 +158,9 @@ the proofs. Section~\ref{sec:fivecard} instantiates them on the five-card
 family, where the deck is small enough for direct case analysis.
 Sections~\ref{sec:pgl} and~\ref{sec:exact} construct the $\PG$ instance,
 where deck enumeration no longer suffices and three-transitivity carries
-the privacy proofs, ending in Theorem A. Because a physical dealer repeats
-cuts rather than sampling one uniform group element,
-Section~\ref{sec:mixing} proves the word-shuffle results, ending in
-Theorem B. Section~\ref{sec:instances} compares the sibling instances and
+the privacy proofs, ending in Theorem A. Section~\ref{sec:mixing} proves
+the word-shuffle results, ending in Theorem B, because a physical dealer
+repeats cuts rather than sampling one uniform group element. Section~\ref{sec:instances} compares the sibling instances and
 states the trust base. Section~\ref{sec:related} places the results among
 related work. Section~\ref{sec:conclusion} states the remaining extensions
 and other future directions.
@@ -310,10 +309,11 @@ $2^{-39}$.
 
 Every instance in this paper supplies the same kinds of data: a group
 with its action and generators, a secret type, the layout of a run, a
-shuffle-security bound, and a decoder. In order to reuse one executable
-protocol across instances, the framework therefore gathers these five
-choices into one record, the record type \coqin{MonodromyProfile}, while
-the generic theorems of this section take their hypotheses directly. The
+shuffle-security bound, and a decoder. The framework therefore gathers
+these five choices into one record, the record type
+\coqin{MonodromyProfile}, in order to reuse one executable protocol
+across instances. The generic theorems of this section instead take
+their hypotheses directly. The
 record carries the data of Equation~\ref{eq:model-data} into the
 executable protocol. Here $R$ is the real closed field of
 Equation~\ref{eq:model-data}, not a protocol datum. The finite algebraic
