@@ -521,6 +521,89 @@ rewrite !binent_1_4 addr0.
 lra.
 Qed.
 
+(** leak_k3_gap — the gapped three cards {0, 1, 3} leak 6/5 - (9/20) log 3
+    bits about a && b, the same value as the consecutive triple {0, 1, 2}.
+    @main security: the mutual information between the secret and the colours
+    at positions {0, 1, 3}. *)
+Lemma leak_k3_gap :
+  `I( Secret ; ViewA [:: 0; 1; 3]%N ) = 6%:R / 5%:R - (9%:R / 20%:R) * log 3%:R.
+Proof.
+rewrite mutual_info_RVE H_secret centropy_RVE'.
+have cardV3 : forall a0 a1 a2 : bool,
+  #|preim (ViewA [:: 0; 1; 3]%N) (pred1 [tuple of [:: a0; a1; a2]])| =
+  (if a0 then (if a1 then (if a2 then 3 else 2) else (if a2 then 4 else 3))
+         else (if a1 then (if a2 then 4 else 3) else (if a2 then 1 else 0)))%N.
+  move=> a0 a1 a2.
+  rewrite -sum1_card (eq_bigl (fun w : Omega =>
+     (nth false (arr w) 0 == a0) && (nth false (arr w) 1 == a1)
+       && (nth false (arr w) 3 == a2))); last first.
+    move=> w /=.
+    by rewrite /ViewA inE /= -val_eqE /= !eqseq_cons andbT andbA.
+  rewrite big_mkcond /= stepO.
+  under eq_bigr=> ab _ do rewrite !big_ord_recl big_ord0 addn0 /=.
+  rewrite stepBB !big_bool /=.
+  by case: a0; case: a1; case: a2.
+have cardJ3 : forall (s a0 a1 a2 : bool),
+  #|preim [% Secret, ViewA [:: 0; 1; 3]%N]
+      (pred1 (s, [tuple of [:: a0; a1; a2]]))| =
+  (if s
+   then (if a0 then (if a1 then (if a2 then 0 else 2) else (if a2 then 1 else 0))
+               else (if a1 then (if a2 then 1 else 0) else (if a2 then 1 else 0)))
+   else (if a0 then (if a1 then (if a2 then 3 else 0) else (if a2 then 3 else 3))
+               else (if a1 then (if a2 then 3 else 3) else (if a2 then 0 else 0))))%N.
+  move=> s a0 a1 a2.
+  rewrite -sum1_card (eq_bigl (fun w : Omega =>
+      (let: (a, b, _) := w in (a && b) == s)
+        && ((nth false (arr w) 0 == a0) && ((nth false (arr w) 1 == a1)
+            && (nth false (arr w) 3 == a2))))); last first.
+    move=> w /=; rewrite inE /=.
+    rewrite xpair_eqE /Secret /ViewA /=.
+    by case: w => [[a b] k] /=; rewrite -val_eqE /= !eqseq_cons andbT.
+  rewrite big_mkcond /= stepO.
+  under eq_bigr=> ab _ do rewrite !big_ord_recl big_ord0 addn0 /=.
+  rewrite stepBB !big_bool /=.
+  by case: s; case: a0; case: a1; case: a2.
+have hterm : forall (t : (size [:: 0; 1; 3]%N).-tuple bool) (nv nt nf : nat),
+   #|preim (ViewA [:: 0; 1; 3]%N) (pred1 t)| = nv ->
+   #|preim [% Secret, ViewA [:: 0; 1; 3]%N] (pred1 (true, t))| = nt ->
+   #|preim [% Secret, ViewA [:: 0; 1; 3]%N] (pred1 (false, t))| = nf ->
+   (0 < nv)%N ->
+   pfwd1 (ViewA [:: 0; 1; 3]%N) t * centropy1_RV (ViewA [:: 0; 1; 3]%N) Secret t =
+   nv%:R / 20%:R *
+   (- (nt%:R / nv%:R) * log (nt%:R / nv%:R)
+    - (nf%:R / nv%:R) * log (nf%:R / nv%:R)).
+  move=> t nv nt nf Hv Ht Hf Hpos.
+  by rewrite count_pr Hv (condent_ratio Hv Ht Hf Hpos).
+rewrite (bigD1 [tuple of [:: false; true; true]]) //=.
+rewrite (bigD1 [tuple of [:: true; false; true]]) //=.
+rewrite big1; last first.
+  move=> i; case/tupleP: i => a0 /tupleP[a1 /tupleP[a2 a3]].
+  rewrite (tuple0 a3) /=.
+  case: a0; case: a1; case: a2 => //=.
+  - move=> _; rewrite (hterm [tuple true; true; true] 3 0 3 (cardV3 true true true)
+      (cardJ3 true true true true) (cardJ3 false true true true) (ltn0Sn _))
+      (binent_det0 (ltn0Sn _)) mulr0 //.
+  - move=> _; rewrite (hterm [tuple true; true; false] 2 2 0 (cardV3 true true false)
+      (cardJ3 true true true false) (cardJ3 false true true false) (ltn0Sn _))
+      (binent_det1 (ltn0Sn _)) mulr0 //.
+  - move=> _; rewrite (hterm [tuple true; false; false] 3 0 3 (cardV3 true false false)
+      (cardJ3 true true false false) (cardJ3 false true false false) (ltn0Sn _))
+      (binent_det0 (ltn0Sn _)) mulr0 //.
+  - move=> _; rewrite (hterm [tuple false; true; false] 3 0 3 (cardV3 false true false)
+      (cardJ3 true false true false) (cardJ3 false false true false) (ltn0Sn _))
+      (binent_det0 (ltn0Sn _)) mulr0 //.
+  - move=> _; rewrite (hterm [tuple false; false; true] 1 1 0 (cardV3 false false true)
+      (cardJ3 true false false true) (cardJ3 false false false true) (ltn0Sn _))
+      (binent_det1 (ltn0Sn _)) mulr0 //.
+  - move=> _; rewrite count_pr (cardV3 false false false) /= !mul0r //.
+rewrite (hterm [tuple false; true; true] 4 1 3 (cardV3 false true true)
+  (cardJ3 true false true true) (cardJ3 false false true true) (ltn0Sn _)).
+rewrite (hterm [tuple true; false; true] 4 1 3 (cardV3 true false true)
+  (cardJ3 true true false true) (cardJ3 false true false true) (ltn0Sn _)).
+rewrite !binent_1_4 addr0.
+lra.
+Qed.
+
 (** leak_k4 — four cards leak the full secret entropy 2 - (3/4) log 3 bits.
     @main security: the mutual information between the secret and the colours
     at positions {0, 1, 2, 3} equals H(Secret), so the secret is determined. *)
