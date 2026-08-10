@@ -223,7 +223,7 @@ Definition exchange_player (i : 'I_T)
 In the listing, \coqin{\#} marks a dealt hand, \coqin{\$} marks the
 public shuffle index, and \coqin{\&} marks a card position. The player
 receives the hand and the index, selects one entry, and reveals it to the
-verifier. The verifier's observation receives this entry. The interpreter
+verifier. The verifier receives this entry as its observation. The interpreter
 records both received values in the player's trace. The trace-privacy
 theorem therefore concerns the execution of this process, not only a static
 distribution of cards.
@@ -612,7 +612,7 @@ length, which is the precise sense in which the unbiased member is den
 Boer's protocol.\footnote{\coqin{five\_card\_eps0\_eq0} in
 \path{pgg-smc/instances/kim2025/five_card_family.v}.}
 
-The master theorem quantifies every fixed reveal set exactly.\footnote{The master theorem \coqin{leak\_view\_set} covers all
+The master theorem gives the exact leakage for every fixed reveal set.\footnote{The master theorem \coqin{leak\_view\_set} covers all
 thirty-two position subsets, anchored by \coqin{leak\_k1},
 \coqin{leak\_k2\_adj}, \coqin{leak\_k2\_dist2}, \coqin{leak\_k3},
 \coqin{leak\_k3\_gap}, \coqin{leak\_k4}, \coqin{leak\_k5}, and the cap
