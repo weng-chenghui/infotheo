@@ -14,7 +14,8 @@ All line numbers below refer to revision `ae47ca79`.
 | D4 | Sections that introduce no objects stay at zero: Related Work and Conclusion keep 0 signposts, disclosed as honest zeros. |
 | D5 | Acceptance is the Before/After table verified by an adversarial Opus audit (charter below) plus a full `fact_density.py` re-run. |
 | D6 | The abstract is untouched. Its connective gates (std 2) from round 2 have zero margin. |
-| D7 | Counted vocabulary is exactly the v2 SIGNPOST regex. Relevant facts: `figure`/`tabular`/`tikzpicture`/`lstlisting`/`verbatim`/`algorithmic` environments are stripped INCLUDING captions; footnotes are NOT stripped and do count; theorem-class environments count. |
+| D7 | Counted vocabulary is exactly the v2 SIGNPOST regex. Relevant facts: `figure` environments are stripped INCLUDING their captions; `tabular`/`tikzpicture`/`lstlisting`/`verbatim`/`algorithmic` bodies are stripped but TABLE CAPTIONS SURVIVE (audit N9); footnotes are NOT stripped and do count; theorem-class environments count. |
+| D8 | Audit-driven amendment (2026-08-10): S3, S4, S8a, S11, S14, S15, B1 replaced per audit findings F1-F8; resolution table at the end of this file. |
 
 ## Instrument definition (verbatim from fact_density.py v2)
 
@@ -69,24 +70,39 @@ The resulting record is called the
 executed trace $T_i$, and $T_C=(T_i)_{i\in C}$ is called the coalition trace.
 ```
 
-### S3. Term: profile (sec:framework, L414). Form: I call. +1
+### S3. Term: profile (sec:framework, L414; plus forward pointer at L136). Form: I call. +1
 
-First standalone body-prose use of "profile" is L414 (earlier occurrences are
-in the stripped table and figure). The term recurs at L433, L438, L535, L588.
+Audit F1: "profile" is already used in surviving body prose at Introduction
+L136 ("one profile at bias $\varepsilon$", renders page 2), so the L414
+introduction needs a forward pointer there. Audit F2: "a filled record" is
+over-general; a profile is specifically a filled `MonodromyProfile`.
 
-OLD:
+Sub-edit (a), forward pointer at L136, OLD:
+```
+one profile at bias $\varepsilon$: executed-run correctness of the
+```
+NEW:
+```
+one profile at bias $\varepsilon$, in the sense of
+Section~\ref{sec:framework}: executed-run correctness of the
+```
+
+Sub-edit (b), introduction at L414, OLD:
 ```
 Packing these components in one profile keeps the participants, verifier,
 ```
 NEW:
 ```
-I call a filled record a profile. Packing these components in one
-profile keeps the participants, verifier,
+I call a filled \coqin{MonodromyProfile} a profile. Packing these
+components in one profile keeps the participants, verifier,
 ```
 
 ### S4. Term: security witness (sec:framework, L436). Form: is called. +1
 
-First body-prose use is L436 (the table caption occurrence is stripped).
+First body-prose use is L436. The tab:witness-mechanism caption also uses
+the term but sits at L458, after this site (table captions survive the
+strip, audit N9). Gloss per audit F3: the record carries the shuffle
+distribution `sw_rho_dist` and the endpoint bound, not the evidence itself.
 
 OLD:
 ```
@@ -95,9 +111,9 @@ both.
 ```
 NEW:
 ```
-The record that holds the shuffle-security evidence is called the
-security witness. It can carry exact evidence, asymptotic evidence, or
-both.
+The record that carries the shuffle distribution and its endpoint bound is
+called the security witness. It can carry exact evidence, asymptotic
+evidence, or both.
 ```
 
 ### S5. Term: commit prologue (sec:framework, L465). Form: I call. +1
@@ -155,15 +171,17 @@ The term appears in the leakage figure labels (stripped) and in the L614
 footnote before its body use. Sub-edit (a) removes the footnote gloss so the
 body sentence owns the first use; sub-edit (b) introduces the term.
 
-Sub-edit (a), footnote at L617-618, OLD:
+Sub-edit (a), footnote at L617-618 (audit F4: keep a gloss because
+`H_secret` is the entropy ceiling, not a leakage value; in the compiled PDF
+the body introduction precedes this footnote in reading order), OLD:
 ```
 \coqin{leak\_k3\_gap}, \coqin{leak\_k4}, \coqin{leak\_k5}, and the cap
 \coqin{H\_secret} in
 ```
 NEW:
 ```
-\coqin{leak\_k3\_gap}, \coqin{leak\_k4}, \coqin{leak\_k5}, and
-\coqin{H\_secret} in
+\coqin{leak\_k3\_gap}, \coqin{leak\_k4}, \coqin{leak\_k5}, and the secret's
+own entropy \coqin{H\_secret} in
 ```
 
 Sub-edit (b), body at L623-624, OLD:
@@ -210,11 +228,12 @@ A third dealer samples a uniform valid deck in the chosen class and applies
 no later shuffle. For this shuffle-free deck distribution, view independence holds for
 every Boolean secret prior.
 ```
-NEW:
+NEW (audit F5: "the resulting distribution" fixes the dealer-as-antecedent
+slip and the clause order):
 ```
 A third dealer samples a uniform valid deck in the chosen class and applies
-no later shuffle. I call this the shuffle-free deck distribution. For it,
-view independence holds for
+no later shuffle. I call the resulting distribution the shuffle-free deck
+distribution, and view independence holds under it for
 every Boolean secret prior.
 ```
 
@@ -250,9 +269,11 @@ first transfer, which I call the endpoint transfer, maps each
 permutation to the endpoint of one fixed card.
 ```
 
-### S14. Symbol: $V_C(s,g)$ in Theorem B (sec:mixing, L1199-1200). Form: I write. +1
+### S14. Symbol: $V_C(s,g)$ in Theorem B (sec:mixing, L1199-1200). Form: is denoted. +1
 
-Zero-meaning-change retrofit of a participle into a counted main clause.
+Zero-meaning-change retrofit of a participle into a counted clause. Audit
+F6: no theorem-class environment in the paper contains an authorial
+pronoun, so the counted form must be voice-neutral.
 
 OLD:
 ```
@@ -261,15 +282,17 @@ for the coalition view at dealt secret $s$ and shuffle $g$,
 ```
 NEW:
 ```
-$\lvert C\rvert\leq3$, and all secrets $s,s'\in\{0,1\}$, where I write
-$V_C(s,g)$ for the coalition view at dealt secret $s$ and shuffle $g$,
+$\lvert C\rvert\leq3$, and all secrets $s,s'\in\{0,1\}$, where the coalition
+view at dealt secret $s$ and shuffle $g$ is denoted $V_C(s,g)$,
 ```
 
-### S15. Term: trust base (sec:instances, L1349). Form: is called. +1
+### S15. Term: trust base (sec:instances, L1349). Form: are called. +1
 
 Earlier occurrences at L163, L1098, L1231 are forward pointers of the form
 "the trust base ... is stated in Section~8"; the section that states it never
-introduces the term.
+introduces the term. Audit F7: the paper's trust-base column lists the Rocq
+kernel, which is trusted software, not an assumption, so the definition must
+cover the checker as well as the axioms.
 
 OLD:
 ```
@@ -278,7 +301,7 @@ from the MathComp probability stack: propositional extensionality,
 ```
 NEW:
 ```
-The set of assumptions that a result's verification rests on is called
+The checker and the axioms that a result's verification rests on are called
 its trust base. The probability, view, and trace results use three
 classical principles
 from the MathComp probability stack: propositional extensionality,
@@ -301,10 +324,12 @@ distance in the formal development, with maximum value 2.
 
 ## Bonus edit B1 (non-counted, term consistency)
 
-Introduction L93 uses "the ideal model", an orphan term appearing exactly once
-in the paper. It becomes "the uniform-shuffle model", matching the term S1
-introduces and the Section 7 title. This is a forward use of a term introduced
-in Section 2, disclosed below.
+Introduction L93 uses "the ideal model", a bigram appearing exactly once in
+the paper (the wider "ideal" vocabulary survives at L88, L1102, L1226,
+L1441, disclosed below). It becomes "the uniform-shuffle model of
+Section~\ref{sec:model}", matching the term S1 introduces; audit F8
+requires the section reference so the forward use names its introducing
+section, like the trust-base pointers.
 
 OLD:
 ```
@@ -312,7 +337,7 @@ small cut alphabet yields a finite implementable shuffle. In this paper I prove 
 ```
 NEW:
 ```
-small cut alphabet yields a finite implementable shuffle. In this paper I prove the security results in the uniform-shuffle model and then
+small cut alphabet yields a finite implementable shuffle. In this paper I prove the security results in the uniform-shuffle model of Section~\ref{sec:model} and then
 ```
 
 ## Projected numbers
@@ -369,13 +394,45 @@ numbered blockers, amendments, and notes.
 
 ## Disclosures carried to the final report
 
-1. Forward-pointer terms: "trust base" and (after B1) "uniform-shuffle model"
-   are used as forward references before their introduction sections; both
-   pointers name the section that introduces them.
+1. Forward-pointer terms: "trust base" (L163, L1098, L1231), "profile"
+   (L136 after S3a), and "uniform-shuffle model" (L93 after B1) are used
+   before their introduction sections; every pointer names the section that
+   introduces the term.
 2. S2, S9+S10 each place two counted forms in one sentence, a deliberate
    parallel-definition style.
 3. 14 of 17 new hits are retrofits of existing introductions into counted
-   forms; S3, S5 (partially), and S15 are new sentences.
+   forms; S3b, S5 (partially), and S15 are new sentences.
 4. Related Work and Conclusion remain at zero signposts by design (D4).
 5. The word growth dilutes round 2's moves/10k from 67.1 to about 66;
    the round 2 gates all still hold.
+6. Census exemptions are not reader exemptions (audit N11): "mixing
+   certificate" appears in the stripped fig:models caption (page 5) before
+   its S12 introduction; "executed trace" (abstract L48, intro L83) and
+   "coalition trace" (Theorem B informal, L119) precede the S2 naming.
+7. "master theorem" recurs nowhere after its introduction sentence and
+   footnote (audit N13); kept as an honest coinage that disambiguates from
+   the divide-and-conquer Master theorem.
+8. S13 names the first transfer while the second transfer stays unnamed in
+   prose (audit N16).
+
+## Audit resolution table
+
+| Finding | Severity | Resolution |
+|---------|----------|------------|
+| F1 profile used at L136 before L414 | BLOCKER | S3a forward pointer added at L136 |
+| F2 "filled record" over-general | AMEND | S3b names `MonodromyProfile` |
+| F3 witness gloss wrong | AMEND | S4 gloss: carries shuffle distribution and endpoint bound |
+| F4 S8a deleted load-bearing gloss | AMEND | footnote keeps "the secret's own entropy" gloss |
+| F5 dealer-as-antecedent, term never recurs | AMEND | S11 "the resulting distribution" + merged clause |
+| F6 authorial pronoun in Theorem B | AMEND | S14 voice-neutral "is denoted" |
+| F7 trust base excludes the kernel | AMEND | S15 "the checker and the axioms" |
+| F8 B1 pointer named no section | AMEND | B1 adds "of Section~\ref{sec:model}" |
+| N9 table captions survive strip | NOTE | D7 corrected; S4 justification fixed |
+| N11 caption precedes S12 intro | NOTE | disclosure 6 |
+| N12 trace terms precede S2 naming | NOTE | disclosure 6 |
+| N13 master theorem no downstream use | NOTE | disclosure 7 |
+| N14 privacy threshold bare at L415 | NOTE | accepted, list mention |
+| N15 designator/class-noun tension | NOTE | accepted |
+| N16 second transfer unnamed | NOTE | disclosure 8 |
+| N17 two senses of "record" | NOTE | mitigated by F2 naming the Rocq record |
+| N18 indentation drift | NOTE | executor re-indents to file context |
