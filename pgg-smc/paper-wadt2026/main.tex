@@ -127,11 +127,18 @@ Section~\ref{sec:mixing}. The constituent formalized results are
 \coqin{pgl27\_word\_trace\_indist}, and \coqin{pgl27\_word\_run\_recovers} in
 \path{pgg-smc/instances/pgl27}.}
 
-There are three contributions in this work.
+There are four contributions in this work.
 \begin{itemize}
 \item I give a common \Rocq{} interface for a finite group, its permutation
   action, the shuffle distribution, reconstruction, participant views, and executed
   traces.
+\item I verify the den Boer~\cite{denBoer1989} and the Kim and
+  \c{C}etinkaya~\cite{KimCetinkaya2025} five-card protocols in \Rocq{} as
+  one profile at bias $\varepsilon$: executed-run correctness of the
+  conjunction output, exact mutual-information leakage values for six
+  reveal patterns, executed-trace secrecy for a single corrupted player,
+  den Boer's perfect dealing bound recovered at bias zero, and a
+  kernel-checked seven-cut single-card bound of $2^{-40}$ at bias $1/100$.
 \item I prove correctness, the recovery ramp, coalition-view privacy, and
   executed-trace secrecy for the $\PG$ instance under the uniform shuffle
   distribution.
@@ -582,8 +589,8 @@ length, which is the precise sense in which the unbiased member is den
 Boer's protocol.\footnote{\coqin{five\_card\_eps0\_eq0} in
 \path{pgg-smc/instances/kim2025/five_card_family.v}.}
 
-Figure~\ref{fig:fivecard-leakage} quantifies every reveal
-case.\footnote{\coqin{leak\_k1}, \coqin{leak\_k2\_adj},
+Figure~\ref{fig:fivecard-leakage} quantifies six reveal patterns
+exactly.\footnote{\coqin{leak\_k1}, \coqin{leak\_k2\_adj},
 \coqin{leak\_k2\_dist2}, \coqin{leak\_k3}, \coqin{leak\_k4},
 \coqin{leak\_k5}, and the cap \coqin{H\_secret} in
 \path{pgg-smc/instances/denboer1989/five_card_leakage.v}. For example
