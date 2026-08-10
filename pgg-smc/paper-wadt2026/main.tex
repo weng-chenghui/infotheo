@@ -90,9 +90,8 @@ samples a uniform group element in one physical move. A dealer instead
 repeats simple cuts, and the repeated cuts follow what I call a word distribution over
 the generators of the group. The group parameters pay for this connection.
 Transitivity of the action yields coalition privacy, and generation by a
-small cut alphabet yields a finite implementable shuffle. The paper proves
-the security results in the ideal model and then proves that the word
-distribution approximates it.
+small cut alphabet yields a finite implementable shuffle. In this paper I prove the security results in the ideal model and then
+prove that the word distribution approximates it.
 
 Overall, this work contributes a group-parametric framework whose main
 instance carries two machine-checked security results.
@@ -175,8 +174,9 @@ players reveal their cards to a verifier, and the verifier decodes the
 secret from the revealed arrangement. Each instance section shows its own
 run as a flow diagram.
 
-Security rests on the shuffle alone. A player sees one card, and a
-coalition sees the cards at its positions. The shuffle spreads every small
+Security rests on the shuffle alone, because the dealer's encoding of
+the secret is fixed and the shuffle carries all the randomness. A player
+sees one card, and a coalition sees the cards at its positions. The shuffle spreads every small
 coalition view over many arrangements, and the privacy theorems make this
 spreading exact. The rest of this section states the same flow as
 probability distributions.
@@ -267,10 +267,9 @@ and $Q$ by the $L_1$ distance
 
 The model observes the word shuffle only through its product. The dealer
 performs the 200 physical moves and no party records an intermediate
-arrangement. This assumption is structural in the formalization. The dealer
-process takes a list of alternative cuts and deals one hand per cut, so a
-word enters the execution only through its evaluated group
-element. The uniform-shuffle model makes the same assumption, since its single
+arrangement. This assumption is structural in the formalization. The dealer process takes a list of alternative cuts and deals one hand
+per cut. A word hence enters the execution only through its evaluated
+group element. The uniform-shuffle model makes the same assumption, since its single
 uniform shuffle is likewise unobserved.
 
 Figure~\ref{fig:models} separates the proved paths for the two distributions. The
@@ -608,8 +607,8 @@ The dealing distribution is the biased cut of Kim and \c{C}etinkaya
   \label{eq:fivecard-weight}
 \end{equation}
 At bias zero the witness bound collapses to zero for any positive word
-length, which is the precise sense in which the unbiased member is den
-Boer's protocol.\footnote{\coqin{five\_card\_eps0\_eq0} in
+length. The unbiased member is therefore den Boer's protocol in
+precisely this sense.\footnote{\coqin{five\_card\_eps0\_eq0} in
 \path{pgg-smc/instances/kim2025/five_card_family.v}.}
 
 The master theorem gives the exact leakage for every fixed reveal set.\footnote{The master theorem \coqin{leak\_view\_set} covers all
@@ -696,8 +695,8 @@ times. Then every single-card endpoint distribution is within $L_1$
 distance $2^{-40}$ of uniform, and the kernel checks the computation.
 \end{proposition}
 
-The two members share one executed program, so correctness transfers
-verbatim. The Kim program is the den Boer program, and its recovery
+Because the two members share one executed program, correctness
+transfers verbatim. The Kim program is the den Boer program, and its recovery
 theorem is the den Boer proof reused.\footnote{\coqin{kim\_procs} and
 \coqin{kim\_run\_recovers} in
 \path{pgg-smc/instances/kim2025/kim_run.v}.} The committed inputs of the
@@ -1118,7 +1117,8 @@ as the original three generators, so the fiber count concerns the same
 $336$ elements.
 
 For a word length $L$, the shuffle distribution evaluates a uniform word in
-$\{0,1,2,3,4\}^L$. At $L=200$, the sample space contains $5^{200}$ words.
+$\{0,1,2,3,4\}^L$. For instance, at the Theorem B length $L=200$ the sample space contains
+$5^{200}$ words.
 The proof partitions these words by evaluated group element. I call the
 set of words that evaluate to $g$ the fiber of $g$, and there are $336$
 fibers. A computation over binary naturals records the size of every
@@ -1360,8 +1360,8 @@ The $S_5$ instance uses additive sharing modulo five. Its endpoint mixing
 proof applies a spectral inequality at word length 286. The development
 imports the required Rayleigh bound as an axiom. The $S_5\times S_5$ instance
 uses two disjoint piles. It inherits the same Rayleigh premise for decay
-within either pile. A card never changes piles, so its distance from the
-uniform distribution on all ten positions cannot converge to zero. The formal global
+within either pile. Because a card never changes piles, its distance from the uniform
+distribution on all ten positions cannot converge to zero. The formal global
 bound approaches the exact $L_1$ floor of one.
 
 \section{Related Work}\label{sec:related}
