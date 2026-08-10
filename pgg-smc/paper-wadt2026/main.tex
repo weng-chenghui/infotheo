@@ -396,7 +396,9 @@ values the $\PG$ instance supplies.
   \end{tikzpicture}}
   \caption{Architecture of the group-parametric card-protocol framework.
   Blue boxes are profile records, green boxes are supporting records, and
-  arrows are dependencies.}
+  the purple box is the derived protocol. Solid arrows are required
+  dependencies, the dashed arrow is optional, and the dotted arrow is
+  derivation.}
   \label{fig:framework-architecture}
 \end{figure}
 
@@ -408,10 +410,7 @@ the threshold scheme and decoder.
 
 Packing these choices in one profile keeps the participants, verifier,
 recovery map, privacy threshold, and shuffle bound tied to the same
-instance. Each instance discharges the three obligations below once. Later
-definitions can then use the packed components without repeating them.
-
-A profile has three proof obligations.
+instance. Each profile supplies proofs of the following three obligations.
 \begin{itemize}
 \item Every single card position lands close to uniform: \coqin{sw\_bound}
   bounds the distance of each position's endpoint distribution from the
