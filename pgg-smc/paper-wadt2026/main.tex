@@ -1003,8 +1003,10 @@ and \coqin{pgl27\_seven\_reveal\_class} in
 \path{pgg-smc/instances/pgl27/pgl27_trace.v}.}
 
 The trust base for these results is stated in
-Section~\ref{sec:instances}, and Table~\ref{tab:source-index} indexes the
-formal sources.
+Section~\ref{sec:instances}.
+
+Theorem A uses a uniform group element. The next section replaces this
+ideal shuffle with a finite generator word and bounds the resulting error.
 
 \section{Word-Shuffle Approximation of the Uniform-Shuffle Model}\label{sec:mixing}
 
@@ -1127,11 +1129,69 @@ privacy definition.}
 The word-shuffle privacy results cover the fixed representative dealer only,
 since the all-decks and shuffle-free dealers use different sample spaces
 that the product-distribution transfer does not reach. The trust base for
-these results is stated in Section~\ref{sec:instances}, and the
-mixing-transfers group of Table~\ref{tab:source-index} indexes the formal
-sources.
+these results is stated in Section~\ref{sec:instances}.
 
-\section{Other Instances}\label{sec:instances}
+The PGL argument has four proof layers: construction, recovery, privacy,
+and finite-word transfer. Table~\ref{tab:source-index} maps the
+mathematical claims used by Theorems A and B to the \Rocq{} results that
+establish them.
+
+\begin{table}[H]
+  \centering
+  \small
+  \begin{tabular}{p{.40\linewidth}p{.50\linewidth}}
+    \toprule
+    Mathematical statement & Rocq source name \\
+    \midrule
+    \multicolumn{2}{@{}l}{\emph{Construction}} \\
+    three-transitivity & \coqin{pgl27\_3transitive} \\
+    equianharmonic and harmonic counts & \coqin{orbit\_class\_split},
+      \coqin{orbit\_class\_split\_complement} \\
+    encoder returns its class & \coqin{orbit\_encodeK} \\
+    group order & \coqin{pgl27\_card} \\
+    \midrule
+    \multicolumn{2}{@{}l}{\emph{Correctness and recovery}} \\
+    executed class recovery & \coqin{pgl27\_run\_recovers\_class} \\
+    seven cards determine deck and class &
+      \coqin{pgl27\_seven\_reveal\_determines},
+      \coqin{pgl27\_seven\_reveal\_class} \\
+    at most six cards remain ambiguous &
+      \coqin{pgl27\_six\_reveal\_ambiguous},
+      \coqin{pgl27\_reveal\_ambiguous} \\
+    four-card dependence and leakage &
+      \coqin{pgl27\_view\_dep\_k4}, \coqin{pgl27\_view\_leak\_k4} \\
+    \midrule
+    \multicolumn{2}{@{}l}{\emph{Privacy}} \\
+    fixed representative views &
+      \coqin{pgl27\_view\_indep}, \coqin{pgl27\_view\_leakage\_le} \\
+    fixed representative traces &
+      \coqin{pgl27\_trace\_secrecy},
+      \coqin{pgl27\_coalition\_trace\_secrecy} \\
+    all-decks views and traces &
+      \coqin{pgl27\_view\_indep\_alldecks},
+      \coqin{pgl27\_alldecks\_trace\_secrecy},
+      \coqin{pgl27\_alldecks\_coalition\_secrecy} \\
+    shuffle-free views and traces &
+      \coqin{pgl27\_view\_indep\_deck\_prior},
+      \coqin{pgl27\_deck\_trace\_secrecy},
+      \coqin{pgl27\_deck\_coalition\_secrecy} \\
+    \midrule
+    \multicolumn{2}{@{}l}{\emph{Mixing and transfers}} \\
+    word mixing certificate & \coqin{pgl27\_word\_mixing} \\
+    endpoint and product transfers &
+      \coqin{pgl27\_endpoint\_mixing}, \coqin{pgl27\_joint\_mixing} \\
+    word view and trace bounds &
+      \coqin{pgl27\_word\_view\_indist},
+      \coqin{pgl27\_word\_trace\_indist} \\
+    ideal-proximity companion & \coqin{pgl27\_view\_mixing} \\
+    word correctness & \coqin{pgl27\_word\_run\_recovers} \\
+    \bottomrule
+  \end{tabular}
+  \caption{Rocq sources for the $\PG$ results.}
+  \label{tab:source-index}
+\end{table}
+
+\section{Other Instances and Trust Base}\label{sec:instances}
 
 The framework's value shows in which arguments transfer across instances
 unchanged and which need instance-specific finite or spectral evidence.
@@ -1200,62 +1260,6 @@ uses two disjoint piles. It inherits the same Rayleigh premise for decay
 within either pile. A card never changes piles, so its distance from the
 uniform distribution on all ten positions cannot converge to zero. The formal global
 bound approaches the exact $L_1$ floor of one.
-
-\begin{table}[p]
-  \centering
-  \small
-  \begin{tabular}{p{.40\linewidth}p{.50\linewidth}}
-    \toprule
-    Mathematical statement & Rocq source name \\
-    \midrule
-    \multicolumn{2}{@{}l}{\emph{Construction}} \\
-    three-transitivity & \coqin{pgl27\_3transitive} \\
-    equianharmonic and harmonic counts & \coqin{orbit\_class\_split},
-      \coqin{orbit\_class\_split\_complement} \\
-    encoder returns its class & \coqin{orbit\_encodeK} \\
-    group order & \coqin{pgl27\_card} \\
-    \midrule
-    \multicolumn{2}{@{}l}{\emph{Correctness and recovery}} \\
-    executed class recovery & \coqin{pgl27\_run\_recovers\_class} \\
-    seven cards determine deck and class &
-      \coqin{pgl27\_seven\_reveal\_determines},
-      \coqin{pgl27\_seven\_reveal\_class} \\
-    at most six cards remain ambiguous &
-      \coqin{pgl27\_six\_reveal\_ambiguous},
-      \coqin{pgl27\_reveal\_ambiguous} \\
-    four-card dependence and leakage &
-      \coqin{pgl27\_view\_dep\_k4}, \coqin{pgl27\_view\_leak\_k4} \\
-    \midrule
-    \multicolumn{2}{@{}l}{\emph{Privacy}} \\
-    fixed representative views &
-      \coqin{pgl27\_view\_indep}, \coqin{pgl27\_view\_leakage\_le} \\
-    fixed representative traces &
-      \coqin{pgl27\_trace\_secrecy},
-      \coqin{pgl27\_coalition\_trace\_secrecy} \\
-    all-decks views and traces &
-      \coqin{pgl27\_view\_indep\_alldecks},
-      \coqin{pgl27\_alldecks\_trace\_secrecy},
-      \coqin{pgl27\_alldecks\_coalition\_secrecy} \\
-    shuffle-free views and traces &
-      \coqin{pgl27\_view\_indep\_deck\_prior},
-      \coqin{pgl27\_deck\_trace\_secrecy},
-      \coqin{pgl27\_deck\_coalition\_secrecy} \\
-    \midrule
-    \multicolumn{2}{@{}l}{\emph{Mixing and transfers}} \\
-    word mixing certificate & \coqin{pgl27\_word\_mixing} \\
-    endpoint and product transfers &
-      \coqin{pgl27\_endpoint\_mixing}, \coqin{pgl27\_joint\_mixing} \\
-    word view and trace bounds &
-      \coqin{pgl27\_word\_view\_indist},
-      \coqin{pgl27\_word\_trace\_indist} \\
-    ideal-proximity companion & \coqin{pgl27\_view\_mixing} \\
-    word correctness & \coqin{pgl27\_word\_run\_recovers} \\
-    \bottomrule
-  \end{tabular}
-  \caption{Consolidated source index for the $\PG$ results, grouped by the
-  sections that prove them.}
-  \label{tab:source-index}
-\end{table}
 
 \section{Related Work}\label{sec:related}
 
