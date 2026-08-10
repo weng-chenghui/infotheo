@@ -168,7 +168,7 @@ The explanation that the decimal values evaluate proved closed forms stays in
 body prose. The caption contains only the figure name and the meaning of the
 blue card backs.
 
-## 3. Framework architecture before the record listing
+## 3. Framework architecture and record packing
 
 ### Name and figure role
 
@@ -190,17 +190,41 @@ All other compatible decisions in that design remain in force.
 2. The model-to-record bridge table appears.
 3. The architecture figure appears.
 4. One short paragraph explains the record dependencies shown by the figure.
-5. The `MonodromyProfile` and derived-protocol listing appears.
+5. Two short paragraphs state what the profile packs and what packing provides.
 6. The three proof obligations appear.
-7. A short paragraph explains the derived protocol wiring.
-8. The security-witness mechanism table appears.
-9. One paragraph explains the optional committed-input encoding.
+7. The security-witness mechanism table appears.
+8. One paragraph explains the optional committed-input encoding.
+9. One sentence points to the concrete five-card packing example.
 10. One sentence closes the framework account and introduces the next
     subsection.
 
-The architecture figure therefore appears after `tab:bridge` and before the
-record listing. The PDF must preserve this visual order. Source order alone is
-not enough.
+The architecture figure therefore appears directly after `tab:bridge`. The PDF
+must preserve this visual order. Source order alone is not enough.
+
+### Prose account and concrete packing example
+
+Section 3.1 does not print the Rocq definition of `Record MonodromyProfile`.
+It also removes the combined listing of the derived party, verifier, recovery,
+threshold, and security-bound definitions. These details are stated in prose.
+
+The first paragraph says that one profile packs the group representation and
+generators, the secret type, the protocol layout, the shuffle-security
+evidence, and the reconstruction component. The second paragraph says what
+this packing provides: participant processes, the verifier, the recovery map,
+the private-coalition threshold, and the shuffle bound all refer to one
+consistent instance. The profile's proof obligations establish endpoint
+security, threshold recovery and privacy, and shuffle-invariant
+reconstruction.
+
+The paper keeps the existing `five_card_profile` listing in the five-card
+section. That listing is the concrete example of record packing. It shows the
+five-card group and layout, the biased-cut security witness, and the
+three-hearts reconstruction component supplied to `MkMonodromyProfile`.
+Section 3.1 points forward to this example. The listing's existing source
+footnote stays.
+
+This arrangement keeps the benefit of a record visible without exposing the
+abstract record declaration or the derived wiring code.
 
 ### Figure caption
 
@@ -423,37 +447,41 @@ The implementation is complete only after all checks below pass.
    selected cases drawn in the figure.
 6. Confirm that `leak_view_set`, `leak_k3_gap`, the existing anchor names, and
    `H_secret` remain in the five-card source footnote.
-7. Confirm in the PDF that the bridge table, architecture figure, record
-   listing, and generic-theorem heading occur in that order.
-8. Confirm that every generic theorem statement and formalization footnote is
+7. Confirm in the PDF that the bridge table, architecture figure, profile
+   prose, and generic-theorem heading occur in that order.
+8. Confirm that no listing in Section 3.1 prints `Record MonodromyProfile` or
+   the derived wiring definitions.
+9. Confirm that the existing `five_card_profile` listing and its source
+   footnote remain in the five-card section.
+10. Confirm that every generic theorem statement and formalization footnote is
    unchanged.
-9. Confirm in the PDF that the PGL claim-to-proof table appears before
+11. Confirm in the PDF that the PGL claim-to-proof table appears before
    `Other Instances and Trust Base` and fits within the text area.
-10. Confirm that the source table still contains all four groups and every
+12. Confirm that the source table still contains all four groups and every
     current PGL Rocq name.
-11. Confirm that the other-instances section contains the instance table,
+13. Confirm that the other-instances section contains the instance table,
     trust base, and the `S_5` and `S_5 x S_5` summaries.
-12. Confirm that `references.bib` contains one `Shinagawa2021` entry with the
+14. Confirm that `references.bib` contains one `Shinagawa2021` entry with the
     verified DOI and metadata.
-13. Confirm that Related Work preserves the limited den Boer priority claim
+15. Confirm that Related Work preserves the limited den Boer priority claim
     and compares the two frameworks only by their parameters and outputs.
-14. Run the AI-ism scan over changed prose. Review each match by hand:
+16. Run the AI-ism scan over changed prose. Review each match by hand:
 
     ```sh
     rg -n -i '\b(we|our)\b|—|;|Moreover|Furthermore|Consequently|It is worth noting|delve|pivotal|crucial|groundbreaking|comprehensive|robust|seamless' main.tex
     ```
 
-15. Build from `pgg-smc/paper-wadt2026/`:
+17. Build from `pgg-smc/paper-wadt2026/`:
 
     ```sh
     latexmk -g -pdf -interaction=nonstopmode -halt-on-error main.tex
     ```
 
-16. Check `main.log` for undefined references, undefined citations, multiply
+18. Check `main.log` for undefined references, undefined citations, multiply
     defined labels, errors, and overfull boxes.
-17. Render and inspect the pages containing the piSMC listing, the five-card
+19. Render and inspect the pages containing the piSMC listing, the five-card
     figure, the architecture figure, the PGL source table, and Related Work.
-18. Read the complete modified `main.tex` before committing. Compare every
+20. Read the complete modified `main.tex` before committing. Compare every
     changed claim and hedge with the old text and the source named by this
     design.
 
@@ -467,6 +495,9 @@ The revision is accepted when all of the following statements hold.
   display all thirty-two sets.
 - The architecture figure appears near the start of Section 3.1 and is named
   for the full framework.
+- Section 3.1 explains the profile in prose and does not print its record
+  declaration or derived wiring code.
+- The five-card profile listing remains as the concrete record-packing example.
 - The start of `Generic Theorems` is unmistakable and the theorem statements
   are unchanged.
 - The uniform and finite-word PGL analyses remain adjacent and explicitly
