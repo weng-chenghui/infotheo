@@ -399,20 +399,41 @@ commit; each compiles before the next starts.
    soundness review Stage 2 would have provided is already covered for
    this package by the two adversarial audit agents recorded above.
 
+## Paper placement and ordering
+
+- The result remains inside the existing five-card instance section. It is
+  instance-specific evidence, not a new generic framework theorem and not a
+  third shuffle regime.
+- The paper edit adds no section, subsection, or theorem environment. Outside
+  the five-card section, it changes only the existing contribution bullet in
+  the introduction.
+- The core section order stays: framework, five-card family, PGL construction,
+  uniform-shuffle results, then finite-word approximation. In particular, the
+  uniform-shuffle and finite-word sections remain adjacent.
+- A later paper-structure revision may add a piSMC program example, move the
+  framework architecture figure, rename the other-instances section, and extend
+  related work. This package lands first and must not anticipate or block those
+  edits.
+
 ## Paper edits (gated on gate 2)
 
 - `main.tex` lines 138-139 (contribution bullet): "exact
   mutual-information leakage values for six reveal patterns" becomes
   "exact mutual-information leakage values for every reveal pattern".
-- Line 592: "quantifies six reveal patterns exactly" becomes "quantifies
-  every reveal pattern exactly"; the footnote gains `leak_view_set` and
-  `leak_k3_gap` alongside the six existing lemma names.
+- Line 592: "quantifies six reveal patterns exactly" becomes a short paragraph
+  stating that `leak_view_set` quantifies every fixed reveal set exactly and
+  that Fig. `fig:fivecard-leakage` shows representatives of the nonempty
+  rotation classes. The footnote gains `leak_view_set` and `leak_k3_gap`
+  alongside the six existing lemma names.
 - One added sentence recording the finding: every three-card reveal leaks
   the same 6/5 - (9/20) log 3 bits, so only the two-card case
   distinguishes the pattern's shape, adjacent versus distance-two.
   (Licensed: soundness audit Finding 14.)
-- Figure caption at line 644 already reads "one machine-checked value per
-  reveal pattern" and stays.
+- Move the explanation that the printed decimals evaluate the proved closed
+  forms into body prose. Replace the figure caption with the name and its style
+  key only: "Mutual-information leakage for representative reveal patterns.
+  Blue card backs mark unrevealed positions." This avoids implying that the
+  six drawn rows display all 32 fixed sets.
 - The paper builds; page count stays at 21; house prose rules (no
   em-dashes, no parenthetical asides, "distribution" never "law",
   no abbreviations).
