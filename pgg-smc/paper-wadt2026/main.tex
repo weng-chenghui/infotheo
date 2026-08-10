@@ -311,7 +311,7 @@ structures use Mathematical Components~\cite{MathComp}, and
 Table~\ref{tab:bridge} maps each model datum to its record role and to the
 values the $\PG$ instance supplies.
 
-\begin{table}[t]
+\begin{table}[H]
   \centering
   \small
   \begin{tabular}{@{}L{.26\linewidth}L{.36\linewidth}L{.30\linewidth}@{}}
@@ -332,35 +332,86 @@ values the $\PG$ instance supplies.
   \label{tab:bridge}
 \end{table}
 
-The central record and its derived protocol follow.\footnote{Formalized in
-\path{pgg-smc/protocol/pgg_monodromy_profile.v}. The listing elides
-argument types and implicit parameters.}
+\begin{figure}[H]
+  \centering
+  \resizebox{\linewidth}{!}{%
+  \begin{tikzpicture}[
+      every node/.style={font=\small},
+      supportbox/.style={
+        rectangle, draw, rounded corners=2pt, inner xsep=5pt,
+        minimum width=2.8cm, minimum height=0.7cm,
+        align=center, fill=green!12
+      },
+      compbox/.style={
+        rectangle, draw, rounded corners=2pt, inner xsep=5pt,
+        minimum width=3.2cm, minimum height=0.8cm,
+        align=center, fill=blue!10
+      },
+      bundlebox/.style={
+        rectangle, draw, thick, rounded corners=3pt, inner xsep=5pt,
+        minimum width=3.6cm, minimum height=0.8cm,
+        align=center, fill=blue!28
+      },
+      derivedbox/.style={
+        rectangle, draw, thick, rounded corners=3pt, inner xsep=5pt,
+        minimum width=3.6cm, minimum height=0.8cm,
+        align=center, fill=purple!15
+      },
+      arr/.style={-{Stealth[length=2mm]}, thick},
+      darr/.style={-{Stealth[length=2mm]}, dashed},
+      deparr/.style={-{Stealth[length=2mm]}, dotted, thick}
+    ]
 
-\needspace{7\baselineskip}
-\begin{lstlisting}
-Record MonodromyProfile (R : realType) := MkMonodromyProfile {
-  (* the group, its action, and its generators *)
-  mp_M        : MonodromyReprWithGeneratorType ;
-  mp_secretT  : Type ;                   (* secret type    *)
-  mp_PI       : PGGInterface mp_M ;      (* run layout     *)
-  mp_security : SecurityWitness R mp_M ; (* endpoint bound *)
-  mp_plug     : ReconPlug mp_M mp_secretT }. (* decoder    *)
+    % ===== Bottom: supporting records =====
+    \node[supportbox] (ie) at (9.6, 0) {input encoding};
+    \node[supportbox] (se) at (4.8, 1.5) {exact and asymptotic\\[-2pt]
+      security evidence};
+    \node[supportbox] (ts) at (9.6, 1.5) {threshold sharing};
 
-Section protocol_of_profile. (* the protocol of profile mp *)
-Definition run_party i    := exchange_player PI i.
-Definition run_verifier   := exchange_verifier PI players.
-Definition run_recover c  := ts_recon (rp_scheme plug) c.
-Definition profile_eps  : R  := sw_bound_eps (mp_security mp).
-Definition profile_k : nat   := ts_k (rp_scheme plug).
-Definition profile_anonymous := sw_bound (mp_security mp).
-Definition profile_private   := ts_private (rp_scheme plug).
+    % ===== Middle: the three component records =====
+    \node[compbox] (pi) at (0, 3.2) {protocol layout\\[-2pt]
+      \footnotesize dealer, players, verifier};
+    \node[compbox] (sw) at (4.8, 3.2) {shuffle-security bound\\[-2pt]
+      \footnotesize endpoint bound};
+    \node[compbox] (rp) at (9.6, 3.2) {reconstruction\\[-2pt]
+      \footnotesize group action to decoder};
 
-Lemma profile_recon_encode s :
-  run_recover (ts_encode (rp_scheme plug) s) = s.
-Proof. exact: ts_correct (ts_encode_valid (rp_scheme plug) s). Qed.
-\end{lstlisting}
+    % ===== The aggregate and what it derives =====
+    \node[bundlebox] (mp) at (4.8, 4.9) {profile bundle};
+    \node[derivedbox] (pr) at (10.6, 4.9) {derived protocol\\[-2pt]
+      \footnotesize roles, characters, round-trip lemma};
 
-Filling the record means discharging three proof obligations.
+    % ===== Arrows: supporting records into components =====
+    \draw[darr] (ie) -- (ts) node[midway, right, font=\scriptsize] {optional};
+    \draw[arr] (se) -- (sw);
+    \draw[arr] (ts) -- (rp);
+
+    % ===== Arrows: components into the bundle, bundle into the protocol =====
+    \draw[arr] (pi) -- (mp);
+    \draw[arr] (sw) -- (mp)
+      node[midway, right, font=\scriptsize] {aggregate};
+    \draw[arr] (rp) -- (mp);
+    \draw[deparr] (mp) -- (pr)
+      node[midway, above, font=\scriptsize] {derive};
+  \end{tikzpicture}}
+  \caption{Architecture of the group-parametric card-protocol framework.
+  Blue boxes are profile records, green boxes are supporting records, and
+  arrows are dependencies.}
+  \label{fig:framework-architecture}
+\end{figure}
+
+The profile packs the group action and its generators, the secret type, the
+protocol layout, the shuffle-security evidence, and the reconstruction
+component. The layout supplies the participant processes. The security
+evidence supplies an endpoint bound. The reconstruction component supplies
+the threshold scheme and decoder.
+
+Packing these choices in one profile keeps the participants, verifier,
+recovery map, privacy threshold, and shuffle bound tied to the same
+instance. Each instance discharges the three obligations below once. Later
+definitions can then use the packed components without repeating them.
+
+A profile has three proof obligations.
 \begin{itemize}
 \item Every single card position lands close to uniform: \coqin{sw\_bound}
   bounds the distance of each position's endpoint distribution from the
@@ -374,40 +425,15 @@ Filling the record means discharging three proof obligations.
   shares by the shuffle leaves the recovered secret unchanged.
 \end{itemize}
 
-Once the record is filled, the \coqin{protocol\_of\_profile} section
-derives the players, the verifier, and the recovery map as definitions
-over the fields. It re-exports the certified characters and proves the
-round-trip correctness lemma \coqin{profile\_recon\_encode} in one line
-from the record's obligations, so no new proof obligation arises at wiring
-time. In the worked instance the players and the verifier are exactly the
-generic processes at its layout record, and the dealer is the same generic
-dealing program carrying the instance's own content readout. Each player
-coincides with the derived role, the correctness is restated through the
-shared decoder, and the characters are read off the shared
-definitions.\footnote{\coqin{run\_party\_pgl27} and
-\coqin{run\_recover\_pgl27} in
-\path{pgg-smc/instances/pgl27/pgl27_run.v}, \coqin{profile\_k\_pgl27} and
-\coqin{profile\_eps\_pgl27} in
-\path{pgg-smc/instances/pgl27/pgl27_profile.v}.} The threshold character
-has value four under the successor convention, so the largest private
-coalition size is three.
+The layout supplies the executable processes described in
+Section~\ref{sec:model}. The group action and shuffle distribution fix the
+dealing rule and endpoint bound. The reconstruction component chooses the
+decoder, so profiles over the same group can use different reconstruction
+schemes.
 
-A small process interpreter executes the layout record. It originates in
-the earlier FORTE development~\cite{WengEtAl2025} and produces the
-executed traces of Section~\ref{sec:model}. The group, its action, and its
-shuffle distribution fix the dealing and the endpoint bound, and the
-decoder is an independent choice, so instances over the same group differ
-only in the reconstruction component.
-Figure~\ref{fig:framework-architecture} shows the dependencies.
-
-The record path certifies correctness, endpoint uniformity, and the
-sharing threshold. The coalition-view, trace, and word-shuffle privacy
-theorems of Sections~\ref{sec:exact} and~\ref{sec:mixing} are stated
-separately. They consume the transitivity of the action and the shuffle
-distribution directly, not the record fields. The two optional slots of
-the security witness encode the proof mechanism, and
-Table~\ref{tab:witness-mechanism} shows the realized combinations.
-Section~\ref{sec:pgl} is the difficult worked instantiation.
+The security witness can carry exact evidence, asymptotic evidence, or
+both. Table~\ref{tab:witness-mechanism} shows the combinations used by the
+five instances in this paper.
 
 \begin{table}[t]
   \setlength{\tabcolsep}{6pt}
@@ -445,44 +471,11 @@ list. Section~\ref{sec:fivecard} realizes the committed-input flow, and
 the instance table of Section~\ref{sec:instances} records the full
 landscape.
 
-\begin{figure}[t]
-  \centering
-  \resizebox{\linewidth}{!}{%
-  \begin{tikzpicture}[
-      every node/.style={font=\small},
-      rec/.style={draw,rounded corners,fill=blue!8,align=center,inner sep=5pt},
-      sub/.style={draw,rounded corners,fill=green!8,align=center,inner sep=4pt,
-                 font=\footnotesize},
-      arr/.style={-{Latex[length=2mm]},thick}]
-    \node[rec] (mp) at (0,1.5) {\textbf{profile bundle}};
-    \node[rec] (pi) at (-3.7,0) {\textbf{protocol layout}\\dealer, players, verifier};
-    \node[rec] (sw) at (0,0) {\textbf{shuffle-security bound}\\endpoint bound};
-    \node[rec] (rp) at (3.7,0) {\textbf{reconstruction}\\group action to decoder};
-    \node[sub] (se) at (0,-1.2)
-      {exact and asymptotic\\security evidence};
-    \node[sub] (ts) at (3.7,-1.05) {threshold sharing};
-    \node[sub] (ie) at (3.7,-1.8) {input encoding};
-    \draw[arr] (pi) -- (mp);
-    \draw[arr] (sw) -- (mp);
-    \draw[arr] (rp) -- (mp);
-    \draw[arr] (se) -- (sw);
-    \draw[arr] (ie) -- (ts);
-    \draw[arr] (ts) -- (rp);
-  \end{tikzpicture}}
-  \caption{Architecture of the group-parametric card-protocol framework.
-  Blue boxes denote the profile bundle and its three component records
-  (\coqin{MonodromyProfile}, \coqin{PGGInterface}, \coqin{SecurityWitness},
-  \coqin{ReconPlug}). Green boxes denote supporting records
-  (\coqin{SecurityExact}, \coqin{SecurityAsymptotic},
-  \coqin{ThresholdScheme}, \coqin{InputEncoding}). Arrows denote
-  dependencies. Filling the three component records yields the derived
-  protocol roles, the certified characters, and the round-trip lemma of
-  the listing.}
-  \label{fig:framework-architecture}
-\end{figure}
+Section~\ref{sec:fivecard} gives a concrete packing example in the
+definition of the five-card profile.
 
-The next subsection states the generic theorems the framework supplies to
-every instance.
+This completes the framework description. The next subsection states the
+generic theorems.
 
 \subsection{Generic Theorems}
 
