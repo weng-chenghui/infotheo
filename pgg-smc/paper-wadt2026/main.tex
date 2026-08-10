@@ -87,7 +87,7 @@ word-shuffle mixing bound.
 Two shuffle distributions organize the analysis. The uniform distribution on
 the shuffle group is the ideal object of the security proofs. No dealer
 samples a uniform group element in one physical move. A dealer instead
-repeats simple cuts, and the repeated cuts follow a word distribution over
+repeats simple cuts, and the repeated cuts follow what I call a word distribution over
 the generators of the group. The group parameters pay for this connection.
 Transitivity of the action yields coalition privacy, and generation by a
 small cut alphabet yields a finite implementable shuffle. The paper proves
@@ -190,8 +190,9 @@ The framework describes a protocol by the data
 Here $G$ is a finite shuffle group. The representation
 $\rho:G\to S_n$ acts on $n$ card positions. The distribution $\mu$ selects one
 generator letter, and $R$ is the real closed field used for probabilities.
-The distribution $U_G$ is uniform on $G$. The convolution $\mu^{*L}$ is the distribution of the
-group element obtained by evaluating $L$ independent letters.
+The distribution $U_G$ is uniform on $G$. I write $\mu^{*L}$ for the word distribution at length $L$: the
+distribution of the group element obtained by evaluating $L$ independent
+letters.
 
 A dealer samples a secret $S$ and a valid dealt arrangement $D$. The action
 of a sampled shuffle $g$ produces the arrangement $\rho(g)D$. Position $i$
@@ -234,8 +235,9 @@ distribution of cards.
 
 The primary execution distribution samples a uniform Boolean secret and
 deals one fixed representative arrangement $D_s$ for each secret $s$. It
-then applies an independent uniform shuffle. This fixed-representative
-dealer is the dealer of the headline theorems. An all-decks dealer instead
+then applies an independent uniform shuffle. I call this the fixed
+representative dealer, and it is the dealer of the headline theorems. An
+all-decks dealer instead
 samples a uniform valid arrangement in the selected secret class before the
 shuffle. Both execution distributions use a uniform Boolean prior.
 
@@ -255,8 +257,9 @@ curious players learn. The protocol has no private player inputs. Active
 deviation, security after the verifier's reveal, and composition across
 executions are outside the model.
 
-The word-shuffle model describes the dealer performing the shuffle as a
-sequence of physical cuts. It replaces $U_G$ by $\mu^{*L}$. I measure two distributions $P$
+A second model describes the dealer performing the shuffle as a
+sequence of physical cuts. I call this the word-shuffle model. It
+replaces $U_G$ by $\mu^{*L}$. I measure two distributions $P$
 and $Q$ by the $L_1$ distance
 \begin{equation}
   \lVert P-Q\rVert_1=\sum_x\lvert P(x)-Q(x)\rvert.
@@ -433,7 +436,9 @@ schemes.
 
 The security witness can carry exact evidence, asymptotic evidence, or
 both. Table~\ref{tab:witness-mechanism} shows the combinations used by the
-five instances in this paper.
+five instances in this paper. For example, the den Boer row fills only
+the exact slot, since one uniform cut already gives the exact endpoint
+distribution.
 
 \begin{table}[t]
   \setlength{\tabcolsep}{6pt}
@@ -595,7 +600,7 @@ Definition five_card_profile (R : realType) (eps : R)
     five_card_plug.                 (* three-hearts decoder  *)
 \end{lstlisting}
 
-The dealing distribution is the biased cut
+The dealing distribution is the biased cut of Kim and \c{C}etinkaya
 \begin{equation}
   w_\varepsilon(a^k)=\begin{cases}\tfrac{1}{5}-\varepsilon, & k=0,\\[2pt]
   \tfrac{1}{5}+\tfrac{\varepsilon}{4}, & k=1,2,3,4,\end{cases}
@@ -706,8 +711,8 @@ certificates proven without computing in the group.
 
 This section supplies the instance column of Table~\ref{tab:bridge}. The
 group is $\PG$, the action permutes the eight projective points, the
-shuffle distribution draws uniform generator letters, and the decoder reads
-the orbit class. Figure~\ref{fig:run} shows a run.
+shuffle distribution draws uniform generator letters, and the decoder
+reads what I call the orbit class. Figure~\ref{fig:run} shows a run.
 
 \begin{figure}[H]
   \centering
@@ -825,7 +830,9 @@ projective points, there is a $g\in\PG$ such that
 \end{lemma}
 
 The formal proof enumerates generator words that send a fixed base triple to
-each distinct target triple. The kernel checks the resulting finite table.
+each distinct target triple. The kernel checks the resulting finite table. For example, the base
+triple is $(0,1,2)$, and the table stores for every other ordered triple
+of distinct points one generator word that carries $(0,1,2)$ to it.
 Lemma~\ref{thm:three-transitive} makes every ordered view of at most three
 positions uniform under $U_G$. It discharges the hypothesis of
 Theorem~\ref{thm:generic-privacy} at $t=3$ and thereby supplies the
@@ -874,7 +881,8 @@ consistent with valid arrangements from both secret classes.
 Three parameters summarize the instance. The privacy threshold $t$ is the
 largest coalition size with perfect privacy, the recovery threshold $r$ is
 the least number of revealed positions that always determines the secret
-class, and $n$ is the number of card positions.
+class, and $n$ is the number of card positions. I call the triple
+$(t,r,n)$ the recovery ramp.
 
 \begin{proposition}[Recovery ramp and sharpness\footnotemark]\label{thm:recovery-ramp}
 \footnotetext{Formalized in \path{pgg-smc/instances/pgl27/pgl27_recovery.v}
@@ -1024,13 +1032,17 @@ this bound to the security observables, and Theorem B gives the final bound.
 The executable shuffle samples a word over five letters. Three letters are
 the projective translation, scaling, and inversion generators. The alphabet
 also contains the inverses of translation and scaling. Inversion is already
-self-inverse. The resulting tuple is symmetric and generates the same group
-as the original three generators.
+self-inverse. The alphabet includes the two inverse letters because the fiber
+computation below steps backward through a letter's inverse and must stay
+inside the alphabet. The symmetric tuple still generates the same group
+as the original three generators, so the fiber count concerns the same
+$336$ elements.
 
 For a word length $L$, the shuffle distribution evaluates a uniform word in
 $\{0,1,2,3,4\}^L$. At $L=200$, the sample space contains $5^{200}$ words.
-The proof partitions these words into $336$ fibers, one for each group
-element. A computation over binary naturals records the size of every
+The proof partitions these words by evaluated group element. I call the
+set of words that evaluate to $g$ the fiber of $g$, and there are $336$
+fibers. A computation over binary naturals records the size of every
 fiber. The final arithmetic check sums the deviations of these fiber counts
 from $5^{200}/336$.
 
@@ -1050,7 +1062,9 @@ Equation~\ref{eq:pgl-order}, the $336$ fiber counts, and the final integer
 inequality. The certificate concerns the distribution of shuffle group
 elements.
 
-The first transfer maps each permutation to the endpoint of one fixed card.
+A coalition observes card endpoints rather than group elements. The
+certificate therefore moves from the group to the endpoints first. The
+first transfer maps each permutation to the endpoint of one fixed card.
 
 \begin{lemma}[Endpoint transfer\footnotemark]\label{lem:endpoint-transfer}
 \footnotetext{Formalized in \path{pgg-smc/instances/pgl27/pgl27_mixing.v}
@@ -1205,7 +1219,10 @@ unchanged and which need instance-specific finite or spectral evidence.
 Beyond the instances of Sections~\ref{sec:fivecard} and~\ref{sec:pgl}, the
 $S_5$ and $S_5\times S_5$ instances exercise the spectral part of the
 framework, and Table~\ref{tab:instances} records the proved coverage
-across all five. Perfect privacy in the table refers to the dealer distribution defined by each
+across all five. For example, the trace-lifting theorem of
+Section~\ref{sec:framework} is consumed verbatim by all five instances,
+while each instance supplies its own endpoint bound. Perfect privacy in
+the table refers to the dealer distribution defined by each
 instance. Trace privacy refers to the executed trace of the stated corrupted
 players.
 
