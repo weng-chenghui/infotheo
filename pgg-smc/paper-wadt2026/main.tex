@@ -135,8 +135,8 @@ There are four contributions in this work.
 \item I verify the den Boer~\cite{denBoer1989} and the Kim and
   \c{C}etinkaya~\cite{KimCetinkaya2025} five-card protocols in \Rocq{} as
   one profile at bias $\varepsilon$: executed-run correctness of the
-  conjunction output, exact mutual-information leakage values for six
-  reveal patterns, executed-trace secrecy for a single corrupted player,
+  conjunction output, exact mutual-information leakage values for every
+  reveal pattern, executed-trace secrecy for a single corrupted player,
   den Boer's perfect dealing bound recovered at bias zero, and a
   kernel-checked seven-cut single-card bound of $2^{-40}$ at bias $1/100$.
 \item I prove correctness, the recovery ramp, coalition-view privacy, and
@@ -589,10 +589,12 @@ length, which is the precise sense in which the unbiased member is den
 Boer's protocol.\footnote{\coqin{five\_card\_eps0\_eq0} in
 \path{pgg-smc/instances/kim2025/five_card_family.v}.}
 
-Figure~\ref{fig:fivecard-leakage} quantifies six reveal patterns
-exactly.\footnote{\coqin{leak\_k1}, \coqin{leak\_k2\_adj},
-\coqin{leak\_k2\_dist2}, \coqin{leak\_k3}, \coqin{leak\_k4},
-\coqin{leak\_k5}, and the cap \coqin{H\_secret} in
+Figure~\ref{fig:fivecard-leakage} quantifies every reveal pattern
+exactly.\footnote{The master theorem \coqin{leak\_view\_set} covers all
+thirty-two position subsets, anchored by \coqin{leak\_k1},
+\coqin{leak\_k2\_adj}, \coqin{leak\_k2\_dist2}, \coqin{leak\_k3},
+\coqin{leak\_k3\_gap}, \coqin{leak\_k4}, \coqin{leak\_k5}, and the cap
+\coqin{H\_secret} in
 \path{pgg-smc/instances/denboer1989/five_card_leakage.v}. For example
 \coqin{leak\_k2\_adj} $=\tfrac{27}{10}-\tfrac14\log 5-\tfrac{7}{10}\log
 7$.} One revealed card carries no information about the conjunction, which
@@ -646,6 +648,9 @@ proven closed forms.
   average over the whole distribution of arrangements.}
   \label{fig:fivecard-leakage}
 \end{figure}
+
+Every three-card reveal leaks the same $\tfrac65-\tfrac{9}{20}\log 3$
+bits, so only the two-card value depends on the pattern's shape.
 
 \begin{proposition}[Seven-cut security at bias $1/100$\footnotemark]
 \label{prop:fivecard-mixing}
