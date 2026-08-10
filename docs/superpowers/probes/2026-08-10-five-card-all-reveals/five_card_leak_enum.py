@@ -9,7 +9,6 @@ Mirrors five_card_program.v exactly:
   fc_shuffle k s = rot k s  (MathComp rot: drop k ++ take k, cyclic LEFT rotation)
 """
 from itertools import product, combinations
-from fractions import Fraction
 import math
 
 def fc_encode(b): return [True, False] if b else [False, True]
@@ -26,8 +25,8 @@ def secret(w):
     return bool(a) and bool(b)
 
 def mutual_info(A):
-    """I(Secret; View_A) in bits, exact via Fractions on counts; returns
-    (float value, dict of per-view counts) with counts (nv, nt, nf)."""
+    """I(Secret; View_A) in bits: exact integer fibre counts, float entropy
+    sums. Returns (float value, dict of per-view counts (nv, nt, nf))."""
     views = {}
     for w in outcomes:
         v = tuple(arr(w)[i] for i in A)
