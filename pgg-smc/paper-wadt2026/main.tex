@@ -951,6 +951,19 @@ independent uniform $\PG$ shuffle,
 \]
 \end{proposition}
 
+\begin{example}\label{ex:coalition-view}
+Let the dealt secret be $s=0$, so the dealt arrangement is $D_0$, and let
+the shuffle be the translation $x\mapsto x+1$, which fixes the point
+$\infty$ at position seven. Each position then shows the card that $D_0$
+places one position later, and the coalition $\{0,1,2\}$ sees the card
+values $(1,2,3)$. At $s=1$ the same shuffle would show $(1,2,4)$. By
+Lemma~\ref{thm:three-transitive} some shuffle instead sends the
+coalition's three positions to the positions $1$, $2$, and $4$ of $D_1$,
+which hold the values $1$, $2$, and $3$. A coalition of three cards
+therefore never separates the two secrets, and the proposition above makes
+this uniformity exact.
+\end{example}
+
 Two further dealers act as robustness checks on the fixed representative.
 The all-decks dealer tests whether the fixed representative hides a special
 choice. It samples $S$ uniformly. Conditional on $S=s$, it samples a uniform
