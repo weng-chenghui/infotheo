@@ -153,13 +153,15 @@ There are four contributions in this work.
 \end{itemize}
 
 Section~\ref{sec:model} fixes the protocol flow, the two distributions, and
-the security scope. Section~\ref{sec:framework} presents the framework
-components used by the proofs. Section~\ref{sec:fivecard} instantiates them
-on the five-card family as a first worked example.
-Sections~\ref{sec:pgl} and~\ref{sec:exact}
-give the $\PG$ construction and its uniform-shuffle results, ending in
-Theorem A. Section~\ref{sec:mixing} proves the word-shuffle results, ending
-in Theorem B. Section~\ref{sec:instances} compares the sibling instances and
+the security scope. Section~\ref{sec:framework} presents the framework components used by
+the proofs. Section~\ref{sec:fivecard} instantiates them on the five-card
+family, where the deck is small enough for direct case analysis.
+Sections~\ref{sec:pgl} and~\ref{sec:exact} construct the $\PG$ instance,
+where deck enumeration no longer suffices and three-transitivity carries
+the privacy proofs, ending in Theorem A. Because a physical dealer repeats
+cuts rather than sampling one uniform group element,
+Section~\ref{sec:mixing} proves the word-shuffle results, ending in
+Theorem B. Section~\ref{sec:instances} compares the sibling instances and
 states the trust base. Section~\ref{sec:related} places the results among
 related work. Section~\ref{sec:conclusion} states the remaining extensions
 and other future directions.
@@ -192,7 +194,9 @@ The distribution $U_G$ is uniform on $G$. The convolution $\mu^{*L}$ is the dist
 group element obtained by evaluating $L$ independent letters.
 
 A dealer samples a secret $S$ and a valid dealt arrangement $D$. The action
-of a sampled shuffle $g$ produces the arrangement $\rho(g)D$. Player $i$
+of a sampled shuffle $g$ produces the arrangement $\rho(g)D$. Position $i$
+of the shuffled arrangement holds the card that $D$ places at position
+$\rho(g)(i)$. Player $i$
 observes a view $V_i$ derived from the card at position $i$. A coalition
 $C\subseteq\{0,\ldots,n-1\}$ observes the joint view
 \begin{equation}
@@ -301,12 +305,15 @@ $2^{-39}$.
 
 \subsection{Framework Architecture}
 
-An instance is specified by filling one record. The record type
-\coqin{MonodromyProfile} has five fields, and they carry the data of
-Equation~\ref{eq:model-data} into the executable protocol: the group with
-its action and generators, the secret type, the layout of a run, the
-shuffle-security bound, and the decoder. Here $R$ is the real closed field
-of Equation~\ref{eq:model-data}, not a protocol datum. The finite algebraic
+Every instance in this paper supplies the same kinds of data: a group
+with its action and generators, a secret type, the layout of a run, a
+shuffle-security bound, and a decoder. In order to reuse one executable
+protocol across instances, the framework therefore gathers these five
+choices into one record, the record type \coqin{MonodromyProfile}, while
+the generic theorems of this section take their hypotheses directly. The
+record carries the data of Equation~\ref{eq:model-data} into the
+executable protocol. Here $R$ is the real closed field of
+Equation~\ref{eq:model-data}, not a protocol datum. The finite algebraic
 structures use Mathematical Components~\cite{MathComp}, and
 Table~\ref{tab:bridge} maps each model datum to its record role and to the
 values the $\PG$ instance supplies.
@@ -402,13 +409,7 @@ values the $\PG$ instance supplies.
   \label{fig:framework-architecture}
 \end{figure}
 
-The profile packs the group action and its generators, the secret type, the
-protocol layout, the shuffle-security evidence, and the reconstruction
-component. The layout supplies the participant processes. The security
-evidence supplies an endpoint bound. The reconstruction component supplies
-the threshold scheme and decoder.
-
-Packing these choices in one profile keeps the participants, verifier,
+Packing these components in one profile keeps the participants, verifier,
 recovery map, privacy threshold, and shuffle bound tied to the same
 instance. Each profile supplies proofs of the following three obligations.
 \begin{itemize}
@@ -830,7 +831,8 @@ positions uniform under $U_G$. It discharges the hypothesis of
 Theorem~\ref{thm:generic-privacy} at $t=3$ and thereby supplies the
 group-theoretic premise for coalition privacy.
 
-Table~\ref{tab:source-index} indexes the formal sources for this section.
+Table~\ref{tab:source-index} at the end of Section~\ref{sec:mixing}
+indexes the formal sources for this section and the two that follow.
 
 \section{Correctness, Recovery, and Uniform-Shuffle Privacy}\label{sec:exact}
 
@@ -911,12 +913,11 @@ has positive mutual information with it.
   \label{fig:ramp}
 \end{figure}
 
-The implemented decoder reads all eight endpoints.
-
-The witness coalition makes the privacy cutoff three sharp. It
-does not classify all four-position coalitions. The development also proves
-monotonicity of mutual information under inclusion, but it does not compute
-the leakage for all reveal sets of sizes four through six.
+The implemented decoder reads all eight endpoints. The witness coalition
+makes the privacy cutoff three sharp. Although the development proves
+monotonicity of mutual information under inclusion, it neither classifies
+all four-position coalitions nor computes the leakage for every reveal set
+of sizes four through six.
 
 \subsection{Perfect View and Trace Privacy}
 
@@ -1084,10 +1085,11 @@ into the product distributions, and
 \end{equation}
 \end{lemma}
 
-Equation~\ref{eq:product-transfer} compares two distributions on a secret
-and a shuffle. It is not an execution distribution. Equations~\ref{eq:endpoint-transfer}
-and~\ref{eq:product-transfer} transfer the one certificate in
-Equation~\ref{eq:pgl-mixing}. They are not separate mixing certificates.
+Equations~\ref{eq:endpoint-transfer} and~\ref{eq:product-transfer}
+transfer the one certificate of Equation~\ref{eq:pgl-mixing} to two
+further sample spaces. Neither is a separate mixing certificate, and
+Equation~\ref{eq:product-transfer} still compares a prior with a shuffle
+distribution rather than a distribution over executed runs.
 
 The proved chain reaches group-distribution proximity, every single-card
 marginal, and the product with any secret prior. Transport through the
