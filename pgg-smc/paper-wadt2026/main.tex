@@ -205,6 +205,29 @@ executed trace $T_i$, and $T_C=(T_i)_{i\in C}$ is the coalition trace. The
 verifier receives all endpoints and applies the decoder. It therefore learns
 $S$ by design.
 
+The following player process makes this execution model
+concrete.\footnote{Formalized in
+\path{pgg-smc/protocol/card_exchange_pismc.v} as
+\coqin{exchange\_dealer}, \coqin{exchange\_player}, and
+\coqin{exchange\_verifier}.}
+
+\begin{lstlisting}
+Definition exchange_player (i : 'I_T)
+    : sproc pgg_dtype data (player_idx i) :=
+  \pi{ Receive<dealer_idx> #my_hand =>
+     Receive<dealer_idx> $shuffle_idx =>
+     Reveal<verifier_idx> &(nth ord0 my_hand shuffle_idx) ;
+     Finish }.
+\end{lstlisting}
+
+In the listing, \coqin{\#} marks a dealt hand, \coqin{\$} marks the
+public shuffle index, and \coqin{\&} marks a card position. The player
+receives the hand and the index, selects one entry, and reveals it to the
+verifier. The verifier's observation receives this entry. The interpreter
+records both received values in the player's trace. The trace-privacy
+theorem therefore concerns the execution of this process, not only a static
+distribution of cards.
+
 The primary execution distribution samples a uniform Boolean secret and
 deals one fixed representative arrangement $D_s$ for each secret $s$. It
 then applies an independent uniform shuffle. This fixed-representative
@@ -589,8 +612,7 @@ length, which is the precise sense in which the unbiased member is den
 Boer's protocol.\footnote{\coqin{five\_card\_eps0\_eq0} in
 \path{pgg-smc/instances/kim2025/five_card_family.v}.}
 
-Figure~\ref{fig:fivecard-leakage} quantifies every reveal pattern
-exactly.\footnote{The master theorem \coqin{leak\_view\_set} covers all
+The master theorem quantifies every fixed reveal set exactly.\footnote{The master theorem \coqin{leak\_view\_set} covers all
 thirty-two position subsets, anchored by \coqin{leak\_k1},
 \coqin{leak\_k2\_adj}, \coqin{leak\_k2\_dist2}, \coqin{leak\_k3},
 \coqin{leak\_k3\_gap}, \coqin{leak\_k4}, \coqin{leak\_k5}, and the cap
@@ -602,6 +624,8 @@ is the information-theoretic counterpart of the scheme's privacy
 threshold, and the ramp climbs to the secret's own entropy
 $2-\tfrac34\log 3\approx 0.811$. The decimals are evaluations of the
 proven closed forms.
+
+Figure~\ref{fig:fivecard-leakage} shows selected cases.
 
 \begin{figure}[H]
   \centering
@@ -642,15 +666,15 @@ proven closed forms.
     \node[card] at (4,6) {$\clubsuit$};
     \node[lab] at (4.8,6) {$0.811$ bits, the cap};
   \end{tikzpicture}
-  \caption{Mutual information between the revealed cards and the
-  conjunction, one machine-checked value per reveal pattern. The drawn
-  card faces are one illustrative arrangement, and the printed values
-  average over the whole distribution of arrangements.}
+  \caption{Mutual-information leakage for selected reveal cases. Blue card
+  backs mark unrevealed positions.}
   \label{fig:fivecard-leakage}
 \end{figure}
 
-Every three-card reveal leaks the same $\tfrac65-\tfrac{9}{20}\log 3$
-bits, so only the two-card value depends on the pattern's shape.
+Every three-card reveal leaks the same
+$\tfrac65-\tfrac{9}{20}\log 3$ bits. The figure draws the consecutive
+case, and the gapped case has the same value. Only the two-card value
+depends on the pattern's shape.
 
 \begin{proposition}[Seven-cut security at bias $1/100$\footnotemark]
 \label{prop:fivecard-mixing}
