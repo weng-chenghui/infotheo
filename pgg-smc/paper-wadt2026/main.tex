@@ -1276,15 +1276,21 @@ group-action, execution, privacy, and mixing lemmas in \Rocq{}. The Kim
 instance also connects a biased shuffle model to a concrete word-shuffle
 bound~\cite{KimCetinkaya2025}.
 
+Shinagawa gives a unified model in which a card protocol is specified by a
+deck and a set of operations~\cite{Shinagawa2021}. The model covers binary
+cards, regular polygon cards, and dihedral cards. It varies the card type
+and the allowed physical operations. The framework in this paper instead
+varies the finite group, its permutation action, the shuffle distribution,
+and the reconstruction map. It connects these parameters to executable
+traces and machine-checked privacy and mixing results.
+
 Group-based shuffle models appear in work on closed shuffles and graph
 automorphisms. Miyamoto and Shinagawa realize a uniformly chosen graph
 automorphism by pile-scramble shuffles~\cite{MiyamotoShinagawa2022}.
 Shinagawa and Miyamoto extend the construction to graphs and hypergraphs and
 give applications to cyclic group shuffles~\cite{ShinagawaMiyamoto2023}.
 These results describe physical protocols that implement structured uniform
-shuffle groups. The framework in this paper takes the finite group, its
-action, and its probability distribution as parameters. It then connects them to
-sharing and execution semantics. A single uniform closed shuffle suffices to
+shuffle groups. A single uniform closed shuffle suffices to
 compute any Boolean circuit~\cite{ShinagawaNuida2021}. A later compiler maps
 simple finite-runtime card protocols to private simultaneous-message
 protocols~\cite{ShinagawaNuida2025}.
