@@ -274,3 +274,10 @@ Lemma db_decode_encoded (s : bool) :
 Proof. exact: gen_decode_encoded. Qed.
 
 End fivecard_count_bridge.
+
+(* Audit fold (2026-08-11, soundness finding 10): in-file assumption checks. *)
+Print Assumptions gen_decode_encoded.
+Print Assumptions pgl_decodeE.
+Print Assumptions pgl_decode_encoded.
+Print Assumptions db_decodeE.
+Print Assumptions db_decode_encoded.

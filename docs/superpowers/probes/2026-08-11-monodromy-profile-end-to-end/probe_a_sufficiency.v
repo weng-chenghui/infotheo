@@ -336,3 +336,14 @@ Lemma db_input_ids : @gen_input_ids R mpD db_input_procs = [:: 7; 8].
 Proof. by []. Qed.
 
 End fivecard_register.
+
+(* Audit fold (2026-08-11, soundness finding 10): in-file assumption checks. *)
+Print Assumptions gen_players_size.
+Print Assumptions gen_procs_size.
+Print Assumptions pgl_procs_size.
+Print Assumptions pgl_input_ids.
+Print Assumptions fc_lt0.
+Print Assumptions fc_gt0.
+Print Assumptions fc_spec0.
+Print Assumptions db_procs_size.
+Print Assumptions db_input_ids.

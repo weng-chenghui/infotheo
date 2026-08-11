@@ -460,7 +460,7 @@ Lemma pgl_playersE : pgl27_players = enum 'I_(pi_T' (mp_PI mpP)).+1.
 Proof. by apply: (inj_map val_inj); rewrite val_enum_ord. Qed.
 
 (** pgl_epp — the PGL(2,7) execution adapter.
-    @intent: run argument bool, both bridges erefl at 7 seats, 7 shares and 8
+    @intent: run argument bool, both bridges erefl at 8 seats, 8 shares and 8
     cards, participant list pgl27_players, content the shares ts_encode
     orbit_scheme s of the dealt orbit secret, no input processes, fuel
     pgl27_fuel. *)
@@ -868,3 +868,29 @@ Print Assumptions sa_seat_distE.
 (*   rebuilding every profile value above and of admitting instances that     *)
 (*   carry execution data they never run.                                    *)
 (******************************************************************************)
+
+(******************************************************************************)
+(*     Audit fold (2026-08-11, soundness finding 11): the SampleAdapter       *)
+(*     record packaging instantiated at the PGL(2,7) exact sample space.      *)
+(******************************************************************************)
+
+From pgg_smc Require Import pgl27_secrecy.
+
+Section sample_record_instance.
+
+Variable R : realType.
+
+(** sa_pgl — the sample adapter packaged at the PGL(2,7) exact sample space.
+    @intent: sample space bool * pgg_gT pgl27_M with law pgl27P, argument and
+    cut maps the two projections, over pgl_epp. *)
+Definition sa_pgl : SampleAdapter (pgl_epp R) :=
+  @MkSampleAdapter R (pgl27_profile R) (pgl_epp R)
+    [the finType of (bool * pgg_gT pgl27_M)%type] (pgl27P R) fst snd.
+
+(** sa_pgl_seat_dist — the seat-view law at the packaged adapter.
+    @intent: sa_seat_dist at sa_pgl; forces elaboration of the record against
+    the eight-field execution adapter. *)
+Definition sa_pgl_seat_dist (i : 'I_(pi_T' (mp_PI (pgl27_profile R))).+1) :=
+  @sa_seat_dist R (pgl27_profile R) (pgl_epp R) sa_pgl 0%N i.
+
+End sample_record_instance.

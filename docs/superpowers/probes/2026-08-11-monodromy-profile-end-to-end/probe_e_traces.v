@@ -164,7 +164,7 @@ Definition epp_participant_trace (x : ep_inputT e) (w0 : pgg_gT (mp_M mp))
   nth [::] (epp_run x w0 P_idx).2 (2 + i).
 
 (** epp_seat_share_count — the seat/share bridge in successor form.
-    @composes: fc_epp_endpoints *)
+    @composes: epp_decode *)
 Lemma epp_seat_share_count :
   (pi_T' (mp_PI mp)).+1 = (ts_T' (rp_scheme (mp_plug mp))).+1.
 Proof. by rewrite e.(ep_players_bridge). Qed.
@@ -279,7 +279,7 @@ Variable R : realType.
 Let mpP : MonodromyProfile R := pgl27_profile R.
 
 (** pgl_epp — the PGL(2,7) execution adapter.
-    @intent: run argument bool, both bridges erefl at 7 seats, 7 shares and 8
+    @intent: run argument bool, both bridges erefl at 8 seats, 8 shares and 8
     cards, content the shares ts_encode orbit_scheme s of the dealt orbit
     secret, no input processes, fuel pgl27_fuel. *)
 Definition pgl_epp : EPP mpP :=
