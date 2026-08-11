@@ -137,6 +137,7 @@ pgg-smc/protocol/card_exchange_pismc.v
 pgg-smc/protocol/pgg_input_commitment.v
 pgg-smc/protocol/pgg_run.v
 pgg-smc/protocol/pgg_monodromy_profile.v
+pgg-smc/protocol/pgg_execution_plug.v
 pgg-smc/protocol/pgg_correctness.v
 pgg-smc/instances/abelian/pgg_abelian.v
 pgg-smc/instances/abelian/abelian_word_collapse.v
