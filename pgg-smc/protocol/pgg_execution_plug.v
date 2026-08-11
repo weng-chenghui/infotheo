@@ -349,7 +349,8 @@ Theorem exec_run_correct :
       @exec_decode (exec_endpoints x w0 P_idx) exec_endpoints_size
       = expected x].
 Proof.
-split; [exact: Hterm | exact: exec_endpoints_size | exact: exec_run_recovers].
+by split;
+  [exact: Hterm | exact: exec_endpoints_size | exact: exec_run_recovers].
 Qed.
 
 End run_of_static_observation.
