@@ -297,14 +297,7 @@ Proof. by rewrite Hep exec_static_endpoints_size. Qed.
     observation decodes to expected x. *)
 Theorem exec_run_recovers :
   @exec_decode (exec_endpoints x w0 P_idx) exec_endpoints_size = expected x.
-Proof.
-have Hgen : forall (ep : seq 'I_(pgg_N' (mp_M mp)).+1)
-    (H1 : size ep = (pi_T' (mp_PI mp)).+1),
-    ep = exec_static_endpoints content_obs x w0 ->
-    @exec_decode ep H1 = expected x.
-  by move=> ep H1 Heq; move: H1; rewrite Heq => H1; exact: Hrecon.
-by apply: Hgen.
-Qed.
+Proof. by move: exec_endpoints_size; rewrite Hep; exact: Hrecon. Qed.
 
 (** exec_seat_endpointE — seat i's endpoint is the static observation at seat i.
     @main correctness: exec_seat_endpoint x w0 P_idx i = content_obs x (w0, tnth

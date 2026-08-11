@@ -158,9 +158,7 @@ Lemma pgl27_exec_decodeE (ep : seq 'I_(pgg_N' (mp_M mpP)).+1)
   @exec_decode R mpP pgl27_exec_plug ep Hsz
   = ts_recon orbit_scheme (tcast Hsz' (in_tuple ep)).
 Proof.
-rewrite /exec_decode /run_recover.
-by rewrite (eq_irrelevance
-              (etrans Hsz (@exec_seat_share_count R mpP pgl27_exec_plug)) Hsz').
+by rewrite /exec_decode /run_recover (eq_irrelevance (etrans Hsz _) Hsz').
 Qed.
 
 (** pgl27_exec_recon — decoding the static observation returns the dealt
@@ -175,17 +173,10 @@ Lemma pgl27_exec_recon (s : bool) (w0 : pgg_gT pgl27_M) :
     Hsz = s.
 Proof.
 move=> Hw0.
-have Hgen : forall (ep : seq 'I_(pgg_N' (mp_M mpP)).+1)
-    (H1 : size ep = (pi_T' (mp_PI mpP)).+1),
-    ep = endpoints_of_trace
-           (nth [::] (run_interp pgl27_fuel (pgl27_procs s w0)).2 1) ->
-    @exec_decode R mpP pgl27_exec_plug ep H1 = s.
-  move=> ep H1 Hq; move: H1; rewrite Hq => H1.
-  rewrite (pgl27_exec_decodeE H1 (pgl27_endpoints_size s w0)).
-  exact: (pgl27_run_recovers s Hw0).
-move=> Hsz; apply: Hgen.
-by rewrite -pgl27_exec_endpoints /exec_endpoints /exec_run pgl27_exec_fuelE
-           pgl27_exec_procsE /exec_verifier_id.
+rewrite -pgl27_exec_endpoints /exec_endpoints /exec_run pgl27_exec_fuelE
+        pgl27_exec_procsE /exec_verifier_id => Hsz.
+rewrite (pgl27_exec_decodeE Hsz (pgl27_endpoints_size s w0)).
+exact: (pgl27_run_recovers s Hw0).
 Qed.
 
 (** pgl27_exec_recovers — the derived PGL(2,7) run decodes to the dealt

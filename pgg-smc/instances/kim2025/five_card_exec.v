@@ -207,10 +207,7 @@ Lemma five_card_exec_decodeE (ep : seq 'I_(pgg_N' (mp_M mpF)).+1)
   @exec_decode R mpF five_card_exec_plug ep Hsz
   = ts_recon fcI_scheme (tcast Hsz' (in_tuple ep)).
 Proof.
-rewrite /exec_decode /run_recover.
-by rewrite (eq_irrelevance
-              (etrans Hsz (@exec_seat_share_count R mpF five_card_exec_plug))
-              Hsz').
+by rewrite /exec_decode /run_recover (eq_irrelevance (etrans Hsz _) Hsz').
 Qed.
 
 (** five_card_exec_decode_seqE — the plug's decoder reads the endpoint list as

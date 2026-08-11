@@ -218,9 +218,7 @@ Proof. by rewrite /sa_seat_dist sa_seat_viewE. Qed.
     @composes: sa_coalition_distE *)
 Lemma sa_coalition_viewE (C : {set 'I_(pi_T' (mp_PI mp)).+1}) :
   sa_coalition_view C = sa_static_coalition_view C.
-Proof.
-by apply: funext => u; exact: (exec_coalition_endpointsE (Hep u) C).
-Qed.
+Proof. by apply: funext => u; exact: (exec_coalition_endpointsE (Hep u) C). Qed.
 
 (** sa_coalition_distE — the executed coalition law is the static
     observation's law.
