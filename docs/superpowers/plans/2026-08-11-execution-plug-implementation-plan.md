@@ -150,3 +150,42 @@ Implementation starts on explicit user go. Estimated total: ~1350 lines of
 ported Rocq across 5 commits, all de-risked by compiled probes; the only
 unprobed items are the two definitional smart constructors (D2) and the S3
 `trace_secrecy_of_view` corollary, both with recorded fallbacks.
+
+## As-built record (executed 2026-08-11..12 on user go)
+
+All stages executed and committed; every commit passed the gate unbypassed.
+The gate's Stage 2 was the known S998 silent no-op on each commit, so per the
+cross-stage rule a `rocq-auditor` (opus) review was dispatched for every
+substantive commit; all returned PASS at error severity after fixes.
+
+| Stage | Commits | Outcome |
+|---|---|---|
+| S1 | `f546e31d`, `b641d4fa` | `pgg_execution_plug.v` (351 lines after golf); follow-up commit restores a dropped `by` terminator (amend blocked by guardrail hook) |
+| S2a | `f16b1473`, `c0365b70` | `pgl27_exec.v` via `dealer_secret_plug`; follow-up renames `pgl27_exec_proc_count` to `pgl27_exec_procs_size` per the repo `_size` convention (auditor finding, accepted) |
+| S2b | `10ace921` | `five_card_exec.v` via `committed_input_plug`; `five_card_exec_procs_biasE` restated at the production record, `by []` |
+| S3 | `9dd8b6bd` | Eight ported corollaries; the UNPROBED `trace_secrecy_of_view` hookup LANDED on attempt 1 (`five_card_exec_trace` + `five_card_exec_traceE` + `five_card_exec_trace_secrecy`), so the fallback was unused and the hookup is in scope, not a non-goal |
+| S4 | `7d567b3b` | `pgg_sample_adapter.v` (233 lines) + instance sample values; soundness invariant 4 (no privacy statement) auditor-confirmed |
+| Golf | `e81fab8a` | Bodies only; measured -21 lines (1.3%) / -691 bytes (0.8%) across the four files; four proofs shortened; all ten headline results re-verified boolp-trio-only |
+
+Deviations from the written plan, verbatim intent preserved:
+
+1. S4's generic file additionally carries record-form ports of six probe_f
+   generic lemmas (`sa_seat_view_of_run`, `sa_seat_dist_law`,
+   `sa_cut_dist_image`, `sa_static_coalition_view`, `sa_coalition_viewE`,
+   `sa_coalition_distE`) because the ported instance values consume them.
+2. S3 auditor: four fictitious `@composes` edges retagged as terminal
+   `@main` exports; probe_e's `@composes`-on-a-Definition tag defect fixed at
+   port, per the S1 hygiene rule.
+3. Auditor warnings deferred without action, recorded as future-cycle
+   candidates: W2 (restating `pgl27_sample_witness_prodE` against
+   `sa_sampleP`) rejected because it rewrites a ported identity; W4 (word-space
+   coalition `distE` twin) and W5 (cut-law ties for the den Boer and witness
+   cut distributions) are new mathematical content and join the non-goals.
+
+Final assumption state: `exec_run_recovers`, `exec_run_correct`,
+`pgl27_exec_recovers`, `pgl27_exec_correct`, `five_card_exec_recovers`,
+`five_card_exec_correct`, `five_card_exec_procs_biasE`,
+`five_card_exec_trace_secrecy`, `pgl27_sample_witness_prodE`,
+`pgl27_word_cut_distE` each depend on exactly the boolp trio; zero
+`Admitted`/`Abort`/`Axiom` in the four files. Probe directory untouched
+(evidence frozen at `cf64d7ae`).
