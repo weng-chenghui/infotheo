@@ -20,6 +20,9 @@
 (*                                      trace                                 *)
 (*   five_card_exec_trace  == seat i's executed trace as a random variable on *)
 (*                            the leakage space                               *)
+(*   five_card_sample      == the den Boer sample adapter: the leakage space  *)
+(*                            Omega under P, the cut being the sampled        *)
+(*                            rotation                                        *)
 (*                                                                            *)
 (* Key results:                                                               *)
 (*   five_card_exec_recovers    == the derived run decodes to the conjunction *)
@@ -44,6 +47,10 @@
 (*                                identifier                                  *)
 (*   five_card_exec_traceE == the execution layer's trace variable is         *)
 (*                            denboer_player_trace                            *)
+(*   five_card_sample_seat_distE == the executed seat law at the den Boer     *)
+(*                                  space is the law of the layout entry at   *)
+(*                                  the rotation image of the seat's start    *)
+(*   five_card_sample_coalition_distE == the same for a coalition's readings  *)
 (*   five_card_exec_trace_secrecy == one seat's executed trace leaves the     *)
 (*                                   secret's conditional entropy equal to    *)
 (*                                   its plain entropy                        *)
@@ -59,7 +66,7 @@ From infotheo Require Import variation_dist entropy.
 Require Import smc_interpreter pismc smc_session_types.
 From pgg_smc Require Import pgg_interface pgg_session_types card_exchange_pismc.
 From pgg_smc Require Import pgg_input_commitment pgg_run pgg_monodromy_profile.
-From pgg_smc Require Import pgg_execution_plug.
+From pgg_smc Require Import pgg_execution_plug pgg_sample_adapter.
 From pgg_reconstruct Require Import pgg_sharing_framework covering_scheme
                                     algebraic_rigidity input_encoding.
 From pgg_smc Require Import five_card_group five_card_program.
@@ -377,6 +384,115 @@ Lemma five_card_exec_raw_traceE (a b : bool) (w0 : pgg_gT FiveCardKim_M)
 Proof.
 by rewrite /five_card_exec_player_raw_trace /exec_participant_trace
    /exec_seat_id /exec_run five_card_exec_fuelE five_card_exec_procsE.
+Qed.
+
+(******************************************************************************)
+(*     The den Boer sample space of the five-card instance                    *)
+(******************************************************************************)
+
+(** five_card_sample_arg — the committed pair of a den Boer sample point.
+    @intent: the first component of a point of bool * bool * 'I_5. *)
+Definition five_card_sample_arg (u : five_card_leakage.Omega)
+    : (bool * bool)%type := u.1.
+
+(** five_card_sample_cut — the cut of a den Boer sample point.
+    @intent: the rotation fc_sigma ^+ k realizing the sampled rotation k, the
+    second component of a point of bool * bool * 'I_5. *)
+Definition five_card_sample_cut (u : five_card_leakage.Omega)
+    : pgg_gT (mp_M mpF) := (five_card_group.fc_sigma ^+ u.2)%g.
+
+(** five_card_sample — the five-card sample adapter at bias eps.
+    @intent: the sample layer over five_card_exec_plug whose sample space is
+    the den Boer leakage space Omega under its uniform law P, the run argument
+    being the committed pair and the cut the realized rotation. *)
+Definition five_card_sample : SampleAdapter five_card_exec_plug :=
+  @MkSampleAdapter R mpF five_card_exec_plug five_card_leakage.Omega (P R)
+    five_card_sample_arg five_card_sample_cut.
+
+(** five_card_sample_run — layer 1 at the den Boer space: the run at a sample
+    point.
+    @intent: sa_run at five_card_sample and process offset 0, the run at the
+    sampled committed pair and the sampled rotation. *)
+Definition five_card_sample_run (u : five_card_leakage.Omega) :=
+  @sa_run R mpF five_card_exec_plug five_card_sample 0 u.
+
+(** five_card_sample_seat_view — layer 2 at the den Boer space: seat i's
+    endpoint.
+    @intent: sa_seat_view at five_card_sample, seat i's endpoint reader as a
+    random variable on P.
+    Naming: intentional; five_card is the two-word instance prefix shared by
+    five_card_exec_plug and five_card_content_obs. *)
+Definition five_card_sample_seat_view (i : 'I_(pi_T' (mp_PI mpF)).+1) :=
+  @sa_seat_view R mpF five_card_exec_plug five_card_sample 0 i.
+
+(** five_card_sample_coalition_view — layer 2 at the den Boer space: a
+    coalition's readings.
+    @intent: sa_coalition_view at five_card_sample, the coalition endpoint
+    reader as a random variable on P.
+    Naming: intentional; five_card is the two-word instance prefix shared by
+    five_card_exec_plug and five_card_content_obs. *)
+Definition five_card_sample_coalition_view
+    (C : {set 'I_(pi_T' (mp_PI mpF)).+1}) :=
+  @sa_coalition_view R mpF five_card_exec_plug five_card_sample 0 C.
+
+(** five_card_sample_seat_dist — layer 3 at the den Boer space: the law of
+    seat i's endpoint.
+    @intent: the pushforward of P along five_card_sample_seat_view i.
+    Naming: intentional; five_card is the two-word instance prefix shared by
+    five_card_exec_plug and five_card_content_obs. *)
+Definition five_card_sample_seat_dist (i : 'I_(pi_T' (mp_PI mpF)).+1) :=
+  @sa_seat_dist R mpF five_card_exec_plug five_card_sample 0 i.
+
+(** five_card_sample_coalition_dist — layer 3 at the den Boer space, coalition
+    form.
+    @intent: the pushforward of P along five_card_sample_coalition_view C.
+    Naming: intentional; five_card is the two-word instance prefix shared by
+    five_card_exec_plug and five_card_content_obs. *)
+Definition five_card_sample_coalition_dist
+    (C : {set 'I_(pi_T' (mp_PI mpF)).+1}) :=
+  @sa_coalition_dist R mpF five_card_exec_plug five_card_sample 0 C.
+
+(** five_card_sample_cut_dist — the den Boer sample space's cut law.
+    @intent: the pushforward of P along the rotation map five_card_sample_cut.
+    Naming: intentional; five_card is the two-word instance prefix shared by
+    five_card_exec_plug and five_card_content_obs. *)
+Definition five_card_sample_cut_dist :=
+  @sa_cut_dist R mpF five_card_exec_plug five_card_sample.
+
+(** five_card_witness_cut_dist — the security witness's distribution read as a
+    cut law.
+    @intent: at the Gen_PGGTypes carrier of the instance the permutation group
+    {perm 'I_5} and the group pgg_gT FiveCardKim_M coincide, so sw_rho_dist
+    (mp_security mpF) is a law on the carrier the cut is drawn from.
+    Naming: intentional; five_card is the two-word instance prefix shared by
+    five_card_exec_plug and five_card_content_obs. *)
+Definition five_card_witness_cut_dist : R.-fdist (pgg_gT (mp_M mpF)) :=
+  sw_rho_dist (mp_security mpF).
+
+(** five_card_sample_seat_distE — the executed seat law at the den Boer space
+    is the law of the layout entry at the rotation image of the seat's start.
+    @main architecture: five_card_sample_seat_dist i = fdistmap
+    (sa_static_seat_view five_card_sample five_card_content_obs i) (P R). *)
+Lemma five_card_sample_seat_distE (i : 'I_(pi_T' (mp_PI mpF)).+1) :
+  five_card_sample_seat_dist i
+  = fdistmap (@sa_static_seat_view R mpF five_card_exec_plug five_card_sample
+                five_card_content_obs i) (P R).
+Proof.
+by apply: sa_seat_distE => -[[a b] k]; exact: five_card_exec_endpoints.
+Qed.
+
+(** five_card_sample_coalition_distE — the executed coalition law at the den
+    Boer space is the law of the layout entries at the rotation images of the
+    coalition's starts.
+    @main architecture: five_card_sample_coalition_dist C = fdistmap
+    (sa_static_coalition_view five_card_sample five_card_content_obs C)
+    (P R). *)
+Lemma five_card_sample_coalition_distE (C : {set 'I_(pi_T' (mp_PI mpF)).+1}) :
+  five_card_sample_coalition_dist C
+  = fdistmap (@sa_static_coalition_view R mpF five_card_exec_plug
+                five_card_sample five_card_content_obs C) (P R).
+Proof.
+by apply: sa_coalition_distE => -[[a b] k]; exact: five_card_exec_endpoints.
 Qed.
 
 (******************************************************************************)
