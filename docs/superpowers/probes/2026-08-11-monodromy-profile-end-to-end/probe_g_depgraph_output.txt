@@ -1,0 +1,48 @@
+modules scanned: 119
+live graph acyclic: YES
+
+directory-level edges (importer -> imported):
+  pgg-smc/groups -> pgg-smc/protocol
+  pgg-smc/instances/denboer1989 -> pgg-smc/instances/kim2025
+  pgg-smc/instances/denboer1989 -> pgg-smc/protocol
+  pgg-smc/instances/denboer1989 -> pgg-smc/reconstruct
+  pgg-smc/instances/denboer1989 -> pgg-smc/security
+  pgg-smc/instances/kim2025 -> pgg-smc/instances/denboer1989
+  pgg-smc/instances/kim2025 -> pgg-smc/protocol
+  pgg-smc/instances/kim2025 -> pgg-smc/reconstruct
+  pgg-smc/instances/kim2025 -> pgg-smc/security
+  pgg-smc/instances/pgl27 -> pgg-smc/protocol
+  pgg-smc/instances/pgl27 -> pgg-smc/reconstruct
+  pgg-smc/instances/pgl27 -> pgg-smc/security
+  pgg-smc/instances/s5 -> pgg-smc/groups
+  pgg-smc/instances/s5 -> pgg-smc/lib
+  pgg-smc/instances/s5 -> pgg-smc/protocol
+  pgg-smc/instances/s5 -> pgg-smc/reconstruct
+  pgg-smc/instances/s5 -> pgg-smc/security
+  pgg-smc/instances/s5x5 -> pgg-smc/groups
+  pgg-smc/instances/s5x5 -> pgg-smc/instances/s5
+  pgg-smc/instances/s5x5 -> pgg-smc/lib
+  pgg-smc/instances/s5x5 -> pgg-smc/protocol
+  pgg-smc/instances/s5x5 -> pgg-smc/reconstruct
+  pgg-smc/instances/s5x5 -> pgg-smc/security
+  pgg-smc/protocol -> pgg-smc/groups
+  pgg-smc/protocol -> pgg-smc/reconstruct
+  pgg-smc/protocol -> pgg-smc/security
+  pgg-smc/reconstruct -> pgg-smc/groups
+  pgg-smc/reconstruct -> pgg-smc/lib
+  pgg-smc/reconstruct -> pgg-smc/protocol
+  pgg-smc/reconstruct -> pgg-smc/security
+  pgg-smc/security -> pgg-smc/groups
+  pgg-smc/security -> pgg-smc/lib
+  pgg-smc/security -> pgg-smc/protocol
+  pgg-smc/security -> pgg-smc/reconstruct
+
+placement A (protocol exec adapter): imports=['card_exchange_pismc', 'covering_scheme', 'input_encoding', 'pgg_input_commitment', 'pgg_interface', 'pgg_monodromy_profile', 'pgg_run', 'pgg_session_types', 'pgg_sharing_framework']
+  closure size=16; instance modules in closure: NONE
+  verdict: NO CYCLE POSSIBLE
+placement B (security dist adapter): imports=['card_exchange_pismc', 'covering_scheme', 'input_encoding', 'pgg_input_commitment', 'pgg_interface', 'pgg_monodromy_profile', 'pgg_run', 'pgg_session_types', 'pgg_sharing_framework', 'pgg_trace_secrecy']
+  closure size=18; instance modules in closure: NONE
+  verdict: NO CYCLE POSSIBLE
+
+non-instance modules importing instance modules (must be empty):
+  NONE
