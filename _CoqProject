@@ -256,6 +256,7 @@ pgg-smc/instances/pgl27/pgl27_trace.v
 pgg-smc/instances/pgl27/pgl27_recovery.v
 pgg-smc/instances/pgl27/pgl27_mixing.v
 pgg-smc/instances/pgl27/pgl27_word_privacy.v
+pgg-smc/instances/pgl27/pgl27_exec.v
 
 -R . infotheo
 -R pgg-smc/lib pgg_smc
