@@ -10,14 +10,27 @@
 (* and the fuel is pgl27_fuel.                                                *)
 (*                                                                            *)
 (* Definitions:                                                               *)
-(*   pgl27_exec_plug   == the execution plug over pgl27_profile               *)
-(*   pgl27_content_obs == the static observation: the share of the secret at  *)
-(*                        the cut image of a starting position                *)
+(*   pgl27_exec_plug                 == the execution plug over               *)
+(*                                      pgl27_profile                         *)
+(*   pgl27_content_obs               == the static observation: the share of  *)
+(*                                      the secret at the cut image of a      *)
+(*                                      starting position                     *)
+(*   pgl27_exec_player_raw_trace     == seat i's raw executed trace           *)
+(*   pgl27_exec_coalition_raw_trace  == a coalition's raw executed traces     *)
 (*                                                                            *)
 (* Key results:                                                               *)
 (*   pgl27_exec_recovers == the derived run decodes to the dealt secret       *)
 (*   pgl27_exec_correct  == termination, endpoint count and recovery of the   *)
 (*                          derived run                                       *)
+(*   pgl27_exec_seat_endpointE == seat i's endpoint is the share at the cut   *)
+(*                                image of seat i's start                     *)
+(*   pgl27_exec_coalition_endpointsE     == a coalition's endpoint readings   *)
+(*                                          are the shares at the cut images  *)
+(*                                          of its seats                      *)
+(*   pgl27_exec_coalition_endpoints_seqE == the same reading in seat order    *)
+(*   pgl27_exec_seat_countE == the profile's seat index type is 'I_8          *)
+(*   pgl27_exec_raw_traceE  == the derived raw trace is the trace of          *)
+(*                             pgl27_procs at the seat's process identifier   *)
 (******************************************************************************)
 
 From HB Require Import structures.
@@ -189,6 +202,82 @@ Proof.
 exact: (@exec_run_correct R mpP pgl27_exec_plug pgl27_content_obs (fun b => b)
           s w0 0 (pgl27_exec_terminates s w0) (pgl27_exec_endpoints s w0)
           (pgl27_exec_recon Hw0)).
+Qed.
+
+(******************************************************************************)
+(*     The endpoint and trace read-off at pgl27_profile                       *)
+(******************************************************************************)
+
+(** pgl27_exec_seat_endpointE — seat i's endpoint is the share at the cut
+    image of seat i's start.
+    @main correctness: exec_seat_endpoint pgl27_exec_plug s w0 0 i =
+    pgl27_content_obs s (w0, tnth (pi_starts (mp_PI mpP)) i). *)
+Lemma pgl27_exec_seat_endpointE (s : bool) (w0 : pgg_gT pgl27_M)
+    (i : 'I_(pi_T' (mp_PI mpP)).+1) :
+  @exec_seat_endpoint R mpP pgl27_exec_plug s w0 0 i
+  = pgl27_content_obs s (w0, tnth (pi_starts (mp_PI mpP)) i).
+Proof. exact: (exec_seat_endpointE (pgl27_exec_endpoints s w0) i). Qed.
+
+(** pgl27_exec_coalition_endpointsE — a coalition's endpoint readings are the
+    shares at the cut images of its seats.
+    @main correctness: the finfun sends a seat in C to the share of s at the
+    cut image of that seat's start, and every seat outside C to ord0. *)
+Lemma pgl27_exec_coalition_endpointsE (s : bool) (w0 : pgg_gT pgl27_M)
+    (C : {set 'I_(pi_T' (mp_PI mpP)).+1}) :
+  @exec_coalition_endpoints R mpP pgl27_exec_plug s w0 0 C
+  = [ffun i => if i \in C
+               then pgl27_content_obs s (w0, tnth (pi_starts (mp_PI mpP)) i)
+               else ord0].
+Proof. exact: (exec_coalition_endpointsE (pgl27_exec_endpoints s w0) C). Qed.
+
+(** pgl27_exec_coalition_endpoints_seqE — the coalition's endpoint readings in
+    seat order are the shares at the cut images of its seats.
+    @main correctness: mapping the endpoint reading over enum C gives the same
+    list as mapping the share of s at the cut image of the start over enum C. *)
+Lemma pgl27_exec_coalition_endpoints_seqE (s : bool) (w0 : pgg_gT pgl27_M)
+    (C : {set 'I_(pi_T' (mp_PI mpP)).+1}) :
+  [seq @exec_seat_endpoint R mpP pgl27_exec_plug s w0 0 i | i <- enum C]
+  = [seq pgl27_content_obs s (w0, tnth (pi_starts (mp_PI mpP)) i)
+     | i <- enum C].
+Proof.
+exact: (exec_coalition_endpoints_seqE (pgl27_exec_endpoints s w0) C).
+Qed.
+
+(** pgl27_exec_player_raw_trace — seat i's raw executed trace.
+    @intent: the generic participant extractor exec_participant_trace at
+    pgl27_exec_plug, secret s, cut w0 and process offset 0.
+    Naming: intentional; _player_raw_trace names the seat-indexed executed
+    trace, and no MathComp suffix denotes it. *)
+Definition pgl27_exec_player_raw_trace (s : bool) (w0 : pgg_gT pgl27_M)
+    (i : 'I_(pi_T' (mp_PI mpP)).+1) :=
+  @exec_participant_trace R mpP pgl27_exec_plug s w0 0 i.
+
+(** pgl27_exec_coalition_raw_trace — a coalition's raw executed traces.
+    @intent: the generic coalition assembly exec_coalition_trace at
+    pgl27_exec_plug, secret s, cut w0 and process offset 0.
+    Naming: intentional; _coalition_raw_trace names the set-indexed executed
+    trace family, the coalition twin of pgl27_exec_player_raw_trace. *)
+Definition pgl27_exec_coalition_raw_trace (s : bool) (w0 : pgg_gT pgl27_M)
+    (C : {set 'I_(pi_T' (mp_PI mpP)).+1}) :=
+  @exec_coalition_trace R mpP pgl27_exec_plug s w0 0 C.
+
+(** pgl27_exec_seat_countE — the profile's seat index type is 'I_8.
+    @main architecture: (pi_T' (mp_PI mpP)).+1 = 8, the seat index type shared
+    by the execution layer and the eight-seat coalition view. *)
+Lemma pgl27_exec_seat_countE : (pi_T' (mp_PI mpP)).+1 = 8.
+Proof. by []. Qed.
+
+(** pgl27_exec_raw_traceE — the derived raw trace is the trace of pgl27_procs
+    at the seat's process identifier.
+    @main architecture: pgl27_exec_player_raw_trace s w0 i = nth [::]
+    (run_interp pgl27_fuel (pgl27_procs s w0)).2 (2 + i). *)
+Lemma pgl27_exec_raw_traceE (s : bool) (w0 : pgg_gT pgl27_M)
+    (i : 'I_(pi_T' (mp_PI mpP)).+1) :
+  pgl27_exec_player_raw_trace s w0 i
+  = nth [::] (run_interp pgl27_fuel (pgl27_procs s w0)).2 (2 + i).
+Proof.
+by rewrite /pgl27_exec_player_raw_trace /exec_participant_trace /exec_seat_id
+   /exec_run pgl27_exec_fuelE pgl27_exec_procsE.
 Qed.
 
 End pgl27_execution.

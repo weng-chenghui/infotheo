@@ -15,6 +15,11 @@
 (*   five_card_content_obs == the static observation: the den Boer layout of  *)
 (*                            the committed pair at the cut image of a        *)
 (*                            starting position                               *)
+(*   five_card_exec_player_raw_trace == seat i's raw executed trace           *)
+(*   five_card_exec_input_raw_trace  == committing party j's raw executed     *)
+(*                                      trace                                 *)
+(*   five_card_exec_trace  == seat i's executed trace as a random variable on *)
+(*                            the leakage space                               *)
 (*                                                                            *)
 (* Key results:                                                               *)
 (*   five_card_exec_recovers    == the derived run decodes to the conjunction *)
@@ -23,6 +28,25 @@
 (*                                 of the derived run                         *)
 (*   five_card_exec_procs_biasE == the derived process list is the same at    *)
 (*                                 two biases                                 *)
+(*   five_card_exec_seat_endpointE == seat i's endpoint is the layout entry   *)
+(*                                    at the cut image of seat i's start      *)
+(*   five_card_exec_coalition_endpointsE     == a coalition's endpoint        *)
+(*                                              readings are the layout       *)
+(*                                              entries at the cut images of  *)
+(*                                              its seats                     *)
+(*   five_card_exec_coalition_endpoints_seqE == the same reading in seat      *)
+(*                                              order                         *)
+(*   five_card_exec_seat_countE == the profile's seat index type is 'I_5      *)
+(*   five_card_exec_input_positions == the committing parties are read at     *)
+(*                                     process identifiers 7 and 8            *)
+(*   five_card_exec_raw_traceE == the derived raw trace is the trace of       *)
+(*                                den_boer_procs at the seat's process        *)
+(*                                identifier                                  *)
+(*   five_card_exec_traceE == the execution layer's trace variable is         *)
+(*                            denboer_player_trace                            *)
+(*   five_card_exec_trace_secrecy == one seat's executed trace leaves the     *)
+(*                                   secret's conditional entropy equal to    *)
+(*                                   its plain entropy                        *)
 (******************************************************************************)
 
 From HB Require Import structures.
@@ -30,7 +54,8 @@ From mathcomp Require Import ssreflect ssrbool ssrfun eqtype ssrnat seq.
 From mathcomp Require Import div fintype tuple finfun finset fingroup perm.
 From mathcomp Require Import morphism action bigop order ssrnum ssralg.
 From mathcomp Require Import boolp reals.
-From infotheo Require Import realType_ext fdist proba variation_dist.
+From infotheo Require Import realType_ext realType_ln fdist proba.
+From infotheo Require Import variation_dist entropy.
 Require Import smc_interpreter pismc smc_session_types.
 From pgg_smc Require Import pgg_interface pgg_session_types card_exchange_pismc.
 From pgg_smc Require Import pgg_input_commitment pgg_run pgg_monodromy_profile.
@@ -41,6 +66,7 @@ From pgg_smc Require Import five_card_group five_card_program.
 From pgg_smc Require Import five_card_scheme_I5.
 From pgg_smc Require Import five_card_kim five_card_family.
 From pgg_smc Require Import den_boer_profile den_boer_encoding den_boer_run.
+From pgg_smc Require Import five_card_leakage denboer_trace.
 
 Set Implicit Arguments.
 Unset Strict Implicit.
@@ -48,6 +74,7 @@ Import Prenex Implicits.
 
 Local Open Scope fdist_scope.
 Local Open Scope proba_scope.
+Local Open Scope entropy_scope.
 
 Import GRing.Theory Num.Theory.
 Local Open Scope ring_scope.
@@ -248,6 +275,149 @@ exact: (@exec_run_correct R mpF five_card_exec_plug five_card_content_obs
           (five_card_exec_terminates a b w0 0)
           (five_card_exec_endpoints a b w0) (five_card_exec_recon Hw0)).
 Qed.
+
+(******************************************************************************)
+(*     The endpoint and trace read-off at five_card_profile                   *)
+(******************************************************************************)
+
+(** five_card_exec_seat_endpointE — seat i's endpoint is the layout entry at
+    the cut image of seat i's start.
+    @main correctness: exec_seat_endpoint five_card_exec_plug (a, b) w0 0 i =
+    five_card_content_obs (a, b) (w0, tnth (pi_starts (mp_PI mpF)) i). *)
+Lemma five_card_exec_seat_endpointE (a b : bool) (w0 : pgg_gT FiveCardKim_M)
+    (i : 'I_(pi_T' (mp_PI mpF)).+1) :
+  @exec_seat_endpoint R mpF five_card_exec_plug (a, b) w0 0 i
+  = five_card_content_obs (a, b) (w0, tnth (pi_starts (mp_PI mpF)) i).
+Proof. exact: (exec_seat_endpointE (five_card_exec_endpoints a b w0) i). Qed.
+
+(** five_card_exec_coalition_endpointsE — a coalition's endpoint readings are
+    the layout entries at the cut images of its seats.
+    @main correctness: the finfun sends a seat in C to the layout entry of the
+    committed pair at the cut image of that seat's start, and every seat
+    outside C to ord0. *)
+Lemma five_card_exec_coalition_endpointsE (a b : bool)
+    (w0 : pgg_gT FiveCardKim_M) (C : {set 'I_(pi_T' (mp_PI mpF)).+1}) :
+  @exec_coalition_endpoints R mpF five_card_exec_plug (a, b) w0 0 C
+  = [ffun i => if i \in C
+               then five_card_content_obs (a, b)
+                      (w0, tnth (pi_starts (mp_PI mpF)) i)
+               else ord0].
+Proof.
+exact: (exec_coalition_endpointsE (five_card_exec_endpoints a b w0) C).
+Qed.
+
+(** five_card_exec_coalition_endpoints_seqE — the coalition's endpoints in
+    seat order are the layout entries at the cut images of its seats.
+    @main correctness: mapping the endpoint reading over enum C gives the same
+    list as mapping the layout entry at the cut image of the start over
+    enum C. *)
+Lemma five_card_exec_coalition_endpoints_seqE (a b : bool)
+    (w0 : pgg_gT FiveCardKim_M) (C : {set 'I_(pi_T' (mp_PI mpF)).+1}) :
+  [seq @exec_seat_endpoint R mpF five_card_exec_plug (a, b) w0 0 i
+   | i <- enum C]
+  = [seq five_card_content_obs (a, b) (w0, tnth (pi_starts (mp_PI mpF)) i)
+     | i <- enum C].
+Proof.
+exact: (exec_coalition_endpoints_seqE (five_card_exec_endpoints a b w0) C).
+Qed.
+
+(** five_card_exec_player_raw_trace — seat i's raw executed trace.
+    @intent: the generic participant extractor exec_participant_trace at
+    five_card_exec_plug, committed pair ab, cut w0 and process offset 0.
+    Naming: intentional; _player_raw_trace names the seat-indexed executed
+    trace, matching denboer_player_trace, with which it agrees. *)
+Definition five_card_exec_player_raw_trace (ab : bool * bool)
+    (w0 : pgg_gT FiveCardKim_M) (i : 'I_(pi_T' (mp_PI mpF)).+1) :=
+  @exec_participant_trace R mpF five_card_exec_plug ab w0 0 i.
+
+(** five_card_exec_coalition_raw_trace — a coalition's raw executed traces.
+    @intent: the generic coalition assembly exec_coalition_trace at
+    five_card_exec_plug, committed pair ab, cut w0 and process offset 0.
+    Naming: intentional; _coalition_raw_trace names the set-indexed executed
+    trace family, the coalition twin of five_card_exec_player_raw_trace. *)
+Definition five_card_exec_coalition_raw_trace (ab : bool * bool)
+    (w0 : pgg_gT FiveCardKim_M) (C : {set 'I_(pi_T' (mp_PI mpF)).+1}) :=
+  @exec_coalition_trace R mpF five_card_exec_plug ab w0 0 C.
+
+(** five_card_exec_input_raw_trace — committing party j's raw executed trace.
+    @intent: the generic input extractor exec_input_trace at
+    five_card_exec_plug, reading process identifier (pi_T' (mp_PI mpF)).+3 + j
+    of the run.
+    Naming: intentional; _input_raw_trace names the party-indexed executed
+    trace, the committing-party twin of five_card_exec_player_raw_trace. *)
+Definition five_card_exec_input_raw_trace (ab : bool * bool)
+    (w0 : pgg_gT FiveCardKim_M) (j : nat) :=
+  @exec_input_trace R mpF five_card_exec_plug ab w0 0 j.
+
+(** five_card_exec_seat_countE — the profile's seat index type is 'I_5.
+    @main architecture: (pi_T' (mp_PI mpF)).+1 = 5, the seat index type shared
+    by the execution layer and the five-card coalition view. *)
+Lemma five_card_exec_seat_countE : (pi_T' (mp_PI mpF)).+1 = 5.
+Proof. by []. Qed.
+
+(** five_card_exec_input_positions — the two committing parties are read at
+    process identifiers 7 and 8.
+    @main architecture: [seq (pi_T' (mp_PI mpF)).+3 + j | j <- iota 0 2] =
+    [:: 7; 8], the identifiers of five_card_exec_input_idsE.
+    Naming: intentional; _positions distinguishes the unfolded identifier
+    arithmetic from the packaged exec_input_ids form of
+    five_card_exec_input_idsE. *)
+Lemma five_card_exec_input_positions :
+  [seq ((pi_T' (mp_PI mpF)).+3 + j)%N | j <- iota 0 2] = [:: 7; 8].
+Proof. by []. Qed.
+
+(** five_card_exec_raw_traceE — the derived raw trace is the trace of
+    den_boer_procs at the seat's process identifier.
+    @main architecture: five_card_exec_player_raw_trace (a, b) w0 i = nth [::]
+    (run_interp 100 (den_boer_procs a b w0 0)).2 (2 + i). *)
+Lemma five_card_exec_raw_traceE (a b : bool) (w0 : pgg_gT FiveCardKim_M)
+    (i : 'I_(pi_T' (mp_PI mpF)).+1) :
+  five_card_exec_player_raw_trace (a, b) w0 i
+  = nth [::] (run_interp 100 (den_boer_procs a b w0 0)).2 (2 + i).
+Proof.
+by rewrite /five_card_exec_player_raw_trace /exec_participant_trace
+   /exec_seat_id /exec_run five_card_exec_fuelE five_card_exec_procsE.
+Qed.
+
+(******************************************************************************)
+(*     Single-player executed-trace secrecy through the generic extractor     *)
+(******************************************************************************)
+
+Let dbP := P R.
+
+(** five_card_exec_trace — seat i's executed trace as a random variable on the
+    leakage space.
+    @intent: content_of of five_card_exec_player_raw_trace at the committed
+    pair (w.1.1, w.1.2) and the cut fc_sigma ^+ w.2 realizing rotation w.2.
+    Naming: intentional; _exec_trace names the executed-trace random variable
+    of the execution layer, the plug-side twin of denboer_player_trace. *)
+Definition five_card_exec_trace (i : 'I_(pi_T' (mp_PI mpF)).+1)
+    : {RV dbP -> 'I_5} :=
+  fun w => content_of (five_card_exec_player_raw_trace (w.1.1, w.1.2)
+                         (five_card_group.fc_sigma ^+ w.2)%g i).
+
+(** five_card_exec_traceE — the execution layer's trace variable is the den
+    Boer trace variable of denboer_trace.v.
+    @composes: five_card_exec_trace_secrecy *)
+Lemma five_card_exec_traceE (i : 'I_(pi_T' (mp_PI mpF)).+1) :
+  five_card_exec_trace i = denboer_player_trace R i.
+Proof.
+apply: funext => -[[a b] k].
+rewrite /five_card_exec_trace /denboer_player_trace /denboer_rprocs.
+by rewrite five_card_exec_raw_traceE.
+Qed.
+
+(** five_card_exec_trace_secrecy — one seat's executed trace, read through the
+    generic extractor, leaves the secret's conditional entropy equal to its
+    plain entropy.
+    @main security: conditioning the secret on seat 0's executed trace does not
+    lower its entropy, at every bias eps.
+    Naming: intentional; _trace_secrecy names the conditional-entropy statement
+    about the executed trace, matching denboer_trace_secrecy, which it
+    transports. *)
+Corollary five_card_exec_trace_secrecy :
+  `H( Secret R | five_card_exec_trace ord0 ) = `H `p_ (Secret R).
+Proof. by rewrite five_card_exec_traceE; exact: denboer_trace_secrecy. Qed.
 
 End five_card_execution.
 
