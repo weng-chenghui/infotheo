@@ -89,9 +89,9 @@ Lemma pgl27_exec_procsE (s : bool) (w0 : pgg_gT pgl27_M) :
   @exec_procs R mpP pgl27_exec_plug s w0 0 = pgl27_procs s w0.
 Proof. by []. Qed.
 
-(** pgl27_exec_proc_count — the derived run has ten processes.
+(** pgl27_exec_procs_size — the derived run has ten processes.
     @composes: pgl27_exec_terminates *)
-Lemma pgl27_exec_proc_count (s : bool) (w0 : pgg_gT pgl27_M) :
+Lemma pgl27_exec_procs_size (s : bool) (w0 : pgg_gT pgl27_M) :
   size (@exec_procs R mpP pgl27_exec_plug s w0 0) = 10.
 Proof. by []. Qed.
 
@@ -101,7 +101,7 @@ Lemma pgl27_exec_terminates (s : bool) (w0 : pgg_gT pgl27_M) :
   (@exec_run R mpP pgl27_exec_plug s w0 0).1
   = nseq (size (@exec_procs R mpP pgl27_exec_plug s w0 0)) Finish.
 Proof.
-rewrite pgl27_exec_proc_count /exec_run pgl27_exec_fuelE pgl27_exec_procsE.
+rewrite pgl27_exec_procs_size /exec_run pgl27_exec_fuelE pgl27_exec_procsE.
 exact: pgl27_run_terminates.
 Qed.
 
