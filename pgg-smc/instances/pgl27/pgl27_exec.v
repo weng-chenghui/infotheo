@@ -21,8 +21,9 @@
 (*                                      space bool * pgg_gT pgl27_M under     *)
 (*                                      pgl27P                                *)
 (*   pgl27_word_sample               == the finite-word sample adapter: a     *)
-(*                                      secret prior times the word law, the  *)
-(*                                      cut being the evaluated word          *)
+(*                                      secret prior times the word           *)
+(*                                      distribution, the cut being the       *)
+(*                                      evaluated word                        *)
 (*                                                                            *)
 (* Key results:                                                               *)
 (*   pgl27_exec_recovers == the derived run decodes to the dealt secret       *)
@@ -37,9 +38,9 @@
 (*   pgl27_exec_seat_countE == the profile's seat index type is 'I_8          *)
 (*   pgl27_exec_raw_traceE  == the derived raw trace is the trace of          *)
 (*                             pgl27_procs at the seat's process identifier   *)
-(*   pgl27_sample_seat_distE      == the executed seat law at pgl27P is the   *)
-(*                                   law of the orbit share at the cut image  *)
-(*                                   of the seat's start                      *)
+(*   pgl27_sample_seat_distE      == the executed seat distribution at pgl27P *)
+(*                                   is the distribution of the orbit share   *)
+(*                                   at the cut image of the seat's start     *)
 (*   pgl27_sample_coalition_distE == the same for a coalition's readings      *)
 (*   pgl27_sample_witness_prodE   == the exact sample space is the uniform    *)
 (*                                   secret prior times the profile's own     *)
@@ -47,12 +48,12 @@
 (*   pgl27_sample_cut_distE       == the exact sample space's cut             *)
 (*                                   distribution is the profile's own        *)
 (*                                   shuffle distribution                     *)
-(*   pgl27_word_sample_seat_distE == the executed seat law under the word     *)
-(*                                   shuffle                                  *)
+(*   pgl27_word_sample_seat_distE == the executed seat distribution under the *)
+(*                                   word shuffle                             *)
 (*   pgl27_word_sample_coalition_distE == the same for a coalition's          *)
 (*                                        readings                            *)
-(*   pgl27_word_cut_distE         == the word sample space's cut law is       *)
-(*                                   rho_word                                 *)
+(*   pgl27_word_cut_distE         == the word sample space's cut distribution *)
+(*                                   is rho_word                              *)
 (*   pgl27_word_sample_joint_distE == the joint distribution of the word      *)
 (*                                   sample's secret and evaluated cut is     *)
 (*                                   pgl27P_word_gen                          *)
@@ -304,9 +305,9 @@ Qed.
 
 (** pgl27_sample — the PGL(2,7) exact sample adapter.
     @intent: the sample layer over pgl27_exec_plug whose sample space is
-    bool * pgg_gT pgl27_M under the law pgl27P of a uniform orbit secret and an
-    independent uniform shuffle, the run argument being the first projection
-    and the cut the second. *)
+    bool * pgg_gT pgl27_M under the distribution pgl27P of a uniform orbit
+    secret and an independent uniform shuffle, the run argument being the
+    first projection and the cut the second. *)
 Definition pgl27_sample : SampleAdapter pgl27_exec_plug :=
   @MkSampleAdapter R mpP pgl27_exec_plug
     [the finType of (bool * pgg_gT pgl27_M)%type] (pgl27P R) fst snd.
@@ -329,19 +330,20 @@ Definition pgl27_sample_seat_view (i : 'I_(pi_T' (mp_PI mpP)).+1) :=
 Definition pgl27_sample_coalition_view (C : {set 'I_(pi_T' (mp_PI mpP)).+1}) :=
   @sa_coalition_view R mpP pgl27_exec_plug pgl27_sample 0 C.
 
-(** pgl27_sample_seat_dist — layer 3 at pgl27P: the law of seat i's endpoint.
+(** pgl27_sample_seat_dist — layer 3 at pgl27P: the distribution of seat i's
+    endpoint.
     @intent: the pushforward of pgl27P along pgl27_sample_seat_view i. *)
 Definition pgl27_sample_seat_dist (i : 'I_(pi_T' (mp_PI mpP)).+1) :=
   @sa_seat_dist R mpP pgl27_exec_plug pgl27_sample 0 i.
 
-(** pgl27_sample_coalition_dist — layer 3 at pgl27P: the law of a coalition's
-    readings.
+(** pgl27_sample_coalition_dist — layer 3 at pgl27P: the distribution of a
+    coalition's readings.
     @intent: the pushforward of pgl27P along pgl27_sample_coalition_view C. *)
 Definition pgl27_sample_coalition_dist (C : {set 'I_(pi_T' (mp_PI mpP)).+1}) :=
   @sa_coalition_dist R mpP pgl27_exec_plug pgl27_sample 0 C.
 
-(** pgl27_sample_seat_distE — the executed seat law at pgl27P is the law of
-    the orbit share at the cut image of the seat's start.
+(** pgl27_sample_seat_distE — the executed seat distribution at pgl27P is the
+    distribution of the orbit share at the cut image of the seat's start.
     @main architecture: pgl27_sample_seat_dist i = fdistmap
     (sa_static_seat_view pgl27_sample pgl27_content_obs i) (pgl27P R). *)
 Lemma pgl27_sample_seat_distE (i : 'I_(pi_T' (mp_PI mpP)).+1) :
@@ -350,8 +352,9 @@ Lemma pgl27_sample_seat_distE (i : 'I_(pi_T' (mp_PI mpP)).+1) :
                 pgl27_content_obs i) (pgl27P R).
 Proof. by apply: sa_seat_distE => u; exact: pgl27_exec_endpoints. Qed.
 
-(** pgl27_sample_coalition_distE — the executed coalition law at pgl27P is the
-    law of the orbit shares at the cut images of the coalition's starts.
+(** pgl27_sample_coalition_distE — the executed coalition distribution at
+    pgl27P is the distribution of the orbit shares at the cut images of the
+    coalition's starts.
     @main architecture: pgl27_sample_coalition_dist C = fdistmap
     (sa_static_coalition_view pgl27_sample pgl27_content_obs C) (pgl27P R). *)
 Lemma pgl27_sample_coalition_distE (C : {set 'I_(pi_T' (mp_PI mpP)).+1}) :
@@ -361,10 +364,11 @@ Lemma pgl27_sample_coalition_distE (C : {set 'I_(pi_T' (mp_PI mpP)).+1}) :
 Proof. by apply: sa_coalition_distE => u; exact: pgl27_exec_endpoints. Qed.
 
 (** pgl27_witness_cut_dist — the security witness's distribution read as a cut
-    law.
+    distribution.
     @intent: at the Gen_PGGTypes carrier of the instance the permutation group
     {perm 'I_8} and the group pgg_gT pgl27_M coincide, so sw_rho_dist
-    (mp_security mpP) is a law on the carrier the cut is drawn from. *)
+    (mp_security mpP) is a distribution on the carrier the cut is drawn
+    from. *)
 Definition pgl27_witness_cut_dist : R.-fdist (pgg_gT (mp_M mpP)) :=
   sw_rho_dist (mp_security mpP).
 
@@ -396,10 +400,10 @@ Qed.
    space fixes the uniform one. *)
 Variable secretP : R.-fdist bool.
 
-(** pgl27_word_wordP — the two-hundred-letter word law over the symmetrized
-    generator alphabet.
-    @intent: the word_weighted law at length 200 and uniform letters, the space
-    rho_word is the image of. *)
+(** pgl27_word_wordP — the two-hundred-letter word distribution over the
+    symmetrized generator alphabet.
+    @intent: the word_weighted distribution at length 200 and uniform letters,
+    the space rho_word is the image of. *)
 Definition pgl27_word_wordP : R.-fdist (200.-tuple 'I_5) :=
   @word_weighted R 4 200 (pgl27_mixing.Wuni R).
 
@@ -409,9 +413,9 @@ Definition pgl27_word_wordP : R.-fdist (200.-tuple 'I_5) :=
 Definition pgl27_word_sampleT : finType :=
   [the finType of (bool * 200.-tuple 'I_5)%type].
 
-(** pgl27_word_sampleP — the finite-word sample law.
-    @intent: the product of the secret prior secretP with the word law
-    pgl27_word_wordP. *)
+(** pgl27_word_sampleP — the finite-word sample distribution.
+    @intent: the product of the secret prior secretP with the word
+    distribution pgl27_word_wordP. *)
 Definition pgl27_word_sampleP : R.-fdist pgl27_word_sampleT :=
   (secretP `x pgl27_word_wordP)%fdist.
 
@@ -444,8 +448,8 @@ Definition pgl27_word_sample_run (u : pgl27_word_sampleT) :=
 Definition pgl27_word_sample_seat_view (i : 'I_(pi_T' (mp_PI mpP)).+1) :=
   @sa_seat_view R mpP pgl27_exec_plug pgl27_word_sample 0 i.
 
-(** pgl27_word_sample_seat_dist — layer 3 at the word space: the law of seat
-    i's endpoint.
+(** pgl27_word_sample_seat_dist — layer 3 at the word space: the distribution
+    of seat i's endpoint.
     @intent: the pushforward of pgl27_word_sampleP along
     pgl27_word_sample_seat_view i.
     Naming: intentional; the _word_sample prefix distinguishes the finite-word
@@ -463,9 +467,9 @@ Definition pgl27_word_sample_coalition_dist
     (C : {set 'I_(pi_T' (mp_PI mpP)).+1}) :=
   @sa_coalition_dist R mpP pgl27_exec_plug pgl27_word_sample 0 C.
 
-(** pgl27_word_sample_seat_distE — the executed seat law under the word
-    shuffle is the law of the orbit share at the evaluated word's image of the
-    seat's start.
+(** pgl27_word_sample_seat_distE — the executed seat distribution under the
+    word shuffle is the distribution of the orbit share at the evaluated
+    word's image of the seat's start.
     @main architecture: pgl27_word_sample_seat_dist i = fdistmap
     (sa_static_seat_view pgl27_word_sample pgl27_content_obs i)
     pgl27_word_sampleP. *)
@@ -488,8 +492,8 @@ Lemma pgl27_word_sample_coalition_distE
                 pgl27_word_sample pgl27_content_obs C) pgl27_word_sampleP.
 Proof. by apply: sa_coalition_distE => u; exact: pgl27_exec_endpoints. Qed.
 
-(** pgl27_word_cut_distE — the word sample space's cut law is rho_word, the
-    word shuffle law on PGL(2,7).
+(** pgl27_word_cut_distE — the word sample space's cut distribution is
+    rho_word, the word shuffle distribution on PGL(2,7).
     @main architecture: sa_cut_dist pgl27_word_sample = rho_word R. *)
 Lemma pgl27_word_cut_distE :
   @sa_cut_dist R mpP pgl27_exec_plug pgl27_word_sample = rho_word R.

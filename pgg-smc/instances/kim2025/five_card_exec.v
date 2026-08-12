@@ -55,9 +55,10 @@
 (*                                identifier                                  *)
 (*   five_card_exec_traceE == the execution layer's trace variable is         *)
 (*                            denboer_player_trace                            *)
-(*   five_card_sample_seat_distE == the executed seat law at the den Boer     *)
-(*                                  space is the law of the layout entry at   *)
-(*                                  the rotation image of the seat's start    *)
+(*   five_card_sample_seat_distE == the executed seat distribution at the den *)
+(*                                  Boer space is the distribution of the     *)
+(*                                  layout entry at the rotation image of the *)
+(*                                  seat's start                              *)
 (*   five_card_sample_coalition_distE == the same for a coalition's readings  *)
 (*   five_card_exec_trace_secrecy == one seat's executed trace leaves the     *)
 (*                                   secret's conditional entropy equal to    *)
@@ -423,8 +424,8 @@ Definition five_card_sample_cut (u : five_card_leakage.Omega)
 
 (** five_card_sample — the five-card sample adapter at bias eps.
     @intent: the sample layer over five_card_exec_plug whose sample space is
-    the den Boer leakage space Omega under its uniform law P, the run argument
-    being the committed pair and the cut the realized rotation. *)
+    the den Boer leakage space Omega under its uniform distribution P, the run
+    argument being the committed pair and the cut the realized rotation. *)
 Definition five_card_sample : SampleAdapter five_card_exec_plug :=
   @MkSampleAdapter R mpF five_card_exec_plug five_card_leakage.Omega (P R)
     five_card_sample_arg five_card_sample_cut.
@@ -455,8 +456,8 @@ Definition five_card_sample_coalition_view
     (C : {set 'I_(pi_T' (mp_PI mpF)).+1}) :=
   @sa_coalition_view R mpF five_card_exec_plug five_card_sample 0 C.
 
-(** five_card_sample_seat_dist — layer 3 at the den Boer space: the law of
-    seat i's endpoint.
+(** five_card_sample_seat_dist — layer 3 at the den Boer space: the
+    distribution of seat i's endpoint.
     @intent: the pushforward of P along five_card_sample_seat_view i.
     Naming: intentional; five_card is the two-word instance prefix shared by
     five_card_exec_plug and five_card_content_obs. *)
@@ -472,7 +473,8 @@ Definition five_card_sample_coalition_dist
     (C : {set 'I_(pi_T' (mp_PI mpF)).+1}) :=
   @sa_coalition_dist R mpF five_card_exec_plug five_card_sample 0 C.
 
-(** five_card_sample_cut_dist — the den Boer sample space's cut law.
+(** five_card_sample_cut_dist — the den Boer sample space's cut
+    distribution.
     @intent: the pushforward of P along the rotation map five_card_sample_cut.
     Naming: intentional; five_card is the two-word instance prefix shared by
     five_card_exec_plug and five_card_content_obs. *)
@@ -480,17 +482,18 @@ Definition five_card_sample_cut_dist :=
   @sa_cut_dist R mpF five_card_exec_plug five_card_sample.
 
 (** five_card_witness_cut_dist — the security witness's distribution read as a
-    cut law.
+    cut distribution.
     @intent: at the Gen_PGGTypes carrier of the instance the permutation group
     {perm 'I_5} and the group pgg_gT FiveCardKim_M coincide, so sw_rho_dist
-    (mp_security mpF) is a law on the carrier the cut is drawn from.
+    (mp_security mpF) is a distribution on the carrier the cut is drawn from.
     Naming: intentional; five_card is the two-word instance prefix shared by
     five_card_exec_plug and five_card_content_obs. *)
 Definition five_card_witness_cut_dist : R.-fdist (pgg_gT (mp_M mpF)) :=
   sw_rho_dist (mp_security mpF).
 
-(** five_card_sample_seat_distE — the executed seat law at the den Boer space
-    is the law of the layout entry at the rotation image of the seat's start.
+(** five_card_sample_seat_distE — the executed seat distribution at the den
+    Boer space is the distribution of the layout entry at the rotation image
+    of the seat's start.
     @main architecture: five_card_sample_seat_dist i = fdistmap
     (sa_static_seat_view five_card_sample five_card_content_obs i) (P R). *)
 Lemma five_card_sample_seat_distE (i : 'I_(pi_T' (mp_PI mpF)).+1) :
@@ -501,9 +504,9 @@ Proof.
 by apply: sa_seat_distE => -[[a b] k]; exact: five_card_exec_endpoints.
 Qed.
 
-(** five_card_sample_coalition_distE — the executed coalition law at the den
-    Boer space is the law of the layout entries at the rotation images of the
-    coalition's starts.
+(** five_card_sample_coalition_distE — the executed coalition distribution at
+    the den Boer space is the distribution of the layout entries at the
+    rotation images of the coalition's starts.
     @main architecture: five_card_sample_coalition_dist C = fdistmap
     (sa_static_coalition_view five_card_sample five_card_content_obs C)
     (P R). *)

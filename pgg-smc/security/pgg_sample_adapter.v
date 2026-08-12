@@ -4,45 +4,48 @@
 (* SampleAdapter: the sample layer over an ExecutionPlug                      *)
 (*                                                                            *)
 (* A SampleAdapter over an ExecutionPlug carries a finite sample space with a *)
-(* law on it and the two maps reading a sample point as one run: the run      *)
-(* argument sa_arg and the cut sa_cut. The plug itself is unchanged: a sample *)
-(* adapter is a third value over an existing profile and plug.                *)
+(* distribution on it and the two maps reading a sample point as one run: the *)
+(* run argument sa_arg and the cut sa_cut. The plug itself is unchanged: a    *)
+(* sample adapter is a third value over an existing profile and plug.         *)
 (*                                                                            *)
 (* Section sample_layers derives the three layers of the sample space. Layer  *)
 (* one is the interpreter run at a sample point. Layer two is a seat's or a   *)
 (* coalition's endpoint reading as a random variable on the sample space.     *)
-(* Layer three is the pushforward of the sample law along a layer-two reader  *)
-(* or along the cut map. Its inner section sample_of_static_observation       *)
-(* replaces, from a pointwise endpoint equation, every executed reader by the *)
-(* static group-action observation, at the level of the random variables and  *)
-(* at the level of their laws.                                                *)
+(* Layer three is the pushforward of the sample distribution along a          *)
+(* layer-two reader or along the cut map. Its inner section                   *)
+(* sample_of_static_observation replaces, from a pointwise endpoint equation, *)
+(* every executed reader by the static group-action observation, at the level *)
+(* of the random variables and at the level of their distributions.           *)
 (*                                                                            *)
 (* Definitions:                                                               *)
 (*   SampleAdapter e         == the sample layer over the execution plug e    *)
 (*   sa_run                  == layer 1: the run at a sample point            *)
 (*   sa_seat_view            == layer 2: seat i's endpoint reader             *)
 (*   sa_coalition_view       == layer 2: a coalition's endpoint reader        *)
-(*   sa_seat_dist            == layer 3: the law of seat i's endpoint         *)
-(*   sa_coalition_dist       == layer 3: the law of a coalition's reading     *)
-(*   sa_cut_dist             == layer 3: the law of the cut                   *)
-(*   sa_joint_dist           == layer 3: the joint law of the run argument    *)
-(*                              and the cut                                   *)
-(*   sa_cut_dist_image       == the law of the cut's permutation image        *)
+(*   sa_seat_dist            == layer 3: the distribution of seat i's         *)
+(*                              endpoint                                      *)
+(*   sa_coalition_dist       == layer 3: the distribution of a coalition's    *)
+(*                              reading                                       *)
+(*   sa_cut_dist             == layer 3: the distribution of the cut          *)
+(*   sa_joint_dist           == layer 3: the joint distribution of the run    *)
+(*                              argument and the cut                          *)
+(*   sa_cut_dist_image       == the distribution of the cut's permutation     *)
+(*                              image                                         *)
 (*   sa_static_seat_view     == the static observation at seat i              *)
 (*   sa_static_coalition_view == the static observation over a coalition      *)
 (*                                                                            *)
 (* Key results:                                                               *)
 (*   sa_seat_view_of_run  == the layer-two reader reads the layer-one run     *)
-(*   sa_seat_dist_law     == the pushforward is the law of the random         *)
-(*                           variable                                         *)
+(*   sa_seat_dist_law     == the pushforward is the distribution of the       *)
+(*                           random variable                                  *)
 (*   sa_seat_viewE        == the executed seat reader is the static           *)
 (*                           observation                                      *)
-(*   sa_seat_distE        == the executed seat law is the static              *)
-(*                           observation's law                                *)
+(*   sa_seat_distE        == the executed seat distribution is the static     *)
+(*                           observation's distribution                       *)
 (*   sa_coalition_viewE   == the executed coalition reader is the static      *)
 (*                           observation over the coalition                   *)
-(*   sa_coalition_distE   == the executed coalition law is the static         *)
-(*                           observation's law                                *)
+(*   sa_coalition_distE   == the executed coalition distribution is the       *)
+(*                           static observation's distribution                *)
 (******************************************************************************)
 
 From HB Require Import structures.
@@ -105,8 +108,9 @@ End fdist_product_map.
 
 (** SampleAdapter — the probabilistic layer over an execution plug.
     Kind: interface.
-    A value of this type carries a finite sample space sa_sampleT with a law
-    sa_sampleP on it, the run argument map sa_arg and the cut map sa_cut. *)
+    A value of this type carries a finite sample space sa_sampleT with a
+    distribution sa_sampleP on it, the run argument map sa_arg and the cut
+    map sa_cut. *)
 Record SampleAdapter (R : realType) (mp : MonodromyProfile R)
     (e : ExecutionPlug mp) :=
   MkSampleAdapter {
@@ -165,29 +169,30 @@ Lemma sa_seat_view_of_run (u : sa_sampleT sa)
   = nth ord0 (endpoints_of_trace (nth [::] (sa_run u).2 exec_verifier_id)) i.
 Proof. by []. Qed.
 
-(* LAYER 3: pushforwards of the sample law along the layer-two readers. The
-   raw trace has no layer 3: seq (pgg_data _) is not a finType. The cut laws
-   do not mention P_idx, so section discharge gives them one argument fewer
-   than the seat and coalition laws. *)
+(* LAYER 3: pushforwards of the sample distribution along the layer-two
+   readers. The raw trace has no layer 3: seq (pgg_data _) is not a finType.
+   The cut distributions do not mention P_idx, so section discharge gives
+   them one argument fewer than the seat and coalition distributions. *)
 
-(** sa_seat_dist — the law of seat i's endpoint.
+(** sa_seat_dist — the distribution of seat i's endpoint.
     @intent: the pushforward of sa_sampleP along sa_seat_view i. *)
 Definition sa_seat_dist (i : 'I_(pi_T' (mp_PI mp)).+1)
     : R.-fdist 'I_(pgg_N' (mp_M mp)).+1 :=
   fdistmap (sa_seat_view i) sa.(sa_sampleP).
 
-(** sa_coalition_dist — the law of a coalition's endpoint readings.
+(** sa_coalition_dist — the distribution of a coalition's endpoint readings.
     @intent: the pushforward of sa_sampleP along sa_coalition_view C. *)
 Definition sa_coalition_dist (C : {set 'I_(pi_T' (mp_PI mp)).+1}) :=
   fdistmap (sa_coalition_view C) sa.(sa_sampleP).
 
-(** sa_seat_dist_law — the pushforward is the law of the random variable.
+(** sa_seat_dist_law — the pushforward is the distribution of the random
+    variable.
     @main architecture: sa_seat_dist i = `p_ (sa_seat_view i). *)
 Lemma sa_seat_dist_law (i : 'I_(pi_T' (mp_PI mp)).+1) :
   sa_seat_dist i = `p_ (sa_seat_view i).
 Proof. by []. Qed.
 
-(** sa_cut_dist — the law of the cut.
+(** sa_cut_dist — the distribution of the cut.
     @intent: the pushforward of sa_sampleP along sa_cut. *)
 Definition sa_cut_dist : R.-fdist (pgg_gT (mp_M mp)) :=
   fdistmap sa.(sa_cut) sa.(sa_sampleP).
@@ -204,7 +209,7 @@ Definition sa_joint_dist (argT : finType) (arg : sa_sampleT sa -> argT)
     : R.-fdist (argT * pgg_gT (mp_M mp)) :=
   fdistmap (fun u => (arg u, sa.(sa_cut) u)) sa.(sa_sampleP).
 
-(** sa_cut_dist_image — the law of the cut's permutation image.
+(** sa_cut_dist_image — the distribution of the cut's permutation image.
     @intent: the pushforward of sa_cut_dist along the representation pgg_rho,
     the carrier in which a SecurityWitness states its bound. *)
 Definition sa_cut_dist_image : R.-fdist {perm 'I_(pgg_N' (mp_M mp)).+1} :=
@@ -254,7 +259,8 @@ Lemma sa_seat_viewE (i : 'I_(pi_T' (mp_PI mp)).+1) :
   sa_seat_view i = sa_static_seat_view i.
 Proof. by apply: funext => u; exact: (exec_seat_endpointE (Hep u) i). Qed.
 
-(** sa_seat_distE — the executed seat law is the static observation's law.
+(** sa_seat_distE — the executed seat distribution is the static
+    observation's distribution.
     @main architecture: sa_seat_dist i = fdistmap (sa_static_seat_view i)
     sa_sampleP. *)
 Lemma sa_seat_distE (i : 'I_(pi_T' (mp_PI mp)).+1) :
@@ -268,8 +274,8 @@ Lemma sa_coalition_viewE (C : {set 'I_(pi_T' (mp_PI mp)).+1}) :
   sa_coalition_view C = sa_static_coalition_view C.
 Proof. by apply: funext => u; exact: (exec_coalition_endpointsE (Hep u) C). Qed.
 
-(** sa_coalition_distE — the executed coalition law is the static
-    observation's law.
+(** sa_coalition_distE — the executed coalition distribution is the static
+    observation's distribution.
     @main architecture: sa_coalition_dist C = fdistmap
     (sa_static_coalition_view C) sa_sampleP. *)
 Lemma sa_coalition_distE (C : {set 'I_(pi_T' (mp_PI mp)).+1}) :
