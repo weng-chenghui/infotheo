@@ -253,12 +253,16 @@ Proof. by move=> ->. Qed.
 (** abel_1_neq_s1 — the identity differs from the first generator.
     @composes: abel_G4_card *)
 Lemma abel_1_neq_s1 : (1%g == abel_s1) = false.
-Proof. by apply/negbTE/eqP => /abel_perm_eq0; rewrite perm1 /abel_s1 !permE. Qed.
+Proof.
+by apply/negbTE/eqP => /abel_perm_eq0; rewrite perm1 /abel_s1 !permE.
+Qed.
 
 (** abel_1_neq_s2 — the identity differs from the second generator.
     @composes: abel_G4_card *)
 Lemma abel_1_neq_s2 : (1%g == abel_s2) = false.
-Proof. by apply/negbTE/eqP => /abel_perm_eq2; rewrite perm1 /abel_s2 !permE. Qed.
+Proof.
+by apply/negbTE/eqP => /abel_perm_eq2; rewrite perm1 /abel_s2 !permE.
+Qed.
 
 (** abel_1_neq_s1s2 — the identity differs from the generator product.
     @composes: abel_G4_card *)

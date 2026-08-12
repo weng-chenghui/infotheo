@@ -62,7 +62,8 @@
 (*                          the shares at the cut images of its seats         *)
 (*   abel_exec_verifier_traceE, abel_shuffle_verifier_traceE == the derived   *)
 (*                          verifier rows are process row 1 of the run        *)
-(*   abel_shuffle_raw_traceE == the derived raw seat row is process row 2 + i *)
+(*   abel_exec_raw_traceE, abel_shuffle_raw_traceE == the derived raw seat    *)
+(*                          rows are process row 2 + i of the run            *)
 (*   abel_seat_countE    == the profile's seat index type is 'I_4             *)
 (******************************************************************************)
 
@@ -100,7 +101,7 @@ Definition abel_players : seq 'I_4 :=
   [:: @Ordinal 4 0 isT; @Ordinal 4 1 isT; @Ordinal 4 2 isT; @Ordinal 4 3 isT].
 
 (** abel_players_enumE — the participant list is the seat enumeration.
-    @composes: abel_exec_plug, abel_shuffle_plug *)
+    @composes: abel_exec_correct, abel_shuffle_correct *)
 Lemma abel_players_enumE :
   abel_players = enum 'I_(pi_T' (mp_PI abel_profile)).+1.
 Proof. by apply: (inj_map val_inj); rewrite val_enum_ord. Qed.
@@ -471,8 +472,8 @@ Definition abel_reader (sigma : {perm 'I_4}) : 4.-tuple 'I_4 :=
 Lemma abel_reader_inj : injective abel_reader.
 Proof.
 move=> x y H; apply/permP => z.
-have := congr1 (fun t : 4.-tuple 'I_4 => tnth t z) H.
-by rewrite /abel_reader !tnth_mktuple tnth_ord_tuple.
+have Hz : tnth (abel_reader x) z = tnth (abel_reader y) z by rewrite H.
+by move: Hz; rewrite /abel_reader !tnth_mktuple tnth_ord_tuple.
 Qed.
 
 (** abel_shuffle_static_readerE — the shuffle-analysis static observation is
@@ -540,6 +541,17 @@ Proof. exact: (exec_coalition_endpointsE (abel_exec_endpoints s w0) C). Qed.
 Lemma abel_exec_verifier_traceE (s : 'I_4) (w0 : pgg_gT abel_M) :
   @exec_verifier_trace abel_profile abel_exec_plug s w0 0
   = nth [::] (@exec_run abel_profile abel_exec_plug s w0 0).2 1.
+Proof. by []. Qed.
+
+(** abel_exec_raw_traceE — the derived raw seat row of the secret-recovery
+    run is process row 2 + i of the interpreter output. The row is a message
+    list and is navigation only: it is not a finite random variable.
+    @main architecture: exec_participant_trace abel_exec_plug s w0 0 i =
+    nth [::] (exec_run abel_exec_plug s w0 0).2 (2 + i). *)
+Lemma abel_exec_raw_traceE (s : 'I_4) (w0 : pgg_gT abel_M)
+    (i : 'I_(pi_T' (mp_PI abel_profile)).+1) :
+  @exec_participant_trace abel_profile abel_exec_plug s w0 0 i
+  = nth [::] (@exec_run abel_profile abel_exec_plug s w0 0).2 (2 + i).
 Proof. by []. Qed.
 
 (** abel_shuffle_verifier_traceE — the derived verifier row of the
