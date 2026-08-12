@@ -23,6 +23,14 @@
 (*   five_card_sample      == the den Boer sample adapter: the leakage space  *)
 (*                            Omega under P, the cut being the sampled        *)
 (*                            rotation                                        *)
+(*   five_card_exec_input_trace == committing party j's executed-row content  *)
+(*                                 as a random variable on the leakage space  *)
+(*   five_card_exec_dealer_raw_trace == the dealer's raw executed trace       *)
+(*   five_card_exec_dealer_readout   == the committed pair decoded from a     *)
+(*                                      dealer row                            *)
+(*   five_card_exec_dealer_trace     == the dealer's executed row decoded as  *)
+(*                                      a random variable on the leakage      *)
+(*                                      space                                 *)
 (*                                                                            *)
 (* Key results:                                                               *)
 (*   five_card_exec_recovers    == the derived run decodes to the conjunction *)
@@ -54,19 +62,34 @@
 (*   five_card_exec_trace_secrecy == one seat's executed trace leaves the     *)
 (*                                   secret's conditional entropy equal to    *)
 (*                                   its plain entropy                        *)
+(*   five_card_sample_cut_distE == the sample space's cut distribution is the *)
+(*                                 image of the uniform rotation distribution *)
+(*                                 under k |-> fc_sigma ^+ k                  *)
+(*   five_card_exec_input_trace_secrecy == conditioning the secret on a       *)
+(*                                         committing party's executed-row    *)
+(*                                         observable leaves its entropy      *)
+(*                                         unchanged                          *)
+(*   five_card_exec_dealer_pair_centropy0  == the dealer's decoded row        *)
+(*                                            determines the committed pair   *)
+(*   five_card_exec_dealer_trace_centropy0 == the dealer's decoded row        *)
+(*                                            determines the secret           *)
+(*   den_boer_sample_cut_witnessE == the sample space's cut distribution is   *)
+(*                                   the den Boer member's witness            *)
+(*                                   distribution                             *)
 (******************************************************************************)
 
 From HB Require Import structures.
 From mathcomp Require Import ssreflect ssrbool ssrfun eqtype ssrnat seq.
 From mathcomp Require Import div fintype tuple finfun finset fingroup perm.
-From mathcomp Require Import morphism action bigop order ssrnum ssralg.
+From mathcomp Require Import morphism action bigop order ssrnum ssralg matrix.
 From mathcomp Require Import boolp reals.
-From infotheo Require Import realType_ext realType_ln fdist proba.
+From infotheo Require Import ssralg_ext realType_ext realType_ln fdist proba.
 From infotheo Require Import variation_dist entropy.
 Require Import smc_interpreter pismc smc_session_types.
 From pgg_smc Require Import pgg_interface pgg_session_types card_exchange_pismc.
 From pgg_smc Require Import pgg_input_commitment pgg_run pgg_monodromy_profile.
 From pgg_smc Require Import pgg_execution_plug pgg_sample_adapter.
+From pgg_smc Require Import pgg_weighted_words.
 From pgg_reconstruct Require Import pgg_sharing_framework covering_scheme
                                     algebraic_rigidity input_encoding.
 From pgg_smc Require Import five_card_group five_card_program.
@@ -532,6 +555,225 @@ Corollary five_card_exec_trace_secrecy :
   `H( Secret R | five_card_exec_trace ord0 ) = `H `p_ (Secret R).
 Proof. by rewrite five_card_exec_traceE; exact: denboer_trace_secrecy. Qed.
 
+(******************************************************************************)
+(*     The cut distribution of the den Boer sample space                      *)
+(******************************************************************************)
+
+(** five_card_card_bool2 — the pair of committed bits has four values.
+    @composes: five_card_sample_uniform_prodE
+    Naming: intentional; the identical certificate card_bool2 is declared at
+    kim_input_privacy.v:51, and the five_card prefix keeps this local copy from
+    colliding with it without adding an import edge to that file. *)
+Lemma five_card_card_bool2 : #|{: bool * bool}| = 3.+1.
+Proof. by rewrite card_prod card_bool. Qed.
+
+(** five_card_sample_uniform_prodE — the den Boer leakage distribution is the
+    product of the uniform distribution on the committed pair with the uniform
+    distribution on the rotation.
+    @composes: five_card_sample_snd_uniformE *)
+Lemma five_card_sample_uniform_prodE :
+  P R = ((fdist_uniform five_card_card_bool2)
+         `x (fdist_uniform (card_ord 5)))%fdist.
+Proof.
+apply/fdist_ext => -[ab k].
+rewrite fdist_prodE /P !fdist_uniformE.
+rewrite card_Omega20 five_card_card_bool2 card_ord.
+by rewrite -invfM -natrM.
+Qed.
+
+(** five_card_sample_snd_uniformE — the rotation marginal of the den Boer
+    leakage distribution is uniform on 'I_5.
+    @composes: five_card_sample_cut_distE *)
+Lemma five_card_sample_snd_uniformE :
+  fdistmap (fun u : five_card_leakage.Omega => u.2) (P R)
+  = fdist_uniform (card_ord 5).
+Proof.
+rewrite five_card_sample_uniform_prodE.
+by rewrite -/(fdist_snd _) -fdistX_prod fdistX2 fdist_prod1.
+Qed.
+
+(** five_card_sample_cut_distE — the den Boer sample space's cut distribution
+    is the image of the uniform rotation distribution under the rotation
+    realization k |-> fc_sigma ^+ k.
+    @main architecture: five_card_sample_cut_dist = fdistmap
+    (fun k : 'I_5 => (fc_sigma ^+ k)%g) (fdist_uniform (card_ord 5)), at every
+    bias eps. *)
+Lemma five_card_sample_cut_distE :
+  five_card_sample_cut_dist
+  = fdistmap (fun k : 'I_5 => (five_card_group.fc_sigma ^+ k)%g)
+      (fdist_uniform (card_ord 5)).
+Proof.
+rewrite /five_card_sample_cut_dist /sa_cut_dist /five_card_sample /=.
+rewrite /five_card_sample_cut -five_card_sample_snd_uniformE.
+by rewrite fdistmap_comp.
+Qed.
+
+(******************************************************************************)
+(*     The committing parties' executed rows                                  *)
+(******************************************************************************)
+
+(** five_card_exec_traces_size — the den Boer run has nine trace rows.
+    @composes: five_card_exec_input_raw_traceE
+    Naming: intentional; _size is the repo's suffix for a size _ = _ statement,
+    as in five_card_exec_procs_size and exec_endpoints_size. *)
+Lemma five_card_exec_traces_size (a b : bool) (w0 : pgg_gT FiveCardKim_M) :
+  size (run_interp 100 (den_boer_procs a b w0 0)).2 = 9.
+Proof. rewrite /den_boer_procs; vm_compute; reflexivity. Qed.
+
+(** five_card_exec_input_raw_traceE — committing party j's executed row is
+    empty, at every j.
+    @composes: five_card_exec_input_trace_secrecy
+    Rows 0 and 1, the rows of the two committing parties, are empty because a
+    Send logs nothing to the sender's own row in this interpreter and the
+    committing parties are pure senders. Rows j >= 2 are empty by the nth
+    default past the nine-process run. *)
+Lemma five_card_exec_input_raw_traceE (a b : bool)
+    (w0 : pgg_gT FiveCardKim_M) (j : nat) :
+  five_card_exec_input_raw_trace (a, b) w0 j = [::].
+Proof.
+rewrite /five_card_exec_input_raw_trace /exec_input_trace /exec_input_id
+        /exec_run five_card_exec_fuelE five_card_exec_procsE.
+case: j => [|[|j]].
+- by rewrite /den_boer_procs; vm_compute.
+- by rewrite /den_boer_procs; vm_compute.
+- by apply: nth_default; rewrite five_card_exec_traces_size.
+Qed.
+
+(** five_card_exec_input_trace — committing party j's executed-row content
+    as a random variable on the leakage space.
+    @intent: content_of of five_card_exec_input_raw_trace at the committed pair
+    (w.1.1, w.1.2) and the cut fc_sigma ^+ w.2 realizing rotation w.2.
+    Naming: intentional; _input_trace names the party-indexed executed-trace
+    random variable, the committing-party twin of five_card_exec_trace. *)
+Definition five_card_exec_input_trace (j : nat) : {RV dbP -> 'I_5} :=
+  fun w => content_of (five_card_exec_input_raw_trace (w.1.1, w.1.2)
+                         (five_card_group.fc_sigma ^+ w.2)%g j).
+
+(** five_card_exec_input_trace_secrecy — conditioning the secret on committing
+    party j's executed-row observable leaves its entropy unchanged, at every j.
+    @main architecture: `H( Secret | five_card_exec_input_trace j ) =
+    `H `p_ Secret, at every bias eps.
+    The rows are empty because in this interpreter model a Send logs nothing to
+    the sender's own trace, so the identity is a constant-conditioning
+    statement, not a commitment-privacy result. A committing party knows its
+    own bit, so even a non-empty row would not make this a privacy statement
+    about that party. The committed payloads travel to the dealer's row, which
+    five_card_exec_dealer_pair_centropy0 and
+    five_card_exec_dealer_trace_centropy0 show determines both bits.
+    Naming: intentional; _trace_secrecy names the conditional-entropy statement
+    about an executed trace, matching five_card_exec_trace_secrecy. *)
+Lemma five_card_exec_input_trace_secrecy (j : nat) :
+  `H( Secret R | five_card_exec_input_trace j ) = `H `p_ (Secret R).
+Proof.
+have Hc : five_card_exec_input_trace j
+        = (fun _ : unit => ord0) `o (unit_RV dbP).
+  apply: funext => w.
+  rewrite /five_card_exec_input_trace /comp_RV.
+  by rewrite five_card_exec_input_raw_traceE.
+rewrite Hc; apply: extra_entropy.inde_cond_entropy.
+apply: pgg_trace_secrecy.inde_RV_comp; exact: spp_proba.inde_unit_RV.
+Qed.
+
+(******************************************************************************)
+(*     The dealer's executed row                                              *)
+(******************************************************************************)
+
+(** five_card_exec_dealer_raw_trace — the dealer's raw executed trace.
+    @intent: the generic dealer extractor exec_dealer_trace at
+    five_card_exec_plug, committed pair ab, cut w0 and process offset 0.
+    Naming: intentional; _dealer_raw_trace names the dealer's executed trace,
+    the dealer twin of five_card_exec_input_raw_trace. *)
+Definition five_card_exec_dealer_raw_trace (ab : bool * bool)
+    (w0 : pgg_gT FiveCardKim_M) :=
+  @exec_dealer_trace R mpF five_card_exec_plug ab w0 0.
+
+(** five_card_exec_dealer_raw_traceE — the dealer's executed row is the deck
+    index followed by the two committed sheets.
+    @composes: five_card_exec_dealer_traceE
+    The row is anti-chronological: the head PGG_idx 0 is the dealer's own Init
+    of the deck index, which happens last, then party 8's sheet
+    PGG_sheet (encode_bool b), then party 7's PGG_sheet (encode_bool a). *)
+Lemma five_card_exec_dealer_raw_traceE (a b : bool)
+    (w0 : pgg_gT FiveCardKim_M) :
+  five_card_exec_dealer_raw_trace (a, b) w0
+  = [:: PGG_idx 0; PGG_sheet (encode_bool b); PGG_sheet (encode_bool a)].
+Proof.
+rewrite /five_card_exec_dealer_raw_trace /exec_dealer_trace /exec_dealer_id
+        /exec_run five_card_exec_fuelE five_card_exec_procsE.
+rewrite /den_boer_procs; vm_compute; reflexivity.
+Qed.
+
+(** five_card_exec_dealer_readout — the committed pair decoded from a dealer
+    row.
+    @intent: decode_bool of the two sheets of a three-entry row, the second bit
+    at the head, and (false, false) elsewhere.
+    The (false, false) value returned on a malformed row coincides with a
+    legitimate committed pair, so the readout is meaningful only through
+    five_card_exec_dealer_raw_traceE.
+    Naming: intentional; _dealer_readout names the decoding function of the
+    dealer row, the row-level companion of five_card_exec_dealer_trace. *)
+Definition five_card_exec_dealer_readout
+    (tr : seq (pgg_data (pgg_N' FiveCardKim_M).+1)) : (bool * bool)%type :=
+  if tr is [:: _ ; PGG_sheet y ; PGG_sheet x]
+  then (decode_bool x, decode_bool y) else (false, false).
+
+(** five_card_exec_dealer_trace — the dealer's executed row decoded as a
+    random variable on the leakage space.
+    @intent: five_card_exec_dealer_readout of five_card_exec_dealer_raw_trace
+    at the committed pair (w.1.1, w.1.2) and the cut fc_sigma ^+ w.2 realizing
+    rotation w.2.
+    Naming: intentional; _dealer_trace names the dealer's executed-trace random
+    variable, the dealer twin of five_card_exec_trace. *)
+Definition five_card_exec_dealer_trace : {RV dbP -> (bool * bool)%type} :=
+  fun w => five_card_exec_dealer_readout
+             (five_card_exec_dealer_raw_trace (w.1.1, w.1.2)
+                (five_card_group.fc_sigma ^+ w.2)%g).
+
+(** five_card_exec_dealer_traceE — the dealer's decoded row is the sampled
+    committed pair.
+    @composes: five_card_exec_dealer_pair_centropy0 *)
+Lemma five_card_exec_dealer_traceE :
+  five_card_exec_dealer_trace = fun w => (w.1.1, w.1.2).
+Proof.
+apply: funext => w.
+rewrite /five_card_exec_dealer_trace five_card_exec_dealer_raw_traceE.
+by rewrite /five_card_exec_dealer_readout /= !decode_encode_bool.
+Qed.
+
+(** five_card_exec_dealer_pair_centropy0 — the dealer's decoded row determines
+    the committed pair.
+    @main security: `H( (fun w => w.1) | five_card_exec_dealer_trace ) = 0,
+    where fun w => w.1 reads the committed pair off a sample point, at every
+    bias eps.
+    Naming: intentional; _centropy0 names a conditional-entropy-zero
+    determination statement, _pair_ marking the committed-pair reader. *)
+Lemma five_card_exec_dealer_pair_centropy0 :
+  `H( (fun w : five_card_leakage.Omega => w.1)
+      | five_card_exec_dealer_trace ) = 0.
+Proof.
+have -> : (fun w : five_card_leakage.Omega => w.1)
+        = idfun `o five_card_exec_dealer_trace.
+  apply: funext => w; rewrite /comp_RV five_card_exec_dealer_traceE /=.
+  by case: w => -[a b] k.
+exact: centropy_RV_comp0.
+Qed.
+
+(** five_card_exec_dealer_trace_centropy0 — the dealer's decoded row
+    determines the secret.
+    @main security: `H( Secret | five_card_exec_dealer_trace ) = 0, at every
+    bias eps.
+    Naming: intentional; _trace_centropy0 names the conditional-entropy-zero
+    determination statement carried by an executed trace. *)
+Lemma five_card_exec_dealer_trace_centropy0 :
+  `H( Secret R | five_card_exec_dealer_trace ) = 0.
+Proof.
+have -> : Secret R
+        = (fun p : bool * bool => p.1 && p.2) `o five_card_exec_dealer_trace.
+  apply: funext => w; rewrite /comp_RV five_card_exec_dealer_traceE /=.
+  by case: w => -[a b] k.
+exact: centropy_RV_comp0.
+Qed.
+
 End five_card_execution.
 
 (** five_card_exec_procs_biasE — the executed program does not depend on the
@@ -552,3 +794,88 @@ Lemma five_card_exec_procs_biasE (R : realType) (eps1 eps2 : R)
                   (@five_card_exec_plug R eps2 Hlt2 Hgt2 Hspec2 L2)
                   (a, b) w0 P_idx.
 Proof. by []. Qed.
+
+(******************************************************************************)
+(*     The den Boer member's witness distribution                             *)
+(******************************************************************************)
+
+Section five_card_one_letter_words.
+Local Open Scope vec_ext_scope.
+
+Variable R : realType.
+Variables (N'' m : nat).
+Variable sigmas : m.+1.-tuple {perm 'I_N''.+2}.
+Variable W : R.-fdist 'I_m.+1.
+
+(** fdistmap_head1 — the head letter of a one-letter word is distributed as
+    the letter itself.
+    @composes: rho_from_words_weighted1 *)
+Lemma fdistmap_head1 :
+  fdistmap (fun v : 'rV['I_m.+1]_1 => v ``_ ord0) (W `^ 1) = W.
+Proof.
+apply/fdist_ext => k; rewrite fdistmapE.
+rewrite (big_pred1 (\row_(_ < 1) k)); last first.
+  move=> v /=; rewrite !inE.
+  apply/idP/idP.
+    by move/eqP => H; apply/eqP/rowP => i; rewrite (ord1 i) mxE.
+  by move/eqP => ->; rewrite mxE.
+by rewrite fdist_rV1 mxE.
+Qed.
+
+(** rho_from_words_weighted1 — the word shuffle at word length 1 is the image
+    of the letter distribution under the alphabet lookup.
+    @composes: den_boer_witness_rotationE *)
+Lemma rho_from_words_weighted1 :
+  @rho_from_words_weighted R N'' m 1 sigmas W = fdistmap (tnth sigmas) W.
+Proof.
+rewrite /rho_from_words_weighted /word_weighted fdistmap_comp.
+have -> : (@word_eval (Gen_PGGTypes sigmas) 1) \o (@tuple_of_row _ 1)
+        = (tnth sigmas) \o (fun v : 'rV['I_m.+1]_1 => v ``_ ord0).
+  apply: funext => v; rewrite /= /word_eval big_ord1.
+  by congr (tnth sigmas _); rewrite tnth_mktuple.
+by rewrite -fdistmap_comp fdistmap_head1.
+Qed.
+
+End five_card_one_letter_words.
+
+Section den_boer_witness_distribution.
+
+Variable R : realType.
+
+(** kim_weight_uniform_at0 — the Kim weight distribution at bias 0 is uniform
+    on 'I_5.
+    @composes: den_boer_witness_rotationE *)
+Lemma kim_weight_uniform_at0 :
+  kim_weight_dist (den_boer_eps0_lt R) (den_boer_eps0_gt R)
+  = fdist_uniform (card_ord 5).
+Proof.
+apply/fdist_ext => k; rewrite kim_weight_distE fdist_uniformE card_ord.
+by case: ifP => _; [rewrite subr0 | rewrite mul0r addr0].
+Qed.
+
+(** den_boer_witness_rotationE — the den Boer member's witness distribution is
+    the image of the uniform rotation distribution under the rotation
+    realization k |-> fc_sigma ^+ k.
+    @composes: den_boer_sample_cut_witnessE *)
+Lemma den_boer_witness_rotationE :
+  sw_rho_dist (mp_security (den_boer_profile R))
+  = fdistmap (fun k : 'I_5 => (five_card_group.fc_sigma ^+ k)%g)
+      (fdist_uniform (card_ord 5)).
+Proof.
+rewrite /den_boer_profile /= rho_from_words_weighted1 kim_weight_uniform_at0.
+by congr fdistmap; apply: funext => k; exact: fc_kim_sigmasE.
+Qed.
+
+End den_boer_witness_distribution.
+
+(** den_boer_sample_cut_witnessE — the five-card sample's cut distribution is
+    bias-independent and equals the den Boer member's witness distribution.
+    @main architecture: five_card_sample_cut_dist Hlt Hgt Hspec L =
+    sw_rho_dist (mp_security (den_boer_profile R)), at every bias eps and every
+    word length L. *)
+Lemma den_boer_sample_cut_witnessE (R : realType) (eps : R)
+    (Hlt : eps < 5%:R^-1) (Hgt : - (4%:R * 5%:R^-1) < eps)
+    (Hspec : `|eps| < 4%:R / 5%:R) (L : nat) :
+  five_card_sample_cut_dist Hlt Hgt Hspec L
+  = sw_rho_dist (mp_security (den_boer_profile R)).
+Proof. by rewrite five_card_sample_cut_distE den_boer_witness_rotationE. Qed.
