@@ -3,33 +3,81 @@
 (******************************************************************************)
 (* pgg_analysis_manifest: the repository-level analysis manifest              *)
 (*                                                                            *)
-(* The manifest re-exports the two featured facades, so that one import       *)
-(* reaches every public alias of the eight-card orbit instance and of the     *)
-(* five-card development, and records one row per analysis path. Each row     *)
-(* names its profile, execution, observed-execution, sample, observer,        *)
-(* bound or certificate and final bridge aliases, its completion level, and   *)
-(* one capability line per (theorem, distribution, observer, security         *)
-(* notion) tuple.                                                             *)
+(* The manifest re-exports the five instance facades, so that one import      *)
+(* reaches every public alias of the eight-card orbit instance, the five-card *)
+(* development, the five-seat S_5 instance, the ten-seat S_5 x S_5 instance   *)
+(* and the four-seat abelian instance, and records one row per analysis path. *)
+(* Each row names its protocol instance, probability model, profile,          *)
+(* execution, observed-execution and sample aliases, its observers with their *)
+(* carriers, its correctness theorem, its security, leakage, mixing or        *)
+(* limitation theorem, its static-to-executed bridge and model-transfer       *)
+(* theorem when present, the missing model-transfer premise when none is      *)
+(* claimed, its exact capability, its completion level and its assumption     *)
+(* status.                                                                    *)
 (*                                                                            *)
-(* Completion levels are cumulative and are read off the typed witnesses      *)
-(* this manifest names, never asserted:                                       *)
+(* Each row is also a typed value of AnalysisPathRow below, carrying the      *)
+(* observed execution of the path, its sample adapter when the path has one   *)
+(* at every realType, and the three typed statuses of pgg_analysis_status.v.  *)
+(* The record stores no theorem: theorems stay facade aliases and are pinned  *)
+(* by spelled type in the checker at the end of this file.                    *)
 (*                                                                            *)
-(*   Algebraic        profile alias                                           *)
-(*   Executable       + execution-plug alias indexed by that profile          *)
-(*   Observed         + observed-execution alias indexed by profile and plug  *)
-(*   Sampled          + sample-adapter alias AND its distribution-to-observer *)
-(*                     bridge                                                 *)
-(*   Security-bridged + bridge alias to a named security theorem about the    *)
-(*                     same distribution and the same observer                *)
+(* Completion levels are the constructors of CompletionLevel. They are        *)
+(* cumulative and are read off the typed witnesses this manifest names, never *)
+(* asserted:                                                                  *)
 (*                                                                            *)
-(* Every identifier in the table below is checked at the end of this file by  *)
-(* one Timeout-guarded Check against its spelled type. Deleting an alias      *)
-(* makes its line fail with "The reference ... was not found" and retyping    *)
-(* one makes it fail with a type mismatch, so the table cannot drift away     *)
-(* from the code.                                                             *)
+(*   Algebraic       profile alias                                            *)
+(*   Executable      + execution-plug alias indexed by that profile           *)
+(*   Observed        + observed-execution alias indexed by profile and plug   *)
+(*   Sampled         + sample-adapter alias AND its distribution-to-observer  *)
+(*                    bridge                                                  *)
+(*   AnalysisBridged + bridge alias to a named security, leakage, mixing or   *)
+(*                    limitation theorem about the same distribution and the  *)
+(*                    same observer                                           *)
+(*                                                                            *)
+(* AnalysisBridged is the typed form of the prose label Security-bridged of   *)
+(* the earlier banner. The rename is what lets a negative mixing result       *)
+(* classify accurately: the Abelian limitation path is bridged and carries no *)
+(* security claim at all.                                                     *)
+(*                                                                            *)
+(* Three conventions hold throughout the rows.                                *)
+(*                                                                            *)
+(* (1) The classical trio propositional_extensionality,                       *)
+(* functional_extensionality_dep and constructive_indefinite_description is   *)
+(* the repository baseline, inherited from boolp through the infotheo         *)
+(* probability layer. It is NOT listed in an assumption status. A row is      *)
+(* KernelClosed when Print Assumptions reports the trio and nothing else, and *)
+(* AcceptsAxioms when it reports named repository assumptions beyond it. The  *)
+(* three constructors of PggAxiom are the only such assumptions, and a status *)
+(* covers the public results of the path, not only the values the row stores. *)
+(*                                                                            *)
+(* (2) Completion levels are cumulative and are stated at the level the       *)
+(* theorems actually reach. The two limitation families differ on this point  *)
+(* and stay at different levels: the S_5 x S_5 limitation rows stay Sampled   *)
+(* because their floors are stated at the sheet-endpoint reader of the        *)
+(* word-cut distribution, which is a pushforward of that distribution and not *)
+(* an interpreter-executed content observer, while the Abelian limitation row *)
+(* is AnalysisBridged because its distance-one theorem is stated at the two   *)
+(* adapters' own executed observation.                                        *)
+(*                                                                            *)
+(* (3) A capability line uses the narrowest label the theorem statement       *)
+(* supports, from the list of section 11 of the request: correctness, exact   *)
+(* privacy, approximate privacy, trace secrecy, conditional entropy, mutual   *)
+(* information, endpoint marginal mixing, negative mixing result, anonymity   *)
+(* or privacy limitation. A theorem conditional on the trusted analytical     *)
+(* certificate s5_rayleigh_Q2_R is described as conditional in every          *)
+(* capability line that depends on it. A limitation theorem carrying a        *)
+(* security role tag is a mixing limitation, never a privacy failure.         *)
+(*                                                                            *)
+(* Every identifier in the tables below is checked at the end of this file by *)
+(* one Timeout-guarded Check against its spelled type, and every row by one   *)
+(* Check against AnalysisPathRow together with three erefl pins on its status *)
+(* fields. Deleting an alias makes its line fail with a reference-not-found   *)
+(* message, retyping one makes it fail with a type mismatch and restatusing a *)
+(* row makes its pin fail, so the tables cannot drift away from the code.     *)
 (******************************************************************************)
 
-From pgg_smc Require Export pgl27_analysis five_card_analysis.
+From pgg_smc Require Export pgl27_analysis five_card_analysis s5_analysis
+                            s5x5_analysis abelian_analysis.
 
 Set Implicit Arguments.
 Unset Strict Implicit.
@@ -68,7 +116,15 @@ Local Open Scope ring_scope.
 (* | bound or certificate | PGL27Analysis.marginal_bound,                     *)
 (*                          PGL27Analysis.certificate_bundle |                *)
 (* | final bridge theorem | PGL27Analysis.exact_view_indep |                  *)
-(* | completion level     | Security-bridged |                                *)
+(* | correctness theorem  | PGL27Analysis.observed_recovers |                 *)
+(* | model transfer       | none claimed |                                    *)
+(* | missing premise      | none: the path compares no idealized model, its   *)
+(*                          shuffle being the exact uniform distribution on   *)
+(*                          the group already |                               *)
+(* | completion level     | AnalysisBridged |                                 *)
+(* | transfer status      | StaticExecutedOnly |                              *)
+(* | assumption status    | KernelClosed |                                    *)
+(* | typed row            | pgl27_row_exact |                                 *)
 (*                                                                            *)
 (* Capabilities, one line per (theorem, distribution, observer, notion):      *)
 (*                                                                            *)
@@ -90,7 +146,7 @@ Local Open Scope ring_scope.
 (* Sampled; exact_view_indep is a security theorem whose right-hand side      *)
 (* names sa_coalition_dist (exact_sample R) 0 C itself, so the theorem, the   *)
 (* distribution and the observer are this row's own, giving                   *)
-(* Security-bridged.                                                          *)
+(* AnalysisBridged.                                                           *)
 (*                                                                            *)
 (*     Row 2: eight-card orbit instance, finite two-hundred-letter word       *)
 (*                                                                            *)
@@ -123,7 +179,17 @@ Local Open Scope ring_scope.
 (* | final bridge theorem | PGL27Analysis.exec_view_indist,                   *)
 (*                          PGL27Analysis.exec_trace_indist,                  *)
 (*                          PGL27Analysis.word_view_indist_via_transfer |     *)
-(* | completion level     | Security-bridged |                                *)
+(* | correctness theorem  | PGL27Analysis.observed_recovers |                 *)
+(* | model transfer       | PGL27Analysis.var_dist_transfer, discharged at    *)
+(*                          this instance by                                  *)
+(*                          PGL27Analysis.word_view_indist_via_transfer |     *)
+(* | missing premise      | none: PGL27Analysis.word_mixing supplies the      *)
+(*                          base-distribution bound the generic transfer      *)
+(*                          inequality needs, on the cut carrier itself |     *)
+(* | completion level     | AnalysisBridged |                                 *)
+(* | transfer status      | IdealFinite |                                     *)
+(* | assumption status    | KernelClosed |                                    *)
+(* | typed row            | pgl27_row_word |                                  *)
 (*                                                                            *)
 (* | theorem | distribution | observer | notion |                             *)
 (* |---|---|---|---|                                                          *)
@@ -149,7 +215,7 @@ Local Open Scope ring_scope.
 (* distribution with the pushforward of rho_word along static_view, giving    *)
 (* Sampled. exec_view_indist and exec_trace_indist are stated directly at     *)
 (* that sample layer, at the executed coalition observation and at the        *)
-(* executed content reader, giving Security-bridged at both executed          *)
+(* executed content reader, giving AnalysisBridged at both executed           *)
 (* observers rather than at the static layer alone.                           *)
 (*                                                                            *)
 (*     Row 3: five-card development, uniform cut (den Boer)                   *)
@@ -177,7 +243,17 @@ Local Open Scope ring_scope.
 (* | bound or certificate | FiveCardAnalysis.marginal_bound,                  *)
 (*                          FiveCardAnalysis.perfect |                        *)
 (* | final bridge theorem | FiveCardAnalysis.exec_trace_secrecy |             *)
-(* | completion level     | Security-bridged |                                *)
+(* | correctness theorem  | FiveCardAnalysis.observed_recovers |              *)
+(* | model transfer       | none claimed |                                    *)
+(* | missing premise      | the ideal distribution equality: the second       *)
+(*                          hypothesis of var_dist_fdistmap_transfer, an      *)
+(*                          equality of two reader pushforwards under an      *)
+(*                          ideal distribution, which the five-card           *)
+(*                          development does not supply |                     *)
+(* | completion level     | AnalysisBridged |                                 *)
+(* | transfer status      | StaticExecutedOnly |                              *)
+(* | assumption status    | KernelClosed |                                    *)
+(* | typed row            | five_card_row_uniform |                           *)
 (*                                                                            *)
 (* | theorem | distribution | observer | notion |                             *)
 (* |---|---|---|---|                                                          *)
@@ -202,7 +278,7 @@ Local Open Scope ring_scope.
 (* cut. exec_trace_secrecy is stated at that random variable. So the          *)
 (* theorem's distribution is the row's sample distribution, its observer is   *)
 (* an aliased executed observer of the row, and sample_cut_distE names the    *)
-(* row's cut distribution; the row is Security-bridged with the trace         *)
+(* row's cut distribution; the row is AnalysisBridged with the trace          *)
 (* privacy capability. input_trace_secrecy is NOT counted towards that level: *)
 (* the input rows of the executed trace are empty, so its conditioning        *)
 (* variable is constant and it is recorded as conditional entropy under       *)
@@ -229,7 +305,13 @@ Local Open Scope ring_scope.
 (* | bound or certificate | none; kim_leak_bound is the numeric constant of   *)
 (*                          the bridge theorem, not a shuffle certificate |   *)
 (* | final bridge theorem | FiveCardAnalysis.colour_view_leak_bound |         *)
-(* | completion level     | Security-bridged |                                *)
+(* | correctness theorem  | FiveCardAnalysis.observed_recovers |              *)
+(* | model transfer       | none claimed |                                    *)
+(* | missing premise      | the ideal distribution equality, as in row 3 |    *)
+(* | completion level     | AnalysisBridged |                                 *)
+(* | transfer status      | StaticExecutedOnly |                              *)
+(* | assumption status    | KernelClosed |                                    *)
+(* | typed row            | five_card_row_biased |                            *)
 (*                                                                            *)
 (* | theorem | distribution | observer | notion |                             *)
 (* |---|---|---|---|                                                          *)
@@ -247,7 +329,7 @@ Local Open Scope ring_scope.
 (* distribution with the biased rotation, giving Sampled.                     *)
 (* colour_view_leak_bound bounds a conditional mutual information of a joint  *)
 (* distribution whose middle component is the executed reader colour_view     *)
-(* itself, over that same biased distribution, giving Security-bridged.       *)
+(* itself, over that same biased distribution, giving AnalysisBridged.        *)
 (*                                                                            *)
 (*     Row 5: five-card development, repeated biased cuts and seven cuts      *)
 (*                                                                            *)
@@ -275,7 +357,15 @@ Local Open Scope ring_scope.
 (*                          FiveCardAnalysis.endpoint_bound,                  *)
 (*                          FiveCardAnalysis.deal_centi_lt |                  *)
 (* | final bridge theorem | NONE |                                            *)
+(* | correctness theorem  | FiveCardAnalysis.observed_recovers |              *)
+(* | model transfer       | none claimed |                                    *)
+(* | missing premise      | the ideal distribution equality, as in row 3, and *)
+(*                          in addition no security statement is attached to  *)
+(*                          either model |                                    *)
 (* | completion level     | Sampled |                                         *)
+(* | transfer status      | NoModelComparison |                               *)
+(* | assumption status    | KernelClosed |                                    *)
+(* | typed row            | five_card_row_repeated |                          *)
 (*                                                                            *)
 (* | theorem | distribution | observer | notion |                             *)
 (* |---|---|---|---|                                                          *)
@@ -287,15 +377,600 @@ Local Open Scope ring_scope.
 (*                                                                            *)
 (* Level justification. Both models are sample adapters over the plug and     *)
 (* both cut distributions are named, giving Sampled. The row is NOT           *)
-(* Security-bridged. endpoint_bound and deal_centi_lt bound the distance      *)
+(* AnalysisBridged. endpoint_bound and deal_centi_lt bound the distance       *)
 (* from uniform of ONE seat's endpoint distribution: neither quantifies over  *)
 (* a coalition, neither mentions a second secret, and neither has the shape   *)
 (* of an indistinguishability or leakage statement. A ShuffleCertificate-     *)
 (* Bundle exists for both models and does not raise the level.                *)
 (*                                                                            *)
+(*     Row 6: five-seat S_5 instance, deterministic dealt position            *)
+(*                                                                            *)
+(* | field | value |                                                          *)
+(* |---|---|                                                                  *)
+(* | protocol instance    | five-seat S_5 path-generated instance |           *)
+(* | probability model    | none: the path is distribution-free |             *)
+(* | profile alias        | S5Analysis.profile |                              *)
+(* | execution alias      | S5Analysis.exec_plug |                            *)
+(* | observed alias       | S5Analysis.observed |                             *)
+(* | sample alias         | none |                                            *)
+(* | observers            | S5Analysis.seat_endpoint : 'I_5, executed;        *)
+(*                          S5Analysis.coalition_endpoints                    *)
+(*                            : {ffun 'I_5 -> 'I_5}, executed;                *)
+(*                          S5Analysis.verifier_endpoints : seq 'I_5,         *)
+(*                            executed;                                       *)
+(*                          S5Analysis.verifier_trace,                        *)
+(*                          S5Analysis.player_raw_trace : message lists,      *)
+(*                            navigation only, not random variables |         *)
+(* | distribution-to-observer bridges | none: the path has no sample layer |  *)
+(* | bound or certificate | none |                                            *)
+(* | correctness theorem  | S5Analysis.exec_correct, S5Analysis.exec_recovers,*)
+(*                          S5Analysis.observed_recovers |                    *)
+(* | security, leakage, mixing or limitation theorem | none |                 *)
+(* | final bridge theorem | NONE |                                            *)
+(* | model transfer       | none claimed |                                    *)
+(* | missing premise      | not applicable: the path names no model, so there *)
+(*                          is no distribution to compare with an idealized   *)
+(*                          one |                                             *)
+(* | completion level     | Observed |                                        *)
+(* | transfer status      | NoModelComparison |                               *)
+(* | assumption status    | AcceptsAxioms [:: AxS5GroupOrder] |               *)
+(* | typed row            | s5_row_det |                                      *)
+(*                                                                            *)
+(* | theorem | distribution | observer | notion |                             *)
+(* |---|---|---|---|                                                          *)
+(* | observed_recovers | none, the statement is distribution-free             *)
+(*   | the executed endpoint list | correctness |                             *)
+(*                                                                            *)
+(* Level justification. profile gives Algebraic; exec_plug is indexed by that *)
+(* profile, giving Executable; observed is the ObservedExecution over that    *)
+(* profile and plug, giving Observed. No sample adapter stands over this      *)
+(* plug, so the row stops at Observed and its typed sample slot is empty. The *)
+(* assumption status is the group-order assumption of the instance:           *)
+(* Print Assumptions on the row reports s5_group_order_eq beyond the          *)
+(* classical trio, because the profile's threshold data is proved from the    *)
+(* order of the generated group.                                              *)
+(*                                                                            *)
+(*     Row 7: five-seat S_5 instance, randomized additive sharing             *)
+(*                                                                            *)
+(* | field | value |                                                          *)
+(* |---|---|                                                                  *)
+(* | protocol instance    | five-seat S_5 path-generated instance |           *)
+(* | probability model    | uniform independent tape 'rV['Z_5]_5 with the     *)
+(*                          identity cut |                                    *)
+(* | profile alias        | S5Analysis.profile |                              *)
+(* | execution alias      | S5Analysis.rand_exec_plug |                       *)
+(* | observed alias       | S5Analysis.rand_observed |                        *)
+(* | sample alias         | S5Analysis.rand_sample |                          *)
+(* | observers            | S5Analysis.rand_content_trace R i : 'I_5, a       *)
+(*                            random variable on the tape distribution,       *)
+(*                            executed;                                       *)
+(*                          sa_coalition_view of rand_sample at offset zero   *)
+(*                            : {ffun 'I_5 -> 'I_5}, executed;                *)
+(*                          S5Analysis.rand_seat_endpoint : 'I_5, executed;   *)
+(*                          S5Analysis.rand_verifier_endpoints : seq 'I_5;    *)
+(*                          the secret is rsh_secret of the randomized        *)
+(*                            sharing, carrier 'Z_5 |                         *)
+(* | distribution-to-observer bridges | S5Analysis.rand_cut_distE,            *)
+(*                          S5Analysis.rand_content_traceE,                   *)
+(*                          S5Analysis.rand_coalition_viewE |                 *)
+(* | bound or certificate | none |                                            *)
+(* | correctness theorem  | S5Analysis.rand_correct,                          *)
+(*                          S5Analysis.rand_recovers,                         *)
+(*                          S5Analysis.rand_observed_recovers |               *)
+(* | security, leakage, mixing or limitation theorem                          *)
+(*                        | S5Analysis.exec_trace_secrecy,                    *)
+(*                          S5Analysis.exec_coalition_secrecy |               *)
+(* | final bridge theorem | S5Analysis.exec_coalition_secrecy |               *)
+(* | model transfer       | none claimed |                                    *)
+(* | missing premise      | none is needed: the path states exact results at  *)
+(*                          its own executed observers and compares no        *)
+(*                          idealized model |                                 *)
+(* | completion level     | AnalysisBridged |                                 *)
+(* | transfer status      | StaticExecutedOnly |                              *)
+(* | assumption status    | AcceptsAxioms [:: AxS5GroupOrder] |               *)
+(* | typed row            | s5_row_rand |                                     *)
+(*                                                                            *)
+(* | theorem | distribution | observer | notion |                             *)
+(* |---|---|---|---|                                                          *)
+(* | exec_coalition_secrecy | the uniform tape distribution of rand_sample    *)
+(*   | sa_coalition_view of rand_sample at offset zero, executed              *)
+(*   | exact privacy: zero mutual information, and conditional entropy equal  *)
+(*     to entropy, for a coalition of fewer than five seats |                 *)
+(* | exec_trace_secrecy | the same distribution                               *)
+(*   | rand_content_trace R i, executed | trace secrecy |                     *)
+(* | rand_observed_recovers | none, the statement is distribution-free        *)
+(*   | the executed endpoint list | correctness |                             *)
+(*                                                                            *)
+(* Level justification. profile, rand_exec_plug and rand_observed give the    *)
+(* first three levels. rand_sample is a SampleAdapter over rand_exec_plug and *)
+(* rand_cut_distE names its cut distribution, giving Sampled.                 *)
+(* exec_coalition_secrecy is stated at sa_coalition_view of rand_sample       *)
+(* itself, so the theorem's distribution and observer are the row's own,      *)
+(* giving AnalysisBridged. The two reader equalities rand_content_traceE and  *)
+(* rand_coalition_viewE identify those executed observers with the landed     *)
+(* static readers, which is the content of the StaticExecutedOnly status:     *)
+(* results travel from the static layer to the executed one, and no           *)
+(* idealized model is compared.                                               *)
+(*                                                                            *)
+(*     Row 8: five-seat S_5 instance, finite generator word                   *)
+(*                                                                            *)
+(* | field | value |                                                          *)
+(* |---|---|                                                                  *)
+(* | protocol instance    | five-seat S_5 path-generated instance |           *)
+(* | probability model    | the product of an arbitrary secret prior with the *)
+(*                          uniform distribution on generator words of length *)
+(*                          L, the cut being the word's evaluation in S_5 |   *)
+(* | profile alias        | S5Analysis.profile |                              *)
+(* | execution alias      | S5Analysis.exec_plug |                            *)
+(* | observed alias       | S5Analysis.observed |                             *)
+(* | sample alias         | S5Analysis.word_sample at a secret prior and a    *)
+(*                          word length. The typed sample slot of this row is *)
+(*                          empty: the adapter is a family indexed by a       *)
+(*                          secret prior and a word length, the repository    *)
+(*                          fixes neither, and the row does not manufacture a *)
+(*                          member to fill the slot |                         *)
+(* | observers            | one position's endpoint distribution, the         *)
+(*                          pushforward of the cut distribution along the     *)
+(*                          evaluation of a permutation at that position,     *)
+(*                          carrier 'I_5 |                                    *)
+(* | distribution-to-observer bridges | S5Analysis.word_cut_distE,            *)
+(*                          S5Analysis.word_cut_imageE |                      *)
+(* | bound or certificate | S5Analysis.word_endpoint_bound |                  *)
+(* | correctness theorem  | S5Analysis.observed_recovers, shared with row 6:  *)
+(*                          the model stands over the same plug |             *)
+(* | security, leakage, mixing or limitation theorem | none |                 *)
+(* | final bridge theorem | NONE |                                            *)
+(* | model transfer       | S5Analysis.word_transfer_conditional, the generic *)
+(*                          inequality under the premise below, and no        *)
+(*                          unconditional transfer theorem |                  *)
+(* | missing premise      | S5Analysis.word_missing_premise: a bound          *)
+(*                          var_dist (sa_cut_dist (word_sample secretP L)) Q  *)
+(*                          <= delta on the cut carrier {perm 'I_5}, against  *)
+(*                          a named reference distribution Q |                *)
+(* | completion level     | Sampled |                                         *)
+(* | transfer status      | NoModelComparison |                               *)
+(* | assumption status    | AcceptsAxioms [:: AxS5GroupOrder; AxRayleighQ2R] |*)
+(* | typed row            | s5_row_word |                                     *)
+(*                                                                            *)
+(* | theorem | distribution | observer | notion |                             *)
+(* |---|---|---|---|                                                          *)
+(* | word_endpoint_bound | the cut distribution of word_sample, named by      *)
+(*   word_cut_distE | one position's endpoint distribution                    *)
+(*   | endpoint marginal mixing, conditional on s5_rayleigh_Q2_R |            *)
+(*                                                                            *)
+(* Level justification. word_sample is a SampleAdapter over exec_plug and     *)
+(* word_cut_distE names its cut distribution, giving Sampled. The row is NOT  *)
+(* AnalysisBridged: word_endpoint_bound bounds the distance from uniform of   *)
+(* ONE position's endpoint distribution, quantifies over no coalition,        *)
+(* mentions no second secret and has neither the shape of an                  *)
+(* indistinguishability statement nor that of a leakage statement. No         *)
+(* finite-word coalition claim is made anywhere on this path. The bound is    *)
+(* conditional on the trusted analytical certificate s5_rayleigh_Q2_R, which  *)
+(* is why the assumption status of this row lists AxRayleighQ2R next to the   *)
+(* instance's group-order assumption.                                         *)
+(*                                                                            *)
+(*     Row 9: ten-seat S_5 x S_5 instance, deterministic dealt position       *)
+(*                                                                            *)
+(* | field | value |                                                          *)
+(* |---|---|                                                                  *)
+(* | protocol instance    | ten-seat two-pile S_5 x S_5 instance |            *)
+(* | probability model    | none: the path is distribution-free |             *)
+(* | profile alias        | S5x5Analysis.profile |                            *)
+(* | execution alias      | S5x5Analysis.exec_plug |                          *)
+(* | observed alias       | S5x5Analysis.observed |                           *)
+(* | sample alias         | none |                                            *)
+(* | observers            | S5x5Analysis.seat_endpoint : 'I_10, executed;     *)
+(*                          S5x5Analysis.coalition_endpoints                  *)
+(*                            : {ffun 'I_10 -> 'I_10}, executed;              *)
+(*                          S5x5Analysis.verifier_endpoints : seq 'I_10;      *)
+(*                          S5x5Analysis.verifier_trace,                      *)
+(*                          S5x5Analysis.player_raw_trace : message lists,    *)
+(*                            navigation only, not random variables |         *)
+(* | distribution-to-observer bridges | none: the path has no sample layer |  *)
+(* | bound or certificate | none |                                            *)
+(* | correctness theorem  | S5x5Analysis.exec_correct,                        *)
+(*                          S5x5Analysis.exec_recovers,                       *)
+(*                          S5x5Analysis.observed_recovers |                  *)
+(* | security, leakage, mixing or limitation theorem | none |                 *)
+(* | final bridge theorem | NONE |                                            *)
+(* | model transfer       | none claimed |                                    *)
+(* | missing premise      | not applicable: the path names no model |         *)
+(* | completion level     | Observed |                                        *)
+(* | transfer status      | NoModelComparison |                               *)
+(* | assumption status    | AcceptsAxioms [:: AxS5x5GroupOrder] |             *)
+(* | typed row            | s5x5_row_det |                                    *)
+(*                                                                            *)
+(* | theorem | distribution | observer | notion |                             *)
+(* |---|---|---|---|                                                          *)
+(* | observed_recovers | none, the statement is distribution-free             *)
+(*   | the executed endpoint list | correctness |                             *)
+(*                                                                            *)
+(* Level justification. As in row 6: profile, plug and observed value give    *)
+(* the first three levels and no sample adapter stands over this plug. The    *)
+(* assumption status is the instance's own group-order assumption:            *)
+(* Print Assumptions on the row reports s5x5_group_order_eq and not the S_5   *)
+(* one.                                                                       *)
+(*                                                                            *)
+(*     Row 10: ten-seat S_5 x S_5 instance, randomized two-pile sharing       *)
+(*                                                                            *)
+(* | field | value |                                                          *)
+(* |---|---|                                                                  *)
+(* | protocol instance    | ten-seat two-pile S_5 x S_5 instance |            *)
+(* | probability model    | the product of two uniform independent tapes,     *)
+(*                          one per pile, with the identity cut |             *)
+(* | profile alias        | S5x5Analysis.profile |                            *)
+(* | execution alias      | S5x5Analysis.rand_exec_plug |                     *)
+(* | observed alias       | S5x5Analysis.rand_observed |                      *)
+(* | sample alias         | S5x5Analysis.rand_sample |                        *)
+(* | observers            | S5x5Analysis.rand_content_trace R j : 'I_10, a    *)
+(*                            random variable on the product tape             *)
+(*                            distribution, executed;                         *)
+(*                          S5x5Analysis.pile1_seat_view,                     *)
+(*                          S5x5Analysis.pile2_seat_view : 'Z_5, one party's  *)
+(*                            executed share in its own pile;                 *)
+(*                          S5x5Analysis.pile1_coalition_view,                *)
+(*                          S5x5Analysis.pile2_coalition_view                 *)
+(*                            : {ffun 'I_5 -> 'Z_5}, one pile coalition's     *)
+(*                            executed shares, indexed by that pile's five    *)
+(*                            parties;                                        *)
+(*                          S5x5Analysis.joint_view : the pair of the two,    *)
+(*                            the two pile memberships kept separate;         *)
+(*                          the secret is JointSecret, the pile pair |        *)
+(* | distribution-to-observer bridges | S5x5Analysis.rand_cut_distE,          *)
+(*                          S5x5Analysis.rand_content_traceE,                 *)
+(*                          S5x5Analysis.rand_pile1_seat_viewE,               *)
+(*                          S5x5Analysis.rand_pile2_seat_viewE,               *)
+(*                          S5x5Analysis.rand_pile1_viewE,                    *)
+(*                          S5x5Analysis.rand_pile2_viewE,                    *)
+(*                          S5x5Analysis.rand_joint_viewE |                   *)
+(* | bound or certificate | none |                                            *)
+(* | correctness theorem  | S5x5Analysis.rand_correct,                        *)
+(*                          S5x5Analysis.rand_recovers,                       *)
+(*                          S5x5Analysis.rand_observed_recovers, recovering   *)
+(*                          the 'I_10 image of the pile pair, with            *)
+(*                          S5x5Analysis.combine_not_injectiveE recording     *)
+(*                          that the image is not the pair |                  *)
+(* | security, leakage, mixing or limitation theorem                          *)
+(*                        | S5x5Analysis.exec_trace_secrecy,                  *)
+(*                          S5x5Analysis.exec_p1_secrecy,                     *)
+(*                          S5x5Analysis.exec_p2_secrecy,                     *)
+(*                          S5x5Analysis.exec_joint_secrecy |                 *)
+(* | final bridge theorem | S5x5Analysis.exec_joint_secrecy |                 *)
+(* | model transfer       | none claimed |                                    *)
+(* | missing premise      | none is needed: the path states exact results at  *)
+(*                          its own executed observers |                      *)
+(* | completion level     | AnalysisBridged |                                 *)
+(* | transfer status      | StaticExecutedOnly |                              *)
+(* | assumption status    | AcceptsAxioms [:: AxS5x5GroupOrder] |             *)
+(* | typed row            | s5x5_row_rand |                                   *)
+(*                                                                            *)
+(* | theorem | distribution | observer | notion |                             *)
+(* |---|---|---|---|                                                          *)
+(* | exec_joint_secrecy | the product tape distribution of rand_sample        *)
+(*   | joint_view R C1 C2, executed | exact privacy of the pile pair: zero    *)
+(*     mutual information, and conditional entropy equal to entropy, under    *)
+(*     the two per-pile cardinality bounds |                                  *)
+(* | exec_p1_secrecy, exec_p2_secrecy | the same distribution                 *)
+(*   | pile1_coalition_view, pile2_coalition_view, executed                   *)
+(*   | exact privacy of the pile pair against one sub-threshold pile          *)
+(*     coalition |                                                            *)
+(* | exec_trace_secrecy | the same distribution                               *)
+(*   | rand_content_trace R j, executed | trace secrecy |                     *)
+(* | rand_observed_recovers | none, the statement is distribution-free        *)
+(*   | the executed endpoint list | correctness |                             *)
+(*                                                                            *)
+(* Level justification. As in row 7, the first four levels come from profile, *)
+(* rand_exec_plug, rand_observed, rand_sample and rand_cut_distE.             *)
+(* exec_joint_secrecy is stated at joint_view, an executed reader of          *)
+(* rand_sample, over that same distribution, giving AnalysisBridged. The      *)
+(* joint statement is proved as such and is not inferred from the two         *)
+(* per-pile ones, and no alias flattens the two piles into one ten-seat       *)
+(* coalition.                                                                 *)
+(*                                                                            *)
+(*     Row 11: ten-seat S_5 x S_5 instance, finite word inside the first pile *)
+(*                                                                            *)
+(* | field | value |                                                          *)
+(* |---|---|                                                                  *)
+(* | protocol instance    | ten-seat two-pile S_5 x S_5 instance |            *)
+(* | probability model    | the product of an arbitrary secret prior with the *)
+(*                          uniform distribution on generator words of length *)
+(*                          L, the cut being the word's evaluation in         *)
+(*                          S_5 x S_5 |                                       *)
+(* | profile alias        | S5x5Analysis.profile |                            *)
+(* | execution alias      | S5x5Analysis.exec_plug |                          *)
+(* | observed alias       | S5x5Analysis.observed |                           *)
+(* | sample alias         | S5x5Analysis.word_sample at a secret prior and a  *)
+(*                          word length. The typed sample slot is empty for   *)
+(*                          the reason given in row 8 |                       *)
+(* | observers            | one first-pile position's endpoint distribution,  *)
+(*                          the pushforward of the cut distribution along the *)
+(*                          evaluation of a permutation at the ten-seat image *)
+(*                          of that pile position, carrier 'I_10 |            *)
+(* | distribution-to-observer bridges | S5x5Analysis.word_cut_distE |         *)
+(* | bound or certificate | S5x5Analysis.word_pile1_bound |                   *)
+(* | correctness theorem  | S5x5Analysis.observed_recovers, shared with row 9 *)
+(*                          | *)
+(* | security, leakage, mixing or limitation theorem | none |                 *)
+(* | final bridge theorem | NONE |                                            *)
+(* | model transfer       | S5x5Analysis.word_transfer_conditional, under the *)
+(*                          premise below |                                   *)
+(* | missing premise      | S5x5Analysis.word_missing_premise: a bound        *)
+(*                          var_dist (sa_cut_dist (word_sample secretP L)) Q  *)
+(*                          <= delta on the cut carrier {perm 'I_10} |        *)
+(* | completion level     | Sampled |                                         *)
+(* | transfer status      | NoModelComparison |                               *)
+(* | assumption status                                                        *)
+(*     | AcceptsAxioms [:: AxS5x5GroupOrder; AxRayleighQ2R] |                 *)
+(* | typed row            | s5x5_row_pile1_word |                             *)
+(*                                                                            *)
+(* | theorem | distribution | observer | notion |                             *)
+(* |---|---|---|---|                                                          *)
+(* | word_pile1_bound | the cut distribution of word_sample, named by         *)
+(*   word_cut_distE | one first-pile position's endpoint distribution         *)
+(*   | endpoint marginal mixing inside the first pile, against the uniform    *)
+(*     distribution on that pile, conditional on s5_rayleigh_Q2_R |           *)
+(*                                                                            *)
+(* Level justification. word_sample is a SampleAdapter over exec_plug and     *)
+(* word_cut_distE names its cut distribution, giving Sampled. The row is NOT  *)
+(* AnalysisBridged, for the reason of row 8: the bound is about one           *)
+(* position's endpoint distribution. No joint finite-word privacy theorem is  *)
+(* claimed on this instance. The bound is conditional on s5_rayleigh_Q2_R.    *)
+(*                                                                            *)
+(*     Row 12: ten-seat S_5 x S_5 instance, finite word inside the second     *)
+(*             pile                                                           *)
+(*                                                                            *)
+(* Every field is that of row 11 with the second pile in place of the first:  *)
+(* the observer is one second-pile position's endpoint distribution, reached  *)
+(* through the ten-seat image of that pile position, and the bound is         *)
+(* S5x5Analysis.word_pile2_bound against the uniform distribution on the      *)
+(* second pile. Transfer status NoModelComparison with the same missing       *)
+(* premise, completion level Sampled, assumption status                       *)
+(* AcceptsAxioms [:: AxS5x5GroupOrder; AxRayleighQ2R], typed row              *)
+(* s5x5_row_pile2_word.                                                       *)
+(*                                                                            *)
+(* | theorem | distribution | observer | notion |                             *)
+(* |---|---|---|---|                                                          *)
+(* | word_pile2_bound | the cut distribution of word_sample, named by         *)
+(*   word_cut_distE | one second-pile position's endpoint distribution        *)
+(*   | endpoint marginal mixing inside the second pile, against the uniform   *)
+(*     distribution on that pile, conditional on s5_rayleigh_Q2_R |           *)
+(*                                                                            *)
+(*     Row 13: ten-seat S_5 x S_5 instance, first pile against global uniform *)
+(*                                                                            *)
+(* | field | value |                                                          *)
+(* |---|---|                                                                  *)
+(* | protocol instance    | ten-seat two-pile S_5 x S_5 instance |            *)
+(* | probability model    | the finite-word model of row 11 |                 *)
+(* | profile alias        | S5x5Analysis.profile |                            *)
+(* | execution alias      | S5x5Analysis.exec_plug |                          *)
+(* | observed alias       | S5x5Analysis.observed |                           *)
+(* | sample alias         | S5x5Analysis.word_sample, typed slot empty as in  *)
+(*                          row 11 |                                          *)
+(* | observers            | one first-pile position's endpoint distribution,  *)
+(*                          carrier 'I_10, now compared with the uniform      *)
+(*                          distribution on all ten seats |                   *)
+(* | distribution-to-observer bridges | S5x5Analysis.word_cut_distE |         *)
+(* | bound or certificate | S5x5Analysis.word_pile1_bound, and the companion  *)
+(*                          upper bound S5x5Analysis.word_seat_bound, which   *)
+(*                          quantifies over all ten positions and whose       *)
+(*                          leading summand one is the distance between a     *)
+(*                          pile-uniform distribution and global uniform |    *)
+(* | correctness theorem  | S5x5Analysis.observed_recovers, shared with row 9 *)
+(*                          | *)
+(* | security, leakage, mixing or limitation theorem                          *)
+(*                        | S5x5Analysis.word_pile1_floor,                    *)
+(*                          S5x5Analysis.word_pile1_floor_gt0, with the       *)
+(*                          regime named by                                   *)
+(*                          S5x5Analysis.word_positive_regime |               *)
+(* | final bridge theorem | NONE |                                            *)
+(* | model transfer       | S5x5Analysis.word_pile1_floor: a lower bound on   *)
+(*                          the distance from global uniform, transported to  *)
+(*                          this row's own observer by the reverse triangle   *)
+(*                          inequality |                                      *)
+(* | missing premise      | not applicable to the limitation, which is proved *)
+(*                          rather than assumed; the absent premise of the    *)
+(*                          POSITIVE direction remains the one of row 11 |    *)
+(* | completion level     | Sampled |                                         *)
+(* | transfer status      | NegativeTransfer |                                *)
+(* | assumption status                                                        *)
+(*     | AcceptsAxioms [:: AxS5x5GroupOrder; AxRayleighQ2R] |                 *)
+(* | typed row            | s5x5_row_pile1_limitation |                       *)
+(*                                                                            *)
+(* | theorem | distribution | observer | notion |                             *)
+(* |---|---|---|---|                                                          *)
+(* | word_pile1_floor | the cut distribution of word_sample                   *)
+(*   | one first-pile position's endpoint distribution                        *)
+(*   | negative mixing result: the distance from global uniform is at least   *)
+(*     one minus the pile mixing factor, conditional on s5_rayleigh_Q2_R |    *)
+(* | word_pile1_floor_gt0 | the same distribution | the same observer         *)
+(*   | negative mixing result in its non-vacuous regime, word length at least *)
+(*     seventeen, conditional on s5_rayleigh_Q2_R |                           *)
+(*                                                                            *)
+(* Level justification. The row stays Sampled and does not reach              *)
+(* AnalysisBridged. Its floors are stated at the sheet-endpoint reader of the *)
+(* word-cut distribution, which is a pushforward of that distribution, and    *)
+(* not at an interpreter-executed content observer of this instance: no       *)
+(* reader equality carries them to one. The status is still NegativeTransfer, *)
+(* because a theorem does transport an obstruction to the row's own observer; *)
+(* the level and the status answer different questions. The result is a       *)
+(* mixing limitation about the shuffle, not a privacy failure of the          *)
+(* protocol, and it says nothing about any coalition.                         *)
+(*                                                                            *)
+(*     Row 14: ten-seat S_5 x S_5 instance, second pile against global        *)
+(*             uniform                                                        *)
+(*                                                                            *)
+(* Every field is that of row 13 with the second pile in place of the first:  *)
+(* the theorems are S5x5Analysis.word_pile2_floor and                         *)
+(* S5x5Analysis.word_pile2_floor_gt0 at one second-pile position's endpoint   *)
+(* distribution, with the same companion bounds, the same regime, completion  *)
+(* level Sampled, transfer status NegativeTransfer, assumption status         *)
+(* AcceptsAxioms [:: AxS5x5GroupOrder; AxRayleighQ2R] and typed row           *)
+(* s5x5_row_pile2_limitation.                                                 *)
+(*                                                                            *)
+(* | theorem | distribution | observer | notion |                             *)
+(* |---|---|---|---|                                                          *)
+(* | word_pile2_floor | the cut distribution of word_sample                   *)
+(*   | one second-pile position's endpoint distribution                       *)
+(*   | negative mixing result: the distance from global uniform is at least   *)
+(*     one minus the pile mixing factor, conditional on s5_rayleigh_Q2_R |    *)
+(* | word_pile2_floor_gt0 | the same distribution | the same observer         *)
+(*   | negative mixing result in its non-vacuous regime, word length at least *)
+(*     seventeen, conditional on s5_rayleigh_Q2_R |                           *)
+(*                                                                            *)
+(*     Row 15: four-seat abelian instance, secret recovery                    *)
+(*                                                                            *)
+(* | field | value |                                                          *)
+(* |---|---|                                                                  *)
+(* | protocol instance    | four-seat abelian two-generator instance |        *)
+(* | probability model    | none: the path is distribution-free |             *)
+(* | profile alias        | AbelianAnalysis.profile |                         *)
+(* | execution alias      | AbelianAnalysis.exec_plug |                       *)
+(* | observed alias       | AbelianAnalysis.observed |                        *)
+(* | sample alias         | none |                                            *)
+(* | observers            | AbelianAnalysis.seat_endpoint : 'I_4, executed;   *)
+(*                          AbelianAnalysis.verifier_endpoints : seq 'I_4;    *)
+(*                          AbelianAnalysis.verifier_trace,                   *)
+(*                          AbelianAnalysis.player_raw_trace : message lists, *)
+(*                            navigation only, not random variables |         *)
+(* | distribution-to-observer bridges | none: the path has no sample layer |  *)
+(* | bound or certificate | none |                                            *)
+(* | correctness theorem  | AbelianAnalysis.exec_correct,                     *)
+(*                          AbelianAnalysis.exec_recovers,                    *)
+(*                          AbelianAnalysis.observed_recovers |               *)
+(* | security, leakage, mixing or limitation theorem | none |                 *)
+(* | final bridge theorem | NONE |                                            *)
+(* | model transfer       | none claimed |                                    *)
+(* | missing premise      | not applicable: the path names no model |         *)
+(* | completion level     | Observed |                                        *)
+(* | transfer status      | NoModelComparison |                               *)
+(* | assumption status    | KernelClosed |                                    *)
+(* | typed row            | abel_row_recovery |                               *)
+(*                                                                            *)
+(* | theorem | distribution | observer | notion |                             *)
+(* |---|---|---|---|                                                          *)
+(* | observed_recovers | none, the statement is distribution-free             *)
+(*   | the executed endpoint list | correctness, for every secret in 'I_4 and *)
+(*     every cut in the generated group |                                     *)
+(*                                                                            *)
+(* Level justification. profile, exec_plug and observed give the first three  *)
+(* levels; no sample adapter stands over this plug, the two shuffle models    *)
+(* standing over the identity-content plug of rows 16 and 17.                 *)
+(*                                                                            *)
+(*     Row 16: four-seat abelian instance, identity card content              *)
+(*                                                                            *)
+(* | field | value |                                                          *)
+(* |---|---|                                                                  *)
+(* | protocol instance    | four-seat abelian two-generator instance |        *)
+(* | probability model    | none on this row: the run argument is the unit    *)
+(*                          and carries no randomness |                       *)
+(* | profile alias        | AbelianAnalysis.profile |                         *)
+(* | execution alias      | AbelianAnalysis.shuffle_plug |                    *)
+(* | observed alias       | AbelianAnalysis.shuffle_observed |                *)
+(* | sample alias         | none on this row |                                *)
+(* | observers            | AbelianAnalysis.endpoint_vector                   *)
+(*                            : 4.-tuple 'I_4, the complete four-endpoint     *)
+(*                            observation of a cut, injective on all of       *)
+(*                            {perm 'I_4} by                                  *)
+(*                            AbelianAnalysis.endpoint_vector_inj |           *)
+(* | distribution-to-observer bridges | none on this row |                    *)
+(* | bound or certificate | none |                                            *)
+(* | correctness theorem  | AbelianAnalysis.shuffle_recovers |                *)
+(* | security, leakage, mixing or limitation theorem | none |                 *)
+(* | final bridge theorem | NONE |                                            *)
+(* | model transfer       | none claimed |                                    *)
+(* | missing premise      | not applicable: this row makes no model claim,    *)
+(*                          the models of the same plug being row 17's |      *)
+(* | completion level     | Observed |                                        *)
+(* | transfer status      | NoModelComparison |                               *)
+(* | assumption status    | KernelClosed |                                    *)
+(* | typed row            | abel_row_identity |                               *)
+(*                                                                            *)
+(* | theorem | distribution | observer | notion |                             *)
+(* |---|---|---|---|                                                          *)
+(* | shuffle_recovers | none, the statement is distribution-free              *)
+(*   | the executed endpoint list | correctness: the run decodes to the       *)
+(*     constant abel_identity_recon_value at every cut in the generated       *)
+(*     group. The plug deals identity card content and no secret, so this is  *)
+(*     a constant-recovery statement and not an arbitrary-secret one |        *)
+(*                                                                            *)
+(* Level justification. The row is Observed: it names a profile, a plug and   *)
+(* an observed execution and attaches no distribution of its own. The two     *)
+(* adapters that stand over this same plug belong to row 17, where the        *)
+(* probability lives.                                                         *)
+(*                                                                            *)
+(*     Row 17: four-seat abelian instance, fixed-length mixing limitation     *)
+(*                                                                            *)
+(* | field | value |                                                          *)
+(* |---|---|                                                                  *)
+(* | protocol instance    | four-seat abelian two-generator instance |        *)
+(* | probability model    | two models on the identity-content plug: the      *)
+(*                          ideal one, uniform on the four-element generated  *)
+(*                          group, and the actual one, the uniform            *)
+(*                          distribution on generator words of length L + 1   *)
+(*                          evaluated in that group |                         *)
+(* | profile alias        | AbelianAnalysis.profile |                         *)
+(* | execution alias      | AbelianAnalysis.shuffle_plug |                    *)
+(* | observed alias       | AbelianAnalysis.shuffle_observed |                *)
+(* | sample alias         | AbelianAnalysis.ideal_sample, which the typed row *)
+(*                          carries because it stands at every realType, and  *)
+(*                          AbelianAnalysis.word_sample at word length L,     *)
+(*                          which the typed slot cannot carry because it is a *)
+(*                          family indexed by that length |                   *)
+(* | observers            | AbelianAnalysis.endpoint_vector                   *)
+(*                            : 4.-tuple 'I_4, the complete four-endpoint     *)
+(*                            executed observation, read on each model's own  *)
+(*                            sample space |                                  *)
+(* | distribution-to-observer bridges | AbelianAnalysis.actual_cut_distE,     *)
+(*                          AbelianAnalysis.sample_reader_distE |             *)
+(* | bound or certificate | none: the row states an exact distance, not a     *)
+(*                          bound |                                           *)
+(* | correctness theorem  | AbelianAnalysis.shuffle_recovers, shared with row *)
+(*                          16 |                                              *)
+(* | security, leakage, mixing or limitation theorem                          *)
+(*                        | AbelianAnalysis.word_mixing_limitation, with its  *)
+(*                          group form AbelianAnalysis.word_group_dist and    *)
+(*                          its static form AbelianAnalysis.executed_distance *)
+(*                          | *)
+(* | final bridge theorem | AbelianAnalysis.word_mixing_limitation, the same  *)
+(*                          statement as                                      *)
+(*                          AbelianAnalysis.executed_observation_distance |   *)
+(* | model transfer       | AbelianAnalysis.word_mixing_limitation: the       *)
+(*                          comparison of the two models is carried to the    *)
+(*                          executed observer, and it is negative |           *)
+(* | missing premise      | not applicable: the comparison is proved, and its *)
+(*                          conclusion excludes any bound below one |         *)
+(* | completion level     | AnalysisBridged |                                 *)
+(* | transfer status      | NegativeTransfer |                                *)
+(* | assumption status    | KernelClosed |                                    *)
+(* | typed row            | abel_row_limitation |                             *)
+(*                                                                            *)
+(* | theorem | distribution | observer | notion |                             *)
+(* |---|---|---|---|                                                          *)
+(* | word_mixing_limitation | the two models' own sample distributions        *)
+(*   | endpoint_vector, read through abel_sample_reader on each sample space, *)
+(*     executed | negative mixing result: full-L1 distance exactly one at     *)
+(*     every finite word length |                                             *)
+(* | word_group_dist | the two cut distributions on the generated group       *)
+(*   | none, the statement is about the distributions themselves              *)
+(*   | negative mixing result, full-L1 distance one |                         *)
+(* | executed_distance | the same two cut distributions                       *)
+(*   | endpoint_vector | negative mixing result, full-L1 distance one |       *)
+(*                                                                            *)
+(* Level justification, stated explicitly because this row is a limitation    *)
+(* row that DOES reach AnalysisBridged while the S_5 x S_5 limitation rows do *)
+(* not. ideal_sample and word_sample are SampleAdapters over shuffle_plug and *)
+(* actual_cut_distE names the second one's cut distribution, giving Sampled.  *)
+(* word_mixing_limitation is stated at fdistmap of abel_sample_reader over    *)
+(* sa_sampleP of those two adapters, that is at the adapters' own executed    *)
+(* observation, so the theorem's distributions and observer are the row's     *)
+(* own, giving AnalysisBridged. The theorem is a fixed-length mixing          *)
+(* limitation about the shuffle. It is not a privacy failure, it is not an    *)
+(* unqualified protocol failure, and the instance carries no privacy result   *)
+(* at all, positive or negative.                                              *)
+(*                                                                            *)
 (*     Aliases carrying no capability yet                                     *)
 (*                                                                            *)
-(* These are public observers and correctness statements of the two facades   *)
+(* These are public observers and correctness statements of the five facades  *)
 (* that no row above attaches a security notion to. They are named here so    *)
 (* that the checker pins the whole facade surface, not only the rows.         *)
 (*                                                                            *)
@@ -308,15 +983,247 @@ Local Open Scope ring_scope.
 (*                      coalition_raw_trace, input_raw_trace,                 *)
 (*                      dealer_raw_trace, prior, exec_correct, exec_recovers, *)
 (*                      procs_biasE |                                         *)
+(* | S5Analysis | profile_k, seat_endpoint, coalition_endpoints,              *)
+(*                verifier_trace, verifier_endpoints, player_raw_trace,       *)
+(*                rand_seat_endpoint, rand_coalition_endpoints,               *)
+(*                rand_verifier_trace, rand_verifier_endpoints,               *)
+(*                rand_player_raw_trace, exec_correct, exec_recovers,         *)
+(*                rand_correct, rand_recovers, word_cut_imageE,               *)
+(*                word_transfer_conditional |                                 *)
+(* | S5x5Analysis | profile_k, seat_endpoint, coalition_endpoints,            *)
+(*                  verifier_trace, verifier_endpoints, player_raw_trace,     *)
+(*                  rand_seat_endpoint, rand_coalition_endpoints,             *)
+(*                  rand_verifier_trace, rand_verifier_endpoints,             *)
+(*                  rand_player_raw_trace, pile1_seats, pile2_seats,          *)
+(*                  pile1_seat_view, pile2_seat_view, exec_correct,           *)
+(*                  exec_recovers, rand_correct, rand_recovers,               *)
+(*                  combine_not_injectiveE, word_transfer_conditional |       *)
+(* | AbelianAnalysis | profile_k, seat_endpoint, verifier_trace,              *)
+(*                     verifier_endpoints, player_raw_trace,                  *)
+(*                     endpoint_vector_inj, exec_correct, exec_recovers |     *)
 (*                                                                            *)
 (*     Absent capabilities                                                    *)
 (*                                                                            *)
-(* The five-card development has no transfer-layer result: section 7 of its   *)
-(* facade is empty and no row cites a transfer capability. No row is filled   *)
-(* with a dummy theorem, an option-valued proof, an axiom or a placeholder,   *)
-(* and no endpoint marginal bound is recorded as a privacy or security        *)
-(* capability.                                                                *)
+(* No row is filled with a dummy theorem, an option-valued proof, an axiom or *)
+(* a placeholder, no endpoint marginal bound is recorded as a privacy or      *)
+(* security capability, and every path whose transfer status is               *)
+(* NoModelComparison or StaticExecutedOnly names the premise it lacks.        *)
+(*                                                                            *)
+(* Five-card development. No transfer-layer result exists: section 7 of its   *)
+(* facade carries typed status aliases and no theorem. The absent premise is  *)
+(* the second hypothesis of var_dist_fdistmap_transfer, an equality of two    *)
+(* reader pushforwards under an ideal distribution, which the development     *)
+(* does not supply.                                                           *)
+(*                                                                            *)
+(* S_5 finite-word path (row 8). The absent premise is                        *)
+(* S5Analysis.word_missing_premise, that is                                   *)
+(* var_dist (sa_cut_dist (S5Analysis.word_sample secretP L)) Q <= delta on    *)
+(* the cut carrier {perm 'I_5}, against a named reference distribution Q. The *)
+(* landed spectral theorem bounds a pushforward on the carrier 'I_5 instead,  *)
+(* which does not discharge it. For Q the uniform distribution on the         *)
+(* generated group the premise is moreover UNSATISFIABLE at every delta below *)
+(* one: every generator of this instance is a transposition, so a word of     *)
+(* length L evaluates into the coset of the alternating subgroup determined   *)
+(* by the parity of L, and the cut distribution has full-L1 distance one from *)
+(* group uniform. That sign-coset confinement is the phenomenon row 17 proves *)
+(* inside its own group; it is not formalized at S_5, and no theorem of this  *)
+(* repository asserts it there.                                               *)
+(*                                                                            *)
+(* S_5 x S_5 finite-word paths (rows 11 to 14). The absent premise is the     *)
+(* twin of the previous one on the carrier {perm 'I_10}, namely               *)
+(* S5x5Analysis.word_missing_premise, that is                                 *)
+(* var_dist (sa_cut_dist (S5x5Analysis.word_sample secretP L)) Q <= delta.    *)
+(* It is unsatisfiable for Q the uniform distribution on the generated group  *)
+(* for the same reason, every generator of this instance being a transposition*)
+(* of the ten positions. The per-pile bounds of rows 11 and 12 are not        *)
+(* affected: they are taken against the uniform distribution on one pile,     *)
+(* which the confinement argument does not reach.                             *)
 (******************************************************************************)
+
+(******************************************************************************)
+(*     The typed rows                                                         *)
+(******************************************************************************)
+
+(** AnalysisPathRow — one analysis path of the repository.
+    Kind: interface.
+    A constructor supplies the observed execution apr_observed of the path,
+    which carries its profile and its execution plug as projections, the
+    sample adapter apr_sample of the path at every realType when the path has
+    one, and the three typed statuses apr_completion, apr_transfer and
+    apr_assumptions. The record stores no theorem: theorems are facade
+    aliases, pinned by spelled type in the checker below. *)
+Record AnalysisPathRow := MkAnalysisPathRow {
+  (* apr_observed is the executed run of the path together with its static
+     observation and the value it recovers. *)
+  apr_observed    : OE.ObservedExecution ;
+  (* apr_sample is the path's sample adapter over that very execution, at each
+     realType. The slot is empty when the path's model is a family indexed by
+     data the repository does not fix, such as a secret prior or a word
+     length; the row's prose then names the family instead. *)
+  apr_sample      : forall R : realType,
+                      option (@SampleAdapter R _
+                                (OE.oe_execution apr_observed)) ;
+  (* apr_completion is the level the path's theorems actually reach. *)
+  apr_completion  : CompletionLevel ;
+  (* apr_transfer is the relation the path establishes between its executed
+     model and an idealized one. *)
+  apr_transfer    : TransferStatus ;
+  (* apr_assumptions is the assumption status of the path's public results,
+     the classical trio of the repository baseline excluded. *)
+  apr_assumptions : AssumptionStatus ;
+}.
+
+(** pgl27_row_exact — row 1: the eight-card orbit instance under its exact
+    uniform shuffle.
+    @intent: the observed execution of that instance, its exact-uniform sample
+    adapter, and the statuses of row 1. *)
+Definition pgl27_row_exact : AnalysisPathRow :=
+  @MkAnalysisPathRow PGL27Analysis.observed
+    (fun R => Some (PGL27Analysis.exact_sample R))
+    AnalysisBridged StaticExecutedOnly KernelClosed.
+
+(** pgl27_row_word — row 2: the same instance under its two-hundred-letter
+    word shuffle.
+    @intent: the observed execution of that instance and the statuses of row
+    2. The sample slot is empty: word_sample is indexed by a secret prior and
+    fixed_word_sample by a secret, and the row's theorems quantify over the
+    secret rather than fixing one. *)
+Definition pgl27_row_word : AnalysisPathRow :=
+  @MkAnalysisPathRow PGL27Analysis.observed (fun _ => None)
+    AnalysisBridged IdealFinite KernelClosed.
+
+(** five_card_row_uniform — row 3: the five-card development under the uniform
+    rotation cut.
+    @intent: the observed execution of that development, its uniform sample
+    adapter, and the statuses of row 3. *)
+Definition five_card_row_uniform : AnalysisPathRow :=
+  @MkAnalysisPathRow FiveCardAnalysis.observed
+    (fun R => Some (FiveCardAnalysis.uniform_sample R))
+    AnalysisBridged StaticExecutedOnly KernelClosed.
+
+(** five_card_row_biased — row 4: the same development under one biased cut.
+    @intent: the observed execution of that development, the single-biased
+    sample adapter at the landed bias one hundredth, whose two hypotheses are
+    discharged by kim_centi_lt and kim_centi_gt so that the adapter stands at
+    every realType, and the statuses of row 4. The row's theorem quantifies
+    over the bias; the slot names the one member the repository fixes. *)
+Definition five_card_row_biased : AnalysisPathRow :=
+  @MkAnalysisPathRow FiveCardAnalysis.observed
+    (fun R => Some (@FiveCardAnalysis.single_biased_sample R (1 / 100)
+                      (five_card_kim.kim_centi_lt R)
+                      (five_card_kim.kim_centi_gt R)))
+    AnalysisBridged StaticExecutedOnly KernelClosed.
+
+(** five_card_row_repeated — row 5: the same development under repeated biased
+    cuts.
+    @intent: the observed execution of that development, the seven-cut sample
+    adapter at bias one hundredth, and the statuses of row 5. *)
+Definition five_card_row_repeated : AnalysisPathRow :=
+  @MkAnalysisPathRow FiveCardAnalysis.observed
+    (fun R => Some (FiveCardAnalysis.centi_sample R))
+    Sampled NoModelComparison KernelClosed.
+
+(** s5_row_det — row 6: the five-seat S_5 instance dealing a position.
+    @intent: the deterministic observed execution of that instance and the
+    statuses of row 6. The path has no sample layer. *)
+Definition s5_row_det : AnalysisPathRow :=
+  @MkAnalysisPathRow S5Analysis.observed (fun _ => None)
+    Observed NoModelComparison (AcceptsAxioms [:: AxS5GroupOrder]).
+
+(** s5_row_rand — row 7: the same instance dealing an additive sharing.
+    @intent: the randomized observed execution of that instance, its
+    randomized sample adapter, and the statuses of row 7. *)
+Definition s5_row_rand : AnalysisPathRow :=
+  @MkAnalysisPathRow S5Analysis.rand_observed
+    (fun R => Some (S5Analysis.rand_sample R))
+    AnalysisBridged StaticExecutedOnly (AcceptsAxioms [:: AxS5GroupOrder]).
+
+(** s5_row_word — row 8: the same instance under a finite generator word.
+    @intent: the deterministic observed execution the finite-word model stands
+    over, and the statuses of row 8. The sample slot is empty: word_sample is
+    a family indexed by a secret prior and a word length. *)
+Definition s5_row_word : AnalysisPathRow :=
+  @MkAnalysisPathRow S5Analysis.observed (fun _ => None)
+    Sampled NoModelComparison
+    (AcceptsAxioms [:: AxS5GroupOrder; AxRayleighQ2R]).
+
+(** s5x5_row_det — row 9: the ten-seat S_5 x S_5 instance dealing a position.
+    @intent: the deterministic observed execution of that instance and the
+    statuses of row 9. *)
+Definition s5x5_row_det : AnalysisPathRow :=
+  @MkAnalysisPathRow S5x5Analysis.observed (fun _ => None)
+    Observed NoModelComparison (AcceptsAxioms [:: AxS5x5GroupOrder]).
+
+(** s5x5_row_rand — row 10: the same instance dealing two pile sharings.
+    @intent: the randomized observed execution of that instance, its product
+    sample adapter, and the statuses of row 10. *)
+Definition s5x5_row_rand : AnalysisPathRow :=
+  @MkAnalysisPathRow S5x5Analysis.rand_observed
+    (fun R => Some (S5x5Analysis.rand_sample R))
+    AnalysisBridged StaticExecutedOnly (AcceptsAxioms [:: AxS5x5GroupOrder]).
+
+(** s5x5_row_pile1_word — row 11: the first pile under a finite generator
+    word.
+    @intent: the deterministic observed execution the finite-word model stands
+    over, and the statuses of row 11. The sample slot is empty for the reason
+    of row 8. *)
+Definition s5x5_row_pile1_word : AnalysisPathRow :=
+  @MkAnalysisPathRow S5x5Analysis.observed (fun _ => None)
+    Sampled NoModelComparison
+    (AcceptsAxioms [:: AxS5x5GroupOrder; AxRayleighQ2R]).
+
+(** s5x5_row_pile2_word — row 12: the second pile under a finite generator
+    word.
+    @intent: the same observed execution and the statuses of row 12. *)
+Definition s5x5_row_pile2_word : AnalysisPathRow :=
+  @MkAnalysisPathRow S5x5Analysis.observed (fun _ => None)
+    Sampled NoModelComparison
+    (AcceptsAxioms [:: AxS5x5GroupOrder; AxRayleighQ2R]).
+
+(** s5x5_row_pile1_limitation — row 13: the first pile against global uniform.
+    @intent: the same observed execution and the statuses of row 13, whose
+    transfer status is negative because a floor transports the obstruction to
+    the row's own observer. *)
+Definition s5x5_row_pile1_limitation : AnalysisPathRow :=
+  @MkAnalysisPathRow S5x5Analysis.observed (fun _ => None)
+    Sampled NegativeTransfer
+    (AcceptsAxioms [:: AxS5x5GroupOrder; AxRayleighQ2R]).
+
+(** s5x5_row_pile2_limitation — row 14: the second pile against global
+    uniform.
+    @intent: the same observed execution and the statuses of row 14. *)
+Definition s5x5_row_pile2_limitation : AnalysisPathRow :=
+  @MkAnalysisPathRow S5x5Analysis.observed (fun _ => None)
+    Sampled NegativeTransfer
+    (AcceptsAxioms [:: AxS5x5GroupOrder; AxRayleighQ2R]).
+
+(** abel_row_recovery — row 15: the four-seat abelian instance recovering a
+    dealt secret.
+    @intent: the secret-recovery observed execution of that instance and the
+    statuses of row 15. *)
+Definition abel_row_recovery : AnalysisPathRow :=
+  @MkAnalysisPathRow AbelianAnalysis.observed (fun _ => None)
+    Observed NoModelComparison KernelClosed.
+
+(** abel_row_identity — row 16: the same instance dealing identity card
+    content.
+    @intent: the identity-content observed execution of that instance and the
+    statuses of row 16. The two shuffle models of that plug belong to row
+    17. *)
+Definition abel_row_identity : AnalysisPathRow :=
+  @MkAnalysisPathRow AbelianAnalysis.shuffle_observed (fun _ => None)
+    Observed NoModelComparison KernelClosed.
+
+(** abel_row_limitation — row 17: the fixed-length mixing limitation of that
+    instance.
+    @intent: the identity-content observed execution, the ideal shuffle model,
+    which is the one of the row's two adapters standing at every realType, and
+    the statuses of row 17. The actual model word_sample is indexed by the
+    word length and is named in the row's prose. *)
+Definition abel_row_limitation : AnalysisPathRow :=
+  @MkAnalysisPathRow AbelianAnalysis.shuffle_observed
+    (fun R => Some (AbelianAnalysis.ideal_sample R))
+    AnalysisBridged NegativeTransfer KernelClosed.
 
 (******************************************************************************)
 (*     The deterministic checker: eight-card orbit instance                   *)
@@ -873,3 +1780,855 @@ Timeout 60 Check (FiveCardAnalysis.deal_centi_lt :
 
 (* --- 7 Transfer: the five-card facade has none, so there is nothing to
    check here; the PGL transfer aliases are checked above. --- *)
+
+(******************************************************************************)
+(*     The deterministic checker: five-seat S_5 instance                      *)
+(******************************************************************************)
+
+(* --- 1 Program --- *)
+
+Timeout 60 Check (S5Analysis.profile : MonodromyProfile).
+
+Timeout 60 Check (S5Analysis.profile_k : profile_k S5Analysis.profile = 5%N).
+
+(* --- 2 Execution --- *)
+
+Timeout 60 Check (S5Analysis.exec_plug : ExecutionPlug S5Analysis.profile).
+
+Timeout 60 Check (S5Analysis.rand_exec_plug :
+  ExecutionPlug S5Analysis.profile).
+
+(* --- 3 Observers --- *)
+
+Timeout 60 Check (S5Analysis.seat_endpoint :
+  ep_inputT S5Analysis.exec_plug ->
+  pgg_gT (mp_M S5Analysis.profile) -> nat ->
+  'I_(pi_T' (mp_PI S5Analysis.profile)).+1 ->
+  'I_(pgg_N' (mp_M S5Analysis.profile)).+1).
+
+Timeout 60 Check (S5Analysis.coalition_endpoints :
+  ep_inputT S5Analysis.exec_plug ->
+  pgg_gT (mp_M S5Analysis.profile) -> nat ->
+  {set 'I_(pi_T' (mp_PI S5Analysis.profile)).+1} ->
+  {ffun 'I_(pi_T' (mp_PI S5Analysis.profile)).+1 ->
+        'I_(pgg_N' (mp_M S5Analysis.profile)).+1}).
+
+Timeout 60 Check (S5Analysis.verifier_trace :
+  ep_inputT S5Analysis.exec_plug ->
+  pgg_gT (mp_M S5Analysis.profile) -> nat ->
+  seq (pgg_data (pgg_N' (mp_M S5Analysis.profile)).+1)).
+
+Timeout 60 Check (S5Analysis.verifier_endpoints :
+  ep_inputT S5Analysis.exec_plug ->
+  pgg_gT (mp_M S5Analysis.profile) -> nat ->
+  seq 'I_(pgg_N' (mp_M S5Analysis.profile)).+1).
+
+Timeout 60 Check (S5Analysis.player_raw_trace :
+  ep_inputT S5Analysis.exec_plug ->
+  pgg_gT (mp_M S5Analysis.profile) -> nat ->
+  'I_(pi_T' (mp_PI S5Analysis.profile)).+1 ->
+  seq (pgg_data (pgg_N' (mp_M S5Analysis.profile)).+1)).
+
+Timeout 60 Check (S5Analysis.observed : OE.ObservedExecution).
+
+Timeout 60 Check (S5Analysis.rand_seat_endpoint :
+  ep_inputT S5Analysis.rand_exec_plug ->
+  pgg_gT (mp_M S5Analysis.profile) -> nat ->
+  'I_(pi_T' (mp_PI S5Analysis.profile)).+1 ->
+  'I_(pgg_N' (mp_M S5Analysis.profile)).+1).
+
+Timeout 60 Check (S5Analysis.rand_coalition_endpoints :
+  ep_inputT S5Analysis.rand_exec_plug ->
+  pgg_gT (mp_M S5Analysis.profile) -> nat ->
+  {set 'I_(pi_T' (mp_PI S5Analysis.profile)).+1} ->
+  {ffun 'I_(pi_T' (mp_PI S5Analysis.profile)).+1 ->
+        'I_(pgg_N' (mp_M S5Analysis.profile)).+1}).
+
+Timeout 60 Check (S5Analysis.rand_content_trace :
+  forall (R : realType) (i : 'I_(pi_T' (mp_PI S5Analysis.profile)).+1),
+    {RV (s5_models.s5_rand_sampleP R) -> 'I_5}).
+
+Timeout 60 Check (S5Analysis.rand_verifier_trace :
+  ep_inputT S5Analysis.rand_exec_plug ->
+  pgg_gT (mp_M S5Analysis.profile) -> nat ->
+  seq (pgg_data (pgg_N' (mp_M S5Analysis.profile)).+1)).
+
+Timeout 60 Check (S5Analysis.rand_verifier_endpoints :
+  ep_inputT S5Analysis.rand_exec_plug ->
+  pgg_gT (mp_M S5Analysis.profile) -> nat ->
+  seq 'I_(pgg_N' (mp_M S5Analysis.profile)).+1).
+
+Timeout 60 Check (S5Analysis.rand_player_raw_trace :
+  ep_inputT S5Analysis.rand_exec_plug ->
+  pgg_gT (mp_M S5Analysis.profile) -> nat ->
+  'I_(pi_T' (mp_PI S5Analysis.profile)).+1 ->
+  seq (pgg_data (pgg_N' (mp_M S5Analysis.profile)).+1)).
+
+Timeout 60 Check (S5Analysis.rand_observed : OE.ObservedExecution).
+
+(* --- 4 Models --- *)
+
+Timeout 60 Check (S5Analysis.rand_sample :
+  forall R : realType, SampleAdapter R S5Analysis.rand_exec_plug).
+
+Timeout 60 Check (S5Analysis.word_sample :
+  forall R : realType, R.-fdist 'I_5 -> forall L : nat,
+    SampleAdapter R S5Analysis.exec_plug).
+
+Timeout 60 Check (S5Analysis.rand_cut_distE :
+  forall R : realType,
+    sa_cut_dist (S5Analysis.rand_sample R) = fdist1 1%g).
+
+Timeout 60 Check (S5Analysis.word_cut_distE :
+  forall (R : realType) (secretP : R.-fdist 'I_5) (L : nat),
+    sa_cut_dist (S5Analysis.word_sample secretP L)
+    = rho_from_words L (pgg_raag_path.path_gen_tuple 3)).
+
+Timeout 60 Check (S5Analysis.word_cut_imageE :
+  forall (R : realType) (secretP : R.-fdist 'I_5) (L : nat),
+    sa_cut_dist_image (S5Analysis.word_sample secretP L)
+    = rho_from_words L (pgg_raag_path.path_gen_tuple 3)).
+
+(* --- 5 Correctness --- *)
+
+Timeout 60 Check (S5Analysis.exec_correct :
+  forall (s : 'I_5) (w0 : pgg_gT (mp_M S5Analysis.profile)),
+    w0 \in pgg_G (mp_M S5Analysis.profile) ->
+    [/\ (@exec_run S5Analysis.profile S5Analysis.exec_plug s w0 0).1
+        = nseq (size (@exec_procs S5Analysis.profile S5Analysis.exec_plug
+                        s w0 0))
+            smc_interpreter.Finish,
+        size (@exec_endpoints S5Analysis.profile S5Analysis.exec_plug s w0 0)
+        = (pi_T' (mp_PI S5Analysis.profile)).+1
+      & exec_decode S5Analysis.exec_plug
+          (exec_endpoints_size (s5_exec.s5_exec_endpoints s w0)) = s]).
+
+Timeout 60 Check (S5Analysis.exec_recovers :
+  forall (s : 'I_5) (w0 : pgg_gT (mp_M S5Analysis.profile)),
+    w0 \in pgg_G (mp_M S5Analysis.profile) ->
+    exec_decode S5Analysis.exec_plug
+      (exec_endpoints_size (s5_exec.s5_exec_endpoints s w0)) = s).
+
+Timeout 60 Check (S5Analysis.observed_recovers :
+  forall (s : 'I_5) (w0 : pgg_gT (mp_M S5Analysis.profile)),
+    w0 \in pgg_G (mp_M S5Analysis.profile) ->
+    exec_decode S5Analysis.exec_plug
+      (OE.oe_endpoints_size S5Analysis.observed s w0) = s).
+
+Timeout 60 Check (S5Analysis.rand_correct :
+  forall (u : 'rV['Z_5]_5) (w0 : pgg_gT (mp_M S5Analysis.profile)),
+    w0 \in pgg_G (mp_M S5Analysis.profile) ->
+    [/\ (@exec_run S5Analysis.profile S5Analysis.rand_exec_plug u w0 0).1
+        = nseq (size (@exec_procs S5Analysis.profile
+                        S5Analysis.rand_exec_plug u w0 0))
+            smc_interpreter.Finish,
+        size (@exec_endpoints S5Analysis.profile S5Analysis.rand_exec_plug
+                u w0 0)
+        = (pi_T' (mp_PI S5Analysis.profile)).+1
+      & exec_decode S5Analysis.rand_exec_plug
+          (exec_endpoints_size (s5_exec.s5_rand_endpoints u w0))
+        = s5_exec.s5_codec (s5_exec.s5_tape_secret u)]).
+
+Timeout 60 Check (S5Analysis.rand_recovers :
+  forall (u : 'rV['Z_5]_5) (w0 : pgg_gT (mp_M S5Analysis.profile)),
+    w0 \in pgg_G (mp_M S5Analysis.profile) ->
+    exec_decode S5Analysis.rand_exec_plug
+      (exec_endpoints_size (s5_exec.s5_rand_endpoints u w0))
+    = s5_exec.s5_codec (s5_exec.s5_tape_secret u)).
+
+Timeout 60 Check (S5Analysis.rand_observed_recovers :
+  forall (u : 'rV['Z_5]_5) (w0 : pgg_gT (mp_M S5Analysis.profile)),
+    w0 \in pgg_G (mp_M S5Analysis.profile) ->
+    exec_decode S5Analysis.rand_exec_plug
+      (OE.oe_endpoints_size S5Analysis.rand_observed u w0)
+    = s5_exec.s5_codec (s5_exec.s5_tape_secret u)).
+
+(* --- 6 Security --- *)
+
+Timeout 60 Check (S5Analysis.exec_trace_secrecy :
+  forall (R : realType) (i : 'I_(pi_T' (mp_PI S5Analysis.profile)).+1),
+    `H( rsh_secret (@unif_randomized_sharing R 3 4)
+      | S5Analysis.rand_content_trace R i)
+    = `H `p_ (rsh_secret (@unif_randomized_sharing R 3 4))).
+
+Timeout 60 Check (S5Analysis.exec_coalition_secrecy :
+  forall (R : realType) (C : {set 'I_(pi_T' (mp_PI S5Analysis.profile)).+1}),
+    (#|C| < 5)%N ->
+    `I( rsh_secret (@unif_randomized_sharing R 3 4) ;
+        @sa_coalition_view R S5Analysis.profile S5Analysis.rand_exec_plug
+          (S5Analysis.rand_sample R) 0 C ) = 0 /\
+    `H( rsh_secret (@unif_randomized_sharing R 3 4)
+        | @sa_coalition_view R S5Analysis.profile S5Analysis.rand_exec_plug
+            (S5Analysis.rand_sample R) 0 C )
+      = `H `p_ (rsh_secret (@unif_randomized_sharing R 3 4))).
+
+(* --- bound (endpoint marginal, not security) --- *)
+
+Timeout 60 Check (S5Analysis.word_endpoint_bound :
+  forall (R : realType) (secretP : R.-fdist 'I_5) (L : nat) (s : 'I_5),
+    var_dist (fdistmap (fun sigma : {perm 'I_5} => sigma s)
+                (sa_cut_dist (S5Analysis.word_sample secretP L)))
+             (fdist_uniform (card_ord 5))
+    <= Num.sqrt 5%:R * (s5_mixing.s5_alpha_R R) ^+ L).
+
+(* --- 7 Transfer --- *)
+
+Timeout 60 Check (erefl : S5Analysis.det_transfer_status = NoModelComparison).
+
+Timeout 60 Check
+  (erefl : S5Analysis.rand_transfer_status = StaticExecutedOnly).
+
+Timeout 60 Check (S5Analysis.rand_content_traceE :
+  forall (R : realType) (i : 'I_(pi_T' (mp_PI S5Analysis.profile)).+1),
+    S5Analysis.rand_content_trace R i = s5_trace.s5_player_trace R i).
+
+Timeout 60 Check (S5Analysis.rand_coalition_viewE :
+  forall (R : realType) (C : {set 'I_(pi_T' (mp_PI S5Analysis.profile)).+1}),
+    @sa_coalition_view R S5Analysis.profile S5Analysis.rand_exec_plug
+      (S5Analysis.rand_sample R) 0 C
+    = rsh_view (@unif_randomized_sharing R 3 4) C).
+
+Timeout 60 Check (erefl : S5Analysis.word_transfer_status = NoModelComparison).
+
+Timeout 60 Check (S5Analysis.word_missing_premise :
+  forall R : realType, R.-fdist 'I_5 -> forall L : nat,
+    R.-fdist {perm 'I_5} -> R -> Prop).
+
+Timeout 60 Check (S5Analysis.word_transfer_conditional :
+  forall (R : realType) (secretP : R.-fdist 'I_5) (L : nat)
+    (Q : R.-fdist {perm 'I_5}) (delta : R) (B : finType)
+    (fx fy : {perm 'I_5} -> B),
+    S5Analysis.word_missing_premise secretP L Q delta ->
+    fdistmap fx Q = fdistmap fy Q ->
+    var_dist (fdistmap fx (sa_cut_dist (S5Analysis.word_sample secretP L)))
+             (fdistmap fy (sa_cut_dist (S5Analysis.word_sample secretP L)))
+    <= delta + delta).
+
+(******************************************************************************)
+(*     The deterministic checker: ten-seat S_5 x S_5 instance                 *)
+(******************************************************************************)
+
+(* --- 1 Program --- *)
+
+Timeout 60 Check (S5x5Analysis.profile : MonodromyProfile).
+
+Timeout 60 Check
+  (S5x5Analysis.profile_k : profile_k S5x5Analysis.profile = 5%N).
+
+(* --- 2 Execution --- *)
+
+Timeout 60 Check (S5x5Analysis.exec_plug : ExecutionPlug S5x5Analysis.profile).
+
+Timeout 60 Check (S5x5Analysis.rand_exec_plug :
+  ExecutionPlug S5x5Analysis.profile).
+
+(* --- 3 Observers --- *)
+
+Timeout 60 Check (S5x5Analysis.seat_endpoint :
+  ep_inputT S5x5Analysis.exec_plug ->
+  pgg_gT (mp_M S5x5Analysis.profile) -> nat ->
+  'I_(pi_T' (mp_PI S5x5Analysis.profile)).+1 ->
+  'I_(pgg_N' (mp_M S5x5Analysis.profile)).+1).
+
+Timeout 60 Check (S5x5Analysis.coalition_endpoints :
+  ep_inputT S5x5Analysis.exec_plug ->
+  pgg_gT (mp_M S5x5Analysis.profile) -> nat ->
+  {set 'I_(pi_T' (mp_PI S5x5Analysis.profile)).+1} ->
+  {ffun 'I_(pi_T' (mp_PI S5x5Analysis.profile)).+1 ->
+        'I_(pgg_N' (mp_M S5x5Analysis.profile)).+1}).
+
+Timeout 60 Check (S5x5Analysis.verifier_trace :
+  ep_inputT S5x5Analysis.exec_plug ->
+  pgg_gT (mp_M S5x5Analysis.profile) -> nat ->
+  seq (pgg_data (pgg_N' (mp_M S5x5Analysis.profile)).+1)).
+
+Timeout 60 Check (S5x5Analysis.verifier_endpoints :
+  ep_inputT S5x5Analysis.exec_plug ->
+  pgg_gT (mp_M S5x5Analysis.profile) -> nat ->
+  seq 'I_(pgg_N' (mp_M S5x5Analysis.profile)).+1).
+
+Timeout 60 Check (S5x5Analysis.player_raw_trace :
+  ep_inputT S5x5Analysis.exec_plug ->
+  pgg_gT (mp_M S5x5Analysis.profile) -> nat ->
+  'I_(pi_T' (mp_PI S5x5Analysis.profile)).+1 ->
+  seq (pgg_data (pgg_N' (mp_M S5x5Analysis.profile)).+1)).
+
+Timeout 60 Check (S5x5Analysis.observed : OE.ObservedExecution).
+
+Timeout 60 Check (S5x5Analysis.rand_seat_endpoint :
+  ep_inputT S5x5Analysis.rand_exec_plug ->
+  pgg_gT (mp_M S5x5Analysis.profile) -> nat ->
+  'I_(pi_T' (mp_PI S5x5Analysis.profile)).+1 ->
+  'I_(pgg_N' (mp_M S5x5Analysis.profile)).+1).
+
+Timeout 60 Check (S5x5Analysis.rand_coalition_endpoints :
+  ep_inputT S5x5Analysis.rand_exec_plug ->
+  pgg_gT (mp_M S5x5Analysis.profile) -> nat ->
+  {set 'I_(pi_T' (mp_PI S5x5Analysis.profile)).+1} ->
+  {ffun 'I_(pi_T' (mp_PI S5x5Analysis.profile)).+1 ->
+        'I_(pgg_N' (mp_M S5x5Analysis.profile)).+1}).
+
+Timeout 60 Check (S5x5Analysis.rand_content_trace :
+  forall (R : realType) (j : 'I_(pi_T' (mp_PI S5x5Analysis.profile)).+1),
+    {RV (s5x5_models.s5x5_rand_sampleP R) -> 'I_10}).
+
+Timeout 60 Check (S5x5Analysis.rand_verifier_trace :
+  ep_inputT S5x5Analysis.rand_exec_plug ->
+  pgg_gT (mp_M S5x5Analysis.profile) -> nat ->
+  seq (pgg_data (pgg_N' (mp_M S5x5Analysis.profile)).+1)).
+
+Timeout 60 Check (S5x5Analysis.rand_verifier_endpoints :
+  ep_inputT S5x5Analysis.rand_exec_plug ->
+  pgg_gT (mp_M S5x5Analysis.profile) -> nat ->
+  seq 'I_(pgg_N' (mp_M S5x5Analysis.profile)).+1).
+
+Timeout 60 Check (S5x5Analysis.rand_player_raw_trace :
+  ep_inputT S5x5Analysis.rand_exec_plug ->
+  pgg_gT (mp_M S5x5Analysis.profile) -> nat ->
+  'I_(pi_T' (mp_PI S5x5Analysis.profile)).+1 ->
+  seq (pgg_data (pgg_N' (mp_M S5x5Analysis.profile)).+1)).
+
+Timeout 60 Check (S5x5Analysis.rand_observed : OE.ObservedExecution).
+
+Timeout 60 Check (S5x5Analysis.pile1_seats :
+  {set 'I_5} -> {set 'I_(pi_T' (mp_PI S5x5Analysis.profile)).+1}).
+
+Timeout 60 Check (S5x5Analysis.pile2_seats :
+  {set 'I_5} -> {set 'I_(pi_T' (mp_PI S5x5Analysis.profile)).+1}).
+
+Timeout 60 Check (S5x5Analysis.pile1_seat_view :
+  forall R : realType,
+    'I_5 -> {RV (s5x5_models.s5x5_rand_sampleP R) -> 'Z_5}).
+
+Timeout 60 Check (S5x5Analysis.pile2_seat_view :
+  forall R : realType,
+    'I_5 -> {RV (s5x5_models.s5x5_rand_sampleP R) -> 'Z_5}).
+
+Timeout 60 Check (S5x5Analysis.pile1_coalition_view :
+  forall R : realType, {set 'I_5} ->
+    {RV (s5x5_models.s5x5_rand_sampleP R) -> {ffun 'I_5 -> 'Z_5}}).
+
+Timeout 60 Check (S5x5Analysis.pile2_coalition_view :
+  forall R : realType, {set 'I_5} ->
+    {RV (s5x5_models.s5x5_rand_sampleP R) -> {ffun 'I_5 -> 'Z_5}}).
+
+Timeout 60 Check (S5x5Analysis.joint_view :
+  forall R : realType, {set 'I_5} -> {set 'I_5} ->
+    {RV (s5x5_models.s5x5_rand_sampleP R)
+     -> ({ffun 'I_5 -> 'Z_5} * {ffun 'I_5 -> 'Z_5})%type}).
+
+(* --- 4 Models --- *)
+
+Timeout 60 Check (S5x5Analysis.rand_sample :
+  forall R : realType, SampleAdapter R S5x5Analysis.rand_exec_plug).
+
+Timeout 60 Check (S5x5Analysis.word_sample :
+  forall R : realType, R.-fdist 'I_10 -> forall L : nat,
+    SampleAdapter R S5x5Analysis.exec_plug).
+
+Timeout 60 Check (S5x5Analysis.rand_cut_distE :
+  forall R : realType,
+    sa_cut_dist (S5x5Analysis.rand_sample R) = fdist1 1%g).
+
+Timeout 60 Check (S5x5Analysis.word_cut_distE :
+  forall (R : realType) (secretP : R.-fdist 'I_10) (L : nat),
+    sa_cut_dist (S5x5Analysis.word_sample secretP L)
+    = rho_from_words L pgg_s5x5.s5x5_gen_tuple).
+
+(* --- 5 Correctness --- *)
+
+Timeout 60 Check (S5x5Analysis.exec_correct :
+  forall (s : 'I_10) (w0 : pgg_gT (mp_M S5x5Analysis.profile)),
+    w0 \in pgg_G (mp_M S5x5Analysis.profile) ->
+    [/\ (@exec_run S5x5Analysis.profile S5x5Analysis.exec_plug s w0 0).1
+        = nseq (size (@exec_procs S5x5Analysis.profile S5x5Analysis.exec_plug
+                        s w0 0))
+            smc_interpreter.Finish,
+        size (@exec_endpoints S5x5Analysis.profile S5x5Analysis.exec_plug
+                s w0 0)
+        = (pi_T' (mp_PI S5x5Analysis.profile)).+1
+      & exec_decode S5x5Analysis.exec_plug
+          (exec_endpoints_size (s5x5_exec.s5x5_exec_endpoints s w0)) = s]).
+
+Timeout 60 Check (S5x5Analysis.exec_recovers :
+  forall (s : 'I_10) (w0 : pgg_gT (mp_M S5x5Analysis.profile)),
+    w0 \in pgg_G (mp_M S5x5Analysis.profile) ->
+    exec_decode S5x5Analysis.exec_plug
+      (exec_endpoints_size (s5x5_exec.s5x5_exec_endpoints s w0)) = s).
+
+Timeout 60 Check (S5x5Analysis.observed_recovers :
+  forall (s : 'I_10) (w0 : pgg_gT (mp_M S5x5Analysis.profile)),
+    w0 \in pgg_G (mp_M S5x5Analysis.profile) ->
+    exec_decode S5x5Analysis.exec_plug
+      (OE.oe_endpoints_size S5x5Analysis.observed s w0) = s).
+
+Timeout 60 Check (S5x5Analysis.rand_correct :
+  forall (uv : ('rV['Z_5]_5 * 'rV['Z_5]_5)%type)
+    (w0 : pgg_gT (mp_M S5x5Analysis.profile)),
+    w0 \in pgg_G (mp_M S5x5Analysis.profile) ->
+    [/\ (@exec_run S5x5Analysis.profile S5x5Analysis.rand_exec_plug
+           uv w0 0).1
+        = nseq (size (@exec_procs S5x5Analysis.profile
+                        S5x5Analysis.rand_exec_plug uv w0 0))
+            smc_interpreter.Finish,
+        size (@exec_endpoints S5x5Analysis.profile
+                S5x5Analysis.rand_exec_plug uv w0 0)
+        = (pi_T' (mp_PI S5x5Analysis.profile)).+1
+      & exec_decode S5x5Analysis.rand_exec_plug
+          (exec_endpoints_size (s5x5_exec.s5x5_rand_endpoints uv w0))
+        = s5x5_exec.s5x5_codec (s5x5_exec.s5x5_joint_tape_secret uv)]).
+
+Timeout 60 Check (S5x5Analysis.rand_recovers :
+  forall (uv : ('rV['Z_5]_5 * 'rV['Z_5]_5)%type)
+    (w0 : pgg_gT (mp_M S5x5Analysis.profile)),
+    w0 \in pgg_G (mp_M S5x5Analysis.profile) ->
+    exec_decode S5x5Analysis.rand_exec_plug
+      (exec_endpoints_size (s5x5_exec.s5x5_rand_endpoints uv w0))
+    = s5x5_exec.s5x5_codec (s5x5_exec.s5x5_joint_tape_secret uv)).
+
+Timeout 60 Check (S5x5Analysis.rand_observed_recovers :
+  forall (uv : ('rV['Z_5]_5 * 'rV['Z_5]_5)%type)
+    (w0 : pgg_gT (mp_M S5x5Analysis.profile)),
+    w0 \in pgg_G (mp_M S5x5Analysis.profile) ->
+    exec_decode S5x5Analysis.rand_exec_plug
+      (OE.oe_endpoints_size S5x5Analysis.rand_observed uv w0)
+    = s5x5_exec.s5x5_codec (s5x5_exec.s5x5_joint_tape_secret uv)).
+
+Timeout 60 Check (S5x5Analysis.combine_not_injectiveE :
+  @product_threshold.combine_secret 3 3 (@Ordinal 5 0 isT) (@Ordinal 5 2 isT)
+  = @product_threshold.combine_secret 3 3 (@Ordinal 5 0 isT)
+      (@Ordinal 5 0 isT)).
+
+(* --- 6 Security --- *)
+
+Timeout 60 Check (S5x5Analysis.exec_trace_secrecy :
+  forall (R : realType) (j : 'I_(pi_T' (mp_PI S5x5Analysis.profile)).+1),
+    `H( s5x5_trace.JointSecret R | S5x5Analysis.rand_content_trace R j )
+    = `H `p_ (s5x5_trace.JointSecret R)).
+
+Timeout 60 Check (S5x5Analysis.exec_p1_secrecy :
+  forall (R : realType) (C1 : {set 'I_5}), (#|C1| < 5)%N ->
+    `I( s5x5_trace.JointSecret R ;
+        S5x5Analysis.pile1_coalition_view R C1 ) = 0 /\
+    `H( s5x5_trace.JointSecret R | S5x5Analysis.pile1_coalition_view R C1 )
+      = `H `p_ (s5x5_trace.JointSecret R)).
+
+Timeout 60 Check (S5x5Analysis.exec_p2_secrecy :
+  forall (R : realType) (C2 : {set 'I_5}), (#|C2| < 5)%N ->
+    `I( s5x5_trace.JointSecret R ;
+        S5x5Analysis.pile2_coalition_view R C2 ) = 0 /\
+    `H( s5x5_trace.JointSecret R | S5x5Analysis.pile2_coalition_view R C2 )
+      = `H `p_ (s5x5_trace.JointSecret R)).
+
+Timeout 60 Check (S5x5Analysis.exec_joint_secrecy :
+  forall (R : realType) (C1 C2 : {set 'I_5}),
+    (#|C1| < 5)%N -> (#|C2| < 5)%N ->
+    `I( s5x5_trace.JointSecret R ; S5x5Analysis.joint_view R C1 C2 ) = 0 /\
+    `H( s5x5_trace.JointSecret R | S5x5Analysis.joint_view R C1 C2 )
+      = `H `p_ (s5x5_trace.JointSecret R)).
+
+(* --- bound (endpoint marginal, not security) --- *)
+
+Timeout 60 Check (S5x5Analysis.word_pile1_bound :
+  forall (R : realType) (secretP : R.-fdist 'I_10) (L : nat) (s : 'I_5),
+    var_dist (fdistmap (fun sigma : {perm 'I_10} =>
+                          sigma (s5x5_mixing.widen5to10 s))
+                (sa_cut_dist (S5x5Analysis.word_sample secretP L)))
+             (s5x5_mixing.fdist_uniform_pile1 R)
+    <= Num.sqrt 5%:R * (s5x5_mixing.s5_lazy_alpha_R R) ^+ L).
+
+Timeout 60 Check (S5x5Analysis.word_pile2_bound :
+  forall (R : realType) (secretP : R.-fdist 'I_10) (L : nat) (s : 'I_5),
+    var_dist (fdistmap (fun sigma : {perm 'I_10} =>
+                          sigma (s5x5_mixing.rshift5to10 s))
+                (sa_cut_dist (S5x5Analysis.word_sample secretP L)))
+             (s5x5_mixing.fdist_uniform_pile2 R)
+    <= Num.sqrt 5%:R * (s5x5_mixing.s5_lazy_alpha_R R) ^+ L).
+
+Timeout 60 Check (S5x5Analysis.word_seat_bound :
+  forall (R : realType) (secretP : R.-fdist 'I_10) (L : nat) (s : 'I_10),
+    var_dist (fdistmap (fun sigma : {perm 'I_10} => sigma s)
+                (sa_cut_dist (S5x5Analysis.word_sample secretP L)))
+             (fdist_uniform (card_ord 10))
+    <= 1 + Num.sqrt 5%:R * (s5x5_mixing.s5_lazy_alpha_R R) ^+ L).
+
+(* --- 7 Transfer --- *)
+
+Timeout 60 Check
+  (erefl : S5x5Analysis.det_transfer_status = NoModelComparison).
+
+Timeout 60 Check
+  (erefl : S5x5Analysis.rand_transfer_status = StaticExecutedOnly).
+
+Timeout 60 Check (S5x5Analysis.rand_content_traceE :
+  forall (R : realType) (j : 'I_(pi_T' (mp_PI S5x5Analysis.profile)).+1),
+    S5x5Analysis.rand_content_trace R j = s5x5_trace.s5x5_player_trace R j).
+
+Timeout 60 Check (S5x5Analysis.rand_pile1_seat_viewE :
+  forall (R : realType) (j : 'I_5),
+    S5x5Analysis.pile1_seat_view R j
+    = (fun uv : ('rV['Z_5]_5 * 'rV['Z_5]_5)%type =>
+         rsh_share (s5x5_trace.rs1 R) j uv.1)).
+
+Timeout 60 Check (S5x5Analysis.rand_pile2_seat_viewE :
+  forall (R : realType) (j : 'I_5),
+    S5x5Analysis.pile2_seat_view R j
+    = (fun uv : ('rV['Z_5]_5 * 'rV['Z_5]_5)%type =>
+         rsh_share (s5x5_trace.rs2 R) j uv.2)).
+
+Timeout 60 Check (S5x5Analysis.rand_pile1_viewE :
+  forall (R : realType) (C1 : {set 'I_5}),
+    S5x5Analysis.pile1_coalition_view R C1
+    = (fun uv : ('rV['Z_5]_5 * 'rV['Z_5]_5)%type =>
+         rsh_view (s5x5_trace.rs1 R) C1 uv.1)).
+
+Timeout 60 Check (S5x5Analysis.rand_pile2_viewE :
+  forall (R : realType) (C2 : {set 'I_5}),
+    S5x5Analysis.pile2_coalition_view R C2
+    = (fun uv : ('rV['Z_5]_5 * 'rV['Z_5]_5)%type =>
+         rsh_view (s5x5_trace.rs2 R) C2 uv.2)).
+
+Timeout 60 Check (S5x5Analysis.rand_joint_viewE :
+  forall (R : realType) (C1 C2 : {set 'I_5})
+    (HC1 : (#|C1| < 5)%N) (HC2 : (#|C2| < 5)%N),
+    S5x5Analysis.joint_view R C1 C2
+    = pgg_leakage_witness.lw_view
+        (pgg_leakage_product.leakage_product
+           (pgg_sharing_mechanism.mechanism_leakage
+              (pgg_sharing_mechanism.Additive
+                 (@unif_randomized_sharing R 3 4) HC1))
+           (pgg_sharing_mechanism.mechanism_leakage
+              (pgg_sharing_mechanism.Additive
+                 (@unif_randomized_sharing R 3 4) HC2)))).
+
+Timeout 60 Check
+  (erefl : S5x5Analysis.pile1_word_transfer_status = NoModelComparison).
+
+Timeout 60 Check
+  (erefl : S5x5Analysis.pile2_word_transfer_status = NoModelComparison).
+
+Timeout 60 Check (S5x5Analysis.word_missing_premise :
+  forall R : realType, R.-fdist 'I_10 -> forall L : nat,
+    R.-fdist {perm 'I_10} -> R -> Prop).
+
+Timeout 60 Check (S5x5Analysis.word_transfer_conditional :
+  forall (R : realType) (secretP : R.-fdist 'I_10) (L : nat)
+    (Q : R.-fdist {perm 'I_10}) (delta : R) (B : finType)
+    (fx fy : {perm 'I_10} -> B),
+    S5x5Analysis.word_missing_premise secretP L Q delta ->
+    fdistmap fx Q = fdistmap fy Q ->
+    var_dist (fdistmap fx (sa_cut_dist (S5x5Analysis.word_sample secretP L)))
+             (fdistmap fy (sa_cut_dist (S5x5Analysis.word_sample secretP L)))
+    <= delta + delta).
+
+Timeout 60 Check
+  (erefl : S5x5Analysis.pile1_limitation_transfer_status = NegativeTransfer).
+
+Timeout 60 Check
+  (erefl : S5x5Analysis.pile2_limitation_transfer_status = NegativeTransfer).
+
+Timeout 60 Check (S5x5Analysis.word_pile1_floor :
+  forall (R : realType) (secretP : R.-fdist 'I_10) (L : nat) (s : 'I_5),
+    1 - Num.sqrt 5%:R * (s5x5_mixing.s5_lazy_alpha_R R) ^+ L
+    <= var_dist (fdistmap (fun sigma : {perm 'I_10} =>
+                             sigma (s5x5_mixing.widen5to10 s))
+                   (sa_cut_dist (S5x5Analysis.word_sample secretP L)))
+                (fdist_uniform (card_ord 10))).
+
+Timeout 60 Check (S5x5Analysis.word_pile2_floor :
+  forall (R : realType) (secretP : R.-fdist 'I_10) (L : nat) (s : 'I_5),
+    1 - Num.sqrt 5%:R * (s5x5_mixing.s5_lazy_alpha_R R) ^+ L
+    <= var_dist (fdistmap (fun sigma : {perm 'I_10} =>
+                             sigma (s5x5_mixing.rshift5to10 s))
+                   (sa_cut_dist (S5x5Analysis.word_sample secretP L)))
+                (fdist_uniform (card_ord 10))).
+
+Timeout 60 Check (S5x5Analysis.word_positive_regime :
+  forall (R : realType) (n : nat), (17 <= n)%N ->
+    Num.sqrt 5%:R * (s5x5_mixing.s5_lazy_alpha_R R) ^+ n < 1).
+
+Timeout 60 Check (S5x5Analysis.word_pile1_floor_gt0 :
+  forall (R : realType) (secretP : R.-fdist 'I_10) (L : nat) (s : 'I_5),
+    (17 <= L)%N ->
+    0 < var_dist (fdistmap (fun sigma : {perm 'I_10} =>
+                              sigma (s5x5_mixing.widen5to10 s))
+                    (sa_cut_dist (S5x5Analysis.word_sample secretP L)))
+                 (fdist_uniform (card_ord 10))).
+
+Timeout 60 Check (S5x5Analysis.word_pile2_floor_gt0 :
+  forall (R : realType) (secretP : R.-fdist 'I_10) (L : nat) (s : 'I_5),
+    (17 <= L)%N ->
+    0 < var_dist (fdistmap (fun sigma : {perm 'I_10} =>
+                              sigma (s5x5_mixing.rshift5to10 s))
+                    (sa_cut_dist (S5x5Analysis.word_sample secretP L)))
+                 (fdist_uniform (card_ord 10))).
+
+(******************************************************************************)
+(*     The deterministic checker: four-seat abelian instance                  *)
+(******************************************************************************)
+
+(* --- 1 Program --- *)
+
+Timeout 60 Check (AbelianAnalysis.profile : MonodromyProfile).
+
+Timeout 60 Check
+  (AbelianAnalysis.profile_k : profile_k AbelianAnalysis.profile = 4%N).
+
+(* --- 2 Execution --- *)
+
+Timeout 60 Check
+  (AbelianAnalysis.exec_plug : ExecutionPlug AbelianAnalysis.profile).
+
+Timeout 60 Check
+  (AbelianAnalysis.shuffle_plug : ExecutionPlug AbelianAnalysis.profile).
+
+(* --- 3 Observers --- *)
+
+Timeout 60 Check (AbelianAnalysis.seat_endpoint :
+  ep_inputT AbelianAnalysis.exec_plug ->
+  pgg_gT (mp_M AbelianAnalysis.profile) -> nat ->
+  'I_(pi_T' (mp_PI AbelianAnalysis.profile)).+1 ->
+  'I_(pgg_N' (mp_M AbelianAnalysis.profile)).+1).
+
+Timeout 60 Check
+  (AbelianAnalysis.endpoint_vector : {perm 'I_4} -> 4.-tuple 'I_4).
+
+Timeout 60 Check (AbelianAnalysis.verifier_trace :
+  ep_inputT AbelianAnalysis.exec_plug ->
+  pgg_gT (mp_M AbelianAnalysis.profile) -> nat ->
+  seq (pgg_data (pgg_N' (mp_M AbelianAnalysis.profile)).+1)).
+
+Timeout 60 Check (AbelianAnalysis.verifier_endpoints :
+  ep_inputT AbelianAnalysis.exec_plug ->
+  pgg_gT (mp_M AbelianAnalysis.profile) -> nat ->
+  seq 'I_(pgg_N' (mp_M AbelianAnalysis.profile)).+1).
+
+Timeout 60 Check (AbelianAnalysis.player_raw_trace :
+  ep_inputT AbelianAnalysis.exec_plug ->
+  pgg_gT (mp_M AbelianAnalysis.profile) -> nat ->
+  'I_(pi_T' (mp_PI AbelianAnalysis.profile)).+1 ->
+  seq (pgg_data (pgg_N' (mp_M AbelianAnalysis.profile)).+1)).
+
+Timeout 60 Check (AbelianAnalysis.observed : OE.ObservedExecution).
+
+Timeout 60 Check (AbelianAnalysis.shuffle_observed : OE.ObservedExecution).
+
+Timeout 60 Check (AbelianAnalysis.endpoint_vector_inj :
+  injective AbelianAnalysis.endpoint_vector).
+
+(* --- 4 Models --- *)
+
+Timeout 60 Check (AbelianAnalysis.ideal_sample :
+  forall R : realType, SampleAdapter R AbelianAnalysis.shuffle_plug).
+
+Timeout 60 Check (AbelianAnalysis.word_sample :
+  forall (R : realType) (L : nat),
+    SampleAdapter R AbelianAnalysis.shuffle_plug).
+
+Timeout 60 Check (AbelianAnalysis.actual_cut_distE :
+  forall (R : realType) (L : nat),
+    sa_cut_dist (AbelianAnalysis.word_sample R L)
+    = abelian_models.abel_word_dist R L).
+
+(* --- 5 Correctness --- *)
+
+Timeout 60 Check (AbelianAnalysis.exec_correct :
+  forall (s : 'I_4) (w0 : pgg_gT (mp_M AbelianAnalysis.profile)),
+    w0 \in pgg_G (mp_M AbelianAnalysis.profile) ->
+    [/\ (@exec_run AbelianAnalysis.profile AbelianAnalysis.exec_plug
+           s w0 0).1
+        = nseq (size (@exec_procs AbelianAnalysis.profile
+                        AbelianAnalysis.exec_plug s w0 0))
+            smc_interpreter.Finish,
+        size (@exec_endpoints AbelianAnalysis.profile
+                AbelianAnalysis.exec_plug s w0 0)
+        = (pi_T' (mp_PI AbelianAnalysis.profile)).+1
+      & exec_decode AbelianAnalysis.exec_plug
+          (exec_endpoints_size (abelian_exec.abel_exec_endpoints s w0))
+        = s]).
+
+Timeout 60 Check (AbelianAnalysis.exec_recovers :
+  forall (s : 'I_4) (w0 : pgg_gT (mp_M AbelianAnalysis.profile)),
+    w0 \in pgg_G (mp_M AbelianAnalysis.profile) ->
+    exec_decode AbelianAnalysis.exec_plug
+      (exec_endpoints_size (abelian_exec.abel_exec_endpoints s w0)) = s).
+
+Timeout 60 Check (AbelianAnalysis.observed_recovers :
+  forall (s : 'I_4) (w0 : pgg_gT (mp_M AbelianAnalysis.profile)),
+    w0 \in pgg_G (mp_M AbelianAnalysis.profile) ->
+    exec_decode AbelianAnalysis.exec_plug
+      (OE.oe_endpoints_size AbelianAnalysis.observed s w0) = s).
+
+Timeout 60 Check (AbelianAnalysis.shuffle_recovers :
+  forall (x : unit) (w0 : pgg_gT (mp_M AbelianAnalysis.profile)),
+    w0 \in pgg_G (mp_M AbelianAnalysis.profile) ->
+    exec_decode AbelianAnalysis.shuffle_plug
+      (exec_endpoints_size (abelian_exec.abel_shuffle_endpoints x w0))
+    = abelian_exec.abel_identity_recon_value).
+
+(* --- 6 Security: the one result of this instance is negative --- *)
+
+Timeout 60 Check (AbelianAnalysis.word_mixing_limitation :
+  forall (R : realType) (L : nat),
+    var_dist
+      (fdistmap (@abelian_models.abel_sample_reader R
+                   (AbelianAnalysis.word_sample R L))
+                (sa_sampleP (AbelianAnalysis.word_sample R L)))
+      (fdistmap (@abelian_models.abel_sample_reader R
+                   (AbelianAnalysis.ideal_sample R))
+                (sa_sampleP (AbelianAnalysis.ideal_sample R)))
+    = 1).
+
+(* --- 7 Transfer --- *)
+
+Timeout 60 Check
+  (erefl : AbelianAnalysis.det_transfer_status = NoModelComparison).
+
+Timeout 60 Check
+  (erefl : AbelianAnalysis.shuffle_transfer_status = NoModelComparison).
+
+Timeout 60 Check
+  (erefl : AbelianAnalysis.limitation_transfer_status = NegativeTransfer).
+
+Timeout 60 Check (AbelianAnalysis.word_group_dist :
+  forall (R : realType) (L : nat),
+    var_dist (abelian_models.abel_word_dist R L)
+             (abelian_models.abel_group_uniform R) = 1).
+
+Timeout 60 Check (AbelianAnalysis.executed_distance :
+  forall (R : realType) (L : nat),
+    var_dist (fdistmap AbelianAnalysis.endpoint_vector
+                (abelian_models.abel_word_dist R L))
+             (fdistmap AbelianAnalysis.endpoint_vector
+                (abelian_models.abel_group_uniform R))
+    = 1).
+
+Timeout 60 Check (AbelianAnalysis.sample_reader_distE :
+  forall (R : realType) (sa : SampleAdapter R AbelianAnalysis.shuffle_plug),
+    fdistmap (@abelian_models.abel_sample_reader R sa) (sa_sampleP sa)
+    = fdistmap AbelianAnalysis.endpoint_vector (sa_cut_dist sa)).
+
+Timeout 60 Check (AbelianAnalysis.executed_observation_distance :
+  forall (R : realType) (L : nat),
+    var_dist
+      (fdistmap (@abelian_models.abel_sample_reader R
+                   (AbelianAnalysis.word_sample R L))
+                (sa_sampleP (AbelianAnalysis.word_sample R L)))
+      (fdistmap (@abelian_models.abel_sample_reader R
+                   (AbelianAnalysis.ideal_sample R))
+                (sa_sampleP (AbelianAnalysis.ideal_sample R)))
+    = 1).
+
+(******************************************************************************)
+(*     The deterministic checker: the seventeen typed rows                    *)
+(*                                                                            *)
+(* One Check per row against AnalysisPathRow, then one erefl pin per status   *)
+(* field. A row whose completion level, transfer status or assumption status  *)
+(* is edited away from the table above fails at its own pin.                  *)
+(******************************************************************************)
+
+Timeout 60 Check (pgl27_row_exact : AnalysisPathRow).
+Timeout 60 Check (erefl : apr_completion pgl27_row_exact = AnalysisBridged).
+Timeout 60 Check (erefl : apr_transfer pgl27_row_exact = StaticExecutedOnly).
+Timeout 60 Check (erefl : apr_assumptions pgl27_row_exact = KernelClosed).
+
+Timeout 60 Check (pgl27_row_word : AnalysisPathRow).
+Timeout 60 Check (erefl : apr_completion pgl27_row_word = AnalysisBridged).
+Timeout 60 Check (erefl : apr_transfer pgl27_row_word = IdealFinite).
+Timeout 60 Check (erefl : apr_assumptions pgl27_row_word = KernelClosed).
+
+Timeout 60 Check (five_card_row_uniform : AnalysisPathRow).
+Timeout 60 Check
+  (erefl : apr_completion five_card_row_uniform = AnalysisBridged).
+Timeout 60 Check
+  (erefl : apr_transfer five_card_row_uniform = StaticExecutedOnly).
+Timeout 60 Check
+  (erefl : apr_assumptions five_card_row_uniform = KernelClosed).
+
+Timeout 60 Check (five_card_row_biased : AnalysisPathRow).
+Timeout 60 Check
+  (erefl : apr_completion five_card_row_biased = AnalysisBridged).
+Timeout 60 Check
+  (erefl : apr_transfer five_card_row_biased = StaticExecutedOnly).
+Timeout 60 Check
+  (erefl : apr_assumptions five_card_row_biased = KernelClosed).
+
+Timeout 60 Check (five_card_row_repeated : AnalysisPathRow).
+Timeout 60 Check (erefl : apr_completion five_card_row_repeated = Sampled).
+Timeout 60 Check
+  (erefl : apr_transfer five_card_row_repeated = NoModelComparison).
+Timeout 60 Check
+  (erefl : apr_assumptions five_card_row_repeated = KernelClosed).
+
+Timeout 60 Check (s5_row_det : AnalysisPathRow).
+Timeout 60 Check (erefl : apr_completion s5_row_det = Observed).
+Timeout 60 Check (erefl : apr_transfer s5_row_det = NoModelComparison).
+Timeout 60 Check
+  (erefl : apr_assumptions s5_row_det = AcceptsAxioms [:: AxS5GroupOrder]).
+
+Timeout 60 Check (s5_row_rand : AnalysisPathRow).
+Timeout 60 Check (erefl : apr_completion s5_row_rand = AnalysisBridged).
+Timeout 60 Check (erefl : apr_transfer s5_row_rand = StaticExecutedOnly).
+Timeout 60 Check
+  (erefl : apr_assumptions s5_row_rand = AcceptsAxioms [:: AxS5GroupOrder]).
+
+Timeout 60 Check (s5_row_word : AnalysisPathRow).
+Timeout 60 Check (erefl : apr_completion s5_row_word = Sampled).
+Timeout 60 Check (erefl : apr_transfer s5_row_word = NoModelComparison).
+Timeout 60 Check (erefl : apr_assumptions s5_row_word
+  = AcceptsAxioms [:: AxS5GroupOrder; AxRayleighQ2R]).
+
+Timeout 60 Check (s5x5_row_det : AnalysisPathRow).
+Timeout 60 Check (erefl : apr_completion s5x5_row_det = Observed).
+Timeout 60 Check (erefl : apr_transfer s5x5_row_det = NoModelComparison).
+Timeout 60 Check (erefl : apr_assumptions s5x5_row_det
+  = AcceptsAxioms [:: AxS5x5GroupOrder]).
+
+Timeout 60 Check (s5x5_row_rand : AnalysisPathRow).
+Timeout 60 Check (erefl : apr_completion s5x5_row_rand = AnalysisBridged).
+Timeout 60 Check (erefl : apr_transfer s5x5_row_rand = StaticExecutedOnly).
+Timeout 60 Check (erefl : apr_assumptions s5x5_row_rand
+  = AcceptsAxioms [:: AxS5x5GroupOrder]).
+
+Timeout 60 Check (s5x5_row_pile1_word : AnalysisPathRow).
+Timeout 60 Check (erefl : apr_completion s5x5_row_pile1_word = Sampled).
+Timeout 60 Check
+  (erefl : apr_transfer s5x5_row_pile1_word = NoModelComparison).
+Timeout 60 Check (erefl : apr_assumptions s5x5_row_pile1_word
+  = AcceptsAxioms [:: AxS5x5GroupOrder; AxRayleighQ2R]).
+
+Timeout 60 Check (s5x5_row_pile2_word : AnalysisPathRow).
+Timeout 60 Check (erefl : apr_completion s5x5_row_pile2_word = Sampled).
+Timeout 60 Check
+  (erefl : apr_transfer s5x5_row_pile2_word = NoModelComparison).
+Timeout 60 Check (erefl : apr_assumptions s5x5_row_pile2_word
+  = AcceptsAxioms [:: AxS5x5GroupOrder; AxRayleighQ2R]).
+
+Timeout 60 Check (s5x5_row_pile1_limitation : AnalysisPathRow).
+Timeout 60 Check (erefl : apr_completion s5x5_row_pile1_limitation = Sampled).
+Timeout 60 Check
+  (erefl : apr_transfer s5x5_row_pile1_limitation = NegativeTransfer).
+Timeout 60 Check (erefl : apr_assumptions s5x5_row_pile1_limitation
+  = AcceptsAxioms [:: AxS5x5GroupOrder; AxRayleighQ2R]).
+
+Timeout 60 Check (s5x5_row_pile2_limitation : AnalysisPathRow).
+Timeout 60 Check (erefl : apr_completion s5x5_row_pile2_limitation = Sampled).
+Timeout 60 Check
+  (erefl : apr_transfer s5x5_row_pile2_limitation = NegativeTransfer).
+Timeout 60 Check (erefl : apr_assumptions s5x5_row_pile2_limitation
+  = AcceptsAxioms [:: AxS5x5GroupOrder; AxRayleighQ2R]).
+
+Timeout 60 Check (abel_row_recovery : AnalysisPathRow).
+Timeout 60 Check (erefl : apr_completion abel_row_recovery = Observed).
+Timeout 60 Check (erefl : apr_transfer abel_row_recovery = NoModelComparison).
+Timeout 60 Check (erefl : apr_assumptions abel_row_recovery = KernelClosed).
+
+Timeout 60 Check (abel_row_identity : AnalysisPathRow).
+Timeout 60 Check (erefl : apr_completion abel_row_identity = Observed).
+Timeout 60 Check (erefl : apr_transfer abel_row_identity = NoModelComparison).
+Timeout 60 Check (erefl : apr_assumptions abel_row_identity = KernelClosed).
+
+Timeout 60 Check (abel_row_limitation : AnalysisPathRow).
+Timeout 60 Check (erefl : apr_completion abel_row_limitation = AnalysisBridged).
+Timeout 60 Check (erefl : apr_transfer abel_row_limitation = NegativeTransfer).
+Timeout 60 Check (erefl : apr_assumptions abel_row_limitation = KernelClosed).
