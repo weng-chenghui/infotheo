@@ -384,8 +384,9 @@ Definition deal_centi_lt := @kim_deal_centi_lt.
 (* var_dist_fdistmap_transfer applies to any pair of readers, but the         *)
 (* five-card development has no ideal distribution equality to discharge its  *)
 (* second hypothesis, so there is nothing to alias and nothing is             *)
-(* manufactured to fill the section. What the section does carry is one typed *)
-(* transfer status per analysis path, the value that records that absence.    *)
+(* manufactured to fill the section. What the section does carry is a typed   *)
+(* transfer status for each analysis path, one alias for the two exact-cut    *)
+(* paths, which share their status, and one for the repeated-cut path.        *)
 (******************************************************************************)
 
 (** exec_transfer_status — the transfer status of the two exact-cut paths, the
