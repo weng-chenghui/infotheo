@@ -199,3 +199,54 @@ Estimated ~260 lines of ported Rocq across 4 commits (P0 probes, P1-P3),
 plus the close-out. The only unprobed items: the `exec_dealer_trace`
 parameterization (P1, fallback recorded) and the `den_boer_sample_cut_witnessE`
 two-rewrite derivation (P3, contingency recorded).
+
+## As-built record (executed 2026-08-12 on user go)
+
+All stages executed; every commit passed the gate unbypassed (the gate's
+Stage 2 was the known S998 silent no-op on each, so a real `rocq-auditor`
+review was dispatched per commit; all four returned PASS at error severity).
+
+| Stage | Commit | Outcome |
+|---|---|---|
+| P0 | `ea0500f2` | probe_b: semantic M1 + POSITIVE M4/M5 (via `H_secret` at `five_card_leakage.v:86` and a new `mut_secret_entropy_gt0 : 0 < H` bound through `log4`/`ltr_log`); probe_a: F15 instantiation Example appended; both green. Probe-commit audit PASS (probes are `excluded_paths` for the rule catalog; manual honesty check clean) |
+| P1 | `2376b3bd` | `exec_dealer_trace` + `fdistmap_prodr` + `sa_joint_dist`; cone rebuilt, instance files recompiled unchanged. Audit PASS, one advisory (header-table "law" wording matches its pre-existing sibling lines; kept for local consistency) |
+| P2 | `74726029` | The three pgl27 exports. Audit PASS; C5 deep-check confirmed the single-export rule and the honest instantiation of the P1-deviated `sa_joint_dist` |
+| P3 | `c4f159b2` | All fifteen Part-A items + five Part-B items (+329/-2). C9b landed at FULL generality — the contingency was unused. Audit PASS; invariant-2 caveats verified verbatim in the rendered comments |
+| Golf | `78e8b8d9` | Bodies only, measured -6 lines (-0.7%), saturation: 3 of 24 candidates shortened (notably `fdistmap_head1` via `bigop_ext.big_rV1_ord0` replacing a hand-rolled `big_pred1` argument). All 17 `@main` exports of `five_card_exec.v` re-verified boolp-trio-only |
+
+Deviations from the written plan, verbatim intent preserved:
+
+1. P1: the plan's literal `sa_joint_dist` was ill-typed (`ep_inputT : Type`
+   is not a finType; the probe only exercised the instance where it
+   delta-reduces). Landed form parameterizes the argument reader:
+   `sa_joint_dist (argT : finType) (arg : sa_sampleT sa -> argT)`. C5's
+   landed statement `sa_joint_dist (pgl27_word_sample.(sa_arg)) =
+   pgl27P_word_gen secretP` is the honest instantiation (auditor-confirmed).
+2. P0: the plan's swapped-factor M1 was ill-typed across distinct carriers;
+   landed at a single carrier `A` where it typechecks and is refuted
+   positively via `fdist1` witnesses.
+3. P3: minor reflows and qualification matched to the file (`P R`
+   unqualified, `unit_RV dbP`); item 14 needed the pair split by cases
+   (`prod` has no definitional eta) before `centropy_RV_comp0` at
+   `f := idfun`.
+
+Independent final verification (orchestrator, own compile): the ten cycle
+exports — `fdistmap_prodr`, `pgl27_sample_cut_distE`,
+`pgl27_word_sample_coalition_distE`, `pgl27_word_sample_joint_distE`,
+`five_card_sample_cut_distE`, `five_card_exec_input_raw_traceE`,
+`five_card_exec_input_trace_secrecy`,
+`five_card_exec_dealer_pair_centropy0`,
+`five_card_exec_dealer_trace_centropy0`, `den_boer_sample_cut_witnessE` —
+each depend on exactly the boolp trio (10/10 `Print Assumptions` blocks);
+zero `Admitted`/`Abort`/`Axiom` in the four touched files; gate run
+recorded for every commit including golf (`20260812T021805Z-9c02d610-d9c2`,
+clean). Probe directory frozen at `ea0500f2` (+ the pre-existing frozen
+2026-08-11 directory untouched).
+
+Notes for future cycles: (a) `.git/hooks/pre-commit` is NOT installed in
+this clone — the gate fires only through the Claude Code hook, so commits
+made outside Claude Code skip the audit; installing via
+`.claude/audit/bin/install-hooks.sh` is a one-line fix awaiting a user
+decision. (b) The P2 auditor flagged the file-wide "law"/"distribution"
+vocabulary split (pre-existing S4-era comments vs this cycle's invariant 7)
+as a candidate dedicated terminology-sweep commit.
