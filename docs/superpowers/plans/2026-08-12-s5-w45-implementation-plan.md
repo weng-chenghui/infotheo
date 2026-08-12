@@ -243,10 +243,19 @@ recorded for every commit including golf (`20260812T021805Z-9c02d610-d9c2`,
 clean). Probe directory frozen at `ea0500f2` (+ the pre-existing frozen
 2026-08-11 directory untouched).
 
-Notes for future cycles: (a) `.git/hooks/pre-commit` is NOT installed in
-this clone — the gate fires only through the Claude Code hook, so commits
-made outside Claude Code skip the audit; installing via
+Notes for future cycles: `.git/hooks/pre-commit` is NOT installed in this
+clone — the gate fires only through the Claude Code hook, so commits made
+outside Claude Code skip the audit; installing via
 `.claude/audit/bin/install-hooks.sh` is a one-line fix awaiting a user
-decision. (b) The P2 auditor flagged the file-wide "law"/"distribution"
-vocabulary split (pre-existing S4-era comments vs this cycle's invariant 7)
-as a candidate dedicated terminology-sweep commit.
+decision.
+
+Post-cycle sweep (user go 2026-08-12): the P2 auditor's candidate
+"law" -> "distribution" terminology sweep landed as `5439a34e` — comment
+prose only, across `pgg_sample_adapter.v`, `pgl27_exec.v`,
+`five_card_exec.v` (`pgg_execution_plug.v` had no occurrences); the
+identifier `sa_seat_dist_law` and its name references stay per the
+identifiers-exempt rule; all lines re-wrapped within 80 columns; the
+three-file cone rebuilt clean with one rocqworker; gate run
+`20260812T031938Z-6bbb2f2d-6ca6` clean (Stage 1 re-validated every touched
+entity's comment tags; no semantic review dispatched — no statement or
+proof term changed).
