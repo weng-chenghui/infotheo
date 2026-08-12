@@ -61,6 +61,7 @@ From pgg_smc Require Export pgg_interface pgg_monodromy_profile.
 From pgg_smc Require Export pgg_execution_plug pgg_observed_execution.
 From pgg_smc Require Export pgg_sample_adapter pgg_weighted_words.
 From pgg_smc Require Export pgg_collusion_bound.
+From pgg_smc Require Export pgg_analysis_status.
 From pgg_reconstruct Require Export algebraic_rigidity.
 
 (* Imported instance cone: loaded, never re-exported. *)
@@ -331,6 +332,11 @@ Definition var_dist_transfer := @var_dist_fdistmap_transfer.
 Definition word_view_indist_via_transfer :=
   @pgl27_word_view_indist_via_transfer.
 
+(** word_transfer_status — the word path's transfer status.
+    @intent: IdealFinite, the path carrying a public model-transfer theorem
+    whose base-distribution premise is discharged by word_mixing. *)
+Definition word_transfer_status : TransferStatus := IdealFinite.
+
 End PGL27Analysis.
 
 (******************************************************************************)
@@ -383,7 +389,9 @@ Timeout 60 Check (PGL27Analysis.exec_view_indist :
     <= 2%:R^-39).
 
 (* 7 Transfer: the specialization has the statement of word_view_indist
-   verbatim, hypothesis for hypothesis and constant for constant. *)
+   verbatim, hypothesis for hypothesis and constant for constant, and the
+   typed status is pinned at its constructor. *)
+Timeout 60 Check (erefl : PGL27Analysis.word_transfer_status = IdealFinite).
 Timeout 60 Check (PGL27Analysis.word_view_indist_via_transfer :
   forall (R : realType) (C : {set 'I_8}) (s s' : bool),
     (#|C| <= 3)%N ->

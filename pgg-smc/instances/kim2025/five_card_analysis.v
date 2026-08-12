@@ -69,6 +69,7 @@ From infotheo Require Export variation_dist entropy.
 From pgg_smc Require Export pgg_interface pgg_monodromy_profile.
 From pgg_smc Require Export pgg_execution_plug pgg_observed_execution.
 From pgg_smc Require Export pgg_sample_adapter pgg_weighted_words.
+From pgg_smc Require Export pgg_analysis_status.
 From pgg_reconstruct Require Export algebraic_rigidity.
 
 (* Imported instance cone: loaded, never re-exported. *)
@@ -378,12 +379,25 @@ Definition deal_centi_lt := @kim_deal_centi_lt.
 (******************************************************************************)
 (* ===== 7. Transfer ===== *)
 (*                                                                            *)
-(* This section is intentionally EMPTY. No transfer-layer result exists for   *)
-(* the five-card development: the generic bound var_dist_fdistmap_transfer    *)
-(* applies to any pair of readers, but the five-card development has no ideal *)
-(* distribution equality to discharge its second hypothesis, so there is      *)
-(* nothing to alias and nothing is manufactured to fill the section.          *)
+(* This section carries NO transfer theorem. No transfer-layer result exists  *)
+(* for the five-card development: the generic bound                           *)
+(* var_dist_fdistmap_transfer applies to any pair of readers, but the         *)
+(* five-card development has no ideal distribution equality to discharge its  *)
+(* second hypothesis, so there is nothing to alias and nothing is             *)
+(* manufactured to fill the section. What the section does carry is one typed *)
+(* transfer status per analysis path, the value that records that absence.    *)
 (******************************************************************************)
+
+(** exec_transfer_status — the transfer status of the two exact-cut paths, the
+    uniform one and the single-biased one.
+    @intent: StaticExecutedOnly, the paths carrying their landed static
+    results to their executed observers and no ideal-to-finite theorem. *)
+Definition exec_transfer_status : TransferStatus := StaticExecutedOnly.
+
+(** repeated_transfer_status — the transfer status of the repeated-cut path.
+    @intent: NoModelComparison, the path carrying endpoint marginal bounds
+    only. *)
+Definition repeated_transfer_status : TransferStatus := NoModelComparison.
 
 End FiveCardAnalysis.
 
@@ -446,4 +460,9 @@ Timeout 60 Check (FiveCardAnalysis.endpoint_bound :
         (fdist_uniform (card_ord 5))
       <= Num.Def.sqrtr 5%:R * kim_lambda2 eps ^+ L).
 
-(* 7 Transfer: nothing to check, by construction. *)
+(* 7 Transfer: no theorem to check, by construction; the two typed statuses
+   are pinned at their constructors. *)
+Timeout 60 Check
+  (erefl : FiveCardAnalysis.exec_transfer_status = StaticExecutedOnly).
+Timeout 60 Check
+  (erefl : FiveCardAnalysis.repeated_transfer_status = NoModelComparison).

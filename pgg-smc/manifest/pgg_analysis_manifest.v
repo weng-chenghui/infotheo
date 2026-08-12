@@ -1496,6 +1496,8 @@ Timeout 60 Check (PGL27Analysis.word_view_indist_via_transfer :
          (pgl27_word_privacy.rho_word R))
     <= 2%:R^-39).
 
+Timeout 60 Check (erefl : PGL27Analysis.word_transfer_status = IdealFinite).
+
 (******************************************************************************)
 (*     The deterministic checker: five-card development                       *)
 (******************************************************************************)
@@ -1778,8 +1780,15 @@ Timeout 60 Check (FiveCardAnalysis.deal_centi_lt :
       (fdist_uniform (card_ord 5))
     < 2%:R^-40).
 
-(* --- 7 Transfer: the five-card facade has none, so there is nothing to
-   check here; the PGL transfer aliases are checked above. --- *)
+(* --- 7 Transfer: the five-card facade carries no transfer theorem, so the
+   two typed statuses are all there is to check; the PGL transfer aliases are
+   checked above. --- *)
+
+Timeout 60 Check
+  (erefl : FiveCardAnalysis.exec_transfer_status = StaticExecutedOnly).
+
+Timeout 60 Check
+  (erefl : FiveCardAnalysis.repeated_transfer_status = NoModelComparison).
 
 (******************************************************************************)
 (*     The deterministic checker: five-seat S_5 instance                      *)
