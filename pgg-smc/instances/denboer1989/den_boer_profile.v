@@ -5,8 +5,8 @@
 (*                                                                            *)
 (* den Boer (1989) is the unbiased member of the shared five-card family       *)
 (* (five_card_family.v): the cyclic C_5 monodromy plugged through the          *)
-(* five-generator instance FiveCardKim_M, at bias eps = 0 and word length 1    *)
-(* (one uniform cyclic cut). At eps = 0 the second-largest eigenvalue modulus  *)
+(* five-generator instance FiveCardKim_M, read at bias eps = 0 and word length *)
+(* 1 (one uniform cyclic cut). At eps = 0 the second-largest eigenvalue modulus *)
 (* kim_lambda2 vanishes, so one shuffle drives the dealing-phase security bound    *)
 (* sqrt 5 * kim_lambda2 ^+ 1 to 0: the perfectly-anonymous den Boer regime.       *)
 (* The plug bundles the five-card starting interface (FiveCardKim_PI), the      *)
@@ -41,57 +41,62 @@ Import GRing.Theory Num.Theory.
 Local Open Scope ring_scope.
 
 (** den_boer_eps0_lt — the eps = 0 upper-positivity constraint of the family.
-    @composes: den_boer_profile
+    @composes: den_boer_marginal_bound
     Naming: eps0_lt is the bias-0 instance of the family's `eps < 1/5`
     hypothesis; the suffix tracks the discharged hypothesis, not the 0 < x
-    shape. At bias 0 it holds since 0 < 1/5; fed to five_card_profile. *)
+    shape. At bias 0 it holds since 0 < 1/5; fed to fc_kim_security_bundle. *)
 Lemma den_boer_eps0_lt (R : realType) : (0 : R) < 5%:R^-1.
 Proof. by rewrite invr_gt0 ltr0n. Qed.
 
 (** den_boer_eps0_gt — the eps = 0 lower-positivity constraint of the family.
-    @composes: den_boer_profile
+    @composes: den_boer_marginal_bound
     Naming: eps0_gt is the bias-0 instance of the family's `-4/5 < eps`
     hypothesis; the suffix tracks the discharged hypothesis, not the x < 0
-    shape. At bias 0 it holds since -(4/5) < 0; fed to five_card_profile. *)
+    shape. At bias 0 it holds since -(4/5) < 0; fed to fc_kim_security_bundle. *)
 Lemma den_boer_eps0_gt (R : realType) : - (4%:R * 5%:R^-1) < (0 : R).
 Proof. by rewrite oppr_lt0 divr_gt0 // ltr0n. Qed.
 
 (** den_boer_eps0_spectral — the eps = 0 spectral-gap constraint of the family.
-    @composes: den_boer_profile
+    @composes: den_boer_marginal_bound
     Naming: eps0_spectral is the bias-0 instance of the family's spectral-gap
     hypothesis `|eps| < 4/5; the suffix names the discharged constraint. At
-    bias 0 it holds since `|0| = 0 < 4/5; fed to five_card_profile. *)
+    bias 0 it holds since `|0| = 0 < 4/5; fed to fc_kim_security_bundle. *)
 Lemma den_boer_eps0_spectral (R : realType) : `|(0 : R)| < 4%:R / 5%:R.
 Proof. by rewrite normr0 divr_gt0 // ltr0n. Qed.
 
-(** den_boer_profile — den Boer is the unbiased (eps = 0) five-card family
-    member with one uniform cut.
-    @intent: the MonodromyProfile obtained from five_card_profile at bias 0 and
-    word length 1, bundling FiveCardKim_PI, the perfect dealing-phase security
-    witness (eps = 0 forces the bound to 0 after one shuffle), and the bool/'I_5
-    five-card plug five_card_plug. This is the foundational five-card trick read
-    off the shared five-card family at its anonymous member: its dealing phase
-    is perfectly anonymous and its reconstruction recovers one bit (a AND b).
-    Used-by: contrast demos, landscape. *)
-Definition den_boer_profile (R : realType) : MonodromyProfile R :=
-  @five_card_profile R 0 (den_boer_eps0_lt R) (den_boer_eps0_gt R)
-    (den_boer_eps0_spectral R) 1.
+(** den_boer_profile — den Boer is the unbiased five-card family member.
+    @intent: the five-card MonodromyProfile, bundling FiveCardKim_M, the secret
+    type bool, FiveCardKim_PI and the bool/'I_5 five-card plug five_card_plug.
+    This is the foundational five-card trick read off the shared five-card
+    family: the bias and the word length that distinguish the den Boer member
+    from the Kim family are data of the marginal bound below, not of the program
+    layer. Used-by: contrast demos, landscape. *)
+Definition den_boer_profile : MonodromyProfile := five_card_profile.
+
+(** den_boer_marginal_bound — the marginal bound of the unbiased one-cut
+    five-card member.
+    @intent: the bound projection of the five-card certificate bundle at bias 0
+    and word length 1. *)
+Definition den_boer_marginal_bound (R : realType)
+    : ShuffleMarginalBound R FiveCardKim_M :=
+  scb_bound (fc_kim_security_bundle (den_boer_eps0_lt R) (den_boer_eps0_gt R)
+    (den_boer_eps0_spectral R) 1).
 
 (** den_boer_perfect — the den Boer dealing-phase security bound is exactly 0.
-    @main bound: sw_bound_eps of the den Boer profile is 0; the precise sense in
+    @main bound: sw_bound_eps den_boer_marginal_bound is 0; the precise sense in
     which the unbiased family member is perfectly anonymous. One uniform cut
     (word length 1) at bias 0 drives sqrt 5 * kim_lambda2 ^+ 1 to 0, since
     kim_lambda2 0 = 0 (kim_security_at_zero). Naming: _perfect marks the lhs = 0
     perfect-security shape. *)
 Lemma den_boer_perfect (R : realType) :
-  sw_bound_eps (mp_security (den_boer_profile R)) = 0.
+  sw_bound_eps (den_boer_marginal_bound R) = 0.
 Proof. by rewrite /= kim_security_at_zero. Qed.
 
 (** profile_k_denboer — the five-card plug's privacy threshold is 2.
-    @main bound: profile_k (den_boer_profile R) = 2; the contrast
-    character (any single revealed card leaks nothing about the AND, but two
-    may), read off the shared profile_k of the five-card plug. *)
-Lemma profile_k_denboer (R : realType) : profile_k (den_boer_profile R) = 2.
+    @main bound: profile_k den_boer_profile = 2; the contrast character (any
+    single revealed card leaks nothing about the AND, but two may), read off the
+    shared profile_k of the five-card plug. *)
+Lemma profile_k_denboer : profile_k den_boer_profile = 2.
 Proof. by []. Qed.
 
 (******************************************************************************)

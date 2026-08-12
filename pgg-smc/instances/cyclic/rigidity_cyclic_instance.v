@@ -8,7 +8,7 @@
 (* (0 1 2 ... N-1).                                                           *)
 (*                                                                            *)
 (* This is the simplest instance with a single generator (Tg = 1), L = 1.    *)
-(* The SecurityWitness is proved via var_dist_endpoint_weval_inj (DPI bound). *)
+(* The marginal bound is proved via var_dist_endpoint_weval_inj (DPI bound).  *)
 (*                                                                            *)
 (* Parameters:                                                                *)
 (*   Tg = 1 (one generator: the N-cycle), N = n+2 (sheets), L = 1            *)
@@ -20,7 +20,7 @@
 (* Key properties:                                                            *)
 (*   ncycle_sigmas_inj : generator tuple is injective (trivial, Tg=1)        *)
 (*   ncycle_weval_inj1 : word-eval injectivity at L=1                        *)
-(*   ncycle_security_witness_direct_1 : SecurityWitness (endpoint_inj)       *)
+(*   ncycle_security_witness_direct_1 : ShuffleMarginalBound (endpoint_inj)  *)
 (*   ncycle_rigidity : AlgebraicRigidity (security + threshold)              *)
 (******************************************************************************)
 
@@ -46,7 +46,7 @@ Local Open Scope ring_scope.
 Local Open Scope fdist_scope.
 
 (******************************************************************************)
-(*     SecurityWitness Construction                                           *)
+(*     ShuffleMarginalBound Construction                                      *)
 (******************************************************************************)
 
 Section ncycle_security.
@@ -68,7 +68,7 @@ Proof. by move=> i j _; rewrite (ord1 i) (ord1 j). Qed.
 Lemma ncycle_weval_inj1 : @weval_inj M_ncycle 1.
 Proof. exact: gen_inj_weval_inj1 ncycle_sigmas_inj. Qed.
 
-(* Direct endpoint SecurityWitness at L=1.
+(* Direct endpoint ShuffleMarginalBound at L=1.
    Epsilon = 2*(N-1)/N, tighter than DPI bound 2*(N!-1)/N!.
    Proof: Tg=1, L=1, achievable has 1 element → perm_endpoint trivially injective. *)
 Lemma ncycle_perm_endpoint_inj1 :
@@ -84,7 +84,14 @@ rewrite (weval_inj_search_space ncycle_weval_inj1).
 by rewrite exp1n.
 Qed.
 
-Definition ncycle_security_witness_direct_1 : SecurityWitness R R_ncycle :=
+(** ncycle_security_witness_direct_1 — the direct endpoint marginal bound of
+    the N-cycle at word length 1.
+    @intent: security_witness_endpoint_inj at the single N-cycle generator,
+    word length 1 and the endpoint-injectivity proof.
+    Naming: intentional; the instance prefix, the migrated constructor family
+    security_witness, the direct route and the word length 1 each contribute
+    a component, and no canonical MathComp suffix denotes the combination. *)
+Definition ncycle_security_witness_direct_1 : ShuffleMarginalBound R R_ncycle :=
   security_witness_endpoint_inj R ncycle_weval_inj1 ncycle_perm_endpoint_inj1.
 
 End ncycle_security.
@@ -133,9 +140,12 @@ Hypothesis ncycle_genus0_klein :
 Definition ncycle_threshold_witness : ThresholdWitness R_ncycle :=
   @MkThresholdWitness R_ncycle ncycle_covering (fun _ => ncycle_genus0_klein).
 
+(** ncycle_rigidity — the AlgebraicRigidity value of the N-cycle instance.
+    @intent: MkAlgebraicRigidity at the certificate-free bundle of
+    ncycle_security_witness_direct_1 and ncycle_threshold_witness. *)
 Definition ncycle_rigidity : AlgebraicRigidity R R_ncycle :=
   @MkAlgebraicRigidity R R_ncycle
-    (ncycle_security_witness_direct_1 R n)
+    (shuffle_bundle_of_bound (ncycle_security_witness_direct_1 R n))
     ncycle_threshold_witness.
 
 (* Derived properties *)

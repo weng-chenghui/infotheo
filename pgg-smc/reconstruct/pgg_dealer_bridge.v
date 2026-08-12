@@ -3,8 +3,9 @@
 (******************************************************************************)
 (* Dealer Bridge: Solver Output to Protocol Correctness                       *)
 (*                                                                            *)
-(* Connects the solver-determined word length (from SecurityWitness) to the   *)
-(* session-typed protocol (exchange_dealer_from_words) via AlgebraicRigidity.  *)
+(* Connects the solver-determined word length (from the marginal bound) to    *)
+(* the session-typed protocol (exchange_dealer_from_words) via                *)
+(* AlgebraicRigidity.                                                         *)
 (*                                                                            *)
 (*   dealer_words_correct == end-to-end: word of solver-determined length L   *)
 (*     produces a correct protocol execution                                  *)
@@ -35,7 +36,7 @@ Variable M : MonodromyReprWithGeneratorType.
 Variable PI : PGGInterface M.
 Variable ar : AlgebraicRigidity R M.
 
-Let L := sw_L (ar_security ar).
+Let L := sw_L (scb_bound (ar_security ar)).
 Let Tg := (@pgg_ngens' M).+1.
 Let N := (pgg_N' M).+1.
 Let T := (pi_T' PI).+1.
@@ -73,14 +74,14 @@ Qed.
 
 (** dealer_words_epsilon_bound — var_dist epsilon bound for the word-based dealer.
     Kind: main.
-    Why: re-exports the SecurityWitness var_dist bound at each secret position,
+    Why: re-exports the marginal-bound var_dist bound at each secret position,
          so dealer consumers do not need to unfold the AlgebraicRigidity record.
 *)
 Lemma dealer_words_epsilon_bound (s : 'I_N) :
   (var_dist (fdistmap (fun sigma : {perm 'I_N} => sigma s)
-                      (sw_rho_dist (ar_security ar)))
+                      (sw_rho_dist (scb_bound (ar_security ar))))
             (fdist_uniform (card_ord N))
-   <= sw_bound_eps (ar_security ar))%O.
+   <= sw_bound_eps (scb_bound (ar_security ar)))%O.
 Proof. exact: sw_bound. Qed.
 
 (* When the dealer uses ts_encode to produce the starting shares,

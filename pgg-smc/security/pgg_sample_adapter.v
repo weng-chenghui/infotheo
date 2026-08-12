@@ -27,8 +27,8 @@
 (*   sa_coalition_dist       == layer 3: the distribution of a coalition's    *)
 (*                              reading                                       *)
 (*   sa_cut_dist             == layer 3: the distribution of the cut          *)
-(*   sa_joint_dist           == layer 3: the joint distribution of the run    *)
-(*                              argument and the cut                          *)
+(*   sa_joint_dist           == layer 3: the joint distribution of a chosen   *)
+(*                              finite-valued sample observable and the cut   *)
 (*   sa_cut_dist_image       == the distribution of the cut's permutation     *)
 (*                              image                                         *)
 (*   sa_static_seat_view     == the static observation at seat i              *)
@@ -108,15 +108,21 @@ End fdist_product_map.
 
 (** SampleAdapter — the probabilistic layer over an execution plug.
     Kind: interface.
-    A value of this type carries a finite sample space sa_sampleT with a
+    A constructor supplies a finite sample space sa_sampleT with a
     distribution sa_sampleP on it, the run argument map sa_arg and the cut
     map sa_cut. *)
-Record SampleAdapter (R : realType) (mp : MonodromyProfile R)
+Record SampleAdapter (R : realType) (mp : MonodromyProfile)
     (e : ExecutionPlug mp) :=
   MkSampleAdapter {
+    (* sa_sampleT is the finite carrier of the random choices of one run. *)
     sa_sampleT : finType ;
+    (* sa_sampleP is the distribution on that carrier. It is a distribution on
+       random choices, not on interpreter results. *)
     sa_sampleP : R.-fdist sa_sampleT ;
+    (* sa_arg maps a sample point to the executable program input. *)
     sa_arg     : sa_sampleT -> ep_inputT e ;
+    (* sa_cut maps a sample point to the group element the run is dealt at. It
+       may evaluate a generator word before the run sees the result. *)
     sa_cut     : sa_sampleT -> pgg_gT (mp_M mp) ;
   }.
 
@@ -127,9 +133,9 @@ Record SampleAdapter (R : realType) (mp : MonodromyProfile R)
 Section sample_layers.
 
 Variable R : realType.
-Variable mp : MonodromyProfile R.
+Variable mp : MonodromyProfile.
 Variable e : ExecutionPlug mp.
-Variable sa : SampleAdapter e.
+Variable sa : SampleAdapter R e.
 Variable P_idx : nat.
 
 (* LAYER 1: raw execution. One interpreter result per sample point. *)
@@ -138,7 +144,7 @@ Variable P_idx : nat.
     @intent: exec_run at the sample's argument and cut, a pair of the final
     process states and the per-process traces. *)
 Definition sa_run (u : sa_sampleT sa) :=
-  @exec_run R mp e (sa.(sa_arg) u) (sa.(sa_cut) u) P_idx.
+  @exec_run mp e (sa.(sa_arg) u) (sa.(sa_cut) u) P_idx.
 
 (* LAYER 2: endpoint readers on sample points, typed as random variables. *)
 
@@ -147,7 +153,7 @@ Definition sa_run (u : sa_sampleT sa) :=
     cut. *)
 Definition sa_seat_view (i : 'I_(pi_T' (mp_PI mp)).+1)
     : {RV sa.(sa_sampleP) -> 'I_(pgg_N' (mp_M mp)).+1} :=
-  fun u => @exec_seat_endpoint R mp e (sa.(sa_arg) u) (sa.(sa_cut) u) P_idx i.
+  fun u => @exec_seat_endpoint mp e (sa.(sa_arg) u) (sa.(sa_cut) u) P_idx i.
 
 (** sa_coalition_view — a coalition's endpoint readings as a random variable.
     @intent: the sample point mapped to exec_coalition_endpoints at its
@@ -155,7 +161,7 @@ Definition sa_seat_view (i : 'I_(pi_T' (mp_PI mp)).+1)
 Definition sa_coalition_view (C : {set 'I_(pi_T' (mp_PI mp)).+1})
     : {RV sa.(sa_sampleP) -> {ffun 'I_(pi_T' (mp_PI mp)).+1
                               -> 'I_(pgg_N' (mp_M mp)).+1}} :=
-  fun u => @exec_coalition_endpoints R mp e (sa.(sa_arg) u) (sa.(sa_cut) u)
+  fun u => @exec_coalition_endpoints mp e (sa.(sa_arg) u) (sa.(sa_cut) u)
              P_idx C.
 
 (** sa_seat_view_of_run — the layer-two reader reads the layer-one run.
@@ -197,21 +203,20 @@ Proof. by []. Qed.
 Definition sa_cut_dist : R.-fdist (pgg_gT (mp_M mp)) :=
   fdistmap sa.(sa_cut) sa.(sa_sampleP).
 
-(* The plug's run argument type ep_inputT is a Type, so the joint distribution
-   takes the argument reader as a parameter rather than reading sa_arg
-   directly: at an instance the reader is the adapter's own sa_arg, whose
-   codomain is then a concrete finType. *)
-
-(** sa_joint_dist — the joint distribution of the run argument and the cut.
-    @intent: the pushforward of sa_sampleP along u |-> (arg u, sa_cut u), at an
-    argument reader arg with finite codomain. *)
+(** sa_joint_dist — the joint distribution of a chosen finite-valued sample
+    observable and the evaluated cut.
+    @intent: the pushforward of sa_sampleP along u |-> (arg u, sa_cut u), at a
+    reader arg whose codomain is a finType. The reader is an explicit argument
+    because the plug's run argument type ep_inputT is a Type, while a finite
+    distribution requires a finite codomain; its type does not require the
+    reader to be sa_arg. *)
 Definition sa_joint_dist (argT : finType) (arg : sa_sampleT sa -> argT)
     : R.-fdist (argT * pgg_gT (mp_M mp)) :=
   fdistmap (fun u => (arg u, sa.(sa_cut) u)) sa.(sa_sampleP).
 
 (** sa_cut_dist_image — the distribution of the cut's permutation image.
     @intent: the pushforward of sa_cut_dist along the representation pgg_rho,
-    the carrier in which a SecurityWitness states its bound. *)
+    the carrier in which a ShuffleMarginalBound states its bound. *)
 Definition sa_cut_dist_image : R.-fdist {perm 'I_(pgg_N' (mp_M mp)).+1} :=
   fdistmap (@pgg_rho (mp_M mp)) sa_cut_dist.
 
@@ -228,8 +233,8 @@ Variable content_obs :
 (* Endpoint equation at every sample point: the executed endpoints are the
    static observation. *)
 Hypothesis Hep : forall u : sa_sampleT sa,
-  @exec_endpoints R mp e (sa.(sa_arg) u) (sa.(sa_cut) u) P_idx
-  = @exec_static_endpoints R mp e content_obs (sa.(sa_arg) u) (sa.(sa_cut) u).
+  @exec_endpoints mp e (sa.(sa_arg) u) (sa.(sa_cut) u) P_idx
+  = @exec_static_endpoints mp e content_obs (sa.(sa_arg) u) (sa.(sa_cut) u).
 
 (** sa_static_seat_view — the static observation at seat i as a random
     variable.

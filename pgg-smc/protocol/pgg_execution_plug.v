@@ -3,12 +3,12 @@
 (******************************************************************************)
 (* ExecutionPlug: the execution layer over a MonodromyProfile                 *)
 (*                                                                            *)
-(* An ExecutionPlug over a MonodromyProfile R carries the eight data that     *)
+(* An ExecutionPlug over a MonodromyProfile carries the seven data that       *)
 (* turn an algebraic profile into an executable piSMC run: the run argument   *)
-(* type, the seat/share and card/share count bridges, the participant list    *)
-(* with its enumeration equation, the content readout, the input processes    *)
-(* and the interpreter fuel. The profile itself is unchanged: an execution    *)
-(* plug is a second value over an existing profile.                           *)
+(* type, the seat/share count bridge, the participant list with its           *)
+(* enumeration equation, the content readout, the input processes and the     *)
+(* interpreter fuel. The profile itself is unchanged: an execution plug is a  *)
+(* second value over an existing profile.                                     *)
 (*                                                                            *)
 (* Section execution_of_profile derives from a plug the dealer, the session-  *)
 (* typed process list, the interpreter run, the verifier endpoints, the       *)
@@ -49,25 +49,40 @@ Local Open Scope proba_scope.
 
 (** ExecutionPlug — the execution layer over a MonodromyProfile.
     Kind: interface.
-    A value of this type carries the run argument type ep_inputT, the seat/share
-    bridge ep_players_bridge, the card/share bridge ep_cards_bridge, the
-    participant list ep_players with its enumeration equation ep_playersE, the
-    content readout ep_content, the input processes ep_input_procs and the
-    interpreter fuel ep_fuel. *)
-Record ExecutionPlug (R : realType) (mp : MonodromyProfile R) :=
+    A constructor supplies the run argument type ep_inputT, the seat/share
+    bridge ep_players_bridge, the participant list ep_players with its
+    enumeration equation ep_playersE, the content readout ep_content, the input
+    processes ep_input_procs and the interpreter fuel ep_fuel. *)
+Record ExecutionPlug (mp : MonodromyProfile) :=
   MkExecutionPlug {
+    (* ep_inputT is the carrier of one run argument. It may differ from the
+       reconstructed secret type mp_secretT mp. *)
     ep_inputT         : Type ;
+    (* ep_players_bridge is the type-level coherence condition between the
+       piSMC seat tuple and the reconstruction share tuple. exec_decode
+       transports an endpoint list along it. *)
     ep_players_bridge : pi_T' (mp_PI mp) = ts_T' (rp_scheme (mp_plug mp)) ;
-    ep_cards_bridge   : (pgg_N' (mp_M mp)).+1
-                          = (ts_T' (rp_scheme (mp_plug mp))).+1 ;
+    (* ep_players is the concrete ordered seat list used by executable
+       reduction. The stored list reduces in milliseconds where the canonical
+       enumeration reduces to a large term stuck behind an opaque idP. *)
     ep_players        : seq 'I_(pi_T' (mp_PI mp)).+1 ;
+    (* ep_playersE certifies that the cached list is exactly the canonical seat
+       enumeration, so storing it gives no freedom to omit or reorder seats. *)
     ep_playersE       : ep_players = enum 'I_(pi_T' (mp_PI mp)).+1 ;
+    (* ep_content turns a run argument and the committed input payloads into
+       the card content readout the dealer uses to build the deck. *)
     ep_content        : ep_inputT -> seq 'I_(pgg_N' (mp_M mp)).+1
                           -> ('I_(pgg_N' (mp_M mp)).+1
                               -> 'I_(pgg_N' (mp_M mp)).+1) ;
+    (* ep_input_procs supplies the additional committing-party processes. It
+       records the input mode of the protocol family: empty at every argument
+       for a dealer-secret instance, nonempty for a committed-input one. *)
     ep_input_procs    : ep_inputT
                           -> seq (aproc pgg_dtype
                                     (pgg_data (pgg_N' (mp_M mp)).+1)) ;
+    (* ep_fuel selects the interpreter evaluation budget used by exec_run.
+       Replacing a sufficient fuel value by another sufficient one does not
+       define a different algebraic profile. *)
     ep_fuel           : nat ;
   }.
 
@@ -75,28 +90,24 @@ Record ExecutionPlug (R : realType) (mp : MonodromyProfile R) :=
     @intent: the plug whose runs have no committing party, its input process
     list being empty at every run argument, so that the dealt secret is the
     only input of the run. *)
-Definition dealer_secret_plug (R : realType) (mp : MonodromyProfile R)
+Definition dealer_secret_plug (mp : MonodromyProfile)
     (inputT : Type)
     (players_bridge : pi_T' (mp_PI mp) = ts_T' (rp_scheme (mp_plug mp)))
-    (cards_bridge : (pgg_N' (mp_M mp)).+1
-                      = (ts_T' (rp_scheme (mp_plug mp))).+1)
     (players : seq 'I_(pi_T' (mp_PI mp)).+1)
     (playersE : players = enum 'I_(pi_T' (mp_PI mp)).+1)
     (content : inputT -> seq 'I_(pgg_N' (mp_M mp)).+1
                  -> ('I_(pgg_N' (mp_M mp)).+1 -> 'I_(pgg_N' (mp_M mp)).+1))
     (fuel : nat) : ExecutionPlug mp :=
-  @MkExecutionPlug R mp inputT players_bridge cards_bridge players playersE
+  @MkExecutionPlug mp inputT players_bridge players playersE
     content (fun _ => [::]) fuel.
 
 (** committed_input_plug — the execution plug of a committed input.
     @intent: the plug whose runs carry the committing parties as an argument,
     one commit process per party, so that the run argument is the committed
     value rather than a dealt secret. *)
-Definition committed_input_plug (R : realType) (mp : MonodromyProfile R)
+Definition committed_input_plug (mp : MonodromyProfile)
     (inputT : Type)
     (players_bridge : pi_T' (mp_PI mp) = ts_T' (rp_scheme (mp_plug mp)))
-    (cards_bridge : (pgg_N' (mp_M mp)).+1
-                      = (ts_T' (rp_scheme (mp_plug mp))).+1)
     (players : seq 'I_(pi_T' (mp_PI mp)).+1)
     (playersE : players = enum 'I_(pi_T' (mp_PI mp)).+1)
     (content : inputT -> seq 'I_(pgg_N' (mp_M mp)).+1
@@ -104,7 +115,7 @@ Definition committed_input_plug (R : realType) (mp : MonodromyProfile R)
     (input_procs : inputT
                      -> seq (aproc pgg_dtype (pgg_data (pgg_N' (mp_M mp)).+1)))
     (fuel : nat) : ExecutionPlug mp :=
-  @MkExecutionPlug R mp inputT players_bridge cards_bridge players playersE
+  @MkExecutionPlug mp inputT players_bridge players playersE
     content input_procs fuel.
 
 (******************************************************************************)
@@ -113,8 +124,7 @@ Definition committed_input_plug (R : realType) (mp : MonodromyProfile R)
 
 Section execution_of_profile.
 
-Variable R : realType.
-Variable mp : MonodromyProfile R.
+Variable mp : MonodromyProfile.
 Variable e : ExecutionPlug mp.
 
 (** exec_dealer_id — the dealer's process identifier.
@@ -180,27 +190,52 @@ Definition exec_endpoints (x : ep_inputT e) (w0 : pgg_gT (mp_M mp))
     (P_idx : nat) :=
   endpoints_of_trace (nth [::] (exec_run x w0 P_idx).2 exec_verifier_id).
 
+(** exec_verifier_trace — the executed trace of the verifier.
+    @intent: entry exec_verifier_id of exec_run.2. The verifier row is a raw
+    message log, distinct from the endpoint list exec_endpoints decoded from
+    it. *)
+Definition exec_verifier_trace (x : ep_inputT e) (w0 : pgg_gT (mp_M mp))
+    (P_idx : nat) :=
+  nth [::] (exec_run x w0 P_idx).2 exec_verifier_id.
+
+(** exec_endpoints_verifier_traceE — the endpoints are the endpoint reading of
+    the verifier's executed trace.
+    @main architecture: exec_endpoints x w0 P_idx = endpoints_of_trace
+    (exec_verifier_trace x w0 P_idx). *)
+Lemma exec_endpoints_verifier_traceE (x : ep_inputT e) (w0 : pgg_gT (mp_M mp))
+    (P_idx : nat) :
+  exec_endpoints x w0 P_idx
+  = endpoints_of_trace (exec_verifier_trace x w0 P_idx).
+Proof. by []. Qed.
+
 (** exec_participant_trace — the executed trace of the seat-i player.
-    @intent: entry exec_seat_id i of exec_run.2. *)
+    @intent: entry exec_seat_id i of exec_run.2. The row is one participant
+    seat's own log; a seq of messages is not itself a finite-distribution
+    observable. *)
 Definition exec_participant_trace (x : ep_inputT e) (w0 : pgg_gT (mp_M mp))
     (P_idx : nat) (i : 'I_(pi_T' (mp_PI mp)).+1) :=
   nth [::] (exec_run x w0 P_idx).2 (exec_seat_id i).
 
 (** exec_input_trace — the executed trace of committing party j.
-    @intent: entry exec_input_id j of exec_run.2. *)
+    @intent: entry exec_input_id j of exec_run.2. An input row is not a dealer
+    row. Only the indices j below the length of ep_input_procs e x denote
+    committing parties; a larger j is outside the run and returns the default
+    empty row. *)
 Definition exec_input_trace (x : ep_inputT e) (w0 : pgg_gT (mp_M mp))
     (P_idx : nat) (j : nat) :=
   nth [::] (exec_run x w0 P_idx).2 (exec_input_id j).
 
 (** exec_dealer_trace — the executed trace of the dealer.
-    @intent: entry exec_dealer_id of exec_run.2. *)
+    @intent: entry exec_dealer_id of exec_run.2. The dealer row belongs to no
+    participant coalition unless a theorem adds it explicitly. *)
 Definition exec_dealer_trace (x : ep_inputT e) (w0 : pgg_gT (mp_M mp))
     (P_idx : nat) :=
   nth [::] (exec_run x w0 P_idx).2 exec_dealer_id.
 
 (** exec_coalition_trace — the coalition's executed raw traces.
     @intent: the finfun sending a seat in C to its executed trace and a seat
-    outside C to the empty trace. *)
+    outside C to the empty trace. The observation covers the selected
+    participant seats only, and no dealer, verifier or input row. *)
 Definition exec_coalition_trace (x : ep_inputT e) (w0 : pgg_gT (mp_M mp))
     (P_idx : nat) (C : {set 'I_(pi_T' (mp_PI mp)).+1})
     : {ffun 'I_(pi_T' (mp_PI mp)).+1 -> seq (pgg_data (pgg_N' (mp_M mp)).+1)} :=
@@ -238,16 +273,6 @@ Proof. by rewrite e.(ep_players_bridge). Qed.
 Definition exec_decode (ep : seq 'I_(pgg_N' (mp_M mp)).+1)
     (Hsz : size ep = (pi_T' (mp_PI mp)).+1) : mp_secretT mp :=
   run_recover (tcast (etrans Hsz exec_seat_share_count) (in_tuple ep)).
-
-(** exec_content_from_plug — the share readout derived from the card/share
-    bridge.
-    @intent: tnth (ts_encode (rp_scheme (mp_plug mp)) s) at a card position,
-    transported along ep_cards_bridge. *)
-Definition exec_content_from_plug (s : mp_secretT mp)
-    : seq 'I_(pgg_N' (mp_M mp)).+1
-      -> ('I_(pgg_N' (mp_M mp)).+1 -> 'I_(pgg_N' (mp_M mp)).+1) :=
-  fun _ i => tnth (ts_encode (rp_scheme (mp_plug mp)) s)
-               (cast_ord e.(ep_cards_bridge) i).
 
 (** exec_static_endpoints — the static group-action observation over the seats.
     @intent: content_obs x read at the cut w0 and each participant's starting

@@ -60,8 +60,10 @@ rewrite fiber_entropy_injective ?Hsat //;
 exact: monster_perm_endpoint_inj_Lstar.
 Qed.
 
-(* SecurityWitness via entropy pipeline *)
-Definition monster_security_from_entropy : SecurityWitness R R_monster :=
+(** monster_security_from_entropy — the monster marginal bound via the
+    entropy pipeline.
+    @intent: security_witness_from_entropy at monster_entropy_witness_Lstar. *)
+Definition monster_security_from_entropy : ShuffleMarginalBound R R_monster :=
   security_witness_from_entropy monster_entropy_witness_Lstar.
 
 (* eps = 0 under saturation *)
@@ -115,8 +117,10 @@ Proof. exact: fiber_entropy_gap. Qed.
 Definition monster_entropy_witness_short_L : EntropyWitness R R_monster :=
   @entropy_witness_inj R _ _ monster_sigmas _ Hweval Hpe.
 
-(* SecurityWitness: eps = sqrt(2*(log N - log(2^L))) *)
-Definition monster_security_short_L : SecurityWitness R R_monster :=
+(** monster_security_short_L — the short-word monster marginal bound.
+    @intent: security_witness_from_entropy at the short-L entropy witness;
+    eps = sqrt(2*(log N - log(2^L))). *)
+Definition monster_security_short_L : ShuffleMarginalBound R R_monster :=
   security_witness_from_entropy monster_entropy_witness_short_L.
 
 End monster_short_L.
@@ -207,8 +211,10 @@ Definition oc_entropy_witness_2 : EntropyWitness R R_oc :=
     (log 2%:R)
     oc_entropy_bound.
 
-(* SecurityWitness via entropy pipeline *)
-Definition oc_security_from_entropy : SecurityWitness R R_oc :=
+(** oc_security_from_entropy — the OC marginal bound via the entropy
+    pipeline.
+    @intent: security_witness_from_entropy at oc_entropy_witness_2. *)
+Definition oc_security_from_entropy : ShuffleMarginalBound R R_oc :=
   security_witness_from_entropy oc_entropy_witness_2.
 
 (* Combinatorial bound (eps=1) is tighter than entropy bound (eps=sqrt 2).
@@ -253,10 +259,10 @@ Hypothesis Hbound : forall s : 'I_4,
 Definition oc_entropy_witness_L : EntropyWitness R R_oc :=
   @entropy_witness_from_rho R R_oc L rho_dist H_min Hbound.
 
-(** oc_security_from_entropy_L — parametric security witness for OC obtained from the L-indexed entropy witness via Pinsker.
-    Kind: example.
-*)
-Definition oc_security_from_entropy_L : SecurityWitness R R_oc :=
+(** oc_security_from_entropy_L — parametric marginal bound for OC.
+    @intent: the L-indexed entropy witness pushed through Pinsker via
+    security_witness_from_entropy. *)
+Definition oc_security_from_entropy_L : ShuffleMarginalBound R R_oc :=
   security_witness_from_entropy oc_entropy_witness_L.
 
 (* When H_min reaches log N = log 4, perfect security *)

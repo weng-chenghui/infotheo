@@ -23,7 +23,7 @@
 (* Key properties:                                                            *)
 (*   abel_sigmas_distinct : generators are distinct permutations             *)
 (*   abel_weval_inj1 : word-eval injectivity at L=1                          *)
-(*   abel_security_witness_direct_1 : SecurityWitness (via endpoint_inj)     *)
+(*   abel_security_witness_direct_1 : ShuffleMarginalBound (endpoint_inj)    *)
 (*   abel_rigidity : AlgebraicRigidity (security + threshold)                *)
 (******************************************************************************)
 
@@ -101,7 +101,7 @@ case: i => [[|[|i]] Hi] //; case: j => [[|[|j]] Hj] //= Habs;
 Qed.
 
 (******************************************************************************)
-(*     SecurityWitness Construction                                           *)
+(*     ShuffleMarginalBound Construction                                      *)
 (******************************************************************************)
 
 Section abel_security.
@@ -115,7 +115,7 @@ Let R_abel : MonodromyReprWithGeneratorType := M_abel.
 Lemma abel_weval_inj1 : @weval_inj M_abel 1.
 Proof. exact: gen_inj_weval_inj1 abel_sigmas_distinct. Qed.
 
-(* Direct endpoint SecurityWitness at L=1.
+(* Direct endpoint ShuffleMarginalBound at L=1.
    Epsilon = 2*(4-2)/4 = 1.0, tighter than DPI bound 44/24 ≈ 1.83.
    Proof: (01) and (23) have disjoint support, so they map every sheet
    to distinct values. *)
@@ -137,12 +137,14 @@ case: i => [[|[|i]] Hi]; case: j => [[|[|j]] Hj] //=;
   by have := congr1 val Hf; rewrite !permE.
 Qed.
 
-(** abel_security_witness_direct_1 — direct (non-DPI) SecurityWitness at L=1 for the abelian instance.
+(** abel_security_witness_direct_1 — direct (non-DPI) marginal bound at L=1 for the abelian instance.
     Kind: instance.
     Why: Uses endpoint-injectivity to give a tighter epsilon than the generic DPI bound (44/24) for the disjoint-transposition case.
     Naming: "direct" contrasts with the DPI-mediated construction and "1" marks the word length L=1 regime; both qualifiers are content-bearing and not redundant kind-suffixes.
+    @intent: security_witness_endpoint_inj at the abelian generators, word
+    length 1 and the endpoint-injectivity proof.
 *)
-Definition abel_security_witness_direct_1 : SecurityWitness R R_abel :=
+Definition abel_security_witness_direct_1 : ShuffleMarginalBound R R_abel :=
   security_witness_endpoint_inj R abel_weval_inj1 abel_perm_endpoint_inj1.
 
 End abel_security.
@@ -195,11 +197,13 @@ Definition abel_threshold_witness : ThresholdWitness R_abel :=
 
 (** abel_rigidity — AlgebraicRigidity instance for the disjoint-transpositions abelian example.
     Kind: instance.
-    Why: Bundles the direct endpoint SecurityWitness with the genus-0 ThresholdWitness to exhibit a concrete rigidity certificate for the abelian case.
+    Why: Bundles the direct endpoint marginal bound with the genus-0 ThresholdWitness to exhibit a concrete rigidity certificate for the abelian case.
+    @intent: MkAlgebraicRigidity at the certificate-free bundle of
+    abel_security_witness_direct_1 and abel_threshold_witness.
 *)
 Definition abel_rigidity : AlgebraicRigidity R R_abel :=
   @MkAlgebraicRigidity R R_abel
-    (abel_security_witness_direct_1 R)
+    (shuffle_bundle_of_bound (abel_security_witness_direct_1 R))
     abel_threshold_witness.
 
 (* Derived properties *)

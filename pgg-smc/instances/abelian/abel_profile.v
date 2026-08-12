@@ -62,19 +62,21 @@ Definition abel_plug : ReconPlug (@Gen_PGGTypes 1 2 abel_sigmas) 'I_4 :=
     (@pgg_rho (@Gen_PGGTypes 1 2 abel_sigmas)) abel_sum_mod_perm_compatible.
 
 (** abel_profile — plug the abelian Z_2 x Z_2 (N = 4), paired with sum-mod.
-    Kind: instance. What: the MonodromyProfile bundling Gen_PGG_2 abel_sigmas,
-    the direct security witness, and abel_plug. Why: the insecure plug;
-    commuting generators, k = 4, the eps-floor contrast to the secure plugs.
-    Used-by: contrast demos. *)
-Definition abel_profile (R : realType) : MonodromyProfile R :=
-  @MkMonodromyProfile R (@Gen_PGGTypes 1 2 abel_sigmas) 'I_4 (Gen_PGG_2 abel_sigmas)
-    (abel_security_witness_direct_1 R) abel_plug.
+    Kind: instance. What: the MonodromyProfile bundling the group, the secret
+    type 'I_4, Gen_PGG_2 abel_sigmas and abel_plug. Why: the insecure plug;
+    commuting generators, k = 4, the contrast to the secure plugs.
+    Used-by: contrast demos.
+    @intent: MkMonodromyProfile at the abelian group, the secret type 'I_4,
+    the two-generator interface and abel_plug. *)
+Definition abel_profile : MonodromyProfile :=
+  @MkMonodromyProfile (@Gen_PGGTypes 1 2 abel_sigmas) 'I_4
+    (Gen_PGG_2 abel_sigmas) abel_plug.
 
 (** profile_k_abel — the abelian plug's privacy threshold is 4 (one share per
     sheet).
     @main bound: contrast character against the S_5 plug's k = 5, read off
     the shared profile_k. *)
-Lemma profile_k_abel (R : realType) : profile_k (abel_profile R) = 4.
+Lemma profile_k_abel : profile_k abel_profile = 4.
 Proof. by []. Qed.
 
 (** abel_gens_commute — the abelian plug's generators commute.

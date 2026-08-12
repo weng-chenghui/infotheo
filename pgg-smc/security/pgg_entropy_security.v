@@ -6,7 +6,7 @@
 (* Pipeline position:                                                         *)
 (*   pgg_interface.v -- word_eval, achievable, endpoint, perm_endpoint        *)
 (*   pgg_collusion_bound.v -- rho_from_words, var_dist bounds                 *)
-(*   algebraic_rigidity.v -- SecurityWitness (fiber + endpoint_inj)           *)
+(*   algebraic_rigidity.v -- ShuffleMarginalBound (fiber + endpoint_inj)      *)
 (*   THIS FILE -- fiber_entropy, EntropyWitness, Pinsker bridge              *)
 (*   pgg_security_solver.v -- check_perm_endpoint_inj, fiber_entropy_summary  *)
 (*   pgg_schreier.v -- Schreier spectral gap, convergence rate               *)
@@ -39,7 +39,7 @@
 (* Full pipeline:                                                             *)
 (*   entropy_fdistmap_uniform_supp -> H(P_s) from word fibers               *)
 (*   -> EntropyWitness (entropy_witness_from_rho)                             *)
-(*   -> SecurityWitness (security_witness_from_entropy, via Pinsker)          *)
+(*   -> ShuffleMarginalBound (security_witness_from_entropy, via Pinsker)     *)
 (*   -> collusion_bound (pgg_collusion_bound.v)                               *)
 (*                                                                            *)
 (* Specializations (stronger hypotheses, simpler formulas):                   *)
@@ -107,7 +107,7 @@
 (*   var_dist_from_fiber_entropy                                              *)
 (*     var_dist <= sqrt(2 * (log N - H))  [Pinsker bridge]                   *)
 (*   security_witness_from_entropy                                            *)
-(*     EntropyWitness -> SecurityWitness via Pinsker                         *)
+(*     EntropyWitness -> ShuffleMarginalBound via Pinsker                    *)
 (*                                                                            *)
 (* Sections:                                                                  *)
 (*   1. entropy_uniform_supp -- H(uniform_supp C) = log |C|                  *)
@@ -117,7 +117,7 @@
 (*   4b. entropy_var_dist_bridge -- Pinsker bridge: H -> var_dist            *)
 (*   5. protocol_rvs -- Endpoint_RV random variable                          *)
 (*   6. entropy_witness -- EntropyWitness record                              *)
-(*   7. security_from_entropy -- EntropyWitness -> SecurityWitness            *)
+(*   7. security_from_entropy -- EntropyWitness -> ShuffleMarginalBound       *)
 (*   8. entropy_witness_injective -- constructor for pe_inj groups           *)
 (*   9. joint_entropy -- T-party joint endpoint entropy + bounds             *)
 (******************************************************************************)
@@ -419,13 +419,13 @@ End entropy_divergence.
 (******************************************************************************)
 (*  Section 4b: Entropy-to-var_dist bridge via Pinsker                        *)
 (*                                                                            *)
-(*  Connects entropy analysis to the var_dist-based SecurityWitness           *)
+(*  Connects entropy analysis to the var_dist-based ShuffleMarginalBound      *)
 (*  via Pinsker's inequality: var_dist(P,Q) <= sqrt(2 * D(P||Q)).            *)
 (*  Combined with fiber_entropy_gap: D = log N - H(P_s), this gives          *)
 (*  var_dist <= sqrt(2 * (log N - H)).                                        *)
 (*                                                                            *)
 (*  This makes EntropyWitness useful: high entropy -> small var_dist ->       *)
-(*  SecurityWitness -> coalition security via collusion_bound.                *)
+(*  ShuffleMarginalBound -> coalition security via collusion_bound.           *)
 (******************************************************************************)
 
 Section entropy_var_dist_bridge.
@@ -548,7 +548,8 @@ Record EntropyWitness := MkEntropyWitness {
 }.
 
 (* Construct EntropyWitness from a rho_dist + entropy bound -- ANY group.
-   When used with SecurityWitness, pass sw_L and sw_rho_dist directly. *)
+   When used with a ShuffleMarginalBound, pass sw_L and sw_rho_dist
+   directly. *)
 Definition entropy_witness_from_rho
     (L : nat)
     (rho_dist : R.-fdist {perm 'I_N'.+1})
@@ -564,7 +565,7 @@ End entropy_witness.
 Arguments MkEntropyWitness {R M}.
 Arguments entropy_witness_from_rho {R M}.
 
-(* Derive SecurityWitness from EntropyWitness via Pinsker.
+(* Derive a ShuffleMarginalBound from an EntropyWitness via Pinsker.
    eps = sqrt(2 * (log N - ew_min_entropy)). *)
 Section security_from_entropy.
 
@@ -572,16 +573,18 @@ Variable R : realType.
 Variable M : MonodromyReprWithGeneratorType.
 Let N' := pgg_N' M.
 
-(** security_witness_from_entropy — constructs a SecurityWitness from an EntropyWitness via Pinsker.
+(** security_witness_from_entropy — the marginal bound of an EntropyWitness
+    via Pinsker.
     Kind: main.
-    Why: materialises the entropy-to-TV conversion path (EntropyWitness -> Pinsker -> SecurityWitness) as a named construction.
+    Why: materialises the entropy-to-TV conversion path (EntropyWitness ->
+    Pinsker -> ShuffleMarginalBound) as a named construction.
 *)
 Definition security_witness_from_entropy
-    (ew : EntropyWitness R M) : SecurityWitness R M.
+    (ew : EntropyWitness R M) : ShuffleMarginalBound R M.
 Proof.
-refine (@MkSecurityWitness R M (ew_L ew)
+refine (@MkShuffleMarginalBound R M (ew_L ew)
   (Num.sqrt (2%:R * (log N'.+1%:R - ew_min_entropy ew)))
-  (ew_rho_dist ew) _ None None).
+  (ew_rho_dist ew) _).
 move=> s.
 set P := fdistmap _ _.
 apply: (Order.POrderTheory.le_trans

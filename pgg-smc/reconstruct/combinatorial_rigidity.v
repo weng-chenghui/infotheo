@@ -13,8 +13,9 @@
 (* the two facts together that s5_nogo (reconstruct/s5_nogo.v) proves no       *)
 (* genus-zero curve can satisfy: the group order EXCEEDS the curve-rigidity    *)
 (* bound (cr_klein_lt_card : klein_genus0_bound M < #|pgg_G M|) WHILE the recovery gap is  *)
-(* positive (cr_genus_gt0 : 0 < cd_genus). It still bundles a SecurityWitness  *)
-(* (anonymity) and a CoveringScheme (the recovery scheme and its gap).        *)
+(* positive (cr_genus_gt0 : 0 < cd_genus). It still bundles a shuffle         *)
+(* certificate bundle (anonymity) and a CoveringScheme (the recovery scheme   *)
+(* and its gap).                                                             *)
 (******************************************************************************)
 
 From mathcomp Require Import ssreflect ssrbool ssrfun eqtype ssrnat seq.
@@ -40,7 +41,7 @@ Variable M : MonodromyReprWithGeneratorType.
     would be a false inequality). This record certifies the same security and
     recovery content while replacing the curve cap with the order inequality. *)
 Record CombinatorialRigidity := MkCombinatorialRigidity {
-  cr_security : SecurityWitness R M ;
+  cr_security : ShuffleCertificateBundle R M ;
   cr_covering : CoveringScheme M ;
   cr_genus_gt0 : 0 < cd_genus (cs_data cr_covering) ;
   cr_klein_lt_card : klein_genus0_bound M < #|pgg_G M|

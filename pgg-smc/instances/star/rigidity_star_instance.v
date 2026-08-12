@@ -5,7 +5,7 @@
 (*                                                                            *)
 (* Constructs a concrete AlgebraicRigidity instance for the star-graph RAAG.  *)
 (*                                                                            *)
-(* The SecurityWitness uses fiber-counted epsilon:                            *)
+(* The marginal bound uses fiber-counted epsilon:                             *)
 (*   epsilon = 2 * (m+1) / (m+3)  at L=1 (worst-case card position s≠2)     *)
 (*                                                                            *)
 (* The ThresholdWitness uses a genus-0 covering scheme constructed from       *)
@@ -69,7 +69,7 @@ Lemma star_nt_m3_L3 : n_traces_natB 4 3 (star_comm_nat 3) = 40.
 Proof. by vm_compute. Qed.
 
 (******************************************************************************)
-(*     SecurityWitness Construction                                           *)
+(*     ShuffleMarginalBound Construction                                      *)
 (******************************************************************************)
 
 Section star_security.
@@ -102,9 +102,10 @@ Lemma star_endpoint_bound_fiber :
    2%:R * m.+1%:R / m.+3%:R)%O.
 Proof. Admitted.
 
-(* SecurityWitness at L=1 via fiber counting.
-   Epsilon = 2*(m+1)/(m+3), much tighter than DPI bound 2*(N!-Tg)/N!. *)
-Definition star_security_witness_1 : SecurityWitness R R_star :=
+(** star_security_witness_1 — the star marginal bound at word length 1.
+    @intent: security_witness_fiber at the star generators; epsilon =
+    2*(m+1)/(m+3), much tighter than the DPI bound 2*(N!-Tg)/N!. *)
+Definition star_security_witness_1 : ShuffleMarginalBound R R_star :=
   security_witness_fiber star_weval_inj1 star_endpoint_bound_fiber.
 
 End star_security.
@@ -158,9 +159,12 @@ Hypothesis star_genus0_klein :
 Definition star_threshold_witness : ThresholdWitness R_star :=
   @MkThresholdWitness R_star star_covering (fun _ => star_genus0_klein).
 
+(** star_rigidity — the star AlgebraicRigidity value.
+    @intent: the fiber marginal bound wrapped by shuffle_bundle_of_bound,
+    paired with the star threshold witness. *)
 Definition star_rigidity : AlgebraicRigidity R R_star :=
   @MkAlgebraicRigidity R R_star
-    (star_security_witness_1 R m)
+    (shuffle_bundle_of_bound (star_security_witness_1 R m))
     star_threshold_witness.
 
 (* Verify that derived properties instantiate correctly *)
@@ -204,8 +208,11 @@ rewrite /= /security_witness_fiber /= GRing.natrM.
 exact: Order.POrderTheory.lexx.
 Qed.
 
+(** star_certified_1 — the star CertifiedSolution at word length 1.
+    @intent: certified_from_bound at the fiber marginal bound and the
+    rational epsilon certificate 2*(m+1)/(m+3). *)
 Definition star_certified_1 : CertifiedSolution R R_star :=
-  @certified_from_witness R R_star
+  @certified_from_bound R R_star
     (star_security_witness_1 R m)
     (2 * m.+1) m.+3
     (ltn0Sn m.+2)

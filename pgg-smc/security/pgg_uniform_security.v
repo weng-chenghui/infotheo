@@ -1,15 +1,15 @@
 (* infotheo: information theory and error-correcting codes in Rocq            *)
 (* Copyright (C) 2025 infotheo authors, license: LGPL-2.1-or-later            *)
 (******************************************************************************)
-(* SecurityWitness for uniform dealing (epsilon = 0)                          *)
+(* Certificate bundle for uniform dealing (epsilon = 0)                       *)
 (*                                                                            *)
 (* When the dealing phase samples a permutation uniformly from a group G      *)
 (* that acts regularly (= free + transitive) on sheets, the endpoint          *)
 (* distribution is exactly uniform, giving epsilon = 0.                       *)
 (*                                                                            *)
 (* Main result:                                                               *)
-(*   uniform_security_witness : SecurityWitness R M                           *)
-(*     with sw_bound_eps = 0 and sw_exact = Some (se_eps = 0)                *)
+(*   uniform_security_witness : ShuffleCertificateBundle R M                  *)
+(*     with sw_bound_eps = 0 and scb_exact = Some (se_eps = 0)               *)
 (*                                                                            *)
 (* Hypotheses:                                                                *)
 (*   - pgg_rho is injective on pgg_G M (faithfulness)                         *)
@@ -91,7 +91,7 @@ Qed.
 End var_dist_self.
 
 (******************************************************************************)
-(*  SecurityWitness for uniform dealing with regular group action             *)
+(*  Certificate bundle for uniform dealing with regular group action          *)
 (******************************************************************************)
 
 Section uniform_security.
@@ -178,13 +178,15 @@ Lemma endpoint_exact (s : 'I_N) :
            (fdist_uniform (card_ord N)) = 0.
 Proof. by rewrite eval_pushforward_uniform var_dist_self. Qed.
 
-(* The SecurityWitness with epsilon = 0 and exact equality.
-   L is recorded explicitly so callers can label the round count of
-   their protocol; the bound and exact-equality proofs are
-   independent of L because uniform dealing produces the same
-   distribution at every length. *)
-Definition uniform_security_witness (L : nat) : SecurityWitness R M :=
-  @MkSecurityWitness R M L (0 : R) rho_uniform endpoint_bound
+(** uniform_security_witness — the certificate bundle of exact uniform
+    dealing.
+    @intent: the bundle with epsilon = 0 and the exact equality attached;
+    L is recorded so callers can label the round count, while the bound and
+    exact-equality proofs are independent of L because uniform dealing
+    produces the same distribution at every length. *)
+Definition uniform_security_witness (L : nat) : ShuffleCertificateBundle R M :=
+  @MkShuffleCertificateBundle R M
+    (@MkShuffleMarginalBound R M L (0 : R) rho_uniform endpoint_bound)
     (Some (@MkSecurityExact R M rho_uniform 0 endpoint_exact))
     None.
 

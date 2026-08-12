@@ -45,15 +45,17 @@ Definition s5_plug : ReconPlug (@Gen_PGGTypes 3 3 (path_gen_tuple 3)) 'I_5 :=
   cs_plug s5_brings_covering.
 
 (** s5_profile — plug the S_5 adjacent-transposition monodromy (N = 5).
-    Kind: instance. What: the MonodromyProfile bundling s5_PI, the Schreier-walk
-    security witness, and s5_plug. Why: the S_5 plug of the shared program; its
-    anonymity bound decays geometrically to 0, k = 5. Used-by: contrast demos. *)
-Definition s5_profile (R : realType) : MonodromyProfile R :=
-  @MkMonodromyProfile R (@Gen_PGGTypes 3 3 (path_gen_tuple 3)) 'I_5 s5_PI
-    (s5_security_witness_schreier R 286) s5_plug.
+    Kind: instance. What: the MonodromyProfile bundling the group, the secret
+    type 'I_5, s5_PI and s5_plug. Why: the S_5 plug of the shared program; its
+    privacy threshold is k = 5. Used-by: contrast demos.
+    @intent: MkMonodromyProfile at the S_5 group, the secret type 'I_5, s5_PI
+    and s5_plug. *)
+Definition s5_profile : MonodromyProfile :=
+  @MkMonodromyProfile (@Gen_PGGTypes 3 3 (path_gen_tuple 3)) 'I_5 s5_PI
+    s5_plug.
 
 (** profile_k_s5 — the S_5 plug's privacy threshold is 5.
     @main bound: contrast character against the den Boer plug's k = 2, read
     off the shared profile_k. *)
-Lemma profile_k_s5 (R : realType) : profile_k (s5_profile R) = 5.
+Lemma profile_k_s5 : profile_k s5_profile = 5.
 Proof. by []. Qed.

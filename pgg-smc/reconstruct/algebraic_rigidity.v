@@ -21,27 +21,34 @@
 (*   Note: this is conceptual — field arithmetic on roots is irrelevant     *)
 (*   to the permutation action that PGG uses.                                *)
 (*                                                                            *)
+(* The endpoint-level security guarantee is packed in two layers. The bound   *)
+(* layer is always present. The certificate layer attaches optional exact     *)
+(* and asymptotic evidence for the same shuffle distribution, leaving the     *)
+(* bound unchanged.                                                          *)
+(*                                                                            *)
 (* Records:                                                                   *)
 (*   SecurityExact rho == optional exact-equality carrier:                   *)
 (*                         var_dist(rho, uniform) = se_eps                   *)
-(*   SecurityWitness R M == packages the endpoint-level security guarantee    *)
-(*                          as a (bound, optional-exact) pair:                *)
-(*                            sw_bound : var_dist ... <= sw_bound_eps         *)
-(*                            sw_exact : option (SecurityExact sw_rho_dist)   *)
+(*   SecurityAsymptotic == optional geometric-convergence certificate         *)
+(*   ShuffleMarginalBound R M == the bound layer: sw_L, sw_bound_eps,         *)
+(*                          sw_rho_dist and the per-position sw_bound         *)
+(*   ShuffleCertificateBundle R M == the certificate layer: scb_bound with    *)
+(*                          the optional scb_exact and scb_asymptotic         *)
 (*   ThresholdWitness M  == packages the covering scheme + PGL hypothesis     *)
-(*   AlgebraicRigidity R M == combines both into a unified witness            *)
+(*   AlgebraicRigidity R M == combines a bundle and a threshold witness       *)
 (*                                                                            *)
 (*   See dropout_witness.v for [DropoutWitness], the capability-side          *)
 (*   record that complements the structural ThresholdWitness here.            *)
 (*                                                                            *)
 (* Constructors:                                                              *)
-(*   security_witness_fiber == SecurityWitness from fiber-counted epsilon      *)
+(*   shuffle_bundle_of_bound == a bound with neither certificate attached     *)
+(*   security_witness_fiber == bound from fiber-counted epsilon               *)
 (*     Accepts any epsilon + proof; instances use vm_compute/case analysis.   *)
 (*     Applicable to: OC (eps=1), S5 (eps=6/5), Star (eps=2(m+1)/(m+3))   *)
 (*   security_witness_endpoint_inj == for perm_endpoint-injective groups             *)
 (*     Epsilon = 2*(N - Tg^L)/N. Applicable to: NCycle, Abelian, Monster     *)
-(*   security_witness_from_bound == new helper: bound-only (sw_exact=None)    *)
-(*   security_witness_with_exact == new helper: bound + exact equality        *)
+(*   security_witness_from_bound == bound from an arbitrary epsilon proof     *)
+(*   security_witness_with_exact == bundle with the exact certificate         *)
 (*                                                                            *)
 (* Derived properties:                                                        *)
 (*   ar_complexity      == search space bounded by |G|                        *)
@@ -85,8 +92,8 @@ Let G := pgg_G M.
 
 (** SecurityExact: an optional exact-equality carrier.                         *)
 (* Parameterised by the distribution [rho] so that the exact-value proof is    *)
-(* tied to the same distribution used for the bound in a SecurityWitness.      *)
-(* Constructed via MkSecurityExact; used via Some in sw_exact.                 *)
+(* tied to the same distribution the bound of a ShuffleCertificateBundle      *)
+(* is stated at. Constructed via MkSecurityExact; used via Some in scb_exact. *)
 Record SecurityExact (rho : R.-fdist {perm 'I_N'.+1}) := MkSecurityExact {
   se_eps : R;
   se_exact :
@@ -104,7 +111,7 @@ Record SecurityExact (rho : R.-fdist {perm 'I_N'.+1}) := MkSecurityExact {
 (*   - Disconnected Schreier graphs (e.g., cyclic/1-gen, abelian/disjoint)    *)
 (*   - Instances where the spectral gap has not yet been formalized           *)
 (*                                                                             *)
-(* Mirrors SchreierCertificate (pgg_schreier.v) at the SecurityWitness level. *)
+(* Mirrors SchreierCertificate (pgg_schreier.v) at the bundle level.          *)
 (* Cannot reuse SchreierCertificate directly due to circular dependency:       *)
 (*   pgg_schreier.v imports algebraic_rigidity.v.                              *)
 (*                                                                             *)
@@ -133,27 +140,56 @@ Record SecurityAsymptotic := MkSecurityAsymptotic {
     <= sa_eps_inf + Num.sqrt N'.+1%:R * (1 - sa_spectral_gap) ^+ L)%R
 }.
 
-(** SecurityWitness: unified record carrying an always-present bound,          *)
-(* an optional exact-equality slot, and an optional asymptotic convergence     *)
-(* certificate.                                                                *)
-(*                                                                             *)
-(* The three optional slots encode the security proof mechanism:               *)
-(*   sw_exact = Some, sw_asymptotic = Some:                                   *)
-(*     Random walk with exact counting (e.g., Kim's biased five-card)         *)
-(*   sw_exact = Some, sw_asymptotic = None:                                   *)
-(*     Uniform dealing, perfect security (e.g., den Boer five-card)           *)
-(*   sw_exact = None, sw_asymptotic = None:                                   *)
-(*     Fiber-counted bound only, convergence not yet formalized               *)
-Record SecurityWitness := MkSecurityWitness {
+(** ShuffleMarginalBound — the single-position marginal bound of a shuffle
+    distribution against the uniform distribution on sheets.
+    Kind: interface.
+    A constructor supplies a finite-word length, a stated epsilon, the analyzed
+    distribution on permutation images, and the per-position proof that the
+    one-card pushforward of that distribution is within epsilon of uniform.
+    The sw_ prefix abbreviates "shuffle witness bound"; the prefix is the
+    historical one of the record this one replaces and is retained on all four
+    fields. *)
+Record ShuffleMarginalBound := MkShuffleMarginalBound {
+  (* sw_L is the finite-word length the distribution is read at. It is the
+     length consumed by the dealer bridge (pgg_dealer_bridge.v) and by the
+     SecurityParams of a CertifiedSolution. *)
   sw_L : nat;
+  (* sw_bound_eps is the stated full-L1 upper bound on one endpoint marginal.
+     It is a per-position quantity, not a coalition-view distance. *)
   sw_bound_eps : R;
+  (* sw_rho_dist is the analyzed distribution on permutation images. *)
   sw_rho_dist : R.-fdist {perm 'I_N'.+1};
+  (* sw_bound proves the bound separately for each starting position s. The
+     guarantee is the endpoint marginal at one position; it is neither
+     coalition-view privacy nor protocol security. *)
   sw_bound :
     forall (s : 'I_N'.+1),
     (var_dist (fdistmap (fun sigma : {perm 'I_N'.+1} => sigma s) sw_rho_dist)
-              (fdist_uniform (card_ord N'.+1)) <= sw_bound_eps)%O;
-  sw_exact : option (SecurityExact sw_rho_dist);
-  sw_asymptotic : option SecurityAsymptotic
+              (fdist_uniform (card_ord N'.+1)) <= sw_bound_eps)%O
+}.
+
+(** ShuffleCertificateBundle — a marginal bound together with the optional
+    exact-equality and asymptotic-convergence certificates of the same shuffle
+    distribution.
+    Kind: interface.
+    A constructor supplies a ShuffleMarginalBound and, indexed on that bound's
+    own sw_rho_dist, an optional SecurityExact and an optional
+    SecurityAsymptotic.
+    The two optional slots record the mechanism of the bound: both Some for a
+    random walk with exact counting, exact only for uniform dealing, and both
+    None for a fiber-counted bound. *)
+Record ShuffleCertificateBundle := MkShuffleCertificateBundle {
+  (* scb_bound is the marginal bound the bundle is built on. It is the only
+     always-present component; the two fields below are attachments. *)
+  scb_bound : ShuffleMarginalBound;
+  (* scb_exact is an optional closed-form equality var_dist ... = se_eps at
+     sw_rho_dist scb_bound. Attaching or emptying it leaves scb_bound and its
+     epsilon unchanged. *)
+  scb_exact : option (SecurityExact (sw_rho_dist scb_bound));
+  (* scb_asymptotic is an optional geometric-convergence certificate for the
+     same group. Attaching or emptying it leaves scb_bound and its epsilon
+     unchanged. *)
+  scb_asymptotic : option SecurityAsymptotic
 }.
 
 (* The cs_gap field of [tw_covering] (ts_T <= ts_k + 2 * cd_genus,
@@ -185,7 +221,7 @@ Record ThresholdWitness := MkThresholdWitness {
 }.
 
 Record AlgebraicRigidity := MkAlgebraicRigidity {
-  ar_security : SecurityWitness;
+  ar_security : ShuffleCertificateBundle;
   ar_threshold : ThresholdWitness
 }.
 
@@ -193,12 +229,26 @@ End algebraic_rigidity_records.
 
 Arguments SecurityExact {R} {M} rho.
 Arguments SecurityAsymptotic {R} {M}.
-Arguments SecurityWitness R M : clear implicits.
+(* Under Set Implicit Arguments the field scb_bound occurs in the type of
+   scb_exact, so the bundle constructor would take it implicitly. The two
+   constructor directives below restore the three- and four-explicit-argument
+   shapes; the two record directives keep R and M explicit at the type. *)
+Arguments MkShuffleMarginalBound {R M} _ _ _ _.
+Arguments MkShuffleCertificateBundle {R M} _ _ _.
+Arguments ShuffleMarginalBound R M : clear implicits.
+Arguments ShuffleCertificateBundle R M : clear implicits.
 Arguments ThresholdWitness M : clear implicits.
 Arguments AlgebraicRigidity R M : clear implicits.
 
+(** shuffle_bundle_of_bound — the bundle carrying a marginal bound and neither
+    optional certificate.
+    @intent: MkShuffleCertificateBundle at a bound with scb_exact and
+    scb_asymptotic both None. *)
+Definition shuffle_bundle_of_bound R M (b : ShuffleMarginalBound R M)
+  : ShuffleCertificateBundle R M := MkShuffleCertificateBundle b None None.
+
 (******************************************************************************)
-(*     Fiber-Counted SecurityWitness Constructor                              *)
+(*     Fiber-Counted ShuffleMarginalBound Constructor                         *)
 (*                                                                            *)
 (* For groups where perm_endpoint is NOT injective on achievable(L), the direct      *)
 (* endpoint bound is invalid. Instead, each instance proves its own           *)
@@ -215,7 +265,7 @@ Variable m n' : nat.
 Variable sigmas : m.+1.-tuple {perm 'I_n'.+2}.
 Let M := Gen_PGGTypes sigmas.
 
-(** security_witness_fiber — build a SecurityWitness from a pointwise fiber bound.
+(** security_witness_fiber — the marginal bound of a pointwise fiber estimate.
     Kind: main.
     Why: packages the generic fiber-based var_dist bound used by the OC, S5 and
          Star instances, so callers only need to supply the epsilon estimate.
@@ -227,14 +277,14 @@ Definition security_witness_fiber (L : nat)
       (var_dist (fdistmap (fun sigma : {perm 'I_n'.+2} => sigma s)
                          (rho_from_words L sigmas))
                (fdist_uniform (card_ord n'.+2)) <= epsilon)%O)
-    : SecurityWitness R M :=
-  @MkSecurityWitness R M L epsilon
-    (rho_from_words L sigmas) Hbound None None.
+    : ShuffleMarginalBound R M :=
+  @MkShuffleMarginalBound R M L epsilon
+    (rho_from_words L sigmas) Hbound.
 
 End fiber_security.
 
 (******************************************************************************)
-(*     Direct Endpoint SecurityWitness Constructor                            *)
+(*     Direct Endpoint ShuffleMarginalBound Constructor                       *)
 (*                                                                            *)
 (* When perm_endpoint is injective on achievable(L) for each starting sheet s,       *)
 (* the endpoint distribution is closer to uniform than the DPI bound gives.  *)
@@ -263,24 +313,23 @@ Definition security_witness_endpoint_inj (L : nat)
     (Hinj_s : forall s : 'I_n'.+2,
       {in @achievable M L &,
        injective (fun sigma : {perm 'I_n'.+2} => sigma s)})
-    : SecurityWitness R M :=
-  @MkSecurityWitness R M L _
+    : ShuffleMarginalBound R M :=
+  @MkShuffleMarginalBound R M L _
     (rho_from_words L sigmas)
-    (var_dist_endpoint_direct Hlfree Hinj_s)
-    None None.
+    (var_dist_endpoint_direct Hlfree Hinj_s).
 
 End direct_endpoint_security.
 
 (******************************************************************************)
 (*     Convenience Constructors                                               *)
 (*                                                                            *)
-(* security_witness_from_bound: build a SecurityWitness from only a bound     *)
-(*   (sw_exact := None). Use this when only an upper bound on var_dist is     *)
-(*   available (e.g., spectral / Pinsker / DPI estimates).                    *)
+(* security_witness_from_bound: build a ShuffleMarginalBound from a bound.    *)
+(*   Use this when only an upper bound on var_dist is available (e.g.,        *)
+(*   spectral / Pinsker / DPI estimates).                                     *)
 (*                                                                            *)
-(* security_witness_with_exact: build a SecurityWitness from a bound and an   *)
-(*   exact-equality proof (sw_exact := Some ...). Use this when a closed-form *)
-(*   var_dist equality is known alongside the spectral bound.                 *)
+(* security_witness_with_exact: build a ShuffleCertificateBundle from a bound *)
+(*   and an exact-equality proof (scb_exact := Some ...). Use this when a     *)
+(*   closed-form var_dist equality is known alongside the bound.              *)
 (******************************************************************************)
 
 Section security_witness_constructors.
@@ -289,10 +338,11 @@ Variable R : realType.
 Variable M : MonodromyReprWithGeneratorType.
 Let N' := pgg_N' M.
 
-(** security_witness_from_bound — SecurityWitness from a bound only (no exact eps).
+(** security_witness_from_bound — the marginal bound of an arbitrary epsilon
+    proof.
     Kind: main.
     Why: convenience wrapper used when only spectral / Pinsker / DPI upper
-         bounds are available, defaulting sw_exact to None.
+         bounds are available.
 *)
 Definition security_witness_from_bound (L : nat)
     (eps : R)
@@ -300,13 +350,14 @@ Definition security_witness_from_bound (L : nat)
     (Hbound : forall s : 'I_N'.+1,
       (var_dist (fdistmap (fun sigma : {perm 'I_N'.+1} => sigma s) rho_dist)
                 (fdist_uniform (card_ord N'.+1)) <= eps)%O)
-    : SecurityWitness R M :=
-  @MkSecurityWitness R M L eps rho_dist Hbound None None.
+    : ShuffleMarginalBound R M :=
+  @MkShuffleMarginalBound R M L eps rho_dist Hbound.
 
-(** security_witness_with_exact — SecurityWitness with bound and exact equality.
+(** security_witness_with_exact — the certificate bundle of a bound and an
+    exact equality.
     Kind: main.
     Why: used when closed-form var_dist equalities are known (e.g., structured
-         group orbits), filling sw_exact with the equality proof.
+         group orbits), filling scb_exact with the equality proof.
 *)
 Definition security_witness_with_exact (L : nat)
     (bound_eps : R)
@@ -318,8 +369,9 @@ Definition security_witness_with_exact (L : nat)
     (Hexact : forall s : 'I_N'.+1,
       var_dist (fdistmap (fun sigma : {perm 'I_N'.+1} => sigma s) rho_dist)
                (fdist_uniform (card_ord N'.+1)) = exact_eps)
-    : SecurityWitness R M :=
-  @MkSecurityWitness R M L bound_eps rho_dist Hbound
+    : ShuffleCertificateBundle R M :=
+  @MkShuffleCertificateBundle R M
+    (@MkShuffleMarginalBound R M L bound_eps rho_dist Hbound)
     (Some (@MkSecurityExact R M rho_dist exact_eps Hexact))
     None.
 
@@ -447,9 +499,9 @@ Proof. exact: search_space_chain. Qed.
 End raag_derived_properties.
 
 (******************************************************************************)
-(*     SecurityProfile: SecurityWitness + L* + nontriviality                  *)
+(*     SecurityProfile: ShuffleMarginalBound + L* + nontriviality             *)
 (*                                                                            *)
-(* A SecurityProfile bundles a SecurityWitness with:                          *)
+(* A SecurityProfile bundles a ShuffleMarginalBound with:                     *)
 (*   - sp_Lstar: the specific word length (turning point)                     *)
 (*   - sp_nontrivial: epsilon < 2 (strictly better than trivial bound)        *)
 (*                                                                            *)
@@ -474,18 +526,19 @@ Let eps_bound := (2%:R : R).
 
 Record SecurityProfile := MkSecurityProfile {
   sp_Lstar : nat ;
-  sp_witness : SecurityWitness R M ;
+  sp_witness : ShuffleMarginalBound R M ;
   sp_at_Lstar : sw_L sp_witness = sp_Lstar ;
   sp_nontrivial : is_true (Num.lt (sw_bound_eps sp_witness) eps_bound)
 }.
 
 (* Constructor from AlgebraicRigidity, when epsilon < 2 can be proved *)
 Definition ar_security_profile (ar : AlgebraicRigidity R M)
-    (Hlt2 : is_true (Num.lt (sw_bound_eps (ar_security ar)) eps_bound))
+    (Hlt2 : is_true
+      (Num.lt (sw_bound_eps (scb_bound (ar_security ar))) eps_bound))
     : SecurityProfile :=
   @MkSecurityProfile
-    (sw_L (ar_security ar))
-    (ar_security ar)
+    (sw_L (scb_bound (ar_security ar)))
+    (scb_bound (ar_security ar))
     erefl
     Hlt2.
 
@@ -497,7 +550,7 @@ Arguments SecurityProfile R M : clear implicits.
 (*     CertifiedSolution: Bridge from computable solver to proof witness     *)
 (*                                                                           *)
 (*     Connects the nat-level SecurityParams (from dealer_solve/raag_template *)
-(*     via vm_compute) to the proof-level SecurityWitness.                   *)
+(*     via vm_compute) to the proof-level ShuffleMarginalBound.              *)
 (*                                                                           *)
 (*     Since the solver uses raag_fiber_eps_nat (same formula as the witness *)
 (*     fiber counting), cs_eps_le is typically lexx (reflexivity) for all    *)
@@ -513,7 +566,7 @@ Local Open Scope ring_scope.
 
 Record CertifiedSolution := MkCertifiedSolution {
   cs_params    : SecurityParams ;
-  cs_witness   : SecurityWitness R M ;
+  cs_witness   : ShuffleMarginalBound R M ;
   cs_L_eq      : sw_L cs_witness = sp_L cs_params ;
   cs_denom_pos : (0 < (sp_eps cs_params).2)%N ;
   cs_eps_le    : (sw_bound_eps cs_witness <=
@@ -527,44 +580,46 @@ Arguments CertifiedSolution R M : clear implicits.
 (******************************************************************************)
 (*     Generic CertifiedSolution Constructor                                  *)
 (*                                                                            *)
-(* Any SecurityWitness with known rational epsilon gives a CertifiedSolution. *)
+(* Any ShuffleMarginalBound with known rational epsilon gives a               *)
+(* CertifiedSolution.                                                         *)
 (* Works for ALL groups — RAAG and non-RAAG alike (Monster, Star, S5, etc.). *)
 (*                                                                            *)
 (* Architecture layers:                                                       *)
 (*   Layer 1 (Computable — RAAG only):                                       *)
 (*     RAAGDesc -> dealer_solve -> SecurityParams (uses vm_compute)           *)
 (*   Layer 2 (Proof-level — ANY MonodromyReprWithGeneratorType):                  *)
-(*     SecurityWitness -> certified_from_witness -> CertifiedSolution         *)
+(*     ShuffleMarginalBound -> certified_from_bound -> CertifiedSolution      *)
 (*     AlgebraicRigidity + PGGInterface + G_stable -> ar_protocol_correct     *)
 (******************************************************************************)
 
-Section certified_from_witness.
+Section certified_from_bound.
 
 Variable R : realType.
 Variable M : MonodromyReprWithGeneratorType.
 
 Local Open Scope ring_scope.
 
-(** certified_from_witness — assemble a CertifiedSolution from a SecurityWitness.
-    Kind: main.
-    Why: bundles the rational epsilon certificate together with the witness
-         into a CertifiedSolution, the interface consumed by the certified
-         security tables in pgg_protocol_landscape.v.
-*)
-Definition certified_from_witness
-    (sw : SecurityWitness R M)
+(* R and M are inferable from the bound argument, so section discharge demotes
+   them to implicit arguments; callers that pin the group write
+   @certified_from_bound R M b .... *)
+
+(** certified_from_bound — assemble a CertifiedSolution from a marginal bound.
+    @intent: bundles the rational epsilon certificate together with the bound
+    into a CertifiedSolution, the interface consumed by the certified
+    security tables in pgg_protocol_landscape.v. *)
+Definition certified_from_bound
+    (b : ShuffleMarginalBound R M)
     (eps_n eps_d : nat) (Hd : (0 < eps_d)%N)
-    (Hle : (sw_bound_eps sw <= eps_n%:R / eps_d%:R)%O)
+    (Hle : (sw_bound_eps b <= eps_n%:R / eps_d%:R)%O)
     : CertifiedSolution R M :=
   @MkCertifiedSolution R M
-    (MkSP (@pgg_ngens' M).+1 (pgg_N' M).+1 (sw_L sw) (eps_n, eps_d))
-    sw erefl Hd Hle.
+    (MkSP (@pgg_ngens' M).+1 (pgg_N' M).+1 (sw_L b) (eps_n, eps_d))
+    b erefl Hd Hle.
 
-End certified_from_witness.
+End certified_from_bound.
 
-(* Note: the old SecurityWitnessEx section has been deleted.                  *)
-(* Its functionality was folded into SecurityWitness above, which now         *)
-(* carries an optional `sw_exact : option (SecurityExact sw_rho_dist)` field. *)
-(* Clients that previously built SecurityWitnessEx should now build a         *)
-(* SecurityWitness via `security_witness_from_bound` (bound-only) or          *)
-(* `security_witness_with_exact` (bound + exact equality).                    *)
+(* Exact-equality evidence is carried by ShuffleCertificateBundle above,      *)
+(* whose scb_exact field is an optional SecurityExact at the bound's own      *)
+(* distribution. Build a ShuffleMarginalBound with                            *)
+(* `security_witness_from_bound` and a ShuffleCertificateBundle with          *)
+(* `security_witness_with_exact`.                                             *)

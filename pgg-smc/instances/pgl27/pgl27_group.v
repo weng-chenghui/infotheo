@@ -96,7 +96,7 @@ Definition pgl27_gens : 3.-tuple {perm 'I_8} :=
 
 (* [pgl27_M] must be a Notation (not a Definition with a MonodromyReprType
    ascription): the ascription would seal the HB hasGenerators structure that
-   SecurityWitness needs downstream. *)
+   ShuffleMarginalBound needs downstream. *)
 Notation pgl27_M := (@Gen_PGGTypes 2 6 pgl27_gens).
 
 (** pgl27_N' — the deck of [pgl27_M] has eight card positions ('I_8).

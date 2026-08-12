@@ -43,11 +43,11 @@
 (*                                   at the cut image of the seat's start     *)
 (*   pgl27_sample_coalition_distE == the same for a coalition's readings      *)
 (*   pgl27_sample_witness_prodE   == the exact sample space is the uniform    *)
-(*                                   secret prior times the profile's own     *)
-(*                                   shuffle distribution                     *)
+(*                                   secret prior times the marginal bound's  *)
+(*                                   own shuffle distribution                 *)
 (*   pgl27_sample_cut_distE       == the exact sample space's cut             *)
-(*                                   distribution is the profile's own        *)
-(*                                   shuffle distribution                     *)
+(*                                   distribution is the marginal bound's     *)
+(*                                   own shuffle distribution                 *)
 (*   pgl27_word_sample_seat_distE == the executed seat distribution under the *)
 (*                                   word shuffle                             *)
 (*   pgl27_word_sample_coalition_distE == the same for a coalition's          *)
@@ -86,7 +86,7 @@ Section pgl27_execution.
 
 Variable R : realType.
 
-Let mpP : MonodromyProfile R := pgl27_profile R.
+Let mpP : MonodromyProfile := pgl27_profile.
 
 (** pgl27_players_enumE — the eight-element participant list is the seat
     enumeration.
@@ -96,12 +96,12 @@ Proof. by apply: (inj_map val_inj); rewrite val_enum_ord. Qed.
 
 (** pgl27_exec_plug — the PGL(2,7) execution plug.
     @intent: the execution layer over pgl27_profile with run argument bool,
-    both count bridges erefl at 8 seats, 8 shares and 8 cards, participant
-    list pgl27_players, content the shares ts_encode orbit_scheme s of the
-    dealt orbit secret s and fuel pgl27_fuel; the dealer-secret constructor
-    fixes the input-process list to the empty list. *)
+    the seat/share bridge erefl at 8 seats and 8 shares, participant list
+    pgl27_players, content the shares ts_encode orbit_scheme s of the dealt
+    orbit secret s and fuel pgl27_fuel; the dealer-secret constructor fixes the
+    input-process list to the empty list. *)
 Definition pgl27_exec_plug : ExecutionPlug mpP :=
-  @dealer_secret_plug R mpP bool erefl erefl pgl27_players pgl27_players_enumE
+  @dealer_secret_plug mpP bool erefl pgl27_players pgl27_players_enumE
     (fun s _ => tnth (ts_encode orbit_scheme s)) pgl27_fuel.
 
 (** pgl27_content_obs — the PGL(2,7) static observation.
@@ -127,20 +127,20 @@ Proof. by []. Qed.
     list.
     @composes: pgl27_exec_terminates, pgl27_exec_endpoints, pgl27_exec_recon *)
 Lemma pgl27_exec_procsE (s : bool) (w0 : pgg_gT pgl27_M) :
-  @exec_procs R mpP pgl27_exec_plug s w0 0 = pgl27_procs s w0.
+  @exec_procs mpP pgl27_exec_plug s w0 0 = pgl27_procs s w0.
 Proof. by []. Qed.
 
 (** pgl27_exec_procs_size — the derived run has ten processes.
     @composes: pgl27_exec_terminates *)
 Lemma pgl27_exec_procs_size (s : bool) (w0 : pgg_gT pgl27_M) :
-  size (@exec_procs R mpP pgl27_exec_plug s w0 0) = 10.
+  size (@exec_procs mpP pgl27_exec_plug s w0 0) = 10.
 Proof. by []. Qed.
 
 (** pgl27_exec_terminates — every process of the derived run reaches Finish.
     @composes: pgl27_exec_correct *)
 Lemma pgl27_exec_terminates (s : bool) (w0 : pgg_gT pgl27_M) :
-  (@exec_run R mpP pgl27_exec_plug s w0 0).1
-  = nseq (size (@exec_procs R mpP pgl27_exec_plug s w0 0)) Finish.
+  (@exec_run mpP pgl27_exec_plug s w0 0).1
+  = nseq (size (@exec_procs mpP pgl27_exec_plug s w0 0)) Finish.
 Proof.
 rewrite pgl27_exec_procs_size /exec_run pgl27_exec_fuelE pgl27_exec_procsE.
 exact: pgl27_run_terminates.
@@ -150,8 +150,8 @@ Qed.
     observation over the seats.
     @composes: pgl27_exec_recon, pgl27_exec_recovers, pgl27_exec_correct *)
 Lemma pgl27_exec_endpoints (s : bool) (w0 : pgg_gT pgl27_M) :
-  @exec_endpoints R mpP pgl27_exec_plug s w0 0
-  = @exec_static_endpoints R mpP pgl27_exec_plug pgl27_content_obs s w0.
+  @exec_endpoints mpP pgl27_exec_plug s w0 0
+  = @exec_static_endpoints mpP pgl27_exec_plug pgl27_content_obs s w0.
 Proof.
 rewrite /exec_endpoints /exec_run pgl27_exec_fuelE pgl27_exec_procsE.
 rewrite /exec_verifier_id.
@@ -164,7 +164,7 @@ Qed.
 Lemma pgl27_exec_decodeE (ep : seq 'I_(pgg_N' (mp_M mpP)).+1)
     (Hsz : size ep = (pi_T' (mp_PI mpP)).+1)
     (Hsz' : size ep = (ts_T' orbit_scheme).+1) :
-  @exec_decode R mpP pgl27_exec_plug ep Hsz
+  @exec_decode mpP pgl27_exec_plug ep Hsz
   = ts_recon orbit_scheme (tcast Hsz' (in_tuple ep)).
 Proof.
 by rewrite /exec_decode /run_recover (eq_irrelevance (etrans Hsz _) Hsz').
@@ -175,10 +175,10 @@ Qed.
     @composes: pgl27_exec_recovers, pgl27_exec_correct *)
 Lemma pgl27_exec_recon (s : bool) (w0 : pgg_gT pgl27_M) :
   w0 \in pgg_G pgl27_M ->
-  forall Hsz : size (@exec_static_endpoints R mpP pgl27_exec_plug
+  forall Hsz : size (@exec_static_endpoints mpP pgl27_exec_plug
                        pgl27_content_obs s w0) = (pi_T' (mp_PI mpP)).+1,
-  @exec_decode R mpP pgl27_exec_plug
-    (@exec_static_endpoints R mpP pgl27_exec_plug pgl27_content_obs s w0)
+  @exec_decode mpP pgl27_exec_plug
+    (@exec_static_endpoints mpP pgl27_exec_plug pgl27_content_obs s w0)
     Hsz = s.
 Proof.
 move=> Hw0.
@@ -195,11 +195,11 @@ Qed.
     group. *)
 Theorem pgl27_exec_recovers (s : bool) (w0 : pgg_gT pgl27_M)
     (Hw0 : w0 \in pgg_G pgl27_M) :
-  @exec_decode R mpP pgl27_exec_plug
-    (@exec_endpoints R mpP pgl27_exec_plug s w0 0)
+  @exec_decode mpP pgl27_exec_plug
+    (@exec_endpoints mpP pgl27_exec_plug s w0 0)
     (exec_endpoints_size (pgl27_exec_endpoints s w0)) = s.
 Proof.
-exact: (@exec_run_recovers R mpP pgl27_exec_plug pgl27_content_obs (fun b => b)
+exact: (@exec_run_recovers mpP pgl27_exec_plug pgl27_content_obs (fun b => b)
           s w0 0 (pgl27_exec_endpoints s w0) (pgl27_exec_recon Hw0)).
 Qed.
 
@@ -210,15 +210,15 @@ Qed.
     secret s, for any cut w0 in the group. *)
 Theorem pgl27_exec_correct (s : bool) (w0 : pgg_gT pgl27_M)
     (Hw0 : w0 \in pgg_G pgl27_M) :
-  [/\ (@exec_run R mpP pgl27_exec_plug s w0 0).1
-        = nseq (size (@exec_procs R mpP pgl27_exec_plug s w0 0)) Finish,
-      size (@exec_endpoints R mpP pgl27_exec_plug s w0 0)
+  [/\ (@exec_run mpP pgl27_exec_plug s w0 0).1
+        = nseq (size (@exec_procs mpP pgl27_exec_plug s w0 0)) Finish,
+      size (@exec_endpoints mpP pgl27_exec_plug s w0 0)
         = (pi_T' (mp_PI mpP)).+1 &
-      @exec_decode R mpP pgl27_exec_plug
-        (@exec_endpoints R mpP pgl27_exec_plug s w0 0)
+      @exec_decode mpP pgl27_exec_plug
+        (@exec_endpoints mpP pgl27_exec_plug s w0 0)
         (exec_endpoints_size (pgl27_exec_endpoints s w0)) = s].
 Proof.
-exact: (@exec_run_correct R mpP pgl27_exec_plug pgl27_content_obs (fun b => b)
+exact: (@exec_run_correct mpP pgl27_exec_plug pgl27_content_obs (fun b => b)
           s w0 0 (pgl27_exec_terminates s w0) (pgl27_exec_endpoints s w0)
           (pgl27_exec_recon Hw0)).
 Qed.
@@ -233,7 +233,7 @@ Qed.
     pgl27_content_obs s (w0, tnth (pi_starts (mp_PI mpP)) i). *)
 Lemma pgl27_exec_seat_endpointE (s : bool) (w0 : pgg_gT pgl27_M)
     (i : 'I_(pi_T' (mp_PI mpP)).+1) :
-  @exec_seat_endpoint R mpP pgl27_exec_plug s w0 0 i
+  @exec_seat_endpoint mpP pgl27_exec_plug s w0 0 i
   = pgl27_content_obs s (w0, tnth (pi_starts (mp_PI mpP)) i).
 Proof. exact: (exec_seat_endpointE (pgl27_exec_endpoints s w0) i). Qed.
 
@@ -243,7 +243,7 @@ Proof. exact: (exec_seat_endpointE (pgl27_exec_endpoints s w0) i). Qed.
     cut image of that seat's start, and every seat outside C to ord0. *)
 Lemma pgl27_exec_coalition_endpointsE (s : bool) (w0 : pgg_gT pgl27_M)
     (C : {set 'I_(pi_T' (mp_PI mpP)).+1}) :
-  @exec_coalition_endpoints R mpP pgl27_exec_plug s w0 0 C
+  @exec_coalition_endpoints mpP pgl27_exec_plug s w0 0 C
   = [ffun i => if i \in C
                then pgl27_content_obs s (w0, tnth (pi_starts (mp_PI mpP)) i)
                else ord0].
@@ -255,7 +255,7 @@ Proof. exact: (exec_coalition_endpointsE (pgl27_exec_endpoints s w0) C). Qed.
     list as mapping the share of s at the cut image of the start over enum C. *)
 Lemma pgl27_exec_coalition_endpoints_seqE (s : bool) (w0 : pgg_gT pgl27_M)
     (C : {set 'I_(pi_T' (mp_PI mpP)).+1}) :
-  [seq @exec_seat_endpoint R mpP pgl27_exec_plug s w0 0 i | i <- enum C]
+  [seq @exec_seat_endpoint mpP pgl27_exec_plug s w0 0 i | i <- enum C]
   = [seq pgl27_content_obs s (w0, tnth (pi_starts (mp_PI mpP)) i)
      | i <- enum C].
 Proof.
@@ -269,7 +269,7 @@ Qed.
     trace, and no MathComp suffix denotes it. *)
 Definition pgl27_exec_player_raw_trace (s : bool) (w0 : pgg_gT pgl27_M)
     (i : 'I_(pi_T' (mp_PI mpP)).+1) :=
-  @exec_participant_trace R mpP pgl27_exec_plug s w0 0 i.
+  @exec_participant_trace mpP pgl27_exec_plug s w0 0 i.
 
 (** pgl27_exec_coalition_raw_trace — a coalition's raw executed traces.
     @intent: the generic coalition assembly exec_coalition_trace at
@@ -278,7 +278,7 @@ Definition pgl27_exec_player_raw_trace (s : bool) (w0 : pgg_gT pgl27_M)
     trace family, the coalition twin of pgl27_exec_player_raw_trace. *)
 Definition pgl27_exec_coalition_raw_trace (s : bool) (w0 : pgg_gT pgl27_M)
     (C : {set 'I_(pi_T' (mp_PI mpP)).+1}) :=
-  @exec_coalition_trace R mpP pgl27_exec_plug s w0 0 C.
+  @exec_coalition_trace mpP pgl27_exec_plug s w0 0 C.
 
 (** pgl27_exec_seat_countE — the profile's seat index type is 'I_8.
     @main architecture: (pi_T' (mp_PI mpP)).+1 = 8, the seat index type shared
@@ -308,7 +308,7 @@ Qed.
     bool * pgg_gT pgl27_M under the distribution pgl27P of a uniform orbit
     secret and an independent uniform shuffle, the run argument being the
     first projection and the cut the second. *)
-Definition pgl27_sample : SampleAdapter pgl27_exec_plug :=
+Definition pgl27_sample : SampleAdapter R pgl27_exec_plug :=
   @MkSampleAdapter R mpP pgl27_exec_plug
     [the finType of (bool * pgg_gT pgl27_M)%type] (pgl27P R) fst snd.
 
@@ -363,31 +363,24 @@ Lemma pgl27_sample_coalition_distE (C : {set 'I_(pi_T' (mp_PI mpP)).+1}) :
                 pgl27_content_obs C) (pgl27P R).
 Proof. by apply: sa_coalition_distE => u; exact: pgl27_exec_endpoints. Qed.
 
-(** pgl27_witness_cut_dist — the security witness's distribution read as a cut
-    distribution.
-    @intent: at the Gen_PGGTypes carrier of the instance the permutation group
-    {perm 'I_8} and the group pgg_gT pgl27_M coincide, so sw_rho_dist
-    (mp_security mpP) is a distribution on the carrier the cut is drawn
-    from. *)
-Definition pgl27_witness_cut_dist : R.-fdist (pgg_gT (mp_M mpP)) :=
-  sw_rho_dist (mp_security mpP).
-
 (** pgl27_sample_witness_prodE — the exact sample space is the product of the
-    uniform secret prior with the profile's own shuffle distribution.
+    uniform secret prior with the marginal bound's own shuffle distribution.
     @main architecture: pgl27P R = fdist_uniform card_bool `x sw_rho_dist
-    (mp_security mpP). *)
+    (pgl27_marginal_bound R). *)
 Lemma pgl27_sample_witness_prodE :
   pgl27P R
-  = ((fdist_uniform card_bool) `x (sw_rho_dist (mp_security mpP)))%fdist.
+  = ((fdist_uniform card_bool) `x (sw_rho_dist (pgl27_marginal_bound R)))%fdist.
 Proof. by []. Qed.
 
 (** pgl27_sample_cut_distE — the exact sample space's cut distribution is the
-    profile's own shuffle distribution.
-    @main architecture: sa_cut_dist pgl27_sample = pgl27_witness_cut_dist. *)
+    marginal bound's own shuffle distribution.
+    @main architecture: sa_cut_dist pgl27_sample = sw_rho_dist
+    (pgl27_marginal_bound R). *)
 Lemma pgl27_sample_cut_distE :
-  @sa_cut_dist R mpP pgl27_exec_plug pgl27_sample = pgl27_witness_cut_dist.
+  @sa_cut_dist R mpP pgl27_exec_plug pgl27_sample
+  = sw_rho_dist (pgl27_marginal_bound R).
 Proof.
-rewrite /sa_cut_dist /pgl27_witness_cut_dist /pgl27_sample /=.
+rewrite /sa_cut_dist /pgl27_sample /=.
 rewrite pgl27_sample_witness_prodE.
 by rewrite -/(fdist_snd _) -fdistX_prod fdistX2 fdist_prod1.
 Qed.
@@ -428,7 +421,7 @@ Definition pgl27_word_cut (u : pgl27_word_sampleT) : pgg_gT (mp_M mpP) :=
     @intent: the sample layer over pgl27_exec_plug whose sample space is
     pgl27_word_sampleT under pgl27_word_sampleP, the run argument being the
     first projection and the cut the evaluated word. *)
-Definition pgl27_word_sample : SampleAdapter pgl27_exec_plug :=
+Definition pgl27_word_sample : SampleAdapter R pgl27_exec_plug :=
   @MkSampleAdapter R mpP pgl27_exec_plug pgl27_word_sampleT pgl27_word_sampleP
     fst pgl27_word_cut.
 

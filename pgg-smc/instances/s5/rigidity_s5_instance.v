@@ -34,7 +34,7 @@
 (*   s5_nt_L3 : n_traces_natB 4 3 path_comm_nat = 40                         *)
 (*                                                                            *)
 (* Proved (not axiomatized):                                                  *)
-(*   s5_security_witness_1 : SecurityWitness (fiber-counted eps=6/5)         *)
+(*   s5_security_witness_1 : ShuffleMarginalBound (fiber-counted eps=6/5)    *)
 (*   s5_rigidity : AlgebraicRigidity (security + threshold)                  *)
 (******************************************************************************)
 
@@ -63,7 +63,7 @@ Local Open Scope fdist_scope.
 Import GRing.Theory Num.Theory.
 
 (******************************************************************************)
-(*     SecurityWitness Construction                                           *)
+(*     ShuffleMarginalBound Construction                                      *)
 (******************************************************************************)
 
 Section s5_security.
@@ -149,9 +149,11 @@ case: s Hmem => [[|[|[|[|[|s]]]]] Hs] //= Hmem.
   rewrite tpermR; rewrite -?val_eqE //.
 Qed.
 
-(* SecurityWitness at L=1 via fiber counting.
-   Epsilon = 6/5, much tighter than DPI bound 2*(5!-4)/5! ≈ 1.93. *)
-Definition s5_security_witness_1 : SecurityWitness R s5_M :=
+(* ShuffleMarginalBound at L=1 via fiber counting.
+   Epsilon = 6/5, much tighter than DPI bound 2*(5!-4)/5! ≈ 1.93.
+   @intent: security_witness_fiber at the adjacent-transposition generators,
+   word length 1 and the fiber-counted epsilon proof. *)
+Definition s5_security_witness_1 : ShuffleMarginalBound R s5_M :=
   security_witness_fiber s5_weval_inj1 s5_endpoint_bound_fiber.
 
 End s5_security.
@@ -195,14 +197,17 @@ rewrite add0r.
 exact: s5_spectral_convergence_gap.
 Defined.
 
-(** s5_security_witness_schreier — Schreier-based security witness for S_5 at length [L].
-    Kind: instance. *)
+(** s5_security_witness_schreier — Schreier-based certificate bundle for S_5 at length [L].
+    Kind: instance.
+    @intent: MkShuffleCertificateBundle at the spectral marginal bound of the
+    word distribution, with no exact certificate and s5_asymptotic attached. *)
 Definition s5_security_witness_schreier (L : nat) :
-    SecurityWitness R s5_M :=
-  @MkSecurityWitness R s5_M L
-    (Num.sqrt 5%:R * (1 - s5_gap_R R) ^+ L)
-    (rho_from_words L (path_gen_tuple 3))
-    (fun s => @s5_spectral_convergence_gap R L s)
+    ShuffleCertificateBundle R s5_M :=
+  @MkShuffleCertificateBundle R s5_M
+    (@MkShuffleMarginalBound R s5_M L
+      (Num.sqrt 5%:R * (1 - s5_gap_R R) ^+ L)
+      (rho_from_words L (path_gen_tuple 3))
+      (fun s => @s5_spectral_convergence_gap R L s))
     None
     (Some s5_asymptotic).
 
@@ -381,6 +386,10 @@ Definition s5_threshold_witness_concrete : ThresholdWitness s5_M :=
 
 (* The spectral content is discharged by s5_mixing.v. *)
 
+(** s5_rigidity_cryptographically_secure — the AlgebraicRigidity value of the
+    S_5 instance at word length 286.
+    @intent: MkAlgebraicRigidity at the Schreier certificate bundle read at
+    L = 286 and the concrete threshold witness. *)
 Definition s5_rigidity_cryptographically_secure : AlgebraicRigidity R s5_M :=
   @MkAlgebraicRigidity R s5_M
     (@s5_security_witness_schreier R 286)
@@ -430,10 +439,12 @@ Definition s5_threshold_witness : ThresholdWitness s5_M :=
   @MkThresholdWitness s5_M s5_covering s5_genus0_automorphism.
 
 (** s5_rigidity — algebraic rigidity record for the S_5 instance.
-    Kind: instance. *)
+    Kind: instance.
+    @intent: MkAlgebraicRigidity at the certificate-free bundle of
+    s5_security_witness_1 and s5_threshold_witness. *)
 Definition s5_rigidity : AlgebraicRigidity R s5_M :=
   @MkAlgebraicRigidity R s5_M
-    (s5_security_witness_1 R)
+    (shuffle_bundle_of_bound (s5_security_witness_1 R))
     s5_threshold_witness.
 
 (* Derived properties *)

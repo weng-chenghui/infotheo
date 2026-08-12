@@ -30,7 +30,7 @@
 (*     L = 259 gives var_dist < 2^{-128} (128-bit security)                  *)
 (*                                                                            *)
 (* Proved (not axiomatized):                                                  *)
-(*   oc_security_witness_2 : SecurityWitness (fiber-counted eps=1)           *)
+(*   oc_security_witness_2 : ShuffleMarginalBound (fiber-counted eps=1)      *)
 (*   oc_rigidity : AlgebraicRigidity (security + threshold)                  *)
 (******************************************************************************)
 
@@ -58,7 +58,7 @@ Local Open Scope fdist_scope.
 Import GRing.Theory Num.Theory.
 
 (******************************************************************************)
-(*     SecurityWitness Construction                                           *)
+(*     ShuffleMarginalBound Construction                                      *)
 (******************************************************************************)
 
 Section oc_security.
@@ -120,9 +120,11 @@ case: s Hmem => [[|[|[|[|s]]]] Hs] //= Hmem.
     rewrite Hw00 Hw11 !permM !oc_s0E !oc_s1E].
 Qed.
 
-(* SecurityWitness at L=2 via fiber counting.
-   Epsilon = 1, tighter than DPI bound 40/24 ≈ 1.67. *)
-Definition oc_security_witness_2 : SecurityWitness R R_oc :=
+(* ShuffleMarginalBound at L=2 via fiber counting.
+   Epsilon = 1, tighter than DPI bound 40/24 ≈ 1.67.
+   @intent: security_witness_fiber at the overlapping-cycles generators, word
+   length 2 and the fiber-counted epsilon proof. *)
+Definition oc_security_witness_2 : ShuffleMarginalBound R R_oc :=
   security_witness_fiber oc_weval_inj2 oc_endpoint_bound_fiber.
 
 End oc_security.
@@ -177,12 +179,17 @@ rewrite add0r.
 exact: oc_spectral_convergence.
 Defined.
 
+(** oc_security_witness_schreier — the certificate bundle of the
+    overlapping-cycles Schreier walk at word length L.
+    @intent: MkShuffleCertificateBundle at the spectral marginal bound of the
+    walk distribution, with no exact certificate and oc_asymptotic attached. *)
 Definition oc_security_witness_schreier (L : nat) :
-    SecurityWitness R R_oc :=
-  @MkSecurityWitness R R_oc L
-    (Num.sqrt 4%:R * (1 - oc_spectral_gap) ^+ L)
-    (oc_schreier_rho L)
-    (fun s => oc_spectral_convergence L s)
+    ShuffleCertificateBundle R R_oc :=
+  @MkShuffleCertificateBundle R R_oc
+    (@MkShuffleMarginalBound R R_oc L
+      (Num.sqrt 4%:R * (1 - oc_spectral_gap) ^+ L)
+      (oc_schreier_rho L)
+      (fun s => oc_spectral_convergence L s))
     None
     (Some oc_asymptotic).
 
@@ -218,6 +225,10 @@ Hypothesis oc_spectral_convergence :
            (fdist_uniform (card_ord 4))
   <= Num.sqrt 4%:R * (1 - oc_spectral_gap) ^+ L)%O.
 
+(** oc_rigidity_cryptographically_secure — the AlgebraicRigidity value of the
+    overlapping-cycles instance at word length 83.
+    @intent: MkAlgebraicRigidity at the Schreier certificate bundle read at
+    L = 83 and the parametrised threshold witness. *)
 Definition oc_rigidity_cryptographically_secure : AlgebraicRigidity R R_oc :=
   @MkAlgebraicRigidity R R_oc
     (@oc_security_witness_schreier R oc_spectral_gap oc_gap_pos
@@ -268,9 +279,13 @@ Hypothesis oc_genus0_klein :
 Definition oc_threshold_witness : ThresholdWitness R_oc :=
   @MkThresholdWitness R_oc oc_covering (fun _ => oc_genus0_klein).
 
+(** oc_rigidity — the AlgebraicRigidity value of the overlapping-cycles
+    instance.
+    @intent: MkAlgebraicRigidity at the certificate-free bundle of
+    oc_security_witness_2 and oc_threshold_witness. *)
 Definition oc_rigidity : AlgebraicRigidity R R_oc :=
   @MkAlgebraicRigidity R R_oc
-    (oc_security_witness_2 R)
+    (shuffle_bundle_of_bound (oc_security_witness_2 R))
     oc_threshold_witness.
 
 (* Derived properties *)

@@ -23,7 +23,7 @@
 (*     the same C_5, so the rotation argument is identical to den Boer).        *)
 (*   FiveCardKim_PI          == the five-sheet starting interface (ord_tuple 5) *)
 (*   five_card_plug          == the bool/'I_5 ReconPlug on FiveCardKim_M        *)
-(*   five_card_profile       == the eps-parameterized MonodromyProfile          *)
+(*   five_card_profile       == the five-card MonodromyProfile                  *)
 (*   five_card_eps0_perfect  == at eps = 0 the security bound is 0              *)
 (*                                                                            *)
 (* References:                                                                 *)
@@ -152,20 +152,15 @@ Definition five_card_plug : ReconPlug FiveCardKim_M bool :=
 Import GRing.Theory Num.Theory.
 Local Open Scope ring_scope.
 
-(** five_card_profile — the epsilon-parameterized five-card MonodromyProfile.
-    @intent: bundles FiveCardKim_PI, the Kim biased-shuffle security witness at
-    bias eps and word length L (fc_kim_security_witness), and five_card_plug,
-    with secret type bool. This is the single profile that unifies den Boer
-    (recovered at eps = 0, see five_card_eps0_perfect) and Kim (eps != 0): the
-    group, the plug and the starting layout are shared, and only the dealing
-    distribution's bias eps varies. The three hypotheses are Kim's positivity
-    and spectral-gap constraints on the bias, all of which hold at eps = 0.
+(** five_card_profile — the five-card MonodromyProfile.
+    @intent: bundles FiveCardKim_M, the secret type bool, FiveCardKim_PI and
+    five_card_plug. This is the single profile that unifies den Boer and Kim:
+    the group, the plug and the starting layout are shared, and the dealing
+    distribution's bias eps is data of the separate marginal bound rather than
+    of the program layer.
     Used-by: the unified five-card landscape entry. *)
-Definition five_card_profile (R : realType) (eps : R)
-    (Hlt : eps < 5%:R^-1) (Hgt : - (4%:R * 5%:R^-1) < eps)
-    (Hspec : `|eps| < 4%:R / 5%:R) (L : nat) : MonodromyProfile R :=
-  @MkMonodromyProfile R FiveCardKim_M bool FiveCardKim_PI
-    (fc_kim_security_witness Hlt Hgt Hspec L) five_card_plug.
+Definition five_card_profile : MonodromyProfile :=
+  @MkMonodromyProfile FiveCardKim_M bool FiveCardKim_PI five_card_plug.
 
 (** five_card_eps0_eq0 — at eps = 0 the dealing-phase security bound is 0.
     @main bound: for any positive word length L.+1 the Kim security epsilon
@@ -180,5 +175,5 @@ Definition five_card_profile (R : realType) (eps : R)
 Lemma five_card_eps0_eq0 (R : realType) (L : nat)
     (Hlt : (0:R) < 5%:R^-1) (Hgt : - (4%:R * 5%:R^-1) < (0:R))
     (Hspec : `|(0:R)| < 4%:R / 5%:R) :
-  sw_bound_eps (fc_kim_security_witness Hlt Hgt Hspec L.+1) = 0.
+  sw_bound_eps (scb_bound (fc_kim_security_bundle Hlt Hgt Hspec L.+1)) = 0.
 Proof. by rewrite /= kim_security_at_zero. Qed.

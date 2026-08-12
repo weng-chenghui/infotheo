@@ -30,7 +30,7 @@
 (*                                                                            *)
 (* All group-level data (generators, word-eval injectivity) is axiomatized    *)
 (* since the Monster is not computationally enumerable in Rocq. The algebraic *)
-(* properties (SecurityWitness, derived theorems) are proved, showing that    *)
+(* properties (the marginal bound, derived theorems) are proved, showing that *)
 (* protocol correctness depends only on algebraic structure, not on           *)
 (* computability.                                                             *)
 (*                                                                            *)
@@ -45,7 +45,7 @@
 (*   monster_genus0_klein : genus-0 coverings have |G| <= PGL(2,N)             *)
 (*                                                                            *)
 (* Proved (not axiomatized):                                                  *)
-(*   monster_security_witness_Lstar : SecurityWitness                        *)
+(*   monster_security_witness_Lstar : ShuffleMarginalBound                   *)
 (*     (via security_witness_endpoint_inj, eps = 2(N-2^Ls)/N ~ 0)           *)
 (*   monster_rigidity : AlgebraicRigidity (security + threshold)             *)
 (*   monster_complexity : search space <= |G|                                 *)
@@ -122,20 +122,22 @@ Axiom monster_perm_endpoint_inj_Lstar :
    injective (fun sigma : {perm 'I_monster_n.+2} => sigma s)}.
 
 (******************************************************************************)
-(*     SecurityWitness Construction                                           *)
+(*     ShuffleMarginalBound Construction                                      *)
 (******************************************************************************)
 
 Section monster_security.
 
 Variable R : realType.
 
-(* SecurityWitness at L* via direct endpoint bound.
+(* ShuffleMarginalBound at L* via direct endpoint bound.
    Epsilon = 2 * (N - 2^Lstar) / N.
    For the concrete Monster (N ~ 10^20, L* = 67, 2^67 > N):
      epsilon = 2*(N - 2^67)/N = 0  (perfect endpoint security)
    This is astronomically tighter than the DPI bound at L=1:
-     epsilon_DPI = 2*(N! - 2)/N! ≈ 2  (vacuous) *)
-Definition monster_security_witness_Lstar : SecurityWitness R R_monster :=
+     epsilon_DPI = 2*(N! - 2)/N! ≈ 2  (vacuous)
+   @intent: security_witness_endpoint_inj at the Monster generators, word
+   length L* and the endpoint-injectivity axiom. *)
+Definition monster_security_witness_Lstar : ShuffleMarginalBound R R_monster :=
   security_witness_endpoint_inj R
     monster_weval_inj_Lstar
     monster_perm_endpoint_inj_Lstar.
@@ -167,9 +169,12 @@ Axiom monster_genus0_klein :
 Definition monster_threshold_witness : ThresholdWitness R_monster :=
   @MkThresholdWitness R_monster monster_covering monster_genus0_klein.
 
+(** monster_rigidity — the AlgebraicRigidity value of the Monster instance.
+    @intent: MkAlgebraicRigidity at the certificate-free bundle of
+    monster_security_witness_Lstar and monster_threshold_witness. *)
 Definition monster_rigidity : AlgebraicRigidity R R_monster :=
   @MkAlgebraicRigidity R R_monster
-    (monster_security_witness_Lstar R)
+    (shuffle_bundle_of_bound (monster_security_witness_Lstar R))
     monster_threshold_witness.
 
 (* Derived properties — all PROVED from the axioms *)
@@ -258,12 +263,14 @@ Definition monster_schreier_certificate :
     monster_lambda_gap_le1
     monster_spectral_convergence.
 
-(* Derived: SecurityWitness at any L from Schreier certificate.
-   NOTE: weval_inj IS needed here for the SecurityWitness construction
+(* Derived: ShuffleCertificateBundle at any L from Schreier certificate.
+   NOTE: weval_inj IS needed here for the bundle construction
    (rho_from_words must be a valid distribution), even though the
-   Schreier spectral bound itself doesn't require it. *)
+   Schreier spectral bound itself doesn't require it.
+   @intent: security_witness_schreier at the Monster Schreier certificate and
+   the word-eval injectivity at L. *)
 Definition monster_security_witness_schreier (L : nat)
-    (Hlfree : @weval_inj M_monster L) : SecurityWitness R R_monster :=
+    (Hlfree : @weval_inj M_monster L) : ShuffleCertificateBundle R R_monster :=
   security_witness_schreier monster_schreier_certificate Hlfree.
 
 End monster_spectral.

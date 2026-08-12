@@ -12,7 +12,7 @@
 (*   - Constraint/solve: given partial parameters, solve for the rest         *)
 (*   - solve_L_aux: search for smallest L achieving target epsilon            *)
 (*   - StarParams/star_solve: star-graph specific solver (m -> Tg=m+1, N=m+3)*)
-(*   - SecurityProfile: wraps SecurityWitness with L* + nontriviality         *)
+(*   - SecurityProfile: wraps a ShuffleMarginalBound with L* + nontriviality  *)
 (*   - vm_compute demonstrations for all group families                       *)
 (*                                                                            *)
 (* Key design: two epsilon formulas:                                          *)
@@ -304,7 +304,7 @@ Eval vm_compute in eps_lt1 (epsilon_endpoint_rat 1 4 1).   (* Cyclic N=4: false 
 (******************************************************************************)
 (*     SecurityProfile record                                                 *)
 (*                                                                            *)
-(*     Wraps a SecurityWitness with:                                          *)
+(*     Wraps a ShuffleMarginalBound with:                                     *)
 (*       - L* (the specific length used)                                      *)
 (*       - Nontriviality: epsilon < 2 (strictly better than trivial bound)    *)
 (*                                                                            *)
@@ -315,7 +315,7 @@ Eval vm_compute in eps_lt1 (epsilon_endpoint_rat 1 4 1).   (* Cyclic N=4: false 
 
 (* SecurityProfile is parameterized; we define it in a Section.
    The actual record definition is in algebraic_rigidity.v alongside
-   SecurityWitness, since it depends on realType and fdist. *)
+   ShuffleMarginalBound, since it depends on realType and fdist. *)
 
 (******************************************************************************)
 (*     Nat-level word enumeration and fingerprinting                         *)

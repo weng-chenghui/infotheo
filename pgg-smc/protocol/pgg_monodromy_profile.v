@@ -3,24 +3,28 @@
 (******************************************************************************)
 (* MonodromyProfile: one piSMC program, plug a group, read its characters     *)
 (*                                                                            *)
-(* A MonodromyProfile R bundles, for a plugged monodromy group M, the data    *)
+(* A MonodromyProfile bundles, for a plugged monodromy group M, the data      *)
 (* that gives the shared exchange_* piSMC program its observable characters:   *)
+(*   mp_M        the group representation and its permutation action          *)
+(*   mp_secretT  the reconstructed secret carrier                             *)
 (*   mp_PI       the starting layout (drives what the SSend carries)           *)
-(*   mp_security the anonymity character: eps = sw_bound_eps                    *)
 (*   mp_plug     the reconstruction plug: scheme + content + monodromy +       *)
 (*               full-group reconstruction invariance (see covering_scheme).   *)
 (*                                                                            *)
+(* The record is program data alone: it carries no probability model and no   *)
+(* security theorem, and mentions no realType. Shuffle bounds are separate    *)
+(* values of ShuffleMarginalBound and ShuffleCertificateBundle                *)
+(* (algebraic_rigidity.v).                                                    *)
+(*                                                                            *)
 (* The generic section protocol_of_profile builds the program from the profile*)
 (* (run_party/run_verifier are exchange_* at mp_PI, run_recover is the plug's *)
-(* ts_recon), exposes the characters (profile_eps, profile_k), and proves the *)
-(* three guarantees that CONSUME the fields:                                  *)
-(*   profile_anonymous    var_dist(sent distribution, uniform) <= profile_eps *)
+(* ts_recon), exposes the threshold character profile_k, and proves the two   *)
+(* guarantees that CONSUME the fields:                                        *)
 (*   profile_private      fewer than profile_k shares are indistinguishable   *)
 (*   profile_recon_encode the dealt secret is recovered                       *)
 (*                                                                            *)
-(* This record was relocated here from the wreath7 instance so that the core   *)
-(* protocol owns it; each instance supplies its own plug (s5_profile,          *)
-(* abel_profile, s5x5_profile, den_boer_profile).                             *)
+(* The in-scope profiles filling this record are pgl27_profile,               *)
+(* five_card_profile, s5_profile and s5x5_profile.                            *)
 (******************************************************************************)
 
 From HB Require Import structures.
@@ -40,17 +44,24 @@ Import Prenex Implicits.
 
 Local Open Scope ring_scope.
 
-(** MonodromyProfile — one plug bundling a group's protocol characters.
+(** MonodromyProfile — one plug bundling a group's program data.
     Kind: interface.
-    Why: a value of this type is "a plugged group"; the generic
-    protocol_of_profile section turns it into the shared piSMC program plus its
-    security/privacy characters. The reconstruction half is the ReconPlug, so
-    correctness and the dealer's content readout come from one field. *)
-Record MonodromyProfile (R : realType) := MkMonodromyProfile {
+    A constructor supplies the group action, the starting layout and the
+    reconstruction plug; the generic protocol_of_profile section turns such a
+    value into the shared piSMC program and its threshold character. *)
+Record MonodromyProfile := MkMonodromyProfile {
+  (* mp_M selects the finite group representation and its permutation action
+     on the sheets. *)
   mp_M        : MonodromyReprWithGeneratorType ;
+  (* mp_secretT is the dependent secret carrier used by the reconstruction
+     plug. Being a field rather than a parameter, it permits profiles whose
+     secrets have different types. *)
   mp_secretT  : Type ;
+  (* mp_PI supplies the participant count and the starting positions of the
+     shared exchange program. *)
   mp_PI       : PGGInterface mp_M ;
-  mp_security : SecurityWitness R mp_M ;
+  (* mp_plug supplies the reconstruction scheme together with its
+     group-invariance data. *)
   mp_plug     : ReconPlug mp_M mp_secretT ;
 }.
 
@@ -60,8 +71,7 @@ Record MonodromyProfile (R : realType) := MkMonodromyProfile {
 
 Section protocol_of_profile.
 
-Variable R : realType.
-Variable mp : MonodromyProfile R.
+Variable mp : MonodromyProfile.
 
 Let M    := mp_M mp.
 Let PI   := mp_PI mp.
@@ -82,18 +92,9 @@ Definition run_recover (collected : (ts_T' (rp_scheme plug)).+1.-tuple 'I_N)
     : mp_secretT mp :=
   ts_recon (rp_scheme plug) collected.
 
-(** profile_eps — the anonymity character of the profile.
-    @intent: the security epsilon read off mp_security; group-sensitive. *)
-Definition profile_eps : R := sw_bound_eps (mp_security mp).
-
 (** profile_k — the privacy-threshold character of the profile.
     @intent: the threshold k read off the plug's scheme. *)
 Definition profile_k : nat := ts_k (rp_scheme plug).
-
-(** profile_anonymous — the sent distribution is profile_eps-close to uniform.
-    @intent: the security guarantee, consuming mp_security's sw_bound
-    field. *)
-Definition profile_anonymous := sw_bound (mp_security mp).
 
 (** profile_private — fewer than profile_k shares cannot distinguish two
     secrets.

@@ -7,7 +7,7 @@
 (*                                                                            *)
 (*   pgg_interface.v -- word_eval, achievable, endpoint, perm_endpoint        *)
 (*   pgg_collusion_bound.v -- rho_from_words, var_dist bounds                 *)
-(*   algebraic_rigidity.v -- SecurityWitness (fiber + endpoint_inj)           *)
+(*   algebraic_rigidity.v -- ShuffleMarginalBound (fiber + endpoint_inj)      *)
 (*   pgg_entropy_security.v -- fiber_entropy, Pinsker bridge                  *)
 (*   THIS FILE -- Schreier transition matrix, spectral gap, convergence rate  *)
 (*   rigidity_*_instance.v -- per-family SchreierCertificate axioms           *)
@@ -32,7 +32,7 @@
 (* The Schreier walk Q^L(s,x) = Pr[sigma_w(s) = x] holds directly --        *)
 (* no need to go through G. The weval_inj hypothesis is dropped from the     *)
 (* spectral bound (it was an artifact of going through the Cayley graph).    *)
-(* weval_inj is still needed downstream for SecurityWitness construction.    *)
+(* weval_inj is still needed downstream for marginal-bound construction.     *)
 (*                                                                            *)
 (* == Contents ==                                                             *)
 (*                                                                            *)
@@ -54,7 +54,7 @@
 (*       property of the Markov chain, independent of word-eval injectivity   *)
 (*   convergence_rate sc == 1 - sc_lambda_gap sc, decay factor per step       *)
 (*   schreier_epsilon sc L == sqrt(N) * (1-gap)^L, the epsilon bound         *)
-(*   security_witness_schreier sc L == SecurityWitness from certificate       *)
+(*   security_witness_schreier sc L == certificate bundle from certificate    *)
 (*   schreier_epsilon_decreasing == eps(L2) <= eps(L1) when L1 <= L2         *)
 (*   security_monotone == var_dist at L2 bounded by eps(L1) when L1 <= L2    *)
 (*                                                                            *)
@@ -326,11 +326,11 @@ rewrite /convergence_rate ltrBlDr addrC -ltrBlDr subrr.
 exact: (sc_lambda_pos sc).
 Qed.
 
-(* SecurityWitness from Schreier certificate at any L.
-   NOTE: weval_inj IS needed here -- it is required by SecurityWitness
+(* ShuffleCertificateBundle from a Schreier certificate at any L.
+   NOTE: weval_inj IS needed here -- it is required by the marginal bound
    (to ensure rho_from_words is a valid distribution over achievable
    permutations). The Schreier spectral bound itself doesn't need it,
-   but the downstream SecurityWitness construction does. *)
+   but the downstream bundle construction does. *)
 Definition security_witness_schreier_asymptotic (sc : SchreierCertificate)
   : @SecurityAsymptotic R M.
 Proof.
@@ -344,16 +344,19 @@ rewrite add0r.
 exact: sc_convergence.
 Defined.
 
-(** security_witness_schreier — builds a SecurityWitness at word length L from a Schreier spectral certificate.
+(** security_witness_schreier — the certificate bundle at word length L of a
+    Schreier spectral certificate.
     Kind: main.
-    Why: packages the spectral convergence bound together with the word distribution into the SecurityWitness structure.
+    Why: packages the spectral convergence bound together with the word
+    distribution, attaching the asymptotic certificate to the bundle.
 *)
 Definition security_witness_schreier (sc : SchreierCertificate)
-    (L : nat) (Hlfree : @weval_inj M L) : SecurityWitness R M :=
-  @MkSecurityWitness R M L
-    (Num.sqrt (N%:R) * (1 - sc_lambda_gap sc) ^+ L)
-    (rho_from_words L sigmas)
-    (sc_convergence sc L)
+    (L : nat) (Hlfree : @weval_inj M L) : ShuffleCertificateBundle R M :=
+  @MkShuffleCertificateBundle R M
+    (@MkShuffleMarginalBound R M L
+      (Num.sqrt (N%:R) * (1 - sc_lambda_gap sc) ^+ L)
+      (rho_from_words L sigmas)
+      (sc_convergence sc L))
     None
     (Some (security_witness_schreier_asymptotic sc)).
 

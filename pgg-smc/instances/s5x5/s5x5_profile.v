@@ -35,16 +35,18 @@ Definition s5x5_plug : ReconPlug (@Gen_PGGTypes 7 8 s5x5_gen_tuple) 'I_10 :=
   cs_plug s5x5_covering.
 
 (** s5x5_profile — plug the S_5 x S_5 product monodromy (N = 10, two piles of
-    five). Kind: instance. What: the MonodromyProfile bundling s5x5_PI, the L=1
-    fiber-counted security witness, and s5x5_plug. Why: the S_5 x S_5 plug of
-    the shared program; its privacy threshold is k = 5 (per-pile sum-mod).
-    Used-by: contrast demos. *)
-Definition s5x5_profile (R : realType) : MonodromyProfile R :=
-  @MkMonodromyProfile R (@Gen_PGGTypes 7 8 s5x5_gen_tuple) 'I_10 s5x5_PI
-    (s5x5_security_witness_1 R) s5x5_plug.
+    five). Kind: instance. What: the MonodromyProfile bundling the group, the
+    secret type 'I_10, s5x5_PI and s5x5_plug. Why: the S_5 x S_5 plug of the
+    shared program; its privacy threshold is k = 5 (per-pile sum-mod).
+    Used-by: contrast demos.
+    @intent: MkMonodromyProfile at the S_5 x S_5 group, the secret type 'I_10,
+    s5x5_PI and s5x5_plug. *)
+Definition s5x5_profile : MonodromyProfile :=
+  @MkMonodromyProfile (@Gen_PGGTypes 7 8 s5x5_gen_tuple) 'I_10 s5x5_PI
+    s5x5_plug.
 
 (** profile_k_s5x5 — the S_5 x S_5 plug's privacy threshold is 5.
     @main bound: coalitions below five in a pile learn nothing; k = 5 per
     pile, read off the shared profile_k. *)
-Lemma profile_k_s5x5 (R : realType) : profile_k (s5x5_profile R) = 5.
+Lemma profile_k_s5x5 : profile_k s5x5_profile = 5.
 Proof. by []. Qed.

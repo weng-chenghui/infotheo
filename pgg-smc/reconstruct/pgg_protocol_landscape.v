@@ -22,7 +22,7 @@
 (*          |    finds L' directly)      - endpoint_inj, OR                   *)
 (*          |                            - from_entropy (Pinsker)             *)
 (*          |                                    |                            *)
-(*          +-----> L' -------->  SecurityWitness R M                         *)
+(*          +-----> L' -------->  ShuffleMarginalBound R M                    *)
 (*                                {L', eps, rho_dist, bound}                  *)
 (*                                       |                                    *)
 (*                                       |    CoveringScheme M                *)
@@ -53,7 +53,7 @@
 (*                                                                            *)
 (* Phase 1 tools: pgg_schreier.v (spectral gap), pgg_security_solver.v      *)
 (*   (vm_compute scans), pgg_security_demo.v (convergence diagnostics)      *)
-(* Phase 2 tools: algebraic_rigidity.v (SecurityWitness, AlgebraicRigidity) *)
+(* Phase 2 tools: algebraic_rigidity.v (marginal bound, AlgebraicRigidity)  *)
 (*   pgg_entropy_security.v (EntropyWitness, Pinsker bridge)                *)
 (*   pgg_collusion_bound.v (rho_from_words, var_dist bounds)                *)
 (*                                                                            *)
@@ -117,11 +117,9 @@ Let G := pgg_G M.
 Let N := (pgg_N' M).+1.
 
 (** security_per_position — re-exports sw_bound at each secret sheet.
-    Kind: example.
-    Why: landscape-facing restatement of the SecurityWitness epsilon bound,
-         pinning the dependency on sw for downstream callers.
-*)
-Lemma security_per_position (sw : SecurityWitness R M) (s : 'I_N) :
+    @main bound: landscape-facing restatement of the per-position marginal
+    epsilon bound, pinning the dependency on sw for downstream callers. *)
+Lemma security_per_position (sw : ShuffleMarginalBound R M) (s : 'I_N) :
   (var_dist (fdistmap (fun sigma : {perm 'I_N} => sigma s) (sw_rho_dist sw))
             (fdist_uniform (card_ord N)) <= sw_bound_eps sw)%O.
 Proof. exact: sw_bound. Qed.
@@ -306,12 +304,12 @@ Let N := (pgg_N' M).+1.
 (** protocol_correct_unbundled - standalone protocol correctness statement.
     Kind: helper.
     Why: spells out correctness of the PGG protocol without bundling the
-    SecurityWitness, CoveringScheme and PGGInterface into a single record,
+    marginal bound, CoveringScheme and PGGInterface into a single record,
     so that instance authors can quote it without the full bundle machinery.
     Used by: instance-level correctness proofs that assemble the bundle lazily.
 *)
 Lemma protocol_correct_unbundled
-    (sw : SecurityWitness R M)
+    (sw : ShuffleMarginalBound R M)
     (cs : CoveringScheme M)
     (PI : PGGInterface M)
     (HT : ts_T' (cs_scheme cs) = pi_T' PI)
@@ -364,9 +362,9 @@ Let cs := tw_covering (ar_threshold ar).
 *)
 Lemma ar_security_per_position (s : 'I_N) :
   (var_dist (fdistmap (fun sigma : {perm 'I_N} => sigma s)
-                      (sw_rho_dist (ar_security ar)))
+                      (sw_rho_dist (scb_bound (ar_security ar))))
             (fdist_uniform (card_ord N))
-   <= sw_bound_eps (ar_security ar))%O.
+   <= sw_bound_eps (scb_bound (ar_security ar)))%O.
 Proof. exact: sw_bound. Qed.
 
 (** ar_genus0_exact - genus-0 exactness specialised to AlgebraicRigidity.
@@ -428,7 +426,7 @@ End landscape_from_rigidity.
 (* Already proved in pgg_schreier.v:                                         *)
 (*   - schreier_epsilon_decreasing : eps monotone in L                        *)
 (*   - security_monotone : var_dist at L2 bounded by eps(L1) when L1 <= L2  *)
-(*   - security_witness_schreier : SecurityWitness from certificate at L     *)
+(*   - security_witness_schreier : certificate bundle from certificate at L  *)
 (******************************************************************************)
 
 Section discovery_phase.
@@ -452,10 +450,10 @@ Variable sigmas : m.+1.-tuple {perm 'I_n'.+2}.
    - SchreierCertificate packages the spectral gap
    - schreier_epsilon computes the envelope at each L
    - schreier_epsilon_decreasing proves monotonicity
-   - security_witness_schreier converts to SecurityWitness at chosen L'
+   - security_witness_schreier converts to a certificate bundle at chosen L'
 
    This section serves as documentation of the Phase 1 → Phase 2 interface:
-   once L' is found, construct SecurityWitness and proceed to
+   once L' is found, construct the certificate bundle and proceed to
    AlgebraicRigidity (Section 6) and certification (Section 8). *)
 
 (* Envelope monotonicity — re-exported for landscape visibility *)
@@ -465,10 +463,10 @@ Lemma discovery_eps_monotone (sc : SchreierCertificate R m n' sigmas)
   schreier_epsilon sc L2 <= schreier_epsilon sc L1.
 Proof. exact: schreier_epsilon_decreasing. Qed.
 
-(* SecurityWitness construction from discovery — re-exported *)
+(* Certificate-bundle construction from discovery — re-exported *)
 Lemma discovery_to_certification (sc : SchreierCertificate R m n' sigmas)
     (L : nat) (Hinj : @weval_inj (Gen_PGGTypes sigmas) L) :
-  SecurityWitness R (Gen_PGGTypes sigmas).
+  ShuffleCertificateBundle R (Gen_PGGTypes sigmas).
 Proof. exact: (security_witness_schreier sc Hinj). Defined.
 
 End discovery_phase.
@@ -476,7 +474,7 @@ End discovery_phase.
 (******************************************************************************)
 (*     Section 8: Certification Phase — Entropy View from AlgebraicRigidity  *)
 (*                                                                            *)
-(* The SecurityWitness inside ar carries sw_rho_dist — the endpoint          *)
+(* The marginal bound inside ar carries sw_rho_dist — the endpoint           *)
 (* distribution. Its Shannon entropy gives an information-theoretic view     *)
 (* of the same security guarantee:                                           *)
 (*   - ar_entropy s = H(P_s): bits of uncertainty at sheet s                 *)
@@ -493,7 +491,7 @@ Variable R : realType.
 Variable M : MonodromyReprWithGeneratorType.
 Variable ar : AlgebraicRigidity R M.
 
-Let sw := ar_security ar.
+Let sw := scb_bound (ar_security ar).
 Let N := (pgg_N' M).+1.
 
 (* Endpoint distribution at sheet s, extracted from ar *)
@@ -581,10 +579,10 @@ Variable ar : AlgebraicRigidity R M.
 
 Let N := (pgg_N' M).+1.
 Let cs := tw_covering (ar_threshold ar).
-Let sw := ar_security ar.
+Let sw := scb_bound (ar_security ar).
 
 (* The covering decomposition: security and threshold from one algebraic
-   choice. The SecurityWitness gives the endpoint bound (security side),
+   choice. The marginal bound gives the endpoint bound (security side),
    and the CoveringScheme gives the gap bound (threshold side). *)
 Lemma ar_covering_decomposition :
   (forall s : 'I_N,

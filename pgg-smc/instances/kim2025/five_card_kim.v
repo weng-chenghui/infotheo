@@ -36,7 +36,7 @@
 (*   fc_kim_schreier_circulant == Schreier matrix is circulant                *)
 (*   fc_kim_doubly_stochastic  == column sums = 1                             *)
 (*   kim_var_dist_exact      == exact var_dist = 8/5 * kim_lambda2^L            *)
-(*   fc_kim_security_witness == SecurityWitness with sw_exact populated      *)
+(*   fc_kim_security_bundle == certificate bundle with both attachments      *)
 (*   fc_kim_schreier_cert        == WeightedSchreierCertificate (sibling packaging)     *)
 (*                                                                            *)
 (* References:                                                                *)
@@ -67,7 +67,7 @@
 (*   In the code, the proved values are stored as var_dist (= 2 * d_TV):    *)
 (*     kim_spectral_convergence : var_dist <= sqrt(5) * s^L                  *)
 (*     kim_var_dist_exact       : var_dist  = (8/5) * s^L                    *)
-(*   The sw_exact field of fc_kim_security_witness is populated below.       *)
+(*   The scb_exact field of fc_kim_security_bundle is populated below.       *)
 (******************************************************************************)
 
 From HB Require Import structures.
@@ -339,7 +339,7 @@ Proof. exact: fc_kim_col_stochastic. Qed.
 End kim_schreier.
 
 (******************************************************************************)
-(** * Section 5: SecurityWitness via Weighted Schreier Certificate            *)
+(** * Section 5: certificate bundle via Weighted Schreier Certificate         *)
 (*                                                                            *)
 (* Kim's circulant matrix has eigenvalues:                                    *)
 (*   lambda_0 = 1 (Perron eigenvector = uniform)                              *)
@@ -353,7 +353,7 @@ End kim_schreier.
 (*                                                                            *)
 (* We prove the spectral convergence bound via the uniform-off-diagonal       *)
 (* convergence theorem (unif_offdiag_convergence, pgg_schreier_weighted.v:498)*)
-(* and construct the WeightedSchreierCertificate + SecurityWitness.           *)
+(* and construct the WeightedSchreierCertificate + certificate bundle.        *)
 (******************************************************************************)
 
 Section kim_security.
@@ -503,13 +503,19 @@ rewrite add0r /kim_spectral_gap /kim_lambda2 opprB addrC subrK.
 exact: kim_spectral_convergence.
 Defined.
 
-(** SecurityWitness for a given word length L, with exact equality *)
-Definition fc_kim_security_witness (L : nat) :
-  SecurityWitness R FiveCardKim_M :=
-  @MkSecurityWitness R FiveCardKim_M L
-    (Num.sqrt 5%:R * kim_lambda2 ^+ L)
-    (@rho_from_words_weighted R 3 4 L fc_kim_sigmas W)
-    (fun s => kim_spectral_convergence L s)
+(** fc_kim_security_bundle — the certificate bundle at word length L, carrying
+    the spectral marginal bound, the exact variational distance and the
+    asymptotic convergence certificate.
+    @intent: MkShuffleCertificateBundle at the spectral bound of the weighted
+    word distribution, with scb_exact the closed-form equality and
+    scb_asymptotic the geometric-convergence certificate. *)
+Definition fc_kim_security_bundle (L : nat) :
+  ShuffleCertificateBundle R FiveCardKim_M :=
+  @MkShuffleCertificateBundle R FiveCardKim_M
+    (@MkShuffleMarginalBound R FiveCardKim_M L
+      (Num.sqrt 5%:R * kim_lambda2 ^+ L)
+      (@rho_from_words_weighted R 3 4 L fc_kim_sigmas W)
+      (fun s => kim_spectral_convergence L s))
     (Some (@MkSecurityExact R FiveCardKim_M
       (@rho_from_words_weighted R 3 4 L fc_kim_sigmas W)
       (2%:R * 4%:R / 5%:R * kim_lambda2 ^+ L)
@@ -561,7 +567,7 @@ Variable R : realType.
     3. Doubly stochastic proof (fc_kim_doubly_stochastic)
     4. Spectral convergence bound (kim_spectral_convergence)
     5. Exact variation distance (kim_var_dist_exact)
-    6. SecurityWitness with sw_exact (fc_kim_security_witness) *)
+    6. certificate bundle with scb_exact (fc_kim_security_bundle) *)
 
 (** The security bound for L shuffles:
     var_dist <= sqrt(5) * ((5/4)*|eps|)^L *)
@@ -625,21 +631,24 @@ rewrite -!natrX -natrM ltr_nat.
 by lia.
 Qed.
 
-(** SecurityWitness for Kim at bias 1/100 and word length 7.
-    @intent: the concrete witness bounding the 7-cut deal by sqrt 5 * (1/80)^7. *)
-Definition kim_security_witness_centi : SecurityWitness R FiveCardKim_M :=
-  @fc_kim_security_witness R (1 / 100) kim_centi_lt kim_centi_gt kim_centi_spec 7.
+(** kim_security_bundle_centi — the certificate bundle for Kim at bias 1/100
+    and word length 7.
+    @intent: fc_kim_security_bundle at bias 1/100 and L = 7, whose marginal
+    bound is sqrt 5 * (1/80)^7. *)
+Definition kim_security_bundle_centi : ShuffleCertificateBundle R FiveCardKim_M :=
+  @fc_kim_security_bundle R (1 / 100) kim_centi_lt kim_centi_gt kim_centi_spec 7.
 
 (** Variation distance of the 7-cut biased deal from uniform is below 2^-40.
     @main security: closes the numeric mixing-length step in-kernel for Kim. *)
 Lemma kim_deal_centi_lt (s : 'I_5) :
   var_dist (fdistmap (fun sigma : {perm 'I_5} => sigma s)
-              (sw_rho_dist kim_security_witness_centi))
+              (sw_rho_dist (scb_bound kim_security_bundle_centi)))
            (fdist_uniform (card_ord 5))
   < 2%:R ^- 40.
 Proof.
-apply: (Order.POrderTheory.le_lt_trans (sw_bound kim_security_witness_centi s)).
-rewrite /kim_security_witness_centi /fc_kim_security_witness /sw_bound_eps.
+apply: (Order.POrderTheory.le_lt_trans
+  (sw_bound (scb_bound kim_security_bundle_centi) s)).
+rewrite /kim_security_bundle_centi /fc_kim_security_bundle /sw_bound_eps.
 exact: kim_bound_centi.
 Qed.
 

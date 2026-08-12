@@ -11,8 +11,9 @@
 (* Parameters:                                                                *)
 (*   N = 10 sheets (two 5-card piles)                                        *)
 (*   Tg = 8 generators (adjacent transpositions, 4 per pile)                 *)
-(*   SecurityWitness (fiber): L=1, eps = 8/5 (fiber-counted, proved)         *)
-(*   SecurityWitness (spectral): L=591, eps = 1 + sqrt(10)*lazy_alpha^591   *)
+(*   ShuffleMarginalBound (fiber): L=1, eps = 8/5 (fiber-counted, proved)    *)
+(*   ShuffleCertificateBundle (spectral): L=591,                             *)
+(*     eps = 1 + sqrt(10)*lazy_alpha^591                                     *)
 (*     var_dist floors at 1 (orbit-vs-global gap), not 0                    *)
 (*   ThresholdScheme: product of two sum_mod on 'I_5                         *)
 (*   CoveringData: genus 3, base genus 0, ramif = 28804                      *)
@@ -88,7 +89,7 @@ Proof. by rewrite s5x5_group_order_eq. Qed.
    gen_subG + an 8x10 = 80 case analysis on the generator action. *)
 
 (******************************************************************************)
-(*     SecurityWitness Construction                                           *)
+(*     ShuffleMarginalBound Construction                                      *)
 (******************************************************************************)
 
 Section s5x5_security.
@@ -200,8 +201,10 @@ case: m Hm Hmem => [|[|[|[|[|m']]]]] Hm Hmem.
   + by [].
 Qed.
 
-(* SecurityWitness at L=1 via fiber counting. Epsilon = 8/5. *)
-Definition s5x5_security_witness_1 : SecurityWitness R s5x5_M :=
+(* ShuffleMarginalBound at L=1 via fiber counting. Epsilon = 8/5.
+   @intent: security_witness_fiber at the eight product generators, word
+   length 1 and the fiber-counted epsilon proof. *)
+Definition s5x5_security_witness_1 : ShuffleMarginalBound R s5x5_M :=
   security_witness_fiber s5x5_weval_inj1 s5x5_endpoint_bound_fiber.
 
 End s5x5_security.
@@ -271,14 +274,18 @@ apply: (@MkSecurityAsymptotic R s5x5_M
   + by rewrite Num.Theory.ler_sqrt ?Num.Theory.ler0n // Num.Theory.ler_nat.
 Defined.
 
-(* SecurityWitness at any word length L, parametrised only by R. *)
+(* ShuffleCertificateBundle at any word length L, parametrised only by R.
+   @intent: MkShuffleCertificateBundle at the spectral marginal bound of the
+   word distribution, with no exact certificate and s5x5_asymptotic
+   attached. *)
 Definition s5x5_security_witness_schreier (L : nat) :
-    SecurityWitness R s5x5_M.
+    ShuffleCertificateBundle R s5x5_M.
 Proof.
-apply: (@MkSecurityWitness R s5x5_M L
-  (1 + Num.sqrt 10%:R * (s5_lazy_alpha_R R) ^+ L)
-  (rho_from_words L s5x5_gen_tuple)
-  _ None (Some s5x5_asymptotic)).
+apply: (@MkShuffleCertificateBundle R s5x5_M
+  (@MkShuffleMarginalBound R s5x5_M L
+    (1 + Num.sqrt 10%:R * (s5_lazy_alpha_R R) ^+ L)
+    (rho_from_words L s5x5_gen_tuple)
+    _) None (Some s5x5_asymptotic)).
 move=> s.
 change (pgg_N' s5x5_M).+1 with 10%N in s |- *.
 apply: (Order.POrderTheory.le_trans (s5x5_spectral_TV_bound R L s)).
@@ -425,9 +432,12 @@ Definition s5x5_threshold_witness : ThresholdWitness s5x5_M :=
 
 (* --- AlgebraicRigidity --- *)
 
+(** s5x5_rigidity — the AlgebraicRigidity value of the S_5 x S_5 instance.
+    @intent: MkAlgebraicRigidity at the certificate-free bundle of
+    s5x5_security_witness_1 and s5x5_threshold_witness. *)
 Definition s5x5_rigidity : AlgebraicRigidity R s5x5_M :=
   @MkAlgebraicRigidity R s5x5_M
-    (s5x5_security_witness_1 R)
+    (shuffle_bundle_of_bound (s5x5_security_witness_1 R))
     s5x5_threshold_witness.
 
 (* --- Derived properties --- *)
@@ -567,10 +577,13 @@ Qed.
     with its positive gap), the positive genus (173 > 0), and the order
     inequality (60 < 14400), in one record. The positive dual of s5_nogo:
     the product realises an order inequality with a positive gap that no
-    genus-zero curve admits. *)
+    genus-zero curve admits.
+    @intent: MkCombinatorialRigidity at the certificate-free bundle of
+    s5x5_security_witness_1, s5x5_covering and its two order side
+    conditions. *)
 Definition s5x5_combinatorial_rigidity : CombinatorialRigidity R s5x5_M :=
   @MkCombinatorialRigidity R s5x5_M
-    (s5x5_security_witness_1 R) s5x5_covering
+    (shuffle_bundle_of_bound (s5x5_security_witness_1 R)) s5x5_covering
     s5x5_large_group s5x5_group_order_bound.
 
 End s5x5_rigidity.
@@ -578,7 +591,7 @@ End s5x5_rigidity.
 (******************************************************************************)
 (*     Spectral AlgebraicRigidity at L=591 (var_dist floors at 1)           *)
 (*                                                                            *)
-(* Combines the Schreier spectral SecurityWitness at L=591 with the          *)
+(* Combines the Schreier spectral certificate bundle at L=591 with the       *)
 (* product threshold scheme. At L=591 with lazy_alpha = 0.9525:             *)
 (*   var_dist <= 1 + sqrt(10)*lazy_alpha^591 ~ 1 + 1.02e-12 (floors at 1)   *)
 (*                                                                            *)
@@ -592,11 +605,13 @@ Variable R : realType.
 Let s5x5_M : MonodromyReprWithGeneratorType :=
   @Gen_PGGTypes 7 8 s5x5_gen_tuple.
 
-(* Honest spectral SecurityWitness at L=591, fully discharged.
+(* Honest spectral certificate bundle at L=591, fully discharged.
    The bound is var_dist <= 1 + sqrt(10) * lazy_alpha^591, where lazy_alpha
    = (1 + 181/200) / 2 = 0.9525. The 1 floor is the orbit-vs-global gap
    (the walk preserves piles), not a security weakness in the threshold
-   sense (the product threshold scheme reconstructs per-pile). *)
+   sense (the product threshold scheme reconstructs per-pile).
+   @intent: MkAlgebraicRigidity at the Schreier certificate bundle read at
+   L = 591 and s5x5_threshold_witness. *)
 Definition s5x5_rigidity_cryptographically_secure : AlgebraicRigidity R s5x5_M :=
   @MkAlgebraicRigidity R s5x5_M
     (s5x5_security_witness_schreier R 591)

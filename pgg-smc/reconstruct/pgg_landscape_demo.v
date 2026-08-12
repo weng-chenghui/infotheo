@@ -80,9 +80,9 @@ Let ar := monster_rigidity R.
 (* A: For every sheet s, var_dist <= epsilon ~ 0. *)
 Lemma monster_security_demo (s : 'I_monster_n.+2) :
   (var_dist (fdistmap (fun sigma : {perm 'I_monster_n.+2} => sigma s)
-                      (sw_rho_dist (ar_security ar)))
+                      (sw_rho_dist (scb_bound (ar_security ar))))
             (fdist_uniform (card_ord monster_n.+2))
-   <= sw_bound_eps (ar_security ar))%O.
+   <= sw_bound_eps (scb_bound (ar_security ar)))%O.
 Proof. exact: ar_security_per_position ar s. Qed.
 
 (* --- Threshold side --- *)
@@ -139,7 +139,7 @@ Proof. exact: ar_entropy_le_logN. Qed.
 Lemma monster_entropy_gap_demo (s : 'I_monster_n.+2) :
   log monster_n.+2%:R - ar_entropy ar s =
   D(fdistmap (fun sigma : {perm 'I_monster_n.+2} => sigma s)
-             (sw_rho_dist (ar_security ar)) ||
+             (sw_rho_dist (scb_bound (ar_security ar))) ||
     fdist_uniform (card_ord monster_n.+2)).
 Proof. exact: (ar_entropy_gap ar s). Qed.
 
@@ -147,7 +147,7 @@ Proof. exact: (ar_entropy_gap ar s). Qed.
 (* A: Yes — Pinsker gives var_dist <= sqrt(2 * entropy_gap). *)
 Lemma monster_pinsker_demo (s : 'I_monster_n.+2) :
   var_dist (fdistmap (fun sigma : {perm 'I_monster_n.+2} => sigma s)
-                     (sw_rho_dist (ar_security ar)))
+                     (sw_rho_dist (scb_bound (ar_security ar))))
            (fdist_uniform (card_ord monster_n.+2)) <=
   Num.sqrt (2%:R * (log monster_n.+2%:R - ar_entropy ar s)).
 Proof. exact: (ar_var_dist_from_entropy ar s). Qed.
@@ -210,9 +210,9 @@ Let ar := oc_rigidity R HG_oc qn an HN sigma_fix0 code_auto oc_genus0_klein.
 (* A: eps = 1 (fiber-counted). Weaker than Monster but exact threshold. *)
 Lemma oc_security_demo (s : 'I_4) :
   (var_dist (fdistmap (fun sigma : {perm 'I_4} => sigma s)
-                      (sw_rho_dist (ar_security ar)))
+                      (sw_rho_dist (scb_bound (ar_security ar))))
             (fdist_uniform (card_ord 4))
-   <= sw_bound_eps (ar_security ar))%O.
+   <= sw_bound_eps (scb_bound (ar_security ar)))%O.
 Proof. exact: ar_security_per_position ar s. Qed.
 
 (* Q: What is the entropy bound? *)

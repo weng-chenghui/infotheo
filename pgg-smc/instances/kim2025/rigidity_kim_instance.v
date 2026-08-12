@@ -13,8 +13,7 @@
 (* three-consecutive-hearts read, not through a Reed-Solomon code, so the     *)
 (* genus-0 RS packaging was vacuous for the cyclic group of order |C_5| = 5.  *)
 (*                                                                            *)
-(* What remains is the family alias and the search-space complexity bound:    *)
-(*   kim_profile : the biased five-card MonodromyProfile at bias eps          *)
+(* What remains is the search-space complexity bound:                         *)
 (*   kim_complexity : search_space L <= |G|                                   *)
 (******************************************************************************)
 
@@ -58,12 +57,5 @@ Let M_kim : MonodromyReprWithGeneratorType := FiveCardKim_M.
 Lemma kim_complexity (L : nat) :
   (@search_space M_kim L <= #|pgg_G M_kim|)%N.
 Proof. exact: search_space_leG. Qed.
-
-(** kim_profile — Kim & Cetinkaya = the biased (eps <> 0) member of the shared
-    five-card family.
-    @intent: five_card_profile at the section bias eps and word length L; the
-    den Boer profile is the same family at eps = 0. *)
-Definition kim_profile (L : nat) : MonodromyProfile R :=
-  five_card_profile eps_lt eps_gt eps_spectral L.
 
 End kim_family.

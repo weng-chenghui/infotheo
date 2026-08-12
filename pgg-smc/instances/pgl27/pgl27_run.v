@@ -215,9 +215,9 @@ Qed.
     @main architecture: the verifier's executed endpoints reconstruct the
     dealt secret via run_recover of pgl27_profile, for any cut in the
     group. *)
-Corollary run_recover_pgl27 (R : realType) (s : bool) (w0 : pgg_gT pgl27_M) :
+Corollary run_recover_pgl27 (s : bool) (w0 : pgg_gT pgl27_M) :
   w0 \in pgg_G pgl27_M ->
-  @run_recover R (pgl27_profile R)
+  @run_recover pgl27_profile
     (tcast (pgl27_endpoints_size s w0)
        (in_tuple (endpoints_of_trace
           (nth [::] (run_interp pgl27_fuel (pgl27_procs s w0)).2 1))))
@@ -228,6 +228,6 @@ Proof. exact: pgl27_run_recovers. Qed.
     profile's derived player.
     @main architecture: the instance's player process at seat i coincides
     with run_party of pgl27_profile. *)
-Corollary run_party_pgl27 (R : realType) (i : 'I_(pi_T' pgl27_PI).+1) :
-  @run_party R (pgl27_profile R) i = exchange_player pgl27_PI i.
+Corollary run_party_pgl27 (i : 'I_(pi_T' pgl27_PI).+1) :
+  @run_party pgl27_profile i = exchange_player pgl27_PI i.
 Proof. by []. Qed.

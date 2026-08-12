@@ -4,20 +4,22 @@
 (* pgl27_profile: the PGL(2,7) plug of the shared MonodromyProfile program    *)
 (*                                                                            *)
 (* The eight-card orbit scheme (pgl27_scheme) is packaged as a               *)
-(* MonodromyProfile with an exact (epsilon = 0) SecurityWitness: the single- *)
-(* card pushforward of the uniform shuffle over PGL(2,7) is exactly uniform,  *)
-(* by the transitivity marginal ttrans_point_uniform.                         *)
+(* MonodromyProfile, a program-layer value carrying no epsilon, together with *)
+(* a separate marginal bound at epsilon = 0: the single-card pushforward of   *)
+(* the uniform shuffle over PGL(2,7) is exactly uniform, by the transitivity  *)
+(* marginal ttrans_point_uniform.                                             *)
 (*                                                                            *)
 (* Definitions:                                                               *)
 (*   pgl27_PI       == the eight-sheet starting interface (ord_tuple 8)       *)
 (*   pgl27_rho_dist == the uniform distribution over the shuffle group        *)
-(*   pgl27_security == the exact SecurityWitness at epsilon = 0               *)
-(*   pgl27_profile  == the MonodromyProfile bundling PI, security and plug    *)
+(*   pgl27_marginal_bound == the ShuffleMarginalBound at epsilon = 0          *)
+(*   pgl27_certificate_bundle == that bound with the exact certificate         *)
+(*   pgl27_profile  == the MonodromyProfile bundling PI and plug              *)
 (*                                                                            *)
 (* Key results:                                                               *)
 (*   pgl27_point_uniform == the single-card pushforward is exactly uniform    *)
 (*   profile_k_pgl27     == the plug's privacy threshold is four              *)
-(*   profile_eps_pgl27   == the security character eps is zero                *)
+(*   profile_eps_pgl27   == the marginal bound's epsilon is zero              *)
 (******************************************************************************)
 
 From HB Require Import structures.
@@ -55,7 +57,7 @@ Section witness.
 Variable R : realType.
 
 (** pgl27_G_pos — the shuffle group is nonempty.
-    @composes: pgl27_security *)
+    @composes: pgl27_marginal_bound *)
 Lemma pgl27_G_pos : (0 < #|pgg_G pgl27_M|)%N.
 Proof. exact: cardG_gt0. Qed.
 
@@ -65,7 +67,7 @@ Definition pgl27_rho_dist : R.-fdist {perm 'I_8} := `U pgl27_G_pos.
 
 (** pgl27_point_uniform — the single-card pushforward of the uniform shuffle
     is exactly uniform, via the transitivity marginal.
-    @composes: pgl27_security *)
+    @composes: pgl27_marginal_bound *)
 Lemma pgl27_point_uniform (s : 'I_8) :
   fdistmap (fun sigma : {perm 'I_8} => sigma s) pgl27_rho_dist
   = fdist_uniform (card_ord 8).
@@ -76,7 +78,7 @@ Qed.
 
 (** pgl27_se_exact — the single-card pushforward is at variational distance
     zero from uniform.
-    @composes: pgl27_security *)
+    @composes: pgl27_certificate_bundle *)
 Lemma pgl27_se_exact (s : 'I_8) :
   var_dist (fdistmap (fun sigma : {perm 'I_8} => sigma s) pgl27_rho_dist)
            (fdist_uniform (card_ord 8)) = 0%R.
@@ -86,35 +88,43 @@ by apply: big1 => a _; rewrite subrr normr0.
 Qed.
 
 (** pgl27_sw_bound — the single-card pushforward meets the epsilon = 0 bound.
-    @composes: pgl27_security *)
+    @composes: pgl27_marginal_bound *)
 Lemma pgl27_sw_bound (s : 'I_8) :
   (var_dist (fdistmap (fun sigma : {perm 'I_8} => sigma s) pgl27_rho_dist)
             (fdist_uniform (card_ord 8)) <= 0%R)%O.
 Proof. rewrite pgl27_se_exact; exact: lexx. Qed.
 
-(** pgl27_security — the exact SecurityWitness at epsilon = 0: single-card
+(** pgl27_marginal_bound — the marginal bound at epsilon = 0: single-card
     perfect uniformity of the PGL(2,7) shuffle.
-    @intent: the exact security witness of the eight-card orbit scheme. *)
-Definition pgl27_security : SecurityWitness R pgl27_M :=
-  @MkSecurityWitness R pgl27_M 0 0%R pgl27_rho_dist pgl27_sw_bound
-    (Some (@MkSecurityExact R pgl27_M pgl27_rho_dist 0%R pgl27_se_exact)) None.
+    @intent: MkShuffleMarginalBound at word length 0, epsilon 0, the uniform
+    shuffle distribution and its per-position bound. *)
+Definition pgl27_marginal_bound : ShuffleMarginalBound R pgl27_M :=
+  @MkShuffleMarginalBound R pgl27_M 0 0%R pgl27_rho_dist pgl27_sw_bound.
 
-(** pgl27_profile — the PGL(2,7) plug of the shared MonodromyProfile: PI, the
-    exact security witness, and the orbit plug.
-    @intent: the eight-card orbit-class plug of the MonodromyProfile program. *)
-Definition pgl27_profile : MonodromyProfile R :=
-  @MkMonodromyProfile R pgl27_M bool pgl27_PI pgl27_security pgl27_plug.
+(** pgl27_certificate_bundle — the marginal bound above with the exact-equality
+    certificate attached and no asymptotic certificate.
+    @intent: MkShuffleCertificateBundle at pgl27_marginal_bound with scb_exact
+    the closed-form equality var_dist ... = 0 and scb_asymptotic None. *)
+Definition pgl27_certificate_bundle : ShuffleCertificateBundle R pgl27_M :=
+  @MkShuffleCertificateBundle R pgl27_M pgl27_marginal_bound
+    (Some (@MkSecurityExact R pgl27_M pgl27_rho_dist 0%R pgl27_se_exact)) None.
 
 End witness.
 
+(** pgl27_profile — the PGL(2,7) plug of the shared MonodromyProfile: the group,
+    the secret type, PI and the orbit plug.
+    @intent: the eight-card orbit-class plug of the MonodromyProfile program. *)
+Definition pgl27_profile : MonodromyProfile :=
+  @MkMonodromyProfile pgl27_M bool pgl27_PI pgl27_plug.
+
 (** profile_k_pgl27 — the PGL(2,7) plug's privacy threshold is four.
     @main bound: coalitions of at most three cards are private, k = 4. *)
-Lemma profile_k_pgl27 (R : realType) : profile_k (pgl27_profile R) = 4.
+Lemma profile_k_pgl27 : profile_k pgl27_profile = 4.
 Proof. by []. Qed.
 
-(** profile_eps_pgl27 — the PGL(2,7) profile's security character is zero.
-    @main bound: the eps of pgl27_profile is 0; the single-card pushforward
-    of the uniform-over-the-group shuffle is exactly uniform. *)
+(** profile_eps_pgl27 — the PGL(2,7) marginal bound's epsilon is zero.
+    @main bound: sw_bound_eps of pgl27_marginal_bound is 0; the single-card
+    pushforward of the uniform-over-the-group shuffle is exactly uniform. *)
 Lemma profile_eps_pgl27 (R : realType) :
-  @profile_eps R (pgl27_profile R) = 0%R.
+  sw_bound_eps (pgl27_marginal_bound R) = 0%R.
 Proof. by []. Qed.
