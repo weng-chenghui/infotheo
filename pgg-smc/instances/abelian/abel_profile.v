@@ -63,7 +63,9 @@ Local Notation abel_M := (@Gen_PGGTypes 1 2 abel_sigmas).
     'I_4 'I_4 (ts_T' = 3, so the share-index space 'I_4 matches the sheet space
     that the abelian monodromy pgg_rho permutes). Why: the plain scheme for the
     abelian plug; the differentiator from the secure plugs is the group, not the
-    scheme. Used-by: abel_plug. *)
+    scheme. Used-by: abel_plug.
+    @intent: sum_mod_scheme at two sheets' worth of successor numerals, giving
+    four shares over 'I_4. *)
 Definition abel_ts : ThresholdScheme 'I_4 'I_4 := @sum_mod_scheme 2 3.
 
 (** abel_sum_mod_perm_compatible — sum-mod reconstruction is invariant under the
@@ -71,7 +73,11 @@ Definition abel_ts : ThresholdScheme 'I_4 'I_4 := @sum_mod_scheme 2 3.
     pgg_G (Gen_PGGTypes abel_sigmas) for abel_ts and pgg_rho. Why: the
     rp_recon_invariant field of abel_plug; the proof is the group-agnostic
     single-reindex argument shared with s5_sum_mod_perm_compatible. Used-by:
-    abel_plug. *)
+    abel_plug.
+    Naming: the name spells the scheme (sum_mod), the transported structure
+    (perm) and the property (compatible), matching the sibling
+    s5_sum_mod_perm_compatible; no MathComp suffix names this shape.
+    @composes: abel_plug *)
 Lemma abel_sum_mod_perm_compatible :
   @ts_recon_perm_invariant _ (pgg_G (@Gen_PGGTypes 1 2 abel_sigmas)) _ _ abel_ts
     (@pgg_rho (@Gen_PGGTypes 1 2 abel_sigmas)).
@@ -89,7 +95,9 @@ Qed.
 (** abel_plug — the abelian reconstruction plug. Kind: instance. What: abel_ts +
     id content + abelian monodromy + abel_sum_mod_perm_compatible. Why: routes
     the abelian (insecure) example through the general MonodromyProfile program.
-    Used-by: abel_profile. *)
+    Used-by: abel_profile.
+    @intent: MkReconPlug at abel_M with scheme abel_ts, identity content
+    readout, monodromy pgg_rho and invariance abel_sum_mod_perm_compatible. *)
 Definition abel_plug : ReconPlug (@Gen_PGGTypes 1 2 abel_sigmas) 'I_4 :=
   @MkReconPlug (@Gen_PGGTypes 1 2 abel_sigmas) 'I_4 abel_ts id
     (@pgg_rho (@Gen_PGGTypes 1 2 abel_sigmas)) abel_sum_mod_perm_compatible.
@@ -129,7 +137,9 @@ Proof. by []. Qed.
 (** abel_gens_commute — the abelian plug's generators commute.
     Kind: main. What: commute abel_s1 abel_s2. Why: the structural root of the
     insecure character (commuting shuffles do not mix, eps floors), the opposite
-    of the non-abelian secure plugs. Used-by: abelian security narrative. *)
+    of the non-abelian secure plugs. Used-by: abelian security narrative.
+    @main architecture: commute abel_s1 abel_s2, the two generators being
+    disjoint transpositions of the four sheets. *)
 Lemma abel_gens_commute : commute abel_s1 abel_s2.
 Proof.
 apply/permP => x; rewrite !permM /abel_s1 /abel_s2.
