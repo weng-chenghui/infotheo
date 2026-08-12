@@ -243,6 +243,7 @@ pgg-smc/instances/s5x5/s5x5_run.v
 pgg-smc/instances/s5x5/s5x5_secrecy.v
 pgg-smc/instances/s5x5/s5x5_trace.v
 pgg-smc/instances/s5x5/s5x5_exec.v
+pgg-smc/instances/s5x5/s5x5_models.v
 pgg-smc/instances/monster/rigidity_monster_instance.v
 pgg-smc/instances/oc/rigidity_oc_instance.v
 pgg-smc/instances/cyclic/rigidity_cyclic_instance.v
