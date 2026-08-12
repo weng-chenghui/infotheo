@@ -325,36 +325,9 @@ rewrite big_split /=.
 by rewrite !FDist.f1; rewrite -[2]/(1+1).
 Qed.
 
-(* fdistmap with injective f preserves var_dist exactly. *)
-Lemma var_dist_fdistmap_inj (A B : finType) (f : A -> B) (P Q : R.-fdist A) :
-  injective f -> var_dist (fdistmap f P) (fdistmap f Q) = var_dist P Q.
-Proof.
-move=> Hinj.
-rewrite /var_dist (partition_big f xpredT) //=.
-apply: eq_bigr => b _.
-rewrite !fdistmapE.
-have Hsimp : forall (R' : R.-fdist A),
-  \sum_(a in A | a \in preim f (pred1 b)) R' a = \sum_(a | f a == b) R' a.
-  by move=> R'; apply: eq_bigl => a /=; rewrite inE.
-rewrite !Hsimp -sumrB.
-case Hb : [exists a, f a == b]; last first.
-  move/negbT/negP: Hb => Hb.
-  have Hempty : (fun i : A => f i == b) =1 xpred0.
-    move=> a /=. apply/negP => /eqP H. apply: Hb.
-    by apply/existsP; exists a; rewrite H.
-  by rewrite (eq_bigl _ _ Hempty) (eq_bigl _ _ Hempty) !big_pred0_eq normr0.
-move: Hb => /existsP [a /eqP Heq].
-rewrite (bigD1 a) /=; last by apply/eqP.
-rewrite big1; last first.
-  move=> a' /andP [Ha' Hne].
-  move/eqP in Ha'. rewrite -Heq in Ha'. move/Hinj in Ha'.
-  by rewrite Ha' eqxx in Hne.
-rewrite addr0.
-rewrite [in RHS](bigD1 a) /=; last by apply/eqP.
-rewrite big1 ?addr0 // => a' /andP [Ha' Hne].
-move/eqP in Ha'. rewrite -Heq in Ha'. move/Hinj in Ha'.
-by rewrite Ha' eqxx in Hne.
-Qed.
+(* var_dist_fdistmap_inj, the exact transport of var_dist along an injective
+   reader, is stated in pgg-smc/security/pgg_collusion_bound.v, imported
+   above, and is used below at widen5to10 and rshift5to10. *)
 
 (* === Matrix-level Q_lazy facts === *)
 

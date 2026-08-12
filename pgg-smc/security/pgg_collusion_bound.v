@@ -55,6 +55,55 @@ Qed.
 End var_dist_extra.
 
 (******************************************************************************)
+(*     Section 1b: Exact transport of var_dist along an injective map         *)
+(******************************************************************************)
+
+Section var_dist_inj.
+
+(* R is bound by Variable, not by Context, so that the discharged constant
+   keeps the non-maximal implicit R of its former home in s5x5_mixing.v. *)
+Variable R : realType.
+
+(** var_dist_fdistmap_inj — an injective reader transports the total variation
+    distance exactly.
+    @main architecture: for injective [f],
+    [var_dist (fdistmap f P) (fdistmap f Q) = var_dist P Q], the equality case
+    of the data processing inequality [var_dist_fdistmap] below. Shared by the
+    instance mixing developments, which read a shuffle distribution through an
+    injective endpoint reader. *)
+Lemma var_dist_fdistmap_inj (A B : finType) (f : A -> B) (P Q : R.-fdist A) :
+  injective f -> var_dist (fdistmap f P) (fdistmap f Q) = var_dist P Q.
+Proof.
+move=> Hinj.
+rewrite /var_dist (partition_big f xpredT) //=.
+apply: eq_bigr => b _.
+rewrite !fdistmapE.
+have Hsimp : forall (R' : R.-fdist A),
+  \sum_(a in A | a \in preim f (pred1 b)) R' a = \sum_(a | f a == b) R' a.
+  by move=> R'; apply: eq_bigl => a /=; rewrite inE.
+rewrite !Hsimp -sumrB.
+case Hb : [exists a, f a == b]; last first.
+  move/negbT/negP: Hb => Hb.
+  have Hempty : (fun i : A => f i == b) =1 xpred0.
+    move=> a /=. apply/negP => /eqP H. apply: Hb.
+    by apply/existsP; exists a; rewrite H.
+  by rewrite (eq_bigl _ _ Hempty) (eq_bigl _ _ Hempty) !big_pred0_eq normr0.
+move: Hb => /existsP [a /eqP Heq].
+rewrite (bigD1 a) /=; last by apply/eqP.
+rewrite big1; last first.
+  move=> a' /andP [Ha' Hne].
+  move/eqP in Ha'. rewrite -Heq in Ha'. move/Hinj in Ha'.
+  by rewrite Ha' eqxx in Hne.
+rewrite addr0.
+rewrite [in RHS](bigD1 a) /=; last by apply/eqP.
+rewrite big1 ?addr0 // => a' /andP [Ha' Hne].
+move/eqP in Ha'. rewrite -Heq in Ha'. move/Hinj in Ha'.
+by rewrite Ha' eqxx in Hne.
+Qed.
+
+End var_dist_inj.
+
+(******************************************************************************)
 (*          Section 2: Data processing inequality for var_dist                *)
 (******************************************************************************)
 
