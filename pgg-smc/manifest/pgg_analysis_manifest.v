@@ -487,8 +487,9 @@ Local Open Scope ring_scope.
 (* exec_coalition_secrecy is stated at sa_coalition_view of rand_sample       *)
 (* itself, so the theorem's distribution and observer are the row's own,      *)
 (* giving AnalysisBridged. The two reader equalities rand_content_traceE and  *)
-(* rand_coalition_viewE identify those executed observers with the landed     *)
-(* static readers, which is the content of the StaticExecutedOnly status:     *)
+(* rand_coalition_viewE identify those executed observers with the static     *)
+(* readers of s5_trace and s5_secrecy, which is the content of the            *)
+(* StaticExecutedOnly status:                                                 *)
 (* results travel from the static layer to the executed one, and no           *)
 (* idealized model is compared.                                               *)
 (*                                                                            *)
@@ -1018,9 +1019,9 @@ Local Open Scope ring_scope.
 (* S_5 finite-word path (row 8). The absent premise is                        *)
 (* S5Analysis.word_missing_premise, that is                                   *)
 (* var_dist (sa_cut_dist (S5Analysis.word_sample secretP L)) Q <= delta on    *)
-(* the cut carrier {perm 'I_5}, against a named reference distribution Q. The *)
-(* landed spectral theorem bounds a pushforward on the carrier 'I_5 instead,  *)
-(* which does not discharge it. For Q the uniform distribution on the         *)
+(* the cut carrier {perm 'I_5}, against a named reference distribution Q.     *)
+(* S5Analysis.word_endpoint_bound bounds a pushforward on the carrier 'I_5    *)
+(* instead, which does not discharge it. For Q the uniform distribution on the*)
 (* generated group the premise is moreover UNSATISFIABLE at every delta below *)
 (* one: every generator of this instance is a transposition, so a word of     *)
 (* length L evaluates into the coset of the alternating subgroup determined   *)
@@ -1103,10 +1104,10 @@ Definition five_card_row_uniform : AnalysisPathRow :=
 
 (** five_card_row_biased — row 4: the same development under one biased cut.
     @intent: the observed execution of that development, the single-biased
-    sample adapter at the landed bias one hundredth, whose two hypotheses are
-    discharged by kim_centi_lt and kim_centi_gt so that the adapter stands at
-    every realType, and the statuses of row 4. The row's theorem quantifies
-    over the bias; the slot names the one member the repository fixes. *)
+    sample adapter at bias one hundredth, whose two hypotheses are discharged
+    by kim_centi_lt and kim_centi_gt so that the adapter stands at every
+    realType, and the statuses of row 4. The row's theorem quantifies over the
+    bias; the slot names the one member the repository fixes. *)
 Definition five_card_row_biased : AnalysisPathRow :=
   @MkAnalysisPathRow FiveCardAnalysis.observed
     (fun R => Some (@FiveCardAnalysis.single_biased_sample R (1 / 100)
