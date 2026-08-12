@@ -44,10 +44,18 @@
 (*   pgl27_sample_witness_prodE   == the exact sample space is the uniform    *)
 (*                                   secret prior times the profile's own     *)
 (*                                   shuffle distribution                     *)
+(*   pgl27_sample_cut_distE       == the exact sample space's cut             *)
+(*                                   distribution is the profile's own        *)
+(*                                   shuffle distribution                     *)
 (*   pgl27_word_sample_seat_distE == the executed seat law under the word     *)
 (*                                   shuffle                                  *)
+(*   pgl27_word_sample_coalition_distE == the same for a coalition's          *)
+(*                                        readings                            *)
 (*   pgl27_word_cut_distE         == the word sample space's cut law is       *)
 (*                                   rho_word                                 *)
+(*   pgl27_word_sample_joint_distE == the joint distribution of the word      *)
+(*                                   sample's secret and evaluated cut is     *)
+(*                                   pgl27P_word_gen                          *)
 (******************************************************************************)
 
 From HB Require Import structures.
@@ -369,6 +377,17 @@ Lemma pgl27_sample_witness_prodE :
   = ((fdist_uniform card_bool) `x (sw_rho_dist (mp_security mpP)))%fdist.
 Proof. by []. Qed.
 
+(** pgl27_sample_cut_distE — the exact sample space's cut distribution is the
+    profile's own shuffle distribution.
+    @main architecture: sa_cut_dist pgl27_sample = pgl27_witness_cut_dist. *)
+Lemma pgl27_sample_cut_distE :
+  @sa_cut_dist R mpP pgl27_exec_plug pgl27_sample = pgl27_witness_cut_dist.
+Proof.
+rewrite /sa_cut_dist /pgl27_witness_cut_dist /pgl27_sample /=.
+rewrite pgl27_sample_witness_prodE.
+by rewrite -/(fdist_snd _) -fdistX_prod fdistX2 fdist_prod1.
+Qed.
+
 (******************************************************************************)
 (*     The finite-word sample space of the eight-card orbit instance          *)
 (******************************************************************************)
@@ -456,6 +475,19 @@ Lemma pgl27_word_sample_seat_distE (i : 'I_(pi_T' (mp_PI mpP)).+1) :
                 pgl27_content_obs i) pgl27_word_sampleP.
 Proof. by apply: sa_seat_distE => u; exact: pgl27_exec_endpoints. Qed.
 
+(** pgl27_word_sample_coalition_distE — the executed coalition distribution
+    under the word shuffle is the distribution of the orbit shares at the
+    evaluated word's images of the coalition's starts.
+    @main architecture: pgl27_word_sample_coalition_dist C = fdistmap
+    (sa_static_coalition_view pgl27_word_sample pgl27_content_obs C)
+    pgl27_word_sampleP. *)
+Lemma pgl27_word_sample_coalition_distE
+    (C : {set 'I_(pi_T' (mp_PI mpP)).+1}) :
+  pgl27_word_sample_coalition_dist C
+  = fdistmap (@sa_static_coalition_view R mpP pgl27_exec_plug
+                pgl27_word_sample pgl27_content_obs C) pgl27_word_sampleP.
+Proof. by apply: sa_coalition_distE => u; exact: pgl27_exec_endpoints. Qed.
+
 (** pgl27_word_cut_distE — the word sample space's cut law is rho_word, the
     word shuffle law on PGL(2,7).
     @main architecture: sa_cut_dist pgl27_word_sample = rho_word R. *)
@@ -465,6 +497,20 @@ Proof.
 rewrite /sa_cut_dist /pgl27_word_sample /= /pgl27_word_cut /pgl27_word_sampleP.
 rewrite -(fdistmap_comp (@word_eval pgl27_Msym 200) snd).
 by rewrite -/(fdist_snd _) -fdistX_prod fdistX2 fdist_prod1.
+Qed.
+
+(** pgl27_word_sample_joint_distE — the joint distribution of the word
+    sample's secret and evaluated cut is the generic word-shuffle sample
+    distribution.
+    @main architecture: sa_joint_dist (sa_arg pgl27_word_sample) =
+    pgl27P_word_gen secretP. *)
+Lemma pgl27_word_sample_joint_distE :
+  sa_joint_dist (pgl27_word_sample.(sa_arg)) = pgl27P_word_gen secretP.
+Proof.
+rewrite /sa_joint_dist /pgl27_word_sample /= /pgl27_word_sampleP.
+rewrite /pgl27P_word_gen /pgl27_word_cut /rho_word.
+rewrite /rho_from_words_weighted /pgl27_word_wordP.
+exact: fdistmap_prodr.
 Qed.
 
 End pgl27_execution.
