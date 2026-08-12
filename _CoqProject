@@ -165,6 +165,7 @@ pgg-smc/instances/kim2025/kim_trace.v
 pgg-smc/instances/kim2025/kim_input_privacy.v
 pgg-smc/instances/kim2025/five_card_exec.v
 pgg-smc/instances/kim2025/five_card_models.v
+pgg-smc/instances/kim2025/five_card_analysis.v
 pgg-smc/protocol/card_protocol.v
 pgg-smc/protocol/card_protocol_posterior.v
 pgg-smc/protocol/pgg_uc_security.v
@@ -262,6 +263,9 @@ pgg-smc/instances/pgl27/pgl27_mixing.v
 pgg-smc/instances/pgl27/pgl27_word_privacy.v
 pgg-smc/instances/pgl27/pgl27_exec.v
 pgg-smc/instances/pgl27/pgl27_models.v
+pgg-smc/instances/pgl27/pgl27_analysis.v
+pgg-smc/manifest/pgg_analysis_manifest.v
+pgg-smc/manifest/pgg_analysis_client.v
 
 -R . infotheo
 -R pgg-smc/lib pgg_smc
@@ -279,3 +283,4 @@ pgg-smc/instances/pgl27/pgl27_models.v
 -R pgg-smc/instances/cyclic pgg_smc
 -R pgg-smc/instances/monster pgg_smc
 -R pgg-smc/instances/pgl27 pgg_smc
+-R pgg-smc/manifest pgg_smc
