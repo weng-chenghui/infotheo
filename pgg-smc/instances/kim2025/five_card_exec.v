@@ -20,6 +20,10 @@
 (*                                      trace                                 *)
 (*   five_card_exec_trace  == seat i's executed trace as a random variable on *)
 (*                            the leakage space                               *)
+(*   five_card_observed    == the ObservedExecution packing the plug, the     *)
+(*                            static observation and the three run facts at   *)
+(*                            process offset 0                                *)
+(*   den_boer_observed     == the same value, named for the den Boer member   *)
 (*   five_card_sample      == the den Boer sample adapter: the leakage space  *)
 (*                            Omega under P, the cut being the sampled        *)
 (*                            rotation                                        *)
@@ -55,6 +59,10 @@
 (*                                identifier                                  *)
 (*   five_card_exec_traceE == the execution layer's trace variable is         *)
 (*                            denboer_player_trace                            *)
+(*   five_card_observed_recovers == the packaged run decodes to the           *)
+(*                                  conjunction of the two committed bits     *)
+(*   den_boer_observed_core     == the den Boer wrapper is the five-card      *)
+(*                                 observed execution                         *)
 (*   five_card_sample_seat_distE == the executed seat distribution at the den *)
 (*                                  Boer space is the distribution of the     *)
 (*                                  layout entry at the rotation image of the *)
@@ -89,8 +97,8 @@ From infotheo Require Import variation_dist entropy.
 Require Import smc_interpreter pismc smc_session_types.
 From pgg_smc Require Import pgg_interface pgg_session_types card_exchange_pismc.
 From pgg_smc Require Import pgg_input_commitment pgg_run pgg_monodromy_profile.
-From pgg_smc Require Import pgg_execution_plug pgg_sample_adapter.
-From pgg_smc Require Import pgg_weighted_words.
+From pgg_smc Require Import pgg_execution_plug pgg_observed_execution.
+From pgg_smc Require Import pgg_sample_adapter pgg_weighted_words.
 From pgg_reconstruct Require Import pgg_sharing_framework covering_scheme
                                     algebraic_rigidity input_encoding.
 From pgg_smc Require Import five_card_group five_card_program.
@@ -404,6 +412,88 @@ Proof.
 by rewrite /five_card_exec_player_raw_trace /exec_participant_trace
    /exec_seat_id /exec_run five_card_exec_fuelE five_card_exec_procsE.
 Qed.
+
+(******************************************************************************)
+(*     The packaged observed execution at five_card_profile                   *)
+(******************************************************************************)
+
+(* The record quantifies over the committed pair, while the three execution
+   lemmas take the pair split into two bits, so each field needs one case split
+   on the pair and nothing else. *)
+
+(** five_card_oe_terminates — every process of the five-card run reaches
+    Finish at every committed pair and cut.
+    @composes: five_card_observed *)
+Lemma five_card_oe_terminates (x : bool * bool) (w0 : pgg_gT FiveCardKim_M) :
+  (@exec_run mpF five_card_exec_plug x w0 0).1
+  = nseq (size (@exec_procs mpF five_card_exec_plug x w0 0)) Finish.
+Proof. by case: x => a b; exact: five_card_exec_terminates. Qed.
+
+(** five_card_oe_endpoints — the five-card verifier endpoints are the static
+    observation at every committed pair and cut.
+    @composes: five_card_observed *)
+Lemma five_card_oe_endpoints (x : bool * bool) (w0 : pgg_gT FiveCardKim_M) :
+  @exec_endpoints mpF five_card_exec_plug x w0 0
+  = @exec_static_endpoints mpF five_card_exec_plug five_card_content_obs x w0.
+Proof. by case: x => a b; exact: five_card_exec_endpoints. Qed.
+
+(** five_card_oe_static_recon — decoding the five-card static observation
+    returns the conjunction of the committed pair.
+    @composes: five_card_observed
+    Naming: intentional; the _oe_ infix marks the three fields of the
+    ObservedExecution record, and _static_recon is the field's own name. *)
+Lemma five_card_oe_static_recon (x : bool * bool)
+    (w0 : pgg_gT FiveCardKim_M) :
+  w0 \in pgg_G FiveCardKim_M ->
+  forall Hsz : size (@exec_static_endpoints mpF five_card_exec_plug
+                       five_card_content_obs x w0)
+               = (pi_T' (mp_PI mpF)).+1,
+  @exec_decode mpF five_card_exec_plug
+    (@exec_static_endpoints mpF five_card_exec_plug five_card_content_obs x w0)
+    Hsz
+  = x.1 && x.2.
+Proof. by case: x => a b; exact: five_card_exec_recon. Qed.
+
+(* five_card_observed is the one value the den Boer and the Kim members of the
+   family share. Neither its type nor its body can vary with the bias or the
+   word length: five_card_profile and five_card_exec_plug are closed terms with
+   no realType, no bias, no hypothesis pack and no word length, and the three
+   proof fields quantify over the cut, not over a distribution on cuts. *)
+
+(** five_card_observed — the five-card observed execution.
+    @intent: five_card_profile with plug five_card_exec_plug at process offset
+    0, static observation five_card_content_obs and expected value the
+    conjunction of the committed pair. *)
+Definition five_card_observed : OE.ObservedExecution :=
+  OE.MkObservedExecution mpF five_card_exec_plug 0
+    five_card_content_obs (fun ab : bool * bool => ab.1 && ab.2)
+    five_card_oe_terminates five_card_oe_endpoints five_card_oe_static_recon.
+
+(** den_boer_observed — the den Boer observed execution.
+    @intent: the five-card observed execution; the den Boer member adds no
+    execution data to the five-card family.
+    Naming: intentional; the den Boer prefix names the protocol member, matching
+    den_boer_profile, and the body records that the member adds no execution
+    data. *)
+Definition den_boer_observed : OE.ObservedExecution := five_card_observed.
+
+(** den_boer_observed_core — the den Boer wrapper is the five-card observed
+    execution.
+    @main architecture: den_boer_observed = five_card_observed. *)
+Lemma den_boer_observed_core : den_boer_observed = five_card_observed.
+Proof. by []. Qed.
+
+(** five_card_observed_recovers — the packaged five-card run decodes to the
+    conjunction of the committed pair.
+    @main correctness: exec_decode of the executed endpoints of
+    five_card_observed at the committed pair x and cut w0 is x.1 && x.2, for any
+    cut w0 in the group. *)
+Theorem five_card_observed_recovers (x : bool * bool)
+    (w0 : pgg_gT FiveCardKim_M) (Hw0 : w0 \in pgg_G FiveCardKim_M) :
+  @exec_decode mpF five_card_exec_plug
+    (@exec_endpoints mpF five_card_exec_plug x w0 0)
+    (OE.oe_endpoints_size five_card_observed x w0) = x.1 && x.2.
+Proof. exact: (OE.oe_run_recovers five_card_observed x w0 Hw0). Qed.
 
 (******************************************************************************)
 (*     The den Boer sample space of the five-card instance                    *)

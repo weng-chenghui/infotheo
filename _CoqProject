@@ -138,6 +138,7 @@ pgg-smc/protocol/pgg_input_commitment.v
 pgg-smc/protocol/pgg_run.v
 pgg-smc/protocol/pgg_monodromy_profile.v
 pgg-smc/protocol/pgg_execution_plug.v
+pgg-smc/protocol/pgg_observed_execution.v
 pgg-smc/protocol/pgg_correctness.v
 pgg-smc/instances/abelian/pgg_abelian.v
 pgg-smc/instances/abelian/abelian_word_collapse.v
@@ -163,6 +164,7 @@ pgg-smc/instances/kim2025/kim_secrecy.v
 pgg-smc/instances/kim2025/kim_trace.v
 pgg-smc/instances/kim2025/kim_input_privacy.v
 pgg-smc/instances/kim2025/five_card_exec.v
+pgg-smc/instances/kim2025/five_card_models.v
 pgg-smc/protocol/card_protocol.v
 pgg-smc/protocol/card_protocol_posterior.v
 pgg-smc/protocol/pgg_uc_security.v
@@ -259,6 +261,7 @@ pgg-smc/instances/pgl27/pgl27_recovery.v
 pgg-smc/instances/pgl27/pgl27_mixing.v
 pgg-smc/instances/pgl27/pgl27_word_privacy.v
 pgg-smc/instances/pgl27/pgl27_exec.v
+pgg-smc/instances/pgl27/pgl27_models.v
 
 -R . infotheo
 -R pgg-smc/lib pgg_smc

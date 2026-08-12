@@ -17,6 +17,9 @@
 (*                                      starting position                     *)
 (*   pgl27_exec_player_raw_trace     == seat i's raw executed trace           *)
 (*   pgl27_exec_coalition_raw_trace  == a coalition's raw executed traces     *)
+(*   pgl27_observed                  == the ObservedExecution packing the     *)
+(*                                      plug, the static observation and the  *)
+(*                                      three run facts at process offset 0   *)
 (*   pgl27_sample                    == the exact sample adapter: the sample  *)
 (*                                      space bool * pgg_gT pgl27_M under     *)
 (*                                      pgl27P                                *)
@@ -38,6 +41,7 @@
 (*   pgl27_exec_seat_countE == the profile's seat index type is 'I_8          *)
 (*   pgl27_exec_raw_traceE  == the derived raw trace is the trace of          *)
 (*                             pgl27_procs at the seat's process identifier   *)
+(*   pgl27_observed_recovers == the packaged run decodes to the dealt secret  *)
 (*   pgl27_sample_seat_distE      == the executed seat distribution at pgl27P *)
 (*                                   is the distribution of the orbit share   *)
 (*                                   at the cut image of the seat's start     *)
@@ -69,7 +73,7 @@ Require Import smc_interpreter pismc smc_session_types.
 From pgg_smc Require Import pgg_interface pgg_session_types card_exchange_pismc.
 From pgg_smc Require Import pgg_input_commitment pgg_run pgg_monodromy_profile.
 From pgg_smc Require Import pgg_execution_plug pgg_weighted_words.
-From pgg_smc Require Import pgg_sample_adapter.
+From pgg_smc Require Import pgg_observed_execution pgg_sample_adapter.
 From pgg_reconstruct Require Import pgg_sharing_framework covering_scheme
                                     algebraic_rigidity input_encoding.
 From pgg_smc Require Import pgl27_group pgl27_scheme pgl27_profile pgl27_run.
@@ -298,6 +302,32 @@ Proof.
 by rewrite /pgl27_exec_player_raw_trace /exec_participant_trace /exec_seat_id
    /exec_run pgl27_exec_fuelE pgl27_exec_procsE.
 Qed.
+
+(******************************************************************************)
+(*     The packaged observed execution at pgl27_profile                       *)
+(******************************************************************************)
+
+(** pgl27_observed — the eight-card orbit observed execution.
+    @intent: pgl27_profile with plug pgl27_exec_plug at process offset 0, static
+    observation pgl27_content_obs and expected value the dealt secret; the three
+    run facts are pgl27_exec_terminates, pgl27_exec_endpoints and
+    pgl27_exec_recon, whose cut index is already the record's own offset and
+    whose quantifiers are already the record's forall over secret and cut. *)
+Definition pgl27_observed : OE.ObservedExecution :=
+  OE.MkObservedExecution mpP pgl27_exec_plug 0
+    pgl27_content_obs (fun b : bool => b)
+    pgl27_exec_terminates pgl27_exec_endpoints (@pgl27_exec_recon).
+
+(** pgl27_observed_recovers — the packaged eight-card orbit run decodes to the
+    dealt secret.
+    @main correctness: exec_decode of the executed endpoints of pgl27_observed
+    at secret s and cut w0 is s, for any cut w0 in the group. *)
+Theorem pgl27_observed_recovers (s : bool) (w0 : pgg_gT pgl27_M)
+    (Hw0 : w0 \in pgg_G pgl27_M) :
+  @exec_decode mpP pgl27_exec_plug
+    (@exec_endpoints mpP pgl27_exec_plug s w0 0)
+    (OE.oe_endpoints_size pgl27_observed s w0) = s.
+Proof. exact: (OE.oe_run_recovers pgl27_observed s w0 Hw0). Qed.
 
 (******************************************************************************)
 (*     The exact sample space of the eight-card orbit instance                *)
