@@ -25,6 +25,8 @@
 (*   sa_seat_dist            == layer 3: the law of seat i's endpoint         *)
 (*   sa_coalition_dist       == layer 3: the law of a coalition's reading     *)
 (*   sa_cut_dist             == layer 3: the law of the cut                   *)
+(*   sa_joint_dist           == layer 3: the joint law of the run argument    *)
+(*                              and the cut                                   *)
 (*   sa_cut_dist_image       == the law of the cut's permutation image        *)
 (*   sa_static_seat_view     == the static observation at seat i              *)
 (*   sa_static_coalition_view == the static observation over a coalition      *)
@@ -62,6 +64,40 @@ Import Prenex Implicits.
 
 Local Open Scope fdist_scope.
 Local Open Scope proba_scope.
+
+(******************************************************************************)
+(*     A product distribution under a map on its right factor                 *)
+(******************************************************************************)
+
+Section fdist_product_map.
+
+Variable R : realType.
+
+Local Open Scope ring_scope.
+
+(** fdistmap_prodr — the image of a product distribution under a map on its
+    second component is the product of the first factor with the mapped second
+    factor.
+    @main architecture: fdistmap (fun ab => (ab.1, g ab.2)) (Pa `x Q) =
+    Pa `x fdistmap g Q. *)
+Lemma fdistmap_prodr (A B C : finType)
+    (Pa : R.-fdist A) (Q : R.-fdist B) (g : B -> C) :
+  fdistmap (fun ab : A * B => (ab.1, g ab.2)) (Pa `x Q)
+  = (Pa `x (fdistmap g Q))%fdist.
+Proof.
+apply/fdist_ext => -[a c].
+rewrite fdistmapE fdist_prodE fdistmapE.
+rewrite (eq_big (fun a0 : A * B => (a0.1 == a) && (g a0.2 == c))
+                (fun a0 : A * B => Pa a0.1 * Q a0.2)); first last.
+- by move=> i _; rewrite fdist_prodE.
+- by case=> x y; rewrite !inE.
+rewrite (reindex_onto (fun b : B => (a, b)) snd) /=;
+  last by case=> x y /andP[] /= /eqP -> _.
+rewrite big_distrr /=; apply: eq_bigl => j.
+by rewrite !eqxx andbT andTb.
+Qed.
+
+End fdist_product_map.
 
 (******************************************************************************)
 (*     The sample adapter                                                     *)
@@ -155,6 +191,18 @@ Proof. by []. Qed.
     @intent: the pushforward of sa_sampleP along sa_cut. *)
 Definition sa_cut_dist : R.-fdist (pgg_gT (mp_M mp)) :=
   fdistmap sa.(sa_cut) sa.(sa_sampleP).
+
+(* The plug's run argument type ep_inputT is a Type, so the joint distribution
+   takes the argument reader as a parameter rather than reading sa_arg
+   directly: at an instance the reader is the adapter's own sa_arg, whose
+   codomain is then a concrete finType. *)
+
+(** sa_joint_dist — the joint distribution of the run argument and the cut.
+    @intent: the pushforward of sa_sampleP along u |-> (arg u, sa_cut u), at an
+    argument reader arg with finite codomain. *)
+Definition sa_joint_dist (argT : finType) (arg : sa_sampleT sa -> argT)
+    : R.-fdist (argT * pgg_gT (mp_M mp)) :=
+  fdistmap (fun u => (arg u, sa.(sa_cut) u)) sa.(sa_sampleP).
 
 (** sa_cut_dist_image — the law of the cut's permutation image.
     @intent: the pushforward of sa_cut_dist along the representation pgg_rho,

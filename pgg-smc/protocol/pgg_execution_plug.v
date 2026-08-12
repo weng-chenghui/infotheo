@@ -192,6 +192,12 @@ Definition exec_input_trace (x : ep_inputT e) (w0 : pgg_gT (mp_M mp))
     (P_idx : nat) (j : nat) :=
   nth [::] (exec_run x w0 P_idx).2 (exec_input_id j).
 
+(** exec_dealer_trace — the executed trace of the dealer.
+    @intent: entry exec_dealer_id of exec_run.2. *)
+Definition exec_dealer_trace (x : ep_inputT e) (w0 : pgg_gT (mp_M mp))
+    (P_idx : nat) :=
+  nth [::] (exec_run x w0 P_idx).2 exec_dealer_id.
+
 (** exec_coalition_trace — the coalition's executed raw traces.
     @intent: the finfun sending a seat in C to its executed trace and a seat
     outside C to the empty trace. *)
