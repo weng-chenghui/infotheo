@@ -234,6 +234,7 @@ pgg-smc/instances/s5/s5_secrecy.v
 pgg-smc/instances/s5/s5_trace.v
 pgg-smc/instances/s5/s5_exec.v
 pgg-smc/instances/s5/s5_models.v
+pgg-smc/instances/s5/s5_analysis.v
 pgg-smc/instances/denboer1989/denboer_trace.v
 pgg-smc/instances/s5x5/s5x5_mixing.v
 pgg-smc/instances/s5x5/rigidity_s5x5_instance.v
