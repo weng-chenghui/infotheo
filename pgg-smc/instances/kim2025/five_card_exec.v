@@ -633,10 +633,9 @@ Lemma five_card_exec_input_raw_traceE (a b : bool)
 Proof.
 rewrite /five_card_exec_input_raw_trace /exec_input_trace /exec_input_id
         /exec_run five_card_exec_fuelE five_card_exec_procsE.
-case: j => [|[|j]].
-- by rewrite /den_boer_procs; vm_compute.
-- by rewrite /den_boer_procs; vm_compute.
-- by apply: nth_default; rewrite five_card_exec_traces_size.
+case: j => [|[|j]];
+  last by apply: nth_default; rewrite five_card_exec_traces_size.
+all: by rewrite /den_boer_procs; vm_compute.
 Qed.
 
 (** five_card_exec_input_trace — committing party j's executed-row content
@@ -753,8 +752,7 @@ Lemma five_card_exec_dealer_pair_centropy0 :
 Proof.
 have -> : (fun w : five_card_leakage.Omega => w.1)
         = idfun `o five_card_exec_dealer_trace.
-  apply: funext => w; rewrite /comp_RV five_card_exec_dealer_traceE /=.
-  by case: w => -[a b] k.
+  by apply: funext => -[[a b] k]; rewrite /comp_RV five_card_exec_dealer_traceE.
 exact: centropy_RV_comp0.
 Qed.
 
@@ -769,8 +767,7 @@ Lemma five_card_exec_dealer_trace_centropy0 :
 Proof.
 have -> : Secret R
         = (fun p : bool * bool => p.1 && p.2) `o five_card_exec_dealer_trace.
-  apply: funext => w; rewrite /comp_RV five_card_exec_dealer_traceE /=.
-  by case: w => -[a b] k.
+  by apply: funext => -[[a b] k]; rewrite /comp_RV five_card_exec_dealer_traceE.
 exact: centropy_RV_comp0.
 Qed.
 
@@ -813,13 +810,10 @@ Variable W : R.-fdist 'I_m.+1.
 Lemma fdistmap_head1 :
   fdistmap (fun v : 'rV['I_m.+1]_1 => v ``_ ord0) (W `^ 1) = W.
 Proof.
-apply/fdist_ext => k; rewrite fdistmapE.
-rewrite (big_pred1 (\row_(_ < 1) k)); last first.
-  move=> v /=; rewrite !inE.
-  apply/idP/idP.
-    by move/eqP => H; apply/eqP/rowP => i; rewrite (ord1 i) mxE.
-  by move/eqP => ->; rewrite mxE.
-by rewrite fdist_rV1 mxE.
+apply/fdist_ext => k; rewrite fdistmapE big_mkcond /=.
+under eq_bigr do rewrite fdist_rV1 inE /=.
+apply: (bigop_ext.big_rV1_ord0 (f := fun j => if j == k then W j else 0)).
+by rewrite -big_mkcond big_pred1_eq.
 Qed.
 
 (** rho_from_words_weighted1 — the word shuffle at word length 1 is the image
