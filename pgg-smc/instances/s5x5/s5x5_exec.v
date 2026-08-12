@@ -79,6 +79,12 @@
 (*   s5x5_rand_run_recovers == reconstruction returns the combined pile       *)
 (*                          secrets                                           *)
 (*   s5x5_rand_endpoint_count == the randomized run collects ten endpoints    *)
+(*   s5x5_joint_tape_secretE == the pair of pile secrets is the joint        *)
+(*                          product secret of the landed secrecy results      *)
+(*   s5x5_decodecK       == the codec identifies the pile pair with the       *)
+(*                          profile secret carrier at every profile secret    *)
+(*   s5x5_codecK_partial == the reverse identification holds exactly on the   *)
+(*                          pile pairs whose combination does not wrap        *)
 (*   s5x5_combine_not_injectiveE == the profile secret combination collapses  *)
 (*                          two distinct pile pairs                           *)
 (*   s5x5_rand_exec_recovers == the randomized run decodes to the combined    *)
@@ -371,7 +377,7 @@ Proof. by []. Qed.
 Definition s5x5_p1_idx (i : 'I_5) : 'I_10 := widen_ord (isT : (5 <= 10)%N) i.
 
 (** s5x5_p1_idx_val — the seat of pile-1 party i has value i.
-    @composes: s5x5_pile1_sharesE *)
+    @composes: s5x5_p1_map_inj *)
 Lemma s5x5_p1_idx_val (i : 'I_5) : s5x5_p1_idx i = i :> nat.
 Proof. by []. Qed.
 
@@ -386,12 +392,12 @@ Proof. by rewrite -[10]/(5 + 5) ltn_add2l; exact: ltn_ord. Qed.
 Definition s5x5_p2_idx (i : 'I_5) : 'I_10 := Ordinal (s5x5_p2_idx_lt i).
 
 (** s5x5_p2_idx_val — the seat of pile-2 party i has value 5 + i.
-    @composes: s5x5_pile2_sharesE *)
+    @composes: s5x5_p2_idx_ge, s5x5_p2_map_inj *)
 Lemma s5x5_p2_idx_val (i : 'I_5) : s5x5_p2_idx i = (5 + i)%N :> nat.
 Proof. by []. Qed.
 
 (** s5x5_p2_idx_ge — the seat of pile-2 party i lies in the upper half.
-    @composes: s5x5_pile2_layoutE *)
+    @composes: s5x5_p2_stab *)
 Lemma s5x5_p2_idx_ge (i : 'I_5) : (5 <= s5x5_p2_idx i)%N.
 Proof. by rewrite s5x5_p2_idx_val leq_addr. Qed.
 
@@ -509,7 +515,7 @@ by rewrite leqNgt.
 Qed.
 
 (** s5x5_p2_stab_sub — the offset image of a pile-2 seat is a pile index.
-    @composes: s5x5_p2_map_inj, s5x5_pile2_layoutE *)
+    @composes: s5x5_p2_map_inj *)
 Lemma s5x5_p2_stab_sub (w0 : pgg_gT s5x5_M) (Hw0 : w0 \in pgg_G s5x5_M)
     (i : 'I_5) : (@pgg_rho s5x5_M w0 (s5x5_p2_idx i) - 5 < 5)%N.
 Proof.
@@ -905,7 +911,9 @@ Definition s5x5_joint_tape_secret (uv : ('rV['Z_5]_5 * 'rV['Z_5]_5)%type)
 
 (** s5x5_joint_tape_secretE — the pair of pile secrets is the trace file's
     joint product secret, at every realType.
-    @composes: s5x5_rand_observed *)
+    @main architecture: JointSecret R = s5x5_joint_tape_secret, the equation
+    identifying the run argument's two secret coordinates with the secret of
+    the landed product secrecy results. *)
 Lemma s5x5_joint_tape_secretE (R : realType) :
   JointSecret R = s5x5_joint_tape_secret.
 Proof. by []. Qed.
@@ -922,7 +930,9 @@ Definition s5x5_decodec (s : 'I_10) : ('Z_5 * 'Z_5)%type :=
   @split_secret 3 3 s.
 
 (** s5x5_decodecK — encoding cancels decoding on the whole profile carrier.
-    @composes: s5x5_rand_observed *)
+    @main architecture: cancel s5x5_decodec s5x5_codec, the half of the
+    identity between the pile pair and the profile secret carrier that holds
+    at every profile secret. *)
 Lemma s5x5_decodecK : cancel s5x5_decodec s5x5_codec.
 Proof.
 by move=> s; rewrite /s5x5_codec /s5x5_decodec; exact: (@combine_splitK 3 3 s).
@@ -930,7 +940,9 @@ Qed.
 
 (** s5x5_codecK_partial — decoding cancels encoding exactly on the pile pairs
     whose combination does not wrap.
-    @composes: s5x5_rand_observed *)
+    @main architecture: the other half of that identity holds exactly under
+    val z.1 + 5 * val z.2 < 10, which is the boundary of the codec's
+    injectivity. *)
 Lemma s5x5_codecK_partial (z : ('Z_5 * 'Z_5)%type) :
   (val z.1 + 5 * val z.2 < 10)%N -> s5x5_decodec (s5x5_codec z) = z.
 Proof.
