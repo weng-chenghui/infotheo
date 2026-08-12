@@ -252,6 +252,7 @@ pgg-smc/instances/abelian/rigidity_abelian_instance.v
 pgg-smc/instances/abelian/abel_profile.v
 pgg-smc/instances/abelian/abelian_exec.v
 pgg-smc/instances/abelian/abelian_models.v
+pgg-smc/instances/abelian/abelian_analysis.v
 pgg-smc/instances/kim2025/rigidity_kim_instance.v
 pgg-smc/reconstruct/pgg_landscape_demo.v
 pgg-smc/reconstruct/pgl_bound.v
