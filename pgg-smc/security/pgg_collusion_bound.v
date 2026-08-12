@@ -64,7 +64,8 @@ Context {R : realType}.
 Variables (A B : finType).
 
 (* WARNING: DPI is too loose for spectral convergence analysis.           *)
-(* For the spectral path to SecurityWitness, use SchreierCertificate      *)
+(* For the spectral path to a ShuffleMarginalBound, use                   *)
+(* SchreierCertificate                                                    *)
 (* (pgg_schreier.v) which bounds var_dist on 'I_N directly with          *)
 (* prefactor sqrt(N), avoiding the sqrt(|G|) blowup from projecting      *)
 (* through G. DPI remains valid for collusion_bound_unconditional        *)
@@ -1154,6 +1155,46 @@ by rewrite ler_nat leq_sub2l.
 Qed.
 
 End endpoint_image_bound.
+
+(******************************************************************************)
+(*     Section 8: Transfer of a pushforward equality along a close prior      *)
+(*                                                                            *)
+(* Two readers of a distribution P that agree on a nearby ideal               *)
+(* distribution Q stay close on P itself. The bound is a triangle             *)
+(* inequality through the ideal distribution with a data-processing step      *)
+(* on each half.                                                              *)
+(******************************************************************************)
+
+(** var_dist_refl — the variation distance of a distribution to itself is zero.
+    @composes: var_dist_fdistmap_transfer *)
+Lemma var_dist_refl (R : realType) (A : finType) (P : R.-fdist A) :
+  var_dist P P = 0.
+Proof. by rewrite /var_dist big1 // => a _; rewrite subrr normr0. Qed.
+
+Section var_dist_transfer.
+Variables (R : realType) (A B : finType) (P Q : R.-fdist A).
+Variables (fx fy : A -> B) (delta : R).
+Hypothesis HPQ : var_dist P Q <= delta.
+Hypothesis Hideal : fdistmap fx Q = fdistmap fy Q.
+
+(** var_dist_fdistmap_transfer — two readers of a distribution P within delta
+    of Q, whose pushforwards along Q are equal, have pushforwards along P
+    within delta + delta.
+    @main architecture: var_dist (fdistmap fx P) (fdistmap fy P) <= delta +
+    delta, for var_dist P Q <= delta and fdistmap fx Q = fdistmap fy Q. *)
+Lemma var_dist_fdistmap_transfer :
+  var_dist (fdistmap fx P) (fdistmap fy P) <= delta + delta.
+Proof.
+apply: (Order.POrderTheory.le_trans (var_dist_triangle _ (fdistmap fx Q) _)).
+apply: lerD.
+- apply: (Order.POrderTheory.le_trans (var_dist_fdistmap _ _ _)); exact: HPQ.
+- rewrite Hideal symmetric_var_dist.
+  apply: (Order.POrderTheory.le_trans (var_dist_fdistmap _ _ _)); exact: HPQ.
+Qed.
+
+End var_dist_transfer.
+
+Arguments var_dist_fdistmap_transfer : clear implicits.
 
 Check collusion_bound.
 Check collusion_bound_unconditional.
