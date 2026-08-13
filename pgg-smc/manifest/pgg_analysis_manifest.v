@@ -45,7 +45,7 @@
 (* functional_extensionality_dep and constructive_indefinite_description is   *)
 (* the repository baseline, inherited from boolp through the infotheo         *)
 (* probability layer. It is NOT listed in an assumption status. A row is      *)
-(* KernelClosed when Print Assumptions reports the trio and nothing else, and *)
+(* BaselineClassicalOnly when Print Assumptions reports the trio and nothing else, and *)
 (* AcceptsAxioms when it reports named repository assumptions beyond it. The  *)
 (* three constructors of PggAxiom are the only such assumptions, and a status *)
 (* covers the public results of the path, not only the values the row stores. *)
@@ -123,7 +123,7 @@ Local Open Scope ring_scope.
 (*                          the group already |                               *)
 (* | completion level     | AnalysisBridged |                                 *)
 (* | transfer status      | StaticExecutedOnly |                              *)
-(* | assumption status    | KernelClosed |                                    *)
+(* | assumption status    | BaselineClassicalOnly |                                    *)
 (* | typed row            | pgl27_row_exact |                                 *)
 (*                                                                            *)
 (* Capabilities, one line per (theorem, distribution, observer, notion):      *)
@@ -188,7 +188,7 @@ Local Open Scope ring_scope.
 (*                          inequality needs, on the cut carrier itself |     *)
 (* | completion level     | AnalysisBridged |                                 *)
 (* | transfer status      | IdealFinite |                                     *)
-(* | assumption status    | KernelClosed |                                    *)
+(* | assumption status    | BaselineClassicalOnly |                                    *)
 (* | typed row            | pgl27_row_word |                                  *)
 (*                                                                            *)
 (* | theorem | distribution | observer | notion |                             *)
@@ -252,7 +252,7 @@ Local Open Scope ring_scope.
 (*                          development does not supply |                     *)
 (* | completion level     | AnalysisBridged |                                 *)
 (* | transfer status      | StaticExecutedOnly |                              *)
-(* | assumption status    | KernelClosed |                                    *)
+(* | assumption status    | BaselineClassicalOnly |                                    *)
 (* | typed row            | five_card_row_uniform |                           *)
 (*                                                                            *)
 (* | theorem | distribution | observer | notion |                             *)
@@ -310,7 +310,7 @@ Local Open Scope ring_scope.
 (* | missing premise      | the ideal distribution equality, as in row 3 |    *)
 (* | completion level     | AnalysisBridged |                                 *)
 (* | transfer status      | StaticExecutedOnly |                              *)
-(* | assumption status    | KernelClosed |                                    *)
+(* | assumption status    | BaselineClassicalOnly |                                    *)
 (* | typed row            | five_card_row_biased |                            *)
 (*                                                                            *)
 (* | theorem | distribution | observer | notion |                             *)
@@ -364,7 +364,7 @@ Local Open Scope ring_scope.
 (*                          either model |                                    *)
 (* | completion level     | Sampled |                                         *)
 (* | transfer status      | NoModelComparison |                               *)
-(* | assumption status    | KernelClosed |                                    *)
+(* | assumption status    | BaselineClassicalOnly |                                    *)
 (* | typed row            | five_card_row_repeated |                          *)
 (*                                                                            *)
 (* | theorem | distribution | observer | notion |                             *)
@@ -844,7 +844,7 @@ Local Open Scope ring_scope.
 (* | missing premise      | not applicable: the path names no model |         *)
 (* | completion level     | Observed |                                        *)
 (* | transfer status      | NoModelComparison |                               *)
-(* | assumption status    | KernelClosed |                                    *)
+(* | assumption status    | BaselineClassicalOnly |                                    *)
 (* | typed row            | abel_row_recovery |                               *)
 (*                                                                            *)
 (* | theorem | distribution | observer | notion |                             *)
@@ -883,7 +883,7 @@ Local Open Scope ring_scope.
 (*                          the models of the same plug being row 17's |      *)
 (* | completion level     | Observed |                                        *)
 (* | transfer status      | NoModelComparison |                               *)
-(* | assumption status    | KernelClosed |                                    *)
+(* | assumption status    | BaselineClassicalOnly |                                    *)
 (* | typed row            | abel_row_identity |                               *)
 (*                                                                            *)
 (* | theorem | distribution | observer | notion |                             *)
@@ -942,7 +942,7 @@ Local Open Scope ring_scope.
 (*                          conclusion excludes any bound below one |         *)
 (* | completion level     | AnalysisBridged |                                 *)
 (* | transfer status      | NegativeTransfer |                                *)
-(* | assumption status    | KernelClosed |                                    *)
+(* | assumption status    | BaselineClassicalOnly |                                    *)
 (* | typed row            | abel_row_limitation |                             *)
 (*                                                                            *)
 (* | theorem | distribution | observer | notion |                             *)
@@ -1081,7 +1081,7 @@ Record AnalysisPathRow := MkAnalysisPathRow {
 Definition pgl27_row_exact : AnalysisPathRow :=
   @MkAnalysisPathRow PGL27Analysis.observed
     (fun R => Some (PGL27Analysis.exact_sample R))
-    AnalysisBridged StaticExecutedOnly KernelClosed.
+    AnalysisBridged StaticExecutedOnly BaselineClassicalOnly.
 
 (** pgl27_row_word — row 2: the same instance under its two-hundred-letter
     word shuffle.
@@ -1091,7 +1091,7 @@ Definition pgl27_row_exact : AnalysisPathRow :=
     secret rather than fixing one. *)
 Definition pgl27_row_word : AnalysisPathRow :=
   @MkAnalysisPathRow PGL27Analysis.observed (fun _ => None)
-    AnalysisBridged IdealFinite KernelClosed.
+    AnalysisBridged IdealFinite BaselineClassicalOnly.
 
 (** five_card_row_uniform — row 3: the five-card development under the uniform
     rotation cut.
@@ -1100,7 +1100,7 @@ Definition pgl27_row_word : AnalysisPathRow :=
 Definition five_card_row_uniform : AnalysisPathRow :=
   @MkAnalysisPathRow FiveCardAnalysis.observed
     (fun R => Some (FiveCardAnalysis.uniform_sample R))
-    AnalysisBridged StaticExecutedOnly KernelClosed.
+    AnalysisBridged StaticExecutedOnly BaselineClassicalOnly.
 
 (** five_card_row_biased — row 4: the same development under one biased cut.
     @intent: the observed execution of that development, the single-biased
@@ -1113,7 +1113,7 @@ Definition five_card_row_biased : AnalysisPathRow :=
     (fun R => Some (@FiveCardAnalysis.single_biased_sample R (1 / 100)
                       (five_card_kim.kim_centi_lt R)
                       (five_card_kim.kim_centi_gt R)))
-    AnalysisBridged StaticExecutedOnly KernelClosed.
+    AnalysisBridged StaticExecutedOnly BaselineClassicalOnly.
 
 (** five_card_row_repeated — row 5: the same development under repeated biased
     cuts.
@@ -1122,7 +1122,7 @@ Definition five_card_row_biased : AnalysisPathRow :=
 Definition five_card_row_repeated : AnalysisPathRow :=
   @MkAnalysisPathRow FiveCardAnalysis.observed
     (fun R => Some (FiveCardAnalysis.centi_sample R))
-    Sampled NoModelComparison KernelClosed.
+    Sampled NoModelComparison BaselineClassicalOnly.
 
 (** s5_row_det — row 6: the five-seat S_5 instance dealing a position.
     @intent: the deterministic observed execution of that instance and the
@@ -1204,7 +1204,7 @@ Definition s5x5_row_pile2_limitation : AnalysisPathRow :=
     statuses of row 15. *)
 Definition abel_row_recovery : AnalysisPathRow :=
   @MkAnalysisPathRow AbelianAnalysis.observed (fun _ => None)
-    Observed NoModelComparison KernelClosed.
+    Observed NoModelComparison BaselineClassicalOnly.
 
 (** abel_row_identity — row 16: the same instance dealing identity card
     content.
@@ -1213,7 +1213,7 @@ Definition abel_row_recovery : AnalysisPathRow :=
     17. *)
 Definition abel_row_identity : AnalysisPathRow :=
   @MkAnalysisPathRow AbelianAnalysis.shuffle_observed (fun _ => None)
-    Observed NoModelComparison KernelClosed.
+    Observed NoModelComparison BaselineClassicalOnly.
 
 (** abel_row_limitation — row 17: the fixed-length mixing limitation of that
     instance.
@@ -1224,7 +1224,7 @@ Definition abel_row_identity : AnalysisPathRow :=
 Definition abel_row_limitation : AnalysisPathRow :=
   @MkAnalysisPathRow AbelianAnalysis.shuffle_observed
     (fun R => Some (AbelianAnalysis.ideal_sample R))
-    AnalysisBridged NegativeTransfer KernelClosed.
+    AnalysisBridged NegativeTransfer BaselineClassicalOnly.
 
 (******************************************************************************)
 (*     The deterministic checker: eight-card orbit instance                   *)
@@ -2540,12 +2540,12 @@ Timeout 60 Check (AbelianAnalysis.executed_observation_distance :
 Timeout 60 Check (pgl27_row_exact : AnalysisPathRow).
 Timeout 60 Check (erefl : apr_completion pgl27_row_exact = AnalysisBridged).
 Timeout 60 Check (erefl : apr_transfer pgl27_row_exact = StaticExecutedOnly).
-Timeout 60 Check (erefl : apr_assumptions pgl27_row_exact = KernelClosed).
+Timeout 60 Check (erefl : apr_assumptions pgl27_row_exact = BaselineClassicalOnly).
 
 Timeout 60 Check (pgl27_row_word : AnalysisPathRow).
 Timeout 60 Check (erefl : apr_completion pgl27_row_word = AnalysisBridged).
 Timeout 60 Check (erefl : apr_transfer pgl27_row_word = IdealFinite).
-Timeout 60 Check (erefl : apr_assumptions pgl27_row_word = KernelClosed).
+Timeout 60 Check (erefl : apr_assumptions pgl27_row_word = BaselineClassicalOnly).
 
 Timeout 60 Check (five_card_row_uniform : AnalysisPathRow).
 Timeout 60 Check
@@ -2553,7 +2553,7 @@ Timeout 60 Check
 Timeout 60 Check
   (erefl : apr_transfer five_card_row_uniform = StaticExecutedOnly).
 Timeout 60 Check
-  (erefl : apr_assumptions five_card_row_uniform = KernelClosed).
+  (erefl : apr_assumptions five_card_row_uniform = BaselineClassicalOnly).
 
 Timeout 60 Check (five_card_row_biased : AnalysisPathRow).
 Timeout 60 Check
@@ -2561,14 +2561,14 @@ Timeout 60 Check
 Timeout 60 Check
   (erefl : apr_transfer five_card_row_biased = StaticExecutedOnly).
 Timeout 60 Check
-  (erefl : apr_assumptions five_card_row_biased = KernelClosed).
+  (erefl : apr_assumptions five_card_row_biased = BaselineClassicalOnly).
 
 Timeout 60 Check (five_card_row_repeated : AnalysisPathRow).
 Timeout 60 Check (erefl : apr_completion five_card_row_repeated = Sampled).
 Timeout 60 Check
   (erefl : apr_transfer five_card_row_repeated = NoModelComparison).
 Timeout 60 Check
-  (erefl : apr_assumptions five_card_row_repeated = KernelClosed).
+  (erefl : apr_assumptions five_card_row_repeated = BaselineClassicalOnly).
 
 Timeout 60 Check (s5_row_det : AnalysisPathRow).
 Timeout 60 Check (erefl : apr_completion s5_row_det = Observed).
@@ -2631,14 +2631,14 @@ Timeout 60 Check (erefl : apr_assumptions s5x5_row_pile2_limitation
 Timeout 60 Check (abel_row_recovery : AnalysisPathRow).
 Timeout 60 Check (erefl : apr_completion abel_row_recovery = Observed).
 Timeout 60 Check (erefl : apr_transfer abel_row_recovery = NoModelComparison).
-Timeout 60 Check (erefl : apr_assumptions abel_row_recovery = KernelClosed).
+Timeout 60 Check (erefl : apr_assumptions abel_row_recovery = BaselineClassicalOnly).
 
 Timeout 60 Check (abel_row_identity : AnalysisPathRow).
 Timeout 60 Check (erefl : apr_completion abel_row_identity = Observed).
 Timeout 60 Check (erefl : apr_transfer abel_row_identity = NoModelComparison).
-Timeout 60 Check (erefl : apr_assumptions abel_row_identity = KernelClosed).
+Timeout 60 Check (erefl : apr_assumptions abel_row_identity = BaselineClassicalOnly).
 
 Timeout 60 Check (abel_row_limitation : AnalysisPathRow).
 Timeout 60 Check (erefl : apr_completion abel_row_limitation = AnalysisBridged).
 Timeout 60 Check (erefl : apr_transfer abel_row_limitation = NegativeTransfer).
-Timeout 60 Check (erefl : apr_assumptions abel_row_limitation = KernelClosed).
+Timeout 60 Check (erefl : apr_assumptions abel_row_limitation = BaselineClassicalOnly).

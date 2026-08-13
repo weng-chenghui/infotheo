@@ -57,7 +57,10 @@ Inductive PggAxiom : Set :=
   | AxS5GroupOrder     (* s5_group_order_eq *)
   | AxS5x5GroupOrder.  (* s5x5_group_order_eq *)
 
-(* Assumptions a public value accepts: none beyond the ambient classical
-   axioms, or the exact list of named assumptions Print Assumptions reports. *)
+(* Assumptions a public value accepts. BaselineClassicalOnly means no
+   accepted assumption beyond the repository's documented boolp classical
+   trio; AcceptsAxioms xs means the boolp trio plus exactly the named
+   repository assumptions in xs. The trio is the ambient baseline of the
+   whole repository and is deliberately not a PggAxiom constructor. *)
 Inductive AssumptionStatus : Set :=
-  | KernelClosed | AcceptsAxioms of seq PggAxiom.
+  | BaselineClassicalOnly | AcceptsAxioms of seq PggAxiom.
