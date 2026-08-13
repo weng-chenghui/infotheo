@@ -93,6 +93,7 @@ From mathcomp Require Import ssreflect ssrbool ssrfun eqtype ssrnat seq.
 From mathcomp Require Import div fintype tuple finfun finset fingroup perm.
 From mathcomp Require Import morphism action bigop order ssrnum ssralg.
 From mathcomp Require Import boolp reals zmodp matrix.
+From mathcomp Require Import lra.
 From infotheo Require Import realType_ext realType_ln fdist proba entropy.
 From infotheo Require Import variation_dist.
 Require Import smc_interpreter pismc smc_session_types.
@@ -893,6 +894,501 @@ Fail Check (fun s : 'I_5 =>
          (Num.sqrt 5%:R * s5_lazy_alpha_R R ^+ L)%R)).
 
 End s5x5_sample_layers.
+
+(******************************************************************************)
+(*     Executed endpoint bounds against the encoder-image pile ideals         *)
+(*                                                                            *)
+(* Amended work package A (user-approved 2026-08-13): the executed seat      *)
+(* readings are compared with the encoder-image pile ideals, not with        *)
+(* uniform. The uniform-ideal forms are false for this plug's deterministic  *)
+(* encoder; their compiled refutations are recorded in the 2026-08-13        *)
+(* completion response. The floors against global uniform transport the      *)
+(* ideals' support confinement, and hold unconditionally with constant one   *)
+(* by the same confinement at the executed observer.                         *)
+(******************************************************************************)
+
+Section s5x5_exec_ideal.
+
+Variable R : realType.
+Let mpX : MonodromyProfile := s5x5_profile.
+
+Local Open Scope ring_scope.
+
+(** s5x5_ideal_pile1_reading — the first-pile encoder-image ideal reading:
+    the content a first-pile seat reads when its pile position is exactly
+    uniform, mixed over the secret prior.
+    @intent: the pushforward of secretP times the uniform pile position
+    along the product encoder; neither uniform nor secret-independent. *)
+Definition s5x5_ideal_pile1_reading (secretP : R.-fdist 'I_10)
+    : R.-fdist 'I_10 :=
+  fdistmap (fun sq : 'I_10 * 'I_5 =>
+              tnth (ts_encode s5x5_scheme sq.1) (widen5to10 sq.2))
+    (secretP `x (fdist_uniform (card_ord 5))).
+
+(** s5x5_ideal_pile2_reading — the second-pile encoder-image ideal reading.
+    @intent: the pushforward of secretP times the uniform pile position
+    along the product encoder at second-pile positions. *)
+Definition s5x5_ideal_pile2_reading (secretP : R.-fdist 'I_10)
+    : R.-fdist 'I_10 :=
+  fdistmap (fun sq : 'I_10 * 'I_5 =>
+              tnth (ts_encode s5x5_scheme sq.1) (rshift5to10 sq.2))
+    (secretP `x (fdist_uniform (card_ord 5))).
+
+(** s5x5_ideal_seat_reading — the seat's own pile's encoder-image ideal
+    reading.
+    @intent: the first-pile ideal at a first-pile seat, the second-pile
+    ideal otherwise. *)
+Definition s5x5_ideal_seat_reading (secretP : R.-fdist 'I_10)
+    (i : 'I_(pi_T' (mp_PI mpX)).+1) : R.-fdist 'I_10 :=
+  if (val i < 5)%N then s5x5_ideal_pile1_reading secretP
+  else s5x5_ideal_pile2_reading secretP.
+
+(** prod_encode_pile1_lt — the product encoder carries a first-pile
+    position to a first-pile content value, for every secret.
+    @composes: s5x5_ideal_pile1_uniform_ge *)
+Lemma prod_encode_pile1_lt (s : 'I_10) (j : 'I_10) : (val j < 5)%N ->
+  (val (tnth (ts_encode s5x5_scheme s) j) < 5)%N.
+Proof.
+move=> Hj; rewrite /= tnth_mktuple Hj.
+by set y := tnth _ _; exact: (ltn_ord y).
+Qed.
+
+(** prod_encode_pile2_ge — the product encoder carries a second-pile
+    position to a second-pile content value, for every secret.
+    @composes: s5x5_ideal_pile2_uniform_ge *)
+Lemma prod_encode_pile2_ge (s : 'I_10) (j : 'I_10) : (val j < 5)%N = false ->
+  (5 <= val (tnth (ts_encode s5x5_scheme s) j))%N.
+Proof.
+move=> Hj; rewrite /= tnth_mktuple Hj.
+by set y := tnth _ _; exact: leq_addr.
+Qed.
+
+(** s5x5_exec_pile1_bound — executed endpoint marginal mixing, conditional
+    on the trusted analytical certificate s5_rayleigh_Q2_R.
+    @main bound: the variation distance, in the repository's full-L1
+    convention, between sa_seat_dist of the interpreter-executed
+    finite-word adapter at one first-pile seat and the first-pile
+    encoder-image ideal reading is at most sqrt 5 times the lazy
+    coefficient to the power L. One endpoint marginal; the ideal is
+    neither uniform nor secret-independent; no coalition, privacy, secrecy
+    or leakage conclusion is claimed. *)
+Lemma s5x5_exec_pile1_bound (secretP : R.-fdist 'I_10) (L : nat)
+    (s : 'I_5) :
+  var_dist
+    (@sa_seat_dist R mpX s5x5_exec_plug (s5x5_word_sample secretP L) 0
+       (widen5to10 s : 'I_(pi_T' (mp_PI mpX)).+1))
+    (s5x5_ideal_pile1_reading secretP)
+  <= Num.sqrt 5%:R * (s5_lazy_alpha_R R) ^+ L.
+Proof.
+have Hsp : sa_sampleP (s5x5_word_sample secretP L)
+         = (secretP `x (@word_uniform R 7 L))%fdist by [].
+have Hview : @sa_seat_view R mpX s5x5_exec_plug (s5x5_word_sample secretP L) 0
+               (widen5to10 s : 'I_(pi_T' (mp_PI mpX)).+1)
+  = (fun u : ('I_10 * L.-tuple 'I_8)%type =>
+       tnth (ts_encode s5x5_scheme u.1)
+         (@word_eval s5x5_M L u.2 (widen5to10 s))).
+  apply: boolp.funext => u.
+  by rewrite /sa_seat_view /= s5x5_exec_seat_endpointE /s5x5_content_obs /=
+             tnth_ord_tuple.
+rewrite /sa_seat_dist Hview Hsp /s5x5_ideal_pile1_reading.
+apply: (@var_dist_fdistmap_prod_mix R _ _ _ _ secretP _ _
+          (fun (a : 'I_10) (w : L.-tuple 'I_8) =>
+             tnth (ts_encode s5x5_scheme a)
+               (@word_eval s5x5_M L w (widen5to10 s)))
+          (fun (a : 'I_10) (q : 'I_5) =>
+             tnth (ts_encode s5x5_scheme a) (widen5to10 q)) _) => a.
+have E1 : fdistmap (fun w : L.-tuple 'I_8 =>
+             tnth (ts_encode s5x5_scheme a)
+               (@word_eval s5x5_M L w (widen5to10 s))) (@word_uniform R 7 L)
+        = fdistmap (fun c : 'I_10 => tnth (ts_encode s5x5_scheme a) c)
+            (fdistmap (fun sigma : {perm 'I_10} => sigma (widen5to10 s))
+               (@rho_from_words R 8 7 L s5x5_gen_tuple)).
+  by rewrite fdistmap_comp /rho_from_words fdistmap_comp.
+have E2 : fdistmap (fun q : 'I_5 =>
+             tnth (ts_encode s5x5_scheme a) (widen5to10 q))
+            (fdist_uniform (card_ord 5))
+        = fdistmap (fun c : 'I_10 => tnth (ts_encode s5x5_scheme a) c)
+            (fdist_uniform_pile1 R).
+  by rewrite /fdist_uniform_pile1 fdistmap_comp.
+rewrite E1 E2.
+apply: (le_trans (var_dist_fdistmap _ _ _)).
+exact: s5x5_pile1_TV_bound.
+Qed.
+
+(** s5x5_exec_pile2_bound — the second-pile executed endpoint marginal
+    mixing bound, conditional on s5_rayleigh_Q2_R.
+    @main bound: the second-pile mirror of s5x5_exec_pile1_bound, at the
+    second-pile encoder-image ideal reading. *)
+Lemma s5x5_exec_pile2_bound (secretP : R.-fdist 'I_10) (L : nat)
+    (s : 'I_5) :
+  var_dist
+    (@sa_seat_dist R mpX s5x5_exec_plug (s5x5_word_sample secretP L) 0
+       (rshift5to10 s : 'I_(pi_T' (mp_PI mpX)).+1))
+    (s5x5_ideal_pile2_reading secretP)
+  <= Num.sqrt 5%:R * (s5_lazy_alpha_R R) ^+ L.
+Proof.
+have Hsp : sa_sampleP (s5x5_word_sample secretP L)
+         = (secretP `x (@word_uniform R 7 L))%fdist by [].
+have Hview : @sa_seat_view R mpX s5x5_exec_plug (s5x5_word_sample secretP L) 0
+               (rshift5to10 s : 'I_(pi_T' (mp_PI mpX)).+1)
+  = (fun u : ('I_10 * L.-tuple 'I_8)%type =>
+       tnth (ts_encode s5x5_scheme u.1)
+         (@word_eval s5x5_M L u.2 (rshift5to10 s))).
+  apply: boolp.funext => u.
+  by rewrite /sa_seat_view /= s5x5_exec_seat_endpointE /s5x5_content_obs /=
+             tnth_ord_tuple.
+rewrite /sa_seat_dist Hview Hsp /s5x5_ideal_pile2_reading.
+apply: (@var_dist_fdistmap_prod_mix R _ _ _ _ secretP _ _
+          (fun (a : 'I_10) (w : L.-tuple 'I_8) =>
+             tnth (ts_encode s5x5_scheme a)
+               (@word_eval s5x5_M L w (rshift5to10 s)))
+          (fun (a : 'I_10) (q : 'I_5) =>
+             tnth (ts_encode s5x5_scheme a) (rshift5to10 q)) _) => a.
+have E1 : fdistmap (fun w : L.-tuple 'I_8 =>
+             tnth (ts_encode s5x5_scheme a)
+               (@word_eval s5x5_M L w (rshift5to10 s))) (@word_uniform R 7 L)
+        = fdistmap (fun c : 'I_10 => tnth (ts_encode s5x5_scheme a) c)
+            (fdistmap (fun sigma : {perm 'I_10} => sigma (rshift5to10 s))
+               (@rho_from_words R 8 7 L s5x5_gen_tuple)).
+  by rewrite fdistmap_comp /rho_from_words fdistmap_comp.
+have E2 : fdistmap (fun q : 'I_5 =>
+             tnth (ts_encode s5x5_scheme a) (rshift5to10 q))
+            (fdist_uniform (card_ord 5))
+        = fdistmap (fun c : 'I_10 => tnth (ts_encode s5x5_scheme a) c)
+            (fdist_uniform_pile2 R).
+  by rewrite /fdist_uniform_pile2 fdistmap_comp.
+rewrite E1 E2.
+apply: (le_trans (var_dist_fdistmap _ _ _)).
+exact: s5x5_pile2_TV_bound.
+Qed.
+
+(** s5x5_exec_seat_bound — the per-seat executed endpoint marginal mixing
+    bound against the seat's own pile's encoder-image ideal reading,
+    conditional on s5_rayleigh_Q2_R.
+    @main bound: at every seat, the executed reading is within sqrt 5 times
+    the lazy coefficient to the power L of the seat's pile ideal; the
+    refuted global-uniform target is deliberately not reproduced. *)
+Lemma s5x5_exec_seat_bound (secretP : R.-fdist 'I_10) (L : nat)
+    (i : 'I_(pi_T' (mp_PI mpX)).+1) :
+  var_dist
+    (@sa_seat_dist R mpX s5x5_exec_plug (s5x5_word_sample secretP L) 0 i)
+    (s5x5_ideal_seat_reading secretP i)
+  <= Num.sqrt 5%:R * (s5_lazy_alpha_R R) ^+ L.
+Proof.
+rewrite /s5x5_ideal_seat_reading.
+case: ifP => Hi.
+  have -> : i = (widen5to10 (Ordinal Hi) : 'I_(pi_T' (mp_PI mpX)).+1).
+    by apply: val_inj.
+  exact: s5x5_exec_pile1_bound.
+have Hi5 : (5 <= val i)%N by rewrite leqNgt Hi.
+have Hi' : (val i - 5 < 5)%N by rewrite ltn_subLR //; exact: ltn_ord.
+have -> : i = (rshift5to10 (Ordinal Hi') : 'I_(pi_T' (mp_PI mpX)).+1).
+  by apply: val_inj => /=; rewrite subnK.
+exact: s5x5_exec_pile2_bound.
+Qed.
+
+(** s5x5_ideal_pile1_uniform_ge — the first-pile encoder-image ideal is at
+    full-L1 distance at least one from global uniform, because the
+    deterministic encoder confines it to that pile's five of ten values;
+    the obstruction the executed floors transport.
+    @composes: s5x5_exec_pile1_floor
+    Naming: intentional; _uniform_ge names the compared distribution and
+    the inequality direction, as in var_dist_uniform_pile1_uniform10. *)
+Lemma s5x5_ideal_pile1_uniform_ge (secretP : R.-fdist 'I_10) :
+  1 <= var_dist (s5x5_ideal_pile1_reading secretP)
+                (fdist_uniform (card_ord 10)).
+Proof.
+have Hcard : #|[set v : 'I_10 | (val v < 5)%N]| = 5.
+  have -> : [set v : 'I_10 | (val v < 5)%N] = widen5to10 @: [set: 'I_5].
+    apply/setP => v; rewrite inE.
+    apply/idP/imsetP => [Hv|[q _ ->]]; last exact: (ltn_ord q).
+    by exists (Ordinal Hv); [rewrite inE | apply: val_inj].
+  by rewrite (card_imset _ widen5to10_inj) cardsT card_ord.
+have Hsupp : forall v : 'I_10, v \notin [set v : 'I_10 | (val v < 5)%N] ->
+    s5x5_ideal_pile1_reading secretP v = 0.
+  move=> v; rewrite inE -leqNgt => Hv.
+  rewrite /s5x5_ideal_pile1_reading fdistmapE big_pred0 //.
+  move=> sq; apply/negbTE; rewrite inE /=; apply/negP => /eqP Heq.
+  have Hlt : (val v < 5)%N.
+    by rewrite -Heq; exact: (@prod_encode_pile1_lt sq.1 (widen5to10 sq.2) (ltn_ord sq.2)).
+  by move: Hlt; rewrite ltnNge Hv.
+have Hge := @var_dist_supp_ge R 9 [set v : 'I_10 | (val v < 5)%N]
+              (s5x5_ideal_pile1_reading secretP) Hsupp.
+rewrite Hcard in Hge.
+apply: (le_trans _ Hge).
+by lra.
+Qed.
+
+(** s5x5_ideal_pile2_uniform_ge — the second-pile mirror of
+    s5x5_ideal_pile1_uniform_ge.
+    @composes: s5x5_exec_pile2_floor
+    Naming: intentional; _uniform_ge names the compared distribution and
+    the inequality direction, as in var_dist_uniform_pile1_uniform10. *)
+Lemma s5x5_ideal_pile2_uniform_ge (secretP : R.-fdist 'I_10) :
+  1 <= var_dist (s5x5_ideal_pile2_reading secretP)
+                (fdist_uniform (card_ord 10)).
+Proof.
+have Hcard : #|[set v : 'I_10 | (5 <= val v)%N]| = 5.
+  have -> : [set v : 'I_10 | (5 <= val v)%N] = rshift5to10 @: [set: 'I_5].
+    apply/setP => v; rewrite inE.
+    apply/idP/imsetP => [Hv|[q _ ->]]; last exact: leq_addl.
+    have Hv' : (val v - 5 < 5)%N by rewrite ltn_subLR //; exact: ltn_ord.
+    exists (Ordinal Hv'); first by rewrite inE.
+    by apply: val_inj => /=; rewrite subnK.
+  by rewrite (card_imset _ rshift5to10_inj) cardsT card_ord.
+have Hsupp : forall v : 'I_10, v \notin [set v : 'I_10 | (5 <= val v)%N] ->
+    s5x5_ideal_pile2_reading secretP v = 0.
+  move=> v; rewrite inE -ltnNge => Hv.
+  rewrite /s5x5_ideal_pile2_reading fdistmapE big_pred0 //.
+  move=> sq; apply/negbTE; rewrite inE /=; apply/negP => /eqP Heq.
+  have Hge5 : (val (rshift5to10 sq.2) < 5)%N = false.
+    by apply/negbTE; rewrite -leqNgt; exact: leq_addl.
+  have Hge2 : (5 <= val v)%N.
+    by rewrite -Heq; exact: (@prod_encode_pile2_ge sq.1 (rshift5to10 sq.2) Hge5).
+  by move: Hge2; rewrite leqNgt Hv.
+have Hge := @var_dist_supp_ge R 9 [set v : 'I_10 | (5 <= val v)%N]
+              (s5x5_ideal_pile2_reading secretP) Hsupp.
+rewrite Hcard in Hge.
+apply: (le_trans _ Hge).
+by lra.
+Qed.
+
+(** s5x5_exec_pile1_floor — negative result against global uniform at the
+    executed observer, conditional on s5_rayleigh_Q2_R for the stated
+    constant.
+    @main bound: the variation distance, in the full-L1 convention, between
+    the first-pile executed seat reading and the uniform distribution on
+    ten values is at least one minus sqrt 5 times the lazy coefficient to
+    the power L, transported by the reverse triangle inequality from the
+    encoder-image pile ideal's support confinement. One endpoint marginal;
+    no coalition or privacy conclusion is claimed. *)
+Lemma s5x5_exec_pile1_floor (secretP : R.-fdist 'I_10) (L : nat)
+    (s : 'I_5) :
+  1 - Num.sqrt 5%:R * (s5_lazy_alpha_R R) ^+ L
+  <= var_dist
+       (@sa_seat_dist R mpX s5x5_exec_plug (s5x5_word_sample secretP L) 0
+          (widen5to10 s : 'I_(pi_T' (mp_PI mpX)).+1))
+       (fdist_uniform (card_ord 10)).
+Proof.
+have Ht := var_dist_triangle (s5x5_ideal_pile1_reading secretP)
+             (@sa_seat_dist R mpX s5x5_exec_plug (s5x5_word_sample secretP L) 0
+                (widen5to10 s : 'I_(pi_T' (mp_PI mpX)).+1))
+             (fdist_uniform (card_ord 10)).
+have H2 : var_dist (s5x5_ideal_pile1_reading secretP)
+            (@sa_seat_dist R mpX s5x5_exec_plug (s5x5_word_sample secretP L) 0
+               (widen5to10 s : 'I_(pi_T' (mp_PI mpX)).+1))
+          <= Num.sqrt 5%:R * (s5_lazy_alpha_R R) ^+ L.
+  by rewrite symmetric_var_dist; exact: s5x5_exec_pile1_bound.
+rewrite lerBlDr.
+apply: (le_trans (s5x5_ideal_pile1_uniform_ge secretP)).
+apply: (le_trans Ht).
+by rewrite addrC lerD2l.
+Qed.
+
+(** s5x5_exec_pile2_floor — the second-pile executed negative result
+    against global uniform, conditional on s5_rayleigh_Q2_R for the stated
+    constant.
+    @main bound: the second-pile mirror of s5x5_exec_pile1_floor. *)
+Lemma s5x5_exec_pile2_floor (secretP : R.-fdist 'I_10) (L : nat)
+    (s : 'I_5) :
+  1 - Num.sqrt 5%:R * (s5_lazy_alpha_R R) ^+ L
+  <= var_dist
+       (@sa_seat_dist R mpX s5x5_exec_plug (s5x5_word_sample secretP L) 0
+          (rshift5to10 s : 'I_(pi_T' (mp_PI mpX)).+1))
+       (fdist_uniform (card_ord 10)).
+Proof.
+have Ht := var_dist_triangle (s5x5_ideal_pile2_reading secretP)
+             (@sa_seat_dist R mpX s5x5_exec_plug (s5x5_word_sample secretP L) 0
+                (rshift5to10 s : 'I_(pi_T' (mp_PI mpX)).+1))
+             (fdist_uniform (card_ord 10)).
+have H2 : var_dist (s5x5_ideal_pile2_reading secretP)
+            (@sa_seat_dist R mpX s5x5_exec_plug (s5x5_word_sample secretP L) 0
+               (rshift5to10 s : 'I_(pi_T' (mp_PI mpX)).+1))
+          <= Num.sqrt 5%:R * (s5_lazy_alpha_R R) ^+ L.
+  by rewrite symmetric_var_dist; exact: s5x5_exec_pile2_bound.
+rewrite lerBlDr.
+apply: (le_trans (s5x5_ideal_pile2_uniform_ge secretP)).
+apply: (le_trans Ht).
+by rewrite addrC lerD2l.
+Qed.
+
+(** s5x5_exec_pile1_floor_gt0 — the first-pile executed floor in its
+    positive regime: at word length at least seventeen the first-pile
+    executed seat reading is at strictly positive distance from global
+    uniform, conditional on s5_rayleigh_Q2_R.
+    @composes: s5x5_exec_pile1_floor *)
+Lemma s5x5_exec_pile1_floor_gt0 (secretP : R.-fdist 'I_10) (L : nat)
+    (s : 'I_5) : (17 <= L)%N ->
+  0 < var_dist
+        (@sa_seat_dist R mpX s5x5_exec_plug (s5x5_word_sample secretP L) 0
+           (widen5to10 s : 'I_(pi_T' (mp_PI mpX)).+1))
+        (fdist_uniform (card_ord 10)).
+Proof.
+move=> HL.
+apply: (lt_le_trans _ (s5x5_exec_pile1_floor secretP L s)).
+by rewrite subr_gt0; exact: (@s5x5_lazy_bound_lt1 R L HL).
+Qed.
+
+(** s5x5_exec_pile2_floor_gt0 — the second-pile executed floor in its
+    positive regime, at word length at least seventeen, conditional on
+    s5_rayleigh_Q2_R.
+    @composes: s5x5_exec_pile2_floor *)
+Lemma s5x5_exec_pile2_floor_gt0 (secretP : R.-fdist 'I_10) (L : nat)
+    (s : 'I_5) : (17 <= L)%N ->
+  0 < var_dist
+        (@sa_seat_dist R mpX s5x5_exec_plug (s5x5_word_sample secretP L) 0
+           (rshift5to10 s : 'I_(pi_T' (mp_PI mpX)).+1))
+        (fdist_uniform (card_ord 10)).
+Proof.
+move=> HL.
+apply: (lt_le_trans _ (s5x5_exec_pile2_floor secretP L s)).
+by rewrite subr_gt0; exact: (@s5x5_lazy_bound_lt1 R L HL).
+Qed.
+
+End s5x5_exec_ideal.
+
+Section s5x5_exec_ideal_corollaries.
+
+Variable R : realType.
+Let mpX : MonodromyProfile := s5x5_profile.
+
+Local Open Scope ring_scope.
+
+(** s5x5_exec_seat_uniform_ub — the executed distance to global uniform is
+    at most the seat's ideal-to-uniform distance plus the mixing term, the
+    global-uniform ceiling companion of the floors; the leading term is the
+    ideal's own distance, deliberately not a constant.
+    @composes: s5x5_exec_seat_bound
+    Naming: intentional; _uniform_ub names the compared distribution and
+    the inequality direction, as in var_dist_uniform_pile1_uniform10. *)
+Lemma s5x5_exec_seat_uniform_ub (secretP : R.-fdist 'I_10) (L : nat)
+    (i : 'I_(pi_T' (mp_PI mpX)).+1) :
+  var_dist
+    (@sa_seat_dist R mpX s5x5_exec_plug (s5x5_word_sample secretP L) 0 i)
+    (fdist_uniform (card_ord 10))
+  <= var_dist (s5x5_ideal_seat_reading secretP i)
+       (fdist_uniform (card_ord 10))
+     + Num.sqrt 5%:R * (s5_lazy_alpha_R R) ^+ L.
+Proof.
+apply: (le_trans (var_dist_triangle _
+          (s5x5_ideal_seat_reading secretP i) _)).
+by rewrite addrC lerD2l; exact: s5x5_exec_seat_bound.
+Qed.
+
+(** s5x5_exec_pile1_uniform_ge — unconditional support floor at the
+    executed observer: the deterministic encoder confines a first-pile
+    seat's executed reading to that pile's five of ten values, so its
+    full-L1 distance from global uniform is at least one, at every word
+    length and every secret prior, with no analytical certificate.
+    @main bound: negative result against global uniform at the executed
+    observer by encoder support confinement; one endpoint marginal; no
+    coalition or privacy conclusion is claimed.
+    Naming: intentional; _uniform_ge names the compared distribution and
+    the inequality direction, as in var_dist_uniform_pile1_uniform10. *)
+Lemma s5x5_exec_pile1_uniform_ge (secretP : R.-fdist 'I_10) (L : nat)
+    (s : 'I_5) :
+  1 <= var_dist
+        (@sa_seat_dist R mpX s5x5_exec_plug (s5x5_word_sample secretP L) 0
+           (widen5to10 s : 'I_(pi_T' (mp_PI mpX)).+1))
+        (fdist_uniform (card_ord 10)).
+Proof.
+have Hview : @sa_seat_view R mpX s5x5_exec_plug (s5x5_word_sample secretP L) 0
+               (widen5to10 s : 'I_(pi_T' (mp_PI mpX)).+1)
+  = (fun u : ('I_10 * L.-tuple 'I_8)%type =>
+       tnth (ts_encode s5x5_scheme u.1)
+         (@word_eval s5x5_M L u.2 (widen5to10 s))).
+  apply: boolp.funext => u.
+  by rewrite /sa_seat_view /= s5x5_exec_seat_endpointE /s5x5_content_obs /=
+             tnth_ord_tuple.
+have Hcard : #|[set v : 'I_10 | (val v < 5)%N]| = 5.
+  have -> : [set v : 'I_10 | (val v < 5)%N] = widen5to10 @: [set: 'I_5].
+    apply/setP => v; rewrite inE.
+    apply/idP/imsetP => [Hv|[q _ ->]]; last exact: (ltn_ord q).
+    by exists (Ordinal Hv); [rewrite inE | apply: val_inj].
+  by rewrite (card_imset _ widen5to10_inj) cardsT card_ord.
+have Hsupp : forall v : 'I_10, v \notin [set v : 'I_10 | (val v < 5)%N] ->
+    @sa_seat_dist R mpX s5x5_exec_plug (s5x5_word_sample secretP L) 0
+      (widen5to10 s : 'I_(pi_T' (mp_PI mpX)).+1) v = 0.
+  move=> v; rewrite inE -leqNgt => Hv.
+  rewrite /sa_seat_dist Hview fdistmapE big_pred0 //.
+  move=> u; apply/negbTE; rewrite inE /=; apply/negP => /eqP Heq.
+  have Hw5 : forall t : 'I_5, (val (widen5to10 t) < 5)%N by case=> m Hm.
+  have Hpos : (val (@word_eval s5x5_M L u.2 (widen5to10 s)) < 5)%N.
+    by rewrite word_eval_pile1; exact: Hw5.
+  have Hlt : (val v < 5)%N.
+    by rewrite -Heq; exact: prod_encode_pile1_lt.
+  by move: Hlt; rewrite ltnNge Hv.
+have Hge := @var_dist_supp_ge R 9 [set v : 'I_10 | (val v < 5)%N]
+              (@sa_seat_dist R mpX s5x5_exec_plug (s5x5_word_sample secretP L)
+                 0 (widen5to10 s : 'I_(pi_T' (mp_PI mpX)).+1)) Hsupp.
+rewrite Hcard in Hge.
+apply: (le_trans _ Hge).
+by lra.
+Qed.
+
+(** s5x5_exec_pile2_uniform_ge — the second-pile unconditional support
+    floor at the executed observer.
+    @main bound: negative result against global uniform at the executed
+    observer by encoder support confinement; one endpoint marginal; no
+    coalition or privacy conclusion is claimed.
+    Naming: intentional; _uniform_ge names the compared distribution and
+    the inequality direction, as in var_dist_uniform_pile1_uniform10. *)
+Lemma s5x5_exec_pile2_uniform_ge (secretP : R.-fdist 'I_10) (L : nat)
+    (s : 'I_5) :
+  1 <= var_dist
+        (@sa_seat_dist R mpX s5x5_exec_plug (s5x5_word_sample secretP L) 0
+           (rshift5to10 s : 'I_(pi_T' (mp_PI mpX)).+1))
+        (fdist_uniform (card_ord 10)).
+Proof.
+have Hview : @sa_seat_view R mpX s5x5_exec_plug (s5x5_word_sample secretP L) 0
+               (rshift5to10 s : 'I_(pi_T' (mp_PI mpX)).+1)
+  = (fun u : ('I_10 * L.-tuple 'I_8)%type =>
+       tnth (ts_encode s5x5_scheme u.1)
+         (@word_eval s5x5_M L u.2 (rshift5to10 s))).
+  apply: boolp.funext => u.
+  by rewrite /sa_seat_view /= s5x5_exec_seat_endpointE /s5x5_content_obs /=
+             tnth_ord_tuple.
+have Hcard : #|[set v : 'I_10 | (5 <= val v)%N]| = 5.
+  have -> : [set v : 'I_10 | (5 <= val v)%N] = rshift5to10 @: [set: 'I_5].
+    apply/setP => v; rewrite inE.
+    apply/idP/imsetP => [Hv|[q _ ->]]; last exact: leq_addl.
+    have Hv' : (val v - 5 < 5)%N by rewrite ltn_subLR //; exact: ltn_ord.
+    exists (Ordinal Hv'); first by rewrite inE.
+    by apply: val_inj => /=; rewrite subnK.
+  by rewrite (card_imset _ rshift5to10_inj) cardsT card_ord.
+have Hsupp : forall v : 'I_10, v \notin [set v : 'I_10 | (5 <= val v)%N] ->
+    @sa_seat_dist R mpX s5x5_exec_plug (s5x5_word_sample secretP L) 0
+      (rshift5to10 s : 'I_(pi_T' (mp_PI mpX)).+1) v = 0.
+  move=> v; rewrite inE -ltnNge => Hv.
+  rewrite /sa_seat_dist Hview fdistmapE big_pred0 //.
+  move=> u; apply/negbTE; rewrite inE /=; apply/negP => /eqP Heq.
+  have Hpos : (val (@word_eval s5x5_M L u.2 (rshift5to10 s)) < 5)%N = false.
+    apply/negbTE; rewrite -leqNgt word_eval_pile2 /=.
+    exact: leq_addl.
+  have Hge2 : (5 <= val v)%N.
+    by rewrite -Heq; exact: prod_encode_pile2_ge.
+  by move: Hge2; rewrite leqNgt Hv.
+have Hge := @var_dist_supp_ge R 9 [set v : 'I_10 | (5 <= val v)%N]
+              (@sa_seat_dist R mpX s5x5_exec_plug (s5x5_word_sample secretP L)
+                 0 (rshift5to10 s : 'I_(pi_T' (mp_PI mpX)).+1)) Hsupp.
+rewrite Hcard in Hge.
+apply: (le_trans _ Hge).
+by lra.
+Qed.
+
+(* The executed bounds live at the endpoint carrier 'I_10. The guard below
+   records that they do not instantiate the cut-carrier base premise
+   s5x5_word_base_premise on {perm 'I_10}: the encoder-image transfer is
+   observer-level and never discharges the absent group-level premise. The
+   positive Check pins the failure to that carrier mismatch. *)
+Check (fun (secretP : R.-fdist 'I_10) (L : nat) (s : 'I_5) =>
+  s5x5_exec_pile1_bound secretP L s).
+Fail Check (fun (secretP : R.-fdist 'I_10) (L : nat) (s : 'I_5) =>
+  (s5x5_exec_pile1_bound secretP L s
+     : s5x5_word_base_premise secretP L (fdist_uniform (card_ord 10))
+         (Num.sqrt 5%:R * s5_lazy_alpha_R R ^+ L)%R)).
+
+End s5x5_exec_ideal_corollaries.
 
 (******************************************************************************)
 (*     The typed model families of the S_5 x S_5 analysis paths               *)

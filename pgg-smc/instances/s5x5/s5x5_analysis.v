@@ -255,6 +255,20 @@ Definition rand_family := s5x5_rand_family.
     @intent: alias of s5x5_word_family. *)
 Definition word_family := s5x5_word_family.
 
+(** ideal_pile1_reading — the encoder-image ideal reading of a first-pile
+    seat: the content it reads when its pile position is exactly uniform,
+    mixed over the secret prior; neither uniform nor secret-independent.
+    @intent: alias of s5x5_ideal_pile1_reading. *)
+Definition ideal_pile1_reading := @s5x5_ideal_pile1_reading.
+
+(** ideal_pile2_reading — the second-pile encoder-image ideal reading.
+    @intent: alias of s5x5_ideal_pile2_reading. *)
+Definition ideal_pile2_reading := @s5x5_ideal_pile2_reading.
+
+(** ideal_seat_reading — the seat's own pile's encoder-image ideal reading.
+    @intent: alias of s5x5_ideal_seat_reading. *)
+Definition ideal_seat_reading := @s5x5_ideal_seat_reading.
+
 (** rand_cut_distE — the randomized model's cut distribution is the point
     distribution at the identity.
     @intent: alias of s5x5_rand_cut_distE. *)
@@ -355,33 +369,65 @@ Definition exec_joint_secrecy := @s5x5_exec_joint_secrecy.
 (******************************************************************************)
 (* ===== bound (endpoint marginal, not security) ===== *)
 (*                                                                            *)
-(* The three aliases below are endpoint marginal mixing bounds: each bounds   *)
-(* the distance from a reference distribution of ONE position's endpoint      *)
-(* distribution after a word of L cuts, in the repository's full-L1           *)
-(* convention. Each quantifies over one position, mentions no coalition view  *)
-(* and no second secret, and is conditional on the trusted analytical         *)
-(* certificate s5_rayleigh_Q2_R. They are neither exact nor approximate       *)
-(* privacy, and are recorded as endpoint marginal bounds in the analysis      *)
-(* manifest. The two pile bounds are taken against the uniform distribution   *)
-(* on their own pile and vanish with L; the seat bound is taken against       *)
-(* global uniform on ten seats and does not vanish, its leading summand 1     *)
-(* being the distance between a pile-uniform distribution and global uniform. *)
+(* The aliases below are endpoint marginal mixing bounds, in the              *)
+(* repository's full-L1 convention, conditional on the trusted analytical     *)
+(* certificate s5_rayleigh_Q2_R. Each concerns ONE endpoint marginal,         *)
+(* mentions no coalition view and no second secret, and is neither exact nor  *)
+(* approximate privacy. The three word_* aliases are CUT-LEVEL: pushforwards  *)
+(* of the cut distribution at one position, the pile bounds against the       *)
+(* uniform distribution on their own pile, the seat bound against global      *)
+(* uniform with leading summand 1. The four exec_* aliases are EXECUTED:      *)
+(* sa_seat_dist of the interpreter-executed finite-word adapter, compared     *)
+(* with the encoder-image pile ideals, which are neither uniform nor          *)
+(* secret-independent; the ceiling against global uniform keeps the ideal's   *)
+(* own distance as its leading term.                                          *)
 (******************************************************************************)
 
-(** word_pile1_bound — endpoint marginal mixing inside the first pile at word
-    length L, conditional on s5_rayleigh_Q2_R.
+(** word_pile1_bound — cut-level endpoint marginal mixing inside the first
+    pile at word length L, conditional on s5_rayleigh_Q2_R; a position
+    pushforward of the cut distribution, not an executed observer.
     @intent: alias of s5x5_word_pile1_bound. *)
 Definition word_pile1_bound := @s5x5_word_pile1_bound.
 
-(** word_pile2_bound — endpoint marginal mixing inside the second pile at word
-    length L, conditional on s5_rayleigh_Q2_R.
+(** word_pile2_bound — cut-level endpoint marginal mixing inside the second
+    pile at word length L, conditional on s5_rayleigh_Q2_R; a position
+    pushforward of the cut distribution, not an executed observer.
     @intent: alias of s5x5_word_pile2_bound. *)
 Definition word_pile2_bound := @s5x5_word_pile2_bound.
 
-(** word_seat_bound — the one-seat endpoint marginal bound against global
-    uniform on ten seats at word length L, conditional on s5_rayleigh_Q2_R.
+(** word_seat_bound — the cut-level one-seat endpoint marginal bound against
+    global uniform on ten seats at word length L, conditional on
+    s5_rayleigh_Q2_R; a position pushforward of the cut distribution, not an
+    executed observer.
     @intent: alias of s5x5_word_seat_bound. *)
 Definition word_seat_bound := @s5x5_word_seat_bound.
+
+(** exec_pile1_bound — executed endpoint marginal mixing, conditional on
+    s5_rayleigh_Q2_R: the variation distance, in the full-L1 convention,
+    between sa_seat_dist of the interpreter-executed finite-word adapter at
+    one first-pile seat and the first-pile encoder-image ideal reading is at
+    most sqrt 5 times the lazy coefficient to the power L. One endpoint
+    marginal; no coalition, privacy, secrecy or leakage conclusion is
+    claimed.
+    @intent: alias of s5x5_exec_pile1_bound. *)
+Definition exec_pile1_bound := @s5x5_exec_pile1_bound.
+
+(** exec_pile2_bound — the second-pile executed endpoint marginal mixing
+    bound, conditional on s5_rayleigh_Q2_R.
+    @intent: alias of s5x5_exec_pile2_bound. *)
+Definition exec_pile2_bound := @s5x5_exec_pile2_bound.
+
+(** exec_seat_bound — the per-seat executed endpoint marginal mixing bound
+    against the seat's own pile's encoder-image ideal reading, conditional
+    on s5_rayleigh_Q2_R.
+    @intent: alias of s5x5_exec_seat_bound. *)
+Definition exec_seat_bound := @s5x5_exec_seat_bound.
+
+(** exec_seat_uniform_ub — the executed ceiling against global uniform: the
+    ideal-to-uniform distance plus the mixing term, the leading term being
+    the ideal's own distance and deliberately not a constant.
+    @intent: alias of s5x5_exec_seat_uniform_ub. *)
+Definition exec_seat_uniform_ub := @s5x5_exec_seat_uniform_ub.
 
 (******************************************************************************)
 (* ===== 7. Transfer ===== *)
@@ -389,15 +435,18 @@ Definition word_seat_bound := @s5x5_word_seat_bound.
 (* One status per analysis path. The deterministic path compares no model     *)
 (* with an idealized one. The randomized path carries its executed observers  *)
 (* back to the landed static results by the reader equalities below, and      *)
-(* compares no idealized model. The two finite-word endpoint paths compare no *)
-(* model either: the landed pile spectral theorems bound pushforwards on the  *)
-(* carrier 'I_10, while the generic transfer theorem needs a bound on the     *)
-(* carrier {perm 'I_10}, which is the premise word_missing_premise names and  *)
-(* which the repository does not supply. The two global-uniform limitation    *)
-(* paths do carry a theorem transporting an obstruction to their own          *)
-(* observer: the exact distance one between a pile-uniform distribution and   *)
-(* global uniform combined with the conditional endpoint upper bound by the   *)
-(* reverse triangle inequality, positive from word length seventeen on.       *)
+(* compares no idealized model. The two finite-word endpoint paths carry      *)
+(* observer-level transfer theorems to the encoder-image pile ideals on the   *)
+(* endpoint carrier 'I_10 (exec_pile1_bound, exec_pile2_bound); their base    *)
+(* premise on the cut carrier {perm 'I_10} remains absent, is named by        *)
+(* word_missing_premise, and for the group-uniform ideal is unsatisfiable.    *)
+(* The two global-uniform limitation paths carry theorems transporting an     *)
+(* obstruction to the executed observer: the encoder-image pile ideal's       *)
+(* support confinement (distance at least one from global uniform, the        *)
+(* deterministic encoder confining the ideal to its pile's five of ten        *)
+(* values), moved by the reverse triangle inequality, positive from word      *)
+(* length seventeen on, and unconditionally at least one by the same          *)
+(* confinement at the executed reading itself.                                *)
 (******************************************************************************)
 
 (** det_transfer_status — the deterministic path's transfer status.
@@ -446,14 +495,21 @@ Definition rand_joint_viewE := @s5x5_joint_viewE.
 
 (** pile1_word_transfer_status — the first pile's finite-word path's transfer
     status.
-    @intent: NoModelComparison, the base-distribution premise of the generic
-    transfer theorem being absent at the cut carrier. *)
-Definition pile1_word_transfer_status : TransferStatus := NoModelComparison.
+    @intent: IdealFinite, the path carrying the observer-level public
+    model-transfer theorem exec_pile1_bound to the first-pile encoder-image
+    ideal reading on the endpoint carrier 'I_10. That ideal is not the
+    group-uniform ideal: the base premise word_missing_premise on the cut
+    carrier {perm 'I_10} remains absent and, for the uniform distribution on
+    the generated group, unsatisfiable at every delta below one. No bound
+    against group uniform on any carrier is stated or implied. *)
+Definition pile1_word_transfer_status : TransferStatus := IdealFinite.
 
 (** pile2_word_transfer_status — the second pile's finite-word path's transfer
     status.
-    @intent: NoModelComparison, for the same absent premise. *)
-Definition pile2_word_transfer_status : TransferStatus := NoModelComparison.
+    @intent: IdealFinite, for the observer-level transfer exec_pile2_bound to
+    the second-pile encoder-image ideal, under the same absent and, for the
+    group-uniform ideal, unsatisfiable cut-carrier premise. *)
+Definition pile2_word_transfer_status : TransferStatus := IdealFinite.
 
 (** word_missing_premise — the absent premise named as a proposition.
     @intent: alias of s5x5_word_base_premise, a variation-distance bound
@@ -468,25 +524,29 @@ Definition word_transfer_conditional := @s5x5_word_transfer_conditional.
 
 (** pile1_limitation_transfer_status — the first pile's global-uniform
     limitation path's transfer status.
-    @intent: NegativeTransfer, the path carrying a lower bound on the distance
-    from global uniform to its own executed endpoint distribution. *)
+    @intent: NegativeTransfer, the path carrying exec_pile1_floor, which
+    transports the first-pile encoder-image ideal's support confinement to
+    the executed seat reading by the reverse triangle inequality. *)
 Definition pile1_limitation_transfer_status : TransferStatus :=
   NegativeTransfer.
 
 (** pile2_limitation_transfer_status — the second pile's global-uniform
     limitation path's transfer status.
-    @intent: NegativeTransfer, for the same reason. *)
+    @intent: NegativeTransfer, for the second-pile transport
+    exec_pile2_floor. *)
 Definition pile2_limitation_transfer_status : TransferStatus :=
   NegativeTransfer.
 
-(** word_pile1_floor — negative mixing result for the first pile: the reverse
-    triangle lower bound to global uniform on ten seats, conditional on
+(** word_pile1_floor — cut-level negative mixing result for the first pile:
+    the reverse triangle lower bound to global uniform on ten seats at the
+    sheet-endpoint reader of the word-cut distribution, conditional on
     s5_rayleigh_Q2_R.
     @intent: alias of s5x5_word_pile1_floor. *)
 Definition word_pile1_floor := @s5x5_word_pile1_floor.
 
-(** word_pile2_floor — negative mixing result for the second pile: the reverse
-    triangle lower bound to global uniform on ten seats, conditional on
+(** word_pile2_floor — cut-level negative mixing result for the second pile:
+    the reverse triangle lower bound to global uniform on ten seats at the
+    sheet-endpoint reader of the word-cut distribution, conditional on
     s5_rayleigh_Q2_R.
     @intent: alias of s5x5_word_pile2_floor. *)
 Definition word_pile2_floor := @s5x5_word_pile2_floor.
@@ -498,19 +558,59 @@ Definition word_pile2_floor := @s5x5_word_pile2_floor.
     from word length seventeen on. *)
 Definition word_positive_regime := @s5x5_lazy_bound_lt1.
 
-(** word_pile1_floor_gt0 — negative mixing result for the first pile in its
-    positive regime: at word length at least seventeen the first pile's
-    executed endpoint distribution is at positive distance from global
-    uniform, conditional on s5_rayleigh_Q2_R.
+(** word_pile1_floor_gt0 — cut-level negative mixing result for the first
+    pile in its positive regime: at word length at least seventeen the
+    first pile's sheet-endpoint reading of the word-cut distribution is at
+    positive distance from global uniform, conditional on s5_rayleigh_Q2_R.
     @intent: alias of s5x5_word_pile1_floor_gt0. *)
 Definition word_pile1_floor_gt0 := @s5x5_word_pile1_floor_gt0.
 
-(** word_pile2_floor_gt0 — negative mixing result for the second pile in its
-    positive regime: at word length at least seventeen the second pile's
-    executed endpoint distribution is at positive distance from global
-    uniform, conditional on s5_rayleigh_Q2_R.
+(** word_pile2_floor_gt0 — cut-level negative mixing result for the second
+    pile in its positive regime: at word length at least seventeen the
+    second pile's sheet-endpoint reading of the word-cut distribution is at
+    positive distance from global uniform, conditional on s5_rayleigh_Q2_R.
     @intent: alias of s5x5_word_pile2_floor_gt0. *)
 Definition word_pile2_floor_gt0 := @s5x5_word_pile2_floor_gt0.
+
+(** exec_pile1_floor — negative result against global uniform at the
+    executed observer, conditional on s5_rayleigh_Q2_R for the stated
+    constant: the distance between the first-pile executed seat reading and
+    global uniform is at least one minus the mixing term, transported by
+    the reverse triangle inequality from the encoder-image pile ideal's
+    support confinement. One endpoint marginal; no coalition or privacy
+    conclusion is claimed.
+    @intent: alias of s5x5_exec_pile1_floor. *)
+Definition exec_pile1_floor := @s5x5_exec_pile1_floor.
+
+(** exec_pile2_floor — the second-pile executed negative result against
+    global uniform, conditional on s5_rayleigh_Q2_R for the stated
+    constant.
+    @intent: alias of s5x5_exec_pile2_floor. *)
+Definition exec_pile2_floor := @s5x5_exec_pile2_floor.
+
+(** exec_pile1_floor_gt0 — the first-pile executed floor in its positive
+    regime, at word length at least seventeen, conditional on
+    s5_rayleigh_Q2_R.
+    @intent: alias of s5x5_exec_pile1_floor_gt0. *)
+Definition exec_pile1_floor_gt0 := @s5x5_exec_pile1_floor_gt0.
+
+(** exec_pile2_floor_gt0 — the second-pile executed floor in its positive
+    regime, at word length at least seventeen, conditional on
+    s5_rayleigh_Q2_R.
+    @intent: alias of s5x5_exec_pile2_floor_gt0. *)
+Definition exec_pile2_floor_gt0 := @s5x5_exec_pile2_floor_gt0.
+
+(** exec_pile1_uniform_ge — the unconditional first-pile support floor at
+    the executed observer: distance at least one from global uniform at
+    every word length, by encoder support confinement alone, with no
+    analytical certificate.
+    @intent: alias of s5x5_exec_pile1_uniform_ge. *)
+Definition exec_pile1_uniform_ge := @s5x5_exec_pile1_uniform_ge.
+
+(** exec_pile2_uniform_ge — the unconditional second-pile support floor at
+    the executed observer.
+    @intent: alias of s5x5_exec_pile2_uniform_ge. *)
+Definition exec_pile2_uniform_ge := @s5x5_exec_pile2_uniform_ge.
 
 End S5x5Analysis.
 
@@ -601,9 +701,16 @@ Timeout 60 Check
 Timeout 60 Check
   (erefl : S5x5Analysis.rand_transfer_status = StaticExecutedOnly).
 Timeout 60 Check
-  (erefl : S5x5Analysis.pile1_word_transfer_status = NoModelComparison).
+  (erefl : S5x5Analysis.pile1_word_transfer_status = IdealFinite).
+Timeout 60 Check (S5x5Analysis.exec_pile1_bound :
+  forall (R : realType) (secretP : R.-fdist 'I_10) (L : nat) (s : 'I_5),
+    var_dist
+      (sa_seat_dist (S5x5Analysis.word_sample secretP L) 0
+         (widen5to10 s : 'I_(pi_T' (mp_PI s5x5_profile)).+1))
+      (S5x5Analysis.ideal_pile1_reading secretP)
+    <= Num.sqrt 5%:R * (s5_lazy_alpha_R R) ^+ L).
 Timeout 60 Check
-  (erefl : S5x5Analysis.pile2_word_transfer_status = NoModelComparison).
+  (erefl : S5x5Analysis.pile2_word_transfer_status = IdealFinite).
 Timeout 60 Check
   (erefl : S5x5Analysis.pile1_limitation_transfer_status = NegativeTransfer).
 Timeout 60 Check
