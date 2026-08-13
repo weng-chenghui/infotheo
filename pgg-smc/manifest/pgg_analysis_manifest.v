@@ -53,13 +53,13 @@
 (* covers the public results of the path, not only the values the row stores. *)
 (*                                                                            *)
 (* (2) Completion levels are cumulative and are stated at the level the       *)
-(* theorems actually reach. The two limitation families differ on this point  *)
-(* and stay at different levels: the S_5 x S_5 limitation rows stay Sampled   *)
-(* because their floors are stated at the sheet-endpoint reader of the        *)
-(* word-cut distribution, which is a pushforward of that distribution and not *)
-(* an interpreter-executed content observer, while the Abelian limitation row *)
-(* is AnalysisBridged because its distance-one theorem is stated at the two   *)
-(* adapters' own executed observation.                                        *)
+(* theorems actually reach. Since the user-approved 2026-08-13 amendment the  *)
+(* S_5 and S_5 x S_5 word and limitation rows are AnalysisBridged: their      *)
+(* executed theorems are stated at sa_seat_dist of the interpreter-executed   *)
+(* finite-word adapter, against the encoder-image ideals, next to the kept    *)
+(* cut-level results at the sheet-endpoint reader of the word-cut             *)
+(* distribution. The Abelian limitation row is AnalysisBridged for its        *)
+(* distance-one theorem at the two adapters' own executed observation.        *)
 (*                                                                            *)
 (* (3) A capability line uses the narrowest label the theorem statement       *)
 (* supports, from the list of section 11 of the request: correctness, exact   *)
@@ -510,26 +510,39 @@ Local Open Scope ring_scope.
 (*                          word length; the row's typed model witness is     *)
 (*                          S5Analysis.word_family, the family indexed by     *)
 (*                          exactly that prior and that length |              *)
-(* | observers            | one position's endpoint distribution, the         *)
-(*                          pushforward of the cut distribution along the     *)
-(*                          evaluation of a permutation at that position,     *)
-(*                          carrier 'I_5 |                                    *)
+(* | observers            | one position's endpoint distribution (cut level,  *)
+(*                          a pushforward of the cut distribution, carrier    *)
+(*                          'I_5), and one seat's executed reading            *)
+(*                          sa_seat_dist of the interpreter-executed adapter, *)
+(*                          compared with the encoder-image ideal             *)
+(*                          S5Analysis.ideal_reading |                        *)
 (* | distribution-to-observer bridges | S5Analysis.word_cut_distE,            *)
 (*                          S5Analysis.word_cut_imageE |                      *)
-(* | bound or certificate | S5Analysis.word_endpoint_bound |                  *)
+(* | bound or certificate | S5Analysis.word_endpoint_bound (cut level) and    *)
+(*                          S5Analysis.exec_endpoint_bound (executed, against *)
+(*                          the encoder-image ideal) |                        *)
 (* | correctness theorem  | S5Analysis.observed_recovers, shared with row 6:  *)
 (*                          the model stands over the same plug |             *)
-(* | security, leakage, mixing or limitation theorem | none |                 *)
-(* | final bridge theorem | NONE |                                            *)
-(* | model transfer       | S5Analysis.word_transfer_conditional, the generic *)
-(*                          inequality under the premise below, and no        *)
-(*                          unconditional transfer theorem |                  *)
+(* | security, leakage, mixing or limitation theorem                          *)
+(*                        | S5Analysis.exec_endpoint_bound, endpoint marginal *)
+(*                          mixing at the executed observer |                 *)
+(* | final bridge theorem | S5Analysis.exec_endpoint_bound |                  *)
+(* | model transfer       | observer-level: S5Analysis.exec_endpoint_bound    *)
+(*                          transfers the executed reading to the             *)
+(*                          encoder-image ideal on the endpoint carrier       *)
+(*                          'I_5; S5Analysis.word_transfer_conditional stays  *)
+(*                          the generic cut-carrier inequality under the      *)
+(*                          premise below |                                   *)
 (* | missing premise      | S5Analysis.word_missing_premise: a bound          *)
 (*                          var_dist (sa_cut_dist (word_sample secretP L)) Q  *)
 (*                          <= delta on the cut carrier {perm 'I_5}, against  *)
-(*                          a named reference distribution Q |                *)
-(* | completion level     | Sampled |                                         *)
-(* | transfer status      | NoModelComparison |                               *)
+(*                          a named reference distribution Q. The transfer of *)
+(*                          this row is observer-level and does NOT discharge *)
+(*                          it: the encoder-image ideal is not the            *)
+(*                          group-uniform ideal, and no bound against group   *)
+(*                          uniform on any carrier is stated or implied |     *)
+(* | completion level     | AnalysisBridged |                                 *)
+(* | transfer status      | IdealFinite |                                     *)
 (* | assumption status    | AcceptsAxioms [:: AxS5GroupOrder; AxRayleighQ2R] |*)
 (* | typed row            | s5_row_word |                                     *)
 (*                                                                            *)
@@ -537,18 +550,23 @@ Local Open Scope ring_scope.
 (* |---|---|---|---|                                                          *)
 (* | word_endpoint_bound | the cut distribution of word_sample, named by      *)
 (*   word_cut_distE | one position's endpoint distribution                    *)
-(*   | endpoint marginal mixing, conditional on s5_rayleigh_Q2_R |            *)
+(*   | cut-level endpoint marginal mixing, conditional on s5_rayleigh_Q2_R |  *)
+(* | exec_endpoint_bound | sa_seat_dist of word_sample                        *)
+(*   | one seat's executed reading against the encoder-image ideal           *)
+(*   | executed endpoint marginal mixing, conditional on s5_rayleigh_Q2_R |   *)
 (*                                                                            *)
 (* Level justification. word_sample is a SampleAdapter over exec_plug and     *)
-(* word_cut_distE names its cut distribution, giving Sampled. The row is NOT  *)
-(* AnalysisBridged: word_endpoint_bound bounds the distance from uniform of   *)
-(* ONE position's endpoint distribution, quantifies over no coalition,        *)
-(* mentions no second secret and has neither the shape of an                  *)
-(* indistinguishability statement nor that of a leakage statement. No         *)
-(* finite-word coalition claim is made anywhere on this path. The bound is    *)
-(* conditional on the trusted analytical certificate s5_rayleigh_Q2_R, which  *)
-(* is why the assumption status of this row lists AxRayleighQ2R next to the   *)
-(* instance's group-order assumption.                                         *)
+(* word_cut_distE names its cut distribution, giving Sampled;                 *)
+(* exec_endpoint_bound is a mixing theorem at the row's own executed          *)
+(* observer, giving AnalysisBridged. It bounds ONE seat's endpoint marginal   *)
+(* against the encoder-image ideal, which is neither uniform nor              *)
+(* secret-independent; it quantifies over no coalition, mentions no second    *)
+(* secret and has neither the shape of an indistinguishability statement nor  *)
+(* that of a leakage statement. No finite-word coalition claim is made        *)
+(* anywhere on this path. Both bounds are conditional on the trusted          *)
+(* analytical certificate s5_rayleigh_Q2_R, which is why the assumption       *)
+(* status of this row lists AxRayleighQ2R next to the instance's group-order  *)
+(* assumption.                                                                *)
 (*                                                                            *)
 (*     Row 9: ten-seat S_5 x S_5 instance, deterministic dealt position       *)
 (*                                                                            *)
@@ -683,23 +701,37 @@ Local Open Scope ring_scope.
 (* | sample alias         | S5x5Analysis.word_sample at a secret prior and a  *)
 (*                          word length; the row's typed model witness is     *)
 (*                          S5x5Analysis.word_family |                        *)
-(* | observers            | one first-pile position's endpoint distribution,  *)
-(*                          the pushforward of the cut distribution along the *)
-(*                          evaluation of a permutation at the ten-seat image *)
-(*                          of that pile position, carrier 'I_10 |            *)
+(* | observers            | one first-pile position's endpoint distribution   *)
+(*                          (cut level, carrier 'I_10), and one first-pile    *)
+(*                          seat's executed reading sa_seat_dist of the       *)
+(*                          interpreter-executed adapter, compared with the   *)
+(*                          encoder-image ideal                               *)
+(*                          S5x5Analysis.ideal_pile1_reading |                *)
 (* | distribution-to-observer bridges | S5x5Analysis.word_cut_distE |         *)
-(* | bound or certificate | S5x5Analysis.word_pile1_bound |                   *)
+(* | bound or certificate | S5x5Analysis.word_pile1_bound (cut level) and     *)
+(*                          S5x5Analysis.exec_pile1_bound (executed) |        *)
 (* | correctness theorem  | S5x5Analysis.observed_recovers, shared with row 9 *)
 (*                          | *)
-(* | security, leakage, mixing or limitation theorem | none |                 *)
-(* | final bridge theorem | NONE |                                            *)
-(* | model transfer       | S5x5Analysis.word_transfer_conditional, under the *)
-(*                          premise below |                                   *)
+(* | security, leakage, mixing or limitation theorem                          *)
+(*                        | S5x5Analysis.exec_pile1_bound, endpoint marginal  *)
+(*                          mixing at the executed observer |                 *)
+(* | final bridge theorem | S5x5Analysis.exec_pile1_bound |                   *)
+(* | model transfer       | observer-level: S5x5Analysis.exec_pile1_bound     *)
+(*                          transfers the executed reading to the first-pile  *)
+(*                          encoder-image ideal on the endpoint carrier       *)
+(*                          'I_10; S5x5Analysis.word_transfer_conditional     *)
+(*                          stays the generic cut-carrier inequality under    *)
+(*                          the premise below |                               *)
 (* | missing premise      | S5x5Analysis.word_missing_premise: a bound        *)
 (*                          var_dist (sa_cut_dist (word_sample secretP L)) Q  *)
-(*                          <= delta on the cut carrier {perm 'I_10} |        *)
-(* | completion level     | Sampled |                                         *)
-(* | transfer status      | NoModelComparison |                               *)
+(*                          <= delta on the cut carrier {perm 'I_10}. The     *)
+(*                          transfer of this row is observer-level and does   *)
+(*                          NOT discharge it: the encoder-image ideal is not  *)
+(*                          the group-uniform ideal, and no bound against     *)
+(*                          group uniform on any carrier is stated or         *)
+(*                          implied |                                         *)
+(* | completion level     | AnalysisBridged |                                 *)
+(* | transfer status      | IdealFinite |                                     *)
 (* | assumption status                                                        *)
 (*     | AcceptsAxioms [:: AxS5x5GroupOrder; AxRayleighQ2R] |                 *)
 (* | typed row            | s5x5_row_pile1_word |                             *)
@@ -708,33 +740,45 @@ Local Open Scope ring_scope.
 (* |---|---|---|---|                                                          *)
 (* | word_pile1_bound | the cut distribution of word_sample, named by         *)
 (*   word_cut_distE | one first-pile position's endpoint distribution         *)
-(*   | endpoint marginal mixing inside the first pile, against the uniform    *)
-(*     distribution on that pile, conditional on s5_rayleigh_Q2_R |           *)
+(*   | cut-level endpoint marginal mixing inside the first pile, against the  *)
+(*     uniform distribution on that pile, conditional on s5_rayleigh_Q2_R |   *)
+(* | exec_pile1_bound | sa_seat_dist of word_sample                           *)
+(*   | one first-pile seat's executed reading against the first-pile          *)
+(*     encoder-image ideal                                                    *)
+(*   | executed endpoint marginal mixing, conditional on s5_rayleigh_Q2_R |   *)
 (*                                                                            *)
 (* Level justification. word_sample is a SampleAdapter over exec_plug and     *)
-(* word_cut_distE names its cut distribution, giving Sampled. The row is NOT  *)
-(* AnalysisBridged, for the reason of row 8: the bound is about one           *)
-(* position's endpoint distribution. No joint finite-word privacy theorem is  *)
-(* claimed on this instance. The bound is conditional on s5_rayleigh_Q2_R.    *)
+(* word_cut_distE names its cut distribution, giving Sampled;                 *)
+(* exec_pile1_bound is a mixing theorem at the row's own executed observer,   *)
+(* giving AnalysisBridged, for the reasons of row 8. No joint finite-word     *)
+(* privacy theorem is claimed on this instance. Both bounds are conditional   *)
+(* on s5_rayleigh_Q2_R.                                                       *)
 (*                                                                            *)
 (*     Row 12: ten-seat S_5 x S_5 instance, finite word inside the second     *)
 (*             pile                                                           *)
 (*                                                                            *)
 (* Every field is that of row 11 with the second pile in place of the first:  *)
-(* the observer is one second-pile position's endpoint distribution, reached  *)
-(* through the ten-seat image of that pile position, and the bound is         *)
-(* S5x5Analysis.word_pile2_bound against the uniform distribution on the      *)
-(* second pile. Transfer status NoModelComparison with the same missing       *)
-(* premise, completion level Sampled, assumption status                       *)
-(* AcceptsAxioms [:: AxS5x5GroupOrder; AxRayleighQ2R], typed row              *)
-(* s5x5_row_pile2_word.                                                       *)
+(* the observers are one second-pile position's endpoint distribution and     *)
+(* one second-pile seat's executed reading against                            *)
+(* S5x5Analysis.ideal_pile2_reading, the bounds are                           *)
+(* S5x5Analysis.word_pile2_bound (cut level) and                              *)
+(* S5x5Analysis.exec_pile2_bound (executed, the final bridge theorem).        *)
+(* Transfer status IdealFinite by the same observer-level transfer with the   *)
+(* same not-discharged missing premise, completion level AnalysisBridged,     *)
+(* assumption status AcceptsAxioms [:: AxS5x5GroupOrder; AxRayleighQ2R],      *)
+(* typed row s5x5_row_pile2_word.                                             *)
 (*                                                                            *)
 (* | theorem | distribution | observer | notion |                             *)
 (* |---|---|---|---|                                                          *)
 (* | word_pile2_bound | the cut distribution of word_sample, named by         *)
 (*   word_cut_distE | one second-pile position's endpoint distribution        *)
-(*   | endpoint marginal mixing inside the second pile, against the uniform   *)
-(*     distribution on that pile, conditional on s5_rayleigh_Q2_R |           *)
+(*   | cut-level endpoint marginal mixing inside the second pile, against     *)
+(*     the uniform distribution on that pile, conditional on                  *)
+(*     s5_rayleigh_Q2_R |                                                     *)
+(* | exec_pile2_bound | sa_seat_dist of word_sample                           *)
+(*   | one second-pile seat's executed reading against the second-pile        *)
+(*     encoder-image ideal                                                    *)
+(*   | executed endpoint marginal mixing, conditional on s5_rayleigh_Q2_R |   *)
 (*                                                                            *)
 (*     Row 13: ten-seat S_5 x S_5 instance, first pile against global uniform *)
 (*                                                                            *)
@@ -748,31 +792,38 @@ Local Open Scope ring_scope.
 (* | sample alias         | S5x5Analysis.word_sample; the row's typed model   *)
 (*                          witness is S5x5Analysis.word_family, as in row    *)
 (*                          11 |                                              *)
-(* | observers            | one first-pile position's endpoint distribution,  *)
-(*                          carrier 'I_10, now compared with the uniform      *)
+(* | observers            | one first-pile position's endpoint distribution   *)
+(*                          (cut level) and one first-pile seat's executed    *)
+(*                          reading, both compared with the uniform           *)
 (*                          distribution on all ten seats |                   *)
 (* | distribution-to-observer bridges | S5x5Analysis.word_cut_distE |         *)
-(* | bound or certificate | S5x5Analysis.word_pile1_bound, and the companion  *)
-(*                          upper bound S5x5Analysis.word_seat_bound, which   *)
-(*                          quantifies over all ten positions and whose       *)
-(*                          leading summand one is the distance between a     *)
-(*                          pile-uniform distribution and global uniform |    *)
+(* | bound or certificate | cut level: S5x5Analysis.word_pile1_bound and the  *)
+(*                          companion S5x5Analysis.word_seat_bound; executed: *)
+(*                          S5x5Analysis.exec_pile1_bound and the ceiling     *)
+(*                          S5x5Analysis.exec_seat_uniform_ub, whose leading  *)
+(*                          term is the ideal's own distance from global      *)
+(*                          uniform, deliberately not a constant |            *)
 (* | correctness theorem  | S5x5Analysis.observed_recovers, shared with row 9 *)
 (*                          | *)
 (* | security, leakage, mixing or limitation theorem                          *)
-(*                        | S5x5Analysis.word_pile1_floor,                    *)
-(*                          S5x5Analysis.word_pile1_floor_gt0, with the       *)
-(*                          regime named by                                   *)
-(*                          S5x5Analysis.word_positive_regime |               *)
-(* | final bridge theorem | NONE |                                            *)
-(* | model transfer       | S5x5Analysis.word_pile1_floor: a lower bound on   *)
-(*                          the distance from global uniform, transported to  *)
-(*                          this row's own observer by the reverse triangle   *)
-(*                          inequality |                                      *)
+(*                        | executed: S5x5Analysis.exec_pile1_floor,          *)
+(*                          S5x5Analysis.exec_pile1_floor_gt0 and the         *)
+(*                          unconditional support floor                       *)
+(*                          S5x5Analysis.exec_pile1_uniform_ge; cut level:    *)
+(*                          S5x5Analysis.word_pile1_floor,                    *)
+(*                          S5x5Analysis.word_pile1_floor_gt0; regime named   *)
+(*                          by S5x5Analysis.word_positive_regime |            *)
+(* | final bridge theorem | S5x5Analysis.exec_pile1_floor |                   *)
+(* | model transfer       | S5x5Analysis.exec_pile1_floor: the encoder-image  *)
+(*                          pile ideal's support confinement (distance at     *)
+(*                          least one from global uniform, the deterministic  *)
+(*                          encoder confining the ideal to that pile's five   *)
+(*                          of ten values), transported to the executed       *)
+(*                          reading by the reverse triangle inequality |      *)
 (* | missing premise      | not applicable to the limitation, which is proved *)
 (*                          rather than assumed; the absent premise of the    *)
 (*                          POSITIVE direction remains the one of row 11 |    *)
-(* | completion level     | Sampled |                                         *)
+(* | completion level     | AnalysisBridged |                                 *)
 (* | transfer status      | NegativeTransfer |                                *)
 (* | assumption status                                                        *)
 (*     | AcceptsAxioms [:: AxS5x5GroupOrder; AxRayleighQ2R] |                 *)
@@ -782,30 +833,45 @@ Local Open Scope ring_scope.
 (* |---|---|---|---|                                                          *)
 (* | word_pile1_floor | the cut distribution of word_sample                   *)
 (*   | one first-pile position's endpoint distribution                        *)
-(*   | negative mixing result: the distance from global uniform is at least   *)
-(*     one minus the pile mixing factor, conditional on s5_rayleigh_Q2_R |    *)
-(* | word_pile1_floor_gt0 | the same distribution | the same observer         *)
-(*   | negative mixing result in its non-vacuous regime, word length at least *)
-(*     seventeen, conditional on s5_rayleigh_Q2_R |                           *)
+(*   | cut-level negative mixing result: the distance from global uniform is  *)
+(*     at least one minus the pile mixing factor, conditional on              *)
+(*     s5_rayleigh_Q2_R |                                                     *)
+(* | exec_pile1_floor | sa_seat_dist of word_sample                           *)
+(*   | one first-pile seat's executed reading                                 *)
+(*   | negative result against global uniform at the executed observer, at    *)
+(*     least one minus the mixing term, transported from the encoder-image    *)
+(*     ideal's support confinement, conditional on s5_rayleigh_Q2_R for the   *)
+(*     stated constant; unconditionally at least one by                       *)
+(*     exec_pile1_uniform_ge |                                                *)
+(* | word_pile1_floor_gt0 | the cut distribution | the cut-level observer     *)
+(*   | cut-level negative mixing result in its non-vacuous regime, word       *)
+(*     length at least seventeen, conditional on s5_rayleigh_Q2_R |           *)
+(* | exec_pile1_floor_gt0 | sa_seat_dist of word_sample | the executed        *)
+(*     observer | executed negative result in the same regime |               *)
 (*                                                                            *)
-(* Level justification. The row stays Sampled and does not reach              *)
-(* AnalysisBridged. Its floors are stated at the sheet-endpoint reader of the *)
-(* word-cut distribution, which is a pushforward of that distribution, and    *)
-(* not at an interpreter-executed content observer of this instance: no       *)
-(* reader equality carries them to one. The status is still NegativeTransfer, *)
-(* because a theorem does transport an obstruction to the row's own observer; *)
-(* the level and the status answer different questions. The result is a       *)
-(* mixing limitation about the shuffle, not a privacy failure of the          *)
-(* protocol, and it says nothing about any coalition.                         *)
+(* Level justification. Since the 2026-08-13 amendment the row reaches        *)
+(* AnalysisBridged: exec_pile1_floor is stated at sa_seat_dist of the         *)
+(* interpreter-executed finite-word adapter, the row's own executed           *)
+(* observer. The transported obstruction is the encoder-image pile ideal's    *)
+(* SUPPORT CONFINEMENT, the deterministic encoder confining the ideal to the  *)
+(* pile's five of ten values; it is not a spectral mixing failure, and the    *)
+(* executed floor also holds unconditionally with constant one by the same    *)
+(* confinement (exec_pile1_uniform_ge). The cut-level floors are kept and     *)
+(* remain sourced in the pile mixing factor. The result is a limitation of    *)
+(* the deterministic encoder's executed reading, not a privacy failure of     *)
+(* the protocol, and it says nothing about any coalition.                     *)
 (*                                                                            *)
 (*     Row 14: ten-seat S_5 x S_5 instance, second pile against global        *)
 (*             uniform                                                        *)
 (*                                                                            *)
 (* Every field is that of row 13 with the second pile in place of the first:  *)
-(* the theorems are S5x5Analysis.word_pile2_floor and                         *)
-(* S5x5Analysis.word_pile2_floor_gt0 at one second-pile position's endpoint   *)
-(* distribution, with the same companion bounds, the same regime, completion  *)
-(* level Sampled, transfer status NegativeTransfer, assumption status         *)
+(* the executed theorems are S5x5Analysis.exec_pile2_floor (the final bridge  *)
+(* theorem), S5x5Analysis.exec_pile2_floor_gt0 and the unconditional support  *)
+(* floor S5x5Analysis.exec_pile2_uniform_ge, next to the kept cut-level       *)
+(* S5x5Analysis.word_pile2_floor and S5x5Analysis.word_pile2_floor_gt0, with  *)
+(* the same companion bounds and regime, completion level AnalysisBridged,    *)
+(* transfer status NegativeTransfer sourced in the second-pile ideal's        *)
+(* support confinement, assumption status                                     *)
 (* AcceptsAxioms [:: AxS5x5GroupOrder; AxRayleighQ2R] and typed row           *)
 (* s5x5_row_pile2_limitation.                                                 *)
 (*                                                                            *)
@@ -813,11 +879,17 @@ Local Open Scope ring_scope.
 (* |---|---|---|---|                                                          *)
 (* | word_pile2_floor | the cut distribution of word_sample                   *)
 (*   | one second-pile position's endpoint distribution                       *)
-(*   | negative mixing result: the distance from global uniform is at least   *)
-(*     one minus the pile mixing factor, conditional on s5_rayleigh_Q2_R |    *)
-(* | word_pile2_floor_gt0 | the same distribution | the same observer         *)
-(*   | negative mixing result in its non-vacuous regime, word length at least *)
-(*     seventeen, conditional on s5_rayleigh_Q2_R |                           *)
+(*   | cut-level negative mixing result, conditional on s5_rayleigh_Q2_R |    *)
+(* | exec_pile2_floor | sa_seat_dist of word_sample                           *)
+(*   | one second-pile seat's executed reading                                *)
+(*   | executed negative result transported from the second-pile ideal's      *)
+(*     support confinement, conditional on s5_rayleigh_Q2_R for the stated    *)
+(*     constant; unconditionally at least one by exec_pile2_uniform_ge |      *)
+(* | word_pile2_floor_gt0 | the cut distribution | the cut-level observer     *)
+(*   | cut-level negative mixing result in its non-vacuous regime,            *)
+(*     conditional on s5_rayleigh_Q2_R |                                      *)
+(* | exec_pile2_floor_gt0 | sa_seat_dist of word_sample | the executed        *)
+(*     observer | executed negative result in the same regime |               *)
 (*                                                                            *)
 (*     Row 15: four-seat abelian instance, secret recovery                    *)
 (*                                                                            *)
@@ -958,9 +1030,10 @@ Local Open Scope ring_scope.
 (* | executed_distance | the same two cut distributions                       *)
 (*   | endpoint_vector | negative mixing result, full-L1 distance one |       *)
 (*                                                                            *)
-(* Level justification, stated explicitly because this row is a limitation    *)
-(* row that DOES reach AnalysisBridged while the S_5 x S_5 limitation rows do *)
-(* not. ideal_sample and word_sample are SampleAdapters over shuffle_plug and *)
+(* Level justification. Like the S_5 x S_5 limitation rows since the          *)
+(* 2026-08-13 amendment, this limitation row reaches AnalysisBridged, its     *)
+(* theorem being stated at its own executed observation. ideal_sample and    *)
+(* word_sample are SampleAdapters over shuffle_plug and                       *)
 (* actual_cut_distE names the second one's cut distribution, giving Sampled.  *)
 (* word_mixing_limitation is stated at fdistmap of abel_sample_reader over    *)
 (* sa_sampleP of those two adapters, that is at the adapters' own executed    *)
@@ -1009,7 +1082,10 @@ Local Open Scope ring_scope.
 (* No row is filled with a dummy theorem, an option-valued proof, an axiom or *)
 (* a placeholder, no endpoint marginal bound is recorded as a privacy or      *)
 (* security capability, and every path whose transfer status is               *)
-(* NoModelComparison or StaticExecutedOnly names the premise it lacks.        *)
+(* NoModelComparison or StaticExecutedOnly names the premise it lacks. The    *)
+(* IdealFinite word rows 8, 11 and 12 and the NegativeTransfer limitation     *)
+(* rows 13 and 14 also keep naming the absent cut-carrier premise below:      *)
+(* their transfers are observer-level and never discharge it.                 *)
 (*                                                                            *)
 (* Five-card development. No transfer-layer result exists: section 7 of its   *)
 (* facade carries typed status aliases and no theorem. The absent premise is  *)
@@ -1022,7 +1098,11 @@ Local Open Scope ring_scope.
 (* var_dist (sa_cut_dist (S5Analysis.word_sample secretP L)) Q <= delta on    *)
 (* the cut carrier {perm 'I_5}, against a named reference distribution Q.     *)
 (* S5Analysis.word_endpoint_bound bounds a pushforward on the carrier 'I_5    *)
-(* instead, which does not discharge it. For Q the uniform distribution on the*)
+(* instead, and the executed transfer S5Analysis.exec_endpoint_bound compares *)
+(* the executed reading with the encoder-image ideal, the content one seat    *)
+(* reads when the dealt position is exactly uniform mixed over the secret     *)
+(* prior, on the carrier 'I_5; neither discharges it. That ideal is not the   *)
+(* group-uniform ideal. For Q the uniform distribution on the*)
 (* generated group the premise is moreover UNSATISFIABLE at every delta below *)
 (* one: every generator of this instance is a transposition, so a word of     *)
 (* length L evaluates into the coset of the alternating subgroup determined   *)
@@ -1037,9 +1117,13 @@ Local Open Scope ring_scope.
 (* var_dist (sa_cut_dist (S5x5Analysis.word_sample secretP L)) Q <= delta.    *)
 (* It is unsatisfiable for Q the uniform distribution on the generated group  *)
 (* for the same reason, every generator of this instance being a transposition*)
-(* of the ten positions. The per-pile bounds of rows 11 and 12 are not        *)
-(* affected: they are taken against the uniform distribution on one pile,     *)
-(* which the confinement argument does not reach.                             *)
+(* of the ten positions. Three targets must not be conflated: the cut-level   *)
+(* per-pile bounds of rows 11 and 12 are taken against the uniform            *)
+(* distribution on one pile, which the confinement argument does not reach;   *)
+(* the executed bounds are taken against the encoder-image pile ideals,       *)
+(* satisfiable and transferred by exec_pile1_bound and exec_pile2_bound; and  *)
+(* group or global uniform remains the unsatisfiable-premise carrier and the  *)
+(* floors' comparison target only.                                            *)
 (******************************************************************************)
 
 (******************************************************************************)
@@ -1139,8 +1223,9 @@ Definition s5_row_rand : AnalysisPathRow :=
     stands over, the word model family indexed by a secret prior and a word
     length, and the statuses of row 8. *)
 Definition s5_row_word : AnalysisPathRow :=
-  @MkAnalysisPathRow S5Analysis.observed Sampled S5Analysis.word_family
-    NoModelComparison (AcceptsAxioms [:: AxS5GroupOrder; AxRayleighQ2R]).
+  @MkAnalysisPathRow S5Analysis.observed AnalysisBridged
+    S5Analysis.word_family IdealFinite
+    (AcceptsAxioms [:: AxS5GroupOrder; AxRayleighQ2R]).
 
 (** s5x5_row_det — row 9: the ten-seat S_5 x S_5 instance dealing a
     position.
@@ -1164,16 +1249,18 @@ Definition s5x5_row_rand : AnalysisPathRow :=
     stands over, the word model family shared by rows 11 to 14, and the
     statuses of row 11. *)
 Definition s5x5_row_pile1_word : AnalysisPathRow :=
-  @MkAnalysisPathRow S5x5Analysis.observed Sampled S5x5Analysis.word_family
-    NoModelComparison (AcceptsAxioms [:: AxS5x5GroupOrder; AxRayleighQ2R]).
+  @MkAnalysisPathRow S5x5Analysis.observed AnalysisBridged
+    S5x5Analysis.word_family IdealFinite
+    (AcceptsAxioms [:: AxS5x5GroupOrder; AxRayleighQ2R]).
 
 (** s5x5_row_pile2_word — row 12: the second pile under a finite generator
     word.
     @intent: the same observed execution, the same shared word model family,
     and the statuses of row 12. *)
 Definition s5x5_row_pile2_word : AnalysisPathRow :=
-  @MkAnalysisPathRow S5x5Analysis.observed Sampled S5x5Analysis.word_family
-    NoModelComparison (AcceptsAxioms [:: AxS5x5GroupOrder; AxRayleighQ2R]).
+  @MkAnalysisPathRow S5x5Analysis.observed AnalysisBridged
+    S5x5Analysis.word_family IdealFinite
+    (AcceptsAxioms [:: AxS5x5GroupOrder; AxRayleighQ2R]).
 
 (** s5x5_row_pile1_limitation — row 13: the first pile against global
     uniform.
@@ -1181,16 +1268,18 @@ Definition s5x5_row_pile2_word : AnalysisPathRow :=
     and the statuses of row 13, whose transfer status is negative because a
     floor transports the obstruction to the row's own observer. *)
 Definition s5x5_row_pile1_limitation : AnalysisPathRow :=
-  @MkAnalysisPathRow S5x5Analysis.observed Sampled S5x5Analysis.word_family
-    NegativeTransfer (AcceptsAxioms [:: AxS5x5GroupOrder; AxRayleighQ2R]).
+  @MkAnalysisPathRow S5x5Analysis.observed AnalysisBridged
+    S5x5Analysis.word_family NegativeTransfer
+    (AcceptsAxioms [:: AxS5x5GroupOrder; AxRayleighQ2R]).
 
 (** s5x5_row_pile2_limitation — row 14: the second pile against global
     uniform.
     @intent: the same observed execution, the same shared word model family,
     and the statuses of row 14. *)
 Definition s5x5_row_pile2_limitation : AnalysisPathRow :=
-  @MkAnalysisPathRow S5x5Analysis.observed Sampled S5x5Analysis.word_family
-    NegativeTransfer (AcceptsAxioms [:: AxS5x5GroupOrder; AxRayleighQ2R]).
+  @MkAnalysisPathRow S5x5Analysis.observed AnalysisBridged
+    S5x5Analysis.word_family NegativeTransfer
+    (AcceptsAxioms [:: AxS5x5GroupOrder; AxRayleighQ2R]).
 
 (** abel_row_recovery — row 15: the four-seat abelian instance recovering a
     dealt secret.
@@ -1991,7 +2080,7 @@ Timeout 60 Check (S5Analysis.rand_coalition_viewE :
       (S5Analysis.rand_sample R) 0 C
     = rsh_view (@unif_randomized_sharing R 3 4) C).
 
-Timeout 60 Check (erefl : S5Analysis.word_transfer_status = NoModelComparison).
+Timeout 60 Check (erefl : S5Analysis.word_transfer_status = IdealFinite).
 
 Timeout 60 Check (S5Analysis.word_missing_premise :
   forall R : realType, R.-fdist 'I_5 -> forall L : nat,
@@ -2305,10 +2394,10 @@ Timeout 60 Check (S5x5Analysis.rand_joint_viewE :
                  (@unif_randomized_sharing R 3 4) HC2)))).
 
 Timeout 60 Check
-  (erefl : S5x5Analysis.pile1_word_transfer_status = NoModelComparison).
+  (erefl : S5x5Analysis.pile1_word_transfer_status = IdealFinite).
 
 Timeout 60 Check
-  (erefl : S5x5Analysis.pile2_word_transfer_status = NoModelComparison).
+  (erefl : S5x5Analysis.pile2_word_transfer_status = IdealFinite).
 
 Timeout 60 Check (S5x5Analysis.word_missing_premise :
   forall R : realType, R.-fdist 'I_10 -> forall L : nat,
@@ -2595,8 +2684,8 @@ Timeout 60 Check
 Timeout 60 Check (s5_row_word : AnalysisPathRow).
 Timeout 60 Check (apr_model s5_row_word
   : AnalysisModelFamily S5Analysis.observed).
-Timeout 60 Check (erefl : apr_completion s5_row_word = Sampled).
-Timeout 60 Check (erefl : apr_transfer s5_row_word = NoModelComparison).
+Timeout 60 Check (erefl : apr_completion s5_row_word = AnalysisBridged).
+Timeout 60 Check (erefl : apr_transfer s5_row_word = IdealFinite).
 Timeout 60 Check (erefl : apr_assumptions s5_row_word
   = AcceptsAxioms [:: AxS5GroupOrder; AxRayleighQ2R]).
 
@@ -2619,25 +2708,26 @@ Timeout 60 Check (erefl : apr_assumptions s5x5_row_rand
 Timeout 60 Check (s5x5_row_pile1_word : AnalysisPathRow).
 Timeout 60 Check (apr_model s5x5_row_pile1_word
   : AnalysisModelFamily S5x5Analysis.observed).
-Timeout 60 Check (erefl : apr_completion s5x5_row_pile1_word = Sampled).
 Timeout 60 Check
-  (erefl : apr_transfer s5x5_row_pile1_word = NoModelComparison).
+  (erefl : apr_completion s5x5_row_pile1_word = AnalysisBridged).
+Timeout 60 Check (erefl : apr_transfer s5x5_row_pile1_word = IdealFinite).
 Timeout 60 Check (erefl : apr_assumptions s5x5_row_pile1_word
   = AcceptsAxioms [:: AxS5x5GroupOrder; AxRayleighQ2R]).
 
 Timeout 60 Check (s5x5_row_pile2_word : AnalysisPathRow).
 Timeout 60 Check (apr_model s5x5_row_pile2_word
   : AnalysisModelFamily S5x5Analysis.observed).
-Timeout 60 Check (erefl : apr_completion s5x5_row_pile2_word = Sampled).
 Timeout 60 Check
-  (erefl : apr_transfer s5x5_row_pile2_word = NoModelComparison).
+  (erefl : apr_completion s5x5_row_pile2_word = AnalysisBridged).
+Timeout 60 Check (erefl : apr_transfer s5x5_row_pile2_word = IdealFinite).
 Timeout 60 Check (erefl : apr_assumptions s5x5_row_pile2_word
   = AcceptsAxioms [:: AxS5x5GroupOrder; AxRayleighQ2R]).
 
 Timeout 60 Check (s5x5_row_pile1_limitation : AnalysisPathRow).
 Timeout 60 Check (apr_model s5x5_row_pile1_limitation
   : AnalysisModelFamily S5x5Analysis.observed).
-Timeout 60 Check (erefl : apr_completion s5x5_row_pile1_limitation = Sampled).
+Timeout 60 Check
+  (erefl : apr_completion s5x5_row_pile1_limitation = AnalysisBridged).
 Timeout 60 Check
   (erefl : apr_transfer s5x5_row_pile1_limitation = NegativeTransfer).
 Timeout 60 Check (erefl : apr_assumptions s5x5_row_pile1_limitation
@@ -2646,7 +2736,8 @@ Timeout 60 Check (erefl : apr_assumptions s5x5_row_pile1_limitation
 Timeout 60 Check (s5x5_row_pile2_limitation : AnalysisPathRow).
 Timeout 60 Check (apr_model s5x5_row_pile2_limitation
   : AnalysisModelFamily S5x5Analysis.observed).
-Timeout 60 Check (erefl : apr_completion s5x5_row_pile2_limitation = Sampled).
+Timeout 60 Check
+  (erefl : apr_completion s5x5_row_pile2_limitation = AnalysisBridged).
 Timeout 60 Check
   (erefl : apr_transfer s5x5_row_pile2_limitation = NegativeTransfer).
 Timeout 60 Check (erefl : apr_assumptions s5x5_row_pile2_limitation
@@ -2706,6 +2797,107 @@ Timeout 60 Check (fun (row : AnalysisPathRow)
     (x : amf_index fam R) =>
   amf_sample fam R x
     : @SampleAdapter R _ (OE.oe_execution (apr_observed row))).
+
+(******************************************************************************)
+(*     The executed finite-word theorem family at its spelled types           *)
+(*                                                                            *)
+(* Request 5.3 check 5 (amended): the S_5 and S_5 x S_5 word and limitation  *)
+(* rows name executed theorem aliases; each is pinned here at its full        *)
+(* spelled type, the observer being sa_seat_dist of the interpreter-executed  *)
+(* finite-word adapter and the ideals the encoder-image readings.             *)
+(******************************************************************************)
+
+Timeout 60 Check (S5Analysis.exec_endpoint_bound :
+  forall (R : realType) (secretP : R.-fdist 'I_5) (L : nat)
+         (i : 'I_(pi_T' (mp_PI S5Analysis.profile)).+1),
+    var_dist
+      (sa_seat_dist (S5Analysis.word_sample secretP L) 0 i)
+      (S5Analysis.ideal_reading secretP)
+    <= Num.sqrt 5%:R * (s5_mixing.s5_alpha_R R) ^+ L).
+
+Timeout 60 Check (S5x5Analysis.exec_pile1_bound :
+  forall (R : realType) (secretP : R.-fdist 'I_10) (L : nat) (s : 'I_5),
+    var_dist
+      (sa_seat_dist (S5x5Analysis.word_sample secretP L) 0
+         (s5x5_mixing.widen5to10 s : 'I_(pi_T' (mp_PI S5x5Analysis.profile)).+1))
+      (S5x5Analysis.ideal_pile1_reading secretP)
+    <= Num.sqrt 5%:R * (s5x5_mixing.s5_lazy_alpha_R R) ^+ L).
+
+Timeout 60 Check (S5x5Analysis.exec_pile2_bound :
+  forall (R : realType) (secretP : R.-fdist 'I_10) (L : nat) (s : 'I_5),
+    var_dist
+      (sa_seat_dist (S5x5Analysis.word_sample secretP L) 0
+         (s5x5_mixing.rshift5to10 s : 'I_(pi_T' (mp_PI S5x5Analysis.profile)).+1))
+      (S5x5Analysis.ideal_pile2_reading secretP)
+    <= Num.sqrt 5%:R * (s5x5_mixing.s5_lazy_alpha_R R) ^+ L).
+
+Timeout 60 Check (S5x5Analysis.exec_seat_bound :
+  forall (R : realType) (secretP : R.-fdist 'I_10) (L : nat)
+         (i : 'I_(pi_T' (mp_PI S5x5Analysis.profile)).+1),
+    var_dist
+      (sa_seat_dist (S5x5Analysis.word_sample secretP L) 0 i)
+      (S5x5Analysis.ideal_seat_reading secretP i)
+    <= Num.sqrt 5%:R * (s5x5_mixing.s5_lazy_alpha_R R) ^+ L).
+
+Timeout 60 Check (S5x5Analysis.exec_seat_uniform_ub :
+  forall (R : realType) (secretP : R.-fdist 'I_10) (L : nat)
+         (i : 'I_(pi_T' (mp_PI S5x5Analysis.profile)).+1),
+    var_dist
+      (sa_seat_dist (S5x5Analysis.word_sample secretP L) 0 i)
+      (fdist_uniform (card_ord 10))
+    <= var_dist (S5x5Analysis.ideal_seat_reading secretP i)
+         (fdist_uniform (card_ord 10))
+       + Num.sqrt 5%:R * (s5x5_mixing.s5_lazy_alpha_R R) ^+ L).
+
+Timeout 60 Check (S5x5Analysis.exec_pile1_floor :
+  forall (R : realType) (secretP : R.-fdist 'I_10) (L : nat) (s : 'I_5),
+    1 - Num.sqrt 5%:R * (s5x5_mixing.s5_lazy_alpha_R R) ^+ L
+    <= var_dist
+         (sa_seat_dist (S5x5Analysis.word_sample secretP L) 0
+            (s5x5_mixing.widen5to10 s : 'I_(pi_T' (mp_PI S5x5Analysis.profile)).+1))
+         (fdist_uniform (card_ord 10))).
+
+Timeout 60 Check (S5x5Analysis.exec_pile2_floor :
+  forall (R : realType) (secretP : R.-fdist 'I_10) (L : nat) (s : 'I_5),
+    1 - Num.sqrt 5%:R * (s5x5_mixing.s5_lazy_alpha_R R) ^+ L
+    <= var_dist
+         (sa_seat_dist (S5x5Analysis.word_sample secretP L) 0
+            (s5x5_mixing.rshift5to10 s : 'I_(pi_T' (mp_PI S5x5Analysis.profile)).+1))
+         (fdist_uniform (card_ord 10))).
+
+Timeout 60 Check (S5x5Analysis.exec_pile1_floor_gt0 :
+  forall (R : realType) (secretP : R.-fdist 'I_10) (L : nat) (s : 'I_5),
+    (17 <= L)%N ->
+    0 < var_dist
+          (sa_seat_dist (S5x5Analysis.word_sample secretP L) 0
+             (s5x5_mixing.widen5to10 s
+                : 'I_(pi_T' (mp_PI S5x5Analysis.profile)).+1))
+          (fdist_uniform (card_ord 10))).
+
+Timeout 60 Check (S5x5Analysis.exec_pile2_floor_gt0 :
+  forall (R : realType) (secretP : R.-fdist 'I_10) (L : nat) (s : 'I_5),
+    (17 <= L)%N ->
+    0 < var_dist
+          (sa_seat_dist (S5x5Analysis.word_sample secretP L) 0
+             (s5x5_mixing.rshift5to10 s
+                : 'I_(pi_T' (mp_PI S5x5Analysis.profile)).+1))
+          (fdist_uniform (card_ord 10))).
+
+Timeout 60 Check (S5x5Analysis.exec_pile1_uniform_ge :
+  forall (R : realType) (secretP : R.-fdist 'I_10) (L : nat) (s : 'I_5),
+    1 <= var_dist
+          (sa_seat_dist (S5x5Analysis.word_sample secretP L) 0
+             (s5x5_mixing.widen5to10 s
+                : 'I_(pi_T' (mp_PI S5x5Analysis.profile)).+1))
+          (fdist_uniform (card_ord 10))).
+
+Timeout 60 Check (S5x5Analysis.exec_pile2_uniform_ge :
+  forall (R : realType) (secretP : R.-fdist 'I_10) (L : nat) (s : 'I_5),
+    1 <= var_dist
+          (sa_seat_dist (S5x5Analysis.word_sample secretP L) 0
+             (s5x5_mixing.rshift5to10 s
+                : 'I_(pi_T' (mp_PI S5x5Analysis.profile)).+1))
+          (fdist_uniform (card_ord 10))).
 
 (******************************************************************************)
 (*     Mutation guards: the states the dependent model slot must reject       *)
