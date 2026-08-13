@@ -2819,7 +2819,8 @@ Timeout 60 Check (S5x5Analysis.exec_pile1_bound :
   forall (R : realType) (secretP : R.-fdist 'I_10) (L : nat) (s : 'I_5),
     var_dist
       (sa_seat_dist (S5x5Analysis.word_sample secretP L) 0
-         (s5x5_mixing.widen5to10 s : 'I_(pi_T' (mp_PI S5x5Analysis.profile)).+1))
+         (s5x5_mixing.widen5to10 s
+            : 'I_(pi_T' (mp_PI S5x5Analysis.profile)).+1))
       (S5x5Analysis.ideal_pile1_reading secretP)
     <= Num.sqrt 5%:R * (s5x5_mixing.s5_lazy_alpha_R R) ^+ L).
 
@@ -2827,7 +2828,8 @@ Timeout 60 Check (S5x5Analysis.exec_pile2_bound :
   forall (R : realType) (secretP : R.-fdist 'I_10) (L : nat) (s : 'I_5),
     var_dist
       (sa_seat_dist (S5x5Analysis.word_sample secretP L) 0
-         (s5x5_mixing.rshift5to10 s : 'I_(pi_T' (mp_PI S5x5Analysis.profile)).+1))
+         (s5x5_mixing.rshift5to10 s
+            : 'I_(pi_T' (mp_PI S5x5Analysis.profile)).+1))
       (S5x5Analysis.ideal_pile2_reading secretP)
     <= Num.sqrt 5%:R * (s5x5_mixing.s5_lazy_alpha_R R) ^+ L).
 
@@ -2854,7 +2856,8 @@ Timeout 60 Check (S5x5Analysis.exec_pile1_floor :
     1 - Num.sqrt 5%:R * (s5x5_mixing.s5_lazy_alpha_R R) ^+ L
     <= var_dist
          (sa_seat_dist (S5x5Analysis.word_sample secretP L) 0
-            (s5x5_mixing.widen5to10 s : 'I_(pi_T' (mp_PI S5x5Analysis.profile)).+1))
+            (s5x5_mixing.widen5to10 s
+            : 'I_(pi_T' (mp_PI S5x5Analysis.profile)).+1))
          (fdist_uniform (card_ord 10))).
 
 Timeout 60 Check (S5x5Analysis.exec_pile2_floor :
@@ -2862,7 +2865,8 @@ Timeout 60 Check (S5x5Analysis.exec_pile2_floor :
     1 - Num.sqrt 5%:R * (s5x5_mixing.s5_lazy_alpha_R R) ^+ L
     <= var_dist
          (sa_seat_dist (S5x5Analysis.word_sample secretP L) 0
-            (s5x5_mixing.rshift5to10 s : 'I_(pi_T' (mp_PI S5x5Analysis.profile)).+1))
+            (s5x5_mixing.rshift5to10 s
+            : 'I_(pi_T' (mp_PI S5x5Analysis.profile)).+1))
          (fdist_uniform (card_ord 10))).
 
 Timeout 60 Check (S5x5Analysis.exec_pile1_floor_gt0 :
@@ -2902,11 +2906,11 @@ Timeout 60 Check (S5x5Analysis.exec_pile2_uniform_ge :
 (******************************************************************************)
 (*     Mutation guards: the states the dependent model slot must reject       *)
 (*                                                                            *)
-(* Request 5.3: a Sampled or AnalysisBridged row with no model witness, and  *)
-(* a family over the wrong execution, are compile errors, demonstrated by    *)
-(* Fail. The fourth requested mutation, an executed word theorem alias       *)
-(* changed back to the cut-level type, is contingent on work package A and   *)
-(* is recorded as unmet in the 2026-08-13 completion response.               *)
+(* Request 5.3: a Sampled or AnalysisBridged row with no model witness, a    *)
+(* family over the wrong execution, and an executed word theorem alias       *)
+(* reverted to the cut-level type are compile errors, demonstrated by Fail.  *)
+(* The fourth guard is satisfiable since the user-approved 2026-08-13        *)
+(* amendment landed the executed theorem family.                             *)
 (******************************************************************************)
 
 Fail Check (@MkAnalysisPathRow S5Analysis.observed Sampled None
@@ -2921,4 +2925,14 @@ Fail Check (@MkAnalysisPathRow S5Analysis.rand_observed AnalysisBridged None
 Fail Check (@MkAnalysisPathRow S5Analysis.observed Sampled
   S5x5Analysis.word_family NoModelComparison
   (AcceptsAxioms [:: AxS5GroupOrder])).
+
+(* The fourth mutation: an executed word theorem alias reverted to the
+   cut-level type, the executed observer sa_seat_dist not being the
+   cut-position pushforward. *)
+Fail Check (S5Analysis.exec_endpoint_bound :
+  forall (R : realType) (secretP : R.-fdist 'I_5) (L : nat) (s : 'I_5),
+    var_dist (fdistmap (fun sigma : {perm 'I_5} => sigma s)
+                (sa_cut_dist (S5Analysis.word_sample secretP L)))
+             (fdist_uniform (card_ord 5))
+    <= Num.sqrt 5%:R * (s5_mixing.s5_alpha_R R) ^+ L).
 

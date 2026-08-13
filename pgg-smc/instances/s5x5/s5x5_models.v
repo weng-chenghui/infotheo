@@ -1110,7 +1110,8 @@ have Hsupp : forall v : 'I_10, v \notin [set v : 'I_10 | (val v < 5)%N] ->
   rewrite /s5x5_ideal_pile1_reading fdistmapE big_pred0 //.
   move=> sq; apply/negbTE; rewrite inE /=; apply/negP => /eqP Heq.
   have Hlt : (val v < 5)%N.
-    by rewrite -Heq; exact: (@prod_encode_pile1_lt sq.1 (widen5to10 sq.2) (ltn_ord sq.2)).
+    rewrite -Heq.
+  exact: (@prod_encode_pile1_lt sq.1 (widen5to10 sq.2) (ltn_ord sq.2)).
   by move: Hlt; rewrite ltnNge Hv.
 have Hge := @var_dist_supp_ge R 9 [set v : 'I_10 | (val v < 5)%N]
               (s5x5_ideal_pile1_reading secretP) Hsupp.
@@ -1144,7 +1145,8 @@ have Hsupp : forall v : 'I_10, v \notin [set v : 'I_10 | (5 <= val v)%N] ->
   have Hge5 : (val (rshift5to10 sq.2) < 5)%N = false.
     by apply/negbTE; rewrite -leqNgt; exact: leq_addl.
   have Hge2 : (5 <= val v)%N.
-    by rewrite -Heq; exact: (@prod_encode_pile2_ge sq.1 (rshift5to10 sq.2) Hge5).
+    rewrite -Heq.
+  exact: (@prod_encode_pile2_ge sq.1 (rshift5to10 sq.2) Hge5).
   by move: Hge2; rewrite leqNgt Hv.
 have Hge := @var_dist_supp_ge R 9 [set v : 'I_10 | (5 <= val v)%N]
               (s5x5_ideal_pile2_reading secretP) Hsupp.
@@ -1216,7 +1218,9 @@ Qed.
     positive regime: at word length at least seventeen the first-pile
     executed seat reading is at strictly positive distance from global
     uniform, conditional on s5_rayleigh_Q2_R.
-    @composes: s5x5_exec_pile1_floor *)
+    @composes: s5x5_exec_pile1_floor
+    Naming: intentional; _floor_gt0 mirrors the pre-existing
+    word_pile1_floor_gt0 and word_pile2_floor_gt0 pair. *)
 Lemma s5x5_exec_pile1_floor_gt0 (secretP : R.-fdist 'I_10) (L : nat)
     (s : 'I_5) : (17 <= L)%N ->
   0 < var_dist
@@ -1232,7 +1236,9 @@ Qed.
 (** s5x5_exec_pile2_floor_gt0 — the second-pile executed floor in its
     positive regime, at word length at least seventeen, conditional on
     s5_rayleigh_Q2_R.
-    @composes: s5x5_exec_pile2_floor *)
+    @composes: s5x5_exec_pile2_floor
+    Naming: intentional; _floor_gt0 mirrors the pre-existing
+    word_pile1_floor_gt0 and word_pile2_floor_gt0 pair. *)
 Lemma s5x5_exec_pile2_floor_gt0 (secretP : R.-fdist 'I_10) (L : nat)
     (s : 'I_5) : (17 <= L)%N ->
   0 < var_dist
