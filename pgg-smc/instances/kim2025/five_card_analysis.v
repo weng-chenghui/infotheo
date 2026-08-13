@@ -226,6 +226,21 @@ Definition repeated_sample := @kim_repeated_sample.
     @intent: alias of kim_centi_repeated_sample. *)
 Definition centi_sample := @kim_centi_repeated_sample.
 
+(** uniform_family — the uniform rotation model as a unit-indexed typed
+    family.
+    @intent: alias of five_card_uniform_family. *)
+Definition uniform_family := five_card_uniform_family.
+
+(** biased_family — the single biased cut at bias one hundredth as a
+    unit-indexed typed family.
+    @intent: alias of kim_biased_family. *)
+Definition biased_family := kim_biased_family.
+
+(** centi_family — the seven-cut repeated model at bias one hundredth as a
+    unit-indexed typed family.
+    @intent: alias of kim_centi_family. *)
+Definition centi_family := kim_centi_family.
+
 (** sample_cut_distE — the uniform model's cut distribution is the uniform
     rotation.
     @intent: alias of five_card_sample_cut_distE. *)

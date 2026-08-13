@@ -245,6 +245,16 @@ Definition rand_sample := @s5x5_rand_sample.
     @intent: alias of s5x5_word_sample. *)
 Definition word_sample := @s5x5_word_sample.
 
+(** rand_family — the randomized product-tape model as a unit-indexed typed
+    family.
+    @intent: alias of s5x5_rand_family. *)
+Definition rand_family := s5x5_rand_family.
+
+(** word_family — the finite-word model family, indexed by a secret prior
+    and a word length; shared by the endpoint and limitation rows.
+    @intent: alias of s5x5_word_family. *)
+Definition word_family := s5x5_word_family.
+
 (** rand_cut_distE — the randomized model's cut distribution is the point
     distribution at the identity.
     @intent: alias of s5x5_rand_cut_distE. *)

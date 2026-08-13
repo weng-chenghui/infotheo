@@ -108,7 +108,7 @@ From pgg_smc Require Import pgg_leakage_product pgg_trace_secrecy.
 From pgg_smc Require Import pgg_s5x5 s5x5_pile rigidity_s5x5_instance.
 From pgg_smc Require Import s5x5_profile s5x5_run s5x5_trace s5x5_secrecy.
 From pgg_smc Require Import s5_mixing s5x5_mixing.
-From pgg_smc Require Import s5_exec s5x5_exec.
+From pgg_smc Require Import s5_exec s5x5_exec pgg_analysis_status.
 
 Set Implicit Arguments.
 Unset Strict Implicit.
@@ -893,3 +893,25 @@ Fail Check (fun s : 'I_5 =>
          (Num.sqrt 5%:R * s5_lazy_alpha_R R ^+ L)%R)).
 
 End s5x5_sample_layers.
+
+(******************************************************************************)
+(*     The typed model families of the S_5 x S_5 analysis paths               *)
+(******************************************************************************)
+
+(** s5x5_rand_family — the randomized product-tape model as a unit-indexed
+    family.
+    @intent: the AnalysisModelFamily over s5x5_rand_observed whose one
+    member at every real field is s5x5_rand_sample. *)
+Definition s5x5_rand_family : AnalysisModelFamily s5x5_rand_observed :=
+  @MkAnalysisModelFamily s5x5_rand_observed (fun _ => unit)
+    (fun R _ => s5x5_rand_sample R).
+
+(** s5x5_word_family — the finite-word model family, indexed by a secret
+    prior and a word length; the one family shared by the two endpoint and
+    the two limitation rows.
+    @intent: the AnalysisModelFamily over s5x5_observed sending an index
+    (secretP, L) to s5x5_word_sample secretP L. *)
+Definition s5x5_word_family : AnalysisModelFamily s5x5_observed :=
+  @MkAnalysisModelFamily s5x5_observed
+    (fun R => (R.-fdist 'I_10 * nat)%type)
+    (fun R p => s5x5_word_sample p.1 p.2).

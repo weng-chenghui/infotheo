@@ -60,6 +60,7 @@ From pgg_smc Require Import pgg_sample_adapter pgg_collusion_bound.
 From pgg_reconstruct Require Import pgg_sharing_framework covering_scheme.
 From pgg_smc Require Import rigidity_abelian_instance abelian_word_collapse.
 From pgg_smc Require Import abel_profile abelian_exec.
+From pgg_smc Require Import pgg_analysis_status.
 
 Set Implicit Arguments.
 Unset Strict Implicit.
@@ -621,3 +622,16 @@ exact: abel_executed_distance.
 Qed.
 
 End abel_models.
+
+(******************************************************************************)
+(*     The typed model family of the abelian limitation path                  *)
+(******************************************************************************)
+
+(** abel_word_family — the fixed-length word model family, indexed by the
+    word length.
+    @intent: the AnalysisModelFamily over abel_shuffle_observed sending a
+    length L to abel_actual_adapter at that length, the model the mixing
+    limitation is stated about. *)
+Definition abel_word_family : AnalysisModelFamily abel_shuffle_observed :=
+  @MkAnalysisModelFamily abel_shuffle_observed (fun _ => nat)
+    (fun R L => @abel_actual_adapter R L).

@@ -96,6 +96,7 @@ From pgg_smc Require Import five_card_kim five_card_family.
 From pgg_smc Require Import den_boer_profile den_boer_encoding den_boer_run.
 From pgg_smc Require Import five_card_leakage denboer_trace.
 From pgg_smc Require Import five_card_exec kim_input_privacy.
+From pgg_smc Require Import pgg_analysis_status.
 
 Set Implicit Arguments.
 Unset Strict Implicit.
@@ -402,3 +403,34 @@ Definition kim_centi_repeated_seat_distE :=
   @kim_repeated_seat_distE R (1 / 100) (kim_centi_lt R) (kim_centi_gt R) 7.
 
 End five_card_centi_model.
+
+(******************************************************************************)
+(*     The typed model families of the five-card analysis paths               *)
+(******************************************************************************)
+
+(** five_card_uniform_family — the uniform rotation model as a unit-indexed
+    family.
+    @intent: the AnalysisModelFamily over five_card_observed whose one member
+    at every real field is five_card_sample. *)
+Definition five_card_uniform_family
+    : AnalysisModelFamily five_card_observed :=
+  @MkAnalysisModelFamily five_card_observed (fun _ => unit)
+    (fun R _ => five_card_sample R).
+
+(** kim_biased_family — the single biased cut at bias one hundredth as a
+    unit-indexed family.
+    @intent: the AnalysisModelFamily over five_card_observed whose one member
+    at every real field is kim_single_sample at bias 1/100, its two side
+    conditions discharged by kim_centi_lt and kim_centi_gt. *)
+Definition kim_biased_family : AnalysisModelFamily five_card_observed :=
+  @MkAnalysisModelFamily five_card_observed (fun _ => unit)
+    (fun R _ => @kim_single_sample R (1 / 100)
+                  (kim_centi_lt R) (kim_centi_gt R)).
+
+(** kim_centi_family — the seven-cut repeated model at bias one hundredth as
+    a unit-indexed family.
+    @intent: the AnalysisModelFamily over five_card_observed whose one member
+    at every real field is kim_centi_repeated_sample. *)
+Definition kim_centi_family : AnalysisModelFamily five_card_observed :=
+  @MkAnalysisModelFamily five_card_observed (fun _ => unit)
+    (fun R _ => kim_centi_repeated_sample R).

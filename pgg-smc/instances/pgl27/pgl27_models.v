@@ -84,6 +84,7 @@ From pgg_reconstruct Require Import pgg_sharing_framework covering_scheme
 From pgg_smc Require Import pgl27_group pgl27_orbit pgl27_scheme pgl27_profile.
 From pgg_smc Require Import pgl27_run pgl27_secrecy pgl27_trace pgl27_mixing.
 From pgg_smc Require Import pgl27_word_privacy pgl27_exec.
+From pgg_smc Require Import pgg_analysis_status.
 
 Set Implicit Arguments.
 Unset Strict Implicit.
@@ -420,3 +421,22 @@ apply: (@var_dist_fdistmap_transfer R (pgg_gT pgl27_M) _ (rho_word R)
 Qed.
 
 End pgl27_sample_models.
+
+(******************************************************************************)
+(*     The typed model families of the eight-card orbit analysis paths        *)
+(******************************************************************************)
+
+(** pgl27_exact_family — the exact-shuffle model as a unit-indexed family.
+    @intent: the AnalysisModelFamily over pgl27_observed whose one member at
+    every real field is pgl27_sample. *)
+Definition pgl27_exact_family : AnalysisModelFamily pgl27_observed :=
+  @MkAnalysisModelFamily pgl27_observed (fun _ => unit)
+    (fun R _ => pgl27_sample R).
+
+(** pgl27_word_family — the two-hundred-letter word model family, indexed by
+    the secret prior.
+    @intent: the AnalysisModelFamily over pgl27_observed sending a secret
+    prior to pgl27_word_sample at that prior. *)
+Definition pgl27_word_family : AnalysisModelFamily pgl27_observed :=
+  @MkAnalysisModelFamily pgl27_observed (fun R => R.-fdist bool)
+    (fun R p => @pgl27_word_sample R p).

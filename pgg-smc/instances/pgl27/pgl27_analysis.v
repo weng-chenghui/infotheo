@@ -189,6 +189,15 @@ Definition fixed_exact_sample := @pgl27_fixed_sample.
     @intent: alias of pgl27_fixed_word_sample. *)
 Definition fixed_word_sample := @pgl27_fixed_word_sample.
 
+(** exact_family — the exact-shuffle model as a unit-indexed typed family.
+    @intent: alias of pgl27_exact_family. *)
+Definition exact_family := pgl27_exact_family.
+
+(** word_family — the two-hundred-letter word model family, indexed by the
+    secret prior.
+    @intent: alias of pgl27_word_family. *)
+Definition word_family := pgl27_word_family.
+
 (** sample_cut_distE — the exact model's cut distribution is the marginal
     bound's shuffle.
     @intent: alias of pgl27_sample_cut_distE. *)

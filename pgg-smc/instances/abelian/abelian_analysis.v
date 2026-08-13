@@ -177,6 +177,11 @@ Definition ideal_sample := abel_ideal_adapter.
     @intent: alias of abel_actual_adapter. *)
 Definition word_sample := abel_actual_adapter.
 
+(** word_family — the fixed-length word model family, indexed by the word
+    length.
+    @intent: alias of abel_word_family. *)
+Definition word_family := abel_word_family.
+
 (** actual_cut_distE — the actual model's cut distribution is the
     word-induced shuffle distribution.
     @intent: alias of abel_actual_cut_dist. *)

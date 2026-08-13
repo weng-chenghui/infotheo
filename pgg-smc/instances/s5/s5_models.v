@@ -73,7 +73,7 @@ From pgg_smc Require Import pgg_raag_s5 pgg_raag_path s5_profile s5_run.
 From pgg_smc Require Import pgg_leakage_witness pgg_randomized_sharing.
 From pgg_smc Require Import pgg_canonical_sharing pgg_sharing_mechanism.
 From pgg_smc Require Import pgg_trace_secrecy s5_trace s5_secrecy s5_mixing.
-From pgg_smc Require Import s5_exec.
+From pgg_smc Require Import s5_exec pgg_analysis_status.
 
 Set Implicit Arguments.
 Unset Strict Implicit.
@@ -344,3 +344,23 @@ Fail Check (fun s : 'I_5 =>
          (Num.sqrt 5%:R * s5_alpha_R R ^+ L)%R)).
 
 End s5_sample_layers.
+
+(******************************************************************************)
+(*     The typed model families of the S_5 analysis paths                     *)
+(******************************************************************************)
+
+(** s5_rand_family — the randomized tape model as a unit-indexed family.
+    @intent: the AnalysisModelFamily over s5_rand_observed whose one member
+    at every real field is s5_rand_sample. *)
+Definition s5_rand_family : AnalysisModelFamily s5_rand_observed :=
+  @MkAnalysisModelFamily s5_rand_observed (fun _ => unit)
+    (fun R _ => s5_rand_sample R).
+
+(** s5_word_family — the finite-word model family, indexed by a secret prior
+    and a word length.
+    @intent: the AnalysisModelFamily over s5_observed sending an index
+    (secretP, L) to s5_word_sample secretP L. *)
+Definition s5_word_family : AnalysisModelFamily s5_observed :=
+  @MkAnalysisModelFamily s5_observed
+    (fun R => (R.-fdist 'I_5 * nat)%type)
+    (fun R p => s5_word_sample p.1 p.2).
