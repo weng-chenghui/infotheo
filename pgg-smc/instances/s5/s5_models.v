@@ -346,6 +346,96 @@ Fail Check (fun s : 'I_5 =>
 End s5_sample_layers.
 
 (******************************************************************************)
+(*     The executed endpoint bound against the encoder-image ideal            *)
+(*                                                                            *)
+(* Amended work package A (user-approved 2026-08-13): the executed seat      *)
+(* reading is compared with the encoder-image ideal, not with uniform. The   *)
+(* uniform-ideal form is false for this plug's deterministic encoder; its    *)
+(* compiled refutation is recorded in the 2026-08-13 completion response.    *)
+(******************************************************************************)
+
+Section s5_exec_ideal.
+
+Variable R : realType.
+Let mpS : MonodromyProfile := s5_profile.
+
+Import GRing.Theory Num.Theory Order.POrderTheory.
+Local Open Scope ring_scope.
+
+Local Notation s5_M := (@Gen_PGGTypes 3 3 (path_gen_tuple 3)).
+
+(** s5_ideal_reading — the encoder-image ideal reading: the content one seat
+    reads when the dealt position is exactly uniform, mixed over the secret
+    prior.
+    @intent: the pushforward of secretP times the uniform position along the
+    encoder tnth (ts_encode s5_scheme). The ideal is neither uniform nor
+    secret-independent. *)
+Definition s5_ideal_reading (secretP : R.-fdist 'I_5) : R.-fdist 'I_5 :=
+  fdistmap (fun sq : 'I_5 * 'I_5 => tnth (ts_encode s5_scheme sq.1) sq.2)
+    (secretP `x (fdist_uniform (card_ord 5))).
+
+(** s5_exec_endpoint_bound — executed endpoint marginal mixing, conditional
+    on the trusted analytical certificate s5_rayleigh_Q2_R.
+    @main bound: the variation distance, in the repository's full-L1
+    convention, between sa_seat_dist of the interpreter-executed finite-word
+    adapter at one seat and the encoder-image ideal reading, the content
+    that seat reads when the dealt position is exactly uniform mixed over
+    the secret prior, is at most sqrt 5 times alpha to the power L. The
+    statement bounds one seat's endpoint marginal, the ideal reading is
+    neither uniform nor secret-independent, and no coalition, privacy,
+    secrecy or leakage conclusion is claimed. *)
+Lemma s5_exec_endpoint_bound (secretP : R.-fdist 'I_5) (L : nat)
+    (i : 'I_(pi_T' (mp_PI mpS)).+1) :
+  var_dist
+    (@sa_seat_dist R mpS s5_exec_plug (s5_word_sample secretP L) 0 i)
+    (s5_ideal_reading secretP)
+  <= Num.sqrt 5%:R * (s5_alpha_R R) ^+ L.
+Proof.
+have Hsp : sa_sampleP (s5_word_sample secretP L)
+         = (secretP `x (@word_uniform R 3 L))%fdist by [].
+have Hview : @sa_seat_view R mpS s5_exec_plug (s5_word_sample secretP L) 0 i
+  = (fun u : ('I_5 * L.-tuple 'I_4)%type =>
+       tnth (ts_encode s5_scheme u.1) (@word_eval s5_M L u.2 i)).
+  apply: boolp.funext => u.
+  by rewrite /sa_seat_view /= s5_exec_seat_endpointE /s5_content_obs /=
+             tnth_ord_tuple.
+rewrite /sa_seat_dist Hview Hsp /s5_ideal_reading.
+apply: (@var_dist_fdistmap_prod_mix R _ _ _ _ secretP _ _
+          (fun (a : 'I_5) (w : L.-tuple 'I_4) =>
+             tnth (ts_encode s5_scheme a) (@word_eval s5_M L w i))
+          (fun (a : 'I_5) (q : 'I_5) => tnth (ts_encode s5_scheme a) q) _)
+  => a.
+have E1 : fdistmap (fun w : L.-tuple 'I_4 =>
+             tnth (ts_encode s5_scheme a) (@word_eval s5_M L w i))
+            (@word_uniform R 3 L)
+        = fdistmap (fun c : 'I_5 => tnth (ts_encode s5_scheme a) c)
+            (fdistmap (fun sigma : {perm 'I_5} => sigma i)
+               (@rho_from_words R 3 3 L (path_gen_tuple 3))).
+  by rewrite fdistmap_comp /rho_from_words fdistmap_comp.
+rewrite E1.
+apply: (le_trans (var_dist_fdistmap _ _ _)).
+exact: s5_spectral_convergence_proved.
+Qed.
+
+(* The executed bound lives at the endpoint carrier 'I_5. The guard below
+   records that it does not instantiate the cut-carrier base premise
+   s5_word_base_premise on {perm 'I_5}: the encoder-image transfer is
+   observer-level and never discharges the absent group-level premise,
+   which for the group-uniform ideal remains unsatisfiable. The positive
+   Check pins the failure to that carrier mismatch and not to a later name
+   or arity change. *)
+Check (fun (secretP : R.-fdist 'I_5) (L : nat)
+           (i : 'I_(pi_T' (mp_PI mpS)).+1) =>
+  s5_exec_endpoint_bound secretP L i).
+Fail Check (fun (secretP : R.-fdist 'I_5) (L : nat)
+                (i : 'I_(pi_T' (mp_PI mpS)).+1) =>
+  (s5_exec_endpoint_bound secretP L i
+     : s5_word_base_premise secretP L (fdist_uniform (card_ord 5))
+         (Num.sqrt 5%:R * s5_alpha_R R ^+ L)%R)).
+
+End s5_exec_ideal.
+
+(******************************************************************************)
 (*     The typed model families of the S_5 analysis paths                     *)
 (******************************************************************************)
 

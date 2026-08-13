@@ -214,6 +214,12 @@ Definition rand_family := s5_rand_family.
     @intent: alias of s5_word_family. *)
 Definition word_family := s5_word_family.
 
+(** ideal_reading — the encoder-image ideal reading: the content one seat
+    reads when the dealt position is exactly uniform, mixed over the secret
+    prior; neither uniform nor secret-independent.
+    @intent: alias of s5_ideal_reading. *)
+Definition ideal_reading := @s5_ideal_reading.
+
 (** rand_cut_distE — the randomized model's cut distribution is the point
     distribution at the identity.
     @intent: alias of s5_rand_cut_distE. *)
@@ -304,10 +310,22 @@ Definition exec_coalition_secrecy := @s5_exec_coalition_secrecy.
 (* marginal bound in the analysis manifest.                                   *)
 (******************************************************************************)
 
-(** word_endpoint_bound — endpoint marginal mixing of the finite-word model at
-    word length L, conditional on s5_rayleigh_Q2_R.
+(** word_endpoint_bound — cut-level endpoint marginal mixing of the
+    finite-word model at word length L, conditional on s5_rayleigh_Q2_R: the
+    bound is on a position pushforward of the cut distribution, not on an
+    interpreter-executed observer.
     @intent: alias of s5_word_endpoint_bound. *)
 Definition word_endpoint_bound := @s5_word_endpoint_bound.
+
+(** exec_endpoint_bound — executed endpoint marginal mixing, conditional on
+    s5_rayleigh_Q2_R: the variation distance, in the full-L1 convention,
+    between sa_seat_dist of the interpreter-executed finite-word adapter at
+    one seat and the encoder-image ideal reading is at most sqrt 5 times
+    alpha to the power L. One endpoint marginal; the ideal is neither
+    uniform nor secret-independent; no coalition, privacy, secrecy or
+    leakage conclusion is claimed.
+    @intent: alias of s5_exec_endpoint_bound. *)
+Definition exec_endpoint_bound := @s5_exec_endpoint_bound.
 
 (******************************************************************************)
 (* ===== 7. Transfer ===== *)
@@ -315,11 +333,11 @@ Definition word_endpoint_bound := @s5_word_endpoint_bound.
 (* One status per analysis path. The deterministic path compares no model     *)
 (* with an idealized one. The randomized path carries its executed observers  *)
 (* back to the landed static results by the two reader equalities below, and  *)
-(* compares no idealized model. The finite-word path compares no model        *)
-(* either: the landed spectral theorem bounds a pushforward on the carrier    *)
-(* 'I_5, while the generic transfer theorem needs a bound on the carrier      *)
-(* {perm 'I_5}, which is the premise word_missing_premise names and which the *)
-(* repository does not supply.                                                *)
+(* compares no idealized model. The finite-word path carries an               *)
+(* observer-level transfer theorem to the encoder-image ideal reading on the  *)
+(* endpoint carrier 'I_5 (exec_endpoint_bound); its base-distribution         *)
+(* premise on the cut carrier {perm 'I_5} remains absent, is named by         *)
+(* word_missing_premise, and for the group-uniform ideal is unsatisfiable.    *)
 (******************************************************************************)
 
 (** det_transfer_status — the deterministic path's transfer status.
@@ -344,9 +362,15 @@ Definition rand_content_traceE := @s5_sample_content_traceE.
 Definition rand_coalition_viewE := @s5_sample_coalition_viewE.
 
 (** word_transfer_status — the finite-word path's transfer status.
-    @intent: NoModelComparison, the base-distribution premise of the generic
-    transfer theorem being absent at the cut carrier. *)
-Definition word_transfer_status : TransferStatus := NoModelComparison.
+    @intent: IdealFinite, the path carrying the observer-level public
+    model-transfer theorem exec_endpoint_bound to the encoder-image ideal
+    reading on the endpoint carrier 'I_5. That ideal is not the
+    group-uniform ideal: the base premise word_missing_premise on the cut
+    carrier {perm 'I_5} remains absent and, for the uniform distribution on
+    the generated group, unsatisfiable at every delta below one by
+    sign-coset confinement. No bound against group uniform on any carrier
+    is stated or implied. *)
+Definition word_transfer_status : TransferStatus := IdealFinite.
 
 (** word_missing_premise — the absent premise named as a proposition.
     @intent: alias of s5_word_base_premise, a variation-distance bound
@@ -437,7 +461,14 @@ Timeout 60 Check (S5Analysis.word_endpoint_bound :
 Timeout 60 Check (erefl : S5Analysis.det_transfer_status = NoModelComparison).
 Timeout 60 Check (erefl :
   S5Analysis.rand_transfer_status = StaticExecutedOnly).
-Timeout 60 Check (erefl : S5Analysis.word_transfer_status = NoModelComparison).
+Timeout 60 Check (erefl : S5Analysis.word_transfer_status = IdealFinite).
+Timeout 60 Check (S5Analysis.exec_endpoint_bound :
+  forall (R : realType) (secretP : R.-fdist 'I_5) (L : nat)
+         (i : 'I_(pi_T' (mp_PI s5_profile)).+1),
+    var_dist
+      (sa_seat_dist (S5Analysis.word_sample secretP L) 0 i)
+      (S5Analysis.ideal_reading secretP)
+    <= Num.sqrt 5%:R * (s5_alpha_R R) ^+ L).
 Timeout 60 Check (S5Analysis.word_missing_premise :
   forall (R : realType), R.-fdist 'I_5 -> forall L : nat,
     R.-fdist {perm 'I_5} -> R -> Prop).

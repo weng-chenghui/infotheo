@@ -201,6 +201,111 @@ Qed.
 End var_dist_uniform_supp.
 
 (******************************************************************************)
+(*  Section 3b: Mixture bound and support lower bound for var_dist            *)
+(******************************************************************************)
+
+Section var_dist_mixture_supp.
+
+Variable R : realType.
+Import Order.POrderTheory.
+
+(** fdistmap_prod_curryE — the pointwise mass of a product pushforward along
+    a curried map is the prior-weighted mixture of the conditional
+    pushforwards.
+    @composes: var_dist_fdistmap_prod_mix *)
+Lemma fdistmap_prod_curryE (A B C : finType) (P : R.-fdist A) (Q : R.-fdist B)
+    (h : A -> B -> C) (c : C) :
+  fdistmap (fun ab : A * B => h ab.1 ab.2) (P `x Q) c
+  = \sum_(a : A) P a * fdistmap (h a) Q c.
+Proof.
+transitivity (\sum_(a : A) \sum_(b : B | h a b == c) P a * Q b).
+  rewrite pair_big_dep /= fdistmapE.
+  by apply: eq_big => [ab|ab _]; [rewrite inE | rewrite fdist_prodE].
+apply: eq_bigr => a _.
+rewrite fdistmapE big_distrr /=.
+by apply: eq_big => [b|b _]; [rewrite inE|].
+Qed.
+
+(** var_dist_fdistmap_prod_mix — the mixture bound: if for every first
+    coordinate the two conditional pushforwards are within delta, the two
+    product pushforwards are within delta, the two right factors possibly
+    on different carriers.
+    @main architecture: var_dist (fdistmap (uncurry h) (P `x Q))
+    (fdistmap (uncurry h') (P `x Q')) <= delta from the per-coordinate
+    bounds, by joint convexity of the total variation distance.
+    Naming: intentional; extends this file's var_dist_fdistmap family
+    (var_dist_fdistmap, var_dist_fdistmap_inj, var_dist_fdistmap_balanced)
+    with the product-mixture form, and the family prefix is load-bearing
+    for Search. *)
+Lemma var_dist_fdistmap_prod_mix (A B B' C : finType) (P : R.-fdist A)
+    (Q : R.-fdist B) (Q' : R.-fdist B')
+    (h : A -> B -> C) (h' : A -> B' -> C) (delta : R) :
+  (forall a : A,
+     var_dist (fdistmap (h a) Q) (fdistmap (h' a) Q') <= delta) ->
+  var_dist (fdistmap (fun ab : A * B => h ab.1 ab.2) (P `x Q))
+           (fdistmap (fun ab : A * B' => h' ab.1 ab.2) (P `x Q')) <= delta.
+Proof.
+move=> Hd.
+rewrite /var_dist.
+under eq_bigr do rewrite !fdistmap_prod_curryE -sumrB.
+apply: (@le_trans _ _ (\sum_(c : C) \sum_(a : A)
+          P a * `|fdistmap (h a) Q c - fdistmap (h' a) Q' c|)).
+  apply: ler_sum => c _.
+  apply: (le_trans (ler_norm_sum _ _ _)).
+  apply: ler_sum => a _.
+  by rewrite -mulrBr normrM ger0_norm.
+rewrite exchange_big /=.
+under eq_bigr do rewrite -big_distrr /=.
+apply: (@le_trans _ _ (\sum_(a : A) P a * delta)).
+  by apply: ler_sum => a _; rewrite ler_wpM2l //; exact: Hd.
+by rewrite -big_distrl /= FDist.f1 mul1r.
+Qed.
+
+(** var_dist_supp_ge — a distribution supported on a set of size k among
+    n.+1 values is at total variation distance at least 2 (1 - k / n.+1)
+    from the uniform distribution.
+    @main architecture: the support lower bound
+    2%:R * (1 - #|S|%:R / n.+1%:R) <= var_dist P (fdist_uniform _) whenever
+    P vanishes outside S. *)
+Lemma var_dist_supp_ge (n : nat) (S : {set 'I_n.+1}) (P : R.-fdist 'I_n.+1) :
+  (forall v : 'I_n.+1, v \notin S -> P v = 0) ->
+  2%:R * (1 - #|S|%:R / n.+1%:R)
+  <= var_dist P (fdist_uniform (card_ord n.+1)).
+Proof.
+move=> HS.
+set u := (n.+1%:R^-1 : R).
+have Hu0 : (0 : R) <= u by rewrite /u invr_ge0 ler0n.
+have HuE : forall v : 'I_n.+1, fdist_uniform (R := R) (card_ord n.+1) v = u.
+  by move=> v; rewrite fdist_uniformE card_ord.
+have Htot : \sum_(v : 'I_n.+1) u = 1.
+  by rewrite sumr_const card_ord -mulr_natl /u mulfV // pnatr_eq0.
+have Hblk : \sum_(v in S) u = #|S|%:R * u.
+  by rewrite sumr_const mulr_natl.
+have Hmass : \sum_(v in S) P v = 1.
+  rewrite -(FDist.f1 P) [RHS](bigID (fun v => v \in S)) /=.
+  by rewrite [X in _ = _ + X]big1 ?addr0 // => v Hv; exact: HS.
+have Hgap : 1 - #|S|%:R * u <= \sum_(v in S) `|P v - u|.
+  apply: (le_trans (ler_norm _)).
+  have <- : \sum_(v in S) (P v - u) = 1 - #|S|%:R * u.
+    by rewrite sumrB Hmass Hblk.
+  exact: ler_norm_sum.
+have Hcomp : \sum_(v : 'I_n.+1 | v \notin S) u = 1 - #|S|%:R * u.
+  have H := Htot.
+  rewrite (bigID (fun v => v \in S)) /= Hblk addrC in H.
+  exact: (canRL (addrK _) H).
+have Hout : \sum_(v : 'I_n.+1 | v \notin S) `|P v - u| = 1 - #|S|%:R * u.
+  rewrite -Hcomp; apply: eq_bigr => v Hv.
+  by rewrite (HS _ Hv) sub0r normrN ger0_norm.
+rewrite /var_dist.
+under eq_bigr do rewrite HuE.
+rewrite (bigID (fun v => v \in S)) /= Hout.
+rewrite mulr_natl mulr2n.
+by apply: lerD; [exact: Hgap | exact: lexx].
+Qed.
+
+End var_dist_mixture_supp.
+
+(******************************************************************************)
 (*                 Section 4: Collusion bound (Theorem 5)                    *)
 (******************************************************************************)
 
