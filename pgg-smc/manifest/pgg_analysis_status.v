@@ -61,10 +61,14 @@ Inductive CompletionLevel : Set :=
   | Algebraic | Executable | Observed | Sampled | AnalysisBridged.
 
 (* Relation an analysis path establishes between its executed model and an
-   idealized one. IdealFinite is a public model-transfer theorem and
-   NegativeTransfer is a theorem transporting an obstruction to the path's
-   observer. StaticExecutedOnly and NoModelComparison carry no such theorem,
-   and the manifest row of such a path names the absent premise instead. *)
+   idealized one. IdealFinite is a public model-transfer theorem, and the
+   row's prose names the ideal and the carrier of the transfer: the
+   constructor covers both a cut-carrier transfer whose base premise is
+   discharged and an observer-level transfer to a named ideal at the
+   endpoint carrier. NegativeTransfer is a theorem transporting an
+   obstruction to the path's observer. StaticExecutedOnly and
+   NoModelComparison carry no such theorem, and the manifest row of such a
+   path names the absent premise instead. *)
 Inductive TransferStatus : Set :=
   | NoModelComparison | StaticExecutedOnly | IdealFinite | NegativeTransfer.
 
