@@ -64,9 +64,11 @@ the floors' obstruction is re-sourced to encoder support confinement.
   `9cceb246` (dependent model slot), `0d925262` (legend alignment),
   `ed48250b` (the pre-amendment NO-GO response).
 - Amended package A: `b552ef7a` (generic mixture and support lemmas + S5),
-  `2dfcb150` (S5xS5), `7c6f7f13` (manifest statuses, check 5, fourth
-  mutation guard, client), `9220bedc` (IdealFinite vocabulary
-  clarification).
+  `2dfcb150` (S5xS5), `7c6f7f13` (manifest statuses, check 5, client),
+  `9220bedc` (IdealFinite vocabulary clarification), `36def083` (the
+  fourth mutation guard and the post-landing audit fix-forwards; the
+  guard had been claimed in 7c6f7f13's message but its edit was lost in a
+  timed-out shell step, which the compensating review caught).
 - Final commit: the commit updating this response.
 
 ## 2. Verdicts (section 12 item 2)
@@ -207,8 +209,10 @@ own observed execution a type error. Manifest checks: per-row `apr_model`
 checks, index-exercise checks, the generic execution-projection check, 51
 erefl status pins (8 flipped by the amendment, plus 3 facade status
 pins), the eleven executed spelled-type checks (request 5.3 check 5), and
-FOUR mutation `Fail` guards, the fourth being the executed alias at the
-cut-level type. The manifest's convention banner, the five affected row
+five mutation `Fail` commands covering the four requested mutation
+classes, the fourth class being the executed alias reverted to the
+cut-level type (landed in `36def083` after the compensating review caught
+its earlier omission). The manifest's convention banner, the five affected row
 tables, the row-17 justification and the absent-capabilities block are
 rewritten so the three comparison targets (cut-level pile uniform;
 satisfiable encoder-image ideals; unsatisfiable-premise group uniform)
@@ -268,7 +272,11 @@ landed. Compensating direct rocq-auditor dispatches reviewed every
 substantive commit; the amendment's label decisions were separately
 audited before implementation (conditional GO whose conditions this
 response and the landed prose discharge), and the post-landing dispatch
-over the four amended commits is recorded in the session log.
+over the four amended commits returned: wording contract COMPLIANT on
+every added line (no privacy framing, no ideal conflation, floors sourced
+in the encoder), one error-severity accuracy finding (the fourth guard
+claimed but not landed) and eight style findings, all fixed forward in
+`36def083`.
 
 ## 8. Print Assumptions (section 12 item 10)
 
