@@ -45,7 +45,8 @@
 (* functional_extensionality_dep and constructive_indefinite_description is   *)
 (* the repository baseline, inherited from boolp through the infotheo         *)
 (* probability layer. It is NOT listed in an assumption status. A row is      *)
-(* BaselineClassicalOnly when Print Assumptions reports the trio and nothing else, and *)
+(* BaselineClassicalOnly when Print Assumptions reports the trio and        *)
+(* nothing else, and                                                          *)
 (* AcceptsAxioms when it reports named repository assumptions beyond it. The  *)
 (* three constructors of PggAxiom are the only such assumptions, and a status *)
 (* covers the public results of the path, not only the values the row stores. *)
@@ -123,7 +124,7 @@ Local Open Scope ring_scope.
 (*                          the group already |                               *)
 (* | completion level     | AnalysisBridged |                                 *)
 (* | transfer status      | StaticExecutedOnly |                              *)
-(* | assumption status    | BaselineClassicalOnly |                                    *)
+(* | assumption status    | BaselineClassicalOnly |                           *)
 (* | typed row            | pgl27_row_exact |                                 *)
 (*                                                                            *)
 (* Capabilities, one line per (theorem, distribution, observer, notion):      *)
@@ -188,7 +189,7 @@ Local Open Scope ring_scope.
 (*                          inequality needs, on the cut carrier itself |     *)
 (* | completion level     | AnalysisBridged |                                 *)
 (* | transfer status      | IdealFinite |                                     *)
-(* | assumption status    | BaselineClassicalOnly |                                    *)
+(* | assumption status    | BaselineClassicalOnly |                           *)
 (* | typed row            | pgl27_row_word |                                  *)
 (*                                                                            *)
 (* | theorem | distribution | observer | notion |                             *)
@@ -252,7 +253,7 @@ Local Open Scope ring_scope.
 (*                          development does not supply |                     *)
 (* | completion level     | AnalysisBridged |                                 *)
 (* | transfer status      | StaticExecutedOnly |                              *)
-(* | assumption status    | BaselineClassicalOnly |                                    *)
+(* | assumption status    | BaselineClassicalOnly |                           *)
 (* | typed row            | five_card_row_uniform |                           *)
 (*                                                                            *)
 (* | theorem | distribution | observer | notion |                             *)
@@ -310,7 +311,7 @@ Local Open Scope ring_scope.
 (* | missing premise      | the ideal distribution equality, as in row 3 |    *)
 (* | completion level     | AnalysisBridged |                                 *)
 (* | transfer status      | StaticExecutedOnly |                              *)
-(* | assumption status    | BaselineClassicalOnly |                                    *)
+(* | assumption status    | BaselineClassicalOnly |                           *)
 (* | typed row            | five_card_row_biased |                            *)
 (*                                                                            *)
 (* | theorem | distribution | observer | notion |                             *)
@@ -364,7 +365,7 @@ Local Open Scope ring_scope.
 (*                          either model |                                    *)
 (* | completion level     | Sampled |                                         *)
 (* | transfer status      | NoModelComparison |                               *)
-(* | assumption status    | BaselineClassicalOnly |                                    *)
+(* | assumption status    | BaselineClassicalOnly |                           *)
 (* | typed row            | five_card_row_repeated |                          *)
 (*                                                                            *)
 (* | theorem | distribution | observer | notion |                             *)
@@ -424,7 +425,7 @@ Local Open Scope ring_scope.
 (* Level justification. profile gives Algebraic; exec_plug is indexed by that *)
 (* profile, giving Executable; observed is the ObservedExecution over that    *)
 (* profile and plug, giving Observed. No sample adapter stands over this      *)
-(* plug, so the row stops at Observed and its typed sample slot is empty. The *)
+(* plug, so the row stops at Observed with an empty optional model slot. The  *)
 (* assumption status is the group-order assumption of the instance:           *)
 (* Print Assumptions on the row reports s5_group_order_eq beyond the          *)
 (* classical trio, because the profile's threshold data is proved from the    *)
@@ -505,11 +506,9 @@ Local Open Scope ring_scope.
 (* | execution alias      | S5Analysis.exec_plug |                            *)
 (* | observed alias       | S5Analysis.observed |                             *)
 (* | sample alias         | S5Analysis.word_sample at a secret prior and a    *)
-(*                          word length. The typed sample slot of this row is *)
-(*                          empty: the adapter is a family indexed by a       *)
-(*                          secret prior and a word length, the repository    *)
-(*                          fixes neither, and the row does not manufacture a *)
-(*                          member to fill the slot |                         *)
+(*                          word length; the row's typed model witness is     *)
+(*                          S5Analysis.word_family, the family indexed by     *)
+(*                          exactly that prior and that length |              *)
 (* | observers            | one position's endpoint distribution, the         *)
 (*                          pushforward of the cut distribution along the     *)
 (*                          evaluation of a permutation at that position,     *)
@@ -681,8 +680,8 @@ Local Open Scope ring_scope.
 (* | execution alias      | S5x5Analysis.exec_plug |                          *)
 (* | observed alias       | S5x5Analysis.observed |                           *)
 (* | sample alias         | S5x5Analysis.word_sample at a secret prior and a  *)
-(*                          word length. The typed sample slot is empty for   *)
-(*                          the reason given in row 8 |                       *)
+(*                          word length; the row's typed model witness is     *)
+(*                          S5x5Analysis.word_family |                        *)
 (* | observers            | one first-pile position's endpoint distribution,  *)
 (*                          the pushforward of the cut distribution along the *)
 (*                          evaluation of a permutation at the ten-seat image *)
@@ -745,8 +744,9 @@ Local Open Scope ring_scope.
 (* | profile alias        | S5x5Analysis.profile |                            *)
 (* | execution alias      | S5x5Analysis.exec_plug |                          *)
 (* | observed alias       | S5x5Analysis.observed |                           *)
-(* | sample alias         | S5x5Analysis.word_sample, typed slot empty as in  *)
-(*                          row 11 |                                          *)
+(* | sample alias         | S5x5Analysis.word_sample; the row's typed model   *)
+(*                          witness is S5x5Analysis.word_family, as in row    *)
+(*                          11 |                                              *)
 (* | observers            | one first-pile position's endpoint distribution,  *)
 (*                          carrier 'I_10, now compared with the uniform      *)
 (*                          distribution on all ten seats |                   *)
@@ -844,7 +844,7 @@ Local Open Scope ring_scope.
 (* | missing premise      | not applicable: the path names no model |         *)
 (* | completion level     | Observed |                                        *)
 (* | transfer status      | NoModelComparison |                               *)
-(* | assumption status    | BaselineClassicalOnly |                                    *)
+(* | assumption status    | BaselineClassicalOnly |                           *)
 (* | typed row            | abel_row_recovery |                               *)
 (*                                                                            *)
 (* | theorem | distribution | observer | notion |                             *)
@@ -883,7 +883,7 @@ Local Open Scope ring_scope.
 (*                          the models of the same plug being row 17's |      *)
 (* | completion level     | Observed |                                        *)
 (* | transfer status      | NoModelComparison |                               *)
-(* | assumption status    | BaselineClassicalOnly |                                    *)
+(* | assumption status    | BaselineClassicalOnly |                           *)
 (* | typed row            | abel_row_identity |                               *)
 (*                                                                            *)
 (* | theorem | distribution | observer | notion |                             *)
@@ -912,11 +912,11 @@ Local Open Scope ring_scope.
 (* | profile alias        | AbelianAnalysis.profile |                         *)
 (* | execution alias      | AbelianAnalysis.shuffle_plug |                    *)
 (* | observed alias       | AbelianAnalysis.shuffle_observed |                *)
-(* | sample alias         | AbelianAnalysis.ideal_sample, which the typed row *)
-(*                          carries because it stands at every realType, and  *)
-(*                          AbelianAnalysis.word_sample at word length L,     *)
-(*                          which the typed slot cannot carry because it is a *)
-(*                          family indexed by that length |                   *)
+(* | sample alias         | AbelianAnalysis.word_sample at word length L; the *)
+(*                          row's typed model witness is the length-indexed   *)
+(*                          AbelianAnalysis.word_family, and the ideal model  *)
+(*                          stays the facade alias                            *)
+(*                          AbelianAnalysis.ideal_sample |                    *)
 (* | observers            | AbelianAnalysis.endpoint_vector                   *)
 (*                            : 4.-tuple 'I_4, the complete four-endpoint     *)
 (*                            executed observation, read on each model's own  *)
@@ -942,7 +942,7 @@ Local Open Scope ring_scope.
 (*                          conclusion excludes any bound below one |         *)
 (* | completion level     | AnalysisBridged |                                 *)
 (* | transfer status      | NegativeTransfer |                                *)
-(* | assumption status    | BaselineClassicalOnly |                                    *)
+(* | assumption status    | BaselineClassicalOnly |                           *)
 (* | typed row            | abel_row_limitation |                             *)
 (*                                                                            *)
 (* | theorem | distribution | observer | notion |                             *)
@@ -1049,23 +1049,24 @@ Local Open Scope ring_scope.
     Kind: interface.
     A constructor supplies the observed execution apr_observed of the path,
     which carries its profile and its execution plug as projections, the
-    sample adapter apr_sample of the path at every realType when the path has
-    one, and the three typed statuses apr_completion, apr_transfer and
-    apr_assumptions. The record stores no theorem: theorems are facade
-    aliases, pinned by spelled type in the checker below. *)
+    completion level apr_completion, the model slot apr_model, whose type
+    AnalysisModelSlot makes a typed model-family witness mandatory at
+    Sampled and AnalysisBridged and optional below, and the two remaining
+    statuses apr_transfer and apr_assumptions. The record stores no theorem:
+    theorems are facade aliases, pinned by spelled type in the checker
+    below. *)
 Record AnalysisPathRow := MkAnalysisPathRow {
   (* apr_observed is the executed run of the path together with its static
      observation and the value it recovers. *)
   apr_observed    : OE.ObservedExecution ;
-  (* apr_sample is the path's sample adapter over that very execution, at each
-     realType. The slot is empty when the path's model is a family indexed by
-     data the repository does not fix, such as a secret prior or a word
-     length; the row's prose then names the family instead. *)
-  apr_sample      : forall R : realType,
-                      option (@SampleAdapter R _
-                                (OE.oe_execution apr_observed)) ;
   (* apr_completion is the level the path's theorems actually reach. *)
   apr_completion  : CompletionLevel ;
+  (* apr_model is the path's typed model evidence: an AnalysisModelFamily
+     over the row's own observed execution, mandatory at Sampled and
+     AnalysisBridged, optional at the three lower levels. A parameterized
+     model is carried as a family with its real index type, never as an
+     empty slot. *)
+  apr_model       : AnalysisModelSlot apr_observed apr_completion ;
   (* apr_transfer is the relation the path establishes between its executed
      model and an idealized one. *)
   apr_transfer    : TransferStatus ;
@@ -1076,155 +1077,146 @@ Record AnalysisPathRow := MkAnalysisPathRow {
 
 (** pgl27_row_exact — row 1: the eight-card orbit instance under its exact
     uniform shuffle.
-    @intent: the observed execution of that instance, its exact-uniform sample
-    adapter, and the statuses of row 1. *)
+    @intent: the observed execution of that instance, its exact-uniform
+    model family, and the statuses of row 1. *)
 Definition pgl27_row_exact : AnalysisPathRow :=
-  @MkAnalysisPathRow PGL27Analysis.observed
-    (fun R => Some (PGL27Analysis.exact_sample R))
-    AnalysisBridged StaticExecutedOnly BaselineClassicalOnly.
+  @MkAnalysisPathRow PGL27Analysis.observed AnalysisBridged
+    PGL27Analysis.exact_family StaticExecutedOnly BaselineClassicalOnly.
 
 (** pgl27_row_word — row 2: the same instance under its two-hundred-letter
     word shuffle.
-    @intent: the observed execution of that instance and the statuses of row
-    2. The sample slot is empty: word_sample is indexed by a secret prior and
-    fixed_word_sample by a secret, and the row's theorems quantify over the
-    secret rather than fixing one. *)
+    @intent: the observed execution of that instance, the word model family
+    indexed by the secret prior the row's theorems quantify over, and the
+    statuses of row 2. *)
 Definition pgl27_row_word : AnalysisPathRow :=
-  @MkAnalysisPathRow PGL27Analysis.observed (fun _ => None)
-    AnalysisBridged IdealFinite BaselineClassicalOnly.
+  @MkAnalysisPathRow PGL27Analysis.observed AnalysisBridged
+    PGL27Analysis.word_family IdealFinite BaselineClassicalOnly.
 
-(** five_card_row_uniform — row 3: the five-card development under the uniform
-    rotation cut.
-    @intent: the observed execution of that development, its uniform sample
-    adapter, and the statuses of row 3. *)
+(** five_card_row_uniform — row 3: the five-card development under the
+    uniform rotation cut.
+    @intent: the observed execution of that development, its uniform model
+    family, and the statuses of row 3. *)
 Definition five_card_row_uniform : AnalysisPathRow :=
-  @MkAnalysisPathRow FiveCardAnalysis.observed
-    (fun R => Some (FiveCardAnalysis.uniform_sample R))
-    AnalysisBridged StaticExecutedOnly BaselineClassicalOnly.
+  @MkAnalysisPathRow FiveCardAnalysis.observed AnalysisBridged
+    FiveCardAnalysis.uniform_family StaticExecutedOnly BaselineClassicalOnly.
 
 (** five_card_row_biased — row 4: the same development under one biased cut.
     @intent: the observed execution of that development, the single-biased
-    sample adapter at bias one hundredth, whose two hypotheses are discharged
-    by kim_centi_lt and kim_centi_gt so that the adapter stands at every
-    realType, and the statuses of row 4. The row's theorem quantifies over the
-    bias; the slot names the one member the repository fixes. *)
+    model family at bias one hundredth, the one member the repository fixes
+    of the bias family the row's theorem quantifies over, and the statuses
+    of row 4. *)
 Definition five_card_row_biased : AnalysisPathRow :=
-  @MkAnalysisPathRow FiveCardAnalysis.observed
-    (fun R => Some (@FiveCardAnalysis.single_biased_sample R (1 / 100)
-                      (five_card_kim.kim_centi_lt R)
-                      (five_card_kim.kim_centi_gt R)))
-    AnalysisBridged StaticExecutedOnly BaselineClassicalOnly.
+  @MkAnalysisPathRow FiveCardAnalysis.observed AnalysisBridged
+    FiveCardAnalysis.biased_family StaticExecutedOnly BaselineClassicalOnly.
 
-(** five_card_row_repeated — row 5: the same development under repeated biased
-    cuts.
-    @intent: the observed execution of that development, the seven-cut sample
-    adapter at bias one hundredth, and the statuses of row 5. *)
+(** five_card_row_repeated — row 5: the same development under repeated
+    biased cuts.
+    @intent: the observed execution of that development, the seven-cut model
+    family at bias one hundredth, and the statuses of row 5. *)
 Definition five_card_row_repeated : AnalysisPathRow :=
-  @MkAnalysisPathRow FiveCardAnalysis.observed
-    (fun R => Some (FiveCardAnalysis.centi_sample R))
-    Sampled NoModelComparison BaselineClassicalOnly.
+  @MkAnalysisPathRow FiveCardAnalysis.observed Sampled
+    FiveCardAnalysis.centi_family NoModelComparison BaselineClassicalOnly.
 
 (** s5_row_det — row 6: the five-seat S_5 instance dealing a position.
     @intent: the deterministic observed execution of that instance and the
-    statuses of row 6. The path has no sample layer. *)
+    statuses of row 6. The path has no sample layer, so the optional
+    lower-level slot is empty. *)
 Definition s5_row_det : AnalysisPathRow :=
-  @MkAnalysisPathRow S5Analysis.observed (fun _ => None)
-    Observed NoModelComparison (AcceptsAxioms [:: AxS5GroupOrder]).
+  @MkAnalysisPathRow S5Analysis.observed Observed None
+    NoModelComparison (AcceptsAxioms [:: AxS5GroupOrder]).
 
 (** s5_row_rand — row 7: the same instance dealing an additive sharing.
     @intent: the randomized observed execution of that instance, its
-    randomized sample adapter, and the statuses of row 7. *)
+    randomized model family, and the statuses of row 7. *)
 Definition s5_row_rand : AnalysisPathRow :=
-  @MkAnalysisPathRow S5Analysis.rand_observed
-    (fun R => Some (S5Analysis.rand_sample R))
-    AnalysisBridged StaticExecutedOnly (AcceptsAxioms [:: AxS5GroupOrder]).
+  @MkAnalysisPathRow S5Analysis.rand_observed AnalysisBridged
+    S5Analysis.rand_family StaticExecutedOnly
+    (AcceptsAxioms [:: AxS5GroupOrder]).
 
 (** s5_row_word — row 8: the same instance under a finite generator word.
-    @intent: the deterministic observed execution the finite-word model stands
-    over, and the statuses of row 8. The sample slot is empty: word_sample is
-    a family indexed by a secret prior and a word length. *)
+    @intent: the deterministic observed execution the finite-word model
+    stands over, the word model family indexed by a secret prior and a word
+    length, and the statuses of row 8. *)
 Definition s5_row_word : AnalysisPathRow :=
-  @MkAnalysisPathRow S5Analysis.observed (fun _ => None)
-    Sampled NoModelComparison
-    (AcceptsAxioms [:: AxS5GroupOrder; AxRayleighQ2R]).
+  @MkAnalysisPathRow S5Analysis.observed Sampled S5Analysis.word_family
+    NoModelComparison (AcceptsAxioms [:: AxS5GroupOrder; AxRayleighQ2R]).
 
-(** s5x5_row_det — row 9: the ten-seat S_5 x S_5 instance dealing a position.
+(** s5x5_row_det — row 9: the ten-seat S_5 x S_5 instance dealing a
+    position.
     @intent: the deterministic observed execution of that instance and the
     statuses of row 9. *)
 Definition s5x5_row_det : AnalysisPathRow :=
-  @MkAnalysisPathRow S5x5Analysis.observed (fun _ => None)
-    Observed NoModelComparison (AcceptsAxioms [:: AxS5x5GroupOrder]).
+  @MkAnalysisPathRow S5x5Analysis.observed Observed None
+    NoModelComparison (AcceptsAxioms [:: AxS5x5GroupOrder]).
 
 (** s5x5_row_rand — row 10: the same instance dealing two pile sharings.
     @intent: the randomized observed execution of that instance, its product
-    sample adapter, and the statuses of row 10. *)
+    model family, and the statuses of row 10. *)
 Definition s5x5_row_rand : AnalysisPathRow :=
-  @MkAnalysisPathRow S5x5Analysis.rand_observed
-    (fun R => Some (S5x5Analysis.rand_sample R))
-    AnalysisBridged StaticExecutedOnly (AcceptsAxioms [:: AxS5x5GroupOrder]).
+  @MkAnalysisPathRow S5x5Analysis.rand_observed AnalysisBridged
+    S5x5Analysis.rand_family StaticExecutedOnly
+    (AcceptsAxioms [:: AxS5x5GroupOrder]).
 
 (** s5x5_row_pile1_word — row 11: the first pile under a finite generator
     word.
-    @intent: the deterministic observed execution the finite-word model stands
-    over, and the statuses of row 11. The sample slot is empty for the reason
-    of row 8. *)
+    @intent: the deterministic observed execution the finite-word model
+    stands over, the word model family shared by rows 11 to 14, and the
+    statuses of row 11. *)
 Definition s5x5_row_pile1_word : AnalysisPathRow :=
-  @MkAnalysisPathRow S5x5Analysis.observed (fun _ => None)
-    Sampled NoModelComparison
-    (AcceptsAxioms [:: AxS5x5GroupOrder; AxRayleighQ2R]).
+  @MkAnalysisPathRow S5x5Analysis.observed Sampled S5x5Analysis.word_family
+    NoModelComparison (AcceptsAxioms [:: AxS5x5GroupOrder; AxRayleighQ2R]).
 
 (** s5x5_row_pile2_word — row 12: the second pile under a finite generator
     word.
-    @intent: the same observed execution and the statuses of row 12. *)
+    @intent: the same observed execution, the same shared word model family,
+    and the statuses of row 12. *)
 Definition s5x5_row_pile2_word : AnalysisPathRow :=
-  @MkAnalysisPathRow S5x5Analysis.observed (fun _ => None)
-    Sampled NoModelComparison
-    (AcceptsAxioms [:: AxS5x5GroupOrder; AxRayleighQ2R]).
+  @MkAnalysisPathRow S5x5Analysis.observed Sampled S5x5Analysis.word_family
+    NoModelComparison (AcceptsAxioms [:: AxS5x5GroupOrder; AxRayleighQ2R]).
 
-(** s5x5_row_pile1_limitation — row 13: the first pile against global uniform.
-    @intent: the same observed execution and the statuses of row 13, whose
-    transfer status is negative because a floor transports the obstruction to
-    the row's own observer. *)
+(** s5x5_row_pile1_limitation — row 13: the first pile against global
+    uniform.
+    @intent: the same observed execution, the same shared word model family,
+    and the statuses of row 13, whose transfer status is negative because a
+    floor transports the obstruction to the row's own observer. *)
 Definition s5x5_row_pile1_limitation : AnalysisPathRow :=
-  @MkAnalysisPathRow S5x5Analysis.observed (fun _ => None)
-    Sampled NegativeTransfer
-    (AcceptsAxioms [:: AxS5x5GroupOrder; AxRayleighQ2R]).
+  @MkAnalysisPathRow S5x5Analysis.observed Sampled S5x5Analysis.word_family
+    NegativeTransfer (AcceptsAxioms [:: AxS5x5GroupOrder; AxRayleighQ2R]).
 
 (** s5x5_row_pile2_limitation — row 14: the second pile against global
     uniform.
-    @intent: the same observed execution and the statuses of row 14. *)
+    @intent: the same observed execution, the same shared word model family,
+    and the statuses of row 14. *)
 Definition s5x5_row_pile2_limitation : AnalysisPathRow :=
-  @MkAnalysisPathRow S5x5Analysis.observed (fun _ => None)
-    Sampled NegativeTransfer
-    (AcceptsAxioms [:: AxS5x5GroupOrder; AxRayleighQ2R]).
+  @MkAnalysisPathRow S5x5Analysis.observed Sampled S5x5Analysis.word_family
+    NegativeTransfer (AcceptsAxioms [:: AxS5x5GroupOrder; AxRayleighQ2R]).
 
 (** abel_row_recovery — row 15: the four-seat abelian instance recovering a
     dealt secret.
     @intent: the secret-recovery observed execution of that instance and the
     statuses of row 15. *)
 Definition abel_row_recovery : AnalysisPathRow :=
-  @MkAnalysisPathRow AbelianAnalysis.observed (fun _ => None)
-    Observed NoModelComparison BaselineClassicalOnly.
+  @MkAnalysisPathRow AbelianAnalysis.observed Observed None
+    NoModelComparison BaselineClassicalOnly.
 
 (** abel_row_identity — row 16: the same instance dealing identity card
     content.
-    @intent: the identity-content observed execution of that instance and the
-    statuses of row 16. The two shuffle models of that plug belong to row
-    17. *)
+    @intent: the identity-content observed execution of that instance and
+    the statuses of row 16. The two shuffle models of that plug belong to
+    row 17. *)
 Definition abel_row_identity : AnalysisPathRow :=
-  @MkAnalysisPathRow AbelianAnalysis.shuffle_observed (fun _ => None)
-    Observed NoModelComparison BaselineClassicalOnly.
+  @MkAnalysisPathRow AbelianAnalysis.shuffle_observed Observed None
+    NoModelComparison BaselineClassicalOnly.
 
 (** abel_row_limitation — row 17: the fixed-length mixing limitation of that
     instance.
-    @intent: the identity-content observed execution, the ideal shuffle model,
-    which is the one of the row's two adapters standing at every realType, and
-    the statuses of row 17. The actual model word_sample is indexed by the
-    word length and is named in the row's prose. *)
+    @intent: the identity-content observed execution, the length-indexed
+    word model family the limitation is stated about, and the statuses of
+    row 17. The ideal shuffle model stays a Models alias of the facade; the
+    row's evidence is the actual model. *)
 Definition abel_row_limitation : AnalysisPathRow :=
-  @MkAnalysisPathRow AbelianAnalysis.shuffle_observed
-    (fun R => Some (AbelianAnalysis.ideal_sample R))
-    AnalysisBridged NegativeTransfer BaselineClassicalOnly.
+  @MkAnalysisPathRow AbelianAnalysis.shuffle_observed AnalysisBridged
+    AbelianAnalysis.word_family NegativeTransfer BaselineClassicalOnly.
 
 (******************************************************************************)
 (*     The deterministic checker: eight-card orbit instance                   *)
@@ -2532,22 +2524,31 @@ Timeout 60 Check (AbelianAnalysis.executed_observation_distance :
 (******************************************************************************)
 (*     The deterministic checker: the seventeen typed rows                    *)
 (*                                                                            *)
-(* One Check per row against AnalysisPathRow, then one erefl pin per status   *)
-(* field. A row whose completion level, transfer status or assumption status  *)
-(* is edited away from the table above fails at its own pin.                  *)
+(* One Check per row against AnalysisPathRow, one erefl pin per status       *)
+(* field, and one typed check on the model slot: a mandatory family at        *)
+(* Sampled and AnalysisBridged, an optional one below. A row whose status or  *)
+(* model witness is edited away from the table above fails at its own pin.    *)
 (******************************************************************************)
 
 Timeout 60 Check (pgl27_row_exact : AnalysisPathRow).
+Timeout 60 Check (apr_model pgl27_row_exact
+  : AnalysisModelFamily PGL27Analysis.observed).
 Timeout 60 Check (erefl : apr_completion pgl27_row_exact = AnalysisBridged).
 Timeout 60 Check (erefl : apr_transfer pgl27_row_exact = StaticExecutedOnly).
-Timeout 60 Check (erefl : apr_assumptions pgl27_row_exact = BaselineClassicalOnly).
+Timeout 60 Check
+  (erefl : apr_assumptions pgl27_row_exact = BaselineClassicalOnly).
 
 Timeout 60 Check (pgl27_row_word : AnalysisPathRow).
+Timeout 60 Check (apr_model pgl27_row_word
+  : AnalysisModelFamily PGL27Analysis.observed).
 Timeout 60 Check (erefl : apr_completion pgl27_row_word = AnalysisBridged).
 Timeout 60 Check (erefl : apr_transfer pgl27_row_word = IdealFinite).
-Timeout 60 Check (erefl : apr_assumptions pgl27_row_word = BaselineClassicalOnly).
+Timeout 60 Check
+  (erefl : apr_assumptions pgl27_row_word = BaselineClassicalOnly).
 
 Timeout 60 Check (five_card_row_uniform : AnalysisPathRow).
+Timeout 60 Check (apr_model five_card_row_uniform
+  : AnalysisModelFamily FiveCardAnalysis.observed).
 Timeout 60 Check
   (erefl : apr_completion five_card_row_uniform = AnalysisBridged).
 Timeout 60 Check
@@ -2556,6 +2557,8 @@ Timeout 60 Check
   (erefl : apr_assumptions five_card_row_uniform = BaselineClassicalOnly).
 
 Timeout 60 Check (five_card_row_biased : AnalysisPathRow).
+Timeout 60 Check (apr_model five_card_row_biased
+  : AnalysisModelFamily FiveCardAnalysis.observed).
 Timeout 60 Check
   (erefl : apr_completion five_card_row_biased = AnalysisBridged).
 Timeout 60 Check
@@ -2564,6 +2567,8 @@ Timeout 60 Check
   (erefl : apr_assumptions five_card_row_biased = BaselineClassicalOnly).
 
 Timeout 60 Check (five_card_row_repeated : AnalysisPathRow).
+Timeout 60 Check (apr_model five_card_row_repeated
+  : AnalysisModelFamily FiveCardAnalysis.observed).
 Timeout 60 Check (erefl : apr_completion five_card_row_repeated = Sampled).
 Timeout 60 Check
   (erefl : apr_transfer five_card_row_repeated = NoModelComparison).
@@ -2571,36 +2576,48 @@ Timeout 60 Check
   (erefl : apr_assumptions five_card_row_repeated = BaselineClassicalOnly).
 
 Timeout 60 Check (s5_row_det : AnalysisPathRow).
+Timeout 60 Check (apr_model s5_row_det
+  : option (AnalysisModelFamily S5Analysis.observed)).
 Timeout 60 Check (erefl : apr_completion s5_row_det = Observed).
 Timeout 60 Check (erefl : apr_transfer s5_row_det = NoModelComparison).
 Timeout 60 Check
   (erefl : apr_assumptions s5_row_det = AcceptsAxioms [:: AxS5GroupOrder]).
 
 Timeout 60 Check (s5_row_rand : AnalysisPathRow).
+Timeout 60 Check (apr_model s5_row_rand
+  : AnalysisModelFamily S5Analysis.rand_observed).
 Timeout 60 Check (erefl : apr_completion s5_row_rand = AnalysisBridged).
 Timeout 60 Check (erefl : apr_transfer s5_row_rand = StaticExecutedOnly).
 Timeout 60 Check
   (erefl : apr_assumptions s5_row_rand = AcceptsAxioms [:: AxS5GroupOrder]).
 
 Timeout 60 Check (s5_row_word : AnalysisPathRow).
+Timeout 60 Check (apr_model s5_row_word
+  : AnalysisModelFamily S5Analysis.observed).
 Timeout 60 Check (erefl : apr_completion s5_row_word = Sampled).
 Timeout 60 Check (erefl : apr_transfer s5_row_word = NoModelComparison).
 Timeout 60 Check (erefl : apr_assumptions s5_row_word
   = AcceptsAxioms [:: AxS5GroupOrder; AxRayleighQ2R]).
 
 Timeout 60 Check (s5x5_row_det : AnalysisPathRow).
+Timeout 60 Check (apr_model s5x5_row_det
+  : option (AnalysisModelFamily S5x5Analysis.observed)).
 Timeout 60 Check (erefl : apr_completion s5x5_row_det = Observed).
 Timeout 60 Check (erefl : apr_transfer s5x5_row_det = NoModelComparison).
 Timeout 60 Check (erefl : apr_assumptions s5x5_row_det
   = AcceptsAxioms [:: AxS5x5GroupOrder]).
 
 Timeout 60 Check (s5x5_row_rand : AnalysisPathRow).
+Timeout 60 Check (apr_model s5x5_row_rand
+  : AnalysisModelFamily S5x5Analysis.rand_observed).
 Timeout 60 Check (erefl : apr_completion s5x5_row_rand = AnalysisBridged).
 Timeout 60 Check (erefl : apr_transfer s5x5_row_rand = StaticExecutedOnly).
 Timeout 60 Check (erefl : apr_assumptions s5x5_row_rand
   = AcceptsAxioms [:: AxS5x5GroupOrder]).
 
 Timeout 60 Check (s5x5_row_pile1_word : AnalysisPathRow).
+Timeout 60 Check (apr_model s5x5_row_pile1_word
+  : AnalysisModelFamily S5x5Analysis.observed).
 Timeout 60 Check (erefl : apr_completion s5x5_row_pile1_word = Sampled).
 Timeout 60 Check
   (erefl : apr_transfer s5x5_row_pile1_word = NoModelComparison).
@@ -2608,6 +2625,8 @@ Timeout 60 Check (erefl : apr_assumptions s5x5_row_pile1_word
   = AcceptsAxioms [:: AxS5x5GroupOrder; AxRayleighQ2R]).
 
 Timeout 60 Check (s5x5_row_pile2_word : AnalysisPathRow).
+Timeout 60 Check (apr_model s5x5_row_pile2_word
+  : AnalysisModelFamily S5x5Analysis.observed).
 Timeout 60 Check (erefl : apr_completion s5x5_row_pile2_word = Sampled).
 Timeout 60 Check
   (erefl : apr_transfer s5x5_row_pile2_word = NoModelComparison).
@@ -2615,6 +2634,8 @@ Timeout 60 Check (erefl : apr_assumptions s5x5_row_pile2_word
   = AcceptsAxioms [:: AxS5x5GroupOrder; AxRayleighQ2R]).
 
 Timeout 60 Check (s5x5_row_pile1_limitation : AnalysisPathRow).
+Timeout 60 Check (apr_model s5x5_row_pile1_limitation
+  : AnalysisModelFamily S5x5Analysis.observed).
 Timeout 60 Check (erefl : apr_completion s5x5_row_pile1_limitation = Sampled).
 Timeout 60 Check
   (erefl : apr_transfer s5x5_row_pile1_limitation = NegativeTransfer).
@@ -2622,6 +2643,8 @@ Timeout 60 Check (erefl : apr_assumptions s5x5_row_pile1_limitation
   = AcceptsAxioms [:: AxS5x5GroupOrder; AxRayleighQ2R]).
 
 Timeout 60 Check (s5x5_row_pile2_limitation : AnalysisPathRow).
+Timeout 60 Check (apr_model s5x5_row_pile2_limitation
+  : AnalysisModelFamily S5x5Analysis.observed).
 Timeout 60 Check (erefl : apr_completion s5x5_row_pile2_limitation = Sampled).
 Timeout 60 Check
   (erefl : apr_transfer s5x5_row_pile2_limitation = NegativeTransfer).
@@ -2629,16 +2652,80 @@ Timeout 60 Check (erefl : apr_assumptions s5x5_row_pile2_limitation
   = AcceptsAxioms [:: AxS5x5GroupOrder; AxRayleighQ2R]).
 
 Timeout 60 Check (abel_row_recovery : AnalysisPathRow).
+Timeout 60 Check (apr_model abel_row_recovery
+  : option (AnalysisModelFamily AbelianAnalysis.observed)).
 Timeout 60 Check (erefl : apr_completion abel_row_recovery = Observed).
 Timeout 60 Check (erefl : apr_transfer abel_row_recovery = NoModelComparison).
-Timeout 60 Check (erefl : apr_assumptions abel_row_recovery = BaselineClassicalOnly).
+Timeout 60 Check
+  (erefl : apr_assumptions abel_row_recovery = BaselineClassicalOnly).
 
 Timeout 60 Check (abel_row_identity : AnalysisPathRow).
+Timeout 60 Check (apr_model abel_row_identity
+  : option (AnalysisModelFamily AbelianAnalysis.shuffle_observed)).
 Timeout 60 Check (erefl : apr_completion abel_row_identity = Observed).
 Timeout 60 Check (erefl : apr_transfer abel_row_identity = NoModelComparison).
-Timeout 60 Check (erefl : apr_assumptions abel_row_identity = BaselineClassicalOnly).
+Timeout 60 Check
+  (erefl : apr_assumptions abel_row_identity = BaselineClassicalOnly).
 
 Timeout 60 Check (abel_row_limitation : AnalysisPathRow).
+Timeout 60 Check (apr_model abel_row_limitation
+  : AnalysisModelFamily AbelianAnalysis.shuffle_observed).
 Timeout 60 Check (erefl : apr_completion abel_row_limitation = AnalysisBridged).
 Timeout 60 Check (erefl : apr_transfer abel_row_limitation = NegativeTransfer).
-Timeout 60 Check (erefl : apr_assumptions abel_row_limitation = BaselineClassicalOnly).
+Timeout 60 Check
+  (erefl : apr_assumptions abel_row_limitation = BaselineClassicalOnly).
+
+(******************************************************************************)
+(*     The model families exercised at their index types                      *)
+(*                                                                            *)
+(* One application per parameterized family pins the section 5.2 index type  *)
+(* (a wrong index type is a compile error at the pair), and one application  *)
+(* at tt pins a unit family. The generic check below them establishes that   *)
+(* every family's adapter is typed at the execution projected from its own   *)
+(* row's observed execution, for every row and every family.                 *)
+(******************************************************************************)
+
+Timeout 60 Check (fun (R : realType) (p : R.-fdist bool) =>
+  amf_sample (apr_model pgl27_row_word) R p).
+
+Timeout 60 Check (fun (R : realType) (secretP : R.-fdist 'I_5) (L : nat) =>
+  amf_sample (apr_model s5_row_word) R (secretP, L)).
+
+Timeout 60 Check (fun (R : realType) (secretP : R.-fdist 'I_10) (L : nat) =>
+  amf_sample (apr_model s5x5_row_pile1_word) R (secretP, L)).
+
+Timeout 60 Check (fun (R : realType) (L : nat) =>
+  amf_sample (apr_model abel_row_limitation) R L).
+
+Timeout 60 Check (fun R : realType =>
+  amf_sample (apr_model s5_row_rand) R tt).
+
+Timeout 60 Check (fun (row : AnalysisPathRow)
+    (fam : AnalysisModelFamily (apr_observed row)) (R : realType)
+    (x : amf_index fam R) =>
+  amf_sample fam R x
+    : @SampleAdapter R _ (OE.oe_execution (apr_observed row))).
+
+(******************************************************************************)
+(*     Mutation guards: the states the dependent model slot must reject       *)
+(*                                                                            *)
+(* Request 5.3: a Sampled or AnalysisBridged row with no model witness, and  *)
+(* a family over the wrong execution, are compile errors, demonstrated by    *)
+(* Fail. The fourth requested mutation, an executed word theorem alias       *)
+(* changed back to the cut-level type, is contingent on work package A and   *)
+(* is recorded as unmet in the 2026-08-13 completion response.               *)
+(******************************************************************************)
+
+Fail Check (@MkAnalysisPathRow S5Analysis.observed Sampled None
+  NoModelComparison (AcceptsAxioms [:: AxS5GroupOrder])).
+
+Fail Check (@MkAnalysisPathRow S5Analysis.observed Sampled tt
+  NoModelComparison (AcceptsAxioms [:: AxS5GroupOrder])).
+
+Fail Check (@MkAnalysisPathRow S5Analysis.rand_observed AnalysisBridged None
+  StaticExecutedOnly (AcceptsAxioms [:: AxS5GroupOrder])).
+
+Fail Check (@MkAnalysisPathRow S5Analysis.observed Sampled
+  S5x5Analysis.word_family NoModelComparison
+  (AcceptsAxioms [:: AxS5GroupOrder])).
+

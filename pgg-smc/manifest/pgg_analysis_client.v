@@ -24,6 +24,8 @@ Check PGL27Analysis.profile.                    (* 1 Program *)
 Check PGL27Analysis.exec_plug.                  (* 2 Execution *)
 Check PGL27Analysis.content_trace.              (* 3 Observers *)
 Check PGL27Analysis.word_sample.                (* 4 Models *)
+Check PGL27Analysis.exact_family.               (* 4 Models, typed family *)
+Check PGL27Analysis.word_family.                (* 4 Models, typed family *)
 Check PGL27Analysis.observed_recovers.          (* 5 Correctness *)
 Check PGL27Analysis.exec_view_indist.           (* 6 Security *)
 Check PGL27Analysis.word_view_indist_via_transfer. (* 7 Transfer *)
@@ -37,6 +39,9 @@ Check FiveCardAnalysis.profile.                 (* 1 Program *)
 Check FiveCardAnalysis.exec_plug.               (* 2 Execution *)
 Check FiveCardAnalysis.colour_view.             (* 3 Observers *)
 Check FiveCardAnalysis.centi_sample.            (* 4 Models *)
+Check FiveCardAnalysis.uniform_family.          (* 4 Models, typed family *)
+Check FiveCardAnalysis.biased_family.           (* 4 Models, typed family *)
+Check FiveCardAnalysis.centi_family.            (* 4 Models, typed family *)
 Check FiveCardAnalysis.observed_recovers.       (* 5 Correctness *)
 Check FiveCardAnalysis.exec_trace_secrecy.      (* 6 Security *)
 Check FiveCardAnalysis.deal_centi_lt.           (* bound, not security *)
@@ -49,6 +54,8 @@ Check S5Analysis.profile.                       (* 1 Program *)
 Check S5Analysis.rand_exec_plug.                (* 2 Execution *)
 Check S5Analysis.rand_content_trace.            (* 3 Observers *)
 Check S5Analysis.rand_sample.                   (* 4 Models *)
+Check S5Analysis.rand_family.                   (* 4 Models, typed family *)
+Check S5Analysis.word_family.                   (* 4 Models, typed family *)
 Check S5Analysis.rand_observed_recovers.        (* 5 Correctness *)
 Check S5Analysis.exec_coalition_secrecy.        (* 6 Security *)
 Check S5Analysis.word_endpoint_bound.           (* bound, not security *)
@@ -60,6 +67,8 @@ Check S5x5Analysis.profile.                     (* 1 Program *)
 Check S5x5Analysis.rand_exec_plug.              (* 2 Execution *)
 Check S5x5Analysis.joint_view.                  (* 3 Observers *)
 Check S5x5Analysis.rand_sample.                 (* 4 Models *)
+Check S5x5Analysis.rand_family.                 (* 4 Models, typed family *)
+Check S5x5Analysis.word_family.                 (* 4 Models, typed family *)
 Check S5x5Analysis.rand_observed_recovers.      (* 5 Correctness *)
 Check S5x5Analysis.exec_joint_secrecy.          (* 6 Security *)
 Check S5x5Analysis.word_pile1_bound.            (* bound, not security *)
@@ -71,6 +80,7 @@ Check AbelianAnalysis.profile.                  (* 1 Program *)
 Check AbelianAnalysis.shuffle_plug.             (* 2 Execution *)
 Check AbelianAnalysis.endpoint_vector.          (* 3 Observers *)
 Check AbelianAnalysis.word_sample.              (* 4 Models *)
+Check AbelianAnalysis.word_family.              (* 4 Models, typed family *)
 Check AbelianAnalysis.shuffle_recovers.         (* 5 Correctness *)
 Check AbelianAnalysis.word_mixing_limitation.   (* 6 mixing limitation *)
 Check AbelianAnalysis.limitation_transfer_status. (* 7 Transfer *)
@@ -157,8 +167,14 @@ Check TransferStatus.
 Check PggAxiom.
 Check AssumptionStatus.
 Check AnalysisPathRow.
+Check AnalysisModelFamily.
+Check AnalysisModelSlot.
+Check amf_index.
+Check amf_sample.
+Check BaselineClassicalOnly.
+Check AcceptsAxioms.
 Check apr_observed.
-Check apr_sample.
+Check apr_model.
 Check apr_completion.
 Check apr_transfer.
 Check apr_assumptions.
