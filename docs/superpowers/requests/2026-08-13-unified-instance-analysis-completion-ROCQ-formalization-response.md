@@ -1,242 +1,184 @@
 # Completion response: unified instance analysis contract
 
-Date: 2026-08-13
+Date: 2026-08-13 (amended and completed the same day)
 
-Status: PARTIAL. Work package A is NO-GO because its pinned executed
-theorems are mathematically false for the deterministic encoders; work
-packages B and C are delivered in full. Per section 12 of the request the
-status is not COMPLETE, since acceptance criteria 1, 2, 4, 5 and 6 cannot
-pass.
+Status: COMPLETE UNDER AMENDMENT. The request as originally pinned was
+partially impossible: the work package A executed theorems were false, and
+this response's section 3 keeps their compiled refutations. The user
+approved amending the request (section 0); under the amended request every
+work package is delivered and every amended acceptance criterion passes.
+The original section 11 criteria 1-6 are refuted as written and met in
+their amended form.
 
 Request: `docs/superpowers/requests/2026-08-13-unified-instance-analysis-completion-ROCQ-formalization-request.md`
 
+## 0. The amendment (user-approved, 2026-08-13)
+
+This response records that the REQUEST WAS CHANGED, by user approval given
+in-session after the NO-GO report, for the following reasons:
+
+- The section 4.1/4.2 executed upper bounds, as pinned (observer
+  `sa_seat_dist` of the deterministic plugs, ideals the uniform
+  distributions, constants `sqrt 5 * alpha^L` and `sqrt 5 * lazy^L`), are
+  mathematically FALSE: the deterministic encoder `sum_mod_encode s =
+  [0,...,0,s]` collapses the executed content, and compiled counterexamples
+  (section 3) refute all four upper-bound shapes, prior-independently.
+- The true executed statements the request's machinery supports compare the
+  executed reading with the ENCODER-IMAGE ideals: the content a seat reads
+  when its dealt position is exactly uniform, mixed over the secret prior.
+  The user chose this repair (option 1 of the NO-GO report's menu) over
+  randomizing the encoder or delivering floors only.
+
+What the amendment changes in the request, precisely:
+
+1. Section 4.1/4.2 statement shapes: the ideals become the encoder-image
+   readings (`s5_ideal_reading`, `s5x5_ideal_pile1_reading`,
+   `s5x5_ideal_pile2_reading`, `s5x5_ideal_seat_reading`); the constants
+   and the observer are unchanged. The 4.2 item-3 shape
+   (`<= 1 + sqrt5*lazy^L` against global uniform) is not reproduced (it is
+   refuted); its role passes to the per-seat pile-ideal bound
+   `s5x5_exec_seat_bound` and the ceiling `s5x5_exec_seat_uniform_ub`,
+   whose leading term is the ideal's own distance, deliberately not a
+   constant.
+2. Section 3 item 3 now reads: no cut-carrier or full-carrier
+   ideal-to-finite theorem is claimed for S5 or S5xS5; the missing
+   full-carrier premise remains absent and named; the OBSERVER-LEVEL
+   encoder-image transfer IS claimed.
+3. Section 4.3's transfer column and its sentence "Do not change these
+   paths to IdealFinite": superseded. With the executed transfer theorems
+   landed, `NoModelComparison` would be false under the vocabulary's own
+   definition; the word rows are `AnalysisBridged / IdealFinite` and the
+   limitation rows `AnalysisBridged / NegativeTransfer`.
+4. Acceptance criteria 1-6: met in the amended form (section 10).
+
+The amendment decisions were adversarially audited before implementation
+(section 7): the IdealFinite label carries binding conditions (this record;
+the two-ideal guard prose everywhere; the vocabulary clarification), and
+the floors' obstruction is re-sourced to encoder support confinement.
+
 ## 1. Commits (section 12 item 1)
 
-- Baseline: `51f8192661440576abd8274d051cf5e366b6ec87` (as expected by the
-  request).
-- Code commits, in order:
-  - `e1b11396` rename KernelClosed to BaselineClassicalOnly (package C)
-  - `ffebab0b` typed model-family vocabulary (package B, section 5.1)
-  - `89220316` ten typed model families + facade aliases (package B, 5.2)
-  - `9cceb246` dependent model slot in the manifest rows (package B, 5.1/5.3)
-  - `0d925262` manifest file-legend alignment (audit fix-forward)
-- Final commit: the commit adding this response document.
+- Baseline: `51f8192661440576abd8274d051cf5e366b6ec87`.
+- Packages B and C (delivered before the amendment): `e1b11396` (rename),
+  `ffebab0b` (model-family vocabulary), `89220316` (ten typed families),
+  `9cceb246` (dependent model slot), `0d925262` (legend alignment),
+  `ed48250b` (the pre-amendment NO-GO response).
+- Amended package A: `b552ef7a` (generic mixture and support lemmas + S5),
+  `2dfcb150` (S5xS5), `7c6f7f13` (manifest statuses, check 5, fourth
+  mutation guard, client), `9220bedc` (IdealFinite vocabulary
+  clarification).
+- Final commit: the commit updating this response.
 
 ## 2. Verdicts (section 12 item 2)
 
 | Package | Verdict |
 |---|---|
-| S5 executed endpoints (4.1) | NO-GO: the requested statement is false; compiled counterexample below |
-| S5xS5 executed endpoints (4.2) | NO-GO: items 1-3 false (compiled counterexamples); items 4-7 true only by support confinement, excluded to avoid mislabeling (section 5 below) |
-| Typed manifest (5) | GO: delivered, except 5.3 check 5 and the fourth mutation case, both contingent on package A and recorded unmet |
-| Assumption-status correction (6) | GO: delivered in full |
-| Repository contract (7) | GO with one A-contingent gap: the client reaches every new model family and the revised typed fields; there is no executed finite-word theorem family to reach |
+| S5 executed endpoints | GO under the amendment: `s5_exec_endpoint_bound` at the encoder-image ideal; the original uniform-ideal statement refuted (section 3) |
+| S5xS5 executed endpoints | GO under the amendment: seven executed theorems plus the ceiling and two unconditional support floors; original items 1-3 refuted |
+| Typed manifest | GO: dependent model slot, ten families, all four mutation guards, check 5 satisfied by the eleven executed spelled-type pins |
+| Assumption-status correction | GO: `BaselineClassicalOnly` |
+| Repository contract | GO: one-import client reaches the model families, the executed theorem family, the ideal readings, the revised typed fields and constructors |
 
-## 3. Work package A: the obstruction (section 12 items 3, 5; request 4.1/4.2 NO-GO protocol)
-
-### 3.1 Why the executed upper bounds are false
+## 3. The refutation of the original package A (kept as the amendment's justification)
 
 The deterministic plugs deal the canonical threshold encoding, and that
-encoding is degenerate:
-
-- `sum_mod_encode s = mktuple (fun i => if i == ord_max then s else ord0)`,
-  i.e. `[0,0,0,0,s]` (`pgg-smc/reconstruct/pgg_sharing_framework.v:191`),
-  the `ts_encode` of `s5_scheme = @sum_mod_scheme 3 4`
-  (`pgg-smc/instances/s5/s5_run.v:39`).
-- The interpreter-executed seat endpoint of the deterministic S5 plug is
-  `s5_content_obs s (w0, i) = tnth (ts_encode s5_scheme s) (pgg_rho w0 i)`
-  (`s5_exec.v:139-143`, cut-generic seat equation `s5_exec_seat_endpointE`
-  at `s5_exec.v:295`), with `pgg_rho` the identity inclusion
-  (`pgg_interface.v:536-545`) and `pi_starts = ord_tuple 5`
-  (`s5_profile.v:37-38`).
-
-So the executed endpoint at seat `i`, secret `s` and cut `w0` is
-`if w0 i == ord_max then s else ord0`: the cut-level theorems bound the
-distribution of the position `w0 i`, while `sa_seat_dist` is that position
-pushed through the non-injective content map `q |-> tnth (encode s) q`.
-The two observers agree only for an encoder injective per secret;
-`sum_mod_encode` collapses four of five positions to `ord0`.
-
-For S5xS5, `product_encode` (`product_threshold.v:220-227`) composes two
-sum-mod encoders pile-wise with `embed_pile1` value-preserving and
-`embed_pile2 = +5` (`product_threshold.v:126-148`); at secret `ord0` the
-content tuple is `[0,0,0,0,0,5,5,5,5,5]`, the action is pile-preserving at
-word_eval images (`word_eval_pile1`, `s5x5_mixing.v:616-635`), and
-`pi_starts = ord_tuple 10` (`rigidity_s5x5_instance.v:520-521`).
-
-### 3.2 The exact attempted types and their compiled refutations
-
-The refutation probe (session scratchpad, twelve statements, all `Qed`,
-zero `Admitted`/`Abort`/`Axiom`, 5.0 s compile, exit 0) proves for every
-`R : realType`:
-
-Executed seat distributions at the point-mass prior, for every length and
-seat:
+encoding is degenerate: `sum_mod_encode s = [0,0,0,0,s]`
+(`pgg-smc/reconstruct/pgg_sharing_framework.v:191`), the `ts_encode` of
+`s5_scheme = @sum_mod_scheme 3 4`; `product_encode` composes two such
+encoders pile-wise. The interpreter-executed seat endpoint is
+`tnth (ts_encode scheme s) (rho(cut)(seat))` by the cut-generic seat
+equations, with `pgg_rho` the identity inclusion and identity start
+tuples. So `sa_seat_dist` is the position distribution pushed through a
+non-injective content map, and at `secretP := fdist1 ord0` it equals
+`fdist1 ord0` at EVERY word length, at full-L1 distance 8/5 from
+`fdist_uniform (card_ord 5)` and from the pile ideals, and 9/5 from
+`fdist_uniform (card_ord 10)` — while the claimed right-hand sides fall
+below these constants. A session probe (twelve statements, all `Qed`,
+zero `Admitted`/`Abort`/`Axiom`, mutation-checked, assumptions the boolp
+trio plus only the relevant group-order axiom) compiled:
 
 ```coq
 Lemma refute_s5_seat_dist (L : nat) (i : 'I_(pi_T' (mp_PI mpS)).+1) :
   @sa_seat_dist R mpS s5_exec_plug (s5_word_sample (fdist1 ord0) L) 0 i
   = fdist1 ord0.
-```
 
-with the S5xS5 analogues at seats `widen5to10 s` (value `fdist1 ord0`) and
-`rshift5to10 s` (value `fdist1 (Ordinal 5)`). Full-L1 distances:
-`var_dist (fdist1 v) (fdist_uniform (card_ord n.+1)) = 2 * (1 - 1/n.+1)`,
-i.e. 8/5 against `fdist_uniform (card_ord 5)`, `fdist_uniform_pile1` and
-`fdist_uniform_pile2`, and 9/5 against `fdist_uniform (card_ord 10)`.
-Numeric gates: `sqrt 5 * (s5_alpha_R R)^+17 < 8/5` (via
-`alpha = 181/200 <= 381/400 = lazy` and `s5x5_lazy_sqrt17`),
-`sqrt 5 * (s5_lazy_alpha_R R)^+17 < 8/5`, and
-`1 + sqrt 5 * (s5_lazy_alpha_R R)^+34 < 9/5` (via `s5x5_lazy_pow34` and
-`sqrt 5 <= 3`). Hence the four negations, quoted with the exact attempted
-statement under the negation:
-
-```coq
 Lemma refute_s5_requested :
   ~ (forall (secretP : R.-fdist 'I_5) (L : nat)
        (i : 'I_(pi_T' (mp_PI mpS)).+1),
        var_dist
          (@sa_seat_dist R mpS s5_exec_plug (s5_word_sample secretP L) 0 i)
          (fdist_uniform (card_ord 5))
-       <= Num.sqrt 5%:R * (s5_alpha_R R) ^+ 17).   (* section 4.1 shape *)
-
-Lemma refute_s5x5_pile1_requested :  (* section 4.2 item 1 shape *)
-  ~ (forall (secretP : R.-fdist 'I_10) (L : nat) (s : 'I_5),
-       var_dist
-         (@sa_seat_dist R mpX s5x5_exec_plug (s5x5_word_sample secretP L) 0
-            (widen5to10 s : 'I_(pi_T' (mp_PI mpX)).+1))
-         (fdist_uniform_pile1 R)
-       <= Num.sqrt 5%:R * (s5_lazy_alpha_R R) ^+ L).
-
-Lemma refute_s5x5_pile2_requested :  (* item 2, rshift5to10 / pile2 *)
-Lemma refute_s5x5_seat_requested :   (* item 3, uniform (card_ord 10) *)
+       <= Num.sqrt 5%:R * (s5_alpha_R R) ^+ 17).
 ```
 
-(the last two elided here have exactly the item-2 and item-3 shapes of
-request section 4.2; all four are `Qed` in the probe). Statement integrity:
-every statement compiled byte-identical to the planned form; the seat
-ascriptions `(widen5to10 s : 'I_(pi_T' (mp_PI mpX)).+1)` elaborate because
-`pi_T' s5x5_PI` is the literal 9.
+with the S5xS5 analogues (`refute_s5x5_pile1_requested`,
+`refute_s5x5_pile2_requested` at distance 8/5 vs `sqrt5*lazy^17`;
+`refute_s5x5_seat_requested` at 9/5 vs `1 + sqrt5*lazy^34`). An
+independent adversarial audit confirmed every step and strengthened it:
+minimal refuting lengths L = 4 (S5), 7 (piles), 22 (global seat), and the
+S5 failure is prior-independent (`P(endpoint = ord0) >= 4/5 - delta`; the
+uniform prior gives asymptotic distance 32/25), so no quantifier repair
+existed inside the original pins. The would-be floors at the uniform
+target are true but only by support confinement, which motivated the
+amendment's honest re-sourcing rather than delivery under the original
+section 4.3 semantics.
 
-Probe assumption lists (`Print Assumptions`): each refutation carries the
-boolp trio plus only the relevant group-order assumption
-(`s5_group_order_eq` for S5, `s5x5_group_order_eq` for S5xS5), which enters
-through the profile's plug; nothing else, and nothing from the `lra`
-side-condition tactic used in the numeric gates.
+## 4. The amended executed theorems (section 12 items 3, 5, 6)
 
-Mutation checks on the probe: replacing the point-mass prior by the uniform
-prior breaks the seat-distribution equality at its first step, and lowering
-the numeric gate's exponent to 0 breaks the gate (the bound is vacuous at
-small L, not false), confirming the probe tests what it claims.
+New generic lemmas (`pgg-smc/security/pgg_collusion_bound.v`):
+`fdistmap_prod_curryE` (product pushforward as prior-weighted mixture),
+`var_dist_fdistmap_prod_mix` (the mixture bound: per-first-coordinate
+distance delta transfers to the product pushforwards; the two right
+factors may live on different carriers), `var_dist_supp_ge`
+(`2 * (1 - #|S|/n.+1) <= var_dist P uniform` when P vanishes off S).
 
-### 3.3 Adversarial verification of the NO-GO
-
-Two independent read-only audits were dispatched before implementation:
-
-- A mathematical audit attacked every step (observer semantics of P_idx,
-  plug content, rho, the 8/5 computation in the un-halved convention, pile
-  preservation, alternative readings, vacuity regimes) and returned
-  REFUTATION-CONFIRMED. Strengthenings it established: the minimal
-  refuting lengths are L = 4 (S5), L = 7 (both pile bounds), L = 22
-  (global seat bound); and the S5 failure is prior-independent, since
-  `P(endpoint = ord0) >= 4/5 - sqrt 5 * alpha^L` for every prior (the
-  uniform prior gives asymptotic distance 32/25), so no quantifier repair
-  exists within the pinned deterministic plug.
-- A requirements audit confirmed that no implementable reading of package
-  A exists inside the request's pins (observer, ideals, constants,
-  sections 3.5/3.8, the no-substitution rule of 4.2), and that the
-  request's NO-GO protocol is package-scoped, prescribing delivery of
-  packages B and C with A reported NO-GO.
-
-### 3.4 Old cut-level theorems and their executed counterparts (section 12 item 3)
-
-| Cut-level theorem (kept, unchanged) | Executed counterpart |
-|---|---|
-| `s5_word_endpoint_bound` (s5_models.v:295) | NO-GO, false; attempted type in 3.2 |
-| `s5x5_word_pile1_bound` (s5x5_models.v:703) | NO-GO, false |
-| `s5x5_word_pile2_bound` (s5x5_models.v:720) | NO-GO, false |
-| `s5x5_word_seat_bound` (s5x5_models.v:738) | NO-GO, false |
-| `s5x5_word_pile1_floor` (s5x5_models.v:757) | type true, NOT delivered (see below) |
-| `s5x5_word_pile2_floor` (s5x5_models.v:787) | type true, NOT delivered |
-| `s5x5_word_pile1_floor_gt0` (s5x5_models.v:817) | type true, NOT delivered |
-| `s5x5_word_pile2_floor_gt0` (s5x5_models.v:837) | type true, NOT delivered |
-
-Why the true floor types were not delivered: at the executed observer the
-floors hold with the unconditional constant 1, for every length and every
-word distribution, purely because the deterministic encoder confines a
-pile seat's executed content to at most five of ten values. Nothing is
-transported from the spectral floor; the `1 - sqrt 5 * lazy^L` slack and
-the `17 <= L` regime would be decoration. Delivering them under section
-4.3's `AnalysisBridged / NegativeTransfer` semantics ("a theorem
-transporting an obstruction to the path's observer",
-`pgg_analysis_status.v`) would present a support-confinement artifact as a
-transported mixing limitation, contradicting section 3.2's preserved claim
-that these are negative mixing results and the manifest's own row prose.
-This is the same class of substitution section 4.2 forbids without
-approval, so the whole package is NO-GO rather than 4/7 delivered.
-
-### 3.5 Consequence for section 4.3
-
-The status table of section 4.3 is conditioned on the executed theorems
-existing and is NOT applied. The word and limitation rows keep their
-honest cut-level statuses: `s5_row_word`, `s5x5_row_pile1_word`,
-`s5x5_row_pile2_word` at `Sampled / NoModelComparison`,
-`s5x5_row_pile1_limitation`, `s5x5_row_pile2_limitation` at
-`Sampled / NegativeTransfer` (the transported obstruction being at the
-cut-level observer, as their prose states).
-
-## 4. Work package B as delivered (section 12 items 4, 5, 6)
-
-### 4.1 New public types (in `pgg-smc/manifest/pgg_analysis_status.v`)
+The encoder-image ideals (Models layer, aliased in the facades):
 
 ```coq
-Record AnalysisModelFamily (observed : OE.ObservedExecution) :=
-  MkAnalysisModelFamily {
-    amf_index  : realType -> Type ;
-    amf_sample : forall R : realType,
-                   amf_index R
-                   -> @SampleAdapter R _ (OE.oe_execution observed) ;
-  }.
-Arguments amf_sample {observed} f R x : rename.
-
-Definition AnalysisModelSlot (observed : OE.ObservedExecution)
-    (c : CompletionLevel) : Type :=
-  match c with
-  | Sampled | AnalysisBridged => AnalysisModelFamily observed
-  | Algebraic | Executable | Observed => option (AnalysisModelFamily observed)
-  end.
+Definition s5_ideal_reading (secretP : R.-fdist 'I_5) : R.-fdist 'I_5 :=
+  fdistmap (fun sq : 'I_5 * 'I_5 => tnth (ts_encode s5_scheme sq.1) sq.2)
+    (secretP `x (fdist_uniform (card_ord 5))).
 ```
 
-The row record's slot is now
-`apr_model : AnalysisModelSlot apr_observed apr_completion` (field order
-observed, completion, model, transfer, assumptions), so a `Sampled` or
-`AnalysisBridged` row without a typed family witness is a type error, and
-a family over another row's execution is a type error against the slot
-type itself. The vocabulary file now imports the protocol layer it is
-typed against and still imports no instance, facade or manifest file (no
-cycle; its header records the new boundary).
+with `s5x5_ideal_pile1_reading` / `s5x5_ideal_pile2_reading` (positions
+through `widen5to10` / `rshift5to10`) and the per-seat
+`s5x5_ideal_seat_reading` (the seat's own pile's ideal).
 
-### 4.2 Model families and facade aliases (section 5.2 table as landed)
+Old cut-level theorem (kept, reworded as cut-level) and its executed
+counterpart (all conditional on `s5_rayleigh_Q2_R`, full-L1, one endpoint
+marginal, no privacy or coalition claim; proofs are per-secret DPI onto
+the landed spectral bounds plus the mixture lemma):
 
-| Family (instance constant) | Facade alias | Index at R | Row(s) |
-|---|---|---|---|
-| `pgl27_exact_family` | `PGL27Analysis.exact_family` | `unit` | 1 |
-| `pgl27_word_family` | `PGL27Analysis.word_family` | `R.-fdist bool` | 2 |
-| `five_card_uniform_family` | `FiveCardAnalysis.uniform_family` | `unit` | 3 |
-| `kim_biased_family` | `FiveCardAnalysis.biased_family` | `unit` (the fixed 1/100 member) | 4 |
-| `kim_centi_family` | `FiveCardAnalysis.centi_family` | `unit` | 5 |
-| `s5_rand_family` | `S5Analysis.rand_family` | `unit` | 7 |
-| `s5_word_family` | `S5Analysis.word_family` | `(R.-fdist 'I_5 * nat)%type` | 8 |
-| `s5x5_rand_family` | `S5x5Analysis.rand_family` | `unit` | 10 |
-| `s5x5_word_family` | `S5x5Analysis.word_family` | `(R.-fdist 'I_10 * nat)%type` | 11, 12, 13, 14 (one shared value) |
-| `abel_word_family` | `AbelianAnalysis.word_family` | `nat` | 17 |
+| Cut-level (kept) | Executed counterpart (new) |
+|---|---|
+| `s5_word_endpoint_bound` | `s5_exec_endpoint_bound`: `var_dist (sa_seat_dist (s5_word_sample secretP L) 0 i) (s5_ideal_reading secretP) <= sqrt5 * alpha^L` |
+| `s5x5_word_pile1_bound` | `s5x5_exec_pile1_bound` (vs the pile-1 ideal, `sqrt5 * lazy^L`) |
+| `s5x5_word_pile2_bound` | `s5x5_exec_pile2_bound` (vs the pile-2 ideal) |
+| `s5x5_word_seat_bound` | `s5x5_exec_seat_bound` (vs the seat's own pile ideal) and `s5x5_exec_seat_uniform_ub` (ceiling vs global uniform, leading term the ideal's own distance) |
+| `s5x5_word_pile1_floor` | `s5x5_exec_pile1_floor`: `1 - sqrt5*lazy^L <= var_dist (executed reading) uniform_I10`, transported by reverse triangle from `s5x5_ideal_pile1_uniform_ge` (the ideal's support confinement, `1 <= var_dist ideal uniform_I10`); plus the unconditional `s5x5_exec_pile1_uniform_ge` (`1 <=` at every L, no certificate) |
+| `s5x5_word_pile2_floor` | `s5x5_exec_pile2_floor` + `s5x5_exec_pile2_uniform_ge` |
+| `s5x5_word_pile1_floor_gt0` | `s5x5_exec_pile1_floor_gt0` (17 <= L) |
+| `s5x5_word_pile2_floor_gt0` | `s5x5_exec_pile2_floor_gt0` (17 <= L) |
 
-The abelian limitation row now carries the actual length-indexed word
-model as its typed evidence; the ideal model remains the facade Models
-alias `AbelianAnalysis.ideal_sample`. No underlying model was duplicated.
-No other facade alias was changed.
+Facade aliases added: S5 `ideal_reading`, `exec_endpoint_bound`; S5xS5
+`ideal_pile1_reading`, `ideal_pile2_reading`, `ideal_seat_reading`,
+`exec_pile1_bound`, `exec_pile2_bound`, `exec_seat_bound`,
+`exec_seat_uniform_ub`, `exec_pile1_floor`, `exec_pile2_floor`,
+`exec_pile1_floor_gt0`, `exec_pile2_floor_gt0`, `exec_pile1_uniform_ge`,
+`exec_pile2_uniform_ge`. Changed aliases: the cut-level word aliases'
+comments now say cut-level explicitly (also fixing older facade prose
+that called the word-cut reader executed); `word_transfer_status`,
+`pile1_word_transfer_status`, `pile2_word_transfer_status` are
+`IdealFinite` with the two-ideal guard prose; the limitation statuses'
+justifications are re-sourced to the support-confinement transport.
+`word_missing_premise` aliases are kept verbatim, and new
+`Check`/`Fail Check` pairs in both model files pin that the executed
+bounds do not instantiate the cut-carrier base premises.
 
-### 4.3 The seventeen rows (section 12 item 4)
+## 5. The manifest and client after the amendment (section 12 item 4)
+
+Row table (families and assumption statuses unchanged from the
+pre-amendment delivery; only rows 8, 11-14 changed status):
 
 | # | Row | Family index at R | Completion | Transfer | Assumptions |
 |---|---|---|---|---|---|
@@ -247,189 +189,158 @@ No other facade alias was changed.
 | 5 | `five_card_row_repeated` | `unit` | Sampled | NoModelComparison | BaselineClassicalOnly |
 | 6 | `s5_row_det` | empty optional slot | Observed | NoModelComparison | AcceptsAxioms [:: AxS5GroupOrder] |
 | 7 | `s5_row_rand` | `unit` | AnalysisBridged | StaticExecutedOnly | AcceptsAxioms [:: AxS5GroupOrder] |
-| 8 | `s5_row_word` | `R.-fdist 'I_5 * nat` | Sampled | NoModelComparison | AcceptsAxioms [:: AxS5GroupOrder; AxRayleighQ2R] |
+| 8 | `s5_row_word` | `R.-fdist 'I_5 * nat` | AnalysisBridged | IdealFinite | AcceptsAxioms [:: AxS5GroupOrder; AxRayleighQ2R] |
 | 9 | `s5x5_row_det` | empty optional slot | Observed | NoModelComparison | AcceptsAxioms [:: AxS5x5GroupOrder] |
 | 10 | `s5x5_row_rand` | `unit` | AnalysisBridged | StaticExecutedOnly | AcceptsAxioms [:: AxS5x5GroupOrder] |
-| 11 | `s5x5_row_pile1_word` | `R.-fdist 'I_10 * nat` | Sampled | NoModelComparison | AcceptsAxioms [:: AxS5x5GroupOrder; AxRayleighQ2R] |
-| 12 | `s5x5_row_pile2_word` | `R.-fdist 'I_10 * nat` | Sampled | NoModelComparison | AcceptsAxioms [:: AxS5x5GroupOrder; AxRayleighQ2R] |
-| 13 | `s5x5_row_pile1_limitation` | `R.-fdist 'I_10 * nat` | Sampled | NegativeTransfer | AcceptsAxioms [:: AxS5x5GroupOrder; AxRayleighQ2R] |
-| 14 | `s5x5_row_pile2_limitation` | `R.-fdist 'I_10 * nat` | Sampled | NegativeTransfer | AcceptsAxioms [:: AxS5x5GroupOrder; AxRayleighQ2R] |
+| 11 | `s5x5_row_pile1_word` | `R.-fdist 'I_10 * nat` | AnalysisBridged | IdealFinite | AcceptsAxioms [:: AxS5x5GroupOrder; AxRayleighQ2R] |
+| 12 | `s5x5_row_pile2_word` | `R.-fdist 'I_10 * nat` | AnalysisBridged | IdealFinite | AcceptsAxioms [:: AxS5x5GroupOrder; AxRayleighQ2R] |
+| 13 | `s5x5_row_pile1_limitation` | `R.-fdist 'I_10 * nat` | AnalysisBridged | NegativeTransfer | AcceptsAxioms [:: AxS5x5GroupOrder; AxRayleighQ2R] |
+| 14 | `s5x5_row_pile2_limitation` | `R.-fdist 'I_10 * nat` | AnalysisBridged | NegativeTransfer | AcceptsAxioms [:: AxS5x5GroupOrder; AxRayleighQ2R] |
 | 15 | `abel_row_recovery` | empty optional slot | Observed | NoModelComparison | BaselineClassicalOnly |
 | 16 | `abel_row_identity` | empty optional slot | Observed | NoModelComparison | BaselineClassicalOnly |
 | 17 | `abel_row_limitation` | `nat` | AnalysisBridged | NegativeTransfer | BaselineClassicalOnly |
 
-Every completion, transfer and assumption status is unchanged from the
-baseline; only the model evidence became typed.
+Typed model slot (pre-amendment delivery, unchanged): `apr_model :
+AnalysisModelSlot apr_observed apr_completion` makes a `Sampled` or
+`AnalysisBridged` row without an `AnalysisModelFamily` witness over its
+own observed execution a type error. Manifest checks: per-row `apr_model`
+checks, index-exercise checks, the generic execution-projection check, 51
+erefl status pins (8 flipped by the amendment, plus 3 facade status
+pins), the eleven executed spelled-type checks (request 5.3 check 5), and
+FOUR mutation `Fail` guards, the fourth being the executed alias at the
+cut-level type. The manifest's convention banner, the five affected row
+tables, the row-17 justification and the absent-capabilities block are
+rewritten so the three comparison targets (cut-level pile uniform;
+satisfiable encoder-image ideals; unsatisfiable-premise group uniform)
+cannot be conflated, and the premise-naming obligation covers the
+IdealFinite and NegativeTransfer word rows by name. The still-recorded
+fact that the group-uniform cut-carrier premise is UNSATISFIABLE (sign
+cosets) is untouched and now guarded on both sides.
 
-### 4.4 Manifest checks and mutation guards (section 5.3)
-
-- Check 1 (witness required at Sampled/AnalysisBridged): enforced by the
-  slot type itself, and one `Timeout 60 Check (apr_model <row> : ...)` per
-  row pins the mandatory or optional form.
-- Check 2 (adapter over the row's own execution): the family record's
-  `amf_sample` codomain is literally
-  `SampleAdapter R (OE.oe_execution observed)`, and a generic spelled
-  check in the manifest exhibits it for every row and family.
-- Check 3 (status constructors): the 51 existing erefl pins retained
-  (renamed constructor).
-- Check 4 (theorems at spelled types): the 203 existing spelled-type
-  checks retained unchanged.
-- Check 5 (executed aliases named by word rows): UNMET, contingent on
-  package A.
-- Index-type pins: one application per parameterized family at its
-  section 5.2 index type, plus one at `tt` for a unit family.
-- Mutation guards, inline `Fail Check` in the manifest (each verified to
-  fail for the intended reason; probe error messages below):
-  1. `Sampled` row with `None` — rejected: "The term None has type
-     option ?A while it is expected to have type AnalysisModelSlot ...
-     Sampled".
-  2. `Sampled` row with a `tt` stub — rejected analogously.
-  3. `AnalysisBridged` row with `None` — rejected analogously.
-  4. A family over the wrong execution (`s5x5_word_family` in an S5 row) —
-     rejected against `AnalysisModelSlot S5Analysis.observed Sampled`,
-     i.e. by the slot's dependency on the row's own observed execution.
-  The request's fourth case (executed alias reverted to cut-level type) is
-  UNMET, contingent on package A.
-- The profile-facade checker is untouched: `profile_facade_check.sh` exits
-  0 (six profiles, all represented) and all 18 cases of
-  `profile_facade_check_test.py` pass.
-
-### 4.5 Client
-
-`pgg_analysis_client.v` keeps exactly one `Require`. It now also reaches:
-`AnalysisModelFamily`, `AnalysisModelSlot`, `amf_index`, `amf_sample`,
-`BaselineClassicalOnly`, `AcceptsAxioms`, `apr_model`, and all ten family
-aliases across the five facades.
-
-## 5. Work package C as delivered (section 6)
-
-`KernelClosed` renamed to `BaselineClassicalOnly` with the required
-meanings stated at the constructor:
-
-- `BaselineClassicalOnly` = no accepted assumption beyond the repository's
-  documented boolp classical trio;
-- `AcceptsAxioms xs` = the trio plus exactly the named assumptions in xs.
-
-The boolp trio was not added to `PggAxiom`. All 8 row definitions, 8 erefl
-pins and 9 prose comments updated; no facade or client occurrence existed.
-This response never describes a trio-dependent result as kernel-closed.
+Client: exactly one `Require`; additionally reaches the three ideal
+readings and all eleven executed aliases.
 
 ## 6. Changed files by work package (section 12 item 7)
 
 - Package C: `pgg-smc/manifest/pgg_analysis_status.v`,
-  `pgg-smc/manifest/pgg_analysis_manifest.v` (commit e1b11396).
-- Package B: `pgg-smc/manifest/pgg_analysis_status.v` (ffebab0b);
-  `pgg-smc/instances/s5/{s5_models,s5_analysis}.v`,
-  `pgg-smc/instances/s5x5/{s5x5_models,s5x5_analysis}.v`,
-  `pgg-smc/instances/pgl27/{pgl27_models,pgl27_analysis}.v`,
-  `pgg-smc/instances/kim2025/{five_card_models,five_card_analysis}.v`,
-  `pgg-smc/instances/abelian/{abelian_models,abelian_analysis}.v`
-  (89220316); `pgg-smc/manifest/{pgg_analysis_manifest,pgg_analysis_client}.v`
-  (9cceb246); `pgg-smc/manifest/pgg_analysis_manifest.v` (0d925262).
-- Package A: no production file (NO-GO; refutation probes stayed in the
-  session scratchpad and are quoted in 3.2, per the request's rule against
-  permanent probe files).
-- No new production `.v` file, so `_CoqProject` is unchanged. No paper,
-  slide, bibliography or older formalization response was touched (the
-  pre-existing uncommitted working-tree modification of
-  `pgg-smc/paper-wadt2026/main.tex` was left strictly alone and never
-  staged).
+  `pgg_analysis_manifest.v` (e1b11396).
+- Package B: `pgg_analysis_status.v` (ffebab0b, 9cceb246-adjacent);
+  the ten instance/facade files (89220316); `pgg_analysis_manifest.v`,
+  `pgg_analysis_client.v` (9cceb246, 0d925262).
+- Amended package A: `pgg-smc/security/pgg_collusion_bound.v`,
+  `pgg-smc/instances/s5/{s5_models,s5_analysis}.v` (b552ef7a);
+  `pgg-smc/instances/s5x5/{s5x5_models,s5x5_analysis}.v` (2dfcb150);
+  `pgg-smc/manifest/{pgg_analysis_manifest,pgg_analysis_client}.v`
+  (7c6f7f13); `pgg_analysis_status.v` (9220bedc).
+- No new production `.v` file; `_CoqProject` unchanged. No paper, slide,
+  bibliography or older formalization response touched (the pre-existing
+  uncommitted user modification of `pgg-smc/paper-wadt2026/main.tex` was
+  never staged). `s5x5_models.v` gained the `mathcomp lra` import for two
+  rational side conditions.
 
 ## 7. Builds, tests, audits (section 12 items 8, 9)
 
-All builds via `opam exec --switch=/Users/cheng-huiweng/Projects/coq --
-make -j1 <targets>`; Rocq 9.0.0 / OCaml 5.2.1; every one exit 0:
+All builds `opam exec --switch=/Users/cheng-huiweng/Projects/coq -- make
+-j1 <targets>`, Rocq 9.0.0 / OCaml 5.2.1, every one exit 0. Amended-round
+steps: collusion_bound 5.7 s; s5_models 73 s; s5_analysis 8.3 s;
+s5x5_models 6.6-7.0 s per iteration; s5x5_analysis 8.1 s; manifest +
+client 10.6 s; facade checker exit 0 (six profiles) and
+profile_facade_check_test.py 18/18; final forced client rebuild + full
+serial repository build exit 0 (pre-amendment full build: 10 min 17 s;
+amended-round full build recorded in the session log). Probe compiles:
+refutation probe 5.0 s; model-slot probe 6.8 s; amended-statement probe
+5.2 s (fifteen `Qed`, statements byte-identical up to one
+parenthesization, three mutation checks failing correctly, one of them
+upgraded to a compiled counterexample of the hypothesis-free support
+lemma).
 
-| Step | Targets | Wall time |
-|---|---|---|
-| C rename | status.vo, manifest.vo, client.vo | 29.7 s |
-| B vocabulary | status.vo | 4.4 s; dependent cone (manifest.vo, client.vo + facades) 31.0 s |
-| B families | five instance models .vo | 3.5-4.5 s each; five facades .vo 18.6 s |
-| B manifest | manifest.vo, client.vo | 11.1 s |
-| Forced client rebuild + full serial repository build | `rm client.vo; make -j1` | 10 min 17 s, exit 0 |
+Warnings: no new warning class; the pre-existing classes now also appear
+on the files that gained protocol-layer imports.
 
-Warnings: no new warning class. The pre-existing classes
-(notation-overridden, ambiguous coercion paths, deprecated-library-file,
-notation-incompatible-prefix) now also appear when compiling
-`pgg_analysis_status.v`, as a mechanical consequence of its new
-protocol-layer imports; nothing else changed.
+Scans over all touched production files:
+`Axiom|Parameter|Admitted|admit|Abort`: none found.
 
-Scans: `Axiom|Parameter|Admitted|admit|Abort` over all 13 touched
-production files: none found.
-
-Audits: the pre-commit gate ran on every commit (Stage 1 green; Stage 2
-remains the known S998 silent no-op), compensated by direct rocq-auditor
-dispatches: e1b11396 passed (its one real finding, fourteen lines pushed
-past 80 columns by the longer constructor name, was fixed in 9cceb246,
-verified zero over-80 lines); 89220316 + 9cceb246 passed with one
-info-severity finding (file-legend drift), fixed forward in 0d925262.
-Probe compiles (scratchpad, project flags, single worker): refutation
-probe 5.0 s exit 0; model-slot probe 6.8 s exit 0.
+Audits: the pre-commit gate ran on every commit (Stage 1; Stage 2 remains
+the S998 no-op), with one Stage-1 rejection each on b552ef7a's and
+2dfcb150's first attempts (a five-component name without `Naming:`; probe
+comments without H-series role tags), fixed forward before the commits
+landed. Compensating direct rocq-auditor dispatches reviewed every
+substantive commit; the amendment's label decisions were separately
+audited before implementation (conditional GO whose conditions this
+response and the landed prose discharge), and the post-landing dispatch
+over the four amended commits is recorded in the session log.
 
 ## 8. Print Assumptions (section 12 item 10)
 
-Per new public value (families are definitions; package B adds no
-theorem):
+Per new public theorem and its facade alias (identical lists):
 
-- boolp trio only (`propositional_extensionality`,
-  `functional_extensionality_dep`, `constructive_indefinite_description`):
-  `pgl27_exact_family`, `pgl27_word_family`, `five_card_uniform_family`,
-  `kim_biased_family`, `kim_centi_family`, `abel_word_family`, and the
-  rows `pgl27_row_exact`, `abel_row_limitation`.
-- trio + `s5_group_order_eq`: `s5_rand_family`, `s5_word_family`, the
-  facade alias `S5Analysis.word_family`, the row `s5_row_word`.
-- trio + `s5x5_group_order_eq`: `s5x5_rand_family`, `s5x5_word_family`.
+- boolp trio only: `fdistmap_prod_curryE`, `var_dist_fdistmap_prod_mix`,
+  `var_dist_supp_ge`, `s5x5_ideal_pile1_uniform_ge`,
+  `s5x5_ideal_pile2_uniform_ge`.
+- trio + `s5_group_order_eq` + `s5_rayleigh_Q2_R`:
+  `s5_exec_endpoint_bound` (and `S5Analysis.exec_endpoint_bound`).
+- trio + `s5x5_group_order_eq` + `s5_rayleigh_Q2_R`:
+  `s5x5_exec_pile1_bound`, `s5x5_exec_pile2_bound`,
+  `s5x5_exec_seat_bound`, `s5x5_exec_seat_uniform_ub`,
+  `s5x5_exec_pile1_floor`, `s5x5_exec_pile2_floor`,
+  `s5x5_exec_pile1_floor_gt0`, `s5x5_exec_pile2_floor_gt0`.
+- trio + `s5x5_group_order_eq` (NO Rayleigh): the unconditional support
+  floors `s5x5_exec_pile1_uniform_ge`, `s5x5_exec_pile2_uniform_ge`.
 
-These match the rows' declared assumption statuses. `s5_rayleigh_Q2_R`
-appears in no new value: it enters only through the (unchanged) cut-level
-theorems, which is what the `AcceptsAxioms` entries of rows 8 and 11-14
-record.
+The ideal definitions and model families carry at most the trio plus the
+instance group-order axiom, as recorded in section 8 of the pre-amendment
+response.
 
 ## 9. Boundary confirmations (section 12 items 11-13)
 
-- Item 11: `s5_rayleigh_Q2_R` was retained, not eliminated, unfolded,
-  reproven or expanded. Every theorem depending on it remains explicitly
-  conditional; the refutation probe reuses only the lazy-coefficient
-  numeric chain built on it.
-- Item 12, strongest repository-facing claim after this work: the landed
-  cut-level finite-word endpoint bounds, randomized executed secrecy
-  theorems and the Abelian executed distance-one limitation stand
-  unchanged; on top of them, the manifest's model evidence is now typed —
-  no Sampled or AnalysisBridged path can exist without a model-family
-  witness over its own observed execution — and the assumption vocabulary
-  states its true boundary. Newly established knowledge: the
-  interpreter-executed endpoint observer of the deterministic S5/S5xS5
-  plugs has encoder-image ideals; its distance to the uniform ideals is
-  bounded below by 8/5 (pile carriers) and 9/5 (global carrier) at
-  point-mass priors, at every word length, which refutes any uniform-ideal
-  executed upper bound for these plugs.
-- Item 13, nearby claims that remain false: the section 4.1/4.2 executed
-  uniform-ideal upper bounds (compiled refutations in 3.2); any privacy,
-  secrecy, indistinguishability, coalition or leakage reading of any
-  finite-word endpoint result, executed or cut-level; any ideal-to-finite
-  transfer for S5 or S5xS5 (the full-carrier premise remains absent, and
-  for group-uniform ideals unsatisfiable); and the reading of the
-  would-be executed floors as transported mixing limitations (they hold
-  only by encoder support confinement, with constant 1, at every length).
+- Item 11: `s5_rayleigh_Q2_R` retained, not eliminated, unfolded,
+  reproven or expanded; every dependent theorem is explicitly conditional,
+  and the two unconditional support floors are proved without it.
+- Item 12, strongest repository-facing claim: every live instance's
+  finite-word path now carries an executed, machine-checked transfer: the
+  interpreter-executed seat reading of the deterministic S5/S5xS5 plugs is
+  within the spectral mixing term of the encoder-image ideal reading, for
+  every secret prior, every seat and every word length; and against global
+  uniform the S5xS5 executed readings are provably far (at least
+  `1 - sqrt5*lazy^L` conditionally, at least 1 unconditionally), a
+  limitation of the deterministic encoder's executed reading. The typed
+  manifest enforces model witnesses; the assumption vocabulary states its
+  true boundary.
+- Item 13, nearby claims that remain false, superseding the pre-amendment
+  response's item 13 where noted: the ORIGINAL uniform-ideal executed
+  upper bounds (refuted, section 3); any privacy, secrecy,
+  indistinguishability, coalition or leakage reading of any finite-word
+  endpoint result, executed or cut-level; any cut-carrier or full-carrier
+  ideal-to-finite transfer for S5/S5xS5 (the group-uniform premise remains
+  absent and unsatisfiable); any reading of the encoder-image ideal as
+  uniform or secret-independent; and — SUPERSEDED — the pre-amendment
+  sentence calling the executed floors mislabeled is replaced: they are
+  now honestly delivered as transports of the encoder-image ideal's
+  support confinement, with the unconditional constant-one versions landed
+  alongside, and the prose sources them in the encoder, never in a
+  spectral mixing failure.
 
-## 10. Acceptance ledger (section 11) and repair options
+## 10. Acceptance ledger (section 11, amended)
 
-Unmet: 1, 2, 4, 5, 6 (package A), the A-contingent parts of 3 (no
-executed counterparts exist; the cut-level theorems are unchanged and
-distinguished), 9 (no executed theorem family to reach) and 11 (three of
-four mutation classes delivered). Met: 7, 8, 10, 12, 13, 14, and the
-remainder of 3, 9, 11.
-
-Paths that would make an executed-endpoint package true, all requiring
-approval because they change a pinned element:
-
-1. Re-pin the executed ideals to the encoder images: per fixed secret the
-   executed reader factors through the cut, so the data processing
-   inequality gives
-   `var_dist (sa_seat_dist ...) (fdistmap (content map) ideal) <= sqrt 5 *
-   alpha^L` per secret, and a mixture argument extends it to any prior.
-2. Randomize the deterministic encoder (the randomized plugs already deal
-   uniform share tapes); an executed uniform-ideal statement then becomes
-   plausible, as a new artifact.
-3. Accept the floors as support-confinement limitations under a new,
-   honest transfer label (not `NegativeTransfer` as currently defined).
+1. AMENDED-MET: S5 has `s5_exec_endpoint_bound` at `sa_seat_dist` of
+   `s5_word_sample` (against the amended ideal).
+2. AMENDED-MET: S5xS5 has executed forms of both pile bounds, the seat
+   bound (pile-ideal target plus the global-uniform ceiling), both floors
+   and both positive-regime corollaries, plus two unconditional support
+   floors.
+3. MET: every cut-level theorem is retained and its aliases say cut-level.
+4. AMENDED-MET: the S5 word row is `AnalysisBridged / IdealFinite`.
+5. AMENDED-MET: both S5xS5 word rows are `AnalysisBridged / IdealFinite`.
+6. MET: both S5xS5 limitation rows are `AnalysisBridged /
+   NegativeTransfer`.
+7. MET: no `Sampled` or `AnalysisBridged` row without a typed family.
+8. MET: all five instances' families are typed facade values.
+9. MET: the client builds from one `Require` and reaches the new API,
+   including the executed theorem family.
+10. MET: the six-profile checker and all 18 mutation cases pass.
+11. MET: all four manifest mutations fail for the intended type-level
+    reason.
+12. MET: no boolp-trio-dependent result is called kernel-closed.
+13. MET: no new trusted assumption or unfinished proof (`lra` is a
+    tactic, not an axiom; `Print Assumptions` confirms).
+14. MET: no paper, slide, bibliography or unrelated file changed.
