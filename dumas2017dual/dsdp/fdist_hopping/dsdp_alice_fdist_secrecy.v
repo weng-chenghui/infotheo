@@ -171,11 +171,6 @@ Context {R : realType}.
 Variables (AHE : AHEncType) (Renc : finType) (index_renc : nat).
 Hypothesis card_renc : #|Renc| = index_renc.+1.
 Variable rand_of_renc : Renc -> rand AHE.
-Variables (t_cipher : finType)
-          (chcipher_of_cipher : cipher AHE -> t_cipher)
-          (cipher_of_chcipher : t_cipher -> cipher AHE).
-Hypothesis chcipher_of_cipherK :
-  cancel chcipher_of_cipher cipher_of_chcipher.
 Variable pkey_of_party : party_id -> pub_key AHE.
 Variables (w_v1 w_u1 w_u2 w_u3 : plain AHE).
 Hypothesis w_u3_inj : injective (fun v : plain AHE => w_u3 * v).
@@ -233,25 +228,23 @@ Definition Sout : {RV alice_sample_fdist -> plain AHE} :=
 Lemma SoutE t : Sout t = w_u1 * w_v1 + w_u2 * V2 t + w_u3 * V3 t.
 Proof. by []. Qed.
 
-(* The Bob-key ciphertext slot of Alice's hopping tuple, encrypting Bob's input at
-   index 0 and zero at every larger index. *)
-Definition hop0_cipher (i : nat) : {RV alice_sample_fdist -> t_cipher} :=
-  fun t => chcipher_of_cipher
-    (enc (pkey_of_party Bob) (if (0 < i)%N then 0 else V2 t)
-         (rand_of_renc (Rho2 t))).
+(* The Bob-key ciphertext slot of Alice's hopping tuple, encrypting Bob's
+   input at index 0 and zero at every larger index. *)
+Definition hop0_cipher (i : nat) : {RV alice_sample_fdist -> cipher AHE} :=
+  fun t => enc (pkey_of_party Bob) (if (0 < i)%N then 0 else V2 t)
+               (rand_of_renc (Rho2 t)).
 
-(* The Charlie-key ciphertext slot of Alice's hopping tuple, encrypting Charlie's input
-   at indices 0 and 1 and zero at every larger index. *)
-Definition hop1_cipher (i : nat) : {RV alice_sample_fdist -> t_cipher} :=
-  fun t => chcipher_of_cipher
-    (enc (pkey_of_party Charlie) (if (1 < i)%N then 0 else V3 t)
-         (rand_of_renc (Rho3 t))).
+(* The Charlie-key ciphertext slot of Alice's hopping tuple, encrypting
+   Charlie's input at indices 0 and 1 and zero at every larger index. *)
+Definition hop1_cipher (i : nat) : {RV alice_sample_fdist -> cipher AHE} :=
+  fun t => enc (pkey_of_party Charlie) (if (1 < i)%N then 0 else V3 t)
+               (rand_of_renc (Rho3 t)).
 
 (* The type of Alice's hopping tuple: her two masks, her two combine
    randomnesses, the leaked output, and the two ciphertexts she receives. *)
 Definition dsdp_alice_hop_tupleT : finType :=
   ((plain AHE * plain AHE) * (Renc * Renc) * plain AHE
-   * t_cipher * t_cipher)%type.
+   * cipher AHE * cipher AHE)%type.
 
 (* Alice's hopping tuple at hop i: her two masks, her two combine
    randomnesses, the leaked output, and the two ciphertext slots, where the
@@ -264,9 +257,8 @@ Definition AliceHopTuple (i : nat) :
 (* The law of an encryption of a plaintext under a public key, with uniform
    encryption randomness. *)
 Definition enc_fdist (pk : pub_key AHE) (v : plain AHE) :
-    R.-fdist t_cipher :=
-  fdistmap (fun r => chcipher_of_cipher (enc pk v (rand_of_renc r)))
-           (fdist_uniform card_renc).
+    R.-fdist (cipher AHE) :=
+  fdistmap (fun r => enc pk v (rand_of_renc r)) (fdist_uniform card_renc).
 
 (* A sampling step of an experiment, the bind of a distribution with a
    kernel. *)
@@ -285,7 +277,7 @@ Record indcpa_fdist_adversary := {
   adv_state : finType ;
   adv_choose : R.-fdist adv_state ;
   adv_plain : adv_state -> plain AHE ;
-  adv_decide : adv_state -> t_cipher -> bool }.
+  adv_decide : adv_state -> cipher AHE -> bool }.
 
 Arguments adv_choose : clear implicits.
 Arguments adv_plain : clear implicits.
@@ -350,15 +342,15 @@ Definition indcpa_fdist_epsilon (pk : pub_key AHE)
 Lemma enc_slot_resampleE (stateT : finType) (Q : R.-fdist stateT)
     (State : {RV alice_sample_fdist -> stateT})
     (Rho : {RV alice_sample_fdist -> Renc})
-    (k : stateT -> Renc -> t_cipher) :
+    (k : stateT -> Renc -> cipher AHE) :
   `p_ [% State, Rho] = Q `x (fdist_uniform card_renc) ->
   `p_ [% State, (fun t => k (State t) (Rho t))
-        : {RV alice_sample_fdist -> t_cipher}]
+        : {RV alice_sample_fdist -> cipher AHE}]
     = Q `X (fun a => fdistmap (k a) (fdist_uniform card_renc)).
 Proof.
 move=> Hprod.
 have HL : `p_ [% State, (fun t => k (State t) (Rho t))
-                : {RV alice_sample_fdist -> t_cipher}]
+                : {RV alice_sample_fdist -> cipher AHE}]
         = fdistmap (fun p : (stateT * Renc)%type => (p.1, k p.1 p.2))
                    (`p_ [% State, Rho]).
   by rewrite /dist_of_RV fdistmap_comp.
@@ -424,7 +416,7 @@ Qed.
    randomness, and the hop-0 ciphertext of zero. *)
 Definition hop1_stateT : finType :=
   ((plain AHE * plain AHE) * (plain AHE * plain AHE)
-   * (Renc * Renc) * t_cipher)%type.
+   * (Renc * Renc) * cipher AHE)%type.
 
 (* The random variable of the hop-1 adversary state. *)
 Definition Hop1State : {RV alice_sample_fdist -> hop1_stateT} :=
@@ -439,7 +431,7 @@ Definition Hop1PreState : {RV alice_sample_fdist -> hop0_stateT} :=
    the hop-0 slot. *)
 Definition hop1_state_of (c : hop0_stateT) : hop1_stateT :=
   (c.1.1.1, c.1.1.2, c.1.2,
-   chcipher_of_cipher (enc (pkey_of_party Bob) 0 (rand_of_renc c.2))).
+   enc (pkey_of_party Bob) 0 (rand_of_renc c.2)).
 
 (* The hop-1 prestate and the hop-1 encryption randomness are jointly
    uniform. *)
@@ -485,17 +477,16 @@ Qed.
 
 (* The inputs and the view rebuilt from a hop-0 state and a ciphertext in
    the hop-0 slot. *)
-Definition hop0_assemble (c : hop0_stateT) (ch : t_cipher) :
+Definition hop0_assemble (c : hop0_stateT) (ch : cipher AHE) :
     plain AHE * plain AHE * dsdp_alice_hop_tupleT :=
   let: (vv, masks, ra, rho3) := c in
   (vv.1, vv.2,
    (masks, ra, dsdp_output w_v1 w_u1 w_u2 w_u3 vv.1 vv.2, ch,
-    chcipher_of_cipher
-      (enc (pkey_of_party Charlie) vv.2 (rand_of_renc rho3)))).
+    enc (pkey_of_party Charlie) vv.2 (rand_of_renc rho3))).
 
 (* The inputs and the view rebuilt from a hop-1 state and a ciphertext in
    the hop-1 slot. *)
-Definition hop1_assemble (c : hop1_stateT) (ch : t_cipher) :
+Definition hop1_assemble (c : hop1_stateT) (ch : cipher AHE) :
     plain AHE * plain AHE * dsdp_alice_hop_tupleT :=
   let: (vv, masks, ra, c2zero) := c in
   (vv.1, vv.2,
@@ -528,13 +519,14 @@ Lemma hop_challengeE (stateT : finType)
     (State : {RV alice_sample_fdist -> stateT})
     (Rho : {RV alice_sample_fdist -> Renc}) (pk : pub_key AHE)
     (p : stateT -> plain AHE)
-    (asm : stateT -> t_cipher -> plain AHE * plain AHE * dsdp_alice_hop_tupleT)
+    (asm : stateT -> cipher AHE ->
+             plain AHE * plain AHE * dsdp_alice_hop_tupleT)
     (X : {RV alice_sample_fdist ->
             (plain AHE * plain AHE * dsdp_alice_hop_tupleT)%type})
     (D : plain AHE * plain AHE * dsdp_alice_hop_tupleT -> bool) :
   `p_ [% State, Rho] = (`p_ State) `x (fdist_uniform card_renc) ->
   (forall t, X t = asm (State t)
-     (chcipher_of_cipher (enc pk (p (State t)) (rand_of_renc (Rho t))))) ->
+     (enc pk (p (State t)) (rand_of_renc (Rho t)))) ->
   Pr (`p_ X) [set x | D x]
   = Pr (`p_ State >>= (fun c => fdistmap (fun ch => D (asm c ch))
                                   (enc_fdist pk (p c)))) [set true].
@@ -542,15 +534,14 @@ Proof.
 move=> Hprod HX.
 rewrite -Pr_fdistmap_bool.
 have -> : fdistmap D (`p_ X)
-        = fdistmap (fun q : stateT * t_cipher => D (asm q.1 q.2))
+        = fdistmap (fun q : stateT * cipher AHE => D (asm q.1 q.2))
                    (`p_ [% State,
-                         (fun t => chcipher_of_cipher
-                            (enc pk (p (State t)) (rand_of_renc (Rho t))))
-                           : {RV alice_sample_fdist -> t_cipher}]).
+                         (fun t => enc pk (p (State t)) (rand_of_renc (Rho t)))
+                           : {RV alice_sample_fdist -> cipher AHE}]).
   rewrite /dist_of_RV !fdistmap_comp; congr fdistmap.
   by apply/boolp.funext => t; rewrite /= HX.
-rewrite (enc_slot_resampleE (fun c r => chcipher_of_cipher
-  (enc pk (p c) (rand_of_renc r))) Hprod) fdist_prod_bindE fdistmap_bind.
+rewrite (enc_slot_resampleE (fun c r => enc pk (p c) (rand_of_renc r)) Hprod)
+        fdist_prod_bindE fdistmap_bind.
 congr (Pr _ _); congr (_ >>= _); apply/boolp.funext => c.
 by rewrite /enc_fdist !fdistmap_comp.
 Qed.
@@ -775,15 +766,17 @@ Qed.
 (* Everything Alice's all-zero view carries besides the leaked output. *)
 Definition AliceSpectator :
     {RV alice_sample_fdist ->
-       ((plain AHE * plain AHE) * (Renc * Renc) * t_cipher * t_cipher)%type}
+       ((plain AHE * plain AHE) * (Renc * Renc) * cipher AHE
+        * cipher AHE)%type}
   := [% [% R2, R3], [% RA1, RA2], hop0_cipher 2, hop1_cipher 2].
 
 (* The spectator rebuilt from the spectator coordinates. *)
 Definition alice_spectator_of (c : alice_spectator_preT) :
-    ((plain AHE * plain AHE) * (Renc * Renc) * t_cipher * t_cipher)%type :=
+    ((plain AHE * plain AHE) * (Renc * Renc) * cipher AHE
+     * cipher AHE)%type :=
   (c.1.1, c.2,
-   chcipher_of_cipher (enc (pkey_of_party Bob) 0 (rand_of_renc c.1.2.1)),
-   chcipher_of_cipher (enc (pkey_of_party Charlie) 0 (rand_of_renc c.1.2.2))).
+   enc (pkey_of_party Bob) 0 (rand_of_renc c.1.2.1),
+   enc (pkey_of_party Charlie) 0 (rand_of_renc c.1.2.2)).
 
 (* The spectator is independent of the two secret inputs. *)
 Lemma alice_spectator_indep :
@@ -810,7 +803,7 @@ Qed.
    Naming: the [_of_] connective names the source the conversion reads, after
    the repository's total-conversion family. *)
 Definition alice_hop_tuple_of_spectator
-    (p : (((plain AHE * plain AHE) * (Renc * Renc) * t_cipher * t_cipher)
+    (p : (((plain AHE * plain AHE) * (Renc * Renc) * cipher AHE * cipher AHE)
           * plain AHE)%type) : dsdp_alice_hop_tupleT :=
   (p.1.1.1.1, p.1.1.1.2, p.2, p.1.1.2, p.1.2).
 
@@ -978,10 +971,11 @@ Qed.
 
 (* The spectator rebuilt from the reordered spectator coordinates. *)
 Definition alice_spectator_prod (c : alice_spectator_pre2T) :
-    ((plain AHE * plain AHE) * (Renc * Renc) * t_cipher * t_cipher)%type :=
+    ((plain AHE * plain AHE) * (Renc * Renc) * cipher AHE
+     * cipher AHE)%type :=
   (c.1.1.1, c.1.1.2,
-   chcipher_of_cipher (enc (pkey_of_party Bob) 0 (rand_of_renc c.1.2)),
-   chcipher_of_cipher (enc (pkey_of_party Charlie) 0 (rand_of_renc c.2))).
+   enc (pkey_of_party Bob) 0 (rand_of_renc c.1.2),
+   enc (pkey_of_party Charlie) 0 (rand_of_renc c.2)).
 
 (* The spectator is the image of the reordered spectator coordinates under the
    zero-plaintext encryptions. *)
@@ -1015,7 +1009,8 @@ Qed.
    Naming: the [_of_] connective names the source the projection reads, after
    the repository's total-conversion family. *)
 Definition alice_spectator_of_hop_tuple (v : dsdp_alice_hop_tupleT) :
-    ((plain AHE * plain AHE) * (Renc * Renc) * t_cipher * t_cipher)%type :=
+    ((plain AHE * plain AHE) * (Renc * Renc) * cipher AHE
+     * cipher AHE)%type :=
   (v.1.1.1.1, v.1.1.1.2, v.1.2, v.2).
 
 (* On a conditioning event that determines the leaked output, the joint mass of
@@ -1133,8 +1128,8 @@ Qed.
    the [alice_view_of_hop_tupleE] rewrite lemma below. *)
 Definition alice_view_of_hop_tuple (v : dsdp_alice_hop_tupleT) :
     dsdp_alice_hop_tupleT * cipher AHE * cipher AHE * plain AHE :=
-  let c_bob := cipher_of_chcipher v.1.2 in
-  let c_charlie := cipher_of_chcipher v.2 in
+  let c_bob := v.1.2 in
+  let c_charlie := v.2 in
   let r2 := v.1.1.1.1.1 in
   let r3 := v.1.1.1.1.2 in
   let ra1 := v.1.1.1.2.1 in
@@ -1190,7 +1185,7 @@ Lemma alice_view_of_hop_tupleE :
 Proof.
 apply/boolp.funext => t.
 rewrite /AliceView /alice_view_of_hop_tuple /AliceCombineBob
-        /AliceCombineCharlie /AliceRecvPlain /= !chcipher_of_cipherK.
+        /AliceCombineCharlie /AliceRecvPlain /=.
 by congr (_, _, _, _); rewrite /Sout /comp_RV /dsdp_output /=; ring.
 Qed.
 
