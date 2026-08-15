@@ -81,6 +81,57 @@ Require Import dsdp_alice_fdist_secrecy.
 (*                              input with probability at most one over that  *)
 (*                              cardinality plus the advantages of the two    *)
 (*                              per-hop reductions                            *)
+(*   dsdp_alice_trace_tupleT == the trace-visible part of Alice's hopping     *)
+(*                              tuple: the two masks, the leaked output and   *)
+(*                              the two received ciphertexts                  *)
+(*           AliceTraceTuple == that part as a random variable on the sample  *)
+(*                              space                                         *)
+(*        alice_sample_restT == the sample coordinates other than Alice's     *)
+(*                              two combine randomnesses                      *)
+(*           AliceSampleRest == the random variable of those coordinates      *)
+(*          AliceCombineRand == the random variable of Alice's two combine    *)
+(*                              randomnesses                                  *)
+(* combine_rand_rest_uniformE ==                                              *)
+(*                              Alice's combine randomnesses and the other    *)
+(*                              sample coordinates are jointly uniform        *)
+(*     combine_rand_uniformE == Alice's combine randomnesses are uniform      *)
+(*      sample_rest_uniformE == the other sample coordinates are uniform      *)
+(*   combine_rand_rest_indep == Alice's combine randomnesses are independent  *)
+(*                              of the other sample coordinates               *)
+(* v2_trace_tuple_of_sample_rest ==                                           *)
+(*                              Bob's input and the trace-visible tuple,      *)
+(*                              rebuilt from the other sample coordinates     *)
+(*  combine_rand_trace_indep == Alice's combine randomnesses are              *)
+(*                              independent of Bob's input taken jointly      *)
+(*                              with the trace-visible tuple                  *)
+(*   hop_tuple_of_rand_trace == Alice's hopping tuple rebuilt from her        *)
+(*                              combine randomnesses and the trace-visible    *)
+(*                              tuple                                         *)
+(*   rand_trace_of_hop_tuple == the two read back off a hopping tuple         *)
+(* alice_hop_tuple_rand_traceE ==                                             *)
+(*                              Alice's hopping tuple is her combine          *)
+(*                              randomnesses together with the trace-visible  *)
+(*                              tuple                                         *)
+(*      trace_of_trace_tuple == Alice's executed trace read off the           *)
+(*                              trace-visible tuple                           *)
+(*          trace_data_plain == the plaintext carried by a trace entry,       *)
+(*                              zero at any other sort                        *)
+(*         trace_data_cipher == the ciphertext carried by a trace entry, a    *)
+(*                              fixed encryption of zero at any other sort    *)
+(*      trace_tuple_of_trace == the trace-visible tuple read back off an      *)
+(*                              encoded trace                                 *)
+(*        alice_trace_tupleE == Alice's executed trace is the image of the    *)
+(*                              trace-visible tuple                           *)
+(* centropy_AliceTrace_AliceHopTuple ==                                       *)
+(*                              conditioning on Alice's executed trace        *)
+(*                              leaves the same uncertainty about Bob's       *)
+(*                              input as conditioning on her hopping tuple    *)
+(*   alice_hop_tuple_of_view == the hopping tuple is the first component      *)
+(*                              of Alice's view                               *)
+(* centropy_AliceView_AliceHopTuple ==                                        *)
+(*                              conditioning on Alice's view leaves the       *)
+(*                              same uncertainty about Bob's input as         *)
+(*                              conditioning on her hopping tuple             *)
 (* ```                                                                        *)
 (*                                                                            *)
 (* DI and the parameter-pinning abbreviations that Section                    *)
@@ -105,6 +156,14 @@ Require Import dsdp_alice_fdist_secrecy.
 (* averaged sample coordinates, so the bounds hold at every value of the two, *)
 (* including an adversarially chosen one, and imply the averaged bounds. The  *)
 (* epsilons here are per-value, not averages over w_rc2.                      *)
+(*                                                                            *)
+(* The conditional-entropy results are stated for Bob's input V2 only. They   *)
+(* say the three objects leave the same residual uncertainty about V2, which  *)
+(* transfers conditional-entropy statements between them. They do not         *)
+(* transfer the guessing bound: that reaches the trace by composing the       *)
+(* predictor with dsdp_trace_of_hop_tuple, a separate argument. The trace is  *)
+(* not in bijection with the hopping tuple, since it drops the two combine    *)
+(* randomnesses whenever 0 < index_renc.                                      *)
 (*                                                                            *)
 (* Charlie-side re-encryption randomness reaches Alice's trace: the           *)
 (* interpreter's step traces the datum a party receives rather than the       *)
@@ -803,6 +862,42 @@ rewrite alice_trace_tupleE (centropy_RV_cancel trace_of_trace_tupleK).
 rewrite alice_hop_tuple_rand_traceE
         (centropy_RV_cancel hop_tuple_of_rand_traceK).
 by rewrite (centropy_RV_drop_indep combine_rand_trace_indep).
+Qed.
+
+(* Rebuilding Alice's view from a value of her hopping tuple reads the two
+   ciphertext slots back through cipher_of_chcipher, so the marshalling round
+   trip is a parameter of the corollary below and of nothing above it. *)
+Variable cipher_of_chcipher : t_cipher -> cipher AHE.
+Hypothesis chcipher_of_cipherK :
+  cancel chcipher_of_cipher cipher_of_chcipher.
+
+(* The two abbreviations pin the parameters of the view ladder, as the
+   abbreviations this section opens with do. *)
+Local Notation AliceView :=
+  (AliceView (R:=R) (AHE:=AHE) card_renc rand_of_renc chcipher_of_cipher
+     pkey_of_dk w_v1 w_u1 w_u2 w_u3).
+Local Notation alice_view_of_hop_tupleE :=
+  (alice_view_of_hop_tupleE (R:=R) (AHE:=AHE) card_renc rand_of_renc
+     chcipher_of_cipherK pkey_of_dk w_v1 w_u1 w_u2 w_u3).
+
+(* The hopping tuple is the first component of Alice's view.
+   Naming: [_of_] names the source the conversion reads, after
+   [hop_tuple_of_rand_trace]. *)
+Lemma alice_hop_tuple_of_view :
+  AliceHopTuple 0 = (fun q => q.1.1.1) `o AliceView.
+Proof. by []. Qed.
+
+(* Conditioning on Alice's view leaves the same uncertainty about Bob's input
+   as conditioning on her hopping tuple. *)
+Corollary centropy_AliceView_AliceHopTuple :
+  `H( V2 | AliceView ) = `H( V2 | AliceHopTuple 0 ).
+Proof.
+(* Each of the two is a deterministic function of the other, so the
+   contraction of entropy.v applies in both directions. *)
+transitivity (`H( V2 | [% AliceView, AliceHopTuple 0] )).
+  by rewrite [in RHS]alice_hop_tuple_of_view centropy_RV_contraction.
+rewrite centropy_RV_fdistA.
+by rewrite [in LHS]alice_view_of_hop_tupleE centropy_RV_contraction.
 Qed.
 
 End dsdp_alice_trace_centropy.
