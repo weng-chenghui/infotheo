@@ -2,8 +2,10 @@ From HB Require Import structures.
 From mathcomp Require Import all_boot all_order all_algebra fingroup finalg.
 From mathcomp Require Import ring boolp finmap matrix lra reals.
 Require Import realType_ext realType_ln ssr_ext ssralg_ext bigop_ext fdist.
+Require Import fdist_extra.
 Require Import proba jfdist_cond entropy graphoid.
-Require Import extra_proba.
+Require Import spp_proba.
+Require Import extra_proba extra_entropy.
 Require Import smc_interpreter smc_session_types.
 Require Import homomorphic_encryption dsdp_interface dsdp_program dsdp_pismc.
 Require Import dsdp_alice_fdist_secrecy.
@@ -526,3 +528,143 @@ exact: (dsdp_alice_guess_fdist_V2_real_le card_renc rand_of_renc
 Qed.
 
 End dsdp_alice_trace_rv.
+
+Section dsdp_alice_trace_centropy.
+Context {R : realType}.
+Variables (AHE : AHEncType) (Renc : finType) (index_renc : nat).
+Hypothesis card_renc : #|Renc| = index_renc.+1.
+Variable rand_of_renc : Renc -> rand AHE.
+Variables (t_cipher : finType) (chcipher_of_cipher : cipher AHE -> t_cipher).
+Variables (w_v1 w_u1 w_u2 w_u3 : plain AHE).
+Variables (dk_a dk_b dk_c : priv_key AHE).
+Variables (w_rb2 w_rc2 : Renc).
+
+(* Each abbreviation pins, under the name it abbreviates, the parameters that
+   dsdp_alice_fdist_secrecy.v discharges; the shadowing is not recursive,
+   since the right-hand side resolves against the constant. *)
+Local Notation P := (alice_sample_fdist (R:=R) AHE card_renc).
+Local Notation pkey_of_dk := (pkey_of_dk dk_a dk_b dk_c).
+Local Notation V2 := (V2 (R:=R) (AHE:=AHE) card_renc).
+Local Notation V3 := (V3 (R:=R) (AHE:=AHE) card_renc).
+Local Notation R2 := (R2 (R:=R) (AHE:=AHE) card_renc).
+Local Notation R3 := (R3 (R:=R) (AHE:=AHE) card_renc).
+Local Notation RA1 := (RA1 (R:=R) (AHE:=AHE) card_renc).
+Local Notation RA2 := (RA2 (R:=R) (AHE:=AHE) card_renc).
+Local Notation Sout :=
+  (Sout (R:=R) (AHE:=AHE) card_renc w_v1 w_u1 w_u2 w_u3).
+Local Notation hop0_cipher i :=
+  (hop0_cipher (R:=R) (AHE:=AHE) card_renc rand_of_renc
+     chcipher_of_cipher pkey_of_dk i).
+Local Notation hop1_cipher i :=
+  (hop1_cipher (R:=R) (AHE:=AHE) card_renc rand_of_renc
+     chcipher_of_cipher pkey_of_dk i).
+
+(* The part of Alice's hopping tuple her executed trace shows: the two masks,
+   the leaked output and the two received ciphertexts. *)
+Definition dsdp_alice_trace_tupleT : finType :=
+  ((plain AHE * plain AHE) * plain AHE * t_cipher * t_cipher)%type.
+
+(* The trace-visible part of Alice's hopping tuple as a random variable on the
+   sample space: the two masks, the leaked output, and the two received
+   ciphertexts at hop index 0, where both slots are the real encryptions. *)
+Definition AliceTraceTuple : {RV P -> dsdp_alice_trace_tupleT} :=
+  [% [% R2, R3], Sout, hop0_cipher 0, hop1_cipher 0].
+
+(* The sample coordinates other than Alice's two combine randomnesses: the two
+   honest inputs, the two masks and the two hop encryption randomnesses. *)
+Definition alice_sample_restT : finType :=
+  ((plain AHE * plain AHE) * (plain AHE * plain AHE) * (Renc * Renc))%type.
+
+(* The random variable of those coordinates. *)
+Definition AliceSampleRest : {RV P -> alice_sample_restT} := fun t => t.1.
+
+(* The random variable of Alice's two combine randomnesses. *)
+Definition AliceCombineRand : {RV P -> (Renc * Renc)} := fun t => t.2.
+
+Let card_combine_rand : #|((Renc * Renc)%type : finType)|
+            = #|((Renc * Renc)%type : finType)|.-1.+1.
+Proof. exact: fdist_card_prednK (`p_ AliceCombineRand). Qed.
+
+Let card_sample_rest : #|alice_sample_restT| = #|alice_sample_restT|.-1.+1.
+Proof. exact: fdist_card_prednK (`p_ AliceSampleRest). Qed.
+
+Let card_combine_rand_rest :
+  #|(((Renc * Renc) * alice_sample_restT)%type : finType)|
+  = #|(((Renc * Renc) * alice_sample_restT)%type : finType)|.-1.+1.
+Proof.
+exact: fdist_card_prednK (`p_ [% AliceCombineRand, AliceSampleRest]).
+Qed.
+
+(* Alice's combine randomnesses and the other sample coordinates are jointly
+   uniform. *)
+Lemma combine_rand_rest_uniformE :
+  `p_ [% AliceCombineRand, AliceSampleRest]
+  = (fdist_uniform card_combine_rand) `x (fdist_uniform card_sample_rest).
+Proof.
+rewrite -(fdist_uniform_prod card_combine_rand card_sample_rest
+           card_combine_rand_rest)
+        /dist_of_RV alice_sample_fdistE.
+apply: fdistmap_bij_uniform.
+exists (fun p : (Renc * Renc) * alice_sample_restT => (p.2, p.1)).
+  by move=> [[[[v2 v3] [r2 r3]] [rho2 rho3]] [ra1 ra2]].
+by move=> [[ra1 ra2] [[[v2 v3] [r2 r3]] [rho2 rho3]]].
+Qed.
+
+(* Alice's combine randomnesses are uniform. *)
+Lemma combine_rand_uniformE :
+  `p_ AliceCombineRand = fdist_uniform card_combine_rand.
+Proof.
+by rewrite -(fst_RV2 AliceCombineRand AliceSampleRest)
+   combine_rand_rest_uniformE fdist_prod1.
+Qed.
+
+(* The other sample coordinates are uniform. *)
+Lemma sample_rest_uniformE :
+  `p_ AliceSampleRest = fdist_uniform card_sample_rest.
+Proof.
+by rewrite -(snd_RV2 AliceCombineRand AliceSampleRest)
+   combine_rand_rest_uniformE fdist_prod2.
+Qed.
+
+(* Alice's combine randomnesses are independent of the other sample
+   coordinates.
+   Naming: [_indep] is the local spelling for an independence statement,
+   after [alice_spectator_indep] and [spectator_pre_indep]; the [inde_]
+   prefix is reserved for the general theory in [proba.v]. *)
+Lemma combine_rand_rest_indep : P |= AliceCombineRand _|_ AliceSampleRest.
+Proof.
+by apply: inde_RV_of_prod;
+   rewrite combine_rand_rest_uniformE combine_rand_uniformE
+           sample_rest_uniformE.
+Qed.
+
+(* Bob's input and the trace-visible tuple, rebuilt from the sample
+   coordinates other than Alice's combine randomnesses.
+   The output slot is written with [uncurry] applied to an explicit pair
+   because [Sout] is itself [uncurry (dsdp_output ...) `o [% V2, V3]]; the
+   curried spelling is not convertible and breaks the proof below.
+   Naming: [_of_] names the source the conversion reads, after the
+   repository's total-conversion family; the length is a byproduct of
+   naming both the pair it builds and the coordinates it reads. *)
+Definition v2_trace_tuple_of_sample_rest (u : alice_sample_restT) :
+    (plain AHE * dsdp_alice_trace_tupleT) :=
+  (u.1.1.1,
+   ((u.1.2.1, u.1.2.2),
+    uncurry (dsdp_output w_v1 w_u1 w_u2 w_u3) (u.1.1.1, u.1.1.2),
+    chcipher_of_cipher (enc (pkey_of_dk Bob) u.1.1.1 (rand_of_renc u.2.1)),
+    chcipher_of_cipher
+      (enc (pkey_of_dk Charlie) u.1.1.2 (rand_of_renc u.2.2)))).
+
+(* Alice's two combine randomnesses are independent of Bob's input taken
+   jointly with everything her executed trace shows.
+   Naming: [_indep] as in [combine_rand_rest_indep] above. *)
+Lemma combine_rand_trace_indep :
+  P |= [% RA1, RA2] _|_ [% V2, AliceTraceTuple].
+Proof.
+(* The pair function must stay eta-expanded: [prod] has no definitional eta,
+   so [idfun] does not typecheck here. *)
+exact: (inde_RV_comp (fun p : Renc * Renc => (p.1, p.2))
+          v2_trace_tuple_of_sample_rest combine_rand_rest_indep).
+Qed.
+
+End dsdp_alice_trace_centropy.
