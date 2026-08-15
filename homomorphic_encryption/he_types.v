@@ -12,7 +12,7 @@
 (*     - party : finType            (party/participant space)                 *)
 (*     - plain : finComNzRingType   (message/plaintext space)                 *)
 (*     - rand : ringType            (randomness space, ring for r1*r2)        *)
-(*     - cipher : ringType          (raw ciphertext without party label)      *)
+(*     - cipher : finNzRingType     (raw ciphertext without party label)      *)
 (*     - party_cipher : finType     (party-labeled ciphertext space)          *)
 (*     - pkey : Type                (party-labeled key space)                 *)
 (*                                                                            *)
@@ -40,7 +40,7 @@ Record HETypes := MkHE {
   rand : Type ;                 (* different HE schemes have different
                                    rand requirements, like {unit 'Z_n}
                                    for Benaloh, {unit 'Z_n2} for Paillier *)
-  cipher : nzRingType ;         (* raw ciphertext values without party label *)
+  cipher : finNzRingType ;      (* raw ciphertext values without party label *)
   pub_key : Type ;              
   priv_key : Type;
 }.
