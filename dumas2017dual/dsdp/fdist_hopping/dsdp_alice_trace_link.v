@@ -64,13 +64,13 @@ Require Import dsdp_alice_fdist_secrecy.
 (*                              normalised to a single encryption, whose      *)
 (*                              randomness combines the randomness of the     *)
 (*                              arguments                                     *)
-(*        dsdp_trace_of_view == Alice's executed trace read off a value of    *)
+(*   dsdp_trace_of_hop_tuple == Alice's executed trace read off a value of    *)
 (*                              her reduced view                              *)
 (*      dsdp_procs_of_sample == the three programs at the coordinates of one  *)
 (*                              sample                                        *)
 (*                AliceTrace == Alice's encoded executed trace as a random    *)
 (*                              variable on the sample space                  *)
-(*       dsdp_trace_of_viewE == the trace the interpreter produces for Alice  *)
+(*  dsdp_trace_of_hop_tupleE == the trace the interpreter produces for Alice  *)
 (*                              is the deterministic image of her reduced     *)
 (*                              view                                          *)
 (* dsdp_alice_guess_fdist_trace_V2_real_le ==                                 *)
@@ -425,10 +425,9 @@ Local Notation RA1 := (RA1 (R:=R) (AHE:=AHE) card_renc).
 Local Notation RA2 := (RA2 (R:=R) (AHE:=AHE) card_renc).
 Local Notation Sout :=
   (Sout (R:=R) (AHE:=AHE) card_renc w_v1 w_u1 w_u2 w_u3).
-Local Notation AliceView_zero_prefix i :=
-  (AliceView_zero_prefix (R:=R) (AHE:=AHE) card_renc rand_of_renc
+Local Notation AliceHopTuple i :=
+  (AliceHopTuple (R:=R) (AHE:=AHE) card_renc rand_of_renc
      chcipher_of_cipher pkey_of_dk w_v1 w_u1 w_u2 w_u3 i).
-Local Notation AliceView := (AliceView_zero_prefix 0).
 Local Notation indcpa_fdist_epsilon :=
   (indcpa_fdist_epsilon (R:=R) (AHE:=AHE) card_renc rand_of_renc
      chcipher_of_cipher).
@@ -441,8 +440,11 @@ Local Notation hop1_reduction :=
 
 (* Alice's executed trace read off a value of her reduced view: the leaked
    output, Charlie's re-encryption of it, the two received ciphertexts, the
-   two masks, the four weights, and the erased key mark. *)
-Definition dsdp_trace_of_view (v : dsdp_alice_viewT AHE Renc t_cipher) :
+   two masks, the four weights, and the erased key mark.
+   Naming: the [_of_] connective names the source the conversion reads, after
+   the repository's total-conversion family. *)
+Definition dsdp_trace_of_hop_tuple
+    (v : dsdp_alice_hop_tupleT AHE Renc t_cipher) :
     15.-bseq dsdp_trace_dataT :=
   [bseq inl (inl (inl v.1.1.2));
         inl (inl (inr (chcipher_of_cipher
@@ -492,8 +494,8 @@ Proof. by rewrite SoutE; ring. Qed.
 
 (* The trace the interpreter produces for Alice is the deterministic image of
    her reduced view. *)
-Lemma dsdp_trace_of_viewE :
-  AliceTrace = dsdp_trace_of_view `o AliceView.
+Lemma dsdp_trace_of_hop_tupleE :
+  AliceTrace = dsdp_trace_of_hop_tuple `o (AliceHopTuple 0).
 Proof.
 apply: boolp.funext => s; apply/val_inj.
 rewrite /AliceTrace; move: (size_alice_trace s).
@@ -512,15 +514,15 @@ Theorem dsdp_alice_guess_fdist_trace_V2_real_le
     <= (#|plain AHE|%:R : R)^-1
        + indcpa_fdist_epsilon (pkey_of_dk Bob)
            (hop0_reduction
-              (distinguisher_of_guess (g \o dsdp_trace_of_view)))
+              (distinguisher_of_guess (g \o dsdp_trace_of_hop_tuple)))
        + indcpa_fdist_epsilon (pkey_of_dk Charlie)
            (hop1_reduction
-              (distinguisher_of_guess (g \o dsdp_trace_of_view))).
+              (distinguisher_of_guess (g \o dsdp_trace_of_hop_tuple))).
 Proof.
-rewrite dsdp_trace_of_viewE.
+rewrite dsdp_trace_of_hop_tupleE.
 exact: (dsdp_alice_guess_fdist_V2_real_le card_renc rand_of_renc
           chcipher_of_cipher pkey_of_dk w_v1 w_u1 w_u2 w_u3_inj
-          (g \o dsdp_trace_of_view)).
+          (g \o dsdp_trace_of_hop_tuple)).
 Qed.
 
 End dsdp_alice_trace_rv.
