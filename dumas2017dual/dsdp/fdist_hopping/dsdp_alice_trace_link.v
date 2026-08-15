@@ -65,14 +65,14 @@ Require Import dsdp_alice_fdist_secrecy.
 (*                              randomness combines the randomness of the     *)
 (*                              arguments                                     *)
 (*   dsdp_trace_of_hop_tuple == Alice's executed trace read off a value of    *)
-(*                              her reduced view                              *)
+(*                              her hopping tuple                             *)
 (*      dsdp_procs_of_sample == the three programs at the coordinates of one  *)
 (*                              sample                                        *)
 (*                AliceTrace == Alice's encoded executed trace as a random    *)
 (*                              variable on the sample space                  *)
 (*  dsdp_trace_of_hop_tupleE == the trace the interpreter produces for Alice  *)
-(*                              is the deterministic image of her reduced     *)
-(*                              view                                          *)
+(*                              is the deterministic image of her hopping     *)
+(*                              tuple                                         *)
 (* dsdp_alice_guess_fdist_trace_V2_real_le ==                                 *)
 (*                              every predictor reading the trace the         *)
 (*                              interpreter produces for Alice matches Bob's  *)
@@ -140,10 +140,10 @@ Variable gdec : gprivT -> gcipherT -> option gmsgT.
    order the interface fixes. *)
 Definition gdp (x : gmsgT) : gdata := inl (inl (inl x)).
 
-(* The injection of a ciphertext into the generic data carrier. *)
+(* The injection of a ciphertext into the generic data carrier.               *)
 Definition gde (x : gcipherT) : gdata := inl (inl (inr x)).
 
-(* The injection of a private key into the generic data carrier. *)
+(* The injection of a private key into the generic data carrier.              *)
 Definition gdk (x : gprivT) : gdata := inl (inr x).
 
 (* The partial read of a ciphertext out of the generic data carrier, which is
@@ -438,7 +438,7 @@ Local Notation hop1_reduction :=
   (hop1_reduction (R:=R) (AHE:=AHE) card_renc rand_of_renc
      chcipher_of_cipher pkey_of_dk w_v1 w_u1 w_u2 w_u3).
 
-(* Alice's executed trace read off a value of her reduced view: the leaked
+(* Alice's executed trace read off a value of her hopping tuple: the leaked
    output, Charlie's re-encryption of it, the two received ciphertexts, the
    two masks, the four weights, and the erased key mark.
    Naming: the [_of_] connective names the source the conversion reads, after
@@ -479,7 +479,7 @@ Definition AliceTrace :
      15.-bseq dsdp_trace_dataT} :=
   fun s => Bseq (size_alice_trace s).
 
-(* The leaked output the run computes is Alice's view slot. *)
+(* The leaked output the run computes is Alice's hopping tuple slot. *)
 Let Sout_runE (s : dsdp_alice_sampleT AHE Renc) :
   V3 s * w_u3 + R3 s + (V2 s * w_u2 + R2 s) - R2 s - R3 s + w_u1 * w_v1
   = Sout s.
@@ -493,7 +493,7 @@ Let recrypt_plainE (s : dsdp_alice_sampleT AHE Renc) :
 Proof. by rewrite SoutE; ring. Qed.
 
 (* The trace the interpreter produces for Alice is the deterministic image of
-   her reduced view. *)
+   her hopping tuple. *)
 Lemma dsdp_trace_of_hop_tupleE :
   AliceTrace = dsdp_trace_of_hop_tuple `o (AliceHopTuple 0).
 Proof.
