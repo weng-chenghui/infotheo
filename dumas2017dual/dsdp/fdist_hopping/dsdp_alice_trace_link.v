@@ -51,8 +51,8 @@ Require Import dsdp_alice_fdist_secrecy.
 (*                pkey_of_dk == each party's public key, read off that        *)
 (*                              party's private key                           *)
 (*          dsdp_trace_dataT == the finite image of the interpreter's data    *)
-(*                              carrier: plaintexts kept, ciphertexts         *)
-(*                              marshalled, both key sorts erased to marks    *)
+(*                              carrier: plaintexts and ciphertexts kept,     *)
+(*                              both key sorts erased to marks                *)
 (*     trace_data_of_di_data == the encoding of one datum of the standard     *)
 (*                              interface into that image                     *)
 (*            dsdp_procs_std == the three programs at the standard interface  *)
@@ -328,7 +328,6 @@ Arguments gprocs : clear implicits.
 Section dsdp_alice_trace_link.
 Variables (AHE : AHEncType) (Renc : finType).
 Variable rand_of_renc : Renc -> rand AHE.
-Variables (t_cipher : finType) (chcipher_of_cipher : cipher AHE -> t_cipher).
 Variables (w_v1 w_u1 w_u2 w_u3 : plain AHE).
 Variables (dk_a dk_b dk_c : priv_key AHE).
 Variables (w_rb2 w_rc2 : Renc).
@@ -345,11 +344,11 @@ Definition pkey_of_dk (p : party_id) : pub_key AHE :=
 
 Let DI := Standard_DSDP_Interface AHE.
 
-(* The finite image of the interpreter's data carrier: plaintexts kept,
-   ciphertexts marshalled, both key sorts erased to marks. The summand order
+(* The finite image of the interpreter's data carrier: plaintexts and
+   ciphertexts kept, both key sorts erased to marks. The summand order
    mirrors std_data's msgT + encT + privT + pubT. *)
 Definition dsdp_trace_dataT : finType :=
-  ((plain AHE + t_cipher) + unit + unit)%type.
+  ((plain AHE + cipher AHE) + unit + unit)%type.
 
 (* The encoding of one datum of the standard interface into that finite image,
    applied entrywise to a trace so that a trace becomes a value of a finType
@@ -359,7 +358,7 @@ Definition dsdp_trace_dataT : finType :=
 Definition trace_data_of_di_data (x : di_data DI) : dsdp_trace_dataT :=
   match x with
   | inl (inl (inl m)) => inl (inl (inl m))
-  | inl (inl (inr c)) => inl (inl (inr (chcipher_of_cipher c)))
+  | inl (inl (inr c)) => inl (inl (inr c))
   | inl (inr _) => inl (inr tt)
   | inr _ => inr tt
   end.
@@ -462,7 +461,6 @@ Context {R : realType}.
 Variables (AHE : AHEncType) (Renc : finType) (index_renc : nat).
 Hypothesis card_renc : #|Renc| = index_renc.+1.
 Variable rand_of_renc : Renc -> rand AHE.
-Variables (t_cipher : finType) (chcipher_of_cipher : cipher AHE -> t_cipher).
 Variables (w_v1 w_u1 w_u2 w_u3 : plain AHE).
 Hypothesis w_u3_inj : injective (fun v : plain AHE => w_u3 * v).
 Variables (dk_a dk_b dk_c : priv_key AHE).
@@ -475,7 +473,7 @@ Variables (w_rb2 w_rc2 : Renc).
    constant. *)
 Local Notation DI := (Standard_DSDP_Interface AHE).
 Local Notation pkey_of_dk := (pkey_of_dk dk_a dk_b dk_c).
-Local Notation dsdp_trace_dataT := (dsdp_trace_dataT AHE t_cipher).
+Local Notation dsdp_trace_dataT := (dsdp_trace_dataT AHE).
 Local Notation V2 := (V2 (R:=R) (AHE:=AHE) card_renc).
 Local Notation V3 := (V3 (R:=R) (AHE:=AHE) card_renc).
 Local Notation R2 := (R2 (R:=R) (AHE:=AHE) card_renc).
@@ -488,16 +486,15 @@ Local Notation Sout :=
   (Sout (R:=R) (AHE:=AHE) card_renc w_v1 w_u1 w_u2 w_u3).
 Local Notation AliceHopTuple i :=
   (AliceHopTuple (R:=R) (AHE:=AHE) card_renc rand_of_renc
-     chcipher_of_cipher pkey_of_dk w_v1 w_u1 w_u2 w_u3 i).
+     pkey_of_dk w_v1 w_u1 w_u2 w_u3 i).
 Local Notation indcpa_fdist_epsilon :=
-  (indcpa_fdist_epsilon (R:=R) (AHE:=AHE) card_renc rand_of_renc
-     chcipher_of_cipher).
+  (indcpa_fdist_epsilon (R:=R) (AHE:=AHE) card_renc rand_of_renc).
 Local Notation hop0_reduction :=
   (hop0_reduction (R:=R) (AHE:=AHE) card_renc rand_of_renc
-     chcipher_of_cipher pkey_of_dk w_v1 w_u1 w_u2 w_u3).
+     pkey_of_dk w_v1 w_u1 w_u2 w_u3).
 Local Notation hop1_reduction :=
   (hop1_reduction (R:=R) (AHE:=AHE) card_renc rand_of_renc
-     chcipher_of_cipher pkey_of_dk w_v1 w_u1 w_u2 w_u3).
+     pkey_of_dk w_v1 w_u1 w_u2 w_u3).
 
 (* Alice's executed trace read off a value of her hopping tuple: the leaked
    output, Charlie's re-encryption of it, the two received ciphertexts, the
@@ -505,13 +502,13 @@ Local Notation hop1_reduction :=
    Naming: the [_of_] connective names the source the conversion reads, after
    the repository's total-conversion family. *)
 Definition dsdp_trace_of_hop_tuple
-    (v : dsdp_alice_hop_tupleT AHE Renc t_cipher) :
+    (v : dsdp_alice_hop_tupleT AHE Renc) :
     15.-bseq dsdp_trace_dataT :=
   [bseq inl (inl (inl v.1.1.2));
-        inl (inl (inr (chcipher_of_cipher
+        inl (inl (inr
           (enc (pkey_of_dk Alice)
                (v.1.1.2 - w_u1 * w_v1 + v.1.1.1.1.1 + v.1.1.1.1.2)
-               (rand_of_renc w_rc2)))));
+               (rand_of_renc w_rc2))));
         inl (inl (inr v.2));
         inl (inl (inr v.1.2));
         inl (inl (inl v.1.1.1.1.2));
@@ -529,7 +526,7 @@ Definition dsdp_procs_of_sample (s : dsdp_alice_sampleT AHE Renc) :
 
 (* Fuel bounds the encoded trace, since encoding preserves length. *)
 Let size_alice_trace (s : dsdp_alice_sampleT AHE Renc) :
-  (size (map (trace_data_of_di_data chcipher_of_cipher)
+  (size (map (@trace_data_of_di_data AHE)
            (nth [::] (run_interp 15 (dsdp_procs_of_sample s)).2 0)) <= 15)%N.
 Proof. by rewrite size_map; exact: size_traces_nth. Qed.
 
@@ -582,7 +579,7 @@ Theorem dsdp_alice_guess_fdist_trace_V2_real_le
 Proof.
 rewrite dsdp_trace_of_hop_tupleE.
 exact: (dsdp_alice_guess_fdist_V2_real_le card_renc rand_of_renc
-          chcipher_of_cipher pkey_of_dk w_v1 w_u1 w_u2 w_u3_inj
+          pkey_of_dk w_v1 w_u1 w_u2 w_u3_inj
           (g \o dsdp_trace_of_hop_tuple)).
 Qed.
 
@@ -593,7 +590,6 @@ Context {R : realType}.
 Variables (AHE : AHEncType) (Renc : finType) (index_renc : nat).
 Hypothesis card_renc : #|Renc| = index_renc.+1.
 Variable rand_of_renc : Renc -> rand AHE.
-Variables (t_cipher : finType) (chcipher_of_cipher : cipher AHE -> t_cipher).
 Variables (w_v1 w_u1 w_u2 w_u3 : plain AHE).
 Variables (dk_a dk_b dk_c : priv_key AHE).
 Variables (w_rb2 w_rc2 : Renc).
@@ -612,22 +608,20 @@ Local Notation RA2 := (RA2 (R:=R) (AHE:=AHE) card_renc).
 Local Notation Sout :=
   (Sout (R:=R) (AHE:=AHE) card_renc w_v1 w_u1 w_u2 w_u3).
 Local Notation hop0_cipher i :=
-  (hop0_cipher (R:=R) (AHE:=AHE) card_renc rand_of_renc
-     chcipher_of_cipher pkey_of_dk i).
+  (hop0_cipher (R:=R) (AHE:=AHE) card_renc rand_of_renc pkey_of_dk i).
 Local Notation hop1_cipher i :=
-  (hop1_cipher (R:=R) (AHE:=AHE) card_renc rand_of_renc
-     chcipher_of_cipher pkey_of_dk i).
+  (hop1_cipher (R:=R) (AHE:=AHE) card_renc rand_of_renc pkey_of_dk i).
 Local Notation AliceHopTuple i :=
   (AliceHopTuple (R:=R) (AHE:=AHE) card_renc rand_of_renc
-     chcipher_of_cipher pkey_of_dk w_v1 w_u1 w_u2 w_u3 i).
+     pkey_of_dk w_v1 w_u1 w_u2 w_u3 i).
 Local Notation AliceTrace :=
-  (AliceTrace (R:=R) (AHE:=AHE) card_renc rand_of_renc chcipher_of_cipher
+  (AliceTrace (R:=R) (AHE:=AHE) card_renc rand_of_renc
      w_v1 w_u1 w_u2 w_u3 dk_a dk_b dk_c w_rb2 w_rc2).
 
 (* The part of Alice's hopping tuple her executed trace shows: the two masks,
    the leaked output and the two received ciphertexts. *)
 Definition dsdp_alice_trace_tupleT : finType :=
-  ((plain AHE * plain AHE) * plain AHE * t_cipher * t_cipher)%type.
+  ((plain AHE * plain AHE) * plain AHE * cipher AHE * cipher AHE)%type.
 
 (* The trace-visible part of Alice's hopping tuple as a random variable on the
    sample space: the two masks, the leaked output, and the two received
@@ -716,9 +710,8 @@ Definition v2_trace_tuple_of_sample_rest (u : alice_sample_restT) :
   (u.1.1.1,
    ((u.1.2.1, u.1.2.2),
     uncurry (dsdp_output w_v1 w_u1 w_u2 w_u3) (u.1.1.1, u.1.1.2),
-    chcipher_of_cipher (enc (pkey_of_dk Bob) u.1.1.1 (rand_of_renc u.2.1)),
-    chcipher_of_cipher
-      (enc (pkey_of_dk Charlie) u.1.1.2 (rand_of_renc u.2.2)))).
+    enc (pkey_of_dk Bob) u.1.1.1 (rand_of_renc u.2.1),
+    enc (pkey_of_dk Charlie) u.1.1.2 (rand_of_renc u.2.2))).
 
 (* Alice's two combine randomnesses are independent of Bob's input taken
    jointly with everything her executed trace shows.
@@ -738,7 +731,7 @@ Qed.
    repository's total-conversion family. *)
 Definition hop_tuple_of_rand_trace
     (p : ((Renc * Renc) * dsdp_alice_trace_tupleT)) :
-    dsdp_alice_hop_tupleT AHE Renc t_cipher :=
+    dsdp_alice_hop_tupleT AHE Renc :=
   (p.2.1.1.1, p.1, p.2.1.1.2, p.2.1.2, p.2.2).
 
 (* The combine randomnesses and the trace-visible tuple read back off a
@@ -746,7 +739,7 @@ Definition hop_tuple_of_rand_trace
    Naming: [_of_] as in [hop_tuple_of_rand_trace], in the opposite
    direction. *)
 Definition rand_trace_of_hop_tuple
-    (v : dsdp_alice_hop_tupleT AHE Renc t_cipher) :
+    (v : dsdp_alice_hop_tupleT AHE Renc) :
     ((Renc * Renc) * dsdp_alice_trace_tupleT) :=
   (v.1.1.1.2, (v.1.1.1.1, v.1.1.2, v.1.2, v.2)).
 
@@ -774,12 +767,12 @@ Qed.
    two masks, the four weights, and the erased key mark.
    Naming: [_of_] as in [hop_tuple_of_rand_trace]. *)
 Definition trace_of_trace_tuple (q : dsdp_alice_trace_tupleT) :
-    15.-bseq (dsdp_trace_dataT AHE t_cipher) :=
+    15.-bseq (dsdp_trace_dataT AHE) :=
   [bseq inl (inl (inl q.1.1.2));
-        inl (inl (inr (chcipher_of_cipher
+        inl (inl (inr
           (enc (pkey_of_dk Alice)
                (q.1.1.2 - w_u1 * w_v1 + q.1.1.1.1 + q.1.1.1.2)
-               (rand_of_renc w_rc2)))));
+               (rand_of_renc w_rc2))));
         inl (inl (inr q.2));
         inl (inl (inr q.1.2));
         inl (inl (inl q.1.1.1.2));
@@ -789,22 +782,22 @@ Definition trace_of_trace_tuple (q : dsdp_alice_trace_tupleT) :
         inl (inr tt)].
 
 (* The plaintext carried by a trace entry, zero at any other sort. *)
-Definition trace_data_plain (x : dsdp_trace_dataT AHE t_cipher) :
+Definition trace_data_plain (x : dsdp_trace_dataT AHE) :
     plain AHE :=
   if x is inl (inl (inl m)) then m else 0.
 
 (* The ciphertext carried by a trace entry, a fixed encryption of zero at any
    other sort. *)
-Definition trace_data_cipher (x : dsdp_trace_dataT AHE t_cipher) :
-    t_cipher :=
+Definition trace_data_cipher (x : dsdp_trace_dataT AHE) :
+    cipher AHE :=
   if x is inl (inl (inr c)) then c
-  else chcipher_of_cipher (enc (pkey_of_dk Alice) 0 (rand_of_renc w_rc2)).
+  else enc (pkey_of_dk Alice) 0 (rand_of_renc w_rc2).
 
 (* The trace-visible tuple read back off an encoded trace, at the five
    positions the encoding writes it to.
    Naming: [_of_] as in [hop_tuple_of_rand_trace]. *)
 Definition trace_tuple_of_trace
-    (b : 15.-bseq (dsdp_trace_dataT AHE t_cipher)) :
+    (b : 15.-bseq (dsdp_trace_dataT AHE)) :
     dsdp_alice_trace_tupleT :=
   let s := bseqval b in
   ((trace_data_plain (nth (inr tt) s 5),
@@ -864,21 +857,14 @@ rewrite alice_hop_tuple_rand_traceE
 by rewrite (centropy_RV_drop_indep combine_rand_trace_indep).
 Qed.
 
-(* Rebuilding Alice's view from a value of her hopping tuple reads the two
-   ciphertext slots back through cipher_of_chcipher, so the marshalling round
-   trip is a parameter of the corollary below and of nothing above it. *)
-Variable cipher_of_chcipher : t_cipher -> cipher AHE.
-Hypothesis chcipher_of_cipherK :
-  cancel chcipher_of_cipher cipher_of_chcipher.
-
 (* The two abbreviations pin the parameters of the view ladder, as the
    abbreviations this section opens with do. *)
 Local Notation AliceView :=
-  (AliceView (R:=R) (AHE:=AHE) card_renc rand_of_renc chcipher_of_cipher
+  (AliceView (R:=R) (AHE:=AHE) card_renc rand_of_renc
      pkey_of_dk w_v1 w_u1 w_u2 w_u3).
 Local Notation alice_view_of_hop_tupleE :=
   (alice_view_of_hop_tupleE (R:=R) (AHE:=AHE) card_renc rand_of_renc
-     chcipher_of_cipherK pkey_of_dk w_v1 w_u1 w_u2 w_u3).
+     pkey_of_dk w_v1 w_u1 w_u2 w_u3).
 
 (* The hopping tuple is the first component of Alice's view.
    Naming: [_of_] names the source the conversion reads, after
