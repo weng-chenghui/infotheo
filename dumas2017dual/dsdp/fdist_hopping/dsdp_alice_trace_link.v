@@ -558,6 +558,12 @@ Local Notation hop0_cipher i :=
 Local Notation hop1_cipher i :=
   (hop1_cipher (R:=R) (AHE:=AHE) card_renc rand_of_renc
      chcipher_of_cipher pkey_of_dk i).
+Local Notation AliceHopTuple i :=
+  (AliceHopTuple (R:=R) (AHE:=AHE) card_renc rand_of_renc
+     chcipher_of_cipher pkey_of_dk w_v1 w_u1 w_u2 w_u3 i).
+Local Notation AliceTrace :=
+  (AliceTrace (R:=R) (AHE:=AHE) card_renc rand_of_renc chcipher_of_cipher
+     w_v1 w_u1 w_u2 w_u3 dk_a dk_b dk_c w_rb2 w_rc2).
 
 (* The part of Alice's hopping tuple her executed trace shows: the two masks,
    the leaked output and the two received ciphertexts. *)
@@ -665,6 +671,138 @@ Proof.
    so [idfun] does not typecheck here. *)
 exact: (inde_RV_comp (fun p : Renc * Renc => (p.1, p.2))
           v2_trace_tuple_of_sample_rest combine_rand_rest_indep).
+Qed.
+
+(* Alice's hopping tuple rebuilt from her combine randomnesses and the
+   trace-visible tuple.
+   Naming: [_of_] names the source the conversion reads, after the
+   repository's total-conversion family. *)
+Definition hop_tuple_of_rand_trace
+    (p : ((Renc * Renc) * dsdp_alice_trace_tupleT)) :
+    dsdp_alice_hop_tupleT AHE Renc t_cipher :=
+  (p.2.1.1.1, p.1, p.2.1.1.2, p.2.1.2, p.2.2).
+
+(* The combine randomnesses and the trace-visible tuple read back off a
+   hopping tuple.
+   Naming: [_of_] as in [hop_tuple_of_rand_trace], in the opposite
+   direction. *)
+Definition rand_trace_of_hop_tuple
+    (v : dsdp_alice_hop_tupleT AHE Renc t_cipher) :
+    ((Renc * Renc) * dsdp_alice_trace_tupleT) :=
+  (v.1.1.1.2, (v.1.1.1.1, v.1.1.2, v.1.2, v.2)).
+
+(* The two relabellings are mutually inverse.
+   Naming: the [K] suffix marks a cancellation lemma, after MathComp. *)
+Lemma hop_tuple_of_rand_traceK :
+  cancel hop_tuple_of_rand_trace rand_trace_of_hop_tuple.
+Proof. by case=> ra [[[m s] c0] c1]. Qed.
+
+(* Alice's hopping tuple is her combine randomnesses together with the
+   trace-visible tuple.
+   Naming: the [E] suffix marks an equation, after [SoutE]. *)
+Lemma alice_hop_tuple_rand_traceE :
+  AliceHopTuple 0
+  = hop_tuple_of_rand_trace `o [% [% RA1, RA2], AliceTraceTuple].
+Proof.
+(* The combine randomnesses stay eta-expanded as [% RA1, RA2]: [prod] has no
+   definitional eta, so [AliceCombineRand] is not convertible with the pair
+   the hopping tuple carries. *)
+by [].
+Qed.
+
+(* Alice's executed trace read off the trace-visible tuple: the leaked
+   output, Charlie's re-encryption of it, the two received ciphertexts, the
+   two masks, the four weights, and the erased key mark.
+   Naming: [_of_] as in [hop_tuple_of_rand_trace]. *)
+Definition trace_of_trace_tuple (q : dsdp_alice_trace_tupleT) :
+    15.-bseq (dsdp_trace_dataT AHE t_cipher) :=
+  [bseq inl (inl (inl q.1.1.2));
+        inl (inl (inr (chcipher_of_cipher
+          (enc (pkey_of_dk Alice)
+               (q.1.1.2 - w_u1 * w_v1 + q.1.1.1.1 + q.1.1.1.2)
+               (rand_of_renc w_rc2)))));
+        inl (inl (inr q.2));
+        inl (inl (inr q.1.2));
+        inl (inl (inl q.1.1.1.2));
+        inl (inl (inl q.1.1.1.1));
+        inl (inl (inl w_u3)); inl (inl (inl w_u2));
+        inl (inl (inl w_u1)); inl (inl (inl w_v1));
+        inl (inr tt)].
+
+(* The plaintext carried by a trace entry, zero at any other sort. *)
+Definition trace_data_plain (x : dsdp_trace_dataT AHE t_cipher) :
+    plain AHE :=
+  if x is inl (inl (inl m)) then m else 0.
+
+(* The ciphertext carried by a trace entry, a fixed encryption of zero at any
+   other sort. *)
+Definition trace_data_cipher (x : dsdp_trace_dataT AHE t_cipher) :
+    t_cipher :=
+  if x is inl (inl (inr c)) then c
+  else chcipher_of_cipher (enc (pkey_of_dk Alice) 0 (rand_of_renc w_rc2)).
+
+(* The trace-visible tuple read back off an encoded trace, at the five
+   positions the encoding writes it to.
+   Naming: [_of_] as in [hop_tuple_of_rand_trace]. *)
+Definition trace_tuple_of_trace
+    (b : 15.-bseq (dsdp_trace_dataT AHE t_cipher)) :
+    dsdp_alice_trace_tupleT :=
+  let s := bseqval b in
+  ((trace_data_plain (nth (inr tt) s 5),
+    trace_data_plain (nth (inr tt) s 4)),
+   trace_data_plain (nth (inr tt) s 0),
+   trace_data_cipher (nth (inr tt) s 3),
+   trace_data_cipher (nth (inr tt) s 2)).
+
+(* Encoding the trace-visible tuple into a trace is left-invertible.
+   Naming: [K] as in [hop_tuple_of_rand_traceK]. *)
+Lemma trace_of_trace_tupleK :
+  cancel trace_of_trace_tuple trace_tuple_of_trace.
+Proof. by case=> [[[m s] c0] c1]; case: m => r2 r3. Qed.
+
+(* Alice's executed trace is the image of the trace-visible tuple. *)
+Lemma alice_trace_tupleE :
+  AliceTrace = trace_of_trace_tuple `o AliceTraceTuple.
+Proof. by rewrite dsdp_trace_of_hop_tupleE. Qed.
+
+(* Conditioning on an injective image of a random variable leaves the same
+   conditional entropy, since the two conditioning events coincide.
+   Naming: local helper, from [cPr_centropy_RV_comp] of
+   information_theory/entropy.v. *)
+Let centropy_RV_cancel (A B C : finType) (g : B -> C) (h : C -> B)
+    (gK : cancel g h) (X : {RV P -> A}) (Y : {RV P -> B}) :
+  `H( X | g `o Y ) = `H( X | Y ).
+Proof.
+have gi : injective g := can_inj gK.
+apply: cPr_centropy_RV_comp => x y _.
+rewrite 2!cpr_eqE; congr (_ / _); last exact: pfwd1_comp.
+have -> : [% X, g `o Y] = (fun p : A * B => (p.1, g p.2)) `o [% X, Y] by [].
+have -> : (x, g y) = (fun p : A * B => (p.1, g p.2)) (x, y) by [].
+by apply: pfwd1_comp => -[a b] [c d] [] -> /gi ->.
+Qed.
+
+(* A random variable independent of a pair drops out of the conditioning of
+   the first component of that pair on the second.
+   Naming: [_indep] is the local spelling for an independence statement, as
+   in [combine_rand_rest_indep]. *)
+Let centropy_RV_drop_indep (A B C : finType)
+    (X : {RV P -> A}) (Y : {RV P -> B}) (Z : {RV P -> C}) :
+  P |= Z _|_ [% X, Y] -> `H( X | [% Z, Y] ) = `H( X | Y ).
+Proof.
+move=> HZ; apply: cinde_centropy_eq.
+apply: cpr_prd_unit_RV; apply: weak_union.
+by apply/cinde_RV_unit.
+Qed.
+
+(* Conditioning on Alice's executed trace leaves the same uncertainty about
+   Bob's input as conditioning on her hopping tuple. *)
+Theorem centropy_AliceTrace_AliceHopTuple :
+  `H( V2 | AliceTrace ) = `H( V2 | AliceHopTuple 0 ).
+Proof.
+rewrite alice_trace_tupleE (centropy_RV_cancel trace_of_trace_tupleK).
+rewrite alice_hop_tuple_rand_traceE
+        (centropy_RV_cancel hop_tuple_of_rand_traceK).
+by rewrite (centropy_RV_drop_indep combine_rand_trace_indep).
 Qed.
 
 End dsdp_alice_trace_centropy.
