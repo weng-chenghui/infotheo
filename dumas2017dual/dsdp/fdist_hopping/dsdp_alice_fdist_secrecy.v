@@ -31,8 +31,7 @@ Require Import dsdp_program dsdp_entropy.
 (* dsdp_alice_unpredictability_fdist_ge is its negative-logarithm form;       *)
 (* dsdp_alice_sim_advantage_fdist_le bounds the gap between the real joint    *)
 (* law and the ideal-world joint law built from dsdp_alice_simulator;         *)
-(* dsdp_alice_guess_fdist_view_le transfers the first bound to Alice's full   *)
-(* view.                                                                      *)
+(* dsdp_alice_guess_fdist_view_le transfers the first bound to Alice's view.  *)
 (*                                                                            *)
 (* ```                                                                        *)
 (*        dsdp_alice_sampleT == the sample space: the two honest inputs,      *)
@@ -50,11 +49,11 @@ Require Import dsdp_program dsdp_entropy.
 (*                              for i = 0 and zero for larger i               *)
 (*             hop1_cipher i == the Charlie-key ciphertext slot, encrypting   *)
 (*                              V3 for i at most 1 and zero for larger i      *)
-(*     dsdp_alice_hop_tupleT == the type of Alice's reduced view: masks,      *)
+(*     dsdp_alice_hop_tupleT == the type of Alice's hopping tuple: masks,     *)
 (*                              combine randomness, output and the two        *)
 (*                              ciphertext slots                              *)
-(*           AliceHopTuple i == Alice's view with its first i ciphertext      *)
-(*                              slots zeroed                                  *)
+(*           AliceHopTuple i == Alice's hopping tuple with its first i        *)
+(*                              ciphertext slots zeroed                       *)
 (*            enc_fdist pk v == the law of an encryption of v under pk with   *)
 (*                              uniform randomness                            *)
 (*                x <- m ; f == a sampling step of an experiment, the bind    *)
@@ -98,8 +97,8 @@ Require Import dsdp_program dsdp_entropy.
 (*                              samples everything else                       *)
 (*        V1c, U1c, U2c, U3c == Alice's four protocol weights as constant     *)
 (*                              random variables                              *)
-(*      alice_spectator_preT == the sample coordinates Alice's view reads     *)
-(*                              besides the two inputs                        *)
+(*      alice_spectator_preT == the sample coordinates Alice's hopping        *)
+(*                              tuple reads besides the two inputs            *)
 (*         AliceSpectatorPre == the random variable of those coordinates      *)
 (*            AliceSpectator == everything Alice's all-zero view carries      *)
 (*                              besides the output                            *)
@@ -131,19 +130,19 @@ Require Import dsdp_program dsdp_entropy.
 (*                              view                                          *)
 (*         alice_ideal_joint == the ideal-world joint law of the two inputs   *)
 (*                              and a simulated view                          *)
-(*   alice_view_of_hop_tuple == the full corrupted view rebuilt from a value  *)
-(*                              of the reduced view                           *)
+(*   alice_view_of_hop_tuple == Alice's view rebuilt from a value             *)
+(*                              of the hopping tuple                          *)
 (*           AliceCombineBob == Alice's outgoing combine addressed to Bob's   *)
 (*                              key                                           *)
 (*       AliceCombineCharlie == Alice's outgoing combine addressed to         *)
 (*                              Charlie's key                                 *)
 (*            AliceRecvPlain == the plaintext of Alice's final                *)
 (*                              decrypt-on-receive                            *)
-(*                 AliceView == Alice's four real observables: the reduced    *)
-(*                              view, the two combines and that plaintext     *)
+(*                 AliceView == Alice's four real observables: the hopping    *)
+(*                              tuple, the two combines and that plaintext    *)
 (*  alice_view_of_hop_tupleE == those four observables assemble into the      *)
-(*                              reconstruction of the full view from the      *)
-(*                              reduced view                                  *)
+(*                              reconstruction of Alice's view from the       *)
+(*                              hopping tuple                                 *)
 (* ```                                                                        *)
 (*                                                                            *)
 (* Scope. The statements are average-case over the honest inputs V2 and V3,   *)
@@ -234,21 +233,21 @@ Definition Sout : {RV alice_sample_fdist -> plain AHE} :=
 Lemma SoutE t : Sout t = w_u1 * w_v1 + w_u2 * V2 t + w_u3 * V3 t.
 Proof. by []. Qed.
 
-(* The Bob-key ciphertext slot of Alice's view, encrypting Bob's input at
+(* The Bob-key ciphertext slot of Alice's hopping tuple, encrypting Bob's input at
    index 0 and zero at every larger index. *)
 Definition hop0_cipher (i : nat) : {RV alice_sample_fdist -> t_cipher} :=
   fun t => chcipher_of_cipher
     (enc (pkey_of_party Bob) (if (0 < i)%N then 0 else V2 t)
          (rand_of_renc (Rho2 t))).
 
-(* The Charlie-key ciphertext slot of Alice's view, encrypting Charlie's input
+(* The Charlie-key ciphertext slot of Alice's hopping tuple, encrypting Charlie's input
    at indices 0 and 1 and zero at every larger index. *)
 Definition hop1_cipher (i : nat) : {RV alice_sample_fdist -> t_cipher} :=
   fun t => chcipher_of_cipher
     (enc (pkey_of_party Charlie) (if (1 < i)%N then 0 else V3 t)
          (rand_of_renc (Rho3 t))).
 
-(* The type of Alice's reduced view: her two masks, her two combine
+(* The type of Alice's hopping tuple: her two masks, her two combine
    randomnesses, the leaked output, and the two ciphertexts she receives. *)
 Definition dsdp_alice_hop_tupleT : finType :=
   ((plain AHE * plain AHE) * (Renc * Renc) * plain AHE
@@ -1012,7 +1011,7 @@ rewrite -fdistmap_prod fdistmap_comp; congr fdistmap.
 by apply/boolp.funext => -[[[m ra] rho2] rho3].
 Qed.
 
-(* The spectator slots of a value of Alice's view.
+(* The spectator slots of a value of Alice's hopping tuple.
    Naming: the [_of_] connective names the source the projection reads, after
    the repository's total-conversion family. *)
 Definition alice_spectator_of_hop_tuple (v : dsdp_alice_hop_tupleT) :
@@ -1127,7 +1126,7 @@ rewrite Pr_fdistmap_bool alice_ideal_jointE -hop0_advantageE -hop1_advantageE.
 exact: ler_distD.
 Qed.
 
-(* The full corrupted-Alice view rebuilt from a value of the reduced view: that
+(* Alice's view rebuilt from a value of her hopping tuple: that
    value, Alice's two outgoing combines, and the plaintext of her final
    decrypt-on-receive.
    Naming: [_of_] after the repository's total-conversion family, paired with
@@ -1175,15 +1174,15 @@ Definition AliceCombineCharlie : {RV alice_sample_fdist -> cipher AHE} :=
 Definition AliceRecvPlain : {RV alice_sample_fdist -> plain AHE} :=
   fun t => w_u2 * V2 t + w_u3 * V3 t + R2 t + R3 t.
 
-(* Alice's four real observables: her reduced view, her two outgoing combines,
+(* Alice's four real observables: her hopping tuple, her two outgoing combines,
    and the plaintext of her final decrypt-on-receive. *)
 Definition AliceView :
     {RV alice_sample_fdist ->
        (dsdp_alice_hop_tupleT * cipher AHE * cipher AHE * plain AHE)%type} :=
   [% (AliceHopTuple 0), AliceCombineBob, AliceCombineCharlie, AliceRecvPlain].
 
-(* Alice's four real observables assemble into the reconstruction of the full
-   view from the reduced view.
+(* Alice's four real observables assemble into the reconstruction of her view
+   from her hopping tuple.
    Naming: [E] marks the equation unfolding [AliceView] into
    [alice_view_of_hop_tuple] composed with [AliceHopTuple 0]. *)
 Lemma alice_view_of_hop_tupleE :
@@ -1195,7 +1194,7 @@ rewrite /AliceView /alice_view_of_hop_tuple /AliceCombineBob
 by congr (_, _, _, _); rewrite /Sout /comp_RV /dsdp_output /=; ring.
 Qed.
 
-(* A predictor reading Alice's full real view matches Bob's input with
+(* A predictor reading Alice's view matches Bob's input with
    probability at most 1/#|plain AHE| plus the advantages of the two hop
    reductions.
    Naming: [dsdp_alice_guess_fdist] as in the hopping-tuple headline, with
