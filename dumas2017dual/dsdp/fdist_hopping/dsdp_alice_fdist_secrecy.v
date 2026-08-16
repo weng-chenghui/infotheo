@@ -254,6 +254,31 @@ Definition AliceHopTuple (i : nat) :
     {RV alice_sample_fdist -> dsdp_alice_hop_tupleT} :=
   [% [% R2, R3], [% RA1, RA2], Sout, hop0_cipher i, hop1_cipher i].
 
+(* The joint distribution of the two honest inputs and Alice's hopping tuple
+   at hop i. *)
+Definition alice_hop_joint_fdist (i : nat) :
+    R.-fdist (plain AHE * plain AHE * dsdp_alice_hop_tupleT) :=
+  `p_ [% V2, V3, AliceHopTuple i].
+
+(* The distribution of the Boolean output of D at hop i. *)
+Definition alice_hop_game_fdist (i : nat)
+    (D : plain AHE * plain AHE * dsdp_alice_hop_tupleT -> bool) :
+    R.-fdist bool :=
+  fdistmap D (alice_hop_joint_fdist i).
+
+(* The probability that D returns true at hop i. *)
+Definition alice_hop_game_success (i : nat)
+    (D : plain AHE * plain AHE * dsdp_alice_hop_tupleT -> bool) : R :=
+  Pr (alice_hop_game_fdist i D) [set true].
+
+(* The acceptance probability at hop i is the probability that D returns true
+   under the joint distribution at hop i. *)
+Lemma alice_hop_game_successE (i : nat)
+    (D : plain AHE * plain AHE * dsdp_alice_hop_tupleT -> bool) :
+  alice_hop_game_success i D
+    = Pr (alice_hop_joint_fdist i) [set x | D x].
+Proof. exact: Pr_fdistmap_bool. Qed.
+
 (* The law of an encryption of a plaintext under a public key, with uniform
    encryption randomness. *)
 Definition enc_fdist (pk : pub_key AHE) (v : plain AHE) :
