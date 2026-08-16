@@ -575,9 +575,10 @@ Qed.
    encryption of the first input. *)
 Lemma hop0_real_challengeE
     (D : plain AHE * plain AHE * dsdp_alice_hop_tupleT -> bool) :
-  Pr (`p_ [% V2, V3, AliceHopTuple 0]) [set x | D x]
+  alice_hop_game_success 0 D
     = indcpa_fdist_success_real (pkey_of_party Bob) (hop0_reduction D).
 Proof.
+rewrite alice_hop_game_successE.
 rewrite (hop_challengeE (pk := pkey_of_party Bob)
     (p := fun c : hop0_stateT => c.1.1.1.1)
     (asm := hop0_assemble) D hop0_state_prod); last first.
@@ -589,9 +590,10 @@ Qed.
    reduction facing an encryption of zero. *)
 Lemma hop0_zero_challengeE
     (D : plain AHE * plain AHE * dsdp_alice_hop_tupleT -> bool) :
-  Pr (`p_ [% V2, V3, AliceHopTuple 1]) [set x | D x]
+  alice_hop_game_success 1 D
     = indcpa_fdist_success_zero (pkey_of_party Bob) (hop0_reduction D).
 Proof.
+rewrite alice_hop_game_successE.
 rewrite (hop_challengeE (pk := pkey_of_party Bob)
     (p := fun _ : hop0_stateT => 0)
     (asm := hop0_assemble) D hop0_state_prod); last first.
@@ -603,8 +605,7 @@ Qed.
    the advantage of the hop-0 reduction against Bob's key. *)
 Lemma hop0_advantageE
     (D : plain AHE * plain AHE * dsdp_alice_hop_tupleT -> bool) :
-  `| Pr (`p_ [% V2, V3, AliceHopTuple 0]) [set x | D x]
-     - Pr (`p_ [% V2, V3, AliceHopTuple 1]) [set x | D x] |
+  `| alice_hop_game_success 0 D - alice_hop_game_success 1 D |
   = indcpa_fdist_epsilon (pkey_of_party Bob) (hop0_reduction D).
 Proof.
 by rewrite /indcpa_fdist_epsilon hop0_real_challengeE hop0_zero_challengeE.
@@ -614,9 +615,10 @@ Qed.
    reduction facing an encryption of the second input. *)
 Lemma hop1_real_challengeE
     (D : plain AHE * plain AHE * dsdp_alice_hop_tupleT -> bool) :
-  Pr (`p_ [% V2, V3, AliceHopTuple 1]) [set x | D x]
+  alice_hop_game_success 1 D
     = indcpa_fdist_success_real (pkey_of_party Charlie) (hop1_reduction D).
 Proof.
+rewrite alice_hop_game_successE.
 rewrite (hop_challengeE (pk := pkey_of_party Charlie)
     (p := fun c : hop1_stateT => c.1.1.1.2)
     (asm := hop1_assemble) D hop1_state_prod); last first.
@@ -628,9 +630,10 @@ Qed.
    encryption of zero. *)
 Lemma hop1_zero_challengeE
     (D : plain AHE * plain AHE * dsdp_alice_hop_tupleT -> bool) :
-  Pr (`p_ [% V2, V3, AliceHopTuple 2]) [set x | D x]
+  alice_hop_game_success 2 D
     = indcpa_fdist_success_zero (pkey_of_party Charlie) (hop1_reduction D).
 Proof.
+rewrite alice_hop_game_successE.
 rewrite (hop_challengeE (pk := pkey_of_party Charlie)
     (p := fun _ : hop1_stateT => 0)
     (asm := hop1_assemble) D hop1_state_prod); last first.
@@ -642,8 +645,7 @@ Qed.
    the advantage of the hop-1 reduction against Charlie's key. *)
 Lemma hop1_advantageE
     (D : plain AHE * plain AHE * dsdp_alice_hop_tupleT -> bool) :
-  `| Pr (`p_ [% V2, V3, AliceHopTuple 1]) [set x | D x]
-     - Pr (`p_ [% V2, V3, AliceHopTuple 2]) [set x | D x] |
+  `| alice_hop_game_success 1 D - alice_hop_game_success 2 D |
   = indcpa_fdist_epsilon (pkey_of_party Charlie) (hop1_reduction D).
 Proof.
 by rewrite /indcpa_fdist_epsilon hop1_real_challengeE hop1_zero_challengeE.
@@ -877,6 +879,7 @@ Theorem dsdp_alice_guess_fdist_V2_real_le
            (hop1_reduction (distinguisher_of_guess g)).
 Proof.
 rewrite guess_event_jointE -hop0_advantageE -hop1_advantageE -addrA -lerBlDl.
+rewrite !alice_hop_game_successE.
 apply: le_trans (lerB (lexx _) _) _; last first.
   exact: le_trans (ler_norm _) (ler_distD _ _ _).
 by rewrite -guess_event_jointE; exact: guess_all_zero_le_invm.
@@ -1143,6 +1146,7 @@ Theorem dsdp_alice_sim_advantage_fdist_le
      + indcpa_fdist_epsilon (pkey_of_party Charlie) (hop1_reduction D).
 Proof.
 rewrite Pr_fdistmap_bool alice_ideal_jointE -hop0_advantageE -hop1_advantageE.
+rewrite !alice_hop_game_successE.
 exact: ler_distD.
 Qed.
 
