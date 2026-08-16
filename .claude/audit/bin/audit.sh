@@ -70,8 +70,30 @@ validate_int_range ROCQ_AUDIT_WALL_SECONDS     "${ROCQ_AUDIT_WALL_SECONDS:-}"   
 validate_int_range ROCQ_AUDIT_MAX_ATTEMPTS     "${ROCQ_AUDIT_MAX_ATTEMPTS:-}"   1     10
 
 # Git trailers override env vars.
+#
+# Staleness: when this runs from the pre-commit hook, git has not yet written
+# the message of the commit being created, so COMMIT_EDITMSG still holds the
+# PREVIOUS commit's message. Acting on it is wrong twice over: an override
+# would be granted to a commit that never asked for it, and a forbidden
+# trailer would abort the commit AFTER the offending one instead of the
+# offending one itself. Detect the leftover by comparing against HEAD's
+# message and ignore the file when they match, so a stale trailer is inert.
+# Trailers still take effect when the audit is invoked outside the pre-commit
+# hook with a message already staged in COMMIT_EDITMSG.
 EDITMSG="$(git rev-parse --git-path COMMIT_EDITMSG 2>/dev/null)"
+EDITMSG_STALE=0
 if [[ -n "${EDITMSG}" && -f "${EDITMSG}" ]]; then
+  if HEAD_MSG="$(git log -1 --format=%B 2>/dev/null)"; then
+    if [[ "$(<"${EDITMSG}")" == "${HEAD_MSG}" ]]; then
+      EDITMSG_STALE=1
+      if git interpret-trailers --parse --no-divider <"${EDITMSG}" 2>/dev/null \
+           | grep -qi '^Rocq-Audit-'; then
+        echo "rocq-audit: ignoring Rocq-Audit-* trailers: COMMIT_EDITMSG still holds the previous commit's message, so they do not describe this commit." >&2
+      fi
+    fi
+  fi
+fi
+if [[ -n "${EDITMSG}" && -f "${EDITMSG}" && "${EDITMSG_STALE}" == "0" ]]; then
   parse_trailer() {
     local key="$1"
     git interpret-trailers --parse --no-divider <"${EDITMSG}" 2>/dev/null | awk -F': *' -v k="${key}" 'tolower($1)==tolower(k){print $2; exit}'
@@ -90,7 +112,9 @@ if [[ -n "${EDITMSG}" && -f "${EDITMSG}" ]]; then
   [[ -n "${T_CHUNK}" ]]   && { validate_int_range "trailer Rocq-Audit-Chunk-Size" "${T_CHUNK}" 1 20; ROCQ_AUDIT_CHUNK_SIZE="${T_CHUNK}"; }
   [[ -n "${T_WALL}" ]]    && { validate_int_range "trailer Rocq-Audit-Wall-Seconds" "${T_WALL}" 60 3600; ROCQ_AUDIT_WALL_SECONDS="${T_WALL}"; }
   if [[ -n "${T_SKIP2}" ]]; then
-    case "${T_SKIP2,,}" in
+    # Lowercase via tr, not ${var,,}: that expansion needs bash 4 and macOS
+    # ships bash 3.2, where it aborts the hook with "bad substitution".
+    case "$(printf '%s' "${T_SKIP2}" | tr '[:upper:]' '[:lower:]')" in
       true|yes|1) BYPASS="fast" ;;
       false|no|0) : ;;
       *) echo "rocq-audit: trailer Rocq-Audit-Skip-Stage2 must be true/false; got '${T_SKIP2}'" >&2; exit 2 ;;
