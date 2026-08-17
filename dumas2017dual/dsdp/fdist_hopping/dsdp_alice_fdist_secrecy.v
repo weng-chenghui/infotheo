@@ -29,6 +29,8 @@ Require Import dsdp_program dsdp_entropy.
 (* Headline results: dsdp_alice_guess_fdist_V2_real_le bounds the probability *)
 (* that a predictor reading Alice's real view returns Bob's input;            *)
 (* dsdp_alice_unpredictability_fdist_ge is its negative-logarithm form;       *)
+(* dsdp_alice_predictor_unpredictability_fdist_ge restates that bound through *)
+(* the named quantity alice_predictor_unpredictability;                       *)
 (* dsdp_alice_sim_advantage_fdist_le bounds the gap between the real joint    *)
 (* law and the ideal-world joint law built from dsdp_alice_simulator;         *)
 (* dsdp_alice_guess_fdist_view_le transfers the first bound to Alice's view.  *)
@@ -137,6 +139,9 @@ Require Import dsdp_program dsdp_entropy.
 (*  distinguisher_of_guess g == the distinguisher accepting when the          *)
 (*                              predictor g returns the first input of its    *)
 (*                              argument                                      *)
+(* alice_predictor_unpredictability g == the negative logarithm of the        *)
+(*                              probability that the predictor g recovers     *)
+(*                              Bob's input from Alice's real hopping tuple   *)
 (*             fdistmap_prod == the pushforward of a product along a pair of  *)
 (*                              coordinate maps is the product of the         *)
 (*                              pushforwards                                  *)
@@ -919,6 +924,20 @@ Let eps1 (g : dsdp_alice_hop_tupleT -> plain AHE) : R :=
   indcpa_fdist_epsilon (pkey_of_party Charlie)
     (hop1_reduction (distinguisher_of_guess g)).
 
+(* The negative logarithm of the probability that g recovers Bob's input
+   from Alice's real hopping tuple.
+   Naming: after [Hunp_leak_S] of the sdistr axis (dsdp_guess_fiber.v),
+   with the fixed predictor explicit. *)
+Definition alice_predictor_unpredictability
+    (g : dsdp_alice_hop_tupleT -> plain AHE) : R :=
+  - log (Pr alice_sample_fdist
+           [set t | (g `o (AliceHopTuple 0)) t == V2 t]).
+
+Local Notation "'`H_unp^{' g '}'" :=
+  (alice_predictor_unpredictability g)
+  (at level 0, g at level 200,
+   format "'`H_unp^{' g '}'").
+
 (* The negative logarithm of the success probability of a predictor reading
    Alice's real view is at least log #|plain AHE| minus the logarithm of one
    plus #|plain AHE| times the sum of the two hop advantages.
@@ -940,6 +959,21 @@ have Hnum_pos : (0 < 1 + #|plain AHE|%:R * (eps0 g + eps1 g) :> R).
 rewrite lerNr opprB -logDiv // ler_log ?posrE ?divr_gt0 //.
 rewrite mulrDl mul1r mulrAC (divff (lt0r_neq0 Hcard_pos)) mul1r addrA.
 exact: dsdp_alice_guess_fdist_V2_real_le.
+Qed.
+
+(* The predictor-specific unpredictability of Bob's input is at least the
+   negative-logarithm form of the two-hop guessing bound.
+   Naming: after [dsdp_alice_unpredictability_fdist_ge], whose right-hand
+   side this theorem folds into the named quantity. *)
+Theorem dsdp_alice_predictor_unpredictability_fdist_ge
+    (g : dsdp_alice_hop_tupleT -> plain AHE)
+    (Hpos : 0 < Pr alice_sample_fdist
+                  [set t | (g `o (AliceHopTuple 0)) t == V2 t]) :
+  log (#|plain AHE|%:R)
+    - log (1 + #|plain AHE|%:R * (eps0 g + eps1 g))
+  <= `H_unp^{g}.
+Proof.
+exact: dsdp_alice_unpredictability_fdist_ge.
 Qed.
 
 (* The pushforward of a product distribution along a pair of coordinate maps is
