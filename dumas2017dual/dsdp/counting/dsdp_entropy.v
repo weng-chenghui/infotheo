@@ -418,7 +418,7 @@ End dsdp_entropy.
     1/m] where [m = #|R|]. The original
     [Pr_dsdp_sol_uniform] specializes [R] to [Z_(p*q)]; the
     [_ring] sibling carries the same statement parametric in
-    [R : finComUnitRingType], discharging the ring-specialization
+    [R : finComNzRingType], discharging the ring-specialization
     asterisk that the goal-gap audit flagged.
 
     **Used-by:** [dsdp_security_indcpa.v] Task F when instantiating

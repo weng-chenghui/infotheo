@@ -353,7 +353,7 @@ Arguments gprocs : clear implicits.
 Section dsdp_alice_trace_link.
 Variables (AHE : AHEncType) (Renc : finType).
 Variable rand_of_renc : Renc -> rand AHE.
-Variables (w_v1 w_u1 w_u2 w_u3 : plain AHE).
+Variables (v1 u1 u2 u3 : plain AHE).
 Variables (dk_a dk_b dk_c : priv_key AHE).
 Variables (w_rb2 w_rc2 : Renc).
 
@@ -399,7 +399,7 @@ Let e := di_data_of_cipher DI.
 Let kd := di_data_of_priv_key DI.
 
 Let palice_inst :=
-  @palice DI decode pkey_of_dk dk_a w_v1 w_u1 w_u2 w_u3 r2 r3 ra1 ra2.
+  @palice DI decode pkey_of_dk dk_a v1 u1 u2 u3 r2 r3 ra1 ra2.
 Let pbob_inst := @pbob DI decode pkey_of_dk dk_b v2 rb1 (rand_of_renc w_rb2).
 Let pcharlie_inst :=
   @pcharlie DI decode pkey_of_dk dk_c v3 rc1 (rand_of_renc w_rc2).
@@ -416,7 +416,7 @@ Let procs_of_ops :=
          (@enc AHE) (@Emul AHE) (@Epow AHE)
          +%R (fun a b : plain AHE => a - b) *%R (@dec AHE)
          dk_a dk_b dk_c pkey_of_dk
-         w_v1 v2 v3 w_u1 w_u2 w_u3 r2 r3
+         v1 v2 v3 u1 u2 u3 r2 r3
          rb1 (rand_of_renc w_rb2) rc1 (rand_of_renc w_rc2) ra1 ra2.
 
 (* The abstract instance at the standard interface is the standard instance,
@@ -429,20 +429,20 @@ Proof. by []. Qed.
    the form the programs build it. *)
 Lemma dsdp_run_traces_ok :
   (run_interp 15 dsdp_procs_std).2 =
-  [:: [:: d (v3 * w_u3 + r3 + (v2 * w_u2 + r2) - r2 - r3 + w_u1 * w_v1);
+  [:: [:: d (v3 * u3 + r3 + (v2 * u2 + r2) - r2 - r3 + u1 * v1);
           e (enc (pkey_of_dk Alice)
-                 (v3 * w_u3 + r3 + (v2 * w_u2 + r2)) (rand_of_renc w_rc2));
+                 (v3 * u3 + r3 + (v2 * u2 + r2)) (rand_of_renc w_rc2));
           e (enc (pkey_of_dk Charlie) v3 rc1);
           e (enc (pkey_of_dk Bob) v2 rb1);
-          d r3; d r2; d w_u3; d w_u2; d w_u1; d w_v1; kd dk_a];
-      [:: e (Emul (Epow (enc (pkey_of_dk Charlie) v3 rc1) w_u3)
+          d r3; d r2; d u3; d u2; d u1; d v1; kd dk_a];
+      [:: e (Emul (Epow (enc (pkey_of_dk Charlie) v3 rc1) u3)
                   (enc (pkey_of_dk Charlie) r3 ra2));
-          e (Emul (Epow (enc (pkey_of_dk Bob) v2 rb1) w_u2)
+          e (Emul (Epow (enc (pkey_of_dk Bob) v2 rb1) u2)
                   (enc (pkey_of_dk Bob) r2 ra1));
           d v2; kd dk_b];
-      [:: e (Emul (Emul (Epow (enc (pkey_of_dk Charlie) v3 rc1) w_u3)
+      [:: e (Emul (Emul (Epow (enc (pkey_of_dk Charlie) v3 rc1) u3)
                         (enc (pkey_of_dk Charlie) r3 ra2))
-                  (enc (pkey_of_dk Charlie) (v2 * w_u2 + r2)
+                  (enc (pkey_of_dk Charlie) (v2 * u2 + r2)
                        (rand_of_renc w_rb2)));
           d v3; kd dk_c]].
 Proof.
@@ -457,19 +457,19 @@ Qed.
    its arguments. *)
 Lemma dsdp_run_traces_encE :
   (run_interp 15 dsdp_procs_std).2 =
-  [:: [:: d (v3 * w_u3 + r3 + (v2 * w_u2 + r2) - r2 - r3 + w_u1 * w_v1);
+  [:: [:: d (v3 * u3 + r3 + (v2 * u2 + r2) - r2 - r3 + u1 * v1);
           e (enc (pkey_of_dk Alice)
-                 (v3 * w_u3 + r3 + (v2 * w_u2 + r2)) (rand_of_renc w_rc2));
+                 (v3 * u3 + r3 + (v2 * u2 + r2)) (rand_of_renc w_rc2));
           e (enc (pkey_of_dk Charlie) v3 rc1);
           e (enc (pkey_of_dk Bob) v2 rb1);
-          d r3; d r2; d w_u3; d w_u2; d w_u1; d w_v1; kd dk_a];
-      [:: e (enc (pkey_of_dk Charlie) (v3 * w_u3 + r3)
-                 (rand_mul (rand_pow rc1 w_u3) ra2));
-          e (enc (pkey_of_dk Bob) (v2 * w_u2 + r2)
-                 (rand_mul (rand_pow rb1 w_u2) ra1));
+          d r3; d r2; d u3; d u2; d u1; d v1; kd dk_a];
+      [:: e (enc (pkey_of_dk Charlie) (v3 * u3 + r3)
+                 (rand_mul (rand_pow rc1 u3) ra2));
+          e (enc (pkey_of_dk Bob) (v2 * u2 + r2)
+                 (rand_mul (rand_pow rb1 u2) ra1));
           d v2; kd dk_b];
-      [:: e (enc (pkey_of_dk Charlie) (v3 * w_u3 + r3 + (v2 * w_u2 + r2))
-                 (rand_mul (rand_mul (rand_pow rc1 w_u3) ra2)
+      [:: e (enc (pkey_of_dk Charlie) (v3 * u3 + r3 + (v2 * u2 + r2))
+                 (rand_mul (rand_mul (rand_pow rc1 u3) ra2)
                            (rand_of_renc w_rb2)));
           d v3; kd dk_c]].
 Proof. by rewrite dsdp_run_traces_ok !Epow_encE !Emul_encE. Qed.
@@ -486,8 +486,10 @@ Context {R : realType}.
 Variables (AHE : AHEncType) (Renc : finType) (index_renc : nat).
 Hypothesis card_renc : #|Renc| = index_renc.+1.
 Variable rand_of_renc : Renc -> rand AHE.
-Variables (w_v1 w_u1 w_u2 w_u3 : plain AHE).
-Hypothesis w_u3_inj : injective (fun v : plain AHE => w_u3 * v).
+Variables (v1 u1 u2 u3 : plain AHE).
+(* Naming: [u3_unit] reads "u3 is a unit", the subject_property hypothesis
+   pattern; same premise as in dsdp_alice_fdist_secrecy.v. *)
+Hypothesis u3_unit : u3 \is a GRing.unit.
 Variables (dk_a dk_b dk_c : priv_key AHE).
 Variables (w_rb2 w_rc2 : Renc).
 
@@ -508,24 +510,24 @@ Local Notation Rho3 := (Rho3 (R:=R) (AHE:=AHE) card_renc).
 Local Notation RA1 := (RA1 (R:=R) (AHE:=AHE) card_renc).
 Local Notation RA2 := (RA2 (R:=R) (AHE:=AHE) card_renc).
 Local Notation Sout :=
-  (Sout (R:=R) (AHE:=AHE) card_renc w_v1 w_u1 w_u2 w_u3).
+  (Sout (R:=R) (AHE:=AHE) card_renc v1 u1 u2 u3).
 Local Notation AliceHopTuple i :=
   (AliceHopTuple (R:=R) (AHE:=AHE) card_renc rand_of_renc
-     pkey_of_dk w_v1 w_u1 w_u2 w_u3 i).
+     pkey_of_dk v1 u1 u2 u3 i).
 Local Notation indcpa_fdist_epsilon :=
   (indcpa_fdist_epsilon (R:=R) (AHE:=AHE) card_renc rand_of_renc).
 Local Notation hop0_reduction :=
   (hop0_reduction (R:=R) (AHE:=AHE) card_renc rand_of_renc
-     pkey_of_dk w_v1 w_u1 w_u2 w_u3).
+     pkey_of_dk v1 u1 u2 u3).
 Local Notation hop1_reduction :=
   (hop1_reduction (R:=R) (AHE:=AHE) card_renc rand_of_renc
-     pkey_of_dk w_v1 w_u1 w_u2 w_u3).
+     pkey_of_dk v1 u1 u2 u3).
 Local Notation dsdp_alice_simulator :=
   (dsdp_alice_simulator (R:=R) (AHE:=AHE) card_renc rand_of_renc
      pkey_of_dk).
 Local Notation alice_ideal_joint :=
   (alice_ideal_joint (R:=R) (AHE:=AHE) card_renc rand_of_renc
-     pkey_of_dk w_v1 w_u1 w_u2 w_u3).
+     pkey_of_dk v1 u1 u2 u3).
 
 (* Alice's executed trace read off a value of her hopping tuple: the leaked
    output, Charlie's re-encryption of it, the two received ciphertexts, the
@@ -538,20 +540,20 @@ Definition dsdp_trace_of_hop_tuple
   [bseq inl (inl (inl v.1.1.2));
         inl (inl (inr
           (enc (pkey_of_dk Alice)
-               (v.1.1.2 - w_u1 * w_v1 + v.1.1.1.1.1 + v.1.1.1.1.2)
+               (v.1.1.2 - u1 * v1 + v.1.1.1.1.1 + v.1.1.1.1.2)
                (rand_of_renc w_rc2))));
         inl (inl (inr v.2));
         inl (inl (inr v.1.2));
         inl (inl (inl v.1.1.1.1.2));
         inl (inl (inl v.1.1.1.1.1));
-        inl (inl (inl w_u3)); inl (inl (inl w_u2));
-        inl (inl (inl w_u1)); inl (inl (inl w_v1));
+        inl (inl (inl u3)); inl (inl (inl u2));
+        inl (inl (inl u1)); inl (inl (inl v1));
         inl (inr tt)].
 
 (* The three piSMC programs at the coordinates of one sample. *)
 Definition dsdp_procs_of_sample (s : dsdp_alice_sampleT AHE Renc) :
     seq (proc (di_data DI)) :=
-  dsdp_procs_std AHE Renc rand_of_renc w_v1 w_u1 w_u2 w_u3 dk_a dk_b dk_c
+  dsdp_procs_std AHE Renc rand_of_renc v1 u1 u2 u3 dk_a dk_b dk_c
     w_rb2 w_rc2 (V2 s) (V3 s) (R2 s) (R3 s) (rand_of_renc (Rho2 s))
     (rand_of_renc (Rho3 s)) (rand_of_renc (RA1 s)) (rand_of_renc (RA2 s)).
 
@@ -570,15 +572,15 @@ Definition AliceTrace :
 
 (* The leaked output the run computes is Alice's hopping tuple slot. *)
 Let Sout_runE (s : dsdp_alice_sampleT AHE Renc) :
-  V3 s * w_u3 + R3 s + (V2 s * w_u2 + R2 s) - R2 s - R3 s + w_u1 * w_v1
+  V3 s * u3 + R3 s + (V2 s * u2 + R2 s) - R2 s - R3 s + u1 * v1
   = Sout s.
 Proof. by rewrite SoutE; ring. Qed.
 
 (* The plaintext Charlie re-encrypts is the leaked output net of Alice's own
    term and masks. *)
 Let recrypt_plainE (s : dsdp_alice_sampleT AHE Renc) :
-  V3 s * w_u3 + R3 s + (V2 s * w_u2 + R2 s)
-  = Sout s - w_u1 * w_v1 + R2 s + R3 s.
+  V3 s * u3 + R3 s + (V2 s * u2 + R2 s)
+  = Sout s - u1 * v1 + R2 s + R3 s.
 Proof. by rewrite SoutE; ring. Qed.
 
 (* The trace the interpreter produces for Alice is the deterministic image of
@@ -610,7 +612,7 @@ Theorem dsdp_alice_guess_fdist_trace_V2_real_le
 Proof.
 rewrite dsdp_trace_of_hop_tupleE.
 exact: (dsdp_alice_guess_fdist_V2_real_le card_renc rand_of_renc
-          pkey_of_dk w_v1 w_u1 w_u2 w_u3_inj
+          pkey_of_dk v1 u1 u2 u3_unit
           (g \o dsdp_trace_of_hop_tuple)).
 Qed.
 
@@ -703,7 +705,7 @@ Definition alice_trace_ideal_joint :
   `p_ [% V2, V3] >>= (fun vv =>
     fdistmap (fun tr => (vv.1, vv.2, tr))
       (dsdp_alice_trace_simulator
-        (dsdp_output w_v1 w_u1 w_u2 w_u3 vv.1 vv.2))).
+        (dsdp_output v1 u1 u2 u3 vv.1 vv.2))).
 
 (* The trace-level ideal joint law is the deterministic image of the
    hopping-tuple ideal joint law. *)
@@ -750,7 +752,7 @@ Proof.
 rewrite -Pr_fdistmap_bool alice_trace_real_jointE fdistmap_comp.
 rewrite Pr_fdistmap_bool alice_trace_ideal_jointE fdistmap_comp.
 exact: (dsdp_alice_sim_advantage_fdist_le card_renc rand_of_renc
-          pkey_of_dk w_v1 w_u1 w_u2 w_u3
+          pkey_of_dk v1 u1 u2 u3
           (distinguisher_of_trace_test D)).
 Qed.
 
@@ -761,7 +763,7 @@ Context {R : realType}.
 Variables (AHE : AHEncType) (Renc : finType) (index_renc : nat).
 Hypothesis card_renc : #|Renc| = index_renc.+1.
 Variable rand_of_renc : Renc -> rand AHE.
-Variables (w_v1 w_u1 w_u2 w_u3 : plain AHE).
+Variables (v1 u1 u2 u3 : plain AHE).
 Variables (dk_a dk_b dk_c : priv_key AHE).
 Variables (w_rb2 w_rc2 : Renc).
 
@@ -777,17 +779,17 @@ Local Notation R3 := (R3 (R:=R) (AHE:=AHE) card_renc).
 Local Notation RA1 := (RA1 (R:=R) (AHE:=AHE) card_renc).
 Local Notation RA2 := (RA2 (R:=R) (AHE:=AHE) card_renc).
 Local Notation Sout :=
-  (Sout (R:=R) (AHE:=AHE) card_renc w_v1 w_u1 w_u2 w_u3).
+  (Sout (R:=R) (AHE:=AHE) card_renc v1 u1 u2 u3).
 Local Notation hop0_cipher i :=
   (hop0_cipher (R:=R) (AHE:=AHE) card_renc rand_of_renc pkey_of_dk i).
 Local Notation hop1_cipher i :=
   (hop1_cipher (R:=R) (AHE:=AHE) card_renc rand_of_renc pkey_of_dk i).
 Local Notation AliceHopTuple i :=
   (AliceHopTuple (R:=R) (AHE:=AHE) card_renc rand_of_renc
-     pkey_of_dk w_v1 w_u1 w_u2 w_u3 i).
+     pkey_of_dk v1 u1 u2 u3 i).
 Local Notation AliceTrace :=
   (AliceTrace (R:=R) (AHE:=AHE) card_renc rand_of_renc
-     w_v1 w_u1 w_u2 w_u3 dk_a dk_b dk_c w_rb2 w_rc2).
+     v1 u1 u2 u3 dk_a dk_b dk_c w_rb2 w_rc2).
 
 (* The part of Alice's hopping tuple her executed trace shows: the two masks,
    the leaked output and the two received ciphertexts. *)
@@ -880,7 +882,7 @@ Definition v2_trace_tuple_of_sample_rest (u : alice_sample_restT) :
     (plain AHE * dsdp_alice_trace_tupleT) :=
   (u.1.1.1,
    ((u.1.2.1, u.1.2.2),
-    uncurry (dsdp_output w_v1 w_u1 w_u2 w_u3) (u.1.1.1, u.1.1.2),
+    uncurry (dsdp_output v1 u1 u2 u3) (u.1.1.1, u.1.1.2),
     enc (pkey_of_dk Bob) u.1.1.1 (rand_of_renc u.2.1),
     enc (pkey_of_dk Charlie) u.1.1.2 (rand_of_renc u.2.2))).
 
@@ -942,14 +944,14 @@ Definition trace_of_trace_tuple (q : dsdp_alice_trace_tupleT) :
   [bseq inl (inl (inl q.1.1.2));
         inl (inl (inr
           (enc (pkey_of_dk Alice)
-               (q.1.1.2 - w_u1 * w_v1 + q.1.1.1.1 + q.1.1.1.2)
+               (q.1.1.2 - u1 * v1 + q.1.1.1.1 + q.1.1.1.2)
                (rand_of_renc w_rc2))));
         inl (inl (inr q.2));
         inl (inl (inr q.1.2));
         inl (inl (inl q.1.1.1.2));
         inl (inl (inl q.1.1.1.1));
-        inl (inl (inl w_u3)); inl (inl (inl w_u2));
-        inl (inl (inl w_u1)); inl (inl (inl w_v1));
+        inl (inl (inl u3)); inl (inl (inl u2));
+        inl (inl (inl u1)); inl (inl (inl v1));
         inl (inr tt)].
 
 (* The plaintext carried by a trace entry, zero at any other sort. *)
@@ -1032,10 +1034,10 @@ Qed.
    abbreviations this section opens with do. *)
 Local Notation AliceView :=
   (AliceView (R:=R) (AHE:=AHE) card_renc rand_of_renc
-     pkey_of_dk w_v1 w_u1 w_u2 w_u3).
+     pkey_of_dk v1 u1 u2 u3).
 Local Notation alice_view_of_hop_tupleE :=
   (alice_view_of_hop_tupleE (R:=R) (AHE:=AHE) card_renc rand_of_renc
-     pkey_of_dk w_v1 w_u1 w_u2 w_u3).
+     pkey_of_dk v1 u1 u2 u3).
 
 (* The hopping tuple is the first component of Alice's view.
    Naming: [_of_] names the source the conversion reads, after

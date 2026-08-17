@@ -9,7 +9,7 @@
 (* == Types ==                                                                *)
 (*                                                                            *)
 (*   HETypes bundles five types:                                              *)
-(*     - plain : finComNzRingType   (message/plaintext space)                 *)
+(*     - plain : finComUnitRingType (message/plaintext space)                 *)
 (*     - rand : Type                (randomness; ops from the isAHEnc mixin)  *)
 (*     - cipher : finNzRingType     (raw ciphertext without party label)      *)
 (*     - pub_key : Type             (public key space)                        *)
@@ -35,7 +35,7 @@ Import Prenex Implicits.
 Local Open Scope ring_scope.
 
 Record HETypes := MkHE {
-  plain : finComNzRingType ;    (* message/plaintext space *)
+  plain : finComUnitRingType ;  (* message/plaintext space *)
   rand : Type ;                 (* different HE schemes have different
                                    rand requirements, like {unit 'Z_n}
                                    for Benaloh, {unit 'Z_n2} for Paillier *)
