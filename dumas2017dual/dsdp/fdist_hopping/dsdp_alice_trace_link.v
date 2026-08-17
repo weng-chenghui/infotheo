@@ -34,8 +34,9 @@ Require Import dsdp_alice_fdist_secrecy.
 (* two explicitly constructed reductions;                                     *)
 (* dsdp_alice_trace_predictor_unpredictability_fdist_ge restates that bound   *)
 (* through the named quantity alice_trace_predictor_unpredictability;         *)
-(* dsdp_alice_sim_advantage_fdist_trace_le carries the simulator bound of     *)
-(* dsdp_alice_sim_advantage_fdist_le to that executed trace.                  *)
+(* dsdp_alice_trace_sim_advantage_fdist_le bounds the gap any Boolean trace   *)
+(* test sees between the real executed-trace joint law and the ideal trace    *)
+(* joint law by the two lifted hop advantages.                                *)
 (*                                                                            *)
 (* ```                                                                        *)
 (*             gdp, gde, gdk == the injections of a plaintext, of a           *)
@@ -93,31 +94,18 @@ Require Import dsdp_alice_fdist_secrecy.
 (*                              that trace guessing bound in                  *)
 (*                              negative-logarithm form, stated through that  *)
 (*                              named quantity                                *)
-(* alice_trace_joint_of_hop_joint ==                                          *)
-(*                              the two honest inputs and Alice's encoded     *)
-(*                              trace obtained from a joint hopping-tuple     *)
-(*                              value                                         *)
-(* distinguisher_of_trace_test D ==                                           *)
-(*                              the hopping-tuple distinguisher that applies  *)
-(*                              the trace test D after the joint              *)
-(*                              hopping-to-trace map                          *)
 (* dsdp_alice_trace_simulator s ==                                            *)
 (*                              the hopping-tuple simulator of one leaked     *)
 (*                              output mapped to the encoded executed-trace   *)
 (*                              carrier                                       *)
-(*   alice_trace_ideal_joint == the ideal joint law mapped from simulated     *)
-(*                              hopping tuples to encoded traces              *)
-(* alice_trace_ideal_joint_simE ==                                            *)
-(*                              the trace-level ideal joint law samples the   *)
-(*                              two honest inputs and runs the trace          *)
-(*                              simulator on their leaked output              *)
-(*   alice_trace_real_jointE == the real executed-trace joint law is the      *)
-(*                              deterministic image of the real hopping-tuple *)
-(*                              joint law                                     *)
-(* dsdp_alice_sim_advantage_fdist_trace_le ==                                 *)
+(*   alice_trace_ideal_joint == the joint law of the two honest inputs and    *)
+(*                              the trace simulator run on their leaked       *)
+(*                              output                                        *)
+(* dsdp_alice_trace_sim_advantage_fdist_le ==                                 *)
 (*                              every Boolean test separates the real         *)
-(*                              executed-trace law from the trace simulator   *)
-(*                              law by at most the two lifted hop advantages  *)
+(*                              executed-trace joint law from the ideal trace *)
+(*                              joint law by at most the two lifted hop       *)
+(*                              advantages                                    *)
 (*   dsdp_alice_trace_tupleT == the trace-visible part of Alice's hopping     *)
 (*                              tuple: the two masks, the leaked output and   *)
 (*                              the two received ciphertexts                  *)
@@ -685,7 +673,7 @@ Qed.
    hopping-tuple value.
    Naming: the [_of_] connective names the source the conversion reads,
    here the joint carrier of [alice_hop_joint_fdist], not the bare tuple. *)
-Definition alice_trace_joint_of_hop_joint
+Let alice_trace_joint_of_hop_joint
     (x : plain AHE * plain AHE * dsdp_alice_hop_tupleT AHE Renc) :
     plain AHE * plain AHE * 15.-bseq dsdp_trace_dataT :=
   (x.1.1, x.1.2, dsdp_trace_of_hop_tuple x.2).
@@ -693,7 +681,7 @@ Definition alice_trace_joint_of_hop_joint
 (* The hopping-tuple distinguisher that applies a trace test after the
    joint hopping-to-trace map.
    Naming: result first, after [distinguisher_of_guess]. *)
-Definition distinguisher_of_trace_test
+Let distinguisher_of_trace_test
     (D : plain AHE * plain AHE * 15.-bseq dsdp_trace_dataT -> bool) :
     plain AHE * plain AHE * dsdp_alice_hop_tupleT AHE Renc -> bool :=
   D \o alice_trace_joint_of_hop_joint.
@@ -706,21 +694,22 @@ Definition dsdp_alice_trace_simulator (s : plain AHE) :
     R.-fdist (15.-bseq dsdp_trace_dataT) :=
   fdistmap dsdp_trace_of_hop_tuple (dsdp_alice_simulator s).
 
-(* The ideal joint law mapped from simulated hopping tuples to encoded
-   traces.
+(* The joint law of the honest inputs and the simulated encoded trace: the
+   honest input law bound to the trace simulator fed the leaked output
+   computed from the sampled inputs.
    Naming: after [alice_ideal_joint] of the hopping-tuple level. *)
 Definition alice_trace_ideal_joint :
     R.-fdist (plain AHE * plain AHE * 15.-bseq dsdp_trace_dataT) :=
-  fdistmap alice_trace_joint_of_hop_joint alice_ideal_joint.
+  `p_ [% V2, V3] >>= (fun vv =>
+    fdistmap (fun tr => (vv.1, vv.2, tr))
+      (dsdp_alice_trace_simulator
+        (dsdp_output w_v1 w_u1 w_u2 w_u3 vv.1 vv.2))).
 
-(* The trace-level ideal joint law samples the two honest inputs and runs the
-   trace simulator on their leaked output. *)
-Lemma alice_trace_ideal_joint_simE :
+(* The trace-level ideal joint law is the deterministic image of the
+   hopping-tuple ideal joint law. *)
+Let alice_trace_ideal_jointE :
   alice_trace_ideal_joint
-  = `p_ [% V2, V3] >>= (fun vv =>
-      fdistmap (fun tr => (vv.1, vv.2, tr))
-        (dsdp_alice_trace_simulator
-           (dsdp_output w_v1 w_u1 w_u2 w_u3 vv.1 vv.2))).
+  = fdistmap alice_trace_joint_of_hop_joint alice_ideal_joint.
 Proof.
 rewrite /alice_trace_ideal_joint /alice_ideal_joint fdistmap_bind.
 congr (_ >>= _); apply: boolp.funext => vv.
@@ -729,7 +718,7 @@ Qed.
 
 (* The real executed-trace joint law is the deterministic image of the real
    hopping-tuple joint law. *)
-Lemma alice_trace_real_jointE :
+Let alice_trace_real_jointE :
   `p_ [% V2, V3, AliceTrace]
   = fdistmap alice_trace_joint_of_hop_joint
       (`p_ [% V2, V3, AliceHopTuple 0]).
@@ -737,21 +726,29 @@ Proof.
 by rewrite dsdp_trace_of_hop_tupleE /dist_of_RV fdistmap_comp.
 Qed.
 
-(* Every Boolean test separates the real executed-trace law from the trace
-   simulator law by at most the two lifted hop advantages.
-   Naming: [dsdp_alice_sim_advantage_fdist] as in the hopping-tuple
-   headline, with [trace] naming the observation the test reads. *)
-Theorem dsdp_alice_sim_advantage_fdist_trace_le
+(* A Boolean trace test separates the real and simulated joint laws by at most
+   the two hop advantages of its lifted hopping-tuple test.
+   Naming: after [dsdp_alice_sim_advantage_fdist_le] with [alice_trace] as
+   the object stem, as in
+   [dsdp_alice_trace_predictor_unpredictability_fdist_ge]; the transfer
+   corollaries [dsdp_alice_guess_fdist_view_le] and
+   [dsdp_alice_guess_fdist_trace_V2_real_le] keep the hop stem and append
+   the observation read after [fdist]. *)
+Theorem dsdp_alice_trace_sim_advantage_fdist_le
     (D : plain AHE * plain AHE * 15.-bseq dsdp_trace_dataT -> bool) :
   `| Pr (`p_ [% V2, V3, AliceTrace]) [set x | D x]
      - Pr (fdistmap D alice_trace_ideal_joint) [set true] |
   <= indcpa_fdist_epsilon (pkey_of_dk Bob)
-       (hop0_reduction (distinguisher_of_trace_test D))
+       (hop0_reduction
+         (fun x => D
+           (x.1.1, x.1.2, dsdp_trace_of_hop_tuple x.2)))
      + indcpa_fdist_epsilon (pkey_of_dk Charlie)
-       (hop1_reduction (distinguisher_of_trace_test D)).
+       (hop1_reduction
+         (fun x => D
+           (x.1.1, x.1.2, dsdp_trace_of_hop_tuple x.2))).
 Proof.
 rewrite -Pr_fdistmap_bool alice_trace_real_jointE fdistmap_comp.
-rewrite Pr_fdistmap_bool /alice_trace_ideal_joint fdistmap_comp.
+rewrite Pr_fdistmap_bool alice_trace_ideal_jointE fdistmap_comp.
 exact: (dsdp_alice_sim_advantage_fdist_le card_renc rand_of_renc
           pkey_of_dk w_v1 w_u1 w_u2 w_u3
           (distinguisher_of_trace_test D)).
