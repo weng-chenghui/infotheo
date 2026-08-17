@@ -19,7 +19,7 @@
    Design note (the [Symbolic_AHEnc] finType wall, RESOLVED).  The design doc
    named a symbolic [AHEncType] instance over [he_term] to re-run the
    interpreter.  That is impossible at the type-class level: [AHEncType]
-   requires [plain : finComNzRingType] and [cipher : nzRingType], but a free
+   requires [plain : finComUnitRingType] and [cipher : finNzRingType], but a free
    [he_term] algebra is infinite.  Resolution: the protocol is re-parameterised
    over a standalone [DSDP_Interface] (no AHEncType, hence no finType/ring/law
    constraints), and [dsdp_symbolic_exec.v] instantiates it at

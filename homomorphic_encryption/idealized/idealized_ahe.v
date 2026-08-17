@@ -38,7 +38,7 @@ Local Open Scope ring_scope.
 
 Section Idealized_AHE.
 
-Variable msgT : finComNzRingType.
+Variable msgT : finComUnitRingType.
 
 (* ========================================================================== *)
 (*                   Type Bundle                                              *)

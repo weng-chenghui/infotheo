@@ -16,7 +16,8 @@ Require Import dsdp_program dsdp_entropy.
 (* the two honest inputs, Alice's two mask plaintexts, the randomness of the  *)
 (* two hop encryptions and the randomness of Alice's two combines; uniformity *)
 (* and independence of the coordinates are theorems of the product            *)
-(* construction rather than hypotheses.                                       *)
+(* construction rather than hypotheses. The one algebraic assumption is       *)
+(* [u3_unit]: Charlie's weight u3 is a unit of the plaintext ring.            *)
 (*                                                                            *)
 (* A one-parameter family of views interpolates from Alice's real view to the *)
 (* view whose two ciphertext slots both encrypt zero. Each step of the        *)
@@ -205,8 +206,11 @@ Variables (AHE : AHEncType) (Renc : finType) (index_renc : nat).
 Hypothesis card_renc : #|Renc| = index_renc.+1.
 Variable rand_of_renc : Renc -> rand AHE.
 Variable pkey_of_party : party_id -> pub_key AHE.
-Variables (w_v1 w_u1 w_u2 w_u3 : plain AHE).
-Hypothesis w_u3_inj : injective (fun v : plain AHE => w_u3 * v).
+Variables (v1 u1 u2 u3 : plain AHE).
+(* Naming: [u3_unit] reads "u3 is a unit", the subject_property hypothesis
+   pattern. *)
+Hypothesis u3_unit : u3 \is a GRing.unit.
+Let u3_inj : injective (fun v : plain AHE => u3 * v) := mulrI u3_unit.
 
 Let card_plain_gt0 : (0 < #|plain AHE|)%N.
 Proof. by apply/card_gt0P; exists 0; rewrite inE. Qed.
@@ -255,10 +259,10 @@ Definition RA2 : {RV alice_sample_fdist -> Renc} := fun t => t.2.2.
    Naming: [Sout] rather than [S], which shadows the successor of nat, after
    [dsdp_guess_fiber.v]. *)
 Definition Sout : {RV alice_sample_fdist -> plain AHE} :=
-  uncurry (dsdp_output w_v1 w_u1 w_u2 w_u3) `o [% V2, V3].
+  uncurry (dsdp_output v1 u1 u2 u3) `o [% V2, V3].
 
 (* The output written out at the protocol's weights. *)
-Lemma SoutE t : Sout t = w_u1 * w_v1 + w_u2 * V2 t + w_u3 * V3 t.
+Lemma SoutE t : Sout t = u1 * v1 + u2 * V2 t + u3 * V3 t.
 Proof. by []. Qed.
 
 (* The Bob-key ciphertext slot of Alice's hopping tuple, encrypting Bob's
@@ -533,7 +537,7 @@ Definition hop0_assemble (c : hop0_stateT) (ch : cipher AHE) :
     plain AHE * plain AHE * dsdp_alice_hop_tupleT :=
   let: (vv, masks, ra, rho3) := c in
   (vv.1, vv.2,
-   (masks, ra, dsdp_output w_v1 w_u1 w_u2 w_u3 vv.1 vv.2, ch,
+   (masks, ra, dsdp_output v1 u1 u2 u3 vv.1 vv.2, ch,
     enc (pkey_of_party Charlie) vv.2 (rand_of_renc rho3))).
 
 (* The inputs and the view rebuilt from a hop-1 state and a ciphertext in
@@ -542,7 +546,7 @@ Definition hop1_assemble (c : hop1_stateT) (ch : cipher AHE) :
     plain AHE * plain AHE * dsdp_alice_hop_tupleT :=
   let: (vv, masks, ra, c2zero) := c in
   (vv.1, vv.2,
-   (masks, ra, dsdp_output w_v1 w_u1 w_u2 w_u3 vv.1 vv.2, c2zero, ch)).
+   (masks, ra, dsdp_output v1 u1 u2 u3 vv.1 vv.2, c2zero, ch)).
 
 (* The adversary that challenges Bob's key on the first input and runs the
    distinguisher on the view rebuilt around the challenge. *)
@@ -679,13 +683,13 @@ by rewrite /indcpa_fdist_epsilon hop1_real_challengeE hop1_zero_challengeE.
 Qed.
 
 (* Alice's own input as a constant random variable. *)
-Definition V1c : {RV alice_sample_fdist -> plain AHE} := const_RV _ w_v1.
+Definition V1c : {RV alice_sample_fdist -> plain AHE} := const_RV _ v1.
 (* Alice's first protocol weight as a constant random variable. *)
-Definition U1c : {RV alice_sample_fdist -> plain AHE} := const_RV _ w_u1.
+Definition U1c : {RV alice_sample_fdist -> plain AHE} := const_RV _ u1.
 (* Alice's second protocol weight as a constant random variable. *)
-Definition U2c : {RV alice_sample_fdist -> plain AHE} := const_RV _ w_u2.
+Definition U2c : {RV alice_sample_fdist -> plain AHE} := const_RV _ u2.
 (* Alice's third protocol weight as a constant random variable. *)
-Definition U3c : {RV alice_sample_fdist -> plain AHE} := const_RV _ w_u3.
+Definition U3c : {RV alice_sample_fdist -> plain AHE} := const_RV _ u3.
 
 (* The sample coordinates the view reads besides the two secret inputs: the
    masks, the two encryption randomnesses, and Alice's combine randomness. *)
@@ -746,7 +750,7 @@ Qed.
 (* The four protocol weights form a constant random variable. *)
 Lemma alice_inputs_constE :
   [% V1c, U1c, U2c, U3c]
-  = const_RV alice_sample_fdist (w_v1, w_u1, w_u2, w_u3).
+  = const_RV alice_sample_fdist (v1, u1, u2, u3).
 Proof. by apply: boolp.funext => t; rewrite /V1c /U1c /U2c /U3c !const_RVE. Qed.
 
 (* The protocol weights, the leaked output and the two secret inputs satisfy the
@@ -761,10 +765,10 @@ Qed.
 (* Conditioned on the protocol weights and the leaked output, the secret input
    pair is uniform on the solution fiber, with mass 1/#|plain AHE|. *)
 Lemma alice_VarRV_cond_uniform (s v2 v3 : plain AHE) :
-  `Pr[ [% V1c, U1c, U2c, U3c, Sout] = (w_v1, w_u1, w_u2, w_u3, s) ] != 0 ->
-  (v2, v3) \in dsdp_fiber_ring w_u1 w_u2 w_u3 w_v1 s ->
+  `Pr[ [% V1c, U1c, U2c, U3c, Sout] = (v1, u1, u2, u3, s) ] != 0 ->
+  (v2, v3) \in dsdp_fiber_ring u1 u2 u3 v1 s ->
   `Pr[ [% V2, V3] = (v2, v3)
-     | [% V1c, U1c, U2c, U3c, Sout] = (w_v1, w_u1, w_u2, w_u3, s) ]
+     | [% V1c, U1c, U2c, U3c, Sout] = (v1, u1, u2, u3, s) ]
   = #|plain AHE|%:R^-1.
 Proof.
 apply: Pr_dsdp_sol_uniform_ring => //;
@@ -780,10 +784,10 @@ Lemma alice_V2_cond_Sout (a s : plain AHE) :
   `Pr[ V2 = a | Sout = s ] = #|plain AHE|%:R^-1.
 Proof.
 move=> Hs.
-have [g _ Hg2] : bijective (fun v : plain AHE => w_u3 * v)
+have [g _ Hg2] : bijective (fun v : plain AHE => u3 * v)
   by apply: inj_card_bij.
-pose v3star := g (s - w_u1 * w_v1 - w_u2 * a).
-have Hfib : (a, v3star) \in dsdp_fiber_ring w_u1 w_u2 w_u3 w_v1 s
+pose v3star := g (s - u1 * v1 - u2 * a).
+have Hfib : (a, v3star) \in dsdp_fiber_ring u1 u2 u3 v1 s
   by rewrite inE /=; apply/eqP; rewrite /v3star Hg2; ring.
 have Hnum : pfwd1 [% V2, Sout] (a, s)
           = pfwd1 [% [% V2, V3], Sout] ((a, v3star), s).
@@ -792,13 +796,13 @@ have Hnum : pfwd1 [% V2, Sout] (a, s)
   case: (V2 t =P a) => [Hva|_] //=.
   suff -> : (Sout t == s) = (V3 t == v3star) by rewrite andbb.
   rewrite /Sout /comp_RV /dsdp_output /= Hva.
-  have -> : s = w_u1 * w_v1 + w_u2 * a + w_u3 * v3star
+  have -> : s = u1 * v1 + u2 * a + u3 * v3star
     by rewrite /v3star Hg2; ring.
-  by rewrite (inj_eq (addrI _)) (inj_eq w_u3_inj).
-have Hcond_eq : pfwd1 [% V1c, U1c, U2c, U3c, Sout] (w_v1, w_u1, w_u2, w_u3, s)
+  by rewrite (inj_eq (addrI _)) (inj_eq u3_inj).
+have Hcond_eq : pfwd1 [% V1c, U1c, U2c, U3c, Sout] (v1, u1, u2, u3, s)
               = `Pr[ Sout = s ]
-  := pfwd1_RV2_compl Sout (fun=> (w_v1, w_u1, w_u2, w_u3)) s.
-have HcwN : `Pr[ [% V1c, U1c, U2c, U3c] = (w_v1, w_u1, w_u2, w_u3) ] != 0.
+  := pfwd1_RV2_compl Sout (fun=> (v1, u1, u2, u3)) s.
+have HcwN : `Pr[ [% V1c, U1c, U2c, U3c] = (v1, u1, u2, u3) ] != 0.
   by apply: contra_neq Hs => /(pfwd1_domin_RV2 Sout s); rewrite -Hcond_eq.
 have Hind : alice_sample_fdist
               |= [% V1c, U1c, U2c, U3c] _|_ [% [% V2, V3], Sout]
@@ -849,7 +853,7 @@ Proof.
 apply: cpr_prd_unit_RV; apply: weak_union.
 apply/cinde_RV_unit.
 exact: (inde_RV_comp idfun (fun p : plain AHE * plain AHE =>
-          (p.1, uncurry (dsdp_output w_v1 w_u1 w_u2 w_u3) p))
+          (p.1, uncurry (dsdp_output v1 u1 u2 u3) p))
         alice_spectator_indep).
 Qed.
 
@@ -1129,11 +1133,11 @@ Lemma dsdp_alice_hop_tuple_cond_sim (v : dsdp_alice_hop_tupleT)
     (v2 v3 : plain AHE) :
   `Pr[ [% V2, V3] = (v2, v3) ] != 0 ->
   `Pr[ (AliceHopTuple 2) = v | [% V2, V3] = (v2, v3) ]
-    = dsdp_alice_simulator (dsdp_output w_v1 w_u1 w_u2 w_u3 v2 v3) v.
+    = dsdp_alice_simulator (dsdp_output v1 u1 u2 u3 v2 v3) v.
 Proof.
 move=> Hvv.
 have HW t : [% V2, V3] t = (v2, v3) ->
-    Sout t = dsdp_output w_v1 w_u1 w_u2 w_u3 v2 v3.
+    Sout t = dsdp_output v1 u1 u2 u3 v2 v3.
   by rewrite /Sout /comp_RV => ->.
 rewrite cpr_eqE (alice_hop_tuple_all_zero_pfwd1E v HW)
         (alice_spectator_indep _ _).
@@ -1153,7 +1157,7 @@ Corollary dsdp_alice_hop_tuple_cond_sim_S (v : dsdp_alice_hop_tupleT)
 Proof.
 move=> Hs.
 have Hind : alice_sample_fdist |= AliceSpectator _|_ Sout.
-  exact: (inde_RV_comp idfun (uncurry (dsdp_output w_v1 w_u1 w_u2 w_u3))
+  exact: (inde_RV_comp idfun (uncurry (dsdp_output v1 u1 u2 u3))
             alice_spectator_indep).
 rewrite cpr_eqE (alice_hop_tuple_all_zero_pfwd1E v (fun=> id)) (Hind _ _).
 rewrite mulrA mulfK // -dist_of_RVE alice_spectator_law.
@@ -1169,7 +1173,7 @@ Definition alice_ideal_joint :
     R.-fdist (plain AHE * plain AHE * dsdp_alice_hop_tupleT) :=
   `p_ [% V2, V3] >>= (fun vv =>
      fdistmap (fun v => (vv.1, vv.2, v))
-       (dsdp_alice_simulator (dsdp_output w_v1 w_u1 w_u2 w_u3 vv.1 vv.2))).
+       (dsdp_alice_simulator (dsdp_output v1 u1 u2 u3 vv.1 vv.2))).
 
 (* The ideal-world joint law is the joint law of the two secret inputs and
    Alice's all-zero view. *)
@@ -1221,12 +1225,12 @@ Definition alice_view_of_hop_tuple (v : dsdp_alice_hop_tupleT) :
   let ra2 := v.1.1.1.2.2 in
   let s := v.1.1.2 in
   let combine_bob :=
-    Emul (Epow c_bob w_u2)
+    Emul (Epow c_bob u2)
          (enc (pkey_of_party Bob) r2 (rand_of_renc ra1)) in
   let combine_charlie :=
-    Emul (Epow c_charlie w_u3)
+    Emul (Epow c_charlie u3)
          (enc (pkey_of_party Charlie) r3 (rand_of_renc ra2)) in
-  let recv_plain := s - w_u1 * w_v1 + r2 + r3 in
+  let recv_plain := s - u1 * v1 + r2 + r3 in
   (v, combine_bob, combine_charlie, recv_plain).
 
 (* Alice's outgoing combine toward Bob's key, replaying her real protocol step:
@@ -1234,7 +1238,7 @@ Definition alice_view_of_hop_tuple (v : dsdp_alice_hop_tupleT) :
    encryption of her first mask.  Used by alice_view_of_hop_tupleE. *)
 Definition AliceCombineBob : {RV alice_sample_fdist -> cipher AHE} :=
   fun t => Emul
-    (Epow (enc (pkey_of_party Bob) (V2 t) (rand_of_renc (Rho2 t))) w_u2)
+    (Epow (enc (pkey_of_party Bob) (V2 t) (rand_of_renc (Rho2 t))) u2)
     (enc (pkey_of_party Bob) (R2 t) (rand_of_renc (RA1 t))).
 
 (* Alice's outgoing combine toward Charlie's key, the symmetric counterpart of
@@ -1243,7 +1247,7 @@ Definition AliceCombineBob : {RV alice_sample_fdist -> cipher AHE} :=
    alice_view_of_hop_tupleE. *)
 Definition AliceCombineCharlie : {RV alice_sample_fdist -> cipher AHE} :=
   fun t => Emul
-    (Epow (enc (pkey_of_party Charlie) (V3 t) (rand_of_renc (Rho3 t))) w_u3)
+    (Epow (enc (pkey_of_party Charlie) (V3 t) (rand_of_renc (Rho3 t))) u3)
     (enc (pkey_of_party Charlie) (R3 t) (rand_of_renc (RA2 t))).
 
 (* The plaintext Alice recovers at her final decrypt-on-receive step: the two
@@ -1252,7 +1256,7 @@ Definition AliceCombineCharlie : {RV alice_sample_fdist -> cipher AHE} :=
    Naming: Owner-Verb-Noun, parallel to AliceCombineBob and
    AliceCombineCharlie; [Plain] is the AHE plaintext carrier. *)
 Definition AliceRecvPlain : {RV alice_sample_fdist -> plain AHE} :=
-  fun t => w_u2 * V2 t + w_u3 * V3 t + R2 t + R3 t.
+  fun t => u2 * V2 t + u3 * V3 t + R2 t + R3 t.
 
 (* Alice's four real observables: her hopping tuple, her two outgoing combines,
    and the plaintext of her final decrypt-on-receive. *)
