@@ -599,22 +599,35 @@ Record dsdp_indcpa_experiment := {
        names of those it RECEIVED, returns the ordered name list the game leaks *)
   (* the concrete scheme the abstract game is denoted into *)
   exp_enc_scheme : AHEncType ;
+    (* the additively homomorphic scheme the game encrypts under *)
   exp_rand_carrier : finType ;
+    (* the finite type the game samples encryption randomness from *)
   exp_rand_carrier_card : #|exp_rand_carrier| = exp_card_randomness ;
+    (* the carrier has exactly as many elements as the symbolic trace's
+       randomness sample space *)
   exp_rand_of_carrier : exp_rand_carrier -> rand exp_enc_scheme ;
+    (* reads a carrier element as scheme randomness *)
   exp_choice_msg_type : choice_type ;
     (* the choice_type a plaintext is encoded as on the oracle interface *)
   exp_choice_cipher_type : choice_type ;
     (* the choice_type a ciphertext is encoded as; the type of each leaked slot *)
   exp_choice_msg_of_plain : plain exp_enc_scheme -> exp_choice_msg_type ;
+    (* encodes a plaintext for the oracle interface *)
   exp_plain_of_choice_msg : exp_choice_msg_type -> plain exp_enc_scheme ;
+    (* decodes an interface message back to a plaintext *)
   exp_choice_msg_of_plainK : cancel exp_choice_msg_of_plain exp_plain_of_choice_msg ;
+    (* decoding undoes encoding on plaintexts *)
   exp_choice_cipher_of_cipher : cipher exp_enc_scheme -> exp_choice_cipher_type ;
+    (* encodes a ciphertext for the oracle interface *)
   exp_cipher_of_choice_cipher : exp_choice_cipher_type -> cipher exp_enc_scheme ;
+    (* decodes an interface ciphertext back to a scheme ciphertext *)
   exp_choice_cipher_of_cipherK :
     cancel exp_choice_cipher_of_cipher exp_cipher_of_choice_cipher ;
+    (* decoding undoes encoding on ciphertexts *)
   exp_pub_key_of_party : party_id -> pub_key exp_enc_scheme ;
+    (* the public key a party's incoming ciphertexts are encrypted under *)
   exp_msg_of_index : 'I_exp_card_plaintext -> plain exp_enc_scheme ;
+    (* reads a uniform plaintext-scalar sample as a plaintext *)
   exp_fallback_rand : rand exp_enc_scheme ;
     (* randomness returned by an out-of-range slot lookup; dead in a well-formed
        game (every slot is filled by a prior sample), present only for totality *)
@@ -677,11 +690,19 @@ Definition zero_game (P : dsdp_indcpa_experiment) : raw_package :=
    quantifies over all valid adversaries. *)
 Record dsdp_indcpa_adversary (P : dsdp_indcpa_experiment) := {
   adv_locations : Locations ;
+    (* the memory locations the distinguisher owns *)
   adv_package   : raw_package ;
+    (* the distinguisher's code *)
   adv_valid : ValidPackage adv_locations (game_iface_P P) A_export adv_package ;
+    (* the code is a valid package over [adv_locations], importing [P]'s oracle
+       interface and exporting [A_export] *)
   adv_disjoint_from_protocol_state : fseparate adv_locations (protocol_state_P P) ;
+    (* the distinguisher's locations are separate from the game's protocol
+       state *)
   adv_disjoint_from_real_oracle : fseparate adv_locations (real_oracle_P P).(locs) ;
+    (* separate from the real oracle's locations *)
   adv_disjoint_from_zero_oracle : fseparate adv_locations (zero_oracle_P P).(locs) ;
+    (* separate from the zero oracle's locations *)
 }.
 
 (* dsdp_indcpa_secrecy_le — the one-record IND-CPA secrecy bound, GENERIC over

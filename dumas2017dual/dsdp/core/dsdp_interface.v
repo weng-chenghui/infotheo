@@ -79,12 +79,13 @@ HB.instance Definition _ := hasDecEq.Build dsdp_dtype dsdp_dtype_eqP.
     to repeat data/conversion/operation definitions in every DSDP file. *)
 Record DSDP_Interface := MkDSDP_Interface {
   (* Carrier types *)
-  di_msgT : Type ;
-  di_cipherT : Type ;
-  di_randT : Type ;
-  di_priv_keyT : Type ;
-  di_pub_keyT : Type ;
-  di_data : Type ;
+  di_msgT      : Type ;  (* plaintext scalars *)
+  di_cipherT   : Type ;  (* ciphertexts *)
+  di_randT     : Type ;  (* encryption randomness *)
+  di_priv_keyT : Type ;  (* private keys *)
+  di_pub_keyT  : Type ;  (* public keys *)
+  di_data      : Type ;  (* the unified carrier a [proc] passes around, holding
+                            a value of any of the five carriers above *)
 
   (* Injectors: wrap a typed value into the unified data carrier.
      Naming: MathComp X_of_Y total-conversion form (the [di_data] of a plain/
@@ -97,24 +98,33 @@ Record DSDP_Interface := MkDSDP_Interface {
 
   (* Extractor: get a ciphertext out of the data carrier *)
   di_get_cipher : di_data -> option di_cipherT ;
+    (* the ciphertext a carrier holds, when it holds one *)
 
   (* Encryption and homomorphic operations *)
   di_encrypt : di_pub_keyT -> di_msgT -> di_randT -> di_cipherT ;
+    (* encryption of a plaintext under a public key with given randomness *)
   di_emul : di_cipherT -> di_cipherT -> di_cipherT ;
+    (* the homomorphic product, an encryption of the sum of the plaintexts *)
   di_epow : di_cipherT -> di_msgT -> di_cipherT ;
+    (* the homomorphic power, an encryption of the plaintext scaled by a
+       plaintext scalar *)
 
   (* Plaintext ring operations used by the parties' final reconstruction *)
-  di_add : di_msgT -> di_msgT -> di_msgT ;
-  di_sub : di_msgT -> di_msgT -> di_msgT ;
-  di_mul : di_msgT -> di_msgT -> di_msgT ;
+  di_add : di_msgT -> di_msgT -> di_msgT ;  (* plaintext addition *)
+  di_sub : di_msgT -> di_msgT -> di_msgT ;  (* plaintext subtraction *)
+  di_mul : di_msgT -> di_msgT -> di_msgT ;  (* plaintext multiplication *)
 
   (* Specialized Recv operations (proc is unindexed) *)
   di_Recv_dec :
     nat -> di_priv_keyT -> (di_msgT -> proc di_data) ->
     proc di_data ;
+    (* receive from the given party, decrypt the ciphertext with the private
+       key, and continue on the resulting plaintext *)
   di_Recv_enc :
     nat -> (di_cipherT -> proc di_data) ->
     proc di_data ;
+    (* receive from the given party and continue on the ciphertext itself, for
+       homomorphic computation under the sender's public key *)
 }.
 
 (* Keep the interface argument explicit on every field projection.
