@@ -87,11 +87,11 @@ Require Import dsdp_program dsdp_entropy.
 (*                x <- m ; f == a sampling step of an experiment, the bind    *)
 (*                              of a distribution with a kernel               *)
 (*                     ret a == the Dirac distribution at a                   *)
-(*    indcpa_fdist_adversary == a single-query real-or-zero adversary: a law  *)
-(*                              adv_choose over the state type adv_state, a   *)
-(*                              challenge plaintext adv_plain read off the    *)
-(*                              state, and a decision adv_decide on the state *)
-(*                              and the challenge ciphertext                  *)
+(*    indcpa_fdist_adversary == a single-query real-or-zero adversary: a      *)
+(*                              state type adv_state, a law adv_choose over   *)
+(*                              it, a challenge plaintext adv_plain read off  *)
+(*                              the state, and a decision adv_decide on the   *)
+(*                              state and the challenge ciphertext            *)
 (* indcpa_fdist_success_real == the probability that the adversary accepts    *)
 (*                              when the challenge encrypts its chosen        *)
 (*                              plaintext                                     *)
@@ -317,7 +317,7 @@ Local Notation "x '<-' m ';' f" := (m >>= (fun x => f))
    distribution at a value. *)
 Local Notation "'ret' a" := (fdist1 a) (at level 0) : fdist_scope.
 
-(* A single-query real-or-zero adversary: a law over a state type, a
+(* A single-query real-or-zero adversary: a state type, a law over it, a
    challenge plaintext read off the state, and a decision taken on the
    state and the challenge ciphertext. *)
 Record indcpa_fdist_adversary := {
