@@ -113,3 +113,53 @@ If landing Task 1 hits anything the C6 build did not (it should not; the
 copy build is the same toolchain), fall back to spec option 1: keep the
 carrier, state `Hypothesis w_u3_unit : exists v, w_u3 * v = 1` — probed GO
 2026-08-17 in session scratch (probe_unit_inj.v).
+
+## As-built record (2026-08-18)
+
+Executed with one user-directed deviation: the `w_` prefix is dropped from
+the protocol-parameter row in both fdist_hopping files
+(`w_v1 w_u1 w_u2 w_u3` -> `v1 u1 u2 u3`), so the hypothesis is
+`u3_unit : u3 \is a GRing.unit` and the derived Let is `u3_inj`. Grounds:
+zero bare `v1/u1/u2/u3` tokens existed in either file (no shadowing risk),
+no external consumer applies the closed lemmas by binder name, and the
+prefix-free names match the paper's math ($v_1,u_1,u_2,u_3$). The
+randomness witnesses `w_rb2`/`w_rc2` keep their prefix (not paper symbols,
+different family). All other Task 1 items applied as planned.
+
+Verification at landing: make exit 0 with exactly the predicted 28-file
+closure; About on the guessing endpoint shows binders `v1 u1 u2 [u3]` and
+antecedent `u3 \is a GRing.unit`; Print Assumptions on both endpoints =
+the three boolp classical axioms (baseline-identical); zero
+Admitted/Axiom/Abort in the two edited proof files. Paper (Task 2): all
+six loci updated with "invertible"/"invertibility" wording and
+`\coqin{u3_unit}` footnotes, grep for stale forms empty, builds 16 pages.
+Thesis (Task 3): ahe-hierarchy.tex listing + prose updated, chapter grep
+for stale forms empty.
+
+## Landed (2026-08-18, commit 691593cf)
+
+Six-file atomic commit through the audit gate, no bypass. Style gate: six
+per-file mathcomp-style-auditor passes, 6/6 GO, zero findings attributable
+to the change beyond nits folded in before landing (one-line Naming comments
+in both fdist_hopping files, header sentence naming the u3 assumption,
+cipher comment in dsdp_game_derivation.v corrected to finNzRingType after
+verifying he_types.v:42). Paper and thesis edits applied and built
+(uncommitted, matching those repos' working state).
+
+Follow-ups recorded by the auditors (none blocking, none landed here):
+- Cluster rename: dsdp_main.v, indcpa_hopping/dsdp_guess_fiber.v, and
+  symbolic_game/dsdp_game_gen_literal.v still use w_v1..w_u3 rows and
+  inline injectivity premises. Bare v1/u1/u2/u3 tokens already exist in all
+  three files, so the rename there needs per-site collision review, and the
+  premise swap to unit form changes exported statements. Separate task.
+- secrecy.v:787-801 proof simplification: u3_unit gives the inverse
+  directly (pose v3star := u3^-1 * ...; mulVKr u3_unit), removing the
+  inj_card_bij detour. Real code change, compile before keeping.
+- trace_link.v: orphaned w_rb2/w_rc2 prefix; binder homographs (v near v1
+  at :536/:541, u near u1..u3 at :879/:883); reflow of lines the rename
+  shortened; :613 vs :753 implicit-argument asymmetry.
+- boolp.funext qualification (9 sites secrecy, 2 trace_link): import and
+  unqualify.
+- dsdp_entropy.v doc blocks: :401 still describes the hypothesis in unit
+  terms not typecheckable at the section carrier, [alice_view_joint] is a
+  dangling name, used-by points into legacy/superseded/.
