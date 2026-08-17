@@ -31,7 +31,9 @@ Require Import dsdp_alice_fdist_secrecy.
 (* dsdp_alice_guess_fdist_trace_V2_real_le bounds the probability that a      *)
 (* predictor reading Alice's encoded trace returns Bob's input by one over    *)
 (* the cardinality of the plaintext space plus the real-or-zero advantages of *)
-(* two explicitly constructed reductions.                                     *)
+(* two explicitly constructed reductions;                                     *)
+(* dsdp_alice_trace_predictor_unpredictability_fdist_ge restates that bound   *)
+(* through the named quantity alice_trace_predictor_unpredictability.         *)
 (*                                                                            *)
 (* ```                                                                        *)
 (*             gdp, gde, gdk == the injections of a plaintext, of a           *)
@@ -81,6 +83,14 @@ Require Import dsdp_alice_fdist_secrecy.
 (*                              input with probability at most one over that  *)
 (*                              cardinality plus the advantages of the two    *)
 (*                              per-hop reductions                            *)
+(* alice_trace_predictor_unpredictability g ==                                *)
+(*                              the negative logarithm of the probability     *)
+(*                              that the predictor g recovers Bob's input     *)
+(*                              from Alice's encoded executed trace           *)
+(* dsdp_alice_trace_predictor_unpredictability_fdist_ge ==                    *)
+(*                              that trace guessing bound in                  *)
+(*                              negative-logarithm form, stated through that  *)
+(*                              named quantity                                *)
 (*   dsdp_alice_trace_tupleT == the trace-visible part of Alice's hopping     *)
 (*                              tuple: the two masks, the leaked output and   *)
 (*                              the two received ciphertexts                  *)
@@ -581,6 +591,61 @@ rewrite dsdp_trace_of_hop_tupleE.
 exact: (dsdp_alice_guess_fdist_V2_real_le card_renc rand_of_renc
           pkey_of_dk w_v1 w_u1 w_u2 w_u3_inj
           (g \o dsdp_trace_of_hop_tuple)).
+Qed.
+
+(* The advantage against Bob's key of the hop-0 reduction of the distinguisher
+   associated with a trace predictor composed with
+   dsdp_trace_of_hop_tuple. *)
+Let trace_eps0 (g : 15.-bseq dsdp_trace_dataT -> plain AHE) : R :=
+  indcpa_fdist_epsilon (pkey_of_dk Bob)
+    (hop0_reduction
+       (distinguisher_of_guess (g \o dsdp_trace_of_hop_tuple))).
+
+(* The advantage against Charlie's key of the hop-1 reduction of the
+   distinguisher associated with a trace predictor composed with
+   dsdp_trace_of_hop_tuple. *)
+Let trace_eps1 (g : 15.-bseq dsdp_trace_dataT -> plain AHE) : R :=
+  indcpa_fdist_epsilon (pkey_of_dk Charlie)
+    (hop1_reduction
+       (distinguisher_of_guess (g \o dsdp_trace_of_hop_tuple))).
+
+(* The negative logarithm of the probability that g recovers Bob's input
+   from Alice's encoded executed trace.
+   Naming: after [alice_predictor_unpredictability] of the hopping-tuple
+   level, with [trace] marking the observation g reads. *)
+Definition alice_trace_predictor_unpredictability
+    (g : 15.-bseq dsdp_trace_dataT -> plain AHE) : R :=
+  - log
+      (Pr (alice_sample_fdist (R:=R) AHE card_renc)
+         [set t | (g `o AliceTrace) t == V2 t]).
+
+Local Notation "'`H_unp^{' g '}'" :=
+  (alice_trace_predictor_unpredictability g)
+  (at level 0, g at level 200,
+   format "'`H_unp^{' g '}'").
+
+(* The predictor-specific unpredictability of Bob's input at Alice's executed
+   trace is at least the negative-logarithm form of the trace guessing bound.
+   Naming: after [dsdp_alice_predictor_unpredictability_fdist_ge], the
+   theorem name extending [alice_trace_predictor_unpredictability] as
+   there. *)
+Theorem dsdp_alice_trace_predictor_unpredictability_fdist_ge
+    (g : 15.-bseq dsdp_trace_dataT -> plain AHE)
+    (Hpos :
+       0 < Pr (alice_sample_fdist (R:=R) AHE card_renc)
+              [set t | (g `o AliceTrace) t == V2 t]) :
+  log (#|plain AHE|%:R)
+    - log (1 + #|plain AHE|%:R * (trace_eps0 g + trace_eps1 g))
+  <= `H_unp^{g}.
+Proof.
+have Hcard_pos : (0 < #|plain AHE|%:R :> R).
+  by rewrite ltr0n; apply/card_gt0P; exists 0; rewrite inE.
+have Hnum_pos : (0 < 1 + #|plain AHE|%:R * (trace_eps0 g + trace_eps1 g) :> R).
+  by rewrite ltr_pwDl // mulr_ge0 // addr_ge0 // normr_ge0.
+rewrite /alice_trace_predictor_unpredictability.
+rewrite lerNr opprB -logDiv // ler_log ?posrE ?divr_gt0 //.
+rewrite mulrDl mul1r mulrAC (divff (lt0r_neq0 Hcard_pos)) mul1r addrA.
+exact: dsdp_alice_guess_fdist_trace_V2_real_le.
 Qed.
 
 End dsdp_alice_trace_rv.
