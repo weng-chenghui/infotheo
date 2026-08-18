@@ -177,6 +177,16 @@ Require Import dsdp_alice_fdist_secrecy.
 (* dsdp_alice_trace_simulator_pubE ==                                         *)
 (*                              instantiating the three public keys from the  *)
 (*                              private keys yields the existing simulator    *)
+(* alice_trace_real_joint_avg ==                                              *)
+(*                              the real executed-trace joint law with a      *)
+(*                              uniformly sampled re-encryption coin          *)
+(* alice_trace_ideal_joint_avg ==                                             *)
+(*                              the ideal trace joint law with a uniformly    *)
+(*                              sampled re-encryption coin                    *)
+(* dsdp_alice_trace_sim_advantage_fdist_avg_le ==                             *)
+(*                              the averaged real-versus-ideal gap is at      *)
+(*                              most the average of the two per-coin hop      *)
+(*                              advantages                                    *)
 (* ```                                                                        *)
 (*                                                                            *)
 (* DI and the parameter-pinning abbreviations that Section                    *)
@@ -1231,3 +1241,75 @@ Lemma dsdp_alice_trace_simulator_pubE (s : plain AHE) :
 Proof. by []. Qed.
 
 End dsdp_alice_trace_public_compat.
+
+Section dsdp_alice_trace_avg_sec.
+Context {R : realType}.
+Variables (AHE : AHEncType) (Renc : finType) (index_renc : nat).
+Hypothesis card_renc : #|Renc| = index_renc.+1.
+Variable rand_of_renc : Renc -> rand AHE.
+Variables (v1 u1 u2 u3 : plain AHE).
+Variables (dk_a dk_b dk_c : priv_key AHE).
+Variable w_rb2 : Renc.
+
+(* Each parameterized abbreviation pins everything but the re-encryption
+   coin, which this section samples. *)
+Local Notation dsdp_trace_dataT := (dsdp_trace_dataT AHE).
+Local Notation pkey_of_dk := (pkey_of_dk dk_a dk_b dk_c).
+Local Notation V2 := (V2 (R:=R) (AHE:=AHE) card_renc).
+Local Notation V3 := (V3 (R:=R) (AHE:=AHE) card_renc).
+Local Notation AliceTraceW w :=
+  (AliceTrace (R:=R) card_renc rand_of_renc v1 u1 u2 u3
+     dk_a dk_b dk_c w_rb2 w).
+Local Notation alice_trace_ideal_joint_at w :=
+  (alice_trace_ideal_joint (R:=R) card_renc rand_of_renc
+     v1 u1 u2 u3 dk_a dk_b dk_c w).
+Local Notation dsdp_trace_of_hop_tuple_at w :=
+  (dsdp_trace_of_hop_tuple rand_of_renc v1 u1 u2 u3 dk_a dk_b dk_c w).
+Local Notation indcpa_fdist_epsilon :=
+  (indcpa_fdist_epsilon (R:=R) (AHE:=AHE) card_renc rand_of_renc).
+Local Notation hop0_reduction :=
+  (hop0_reduction (R:=R) (AHE:=AHE) card_renc rand_of_renc
+     pkey_of_dk v1 u1 u2 u3).
+Local Notation hop1_reduction :=
+  (hop1_reduction (R:=R) (AHE:=AHE) card_renc rand_of_renc
+     pkey_of_dk v1 u1 u2 u3).
+
+(* The real executed-trace joint law with a uniformly sampled re-encryption
+   coin.
+   Naming: after the per-coin joint law of
+   [dsdp_alice_trace_sim_advantage_fdist_le], with [avg] marking the
+   sampled coin. *)
+Definition alice_trace_real_joint_avg :
+    R.-fdist (plain AHE * plain AHE * 15.-bseq dsdp_trace_dataT) :=
+  fdist_uniform card_renc >>= (fun w => `p_ [% V2, V3, AliceTraceW w]).
+
+(* The ideal trace joint law with a uniformly sampled re-encryption coin.
+   Naming: after [alice_trace_ideal_joint], with [avg] as above. *)
+Definition alice_trace_ideal_joint_avg :
+    R.-fdist (plain AHE * plain AHE * 15.-bseq dsdp_trace_dataT) :=
+  fdist_uniform card_renc >>= (fun w => alice_trace_ideal_joint_at w).
+
+(* The averaged real-versus-ideal gap is at most the average of the two
+   per-coin hop advantages.
+   Naming: extends [dsdp_alice_trace_sim_advantage_fdist_le] with the [avg]
+   variant token before [le]; kept long to preserve the family grouping. *)
+Theorem dsdp_alice_trace_sim_advantage_fdist_avg_le
+    (D : plain AHE * plain AHE * 15.-bseq dsdp_trace_dataT -> bool) :
+  `| Pr alice_trace_real_joint_avg [set x | D x]
+     - Pr (fdistmap D alice_trace_ideal_joint_avg) [set true] |
+  <= \sum_(w in Renc) (fdist_uniform card_renc : R.-fdist Renc) w
+       * (indcpa_fdist_epsilon (pkey_of_dk Bob)
+            (hop0_reduction
+              (fun x => D (x.1.1, x.1.2, dsdp_trace_of_hop_tuple_at w x.2)))
+          + indcpa_fdist_epsilon (pkey_of_dk Charlie)
+            (hop1_reduction
+              (fun x => D (x.1.1, x.1.2, dsdp_trace_of_hop_tuple_at w x.2)))).
+Proof.
+rewrite Pr_fdistmap_bool.
+apply: fdist_mixture_advantage_le => w.
+rewrite -[X in `|_ - X| <= _]Pr_fdistmap_bool.
+exact: (dsdp_alice_trace_sim_advantage_fdist_le card_renc rand_of_renc
+          v1 u1 u2 u3 dk_a dk_b dk_c w_rb2 w D).
+Qed.
+
+End dsdp_alice_trace_avg_sec.
