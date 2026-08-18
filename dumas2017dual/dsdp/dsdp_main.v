@@ -1,11 +1,11 @@
-(* DSDP main results — the headline theorems.
+(* DSDP main results — the information-theoretic headline theorems.
 
-   This file centralizes the headline theorems of the DSDP development. Each
-   theorem's full proof is presented here over a cloned copy of its source
-   section context; the supporting machinery stays in the axis files
-   (counting/, symbolic_game/, indcpa_hopping/, convert/) and is referenced, not
-   duplicated. The file mixes generic N-party results with their 3-party DSDP
-   instances; each theorem's comment states its party scope. The headlines are:
+   This file centralizes the information-theoretic headline theorems of the
+   DSDP development. Each theorem's full proof is presented here over a cloned
+   copy of its source section context; the supporting machinery stays in the
+   counting axis files and is referenced, not duplicated. The file mixes
+   generic N-party results with their 3-party DSDP instances; each theorem's
+   comment states its party scope. The headlines are:
 
    Information-theoretic (counting axis)
      dsdp_centropy_uniform : H(V2,V3 | view) = log m  [3-party]
@@ -19,45 +19,21 @@
      bob_privacy_V3 : H(V3 | BobView) = log m > 0: a corrupted Bob learns
        nothing about Charlie's input V3 (R3 one-time-pad masking)  [3-party]
      charlie_privacy_V2 : H(V2 | CharlieView) = log m > 0: a corrupted Charlie
-       learns nothing about Bob's input V2 (R2 one-time-pad masking)  [3-party]
-
-   Corrupted-Alice secrecy (indcpa_hopping axis), guessing triangle  [3-party]
-     dsdp_alice_view_advantage_le : AdvantageE <= eps_0 + eps_1
-     dsdp_alice_guess_V2_zero_le : guess <= 1/m (all-zero endpoint)
-     dsdp_alice_guess_advantage_le : AdvantageE <= eps_0 + eps_1
-     dsdp_alice_guess_V2_real_le : guess <= 1/m + (eps_0 + eps_1)
-     dsdp_alice_unpredictability_entropy_ge : H_unp >= log m
-       - log (1 + m (eps_0 + eps_1))
-   Here eps_0 and eps_1 are the IND-CPA real-or-zero advantages of the two
-   per-hop reductions built from the distinguisher at hand.
-
-   Simulation-based security (simulation axis; average-case: honest inputs
-   sampled uniformly in-game)  [3-party]
-     dsdp_alice_simulation_advantage_le : AdvantageE real (Sim ∘ Ideal)
-       <= eps_0 + eps_1 *)
+       learns nothing about Bob's input V2 (R2 one-time-pad masking)  [3-party] *)
 
 From HB Require Import structures.
 From mathcomp Require Import all_boot all_order all_algebra fingroup finalg.
-From mathcomp Require Import matrix ring boolp finmap reals realsum.
-
-Set Warnings "-notation-overridden,-ambiguous-paths".
-From SSProve.Crypt Require Import Package pkg_composition Pr.
-From SSProve.Crypt Require Import HybridArgument.
-Set Warnings "notation-overridden,ambiguous-paths".
+From mathcomp Require Import matrix ring boolp finmap reals.
 
 From Stdlib Require Import Utf8.
-From extructures Require Import ord fset fmap.
 
 Require Import realType_ext realType_ln ssr_ext ssralg_ext bigop_ext fdist.
 Require Import proba jfdist_cond entropy graphoid smc_interpreter spp_proba bayes.
 Require Import spp_entropy extra_proba extra_algebra extra_entropy rouche_capelli.
 Require Import entropy_fiber.
-Require Import homomorphic_encryption indcpa_ror.
+Require Import homomorphic_encryption.
 Require Import dsdp_program dsdp_entropy dsdp_pismc.
-Require Import smc.ssprove_ext_lossless.
-Require Import dsdp_game_code dsdp_symbolic_exec dsdp_game_derivation.
-Require Import dsdp_indcpa_advantage dsdp_convert dsdp_guess_fiber.
-Require Import dsdp_malicious_dotp dsdp_simulator.
+Require Import dsdp_malicious_dotp.
 
 Set Implicit Arguments.
 Unset Strict Implicit.
@@ -68,93 +44,8 @@ Set Default Goal Selector "!".
 Set Primitive Projections.
 
 Import GRing.Theory Num.Theory Order.POrderTheory.
-Import PackageNotation.
-#[local] Open Scope package_scope.
 #[local] Open Scope ring_scope.
 #[local] Open Scope real_scope.
-
-(* Pin SSProve's real type as the ambient realType. *)
-Notation R := SSProve.Crypt.Axioms.R.
-
-(* ================================================================= *)
-(* Corrupted-Alice IND-CPA advantage (indcpa_hopping axis)           *)
-(* ================================================================= *)
-
-Section dsdp_alice_indcpa.
-(* cloned context of Section dsdp_indcpa_advantage *)
-Variables (AHE : AHEncType) (Renc : finType) (card_renc : nat)
-  (renc_card : #|Renc| = card_renc) (rand_of_renc : Renc -> rand AHE)
-  (t_msg t_cipher : choice_type)
-  (msg_of_chmsg : t_msg -> plain AHE) (chmsg_of_msg : plain AHE -> t_msg)
-  (chcipher_of_cipher : cipher AHE -> t_cipher)
-  (cipher_of_chcipher : t_cipher -> cipher AHE)
-  (chmsg_of_msgK : cancel chmsg_of_msg msg_of_chmsg)
-  (chcipher_of_cipherK : cancel chcipher_of_cipher cipher_of_chcipher)
-  (pkey_of_party : party_id -> pub_key AHE)
-  (card_msg : nat) (msg_of_idx : 'I_card_msg -> plain AHE) (rand0 : rand AHE).
-
-(* dsdp_experiment — THE one control record: the DSDP corrupted-Alice model
-   (palice_sym, the derived hop stream, challenge = Bob's secret name) plus the
-   chosen scheme + marshalling. Everything downstream is a projection of this. *)
-Definition dsdp_experiment : dsdp_indcpa_experiment :=
-  {| exp_card_plaintext  := card_msg ; exp_card_randomness := card_renc ;
-     exp_corrupted_party_program := palice_sym ;
-     exp_received_hop_ciphertexts := dsdp_received_hop_ciphertexts ;
-     exp_challenge_secret := dsdp_v2_name ;
-     exp_leak_order := fun combines recvs => combines ++ recvs ;
-     exp_enc_scheme := AHE ; exp_rand_carrier := Renc ;
-     exp_rand_carrier_card := renc_card ; exp_rand_of_carrier := rand_of_renc ;
-     exp_choice_msg_type := t_msg ; exp_choice_cipher_type := t_cipher ;
-     exp_choice_msg_of_plain := chmsg_of_msg ; exp_plain_of_choice_msg := msg_of_chmsg ;
-     exp_choice_msg_of_plainK := chmsg_of_msgK ;
-     exp_choice_cipher_of_cipher := chcipher_of_cipher ;
-     exp_cipher_of_choice_cipher := cipher_of_chcipher ;
-     exp_choice_cipher_of_cipherK := chcipher_of_cipherK ;
-     exp_pub_key_of_party := pkey_of_party ; exp_msg_of_index := msg_of_idx ;
-     exp_fallback_rand := rand0 |}.
-
-(* the corrupted-Alice trace of dsdp_experiment has exactly two encryption hops. *)
-Example dsdp_experiment_hops : count_obs_hops (corrupted_view dsdp_experiment) = 2.
-Proof. by []. Qed.
-
-(* dsdp_alice_view_advantage_le — every adversary's advantage between DSDP's
-   real corrupted-Alice game and its all-zero endpoint is at most the sum of
-   the IND-CPA real-or-zero advantages of its two per-hop reductions: the
-   generic bound [dsdp_indcpa_secrecy_le] (any experiment's real-vs-all-zero
-   advantage is at most the sum of its per-hop reduction advantages) at hop
-   count two.  [dsdp_experiment] is the DSDP instance of such a two-hop
-   experiment, its corrupted-Alice trace having exactly two encryption hops
-   ([dsdp_experiment_hops]).
-   Naming: subject-prefixed [dsdp_alice], with [view] naming the corrupted-view
-   game pair the advantage is measured on and [_le] the upper bound.
-   [3-party] *)
-Theorem dsdp_alice_view_advantage_le
-    (Adv : dsdp_indcpa_adversary dsdp_experiment) :
-  AdvantageE (real_game dsdp_experiment) (zero_game dsdp_experiment)
-             (adv_package Adv)
-    <= indcpa_epsilon AHE Renc card_renc renc_card rand_of_renc t_msg t_cipher
-         msg_of_chmsg chcipher_of_cipher pkey_of_party
-         (adv_package Adv
-          ∘ denote_game_shim renc_card rand_of_renc chmsg_of_msg
-              chcipher_of_cipher cipher_of_chcipher pkey_of_party
-              msg_of_idx rand0
-              (zero_hop_prefix 0
-                 (game_of_trace (corrupted_view dsdp_experiment))) 0)
-     + indcpa_epsilon AHE Renc card_renc renc_card rand_of_renc t_msg t_cipher
-         msg_of_chmsg chcipher_of_cipher pkey_of_party
-         (adv_package Adv
-          ∘ denote_game_shim renc_card rand_of_renc chmsg_of_msg
-              chcipher_of_cipher cipher_of_chcipher pkey_of_party
-              msg_of_idx rand0
-              (zero_hop_prefix 1
-                 (game_of_trace (corrupted_view dsdp_experiment))) 1).
-Proof.
-have H := dsdp_indcpa_secrecy_le Adv.
-rewrite dsdp_experiment_hops big_ord_recl big_ord1 in H.
-exact: H.
-Qed.
-
-End dsdp_alice_indcpa.
 
 (* ================================================================= *)
 (* Information-theoretic party privacy (counting axis)               *)
@@ -204,8 +95,8 @@ Let InputRV : {RV P -> (msg * msg * msg * msg)} := [%V1, U1, U2, U3].
    (V1, U1, U2, U3, S), the plaintext residual (not Alice's full view, which
    also carries her key, masks, and the ciphertext hops), the relay private
    inputs (V2, V3) retain log m bits of uncertainty. The counting axis
-   conditions on plaintexts only; the ciphertext-carrying view is the SSProve
-   leg's business (the guessing triangle).  [3-party] *)
+   conditions on plaintexts only; the ciphertext-carrying view is the
+   fdist_hopping leg's business (the guessing triangle).  [3-party] *)
 Theorem dsdp_centropy_uniform :
   (forall t, (0 < U3 t)%N) ->
   (forall t, (U3 t < minn p q)%N) ->
@@ -665,336 +556,3 @@ by rewrite ltr1n.
 Qed.
 
 End dsdp_relay_secrecy_v1.
-
-(* ================================================================= *)
-(* Corrupted-Alice secrecy: the guessing triangle (indcpa_hopping axis) *)
-(* ================================================================= *)
-
-Section dsdp_alice_guess.
-(* cloned context of Section dsdp_guess_distribution *)
-Variables (AHE : AHEncType) (Renc : finType) (card_renc : nat)
-  (renc_card : #|Renc| = card_renc) (rand_of_renc : Renc -> rand AHE)
-  (t_msg t_cipher : choice_type)
-  (chmsg_of_msg : plain AHE -> t_msg)
-  (chcipher_of_cipher : cipher AHE -> t_cipher)
-  (pkey_of_party : party_id -> pub_key AHE)
-  (card_msg : nat) (msg_of_idx : 'I_card_msg -> plain AHE) (rand0 : rand AHE).
-Variable seed : denv AHE.
-Variable predictor : predictor_guesser t_msg t_cipher.
-Variable Mfin : finType.
-Variable msg_to_fin : t_msg -> Mfin.
-Variable fin_to_msg : Mfin -> t_msg.
-Hypothesis msg_to_finK : cancel msg_to_fin fin_to_msg.
-
-Hypothesis guess_lossless :
-  psum (distr.mu (Pr_fst (guess_joint_code renc_card rand_of_renc chmsg_of_msg
-    chcipher_of_cipher pkey_of_party msg_of_idx rand0 seed predictor
-    msg_to_fin))) = 1.
-
-Hypothesis card_renc_neq : card_renc != card_msg.
-Hypothesis predictor_locs_disj : fseparate (locs predictor) (protocol_state t_msg).
-
-Variable msg_of_chmsg : t_msg -> plain AHE.
-Hypothesis chmsg_of_msgK : cancel chmsg_of_msg msg_of_chmsg.
-Hypothesis Hmsg_bij : bijective msg_of_idx.
-Hypothesis guess_full_lossless :
-  psum (distr.mu (Pr_fst (guess_full_code renc_card rand_of_renc chmsg_of_msg
-    chcipher_of_cipher pkey_of_party msg_of_idx rand0 seed predictor
-    msg_to_fin))) = 1.
-
-(* The four protocol weights Alice holds (seeded constants). *)
-Variables (v1 u1 u2 u3 : plain AHE).
-(* The seed's four value slots 0..3 are the protocol weights u1, u2, u3,
-   v1, so the run's leaked output (computed from the seed at the
-   [output_term] de Bruijn indices) coincides with [Sout]. *)
-Hypothesis seed_u1 : as_plain (de_val_nth seed 0) = u1.
-Hypothesis seed_u2 : as_plain (de_val_nth seed 1) = u2.
-Hypothesis seed_u3 : as_plain (de_val_nth seed 2) = u3.
-Hypothesis seed_v1 : as_plain (de_val_nth seed 3) = v1.
-
-(* zero_game_leak_S instantiated at this section's parameters. *)
-Let game : raw_package :=
-  zero_game_leak_S renc_card rand_of_renc chmsg_of_msg chcipher_of_cipher
-    pkey_of_party msg_of_idx rand0 seed.
-
-(* real_game — the output-exposing real endpoint game (all-real counterpart). *)
-Let real_game : raw_package :=
-  real_game_leak_S renc_card rand_of_renc chmsg_of_msg chcipher_of_cipher
-    pkey_of_party msg_of_idx rand0 seed.
-
-(* guess_reduction — the IND-CPA distinguisher built from the guessing layer. *)
-Let guess_reduction : raw_package :=
-  guessing_challenger t_msg t_cipher
-    ∘ par (pack predictor) (ID (game_iface_leak_S t_msg t_cipher)).
-
-(* dsdp_alice_guess_V2_zero_le — the SSProve-side success probability of the
-   all-zero guessing experiment is at most 1/card_msg: the connector
-   [guess_success_sdistr_eq_fdist] crosses to the Infotheo side, then the fiber
-   bound [guess_fdist_success_le].  [3-party] *)
-Lemma dsdp_alice_guess_V2_zero_le :
-  injective (fun v : plain AHE => u3 * v) ->
-  guess_sdistr_success renc_card rand_of_renc chmsg_of_msg chcipher_of_cipher
-    pkey_of_party msg_of_idx rand0 seed predictor <= card_msg%:R^-1.
-Proof.
-move=> Hinj.
-rewrite (guess_success_sdistr_eq_fdist msg_to_finK guess_lossless).
-exact: (guess_fdist_success_le msg_to_finK guess_lossless card_renc_neq
-  predictor_locs_disj chmsg_of_msgK Hmsg_bij guess_full_lossless
-  seed_u1 seed_u2 seed_u3 seed_v1 Hinj).
-Qed.
-
-(* dsdp_alice_guess_advantage_le — the reduction distinguisher's advantage is at
-   most the sum of the IND-CPA real-or-zero advantages of its two site
-   reductions, at hop sites 0 and 1: the output-exposing endpoint games add only
-   the common id_Sout_get oracle and no encryption hop, so
-   [dsdp_derived_game_advantage_le_leak_S] applies at the two-hop count.
-   Naming: subject-prefixed [dsdp_alice_guess], with [advantage] naming the
-   AdvantageE being bounded and [_le] the upper bound.  [3-party] *)
-Lemma dsdp_alice_guess_advantage_le
-    (cipher_of_chcipher : t_cipher -> cipher AHE)
-    (chcipher_of_cipherK : cancel chcipher_of_cipher cipher_of_chcipher)
-    (Hore : fseparate (locs predictor)
-       (locs (oracle_real_pkg renc_card rand_of_renc msg_of_chmsg
-                chcipher_of_cipher pkey_of_party)))
-    (Hoze : fseparate (locs predictor)
-       (locs (oracle_zero_pkg renc_card rand_of_renc t_msg
-                chcipher_of_cipher pkey_of_party))) :
-  AdvantageE real_game game guess_reduction
-    <= indcpa_epsilon AHE Renc card_renc renc_card rand_of_renc t_msg t_cipher
-         msg_of_chmsg chcipher_of_cipher pkey_of_party
-         (guess_reduction ∘ denote_game_shim_leak_S renc_card rand_of_renc
-            chmsg_of_msg chcipher_of_cipher cipher_of_chcipher pkey_of_party
-            msg_of_idx rand0 seed
-            (zero_hop_prefix 0
-               (game_of_trace_seeded dsdp_weight_names
-                  (dsdp_alice_obs_leak_S_seeded card_msg card_renc))) 0)
-     + indcpa_epsilon AHE Renc card_renc renc_card rand_of_renc t_msg t_cipher
-         msg_of_chmsg chcipher_of_cipher pkey_of_party
-         (guess_reduction ∘ denote_game_shim_leak_S renc_card rand_of_renc
-            chmsg_of_msg chcipher_of_cipher cipher_of_chcipher pkey_of_party
-            msg_of_idx rand0 seed
-            (zero_hop_prefix 1
-               (game_of_trace_seeded dsdp_weight_names
-                  (dsdp_alice_obs_leak_S_seeded card_msg card_renc))) 1).
-Proof.
-rewrite /real_game /game.
-eapply dsdp_derived_game_advantage_le_leak_S.
-- exact: chcipher_of_cipherK.
-- exact: chmsg_of_msgK.
-- exact: guess_reduction_valid.
-- exact: predictor_locs_disj.
-- exact: Hore.
-- exact: Hoze.
-Qed.
-
-(* dsdp_alice_guess_V2_real_le — Alice's probability of guessing the challenge
-   secret V2 from her cipher view and the leaked scalar-product output S is at
-   most 1/card_msg plus the sum of the IND-CPA real-or-zero advantages of the
-   two site reductions: the fiber bound 1/card_msg at the all-zero endpoint,
-   plus the cost of moving to the real game.
-   Naming: subject-prefixed [dsdp_alice_guess], with [real] naming the real
-   endpoint game the probability is measured on and [_le] the upper bound.
-   [3-party] *)
-Theorem dsdp_alice_guess_V2_real_le
-    (cipher_of_chcipher : t_cipher -> cipher AHE)
-    (chcipher_of_cipherK : cancel chcipher_of_cipher cipher_of_chcipher)
-    (Hore : fseparate (locs predictor)
-       (locs (oracle_real_pkg renc_card rand_of_renc msg_of_chmsg
-                chcipher_of_cipher pkey_of_party)))
-    (Hoze : fseparate (locs predictor)
-       (locs (oracle_zero_pkg renc_card rand_of_renc t_msg
-                chcipher_of_cipher pkey_of_party)))
-    (Hinj : injective (fun v : plain AHE => u3 * v)) :
-  guess_sdistr_success_real renc_card rand_of_renc chmsg_of_msg
-    chcipher_of_cipher pkey_of_party msg_of_idx rand0 seed predictor
-    <= card_msg%:R^-1
-       + (indcpa_epsilon AHE Renc card_renc renc_card rand_of_renc t_msg
-            t_cipher msg_of_chmsg chcipher_of_cipher pkey_of_party
-            (guess_reduction ∘ denote_game_shim_leak_S renc_card rand_of_renc
-               chmsg_of_msg chcipher_of_cipher cipher_of_chcipher pkey_of_party
-               msg_of_idx rand0 seed
-               (zero_hop_prefix 0
-                  (game_of_trace_seeded dsdp_weight_names
-                     (dsdp_alice_obs_leak_S_seeded card_msg card_renc))) 0)
-          + indcpa_epsilon AHE Renc card_renc renc_card rand_of_renc t_msg
-              t_cipher msg_of_chmsg chcipher_of_cipher pkey_of_party
-              (guess_reduction ∘ denote_game_shim_leak_S renc_card rand_of_renc
-                 chmsg_of_msg chcipher_of_cipher cipher_of_chcipher
-                 pkey_of_party msg_of_idx rand0 seed
-                 (zero_hop_prefix 1
-                    (game_of_trace_seeded dsdp_weight_names
-                       (dsdp_alice_obs_leak_S_seeded card_msg card_renc))) 1)).
-Proof.
-have Hzero : guess_sdistr_success renc_card rand_of_renc chmsg_of_msg
-    chcipher_of_cipher pkey_of_party msg_of_idx rand0 seed predictor
-    <= card_msg%:R^-1
-  by exact: (dsdp_alice_guess_V2_zero_le Hinj).
-apply: (@le_trans _ _ (guess_sdistr_success renc_card rand_of_renc chmsg_of_msg
-    chcipher_of_cipher pkey_of_party msg_of_idx rand0 seed predictor
-    + (indcpa_epsilon AHE Renc card_renc renc_card rand_of_renc t_msg t_cipher
-         msg_of_chmsg chcipher_of_cipher pkey_of_party
-         (guess_reduction ∘ denote_game_shim_leak_S renc_card rand_of_renc
-            chmsg_of_msg chcipher_of_cipher cipher_of_chcipher pkey_of_party
-            msg_of_idx rand0 seed
-            (zero_hop_prefix 0
-               (game_of_trace_seeded dsdp_weight_names
-                  (dsdp_alice_obs_leak_S_seeded card_msg card_renc))) 0)
-       + indcpa_epsilon AHE Renc card_renc renc_card rand_of_renc t_msg t_cipher
-           msg_of_chmsg chcipher_of_cipher pkey_of_party
-           (guess_reduction ∘ denote_game_shim_leak_S renc_card rand_of_renc
-              chmsg_of_msg chcipher_of_cipher cipher_of_chcipher pkey_of_party
-              msg_of_idx rand0 seed
-              (zero_hop_prefix 1
-                 (game_of_trace_seeded dsdp_weight_names
-                    (dsdp_alice_obs_leak_S_seeded card_msg card_renc))) 1)))).
-- rewrite addrC -lerBlDr.
-  apply: (le_trans (ler_norm _)).
-  rewrite guess_advantage_eq.
-  exact: (dsdp_alice_guess_advantage_le chcipher_of_cipherK Hore Hoze).
-- by rewrite lerD2r.
-Qed.
-
-(* dsdp_alice_unpredictability_entropy_ge — the entropy lower bound
-   [log card_msg - log (1 + card_msg * (eps_0 + eps_1)) <= Hunp_leak_S], where
-   [eps_0] and [eps_1] are the IND-CPA real-or-zero advantages of the two site
-   reductions: the predictor's unpredictability entropy on the output-exposing
-   real game is at least the closed-form bound, approaching [log card_msg] as
-   the two reduction advantages vanish.
-   Naming: subject-prefixed [dsdp_alice], with [unpredictability_entropy]
-   naming [Hunp_leak_S] and [_ge] the lower bound.  [3-party] *)
-Theorem dsdp_alice_unpredictability_entropy_ge
-    (cipher_of_chcipher : t_cipher -> cipher AHE)
-    (chcipher_of_cipherK : cancel chcipher_of_cipher cipher_of_chcipher)
-    (Hore : fseparate (locs predictor)
-       (locs (oracle_real_pkg renc_card rand_of_renc msg_of_chmsg
-                chcipher_of_cipher pkey_of_party)))
-    (Hoze : fseparate (locs predictor)
-       (locs (oracle_zero_pkg renc_card rand_of_renc t_msg
-                chcipher_of_cipher pkey_of_party)))
-    (Hinj : injective (fun v : plain AHE => u3 * v))
-    (Hpos : (0 < guess_sdistr_success_real renc_card rand_of_renc chmsg_of_msg
-                chcipher_of_cipher pkey_of_party msg_of_idx rand0 seed
-                predictor)%R) :
-  (log card_msg%:R
-     - log (1 + card_msg%:R
-              * (indcpa_epsilon AHE Renc card_renc renc_card rand_of_renc t_msg
-                   t_cipher msg_of_chmsg chcipher_of_cipher pkey_of_party
-                   (guess_reduction ∘ denote_game_shim_leak_S renc_card
-                      rand_of_renc chmsg_of_msg chcipher_of_cipher
-                      cipher_of_chcipher pkey_of_party msg_of_idx rand0 seed
-                      (zero_hop_prefix 0
-                         (game_of_trace_seeded dsdp_weight_names
-                            (dsdp_alice_obs_leak_S_seeded card_msg card_renc)))
-                      0)
-                 + indcpa_epsilon AHE Renc card_renc renc_card rand_of_renc
-                     t_msg t_cipher msg_of_chmsg chcipher_of_cipher
-                     pkey_of_party
-                     (guess_reduction ∘ denote_game_shim_leak_S renc_card
-                        rand_of_renc chmsg_of_msg chcipher_of_cipher
-                        cipher_of_chcipher pkey_of_party msg_of_idx rand0 seed
-                        (zero_hop_prefix 1
-                           (game_of_trace_seeded dsdp_weight_names
-                              (dsdp_alice_obs_leak_S_seeded card_msg
-                                 card_renc)))
-                        1)))
-     <= Hunp_leak_S renc_card rand_of_renc chmsg_of_msg chcipher_of_cipher
-          pkey_of_party msg_of_idx rand0 seed predictor)%R.
-Proof.
-rewrite /Hunp_leak_S.
-set eps_sum := (X in card_msg%:R * X).
-have Heps_ge0 : (0 <= eps_sum)%R
-  by rewrite /eps_sum; exact: addr_ge0 (normr_ge0 _) (normr_ge0 _).
-have Hcard_pos : (0 < card_msg%:R :> R)%R
-  by have [gm _ _] := Hmsg_bij; rewrite ltr0n -[card_msg]card_ord;
-     apply/card_gt0P; exists (gm 0%R).
-have Hnum_pos : (0 < 1 + card_msg%:R * eps_sum :> R)%R
-  by exact: ltr_pwDl ltr01 (mulr_ge0 (ler0n _ _) Heps_ge0).
-rewrite lerNr opprB -logDiv // ler_log ?posrE ?divr_gt0 //
-  mulrDl mul1r mulrAC (divff (lt0r_neq0 Hcard_pos)) mul1r /eps_sum.
-exact: (dsdp_alice_guess_V2_real_le chcipher_of_cipherK Hore Hoze Hinj).
-Qed.
-
-End dsdp_alice_guess.
-
-Section dsdp_alice_simulation.
-(* cloned context of Section dsdp_alice_guess, matching the simulation axis
-   section of dsdp_simulator.v. *)
-Variables (AHE : AHEncType) (Renc : finType) (card_renc : nat)
-  (renc_card : #|Renc| = card_renc) (rand_of_renc : Renc -> rand AHE)
-  (t_msg t_cipher : choice_type)
-  (chmsg_of_msg : plain AHE -> t_msg)
-  (chcipher_of_cipher : cipher AHE -> t_cipher)
-  (pkey_of_party : party_id -> pub_key AHE)
-  (card_msg : nat) (msg_of_idx : 'I_card_msg -> plain AHE) (rand0 : rand AHE).
-Variable seed : denv AHE.
-Variable msg_of_chmsg : t_msg -> plain AHE.
-Hypothesis chmsg_of_msgK : cancel chmsg_of_msg msg_of_chmsg.
-Hypothesis card_renc_neq : card_renc != card_msg.
-
-(* dsdp_alice_simulation_advantage_le — the output-exposing real game and the
-   simulator composed with the ideal functionality are distinguished with
-   advantage at most the sum of the IND-CPA real-or-zero advantages of the
-   adversary's two site reductions.  Average-case scope: the honest inputs v2,
-   v3 are sampled uniformly in-game, by the real game on one side and the ideal
-   functionality on the other.
-   Naming: subject-prefixed [dsdp_alice], with [simulation_advantage] naming
-   the AdvantageE and [_le] the upper bound.  [3-party] *)
-Theorem dsdp_alice_simulation_advantage_le
-    (cipher_of_chcipher : t_cipher -> cipher AHE)
-    (chcipher_of_cipherK : cancel chcipher_of_cipher cipher_of_chcipher)
-    (LA : Locations) (A : raw_package)
-    (A_valid : ValidPackage LA (game_iface_leak_S t_msg t_cipher) A_export A)
-    (A_disj_state : fseparate LA (protocol_state t_msg))
-    (A_disj_ore : fseparate LA
-       (locs (oracle_real_pkg renc_card rand_of_renc msg_of_chmsg
-                chcipher_of_cipher pkey_of_party)))
-    (A_disj_oze : fseparate LA
-       (locs (oracle_zero_pkg renc_card rand_of_renc t_msg
-                chcipher_of_cipher pkey_of_party))) :
-  AdvantageE
-    (real_game_leak_S renc_card rand_of_renc chmsg_of_msg chcipher_of_cipher
-       pkey_of_party msg_of_idx rand0 seed)
-    (dsdp_simulator_pkg renc_card rand_of_renc t_msg
-       chcipher_of_cipher pkey_of_party msg_of_idx seed
-     ∘ dsdp_ideal_pkg chmsg_of_msg msg_of_idx seed)
-    A
-    <= indcpa_epsilon AHE Renc card_renc renc_card rand_of_renc t_msg t_cipher
-         msg_of_chmsg chcipher_of_cipher pkey_of_party
-         (A ∘ denote_game_shim_leak_S renc_card rand_of_renc chmsg_of_msg
-                chcipher_of_cipher cipher_of_chcipher pkey_of_party
-                msg_of_idx rand0 seed
-                (zero_hop_prefix 0
-                   (game_of_trace_seeded dsdp_weight_names
-                      (dsdp_alice_obs_leak_S_seeded card_msg card_renc))) 0)
-     + indcpa_epsilon AHE Renc card_renc renc_card rand_of_renc t_msg t_cipher
-         msg_of_chmsg chcipher_of_cipher pkey_of_party
-         (A ∘ denote_game_shim_leak_S renc_card rand_of_renc chmsg_of_msg
-                chcipher_of_cipher cipher_of_chcipher pkey_of_party
-                msg_of_idx rand0 seed
-                (zero_hop_prefix 1
-                   (game_of_trace_seeded dsdp_weight_names
-                      (dsdp_alice_obs_leak_S_seeded card_msg card_renc))) 1).
-Proof.
-apply: (le_trans (Advantage_triangle _ _
-  (zero_game_leak_S renc_card rand_of_renc chmsg_of_msg chcipher_of_cipher
-     pkey_of_party msg_of_idx rand0 seed) A)).
-have HY : AdvantageE
-    (zero_game_leak_S renc_card rand_of_renc chmsg_of_msg chcipher_of_cipher
-       pkey_of_party msg_of_idx rand0 seed)
-    (dsdp_simulator_pkg renc_card rand_of_renc t_msg chcipher_of_cipher
-       pkey_of_party msg_of_idx seed
-     ∘ dsdp_ideal_pkg chmsg_of_msg msg_of_idx seed)
-    A = 0
-  by exact: (dsdp_simulator_factorization card_renc_neq A_valid A_disj_state
-    A_disj_state).
-rewrite HY addr0.
-eapply dsdp_derived_game_advantage_le_leak_S.
-- exact: chcipher_of_cipherK.
-- exact: chmsg_of_msgK.
-- exact: A_valid.
-- exact: A_disj_state.
-- exact: A_disj_ore.
-- exact: A_disj_oze.
-Qed.
-
-End dsdp_alice_simulation.
