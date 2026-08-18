@@ -182,6 +182,20 @@ Require Import dsdp_program dsdp_entropy.
 (*                              as the two public keys it encrypts under      *)
 (* dsdp_alice_simulator_pubE == any party-indexed key table instantiates the  *)
 (*                              public-key simulator to dsdp_alice_simulator  *)
+(*        enc_of_renc pk v r == the encryption of v under pk at coin index r  *)
+(*     card_enc_img_gt0 pk v == the reachable encryptions of v under pk are   *)
+(*                              nonempty                                      *)
+(* enc_fdist_uniform_img pk v ==                                              *)
+(*                              the challenge law is uniform over the         *)
+(*                              reachable encryptions of v under pk           *)
+(* enc_fdist_uniform_img_fiber ==                                             *)
+(*                              equal fiber cardinalities over the image      *)
+(*                              establish that property                       *)
+(* enc_fdist_uniform_img_inj == injectivity of the coin-index encryption map  *)
+(*                              establishes that property                     *)
+(*    enc_fdist_uniform_imgE == under that property each reachable            *)
+(*                              ciphertext carries mass one over the number   *)
+(*                              of reachable encryptions                      *)
 (* ```                                                                        *)
 (*                                                                            *)
 (* Scope. The statements are average-case over the honest inputs V2 and V3,   *)
@@ -1335,3 +1349,74 @@ Lemma dsdp_alice_simulator_pubE (pkey_of_party : party_id -> pub_key AHE)
 Proof. by []. Qed.
 
 End dsdp_alice_simulator_pub_sec.
+
+Section dsdp_alice_enc_uniform_img_sec.
+Context {R : realType}.
+Variables (AHE : AHEncType) (Renc : finType) (index_renc : nat).
+Hypothesis card_renc : #|Renc| = index_renc.+1.
+Variable rand_of_renc : Renc -> rand AHE.
+
+(* The encryption of v under pk as a function of the coin index.
+   Naming: the [_of_] connective names the source the map reads, after the
+   repository's total-conversion family. *)
+Definition enc_of_renc (pk : pub_key AHE) (v : plain AHE) :
+    Renc -> cipher AHE :=
+  fun r => enc pk v (rand_of_renc r).
+
+(* The reachable encryptions are nonempty, since the coin-index type is. *)
+Lemma card_enc_img_gt0 (pk : pub_key AHE) (v : plain AHE) :
+  (0 < #|enc_of_renc pk v @: [set: Renc]|)%N.
+Proof.
+have /card_gt0P[r0 _] : (0 < #|Renc|)%N by rewrite card_renc.
+apply/card_gt0P; exists (enc_of_renc pk v r0).
+by apply/imsetP; exists r0; rewrite ?inE.
+Qed.
+
+(* The named property: the challenge law is uniform over the reachable
+   encryptions of v under pk.  It is a property of the scheme map, consumed
+   only by its own specialization below, never by a hop theorem.
+   Naming: [img] marks the image the uniformity ranges over, after
+   [fdistmap_uniform_supp_img] of extra_proba.v. *)
+Definition enc_fdist_uniform_img (pk : pub_key AHE) (v : plain AHE) : Prop :=
+  enc_fdist card_renc rand_of_renc pk v
+  = fdist_uniform_supp R (card_enc_img_gt0 pk v).
+
+(* Equal fiber cardinalities over the image suffice.
+   Naming: [_fiber] marks the sufficient condition the lemma consumes. *)
+Lemma enc_fdist_uniform_img_fiber (pk : pub_key AHE) (v : plain AHE) :
+  (forall c c', c \in enc_of_renc pk v @: [set: Renc] ->
+                c' \in enc_of_renc pk v @: [set: Renc] ->
+     #|[set r | enc_of_renc pk v r == c]|
+     = #|[set r | enc_of_renc pk v r == c']|) ->
+  enc_fdist_uniform_img pk v.
+Proof.
+move=> Hfib.
+exact: (fdistmap_uniform_supp_img card_renc (card_enc_img_gt0 pk v) Hfib).
+Qed.
+
+(* Injectivity of the composed encryption map suffices.
+   Naming: [_inj] marks the sufficient condition the lemma consumes. *)
+Lemma enc_fdist_uniform_img_inj (pk : pub_key AHE) (v : plain AHE) :
+  injective (enc_of_renc pk v) -> enc_fdist_uniform_img pk v.
+Proof.
+move=> Hinj; apply: enc_fdist_uniform_img_fiber => c c' Hc Hc'.
+have fib1 : forall w, w \in enc_of_renc pk v @: [set: Renc] ->
+    #|[set r | enc_of_renc pk v r == w]| = 1%N.
+  move=> w /imsetP[r0 _ ->].
+  have -> : [set r | enc_of_renc pk v r == enc_of_renc pk v r0] = [set r0].
+    by apply/setP => r; rewrite !inE (inj_eq Hinj).
+  by rewrite cards1.
+by rewrite !fib1.
+Qed.
+
+(* Under the named property, each reachable ciphertext carries mass one over
+   the number of reachable encryptions.
+   Naming: the [E] suffix marks the mass equation the property yields. *)
+Lemma enc_fdist_uniform_imgE (pk : pub_key AHE) (v : plain AHE) :
+  enc_fdist_uniform_img pk v ->
+  forall c, c \in enc_of_renc pk v @: [set: Renc] ->
+  enc_fdist (R:=R) card_renc rand_of_renc pk v c
+  = #|enc_of_renc pk v @: [set: Renc]|%:R^-1.
+Proof. by move=> H c Hc; rewrite H fdist_uniform_supp_in. Qed.
+
+End dsdp_alice_enc_uniform_img_sec.
