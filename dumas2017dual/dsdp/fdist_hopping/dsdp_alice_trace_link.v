@@ -157,6 +157,14 @@ Require Import dsdp_alice_fdist_secrecy.
 (*                              conditioning on Alice's view leaves the       *)
 (*                              same uncertainty about Bob's input as         *)
 (*                              conditioning on her hopping tuple             *)
+(* alice_trace_ideal_test D == the Boolean ideal trace experiment: sample     *)
+(*                              the honest inputs, run the trace simulator    *)
+(*                              on their leaked output, apply the test        *)
+(*   alice_trace_ideal_testE == that experiment is the pushforward of the     *)
+(*                              ideal trace joint law along the test          *)
+(* dsdp_alice_trace_sim_advantage_fdist_test_le ==                            *)
+(*                              the simulator-advantage bound with its ideal  *)
+(*                              side written through the named experiment     *)
 (* ```                                                                        *)
 (*                                                                            *)
 (* DI and the parameter-pinning abbreviations that Section                    *)
@@ -1060,3 +1068,84 @@ by rewrite [in LHS]alice_view_of_hop_tupleE centropy_RV_contraction.
 Qed.
 
 End dsdp_alice_trace_centropy.
+
+Section dsdp_alice_trace_ideal_test_sec.
+Context {R : realType}.
+Variables (AHE : AHEncType) (Renc : finType) (index_renc : nat).
+Hypothesis card_renc : #|Renc| = index_renc.+1.
+Variable rand_of_renc : Renc -> rand AHE.
+Variables (v1 u1 u2 u3 : plain AHE).
+Variables (dk_a dk_b dk_c : priv_key AHE).
+Variables (w_rb2 w_rc2 : Renc).
+
+(* Each abbreviation pins, under the name it abbreviates, the parameters
+   discharged by the sections above, as Section dsdp_alice_trace_centropy
+   does. *)
+Local Notation dsdp_trace_dataT := (dsdp_trace_dataT AHE).
+Local Notation pkey_of_dk := (pkey_of_dk dk_a dk_b dk_c).
+Local Notation V2 := (V2 (R:=R) (AHE:=AHE) card_renc).
+Local Notation V3 := (V3 (R:=R) (AHE:=AHE) card_renc).
+Local Notation AliceTrace :=
+  (AliceTrace (R:=R) card_renc rand_of_renc v1 u1 u2 u3
+     dk_a dk_b dk_c w_rb2 w_rc2).
+Local Notation dsdp_alice_trace_simulator :=
+  (dsdp_alice_trace_simulator (R:=R) card_renc rand_of_renc
+     v1 u1 u2 u3 dk_a dk_b dk_c w_rc2).
+Local Notation alice_trace_ideal_joint :=
+  (alice_trace_ideal_joint (R:=R) card_renc rand_of_renc
+     v1 u1 u2 u3 dk_a dk_b dk_c w_rc2).
+Local Notation dsdp_trace_of_hop_tuple :=
+  (dsdp_trace_of_hop_tuple rand_of_renc v1 u1 u2 u3 dk_a dk_b dk_c w_rc2).
+Local Notation indcpa_fdist_epsilon :=
+  (indcpa_fdist_epsilon (R:=R) (AHE:=AHE) card_renc rand_of_renc).
+Local Notation hop0_reduction :=
+  (hop0_reduction (R:=R) (AHE:=AHE) card_renc rand_of_renc
+     pkey_of_dk v1 u1 u2 u3).
+Local Notation hop1_reduction :=
+  (hop1_reduction (R:=R) (AHE:=AHE) card_renc rand_of_renc
+     pkey_of_dk v1 u1 u2 u3).
+
+(* The Boolean ideal trace experiment: sample the honest inputs, run the
+   trace simulator on their leaked output, and apply the test.
+   Naming: after [alice_trace_ideal_joint], with [test] marking the Boolean
+   experiment a distinguisher plays against that law. *)
+Definition alice_trace_ideal_test
+    (D : plain AHE * plain AHE * 15.-bseq dsdp_trace_dataT -> bool) :
+    R.-fdist bool :=
+  `p_ [% V2, V3] >>= (fun vv =>
+    dsdp_alice_trace_simulator (dsdp_output v1 u1 u2 u3 vv.1 vv.2)
+      >>= (fun tr => fdist1 (D (vv.1, vv.2, tr)))).
+
+(* The experiment is the pushforward of the ideal joint law along the
+   test.
+   Naming: the [E] suffix marks the equation, after [alice_trace_tupleE]. *)
+Lemma alice_trace_ideal_testE
+    (D : plain AHE * plain AHE * 15.-bseq dsdp_trace_dataT -> bool) :
+  alice_trace_ideal_test D = fdistmap D alice_trace_ideal_joint.
+Proof.
+rewrite /alice_trace_ideal_test /alice_trace_ideal_joint fdistmap_bind.
+congr (_ >>= _); apply/boolp.funext => vv.
+by rewrite fdistmap_comp.
+Qed.
+
+(* The simulator-advantage bound with its ideal side written through the
+   named experiment.
+   Naming: extends [dsdp_alice_trace_sim_advantage_fdist_le] with the [test]
+   variant token before [le]; kept long to preserve the family grouping. *)
+Corollary dsdp_alice_trace_sim_advantage_fdist_test_le
+    (D : plain AHE * plain AHE * 15.-bseq dsdp_trace_dataT -> bool) :
+  `| Pr (`p_ [% V2, V3, AliceTrace]) [set x | D x]
+     - Pr (alice_trace_ideal_test D) [set true] |
+  <= indcpa_fdist_epsilon (pkey_of_dk Bob)
+       (hop0_reduction
+         (fun x => D (x.1.1, x.1.2, dsdp_trace_of_hop_tuple x.2)))
+     + indcpa_fdist_epsilon (pkey_of_dk Charlie)
+       (hop1_reduction
+         (fun x => D (x.1.1, x.1.2, dsdp_trace_of_hop_tuple x.2))).
+Proof.
+rewrite alice_trace_ideal_testE.
+exact: (dsdp_alice_trace_sim_advantage_fdist_le card_renc rand_of_renc
+          v1 u1 u2 u3 dk_a dk_b dk_c w_rb2 w_rc2 D).
+Qed.
+
+End dsdp_alice_trace_ideal_test_sec.
