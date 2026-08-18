@@ -44,11 +44,15 @@ Variables (AHE : AHEncType) (Renc : finType) (card_renc : nat)
   (card_msg : nat) (msg_of_idx : 'I_card_msg -> plain AHE) (rand0 : rand AHE).
 Variable seed : denv AHE.
 Hypothesis card_renc_neq : card_renc != card_msg.
-Variables (w_v1 w_u1 w_u2 w_u3 : plain AHE).
-Hypothesis seed_wu1 : as_plain (de_val_nth seed 0) = w_u1.
-Hypothesis seed_wu2 : as_plain (de_val_nth seed 1) = w_u2.
-Hypothesis seed_wu3 : as_plain (de_val_nth seed 2) = w_u3.
-Hypothesis seed_wv1 : as_plain (de_val_nth seed 3) = w_v1.
+(* The four protocol weights Alice holds (seeded constants). *)
+Variables (v1 u1 u2 u3 : plain AHE).
+(* The seed's four value slots 0..3 are the protocol weights u1, u2, u3,
+   v1, so the run's leaked output (computed from the seed at the
+   [output_term] de Bruijn indices) coincides with [Sout]. *)
+Hypothesis seed_u1 : as_plain (de_val_nth seed 0) = u1.
+Hypothesis seed_u2 : as_plain (de_val_nth seed 1) = u2.
+Hypothesis seed_u3 : as_plain (de_val_nth seed 2) = u3.
+Hypothesis seed_v1 : as_plain (de_val_nth seed 3) = v1.
 
 Local Notation "'msg'" := t_msg (in custom pack_type at level 2).
 Local Notation "'ciphers'" := (cipher_list t_cipher) (in custom pack_type at level 2).
@@ -139,10 +143,10 @@ Definition gen_literal_zero : raw_code (cipher_list t_cipher) :=
    #put (V_2_cell t_msg) := Some (chmsg_of_msg m[ x ]) ;;
    ir  ← sample uniform card_renc ;;
    ir0 ← sample uniform card_renc ;;
-   let Sout := dsdp_output w_v1 w_u1 w_u2 w_u3 m[ x ] m[ x0 ] in
+   let Sout := dsdp_output v1 u1 u2 u3 m[ x ] m[ x0 ] in
    #put (Sout_cell t_msg) := Some (chmsg_of_msg Sout) ;;
-   ret ([:: <[ (E<Bob, ir>(| 0%:R |) ^h w_u2) *h E<Bob, x5>(| m[ x1 ] |) ]> ;
-            <[ (E<Charlie, ir0>(| 0%:R |) ^h w_u3) *h E<Charlie, x6>(| m[ x2 ] |) ]> ;
+   ret ([:: <[ (E<Bob, ir>(| 0%:R |) ^h u2) *h E<Bob, x5>(| m[ x1 ] |) ]> ;
+            <[ (E<Charlie, ir0>(| 0%:R |) ^h u3) *h E<Charlie, x6>(| m[ x2 ] |) ]> ;
             <[ E<Bob, ir>(| 0%:R |) ]> ;
             <[ E<Charlie, ir0>(| 0%:R |) ]> ] : cipher_list t_cipher)).
 
@@ -158,10 +162,10 @@ Definition gen_literal_real : raw_code (cipher_list t_cipher) :=
    #put (V_2_cell t_msg) := Some (chmsg_of_msg m[ x ]) ;;
    ir  ← sample uniform card_renc ;;
    ir0 ← sample uniform card_renc ;;
-   let Sout := dsdp_output w_v1 w_u1 w_u2 w_u3 m[ x ] m[ x0 ] in
+   let Sout := dsdp_output v1 u1 u2 u3 m[ x ] m[ x0 ] in
    #put (Sout_cell t_msg) := Some (chmsg_of_msg Sout) ;;
-   ret ([:: <[ (E<Bob, ir>(| m[ x ] |) ^h w_u2) *h E<Bob, x5>(| m[ x1 ] |) ]> ;
-            <[ (E<Charlie, ir0>(| m[ x0 ] |) ^h w_u3) *h E<Charlie, x6>(| m[ x2 ] |) ]> ;
+   ret ([:: <[ (E<Bob, ir>(| m[ x ] |) ^h u2) *h E<Bob, x5>(| m[ x1 ] |) ]> ;
+            <[ (E<Charlie, ir0>(| m[ x0 ] |) ^h u3) *h E<Charlie, x6>(| m[ x2 ] |) ]> ;
             <[ E<Bob, ir>(| m[ x ] |) ]> ;
             <[ E<Charlie, ir0>(| m[ x0 ] |) ]> ] : cipher_list t_cipher)).
 
@@ -180,11 +184,11 @@ rewrite denote_run_put; congr putr.
 rewrite denote_run_enc_hop; congr sampler; apply: boolp.funext => ir.
 rewrite denote_run_enc_hop; congr sampler; apply: boolp.funext => ir0.
 rewrite denote_run_let denote_run_let denote_run_put_output; congr putr.
-1: by rewrite denote_output_termE seed_wv1 seed_wu1 seed_wu2 seed_wu3.
+1: by rewrite denote_output_termE seed_v1 seed_u1 seed_u2 seed_u3.
 rewrite denote_run_ret /=.
 rewrite /de_val_nth /de_rand_nth /push_val /push_rand /de_val /de_rand /=.
 rewrite -![nth (Gplain 0) (de_val seed) _]/(de_val_nth seed _).
-by rewrite seed_wu2 seed_wu3.
+by rewrite seed_u2 seed_u3.
 Qed.
 
 (* The legible real program equals the generator's denotation of the seeded real
@@ -202,11 +206,11 @@ rewrite denote_run_put; congr putr.
 rewrite denote_run_enc_hop; congr sampler; apply: boolp.funext => ir.
 rewrite denote_run_enc_hop; congr sampler; apply: boolp.funext => ir0.
 rewrite denote_run_let denote_run_let denote_run_put_output; congr putr.
-1: by rewrite denote_output_termE seed_wv1 seed_wu1 seed_wu2 seed_wu3.
+1: by rewrite denote_output_termE seed_v1 seed_u1 seed_u2 seed_u3.
 rewrite denote_run_ret /=.
 rewrite /de_val_nth /de_rand_nth /push_val /push_rand /de_val /de_rand /=.
 rewrite -![nth (Gplain 0) (de_val seed) _]/(de_val_nth seed _).
-by rewrite seed_wu2 seed_wu3.
+by rewrite seed_u2 seed_u3.
 Qed.
 
 End dsdp_game_gen_literal.

@@ -815,15 +815,15 @@ Qed.
 Local Open Scope proba_scope.
 
 (* The four protocol weights Alice holds (seeded constants). *)
-Variables (w_v1 w_u1 w_u2 w_u3 : plain AHE).
+Variables (v1 u1 u2 u3 : plain AHE).
 
-(* seed_weights — the seed's four value slots 0..3 are the protocol weights
-   w_u1, w_u2, w_u3, w_v1, so the run's leaked output (computed from the seed at
+(* The seed's four value slots 0..3 are the protocol weights
+   u1, u2, u3, v1, so the run's leaked output (computed from the seed at
    the [output_term] de Bruijn indices) coincides with [Sout]. *)
-Hypothesis seed_wu1 : as_plain (de_val_nth seed 0) = w_u1.
-Hypothesis seed_wu2 : as_plain (de_val_nth seed 1) = w_u2.
-Hypothesis seed_wu3 : as_plain (de_val_nth seed 2) = w_u3.
-Hypothesis seed_wv1 : as_plain (de_val_nth seed 3) = w_v1.
+Hypothesis seed_u1 : as_plain (de_val_nth seed 0) = u1.
+Hypothesis seed_u2 : as_plain (de_val_nth seed 1) = u2.
+Hypothesis seed_u3 : as_plain (de_val_nth seed 2) = u3.
+Hypothesis seed_v1 : as_plain (de_val_nth seed 3) = v1.
 
 (* Projection random variables from the rich carrier (named as in
    dsdp_entropy_ring); inputs are constants, the secrets and guess cross to
@@ -834,10 +834,10 @@ Definition V2 : {RV guess_sample_fdist -> plain AHE} :=
   fun t => fin_to_plain t.1.1.1.1.2.
 Definition V3 : {RV guess_sample_fdist -> plain AHE} :=
   fun t => fin_to_plain t.1.1.1.2.
-Definition V1 : {RV guess_sample_fdist -> plain AHE} := const_RV _ w_v1.
-Definition U1 : {RV guess_sample_fdist -> plain AHE} := const_RV _ w_u1.
-Definition U2 : {RV guess_sample_fdist -> plain AHE} := const_RV _ w_u2.
-Definition U3 : {RV guess_sample_fdist -> plain AHE} := const_RV _ w_u3.
+Definition V1 : {RV guess_sample_fdist -> plain AHE} := const_RV _ v1.
+Definition U1 : {RV guess_sample_fdist -> plain AHE} := const_RV _ u1.
+Definition U2 : {RV guess_sample_fdist -> plain AHE} := const_RV _ u2.
+Definition U3 : {RV guess_sample_fdist -> plain AHE} := const_RV _ u3.
 Definition ir1_rv : {RV guess_sample_fdist -> option 'I_card_renc} :=
   fun t => t.1.2.
 Definition ir2_rv : {RV guess_sample_fdist -> option 'I_card_renc} :=
@@ -845,7 +845,7 @@ Definition ir2_rv : {RV guess_sample_fdist -> option 'I_card_renc} :=
 
 (* Sout — the leaked output as the scalar product of the inputs and secrets. *)
 Definition Sout : {RV guess_sample_fdist -> plain AHE} :=
-  fun t => dsdp_output w_v1 w_u1 w_u2 w_u3 (V2 t) (V3 t).
+  fun t => dsdp_output v1 u1 u2 u3 (V2 t) (V3 t).
 
 (* guess_S_determined — the leaked output is the scalar-product spec of the
    inputs and secrets; the fiber-side instance of [S_determined]. *)
@@ -883,7 +883,7 @@ Lemma guess_run_cells (a b : 'I_card_msg) z :
        output_term (GC_ret [:: HE_var 1; HE_var 0; HE_var 3;
        HE_var 2])))))))))))) emptym) ->
   get_heap z.2 (Sout_cell t_msg)
-    = Some (chmsg_of_msg (dsdp_output w_v1 w_u1 w_u2 w_u3
+    = Some (chmsg_of_msg (dsdp_output v1 u1 u2 u3
                             (msg_of_idx a) (msg_of_idx b)))
   /\ get_heap z.2 (V_2_cell t_msg) = Some (chmsg_of_msg (msg_of_idx a))
   /\ z.1.1.2.1.2 = msg_of_idx b.
@@ -900,7 +900,7 @@ move: Hin; rewrite denote_run_caps_let denote_run_caps_let denote_run_caps_put_o
   Pr_code_ret dlet_unit_ext Pr_code_ret => /distr.in_dunit [= -> ->].
 split; first by rewrite get_set_heap_eq
   !(de_val_nth_pushS, de_val_nth_pushrand, de_val_nth_push0)
-  seed_wu1 seed_wv1 seed_wu2 seed_wu3 /dsdp_output.
+  seed_u1 seed_v1 seed_u2 seed_u3 /dsdp_output.
 split; first by rewrite get_set_heap_neq// get_set_heap_eq.
 by [].
 Qed.
@@ -927,7 +927,7 @@ move=> /distr.dinsupp_dlet [[vt h_run] Hrun Hrest].
 have [HS [HV2 Hv3]] := guess_run_cells Hrun.
 rewrite Hv3 in Hrest.
 have HSout_get : Pr_code (denote_Sout_get_body chmsg_of_msg) (vt, h_run).2
-    = distr.dunit (chmsg_of_msg (dsdp_output w_v1 w_u1 w_u2 w_u3
+    = distr.dunit (chmsg_of_msg (dsdp_output v1 u1 u2 u3
                                    (msg_of_idx a) (msg_of_idx b)), (vt, h_run).2)
   by rewrite /denote_Sout_get_body Pr_code_get HS Pr_code_ret.
 move: Hrest; rewrite Pr_code_bind HSout_get dlet_unit_ext.
@@ -964,7 +964,7 @@ Lemma guess_inner_kernel_form (a b : 'I_card_msg) :
       distr.dmargin (fun gh : (t_msg * heap)%type => msg_to_fin gh.1)
         (Pr_code (resolve (pack predictor)
            (id_guess, (chProd (cipher_list t_cipher) t_msg, t_msg))
-           (cl, chmsg_of_msg (dsdp_output w_v1 w_u1 w_u2 w_u3
+           (cl, chmsg_of_msg (dsdp_output v1 u1 u2 u3
                                (msg_of_idx a) (msg_of_idx b)))) emptym))
       (distr.dmargin fst (Pr_code (drun (push_val (Gplain (msg_of_idx b))
          (push_val (Gplain (msg_of_idx a)) seed))
@@ -990,7 +990,7 @@ rewrite HBASE dlet_dmargin_eq.
 apply: eq_in_dlet => x Hx.
 have [HS [HV2 _]] := guess_run_cells Hx.
 have HSout_get : Pr_code (denote_Sout_get_body chmsg_of_msg) x.2
-   = distr.dunit (chmsg_of_msg (dsdp_output w_v1 w_u1 w_u2 w_u3
+   = distr.dunit (chmsg_of_msg (dsdp_output v1 u1 u2 u3
                                   (msg_of_idx a) (msg_of_idx b)), x.2)
   by rewrite /denote_Sout_get_body Pr_code_get HS Pr_code_ret.
 rewrite bind_assoc Pr_code_bind dfst_dlet_commut HSout_get dlet_unit_ext.
@@ -1012,17 +1012,17 @@ under eq_dlet => x0 do rewrite (Hinner x0.1 x0.2).
 rewrite -distr.dmarginE.
 have Hdrop : distr.dmargin fst (Pr_code (resolve (pack predictor)
      (id_guess, (chProd (cipher_list t_cipher) t_msg, t_msg))
-     (x.1.1.1, chmsg_of_msg (dsdp_output w_v1 w_u1 w_u2 w_u3
+     (x.1.1.1, chmsg_of_msg (dsdp_output v1 u1 u2 u3
                               (msg_of_idx a) (msg_of_idx b)))) x.2)
    = distr.dmargin fst (Pr_code (resolve (pack predictor)
      (id_guess, (chProd (cipher_list t_cipher) t_msg, t_msg))
-     (x.1.1.1, chmsg_of_msg (dsdp_output w_v1 w_u1 w_u2 w_u3
+     (x.1.1.1, chmsg_of_msg (dsdp_output v1 u1 u2 u3
                               (msg_of_idx a) (msg_of_idx b)))) emptym)
   by apply: (Pr_fst_agree_locs (resolve_predictor_valid _ _)) => l Hl;
      exact: (run_heap_agree_predictor Hx Hl).
 transitivity (distr.dmargin msg_to_fin (distr.dmargin fst (Pr_code
   (resolve (pack predictor) (id_guess, (chProd (cipher_list t_cipher) t_msg, t_msg))
-     (x.1.1.1, chmsg_of_msg (dsdp_output w_v1 w_u1 w_u2 w_u3
+     (x.1.1.1, chmsg_of_msg (dsdp_output v1 u1 u2 u3
                               (msg_of_idx a) (msg_of_idx b)))) x.2))).
 - by rewrite dmargin_comp.
 - by rewrite Hdrop dmargin_comp.
@@ -1033,8 +1033,8 @@ Qed.
    only through the cipher view (independent of them by view_marginal_indep) and
    through S (equal by hypothesis), so the kernel-form factorisations coincide. *)
 Lemma guess_inner_out (a b a' b' : 'I_card_msg) :
-  dsdp_output w_v1 w_u1 w_u2 w_u3 (msg_of_idx a) (msg_of_idx b)
-  = dsdp_output w_v1 w_u1 w_u2 w_u3 (msg_of_idx a') (msg_of_idx b') ->
+  dsdp_output v1 u1 u2 u3 (msg_of_idx a) (msg_of_idx b)
+  = dsdp_output v1 u1 u2 u3 (msg_of_idx a') (msg_of_idx b') ->
   distr.dmargin (fun t : (Mfin * Mfin * Mfin)%type => t.1.1)
     (Pr_fst (guess_inner a b))
   = distr.dmargin (fun t : (Mfin * Mfin * Mfin)%type => t.1.1)
@@ -1053,7 +1053,7 @@ Lemma guess_inputs_indep :
   guess_sample_fdist |= [% V1, U1, U2, U3] _|_ [% V2, V3].
 Proof.
 have Hc : [% V1, U1, U2, U3]
-    = const_RV guess_sample_fdist (w_v1, w_u1, w_u2, w_u3)
+    = const_RV guess_sample_fdist (v1, u1, u2, u3)
   by apply: boolp.funext => t; rewrite /V1 /U1 /U2 /U3 !const_RVE.
 by rewrite Hc; exact: inde_const_RV.
 Qed.
@@ -1400,11 +1400,11 @@ Set Default Goal Selector "!".
    the inputs and the leaked output S, the secret pair (V2, V3) is uniform on the
    solution fiber, with mass 1/#|plain AHE|. *)
 Lemma guess_VarRV_cond_uniform (s v2 v3 : plain AHE) :
-  injective (fun v : plain AHE => w_u3 * v) ->
-  `Pr[ [% V1, U1, U2, U3, Sout] = (w_v1, w_u1, w_u2, w_u3, s) ] != 0 ->
-  (v2, v3) \in dsdp_fiber_ring w_u1 w_u2 w_u3 w_v1 s ->
+  injective (fun v : plain AHE => u3 * v) ->
+  `Pr[ [% V1, U1, U2, U3, Sout] = (v1, u1, u2, u3, s) ] != 0 ->
+  (v2, v3) \in dsdp_fiber_ring u1 u2 u3 v1 s ->
   `Pr[ [% V2, V3] = (v2, v3)
-     | [% V1, U1, U2, U3, Sout] = (w_v1, w_u1, w_u2, w_u3, s) ]
+     | [% V1, U1, U2, U3, Sout] = (v1, u1, u2, u3, s) ]
   = #|plain AHE|%:R^-1.
 Proof.
 move=> Hinj Hcond Hin.
@@ -1423,15 +1423,15 @@ Qed.
    uniform on the plaintext space: marginalizing V3 out of [guess_VarRV_cond_uniform]
    over the single fiber solution (u3 injective) and dropping the constant inputs. *)
 Lemma guess_V2_cond_Sout (a s : plain AHE) :
-  injective (fun v : plain AHE => w_u3 * v) ->
+  injective (fun v : plain AHE => u3 * v) ->
   `Pr[ Sout = s ] != 0 ->
   `Pr[ V2 = a | Sout = s ] = #|plain AHE|%:R^-1.
 Proof.
 move=> Hinj Hs.
-have Hbij : bijective (fun v : plain AHE => w_u3 * v) by apply: inj_card_bij.
+have Hbij : bijective (fun v : plain AHE => u3 * v) by apply: inj_card_bij.
 case: Hbij => g Hg1 Hg2.
-pose v3star := g (s - w_u1 * w_v1 - w_u2 * a).
-have Hfib : (a, v3star) \in dsdp_fiber_ring w_u1 w_u2 w_u3 w_v1 s
+pose v3star := g (s - u1 * v1 - u2 * a).
+have Hfib : (a, v3star) \in dsdp_fiber_ring u1 u2 u3 v1 s
   by rewrite inE /=; apply/eqP; rewrite /v3star Hg2; ring.
 have Hnum : pfwd1 [% V2, Sout] (a, s)
           = pfwd1 [% [% V2, V3], Sout] ((a, v3star), s).
@@ -1441,28 +1441,28 @@ have Hnum : pfwd1 [% V2, Sout] (a, s)
   move/eqP: Hva => Hva.
   have HsEq : (Sout t == s) = (V3 t == v3star).
   { rewrite /Sout /dsdp_output Hva.
-    have -> : s = w_u1 * w_v1 + w_u2 * a + w_u3 * v3star
+    have -> : s = u1 * v1 + u2 * a + u3 * v3star
       by rewrite /v3star Hg2; ring.
     by rewrite (inj_eq (addrI _)) (inj_eq Hinj). }
   by rewrite HsEq andbb. }
 have Hcst : [% V1, U1, U2, U3]
-    = const_RV guess_sample_fdist (w_v1, w_u1, w_u2, w_u3)
+    = const_RV guess_sample_fdist (v1, u1, u2, u3)
   by apply: boolp.funext => t; rewrite /V1 /U1 /U2 /U3 !const_RVE.
-have HcwN : `Pr[ [% V1, U1, U2, U3] = (w_v1, w_u1, w_u2, w_u3) ] != 0.
+have HcwN : `Pr[ [% V1, U1, U2, U3] = (v1, u1, u2, u3) ] != 0.
 { rewrite Hcst pfwd1E.
-  have -> : finset (preim (const_RV guess_sample_fdist (w_v1, w_u1, w_u2, w_u3))
-                     (pred1 (w_v1, w_u1, w_u2, w_u3))) = [set: _].
+  have -> : finset (preim (const_RV guess_sample_fdist (v1, u1, u2, u3))
+                     (pred1 (v1, u1, u2, u3))) = [set: _].
   { by apply/setP => t; rewrite !inE /= const_RVE eqxx. }
   by rewrite Pr_setT oner_neq0. }
 have Hind : guess_sample_fdist |= [% V1, U1, U2, U3] _|_ [% [% V2, V3], Sout]
   by rewrite Hcst; exact: inde_const_RV.
-have Hcond_eq : `Pr[ [% V1, U1, U2, U3, Sout] = (w_v1, w_u1, w_u2, w_u3, s) ]
+have Hcond_eq : `Pr[ [% V1, U1, U2, U3, Sout] = (v1, u1, u2, u3, s) ]
               = `Pr[ Sout = s ].
 { rewrite Hcst !pfwd1E; congr (Pr _ _).
   by apply/setP => t; rewrite !inE /= !xpair_eqE !eqxx. }
 rewrite cpr_eqE Hnum -cpr_eqE.
 rewrite -(@cpr_eq_drop_indep _ _ guess_sample_fdist _ _ _ [% V2, V3] Sout
-            [% V1, U1, U2, U3] (a, v3star) s (w_v1, w_u1, w_u2, w_u3) HcwN Hind).
+            [% V1, U1, U2, U3] (a, v3star) s (v1, u1, u2, u3) HcwN Hind).
 apply: guess_VarRV_cond_uniform.
 - exact: Hinj.
 - by rewrite Hcond_eq.
@@ -1473,7 +1473,7 @@ Qed.
    secret V2 is matched with probability at most 1/card_msg (the entropy bound,
    carried to the message-index cardinality through the sampling bijection). *)
 Lemma guess_V2_cond_le (a s : plain AHE) :
-  injective (fun v : plain AHE => w_u3 * v) ->
+  injective (fun v : plain AHE => u3 * v) ->
   `Pr[ V2 = a | Sout = s ] <= card_msg%:R^-1.
 Proof.
 move=> Hinj.
@@ -1512,7 +1512,7 @@ Definition guess_kernel (z : plain AHE) : distr.distr R Mfin :=
 Lemma guess_inner_kernel_z (a b : 'I_card_msg) :
   distr.dmargin (fun t : (Mfin * Mfin * Mfin)%type => t.1.1)
     (Pr_fst (guess_inner a b))
-  = guess_kernel (dsdp_output w_v1 w_u1 w_u2 w_u3 (msg_of_idx a) (msg_of_idx b)).
+  = guess_kernel (dsdp_output v1 u1 u2 u3 (msg_of_idx a) (msg_of_idx b)).
 Proof.
 rewrite guess_inner_kernel_form /guess_kernel.
 congr (distr.dlet _ _).
@@ -1528,7 +1528,7 @@ Lemma guess_triple_pr (x y v3 : plain AHE) :
   pfwd1 [% guess_rv, V2, V3] (x, y, v3)
   = (#|plain AHE|%:R^-1) ^+ 2
     * distr.mu (distr.dmargin fin_to_plain
-        (guess_kernel (dsdp_output w_v1 w_u1 w_u2 w_u3 y v3))) x.
+        (guess_kernel (dsdp_output v1 u1 u2 u3 y v3))) x.
 Proof.
 pose proj3 := (fun t : (Mfin * Mfin * Mfin * Mfin * option 'I_card_renc *
                       option 'I_card_renc)%type
@@ -1563,7 +1563,7 @@ have Hab : forall a b : 'I_card_msg,
        (fin_to_plain t.1.1, fin_to_plain t.1.2, fin_to_plain t.2))
       (Pr_fst (guess_inner a b))
     = distr.dmargin (fun g : Mfin => (fin_to_plain g, msg_of_idx a, msg_of_idx b))
-        (guess_kernel (dsdp_output w_v1 w_u1 w_u2 w_u3 (msg_of_idx a) (msg_of_idx b))).
+        (guess_kernel (dsdp_output v1 u1 u2 u3 (msg_of_idx a) (msg_of_idx b))).
   by move=> a b; rewrite [in LHS](guess_inner_v2v3_det a b) dmargin_comp
      guess_inner_kernel_z; congr (distr.dmargin _ _);
      apply: boolp.funext => g; rewrite /= /fin_to_plain !msg_to_finK !chmsg_of_msgK.
@@ -1611,16 +1611,16 @@ Proof.
 apply: (cinde_RV_factor
   (f := fun (y z : plain AHE) =>
      \sum_(v3 : plain AHE)
-        (dsdp_output w_v1 w_u1 w_u2 w_u3 y v3 == z)%:R * pfwd1 [% V2, V3] (y, v3))
+        (dsdp_output v1 u1 u2 u3 y v3 == z)%:R * pfwd1 [% V2, V3] (y, v3))
   (g := fun (z x : plain AHE) => distr.mu (distr.dmargin fin_to_plain (guess_kernel z)) x)).
 move=> x y z.
 have Hmarg : pfwd1 [% guess_rv, V2, Sout] (x, y, z)
-   = \sum_(v3 : plain AHE) (dsdp_output w_v1 w_u1 w_u2 w_u3 y v3 == z)%:R
+   = \sum_(v3 : plain AHE) (dsdp_output v1 u1 u2 u3 y v3 == z)%:R
        * pfwd1 [% guess_rv, V2, V3] (x, y, v3).
   rewrite pfwd1_pairC /= pfwd1_pairA -(marg_snd V3).
   apply: eq_bigr => v3 _.
   rewrite (_ : Sout = (fun ac : (plain AHE * plain AHE)%type =>
-                  dsdp_output w_v1 w_u1 w_u2 w_u3 ac.1 ac.2) `o [% V2, V3]);
+                  dsdp_output v1 u1 u2 u3 ac.1 ac.2) `o [% V2, V3]);
     last by apply: boolp.funext.
   exact: pr_eq_comp_constraint_tail.
 have Huni : forall yy vv3 : plain AHE,
@@ -1629,7 +1629,7 @@ have Huni : forall yy vv3 : plain AHE,
      card_prod natrM invfM -expr2.
 rewrite Hmarg big_distrl /=.
 apply: eq_bigr => v3 _.
-case: (eqVneq (dsdp_output w_v1 w_u1 w_u2 w_u3 y v3) z) => [Heq|Hne].
+case: (eqVneq (dsdp_output v1 u1 u2 u3 y v3) z) => [Heq|Hne].
   by rewrite !mul1r guess_triple_pr Heq -(Huni y v3).
 by rewrite !mul0r.
 Qed.
@@ -1642,7 +1642,7 @@ Set Bullet Behavior "Strict Subproofs".
    ([guess_cinde_V2]), the bridged-pair diagonal mass is bounded by the fiber
    1/card_msg through [cinde_diagonal_bound] and [guess_V2_cond_le]. *)
 Lemma guess_fdist_success_le :
-  injective (fun v : plain AHE => w_u3 * v) ->
+  injective (fun v : plain AHE => u3 * v) ->
   guess_fdist_success <= card_msg%:R^-1.
 Proof.
 move=> Hinj.
