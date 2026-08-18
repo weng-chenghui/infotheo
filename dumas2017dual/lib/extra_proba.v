@@ -637,6 +637,73 @@ rewrite fdistmapE fdist_uniformE (big_pred1 (h b)); last first.
 by rewrite fdist_uniformE (bij_eq_card bg).
 Qed.
 
+(* The probability a bind assigns to an event: the mixture of the component
+   probabilities. *)
+Lemma Pr_fdistbind (A B : finType) (m : R.-fdist A)
+    (k : A -> R.-fdist B) (E : {set B}) :
+  Pr (m >>= k) E = \sum_(a in A) m a * Pr (k a) E.
+Proof.
+rewrite /Pr.
+under eq_bigr => b _ do rewrite fdistbindE.
+rewrite exchange_big /=.
+by apply: eq_bigr => a _; rewrite big_distrr.
+Qed.
+
+(* A mixture of pairwise-close distributions is close: the distinguishing
+   gap of two binds is at most the mixture of the per-component gaps. *)
+Lemma fdist_mixture_advantage_le (W T : finType) (u : R.-fdist W)
+    (m1 m2 : W -> R.-fdist T) (e : W -> R) (E : {set T}) :
+  (forall w, `| Pr (m1 w) E - Pr (m2 w) E | <= e w) ->
+  `| Pr (u >>= m1) E - Pr (u >>= m2) E | <= \sum_(w in W) u w * e w.
+Proof.
+move=> He.
+rewrite !Pr_fdistbind -sumrB.
+apply: le_trans (ler_norm_sum _ _ _) _.
+apply: ler_sum => w _.
+rewrite -mulrBr normrM ger0_norm //.
+exact: ler_wpM2l (He w).
+Qed.
+
+(* The pushforward of a uniform distribution along a map with equal fiber
+   cardinalities over its image is the uniform distribution on the image. *)
+Lemma fdistmap_uniform_supp_img (T U : finType) (n : nat)
+    (cardT : #|T| = n.+1) (f : T -> U)
+    (Himg : (0 < #|f @: [set: T]|)%N)
+    (Hfib : forall u u', u \in f @: [set: T] -> u' \in f @: [set: T] ->
+        #|[set t | f t == u]| = #|[set t | f t == u']|) :
+  fdistmap f (fdist_uniform (R:=R) cardT) = fdist_uniform_supp R Himg.
+Proof.
+apply/fdist_ext => u.
+rewrite fdistmapE.
+case/boolP : (u \in f @: [set: T]) => Hu; last first.
+  rewrite fdist_uniform_supp_notin // big_pred0 // => t.
+  apply/negbTE; apply: contra Hu => /eqP <-.
+  by apply/imsetP; exists t; rewrite ?inE.
+rewrite fdist_uniform_supp_in //.
+under eq_bigr do rewrite fdist_uniformE.
+rewrite sumr_const.
+have -> : #|[pred a | a \in preim f (pred1 u)]| = #|[set t | f t == u]|.
+  by apply: eq_card => t; rewrite !inE.
+have Hpart : #|T| = (#|f @: [set: T]| * #|[set t | f t == u]|)%N.
+  rewrite -[X in X = _]sum1_card.
+  rewrite (partition_big_imset f) /=.
+  apply: etrans
+    (_ : \sum_(j in [set f x | x : T]) #|[set t | f t == j]| = _)%N.
+    by apply: eq_bigr => j _; rewrite -sum1_card; apply: eq_bigl => t;
+       rewrite !inE.
+  rewrite (eq_bigr (fun j => #|[set t | f t == u]|)); last first.
+    move=> j Hj; apply: Hfib => //.
+    by case/imsetP : Hj => t _ ->; apply/imsetP; exists t; rewrite ?inE.
+  rewrite sum_nat_const.
+  congr (_ * _)%N.
+  by apply: eq_card => y; apply/imsetP/imsetP => -[t _ ->]; exists t;
+     rewrite ?inE.
+have Hfib_gt0 : (0 < #|[set t | f t == u]|)%N.
+  by case/imsetP : Hu => r _ ->; apply/card_gt0P; exists r; rewrite inE.
+rewrite Hpart natrM invfM -mulr_natr; field.
+by rewrite !pnatr_eq0 -!lt0n Himg.
+Qed.
+
 End fdist_glue.
 
 (* ========================================================================== *)
