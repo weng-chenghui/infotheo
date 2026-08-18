@@ -1,6 +1,7 @@
 From HB Require Import structures.
 From mathcomp Require Import all_boot all_order all_algebra fingroup finalg.
 From mathcomp Require Import ring boolp finmap matrix lra reals.
+From mathcomp Require Import constructive_ereal.
 Require Import realType_ext realType_ln ssr_ext ssralg_ext bigop_ext fdist.
 Require Import fdist_extra.
 Require Import proba jfdist_cond entropy graphoid.
@@ -187,6 +188,22 @@ Require Import dsdp_alice_fdist_secrecy.
 (*                              the averaged real-versus-ideal gap is at      *)
 (*                              most the average of the two per-coin hop      *)
 (*                              advantages                                    *)
+(* alice_trace_predictor_unpredictability_ereal g ==                          *)
+(*                              the zero-safe unpredictability of Bob's       *)
+(*                              input at Alice's encoded trace: infinite at   *)
+(*                              zero predictor success, the negative          *)
+(*                              logarithm otherwise                           *)
+(* alice_trace_predictor_unpredictability_ereal_zeroE ==                      *)
+(*                              zero success is infinite unpredictability     *)
+(* alice_trace_predictor_unpredictability_ereal_gt0E ==                       *)
+(*                              positive success is the finite negative       *)
+(*                              logarithm                                     *)
+(* alice_trace_predictor_unpredictability_ereal_finE ==                       *)
+(*                              the real-valued definition is the finite      *)
+(*                              branch                                        *)
+(* dsdp_alice_trace_predictor_unpredictability_fdist_ereal_ge ==              *)
+(*                              the trace guessing bound lifted to the        *)
+(*                              zero-safe order, with no positivity premise   *)
 (* ```                                                                        *)
 (*                                                                            *)
 (* DI and the parameter-pinning abbreviations that Section                    *)
@@ -1313,3 +1330,122 @@ exact: (dsdp_alice_trace_sim_advantage_fdist_le card_renc rand_of_renc
 Qed.
 
 End dsdp_alice_trace_avg_sec.
+
+Section dsdp_alice_trace_unpredictability_ereal_sec.
+Context {R : realType}.
+Variables (AHE : AHEncType) (Renc : finType) (index_renc : nat).
+Hypothesis card_renc : #|Renc| = index_renc.+1.
+Variable rand_of_renc : Renc -> rand AHE.
+Variables (v1 u1 u2 u3 : plain AHE).
+Hypothesis u3_unit : u3 \is a GRing.unit.
+Variables (dk_a dk_b dk_c : priv_key AHE).
+Variables (w_rb2 w_rc2 : Renc).
+
+(* Extended-real statements are written with the constructors and the order
+   constant explicitly (EFin, EPInf, Order.le): ahe_monoid.v delimits
+   emul_scope with %E, shadowing constructive_ereal's delimiter in every
+   file that imports the HE stack. *)
+Local Notation dsdp_trace_dataT := (dsdp_trace_dataT AHE).
+Local Notation pkey_of_dk := (pkey_of_dk dk_a dk_b dk_c).
+Local Notation V2 := (V2 (R:=R) (AHE:=AHE) card_renc).
+Local Notation AliceTrace :=
+  (AliceTrace (R:=R) card_renc rand_of_renc v1 u1 u2 u3
+     dk_a dk_b dk_c w_rb2 w_rc2).
+Local Notation dsdp_trace_of_hop_tuple :=
+  (dsdp_trace_of_hop_tuple rand_of_renc v1 u1 u2 u3 dk_a dk_b dk_c w_rc2).
+Local Notation indcpa_fdist_epsilon :=
+  (indcpa_fdist_epsilon (R:=R) (AHE:=AHE) card_renc rand_of_renc).
+Local Notation hop0_reduction :=
+  (hop0_reduction (R:=R) (AHE:=AHE) card_renc rand_of_renc
+     pkey_of_dk v1 u1 u2 u3).
+Local Notation hop1_reduction :=
+  (hop1_reduction (R:=R) (AHE:=AHE) card_renc rand_of_renc
+     pkey_of_dk v1 u1 u2 u3).
+Local Notation alice_trace_predictor_unpredictability :=
+  (alice_trace_predictor_unpredictability (R:=R) card_renc rand_of_renc
+     v1 u1 u2 u3 dk_a dk_b dk_c w_rb2 w_rc2).
+
+(* The success probability of a trace predictor, the quantity the zero-safe
+   unpredictability reads. *)
+Let trace_guess_pr (g : 15.-bseq dsdp_trace_dataT -> plain AHE) : R :=
+  Pr (alice_sample_fdist (R:=R) AHE card_renc)
+     [set t | (g `o AliceTrace) t == V2 t].
+
+(* The advantage against Bob's key of the hop-0 reduction of the
+   distinguisher associated with a trace predictor composed with
+   dsdp_trace_of_hop_tuple. *)
+Let trace_eps0 (g : 15.-bseq dsdp_trace_dataT -> plain AHE) : R :=
+  indcpa_fdist_epsilon (pkey_of_dk Bob)
+    (hop0_reduction
+       (distinguisher_of_guess (g \o dsdp_trace_of_hop_tuple))).
+
+(* The advantage against Charlie's key of the hop-1 reduction of the
+   distinguisher associated with a trace predictor composed with
+   dsdp_trace_of_hop_tuple. *)
+Let trace_eps1 (g : 15.-bseq dsdp_trace_dataT -> plain AHE) : R :=
+  indcpa_fdist_epsilon (pkey_of_dk Charlie)
+    (hop1_reduction
+       (distinguisher_of_guess (g \o dsdp_trace_of_hop_tuple))).
+
+(* The zero-safe unpredictability of Bob's input at Alice's encoded trace:
+   infinite at zero predictor success, the negative logarithm otherwise.
+   Naming: the [_ereal] token marks the extended-real carrier, after
+   [conv_erealE] of probability/convex.v. *)
+Definition alice_trace_predictor_unpredictability_ereal
+    (g : 15.-bseq dsdp_trace_dataT -> plain AHE) : \bar R :=
+  if trace_guess_pr g == 0 then @EPInf R
+  else EFin (alice_trace_predictor_unpredictability g).
+
+(* Zero success is infinite unpredictability.
+   Naming: the [E] suffix marks the branch equation. *)
+Lemma alice_trace_predictor_unpredictability_ereal_zeroE g :
+  trace_guess_pr g = 0 ->
+  alice_trace_predictor_unpredictability_ereal g = @EPInf R.
+Proof.
+by move=> H; rewrite /alice_trace_predictor_unpredictability_ereal H eqxx.
+Qed.
+
+(* Positive success is the finite negative logarithm.
+   Naming: [_gt0] spells the positivity premise, after MathComp; the [E]
+   suffix marks the branch equation. *)
+Lemma alice_trace_predictor_unpredictability_ereal_gt0E g :
+  0 < trace_guess_pr g ->
+  alice_trace_predictor_unpredictability_ereal g
+  = EFin (- log (trace_guess_pr g)).
+Proof.
+move=> H.
+by rewrite /alice_trace_predictor_unpredictability_ereal gt_eqF.
+Qed.
+
+(* The real-valued definition is the finite branch.
+   Naming: [_fin] marks the finite branch; the [E] suffix marks the branch
+   equation. *)
+Lemma alice_trace_predictor_unpredictability_ereal_finE g :
+  0 < trace_guess_pr g ->
+  alice_trace_predictor_unpredictability_ereal g
+  = EFin (alice_trace_predictor_unpredictability g).
+Proof.
+move=> H.
+by rewrite /alice_trace_predictor_unpredictability_ereal gt_eqF.
+Qed.
+
+(* The existing lower bound, lifted to the zero-safe order with no
+   positivity premise: the zero branch is infinite, and the positive branch
+   consumes the guessing bound through
+   [dsdp_alice_trace_predictor_unpredictability_fdist_ge].
+   Naming: extends that theorem name with the [ereal] variant token before
+   [ge]; kept long to preserve the family grouping. *)
+Theorem dsdp_alice_trace_predictor_unpredictability_fdist_ereal_ge g :
+  Order.le
+    (EFin (log (#|plain AHE|%:R)
+           - log (1 + #|plain AHE|%:R * (trace_eps0 g + trace_eps1 g))))
+    (alice_trace_predictor_unpredictability_ereal g).
+Proof.
+rewrite /alice_trace_predictor_unpredictability_ereal.
+case: (eqVneq (trace_guess_pr g) 0) => [_|Hneq]; first exact: leey.
+have Hpos : 0 < trace_guess_pr g by rewrite lt0r Hneq /=; exact: Pr_ge0.
+rewrite lee_fin.
+exact: (dsdp_alice_trace_predictor_unpredictability_fdist_ge u3_unit Hpos).
+Qed.
+
+End dsdp_alice_trace_unpredictability_ereal_sec.
