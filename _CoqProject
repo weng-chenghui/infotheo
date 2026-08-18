@@ -104,10 +104,6 @@ smc/smc_interpreter_sound.v
 smc/graded_resource.v
 smc/smc_session_types.v
 smc/pismc.v
-smc/pismc_to_ssprove.v
-smc/ssprove_ext_lossless.v
-smc/ssprove_ext_simulator.v
-smc/ssprove_ext_lossless_heap.v
 du2002/spp_tactics.v
 du2002/spp_proba.v
 du2002/spp_entropy.v
@@ -128,9 +124,7 @@ homomorphic_encryption/benaloh1994/benaloh_ahe.v
 homomorphic_encryption/paillier1999/paillier_enc.v
 homomorphic_encryption/paillier1999/paillier_ahe.v
 homomorphic_encryption/homomorphic_encryption.v
-homomorphic_encryption/indcpa_ror.v
 homomorphic_encryption/idealized/idealized_ahe.v
-homomorphic_encryption/idealized/idealized_indcpa.v
 dumas2017dual/lib/extra_algebra.v
 dumas2017dual/lib/extra_proba.v
 dumas2017dual/lib/extra_entropy.v
@@ -148,14 +142,6 @@ dumas2017dual/dsdp/counting/dsdp_entropy.v
 dumas2017dual/dsdp/fdist_hopping/dsdp_alice_fdist_secrecy.v
 dumas2017dual/dsdp/fdist_hopping/dsdp_alice_trace_link.v
 dumas2017dual/dsdp/counting/dsdp_malicious_dotp.v
-dumas2017dual/dsdp/symbolic_game/dsdp_game_code.v
-dumas2017dual/dsdp/symbolic_game/dsdp_symbolic_exec.v
-dumas2017dual/dsdp/symbolic_game/dsdp_game_derivation.v
-dumas2017dual/dsdp/symbolic_game/dsdp_game_gen_literal.v
-dumas2017dual/dsdp/convert/dsdp_convert.v
-dumas2017dual/dsdp/indcpa_hopping/dsdp_indcpa_advantage.v
-dumas2017dual/dsdp/indcpa_hopping/dsdp_guess_fiber.v
-dumas2017dual/dsdp/simulation/dsdp_simulator.v
 dumas2017dual/dsdp/dsdp_main.v
 
 -R . infotheo
