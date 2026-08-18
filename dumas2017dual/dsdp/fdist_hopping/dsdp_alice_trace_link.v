@@ -217,6 +217,19 @@ Require Import dsdp_alice_fdist_secrecy.
 (*                              the simulator-advantage bound for a Boolean   *)
 (*                              test reading the raw interpreter trace, via   *)
 (*                              composition with the fixed-key decoder        *)
+(* alice_raw_trace_real_test_avg ==                                           *)
+(*                              the Boolean real raw-trace experiment: the    *)
+(*                              re-encryption coin sampled uniformly, then    *)
+(*                              the test applied to the honest inputs and     *)
+(*                              Alice's raw interpreter trace at that coin    *)
+(* alice_raw_trace_ideal_test_avg ==                                          *)
+(*                              the Boolean image of the averaged ideal       *)
+(*                              trace joint law under the test composed with  *)
+(*                              the fixed-key decoder                         *)
+(* dsdp_alice_raw_trace_sim_advantage_fdist_avg_le ==                         *)
+(*                              the averaged raw-trace gap is at most the     *)
+(*                              average of the two per-coin hop advantages    *)
+(*                              of the decoded test                           *)
 (* dsdp_alice_guess_fdist_trace_V2_real_pq_le ==                              *)
 (*                              the trace guessing bound with its endpoint    *)
 (*                              written at the composite modulus p * q        *)
@@ -1573,6 +1586,112 @@ exact: (dsdp_alice_trace_sim_advantage_fdist_le card_renc rand_of_renc
 Qed.
 
 End dsdp_alice_raw_trace_sec.
+
+Section dsdp_alice_raw_trace_avg_sec.
+Context {R : realType}.
+Variables (AHE : AHEncType) (Renc : finType) (index_renc : nat).
+Hypothesis card_renc : #|Renc| = index_renc.+1.
+Variable rand_of_renc : Renc -> rand AHE.
+Variables (v1 u1 u2 u3 : plain AHE).
+Variables (dk_a dk_b dk_c : priv_key AHE).
+Variable w_rb2 : Renc.
+
+(* Each parameterized abbreviation pins everything but the re-encryption
+   coin, which this section samples. *)
+Local Notation DI := (Standard_DSDP_Interface AHE).
+Local Notation dsdp_trace_dataT := (dsdp_trace_dataT AHE).
+Local Notation pkey_of_dk := (pkey_of_dk dk_a dk_b dk_c).
+Local Notation V2 := (V2 (R:=R) (AHE:=AHE) card_renc).
+Local Notation V3 := (V3 (R:=R) (AHE:=AHE) card_renc).
+Local Notation AliceRawTraceW w :=
+  (alice_raw_trace (R:=R) card_renc rand_of_renc v1 u1 u2 u3
+     dk_a dk_b dk_c w_rb2 w).
+Local Notation RealAvg :=
+  (alice_trace_real_joint_avg (R:=R) card_renc rand_of_renc
+     v1 u1 u2 u3 dk_a dk_b dk_c w_rb2).
+Local Notation IdealAvg :=
+  (alice_trace_ideal_joint_avg (R:=R) card_renc rand_of_renc
+     v1 u1 u2 u3 dk_a dk_b dk_c).
+Local Notation dsdp_trace_of_hop_tuple_at w :=
+  (dsdp_trace_of_hop_tuple rand_of_renc v1 u1 u2 u3 dk_a dk_b dk_c w).
+Local Notation indcpa_fdist_epsilon :=
+  (indcpa_fdist_epsilon (R:=R) (AHE:=AHE) card_renc rand_of_renc).
+Local Notation hop0_reduction :=
+  (hop0_reduction (R:=R) (AHE:=AHE) card_renc rand_of_renc
+     pkey_of_dk v1 u1 u2 u3).
+Local Notation hop1_reduction :=
+  (hop1_reduction (R:=R) (AHE:=AHE) card_renc rand_of_renc
+     pkey_of_dk v1 u1 u2 u3).
+
+(* The encoded-trace test a raw-trace test induces, decoding with Alice's
+   fixed key context.  The binder is annotated because the bounded-sequence
+   coercion is inserted only at a known domain. *)
+Local Notation Denc D_raw :=
+  (fun x : plain AHE * plain AHE * 15.-bseq dsdp_trace_dataT =>
+     D_raw (x.1.1, x.1.2,
+            map (di_data_of_trace_data dk_a (pub_of_priv dk_a)) x.2)).
+
+(* The Boolean real raw-trace experiment: the re-encryption coin sampled
+   uniformly, then the test applied to the two honest inputs and Alice's
+   raw interpreter trace at that coin.
+   Naming: after [alice_raw_trace], with [test] marking the Boolean image
+   and [avg] the sampled coin. *)
+Definition alice_raw_trace_real_test_avg
+    (D_raw : plain AHE * plain AHE * seq (di_data DI) -> bool) :
+    R.-fdist bool :=
+  fdist_uniform card_renc >>= (fun w =>
+    fdistmap (fun t => D_raw (V2 t, V3 t, AliceRawTraceW w t))
+      (alice_sample_fdist (R:=R) AHE card_renc)).
+
+(* The Boolean ideal raw-trace experiment: the image of the averaged ideal
+   trace joint law under the test composed with the fixed-key decoder.
+   Naming: after [alice_trace_ideal_test], with [raw] marking the
+   observation read and [avg] the sampled coin. *)
+Definition alice_raw_trace_ideal_test_avg
+    (D_raw : plain AHE * plain AHE * seq (di_data DI) -> bool) :
+    R.-fdist bool :=
+  fdistmap (Denc D_raw) IdealAvg.
+
+(* The averaged gap a Boolean test reading Alice's raw interpreter trace
+   sees between the real and the ideal experiment is at most the average of
+   the two per-coin hop advantages of the decoded test.
+   Naming: extends [dsdp_alice_raw_trace_sim_advantage_fdist_le] with the
+   [avg] variant token before [le]; kept long to preserve the family
+   grouping. *)
+Theorem dsdp_alice_raw_trace_sim_advantage_fdist_avg_le
+    (D_raw : plain AHE * plain AHE * seq (di_data DI) -> bool) :
+  `| Pr (alice_raw_trace_real_test_avg D_raw) [set true]
+     - Pr (alice_raw_trace_ideal_test_avg D_raw) [set true] |
+  <= \sum_(w in Renc)
+       (fdist_uniform card_renc : R.-fdist Renc) w
+       * (indcpa_fdist_epsilon (pkey_of_dk Bob)
+            (hop0_reduction (fun x =>
+               D_raw (x.1.1, x.1.2,
+                      map (di_data_of_trace_data dk_a (pub_of_priv dk_a))
+                          (dsdp_trace_of_hop_tuple_at w x.2))))
+          + indcpa_fdist_epsilon (pkey_of_dk Charlie)
+            (hop1_reduction (fun x =>
+               D_raw (x.1.1, x.1.2,
+                      map (di_data_of_trace_data dk_a (pub_of_priv dk_a))
+                          (dsdp_trace_of_hop_tuple_at w x.2))))).
+Proof.
+(* Push the decoded test through the outer coin bind, reduce each branch to
+   one pushforward of the sample law, and consume the round trip of
+   alice_raw_trace_decodeE inside that branch. *)
+have HrealE : fdistmap (Denc D_raw) RealAvg
+            = alice_raw_trace_real_test_avg D_raw.
+  rewrite /alice_raw_trace_real_test_avg /alice_trace_real_joint_avg.
+  rewrite fdistmap_bind; congr (_ >>= _); apply: boolp.funext => w.
+  rewrite /dist_of_RV fdistmap_comp.
+  congr fdistmap; apply: boolp.funext => t.
+  by rewrite -(alice_raw_trace_decodeE card_renc rand_of_renc v1 u1 u2 u3
+                 dk_a dk_b dk_c w_rb2 w (pub_of_priv dk_a) t).
+rewrite -HrealE Pr_fdistmap_bool.
+exact: (dsdp_alice_trace_sim_advantage_fdist_avg_le card_renc rand_of_renc
+          v1 u1 u2 u3 dk_a dk_b dk_c w_rb2 (Denc D_raw)).
+Qed.
+
+End dsdp_alice_raw_trace_avg_sec.
 
 Section dsdp_alice_trace_pq_sec.
 Context {R : realType}.
