@@ -177,6 +177,11 @@ Require Import dsdp_program dsdp_entropy.
 (*  alice_view_of_hop_tupleE == those four observables assemble into the      *)
 (*                              reconstruction of Alice's view from the       *)
 (*                              hopping tuple                                 *)
+(* dsdp_alice_simulator_pub pk_b pk_c s ==                                    *)
+(*                              the simulated view law with its setup passed  *)
+(*                              as the two public keys it encrypts under      *)
+(* dsdp_alice_simulator_pubE == any party-indexed key table instantiates the  *)
+(*                              public-key simulator to dsdp_alice_simulator  *)
 (* ```                                                                        *)
 (*                                                                            *)
 (* Scope. The statements are average-case over the honest inputs V2 and V3,   *)
@@ -1299,3 +1304,34 @@ by rewrite alice_view_of_hop_tupleE; exact: dsdp_alice_guess_fdist_V2_real_le.
 Qed.
 
 End dsdp_alice_fdist_secrecy.
+
+Section dsdp_alice_simulator_pub_sec.
+Context {R : realType}.
+Variables (AHE : AHEncType) (Renc : finType) (index_renc : nat).
+Hypothesis card_renc : #|Renc| = index_renc.+1.
+Variable rand_of_renc : Renc -> rand AHE.
+
+(* The two uniform factors below reuse the card constants the main section
+   discharges.  Those [_subproof] names are generated from the [Let] names
+   [card_plain_pair] and [card_renc_pair] of Section dsdp_alice_fdist_secrecy,
+   so renaming either [Let] breaks this section. *)
+
+(* The simulated view law with its cryptographic setup passed as the two
+   public keys it encrypts under. *)
+Definition dsdp_alice_simulator_pub (pk_b pk_c : pub_key AHE)
+    (s : plain AHE) : R.-fdist (dsdp_alice_hop_tupleT AHE Renc) :=
+  ((((fdist_uniform (card_plain_pair_subproof AHE))
+       `x (fdist_uniform (card_renc_pair_subproof card_renc)))
+      `x (fdist1 s))
+     `x (enc_fdist card_renc rand_of_renc pk_b 0))
+    `x (enc_fdist card_renc rand_of_renc pk_c 0).
+
+(* Instantiating the public keys as any party-indexed key table yields the
+   existing simulator. *)
+Lemma dsdp_alice_simulator_pubE (pkey_of_party : party_id -> pub_key AHE)
+    (s : plain AHE) :
+  dsdp_alice_simulator_pub (pkey_of_party Bob) (pkey_of_party Charlie) s
+  = dsdp_alice_simulator card_renc rand_of_renc pkey_of_party s.
+Proof. by []. Qed.
+
+End dsdp_alice_simulator_pub_sec.
