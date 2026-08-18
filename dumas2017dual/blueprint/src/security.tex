@@ -1,12 +1,11 @@
-% The security-story Parts of the SMC-DSDP blueprint: Foundations, Corrupted
-% Alice, Corrupted relay. The final Auto-derivation Part is content.tex +
-% it_bound_bridge.tex, input after this file.
+% The whole SMC-DSDP blueprint: Foundations, Corrupted Alice, Corrupted relay.
+% web.tex inputs this file and nothing else.
 %
-% Each security chapter states one headline theorem of dsdp_main.v and chains it
-% to its leaves: a standing-hypotheses block (what the bound assumes), the
-% statement, its direct dependencies as nodes, and the library/plumbing facts it
-% rests on cited as black-box leaves in prose. Node bodies are terse declarative
-% statements, per the mathcomp-qbs standard.
+% Each security chapter states one headline theorem and chains it to its leaves:
+% a standing-hypotheses block (what the bound assumes), the statement, its direct
+% dependencies as nodes, and the library/plumbing facts it rests on cited as
+% black-box leaves in prose. Node bodies are terse declarative statements, per
+% the mathcomp-qbs standard.
 
 \chapter{The corrupted-Alice and corrupted-relay security of DSDP}
 
@@ -19,21 +18,18 @@ Charlie), who forwards masked ciphertexts; and, as the tightness boundary of the
 corrupted-Alice case, a corrupted Alice who fixes her query to a coordinate
 vector and reads a relay's input directly.
 
-The headline theorems live in \texttt{dsdp\_main.v}. Each chapter below takes one
-of them and chains it to its leaves, opening with the hypotheses the bound
-actually assumes so an over-hypothesised or vacuous bound is visible on the page.
-The two proof techniques are kept distinct: the corrupted-Alice ciphertext
-channel is bounded by SSProve game-hopping under the IND-CPA assumption, and the
-output and relay channels are bounded information-theoretically by conditional
-entropy and fiber-counting, which need no cryptographic assumption. The final
-part of the blueprint documents the auto-derivation that generates the SSProve
-ciphertext game from the one protocol program.
+The headline theorems live in \texttt{dsdp\_main.v} and in
+\texttt{dsdp/fdist\_hopping/}. Each chapter below takes one of them and chains it
+to its leaves, opening with the hypotheses the bound actually assumes so an
+over-hypothesised or vacuous bound is visible on the page. The two proof
+techniques are kept distinct: the corrupted-Alice ciphertext channel is bounded
+by a two-hop ladder over one explicit Infotheo distribution, and the output and
+relay channels are bounded information-theoretically by conditional entropy and
+fiber-counting.
 
-Both computational legs above state their bounds as advantages of explicit
-reductions. Chapter~\ref{ch:ssprove_alignment} records how this statement
-discipline follows the \ssprove{} case studies.
-
-\input{ssprove_alignment}
+Every $\varepsilon$ in this blueprint is the real-or-zero advantage of a
+reduction constructed in the same file as the bound that names it, so the
+computational leg carries no cryptographic assumption as an axiom.
 
 \part{Foundations}
 
@@ -85,12 +81,13 @@ Alice is the party the analysis works hardest on: she receives every ciphertext
 and she decrypts the output. Her secrecy has two channels. The output she decrypts
 is the scalar product, and conditioned on it a relay's input stays uniform over a
 fiber of $m$ points, an information-theoretic bound. The ciphertexts she receives
-are bounded computationally by the derived game-hopping of the final part. The two
-compose to the full bound $1/m + \epshopsum{A}$ for a distinguisher $A$, where
-each summand is the IND-CPA advantage against DSDP's scheme $E$ of the reduction
-$A$ induces on one of the two encryption hops. The part closes with the
-tightness boundary: the fiber bound needs Alice's third weight to act invertibly,
-and the degenerate query that violates it lets Alice read a relay's input outright.
+are bounded by a ladder of two hops, each replacing one received ciphertext by an
+encryption of zero. The two channels compose to the bound
+$1/m + \epshopsum{D_g}$ on any predictor $g$ of Bob's input, where each summand is
+the real-or-zero advantage, at the key of the party that sent that ciphertext, of
+the reduction $g$ induces on that hop. The part closes with the tightness
+boundary: the fiber bound needs Alice's third weight to act invertibly, and the
+degenerate query that violates it lets Alice read a relay's input outright.
 
 \chapter{What the output alone reveals: the plaintext residual}
 
@@ -145,103 +142,406 @@ and the degenerate query that violates it lets Alice read a relay's input outrig
   \[ \HH(V_0,\dots,V_{n} \mid \mathrm{view}) = \log(m^{n}) \]
 \end{theorem}
 
+\section{Reused Infotheo facts}
+
+The fiber lemma of this chapter and the endpoint bound of the next one are
+assembled from four facts that live outside the DSDP files: two counting facts
+about the solution set of the scalar-product constraint, one conditional
+uniformity fact for a fiber, and one diagonal bound for conditionally independent
+variables. They are recorded here as leaves.
+
+\begin{lemma}[Fiber cardinality is $m$]
+  \label{lem:exist_fiber_card}
+  \rocq{infotheo.dumas2017dual.dsdp.counting.dsdp_entropy.dsdp_fiber_card_ring}
+  \rocqok
+  Over a commutative ring, when the multiplier $u_3$ is injective the solution
+  set of the scalar-product constraint has exactly $\#R = m$ points, the image of
+  the ring under $v \mapsto u_3 v$.
+  \[ \#\lvert \fib(u_1,u_2,u_3,v_1,s)\rvert = \#R = m \]
+\end{lemma}
+
+\begin{lemma}[Conditional uniformity on the fiber]
+  \label{lem:exist_cpr_fiber}
+  \rocq{infotheo.dumas2017dual.entropy_fiber.entropy_fiber_zpq.gen_cPr_uniform_fiber}
+  \rocqok
+  \uses{lem:exist_fiber_card}
+  For a joint distribution in which the variable pair is uniform and
+  independent of the inputs, conditioning on the revealed values leaves the
+  variable uniform over its fiber.
+  \[ \Pr[\,\mathrm{Var}=v \mid \mathrm{Cond}=\cond\,]
+        = \#\lvert\fib(\cond)\rvert^{-1} \]
+\end{lemma}
+
+\begin{lemma}[DSDP solution is uniform, probability $1/m$]
+  \label{lem:exist_pr_sol}
+  \rocq{infotheo.dumas2017dual.dsdp.counting.dsdp_entropy.Pr_dsdp_sol_uniform_ring}
+  \rocqok
+  \uses{lem:exist_cpr_fiber,lem:exist_fiber_card}
+  Over a commutative ring with injective multiplier, each solution $(v_2,v_3)$ of
+  the DSDP constraint has conditional probability $1/m$ given the inputs and $S$.
+  \[ \Pr[\,(V_2,V_3)=(v_2,v_3)\mid \mathrm{Cond}=\cond\,] = m^{-1} \]
+\end{lemma}
+
+\begin{lemma}[Conditional-independence diagonal bound]
+  \label{lem:cinde_diagonal_bound}
+  \rocq{infotheo.dumas2017dual.lib.extra_proba.cinde_diagonal_bound}
+  \rocqok
+  When $X$ and $Y$ are conditionally independent given $Z$ and each value of $Y$
+  has conditional probability at most $1/m$ given $Z$, the probability of the
+  diagonal $X = Y$ is at most $1/m$.
+  \[ X \perp Y \mid Z,\quad \Pr[\,Y = a \mid Z = c\,] \le 1/m
+        \;\Longrightarrow\; \Pr[\,X = Y\,] \le 1/m \]
+\end{lemma}
+
 \chapter{Computational secrecy of the ciphertext channel}
+\label{ch:fdist_hopping}
 
-The ciphertexts Alice receives are bounded by the derived game-hopping developed
-in the final part. This chapter records the corrupted-Alice results that the
-derivation delivers; their construction and proof are the subject of
-Part~\ref{part:autoderiv} (the final part).
+The two ciphertexts Alice receives are bounded by a ladder of two hops over one
+explicit distribution. Hop $i$ replaces the $i$-th received ciphertext by an
+encryption of zero, and the distinguishing gap it costs is exactly the
+real-or-zero advantage of a single-query adversary constructed in the same file.
+At the end of the ladder both slots encrypt zero and the fiber bound applies.
+Throughout, $m$ is the size of the plaintext space and the plaintext carrier is a
+finite commutative unit ring.
 
-\begin{theorem}[Ciphertext-view advantage]
-  \label{thm:alice_view_advantage}
-  \rocq{infotheo.dumas2017dual.dsdp.dsdp_main.dsdp_alice_view_advantage_le}
+\begin{definition}[The corrupted-Alice experiment]
+  \label{def:alice_experiment}
+  \rocq{infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.dsdp_alice_sampleT,
+       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.alice_sample_fdist,
+       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.alice_sample_fdistE,
+       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.V2,
+       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.V3,
+       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.R2,
+       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.R3,
+       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.Rho2,
+       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.Rho3,
+       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.RA1,
+       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.RA2,
+       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.Sout,
+       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.SoutE}
   \rocqok
   \uses{def:party_views}
-  Every valid adversary $A$ distinguishes DSDP's real corrupted-Alice game from
-  its all-zero endpoint with advantage at most the sum of the IND-CPA advantages
-  of the two reductions $A$ induces, one per encryption hop of the
-  corrupted-Alice view.
-  \[ \AdvE(\real, \zero, A) \le \epshopsum{A} \]
+  The experiment is the uniform distribution on the product of eight
+  coordinates: the two honest inputs $V_2, V_3$, Alice's two mask plaintexts
+  $R_2, R_3$, the randomness $\rho_2, \rho_3$ of the two ciphertexts she
+  receives, and the randomness $\alpha_1, \alpha_2$ of her two outgoing combines.
+  Alice's own input $v_1$ and her three weights $u_1, u_2, u_3$ are parameters of
+  the experiment rather than sampled coordinates. The output she learns is the
+  weighted scalar product of her weights with the two honest inputs.
+  \[ S = u_1 v_1 + u_2 V_2 + u_3 V_3 \]
+\end{definition}
+
+\begin{definition}[The hop ladder]
+  \label{def:alice_hop_ladder}
+  \rocq{infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.hop0_cipher,
+       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.hop1_cipher,
+       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.dsdp_alice_hop_tupleT,
+       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.AliceHopTuple,
+       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.alice_hop_joint_fdist,
+       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.alice_hop_game_success,
+       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.alice_hop_game_successE}
+  \rocqok
+  \uses{def:alice_experiment}
+  Alice's tuple at hop $i$ carries her two masks, her two combine randomnesses,
+  the output $S$, and the two ciphertexts she receives, of which the first $i$
+  encrypt zero.
+  \[ \hoptuple{i} = \big(R_2, R_3, \alpha_1, \alpha_2, S,\;
+       \Enc(\pk_B, b^i_0, \rho_2),\; \Enc(\pk_C, b^i_1, \rho_3)\big),\qquad
+     b^i_0 = \begin{cases} V_2 & i = 0\\ 0 & i > 0\end{cases},\quad
+     b^i_1 = \begin{cases} V_3 & i \le 1\\ 0 & i > 1\end{cases} \]
+  Hop $0$ is Alice's real tuple and hop $2$ the all-zero endpoint. A
+  distinguisher reads the honest input pair together with the tuple; write
+  $\gamma_i(D)$ for the probability that $D$ accepts at hop $i$.
+\end{definition}
+
+\begin{definition}[Real-or-zero advantage of a single-query adversary]
+  \label{def:indcpa_fdist_epsilon}
+  \rocq{infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.enc_fdist,
+       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.indcpa_fdist_adversary,
+       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.indcpa_fdist_success_real,
+       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.indcpa_fdist_success_realE,
+       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.indcpa_fdist_success_zero,
+       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.indcpa_fdist_success_zeroE,
+       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.indcpa_fdist_epsilon}
+  \rocqok
+  A single-query real-or-zero adversary $A$ is a finite state type, a law on it,
+  a challenge plaintext $p_A$ read off the state, and a decision taken on the
+  state and one challenge ciphertext. Encryption randomness is uniform. The
+  advantage of $A$ at a public key is the gap between its acceptance probability
+  when the challenge encrypts $p_A$ and its acceptance probability when the
+  challenge encrypts zero.
+  \[ \epsror{\pk}{A} = \big\lvert \Pr[A \text{ accepts } \Enc(\pk, p_A)]
+       - \Pr[A \text{ accepts } \Enc(\pk, 0)] \big\rvert \]
+\end{definition}
+
+\begin{definition}[The two hop reductions]
+  \label{def:alice_hop_reductions}
+  \rocq{infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.hop0_stateT,
+       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.Hop0State,
+       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.hop0_assemble,
+       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.hop0_reduction,
+       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.hop1_stateT,
+       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.Hop1State,
+       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.hop1_assemble,
+       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.hop1_reduction}
+  \rocqok
+  \uses{def:alice_hop_ladder,def:indcpa_fdist_epsilon}
+  The hop-$i$ reduction $\hopred{i}{D}$ of a distinguisher $D$ is the
+  single-query adversary whose state carries everything the hop-$i$ tuple holds
+  apart from the $i$-th ciphertext slot, whose challenge plaintext is the honest
+  input that slot carries, and whose decision is $D$ applied to the honest input
+  pair together with the tuple rebuilt around the challenge. Hop $0$ challenges
+  Bob's key on $V_2$, and hop $1$ challenges Charlie's key on $V_3$.
+\end{definition}
+
+\begin{theorem}[One hop costs one reduction advantage]
+  \label{thm:alice_view_advantage}
+  \rocq{infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.hop0_advantageE,
+       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.hop1_advantageE}
+  \rocqok
+  \uses{def:alice_hop_reductions}
+  For all weights $u_1, u_2, u_3$ and every distinguisher $D$, zeroing one
+  received ciphertext moves the acceptance probability by exactly the advantage
+  of the corresponding hop reduction, at the key of the party that sent that
+  ciphertext.
+  \[ \lvert \gamma_0(D) - \gamma_1(D)\rvert = \epsror{\pk_B}{\hopred{0}{D}},
+     \qquad
+     \lvert \gamma_1(D) - \gamma_2(D)\rvert = \epsror{\pk_C}{\hopred{1}{D}} \]
 \end{theorem}
 
-\begin{theorem}[Guessing the challenge secret, real game]
-  \label{thm:alice_guess_real}
-  \rocq{infotheo.dumas2017dual.dsdp.dsdp_main.dsdp_alice_guess_V2_real_le,
-       infotheo.dumas2017dual.dsdp.dsdp_main.dsdp_alice_guess_V2_zero_le,
-       infotheo.dumas2017dual.dsdp.dsdp_main.dsdp_alice_guess_advantage_le}
+\begin{lemma}[Guessing at the all-zero endpoint]
+  \label{lem:guess_all_zero}
+  \rocq{infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.AliceSpectator,
+       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.alice_spectator_of,
+       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.alice_spectator_indep,
+       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.alice_spectator_cinde,
+       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.alice_VarRV_cond_uniform,
+       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.alice_V2_cond_Sout,
+       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.alice_V2_cond_le,
+       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.alice_hop_tuple_of_spectator,
+       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.guess_all_zero_le_invm}
   \rocqok
-  \uses{thm:alice_view_advantage,lem:dsdp_fiber_uniform}
-  Reading the ciphertext view and the leaked output $S$, and when $U_3$ acts
-  injectively, the predictor $A$ guesses Bob's secret $V_2$ with probability at
-  most $1/m + \epshopsum{A}$: the fiber bound $1/m$ at the all-zero endpoint plus
-  the cost of moving to the real game, the advantages of $A$'s two hop
-  reductions. The two legs join by the triangle inequality.
-  \[ \Pr[\mathrm{guess} = V_2] \le 1/m + \epshopsum{A} \]
+  \uses{def:alice_hop_ladder,lem:exist_pr_sol,lem:cinde_diagonal_bound}
+  When Alice's third weight $u_3$ is a unit of the plaintext ring, every
+  predictor reading the all-zero tuple matches Bob's input with probability at
+  most $1/m$. The all-zero tuple is independent of the honest inputs, hence
+  conditionally independent of $V_2$ given the output, and conditioned on the
+  output alone $V_2$ is uniform.
+  \[ u_3 \in R^{\times} \;\Longrightarrow\;
+       \Pr[\,g(\hoptuple{2}) = V_2\,] \le 1/m \]
+\end{lemma}
+
+\begin{definition}[The distinguisher of a predictor]
+  \label{def:distinguisher_of_guess}
+  \rocq{infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.distinguisher_of_guess,
+       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.guess_event_jointE}
+  \rocqok
+  \uses{def:alice_hop_ladder}
+  The distinguisher $D_g$ of a predictor $g$ accepts when $g$, applied to the
+  tuple component of its input, returns the first honest input. The event that
+  $g$ matches Bob's input at hop $i$ is the acceptance event of $D_g$ at hop $i$.
+  \[ D_g(v_2, v_3, t) = [\,g(t) = v_2\,] \]
+\end{definition}
+
+\begin{theorem}[Guessing Bob's input from Alice's real tuple]
+  \label{thm:alice_guess_real}
+  \rocq{infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.dsdp_alice_guess_fdist_V2_real_le}
+  \rocqok
+  \uses{thm:alice_view_advantage,lem:guess_all_zero,def:distinguisher_of_guess}
+  When $u_3$ is a unit of the plaintext ring, every predictor reading Alice's
+  real tuple matches Bob's input with probability at most $1/m$ plus the
+  advantages of the two hop reductions of its distinguisher.
+  \[ \Pr[\,g(\hoptuple{0}) = V_2\,]
+       \le \tfrac{1}{m} + \epshopsum{D_g} \]
 \end{theorem}
+\begin{proof}
+  \uses{thm:alice_view_advantage,lem:guess_all_zero}
+  \rocqok
+  The endpoint probability is at most $1/m$, and the triangle inequality along
+  the two rungs adds the two reduction advantages.
+\end{proof}
 
 \begin{theorem}[Unpredictability entropy]
   \label{thm:alice_unpredictability}
-  \rocq{infotheo.dumas2017dual.dsdp.dsdp_main.dsdp_alice_unpredictability_entropy_ge}
+  \rocq{infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.alice_predictor_unpredictability,
+       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.dsdp_alice_unpredictability_fdist_ge,
+       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.dsdp_alice_predictor_unpredictability_fdist_ge}
   \rocqok
   \uses{thm:alice_guess_real}
-  Equivalently in entropy form, the predictor $A$'s unpredictability entropy on
-  the output-exposing real game is at least
-  $\log m - \log\!\big(1 + m\,(\epshopsum{A})\big)$, approaching the full
-  $\log m$ as the two hop-reduction advantages vanish.
-  \[ \Hunp \ge \log m - \log\!\big(1 + m\,(\epshopsum{A})\big) \]
+  For a predictor whose success probability on Alice's real tuple is positive,
+  and with $u_3$ a unit of the plaintext ring, the negative logarithm of that
+  probability is at least $\log m$ less the logarithm of one plus $m$ times the
+  two hop advantages.
+  \[ \Hunp(g) = -\log \Pr[\,g(\hoptuple{0}) = V_2\,]
+       \ge \log m - \log\!\big(1 + m\,(\epshopsum{D_g})\big) \]
 \end{theorem}
+
+\begin{corollary}[The same bound at Alice's full view]
+  \label{cor:alice_guess_view}
+  \rocq{infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.AliceCombineBob,
+       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.AliceCombineCharlie,
+       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.AliceRecvPlain,
+       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.AliceView,
+       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.alice_view_of_hop_tuple,
+       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.alice_view_of_hop_tupleE,
+       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.dsdp_alice_guess_fdist_view_le}
+  \rocqok
+  \uses{thm:alice_guess_real,def:party_views}
+  Alice's four real observables are her hop-$0$ tuple, her two outgoing combines,
+  and the plaintext of her final decryption. Each of the last three is a function
+  of the tuple, so the view is the image of the tuple under a map $\nu$, and
+  every predictor $g'$ of Bob's input reading the whole view obeys the tuple
+  bound at $g' \circ \nu$.
+  \[ \Pr[\,g'(\mathrm{AliceView}) = V_2\,]
+       \le \tfrac{1}{m} + \epshopsum{D_{g' \circ \nu}} \]
+\end{corollary}
 
 \chapter{Simulation-based security}
 \label{ch:simulation}
 
-The corrupted-Alice view can be produced by a simulator that never sees the honest
-inputs, up to the same two-reduction sum. The scope is average-case: the honest
-inputs $v_2, v_3$ are sampled uniformly in-game, by the real game on one side and
-by the ideal functionality on the other, rather than quantified over all input
-vectors.
+Alice's tuple can be produced by a simulator that reads the output and nothing
+else, up to the same two-reduction sum. The scope is average-case: the honest
+inputs are sampled uniformly by the experiment on one side and fed to the ideal
+functionality on the other, rather than quantified over all input vectors.
+
+\begin{definition}[The simulator and the ideal-world law]
+  \label{def:alice_simulator}
+  \rocq{infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.dsdp_alice_simulator,
+       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.alice_ideal_joint}
+  \rocqok
+  \uses{def:alice_hop_ladder}
+  From a value $s$ of the output, the simulator draws uniform masks, uniform
+  combine randomness, and one encryption of zero under each of Bob's and
+  Charlie's keys, and returns $s$ unchanged. The ideal-world law samples the
+  honest input pair, computes its output, and returns that pair with a simulated
+  tuple.
+  \[ \Sim(s) = \big(\mathcal{U}, \mathcal{U}, s,
+       \Enc(\pk_B, 0), \Enc(\pk_C, 0)\big),\qquad
+     \Ideal = \big[(v_2,v_3) \sim \mathcal{U};\ t \sim \Sim(S(v_2,v_3));\
+       (v_2, v_3, t)\big] \]
+\end{definition}
+
+\begin{lemma}[The all-zero endpoint is the simulator]
+  \label{lem:simulator_factorization}
+  \rocq{infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.alice_spectator_law,
+       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.alice_hop_tuple_all_zero_pfwd1E,
+       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.dsdp_alice_hop_tuple_cond_sim,
+       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.dsdp_alice_hop_tuple_cond_sim_S,
+       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.alice_ideal_jointE}
+  \rocqok
+  \uses{def:alice_simulator}
+  Conditioned on any honest input pair of positive probability, Alice's all-zero
+  tuple has exactly the simulator law fed the output of that pair, and the same
+  holds conditioned on the output alone. The ideal-world law is therefore the
+  joint law of the honest inputs and the all-zero tuple, with no error term.
+  \[ \Pr[\,\hoptuple{2} = t \mid (V_2,V_3) = (v_2,v_3)\,] = \Sim(S(v_2,v_3))(t),
+     \qquad \Ideal = \mathrm{law}(V_2, V_3, \hoptuple{2}) \]
+\end{lemma}
 
 \begin{theorem}[Bounded simulation security]
   \label{thm:alice_simulation_secure}
-  \rocq{infotheo.dumas2017dual.dsdp.dsdp_main.dsdp_alice_simulation_advantage_le,
-       infotheo.dumas2017dual.dsdp.simulation.dsdp_simulator.dsdp_advantage_sim_le}
+  \rocq{infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.dsdp_alice_sim_advantage_fdist_le}
   \rocqok
-  \uses{def:party_views,thm:alice_view_advantage}
-  Any valid admissible adversary $A$ distinguishes the output-exposing real game
-  from the simulator composed with the ideal functionality with advantage at most
-  the sum of the IND-CPA advantages of its two hop reductions. The simulator
-  fabricates the four-cipher view from encryptions of zero and fresh samples; the
-  honest inputs and $S$ have no path into it, a type-level allowed-information
-  witness.
-  \[ \AdvE(\real_S,\ \Sim \circ \Ideal,\ A) \le \epshopsum{A} \]
+  \uses{def:party_views,thm:alice_view_advantage,lem:simulator_factorization}
+  For all weights $u_1, u_2, u_3$, every distinguisher separates the real joint
+  law of the honest inputs and Alice's tuple from the ideal-world law by at most
+  the sum of the advantages of its two hop reductions.
+  \[ \big\lvert \Pr_{\mathrm{law}(V_2,V_3,\hoptuple{0})}[D]
+       - \Pr_{\Ideal}[D] \big\rvert \le \epshopsum{D} \]
 \end{theorem}
 \begin{proof}
-  \uses{lem:simulator_factorization}
+  \uses{lem:simulator_factorization,thm:alice_view_advantage}
   \rocqok
-  Triangle through the all-zero endpoint: the real-to-zero distance is
-  $\epshopsum{A}$ (Part~\ref{part:autoderiv}), and the zero endpoint is perfectly
-  equivalent to the simulated ideal (Lemma~\ref{lem:simulator_factorization}).
+  The ideal-world law is the hop-$2$ joint law, so the gap is
+  $\lvert \gamma_0(D) - \gamma_2(D) \rvert$, which the triangle inequality
+  splits into the two rung equalities.
 \end{proof}
-
-\begin{lemma}[Simulator factorization]
-  \label{lem:simulator_factorization}
-  \rocq{infotheo.dumas2017dual.dsdp.simulation.dsdp_simulator.dsdp_simulator_factorization}
-  \rocqok
-  The output-exposing all-zero endpoint game is perfectly equivalent, with no
-  epsilon term, to the simulator composed with the ideal functionality.
-  \[ \zero_S \;\approx_0\; \Sim \circ \Ideal \]
-\end{lemma}
 
 \begin{remark}[Worst-case simulation: open]
   \label{rem:worstcase_sim}
   \rocqok
   % blue frontier node: the standard, input-quantified simulation statement is not
-  %   proved; only the uniform-average is. Recorded to make the gap visible.
-  The standard simulation-security statement quantifies over every input vector:
-  for all $v_2, v_3$, the real game is indistinguishable from the simulated ideal.
-  This blueprint proves the uniform-average. The worst-case statement is open; it
-  would parameterize the ideal by the inputs and re-prove the factorization per
-  input, with the simulator unchanged.
+  %   proved at hop 0; only the uniform-average is. Recorded to make the gap visible.
+  The standard simulation-security statement quantifies over every input pair:
+  for all $v_2, v_3$, the real tuple is indistinguishable from the simulated
+  ideal. Theorem~\ref{thm:alice_simulation_secure} bounds the gap at the joint
+  law in which the honest inputs are sampled uniformly, and the per-input
+  statement is proved at the all-zero endpoint alone
+  (Lemma~\ref{lem:simulator_factorization}). At hop $0$ it is open.
 \end{remark}
+
+\chapter{The bounds at the executed protocol trace}
+\label{ch:trace_link}
+
+The hopping tuple is an abstraction of what Alice sees. Identifying it with the
+trace the piSMC interpreter returns when it runs the three DSDP party programs
+carries the three bounds above to the executed protocol.
+
+\begin{definition}[Alice's executed trace]
+  \label{def:alice_trace}
+  \rocq{infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_trace_link.dsdp_trace_dataT,
+       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_trace_link.trace_data_of_di_data,
+       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_trace_link.dsdp_procs_std,
+       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_trace_link.dsdp_procs_of_sample,
+       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_trace_link.AliceTrace,
+       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_trace_link.dsdp_trace_of_hop_tuple}
+  \rocqok
+  \uses{def:protocol_flow,def:alice_hop_ladder}
+  Alice's trace is the message log the interpreter returns for her when it runs
+  the three party programs on a sample of the experiment, encoded as a bounded
+  sequence of at most fifteen entries, each a plaintext, a ciphertext, or a
+  private key.
+\end{definition}
+
+\begin{lemma}[The trace is a function of the tuple]
+  \label{lem:trace_of_hop_tuple}
+  \rocq{infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_trace_link.DSDP_Interface_of_ops,
+       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_trace_link.dsdp_run_traces_of_ops_ok,
+       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_trace_link.dsdp_procs_stdE,
+       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_trace_link.dsdp_run_traces_ok,
+       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_trace_link.dsdp_run_traces_encE,
+       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_trace_link.dsdp_trace_of_hop_tupleE}
+  \rocqok
+  \uses{def:alice_trace,lem:dsdp_is_correct}
+  The interpreter run on the three DSDP party programs terminates with the
+  message log the protocol prescribes, and Alice's trace is the image of her
+  hop-$0$ tuple under a map $\tau$.
+  \[ \mathrm{AliceTrace} = \tau \circ \hoptuple{0} \]
+\end{lemma}
+
+\begin{theorem}[The three bounds at the trace]
+  \label{thm:alice_trace_bounds}
+  \rocq{infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_trace_link.dsdp_alice_guess_fdist_trace_V2_real_le,
+       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_trace_link.alice_trace_predictor_unpredictability,
+       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_trace_link.dsdp_alice_trace_predictor_unpredictability_fdist_ge,
+       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_trace_link.dsdp_alice_trace_simulator,
+       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_trace_link.alice_trace_ideal_joint,
+       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_trace_link.dsdp_alice_trace_sim_advantage_fdist_le}
+  \rocqok
+  \uses{lem:trace_of_hop_tuple,thm:alice_guess_real,thm:alice_unpredictability,thm:alice_simulation_secure}
+  With $u_3$ a unit of the plaintext ring, every predictor reading Alice's
+  executed trace obeys the guessing bound and its negative-logarithm form at
+  $g \circ \tau$. For all weights, every distinguisher separates the real trace
+  law from the trace-level ideal law by at most the two hop advantages.
+  \[ \Pr[\,g(\mathrm{AliceTrace}) = V_2\,]
+       \le \tfrac{1}{m} + \epshopsum{D_{g \circ \tau}} \]
+\end{theorem}
+
+\begin{theorem}[Trace, view, and tuple leave the same uncertainty]
+  \label{thm:centropy_trace_tuple}
+  \rocq{infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_trace_link.dsdp_alice_trace_tupleT,
+       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_trace_link.AliceTraceTuple,
+       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_trace_link.alice_trace_tupleE,
+       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_trace_link.centropy_AliceTrace_AliceHopTuple,
+       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_trace_link.centropy_AliceView_AliceHopTuple}
+  \rocqok
+  \uses{lem:trace_of_hop_tuple,cor:alice_guess_view}
+  Conditioning on Alice's executed trace, and conditioning on her full view,
+  leave the same uncertainty about Bob's input as conditioning on her hop-$0$
+  tuple. The equalities hold for all weights.
+  \[ \HH(V_2 \mid \mathrm{AliceTrace}) = \HH(V_2 \mid \hoptuple{0})
+       = \HH(V_2 \mid \mathrm{AliceView}) \]
+\end{theorem}
 
 \chapter{Tightness: the degenerate query}
 

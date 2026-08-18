@@ -10,29 +10,18 @@ PLASTEX="$BP/.venv/bin/plastex"
 # Modules the blueprint references via \rocq{...}; coqdoc needs their .glob
 # (present after a normal build of the project).
 MODULES=(
-  dumas2017dual/dsdp/symbolic_game/dsdp_symbolic_exec.v
-  dumas2017dual/dsdp/symbolic_game/dsdp_game_derivation.v
-  dumas2017dual/dsdp/symbolic_game/dsdp_game_code.v
-  dumas2017dual/dsdp/indcpa_hopping/dsdp_indcpa_advantage.v
-  homomorphic_encryption/indcpa_ror.v
-  # Modules cited green by Part II (it_bound_bridge.tex): the Infotheo fiber
-  # facts and the full output-channel chain: the derivation extension, the
-  # S-exposing games + the two-reduction sum, the guessing layer + connector, and
-  # information-theoretic bound + composition (footprint frame, sample fdist, the
-  # output-determined guess kernel + guess _|_ V2 | S, the route-F fiber bound,
-  # and the triangle composition).  Every Part II node is green.
+  # The library facts the "Reused Infotheo facts" section cites: the fiber
+  # counting and conditional-uniformity lemmas, and the diagonal bound.
   dumas2017dual/dsdp/counting/dsdp_entropy.v
   dumas2017dual/entropy_fiber/entropy_fiber_zpq.v
-  dumas2017dual/dsdp/indcpa_hopping/dsdp_guess_fiber.v
   dumas2017dual/lib/extra_proba.v
-  # The main-results file: every headline theorem, with its full proof.
+  # The information-theoretic headline theorems, with their full proofs.
   dumas2017dual/dsdp/dsdp_main.v
-  # The simulation axis: the ideal functionality, the simulator, and the
-  # factorization the simulation-security chapter (security.tex) cites.
-  dumas2017dual/dsdp/simulation/dsdp_simulator.v
-  # The SSProve<->Infotheo connector: the footprint-frame lemmas the
-  # output-secrecy chain (it_bound_bridge.tex) cites.
-  dumas2017dual/dsdp/convert/dsdp_convert.v
+  # The computational leg: the two-hop ladder over the corrupted-Alice
+  # experiment, its two reductions, the guessing / unpredictability / simulation
+  # bounds, and their transfer to the executed piSMC trace.
+  dumas2017dual/dsdp/fdist_hopping/dsdp_alice_fdist_secrecy.v
+  dumas2017dual/dsdp/fdist_hopping/dsdp_alice_trace_link.v
 )
 
 echo "[1/3] blueprint HTML + dependency graph (plastex)"
