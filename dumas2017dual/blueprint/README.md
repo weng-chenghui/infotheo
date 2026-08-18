@@ -1,22 +1,31 @@
-# DSDP derivation-chain blueprint
+# DSDP security blueprint
 
 A `rocqblueprint` (a Rocq port of Patrick Massot's `leanblueprint`) presentation
-of the DSDP corrupted-Alice IND-CPA secrecy auto-derivation chain: from the one
-protocol program and the one control record to the final `2*epsilon_cpa` bound,
-with the deferred information-theoretic and composition legs shown as targets.
+of the machine-checked security analysis of SMC-DSDP against one semi-honest
+corrupted party: the corrupted-Alice output and ciphertext channels, and the
+corrupted-relay channels.
 
 ## What is here
 
-- `src/web.tex`, `src/plastex.cfg`, `src/macros/*`, `src/content.tex` — the
-  blueprint source. `content.tex` holds the full chain as ~38 nodes across eight
-  chapters (symbolic model, corrupted view, lowering, denotation, IND-CPA hybrid
-  bound, control record + generic theorem, DSDP instance, deferred legs). Each
-  node carries `\rocq{<full Rocq name>}` (the formal declaration), `\rocqok`
-  (formalized), and `\uses{...}` (dependency edges).
+- `src/web.tex`, `src/plastex.cfg`, `src/macros/*`, `src/security.tex` — the
+  blueprint source. `security.tex` is the whole document: a Foundations part (the
+  message flow, party views, correctness), a Corrupted Alice part (the
+  conditional-entropy residual of the plaintext channel, the reused Infotheo
+  fiber facts, the two-hop ladder that bounds the ciphertext channel, the
+  simulation bound, the transfer of all three bounds to the executed piSMC
+  trace, and the degenerate-query tightness boundary), and a Corrupted relay
+  part (the one-time-pad secrecy of each relay's view). Each node carries
+  `\rocq{<full Rocq name>}` (the formal declaration), `\rocqok` (formalized),
+  and `\uses{...}` (dependency edges).
+- The computational leg is SSProve-free. Every `\varepsilon` in it is the
+  real-or-zero advantage `indcpa_fdist_epsilon` of a reduction constructed in
+  `dsdp/fdist_hopping/dsdp_alice_fdist_secrecy.v`, so the blueprint states no
+  cryptographic assumption as an axiom.
 - `make_blueprint.sh` — one-command build: the blueprint HTML + dependency graph,
   the coqdoc API pages the `\rocq{...}` links point at, and the static graph PNG.
-- `web/` (gitignored) — the generated site: `index.html`, `sect0001..8.html`,
-  `dep_graph_document.html`, `dep_graph.png`, and `web/coqdoc/` (the coqdoc pages).
+- `web/` (gitignored) — the generated site: `index.html`, the per-chapter
+  `sect*.html`, `dep_graph_document.html`, `dep_graph.png`, and `web/coqdoc/`
+  (the coqdoc pages).
 - `.venv/` (gitignored) — local Python environment with rocqblueprint installed.
 
 ## Build
@@ -34,7 +43,7 @@ The build has two halves, both in `make_blueprint.sh`:
    blueprint lives at the git root (`<root>/blueprint`); this one lives under
    `dumas2017dual/`, so the script calls `plastex -c plastex.cfg web.tex`
    directly (exactly what `rocqblueprint web` runs internally).
-2. **coqdoc API pages** for the five referenced modules into `web/coqdoc/`. The
+2. **coqdoc API pages** for the referenced modules into `web/coqdoc/`. The
    `\rocq{M.decl}` links resolve to `coqdoc/M.html#decl` because `web.tex` sets
    `\dochome{coqdoc}`. coqdoc needs each module's `.glob`, which a normal project
    build produces. The coqdoc file naming (`infotheo.<path>.<module>.html`) and
@@ -52,9 +61,12 @@ To re-create the venv from scratch (graphviz required: `brew install graphviz`):
 
 ## Status
 
-The build succeeds end to end. The dependency graph renders the full chain with
-proof-status coloring: definitions light green ("defined"), proved
-lemmas/theorems dark green ("fully proved"), and the two deferred legs as blue
-dashed nodes ("can state, not yet formalized"). Every node's "Rocq" link opens
-the corresponding coqdoc declaration (HTTP 200). The only cosmetic note is that
-`dvisvgm` is absent, so inline math uses plasTeX's fallback raster imager.
+The dependency graph renders the analysis with proof-status coloring:
+definitions light green ("defined"), proved lemmas/theorems dark green ("fully
+proved"), and the one open statement (worst-case simulation) as a blue dashed
+node ("can state, not yet formalized"). Every node's "Rocq" link opens the
+corresponding coqdoc declaration. The only cosmetic note is that `dvisvgm` is
+absent, so inline math uses plasTeX's fallback raster imager.
+
+`check_coverage.py` is the ratchet that keeps the node set and the `MODULES`
+scope in step; see `COVERAGE.md`.

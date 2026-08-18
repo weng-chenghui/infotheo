@@ -6,39 +6,30 @@
 
 \theoremstyle{definition}
 \newtheorem{definition}[theorem]{Definition}
+\newtheorem{remark}[theorem]{Remark}
 
-% Notation used in the statements below.
-% ε of a scheme and a reduction package, written \epscpaof{E, R}.
-\newcommand{\epscpaof}[1]{\varepsilon_{\mathrm{cpa}}(#1)}
-% One-hop oracle routing at a site: \shimof{i} routes hop i through the oracle.
-\newcommand{\shimof}[1]{\mathrm{shim}_{#1}}
-% The two hop reductions a distinguisher induces on DSDP's two encryption hops,
-% and the sum of their advantages against DSDP's fixed scheme E.
-\newcommand{\epshopsum}[1]{\epscpaof{E,\, #1 \circ \shimof{0}} + \epscpaof{E,\, #1 \circ \shimof{1}}}
-\newcommand{\counthops}{\mathrm{hops}}
-\newcommand{\AdvE}{\mathsf{Adv}}
+% Notation for the computational leg (the two-hop ladder).
+% A public key; \pk_B and \pk_C are Bob's and Charlie's.
+\newcommand{\pk}{\mathsf{pk}}
+% Encryption under a public key.
 \newcommand{\Enc}{\mathsf{Enc}}
-\newcommand{\real}{\mathrm{real}}
-\newcommand{\zero}{\mathrm{zero}}
-\newcommand{\ssprove}{SSProve}
-
-% Pen-and-paper math notation for the node statements (no Rocq code).
-\newcommand{\sem}[1]{[\![#1]\!]}        % denotation into SSProve
-\newcommand{\Dec}{\mathsf{Dec}}
-\newcommand{\hadd}{\boxplus}            % homomorphic ciphertext add (Emul)
-\newcommand{\hmul}{\boxdot}             % homomorphic scalar action (Epow)
-\newcommand{\nhops}{\#\mathrm{hops}}
-\newcommand{\sites}{\mathrm{sites}}
-\newcommand{\gtrace}{\mathcal{G}}       % game_of_trace
-\newcommand{\view}{\mathrm{view}}
-\newcommand{\samples}{\mathrm{samples}}
-\newcommand{\walk}{\mathrm{walk}}
-\newcommand{\cat}{\mathbin{+\!\!+}}     % sequence append
-\newcommand{\Oreal}{\mathcal{O}_{\real}}
-\newcommand{\Ozero}{\mathcal{O}_{\zero}}
+% The real-or-zero advantage at a public key of a single-query adversary:
+% \epsror{pk}{A} is the gap between A's acceptance probability on an encryption
+% of the plaintext it chose and on an encryption of zero.
+\newcommand{\epsror}[2]{\varepsilon_{\mathrm{ror}}(#1,\,#2)}
+% The hop-i reduction a distinguisher induces on the i-th received ciphertext.
+\newcommand{\hopred}[2]{\mathcal{R}_{#1}(#2)}
+% The sum of the advantages of a distinguisher's two hop reductions, at the key
+% of the party that sent each of the two ciphertexts Alice receives.
+\newcommand{\epshopsum}[1]{\epsror{\pk_B}{\hopred{0}{#1}} + \epsror{\pk_C}{\hopred{1}{#1}}}
+% Alice's hopping tuple at hop i: her masks, her combine randomness, the output,
+% and the two received ciphertexts with the first i of them encrypting zero.
+\newcommand{\hoptuple}[1]{T_{#1}}
 
 % Information-theoretic notation for the security-story chapters.
 \newcommand{\HH}{\mathrm{H}}                       % (conditional) entropy
 \newcommand{\Hunp}{\mathrm{H}_{\mathrm{unp}}}      % unpredictability entropy
 \newcommand{\Sim}{\mathsf{Sim}}                    % the simulator
-\newcommand{\Ideal}{\mathsf{Ideal}}               % the ideal functionality
+\newcommand{\Ideal}{\mathsf{Ideal}}                % the ideal-world law
+\newcommand{\fib}{\mathrm{fiber}}                  % solution fiber of a constraint
+\newcommand{\cond}{\mathrm{cond}}                  % a value of the conditioning variable

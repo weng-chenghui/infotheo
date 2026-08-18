@@ -1,14 +1,87 @@
-# Blueprint coverage baseline — declarations in the make_blueprint.sh MODULES
-# scope that do NOT yet have a \rocq{} node. Regenerated 2026-06-16 after the
-# headline relocation into dsdp_main.v and the MODULES-parser fix. Anti-drift
-# ratchet: a NEW declaration must get a \rocq node or be added here; renames
-# surface as dangling refs.
+# Blueprint coverage baseline - declarations in the make_blueprint.sh MODULES
+# scope that do NOT have a \rocq{} node. Regenerated 2026-08-18, when the
+# SSProve modules left the codebase and the computational chapters were
+# retargeted at dsdp/fdist_hopping/. Anti-drift ratchet: a NEW declaration must
+# get a \rocq node or be added here; renames surface as dangling refs.
 #
 # Format: one `module_basename:identifier` per line. Auto-excluded kinds
 # (Variable/Hypothesis/Context/Let) are not listed.
-dsdp_entropy:dsdp_centropy_uniform_direct
+# dsdp_alice_fdist_secrecy: the uniformity, product-law and slot-resampling
+# plumbing under the hop ladder, the constant-weight random variables, and the
+# per-rung challenge equalities the two hop_advantageE nodes fold together.
+dsdp_alice_fdist_secrecy:AliceSpectatorPre
+dsdp_alice_fdist_secrecy:AliceSpectatorPre2
+dsdp_alice_fdist_secrecy:Hop1PreState
+dsdp_alice_fdist_secrecy:U1c
+dsdp_alice_fdist_secrecy:U2c
+dsdp_alice_fdist_secrecy:U3c
+dsdp_alice_fdist_secrecy:V1c
+dsdp_alice_fdist_secrecy:alice_constraint_holds
+dsdp_alice_fdist_secrecy:alice_inputs_constE
+dsdp_alice_fdist_secrecy:alice_spectator_of_hop_tuple
+dsdp_alice_fdist_secrecy:alice_spectator_pre2T
+dsdp_alice_fdist_secrecy:alice_spectator_preT
+dsdp_alice_fdist_secrecy:alice_spectator_prod
+dsdp_alice_fdist_secrecy:alice_spectator_prodE
+dsdp_alice_fdist_secrecy:alice_spectator_regroup
+dsdp_alice_fdist_secrecy:alice_var_uniform
+dsdp_alice_fdist_secrecy:enc_slot_resampleE
+dsdp_alice_fdist_secrecy:fdistmap_prod
+dsdp_alice_fdist_secrecy:fdistmap_prodr
+dsdp_alice_fdist_secrecy:hop0_pair_uniformE
+dsdp_alice_fdist_secrecy:hop0_real_challengeE
+dsdp_alice_fdist_secrecy:hop0_state_prod
+dsdp_alice_fdist_secrecy:hop0_zero_challengeE
+dsdp_alice_fdist_secrecy:hop1_prestate_pair_uniformE
+dsdp_alice_fdist_secrecy:hop1_real_challengeE
+dsdp_alice_fdist_secrecy:hop1_state_of
+dsdp_alice_fdist_secrecy:hop1_state_prod
+dsdp_alice_fdist_secrecy:hop1_zero_challengeE
+dsdp_alice_fdist_secrecy:hop_challengeE
+dsdp_alice_fdist_secrecy:inde_RV_of_prod
+dsdp_alice_fdist_secrecy:rho3_uniformE
+dsdp_alice_fdist_secrecy:spectator_pre2_uniformE
+dsdp_alice_fdist_secrecy:spectator_pre_indep
+dsdp_alice_fdist_secrecy:spectator_pre_pair_uniformE
+dsdp_alice_fdist_secrecy:spectator_pre_uniformE
+# dsdp_alice_trace_link: the operation-generic interpreter shim, the trace/tuple
+# encodings and their round-trips, and the sample-splitting uniformity lemmas
+# under the two conditional-entropy transfers.
+dsdp_alice_trace_link:AliceCombineRand
+dsdp_alice_trace_link:AliceSampleRest
+dsdp_alice_trace_link:alice_hop_tuple_of_view
+dsdp_alice_trace_link:alice_hop_tuple_rand_traceE
+dsdp_alice_trace_link:alice_sample_restT
+dsdp_alice_trace_link:combine_rand_rest_indep
+dsdp_alice_trace_link:combine_rand_rest_uniformE
+dsdp_alice_trace_link:combine_rand_trace_indep
+dsdp_alice_trace_link:combine_rand_uniformE
+dsdp_alice_trace_link:gRecv_dec
+dsdp_alice_trace_link:gRecv_enc
+dsdp_alice_trace_link:gde
+dsdp_alice_trace_link:gdk
+dsdp_alice_trace_link:gdp
+dsdp_alice_trace_link:gget_cipher
+dsdp_alice_trace_link:gprocs
+dsdp_alice_trace_link:hop_tuple_of_rand_trace
+dsdp_alice_trace_link:hop_tuple_of_rand_traceK
+dsdp_alice_trace_link:pkey_of_dk
+dsdp_alice_trace_link:rand_trace_of_hop_tuple
+dsdp_alice_trace_link:sample_rest_uniformE
+dsdp_alice_trace_link:trace_data_cipher
+dsdp_alice_trace_link:trace_data_plain
+dsdp_alice_trace_link:trace_of_trace_tuple
+dsdp_alice_trace_link:trace_of_trace_tupleK
+dsdp_alice_trace_link:trace_tuple_of_trace
+dsdp_alice_trace_link:v2_trace_tuple_of_sample_rest
+# dsdp_entropy: the abstract-variable and non-ring forms of the fiber counting
+# facts; the blueprint cites the two ring forms.
+dsdp_entropy:Pr_dsdp_nosol_eq0
+dsdp_entropy:Pr_dsdp_sol_uniform
+dsdp_entropy:S_determined
 dsdp_entropy:dsdp_centropy1_uniform
 dsdp_entropy:dsdp_centropy1_uniform_n
+dsdp_entropy:dsdp_centropy_uniform_direct
 dsdp_entropy:dsdp_constraint
 dsdp_entropy:dsdp_constraint_ring
 dsdp_entropy:dsdp_fiber
@@ -19,281 +92,41 @@ dsdp_entropy:dsdp_fiber_n
 dsdp_entropy:dsdp_fiber_ring
 dsdp_entropy:dsdp_g
 dsdp_entropy:dsdp_var_entropy
-dsdp_entropy:Pr_dsdp_nosol_eq0
-dsdp_entropy:Pr_dsdp_sol_uniform
-dsdp_entropy:S_determined
-dsdp_game_code:advantage_game_code_dsdp_le
-dsdp_game_code:advantage_self_zero
-dsdp_game_code:as_cipher
-dsdp_game_code:as_plain
-dsdp_game_code:cipher_list
-dsdp_game_code:de_rand_nth
-dsdp_game_code:de_val_nth
-dsdp_game_code:denote_game_leak_S_raw
-dsdp_game_code:denote_game_leak_S_valid
-dsdp_game_code:denote_game_raw
-dsdp_game_code:denote_game_shim_valid
-dsdp_game_code:denote_game_valid
-dsdp_game_code:denote_run_shim
-dsdp_game_code:denote_run_shim_post_target_zero
-dsdp_game_code:denote_run_shim_real_equiv
-dsdp_game_code:denote_run_shim_valid
-dsdp_game_code:denote_run_shim_zero_equiv
-dsdp_game_code:denote_run_valid
-dsdp_game_code:denote_Sout_get_body
-dsdp_game_code:denote_Sout_get_valid
-dsdp_game_code:denote_v2_get_body
-dsdp_game_code:denote_v2_get_valid
-dsdp_game_code:denv
-dsdp_game_code:empty_denv
-dsdp_game_code:game_code_dsdp
-dsdp_game_code:game_iface
-dsdp_game_code:game_iface_leak_S
-dsdp_game_code:GC_enc_hop
-dsdp_game_code:GC_let
-dsdp_game_code:GC_put
-dsdp_game_code:GC_put_output
-dsdp_game_code:GC_ret
-dsdp_game_code:GC_sample
-dsdp_game_code:Gcipher
-dsdp_game_code:Gplain
-dsdp_game_code:gval
-dsdp_game_code:HE_add
-dsdp_game_code:HE_const
-dsdp_game_code:HE_dec
-dsdp_game_code:HE_emul
-dsdp_game_code:HE_enc
-dsdp_game_code:HE_epow
-dsdp_game_code:HE_mul
-dsdp_game_code:HE_sub
-dsdp_game_code:HE_var
-dsdp_game_code:hop_sites_game_code_dsdp
-dsdp_game_code:i
-dsdp_game_code:id_game_run
-dsdp_game_code:id_v2_get
-dsdp_game_code:oracle_real
-dsdp_game_code:oracle_real_pkg
-dsdp_game_code:oracle_zero
-dsdp_game_code:oracle_zero_pkg
-dsdp_game_code:protocol_state
-dsdp_game_code:push_rand
-dsdp_game_code:push_val
-dsdp_game_code:sample_to_renc
-dsdp_game_code:V_2_cell
-dsdp_game_derivation:_
-dsdp_game_derivation:AO_combine
-dsdp_game_derivation:AO_leak
-dsdp_game_derivation:AO_put
-dsdp_game_derivation:AO_recv_hop
-dsdp_game_derivation:AO_sample_rnd
-dsdp_game_derivation:AO_sample_val
-dsdp_game_derivation:bound_names
-dsdp_game_derivation:combine_names
-dsdp_game_derivation:count_hops_game_of_trace_seeded
-dsdp_game_derivation:count_hops_lower_obs
-dsdp_game_derivation:dsdp_alice_obs_leak_S
-dsdp_game_derivation:dsdp_alice_obs_leak_S_seeded
-dsdp_game_derivation:dsdp_obs_hops
-dsdp_game_derivation:dsdp_obs_hops_leak_S_seeded
-dsdp_game_derivation:dsdp_weight_names
-dsdp_game_derivation:game_iface_P
-dsdp_game_derivation:game_of_trace_seeded
-dsdp_game_derivation:o
-dsdp_game_derivation:obs_rnd_names
-dsdp_game_derivation:obs_value_names
-dsdp_game_derivation:protocol_state_P
-dsdp_game_derivation:r
-dsdp_game_derivation:real_oracle_P
-dsdp_game_derivation:recv_names
-dsdp_game_derivation:s_dec
-dsdp_game_derivation:s_emul
-dsdp_game_derivation:s_enc
-dsdp_game_derivation:s_epow
-dsdp_game_derivation:term_rnd_names
-dsdp_game_derivation:term_value_names
-dsdp_game_derivation:walk_obs_dsdp
-dsdp_game_derivation:walk_obs_dsdp_leak_S
-dsdp_game_derivation:zero_oracle_P
-dsdp_guess_fiber:as_plain_Gplain
-dsdp_guess_fiber:card_plain_pair
-dsdp_guess_fiber:cond_view
-dsdp_guess_fiber:cpr_eq_drop_indep
-dsdp_guess_fiber:de_val_nth_push0
-dsdp_guess_fiber:de_val_nth_pushrand
-dsdp_guess_fiber:de_val_nth_pushS
-dsdp_guess_fiber:denote_he_var
-dsdp_guess_fiber:denote_output_termE
-dsdp_guess_fiber:denote_run_caps
-dsdp_guess_fiber:denote_run_caps_enc_hop
-dsdp_guess_fiber:denote_run_caps_fst
-dsdp_guess_fiber:denote_run_caps_let
-dsdp_guess_fiber:denote_run_caps_preserves
-dsdp_guess_fiber:denote_run_caps_put
-dsdp_guess_fiber:denote_run_caps_put_output
-dsdp_guess_fiber:denote_run_caps_sample_msg
-dsdp_guess_fiber:denote_run_caps_sample_renc
-dsdp_guess_fiber:denote_run_caps_valid
-dsdp_guess_fiber:denote_run_distr
-dsdp_guess_fiber:denote_run_distrE
-dsdp_guess_fiber:denote_run_enc_hop
-dsdp_guess_fiber:denote_run_let
-dsdp_guess_fiber:denote_run_put
-dsdp_guess_fiber:denote_run_put_output
-dsdp_guess_fiber:denote_run_ret
-dsdp_guess_fiber:denote_run_sample_msg
-dsdp_guess_fiber:denote_run_sample_renc
-dsdp_guess_fiber:fin_to_plain
-dsdp_guess_fiber:game_valid
-dsdp_guess_fiber:gc_eq
-dsdp_guess_fiber:guess_full_code
-dsdp_guess_fiber:guess_full_proj_code
-dsdp_guess_fiber:guess_inner
-dsdp_guess_fiber:guess_inner_kernel_z
-dsdp_guess_fiber:guess_inner_v2v3_det
-dsdp_guess_fiber:guess_kernel
-dsdp_guess_fiber:guess_op
-dsdp_guess_fiber:guess_pair_challenger
-dsdp_guess_fiber:guess_reduction_valid
-dsdp_guess_fiber:guess_resolve_eq
-dsdp_guess_fiber:guess_resolved
-dsdp_guess_fiber:guess_resolved_caps
-dsdp_guess_fiber:guess_resolved_oracles
-dsdp_guess_fiber:guess_resolved_par
-dsdp_guess_fiber:guess_run_cells
-dsdp_guess_fiber:guess_sdistr_success_real
-dsdp_guess_fiber:guess_triple_peel
-dsdp_guess_fiber:guess_triple_proj_code
-dsdp_guess_fiber:guess_V2_cond_Sout
-dsdp_guess_fiber:guesser_export
-dsdp_guess_fiber:Hunp_leak_S
-dsdp_guess_fiber:id_guess
-dsdp_guess_fiber:ir1_rv
-dsdp_guess_fiber:ir2_rv
-dsdp_guess_fiber:o
-dsdp_guess_fiber:Pr_fdistmap_pre
-dsdp_guess_fiber:real_game_valid
-dsdp_guess_fiber:resolve_game_run
-dsdp_guess_fiber:resolve_game_Sout_get
-dsdp_guess_fiber:resolve_game_v2get
-dsdp_guess_fiber:resolve_predictor_valid
-dsdp_guess_fiber:tail_collapse_pred_abstract
-dsdp_guess_fiber:U1
-dsdp_guess_fiber:U2
-dsdp_guess_fiber:U3
-dsdp_guess_fiber:V1
-dsdp_guess_fiber:V2
-dsdp_guess_fiber:V3
-dsdp_indcpa_advantage:advantage_hop_leak_S
-dsdp_indcpa_advantage:advantage_le_leak_S
-dsdp_indcpa_advantage:advantage_sum_ladder_le_leak_S
-dsdp_indcpa_advantage:denote_game_shim_leak_S
-dsdp_indcpa_advantage:denote_game_shim_leak_S_raw
-dsdp_indcpa_advantage:denote_game_shim_leak_S_valid
-dsdp_indcpa_advantage:hop_equiv_real_leak_S
-dsdp_indcpa_advantage:hop_equiv_zero_leak_S
-# dsdp_main security headlines: documented in the security-story chapters, which
-# are pending (Bucket B, see notes/20260717-blueprint-revision-list.md). Each
-# leaves this list when its chapter lands. This is a scope-vs-claim gap: the
-# checker scopes dsdp_main.v, the current document covers only the
-# auto-derivation (ciphertext) subset.
-# Reconciled 2026-07-17: dropped dsdp_alice_guess_advantage_le (now cited by
-# lem:guess_advantage_le) and the stale guess_sdistr_success_real / relay_privacy_n.
-# All dsdp_main security headlines are now documented in the security-story
-# chapters (security.tex, landed 2026-07-17): the corrupted-relay Part and the
-# corrupted-Alice Part cover every headline, so none remain waived here.
-#
-# dsdp_simulator: the simulation chapter cites dsdp_advantage_sim_le and
-# dsdp_simulator_factorization; the module's other declarations (the packages,
-# the resolution/mass-1 support, the test adversary) are internal to that axis
-# and not blueprint nodes.
-dsdp_simulator:I_dsdp_ideal
-dsdp_simulator:denote_run_lossless_heap
-dsdp_simulator:dsdp_locs_disjoint
-dsdp_simulator:dsdp_ideal_pkg
-dsdp_simulator:dsdp_simulator_pkg
-dsdp_simulator:id_ideal_run
-dsdp_simulator:resolve_denote_game_leak_S_Sout
-dsdp_simulator:resolve_denote_game_leak_S_run
-dsdp_simulator:sample_cards_msg_renc
-dsdp_simulator:sample_cards_msg_renc_all_real
-dsdp_simulator:sample_cards_msg_renc_all_zero
-dsdp_simulator:sim_view_body
-dsdp_simulator:valid_sim_view_body
-dsdp_simulator:view_mass1_denote
-dsdp_simulator:view_op
-dsdp_simulator:view_pair_challenger
-dsdp_simulator:view_resolved
-dsdp_simulator:view_resolved_denote
-dsdp_simulator:view_zero_mass1
-dsdp_symbolic_exec:a1_observed
-dsdp_symbolic_exec:a2_observed
-dsdp_symbolic_exec:decode_sym
-dsdp_symbolic_exec:dsdp_observed_combines
-dsdp_symbolic_exec:dsdp_received_hop_ciphertexts_eq
-dsdp_symbolic_exec:dsdp_recv_responses
-dsdp_symbolic_exec:dsdp_v3_name
-dsdp_symbolic_exec:ek_sym
-dsdp_symbolic_exec:r
-dsdp_symbolic_exec:SD_plain
-dsdp_symbolic_exec:SD_priv_key
-dsdp_symbolic_exec:sent_payloads
-dsdp_symbolic_exec:symbolic_get_cipher
-dsdp_symbolic_exec:symbolic_Recv_dec
-dsdp_symbolic_exec:symbolic_Recv_enc
+# entropy_fiber_zpq: the Z_pq-specialized fiber lemmas; the blueprint cites the
+# generic gen_cPr_uniform_fiber.
+entropy_fiber_zpq:Pr_cond_fiber_marginE
 entropy_fiber_zpq:cPr_uniform_fiber
-entropy_fiber_zpq:gen_joint_factors_by_indeE
 entropy_fiber_zpq:gen_Pr_cond_fiber_marginE
+entropy_fiber_zpq:gen_joint_factors_by_indeE
 entropy_fiber_zpq:gen_uniform_VarRV_probE
 entropy_fiber_zpq:joint_factors_by_indeE
-entropy_fiber_zpq:Pr_cond_fiber_marginE
 entropy_fiber_zpq:uniform_VarRV_probE
-extra_proba:centropy4_swap_2_4
-extra_proba:centropyA
-extra_proba:centropyA_middle
-extra_proba:centropyAC
-extra_proba:cinde_RV_comp
-extra_proba:cinde_RV_factor
-extra_proba:cond_prob_zero_outside_constraint
+# extra_proba: the general-purpose probability lemmas of the local library; the
+# blueprint cites cinde_diagonal_bound.
+extra_proba:PrX_fstRV
+extra_proba:Pr_diag_sum
+extra_proba:Pr_fdistmap_bool
 extra_proba:cPr_eq_notin_fin_img
 extra_proba:cPr_eq_two_ones_absurd
-extra_proba:fdist_proj23_RV3
+extra_proba:centropy4_swap_2_4
+extra_proba:centropyA
+extra_proba:centropyAC
+extra_proba:centropyA_middle
+extra_proba:cinde_RV_comp
+extra_proba:cond_prob_zero_outside_constraint
+extra_proba:cpr_eq_drop_indep
+extra_proba:fdist_prod_bindE
+extra_proba:fdist_uniform_prod
+extra_proba:fdistmap_bij_uniform
 extra_proba:inde_const_RV
 extra_proba:jfdist_cond_cPr_eq
 extra_proba:jproduct_ruleRV
-extra_proba:marg_out_X
-extra_proba:marg_out_Y
 extra_proba:marg_snd
-extra_proba:marg_Z_X
 extra_proba:marginal_swap_YZ
 extra_proba:pair_notin_fin_img_fst
 extra_proba:pfwd1_nested3_AC
 extra_proba:pfwd1_pair4_mid_A
 extra_proba:pfwd1_pair4_swap34
-extra_proba:Pr_diag_sum
 extra_proba:pr_eq_comp_constraint
 extra_proba:pr_eq_comp_constraint_tail
-extra_proba:PrX_fstRV
 extra_proba:sum_cPr_eq
-indcpa_ror:id_oracle_encrypt
-indcpa_ror:oracle_encrypt_iface
-indcpa_ror:oracle_encrypt_real
-indcpa_ror:oracle_encrypt_real_pkg
-indcpa_ror:oracle_encrypt_zero
-indcpa_ror:oracle_encrypt_zero_pkg
-indcpa_ror:party_of_nat
-indcpa_ror:sample_to_renc
-# dsdp_convert: the output-secrecy chain cites Pr_fst_agree_locs and
-# Pr_fst_closed; the module's other connector lemmas are internal.
-dsdp_convert:Pr_code_preserves
-dsdp_convert:Pr_fst_map
-dsdp_convert:Pr_fst_put_invariant
-dsdp_convert:Pr_sdistr_to_fdist
-dsdp_convert:dlet_const_unit
-dsdp_convert:dlet_dmargin_eq
-dsdp_convert:dmargin_comp
-dsdp_convert:dmargin_fst_const
-dsdp_convert:eq_in_dlet
-dsdp_convert:fdistmap_bij_unif
-dsdp_convert:mean1_eq1
-dsdp_convert:sdistr_to_fdist
-dsdp_convert:sdistr_to_fdistE
