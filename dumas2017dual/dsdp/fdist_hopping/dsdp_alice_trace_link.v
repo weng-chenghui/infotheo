@@ -165,6 +165,18 @@ Require Import dsdp_alice_fdist_secrecy.
 (* dsdp_alice_trace_sim_advantage_fdist_test_le ==                            *)
 (*                              the simulator-advantage bound with its ideal  *)
 (*                              side written through the named experiment     *)
+(* dsdp_trace_of_hop_tuple_pub ==                                             *)
+(*                              the trace encoder with the reconstruction     *)
+(*                              key passed as Alice's public key              *)
+(* dsdp_alice_trace_simulator_pub ==                                          *)
+(*                              the trace simulator with its setup passed as  *)
+(*                              the three public keys it reads                *)
+(* dsdp_trace_of_hop_tuple_pubE ==                                            *)
+(*                              instantiating Alice's public key from her     *)
+(*                              private key yields the existing encoder       *)
+(* dsdp_alice_trace_simulator_pubE ==                                         *)
+(*                              instantiating the three public keys from the  *)
+(*                              private keys yields the existing simulator    *)
 (* ```                                                                        *)
 (*                                                                            *)
 (* DI and the parameter-pinning abbreviations that Section                    *)
@@ -1149,3 +1161,73 @@ exact: (dsdp_alice_trace_sim_advantage_fdist_le card_renc rand_of_renc
 Qed.
 
 End dsdp_alice_trace_ideal_test_sec.
+
+Section dsdp_alice_trace_public_setup.
+Context {R : realType}.
+Variables (AHE : AHEncType) (Renc : finType) (index_renc : nat).
+Hypothesis card_renc : #|Renc| = index_renc.+1.
+Variable rand_of_renc : Renc -> rand AHE.
+Variables (v1 u1 u2 u3 : plain AHE).
+Variables (pk_a pk_b pk_c : pub_key AHE).
+Variable w_rc2 : Renc.
+
+(* Alice's encoded executed trace read off a value of her hopping tuple,
+   with the reconstruction key passed as Alice's public key.
+   Naming: after [dsdp_trace_of_hop_tuple], with [pub] marking the
+   public-key setup, as in [dsdp_alice_simulator_pub]. *)
+Definition dsdp_trace_of_hop_tuple_pub
+    (v : dsdp_alice_hop_tupleT AHE Renc) :
+    15.-bseq (dsdp_trace_dataT AHE) :=
+  [bseq inl (inl (inl v.1.1.2));
+        inl (inl (inr
+          (enc pk_a
+               (v.1.1.2 - u1 * v1 + v.1.1.1.1.1 + v.1.1.1.1.2)
+               (rand_of_renc w_rc2))));
+        inl (inl (inr v.2));
+        inl (inl (inr v.1.2));
+        inl (inl (inl v.1.1.1.1.2));
+        inl (inl (inl v.1.1.1.1.1));
+        inl (inl (inl u3)); inl (inl (inl u2));
+        inl (inl (inl u1)); inl (inl (inl v1));
+        inl (inr tt)].
+
+(* The trace simulator with its cryptographic setup passed as the three
+   public keys it reads: Alice's for the reconstructed ciphertext, Bob's and
+   Charlie's for the two zero encryptions.
+   Naming: after [dsdp_alice_trace_simulator], with [pub] as above. *)
+Definition dsdp_alice_trace_simulator_pub (s : plain AHE) :
+    R.-fdist (15.-bseq (dsdp_trace_dataT AHE)) :=
+  fdistmap dsdp_trace_of_hop_tuple_pub
+           (dsdp_alice_simulator_pub card_renc rand_of_renc pk_b pk_c s).
+
+End dsdp_alice_trace_public_setup.
+
+Section dsdp_alice_trace_public_compat.
+Context {R : realType}.
+Variables (AHE : AHEncType) (Renc : finType) (index_renc : nat).
+Hypothesis card_renc : #|Renc| = index_renc.+1.
+Variable rand_of_renc : Renc -> rand AHE.
+Variables (v1 u1 u2 u3 : plain AHE).
+Variables (dk_a dk_b dk_c : priv_key AHE).
+Variable w_rc2 : Renc.
+
+(* Instantiating Alice's public key from her private key yields the
+   existing encoder.
+   Naming: the [E] suffix marks the instantiation equation. *)
+Lemma dsdp_trace_of_hop_tuple_pubE :
+  dsdp_trace_of_hop_tuple_pub rand_of_renc v1 u1 u2 u3
+    (pub_of_priv dk_a) w_rc2
+  = dsdp_trace_of_hop_tuple rand_of_renc v1 u1 u2 u3 dk_a dk_b dk_c w_rc2.
+Proof. by []. Qed.
+
+(* Instantiating the three public keys from the private keys yields the
+   existing trace simulator.
+   Naming: the [E] suffix marks the instantiation equation. *)
+Lemma dsdp_alice_trace_simulator_pubE (s : plain AHE) :
+  dsdp_alice_trace_simulator_pub (R:=R) card_renc rand_of_renc v1 u1 u2 u3
+    (pub_of_priv dk_a) (pub_of_priv dk_b) (pub_of_priv dk_c) w_rc2 s
+  = dsdp_alice_trace_simulator card_renc rand_of_renc v1 u1 u2 u3
+      dk_a dk_b dk_c w_rc2 s.
+Proof. by []. Qed.
+
+End dsdp_alice_trace_public_compat.
