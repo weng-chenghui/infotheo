@@ -147,11 +147,15 @@ verifying he_types.v:42). Paper and thesis edits applied and built
 (uncommitted, matching those repos' working state).
 
 Follow-ups recorded by the auditors (none blocking, none landed here):
-- Cluster rename: dsdp_main.v, indcpa_hopping/dsdp_guess_fiber.v, and
-  symbolic_game/dsdp_game_gen_literal.v still use w_v1..w_u3 rows and
-  inline injectivity premises. Bare v1/u1/u2/u3 tokens already exist in all
-  three files, so the rename there needs per-site collision review, and the
-  premise swap to unit form changes exported statements. Separate task.
+- Cluster rename: DONE 2026-08-18 (commit 443173ba, user-directed).
+  w_v1..w_u3 -> v1..u3 and seed_wv1/seed_wu* -> seed_v1/seed_u* across
+  dsdp_main.v, dsdp_guess_fiber.v, dsdp_game_gen_literal.v; capture-freedom
+  verified per file by three style auditors (all GO, zero findings on
+  changed lines); orienting comments ported to the cloned blocks. Kept:
+  seed_ prefix (bare names collide with the variables, machine-checked;
+  the prefix names the subject of the fact). Still open from this line:
+  the inline injectivity premises in those files could move to unit form
+  (changes exported statements; separate decision).
 - secrecy.v:787-801 proof simplification: u3_unit gives the inverse
   directly (pose v3star := u3^-1 * ...; mulVKr u3_unit), removing the
   inj_card_bij detour. Real code change, compile before keeping.
