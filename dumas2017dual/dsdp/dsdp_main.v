@@ -702,11 +702,15 @@ Hypothesis guess_full_lossless :
     chcipher_of_cipher pkey_of_party msg_of_idx rand0 seed predictor
     msg_to_fin))) = 1.
 
-Variables (w_v1 w_u1 w_u2 w_u3 : plain AHE).
-Hypothesis seed_wu1 : as_plain (de_val_nth seed 0) = w_u1.
-Hypothesis seed_wu2 : as_plain (de_val_nth seed 1) = w_u2.
-Hypothesis seed_wu3 : as_plain (de_val_nth seed 2) = w_u3.
-Hypothesis seed_wv1 : as_plain (de_val_nth seed 3) = w_v1.
+(* The four protocol weights Alice holds (seeded constants). *)
+Variables (v1 u1 u2 u3 : plain AHE).
+(* The seed's four value slots 0..3 are the protocol weights u1, u2, u3,
+   v1, so the run's leaked output (computed from the seed at the
+   [output_term] de Bruijn indices) coincides with [Sout]. *)
+Hypothesis seed_u1 : as_plain (de_val_nth seed 0) = u1.
+Hypothesis seed_u2 : as_plain (de_val_nth seed 1) = u2.
+Hypothesis seed_u3 : as_plain (de_val_nth seed 2) = u3.
+Hypothesis seed_v1 : as_plain (de_val_nth seed 3) = v1.
 
 (* zero_game_leak_S instantiated at this section's parameters. *)
 Let game : raw_package :=
@@ -728,7 +732,7 @@ Let guess_reduction : raw_package :=
    [guess_success_sdistr_eq_fdist] crosses to the Infotheo side, then the fiber
    bound [guess_fdist_success_le].  [3-party] *)
 Lemma dsdp_alice_guess_V2_zero_le :
-  injective (fun v : plain AHE => w_u3 * v) ->
+  injective (fun v : plain AHE => u3 * v) ->
   guess_sdistr_success renc_card rand_of_renc chmsg_of_msg chcipher_of_cipher
     pkey_of_party msg_of_idx rand0 seed predictor <= card_msg%:R^-1.
 Proof.
@@ -736,7 +740,7 @@ move=> Hinj.
 rewrite (guess_success_sdistr_eq_fdist msg_to_finK guess_lossless).
 exact: (guess_fdist_success_le msg_to_finK guess_lossless card_renc_neq
   predictor_locs_disj chmsg_of_msgK Hmsg_bij guess_full_lossless
-  seed_wu1 seed_wu2 seed_wu3 seed_wv1 Hinj).
+  seed_u1 seed_u2 seed_u3 seed_v1 Hinj).
 Qed.
 
 (* dsdp_alice_guess_advantage_le — the reduction distinguisher's advantage is at
@@ -800,7 +804,7 @@ Theorem dsdp_alice_guess_V2_real_le
     (Hoze : fseparate (locs predictor)
        (locs (oracle_zero_pkg renc_card rand_of_renc t_msg
                 chcipher_of_cipher pkey_of_party)))
-    (Hinj : injective (fun v : plain AHE => w_u3 * v)) :
+    (Hinj : injective (fun v : plain AHE => u3 * v)) :
   guess_sdistr_success_real renc_card rand_of_renc chmsg_of_msg
     chcipher_of_cipher pkey_of_party msg_of_idx rand0 seed predictor
     <= card_msg%:R^-1
@@ -867,7 +871,7 @@ Theorem dsdp_alice_unpredictability_entropy_ge
     (Hoze : fseparate (locs predictor)
        (locs (oracle_zero_pkg renc_card rand_of_renc t_msg
                 chcipher_of_cipher pkey_of_party)))
-    (Hinj : injective (fun v : plain AHE => w_u3 * v))
+    (Hinj : injective (fun v : plain AHE => u3 * v))
     (Hpos : (0 < guess_sdistr_success_real renc_card rand_of_renc chmsg_of_msg
                 chcipher_of_cipher pkey_of_party msg_of_idx rand0 seed
                 predictor)%R) :
