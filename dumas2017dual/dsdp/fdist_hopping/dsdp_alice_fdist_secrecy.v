@@ -1366,11 +1366,7 @@ Definition enc_of_renc (pk : pub_key AHE) (v : plain AHE) :
 (* The reachable encryptions are nonempty, since the coin-index type is. *)
 Lemma card_enc_img_gt0 (pk : pub_key AHE) (v : plain AHE) :
   (0 < #|enc_of_renc pk v @: [set: Renc]|)%N.
-Proof.
-have /card_gt0P[r0 _] : (0 < #|Renc|)%N by rewrite card_renc.
-apply/card_gt0P; exists (enc_of_renc pk v r0).
-by apply/imsetP; exists r0; rewrite ?inE.
-Qed.
+Proof. by rewrite card_gt0 imset_eq0 -card_gt0 cardsT card_renc. Qed.
 
 (* The named property: the challenge law is uniform over the reachable
    encryptions of v under pk.  It is a property of the scheme map, consumed
@@ -1390,8 +1386,7 @@ Lemma enc_fdist_uniform_img_fiber (pk : pub_key AHE) (v : plain AHE) :
      = #|[set r | enc_of_renc pk v r == c']|) ->
   enc_fdist_uniform_img pk v.
 Proof.
-move=> Hfib.
-exact: (fdistmap_uniform_supp_img card_renc (card_enc_img_gt0 pk v) Hfib).
+exact: (fdistmap_uniform_supp_img card_renc (card_enc_img_gt0 pk v)).
 Qed.
 
 (* Injectivity of the composed encryption map suffices.
@@ -1399,14 +1394,12 @@ Qed.
 Lemma enc_fdist_uniform_img_inj (pk : pub_key AHE) (v : plain AHE) :
   injective (enc_of_renc pk v) -> enc_fdist_uniform_img pk v.
 Proof.
-move=> Hinj; apply: enc_fdist_uniform_img_fiber => c c' Hc Hc'.
-have fib1 : forall w, w \in enc_of_renc pk v @: [set: Renc] ->
+move=> Hinj; apply: enc_fdist_uniform_img_fiber => c c'.
+have fib1 w : w \in enc_of_renc pk v @: [set: Renc] ->
     #|[set r | enc_of_renc pk v r == w]| = 1%N.
-  move=> w /imsetP[r0 _ ->].
-  have -> : [set r | enc_of_renc pk v r == enc_of_renc pk v r0] = [set r0].
-    by apply/setP => r; rewrite !inE (inj_eq Hinj).
-  by rewrite cards1.
-by rewrite !fib1.
+  move=> /imsetP[r0 _ ->]; rewrite -(cards1 r0); apply: eq_card => r.
+  by rewrite !inE (inj_eq Hinj).
+by move=> /fib1 -> /fib1 ->.
 Qed.
 
 (* Under the named property, each reachable ciphertext carries mass one over
