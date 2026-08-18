@@ -217,6 +217,13 @@ Require Import dsdp_alice_fdist_secrecy.
 (*                              the simulator-advantage bound for a Boolean   *)
 (*                              test reading the raw interpreter trace, via   *)
 (*                              composition with the fixed-key decoder        *)
+(* dsdp_alice_guess_fdist_trace_V2_real_pq_le ==                              *)
+(*                              the trace guessing bound with its endpoint    *)
+(*                              written at the composite modulus p * q        *)
+(* dsdp_alice_trace_predictor_unpredictability_fdist_ereal_pq_ge ==           *)
+(*                              the zero-safe unpredictability bound with     *)
+(*                              both cardinalities written at the composite   *)
+(*                              modulus p * q                                 *)
 (* ```                                                                        *)
 (*                                                                            *)
 (* DI and the parameter-pinning abbreviations that Section                    *)
@@ -1578,3 +1585,97 @@ exact: (dsdp_alice_trace_sim_advantage_fdist_le card_renc rand_of_renc
 Qed.
 
 End dsdp_alice_raw_trace_sec.
+
+Section dsdp_alice_trace_pq_sec.
+Context {R : realType}.
+Variables (AHE : AHEncType) (Renc : finType) (index_renc : nat).
+Hypothesis card_renc : #|Renc| = index_renc.+1.
+Variable rand_of_renc : Renc -> rand AHE.
+Variables (v1 u1 u2 u3 : plain AHE).
+Hypothesis u3_unit : u3 \is a GRing.unit.
+Variables (dk_a dk_b dk_c : priv_key AHE).
+Variables (w_rb2 w_rc2 : Renc).
+Variables (p q : nat).
+(* No positivity hypotheses: #|plain AHE| > 0 is a theorem, so the equation
+   already forces 0 < p and 0 < q. *)
+Hypothesis card_plain_pq : #|plain AHE| = (p * q)%N.
+
+Local Notation dsdp_trace_dataT := (dsdp_trace_dataT AHE).
+Local Notation pkey_of_dk := (pkey_of_dk dk_a dk_b dk_c).
+Local Notation V2 := (V2 (R:=R) (AHE:=AHE) card_renc).
+Local Notation AliceTrace :=
+  (AliceTrace (R:=R) card_renc rand_of_renc v1 u1 u2 u3
+     dk_a dk_b dk_c w_rb2 w_rc2).
+Local Notation dsdp_trace_of_hop_tuple :=
+  (dsdp_trace_of_hop_tuple rand_of_renc v1 u1 u2 u3 dk_a dk_b dk_c w_rc2).
+Local Notation indcpa_fdist_epsilon :=
+  (indcpa_fdist_epsilon (R:=R) (AHE:=AHE) card_renc rand_of_renc).
+Local Notation hop0_reduction :=
+  (hop0_reduction (R:=R) (AHE:=AHE) card_renc rand_of_renc
+     pkey_of_dk v1 u1 u2 u3).
+Local Notation hop1_reduction :=
+  (hop1_reduction (R:=R) (AHE:=AHE) card_renc rand_of_renc
+     pkey_of_dk v1 u1 u2 u3).
+Local Notation alice_trace_predictor_unpredictability_ereal :=
+  (alice_trace_predictor_unpredictability_ereal (R:=R) card_renc
+     rand_of_renc v1 u1 u2 u3 dk_a dk_b dk_c w_rb2 w_rc2).
+
+(* The success probability of a trace predictor. *)
+Let trace_guess_pr (g : 15.-bseq dsdp_trace_dataT -> plain AHE) : R :=
+  Pr (alice_sample_fdist (R:=R) AHE card_renc)
+     [set t | (g `o AliceTrace) t == V2 t].
+
+(* The advantage against Bob's key of the hop-0 reduction of the
+   distinguisher associated with a trace predictor composed with
+   dsdp_trace_of_hop_tuple. *)
+Let trace_eps0 (g : 15.-bseq dsdp_trace_dataT -> plain AHE) : R :=
+  indcpa_fdist_epsilon (pkey_of_dk Bob)
+    (hop0_reduction
+       (distinguisher_of_guess (g \o dsdp_trace_of_hop_tuple))).
+
+(* The advantage against Charlie's key of the hop-1 reduction of the
+   distinguisher associated with a trace predictor composed with
+   dsdp_trace_of_hop_tuple. *)
+Let trace_eps1 (g : 15.-bseq dsdp_trace_dataT -> plain AHE) : R :=
+  indcpa_fdist_epsilon (pkey_of_dk Charlie)
+    (hop1_reduction
+       (distinguisher_of_guess (g \o dsdp_trace_of_hop_tuple))).
+
+(* The inverse plaintext cardinality at the composite modulus. *)
+Let inv_pq_cardE : ((p%:R : R) * q%:R)^-1 = (#|plain AHE|%:R : R)^-1.
+Proof. by rewrite card_plain_pq natrM. Qed.
+
+(* The trace guessing bound with its endpoint written at the composite
+   modulus p * q, the modulus of the Paillier-style instantiations.
+   Naming: extends [dsdp_alice_guess_fdist_trace_V2_real_le] with the [pq]
+   variant token before [le]; kept long to preserve the family grouping. *)
+Corollary dsdp_alice_guess_fdist_trace_V2_real_pq_le
+    (g : 15.-bseq dsdp_trace_dataT -> plain AHE) :
+  trace_guess_pr g
+  <= ((p%:R : R) * q%:R)^-1 + trace_eps0 g + trace_eps1 g.
+Proof.
+rewrite inv_pq_cardE.
+exact: (dsdp_alice_guess_fdist_trace_V2_real_le card_renc rand_of_renc
+          v1 u1 u2 u3_unit dk_a dk_b dk_c w_rb2 w_rc2 g).
+Qed.
+
+(* The zero-safe unpredictability bound with both cardinalities written at
+   the composite modulus p * q.
+   Naming: extends
+   [dsdp_alice_trace_predictor_unpredictability_fdist_ereal_ge] with the
+   [pq] variant token before [ge]; kept long to preserve the family
+   grouping. *)
+Theorem dsdp_alice_trace_predictor_unpredictability_fdist_ereal_pq_ge
+    (g : 15.-bseq dsdp_trace_dataT -> plain AHE) :
+  Order.le
+    (EFin (log ((p%:R : R) * q%:R)
+           - log (1 + (p%:R : R) * q%:R * (trace_eps0 g + trace_eps1 g))))
+    (alice_trace_predictor_unpredictability_ereal g).
+Proof.
+have -> : (p%:R : R) * q%:R = #|plain AHE|%:R by rewrite card_plain_pq natrM.
+exact: (dsdp_alice_trace_predictor_unpredictability_fdist_ereal_ge
+          card_renc rand_of_renc v1 u1 u2 u3_unit dk_a dk_b dk_c
+          w_rb2 w_rc2 g).
+Qed.
+
+End dsdp_alice_trace_pq_sec.
