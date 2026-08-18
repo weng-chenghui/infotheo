@@ -1183,8 +1183,7 @@ Lemma alice_trace_ideal_testE
   alice_trace_ideal_test D = fdistmap D alice_trace_ideal_joint.
 Proof.
 rewrite /alice_trace_ideal_test /alice_trace_ideal_joint fdistmap_bind.
-congr (_ >>= _); apply/boolp.funext => vv.
-by rewrite fdistmap_comp.
+by congr (_ >>= _); apply/boolp.funext => vv; rewrite fdistmap_comp.
 Qed.
 
 (* The simulator-advantage bound with its ideal side written through the
@@ -1433,8 +1432,7 @@ Lemma alice_trace_predictor_unpredictability_ereal_gt0E g :
   alice_trace_predictor_unpredictability_ereal g
   = EFin (- log (trace_guess_pr g)).
 Proof.
-move=> H.
-by rewrite /alice_trace_predictor_unpredictability_ereal gt_eqF.
+by move=> H; rewrite /alice_trace_predictor_unpredictability_ereal gt_eqF.
 Qed.
 
 (* The real-valued definition is the finite branch.
@@ -1445,8 +1443,7 @@ Lemma alice_trace_predictor_unpredictability_ereal_finE g :
   alice_trace_predictor_unpredictability_ereal g
   = EFin (alice_trace_predictor_unpredictability g).
 Proof.
-move=> H.
-by rewrite /alice_trace_predictor_unpredictability_ereal gt_eqF.
+by move=> H; rewrite /alice_trace_predictor_unpredictability_ereal gt_eqF.
 Qed.
 
 (* The existing lower bound, lifted to the zero-safe order with no
@@ -1532,15 +1529,7 @@ Lemma alice_raw_trace_decodeE (pk : pub_key AHE)
     (s : dsdp_alice_sampleT AHE Renc) :
   map (di_data_of_trace_data dk_a pk) (AliceTrace s) = alice_raw_trace s.
 Proof.
-have -> : map (di_data_of_trace_data dk_a pk) (AliceTrace s)
-        = map (di_data_of_trace_data dk_a pk
-               \o @trace_data_of_di_data AHE)
-              (nth [::]
-                 (run_interp 15 (dsdp_procs_of_sample (R:=R) card_renc
-                    rand_of_renc v1 u1 u2 u3 dk_a dk_b dk_c w_rb2 w_rc2 s)).2
-                 0).
-  by rewrite map_comp.
-rewrite /alice_raw_trace /dsdp_procs_of_sample.
+rewrite -map_comp /alice_raw_trace /dsdp_procs_of_sample.
 by rewrite dsdp_run_traces_ok.
 Qed.
 
@@ -1576,8 +1565,7 @@ set D := fun x : plain AHE * plain AHE * 15.-bseq dsdp_trace_dataT =>
 have HrealE : Pr (`p_ [% V2, V3, AliceTrace]) [set x | D x]
             = Pr (alice_sample_fdist (R:=R) AHE card_renc)
                  [set t | D_raw (V2 t, V3 t, alice_raw_trace t)].
-  rewrite /dist_of_RV Pr_fdistmap_preim; apply: eq_bigl => t.
-  rewrite !inE.
+  rewrite /dist_of_RV Pr_fdistmap_preim; apply: eq_bigl => t; rewrite !inE.
   by rewrite -(alice_raw_trace_decodeE (pub_of_priv dk_a)).
 rewrite -HrealE.
 exact: (dsdp_alice_trace_sim_advantage_fdist_le card_renc rand_of_renc
