@@ -1606,9 +1606,6 @@ Local Notation V3 := (V3 (R:=R) (AHE:=AHE) card_renc).
 Local Notation AliceRawTraceW w :=
   (alice_raw_trace (R:=R) card_renc rand_of_renc v1 u1 u2 u3
      dk_a dk_b dk_c w_rb2 w).
-Local Notation RealAvg :=
-  (alice_trace_real_joint_avg (R:=R) card_renc rand_of_renc
-     v1 u1 u2 u3 dk_a dk_b dk_c w_rb2).
 Local Notation IdealAvg :=
   (alice_trace_ideal_joint_avg (R:=R) card_renc rand_of_renc
      v1 u1 u2 u3 dk_a dk_b dk_c).
@@ -1675,20 +1672,14 @@ Theorem dsdp_alice_raw_trace_sim_advantage_fdist_avg_le
                       map (di_data_of_trace_data dk_a (pub_of_priv dk_a))
                           (dsdp_trace_of_hop_tuple_at w x.2))))).
 Proof.
-(* Push the decoded test through the outer coin bind, reduce each branch to
-   one pushforward of the sample law, and consume the round trip of
-   alice_raw_trace_decodeE inside that branch. *)
-have HrealE : fdistmap (Denc D_raw) RealAvg
-            = alice_raw_trace_real_test_avg D_raw.
-  rewrite /alice_raw_trace_real_test_avg /alice_trace_real_joint_avg.
-  rewrite fdistmap_bind; congr (_ >>= _); apply: boolp.funext => w.
-  rewrite /dist_of_RV fdistmap_comp.
-  congr fdistmap; apply: boolp.funext => t.
-  by rewrite -(alice_raw_trace_decodeE card_renc rand_of_renc v1 u1 u2 u3
-                 dk_a dk_b dk_c w_rb2 w (pub_of_priv dk_a) t).
-rewrite -HrealE Pr_fdistmap_bool.
-exact: (dsdp_alice_trace_sim_advantage_fdist_avg_le card_renc rand_of_renc
-          v1 u1 u2 u3 dk_a dk_b dk_c w_rb2 (Denc D_raw)).
+(* Push the decoded test through the outer coin bind; each branch is then
+   the per-coin corollary, which consumes the round trip of
+   alice_raw_trace_decodeE. *)
+rewrite /alice_raw_trace_real_test_avg /alice_raw_trace_ideal_test_avg.
+rewrite /alice_trace_ideal_joint_avg fdistmap_bind.
+apply: fdist_mixture_advantage_le => w; rewrite Pr_fdistmap_bool.
+exact: (dsdp_alice_raw_trace_sim_advantage_fdist_le card_renc rand_of_renc
+          v1 u1 u2 u3 dk_a dk_b dk_c w_rb2 w D_raw).
 Qed.
 
 End dsdp_alice_raw_trace_avg_sec.
