@@ -204,6 +204,19 @@ Require Import dsdp_alice_fdist_secrecy.
 (* dsdp_alice_trace_predictor_unpredictability_fdist_ereal_ge ==              *)
 (*                              the trace guessing bound lifted to the        *)
 (*                              zero-safe order, with no positivity premise   *)
+(* di_data_of_trace_data dk pk ==                                             *)
+(*                              the fixed-key decoding of one encoded trace   *)
+(*                              datum: plaintexts and ciphertexts restored    *)
+(*                              as themselves, the private-key mark as dk,    *)
+(*                              the public-key mark as pk                     *)
+(*         alice_raw_trace s == Alice's raw interpreter trace at one sample   *)
+(*   alice_raw_trace_decodeE == decoding Alice's encoded trace with her       *)
+(*                              private key restores the raw interpreter      *)
+(*                              trace                                         *)
+(* dsdp_alice_raw_trace_sim_advantage_fdist_le ==                             *)
+(*                              the simulator-advantage bound for a Boolean   *)
+(*                              test reading the raw interpreter trace, via   *)
+(*                              composition with the fixed-key decoder        *)
 (* ```                                                                        *)
 (*                                                                            *)
 (* DI and the parameter-pinning abbreviations that Section                    *)
@@ -1449,3 +1462,119 @@ exact: (dsdp_alice_trace_predictor_unpredictability_fdist_ge u3_unit Hpos).
 Qed.
 
 End dsdp_alice_trace_unpredictability_ereal_sec.
+
+Section dsdp_alice_raw_trace_sec.
+Context {R : realType}.
+Variables (AHE : AHEncType) (Renc : finType) (index_renc : nat).
+Hypothesis card_renc : #|Renc| = index_renc.+1.
+Variable rand_of_renc : Renc -> rand AHE.
+Variables (v1 u1 u2 u3 : plain AHE).
+Variables (dk_a dk_b dk_c : priv_key AHE).
+Variables (w_rb2 w_rc2 : Renc).
+
+Local Notation DI := (Standard_DSDP_Interface AHE).
+Local Notation dsdp_trace_dataT := (dsdp_trace_dataT AHE).
+Local Notation pkey_of_dk := (pkey_of_dk dk_a dk_b dk_c).
+Local Notation V2 := (V2 (R:=R) (AHE:=AHE) card_renc).
+Local Notation V3 := (V3 (R:=R) (AHE:=AHE) card_renc).
+Local Notation AliceTrace :=
+  (AliceTrace (R:=R) card_renc rand_of_renc v1 u1 u2 u3
+     dk_a dk_b dk_c w_rb2 w_rc2).
+Local Notation alice_trace_ideal_joint :=
+  (alice_trace_ideal_joint (R:=R) card_renc rand_of_renc
+     v1 u1 u2 u3 dk_a dk_b dk_c w_rc2).
+Local Notation dsdp_trace_of_hop_tuple :=
+  (dsdp_trace_of_hop_tuple rand_of_renc v1 u1 u2 u3 dk_a dk_b dk_c w_rc2).
+Local Notation indcpa_fdist_epsilon :=
+  (indcpa_fdist_epsilon (R:=R) (AHE:=AHE) card_renc rand_of_renc).
+Local Notation hop0_reduction :=
+  (hop0_reduction (R:=R) (AHE:=AHE) card_renc rand_of_renc
+     pkey_of_dk v1 u1 u2 u3).
+Local Notation hop1_reduction :=
+  (hop1_reduction (R:=R) (AHE:=AHE) card_renc rand_of_renc
+     pkey_of_dk v1 u1 u2 u3).
+
+(* The fixed-key decoding of one encoded trace datum: plaintexts and
+   ciphertexts restored as themselves, the private-key mark restored as dk,
+   the public-key mark as pk.  There is no global inverse: the encoding
+   erases which key value each mark carried.
+   Naming: the [_of_] connective names the source the conversion reads,
+   after [trace_data_of_di_data], in the opposite direction. *)
+Definition di_data_of_trace_data (dk : priv_key AHE) (pk : pub_key AHE)
+    (x : dsdp_trace_dataT) : di_data DI :=
+  match x with
+  | inl (inl (inl m)) => di_data_of_plain DI m
+  | inl (inl (inr c)) => di_data_of_cipher DI c
+  | inl (inr _) => di_data_of_priv_key DI dk
+  | inr _ => di_data_of_pub_key DI pk
+  end.
+
+(* Alice's raw interpreter trace at one sample.  A plain function: di_data
+   DI is not a finType and no distribution on it is ever formed. *)
+Definition alice_raw_trace (s : dsdp_alice_sampleT AHE Renc) :
+    seq (di_data DI) :=
+  nth [::]
+      (run_interp 15 (dsdp_procs_of_sample (R:=R) card_renc rand_of_renc
+                        v1 u1 u2 u3 dk_a dk_b dk_c w_rb2 w_rc2 s)).2 0.
+
+(* The round trip on Alice's actual generated trace: decoding with her
+   private key restores the raw interpreter trace.  The public key pk is
+   universally quantified because her trace contains no public-key mark.
+   Naming: the [E] suffix marks the round-trip equation. *)
+Lemma alice_raw_trace_decodeE (pk : pub_key AHE)
+    (s : dsdp_alice_sampleT AHE Renc) :
+  map (di_data_of_trace_data dk_a pk) (AliceTrace s) = alice_raw_trace s.
+Proof.
+have -> : map (di_data_of_trace_data dk_a pk) (AliceTrace s)
+        = map (di_data_of_trace_data dk_a pk
+               \o @trace_data_of_di_data AHE)
+              (nth [::]
+                 (run_interp 15 (dsdp_procs_of_sample (R:=R) card_renc
+                    rand_of_renc v1 u1 u2 u3 dk_a dk_b dk_c w_rb2 w_rc2 s)).2
+                 0).
+  by rewrite map_comp.
+rewrite /alice_raw_trace /dsdp_procs_of_sample.
+by rewrite dsdp_run_traces_ok.
+Qed.
+
+(* The simulator-advantage bound for a Boolean test reading the raw
+   interpreter trace, via composition with the fixed-key decoder.
+   Naming: extends [dsdp_alice_trace_sim_advantage_fdist_le] with [raw]
+   marking the observation read; kept long to preserve the family
+   grouping. *)
+Corollary dsdp_alice_raw_trace_sim_advantage_fdist_le
+    (D_raw : plain AHE * plain AHE * seq (di_data DI) -> bool) :
+  `| Pr (alice_sample_fdist (R:=R) AHE card_renc)
+        [set t | D_raw (V2 t, V3 t, alice_raw_trace t)]
+     - Pr (fdistmap
+             (fun x : plain AHE * plain AHE * 15.-bseq dsdp_trace_dataT =>
+                D_raw (x.1.1, x.1.2,
+                       map (di_data_of_trace_data dk_a (pub_of_priv dk_a))
+                           x.2))
+             alice_trace_ideal_joint) [set true] |
+  <= indcpa_fdist_epsilon (pkey_of_dk Bob)
+       (hop0_reduction
+         (fun x => D_raw (x.1.1, x.1.2,
+            map (di_data_of_trace_data dk_a (pub_of_priv dk_a))
+                (dsdp_trace_of_hop_tuple x.2))))
+     + indcpa_fdist_epsilon (pkey_of_dk Charlie)
+       (hop1_reduction
+         (fun x => D_raw (x.1.1, x.1.2,
+            map (di_data_of_trace_data dk_a (pub_of_priv dk_a))
+                (dsdp_trace_of_hop_tuple x.2)))).
+Proof.
+set D := fun x : plain AHE * plain AHE * 15.-bseq dsdp_trace_dataT =>
+  D_raw (x.1.1, x.1.2,
+         map (di_data_of_trace_data dk_a (pub_of_priv dk_a)) x.2).
+have HrealE : Pr (`p_ [% V2, V3, AliceTrace]) [set x | D x]
+            = Pr (alice_sample_fdist (R:=R) AHE card_renc)
+                 [set t | D_raw (V2 t, V3 t, alice_raw_trace t)].
+  rewrite /dist_of_RV Pr_fdistmap_preim; apply: eq_bigl => t.
+  rewrite !inE.
+  by rewrite -(alice_raw_trace_decodeE (pub_of_priv dk_a)).
+rewrite -HrealE.
+exact: (dsdp_alice_trace_sim_advantage_fdist_le card_renc rand_of_renc
+          v1 u1 u2 u3 dk_a dk_b dk_c w_rb2 w_rc2 D).
+Qed.
+
+End dsdp_alice_raw_trace_sec.
