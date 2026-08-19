@@ -2518,8 +2518,9 @@ End cinde_RV_factor.
 Section pfwd1_comp_sum.
 Context {R : realType} {U : finType} {P : R.-fdist U}.
 
-(* The law of a recoded variable paired with a spectator is the sum of the
-   laws over the fibre of the recoding. *)
+(* The law of a recoded variable paired with a spectator, a variable the
+   statement carries along unchanged, is the sum of the laws over the fibre
+   of the recoding. *)
 Lemma pfwd1_comp_sum (B C D : finType) (V : {RV P -> B}) (W : {RV P -> C})
     (g : B -> D) (t : D) (w : C) :
   `Pr[ [% (g `o V), W] = (t, w) ]

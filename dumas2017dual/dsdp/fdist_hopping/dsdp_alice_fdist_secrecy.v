@@ -58,6 +58,51 @@ Require Import dsdp_program dsdp_entropy.
 (* law is a named theorem.  A distribution function F_X(r) = L_X(]-oo, r])    *)
 (* represents L_X on the real line.                                           *)
 (*                                                                            *)
+(* ## Terminology: spectator                                                  *)
+(*                                                                            *)
+(* A spectator is a random variable that a statement carries along unchanged. *)
+(* It rides in the tuple while the conclusion ranges over all of its values.  *)
+(* probability/proba.v and dumas2017dual/lib/extra_proba.v use the word in    *)
+(* that generic sense.                                                        *)
+(*                                                                            *)
+(* AliceSpectator is the spectator of this file: everything Alice's all-zero  *)
+(* view carries besides the leaked output, namely her two mask plaintexts,    *)
+(* her two combine randomnesses and the two ciphertext slots that encrypt     *)
+(* zero.  alice_spectator_law gives its law as the product of the mask law,   *)
+(* the combine randomness law and the two zero-plaintext encryption laws.     *)
+(* alice_spectator_indep states that it is independent of the two honest      *)
+(* inputs, and alice_spectator_cinde that it is conditionally independent of  *)
+(* Bob's input given the output.  dsdp_alice_simulator rebuilds that law from *)
+(* the output alone.                                                          *)
+(*                                                                            *)
+(* ## The state variants                                                      *)
+(*                                                                            *)
+(* Each hop challenges one ciphertext slot of Alice's view.  The adversary    *)
+(* state of that hop holds everything the view needs apart from the           *)
+(* challenged slot, which the IND-CPA challenge ciphertext fills.             *)
+(*                                                                            *)
+(*   Hop0State, of type hop0_stateT, holds the inputs, the masks, Alice's     *)
+(*   combine randomness and Rho3.  hop0_assemble puts the challenge in the    *)
+(*   Bob slot and builds the real Charlie ciphertext from Rho3.               *)
+(*                                                                            *)
+(*   Hop1State, of type hop1_stateT, holds the inputs, the masks, Alice's     *)
+(*   combine randomness and the hop-0 ciphertext of zero.  hop1_assemble      *)
+(*   puts the challenge in the Charlie slot and reuses that stored            *)
+(*   ciphertext in the Bob slot.                                              *)
+(*                                                                            *)
+(*   Hop1StatePre, of type hop0_stateT, holds Rho2 where Hop1State holds the  *)
+(*   hop-0 ciphertext.  hop1_state_of encrypts zero under Bob's key and       *)
+(*   carries it to Hop1State.                                                 *)
+(*                                                                            *)
+(* Hop0State and Hop1StatePre share the type hop0_stateT and differ in the    *)
+(* trailing slot: Hop0State carries Rho3, Hop1StatePre carries Rho2.          *)
+(*                                                                            *)
+(* The suffix Pre marks a random variable on raw sample coordinates that a    *)
+(* map named _of carries to the assembled variable, so uniformity and         *)
+(* independence are proved on the coordinates and transported by              *)
+(* inde_RV_comp.  AliceSpectatorPre pairs with alice_spectator_of the same    *)
+(* way, and AliceSpectatorPre2 with alice_spectator_prod.                     *)
+(*                                                                            *)
 (* ```                                                                        *)
 (*        dsdp_alice_sampleT == the sample space: the two honest inputs,      *)
 (*                              Alice's two masks, the two hop encryption     *)
@@ -110,10 +155,9 @@ Require Import dsdp_program dsdp_entropy.
 (*                              variable                                      *)
 (*    hop1_stateT, Hop1State == the adversary state of hop 1 and its random   *)
 (*                              variable                                      *)
-(*              Hop1PreState == the hop-1 state before the hop-0 slot is      *)
+(*              Hop1StatePre == the hop-1 state before the hop-0 slot is      *)
 (*                              encrypted                                     *)
-(*             hop1_state_of == the map carrying the hop-1 prestate to the    *)
-(*                              hop-1 state                                   *)
+(*             hop1_state_of == the map carrying Hop1StatePre to Hop1State    *)
 (*             hop0_assemble == the inputs and the view rebuilt from a hop-0  *)
 (*                              state and a ciphertext in the hop-0 slot      *)
 (*             hop1_assemble == the inputs and the view rebuilt from a hop-1  *)
@@ -499,19 +543,19 @@ Definition Hop1State : {RV alice_sample_fdist -> hop1_stateT} :=
 
 (* The hop-1 adversary state with the randomness of the hop-0 encryption in
    place of the ciphertext it produces. *)
-Definition Hop1PreState : {RV alice_sample_fdist -> hop0_stateT} :=
+Definition Hop1StatePre : {RV alice_sample_fdist -> hop0_stateT} :=
   fun t => (t.1.1.1, t.1.1.2, t.2, t.1.2.1).
 
-(* The map carrying a hop-1 prestate to the hop-1 state, encrypting zero in
-   the hop-0 slot. *)
+(* The map carrying Hop1StatePre to Hop1State, encrypting zero in the
+   hop-0 slot. *)
 Definition hop1_state_of (c : hop0_stateT) : hop1_stateT :=
   (c.1.1.1, c.1.1.2, c.1.2,
    enc (pkey_of_party Bob) 0 (rand_of_renc c.2)).
 
-(* The hop-1 prestate and the hop-1 encryption randomness are jointly
-   uniform. *)
-Lemma hop1_prestate_pair_uniformE :
-  `p_ [% Hop1PreState, Rho3]
+(* The hop-1 state before encryption and the hop-1 encryption randomness
+   are jointly uniform. *)
+Lemma hop1_state_pre_pair_uniformE :
+  `p_ [% Hop1StatePre, Rho3]
     = (fdist_uniform card_hop0_state) `x (fdist_uniform card_renc).
 Proof.
 rewrite -(fdist_uniform_prod card_hop0_state card_renc card_hop0_pair).
@@ -526,7 +570,7 @@ Qed.
 (* The hop-1 encryption randomness is uniform. *)
 Lemma rho3_uniformE : `p_ Rho3 = fdist_uniform card_renc.
 Proof.
-by rewrite -(snd_RV2 Hop1PreState Rho3) hop1_prestate_pair_uniformE fdist_prod2.
+by rewrite -(snd_RV2 Hop1StatePre Rho3) hop1_state_pre_pair_uniformE fdist_prod2.
 Qed.
 
 (* A joint law that factors as the product of its marginals is the law of an
@@ -541,10 +585,10 @@ Proof. by move=> H a b; rewrite -!dist_of_RVE H fdist_prodE. Qed.
 Lemma hop1_state_prod :
   `p_ [% Hop1State, Rho3] = (`p_ Hop1State) `x (fdist_uniform card_renc).
 Proof.
-have Hpre : alice_sample_fdist |= Hop1PreState _|_ Rho3.
+have Hpre : alice_sample_fdist |= Hop1StatePre _|_ Rho3.
   apply: inde_RV_of_prod.
-  by rewrite hop1_prestate_pair_uniformE -(fst_RV2 Hop1PreState Rho3)
-             hop1_prestate_pair_uniformE fdist_prod1 rho3_uniformE.
+  by rewrite hop1_state_pre_pair_uniformE -(fst_RV2 Hop1StatePre Rho3)
+             hop1_state_pre_pair_uniformE fdist_prod1 rho3_uniformE.
 have Hstate : alice_sample_fdist |= Hop1State _|_ Rho3.
   exact: (inde_RV_comp hop1_state_of idfun Hpre).
 by rewrite (inde_dist_of_RV2 Hstate) rho3_uniformE.
@@ -587,9 +631,10 @@ Definition hop1_reduction
      adv_plain := fun c => c.1.1.1.2 ;
      adv_decide := fun c ch => D (hop1_assemble c ch) |}.
 
-(* One hop of the ladder: a distinguisher reading a view assembled
-   around one encrypted slot succeeds with the probability of the reduction
-   whose state samples everything else. *)
+(* If State is independent of uniform encryption randomness and X is assembled
+   from State with the resulting ciphertext, then D has the same acceptance
+   probability on X as in the experiment that samples State and the ciphertext
+   separately. *)
 Lemma hop_challengeE (stateT : finType)
     (State : {RV alice_sample_fdist -> stateT})
     (Rho : {RV alice_sample_fdist -> Renc}) (pk : pub_key AHE)
