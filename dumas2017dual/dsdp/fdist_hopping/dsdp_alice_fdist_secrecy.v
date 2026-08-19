@@ -168,10 +168,18 @@ Require Import dsdp_program dsdp_entropy.
 (*                              key                                           *)
 (*          hop1_reduction D == the reduction of a distinguisher D to         *)
 (*                              Charlie's key                                 *)
-(*            hop_challengeE == a distinguisher reading a view assembled      *)
-(*                              around one encrypted slot succeeds with the   *)
-(*                              probability of the reduction whose state      *)
-(*                              samples everything else                       *)
+(*       hop_challenge_fdist == the joint law obtained by sampling a          *)
+(*                              reduction state and its challenge ciphertext  *)
+(*                              before reconstructing the tested value        *)
+(*      hop_challenge_fdistE == the law of a tested value assembled from a    *)
+(*                              reduction state and independent uniform       *)
+(*                              encryption randomness is that challenge law   *)
+(*     hop_challenge_acceptE == equal joint laws give equal acceptance        *)
+(*                              probabilities for every Boolean test          *)
+(*    hop_challenge_successE == the challenge law tested by a distinguisher   *)
+(*                              is the state law bound with the pushforward   *)
+(*                              of that distinguisher along each challenge    *)
+(*                              law                                           *)
 (*        V1c, U1c, U2c, U3c == Alice's four protocol weights as constant     *)
 (*                              random variables                              *)
 (*      alice_spectator_preT == the sample coordinates Alice's hopping        *)
@@ -529,7 +537,7 @@ Qed.
 
 (* The hop-0 encryption randomness is uniform and independent of the hop-0
    state. *)
-Lemma hop0_state_prod :
+Lemma hop0_state_prodE :
   `p_ [% Hop0State, Rho2] = (`p_ Hop0State) `x (fdist_uniform card_renc).
 Proof.
 by rewrite -(fst_RV2 Hop0State Rho2) !hop0_pair_uniformE fdist_prod1.
@@ -586,7 +594,7 @@ Proof. by move=> H a b; rewrite -!dist_of_RVE H fdist_prodE. Qed.
 
 (* The hop-1 encryption randomness is uniform and independent of the hop-1
    state. *)
-Lemma hop1_state_prod :
+Lemma hop1_state_prodE :
   `p_ [% Hop1State, Rho3] = (`p_ Hop1State) `x (fdist_uniform card_renc).
 Proof.
 have Hpre : alice_sample_fdist |= Hop1StatePre _|_ Rho3.
@@ -633,40 +641,73 @@ Definition hop1_reduction (D : alice_hop_jointT -> bool) :
      adv_plain := fun c => c.1.1.1.2 ;
      adv_decide := fun c ch => D (hop1_assemble c ch) |}.
 
-(* If State is independent of uniform encryption randomness and X is assembled
-   from State with the resulting ciphertext, then D has the same acceptance
-   probability on X as in the experiment that samples State and the ciphertext
-   separately. *)
-Lemma hop_challengeE (stateT : finType)
-    (State : {RV alice_sample_fdist -> stateT})
-    (Rho : {RV alice_sample_fdist -> Renc}) (pk : pub_key AHE)
-    (p : stateT -> plain AHE)
-    (asm : stateT -> cipher AHE ->
-             plain AHE * plain AHE * dsdp_alice_hop_tupleT)
-    (X : {RV alice_sample_fdist ->
-            (plain AHE * plain AHE * dsdp_alice_hop_tupleT)%type})
-    (D : plain AHE * plain AHE * dsdp_alice_hop_tupleT -> bool) :
-  `p_ [% State, Rho] = (`p_ State) `x (fdist_uniform card_renc) ->
-  (forall t, X t = asm (State t)
-     (enc pk (p (State t)) (rand_of_renc (Rho t)))) ->
-  Pr (`p_ X) [set x | D x]
-  = Pr (`p_ State >>= (fun c => fdistmap (fun ch => D (asm c ch))
-                                  (enc_fdist pk (p c)))) [set true].
+Section hop_challenge.
+
+Variable stateT : finType.
+Variables
+  (State : {RV alice_sample_fdist -> stateT})
+  (Rho : {RV alice_sample_fdist -> Renc}).
+Variable pk : pub_key AHE.
+Variable msg : stateT -> plain AHE.
+
+(* [assemble c ch] reconstructs the complete joint value tested by a
+   distinguisher from reduction state c and challenge ciphertext ch. *)
+Variable assemble : stateT -> cipher AHE -> alice_hop_jointT.
+
+Variable X : {RV alice_sample_fdist -> alice_hop_jointT}.
+
+Hypothesis state_rho_prodE :
+  `p_ [% State, Rho] = (`p_ State) `x (fdist_uniform card_renc).
+
+Hypothesis X_assembleE : forall t,
+  X t = assemble (State t) (enc pk (msg (State t)) (rand_of_renc (Rho t))).
+
+(* The joint law obtained by sampling a reduction state and its challenge
+   ciphertext before reconstructing the tested value. *)
+Definition hop_challenge_fdist : R.-fdist alice_hop_jointT :=
+  c  <- `p_ State ;
+  ch <- enc_fdist pk (msg c) ;
+  ret (assemble c ch).
+
+(* The protocol-game law from one complete protocol sample equals the
+   reduction-game law obtained by separately sampling the reduction state and
+   fresh uniform encryption randomness, then applying the same deterministic
+   encryption and assembly functions. *)
+Lemma hop_challenge_fdistE : `p_ X = hop_challenge_fdist.
 Proof.
-move=> Hprod HX.
-rewrite -Pr_fdistmap_bool.
-have -> : fdistmap D (`p_ X)
-        = fdistmap (fun q : stateT * cipher AHE => D (asm q.1 q.2))
-                   (`p_ [% State,
-                         (fun t => enc pk (p (State t)) (rand_of_renc (Rho t)))
-                           : {RV alice_sample_fdist -> cipher AHE}]).
+have -> : `p_ X
+        = fdistmap (fun q : stateT * cipher AHE => assemble q.1 q.2)
+            (`p_ [% State,
+                  (fun t => enc pk (msg (State t)) (rand_of_renc (Rho t)))
+                    : {RV alice_sample_fdist -> cipher AHE}]).
   rewrite /dist_of_RV !fdistmap_comp; congr fdistmap.
-  by apply/boolp.funext => t; rewrite /= HX.
-rewrite (enc_slot_resampleE (fun c r => enc pk (p c) (rand_of_renc r)) Hprod)
-        fdist_prod_bindE fdistmap_bind.
-congr (Pr _ _); congr (_ >>= _); apply/boolp.funext => c.
-by rewrite /enc_fdist !fdistmap_comp.
+  by apply/boolp.funext => t; rewrite /= X_assembleE.
+rewrite (enc_slot_resampleE (fun c r => enc pk (msg c) (rand_of_renc r))
+           state_rho_prodE) fdist_prod_bindE fdistmap_bind.
+congr (_ >>= _); apply/boolp.funext => c.
+by rewrite -/(fdistmap (assemble c) (enc_fdist pk (msg c))) !fdistmap_comp.
 Qed.
+
+(* Equal joint laws give equal acceptance probabilities for every Boolean
+   test. *)
+Corollary hop_challenge_acceptE (D : alice_hop_jointT -> bool) :
+  Pr (`p_ X) [set x | D x]
+  = Pr hop_challenge_fdist [set x | D x].
+Proof. by rewrite hop_challenge_fdistE. Qed.
+
+(* The challenge law tested by D is the state law bound with the pushforward
+   of D along each challenge law. *)
+Lemma hop_challenge_successE (D : alice_hop_jointT -> bool) :
+  Pr hop_challenge_fdist [set x | D x]
+  = Pr (`p_ State >>= (fun c => fdistmap (fun ch => D (assemble c ch))
+                                  (enc_fdist pk (msg c)))) [set true].
+Proof.
+rewrite -Pr_fdistmap_bool /hop_challenge_fdist fdistmap_bind.
+congr (Pr _ _); congr (_ >>= _); apply/boolp.funext => c.
+by rewrite -/(fdistmap (assemble c) (enc_fdist pk (msg c))) fdistmap_comp.
+Qed.
+
+End hop_challenge.
 
 (* The distinguisher on the real view is the hop-0 reduction facing an
    encryption of the first input. *)
@@ -675,11 +716,11 @@ Lemma hop0_real_challengeE (D : alice_hop_jointT -> bool) :
     = indcpa_fdist_success_real (pkey_of_party Bob) (hop0_reduction D).
 Proof.
 rewrite alice_hop_game_successE.
-rewrite (hop_challengeE (pk := pkey_of_party Bob)
-    (p := fun c : hop0_stateT => c.1.1.1.1)
-    (asm := hop0_assemble) D hop0_state_prod); last first.
+rewrite (hop_challenge_acceptE (pk := pkey_of_party Bob)
+    (msg := fun c : hop0_stateT => c.1.1.1.1)
+    (assemble := hop0_assemble) hop0_state_prodE); last first.
   by move=> -[[[[v2 v3] [r2 r3]] [rho2 rho3]] [ra1 ra2]].
-by rewrite indcpa_fdist_success_realE.
+by rewrite hop_challenge_successE indcpa_fdist_success_realE.
 Qed.
 
 (* The distinguisher on the view with a zeroed hop-0 slot is the hop-0
@@ -689,11 +730,11 @@ Lemma hop0_zero_challengeE (D : alice_hop_jointT -> bool) :
     = indcpa_fdist_success_zero (pkey_of_party Bob) (hop0_reduction D).
 Proof.
 rewrite alice_hop_game_successE.
-rewrite (hop_challengeE (pk := pkey_of_party Bob)
-    (p := fun _ : hop0_stateT => 0)
-    (asm := hop0_assemble) D hop0_state_prod); last first.
+rewrite (hop_challenge_acceptE (pk := pkey_of_party Bob)
+    (msg := fun _ : hop0_stateT => 0)
+    (assemble := hop0_assemble) hop0_state_prodE); last first.
   by move=> -[[[[v2 v3] [r2 r3]] [rho2 rho3]] [ra1 ra2]].
-by rewrite indcpa_fdist_success_zeroE.
+by rewrite hop_challenge_successE indcpa_fdist_success_zeroE.
 Qed.
 
 (* Zeroing the hop-0 slot of the view moves the distinguishing probability by
@@ -712,11 +753,11 @@ Lemma hop1_real_challengeE (D : alice_hop_jointT -> bool) :
     = indcpa_fdist_success_real (pkey_of_party Charlie) (hop1_reduction D).
 Proof.
 rewrite alice_hop_game_successE.
-rewrite (hop_challengeE (pk := pkey_of_party Charlie)
-    (p := fun c : hop1_stateT => c.1.1.1.2)
-    (asm := hop1_assemble) D hop1_state_prod); last first.
+rewrite (hop_challenge_acceptE (pk := pkey_of_party Charlie)
+    (msg := fun c : hop1_stateT => c.1.1.1.2)
+    (assemble := hop1_assemble) hop1_state_prodE); last first.
   by move=> -[[[[v2 v3] [r2 r3]] [rho2 rho3]] [ra1 ra2]].
-by rewrite indcpa_fdist_success_realE.
+by rewrite hop_challenge_successE indcpa_fdist_success_realE.
 Qed.
 
 (* The distinguisher on the all-zero view is the hop-1 reduction facing an
@@ -726,11 +767,11 @@ Lemma hop1_zero_challengeE (D : alice_hop_jointT -> bool) :
     = indcpa_fdist_success_zero (pkey_of_party Charlie) (hop1_reduction D).
 Proof.
 rewrite alice_hop_game_successE.
-rewrite (hop_challengeE (pk := pkey_of_party Charlie)
-    (p := fun _ : hop1_stateT => 0)
-    (asm := hop1_assemble) D hop1_state_prod); last first.
+rewrite (hop_challenge_acceptE (pk := pkey_of_party Charlie)
+    (msg := fun _ : hop1_stateT => 0)
+    (assemble := hop1_assemble) hop1_state_prodE); last first.
   by move=> -[[[[v2 v3] [r2 r3]] [rho2 rho3]] [ra1 ra2]].
-by rewrite indcpa_fdist_success_zeroE.
+by rewrite hop_challenge_successE indcpa_fdist_success_zeroE.
 Qed.
 
 (* Zeroing the hop-1 slot of the view moves the distinguishing probability by
