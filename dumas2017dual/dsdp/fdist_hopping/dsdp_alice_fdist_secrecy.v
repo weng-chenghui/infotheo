@@ -469,29 +469,41 @@ Definition indcpa_fdist_epsilon (pk : pub_key AHE)
     (adv : indcpa_fdist_adversary) : R :=
   `| indcpa_fdist_success_real pk adv - indcpa_fdist_success_zero pk adv |.
 
+Section enc_slot_resample.
+
+Variable stateT : finType.
+Variable Q : R.-fdist stateT.
+Variables
+  (State : {RV alice_sample_fdist -> stateT})
+  (Rho : {RV alice_sample_fdist -> Renc}).
+Variable k : stateT -> Renc -> cipher AHE.
+
+(* The state and selected coordinate have the product of Q and the uniform
+   coordinate law. *)
+Hypothesis state_rho_prodE :
+  `p_ [% State, Rho] = Q `x (fdist_uniform card_renc).
+
 (* The law of a state paired with a slot computed from the state and a
    coordinate disjoint from the state is the law of the state with the
    stochastic map that resamples the coordinate. *)
-Lemma enc_slot_resampleE (stateT : finType) (Q : R.-fdist stateT)
-    (State : {RV alice_sample_fdist -> stateT})
-    (Rho : {RV alice_sample_fdist -> Renc})
-    (k : stateT -> Renc -> cipher AHE) :
-  `p_ [% State, Rho] = Q `x (fdist_uniform card_renc) ->
+Lemma enc_slot_resampleE :
   `p_ [% State, (fun t => k (State t) (Rho t))
         : {RV alice_sample_fdist -> cipher AHE}]
-    = Q `X (fun a => fdistmap (k a) (fdist_uniform card_renc)).
+  = Q `X (fun a => fdistmap (k a) (fdist_uniform card_renc)).
 Proof.
-move=> Hprod.
 have HL : `p_ [% State, (fun t => k (State t) (Rho t))
                 : {RV alice_sample_fdist -> cipher AHE}]
         = fdistmap (fun p : (stateT * Renc)%type => (p.1, k p.1 p.2))
                    (`p_ [% State, Rho]).
   by rewrite /dist_of_RV fdistmap_comp.
-rewrite HL Hprod [in RHS]fdist_prod_bindE fdist_prod_bindE fdistmap_bind.
+rewrite HL state_rho_prodE [in RHS]fdist_prod_bindE fdist_prod_bindE
+        fdistmap_bind.
 congr (_ >>= _); apply/boolp.funext => a.
 rewrite !fdistmap_comp.
 congr fdistmap; exact/boolp.funext.
 Qed.
+
+End enc_slot_resample.
 
 Let card_sample : #|dsdp_alice_sampleT| = #|dsdp_alice_sampleT|.-1.+1.
 Proof. exact: fdist_card_prednK alice_sample_fdist. Qed.
@@ -1203,29 +1215,39 @@ Definition alice_spectator_of_hop_tuple (v : dsdp_alice_hop_tupleT) :
      * cipher AHE)%type :=
   (v.1.1.1.1, v.1.1.1.2, v.1.2, v.2).
 
+Section alice_hop_tuple_all_zero_mass.
+
+Variable BT : finType.
+Variable W : {RV alice_sample_fdist -> BT}.
+Variable v : dsdp_alice_hop_tupleT.
+Variables (w : BT) (s : plain AHE).
+
+(* On the event W = w, the leaked output equals s. *)
+Hypothesis W_determines_Sout :
+  forall t, W t = w -> Sout t = s.
+
 (* On a conditioning event that determines the leaked output, the joint mass of
    Alice's all-zero view splits into the leaked-output indicator times the joint
    mass of the spectator. *)
-Lemma alice_hop_tuple_all_zero_pfwd1E (BT : finType)
-    (W : {RV alice_sample_fdist -> BT}) (v : dsdp_alice_hop_tupleT) (w : BT)
-    (s : plain AHE) :
-  (forall t, W t = w -> Sout t = s) ->
+Lemma alice_hop_tuple_all_zero_pfwd1E :
   pfwd1 [% (AliceHopTuple 2), W] (v, w)
   = (v.1.1.2 == s)%:R
     * pfwd1 [% AliceSpectator, W] (alice_spectator_of_hop_tuple v, w).
 Proof.
-move=> HW; case: v => [[[[m ra] sv] c2] c3].
+case: v => [[[[m ra] sv] c2] c3].
 rewrite /alice_spectator_of_hop_tuple /=.
 case: (eqVneq sv s) => [->|Hne]; last first.
   rewrite mul0r pfwd1E (_ : finset _ = set0) ?Pr_set0 //.
   apply/setP => t; rewrite !inE; apply/negbTE; apply: contra Hne.
   rewrite !xpair_eqE => /andP[/andP[/andP[/andP[_ Hsv] _] _] Hw].
-  by rewrite -(eqP Hsv) (HW t (eqP Hw)).
+  by rewrite -(eqP Hsv) (W_determines_Sout (eqP Hw)).
 rewrite mul1r !pfwd1E; congr (Pr _ _).
 apply/setP => t; rewrite !inE !xpair_eqE.
 case: (W t =P w) => [Ew|_]; last by rewrite !andbF.
-by rewrite (HW t Ew) eqxx !andbT.
+by rewrite (W_determines_Sout Ew) eqxx !andbT.
 Qed.
+
+End alice_hop_tuple_all_zero_mass.
 
 (* Conditioned on the two secret inputs, Alice's all-zero view follows the
    simulator law fed the leaked output of those inputs.
