@@ -682,12 +682,11 @@ have -> : `p_ X
             (`p_ [% State,
                   (fun t => enc pk (msg (State t)) (rand_of_renc (Rho t)))
                     : {RV alice_sample_fdist -> cipher AHE}]).
-  rewrite /dist_of_RV !fdistmap_comp; congr fdistmap.
-  by apply/boolp.funext => t; rewrite /= X_assembleE.
+  by rewrite /dist_of_RV fdistmap_comp; congr fdistmap; exact/boolp.funext.
 rewrite (enc_slot_resampleE (fun c r => enc pk (msg c) (rand_of_renc r))
            state_rho_prodE) fdist_prod_bindE fdistmap_bind.
 congr (_ >>= _); apply/boolp.funext => c.
-by rewrite -/(fdistmap (assemble c) (enc_fdist pk (msg c))) !fdistmap_comp.
+by rewrite -/(fdistmap (assemble c) (enc_fdist pk (msg c))) fdistmap_comp.
 Qed.
 
 (* Equal joint laws give equal acceptance probabilities for every Boolean
