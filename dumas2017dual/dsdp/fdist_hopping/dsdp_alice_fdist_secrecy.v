@@ -160,10 +160,12 @@ Require Import dsdp_program dsdp_entropy.
 (*              Hop1StatePre == the hop-1 state before the hop-0 slot is      *)
 (*                              encrypted                                     *)
 (*             hop1_state_of == the map carrying Hop1StatePre to Hop1State    *)
-(*             hop0_assemble == the inputs and the view rebuilt from a hop-0  *)
-(*                              state and a ciphertext in the hop-0 slot      *)
-(*             hop1_assemble == the inputs and the view rebuilt from a hop-1  *)
-(*                              state and a ciphertext in the hop-1 slot      *)
+(*             hop0_assemble == the tested joint value reconstructed from a   *)
+(*                              hop-0 reduction state and Bob's challenge     *)
+(*                              ciphertext                                    *)
+(*             hop1_assemble == the tested joint value reconstructed from a   *)
+(*                              hop-1 reduction state and Charlie's challenge *)
+(*                              ciphertext                                    *)
 (*          hop0_reduction D == the reduction of a distinguisher D to Bob's   *)
 (*                              key                                           *)
 (*          hop1_reduction D == the reduction of a distinguisher D to         *)
@@ -606,8 +608,8 @@ have Hstate : alice_sample_fdist |= Hop1State _|_ Rho3.
 by rewrite (inde_dist_of_RV2 Hstate) rho3_uniformE.
 Qed.
 
-(* The inputs and the view rebuilt from a hop-0 state and a ciphertext in
-   the hop-0 slot. *)
+(* The tested hop-0 joint value formed by placing ch in Bob's ciphertext slot
+   and constructing Charlie's ciphertext from the stored randomness. *)
 Definition hop0_assemble (c : hop0_stateT) (ch : cipher AHE) :
     alice_hop_jointT :=
   let: (vv, masks, ra, rho3) := c in
@@ -615,8 +617,8 @@ Definition hop0_assemble (c : hop0_stateT) (ch : cipher AHE) :
    (masks, ra, dsdp_output v1 u1 u2 u3 vv.1 vv.2, ch,
     enc (pkey_of_party Charlie) vv.2 (rand_of_renc rho3))).
 
-(* The inputs and the view rebuilt from a hop-1 state and a ciphertext in
-   the hop-1 slot. *)
+(* The tested hop-1 joint value formed by retaining Bob's stored zero
+   ciphertext and placing ch in Charlie's ciphertext slot. *)
 Definition hop1_assemble (c : hop1_stateT) (ch : cipher AHE) :
     alice_hop_jointT :=
   let: (vv, masks, ra, c2zero) := c in
