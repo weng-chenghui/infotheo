@@ -592,8 +592,8 @@ Section fdist_glue.
 
 Context {R : realType}.
 
-(* A product distribution with kernel is the bind of the first factor with the
-   pairing of each first coordinate. *)
+(* A product distribution with a stochastic map is the bind of the first
+   factor with the pairing of each first coordinate. *)
 Lemma fdist_prod_bindE (T1 T2 : finType) (Q1 : R.-fdist T1)
     (W : T1 -> R.-fdist T2) :
   (Q1 `X W) = Q1 >>= (fun a => fdistmap (fun b => (a, b)) (W a)).

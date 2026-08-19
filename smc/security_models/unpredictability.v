@@ -2,7 +2,7 @@
 (* Copyright (C) 2025 infotheo authors, license: LGPL-2.1-or-later            *)
 From mathcomp Require Import all_boot all_order ssralg ssrnum reals.
 Require Import realType_ext realType_ln fdist proba.
-Require Import finstoch statdist privacy_kernel.
+Require Import finstoch statdist privacy_model.
 
 (**md**************************************************************************)
 (* # T-relative unpredictability                                              *)

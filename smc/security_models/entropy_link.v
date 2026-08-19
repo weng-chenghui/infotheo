@@ -3,7 +3,7 @@
 From mathcomp Require Import all_ssreflect all_algebra reals.
 Require Import realType_ext realType_ln ssr_ext bigop_ext fdist fdist_extra proba.
 Require Import jfdist_cond entropy graphoid.
-Require Import finstoch privacy_kernel.
+Require Import finstoch privacy_model.
 
 (**md**************************************************************************)
 (* # The conditional-entropy characterization of perfect privacy              *)
@@ -51,7 +51,7 @@ Require Import finstoch privacy_kernel.
 (* output_independent_determined == output-determined delivery at every       *)
 (*                                  execution of positive mass discharges it  *)
 (*  triangle_perfect_privacyP == the privacy triangle at a simulator is the   *)
-(*                               perfect privacy of the privacy kernel at     *)
+(*                               perfect privacy of the privacy model at      *)
 (*                               that simulator                               *)
 (*            pair_readoff == Lindell's joint comparison of the real and the  *)
 (*                            ideal pair of a view with a delivered output    *)
@@ -864,7 +864,7 @@ Variable P_Omega : R.-fdist Omega.
 Variable view_at : X * Omega -> Bv.
 
 (* The privacy triangle at a simulator is the perfect privacy of the privacy
-   kernel at that simulator.
+   model at that simulator.
    Naming: P = iff characterization, ffunP/setP precedent. *)
 Lemma triangle_perfect_privacyP (Sim : Xa * Ya -> R.-fdist Bv) :
   triangle proj_xa proj_ya F P_Omega view_at Sim

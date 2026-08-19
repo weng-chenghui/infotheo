@@ -4,7 +4,7 @@ From mathcomp Require Import all_boot all_order ssralg ssrnum reals.
 Require Import fdist finstoch statdist.
 
 (**md**************************************************************************)
-(* # The privacy kernel                                                       *)
+(* # The privacy model                                                        *)
 (*                                                                            *)
 (* A protocol is presented by an ideal functionality F on the inputs X, an    *)
 (* ancilla law P_Omega, an observation view_at and a run map on the           *)
@@ -92,7 +92,7 @@ Import Prenex Implicits.
 Local Open Scope ring_scope.
 Local Open Scope fdist_scope.
 
-Section kernel.
+Section privacy_model.
 Context {R : realType}.
 Variables X Yfull Y Xa Ya Bv Omega : finType.
 Variable f : X -> Y.
@@ -269,7 +269,7 @@ apply: le_trans (adv_triangle _ _ _ (H x)) _.
 by apply: lerD; [exact: h_game|exact: h_sim].
 Qed.
 
-End kernel.
+End privacy_model.
 
 (* The identity protocol on a two-point input space: the ideal functionality
    delivers the input, the ancilla space is a point, and the adversary sees

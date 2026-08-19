@@ -375,8 +375,8 @@ Local Open Scope ring_scope.
 Variable R : realType.
 Variables (A B : finType).
 
-(* A predicate carried by every kernel of a bind at the points of positive mass
-   of the bound distribution is carried by the bind. *)
+(* A predicate carried by the stochastic map of a bind at the points of
+   positive mass of the bound distribution is carried by the bind. *)
 Lemma fdistbind_neq0_pred (p : fdist R A) (g : A -> fdist R B) (Q : pred B) :
   (forall a, p a != 0 -> forall b, g a b != 0 -> Q b) ->
   forall b, (p >>= g) b != 0 -> Q b.

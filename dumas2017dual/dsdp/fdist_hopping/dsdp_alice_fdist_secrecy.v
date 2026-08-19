@@ -88,7 +88,7 @@ Require Import dsdp_program dsdp_entropy.
 (*            enc_fdist pk v == the law of an encryption of v under pk with   *)
 (*                              uniform randomness                            *)
 (*                x <- m ; f == a sampling step of an experiment, the bind    *)
-(*                              of a distribution with a kernel               *)
+(*                              of a distribution with a stochastic map       *)
 (*                     ret a == the Dirac distribution at a                   *)
 (*    indcpa_fdist_adversary == a single-query real-or-zero adversary: a      *)
 (*                              state type adv_state, a law adv_choose over   *)
@@ -104,8 +104,8 @@ Require Import dsdp_program dsdp_entropy.
 (*                              probabilities                                 *)
 (*        enc_slot_resampleE == the law of a state paired with a slot         *)
 (*                              computed from the state and a coordinate      *)
-(*                              disjoint from the state factors as a kernel   *)
-(*                              resampling that coordinate                    *)
+(*                              disjoint from the state factors as a          *)
+(*                              stochastic map resampling that coordinate     *)
 (*    hop0_stateT, Hop0State == the adversary state of hop 0 and its random   *)
 (*                              variable                                      *)
 (*    hop1_stateT, Hop1State == the adversary state of hop 1 and its random   *)
@@ -336,7 +336,7 @@ Definition enc_fdist (pk : pub_key AHE) (v : plain AHE) :
   fdistmap (fun r => enc pk v (rand_of_renc r)) (fdist_uniform card_renc).
 
 (* A sampling step of an experiment, the bind of a distribution with a
-   kernel. *)
+   stochastic map. *)
 Local Notation "x '<-' m ';' f" := (m >>= (fun x => f))
   (at level 100, right associativity,
    format "'[v' x  '<-'  m ;  '//' f ']'") : fdist_scope.
@@ -413,7 +413,7 @@ Definition indcpa_fdist_epsilon (pk : pub_key AHE)
 
 (* The law of a state paired with a slot computed from the state and a
    coordinate disjoint from the state is the law of the state with the
-   kernel that resamples the coordinate. *)
+   stochastic map that resamples the coordinate. *)
 Lemma enc_slot_resampleE (stateT : finType) (Q : R.-fdist stateT)
     (State : {RV alice_sample_fdist -> stateT})
     (Rho : {RV alice_sample_fdist -> Renc})
@@ -587,7 +587,7 @@ Definition hop1_reduction
      adv_plain := fun c => c.1.1.1.2 ;
      adv_decide := fun c ch => D (hop1_assemble c ch) |}.
 
-(* One rung of the hop ladder: a distinguisher reading a view assembled
+(* One hop of the ladder: a distinguisher reading a view assembled
    around one encrypted slot succeeds with the probability of the reduction
    whose state samples everything else. *)
 Lemma hop_challengeE (stateT : finType)

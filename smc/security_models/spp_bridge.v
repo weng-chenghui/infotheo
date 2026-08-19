@@ -9,12 +9,12 @@ Require Import smc_interpreter spp_tactics smc_session_types.
 Require Import spp_interface spp_program spp_pismc spp_proof spp_simulator.
 
 (**md**************************************************************************)
-(* # The scalar-product protocol as a privacy-kernel instance                 *)
+(* # The scalar-product protocol as a privacy-model instance                  *)
 (*                                                                            *)
 (* A random variable whose conditional law on every mass-carrying fibre of a  *)
-(* second random variable is a kernel at that fibre has, as its own law, the  *)
-(* law of the second variable bound through the kernel.  Applied to the       *)
-(* corrupted-Bob view of the scalar-product protocol this turns the           *)
+(* second random variable is a stochastic map at that fibre has, as its own   *)
+(* law, the law of the second variable bound through that map.  Applied to    *)
+(* the corrupted-Bob view of the scalar-product protocol this turns the       *)
 (* conditional-law statement of the privacy triangle into the factorization   *)
 (* of the view law through Bob's inputs, and applied to the delivered output  *)
 (* shares it turns the protocol's independence and uniformity facts into the  *)
