@@ -1218,7 +1218,7 @@ Variable v : dsdp_alice_hop_tupleT.
 Variables (w : BT) (s : plain AHE).
 
 (* On the event W = w, the leaked output equals s. *)
-Hypothesis W_determines_Sout :
+Hypothesis Sout_determinedE :
   forall t, W t = w -> Sout t = s.
 
 (* On a conditioning event that determines the leaked output, the joint mass of
@@ -1235,11 +1235,11 @@ case: (eqVneq sv s) => [->|Hne]; last first.
   rewrite mul0r pfwd1E (_ : finset _ = set0) ?Pr_set0 //.
   apply/setP => t; rewrite !inE; apply/negbTE; apply: contra Hne.
   rewrite !xpair_eqE => /andP[/andP[/andP[/andP[_ Hsv] _] _] Hw].
-  by rewrite -(eqP Hsv) (W_determines_Sout (eqP Hw)).
+  by rewrite -(eqP Hsv) (Sout_determinedE (eqP Hw)).
 rewrite mul1r !pfwd1E; congr (Pr _ _).
 apply/setP => t; rewrite !inE !xpair_eqE.
 case: (W t =P w) => [Ew|_]; last by rewrite !andbF.
-by rewrite (W_determines_Sout Ew) eqxx !andbT.
+by rewrite (Sout_determinedE Ew) eqxx !andbT.
 Qed.
 
 End alice_hop_tuple_all_zero_mass.
