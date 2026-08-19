@@ -2,13 +2,13 @@
 (* Copyright (C) 2025 infotheo authors, license: LGPL-2.1-or-later            *)
 From mathcomp Require Import all_boot all_order all_algebra reals lra.
 Require Import realType_ext realType_ln fdist fdist_extra proba variation_dist entropy.
-Require Import finstoch statdist privacy_kernel entropy_link.
+Require Import finstoch statdist privacy_model entropy_link.
 
 (**md**************************************************************************)
-(* # Worked examples of the privacy kernel                                    *)
+(* # Worked examples of the privacy model                                     *)
 (*                                                                            *)
 (* The additive mask on the three-element field is the smallest instance of   *)
-(* the privacy kernel that separates the three verdicts: a uniform mask sends *)
+(* the privacy model that separates the three verdicts: a uniform mask sends  *)
 (* every input to the uniform law, the biased mask (1/2, 1/4, 1/4) keeps the  *)
 (* view within statistical distance 6^-1 of that law, and with no mask the    *)
 (* view is the input itself, which two inputs with the same allowed           *)
@@ -1096,9 +1096,9 @@ by case: w => w1 w2; rewrite /P_Omega tensorE /unif2 !fdist_uniformE card_F2
   -invfM -natrM.
 Qed.
 
-(* The view kernel at an input is the ancilla law on the two shares the
+(* The view law at an input is the ancilla law on the two shares the
    adversary sees, at its own bit. *)
-Lemma view_kernelE (c a s t : F2) :
+Lemma view_massE (c a s t : F2) :
   fdistmap (fun w : F2 * F2 => ((c, w.1), w.2)) P_Omega ((a, s), t)
   = (c == a)%:R * 4%:R^-1.
 Proof.
@@ -1109,9 +1109,9 @@ rewrite mul1r (big_pred1 (s, t)); first exact: P_OmegaE.
 by move=> -[w1 w2]; rewrite !inE !xpair_eqE/= eqxx.
 Qed.
 
-(* The allowed-information kernel at an input is the uniform law on the
+(* The allowed-information law at an input is the uniform law on the
    adversary's share, at its own bit. *)
-Lemma allow_kernelE (c a s : F2) :
+Lemma allow_massE (c a s : F2) :
   fdistmap (fun w : F2 * F2 => (c, w.1)) P_Omega (a, s) = (c == a)%:R * 2%:R^-1.
 Proof.
 have -> : fdistmap (fun w : F2 * F2 => (c, w.1)) P_Omega
@@ -1133,9 +1133,9 @@ move=> x; apply/fdist_ext => -[[a s] t].
 have -> : fdistmap (fun yl => (proj_xa x, proj_ya yl)) (functionality x)
         = fdistmap (fun w : F2 * F2 => (proj_xa x, w.1)) P_Omega.
   by rewrite /functionality fdistmap_comp; apply: eq_fdistmap.
-rewrite [LHS]view_kernelE fdistbindE (bigD1 (a, s))//= big1 ?addr0; last first.
+rewrite [LHS]view_massE fdistbindE (bigD1 (a, s))//= big1 ?addr0; last first.
   by move=> b bne; rewrite /sim tensorE fdist1E eq_sym (negbTE bne) mul0r mulr0.
-rewrite allow_kernelE /sim tensorE fdist1E eqxx mul1r.
+rewrite allow_massE /sim tensorE fdist1E eqxx mul1r.
 by rewrite /unif2 fdist_uniformE card_F2 -mulrA -invfM -natrM.
 Qed.
 
@@ -1933,9 +1933,9 @@ case: w => -[w1 w2] r; rewrite /P_Omega !tensorE /unif2 !fdist_uniformE.
 by rewrite card_F2 -!invfM -!natrM.
 Qed.
 
-(* The view kernel at an input is the coin law on the share and the key the
+(* The view law at an input is the coin law on the share and the key the
    adversary sees, at its own bit. *)
-Lemma view_kernelE (c a s t : F2) :
+Lemma view_massE (c a s t : F2) :
   fdistmap (fun w : Om => ((c, w.1.1), w.2)) P_Omega ((a, s), t)
   = (c == a)%:R * 4%:R^-1.
 Proof.
@@ -1949,9 +1949,9 @@ case: (c == a); last by rewrite cards0 !mulr0n.
 by rewrite !cardsX !cards1 cardsT card_F2 !mulr1n mulr2n; lra.
 Qed.
 
-(* The allowed-information kernel at an input is the uniform law on the
+(* The allowed-information law at an input is the uniform law on the
    adversary's share, at its own bit. *)
-Lemma allow_kernelE (c a s : F2) :
+Lemma allow_massE (c a s : F2) :
   fdistmap (fun w : Om => (c, w.1.1)) P_Omega (a, s) = (c == a)%:R * 2%:R^-1.
 Proof.
 have -> : fdistmap (fun w : Om => (c, w.1.1)) P_Omega
@@ -1973,9 +1973,9 @@ move=> x; apply/fdist_ext => -[[a s] t].
 have -> : fdistmap (fun yl => (proj_xa x, proj_ya yl)) (functionality x)
         = fdistmap (fun w : Om => (proj_xa x, w.1.1)) P_Omega.
   by rewrite /functionality fdistmap_comp; apply: eq_fdistmap.
-rewrite [LHS]view_kernelE fdistbindE (bigD1 (a, s))//= big1 ?addr0; last first.
+rewrite [LHS]view_massE fdistbindE (bigD1 (a, s))//= big1 ?addr0; last first.
   by move=> b bne; rewrite /sim tensorE fdist1E eq_sym (negbTE bne) mul0r mulr0.
-rewrite allow_kernelE /sim tensorE fdist1E eqxx mul1r.
+rewrite allow_massE /sim tensorE fdist1E eqxx mul1r.
 by rewrite /unif2 fdist_uniformE card_F2 -mulrA -invfM -natrM.
 Qed.
 
@@ -2408,10 +2408,10 @@ have -> : fdistmap (fun w : Om => w.1.1) P_Omega_unif = ((P_Omega_unif)`1)`1.
 by rewrite /P_Omega_unif /tensor !fdist_prod1.
 Qed.
 
-(* The allowed-information kernel at an input is the uniform law on the
+(* The allowed-information law at an input is the uniform law on the
    adversary's share, at its own bit, under any coins with uniform first
    marginal. *)
-Lemma allow_kernelE (P : R.-fdist Om)
+Lemma allow_massE (P : R.-fdist Om)
     (hP : fdistmap (fun w : Om => w.1.1) P = unif2) (c a s : F2) :
   fdistmap (fun w : Om => (c, w.1.1)) P (a, s) = (c == a)%:R * 2%:R^-1.
 Proof.
@@ -2436,8 +2436,8 @@ have -> : fdistmap (fun yl => (proj_xa x, proj_ya yl)) (functionality x)
   by rewrite /functionality fdistmap_comp; apply: eq_fdistmap.
 rewrite fdistbindE (bigD1 (a, s))//= big1 ?addr0; last first.
   by move=> b bne; rewrite /sim fdist1E eq_sym (negbTE bne) mulr0.
-rewrite /sim fdist1E eqxx mulr1 (allow_kernelE fst_marginal_unifE).
-by rewrite [LHS](allow_kernelE fst_marginal_biasedE).
+rewrite /sim fdist1E eqxx mulr1 (allow_massE fst_marginal_unifE).
+by rewrite [LHS](allow_massE fst_marginal_biasedE).
 Qed.
 
 (* The simulator achieves perfect privacy.
@@ -3078,7 +3078,7 @@ Definition mu : R.-fdist U := fdist1 tt.
 Definition sim (p : U * U) : R.-fdist B2 := unif2.
 
 (* The view law at an input is the uniform law. *)
-Let view_kernelE (x : U) :
+Let view_unifE (x : U) :
   fdistmap (fun w : B2 => view_at (x, w)) P_Omega = unif2.
 Proof. by rewrite -[RHS]fdistmap_id; apply: eq_fdistmap. Qed.
 
@@ -3111,7 +3111,7 @@ Proof.
 move=> x.
 have -> : fdistmap (fun yl : B2 => (proj_xa x, proj_ya yl)) (functionality x)
         = fdist1 ((tt, tt) : (U * U)%type) by apply: eq_fdistmap_cst.
-by rewrite fdist1bind view_kernelE.
+by rewrite fdist1bind view_unifE.
 Qed.
 
 (* def:smc:output-independence *)

@@ -1,7 +1,7 @@
 (* infotheo: information theory and error-correcting codes in Rocq            *)
 (* Copyright (C) 2025 infotheo authors, license: LGPL-2.1-or-later            *)
 From mathcomp Require Import all_boot reals.
-Require Import fdist privacy_kernel.
+Require Import fdist privacy_model.
 
 (**md**************************************************************************)
 (* # The n-party observation diagram                                          *)
@@ -15,8 +15,8 @@ Require Import fdist privacy_kernel.
 (* read-off commutes with the two projections, the input read-off of a view   *)
 (* returns the adversary's inputs, and a map computing the aggregation off    *)
 (* the adversary's delivered outputs computes the ideal function off its      *)
-(* view.  The view map is an observation of the privacy kernel, and the       *)
-(* kernel's view law at the party data is the law of the adversary's view.    *)
+(* view.  The view map is an observation of the privacy model, and the        *)
+(* model's view law at the party data is the law of the adversary's view.     *)
 (*                                                                            *)
 (* ```                                                                        *)
 (*                   x_all == the joint input space, the dependent product    *)
@@ -45,7 +45,7 @@ Require Import fdist privacy_kernel.
 (*                            projection                                      *)
 (*            reveal_chain == a map revealing the output computes the ideal   *)
 (*                            function off the adversary's view               *)
-(*          party_view_law == the kernel's view law at the party data         *)
+(*          party_view_law == the model's view law at the party data          *)
 (*    three_party_identity == three parties holding one bit each whose trace  *)
 (*                            records the inputs verbatim, an instance of     *)
 (*                            the observation diagram                         *)
@@ -191,7 +191,7 @@ Lemma reveal_chain (p : y_adv -> Y) (e : exec_ctx) :
 Proof. by move=> pr; rewrite readoff_square pr correctness. Qed.
 
 (* def:smc:view-law *)
-(* The view law of the privacy kernel at the party data, the observation
+(* The view law of the privacy model at the party data, the observation
    being the view map and the ancilla law being P_Omega. *)
 Definition party_view_law : x_all -> R.-fdist view_space :=
   view_law P_Omega view.
@@ -282,7 +282,7 @@ Lemma reveal_chain_holds (p : y_adv bit_space adversary -> 'I_2)
 Proof. exact: (reveal_chain correctness). Qed.
 
 (* def:smc:view-law *)
-(* The kernel's view law at this instance is the point mass at the view of
+(* The model's view law at this instance is the point mass at the view of
    the run with the one-point ancilla. *)
 Lemma party_view_lawE (x : x_all bit_space) :
   party_view_law ancilla trace adversary x

@@ -35,7 +35,6 @@ Require Import fdist fdist_extra.
 (*                            along b |-> (a, b)                              *)
 (*          tensor_fdist1r == tensor p (fdist1 b) is the transport of p       *)
 (*                            along a |-> (a, b)                              *)
-(*                            transported kernel                              *)
 (* ```                                                                        *)
 (*                                                                            *)
 (******************************************************************************)

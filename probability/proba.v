@@ -2486,7 +2486,7 @@ by apply/setP => t; rewrite !inE /= !xpair_eqE /= andbC.
 Qed.
 
 (* X and Y are conditionally independent given Z whenever the law of the
-   triple factors as a (Y, Z)-weight times a (Z, X)-kernel. *)
+   triple factors as a (Y, Z)-factor times a (Z, X)-factor. *)
 Lemma cinde_RV_factor (f : B -> C -> R) (g : C -> A -> R) :
   (forall x y z, `Pr[ [% X, Y, Z] = (x, y, z) ] = f y z * g z x) ->
   P |= X _|_ Y | Z.
@@ -2702,8 +2702,8 @@ Variable Kv : {RV P -> K}.
 Variable k : K -> R.-fdist B.
 
 (* The law of a variable whose conditional law on every mass-carrying fibre
-   of a second variable is the kernel at that fibre is the law of the second
-   variable bound through the kernel.
+   of a second variable is the stochastic map at that fibre is the law of the
+   second variable bound through that map.
    Naming: mainSymbols of the conclusion, dist_of_RV for `p_ and bind for
    >>=. *)
 Lemma dist_of_RV_bind :
