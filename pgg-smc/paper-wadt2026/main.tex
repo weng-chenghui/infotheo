@@ -281,7 +281,9 @@ lower path reaches approximate coalition-view and executed-trace privacy at
 $2^{-39}$.
 \begin{figure}[t]
   \centering
-  \resizebox{\linewidth}{!}{%
+  % Drawn at true document font sizes; the picture is never scaled.
+  % It is a little wider than the text block, so it is centred by hand.
+  \makebox[\linewidth][c]{%
   \begin{tikzpicture}[
       node distance=7mm and 8mm,
       box/.style={draw,rounded corners,align=center,inner sep=4pt,
@@ -347,7 +349,9 @@ values the $\PG$ instance supplies.
 
 \begin{figure}[H]
   \centering
-  \resizebox{\linewidth}{!}{%
+  % Drawn at true document font sizes; the picture is never scaled.
+  % It is a little wider than the text block, so it is centred by hand.
+  \makebox[\linewidth][c]{%
   \begin{tikzpicture}[
       every node/.style={font=\small},
       supportbox/.style={
@@ -472,15 +476,17 @@ With an \coqin{InputEncoding}, the flow gains a phase that I call the
 commit prologue. It collects the players' inputs and assembles the dealt
 deck from them, so the same flow evaluates a function of committed
 inputs. The realized encoding is den Boer's. Its
-obligation \coqin{ie\_orbit} places equal-output inputs in one shuffle
-orbit, and its derived lemma \coqin{ie\_output\_correct} shows the
-shuffled layout reconstructs the output for every allowed shuffle. The Kim
-variant reuses the den Boer program unchanged. With an empty input list
+orbit obligation places the assembled layouts of equal-output inputs in one
+shuffle orbit. This property relates different inputs that produce the same
+result. Correctness uses two other facts: the assembled layout is valid, and
+reconstruction is invariant under every allowed shuffle. It follows that the
+shuffled layout reconstructs the intended output. The Kim variant reuses the
+den Boer program unchanged. With an empty input list
 the prologue reduces by computation to the plain dealer, which is the
 secret-sharing case, and the $\PG$ instance passes exactly this empty
 list. Section~\ref{sec:fivecard} realizes the committed-input flow, and
 the instance table of Section~\ref{sec:instances} records the full
-landscape.
+comparison.
 
 Section~\ref{sec:fivecard} gives a concrete packing example in the
 definition of the five-card profile.
@@ -726,10 +732,216 @@ certificates proven without computing in the group.
 
 \section{The \texorpdfstring{$\PG$}{PGL(2,7)} Construction}\label{sec:pgl}
 
-This section supplies the instance column of Table~\ref{tab:bridge}. The
-group is $\PG$, the action permutes the eight projective points, the
-shuffle distribution draws uniform generator letters, and the decoder
-reads what I call the orbit class. Figure~\ref{fig:run} shows a run.
+This section supplies the $\PG$ instance in Table~\ref{tab:bridge}. Let
+\[
+  X=\mathbb{P}^1(\mathbb{F}_7)=\{0,1,\ldots,6,\infty\}.
+\]
+The group $G=\PG$ acts on the eight points of $X$ by fractional linear
+transformations. Its order is\footnote{Formalized in
+\path{pgg-smc/instances/pgl27/pgl27_mixing.v} as \coqin{pgl27\_card}. The
+order of the abstract quotient is \coqin{pgl27\_pgl2\_order} in
+\path{pgg-smc/instances/pgl27/pgl27_group.v}.}
+\begin{equation}
+  \lvert G\rvert=336.
+  \label{eq:pgl-order}
+\end{equation}
+The formal representation writes $\infty$ as position seven. Card positions
+belong to $X$, while card values belong to
+$C=\{0,1,\ldots,7\}$.
+
+\subsection{Orbit Encoding of the Secret}
+
+\begin{definition}[Orbit of four positions]
+Let
+\[
+  \Omega_4=\{A\subseteq X\mid |A|=4\}.
+\]
+For $A,B\in\Omega_4$, define
+\[
+  \operatorname{Orb}_G(A)=\{g\mathbin{\cdot}A\mid g\in G\},
+  \qquad
+  A\sim_G B
+  \quad\Longleftrightarrow\quad
+  B\in\operatorname{Orb}_G(A).
+\]
+\end{definition}
+
+An orbit contains the heart-position patterns that are reachable from one
+another by allowed shuffles. Every orbit in this subsection is an orbit in
+$\Omega_4$. A labelled deck supplies one heart-position representative of
+such an orbit.
+
+\begin{definition}[Heart-position map and decoder\footnotemark]
+\footnotetext{Formalized in
+\path{pgg-smc/instances/pgl27/pgl27_orbit.v} as
+\coqin{is\_heart}, \coqin{deck\_ok}, \coqin{heart\_set},
+\coqin{cross\_ratio}, \coqin{equianharmonic}, \coqin{subset\_class}, and
+\coqin{orbit\_class}.}
+A valid deck is a bijection $D:X\to C$. Its four heart values are
+$0,1,2,3$, and their positions form
+\[
+  H(D)=\{i\in X\mid D(i)\in\{0,1,2,3\}\}\in\Omega_4.
+\]
+For $A=\{a<b<c<d\}$ under the order
+$0<1<\cdots<6<\infty$, define the cross ratio over $\mathbb{F}_7$ by
+\[
+  [a,b;c,d]=\frac{(a-c)(b-d)}{(a-d)(b-c)},
+  \qquad
+  [a,b;c,\infty]=\frac{a-c}{b-c}.
+\]
+The classifier $\kappa:\Omega_4\to\{0,1\}$ is
+\[
+  \kappa(A)=
+  \begin{cases}
+    1, & [a,b;c,d]\in\{3,5\},\\
+    0, & [a,b;c,d]\in\{2,4,6\}.
+  \end{cases}
+\]
+The value one is equianharmonic, and the value zero is harmonic. The deck
+decoder is
+\[
+  \operatorname{dec}(D)=\kappa(H(D)),
+  \qquad
+  D\xmapsto{H}\Omega_4\xmapsto{\kappa}\{0,1\}.
+\]
+\end{definition}
+
+\begin{theorem}[The two orbit classes\footnotemark]
+\label{thm:orbit-split}
+\footnotetext{Formalized in
+\path{pgg-smc/instances/pgl27/pgl27_orbit.v} as
+\coqin{subset\_class\_orbit}, \coqin{subset\_class\_orbitE},
+\coqin{orbit\_class\_split}, and
+\coqin{orbit\_class\_split\_complement}.}
+For all $A,B\in\Omega_4$,
+\[
+  \kappa(A)=\kappa(B)
+  \quad\Longleftrightarrow\quad
+  \exists g\in G,\ B=g\mathbin{\cdot}A.
+\]
+Hence
+\[
+  \Omega_4/G\cong\{0,1\},
+  \qquad
+  |\kappa^{-1}(0)|=42,
+  \qquad
+  |\kappa^{-1}(1)|=28.
+\]
+The fiber $\kappa^{-1}(0)$ is harmonic, and
+$\kappa^{-1}(1)$ is equianharmonic.
+\end{theorem}
+
+\begin{definition}[Orbit encoder\footnotemark]
+\footnotetext{Formalized in
+\path{pgg-smc/instances/pgl27/pgl27_orbit.v} as
+\coqin{orbit\_encode} and \coqin{orbit\_encode\_deck}.}
+The encoder chooses the valid decks
+\[
+  D_0=(0,1,2,3,4,5,6,7),
+  \qquad
+  D_1=(0,1,2,4,3,5,6,7),
+\]
+and sets $\operatorname{enc}(s)=D_s$.
+\end{definition}
+
+\begin{figure}[H]
+  \centering
+  \begin{tikzpicture}[every node/.style={font=\small},
+      card/.style={draw,minimum width=7mm,minimum height=9mm,inner sep=1pt},
+      heart/.style={card,fill=red!15}]
+    \node at (-1.3,0) {$D_0$};
+    \foreach \p/\c/\s in {0/0/heart,1/1/heart,2/2/heart,3/3/heart,
+                          4/4/card,5/5/card,6/6/card,7/7/card}
+      \node[\s] at (\p*0.85,0) {$\c$};
+    \node at (-1.3,-1.6) {$D_1$};
+    \foreach \p/\c/\s in {0/0/heart,1/1/heart,2/2/heart,3/4/card,
+                          4/3/heart,5/5/card,6/6/card,7/7/card}
+      \node[\s] at (\p*0.85,-1.6) {$\c$};
+    \foreach \p in {0,...,7}
+      \node[gray] at (\p*0.85,0.85) {\p};
+  \end{tikzpicture}
+  \caption{The encoded representatives. Gray labels are card positions,
+  with position seven representing $\infty$. Boxed numbers are card values,
+  and shading marks the four heart values. The row $D_0$ represents the
+  harmonic secret $0$, and $D_1$ represents the equianharmonic secret $1$.}
+  \label{fig:encoding}
+\end{figure}
+
+\begin{example}[Decoding the representatives\footnotemark]
+\footnotetext{Formalized in
+\path{pgg-smc/instances/pgl27/pgl27_orbit.v} as
+\coqin{orbit\_encodeK}.}
+The two rows in Figure~\ref{fig:encoding} satisfy
+\[
+  H(D_0)=\{0,1,2,3\},
+  \qquad
+  \kappa(H(D_0))=0,
+\]
+and
+\[
+  H(D_1)=\{0,1,2,4\},
+  \qquad
+  \kappa(H(D_1))=1.
+\]
+Thus the full encoding path is
+\[
+  s\longmapsto D_s
+   \longmapsto H(D_s)
+   \xmapsto{\kappa}s,
+  \qquad
+  \operatorname{dec}(\operatorname{enc}(s))=s.
+\]
+\end{example}
+
+\begin{lemma}[Shuffle invariance\footnotemark]
+\footnotetext{Formalized in
+\path{pgg-smc/instances/pgl27/pgl27_orbit.v} as
+\coqin{subset\_class\_invariant}, \coqin{orbit\_class\_invariant}, and
+\coqin{deck\_stable}. The heart-set identity is the local equality
+\coqin{Hheart} in the proof of \coqin{orbit\_class\_invariant}, not a
+separate exported theorem.}
+Let $\rho:G\to S_X$ be the permutation action, and define
+\[
+  (g\star D)(i)=D(\rho(g)(i)).
+\]
+For every $g\in G$ and valid deck $D$,
+\[
+  H(g\star D)=\rho(g)^{-1}\mathbin{\cdot}H(D).
+\]
+The shuffled deck also satisfies
+\[
+  g\star D\text{ is valid},
+  \qquad
+  \operatorname{dec}(g\star D)=\operatorname{dec}(D).
+\]
+\end{lemma}
+
+Because $\rho(g)^{-1}=\rho(g^{-1})$, the inverse permutation is also induced
+by an element of $G$.
+The shuffle therefore changes the representative inside $\Omega_4$, but not
+its orbit label.
+
+\begin{corollary}[Shuffle correctness of orbit decoding\footnotemark]
+\footnotetext{The direct equality is formalized in
+\path{pgg-smc/instances/pgl27/pgl27_orbit.v} as
+\coqin{orbit\_encodeK} and \coqin{orbit\_class\_invariant}. The
+reconstruction-interface counterpart is
+\coqin{orbit\_recon\_invariant} in
+\path{pgg-smc/instances/pgl27/pgl27_scheme.v}.}
+For every $s\in\{0,1\}$ and $g\in G$,
+\[
+  \operatorname{dec}(g\star\operatorname{enc}(s))
+  =\operatorname{dec}(\operatorname{enc}(s))
+  =s.
+\]
+\end{corollary}
+
+Orbit invariance preserves the secret under every allowed shuffle. It does
+not by itself hide the secret. Under an independent uniform shuffle
+$g\leftarrow U_G$, privacy begins with the distribution of partial
+observations and uses three-transitivity as its group-action premise.
+
+Figure~\ref{fig:run} shows how the encoder and decoder enter one execution.
 
 \begin{figure}[H]
   \centering
@@ -752,7 +964,7 @@ reads what I call the orbit class. Figure~\ref{fig:run} shows a run.
     \node[action, anchor=north] at (2.3, -0.42)
       {encode secret $s$\\[-1pt] as the deck $D_s$};
     \node[action, anchor=north] at (2.3, -1.35)
-      {sample a shuffle $g$,\\[-1pt] rearrange to $\rho(g)D_s$};
+      {sample a shuffle $g$,\\[-1pt] rearrange to $g\star D_s$};
     \draw[msg] (2.9, -2.3) -- node[lbl]
       {deal one card per position} (5.35, -2.3);
 
@@ -762,10 +974,10 @@ reads what I call the orbit class. Figure~\ref{fig:run} shows a run.
 
     \draw[msg] (6.6, -3.2) -- node[lbl] {reveal all cards} (9.5, -3.2);
     \node[action, anchor=north] at (10.2, -3.5)
-      {decode the class of the\\[-1pt] heart positions $\to s$};
+      {decode the orbit label of\\[-1pt] the heart positions $\to s$};
   \end{tikzpicture}
   \caption{One $\PG$ run: eight players, one card each, no player inputs,
-  and the verifier decodes the orbit class of the heart positions. The
+  and the verifier decodes the orbit label of the heart positions. The
   shuffle $g$ is drawn from the uniform distribution $U_G$ in the
   uniform-shuffle model and from the word distribution $\worddist$ in the
   word-shuffle model. This is the no-input counterpart of
@@ -773,15 +985,7 @@ reads what I call the orbit class. Figure~\ref{fig:run} shows a run.
   \label{fig:run}
 \end{figure}
 
-Let $\mathbb{P}^1(\mathbb{F}_7)$ be the projective line over the field with
-seven elements. It has eight points. The group $\PG$ acts on these points by
-fractional linear transformations. The formal representation realizes this
-action as permutations of eight card positions. The generated group has
-order
-\begin{equation}
-  \lvert \PG\rvert=336.
-  \label{eq:pgl-order}
-\end{equation}
+\subsection{Action and Generators}
 
 Three fractional linear maps generate this action. They are the
 translation $z\mapsto z+1$, the scaling $z\mapsto 3z$, and the inversion
@@ -792,9 +996,11 @@ the permutation tables of the three maps, identified with them by
 Figure~\ref{fig:pgl-generators} shows each map as a rearrangement of the
 row of eight cards, one card per projective point. The executable shuffle
 of Section~\ref{sec:mixing} draws its letters from these three maps and
-from two inverses.
+from two inverses. The equality $|G|=336=8\cdot7\cdot6$ also matches the
+number of ordered triples of distinct points. Lemma~\ref{thm:three-transitive}
+shows that each ordered destination has exactly one group element.
 
-\begin{figure}[H]
+\begin{figure}[t]
   \centering
   % Drawn at true document font sizes; the picture is never scaled.
   \begin{tikzpicture}[every node/.style={font=\small},
@@ -814,20 +1020,15 @@ from two inverses.
     \foreach \p/\c in {0/\infty,1/6,2/3,3/2,4/5,5/4,6/1,7/0}
       \node[card] at (\p*0.85,-3.6) {$\c$};
   \end{tikzpicture}
-  \caption{The three generating maps acting on the row that places card
-  $z$ at position $z$. Gray labels are card positions. Position $i$ shows
-  the image point $g(i)$, the observation convention of
-  Section~\ref{sec:model}, with the point at infinity carried by position
-  seven. Figure~\ref{fig:encoding} draws the same row as the encoded
-  arrangement $D_0$ and writes its eighth card as the value $7$. The
-  order $336$ equals the number $8\cdot 7\cdot 6$ of ordered triples of
-  distinct points, so Lemma~\ref{thm:three-transitive} leaves exactly one
-  group element for each ordered destination.}
+  \caption{The three generating maps on the projective points. Gray labels
+  are positions, and the box at position $i$ shows the image point $g(i)$.
+  The symbol $\infty$ is position seven.}
   \label{fig:pgl-generators}
 \end{figure}
 
 \begin{example}\label{ex:pgl-letters}
-Let the deck be the identity assignment with card $z$ at position $z$.
+Use projective-point labels to display the identity assignment, with label
+$z$ at position $z$.
 The translation map turns the row $(0,1,2,3,4,5,6,\infty)$ into
 $(1,2,3,4,5,6,0,\infty)$ because position $i$ shows the image $g(i)$.
 The scaling map fixes $0$ and $\infty$ and moves the six remaining
@@ -839,59 +1040,14 @@ every ordered triple of distinct points, for example a word that carries
 $(0,1,2)$ to $(2,0,1)$.
 \end{example}
 
-Each valid arrangement contains eight distinct cards. Four card values are
-marked as hearts. Their positions form a four-subset of the projective line.
-The secret records which of the two $\PG$ orbits contains that subset. The
-encoder chooses one fixed valid arrangement from each class.
-Figure~\ref{fig:encoding} shows both representatives.
+\subsection{Three-Transitivity and Local Views}
 
-\begin{figure}[t]
-  \centering
-  \begin{tikzpicture}[every node/.style={font=\small},
-      card/.style={draw,minimum width=7mm,minimum height=9mm,inner sep=1pt},
-      heart/.style={card,fill=red!15}]
-    \node at (-1.3,0) {$D_0$};
-    \foreach \p/\c/\s in {0/0/heart,1/1/heart,2/2/heart,3/3/heart,
-                          4/4/card,5/5/card,6/6/card,7/7/card}
-      \node[\s] at (\p*0.85,0) {$\c$};
-    \node at (-1.3,-1.6) {$D_1$};
-    \foreach \p/\c/\s in {0/0/heart,1/1/heart,2/2/heart,3/4/card,
-                          4/3/heart,5/5/card,6/6/card,7/7/card}
-      \node[\s] at (\p*0.85,-1.6) {$\c$};
-    \foreach \p in {0,...,7}
-      \node[gray] at (\p*0.85,0.85) {\p};
-  \end{tikzpicture}
-  \caption{The two encoded representatives. Gray labels are card positions,
-  boxed numbers are card values, and shaded cards are the four hearts, the
-  values below four. The heart positions of $D_0$ form the harmonic subset
-  $\{0,1,2,3\}$ and those of $D_1$ form the equianharmonic subset
-  $\{0,1,2,4\}$. The secret is this orbit class.}
-  \label{fig:encoding}
-\end{figure}
+Global orbit invariance gives correctness. Privacy asks a different question:
+what does a small named set of positions observe when $g\leftarrow U_G$ is
+independent and uniform? Ordered tuples matter because a coalition observes
+card values at named positions.
 
-\begin{lemma}[Orbit encoder\footnotemark]
-\footnotetext{Formalized in \path{pgg-smc/instances/pgl27/pgl27_orbit.v} as
-\coqin{orbit\_encode\_deck} and \coqin{orbit\_encodeK}.}
-For every $s\in\{0,1\}$, the encoded arrangement $D_s$ is valid and its
-four-subset has orbit class $s$.
-\end{lemma}
-
-The seventy subsets of size four divide into two orbits. The smaller orbit
-consists of the equianharmonic subsets. The larger orbit consists of the
-harmonic subsets.
-
-\begin{lemma}[Orbit split\footnotemark]\label{thm:orbit-split}
-\footnotetext{Formalized in \path{pgg-smc/instances/pgl27/pgl27_orbit.v} as
-\coqin{subset\_class\_orbitE}, \coqin{orbit\_class\_split}, and
-\coqin{orbit\_class\_split\_complement}.}
-The action of $\PG$ on the four-subsets of
-$\mathbb{P}^1(\mathbb{F}_7)$ has an equianharmonic orbit of size $28$ and a
-harmonic orbit of size $42$.
-\end{lemma}
-
-Privacy follows from the transitivity of the point action. Ordered tuples
-matter because a coalition observes card values at named positions.
-
+\vfill\pagebreak
 \begin{lemma}[Three-transitivity\footnotemark]\label{thm:three-transitive}
 \footnotetext{Formalized in \path{pgg-smc/instances/pgl27/pgl27_group.v} as
 \coqin{pgl27\_3transitive}.}
@@ -907,9 +1063,10 @@ each distinct target triple. The kernel checks the resulting finite table. For e
 triple is $(0,1,2)$, and the table stores for every other ordered triple
 of distinct points one generator word that carries $(0,1,2)$ to it.
 Lemma~\ref{thm:three-transitive} makes every ordered view of at most three
-positions uniform under $U_G$. It discharges the hypothesis of
-Theorem~\ref{thm:generic-privacy} at $t=3$ and thereby supplies the
-group-theoretic premise for coalition privacy.
+positions uniform under $U_G$. It supplies the group-action premise of
+Theorem~\ref{thm:generic-privacy} at $t=3$. That theorem then gives
+uniform-shuffle coalition privacy. The nonuniform word distribution is treated
+separately in Section~\ref{sec:mixing}.
 
 Table~\ref{tab:source-index} at the end of Section~\ref{sec:mixing}
 indexes the formal sources for this section and the two that follow.
