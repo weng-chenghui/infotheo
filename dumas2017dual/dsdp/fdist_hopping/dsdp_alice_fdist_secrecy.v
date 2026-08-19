@@ -122,6 +122,8 @@ Require Import dsdp_program dsdp_entropy.
 (*     dsdp_alice_hop_tupleT == the type of Alice's hopping tuple: masks,     *)
 (*                              combine randomness, output and the two        *)
 (*                              ciphertext slots                              *)
+(*          alice_hop_jointT == the type of the two honest inputs paired with *)
+(*                              Alice's hopping tuple                         *)
 (*           AliceHopTuple i == Alice's hopping tuple with its first i        *)
 (*                              ciphertext slots zeroed                       *)
 (*   alice_hop_joint_fdist i == the joint distribution of the two honest      *)
@@ -346,6 +348,10 @@ Definition dsdp_alice_hop_tupleT : finType :=
   ((plain AHE * plain AHE) * (Renc * Renc) * plain AHE
    * cipher AHE * cipher AHE)%type.
 
+(* The type of the two honest inputs paired with Alice's hopping tuple. *)
+Definition alice_hop_jointT : finType :=
+  (plain AHE * plain AHE * dsdp_alice_hop_tupleT)%type.
+
 (* Alice's hopping tuple at hop i: her two masks, her two combine
    randomnesses, the leaked output, and the two ciphertext slots, where the
    first i slots hold encryptions of zero. Hop 0 is the real tuple, hop 2 is
@@ -356,19 +362,17 @@ Definition AliceHopTuple (i : nat) :
 
 (* The joint distribution of the two honest inputs and Alice's hopping tuple
    at hop i. *)
-Definition alice_hop_joint_fdist (i : nat) :
-    R.-fdist (plain AHE * plain AHE * dsdp_alice_hop_tupleT) :=
+Definition alice_hop_joint_fdist (i : nat) : R.-fdist alice_hop_jointT :=
   `p_ [% V2, V3, AliceHopTuple i].
 
 (* The probability that D returns true at hop i. *)
 Definition alice_hop_game_success (i : nat)
-    (D : plain AHE * plain AHE * dsdp_alice_hop_tupleT -> bool) : R :=
+    (D : alice_hop_jointT -> bool) : R :=
   Pr (fdistmap D (alice_hop_joint_fdist i)) [set true].
 
 (* The acceptance probability at hop i is the probability that D returns true
    under the joint distribution at hop i. *)
-Lemma alice_hop_game_successE (i : nat)
-    (D : plain AHE * plain AHE * dsdp_alice_hop_tupleT -> bool) :
+Lemma alice_hop_game_successE (i : nat) (D : alice_hop_jointT -> bool) :
   alice_hop_game_success i D
     = Pr (alice_hop_joint_fdist i) [set x | D x].
 Proof. exact: Pr_fdistmap_bool. Qed.
@@ -597,7 +601,7 @@ Qed.
 (* The inputs and the view rebuilt from a hop-0 state and a ciphertext in
    the hop-0 slot. *)
 Definition hop0_assemble (c : hop0_stateT) (ch : cipher AHE) :
-    plain AHE * plain AHE * dsdp_alice_hop_tupleT :=
+    alice_hop_jointT :=
   let: (vv, masks, ra, rho3) := c in
   (vv.1, vv.2,
    (masks, ra, dsdp_output v1 u1 u2 u3 vv.1 vv.2, ch,
@@ -606,15 +610,14 @@ Definition hop0_assemble (c : hop0_stateT) (ch : cipher AHE) :
 (* The inputs and the view rebuilt from a hop-1 state and a ciphertext in
    the hop-1 slot. *)
 Definition hop1_assemble (c : hop1_stateT) (ch : cipher AHE) :
-    plain AHE * plain AHE * dsdp_alice_hop_tupleT :=
+    alice_hop_jointT :=
   let: (vv, masks, ra, c2zero) := c in
   (vv.1, vv.2,
    (masks, ra, dsdp_output v1 u1 u2 u3 vv.1 vv.2, c2zero, ch)).
 
 (* The adversary that challenges Bob's key on the first input and runs the
    distinguisher on the view rebuilt around the challenge. *)
-Definition hop0_reduction
-    (D : plain AHE * plain AHE * dsdp_alice_hop_tupleT -> bool) :
+Definition hop0_reduction (D : alice_hop_jointT -> bool) :
     indcpa_fdist_adversary :=
   {| adv_state := hop0_stateT ;
      adv_choose := `p_ Hop0State ;
@@ -623,8 +626,7 @@ Definition hop0_reduction
 
 (* The adversary that challenges Charlie's key on the second input and runs
    the distinguisher on the view rebuilt around the challenge. *)
-Definition hop1_reduction
-    (D : plain AHE * plain AHE * dsdp_alice_hop_tupleT -> bool) :
+Definition hop1_reduction (D : alice_hop_jointT -> bool) :
     indcpa_fdist_adversary :=
   {| adv_state := hop1_stateT ;
      adv_choose := `p_ Hop1State ;
@@ -668,8 +670,7 @@ Qed.
 
 (* The distinguisher on the real view is the hop-0 reduction facing an
    encryption of the first input. *)
-Lemma hop0_real_challengeE
-    (D : plain AHE * plain AHE * dsdp_alice_hop_tupleT -> bool) :
+Lemma hop0_real_challengeE (D : alice_hop_jointT -> bool) :
   alice_hop_game_success 0 D
     = indcpa_fdist_success_real (pkey_of_party Bob) (hop0_reduction D).
 Proof.
@@ -683,8 +684,7 @@ Qed.
 
 (* The distinguisher on the view with a zeroed hop-0 slot is the hop-0
    reduction facing an encryption of zero. *)
-Lemma hop0_zero_challengeE
-    (D : plain AHE * plain AHE * dsdp_alice_hop_tupleT -> bool) :
+Lemma hop0_zero_challengeE (D : alice_hop_jointT -> bool) :
   alice_hop_game_success 1 D
     = indcpa_fdist_success_zero (pkey_of_party Bob) (hop0_reduction D).
 Proof.
@@ -698,8 +698,7 @@ Qed.
 
 (* Zeroing the hop-0 slot of the view moves the distinguishing probability by
    the advantage of the hop-0 reduction against Bob's key. *)
-Lemma hop0_advantageE
-    (D : plain AHE * plain AHE * dsdp_alice_hop_tupleT -> bool) :
+Lemma hop0_advantageE (D : alice_hop_jointT -> bool) :
   `| alice_hop_game_success 0 D - alice_hop_game_success 1 D |
   = indcpa_fdist_epsilon (pkey_of_party Bob) (hop0_reduction D).
 Proof.
@@ -708,8 +707,7 @@ Qed.
 
 (* The distinguisher on the view with a zeroed hop-0 slot is the hop-1
    reduction facing an encryption of the second input. *)
-Lemma hop1_real_challengeE
-    (D : plain AHE * plain AHE * dsdp_alice_hop_tupleT -> bool) :
+Lemma hop1_real_challengeE (D : alice_hop_jointT -> bool) :
   alice_hop_game_success 1 D
     = indcpa_fdist_success_real (pkey_of_party Charlie) (hop1_reduction D).
 Proof.
@@ -723,8 +721,7 @@ Qed.
 
 (* The distinguisher on the all-zero view is the hop-1 reduction facing an
    encryption of zero. *)
-Lemma hop1_zero_challengeE
-    (D : plain AHE * plain AHE * dsdp_alice_hop_tupleT -> bool) :
+Lemma hop1_zero_challengeE (D : alice_hop_jointT -> bool) :
   alice_hop_game_success 2 D
     = indcpa_fdist_success_zero (pkey_of_party Charlie) (hop1_reduction D).
 Proof.
@@ -738,8 +735,7 @@ Qed.
 
 (* Zeroing the hop-1 slot of the view moves the distinguishing probability by
    the advantage of the hop-1 reduction against Charlie's key. *)
-Lemma hop1_advantageE
-    (D : plain AHE * plain AHE * dsdp_alice_hop_tupleT -> bool) :
+Lemma hop1_advantageE (D : alice_hop_jointT -> bool) :
   `| alice_hop_game_success 1 D - alice_hop_game_success 2 D |
   = indcpa_fdist_epsilon (pkey_of_party Charlie) (hop1_reduction D).
 Proof.
