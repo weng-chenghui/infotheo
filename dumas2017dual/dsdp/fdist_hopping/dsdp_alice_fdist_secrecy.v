@@ -903,24 +903,21 @@ have Hfib : (a, v3star) \in dsdp_fiber_ring u1 u2 u3 v1 s
   by rewrite inE /=; apply/eqP; rewrite /v3star Hg2; ring.
 have Hnum : pfwd1 [% V2, Sout] (a, s)
           = pfwd1 [% [% V2, V3], Sout] ((a, v3star), s).
-  rewrite !pfwd1E; congr (Pr _ _).
-  apply/setP => t; rewrite !inE /= !xpair_eqE.
+  apply: pfwd1_congr_preim => t; rewrite /= !xpair_eqE.
   case: (V2 t =P a) => [Hva|_] //=.
   suff -> : (Sout t == s) = (V3 t == v3star) by rewrite andbb.
-  rewrite /Sout /comp_RV /dsdp_output /= Hva.
+  rewrite SoutE Hva.
   have -> : s = u1 * v1 + u2 * a + u3 * v3star
     by rewrite /v3star Hg2; ring.
   by rewrite (inj_eq (addrI _)) (inj_eq u3_inj).
-have Hcond_eq : pfwd1 [% V1c, U1c, U2c, U3c, Sout] (v1, u1, u2, u3, s)
-              = `Pr[ Sout = s ]
-  := pfwd1_RV2_compl Sout (fun=> (v1, u1, u2, u3)) s.
 have HcwN : `Pr[ [% V1c, U1c, U2c, U3c] = (v1, u1, u2, u3) ] != 0.
-  by apply: contra_neq Hs => /(pfwd1_domin_RV2 Sout s); rewrite -Hcond_eq.
+  by rewrite alice_inputs_constE pfwd1_const_RV eqxx oner_eq0.
 have Hind : alice_sample_fdist
               |= [% V1c, U1c, U2c, U3c] _|_ [% [% V2, V3], Sout]
   by rewrite alice_inputs_constE; exact: inde_const_RV.
 rewrite cpr_eqE Hnum -cpr_eqE -(cpr_eq_drop_indep (a, v3star) s HcwN Hind).
-by apply: alice_VarRV_cond_uniform; rewrite ?Hcond_eq.
+apply: alice_VarRV_cond_uniform => //.
+by rewrite (pfwd1_RV2_compl Sout (fun=> (v1, u1, u2, u3)) s).
 Qed.
 
 (* Conditioned on the leaked output, Bob's input takes any given value with
