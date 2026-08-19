@@ -347,6 +347,11 @@ values the $\PG$ instance supplies.
   \label{tab:bridge}
 \end{table}
 
+The table identifies the role of each component.
+Figure~\ref{fig:framework-architecture} shows how the components and
+supporting records depend on one another, and how the profile determines
+the executable protocol.
+
 \begin{figure}[H]
   \centering
   % Drawn at true document font sizes; the picture is never scaled.
@@ -488,11 +493,10 @@ list. Section~\ref{sec:fivecard} realizes the committed-input flow, and
 the instance table of Section~\ref{sec:instances} records the full
 comparison.
 
-Section~\ref{sec:fivecard} gives a concrete packing example in the
-definition of the five-card profile.
-
-This completes the framework description. The next subsection states the
-generic theorems.
+Section~\ref{sec:fivecard} shows how one instance fills these components.
+Once the data are packaged, the reusable security arguments depend on
+mathematical hypotheses rather than the record representation. The next
+subsection states these arguments directly.
 
 \subsection{Generic Theorems}
 
@@ -512,7 +516,9 @@ cards. If $g$ is uniform on $G$, then
 for every coalition $C$ with $|C|\leq t$.
 \end{theorem}
 
-The second theorem moves view independence to executed traces.
+Three-transitivity establishes privacy of a coalition's card view, but the
+interpreter records an executed trace. The next theorem lifts view
+independence to trace secrecy when the trace and view determine each other.
 
 \begin{theorem}[Generic trace lifting\footnotemark]
 \footnotetext{Formalized in \path{pgg-smc/security/pgg_trace_secrecy.v} as
@@ -526,8 +532,9 @@ If $V$ is independent of $S$, then
 \end{equation}
 \end{theorem}
 
-The third theorem transfers a bound between shuffle distributions to any
-observable computed from them.
+The word-shuffle certificate bounds distributions of group elements, while
+protocol security concerns endpoints, coalition views, and traces. The next
+theorem transfers such a bound through any deterministic observable.
 
 \begin{theorem}[Data processing for finite distributions\footnotemark]
 \footnotetext{Formalized in \path{pgg-smc/security/pgg_collusion_bound.v} as
@@ -598,8 +605,10 @@ Figure~\ref{fig:fivecard-run} shows a run.
 \end{figure}
 
 \needspace{5\baselineskip}
-The central record and the profile that fills it
-follow.\footnote{Formalized in
+The five-card family is the first concrete example of how the framework
+components are packed into one profile. The following definition combines
+the cyclic action, the biased-cut security witness, and the three-hearts
+decoder.\footnote{Formalized in
 \path{pgg-smc/instances/kim2025/five_card_family.v} as
 \coqin{five\_card\_profile}. The listing elides the three bias
 hypotheses.}
@@ -638,7 +647,9 @@ threshold, and the ramp climbs to the secret's own entropy
 $2-\tfrac34\log 3\approx 0.811$, which I call the cap. The decimals are
 evaluations of the proven closed forms.
 
-Figure~\ref{fig:fivecard-leakage} shows selected cases.
+Figure~\ref{fig:fivecard-leakage} selects cases that expose two features of
+the leakage theorem. Two-card leakage depends on the reveal shape, while
+four and five revealed cards reach the secret's entropy.
 
 \begin{figure}[H]
   \centering
@@ -699,6 +710,10 @@ mattering at three revealed cards, because the closed form there depends
 only on how many cards the reveal exposes.
 \end{example}
 
+The example describes what a fixed reveal set exposes. The profile also
+needs a shuffle-security witness for Kim's repeated biased cut. The next
+proposition supplies that witness at the concrete parameters used here.
+
 \begin{proposition}[Seven-cut security at bias $1/100$\footnotemark]
 \label{prop:fivecard-mixing}
 \footnotetext{Formalized in
@@ -732,12 +747,31 @@ certificates proven without computing in the group.
 
 \section{The \texorpdfstring{$\PG$}{PGL(2,7)} Construction}\label{sec:pgl}
 
-This section supplies the $\PG$ instance in Table~\ref{tab:bridge}. Let
+This section constructs the paper's main eight-player instance. Each player
+receives one card, which acts as a physical share of the secret. Under the
+fixed representative dealer and an independent uniform $\PG$ shuffle, every
+passive coalition of at most three players has perfect view and
+executed-trace privacy. Every reveal of seven positions determines the
+secret class, while every reveal of at most six positions remains compatible
+with both classes. A four-position view can leak information, so the privacy
+cutoff at three is sharp. The resulting recovery ramp is
+$(t,r,n)=(3,7,8)$. Decoding the full eight-card arrangement is correct for
+every allowed group element. Theorem~A collects these exact guarantees, and
+Theorem~B later replaces the uniform group element with a uniformly sampled
+200-letter generator word and bounds the resulting privacy error.
+
+The construction indexes the eight card positions by the projective line
+over $\mathbb{F}_7$:
 \[
   X=\mathbb{P}^1(\mathbb{F}_7)=\{0,1,\ldots,6,\infty\}.
 \]
-The group $G=\PG$ acts on the eight points of $X$ by fractional linear
-transformations. Its order is\footnote{Formalized in
+The symbols $0,\ldots,6$ are the seven field elements, and $\infty$ is the
+additional projective point. Each point labels one physical position and
+therefore the player who receives the card in that position. Card values are
+separate labels drawn from $C=\{0,1,\ldots,7\}$. The group $G=\PG$ acts on
+$X$ by fractional linear transformations. Each group element therefore
+permutes the eight card positions and specifies an allowed deck
+rearrangement. Its order is\footnote{Formalized in
 \path{pgg-smc/instances/pgl27/pgl27_mixing.v} as \coqin{pgl27\_card}. The
 order of the abstract quotient is \coqin{pgl27\_pgl2\_order} in
 \path{pgg-smc/instances/pgl27/pgl27_group.v}.}
@@ -745,11 +779,21 @@ order of the abstract quotient is \coqin{pgl27\_pgl2\_order} in
   \lvert G\rvert=336.
   \label{eq:pgl-order}
 \end{equation}
-The formal representation writes $\infty$ as position seven. Card positions
-belong to $X$, while card values belong to
-$C=\{0,1,\ldots,7\}$.
+The formal representation writes $\infty$ as position seven.
+
+The $\PG$ action on $X$ induces an action on sets of four card positions.
+We store the secret bit as the orbit class of the four positions occupied by
+hearts. Every allowed shuffle moves this set within the same orbit, so its
+orbit label remains unchanged. This invariance will give correctness under
+shuffling. Privacy is a separate property of the partial observations made
+by a coalition.
 
 \subsection{Orbit Encoding of the Secret}
+
+To make the encoding precise, we first define the reachable patterns of four
+positions. We then give an explicit classifier for the two orbits, choose one
+deck from each class, and prove that the classifier is unchanged by every
+allowed shuffle.
 
 \begin{definition}[Orbit of four positions]
 Let
@@ -766,10 +810,16 @@ For $A,B\in\Omega_4$, define
 \]
 \end{definition}
 
-An orbit contains the heart-position patterns that are reachable from one
-another by allowed shuffles. Every orbit in this subsection is an orbit in
-$\Omega_4$. A labelled deck supplies one heart-position representative of
-such an orbit.
+Each set $A\in\Omega_4$ records the four positions occupied by hearts without
+recording which heart occupies each position. Throughout this subsection, an
+orbit means an orbit in $\Omega_4$. Two heart-position patterns are
+equivalent when an allowed group action carries one to the other. A valid
+labelled deck therefore determines one representative of a heart-position
+orbit.
+
+To decode the orbit label from a deck, we first extract the positions
+occupied by hearts. We then need an explicit test that identifies the orbit
+of the resulting four-position set. The cross ratio supplies this test.
 
 \begin{definition}[Heart-position map and decoder\footnotemark]
 \footnotetext{Formalized in
@@ -806,6 +856,11 @@ decoder is
 \]
 \end{definition}
 
+For $\kappa$ to serve as an orbit label, its fibers must coincide with the
+orbits of $G$. Thus $\kappa$ must be constant on each orbit and must assign
+different values to distinct orbits. The next theorem verifies both
+requirements and counts the two fibers.
+
 \begin{theorem}[The two orbit classes\footnotemark]
 \label{thm:orbit-split}
 \footnotetext{Formalized in
@@ -831,6 +886,13 @@ The fiber $\kappa^{-1}(0)$ is harmonic, and
 $\kappa^{-1}(1)$ is equianharmonic.
 \end{theorem}
 
+The two orbit classes provide two stable labels and can therefore represent
+the values of a Boolean secret. The dealer fixes one valid deck $D_s$ for
+each label $s\in\{0,1\}$ and later distributes the shuffled cards, one to
+each player. Orbit invariance will establish correctness. Privacy of the
+players' partial observations is proved later from the shuffle distribution
+and three-transitivity.
+
 \begin{definition}[Orbit encoder\footnotemark]
 \footnotetext{Formalized in
 \path{pgg-smc/instances/pgl27/pgl27_orbit.v} as
@@ -843,6 +905,9 @@ The encoder chooses the valid decks
 \]
 and sets $\operatorname{enc}(s)=D_s$.
 \end{definition}
+
+Figure~\ref{fig:encoding} shows how the two chosen decks place the four
+hearts in different position patterns.
 
 \begin{figure}[H]
   \centering
@@ -866,6 +931,11 @@ and sets $\operatorname{enc}(s)=D_s$.
   harmonic secret $0$, and $D_1$ represents the equianharmonic secret $1$.}
   \label{fig:encoding}
 \end{figure}
+
+The encoder must place each bit in the class that the decoder assigns to
+that bit. The following calculation checks this round trip on both
+representatives. Shuffle invariance will then extend it to every deck
+reachable from either representative.
 
 \begin{example}[Decoding the representatives\footnotemark]
 \footnotetext{Formalized in
@@ -893,6 +963,19 @@ Thus the full encoding path is
 \]
 \end{example}
 
+The example establishes
+$\operatorname{dec}(\operatorname{enc}(s))=s$ before shuffling. Correctness
+of a full run also requires the decoder to return the same value after every
+allowed shuffle. Let $\rho:G\to S_X$ denote the induced permutation of card
+positions. Since a deck $D:X\to C$ maps each position to its card value,
+define
+\[
+  (g\star D)(i)=D(\rho(g)(i)).
+\]
+The symbol $\star$ denotes this rearrangement of decks. Position $i$ in
+$g\star D$ holds the value from position $\rho(g)(i)$ in $D$. The following
+lemma tracks how this convention moves the heart positions.
+
 \begin{lemma}[Shuffle invariance\footnotemark]
 \footnotetext{Formalized in
 \path{pgg-smc/instances/pgl27/pgl27_orbit.v} as
@@ -900,10 +983,6 @@ Thus the full encoding path is
 \coqin{deck\_stable}. The heart-set identity is the local equality
 \coqin{Hheart} in the proof of \coqin{orbit\_class\_invariant}, not a
 separate exported theorem.}
-Let $\rho:G\to S_X$ be the permutation action, and define
-\[
-  (g\star D)(i)=D(\rho(g)(i)).
-\]
 For every $g\in G$ and valid deck $D$,
 \[
   H(g\star D)=\rho(g)^{-1}\mathbin{\cdot}H(D).
@@ -916,12 +995,20 @@ The shuffled deck also satisfies
 \]
 \end{lemma}
 
-Because $\rho(g)^{-1}=\rho(g^{-1})$, the inverse permutation is also induced
-by an element of $G$.
-The shuffle therefore changes the representative inside $\Omega_4$, but not
-its orbit label.
+Because $\rho(g)^{-1}=\rho(g^{-1})$, the heart set of the shuffled deck
+remains in the same $G$-orbit as $H(D)$. The shuffle may change the
+representative in $\Omega_4$, but it cannot change the orbit label.
+
+In one run, the dealer encodes $s$ as $D_s$, applies an allowed shuffle, and
+distributes one card to each player. When all eight players reveal their
+cards, the verifier sees $g\star D_s$. The following corollary gives the
+deck-level correctness required by this execution. Proposition~\ref{thm:pgl-correctness}
+later lifts this equality to the executable interpreter. The recovery
+threshold and coalition privacy are separate properties proved in
+Section~\ref{sec:exact}.
 
 \begin{corollary}[Shuffle correctness of orbit decoding\footnotemark]
+\label{cor:orbit-shuffle-correctness}
 \footnotetext{The direct equality is formalized in
 \path{pgg-smc/instances/pgl27/pgl27_orbit.v} as
 \coqin{orbit\_encodeK} and \coqin{orbit\_class\_invariant}. The
@@ -936,10 +1023,11 @@ For every $s\in\{0,1\}$ and $g\in G$,
 \]
 \end{corollary}
 
-Orbit invariance preserves the secret under every allowed shuffle. It does
-not by itself hide the secret. Under an independent uniform shuffle
-$g\leftarrow U_G$, privacy begins with the distribution of partial
-observations and uses three-transitivity as its group-action premise.
+By Corollary~\ref{cor:orbit-shuffle-correctness}, every allowed shuffle
+preserves the decoded secret of an encoded deck. This correctness result
+does not imply privacy. When $g\leftarrow U_G$ is independent of the secret,
+privacy is a property of the distribution of partial observations. The
+privacy proof uses three-transitivity as its group-action premise.
 
 Figure~\ref{fig:run} shows how the encoder and decoder enter one execution.
 
@@ -987,16 +1075,25 @@ Figure~\ref{fig:run} shows how the encoder and decoder enter one execution.
 
 \subsection{Action and Generators}
 
-Three fractional linear maps generate this action. They are the
+The protocol uses the permutation action $\rho:G\to S_X$ on the eight card
+positions. A generator is one of a fixed set of group elements whose finite
+products reach every element of $G$. Under $\rho$, each generator specifies
+a physical rearrangement of the eight cards. A generator word specifies a
+sequence of these rearrangements. In the passive execution model, no party
+records the intermediate arrangements, so the word enters the execution
+only through its product $g\in G$ and the resulting deck $g\star D_s$.
+
+For $G=\PG$, three fractional linear maps generate the group. They are the
 translation $z\mapsto z+1$, the scaling $z\mapsto 3z$, and the inversion
 $z\mapsto -1/z$.\footnote{The rows of Figure~\ref{fig:pgl-generators} are
 the permutation tables of the three maps, identified with them by
 \coqin{tr\_moebius}, \coqin{sc\_moebius}, and \coqin{inv\_moebius} in
 \path{pgg-smc/instances/pgl27/pgl27_group.v}.}
-Figure~\ref{fig:pgl-generators} shows each map as a rearrangement of the
-row of eight cards, one card per projective point. The executable shuffle
-of Section~\ref{sec:mixing} draws its letters from these three maps and
-from two inverses. The equality $|G|=336=8\cdot7\cdot6$ also matches the
+Figure~\ref{fig:pgl-generators} shows each generator as a rearrangement of
+the row of eight cards, one card per projective point. The five-letter
+alphabet of the executable shuffle in Section~\ref{sec:mixing} contains
+these three maps together with the inverses of translation and scaling. The
+equality $|G|=336=8\cdot7\cdot6$ also matches the
 number of ordered triples of distinct points. Lemma~\ref{thm:three-transitive}
 shows that each ordered destination has exactly one group element.
 
@@ -1025,6 +1122,10 @@ shows that each ordered destination has exactly one group element.
   The symbol $\infty$ is position seven.}
   \label{fig:pgl-generators}
 \end{figure}
+
+The figure gives the three permutation tables. The following example reads
+them as physical row movements and connects words in these generators to
+the triple transport used below.
 
 \begin{example}\label{ex:pgl-letters}
 Use projective-point labels to display the identity assignment, with label
@@ -1073,8 +1174,10 @@ indexes the formal sources for this section and the two that follow.
 
 \section{Correctness, Recovery, and Uniform-Shuffle Privacy}\label{sec:exact}
 
-This section follows the upper path of Figure~\ref{fig:models} and ends in
-Theorem A.
+The construction section established deck-level correctness and the
+group-action premise for privacy. This section lifts correctness to the
+executed protocol, determines the recovery ramp, and proves view and trace
+privacy under a uniform shuffle. These results form Theorem A.
 
 \subsection{Correctness and Recovery}
 
@@ -1127,6 +1230,10 @@ positions determines the secret class. The view of the coalition of the
 four heart positions in the identity arrangement depends on the secret and
 has positive mutual information with it.
 \end{proposition}
+
+The recovery result and the privacy result have different cutoffs. Perfect
+coalition privacy holds through size three, while deterministic recovery
+begins at size seven. Figure~\ref{fig:ramp} places them on separate tracks.
 
 \begin{figure}[t]
   \centering
@@ -1235,7 +1342,11 @@ $S\mathrel{\perp}V_C$ whenever $\lvert C\rvert\leq3$. Under the uniform
 Boolean prior, it also gives $H(S\mid T_C)=H(S)$.
 \end{proposition}
 
-The propositions of this section combine into the first headline theorem.
+Executed correctness supplies full-run decoding. The recovery-ramp
+proposition supplies the recovery threshold and the four-card leakage
+witness. Fixed-dealer privacy supplies view and trace privacy through size
+three, which makes the four-card witness sharp. Together these results give
+the first headline theorem.
 
 \begin{thmA}
 The $\PG$ instance recovers the secret from all eight endpoints for every
@@ -1288,7 +1399,9 @@ $\{0,1,2,3,4\}^L$. For instance, at the Theorem B length $L=200$ the sample spac
 $5^{200}$ words.
 The proof partitions these words by evaluated group element. I call the
 set of words that evaluate to $g$ the fiber of $g$, and there are $336$
-fibers. A computation over binary naturals records the size of every
+fibers. For example, at $L=1$ the word consisting of the translation letter
+evaluates to $z\mapsto z+1$ and belongs to the fiber of that group element.
+A computation over binary naturals records the size of every
 fiber. The final arithmetic check sums the deviations of these fiber counts
 from $5^{200}/336$.
 
@@ -1328,9 +1441,11 @@ By the $L_1$ data-processing inequality, for every card position $i$,
 \end{equation}
 \end{lemma}
 
-The uniform group action makes the second endpoint distribution uniform on the eight
-positions. The second transfer adds a secret prior without changing the
-distance.
+The endpoint transfer controls one card position, and transitivity makes
+its uniform-shuffle endpoint distribution uniform on the eight positions.
+The privacy theorem also tracks the secret. The next lemma takes the product
+of both shuffle distributions with the same independent Boolean prior and
+preserves the $L_1$ bound.
 
 \begin{lemma}[Secret-prior product transfer\footnotemark]\label{lem:product-transfer}
 \footnotetext{Formalized in \path{pgg-smc/instances/pgl27/pgl27_mixing.v}
