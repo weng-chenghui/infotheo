@@ -759,6 +759,33 @@ Qed.
 
 (* The tested hop-0 joint value formed by placing ch in Bob's ciphertext slot
    and constructing Charlie's ciphertext from the stored randomness. *)
+(* If
+
+      c = (V2, V3, R2, R3, RA1, RA2, Rho3),
+
+   `hop0_assemble c ch` yields
+
+      (V2, V3, R2, R3, RA1, RA2, Sout, ch, Enc(pk_Charlie, V3; Rho3))
+
+    This can be used when calling D for reduction:
+
+      D (hop0_assemble c ch)
+
+    When return its result for getting Pr[D(...) = 1].
+
+   ----
+
+   The relationship can be summarized as:
+
+   hop0_reduction D
+      = the procedure that adapts D to the encryption experiment
+
+   hop0_assemble
+      = the function used by that procedure to rebuild D's input
+
+   D
+      = the final Boolean test on the rebuilt input
+*)
 Definition hop0_assemble (c : hop0_stateT) (ch : cipher AHE) :
     alice_hop_jointT :=
   let: (vv, masks, ra, rho3) := c in
