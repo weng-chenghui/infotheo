@@ -130,6 +130,7 @@ dumas2017dual/lib/extra_algebra.v
 dumas2017dual/lib/extra_proba.v
 dumas2017dual/lib/extra_entropy.v
 dumas2017dual/lib/rouche_capelli.v
+dumas2017dual/lib/indcpa_game.v
 dumas2017dual/entropy_fiber/entropy_fiber.v
 dumas2017dual/entropy_fiber/entropy_fiber_zpq.v
 dumas2017dual/entropy_fiber/linear_fiber_zpq.v
