@@ -17,6 +17,9 @@ MODULES=(
   dumas2017dual/lib/extra_proba.v
   # The information-theoretic headline theorems, with their full proofs.
   dumas2017dual/dsdp/dsdp_main.v
+  # The game layer the computational leg reduces to: the adversary record,
+  # the hidden-bit challenger, the two experiment arms and the advantage.
+  dumas2017dual/lib/indcpa_game.v
   # The computational leg: the two-hop ladder over the corrupted-Alice
   # experiment, its two reductions, the guessing / unpredictability / simulation
   # bounds, and their transfer to the executed piSMC trace.

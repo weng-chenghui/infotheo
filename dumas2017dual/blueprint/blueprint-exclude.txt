@@ -25,7 +25,6 @@ dsdp_alice_fdist_secrecy:alice_spectator_prod
 dsdp_alice_fdist_secrecy:alice_spectator_prodE
 dsdp_alice_fdist_secrecy:alice_spectator_regroup
 dsdp_alice_fdist_secrecy:alice_var_uniform
-dsdp_alice_fdist_secrecy:enc_slot_resampleE
 dsdp_alice_fdist_secrecy:fdistmap_prod
 dsdp_alice_fdist_secrecy:fdistmap_prodr
 dsdp_alice_fdist_secrecy:hop0_pair_uniformE
@@ -37,7 +36,6 @@ dsdp_alice_fdist_secrecy:hop1_real_challengeE
 dsdp_alice_fdist_secrecy:hop1_state_of
 dsdp_alice_fdist_secrecy:hop1_state_prod
 dsdp_alice_fdist_secrecy:hop1_zero_challengeE
-dsdp_alice_fdist_secrecy:hop_challengeE
 dsdp_alice_fdist_secrecy:inde_RV_of_prod
 dsdp_alice_fdist_secrecy:rho3_uniformE
 dsdp_alice_fdist_secrecy:spectator_pre2_uniformE
@@ -130,3 +128,14 @@ extra_proba:pfwd1_pair4_swap34
 extra_proba:pr_eq_comp_constraint
 extra_proba:pr_eq_comp_constraint_tail
 extra_proba:sum_cPr_eq
+# indcpa_game: the role-type abbreviation, the two arm-selection equations of
+# the challenger, and the slot-resampling and reduction-challenge plumbing the
+# two hop_advantageE nodes fold together.
+indcpa_game:distinguisher
+indcpa_game:enc_slot_resampleE
+indcpa_game:indcpa_challenger_realE
+indcpa_game:indcpa_challenger_zeroE
+indcpa_game:reduction_challenge_acceptE
+indcpa_game:reduction_challenge_fdist
+indcpa_game:reduction_challenge_fdistE
+indcpa_game:reduction_challenge_successE

@@ -256,20 +256,24 @@ finite commutative unit ring.
 
 \begin{definition}[Real-or-zero advantage of a single-query adversary]
   \label{def:indcpa_fdist_epsilon}
-  \rocq{infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.enc_fdist,
-       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.indcpa_fdist_adversary,
-       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.indcpa_fdist_success_real,
-       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.indcpa_fdist_success_realE,
-       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.indcpa_fdist_success_zero,
-       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.indcpa_fdist_success_zeroE,
-       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.indcpa_fdist_epsilon}
+  \rocq{infotheo.dumas2017dual.lib.indcpa_game.enc_fdist,
+       infotheo.dumas2017dual.lib.indcpa_game.indcpa_fdist_adversary,
+       infotheo.dumas2017dual.lib.indcpa_game.indcpa_challenger,
+       infotheo.dumas2017dual.lib.indcpa_game.indcpa_experiment,
+       infotheo.dumas2017dual.lib.indcpa_game.indcpa_fdist_accept,
+       infotheo.dumas2017dual.lib.indcpa_game.indcpa_fdist_success_real,
+       infotheo.dumas2017dual.lib.indcpa_game.indcpa_fdist_success_realE,
+       infotheo.dumas2017dual.lib.indcpa_game.indcpa_fdist_success_zero,
+       infotheo.dumas2017dual.lib.indcpa_game.indcpa_fdist_success_zeroE,
+       infotheo.dumas2017dual.lib.indcpa_game.indcpa_fdist_epsilon}
   \rocqok
   A single-query real-or-zero adversary $A$ is a finite state type, a law on it,
   a challenge plaintext $p_A$ read off the state, and a decision taken on the
   state and one challenge ciphertext. Encryption randomness is uniform. The
-  advantage of $A$ at a public key is the gap between its acceptance probability
-  when the challenge encrypts $p_A$ and its acceptance probability when the
-  challenge encrypts zero.
+  challenger at hidden bit $b$ is the encryption law of $p_A$ at $b = 1$ and the
+  encryption law of zero at $b = 0$, and the experiment at $b$ is the law of the
+  adversary's decision against that challenge. The advantage of $A$ at a public
+  key is the gap between its acceptance probability at the two bits.
   \[ \epsror{\pk}{A} = \big\lvert \Pr[A \text{ accepts } \Enc(\pk, p_A)]
        - \Pr[A \text{ accepts } \Enc(\pk, 0)] \big\rvert \]
 \end{definition}
