@@ -61,10 +61,6 @@ Require Import extra_proba.
 (*  indcpa_challenger b pk v == the challenge law at hidden bit b: the        *)
 (*                              encryption law of v at true and of zero at    *)
 (*                              false                                         *)
-(*   indcpa_challenger_realE == the challenge law at hidden bit true is the   *)
-(*                              encryption law of the plaintext               *)
-(*   indcpa_challenger_zeroE == the challenge law at hidden bit false is the  *)
-(*                              encryption law of zero                        *)
 (* indcpa_experiment b pk adv == the law of the adversary's decision at       *)
 (*                              hidden bit b: its state law bound with the    *)
 (*                              challenge law at that bit, then with its      *)
@@ -159,17 +155,6 @@ Arguments adv_decide : clear implicits.
 Definition indcpa_challenger (b : bool) (pk : pub_key AHE) (v : plain AHE) :
     R.-fdist (cipher AHE) :=
   enc_fdist pk (if b then v else 0).
-
-(* The challenge law at hidden bit true is the encryption law of the
-   plaintext. *)
-Lemma indcpa_challenger_realE pk v :
-  indcpa_challenger true pk v = enc_fdist pk v.
-Proof. by []. Qed.
-
-(* The challenge law at hidden bit false is the encryption law of zero. *)
-Lemma indcpa_challenger_zeroE pk v :
-  indcpa_challenger false pk v = enc_fdist pk 0.
-Proof. by []. Qed.
 
 (* The law of the adversary's decision at hidden bit b: its state law bound
    with the challenge law at that bit, then with its decision. *)

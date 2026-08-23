@@ -150,14 +150,5 @@ rewrite card_ord.
 by rewrite card_Fp // pdiv_id.
 Qed.
 
-(* Reflexivity lemma for entropy formulas over Z_m.
-   This trivial lemma serves as a proof obligation discharge when
-   showing that entropy calculations over different representations
-   (e.g., 'Z_m vs 'F_m when m is prime) yield identical results. *)
-Lemma entropy_formula_same (m : nat) :
-  (1 < m)%N ->
-  log (m%:R : R) = log (m%:R : R).
-Proof. by []. Qed.
-
 End Zp_Fp_equivalence.
 
