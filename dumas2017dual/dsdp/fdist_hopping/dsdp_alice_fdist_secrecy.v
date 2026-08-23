@@ -217,6 +217,8 @@ Require Export indcpa_game.
 (* dsdp_alice_simulator_pub pk_b pk_c s ==                                    *)
 (*                              the simulated view law with its setup passed  *)
 (*                              as the two public keys it encrypts under      *)
+(* dsdp_alice_simulator_pubE == any party-indexed key table instantiates the  *)
+(*                              public-key simulator to dsdp_alice_simulator  *)
 (*        enc_of_renc pk v r == the encryption of v under pk at coin index r  *)
 (*     card_enc_img_gt0 pk v == the reachable encryptions of v under pk are   *)
 (*                              nonempty                                      *)
@@ -1394,6 +1396,14 @@ Definition dsdp_alice_simulator_pub (pk_b pk_c : pub_key AHE)
       `x (fdist1 s))
      `x (enc_fdist card_renc rand_of_renc pk_b 0))
     `x (enc_fdist card_renc rand_of_renc pk_c 0).
+
+(* Instantiating the public keys as any party-indexed key table yields the
+   existing simulator. *)
+Lemma dsdp_alice_simulator_pubE (pkey_of_party : party_id -> pub_key AHE)
+    (s : plain AHE) :
+  dsdp_alice_simulator_pub (pkey_of_party Bob) (pkey_of_party Charlie) s
+  = dsdp_alice_simulator card_renc rand_of_renc pkey_of_party s.
+Proof. by []. Qed.
 
 End dsdp_alice_simulator_pub_sec.
 
