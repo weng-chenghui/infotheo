@@ -126,20 +126,31 @@ Variables (AHE : AHEncType) (Renc : finType) (index_renc : nat).
 Hypothesis card_renc : #|Renc| = index_renc.+1.
 Variable rand_of_renc : Renc -> rand AHE.
 
-(* The law of an encryption of a plaintext under a public key, with uniform
-   encryption randomness. *)
+(* The law of an encryption of v under pk when the encryption randomness is
+   drawn uniformly.  This is the only randomness the challenger uses, so an
+   IND-CPA challenge is a sample from enc_fdist pk v at the real bit and from
+   enc_fdist pk 0 at the zero bit. *)
 Definition enc_fdist (pk : pub_key AHE) (v : plain AHE) :
     R.-fdist (cipher AHE) :=
   fdistmap (fun r => enc pk v (rand_of_renc r)) (fdist_uniform card_renc).
 
-(* A distinguisher on a finite type is a Boolean function on it.
-   This is the plain-function counterpart of [tester] in
-   smc/security_models/statdist.v, which is a finfun. *)
+(* A Boolean test on the value a game hands the adversary.  In a game hop the
+   same test is run on two consecutive games, and the gap between its two
+   acceptance probabilities is the cost of that hop.
+   The statistical-distance axis writes the same notion as the finfun [tester]
+   of smc/security_models/statdist.v, where finiteness is what lets
+   [class_adv] maximize over testers and recover [statdist].  A plain function
+   is enough here because every bound below is stated for one fixed
+   distinguisher, so an epsilon in this development is a per-distinguisher
+   advantage rather than a supremum. *)
 Definition distinguisher (joint : finType) : Type := joint -> bool.
 
-(* A single-query real-or-zero adversary has a finite state type, a law over
-   that state, a challenge plaintext read from the state, and a Boolean
-   decision based on the state and the challenge ciphertext. *)
+(* A single-query real-or-zero adversary.  [adv_state] is everything the
+   adversary holds before the challenge, [adv_choose] is its law, [adv_plain]
+   is the challenge plaintext read off that state, and [adv_decide] is the
+   verdict on the state together with the one challenge ciphertext.  The record
+   grants the public key alone and one challenge, which is the attack model
+   every epsilon in the DSDP files is measured in. *)
 Record indcpa_fdist_adversary := {
   adv_state : finType ;
   adv_choose : R.-fdist adv_state ;
@@ -150,21 +161,25 @@ Arguments adv_choose : clear implicits.
 Arguments adv_plain : clear implicits.
 Arguments adv_decide : clear implicits.
 
-(* The challenge law at hidden bit b: the encryption law of v at true and of
-   zero at false. *)
+(* The challenge law at hidden bit b: enc_fdist pk v at true and enc_fdist pk 0
+   at false.  This is the real-or-zero form of IND-CPA, and zero is the
+   plaintext the DSDP simulator encrypts, so the hidden bit separates Alice's
+   real view from her simulated one. *)
 Definition indcpa_challenger (b : bool) (pk : pub_key AHE) (v : plain AHE) :
     R.-fdist (cipher AHE) :=
   enc_fdist pk (if b then v else 0).
 
-(* The law of the adversary's decision at hidden bit b: its state law bound
-   with the challenge law at that bit, then with its decision. *)
+(* The law of the adversary's verdict at hidden bit b: sample its state, sample
+   the challenge at b, then apply its decision.  The bit b stays hidden from
+   the adversary, and the two instances b = true and b = false are the pair of
+   experiments whose acceptance gap is the advantage. *)
 Definition indcpa_experiment (b : bool) (pk : pub_key AHE)
     (adv : indcpa_fdist_adversary) : R.-fdist bool :=
   c  <- adv_choose adv ;
   ch <- indcpa_challenger b pk (adv_plain adv c) ;
   ret (adv_decide adv c ch).
 
-(* The probability that the adversary accepts at hidden bit b. *)
+(* The probability that the adversary's verdict is true at hidden bit b. *)
 Definition indcpa_fdist_accept (b : bool) (pk : pub_key AHE)
     (adv : indcpa_fdist_adversary) : R :=
   Pr (indcpa_experiment b pk adv) [set true].
@@ -175,8 +190,11 @@ Definition indcpa_fdist_accept (b : bool) (pk : pub_key AHE)
    [guess_sdistr_success_real]; [Pr_] is reserved for the lemma family. *)
 Definition indcpa_fdist_success_real := indcpa_fdist_accept true.
 
-(* The real success probability as a bind of the state law with the
-   pushforward of the decision along the challenge law. *)
+(* The real success probability, unfolded as: draw the adversary state, encrypt
+   the plaintext that state chose under fresh uniform randomness, and test the
+   result.  A protocol hop whose challenged slot still carries the real
+   plaintext has its acceptance probability in exactly this form, which is how
+   hop0_real_challengeE and hop1_real_challengeE close. *)
 Lemma indcpa_fdist_success_realE (pk : pub_key AHE)
     (adv : indcpa_fdist_adversary) :
   indcpa_fdist_success_real pk adv
@@ -191,8 +209,11 @@ Proof. by []. Qed.
    the lemma family. *)
 Definition indcpa_fdist_success_zero := indcpa_fdist_accept false.
 
-(* The zero success probability as a bind of the state law with the
-   pushforward of the decision along the challenge law. *)
+(* The zero success probability in that same unfolded form, with the plaintext
+   replaced by zero.  The neighbouring hop, the one whose challenged slot
+   already encrypts zero, has its acceptance probability in exactly this form.
+   The two lemmas together put two neighbouring hops on the two branches of a
+   single IND-CPA experiment. *)
 Lemma indcpa_fdist_success_zeroE (pk : pub_key AHE)
     (adv : indcpa_fdist_adversary) :
   indcpa_fdist_success_zero pk adv
@@ -201,8 +222,9 @@ Lemma indcpa_fdist_success_zeroE (pk : pub_key AHE)
        [set true].
 Proof. by []. Qed.
 
-(* The real-or-zero advantage of an adversary at a public key: the absolute
-   gap between its two success probabilities. *)
+(* The advantage of adv against pk: the absolute gap between its real and zero
+   success probabilities.  Every DSDP hop is priced by one such advantage, at a
+   fixed key and a single query. *)
 Definition indcpa_fdist_epsilon (pk : pub_key AHE)
     (adv : indcpa_fdist_adversary) : R :=
   `| indcpa_fdist_success_real pk adv - indcpa_fdist_success_zero pk adv |.
@@ -220,9 +242,11 @@ Variable k : stateT -> Renc -> cipher AHE.
 Hypothesis state_rho_prodE :
   `p_ [% State, Rho] = Q `x (fdist_uniform card_renc).
 
-(* The law of a state paired with a slot computed from the state and a
-   coordinate disjoint from the state is the law of the state with the
-   stochastic map that resamples the coordinate. *)
+(* A state paired with a slot built from the state and a coordinate the state
+   omits has the law of the state extended by resampling that coordinate.  The
+   omitted coordinate is the encryption randomness, so one protocol sample can
+   be re-read as sampling the reduction state first and drawing fresh uniform
+   randomness afterwards, which is the order the challenger works in. *)
 Lemma enc_slot_resampleE :
   `p_ [% State, (fun t => k (State t) (Rho t))
         : {RV P -> cipher AHE}]
@@ -262,8 +286,10 @@ Hypothesis state_rho_prodE :
 Hypothesis X_assembleE : forall t,
   X t = assemble (State t) (enc pk (msg (State t)) (rand_of_renc (Rho t))).
 
-(* The joint law obtained by sampling a reduction state and its challenge
-   ciphertext before reconstructing the tested value. *)
+(* The law of the value a distinguisher is handed inside the IND-CPA
+   experiment: sample the reduction state, sample the challenge ciphertext for
+   the plaintext that state selects, then assemble the tested value from the
+   two. *)
 Definition reduction_challenge_fdist : R.-fdist joint :=
   c  <- `p_ State ;
   ch <- enc_fdist pk (msg c) ;
@@ -272,7 +298,8 @@ Definition reduction_challenge_fdist : R.-fdist joint :=
 (* The protocol-game law from one complete protocol sample equals the
    reduction-game law obtained by separately sampling the reduction state and
    fresh uniform encryption randomness, then applying the same deterministic
-   encryption and assembly functions. *)
+   encryption and assembly functions.  The reduction therefore reproduces the
+   protocol hop for the distinguisher with no error term. *)
 Lemma reduction_challenge_fdistE : `p_ X = reduction_challenge_fdist.
 Proof.
 have -> : `p_ X
@@ -287,15 +314,19 @@ congr (_ >>= _); apply/boolp.funext => c.
 by rewrite -/(fdistmap (assemble c) (enc_fdist pk (msg c))) fdistmap_comp.
 Qed.
 
-(* Equal joint laws give equal acceptance probabilities for every Boolean
-   test. *)
+(* A distinguisher accepts the protocol sample with the same probability as it
+   accepts the value assembled inside the IND-CPA experiment.  The reduction is
+   tight: the hop gap it hands to the challenger is the gap the distinguisher
+   had. *)
 Corollary reduction_challenge_acceptE (D : distinguisher joint) :
   Pr (`p_ X) [set x | D x]
   = Pr reduction_challenge_fdist [set x | D x].
 Proof. by rewrite reduction_challenge_fdistE. Qed.
 
-(* The challenge law tested by D is the state law bound with the pushforward
-   of D along each challenge law. *)
+(* The acceptance probability under reduction_challenge_fdist, unfolded as the
+   state law bound with the pushforward of D along each challenge law.  Read
+   together with indcpa_fdist_success_realE and indcpa_fdist_success_zeroE it
+   identifies a hop success probability with an IND-CPA success probability. *)
 Lemma reduction_challenge_successE (D : distinguisher joint) :
   Pr reduction_challenge_fdist [set x | D x]
   = Pr (c <- `p_ State ;
