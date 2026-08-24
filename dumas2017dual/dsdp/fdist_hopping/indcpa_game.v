@@ -245,8 +245,9 @@ Variable Q : R.-fdist stateT.
 Variables (State : {RV P -> stateT}) (Rho : {RV P -> Renc}).
 Variable k : stateT -> Renc -> cipher AHE.
 
-(* The state and the selected coordinate are jointly distributed as Q times the
-   uniform law on that coordinate.
+(* Rho is uniform on its coordinate and independent of State, and Q is State's
+   own law: the pair can be produced by drawing State from Q and then drawing
+   Rho without consulting it.
    As a condition on a protocol this is freshness, not secrecy: the party that
    produces the ciphertext draws its encryption randomness uniformly, and
    independently of its own input and of every other party's randomness.  The
@@ -303,12 +304,12 @@ Variable X : {RV P -> joint}.
 Hypothesis state_rho_prodE :
   `p_ [% State, Rho] = (`p_ State) `x (fdist_uniform card_renc).
 
-(* The tested value is the reduction state together with one encryption, whose
-   randomness is Rho.  Every dependence of X on Rho passes through that single
-   ciphertext, which is what lets the reduction give Rho to the challenger and
-   rebuild X around the challenge it gets back.  The two hypotheses divide the
-   work: state_rho_prodE makes Rho fresh, and this one confines its effect on X
-   to that one slot. *)
+(* Rho enters the tested value at one place only, the ciphertext of the
+   plaintext that State selects.  Everything else X reads is a function of
+   State, so a reduction that gives Rho to the challenger can still rebuild X
+   around the challenge ciphertext it gets back.  The two hypotheses divide the
+   work: state_rho_prodE makes Rho fresh, and this one confines where it
+   enters. *)
 Hypothesis X_assembleE : forall t,
   X t = assemble (State t) (enc pk (msg (State t)) (rand_of_renc (Rho t))).
 
