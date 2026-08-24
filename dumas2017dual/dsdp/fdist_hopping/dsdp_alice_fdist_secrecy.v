@@ -219,7 +219,8 @@ Require Export indcpa_game.
 (*                              as the two public keys it encrypts under      *)
 (* dsdp_alice_simulator_pubE == any party-indexed key table instantiates the  *)
 (*                              public-key simulator to dsdp_alice_simulator  *)
-(*        enc_of_renc pk v r == the encryption of v under pk at coin index r  *)
+(*        enc_of_renc pk v r == the encryption of v under pk at randomness    *)
+(*                              index r                                       *)
 (*     card_enc_img_gt0 pk v == the reachable encryptions of v under pk are   *)
 (*                              nonempty                                      *)
 (* enc_fdist_uniform_img pk v ==                                              *)
@@ -228,7 +229,8 @@ Require Export indcpa_game.
 (* enc_fdist_uniform_img_fiber ==                                             *)
 (*                              equal fiber cardinalities over the image      *)
 (*                              establish that property                       *)
-(* enc_fdist_uniform_img_inj == injectivity of the coin-index encryption map  *)
+(* enc_fdist_uniform_img_inj == injectivity of the randomness-index           *)
+(*                              encryption map                                *)
 (*                              establishes that property                     *)
 (*    enc_fdist_uniform_imgE == under that property each reachable            *)
 (*                              ciphertext carries mass one over the number   *)
@@ -315,9 +317,11 @@ Definition V3 : {RV alice_sample_fdist -> plain AHE} := fun t => t.1.1.1.2.
 Definition R2 : {RV alice_sample_fdist -> plain AHE} := fun t => t.1.1.2.1.
 (* Alice's mask on the second combine. *)
 Definition R3 : {RV alice_sample_fdist -> plain AHE} := fun t => t.1.1.2.2.
-(* The randomness of the encryption Alice receives from Bob. *)
+(* The randomness of the ciphertext Alice receives from Bob, and the randomness
+   the hop-0 challenger takes over. *)
 Definition Rho2 : {RV alice_sample_fdist -> Renc} := fun t => t.1.2.1.
-(* The randomness of the encryption Alice receives from Charlie. *)
+(* The randomness of the ciphertext Alice receives from Charlie, and the
+   randomness the hop-1 challenger takes over. *)
 Definition Rho3 : {RV alice_sample_fdist -> Renc} := fun t => t.1.2.2.
 (* The randomness of Alice's first combine. *)
 Definition RA1 : {RV alice_sample_fdist -> Renc} := fun t => t.2.1.
@@ -331,7 +335,9 @@ Definition RA2 : {RV alice_sample_fdist -> Renc} := fun t => t.2.2.
 Definition Sout : {RV alice_sample_fdist -> plain AHE} :=
   uncurry (dsdp_output v1 u1 u2 u3) `o [% V2, V3].
 
-(* The output written out at the protocol's weights. *)
+(* The leaked output written out as u1 * v1 + u2 * V2 + u3 * V3.  Alice
+   legitimately learns one affine equation in the two secret inputs, and that
+   equation is the leak the fiber term of the headline bound accounts for. *)
 Lemma SoutE t : Sout t = u1 * v1 + u2 * V2 t + u3 * V3 t.
 Proof. by []. Qed.
 
@@ -353,7 +359,11 @@ Definition dsdp_alice_hop_tupleT : finType :=
   ((plain AHE * plain AHE) * (Renc * Renc) * plain AHE
    * cipher AHE * cipher AHE)%type.
 
-(* The type of the two honest inputs paired with Alice's hopping tuple. *)
+(* The value a distinguisher is tested on: the two honest inputs together with
+   Alice's hopping tuple.  Carrying the inputs beside the tuple lets a single
+   sample hold both a predictor's guess, computed from the tuple, and the true
+   input that guess is checked against.  That is what makes
+   distinguisher_of_guess expressible as a Boolean test on one sample. *)
 Definition alice_hop_jointT : finType :=
   (plain AHE * plain AHE * dsdp_alice_hop_tupleT)%type.
 
@@ -375,8 +385,9 @@ Definition alice_hop_game_success (i : nat)
     (D : alice_hop_jointT -> bool) : R :=
   Pr (fdistmap D (alice_hop_joint_fdist i)) [set true].
 
-(* The acceptance probability at hop i is the probability that D returns true
-   under the joint distribution at hop i. *)
+(* The pushforward form of the hop-i acceptance probability agrees with the
+   event form, which is the shape the four reduction correspondences are stated
+   in. *)
 Lemma alice_hop_game_successE (i : nat) (D : alice_hop_jointT -> bool) :
   alice_hop_game_success i D
     = Pr (alice_hop_joint_fdist i) [set x | D x].
@@ -393,13 +404,15 @@ rewrite fdist_uniformE /alice_sample_fdist !fdist_prodE !fdist_uniformE.
 by rewrite -!invfM -!natrM /dsdp_alice_sampleT !card_prod.
 Qed.
 
-(* The adversary state of hop 0: the inputs, the masks, Alice's combine
-   randomness, and the randomness of the hop-1 encryption. *)
+(* The hop-0 reduction state: the two inputs, Alice's masks, her combine
+   randomness, and Rho3.  Rho2 is held by the challenger at this hop, which is
+   why the state stops short of it. *)
 Definition hop0_stateT : finType :=
   ((plain AHE * plain AHE) * (plain AHE * plain AHE)
    * (Renc * Renc) * Renc)%type.
 
-(* The random variable of the hop-0 adversary state. *)
+(* The hop-0 reduction state as a random variable on the sample space:
+   everything the reduction holds before it queries the challenger. *)
 Definition Hop0State : {RV alice_sample_fdist -> hop0_stateT} :=
   fun t => (t.1.1.1, t.1.1.2, t.2, t.1.2.2).
 
@@ -411,8 +424,9 @@ Let card_hop0_pair :
     = #|((hop0_stateT * Renc)%type : finType)|.-1.+1.
 Proof. exact: fdist_card_prednK (`p_ [% Hop0State, Rho2]). Qed.
 
-(* The hop-0 state and the hop-0 encryption randomness are jointly
-   uniform. *)
+(* The hop-0 state and Bob's encryption randomness are jointly uniform on the
+   product of their spaces, so the randomness the challenger draws is uniform
+   and independent of everything the reduction holds. *)
 Lemma hop0_pair_uniformE :
   `p_ [% Hop0State, Rho2]
     = (fdist_uniform card_hop0_state) `x (fdist_uniform card_renc).
@@ -426,26 +440,34 @@ exists (fun p : (hop0_stateT * Renc)%type =>
 by move=> [[[[[v2 v3] [r2 r3]] [ra1 ra2]] rho3] rho2].
 Qed.
 
-(* The hop-0 encryption randomness is uniform and independent of the hop-0
-   state. *)
+(* Bob's encryption randomness is uniform and independent of the hop-0 state.
+   This is the hypothesis reduction_challenge_fdistE consumes, and it is why
+   the reduction can leave that randomness to the challenger without changing
+   the law of anything it keeps. *)
 Lemma hop0_state_prodE :
   `p_ [% Hop0State, Rho2] = (`p_ Hop0State) `x (fdist_uniform card_renc).
 Proof.
 by rewrite -(fst_RV2 Hop0State Rho2) !hop0_pair_uniformE fdist_prod1.
 Qed.
 
-(* The adversary state of hop 1: the inputs, the masks, Alice's combine
-   randomness, and the hop-0 ciphertext of zero. *)
+(* The hop-1 reduction state: the two inputs, Alice's masks, her combine
+   randomness, and Bob's already-zeroed ciphertext.  Bob's slot is fixed data
+   at this hop, and Charlie's encryption randomness is what the challenger
+   owns. *)
 Definition hop1_stateT : finType :=
   ((plain AHE * plain AHE) * (plain AHE * plain AHE)
    * (Renc * Renc) * cipher AHE)%type.
 
-(* The random variable of the hop-1 adversary state. *)
+(* The hop-1 reduction state as a random variable: what the reduction holds
+   after Bob's slot has been zeroed and before it queries Charlie's
+   challenger. *)
 Definition Hop1State : {RV alice_sample_fdist -> hop1_stateT} :=
   fun t => (t.1.1.1, t.1.1.2, t.2, hop0_cipher 1 t).
 
-(* The hop-1 adversary state with the randomness of the hop-0 encryption in
-   place of the ciphertext it produces. *)
+(* The hop-1 state with Bob's encryption randomness in place of the ciphertext
+   it produces.  Uniformity is proved here, before that encryption happens.
+   Hop1State is obtained by applying the fixed function hop1_state_of, and a
+   fixed function of an independent pair leaves the independence in place. *)
 Definition Hop1StatePre : {RV alice_sample_fdist -> hop0_stateT} :=
   fun t => (t.1.1.1, t.1.1.2, t.2, t.1.2.1).
 
@@ -507,11 +529,11 @@ Qed.
 
       (V2, V3, R2, R3, RA1, RA2, Sout, ch, Enc(pk_Charlie, V3; Rho3))
 
-    This can be used when calling D for reduction:
+   This can be used when calling D in the reduction:
 
       D (hop0_assemble c ch)
 
-    When return its result for getting Pr[D(...) = 1].
+   Its result is then returned, which gives Pr[D(...) = 1].
 
    ----
 
@@ -566,18 +588,18 @@ Definition hop1_assemble (c : hop1_stateT) (ch : cipher AHE) :
 
         and return its Boolean result.
 
-   It is called a "reduction" because it converts one distinguishing problem
-   into another security problem. The original problem is:
+   It is called a "reduction" because it converts a distinguishing problem
+   into a security problem. The original problem is:
 
        Can D distinguish the protocol's hop-0 distribution from its hop-1
        distribution?
 
-   And the encryption-security problem is:
+   The encryption-security problem is:
 
        Can an IND-CPA adversary distinguish an encryption of V2 from an
        encryption of zero under Bob's key?
 
-   (indcpa_fdist_epsilon pk adv)
+   That advantage is indcpa_fdist_epsilon pk adv.
 
    The construction:
 
@@ -611,8 +633,8 @@ Definition hop1_assemble (c : hop1_stateT) (ch : cipher AHE) :
               v
       distinguishing Enc(pk_B, V2) and Enc(pk_B, 0)
 
-   The second problem is the encryption-security property used to bound the
-   first.  Since D accepts a complete alice_hop_jointT value rather than an
+   The second problem is the one the encryption-security property answers,
+   and that is what bounds the first.  Since D accepts a complete alice_hop_jointT value rather than an
    encryption challenge, hop0_reduction D adapts D to the real-or-zero
    adversary interface.  It builds the joint value around the challenge
    ciphertext and calls D.  The correspondence theorems prove that D's gap
@@ -651,7 +673,7 @@ Definition hop1_assemble (c : hop1_stateT) (ch : cipher AHE) :
 
    Therefore hop1_advantageE proves
 
-     | alice_hop_game_success 1 D - alice_hop_game_success 2 D |
+     `| alice_hop_game_success 1 D - alice_hop_game_success 2 D |
        = indcpa_fdist_epsilon
            (pkey_of_party Charlie) (hop1_reduction D).
 
@@ -659,8 +681,10 @@ Definition hop1_assemble (c : hop1_stateT) (ch : cipher AHE) :
    the real and zero experiments.  They are not themselves complete
    experiments. *)
 
-(* The adversary that challenges Bob's key on the first input and runs the
-   distinguisher on the view rebuilt around the challenge. *)
+(* The IND-CPA adversary built from D at Bob's key: it samples the hop-0 state,
+   submits Bob's input V2 as the challenge plaintext, and answers with D run on
+   the joint value assembled around the challenge ciphertext.  At the real bit
+   it reproduces hop 0 and at the zero bit hop 1. *)
 Definition hop0_reduction (D : distinguisher alice_hop_jointT) :
     indcpa_fdist_adversary :=
   {| adv_state := hop0_stateT ;
@@ -668,8 +692,10 @@ Definition hop0_reduction (D : distinguisher alice_hop_jointT) :
      adv_plain := fun c => c.1.1.1.1 ;
      adv_decide := fun c ch => D (hop0_assemble c ch) |}.
 
-(* The adversary that challenges Charlie's key on the second input and runs
-   the distinguisher on the view rebuilt around the challenge. *)
+(* The IND-CPA adversary built from D at Charlie's key: it samples the hop-1
+   state, submits Charlie's input V3 as the challenge plaintext, and answers
+   with D run on the joint value assembled around the challenge ciphertext.  At
+   the real bit it reproduces hop 1 and at the zero bit hop 2. *)
 Definition hop1_reduction (D : distinguisher alice_hop_jointT) :
     indcpa_fdist_adversary :=
   {| adv_state := hop1_stateT ;
@@ -677,8 +703,8 @@ Definition hop1_reduction (D : distinguisher alice_hop_jointT) :
      adv_plain := fun c => c.1.1.1.2 ;
      adv_decide := fun c ch => D (hop1_assemble c ch) |}.
 
-(* The distinguisher on the real view is the hop-0 reduction facing an
-   encryption of the first input. *)
+(* D's acceptance probability on the real view, hop 0, equals the real-bit
+   success probability of hop0_reduction D against Bob's key. *)
 Lemma hop0_real_challengeE (D : distinguisher alice_hop_jointT) :
   alice_hop_game_success 0 D
     = indcpa_fdist_success_real (pkey_of_party Bob) (hop0_reduction D).
@@ -691,8 +717,9 @@ rewrite (reduction_challenge_acceptE (pk := pkey_of_party Bob)
 by rewrite reduction_challenge_successE indcpa_fdist_success_realE.
 Qed.
 
-(* The distinguisher on the view with a zeroed hop-0 slot is the hop-0
-   reduction facing an encryption of zero. *)
+(* D's acceptance probability on the view whose Bob slot encrypts zero, hop 1,
+   equals the zero-bit success probability of hop0_reduction D against Bob's
+   key. *)
 Lemma hop0_zero_challengeE (D : distinguisher alice_hop_jointT) :
   alice_hop_game_success 1 D
     = indcpa_fdist_success_zero (pkey_of_party Bob) (hop0_reduction D).
@@ -705,8 +732,9 @@ rewrite (reduction_challenge_acceptE (pk := pkey_of_party Bob)
 by rewrite reduction_challenge_successE indcpa_fdist_success_zeroE.
 Qed.
 
-(* Zeroing the hop-0 slot of the view moves the distinguishing probability by
-   the advantage of the hop-0 reduction against Bob's key. *)
+(* The gap D shows between hop 0 and hop 1 equals the advantage of
+   hop0_reduction D against Bob's key.  Zeroing Bob's slot costs exactly one
+   IND-CPA advantage. *)
 Lemma hop0_advantageE (D : distinguisher alice_hop_jointT) :
   `| alice_hop_game_success 0 D - alice_hop_game_success 1 D |
   = indcpa_fdist_epsilon (pkey_of_party Bob) (hop0_reduction D).
@@ -714,8 +742,9 @@ Proof.
 by rewrite /indcpa_fdist_epsilon hop0_real_challengeE hop0_zero_challengeE.
 Qed.
 
-(* The distinguisher on the view with a zeroed hop-0 slot is the hop-1
-   reduction facing an encryption of the second input. *)
+(* D's acceptance probability at hop 1 equals the real-bit success probability
+   of hop1_reduction D against Charlie's key.  Hop 1 is the zero side for Bob's
+   key and the real side for Charlie's, which is what chains the two hops. *)
 Lemma hop1_real_challengeE (D : distinguisher alice_hop_jointT) :
   alice_hop_game_success 1 D
     = indcpa_fdist_success_real (pkey_of_party Charlie) (hop1_reduction D).
@@ -728,8 +757,8 @@ rewrite (reduction_challenge_acceptE (pk := pkey_of_party Charlie)
 by rewrite reduction_challenge_successE indcpa_fdist_success_realE.
 Qed.
 
-(* The distinguisher on the all-zero view is the hop-1 reduction facing an
-   encryption of zero. *)
+(* D's acceptance probability on the all-zero view, hop 2, equals the zero-bit
+   success probability of hop1_reduction D against Charlie's key. *)
 Lemma hop1_zero_challengeE (D : distinguisher alice_hop_jointT) :
   alice_hop_game_success 2 D
     = indcpa_fdist_success_zero (pkey_of_party Charlie) (hop1_reduction D).
@@ -742,8 +771,9 @@ rewrite (reduction_challenge_acceptE (pk := pkey_of_party Charlie)
 by rewrite reduction_challenge_successE indcpa_fdist_success_zeroE.
 Qed.
 
-(* Zeroing the hop-1 slot of the view moves the distinguishing probability by
-   the advantage of the hop-1 reduction against Charlie's key. *)
+(* The gap D shows between hop 1 and hop 2 equals the advantage of
+   hop1_reduction D against Charlie's key.  Zeroing Charlie's slot costs
+   exactly one IND-CPA advantage. *)
 Lemma hop1_advantageE (D : distinguisher alice_hop_jointT) :
   `| alice_hop_game_success 1 D - alice_hop_game_success 2 D |
   = indcpa_fdist_epsilon (pkey_of_party Charlie) (hop1_reduction D).
@@ -765,7 +795,8 @@ Definition U3c : {RV alice_sample_fdist -> plain AHE} := const_RV _ u3.
 Definition alice_spectator_preT : finType :=
   ((plain AHE * plain AHE) * (Renc * Renc) * (Renc * Renc))%type.
 
-(* The random variable of the spectator coordinates. *)
+(* The spectator coordinates as a random variable: the part of the sample
+   Alice's view reads besides the two secret inputs. *)
 Definition AliceSpectatorPre :
     {RV alice_sample_fdist -> alice_spectator_preT} :=
   fun t => (t.1.1.2, t.1.2, t.2).
@@ -808,7 +839,8 @@ by rewrite -(snd_RV2 AliceSpectatorPre [% V2, V3]) spectator_pre_pair_uniformE
            fdist_prod2.
 Qed.
 
-(* The spectator coordinates are independent of the two secret inputs. *)
+(* The spectator coordinates are independent of the two secret inputs, which is
+   what lets the all-zero view be produced from public data alone. *)
 Lemma spectator_pre_indep :
   alice_sample_fdist |= AliceSpectatorPre _|_ [% V2, V3].
 Proof.
@@ -894,7 +926,9 @@ Definition AliceSpectator :
         * cipher AHE)%type}
   := [% [% R2, R3], [% RA1, RA2], hop0_cipher 2, hop1_cipher 2].
 
-(* The spectator rebuilt from the spectator coordinates. *)
+(* The spectator rebuilt from the spectator coordinates, with both ciphertext
+   slots encrypting zero.  It is a deterministic function of coordinates
+   independent of the secrets. *)
 Definition alice_spectator_of (c : alice_spectator_preT) :
     ((plain AHE * plain AHE) * (Renc * Renc) * cipher AHE
      * cipher AHE)%type :=
@@ -911,8 +945,9 @@ have -> : AliceSpectator = alice_spectator_of `o AliceSpectatorPre.
 exact: (inde_RV_comp alice_spectator_of idfun spectator_pre_indep).
 Qed.
 
-(* The spectator is conditionally independent of Bob's input given the leaked
-   output. *)
+(* Given the leaked output, the spectator and Bob's input are conditionally
+   independent.  At the all-zero endpoint the leaked output is the single
+   channel from V2 into Alice's view. *)
 Lemma alice_spectator_cinde :
   alice_sample_fdist |= AliceSpectator _|_ V2 | Sout.
 Proof.
@@ -945,8 +980,15 @@ by apply: (cinde_diagonal_bound
        alice_spectator_cinde)) => a c; exact: alice_V2_cond_le.
 Qed.
 
-(* The distinguisher that accepts when a predictor reading the view slot of its
-   input returns the first input. *)
+(* The distinguisher that accepts when the predictor g, reading the
+   hopping-tuple slot, returns the input slot.
+   A predictor is scored by an equality event, g's output against Bob's real
+   input, while a hop speaks only about how often a Boolean test accepts.
+   Wrapping g this way makes the two the same number: the probability that g
+   succeeds at hop i is the probability that this test accepts at hop i.  The
+   two hop advantages then measure how much more often g succeeds on Alice's
+   real view than on the all-zero view, where guess_all_zero_le_invm bounds its
+   success outright. *)
 Definition distinguisher_of_guess (g : dsdp_alice_hop_tupleT -> plain AHE) :
     distinguisher alice_hop_jointT :=
   fun x => g x.2 == x.1.1.
@@ -962,8 +1004,11 @@ Proof.
 by rewrite /dist_of_RV Pr_fdistmap_preim; apply: eq_bigl => t; rewrite !inE.
 Qed.
 
-(* A predictor reading Alice's real view matches Bob's input with probability at
-   most 1/#|plain AHE| plus the advantages of the two hop reductions.
+(* A predictor reading Alice's real view returns Bob's input with probability at
+   most the inverse plaintext-space cardinality plus the advantages of the two
+   hop reductions.  The first term is the information-theoretic residue of the
+   leaked output along the DSDP solution fiber, and the two advantages are the
+   price of zeroing Bob's and Charlie's ciphertext slots.
    Naming: [dsdp_alice_guess] after [dsdp_alice_guess_V2_real_le] of the
    SSProve axis, with the axis token [fdist] after [guess]. *)
 Theorem dsdp_alice_guess_fdist_V2_real_le
@@ -1008,9 +1053,12 @@ Local Notation "'`H_unp^{' g '}'" :=
   (at level 0, g at level 200,
    format "'`H_unp^{' g '}'").
 
-(* The negative logarithm of the success probability of a predictor reading
-   Alice's real view is at least log #|plain AHE| minus the logarithm of one
-   plus #|plain AHE| times the sum of the two hop advantages.
+(* The negative logarithm of a predictor's success probability on Alice's real
+   view is bounded below by the log of the plaintext-space cardinality minus a
+   correction term in the two hop advantages.  When the two advantages are
+   small the correction term is small, and what remains is the value the left
+   side would take if Alice were guessing uniformly at random over the
+   plaintext space.
    Naming: after [dsdp_alice_unpredictability_entropy_ge] of the SSProve axis,
    with the axis token [fdist] in place of [entropy]. *)
 Theorem dsdp_alice_unpredictability_fdist_ge
@@ -1031,8 +1079,9 @@ rewrite mulrDl mul1r mulrAC (divff (lt0r_neq0 Hcard_pos)) mul1r addrA.
 exact: dsdp_alice_guess_fdist_V2_real_le.
 Qed.
 
-(* The predictor-specific unpredictability of Bob's input is at least the
-   negative-logarithm form of the two-hop guessing bound.
+(* The same bound stated through alice_predictor_unpredictability: the log of
+   the plaintext-space cardinality minus the correction term in the two hop
+   advantages lower-bounds the named unpredictability quantity.
    Naming: after [dsdp_alice_unpredictability_fdist_ge], whose right-hand
    side this theorem folds into the named quantity. *)
 Theorem dsdp_alice_predictor_unpredictability_fdist_ge
@@ -1071,7 +1120,9 @@ Proof. by rewrite (fdistmap_prod Q1 Q2 idfun f2) fdistmap_id. Qed.
 
 (* The law a simulator produces from a value of the leaked output: uniform
    masks, uniform combine randomness, that output, and an encryption of zero
-   under each of the two other parties' keys. *)
+   under each of the two other parties' keys.  It reads only the output value
+   and the two public keys, so everything it produces is available without the
+   secret inputs. *)
 Definition dsdp_alice_simulator (s : plain AHE) :
     R.-fdist dsdp_alice_hop_tupleT :=
   ((((fdist_uniform card_plain_pair) `x (fdist_uniform card_renc_pair))
@@ -1083,7 +1134,8 @@ Definition dsdp_alice_simulator (s : plain AHE) :
 Definition alice_spectator_pre2T : finType :=
   ((plain AHE * plain AHE) * (Renc * Renc) * Renc * Renc)%type.
 
-(* The random variable of the reordered spectator coordinates. *)
+(* The spectator coordinates with the two encryption randomnesses last, the
+   layout on which the spectator law factors as the simulator's product. *)
 Definition AliceSpectatorPre2 :
     {RV alice_sample_fdist -> alice_spectator_pre2T} :=
   fun t => (t.1.1.2, t.2, t.1.2.1, t.1.2.2).
@@ -1252,7 +1304,8 @@ Definition alice_ideal_joint :
     (dsdp_alice_simulator (dsdp_output v1 u1 u2 u3 vv.1 vv.2)).
 
 (* The ideal-world joint law is the joint law of the two secret inputs and
-   Alice's all-zero view. *)
+   Alice's all-zero view.  The ideal world is therefore hop 2 itself, and the
+   simulation gap is the two-hop distance. *)
 Lemma alice_ideal_jointE :
   alice_ideal_joint = `p_ [% V2, V3, (AliceHopTuple 2)].
 Proof.
@@ -1270,7 +1323,9 @@ Qed.
 
 (* A distinguisher separates the real joint law of the two secret inputs and
    Alice's view from the ideal-world joint law by at most the sum of the
-   advantages of the two hop reductions.
+   advantages of the two hop reductions.  This is the simulation-based reading
+   of the same two hops: the real world is hop 0, the ideal world is hop 2, and
+   the distance between them is the sum of the two IND-CPA advantages.
    Naming: [sim_advantage] rather than [advantage_sim] because the statement
    bounds a distinguishing gap between two laws instead of instantiating the
    [advantage_sim_le] predicate of [smc/ssprove_ext_simulator.v]. *)
@@ -1311,7 +1366,7 @@ Definition alice_view_of_hop_tuple (v : dsdp_alice_hop_tupleT) :
 
 (* Alice's outgoing combine toward Bob's key, replaying her real protocol step:
    the ciphertext she received from Bob raised to her second weight, times an
-   encryption of her first mask.  Used by alice_view_of_hop_tupleE. *)
+   encryption of her first mask. *)
 Definition AliceCombineBob : {RV alice_sample_fdist -> cipher AHE} :=
   fun t => Emul
     (Epow (enc (pkey_of_party Bob) (V2 t) (rand_of_renc (Rho2 t))) u2)
@@ -1319,16 +1374,15 @@ Definition AliceCombineBob : {RV alice_sample_fdist -> cipher AHE} :=
 
 (* Alice's outgoing combine toward Charlie's key, the symmetric counterpart of
    AliceCombineBob: the ciphertext she received from Charlie raised to her
-   third weight, times an encryption of her second mask.  Used by
-   alice_view_of_hop_tupleE. *)
+   third weight, times an encryption of her second mask. *)
 Definition AliceCombineCharlie : {RV alice_sample_fdist -> cipher AHE} :=
   fun t => Emul
     (Epow (enc (pkey_of_party Charlie) (V3 t) (rand_of_renc (Rho3 t))) u3)
     (enc (pkey_of_party Charlie) (R3 t) (rand_of_renc (RA2 t))).
 
 (* The plaintext Alice recovers at her final decrypt-on-receive step: the two
-   weighted inputs of the other parties plus her two masks.  The last of the
-   four observables alice_view_of_hop_tupleE assembles.
+   weighted inputs of the other parties plus her two masks.  Its value is
+   determined by the hopping tuple through alice_view_of_hop_tuple.
    Naming: Owner-Verb-Noun, parallel to AliceCombineBob and
    AliceCombineCharlie; [Plain] is the AHE plaintext carrier. *)
 Definition AliceRecvPlain : {RV alice_sample_fdist -> plain AHE} :=
@@ -1341,8 +1395,11 @@ Definition AliceView :
        (dsdp_alice_hop_tupleT * cipher AHE * cipher AHE * plain AHE)%type} :=
   [% (AliceHopTuple 0), AliceCombineBob, AliceCombineCharlie, AliceRecvPlain].
 
-(* Alice's four real observables assemble into the reconstruction of her view
-   from her hopping tuple.
+(* AliceView is alice_view_of_hop_tuple composed with AliceHopTuple 0.
+   Her combine addressed to Bob's key, her combine addressed to Charlie's key,
+   and the plaintext of her final decrypt-on-receive are each a deterministic
+   function of the hopping tuple, so a bound on the tuple transfers to her
+   whole view with no extra term.
    Naming: [E] marks the equation unfolding [AliceView] into
    [alice_view_of_hop_tuple] composed with [AliceHopTuple 0]. *)
 Lemma alice_view_of_hop_tupleE :
@@ -1413,21 +1470,22 @@ Variables (AHE : AHEncType) (Renc : finType) (index_renc : nat).
 Hypothesis card_renc : #|Renc| = index_renc.+1.
 Variable rand_of_renc : Renc -> rand AHE.
 
-(* The encryption of v under pk as a function of the coin index.
+(* The encryption of v under pk as a function of the randomness index.
    Naming: the [_of_] connective names the source the map reads, after the
    repository's total-conversion family. *)
 Definition enc_of_renc (pk : pub_key AHE) (v : plain AHE) :
     Renc -> cipher AHE :=
   fun r => enc pk v (rand_of_renc r).
 
-(* The reachable encryptions are nonempty, since the coin-index type is. *)
+(* The reachable encryptions are nonempty, since the randomness-index type
+   is. *)
 Lemma card_enc_img_gt0 (pk : pub_key AHE) (v : plain AHE) :
   (0 < #|enc_of_renc pk v @: [set: Renc]|)%N.
 Proof. by rewrite card_gt0 imset_eq0 -card_gt0 cardsT card_renc. Qed.
 
-(* The named property: the challenge law is uniform over the reachable
-   encryptions of v under pk.  It is a property of the scheme map, consumed
-   only by its own specialization below, never by a hop theorem.
+(* The property that the challenge law is uniform on the reachable encryptions
+   of v under pk.  It is a property of the scheme's encryption map, standing on
+   its own beside the hop correspondences.
    Naming: [img] marks the image the uniformity ranges over, after
    [fdistmap_uniform_supp_img] of extra_proba.v. *)
 Definition enc_fdist_uniform_img (pk : pub_key AHE) (v : plain AHE) : Prop :=
