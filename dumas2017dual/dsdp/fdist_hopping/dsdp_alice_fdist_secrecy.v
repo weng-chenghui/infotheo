@@ -441,9 +441,12 @@ by move=> [[[[[v2 v3] [r2 r3]] [ra1 ra2]] rho3] rho2].
 Qed.
 
 (* Bob's encryption randomness is uniform and independent of the hop-0 state.
-   This is the hypothesis reduction_challenge_fdistE consumes, and it is why
-   the reduction can leave that randomness to the challenger without changing
-   the law of anything it keeps. *)
+   The freshness condition reduction_challenge_fdistE consumes, discharged here
+   rather than assumed: Rho2 is a coordinate of the product sample space that
+   the hop-0 state omits, so the pair is a re-indexing of the whole sample.
+   Its protocol reading is that Bob draws the randomness of the ciphertext he
+   sends independently of his own input and of the other parties' randomness,
+   and that this randomness reaches Alice only through that ciphertext. *)
 Lemma hop0_state_prodE :
   `p_ [% Hop0State, Rho2] = (`p_ Hop0State) `x (fdist_uniform card_renc).
 Proof.
@@ -505,8 +508,12 @@ Lemma inde_RV_of_prod (A B : finType)
   `p_ [% X, Y] = (`p_ X) `x (`p_ Y) -> alice_sample_fdist |= X _|_ Y.
 Proof. by move=> H a b; rewrite -!dist_of_RVE H fdist_prodE. Qed.
 
-(* The hop-1 encryption randomness is uniform and independent of the hop-1
-   state. *)
+(* Charlie's encryption randomness is uniform and independent of the hop-1
+   state, the same freshness condition at the second hop.  Hop1State holds
+   Bob's zeroed ciphertext where the hop-0 state held a coordinate, so the
+   product is proved at the pre-encryption layout Hop1StatePre, where the pair
+   is a re-indexing of the sample, and carried across by the fixed function
+   hop1_state_of. *)
 Lemma hop1_state_prodE :
   `p_ [% Hop1State, Rho3] = (`p_ Hop1State) `x (fdist_uniform card_renc).
 Proof.

@@ -39,6 +39,14 @@ Require Import extra_proba.
 (* distinguisher as an indcpa_fdist_adversary, and                            *)
 (* reduction_challenge_fdist is the law their challenge induces.              *)
 (*                                                                            *)
+(* The reduction lemmas take one condition on the protocol they are applied   *)
+(* to: the encryption randomness of the challenged slot is uniform and        *)
+(* independent of the state the reduction keeps.  That is freshness, not      *)
+(* secrecy.  The state may hold the secrets themselves, and whether a         *)
+(* ciphertext hides its plaintext is charged for by indcpa_fdist_epsilon      *)
+(* alone.  What the condition forbids is randomness reuse across a            *)
+(* protocol's messages.                                                       *)
+(*                                                                            *)
 (* Each indcpa_fdist_epsilon is a single-query advantage at a fixed           *)
 (* public key, and a bound stated through it holds vacuously once that        *)
 (* advantage reaches 1.  The advantage quantifies over adversaries holding    *)
@@ -237,8 +245,17 @@ Variable Q : R.-fdist stateT.
 Variables (State : {RV P -> stateT}) (Rho : {RV P -> Renc}).
 Variable k : stateT -> Renc -> cipher AHE.
 
-(* The state and selected coordinate have the product of Q and the uniform
-   coordinate law. *)
+(* The state and the selected coordinate are jointly distributed as Q times the
+   uniform law on that coordinate.
+   As a condition on a protocol this is freshness, not secrecy: the party that
+   produces the ciphertext draws its encryption randomness uniformly, and
+   independently of its own input and of every other party's randomness.  The
+   state is free to hold the secrets themselves, and whether a ciphertext hides
+   its plaintext is charged for separately, by indcpa_fdist_epsilon.
+   What the condition forbids is randomness reuse.  A protocol that let the same
+   coordinate reach the adversary by any route other than the ciphertext built
+   from it would break the product, and no reduction could then rebuild the
+   adversary's view around a challenge ciphertext. *)
 Hypothesis state_rho_prodE :
   `p_ [% State, Rho] = Q `x (fdist_uniform card_renc).
 
@@ -280,9 +297,18 @@ Variable assemble : stateT -> cipher AHE -> joint.
 
 Variable X : {RV P -> joint}.
 
+(* The freshness condition at the reduction's own state: the encryption
+   randomness is uniform and independent of everything the reduction holds
+   before it queries the challenger. *)
 Hypothesis state_rho_prodE :
   `p_ [% State, Rho] = (`p_ State) `x (fdist_uniform card_renc).
 
+(* The tested value is the reduction state together with one encryption, whose
+   randomness is Rho.  Every dependence of X on Rho passes through that single
+   ciphertext, which is what lets the reduction give Rho to the challenger and
+   rebuild X around the challenge it gets back.  The two hypotheses divide the
+   work: state_rho_prodE makes Rho fresh, and this one confines its effect on X
+   to that one slot. *)
 Hypothesis X_assembleE : forall t,
   X t = assemble (State t) (enc pk (msg (State t)) (rand_of_renc (Rho t))).
 
