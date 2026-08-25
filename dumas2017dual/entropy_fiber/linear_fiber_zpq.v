@@ -323,7 +323,12 @@ by rewrite /crt_proj_pair /crt_pair /= !proj_Fp_crt !proj_Fq_crt
    -!surjective_pairing.
 Qed.
 
-(* Main result: 2D fiber cardinality = m via CRT *)
+(* Two unknowns over Z/pqZ, with m solutions.  The hypothesis is numeric
+   rather than an invertibility assumption because the count goes through the
+   two prime moduli separately and each needs its coefficient nonzero there:
+   a value strictly between 0 and min(p,q) is divisible by neither prime.
+   This is a separate result from the n-unknown count below, not an instance
+   of it, since the two represent the fiber differently. *)
 Lemma linear_fiber_2d_card (u2 u3 target : msg) :
   (0 < u3)%N -> (u3 < minn p q)%N ->
   #|linear_fiber_2d u2 u3 target| = m.
@@ -356,7 +361,7 @@ End fiber_2d.
 (*                                                                            *)
 (*  Main result: linear_fiber_nd_card                                         *)
 (*    |{v : 'I_{n+1} -> Z_m | \sum u_i * v_i = target}| = m^n               *)
-(*    (when u_{last} is coprime to m, i.e., 0 < u_last < min(p,q))           *)
+(*    (when u_{last} is coprime to m)                                        *)
 (*                                                                            *)
 (*  Approach: Direct bijection via unit inverse. Since u_last is a unit in    *)
 (*  Z_m, for any choice of the first n variables, the last variable is        *)
@@ -503,14 +508,17 @@ Proof.
 by move=> w1 w2 /(congr1 project_fiber); rewrite !project_extend_id.
 Qed.
 
-(* Main result: N-dimensional fiber cardinality = m^n *)
+(* One equation in n+1 unknowns over Z/pqZ has m^n solutions when its last
+   coefficient is invertible: that coefficient is then a bijection on the
+   unknown it multiplies, so every assignment of the other n unknowns extends
+   to exactly one solution.  Invertibility of this coefficient is sufficient
+   and not necessary, and the count it gives is what the conditional-entropy
+   results downstream are computed from. *)
 Lemma linear_fiber_nd_card (u : 'I_n.+1 -> msg) (target : msg) :
-  (0 < val (u ord_max))%N -> (val (u ord_max) < minn p q)%N ->
+  coprime (val (u ord_max)) m ->
   #|linear_fiber_nd u target| = (m ^ n)%N.
 Proof.
-move=> Hu_pos Hu_lt.
-have Hunit : u ord_max \is a GRing.unit.
-  by apply: coprime_unitZm; apply: lt_minpq_coprime.
+move=> /coprime_unitZm Hunit.
 (* Bijection: extend_to_fiber maps {ffun 'I_n -> msg} injectively to fiber,
    and project_fiber is its inverse on fiber elements *)
 have Himg : linear_fiber_nd u target =

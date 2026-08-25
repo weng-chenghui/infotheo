@@ -217,6 +217,10 @@ Require Import dsdp_alice_fdist_secrecy.
 (*                              the simulator-advantage bound for a Boolean   *)
 (*                              test reading the raw interpreter trace, via   *)
 (*                              composition with the fixed-key decoder        *)
+(* dsdp_alice_guess_fdist_raw_trace_V2_real_le ==                             *)
+(*                              the guessing bound for a predictor reading    *)
+(*                              the raw interpreter trace, via composition    *)
+(*                              with the fixed-key decoder                    *)
 (* alice_raw_trace_real_test_avg ==                                           *)
 (*                              the Boolean real raw-trace experiment: the    *)
 (*                              re-encryption coin sampled uniformly, then    *)
@@ -677,7 +681,9 @@ Qed.
 (* Every predictor reading the trace the interpreter produces for Alice
    matches Bob's input with probability at most one over the plaintext-space
    cardinality plus the real-or-zero advantages of the two per-hop
-   reductions. *)
+   reductions.  The cardinality term is information-theoretic and the two
+   advantages are the price of the two ciphertext replacements, one at Bob's
+   key and one at Charlie's. *)
 Theorem dsdp_alice_guess_fdist_trace_V2_real_le
     (g : 15.-bseq dsdp_trace_dataT -> plain AHE) :
   Pr (alice_sample_fdist (R:=R) AHE card_renc)
@@ -1486,6 +1492,10 @@ Variables (AHE : AHEncType) (Renc : finType) (index_renc : nat).
 Hypothesis card_renc : #|Renc| = index_renc.+1.
 Variable rand_of_renc : Renc -> rand AHE.
 Variables (v1 u1 u2 u3 : plain AHE).
+(* Invertibility of the weight u3 is what stops the leaked output from
+   pinning Bob's input down on its own, so the guessing bound is conditional
+   on it while the simulation bound is not. *)
+Hypothesis u3_unit : u3 \is a GRing.unit.
 Variables (dk_a dk_b dk_c : priv_key AHE).
 Variables (w_rb2 w_rc2 : Renc).
 
@@ -1526,6 +1536,11 @@ Definition di_data_of_trace_data (dk : priv_key AHE) (pk : pub_key AHE)
   | inr _ => di_data_of_pub_key DI pk
   end.
 
+(* Decoding at Alice's own key pair, the only setting in which the encoding
+   is inverted.  [alice_raw_trace_decodeE] keeps the general two-key form
+   because Alice's trace holds no public-key mark to constrain. *)
+Local Notation decode_a := (di_data_of_trace_data dk_a (pub_of_priv dk_a)).
+
 (* Alice's raw interpreter trace at one sample.  A plain function: di_data
    DI is not a finType and no distribution on it is ever formed. *)
 Definition alice_raw_trace (s : dsdp_alice_sampleT AHE Renc) :
@@ -1558,23 +1573,20 @@ Corollary dsdp_alice_raw_trace_sim_advantage_fdist_le
      - Pr (fdistmap
              (fun x : plain AHE * plain AHE * 15.-bseq dsdp_trace_dataT =>
                 D_raw (x.1.1, x.1.2,
-                       map (di_data_of_trace_data dk_a (pub_of_priv dk_a))
-                           x.2))
+                       map decode_a x.2))
              alice_trace_ideal_joint) [set true] |
   <= indcpa_fdist_epsilon (pkey_of_dk Bob)
        (hop0_reduction
          (fun x => D_raw (x.1.1, x.1.2,
-            map (di_data_of_trace_data dk_a (pub_of_priv dk_a))
-                (dsdp_trace_of_hop_tuple x.2))))
+            map decode_a (dsdp_trace_of_hop_tuple x.2))))
      + indcpa_fdist_epsilon (pkey_of_dk Charlie)
        (hop1_reduction
          (fun x => D_raw (x.1.1, x.1.2,
-            map (di_data_of_trace_data dk_a (pub_of_priv dk_a))
-                (dsdp_trace_of_hop_tuple x.2)))).
+            map decode_a (dsdp_trace_of_hop_tuple x.2)))).
 Proof.
 set D := fun x : plain AHE * plain AHE * 15.-bseq dsdp_trace_dataT =>
   D_raw (x.1.1, x.1.2,
-         map (di_data_of_trace_data dk_a (pub_of_priv dk_a)) x.2).
+         map decode_a x.2).
 have HrealE : Pr (`p_ [% V2, V3, AliceTrace]) [set x | D x]
             = Pr (alice_sample_fdist (R:=R) AHE card_renc)
                  [set t | D_raw (V2 t, V3 t, alice_raw_trace t)].
@@ -1583,6 +1595,44 @@ have HrealE : Pr (`p_ [% V2, V3, AliceTrace]) [set x | D x]
 rewrite -HrealE.
 exact: (dsdp_alice_trace_sim_advantage_fdist_le card_renc rand_of_renc
           v1 u1 u2 u3 dk_a dk_b dk_c w_rb2 w_rc2 D).
+Qed.
+
+(* The encoded-trace predictor a raw-trace predictor induces, decoding with
+   Alice's fixed key context.  The binder is annotated because the
+   bounded-sequence coercion is inserted only at a known domain. *)
+Local Notation Genc g_raw :=
+  (fun b : 15.-bseq dsdp_trace_dataT =>
+     g_raw (map decode_a b)).
+
+(* The guessing bound restated at the raw interpreter trace, before any
+   encoding is applied.
+
+   Encoding neither costs Alice anything nor withholds anything from her.
+   Her trace carries no public-key mark, so decoding it under her own key
+   returns the run's own trace, and a predictor reading either format
+   recovers Bob's input on exactly the same samples.
+   Naming: extends [dsdp_alice_guess_fdist_trace_V2_real_le] with [raw]
+   marking the observation read; kept long to preserve the family
+   grouping. *)
+Corollary dsdp_alice_guess_fdist_raw_trace_V2_real_le
+    (g_raw : seq (di_data DI) -> plain AHE) :
+  Pr (alice_sample_fdist (R:=R) AHE card_renc)
+     [set t | g_raw (alice_raw_trace t) == V2 t]
+  <= (#|plain AHE|%:R : R)^-1
+     + indcpa_fdist_epsilon (pkey_of_dk Bob)
+         (hop0_reduction
+            (distinguisher_of_guess
+               (Genc g_raw \o dsdp_trace_of_hop_tuple)))
+     + indcpa_fdist_epsilon (pkey_of_dk Charlie)
+         (hop1_reduction
+            (distinguisher_of_guess
+               (Genc g_raw \o dsdp_trace_of_hop_tuple))).
+Proof.
+have -> : [set t | g_raw (alice_raw_trace t) == V2 t]
+        = [set t | (Genc g_raw `o AliceTrace) t == V2 t].
+  by apply/setP => t; rewrite !inE /comp_RV alice_raw_trace_decodeE.
+exact: (dsdp_alice_guess_fdist_trace_V2_real_le card_renc rand_of_renc
+          v1 u1 u2 u3_unit dk_a dk_b dk_c w_rb2 w_rc2 (Genc g_raw)).
 Qed.
 
 End dsdp_alice_raw_trace_sec.
@@ -1620,13 +1670,18 @@ Local Notation hop1_reduction :=
   (hop1_reduction (R:=R) (AHE:=AHE) card_renc rand_of_renc
      pkey_of_dk v1 u1 u2 u3).
 
+(* Decoding at Alice's own key pair, the only setting in which the encoding
+   is inverted.  [alice_raw_trace_decodeE] keeps the general two-key form
+   because Alice's trace holds no public-key mark to constrain. *)
+Local Notation decode_a := (di_data_of_trace_data dk_a (pub_of_priv dk_a)).
+
 (* The encoded-trace test a raw-trace test induces, decoding with Alice's
    fixed key context.  The binder is annotated because the bounded-sequence
    coercion is inserted only at a known domain. *)
 Local Notation Denc D_raw :=
   (fun x : plain AHE * plain AHE * 15.-bseq dsdp_trace_dataT =>
      D_raw (x.1.1, x.1.2,
-            map (di_data_of_trace_data dk_a (pub_of_priv dk_a)) x.2)).
+            map decode_a x.2)).
 
 (* The Boolean real raw-trace experiment: the re-encryption coin sampled
    uniformly, then the test applied to the two honest inputs and Alice's
@@ -1664,13 +1719,11 @@ Theorem dsdp_alice_raw_trace_sim_advantage_fdist_avg_le
        * (indcpa_fdist_epsilon (pkey_of_dk Bob)
             (hop0_reduction (fun x =>
                D_raw (x.1.1, x.1.2,
-                      map (di_data_of_trace_data dk_a (pub_of_priv dk_a))
-                          (dsdp_trace_of_hop_tuple_at w x.2))))
+                      map decode_a (dsdp_trace_of_hop_tuple_at w x.2))))
           + indcpa_fdist_epsilon (pkey_of_dk Charlie)
             (hop1_reduction (fun x =>
                D_raw (x.1.1, x.1.2,
-                      map (di_data_of_trace_data dk_a (pub_of_priv dk_a))
-                          (dsdp_trace_of_hop_tuple_at w x.2))))).
+                      map decode_a (dsdp_trace_of_hop_tuple_at w x.2))))).
 Proof.
 (* Push the decoded test through the outer coin bind; each branch is then
    the per-coin corollary, which consumes the round trip of

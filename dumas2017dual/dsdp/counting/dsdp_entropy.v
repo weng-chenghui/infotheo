@@ -196,7 +196,17 @@ apply/idP/idP => H.
     by move: Heq => /(f_equal (fun x => x + u1 * v1)); rewrite !subrK.
 Qed.
 
-(* Fiber cardinality for full constraint *)
+(* The number of input pairs consistent with one fixed value of Alice's view
+   data.  It is m whenever her trust weight on Charlie lies strictly between
+   0 and both primes, since such a weight is divisible by neither and is
+   therefore invertible.  What the bound buys is uniformity rather than size:
+   the count is m for every view value alike, and that is what turns it into
+   a conditional entropy of log m.  A weight sharing a factor with the
+   modulus does not simply shrink the count, it makes the count depend on the
+   view, leaving some views impossible and others with more candidates than
+   m.  The weight is a public protocol parameter, so this is a condition on
+   how the protocol is configured rather than an assumption about an
+   adversary. *)
 Lemma dsdp_fiber_card (u1 u2 u3 v1 s : msg) :
   (0 < u3)%N -> (u3 < minn p q)%N ->
   #|dsdp_fiber u1 u2 u3 v1 s| = m.
@@ -672,7 +682,8 @@ have Heta : linear_fiber_nd u_rel (s - u0 * v0) =
             @linear_fiber_nd p_minus_2 q_minus_2 n_relay
               (fun i => u_rel i) (s - u0 * v0) by [].
 rewrite Heta.
-apply linear_fiber_nd_card => //.
+apply: (linear_fiber_nd_card prime_p).
+exact: (lt_minpq_coprime prime_p prime_q).
 Qed.
 
 (* Per-conditioning-value entropy *)
