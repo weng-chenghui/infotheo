@@ -1016,8 +1016,8 @@ Qed.
    hop reductions.  The first term is the information-theoretic residue of the
    leaked output along the DSDP solution fiber, and the two advantages are the
    price of zeroing Bob's and Charlie's ciphertext slots.
-   Naming: [dsdp_alice_guess] after [dsdp_alice_guess_V2_real_le] of the
-   SSProve axis, with the axis token [fdist] after [guess]. *)
+   Naming: [fdist] marks the finite-distribution formulation, [V2_real] the
+   input bounded and the hop-0 tuple it is bounded at. *)
 Theorem dsdp_alice_guess_fdist_V2_real_le
     (g : dsdp_alice_hop_tupleT -> plain AHE) :
   Pr alice_sample_fdist [set t | (g `o (AliceHopTuple 0)) t == V2 t]
@@ -1066,8 +1066,8 @@ Local Notation "'`H_unp^{' g '}'" :=
    small the correction term is small, and what remains is the value the left
    side would take if Alice were guessing uniformly at random over the
    plaintext space.
-   Naming: after [dsdp_alice_unpredictability_entropy_ge] of the SSProve axis,
-   with the axis token [fdist] in place of [entropy]. *)
+   Naming: [fdist] marks the finite-distribution formulation, [ge] the
+   direction of the bound. *)
 Theorem dsdp_alice_unpredictability_fdist_ge
     (g : dsdp_alice_hop_tupleT -> plain AHE)
     (Hpos : 0 < Pr alice_sample_fdist
@@ -1334,8 +1334,8 @@ Qed.
    of the same two hops: the real world is hop 0, the ideal world is hop 2, and
    the distance between them is the sum of the two IND-CPA advantages.
    Naming: [sim_advantage] rather than [advantage_sim] because the statement
-   bounds a distinguishing gap between two laws instead of instantiating the
-   [advantage_sim_le] predicate of [smc/ssprove_ext_simulator.v]. *)
+   bounds a distinguishing gap between two laws rather than instantiating a
+   simulation-advantage predicate. *)
 Theorem dsdp_alice_sim_advantage_fdist_le
     (D : plain AHE * plain AHE * dsdp_alice_hop_tupleT -> bool) :
   `| Pr (`p_ [% V2, V3, AliceHopTuple 0]) [set x | D x]
