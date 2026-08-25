@@ -64,7 +64,7 @@ Local Notation q := q_minus_2.+2.
 Hypothesis prime_p : prime p.
 Hypothesis prime_q : prime q.
 Hypothesis coprime_pq : coprime p q.
-Local Notation m := (p * q).
+Local Notation m := (p * q)%N.
 (* Use Zp ring structure for composite modulus arithmetic *)
 Local Notation msg := 'Z_m.
 
@@ -570,7 +570,7 @@ Local Notation q := q_minus_2.+2.
 Hypothesis prime_p : prime p.
 Hypothesis prime_q : prime q.
 Hypothesis coprime_pq : coprime p q.
-Local Notation m := (p * q).
+Local Notation m := (p * q)%N.
 Local Notation msg := 'Z_m.
 
 Variable n_relay : nat.
