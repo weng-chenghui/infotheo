@@ -429,13 +429,6 @@ have Hcop_q : coprime (val a) q.
 by rewrite coprimeMr Hcop_p Hcop_q.
 Qed.
 
-(* coprime to m implies unit in Z_m *)
-Lemma coprime_unitZm (a : msg) : coprime (val a) m -> a \is a GRing.unit.
-Proof.
-move=> Hcop.
-by rewrite -[a]natr_Zp unitZpE // coprime_sym.
-Qed.
-
 (* Reindex sum: split at ord_max and reindex rest via lift *)
 Lemma widen_lift_ord_max (i : 'I_n) :
   widen_ord (leqnSn n) i = lift ord_max i :> 'I_n.+1.
@@ -518,7 +511,7 @@ Lemma linear_fiber_nd_card (u : 'I_n.+1 -> msg) (target : msg) :
   coprime (val (u ord_max)) m ->
   #|linear_fiber_nd u target| = (m ^ n)%N.
 Proof.
-move=> /coprime_unitZm Hunit.
+move=> /(coprime_Zp_unit m_gt1) Hunit.
 (* Bijection: extend_to_fiber maps {ffun 'I_n -> msg} injectively to fiber,
    and project_fiber is its inverse on fiber elements *)
 have Himg : linear_fiber_nd u target =

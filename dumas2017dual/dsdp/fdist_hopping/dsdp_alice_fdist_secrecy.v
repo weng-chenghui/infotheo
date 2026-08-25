@@ -867,7 +867,7 @@ Lemma alice_constraint_holds (t : dsdp_alice_sampleT) :
   dsdp_constraint_ring ([% V1c, U1c, U2c, U3c, Sout] t) ([% V2, V3] t).
 Proof.
 by rewrite /dsdp_constraint_ring /Sout /comp_RV /dsdp_output /V1c /U1c /U2c /U3c
-           /= !const_RVE; ring.
+           /= !const_RVE; apply/eqP; ring.
 Qed.
 
 (* Conditioned on the protocol weights and the leaked output, the secret input

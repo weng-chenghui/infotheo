@@ -87,27 +87,20 @@ Let card_msg_pair : #|((msg * msg)%type : finType)| = (m ^ 2)%N.
 Proof. by rewrite card_prod !card_msg expnS expn1. Qed.
 
 Definition dsdp_constraint (cond : msg * msg * msg * msg * msg)
-  (var : msg * msg) : Prop :=
+  (var : msg * msg) : bool :=
   let '(v1, u1, u2, u3, s) := cond in
   let '(v2, v3) := var in
-  (s - u1 * v1 = u2 * v2 + u3 * v3)%R.
+  (s - u1 * v1 == u2 * v2 + u3 * v3)%R.
+
+(* The constraint on explicit components, so a caller can rewrite with it
+   instead of unfolding the definition. *)
+Lemma dsdp_constraintE (v1 u1 u2 u3 s v2 v3 : msg) :
+  dsdp_constraint (v1, u1, u2, u3, s) (v2, v3)
+  = (s - u1 * v1 == u2 * v2 + u3 * v3)%R.
+Proof. by []. Qed.
 
 Hypothesis constraint_holds :
   forall t, dsdp_constraint (CondRV t) (VarRV t).
-
-(*
-   Security condition for linear_fiber_2d_card:
-   - (0 < u3)%N: u3 is positive
-   - (u3 < minn p q)%N: u3 < min(p,q)
-   
-   These conditions ensure u3 is coprime to both p and q, hence invertible
-   in Z/p and Z/q. This is sufficient for CRT decomposition.
-   
-   The conditions are passed as explicit parameters to lemmas rather than
-   section hypotheses to make dependencies clear.
-*)
-
-(* Fiber cardinality follows from linear_fiber_2d_card in linear_fiber_zpq.v *)
 
 (* Cryptographic assumptions for DSDP security:
    1. VarRV = (V2, V3) is uniformly distributed over msg × msg
@@ -138,7 +131,7 @@ move=> t.
 rewrite /dsdp_fiber_fn /dsdp_fiber /linear_fiber_2d inE /=.
 apply/eqP.
 move: (constraint_holds t).
-by rewrite /dsdp_constraint /CondRV /VarRV /=.
+by rewrite /dsdp_constraint /CondRV /VarRV /= => /eqP.
 Qed.
 
 (* Prerequisite 2: InputRV is the projection of CondRV *)
@@ -186,7 +179,7 @@ apply/idP/idP => H.
     move: (constraint_holds t0).
     rewrite /dsdp_constraint /CondRV /VarRV /=.
     rewrite Hv1_eq Hu1_eq Hu2_eq Hu3_eq Hv2_eq Hv3_eq.
-    move=> Hconstr.
+    move=> /eqP Hconstr.
     move: Hin_fiber.
     rewrite /dsdp_fiber_fn /dsdp_fiber /linear_fiber_2d inE /=.
     move=> /eqP Hfiber_eq.
@@ -238,7 +231,7 @@ have Hconstraint: forall t, constraint (CondRV t) (VarRV t).
   (* We need: u2*v2 + u3*v3 = s - u1*v1 *)
   move: (constraint_holds t).
   rewrite /dsdp_constraint /CondRV /VarRV /=.
-  by move=> ->.
+  by move=> /eqP ->.
 by rewrite (cond_prob_zero_outside_constraint Hconstraint Hcond_pos).
 Qed.
 
@@ -326,13 +319,9 @@ apply: boolp.funext => t.
 move: (constraint_holds t).
 rewrite /dsdp_constraint /CondRV /VarRV /InputRV /dsdp_g /=.
 move=> Heq.
-move/eqP: Heq; rewrite subr_eq addrC => /eqP ->.
+move: Heq; rewrite subr_eq addrC => /eqP ->.
 by rewrite addrA.
 Qed.
-
-(* Self-contained direct proof, preserved alongside the abstract-routed version
-   above as an alternative derivation that does not depend on the abstract
-   centropy_jcond_determined_fibers layer. *)
 Theorem dsdp_centropy_uniform_direct :
   (forall t, (0 < U3 t)%N) ->
   (forall t, (U3 t < minn p q)%N) ->
@@ -401,46 +390,6 @@ End dsdp_entropy.
 (* Ring-generic siblings of dsdp_fiber_card and Pr_dsdp_sol_uniform           *)
 (* ========================================================================== *)
 
-(** **Kind:** infrastructure lemma (ring-generic fiber cardinality).
-
-    **Why:** matches the TeX abstraction at Setup item 2 (line 35-36)
-    where the DSDP underlying additive masking operates over an arbitrary
-    finite commutative ring with units rather than the concrete [Z_(p*q)].
-    Replaces the prime-based unit check
-    [(0 < u3)%N /\ (u3 < minn p q)%N]
-    with the abstract membership [u3 \is a GRing.unit].
-
-    **Used-by:** [Pr_dsdp_sol_uniform_ring] below, and downstream
-    [dsdp_security_indcpa.v] when instantiating the IT residual
-    section at an arbitrary [finComUnitRingType] (Task F).
-
-    **Naming:** suffix [_ring] indicates the ring-generic sibling
-    of the [Z_(p*q)]-specialized [dsdp_fiber_card] at line 200; the
-    original lemma is preserved unchanged so the N-party code in
-    [dsdp_entropy_n] and the kept theorems in [dsdp_malicious_dotp.v]
-    continue to compile.
-*)
-
-(** **Kind:** infrastructure lemma (ring-generic conditional uniformity).
-
-    **Why:** the TeX residual analysis (Step 4 of the closed-form
-    secrecy proof) routes through [Pr[V_2 V_3 = (v_2,v_3) | view] =
-    1/m] where [m = #|R|]. The original
-    [Pr_dsdp_sol_uniform] specializes [R] to [Z_(p*q)]; the
-    [_ring] sibling carries the same statement parametric in
-    [R : finComNzRingType], discharging the ring-specialization
-    asterisk that the goal-gap audit flagged.
-
-    **Used-by:** [dsdp_security_indcpa.v] Task F when instantiating
-    the residual section at the abstract carrier
-    [alice_view_joint] over an arbitrary [finComUnitRingType].
-
-    **Naming:** suffix [_ring] mirrors [dsdp_fiber_card_ring]; the
-    [Z_(p*q)]-specialized [Pr_dsdp_sol_uniform] at line 237 is left
-    unchanged so the N-party generalization in [Section dsdp_entropy_n]
-    and the legacy theorems in [dsdp_view_independence.v] keep their meaning.
-*)
-
 Section dsdp_entropy_ring.
 
 Context {R_real : realType}.
@@ -450,10 +399,10 @@ Variable R : finComNzRingType.
 Definition dsdp_fiber_ring (u1 u2 u3 v1 s : R) : {set R * R} :=
   [set vv : R * R | (u2 * vv.1 + u3 * vv.2 == s - u1 * v1)%R].
 
-(* Ring-generic fiber cardinality: when multiplication by u3 is injective (on a
-   finite ring, u3 regular / a unit), the fiber has #|R| solutions. *)
+(* Ring-generic fiber cardinality: when u3 is left-regular, so that
+   multiplication by it is injective, the fiber has #|R| solutions. *)
 Lemma dsdp_fiber_card_ring (u1 u2 u3 v1 s : R) :
-  injective (fun v : R => u3 * v) ->
+  GRing.lreg u3 ->
   #|dsdp_fiber_ring u1 u2 u3 v1 s| = #|R|.
 Proof.
 move=> Hinj.
@@ -492,10 +441,16 @@ Qed.
 (* dsdp_constraint_ring — the ring-generic DSDP linear constraint: for conditions
    (v1, u1, u2, u3, s) and variables (v2, v3), s - u1 * v1 = u2 * v2 + u3 * v3. *)
 Definition dsdp_constraint_ring (cond : R * R * R * R * R)
-  (var : R * R) : Prop :=
+  (var : R * R) : bool :=
   let '(v1, u1, u2, u3, s) := cond in
   let '(v2, v3) := var in
-  (s - u1 * v1 = u2 * v2 + u3 * v3)%R.
+  (s - u1 * v1 == u2 * v2 + u3 * v3)%R.
+
+(* The ring-generic constraint on explicit components. *)
+Lemma dsdp_constraint_ringE (v1 u1 u2 u3 s v2 v3 : R) :
+  dsdp_constraint_ring (v1, u1, u2, u3, s) (v2, v3)
+  = (s - u1 * v1 == u2 * v2 + u3 * v3)%R.
+Proof. by []. Qed.
 
 Hypothesis constraint_holds_r :
   forall t, dsdp_constraint_ring (CondRV_r t) (VarRV_r t).
@@ -517,7 +472,7 @@ rewrite /dsdp_fiber_fn_r /dsdp_fiber_ring /CondRV_r /VarRV_r /=.
 rewrite inE /=.
 apply/eqP.
 move: (constraint_holds_r t).
-by rewrite /dsdp_constraint_ring /CondRV_r /VarRV_r /=.
+by rewrite /dsdp_constraint_ring /CondRV_r /VarRV_r /= => /eqP.
 Qed.
 
 Let InputRV_proj_r :
@@ -557,7 +512,7 @@ apply/idP/idP => H.
     move: (constraint_holds_r t0).
     rewrite /dsdp_constraint_ring /CondRV_r /VarRV_r /=.
     rewrite Hv1_eq Hu1_eq Hu2_eq Hu3_eq Hv2_eq Hv3_eq.
-    move=> Hconstr.
+    move=> /eqP Hconstr.
     move: Hin_fiber.
     rewrite /dsdp_fiber_fn_r /dsdp_fiber_ring inE /=.
     move=> /eqP Hfiber_eq.
@@ -567,10 +522,10 @@ apply/idP/idP => H.
     by move: Heq => /eqP; rewrite -subr_eq0 opprB addrA subrK subr_eq0 => /eqP.
 Qed.
 
-(* Ring-generic conditional uniformity: when multiplication by u3 is injective,
-   (v2, v3) is uniform on the fiber given the conditioning view. *)
+(* Ring-generic conditional uniformity: when u3 is left-regular, (v2, v3) is
+   uniform on the fiber given the conditioning view. *)
 Lemma Pr_dsdp_sol_uniform_ring (u1 u2 u3 v1 s v2 v3 : R) :
-  injective (fun v : R => u3 * v) ->
+  GRing.lreg u3 ->
   `Pr[CondRV_r = (v1, u1, u2, u3, s)] != 0 ->
   (v2, v3) \in dsdp_fiber_ring u1 u2 u3 v1 s ->
   `Pr[ VarRV_r = (v2, v3) | CondRV_r = (v1, u1, u2, u3, s) ] = #|R|%:R^-1.
@@ -603,7 +558,7 @@ End dsdp_entropy_ring.
    - CondRV : (v0, u0, u_relay_vec, s) — constraint parameters
    - Fiber: \sum u_i * v_i = s - u0*v0  (n_relay.+1 unknowns, 1 equation)
    - |fiber| = m^n_relay  (n_relay free variables)
-   - H(VarRV | CondRV) = log(m^n_relay) = n_relay * log(m)
+   - H[VarRV | CondRV = c] = n_relay * log m, for each conditioning value c
 *)
 
 Section dsdp_entropy_n.
@@ -669,7 +624,9 @@ Hypothesis joint_eq_input_n :
     `Pr[[%VarRV, CondRV] = (var, cond)] =
     `Pr[[%VarRV, InputRV] = (var, dsdp_proj_input_n cond)].
 
-(* Fiber cardinality for N-party *)
+(* The N-party fiber count.  The numeric interval on the last relay weight
+   is the protocol-checkable specialization of the coprimality condition
+   linear_fiber_nd_card takes, discharged here by lt_minpq_coprime. *)
 Lemma dsdp_fiber_card_n (v0 u0 s : msg)
     (u_rel : {ffun 'I_n_relay.+1 -> msg}) :
   (0 < val (u_rel ord_max))%N ->
@@ -732,5 +689,4 @@ Let u_of_cond (c : CondT_n) : {ffun 'I_n_relay.+1 -> msg} :=
 End dsdp_entropy_n.
 
 
-(* For finite field (F_m) approach, see dsdp_entropy_field.v *)
 
