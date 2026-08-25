@@ -17,6 +17,28 @@ Makefile.coq.conf
 # IDE
 .vscode/
 
+# Local AI assistants and session state
+.agents/
+.claude/
+.claire/
+.cursor/
+.superpowers/
+.local/
+
+# Internal work notes and proof probes
+.scratch/
+notes/
+docs/superpowers/
+*-implementation-plan.md
+*-implementation-spec.md
+/goal*.sh
+/goal*.v
+/scratch*.v
+
+# Unrelated local developments excluded from this distribution branch
+/pgg-smc/
+/weng2026/rssdp/
+
 # Nix overlays
 .nix/coq-overlays/
 
@@ -26,4 +48,25 @@ extraction/sumprod.mli
 
 # Cache
 .nra.cache
+.lia.cache
+.nia.cache
+.csdp.cache
+.venv/
+__pycache__/
+*.pyc
 rocq_mcp_cache_*.v
+
+# Generated documentation and desktop files
+.DS_Store
+Screenshot*.png
+coqdoc.css
+scripts/html/
+_build/
+texput.log
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.~undo-tree~
+/index.html
+/infotheo.*.html
