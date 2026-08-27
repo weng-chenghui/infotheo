@@ -140,8 +140,8 @@ indcpa_game:reduction_challenge_successE
 
 # The axis copies of the ten headlines relocated into dsdp_main.v. Each is
 # still the source the file's own downstream corollaries call; the \rocq node
-# now points at the apex copy, which carries the full proof text the blueprint
-# statement describes.
+# now points at the dsdp_main.v copy, which carries the full proof text the
+# blueprint statement describes.
 dsdp_alice_fdist_secrecy:dsdp_alice_guess_fdist_V2_real_le
 dsdp_alice_fdist_secrecy:dsdp_alice_unpredictability_fdist_ge
 dsdp_alice_fdist_secrecy:dsdp_alice_predictor_unpredictability_fdist_ge

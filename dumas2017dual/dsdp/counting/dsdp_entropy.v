@@ -328,7 +328,7 @@ Qed.
    and same hypotheses as dsdp_centropy_uniform of dsdp_main.v, reached by a
    different route: here the conditional entropy is expanded into its
    per-point sum and each term is closed by dsdp_centropy1_uniform, where the
-   apex proof instead factors through the generic fiber argument of
+   dsdp_main.v proof instead factors through the generic fiber argument of
    centropy_jcond_determined_fibers.  The bound therefore has two independent
    derivations, one counting solutions point by point and one quotienting by
    the fibers of dsdp_g.  [3-party] *)

@@ -18,9 +18,9 @@ split, so its source path is a required argument.
 All three counts are counts of declarations, so that main and technical
 partition the total.  A name carried by two declarations, such as the
 ``enc_mul_dist`` of Benaloh and the one of Paillier, is therefore two results
-even though the paper cites the name once.  The exception is a headline the
-apex file ``dsdp_main.v`` re-presents over a cloned section context: apex and
-axis declare one theorem under one name, and it counts once.
+even though the paper cites the name once.  The exception is a headline that
+``dsdp_main.v`` re-presents over a cloned section context: that file and the
+axis file declare one theorem under one name, and it counts once.
 
 Usage:
 
@@ -39,7 +39,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 
 # The file that centralizes the headline theorems, each over a cloned copy of
 # its source section context.
-APEX = "dumas2017dual/dsdp/dsdp_main.v"
+MAIN_RESULTS_FILE = "dumas2017dual/dsdp/dsdp_main.v"
 
 # ── File scope ─────────────────────────────────────────────────────────────
 #
@@ -188,18 +188,19 @@ def declarations(files: list[Path]) -> list[tuple[str, str, str]]:
     return found
 
 
-def dedupe_apex(decls: list[tuple[str, str, str]]) -> list[tuple[str, str, str]]:
-    """Drop the apex copy of a headline the axis files also declare.
+def dedupe_relocated(decls: list[tuple[str, str, str]]) -> list[tuple[str, str, str]]:
+    """Drop the dsdp_main.v copy of a headline the axis files also declare.
 
     dsdp_main.v re-presents each headline theorem with its full proof text over
     a cloned section context, so a relocated headline is declared twice under
-    one name: once where the machinery lives and once in the apex.  That is one
-    result, not two.  A name declared only in the apex, or declared twice
-    outside it, is untouched -- the Benaloh and Paillier enc_mul_dist remain
-    two results, as they are two theorems about two schemes.
+    one name: once where the machinery lives and once in dsdp_main.v.  That is
+    one result, not two.  A name declared only in dsdp_main.v, or declared
+    twice outside it, is untouched -- the Benaloh and Paillier enc_mul_dist
+    remain two results, as they are two theorems about two schemes.
     """
-    elsewhere = {name for f, _, name in decls if f != APEX}
-    return [d for d in decls if d[0] != APEX or d[2] not in elsewhere]
+    elsewhere = {name for f, _, name in decls if f != MAIN_RESULTS_FILE}
+    return [d for d in decls
+            if d[0] != MAIN_RESULTS_FILE or d[2] not in elsewhere]
 
 
 def cited_names(paper: Path) -> set[str]:
@@ -271,7 +272,7 @@ def main() -> None:
 
     sizes = {name: coqwc(files) for name, files in rows.items()}
     all_files = [f for files in rows.values() for f in files]
-    decls = dedupe_apex(declarations(all_files))
+    decls = dedupe_relocated(declarations(all_files))
 
     declared = {name for _, _, name in decls}
     cited = cited_names(args.paper)
