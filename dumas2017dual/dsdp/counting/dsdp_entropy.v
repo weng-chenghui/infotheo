@@ -322,6 +322,16 @@ move=> Heq.
 move: Heq; rewrite subr_eq addrC => /eqP ->.
 by rewrite addrA.
 Qed.
+
+(* Conditioned on Alice's inputs and the output (V1, U1, U2, U3, S), the relay
+   private inputs (V2, V3) retain log m bits of uncertainty.  Same statement
+   and same hypotheses as dsdp_centropy_uniform of dsdp_main.v, reached by a
+   different route: here the conditional entropy is expanded into its
+   per-point sum and each term is closed by dsdp_centropy1_uniform, where the
+   apex proof instead factors through the generic fiber argument of
+   centropy_jcond_determined_fibers.  The bound therefore has two independent
+   derivations, one counting solutions point by point and one quotienting by
+   the fibers of dsdp_g.  [3-party] *)
 Theorem dsdp_centropy_uniform_direct :
   (forall t, (0 < U3 t)%N) ->
   (forall t, (U3 t < minn p q)%N) ->

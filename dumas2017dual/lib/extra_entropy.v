@@ -2,7 +2,8 @@ From HB Require Import structures.
 From mathcomp Require Import all_boot all_order all_algebra fingroup finalg.
 From mathcomp Require Import ring boolp finmap lra reals.
 Require Import realType_ext realType_ln ssr_ext ssralg_ext bigop_ext fdist.
-Require Import proba jfdist_cond entropy.
+Require Import proba jfdist_cond entropy graphoid.
+Require Import spp_proba.
 Require Import extra_proba.
 
 Import GRing.Theory.
@@ -480,6 +481,37 @@ have Hprod := inde_dist_of_RV2 Hinde.
 have Hprod2 : (`p_[%X, View]) = (((`p_[%X, View])`1) `x ((`p_[%X, View])`2))%fdist.
   by rewrite fst_RV2 snd_RV2 -fdistX_RV2 Hprod fdistX_prod.
 by rewrite (centropy_indep Hprod2) fst_RV2.
+Qed.
+
+(* Conditioning on a reversible recoding of a random variable leaves the same
+   conditional entropy: g and h name the same partition of the sample space,
+   so the two conditioning events coincide event by event.  Companion of
+   centropy_RV_contraction, which removes a function of the conditioner from
+   a pair; here the conditioner is replaced outright. *)
+Lemma can_centropy_eq (U A B C : finType) (P : R.-fdist U)
+  (g : B -> C) (h : C -> B) (gK : cancel g h)
+  (X : {RV P -> A}) (Y : {RV P -> B}) :
+  `H( X | g `o Y ) = `H( X | Y ).
+Proof.
+have gi : injective g := can_inj gK.
+apply: cPr_centropy_RV_comp => x y _.
+rewrite 2!cpr_eqE; congr (_ / _); last exact: pfwd1_comp.
+have -> : [% X, g `o Y] = (fun p : A * B => (p.1, g p.2)) `o [% X, Y] by [].
+have -> : (x, g y) = (fun p : A * B => (p.1, g p.2)) (x, y) by [].
+by apply: pfwd1_comp => -[a b] [c d] [] -> /gi ->.
+Qed.
+
+(* A random variable independent of a pair contributes nothing when adjoined
+   to the conditioner: H(X | Z, Y) = H(X | Y) whenever Z is independent of
+   (X, Y).  The unconditional counterpart of cinde_centropy_eq, obtained from
+   it by conditioning on the unit variable. *)
+Lemma inde_centropy_eq (U A B C : finType) (P : R.-fdist U)
+  (X : {RV P -> A}) (Y : {RV P -> B}) (Z : {RV P -> C}) :
+  P |= Z _|_ [% X, Y] -> `H( X | [% Z, Y] ) = `H( X | Y ).
+Proof.
+move=> HZ; apply: cinde_centropy_eq.
+apply: cpr_prd_unit_RV; apply: weak_union.
+by apply/cinde_RV_unit.
 Qed.
 
 End inde_entropy_lemmas.
