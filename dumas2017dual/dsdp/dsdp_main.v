@@ -1,13 +1,22 @@
-(* DSDP main results — the information-theoretic headline theorems.
+(* DSDP main results — the headline security theorems.
 
-   This file centralizes the information-theoretic headline theorems of the
-   DSDP development. Each theorem's full proof is presented here over a cloned
-   copy of its source section context; the supporting machinery stays in the
-   counting axis files and is referenced, not duplicated. The file mixes
-   generic N-party results with their 3-party DSDP instances; each theorem's
-   comment states its party scope. The headlines are:
+   This file centralizes the headline theorems of the DSDP development. Each
+   theorem's full proof is presented here over a cloned copy of its source
+   section context; the supporting machinery stays in the axis files and is
+   referenced, not duplicated. The file mixes generic N-party results with
+   their 3-party DSDP instances; each theorem's comment states its party
+   scope.
 
-   Information-theoretic (counting axis)
+   The two axes price secrecy in different currencies, and the distinction is
+   load-bearing. The counting axis conditions on plaintexts and its bounds are
+   unconditional: they hold against an adversary of any running time. The
+   game-hopping axis conditions on the ciphertext-carrying view and its bounds
+   carry two IND-CPA advantage terms, one at Bob's key and one at Charlie's;
+   they say nothing until those advantages are argued small. A bound summing
+   an information-theoretic term with an assumption-conditional one is written
+   so the two summands stay distinguishable.
+
+   Information-theoretic (counting axis, unconditional)
      dsdp_centropy_uniform : H(V2,V3 | view) = log m  [3-party]
      dsdp_centropy_uniform_n : H(V | view) = log (m^n)  [N-party]
      US_n_compromised_leaks_secret : corrupted Alice leaks a relay's input,
@@ -19,7 +28,28 @@
      bob_privacy_V3 : H(V3 | BobView) = log m > 0: a corrupted Bob learns
        nothing about Charlie's input V3 (R3 one-time-pad masking)  [3-party]
      charlie_privacy_V2 : H(V2 | CharlieView) = log m > 0: a corrupted Charlie
-       learns nothing about Bob's input V2 (R2 one-time-pad masking)  [3-party] *)
+       learns nothing about Bob's input V2 (R2 one-time-pad masking)  [3-party]
+
+   Corrupted Alice at her hopping tuple (fdist axis, IND-CPA-conditional)
+     dsdp_alice_guess_fdist_V2_real_le : a predictor of Bob's input succeeds
+       with probability at most 1/#|plain| plus the two hop advantages
+     dsdp_alice_unpredictability_fdist_ge /
+     dsdp_alice_predictor_unpredictability_fdist_ge : the same bound in
+       negative-logarithm form, log #|plain| less a correction in the two
+       advantages
+     dsdp_alice_sim_advantage_fdist_le : every Boolean test separates the real
+       joint law from the simulator's by at most the two hop advantages
+     dsdp_alice_guess_fdist_view_le : the guessing bound at Alice's whole
+       view, her two outgoing combines and her final decrypt included
+
+   The same bounds at the executed fifteen-round piSMC trace
+     dsdp_alice_guess_fdist_trace_V2_real_le
+     dsdp_alice_trace_predictor_unpredictability_fdist_ge
+     dsdp_alice_trace_sim_advantage_fdist_le
+     centropy_AliceTrace_AliceHopTuple /
+     centropy_AliceView_AliceHopTuple : conditioning on the trace, on the
+       view, or on the tuple leaves the same uncertainty about Bob's input,
+       so the hop ladder prices all three observations at once *)
 
 From HB Require Import structures.
 From mathcomp Require Import all_boot all_order all_algebra fingroup finalg.
@@ -28,12 +58,15 @@ From mathcomp Require Import matrix ring boolp finmap reals.
 From Stdlib Require Import Utf8.
 
 Require Import realType_ext realType_ln ssr_ext ssralg_ext bigop_ext fdist.
+Require Import fdist_extra.
 Require Import proba jfdist_cond entropy graphoid smc_interpreter spp_proba bayes.
 Require Import spp_entropy extra_proba extra_algebra extra_entropy rouche_capelli.
 Require Import entropy_fiber.
 Require Import homomorphic_encryption.
 Require Import dsdp_program dsdp_entropy dsdp_pismc.
 Require Import dsdp_malicious_dotp.
+Require Import indcpa_game.
+Require Import dsdp_alice_fdist_secrecy dsdp_alice_trace_link.
 
 Set Implicit Arguments.
 Unset Strict Implicit.
@@ -556,3 +589,407 @@ by rewrite ltr1n.
 Qed.
 
 End dsdp_relay_secrecy_v1.
+
+(* ================================================================= *)
+(* Corrupted-Alice secrecy under IND-CPA hopping (fdist axis)        *)
+(* ================================================================= *)
+
+Section dsdp_alice_hop_secrecy.
+(* cloned context of Section dsdp_alice_fdist_secrecy *)
+Local Set Default Goal Selector "1".
+Local Open Scope reals_ext_scope.
+Local Open Scope proba_scope.
+Local Open Scope fdist_scope.
+Local Open Scope entropy_scope.
+Local Open Scope ring_scope.
+Context {R : realType}.
+Variables (AHE : AHEncType) (Renc : finType) (index_renc : nat).
+Hypothesis card_renc : #|Renc| = index_renc.+1.
+Variable rand_of_renc : Renc -> rand AHE.
+Variable pkey_of_party : party_id -> pub_key AHE.
+Variables (v1 u1 u2 u3 : plain AHE).
+Hypothesis u3_unit : u3 \is a GRing.unit.
+
+Local Notation P := (alice_sample_fdist (R:=R) AHE card_renc).
+Local Notation V2 := (V2 (R:=R) (AHE:=AHE) card_renc).
+Local Notation V3 := (V3 (R:=R) (AHE:=AHE) card_renc).
+Local Notation hop_tupleT := (dsdp_alice_hop_tupleT AHE Renc).
+Local Notation AliceHopTuple i :=
+  (AliceHopTuple (R:=R) (AHE:=AHE) card_renc rand_of_renc
+     pkey_of_party v1 u1 u2 u3 i).
+Local Notation AliceView :=
+  (AliceView (R:=R) (AHE:=AHE) card_renc rand_of_renc
+     pkey_of_party v1 u1 u2 u3).
+Local Notation alice_view_of_hop_tuple :=
+  (alice_view_of_hop_tuple (AHE:=AHE) rand_of_renc
+     pkey_of_party v1 u1 u2 u3).
+Local Notation alice_view_of_hop_tupleE :=
+  (alice_view_of_hop_tupleE (R:=R) (AHE:=AHE) card_renc rand_of_renc
+     pkey_of_party v1 u1 u2 u3).
+Local Notation indcpa_fdist_epsilon :=
+  (indcpa_fdist_epsilon (R:=R) (AHE:=AHE) card_renc rand_of_renc).
+Local Notation hop0_reduction :=
+  (hop0_reduction (R:=R) (AHE:=AHE) card_renc rand_of_renc
+     pkey_of_party v1 u1 u2 u3).
+Local Notation hop1_reduction :=
+  (hop1_reduction (R:=R) (AHE:=AHE) card_renc rand_of_renc
+     pkey_of_party v1 u1 u2 u3).
+Local Notation hop0_advantageE :=
+  (hop0_advantageE (R:=R) (AHE:=AHE) card_renc rand_of_renc
+     pkey_of_party v1 u1 u2 u3).
+Local Notation hop1_advantageE :=
+  (hop1_advantageE (R:=R) (AHE:=AHE) card_renc rand_of_renc
+     pkey_of_party v1 u1 u2 u3).
+Local Notation alice_hop_game_successE :=
+  (alice_hop_game_successE (R:=R) (AHE:=AHE) card_renc rand_of_renc
+     pkey_of_party v1 u1 u2 u3).
+Local Notation guess_event_jointE :=
+  (guess_event_jointE (R:=R) (AHE:=AHE) card_renc rand_of_renc
+     pkey_of_party v1 u1 u2 u3).
+Local Notation guess_all_zero_le_invm :=
+  (guess_all_zero_le_invm (R:=R) (AHE:=AHE) card_renc rand_of_renc
+     pkey_of_party v1 u1 u2 u3_unit).
+Local Notation alice_ideal_joint :=
+  (alice_ideal_joint (R:=R) (AHE:=AHE) card_renc rand_of_renc
+     pkey_of_party v1 u1 u2 u3).
+Local Notation alice_ideal_jointE :=
+  (alice_ideal_jointE (R:=R) (AHE:=AHE) card_renc rand_of_renc
+     pkey_of_party v1 u1 u2 u3).
+Local Notation alice_predictor_unpredictability :=
+  (alice_predictor_unpredictability (R:=R) (AHE:=AHE) card_renc rand_of_renc
+     pkey_of_party v1 u1 u2 u3).
+
+Let card_plain_gt0 : (0 < #|plain AHE|)%N.
+Proof. by apply/card_gt0P; exists 0; rewrite inE. Qed.
+
+(* A predictor reading Alice's real hopping tuple matches Bob's input with
+   probability at most uniform guessing over the plaintext space plus the
+   advantages of the two hop reductions.  The first summand is
+   information-theoretic and unconditional; the two others are
+   assumption-conditional, one against Bob's key and one against Charlie's. *)
+Theorem dsdp_alice_guess_fdist_V2_real_le (g : hop_tupleT -> plain AHE) :
+  Pr P [set t | (g `o (AliceHopTuple 0)) t == V2 t]
+    <= #|plain AHE|%:R^-1
+       + indcpa_fdist_epsilon (pkey_of_party Bob)
+           (hop0_reduction (distinguisher_of_guess g))
+       + indcpa_fdist_epsilon (pkey_of_party Charlie)
+           (hop1_reduction (distinguisher_of_guess g)).
+Proof.
+rewrite guess_event_jointE -hop0_advantageE -hop1_advantageE -addrA -lerBlDl.
+rewrite !alice_hop_game_successE.
+apply: le_trans (lerB (lexx _) _) _; last first.
+  exact: le_trans (ler_norm _) (ler_distD _ _ _).
+by rewrite -guess_event_jointE; exact: guess_all_zero_le_invm.
+Qed.
+
+Let eps0 (g : hop_tupleT -> plain AHE) : R :=
+  indcpa_fdist_epsilon (pkey_of_party Bob)
+    (hop0_reduction (distinguisher_of_guess g)).
+
+Let eps1 (g : hop_tupleT -> plain AHE) : R :=
+  indcpa_fdist_epsilon (pkey_of_party Charlie)
+    (hop1_reduction (distinguisher_of_guess g)).
+
+(* The negative logarithm of a predictor's success probability on Alice's
+   real hopping tuple is at least the log of the plaintext-space cardinality
+   less a correction in the two hop advantages.  As the advantages go to
+   zero the correction vanishes and the bound becomes the value uniform
+   guessing would give. *)
+Theorem dsdp_alice_unpredictability_fdist_ge (g : hop_tupleT -> plain AHE)
+    (Hpos : 0 < Pr P [set t | (g `o (AliceHopTuple 0)) t == V2 t]) :
+  log (#|plain AHE|%:R)
+    - log (1 + #|plain AHE|%:R * (eps0 g + eps1 g))
+  <= - log (Pr P [set t | (g `o (AliceHopTuple 0)) t == V2 t]).
+Proof.
+have Hcard_pos : (0 < #|plain AHE|%:R :> R) by rewrite ltr0n card_plain_gt0.
+have Hnum_pos : (0 < 1 + #|plain AHE|%:R * (eps0 g + eps1 g) :> R).
+  apply: ltr_pwDl ltr01 (mulr_ge0 (ler0n _ _) _).
+  by rewrite addr_ge0 // /eps0 /eps1 /indcpa_fdist_epsilon normr_ge0.
+rewrite lerNr opprB -logDiv // ler_log ?posrE ?divr_gt0 //.
+rewrite mulrDl mul1r mulrAC (divff (lt0r_neq0 Hcard_pos)) mul1r addrA.
+exact: dsdp_alice_guess_fdist_V2_real_le.
+Qed.
+
+Local Notation "'`H_unp^{' g '}'" :=
+  (alice_predictor_unpredictability g)
+  (at level 0, g at level 200,
+   format "'`H_unp^{' g '}'").
+
+(* The same bound read through the named unpredictability quantity. *)
+Theorem dsdp_alice_predictor_unpredictability_fdist_ge
+    (g : hop_tupleT -> plain AHE)
+    (Hpos : 0 < Pr P [set t | (g `o (AliceHopTuple 0)) t == V2 t]) :
+  log (#|plain AHE|%:R)
+    - log (1 + #|plain AHE|%:R * (eps0 g + eps1 g))
+  <= `H_unp^{g}.
+Proof.
+exact: dsdp_alice_unpredictability_fdist_ge.
+Qed.
+
+(* Any Boolean test separates the real joint law of the honest inputs and
+   Alice's hopping tuple from the ideal law built by the simulator by at most
+   the sum of the two IND-CPA advantages.  Real world is hop 0, ideal world
+   is hop 2, and the ladder prices the distance one hop at a time. *)
+Theorem dsdp_alice_sim_advantage_fdist_le
+    (D : plain AHE * plain AHE * hop_tupleT -> bool) :
+  `| Pr (`p_ [% V2, V3, AliceHopTuple 0]) [set x | D x]
+     - Pr (fdistmap D alice_ideal_joint) [set true] |
+  <= indcpa_fdist_epsilon (pkey_of_party Bob) (hop0_reduction D)
+     + indcpa_fdist_epsilon (pkey_of_party Charlie) (hop1_reduction D).
+Proof.
+rewrite Pr_fdistmap_bool alice_ideal_jointE -hop0_advantageE -hop1_advantageE.
+rewrite !alice_hop_game_successE.
+exact: ler_distD.
+Qed.
+
+(* Alice's whole view obeys the hopping-tuple bound: her two outgoing
+   combines and the plaintext of her final decrypt-on-receive are
+   deterministic functions of the tuple, so reading them adds no term. *)
+Corollary dsdp_alice_guess_fdist_view_le
+    (g' : hop_tupleT * cipher AHE * cipher AHE * plain AHE -> plain AHE) :
+  Pr P [set t | (g' `o AliceView) t == V2 t]
+    <= #|plain AHE|%:R^-1
+       + indcpa_fdist_epsilon (pkey_of_party Bob)
+           (hop0_reduction
+              (distinguisher_of_guess (g' \o alice_view_of_hop_tuple)))
+       + indcpa_fdist_epsilon (pkey_of_party Charlie)
+           (hop1_reduction
+              (distinguisher_of_guess (g' \o alice_view_of_hop_tuple))).
+Proof.
+by rewrite alice_view_of_hop_tupleE; exact: dsdp_alice_guess_fdist_V2_real_le.
+Qed.
+
+End dsdp_alice_hop_secrecy.
+
+(* ================================================================= *)
+(* The same bounds at Alice's executed piSMC trace                   *)
+(* ================================================================= *)
+
+Section dsdp_alice_trace_secrecy.
+(* cloned context of Section dsdp_alice_trace_rv *)
+Local Set Default Goal Selector "1".
+Local Open Scope reals_ext_scope.
+Local Open Scope proba_scope.
+Local Open Scope fdist_scope.
+Local Open Scope entropy_scope.
+Local Open Scope ring_scope.
+Context {R : realType}.
+Variables (AHE : AHEncType) (Renc : finType) (index_renc : nat).
+Hypothesis card_renc : #|Renc| = index_renc.+1.
+Variable rand_of_renc : Renc -> rand AHE.
+Variables (v1 u1 u2 u3 : plain AHE).
+Hypothesis u3_unit : u3 \is a GRing.unit.
+Variables (dk_a dk_b dk_c : priv_key AHE).
+Variables (w_rb2 w_rc2 : Renc).
+
+Local Notation P := (alice_sample_fdist (R:=R) AHE card_renc).
+Local Notation pkey_of_dk := (pkey_of_dk dk_a dk_b dk_c).
+Local Notation dsdp_trace_dataT := (dsdp_trace_dataT AHE).
+Local Notation hop_tupleT := (dsdp_alice_hop_tupleT AHE Renc).
+Local Notation V2 := (V2 (R:=R) (AHE:=AHE) card_renc).
+Local Notation V3 := (V3 (R:=R) (AHE:=AHE) card_renc).
+Local Notation AliceHopTuple i :=
+  (AliceHopTuple (R:=R) (AHE:=AHE) card_renc rand_of_renc
+     pkey_of_dk v1 u1 u2 u3 i).
+Local Notation AliceTrace :=
+  (AliceTrace (R:=R) (AHE:=AHE) card_renc rand_of_renc
+     v1 u1 u2 u3 dk_a dk_b dk_c w_rb2 w_rc2).
+Local Notation dsdp_trace_of_hop_tuple :=
+  (dsdp_trace_of_hop_tuple rand_of_renc v1 u1 u2 u3 dk_a dk_b dk_c w_rc2).
+Local Notation dsdp_trace_of_hop_tupleE :=
+  (dsdp_trace_of_hop_tupleE (R:=R) (AHE:=AHE) card_renc rand_of_renc
+     v1 u1 u2 u3 dk_a dk_b dk_c w_rb2 w_rc2).
+Local Notation indcpa_fdist_epsilon :=
+  (indcpa_fdist_epsilon (R:=R) (AHE:=AHE) card_renc rand_of_renc).
+Local Notation hop0_reduction :=
+  (hop0_reduction (R:=R) (AHE:=AHE) card_renc rand_of_renc
+     pkey_of_dk v1 u1 u2 u3).
+Local Notation hop1_reduction :=
+  (hop1_reduction (R:=R) (AHE:=AHE) card_renc rand_of_renc
+     pkey_of_dk v1 u1 u2 u3).
+Local Notation alice_ideal_joint :=
+  (alice_ideal_joint (R:=R) (AHE:=AHE) card_renc rand_of_renc
+     pkey_of_dk v1 u1 u2 u3).
+Local Notation alice_trace_ideal_joint :=
+  (alice_trace_ideal_joint (R:=R) card_renc rand_of_renc
+     v1 u1 u2 u3 dk_a dk_b dk_c w_rc2).
+Local Notation dsdp_alice_trace_simulator :=
+  (dsdp_alice_trace_simulator (R:=R) card_renc rand_of_renc
+     v1 u1 u2 u3 dk_a dk_b dk_c w_rc2).
+Local Notation dsdp_alice_simulator :=
+  (dsdp_alice_simulator (R:=R) (AHE:=AHE) card_renc rand_of_renc
+     pkey_of_dk).
+Local Notation alice_trace_predictor_unpredictability :=
+  (alice_trace_predictor_unpredictability (R:=R) card_renc rand_of_renc
+     v1 u1 u2 u3 dk_a dk_b dk_c w_rb2 w_rc2).
+
+(* A predictor reading Alice's executed fifteen-round trace matches Bob's
+   input no better than one reading her hopping tuple: the trace is a
+   deterministic function of the tuple, so the tuple bound transfers with no
+   extra term. *)
+Theorem dsdp_alice_guess_fdist_trace_V2_real_le
+    (g : 15.-bseq dsdp_trace_dataT -> plain AHE) :
+  Pr P [set t | (g `o AliceTrace) t == V2 t]
+    <= (#|plain AHE|%:R : R)^-1
+       + indcpa_fdist_epsilon (pkey_of_dk Bob)
+           (hop0_reduction
+              (distinguisher_of_guess (g \o dsdp_trace_of_hop_tuple)))
+       + indcpa_fdist_epsilon (pkey_of_dk Charlie)
+           (hop1_reduction
+              (distinguisher_of_guess (g \o dsdp_trace_of_hop_tuple))).
+Proof.
+rewrite dsdp_trace_of_hop_tupleE.
+exact: (dsdp_alice_guess_fdist_V2_real_le card_renc rand_of_renc
+          pkey_of_dk v1 u1 u2 u3_unit
+          (g \o dsdp_trace_of_hop_tuple)).
+Qed.
+
+Let trace_eps0 (g : 15.-bseq dsdp_trace_dataT -> plain AHE) : R :=
+  indcpa_fdist_epsilon (pkey_of_dk Bob)
+    (hop0_reduction
+       (distinguisher_of_guess (g \o dsdp_trace_of_hop_tuple))).
+
+Let trace_eps1 (g : 15.-bseq dsdp_trace_dataT -> plain AHE) : R :=
+  indcpa_fdist_epsilon (pkey_of_dk Charlie)
+    (hop1_reduction
+       (distinguisher_of_guess (g \o dsdp_trace_of_hop_tuple))).
+
+Local Notation "'`H_unp^{' g '}'" :=
+  (alice_trace_predictor_unpredictability g)
+  (at level 0, g at level 200,
+   format "'`H_unp^{' g '}'").
+
+(* The unpredictability of Bob's input at Alice's executed trace obeys the
+   same lower bound as at her hopping tuple. *)
+Theorem dsdp_alice_trace_predictor_unpredictability_fdist_ge
+    (g : 15.-bseq dsdp_trace_dataT -> plain AHE)
+    (Hpos : 0 < Pr P [set t | (g `o AliceTrace) t == V2 t]) :
+  log (#|plain AHE|%:R)
+    - log (1 + #|plain AHE|%:R * (trace_eps0 g + trace_eps1 g))
+  <= `H_unp^{g}.
+Proof.
+have Hcard_pos : (0 < #|plain AHE|%:R :> R).
+  by rewrite ltr0n; apply/card_gt0P; exists 0; rewrite inE.
+have Hnum_pos : (0 < 1 + #|plain AHE|%:R * (trace_eps0 g + trace_eps1 g) :> R).
+  by rewrite ltr_pwDl // mulr_ge0 // addr_ge0 // normr_ge0.
+rewrite /alice_trace_predictor_unpredictability.
+rewrite lerNr opprB -logDiv // ler_log ?posrE ?divr_gt0 //.
+rewrite mulrDl mul1r mulrAC (divff (lt0r_neq0 Hcard_pos)) mul1r addrA.
+exact: dsdp_alice_guess_fdist_trace_V2_real_le.
+Qed.
+
+Let alice_trace_joint_of_hop_joint
+    (x : plain AHE * plain AHE * hop_tupleT) :
+    plain AHE * plain AHE * 15.-bseq dsdp_trace_dataT :=
+  (x.1.1, x.1.2, dsdp_trace_of_hop_tuple x.2).
+
+Let distinguisher_of_trace_test
+    (D : plain AHE * plain AHE * 15.-bseq dsdp_trace_dataT -> bool) :
+    plain AHE * plain AHE * hop_tupleT -> bool :=
+  D \o alice_trace_joint_of_hop_joint.
+
+Let alice_trace_ideal_jointE :
+  alice_trace_ideal_joint
+  = fdistmap alice_trace_joint_of_hop_joint alice_ideal_joint.
+Proof.
+rewrite /alice_trace_ideal_joint /alice_ideal_joint fdistmap_bind.
+congr (_ >>= _); apply: boolp.funext => vv.
+by rewrite /dsdp_alice_trace_simulator 2!fdistmap_comp.
+Qed.
+
+Let alice_trace_real_jointE :
+  `p_ [% V2, V3, AliceTrace]
+  = fdistmap alice_trace_joint_of_hop_joint
+      (`p_ [% V2, V3, AliceHopTuple 0]).
+Proof.
+by rewrite dsdp_trace_of_hop_tupleE /dist_of_RV fdistmap_comp.
+Qed.
+
+(* A Boolean test on Alice's executed trace separates the real trace law from
+   the simulated one by at most the two hop advantages of the hopping-tuple
+   test it lifts to. *)
+Theorem dsdp_alice_trace_sim_advantage_fdist_le
+    (D : plain AHE * plain AHE * 15.-bseq dsdp_trace_dataT -> bool) :
+  `| Pr (`p_ [% V2, V3, AliceTrace]) [set x | D x]
+     - Pr (fdistmap D alice_trace_ideal_joint) [set true] |
+  <= indcpa_fdist_epsilon (pkey_of_dk Bob)
+       (hop0_reduction
+         (fun x => D
+           (x.1.1, x.1.2, dsdp_trace_of_hop_tuple x.2)))
+     + indcpa_fdist_epsilon (pkey_of_dk Charlie)
+       (hop1_reduction
+         (fun x => D
+           (x.1.1, x.1.2, dsdp_trace_of_hop_tuple x.2))).
+Proof.
+rewrite -Pr_fdistmap_bool alice_trace_real_jointE fdistmap_comp.
+rewrite Pr_fdistmap_bool alice_trace_ideal_jointE fdistmap_comp.
+exact: (dsdp_alice_sim_advantage_fdist_le card_renc rand_of_renc
+          pkey_of_dk v1 u1 u2 u3
+          (distinguisher_of_trace_test D)).
+Qed.
+
+End dsdp_alice_trace_secrecy.
+
+Section dsdp_alice_trace_uncertainty.
+(* cloned context of Section dsdp_alice_trace_centropy *)
+Local Set Default Goal Selector "1".
+Local Open Scope reals_ext_scope.
+Local Open Scope proba_scope.
+Local Open Scope fdist_scope.
+Local Open Scope entropy_scope.
+Local Open Scope ring_scope.
+Context {R : realType}.
+Variables (AHE : AHEncType) (Renc : finType) (index_renc : nat).
+Hypothesis card_renc : #|Renc| = index_renc.+1.
+Variable rand_of_renc : Renc -> rand AHE.
+Variables (v1 u1 u2 u3 : plain AHE).
+Variables (dk_a dk_b dk_c : priv_key AHE).
+Variables (w_rb2 w_rc2 : Renc).
+
+Local Notation P := (alice_sample_fdist (R:=R) AHE card_renc).
+Local Notation pkey_of_dk := (pkey_of_dk dk_a dk_b dk_c).
+Local Notation V2 := (V2 (R:=R) (AHE:=AHE) card_renc).
+Local Notation AliceHopTuple i :=
+  (AliceHopTuple (R:=R) (AHE:=AHE) card_renc rand_of_renc
+     pkey_of_dk v1 u1 u2 u3 i).
+Local Notation AliceTrace :=
+  (AliceTrace (R:=R) (AHE:=AHE) card_renc rand_of_renc
+     v1 u1 u2 u3 dk_a dk_b dk_c w_rb2 w_rc2).
+Local Notation AliceView :=
+  (AliceView (R:=R) (AHE:=AHE) card_renc rand_of_renc
+     pkey_of_dk v1 u1 u2 u3).
+Local Notation alice_view_of_hop_tupleE :=
+  (alice_view_of_hop_tupleE (R:=R) (AHE:=AHE) card_renc rand_of_renc
+     pkey_of_dk v1 u1 u2 u3).
+
+(* Conditioning on Alice's executed trace leaves the same uncertainty about
+   Bob's input as conditioning on her hopping tuple: the trace and the tuple
+   determine each other once the two combine coins, which are independent of
+   both, are set aside.  The trace is therefore no better an observation than
+   the tuple the hop ladder prices. *)
+Theorem centropy_AliceTrace_AliceHopTuple :
+  `H( V2 | AliceTrace ) = `H( V2 | AliceHopTuple 0 ).
+Proof.
+rewrite alice_trace_tupleE
+        (can_centropy_eq (@trace_of_trace_tupleK AHE Renc rand_of_renc
+                            v1 u1 u2 u3 dk_a dk_b dk_c w_rc2)).
+rewrite alice_hop_tuple_rand_traceE
+        (can_centropy_eq (@hop_tuple_of_rand_traceK AHE Renc)).
+by rewrite (inde_centropy_eq
+              (combine_rand_trace_indep card_renc rand_of_renc v1 u1 u2 u3
+                 dk_a dk_b dk_c)).
+Qed.
+
+(* Conditioning on Alice's whole view leaves the same uncertainty about Bob's
+   input as conditioning on her hopping tuple: each is a deterministic
+   function of the other, so entropy contraction applies both ways. *)
+Corollary centropy_AliceView_AliceHopTuple :
+  `H( V2 | AliceView ) = `H( V2 | AliceHopTuple 0 ).
+Proof.
+transitivity (`H( V2 | [% AliceView, AliceHopTuple 0] )).
+  by rewrite [in RHS]alice_hop_tuple_of_view centropy_RV_contraction.
+rewrite centropy_RV_fdistA.
+by rewrite [in LHS]alice_view_of_hop_tupleE centropy_RV_contraction.
+Qed.
+
+End dsdp_alice_trace_uncertainty.

@@ -15,7 +15,7 @@ MODULES=(
   dumas2017dual/dsdp/counting/dsdp_entropy.v
   dumas2017dual/entropy_fiber/entropy_fiber_zpq.v
   dumas2017dual/lib/extra_proba.v
-  # The information-theoretic headline theorems, with their full proofs.
+  # The headline theorems of both axes, with their full proofs.
   dumas2017dual/dsdp/dsdp_main.v
   # The game layer the computational leg reduces to: the adversary record,
   # the hidden-bit challenger, the two experiment arms and the advantage.

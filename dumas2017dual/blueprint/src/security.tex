@@ -298,8 +298,33 @@ finite commutative unit ring.
   Bob's key on $V_2$, and hop $1$ challenges Charlie's key on $V_3$.
 \end{definition}
 
-\begin{theorem}[One hop costs one reduction advantage]
-  \label{thm:alice_view_advantage}
+\paragraph{How a hop reduction is used.}
+A hop reduction converts a distinguisher for two adjacent protocol hops into
+a real-or-zero adversary for the ciphertext slot changed by that hop. For the
+first hop, the reduction retains every other component of the sampled joint
+value, places Bob's challenge ciphertext in the missing slot, and applies
+$D$ to the rebuilt value. The construction can be summarized as follows.
+\[
+\begin{array}{c}
+D \text{ distinguishing hop $0$ from hop $1$}
+\\[0.6ex]
+\Big\downarrow\ {\scriptstyle D \mapsto \hopred{0}{D}}
+\\[0.6ex]
+\hopred{0}{D} \text{ distinguishing }
+\Enc(\pk_B,V_2) \text{ from } \Enc(\pk_B,0)
+\end{array}
+\]
+The bottom line abbreviates the complete real-or-zero experiment. The
+adversary $\hopred{0}{D}$ receives its sampled state together with the
+challenge ciphertext and reconstructs the full input expected by $D$. When
+the challenge encrypts $V_2$, that input has the law of hop $0$. When it
+encrypts zero, the input has the law of hop $1$. Consequently, the two
+distinguishing gaps are equal. The second reduction applies the same
+construction to hops $1$ and $2$, using Charlie's key and challenge plaintext
+$V_3$.
+
+\begin{lemma}[One hop costs one reduction advantage]
+  \label{lem:alice_view_advantage}
   \rocq{infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.hop0_advantageE,
        infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.hop1_advantageE}
   \rocqok
@@ -311,7 +336,7 @@ finite commutative unit ring.
   \[ \lvert \gamma_0(D) - \gamma_1(D)\rvert = \epsror{\pk_B}{\hopred{0}{D}},
      \qquad
      \lvert \gamma_1(D) - \gamma_2(D)\rvert = \epsror{\pk_C}{\hopred{1}{D}} \]
-\end{theorem}
+\end{lemma}
 
 \begin{lemma}[Guessing at the all-zero endpoint]
   \label{lem:guess_all_zero}
@@ -349,9 +374,9 @@ finite commutative unit ring.
 
 \begin{theorem}[Guessing Bob's input from Alice's real tuple]
   \label{thm:alice_guess_real}
-  \rocq{infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.dsdp_alice_guess_fdist_V2_real_le}
+  \rocq{infotheo.dumas2017dual.dsdp.dsdp_main.dsdp_alice_guess_fdist_V2_real_le}
   \rocqok
-  \uses{thm:alice_view_advantage,lem:guess_all_zero,def:distinguisher_of_guess}
+  \uses{lem:alice_view_advantage,lem:guess_all_zero,def:distinguisher_of_guess}
   When $u_3$ is a unit of the plaintext ring, every predictor reading Alice's
   real tuple matches Bob's input with probability at most $1/m$ plus the
   advantages of the two hop reductions of its distinguisher.
@@ -359,7 +384,7 @@ finite commutative unit ring.
        \le \tfrac{1}{m} + \epshopsum{D_g} \]
 \end{theorem}
 \begin{proof}
-  \uses{thm:alice_view_advantage,lem:guess_all_zero}
+  \uses{lem:alice_view_advantage,lem:guess_all_zero}
   \rocqok
   The endpoint probability is at most $1/m$, and the triangle inequality along
   the two hops adds the two reduction advantages.
@@ -368,8 +393,8 @@ finite commutative unit ring.
 \begin{theorem}[Unpredictability entropy]
   \label{thm:alice_unpredictability}
   \rocq{infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.alice_predictor_unpredictability,
-       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.dsdp_alice_unpredictability_fdist_ge,
-       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.dsdp_alice_predictor_unpredictability_fdist_ge}
+       infotheo.dumas2017dual.dsdp.dsdp_main.dsdp_alice_unpredictability_fdist_ge,
+       infotheo.dumas2017dual.dsdp.dsdp_main.dsdp_alice_predictor_unpredictability_fdist_ge}
   \rocqok
   \uses{thm:alice_guess_real}
   For a predictor whose success probability on Alice's real tuple is positive,
@@ -388,7 +413,7 @@ finite commutative unit ring.
        infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.AliceView,
        infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.alice_view_of_hop_tuple,
        infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.alice_view_of_hop_tupleE,
-       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.dsdp_alice_guess_fdist_view_le}
+       infotheo.dumas2017dual.dsdp.dsdp_main.dsdp_alice_guess_fdist_view_le}
   \rocqok
   \uses{thm:alice_guess_real,def:party_views}
   Alice's four real observables are her hop-$0$ tuple, her two outgoing combines,
@@ -444,9 +469,9 @@ functionality on the other, rather than quantified over all input vectors.
 
 \begin{theorem}[Bounded simulation security]
   \label{thm:alice_simulation_secure}
-  \rocq{infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.dsdp_alice_sim_advantage_fdist_le}
+  \rocq{infotheo.dumas2017dual.dsdp.dsdp_main.dsdp_alice_sim_advantage_fdist_le}
   \rocqok
-  \uses{def:party_views,thm:alice_view_advantage,lem:simulator_factorization}
+  \uses{def:party_views,lem:alice_view_advantage,lem:simulator_factorization}
   For all weights $u_1, u_2, u_3$, every distinguisher separates the real joint
   law of the honest inputs and Alice's tuple from the ideal-world law by at most
   the sum of the advantages of its two hop reductions.
@@ -454,7 +479,7 @@ functionality on the other, rather than quantified over all input vectors.
        - \Pr_{\Ideal}[D] \big\rvert \le \epshopsum{D} \]
 \end{theorem}
 \begin{proof}
-  \uses{lem:simulator_factorization,thm:alice_view_advantage}
+  \uses{lem:simulator_factorization,lem:alice_view_advantage}
   \rocqok
   The ideal-world law is the hop-$2$ joint law, so the gap is
   $\lvert \gamma_0(D) - \gamma_2(D) \rvert$, which the triangle inequality
@@ -515,12 +540,12 @@ carries the three bounds above to the executed protocol.
 
 \begin{theorem}[The three bounds at the trace]
   \label{thm:alice_trace_bounds}
-  \rocq{infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_trace_link.dsdp_alice_guess_fdist_trace_V2_real_le,
+  \rocq{infotheo.dumas2017dual.dsdp.dsdp_main.dsdp_alice_guess_fdist_trace_V2_real_le,
        infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_trace_link.alice_trace_predictor_unpredictability,
-       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_trace_link.dsdp_alice_trace_predictor_unpredictability_fdist_ge,
+       infotheo.dumas2017dual.dsdp.dsdp_main.dsdp_alice_trace_predictor_unpredictability_fdist_ge,
        infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_trace_link.dsdp_alice_trace_simulator,
        infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_trace_link.alice_trace_ideal_joint,
-       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_trace_link.dsdp_alice_trace_sim_advantage_fdist_le}
+       infotheo.dumas2017dual.dsdp.dsdp_main.dsdp_alice_trace_sim_advantage_fdist_le}
   \rocqok
   \uses{lem:trace_of_hop_tuple,thm:alice_guess_real,thm:alice_unpredictability,thm:alice_simulation_secure}
   With $u_3$ a unit of the plaintext ring, every predictor reading Alice's
@@ -536,8 +561,8 @@ carries the three bounds above to the executed protocol.
   \rocq{infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_trace_link.dsdp_alice_trace_tupleT,
        infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_trace_link.AliceTraceTuple,
        infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_trace_link.alice_trace_tupleE,
-       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_trace_link.centropy_AliceTrace_AliceHopTuple,
-       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_trace_link.centropy_AliceView_AliceHopTuple}
+       infotheo.dumas2017dual.dsdp.dsdp_main.centropy_AliceTrace_AliceHopTuple,
+       infotheo.dumas2017dual.dsdp.dsdp_main.centropy_AliceView_AliceHopTuple}
   \rocqok
   \uses{lem:trace_of_hop_tuple,cor:alice_guess_view}
   Conditioning on Alice's executed trace, and conditioning on her full view,
