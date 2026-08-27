@@ -617,6 +617,11 @@ Definition hop1_assemble (c : hop1_stateT) (ch : cipher AHE) :
 
        D |--> hop0_reduction(D)
 
+   D accepts concrete (v_2,v_3,h) and returns a Boolean.
+   The type does not require D to inspect only the challenged ciphertext.
+   It may inspect every component of such a tuple. So A_i(D) wrap it
+   to provide the assembled concrete values from the stateful experiment.
+
    turns any protocol distinguisher D into such an encryption adversary.
    The correspondence theorems prove
 
