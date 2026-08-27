@@ -372,17 +372,13 @@ Qed.
 
 (* card_msg and card_msg_pair are inherited from outer section *)
 
-(* Unconditional entropy of private inputs (V2, V3) when uniformly distributed.
-   
-   Since V2, V3 are private inputs from Bob and Charlie respectively,
-   assuming uniform distribution gives H(V2,V3) = log(m²) = 2*log(m).
-   
-   Combined with the conditional entropy result H(V2,V3 | view) = log(m),
-   this shows DSDP leaks log(m) bits but preserves log(m) bits of entropy.
-   
-   The security argument (joint_centropy_reduction at end of file) shows
-   that H(V2,V3 | AliceView) = H(V2 | AliceView), i.e., knowing V3 given
-   the constraint adds no information beyond knowing V2. *)
+(* Entropy of the relay private inputs (V2, V3) before any conditioning:
+   uniform on a space of size m^2, so H(V2,V3) = log (m * m).  Read against
+   dsdp_centropy_uniform, which gives H(V2,V3 | view) = log m, it says the
+   protocol spends exactly half of that entropy: log m bits reach Alice's
+   plaintext residual and log m bits stay hidden.  This is the numerator of
+   the leakage fraction the counting axis reports; the ciphertext-carrying
+   view is priced separately on the game-hopping axis. *)
 Lemma dsdp_var_entropy :
   `p_VarRV = fdist_uniform card_msg_pair ->
   `H `p_VarRV = log (m%:R * m%:R : R).
