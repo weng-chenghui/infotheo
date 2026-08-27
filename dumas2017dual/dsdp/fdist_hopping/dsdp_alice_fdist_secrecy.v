@@ -646,7 +646,8 @@ Definition hop1_assemble (c : hop1_stateT) (ch : cipher AHE) :
       distinguishing Enc(pk_B, V2) and Enc(pk_B, 0)
 
    The second problem is the one the encryption-security property answers,
-   and that is what bounds the first.  Since D accepts a complete alice_hop_jointT value rather than an
+   and that is what bounds the first.
+   Since D accepts a complete alice_hop_jointT value rather than an
    encryption challenge, hop0_reduction D adapts D to the real-or-zero
    adversary interface.  It builds the joint value around the challenge
    ciphertext and calls D.  The correspondence theorems prove that D's gap
