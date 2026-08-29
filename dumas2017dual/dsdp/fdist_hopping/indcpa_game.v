@@ -165,7 +165,11 @@ Definition predictor (obs : finType) : Type := obs -> plain AHE.
    while a hop speaks only about how often a Boolean test accepts; wrapping
    the predictor this way makes the two the same number: the probability
    that the predictor succeeds at hop i is the probability that this test
-   accepts at hop i. *)
+   accepts at hop i.
+   Naming: [test] is the domain word here rather than drift.  A distinguisher
+   is a statistical test, and the role table of
+   dumas2017dual/dsdp/fdist_hopping/dsdp_alice_fdist_secrecy.v maps the
+   distinguisher role to this name. *)
 Definition guess_test {obs : finType} (predict : predictor obs) :
     distinguisher (plain AHE * plain AHE * obs)%type :=
   fun x => predict x.2 == x.1.1.
