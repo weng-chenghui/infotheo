@@ -328,19 +328,34 @@ Local Notation msg := 'Z_m.
 Variables (V1 V2 V3 U1 U2 U3 R2 R3 : {RV P -> msg}).
 Variable Dk_a : {RV P -> Alice.-key Dec msg}.
 
+(* Bob's input under Alice's query weight U2 and her mask R2, the plaintext of
+   her first combine. *)
 Let D2 : {RV P -> msg} := V2 \* U2 \+ R2.
+
+(* The aggregate Charlie decrypts, both relay inputs under Alice's two
+   masks. *)
 Let D3 : {RV P -> msg} := V3 \* U3 \+ R3 \+ D2.
+
+(* The protocol output Alice computes: she strips both of her masks from the
+   aggregate and adds her own weighted input.  US_compromised_leaks_V2 is the
+   statement that at the query e_1 this value is V2 itself. *)
 Let S  : {RV P -> msg} := D3 \- R2 \- R3 \+ U1 \* V1.
 
+(* The aggregate under Alice's key, Charlie's closing message to her. *)
 Let E_alice_d3   : {RV P -> Alice.-enc msg}   := E' Alice `o D3.
+
+(* Charlie's input under his own key, his opening message to Alice. *)
 Let E_charlie_v3 : {RV P -> Charlie.-enc msg} := E' Charlie `o V3.
+
+(* Bob's input under his own key, his opening message to Alice. *)
 Let E_bob_v2     : {RV P -> Bob.-enc msg}     := E' Bob `o V2.
 
 (* Alice's full real view in the dot-product model: her key, the output S, her
    own inputs and masks, and the three ciphertext hops. V2 appears only inside
    S and the Bob hop.  The view is the honest one; what US_compromised_leaks_V2
-   makes malicious is the query US, not this observation.  The [Dotp] token
-   marks the model, separating it from the AliceView of the hopping axis. *)
+   makes malicious is the query US, not this observation.
+   Naming: the [Dotp] token marks the algebraic model, after [Dotp_n_rv],
+   separating this view from the AliceView of the hopping axis. *)
 Definition AliceDotpView :=
   [% Dk_a, S, V1, U1, U2, U3, R2, R3, E_alice_d3, E_charlie_v3, E_bob_v2].
 
@@ -410,48 +425,52 @@ Variables (V1 V2 V3 U2 U3 R2 R3 : {RV P -> msg}).
 Variable Dk_b : {RV P -> Bob.-key Dec msg}.
 Variable Dk_c : {RV P -> Charlie.-key Dec msg}.
 
-(* Bob's input scaled by his protocol weight.  It reaches the aggregate only
-   through D2, where Alice's fresh pad R2 masks it. *)
+(* Bob's input under Alice's query weight U2.  The weights U1, U2, U3 are
+   Alice's, so this is the one place Bob's secret meets a factor he does not
+   choose.  It reaches the aggregate only through D2. *)
 Let VU2 : {RV P -> msg} := V2 \* U2.
 
-(* Charlie's input scaled by his protocol weight.  It reaches the aggregate
-   only through VU3R, where Charlie's own pad R3 masks it. *)
+(* Charlie's input under Alice's query weight U3, reaching the aggregate only
+   through VU3R. *)
 Let VU3 : {RV P -> msg} := V3 \* U3.
 
-(* Charlie's weighted input under his own one-time pad R3, the value Bob
-   forwards.  The pad is what leaves Bob's view independent of V3 in
-   bob_privacy_V3, so that secrecy is information-theoretic and holds whatever
-   the encryption scheme is worth. *)
+(* Charlie's weighted input under Alice's mask R3, the plaintext of the second
+   combine Alice sends to Bob.  R3 is Alice's, drawn and stripped by palice of
+   dsdp_program.v, so it lies outside Bob's view.  That is what makes
+   bob_privacy_V3 unconditional: Bob's independence from V3 rests on a mask he
+   never sees, not on the encryption being hard to break. *)
 Let VU3R : {RV P -> msg} := VU3 \+ R3.
 
-(* Bob's weighted input under Alice's fresh pad R2.  The pad is what leaves
-   Charlie's view independent of V2 in charlie_privacy_V2, again
-   information-theoretically. *)
+(* Bob's weighted input under Alice's mask R2, the plaintext Bob decrypts from
+   Alice's first combine.  R2 lies outside Charlie's view, which is what makes
+   charlie_privacy_V2 unconditional in the same way. *)
 Let D2 : {RV P -> msg} := VU2 \+ R2.
 
-(* The masked aggregate Charlie returns to Alice, carrying both relay inputs
-   each under its own pad. *)
+(* The aggregate Charlie decrypts, carrying both relay inputs under Alice's two
+   masks.  Alice recovers the output by stripping R2 and R3 from it. *)
 Let D3 : {RV P -> msg} := VU3R \+ D2.
 
-(* Charlie's masked input encrypted under Charlie's key, the ciphertext Bob
-   forwards.  It sits in Bob's view as opaque data, and the R3 pad inside it
-   keeps V3 independent of that view on its own. *)
+(* Alice's second combine, encrypted under Charlie's key and sent to Bob.  It
+   sits in Bob's view as opaque data, and the R3 mask inside it keeps V3
+   independent of that view on its own. *)
 Let E_charlie_vur3 : {RV P -> Charlie.-enc msg} := E' Charlie `o VU3R.
 
-(* The masked Bob aggregate encrypted under Bob's own key.  Bob holds the
-   matching decryption key, and what he recovers is D2, already masked by
-   R2. *)
+(* Alice's first combine, encrypted under Bob's key.  Bob holds the matching
+   decryption key, and what he recovers is D2, already masked by R2. *)
 Let E_bob_d2 : {RV P -> Bob.-enc msg} := E' Bob `o D2.
 
-(* The full masked aggregate encrypted under Charlie's key, the message
-   Charlie returns to Alice. *)
+(* The aggregate Bob sends on to Charlie, encrypted under Charlie's key.  It
+   travels towards Charlie, not away from him: pcharlie of dsdp_program.v
+   decrypts it and answers Alice under Alice's key instead. *)
 Let E_charlie_d3 : {RV P -> Charlie.-enc msg} := E' Charlie `o D3.
 
-(* Bob's full real view: his key, his own input V2, the Charlie-ciphertext he
-   forwards, and the ciphertext of his decrypted masked aggregate D2. *)
+(* Bob's full real view: his key, his own input V2, the Charlie-key combine
+   Alice sends him and which he can only multiply into, and the Bob-key
+   combine he decrypts to D2. *)
 Definition BobView := [% Dk_b, V2, E_charlie_vur3, E_bob_d2].
-(* Charlie's full real view: his key, his own input V3, the encrypted aggregate
-   D3 he returns to Alice. *)
+
+(* Charlie's full real view: his key, his own input V3, and the aggregate
+   ciphertext he receives from Bob. *)
 Definition CharlieView := [% Dk_c, V3, E_charlie_d3].
 
 Hypothesis pV1_unif : `p_ V1 = fdist_uniform card_msg.

@@ -50,8 +50,7 @@ Require Export indcpa_game.
 (* | experiment    | indcpa_experiment                                      | *)
 (* | advantage     | indcpa_fdist_epsilon                                   | *)
 (* | distinguisher | guess_test predict                                     | *)
-(* | reduction     | bob_challenge_adversary,                               | *)
-(* |               | charlie_challenge_adversary                            | *)
+(* | reduction     | bob_challenge_adversary, charlie_challenge_adversary   | *)
 (*                                                                            *)
 (* ## Terminology: law and distribution                                       *)
 (*                                                                            *)
@@ -164,12 +163,13 @@ Require Export indcpa_game.
 (*                              Bob's challenge ciphertext                    *)
 (*             hop1_assemble == builds the complete value given to D around  *)
 (*                              Charlie's challenge ciphertext                *)
-(* bob_challenge_adversary D ==                                               *)
-(*                            turns D on hops 0 and 1 into an adversary       *)
-(*                            distinguishing Enc(pk_B, V2) from Enc(pk_B, 0)  *)
+(* bob_challenge_adversary D == turns D on hops 0 and 1 into an adversary     *)
+(*                              distinguishing Enc(pk_B, V2) from Enc(pk_B,   *)
+(*                              0)                                            *)
 (* charlie_challenge_adversary D ==                                           *)
-(*                            turns D on hops 1 and 2 into an adversary       *)
-(*                            distinguishing Enc(pk_C, V3) from Enc(pk_C, 0)  *)
+(*                              turns D on hops 1 and 2 into an adversary     *)
+(*                              distinguishing Enc(pk_C, V3) from Enc(pk_C,   *)
+(*                              0)                                            *)
 (*                                                                            *)
 (* The all-zero endpoint and guessing                                        *)
 (*                                                                            *)
@@ -191,8 +191,7 @@ Require Export indcpa_game.
 (*         bob_guess_epsilon == the advantage against Bob's key that one      *)
 (*                              predictor buys, the price of the hop-0        *)
 (*                              replacement                                   *)
-(* charlie_guess_epsilon ==                                                   *)
-(*                              the Charlie-key counterpart, the price of the *)
+(*     charlie_guess_epsilon == the Charlie-key counterpart, the price of the *)
 (*                              hop-1 replacement                             *)
 (*             fdistmap_prod == applying separate functions to independent   *)
 (*                              factors preserves their product form         *)
@@ -232,8 +231,7 @@ Require Export indcpa_game.
 (*        bob_view_adversary == the Bob-key adversary a view predictor        *)
 (*                              induces, reading the view through             *)
 (*                              alice_view_of_hop_tuple                       *)
-(* charlie_view_adversary ==                                                  *)
-(*                              the Charlie-key counterpart of                *)
+(*    charlie_view_adversary == the Charlie-key counterpart of                *)
 (*                              bob_view_adversary                            *)
 (*  alice_view_of_hop_tupleE == Alice's complete view is a deterministic     *)
 (*                              function of the hopping tuple, so the bound   *)
@@ -296,11 +294,6 @@ Variables (v1 u1 u2 u3 : plain AHE).
    pattern. *)
 Hypothesis u3_unit : u3 \is a GRing.unit.
 
-(* The relay public key each hop challenges at.  Selecting the party here
-   rather than at every use keeps one hop tied to one key, which is what makes
-   the two advantage terms of the ladder separately attributable. *)
-Definition bob_pkey : pub_key AHE := pkey_of_party Bob.
-Definition charlie_pkey : pub_key AHE := pkey_of_party Charlie.
 Let u3_inj : injective (fun v : plain AHE => u3 * v) := mulrI u3_unit.
 
 Let card_plain_gt0 : (0 < #|plain AHE|)%N.
@@ -315,6 +308,14 @@ Let card_renc_pair :
   #|((Renc * Renc)%type : finType)|
     = (index_renc.+1 * index_renc.+1)%N.-1.+1.
 Proof. by rewrite card_prod card_renc. Qed.
+
+(* The key hop 0 challenges at.  Selecting the party once, here, keeps one hop
+   tied to one key, which is what lets the ladder's two advantage terms be
+   attributed separately. *)
+Definition bob_pkey : pub_key AHE := pkey_of_party Bob.
+
+(* The key hop 1 challenges at, the Charlie-key counterpart of bob_pkey. *)
+Definition charlie_pkey : pub_key AHE := pkey_of_party Charlie.
 
 Local Notation enc_fdist :=
   (enc_fdist (R:=R) (AHE:=AHE) card_renc rand_of_renc).
@@ -432,7 +433,6 @@ Proof. exact: Pr_fdistmap_bool. Qed.
 Definition AliceRealTuple :
     {RV alice_sample_fdist -> dsdp_alice_hop_tupleT} :=
   AliceHopTuple 0.
-
 
 Let card_sample : #|dsdp_alice_sampleT| = #|dsdp_alice_sampleT|.-1.+1.
 Proof. exact: fdist_card_prednK alice_sample_fdist. Qed.
