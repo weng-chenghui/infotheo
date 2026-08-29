@@ -378,9 +378,13 @@ Definition indcpa_fdist_epsilon (pk : pub_key AHE)
    et al., ACM TOPLAS 45(3) Article 15, 2023, section 2.3 gives the
    polynomial-time hypothesis as an informal reading of a concrete bound,
    outside every mechanized statement, and its Coq development defines no
-   cost notion at all.  FCF instead states its efficiency predicate
-   admissible_oc, in WC_PolyTime.v, over families of OracleComp terms, so
-   there the classified object is a program rather than a function.
+   cost notion at all.  Its developers record the same boundary in source:
+   "It would also be nice to formalise Claim 10.3 (p. 186), but its argument
+   depends on the adversary only having polynomial time, and how to formulate
+   that is unclear" (SSProve commit c6d7d4bc,
+   theories/Crypt/examples/PRFMAC.v:6-8).  FCF instead states its efficiency
+   predicate admissible_oc, in WC_PolyTime.v, over families of OracleComp
+   terms, so there the classified object is a program rather than a function.
    The class may be empty, and a bound gated by an empty class holds
    vacuously.  The class must also leave something out whenever the scheme is
    correct and #|plain AHE| > 1: an adversary holding the matching private key
