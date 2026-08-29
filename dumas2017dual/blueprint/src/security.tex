@@ -27,9 +27,12 @@ by a two-hop ladder over one explicit Infotheo distribution, and the output and
 relay channels are bounded information-theoretically by conditional entropy and
 fiber-counting.
 
-Every $\varepsilon$ in this blueprint is the real-or-zero advantage of a
+Every $\varepsilon$ in the hop ladder is the real-or-zero advantage of a
 reduction constructed in the same file as the bound that names it, so the
-computational leg carries no cryptographic assumption as an axiom.
+computational leg carries no cryptographic assumption as an axiom. Chapter
+\ref{ch:adversary_class} adds the one posited quantity, the advantage an
+adversary-class assumption assigns to its class, and shows what forces such an
+assumption to restrict its class.
 
 \part{Foundations}
 
@@ -570,6 +573,148 @@ carries the three bounds above to the executed protocol.
   tuple. The equalities hold for all weights.
   \[ \HH(V_2 \mid \mathrm{AliceTrace}) = \HH(V_2 \mid \hoptuple{0})
        = \HH(V_2 \mid \mathrm{AliceView}) \]
+\end{theorem}
+
+\chapter{Gating the bound on an adversary class}
+\label{ch:adversary_class}
+
+The bounds above quantify over every predictor and every distinguisher, and
+price each hop by the advantage of one reduction. This chapter adds the two
+notions a computational reading of such a bound needs, an asymptotic one and an
+adversary class, and records what forces the class to leave something out.
+
+\begin{definition}[Negligibility of a family]
+  \label{def:negligible_fun}
+  \rocq{infotheo.dumas2017dual.dsdp.fdist_hopping.indcpa_game.negligible_fun}
+  \rocqok
+  A function of the security parameter is negligible when it eventually falls
+  below every inverse polynomial.
+  \[ \mathrm{negl}(f) \iff \forall c,\ \exists N,\ \forall n > N,\
+       f(n) < n^{-c} \]
+  Every bound in this blueprint is stated at one fixed instance, where an
+  asymptotic notion has nothing to measure. This is the shape a family of
+  instances must have for a bound of that form to vanish faster than every
+  inverse polynomial.
+\end{definition}
+
+\begin{definition}[An adversary class and the advantage it gates]
+  \label{def:indcpa_assumption}
+  \rocq{infotheo.dumas2017dual.dsdp.fdist_hopping.indcpa_game.indcpa_epsilon_assumption}
+  \rocqok
+  \uses{def:indcpa_fdist_epsilon}
+  An assumption $\mathcal{A}$ is a Boolean classifier on single-query
+  real-or-zero adversaries, one advantage $\varepsilon_{\mathcal{A}}$, and the
+  assertion that every classified adversary stays below it at every key in the
+  image of the public-key map.
+  \[ \mathcal{A} = \Big(\mathrm{adm},\ \varepsilon_{\mathcal{A}},\
+       \forall dk,\ \forall D,\ \mathrm{adm}(D) \Rightarrow
+       \epsror{\pk(dk)}{D} \le \varepsilon_{\mathcal{A}}\Big) \]
+  The classifier is extensional. Functional extensionality is in scope and an
+  adversary is a record of functions, so two adversaries with the same state
+  law, challenge plaintext and decision are one term and receive one Boolean.
+  Running time is a property of a syntax the record does not carry.
+\end{definition}
+
+\begin{theorem}[The trace bound gated on a class]
+  \label{thm:alice_guess_admissible}
+  \rocq{infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_trace_link.alice_trace_guess_pr,
+       infotheo.dumas2017dual.dsdp.dsdp_main.dsdp_alice_guess_fdist_trace_V2_admissible_le,
+       infotheo.dumas2017dual.dsdp.dsdp_main.dsdp_alice_guess_fdist_trace_V2_admissible_pq_le}
+  \rocqok
+  \uses{thm:alice_trace_bounds,def:indcpa_assumption}
+  When both reduction adversaries of a trace predictor $g$ are admissible for
+  $\mathcal{A}$, and $u_3$ is a unit of the plaintext ring, $g$ matches Bob's
+  input with probability at most $1/m$ plus twice the assumed advantage; the
+  composite form writes $m$ as $pq$.
+  \[ \Pr[\,g(\mathrm{AliceTrace}) = V_2\,]
+       \le \tfrac{1}{m} + 2\,\varepsilon_{\mathcal{A}} \]
+  Three currencies meet here. The term $1/m$ is information-theoretic and
+  unconditional, the residue of the leaked output along the solution fiber. The
+  term $2\varepsilon_{\mathcal{A}}$ is conditional on $\mathcal{A}$, and prices
+  the two ciphertext replacements at the advantage $\mathcal{A}$ posits rather
+  than at their own values. The two admissibility premises are conditional on
+  the class, and are assumed rather than proved.
+\end{theorem}
+
+\begin{lemma}[The gated bound is negligible as a family]
+  \label{lem:negligible_guess_bound}
+  \rocq{infotheo.dumas2017dual.dsdp.fdist_hopping.indcpa_game.negligible_fun_guess_bound}
+  \rocqok
+  \uses{def:negligible_fun,thm:alice_guess_admissible}
+  The arithmetic shape of the gated bound is negligible whenever both of its
+  summand families are.
+  \[ \mathrm{negl}(k \mapsto \iota_k) \wedge \mathrm{negl}(k \mapsto \eta_k)
+     \implies \mathrm{negl}\big(k \mapsto \iota_k + (\eta_k + \eta_k)\big) \]
+  Both arguments are families of reals. A family of DSDP instances would carry
+  a scheme, three key pairs and four weights per security parameter, making the
+  bound a dependent family rather than an inequality between two real
+  sequences.
+\end{lemma}
+
+\begin{definition}[The decrypting predictor]
+  \label{def:trace_decryptor}
+  \rocq{infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_trace_link.bob_trace_decrypt_predictor,
+       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_trace_link.alice_trace_decode_V2E}
+  \rocqok
+  \uses{def:alice_trace}
+  The predictor $\delta$ reads Bob's ciphertext off slot $3$ of Alice's trace
+  and decrypts it with Bob's private key. Correctness of decryption makes Bob's
+  input a function of the trace.
+  \[ \delta(t) = \Dec(dk_B,\, t_3),\qquad V_2 = \delta \circ \mathrm{AliceTrace} \]
+  It holds a private key, so it lies outside the attack model the hop ladder
+  prices, which grants the public keys alone.
+\end{definition}
+
+\begin{theorem}[The class cannot admit every adversary]
+  \label{thm:decrypt_lower_bound}
+  \rocq{infotheo.dumas2017dual.dsdp.dsdp_main.bob_trace_guess_epsilon_decrypt_ge,
+       infotheo.dumas2017dual.dsdp.dsdp_main.bob_charlie_trace_guess_epsilon_decrypt_ge}
+  \rocqok
+  \uses{def:trace_decryptor,thm:alice_guess_real,lem:guess_all_zero}
+  With $u_3$ a unit of the plaintext ring, the hop-$0$ advantage the decrypting
+  predictor buys is at least $1 - 1/m$, and so is the sum of its two hop
+  advantages.
+  \[ 1 - \tfrac{1}{m} \le \epsror{\pk_B}{\hopred{0}{D_\delta}},\qquad
+     1 - \tfrac{1}{m} \le \epshopsum{D_\delta} \]
+  At the real bit the challenge ciphertext decrypts to Bob's input and $\delta$
+  is right always; at the zero bit it decrypts to zero and $\delta$ is right
+  only on the fiber the leaked output leaves, of mass at most $1/m$. An
+  assumption admitting every adversary is therefore forced to posit
+  $2\varepsilon_{\mathcal{A}} \ge 1 - 1/m$, so the premises of
+  Theorem~\ref{thm:alice_guess_admissible} are what make that bound say
+  anything.
+\end{theorem}
+
+\begin{theorem}[The trace determines Bob's input]
+  \label{thm:centropy_trace_eq0}
+  \rocq{infotheo.dumas2017dual.dsdp.dsdp_main.centropy_V2_AliceTrace_eq0}
+  \rocqok
+  \uses{def:trace_decryptor,thm:centropy_trace_tuple}
+  Conditioning on Alice's executed trace leaves no uncertainty about Bob's
+  input.
+  \[ \HH(V_2 \mid \mathrm{AliceTrace}) = 0 \]
+  With Theorem~\ref{thm:centropy_trace_tuple} this transports to her hop-$0$
+  tuple and to her full view, so the Shannon restatement of the headline is
+  degenerate at the real observation. What carries content there are the
+  guessing bounds, which quantify over predictors holding the public keys
+  alone; conditional entropy quantifies over nothing and so charges $\delta$ as
+  well.
+\end{theorem}
+
+\begin{theorem}[Where the Shannon statement is not degenerate]
+  \label{thm:centropy_endpoints}
+  \rocq{infotheo.dumas2017dual.dsdp.dsdp_main.centropy_V2_Sout_logm,
+       infotheo.dumas2017dual.dsdp.dsdp_main.centropy_V2_all_zero_logm}
+  \rocqok
+  \uses{thm:dsdp_centropy_uniform,def:alice_hop_ladder}
+  With $u_3$ a unit of the plaintext ring, conditioning on the leaked output
+  alone and conditioning on Alice's all-zero tuple each leave $\log m$ bits of
+  uncertainty about Bob's input, which is what it carries unconditioned.
+  \[ \HH(V_2 \mid S) = \HH(V_2 \mid \hoptuple{2}) = \log m \]
+  At the all-zero endpoint both ciphertext slots encrypt zero, so the leaked
+  output is the only channel from $V_2$ into the tuple. This and the $1/m$ term
+  of Lemma~\ref{lem:guess_all_zero} descend from one fact, the conditional
+  uniformity of $V_2$ given the output; neither is derived from the other.
 \end{theorem}
 
 \chapter{Tightness: the degenerate query}
