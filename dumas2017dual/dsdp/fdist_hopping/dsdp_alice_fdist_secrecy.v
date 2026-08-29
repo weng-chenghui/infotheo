@@ -125,6 +125,8 @@ Require Export indcpa_game.
 (*        alice_sample_fdist == samples those values uniformly and            *)
 (*                              independently                                 *)
 (*                    V2, V3 == Bob's and Charlie's honest inputs             *)
+(*    bob_pkey, charlie_pkey == the two relay public keys selected from the   *)
+(*                              party key table                               *)
 (*                    R2, R3 == the masks Alice adds to her two combines      *)
 (*                Rho2, Rho3 == the encryption coins for the ciphertexts      *)
 (*                              Alice receives from Bob and Charlie           *)
@@ -140,6 +142,8 @@ Require Export indcpa_game.
 (*          alice_hop_jointT == adds the honest inputs so a test can compare  *)
 (*                              a prediction with the true input              *)
 (*           AliceHopTuple i == Alice's core information in experiment i      *)
+(*            AliceRealTuple == Alice's hopping tuple at hop 0, where both    *)
+(*                              ciphertext slots are the real encryptions     *)
 (*   alice_hop_joint_fdist i == the distribution given to a test at hop i     *)
 (* alice_hop_game_success i D == the probability that D accepts at hop i      *)
 (*   alice_hop_game_successE == expresses that probability as the event that  *)
@@ -183,6 +187,12 @@ Require Export indcpa_game.
 (*                              recovers Bob's input                          *)
 (* alice_predictor_unpredictability predict == the negative logarithm of      *)
 (*                              the predictor's success probability           *)
+(*         bob_guess_epsilon == the advantage against Bob's key that one      *)
+(*                              predictor buys, the price of the hop-0        *)
+(*                              replacement                                   *)
+(* charlie_guess_epsilon ==                                                   *)
+(*                              the Charlie-key counterpart, the price of the *)
+(*                              hop-1 replacement                             *)
 (*             fdistmap_prod == applying separate functions to independent   *)
 (*                              factors preserves their product form         *)
 (*            fdistmap_prodr == changing only the second factor leaves the   *)
@@ -213,8 +223,17 @@ Require Export indcpa_game.
 (*                              key                                           *)
 (*            AliceRecvPlain == the plaintext Alice obtains in her final     *)
 (*                              receive step                                  *)
+(*               alice_viewT == the carrier of Alice's complete view: the     *)
+(*                              hopping tuple beside the values derived from  *)
+(*                              it                                            *)
 (*                 AliceView == the hopping tuple and the values derived      *)
 (*                              from it                                       *)
+(*        bob_view_adversary == the Bob-key adversary a view predictor        *)
+(*                              induces, reading the view through             *)
+(*                              alice_view_of_hop_tuple                       *)
+(* charlie_view_adversary ==                                                  *)
+(*                              the Charlie-key counterpart of                *)
+(*                              bob_view_adversary                            *)
 (*  alice_view_of_hop_tupleE == Alice's complete view is a deterministic     *)
 (*                              function of the hopping tuple, so the bound   *)
 (*                              transfers without another error term         *)
@@ -755,8 +774,8 @@ by rewrite reduction_challenge_successE indcpa_fdist_success_realE.
 Qed.
 
 (* D's acceptance probability on the view whose Bob slot encrypts zero, hop 1,
-   equals the zero-bit success probability of v2_challenge_adversary D against Bob's
-   key. *)
+   equals the zero-bit success probability of v2_challenge_adversary D against
+   Bob's key. *)
 Lemma hop0_zero_challengeE (D : distinguisher alice_hop_jointT) :
   alice_hop_game_success 1 D
     = indcpa_fdist_success_zero bob_pkey (v2_challenge_adversary D).
@@ -770,8 +789,8 @@ by rewrite reduction_challenge_successE indcpa_fdist_success_zeroE.
 Qed.
 
 (* The gap D shows between hop 0 and hop 1 equals the advantage of
-   v2_challenge_adversary D against Bob's key.  Zeroing Bob's slot costs exactly one
-   IND-CPA advantage. *)
+   v2_challenge_adversary D against Bob's key.  Zeroing Bob's slot costs
+   exactly one IND-CPA advantage. *)
 Lemma hop0_advantageE (D : distinguisher alice_hop_jointT) :
   `| alice_hop_game_success 0 D - alice_hop_game_success 1 D |
   = indcpa_fdist_epsilon bob_pkey (v2_challenge_adversary D).
@@ -780,8 +799,9 @@ by rewrite /indcpa_fdist_epsilon hop0_real_challengeE hop0_zero_challengeE.
 Qed.
 
 (* D's acceptance probability at hop 1 equals the real-bit success probability
-   of v3_challenge_adversary D against Charlie's key.  Hop 1 is the zero side for Bob's
-   key and the real side for Charlie's, which is what chains the two hops. *)
+   of v3_challenge_adversary D against Charlie's key.  Hop 1 is the zero side
+   for Bob's key and the real side for Charlie's, which is what chains the two
+   hops. *)
 Lemma hop1_real_challengeE (D : distinguisher alice_hop_jointT) :
   alice_hop_game_success 1 D
     = indcpa_fdist_success_real charlie_pkey (v3_challenge_adversary D).
@@ -1067,8 +1087,8 @@ Definition charlie_guess_epsilon
   indcpa_fdist_epsilon charlie_pkey
     (v3_challenge_adversary (guess_test predict)).
 
-(* The negative logarithm of the probability that g recovers Bob's input
-   from Alice's real hopping tuple.
+(* The negative logarithm of the probability that the predictor recovers
+   Bob's input from Alice's real hopping tuple.
    Naming: after [Hunp_leak_S] of the sdistr axis (dsdp_guess_fiber.v),
    with the fixed predictor explicit. *)
 Definition alice_predictor_unpredictability

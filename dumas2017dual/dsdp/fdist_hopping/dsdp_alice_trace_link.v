@@ -448,7 +448,6 @@ Definition trace_data_of_di_data (x : di_data DI) : dsdp_trace_dataT :=
   | inr _ => inr tt
   end.
 
-(* The decryption the three programs perform on receive. *)
 (* Alice's executed-trace carrier: the fifteen-round bounded sequence of
    encoded trace data. *)
 Definition dsdp_traceT : finType := (15.-bseq dsdp_trace_dataT)%type.
@@ -458,6 +457,7 @@ Definition dsdp_traceT : finType := (15.-bseq dsdp_trace_dataT)%type.
 Definition trace_jointT : finType :=
   (plain AHE * plain AHE * dsdp_traceT)%type.
 
+(* The decryption the three programs perform on receive. *)
 Let decode : di_priv_keyT DI -> di_cipherT DI -> option (di_msgT DI) :=
   @dec AHE.
 
@@ -720,10 +720,10 @@ Definition charlie_trace_guess_epsilon
   indcpa_fdist_epsilon (pkey_of_dk Charlie)
     (charlie_trace_adversary (guess_test predict)).
 
-(* The negative logarithm of the probability that g recovers Bob's input
-   from Alice's encoded executed trace.
+(* The negative logarithm of the probability that the predictor recovers
+   Bob's input from Alice's encoded executed trace.
    Naming: after [alice_predictor_unpredictability] of the hopping-tuple
-   level, with [trace] marking the observation g reads. *)
+   level, with [trace] marking the observation the predictor reads. *)
 Definition alice_trace_predictor_unpredictability
     (predict : predictor dsdp_traceT) : R :=
   - log

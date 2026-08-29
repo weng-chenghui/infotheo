@@ -227,7 +227,10 @@ Hypothesis joint_eq_input_n :
     `Pr[[%VarRV, CondRV] = (var, cond)] =
     `Pr[[%VarRV, InputRV] = (var, dsdp_proj_input_n cond)].
 
-(* The final relay's weight, read off the conditioning tuple. *)
+(* The final relay's weight, read off the conditioning tuple.  The two
+   hypotheses of dsdp_centropy_uniform_n pin it strictly between zero and
+   min(p, q), which makes it invertible modulo m, and that invertibility is
+   what leaves the relay inputs uniform given the view. *)
 Definition last_relay_weight (c : CondT_n) : msg :=
   (let '(_, _, u_rel, _) := c in u_rel) ord_max.
 
@@ -408,14 +411,41 @@ Variables (V1 V2 V3 U2 U3 R2 R3 : {RV P -> msg}).
 Variable Dk_b : {RV P -> Bob.-key Dec msg}.
 Variable Dk_c : {RV P -> Charlie.-key Dec msg}.
 
+(* Bob's input scaled by his protocol weight.  It reaches the aggregate only
+   through D2, where Alice's fresh pad R2 masks it. *)
 Definition VU2 : {RV P -> msg} := V2 \* U2.
+
+(* Charlie's input scaled by his protocol weight.  It reaches the aggregate
+   only through VU3R, where Charlie's own pad R3 masks it. *)
 Definition VU3 : {RV P -> msg} := V3 \* U3.
+
+(* Charlie's weighted input under his own one-time pad R3, the value Bob
+   forwards.  The pad is what leaves Bob's view independent of V3 in
+   bob_privacy_V3, so that secrecy is information-theoretic and holds whatever
+   the encryption scheme is worth. *)
 Definition VU3R : {RV P -> msg} := VU3 \+ R3.
+
+(* Bob's weighted input under Alice's fresh pad R2.  The pad is what leaves
+   Charlie's view independent of V2 in charlie_privacy_V2, again
+   information-theoretically. *)
 Definition D2 : {RV P -> msg} := VU2 \+ R2.
+
+(* The masked aggregate Charlie returns to Alice, carrying both relay inputs
+   each under its own pad. *)
 Definition D3 : {RV P -> msg} := VU3R \+ D2.
 
+(* Charlie's masked input encrypted under Charlie's key, the ciphertext Bob
+   forwards.  It sits in Bob's view as opaque data, and the R3 pad inside it
+   keeps V3 independent of that view on its own. *)
 Definition E_charlie_vur3 : {RV P -> Charlie.-enc msg} := E' Charlie `o VU3R.
+
+(* The masked Bob aggregate encrypted under Bob's own key.  Bob holds the
+   matching decryption key, and what he recovers is D2, already masked by
+   R2. *)
 Definition E_bob_d2 : {RV P -> Bob.-enc msg} := E' Bob `o D2.
+
+(* The full masked aggregate encrypted under Charlie's key, the message
+   Charlie returns to Alice. *)
 Definition E_charlie_d3 : {RV P -> Charlie.-enc msg} := E' Charlie `o D3.
 
 (* Bob's full real view: his key, his own input V2, the Charlie-ciphertext he
@@ -878,8 +908,6 @@ exact: (dsdp_alice_guess_fdist_V2_real_le card_renc rand_of_renc
           pkey_of_dk v1 u1 u2 u3_unit
           (predict \o dsdp_trace_of_hop_tuple)).
 Qed.
-
-
 
 Local Notation "'`H_unp^{' g '}'" :=
   (alice_trace_predictor_unpredictability g)
