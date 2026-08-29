@@ -120,9 +120,9 @@ Notation "'n(' w ')' " := (party_id_to_nat w).
 
 (* This section provides the basic party-labeled encryption types and operations
    used by the DSDP protocol proofs. This is an idealized model where
-   enc = (party * msg). Secrecy is now justified computationally via the IND-CPA
-   game of [dumas2017dual/dsdp/fdist_hopping/indcpa_game.v]. The IT-only
-   hypotheses [E_enc_unif] and [E_enc_inde] are retired.
+   enc = (party * msg). Secrecy is justified computationally, through the
+   IND-CPA game of [dumas2017dual/dsdp/fdist_hopping/indcpa_game.v]. The
+   IT-only hypotheses [E_enc_unif] and [E_enc_inde] are retired.
 
    For concrete encryption (Benaloh, Paillier), see sections below. *)
 
@@ -175,9 +175,10 @@ HB.instance Definition _ := [isNew for @party_key_v p k T].
 
 End party_key_def.
 
-(* The [.-key] postfix mirrors MathComp's [.-tuple] spelling, which that
-   library reserves for types indexed by a size.  Here the index is a party
-   tag and a key sort, so the type is labeled rather than sized. *)
+(* The [.-key] postfix is MathComp's indexed-by spelling, as in [pi.-group]
+   and in infotheo's own [R.-fdist T].  The two indices here are a party tag
+   and a key sort, so a value of [p.-key k T] is a key of sort k held by
+   party p, carrying a payload in T. *)
 Notation "p .-key k" := (party_key p k)
   (at level 2, format "p .-key k") : type_scope.
 
@@ -279,23 +280,23 @@ Variables (T : finType)(P : R.-fdist T).
 (* The IT-only hypotheses [E_enc_unif] and [E_enc_inde] used to live here.
    They postulated that fresh ciphertexts are uniform over the ciphertext
    space and independent of all other random variables. The second is unsound
-   for any correct encryption scheme, since a decryption oracle relates a
-   ciphertext to its plaintext, so both are retired. Secrecy of the
+   for any correct encryption scheme over more than one plaintext, since
+   decryption relates a ciphertext to its plaintext, so both are retired.
+   Secrecy of the
    DSDP protocol is justified computationally instead, through the IND-CPA
    game of [dumas2017dual/dsdp/fdist_hopping/indcpa_game.v]. The contraction
    lemma [E_enc_ce_contract] below takes an explicit independence hypothesis
    as input, so it remains usable wherever such an assumption is locally
    justified. *)
 
-(*
-  "Ciphertext conditioning contract":
-  if `E` is a fresh encryption value (uniform over `p.-enc B` and independent
-  from everything else), then conditioning on `E` does not change the
-  conditional entropy of `Z` given `X`.
-  The hypothesis `(forall x e, Pr[[X,E]=(x,e)] != 0)` is a technical condition
-  to make all the conditional probabilities `Pr[ Z=c | [X,E]=(x,e) ]` well-defined
-  in the cpr/centropy lemmas used below.
-*)
+(* Ciphertext conditioning contract: when the ciphertext E is independent of
+   the pair (X, Z), conditioning on E alongside X leaves the conditional
+   entropy of Z given X unchanged.
+   Independence is a hypothesis, not a property of encryption, and it is the
+   only one: neither uniformity of E nor non-vanishing of the conditioning
+   events is assumed.  Wherever a protocol can justify that independence
+   locally, this contracts the ciphertext out of a conditioner; where it
+   cannot, the ciphertext is charged for computationally instead. *)
 Lemma E_enc_ce_contract (A B C : finType) (p : party_id)
   (X : {RV P -> A})(E : {RV P -> p.-enc B})(Z : {RV P -> C})(n : nat):
   P |= [%X, Z] _|_ E ->
@@ -323,11 +324,12 @@ End enc_lemmas.
   An idealized IT interface would postulate that ciphertext random variables
   are uniform over the ciphertext type and independent of all other random
   variables. The second postulate is unsound for any correct encryption
-  scheme, since decryption relates the ciphertext to its plaintext, so this
-  development states secrecy computationally instead: each hop of the DSDP
-  corrupted-Alice argument is priced by [indcpa_fdist_epsilon] of a reduction
-  constructed there, defined in
-  [dumas2017dual/dsdp/fdist_hopping/indcpa_game.v]. The
+  scheme over more than one plaintext, since decryption relates the
+  ciphertext to its plaintext, so this development states secrecy
+  computationally instead. Each of the two hops of the DSDP corrupted-Alice
+  argument is priced by [indcpa_fdist_epsilon], the advantage defined in
+  [dumas2017dual/dsdp/fdist_hopping/indcpa_game.v], of a reduction adversary
+  built in [dumas2017dual/dsdp/fdist_hopping/dsdp_alice_fdist_secrecy.v]. The
   contraction lemma [E_enc_ce_contract] above takes its independence
   hypothesis explicitly and is usable wherever that hypothesis is locally
   justified.
@@ -337,11 +339,17 @@ End enc_lemmas.
   a Boolean classifier on adversaries, one epsilon, and the assumption that
   every classified adversary stays below it at every key built from a private
   key. The gate is what keeps the assumed epsilon small: an adversary
-  holding the matching private key decrypts the challenge, so a class
-  admitting every adversary forces its epsilon to 1 whenever the plaintext
-  space has more than one element. The
-  second is an instantiation of that record at a scheme, which
-  [dumas2017dual/dsdp/fdist_hopping/paillier_indcpa_instance.v] does for
-  Paillier, leaving the epsilon a parameter that a proof from decisional
-  composite residuosity would supply.
+  holding the matching private key and submitting a nonzero challenge
+  plaintext decrypts the challenge, so a class admitting every adversary is
+  forced to posit an epsilon of at least 1 whenever the plaintext space has
+  more than one element. The second is an instantiation of that record at a
+  scheme, which [dumas2017dual/dsdp/fdist_hopping/paillier_indcpa_instance.v]
+  does for Paillier, leaving the whole assumption a parameter that a proof
+  from decisional composite residuosity would supply.
+
+  Replacing the retired hypotheses does not make the resulting bounds purely
+  computational. The DSDP guessing bound sums an unconditional
+  information-theoretic term, the inverse plaintext-space cardinality left by
+  the leaked output, with the assumption-conditional advantage term; the two
+  DSDP files label the summands where they state them.
 *)
