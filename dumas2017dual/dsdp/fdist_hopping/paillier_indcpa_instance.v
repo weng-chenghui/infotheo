@@ -151,7 +151,7 @@ Local Notation alice_trace_guess_pr :=
    paillier_indcpa_assumption, and prices the two ciphertext replacements at
    Bob's key and at Charlie's; the two premises are conditional on the class,
    and assert membership of the two reduction adversaries without proving it.
-   Naming: extends [dsdp_alice_guess_fdist_trace_V2_admissible_pq_le] with
+   Naming: extends [alice_trace_guess_V2_admissible_pq_le] with
    the scheme in place of the [pq] variant token, keeping [admissible], which
    is what marks the bound class-conditional against the [real] sibling. *)
 Corollary dsdp_alice_guess_fdist_trace_V2_admissible_paillier_le
@@ -164,7 +164,7 @@ Corollary dsdp_alice_guess_fdist_trace_V2_admissible_paillier_le
     <= ((p%:R : R) * q%:R)^-1
        + 2 * indcpa_assumption_epsilon paillier_indcpa_assumption.
 Proof.
-exact: (dsdp_alice_guess_fdist_trace_V2_admissible_pq_le
+exact: (alice_trace_guess_V2_admissible_pq_le
           u3_unit w_rb2 card_plain_pq).
 Qed.
 

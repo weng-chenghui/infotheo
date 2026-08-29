@@ -28,14 +28,14 @@ Require Export indcpa_game.
 (* DSDP linear constraint. Every epsilon in this file is therefore the        *)
 (* defined advantage of an explicit reduction.                                *)
 (*                                                                            *)
-(* Headline results: dsdp_alice_guess_fdist_V2_real_le bounds the probability *)
+(* Headline results: alice_tuple_guess_V2_le bounds the probability *)
 (* that a predictor reading Alice's real view returns Bob's input;            *)
-(* dsdp_alice_unpredictability_fdist_ge is its negative-logarithm form;       *)
-(* dsdp_alice_predictor_unpredictability_fdist_ge restates that bound through *)
+(* alice_unpredictability_ge is its negative-logarithm form;       *)
+(* alice_predictor_unpredictability_ge restates that bound through *)
 (* the named quantity alice_predictor_unpredictability;                       *)
-(* dsdp_alice_sim_advantage_fdist_le bounds the gap between the real joint    *)
+(* alice_sim_advantage_le bounds the gap between the real joint    *)
 (* law and the ideal-world joint law built from dsdp_alice_simulator;         *)
-(* dsdp_alice_guess_fdist_view_le transfers the first bound to Alice's view.  *)
+(* alice_view_guess_V2_le transfers the first bound to Alice's view.  *)
 (*                                                                            *)
 (* ## Game vocabulary                                                         *)
 (*                                                                            *)
@@ -994,7 +994,7 @@ Qed.
    leaked output is exactly uniform.  Neither statement is derived from the
    other, and this entropy reading holds at this conditioner alone; at
    Alice's executed trace the same quantity is zero, which
-   centropy_V2_AliceTrace_eq0 of dsdp_alice_trace_link.v records.
+   centropy_V2_trace_eq0 of dsdp_alice_trace_link.v records.
    Naming: [logm] names the value the quantity takes, the logarithm of the
    plaintext-space cardinality, as [invm] names its reciprocal in
    [guess_all_zero_le_invm]. *)
@@ -1090,9 +1090,9 @@ Qed.
    hop reductions.  The first term is the information-theoretic residue of the
    leaked output along the DSDP solution fiber, and the two advantages are the
    price of zeroing Bob's and Charlie's ciphertext slots.
-   Naming: [fdist] marks the finite-distribution formulation, [V2_real] the
-   input bounded and the hop-0 tuple it is bounded at. *)
-Theorem dsdp_alice_guess_fdist_V2_real_le
+   Naming: [tuple] names the hop-0 conditioner, [V2] the input bounded, and
+   [le] the direction of the bound. *)
+Theorem alice_tuple_guess_V2_le
     (predict : predictor dsdp_alice_hop_tupleT) :
   Pr alice_sample_fdist [set t | (predict `o AliceRealTuple) t == V2 t]
     <= #|plain AHE|%:R^-1
@@ -1144,9 +1144,9 @@ Local Notation "'`H_unp^{' g '}'" :=
    small the correction term is small, and what remains is the value the left
    side would take if Alice were guessing uniformly at random over the
    plaintext space.
-   Naming: [fdist] marks the finite-distribution formulation, [ge] the
+   Naming: [unpredictability] marks the negative-logarithm form, [ge] the
    direction of the bound. *)
-Theorem dsdp_alice_unpredictability_fdist_ge
+Theorem alice_unpredictability_ge
     (predict : predictor dsdp_alice_hop_tupleT)
     (Hpos : 0 < Pr alice_sample_fdist
                   [set t | (predict `o AliceRealTuple) t == V2 t]) :
@@ -1165,15 +1165,15 @@ have Hnum_pos : (0 < 1 + #|plain AHE|%:R
              /indcpa_fdist_epsilon normr_ge0.
 rewrite lerNr opprB -logDiv // ler_log ?posrE ?divr_gt0 //.
 rewrite mulrDl mul1r mulrAC (divff (lt0r_neq0 Hcard_pos)) mul1r addrA.
-exact: dsdp_alice_guess_fdist_V2_real_le.
+exact: alice_tuple_guess_V2_le.
 Qed.
 
 (* The same bound stated through alice_predictor_unpredictability: the log of
    the plaintext-space cardinality minus the correction term in the two hop
    advantages lower-bounds the named unpredictability quantity.
-   Naming: after [dsdp_alice_unpredictability_fdist_ge], whose right-hand
+   Naming: after [alice_unpredictability_ge], whose right-hand
    side this theorem folds into the named quantity. *)
-Theorem dsdp_alice_predictor_unpredictability_fdist_ge
+Theorem alice_predictor_unpredictability_ge
     (predict : predictor dsdp_alice_hop_tupleT)
     (Hpos : 0 < Pr alice_sample_fdist
                   [set t | (predict `o AliceRealTuple) t == V2 t]) :
@@ -1182,7 +1182,7 @@ Theorem dsdp_alice_predictor_unpredictability_fdist_ge
                * (bob_guess_epsilon predict + charlie_guess_epsilon predict))
   <= `H_unp^{predict}.
 Proof.
-exact: dsdp_alice_unpredictability_fdist_ge.
+exact: alice_unpredictability_ge.
 Qed.
 
 (* The pushforward of a product distribution along a pair of coordinate maps is
@@ -1327,7 +1327,7 @@ Proof. by case=> [[[[m ra] c2] c3] s]. Qed.
    statement holds: both ciphertext slots encrypt zero, so the leaked output
    is the only channel from V2 into the view, and adjoining the spectator
    coordinates costs nothing.  At Alice's executed trace the same quantity is
-   zero instead, by centropy_V2_AliceTrace_eq0 of dsdp_alice_trace_link.v.
+   zero instead, by centropy_V2_trace_eq0 of dsdp_alice_trace_link.v.
    The guessing-side fact at this same endpoint is guess_all_zero_le_invm,
    which bounds every predictor's success by 1/#|plain AHE|.  The two are
    different quantities: this one averages the conditional entropy over the
@@ -1454,7 +1454,7 @@ Qed.
    Naming: [sim_advantage] rather than [advantage_sim] because the statement
    bounds a distinguishing gap between two laws rather than instantiating a
    simulation-advantage predicate. *)
-Theorem dsdp_alice_sim_advantage_fdist_le
+Theorem alice_sim_advantage_le
     (D : distinguisher alice_hop_jointT) :
   `| Pr (`p_ [% V2, V3, AliceRealTuple]) [set x | D x]
      - Pr alice_ideal_joint [set x | D x] |
@@ -1554,16 +1554,16 @@ Qed.
 (* A predictor reading Alice's view matches Bob's input with
    probability at most 1/#|plain AHE| plus the advantages of the two hop
    reductions.
-   Naming: [dsdp_alice_guess_fdist] as in the hopping-tuple headline, with
-   [view] naming the view read. *)
-Corollary dsdp_alice_guess_fdist_view_le
+   Naming: [guess_V2_le] as in the hopping-tuple headline
+   [alice_tuple_guess_V2_le], with [view] naming the observation read. *)
+Corollary alice_view_guess_V2_le
     (predict : predictor alice_viewT) :
   Pr alice_sample_fdist [set t | (predict `o AliceView) t == V2 t]
     <= #|plain AHE|%:R^-1
        + indcpa_fdist_epsilon bob_pkey (bob_view_adversary predict)
        + indcpa_fdist_epsilon charlie_pkey (charlie_view_adversary predict).
 Proof.
-by rewrite alice_view_of_hop_tupleE; exact: dsdp_alice_guess_fdist_V2_real_le.
+by rewrite alice_view_of_hop_tupleE; exact: alice_tuple_guess_V2_le.
 Qed.
 
 End dsdp_alice_fdist_secrecy.

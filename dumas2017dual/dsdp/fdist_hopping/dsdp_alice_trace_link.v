@@ -98,14 +98,14 @@ Require Import dsdp_alice_fdist_secrecy.
 (* charlie_trace_guess_epsilon predict ==                                     *)
 (*                              the Charlie-key counterpart of                *)
 (*                              bob_trace_guess_epsilon                       *)
-(* dsdp_alice_guess_fdist_trace_V2_real_le ==                                 *)
+(* alice_trace_guess_V2_le ==                                 *)
 (*                              bounds recovery of Bob's input from Alice's   *)
 (*                              trace by uniform guessing plus the costs of   *)
 (*                              the two ciphertext hops                       *)
 (* alice_trace_guess_pr predict ==                                            *)
 (*                              the probability that a trace predictor        *)
 (*                              returns Bob's input                           *)
-(* dsdp_alice_guess_fdist_trace_V2_admissible_le ==                           *)
+(* alice_trace_guess_V2_admissible_le ==                           *)
 (*                              charges both ciphertext hops to the single    *)
 (*                              epsilon of an adversary-class assumption,     *)
 (*                              under the premise that both reduction         *)
@@ -113,7 +113,7 @@ Require Import dsdp_alice_fdist_secrecy.
 (* alice_trace_predictor_unpredictability predict ==                          *)
 (*                              measures the difficulty of recovering Bob's   *)
 (*                              input from Alice's trace                      *)
-(* dsdp_alice_trace_predictor_unpredictability_fdist_ge ==                    *)
+(* alice_trace_predictor_unpredictability_ge ==                    *)
 (*                              turns the trace guessing bound into a lower   *)
 (*                              bound on that unpredictability                *)
 (* dsdp_alice_trace_simulator s ==                                            *)
@@ -121,7 +121,7 @@ Require Import dsdp_alice_fdist_secrecy.
 (*                              output                                        *)
 (*   alice_trace_ideal_joint == pairs the honest inputs with the ideal trace  *)
 (*                              generated from their leaked output            *)
-(* dsdp_alice_trace_sim_advantage_fdist_le ==                                 *)
+(* alice_trace_sim_advantage_le ==                                 *)
 (*                              bounds every Boolean test between the real    *)
 (*                              and ideal trace laws by the costs of the two  *)
 (*                              ciphertext hops                               *)
@@ -180,7 +180,7 @@ Require Import dsdp_alice_fdist_secrecy.
 (*                              decrypts it with Bob's private key            *)
 (*    alice_trace_decode_V2E == Bob's input is that decryption of Alice's     *)
 (*                              trace                                         *)
-(* centropy_V2_AliceTrace_eq0 ==                                              *)
+(* centropy_V2_trace_eq0 ==                                              *)
 (*                              conditioning on Alice's trace leaves no       *)
 (*                              uncertainty about Bob's input, so the Shannon *)
 (*                              reading of the real trace is degenerate       *)
@@ -276,7 +276,7 @@ Require Import dsdp_alice_fdist_secrecy.
 (* dsdp_alice_trace_predictor_unpredictability_fdist_ereal_pq_ge ==           *)
 (*                              states the zero-safe unpredictability bound   *)
 (*                              when the plaintext space has size p * q       *)
-(* dsdp_alice_guess_fdist_trace_V2_admissible_pq_le ==                        *)
+(* alice_trace_guess_V2_admissible_pq_le ==                        *)
 (*                              states the class-conditional guessing bound   *)
 (*                              when the plaintext space has size p * q       *)
 (* ```                                                                        *)
@@ -718,7 +718,7 @@ Definition charlie_trace_adversary (D : distinguisher trace_jointT) :=
    reductions.  The cardinality term is information-theoretic and the two
    advantages are the price of the two ciphertext replacements, one at Bob's
    key and one at Charlie's. *)
-Theorem dsdp_alice_guess_fdist_trace_V2_real_le
+Theorem alice_trace_guess_V2_le
     (predict : predictor dsdp_traceT) :
   Pr (alice_sample_fdist (R:=R) AHE card_renc)
      [set t | (predict `o AliceTrace) t == V2 t]
@@ -729,7 +729,7 @@ Theorem dsdp_alice_guess_fdist_trace_V2_real_le
            (charlie_trace_adversary (guess_test predict)).
 Proof.
 rewrite dsdp_trace_of_hop_tupleE.
-exact: (dsdp_alice_guess_fdist_V2_real_le card_renc rand_of_renc
+exact: (alice_tuple_guess_V2_le card_renc rand_of_renc
           pkey_of_dk v1 u1 u2 u3_unit
           (predict \o dsdp_trace_of_hop_tuple)).
 Qed.
@@ -767,10 +767,9 @@ Definition alice_trace_guess_pr (predict : predictor dsdp_traceT) : R :=
    choose a nonzero challenge plaintext; here the challenge plaintext is
    fixed by the protocol to be Bob's uniformly distributed input, and the
    zero branch still succeeds on a fiber of mass 1/#|plain AHE|.
-   Naming: extends [dsdp_alice_guess_fdist_trace_V2_real_le] with the
-   [admissible] variant token before [le]; kept long to preserve the family
-   grouping. *)
-Corollary dsdp_alice_guess_fdist_trace_V2_admissible_le
+   Naming: extends [alice_trace_guess_V2_le] with the
+   [admissible] variant token before [le]. *)
+Corollary alice_trace_guess_V2_admissible_le
     (A : indcpa_epsilon_assumption) (predict : predictor dsdp_traceT) :
   indcpa_admissible A (bob_trace_adversary (guess_test predict)) ->
   indcpa_admissible A (charlie_trace_adversary (guess_test predict)) ->
@@ -778,7 +777,7 @@ Corollary dsdp_alice_guess_fdist_trace_V2_admissible_le
     <= (#|plain AHE|%:R : R)^-1 + 2 * indcpa_assumption_epsilon A.
 Proof.
 move=> Hb Hc; rewrite /alice_trace_guess_pr.
-apply: le_trans (dsdp_alice_guess_fdist_trace_V2_real_le predict) _.
+apply: le_trans (alice_trace_guess_V2_le predict) _.
 rewrite mulr_natl mulr2n addrA.
 by rewrite lerD // ?lerD2l //; exact: indcpa_admissible_epsilon_le.
 Qed.
@@ -813,10 +812,10 @@ Local Notation "'`H_unp^{' g '}'" :=
 
 (* The predictor-specific unpredictability of Bob's input at Alice's executed
    trace is at least the negative-logarithm form of the trace guessing bound.
-   Naming: after [dsdp_alice_predictor_unpredictability_fdist_ge], the
+   Naming: after [alice_predictor_unpredictability_ge], the
    theorem name extending [alice_trace_predictor_unpredictability] as
    there. *)
-Theorem dsdp_alice_trace_predictor_unpredictability_fdist_ge
+Theorem alice_trace_predictor_unpredictability_ge
     (predict : predictor dsdp_traceT)
     (Hpos :
        0 < Pr (alice_sample_fdist (R:=R) AHE card_renc)
@@ -836,7 +835,7 @@ have Hnum_pos : (0 < 1 + #|plain AHE|%:R
 rewrite /alice_trace_predictor_unpredictability.
 rewrite lerNr opprB -logDiv // ler_log ?posrE ?divr_gt0 //.
 rewrite mulrDl mul1r mulrAC (divff (lt0r_neq0 Hcard_pos)) mul1r addrA.
-exact: dsdp_alice_guess_fdist_trace_V2_real_le.
+exact: alice_trace_guess_V2_le.
 Qed.
 
 (* The distribution obtained by mapping the hopping-tuple simulator through
@@ -881,13 +880,13 @@ Qed.
 
 (* A Boolean trace test separates the real and simulated joint laws by at most
    the two hop advantages of its lifted hopping-tuple test.
-   Naming: after [dsdp_alice_sim_advantage_fdist_le] with [alice_trace] as
+   Naming: after [alice_sim_advantage_le] with [alice_trace] as
    the object stem, as in
-   [dsdp_alice_trace_predictor_unpredictability_fdist_ge]; the transfer
-   corollaries [dsdp_alice_guess_fdist_view_le] and
-   [dsdp_alice_guess_fdist_trace_V2_real_le] keep the hop stem and append
-   the observation read after [fdist]. *)
-Theorem dsdp_alice_trace_sim_advantage_fdist_le
+   [alice_trace_predictor_unpredictability_ge]; the transfer
+   corollaries [alice_view_guess_V2_le] and
+   [alice_trace_guess_V2_le] keep the guessing stem and name
+   the observation read before [guess]. *)
+Theorem alice_trace_sim_advantage_le
     (D : distinguisher trace_jointT) :
   `| Pr (`p_ [% V2, V3, AliceTrace]) [set x | D x]
      - Pr alice_trace_ideal_joint [set x | D x] |
@@ -897,7 +896,7 @@ Proof.
 rewrite alice_trace_real_jointE alice_trace_ideal_jointE.
 rewrite -2!(Pr_fdistmap_bool D) 2!(fdistmap_comp D) 2!Pr_fdistmap_bool.
 rewrite /bob_trace_adversary /charlie_trace_adversary.
-exact: (dsdp_alice_sim_advantage_fdist_le card_renc rand_of_renc
+exact: (alice_sim_advantage_le card_renc rand_of_renc
           pkey_of_dk v1 u1 u2 u3 (D \o alice_trace_joint_of_hop_joint)).
 Qed.
 
@@ -1217,7 +1216,7 @@ Qed.
    the public keys alone; conditional entropy quantifies over nothing and so
    charges the decryptor as well.
    Naming: [eq0] states the value the quantity takes, after MathComp. *)
-Corollary centropy_V2_AliceTrace_eq0 : `H( V2 | AliceTrace ) = 0.
+Corollary centropy_V2_trace_eq0 : `H( V2 | AliceTrace ) = 0.
 Proof. by rewrite {1}alice_trace_decode_V2E centropy_RV_comp0. Qed.
 
 End dsdp_alice_trace_centropy.
@@ -1278,7 +1277,7 @@ Qed.
    1 - 1/#|plain AHE|.  Read against the guessing bound, this is the
    statement that the hop ladder's epsilons cannot all be small for every
    adversary: a class admitting the decryptor forces its own epsilon up, so
-   the class restriction in dsdp_alice_guess_fdist_trace_V2_admissible_le is
+   the class restriction in alice_trace_guess_V2_admissible_le is
    what makes that bound satisfiable rather than decoration.
    Naming: names the two epsilons summed, the predictor that realizes them,
    and the direction of the inequality. *)
@@ -1290,7 +1289,7 @@ Proof.
 (* The rewrite is confined to the left-hand side: 1 also occurs inside
    #|plain AHE|%:R on the right. *)
 rewrite lerBlDl addrA -[X in X <= _]decrypt_guess_prE.
-exact: (dsdp_alice_guess_fdist_trace_V2_real_le card_renc rand_of_renc
+exact: (alice_trace_guess_V2_le card_renc rand_of_renc
           v1 u1 u2 u3_unit dk_a dk_b dk_c w_rb2 w_rc2).
 Qed.
 
@@ -1301,7 +1300,7 @@ Qed.
    of mass at most 1/#|plain AHE|.  The Charlie-key term of the corollary
    above is therefore not needed: this proof consumes the hop-0 half of the
    ladder alone, never the composite two-hop bound
-   dsdp_alice_guess_fdist_trace_V2_real_le.
+   alice_trace_guess_V2_le.
    Naming: as above, with the single epsilon the bound charges. *)
 Corollary bob_trace_guess_epsilon_decrypt_ge :
   1 - (#|plain AHE|%:R : R)^-1
@@ -1361,9 +1360,9 @@ Qed.
    decrypt_reduction_admissibleF is the complementary half: it shows the
    missing premises cannot be supplied for this predictor.  Together they
    place the bound's truth in the gate.
-   Naming: extends the [dsdp_alice_guess_fdist_trace_V2_admissible] family
+   Naming: extends the [alice_trace_guess_V2_admissible] family
    stem with the premises dropped and the relation proved. *)
-Lemma dsdp_alice_guess_fdist_trace_V2_admissible_premise_free_lt
+Lemma alice_trace_guess_V2_admissible_premise_free_lt
     (A : indcpa_epsilon_assumption) :
   2 * indcpa_assumption_epsilon A < 1 - (#|plain AHE|%:R : R)^-1 ->
   (#|plain AHE|%:R : R)^-1 + 2 * indcpa_assumption_epsilon A
@@ -1444,7 +1443,7 @@ Qed.
 
 (* The simulator-advantage bound with its ideal side written through the
    named experiment.
-   Naming: extends [dsdp_alice_trace_sim_advantage_fdist_le] with the [test]
+   Naming: extends [alice_trace_sim_advantage_le] with the [test]
    variant token before [le]; kept long to preserve the family grouping. *)
 Corollary dsdp_alice_trace_sim_advantage_fdist_test_le
     (D : distinguisher trace_jointT) :
@@ -1454,7 +1453,7 @@ Corollary dsdp_alice_trace_sim_advantage_fdist_test_le
      + indcpa_fdist_epsilon (pkey_of_dk Charlie) (charlie_trace_adversary D).
 Proof.
 rewrite alice_trace_ideal_testE Pr_fdistmap_bool.
-exact: (dsdp_alice_trace_sim_advantage_fdist_le card_renc rand_of_renc
+exact: (alice_trace_sim_advantage_le card_renc rand_of_renc
           v1 u1 u2 u3 dk_a dk_b dk_c w_rb2 w_rc2 D).
 Qed.
 
@@ -1571,7 +1570,7 @@ Local Notation charlie_trace_adversary_at w :=
 (* The real executed-trace joint law with a uniformly sampled re-encryption
    coin.
    Naming: after the per-coin joint law of
-   [dsdp_alice_trace_sim_advantage_fdist_le], with [avg] marking the
+   [alice_trace_sim_advantage_le], with [avg] marking the
    sampled coin. *)
 Definition alice_trace_real_joint_avg :
     R.-fdist (plain AHE * plain AHE * 15.-bseq dsdp_trace_dataT) :=
@@ -1585,7 +1584,7 @@ Definition alice_trace_ideal_joint_avg :
 
 (* The averaged real-versus-ideal gap is at most the average of the two
    per-coin hop advantages.
-   Naming: extends [dsdp_alice_trace_sim_advantage_fdist_le] with the [avg]
+   Naming: extends [alice_trace_sim_advantage_le] with the [avg]
    variant token before [le]; kept long to preserve the family grouping. *)
 Theorem dsdp_alice_trace_sim_advantage_fdist_avg_le
     (D : distinguisher (trace_jointT AHE)) :
@@ -1598,7 +1597,7 @@ Theorem dsdp_alice_trace_sim_advantage_fdist_avg_le
             (charlie_trace_adversary_at w D)).
 Proof.
 apply: fdist_mixture_advantage_le => w.
-exact: (dsdp_alice_trace_sim_advantage_fdist_le card_renc rand_of_renc
+exact: (alice_trace_sim_advantage_le card_renc rand_of_renc
           v1 u1 u2 u3 dk_a dk_b dk_c w_rb2 w D).
 Qed.
 
@@ -1683,7 +1682,7 @@ Qed.
 (* The existing lower bound, lifted to the zero-safe order with no
    positivity premise: the zero branch is infinite, and the positive branch
    consumes the guessing bound through
-   [dsdp_alice_trace_predictor_unpredictability_fdist_ge].
+   [alice_trace_predictor_unpredictability_ge].
    Naming: extends that theorem name with the [ereal] variant token before
    [ge]; kept long to preserve the family grouping. *)
 Theorem dsdp_alice_trace_predictor_unpredictability_fdist_ereal_ge predict :
@@ -1698,7 +1697,7 @@ rewrite /alice_trace_predictor_unpredictability_ereal.
 case: (eqVneq (trace_guess_pr predict) 0) => [_|Hneq]; first exact: leey.
 have Hpos : 0 < trace_guess_pr predict by rewrite lt0r Hneq /=; exact: Pr_ge0.
 rewrite lee_fin.
-exact: (dsdp_alice_trace_predictor_unpredictability_fdist_ge u3_unit Hpos).
+exact: (alice_trace_predictor_unpredictability_ge u3_unit Hpos).
 Qed.
 
 End dsdp_alice_trace_unpredictability_ereal_sec.
@@ -1781,7 +1780,7 @@ Qed.
 
 (* The simulator-advantage bound for a Boolean test reading the raw
    interpreter trace, via composition with the fixed-key decoder.
-   Naming: extends [dsdp_alice_trace_sim_advantage_fdist_le] with [raw]
+   Naming: extends [alice_trace_sim_advantage_le] with [raw]
    marking the observation read; kept long to preserve the family
    grouping. *)
 Corollary dsdp_alice_raw_trace_sim_advantage_fdist_le
@@ -1805,7 +1804,7 @@ have <- : Pr (`p_ [% V2, V3, AliceTrace]) [set x | D x]
              [set t | D_raw (V2 t, V3 t, alice_raw_trace t)].
   rewrite /dist_of_RV Pr_fdistmap_preim; apply: eq_bigl => t; rewrite !inE.
   by rewrite -(alice_raw_trace_decodeE (pub_of_priv dk_a)).
-exact: (dsdp_alice_trace_sim_advantage_fdist_le card_renc rand_of_renc
+exact: (alice_trace_sim_advantage_le card_renc rand_of_renc
           v1 u1 u2 u3 dk_a dk_b dk_c w_rb2 w_rc2 D).
 Qed.
 
@@ -1823,7 +1822,7 @@ Local Notation Genc g_raw :=
    Her trace carries no public-key mark, so decoding it under her own key
    returns the run's own trace, and a predictor reading either format
    recovers Bob's input on exactly the same samples.
-   Naming: extends [dsdp_alice_guess_fdist_trace_V2_real_le] with [raw]
+   Naming: extends [alice_trace_guess_V2_le] with [raw]
    marking the observation read; kept long to preserve the family
    grouping. *)
 Corollary dsdp_alice_guess_fdist_raw_trace_V2_real_le
@@ -1843,7 +1842,7 @@ Proof.
 have -> : [set t | g_raw (alice_raw_trace t) == V2 t]
         = [set t | (Genc g_raw `o AliceTrace) t == V2 t].
   by apply/setP => t; rewrite !inE /comp_RV alice_raw_trace_decodeE.
-exact: (dsdp_alice_guess_fdist_trace_V2_real_le card_renc rand_of_renc
+exact: (alice_trace_guess_V2_le card_renc rand_of_renc
           v1 u1 u2 u3_unit dk_a dk_b dk_c w_rb2 w_rc2 (Genc g_raw)).
 Qed.
 
@@ -1999,7 +1998,7 @@ Proof. by rewrite card_plain_pq natrM. Qed.
 
 (* The trace guessing bound with its endpoint written at the composite
    modulus p * q, the modulus of the Paillier-style instantiations.
-   Naming: extends [dsdp_alice_guess_fdist_trace_V2_real_le] with the [pq]
+   Naming: extends [alice_trace_guess_V2_le] with the [pq]
    variant token before [le]; kept long to preserve the family grouping. *)
 Corollary dsdp_alice_guess_fdist_trace_V2_real_pq_le
     (predict : predictor dsdp_traceT) :
@@ -2008,19 +2007,18 @@ Corollary dsdp_alice_guess_fdist_trace_V2_real_pq_le
      + charlie_trace_guess_epsilon predict.
 Proof.
 rewrite inv_pq_cardE.
-exact: (dsdp_alice_guess_fdist_trace_V2_real_le card_renc rand_of_renc
+exact: (alice_trace_guess_V2_le card_renc rand_of_renc
           v1 u1 u2 u3_unit dk_a dk_b dk_c w_rb2 w_rc2 predict).
 Qed.
 
 (* The class-conditional trace guessing bound with its unconditional term
    written at the composite modulus p * q, the modulus of the Paillier-style
    instantiations.  The three currencies are the ones of
-   dsdp_alice_guess_fdist_trace_V2_admissible_le, with 1/(p * q) naming the
+   alice_trace_guess_V2_admissible_le, with 1/(p * q) naming the
    information-theoretic term at the instance a concrete scheme supplies.
-   Naming: extends [dsdp_alice_guess_fdist_trace_V2_admissible_le] with the
-   [pq] variant token before [le]; kept long to preserve the family
-   grouping. *)
-Corollary dsdp_alice_guess_fdist_trace_V2_admissible_pq_le
+   Naming: extends [alice_trace_guess_V2_admissible_le] with the
+   [pq] variant token before [le]. *)
+Corollary alice_trace_guess_V2_admissible_pq_le
     (A : indcpa_epsilon_assumption) (predict : predictor dsdp_traceT) :
   indcpa_admissible A (bob_trace_adversary (guess_test predict)) ->
   indcpa_admissible A (charlie_trace_adversary (guess_test predict)) ->
@@ -2028,7 +2026,7 @@ Corollary dsdp_alice_guess_fdist_trace_V2_admissible_pq_le
     <= ((p%:R : R) * q%:R)^-1 + 2 * indcpa_assumption_epsilon A.
 Proof.
 rewrite inv_pq_cardE.
-exact: (dsdp_alice_guess_fdist_trace_V2_admissible_le u3_unit w_rb2).
+exact: (alice_trace_guess_V2_admissible_le u3_unit w_rb2).
 Qed.
 
 (* The zero-safe unpredictability bound with both cardinalities written at

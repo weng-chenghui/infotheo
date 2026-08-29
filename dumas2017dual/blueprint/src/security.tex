@@ -377,7 +377,7 @@ $V_3$.
 
 \begin{theorem}[Guessing Bob's input from Alice's real tuple]
   \label{thm:alice_guess_real}
-  \rocq{infotheo.dumas2017dual.dsdp.dsdp_main.dsdp_alice_guess_fdist_V2_real_le}
+  \rocq{infotheo.dumas2017dual.dsdp.dsdp_main.alice_tuple_guess_V2_le}
   \rocqok
   \uses{lem:alice_view_advantage,lem:guess_all_zero,def:distinguisher_of_guess}
   When $u_3$ is a unit of the plaintext ring, every predictor reading Alice's
@@ -396,8 +396,8 @@ $V_3$.
 \begin{theorem}[Unpredictability entropy]
   \label{thm:alice_unpredictability}
   \rocq{infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.alice_predictor_unpredictability,
-       infotheo.dumas2017dual.dsdp.dsdp_main.dsdp_alice_unpredictability_fdist_ge,
-       infotheo.dumas2017dual.dsdp.dsdp_main.dsdp_alice_predictor_unpredictability_fdist_ge}
+       infotheo.dumas2017dual.dsdp.dsdp_main.alice_unpredictability_ge,
+       infotheo.dumas2017dual.dsdp.dsdp_main.alice_predictor_unpredictability_ge}
   \rocqok
   \uses{thm:alice_guess_real}
   For a predictor whose success probability on Alice's real tuple is positive,
@@ -416,7 +416,7 @@ $V_3$.
        infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.AliceView,
        infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.alice_view_of_hop_tuple,
        infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.alice_view_of_hop_tupleE,
-       infotheo.dumas2017dual.dsdp.dsdp_main.dsdp_alice_guess_fdist_view_le}
+       infotheo.dumas2017dual.dsdp.dsdp_main.alice_view_guess_V2_le}
   \rocqok
   \uses{thm:alice_guess_real,def:party_views}
   Alice's four real observables are her hop-$0$ tuple, her two outgoing combines,
@@ -472,7 +472,7 @@ functionality on the other, rather than quantified over all input vectors.
 
 \begin{theorem}[Bounded simulation security]
   \label{thm:alice_simulation_secure}
-  \rocq{infotheo.dumas2017dual.dsdp.dsdp_main.dsdp_alice_sim_advantage_fdist_le}
+  \rocq{infotheo.dumas2017dual.dsdp.dsdp_main.alice_sim_advantage_le}
   \rocqok
   \uses{def:party_views,lem:alice_view_advantage,lem:simulator_factorization}
   For all weights $u_1, u_2, u_3$, every distinguisher separates the real joint
@@ -543,12 +543,12 @@ carries the three bounds above to the executed protocol.
 
 \begin{theorem}[The three bounds at the trace]
   \label{thm:alice_trace_bounds}
-  \rocq{infotheo.dumas2017dual.dsdp.dsdp_main.dsdp_alice_guess_fdist_trace_V2_real_le,
+  \rocq{infotheo.dumas2017dual.dsdp.dsdp_main.alice_trace_guess_V2_le,
        infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_trace_link.alice_trace_predictor_unpredictability,
-       infotheo.dumas2017dual.dsdp.dsdp_main.dsdp_alice_trace_predictor_unpredictability_fdist_ge,
+       infotheo.dumas2017dual.dsdp.dsdp_main.alice_trace_predictor_unpredictability_ge,
        infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_trace_link.dsdp_alice_trace_simulator,
        infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_trace_link.alice_trace_ideal_joint,
-       infotheo.dumas2017dual.dsdp.dsdp_main.dsdp_alice_trace_sim_advantage_fdist_le}
+       infotheo.dumas2017dual.dsdp.dsdp_main.alice_trace_sim_advantage_le}
   \rocqok
   \uses{lem:trace_of_hop_tuple,thm:alice_guess_real,thm:alice_unpredictability,thm:alice_simulation_secure}
   With $u_3$ a unit of the plaintext ring, every predictor reading Alice's
@@ -564,8 +564,8 @@ carries the three bounds above to the executed protocol.
   \rocq{infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_trace_link.dsdp_alice_trace_tupleT,
        infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_trace_link.AliceTraceTuple,
        infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_trace_link.alice_trace_tupleE,
-       infotheo.dumas2017dual.dsdp.dsdp_main.centropy_AliceTrace_AliceRealTuple,
-       infotheo.dumas2017dual.dsdp.dsdp_main.centropy_AliceView_AliceRealTuple}
+       infotheo.dumas2017dual.dsdp.dsdp_main.centropy_V2_trace_tupleE,
+       infotheo.dumas2017dual.dsdp.dsdp_main.centropy_V2_view_tupleE}
   \rocqok
   \uses{lem:trace_of_hop_tuple,cor:alice_guess_view}
   Conditioning on Alice's executed trace, and conditioning on her full view,
@@ -638,8 +638,8 @@ adversary class, and records what forces the class to leave something out.
 \begin{theorem}[The trace bound gated on a class]
   \label{thm:alice_guess_admissible}
   \rocq{infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_trace_link.alice_trace_guess_pr,
-       infotheo.dumas2017dual.dsdp.dsdp_main.dsdp_alice_guess_fdist_trace_V2_admissible_le,
-       infotheo.dumas2017dual.dsdp.dsdp_main.dsdp_alice_guess_fdist_trace_V2_admissible_pq_le}
+       infotheo.dumas2017dual.dsdp.dsdp_main.alice_trace_guess_V2_admissible_le,
+       infotheo.dumas2017dual.dsdp.dsdp_main.alice_trace_guess_V2_admissible_pq_le}
   \rocqok
   \uses{thm:alice_trace_bounds,def:indcpa_assumption}
   When both reduction adversaries of a trace predictor $g$ are admissible for
@@ -740,7 +740,7 @@ adversary class, and records what forces the class to leave something out.
 
 \begin{corollary}[The premise-free bound is false]
   \label{cor:admissible_premise_free}
-  \rocq{infotheo.dumas2017dual.dsdp.dsdp_main.dsdp_alice_guess_fdist_trace_V2_admissible_premise_free_lt}
+  \rocq{infotheo.dumas2017dual.dsdp.dsdp_main.alice_trace_guess_V2_admissible_premise_free_lt}
   \rocqok
   \uses{thm:alice_guess_admissible,def:trace_decryptor,def:indcpa_assumption}
   For every assumption whose promised advantage satisfies
@@ -757,7 +757,7 @@ adversary class, and records what forces the class to leave something out.
 
 \begin{theorem}[The trace determines Bob's input]
   \label{thm:centropy_trace_eq0}
-  \rocq{infotheo.dumas2017dual.dsdp.dsdp_main.centropy_V2_AliceTrace_eq0}
+  \rocq{infotheo.dumas2017dual.dsdp.dsdp_main.centropy_V2_trace_eq0}
   \rocqok
   \uses{def:trace_decryptor,thm:centropy_trace_tuple}
   Conditioning on Alice's executed trace leaves no uncertainty about Bob's
@@ -796,8 +796,8 @@ reads a relay's input outright. These theorems are the boundary of the
 corrupted-Alice case, not a separate malicious threat model.
 
 \begin{theorem}[A degenerate query leaks Bob's input]
-  \label{thm:US_compromised_leaks_V2}
-  \rocq{infotheo.dumas2017dual.dsdp.dsdp_main.US_compromised_leaks_V2}
+  \label{thm:US_e1_centropy_V2_eq0}
+  \rocq{infotheo.dumas2017dual.dsdp.dsdp_main.US_e1_centropy_V2_eq0}
   \rocqok
   \uses{def:party_views,thm:dsdp_centropy_uniform}
   Fixing her query to the first coordinate ($U_2 = 1$, $U_3 = 0$), Alice reads
@@ -807,16 +807,16 @@ corrupted-Alice case, not a separate malicious threat model.
   \[ U_2 = 1,\ U_3 = 0 \;\Longrightarrow\; \HH(V_2 \mid \mathrm{AliceView}) = 0 \]
 \end{theorem}
 \begin{proof}
-  \uses{thm:US_n_compromised_leaks_secret}
+  \uses{thm:US_e1_centropy_VS0_eq0}
   \rocqok
   The 3-party instance of the N-party leakage theorem at $n=1$
-  (Theorem~\ref{thm:US_n_compromised_leaks_secret}), with the query the first
+  (Theorem~\ref{thm:US_e1_centropy_VS0_eq0}), with the query the first
   coordinate vector.
 \end{proof}
 
 \begin{theorem}[N-party degenerate-query leakage]
-  \label{thm:US_n_compromised_leaks_secret}
-  \rocq{infotheo.dumas2017dual.dsdp.dsdp_main.US_n_compromised_leaks_secret}
+  \label{thm:US_e1_centropy_VS0_eq0}
+  \rocq{infotheo.dumas2017dual.dsdp.dsdp_main.US_e1_centropy_VS0_eq0}
   \rocqok
   With her query fixed to the first coordinate vector, and the protocol output a
   function of her view, relay party one's input becomes a deterministic image of

@@ -19,10 +19,10 @@
    Information-theoretic (counting axis, unconditional)
      dsdp_centropy_uniform : H(V2,V3 | view) = log m  [3-party]
      dsdp_centropy_uniform_n : H(V | view) = log (m^n)  [N-party]
-     US_n_compromised_leaks_secret : corrupted Alice leaks a relay's input,
+     US_e1_centropy_VS0_eq0 : corrupted Alice leaks a relay's input,
        H(VS_0 | View) = 0  [N-party]
-     US_compromised_leaks_V2 : corrupted Alice leaks Bob's V2, H(V2 | View) = 0
-       [3-party instance of US_n_compromised_leaks_secret]
+     US_e1_centropy_V2_eq0 : corrupted Alice leaks Bob's V2, H(V2 | View) = 0
+       [3-party instance of US_e1_centropy_VS0_eq0]
      bob_privacy_V1 / charlie_privacy_V1 : H(V1 | RelayView) = log m > 0:
        a corrupted relay learns nothing about Alice's input V1  [3-party]
      bob_privacy_V3 : H(V3 | BobView) = log m > 0: a corrupted Bob learns
@@ -31,29 +31,29 @@
        learns nothing about Bob's input V2 (R2 one-time-pad masking)  [3-party]
 
    Corrupted Alice at her hopping tuple (fdist axis, IND-CPA-conditional)
-     dsdp_alice_guess_fdist_V2_real_le : a predictor of Bob's input succeeds
+     alice_tuple_guess_V2_le : a predictor of Bob's input succeeds
        with probability at most 1/#|plain| plus the two hop advantages
-     dsdp_alice_unpredictability_fdist_ge /
-     dsdp_alice_predictor_unpredictability_fdist_ge : the same bound in
+     alice_unpredictability_ge /
+     alice_predictor_unpredictability_ge : the same bound in
        negative-logarithm form, log #|plain| less a correction in the two
        advantages
-     dsdp_alice_sim_advantage_fdist_le : every Boolean test separates the real
+     alice_sim_advantage_le : every Boolean test separates the real
        joint law from the simulator's by at most the two hop advantages
-     dsdp_alice_guess_fdist_view_le : the guessing bound at Alice's whole
+     alice_view_guess_V2_le : the guessing bound at Alice's whole
        view, her two outgoing combines and her final decrypt included
 
    The same bounds at the executed fifteen-round piSMC trace
-     dsdp_alice_guess_fdist_trace_V2_real_le
-     dsdp_alice_trace_predictor_unpredictability_fdist_ge
-     dsdp_alice_trace_sim_advantage_fdist_le
-     centropy_AliceTrace_AliceRealTuple /
-     centropy_AliceView_AliceRealTuple : conditioning on the trace, on the
+     alice_trace_guess_V2_le
+     alice_trace_predictor_unpredictability_ge
+     alice_trace_sim_advantage_le
+     centropy_V2_trace_tupleE /
+     centropy_V2_view_tupleE : conditioning on the trace, on the
        view, or on the tuple leaves the same uncertainty about Bob's input,
        so the hop ladder prices all three observations at once
 
    The same bounds gated on an adversary class
-     dsdp_alice_guess_fdist_trace_V2_admissible_le /
-     dsdp_alice_guess_fdist_trace_V2_admissible_pq_le : both hop advantages
+     alice_trace_guess_V2_admissible_le /
+     alice_trace_guess_V2_admissible_pq_le : both hop advantages
        charged to the single epsilon of an indcpa_epsilon_assumption, under
        the assumed premise that the two reduction adversaries are in its
        class
@@ -64,7 +64,7 @@
        to every adversary
 
    Shannon uncertainty about Bob's input, by conditioner
-     centropy_V2_AliceTrace_eq0 : zero at her executed trace, which the trace
+     centropy_V2_trace_eq0 : zero at her executed trace, which the trace
        determines
      centropy_V2_Sout_logm / centropy_V2_all_zero_logm : log #|plain| bits at
        the leaked output and at the all-zero endpoint of the hop ladder *)
@@ -305,11 +305,11 @@ Local Notation msg := 'Z_m.
 
 Variable n_relay : nat.
 
-(* US_n_compromised_leaks_secret — a corrupted Alice fixing her query to e_1
+(* US_e1_centropy_VS0_eq0 — a corrupted Alice fixing her query to e_1
    makes relay party 1's input VS_0 a function of her view: the protocol output
    is in the view and equals VS_0, so its conditional entropy collapses to zero.
    N-party generic; the 3-party result is the n_relay = 1 instance. *)
-Theorem US_n_compromised_leaks_secret {A : finType}
+Theorem US_e1_centropy_VS0_eq0 {A : finType}
     (View : {RV P -> A}) (g : A -> msg)
     (US VS : {RV P -> {ffun 'I_n_relay.+1 -> msg}})
     (US_e1 : US = fun _ => @ConstUS_n p_minus_2 q_minus_2 n_relay)
@@ -328,7 +328,7 @@ Qed.
 End dsdp_malicious_n.
 
 Section dsdp_malicious_3party.
-(* 3-party instance of US_n_compromised_leaks_secret at n_relay = 1 *)
+(* 3-party instance of US_e1_centropy_VS0_eq0 at n_relay = 1 *)
 Local Set Default Goal Selector "1".
 Local Open Scope reals_ext_scope.
 Local Open Scope proba_scope.
@@ -355,7 +355,7 @@ Let D2 : {RV P -> msg} := V2 \* U2 \+ R2.
 Let D3 : {RV P -> msg} := V3 \* U3 \+ R3 \+ D2.
 
 (* The protocol output Alice computes: she strips both of her masks from the
-   aggregate and adds her own weighted input.  US_compromised_leaks_V2 is the
+   aggregate and adds her own weighted input.  US_e1_centropy_V2_eq0 is the
    statement that at the query e_1 this value is V2 itself. *)
 Let S  : {RV P -> msg} := D3 \- R2 \- R3 \+ U1 \* V1.
 
@@ -370,17 +370,17 @@ Let E_bob_v2     : {RV P -> Bob.-enc msg}     := E' Bob `o V2.
 
 (* Alice's full real view in the dot-product model: her key, the output S, her
    own inputs and masks, and the three ciphertext hops. V2 appears only inside
-   S and the Bob hop.  The view is the honest one; what US_compromised_leaks_V2
+   S and the Bob hop.  The view is the honest one; what US_e1_centropy_V2_eq0
    makes malicious is the query US, not this observation.
    Naming: the [Dotp] token marks the algebraic model, after [Dotp_n_rv],
    separating this view from the AliceView of the hopping axis. *)
 Definition AliceDotpView :=
   [% Dk_a, S, V1, U1, U2, U3, R2, R3, E_alice_d3, E_charlie_v3, E_bob_v2].
 
-(* US_compromised_leaks_V2 — a malicious Alice fixing her query to e_1
+(* US_e1_centropy_V2_eq0 — a malicious Alice fixing her query to e_1
    (U2 = 1, U3 = 0) reads Bob's private input V2 off her view, ciphertext hops
    included; its conditional entropy collapses to zero. 3-party instance. *)
-Theorem US_compromised_leaks_V2 :
+Theorem US_e1_centropy_V2_eq0 :
   U2 = (fun _ => 1) -> U3 = (fun _ => 0) ->
   `H( V2 | AliceDotpView ) = 0.
 Proof.
@@ -406,7 +406,7 @@ have Hout : @Dotp_n_rv R T P p_minus_2 q_minus_2 1 US VS
     by apply: boolp.funext => t /=; rewrite HU2 HU3 /=; ring.
   rewrite HUS_e1 /Dotp_n_rv.
   by apply: boolp.funext => t /=; rewrite dotp_n_e1 /VS ffunE eqxx.
-have := US_n_compromised_leaks_secret (View := AliceDotpView) (g := g)
+have := US_e1_centropy_VS0_eq0 (View := AliceDotpView) (g := g)
           (US := US) (VS := VS) HUS_e1 Hout.
 by rewrite HVS0.
 Qed.
@@ -759,7 +759,7 @@ Proof. by apply/card_gt0P; exists 0; rewrite inE. Qed.
    advantages of the two hop reductions.  The first summand is
    information-theoretic and unconditional; the two others are
    assumption-conditional, one against Bob's key and one against Charlie's. *)
-Theorem dsdp_alice_guess_fdist_V2_real_le
+Theorem alice_tuple_guess_V2_le
     (predict : predictor hop_tupleT) :
   Pr P [set t | (predict `o AliceRealTuple) t == V2 t]
     <= #|plain AHE|%:R^-1
@@ -788,7 +788,7 @@ Local Notation charlie_guess_epsilon :=
    less a correction in the two hop advantages.  As the advantages go to
    zero the correction vanishes and the bound becomes the value uniform
    guessing would give. *)
-Theorem dsdp_alice_unpredictability_fdist_ge (predict : predictor hop_tupleT)
+Theorem alice_unpredictability_ge (predict : predictor hop_tupleT)
     (Hpos : 0 < Pr P [set t | (predict `o AliceRealTuple) t == V2 t]) :
   log (#|plain AHE|%:R)
     - log (1 + #|plain AHE|%:R
@@ -804,7 +804,7 @@ have Hnum_pos : (0 < 1 + #|plain AHE|%:R
              /indcpa_fdist_epsilon normr_ge0.
 rewrite lerNr opprB -logDiv // ler_log ?posrE ?divr_gt0 //.
 rewrite mulrDl mul1r mulrAC (divff (lt0r_neq0 Hcard_pos)) mul1r addrA.
-exact: dsdp_alice_guess_fdist_V2_real_le.
+exact: alice_tuple_guess_V2_le.
 Qed.
 
 Local Notation "'`H_unp^{' g '}'" :=
@@ -813,7 +813,7 @@ Local Notation "'`H_unp^{' g '}'" :=
    format "'`H_unp^{' g '}'").
 
 (* The same bound read through the named unpredictability quantity. *)
-Theorem dsdp_alice_predictor_unpredictability_fdist_ge
+Theorem alice_predictor_unpredictability_ge
     (predict : predictor hop_tupleT)
     (Hpos : 0 < Pr P [set t | (predict `o AliceRealTuple) t == V2 t]) :
   log (#|plain AHE|%:R)
@@ -821,14 +821,14 @@ Theorem dsdp_alice_predictor_unpredictability_fdist_ge
                * (bob_guess_epsilon predict + charlie_guess_epsilon predict))
   <= `H_unp^{predict}.
 Proof.
-exact: dsdp_alice_unpredictability_fdist_ge.
+exact: alice_unpredictability_ge.
 Qed.
 
 (* Any Boolean test separates the real joint law of the honest inputs and
    Alice's hopping tuple from the ideal law built by the simulator by at most
    the sum of the two IND-CPA advantages.  Real world is hop 0, ideal world
    is hop 2, and the ladder prices the distance one hop at a time. *)
-Theorem dsdp_alice_sim_advantage_fdist_le
+Theorem alice_sim_advantage_le
     (D : distinguisher alice_hop_jointT) :
   `| Pr (`p_ [% V2, V3, AliceRealTuple]) [set x | D x]
      - Pr alice_ideal_joint [set x | D x] |
@@ -843,14 +843,14 @@ Qed.
 (* Alice's whole view obeys the hopping-tuple bound: her two outgoing
    combines and the plaintext of her final decrypt-on-receive are
    deterministic functions of the tuple, so reading them adds no term. *)
-Corollary dsdp_alice_guess_fdist_view_le
+Corollary alice_view_guess_V2_le
     (predict : predictor alice_viewT) :
   Pr P [set t | (predict `o AliceView) t == V2 t]
     <= #|plain AHE|%:R^-1
        + indcpa_fdist_epsilon bob_pkey (bob_view_adversary predict)
        + indcpa_fdist_epsilon charlie_pkey (charlie_view_adversary predict).
 Proof.
-by rewrite alice_view_of_hop_tupleE; exact: dsdp_alice_guess_fdist_V2_real_le.
+by rewrite alice_view_of_hop_tupleE; exact: alice_tuple_guess_V2_le.
 Qed.
 
 (* Conditioned on the leaked output alone, Bob's input still carries
@@ -863,7 +863,7 @@ Qed.
    leaked output is exactly uniform.  Neither statement is derived from the
    other, and this entropy reading holds at this conditioner alone; at
    Alice's executed trace the same quantity is zero, as
-   centropy_V2_AliceTrace_eq0 below records.
+   centropy_V2_trace_eq0 below records.
    Naming: [logm] names the value the quantity takes, the logarithm of the
    plaintext-space cardinality, as [invm] names its reciprocal in
    [guess_all_zero_le_invm]. *)
@@ -888,7 +888,7 @@ Qed.
    statement holds: both ciphertext slots encrypt zero, so the leaked output
    is the only channel from V2 into the view, and adjoining the spectator
    coordinates costs nothing.  At Alice's executed trace the same quantity is
-   zero instead, as centropy_V2_AliceTrace_eq0 below records.
+   zero instead, as centropy_V2_trace_eq0 below records.
    The guessing-side fact at this same endpoint is guess_all_zero_le_invm,
    which bounds every predictor's success by 1/#|plain AHE|.  The two are
    different quantities: this one averages the conditional entropy over the
@@ -999,7 +999,7 @@ Local Notation alice_trace_decode_V2E :=
    input no better than one reading her hopping tuple: the trace is a
    deterministic function of the tuple, so the tuple bound transfers with no
    extra term. *)
-Theorem dsdp_alice_guess_fdist_trace_V2_real_le
+Theorem alice_trace_guess_V2_le
     (predict : predictor dsdp_traceT) :
   Pr P [set t | (predict `o AliceTrace) t == V2 t]
     <= (#|plain AHE|%:R : R)^-1
@@ -1009,7 +1009,7 @@ Theorem dsdp_alice_guess_fdist_trace_V2_real_le
            (charlie_trace_adversary (guess_test predict)).
 Proof.
 rewrite dsdp_trace_of_hop_tupleE.
-exact: (dsdp_alice_guess_fdist_V2_real_le card_renc rand_of_renc
+exact: (alice_tuple_guess_V2_le card_renc rand_of_renc
           pkey_of_dk v1 u1 u2 u3_unit
           (predict \o dsdp_trace_of_hop_tuple)).
 Qed.
@@ -1026,10 +1026,9 @@ Qed.
    classifier admits every adversary is forced to posit an epsilon of at
    least 1 - 1/#|plain AHE|, which is why the class restriction is what makes
    this bound satisfiable.
-   Naming: extends [dsdp_alice_guess_fdist_trace_V2_real_le] with the
-   [admissible] variant token before [le]; kept long to preserve the family
-   grouping. *)
-Corollary dsdp_alice_guess_fdist_trace_V2_admissible_le
+   Naming: extends [alice_trace_guess_V2_le] with the
+   [admissible] variant token before [le]. *)
+Corollary alice_trace_guess_V2_admissible_le
     (A : indcpa_epsilon_assumption) (predict : predictor dsdp_traceT) :
   indcpa_admissible A (bob_trace_adversary (guess_test predict)) ->
   indcpa_admissible A (charlie_trace_adversary (guess_test predict)) ->
@@ -1037,7 +1036,7 @@ Corollary dsdp_alice_guess_fdist_trace_V2_admissible_le
     <= (#|plain AHE|%:R : R)^-1 + 2 * indcpa_assumption_epsilon A.
 Proof.
 move=> Hb Hc.
-apply: le_trans (dsdp_alice_guess_fdist_trace_V2_real_le predict) _.
+apply: le_trans (alice_trace_guess_V2_le predict) _.
 rewrite mulr_natl mulr2n addrA.
 by rewrite lerD // ?lerD2l //; exact: indcpa_admissible_epsilon_le.
 Qed.
@@ -1066,7 +1065,7 @@ Proof.
 (* The rewrite is confined to the left-hand side: 1 also occurs inside
    #|plain AHE|%:R on the right. *)
 rewrite lerBlDl addrA -[X in X <= _]decrypt_guess_prE.
-exact: dsdp_alice_guess_fdist_trace_V2_real_le.
+exact: alice_trace_guess_V2_le.
 Qed.
 
 (* Bob's key alone already carries that whole gap.  The decryptor separates
@@ -1076,7 +1075,7 @@ Qed.
    of mass at most 1/#|plain AHE|.  The Charlie-key term of the corollary
    above is therefore not needed: this consumes the hop-0 half of the ladder
    alone, never the composite two-hop bound
-   dsdp_alice_guess_fdist_trace_V2_real_le.
+   alice_trace_guess_V2_le.
    Naming: as above, with the single epsilon the bound charges. *)
 Corollary bob_trace_guess_epsilon_decrypt_ge :
   1 - (#|plain AHE|%:R : R)^-1
@@ -1133,9 +1132,9 @@ Qed.
    decrypt_reduction_admissibleF is the complementary half: it shows the
    missing premises cannot be supplied for this predictor.  Together they
    place the bound's truth in the gate.
-   Naming: extends the [dsdp_alice_guess_fdist_trace_V2_admissible] family
+   Naming: extends the [alice_trace_guess_V2_admissible] family
    stem with the premises dropped and the relation proved. *)
-Lemma dsdp_alice_guess_fdist_trace_V2_admissible_premise_free_lt
+Lemma alice_trace_guess_V2_admissible_premise_free_lt
     (A : indcpa_epsilon_assumption) :
   2 * indcpa_assumption_epsilon A < 1 - (#|plain AHE|%:R : R)^-1 ->
   (#|plain AHE|%:R : R)^-1 + 2 * indcpa_assumption_epsilon A
@@ -1153,8 +1152,10 @@ Local Notation "'`H_unp^{' g '}'" :=
    format "'`H_unp^{' g '}'").
 
 (* The unpredictability of Bob's input at Alice's executed trace obeys the
-   same lower bound as at her hopping tuple. *)
-Theorem dsdp_alice_trace_predictor_unpredictability_fdist_ge
+   same lower bound as at her hopping tuple.
+   Naming: after [alice_predictor_unpredictability_ge], with [trace] naming
+   the observation read. *)
+Theorem alice_trace_predictor_unpredictability_ge
     (predict : predictor dsdp_traceT)
     (Hpos : 0 < Pr P [set t | (predict `o AliceTrace) t == V2 t]) :
   log (#|plain AHE|%:R)
@@ -1172,7 +1173,7 @@ have Hnum_pos : (0 < 1 + #|plain AHE|%:R
 rewrite /alice_trace_predictor_unpredictability.
 rewrite lerNr opprB -logDiv // ler_log ?posrE ?divr_gt0 //.
 rewrite mulrDl mul1r mulrAC (divff (lt0r_neq0 Hcard_pos)) mul1r addrA.
-exact: dsdp_alice_guess_fdist_trace_V2_real_le.
+exact: alice_trace_guess_V2_le.
 Qed.
 
 (* The two honest inputs and Alice's encoded trace obtained from a joint
@@ -1202,8 +1203,10 @@ Qed.
 
 (* A Boolean test on Alice's executed trace separates the real trace law from
    the simulated one by at most the two hop advantages of the hopping-tuple
-   test it lifts to. *)
-Theorem dsdp_alice_trace_sim_advantage_fdist_le
+   test it lifts to.
+   Naming: after [alice_sim_advantage_le], with [alice_trace] as the object
+   stem. *)
+Theorem alice_trace_sim_advantage_le
     (D : distinguisher trace_jointT) :
   `| Pr (`p_ [% V2, V3, AliceTrace]) [set x | D x]
      - Pr alice_trace_ideal_joint [set x | D x] |
@@ -1213,7 +1216,7 @@ Proof.
 rewrite alice_trace_real_jointE alice_trace_ideal_jointE.
 rewrite -2!(Pr_fdistmap_bool D) 2!(fdistmap_comp D) 2!Pr_fdistmap_bool.
 rewrite /bob_trace_adversary /charlie_trace_adversary.
-exact: (dsdp_alice_sim_advantage_fdist_le card_renc rand_of_renc
+exact: (alice_sim_advantage_le card_renc rand_of_renc
           pkey_of_dk v1 u1 u2 u3 (D \o alice_trace_joint_of_hop_joint)).
 Qed.
 
@@ -1262,7 +1265,7 @@ Local Notation alice_trace_decode_V2E :=
    determine each other once the two combine coins, which are independent of
    both, are set aside.  The trace is therefore no better an observation than
    the tuple the hop ladder prices. *)
-Theorem centropy_AliceTrace_AliceRealTuple :
+Theorem centropy_V2_trace_tupleE :
   `H( V2 | AliceTrace ) = `H( V2 | AliceRealTuple ).
 Proof.
 rewrite /AliceRealTuple alice_trace_tupleE
@@ -1278,7 +1281,7 @@ Qed.
 (* Conditioning on Alice's whole view leaves the same uncertainty about Bob's
    input as conditioning on her hopping tuple: each is a deterministic
    function of the other, so entropy contraction applies both ways. *)
-Corollary centropy_AliceView_AliceRealTuple :
+Corollary centropy_V2_view_tupleE :
   `H( V2 | AliceView ) = `H( V2 | AliceRealTuple ).
 Proof.
 rewrite /AliceRealTuple.
@@ -1296,7 +1299,7 @@ Qed.
    that carry content are the guessing bounds, which quantify over predictors
    holding the public keys alone; conditional entropy quantifies over nothing
    and so charges the decryptor as well. *)
-Corollary centropy_V2_AliceTrace_eq0 : `H( V2 | AliceTrace ) = 0.
+Corollary centropy_V2_trace_eq0 : `H( V2 | AliceTrace ) = 0.
 Proof. by rewrite {1}alice_trace_decode_V2E centropy_RV_comp0. Qed.
 
 End dsdp_alice_trace_uncertainty.
@@ -1344,14 +1347,13 @@ Proof. by rewrite card_plain_pq natrM. Qed.
 (* The class-conditional trace guessing bound with its unconditional term
    written at the composite modulus p * q, the modulus of the Paillier-style
    instantiations.  The currencies are those of
-   dsdp_alice_guess_fdist_trace_V2_admissible_le: the right-hand side sums
+   alice_trace_guess_V2_admissible_le: the right-hand side sums
    1/(p * q), which is unconditional, and twice the assumption's epsilon,
    which is conditional on that assumption; the two premises are conditional
    on its class and assumed rather than proved.
-   Naming: extends [dsdp_alice_guess_fdist_trace_V2_admissible_le] with the
-   [pq] variant token before [le]; kept long to preserve the family
-   grouping. *)
-Corollary dsdp_alice_guess_fdist_trace_V2_admissible_pq_le
+   Naming: extends [alice_trace_guess_V2_admissible_le] with the
+   [pq] variant token before [le]. *)
+Corollary alice_trace_guess_V2_admissible_pq_le
     (A : indcpa_epsilon_assumption) (predict : predictor dsdp_traceT) :
   indcpa_admissible A (bob_trace_adversary (guess_test predict)) ->
   indcpa_admissible A (charlie_trace_adversary (guess_test predict)) ->
@@ -1359,7 +1361,7 @@ Corollary dsdp_alice_guess_fdist_trace_V2_admissible_pq_le
     <= ((p%:R : R) * q%:R)^-1 + 2 * indcpa_assumption_epsilon A.
 Proof.
 rewrite inv_pq_cardE.
-exact: (dsdp_alice_guess_fdist_trace_V2_admissible_le u3_unit w_rb2).
+exact: (alice_trace_guess_V2_admissible_le u3_unit w_rb2).
 Qed.
 
 End dsdp_alice_trace_pq_secrecy.

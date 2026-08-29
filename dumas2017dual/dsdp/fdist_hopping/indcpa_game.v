@@ -221,13 +221,13 @@ Qed.
    negligible as a family: an inverse plaintext cardinality plus two copies of
    one advantage, evaluated at each security parameter, is negligible whenever
    both families are.  That shape is the right-hand side of
-   dsdp_alice_guess_fdist_trace_V2_admissible_le, which reads
+   alice_trace_guess_V2_admissible_le, which reads
    1/#|plain AHE| + 2 * indcpa_assumption_epsilon: one assumption advantage
    stands there for both per-key advantages, which is why a single eps appears
    twice here.  Read at that bound, a modulus family whose inverse cardinality
    is negligible together with an assumption family whose advantage is
    negligible make Alice's chance of recovering Bob's input negligible.
-   The unconditional bound dsdp_alice_guess_fdist_trace_V2_real_le carries two
+   The unconditional bound alice_trace_guess_V2_le carries two
    distinct per-key advantages instead, and a family of that bound is priced
    by two applications of negligible_fun_add over two epsilon families.
    The two arguments are families of reals.  A family of DSDP instances would
