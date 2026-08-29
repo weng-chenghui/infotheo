@@ -706,7 +706,7 @@ adversary class, and records what forces the class to leave something out.
 
 \begin{corollary}[A small-epsilon assumption must reject the decryptor]
   \label{cor:decrypt_not_admissible}
-  \rocq{infotheo.dumas2017dual.dsdp.dsdp_main.decrypt_reduction_not_admissible}
+  \rocq{infotheo.dumas2017dual.dsdp.dsdp_main.decrypt_reduction_admissibleF}
   \rocqok
   \uses{thm:decrypt_lower_bound,def:indcpa_assumption}
   With $u_3$ a unit of the plaintext ring, if $\mathcal{A}$ posits an advantage
@@ -718,21 +718,21 @@ adversary class, and records what forces the class to leave something out.
   assumption's own bound decides membership, and decides against it.
 \end{corollary}
 
-\begin{corollary}[The membership premises are not removable]
-  \label{cor:admissible_premises_necessary}
-  \rocq{infotheo.dumas2017dual.dsdp.dsdp_main.admissible_le_premises_necessary}
+\begin{corollary}[The premise-free bound is false]
+  \label{cor:admissible_premise_free}
+  \rocq{infotheo.dumas2017dual.dsdp.dsdp_main.dsdp_alice_guess_fdist_trace_V2_admissible_premise_free_lt}
   \rocqok
   \uses{thm:alice_guess_admissible,def:trace_decryptor,def:indcpa_assumption}
-  Some assumption and predictor falsify the conclusion of
-  Theorem~\ref{thm:alice_guess_admissible} read without its premises: take the
-  classifier that admits nobody, with $\varepsilon_{\mathcal{A}} = 0$, and the
-  decrypting predictor.
-  \[ \exists\,\mathcal{A},\,g:\quad
-     \Pr[\,g(\mathrm{AliceTrace}) = V_2\,] \not\le
-       \tfrac{1}{m} + 2\,\varepsilon_{\mathcal{A}} \]
-  That predictor succeeds with probability $1$ while the right-hand side is
-  $1/m$, which is below $1$ because the plaintext space has at least two
-  elements. The two premises are where the gated bound's truth lives.
+  For every assumption whose promised advantage satisfies
+  $2\varepsilon_{\mathcal{A}} < 1 - 1/m$, the right-hand side of
+  Theorem~\ref{thm:alice_guess_admissible} sits strictly below what the
+  decrypting predictor achieves.
+  \[ \tfrac{1}{m} + 2\,\varepsilon_{\mathcal{A}}
+       < \Pr[\,\delta(\mathrm{AliceTrace}) = V_2\,] = 1 \]
+  Reading that bound without its two membership premises therefore leaves a
+  false statement, and for every such assumption rather than a contrived one.
+  Corollary~\ref{cor:decrypt_not_admissible} is the complementary half: the
+  missing premises cannot be supplied for this predictor.
 \end{corollary}
 
 \begin{theorem}[The trace determines Bob's input]
