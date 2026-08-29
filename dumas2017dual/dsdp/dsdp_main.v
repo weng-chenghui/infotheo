@@ -1106,6 +1106,60 @@ rewrite -Hlift H0.
 exact: le_trans (lerB (lexx _) H1) (ler_norm _).
 Qed.
 
+(* An assumption that promises a small epsilon has no choice about the
+   decrypting predictor: its classifier must answer false on the reduction
+   adversary that predictor induces, because that adversary's advantage is
+   provably near one.  Whether the class admits an adversary is not free
+   bookkeeping; a sound small-epsilon assumption is forced to reject exactly
+   the adversary a real attacker would want to be.
+   Naming: [not_admissible] states the value the classifier takes, on the
+   reduction the decryptor induces. *)
+Lemma decrypt_reduction_not_admissible (A : indcpa_epsilon_assumption) :
+  indcpa_assumption_epsilon A < 1 - (#|plain AHE|%:R : R)^-1 ->
+  indcpa_admissible A
+    (bob_trace_adversary (guess_test bob_trace_decrypt_predictor)) = false.
+Proof.
+move=> Heps; apply/negbTE/negP => Hadm.
+have Hle := le_trans bob_trace_guess_epsilon_decrypt_ge
+              (indcpa_admissible_epsilon_le dk_b Hadm).
+by move: (lt_le_trans Heps Hle); rewrite ltxx.
+Qed.
+
+(* The plaintext space has at least two elements, since zero and one differ in
+   a nonzero ring. *)
+Let card_plain_gt1 : (1 < #|plain AHE|)%N.
+Proof.
+apply/card_gt1P; exists 0, 1; rewrite !inE; split=> //.
+by rewrite eq_sym oner_neq0.
+Qed.
+
+(* The two membership premises of the gated guessing bound cannot be dropped.
+   With an assumption that admits nobody and promises epsilon zero, the
+   premise-free bound is simply false: the decrypting predictor recovers Bob's
+   input with certainty while the right-hand side stays below one.  The gate is
+   where the bound's truth lives.
+   Naming: [premises_necessary] names what the statement establishes about
+   [dsdp_alice_guess_fdist_trace_V2_admissible_le]. *)
+Lemma admissible_le_premises_necessary :
+  exists (A : indcpa_epsilon_assumption) (predict : predictor dsdp_traceT),
+    ~ (alice_trace_guess_pr predict
+         <= (#|plain AHE|%:R : R)^-1 + 2 * indcpa_assumption_epsilon A).
+Proof.
+have Hvac : forall (dk : priv_key AHE)
+    (adv : indcpa_fdist_adversary (R:=R) AHE),
+    false -> indcpa_fdist_epsilon (pub_of_priv dk) adv <= 0 by [].
+exists {| indcpa_admissible := fun _ => false ;
+          indcpa_assumption_epsilon := 0 ;
+          indcpa_admissible_epsilon_le := Hvac |}.
+exists bob_trace_decrypt_predictor.
+have -> : alice_trace_guess_pr bob_trace_decrypt_predictor = 1
+  by exact: decrypt_guess_prE.
+rewrite /= mulr0 addr0 => Hcon.
+have Hlt : (#|plain AHE|%:R : R)^-1 < 1.
+  by rewrite invf_lt1 ?ltr1n // ltr0n; exact: ltnW card_plain_gt1.
+by move: (le_lt_trans Hcon Hlt); rewrite ltxx.
+Qed.
+
 Local Notation "'`H_unp^{' g '}'" :=
   (alice_trace_predictor_unpredictability g)
   (at level 0, g at level 200,
