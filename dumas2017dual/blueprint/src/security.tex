@@ -708,10 +708,10 @@ adversary class, and records what forces the class to leave something out.
   \label{cor:decrypt_not_admissible}
   \rocq{infotheo.dumas2017dual.dsdp.dsdp_main.decrypt_reduction_not_admissible}
   \rocqok
-  \uses{thm:decrypt_lower_bound}
-  If $\mathcal{A}$ posits an advantage below $1 - 1/m$, its classifier answers
-  false on the reduction adversary the decrypting predictor induces at Bob's
-  key.
+  \uses{thm:decrypt_lower_bound,def:indcpa_assumption}
+  With $u_3$ a unit of the plaintext ring, if $\mathcal{A}$ posits an advantage
+  below $1 - 1/m$, its classifier answers false on the reduction adversary the
+  decrypting predictor induces at Bob's key.
   \[ \varepsilon_{\mathcal{A}} < 1 - \tfrac{1}{m} \implies
      \mathrm{adm}\big(\hopred{0}{D_\delta}\big) = \mathsf{false} \]
   Class membership is therefore not free bookkeeping. On this adversary the
@@ -722,7 +722,7 @@ adversary class, and records what forces the class to leave something out.
   \label{cor:admissible_premises_necessary}
   \rocq{infotheo.dumas2017dual.dsdp.dsdp_main.admissible_le_premises_necessary}
   \rocqok
-  \uses{thm:alice_guess_admissible,thm:decrypt_lower_bound}
+  \uses{thm:alice_guess_admissible,def:trace_decryptor,def:indcpa_assumption}
   Some assumption and predictor falsify the conclusion of
   Theorem~\ref{thm:alice_guess_admissible} read without its premises: take the
   classifier that admits nobody, with $\varepsilon_{\mathcal{A}} = 0$, and the

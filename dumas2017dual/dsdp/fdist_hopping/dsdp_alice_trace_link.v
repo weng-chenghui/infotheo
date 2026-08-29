@@ -1388,7 +1388,7 @@ exists {| indcpa_admissible := fun _ => false ;
           indcpa_admissible_epsilon_le := Hvac |}.
 exists bob_trace_decrypt_predictor.
 have -> : alice_trace_guess_pr bob_trace_decrypt_predictor = 1
-  by exact: decrypt_guess_prE.
+  := decrypt_guess_prE.
 rewrite /= mulr0 addr0 => Hcon.
 have Hlt : (#|plain AHE|%:R : R)^-1 < 1.
   by rewrite invf_lt1 ?ltr1n // ltr0n; exact: ltnW card_plain_gt1.
