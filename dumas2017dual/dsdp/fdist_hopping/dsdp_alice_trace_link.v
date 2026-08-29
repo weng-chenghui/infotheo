@@ -585,11 +585,11 @@ Local Notation AliceHopTuple i :=
      pkey_of_dk v1 u1 u2 u3 i).
 Local Notation indcpa_fdist_epsilon :=
   (indcpa_fdist_epsilon (R:=R) (AHE:=AHE) card_renc rand_of_renc).
-Local Notation v2_challenge_adversary :=
-  (v2_challenge_adversary (R:=R) (AHE:=AHE) card_renc rand_of_renc
+Local Notation bob_challenge_adversary :=
+  (bob_challenge_adversary (R:=R) (AHE:=AHE) card_renc rand_of_renc
      pkey_of_dk v1 u1 u2 u3).
-Local Notation v3_challenge_adversary :=
-  (v3_challenge_adversary (R:=R) (AHE:=AHE) card_renc rand_of_renc
+Local Notation charlie_challenge_adversary :=
+  (charlie_challenge_adversary (R:=R) (AHE:=AHE) card_renc rand_of_renc
      pkey_of_dk v1 u1 u2 u3).
 Local Notation dsdp_traceT := (dsdp_traceT AHE).
 Local Notation trace_jointT := (trace_jointT AHE).
@@ -679,11 +679,11 @@ Let alice_trace_joint_of_hop_joint
    embeds the challenge in the ciphertext of Bob's input V2, rebuilds
    Alice's executed trace around it, and decides with D. *)
 Definition bob_trace_adversary (D : distinguisher trace_jointT) :=
-  v2_challenge_adversary (D \o alice_trace_joint_of_hop_joint).
+  bob_challenge_adversary (D \o alice_trace_joint_of_hop_joint).
 
 (* The Charlie-key counterpart of bob_trace_adversary. *)
 Definition charlie_trace_adversary (D : distinguisher trace_jointT) :=
-  v3_challenge_adversary (D \o alice_trace_joint_of_hop_joint).
+  charlie_challenge_adversary (D \o alice_trace_joint_of_hop_joint).
 
 (* Every predictor reading the trace the interpreter produces for Alice
    matches Bob's input with probability at most one over the plaintext-space
@@ -1130,11 +1130,11 @@ Local Notation dsdp_trace_of_hop_tuple :=
   (dsdp_trace_of_hop_tuple rand_of_renc v1 u1 u2 u3 dk_a dk_b dk_c w_rc2).
 Local Notation indcpa_fdist_epsilon :=
   (indcpa_fdist_epsilon (R:=R) (AHE:=AHE) card_renc rand_of_renc).
-Local Notation v2_challenge_adversary :=
-  (v2_challenge_adversary (R:=R) (AHE:=AHE) card_renc rand_of_renc
+Local Notation bob_challenge_adversary :=
+  (bob_challenge_adversary (R:=R) (AHE:=AHE) card_renc rand_of_renc
      pkey_of_dk v1 u1 u2 u3).
-Local Notation v3_challenge_adversary :=
-  (v3_challenge_adversary (R:=R) (AHE:=AHE) card_renc rand_of_renc
+Local Notation charlie_challenge_adversary :=
+  (charlie_challenge_adversary (R:=R) (AHE:=AHE) card_renc rand_of_renc
      pkey_of_dk v1 u1 u2 u3).
 Local Notation trace_jointT := (trace_jointT AHE).
 Local Notation bob_trace_adversary :=
@@ -1279,11 +1279,11 @@ Local Notation dsdp_trace_of_hop_tuple_at w :=
   (dsdp_trace_of_hop_tuple rand_of_renc v1 u1 u2 u3 dk_a dk_b dk_c w).
 Local Notation indcpa_fdist_epsilon :=
   (indcpa_fdist_epsilon (R:=R) (AHE:=AHE) card_renc rand_of_renc).
-Local Notation v2_challenge_adversary :=
-  (v2_challenge_adversary (R:=R) (AHE:=AHE) card_renc rand_of_renc
+Local Notation bob_challenge_adversary :=
+  (bob_challenge_adversary (R:=R) (AHE:=AHE) card_renc rand_of_renc
      pkey_of_dk v1 u1 u2 u3).
-Local Notation v3_challenge_adversary :=
-  (v3_challenge_adversary (R:=R) (AHE:=AHE) card_renc rand_of_renc
+Local Notation charlie_challenge_adversary :=
+  (charlie_challenge_adversary (R:=R) (AHE:=AHE) card_renc rand_of_renc
      pkey_of_dk v1 u1 u2 u3).
 Local Notation bob_trace_adversary_at w :=
   (bob_trace_adversary (R:=R) card_renc rand_of_renc
@@ -1456,11 +1456,11 @@ Local Notation dsdp_trace_of_hop_tuple :=
   (dsdp_trace_of_hop_tuple rand_of_renc v1 u1 u2 u3 dk_a dk_b dk_c w_rc2).
 Local Notation indcpa_fdist_epsilon :=
   (indcpa_fdist_epsilon (R:=R) (AHE:=AHE) card_renc rand_of_renc).
-Local Notation v2_challenge_adversary :=
-  (v2_challenge_adversary (R:=R) (AHE:=AHE) card_renc rand_of_renc
+Local Notation bob_challenge_adversary :=
+  (bob_challenge_adversary (R:=R) (AHE:=AHE) card_renc rand_of_renc
      pkey_of_dk v1 u1 u2 u3).
-Local Notation v3_challenge_adversary :=
-  (v3_challenge_adversary (R:=R) (AHE:=AHE) card_renc rand_of_renc
+Local Notation charlie_challenge_adversary :=
+  (charlie_challenge_adversary (R:=R) (AHE:=AHE) card_renc rand_of_renc
      pkey_of_dk v1 u1 u2 u3).
 
 (* The fixed-key decoding of one encoded trace datum: plaintexts and
@@ -1515,11 +1515,11 @@ Corollary dsdp_alice_raw_trace_sim_advantage_fdist_le
      - Pr alice_trace_ideal_joint
           [set x : trace_jointT | D_raw (x.1.1, x.1.2, map decode_a x.2)] |
   <= indcpa_fdist_epsilon (pkey_of_dk Bob)
-       (v2_challenge_adversary
+       (bob_challenge_adversary
          (fun x => D_raw (x.1.1, x.1.2,
             map decode_a (dsdp_trace_of_hop_tuple x.2))))
      + indcpa_fdist_epsilon (pkey_of_dk Charlie)
-       (v3_challenge_adversary
+       (charlie_challenge_adversary
          (fun x => D_raw (x.1.1, x.1.2,
             map decode_a (dsdp_trace_of_hop_tuple x.2)))).
 Proof.
@@ -1556,11 +1556,11 @@ Corollary dsdp_alice_guess_fdist_raw_trace_V2_real_le
      [set t | g_raw (alice_raw_trace t) == V2 t]
   <= (#|plain AHE|%:R : R)^-1
      + indcpa_fdist_epsilon (pkey_of_dk Bob)
-         (v2_challenge_adversary
+         (bob_challenge_adversary
             (guess_test
                (Genc g_raw \o dsdp_trace_of_hop_tuple)))
      + indcpa_fdist_epsilon (pkey_of_dk Charlie)
-         (v3_challenge_adversary
+         (charlie_challenge_adversary
             (guess_test
                (Genc g_raw \o dsdp_trace_of_hop_tuple))).
 Proof.
@@ -1599,11 +1599,11 @@ Local Notation dsdp_trace_of_hop_tuple_at w :=
   (dsdp_trace_of_hop_tuple rand_of_renc v1 u1 u2 u3 dk_a dk_b dk_c w).
 Local Notation indcpa_fdist_epsilon :=
   (indcpa_fdist_epsilon (R:=R) (AHE:=AHE) card_renc rand_of_renc).
-Local Notation v2_challenge_adversary :=
-  (v2_challenge_adversary (R:=R) (AHE:=AHE) card_renc rand_of_renc
+Local Notation bob_challenge_adversary :=
+  (bob_challenge_adversary (R:=R) (AHE:=AHE) card_renc rand_of_renc
      pkey_of_dk v1 u1 u2 u3).
-Local Notation v3_challenge_adversary :=
-  (v3_challenge_adversary (R:=R) (AHE:=AHE) card_renc rand_of_renc
+Local Notation charlie_challenge_adversary :=
+  (charlie_challenge_adversary (R:=R) (AHE:=AHE) card_renc rand_of_renc
      pkey_of_dk v1 u1 u2 u3).
 
 (* Decoding at Alice's own key pair, the only setting in which the encoding
@@ -1653,11 +1653,11 @@ Theorem dsdp_alice_raw_trace_sim_advantage_fdist_avg_le
   <= \sum_(w in Renc)
        (fdist_uniform card_renc : R.-fdist Renc) w
        * (indcpa_fdist_epsilon (pkey_of_dk Bob)
-            (v2_challenge_adversary (fun x =>
+            (bob_challenge_adversary (fun x =>
                D_raw (x.1.1, x.1.2,
                       map decode_a (dsdp_trace_of_hop_tuple_at w x.2))))
           + indcpa_fdist_epsilon (pkey_of_dk Charlie)
-            (v3_challenge_adversary (fun x =>
+            (charlie_challenge_adversary (fun x =>
                D_raw (x.1.1, x.1.2,
                       map decode_a (dsdp_trace_of_hop_tuple_at w x.2))))).
 Proof.

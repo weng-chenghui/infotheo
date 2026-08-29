@@ -287,10 +287,6 @@ Local Notation msg := 'Z_m.
 
 Variable n_relay : nat.
 
-(* Alice's e_1 query: weight one on the first relay's slot and zero
-   elsewhere. *)
-Definition e1_query := @ConstUS_n p_minus_2 q_minus_2 n_relay.
-
 (* US_n_compromised_leaks_secret — a corrupted Alice fixing her query to e_1
    makes relay party 1's input VS_0 a function of her view: the protocol output
    is in the view and equals VS_0, so its conditional entropy collapses to zero.
@@ -298,14 +294,14 @@ Definition e1_query := @ConstUS_n p_minus_2 q_minus_2 n_relay.
 Theorem US_n_compromised_leaks_secret {A : finType}
     (View : {RV P -> A}) (g : A -> msg)
     (US VS : {RV P -> {ffun 'I_n_relay.+1 -> msg}})
-    (US_e1 : US = fun _ => e1_query)
+    (US_e1 : US = fun _ => @ConstUS_n p_minus_2 q_minus_2 n_relay)
     (output_in_view :
        @Dotp_n_rv R T P p_minus_2 q_minus_2 n_relay US VS = g `o View) :
   `H( (fun t => VS t ord0) | View ) = 0.
 Proof.
 have disc : @Dotp_n_rv R T P p_minus_2 q_minus_2 n_relay US VS
             = (fun t => VS t ord0).
-  rewrite US_e1 /e1_query /Dotp_n_rv; apply: boolp.funext => t /=.
+  rewrite US_e1 /Dotp_n_rv; apply: boolp.funext => t /=.
   exact: dotp_n_e1.
 have key : (fun t => VS t ord0) = g `o View by rewrite -disc.
 rewrite key; exact: centropy_RV_comp0.
@@ -340,9 +336,12 @@ Let E_alice_d3   : {RV P -> Alice.-enc msg}   := E' Alice `o D3.
 Let E_charlie_v3 : {RV P -> Charlie.-enc msg} := E' Charlie `o V3.
 Let E_bob_v2     : {RV P -> Bob.-enc msg}     := E' Bob `o V2.
 
-(* Alice's full real view: her key, the output S, her own inputs and masks, and
-   the three ciphertext hops. V2 appears only inside S and the Bob hop. *)
-Definition AliceMaliciousView :=
+(* Alice's full real view in the dot-product model: her key, the output S, her
+   own inputs and masks, and the three ciphertext hops. V2 appears only inside
+   S and the Bob hop.  The view is the honest one; what US_compromised_leaks_V2
+   makes malicious is the query US, not this observation.  The [Dotp] token
+   marks the model, separating it from the AliceView of the hopping axis. *)
+Definition AliceDotpView :=
   [% Dk_a, S, V1, U1, U2, U3, R2, R3, E_alice_d3, E_charlie_v3, E_bob_v2].
 
 (* US_compromised_leaks_V2 — a malicious Alice fixing her query to e_1
@@ -350,7 +349,7 @@ Definition AliceMaliciousView :=
    included; its conditional entropy collapses to zero. 3-party instance. *)
 Theorem US_compromised_leaks_V2 :
   U2 = (fun _ => 1) -> U3 = (fun _ => 0) ->
-  `H( V2 | AliceMaliciousView ) = 0.
+  `H( V2 | AliceDotpView ) = 0.
 Proof.
 move=> HU2 HU3.
 pose VS : {RV P -> {ffun 'I_1.+1 -> msg}} :=
@@ -364,17 +363,17 @@ pose g := fun o : (Alice.-key Dec msg * msg * msg * msg * msg * msg * msg * msg
   s - v1 * u1.
 have HVS0 : (fun t => VS t ord0) = V2.
   by apply: boolp.funext => t; rewrite /VS ffunE eqxx.
-have HUS_e1 : US = fun _ => @e1_query p_minus_2 q_minus_2 1.
-  rewrite /US /e1_query /ConstUS_n; apply: boolp.funext => t; apply/ffunP => i.
+have HUS_e1 : US = fun _ => @ConstUS_n p_minus_2 q_minus_2 1.
+  rewrite /US /ConstUS_n; apply: boolp.funext => t; apply/ffunP => i.
   by rewrite !ffunE HU2 HU3 /=; case: (i == ord0).
 have Hout : @Dotp_n_rv R T P p_minus_2 q_minus_2 1 US VS
-             = g `o AliceMaliciousView.
+             = g `o AliceDotpView.
   rewrite (_ : @Dotp_n_rv R T P p_minus_2 q_minus_2 1 US VS = (fun t => V2 t)).
-    rewrite /g /AliceMaliciousView /comp_RV /S /D3 /D2.
+    rewrite /g /AliceDotpView /comp_RV /S /D3 /D2.
     by apply: boolp.funext => t /=; rewrite HU2 HU3 /=; ring.
   rewrite HUS_e1 /Dotp_n_rv.
   by apply: boolp.funext => t /=; rewrite dotp_n_e1 /VS ffunE eqxx.
-have := US_n_compromised_leaks_secret (View := AliceMaliciousView) (g := g)
+have := US_n_compromised_leaks_secret (View := AliceDotpView) (g := g)
           (US := US) (VS := VS) HUS_e1 Hout.
 by rewrite HVS0.
 Qed.
@@ -413,40 +412,40 @@ Variable Dk_c : {RV P -> Charlie.-key Dec msg}.
 
 (* Bob's input scaled by his protocol weight.  It reaches the aggregate only
    through D2, where Alice's fresh pad R2 masks it. *)
-Definition VU2 : {RV P -> msg} := V2 \* U2.
+Let VU2 : {RV P -> msg} := V2 \* U2.
 
 (* Charlie's input scaled by his protocol weight.  It reaches the aggregate
    only through VU3R, where Charlie's own pad R3 masks it. *)
-Definition VU3 : {RV P -> msg} := V3 \* U3.
+Let VU3 : {RV P -> msg} := V3 \* U3.
 
 (* Charlie's weighted input under his own one-time pad R3, the value Bob
    forwards.  The pad is what leaves Bob's view independent of V3 in
    bob_privacy_V3, so that secrecy is information-theoretic and holds whatever
    the encryption scheme is worth. *)
-Definition VU3R : {RV P -> msg} := VU3 \+ R3.
+Let VU3R : {RV P -> msg} := VU3 \+ R3.
 
 (* Bob's weighted input under Alice's fresh pad R2.  The pad is what leaves
    Charlie's view independent of V2 in charlie_privacy_V2, again
    information-theoretically. *)
-Definition D2 : {RV P -> msg} := VU2 \+ R2.
+Let D2 : {RV P -> msg} := VU2 \+ R2.
 
 (* The masked aggregate Charlie returns to Alice, carrying both relay inputs
    each under its own pad. *)
-Definition D3 : {RV P -> msg} := VU3R \+ D2.
+Let D3 : {RV P -> msg} := VU3R \+ D2.
 
 (* Charlie's masked input encrypted under Charlie's key, the ciphertext Bob
    forwards.  It sits in Bob's view as opaque data, and the R3 pad inside it
    keeps V3 independent of that view on its own. *)
-Definition E_charlie_vur3 : {RV P -> Charlie.-enc msg} := E' Charlie `o VU3R.
+Let E_charlie_vur3 : {RV P -> Charlie.-enc msg} := E' Charlie `o VU3R.
 
 (* The masked Bob aggregate encrypted under Bob's own key.  Bob holds the
    matching decryption key, and what he recovers is D2, already masked by
    R2. *)
-Definition E_bob_d2 : {RV P -> Bob.-enc msg} := E' Bob `o D2.
+Let E_bob_d2 : {RV P -> Bob.-enc msg} := E' Bob `o D2.
 
 (* The full masked aggregate encrypted under Charlie's key, the message
    Charlie returns to Alice. *)
-Definition E_charlie_d3 : {RV P -> Charlie.-enc msg} := E' Charlie `o D3.
+Let E_charlie_d3 : {RV P -> Charlie.-enc msg} := E' Charlie `o D3.
 
 (* Bob's full real view: his key, his own input V2, the Charlie-ciphertext he
    forwards, and the ciphertext of his decrypted masked aggregate D2. *)
@@ -678,11 +677,11 @@ Local Notation bob_view_adversary :=
 Local Notation charlie_view_adversary :=
   (charlie_view_adversary (R:=R) (AHE:=AHE) card_renc rand_of_renc
      pkey_of_party v1 u1 u2 u3).
-Local Notation v2_challenge_adversary :=
-  (v2_challenge_adversary (R:=R) (AHE:=AHE) card_renc rand_of_renc
+Local Notation bob_challenge_adversary :=
+  (bob_challenge_adversary (R:=R) (AHE:=AHE) card_renc rand_of_renc
      pkey_of_party v1 u1 u2 u3).
-Local Notation v3_challenge_adversary :=
-  (v3_challenge_adversary (R:=R) (AHE:=AHE) card_renc rand_of_renc
+Local Notation charlie_challenge_adversary :=
+  (charlie_challenge_adversary (R:=R) (AHE:=AHE) card_renc rand_of_renc
      pkey_of_party v1 u1 u2 u3).
 Local Notation hop0_advantageE :=
   (hop0_advantageE (R:=R) (AHE:=AHE) card_renc rand_of_renc
@@ -722,9 +721,9 @@ Theorem dsdp_alice_guess_fdist_V2_real_le
   Pr P [set t | (predict `o AliceRealTuple) t == V2 t]
     <= #|plain AHE|%:R^-1
        + indcpa_fdist_epsilon bob_pkey
-           (v2_challenge_adversary (guess_test predict))
+           (bob_challenge_adversary (guess_test predict))
        + indcpa_fdist_epsilon charlie_pkey
-           (v3_challenge_adversary (guess_test predict)).
+           (charlie_challenge_adversary (guess_test predict)).
 Proof.
 rewrite /AliceRealTuple guess_event_jointE -hop0_advantageE -hop1_advantageE.
 rewrite -addrA -lerBlDl.
@@ -790,8 +789,8 @@ Theorem dsdp_alice_sim_advantage_fdist_le
     (D : distinguisher alice_hop_jointT) :
   `| Pr (`p_ [% V2, V3, AliceRealTuple]) [set x | D x]
      - Pr alice_ideal_joint [set x | D x] |
-  <= indcpa_fdist_epsilon bob_pkey (v2_challenge_adversary D)
-     + indcpa_fdist_epsilon charlie_pkey (v3_challenge_adversary D).
+  <= indcpa_fdist_epsilon bob_pkey (bob_challenge_adversary D)
+     + indcpa_fdist_epsilon charlie_pkey (charlie_challenge_adversary D).
 Proof.
 rewrite /AliceRealTuple alice_ideal_jointE -hop0_advantageE -hop1_advantageE.
 rewrite !alice_hop_game_successE.
@@ -853,11 +852,11 @@ Local Notation dsdp_trace_of_hop_tupleE :=
      v1 u1 u2 u3 dk_a dk_b dk_c w_rb2 w_rc2).
 Local Notation indcpa_fdist_epsilon :=
   (indcpa_fdist_epsilon (R:=R) (AHE:=AHE) card_renc rand_of_renc).
-Local Notation v2_challenge_adversary :=
-  (v2_challenge_adversary (R:=R) (AHE:=AHE) card_renc rand_of_renc
+Local Notation bob_challenge_adversary :=
+  (bob_challenge_adversary (R:=R) (AHE:=AHE) card_renc rand_of_renc
      pkey_of_dk v1 u1 u2 u3).
-Local Notation v3_challenge_adversary :=
-  (v3_challenge_adversary (R:=R) (AHE:=AHE) card_renc rand_of_renc
+Local Notation charlie_challenge_adversary :=
+  (charlie_challenge_adversary (R:=R) (AHE:=AHE) card_renc rand_of_renc
      pkey_of_dk v1 u1 u2 u3).
 Local Notation predictor := (predictor AHE).
 Local Notation dsdp_traceT := (dsdp_traceT AHE).
