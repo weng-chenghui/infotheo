@@ -71,6 +71,11 @@ Require Import dsdp_alice_fdist_secrecy.
 (*                                                                            *)
 (* The bridge from the protocol view to Alice's trace                         *)
 (*                                                                            *)
+(*               dsdp_traceT == Alice's executed-trace carrier, the           *)
+(*                              fifteen-round bounded sequence of encoded     *)
+(*                              trace data                                    *)
+(*              trace_jointT == the carrier a trace test reads: the two       *)
+(*                              honest inputs beside Alice's executed trace   *)
 (*   dsdp_trace_of_hop_tuple == constructs Alice's trace from the hopping     *)
 (*                              tuple used in the secrecy proof               *)
 (*      dsdp_procs_of_sample == runs the three programs with the values from  *)
@@ -82,11 +87,22 @@ Require Import dsdp_alice_fdist_secrecy.
 (*                                                                            *)
 (* Primary trace-security statements                                          *)
 (*                                                                            *)
+(*     bob_trace_adversary D == embeds Bob's challenge in the ciphertext of   *)
+(*                              V2, rebuilds Alice's trace around it, and     *)
+(*                              decides with D                                *)
+(* charlie_trace_adversary D == the Charlie-key counterpart of                *)
+(*                              bob_trace_adversary                           *)
+(* bob_trace_guess_epsilon predict ==                                         *)
+(*                              the advantage against Bob's key of the        *)
+(*                              adversary a trace predictor induces           *)
+(* charlie_trace_guess_epsilon predict ==                                     *)
+(*                              the Charlie-key counterpart of                *)
+(*                              bob_trace_guess_epsilon                       *)
 (* dsdp_alice_guess_fdist_trace_V2_real_le ==                                 *)
 (*                              bounds recovery of Bob's input from Alice's   *)
 (*                              trace by uniform guessing plus the costs of   *)
 (*                              the two ciphertext hops                       *)
-(* alice_trace_predictor_unpredictability g ==                                *)
+(* alice_trace_predictor_unpredictability predict ==                          *)
 (*                              measures the difficulty of recovering Bob's   *)
 (*                              input from Alice's trace                      *)
 (* dsdp_alice_trace_predictor_unpredictability_fdist_ge ==                    *)
@@ -190,7 +206,7 @@ Require Import dsdp_alice_fdist_secrecy.
 (*                                                                            *)
 (* Zero-safe unpredictability                                                 *)
 (*                                                                            *)
-(* alice_trace_predictor_unpredictability_ereal g ==                          *)
+(* alice_trace_predictor_unpredictability_ereal predict ==                    *)
 (*                              extends trace unpredictability so zero        *)
 (*                              success gives infinite unpredictability       *)
 (* alice_trace_predictor_unpredictability_ereal_zeroE ==                      *)
@@ -433,6 +449,15 @@ Definition trace_data_of_di_data (x : di_data DI) : dsdp_trace_dataT :=
   end.
 
 (* The decryption the three programs perform on receive. *)
+(* Alice's executed-trace carrier: the fifteen-round bounded sequence of
+   encoded trace data. *)
+Definition dsdp_traceT : finType := (15.-bseq dsdp_trace_dataT)%type.
+
+(* The carrier a trace test reads: the two honest inputs beside Alice's
+   executed trace. *)
+Definition trace_jointT : finType :=
+  (plain AHE * plain AHE * dsdp_traceT)%type.
+
 Let decode : di_priv_keyT DI -> di_cipherT DI -> option (di_msgT DI) :=
   @dec AHE.
 
@@ -560,12 +585,15 @@ Local Notation AliceHopTuple i :=
      pkey_of_dk v1 u1 u2 u3 i).
 Local Notation indcpa_fdist_epsilon :=
   (indcpa_fdist_epsilon (R:=R) (AHE:=AHE) card_renc rand_of_renc).
-Local Notation hop0_reduction :=
-  (hop0_reduction (R:=R) (AHE:=AHE) card_renc rand_of_renc
+Local Notation v2_challenge_adversary :=
+  (v2_challenge_adversary (R:=R) (AHE:=AHE) card_renc rand_of_renc
      pkey_of_dk v1 u1 u2 u3).
-Local Notation hop1_reduction :=
-  (hop1_reduction (R:=R) (AHE:=AHE) card_renc rand_of_renc
+Local Notation v3_challenge_adversary :=
+  (v3_challenge_adversary (R:=R) (AHE:=AHE) card_renc rand_of_renc
      pkey_of_dk v1 u1 u2 u3).
+Local Notation dsdp_traceT := (dsdp_traceT AHE).
+Local Notation trace_jointT := (trace_jointT AHE).
+Local Notation predictor := (predictor AHE).
 Local Notation dsdp_alice_simulator :=
   (dsdp_alice_simulator (R:=R) (AHE:=AHE) card_renc rand_of_renc
      pkey_of_dk).
@@ -638,6 +666,25 @@ rewrite /dsdp_procs_of_sample dsdp_run_traces_ok.
 by move=> ?; rewrite /= Sout_runE recrypt_plainE.
 Qed.
 
+(* The two honest inputs and Alice's encoded trace obtained from a joint
+   hopping-tuple value.
+   Naming: the [_of_] connective names the source the conversion reads,
+   here the joint carrier of [alice_hop_joint_fdist], not the bare tuple. *)
+Let alice_trace_joint_of_hop_joint
+    (x : plain AHE * plain AHE * dsdp_alice_hop_tupleT AHE Renc) :
+    trace_jointT :=
+  (x.1.1, x.1.2, dsdp_trace_of_hop_tuple x.2).
+
+(* The IND-CPA adversary against Bob's key induced by a trace test D: it
+   embeds the challenge in the ciphertext of Bob's input V2, rebuilds
+   Alice's executed trace around it, and decides with D. *)
+Definition bob_trace_adversary (D : distinguisher trace_jointT) :=
+  v2_challenge_adversary (D \o alice_trace_joint_of_hop_joint).
+
+(* The Charlie-key counterpart of bob_trace_adversary. *)
+Definition charlie_trace_adversary (D : distinguisher trace_jointT) :=
+  v3_challenge_adversary (D \o alice_trace_joint_of_hop_joint).
+
 (* Every predictor reading the trace the interpreter produces for Alice
    matches Bob's input with probability at most one over the plaintext-space
    cardinality plus the real-or-zero advantages of the two per-hop
@@ -645,48 +692,43 @@ Qed.
    advantages are the price of the two ciphertext replacements, one at Bob's
    key and one at Charlie's. *)
 Theorem dsdp_alice_guess_fdist_trace_V2_real_le
-    (g : 15.-bseq dsdp_trace_dataT -> plain AHE) :
+    (predict : predictor dsdp_traceT) :
   Pr (alice_sample_fdist (R:=R) AHE card_renc)
-     [set t | (g `o AliceTrace) t == V2 t]
+     [set t | (predict `o AliceTrace) t == V2 t]
     <= (#|plain AHE|%:R : R)^-1
        + indcpa_fdist_epsilon (pkey_of_dk Bob)
-           (hop0_reduction
-              (distinguisher_of_guess (g \o dsdp_trace_of_hop_tuple)))
+           (bob_trace_adversary (guess_test predict))
        + indcpa_fdist_epsilon (pkey_of_dk Charlie)
-           (hop1_reduction
-              (distinguisher_of_guess (g \o dsdp_trace_of_hop_tuple))).
+           (charlie_trace_adversary (guess_test predict)).
 Proof.
 rewrite dsdp_trace_of_hop_tupleE.
 exact: (dsdp_alice_guess_fdist_V2_real_le card_renc rand_of_renc
           pkey_of_dk v1 u1 u2 u3_unit
-          (g \o dsdp_trace_of_hop_tuple)).
+          (predict \o dsdp_trace_of_hop_tuple)).
 Qed.
 
-(* The advantage against Bob's key of the hop-0 reduction of the distinguisher
-   associated with a trace predictor composed with
-   dsdp_trace_of_hop_tuple. *)
-Let trace_eps0 (g : 15.-bseq dsdp_trace_dataT -> plain AHE) : R :=
+(* The advantage against Bob's key of the adversary a trace predictor
+   induces. *)
+Definition bob_trace_guess_epsilon (predict : predictor dsdp_traceT) : R :=
   indcpa_fdist_epsilon (pkey_of_dk Bob)
-    (hop0_reduction
-       (distinguisher_of_guess (g \o dsdp_trace_of_hop_tuple))).
+    (bob_trace_adversary (guess_test predict)).
 
-(* The advantage against Charlie's key of the hop-1 reduction of the
-   distinguisher associated with a trace predictor composed with
-   dsdp_trace_of_hop_tuple. *)
-Let trace_eps1 (g : 15.-bseq dsdp_trace_dataT -> plain AHE) : R :=
+(* The advantage against Charlie's key of the adversary a trace predictor
+   induces. *)
+Definition charlie_trace_guess_epsilon
+    (predict : predictor dsdp_traceT) : R :=
   indcpa_fdist_epsilon (pkey_of_dk Charlie)
-    (hop1_reduction
-       (distinguisher_of_guess (g \o dsdp_trace_of_hop_tuple))).
+    (charlie_trace_adversary (guess_test predict)).
 
 (* The negative logarithm of the probability that g recovers Bob's input
    from Alice's encoded executed trace.
    Naming: after [alice_predictor_unpredictability] of the hopping-tuple
    level, with [trace] marking the observation g reads. *)
 Definition alice_trace_predictor_unpredictability
-    (g : 15.-bseq dsdp_trace_dataT -> plain AHE) : R :=
+    (predict : predictor dsdp_traceT) : R :=
   - log
       (Pr (alice_sample_fdist (R:=R) AHE card_renc)
-         [set t | (g `o AliceTrace) t == V2 t]).
+         [set t | (predict `o AliceTrace) t == V2 t]).
 
 Local Notation "'`H_unp^{' g '}'" :=
   (alice_trace_predictor_unpredictability g)
@@ -699,40 +741,27 @@ Local Notation "'`H_unp^{' g '}'" :=
    theorem name extending [alice_trace_predictor_unpredictability] as
    there. *)
 Theorem dsdp_alice_trace_predictor_unpredictability_fdist_ge
-    (g : 15.-bseq dsdp_trace_dataT -> plain AHE)
+    (predict : predictor dsdp_traceT)
     (Hpos :
        0 < Pr (alice_sample_fdist (R:=R) AHE card_renc)
-              [set t | (g `o AliceTrace) t == V2 t]) :
+              [set t | (predict `o AliceTrace) t == V2 t]) :
   log (#|plain AHE|%:R)
-    - log (1 + #|plain AHE|%:R * (trace_eps0 g + trace_eps1 g))
-  <= `H_unp^{g}.
+    - log (1 + #|plain AHE|%:R
+               * (bob_trace_guess_epsilon predict
+                  + charlie_trace_guess_epsilon predict))
+  <= `H_unp^{predict}.
 Proof.
 have Hcard_pos : (0 < #|plain AHE|%:R :> R).
   by rewrite ltr0n; apply/card_gt0P; exists 0; rewrite inE.
-have Hnum_pos : (0 < 1 + #|plain AHE|%:R * (trace_eps0 g + trace_eps1 g) :> R).
+have Hnum_pos : (0 < 1 + #|plain AHE|%:R
+                        * (bob_trace_guess_epsilon predict
+                           + charlie_trace_guess_epsilon predict) :> R).
   by rewrite ltr_pwDl // mulr_ge0 // addr_ge0 // normr_ge0.
 rewrite /alice_trace_predictor_unpredictability.
 rewrite lerNr opprB -logDiv // ler_log ?posrE ?divr_gt0 //.
 rewrite mulrDl mul1r mulrAC (divff (lt0r_neq0 Hcard_pos)) mul1r addrA.
 exact: dsdp_alice_guess_fdist_trace_V2_real_le.
 Qed.
-
-(* The two honest inputs and Alice's encoded trace obtained from a joint
-   hopping-tuple value.
-   Naming: the [_of_] connective names the source the conversion reads,
-   here the joint carrier of [alice_hop_joint_fdist], not the bare tuple. *)
-Let alice_trace_joint_of_hop_joint
-    (x : plain AHE * plain AHE * dsdp_alice_hop_tupleT AHE Renc) :
-    plain AHE * plain AHE * 15.-bseq dsdp_trace_dataT :=
-  (x.1.1, x.1.2, dsdp_trace_of_hop_tuple x.2).
-
-(* The hopping-tuple distinguisher that applies a trace test after the
-   joint hopping-to-trace map.
-   Naming: result first, after [distinguisher_of_guess]. *)
-Let distinguisher_of_trace_test
-    (D : plain AHE * plain AHE * 15.-bseq dsdp_trace_dataT -> bool) :
-    plain AHE * plain AHE * dsdp_alice_hop_tupleT AHE Renc -> bool :=
-  D \o alice_trace_joint_of_hop_joint.
 
 (* The distribution obtained by mapping the hopping-tuple simulator through
    the encoded trace function.
@@ -783,23 +812,17 @@ Qed.
    [dsdp_alice_guess_fdist_trace_V2_real_le] keep the hop stem and append
    the observation read after [fdist]. *)
 Theorem dsdp_alice_trace_sim_advantage_fdist_le
-    (D : plain AHE * plain AHE * 15.-bseq dsdp_trace_dataT -> bool) :
+    (D : distinguisher trace_jointT) :
   `| Pr (`p_ [% V2, V3, AliceTrace]) [set x | D x]
-     - Pr (fdistmap D alice_trace_ideal_joint) [set true] |
-  <= indcpa_fdist_epsilon (pkey_of_dk Bob)
-       (hop0_reduction
-         (fun x => D
-           (x.1.1, x.1.2, dsdp_trace_of_hop_tuple x.2)))
-     + indcpa_fdist_epsilon (pkey_of_dk Charlie)
-       (hop1_reduction
-         (fun x => D
-           (x.1.1, x.1.2, dsdp_trace_of_hop_tuple x.2))).
+     - Pr alice_trace_ideal_joint [set x | D x] |
+  <= indcpa_fdist_epsilon (pkey_of_dk Bob) (bob_trace_adversary D)
+     + indcpa_fdist_epsilon (pkey_of_dk Charlie) (charlie_trace_adversary D).
 Proof.
-rewrite -Pr_fdistmap_bool alice_trace_real_jointE fdistmap_comp.
-rewrite Pr_fdistmap_bool alice_trace_ideal_jointE fdistmap_comp.
+rewrite alice_trace_real_jointE alice_trace_ideal_jointE.
+rewrite -2!(Pr_fdistmap_bool D) 2!(fdistmap_comp D) 2!Pr_fdistmap_bool.
+rewrite /bob_trace_adversary /charlie_trace_adversary.
 exact: (dsdp_alice_sim_advantage_fdist_le card_renc rand_of_renc
-          pkey_of_dk v1 u1 u2 u3
-          (distinguisher_of_trace_test D)).
+          pkey_of_dk v1 u1 u2 u3 (D \o alice_trace_joint_of_hop_joint)).
 Qed.
 
 End dsdp_alice_trace_rv.
@@ -1107,12 +1130,19 @@ Local Notation dsdp_trace_of_hop_tuple :=
   (dsdp_trace_of_hop_tuple rand_of_renc v1 u1 u2 u3 dk_a dk_b dk_c w_rc2).
 Local Notation indcpa_fdist_epsilon :=
   (indcpa_fdist_epsilon (R:=R) (AHE:=AHE) card_renc rand_of_renc).
-Local Notation hop0_reduction :=
-  (hop0_reduction (R:=R) (AHE:=AHE) card_renc rand_of_renc
+Local Notation v2_challenge_adversary :=
+  (v2_challenge_adversary (R:=R) (AHE:=AHE) card_renc rand_of_renc
      pkey_of_dk v1 u1 u2 u3).
-Local Notation hop1_reduction :=
-  (hop1_reduction (R:=R) (AHE:=AHE) card_renc rand_of_renc
+Local Notation v3_challenge_adversary :=
+  (v3_challenge_adversary (R:=R) (AHE:=AHE) card_renc rand_of_renc
      pkey_of_dk v1 u1 u2 u3).
+Local Notation trace_jointT := (trace_jointT AHE).
+Local Notation bob_trace_adversary :=
+  (bob_trace_adversary (R:=R) card_renc rand_of_renc
+     v1 u1 u2 u3 dk_a dk_b dk_c w_rc2).
+Local Notation charlie_trace_adversary :=
+  (charlie_trace_adversary (R:=R) card_renc rand_of_renc
+     v1 u1 u2 u3 dk_a dk_b dk_c w_rc2).
 
 (* The Boolean ideal trace experiment: sample the honest inputs, run the
    trace simulator on their leaked output, and apply the test.
@@ -1141,17 +1171,13 @@ Qed.
    Naming: extends [dsdp_alice_trace_sim_advantage_fdist_le] with the [test]
    variant token before [le]; kept long to preserve the family grouping. *)
 Corollary dsdp_alice_trace_sim_advantage_fdist_test_le
-    (D : plain AHE * plain AHE * 15.-bseq dsdp_trace_dataT -> bool) :
+    (D : distinguisher trace_jointT) :
   `| Pr (`p_ [% V2, V3, AliceTrace]) [set x | D x]
      - Pr (alice_trace_ideal_test D) [set true] |
-  <= indcpa_fdist_epsilon (pkey_of_dk Bob)
-       (hop0_reduction
-         (fun x => D (x.1.1, x.1.2, dsdp_trace_of_hop_tuple x.2)))
-     + indcpa_fdist_epsilon (pkey_of_dk Charlie)
-       (hop1_reduction
-         (fun x => D (x.1.1, x.1.2, dsdp_trace_of_hop_tuple x.2))).
+  <= indcpa_fdist_epsilon (pkey_of_dk Bob) (bob_trace_adversary D)
+     + indcpa_fdist_epsilon (pkey_of_dk Charlie) (charlie_trace_adversary D).
 Proof.
-rewrite alice_trace_ideal_testE.
+rewrite alice_trace_ideal_testE Pr_fdistmap_bool.
 exact: (dsdp_alice_trace_sim_advantage_fdist_le card_renc rand_of_renc
           v1 u1 u2 u3 dk_a dk_b dk_c w_rb2 w_rc2 D).
 Qed.
@@ -1253,12 +1279,18 @@ Local Notation dsdp_trace_of_hop_tuple_at w :=
   (dsdp_trace_of_hop_tuple rand_of_renc v1 u1 u2 u3 dk_a dk_b dk_c w).
 Local Notation indcpa_fdist_epsilon :=
   (indcpa_fdist_epsilon (R:=R) (AHE:=AHE) card_renc rand_of_renc).
-Local Notation hop0_reduction :=
-  (hop0_reduction (R:=R) (AHE:=AHE) card_renc rand_of_renc
+Local Notation v2_challenge_adversary :=
+  (v2_challenge_adversary (R:=R) (AHE:=AHE) card_renc rand_of_renc
      pkey_of_dk v1 u1 u2 u3).
-Local Notation hop1_reduction :=
-  (hop1_reduction (R:=R) (AHE:=AHE) card_renc rand_of_renc
+Local Notation v3_challenge_adversary :=
+  (v3_challenge_adversary (R:=R) (AHE:=AHE) card_renc rand_of_renc
      pkey_of_dk v1 u1 u2 u3).
+Local Notation bob_trace_adversary_at w :=
+  (bob_trace_adversary (R:=R) card_renc rand_of_renc
+     v1 u1 u2 u3 dk_a dk_b dk_c w).
+Local Notation charlie_trace_adversary_at w :=
+  (charlie_trace_adversary (R:=R) card_renc rand_of_renc
+     v1 u1 u2 u3 dk_a dk_b dk_c w).
 
 (* The real executed-trace joint law with a uniformly sampled re-encryption
    coin.
@@ -1280,20 +1312,16 @@ Definition alice_trace_ideal_joint_avg :
    Naming: extends [dsdp_alice_trace_sim_advantage_fdist_le] with the [avg]
    variant token before [le]; kept long to preserve the family grouping. *)
 Theorem dsdp_alice_trace_sim_advantage_fdist_avg_le
-    (D : plain AHE * plain AHE * 15.-bseq dsdp_trace_dataT -> bool) :
+    (D : distinguisher (trace_jointT AHE)) :
   `| Pr alice_trace_real_joint_avg [set x | D x]
-     - Pr (fdistmap D alice_trace_ideal_joint_avg) [set true] |
+     - Pr alice_trace_ideal_joint_avg [set x | D x] |
   <= \sum_(w in Renc) (fdist_uniform card_renc : R.-fdist Renc) w
        * (indcpa_fdist_epsilon (pkey_of_dk Bob)
-            (hop0_reduction
-              (fun x => D (x.1.1, x.1.2, dsdp_trace_of_hop_tuple_at w x.2)))
+            (bob_trace_adversary_at w D)
           + indcpa_fdist_epsilon (pkey_of_dk Charlie)
-            (hop1_reduction
-              (fun x => D (x.1.1, x.1.2, dsdp_trace_of_hop_tuple_at w x.2)))).
+            (charlie_trace_adversary_at w D)).
 Proof.
-rewrite Pr_fdistmap_bool.
 apply: fdist_mixture_advantage_le => w.
-rewrite -[X in `|_ - X| <= _]Pr_fdistmap_bool.
 exact: (dsdp_alice_trace_sim_advantage_fdist_le card_renc rand_of_renc
           v1 u1 u2 u3 dk_a dk_b dk_c w_rb2 w D).
 Qed.
@@ -1314,62 +1342,42 @@ Variables (w_rb2 w_rc2 : Renc).
    constant explicitly (EFin, EPInf, Order.le): ahe_monoid.v delimits
    emul_scope with %E, shadowing constructive_ereal's delimiter in every
    file that imports the HE stack. *)
-Local Notation dsdp_trace_dataT := (dsdp_trace_dataT AHE).
-Local Notation pkey_of_dk := (pkey_of_dk dk_a dk_b dk_c).
+Local Notation dsdp_traceT := (dsdp_traceT AHE).
+Local Notation predictor := (predictor AHE).
 Local Notation V2 := (V2 (R:=R) (AHE:=AHE) card_renc).
 Local Notation AliceTrace :=
   (AliceTrace (R:=R) card_renc rand_of_renc v1 u1 u2 u3
      dk_a dk_b dk_c w_rb2 w_rc2).
-Local Notation dsdp_trace_of_hop_tuple :=
-  (dsdp_trace_of_hop_tuple rand_of_renc v1 u1 u2 u3 dk_a dk_b dk_c w_rc2).
-Local Notation indcpa_fdist_epsilon :=
-  (indcpa_fdist_epsilon (R:=R) (AHE:=AHE) card_renc rand_of_renc).
-Local Notation hop0_reduction :=
-  (hop0_reduction (R:=R) (AHE:=AHE) card_renc rand_of_renc
-     pkey_of_dk v1 u1 u2 u3).
-Local Notation hop1_reduction :=
-  (hop1_reduction (R:=R) (AHE:=AHE) card_renc rand_of_renc
-     pkey_of_dk v1 u1 u2 u3).
+Local Notation bob_trace_guess_epsilon :=
+  (bob_trace_guess_epsilon (R:=R) card_renc rand_of_renc
+     v1 u1 u2 u3 dk_a dk_b dk_c w_rc2).
+Local Notation charlie_trace_guess_epsilon :=
+  (charlie_trace_guess_epsilon (R:=R) card_renc rand_of_renc
+     v1 u1 u2 u3 dk_a dk_b dk_c w_rc2).
 Local Notation alice_trace_predictor_unpredictability :=
   (alice_trace_predictor_unpredictability (R:=R) card_renc rand_of_renc
      v1 u1 u2 u3 dk_a dk_b dk_c w_rb2 w_rc2).
 
 (* The success probability of a trace predictor, the quantity the zero-safe
    unpredictability reads. *)
-Let trace_guess_pr (g : 15.-bseq dsdp_trace_dataT -> plain AHE) : R :=
+Let trace_guess_pr (predict : predictor dsdp_traceT) : R :=
   Pr (alice_sample_fdist (R:=R) AHE card_renc)
-     [set t | (g `o AliceTrace) t == V2 t].
-
-(* The advantage against Bob's key of the hop-0 reduction of the
-   distinguisher associated with a trace predictor composed with
-   dsdp_trace_of_hop_tuple. *)
-Let trace_eps0 (g : 15.-bseq dsdp_trace_dataT -> plain AHE) : R :=
-  indcpa_fdist_epsilon (pkey_of_dk Bob)
-    (hop0_reduction
-       (distinguisher_of_guess (g \o dsdp_trace_of_hop_tuple))).
-
-(* The advantage against Charlie's key of the hop-1 reduction of the
-   distinguisher associated with a trace predictor composed with
-   dsdp_trace_of_hop_tuple. *)
-Let trace_eps1 (g : 15.-bseq dsdp_trace_dataT -> plain AHE) : R :=
-  indcpa_fdist_epsilon (pkey_of_dk Charlie)
-    (hop1_reduction
-       (distinguisher_of_guess (g \o dsdp_trace_of_hop_tuple))).
+     [set t | (predict `o AliceTrace) t == V2 t].
 
 (* The zero-safe unpredictability of Bob's input at Alice's encoded trace:
    infinite at zero predictor success, the negative logarithm otherwise.
    Naming: the [_ereal] token marks the extended-real carrier, after
    [conv_erealE] of probability/convex.v. *)
 Definition alice_trace_predictor_unpredictability_ereal
-    (g : 15.-bseq dsdp_trace_dataT -> plain AHE) : \bar R :=
-  if trace_guess_pr g == 0 then @EPInf R
-  else EFin (alice_trace_predictor_unpredictability g).
+    (predict : predictor dsdp_traceT) : \bar R :=
+  if trace_guess_pr predict == 0 then @EPInf R
+  else EFin (alice_trace_predictor_unpredictability predict).
 
 (* Zero success is infinite unpredictability.
    Naming: the [E] suffix marks the branch equation. *)
-Lemma alice_trace_predictor_unpredictability_ereal_zeroE g :
-  trace_guess_pr g = 0 ->
-  alice_trace_predictor_unpredictability_ereal g = @EPInf R.
+Lemma alice_trace_predictor_unpredictability_ereal_zeroE predict :
+  trace_guess_pr predict = 0 ->
+  alice_trace_predictor_unpredictability_ereal predict = @EPInf R.
 Proof.
 by move=> H; rewrite /alice_trace_predictor_unpredictability_ereal H eqxx.
 Qed.
@@ -1377,10 +1385,10 @@ Qed.
 (* Positive success is the finite negative logarithm.
    Naming: [_gt0] spells the positivity premise, after MathComp; the [E]
    suffix marks the branch equation. *)
-Lemma alice_trace_predictor_unpredictability_ereal_gt0E g :
-  0 < trace_guess_pr g ->
-  alice_trace_predictor_unpredictability_ereal g
-  = EFin (- log (trace_guess_pr g)).
+Lemma alice_trace_predictor_unpredictability_ereal_gt0E predict :
+  0 < trace_guess_pr predict ->
+  alice_trace_predictor_unpredictability_ereal predict
+  = EFin (- log (trace_guess_pr predict)).
 Proof.
 by move=> H; rewrite /alice_trace_predictor_unpredictability_ereal gt_eqF.
 Qed.
@@ -1388,10 +1396,10 @@ Qed.
 (* The real-valued definition is the finite branch.
    Naming: [_fin] marks the finite branch; the [E] suffix marks the branch
    equation. *)
-Lemma alice_trace_predictor_unpredictability_ereal_finE g :
-  0 < trace_guess_pr g ->
-  alice_trace_predictor_unpredictability_ereal g
-  = EFin (alice_trace_predictor_unpredictability g).
+Lemma alice_trace_predictor_unpredictability_ereal_finE predict :
+  0 < trace_guess_pr predict ->
+  alice_trace_predictor_unpredictability_ereal predict
+  = EFin (alice_trace_predictor_unpredictability predict).
 Proof.
 by move=> H; rewrite /alice_trace_predictor_unpredictability_ereal gt_eqF.
 Qed.
@@ -1402,15 +1410,17 @@ Qed.
    [dsdp_alice_trace_predictor_unpredictability_fdist_ge].
    Naming: extends that theorem name with the [ereal] variant token before
    [ge]; kept long to preserve the family grouping. *)
-Theorem dsdp_alice_trace_predictor_unpredictability_fdist_ereal_ge g :
+Theorem dsdp_alice_trace_predictor_unpredictability_fdist_ereal_ge predict :
   Order.le
     (EFin (log (#|plain AHE|%:R)
-           - log (1 + #|plain AHE|%:R * (trace_eps0 g + trace_eps1 g))))
-    (alice_trace_predictor_unpredictability_ereal g).
+           - log (1 + #|plain AHE|%:R
+                      * (bob_trace_guess_epsilon predict
+                         + charlie_trace_guess_epsilon predict))))
+    (alice_trace_predictor_unpredictability_ereal predict).
 Proof.
 rewrite /alice_trace_predictor_unpredictability_ereal.
-case: (eqVneq (trace_guess_pr g) 0) => [_|Hneq]; first exact: leey.
-have Hpos : 0 < trace_guess_pr g by rewrite lt0r Hneq /=; exact: Pr_ge0.
+case: (eqVneq (trace_guess_pr predict) 0) => [_|Hneq]; first exact: leey.
+have Hpos : 0 < trace_guess_pr predict by rewrite lt0r Hneq /=; exact: Pr_ge0.
 rewrite lee_fin.
 exact: (dsdp_alice_trace_predictor_unpredictability_fdist_ge u3_unit Hpos).
 Qed.
@@ -1432,6 +1442,7 @@ Variables (w_rb2 w_rc2 : Renc).
 
 Local Notation DI := (Standard_DSDP_Interface AHE).
 Local Notation dsdp_trace_dataT := (dsdp_trace_dataT AHE).
+Local Notation trace_jointT := (trace_jointT AHE).
 Local Notation pkey_of_dk := (pkey_of_dk dk_a dk_b dk_c).
 Local Notation V2 := (V2 (R:=R) (AHE:=AHE) card_renc).
 Local Notation V3 := (V3 (R:=R) (AHE:=AHE) card_renc).
@@ -1445,11 +1456,11 @@ Local Notation dsdp_trace_of_hop_tuple :=
   (dsdp_trace_of_hop_tuple rand_of_renc v1 u1 u2 u3 dk_a dk_b dk_c w_rc2).
 Local Notation indcpa_fdist_epsilon :=
   (indcpa_fdist_epsilon (R:=R) (AHE:=AHE) card_renc rand_of_renc).
-Local Notation hop0_reduction :=
-  (hop0_reduction (R:=R) (AHE:=AHE) card_renc rand_of_renc
+Local Notation v2_challenge_adversary :=
+  (v2_challenge_adversary (R:=R) (AHE:=AHE) card_renc rand_of_renc
      pkey_of_dk v1 u1 u2 u3).
-Local Notation hop1_reduction :=
-  (hop1_reduction (R:=R) (AHE:=AHE) card_renc rand_of_renc
+Local Notation v3_challenge_adversary :=
+  (v3_challenge_adversary (R:=R) (AHE:=AHE) card_renc rand_of_renc
      pkey_of_dk v1 u1 u2 u3).
 
 (* The fixed-key decoding of one encoded trace datum: plaintexts and
@@ -1501,29 +1512,23 @@ Corollary dsdp_alice_raw_trace_sim_advantage_fdist_le
     (D_raw : plain AHE * plain AHE * seq (di_data DI) -> bool) :
   `| Pr (alice_sample_fdist (R:=R) AHE card_renc)
         [set t | D_raw (V2 t, V3 t, alice_raw_trace t)]
-     - Pr (fdistmap
-             (fun x : plain AHE * plain AHE * 15.-bseq dsdp_trace_dataT =>
-                D_raw (x.1.1, x.1.2,
-                       map decode_a x.2))
-             alice_trace_ideal_joint) [set true] |
+     - Pr alice_trace_ideal_joint
+          [set x : trace_jointT | D_raw (x.1.1, x.1.2, map decode_a x.2)] |
   <= indcpa_fdist_epsilon (pkey_of_dk Bob)
-       (hop0_reduction
+       (v2_challenge_adversary
          (fun x => D_raw (x.1.1, x.1.2,
             map decode_a (dsdp_trace_of_hop_tuple x.2))))
      + indcpa_fdist_epsilon (pkey_of_dk Charlie)
-       (hop1_reduction
+       (v3_challenge_adversary
          (fun x => D_raw (x.1.1, x.1.2,
             map decode_a (dsdp_trace_of_hop_tuple x.2)))).
 Proof.
-set D := fun x : plain AHE * plain AHE * 15.-bseq dsdp_trace_dataT =>
-  D_raw (x.1.1, x.1.2,
-         map decode_a x.2).
-have HrealE : Pr (`p_ [% V2, V3, AliceTrace]) [set x | D x]
-            = Pr (alice_sample_fdist (R:=R) AHE card_renc)
-                 [set t | D_raw (V2 t, V3 t, alice_raw_trace t)].
+set D := fun x : trace_jointT => D_raw (x.1.1, x.1.2, map decode_a x.2).
+have <- : Pr (`p_ [% V2, V3, AliceTrace]) [set x | D x]
+        = Pr (alice_sample_fdist (R:=R) AHE card_renc)
+             [set t | D_raw (V2 t, V3 t, alice_raw_trace t)].
   rewrite /dist_of_RV Pr_fdistmap_preim; apply: eq_bigl => t; rewrite !inE.
   by rewrite -(alice_raw_trace_decodeE (pub_of_priv dk_a)).
-rewrite -HrealE.
 exact: (dsdp_alice_trace_sim_advantage_fdist_le card_renc rand_of_renc
           v1 u1 u2 u3 dk_a dk_b dk_c w_rb2 w_rc2 D).
 Qed.
@@ -1551,12 +1556,12 @@ Corollary dsdp_alice_guess_fdist_raw_trace_V2_real_le
      [set t | g_raw (alice_raw_trace t) == V2 t]
   <= (#|plain AHE|%:R : R)^-1
      + indcpa_fdist_epsilon (pkey_of_dk Bob)
-         (hop0_reduction
-            (distinguisher_of_guess
+         (v2_challenge_adversary
+            (guess_test
                (Genc g_raw \o dsdp_trace_of_hop_tuple)))
      + indcpa_fdist_epsilon (pkey_of_dk Charlie)
-         (hop1_reduction
-            (distinguisher_of_guess
+         (v3_challenge_adversary
+            (guess_test
                (Genc g_raw \o dsdp_trace_of_hop_tuple))).
 Proof.
 have -> : [set t | g_raw (alice_raw_trace t) == V2 t]
@@ -1594,11 +1599,11 @@ Local Notation dsdp_trace_of_hop_tuple_at w :=
   (dsdp_trace_of_hop_tuple rand_of_renc v1 u1 u2 u3 dk_a dk_b dk_c w).
 Local Notation indcpa_fdist_epsilon :=
   (indcpa_fdist_epsilon (R:=R) (AHE:=AHE) card_renc rand_of_renc).
-Local Notation hop0_reduction :=
-  (hop0_reduction (R:=R) (AHE:=AHE) card_renc rand_of_renc
+Local Notation v2_challenge_adversary :=
+  (v2_challenge_adversary (R:=R) (AHE:=AHE) card_renc rand_of_renc
      pkey_of_dk v1 u1 u2 u3).
-Local Notation hop1_reduction :=
-  (hop1_reduction (R:=R) (AHE:=AHE) card_renc rand_of_renc
+Local Notation v3_challenge_adversary :=
+  (v3_challenge_adversary (R:=R) (AHE:=AHE) card_renc rand_of_renc
      pkey_of_dk v1 u1 u2 u3).
 
 (* Decoding at Alice's own key pair, the only setting in which the encoding
@@ -1648,11 +1653,11 @@ Theorem dsdp_alice_raw_trace_sim_advantage_fdist_avg_le
   <= \sum_(w in Renc)
        (fdist_uniform card_renc : R.-fdist Renc) w
        * (indcpa_fdist_epsilon (pkey_of_dk Bob)
-            (hop0_reduction (fun x =>
+            (v2_challenge_adversary (fun x =>
                D_raw (x.1.1, x.1.2,
                       map decode_a (dsdp_trace_of_hop_tuple_at w x.2))))
           + indcpa_fdist_epsilon (pkey_of_dk Charlie)
-            (hop1_reduction (fun x =>
+            (v3_challenge_adversary (fun x =>
                D_raw (x.1.1, x.1.2,
                       map decode_a (dsdp_trace_of_hop_tuple_at w x.2))))).
 Proof.
@@ -1661,7 +1666,7 @@ Proof.
    alice_raw_trace_decodeE. *)
 rewrite /alice_raw_trace_real_test_avg /alice_raw_trace_ideal_test_avg.
 rewrite /alice_trace_ideal_joint_avg fdistmap_bind.
-apply: fdist_mixture_advantage_le => w; rewrite Pr_fdistmap_bool.
+apply: fdist_mixture_advantage_le => w; rewrite 2!Pr_fdistmap_bool.
 exact: (dsdp_alice_raw_trace_sim_advantage_fdist_le card_renc rand_of_renc
           v1 u1 u2 u3 dk_a dk_b dk_c w_rb2 w D_raw).
 Qed.
@@ -1682,46 +1687,26 @@ Variables (p q : nat).
    already forces 0 < p and 0 < q. *)
 Hypothesis card_plain_pq : #|plain AHE| = (p * q)%N.
 
-Local Notation dsdp_trace_dataT := (dsdp_trace_dataT AHE).
-Local Notation pkey_of_dk := (pkey_of_dk dk_a dk_b dk_c).
+Local Notation dsdp_traceT := (dsdp_traceT AHE).
+Local Notation predictor := (predictor AHE).
 Local Notation V2 := (V2 (R:=R) (AHE:=AHE) card_renc).
 Local Notation AliceTrace :=
   (AliceTrace (R:=R) card_renc rand_of_renc v1 u1 u2 u3
      dk_a dk_b dk_c w_rb2 w_rc2).
-Local Notation dsdp_trace_of_hop_tuple :=
-  (dsdp_trace_of_hop_tuple rand_of_renc v1 u1 u2 u3 dk_a dk_b dk_c w_rc2).
-Local Notation indcpa_fdist_epsilon :=
-  (indcpa_fdist_epsilon (R:=R) (AHE:=AHE) card_renc rand_of_renc).
-Local Notation hop0_reduction :=
-  (hop0_reduction (R:=R) (AHE:=AHE) card_renc rand_of_renc
-     pkey_of_dk v1 u1 u2 u3).
-Local Notation hop1_reduction :=
-  (hop1_reduction (R:=R) (AHE:=AHE) card_renc rand_of_renc
-     pkey_of_dk v1 u1 u2 u3).
+Local Notation bob_trace_guess_epsilon :=
+  (bob_trace_guess_epsilon (R:=R) card_renc rand_of_renc
+     v1 u1 u2 u3 dk_a dk_b dk_c w_rc2).
+Local Notation charlie_trace_guess_epsilon :=
+  (charlie_trace_guess_epsilon (R:=R) card_renc rand_of_renc
+     v1 u1 u2 u3 dk_a dk_b dk_c w_rc2).
 Local Notation alice_trace_predictor_unpredictability_ereal :=
   (alice_trace_predictor_unpredictability_ereal (R:=R) card_renc
      rand_of_renc v1 u1 u2 u3 dk_a dk_b dk_c w_rb2 w_rc2).
 
 (* The success probability of a trace predictor. *)
-Let trace_guess_pr (g : 15.-bseq dsdp_trace_dataT -> plain AHE) : R :=
+Let trace_guess_pr (predict : predictor dsdp_traceT) : R :=
   Pr (alice_sample_fdist (R:=R) AHE card_renc)
-     [set t | (g `o AliceTrace) t == V2 t].
-
-(* The advantage against Bob's key of the hop-0 reduction of the
-   distinguisher associated with a trace predictor composed with
-   dsdp_trace_of_hop_tuple. *)
-Let trace_eps0 (g : 15.-bseq dsdp_trace_dataT -> plain AHE) : R :=
-  indcpa_fdist_epsilon (pkey_of_dk Bob)
-    (hop0_reduction
-       (distinguisher_of_guess (g \o dsdp_trace_of_hop_tuple))).
-
-(* The advantage against Charlie's key of the hop-1 reduction of the
-   distinguisher associated with a trace predictor composed with
-   dsdp_trace_of_hop_tuple. *)
-Let trace_eps1 (g : 15.-bseq dsdp_trace_dataT -> plain AHE) : R :=
-  indcpa_fdist_epsilon (pkey_of_dk Charlie)
-    (hop1_reduction
-       (distinguisher_of_guess (g \o dsdp_trace_of_hop_tuple))).
+     [set t | (predict `o AliceTrace) t == V2 t].
 
 (* The inverse plaintext cardinality at the composite modulus. *)
 Let inv_pq_cardE : ((p%:R : R) * q%:R)^-1 = (#|plain AHE|%:R : R)^-1.
@@ -1732,13 +1717,14 @@ Proof. by rewrite card_plain_pq natrM. Qed.
    Naming: extends [dsdp_alice_guess_fdist_trace_V2_real_le] with the [pq]
    variant token before [le]; kept long to preserve the family grouping. *)
 Corollary dsdp_alice_guess_fdist_trace_V2_real_pq_le
-    (g : 15.-bseq dsdp_trace_dataT -> plain AHE) :
-  trace_guess_pr g
-  <= ((p%:R : R) * q%:R)^-1 + trace_eps0 g + trace_eps1 g.
+    (predict : predictor dsdp_traceT) :
+  trace_guess_pr predict
+  <= ((p%:R : R) * q%:R)^-1 + bob_trace_guess_epsilon predict
+     + charlie_trace_guess_epsilon predict.
 Proof.
 rewrite inv_pq_cardE.
 exact: (dsdp_alice_guess_fdist_trace_V2_real_le card_renc rand_of_renc
-          v1 u1 u2 u3_unit dk_a dk_b dk_c w_rb2 w_rc2 g).
+          v1 u1 u2 u3_unit dk_a dk_b dk_c w_rb2 w_rc2 predict).
 Qed.
 
 (* The zero-safe unpredictability bound with both cardinalities written at
@@ -1748,16 +1734,18 @@ Qed.
    [pq] variant token before [ge]; kept long to preserve the family
    grouping. *)
 Theorem dsdp_alice_trace_predictor_unpredictability_fdist_ereal_pq_ge
-    (g : 15.-bseq dsdp_trace_dataT -> plain AHE) :
+    (predict : predictor dsdp_traceT) :
   Order.le
     (EFin (log ((p%:R : R) * q%:R)
-           - log (1 + (p%:R : R) * q%:R * (trace_eps0 g + trace_eps1 g))))
-    (alice_trace_predictor_unpredictability_ereal g).
+           - log (1 + (p%:R : R) * q%:R
+                      * (bob_trace_guess_epsilon predict
+                         + charlie_trace_guess_epsilon predict))))
+    (alice_trace_predictor_unpredictability_ereal predict).
 Proof.
 have -> : (p%:R : R) * q%:R = #|plain AHE|%:R by rewrite card_plain_pq natrM.
 exact: (dsdp_alice_trace_predictor_unpredictability_fdist_ereal_ge
           card_renc rand_of_renc v1 u1 u2 u3_unit dk_a dk_b dk_c
-          w_rb2 w_rc2 g).
+          w_rb2 w_rc2 predict).
 Qed.
 
 End dsdp_alice_trace_pq_sec.

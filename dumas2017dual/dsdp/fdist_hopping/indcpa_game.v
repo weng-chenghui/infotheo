@@ -34,7 +34,7 @@ Require Import extra_proba.
 (* A distinguisher here is a plain Boolean function, the counterpart of       *)
 (* the finfun tester of smc/security_models/statdist.v.  A concrete           *)
 (* reduction is built by the protocol file that instantiates this one:        *)
-(* hop0_reduction and hop1_reduction of                                       *)
+(* v2_challenge_adversary and v3_challenge_adversary of                       *)
 (* dumas2017dual/dsdp/fdist_hopping/dsdp_alice_fdist_secrecy.v package a      *)
 (* distinguisher as an indcpa_fdist_adversary, and                            *)
 (* reduction_challenge_fdist is the law their challenge induces.              *)
@@ -60,6 +60,13 @@ Require Import extra_proba.
 (*                      ret a == returns a without sampling anything else     *)
 (*            distinguisher B == a Boolean test on the game output, where     *)
 (*                               true means that the test accepts             *)
+(*              predictor obs == a guessing strategy: a map from an           *)
+(*                               observation to a claimed plaintext           *)
+(*         guess_test predict == the test accepting when the predictor,       *)
+(*                               reading the observation slot, returns the    *)
+(*                               first input slot                             *)
+(*  fdist_uniform_irrelevance == fdist_uniform does not depend on which       *)
+(*                               cardinality proof it is given                *)
 (*     indcpa_fdist_adversary == packages the state sampled before the        *)
 (*                               challenge, the plaintext selected from that  *)
 (*                               state, and the decision made from the state  *)
@@ -114,6 +121,17 @@ Local Open Scope reals_ext_scope.
 Local Open Scope proba_scope.
 Local Open Scope fdist_scope.
 
+(* fdist_uniform does not depend on which cardinality proof it is given.
+   States once what four proof sites re-derived inline as
+   [congr fdist_uniform; exact: eq_irrelevance], and lets a cloned context
+   state a uniformity hypothesis with its own locally built proof term
+   instead of importing the machine-generated [_subproof] constant of the
+   section it clones. *)
+Lemma fdist_uniform_irrelevance {R : realType} (A : finType) (n : nat)
+    (e e' : #|A| = n.+1) :
+  fdist_uniform e = fdist_uniform e' :> R.-fdist A.
+Proof. by congr fdist_uniform; exact: eq_irrelevance. Qed.
+
 (* A sampling step of an experiment, the bind of a distribution with a
    stochastic map. *)
 Notation "x '<-' m ';' f" := (m >>= (fun x => f))
@@ -148,6 +166,22 @@ Definition enc_fdist (pk : pub_key AHE) (v : plain AHE) :
    distinguisher, so an epsilon in this development is a per-distinguisher
    advantage rather than a supremum. *)
 Definition distinguisher (joint : finType) : Type := joint -> bool.
+
+(* A guessing strategy on an observation: a map from the observed value to a
+   claimed plaintext.  The counterpart of [distinguisher] for guessing games:
+   every guessing bound below quantifies over one predictor at a fixed
+   observation. *)
+Definition predictor (obs : finType) : Type := obs -> plain AHE.
+
+(* The test that accepts when a predictor, reading the observation slot,
+   returns the first input slot.  A predictor is scored by an equality event
+   while a hop speaks only about how often a Boolean test accepts; wrapping
+   the predictor this way makes the two the same number: the probability
+   that the predictor succeeds at hop i is the probability that this test
+   accepts at hop i. *)
+Definition guess_test {obs : finType} (predict : obs -> plain AHE) :
+    distinguisher (plain AHE * plain AHE * obs)%type :=
+  fun x => predict x.2 == x.1.1.
 
 (* A single-query real-or-zero adversary.  [adv_state] is everything the
    adversary holds before the challenge, [adv_choose] is its law, [adv_plain]
@@ -364,3 +398,5 @@ Qed.
 End reduction_challenge.
 
 End indcpa_game.
+
+Arguments predictor : clear implicits.
