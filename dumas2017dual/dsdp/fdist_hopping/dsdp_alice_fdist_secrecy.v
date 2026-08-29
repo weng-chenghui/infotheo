@@ -211,6 +211,14 @@ Require Export indcpa_game.
 (*                              choices                                       *)
 (* alice_spectator_of_hop_tuple == removes the leaked output from a hopping   *)
 (*                              tuple                                         *)
+(* alice_hop_tuple_of_spectatorK ==                                           *)
+(*                              assembling the spectator with the leaked      *)
+(*                              output loses neither                          *)
+(*    centropy_V2_Sout_logm == the leaked output alone leaves Bob's input as  *)
+(*                              uncertain as it was                           *)
+(* centropy_V2_all_zero_logm == Alice's all-zero view leaves the same         *)
+(*                              uncertainty, so the Shannon statement is      *)
+(*                              non-degenerate at that endpoint               *)
 (*         alice_ideal_joint == samples the honest inputs and then simulates  *)
 (*                              Alice's view from their leaked output         *)
 (*                                                                            *)
@@ -976,6 +984,35 @@ case: (eqVneq `Pr[ Sout = s ] 0) => [H0|Hn0].
 by rewrite (alice_V2_cond_Sout a Hn0).
 Qed.
 
+(* Conditioned on the leaked output alone, Bob's input still carries
+   log #|plain AHE| bits of uncertainty, which is what it carries with no
+   conditioning at all.  The leaked output is one affine equation in the two
+   secret inputs, as SoutE records, so it cuts the sample space to a fiber on
+   which Bob's input is still uniform.
+   This and the 1/#|plain AHE| term of guess_all_zero_le_invm descend from
+   one fact, alice_V2_cond_Sout: the conditional law of Bob's input given the
+   leaked output is exactly uniform.  Neither statement is derived from the
+   other, and this entropy reading holds at this conditioner alone; at
+   Alice's executed trace the same quantity is zero, which
+   centropy_V2_AliceTrace_eq0 of dsdp_alice_trace_link.v records.
+   Naming: [logm] names the value the quantity takes, the logarithm of the
+   plaintext-space cardinality, as [invm] names its reciprocal in
+   [guess_all_zero_le_invm]. *)
+Lemma centropy_V2_Sout_logm :
+  `H( V2 | Sout ) = log (#|plain AHE|%:R : R).
+Proof.
+rewrite centropy_RVE'.
+transitivity (\sum_(s in plain AHE)
+                `Pr[ Sout = s ] * log (#|plain AHE|%:R : R)); last first.
+  by rewrite -big_distrl /= sum_pfwd1 mul1r.
+apply: eq_bigr => s _.
+have [->|Hs] := eqVneq `Pr[ Sout = s ] 0; first by rewrite !mul0r.
+congr (_ * _); rewrite -[in RHS](cardsT (plain AHE)).
+apply: centropy1_uniform_over_set => //.
+- by move=> a _; rewrite cardsT; exact: alice_V2_cond_Sout.
+- by move=> a; rewrite in_setT.
+Qed.
+
 (* Everything Alice's all-zero view carries besides the leaked output. *)
 Definition AliceSpectator :
     {RV alice_sample_fdist ->
@@ -1271,6 +1308,41 @@ Definition alice_spectator_of_hop_tuple (v : dsdp_alice_hop_tupleT) :
     ((plain AHE * plain AHE) * (Renc * Renc) * cipher AHE
      * cipher AHE)%type :=
   (v.1.1.1.1, v.1.1.1.2, v.1.2, v.2).
+
+(* Assembling the spectator with the leaked output loses nothing: the leaked
+   output is read back from the third slot of the tuple and the spectator
+   from the rest.  Together with the factorization of Alice's all-zero view
+   through that assembly, this is what lets an uncertainty measured at the
+   view be measured at the pair instead.
+   Naming: the [K] suffix marks a cancellation lemma, after MathComp. *)
+Lemma alice_hop_tuple_of_spectatorK :
+  cancel alice_hop_tuple_of_spectator
+    (fun v : dsdp_alice_hop_tupleT =>
+       (alice_spectator_of_hop_tuple v, v.1.1.2)).
+Proof. by case=> [[[[m ra] c2] c3] s]. Qed.
+
+(* Conditioned on Alice's all-zero view, Bob's input carries the same
+   log #|plain AHE| bits it carries given the leaked output alone.  The
+   all-zero endpoint of the hop ladder is where the non-degenerate Shannon
+   statement holds: both ciphertext slots encrypt zero, so the leaked output
+   is the only channel from V2 into the view, and adjoining the spectator
+   coordinates costs nothing.  At Alice's executed trace the same quantity is
+   zero instead, by centropy_V2_AliceTrace_eq0 of dsdp_alice_trace_link.v.
+   The guessing-side fact at this same endpoint is guess_all_zero_le_invm,
+   which bounds every predictor's success by 1/#|plain AHE|.  The two are
+   different quantities: this one averages the conditional entropy over the
+   conditioner, that one bounds a probability, and neither is derived from
+   the other.
+   Naming: [all_zero] names the endpoint, as in [guess_all_zero_le_invm], and
+   [logm] the value, as in [centropy_V2_Sout_logm]. *)
+Lemma centropy_V2_all_zero_logm :
+  `H( V2 | AliceHopTuple 2 ) = log (#|plain AHE|%:R : R).
+Proof.
+have -> : AliceHopTuple 2
+        = alice_hop_tuple_of_spectator `o [% AliceSpectator, Sout] by [].
+rewrite (can_centropy_eq alice_hop_tuple_of_spectatorK).
+by rewrite (cinde_centropy_eq alice_spectator_cinde) centropy_V2_Sout_logm.
+Qed.
 
 Section alice_hop_tuple_all_zero_mass.
 
