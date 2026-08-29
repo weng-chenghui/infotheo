@@ -121,8 +121,8 @@ Notation "'n(' w ')' " := (party_id_to_nat w).
 (* This section provides the basic party-labeled encryption types and operations
    used by the DSDP protocol proofs. This is an idealized model where
    enc = (party * msg). Secrecy is now justified computationally via the IND-CPA
-   game in [dsdp_security_indcpa.v]; the unsound IT-only hypotheses
-   [E_enc_unif] / [E_enc_inde] were retired (Task 15).
+   game of [dumas2017dual/dsdp/fdist_hopping/indcpa_game.v]. The IT-only
+   hypotheses [E_enc_unif] and [E_enc_inde] are retired.
 
    For concrete encryption (Benaloh, Paillier), see sections below. *)
 
@@ -175,7 +175,9 @@ HB.instance Definition _ := [isNew for @party_key_v p k T].
 
 End party_key_def.
 
-(* Future work: it confuses math-comp contributors since this style is used for dep types *)
+(* The [.-key] postfix mirrors MathComp's [.-tuple] spelling, which that
+   library reserves for types indexed by a size.  Here the index is a party
+   tag and a key sort, so the type is labeled rather than sized. *)
 Notation "p .-key k" := (party_key p k)
   (at level 2, format "p .-key k") : type_scope.
 
@@ -276,13 +278,14 @@ Variables (T : finType)(P : R.-fdist T).
 
 (* The IT-only hypotheses [E_enc_unif] and [E_enc_inde] used to live here.
    They postulated that fresh ciphertexts are uniform over the ciphertext
-   space and independent of all other random variables. These axioms are
-   unsound for any real encryption scheme (a deterministic decryption oracle
-   refutes independence) and have been retired in Task 15. Secrecy of the
-   DSDP protocol is now justified computationally via the IND-CPA game in
-   [dsdp_security_indcpa.v]. The contraction lemma [E_enc_ce_contract]
-   below takes an explicit independence hypothesis as input, so it remains
-   usable wherever such an assumption is locally justified. *)
+   space and independent of all other random variables. The second is unsound
+   for any correct encryption scheme, since a decryption oracle relates a
+   ciphertext to its plaintext, so both are retired. Secrecy of the
+   DSDP protocol is justified computationally instead, through the IND-CPA
+   game of [dumas2017dual/dsdp/fdist_hopping/indcpa_game.v]. The contraction
+   lemma [E_enc_ce_contract] below takes an explicit independence hypothesis
+   as input, so it remains usable wherever such an assumption is locally
+   justified. *)
 
 (*
   "Ciphertext conditioning contract":
@@ -317,19 +320,28 @@ End enc_lemmas.
 (*
   Methodology note (two-layer justification for HE-based SMC proofs)
 
-  This development originally used homomorphic encryption through an
-  *idealized* IT interface: ciphertext random variables were postulated to be
-  (1) uniform over the ciphertext type and (2) independent of all other random
-  variables. Those hypotheses were retired in Task 15 because the second is
-  unsound for any real encryption scheme. Secrecy of the DSDP protocol is now
-  justified computationally via the IND-CPA game in
-  [dsdp_security_indcpa.v]; the contraction lemma [E_enc_ce_contract] remains
-  available wherever a local independence assumption is justifiable.
+  An idealized IT interface would postulate that ciphertext random variables
+  are uniform over the ciphertext type and independent of all other random
+  variables. The second postulate is unsound for any correct encryption
+  scheme, since decryption relates the ciphertext to its plaintext, so this
+  development states secrecy computationally instead: each hop of the DSDP
+  corrupted-Alice argument is priced by [indcpa_fdist_epsilon] of a reduction
+  constructed there, defined in
+  [dumas2017dual/dsdp/fdist_hopping/indcpa_game.v]. The
+  contraction lemma [E_enc_ce_contract] above takes its independence
+  hypothesis explicitly and is usable wherever that hypothesis is locally
+  justified.
 
-  Computational HE security is accounted for in a *second layer* (not in this
-  file): one proves a refinement/realization theorem showing that a concrete HE
-  scheme (with computational indistinguishability guarantees) implements the
-  ideal interface up to negligible error. This keeps protocol reasoning modular:
-  the SMC argument is proved once for the ideal primitive, and separately linked
-  to concrete assumptions via a standard reduction.
+  Two things carry a bound of that shape to a concrete scheme. The first is
+  an adversary class: [indcpa_epsilon_assumption], in the same file, packages
+  a Boolean classifier on adversaries, one epsilon, and the assumption that
+  every classified adversary stays below it at every key built from a private
+  key. The gate is what keeps the assumed epsilon small: an adversary
+  holding the matching private key decrypts the challenge, so a class
+  admitting every adversary forces its epsilon to 1 whenever the plaintext
+  space has more than one element. The
+  second is an instantiation of that record at a scheme, which
+  [dumas2017dual/dsdp/fdist_hopping/paillier_indcpa_instance.v] does for
+  Paillier, leaving the epsilon a parameter that a proof from decisional
+  composite residuosity would supply.
 *)
