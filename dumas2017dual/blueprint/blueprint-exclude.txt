@@ -140,6 +140,13 @@ indcpa_game:reduction_challenge_acceptE
 indcpa_game:reduction_challenge_fdist
 indcpa_game:reduction_challenge_fdistE
 indcpa_game:reduction_challenge_successE
+# paillier_indcpa_instance: the coin plumbing and the modulus bound the
+# packaging is taken at; the blueprint cites the bound read off at that
+# instance, not the plumbing that instantiates the abstract statement.
+paillier_indcpa_instance:card_renc_paillier
+paillier_indcpa_instance:pq_gt1
+paillier_indcpa_instance:rand_of_renc_paillier
+paillier_indcpa_instance:renc_paillier
 
 # The axis copies of the headlines relocated into dsdp_main.v. Each is
 # still the source the file's own downstream corollaries call; the \rocq node

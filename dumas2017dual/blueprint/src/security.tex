@@ -564,8 +564,8 @@ carries the three bounds above to the executed protocol.
   \rocq{infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_trace_link.dsdp_alice_trace_tupleT,
        infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_trace_link.AliceTraceTuple,
        infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_trace_link.alice_trace_tupleE,
-       infotheo.dumas2017dual.dsdp.dsdp_main.centropy_AliceTrace_AliceHopTuple,
-       infotheo.dumas2017dual.dsdp.dsdp_main.centropy_AliceView_AliceHopTuple}
+       infotheo.dumas2017dual.dsdp.dsdp_main.centropy_AliceTrace_AliceRealTuple,
+       infotheo.dumas2017dual.dsdp.dsdp_main.centropy_AliceView_AliceRealTuple}
   \rocqok
   \uses{lem:trace_of_hop_tuple,cor:alice_guess_view}
   Conditioning on Alice's executed trace, and conditioning on her full view,
@@ -635,6 +635,25 @@ adversary class, and records what forces the class to leave something out.
   than at their own values. The two admissibility premises are conditional on
   the class, and are assumed rather than proved.
 \end{theorem}
+
+\begin{corollary}[The bound at the Paillier scheme]
+  \label{cor:alice_guess_paillier}
+  \rocq{infotheo.dumas2017dual.dsdp.fdist_hopping.paillier_indcpa_instance.dsdp_alice_guess_fdist_trace_V2_admissible_paillier_le}
+  \rocqok
+  \uses{thm:alice_guess_admissible}
+  At the Paillier packaging with modulus $pq$, a trace predictor whose two
+  reduction adversaries are admissible for $\mathcal{A}$ matches Bob's input
+  with probability at most $1/(pq)$ plus twice the assumed advantage.
+  \[ \Pr[\,g(\mathrm{AliceTrace}) = V_2\,]
+       \le \tfrac{1}{pq} + 2\,\varepsilon_{\mathcal{A}} \]
+  The information-theoretic side is discharged here: the plaintext space of
+  that packaging has exactly $pq$ elements, and the coin plumbing the abstract
+  bound quantifies over is supplied by the scheme's own randomness. The
+  advantage side is not discharged, and $\mathcal{A}$ remains a parameter of
+  the statement. This is therefore the socket a bound on Paillier's IND-CPA
+  advantage plugs into; deriving one from decisional composite residuosity, at
+  a modulus that is the product of two distinct primes, is what would fill it.
+\end{corollary}
 
 \begin{lemma}[The gated bound is negligible as a family]
   \label{lem:negligible_guess_bound}

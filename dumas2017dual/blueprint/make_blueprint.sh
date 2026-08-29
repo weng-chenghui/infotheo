@@ -25,6 +25,9 @@ MODULES=(
   # bounds, and their transfer to the executed piSMC trace.
   dumas2017dual/dsdp/fdist_hopping/dsdp_alice_fdist_secrecy.v
   dumas2017dual/dsdp/fdist_hopping/dsdp_alice_trace_link.v
+  # The plug point: the same bound read off at a concrete scheme, with the
+  # cardinality side discharged and the advantage left a parameter.
+  dumas2017dual/dsdp/fdist_hopping/paillier_indcpa_instance.v
 )
 
 echo "[1/3] blueprint HTML + dependency graph (plastex)"
