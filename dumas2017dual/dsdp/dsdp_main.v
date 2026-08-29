@@ -1137,7 +1137,10 @@ Qed.
    With an assumption that admits nobody and promises epsilon zero, the
    premise-free bound is simply false: the decrypting predictor recovers Bob's
    input with certainty while the right-hand side stays below one.  The gate is
-   where the bound's truth lives.
+   where the bound's truth lives.  The witness here is the assumption that
+   admits nobody, so this lemma only closes the premise-free reading; the
+   previous lemma is what rules out the assumptions that matter, and the two
+   together carry the argument.
    Naming: [premises_necessary] names what the statement establishes about
    [dsdp_alice_guess_fdist_trace_V2_admissible_le]. *)
 Lemma admissible_le_premises_necessary :
