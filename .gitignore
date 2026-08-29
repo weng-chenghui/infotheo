@@ -70,3 +70,6 @@ texput.log
 *.~undo-tree~
 /index.html
 /infotheo.*.html
+
+# Flatten-artifact tarball output (scripts/flatten_artifact.sh)
+/dist/
