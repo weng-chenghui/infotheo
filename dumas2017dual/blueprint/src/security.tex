@@ -615,6 +615,26 @@ adversary class, and records what forces the class to leave something out.
   Running time is a property of a syntax the record does not carry.
 \end{definition}
 
+\begin{definition}[An assumption with a computed class and a proved promise]
+  \label{def:cipher_constant_assumption}
+  \rocq{infotheo.dumas2017dual.dsdp.fdist_hopping.indcpa_game.adv_decide_cipher_constant,
+       infotheo.dumas2017dual.dsdp.fdist_hopping.indcpa_game.indcpa_epsilon_cipher_constant_eq0,
+       infotheo.dumas2017dual.dsdp.fdist_hopping.indcpa_game.cipher_constant_assumption}
+  \rocqok
+  \uses{def:indcpa_assumption}
+  The classifier that admits an adversary exactly when its verdict ignores the
+  challenge ciphertext is decidable, and every adversary it admits has
+  advantage zero.
+  \[ \mathrm{adm}(D) \iff \forall c, ch_1, ch_2:\
+       D_{\mathrm{dec}}(c, ch_1) = D_{\mathrm{dec}}(c, ch_2),
+     \qquad \mathrm{adm}(D) \implies \epsror{\pk}{D} = 0 \]
+  Instantiating the record with that classifier and $\varepsilon = 0$
+  discharges its bound field by the equality rather than by hypothesis, so it
+  is an inhabitant whose promise is proved. Its class is small and the bounds
+  it gates are correspondingly weak; what it settles is that the record type
+  is inhabited with content, and what a classifier that computes looks like.
+\end{definition}
+
 \begin{theorem}[The trace bound gated on a class]
   \label{thm:alice_guess_admissible}
   \rocq{infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_trace_link.alice_trace_guess_pr,

@@ -32,6 +32,7 @@ Require Import extra_proba.
 (* | reduction     | reduction_challenge_fdist                              | *)
 (* | assumption    | indcpa_epsilon_assumption                              | *)
 (* | asymptotics   | negligible_fun                                         | *)
+(* | instance      | cipher_constant_assumption                             | *)
 (*                                                                            *)
 (* A distinguisher here is a plain Boolean function, the counterpart of       *)
 (* the finfun tester of smc/security_models/statdist.v.  A concrete           *)
@@ -79,6 +80,16 @@ Require Import extra_proba.
 (*                               adversaries                                  *)
 (* indcpa_assumption_epsilon A == the advantage A assumes for its class       *)
 (* indcpa_admissible_epsilon_le == the gated bound A assumes                  *)
+(* adv_decide_cipher_constant adv ==                                          *)
+(*                               decides whether the adversary's verdict      *)
+(*                               ignores the challenge ciphertext             *)
+(* indcpa_epsilon_cipher_constant_eq0 ==                                      *)
+(*                               an adversary whose verdict ignores the       *)
+(*                               ciphertext has advantage zero                *)
+(* cipher_constant_assumption == that class with epsilon zero, an assumption  *)
+(*                               whose bound is proved rather than posited    *)
+(*            fdistbind_cst == a distribution bound to a continuation that    *)
+(*                               ignores its sample is the Dirac law there    *)
 (*            enc_fdist pk v == the distribution obtained by encrypting v     *)
 (*                               under pk with fresh uniform randomness       *)
 (*                x <- m ; f == samples x from m and continues with f x       *)
@@ -401,6 +412,68 @@ Record indcpa_epsilon_assumption := {
     indcpa_admissible adv ->
     indcpa_fdist_epsilon (pub_of_priv dk) adv
       <= indcpa_assumption_epsilon }.
+
+(* A distribution bound to a continuation that ignores what it sampled is the
+   Dirac law at that constant value. *)
+Lemma fdistbind_cst (A B : finType) (D : R.-fdist A) (f : A -> B) (b : B) :
+  (forall a, f a = b) -> (a <- D ; ret (f a)) = fdist1 b.
+Proof.
+move=> Hf; apply/fdist_ext => x; rewrite fdistbindE.
+under eq_bigr do rewrite Hf.
+by rewrite -big_distrl /= FDist.f1 mul1r.
+Qed.
+
+(* A classifier that actually computes: it says yes exactly when the
+   adversary's decision ignores the challenge ciphertext, checked over every
+   state and every pair of ciphertexts by finite quantification.  This is what
+   "receive a function, give a boolean" looks like when the boolean is not a
+   placeholder.
+   Naming: names the field it inspects and the property it checks of it. *)
+Definition adv_decide_cipher_constant (adv : indcpa_fdist_adversary) : bool :=
+  [forall c, [forall ch1, [forall ch2,
+     adv_decide adv c ch1 == adv_decide adv c ch2]]].
+
+(* Every adversary that classifier admits has advantage exactly zero, not at
+   most some posited epsilon.  Ignoring the ciphertext means the real and the
+   zero experiment hand the decision the same law, so the two acceptance
+   probabilities are one number and their gap is zero.
+   Naming: [eq0] states the value, after MathComp; the middle names the
+   condition under which it holds. *)
+Lemma indcpa_epsilon_cipher_constant_eq0 (pk : pub_key AHE)
+    (adv : indcpa_fdist_adversary) :
+  adv_decide_cipher_constant adv -> indcpa_fdist_epsilon pk adv = 0.
+Proof.
+move=> /forallP Hc.
+have /card_gt0P[r0 _] : (0 < #|Renc|)%N by rewrite card_renc.
+have Hexp : indcpa_experiment true pk adv = indcpa_experiment false pk adv.
+  congr (_ >>= _); apply/boolp.funext => c.
+  have Hcst (D : R.-fdist (cipher AHE)) :
+      (ch <- D ; ret (adv_decide adv c ch))
+      = fdist1 (adv_decide adv c (enc pk 0 (rand_of_renc r0))).
+    apply: fdistbind_cst => ch; apply/eqP.
+    by move: (Hc c) => /forallP/(_ ch)/forallP/(_ (enc pk 0 (rand_of_renc r0))).
+  by rewrite !Hcst.
+by rewrite /indcpa_fdist_epsilon /indcpa_fdist_success_real
+           /indcpa_fdist_success_zero /indcpa_fdist_accept Hexp subrr normr0.
+Qed.
+
+(* The gated bound the instance below carries, discharged by the lemma. *)
+Let cipher_constant_epsilon_le (dk : priv_key AHE)
+    (adv : indcpa_fdist_adversary) :
+  adv_decide_cipher_constant adv ->
+  indcpa_fdist_epsilon (pub_of_priv dk) adv <= 0.
+Proof. by move=> H; rewrite (indcpa_epsilon_cipher_constant_eq0 _ H). Qed.
+
+(* An assumption whose promise is proved rather than posited.  Its classifier
+   computes, its epsilon is zero, and the bound it carries is the lemma above
+   instead of a hypothesis.  The class it admits is small, so the bounds it
+   gates are weak, but it settles that this record type has an inhabitant with
+   content, and it shows what one looks like.
+   Naming: names the class it carries, after [adv_decide_cipher_constant]. *)
+Definition cipher_constant_assumption : indcpa_epsilon_assumption :=
+  {| indcpa_admissible := adv_decide_cipher_constant ;
+     indcpa_assumption_epsilon := 0 ;
+     indcpa_admissible_epsilon_le := cipher_constant_epsilon_le |}.
 
 Section enc_slot_resample.
 

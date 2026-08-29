@@ -134,6 +134,7 @@ extra_proba:sum_cPr_eq
 # two hop_advantageE nodes fold together.
 indcpa_game:distinguisher
 indcpa_game:enc_slot_resampleE
+indcpa_game:fdistbind_cst
 indcpa_game:negligible_fun_add
 indcpa_game:negligible_fun_le
 indcpa_game:reduction_challenge_acceptE
