@@ -143,6 +143,8 @@ dumas2017dual/dsdp/counting/dsdp_entropy.v
 dumas2017dual/dsdp/fdist_hopping/indcpa_game.v
 dumas2017dual/dsdp/fdist_hopping/dsdp_alice_fdist_secrecy.v
 dumas2017dual/dsdp/fdist_hopping/dsdp_alice_trace_link.v
+# Out of directory order: this file consumes the DSDP results above.
+homomorphic_encryption/paillier1999/paillier_indcpa_instance.v
 dumas2017dual/dsdp/counting/dsdp_malicious_dotp.v
 dumas2017dual/dsdp/dsdp_main.v
 
