@@ -271,7 +271,9 @@ Lemma trivial_bob_cipher_constant (k : nat) :
        (inst_dk_c (trivial_instance k)) (inst_w_rc2 (trivial_instance k))
        (distinguisher_of_predictor (fun _ => 0))).
 Proof.
-Admitted.
+apply/forallP => c; apply/forallP => ch1; apply/forallP => ch2.
+by case: c => [[[vv ms] ra] rho3].
+Qed.
 
 (* The Charlie-key counterpart of trivial_bob_cipher_constant. *)
 Lemma trivial_charlie_cipher_constant (k : nat) :
@@ -286,7 +288,9 @@ Lemma trivial_charlie_cipher_constant (k : nat) :
        (inst_dk_c (trivial_instance k)) (inst_w_rc2 (trivial_instance k))
        (distinguisher_of_predictor (fun _ => 0))).
 Proof.
-Admitted.
+apply/forallP => c; apply/forallP => ch1; apply/forallP => ch2.
+by case: c => [[[vv ms] ra] c2zero].
+Qed.
 
 (* The headline's hypotheses hold together at least once: the witness
    discharges every one of them end-to-end. *)
@@ -300,6 +304,20 @@ Corollary trivial_instance_guess_V2_negligible :
       (inst_dk_c (trivial_instance k)) (inst_w_rb2 (trivial_instance k))
       (inst_w_rc2 (trivial_instance k)) (fun _ => 0)).
 Proof.
-Admitted.
+apply: (alice_trace_guess_V2_admissible_negligible
+          (I := trivial_instance)
+          (A := fun k => cipher_constant_assumption
+                  (inst_card_renc (trivial_instance k))
+                  (@inst_rand_of_renc (trivial_instance k)))
+          (predict := fun k => fun _ => 0)).
+- exact: trivial_bob_cipher_constant.
+- exact: trivial_charlie_cipher_constant.
+- have -> :
+    (fun k : nat => (#|plain (inst_AHE (trivial_instance k))|%:R : R)^-1)
+    = (fun k : nat => (((k.+2) ^ k.+2)%N%:R : R)^-1).
+    by apply/boolp.funext => k; rewrite card_plain_trivial.
+  exact: negligible_fun_inv_expnn.
+- exact: negligible_fun_cst0.
+Qed.
 
 End trivial_witness.
