@@ -224,7 +224,25 @@ Corollary decrypt_reduction_admissible_eventuallyF :
             (inst_dk_a (I k)) (inst_dk_b (I k)) (inst_dk_c (I k))
             (inst_w_rc2 (I k))))) = false.
 Proof.
-Admitted.
+move=> Hinv Heps.
+have [N1 HN1] := Hinv 1%N; have [N2 HN2] := Heps 1%N.
+exists (maxn (maxn N1 N2) 1) => k.
+rewrite !gtn_max => /andP[/andP[Hk1 Hk2] Hk3].
+have Hk0 : (0 < k%:R :> R) by rewrite ltr0n ltnW.
+have Heps' : indcpa_assumption_epsilon (A k) < (k%:R : R)^-1.
+  by move: (HN2 k Hk2); rewrite expr1.
+have Hinv' : (#|plain (inst_AHE (I k))|%:R : R)^-1 < (k%:R : R)^-1.
+  by move: (HN1 k Hk1); rewrite expr1.
+have Hhalf : (k%:R : R)^-1 <= 1 - (k%:R : R)^-1.
+  rewrite lerBrDr -div1r -mulrDl ler_pdivrMr // mul1r -(natrD R 1 1).
+  by rewrite ler_nat.
+apply: (decrypt_reduction_admissibleF (inst_v1 (I k)) (inst_u1 (I k))
+          (inst_u2 (I k)) (inst_u3_unit (I k)) (inst_dk_a (I k))
+          (inst_dk_b (I k)) (inst_dk_c (I k)) (inst_w_rb2 (I k))
+          (inst_w_rc2 (I k))).
+apply: lt_le_trans Heps' _; apply: le_trans Hhalf _.
+by rewrite lerD2l lerN2 ltW.
+Qed.
 
 End dsdp_instance_family.
 
