@@ -101,7 +101,11 @@ Record dsdp_instance := {
    every monomial k^c, by base and exponent monotonicity alone. *)
 Lemma expnn_gt_monomial (c n : nat) : (c < n)%N -> (n ^ c < n.+2 ^ n.+2)%N.
 Proof.
-Admitted.
+move=> Hcn; apply: leq_ltn_trans (_ : (n.+2) ^ c < _)%N; last first.
+  by rewrite ltn_exp2l //; exact: (leq_trans Hcn (leqW (leqnSn n))).
+move: Hcn; case: c => [_|c _]; first by rewrite !expn0.
+by rewrite leq_exp2r //; exact: (leqW (leqnSn n)).
+Qed.
 
 Section negligible_helpers.
 Context {R : realType}.
@@ -111,7 +115,12 @@ Context {R : realType}.
 Lemma negligible_fun_inv_expnn :
   negligible_fun (fun k : nat => (((k.+2) ^ k.+2)%N%:R : R)^-1).
 Proof.
-Admitted.
+move=> c; exists c => n Hn.
+have Hn0 : (0 < n)%N by apply: leq_ltn_trans Hn.
+rewrite -natrX ltf_pV2 ?ltr_nat ?expnn_gt_monomial //.
+  by rewrite posrE ltr0n expn_gt0.
+by rewrite posrE ltr0n expn_gt0 Hn0.
+Qed.
 
 (* A sequence dominating (k+2)^(k+2) has negligible inverse.  The checkable
    modulus-growth condition of the scheme families: a Paillier or Benaloh
@@ -121,13 +130,16 @@ Lemma negligible_fun_inv_ge_expnn (f : nat -> nat) :
   (forall k, ((k.+2) ^ k.+2 <= f k)%N) ->
   negligible_fun (fun k => ((f k)%:R : R)^-1).
 Proof.
-Admitted.
+move=> Hf; apply: negligible_fun_le negligible_fun_inv_expnn => k.
+rewrite lef_pV2 ?ler_nat //.
+  by rewrite posrE ltr0n (leq_trans _ (Hf k)) // expn_gt0.
+by rewrite posrE ltr0n expn_gt0.
+Qed.
 
 (* The zero family is negligible: what the cipher-constant assumption family
    contributes to the witness. *)
 Lemma negligible_fun_cst0 : negligible_fun (fun _ : nat => 0 : R).
-Proof.
-Admitted.
+Proof. by move=> c; exists 0 => n Hn; rewrite invr_gt0 exprn_gt0 // ltr0n. Qed.
 
 End negligible_helpers.
 
