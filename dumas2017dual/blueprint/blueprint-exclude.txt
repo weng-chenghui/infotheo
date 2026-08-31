@@ -6,6 +6,9 @@
 #
 # Format: one `module_basename:identifier` per line. Auto-excluded kinds
 # (Variable/Hypothesis/Context/Let) are not listed.
+# benaloh_indcpa_instance: the per-rung instance record built from the coin
+# plumbing above it; the blueprint cites the bound read off along that family.
+benaloh_indcpa_instance:benaloh_instance
 # dsdp_alice_fdist_secrecy: the uniformity, product-law and slot-resampling
 # plumbing under the hop ladder, the constant-weight random variables, and the
 # per-rung challenge equalities the two hop_advantageE nodes fold together.
@@ -91,6 +94,22 @@ dsdp_entropy:dsdp_fiber_n
 dsdp_entropy:dsdp_fiber_ring
 dsdp_entropy:dsdp_g
 dsdp_entropy:dsdp_var_entropy
+# dsdp_instance_family: the per-rung applications of the concrete constants, the
+# growth and zero facts under the negligibility hypotheses, and the identity-
+# scheme witness; the blueprint cites the family headline and its companion,
+# into which this plumbing is folded.
+dsdp_instance_family:alice_trace_guess_V2_pr_at
+dsdp_instance_family:bob_trace_adversary_at
+dsdp_instance_family:card_renc_ord1
+dsdp_instance_family:charlie_trace_adversary_at
+dsdp_instance_family:expnn_gt_monomial
+dsdp_instance_family:negligible_fun_cst0
+dsdp_instance_family:negligible_fun_inv_expnn
+dsdp_instance_family:negligible_fun_inv_ge_expnn
+dsdp_instance_family:trivial_bob_cipher_constant
+dsdp_instance_family:trivial_charlie_cipher_constant
+dsdp_instance_family:trivial_instance
+dsdp_instance_family:trivial_instance_guess_V2_negligible
 # entropy_fiber_zpq: the Z_pq-specialized fiber lemmas; the blueprint cites the
 # generic gen_cPr_uniform_fiber.
 entropy_fiber_zpq:Pr_cond_fiber_marginE
@@ -145,6 +164,7 @@ indcpa_game:negligible_fun_le
 # packaging is taken at; the blueprint cites the bound read off at that
 # instance, not the plumbing that instantiates the abstract statement.
 paillier_indcpa_instance:card_renc_paillier
+paillier_indcpa_instance:paillier_instance
 paillier_indcpa_instance:pq_gt1
 paillier_indcpa_instance:rand_of_renc_paillier
 paillier_indcpa_instance:renc_paillier

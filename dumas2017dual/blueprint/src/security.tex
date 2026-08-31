@@ -679,15 +679,12 @@ adversary class, and records what forces the class to leave something out.
   \label{lem:negligible_predictor_bound}
   \rocq{infotheo.dumas2017dual.dsdp.fdist_hopping.indcpa_game.negligible_fun_predictor_bound}
   \rocqok
-  \uses{def:negligible_fun,thm:alice_guess_admissible}
+  \uses{def:negligible_fun}
   The arithmetic shape of the class-conditional bound is negligible whenever both of its
   summand families are.
   \[ \mathrm{negl}(k \mapsto \iota_k) \wedge \mathrm{negl}(k \mapsto \eta_k)
-     \implies \mathrm{negl}\big(k \mapsto \iota_k + (\eta_k + \eta_k)\big) \]
-  Both arguments are families of reals. A family of DSDP instances would carry
-  a scheme, three key pairs and four weights per security parameter, making the
-  bound a dependent family rather than an inequality between two real
-  sequences.
+     \implies \mathrm{negl}\big(k \mapsto \iota_k + 2\,\eta_k\big) \]
+  Both arguments are families of reals.
 \end{lemma}
 
 \begin{definition}[The decrypting predictor]
@@ -753,6 +750,100 @@ adversary class, and records what forces the class to leave something out.
   false statement, and for every such assumption rather than a contrived one.
   Corollary~\ref{cor:decrypt_not_admissible} is the complementary half: the
   missing premises cannot be supplied for this predictor.
+\end{corollary}
+
+\begin{definition}[One rung of a DSDP instance family]
+  \label{def:dsdp_instance}
+  \rocq{infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_instance_family.dsdp_instance}
+  \rocqok
+  \uses{def:alice_trace}
+  A rung is the scheme, its coin index type with a nonemptiness proof, the coin
+  map, the four weights with $u_3$ a unit of the plaintext ring, the three
+  private keys, and the two hop coins: exactly the parameters every
+  corrupted-Alice trace bound is stated at.
+  \[ \mathcal{I} = \big(\mathrm{AHE},\ R_{\mathrm{enc}},\ \rho,\
+       v_1, u_1, u_2, u_3,\ dk_A, dk_B, dk_C,\ w_B, w_C\big) \]
+  A family is a map $k \mapsto \mathcal{I}_k$ from the security parameter, so
+  every concrete trace bound applies at each rung unchanged. The real field
+  stays outside the record: one family lives over one $R$, which only the
+  assumption record and the probabilities mention.
+\end{definition}
+
+\begin{theorem}[The trace guessing family is negligible]
+  \label{thm:alice_guess_negligible}
+  \rocq{infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_instance_family.alice_trace_guess_V2_admissible_negligible,
+       infotheo.dumas2017dual.dsdp.dsdp_main.alice_trace_guess_V2_admissible_negligible}
+  \rocqok
+  \uses{def:negligible_fun,def:dsdp_instance,lem:negligible_predictor_bound,thm:alice_guess_admissible}
+  Along a family $k \mapsto \mathcal{I}_k$ carrying an assumption
+  $\mathcal{A}_k$ and a predictor $g_k$ per rung, if both reduction adversaries
+  of $g_k$ are admissible for $\mathcal{A}_k$ at every $k$, and the inverse
+  plaintext cardinalities and the assumed advantages are negligible families,
+  then so are the guessing probabilities.
+  \[ \mathrm{negl}\big(k \mapsto \tfrac{1}{m_k}\big) \wedge
+     \mathrm{negl}\big(k \mapsto \varepsilon_{\mathcal{A}_k}\big)
+     \implies \mathrm{negl}\big(k \mapsto
+       \Pr[\,g_k(\mathrm{AliceTrace}_k) = V_2\,]\big) \]
+  The class restriction lands on the two reduction adversaries, not on the
+  predictor, and that is what separates this statement from the decrypting
+  predictor $\delta$, whose guessing probability is $1$ at every rung.
+  Corollary~\ref{cor:decrypt_family_not_admissible} shows that the same two
+  negligibility hypotheses eventually reject $\delta$'s reduction adversary.
+  Every currency is hypothesis-conditional, priced per rung as in
+  Theorem~\ref{thm:alice_guess_admissible}.
+\end{theorem}
+
+\begin{corollary}[The hypotheses eventually reject the decrypting family]
+  \label{cor:decrypt_family_not_admissible}
+  \rocq{infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_instance_family.decrypt_reduction_admissible_eventuallyF}
+  \rocqok
+  \uses{def:dsdp_instance,def:negligible_fun,cor:decrypt_not_admissible}
+  Under the two negligibility hypotheses above there is a threshold past which
+  every rung's classifier answers false on the reduction adversary $\delta$
+  induces at Bob's key.
+  \[ \exists K,\ \forall k > K,\
+     \mathrm{adm}_{\mathcal{A}_k}\big(\hopred{0}{D_\delta}\big)
+       = \mathsf{false} \]
+  At $c = 1$ both hypotheses put their families below $1/k$, and from $k \ge 2$
+  that leaves $\varepsilon_{\mathcal{A}_k} < 1 - 1/m_k$, which is the premise of
+  Corollary~\ref{cor:decrypt_not_admissible}. The parallel-track reading of
+  Theorem~\ref{thm:alice_guess_negligible} is therefore excluded by that
+  theorem's own hypotheses.
+\end{corollary}
+
+\begin{corollary}[The bound along a Paillier family]
+  \label{cor:alice_guess_paillier_negligible}
+  \rocq{infotheo.dumas2017dual.dsdp.fdist_hopping.paillier_indcpa_instance.dsdp_alice_trace_guess_V2_admissible_paillier_negligible}
+  \rocqok
+  \uses{thm:alice_guess_negligible,cor:alice_guess_paillier}
+  At a family of Paillier moduli $p_k q_k$, the guessing family is negligible
+  once $k \mapsto 1/(p_k q_k)$ is negligible and the assumed per-rung
+  advantages are.
+  \[ \mathrm{negl}\big(k \mapsto \tfrac{1}{p_k q_k}\big) \wedge
+     \mathrm{negl}\big(k \mapsto \varepsilon_{\mathcal{A}_k}\big)
+     \implies \mathrm{negl}\big(k \mapsto
+       \Pr[\,g_k(\mathrm{AliceTrace}_k) = V_2\,]\big) \]
+  The packaging, coin type, cardinality and coin map are the fixed-instance
+  ones applied at $k$; the weights, keys and coins are assumed as families, so
+  no number theory beyond $1 < p_k, q_k$ enters. Decisional composite
+  residuosity remains the source a proved advantage family would start from.
+\end{corollary}
+
+\begin{corollary}[The bound along a Benaloh family]
+  \label{cor:alice_guess_benaloh_negligible}
+  \rocq{infotheo.dumas2017dual.dsdp.fdist_hopping.benaloh_indcpa_instance.dsdp_alice_trace_guess_V2_admissible_benaloh_negligible}
+  \rocqok
+  \uses{thm:alice_guess_negligible,def:negligible_fun}
+  At a family of Benaloh block sizes $r_k$, the guessing family is negligible
+  once $k \mapsto 1/r_k$ is negligible and the assumed per-rung advantages are.
+  \[ \mathrm{negl}\big(k \mapsto \tfrac{1}{r_k}\big) \wedge
+     \mathrm{negl}\big(k \mapsto \varepsilon_{\mathcal{A}_k}\big)
+     \implies \mathrm{negl}\big(k \mapsto
+       \Pr[\,g_k(\mathrm{AliceTrace}_k) = V_2\,]\big) \]
+  The information-theoretic term is read at the block size $r_k$, which is the
+  plaintext space, and not at the modulus $n_k$, which sizes the ciphertext
+  space. $r$-th residuosity remains the source a proved advantage family would
+  start from.
 \end{corollary}
 
 \begin{theorem}[The trace determines Bob's input]
