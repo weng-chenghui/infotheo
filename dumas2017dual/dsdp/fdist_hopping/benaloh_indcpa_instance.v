@@ -6,6 +6,7 @@ Require Import fdist_extra proba.
 Require Import homomorphic_encryption.
 Require Import benaloh_ahe.
 Require Import indcpa_game dsdp_alice_fdist_secrecy dsdp_alice_trace_link.
+Require Import dsdp_instance_family.
 
 (**md**************************************************************************)
 (* # Benaloh as the encryption scheme of the DSDP trace bound                 *)
@@ -48,6 +49,12 @@ Require Import indcpa_game dsdp_alice_fdist_secrecy dsdp_alice_trace_link.
 (*                               the class-conditional DSDP trace guessing    *)
 (*                               bound with 1/r as its information-theoretic  *)
 (*                               term                                         *)
+(*           benaloh_instance == the rung of a DSDP instance family carried   *)
+(*                               by a family of Benaloh block sizes           *)
+(* dsdp_alice_trace_guess_V2_admissible_benaloh_negligible ==                 *)
+(*                               the asymptotic form of that bound, under     *)
+(*                               block-size growth and an assumed negligible  *)
+(*                               advantage family                             *)
 (* ```                                                                        *)
 (*                                                                            *)
 (******************************************************************************)
@@ -212,3 +219,71 @@ exact: (alice_trace_guess_V2_admissible_le u3_unit w_rb2).
 Qed.
 
 End benaloh_indcpa_instance.
+
+Section benaloh_instance_family.
+Context {R : realType}.
+Variables n r : nat -> nat.
+Hypothesis n_gt1 : forall k, (1 < n k)%N.
+Hypothesis r_gt1 : forall k, (1 < r k)%N.
+Variables (v1f u1f u2f u3f :
+  forall k, plain (Benaloh_AHEnc (n k) (r_gt1 k))).
+Hypothesis u3f_unit : forall k, u3f k \is a GRing.unit.
+Variables (dkaf dkbf dkcf :
+  forall k, priv_key (Benaloh_AHEnc (n k) (r_gt1 k))).
+Variables (wb2f wc2f : forall k, renc_benaloh (n k)).
+
+(* The Benaloh rung at parameter k: the existing packaging, coin type,
+   pinned cardinality, and coin map of this file, with the weights, keys,
+   and coins supplied as families.  Everything number-theoretic about the
+   modulus and the block size beyond 1 < n, r stays assumed, as in the
+   fixed-instance section above. *)
+Definition benaloh_instance (k : nat) : dsdp_instance := {|
+  inst_AHE          := Benaloh_AHEnc (n k) (r_gt1 k) ;
+  inst_renc         := renc_benaloh (n k) ;
+  inst_card_renc    := card_renc_benaloh (n k) ;
+  inst_rand_of_renc := rand_of_renc_benaloh (n:=n k) (r_gt1 k) ;
+  inst_v1 := v1f k ; inst_u1 := u1f k ; inst_u2 := u2f k ;
+  inst_u3 := u3f k ; inst_u3_unit := u3f_unit k ;
+  inst_dk_a := dkaf k ; inst_dk_b := dkbf k ; inst_dk_c := dkcf k ;
+  inst_w_rb2 := wb2f k ; inst_w_rc2 := wc2f k |}.
+
+Variable A : forall k, indcpa_epsilon_assumption (R:=R)
+    (inst_card_renc (benaloh_instance k))
+    (@inst_rand_of_renc (benaloh_instance k)).
+Variable predict : forall k, predictor (inst_AHE (benaloh_instance k))
+    (dsdp_traceT (inst_AHE (benaloh_instance k))).
+Arguments predict : clear implicits.
+
+(* The plaintext cardinality at rung k, in the form the block-size growth
+   hypothesis is stated in. *)
+Let card_plain_r_at (k : nat) :
+  #|plain (inst_AHE (benaloh_instance k))| = r k.
+Proof. by rewrite card_ord (Zp_cast (r_gt1 k)). Qed.
+
+(* The asymptotic form of this file's corollary: the guessing family is
+   negligible once the block-size family makes 1/r negligible and the
+   assumed per-rung advantages are negligible.  The assumption family is
+   the per-k form of benaloh_indcpa_assumption; r-th residuosity remains
+   the source a proved record family would start from. *)
+Corollary dsdp_alice_trace_guess_V2_admissible_benaloh_negligible :
+  (forall k, indcpa_admissible (A k)
+     (bob_trace_adversary_at (I:=benaloh_instance)
+        (distinguisher_of_predictor (predict k)))) ->
+  (forall k, indcpa_admissible (A k)
+     (charlie_trace_adversary_at (I:=benaloh_instance)
+        (distinguisher_of_predictor (predict k)))) ->
+  negligible_fun (fun k => ((r k)%:R : R)^-1) ->
+  negligible_fun (fun k => indcpa_assumption_epsilon (A k)) ->
+  negligible_fun (fun k =>
+     alice_trace_guess_V2_pr_at (R:=R) (I:=benaloh_instance) (predict k)).
+Proof.
+move=> HB HC Hr Heps.
+apply: (alice_trace_guess_V2_admissible_negligible HB HC _ Heps).
+have -> :
+  (fun k => (#|plain (inst_AHE (benaloh_instance k))|%:R : R)^-1)
+  = (fun k => ((r k)%:R : R)^-1).
+  by apply/boolp.funext => k; rewrite card_plain_r_at.
+exact: Hr.
+Qed.
+
+End benaloh_instance_family.

@@ -6,6 +6,7 @@ Require Import fdist_extra proba.
 Require Import homomorphic_encryption.
 Require Import paillier_ahe paillier_fdist_instance.
 Require Import indcpa_game dsdp_alice_fdist_secrecy dsdp_alice_trace_link.
+Require Import dsdp_instance_family.
 
 (**md**************************************************************************)
 (* # Paillier as the encryption scheme of the DSDP trace bound                *)
@@ -46,6 +47,12 @@ Require Import indcpa_game dsdp_alice_fdist_secrecy dsdp_alice_trace_link.
 (*                              the class-conditional DSDP trace guessing     *)
 (*                              bound with 1/(p * q) as its                   *)
 (*                              information-theoretic term                    *)
+(*         paillier_instance == the rung of a DSDP instance family carried    *)
+(*                              by a family of Paillier moduli                *)
+(* dsdp_alice_trace_guess_V2_admissible_paillier_negligible ==                *)
+(*                              the asymptotic form of that bound, under      *)
+(*                              modulus growth and an assumed negligible      *)
+(*                              advantage family                              *)
 (* ```                                                                        *)
 (*                                                                            *)
 (******************************************************************************)
@@ -195,3 +202,72 @@ exact: (alice_trace_guess_V2_admissible_pq_le
 Qed.
 
 End paillier_indcpa_instance.
+
+Section paillier_instance_family.
+Context {R : realType}.
+Variables p q : nat -> nat.
+Hypothesis p_gt1 : forall k, (1 < p k)%N.
+Hypothesis q_gt1 : forall k, (1 < q k)%N.
+Variables (v1f u1f u2f u3f :
+  forall k, plain (Paillier_AHEnc (pq_gt1 (p_gt1 k) (q_gt1 k)))).
+Hypothesis u3f_unit : forall k, u3f k \is a GRing.unit.
+Variables (dkaf dkbf dkcf :
+  forall k, priv_key (Paillier_AHEnc (pq_gt1 (p_gt1 k) (q_gt1 k)))).
+Variables (wb2f wc2f : forall k, renc_paillier (p k) (q k)).
+
+(* The Paillier rung at parameter k: the existing packaging, coin type,
+   pinned cardinality, and coin map of this file, with the weights, keys,
+   and coins supplied as families.  Everything number-theoretic about the
+   moduli beyond 1 < p, q stays assumed, as in the fixed-instance section
+   above. *)
+Definition paillier_instance (k : nat) : dsdp_instance := {|
+  inst_AHE          := Paillier_AHEnc (pq_gt1 (p_gt1 k) (q_gt1 k)) ;
+  inst_renc         := renc_paillier (p k) (q k) ;
+  inst_card_renc    := card_renc_paillier (p k) (q k) ;
+  inst_rand_of_renc := rand_of_renc_paillier (p_gt1 k) (q_gt1 k) ;
+  inst_v1 := v1f k ; inst_u1 := u1f k ; inst_u2 := u2f k ;
+  inst_u3 := u3f k ; inst_u3_unit := u3f_unit k ;
+  inst_dk_a := dkaf k ; inst_dk_b := dkbf k ; inst_dk_c := dkcf k ;
+  inst_w_rb2 := wb2f k ; inst_w_rc2 := wc2f k |}.
+
+Variable A : forall k, indcpa_epsilon_assumption (R:=R)
+    (inst_card_renc (paillier_instance k))
+    (@inst_rand_of_renc (paillier_instance k)).
+Variable predict : forall k, predictor (inst_AHE (paillier_instance k))
+    (dsdp_traceT (inst_AHE (paillier_instance k))).
+Arguments predict : clear implicits.
+
+(* The plaintext cardinality at rung k, in the form the modulus-growth
+   hypothesis is stated in. *)
+Let card_plain_pq_at (k : nat) :
+  #|plain (inst_AHE (paillier_instance k))| = (p k * q k)%N.
+Proof. exact: card_plain_paillier_pq. Qed.
+
+(* The asymptotic form of this file's corollary: the guessing family is
+   negligible once the modulus family makes 1/(p q) negligible and the
+   assumed per-rung advantages are negligible.  The assumption family is
+   the per-k form of paillier_indcpa_assumption; decisional composite
+   residuosity remains the source a proved record family would start
+   from. *)
+Corollary dsdp_alice_trace_guess_V2_admissible_paillier_negligible :
+  (forall k, indcpa_admissible (A k)
+     (bob_trace_adversary_at (I:=paillier_instance)
+        (distinguisher_of_predictor (predict k)))) ->
+  (forall k, indcpa_admissible (A k)
+     (charlie_trace_adversary_at (I:=paillier_instance)
+        (distinguisher_of_predictor (predict k)))) ->
+  negligible_fun (fun k => (((p k * q k)%N)%:R : R)^-1) ->
+  negligible_fun (fun k => indcpa_assumption_epsilon (A k)) ->
+  negligible_fun (fun k =>
+     alice_trace_guess_V2_pr_at (R:=R) (I:=paillier_instance) (predict k)).
+Proof.
+move=> HB HC Hpq Heps.
+apply: (alice_trace_guess_V2_admissible_negligible HB HC _ Heps).
+have -> :
+  (fun k => (#|plain (inst_AHE (paillier_instance k))|%:R : R)^-1)
+  = (fun k => (((p k * q k)%N)%:R : R)^-1).
+  by apply/boolp.funext => k; rewrite card_plain_pq_at.
+exact: Hpq.
+Qed.
+
+End paillier_instance_family.
