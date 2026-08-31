@@ -105,9 +105,9 @@ Import GRing.Theory Num.Theory Order.POrderTheory.
 #[local] Open Scope ring_scope.
 #[local] Open Scope real_scope.
 
-(* ================================================================= *)
-(* Information-theoretic party privacy (counting axis)               *)
-(* ================================================================= *)
+(* =================================================================          *)
+(* Information-theoretic party privacy (counting axis)                        *)
+(* =================================================================          *)
 
 Section dsdp_var_centropy.
 (* cloned context of Section dsdp_entropy *)
@@ -366,7 +366,7 @@ Let D3 : {RV P -> msg} := V3 \* U3 \+ R3 \+ D2.
    statement that at the query e_1 this value is V2 itself. *)
 Let S  : {RV P -> msg} := D3 \- R2 \- R3 \+ U1 \* V1.
 
-(* The aggregate under Alice's key, Charlie's closing message to her. *)
+(* The aggregate under Alice's key, Charlie's closing message to her.         *)
 Let E_alice_d3   : {RV P -> Alice.-enc msg}   := E' Alice `o D3.
 
 (* Charlie's input under his own key, his opening message to Alice. *)
@@ -420,9 +420,9 @@ Qed.
 
 End dsdp_malicious_3party.
 
-(* ================================================================= *)
-(* Corrupted-relay secrecy of Alice's input (counting axis)          *)
-(* ================================================================= *)
+(* =================================================================          *)
+(* Corrupted-relay secrecy of Alice's input (counting axis)                   *)
+(* =================================================================          *)
 
 Section dsdp_relay_secrecy_v1.
 (* Alice's input V1 occurs in no protocol message; each corrupted relay's full
@@ -507,14 +507,14 @@ Let bob_view_of (w : (((Bob.-key Dec msg * msg) * msg) * msg)%type) :=
 Let charlie_view_of (w : ((Charlie.-key Dec msg * msg) * msg)%type) :=
   ((w.1.1, w.1.2), E' Charlie w.2).
 
-(* BobView_indep_V1 — Bob's view is independent of Alice's input V1. *)
+(* BobView_indep_V1 — Bob's view is independent of Alice's input V1.          *)
 Lemma BobView_indep_V1 : P |= BobView _|_ V1.
 Proof.
 have H := inde_RV_comp bob_view_of idfun bob_inputs_indep_V1.
 by rewrite /comp_RV /= in H *.
 Qed.
 
-(* CharlieView_indep_V1 — Charlie's view is independent of Alice's input V1. *)
+(* CharlieView_indep_V1 — Charlie's view is independent of Alice's input V1.  *)
 Lemma CharlieView_indep_V1 : P |= CharlieView _|_ V1.
 Proof.
 have H := inde_RV_comp charlie_view_of idfun charlie_inputs_indep_V1.
@@ -553,7 +553,7 @@ Hypothesis pR3_unif : `p_ R3 = fdist_uniform card_msg.
 Hypothesis R3_indep_VU3_V3 : P |= R3 _|_ [% VU3, V3].
 Hypothesis bob_data_indep_charlie : P |= [% Dk_b, V2, D2] _|_ [% V3, VU3, R3].
 
-(* The masked plaintext V3 * U3 + R3 is independent of V3 (one-time pad). *)
+(* The masked plaintext V3 * U3 + R3 is independent of V3 (one-time pad).     *)
 Let VU3R_indep_V3 : P |= VU3R _|_ V3.
 Proof.
 have card_TZ : #|msg| = (Zp_trunc m).+1.+1 by rewrite card_ord.
@@ -572,7 +572,7 @@ have H := @inde_RV_comp _ _ P _ _ _ _ [% Dk_b, V2, D2] [% V3, VU3, R3]
 by rewrite /comp_RV /VU3R /add_RV /= in H *.
 Qed.
 
-(* The joint masked-input independence, assembled by the graphoid mixing rule. *)
+(* The joint masked-input independence, assembled by the graphoid mixing rule.*)
 Let bob_inputs_indep_V3 : P |= [% Dk_b, V2, D2, VU3R] _|_ V3.
 Proof.
 apply cinde_RV_unit.
@@ -582,7 +582,7 @@ split.
 - by apply cinde_RV_unit; rewrite inde_RV_sym; exact: VU3R_indep_V3.
 Qed.
 
-(* BobView_indep_V3 — Bob's full view is independent of Charlie's input V3. *)
+(* BobView_indep_V3 — Bob's full view is independent of Charlie's input V3.   *)
 Let BobView_indep_V3 : P |= BobView _|_ V3.
 Proof.
 have H := inde_RV_comp
@@ -638,7 +638,7 @@ exact: (@lemma_3_5' R T msg msg P VU3R D2 V2 D2_indep_VU3R_V2
         (Zp_trunc m).+1 card_TZ pD2_unif).
 Qed.
 
-(* The ciphertext E'(Charlie, D3) hides V2 (deterministic image of D3). *)
+(* The ciphertext E'(Charlie, D3) hides V2 (deterministic image of D3).       *)
 Let E_charlie_d3_indep_V2 : P |= E_charlie_d3 _|_ V2.
 Proof.
 have H := @inde_RV_comp _ _ P _ _ _ _ D3 V2 (E' Charlie) idfun D3_indep_V2.
@@ -669,9 +669,9 @@ Qed.
 
 End dsdp_relay_secrecy_v1.
 
-(* ================================================================= *)
-(* Corrupted-Alice secrecy under IND-CPA hopping (fdist axis)        *)
-(* ================================================================= *)
+(* =================================================================          *)
+(* Corrupted-Alice secrecy under IND-CPA hopping (fdist axis)                 *)
+(* =================================================================          *)
 
 Section dsdp_alice_hop_secrecy.
 (* cloned context of Section dsdp_alice_fdist_secrecy *)
@@ -917,9 +917,9 @@ Qed.
 
 End dsdp_alice_hop_secrecy.
 
-(* ================================================================= *)
-(* The same bounds at Alice's executed piSMC trace                   *)
-(* ================================================================= *)
+(* =================================================================          *)
+(* The same bounds at Alice's executed piSMC trace                            *)
+(* =================================================================          *)
 
 Section dsdp_alice_trace_secrecy.
 (* cloned context of Section dsdp_alice_trace_rv *)
@@ -1406,15 +1406,15 @@ Local Notation alice_trace_guess_V2_pr_at :=
 (* A family of predictors reading Alice's executed traces along a family of
    DSDP instances matches Bob's input with negligible probability, provided
    the inverse plaintext cardinalities and the assumed advantages are
-   negligible families and each rung's two reduction adversaries are
-   admitted by that rung's class.  The class restriction lands on the
+   negligible families and the two reduction adversaries at each k are
+   admitted by the class at that k.  The class restriction lands on the
    reduction adversaries, not on the predictor, and it is what separates
    this statement from the decrypting counterexample: decrypt_guess_prE
    puts the guessing probability at 1 for the predictor that decrypts
    Bob's ciphertext off the trace, and
    decrypt_reduction_admissible_eventuallyF shows these same negligibility
    hypotheses eventually force that predictor's reduction adversary out of
-   the class.  Every currency is hypothesis-conditional, priced per rung as
+   the class.  Every currency is hypothesis-conditional, priced at each k as
    in the concrete bound. *)
 Theorem alice_trace_guess_V2_admissible_negligible :
   (forall k, indcpa_admissible (A k)

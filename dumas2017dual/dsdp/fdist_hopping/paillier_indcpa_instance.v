@@ -30,7 +30,7 @@ Require Import dsdp_instance_family.
 (* condition this file does not impose, decisional composite residuosity is   *)
 (* the assumption a proof of one would start from.                            *)
 (*                                                                            *)
-(* This is a DSDP corollary specialized at Paillier rather than a property   *)
+(* This is a DSDP corollary specialized at Paillier rather than a property    *)
 (* of the scheme, which is why it lives with the DSDP files and not with the  *)
 (* scheme library.                                                            *)
 (*                                                                            *)
@@ -47,8 +47,8 @@ Require Import dsdp_instance_family.
 (*                              the class-conditional DSDP trace guessing     *)
 (*                              bound with 1/(p * q) as its                   *)
 (*                              information-theoretic term                    *)
-(*         paillier_instance == the rung of a DSDP instance family carried    *)
-(*                              by a family of Paillier moduli                *)
+(*         paillier_instance == the DSDP instance family carried by a        *)
+(*                              family of Paillier moduli                     *)
 (* dsdp_alice_trace_guess_V2_admissible_paillier_negligible ==                *)
 (*                              the asymptotic form of that bound, under      *)
 (*                              modulus growth and an assumed negligible      *)
@@ -215,7 +215,7 @@ Variables (dkaf dkbf dkcf :
   forall k, priv_key (Paillier_AHEnc (pq_gt1 (p_gt1 k) (q_gt1 k)))).
 Variables (wb2f wc2f : forall k, renc_paillier (p k) (q k)).
 
-(* The Paillier rung at parameter k: the existing packaging, coin type,
+(* The Paillier instance at parameter k: the existing packaging, coin type,
    pinned cardinality, and coin map of this file, with the weights, keys,
    and coins supplied as families.  Everything number-theoretic about the
    moduli beyond 1 < p, q stays assumed, as in the fixed-instance section
@@ -237,33 +237,43 @@ Variable predict : forall k, predictor (inst_AHE (paillier_instance k))
     (dsdp_traceT (inst_AHE (paillier_instance k))).
 Arguments predict : clear implicits.
 
-(* The plaintext cardinality at rung k, in the form the modulus-growth
-   hypothesis is stated in. *)
-Let card_plain_pq_at (k : nat) :
-  #|plain (inst_AHE (paillier_instance k))| = (p k * q k)%N.
-Proof. exact: card_plain_paillier_pq. Qed.
+(* The class of the assumption family admits the Bob-side reduction
+   adversary induced by every predictor in the family. *)
+Hypothesis bob_reduction_admissible : forall k,
+  indcpa_admissible (A k)
+    (bob_trace_adversary_at (I:=paillier_instance)
+       (distinguisher_of_predictor (predict k))).
 
-(* The asymptotic form of this file's corollary: the guessing family is
-   negligible once the modulus family makes 1/(p q) negligible and the
-   assumed per-rung advantages are negligible.  The assumption family is
+(* The Charlie-side twin of bob_reduction_admissible. *)
+Hypothesis charlie_reduction_admissible : forall k,
+  indcpa_admissible (A k)
+    (charlie_trace_adversary_at (I:=paillier_instance)
+       (distinguisher_of_predictor (predict k))).
+
+(* The moduli grow superpolynomially: the information-theoretic term of
+   the bound, one over the plaintext cardinality p q, is negligible. *)
+Hypothesis inv_pq_negligible :
+  negligible_fun (fun k => (((p k * q k)%N)%:R : R)^-1).
+
+(* The advantage the assumption family assumes is negligible: the
+   asymptotic IND-CPA reading of decisional composite residuosity. *)
+Hypothesis assumption_epsilon_negligible :
+  negligible_fun (fun k => indcpa_assumption_epsilon (A k)).
+
+(* The asymptotic form of this file's corollary: under the four hypotheses
+   above, the family of predictors guesses Bob's input from Alice's
+   executed trace with negligible probability.  The assumption family is
    the per-k form of paillier_indcpa_assumption; decisional composite
    residuosity remains the source a proved record family would start
    from. *)
 Corollary dsdp_alice_trace_guess_V2_admissible_paillier_negligible :
-  (forall k, indcpa_admissible (A k)
-     (bob_trace_adversary_at (I:=paillier_instance)
-        (distinguisher_of_predictor (predict k)))) ->
-  (forall k, indcpa_admissible (A k)
-     (charlie_trace_adversary_at (I:=paillier_instance)
-        (distinguisher_of_predictor (predict k)))) ->
-  negligible_fun (fun k => (((p k * q k)%N)%:R : R)^-1) ->
-  negligible_fun (fun k => indcpa_assumption_epsilon (A k)) ->
   negligible_fun (fun k =>
      alice_trace_guess_V2_pr_at (R:=R) (I:=paillier_instance) (predict k)).
 Proof.
-move=> HB HC Hpq Heps.
-apply: (alice_trace_guess_V2_admissible_negligible HB HC _ Heps).
-by under eq_fun do rewrite card_plain_pq_at.
+apply: (alice_trace_guess_V2_admissible_negligible
+          bob_reduction_admissible charlie_reduction_admissible _
+          assumption_epsilon_negligible).
+by under eq_fun => k do rewrite (card_plain_paillier_pq (p_gt1 k) (q_gt1 k)).
 Qed.
 
 End paillier_instance_family.

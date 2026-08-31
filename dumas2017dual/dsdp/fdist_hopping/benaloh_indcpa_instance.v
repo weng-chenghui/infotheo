@@ -49,8 +49,8 @@ Require Import dsdp_instance_family.
 (*                               the class-conditional DSDP trace guessing    *)
 (*                               bound with 1/r as its information-theoretic  *)
 (*                               term                                         *)
-(*           benaloh_instance == the rung of a DSDP instance family carried   *)
-(*                               by a family of Benaloh block sizes           *)
+(*           benaloh_instance == the DSDP instance family carried by a       *)
+(*                               family of Benaloh block sizes                *)
 (* dsdp_alice_trace_guess_V2_admissible_benaloh_negligible ==                 *)
 (*                               the asymptotic form of that bound, under     *)
 (*                               block-size growth and an assumed negligible  *)
@@ -232,7 +232,7 @@ Variables (dkaf dkbf dkcf :
   forall k, priv_key (Benaloh_AHEnc (n k) (r_gt1 k))).
 Variables (wb2f wc2f : forall k, renc_benaloh (n k)).
 
-(* The Benaloh rung at parameter k: the existing packaging, coin type,
+(* The Benaloh instance at parameter k: the existing packaging, coin type,
    pinned cardinality, and coin map of this file, with the weights, keys,
    and coins supplied as families.  Everything number-theoretic about the
    modulus and the block size beyond 1 < n, r stays assumed, as in the
@@ -254,31 +254,47 @@ Variable predict : forall k, predictor (inst_AHE (benaloh_instance k))
     (dsdp_traceT (inst_AHE (benaloh_instance k))).
 Arguments predict : clear implicits.
 
-(* The plaintext cardinality at rung k, in the form the block-size growth
+(* The plaintext cardinality at k, in the form the block-size growth
    hypothesis is stated in. *)
 Let card_plain_r_at (k : nat) :
   #|plain (inst_AHE (benaloh_instance k))| = r k.
 Proof. by rewrite card_ord (Zp_cast (r_gt1 k)). Qed.
 
-(* The asymptotic form of this file's corollary: the guessing family is
-   negligible once the block-size family makes 1/r negligible and the
-   assumed per-rung advantages are negligible.  The assumption family is
+(* The class of the assumption family admits the Bob-side reduction
+   adversary induced by every predictor in the family. *)
+Hypothesis bob_reduction_admissible : forall k,
+  indcpa_admissible (A k)
+    (bob_trace_adversary_at (I:=benaloh_instance)
+       (distinguisher_of_predictor (predict k))).
+
+(* The Charlie-side twin of bob_reduction_admissible. *)
+Hypothesis charlie_reduction_admissible : forall k,
+  indcpa_admissible (A k)
+    (charlie_trace_adversary_at (I:=benaloh_instance)
+       (distinguisher_of_predictor (predict k))).
+
+(* The block sizes grow superpolynomially: the information-theoretic term
+   of the bound, one over the plaintext cardinality r, is negligible. *)
+Hypothesis inv_r_negligible :
+  negligible_fun (fun k => ((r k)%:R : R)^-1).
+
+(* The advantage the assumption family assumes is negligible: the
+   asymptotic IND-CPA reading of r-th residuosity. *)
+Hypothesis assumption_epsilon_negligible :
+  negligible_fun (fun k => indcpa_assumption_epsilon (A k)).
+
+(* The asymptotic form of this file's corollary: under the four hypotheses
+   above, the family of predictors guesses Bob's input from Alice's
+   executed trace with negligible probability.  The assumption family is
    the per-k form of benaloh_indcpa_assumption; r-th residuosity remains
    the source a proved record family would start from. *)
 Corollary dsdp_alice_trace_guess_V2_admissible_benaloh_negligible :
-  (forall k, indcpa_admissible (A k)
-     (bob_trace_adversary_at (I:=benaloh_instance)
-        (distinguisher_of_predictor (predict k)))) ->
-  (forall k, indcpa_admissible (A k)
-     (charlie_trace_adversary_at (I:=benaloh_instance)
-        (distinguisher_of_predictor (predict k)))) ->
-  negligible_fun (fun k => ((r k)%:R : R)^-1) ->
-  negligible_fun (fun k => indcpa_assumption_epsilon (A k)) ->
   negligible_fun (fun k =>
      alice_trace_guess_V2_pr_at (R:=R) (I:=benaloh_instance) (predict k)).
 Proof.
-move=> HB HC Hr Heps.
-apply: (alice_trace_guess_V2_admissible_negligible HB HC _ Heps).
+apply: (alice_trace_guess_V2_admissible_negligible
+          bob_reduction_admissible charlie_reduction_admissible _
+          assumption_epsilon_negligible).
 by under eq_fun do rewrite card_plain_r_at.
 Qed.
 

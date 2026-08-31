@@ -752,19 +752,19 @@ adversary class, and records what forces the class to leave something out.
   missing premises cannot be supplied for this predictor.
 \end{corollary}
 
-\begin{definition}[One rung of a DSDP instance family]
+\begin{definition}[One instance of a DSDP family]
   \label{def:dsdp_instance}
   \rocq{infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_instance_family.dsdp_instance}
   \rocqok
   \uses{def:alice_trace}
-  A rung is the scheme, its coin index type with a nonemptiness proof, the coin
+  An instance is the scheme, its coin index type with a nonemptiness proof, the coin
   map, the four weights with $u_3$ a unit of the plaintext ring, the three
   private keys, and the two hop coins: exactly the parameters every
   corrupted-Alice trace bound is stated at.
   \[ \mathcal{I} = \big(\mathrm{AHE},\ R_{\mathrm{enc}},\ \rho,\
        v_1, u_1, u_2, u_3,\ dk_A, dk_B, dk_C,\ w_B, w_C\big) \]
   A family is a map $k \mapsto \mathcal{I}_k$ from the security parameter, so
-  every concrete trace bound applies at each rung unchanged. The real field
+  every concrete trace bound applies at each $k$ unchanged. The real field
   stays outside the record: one family lives over one $R$, which only the
   assumption record and the probabilities mention.
 \end{definition}
@@ -776,7 +776,7 @@ adversary class, and records what forces the class to leave something out.
   \rocqok
   \uses{def:negligible_fun,def:dsdp_instance,lem:negligible_predictor_bound,thm:alice_guess_admissible}
   Along a family $k \mapsto \mathcal{I}_k$ carrying an assumption
-  $\mathcal{A}_k$ and a predictor $g_k$ per rung, if both reduction adversaries
+  $\mathcal{A}_k$ and a predictor $g_k$ at each $k$, if both reduction adversaries
   of $g_k$ are admissible for $\mathcal{A}_k$ at every $k$, and the inverse
   plaintext cardinalities and the assumed advantages are negligible families,
   then so are the guessing probabilities.
@@ -786,10 +786,10 @@ adversary class, and records what forces the class to leave something out.
        \Pr[\,g_k(\mathrm{AliceTrace}_k) = V_2\,]\big) \]
   The class restriction lands on the two reduction adversaries, not on the
   predictor, and that is what separates this statement from the decrypting
-  predictor $\delta$, whose guessing probability is $1$ at every rung.
+  predictor $\delta$, whose guessing probability is $1$ at every $k$.
   Corollary~\ref{cor:decrypt_family_not_admissible} shows that the same two
   negligibility hypotheses eventually reject $\delta$'s reduction adversary.
-  Every currency is hypothesis-conditional, priced per rung as in
+  Every currency is hypothesis-conditional, priced at each $k$ as in
   Theorem~\ref{thm:alice_guess_admissible}.
 \end{theorem}
 
@@ -799,7 +799,7 @@ adversary class, and records what forces the class to leave something out.
   \rocqok
   \uses{def:dsdp_instance,def:negligible_fun,cor:decrypt_not_admissible}
   Under the two negligibility hypotheses above there is a threshold past which
-  every rung's classifier answers false on the reduction adversary $\delta$
+  the classifier at each such $k$ answers false on the reduction adversary $\delta$
   induces at Bob's key.
   \[ \exists K,\ \forall k > K,\
      \mathrm{adm}_{\mathcal{A}_k}\big(\hopred{0}{D_\delta}\big)
@@ -817,7 +817,7 @@ adversary class, and records what forces the class to leave something out.
   \rocqok
   \uses{thm:alice_guess_negligible,cor:alice_guess_paillier}
   At a family of Paillier moduli $p_k q_k$, the guessing family is negligible
-  once $k \mapsto 1/(p_k q_k)$ is negligible and the assumed per-rung
+  once $k \mapsto 1/(p_k q_k)$ is negligible and the assumed per-$k$
   advantages are.
   \[ \mathrm{negl}\big(k \mapsto \tfrac{1}{p_k q_k}\big) \wedge
      \mathrm{negl}\big(k \mapsto \varepsilon_{\mathcal{A}_k}\big)
@@ -835,7 +835,7 @@ adversary class, and records what forces the class to leave something out.
   \rocqok
   \uses{thm:alice_guess_negligible,def:negligible_fun}
   At a family of Benaloh block sizes $r_k$, the guessing family is negligible
-  once $k \mapsto 1/r_k$ is negligible and the assumed per-rung advantages are.
+  once $k \mapsto 1/r_k$ is negligible and the assumed per-$k$ advantages are.
   \[ \mathrm{negl}\big(k \mapsto \tfrac{1}{r_k}\big) \wedge
      \mathrm{negl}\big(k \mapsto \varepsilon_{\mathcal{A}_k}\big)
      \implies \mathrm{negl}\big(k \mapsto

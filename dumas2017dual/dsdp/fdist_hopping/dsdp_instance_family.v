@@ -16,7 +16,7 @@ Require Import indcpa_game dsdp_alice_fdist_secrecy dsdp_alice_trace_link.
 (* families indexed by a security parameter.  This file supplies the object   *)
 (* that joins them, a record holding exactly the section variables of that    *)
 (* development, and reads the concrete class-conditional guessing bound off   *)
-(* at every rung of a family of such records.                                 *)
+(* at every k of a family of such records.                                    *)
 (*                                                                            *)
 (* The class restriction lands on the two reduction adversaries a predictor   *)
 (* induces, never on the predictor itself.  That is what separates the        *)
@@ -28,7 +28,7 @@ Require Import indcpa_game dsdp_alice_fdist_secrecy dsdp_alice_trace_link.
 (* on the identity scheme of idealized_ahe.v.                                 *)
 (*                                                                            *)
 (* ```                                                                        *)
-(*              dsdp_instance == one rung of the family, the section          *)
+(*              dsdp_instance == one instance of the family, the section      *)
 (*                               variables of the corrupted-Alice trace       *)
 (*                               development packed as one record             *)
 (*          expnn_gt_monomial == (k+2)^(k+2) exceeds every monomial k^c past  *)
@@ -37,10 +37,9 @@ Require Import indcpa_game dsdp_alice_fdist_secrecy dsdp_alice_trace_link.
 (* negligible_fun_inv_ge_expnn == a sequence dominating (k+2)^(k+2) has a     *)
 (*                               negligible inverse                           *)
 (*        negligible_fun_cst0 == the zero family is negligible                *)
-(*     bob_trace_adversary_at == the Bob-key reduction adversary at rung k    *)
-(* charlie_trace_adversary_at == the Charlie-key reduction adversary at rung  *)
-(*                               k                                            *)
-(* alice_trace_guess_V2_pr_at == the trace guessing probability at rung k     *)
+(*     bob_trace_adversary_at == the Bob-key reduction adversary at k         *)
+(* charlie_trace_adversary_at == the Charlie-key reduction adversary at k     *)
+(* alice_trace_guess_V2_pr_at == the trace guessing probability at k          *)
 (* alice_trace_guess_V2_admissible_negligible ==                              *)
 (*                               the trace guessing family is negligible      *)
 (*                               under the two class premises and the two     *)
@@ -73,12 +72,12 @@ Local Open Scope reals_ext_scope.
 Local Open Scope proba_scope.
 Local Open Scope fdist_scope.
 
-(* One rung of a security-parameter-indexed family of DSDP executions: the
+(* One instance of a security-parameter-indexed family of DSDP executions: the
    scheme, its coin index type with a pinned nonemptiness proof, the coin
    map, the four weights with Charlie's weight invertible, the three private
    keys, and the two hop coins.  These are exactly the section variables of
    the corrupted-Alice trace development (dsdp_alice_trace_link.v), so every
-   concrete trace bound applies at each rung unchanged.  The real field
+   concrete trace bound applies at each k unchanged.  The real field
    stays outside: a family lives over one R, which only the assumption
    record and the probabilities mention. *)
 Record dsdp_instance := {
@@ -152,8 +151,8 @@ Variable predict : forall k,
     predictor (inst_AHE (I k)) (dsdp_traceT (inst_AHE (I k))).
 Arguments predict : clear implicits.
 
-(* The Bob-key reduction adversary at rung k: the concrete constant applied
-   at the rung's record fields.  Family plumbing; the mathematics is in the
+(* The Bob-key reduction adversary at k: the concrete constant applied
+   at the record fields of I k.  Family plumbing; the mathematics is in the
    constant it applies. *)
 Definition bob_trace_adversary_at k
     (D : distinguisher (trace_jointT (inst_AHE (I k)))) :=
@@ -172,7 +171,7 @@ Definition charlie_trace_adversary_at k
     (inst_dk_a (I k)) (inst_dk_b (I k)) (inst_dk_c (I k))
     (inst_w_rc2 (I k)) D.
 
-(* The probability that a predictor reading Alice's executed trace at rung k
+(* The probability that a predictor reading Alice's executed trace at k
    returns Bob's input.  The two hop coins enter here and not in the two
    reduction adversaries, which fix Bob's coin by the challenge. *)
 Definition alice_trace_guess_V2_pr_at k
@@ -185,8 +184,8 @@ Definition alice_trace_guess_V2_pr_at k
 (* A family of predictors reading Alice's executed traces along a family of
    DSDP instances matches Bob's input with negligible probability, provided
    the inverse plaintext cardinalities and the assumed advantages are
-   negligible families and each rung's two reduction adversaries are
-   admitted by that rung's class.  The class restriction lands on the
+   negligible families and the two reduction adversaries at each k are
+   admitted by the class at that k.  The class restriction lands on the
    reduction adversaries, not on the predictor, and it is what separates
    this statement from the decrypting counterexample: decrypt_guess_prE
    puts the guessing probability at 1 for the predictor that decrypts
@@ -194,7 +193,7 @@ Definition alice_trace_guess_V2_pr_at k
    decrypt_reduction_admissible_eventuallyF below shows these same
    negligibility hypotheses eventually force that predictor's reduction
    adversary out of the class.  Every currency is hypothesis-conditional,
-   priced per rung as in the concrete bound. *)
+   priced at each k as in the concrete bound. *)
 Theorem alice_trace_guess_V2_admissible_negligible :
   (forall k, indcpa_admissible (A k)
      (bob_trace_adversary_at (distinguisher_of_predictor (predict k)))) ->
@@ -266,7 +265,7 @@ Definition trivial_instance (k : nat) : dsdp_instance := {|
   inst_dk_a := 0 ; inst_dk_b := 0 ; inst_dk_c := 0 ;
   inst_w_rb2 := ord0 ; inst_w_rc2 := ord0 |}.
 
-(* The witness plaintext space at rung k has cardinality (k+2)^(k+2). *)
+(* The witness plaintext space at k has cardinality (k+2)^(k+2). *)
 Let card_plain_trivial (k : nat) :
   #|plain (inst_AHE (trivial_instance k))| = ((k.+2) ^ k.+2)%N.
 Proof. by rewrite card_ord Zp_cast // -{1}(expn0 k.+2) ltn_exp2l. Qed.

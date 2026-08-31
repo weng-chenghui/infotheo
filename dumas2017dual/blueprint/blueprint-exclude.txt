@@ -6,12 +6,12 @@
 #
 # Format: one `module_basename:identifier` per line. Auto-excluded kinds
 # (Variable/Hypothesis/Context/Let) are not listed.
-# benaloh_indcpa_instance: the per-rung instance record built from the coin
+# benaloh_indcpa_instance: the per-k instance record built from the coin
 # plumbing above it; the blueprint cites the bound read off along that family.
 benaloh_indcpa_instance:benaloh_instance
 # dsdp_alice_fdist_secrecy: the uniformity, product-law and slot-resampling
 # plumbing under the hop ladder, the constant-weight random variables, and the
-# per-rung challenge equalities the two hop_advantageE nodes fold together.
+# per-k challenge equalities the two hop_advantageE nodes fold together.
 dsdp_alice_fdist_secrecy:AliceSpectatorPre
 dsdp_alice_fdist_secrecy:AliceSpectatorPre2
 dsdp_alice_fdist_secrecy:Hop1PreState
@@ -94,7 +94,7 @@ dsdp_entropy:dsdp_fiber_n
 dsdp_entropy:dsdp_fiber_ring
 dsdp_entropy:dsdp_g
 dsdp_entropy:dsdp_var_entropy
-# dsdp_instance_family: the per-rung applications of the concrete constants, the
+# dsdp_instance_family: the per-k applications of the concrete constants, the
 # growth and zero facts under the negligibility hypotheses, and the identity-
 # scheme witness; the blueprint cites the family headline and its companion,
 # into which this plumbing is folded.
