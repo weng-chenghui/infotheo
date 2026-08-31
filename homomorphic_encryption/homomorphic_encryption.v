@@ -327,7 +327,7 @@ End enc_lemmas.
   scheme over more than one plaintext, since decryption relates the
   ciphertext to its plaintext, so this development states secrecy
   computationally instead. Each of the two hops of the DSDP corrupted-Alice
-  argument is priced by [indcpa_fdist_epsilon], the advantage defined in
+  argument is priced by [indcpa_epsilon], the advantage defined in
   [dumas2017dual/dsdp/fdist_hopping/indcpa_game.v], of a reduction adversary
   built in [dumas2017dual/dsdp/fdist_hopping/dsdp_alice_fdist_secrecy.v]. The
   contraction lemma [E_enc_ce_contract] above takes its independence

@@ -24,10 +24,10 @@ Require Import extra_proba.
 (*                                                                            *)
 (* | role          | identifier                                             | *)
 (* |---------------|--------------------------------------------------------| *)
-(* | adversary     | indcpa_fdist_adversary                                 | *)
+(* | adversary     | indcpa_adversary                                       | *)
 (* | challenger    | indcpa_challenger                                      | *)
 (* | experiment    | indcpa_experiment                                      | *)
-(* | advantage     | indcpa_fdist_epsilon                                   | *)
+(* | advantage     | indcpa_epsilon                                         | *)
 (* | distinguisher | distinguisher                                          | *)
 (* | reduction     | reduction_challenge_fdist                              | *)
 (* | assumption    | indcpa_epsilon_assumption                              | *)
@@ -39,18 +39,18 @@ Require Import extra_proba.
 (* reduction is built by the protocol file that instantiates this one:        *)
 (* bob_challenge_adversary and charlie_challenge_adversary of                 *)
 (* dumas2017dual/dsdp/fdist_hopping/dsdp_alice_fdist_secrecy.v package a      *)
-(* distinguisher as an indcpa_fdist_adversary, and                            *)
+(* distinguisher as an indcpa_adversary, and                                  *)
 (* reduction_challenge_fdist is the law their challenge induces.              *)
 (*                                                                            *)
 (* The reduction lemmas take one condition on the protocol they are applied   *)
 (* to: the encryption randomness of the challenged slot is uniform and        *)
 (* independent of the state the reduction keeps.  That is freshness, not      *)
 (* secrecy.  The state may hold the secrets themselves, and whether a         *)
-(* ciphertext hides its plaintext is charged for by indcpa_fdist_epsilon      *)
+(* ciphertext hides its plaintext is charged for by indcpa_epsilon            *)
 (* alone.  What the condition forbids is randomness reuse across a            *)
 (* protocol's messages.                                                       *)
 (*                                                                            *)
-(* Each indcpa_fdist_epsilon is a single-query advantage at a fixed           *)
+(* Each indcpa_epsilon is a single-query advantage at a fixed                 *)
 (* public key, and a bound stated through it holds vacuously once that        *)
 (* advantage reaches 1.  The advantage quantifies over adversaries holding    *)
 (* the public key alone: when #|plain AHE| > 1, an adversary holding the      *)
@@ -102,7 +102,7 @@ Require Import extra_proba.
 (*                               the test accepting when the predictor,       *)
 (*                               reading the observation slot, returns the    *)
 (*                               first input slot                             *)
-(*     indcpa_fdist_adversary == packages the state sampled before the        *)
+(*           indcpa_adversary == packages the state sampled before the        *)
 (*                               challenge, the plaintext selected from that  *)
 (*                               state, and the decision made from the state  *)
 (*                               and challenge ciphertext                     *)
@@ -111,18 +111,18 @@ Require Import extra_proba.
 (*  indcpa_experiment b pk adv == samples the adversary state, gives it the   *)
 (*                               challenge selected by b, and returns its     *)
 (*                               Boolean decision                             *)
-(*      indcpa_fdist_accept b == the probability that this decision is true   *)
+(*            indcpa_accept b == the probability that this decision is true   *)
 (*                               at hidden bit b                              *)
-(*  indcpa_fdist_success_real == the acceptance probability when the          *)
+(*        indcpa_success_real == the acceptance probability when the          *)
 (*                               challenge encrypts the selected plaintext    *)
-(*  indcpa_fdist_success_zero == the acceptance probability when the          *)
+(*        indcpa_success_zero == the acceptance probability when the          *)
 (*                               challenge encrypts zero                      *)
-(*  indcpa_fdist_success_realE == computes real acceptance by sampling the    *)
+(*        indcpa_success_realE == computes real acceptance by sampling the    *)
 (*                               state, encrypting its selected plaintext,    *)
 (*                               and applying the decision                    *)
-(*  indcpa_fdist_success_zeroE == computes zero acceptance in the same way,   *)
+(*        indcpa_success_zeroE == computes zero acceptance in the same way,   *)
 (*                               with zero as the encrypted plaintext         *)
-(*       indcpa_fdist_epsilon == the absolute difference between the real     *)
+(*             indcpa_epsilon == the absolute difference between the real     *)
 (*                               and zero acceptance probabilities            *)
 (*         enc_slot_resampleE == fresh encryption randomness independent of   *)
 (*                               the state may be sampled after the state     *)
@@ -317,7 +317,7 @@ Definition distinguisher_of_predictor {obs : finType}
    verdict on the state together with the one challenge ciphertext.  The record
    grants the public key alone and one challenge, which is the attack model
    every epsilon in the DSDP files is measured in. *)
-Record indcpa_fdist_adversary := {
+Record indcpa_adversary := {
   adv_state : finType ;
   adv_choose : R.-fdist adv_state ;
   adv_plain : adv_state -> plain AHE ;
@@ -340,30 +340,30 @@ Definition indcpa_challenger (b : bool) (pk : pub_key AHE) (v : plain AHE) :
    the adversary, and the two instances b = true and b = false are the pair of
    experiments whose acceptance gap is the advantage. *)
 Definition indcpa_experiment (b : bool) (pk : pub_key AHE)
-    (adv : indcpa_fdist_adversary) : R.-fdist bool :=
+    (adv : indcpa_adversary) : R.-fdist bool :=
   c  <- adv_choose adv ;
   ch <- indcpa_challenger b pk (adv_plain adv c) ;
   ret (adv_decide adv c ch).
 
 (* The probability that the adversary's verdict is true at hidden bit b. *)
-Definition indcpa_fdist_accept (b : bool) (pk : pub_key AHE)
-    (adv : indcpa_fdist_adversary) : R :=
+Definition indcpa_accept (b : bool) (pk : pub_key AHE)
+    (adv : indcpa_adversary) : R :=
   Pr (indcpa_experiment b pk adv) [set true].
 
 (* The probability that the adversary accepts when the challenge encrypts the
    plaintext it chose.
    Naming: [_success_real] after [oracle_encrypt_real] and
    [guess_sdistr_success_real]; [Pr_] is reserved for the lemma family. *)
-Definition indcpa_fdist_success_real := indcpa_fdist_accept true.
+Definition indcpa_success_real := indcpa_accept true.
 
 (* The real success probability, unfolded as: draw the adversary state, encrypt
    the plaintext that state chose under fresh uniform randomness, and test the
    result.  A protocol hop whose challenged slot still carries the real
    plaintext has its acceptance probability in exactly this form, which is how
    hop0_real_challengeE and hop1_real_challengeE close. *)
-Lemma indcpa_fdist_success_realE (pk : pub_key AHE)
-    (adv : indcpa_fdist_adversary) :
-  indcpa_fdist_success_real pk adv
+Lemma indcpa_success_realE (pk : pub_key AHE)
+    (adv : indcpa_adversary) :
+  indcpa_success_real pk adv
   = Pr (c <- adv_choose adv ;
         fdistmap (adv_decide adv c) (enc_fdist pk (adv_plain adv c)))
        [set true].
@@ -373,16 +373,16 @@ Proof. by []. Qed.
    zero.
    Naming: [_success_zero] after [oracle_encrypt_zero]; [Pr_] is reserved for
    the lemma family. *)
-Definition indcpa_fdist_success_zero := indcpa_fdist_accept false.
+Definition indcpa_success_zero := indcpa_accept false.
 
 (* The zero success probability in that same unfolded form, with the plaintext
    replaced by zero.  The neighbouring hop, the one whose challenged slot
    already encrypts zero, has its acceptance probability in exactly this form.
    The two lemmas together put two neighbouring hops on the two branches of a
    single IND-CPA experiment. *)
-Lemma indcpa_fdist_success_zeroE (pk : pub_key AHE)
-    (adv : indcpa_fdist_adversary) :
-  indcpa_fdist_success_zero pk adv
+Lemma indcpa_success_zeroE (pk : pub_key AHE)
+    (adv : indcpa_adversary) :
+  indcpa_success_zero pk adv
   = Pr (c <- adv_choose adv ;
         fdistmap (adv_decide adv c) (enc_fdist pk 0))
        [set true].
@@ -391,9 +391,9 @@ Proof. by []. Qed.
 (* The advantage of adv against pk: the absolute gap between its real and zero
    success probabilities.  Every DSDP hop is priced by one such advantage, at a
    fixed key and a single query. *)
-Definition indcpa_fdist_epsilon (pk : pub_key AHE)
-    (adv : indcpa_fdist_adversary) : R :=
-  `| indcpa_fdist_success_real pk adv - indcpa_fdist_success_zero pk adv |.
+Definition indcpa_epsilon (pk : pub_key AHE)
+    (adv : indcpa_adversary) : R :=
+  `| indcpa_success_real pk adv - indcpa_success_zero pk adv |.
 
 (* An extensional Boolean classifier. Given one epsilon, and the assumption that
    every classified adversary stays below that epsilon at every key built
@@ -423,11 +423,11 @@ Definition indcpa_fdist_epsilon (pk : pub_key AHE)
    adversary is forced to assume epsilon at least 1.
  *)
 Record indcpa_epsilon_assumption := {
-  indcpa_admissible : indcpa_fdist_adversary -> bool ;
+  indcpa_admissible : indcpa_adversary -> bool ;
   indcpa_assumption_epsilon : R ;
   indcpa_admissible_epsilon_le : forall (dk : priv_key AHE) adv,
     indcpa_admissible adv ->
-    indcpa_fdist_epsilon (pub_of_priv dk) adv
+    indcpa_epsilon (pub_of_priv dk) adv
       <= indcpa_assumption_epsilon }.
 
 (* A distribution bound to a continuation that ignores what it sampled is the
@@ -446,7 +446,7 @@ Qed.
    "receive a function, give a boolean" looks like when the boolean is not a
    placeholder.
    Naming: names the field it inspects and the property it checks of it. *)
-Definition adv_decide_cipher_constant (adv : indcpa_fdist_adversary) : bool :=
+Definition adv_decide_cipher_constant (adv : indcpa_adversary) : bool :=
   [forall c, [forall ch1, [forall ch2,
      adv_decide adv c ch1 == adv_decide adv c ch2]]].
 
@@ -457,8 +457,8 @@ Definition adv_decide_cipher_constant (adv : indcpa_fdist_adversary) : bool :=
    Naming: [eq0] states the value, after MathComp; the middle names the
    condition under which it holds. *)
 Lemma indcpa_epsilon_cipher_constant_eq0 (pk : pub_key AHE)
-    (adv : indcpa_fdist_adversary) :
-  adv_decide_cipher_constant adv -> indcpa_fdist_epsilon pk adv = 0.
+    (adv : indcpa_adversary) :
+  adv_decide_cipher_constant adv -> indcpa_epsilon pk adv = 0.
 Proof.
 move=> /forallP Hc.
 have /card_gt0P[r0 _] : (0 < #|Renc|)%N by rewrite card_renc.
@@ -470,16 +470,16 @@ have Hexp : indcpa_experiment true pk adv = indcpa_experiment false pk adv.
     apply: fdistbind_cst => ch; apply/eqP.
     by move: (Hc c) => /forallP/(_ ch)/forallP/(_ (enc pk 0 (rand_of_renc r0))).
   by rewrite !Hcst.
-by rewrite /indcpa_fdist_epsilon /indcpa_fdist_success_real
-           /indcpa_fdist_success_zero /indcpa_fdist_accept Hexp subrr normr0.
+by rewrite /indcpa_epsilon /indcpa_success_real
+           /indcpa_success_zero /indcpa_accept Hexp subrr normr0.
 Qed.
 
 (* The class-conditional bound the instance below carries, discharged by
    the lemma. *)
 Let cipher_constant_epsilon_le (dk : priv_key AHE)
-    (adv : indcpa_fdist_adversary) :
+    (adv : indcpa_adversary) :
   adv_decide_cipher_constant adv ->
-  indcpa_fdist_epsilon (pub_of_priv dk) adv <= 0.
+  indcpa_epsilon (pub_of_priv dk) adv <= 0.
 Proof. by move=> H; rewrite (indcpa_epsilon_cipher_constant_eq0 _ H). Qed.
 
 (* An assumption whose promise is proved rather than assumed.  Its classifier
@@ -508,7 +508,7 @@ Variable k : stateT -> Renc -> cipher AHE.
    produces the ciphertext draws its encryption randomness uniformly, and
    independently of its own input and of every other party's randomness.  The
    state is free to hold the secrets themselves, and whether a ciphertext hides
-   its plaintext is charged for separately, by indcpa_fdist_epsilon.
+   its plaintext is charged for separately, by indcpa_epsilon.
    What the condition forbids is randomness reuse.  A protocol that let the same
    coordinate reach the adversary by any route other than the ciphertext built
    from it would break the product, and no reduction could then rebuild the
@@ -608,7 +608,7 @@ Proof. by rewrite reduction_challenge_fdistE. Qed.
 
 (* The acceptance probability under reduction_challenge_fdist, unfolded as the
    state law bound with the pushforward of D along each challenge law.  Read
-   together with indcpa_fdist_success_realE and indcpa_fdist_success_zeroE it
+   together with indcpa_success_realE and indcpa_success_zeroE it
    identifies a hop success probability with an IND-CPA success probability. *)
 Lemma reduction_challenge_successE (D : distinguisher joint) :
   Pr reduction_challenge_fdist [set x | D x]

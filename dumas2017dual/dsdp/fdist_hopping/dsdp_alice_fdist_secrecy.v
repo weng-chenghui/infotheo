@@ -45,10 +45,10 @@ Require Export indcpa_game.
 (*                                                                            *)
 (* | role          | identifier                                             | *)
 (* |---------------|--------------------------------------------------------| *)
-(* | adversary     | indcpa_fdist_adversary                                 | *)
+(* | adversary     | indcpa_adversary                                       | *)
 (* | challenger    | indcpa_challenger                                      | *)
 (* | experiment    | indcpa_experiment                                      | *)
-(* | advantage     | indcpa_fdist_epsilon                                   | *)
+(* | advantage     | indcpa_epsilon                                         | *)
 (* | distinguisher | distinguisher_of_predictor predict                     | *)
 (* | reduction     | bob_challenge_adversary, charlie_challenge_adversary   | *)
 (*                                                                            *)
@@ -328,13 +328,13 @@ Definition charlie_pkey : pub_key AHE := pkey_of_party Charlie.
 
 Local Notation enc_fdist :=
   (enc_fdist (R:=R) (AHE:=AHE) card_renc rand_of_renc).
-Local Notation indcpa_fdist_adversary := (indcpa_fdist_adversary (R:=R) AHE).
-Local Notation indcpa_fdist_success_real :=
-  (indcpa_fdist_success_real (R:=R) (AHE:=AHE) card_renc rand_of_renc).
-Local Notation indcpa_fdist_success_zero :=
-  (indcpa_fdist_success_zero (R:=R) (AHE:=AHE) card_renc rand_of_renc).
-Local Notation indcpa_fdist_epsilon :=
-  (indcpa_fdist_epsilon (R:=R) (AHE:=AHE) card_renc rand_of_renc).
+Local Notation indcpa_adversary := (indcpa_adversary (R:=R) AHE).
+Local Notation indcpa_success_real :=
+  (indcpa_success_real (R:=R) (AHE:=AHE) card_renc rand_of_renc).
+Local Notation indcpa_success_zero :=
+  (indcpa_success_zero (R:=R) (AHE:=AHE) card_renc rand_of_renc).
+Local Notation indcpa_epsilon :=
+  (indcpa_epsilon (R:=R) (AHE:=AHE) card_renc rand_of_renc).
 Local Notation reduction_challenge_acceptE :=
   (reduction_challenge_acceptE (rand_of_renc := rand_of_renc)).
 Local Notation reduction_challenge_successE :=
@@ -656,7 +656,7 @@ Definition hop1_assemble (c : hop1_stateT) (ch : cipher AHE) :
        Can an IND-CPA adversary distinguish an encryption of V2 from an
        encryption of zero under Bob's key?
 
-   That advantage is indcpa_fdist_epsilon pk adv.
+   That advantage is indcpa_epsilon pk adv.
 
    The construction:
 
@@ -671,19 +671,19 @@ Definition hop1_assemble (c : hop1_stateT) (ch : cipher AHE) :
    The correspondence theorems prove
 
      alice_hop_game_success 0 D
-       = indcpa_fdist_success_real
+       = indcpa_success_real
            bob_pkey (bob_challenge_adversary D),
 
    and
 
      alice_hop_game_success 1 D
-       = indcpa_fdist_success_zero
+       = indcpa_success_zero
            bob_pkey (bob_challenge_adversary D).
 
    Therefore, the protocol hop gap equals the real-or-zero advantage:
 
      `| alice_hop_game_success 0 D - alice_hop_game_success 1 D |
-       = indcpa_fdist_epsilon
+       = indcpa_epsilon
            bob_pkey (bob_challenge_adversary D).
 
    In other words, this procedure lets the real and zero experiments
@@ -727,17 +727,17 @@ Definition hop1_assemble (c : hop1_stateT) (ch : cipher AHE) :
    from hop 1 to hop 2.  The two correspondence theorems state
 
      alice_hop_game_success 1 D
-       = indcpa_fdist_success_real
+       = indcpa_success_real
            charlie_pkey (charlie_challenge_adversary D),
 
      alice_hop_game_success 2 D
-       = indcpa_fdist_success_zero
+       = indcpa_success_zero
            charlie_pkey (charlie_challenge_adversary D).
 
    Therefore hop1_advantageE proves
 
      `| alice_hop_game_success 1 D - alice_hop_game_success 2 D |
-       = indcpa_fdist_epsilon
+       = indcpa_epsilon
            charlie_pkey (charlie_challenge_adversary D).
 
    bob_challenge_adversary D and charlie_challenge_adversary D are adversary
@@ -750,7 +750,7 @@ Definition hop1_assemble (c : hop1_stateT) (ch : cipher AHE) :
    the joint value assembled around the challenge ciphertext.  At the real bit
    it reproduces hop 0 and at the zero bit hop 1. *)
 Definition bob_challenge_adversary (D : distinguisher alice_hop_jointT) :
-    indcpa_fdist_adversary :=
+    indcpa_adversary :=
   {| adv_state := hop0_stateT ;
      adv_choose := `p_ Hop0State ;
      adv_plain := fun c => c.1.1.1.1 ;
@@ -761,7 +761,7 @@ Definition bob_challenge_adversary (D : distinguisher alice_hop_jointT) :
    with D run on the joint value assembled around the challenge ciphertext.  At
    the real bit it reproduces hop 1 and at the zero bit hop 2. *)
 Definition charlie_challenge_adversary (D : distinguisher alice_hop_jointT) :
-    indcpa_fdist_adversary :=
+    indcpa_adversary :=
   {| adv_state := hop1_stateT ;
      adv_choose := `p_ Hop1State ;
      adv_plain := fun c => c.1.1.1.2 ;
@@ -771,14 +771,14 @@ Definition charlie_challenge_adversary (D : distinguisher alice_hop_jointT) :
    success probability of bob_challenge_adversary D against Bob's key. *)
 Lemma hop0_real_challengeE (D : distinguisher alice_hop_jointT) :
   alice_hop_game_success 0 D
-    = indcpa_fdist_success_real bob_pkey (bob_challenge_adversary D).
+    = indcpa_success_real bob_pkey (bob_challenge_adversary D).
 Proof.
 rewrite alice_hop_game_successE.
 rewrite (reduction_challenge_acceptE (pk := bob_pkey)
     (msg := fun c : hop0_stateT => c.1.1.1.1)
     (assemble := hop0_assemble) hop0_state_prodE); last first.
   by move=> -[[[[v2 v3] [r2 r3]] [rho2 rho3]] [ra1 ra2]].
-by rewrite reduction_challenge_successE indcpa_fdist_success_realE.
+by rewrite reduction_challenge_successE indcpa_success_realE.
 Qed.
 
 (* D's acceptance probability on the view whose Bob slot encrypts zero, hop 1,
@@ -786,14 +786,14 @@ Qed.
    Bob's key. *)
 Lemma hop0_zero_challengeE (D : distinguisher alice_hop_jointT) :
   alice_hop_game_success 1 D
-    = indcpa_fdist_success_zero bob_pkey (bob_challenge_adversary D).
+    = indcpa_success_zero bob_pkey (bob_challenge_adversary D).
 Proof.
 rewrite alice_hop_game_successE.
 rewrite (reduction_challenge_acceptE (pk := bob_pkey)
     (msg := fun _ : hop0_stateT => 0)
     (assemble := hop0_assemble) hop0_state_prodE); last first.
   by move=> -[[[[v2 v3] [r2 r3]] [rho2 rho3]] [ra1 ra2]].
-by rewrite reduction_challenge_successE indcpa_fdist_success_zeroE.
+by rewrite reduction_challenge_successE indcpa_success_zeroE.
 Qed.
 
 (* The gap D shows between hop 0 and hop 1 equals the advantage of
@@ -801,9 +801,9 @@ Qed.
    exactly one IND-CPA advantage. *)
 Lemma hop0_advantageE (D : distinguisher alice_hop_jointT) :
   `| alice_hop_game_success 0 D - alice_hop_game_success 1 D |
-  = indcpa_fdist_epsilon bob_pkey (bob_challenge_adversary D).
+  = indcpa_epsilon bob_pkey (bob_challenge_adversary D).
 Proof.
-by rewrite /indcpa_fdist_epsilon hop0_real_challengeE hop0_zero_challengeE.
+by rewrite /indcpa_epsilon hop0_real_challengeE hop0_zero_challengeE.
 Qed.
 
 (* D's acceptance probability at hop 1 equals the real-bit success probability
@@ -812,14 +812,14 @@ Qed.
    the two hops. *)
 Lemma hop1_real_challengeE (D : distinguisher alice_hop_jointT) :
   alice_hop_game_success 1 D
-    = indcpa_fdist_success_real charlie_pkey (charlie_challenge_adversary D).
+    = indcpa_success_real charlie_pkey (charlie_challenge_adversary D).
 Proof.
 rewrite alice_hop_game_successE.
 rewrite (reduction_challenge_acceptE (pk := charlie_pkey)
     (msg := fun c : hop1_stateT => c.1.1.1.2)
     (assemble := hop1_assemble) hop1_state_prodE); last first.
   by move=> -[[[[v2 v3] [r2 r3]] [rho2 rho3]] [ra1 ra2]].
-by rewrite reduction_challenge_successE indcpa_fdist_success_realE.
+by rewrite reduction_challenge_successE indcpa_success_realE.
 Qed.
 
 (* D's acceptance probability on the all-zero view, hop 2, equals the zero-bit
@@ -827,14 +827,14 @@ Qed.
    key. *)
 Lemma hop1_zero_challengeE (D : distinguisher alice_hop_jointT) :
   alice_hop_game_success 2 D
-    = indcpa_fdist_success_zero charlie_pkey (charlie_challenge_adversary D).
+    = indcpa_success_zero charlie_pkey (charlie_challenge_adversary D).
 Proof.
 rewrite alice_hop_game_successE.
 rewrite (reduction_challenge_acceptE (pk := charlie_pkey)
     (msg := fun _ : hop1_stateT => 0)
     (assemble := hop1_assemble) hop1_state_prodE); last first.
   by move=> -[[[[v2 v3] [r2 r3]] [rho2 rho3]] [ra1 ra2]].
-by rewrite reduction_challenge_successE indcpa_fdist_success_zeroE.
+by rewrite reduction_challenge_successE indcpa_success_zeroE.
 Qed.
 
 (* The gap D shows between hop 1 and hop 2 equals the advantage of
@@ -842,9 +842,9 @@ Qed.
    slot costs exactly one IND-CPA advantage. *)
 Lemma hop1_advantageE (D : distinguisher alice_hop_jointT) :
   `| alice_hop_game_success 1 D - alice_hop_game_success 2 D |
-  = indcpa_fdist_epsilon charlie_pkey (charlie_challenge_adversary D).
+  = indcpa_epsilon charlie_pkey (charlie_challenge_adversary D).
 Proof.
-by rewrite /indcpa_fdist_epsilon hop1_real_challengeE hop1_zero_challengeE.
+by rewrite /indcpa_epsilon hop1_real_challengeE hop1_zero_challengeE.
 Qed.
 
 (* Alice's own input as a constant random variable. *)
@@ -1097,9 +1097,9 @@ Theorem alice_tuple_guess_V2_le
     (predict : predictor dsdp_alice_hop_tupleT) :
   Pr alice_sample_fdist [set t | (predict `o AliceRealTuple) t == V2 t]
     <= #|plain AHE|%:R^-1
-       + indcpa_fdist_epsilon bob_pkey
+       + indcpa_epsilon bob_pkey
            (bob_challenge_adversary (distinguisher_of_predictor predict))
-       + indcpa_fdist_epsilon charlie_pkey
+       + indcpa_epsilon charlie_pkey
            (charlie_challenge_adversary (distinguisher_of_predictor predict)).
 Proof.
 rewrite /AliceRealTuple guess_V2_jointE -hop0_advantageE -hop1_advantageE.
@@ -1116,14 +1116,14 @@ Qed.
    replacement, and it is assumption-conditional at Bob's key. *)
 Definition bob_predictor_epsilon
     (predict : predictor dsdp_alice_hop_tupleT) : R :=
-  indcpa_fdist_epsilon bob_pkey
+  indcpa_epsilon bob_pkey
     (bob_challenge_adversary (distinguisher_of_predictor predict)).
 
 (* The Charlie-key counterpart of bob_predictor_epsilon: the price of the hop-1
    ciphertext replacement, assumption-conditional at Charlie's key. *)
 Definition charlie_predictor_epsilon
     (predict : predictor dsdp_alice_hop_tupleT) : R :=
-  indcpa_fdist_epsilon charlie_pkey
+  indcpa_epsilon charlie_pkey
     (charlie_challenge_adversary (distinguisher_of_predictor predict)).
 
 (* The negative logarithm of the probability that the predictor recovers
@@ -1165,7 +1165,7 @@ have Hnum_pos : (0 < 1 + #|plain AHE|%:R
                            + charlie_predictor_epsilon predict) :> R).
   apply: ltr_pwDl ltr01 (mulr_ge0 (ler0n _ _) _).
   by rewrite addr_ge0 // /bob_predictor_epsilon /charlie_predictor_epsilon
-             /indcpa_fdist_epsilon normr_ge0.
+             /indcpa_epsilon normr_ge0.
 rewrite lerNr opprB -logDiv // ler_log ?posrE ?divr_gt0 //.
 rewrite mulrDl mul1r mulrAC (divff (lt0r_neq0 Hcard_pos)) mul1r addrA.
 exact: alice_tuple_guess_V2_le.
@@ -1462,8 +1462,8 @@ Theorem alice_sim_advantage_le
     (D : distinguisher alice_hop_jointT) :
   `| Pr (`p_ [% V2, V3, AliceRealTuple]) [set x | D x]
      - Pr alice_ideal_joint [set x | D x] |
-  <= indcpa_fdist_epsilon bob_pkey (bob_challenge_adversary D)
-     + indcpa_fdist_epsilon charlie_pkey (charlie_challenge_adversary D).
+  <= indcpa_epsilon bob_pkey (bob_challenge_adversary D)
+     + indcpa_epsilon charlie_pkey (charlie_challenge_adversary D).
 Proof.
 rewrite /AliceRealTuple alice_ideal_jointE -hop0_advantageE -hop1_advantageE.
 rewrite !alice_hop_game_successE.
@@ -1502,13 +1502,13 @@ Definition alice_viewT : finType :=
    embeds the challenge in the ciphertext of Bob's input V2, rebuilds Alice's
    view around it, and guesses with the predictor. *)
 Definition bob_view_adversary (predict : predictor alice_viewT) :
-    indcpa_fdist_adversary :=
+    indcpa_adversary :=
   bob_challenge_adversary
     (distinguisher_of_predictor (predict \o alice_view_of_hop_tuple)).
 
 (* The Charlie-key counterpart of bob_view_adversary. *)
 Definition charlie_view_adversary (predict : predictor alice_viewT) :
-    indcpa_fdist_adversary :=
+    indcpa_adversary :=
   charlie_challenge_adversary
     (distinguisher_of_predictor (predict \o alice_view_of_hop_tuple)).
 
@@ -1566,8 +1566,8 @@ Corollary alice_view_guess_V2_le
     (predict : predictor alice_viewT) :
   Pr alice_sample_fdist [set t | (predict `o AliceView) t == V2 t]
     <= #|plain AHE|%:R^-1
-       + indcpa_fdist_epsilon bob_pkey (bob_view_adversary predict)
-       + indcpa_fdist_epsilon charlie_pkey (charlie_view_adversary predict).
+       + indcpa_epsilon bob_pkey (bob_view_adversary predict)
+       + indcpa_epsilon charlie_pkey (charlie_view_adversary predict).
 Proof.
 by rewrite alice_view_of_hop_tupleE; exact: alice_tuple_guess_V2_le.
 Qed.

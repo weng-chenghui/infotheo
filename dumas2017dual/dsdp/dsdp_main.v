@@ -698,8 +698,8 @@ Local Notation alice_view_of_hop_tuple :=
 Local Notation alice_view_of_hop_tupleE :=
   (alice_view_of_hop_tupleE (R:=R) (AHE:=AHE) card_renc rand_of_renc
      pkey_of_party v1 u1 u2 u3).
-Local Notation indcpa_fdist_epsilon :=
-  (indcpa_fdist_epsilon (R:=R) (AHE:=AHE) card_renc rand_of_renc).
+Local Notation indcpa_epsilon :=
+  (indcpa_epsilon (R:=R) (AHE:=AHE) card_renc rand_of_renc).
 Local Notation bob_pkey := (bob_pkey pkey_of_party).
 Local Notation charlie_pkey := (charlie_pkey pkey_of_party).
 Local Notation predictor := (predictor AHE).
@@ -763,9 +763,9 @@ Theorem alice_tuple_guess_V2_le
     (predict : predictor hop_tupleT) :
   Pr P [set t | (predict `o AliceRealTuple) t == V2 t]
     <= #|plain AHE|%:R^-1
-       + indcpa_fdist_epsilon bob_pkey
+       + indcpa_epsilon bob_pkey
            (bob_challenge_adversary (distinguisher_of_predictor predict))
-       + indcpa_fdist_epsilon charlie_pkey
+       + indcpa_epsilon charlie_pkey
            (charlie_challenge_adversary (distinguisher_of_predictor predict)).
 Proof.
 rewrite /AliceRealTuple guess_V2_jointE -hop0_advantageE -hop1_advantageE.
@@ -802,7 +802,7 @@ have Hnum_pos : (0 < 1 + #|plain AHE|%:R
                            + charlie_predictor_epsilon predict) :> R).
   apply: ltr_pwDl ltr01 (mulr_ge0 (ler0n _ _) _).
   by rewrite addr_ge0 // /bob_predictor_epsilon /charlie_predictor_epsilon
-             /indcpa_fdist_epsilon normr_ge0.
+             /indcpa_epsilon normr_ge0.
 rewrite lerNr opprB -logDiv // ler_log ?posrE ?divr_gt0 //.
 rewrite mulrDl mul1r mulrAC (divff (lt0r_neq0 Hcard_pos)) mul1r addrA.
 exact: alice_tuple_guess_V2_le.
@@ -834,8 +834,8 @@ Theorem alice_sim_advantage_le
     (D : distinguisher alice_hop_jointT) :
   `| Pr (`p_ [% V2, V3, AliceRealTuple]) [set x | D x]
      - Pr alice_ideal_joint [set x | D x] |
-  <= indcpa_fdist_epsilon bob_pkey (bob_challenge_adversary D)
-     + indcpa_fdist_epsilon charlie_pkey (charlie_challenge_adversary D).
+  <= indcpa_epsilon bob_pkey (bob_challenge_adversary D)
+     + indcpa_epsilon charlie_pkey (charlie_challenge_adversary D).
 Proof.
 rewrite /AliceRealTuple alice_ideal_jointE -hop0_advantageE -hop1_advantageE.
 rewrite !alice_hop_game_successE.
@@ -849,8 +849,8 @@ Corollary alice_view_guess_V2_le
     (predict : predictor alice_viewT) :
   Pr P [set t | (predict `o AliceView) t == V2 t]
     <= #|plain AHE|%:R^-1
-       + indcpa_fdist_epsilon bob_pkey (bob_view_adversary predict)
-       + indcpa_fdist_epsilon charlie_pkey (charlie_view_adversary predict).
+       + indcpa_epsilon bob_pkey (bob_view_adversary predict)
+       + indcpa_epsilon charlie_pkey (charlie_view_adversary predict).
 Proof.
 by rewrite alice_view_of_hop_tupleE; exact: alice_tuple_guess_V2_le.
 Qed.
@@ -948,8 +948,8 @@ Local Notation dsdp_trace_of_hop_tuple :=
 Local Notation dsdp_trace_of_hop_tupleE :=
   (dsdp_trace_of_hop_tupleE (R:=R) (AHE:=AHE) card_renc rand_of_renc
      v1 u1 u2 u3 dk_a dk_b dk_c w_rb2 w_rc2).
-Local Notation indcpa_fdist_epsilon :=
-  (indcpa_fdist_epsilon (R:=R) (AHE:=AHE) card_renc rand_of_renc).
+Local Notation indcpa_epsilon :=
+  (indcpa_epsilon (R:=R) (AHE:=AHE) card_renc rand_of_renc).
 Local Notation bob_challenge_adversary :=
   (bob_challenge_adversary (R:=R) (AHE:=AHE) card_renc rand_of_renc
      pkey_of_dk v1 u1 u2 u3).
@@ -1005,9 +1005,9 @@ Theorem alice_trace_guess_V2_le
     (predict : predictor dsdp_traceT) :
   Pr P [set t | (predict `o AliceTrace) t == V2 t]
     <= (#|plain AHE|%:R : R)^-1
-       + indcpa_fdist_epsilon (pkey_of_dk Bob)
+       + indcpa_epsilon (pkey_of_dk Bob)
            (bob_trace_adversary (distinguisher_of_predictor predict))
-       + indcpa_fdist_epsilon (pkey_of_dk Charlie)
+       + indcpa_epsilon (pkey_of_dk Charlie)
            (charlie_trace_adversary (distinguisher_of_predictor predict)).
 Proof.
 rewrite dsdp_trace_of_hop_tupleE.
@@ -1215,8 +1215,8 @@ Theorem alice_trace_sim_advantage_le
     (D : distinguisher trace_jointT) :
   `| Pr (`p_ [% V2, V3, AliceTrace]) [set x | D x]
      - Pr alice_trace_ideal_joint [set x | D x] |
-  <= indcpa_fdist_epsilon (pkey_of_dk Bob) (bob_trace_adversary D)
-     + indcpa_fdist_epsilon (pkey_of_dk Charlie) (charlie_trace_adversary D).
+  <= indcpa_epsilon (pkey_of_dk Bob) (bob_trace_adversary D)
+     + indcpa_epsilon (pkey_of_dk Charlie) (charlie_trace_adversary D).
 Proof.
 rewrite alice_trace_real_jointE alice_trace_ideal_jointE.
 rewrite -2!(Pr_fdistmap_bool D) 2!(fdistmap_comp D) 2!Pr_fdistmap_bool.

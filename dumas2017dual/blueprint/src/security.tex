@@ -258,17 +258,17 @@ finite commutative unit ring.
 \end{definition}
 
 \begin{definition}[Real-or-zero advantage of a single-query adversary]
-  \label{def:indcpa_fdist_epsilon}
+  \label{def:indcpa_epsilon}
   \rocq{infotheo.dumas2017dual.dsdp.fdist_hopping.indcpa_game.enc_fdist,
-       infotheo.dumas2017dual.dsdp.fdist_hopping.indcpa_game.indcpa_fdist_adversary,
+       infotheo.dumas2017dual.dsdp.fdist_hopping.indcpa_game.indcpa_adversary,
        infotheo.dumas2017dual.dsdp.fdist_hopping.indcpa_game.indcpa_challenger,
        infotheo.dumas2017dual.dsdp.fdist_hopping.indcpa_game.indcpa_experiment,
-       infotheo.dumas2017dual.dsdp.fdist_hopping.indcpa_game.indcpa_fdist_accept,
-       infotheo.dumas2017dual.dsdp.fdist_hopping.indcpa_game.indcpa_fdist_success_real,
-       infotheo.dumas2017dual.dsdp.fdist_hopping.indcpa_game.indcpa_fdist_success_realE,
-       infotheo.dumas2017dual.dsdp.fdist_hopping.indcpa_game.indcpa_fdist_success_zero,
-       infotheo.dumas2017dual.dsdp.fdist_hopping.indcpa_game.indcpa_fdist_success_zeroE,
-       infotheo.dumas2017dual.dsdp.fdist_hopping.indcpa_game.indcpa_fdist_epsilon}
+       infotheo.dumas2017dual.dsdp.fdist_hopping.indcpa_game.indcpa_accept,
+       infotheo.dumas2017dual.dsdp.fdist_hopping.indcpa_game.indcpa_success_real,
+       infotheo.dumas2017dual.dsdp.fdist_hopping.indcpa_game.indcpa_success_realE,
+       infotheo.dumas2017dual.dsdp.fdist_hopping.indcpa_game.indcpa_success_zero,
+       infotheo.dumas2017dual.dsdp.fdist_hopping.indcpa_game.indcpa_success_zeroE,
+       infotheo.dumas2017dual.dsdp.fdist_hopping.indcpa_game.indcpa_epsilon}
   \rocqok
   A single-query real-or-zero adversary $A$ is a finite state type, a law on it,
   a challenge plaintext $p_A$ read off the state, and a decision taken on the
@@ -292,7 +292,7 @@ finite commutative unit ring.
        infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.hop1_assemble,
        infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.hop1_reduction}
   \rocqok
-  \uses{def:alice_hop_ladder,def:indcpa_fdist_epsilon}
+  \uses{def:alice_hop_ladder,def:indcpa_epsilon}
   The hop-$i$ reduction $\hopred{i}{D}$ of a distinguisher $D$ is the
   single-query adversary whose state carries everything the hop-$i$ tuple holds
   apart from the $i$-th ciphertext slot, whose challenge plaintext is the honest
@@ -601,7 +601,7 @@ adversary class, and records what forces the class to leave something out.
   \label{def:indcpa_assumption}
   \rocq{infotheo.dumas2017dual.dsdp.fdist_hopping.indcpa_game.indcpa_epsilon_assumption}
   \rocqok
-  \uses{def:indcpa_fdist_epsilon}
+  \uses{def:indcpa_epsilon}
   An assumption $\mathcal{A}$ is a Boolean classifier on single-query
   real-or-zero adversaries, one advantage $\varepsilon_{\mathcal{A}}$, and the
   assertion that every classified adversary stays below it at every key in the

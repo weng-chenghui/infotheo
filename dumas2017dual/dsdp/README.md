@@ -14,7 +14,7 @@ basename and resolve by suffix.
   correctness over idealized / Benaloh / Paillier AHE).
 
 - **fdist_hopping/** — the game-hopping secrecy result over Infotheo distributions.
-  `dsdp_alice_fdist_secrecy` (the real-or-zero advantage `indcpa_fdist_epsilon`, the two hop
+  `dsdp_alice_fdist_secrecy` (the real-or-zero advantage `indcpa_epsilon`, the two hop
   reductions, the guess / unpredictability / simulator-closeness headlines),
   `dsdp_alice_trace_link` (the same bounds at the executed fifteen-round piSMC trace).
 

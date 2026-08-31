@@ -608,8 +608,8 @@ Local Notation Sout :=
 Local Notation AliceHopTuple i :=
   (AliceHopTuple (R:=R) (AHE:=AHE) card_renc rand_of_renc
      pkey_of_dk v1 u1 u2 u3 i).
-Local Notation indcpa_fdist_epsilon :=
-  (indcpa_fdist_epsilon (R:=R) (AHE:=AHE) card_renc rand_of_renc).
+Local Notation indcpa_epsilon :=
+  (indcpa_epsilon (R:=R) (AHE:=AHE) card_renc rand_of_renc).
 Local Notation indcpa_epsilon_assumption :=
   (indcpa_epsilon_assumption (R:=R) (AHE:=AHE) card_renc rand_of_renc).
 Local Notation bob_challenge_adversary :=
@@ -723,9 +723,9 @@ Theorem alice_trace_guess_V2_le
   Pr (alice_sample_fdist (R:=R) AHE card_renc)
      [set t | (predict `o AliceTrace) t == V2 t]
     <= (#|plain AHE|%:R : R)^-1
-       + indcpa_fdist_epsilon (pkey_of_dk Bob)
+       + indcpa_epsilon (pkey_of_dk Bob)
            (bob_trace_adversary (distinguisher_of_predictor predict))
-       + indcpa_fdist_epsilon (pkey_of_dk Charlie)
+       + indcpa_epsilon (pkey_of_dk Charlie)
            (charlie_trace_adversary (distinguisher_of_predictor predict)).
 Proof.
 rewrite dsdp_trace_of_hop_tupleE.
@@ -787,14 +787,14 @@ Qed.
 (* The advantage against Bob's key of the adversary a trace predictor
    induces. *)
 Definition bob_trace_predictor_epsilon (predict : predictor dsdp_traceT) : R :=
-  indcpa_fdist_epsilon (pkey_of_dk Bob)
+  indcpa_epsilon (pkey_of_dk Bob)
     (bob_trace_adversary (distinguisher_of_predictor predict)).
 
 (* The advantage against Charlie's key of the adversary a trace predictor
    induces. *)
 Definition charlie_trace_predictor_epsilon
     (predict : predictor dsdp_traceT) : R :=
-  indcpa_fdist_epsilon (pkey_of_dk Charlie)
+  indcpa_epsilon (pkey_of_dk Charlie)
     (charlie_trace_adversary (distinguisher_of_predictor predict)).
 
 (* The negative logarithm of the probability that the predictor recovers
@@ -892,8 +892,8 @@ Theorem alice_trace_sim_advantage_le
     (D : distinguisher trace_jointT) :
   `| Pr (`p_ [% V2, V3, AliceTrace]) [set x | D x]
      - Pr alice_trace_ideal_joint [set x | D x] |
-  <= indcpa_fdist_epsilon (pkey_of_dk Bob) (bob_trace_adversary D)
-     + indcpa_fdist_epsilon (pkey_of_dk Charlie) (charlie_trace_adversary D).
+  <= indcpa_epsilon (pkey_of_dk Bob) (bob_trace_adversary D)
+     + indcpa_epsilon (pkey_of_dk Charlie) (charlie_trace_adversary D).
 Proof.
 rewrite alice_trace_real_jointE alice_trace_ideal_jointE.
 rewrite -2!(Pr_fdistmap_bool D) 2!(fdistmap_comp D) 2!Pr_fdistmap_bool.
@@ -1406,8 +1406,8 @@ Local Notation alice_trace_ideal_joint :=
      v1 u1 u2 u3 dk_a dk_b dk_c w_rc2).
 Local Notation dsdp_trace_of_hop_tuple :=
   (dsdp_trace_of_hop_tuple rand_of_renc v1 u1 u2 u3 dk_a dk_b dk_c w_rc2).
-Local Notation indcpa_fdist_epsilon :=
-  (indcpa_fdist_epsilon (R:=R) (AHE:=AHE) card_renc rand_of_renc).
+Local Notation indcpa_epsilon :=
+  (indcpa_epsilon (R:=R) (AHE:=AHE) card_renc rand_of_renc).
 Local Notation bob_challenge_adversary :=
   (bob_challenge_adversary (R:=R) (AHE:=AHE) card_renc rand_of_renc
      pkey_of_dk v1 u1 u2 u3).
@@ -1452,8 +1452,8 @@ Corollary dsdp_alice_trace_sim_advantage_fdist_test_le
     (D : distinguisher trace_jointT) :
   `| Pr (`p_ [% V2, V3, AliceTrace]) [set x | D x]
      - Pr (alice_trace_ideal_test D) [set true] |
-  <= indcpa_fdist_epsilon (pkey_of_dk Bob) (bob_trace_adversary D)
-     + indcpa_fdist_epsilon (pkey_of_dk Charlie) (charlie_trace_adversary D).
+  <= indcpa_epsilon (pkey_of_dk Bob) (bob_trace_adversary D)
+     + indcpa_epsilon (pkey_of_dk Charlie) (charlie_trace_adversary D).
 Proof.
 rewrite alice_trace_ideal_testE Pr_fdistmap_bool.
 exact: (alice_trace_sim_advantage_le card_renc rand_of_renc
@@ -1555,8 +1555,8 @@ Local Notation alice_trace_ideal_joint_at w :=
      v1 u1 u2 u3 dk_a dk_b dk_c w).
 Local Notation dsdp_trace_of_hop_tuple_at w :=
   (dsdp_trace_of_hop_tuple rand_of_renc v1 u1 u2 u3 dk_a dk_b dk_c w).
-Local Notation indcpa_fdist_epsilon :=
-  (indcpa_fdist_epsilon (R:=R) (AHE:=AHE) card_renc rand_of_renc).
+Local Notation indcpa_epsilon :=
+  (indcpa_epsilon (R:=R) (AHE:=AHE) card_renc rand_of_renc).
 Local Notation bob_challenge_adversary :=
   (bob_challenge_adversary (R:=R) (AHE:=AHE) card_renc rand_of_renc
      pkey_of_dk v1 u1 u2 u3).
@@ -1594,9 +1594,9 @@ Theorem dsdp_alice_trace_sim_advantage_fdist_avg_le
   `| Pr alice_trace_real_joint_avg [set x | D x]
      - Pr alice_trace_ideal_joint_avg [set x | D x] |
   <= \sum_(w in Renc) (fdist_uniform card_renc : R.-fdist Renc) w
-       * (indcpa_fdist_epsilon (pkey_of_dk Bob)
+       * (indcpa_epsilon (pkey_of_dk Bob)
             (bob_trace_adversary_at w D)
-          + indcpa_fdist_epsilon (pkey_of_dk Charlie)
+          + indcpa_epsilon (pkey_of_dk Charlie)
             (charlie_trace_adversary_at w D)).
 Proof.
 apply: fdist_mixture_advantage_le => w.
@@ -1733,8 +1733,8 @@ Local Notation alice_trace_ideal_joint :=
      v1 u1 u2 u3 dk_a dk_b dk_c w_rc2).
 Local Notation dsdp_trace_of_hop_tuple :=
   (dsdp_trace_of_hop_tuple rand_of_renc v1 u1 u2 u3 dk_a dk_b dk_c w_rc2).
-Local Notation indcpa_fdist_epsilon :=
-  (indcpa_fdist_epsilon (R:=R) (AHE:=AHE) card_renc rand_of_renc).
+Local Notation indcpa_epsilon :=
+  (indcpa_epsilon (R:=R) (AHE:=AHE) card_renc rand_of_renc).
 Local Notation bob_challenge_adversary :=
   (bob_challenge_adversary (R:=R) (AHE:=AHE) card_renc rand_of_renc
      pkey_of_dk v1 u1 u2 u3).
@@ -1793,11 +1793,11 @@ Corollary dsdp_alice_raw_trace_sim_advantage_fdist_le
         [set t | D_raw (V2 t, V3 t, alice_raw_trace t)]
      - Pr alice_trace_ideal_joint
           [set x : trace_jointT | D_raw (x.1.1, x.1.2, map decode_a x.2)] |
-  <= indcpa_fdist_epsilon (pkey_of_dk Bob)
+  <= indcpa_epsilon (pkey_of_dk Bob)
        (bob_challenge_adversary
          (fun x => D_raw (x.1.1, x.1.2,
             map decode_a (dsdp_trace_of_hop_tuple x.2))))
-     + indcpa_fdist_epsilon (pkey_of_dk Charlie)
+     + indcpa_epsilon (pkey_of_dk Charlie)
        (charlie_challenge_adversary
          (fun x => D_raw (x.1.1, x.1.2,
             map decode_a (dsdp_trace_of_hop_tuple x.2)))).
@@ -1834,11 +1834,11 @@ Corollary dsdp_alice_guess_fdist_raw_trace_V2_real_le
   Pr (alice_sample_fdist (R:=R) AHE card_renc)
      [set t | g_raw (alice_raw_trace t) == V2 t]
   <= (#|plain AHE|%:R : R)^-1
-     + indcpa_fdist_epsilon (pkey_of_dk Bob)
+     + indcpa_epsilon (pkey_of_dk Bob)
          (bob_challenge_adversary
             (distinguisher_of_predictor
                (Genc g_raw \o dsdp_trace_of_hop_tuple)))
-     + indcpa_fdist_epsilon (pkey_of_dk Charlie)
+     + indcpa_epsilon (pkey_of_dk Charlie)
          (charlie_challenge_adversary
             (distinguisher_of_predictor
                (Genc g_raw \o dsdp_trace_of_hop_tuple))).
@@ -1876,8 +1876,8 @@ Local Notation IdealAvg :=
      v1 u1 u2 u3 dk_a dk_b dk_c).
 Local Notation dsdp_trace_of_hop_tuple_at w :=
   (dsdp_trace_of_hop_tuple rand_of_renc v1 u1 u2 u3 dk_a dk_b dk_c w).
-Local Notation indcpa_fdist_epsilon :=
-  (indcpa_fdist_epsilon (R:=R) (AHE:=AHE) card_renc rand_of_renc).
+Local Notation indcpa_epsilon :=
+  (indcpa_epsilon (R:=R) (AHE:=AHE) card_renc rand_of_renc).
 Local Notation bob_challenge_adversary :=
   (bob_challenge_adversary (R:=R) (AHE:=AHE) card_renc rand_of_renc
      pkey_of_dk v1 u1 u2 u3).
@@ -1931,11 +1931,11 @@ Theorem dsdp_alice_raw_trace_sim_advantage_fdist_avg_le
      - Pr (alice_raw_trace_ideal_test_avg D_raw) [set true] |
   <= \sum_(w in Renc)
        (fdist_uniform card_renc : R.-fdist Renc) w
-       * (indcpa_fdist_epsilon (pkey_of_dk Bob)
+       * (indcpa_epsilon (pkey_of_dk Bob)
             (bob_challenge_adversary (fun x =>
                D_raw (x.1.1, x.1.2,
                       map decode_a (dsdp_trace_of_hop_tuple_at w x.2))))
-          + indcpa_fdist_epsilon (pkey_of_dk Charlie)
+          + indcpa_epsilon (pkey_of_dk Charlie)
             (charlie_challenge_adversary (fun x =>
                D_raw (x.1.1, x.1.2,
                       map decode_a (dsdp_trace_of_hop_tuple_at w x.2))))).
