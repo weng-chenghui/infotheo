@@ -271,8 +271,14 @@ Hypothesis assumption_epsilon_negligible :
 
 (* The conclusion is negligible_fun of the family k |-> Pr_k, where Pr_k
    is the probability that the k-th predictor guesses Bob's input V2 at
-   the k-th Paillier instance.  It holds under the four hypotheses above.
-   The assumption family is the per-k form of paillier_indcpa_assumption;
+   the k-th Paillier instance.  It follows from the four hypotheses in
+   three steps.  At each k the two class premises yield the bound of
+   alice_trace_guess_V2_admissible_le, Pr_k <= 1/(p k * q k) + 2 * eps k,
+   with eps k the advantage A k assumes.  The two negligibility hypotheses
+   make both summand families vanish, so the upper-bound family is
+   negligible by negligible_fun_predictor_bound.  negligible_fun_le then
+   transfers negligibility from that dominating family down to Pr_k.  The
+   assumption family is the per-k form of paillier_indcpa_assumption;
    decisional composite residuosity remains the source a proved record
    family would start from. *)
 Corollary dsdp_alice_trace_guess_V2_admissible_paillier_negligible :
