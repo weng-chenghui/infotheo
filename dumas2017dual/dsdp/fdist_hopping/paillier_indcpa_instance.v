@@ -103,10 +103,7 @@ Definition rand_of_renc_paillier : renc_paillier -> rand AHE := idfun.
    proof of the same equation is propositionally equal to this one and not
    convertible with it, so bounds stated at the two would compose only
    through a rewrite.
-   Naming: [card_renc] is the abstract development's name for this
-   hypothesis, so the successor form is what the name denotes here; it is a
-   nonemptiness statement rather than a cardinality value, unlike
-   card_plain_paillier. *)
+*)
 Lemma card_renc_paillier : #|renc_paillier| = #|renc_paillier|.-1.+1.
 Proof. by rewrite prednK //; apply/card_gt0P; exists 1%g; rewrite inE. Qed.
 
@@ -124,69 +121,51 @@ Variables (v1 u1 u2 u3 : plain AHE).
 Hypothesis u3_unit : u3 \is a GRing.unit.
 
 Variables (dk_a dk_b dk_c : priv_key AHE).
-Variables (w_rb2 w_rc2 : renc_paillier).
+Variables (rb2 rc2 : renc_paillier).
 
-(* The IND-CPA assumption made of Paillier at this modulus: an adversary
-   class, one epsilon, and the assumption that every classified adversary has
+(* The IND-CPA assumption of Paillier: a classified adversary has
    real-or-zero advantage at most that epsilon at every key built from a
    private key.
-   The class and the epsilon live in the record's fields.  The two type
-   indices card_renc_paillier and rand_of_renc_paillier only site the record
-   at this Paillier packaging, typing the challenger's uniform coin; they
-   carry none of the cryptographic content.
-   It is a parameter, and every bound stated through it is conditional on a
-   record being supplied.  Once a real proof lands, from decisional
-   composite residuosity (DCR) at a modulus that is the product of two
-   distinct primes, a strengthening of this section's p, q > 1 hypotheses,
-   it discharges this Variable by a concrete term built at this same
-   card_renc_paillier proof term:
 
-     Definition paillier_dcr_assumption :
+   If a real proof of the small epsilon is done,
+   replace this `Variable paillier_indcpa_assumption` with a real
+   `indcpa_epsilon_assumption` definition like this:
+
+      Definition paillier_dcr_assumption :
          indcpa_epsilon_assumption card_renc_paillier
                                    rand_of_renc_paillier :=
        {| indcpa_admissible :=
             (* the Boolean adversary class the DCR reduction covers *) ;
           indcpa_assumption_epsilon :=
-            (* the concrete bound, a function of the DCR advantage *) ;
+            (* the concrete bound, a function of the real advantage *) ;
           indcpa_admissible_epsilon_le :=
             (* the Qed lemma: every classified adversary keeps advantage
                at most that epsilon at every key from a private key *) |}.
 
-   cipher_constant_assumption in indcpa_game.v is such an inhabitant, with a
-   computable class, epsilon zero, and the promise field discharged by
-   cipher_constant_epsilon_le.  Under a concrete term the corollary below
-   computes its epsilon with its proof unchanged, and its two class premises
-   become membership proofs of the two reduction adversaries.
-   Naming: [indcpa] is in the name because the record is an IND-CPA
-   advantage assumption; the bare name paillier_assumption is the literature
-   term for decisional composite residuosity, which this record neither is
-   nor implies. *)
+   There is an idealized AHE example `cipher_constant_assumption` in
+   indcpa_game.v, with a computable class shows that the epsilon is zero.
+*)
 Variable paillier_indcpa_assumption :
   indcpa_epsilon_assumption (R:=R) card_renc_paillier rand_of_renc_paillier.
 
 Local Notation bob_trace_adversary :=
   (bob_trace_adversary (R:=R) card_renc_paillier rand_of_renc_paillier
-     v1 u1 u2 u3 dk_a dk_b dk_c w_rc2).
+     v1 u1 u2 u3 dk_a dk_b dk_c rc2).
 Local Notation charlie_trace_adversary :=
   (charlie_trace_adversary (R:=R) card_renc_paillier rand_of_renc_paillier
-     v1 u1 u2 u3 dk_a dk_b dk_c w_rc2).
+     v1 u1 u2 u3 dk_a dk_b dk_c rc2).
 Local Notation alice_trace_guess_V2_pr :=
   (alice_trace_guess_V2_pr (R:=R) card_renc_paillier rand_of_renc_paillier
-     v1 u1 u2 u3 dk_a dk_b dk_c w_rb2 w_rc2).
+     v1 u1 u2 u3 dk_a dk_b dk_c rb2 rc2).
 
 (* A predictor reading Alice's executed DSDP trace at the Paillier
    instantiation returns Bob's input with probability at most 1/(p * q) plus
-   twice the assumed advantage.  The three currencies of the abstract bound
-   land here as follows: 1/(p * q) is information-theoretic and
-   unconditional, the residue of the leaked output along the DSDP solution
-   fiber at a plaintext space of size p * q; 2 * epsilon is conditional on
-   paillier_indcpa_assumption, and prices the two ciphertext replacements at
-   Bob's key and at Charlie's; the two premises are conditional on the class,
-   and assert membership of the two reduction adversaries without proving it.
-   Naming: extends [alice_trace_guess_V2_admissible_pq_le] with
-   the scheme in place of the [pq] variant token, keeping [admissible], which
-   is what marks the bound class-conditional against the unconditional
-   sibling [dsdp_alice_trace_guess_V2_pq_le]. *)
+   twice the assumed advantage.
+
+   The 1/(p * q) is unconditional. It is from Sout by design that Alice knows.
+   2 * epsilon is conditional on paillier_indcpa_assumption, and prices the two
+   ciphertext replacements at Bob's key and at Charlie's
+*)
 Corollary dsdp_alice_trace_guess_V2_admissible_paillier_le
     (predict : predictor AHE (dsdp_traceT AHE)) :
   indcpa_admissible paillier_indcpa_assumption
@@ -198,7 +177,7 @@ Corollary dsdp_alice_trace_guess_V2_admissible_paillier_le
        + 2 * indcpa_assumption_epsilon paillier_indcpa_assumption.
 Proof.
 exact: (alice_trace_guess_V2_admissible_pq_le
-          u3_unit w_rb2 card_plain_pq).
+          u3_unit rb2 card_plain_pq).
 Qed.
 
 End paillier_indcpa_instance.
