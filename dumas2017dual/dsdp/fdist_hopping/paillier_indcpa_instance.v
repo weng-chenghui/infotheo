@@ -269,12 +269,12 @@ Hypothesis inv_pq_negligible :
 Hypothesis assumption_epsilon_negligible :
   negligible_fun (fun k => indcpa_assumption_epsilon (A k)).
 
-(* The asymptotic form of this file's corollary: under the four hypotheses
-   above, the family of predictors guesses Bob's input from Alice's
-   executed trace with negligible probability.  The assumption family is
-   the per-k form of paillier_indcpa_assumption; decisional composite
-   residuosity remains the source a proved record family would start
-   from. *)
+(* The conclusion is negligible_fun of the family k |-> Pr_k, where Pr_k
+   is the probability that the k-th predictor guesses Bob's input V2 at
+   the k-th Paillier instance.  It holds under the four hypotheses above.
+   The assumption family is the per-k form of paillier_indcpa_assumption;
+   decisional composite residuosity remains the source a proved record
+   family would start from. *)
 Corollary dsdp_alice_trace_guess_V2_admissible_paillier_negligible :
   negligible_fun (fun k =>
      alice_trace_guess_V2_pr_at (R:=R) (I:=paillier_instance) (predict k)).
