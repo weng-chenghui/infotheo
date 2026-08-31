@@ -196,7 +196,7 @@ Require Import dsdp_alice_fdist_secrecy.
 (*                              Boolean test D                                *)
 (*   alice_trace_ideal_testE == equates that experiment with testing the      *)
 (*                              ideal trace law                               *)
-(* dsdp_alice_trace_sim_advantage_fdist_test_le ==                            *)
+(* dsdp_alice_trace_sim_advantage_test_le ==                                  *)
 (*                              states the trace simulation bound using the   *)
 (*                              named ideal experiment                        *)
 (* dsdp_trace_of_hop_tuple_pub ==                                             *)
@@ -222,7 +222,7 @@ Require Import dsdp_alice_fdist_secrecy.
 (* alice_trace_ideal_joint_avg ==                                             *)
 (*                              the ideal trace law after sampling the        *)
 (*                              re-encryption coin                            *)
-(* dsdp_alice_trace_sim_advantage_fdist_avg_le ==                             *)
+(* dsdp_alice_trace_sim_advantage_avg_le ==                                   *)
 (*                              bounds the averaged real-to-ideal gap by the  *)
 (*                              average costs of the two ciphertext hops      *)
 (*                                                                            *)
@@ -239,7 +239,7 @@ Require Import dsdp_alice_fdist_secrecy.
 (* alice_trace_predictor_unpredictability_ereal_finE ==                       *)
 (*                              agrees with the real-valued definition when   *)
 (*                              predictor success is positive                 *)
-(* dsdp_alice_trace_predictor_unpredictability_fdist_ereal_ge ==              *)
+(* dsdp_alice_trace_predictor_unpredictability_ereal_ge ==                    *)
 (*                              gives the trace unpredictability bound        *)
 (*                              without assuming positive predictor success   *)
 (*                                                                            *)
@@ -252,10 +252,10 @@ Require Import dsdp_alice_fdist_secrecy.
 (*                              experiment sample                             *)
 (*   alice_raw_trace_decodeE == proves that decoding Alice's encoded trace    *)
 (*                              recovers her raw interpreter trace            *)
-(* dsdp_alice_raw_trace_sim_advantage_fdist_le ==                             *)
+(* dsdp_alice_raw_trace_sim_advantage_le ==                                   *)
 (*                              transfers the simulation bound to tests on    *)
 (*                              Alice's raw trace with no additional cost     *)
-(* dsdp_alice_guess_fdist_raw_trace_V2_real_le ==                             *)
+(* dsdp_alice_raw_trace_guess_V2_le ==                                        *)
 (*                              transfers the guessing bound to predictors    *)
 (*                              on Alice's raw trace with no additional cost  *)
 (* alice_raw_trace_real_test_avg ==                                           *)
@@ -264,16 +264,16 @@ Require Import dsdp_alice_fdist_secrecy.
 (* alice_raw_trace_ideal_test_avg ==                                          *)
 (*                              tests the averaged ideal trace after decoding *)
 (*                              it to the raw trace format                    *)
-(* dsdp_alice_raw_trace_sim_advantage_fdist_avg_le ==                         *)
+(* dsdp_alice_raw_trace_sim_advantage_avg_le ==                               *)
 (*                              bounds the averaged raw-trace gap by the      *)
 (*                              average costs of the two ciphertext hops      *)
 (*                                                                            *)
 (* Composite-modulus forms                                                    *)
 (*                                                                            *)
-(* dsdp_alice_guess_fdist_trace_V2_real_pq_le ==                              *)
+(* dsdp_alice_trace_guess_V2_pq_le ==                                         *)
 (*                              states the trace guessing bound with uniform  *)
 (*                              guessing written as the reciprocal of p * q   *)
-(* dsdp_alice_trace_predictor_unpredictability_fdist_ereal_pq_ge ==           *)
+(* dsdp_alice_trace_predictor_unpredictability_ereal_pq_ge ==                 *)
 (*                              states the zero-safe unpredictability bound   *)
 (*                              when the plaintext space has size p * q       *)
 (* alice_trace_guess_V2_admissible_pq_le ==                        *)
@@ -1448,7 +1448,7 @@ Qed.
    named experiment.
    Naming: extends [alice_trace_sim_advantage_le] with the [test]
    variant token before [le]; kept long to preserve the family grouping. *)
-Corollary dsdp_alice_trace_sim_advantage_fdist_test_le
+Corollary dsdp_alice_trace_sim_advantage_test_le
     (D : distinguisher trace_jointT) :
   `| Pr (`p_ [% V2, V3, AliceTrace]) [set x | D x]
      - Pr (alice_trace_ideal_test D) [set true] |
@@ -1589,7 +1589,7 @@ Definition alice_trace_ideal_joint_avg :
    per-coin hop advantages.
    Naming: extends [alice_trace_sim_advantage_le] with the [avg]
    variant token before [le]; kept long to preserve the family grouping. *)
-Theorem dsdp_alice_trace_sim_advantage_fdist_avg_le
+Theorem dsdp_alice_trace_sim_advantage_avg_le
     (D : distinguisher (trace_jointT AHE)) :
   `| Pr alice_trace_real_joint_avg [set x | D x]
      - Pr alice_trace_ideal_joint_avg [set x | D x] |
@@ -1688,7 +1688,7 @@ Qed.
    [alice_trace_predictor_unpredictability_ge].
    Naming: extends that theorem name with the [ereal] variant token before
    [ge]; kept long to preserve the family grouping. *)
-Theorem dsdp_alice_trace_predictor_unpredictability_fdist_ereal_ge predict :
+Theorem dsdp_alice_trace_predictor_unpredictability_ereal_ge predict :
   Order.le
     (EFin (log (#|plain AHE|%:R)
            - log (1 + #|plain AHE|%:R
@@ -1787,7 +1787,7 @@ Qed.
    Naming: extends [alice_trace_sim_advantage_le] with [raw]
    marking the observation read; kept long to preserve the family
    grouping. *)
-Corollary dsdp_alice_raw_trace_sim_advantage_fdist_le
+Corollary dsdp_alice_raw_trace_sim_advantage_le
     (D_raw : plain AHE * plain AHE * seq (di_data DI) -> bool) :
   `| Pr (alice_sample_fdist (R:=R) AHE card_renc)
         [set t | D_raw (V2 t, V3 t, alice_raw_trace t)]
@@ -1829,7 +1829,7 @@ Local Notation Genc g_raw :=
    Naming: extends [alice_trace_guess_V2_le] with [raw]
    marking the observation read; kept long to preserve the family
    grouping. *)
-Corollary dsdp_alice_guess_fdist_raw_trace_V2_real_le
+Corollary dsdp_alice_raw_trace_guess_V2_le
     (g_raw : seq (di_data DI) -> plain AHE) :
   Pr (alice_sample_fdist (R:=R) AHE card_renc)
      [set t | g_raw (alice_raw_trace t) == V2 t]
@@ -1922,10 +1922,10 @@ Definition alice_raw_trace_ideal_test_avg
 (* The averaged gap a Boolean test reading Alice's raw interpreter trace
    sees between the real and the ideal experiment is at most the average of
    the two per-coin hop advantages of the decoded test.
-   Naming: extends [dsdp_alice_raw_trace_sim_advantage_fdist_le] with the
+   Naming: extends [dsdp_alice_raw_trace_sim_advantage_le] with the
    [avg] variant token before [le]; kept long to preserve the family
    grouping. *)
-Theorem dsdp_alice_raw_trace_sim_advantage_fdist_avg_le
+Theorem dsdp_alice_raw_trace_sim_advantage_avg_le
     (D_raw : plain AHE * plain AHE * seq (di_data DI) -> bool) :
   `| Pr (alice_raw_trace_real_test_avg D_raw) [set true]
      - Pr (alice_raw_trace_ideal_test_avg D_raw) [set true] |
@@ -1946,7 +1946,7 @@ Proof.
 rewrite /alice_raw_trace_real_test_avg /alice_raw_trace_ideal_test_avg.
 rewrite /alice_trace_ideal_joint_avg fdistmap_bind.
 apply: fdist_mixture_advantage_le => w; rewrite 2!Pr_fdistmap_bool.
-exact: (dsdp_alice_raw_trace_sim_advantage_fdist_le card_renc rand_of_renc
+exact: (dsdp_alice_raw_trace_sim_advantage_le card_renc rand_of_renc
           v1 u1 u2 u3 dk_a dk_b dk_c w_rb2 w D_raw).
 Qed.
 
@@ -2004,7 +2004,7 @@ Proof. by rewrite card_plain_pq natrM. Qed.
    modulus p * q, the modulus of the Paillier-style instantiations.
    Naming: extends [alice_trace_guess_V2_le] with the [pq]
    variant token before [le]; kept long to preserve the family grouping. *)
-Corollary dsdp_alice_guess_fdist_trace_V2_real_pq_le
+Corollary dsdp_alice_trace_guess_V2_pq_le
     (predict : predictor dsdp_traceT) :
   trace_guess_V2_pr predict
   <= ((p%:R : R) * q%:R)^-1 + bob_trace_predictor_epsilon predict
@@ -2038,10 +2038,10 @@ Qed.
 (* The zero-safe unpredictability bound with both cardinalities written at
    the composite modulus p * q.
    Naming: extends
-   [dsdp_alice_trace_predictor_unpredictability_fdist_ereal_ge] with the
+   [dsdp_alice_trace_predictor_unpredictability_ereal_ge] with the
    [pq] variant token before [ge]; kept long to preserve the family
    grouping. *)
-Theorem dsdp_alice_trace_predictor_unpredictability_fdist_ereal_pq_ge
+Theorem dsdp_alice_trace_predictor_unpredictability_ereal_pq_ge
     (predict : predictor dsdp_traceT) :
   Order.le
     (EFin (log ((p%:R : R) * q%:R)
@@ -2051,7 +2051,7 @@ Theorem dsdp_alice_trace_predictor_unpredictability_fdist_ereal_pq_ge
     (alice_trace_predictor_unpredictability_ereal predict).
 Proof.
 have -> : (p%:R : R) * q%:R = #|plain AHE|%:R by rewrite card_plain_pq natrM.
-exact: (dsdp_alice_trace_predictor_unpredictability_fdist_ereal_ge
+exact: (dsdp_alice_trace_predictor_unpredictability_ereal_ge
           card_renc rand_of_renc v1 u1 u2 u3_unit dk_a dk_b dk_c
           w_rb2 w_rc2 predict).
 Qed.

@@ -42,7 +42,7 @@ Require Import indcpa_game dsdp_alice_fdist_secrecy dsdp_alice_trace_link.
 (*                              one pinned proof term                         *)
 (* paillier_indcpa_assumption == the adversary class and epsilon assumed of   *)
 (*                              Paillier at this modulus                      *)
-(* dsdp_alice_guess_fdist_trace_V2_admissible_paillier_le ==                  *)
+(* dsdp_alice_trace_guess_V2_admissible_paillier_le ==                        *)
 (*                              the class-conditional DSDP trace guessing     *)
 (*                              bound with 1/(p * q) as its                   *)
 (*                              information-theoretic term                    *)
@@ -123,8 +123,33 @@ Variables (w_rb2 w_rc2 : renc_paillier).
    class, one epsilon, and the assumption that every classified adversary has
    real-or-zero advantage at most that epsilon at every key built from a
    private key.
-   It is a parameter, not a theorem.  Every bound stated through it is
-   conditional on someone supplying such a record.
+   The class and the epsilon live in the record's fields.  The two type
+   indices card_renc_paillier and rand_of_renc_paillier only site the record
+   at this Paillier packaging, typing the challenger's uniform coin; they
+   carry none of the cryptographic content.
+   It is a parameter, and every bound stated through it is conditional on a
+   record being supplied.  Once a real proof lands, from decisional
+   composite residuosity (DCR) at a modulus that is the product of two
+   distinct primes, a strengthening of this section's p, q > 1 hypotheses,
+   it discharges this Variable by a concrete term built at this same
+   card_renc_paillier proof term:
+
+     Definition paillier_dcr_assumption :
+         indcpa_epsilon_assumption card_renc_paillier
+                                   rand_of_renc_paillier :=
+       {| indcpa_admissible :=
+            (* the Boolean adversary class the DCR reduction covers *) ;
+          indcpa_assumption_epsilon :=
+            (* the concrete bound, a function of the DCR advantage *) ;
+          indcpa_admissible_epsilon_le :=
+            (* the Qed lemma: every classified adversary keeps advantage
+               at most that epsilon at every key from a private key *) |}.
+
+   cipher_constant_assumption in indcpa_game.v is such an inhabitant, with a
+   computable class, epsilon zero, and the promise field discharged by
+   cipher_constant_epsilon_le.  Under a concrete term the corollary below
+   computes its epsilon with its proof unchanged, and its two class premises
+   become membership proofs of the two reduction adversaries.
    Naming: [indcpa] is in the name because the record is an IND-CPA
    advantage assumption; the bare name paillier_assumption is the literature
    term for decisional composite residuosity, which this record neither is
@@ -153,8 +178,9 @@ Local Notation alice_trace_guess_V2_pr :=
    and assert membership of the two reduction adversaries without proving it.
    Naming: extends [alice_trace_guess_V2_admissible_pq_le] with
    the scheme in place of the [pq] variant token, keeping [admissible], which
-   is what marks the bound class-conditional against the [real] sibling. *)
-Corollary dsdp_alice_guess_fdist_trace_V2_admissible_paillier_le
+   is what marks the bound class-conditional against the unconditional
+   sibling [dsdp_alice_trace_guess_V2_pq_le]. *)
+Corollary dsdp_alice_trace_guess_V2_admissible_paillier_le
     (predict : predictor AHE (dsdp_traceT AHE)) :
   indcpa_admissible paillier_indcpa_assumption
     (bob_trace_adversary (distinguisher_of_predictor predict)) ->
