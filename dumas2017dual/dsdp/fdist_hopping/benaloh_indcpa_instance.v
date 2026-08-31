@@ -273,8 +273,18 @@ Hypothesis charlie_reduction_admissible : forall k,
     (charlie_trace_adversary_at (I:=benaloh_instance)
        (distinguisher_of_predictor (predict k))).
 
-(* The block sizes grow superpolynomially: the information-theoretic term
-   of the bound, one over the plaintext cardinality r, is negligible. *)
+(* The probability bounded here is that of a predictor reading Alice's
+   executed trace, the encoding of her real hopping tuple
+   ((R2, R3), (RA1, RA2), Sout, hop0_cipher, hop1_cipher): her two masks,
+   her two combine coins, the leaked output, and the ciphertext slots
+   carrying Bob's V2 and Charlie's V3.  Even with the two ciphertext slots
+   idealized to encrypt zero, Sout still confines the uniform V2 to the
+   solution fiber, so a blind guess succeeds with probability 1/#|plain|,
+   a floor no quality of encryption lowers.  At Benaloh the plaintext
+   space is the block Z/rZ at block size r k, so requiring that floor to
+   vanish is requiring the block size to outgrow every polynomial in k,
+   which is what this hypothesis supplies to the negligibility
+   corollary. *)
 Hypothesis inv_r_negligible :
   negligible_fun (fun k => ((r k)%:R : R)^-1).
 
