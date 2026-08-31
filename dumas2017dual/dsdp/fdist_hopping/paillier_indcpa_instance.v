@@ -263,11 +263,8 @@ Corollary dsdp_alice_trace_guess_V2_admissible_paillier_negligible :
 Proof.
 move=> HB HC Hpq Heps.
 apply: (alice_trace_guess_V2_admissible_negligible HB HC _ Heps).
-have -> :
-  (fun k => (#|plain (inst_AHE (paillier_instance k))|%:R : R)^-1)
-  = (fun k => (((p k * q k)%N)%:R : R)^-1).
-  by apply/boolp.funext => k; rewrite card_plain_pq_at.
-exact: Hpq.
+apply: negligible_fun_le Hpq => k.
+by rewrite card_plain_pq_at.
 Qed.
 
 End paillier_instance_family.

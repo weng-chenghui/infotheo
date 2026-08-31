@@ -229,10 +229,7 @@ have [N1 HN1] := Hinv 1%N; have [N2 HN2] := Heps 1%N.
 exists (maxn (maxn N1 N2) 1) => k.
 rewrite !gtn_max => /andP[/andP[Hk1 Hk2] Hk3].
 have Hk0 : (0 < k%:R :> R) by rewrite ltr0n ltnW.
-have Heps' : indcpa_assumption_epsilon (A k) < (k%:R : R)^-1.
-  by move: (HN2 k Hk2); rewrite expr1.
-have Hinv' : (#|plain (inst_AHE (I k))|%:R : R)^-1 < (k%:R : R)^-1.
-  by move: (HN1 k Hk1); rewrite expr1.
+move: (HN1 k Hk1) (HN2 k Hk2); rewrite !expr1 => Hinv' Heps'.
 have Hhalf : (k%:R : R)^-1 <= 1 - (k%:R : R)^-1.
   rewrite lerBrDr -div1r -mulrDl ler_pdivrMr // mul1r -(natrD R 1 1).
   by rewrite ler_nat.
@@ -330,11 +327,8 @@ apply: (alice_trace_guess_V2_admissible_negligible
           (predict := fun k => fun _ => 0)).
 - exact: trivial_bob_cipher_constant.
 - exact: trivial_charlie_cipher_constant.
-- have -> :
-    (fun k : nat => (#|plain (inst_AHE (trivial_instance k))|%:R : R)^-1)
-    = (fun k : nat => (((k.+2) ^ k.+2)%N%:R : R)^-1).
-    by apply/boolp.funext => k; rewrite card_plain_trivial.
-  exact: negligible_fun_inv_expnn.
+- apply: negligible_fun_le negligible_fun_inv_expnn => k.
+  by rewrite card_plain_trivial.
 - exact: negligible_fun_cst0.
 Qed.
 

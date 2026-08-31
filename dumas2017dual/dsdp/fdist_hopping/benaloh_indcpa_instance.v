@@ -279,11 +279,8 @@ Corollary dsdp_alice_trace_guess_V2_admissible_benaloh_negligible :
 Proof.
 move=> HB HC Hr Heps.
 apply: (alice_trace_guess_V2_admissible_negligible HB HC _ Heps).
-have -> :
-  (fun k => (#|plain (inst_AHE (benaloh_instance k))|%:R : R)^-1)
-  = (fun k => ((r k)%:R : R)^-1).
-  by apply/boolp.funext => k; rewrite card_plain_r_at.
-exact: Hr.
+apply: negligible_fun_le Hr => k.
+by rewrite card_plain_r_at.
 Qed.
 
 End benaloh_instance_family.
