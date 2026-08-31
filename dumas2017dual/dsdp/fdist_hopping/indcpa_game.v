@@ -69,9 +69,9 @@ Require Import extra_proba.
 (* ```                                                                        *)
 (*           negligible_fun f == f eventually falls below every inverse       *)
 (*                               polynomial in its argument                   *)
-(*  negligible_fun_predictor_bound == the sum shape of the class-conditional  *)
-(*                               DSDP guessing bound is negligible when its   *)
-(*                               two summand families are                     *)
+(*  negligible_fun_predictor_bound == an inverse plaintext cardinality plus   *)
+(*                               twice one advantage family is negligible     *)
+(*                               when both families are                       *)
 (* indcpa_epsilon_assumption == a Boolean adversary class, one epsilon, and   *)
 (*                               the assumption that every classified         *)
 (*                               adversary stays below that epsilon at every  *)
@@ -248,18 +248,20 @@ by exists N => n Hn; apply: le_lt_trans (Hfg n) (HN n Hn).
 Qed.
 
 (* The arithmetic shape of the class-conditional DSDP trace guessing bound is
-   negligible as a family: an inverse plaintext cardinality plus two copies of
-   one advantage, evaluated at each security parameter, is negligible whenever
+   negligible as a family: an inverse plaintext cardinality plus twice one
+   advantage, evaluated at each security parameter, is negligible whenever
    both families are.
- 
+
    Naming: the conclusion is a negligibility judgment, not a relation, so no
    [le]/[ge]/[E] suffix applies; [predictor_bound] names the expression whose
    family is judged, under the [negligible_fun] stem of this section. *)
 Corollary negligible_fun_predictor_bound (inv_pq eps : nat -> R) :
   negligible_fun inv_pq -> negligible_fun eps ->
-  negligible_fun (fun k => inv_pq k + (eps k + eps k)).
+  negligible_fun (fun k => inv_pq k + 2 * eps k).
 Proof.
-by move=> Hi He; apply: negligible_fun_add => //; apply: negligible_fun_add.
+move=> Hi He; apply: negligible_fun_le (negligible_fun_add Hi
+  (negligible_fun_add He He)) => n.
+by rewrite mulr_natl mulr2n addrA.
 Qed.
 
 End negligible_asymptotics.
