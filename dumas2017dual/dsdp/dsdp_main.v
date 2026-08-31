@@ -63,6 +63,12 @@
        Bob's alone to reach it, which is why the class restriction cannot be
        widened to every adversary
 
+   The same bound along a family of instances (asymptotic form)
+     alice_trace_guess_V2_admissible_negligible : along a
+       security-parameter-indexed family of DSDP instances, the trace
+       guessing probabilities are a negligible family once the inverse
+       plaintext cardinalities and the assumed advantages are
+
    Shannon uncertainty about Bob's input, by conditioner
      centropy_V2_trace_eq0 : zero at her executed trace, which the trace
        determines
@@ -85,6 +91,7 @@ Require Import dsdp_program dsdp_entropy dsdp_pismc.
 Require Import dsdp_malicious_dotp.
 Require Import indcpa_game.
 Require Import dsdp_alice_fdist_secrecy dsdp_alice_trace_link.
+Require Import dsdp_instance_family.
 
 Set Implicit Arguments.
 Unset Strict Implicit.
@@ -1372,3 +1379,56 @@ exact: (alice_trace_guess_V2_admissible_le u3_unit w_rb2).
 Qed.
 
 End dsdp_alice_trace_pq_secrecy.
+
+Section dsdp_instance_family_secrecy.
+(* cloned context of Section dsdp_instance_family *)
+Local Set Default Goal Selector "1".
+Local Open Scope reals_ext_scope.
+Local Open Scope proba_scope.
+Local Open Scope fdist_scope.
+Local Open Scope entropy_scope.
+Local Open Scope ring_scope.
+Context {R : realType}.
+Variable I : nat -> dsdp_instance.
+Variable A : forall k, indcpa_epsilon_assumption (R:=R)
+                         (inst_card_renc (I k)) (@inst_rand_of_renc (I k)).
+Variable predict : forall k,
+    predictor (inst_AHE (I k)) (dsdp_traceT (inst_AHE (I k))).
+Arguments predict : clear implicits.
+
+Local Notation bob_trace_adversary_at :=
+  (bob_trace_adversary_at (R:=R) (I:=I)).
+Local Notation charlie_trace_adversary_at :=
+  (charlie_trace_adversary_at (R:=R) (I:=I)).
+Local Notation alice_trace_guess_V2_pr_at :=
+  (alice_trace_guess_V2_pr_at (R:=R) (I:=I)).
+
+(* A family of predictors reading Alice's executed traces along a family of
+   DSDP instances matches Bob's input with negligible probability, provided
+   the inverse plaintext cardinalities and the assumed advantages are
+   negligible families and each rung's two reduction adversaries are
+   admitted by that rung's class.  The class restriction lands on the
+   reduction adversaries, not on the predictor, and it is what separates
+   this statement from the decrypting counterexample: decrypt_guess_prE
+   puts the guessing probability at 1 for the predictor that decrypts
+   Bob's ciphertext off the trace, and
+   decrypt_reduction_admissible_eventuallyF shows these same negligibility
+   hypotheses eventually force that predictor's reduction adversary out of
+   the class.  Every currency is hypothesis-conditional, priced per rung as
+   in the concrete bound. *)
+Theorem alice_trace_guess_V2_admissible_negligible :
+  (forall k, indcpa_admissible (A k)
+     (bob_trace_adversary_at (distinguisher_of_predictor (predict k)))) ->
+  (forall k, indcpa_admissible (A k)
+     (charlie_trace_adversary_at (distinguisher_of_predictor (predict k)))) ->
+  negligible_fun (fun k => (#|plain (inst_AHE (I k))|%:R : R)^-1) ->
+  negligible_fun (fun k => indcpa_assumption_epsilon (A k)) ->
+  negligible_fun (fun k => alice_trace_guess_V2_pr_at (predict k)).
+Proof.
+move=> HB HC Hinv Heps.
+apply: negligible_fun_le (negligible_fun_predictor_bound Hinv Heps) => k.
+exact: (alice_trace_guess_V2_admissible_le
+          (inst_u3_unit (I k)) (inst_w_rb2 (I k)) (HB k) (HC k)).
+Qed.
+
+End dsdp_instance_family_secrecy.
