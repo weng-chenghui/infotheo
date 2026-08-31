@@ -749,19 +749,19 @@ Definition alice_trace_guess_pr (predict : predictor dsdp_traceT) : R :=
      [set t | (predict `o AliceTrace) t == V2 t].
 
 (* The trace guessing bound with both hop advantages replaced by the single
-   epsilon an adversary-class assumption gates.  The right-hand side sums
+   epsilon an adversary-class assumption carries.  The right-hand side sums
    three currencies.  One over the plaintext-space cardinality is
    information-theoretic and unconditional, the residue of the leaked output
    along the DSDP solution fiber.  Twice the assumption's epsilon is
    assumption-conditional: it is the price of the two ciphertext
    replacements, one at Bob's key and one at Charlie's, each charged at the
-   advantage the assumption posits rather than at its own value.  The two
-   premises are class-conditional, since an assumption gates only the
+   advantage the assumption promises rather than at its own value.  The two
+   premises are class-conditional, since an assumption covers only the
    adversaries its classifier admits.
    Those premises are assumed rather than proved.  Nothing here shows that
    the two reduction adversaries built from a trace predictor lie in the
    class, and bob_trace_guess_epsilon_decrypt_ge shows that an assumption
-   whose classifier admits every adversary is forced to posit an epsilon of
+   whose classifier admits every adversary is forced to assume an epsilon of
    at least 1 - 1/#|plain AHE|.  The abstract version of that obstruction, in
    indcpa_game.v, reaches the value 1 instead, because it lets the adversary
    choose a nonzero challenge plaintext; here the challenge plaintext is
@@ -1353,13 +1353,13 @@ have Hle := le_trans bob_trace_guess_epsilon_decrypt_ge
 by move: (lt_le_trans Heps Hle); rewrite ltxx.
 Qed.
 
-(* Dropping the membership premises of the gated guessing bound outright
+(* Dropping the membership premises of the class-conditional guessing bound outright
    leaves a false statement: whenever the promised epsilon is meaningfully
-   small, the ungated right-hand side sits strictly below what the decrypting
+   small, the premise-free right-hand side sits strictly below what the decrypting
    predictor achieves, for every such assumption, not a contrived one.
    decrypt_reduction_admissibleF is the complementary half: it shows the
    missing premises cannot be supplied for this predictor.  Together they
-   place the bound's truth in the gate.
+   place the bound's truth in the class restriction.
    Naming: extends the [alice_trace_guess_V2_admissible] family
    stem with the premises dropped and the relation proved. *)
 Lemma alice_trace_guess_V2_admissible_premise_free_lt

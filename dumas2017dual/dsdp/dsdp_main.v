@@ -51,7 +51,7 @@
        view, or on the tuple leaves the same uncertainty about Bob's input,
        so the hop ladder prices all three observations at once
 
-   The same bounds gated on an adversary class
+   The same bounds conditional on an adversary class
      alice_trace_guess_V2_admissible_le /
      alice_trace_guess_V2_admissible_pq_le : both hop advantages
        charged to the single epsilon of an indcpa_epsilon_assumption, under
@@ -60,8 +60,8 @@
      bob_charlie_trace_guess_epsilon_decrypt_ge /
      bob_trace_guess_epsilon_decrypt_ge : an adversary holding Bob's private
        key forces the two advantages to sum to at least 1 - 1/#|plain|, and
-       Bob's alone to reach it, which is why the class gate cannot be widened
-       to every adversary
+       Bob's alone to reach it, which is why the class restriction cannot be
+       widened to every adversary
 
    Shannon uncertainty about Bob's input, by conditioner
      centropy_V2_trace_eq0 : zero at her executed trace, which the trace
@@ -1015,7 +1015,7 @@ exact: (alice_tuple_guess_V2_le card_renc rand_of_renc
 Qed.
 
 (* The trace guessing bound with both hop advantages replaced by the single
-   epsilon an adversary-class assumption gates.  The statement spends three
+   epsilon an adversary-class assumption carries.  The statement spends three
    currencies.  The right-hand side sums two of them: one over the
    plaintext-space cardinality, information-theoretic and unconditional; and
    twice the assumption's epsilon, conditional on that assumption, pricing
@@ -1023,7 +1023,7 @@ Qed.
    is the two premises, conditional on the class and assumed rather than
    proved.
    bob_trace_guess_epsilon_decrypt_ge below shows that an assumption whose
-   classifier admits every adversary is forced to posit an epsilon of at
+   classifier admits every adversary is forced to assume an epsilon of at
    least 1 - 1/#|plain AHE|, which is why the class restriction is what makes
    this bound satisfiable.
    Naming: extends [alice_trace_guess_V2_le] with the
@@ -1052,7 +1052,7 @@ Qed.
 
 (* The two hop advantages an adversary holding Bob's private key buys sum to
    at least 1 - 1/#|plain AHE|: the hop ladder's epsilons cannot all be small
-   for every adversary, so the class gate of the corollary above is
+   for every adversary, so the class restriction of the corollary above is
    load-bearing rather than decoration.
    Naming: names the two epsilons summed, the predictor that realizes them,
    and the direction of the inequality; the right-hand side is a sum with no
@@ -1125,13 +1125,13 @@ have Hle := le_trans bob_trace_guess_epsilon_decrypt_ge
 by move: (lt_le_trans Heps Hle); rewrite ltxx.
 Qed.
 
-(* Dropping the membership premises of the gated guessing bound outright
+(* Dropping the membership premises of the class-conditional guessing bound outright
    leaves a false statement: whenever the promised epsilon is meaningfully
-   small, the ungated right-hand side sits strictly below what the decrypting
+   small, the premise-free right-hand side sits strictly below what the decrypting
    predictor achieves, for every such assumption, not a contrived one.
    decrypt_reduction_admissibleF is the complementary half: it shows the
    missing premises cannot be supplied for this predictor.  Together they
-   place the bound's truth in the gate.
+   place the bound's truth in the class restriction.
    Naming: extends the [alice_trace_guess_V2_admissible] family
    stem with the premises dropped and the relation proved. *)
 Lemma alice_trace_guess_V2_admissible_premise_free_lt

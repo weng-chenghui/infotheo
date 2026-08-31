@@ -338,11 +338,11 @@ End enc_lemmas.
   an adversary class: [indcpa_epsilon_assumption], in the same file, packages
   a Boolean classifier on adversaries, one epsilon, and the assumption that
   every classified adversary stays below it at every key built from a private
-  key. The gate is what keeps the assumed epsilon small: an adversary
-  holding the matching private key and submitting a nonzero challenge
-  plaintext decrypts the challenge, so a class admitting every adversary is
-  forced to posit an epsilon of at least 1 whenever the plaintext space has
-  more than one element. The second is an instantiation of that record at a
+  key. The class restriction is what keeps the assumed epsilon small: an
+  adversary holding the matching private key and submitting a nonzero
+  challenge plaintext decrypts the challenge, so a class admitting every
+  adversary is forced to assume an epsilon of at least 1 whenever the
+  plaintext space has more than one element. The second is an instantiation of that record at a
   scheme, which [dumas2017dual/dsdp/fdist_hopping/paillier_indcpa_instance.v]
   does for Paillier, leaving the whole assumption a parameter that a proof
   from decisional composite residuosity would supply.

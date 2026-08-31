@@ -30,7 +30,7 @@ fiber-counting.
 Every $\varepsilon$ in the hop ladder is the real-or-zero advantage of a
 reduction constructed in the same file as the bound that names it, so the
 computational leg carries no cryptographic assumption as an axiom. Chapter
-\ref{ch:adversary_class} adds the one posited quantity, the advantage an
+\ref{ch:adversary_class} adds the one assumed quantity, the advantage an
 adversary-class assumption assigns to its class, and shows what forces such an
 assumption to restrict its class.
 
@@ -597,7 +597,7 @@ adversary class, and records what forces the class to leave something out.
   inverse polynomial.
 \end{definition}
 
-\begin{definition}[An adversary class and the advantage it gates]
+\begin{definition}[An adversary class and the advantage it assumes]
   \label{def:indcpa_assumption}
   \rocq{infotheo.dumas2017dual.dsdp.fdist_hopping.indcpa_game.indcpa_epsilon_assumption}
   \rocqok
@@ -631,11 +631,11 @@ adversary class, and records what forces the class to leave something out.
   Instantiating the record with that classifier and $\varepsilon = 0$
   discharges its bound field by the equality rather than by hypothesis, so it
   is an inhabitant whose promise is proved. Its class is small and the bounds
-  it gates are correspondingly weak; what it settles is that the record type
+  conditional on it are correspondingly weak; what it settles is that the record type
   is inhabited with content, and what a classifier that computes looks like.
 \end{definition}
 
-\begin{theorem}[The trace bound gated on a class]
+\begin{theorem}[The class-conditional trace bound]
   \label{thm:alice_guess_admissible}
   \rocq{infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_trace_link.alice_trace_guess_pr,
        infotheo.dumas2017dual.dsdp.dsdp_main.alice_trace_guess_V2_admissible_le,
@@ -651,7 +651,7 @@ adversary class, and records what forces the class to leave something out.
   Three currencies meet here. The term $1/m$ is information-theoretic and
   unconditional, the residue of the leaked output along the solution fiber. The
   term $2\varepsilon_{\mathcal{A}}$ is conditional on $\mathcal{A}$, and prices
-  the two ciphertext replacements at the advantage $\mathcal{A}$ posits rather
+  the two ciphertext replacements at the advantage $\mathcal{A}$ assumes rather
   than at their own values. The two admissibility premises are conditional on
   the class, and are assumed rather than proved.
 \end{theorem}
@@ -675,12 +675,12 @@ adversary class, and records what forces the class to leave something out.
   a modulus that is the product of two distinct primes, is what would fill it.
 \end{corollary}
 
-\begin{lemma}[The gated bound is negligible as a family]
+\begin{lemma}[The class-conditional bound is negligible as a family]
   \label{lem:negligible_guess_bound}
   \rocq{infotheo.dumas2017dual.dsdp.fdist_hopping.indcpa_game.negligible_fun_guess_bound}
   \rocqok
   \uses{def:negligible_fun,thm:alice_guess_admissible}
-  The arithmetic shape of the gated bound is negligible whenever both of its
+  The arithmetic shape of the class-conditional bound is negligible whenever both of its
   summand families are.
   \[ \mathrm{negl}(k \mapsto \iota_k) \wedge \mathrm{negl}(k \mapsto \eta_k)
      \implies \mathrm{negl}\big(k \mapsto \iota_k + (\eta_k + \eta_k)\big) \]
@@ -718,7 +718,7 @@ adversary class, and records what forces the class to leave something out.
   At the real bit the challenge ciphertext decrypts to Bob's input and $\delta$
   is right always; at the zero bit it decrypts to zero and $\delta$ is right
   only on the fiber the leaked output leaves, of mass at most $1/m$. An
-  assumption admitting every adversary is therefore forced to posit
+  assumption admitting every adversary is therefore forced to assume
   $2\varepsilon_{\mathcal{A}} \ge 1 - 1/m$, so the premises of
   Theorem~\ref{thm:alice_guess_admissible} are what make that bound say
   anything.
@@ -729,7 +729,7 @@ adversary class, and records what forces the class to leave something out.
   \rocq{infotheo.dumas2017dual.dsdp.dsdp_main.decrypt_reduction_admissibleF}
   \rocqok
   \uses{thm:decrypt_lower_bound,def:indcpa_assumption}
-  With $u_3$ a unit of the plaintext ring, if $\mathcal{A}$ posits an advantage
+  With $u_3$ a unit of the plaintext ring, if $\mathcal{A}$ assumes an advantage
   below $1 - 1/m$, its classifier answers false on the reduction adversary the
   decrypting predictor induces at Bob's key.
   \[ \varepsilon_{\mathcal{A}} < 1 - \tfrac{1}{m} \implies
