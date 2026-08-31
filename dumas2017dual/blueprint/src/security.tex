@@ -351,7 +351,7 @@ $V_3$.
        infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.alice_V2_cond_Sout,
        infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.alice_V2_cond_le,
        infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.alice_hop_tuple_of_spectator,
-       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.guess_all_zero_le_invm}
+       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.all_zero_guess_V2_le_invm}
   \rocqok
   \uses{def:alice_hop_ladder,lem:exist_pr_sol,lem:cinde_diagonal_bound}
   When Alice's third weight $u_3$ is a unit of the plaintext ring, every
@@ -364,9 +364,9 @@ $V_3$.
 \end{lemma}
 
 \begin{definition}[The distinguisher of a predictor]
-  \label{def:distinguisher_of_guess}
-  \rocq{infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.distinguisher_of_guess,
-       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.guess_event_jointE}
+  \label{def:distinguisher_of_predictor}
+  \rocq{infotheo.dumas2017dual.dsdp.fdist_hopping.indcpa_game.distinguisher_of_predictor,
+       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.guess_V2_jointE}
   \rocqok
   \uses{def:alice_hop_ladder}
   The distinguisher $D_g$ of a predictor $g$ accepts when $g$, applied to the
@@ -379,7 +379,7 @@ $V_3$.
   \label{thm:alice_guess_real}
   \rocq{infotheo.dumas2017dual.dsdp.dsdp_main.alice_tuple_guess_V2_le}
   \rocqok
-  \uses{lem:alice_view_advantage,lem:guess_all_zero,def:distinguisher_of_guess}
+  \uses{lem:alice_view_advantage,lem:guess_all_zero,def:distinguisher_of_predictor}
   When $u_3$ is a unit of the plaintext ring, every predictor reading Alice's
   real tuple matches Bob's input with probability at most $1/m$ plus the
   advantages of the two hop reductions of its distinguisher.
@@ -637,7 +637,7 @@ adversary class, and records what forces the class to leave something out.
 
 \begin{theorem}[The class-conditional trace bound]
   \label{thm:alice_guess_admissible}
-  \rocq{infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_trace_link.alice_trace_guess_pr,
+  \rocq{infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_trace_link.alice_trace_guess_V2_pr,
        infotheo.dumas2017dual.dsdp.dsdp_main.alice_trace_guess_V2_admissible_le,
        infotheo.dumas2017dual.dsdp.dsdp_main.alice_trace_guess_V2_admissible_pq_le}
   \rocqok
@@ -676,8 +676,8 @@ adversary class, and records what forces the class to leave something out.
 \end{corollary}
 
 \begin{lemma}[The class-conditional bound is negligible as a family]
-  \label{lem:negligible_guess_bound}
-  \rocq{infotheo.dumas2017dual.dsdp.fdist_hopping.indcpa_game.negligible_fun_guess_bound}
+  \label{lem:negligible_predictor_bound}
+  \rocq{infotheo.dumas2017dual.dsdp.fdist_hopping.indcpa_game.negligible_fun_predictor_bound}
   \rocqok
   \uses{def:negligible_fun,thm:alice_guess_admissible}
   The arithmetic shape of the class-conditional bound is negligible whenever both of its
@@ -706,8 +706,8 @@ adversary class, and records what forces the class to leave something out.
 
 \begin{theorem}[The class cannot admit every adversary]
   \label{thm:decrypt_lower_bound}
-  \rocq{infotheo.dumas2017dual.dsdp.dsdp_main.bob_trace_guess_epsilon_decrypt_ge,
-       infotheo.dumas2017dual.dsdp.dsdp_main.bob_charlie_trace_guess_epsilon_decrypt_ge}
+  \rocq{infotheo.dumas2017dual.dsdp.dsdp_main.bob_trace_predictor_epsilon_decrypt_ge,
+       infotheo.dumas2017dual.dsdp.dsdp_main.bob_charlie_trace_predictor_epsilon_decrypt_ge}
   \rocqok
   \uses{def:trace_decryptor,thm:alice_guess_real,lem:guess_all_zero}
   With $u_3$ a unit of the plaintext ring, the hop-$0$ advantage the decrypting

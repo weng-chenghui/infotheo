@@ -138,8 +138,8 @@ Local Notation bob_trace_adversary :=
 Local Notation charlie_trace_adversary :=
   (charlie_trace_adversary (R:=R) card_renc_paillier rand_of_renc_paillier
      v1 u1 u2 u3 dk_a dk_b dk_c w_rc2).
-Local Notation alice_trace_guess_pr :=
-  (alice_trace_guess_pr (R:=R) card_renc_paillier rand_of_renc_paillier
+Local Notation alice_trace_guess_V2_pr :=
+  (alice_trace_guess_V2_pr (R:=R) card_renc_paillier rand_of_renc_paillier
      v1 u1 u2 u3 dk_a dk_b dk_c w_rb2 w_rc2).
 
 (* A predictor reading Alice's executed DSDP trace at the Paillier
@@ -157,10 +157,10 @@ Local Notation alice_trace_guess_pr :=
 Corollary dsdp_alice_guess_fdist_trace_V2_admissible_paillier_le
     (predict : predictor AHE (dsdp_traceT AHE)) :
   indcpa_admissible paillier_indcpa_assumption
-    (bob_trace_adversary (guess_test predict)) ->
+    (bob_trace_adversary (distinguisher_of_predictor predict)) ->
   indcpa_admissible paillier_indcpa_assumption
-    (charlie_trace_adversary (guess_test predict)) ->
-  alice_trace_guess_pr predict
+    (charlie_trace_adversary (distinguisher_of_predictor predict)) ->
+  alice_trace_guess_V2_pr predict
     <= ((p%:R : R) * q%:R)^-1
        + 2 * indcpa_assumption_epsilon paillier_indcpa_assumption.
 Proof.

@@ -49,7 +49,7 @@ Require Export indcpa_game.
 (* | challenger    | indcpa_challenger                                      | *)
 (* | experiment    | indcpa_experiment                                      | *)
 (* | advantage     | indcpa_fdist_epsilon                                   | *)
-(* | distinguisher | guess_test predict                                     | *)
+(* | distinguisher | distinguisher_of_predictor predict                     | *)
 (* | reduction     | bob_challenge_adversary, charlie_challenge_adversary   | *)
 (*                                                                            *)
 (* ## Terminology: law and distribution                                       *)
@@ -184,15 +184,16 @@ Require Export indcpa_game.
 (*                              inputs                                        *)
 (* alice_hop_tuple_of_spectator == combines the spectator and leaked output   *)
 (*                              into the all-zero hopping tuple               *)
-(*        guess_test predict == accepts exactly when the predictor            *)
+(* distinguisher_of_predictor predict ==                                      *)
+(*                              accepts exactly when the predictor            *)
 (*                              recovers Bob's input                          *)
 (* alice_predictor_unpredictability predict == the negative logarithm of      *)
 (*                              the predictor's success probability           *)
-(*         bob_guess_epsilon == the advantage against Bob's key that one      *)
+(*         bob_predictor_epsilon == the advantage against Bob's key that one  *)
 (*                              predictor buys, the price of the hop-0        *)
 (*                              replacement                                   *)
-(*     charlie_guess_epsilon == the Charlie-key counterpart, the price of the *)
-(*                              hop-1 replacement                             *)
+(*     charlie_predictor_epsilon == the Charlie-key counterpart, the price    *)
+(*                              of the hop-1 replacement                      *)
 (*             fdistmap_prod == applying separate functions to independent   *)
 (*                              factors preserves their product form         *)
 (*            fdistmap_prodr == changing only the second factor leaves the   *)
@@ -406,7 +407,7 @@ Definition dsdp_alice_hop_tupleT : finType :=
    Alice's hopping tuple.  Carrying the inputs beside the tuple lets a single
    sample hold both a predictor's guess, computed from the tuple, and the true
    input that guess is checked against.  That is what makes
-   guess_test expressible as a Boolean test on one sample. *)
+   distinguisher_of_predictor expressible as a Boolean test on one sample. *)
 Definition alice_hop_jointT : finType :=
   (plain AHE * plain AHE * dsdp_alice_hop_tupleT)%type.
 
@@ -989,7 +990,7 @@ Qed.
    conditioning at all.  The leaked output is one affine equation in the two
    secret inputs, as SoutE records, so it cuts the sample space to a fiber on
    which Bob's input is still uniform.
-   This and the 1/#|plain AHE| term of guess_all_zero_le_invm descend from
+   This and the 1/#|plain AHE| term of all_zero_guess_V2_le_invm descend from
    one fact, alice_V2_cond_Sout: the conditional law of Bob's input given the
    leaked output is exactly uniform.  Neither statement is derived from the
    other, and this entropy reading holds at this conditioner alone; at
@@ -997,7 +998,7 @@ Qed.
    centropy_V2_trace_eq0 of dsdp_alice_trace_link.v records.
    Naming: [logm] names the value the quantity takes, the logarithm of the
    plaintext-space cardinality, as [invm] names its reciprocal in
-   [guess_all_zero_le_invm]. *)
+   [all_zero_guess_V2_le_invm]. *)
 Lemma centropy_V2_Sout_logm :
   `H( V2 | Sout ) = log (#|plain AHE|%:R : R).
 Proof.
@@ -1065,7 +1066,7 @@ Definition alice_hop_tuple_of_spectator
    Naming: [guess] names the success probability being bounded, [all_zero] the
    view it reads, and [invm] the inverse plaintext-space cardinality bounding
    it. *)
-Lemma guess_all_zero_le_invm (predict : predictor dsdp_alice_hop_tupleT) :
+Lemma all_zero_guess_V2_le_invm (predict : predictor dsdp_alice_hop_tupleT) :
   Pr alice_sample_fdist [set t | (predict `o (AliceHopTuple 2)) t == V2 t]
     <= #|plain AHE|%:R^-1.
 Proof.
@@ -1076,11 +1077,11 @@ Qed.
 
 (* The event that a predictor matches Bob's input is the acceptance event of
    the associated distinguisher on the joint law of the inputs and the view. *)
-Lemma guess_event_jointE (predict : predictor dsdp_alice_hop_tupleT) (i : nat) :
+Lemma guess_V2_jointE (predict : predictor dsdp_alice_hop_tupleT) (i : nat) :
   Pr alice_sample_fdist
      [set t | (predict `o AliceHopTuple i) t == V2 t]
   = Pr (`p_ [% V2, V3, AliceHopTuple i])
-       [set x | guess_test predict x].
+       [set x | distinguisher_of_predictor predict x].
 Proof.
 by rewrite /dist_of_RV Pr_fdistmap_preim; apply: eq_bigl => t; rewrite !inE.
 Qed.
@@ -1097,32 +1098,33 @@ Theorem alice_tuple_guess_V2_le
   Pr alice_sample_fdist [set t | (predict `o AliceRealTuple) t == V2 t]
     <= #|plain AHE|%:R^-1
        + indcpa_fdist_epsilon bob_pkey
-           (bob_challenge_adversary (guess_test predict))
+           (bob_challenge_adversary (distinguisher_of_predictor predict))
        + indcpa_fdist_epsilon charlie_pkey
-           (charlie_challenge_adversary (guess_test predict)).
+           (charlie_challenge_adversary (distinguisher_of_predictor predict)).
 Proof.
-rewrite /AliceRealTuple guess_event_jointE -hop0_advantageE -hop1_advantageE.
+rewrite /AliceRealTuple guess_V2_jointE -hop0_advantageE -hop1_advantageE.
 rewrite -addrA -lerBlDl.
 rewrite !alice_hop_game_successE.
 apply: le_trans (lerB (lexx _) _) _; last first.
   exact: le_trans (ler_norm _) (ler_distD _ _ _).
-by rewrite -guess_event_jointE; exact: guess_all_zero_le_invm.
+by rewrite -guess_V2_jointE; exact: all_zero_guess_V2_le_invm.
 Qed.
 
 (* The IND-CPA advantage against Bob's key that one predictor buys: the
-   predictor is scored by guess_test and that test is embedded in
-   bob_challenge_adversary.  It is the price of the hop-0 ciphertext
+   predictor is scored by distinguisher_of_predictor and that test is
+   embedded in bob_challenge_adversary.  It is the price of the hop-0 ciphertext
    replacement, and it is assumption-conditional at Bob's key. *)
-Definition bob_guess_epsilon (predict : predictor dsdp_alice_hop_tupleT) : R :=
+Definition bob_predictor_epsilon
+    (predict : predictor dsdp_alice_hop_tupleT) : R :=
   indcpa_fdist_epsilon bob_pkey
-    (bob_challenge_adversary (guess_test predict)).
+    (bob_challenge_adversary (distinguisher_of_predictor predict)).
 
-(* The Charlie-key counterpart of bob_guess_epsilon: the price of the hop-1
+(* The Charlie-key counterpart of bob_predictor_epsilon: the price of the hop-1
    ciphertext replacement, assumption-conditional at Charlie's key. *)
-Definition charlie_guess_epsilon
+Definition charlie_predictor_epsilon
     (predict : predictor dsdp_alice_hop_tupleT) : R :=
   indcpa_fdist_epsilon charlie_pkey
-    (charlie_challenge_adversary (guess_test predict)).
+    (charlie_challenge_adversary (distinguisher_of_predictor predict)).
 
 (* The negative logarithm of the probability that the predictor recovers
    Bob's input from Alice's real hopping tuple.
@@ -1152,16 +1154,17 @@ Theorem alice_unpredictability_ge
                   [set t | (predict `o AliceRealTuple) t == V2 t]) :
   log (#|plain AHE|%:R)
     - log (1 + #|plain AHE|%:R
-               * (bob_guess_epsilon predict + charlie_guess_epsilon predict))
+               * (bob_predictor_epsilon predict
+                  + charlie_predictor_epsilon predict))
   <= - log (Pr alice_sample_fdist
               [set t | (predict `o AliceRealTuple) t == V2 t]).
 Proof.
 have Hcard_pos : (0 < #|plain AHE|%:R :> R) by rewrite ltr0n card_plain_gt0.
 have Hnum_pos : (0 < 1 + #|plain AHE|%:R
-                        * (bob_guess_epsilon predict
-                           + charlie_guess_epsilon predict) :> R).
+                        * (bob_predictor_epsilon predict
+                           + charlie_predictor_epsilon predict) :> R).
   apply: ltr_pwDl ltr01 (mulr_ge0 (ler0n _ _) _).
-  by rewrite addr_ge0 // /bob_guess_epsilon /charlie_guess_epsilon
+  by rewrite addr_ge0 // /bob_predictor_epsilon /charlie_predictor_epsilon
              /indcpa_fdist_epsilon normr_ge0.
 rewrite lerNr opprB -logDiv // ler_log ?posrE ?divr_gt0 //.
 rewrite mulrDl mul1r mulrAC (divff (lt0r_neq0 Hcard_pos)) mul1r addrA.
@@ -1179,7 +1182,8 @@ Theorem alice_predictor_unpredictability_ge
                   [set t | (predict `o AliceRealTuple) t == V2 t]) :
   log (#|plain AHE|%:R)
     - log (1 + #|plain AHE|%:R
-               * (bob_guess_epsilon predict + charlie_guess_epsilon predict))
+               * (bob_predictor_epsilon predict
+                  + charlie_predictor_epsilon predict))
   <= `H_unp^{predict}.
 Proof.
 exact: alice_unpredictability_ge.
@@ -1328,12 +1332,12 @@ Proof. by case=> [[[[m ra] c2] c3] s]. Qed.
    is the only channel from V2 into the view, and adjoining the spectator
    coordinates costs nothing.  At Alice's executed trace the same quantity is
    zero instead, by centropy_V2_trace_eq0 of dsdp_alice_trace_link.v.
-   The guessing-side fact at this same endpoint is guess_all_zero_le_invm,
+   The guessing-side fact at this same endpoint is all_zero_guess_V2_le_invm,
    which bounds every predictor's success by 1/#|plain AHE|.  The two are
    different quantities: this one averages the conditional entropy over the
    conditioner, that one bounds a probability, and neither is derived from
    the other.
-   Naming: [all_zero] names the endpoint, as in [guess_all_zero_le_invm], and
+   Naming: [all_zero] names the endpoint, as in [all_zero_guess_V2_le_invm], and
    [logm] the value, as in [centropy_V2_Sout_logm]. *)
 Lemma centropy_V2_all_zero_logm :
   `H( V2 | AliceHopTuple 2 ) = log (#|plain AHE|%:R : R).
@@ -1499,12 +1503,14 @@ Definition alice_viewT : finType :=
    view around it, and guesses with the predictor. *)
 Definition bob_view_adversary (predict : predictor alice_viewT) :
     indcpa_fdist_adversary :=
-  bob_challenge_adversary (guess_test (predict \o alice_view_of_hop_tuple)).
+  bob_challenge_adversary
+    (distinguisher_of_predictor (predict \o alice_view_of_hop_tuple)).
 
 (* The Charlie-key counterpart of bob_view_adversary. *)
 Definition charlie_view_adversary (predict : predictor alice_viewT) :
     indcpa_fdist_adversary :=
-  charlie_challenge_adversary (guess_test (predict \o alice_view_of_hop_tuple)).
+  charlie_challenge_adversary
+    (distinguisher_of_predictor (predict \o alice_view_of_hop_tuple)).
 
 (* Alice's outgoing combine toward Bob's key, replaying her real protocol step:
    the ciphertext she received from Bob raised to her second weight, times an

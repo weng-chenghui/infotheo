@@ -69,7 +69,7 @@ Require Import extra_proba.
 (* ```                                                                        *)
 (*           negligible_fun f == f eventually falls below every inverse       *)
 (*                               polynomial in its argument                   *)
-(*  negligible_fun_guess_bound == the sum shape of the class-conditional      *)
+(*  negligible_fun_predictor_bound == the sum shape of the class-conditional  *)
 (*                               DSDP guessing bound is negligible when its   *)
 (*                               two summand families are                     *)
 (* indcpa_epsilon_assumption == a Boolean adversary class, one epsilon, and   *)
@@ -98,7 +98,8 @@ Require Import extra_proba.
 (*                               true means that the test accepts             *)
 (*              predictor obs == a guessing strategy: a map from an           *)
 (*                               observation to a claimed plaintext           *)
-(*         guess_test predict == the test accepting when the predictor,       *)
+(* distinguisher_of_predictor predict ==                                      *)
+(*                               the test accepting when the predictor,       *)
 (*                               reading the observation slot, returns the    *)
 (*                               first input slot                             *)
 (*     indcpa_fdist_adversary == packages the state sampled before the        *)
@@ -252,9 +253,9 @@ Qed.
    both families are.
  
    Naming: the conclusion is a negligibility judgment, not a relation, so no
-   [le]/[ge]/[E] suffix applies; [guess_bound] names the expression whose
+   [le]/[ge]/[E] suffix applies; [predictor_bound] names the expression whose
    family is judged, under the [negligible_fun] stem of this section. *)
-Corollary negligible_fun_guess_bound (inv_pq eps : nat -> R) :
+Corollary negligible_fun_predictor_bound (inv_pq eps : nat -> R) :
   negligible_fun inv_pq -> negligible_fun eps ->
   negligible_fun (fun k => inv_pq k + (eps k + eps k)).
 Proof.
@@ -300,11 +301,13 @@ Definition predictor (obs : finType) : Type := obs -> plain AHE.
    the predictor this way makes the two the same number: the probability
    that the predictor succeeds at hop i is the probability that this test
    accepts at hop i.
-   Naming: [test] is the domain word here rather than drift.  A distinguisher
-   is a statistical test, and the role table of
+   Naming: [_of_] names the source the conversion reads, after the
+   repository's total-conversion family, and the source is the predictor.
+   The role table of
    dumas2017dual/dsdp/fdist_hopping/dsdp_alice_fdist_secrecy.v maps the
    distinguisher role to this name. *)
-Definition guess_test {obs : finType} (predict : predictor obs) :
+Definition distinguisher_of_predictor {obs : finType}
+    (predict : predictor obs) :
     distinguisher (plain AHE * plain AHE * obs)%type :=
   fun x => predict x.2 == x.1.1.
 
@@ -481,9 +484,9 @@ Proof. by move=> H; rewrite (indcpa_epsilon_cipher_constant_eq0 _ H). Qed.
 
 (* An assumption whose promise is proved rather than assumed.  Its classifier
    computes, its epsilon is zero, and the bound it carries is the lemma above
-   instead of a hypothesis.  The class it admits is small, so the bounds conditional on it
-   are weak, but it settles that this record type has an inhabitant with
-   content, and it shows what one looks like.
+   instead of a hypothesis.  The class it admits is small, so the bounds
+   conditional on it are weak, but it settles that this record type has an
+   inhabitant with content, and it shows what one looks like.
    Naming: names the class it carries, after [adv_decide_cipher_constant]. *)
 Definition cipher_constant_assumption : indcpa_epsilon_assumption :=
   {| indcpa_admissible := adv_decide_cipher_constant ;

@@ -92,17 +92,17 @@ Require Import dsdp_alice_fdist_secrecy.
 (*                              decides with D                                *)
 (* charlie_trace_adversary D == the Charlie-key counterpart of                *)
 (*                              bob_trace_adversary                           *)
-(* bob_trace_guess_epsilon predict ==                                         *)
+(* bob_trace_predictor_epsilon predict ==                                     *)
 (*                              the advantage against Bob's key of the        *)
 (*                              adversary a trace predictor induces           *)
-(* charlie_trace_guess_epsilon predict ==                                     *)
+(* charlie_trace_predictor_epsilon predict ==                                 *)
 (*                              the Charlie-key counterpart of                *)
-(*                              bob_trace_guess_epsilon                       *)
+(*                              bob_trace_predictor_epsilon                   *)
 (* alice_trace_guess_V2_le ==                                 *)
 (*                              bounds recovery of Bob's input from Alice's   *)
 (*                              trace by uniform guessing plus the costs of   *)
 (*                              the two ciphertext hops                       *)
-(* alice_trace_guess_pr predict ==                                            *)
+(* alice_trace_guess_V2_pr predict ==                                         *)
 (*                              the probability that a trace predictor        *)
 (*                              returns Bob's input                           *)
 (* alice_trace_guess_V2_admissible_le ==                           *)
@@ -184,10 +184,10 @@ Require Import dsdp_alice_fdist_secrecy.
 (*                              conditioning on Alice's trace leaves no       *)
 (*                              uncertainty about Bob's input, so the Shannon *)
 (*                              reading of the real trace is degenerate       *)
-(* bob_charlie_trace_guess_epsilon_decrypt_ge ==                              *)
+(* bob_charlie_trace_predictor_epsilon_decrypt_ge ==                          *)
 (*                              the two hop advantages that decryptor buys    *)
 (*                              sum to at least 1 - 1/#|plain AHE|            *)
-(* bob_trace_guess_epsilon_decrypt_ge ==                                      *)
+(* bob_trace_predictor_epsilon_decrypt_ge ==                                  *)
 (*                              Bob's key alone already carries that gap      *)
 (*                                                                            *)
 (* Ideal experiments and public setup                                         *)
@@ -724,9 +724,9 @@ Theorem alice_trace_guess_V2_le
      [set t | (predict `o AliceTrace) t == V2 t]
     <= (#|plain AHE|%:R : R)^-1
        + indcpa_fdist_epsilon (pkey_of_dk Bob)
-           (bob_trace_adversary (guess_test predict))
+           (bob_trace_adversary (distinguisher_of_predictor predict))
        + indcpa_fdist_epsilon (pkey_of_dk Charlie)
-           (charlie_trace_adversary (guess_test predict)).
+           (charlie_trace_adversary (distinguisher_of_predictor predict)).
 Proof.
 rewrite dsdp_trace_of_hop_tupleE.
 exact: (alice_tuple_guess_V2_le card_renc rand_of_renc
@@ -739,12 +739,12 @@ Qed.
    bounds, and it is the spelling the class-conditional bounds use, so that a
    reader can see at a glance that they bound the same number the
    unconditional bounds do.
-   The sections below keep a [Let trace_guess_pr] for the same number where
+   The sections below keep a [Let trace_guess_V2_pr] for the same number where
    they need it as a local abbreviation; those are local spellings of this
    definition's value, not a second quantity.
    Naming: [_pr] marks the probability of the event just named, with the
    [alice_trace] stem naming whose observation the predictor reads. *)
-Definition alice_trace_guess_pr (predict : predictor dsdp_traceT) : R :=
+Definition alice_trace_guess_V2_pr (predict : predictor dsdp_traceT) : R :=
   Pr (alice_sample_fdist (R:=R) AHE card_renc)
      [set t | (predict `o AliceTrace) t == V2 t].
 
@@ -760,7 +760,7 @@ Definition alice_trace_guess_pr (predict : predictor dsdp_traceT) : R :=
    adversaries its classifier admits.
    Those premises are assumed rather than proved.  Nothing here shows that
    the two reduction adversaries built from a trace predictor lie in the
-   class, and bob_trace_guess_epsilon_decrypt_ge shows that an assumption
+   class, and bob_trace_predictor_epsilon_decrypt_ge shows that an assumption
    whose classifier admits every adversary is forced to assume an epsilon of
    at least 1 - 1/#|plain AHE|.  The abstract version of that obstruction, in
    indcpa_game.v, reaches the value 1 instead, because it lets the adversary
@@ -771,12 +771,14 @@ Definition alice_trace_guess_pr (predict : predictor dsdp_traceT) : R :=
    [admissible] variant token before [le]. *)
 Corollary alice_trace_guess_V2_admissible_le
     (A : indcpa_epsilon_assumption) (predict : predictor dsdp_traceT) :
-  indcpa_admissible A (bob_trace_adversary (guess_test predict)) ->
-  indcpa_admissible A (charlie_trace_adversary (guess_test predict)) ->
-  alice_trace_guess_pr predict
+  indcpa_admissible A
+    (bob_trace_adversary (distinguisher_of_predictor predict)) ->
+  indcpa_admissible A
+    (charlie_trace_adversary (distinguisher_of_predictor predict)) ->
+  alice_trace_guess_V2_pr predict
     <= (#|plain AHE|%:R : R)^-1 + 2 * indcpa_assumption_epsilon A.
 Proof.
-move=> Hb Hc; rewrite /alice_trace_guess_pr.
+move=> Hb Hc; rewrite /alice_trace_guess_V2_pr.
 apply: le_trans (alice_trace_guess_V2_le predict) _.
 rewrite mulr_natl mulr2n addrA.
 by rewrite lerD // ?lerD2l //; exact: indcpa_admissible_epsilon_le.
@@ -784,16 +786,16 @@ Qed.
 
 (* The advantage against Bob's key of the adversary a trace predictor
    induces. *)
-Definition bob_trace_guess_epsilon (predict : predictor dsdp_traceT) : R :=
+Definition bob_trace_predictor_epsilon (predict : predictor dsdp_traceT) : R :=
   indcpa_fdist_epsilon (pkey_of_dk Bob)
-    (bob_trace_adversary (guess_test predict)).
+    (bob_trace_adversary (distinguisher_of_predictor predict)).
 
 (* The advantage against Charlie's key of the adversary a trace predictor
    induces. *)
-Definition charlie_trace_guess_epsilon
+Definition charlie_trace_predictor_epsilon
     (predict : predictor dsdp_traceT) : R :=
   indcpa_fdist_epsilon (pkey_of_dk Charlie)
-    (charlie_trace_adversary (guess_test predict)).
+    (charlie_trace_adversary (distinguisher_of_predictor predict)).
 
 (* The negative logarithm of the probability that the predictor recovers
    Bob's input from Alice's encoded executed trace.
@@ -822,15 +824,15 @@ Theorem alice_trace_predictor_unpredictability_ge
               [set t | (predict `o AliceTrace) t == V2 t]) :
   log (#|plain AHE|%:R)
     - log (1 + #|plain AHE|%:R
-               * (bob_trace_guess_epsilon predict
-                  + charlie_trace_guess_epsilon predict))
+               * (bob_trace_predictor_epsilon predict
+                  + charlie_trace_predictor_epsilon predict))
   <= `H_unp^{predict}.
 Proof.
 have Hcard_pos : (0 < #|plain AHE|%:R :> R).
   by rewrite ltr0n; apply/card_gt0P; exists 0; rewrite inE.
 have Hnum_pos : (0 < 1 + #|plain AHE|%:R
-                        * (bob_trace_guess_epsilon predict
-                           + charlie_trace_guess_epsilon predict) :> R).
+                        * (bob_trace_predictor_epsilon predict
+                           + charlie_trace_predictor_epsilon predict) :> R).
   by rewrite ltr_pwDl // mulr_ge0 // addr_ge0 // normr_ge0.
 rewrite /alice_trace_predictor_unpredictability.
 rewrite lerNr opprB -logDiv // ler_log ?posrE ?divr_gt0 //.
@@ -1188,7 +1190,7 @@ Qed.
    ciphertext to Some, so the plaintext zero returned on None is never
    returned either.
    Naming: the party owning the key comes first, as in
-   [bob_trace_guess_epsilon]; [decrypt] names what the predictor does with
+   [bob_trace_predictor_epsilon]; [decrypt] names what the predictor does with
    the slot it reads. *)
 Definition bob_trace_decrypt_predictor : predictor AHE (dsdp_traceT AHE) :=
   fun b => if dec dk_b (trace_data_cipher (nth (inr tt) (bseqval b) 3))
@@ -1248,19 +1250,19 @@ Local Notation dsdp_trace_of_hop_tuple :=
   (dsdp_trace_of_hop_tuple rand_of_renc v1 u1 u2 u3 dk_a dk_b dk_c w_rc2).
 Local Notation bob_trace_decrypt_predictor :=
   (bob_trace_decrypt_predictor rand_of_renc dk_a dk_b dk_c w_rc2).
-Local Notation bob_trace_guess_epsilon :=
-  (bob_trace_guess_epsilon (R:=R) card_renc rand_of_renc
+Local Notation bob_trace_predictor_epsilon :=
+  (bob_trace_predictor_epsilon (R:=R) card_renc rand_of_renc
      v1 u1 u2 u3 dk_a dk_b dk_c w_rc2).
-Local Notation charlie_trace_guess_epsilon :=
-  (charlie_trace_guess_epsilon (R:=R) card_renc rand_of_renc
+Local Notation charlie_trace_predictor_epsilon :=
+  (charlie_trace_predictor_epsilon (R:=R) card_renc rand_of_renc
      v1 u1 u2 u3 dk_a dk_b dk_c w_rc2).
 Local Notation indcpa_epsilon_assumption :=
   (indcpa_epsilon_assumption (R:=R) (AHE:=AHE) card_renc rand_of_renc).
 Local Notation bob_trace_adversary :=
   (bob_trace_adversary (R:=R) card_renc rand_of_renc
      v1 u1 u2 u3 dk_a dk_b dk_c w_rc2).
-Local Notation alice_trace_guess_pr :=
-  (alice_trace_guess_pr (R:=R) card_renc rand_of_renc
+Local Notation alice_trace_guess_V2_pr :=
+  (alice_trace_guess_V2_pr (R:=R) card_renc rand_of_renc
      v1 u1 u2 u3 dk_a dk_b dk_c w_rb2 w_rc2).
 
 (* The decryptor succeeds on every sample. *)
@@ -1281,10 +1283,10 @@ Qed.
    what makes that bound satisfiable rather than decoration.
    Naming: names the two epsilons summed, the predictor that realizes them,
    and the direction of the inequality. *)
-Corollary bob_charlie_trace_guess_epsilon_decrypt_ge :
+Corollary bob_charlie_trace_predictor_epsilon_decrypt_ge :
   1 - (#|plain AHE|%:R : R)^-1
-  <= bob_trace_guess_epsilon bob_trace_decrypt_predictor
-     + charlie_trace_guess_epsilon bob_trace_decrypt_predictor.
+  <= bob_trace_predictor_epsilon bob_trace_decrypt_predictor
+     + charlie_trace_predictor_epsilon bob_trace_decrypt_predictor.
 Proof.
 (* The rewrite is confined to the left-hand side: 1 also occurs inside
    #|plain AHE|%:R on the right. *)
@@ -1302,15 +1304,15 @@ Qed.
    ladder alone, never the composite two-hop bound
    alice_trace_guess_V2_le.
    Naming: as above, with the single epsilon the bound charges. *)
-Corollary bob_trace_guess_epsilon_decrypt_ge :
+Corollary bob_trace_predictor_epsilon_decrypt_ge :
   1 - (#|plain AHE|%:R : R)^-1
-  <= bob_trace_guess_epsilon bob_trace_decrypt_predictor.
+  <= bob_trace_predictor_epsilon bob_trace_decrypt_predictor.
 Proof.
 pose lifted := bob_trace_decrypt_predictor \o dsdp_trace_of_hop_tuple.
 have Hlift : `| Pr P [set t | (lifted `o AliceHopTuple 0) t == V2 t]
               - Pr P [set t | (lifted `o AliceHopTuple 1) t == V2 t] |
-            = bob_trace_guess_epsilon bob_trace_decrypt_predictor.
-  by rewrite 2!guess_event_jointE -2!alice_hop_game_successE hop0_advantageE.
+            = bob_trace_predictor_epsilon bob_trace_decrypt_predictor.
+  by rewrite 2!guess_V2_jointE -2!alice_hop_game_successE hop0_advantageE.
 have HV2 : lifted `o AliceHopTuple 0 = V2.
   rewrite (alice_trace_decode_V2E card_renc rand_of_renc v1 u1 u2 u3
              dk_a dk_b dk_c w_rb2 w_rc2).
@@ -1319,7 +1321,7 @@ have HV2 : lifted `o AliceHopTuple 0 = V2.
 have H0 : Pr P [set t | (lifted `o AliceHopTuple 0) t == V2 t] = 1.
   rewrite HV2 (_ : finset _ = [set: dsdp_alice_sampleT AHE Renc]) ?Pr_setT //.
   by apply/setP => t; rewrite !inE eqxx.
-(* guess_all_zero_le_invm is stated at AliceHopTuple 2 and used here at
+(* all_zero_guess_V2_le_invm is stated at AliceHopTuple 2 and used here at
    AliceHopTuple 1.  Two reductions carry it across: trace_of_trace_tuple is
    a literal bseq, so nth 3 discards Charlie's slot, which is the only slot
    the two hops differ in; and hop0_cipher reduces to enc bob_pkey 0 at both
@@ -1327,7 +1329,7 @@ have H0 : Pr P [set t | (lifted `o AliceHopTuple 0) t == V2 t] = 1.
    making either function opaque breaks this step. *)
 have H1 : Pr P [set t | (lifted `o AliceHopTuple 1) t == V2 t]
           <= #|plain AHE|%:R^-1.
-  exact: (guess_all_zero_le_invm card_renc rand_of_renc pkey_of_dk
+  exact: (all_zero_guess_V2_le_invm card_renc rand_of_renc pkey_of_dk
             v1 u1 u2 u3_unit lifted).
 rewrite -Hlift H0.
 exact: le_trans (lerB (lexx _) H1) (ler_norm _).
@@ -1345,10 +1347,11 @@ Qed.
 Lemma decrypt_reduction_admissibleF (A : indcpa_epsilon_assumption) :
   indcpa_assumption_epsilon A < 1 - (#|plain AHE|%:R : R)^-1 ->
   indcpa_admissible A
-    (bob_trace_adversary (guess_test bob_trace_decrypt_predictor)) = false.
+    (bob_trace_adversary
+       (distinguisher_of_predictor bob_trace_decrypt_predictor)) = false.
 Proof.
 move=> Heps; apply/negbTE/negP => Hadm.
-have Hle := le_trans bob_trace_guess_epsilon_decrypt_ge
+have Hle := le_trans bob_trace_predictor_epsilon_decrypt_ge
               (indcpa_admissible_epsilon_le dk_b Hadm).
 by move: (lt_le_trans Heps Hle); rewrite ltxx.
 Qed.
@@ -1366,10 +1369,10 @@ Lemma alice_trace_guess_V2_admissible_premise_free_lt
     (A : indcpa_epsilon_assumption) :
   2 * indcpa_assumption_epsilon A < 1 - (#|plain AHE|%:R : R)^-1 ->
   (#|plain AHE|%:R : R)^-1 + 2 * indcpa_assumption_epsilon A
-    < alice_trace_guess_pr bob_trace_decrypt_predictor.
+    < alice_trace_guess_V2_pr bob_trace_decrypt_predictor.
 Proof.
 move=> Heps.
-have -> : alice_trace_guess_pr bob_trace_decrypt_predictor = 1
+have -> : alice_trace_guess_V2_pr bob_trace_decrypt_predictor = 1
   := decrypt_guess_prE.
 by rewrite -ltrBrDl.
 Qed.
@@ -1623,11 +1626,11 @@ Local Notation V2 := (V2 (R:=R) (AHE:=AHE) card_renc).
 Local Notation AliceTrace :=
   (AliceTrace (R:=R) card_renc rand_of_renc v1 u1 u2 u3
      dk_a dk_b dk_c w_rb2 w_rc2).
-Local Notation bob_trace_guess_epsilon :=
-  (bob_trace_guess_epsilon (R:=R) card_renc rand_of_renc
+Local Notation bob_trace_predictor_epsilon :=
+  (bob_trace_predictor_epsilon (R:=R) card_renc rand_of_renc
      v1 u1 u2 u3 dk_a dk_b dk_c w_rc2).
-Local Notation charlie_trace_guess_epsilon :=
-  (charlie_trace_guess_epsilon (R:=R) card_renc rand_of_renc
+Local Notation charlie_trace_predictor_epsilon :=
+  (charlie_trace_predictor_epsilon (R:=R) card_renc rand_of_renc
      v1 u1 u2 u3 dk_a dk_b dk_c w_rc2).
 Local Notation alice_trace_predictor_unpredictability :=
   (alice_trace_predictor_unpredictability (R:=R) card_renc rand_of_renc
@@ -1635,7 +1638,7 @@ Local Notation alice_trace_predictor_unpredictability :=
 
 (* The success probability of a trace predictor, the quantity the zero-safe
    unpredictability reads. *)
-Let trace_guess_pr (predict : predictor dsdp_traceT) : R :=
+Let trace_guess_V2_pr (predict : predictor dsdp_traceT) : R :=
   Pr (alice_sample_fdist (R:=R) AHE card_renc)
      [set t | (predict `o AliceTrace) t == V2 t].
 
@@ -1645,13 +1648,13 @@ Let trace_guess_pr (predict : predictor dsdp_traceT) : R :=
    [conv_erealE] of probability/convex.v. *)
 Definition alice_trace_predictor_unpredictability_ereal
     (predict : predictor dsdp_traceT) : \bar R :=
-  if trace_guess_pr predict == 0 then @EPInf R
+  if trace_guess_V2_pr predict == 0 then @EPInf R
   else EFin (alice_trace_predictor_unpredictability predict).
 
 (* Zero success is infinite unpredictability.
    Naming: the [E] suffix marks the branch equation. *)
 Lemma alice_trace_predictor_unpredictability_ereal_zeroE predict :
-  trace_guess_pr predict = 0 ->
+  trace_guess_V2_pr predict = 0 ->
   alice_trace_predictor_unpredictability_ereal predict = @EPInf R.
 Proof.
 by move=> H; rewrite /alice_trace_predictor_unpredictability_ereal H eqxx.
@@ -1661,9 +1664,9 @@ Qed.
    Naming: [_gt0] spells the positivity premise, after MathComp; the [E]
    suffix marks the branch equation. *)
 Lemma alice_trace_predictor_unpredictability_ereal_gt0E predict :
-  0 < trace_guess_pr predict ->
+  0 < trace_guess_V2_pr predict ->
   alice_trace_predictor_unpredictability_ereal predict
-  = EFin (- log (trace_guess_pr predict)).
+  = EFin (- log (trace_guess_V2_pr predict)).
 Proof.
 by move=> H; rewrite /alice_trace_predictor_unpredictability_ereal gt_eqF.
 Qed.
@@ -1672,7 +1675,7 @@ Qed.
    Naming: [_fin] marks the finite branch; the [E] suffix marks the branch
    equation. *)
 Lemma alice_trace_predictor_unpredictability_ereal_finE predict :
-  0 < trace_guess_pr predict ->
+  0 < trace_guess_V2_pr predict ->
   alice_trace_predictor_unpredictability_ereal predict
   = EFin (alice_trace_predictor_unpredictability predict).
 Proof.
@@ -1689,13 +1692,14 @@ Theorem dsdp_alice_trace_predictor_unpredictability_fdist_ereal_ge predict :
   Order.le
     (EFin (log (#|plain AHE|%:R)
            - log (1 + #|plain AHE|%:R
-                      * (bob_trace_guess_epsilon predict
-                         + charlie_trace_guess_epsilon predict))))
+                      * (bob_trace_predictor_epsilon predict
+                         + charlie_trace_predictor_epsilon predict))))
     (alice_trace_predictor_unpredictability_ereal predict).
 Proof.
 rewrite /alice_trace_predictor_unpredictability_ereal.
-case: (eqVneq (trace_guess_pr predict) 0) => [_|Hneq]; first exact: leey.
-have Hpos : 0 < trace_guess_pr predict by rewrite lt0r Hneq /=; exact: Pr_ge0.
+case: (eqVneq (trace_guess_V2_pr predict) 0) => [_|Hneq]; first exact: leey.
+have Hpos : 0 < trace_guess_V2_pr predict
+  by rewrite lt0r Hneq /=; exact: Pr_ge0.
 rewrite lee_fin.
 exact: (alice_trace_predictor_unpredictability_ge u3_unit Hpos).
 Qed.
@@ -1832,11 +1836,11 @@ Corollary dsdp_alice_guess_fdist_raw_trace_V2_real_le
   <= (#|plain AHE|%:R : R)^-1
      + indcpa_fdist_epsilon (pkey_of_dk Bob)
          (bob_challenge_adversary
-            (guess_test
+            (distinguisher_of_predictor
                (Genc g_raw \o dsdp_trace_of_hop_tuple)))
      + indcpa_fdist_epsilon (pkey_of_dk Charlie)
          (charlie_challenge_adversary
-            (guess_test
+            (distinguisher_of_predictor
                (Genc g_raw \o dsdp_trace_of_hop_tuple))).
 Proof.
 have -> : [set t | g_raw (alice_raw_trace t) == V2 t]
@@ -1968,11 +1972,11 @@ Local Notation V2 := (V2 (R:=R) (AHE:=AHE) card_renc).
 Local Notation AliceTrace :=
   (AliceTrace (R:=R) card_renc rand_of_renc v1 u1 u2 u3
      dk_a dk_b dk_c w_rb2 w_rc2).
-Local Notation bob_trace_guess_epsilon :=
-  (bob_trace_guess_epsilon (R:=R) card_renc rand_of_renc
+Local Notation bob_trace_predictor_epsilon :=
+  (bob_trace_predictor_epsilon (R:=R) card_renc rand_of_renc
      v1 u1 u2 u3 dk_a dk_b dk_c w_rc2).
-Local Notation charlie_trace_guess_epsilon :=
-  (charlie_trace_guess_epsilon (R:=R) card_renc rand_of_renc
+Local Notation charlie_trace_predictor_epsilon :=
+  (charlie_trace_predictor_epsilon (R:=R) card_renc rand_of_renc
      v1 u1 u2 u3 dk_a dk_b dk_c w_rc2).
 Local Notation alice_trace_predictor_unpredictability_ereal :=
   (alice_trace_predictor_unpredictability_ereal (R:=R) card_renc
@@ -1988,7 +1992,7 @@ Local Notation charlie_trace_adversary :=
      v1 u1 u2 u3 dk_a dk_b dk_c w_rc2).
 
 (* The success probability of a trace predictor. *)
-Let trace_guess_pr (predict : predictor dsdp_traceT) : R :=
+Let trace_guess_V2_pr (predict : predictor dsdp_traceT) : R :=
   Pr (alice_sample_fdist (R:=R) AHE card_renc)
      [set t | (predict `o AliceTrace) t == V2 t].
 
@@ -2002,9 +2006,9 @@ Proof. by rewrite card_plain_pq natrM. Qed.
    variant token before [le]; kept long to preserve the family grouping. *)
 Corollary dsdp_alice_guess_fdist_trace_V2_real_pq_le
     (predict : predictor dsdp_traceT) :
-  trace_guess_pr predict
-  <= ((p%:R : R) * q%:R)^-1 + bob_trace_guess_epsilon predict
-     + charlie_trace_guess_epsilon predict.
+  trace_guess_V2_pr predict
+  <= ((p%:R : R) * q%:R)^-1 + bob_trace_predictor_epsilon predict
+     + charlie_trace_predictor_epsilon predict.
 Proof.
 rewrite inv_pq_cardE.
 exact: (alice_trace_guess_V2_le card_renc rand_of_renc
@@ -2020,9 +2024,11 @@ Qed.
    [pq] variant token before [le]. *)
 Corollary alice_trace_guess_V2_admissible_pq_le
     (A : indcpa_epsilon_assumption) (predict : predictor dsdp_traceT) :
-  indcpa_admissible A (bob_trace_adversary (guess_test predict)) ->
-  indcpa_admissible A (charlie_trace_adversary (guess_test predict)) ->
-  trace_guess_pr predict
+  indcpa_admissible A
+    (bob_trace_adversary (distinguisher_of_predictor predict)) ->
+  indcpa_admissible A
+    (charlie_trace_adversary (distinguisher_of_predictor predict)) ->
+  trace_guess_V2_pr predict
     <= ((p%:R : R) * q%:R)^-1 + 2 * indcpa_assumption_epsilon A.
 Proof.
 rewrite inv_pq_cardE.
@@ -2040,8 +2046,8 @@ Theorem dsdp_alice_trace_predictor_unpredictability_fdist_ereal_pq_ge
   Order.le
     (EFin (log ((p%:R : R) * q%:R)
            - log (1 + (p%:R : R) * q%:R
-                      * (bob_trace_guess_epsilon predict
-                         + charlie_trace_guess_epsilon predict))))
+                      * (bob_trace_predictor_epsilon predict
+                         + charlie_trace_predictor_epsilon predict))))
     (alice_trace_predictor_unpredictability_ereal predict).
 Proof.
 have -> : (p%:R : R) * q%:R = #|plain AHE|%:R by rewrite card_plain_pq natrM.
