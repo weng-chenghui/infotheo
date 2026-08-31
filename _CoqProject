@@ -144,6 +144,7 @@ dumas2017dual/dsdp/fdist_hopping/indcpa_game.v
 dumas2017dual/dsdp/fdist_hopping/dsdp_alice_fdist_secrecy.v
 dumas2017dual/dsdp/fdist_hopping/dsdp_alice_trace_link.v
 dumas2017dual/dsdp/fdist_hopping/paillier_indcpa_instance.v
+dumas2017dual/dsdp/fdist_hopping/benaloh_indcpa_instance.v
 dumas2017dual/dsdp/counting/dsdp_malicious_dotp.v
 dumas2017dual/dsdp/dsdp_main.v
 
