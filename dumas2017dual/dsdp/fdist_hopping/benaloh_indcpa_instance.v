@@ -109,11 +109,7 @@ Definition rand_of_renc_benaloh : renc_benaloh -> rand AHE := idfun.
    Every statement below is instantiated at this one proof term.  A second
    proof of the same equation is propositionally equal to this one and not
    convertible with it, so bounds stated at the two would compose only
-   through a rewrite.
-   Naming: [card_renc] is the abstract development's name for this
-   hypothesis, so the successor form is what the name denotes here; it is a
-   nonemptiness statement rather than a cardinality value, unlike
-   card_plain_r. *)
+   through a rewrite. *)
 Lemma card_renc_benaloh : #|renc_benaloh| = #|renc_benaloh|.-1.+1.
 Proof. by rewrite prednK //; apply/card_gt0P; exists 1%g; rewrite inE. Qed.
 
@@ -136,21 +132,13 @@ Hypothesis u3_unit : u3 \is a GRing.unit.
 Variables (dk_a dk_b dk_c : priv_key AHE).
 Variables (w_rb2 w_rc2 : renc_benaloh).
 
-(* The IND-CPA assumption made of Benaloh at these parameters: an adversary
-   class, one epsilon, and the assumption that every classified adversary has
+(* The IND-CPA assumption of Benaloh: a classified adversary has
    real-or-zero advantage at most that epsilon at every key built from a
    private key.
-   The class and the epsilon live in the record's fields.  The two type
-   indices card_renc_benaloh and rand_of_renc_benaloh only site the record at
-   this Benaloh packaging, typing the challenger's uniform coin; they carry
-   none of the cryptographic content.
-   It is a parameter, and every bound stated through it is conditional on a
-   record being supplied.  Once a real proof lands, from r-th residuosity,
-   also called higher residuosity, at a modulus n = p * q with p and q
-   distinct primes and a prime r dividing p - 1 and coprime to
-   (p - 1) * (q - 1) / r, a strengthening of this section's n, r > 1
-   hypotheses, it discharges this Variable by a concrete term built at this
-   same card_renc_benaloh proof term:
+
+   If a real proof of the small epsilon is done,
+   replace this `Variable benaloh_indcpa_assumption` with a real
+   `indcpa_epsilon_assumption` definition like this:
 
      Definition benaloh_hr_assumption :
          indcpa_epsilon_assumption card_renc_benaloh
@@ -166,14 +154,7 @@ Variables (w_rb2 w_rc2 : renc_benaloh).
                at most that epsilon at every key from a private key *) |}.
 
    cipher_constant_assumption in indcpa_game.v is such an inhabitant, with a
-   computable class, epsilon zero, and the promise field discharged by
-   cipher_constant_epsilon_le.  Under a concrete term the corollary below
-   computes its epsilon with its proof unchanged, and its two class premises
-   become membership proofs of the two reduction adversaries.
-   Naming: [indcpa] is in the name because the record is an IND-CPA
-   advantage assumption; a bare benaloh_assumption would read as the
-   scheme's own hardness assumption, r-th residuosity, which this record
-   neither is nor implies. *)
+   computable class and epsilon zero. *)
 Variable benaloh_indcpa_assumption :
   indcpa_epsilon_assumption (R:=R) card_renc_benaloh rand_of_renc_benaloh.
 
@@ -193,17 +174,12 @@ Proof. by rewrite card_plain_r. Qed.
 
 (* A predictor reading Alice's executed DSDP trace at the Benaloh
    instantiation returns Bob's input with probability at most 1/r plus twice
-   the assumed advantage.  The three currencies of the abstract bound land
-   here as follows: 1/r is information-theoretic and unconditional, the
-   residue of the leaked output along the DSDP solution fiber at a plaintext
-   space of size r; 2 * epsilon is conditional on benaloh_indcpa_assumption,
-   and prices the two ciphertext replacements at Bob's key and at Charlie's;
-   the two premises are conditional on the class, and assert membership of
-   the two reduction adversaries without proving it.
-   Naming: extends [alice_trace_guess_V2_admissible_le] with the scheme
-   token before [le], keeping [admissible], which is what marks the bound
-   class-conditional against the unconditional sibling
-   [alice_trace_guess_V2_le]. *)
+   the assumed advantage.
+
+   The 1/r is unconditional. It comes from Sout, the output Alice knows by
+   design.
+   2 * epsilon is conditional on benaloh_indcpa_assumption, and prices the
+   two ciphertext replacements at Bob's key and at Charlie's. *)
 Corollary dsdp_alice_trace_guess_V2_admissible_benaloh_le
     (predict : predictor AHE (dsdp_traceT AHE)) :
   indcpa_admissible benaloh_indcpa_assumption

@@ -102,8 +102,7 @@ Definition rand_of_renc_paillier : renc_paillier -> rand AHE := idfun.
    Every statement below is instantiated at this one proof term.  A second
    proof of the same equation is propositionally equal to this one and not
    convertible with it, so bounds stated at the two would compose only
-   through a rewrite.
-*)
+   through a rewrite. *)
 Lemma card_renc_paillier : #|renc_paillier| = #|renc_paillier|.-1.+1.
 Proof. by rewrite prednK //; apply/card_gt0P; exists 1%g; rewrite inE. Qed.
 
@@ -142,9 +141,8 @@ Variables (rb2 rc2 : renc_paillier).
             (* the Qed lemma: every classified adversary keeps advantage
                at most that epsilon at every key from a private key *) |}.
 
-   There is an idealized AHE example `cipher_constant_assumption` in
-   indcpa_game.v, with a computable class shows that the epsilon is zero.
-*)
+   cipher_constant_assumption in indcpa_game.v is such an inhabitant, with
+   a computable class and epsilon zero. *)
 Variable paillier_indcpa_assumption :
   indcpa_epsilon_assumption (R:=R) card_renc_paillier rand_of_renc_paillier.
 
@@ -162,10 +160,10 @@ Local Notation alice_trace_guess_V2_pr :=
    instantiation returns Bob's input with probability at most 1/(p * q) plus
    twice the assumed advantage.
 
-   The 1/(p * q) is unconditional. It is from Sout by design that Alice knows.
-   2 * epsilon is conditional on paillier_indcpa_assumption, and prices the two
-   ciphertext replacements at Bob's key and at Charlie's
-*)
+   The 1/(p * q) is unconditional.  It comes from Sout, the output Alice
+   knows by design.  2 * epsilon is conditional on
+   paillier_indcpa_assumption, and prices the two ciphertext replacements
+   at Bob's key and at Charlie's. *)
 Corollary dsdp_alice_trace_guess_V2_admissible_paillier_le
     (predict : predictor AHE (dsdp_traceT AHE)) :
   indcpa_admissible paillier_indcpa_assumption

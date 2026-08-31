@@ -204,22 +204,14 @@ Context {R : realType}.
    asymptotic notion has nothing to measure.  What this supplies is the shape
    a family of instances must have for such a bound to vanish in the security
    parameter, which is the asymptotic form a computational security claim
-   takes.
-
-   Naming: [negligible_fun] rather than [negligible], which
-   mathcomp-analysis takes for the measure-theoretic notion of
-   measure_negligible.v. *)
+   takes. *)
 Definition negligible_fun (f : nat -> R) : Prop :=
   forall c : nat, exists N : nat,
     forall n : nat, (N < n)%N -> f n < n%:R ^- c.
 
 (* Negligible functions are closed under addition.  A security bound written
    as a sum of per-hop advantages stays negligible when each summand is, so a
-   chain of two hops is priced one hop at a time.
-   Naming: [_add] is spelled out rather than abbreviated to [D]; the main
-   symbol is a Prop-valued predicate on functions, and the addition is inside
-   the argument rather than at the head of the statement, where a [D] suffix
-   would read as an operation on negligible_fun itself. *)
+   chain of two hops is priced one hop at a time. *)
 Lemma negligible_fun_add (f g : nat -> R) :
   negligible_fun f -> negligible_fun g ->
   negligible_fun (fun n => f n + g n).
@@ -250,11 +242,7 @@ Qed.
 (* The arithmetic shape of the class-conditional DSDP trace guessing bound is
    negligible as a family: an inverse plaintext cardinality plus twice one
    advantage, evaluated at each security parameter, is negligible whenever
-   both families are.
-
-   Naming: the conclusion is a negligibility judgment, not a relation, so no
-   [le]/[ge]/[E] suffix applies; [predictor_bound] names the expression whose
-   family is judged, under the [negligible_fun] stem of this section. *)
+   both families are. *)
 Corollary negligible_fun_predictor_bound (inv_pq eps : nat -> R) :
   negligible_fun inv_pq -> negligible_fun eps ->
   negligible_fun (fun k => inv_pq k + 2 * eps k).
@@ -302,12 +290,7 @@ Definition predictor (obs : finType) : Type := obs -> plain AHE.
    while a hop speaks only about how often a Boolean test accepts; wrapping
    the predictor this way makes the two the same number: the probability
    that the predictor succeeds at hop i is the probability that this test
-   accepts at hop i.
-   Naming: [_of_] names the source the conversion reads, after the
-   repository's total-conversion family, and the source is the predictor.
-   The role table of
-   dumas2017dual/dsdp/fdist_hopping/dsdp_alice_fdist_secrecy.v maps the
-   distinguisher role to this name. *)
+   accepts at hop i. *)
 Definition distinguisher_of_predictor {obs : finType}
     (predict : predictor obs) :
     distinguisher (plain AHE * plain AHE * obs)%type :=
@@ -353,9 +336,7 @@ Definition indcpa_accept (b : bool) (pk : pub_key AHE)
   Pr (indcpa_experiment b pk adv) [set true].
 
 (* The probability that the adversary accepts when the challenge encrypts the
-   plaintext it chose.
-   Naming: [_success_real] after [oracle_encrypt_real] and
-   [guess_sdistr_success_real]; [Pr_] is reserved for the lemma family. *)
+   plaintext it chose. *)
 Definition indcpa_success_real := indcpa_accept true.
 
 (* The real success probability, unfolded as: draw the adversary state, encrypt
@@ -372,9 +353,7 @@ Lemma indcpa_success_realE (pk : pub_key AHE)
 Proof. by []. Qed.
 
 (* The probability that the adversary accepts when the challenge encrypts
-   zero.
-   Naming: [_success_zero] after [oracle_encrypt_zero]; [Pr_] is reserved for
-   the lemma family. *)
+   zero. *)
 Definition indcpa_success_zero := indcpa_accept false.
 
 (* The zero success probability in that same unfolded form, with the plaintext
@@ -446,8 +425,7 @@ Qed.
    adversary's decision ignores the challenge ciphertext, checked over every
    state and every pair of ciphertexts by finite quantification.  This is what
    "receive a function, give a boolean" looks like when the boolean is not a
-   placeholder.
-   Naming: names the field it inspects and the property it checks of it. *)
+   placeholder. *)
 Definition adv_decide_cipher_constant (adv : indcpa_adversary) : bool :=
   [forall c, [forall ch1, [forall ch2,
      adv_decide adv c ch1 == adv_decide adv c ch2]]].
@@ -455,9 +433,7 @@ Definition adv_decide_cipher_constant (adv : indcpa_adversary) : bool :=
 (* Every adversary that classifier admits has advantage exactly zero, not at
    most some assumed epsilon.  Ignoring the ciphertext means the real and the
    zero experiment hand the decision the same law, so the two acceptance
-   probabilities are one number and their gap is zero.
-   Naming: [eq0] states the value, after MathComp; the middle names the
-   condition under which it holds. *)
+   probabilities are one number and their gap is zero. *)
 Lemma indcpa_epsilon_cipher_constant_eq0 (pk : pub_key AHE)
     (adv : indcpa_adversary) :
   adv_decide_cipher_constant adv -> indcpa_epsilon pk adv = 0.
@@ -488,8 +464,7 @@ Proof. by move=> H; rewrite (indcpa_epsilon_cipher_constant_eq0 _ H). Qed.
    computes, its epsilon is zero, and the bound it carries is the lemma above
    instead of a hypothesis.  The class it admits is small, so the bounds
    conditional on it are weak, but it settles that this record type has an
-   inhabitant with content, and it shows what one looks like.
-   Naming: names the class it carries, after [adv_decide_cipher_constant]. *)
+   inhabitant with content, and it shows what one looks like. *)
 Definition cipher_constant_assumption : indcpa_epsilon_assumption :=
   {| indcpa_admissible := adv_decide_cipher_constant ;
      indcpa_assumption_epsilon := 0 ;
@@ -574,10 +549,7 @@ Hypothesis X_assembleE : forall t,
 (* The law of the value a distinguisher is handed inside the IND-CPA
    experiment: sample the reduction state, sample the challenge ciphertext for
    the plaintext that state selects, then assemble the tested value from the
-   two.
-   Naming: the joint value assembled around the challenger's ciphertext; the
-   reduction maps themselves are bob_challenge_adversary and
-   charlie_challenge_adversary of dsdp_alice_fdist_secrecy.v. *)
+   two. *)
 Definition challenge_joint_fdist : R.-fdist joint :=
   c  <- `p_ State ;
   ch <- enc_fdist pk (msg c) ;
