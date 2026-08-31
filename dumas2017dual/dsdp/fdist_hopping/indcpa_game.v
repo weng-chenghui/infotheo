@@ -79,7 +79,7 @@ Require Import extra_proba.
 (*       indcpa_admissible A == the class of A, as a Boolean test on          *)
 (*                               adversaries                                  *)
 (* indcpa_assumption_epsilon A == the advantage A assumes for its class       *)
-(* indcpa_admissible_epsilon_le == the gated bound A assumes                  *)
+(* indcpa_admissible_epsilon_le == the class-conditional bound A assumes      *)
 (* adv_decide_cipher_constant adv ==                                          *)
 (*                               decides whether the adversary's verdict      *)
 (*                               ignores the challenge ciphertext             *)
@@ -87,7 +87,7 @@ Require Import extra_proba.
 (*                               an adversary whose verdict ignores the       *)
 (*                               ciphertext has advantage zero                *)
 (* cipher_constant_assumption == that class with epsilon zero, an assumption  *)
-(*                               whose bound is proved rather than posited    *)
+(*                               whose bound is proved rather than assumed    *)
 (*            fdistbind_cst == a distribution bound to a continuation that    *)
 (*                               ignores its sample is the Dirac law there    *)
 (*            enc_fdist pk v == the distribution obtained by encrypting v     *)
@@ -169,13 +169,42 @@ Section negligible_asymptotics.
 Context {R : realType}.
 
 (* A function of the security parameter is negligible when it eventually falls
-   below every inverse polynomial: for each exponent c there is a threshold
-   past which the function is smaller than n ^- c.
+   below every inverse monomial.
+
+   forall c : nat (Given any exponent c): Represents the upper bound of
+   the attacker's capability.
+
+   exists N : nat (There exists a threshold N): Guarantees that once our key
+   length (security parameter n) exceeds this threshold N,
+   the cryptosystem exhibits an absolute security advantage.
+
+   f : nat -> R is a function that monitors attacker success probability (R)
+   as the key gets longer (nat).
+
+   f n < n%:R ^- c : Bound on the attacker's success
+   probability (f(n). It means that when the security parameter is
+   sufficiently large, the attacker's success probability drops strictly
+   below any inverse monomial or polynomial.
+
+   Katz and Lindell, Introduction to
+   Modern Cryptography, 2nd edition, 2015, Definition 3.4, p. 48.
+
+   FCF's negligible states the same test in negated form over its rational
+   probability type, ~ (1 / x ^ c <= f x), a shape that needs no classical
+   totality of the order; the CertiCrypt paper bounds an absolute value,
+   |nu n| <= n ^- c.
+
+   Classical reasoning is in scope here through boolp, and
+   the intended arguments are nonnegative advantage families, so the test is
+   the direct strict inequality, and the closure lemmas [negligible_fun_add]
+   and [negligible_fun_le] are direct order arithmetic.
+
    Every bound in the DSDP files is stated at one fixed instance, where an
    asymptotic notion has nothing to measure.  What this supplies is the shape
-   a family of instances must have for such a bound to vanish faster than any
-   polynomial in the security parameter, which is the asymptotic form a
-   computational security claim takes.
+   a family of instances must have for such a bound to vanish in the security
+   parameter, which is the asymptotic form a computational security claim
+   takes.
+
    Naming: [negligible_fun] rather than [negligible], which
    mathcomp-analysis takes for the measure-theoretic notion of
    measure_negligible.v. *)
@@ -220,20 +249,8 @@ Qed.
 (* The arithmetic shape of the class-conditional DSDP trace guessing bound is
    negligible as a family: an inverse plaintext cardinality plus two copies of
    one advantage, evaluated at each security parameter, is negligible whenever
-   both families are.  That shape is the right-hand side of
-   alice_trace_guess_V2_admissible_le, which reads
-   1/#|plain AHE| + 2 * indcpa_assumption_epsilon: one assumption advantage
-   stands there for both per-key advantages, which is why a single eps appears
-   twice here.  Read at that bound, a modulus family whose inverse cardinality
-   is negligible together with an assumption family whose advantage is
-   negligible make Alice's chance of recovering Bob's input negligible.
-   The unconditional bound alice_trace_guess_V2_le carries two
-   distinct per-key advantages instead, and a family of that bound is priced
-   by two applications of negligible_fun_add over two epsilon families.
-   The two arguments are families of reals.  A family of DSDP instances would
-   carry an AHE scheme, three key pairs and four weights indexed by the
-   security parameter, making the bound a dependent family; this states an
-   inequality between two real sequences instead.
+   both families are.
+ 
    Naming: the conclusion is a negligibility judgment, not a relation, so no
    [le]/[ge]/[E] suffix applies; [guess_bound] names the expression whose
    family is judged, under the [negligible_fun] stem of this section. *)
@@ -375,17 +392,13 @@ Definition indcpa_fdist_epsilon (pk : pub_key AHE)
     (adv : indcpa_fdist_adversary) : R :=
   `| indcpa_fdist_success_real pk adv - indcpa_fdist_success_zero pk adv |.
 
-(* An adversary class packaged with the advantage bound it gates: a Boolean
-   classifier on single-query real-or-zero adversaries, one epsilon, and the
-   assumption that every classified adversary has advantage at most that
-   epsilon at every key in the image of pub_of_priv, which is the only key
-   shape the DSDP files build.
-   The classifier is extensional.  Functional extensionality is in scope and
-   an adversary is a record of functions, so two adversaries with the same
+(* An extensional Boolean classifier. Given one epsilon, and the assumption that
+   every classified adversary stays below that epsilon at every key built
+   from a private key. Extensional means two adversaries with the same
    state law, the same challenge plaintext and the same decision are one term
-   and receive one Boolean.  The classifier can therefore say which
-   adversaries a bound covers, and running time stays a property of a syntax
-   the record does not carry.  SSProve sits at the same boundary: Haselwarter
+   and receive one Boolean.
+
+   SSProve sits at the same boundary: Haselwarter
    et al., ACM TOPLAS 45(3) Article 15, 2023, section 2.3 gives the
    polynomial-time hypothesis as an informal reading of a concrete bound,
    outside every mechanized statement, and its Coq development defines no
@@ -393,18 +406,19 @@ Definition indcpa_fdist_epsilon (pk : pub_key AHE)
    "It would also be nice to formalise Claim 10.3 (p. 186), but its argument
    depends on the adversary only having polynomial time, and how to formulate
    that is unclear" (SSProve commit c6d7d4bc,
-   theories/Crypt/examples/PRFMAC.v:6-8).  FCF instead states its efficiency
+   theories/Crypt/examples/PRFMAC.v:6-8).
+
+   FCF instead states its efficiency
    predicate admissible_oc, in WC_PolyTime.v, over families of OracleComp
    terms, so there the classified object is a program rather than a function.
-   The class may be empty, and a bound gated by an empty class holds
+
+   The class may be empty, and a bound conditional on an empty class holds
    vacuously.  The class must also leave something out whenever the scheme is
    correct and #|plain AHE| > 1: an adversary holding the matching private key
    and submitting a nonzero challenge plaintext decrypts the challenge and
    reaches advantage 1, so an assumption whose classifier admits every
-   adversary is forced to posit epsilon at least 1.
-   Membership of the reduction adversaries a protocol bound consumes is a
-   premise of that bound, discharged by whoever supplies the assumption
-   record. *)
+   adversary is forced to assume epsilon at least 1.
+ *)
 Record indcpa_epsilon_assumption := {
   indcpa_admissible : indcpa_fdist_adversary -> bool ;
   indcpa_assumption_epsilon : R ;
@@ -434,7 +448,7 @@ Definition adv_decide_cipher_constant (adv : indcpa_fdist_adversary) : bool :=
      adv_decide adv c ch1 == adv_decide adv c ch2]]].
 
 (* Every adversary that classifier admits has advantage exactly zero, not at
-   most some posited epsilon.  Ignoring the ciphertext means the real and the
+   most some assumed epsilon.  Ignoring the ciphertext means the real and the
    zero experiment hand the decision the same law, so the two acceptance
    probabilities are one number and their gap is zero.
    Naming: [eq0] states the value, after MathComp; the middle names the
@@ -457,17 +471,18 @@ by rewrite /indcpa_fdist_epsilon /indcpa_fdist_success_real
            /indcpa_fdist_success_zero /indcpa_fdist_accept Hexp subrr normr0.
 Qed.
 
-(* The gated bound the instance below carries, discharged by the lemma. *)
+(* The class-conditional bound the instance below carries, discharged by
+   the lemma. *)
 Let cipher_constant_epsilon_le (dk : priv_key AHE)
     (adv : indcpa_fdist_adversary) :
   adv_decide_cipher_constant adv ->
   indcpa_fdist_epsilon (pub_of_priv dk) adv <= 0.
 Proof. by move=> H; rewrite (indcpa_epsilon_cipher_constant_eq0 _ H). Qed.
 
-(* An assumption whose promise is proved rather than posited.  Its classifier
+(* An assumption whose promise is proved rather than assumed.  Its classifier
    computes, its epsilon is zero, and the bound it carries is the lemma above
-   instead of a hypothesis.  The class it admits is small, so the bounds it
-   gates are weak, but it settles that this record type has an inhabitant with
+   instead of a hypothesis.  The class it admits is small, so the bounds conditional on it
+   are weak, but it settles that this record type has an inhabitant with
    content, and it shows what one looks like.
    Naming: names the class it carries, after [adv_decide_cipher_constant]. *)
 Definition cipher_constant_assumption : indcpa_epsilon_assumption :=
