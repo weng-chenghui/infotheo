@@ -204,7 +204,11 @@ Theorem alice_trace_guess_V2_admissible_negligible :
   negligible_fun (fun k => indcpa_assumption_epsilon (A k)) ->
   negligible_fun (fun k => alice_trace_guess_V2_pr_at (predict k)).
 Proof.
-Admitted.
+move=> HB HC Hinv Heps.
+apply: negligible_fun_le (negligible_fun_predictor_bound Hinv Heps) => k.
+exact: (alice_trace_guess_V2_admissible_le
+          (inst_u3_unit (I k)) (inst_w_rb2 (I k)) (HB k) (HC k)).
+Qed.
 
 (* Under the same two negligibility hypotheses, the decrypting predictor's
    Bob-side reduction adversary is eventually outside the class: the
