@@ -198,3 +198,5 @@ dsdp_alice_trace_link:alice_trace_guess_V2_admissible_premise_free_lt
 # source over a cloned copy of that source's section context, so the two
 # prove the same statement and one node describes both.
 dsdp_main:cipher_constant_assumption
+dsdp_main:alice_trace_guess_V2_paillier_negligible
+dsdp_main:alice_trace_guess_V2_benaloh_negligible
