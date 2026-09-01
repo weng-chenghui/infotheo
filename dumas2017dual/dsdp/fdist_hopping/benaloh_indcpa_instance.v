@@ -45,13 +45,13 @@ Require Import dsdp_instance_family.
 (*                               one pinned proof term                        *)
 (*  benaloh_indcpa_assumption == the adversary class and epsilon assumed of   *)
 (*                               Benaloh at these parameters                  *)
-(* dsdp_alice_trace_guess_V2_admissible_benaloh_le ==                         *)
+(* alice_trace_guess_V2_benaloh_le ==                                         *)
 (*                               the class-conditional DSDP trace guessing    *)
 (*                               bound with 1/r as its information-theoretic  *)
 (*                               term                                         *)
 (*           benaloh_instance == the DSDP instance family carried by a       *)
 (*                               family of Benaloh block sizes                *)
-(* dsdp_alice_trace_guess_V2_admissible_benaloh_negligible ==                 *)
+(* alice_trace_guess_V2_benaloh_negligible ==                                 *)
 (*                               the asymptotic form of that bound, under     *)
 (*                               block-size growth and an assumed negligible  *)
 (*                               advantage family                             *)
@@ -180,7 +180,7 @@ Proof. by rewrite card_plain_r. Qed.
    design.
    2 * epsilon is conditional on benaloh_indcpa_assumption, and prices the
    two ciphertext replacements at Bob's key and at Charlie's. *)
-Corollary dsdp_alice_trace_guess_V2_admissible_benaloh_le
+Corollary alice_trace_guess_V2_benaloh_le
     (predict : predictor AHE (dsdp_traceT AHE)) :
   indcpa_admissible benaloh_indcpa_assumption
     (bob_trace_adversary (distinguisher_of_predictor predict)) ->
@@ -285,7 +285,7 @@ Hypothesis assumption_epsilon_negligible :
    The assumption family is the per-k form of benaloh_indcpa_assumption;
    r-th residuosity remains the source a proved record family would start
    from. *)
-Corollary dsdp_alice_trace_guess_V2_admissible_benaloh_negligible :
+Corollary alice_trace_guess_V2_benaloh_negligible :
   negligible_fun (fun k =>
      alice_trace_guess_V2_pr_at (R:=R) (I:=benaloh_instance) (predict k)).
 Proof.

@@ -43,13 +43,13 @@ Require Import dsdp_instance_family.
 (*                              one pinned proof term                         *)
 (* paillier_indcpa_assumption == the adversary class and epsilon assumed of   *)
 (*                              Paillier at this modulus                      *)
-(* dsdp_alice_trace_guess_V2_admissible_paillier_le ==                        *)
+(* alice_trace_guess_V2_paillier_le ==                                        *)
 (*                              the class-conditional DSDP trace guessing     *)
 (*                              bound with 1/(p * q) as its                   *)
 (*                              information-theoretic term                    *)
 (*         paillier_instance == the DSDP instance family carried by a        *)
 (*                              family of Paillier moduli                     *)
-(* dsdp_alice_trace_guess_V2_admissible_paillier_negligible ==                *)
+(* alice_trace_guess_V2_paillier_negligible ==                                *)
 (*                              the asymptotic form of that bound, under      *)
 (*                              modulus growth and an assumed negligible      *)
 (*                              advantage family                              *)
@@ -164,7 +164,7 @@ Local Notation alice_trace_guess_V2_pr :=
    knows by design.  2 * epsilon is conditional on
    paillier_indcpa_assumption, and prices the two ciphertext replacements
    at Bob's key and at Charlie's. *)
-Corollary dsdp_alice_trace_guess_V2_admissible_paillier_le
+Corollary alice_trace_guess_V2_paillier_le
     (predict : predictor AHE (dsdp_traceT AHE)) :
   indcpa_admissible paillier_indcpa_assumption
     (bob_trace_adversary (distinguisher_of_predictor predict)) ->
@@ -263,7 +263,7 @@ Hypothesis assumption_epsilon_negligible :
    The assumption family is the per-k form of paillier_indcpa_assumption;
    decisional composite residuosity remains the source a proved record
    family would start from. *)
-Corollary dsdp_alice_trace_guess_V2_admissible_paillier_negligible :
+Corollary alice_trace_guess_V2_paillier_negligible :
   negligible_fun (fun k =>
      alice_trace_guess_V2_pr_at (R:=R) (I:=paillier_instance) (predict k)).
 Proof.
