@@ -63,6 +63,10 @@
        Bob's alone to reach it, which is why the class restriction cannot be
        widened to every adversary
 
+   An inhabitant of the assumption those bounds are conditional on
+     cipher_constant_assumption : classifier computing and epsilon zero, so
+       the class the bounds above are conditional on has members
+
    The same bound along a family of instances (asymptotic form)
      alice_trace_guess_V2_admissible_negligible : along a
        security-parameter-indexed family of DSDP instances, the trace
@@ -1379,6 +1383,48 @@ exact: (alice_trace_guess_V2_admissible_le u3_unit w_rb2).
 Qed.
 
 End dsdp_alice_trace_pq_secrecy.
+
+Section dsdp_indcpa_assumption_inhabitant.
+(* cloned context of Section indcpa_game *)
+Local Set Default Goal Selector "1".
+Local Open Scope reals_ext_scope.
+Local Open Scope proba_scope.
+Local Open Scope fdist_scope.
+Local Open Scope ring_scope.
+Context {R : realType}.
+Variables (AHE : AHEncType) (Renc : finType) (index_renc : nat).
+Hypothesis card_renc : #|Renc| = index_renc.+1.
+Variable rand_of_renc : Renc -> rand AHE.
+
+Local Notation indcpa_epsilon_assumption :=
+  (indcpa_epsilon_assumption (R:=R) (AHE:=AHE) card_renc rand_of_renc).
+Local Notation indcpa_epsilon :=
+  (indcpa_epsilon (R:=R) (AHE:=AHE) card_renc rand_of_renc).
+Local Notation adv_decide_cipher_constant :=
+  (adv_decide_cipher_constant (R:=R) (AHE:=AHE)).
+
+(* The class-conditional bound the instance below carries, discharged by
+   indcpa_epsilon_cipher_constant_eq0. *)
+Let cipher_constant_epsilon_le (dk : priv_key AHE)
+    (adv : indcpa_adversary AHE) :
+  adv_decide_cipher_constant adv ->
+  indcpa_epsilon (pub_of_priv dk) adv <= 0.
+Proof.
+move=> H.
+by rewrite (indcpa_epsilon_cipher_constant_eq0 card_renc rand_of_renc _ H).
+Qed.
+
+(* An assumption whose promise is proved rather than assumed.  Its classifier
+   computes, its epsilon is zero, and the bound it carries is the lemma above
+   instead of a hypothesis.  The class it admits is small, so the bounds
+   conditional on it are weak, but it settles that this record type has an
+   inhabitant with content, and it shows what one looks like. *)
+Definition cipher_constant_assumption : indcpa_epsilon_assumption :=
+  {| indcpa_admissible := adv_decide_cipher_constant ;
+     indcpa_assumption_epsilon := 0 ;
+     indcpa_admissible_epsilon_le := cipher_constant_epsilon_le |}.
+
+End dsdp_indcpa_assumption_inhabitant.
 
 Section dsdp_instance_family_secrecy.
 (* cloned context of Section dsdp_instance_family *)

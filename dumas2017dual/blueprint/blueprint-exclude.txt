@@ -192,3 +192,9 @@ dsdp_alice_trace_link:bob_trace_guess_epsilon_decrypt_ge
 dsdp_alice_trace_link:centropy_V2_trace_eq0
 dsdp_alice_trace_link:decrypt_reduction_admissibleF
 dsdp_alice_trace_link:alice_trace_guess_V2_admissible_premise_free_lt
+
+# The dsdp_main.v display clones whose \rocq node stays on the axis file,
+# the reverse of the block above. Each clone carries the full text of its
+# source over a cloned copy of that source's section context, so the two
+# prove the same statement and one node describes both.
+dsdp_main:cipher_constant_assumption
