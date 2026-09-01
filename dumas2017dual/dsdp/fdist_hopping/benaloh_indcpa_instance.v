@@ -130,7 +130,7 @@ Variables (v1 u1 u2 u3 : plain AHE).
 Hypothesis u3_unit : u3 \is a GRing.unit.
 
 Variables (dk_a dk_b dk_c : priv_key AHE).
-Variables (w_rb2 w_rc2 : renc_benaloh).
+Variables (rb2 rc2 : renc_benaloh).
 
 (* The IND-CPA assumption of Benaloh: a classified adversary has
    real-or-zero advantage at most that epsilon at every key built from a
@@ -160,13 +160,13 @@ Variable benaloh_indcpa_assumption :
 
 Local Notation bob_trace_adversary :=
   (bob_trace_adversary (R:=R) card_renc_benaloh rand_of_renc_benaloh
-     v1 u1 u2 u3 dk_a dk_b dk_c w_rc2).
+     v1 u1 u2 u3 dk_a dk_b dk_c rc2).
 Local Notation charlie_trace_adversary :=
   (charlie_trace_adversary (R:=R) card_renc_benaloh rand_of_renc_benaloh
-     v1 u1 u2 u3 dk_a dk_b dk_c w_rc2).
+     v1 u1 u2 u3 dk_a dk_b dk_c rc2).
 Local Notation alice_trace_guess_V2_pr :=
   (alice_trace_guess_V2_pr (R:=R) card_renc_benaloh rand_of_renc_benaloh
-     v1 u1 u2 u3 dk_a dk_b dk_c w_rb2 w_rc2).
+     v1 u1 u2 u3 dk_a dk_b dk_c rb2 rc2).
 
 (* The inverse plaintext cardinality at the Benaloh block size. *)
 Let inv_r_cardE : (r%:R : R)^-1 = (#|plain AHE|%:R : R)^-1.
@@ -191,7 +191,7 @@ Corollary alice_trace_guess_V2_benaloh_le
        + 2 * indcpa_assumption_epsilon benaloh_indcpa_assumption.
 Proof.
 rewrite inv_r_cardE.
-exact: (alice_trace_guess_V2_admissible_le u3_unit w_rb2).
+exact: (alice_trace_guess_V2_admissible_le u3_unit rb2).
 Qed.
 
 End benaloh_indcpa_instance.
@@ -201,12 +201,12 @@ Context {R : realType}.
 Variables n r : nat -> nat.
 Hypothesis n_gt1 : forall k, (1 < n k)%N.
 Hypothesis r_gt1 : forall k, (1 < r k)%N.
-Variables (v1f u1f u2f u3f :
+Variables (v1 u1 u2 u3 :
   forall k, plain (Benaloh_AHEnc (n k) (r_gt1 k))).
-Hypothesis u3f_unit : forall k, u3f k \is a GRing.unit.
-Variables (dkaf dkbf dkcf :
+Hypothesis u3_unit : forall k, u3 k \is a GRing.unit.
+Variables (dk_a dk_b dk_c :
   forall k, priv_key (Benaloh_AHEnc (n k) (r_gt1 k))).
-Variables (wb2f wc2f : forall k, renc_benaloh (n k)).
+Variables (rb2 rc2 : forall k, renc_benaloh (n k)).
 
 (* The Benaloh instance at parameter k: the existing packaging, coin type,
    pinned cardinality, and coin map of this file, with the weights, keys,
@@ -218,10 +218,10 @@ Definition benaloh_instance (k : nat) : dsdp_instance := {|
   inst_renc         := renc_benaloh (n k) ;
   inst_card_renc    := card_renc_benaloh (n k) ;
   inst_rand_of_renc := rand_of_renc_benaloh (n:=n k) (r_gt1 k) ;
-  inst_v1 := v1f k ; inst_u1 := u1f k ; inst_u2 := u2f k ;
-  inst_u3 := u3f k ; inst_u3_unit := u3f_unit k ;
-  inst_dk_a := dkaf k ; inst_dk_b := dkbf k ; inst_dk_c := dkcf k ;
-  inst_w_rb2 := wb2f k ; inst_w_rc2 := wc2f k |}.
+  inst_v1 := v1 k ; inst_u1 := u1 k ; inst_u2 := u2 k ;
+  inst_u3 := u3 k ; inst_u3_unit := u3_unit k ;
+  inst_dk_a := dk_a k ; inst_dk_b := dk_b k ; inst_dk_c := dk_c k ;
+  inst_w_rb2 := rb2 k ; inst_w_rc2 := rc2 k |}.
 
 Variable A : forall k, indcpa_epsilon_assumption (R:=R)
     (inst_card_renc (benaloh_instance k))

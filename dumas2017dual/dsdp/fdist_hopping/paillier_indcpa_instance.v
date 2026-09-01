@@ -185,12 +185,12 @@ Context {R : realType}.
 Variables p q : nat -> nat.
 Hypothesis p_gt1 : forall k, (1 < p k)%N.
 Hypothesis q_gt1 : forall k, (1 < q k)%N.
-Variables (v1f u1f u2f u3f :
+Variables (v1 u1 u2 u3 :
   forall k, plain (Paillier_AHEnc (pq_gt1 (p_gt1 k) (q_gt1 k)))).
-Hypothesis u3f_unit : forall k, u3f k \is a GRing.unit.
-Variables (dkaf dkbf dkcf :
+Hypothesis u3_unit : forall k, u3 k \is a GRing.unit.
+Variables (dk_a dk_b dk_c :
   forall k, priv_key (Paillier_AHEnc (pq_gt1 (p_gt1 k) (q_gt1 k)))).
-Variables (wb2f wc2f : forall k, renc_paillier (p k) (q k)).
+Variables (rb2 rc2 : forall k, renc_paillier (p k) (q k)).
 
 (* The Paillier instance at parameter k: the existing packaging, coin type,
    pinned cardinality, and coin map of this file, with the weights, keys,
@@ -202,10 +202,10 @@ Definition paillier_instance (k : nat) : dsdp_instance := {|
   inst_renc         := renc_paillier (p k) (q k) ;
   inst_card_renc    := card_renc_paillier (p k) (q k) ;
   inst_rand_of_renc := rand_of_renc_paillier (p_gt1 k) (q_gt1 k) ;
-  inst_v1 := v1f k ; inst_u1 := u1f k ; inst_u2 := u2f k ;
-  inst_u3 := u3f k ; inst_u3_unit := u3f_unit k ;
-  inst_dk_a := dkaf k ; inst_dk_b := dkbf k ; inst_dk_c := dkcf k ;
-  inst_w_rb2 := wb2f k ; inst_w_rc2 := wc2f k |}.
+  inst_v1 := v1 k ; inst_u1 := u1 k ; inst_u2 := u2 k ;
+  inst_u3 := u3 k ; inst_u3_unit := u3_unit k ;
+  inst_dk_a := dk_a k ; inst_dk_b := dk_b k ; inst_dk_c := dk_c k ;
+  inst_w_rb2 := rb2 k ; inst_w_rc2 := rc2 k |}.
 
 Variable A : forall k, indcpa_epsilon_assumption (R:=R)
     (inst_card_renc (paillier_instance k))

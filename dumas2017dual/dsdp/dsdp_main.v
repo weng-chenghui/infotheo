@@ -945,6 +945,11 @@ Variable rand_of_renc : Renc -> rand AHE.
 Variables (v1 u1 u2 u3 : plain AHE).
 Hypothesis u3_unit : u3 \is a GRing.unit.
 Variables (dk_a dk_b dk_c : priv_key AHE).
+(* Bob's and Charlie's second-hop coins, held as indices into Renc.  The
+   generic rand of he_types.v is a bare Type and carries no distribution, so
+   a uniformly sampled coin is quantified over the finType of indices, and
+   rand_of_renc carries an index to the randomness the protocol encrypts
+   with.  The w_ prefix marks the index side of that split. *)
 Variables (w_rb2 w_rc2 : Renc).
 
 Local Notation P := (alice_sample_fdist (R:=R) AHE card_renc).
@@ -1498,15 +1503,15 @@ Local Notation card_plain_paillier_pq :=
 Variables p q : nat -> nat.
 Hypothesis p_gt1 : forall k, (1 < p k)%N.
 Hypothesis q_gt1 : forall k, (1 < q k)%N.
-Variables (v1f u1f u2f u3f :
+Variables (v1 u1 u2 u3 :
   forall k, plain (Paillier_AHEnc (pq_gt1 (p_gt1 k) (q_gt1 k)))).
-Hypothesis u3f_unit : forall k, u3f k \is a GRing.unit.
-Variables (dkaf dkbf dkcf :
+Hypothesis u3_unit : forall k, u3 k \is a GRing.unit.
+Variables (dk_a dk_b dk_c :
   forall k, priv_key (Paillier_AHEnc (pq_gt1 (p_gt1 k) (q_gt1 k)))).
-Variables (wb2f wc2f : forall k, renc_paillier (p k) (q k)).
+Variables (rb2 rc2 : forall k, renc_paillier (p k) (q k)).
 
 Local Notation paillier_instance :=
-  (paillier_instance v1f u1f u2f u3f_unit dkaf dkbf dkcf wb2f wc2f).
+  (paillier_instance v1 u1 u2 u3_unit dk_a dk_b dk_c rb2 rc2).
 
 Variable A : forall k, indcpa_epsilon_assumption (R:=R)
     (inst_card_renc (paillier_instance k))
@@ -1587,15 +1592,15 @@ Context {R : realType}.
 Variables n r : nat -> nat.
 Hypothesis n_gt1 : forall k, (1 < n k)%N.
 Hypothesis r_gt1 : forall k, (1 < r k)%N.
-Variables (v1f u1f u2f u3f :
+Variables (v1 u1 u2 u3 :
   forall k, plain (Benaloh_AHEnc (n k) (r_gt1 k))).
-Hypothesis u3f_unit : forall k, u3f k \is a GRing.unit.
-Variables (dkaf dkbf dkcf :
+Hypothesis u3_unit : forall k, u3 k \is a GRing.unit.
+Variables (dk_a dk_b dk_c :
   forall k, priv_key (Benaloh_AHEnc (n k) (r_gt1 k))).
-Variables (wb2f wc2f : forall k, renc_benaloh (n k)).
+Variables (rb2 rc2 : forall k, renc_benaloh (n k)).
 
 Local Notation benaloh_instance :=
-  (benaloh_instance v1f u1f u2f u3f_unit dkaf dkbf dkcf wb2f wc2f).
+  (benaloh_instance v1 u1 u2 u3_unit dk_a dk_b dk_c rb2 rc2).
 
 Variable A : forall k, indcpa_epsilon_assumption (R:=R)
     (inst_card_renc (benaloh_instance k))

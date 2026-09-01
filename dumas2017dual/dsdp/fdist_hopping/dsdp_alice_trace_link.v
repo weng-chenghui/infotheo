@@ -440,6 +440,12 @@ Variables (AHE : AHEncType) (Renc : finType).
 Variable rand_of_renc : Renc -> rand AHE.
 Variables (v1 u1 u2 u3 : plain AHE).
 Variables (dk_a dk_b dk_c : priv_key AHE).
+(* Bob's and Charlie's second-hop coins, held as indices into Renc.  The
+   generic rand of he_types.v is a bare Type and carries no distribution, so
+   a uniformly sampled coin is quantified over the finType of indices, and
+   rand_of_renc carries an index to the randomness the protocol encrypts
+   with.  The w_ prefix marks the index side of that split: rb1, rc1, ra1
+   and ra2 below are rand AHE values, these two are indices. *)
 Variables (w_rb2 w_rc2 : Renc).
 
 (* Every party's public key is the one associated with its private key, so
