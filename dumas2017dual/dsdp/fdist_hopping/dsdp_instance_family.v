@@ -93,8 +93,8 @@ Record dsdp_instance := {
   inst_dk_a         : priv_key inst_AHE ;
   inst_dk_b         : priv_key inst_AHE ;
   inst_dk_c         : priv_key inst_AHE ;
-  inst_w_rb2        : inst_renc ;
-  inst_w_rc2        : inst_renc }.
+  inst_rb2          : inst_renc ;
+  inst_rc2          : inst_renc }.
 
 (* Superpolynomial growth of (k+2)^(k+2): past c the sequence dominates
    every monomial k^c, by base and exponent monotonicity alone. *)
@@ -160,7 +160,7 @@ Definition bob_trace_adversary_at k
     (@inst_rand_of_renc (I k))
     (inst_v1 (I k)) (inst_u1 (I k)) (inst_u2 (I k)) (inst_u3 (I k))
     (inst_dk_a (I k)) (inst_dk_b (I k)) (inst_dk_c (I k))
-    (inst_w_rc2 (I k)) D.
+    (inst_rc2 (I k)) D.
 
 (* The Charlie-key counterpart of bob_trace_adversary_at. *)
 Definition charlie_trace_adversary_at k
@@ -169,7 +169,7 @@ Definition charlie_trace_adversary_at k
     (@inst_rand_of_renc (I k))
     (inst_v1 (I k)) (inst_u1 (I k)) (inst_u2 (I k)) (inst_u3 (I k))
     (inst_dk_a (I k)) (inst_dk_b (I k)) (inst_dk_c (I k))
-    (inst_w_rc2 (I k)) D.
+    (inst_rc2 (I k)) D.
 
 (* The probability that a predictor reading Alice's executed trace at k
    returns Bob's input.  The two hop coins enter here and not in the two
@@ -179,7 +179,7 @@ Definition alice_trace_guess_V2_pr_at k
   alice_trace_guess_V2_pr (inst_card_renc (I k)) (@inst_rand_of_renc (I k))
     (inst_v1 (I k)) (inst_u1 (I k)) (inst_u2 (I k)) (inst_u3 (I k))
     (inst_dk_a (I k)) (inst_dk_b (I k)) (inst_dk_c (I k))
-    (inst_w_rb2 (I k)) (inst_w_rc2 (I k)) p.
+    (inst_rb2 (I k)) (inst_rc2 (I k)) p.
 
 (* A family of predictors reading Alice's executed traces along a family of
    DSDP instances matches Bob's input with negligible probability, provided
@@ -206,7 +206,7 @@ Proof.
 move=> HB HC Hinv Heps.
 apply: negligible_fun_le (negligible_fun_predictor_bound Hinv Heps) => k.
 exact: (alice_trace_guess_V2_admissible_le
-          (inst_u3_unit (I k)) (inst_w_rb2 (I k)) (HB k) (HC k)).
+          (inst_u3_unit (I k)) (inst_rb2 (I k)) (HB k) (HC k)).
 Qed.
 
 (* Under the same two negligibility hypotheses, the decrypting predictor's
@@ -221,7 +221,7 @@ Corollary decrypt_reduction_admissible_eventuallyF :
       (bob_trace_adversary_at (distinguisher_of_predictor
          (bob_trace_decrypt_predictor (@inst_rand_of_renc (I k))
             (inst_dk_a (I k)) (inst_dk_b (I k)) (inst_dk_c (I k))
-            (inst_w_rc2 (I k))))) = false.
+            (inst_rc2 (I k))))) = false.
 Proof.
 move=> Hinv Heps.
 have [N1 HN1] := Hinv 1%N; have [N2 HN2] := Heps 1%N.
@@ -234,8 +234,8 @@ have Hhalf : (k%:R : R)^-1 <= 1 - (k%:R : R)^-1.
   by rewrite ler_nat.
 apply: (decrypt_reduction_admissibleF (inst_v1 (I k)) (inst_u1 (I k))
           (inst_u2 (I k)) (inst_u3_unit (I k)) (inst_dk_a (I k))
-          (inst_dk_b (I k)) (inst_dk_c (I k)) (inst_w_rb2 (I k))
-          (inst_w_rc2 (I k))).
+          (inst_dk_b (I k)) (inst_dk_c (I k)) (inst_rb2 (I k))
+          (inst_rc2 (I k))).
 apply: lt_le_trans Heps' _; apply: le_trans Hhalf _.
 by rewrite lerD2l lerN2 ltW.
 Qed.
@@ -263,7 +263,7 @@ Definition trivial_instance (k : nat) : dsdp_instance := {|
   inst_v1 := 0 ; inst_u1 := 0 ; inst_u2 := 0 ; inst_u3 := 1 ;
   inst_u3_unit      := GRing.unitr1 _ ;
   inst_dk_a := 0 ; inst_dk_b := 0 ; inst_dk_c := 0 ;
-  inst_w_rb2 := ord0 ; inst_w_rc2 := ord0 |}.
+  inst_rb2 := ord0 ; inst_rc2 := ord0 |}.
 
 (* The witness plaintext space at k has cardinality (k+2)^(k+2). *)
 Let card_plain_trivial (k : nat) :
@@ -282,7 +282,7 @@ Lemma trivial_bob_cipher_constant (k : nat) :
        (inst_v1 (trivial_instance k)) (inst_u1 (trivial_instance k))
        (inst_u2 (trivial_instance k)) (inst_u3 (trivial_instance k))
        (inst_dk_a (trivial_instance k)) (inst_dk_b (trivial_instance k))
-       (inst_dk_c (trivial_instance k)) (inst_w_rc2 (trivial_instance k))
+       (inst_dk_c (trivial_instance k)) (inst_rc2 (trivial_instance k))
        (distinguisher_of_predictor (fun _ => 0))).
 Proof.
 apply/forallP => c; apply/forallP => ch1; apply/forallP => ch2.
@@ -299,7 +299,7 @@ Lemma trivial_charlie_cipher_constant (k : nat) :
        (inst_v1 (trivial_instance k)) (inst_u1 (trivial_instance k))
        (inst_u2 (trivial_instance k)) (inst_u3 (trivial_instance k))
        (inst_dk_a (trivial_instance k)) (inst_dk_b (trivial_instance k))
-       (inst_dk_c (trivial_instance k)) (inst_w_rc2 (trivial_instance k))
+       (inst_dk_c (trivial_instance k)) (inst_rc2 (trivial_instance k))
        (distinguisher_of_predictor (fun _ => 0))).
 Proof.
 apply/forallP => c; apply/forallP => ch1; apply/forallP => ch2.
@@ -315,8 +315,8 @@ Corollary trivial_instance_guess_V2_negligible :
       (inst_v1 (trivial_instance k)) (inst_u1 (trivial_instance k))
       (inst_u2 (trivial_instance k)) (inst_u3 (trivial_instance k))
       (inst_dk_a (trivial_instance k)) (inst_dk_b (trivial_instance k))
-      (inst_dk_c (trivial_instance k)) (inst_w_rb2 (trivial_instance k))
-      (inst_w_rc2 (trivial_instance k)) (fun _ => 0)).
+      (inst_dk_c (trivial_instance k)) (inst_rb2 (trivial_instance k))
+      (inst_rc2 (trivial_instance k)) (fun _ => 0)).
 Proof.
 apply: (alice_trace_guess_V2_admissible_negligible
           (I := trivial_instance)

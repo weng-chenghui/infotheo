@@ -1484,7 +1484,7 @@ Proof.
 move=> HB HC Hinv Heps.
 apply: negligible_fun_le (negligible_fun_predictor_bound Hinv Heps) => k.
 exact: (alice_trace_guess_V2_admissible_le
-          (inst_u3_unit (I k)) (inst_w_rb2 (I k)) (HB k) (HC k)).
+          (inst_u3_unit (I k)) (inst_rb2 (I k)) (HB k) (HC k)).
 Qed.
 
 End dsdp_instance_family_secrecy.

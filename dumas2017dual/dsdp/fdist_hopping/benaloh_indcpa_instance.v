@@ -221,7 +221,7 @@ Definition benaloh_instance (k : nat) : dsdp_instance := {|
   inst_v1 := v1 k ; inst_u1 := u1 k ; inst_u2 := u2 k ;
   inst_u3 := u3 k ; inst_u3_unit := u3_unit k ;
   inst_dk_a := dk_a k ; inst_dk_b := dk_b k ; inst_dk_c := dk_c k ;
-  inst_w_rb2 := rb2 k ; inst_w_rc2 := rc2 k |}.
+  inst_rb2 := rb2 k ; inst_rc2 := rc2 k |}.
 
 Variable A : forall k, indcpa_epsilon_assumption (R:=R)
     (inst_card_renc (benaloh_instance k))
