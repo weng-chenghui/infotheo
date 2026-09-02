@@ -12,12 +12,12 @@ Require Import dsdp_alice_hop_secrecy dsdp_alice_trace_link.
 (* # A security-parameter-indexed family of DSDP executions                   *)
 (*                                                                            *)
 (* Every corrupted-Alice bound of dsdp_alice_trace_link.v is stated at one    *)
-(* fixed instance: one AHEncType, one coin type, three private keys, four     *)
-(* weights, one real epsilon.  negligible_fun of indcpa_game.v speaks about   *)
-(* families indexed by a security parameter.  This file supplies the object   *)
-(* that joins them, a record holding exactly the section variables of that    *)
-(* development, and reads the concrete class-conditional guessing bound off   *)
-(* at every k of a family of such records.                                    *)
+(* fixed instance: one IND-CPA scheme, three private keys, four weights, one  *)
+(* real epsilon.  negligible_fun of indcpa_game.v speaks about families       *)
+(* indexed by a security parameter.  This file supplies the object that joins *)
+(* them, a record holding one indcpa_scheme and the remaining section         *)
+(* variables of that development, and reads the concrete class-conditional    *)
+(* guessing bound off at every k of a family of such records.                 *)
 (*                                                                            *)
 (* The class restriction lands on the two reduction adversaries a predictor   *)
 (* induces, never on the predictor itself.  That is what separates the        *)
@@ -26,7 +26,7 @@ Require Import dsdp_alice_hop_secrecy dsdp_alice_trace_link.
 (* same two negligibility hypotheses eventually reject that predictor's       *)
 (* reduction adversary.  The witness section answers the vacuity question     *)
 (* from the other side, discharging every hypothesis of the headline at once  *)
-(* on the identity scheme of idealized_ahe.v.                                 *)
+(* on the idealized scheme of idealized_ahe.v.                                *)
 (*                                                                            *)
 (* The four scheme sections read the fixed and the asymptotic bound off at    *)
 (* the Paillier and Benaloh IND-CPA schemes of paillier_indcpa_scheme.v and   *)
@@ -42,6 +42,13 @@ Require Import dsdp_alice_hop_secrecy dsdp_alice_trace_link.
 (*              dsdp_instance == one instance of the family, the section      *)
 (*                               variables of the corrupted-Alice trace       *)
 (*                               development packed as one record             *)
+(*                inst_scheme == the IND-CPA scheme an instance runs on       *)
+(*                   inst_AHE == its encryption packaging                     *)
+(*                  inst_renc == its coin index type                          *)
+(*             inst_card_renc == its pinned coin-space cardinality            *)
+(*          inst_rand_of_renc == its coin map                                 *)
+(*         inst_pkey_of_party == the public-key table of its three private    *)
+(*                               keys                                         *)
 (*          expnn_gt_monomial == (k+2)^(k+2) exceeds every monomial k^c past  *)
 (*                               c                                            *)
 (*   negligible_fun_inv_expnn == the inverse of (k+2)^(k+2) is negligible     *)
@@ -64,12 +71,15 @@ Require Import dsdp_alice_hop_secrecy dsdp_alice_trace_link.
 (*                               decrypting predictor's reduction adversary   *)
 (*             card_renc_ord1 == the one-element coin space, in successor     *)
 (*                               form                                         *)
-(*           trivial_instance == the identity-scheme witness family           *)
-(* trivial_bob_cipher_constant == the witness Bob reduction ignores the       *)
+(*    idealized_indcpa_scheme == the idealized scheme of idealized_ahe.v as   *)
+(*                               one scheme record                            *)
+(*         idealized_instance == the idealized-scheme witness family          *)
+(* idealized_bob_cipher_constant ==                                           *)
+(*                               the witness Bob reduction ignores the        *)
 (*                               challenge ciphertext                         *)
-(* trivial_charlie_cipher_constant ==                                         *)
+(* idealized_charlie_cipher_constant ==                                       *)
 (*                               its Charlie counterpart                      *)
-(* trivial_instance_guess_V2_negligible ==                                    *)
+(* alice_trace_guess_V2_idealized_negligible ==                               *)
 (*                               the witness discharges every hypothesis of   *)
 (*                               the headline                                 *)
 (* alice_trace_guess_V2_paillier_le ==                                        *)
@@ -107,29 +117,49 @@ Local Open Scope reals_ext_scope.
 Local Open Scope proba_scope.
 Local Open Scope fdist_scope.
 
-(* One instance of a security-parameter-indexed family of DSDP executions: the
-   scheme, its coin index type with a pinned nonemptiness proof, the coin
-   map, the four weights with Charlie's weight invertible, the three private
-   keys, and the two hop coins.  These are exactly the section variables of
-   the corrupted-Alice trace development (dsdp_alice_trace_link.v), so every
-   concrete trace bound applies at each k unchanged.  The real field
-   stays outside: a family lives over one R, which only the assumption
-   record and the probabilities mention. *)
+(* One instance of a security-parameter-indexed family of DSDP executions: an
+   IND-CPA scheme, the four weights with Charlie's weight invertible, the
+   three private keys, and the two hop coins.  These are exactly the section
+   variables of the corrupted-Alice trace development
+   (dsdp_alice_trace_link.v), so every concrete trace bound applies at a
+   record unchanged.
+   The scheme enters as one field rather than as its four data because an
+   IND-CPA assumption is made about an indcpa_scheme: an instance and the
+   assumption made about it then name the same scheme value, and in
+   particular the same pinned coin-space cardinality.
+   Two things stay outside.  The adversary and the two class premises, which
+   restrict the reduction adversaries a predictor induces and so speak about
+   the adversary rather than about the execution.  And the real field: a
+   family lives over one R, which only the assumption record and the
+   probabilities mention. *)
 Record dsdp_instance := {
-  inst_AHE          : AHEncType ;
-  inst_renc         : finType ;
-  inst_card_renc    : #|inst_renc| = #|inst_renc|.-1.+1 ;
-  inst_rand_of_renc : inst_renc -> rand inst_AHE ;
-  inst_v1           : plain inst_AHE ;
-  inst_u1           : plain inst_AHE ;
-  inst_u2           : plain inst_AHE ;
-  inst_u3           : plain inst_AHE ;
-  inst_u3_unit      : inst_u3 \is a GRing.unit ;
-  inst_dk_a         : priv_key inst_AHE ;
-  inst_dk_b         : priv_key inst_AHE ;
-  inst_dk_c         : priv_key inst_AHE ;
-  inst_rb2          : inst_renc ;
-  inst_rc2          : inst_renc }.
+  inst_scheme  : indcpa_scheme ;
+  inst_v1      : plain (scheme_AHE inst_scheme) ;
+  inst_u1      : plain (scheme_AHE inst_scheme) ;
+  inst_u2      : plain (scheme_AHE inst_scheme) ;
+  inst_u3      : plain (scheme_AHE inst_scheme) ;
+  inst_u3_unit : inst_u3 \is a GRing.unit ;
+  inst_dk_a    : priv_key (scheme_AHE inst_scheme) ;
+  inst_dk_b    : priv_key (scheme_AHE inst_scheme) ;
+  inst_dk_c    : priv_key (scheme_AHE inst_scheme) ;
+  inst_rb2     : scheme_renc inst_scheme ;
+  inst_rc2     : scheme_renc inst_scheme }.
+
+(* The four scheme data under the names the corrupted-Alice sections state
+   their bounds over, together with the public-key table those sections read
+   off the three private keys.  Keeping the old names is what lets a bound
+   stated over section variables apply at a record unchanged.  They stay
+   transparent Definitions: the hop-level pkey_of_party of a record and the
+   trace-level pkey_of_dk of its three keys are then the same term by delta
+   alone. *)
+Definition inst_AHE (I : dsdp_instance) := scheme_AHE (inst_scheme I).
+Definition inst_renc (I : dsdp_instance) := scheme_renc (inst_scheme I).
+Definition inst_card_renc (I : dsdp_instance) :=
+  scheme_card_renc (inst_scheme I).
+Definition inst_rand_of_renc (I : dsdp_instance) :=
+  @scheme_rand_of_renc (inst_scheme I).
+Definition inst_pkey_of_party (I : dsdp_instance) :=
+  pkey_of_dk (inst_dk_a I) (inst_dk_b I) (inst_dk_c I).
 
 (* Superpolynomial growth of (k+2)^(k+2): past c the sequence dominates
    every monomial k^c, by base and exponent monotonicity alone. *)
@@ -293,7 +323,7 @@ Qed.
 
 End dsdp_instance_family.
 
-Section trivial_witness.
+Section idealized_witness.
 Context {R : realType}.
 
 (* The one-element coin space, in the successor form the uniform coin of the
@@ -301,56 +331,68 @@ Context {R : realType}.
 Fact card_renc_ord1 : #|'I_1| = #|'I_1|.-1.+1.
 Proof. by rewrite card_ord. Qed.
 
-(* The witness family: the identity scheme of idealized_ahe.v over
-   plaintext spaces of cardinality (k+2)^(k+2), trivial coins and keys.
+(* The idealized scheme of idealized_ahe.v as one value of the scheme record
+   the IND-CPA game is quantified over: encryption on the plaintext ring
+   msgT returns the message and ignores its randomness, so a single coin
+   exhausts the coin space and the coin map is constant.  It is the scheme
+   that answers the vacuity question for every bound stated at an
+   indcpa_scheme: the game is well-typed here, and the cipher-constant class
+   admits the reduction adversaries at advantage 0. *)
+Definition idealized_indcpa_scheme (msgT : finComUnitRingType) :
+    indcpa_scheme := {|
+  scheme_AHE          := Idealized_HETypes msgT ;
+  scheme_renc         := 'I_1 ;
+  scheme_card_renc    := card_renc_ord1 ;
+  scheme_rand_of_renc := fun _ => 0 |}.
+
+(* The witness family: the idealized scheme of idealized_ahe.v over
+   plaintext spaces of cardinality (k+2)^(k+2), with the first three weights
+   zero, Charlie's weight 1, zero keys and the single coin.
    It hides nothing; its role is exactly that the headline's hypotheses
    are jointly satisfiable, and on it the guessing probability is
    1/#|plain|, not 0, so the conclusion has content here. *)
-Definition trivial_instance (k : nat) : dsdp_instance := {|
-  inst_AHE          := Idealized_HETypes 'Z_((k.+2) ^ k.+2) ;
-  inst_renc         := 'I_1 ;
-  inst_card_renc    := card_renc_ord1 ;
-  inst_rand_of_renc := fun _ => 0 ;
+Definition idealized_instance (k : nat) : dsdp_instance := {|
+  inst_scheme       := idealized_indcpa_scheme 'Z_((k.+2) ^ k.+2) ;
   inst_v1 := 0 ; inst_u1 := 0 ; inst_u2 := 0 ; inst_u3 := 1 ;
   inst_u3_unit      := GRing.unitr1 _ ;
   inst_dk_a := 0 ; inst_dk_b := 0 ; inst_dk_c := 0 ;
   inst_rb2 := ord0 ; inst_rc2 := ord0 |}.
 
 (* The witness plaintext space at k has cardinality (k+2)^(k+2). *)
-Let card_plain_trivial (k : nat) :
-  #|plain (inst_AHE (trivial_instance k))| = ((k.+2) ^ k.+2)%N.
+Let card_plain_idealized (k : nat) :
+  #|plain (inst_AHE (idealized_instance k))| = ((k.+2) ^ k.+2)%N.
 Proof. by rewrite card_ord Zp_cast // -{1}(expn0 k.+2) ltn_exp2l. Qed.
 
 (* The constant predictor's distinguisher reads only the state slot, so the
    Bob-key reduction adversary ignores the challenge ciphertext and the
    cipher-constant class admits it. *)
-Lemma trivial_bob_cipher_constant (k : nat) :
+Lemma idealized_bob_cipher_constant (k : nat) :
   indcpa_admissible
-    (cipher_constant_assumption (R:=R) (inst_card_renc (trivial_instance k))
-       (@inst_rand_of_renc (trivial_instance k)))
-    (bob_trace_adversary (R:=R) (inst_card_renc (trivial_instance k))
-       (@inst_rand_of_renc (trivial_instance k))
-       (inst_v1 (trivial_instance k)) (inst_u1 (trivial_instance k))
-       (inst_u2 (trivial_instance k)) (inst_u3 (trivial_instance k))
-       (inst_dk_a (trivial_instance k)) (inst_dk_b (trivial_instance k))
-       (inst_dk_c (trivial_instance k)) (inst_rc2 (trivial_instance k))
+    (cipher_constant_assumption (R:=R) (inst_card_renc (idealized_instance k))
+       (@inst_rand_of_renc (idealized_instance k)))
+    (bob_trace_adversary (R:=R) (inst_card_renc (idealized_instance k))
+       (@inst_rand_of_renc (idealized_instance k))
+       (inst_v1 (idealized_instance k)) (inst_u1 (idealized_instance k))
+       (inst_u2 (idealized_instance k)) (inst_u3 (idealized_instance k))
+       (inst_dk_a (idealized_instance k)) (inst_dk_b (idealized_instance k))
+       (inst_dk_c (idealized_instance k)) (inst_rc2 (idealized_instance k))
        (distinguisher_of_predictor (fun _ => 0))).
 Proof.
 apply/forallP => c; apply/forallP => ch1; apply/forallP => ch2.
 by case: c => [[[vv ms] ra] rho3].
 Qed.
 
-(* The Charlie-key counterpart of trivial_bob_cipher_constant. *)
-Lemma trivial_charlie_cipher_constant (k : nat) :
+(* The Charlie-key counterpart of idealized_bob_cipher_constant. *)
+Lemma idealized_charlie_cipher_constant (k : nat) :
   indcpa_admissible
-    (cipher_constant_assumption (R:=R) (inst_card_renc (trivial_instance k))
-       (@inst_rand_of_renc (trivial_instance k)))
-    (charlie_trace_adversary (R:=R) (inst_card_renc (trivial_instance k))
-       (@inst_rand_of_renc (trivial_instance k))
-       (inst_v1 (trivial_instance k)) (inst_u1 (trivial_instance k))
-       (inst_u2 (trivial_instance k)) (inst_u3 (trivial_instance k))
-       (inst_dk_a (trivial_instance k)) (inst_dk_b (trivial_instance k))
-       (inst_dk_c (trivial_instance k)) (inst_rc2 (trivial_instance k))
+    (cipher_constant_assumption (R:=R) (inst_card_renc (idealized_instance k))
+       (@inst_rand_of_renc (idealized_instance k)))
+    (charlie_trace_adversary (R:=R) (inst_card_renc (idealized_instance k))
+       (@inst_rand_of_renc (idealized_instance k))
+       (inst_v1 (idealized_instance k)) (inst_u1 (idealized_instance k))
+       (inst_u2 (idealized_instance k)) (inst_u3 (idealized_instance k))
+       (inst_dk_a (idealized_instance k)) (inst_dk_b (idealized_instance k))
+       (inst_dk_c (idealized_instance k)) (inst_rc2 (idealized_instance k))
        (distinguisher_of_predictor (fun _ => 0))).
 Proof.
 apply/forallP => c; apply/forallP => ch1; apply/forallP => ch2.
@@ -359,31 +401,31 @@ Qed.
 
 (* The headline's hypotheses hold together at least once: the witness
    discharges every one of them end-to-end. *)
-Corollary trivial_instance_guess_V2_negligible :
+Corollary alice_trace_guess_V2_idealized_negligible :
   negligible_fun (fun k =>
-    alice_trace_guess_V2_pr (R:=R) (inst_card_renc (trivial_instance k))
-      (@inst_rand_of_renc (trivial_instance k))
-      (inst_v1 (trivial_instance k)) (inst_u1 (trivial_instance k))
-      (inst_u2 (trivial_instance k)) (inst_u3 (trivial_instance k))
-      (inst_dk_a (trivial_instance k)) (inst_dk_b (trivial_instance k))
-      (inst_dk_c (trivial_instance k)) (inst_rb2 (trivial_instance k))
-      (inst_rc2 (trivial_instance k)) (fun _ => 0)).
+    alice_trace_guess_V2_pr (R:=R) (inst_card_renc (idealized_instance k))
+      (@inst_rand_of_renc (idealized_instance k))
+      (inst_v1 (idealized_instance k)) (inst_u1 (idealized_instance k))
+      (inst_u2 (idealized_instance k)) (inst_u3 (idealized_instance k))
+      (inst_dk_a (idealized_instance k)) (inst_dk_b (idealized_instance k))
+      (inst_dk_c (idealized_instance k)) (inst_rb2 (idealized_instance k))
+      (inst_rc2 (idealized_instance k)) (fun _ => 0)).
 Proof.
 apply: (alice_trace_guess_V2_negligible
-          (I := trivial_instance)
+          (I := idealized_instance)
           (A := fun k => cipher_constant_assumption
-                  (inst_card_renc (trivial_instance k))
-                  (@inst_rand_of_renc (trivial_instance k)))
+                  (inst_card_renc (idealized_instance k))
+                  (@inst_rand_of_renc (idealized_instance k)))
           (predict := fun k => fun _ => 0)).
-- exact: trivial_bob_cipher_constant.
-- exact: trivial_charlie_cipher_constant.
+- exact: idealized_bob_cipher_constant.
+- exact: idealized_charlie_cipher_constant.
 - rewrite /f_size.
   apply: negligible_fun_le negligible_fun_inv_expnn => k.
-  by rewrite card_plain_trivial.
+  by rewrite card_plain_idealized.
 - exact: negligible_fun_cst0.
 Qed.
 
-End trivial_witness.
+End idealized_witness.
 
 Section paillier_dsdp_instance.
 Context {R : realType}.
@@ -464,16 +506,13 @@ Variables (dk_a dk_b dk_c :
   forall k, priv_key (Paillier_AHEnc (pq_gt1 (p_gt1 k) (q_gt1 k)))).
 Variables (rb2 rc2 : forall k, renc_paillier (p k) (q k)).
 
-(* The DSDP instance at parameter k on the Paillier IND-CPA instance at k:
-   the packaging, coin type, pinned cardinality, and coin map of
+(* The DSDP instance at parameter k on the Paillier IND-CPA scheme at k: the
+   scheme record paillier_indcpa_scheme (p_gt1 k) (q_gt1 k) of
    paillier_indcpa_scheme.v, with the weights, keys, and coins supplied as
    families.  Everything number-theoretic about the moduli beyond 1 < p, q
    stays assumed, as in the fixed-instance section above. *)
 Definition paillier_instance (k : nat) : dsdp_instance := {|
-  inst_AHE          := Paillier_AHEnc (pq_gt1 (p_gt1 k) (q_gt1 k)) ;
-  inst_renc         := renc_paillier (p k) (q k) ;
-  inst_card_renc    := card_renc_paillier (p k) (q k) ;
-  inst_rand_of_renc := rand_of_renc_paillier (p_gt1 k) (q_gt1 k) ;
+  inst_scheme       := paillier_indcpa_scheme (p_gt1 k) (q_gt1 k) ;
   inst_v1 := v1 k ; inst_u1 := u1 k ; inst_u2 := u2 k ;
   inst_u3 := u3 k ; inst_u3_unit := u3_unit k ;
   inst_dk_a := dk_a k ; inst_dk_b := dk_b k ; inst_dk_c := dk_c k ;
@@ -632,17 +671,14 @@ Variables (dk_a dk_b dk_c :
   forall k, priv_key (Benaloh_AHEnc (n k) (r_gt1 k))).
 Variables (rb2 rc2 : forall k, renc_benaloh (n k)).
 
-(* The DSDP instance at parameter k on the Benaloh IND-CPA instance at k:
-   the packaging, coin type, pinned cardinality, and coin map of
+(* The DSDP instance at parameter k on the Benaloh IND-CPA scheme at k: the
+   scheme record benaloh_indcpa_scheme (n k) (r_gt1 k) of
    benaloh_indcpa_scheme.v, with the weights, keys, and coins supplied as
    families.  Everything number-theoretic about the modulus and the block
    size beyond 1 < n, r stays assumed, as in the fixed-instance section
    above. *)
 Definition benaloh_instance (k : nat) : dsdp_instance := {|
-  inst_AHE          := Benaloh_AHEnc (n k) (r_gt1 k) ;
-  inst_renc         := renc_benaloh (n k) ;
-  inst_card_renc    := card_renc_benaloh (n k) ;
-  inst_rand_of_renc := rand_of_renc_benaloh (n:=n k) (r_gt1 k) ;
+  inst_scheme       := benaloh_indcpa_scheme (n k) (r_gt1 k) ;
   inst_v1 := v1 k ; inst_u1 := u1 k ; inst_u2 := u2 k ;
   inst_u3 := u3 k ; inst_u3_unit := u3_unit k ;
   inst_dk_a := dk_a k ; inst_dk_b := dk_b k ; inst_dk_c := dk_c k ;

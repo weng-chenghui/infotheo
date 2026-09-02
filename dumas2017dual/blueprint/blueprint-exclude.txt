@@ -106,21 +106,29 @@ dsdp_entropy:dsdp_fiber_ring
 dsdp_entropy:dsdp_g
 dsdp_entropy:dsdp_var_entropy
 # dsdp_instance_family: the per-k applications of the concrete constants, the
-# growth and zero facts under the negligibility hypotheses, and the identity-
-# scheme witness; the blueprint cites the family headline and its companion,
-# into which this plumbing is folded.
+# growth and zero facts under the negligibility hypotheses, and the
+# idealized-scheme witness; the blueprint cites the family headline and its
+# companion, into which this plumbing is folded.
+dsdp_instance_family:alice_trace_guess_V2_idealized_negligible
 dsdp_instance_family:alice_trace_guess_V2_pr_at
 dsdp_instance_family:bob_trace_adversary_at
 dsdp_instance_family:card_renc_ord1
 dsdp_instance_family:charlie_trace_adversary_at
 dsdp_instance_family:expnn_gt_monomial
+dsdp_instance_family:idealized_bob_cipher_constant
+dsdp_instance_family:idealized_charlie_cipher_constant
+dsdp_instance_family:idealized_indcpa_scheme
+dsdp_instance_family:idealized_instance
 dsdp_instance_family:negligible_fun_cst0
 dsdp_instance_family:negligible_fun_inv_expnn
 dsdp_instance_family:negligible_fun_inv_ge_expnn
-dsdp_instance_family:trivial_bob_cipher_constant
-dsdp_instance_family:trivial_charlie_cipher_constant
-dsdp_instance_family:trivial_instance
-dsdp_instance_family:trivial_instance_guess_V2_negligible
+# dsdp_instance_family: the thin projections of the scheme field, which the
+# def:dsdp_instance node describes as the record's scheme component.
+dsdp_instance_family:inst_AHE
+dsdp_instance_family:inst_card_renc
+dsdp_instance_family:inst_pkey_of_party
+dsdp_instance_family:inst_rand_of_renc
+dsdp_instance_family:inst_renc
 # entropy_fiber_zpq: the Z_pq-specialized fiber lemmas; the blueprint cites the
 # generic gen_cPr_uniform_fiber.
 entropy_fiber_zpq:Pr_cond_fiber_marginE

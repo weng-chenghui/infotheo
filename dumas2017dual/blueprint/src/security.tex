@@ -754,11 +754,12 @@ adversary class, and records what forces the class to leave something out.
   \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_instance_family.dsdp_instance}
   \rocqok
   \uses{def:alice_trace}
-  An instance is the scheme, its coin index type with a nonemptiness proof, the coin
-  map, the four weights with $u_3$ a unit of the plaintext ring, the three
-  private keys, and the two hop coins: exactly the parameters every
-  corrupted-Alice trace bound is stated at.
-  \[ \mathcal{I} = \big(\mathrm{AHE},\ R_{\mathrm{enc}},\ \rho,\
+  An instance is an IND-CPA scheme $\mathcal{S}$, the four weights with $u_3$ a
+  unit of the plaintext ring, the three private keys, and the two hop coins:
+  exactly the parameters every corrupted-Alice trace bound is stated at. The
+  scheme enters as one component, so an instance and the assumption made about
+  it name the same scheme.
+  \[ \mathcal{I} = \big(\mathcal{S},\
        v_1, u_1, u_2, u_3,\ dk_A, dk_B, dk_C,\ w_B, w_C\big) \]
   A family is a map $k \mapsto \mathcal{I}_k$ from the security parameter, so
   every concrete trace bound applies at each $k$ unchanged. The real field
