@@ -1500,7 +1500,7 @@ Qed.
 End dsdp_instance_family_secrecy.
 
 Section dsdp_paillier_family_secrecy.
-(* cloned context of Section paillier_instance_family *)
+(* cloned context of Section paillier_dsdp_instance_family *)
 Local Set Default Goal Selector "1".
 Local Open Scope reals_ext_scope.
 Local Open Scope proba_scope.
@@ -1508,8 +1508,6 @@ Local Open Scope fdist_scope.
 Local Open Scope ring_scope.
 Context {R : realType}.
 Local Notation Paillier_AHEnc := paillier_fdist_instance.Paillier_AHEnc.
-Local Notation card_plain_paillier_pq :=
-  paillier_fdist_instance.card_plain_paillier_pq.
 Variables p q : nat -> nat.
 Hypothesis p_gt1 : forall k, (1 < p k)%N.
 Hypothesis q_gt1 : forall k, (1 < q k)%N.
@@ -1529,6 +1527,10 @@ Variable A : forall k, indcpa_epsilon_assumption (R:=R)
 Variable predict : forall k, predictor (inst_AHE (paillier_instance k))
     (dsdp_traceT (inst_AHE (paillier_instance k))).
 Arguments predict : clear implicits.
+
+Local Notation f_size := (f_size (R:=R) paillier_instance).
+Local Notation f_adv := (f_adv (R:=R) A).
+Local Notation f_guess := (f_guess (R:=R) predict).
 
 (* The class of the assumption family admits the Bob-side reduction
    adversary induced by every predictor in the family. *)
@@ -1555,13 +1557,11 @@ Hypothesis charlie_reduction_admissible : forall k,
    analysis already treats this residue as the acceptable leak, and this
    hypothesis states that acceptability uniformly in k, the residue
    falling below every inverse polynomial. *)
-Hypothesis inv_pq_negligible :
-  negligible_fun (fun k => (((p k * q k)%N)%:R : R)^-1).
+Hypothesis inv_pq_negligible : negligible_fun (f_inv_pq (R:=R) p q).
 
 (* The advantage the assumption family assumes is negligible: the
    asymptotic IND-CPA reading of decisional composite residuosity. *)
-Hypothesis assumption_epsilon_negligible :
-  negligible_fun (fun k => indcpa_assumption_epsilon (A k)).
+Hypothesis assumption_epsilon_negligible : negligible_fun f_adv.
 
 (* The conclusion is negligible_fun of the family k |-> Pr_k, where Pr_k
    is the probability that the k-th predictor guesses Bob's input V2 at
@@ -1571,27 +1571,25 @@ Hypothesis assumption_epsilon_negligible :
    class premises yield the bound of alice_trace_guess_V2_admissible_le,
    Pr_k <= 1/(p k * q k) + 2 * eps k, with eps k the advantage A k
    assumes.  The two negligibility hypotheses make f_size and f_adv
-   negligible.  Closure under addition twice makes f_bound negligible.
+   negligible, f_size through the scheme-side reading of modulus growth as
+   plaintext growth.  Closure under addition twice makes f_bound negligible.
    The pointwise bound then transfers negligibility from f_bound to f_guess.
 
    The assumption family is the per-k form of paillier_indcpa_assumption;
    decisional composite residuosity remains the source a proved record
    family would start from. *)
-Corollary alice_trace_guess_V2_paillier_negligible :
-  negligible_fun (fun k =>
-     alice_trace_guess_V2_pr_at (R:=R) (I:=paillier_instance) (predict k)).
+Corollary alice_trace_guess_V2_paillier_negligible : negligible_fun f_guess.
 Proof.
 apply: (alice_trace_guess_V2_admissible_negligible
           bob_reduction_admissible charlie_reduction_admissible _
           assumption_epsilon_negligible).
-rewrite /f_size.
-by under eq_fun => k do rewrite (card_plain_paillier_pq (p_gt1 k) (q_gt1 k)).
+exact: f_size_paillier_negligible inv_pq_negligible.
 Qed.
 
 End dsdp_paillier_family_secrecy.
 
 Section dsdp_benaloh_family_secrecy.
-(* cloned context of Section benaloh_instance_family *)
+(* cloned context of Section benaloh_dsdp_instance_family *)
 Local Set Default Goal Selector "1".
 Local Open Scope reals_ext_scope.
 Local Open Scope proba_scope.
@@ -1618,11 +1616,9 @@ Variable predict : forall k, predictor (inst_AHE (benaloh_instance k))
     (dsdp_traceT (inst_AHE (benaloh_instance k))).
 Arguments predict : clear implicits.
 
-(* The plaintext cardinality at k, in the form the block-size growth
-   hypothesis is stated in. *)
-Let card_plain_r_at (k : nat) :
-  #|plain (inst_AHE (benaloh_instance k))| = r k.
-Proof. by rewrite card_ord (Zp_cast (r_gt1 k)). Qed.
+Local Notation f_size := (f_size (R:=R) benaloh_instance).
+Local Notation f_adv := (f_adv (R:=R) A).
+Local Notation f_guess := (f_guess (R:=R) predict).
 
 (* The class of the assumption family admits the Bob-side reduction
    adversary induced by every predictor in the family. *)
@@ -1649,13 +1645,11 @@ Hypothesis charlie_reduction_admissible : forall k,
    already treats this residue as the acceptable leak, and this
    hypothesis states that acceptability uniformly in k, the residue
    falling below every inverse polynomial. *)
-Hypothesis inv_r_negligible :
-  negligible_fun (fun k => ((r k)%:R : R)^-1).
+Hypothesis inv_r_negligible : negligible_fun (f_inv_r (R:=R) r).
 
 (* The advantage the assumption family assumes is negligible: the
    asymptotic IND-CPA reading of r-th residuosity. *)
-Hypothesis assumption_epsilon_negligible :
-  negligible_fun (fun k => indcpa_assumption_epsilon (A k)).
+Hypothesis assumption_epsilon_negligible : negligible_fun f_adv.
 
 (* The conclusion is negligible_fun of the family k |-> Pr_k, where Pr_k
    is the probability that the k-th predictor guesses Bob's input V2 at
@@ -1664,22 +1658,21 @@ Hypothesis assumption_epsilon_negligible :
    It follows from the four hypotheses in three steps.  At each k the two
    class premises yield the bound of alice_trace_guess_V2_admissible_le,
    Pr_k <= 1/(r k) + 2 * eps k, with eps k the advantage A k assumes.
-   The two negligibility hypotheses make f_size and f_adv negligible.
-   Closure under addition twice makes f_bound negligible.  The pointwise
-   bound then transfers negligibility from f_bound to f_guess.
+   The two negligibility hypotheses make f_size and f_adv negligible,
+   f_size through the scheme-side reading of block-size growth as
+   plaintext growth.  Closure under addition twice makes f_bound
+   negligible.  The pointwise bound then transfers negligibility from
+   f_bound to f_guess.
 
    The assumption family is the per-k form of benaloh_indcpa_assumption;
    r-th residuosity remains the source a proved record family would start
    from. *)
-Corollary alice_trace_guess_V2_benaloh_negligible :
-  negligible_fun (fun k =>
-     alice_trace_guess_V2_pr_at (R:=R) (I:=benaloh_instance) (predict k)).
+Corollary alice_trace_guess_V2_benaloh_negligible : negligible_fun f_guess.
 Proof.
 apply: (alice_trace_guess_V2_admissible_negligible
           bob_reduction_admissible charlie_reduction_admissible _
           assumption_epsilon_negligible).
-rewrite /f_size.
-by under eq_fun do rewrite card_plain_r_at.
+exact: f_size_benaloh_negligible inv_r_negligible.
 Qed.
 
 End dsdp_benaloh_family_secrecy.

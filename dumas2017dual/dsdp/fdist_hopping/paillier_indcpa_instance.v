@@ -4,23 +4,32 @@ From mathcomp Require Import zmodp ring boolp reals.
 Require Import realType_ext ssr_ext ssralg_ext bigop_ext fdist.
 Require Import fdist_extra proba.
 Require Import homomorphic_encryption.
-Require Import paillier_ahe paillier_fdist_instance.
-Require Import indcpa_game dsdp_alice_fdist_secrecy dsdp_alice_trace_link.
-Require Import dsdp_instance_family.
+Require Import paillier_enc paillier_ahe paillier_fdist_instance.
+Require Import indcpa_game.
 
 (**md**************************************************************************)
-(* # Paillier as the encryption scheme of the DSDP trace bound                *)
+(* # Paillier as an IND-CPA instance                                          *)
 (*                                                                            *)
-(* The DSDP corrupted-Alice results quantify over an abstract AHEncType, a    *)
-(* finite coin-index type, a proof that its cardinality is a successor, and   *)
-(* a map from coin indices to the scheme's randomness.  This file supplies    *)
-(* all four at the Paillier packaging of paillier_fdist_instance.v and reads  *)
-(* the class-conditional guessing bound off at that instance.                 *)
+(* The IND-CPA game of indcpa_game.v quantifies over an AHEncType, a finite   *)
+(* coin-index type, a proof that its cardinality is a successor, and a map    *)
+(* from coin indices to the scheme's randomness.  This file supplies all      *)
+(* four at the Paillier packaging of paillier_fdist_instance.v, states the    *)
+(* IND-CPA assumption of Paillier at that packaging, and indexes the whole    *)
+(* instance by a security parameter.  No protocol enters: the file is the     *)
+(* scheme side of every computational bound the DSDP files read off at        *)
+(* Paillier, and dsdp_instance_family.v is where those bounds are read off.   *)
 (*                                                                            *)
 (* At this instance the coin index type is the scheme's own randomness, the   *)
 (* finite unit group of Z/(pq)^2 Z, and the coin map is the identity.  The    *)
 (* abstract development keeps the two apart because he_types.v gives rand as  *)
 (* a bare Type, over which no distribution is well-typed.                     *)
+(*                                                                            *)
+(* The game and the scheme meet at one constant.  The challenger's law        *)
+(* enc_fdist is, at this packaging, the pushforward of the uniform law on     *)
+(* the unit group along paillier_enc, the encryption of paillier_enc.v; the   *)
+(* two are one term, and enc_fdist_paillierE records it.  The homomorphic     *)
+(* operations of the packaging play no part in the game; they are what the    *)
+(* DSDP protocol runs on.                                                     *)
 (*                                                                            *)
 (* The advantage stays a parameter.  A record of type                         *)
 (* indcpa_epsilon_assumption carries an adversary class, one epsilon, and     *)
@@ -30,9 +39,10 @@ Require Import dsdp_instance_family.
 (* condition this file does not impose, decisional composite residuosity is   *)
 (* the assumption a proof of one would start from.                            *)
 (*                                                                            *)
-(* This is a DSDP corollary specialized at Paillier rather than a property    *)
-(* of the scheme, which is why it lives with the DSDP files and not with the  *)
-(* scheme library.                                                            *)
+(* Along a family of moduli every datum above becomes a function of the       *)
+(* security parameter k, and two hypotheses give the family its asymptotic    *)
+(* content: the moduli outgrow every polynomial, and the assumed advantages   *)
+(* fall below every inverse polynomial.                                       *)
 (*                                                                            *)
 (* ```                                                                        *)
 (*                    pq_gt1 == the modulus bound the packaging is taken at   *)
@@ -41,18 +51,27 @@ Require Import dsdp_instance_family.
 (*     rand_of_renc_paillier == the coin map, the identity                    *)
 (*        card_renc_paillier == the successor form of that cardinality, in    *)
 (*                              one pinned proof term                         *)
+(*       enc_fdist_paillierE == the IND-CPA challenger at this packaging      *)
+(*                              encrypts with paillier_enc under uniform      *)
+(*                              unit-group randomness                         *)
 (* paillier_indcpa_assumption == the adversary class and epsilon assumed of   *)
 (*                              Paillier at this modulus                      *)
-(* alice_trace_guess_V2_paillier_le ==                                        *)
-(*                              the class-conditional DSDP trace guessing     *)
-(*                              bound with 1/(p * q) as its                   *)
-(*                              information-theoretic term                    *)
-(*         paillier_instance == the DSDP instance family carried by a        *)
-(*                              family of Paillier moduli                     *)
-(* alice_trace_guess_V2_paillier_negligible ==                                *)
-(*                              the asymptotic form of that bound, under      *)
-(*                              modulus growth and an assumed negligible      *)
-(*                              advantage family                              *)
+(* paillier_indcpa_epsilon_le ==                                              *)
+(*                              the assumed bound with the Paillier           *)
+(*                              experiment written out: acceptance of an      *)
+(*                              encryption of the chosen plaintext and of     *)
+(*                              zero differ by at most epsilon                *)
+(*                  f_inv_pq == the inverse modulus family 1/(p k * q k)     *)
+(*           f_size_paillier == the inverse plaintext-cardinality family at   *)
+(*                              Paillier                                      *)
+(*            f_adv_paillier == the assumed-advantage family                  *)
+(*          f_bound_paillier == f_inv_pq plus twice f_adv_paillier            *)
+(* f_size_paillier_negligible ==                                            *)
+(*                             superpolynomial growth of p k * q k makes    *)
+(*                             f_size_paillier negligible                   *)
+(* f_bound_paillier_negligible ==                                           *)
+(*                             f_bound_paillier is negligible when f_inv_pq *)
+(*                             and f_adv_paillier are                       *)
 (* ```                                                                        *)
 (*                                                                            *)
 (******************************************************************************)
@@ -75,7 +94,7 @@ Hypothesis p_gt1 : (1 < p)%N.
 Hypothesis q_gt1 : (1 < q)%N.
 
 (* The modulus bound the Paillier packaging is taken at.  It is a Lemma
-   rather than a section Let because the exported statement below mentions
+   rather than a section Let because the exported statements below mention
    the scheme, hence this proof term; a downstream file restating that bound
    at its own proof of the same inequality needs a name to write. *)
 Lemma pq_gt1 : (1 < p * q)%N.
@@ -106,21 +125,17 @@ Definition rand_of_renc_paillier : renc_paillier -> rand AHE := idfun.
 Lemma card_renc_paillier : #|renc_paillier| = #|renc_paillier|.-1.+1.
 Proof. by rewrite prednK //; apply/card_gt0P; exists 1%g; rewrite inE. Qed.
 
-(* The plaintext space of this instantiation has cardinality p * q, the form
-   the composite-modulus DSDP bounds consume. *)
-Let card_plain_pq : #|plain AHE| = (p * q)%N.
-Proof. exact: card_plain_paillier_pq. Qed.
-
-Variables (v1 u1 u2 u3 : plain AHE).
-
-(* Charlie's weight is invertible.  This is what makes the DSDP solution
-   fiber a bijective image of the plaintext space, and so what turns the
-   leaked output into the 1/(p * q) term of the bound below rather than into
-   a determination of Bob's input. *)
-Hypothesis u3_unit : u3 \is a GRing.unit.
-
-Variables (dk_a dk_b dk_c : priv_key AHE).
-Variables (rb2 rc2 : renc_paillier).
+(* The IND-CPA challenger at this packaging is the Paillier encryption of
+   paillier_enc.v under uniform unit-group randomness.  The game's enc is
+   the packaging's enc and the coin map is the identity, so the two laws are
+   one term.  This is the point where the game of indcpa_game.v and the
+   scheme of paillier_ahe.v meet: every advantage measured below is measured
+   against this law, and so against c = g^m * u^n mod (pq)^2 with u
+   uniform in the unit group. *)
+Lemma enc_fdist_paillierE (pk : pub_key AHE) (v : plain AHE) :
+  enc_fdist (R:=R) card_renc_paillier rand_of_renc_paillier pk v
+  = fdistmap (paillier_enc (pub_gen pk) v) (fdist_uniform card_renc_paillier).
+Proof. by []. Qed.
 
 (* The IND-CPA assumption of Paillier: a classified adversary has
    real-or-zero advantage at most that epsilon at every key built from a
@@ -146,130 +161,97 @@ Variables (rb2 rc2 : renc_paillier).
 Variable paillier_indcpa_assumption :
   indcpa_epsilon_assumption (R:=R) card_renc_paillier rand_of_renc_paillier.
 
-Local Notation bob_trace_adversary :=
-  (bob_trace_adversary (R:=R) card_renc_paillier rand_of_renc_paillier
-     v1 u1 u2 u3 dk_a dk_b dk_c rc2).
-Local Notation charlie_trace_adversary :=
-  (charlie_trace_adversary (R:=R) card_renc_paillier rand_of_renc_paillier
-     v1 u1 u2 u3 dk_a dk_b dk_c rc2).
-Local Notation alice_trace_guess_V2_pr :=
-  (alice_trace_guess_V2_pr (R:=R) card_renc_paillier rand_of_renc_paillier
-     v1 u1 u2 u3 dk_a dk_b dk_c rb2 rc2).
-
-(* A predictor reading Alice's executed DSDP trace at the Paillier
-   instantiation returns Bob's input with probability at most 1/(p * q) plus
-   twice the assumed advantage.
-
-   The 1/(p * q) is unconditional.  It comes from Sout, the output Alice
-   knows by design.  2 * epsilon is conditional on
-   paillier_indcpa_assumption, and prices the two ciphertext replacements
-   at Bob's key and at Charlie's. *)
-Corollary alice_trace_guess_V2_paillier_le
-    (predict : predictor AHE (dsdp_traceT AHE)) :
-  indcpa_admissible paillier_indcpa_assumption
-    (bob_trace_adversary (distinguisher_of_predictor predict)) ->
-  indcpa_admissible paillier_indcpa_assumption
-    (charlie_trace_adversary (distinguisher_of_predictor predict)) ->
-  alice_trace_guess_V2_pr predict
-    <= ((p%:R : R) * q%:R)^-1
-       + 2 * indcpa_assumption_epsilon paillier_indcpa_assumption.
+(* What the assumption says of Paillier, with the experiment written out.
+   For every private key and every adversary the class admits, the
+   probability that the adversary accepts an encryption of its chosen
+   plaintext under the key's generator and the probability that it accepts
+   an encryption of zero differ by at most the assumed epsilon.  The key
+   ranges over every PaillierPrivKey record, so the bound is universal over
+   keys rather than averaged over a key-generation law, and the adversary
+   holds the public key alone. *)
+Lemma paillier_indcpa_epsilon_le (dk : priv_key AHE)
+    (adv : indcpa_adversary (R:=R) AHE) :
+  indcpa_admissible paillier_indcpa_assumption adv ->
+  `| Pr (c <- adv_choose adv ;
+         fdistmap (adv_decide c)
+           (fdistmap (paillier_enc (priv_gen dk) (adv_plain c))
+              (fdist_uniform card_renc_paillier))) [set true]
+   - Pr (c <- adv_choose adv ;
+         fdistmap (adv_decide c)
+           (fdistmap (paillier_enc (priv_gen dk) 0)
+              (fdist_uniform card_renc_paillier))) [set true] |
+  <= indcpa_assumption_epsilon paillier_indcpa_assumption.
 Proof.
-exact: (alice_trace_guess_V2_admissible_pq_le
-          u3_unit rb2 card_plain_pq).
+move=> Hadm; have := indcpa_admissible_epsilon_le dk Hadm.
+by rewrite /indcpa_epsilon indcpa_success_realE indcpa_success_zeroE
+           !enc_fdist_paillierE.
 Qed.
 
 End paillier_indcpa_instance.
 
-Section paillier_instance_family.
+Section paillier_indcpa_family.
 Context {R : realType}.
 Variables p q : nat -> nat.
 Hypothesis p_gt1 : forall k, (1 < p k)%N.
 Hypothesis q_gt1 : forall k, (1 < q k)%N.
-Variables (v1 u1 u2 u3 :
-  forall k, plain (Paillier_AHEnc (pq_gt1 (p_gt1 k) (q_gt1 k)))).
-Hypothesis u3_unit : forall k, u3 k \is a GRing.unit.
-Variables (dk_a dk_b dk_c :
-  forall k, priv_key (Paillier_AHEnc (pq_gt1 (p_gt1 k) (q_gt1 k)))).
-Variables (rb2 rc2 : forall k, renc_paillier (p k) (q k)).
 
-(* The Paillier instance at parameter k: the existing packaging, coin type,
-   pinned cardinality, and coin map of this file, with the weights, keys,
-   and coins supplied as families.  Everything number-theoretic about the
-   moduli beyond 1 < p, q stays assumed, as in the fixed-instance section
-   above. *)
-Definition paillier_instance (k : nat) : dsdp_instance := {|
-  inst_AHE          := Paillier_AHEnc (pq_gt1 (p_gt1 k) (q_gt1 k)) ;
-  inst_renc         := renc_paillier (p k) (q k) ;
-  inst_card_renc    := card_renc_paillier (p k) (q k) ;
-  inst_rand_of_renc := rand_of_renc_paillier (p_gt1 k) (q_gt1 k) ;
-  inst_v1 := v1 k ; inst_u1 := u1 k ; inst_u2 := u2 k ;
-  inst_u3 := u3 k ; inst_u3_unit := u3_unit k ;
-  inst_dk_a := dk_a k ; inst_dk_b := dk_b k ; inst_dk_c := dk_c k ;
-  inst_rb2 := rb2 k ; inst_rc2 := rc2 k |}.
+(* The Paillier IND-CPA instance at parameter k is the fixed instance above
+   taken at p k and q k: the packaging Paillier_AHEnc (pq_gt1 (p_gt1 k)
+   (q_gt1 k)), the coin type renc_paillier (p k) (q k), the pinned
+   cardinality card_renc_paillier (p k) (q k), and the coin map
+   rand_of_renc_paillier (p_gt1 k) (q_gt1 k).  A family of assumption
+   records at those types is the per-k form of paillier_indcpa_assumption. *)
+Variable A : forall k,
+  indcpa_epsilon_assumption (R:=R) (card_renc_paillier (p k) (q k))
+    (rand_of_renc_paillier (p_gt1 k) (q_gt1 k)).
 
-Variable A : forall k, indcpa_epsilon_assumption (R:=R)
-    (inst_card_renc (paillier_instance k))
-    (@inst_rand_of_renc (paillier_instance k)).
-Variable predict : forall k, predictor (inst_AHE (paillier_instance k))
-    (dsdp_traceT (inst_AHE (paillier_instance k))).
-Arguments predict : clear implicits.
+(* The inverse modulus family 1/(p k * q k), the form a growth condition on
+   the moduli is stated in. *)
+Definition f_inv_pq k : R := (((p k * q k)%N)%:R : R)^-1.
 
-(* The class of the assumption family admits the Bob-side reduction
-   adversary induced by every predictor in the family. *)
-Hypothesis bob_reduction_admissible : forall k,
-  indcpa_admissible (A k)
-    (bob_trace_adversary_at (I:=paillier_instance)
-       (distinguisher_of_predictor (predict k))).
+(* The inverse plaintext-cardinality family at Paillier: the
+   information-theoretic summand of every guessing bound read off along the
+   family. *)
+Definition f_size_paillier k : R :=
+  (#|plain (Paillier_AHEnc (pq_gt1 (p_gt1 k) (q_gt1 k)))|%:R : R)^-1.
 
-(* The Charlie-side twin of bob_reduction_admissible. *)
-Hypothesis charlie_reduction_admissible : forall k,
-  indcpa_admissible (A k)
-    (charlie_trace_adversary_at (I:=paillier_instance)
-       (distinguisher_of_predictor (predict k))).
+(* The assumed-advantage family: the epsilon A k assumes at each k. *)
+Definition f_adv_paillier k : R := indcpa_assumption_epsilon (A k).
 
-(* Supplies the negligibility of f_size in the bound
-   Pr_k <= 1/(p k * q k) + 2 * eps k; assumption_epsilon_negligible
-   supplies f_adv.  Closure under addition twice makes f_bound negligible,
-   and the pointwise bound transfers negligibility to f_guess.
+(* The bound family 1/(p k * q k) + 2 * eps k: the shape of the
+   class-conditional guessing bound at each k, before any protocol is
+   named. *)
+Definition f_bound_paillier k : R := f_inv_pq k + 2 * f_adv_paillier k.
 
-   The summand 1/(p k * q k) is the guessing probability the leaked
-   output Sout concedes: at Paillier #|plain| is the modulus p k * q k,
-   and Sout confines the uniform V2 to a fiber of that size.  Negligible
-   is the acceptance criterion of the asymptotic reading: the concrete
-   analysis already treats this residue as the acceptable leak, and this
-   hypothesis states that acceptability uniformly in k, the residue
-   falling below every inverse polynomial. *)
-Hypothesis inv_pq_negligible :
-  negligible_fun (fun k => (((p k * q k)%N)%:R : R)^-1).
+(* The moduli outgrow every polynomial in k.  At Paillier the modulus is the
+   plaintext cardinality, so this is the growth of the plaintext space, and
+   negligible is the asymptotic acceptance criterion for the guessing
+   residue an inverse plaintext cardinality concedes. *)
+Hypothesis inv_pq_negligible : negligible_fun f_inv_pq.
 
 (* The advantage the assumption family assumes is negligible: the
    asymptotic IND-CPA reading of decisional composite residuosity. *)
-Hypothesis assumption_epsilon_negligible :
-  negligible_fun (fun k => indcpa_assumption_epsilon (A k)).
+Hypothesis assumption_epsilon_negligible : negligible_fun f_adv_paillier.
 
-(* The conclusion is negligible_fun of the family k |-> Pr_k, where Pr_k
-   is the probability that the k-th predictor guesses Bob's input V2 at
-   the k-th Paillier instance.
-
-   It follows from the four hypotheses in three steps.  At each k the two
-   class premises yield the bound of alice_trace_guess_V2_admissible_le,
-   Pr_k <= 1/(p k * q k) + 2 * eps k, with eps k the advantage A k
-   assumes.  The two negligibility hypotheses make f_size and f_adv
-   negligible.  Closure under addition twice makes f_bound negligible.
-   The pointwise bound then transfers negligibility from f_bound to f_guess.
-
-   The assumption family is the per-k form of paillier_indcpa_assumption;
-   decisional composite residuosity remains the source a proved record
-   family would start from. *)
-Corollary alice_trace_guess_V2_paillier_negligible :
-  negligible_fun (fun k =>
-     alice_trace_guess_V2_pr_at (R:=R) (I:=paillier_instance) (predict k)).
+(* The inverse plaintext cardinality along the family is negligible: the
+   plaintext space at k is Z/(p k * q k)Z, so modulus growth is plaintext
+   growth.  This is the scheme-side summand of every guessing bound of the
+   shape 1/#|plain| + 2 * eps read off along the family. *)
+Lemma f_size_paillier_negligible : negligible_fun f_size_paillier.
 Proof.
-apply: (alice_trace_guess_V2_admissible_negligible
-          bob_reduction_admissible charlie_reduction_admissible _
-          assumption_epsilon_negligible).
-rewrite /f_size.
-by under eq_fun => k do rewrite (card_plain_paillier_pq (p_gt1 k) (q_gt1 k)).
+rewrite /f_size_paillier.
+under eq_fun => k do rewrite (card_plain_paillier_pq (p_gt1 k) (q_gt1 k)).
+exact: inv_pq_negligible.
 Qed.
 
-End paillier_instance_family.
+(* The bound family is negligible.  This is the whole asymptotic content of
+   the Paillier IND-CPA instance family, stated before any protocol is
+   named: a bound of this shape at each k, whatever protocol produced it,
+   vanishes in the security parameter. *)
+Lemma f_bound_paillier_negligible : negligible_fun f_bound_paillier.
+Proof.
+exact: negligible_fun_predictor_bound inv_pq_negligible
+         assumption_epsilon_negligible.
+Qed.
+
+End paillier_indcpa_family.

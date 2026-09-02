@@ -14,9 +14,14 @@ basename and resolve by suffix.
   correctness over idealized / Benaloh / Paillier AHE).
 
 - **fdist_hopping/** — the game-hopping secrecy result over Infotheo distributions.
-  `dsdp_alice_fdist_secrecy` (the real-or-zero advantage `indcpa_epsilon`, the two hop
-  reductions, the guess / unpredictability / simulator-closeness headlines),
-  `dsdp_alice_trace_link` (the same bounds at the executed fifteen-round piSMC trace).
+  `indcpa_game` (the real-or-zero game, the advantage `indcpa_epsilon`, the adversary-class
+  assumption record, `negligible_fun`), `paillier_indcpa_instance` / `benaloh_indcpa_instance`
+  (the two schemes as IND-CPA instances, scheme side only, fixed and indexed by a security
+  parameter), `dsdp_alice_fdist_secrecy` (the two hop reductions, the guess / unpredictability /
+  simulator-closeness headlines), `dsdp_alice_trace_link` (the same bounds at the executed
+  fifteen-round piSMC trace), `dsdp_instance_family` (the per-k DSDP instance record, the
+  asymptotic headline, the identity-scheme witness, and the DSDP bounds read off at the
+  Paillier and Benaloh instances).
 
 - **counting/** — the information-theoretic / solution-counting leg.
   `dsdp_entropy` (fiber cardinality `dsdp_fiber_card`, conditional entropy `dsdp_centropy_uniform`),

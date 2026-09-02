@@ -6,9 +6,27 @@
 #
 # Format: one `module_basename:identifier` per line. Auto-excluded kinds
 # (Variable/Hypothesis/Context/Let) are not listed.
-# benaloh_indcpa_instance: the per-k instance record built from the coin
-# plumbing above it; the blueprint cites the bound read off along that family.
-benaloh_indcpa_instance:benaloh_instance
+# benaloh_indcpa_instance: the scheme side of the Benaloh IND-CPA instance,
+# the coin plumbing, the challenger identity, the assumption spelled at the
+# scheme, and the two scheme-level negligible facts; the blueprint cites the
+# DSDP bound read off at that instance in dsdp_instance_family.
+benaloh_indcpa_instance:Benaloh_AHEnc
+benaloh_indcpa_instance:card_renc_benaloh
+benaloh_indcpa_instance:rand_of_renc_benaloh
+benaloh_indcpa_instance:renc_benaloh
+benaloh_indcpa_instance:enc_fdist_benalohE
+benaloh_indcpa_instance:benaloh_indcpa_epsilon_le
+benaloh_indcpa_instance:f_size_benaloh_negligible
+benaloh_indcpa_instance:f_bound_benaloh_negligible
+benaloh_indcpa_instance:f_inv_r
+benaloh_indcpa_instance:f_size_benaloh
+benaloh_indcpa_instance:f_adv_benaloh
+benaloh_indcpa_instance:f_bound_benaloh
+# dsdp_instance_family: the two per-k scheme instance records, built from the
+# scheme files' coin plumbing; the blueprint cites the bounds read off along
+# those families.
+dsdp_instance_family:benaloh_instance
+dsdp_instance_family:paillier_instance
 # dsdp_alice_fdist_secrecy: the uniformity, product-law and slot-resampling
 # plumbing under the hop ladder, the constant-weight random variables, and the
 # per-k challenge equalities the two hop_advantageE nodes fold together.
@@ -160,14 +178,23 @@ indcpa_game:enc_slot_resampleE
 indcpa_game:fdistbind_cst
 indcpa_game:negligible_fun_add
 indcpa_game:negligible_fun_le
-# paillier_indcpa_instance: the coin plumbing and the modulus bound the
-# packaging is taken at; the blueprint cites the bound read off at that
-# instance, not the plumbing that instantiates the abstract statement.
+# paillier_indcpa_instance: the scheme side of the Paillier IND-CPA instance,
+# the coin plumbing and the modulus bound the packaging is taken at, the
+# challenger identity, the assumption spelled at the scheme, and the two
+# scheme-level negligible facts; the blueprint cites the DSDP bound read off
+# at that instance in dsdp_instance_family.
 paillier_indcpa_instance:card_renc_paillier
-paillier_indcpa_instance:paillier_instance
 paillier_indcpa_instance:pq_gt1
 paillier_indcpa_instance:rand_of_renc_paillier
 paillier_indcpa_instance:renc_paillier
+paillier_indcpa_instance:enc_fdist_paillierE
+paillier_indcpa_instance:paillier_indcpa_epsilon_le
+paillier_indcpa_instance:f_size_paillier_negligible
+paillier_indcpa_instance:f_bound_paillier_negligible
+paillier_indcpa_instance:f_inv_pq
+paillier_indcpa_instance:f_size_paillier
+paillier_indcpa_instance:f_adv_paillier
+paillier_indcpa_instance:f_bound_paillier
 
 # The axis copies of the headlines relocated into dsdp_main.v. Each is
 # still the source the file's own downstream corollaries call; the \rocq node

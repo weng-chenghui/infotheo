@@ -4,8 +4,9 @@ From mathcomp Require Import zmodp ring boolp reals.
 Require Import realType_ext ssr_ext ssralg_ext bigop_ext fdist.
 Require Import fdist_extra proba.
 Require Import homomorphic_encryption.
-Require Import idealized_ahe.
-Require Import indcpa_game dsdp_alice_fdist_secrecy dsdp_alice_trace_link.
+Require Import idealized_ahe paillier_fdist_instance.
+Require Import indcpa_game paillier_indcpa_instance benaloh_indcpa_instance.
+Require Import dsdp_alice_fdist_secrecy dsdp_alice_trace_link.
 
 (**md**************************************************************************)
 (* # A security-parameter-indexed family of DSDP executions                   *)
@@ -26,6 +27,16 @@ Require Import indcpa_game dsdp_alice_fdist_secrecy dsdp_alice_trace_link.
 (* reduction adversary.  The witness section answers the vacuity question     *)
 (* from the other side, discharging every hypothesis of the headline at once  *)
 (* on the identity scheme of idealized_ahe.v.                                 *)
+(*                                                                            *)
+(* The four scheme sections read the fixed and the asymptotic bound off at    *)
+(* the Paillier and Benaloh IND-CPA instances of paillier_indcpa_instance.v   *)
+(* and benaloh_indcpa_instance.v.  Those two files carry the scheme side      *)
+(* alone: the packaging, the coin type and coin map, the assumption record    *)
+(* and its family in k.  Everything DSDP, the four weights, the three keys,   *)
+(* the two hop coins and the two reduction adversaries, is declared here.     *)
+(* The information-theoretic term is discharged at each scheme, 1/(pq) at    *)
+(* the Paillier modulus and 1/r at the Benaloh block size; the advantage      *)
+(* stays the parameter the scheme file leaves it.                             *)
 (*                                                                            *)
 (* ```                                                                        *)
 (*              dsdp_instance == one instance of the family, the section      *)
@@ -61,6 +72,26 @@ Require Import indcpa_game dsdp_alice_fdist_secrecy dsdp_alice_trace_link.
 (* trivial_instance_guess_V2_negligible ==                                    *)
 (*                               the witness discharges every hypothesis of   *)
 (*                               the headline                                 *)
+(* alice_trace_guess_V2_paillier_le ==                                        *)
+(*                               the class-conditional trace guessing bound   *)
+(*                               at Paillier, with 1/(p * q) as its           *)
+(*                               information-theoretic term                   *)
+(*          paillier_instance == the DSDP instance family carried by a        *)
+(*                               family of Paillier moduli                    *)
+(* alice_trace_guess_V2_paillier_negligible ==                                *)
+(*                               the asymptotic form of that bound, under     *)
+(*                               modulus growth and an assumed negligible     *)
+(*                               advantage family                             *)
+(* alice_trace_guess_V2_benaloh_le ==                                         *)
+(*                               the class-conditional trace guessing bound   *)
+(*                               at Benaloh, with 1/r as its information-     *)
+(*                               theoretic term                               *)
+(*           benaloh_instance == the DSDP instance family carried by a        *)
+(*                               family of Benaloh block sizes                *)
+(* alice_trace_guess_V2_benaloh_negligible ==                                 *)
+(*                               the asymptotic form of that bound, under     *)
+(*                               block-size growth and an assumed negligible  *)
+(*                               advantage family                             *)
 (* ```                                                                        *)
 (*                                                                            *)
 (******************************************************************************)
@@ -353,3 +384,334 @@ apply: (alice_trace_guess_V2_admissible_negligible
 Qed.
 
 End trivial_witness.
+
+Section paillier_dsdp_instance.
+Context {R : realType}.
+Variables p q : nat.
+Hypothesis p_gt1 : (1 < p)%N.
+Hypothesis q_gt1 : (1 < q)%N.
+
+(* The Paillier IND-CPA instance of paillier_indcpa_instance.v at this
+   modulus, pinned once under the names that file exports them by. *)
+Local Notation AHE := (Paillier_AHEnc (pq_gt1 p_gt1 q_gt1)).
+Local Notation card_renc_paillier := (card_renc_paillier p q).
+Local Notation rand_of_renc_paillier := (rand_of_renc_paillier p_gt1 q_gt1).
+
+(* The plaintext space of this instantiation has cardinality p * q, the form
+   the composite-modulus DSDP bounds consume. *)
+Let card_plain_pq : #|plain AHE| = (p * q)%N.
+Proof. exact: card_plain_paillier_pq. Qed.
+
+Variables (v1 u1 u2 u3 : plain AHE).
+
+(* Charlie's weight is invertible.  This is what makes the DSDP solution
+   fiber a bijective image of the plaintext space, and so what turns the
+   leaked output into the 1/(p * q) term of the bound below rather than into
+   a determination of Bob's input. *)
+Hypothesis u3_unit : u3 \is a GRing.unit.
+
+Variables (dk_a dk_b dk_c : priv_key AHE).
+Variables (rb2 rc2 : renc_paillier p q).
+
+(* The IND-CPA assumption of Paillier at this modulus, the record
+   paillier_indcpa_instance.v leaves a parameter. *)
+Variable paillier_indcpa_assumption :
+  indcpa_epsilon_assumption (R:=R) card_renc_paillier rand_of_renc_paillier.
+
+Local Notation bob_trace_adversary :=
+  (bob_trace_adversary (R:=R) card_renc_paillier rand_of_renc_paillier
+     v1 u1 u2 u3 dk_a dk_b dk_c rc2).
+Local Notation charlie_trace_adversary :=
+  (charlie_trace_adversary (R:=R) card_renc_paillier rand_of_renc_paillier
+     v1 u1 u2 u3 dk_a dk_b dk_c rc2).
+Local Notation alice_trace_guess_V2_pr :=
+  (alice_trace_guess_V2_pr (R:=R) card_renc_paillier rand_of_renc_paillier
+     v1 u1 u2 u3 dk_a dk_b dk_c rb2 rc2).
+
+(* A predictor reading Alice's executed DSDP trace at the Paillier
+   instantiation returns Bob's input with probability at most 1/(p * q) plus
+   twice the assumed advantage.
+
+   The 1/(p * q) is unconditional.  It comes from Sout, the output Alice
+   knows by design.  2 * epsilon is conditional on
+   paillier_indcpa_assumption, and prices the two ciphertext replacements
+   at Bob's key and at Charlie's. *)
+Corollary alice_trace_guess_V2_paillier_le
+    (predict : predictor AHE (dsdp_traceT AHE)) :
+  indcpa_admissible paillier_indcpa_assumption
+    (bob_trace_adversary (distinguisher_of_predictor predict)) ->
+  indcpa_admissible paillier_indcpa_assumption
+    (charlie_trace_adversary (distinguisher_of_predictor predict)) ->
+  alice_trace_guess_V2_pr predict
+    <= ((p%:R : R) * q%:R)^-1
+       + 2 * indcpa_assumption_epsilon paillier_indcpa_assumption.
+Proof.
+exact: (alice_trace_guess_V2_admissible_pq_le
+          u3_unit rb2 card_plain_pq).
+Qed.
+
+End paillier_dsdp_instance.
+
+Section paillier_dsdp_instance_family.
+Context {R : realType}.
+Variables p q : nat -> nat.
+Hypothesis p_gt1 : forall k, (1 < p k)%N.
+Hypothesis q_gt1 : forall k, (1 < q k)%N.
+Variables (v1 u1 u2 u3 :
+  forall k, plain (Paillier_AHEnc (pq_gt1 (p_gt1 k) (q_gt1 k)))).
+Hypothesis u3_unit : forall k, u3 k \is a GRing.unit.
+Variables (dk_a dk_b dk_c :
+  forall k, priv_key (Paillier_AHEnc (pq_gt1 (p_gt1 k) (q_gt1 k)))).
+Variables (rb2 rc2 : forall k, renc_paillier (p k) (q k)).
+
+(* The DSDP instance at parameter k on the Paillier IND-CPA instance at k:
+   the packaging, coin type, pinned cardinality, and coin map of
+   paillier_indcpa_instance.v, with the weights, keys, and coins supplied as
+   families.  Everything number-theoretic about the moduli beyond 1 < p, q
+   stays assumed, as in the fixed-instance section above. *)
+Definition paillier_instance (k : nat) : dsdp_instance := {|
+  inst_AHE          := Paillier_AHEnc (pq_gt1 (p_gt1 k) (q_gt1 k)) ;
+  inst_renc         := renc_paillier (p k) (q k) ;
+  inst_card_renc    := card_renc_paillier (p k) (q k) ;
+  inst_rand_of_renc := rand_of_renc_paillier (p_gt1 k) (q_gt1 k) ;
+  inst_v1 := v1 k ; inst_u1 := u1 k ; inst_u2 := u2 k ;
+  inst_u3 := u3 k ; inst_u3_unit := u3_unit k ;
+  inst_dk_a := dk_a k ; inst_dk_b := dk_b k ; inst_dk_c := dk_c k ;
+  inst_rb2 := rb2 k ; inst_rc2 := rc2 k |}.
+
+Variable A : forall k, indcpa_epsilon_assumption (R:=R)
+    (inst_card_renc (paillier_instance k))
+    (@inst_rand_of_renc (paillier_instance k)).
+Variable predict : forall k, predictor (inst_AHE (paillier_instance k))
+    (dsdp_traceT (inst_AHE (paillier_instance k))).
+Arguments predict : clear implicits.
+
+Local Notation f_size := (f_size (R:=R) paillier_instance).
+Local Notation f_adv := (f_adv (R:=R) A).
+Local Notation f_guess := (f_guess (R:=R) predict).
+
+(* The class of the assumption family admits the Bob-side reduction
+   adversary induced by every predictor in the family. *)
+Hypothesis bob_reduction_admissible : forall k,
+  indcpa_admissible (A k)
+    (bob_trace_adversary_at (I:=paillier_instance)
+       (distinguisher_of_predictor (predict k))).
+
+(* The Charlie-side twin of bob_reduction_admissible. *)
+Hypothesis charlie_reduction_admissible : forall k,
+  indcpa_admissible (A k)
+    (charlie_trace_adversary_at (I:=paillier_instance)
+       (distinguisher_of_predictor (predict k))).
+
+(* Supplies the negligibility of f_size in the bound
+   Pr_k <= 1/(p k * q k) + 2 * eps k; assumption_epsilon_negligible
+   supplies f_adv.  Closure under addition twice makes f_bound negligible,
+   and the pointwise bound transfers negligibility to f_guess.
+
+   The summand 1/(p k * q k) is the guessing probability the leaked
+   output Sout concedes: at Paillier #|plain| is the modulus p k * q k,
+   and Sout confines the uniform V2 to a fiber of that size.  Negligible
+   is the acceptance criterion of the asymptotic reading: the concrete
+   analysis already treats this residue as the acceptable leak, and this
+   hypothesis states that acceptability uniformly in k, the residue
+   falling below every inverse polynomial. *)
+Hypothesis inv_pq_negligible : negligible_fun (f_inv_pq (R:=R) p q).
+
+(* The advantage the assumption family assumes is negligible: the
+   asymptotic IND-CPA reading of decisional composite residuosity. *)
+Hypothesis assumption_epsilon_negligible : negligible_fun f_adv.
+
+(* The conclusion is negligible_fun of the family k |-> Pr_k, where Pr_k
+   is the probability that the k-th predictor guesses Bob's input V2 at
+   the k-th Paillier instance.
+
+   It follows from the four hypotheses in three steps.  At each k the two
+   class premises yield the bound of alice_trace_guess_V2_admissible_le,
+   Pr_k <= 1/(p k * q k) + 2 * eps k, with eps k the advantage A k
+   assumes.  The two negligibility hypotheses make f_size and f_adv
+   negligible, f_size through the scheme-side reading of modulus growth as
+   plaintext growth.  Closure under addition twice makes f_bound negligible.
+   The pointwise bound then transfers negligibility from f_bound to f_guess.
+
+   The assumption family is the per-k form of paillier_indcpa_assumption;
+   decisional composite residuosity remains the source a proved record
+   family would start from. *)
+Corollary alice_trace_guess_V2_paillier_negligible : negligible_fun f_guess.
+Proof.
+apply: (alice_trace_guess_V2_admissible_negligible
+          bob_reduction_admissible charlie_reduction_admissible _
+          assumption_epsilon_negligible).
+exact: f_size_paillier_negligible inv_pq_negligible.
+Qed.
+
+End paillier_dsdp_instance_family.
+
+Section benaloh_dsdp_instance.
+Context {R : realType}.
+Variables n r : nat.
+Hypothesis n_gt1 : (1 < n)%N.
+Hypothesis r_gt1 : (1 < r)%N.
+
+(* The Benaloh IND-CPA instance of benaloh_indcpa_instance.v at these
+   parameters, pinned once under the names that file exports them by. *)
+Local Notation AHE := (Benaloh_AHEnc n r_gt1).
+Local Notation card_renc_benaloh := (card_renc_benaloh n).
+Local Notation rand_of_renc_benaloh := (rand_of_renc_benaloh (n:=n) r_gt1).
+
+(* The plaintext space of this instantiation is Z/rZ, so its cardinality is
+   the block size r.  It is r, not the modulus n, that the information-
+   theoretic term of the bound below is read off: at Benaloh the plaintext
+   space is the block Z/rZ fixed by the order condition on the private key's
+   generator, while n sizes the ciphertext space. *)
+Let card_plain_r : #|plain AHE| = r.
+Proof. by rewrite card_ord Zp_cast. Qed.
+
+Variables (v1 u1 u2 u3 : plain AHE).
+
+(* Charlie's weight is invertible in Z/rZ.  This is what makes the DSDP
+   solution fiber a bijective image of the plaintext space, and so what turns
+   the leaked output into the 1/r term of the bound below rather than into a
+   determination of Bob's input. *)
+Hypothesis u3_unit : u3 \is a GRing.unit.
+
+Variables (dk_a dk_b dk_c : priv_key AHE).
+Variables (rb2 rc2 : renc_benaloh n).
+
+(* The IND-CPA assumption of Benaloh at these parameters, the record
+   benaloh_indcpa_instance.v leaves a parameter. *)
+Variable benaloh_indcpa_assumption :
+  indcpa_epsilon_assumption (R:=R) card_renc_benaloh rand_of_renc_benaloh.
+
+Local Notation bob_trace_adversary :=
+  (bob_trace_adversary (R:=R) card_renc_benaloh rand_of_renc_benaloh
+     v1 u1 u2 u3 dk_a dk_b dk_c rc2).
+Local Notation charlie_trace_adversary :=
+  (charlie_trace_adversary (R:=R) card_renc_benaloh rand_of_renc_benaloh
+     v1 u1 u2 u3 dk_a dk_b dk_c rc2).
+Local Notation alice_trace_guess_V2_pr :=
+  (alice_trace_guess_V2_pr (R:=R) card_renc_benaloh rand_of_renc_benaloh
+     v1 u1 u2 u3 dk_a dk_b dk_c rb2 rc2).
+
+(* The inverse plaintext cardinality at the Benaloh block size. *)
+Let inv_r_cardE : (r%:R : R)^-1 = (#|plain AHE|%:R : R)^-1.
+Proof. by rewrite card_plain_r. Qed.
+
+(* A predictor reading Alice's executed DSDP trace at the Benaloh
+   instantiation returns Bob's input with probability at most 1/r plus twice
+   the assumed advantage.
+
+   The 1/r is unconditional. It comes from Sout, the output Alice knows by
+   design.
+   2 * epsilon is conditional on benaloh_indcpa_assumption, and prices the
+   two ciphertext replacements at Bob's key and at Charlie's. *)
+Corollary alice_trace_guess_V2_benaloh_le
+    (predict : predictor AHE (dsdp_traceT AHE)) :
+  indcpa_admissible benaloh_indcpa_assumption
+    (bob_trace_adversary (distinguisher_of_predictor predict)) ->
+  indcpa_admissible benaloh_indcpa_assumption
+    (charlie_trace_adversary (distinguisher_of_predictor predict)) ->
+  alice_trace_guess_V2_pr predict
+    <= (r%:R : R)^-1
+       + 2 * indcpa_assumption_epsilon benaloh_indcpa_assumption.
+Proof.
+rewrite inv_r_cardE.
+exact: (alice_trace_guess_V2_admissible_le u3_unit rb2).
+Qed.
+
+End benaloh_dsdp_instance.
+
+Section benaloh_dsdp_instance_family.
+Context {R : realType}.
+Variables n r : nat -> nat.
+Hypothesis n_gt1 : forall k, (1 < n k)%N.
+Hypothesis r_gt1 : forall k, (1 < r k)%N.
+Variables (v1 u1 u2 u3 :
+  forall k, plain (Benaloh_AHEnc (n k) (r_gt1 k))).
+Hypothesis u3_unit : forall k, u3 k \is a GRing.unit.
+Variables (dk_a dk_b dk_c :
+  forall k, priv_key (Benaloh_AHEnc (n k) (r_gt1 k))).
+Variables (rb2 rc2 : forall k, renc_benaloh (n k)).
+
+(* The DSDP instance at parameter k on the Benaloh IND-CPA instance at k:
+   the packaging, coin type, pinned cardinality, and coin map of
+   benaloh_indcpa_instance.v, with the weights, keys, and coins supplied as
+   families.  Everything number-theoretic about the modulus and the block
+   size beyond 1 < n, r stays assumed, as in the fixed-instance section
+   above. *)
+Definition benaloh_instance (k : nat) : dsdp_instance := {|
+  inst_AHE          := Benaloh_AHEnc (n k) (r_gt1 k) ;
+  inst_renc         := renc_benaloh (n k) ;
+  inst_card_renc    := card_renc_benaloh (n k) ;
+  inst_rand_of_renc := rand_of_renc_benaloh (n:=n k) (r_gt1 k) ;
+  inst_v1 := v1 k ; inst_u1 := u1 k ; inst_u2 := u2 k ;
+  inst_u3 := u3 k ; inst_u3_unit := u3_unit k ;
+  inst_dk_a := dk_a k ; inst_dk_b := dk_b k ; inst_dk_c := dk_c k ;
+  inst_rb2 := rb2 k ; inst_rc2 := rc2 k |}.
+
+Variable A : forall k, indcpa_epsilon_assumption (R:=R)
+    (inst_card_renc (benaloh_instance k))
+    (@inst_rand_of_renc (benaloh_instance k)).
+Variable predict : forall k, predictor (inst_AHE (benaloh_instance k))
+    (dsdp_traceT (inst_AHE (benaloh_instance k))).
+Arguments predict : clear implicits.
+
+Local Notation f_size := (f_size (R:=R) benaloh_instance).
+Local Notation f_adv := (f_adv (R:=R) A).
+Local Notation f_guess := (f_guess (R:=R) predict).
+
+(* The class of the assumption family admits the Bob-side reduction
+   adversary induced by every predictor in the family. *)
+Hypothesis bob_reduction_admissible : forall k,
+  indcpa_admissible (A k)
+    (bob_trace_adversary_at (I:=benaloh_instance)
+       (distinguisher_of_predictor (predict k))).
+
+(* The Charlie-side twin of bob_reduction_admissible. *)
+Hypothesis charlie_reduction_admissible : forall k,
+  indcpa_admissible (A k)
+    (charlie_trace_adversary_at (I:=benaloh_instance)
+       (distinguisher_of_predictor (predict k))).
+
+(* Supplies the negligibility of f_size in the bound
+   Pr_k <= 1/(r k) + 2 * eps k; assumption_epsilon_negligible supplies
+   f_adv.  Closure under addition twice makes f_bound negligible, and the
+   pointwise bound transfers negligibility to f_guess.
+
+   The summand 1/(r k) is the guessing probability the leaked output
+   Sout concedes: at Benaloh #|plain| is the block size r k, and Sout
+   confines the uniform V2 to a fiber of that size.  Negligible is the
+   acceptance criterion of the asymptotic reading: the concrete analysis
+   already treats this residue as the acceptable leak, and this
+   hypothesis states that acceptability uniformly in k, the residue
+   falling below every inverse polynomial. *)
+Hypothesis inv_r_negligible : negligible_fun (f_inv_r (R:=R) r).
+
+(* The advantage the assumption family assumes is negligible: the
+   asymptotic IND-CPA reading of r-th residuosity. *)
+Hypothesis assumption_epsilon_negligible : negligible_fun f_adv.
+
+(* The conclusion is negligible_fun of the family k |-> Pr_k, where Pr_k
+   is the probability that the k-th predictor guesses Bob's input V2 at
+   the k-th Benaloh instance.
+
+   It follows from the four hypotheses in three steps.  At each k the two
+   class premises yield the bound of alice_trace_guess_V2_admissible_le,
+   Pr_k <= 1/(r k) + 2 * eps k, with eps k the advantage A k assumes.
+   The two negligibility hypotheses make f_size and f_adv negligible,
+   f_size through the scheme-side reading of block-size growth as
+   plaintext growth.  Closure under addition twice makes f_bound
+   negligible.  The pointwise bound then transfers negligibility from
+   f_bound to f_guess.
+
+   The assumption family is the per-k form of benaloh_indcpa_assumption;
+   r-th residuosity remains the source a proved record family would start
+   from. *)
+Corollary alice_trace_guess_V2_benaloh_negligible : negligible_fun f_guess.
+Proof.
+apply: (alice_trace_guess_V2_admissible_negligible
+          bob_reduction_admissible charlie_reduction_admissible _
+          assumption_epsilon_negligible).
+exact: f_size_benaloh_negligible inv_r_negligible.
+Qed.
+
+End benaloh_dsdp_instance_family.
