@@ -511,12 +511,12 @@ carries the three bounds above to the executed protocol.
 
 \begin{definition}[Alice's executed trace]
   \label{def:alice_trace}
-  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.dsdp_trace_dataT,
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.trace_dataT,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.trace_data_of_di_data,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.dsdp_procs_std,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.dsdp_procs_of_sample,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.AliceTrace,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.dsdp_trace_of_hop_tuple}
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_trace_of_hop_tuple}
   \rocqok
   \uses{def:protocol_flow,def:alice_hop_ladder}
   Alice's trace is the message log the interpreter returns for her when it runs
@@ -529,7 +529,7 @@ carries the three bounds above to the executed protocol.
   \label{lem:trace_of_hop_tuple}
   \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.dsdp_run_tracesE,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.dsdp_run_traces_encE,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.dsdp_trace_of_hop_tupleE}
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_trace_of_hop_tupleE}
   \rocqok
   \uses{def:alice_trace,lem:dsdp_is_correct}
   The interpreter run on the three DSDP party programs terminates with the
@@ -541,8 +541,8 @@ carries the three bounds above to the executed protocol.
 \begin{theorem}[The three bounds at the trace]
   \label{thm:alice_trace_bounds}
   \rocq{infotheo.dumas2017dual.dsdp.dsdp_main.alice_trace_guess_V2_le,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_trace_predictor_unpredictability,
-       infotheo.dumas2017dual.dsdp.dsdp_main.alice_trace_predictor_unpredictability_ge,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_trace_unpredictability,
+       infotheo.dumas2017dual.dsdp.dsdp_main.alice_trace_unpredictability_ge,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.dsdp_alice_trace_simulator,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_trace_ideal_joint,
        infotheo.dumas2017dual.dsdp.dsdp_main.alice_trace_sim_advantage_le}
@@ -558,7 +558,7 @@ carries the three bounds above to the executed protocol.
 
 \begin{theorem}[Trace, view, and tuple leave the same uncertainty]
   \label{thm:centropy_trace_tuple}
-  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.dsdp_alice_trace_tupleT,
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_trace_tupleT,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.AliceTraceTuple,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_trace_tupleE,
        infotheo.dumas2017dual.dsdp.dsdp_main.centropy_V2_trace_tupleE,
@@ -686,7 +686,7 @@ adversary class, and records what forces the class to leave something out.
 
 \begin{definition}[The decrypting predictor]
   \label{def:trace_decryptor}
-  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.bob_trace_decrypt_predictor,
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.bob_decrypt_predictor,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_trace_decode_V2E}
   \rocqok
   \uses{def:alice_trace}
@@ -700,8 +700,8 @@ adversary class, and records what forces the class to leave something out.
 
 \begin{theorem}[The class cannot admit every adversary]
   \label{thm:decrypt_lower_bound}
-  \rocq{infotheo.dumas2017dual.dsdp.dsdp_main.bob_trace_predictor_epsilon_decrypt_ge,
-       infotheo.dumas2017dual.dsdp.dsdp_main.bob_charlie_trace_predictor_epsilon_decrypt_ge}
+  \rocq{infotheo.dumas2017dual.dsdp.dsdp_main.decrypt_bob_epsilon_ge,
+       infotheo.dumas2017dual.dsdp.dsdp_main.decrypt_epsilon_sum_ge}
   \rocqok
   \uses{def:trace_decryptor,thm:alice_guess_real,lem:guess_all_zero}
   With $u_3$ a unit of the plaintext ring, the hop-$0$ advantage the decrypting
@@ -734,7 +734,7 @@ adversary class, and records what forces the class to leave something out.
 
 \begin{corollary}[The premise-free bound is false]
   \label{cor:admissible_premise_free}
-  \rocq{infotheo.dumas2017dual.dsdp.dsdp_main.alice_trace_guess_V2_admissible_premise_free_lt}
+  \rocq{infotheo.dumas2017dual.dsdp.dsdp_main.decrypt_guess_V2_premise_free_lt}
   \rocqok
   \uses{thm:alice_guess_admissible,def:trace_decryptor,def:indcpa_assumption}
   For every assumption whose promised advantage satisfies

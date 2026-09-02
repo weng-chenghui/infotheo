@@ -183,7 +183,7 @@ Variable I : nat -> dsdp_instance.
 Variable A : forall k, indcpa_epsilon_assumption (R:=R)
                          (inst_card_renc (I k)) (@inst_rand_of_renc (I k)).
 Variable predict : forall k,
-    predictor (inst_AHE (I k)) (dsdp_traceT (inst_AHE (I k))).
+    predictor (inst_AHE (I k)) (alice_traceT (inst_AHE (I k))).
 Arguments predict : clear implicits.
 
 (* The Bob-key reduction adversary at k: the concrete constant applied
@@ -210,7 +210,7 @@ Definition charlie_trace_adversary_at k
    returns Bob's input.  The two hop coins enter here and not in the two
    reduction adversaries, which fix Bob's coin by the challenge. *)
 Definition alice_trace_guess_V2_pr_at k
-    (p : predictor (inst_AHE (I k)) (dsdp_traceT (inst_AHE (I k)))) : R :=
+    (p : predictor (inst_AHE (I k)) (alice_traceT (inst_AHE (I k)))) : R :=
   alice_trace_guess_V2_pr (inst_card_renc (I k)) (@inst_rand_of_renc (I k))
     (inst_v1 (I k)) (inst_u1 (I k)) (inst_u2 (I k)) (inst_u3 (I k))
     (inst_dk_a (I k)) (inst_dk_b (I k)) (inst_dk_c (I k))
@@ -270,7 +270,7 @@ Corollary decrypt_reduction_admissible_eventuallyF :
   exists K, forall k, (K < k)%N ->
     indcpa_admissible (A k)
       (bob_trace_adversary_at (distinguisher_of_predictor
-         (bob_trace_decrypt_predictor (@inst_rand_of_renc (I k))
+         (bob_decrypt_predictor (@inst_rand_of_renc (I k))
             (inst_dk_a (I k)) (inst_dk_b (I k)) (inst_dk_c (I k))
             (inst_rc2 (I k))))) = false.
 Proof.
@@ -437,7 +437,7 @@ Local Notation alice_trace_guess_V2_pr :=
    paillier_indcpa_assumption, and prices the two ciphertext replacements
    at Bob's key and at Charlie's. *)
 Corollary alice_trace_guess_V2_paillier_le
-    (predict : predictor AHE (dsdp_traceT AHE)) :
+    (predict : predictor AHE (alice_traceT AHE)) :
   indcpa_admissible paillier_indcpa_assumption
     (bob_trace_adversary (distinguisher_of_predictor predict)) ->
   indcpa_admissible paillier_indcpa_assumption
@@ -483,7 +483,7 @@ Variable A : forall k, indcpa_epsilon_assumption (R:=R)
     (inst_card_renc (paillier_instance k))
     (@inst_rand_of_renc (paillier_instance k)).
 Variable predict : forall k, predictor (inst_AHE (paillier_instance k))
-    (dsdp_traceT (inst_AHE (paillier_instance k))).
+    (alice_traceT (inst_AHE (paillier_instance k))).
 Arguments predict : clear implicits.
 
 Local Notation f_size := (f_size (R:=R) paillier_instance).
@@ -605,7 +605,7 @@ Proof. by rewrite card_plain_r. Qed.
    2 * epsilon is conditional on benaloh_indcpa_assumption, and prices the
    two ciphertext replacements at Bob's key and at Charlie's. *)
 Corollary alice_trace_guess_V2_benaloh_le
-    (predict : predictor AHE (dsdp_traceT AHE)) :
+    (predict : predictor AHE (alice_traceT AHE)) :
   indcpa_admissible benaloh_indcpa_assumption
     (bob_trace_adversary (distinguisher_of_predictor predict)) ->
   indcpa_admissible benaloh_indcpa_assumption
@@ -652,7 +652,7 @@ Variable A : forall k, indcpa_epsilon_assumption (R:=R)
     (inst_card_renc (benaloh_instance k))
     (@inst_rand_of_renc (benaloh_instance k)).
 Variable predict : forall k, predictor (inst_AHE (benaloh_instance k))
-    (dsdp_traceT (inst_AHE (benaloh_instance k))).
+    (alice_traceT (inst_AHE (benaloh_instance k))).
 Arguments predict : clear implicits.
 
 Local Notation f_size := (f_size (R:=R) benaloh_instance).
