@@ -9,7 +9,7 @@
 # benaloh_indcpa_scheme: the scheme side of the Benaloh IND-CPA scheme,
 # the coin plumbing, the challenger identity, the assumption spelled at the
 # scheme, and the two scheme-level negligible facts; the blueprint cites the
-# DSDP bound read off at that scheme in dsdp_instance_family.
+# DSDP bound read off at that scheme in dsdp_instance_sequence.
 benaloh_indcpa_scheme:Benaloh_AHEnc
 benaloh_indcpa_scheme:card_renc_benaloh
 benaloh_indcpa_scheme:rand_of_renc_benaloh
@@ -22,11 +22,14 @@ benaloh_indcpa_scheme:f_r
 benaloh_indcpa_scheme:f_size_benaloh
 benaloh_indcpa_scheme:f_adv_benaloh
 benaloh_indcpa_scheme:f_bound_benaloh
-# dsdp_instance_family: the two per-k scheme instance records, built from the
-# scheme files' coin plumbing; the blueprint cites the bounds read off along
-# those families.
-dsdp_instance_family:benaloh_instance
-dsdp_instance_family:paillier_instance
+# dsdp_instance_sequence: the two per-k scheme instance records and the three
+# sequence records built over them, from the scheme files' coin plumbing; the
+# blueprint cites the bounds read off along those sequences.
+dsdp_instance_sequence:benaloh_instance
+dsdp_instance_sequence:benaloh_instance_sequence
+dsdp_instance_sequence:idealized_instance_sequence
+dsdp_instance_sequence:paillier_instance
+dsdp_instance_sequence:paillier_instance_sequence
 # dsdp_alice_hop_secrecy: the uniformity, product-law and slot-resampling
 # plumbing under the hop ladder, the constant-weight random variables, and the
 # per-k challenge equalities the two hop_advantageE nodes fold together.
@@ -105,30 +108,30 @@ dsdp_entropy:dsdp_fiber_n
 dsdp_entropy:dsdp_fiber_ring
 dsdp_entropy:dsdp_g
 dsdp_entropy:dsdp_var_entropy
-# dsdp_instance_family: the per-k applications of the concrete constants, the
-# growth and zero facts under the negligibility hypotheses, and the
-# idealized-scheme witness; the blueprint cites the family headline and its
+# dsdp_instance_sequence: the per-k applications of the concrete constants, the
+# growth and zero facts under the negligibility fields, and the
+# idealized-scheme witness; the blueprint cites the sequence headline and its
 # companion, into which this plumbing is folded.
-dsdp_instance_family:alice_trace_guess_V2_idealized_negligible
-dsdp_instance_family:alice_trace_guess_V2_pr_at
-dsdp_instance_family:bob_trace_adversary_at
-dsdp_instance_family:card_renc_ord1
-dsdp_instance_family:charlie_trace_adversary_at
-dsdp_instance_family:expnn_gt_monomial
-dsdp_instance_family:idealized_bob_cipher_constant
-dsdp_instance_family:idealized_charlie_cipher_constant
-dsdp_instance_family:idealized_indcpa_scheme
-dsdp_instance_family:idealized_instance
-dsdp_instance_family:negligible_fun_cst0
-dsdp_instance_family:negligible_fun_inv_expnn
-dsdp_instance_family:negligible_fun_inv_ge_expnn
-# dsdp_instance_family: the thin projections of the scheme field, which the
+dsdp_instance_sequence:alice_trace_guess_V2_idealized_negligible
+dsdp_instance_sequence:alice_trace_guess_V2_pr_at
+dsdp_instance_sequence:bob_trace_adversary_at
+dsdp_instance_sequence:card_renc_ord1
+dsdp_instance_sequence:charlie_trace_adversary_at
+dsdp_instance_sequence:expnn_gt_monomial
+dsdp_instance_sequence:idealized_bob_cipher_constant
+dsdp_instance_sequence:idealized_charlie_cipher_constant
+dsdp_instance_sequence:idealized_indcpa_scheme
+dsdp_instance_sequence:idealized_instance
+dsdp_instance_sequence:negligible_fun_cst0
+dsdp_instance_sequence:negligible_fun_inv_expnn
+dsdp_instance_sequence:negligible_fun_inv_ge_expnn
+# dsdp_instance_sequence: the thin projections of the scheme field, which the
 # def:dsdp_instance node describes as the record's scheme component.
-dsdp_instance_family:inst_AHE
-dsdp_instance_family:inst_card_renc
-dsdp_instance_family:inst_pkey_of_party
-dsdp_instance_family:inst_rand_of_renc
-dsdp_instance_family:inst_renc
+dsdp_instance_sequence:inst_AHE
+dsdp_instance_sequence:inst_card_renc
+dsdp_instance_sequence:inst_pkey_of_party
+dsdp_instance_sequence:inst_rand_of_renc
+dsdp_instance_sequence:inst_renc
 # entropy_fiber_zpq: the Z_pq-specialized fiber lemmas; the blueprint cites the
 # generic gen_cPr_uniform_fiber.
 entropy_fiber_zpq:Pr_cond_fiber_marginE
@@ -183,7 +186,7 @@ indcpa_game:negligible_fun_le
 # the coin plumbing and the modulus bound the packaging is taken at, the
 # challenger identity, the assumption spelled at the scheme, and the two
 # scheme-level negligible facts; the blueprint cites the DSDP bound read off
-# at that scheme in dsdp_instance_family.
+# at that scheme in dsdp_instance_sequence.
 paillier_indcpa_scheme:card_renc_paillier
 paillier_indcpa_scheme:pq_gt1
 paillier_indcpa_scheme:rand_of_renc_paillier

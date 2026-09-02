@@ -18,7 +18,7 @@ Require Import indcpa_game.
 (* assumption of Paillier at that packaging, and indexes the whole scheme by  *)
 (* a security parameter.  No protocol enters: the file is the scheme side of  *)
 (* every computational bound the DSDP files read off at Paillier, and         *)
-(* dsdp_instance_family.v is where those bounds are read off.                 *)
+(* dsdp_instance_sequence.v is where those bounds are read off.               *)
 (*                                                                            *)
 (* At this scheme the coin index type is the scheme's own randomness, the     *)
 (* finite unit group of Z/(pq)^2 Z, and the coin map is the identity.  The    *)

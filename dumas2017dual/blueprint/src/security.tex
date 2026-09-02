@@ -655,7 +655,7 @@ adversary class, and records what forces the class to leave something out.
 
 \begin{corollary}[The bound at the Paillier scheme]
   \label{cor:alice_guess_paillier}
-  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_instance_family.alice_trace_guess_V2_paillier_le}
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_instance_sequence.alice_trace_guess_V2_paillier_le}
   \rocqok
   \uses{thm:alice_guess_admissible}
   At the Paillier packaging with modulus $pq$, a trace predictor whose two
@@ -751,7 +751,7 @@ adversary class, and records what forces the class to leave something out.
 
 \begin{definition}[One instance of a DSDP family]
   \label{def:dsdp_instance}
-  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_instance_family.dsdp_instance}
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_instance_sequence.dsdp_instance}
   \rocqok
   \uses{def:alice_trace}
   An instance is an IND-CPA scheme $\mathcal{S}$, the four weights with $u_3$ a
@@ -769,7 +769,7 @@ adversary class, and records what forces the class to leave something out.
 
 \begin{theorem}[The trace guessing family is negligible]
   \label{thm:alice_guess_negligible}
-  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_instance_family.alice_trace_guess_V2_negligible,
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_instance_sequence.alice_trace_guess_V2_negligible,
        infotheo.dumas2017dual.dsdp.dsdp_main.alice_trace_guess_V2_negligible}
   \rocqok
   \uses{def:negligible_fun,def:dsdp_instance,lem:negligible_predictor_bound,thm:alice_guess_admissible}
@@ -793,7 +793,7 @@ adversary class, and records what forces the class to leave something out.
 
 \begin{corollary}[The hypotheses eventually reject the decrypting family]
   \label{cor:decrypt_family_not_admissible}
-  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_instance_family.decrypt_reduction_admissible_eventuallyF}
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_instance_sequence.decrypt_reduction_admissible_eventuallyF}
   \rocqok
   \uses{def:dsdp_instance,def:negligible_fun,cor:decrypt_not_admissible}
   Under the two negligibility hypotheses above there is a threshold past which
@@ -811,7 +811,7 @@ adversary class, and records what forces the class to leave something out.
 
 \begin{corollary}[The bound along a Paillier family]
   \label{cor:alice_guess_paillier_negligible}
-  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_instance_family.alice_trace_guess_V2_paillier_negligible}
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_instance_sequence.alice_trace_guess_V2_paillier_negligible}
   \rocqok
   \uses{thm:alice_guess_negligible,cor:alice_guess_paillier}
   At a family of Paillier moduli $p_k q_k$, the guessing family is negligible
@@ -829,7 +829,7 @@ adversary class, and records what forces the class to leave something out.
 
 \begin{corollary}[The bound along a Benaloh family]
   \label{cor:alice_guess_benaloh_negligible}
-  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_instance_family.alice_trace_guess_V2_benaloh_negligible}
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_instance_sequence.alice_trace_guess_V2_benaloh_negligible}
   \rocqok
   \uses{thm:alice_guess_negligible,def:negligible_fun}
   At a family of Benaloh block sizes $r_k$, the guessing family is negligible

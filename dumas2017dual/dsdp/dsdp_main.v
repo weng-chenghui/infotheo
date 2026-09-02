@@ -67,18 +67,19 @@
      cipher_constant_assumption : classifier computing and epsilon zero, so
        the class the bounds above are conditional on has members
 
-   The same bound along a family of instances (asymptotic form)
-     f_size / f_adv / f_guess / f_bound : the inverse-cardinality,
+   The same bound along a sequence of instances (asymptotic form)
+     f_size / f_adv / f_guess_V2 / f_bound : the inverse-cardinality,
        assumed-advantage, guessing-probability, and combined-bound functions
      alice_trace_guess_V2_negligible : along a security-parameter-indexed
-       family of DSDP instances, the trace guessing probabilities are a
-       negligible family once the inverse plaintext cardinalities and the
-       assumed advantages are negligible and the two reduction adversaries
-       at each k are admitted by the class at that k
+       sequence of DSDP instances carrying the two negligibility facts as
+       record fields, the trace guessing probabilities are a negligible
+       sequence once the two reduction adversaries at each k are admitted by
+       the class at that k
      alice_trace_guess_V2_paillier_negligible /
-     alice_trace_guess_V2_benaloh_negligible : the same statement at a family
-       of Paillier moduli and at a family of Benaloh block sizes, the inverse
-       plaintext cardinality read off as 1/(p k * q k) and as 1/(r k)
+     alice_trace_guess_V2_benaloh_negligible : the same statement at a
+       sequence of Paillier moduli and at a sequence of Benaloh block sizes,
+       the inverse plaintext cardinality read off as 1/(p k * q k) and as
+       1/(r k)
 
    Shannon uncertainty about Bob's input, by conditioner
      centropy_V2_trace_eq0 : zero at her executed trace, which the trace
@@ -102,7 +103,7 @@ Require Import dsdp_program dsdp_entropy dsdp_pismc.
 Require Import dsdp_malicious_dotp.
 Require Import indcpa_game.
 Require Import dsdp_alice_hop_secrecy dsdp_alice_trace_link.
-Require Import dsdp_instance_family.
+Require Import dsdp_instance_sequence.
 Require Import paillier_indcpa_scheme benaloh_indcpa_scheme.
 
 Set Implicit Arguments.
@@ -1441,8 +1442,8 @@ Definition cipher_constant_assumption : indcpa_epsilon_assumption :=
 
 End dsdp_indcpa_assumption_inhabitant.
 
-Section dsdp_instance_family_secrecy.
-(* cloned context of Section dsdp_instance_family *)
+Section dsdp_instance_sequence_secrecy.
+(* cloned context of Section dsdp_instance_sequence_bounds *)
 Local Set Default Goal Selector "1".
 Local Open Scope reals_ext_scope.
 Local Open Scope proba_scope.
@@ -1450,60 +1451,63 @@ Local Open Scope fdist_scope.
 Local Open Scope entropy_scope.
 Local Open Scope ring_scope.
 Context {R : realType}.
-Variable I : nat -> dsdp_instance.
-Variable A : forall k, indcpa_epsilon_assumption (R:=R)
-                         (inst_card_renc (I k)) (@inst_rand_of_renc (I k)).
+Variable Q : dsdp_instance_sequence R.
+Local Notation I := (sequence_instance Q).
+Local Notation A := (sequence_assumption Q).
 Variable predict : forall k,
     predictor (inst_AHE (I k)) (alice_traceT (inst_AHE (I k))).
 Arguments predict : clear implicits.
 
 Local Notation bob_trace_adversary_at :=
-  (bob_trace_adversary_at (R:=R) (I:=I)).
+  (bob_trace_adversary_at (R:=R) (Q:=Q)).
 Local Notation charlie_trace_adversary_at :=
-  (charlie_trace_adversary_at (R:=R) (I:=I)).
+  (charlie_trace_adversary_at (R:=R) (Q:=Q)).
 Local Notation alice_trace_guess_V2_pr_at :=
-  (alice_trace_guess_V2_pr_at (R:=R) (I:=I)).
-Local Notation f_size := (f_size (R:=R) I).
-Local Notation f_adv := (f_adv (R:=R) A).
-Local Notation f_guess := (f_guess (R:=R) predict).
-Local Notation f_bound := (f_bound (R:=R) A).
+  (alice_trace_guess_V2_pr_at (R:=R) (Q:=Q)).
+Local Notation f_size := (f_size (R:=R) Q).
+Local Notation f_adv := (f_adv (R:=R) Q).
+Local Notation f_guess_V2 := (f_guess_V2 (R:=R) (Q:=Q) predict).
+Local Notation f_bound := (f_bound (R:=R) Q).
 
-(* A family of predictors reading Alice's executed traces along a family of
-   DSDP instances matches Bob's input with negligible probability, provided
-   the inverse plaintext cardinalities and the assumed advantages are
-   negligible families and the two reduction adversaries at each k are
-   admitted by the class at that k.  The class restriction lands on the
-   reduction adversaries, not on the predictor, and it is what separates
-   this statement from the decrypting counterexample: decrypt_guess_prE
-   puts the guessing probability at 1 for the predictor that decrypts
-   Bob's ciphertext off the trace, and
-   decrypt_reduction_admissible_eventuallyF shows these same negligibility
-   hypotheses eventually force that predictor's reduction adversary out of
-   the class.  Every currency is hypothesis-conditional, priced at each k as
-   in the concrete bound. *)
+(* A sequence of predictors reading Alice's executed traces along a sequence
+   of DSDP instances matches Bob's input with negligible probability,
+   provided the two reduction adversaries at each k are admitted by the class
+   at that k.  The two negligibility facts the bound consumes, the inverse
+   plaintext cardinalities and the assumed advantages, are fields of Q and so
+   are read off the sequence; the two class premises stay premises of the
+   theorem, because they restrict the reduction adversaries a predictor
+   induces and so speak about the adversary rather than about the sequence.
+   That is also what separates this statement from the decrypting
+   counterexample: decrypt_guess_prE puts the guessing probability at 1 for
+   the predictor that decrypts Bob's ciphertext off the trace, and
+   decrypt_reduction_admissible_eventuallyF shows the same two negligibility
+   fields eventually force that predictor's reduction adversary out of the
+   class.  Every currency is hypothesis-conditional, priced at each k as in
+   the concrete bound. *)
 Theorem alice_trace_guess_V2_negligible :
   (forall k, indcpa_admissible (A k)
      (bob_trace_adversary_at (distinguisher_of_predictor (predict k)))) ->
   (forall k, indcpa_admissible (A k)
      (charlie_trace_adversary_at (distinguisher_of_predictor (predict k)))) ->
-  negligible_fun f_size ->
-  negligible_fun f_adv ->
-  negligible_fun f_guess.
+  negligible_fun f_guess_V2.
 Proof.
-move=> HB HC Hsize Hadv.
+move=> HB HC.
+have size_negligible := sequence_size_negligible Q.
+have adv_negligible := sequence_adv_negligible Q.
 have Hbound : negligible_fun f_bound.
-  exact: negligible_fun_add (negligible_fun_add Hsize Hadv) Hadv.
+  exact: negligible_fun_add (negligible_fun_add size_negligible adv_negligible)
+           adv_negligible.
 apply: negligible_fun_le Hbound => k.
-rewrite /f_guess /f_bound /f_size /f_adv.
+rewrite /f_guess_V2 /f_bound /f_size /f_adv.
 apply: le_trans (alice_trace_guess_V2_admissible_le
   (inst_u3_unit (I k)) (inst_rb2 (I k)) (HB k) (HC k)) _.
 by rewrite mulr_natl mulr2n addrA.
 Qed.
 
-End dsdp_instance_family_secrecy.
+End dsdp_instance_sequence_secrecy.
 
-Section dsdp_paillier_family_secrecy.
-(* cloned context of Section paillier_dsdp_instance_family *)
+Section dsdp_paillier_sequence_secrecy.
+(* cloned context of Section paillier_dsdp_instance_sequence *)
 Local Set Default Goal Selector "1".
 Local Open Scope reals_ext_scope.
 Local Open Scope proba_scope.
@@ -1527,31 +1531,10 @@ Local Notation paillier_instance :=
 Variable A : forall k, indcpa_epsilon_assumption (R:=R)
     (inst_card_renc (paillier_instance k))
     (@inst_rand_of_renc (paillier_instance k)).
-Variable predict : forall k, predictor (inst_AHE (paillier_instance k))
-    (alice_traceT (inst_AHE (paillier_instance k))).
-Arguments predict : clear implicits.
 
-Local Notation f_size := (f_size (R:=R) paillier_instance).
-Local Notation f_adv := (f_adv (R:=R) A).
-Local Notation f_guess := (f_guess (R:=R) predict).
-
-(* The class of the assumption family admits the Bob-side reduction
-   adversary induced by every predictor in the family. *)
-Hypothesis bob_reduction_admissible : forall k,
-  indcpa_admissible (A k)
-    (bob_trace_adversary_at (I:=paillier_instance)
-       (distinguisher_of_predictor (predict k))).
-
-(* The Charlie-side twin of bob_reduction_admissible. *)
-Hypothesis charlie_reduction_admissible : forall k,
-  indcpa_admissible (A k)
-    (charlie_trace_adversary_at (I:=paillier_instance)
-       (distinguisher_of_predictor (predict k))).
-
-(* Supplies the negligibility of f_size in the bound
-   Pr_k <= 1/(p k * q k) + 2 * eps k; f_adv_negligible supplies f_adv.
-   Closure under addition twice makes f_bound negligible, and the
-   pointwise bound transfers negligibility to f_guess.
+(* Supplies the unconditional summand of the bound
+   Pr_k <= 1/(p k * q k) + 2 * eps k, through f_size_paillier_negligible,
+   which reads the plaintext cardinality at k as the modulus p k * q k.
 
    The summand 1/(p k * q k) is the guessing probability the leaked
    output Sout concedes: at Paillier #|plain| is the modulus p k * q k,
@@ -1562,37 +1545,59 @@ Hypothesis charlie_reduction_admissible : forall k,
    falling below every inverse polynomial. *)
 Hypothesis f_pq_negligible : negligible_fun (f_pq (R:=R) p q).
 
-(* The advantage the assumption family assumes is negligible: the
+(* The advantage the assumption sequence assumes is negligible: the
    asymptotic IND-CPA reading of decisional composite residuosity. *)
-Hypothesis f_adv_negligible : negligible_fun f_adv.
+Hypothesis f_adv_negligible :
+  negligible_fun (fun k => indcpa_assumption_epsilon (A k)).
 
-(* The conclusion is negligible_fun of the family k |-> Pr_k, where Pr_k
+Local Notation paillier_instance_sequence :=
+  (paillier_instance_sequence f_pq_negligible f_adv_negligible).
+
+Variable predict : forall k, predictor (inst_AHE (paillier_instance k))
+    (alice_traceT (inst_AHE (paillier_instance k))).
+Arguments predict : clear implicits.
+
+Local Notation f_guess_V2 :=
+  (f_guess_V2 (R:=R) (Q:=paillier_instance_sequence) predict).
+
+(* The class of the assumption sequence admits the Bob-side reduction
+   adversary induced by every predictor in the sequence. *)
+Hypothesis bob_reduction_admissible : forall k,
+  indcpa_admissible (A k)
+    (bob_trace_adversary_at (Q:=paillier_instance_sequence)
+       (distinguisher_of_predictor (predict k))).
+
+(* The Charlie-side twin of bob_reduction_admissible. *)
+Hypothesis charlie_reduction_admissible : forall k,
+  indcpa_admissible (A k)
+    (charlie_trace_adversary_at (Q:=paillier_instance_sequence)
+       (distinguisher_of_predictor (predict k))).
+
+(* The conclusion is negligible_fun of the sequence k |-> Pr_k, where Pr_k
    is the probability that the k-th predictor guesses Bob's input V2 at
    the k-th Paillier instance.
 
-   It follows from the four hypotheses in three steps.  At each k the two
-   class premises yield the bound of alice_trace_guess_V2_admissible_le,
-   Pr_k <= 1/(p k * q k) + 2 * eps k, with eps k the advantage A k
-   assumes.  The two negligibility hypotheses make f_size and f_adv
-   negligible, f_size through the scheme-side reading of modulus growth as
-   plaintext growth.  Closure under addition twice makes f_bound negligible.
-   The pointwise bound then transfers negligibility from f_bound to f_guess.
+   It follows in three steps.  At each k the two class premises yield the
+   bound of alice_trace_guess_V2_admissible_le, Pr_k <= 1/(p k * q k) +
+   2 * eps k, with eps k the advantage A k assumes.  The two negligibility
+   fields of paillier_instance_sequence make f_size and f_adv negligible,
+   f_size through the scheme-side reading of modulus growth as plaintext
+   growth.  Closure under addition twice makes f_bound negligible, and the
+   pointwise bound transfers negligibility from f_bound to f_guess_V2.
 
-   The assumption family is the per-k form of paillier_indcpa_assumption;
+   The assumption sequence is the per-k form of paillier_indcpa_assumption;
    decisional composite residuosity remains the source a proved record
-   family would start from. *)
-Corollary alice_trace_guess_V2_paillier_negligible : negligible_fun f_guess.
+   sequence would start from. *)
+Corollary alice_trace_guess_V2_paillier_negligible : negligible_fun f_guess_V2.
 Proof.
-apply: (alice_trace_guess_V2_negligible
-          bob_reduction_admissible charlie_reduction_admissible _
-          f_adv_negligible).
-exact: f_size_paillier_negligible f_pq_negligible.
+exact: (alice_trace_guess_V2_negligible
+          bob_reduction_admissible charlie_reduction_admissible).
 Qed.
 
-End dsdp_paillier_family_secrecy.
+End dsdp_paillier_sequence_secrecy.
 
-Section dsdp_benaloh_family_secrecy.
-(* cloned context of Section benaloh_dsdp_instance_family *)
+Section dsdp_benaloh_sequence_secrecy.
+(* cloned context of Section benaloh_dsdp_instance_sequence *)
 Local Set Default Goal Selector "1".
 Local Open Scope reals_ext_scope.
 Local Open Scope proba_scope.
@@ -1615,31 +1620,10 @@ Local Notation benaloh_instance :=
 Variable A : forall k, indcpa_epsilon_assumption (R:=R)
     (inst_card_renc (benaloh_instance k))
     (@inst_rand_of_renc (benaloh_instance k)).
-Variable predict : forall k, predictor (inst_AHE (benaloh_instance k))
-    (alice_traceT (inst_AHE (benaloh_instance k))).
-Arguments predict : clear implicits.
 
-Local Notation f_size := (f_size (R:=R) benaloh_instance).
-Local Notation f_adv := (f_adv (R:=R) A).
-Local Notation f_guess := (f_guess (R:=R) predict).
-
-(* The class of the assumption family admits the Bob-side reduction
-   adversary induced by every predictor in the family. *)
-Hypothesis bob_reduction_admissible : forall k,
-  indcpa_admissible (A k)
-    (bob_trace_adversary_at (I:=benaloh_instance)
-       (distinguisher_of_predictor (predict k))).
-
-(* The Charlie-side twin of bob_reduction_admissible. *)
-Hypothesis charlie_reduction_admissible : forall k,
-  indcpa_admissible (A k)
-    (charlie_trace_adversary_at (I:=benaloh_instance)
-       (distinguisher_of_predictor (predict k))).
-
-(* Supplies the negligibility of f_size in the bound
-   Pr_k <= 1/(r k) + 2 * eps k; f_adv_negligible supplies f_adv.
-   Closure under addition twice makes f_bound negligible, and the
-   pointwise bound transfers negligibility to f_guess.
+(* Supplies the unconditional summand of the bound
+   Pr_k <= 1/(r k) + 2 * eps k, through f_size_benaloh_negligible, which
+   reads the plaintext cardinality at k as the block size r k.
 
    The summand 1/(r k) is the guessing probability the leaked output
    Sout concedes: at Benaloh #|plain| is the block size r k, and Sout
@@ -1650,32 +1634,53 @@ Hypothesis charlie_reduction_admissible : forall k,
    falling below every inverse polynomial. *)
 Hypothesis f_r_negligible : negligible_fun (f_r (R:=R) r).
 
-(* The advantage the assumption family assumes is negligible: the
+(* The advantage the assumption sequence assumes is negligible: the
    asymptotic IND-CPA reading of r-th residuosity. *)
-Hypothesis f_adv_negligible : negligible_fun f_adv.
+Hypothesis f_adv_negligible :
+  negligible_fun (fun k => indcpa_assumption_epsilon (A k)).
 
-(* The conclusion is negligible_fun of the family k |-> Pr_k, where Pr_k
+Local Notation benaloh_instance_sequence :=
+  (benaloh_instance_sequence f_r_negligible f_adv_negligible).
+
+Variable predict : forall k, predictor (inst_AHE (benaloh_instance k))
+    (alice_traceT (inst_AHE (benaloh_instance k))).
+Arguments predict : clear implicits.
+
+Local Notation f_guess_V2 :=
+  (f_guess_V2 (R:=R) (Q:=benaloh_instance_sequence) predict).
+
+(* The class of the assumption sequence admits the Bob-side reduction
+   adversary induced by every predictor in the sequence. *)
+Hypothesis bob_reduction_admissible : forall k,
+  indcpa_admissible (A k)
+    (bob_trace_adversary_at (Q:=benaloh_instance_sequence)
+       (distinguisher_of_predictor (predict k))).
+
+(* The Charlie-side twin of bob_reduction_admissible. *)
+Hypothesis charlie_reduction_admissible : forall k,
+  indcpa_admissible (A k)
+    (charlie_trace_adversary_at (Q:=benaloh_instance_sequence)
+       (distinguisher_of_predictor (predict k))).
+
+(* The conclusion is negligible_fun of the sequence k |-> Pr_k, where Pr_k
    is the probability that the k-th predictor guesses Bob's input V2 at
    the k-th Benaloh instance.
 
-   It follows from the four hypotheses in three steps.  At each k the two
-   class premises yield the bound of alice_trace_guess_V2_admissible_le,
-   Pr_k <= 1/(r k) + 2 * eps k, with eps k the advantage A k assumes.
-   The two negligibility hypotheses make f_size and f_adv negligible,
-   f_size through the scheme-side reading of block-size growth as
-   plaintext growth.  Closure under addition twice makes f_bound
-   negligible.  The pointwise bound then transfers negligibility from
-   f_bound to f_guess.
+   It follows in three steps.  At each k the two class premises yield the
+   bound of alice_trace_guess_V2_admissible_le, Pr_k <= 1/(r k) + 2 * eps k,
+   with eps k the advantage A k assumes.  The two negligibility fields of
+   benaloh_instance_sequence make f_size and f_adv negligible, f_size
+   through the scheme-side reading of block-size growth as plaintext growth.
+   Closure under addition twice makes f_bound negligible, and the pointwise
+   bound transfers negligibility from f_bound to f_guess_V2.
 
-   The assumption family is the per-k form of benaloh_indcpa_assumption;
-   r-th residuosity remains the source a proved record family would start
+   The assumption sequence is the per-k form of benaloh_indcpa_assumption;
+   r-th residuosity remains the source a proved record sequence would start
    from. *)
-Corollary alice_trace_guess_V2_benaloh_negligible : negligible_fun f_guess.
+Corollary alice_trace_guess_V2_benaloh_negligible : negligible_fun f_guess_V2.
 Proof.
-apply: (alice_trace_guess_V2_negligible
-          bob_reduction_admissible charlie_reduction_admissible _
-          f_adv_negligible).
-exact: f_size_benaloh_negligible f_r_negligible.
+exact: (alice_trace_guess_V2_negligible
+          bob_reduction_admissible charlie_reduction_admissible).
 Qed.
 
-End dsdp_benaloh_family_secrecy.
+End dsdp_benaloh_sequence_secrecy.

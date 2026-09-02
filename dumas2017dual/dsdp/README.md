@@ -20,9 +20,9 @@ basename and resolve by suffix.
   (the two concrete schemes as `indcpa_scheme` values, scheme side only, fixed and indexed
   by a security parameter), `dsdp_alice_hop_secrecy` (the two hop reductions, the guess / unpredictability /
   simulator-closeness headlines), `dsdp_alice_trace_link` (the same bounds at the executed
-  fifteen-round piSMC trace), `dsdp_instance_family` (the per-k DSDP instance record, the
-  asymptotic headline, the identity-scheme witness, and the DSDP bounds read off at the
-  Paillier and Benaloh instances).
+  fifteen-round piSMC trace), `dsdp_instance_sequence` (the DSDP instance record, the
+  sequence record over it, the asymptotic headline, the idealized-scheme witness, and the
+  DSDP bounds read off at the Paillier and Benaloh instances).
 
 - **counting/** — the information-theoretic / solution-counting leg.
   `dsdp_entropy` (fiber cardinality `dsdp_fiber_card`, conditional entropy `dsdp_centropy_uniform`),
