@@ -40,6 +40,10 @@ Require Import indcpa_game dsdp_alice_fdist_secrecy dsdp_alice_trace_link.
 (*     bob_trace_adversary_at == the Bob-key reduction adversary at k         *)
 (* charlie_trace_adversary_at == the Charlie-key reduction adversary at k     *)
 (* alice_trace_guess_V2_pr_at == the trace guessing probability at k          *)
+(*                     f_size == the inverse plaintext-cardinality family     *)
+(*                      f_adv == the assumed-advantage family                 *)
+(*                    f_guess == the trace guessing-probability family        *)
+(*                    f_bound == f_size plus two copies of f_adv              *)
 (* alice_trace_guess_V2_admissible_negligible ==                              *)
 (*                               the trace guessing family is negligible      *)
 (*                               under the two class premises and the two     *)
@@ -181,6 +185,18 @@ Definition alice_trace_guess_V2_pr_at k
     (inst_dk_a (I k)) (inst_dk_b (I k)) (inst_dk_c (I k))
     (inst_rb2 (I k)) (inst_rc2 (I k)) p.
 
+(* The inverse plaintext-cardinality function used in the family theorem. *)
+Definition f_size k : R := (#|plain (inst_AHE (I k))|%:R : R)^-1.
+
+(* The assumed IND-CPA advantage function used in the family theorem. *)
+Definition f_adv k : R := indcpa_assumption_epsilon (A k).
+
+(* The trace guessing-probability function used in the family theorem. *)
+Definition f_guess k : R := alice_trace_guess_V2_pr_at (predict k).
+
+(* The pointwise upper-bound function used in the family theorem. *)
+Definition f_bound k : R := f_size k + f_adv k + f_adv k.
+
 (* A family of predictors reading Alice's executed traces along a family of
    DSDP instances matches Bob's input with negligible probability, provided
    the inverse plaintext cardinalities and the assumed advantages are
@@ -199,14 +215,18 @@ Theorem alice_trace_guess_V2_admissible_negligible :
      (bob_trace_adversary_at (distinguisher_of_predictor (predict k)))) ->
   (forall k, indcpa_admissible (A k)
      (charlie_trace_adversary_at (distinguisher_of_predictor (predict k)))) ->
-  negligible_fun (fun k => (#|plain (inst_AHE (I k))|%:R : R)^-1) ->
-  negligible_fun (fun k => indcpa_assumption_epsilon (A k)) ->
-  negligible_fun (fun k => alice_trace_guess_V2_pr_at (predict k)).
+  negligible_fun f_size ->
+  negligible_fun f_adv ->
+  negligible_fun f_guess.
 Proof.
-move=> HB HC Hinv Heps.
-apply: negligible_fun_le (negligible_fun_predictor_bound Hinv Heps) => k.
-exact: (alice_trace_guess_V2_admissible_le
-          (inst_u3_unit (I k)) (inst_rb2 (I k)) (HB k) (HC k)).
+move=> HB HC Hsize Hadv.
+have Hbound : negligible_fun f_bound.
+  exact: negligible_fun_add (negligible_fun_add Hsize Hadv) Hadv.
+apply: negligible_fun_le Hbound => k.
+rewrite /f_guess /f_bound /f_size /f_adv.
+apply: le_trans (alice_trace_guess_V2_admissible_le
+  (inst_u3_unit (I k)) (inst_rb2 (I k)) (HB k) (HC k)) _.
+by rewrite mulr_natl mulr2n addrA.
 Qed.
 
 (* Under the same two negligibility hypotheses, the decrypting predictor's
@@ -326,7 +346,8 @@ apply: (alice_trace_guess_V2_admissible_negligible
           (predict := fun k => fun _ => 0)).
 - exact: trivial_bob_cipher_constant.
 - exact: trivial_charlie_cipher_constant.
-- apply: negligible_fun_le negligible_fun_inv_expnn => k.
+- rewrite /f_size.
+  apply: negligible_fun_le negligible_fun_inv_expnn => k.
   by rewrite card_plain_trivial.
 - exact: negligible_fun_cst0.
 Qed.

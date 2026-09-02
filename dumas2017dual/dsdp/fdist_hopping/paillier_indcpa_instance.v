@@ -227,11 +227,10 @@ Hypothesis charlie_reduction_admissible : forall k,
     (charlie_trace_adversary_at (I:=paillier_instance)
        (distinguisher_of_predictor (predict k))).
 
-(* Supplies the negligibility of the first summand family of the bound
+(* Supplies the negligibility of f_size in the bound
    Pr_k <= 1/(p k * q k) + 2 * eps k; assumption_epsilon_negligible
-   supplies the second.  negligible_fun_predictor_bound consumes the two:
-   for every exponent c each summand eventually falls below half of k^-c,
-   so the sum family falls below k^-c, and Pr_k with it.
+   supplies f_adv.  Closure under addition twice makes f_bound negligible,
+   and the pointwise bound transfers negligibility to f_guess.
 
    The summand 1/(p k * q k) is the guessing probability the leaked
    output Sout concedes: at Paillier #|plain| is the modulus p k * q k,
@@ -255,10 +254,9 @@ Hypothesis assumption_epsilon_negligible :
    It follows from the four hypotheses in three steps.  At each k the two
    class premises yield the bound of alice_trace_guess_V2_admissible_le,
    Pr_k <= 1/(p k * q k) + 2 * eps k, with eps k the advantage A k
-   assumes.  The two negligibility hypotheses make both summand families
-   vanish, so the upper-bound family is negligible by
-   negligible_fun_predictor_bound.  negligible_fun_le then transfers
-   negligibility from that dominating family down to Pr_k.
+   assumes.  The two negligibility hypotheses make f_size and f_adv
+   negligible.  Closure under addition twice makes f_bound negligible.
+   The pointwise bound then transfers negligibility from f_bound to f_guess.
 
    The assumption family is the per-k form of paillier_indcpa_assumption;
    decisional composite residuosity remains the source a proved record
@@ -270,6 +268,7 @@ Proof.
 apply: (alice_trace_guess_V2_admissible_negligible
           bob_reduction_admissible charlie_reduction_admissible _
           assumption_epsilon_negligible).
+rewrite /f_size.
 by under eq_fun => k do rewrite (card_plain_paillier_pq (p_gt1 k) (q_gt1 k)).
 Qed.
 

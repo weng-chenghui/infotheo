@@ -68,6 +68,8 @@
        the class the bounds above are conditional on has members
 
    The same bound along a family of instances (asymptotic form)
+     f_size / f_adv / f_guess / f_bound : the inverse-cardinality,
+       assumed-advantage, guessing-probability, and combined-bound functions
      alice_trace_guess_V2_admissible_negligible : along a
        security-parameter-indexed family of DSDP instances, the trace
        guessing probabilities are a negligible family once the inverse
@@ -1458,6 +1460,10 @@ Local Notation charlie_trace_adversary_at :=
   (charlie_trace_adversary_at (R:=R) (I:=I)).
 Local Notation alice_trace_guess_V2_pr_at :=
   (alice_trace_guess_V2_pr_at (R:=R) (I:=I)).
+Local Notation f_size := (f_size (R:=R) I).
+Local Notation f_adv := (f_adv (R:=R) A).
+Local Notation f_guess := (f_guess (R:=R) predict).
+Local Notation f_bound := (f_bound (R:=R) A).
 
 (* A family of predictors reading Alice's executed traces along a family of
    DSDP instances matches Bob's input with negligible probability, provided
@@ -1477,14 +1483,18 @@ Theorem alice_trace_guess_V2_admissible_negligible :
      (bob_trace_adversary_at (distinguisher_of_predictor (predict k)))) ->
   (forall k, indcpa_admissible (A k)
      (charlie_trace_adversary_at (distinguisher_of_predictor (predict k)))) ->
-  negligible_fun (fun k => (#|plain (inst_AHE (I k))|%:R : R)^-1) ->
-  negligible_fun (fun k => indcpa_assumption_epsilon (A k)) ->
-  negligible_fun (fun k => alice_trace_guess_V2_pr_at (predict k)).
+  negligible_fun f_size ->
+  negligible_fun f_adv ->
+  negligible_fun f_guess.
 Proof.
-move=> HB HC Hinv Heps.
-apply: negligible_fun_le (negligible_fun_predictor_bound Hinv Heps) => k.
-exact: (alice_trace_guess_V2_admissible_le
-          (inst_u3_unit (I k)) (inst_rb2 (I k)) (HB k) (HC k)).
+move=> HB HC Hsize Hadv.
+have Hbound : negligible_fun f_bound.
+  exact: negligible_fun_add (negligible_fun_add Hsize Hadv) Hadv.
+apply: negligible_fun_le Hbound => k.
+rewrite /f_guess /f_bound /f_size /f_adv.
+apply: le_trans (alice_trace_guess_V2_admissible_le
+  (inst_u3_unit (I k)) (inst_rb2 (I k)) (HB k) (HC k)) _.
+by rewrite mulr_natl mulr2n addrA.
 Qed.
 
 End dsdp_instance_family_secrecy.
@@ -1533,11 +1543,10 @@ Hypothesis charlie_reduction_admissible : forall k,
     (charlie_trace_adversary_at (I:=paillier_instance)
        (distinguisher_of_predictor (predict k))).
 
-(* Supplies the negligibility of the first summand family of the bound
+(* Supplies the negligibility of f_size in the bound
    Pr_k <= 1/(p k * q k) + 2 * eps k; assumption_epsilon_negligible
-   supplies the second.  negligible_fun_predictor_bound consumes the two:
-   for every exponent c each summand eventually falls below half of k^-c,
-   so the sum family falls below k^-c, and Pr_k with it.
+   supplies f_adv.  Closure under addition twice makes f_bound negligible,
+   and the pointwise bound transfers negligibility to f_guess.
 
    The summand 1/(p k * q k) is the guessing probability the leaked
    output Sout concedes: at Paillier #|plain| is the modulus p k * q k,
@@ -1561,10 +1570,9 @@ Hypothesis assumption_epsilon_negligible :
    It follows from the four hypotheses in three steps.  At each k the two
    class premises yield the bound of alice_trace_guess_V2_admissible_le,
    Pr_k <= 1/(p k * q k) + 2 * eps k, with eps k the advantage A k
-   assumes.  The two negligibility hypotheses make both summand families
-   vanish, so the upper-bound family is negligible by
-   negligible_fun_predictor_bound.  negligible_fun_le then transfers
-   negligibility from that dominating family down to Pr_k.
+   assumes.  The two negligibility hypotheses make f_size and f_adv
+   negligible.  Closure under addition twice makes f_bound negligible.
+   The pointwise bound then transfers negligibility from f_bound to f_guess.
 
    The assumption family is the per-k form of paillier_indcpa_assumption;
    decisional composite residuosity remains the source a proved record
@@ -1576,6 +1584,7 @@ Proof.
 apply: (alice_trace_guess_V2_admissible_negligible
           bob_reduction_admissible charlie_reduction_admissible _
           assumption_epsilon_negligible).
+rewrite /f_size.
 by under eq_fun => k do rewrite (card_plain_paillier_pq (p_gt1 k) (q_gt1 k)).
 Qed.
 
@@ -1628,11 +1637,10 @@ Hypothesis charlie_reduction_admissible : forall k,
     (charlie_trace_adversary_at (I:=benaloh_instance)
        (distinguisher_of_predictor (predict k))).
 
-(* Supplies the negligibility of the first summand family of the bound
+(* Supplies the negligibility of f_size in the bound
    Pr_k <= 1/(r k) + 2 * eps k; assumption_epsilon_negligible supplies
-   the second.  negligible_fun_predictor_bound consumes the two: for
-   every exponent c each summand eventually falls below half of k^-c,
-   so the sum family falls below k^-c, and Pr_k with it.
+   f_adv.  Closure under addition twice makes f_bound negligible, and the
+   pointwise bound transfers negligibility to f_guess.
 
    The summand 1/(r k) is the guessing probability the leaked output
    Sout concedes: at Benaloh #|plain| is the block size r k, and Sout
@@ -1656,10 +1664,9 @@ Hypothesis assumption_epsilon_negligible :
    It follows from the four hypotheses in three steps.  At each k the two
    class premises yield the bound of alice_trace_guess_V2_admissible_le,
    Pr_k <= 1/(r k) + 2 * eps k, with eps k the advantage A k assumes.
-   The two negligibility hypotheses make both summand families vanish, so
-   the upper-bound family is negligible by negligible_fun_predictor_bound.
-   negligible_fun_le then transfers negligibility from that dominating
-   family down to Pr_k.
+   The two negligibility hypotheses make f_size and f_adv negligible.
+   Closure under addition twice makes f_bound negligible.  The pointwise
+   bound then transfers negligibility from f_bound to f_guess.
 
    The assumption family is the per-k form of benaloh_indcpa_assumption;
    r-th residuosity remains the source a proved record family would start
@@ -1671,6 +1678,7 @@ Proof.
 apply: (alice_trace_guess_V2_admissible_negligible
           bob_reduction_admissible charlie_reduction_admissible _
           assumption_epsilon_negligible).
+rewrite /f_size.
 by under eq_fun do rewrite card_plain_r_at.
 Qed.
 
