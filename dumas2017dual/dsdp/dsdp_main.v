@@ -16,6 +16,14 @@
    an information-theoretic term with an assumption-conditional one is written
    so the two summands stay distinguishable.
 
+   The hopping-axis headlines are stated over one dsdp_instance, a scheme
+   with its four weights, its three private keys and its two hop coins, or
+   over one dsdp_instance_sequence. What stays a hypothesis is the adversary
+   side and the arithmetic of the plaintext space: the two class premises on
+   the reduction adversaries a predictor induces, the IND-CPA assumption
+   record itself, the equation writing the plaintext count as a product
+   p * q, and, on the counting axis, that p and q are prime and coprime.
+
    Information-theoretic (counting axis, unconditional)
      dsdp_centropy_uniform : H(V2,V3 | view) = log m  [3-party]
      dsdp_centropy_uniform_n : H(V | view) = log (m^n)  [N-party]
@@ -688,7 +696,9 @@ End dsdp_relay_secrecy_v1.
 
 Section dsdp_alice_hop_secrecy.
 (* cloned context of Section dsdp_alice_hop_secrecy of
-   hopping/dsdp_alice_hop_secrecy.v *)
+   hopping/dsdp_alice_hop_secrecy.v; stated over one record variable; the
+   notations pin its projections under the names the axis section uses, so
+   the statements and proofs below are the axis text verbatim. *)
 Local Set Default Goal Selector "1".
 Local Open Scope reals_ext_scope.
 Local Open Scope proba_scope.
@@ -696,12 +706,18 @@ Local Open Scope fdist_scope.
 Local Open Scope entropy_scope.
 Local Open Scope ring_scope.
 Context {R : realType}.
-Variables (AHE : AHEncType) (Renc : finType) (index_renc : nat).
-Hypothesis card_renc : #|Renc| = index_renc.+1.
-Variable rand_of_renc : Renc -> rand AHE.
-Variable pkey_of_party : party_id -> pub_key AHE.
-Variables (v1 u1 u2 u3 : plain AHE).
-Hypothesis u3_unit : u3 \is a GRing.unit.
+(* The instance whose scheme, weights and keys the hop ladder runs at. *)
+Variable S : dsdp_instance.
+Local Notation AHE := (inst_AHE S).
+Local Notation Renc := (inst_renc S).
+Local Notation card_renc := (inst_card_renc S).
+Local Notation rand_of_renc := (@inst_rand_of_renc S).
+Local Notation pkey_of_party := (inst_pkey_of_party S).
+Local Notation v1 := (inst_v1 S).
+Local Notation u1 := (inst_u1 S).
+Local Notation u2 := (inst_u2 S).
+Local Notation u3 := (inst_u3 S).
+Local Notation u3_unit := (inst_u3_unit S).
 
 Local Notation P := (alice_sample_fdist (R:=R) AHE card_renc).
 Local Notation V2 := (V2 (R:=R) (AHE:=AHE) card_renc).
@@ -936,7 +952,10 @@ End dsdp_alice_hop_secrecy.
 (* =================================================================          *)
 
 Section dsdp_alice_trace_secrecy.
-(* cloned context of Section dsdp_alice_trace_rv *)
+(* cloned context of Section dsdp_alice_trace_rv; stated over one record
+   variable; the notations pin its projections under the names the axis
+   section uses, so the statements and proofs below are the axis text
+   verbatim. *)
 Local Set Default Goal Selector "1".
 Local Open Scope reals_ext_scope.
 Local Open Scope proba_scope.
@@ -944,18 +963,27 @@ Local Open Scope fdist_scope.
 Local Open Scope entropy_scope.
 Local Open Scope ring_scope.
 Context {R : realType}.
-Variables (AHE : AHEncType) (Renc : finType) (index_renc : nat).
-Hypothesis card_renc : #|Renc| = index_renc.+1.
-Variable rand_of_renc : Renc -> rand AHE.
-Variables (v1 u1 u2 u3 : plain AHE).
-Hypothesis u3_unit : u3 \is a GRing.unit.
-Variables (dk_a dk_b dk_c : priv_key AHE).
+(* The instance whose keys and hop coins the executed trace carries. *)
+Variable S : dsdp_instance.
+Local Notation AHE := (inst_AHE S).
+Local Notation Renc := (inst_renc S).
+Local Notation card_renc := (inst_card_renc S).
+Local Notation rand_of_renc := (@inst_rand_of_renc S).
+Local Notation v1 := (inst_v1 S).
+Local Notation u1 := (inst_u1 S).
+Local Notation u2 := (inst_u2 S).
+Local Notation u3 := (inst_u3 S).
+Local Notation u3_unit := (inst_u3_unit S).
+Local Notation dk_a := (inst_dk_a S).
+Local Notation dk_b := (inst_dk_b S).
+Local Notation dk_c := (inst_dk_c S).
 (* Bob's and Charlie's second-hop coins, held as indices into Renc.  The
    generic rand of he_types.v is a bare Type and carries no distribution, so
    a uniformly sampled coin is quantified over the finType of indices, and
    rand_of_renc carries an index to the randomness the protocol encrypts
    with.  The w_ prefix marks the index side of that split. *)
-Variables (w_rb2 w_rc2 : Renc).
+Local Notation w_rb2 := (inst_rb2 S).
+Local Notation w_rc2 := (inst_rc2 S).
 
 Local Notation P := (alice_sample_fdist (R:=R) AHE card_renc).
 Local Notation pkey_of_dk := (pkey_of_dk dk_a dk_b dk_c).
@@ -1037,9 +1065,7 @@ Theorem alice_trace_guess_V2_le
            (charlie_trace_adversary (distinguisher_of_predictor predict)).
 Proof.
 rewrite alice_trace_of_hop_tupleE.
-exact: (alice_tuple_guess_V2_le card_renc rand_of_renc
-          pkey_of_dk v1 u1 u2 u3_unit
-          (predict \o alice_trace_of_hop_tuple)).
+exact: (alice_tuple_guess_V2_le (predict \o alice_trace_of_hop_tuple)).
 Qed.
 
 (* The trace guessing bound with both hop advantages replaced by the single
@@ -1248,14 +1274,16 @@ Proof.
 rewrite alice_trace_real_jointE alice_trace_ideal_jointE.
 rewrite -2!(Pr_fdistmap_bool D) 2!(fdistmap_comp D) 2!Pr_fdistmap_bool.
 rewrite /bob_trace_adversary /charlie_trace_adversary.
-exact: (alice_sim_advantage_le card_renc rand_of_renc
-          pkey_of_dk v1 u1 u2 u3 (D \o alice_trace_joint_of_hop_joint)).
+exact: (alice_sim_advantage_le (D \o alice_trace_joint_of_hop_joint)).
 Qed.
 
 End dsdp_alice_trace_secrecy.
 
 Section dsdp_alice_trace_uncertainty.
-(* cloned context of Section dsdp_alice_trace_centropy *)
+(* cloned context of Section dsdp_alice_trace_centropy; stated over one
+   record variable; the notations pin its projections under the names the
+   axis section uses, so the statements and proofs below are the axis text
+   verbatim. *)
 Local Set Default Goal Selector "1".
 Local Open Scope reals_ext_scope.
 Local Open Scope proba_scope.
@@ -1263,12 +1291,21 @@ Local Open Scope fdist_scope.
 Local Open Scope entropy_scope.
 Local Open Scope ring_scope.
 Context {R : realType}.
-Variables (AHE : AHEncType) (Renc : finType) (index_renc : nat).
-Hypothesis card_renc : #|Renc| = index_renc.+1.
-Variable rand_of_renc : Renc -> rand AHE.
-Variables (v1 u1 u2 u3 : plain AHE).
-Variables (dk_a dk_b dk_c : priv_key AHE).
-Variables (w_rb2 w_rc2 : Renc).
+(* The instance the three conditioning readings below are taken at. *)
+Variable S : dsdp_instance.
+Local Notation AHE := (inst_AHE S).
+Local Notation Renc := (inst_renc S).
+Local Notation card_renc := (inst_card_renc S).
+Local Notation rand_of_renc := (@inst_rand_of_renc S).
+Local Notation v1 := (inst_v1 S).
+Local Notation u1 := (inst_u1 S).
+Local Notation u2 := (inst_u2 S).
+Local Notation u3 := (inst_u3 S).
+Local Notation dk_a := (inst_dk_a S).
+Local Notation dk_b := (inst_dk_b S).
+Local Notation dk_c := (inst_dk_c S).
+Local Notation w_rb2 := (inst_rb2 S).
+Local Notation w_rc2 := (inst_rc2 S).
 
 Local Notation P := (alice_sample_fdist (R:=R) AHE card_renc).
 Local Notation pkey_of_dk := (pkey_of_dk dk_a dk_b dk_c).
@@ -1337,7 +1374,10 @@ Proof. by rewrite {1}alice_trace_decode_V2E centropy_RV_comp0. Qed.
 End dsdp_alice_trace_uncertainty.
 
 Section dsdp_alice_trace_pq_secrecy.
-(* cloned context of Section dsdp_alice_trace_pq *)
+(* cloned context of Section dsdp_alice_trace_pq; stated over one record
+   variable; the notations pin its projections under the names the axis
+   section uses, so the statements and proofs below are the axis text
+   verbatim. *)
 Local Set Default Goal Selector "1".
 Local Open Scope reals_ext_scope.
 Local Open Scope proba_scope.
@@ -1345,13 +1385,22 @@ Local Open Scope fdist_scope.
 Local Open Scope entropy_scope.
 Local Open Scope ring_scope.
 Context {R : realType}.
-Variables (AHE : AHEncType) (Renc : finType) (index_renc : nat).
-Hypothesis card_renc : #|Renc| = index_renc.+1.
-Variable rand_of_renc : Renc -> rand AHE.
-Variables (v1 u1 u2 u3 : plain AHE).
-Hypothesis u3_unit : u3 \is a GRing.unit.
-Variables (dk_a dk_b dk_c : priv_key AHE).
-Variables (w_rb2 w_rc2 : Renc).
+(* The instance whose plaintext count the equation below writes as p * q. *)
+Variable S : dsdp_instance.
+Local Notation AHE := (inst_AHE S).
+Local Notation Renc := (inst_renc S).
+Local Notation card_renc := (inst_card_renc S).
+Local Notation rand_of_renc := (@inst_rand_of_renc S).
+Local Notation v1 := (inst_v1 S).
+Local Notation u1 := (inst_u1 S).
+Local Notation u2 := (inst_u2 S).
+Local Notation u3 := (inst_u3 S).
+Local Notation u3_unit := (inst_u3_unit S).
+Local Notation dk_a := (inst_dk_a S).
+Local Notation dk_b := (inst_dk_b S).
+Local Notation dk_c := (inst_dk_c S).
+Local Notation w_rb2 := (inst_rb2 S).
+Local Notation w_rc2 := (inst_rc2 S).
 Variables (p q : nat).
 (* No positivity hypotheses: #|plain AHE| > 0 is a theorem, so the equation
    already forces 0 < p and 0 < q. *)
@@ -1395,22 +1444,27 @@ Corollary alice_trace_guess_V2_admissible_pq_le
     <= ((p%:R : R) * q%:R)^-1 + 2 * indcpa_assumption_epsilon A.
 Proof.
 rewrite inv_pq_cardE.
-exact: (alice_trace_guess_V2_admissible_le u3_unit w_rb2).
+exact: alice_trace_guess_V2_admissible_le.
 Qed.
 
 End dsdp_alice_trace_pq_secrecy.
 
 Section dsdp_indcpa_assumption_inhabitant.
-(* cloned context of Section indcpa_game *)
+(* cloned context of Section indcpa_game; stated over one record variable;
+   the notations pin its projections under the names the axis section uses,
+   so the statements and proofs below are the axis text verbatim. *)
 Local Set Default Goal Selector "1".
 Local Open Scope reals_ext_scope.
 Local Open Scope proba_scope.
 Local Open Scope fdist_scope.
 Local Open Scope ring_scope.
 Context {R : realType}.
-Variables (AHE : AHEncType) (Renc : finType) (index_renc : nat).
-Hypothesis card_renc : #|Renc| = index_renc.+1.
-Variable rand_of_renc : Renc -> rand AHE.
+(* The scheme the assumption below is made about. *)
+Variable S : indcpa_scheme.
+Local Notation AHE := (scheme_AHE S).
+Local Notation Renc := (scheme_renc S).
+Local Notation card_renc := (scheme_card_renc S).
+Local Notation rand_of_renc := (@scheme_rand_of_renc S).
 
 Local Notation indcpa_epsilon_assumption :=
   (indcpa_epsilon_assumption (R:=R) (AHE:=AHE) card_renc rand_of_renc).
@@ -1499,8 +1553,7 @@ have Hbound : negligible_fun f_bound.
            adv_negligible.
 apply: negligible_fun_le Hbound => k.
 rewrite /f_guess_V2 /f_bound /f_size /f_adv.
-apply: le_trans (alice_trace_guess_V2_admissible_le
-  (inst_u3_unit (I k)) (inst_rb2 (I k)) (HB k) (HC k)) _.
+apply: le_trans (alice_trace_guess_V2_admissible_le (HB k) (HC k)) _.
 by rewrite mulr_natl mulr2n addrA.
 Qed.
 
