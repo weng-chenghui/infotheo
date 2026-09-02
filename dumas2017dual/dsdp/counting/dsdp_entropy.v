@@ -378,7 +378,7 @@ Qed.
    protocol spends exactly half of that entropy: log m bits reach Alice's
    plaintext residual and log m bits stay hidden.  This is the numerator of
    the leakage fraction the counting axis reports; the ciphertext-carrying
-   view is priced separately on the game-hopping axis. *)
+   view is priced separately on the hopping axis. *)
 Lemma dsdp_var_entropy :
   `p_VarRV = fdist_uniform card_msg_pair ->
   `H `p_VarRV = log (m%:R * m%:R : R).

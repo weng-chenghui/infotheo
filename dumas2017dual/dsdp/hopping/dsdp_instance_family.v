@@ -6,7 +6,7 @@ Require Import fdist_extra proba.
 Require Import homomorphic_encryption.
 Require Import idealized_ahe paillier_fdist_instance.
 Require Import indcpa_game paillier_indcpa_instance benaloh_indcpa_instance.
-Require Import dsdp_alice_fdist_secrecy dsdp_alice_trace_link.
+Require Import dsdp_alice_hop_secrecy dsdp_alice_trace_link.
 
 (**md**************************************************************************)
 (* # A security-parameter-indexed family of DSDP executions                   *)
@@ -34,7 +34,7 @@ Require Import dsdp_alice_fdist_secrecy dsdp_alice_trace_link.
 (* alone: the packaging, the coin type and coin map, the assumption record    *)
 (* and its family in k.  Everything DSDP, the four weights, the three keys,   *)
 (* the two hop coins and the two reduction adversaries, is declared here.     *)
-(* The information-theoretic term is discharged at each scheme, 1/(pq) at    *)
+(* The information-theoretic term is discharged at each scheme, 1/(pq) at     *)
 (* the Paillier modulus and 1/r at the Benaloh block size; the advantage      *)
 (* stays the parameter the scheme file leaves it.                             *)
 (*                                                                            *)

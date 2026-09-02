@@ -578,7 +578,7 @@ End cinde_diagonal_bound_sec.
 (*                          fdist glue lemmas                                  *)
 (* ========================================================================== *)
 
-(* Relocated from dumas2017dual/dsdp/fdist_hopping/dsdp_alice_fdist_secrecy.v,
+(* Relocated from dumas2017dual/dsdp/hopping/dsdp_alice_hop_secrecy.v,
    where they sat in a local [fdist_glue] section although none of them uses a
    DSDP section variable.  A probe against the loaded environment confirmed
    that none of these statements exists in infotheo, MathComp or

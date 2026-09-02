@@ -19,7 +19,7 @@ corrupted-relay channels.
   and `\uses{...}` (dependency edges).
 - The computational leg is SSProve-free. Every `\varepsilon` in it is the
   real-or-zero advantage `indcpa_epsilon` of a reduction constructed in
-  `dsdp/fdist_hopping/dsdp_alice_fdist_secrecy.v`, so the blueprint states no
+  `dsdp/hopping/dsdp_alice_hop_secrecy.v`, so the blueprint states no
   cryptographic assumption as an axiom.
 - `make_blueprint.sh` — one-command build: the blueprint HTML + dependency graph,
   the coqdoc API pages the `\rocq{...}` links point at, and the static graph PNG.

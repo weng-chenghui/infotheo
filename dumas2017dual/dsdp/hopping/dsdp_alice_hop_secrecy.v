@@ -10,7 +10,7 @@ Require Import dsdp_program dsdp_entropy.
 Require Export indcpa_game.
 
 (**md**************************************************************************)
-(* # DSDP corrupted-Alice secrecy, fdist axis                                 *)
+(* # DSDP corrupted-Alice secrecy, hopping axis                               *)
 (*                                                                            *)
 (* Corrupted-Alice secrecy for the three-party DSDP protocol, proved in       *)
 (* infotheo over an explicit product sample space. The sample space carries   *)
@@ -28,19 +28,19 @@ Require Export indcpa_game.
 (* DSDP linear constraint. Every epsilon in this file is therefore the        *)
 (* defined advantage of an explicit reduction.                                *)
 (*                                                                            *)
-(* Headline results: alice_tuple_guess_V2_le bounds the probability *)
+(* Headline results: alice_tuple_guess_V2_le bounds the probability           *)
 (* that a predictor reading Alice's real view returns Bob's input;            *)
-(* alice_unpredictability_ge is its negative-logarithm form;       *)
-(* alice_predictor_unpredictability_ge restates that bound through *)
+(* alice_unpredictability_ge is its negative-logarithm form;                  *)
+(* alice_predictor_unpredictability_ge restates that bound through            *)
 (* the named quantity alice_predictor_unpredictability;                       *)
-(* alice_sim_advantage_le bounds the gap between the real joint    *)
+(* alice_sim_advantage_le bounds the gap between the real joint               *)
 (* law and the ideal-world joint law built from dsdp_alice_simulator;         *)
 (* alice_view_guess_V2_le transfers the first bound to Alice's view.          *)
 (*                                                                            *)
 (* ## Game vocabulary                                                         *)
 (*                                                                            *)
 (* The real-or-zero game layer and the reduction wiring live in               *)
-(* dumas2017dual/dsdp/fdist_hopping/indcpa_game.v, whose header carries       *)
+(* dumas2017dual/dsdp/hopping/indcpa_game.v, whose header carries             *)
 (* the full role map.  The names this file plays those roles with are         *)
 (*                                                                            *)
 (* | role          | identifier                                             | *)
@@ -273,8 +273,7 @@ Require Export indcpa_game.
 (*                                                                            *)
 (* Bob's and Charlie's inputs are sampled uniformly, so these results         *)
 (* describe average-case secrecy over their inputs. Each hop uses one         *)
-(* real-or-zero challenge at one fixed public key. These advantages differ    *)
-(* from the multi-query, party-indexed oracle advantage in indcpa_ror.v.      *)
+(* real-or-zero challenge at one fixed public key.                            *)
 (* The guessing bound is nontrivial only while its complete right-hand side   *)
 (* is below 1. The formal adversary has no running-time model.                *)
 (* Computational efficiency remains an external assumption.                   *)
@@ -291,7 +290,7 @@ Local Open Scope reals_ext_scope.
 Local Open Scope proba_scope.
 Local Open Scope fdist_scope.
 
-Section dsdp_alice_fdist_secrecy.
+Section dsdp_alice_hop_secrecy.
 Context {R : realType}.
 Variables (AHE : AHEncType) (Renc : finType) (index_renc : nat).
 Hypothesis card_renc : #|Renc| = index_renc.+1.
@@ -1578,7 +1577,7 @@ Proof.
 by rewrite alice_view_of_hop_tupleE; exact: alice_tuple_guess_V2_le.
 Qed.
 
-End dsdp_alice_fdist_secrecy.
+End dsdp_alice_hop_secrecy.
 
 Section dsdp_alice_simulator_pub_sec.
 Context {R : realType}.
@@ -1588,7 +1587,7 @@ Variable rand_of_renc : Renc -> rand AHE.
 
 (* The two uniform factors below reuse the card constants the main section
    discharges.  Those [_subproof] names are generated from the [Let] names
-   [card_plain_pair] and [card_renc_pair] of Section dsdp_alice_fdist_secrecy,
+   [card_plain_pair] and [card_renc_pair] of Section dsdp_alice_hop_secrecy,
    so renaming either [Let] breaks this section. *)
 
 (* The simulated view law with its cryptographic setup passed as the two

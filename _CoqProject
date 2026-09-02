@@ -140,12 +140,12 @@ dumas2017dual/dsdp/core/dsdp_pismc.v
 dumas2017dual/dsdp/core/dsdp_correctness.v
 dumas2017dual/dsdp/counting/dsdp_entropy_trace.v
 dumas2017dual/dsdp/counting/dsdp_entropy.v
-dumas2017dual/dsdp/fdist_hopping/indcpa_game.v
-dumas2017dual/dsdp/fdist_hopping/paillier_indcpa_instance.v
-dumas2017dual/dsdp/fdist_hopping/benaloh_indcpa_instance.v
-dumas2017dual/dsdp/fdist_hopping/dsdp_alice_fdist_secrecy.v
-dumas2017dual/dsdp/fdist_hopping/dsdp_alice_trace_link.v
-dumas2017dual/dsdp/fdist_hopping/dsdp_instance_family.v
+dumas2017dual/dsdp/hopping/indcpa_game.v
+dumas2017dual/dsdp/hopping/paillier_indcpa_instance.v
+dumas2017dual/dsdp/hopping/benaloh_indcpa_instance.v
+dumas2017dual/dsdp/hopping/dsdp_alice_hop_secrecy.v
+dumas2017dual/dsdp/hopping/dsdp_alice_trace_link.v
+dumas2017dual/dsdp/hopping/dsdp_instance_family.v
 dumas2017dual/dsdp/counting/dsdp_malicious_dotp.v
 dumas2017dual/dsdp/dsdp_main.v
 

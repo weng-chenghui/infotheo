@@ -6,7 +6,7 @@ declaration in scope, and that no `\rocq{}` ref dangles.
 ## Scope
 
 The `.v` files listed in `make_blueprint.sh`'s `MODULES` array — the exact set
-the blueprint claims to document: the two `dsdp/fdist_hopping/` files of the
+the blueprint claims to document: the two `dsdp/hopping/` files of the
 computational leg, `dsdp/counting/dsdp_entropy.v`, `dsdp/dsdp_main.v`, and two
 files outside `dsdp/`, `entropy_fiber_zpq.v` and `extra_proba.v`.
 

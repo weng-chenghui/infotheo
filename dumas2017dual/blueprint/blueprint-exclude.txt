@@ -1,7 +1,7 @@
 # Blueprint coverage baseline - declarations in the make_blueprint.sh MODULES
 # scope that do NOT have a \rocq{} node. Regenerated 2026-08-18, when the
 # SSProve modules left the codebase and the computational chapters were
-# retargeted at dsdp/fdist_hopping/. Anti-drift ratchet: a NEW declaration must
+# retargeted at dsdp/hopping/. Anti-drift ratchet: a NEW declaration must
 # get a \rocq node or be added here; renames surface as dangling refs.
 #
 # Format: one `module_basename:identifier` per line. Auto-excluded kinds
@@ -27,43 +27,43 @@ benaloh_indcpa_instance:f_bound_benaloh
 # those families.
 dsdp_instance_family:benaloh_instance
 dsdp_instance_family:paillier_instance
-# dsdp_alice_fdist_secrecy: the uniformity, product-law and slot-resampling
+# dsdp_alice_hop_secrecy: the uniformity, product-law and slot-resampling
 # plumbing under the hop ladder, the constant-weight random variables, and the
 # per-k challenge equalities the two hop_advantageE nodes fold together.
-dsdp_alice_fdist_secrecy:AliceSpectatorPre
-dsdp_alice_fdist_secrecy:AliceSpectatorPre2
-dsdp_alice_fdist_secrecy:Hop1PreState
-dsdp_alice_fdist_secrecy:U1c
-dsdp_alice_fdist_secrecy:U2c
-dsdp_alice_fdist_secrecy:U3c
-dsdp_alice_fdist_secrecy:V1c
-dsdp_alice_fdist_secrecy:alice_constraint_holds
-dsdp_alice_fdist_secrecy:alice_hop_tuple_of_spectatorK
-dsdp_alice_fdist_secrecy:alice_inputs_constE
-dsdp_alice_fdist_secrecy:alice_spectator_of_hop_tuple
-dsdp_alice_fdist_secrecy:alice_spectator_pre2T
-dsdp_alice_fdist_secrecy:alice_spectator_preT
-dsdp_alice_fdist_secrecy:alice_spectator_prod
-dsdp_alice_fdist_secrecy:alice_spectator_prodE
-dsdp_alice_fdist_secrecy:alice_spectator_regroup
-dsdp_alice_fdist_secrecy:alice_var_uniform
-dsdp_alice_fdist_secrecy:fdistmap_prod
-dsdp_alice_fdist_secrecy:fdistmap_prodr
-dsdp_alice_fdist_secrecy:hop0_pair_uniformE
-dsdp_alice_fdist_secrecy:hop0_real_challengeE
-dsdp_alice_fdist_secrecy:hop0_state_prod
-dsdp_alice_fdist_secrecy:hop0_zero_challengeE
-dsdp_alice_fdist_secrecy:hop1_prestate_pair_uniformE
-dsdp_alice_fdist_secrecy:hop1_real_challengeE
-dsdp_alice_fdist_secrecy:hop1_state_of
-dsdp_alice_fdist_secrecy:hop1_state_prod
-dsdp_alice_fdist_secrecy:hop1_zero_challengeE
-dsdp_alice_fdist_secrecy:inde_RV_of_prod
-dsdp_alice_fdist_secrecy:rho3_uniformE
-dsdp_alice_fdist_secrecy:spectator_pre2_uniformE
-dsdp_alice_fdist_secrecy:spectator_pre_indep
-dsdp_alice_fdist_secrecy:spectator_pre_pair_uniformE
-dsdp_alice_fdist_secrecy:spectator_pre_uniformE
+dsdp_alice_hop_secrecy:AliceSpectatorPre
+dsdp_alice_hop_secrecy:AliceSpectatorPre2
+dsdp_alice_hop_secrecy:Hop1PreState
+dsdp_alice_hop_secrecy:U1c
+dsdp_alice_hop_secrecy:U2c
+dsdp_alice_hop_secrecy:U3c
+dsdp_alice_hop_secrecy:V1c
+dsdp_alice_hop_secrecy:alice_constraint_holds
+dsdp_alice_hop_secrecy:alice_hop_tuple_of_spectatorK
+dsdp_alice_hop_secrecy:alice_inputs_constE
+dsdp_alice_hop_secrecy:alice_spectator_of_hop_tuple
+dsdp_alice_hop_secrecy:alice_spectator_pre2T
+dsdp_alice_hop_secrecy:alice_spectator_preT
+dsdp_alice_hop_secrecy:alice_spectator_prod
+dsdp_alice_hop_secrecy:alice_spectator_prodE
+dsdp_alice_hop_secrecy:alice_spectator_regroup
+dsdp_alice_hop_secrecy:alice_var_uniform
+dsdp_alice_hop_secrecy:fdistmap_prod
+dsdp_alice_hop_secrecy:fdistmap_prodr
+dsdp_alice_hop_secrecy:hop0_pair_uniformE
+dsdp_alice_hop_secrecy:hop0_real_challengeE
+dsdp_alice_hop_secrecy:hop0_state_prod
+dsdp_alice_hop_secrecy:hop0_zero_challengeE
+dsdp_alice_hop_secrecy:hop1_prestate_pair_uniformE
+dsdp_alice_hop_secrecy:hop1_real_challengeE
+dsdp_alice_hop_secrecy:hop1_state_of
+dsdp_alice_hop_secrecy:hop1_state_prod
+dsdp_alice_hop_secrecy:hop1_zero_challengeE
+dsdp_alice_hop_secrecy:inde_RV_of_prod
+dsdp_alice_hop_secrecy:rho3_uniformE
+dsdp_alice_hop_secrecy:spectator_pre2_uniformE
+dsdp_alice_hop_secrecy:spectator_pre_indep
+dsdp_alice_hop_secrecy:spectator_pre_pair_uniformE
+dsdp_alice_hop_secrecy:spectator_pre_uniformE
 # dsdp_alice_trace_link: the operation-generic interpreter shim, the trace/tuple
 # encodings and their round-trips, and the sample-splitting uniformity lemmas
 # under the two conditional-entropy transfers.
@@ -200,18 +200,18 @@ paillier_indcpa_instance:f_bound_paillier
 # still the source the file's own downstream corollaries call; the \rocq node
 # now points at the dsdp_main.v copy, which carries the full proof text the
 # blueprint statement describes.
-dsdp_alice_fdist_secrecy:alice_tuple_guess_V2_le
-dsdp_alice_fdist_secrecy:alice_unpredictability_ge
-dsdp_alice_fdist_secrecy:alice_predictor_unpredictability_ge
-dsdp_alice_fdist_secrecy:alice_view_guess_V2_le
-dsdp_alice_fdist_secrecy:alice_sim_advantage_le
+dsdp_alice_hop_secrecy:alice_tuple_guess_V2_le
+dsdp_alice_hop_secrecy:alice_unpredictability_ge
+dsdp_alice_hop_secrecy:alice_predictor_unpredictability_ge
+dsdp_alice_hop_secrecy:alice_view_guess_V2_le
+dsdp_alice_hop_secrecy:alice_sim_advantage_le
 dsdp_alice_trace_link:alice_trace_guess_V2_le
 dsdp_alice_trace_link:alice_trace_predictor_unpredictability_ge
 dsdp_alice_trace_link:alice_trace_sim_advantage_le
 dsdp_alice_trace_link:centropy_AliceTrace_AliceHopTuple
 dsdp_alice_trace_link:centropy_AliceView_AliceHopTuple
-dsdp_alice_fdist_secrecy:centropy_V2_Sout_logm
-dsdp_alice_fdist_secrecy:centropy_V2_all_zero_logm
+dsdp_alice_hop_secrecy:centropy_V2_Sout_logm
+dsdp_alice_hop_secrecy:centropy_V2_all_zero_logm
 dsdp_alice_trace_link:alice_trace_guess_V2_admissible_le
 dsdp_alice_trace_link:alice_trace_guess_V2_admissible_pq_le
 dsdp_alice_trace_link:bob_charlie_trace_guess_epsilon_decrypt_ge

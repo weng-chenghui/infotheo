@@ -13,11 +13,11 @@ basename and resolve by suffix.
   `dsdp_pismc` (piSMC realization, duality, termination), `dsdp_correctness` (computational
   correctness over idealized / Benaloh / Paillier AHE).
 
-- **fdist_hopping/** — the game-hopping secrecy result over Infotheo distributions.
+- **hopping/** — the hopping secrecy result over Infotheo distributions.
   `indcpa_game` (the real-or-zero game, the advantage `indcpa_epsilon`, the adversary-class
   assumption record, `negligible_fun`), `paillier_indcpa_instance` / `benaloh_indcpa_instance`
   (the two schemes as IND-CPA instances, scheme side only, fixed and indexed by a security
-  parameter), `dsdp_alice_fdist_secrecy` (the two hop reductions, the guess / unpredictability /
+  parameter), `dsdp_alice_hop_secrecy` (the two hop reductions, the guess / unpredictability /
   simulator-closeness headlines), `dsdp_alice_trace_link` (the same bounds at the executed
   fifteen-round piSMC trace), `dsdp_instance_family` (the per-k DSDP instance record, the
   asymptotic headline, the identity-scheme witness, and the DSDP bounds read off at the
@@ -30,7 +30,7 @@ basename and resolve by suffix.
 
 - **dsdp_main.v** — the headline theorems of both axes, each proved over a cloned copy of
   its source section context; supporting machinery stays in the axis files. The counting-axis
-  headlines are unconditional; the fdist-hopping headlines carry two IND-CPA advantage terms,
+  headlines are unconditional; the hopping headlines carry two IND-CPA advantage terms,
   one at Bob's key and one at Charlie's.
 
 - **dsdp_main_ssprove.v** — rename-aside copy of the pre-deprecation SSProve development

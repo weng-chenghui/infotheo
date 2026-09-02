@@ -197,7 +197,7 @@ variables. They are recorded here as leaves.
 \end{lemma}
 
 \chapter{Computational secrecy of the ciphertext channel}
-\label{ch:fdist_hopping}
+\label{ch:hopping}
 
 The two ciphertexts Alice receives are bounded by a ladder of two hops over one
 explicit distribution. Hop $i$ replaces the $i$-th received ciphertext by an
@@ -209,19 +209,19 @@ finite commutative unit ring.
 
 \begin{definition}[The corrupted-Alice experiment]
   \label{def:alice_experiment}
-  \rocq{infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.dsdp_alice_sampleT,
-       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.alice_sample_fdist,
-       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.alice_sample_fdistE,
-       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.V2,
-       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.V3,
-       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.R2,
-       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.R3,
-       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.Rho2,
-       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.Rho3,
-       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.RA1,
-       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.RA2,
-       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.Sout,
-       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.SoutE}
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.dsdp_alice_sampleT,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_sample_fdist,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_sample_fdistE,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.V2,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.V3,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.R2,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.R3,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.Rho2,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.Rho3,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.RA1,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.RA2,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.Sout,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.SoutE}
   \rocqok
   \uses{def:party_views}
   The experiment is the uniform distribution on the product of eight
@@ -236,13 +236,13 @@ finite commutative unit ring.
 
 \begin{definition}[The hop ladder]
   \label{def:alice_hop_ladder}
-  \rocq{infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.hop0_cipher,
-       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.hop1_cipher,
-       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.dsdp_alice_hop_tupleT,
-       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.AliceHopTuple,
-       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.alice_hop_joint_fdist,
-       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.alice_hop_game_success,
-       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.alice_hop_game_successE}
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.hop0_cipher,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.hop1_cipher,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.dsdp_alice_hop_tupleT,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.AliceHopTuple,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_hop_joint_fdist,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_hop_game_success,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_hop_game_successE}
   \rocqok
   \uses{def:alice_experiment}
   Alice's tuple at hop $i$ carries her two masks, her two combine randomnesses,
@@ -259,16 +259,16 @@ finite commutative unit ring.
 
 \begin{definition}[Real-or-zero advantage of a single-query adversary]
   \label{def:indcpa_epsilon}
-  \rocq{infotheo.dumas2017dual.dsdp.fdist_hopping.indcpa_game.enc_fdist,
-       infotheo.dumas2017dual.dsdp.fdist_hopping.indcpa_game.indcpa_adversary,
-       infotheo.dumas2017dual.dsdp.fdist_hopping.indcpa_game.indcpa_challenger,
-       infotheo.dumas2017dual.dsdp.fdist_hopping.indcpa_game.indcpa_experiment,
-       infotheo.dumas2017dual.dsdp.fdist_hopping.indcpa_game.indcpa_accept,
-       infotheo.dumas2017dual.dsdp.fdist_hopping.indcpa_game.indcpa_success_real,
-       infotheo.dumas2017dual.dsdp.fdist_hopping.indcpa_game.indcpa_success_realE,
-       infotheo.dumas2017dual.dsdp.fdist_hopping.indcpa_game.indcpa_success_zero,
-       infotheo.dumas2017dual.dsdp.fdist_hopping.indcpa_game.indcpa_success_zeroE,
-       infotheo.dumas2017dual.dsdp.fdist_hopping.indcpa_game.indcpa_epsilon}
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.indcpa_game.enc_fdist,
+       infotheo.dumas2017dual.dsdp.hopping.indcpa_game.indcpa_adversary,
+       infotheo.dumas2017dual.dsdp.hopping.indcpa_game.indcpa_challenger,
+       infotheo.dumas2017dual.dsdp.hopping.indcpa_game.indcpa_experiment,
+       infotheo.dumas2017dual.dsdp.hopping.indcpa_game.indcpa_accept,
+       infotheo.dumas2017dual.dsdp.hopping.indcpa_game.indcpa_success_real,
+       infotheo.dumas2017dual.dsdp.hopping.indcpa_game.indcpa_success_realE,
+       infotheo.dumas2017dual.dsdp.hopping.indcpa_game.indcpa_success_zero,
+       infotheo.dumas2017dual.dsdp.hopping.indcpa_game.indcpa_success_zeroE,
+       infotheo.dumas2017dual.dsdp.hopping.indcpa_game.indcpa_epsilon}
   \rocqok
   A single-query real-or-zero adversary $A$ is a finite state type, a law on it,
   a challenge plaintext $p_A$ read off the state, and a decision taken on the
@@ -283,14 +283,14 @@ finite commutative unit ring.
 
 \begin{definition}[The two hop reductions]
   \label{def:alice_hop_reductions}
-  \rocq{infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.hop0_stateT,
-       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.Hop0State,
-       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.hop0_assemble,
-       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.hop0_reduction,
-       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.hop1_stateT,
-       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.Hop1State,
-       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.hop1_assemble,
-       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.hop1_reduction}
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.hop0_stateT,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.Hop0State,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.hop0_assemble,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.hop0_reduction,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.hop1_stateT,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.Hop1State,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.hop1_assemble,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.hop1_reduction}
   \rocqok
   \uses{def:alice_hop_ladder,def:indcpa_epsilon}
   The hop-$i$ reduction $\hopred{i}{D}$ of a distinguisher $D$ is the
@@ -328,8 +328,8 @@ $V_3$.
 
 \begin{lemma}[One hop costs one reduction advantage]
   \label{lem:alice_view_advantage}
-  \rocq{infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.hop0_advantageE,
-       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.hop1_advantageE}
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.hop0_advantageE,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.hop1_advantageE}
   \rocqok
   \uses{def:alice_hop_reductions}
   For all weights $u_1, u_2, u_3$ and every distinguisher $D$, zeroing one
@@ -343,15 +343,15 @@ $V_3$.
 
 \begin{lemma}[Guessing at the all-zero endpoint]
   \label{lem:guess_all_zero}
-  \rocq{infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.AliceSpectator,
-       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.alice_spectator_of,
-       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.alice_spectator_indep,
-       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.alice_spectator_cinde,
-       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.alice_VarRV_cond_uniform,
-       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.alice_V2_cond_Sout,
-       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.alice_V2_cond_le,
-       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.alice_hop_tuple_of_spectator,
-       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.all_zero_guess_V2_le_invm}
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.AliceSpectator,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_spectator_of,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_spectator_indep,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_spectator_cinde,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_VarRV_cond_uniform,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_V2_cond_Sout,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_V2_cond_le,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_hop_tuple_of_spectator,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.all_zero_guess_V2_le_invm}
   \rocqok
   \uses{def:alice_hop_ladder,lem:exist_pr_sol,lem:cinde_diagonal_bound}
   When Alice's third weight $u_3$ is a unit of the plaintext ring, every
@@ -365,8 +365,8 @@ $V_3$.
 
 \begin{definition}[The distinguisher of a predictor]
   \label{def:distinguisher_of_predictor}
-  \rocq{infotheo.dumas2017dual.dsdp.fdist_hopping.indcpa_game.distinguisher_of_predictor,
-       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.guess_V2_jointE}
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.indcpa_game.distinguisher_of_predictor,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.guess_V2_jointE}
   \rocqok
   \uses{def:alice_hop_ladder}
   The distinguisher $D_g$ of a predictor $g$ accepts when $g$, applied to the
@@ -395,7 +395,7 @@ $V_3$.
 
 \begin{theorem}[Unpredictability entropy]
   \label{thm:alice_unpredictability}
-  \rocq{infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.alice_predictor_unpredictability,
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_predictor_unpredictability,
        infotheo.dumas2017dual.dsdp.dsdp_main.alice_unpredictability_ge,
        infotheo.dumas2017dual.dsdp.dsdp_main.alice_predictor_unpredictability_ge}
   \rocqok
@@ -410,12 +410,12 @@ $V_3$.
 
 \begin{corollary}[The same bound at Alice's full view]
   \label{cor:alice_guess_view}
-  \rocq{infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.AliceCombineBob,
-       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.AliceCombineCharlie,
-       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.AliceRecvPlain,
-       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.AliceView,
-       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.alice_view_of_hop_tuple,
-       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.alice_view_of_hop_tupleE,
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.AliceCombineBob,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.AliceCombineCharlie,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.AliceRecvPlain,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.AliceView,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_view_of_hop_tuple,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_view_of_hop_tupleE,
        infotheo.dumas2017dual.dsdp.dsdp_main.alice_view_guess_V2_le}
   \rocqok
   \uses{thm:alice_guess_real,def:party_views}
@@ -438,8 +438,8 @@ functionality on the other, rather than quantified over all input vectors.
 
 \begin{definition}[The simulator and the ideal-world law]
   \label{def:alice_simulator}
-  \rocq{infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.dsdp_alice_simulator,
-       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.alice_ideal_joint}
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.dsdp_alice_simulator,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_ideal_joint}
   \rocqok
   \uses{def:alice_hop_ladder}
   From a value $s$ of the output, the simulator draws uniform masks, uniform
@@ -455,11 +455,11 @@ functionality on the other, rather than quantified over all input vectors.
 
 \begin{lemma}[The all-zero endpoint is the simulator]
   \label{lem:simulator_factorization}
-  \rocq{infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.alice_spectator_law,
-       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.alice_hop_tuple_all_zero_pfwd1E,
-       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.dsdp_alice_hop_tuple_cond_sim,
-       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.dsdp_alice_hop_tuple_cond_sim_S,
-       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_fdist_secrecy.alice_ideal_jointE}
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_spectator_law,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_hop_tuple_all_zero_pfwd1E,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.dsdp_alice_hop_tuple_cond_sim,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.dsdp_alice_hop_tuple_cond_sim_S,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_ideal_jointE}
   \rocqok
   \uses{def:alice_simulator}
   Conditioned on any honest input pair of positive probability, Alice's all-zero
@@ -511,12 +511,12 @@ carries the three bounds above to the executed protocol.
 
 \begin{definition}[Alice's executed trace]
   \label{def:alice_trace}
-  \rocq{infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_trace_link.dsdp_trace_dataT,
-       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_trace_link.trace_data_of_di_data,
-       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_trace_link.dsdp_procs_std,
-       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_trace_link.dsdp_procs_of_sample,
-       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_trace_link.AliceTrace,
-       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_trace_link.dsdp_trace_of_hop_tuple}
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.dsdp_trace_dataT,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.trace_data_of_di_data,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.dsdp_procs_std,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.dsdp_procs_of_sample,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.AliceTrace,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.dsdp_trace_of_hop_tuple}
   \rocqok
   \uses{def:protocol_flow,def:alice_hop_ladder}
   Alice's trace is the message log the interpreter returns for her when it runs
@@ -527,12 +527,12 @@ carries the three bounds above to the executed protocol.
 
 \begin{lemma}[The trace is a function of the tuple]
   \label{lem:trace_of_hop_tuple}
-  \rocq{infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_trace_link.DSDP_Interface_of_ops,
-       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_trace_link.dsdp_run_traces_of_ops_ok,
-       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_trace_link.dsdp_procs_stdE,
-       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_trace_link.dsdp_run_traces_ok,
-       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_trace_link.dsdp_run_traces_encE,
-       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_trace_link.dsdp_trace_of_hop_tupleE}
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.DSDP_Interface_of_ops,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.dsdp_run_traces_of_ops_ok,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.dsdp_procs_stdE,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.dsdp_run_traces_ok,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.dsdp_run_traces_encE,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.dsdp_trace_of_hop_tupleE}
   \rocqok
   \uses{def:alice_trace,lem:dsdp_is_correct}
   The interpreter run on the three DSDP party programs terminates with the
@@ -544,10 +544,10 @@ carries the three bounds above to the executed protocol.
 \begin{theorem}[The three bounds at the trace]
   \label{thm:alice_trace_bounds}
   \rocq{infotheo.dumas2017dual.dsdp.dsdp_main.alice_trace_guess_V2_le,
-       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_trace_link.alice_trace_predictor_unpredictability,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_trace_predictor_unpredictability,
        infotheo.dumas2017dual.dsdp.dsdp_main.alice_trace_predictor_unpredictability_ge,
-       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_trace_link.dsdp_alice_trace_simulator,
-       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_trace_link.alice_trace_ideal_joint,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.dsdp_alice_trace_simulator,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_trace_ideal_joint,
        infotheo.dumas2017dual.dsdp.dsdp_main.alice_trace_sim_advantage_le}
   \rocqok
   \uses{lem:trace_of_hop_tuple,thm:alice_guess_real,thm:alice_unpredictability,thm:alice_simulation_secure}
@@ -561,9 +561,9 @@ carries the three bounds above to the executed protocol.
 
 \begin{theorem}[Trace, view, and tuple leave the same uncertainty]
   \label{thm:centropy_trace_tuple}
-  \rocq{infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_trace_link.dsdp_alice_trace_tupleT,
-       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_trace_link.AliceTraceTuple,
-       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_trace_link.alice_trace_tupleE,
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.dsdp_alice_trace_tupleT,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.AliceTraceTuple,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_trace_tupleE,
        infotheo.dumas2017dual.dsdp.dsdp_main.centropy_V2_trace_tupleE,
        infotheo.dumas2017dual.dsdp.dsdp_main.centropy_V2_view_tupleE}
   \rocqok
@@ -585,7 +585,7 @@ adversary class, and records what forces the class to leave something out.
 
 \begin{definition}[Negligibility of a family]
   \label{def:negligible_fun}
-  \rocq{infotheo.dumas2017dual.dsdp.fdist_hopping.indcpa_game.negligible_fun}
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.indcpa_game.negligible_fun}
   \rocqok
   A function of the security parameter is negligible when it eventually falls
   below every inverse polynomial.
@@ -599,7 +599,7 @@ adversary class, and records what forces the class to leave something out.
 
 \begin{definition}[An adversary class and the advantage it assumes]
   \label{def:indcpa_assumption}
-  \rocq{infotheo.dumas2017dual.dsdp.fdist_hopping.indcpa_game.indcpa_epsilon_assumption}
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.indcpa_game.indcpa_epsilon_assumption}
   \rocqok
   \uses{def:indcpa_epsilon}
   An assumption $\mathcal{A}$ is a Boolean classifier on single-query
@@ -617,9 +617,9 @@ adversary class, and records what forces the class to leave something out.
 
 \begin{definition}[An assumption with a computed class and a proved promise]
   \label{def:cipher_constant_assumption}
-  \rocq{infotheo.dumas2017dual.dsdp.fdist_hopping.indcpa_game.adv_decide_cipher_constant,
-       infotheo.dumas2017dual.dsdp.fdist_hopping.indcpa_game.indcpa_epsilon_cipher_constant_eq0,
-       infotheo.dumas2017dual.dsdp.fdist_hopping.indcpa_game.cipher_constant_assumption}
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.indcpa_game.adv_decide_cipher_constant,
+       infotheo.dumas2017dual.dsdp.hopping.indcpa_game.indcpa_epsilon_cipher_constant_eq0,
+       infotheo.dumas2017dual.dsdp.hopping.indcpa_game.cipher_constant_assumption}
   \rocqok
   \uses{def:indcpa_assumption}
   The classifier that admits an adversary exactly when its verdict ignores the
@@ -637,7 +637,7 @@ adversary class, and records what forces the class to leave something out.
 
 \begin{theorem}[The class-conditional trace bound]
   \label{thm:alice_guess_admissible}
-  \rocq{infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_trace_link.alice_trace_guess_V2_pr,
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_trace_guess_V2_pr,
        infotheo.dumas2017dual.dsdp.dsdp_main.alice_trace_guess_V2_admissible_le,
        infotheo.dumas2017dual.dsdp.dsdp_main.alice_trace_guess_V2_admissible_pq_le}
   \rocqok
@@ -658,7 +658,7 @@ adversary class, and records what forces the class to leave something out.
 
 \begin{corollary}[The bound at the Paillier scheme]
   \label{cor:alice_guess_paillier}
-  \rocq{infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_instance_family.alice_trace_guess_V2_paillier_le}
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_instance_family.alice_trace_guess_V2_paillier_le}
   \rocqok
   \uses{thm:alice_guess_admissible}
   At the Paillier packaging with modulus $pq$, a trace predictor whose two
@@ -677,7 +677,7 @@ adversary class, and records what forces the class to leave something out.
 
 \begin{lemma}[The class-conditional bound is negligible as a family]
   \label{lem:negligible_predictor_bound}
-  \rocq{infotheo.dumas2017dual.dsdp.fdist_hopping.indcpa_game.negligible_fun_predictor_bound}
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.indcpa_game.negligible_fun_predictor_bound}
   \rocqok
   \uses{def:negligible_fun}
   The arithmetic shape of the class-conditional bound is negligible whenever both of its
@@ -689,8 +689,8 @@ adversary class, and records what forces the class to leave something out.
 
 \begin{definition}[The decrypting predictor]
   \label{def:trace_decryptor}
-  \rocq{infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_trace_link.bob_trace_decrypt_predictor,
-       infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_alice_trace_link.alice_trace_decode_V2E}
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.bob_trace_decrypt_predictor,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_trace_decode_V2E}
   \rocqok
   \uses{def:alice_trace}
   The predictor $\delta$ reads Bob's ciphertext off slot $3$ of Alice's trace
@@ -754,7 +754,7 @@ adversary class, and records what forces the class to leave something out.
 
 \begin{definition}[One instance of a DSDP family]
   \label{def:dsdp_instance}
-  \rocq{infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_instance_family.dsdp_instance}
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_instance_family.dsdp_instance}
   \rocqok
   \uses{def:alice_trace}
   An instance is the scheme, its coin index type with a nonemptiness proof, the coin
@@ -771,7 +771,7 @@ adversary class, and records what forces the class to leave something out.
 
 \begin{theorem}[The trace guessing family is negligible]
   \label{thm:alice_guess_negligible}
-  \rocq{infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_instance_family.alice_trace_guess_V2_admissible_negligible,
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_instance_family.alice_trace_guess_V2_admissible_negligible,
        infotheo.dumas2017dual.dsdp.dsdp_main.alice_trace_guess_V2_admissible_negligible}
   \rocqok
   \uses{def:negligible_fun,def:dsdp_instance,lem:negligible_predictor_bound,thm:alice_guess_admissible}
@@ -795,7 +795,7 @@ adversary class, and records what forces the class to leave something out.
 
 \begin{corollary}[The hypotheses eventually reject the decrypting family]
   \label{cor:decrypt_family_not_admissible}
-  \rocq{infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_instance_family.decrypt_reduction_admissible_eventuallyF}
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_instance_family.decrypt_reduction_admissible_eventuallyF}
   \rocqok
   \uses{def:dsdp_instance,def:negligible_fun,cor:decrypt_not_admissible}
   Under the two negligibility hypotheses above there is a threshold past which
@@ -813,7 +813,7 @@ adversary class, and records what forces the class to leave something out.
 
 \begin{corollary}[The bound along a Paillier family]
   \label{cor:alice_guess_paillier_negligible}
-  \rocq{infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_instance_family.alice_trace_guess_V2_paillier_negligible}
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_instance_family.alice_trace_guess_V2_paillier_negligible}
   \rocqok
   \uses{thm:alice_guess_negligible,cor:alice_guess_paillier}
   At a family of Paillier moduli $p_k q_k$, the guessing family is negligible
@@ -831,7 +831,7 @@ adversary class, and records what forces the class to leave something out.
 
 \begin{corollary}[The bound along a Benaloh family]
   \label{cor:alice_guess_benaloh_negligible}
-  \rocq{infotheo.dumas2017dual.dsdp.fdist_hopping.dsdp_instance_family.alice_trace_guess_V2_benaloh_negligible}
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_instance_family.alice_trace_guess_V2_benaloh_negligible}
   \rocqok
   \uses{thm:alice_guess_negligible,def:negligible_fun}
   At a family of Benaloh block sizes $r_k$, the guessing family is negligible

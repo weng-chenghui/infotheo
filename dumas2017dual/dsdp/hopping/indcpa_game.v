@@ -38,7 +38,7 @@ Require Import extra_proba.
 (* the finfun tester of smc/security_models/statdist.v.  A concrete           *)
 (* reduction is built by the protocol file that instantiates this one:        *)
 (* bob_challenge_adversary and charlie_challenge_adversary of                 *)
-(* dumas2017dual/dsdp/fdist_hopping/dsdp_alice_fdist_secrecy.v package a      *)
+(* dumas2017dual/dsdp/hopping/dsdp_alice_hop_secrecy.v package a              *)
 (* distinguisher as an indcpa_adversary, and                                  *)
 (* indcpa_fdist is the law their challenge induces.                           *)
 (*                                                                            *)

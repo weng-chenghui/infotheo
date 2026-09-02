@@ -10,7 +10,7 @@
    The two axes price secrecy in different currencies, and the distinction is
    load-bearing. The counting axis conditions on plaintexts and its bounds are
    unconditional: they hold against an adversary of any running time. The
-   game-hopping axis conditions on the ciphertext-carrying view and its bounds
+   hopping axis conditions on the ciphertext-carrying view and its bounds
    carry two IND-CPA advantage terms, one at Bob's key and one at Charlie's;
    they say nothing until those advantages are argued small. A bound summing
    an information-theoretic term with an assumption-conditional one is written
@@ -30,7 +30,7 @@
      charlie_privacy_V2 : H(V2 | CharlieView) = log m > 0: a corrupted Charlie
        learns nothing about Bob's input V2 (R2 one-time-pad masking)  [3-party]
 
-   Corrupted Alice at her hopping tuple (fdist axis, IND-CPA-conditional)
+   Corrupted Alice at her hopping tuple (hopping axis, IND-CPA-conditional)
      alice_tuple_guess_V2_le : a predictor of Bob's input succeeds
        with probability at most 1/#|plain| plus the two hop advantages
      alice_unpredictability_ge /
@@ -100,7 +100,7 @@ Require Import homomorphic_encryption.
 Require Import dsdp_program dsdp_entropy dsdp_pismc.
 Require Import dsdp_malicious_dotp.
 Require Import indcpa_game.
-Require Import dsdp_alice_fdist_secrecy dsdp_alice_trace_link.
+Require Import dsdp_alice_hop_secrecy dsdp_alice_trace_link.
 Require Import dsdp_instance_family.
 Require Import paillier_indcpa_instance benaloh_indcpa_instance.
 
@@ -165,7 +165,7 @@ Let InputRV : {RV P -> (msg * msg * msg * msg)} := [%V1, U1, U2, U3].
    also carries her key, masks, and the ciphertext hops), the relay private
    inputs (V2, V3) retain log m bits of uncertainty. The counting axis
    conditions on plaintexts only; the ciphertext-carrying view is the
-   fdist_hopping leg's business (the guessing triangle).  [3-party] *)
+   hopping leg's business (the guessing triangle).  [3-party] *)
 Theorem dsdp_centropy_uniform :
   (forall t, (0 < U3 t)%N) ->
   (forall t, (U3 t < minn p q)%N) ->
@@ -681,11 +681,12 @@ Qed.
 End dsdp_relay_secrecy_v1.
 
 (* =================================================================          *)
-(* Corrupted-Alice secrecy under IND-CPA hopping (fdist axis)                 *)
+(* Corrupted-Alice secrecy under IND-CPA hopping (hopping axis)               *)
 (* =================================================================          *)
 
 Section dsdp_alice_hop_secrecy.
-(* cloned context of Section dsdp_alice_fdist_secrecy *)
+(* cloned context of Section dsdp_alice_hop_secrecy of
+   hopping/dsdp_alice_hop_secrecy.v *)
 Local Set Default Goal Selector "1".
 Local Open Scope reals_ext_scope.
 Local Open Scope proba_scope.

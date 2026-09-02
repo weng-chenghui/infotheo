@@ -9,7 +9,7 @@ Require Import spp_proba.
 Require Import extra_proba extra_entropy.
 Require Import smc_interpreter smc_session_types.
 Require Import homomorphic_encryption dsdp_interface dsdp_program dsdp_pismc.
-Require Import dsdp_alice_fdist_secrecy.
+Require Import dsdp_alice_hop_secrecy.
 
 (**md**************************************************************************)
 (* # DSDP corrupted-Alice secrecy at the executed piSMC trace                 *)
@@ -588,13 +588,13 @@ Hypothesis card_renc : #|Renc| = index_renc.+1.
 Variable rand_of_renc : Renc -> rand AHE.
 Variables (v1 u1 u2 u3 : plain AHE).
 (* Naming: [u3_unit] reads "u3 is a unit", the subject_property hypothesis
-   pattern; same premise as in dsdp_alice_fdist_secrecy.v. *)
+   pattern; same premise as in dsdp_alice_hop_secrecy.v. *)
 Hypothesis u3_unit : u3 \is a GRing.unit.
 Variables (dk_a dk_b dk_c : priv_key AHE).
 Variables (w_rb2 w_rc2 : Renc).
 
 (* The declarations discharged by the preceding section and by
-   dsdp_alice_fdist_secrecy.v take these parameters explicitly. Each
+   dsdp_alice_hop_secrecy.v take these parameters explicitly. Each
    abbreviation pins them once, under the name it abbreviates; the shadowing
    is not recursive, since the right-hand side resolves against the
    constant. *)
@@ -920,7 +920,7 @@ Variables (dk_a dk_b dk_c : priv_key AHE).
 Variables (w_rb2 w_rc2 : Renc).
 
 (* Each abbreviation pins, under the name it abbreviates, the parameters that
-   dsdp_alice_fdist_secrecy.v discharges; the shadowing is not recursive,
+   dsdp_alice_hop_secrecy.v discharges; the shadowing is not recursive,
    since the right-hand side resolves against the constant. *)
 Local Notation P := (alice_sample_fdist (R:=R) AHE card_renc).
 Local Notation pkey_of_dk := (pkey_of_dk dk_a dk_b dk_c).

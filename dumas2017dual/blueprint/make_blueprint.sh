@@ -19,15 +19,15 @@ MODULES=(
   dumas2017dual/dsdp/dsdp_main.v
   # The game layer the computational leg reduces to: the adversary record,
   # the hidden-bit challenger, the two experiment arms and the advantage.
-  dumas2017dual/dsdp/fdist_hopping/indcpa_game.v
+  dumas2017dual/dsdp/hopping/indcpa_game.v
   # The computational leg: the two-hop ladder over the corrupted-Alice
   # experiment, its two reductions, the guessing / unpredictability / simulation
   # bounds, and their transfer to the executed piSMC trace.
-  dumas2017dual/dsdp/fdist_hopping/dsdp_alice_fdist_secrecy.v
-  dumas2017dual/dsdp/fdist_hopping/dsdp_alice_trace_link.v
+  dumas2017dual/dsdp/hopping/dsdp_alice_hop_secrecy.v
+  dumas2017dual/dsdp/hopping/dsdp_alice_trace_link.v
   # The plug point: the same bound read off at a concrete scheme, with the
   # cardinality side discharged and the advantage left a parameter.
-  dumas2017dual/dsdp/fdist_hopping/paillier_indcpa_instance.v
+  dumas2017dual/dsdp/hopping/paillier_indcpa_instance.v
 )
 
 echo "[1/3] blueprint HTML + dependency graph (plastex)"
