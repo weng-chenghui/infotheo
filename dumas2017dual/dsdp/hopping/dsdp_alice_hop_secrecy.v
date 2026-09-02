@@ -28,14 +28,14 @@ Require Export indcpa_game.
 (* DSDP linear constraint. Every epsilon in this file is therefore the        *)
 (* defined advantage of an explicit reduction.                                *)
 (*                                                                            *)
-(* Headline results: alice_tuple_guess_V2_le bounds the probability           *)
-(* that a predictor reading Alice's real view returns Bob's input;            *)
+(* Headline results: alice_tuple_guess_V2_le bounds the probability that a    *)
+(* predictor reading Alice's real view returns Bob's input;                   *)
 (* alice_unpredictability_ge is its negative-logarithm form;                  *)
-(* alice_predictor_unpredictability_ge restates that bound through            *)
-(* the named quantity alice_predictor_unpredictability;                       *)
-(* alice_sim_advantage_le bounds the gap between the real joint               *)
-(* law and the ideal-world joint law built from dsdp_alice_simulator;         *)
-(* alice_view_guess_V2_le transfers the first bound to Alice's view.          *)
+(* alice_predictor_unpredictability_ge restates that bound through the named  *)
+(* quantity alice_predictor_unpredictability; alice_sim_advantage_le bounds   *)
+(* the gap between the real joint law and the ideal-world joint law built     *)
+(* from alice_simulator; alice_view_guess_V2_le transfers the first bound to  *)
+(* Alice's view.                                                              *)
 (*                                                                            *)
 (* ## Game vocabulary                                                         *)
 (*                                                                            *)
@@ -120,7 +120,7 @@ Require Export indcpa_game.
 (* ```                                                                        *)
 (* One protocol run and its hops                                              *)
 (*                                                                            *)
-(*        dsdp_alice_sampleT == all honest inputs and random choices in one   *)
+(*             alice_sampleT == all honest inputs and random choices in one   *)
 (*                              DSDP run                                      *)
 (*        alice_sample_fdist == samples those values uniformly and            *)
 (*                              independently                                 *)
@@ -137,7 +137,7 @@ Require Export indcpa_game.
 (*                              encrypts zero afterwards                      *)
 (*             hop1_cipher i == Charlie's ciphertext is real through hop 1    *)
 (*                              and encrypts zero at hop 2                    *)
-(*     dsdp_alice_hop_tupleT == the core information used to study Alice's    *)
+(*          alice_hop_tupleT == the core information used to study Alice's    *)
 (*                              secrecy                                       *)
 (*          alice_hop_jointT == adds the honest inputs so a test can compare  *)
 (*                              a prediction with the true input              *)
@@ -201,7 +201,7 @@ Require Export indcpa_game.
 (*                                                                            *)
 (* Simulation                                                                 *)
 (*                                                                            *)
-(*    dsdp_alice_simulator s == constructs the all-zero view from the leaked  *)
+(*         alice_simulator s == constructs the all-zero view from the leaked  *)
 (*                              output s, fresh masks, fresh coins, and two   *)
 (*                              encryptions of zero                           *)
 (*     alice_spectator_pre2T == the spectator choices reordered to separate   *)
@@ -248,9 +248,9 @@ Require Export indcpa_game.
 (*                                                                            *)
 (* Public setup                                                               *)
 (*                                                                            *)
-(* dsdp_alice_simulator_pub pk_b pk_c s == the simulator with Bob's and       *)
-(*                              Charlie's public keys given explicitly        *)
-(* dsdp_alice_simulator_pubE == selecting those keys from the party key table *)
+(* alice_simulator_pub pk_b pk_c s == the simulator with Bob's and Charlie's  *)
+(*                              public keys given explicitly                  *)
+(*      alice_simulator_pubE == selecting those keys from the party key table *)
 (*                              gives the original simulator                  *)
 (*                                                                            *)
 (* Separate facts about encryption distributions                              *)
@@ -341,12 +341,12 @@ Local Notation predictor := (predictor AHE).
 (* The sample space of the corrupted-Alice experiment: the two honest inputs,
    Alice's two mask plaintexts, the randomness of the two hop encryptions, and
    the randomness of Alice's two combines. *)
-Definition dsdp_alice_sampleT : finType :=
+Definition alice_sampleT : finType :=
   ((plain AHE * plain AHE) * (plain AHE * plain AHE)
    * (Renc * Renc) * (Renc * Renc))%type.
 
 (* The uniform product distribution on the sample space. *)
-Definition alice_sample_fdist : R.-fdist dsdp_alice_sampleT :=
+Definition alice_sample_fdist : R.-fdist alice_sampleT :=
   (((fdist_uniform card_plain_pair) `x (fdist_uniform card_plain_pair))
      `x (fdist_uniform card_renc_pair)) `x (fdist_uniform card_renc_pair).
 
@@ -396,7 +396,7 @@ Definition hop1_cipher (i : nat) : {RV alice_sample_fdist -> cipher AHE} :=
 
 (* The type of Alice's hopping tuple: her two masks, her two combine
    randomnesses, the leaked output, and the two ciphertexts she receives. *)
-Definition dsdp_alice_hop_tupleT : finType :=
+Definition alice_hop_tupleT : finType :=
   ((plain AHE * plain AHE) * (Renc * Renc) * plain AHE
    * cipher AHE * cipher AHE)%type.
 
@@ -406,14 +406,14 @@ Definition dsdp_alice_hop_tupleT : finType :=
    input that guess is checked against.  That is what makes
    distinguisher_of_predictor expressible as a Boolean test on one sample. *)
 Definition alice_hop_jointT : finType :=
-  (plain AHE * plain AHE * dsdp_alice_hop_tupleT)%type.
+  (plain AHE * plain AHE * alice_hop_tupleT)%type.
 
 (* Alice's hopping tuple at hop i: her two masks, her two combine
    randomnesses, the leaked output, and the two ciphertext slots, where the
    first i slots hold encryptions of zero. Hop 0 is the real tuple, hop 2 is
    the all-zero endpoint. *)
 Definition AliceHopTuple (i : nat) :
-    {RV alice_sample_fdist -> dsdp_alice_hop_tupleT} :=
+    {RV alice_sample_fdist -> alice_hop_tupleT} :=
   [% [% R2, R3], [% RA1, RA2], Sout, hop0_cipher i, hop1_cipher i].
 
 (* The joint distribution of the two honest inputs and Alice's hopping tuple
@@ -437,10 +437,10 @@ Proof. exact: Pr_fdistmap_bool. Qed.
 (* Alice's real hopping tuple: hop 0, both ciphertext slots carrying
    their real plaintexts. *)
 Definition AliceRealTuple :
-    {RV alice_sample_fdist -> dsdp_alice_hop_tupleT} :=
+    {RV alice_sample_fdist -> alice_hop_tupleT} :=
   AliceHopTuple 0.
 
-Let card_sample : #|dsdp_alice_sampleT| = #|dsdp_alice_sampleT|.-1.+1.
+Let card_sample : #|alice_sampleT| = #|alice_sampleT|.-1.+1.
 Proof. exact: fdist_card_prednK alice_sample_fdist. Qed.
 
 (* The sample space carries the uniform distribution. *)
@@ -448,7 +448,7 @@ Lemma alice_sample_fdistE : alice_sample_fdist = fdist_uniform card_sample.
 Proof.
 apply/fdist_ext => -[[[vv ms] rho] ra].
 rewrite fdist_uniformE /alice_sample_fdist !fdist_prodE !fdist_uniformE.
-by rewrite -!invfM -!natrM /dsdp_alice_sampleT !card_prod.
+by rewrite -!invfM -!natrM /alice_sampleT !card_prod.
 Qed.
 
 (* The state bob_challenge_adversary holds at hop 0: the two inputs, Alice's
@@ -927,7 +927,7 @@ Proof. by apply: boolp.funext => t; rewrite /V1c /U1c /U2c /U3c !const_RVE. Qed.
 
 (* The protocol weights, the leaked output and the two secret inputs satisfy the
    DSDP linear constraint pointwise. *)
-Lemma alice_constraint_holds (t : dsdp_alice_sampleT) :
+Lemma alice_constraint_holds (t : alice_sampleT) :
   dsdp_constraint_ring ([% V1c, U1c, U2c, U3c, Sout] t) ([% V2, V3] t).
 Proof.
 by rewrite /dsdp_constraint_ring /Sout /comp_RV /dsdp_output /V1c /U1c /U2c /U3c
@@ -1063,7 +1063,7 @@ Qed.
    the repository's total-conversion family. *)
 Definition alice_hop_tuple_of_spectator
     (p : (((plain AHE * plain AHE) * (Renc * Renc) * cipher AHE * cipher AHE)
-          * plain AHE)%type) : dsdp_alice_hop_tupleT :=
+          * plain AHE)%type) : alice_hop_tupleT :=
   (p.1.1.1.1, p.1.1.1.2, p.2, p.1.1.2, p.1.2).
 
 (* A predictor reading Alice's all-zero view matches Bob's input with
@@ -1071,7 +1071,7 @@ Definition alice_hop_tuple_of_spectator
    Naming: [guess] names the success probability being bounded, [all_zero] the
    view it reads, and [invm] the inverse plaintext-space cardinality bounding
    it. *)
-Lemma all_zero_guess_V2_le_invm (predict : predictor dsdp_alice_hop_tupleT) :
+Lemma all_zero_guess_V2_le_invm (predict : predictor alice_hop_tupleT) :
   Pr alice_sample_fdist [set t | (predict `o (AliceHopTuple 2)) t == V2 t]
     <= #|plain AHE|%:R^-1.
 Proof.
@@ -1082,7 +1082,7 @@ Qed.
 
 (* The event that a predictor matches Bob's input is the acceptance event of
    the associated distinguisher on the joint law of the inputs and the view. *)
-Lemma guess_V2_jointE (predict : predictor dsdp_alice_hop_tupleT) (i : nat) :
+Lemma guess_V2_jointE (predict : predictor alice_hop_tupleT) (i : nat) :
   Pr alice_sample_fdist
      [set t | (predict `o AliceHopTuple i) t == V2 t]
   = Pr (`p_ [% V2, V3, AliceHopTuple i])
@@ -1099,7 +1099,7 @@ Qed.
    Naming: [tuple] names the hop-0 conditioner, [V2] the input bounded, and
    [le] the direction of the bound. *)
 Theorem alice_tuple_guess_V2_le
-    (predict : predictor dsdp_alice_hop_tupleT) :
+    (predict : predictor alice_hop_tupleT) :
   Pr alice_sample_fdist [set t | (predict `o AliceRealTuple) t == V2 t]
     <= #|plain AHE|%:R^-1
        + indcpa_epsilon bob_pkey
@@ -1120,14 +1120,14 @@ Qed.
    embedded in bob_challenge_adversary.  It is the price of the hop-0 ciphertext
    replacement, and it is assumption-conditional at Bob's key. *)
 Definition bob_predictor_epsilon
-    (predict : predictor dsdp_alice_hop_tupleT) : R :=
+    (predict : predictor alice_hop_tupleT) : R :=
   indcpa_epsilon bob_pkey
     (bob_challenge_adversary (distinguisher_of_predictor predict)).
 
 (* The Charlie-key counterpart of bob_predictor_epsilon: the price of the hop-1
    ciphertext replacement, assumption-conditional at Charlie's key. *)
 Definition charlie_predictor_epsilon
-    (predict : predictor dsdp_alice_hop_tupleT) : R :=
+    (predict : predictor alice_hop_tupleT) : R :=
   indcpa_epsilon charlie_pkey
     (charlie_challenge_adversary (distinguisher_of_predictor predict)).
 
@@ -1136,7 +1136,7 @@ Definition charlie_predictor_epsilon
    Naming: after [Hunp_leak_S] of the sdistr axis (dsdp_guess_fiber.v),
    with the fixed predictor explicit. *)
 Definition alice_predictor_unpredictability
-    (predict : predictor dsdp_alice_hop_tupleT) : R :=
+    (predict : predictor alice_hop_tupleT) : R :=
   - log (Pr alice_sample_fdist
            [set t | (predict `o AliceRealTuple) t == V2 t]).
 
@@ -1154,7 +1154,7 @@ Local Notation "'`H_unp^{' g '}'" :=
    Naming: [unpredictability] marks the negative-logarithm form, [ge] the
    direction of the bound. *)
 Theorem alice_unpredictability_ge
-    (predict : predictor dsdp_alice_hop_tupleT)
+    (predict : predictor alice_hop_tupleT)
     (Hpos : 0 < Pr alice_sample_fdist
                   [set t | (predict `o AliceRealTuple) t == V2 t]) :
   log (#|plain AHE|%:R)
@@ -1182,7 +1182,7 @@ Qed.
    Naming: after [alice_unpredictability_ge], whose right-hand
    side this theorem folds into the named quantity. *)
 Theorem alice_predictor_unpredictability_ge
-    (predict : predictor dsdp_alice_hop_tupleT)
+    (predict : predictor alice_hop_tupleT)
     (Hpos : 0 < Pr alice_sample_fdist
                   [set t | (predict `o AliceRealTuple) t == V2 t]) :
   log (#|plain AHE|%:R)
@@ -1222,8 +1222,8 @@ Proof. by rewrite (fdistmap_prod Q1 Q2 idfun f2) fdistmap_id. Qed.
    under each of the two other parties' keys.  It reads only the output value
    and the two public keys, so everything it produces is available without the
    secret inputs. *)
-Definition dsdp_alice_simulator (s : plain AHE) :
-    R.-fdist dsdp_alice_hop_tupleT :=
+Definition alice_simulator (s : plain AHE) :
+    R.-fdist alice_hop_tupleT :=
   ((((fdist_uniform card_plain_pair) `x (fdist_uniform card_renc_pair))
       `x (fdist1 s))
      `x (enc_fdist bob_pkey 0))
@@ -1313,7 +1313,7 @@ Qed.
 (* The spectator slots of a value of Alice's hopping tuple.
    Naming: the [_of_] connective names the source the projection reads, after
    the repository's total-conversion family. *)
-Definition alice_spectator_of_hop_tuple (v : dsdp_alice_hop_tupleT) :
+Definition alice_spectator_of_hop_tuple (v : alice_hop_tupleT) :
     ((plain AHE * plain AHE) * (Renc * Renc) * cipher AHE
      * cipher AHE)%type :=
   (v.1.1.1.1, v.1.1.1.2, v.1.2, v.2).
@@ -1326,7 +1326,7 @@ Definition alice_spectator_of_hop_tuple (v : dsdp_alice_hop_tupleT) :
    Naming: the [K] suffix marks a cancellation lemma, after MathComp. *)
 Lemma alice_hop_tuple_of_spectatorK :
   cancel alice_hop_tuple_of_spectator
-    (fun v : dsdp_alice_hop_tupleT =>
+    (fun v : alice_hop_tupleT =>
        (alice_spectator_of_hop_tuple v, v.1.1.2)).
 Proof. by case=> [[[[m ra] c2] c3] s]. Qed.
 
@@ -1357,7 +1357,7 @@ Section alice_hop_tuple_all_zero_mass.
 
 Variable BT : finType.
 Variable W : {RV alice_sample_fdist -> BT}.
-Variable v : dsdp_alice_hop_tupleT.
+Variable v : alice_hop_tupleT.
 Variables (w : BT) (s : plain AHE).
 
 (* On the event W = w, the leaked output equals s. *)
@@ -1391,11 +1391,11 @@ End alice_hop_tuple_all_zero_mass.
    simulator law fed the leaked output of those inputs.
    Naming: after [bob_view_cond_sim] of [du2002/spp_simulator.v], with the
    [dsdp_alice] prefix separating it from that near-namesake. *)
-Lemma dsdp_alice_hop_tuple_cond_sim (v : dsdp_alice_hop_tupleT)
+Lemma dsdp_alice_hop_tuple_cond_sim (v : alice_hop_tupleT)
     (v2 v3 : plain AHE) :
   `Pr[ [% V2, V3] = (v2, v3) ] != 0 ->
   `Pr[ (AliceHopTuple 2) = v | [% V2, V3] = (v2, v3) ]
-    = dsdp_alice_simulator (dsdp_output v1 u1 u2 u3 v2 v3) v.
+    = alice_simulator (dsdp_output v1 u1 u2 u3 v2 v3) v.
 Proof.
 move=> Hvv.
 have HW t : [% V2, V3] t = (v2, v3) ->
@@ -1405,17 +1405,17 @@ rewrite cpr_eqE (alice_hop_tuple_all_zero_pfwd1E v HW)
         (alice_spectator_indep _ _).
 rewrite mulrA mulfK // -dist_of_RVE alice_spectator_law.
 case: v => [[[[m ra] sv] c2] c3].
-rewrite /alice_spectator_of_hop_tuple /dsdp_alice_simulator
+rewrite /alice_spectator_of_hop_tuple /alice_simulator
         !fdist_prodE fdist1E /=.
 by ring.
 Qed.
 
 (* Conditioned on the leaked output, Alice's all-zero view follows the simulator
    law fed that output. *)
-Corollary dsdp_alice_hop_tuple_cond_sim_S (v : dsdp_alice_hop_tupleT)
+Corollary dsdp_alice_hop_tuple_cond_sim_S (v : alice_hop_tupleT)
     (s : plain AHE) :
   `Pr[ Sout = s ] != 0 ->
-  `Pr[ (AliceHopTuple 2) = v | Sout = s ] = dsdp_alice_simulator s v.
+  `Pr[ (AliceHopTuple 2) = v | Sout = s ] = alice_simulator s v.
 Proof.
 move=> Hs.
 have Hind : alice_sample_fdist |= AliceSpectator _|_ Sout.
@@ -1424,7 +1424,7 @@ have Hind : alice_sample_fdist |= AliceSpectator _|_ Sout.
 rewrite cpr_eqE (alice_hop_tuple_all_zero_pfwd1E v (fun=> id)) (Hind _ _).
 rewrite mulrA mulfK // -dist_of_RVE alice_spectator_law.
 case: v => [[[[m ra] sv] c2] c3].
-rewrite /alice_spectator_of_hop_tuple /dsdp_alice_simulator
+rewrite /alice_spectator_of_hop_tuple /alice_simulator
         !fdist_prodE fdist1E /=.
 by ring.
 Qed.
@@ -1432,10 +1432,10 @@ Qed.
 (* The ideal-world joint law of the two secret inputs and a simulated view: the
    honest input law bound to the simulator fed the leaked output. *)
 Definition alice_ideal_joint :
-    R.-fdist (plain AHE * plain AHE * dsdp_alice_hop_tupleT) :=
+    R.-fdist (plain AHE * plain AHE * alice_hop_tupleT) :=
   vv <- `p_ [% V2, V3] ;
   fdistmap (fun v => (vv.1, vv.2, v))
-    (dsdp_alice_simulator (dsdp_output v1 u1 u2 u3 vv.1 vv.2)).
+    (alice_simulator (dsdp_output v1 u1 u2 u3 vv.1 vv.2)).
 
 (* The ideal-world joint law is the joint law of the two secret inputs and
    Alice's all-zero view.  The ideal world is therefore hop 2 itself, and the
@@ -1480,8 +1480,8 @@ Qed.
    decrypt-on-receive.
    Naming: [_of_] after the repository's total-conversion family, paired with
    the [alice_view_of_hop_tupleE] rewrite lemma below. *)
-Definition alice_view_of_hop_tuple (v : dsdp_alice_hop_tupleT) :
-    dsdp_alice_hop_tupleT * cipher AHE * cipher AHE * plain AHE :=
+Definition alice_view_of_hop_tuple (v : alice_hop_tupleT) :
+    alice_hop_tupleT * cipher AHE * cipher AHE * plain AHE :=
   let c_bob := v.1.2 in
   let c_charlie := v.2 in
   let r2 := v.1.1.1.1.1 in
@@ -1501,7 +1501,7 @@ Definition alice_view_of_hop_tuple (v : dsdp_alice_hop_tupleT) :
 (* The carrier of Alice's full view: her hopping tuple, her two outgoing
    combines, and the plaintext of her final decrypt-on-receive. *)
 Definition alice_viewT : finType :=
-  (dsdp_alice_hop_tupleT * cipher AHE * cipher AHE * plain AHE)%type.
+  (alice_hop_tupleT * cipher AHE * cipher AHE * plain AHE)%type.
 
 (* The IND-CPA adversary against Bob's key induced by a view predictor: it
    embeds the challenge in the ciphertext of Bob's input V2, rebuilds Alice's
@@ -1579,7 +1579,7 @@ Qed.
 
 End dsdp_alice_hop_secrecy.
 
-Section dsdp_alice_simulator_pub_sec.
+Section dsdp_alice_simulator_pub.
 Context {R : realType}.
 Variables (AHE : AHEncType) (Renc : finType) (index_renc : nat).
 Hypothesis card_renc : #|Renc| = index_renc.+1.
@@ -1592,8 +1592,8 @@ Variable rand_of_renc : Renc -> rand AHE.
 
 (* The simulated view law with its cryptographic setup passed as the two
    public keys it encrypts under. *)
-Definition dsdp_alice_simulator_pub (pk_b pk_c : pub_key AHE)
-    (s : plain AHE) : R.-fdist (dsdp_alice_hop_tupleT AHE Renc) :=
+Definition alice_simulator_pub (pk_b pk_c : pub_key AHE)
+    (s : plain AHE) : R.-fdist (alice_hop_tupleT AHE Renc) :=
   ((((fdist_uniform (card_plain_pair_subproof AHE))
        `x (fdist_uniform (card_renc_pair_subproof card_renc)))
       `x (fdist1 s))
@@ -1602,15 +1602,15 @@ Definition dsdp_alice_simulator_pub (pk_b pk_c : pub_key AHE)
 
 (* Instantiating the public keys as any party-indexed key table yields the
    existing simulator. *)
-Lemma dsdp_alice_simulator_pubE (pkey_of_party : party_id -> pub_key AHE)
+Lemma alice_simulator_pubE (pkey_of_party : party_id -> pub_key AHE)
     (s : plain AHE) :
-  dsdp_alice_simulator_pub (pkey_of_party Bob) (pkey_of_party Charlie) s
-  = dsdp_alice_simulator card_renc rand_of_renc pkey_of_party s.
+  alice_simulator_pub (pkey_of_party Bob) (pkey_of_party Charlie) s
+  = alice_simulator card_renc rand_of_renc pkey_of_party s.
 Proof. by []. Qed.
 
-End dsdp_alice_simulator_pub_sec.
+End dsdp_alice_simulator_pub.
 
-Section dsdp_alice_enc_uniform_img_sec.
+Section dsdp_alice_enc_uniform_img.
 Context {R : realType}.
 Variables (AHE : AHEncType) (Renc : finType) (index_renc : nat).
 Hypothesis card_renc : #|Renc| = index_renc.+1.
@@ -1673,4 +1673,4 @@ Lemma enc_fdist_uniform_imgE (pk : pub_key AHE) (v : plain AHE) :
   = #|enc_of_renc pk v @: [set: Renc]|%:R^-1.
 Proof. by move=> H c Hc; rewrite H fdist_uniform_supp_in. Qed.
 
-End dsdp_alice_enc_uniform_img_sec.
+End dsdp_alice_enc_uniform_img.

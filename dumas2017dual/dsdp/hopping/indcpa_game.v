@@ -96,7 +96,7 @@ Require Import extra_proba.
 (*                      ret a == returns a without sampling anything else     *)
 (*            distinguisher B == a Boolean test on the game output, where     *)
 (*                               true means that the test accepts             *)
-(*              predictor obs == a guessing strategy: a map from an           *)
+(*      predictor observation == a guessing strategy: a map from an           *)
 (*                               observation to a claimed plaintext           *)
 (* distinguisher_of_predictor predict ==                                      *)
 (*                               the test accepting when the predictor,       *)
@@ -283,7 +283,7 @@ Definition distinguisher (joint : finType) : Type := joint -> bool.
    claimed plaintext.  The counterpart of [distinguisher] for guessing games:
    every guessing bound below quantifies over one predictor at a fixed
    observation. *)
-Definition predictor (obs : finType) : Type := obs -> plain AHE.
+Definition predictor (observation : finType) : Type := observation -> plain AHE.
 
 (* The test that accepts when a predictor, reading the observation slot,
    returns the first input slot.  A predictor is scored by an equality event
@@ -291,9 +291,9 @@ Definition predictor (obs : finType) : Type := obs -> plain AHE.
    the predictor this way makes the two the same number: the probability
    that the predictor succeeds at hop i is the probability that this test
    accepts at hop i. *)
-Definition distinguisher_of_predictor {obs : finType}
-    (predict : predictor obs) :
-    distinguisher (plain AHE * plain AHE * obs)%type :=
+Definition distinguisher_of_predictor {observation : finType}
+    (predict : predictor observation) :
+    distinguisher (plain AHE * plain AHE * observation)%type :=
   fun x => predict x.2 == x.1.1.
 
 (* A single-query real-or-zero adversary.  [adv_state] is everything the

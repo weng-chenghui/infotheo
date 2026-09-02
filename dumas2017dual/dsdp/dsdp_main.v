@@ -70,10 +70,11 @@
    The same bound along a family of instances (asymptotic form)
      f_size / f_adv / f_guess / f_bound : the inverse-cardinality,
        assumed-advantage, guessing-probability, and combined-bound functions
-     alice_trace_guess_V2_admissible_negligible : along a
-       security-parameter-indexed family of DSDP instances, the trace
-       guessing probabilities are a negligible family once the inverse
-       plaintext cardinalities and the assumed advantages are
+     alice_trace_guess_V2_negligible : along a security-parameter-indexed
+       family of DSDP instances, the trace guessing probabilities are a
+       negligible family once the inverse plaintext cardinalities and the
+       assumed advantages are negligible and the two reduction adversaries
+       at each k are admitted by the class at that k
      alice_trace_guess_V2_paillier_negligible /
      alice_trace_guess_V2_benaloh_negligible : the same statement at a family
        of Paillier moduli and at a family of Benaloh block sizes, the inverse
@@ -704,7 +705,7 @@ Hypothesis u3_unit : u3 \is a GRing.unit.
 Local Notation P := (alice_sample_fdist (R:=R) AHE card_renc).
 Local Notation V2 := (V2 (R:=R) (AHE:=AHE) card_renc).
 Local Notation V3 := (V3 (R:=R) (AHE:=AHE) card_renc).
-Local Notation hop_tupleT := (dsdp_alice_hop_tupleT AHE Renc).
+Local Notation hop_tupleT := (alice_hop_tupleT AHE Renc).
 Local Notation AliceHopTuple i :=
   (AliceHopTuple (R:=R) (AHE:=AHE) card_renc rand_of_renc
      pkey_of_party v1 u1 u2 u3 i).
@@ -958,7 +959,7 @@ Variables (w_rb2 w_rc2 : Renc).
 Local Notation P := (alice_sample_fdist (R:=R) AHE card_renc).
 Local Notation pkey_of_dk := (pkey_of_dk dk_a dk_b dk_c).
 Local Notation trace_dataT := (trace_dataT AHE).
-Local Notation hop_tupleT := (dsdp_alice_hop_tupleT AHE Renc).
+Local Notation hop_tupleT := (alice_hop_tupleT AHE Renc).
 Local Notation V2 := (V2 (R:=R) (AHE:=AHE) card_renc).
 Local Notation V3 := (V3 (R:=R) (AHE:=AHE) card_renc).
 Local Notation AliceHopTuple i :=
@@ -1001,11 +1002,11 @@ Local Notation alice_ideal_joint :=
 Local Notation alice_trace_ideal_joint :=
   (alice_trace_ideal_joint (R:=R) card_renc rand_of_renc
      v1 u1 u2 u3 dk_a dk_b dk_c w_rc2).
-Local Notation dsdp_alice_trace_simulator :=
-  (dsdp_alice_trace_simulator (R:=R) card_renc rand_of_renc
+Local Notation alice_trace_simulator :=
+  (alice_trace_simulator (R:=R) card_renc rand_of_renc
      v1 u1 u2 u3 dk_a dk_b dk_c w_rc2).
-Local Notation dsdp_alice_simulator :=
-  (dsdp_alice_simulator (R:=R) (AHE:=AHE) card_renc rand_of_renc
+Local Notation alice_simulator :=
+  (alice_simulator (R:=R) (AHE:=AHE) card_renc rand_of_renc
      pkey_of_dk).
 Local Notation alice_trace_unpredictability :=
   (alice_trace_unpredictability (R:=R) card_renc rand_of_renc
@@ -1074,7 +1075,7 @@ Let decrypt_guess_prE :
   Pr P [set t | (bob_decrypt_predictor `o AliceTrace) t == V2 t] = 1.
 Proof.
 rewrite -alice_trace_decode_V2E.
-rewrite (_ : finset _ = [set: dsdp_alice_sampleT AHE Renc]) ?Pr_setT //.
+rewrite (_ : finset _ = [set: alice_sampleT AHE Renc]) ?Pr_setT //.
 by apply/setP => t; rewrite !inE eqxx.
 Qed.
 
@@ -1117,7 +1118,7 @@ have Hlift : `| Pr P [set t | (lifted `o AliceHopTuple 0) t == V2 t]
 have HV2 : lifted `o AliceHopTuple 0 = V2.
   by rewrite alice_trace_decode_V2E alice_trace_of_hop_tupleE.
 have H0 : Pr P [set t | (lifted `o AliceHopTuple 0) t == V2 t] = 1.
-  rewrite HV2 (_ : finset _ = [set: dsdp_alice_sampleT AHE Renc]) ?Pr_setT //.
+  rewrite HV2 (_ : finset _ = [set: alice_sampleT AHE Renc]) ?Pr_setT //.
   by apply/setP => t; rewrite !inE eqxx.
 (* all_zero_guess_V2_le_invm is stated at hop 2 and used here at hop 1.  Two
    reductions carry it across: the encoded trace is a literal bseq, so nth 3
@@ -1220,7 +1221,7 @@ Let alice_trace_ideal_jointE :
 Proof.
 rewrite /alice_trace_ideal_joint /alice_ideal_joint fdistmap_bind.
 congr (_ >>= _); apply: boolp.funext => vv.
-by rewrite /dsdp_alice_trace_simulator 2!fdistmap_comp.
+by rewrite /alice_trace_simulator 2!fdistmap_comp.
 Qed.
 
 Let alice_trace_real_jointE :
@@ -1480,7 +1481,7 @@ Local Notation f_bound := (f_bound (R:=R) A).
    hypotheses eventually force that predictor's reduction adversary out of
    the class.  Every currency is hypothesis-conditional, priced at each k as
    in the concrete bound. *)
-Theorem alice_trace_guess_V2_admissible_negligible :
+Theorem alice_trace_guess_V2_negligible :
   (forall k, indcpa_admissible (A k)
      (bob_trace_adversary_at (distinguisher_of_predictor (predict k)))) ->
   (forall k, indcpa_admissible (A k)
@@ -1582,7 +1583,7 @@ Hypothesis assumption_epsilon_negligible : negligible_fun f_adv.
    family would start from. *)
 Corollary alice_trace_guess_V2_paillier_negligible : negligible_fun f_guess.
 Proof.
-apply: (alice_trace_guess_V2_admissible_negligible
+apply: (alice_trace_guess_V2_negligible
           bob_reduction_admissible charlie_reduction_admissible _
           assumption_epsilon_negligible).
 exact: f_size_paillier_negligible inv_pq_negligible.
@@ -1671,7 +1672,7 @@ Hypothesis assumption_epsilon_negligible : negligible_fun f_adv.
    from. *)
 Corollary alice_trace_guess_V2_benaloh_negligible : negligible_fun f_guess.
 Proof.
-apply: (alice_trace_guess_V2_admissible_negligible
+apply: (alice_trace_guess_V2_negligible
           bob_reduction_admissible charlie_reduction_admissible _
           assumption_epsilon_negligible).
 exact: f_size_benaloh_negligible inv_r_negligible.

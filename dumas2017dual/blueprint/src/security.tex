@@ -209,7 +209,7 @@ finite commutative unit ring.
 
 \begin{definition}[The corrupted-Alice experiment]
   \label{def:alice_experiment}
-  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.dsdp_alice_sampleT,
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_sampleT,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_sample_fdist,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_sample_fdistE,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.V2,
@@ -238,7 +238,7 @@ finite commutative unit ring.
   \label{def:alice_hop_ladder}
   \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.hop0_cipher,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.hop1_cipher,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.dsdp_alice_hop_tupleT,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_hop_tupleT,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.AliceHopTuple,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_hop_joint_fdist,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_hop_game_success,
@@ -438,7 +438,7 @@ functionality on the other, rather than quantified over all input vectors.
 
 \begin{definition}[The simulator and the ideal-world law]
   \label{def:alice_simulator}
-  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.dsdp_alice_simulator,
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_simulator,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_ideal_joint}
   \rocqok
   \uses{def:alice_hop_ladder}
@@ -543,7 +543,7 @@ carries the three bounds above to the executed protocol.
   \rocq{infotheo.dumas2017dual.dsdp.dsdp_main.alice_trace_guess_V2_le,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_trace_unpredictability,
        infotheo.dumas2017dual.dsdp.dsdp_main.alice_trace_unpredictability_ge,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.dsdp_alice_trace_simulator,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_trace_simulator,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_trace_ideal_joint,
        infotheo.dumas2017dual.dsdp.dsdp_main.alice_trace_sim_advantage_le}
   \rocqok
@@ -768,8 +768,8 @@ adversary class, and records what forces the class to leave something out.
 
 \begin{theorem}[The trace guessing family is negligible]
   \label{thm:alice_guess_negligible}
-  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_instance_family.alice_trace_guess_V2_admissible_negligible,
-       infotheo.dumas2017dual.dsdp.dsdp_main.alice_trace_guess_V2_admissible_negligible}
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_instance_family.alice_trace_guess_V2_negligible,
+       infotheo.dumas2017dual.dsdp.dsdp_main.alice_trace_guess_V2_negligible}
   \rocqok
   \uses{def:negligible_fun,def:dsdp_instance,lem:negligible_predictor_bound,thm:alice_guess_admissible}
   Along a family $k \mapsto \mathcal{I}_k$ carrying an assumption

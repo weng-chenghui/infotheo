@@ -55,7 +55,7 @@ Require Import dsdp_alice_hop_secrecy dsdp_alice_trace_link.
 (*                      f_adv == the assumed-advantage family                 *)
 (*                    f_guess == the trace guessing-probability family        *)
 (*                    f_bound == f_size plus two copies of f_adv              *)
-(* alice_trace_guess_V2_admissible_negligible ==                              *)
+(* alice_trace_guess_V2_negligible ==                                         *)
 (*                               the trace guessing family is negligible      *)
 (*                               under the two class premises and the two     *)
 (*                               negligibility hypotheses                     *)
@@ -241,7 +241,7 @@ Definition f_bound k : R := f_size k + f_adv k + f_adv k.
    negligibility hypotheses eventually force that predictor's reduction
    adversary out of the class.  Every currency is hypothesis-conditional,
    priced at each k as in the concrete bound. *)
-Theorem alice_trace_guess_V2_admissible_negligible :
+Theorem alice_trace_guess_V2_negligible :
   (forall k, indcpa_admissible (A k)
      (bob_trace_adversary_at (distinguisher_of_predictor (predict k)))) ->
   (forall k, indcpa_admissible (A k)
@@ -369,7 +369,7 @@ Corollary trivial_instance_guess_V2_negligible :
       (inst_dk_c (trivial_instance k)) (inst_rb2 (trivial_instance k))
       (inst_rc2 (trivial_instance k)) (fun _ => 0)).
 Proof.
-apply: (alice_trace_guess_V2_admissible_negligible
+apply: (alice_trace_guess_V2_negligible
           (I := trivial_instance)
           (A := fun k => cipher_constant_assumption
                   (inst_card_renc (trivial_instance k))
@@ -538,7 +538,7 @@ Hypothesis assumption_epsilon_negligible : negligible_fun f_adv.
    family would start from. *)
 Corollary alice_trace_guess_V2_paillier_negligible : negligible_fun f_guess.
 Proof.
-apply: (alice_trace_guess_V2_admissible_negligible
+apply: (alice_trace_guess_V2_negligible
           bob_reduction_admissible charlie_reduction_admissible _
           assumption_epsilon_negligible).
 exact: f_size_paillier_negligible inv_pq_negligible.
@@ -708,7 +708,7 @@ Hypothesis assumption_epsilon_negligible : negligible_fun f_adv.
    from. *)
 Corollary alice_trace_guess_V2_benaloh_negligible : negligible_fun f_guess.
 Proof.
-apply: (alice_trace_guess_V2_admissible_negligible
+apply: (alice_trace_guess_V2_negligible
           bob_reduction_admissible charlie_reduction_admissible _
           assumption_epsilon_negligible).
 exact: f_size_benaloh_negligible inv_r_negligible.

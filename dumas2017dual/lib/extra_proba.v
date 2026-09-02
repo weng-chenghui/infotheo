@@ -476,7 +476,7 @@ Qed.
 
 End cinde_RV_comp_lemma.
 
-Section inde_const_RV_sec.
+Section inde_const_RV.
 Context {R : realType}.
 Variables (U : finType) (P : R.-fdist U) (A B : finType).
 
@@ -501,9 +501,9 @@ case: (eqVneq a c) => [->|ana].
   by rewrite eq_sym (negbTE ana).
 Qed.
 
-End inde_const_RV_sec.
+End inde_const_RV.
 
-Section cinde_diagonal_bound_sec.
+Section cinde_diagonal_bound.
 Context {R : realType}.
 Variables (U : finType) (P : R.-fdist U) (A C : finType).
 Variables (X Y : {RV P -> A}) (Z : {RV P -> C}).
@@ -571,7 +571,7 @@ have [Hc0|Hc0] := eqVneq (`Pr[ Z = c ]) 0.
   by rewrite mul1r; apply: lexx.
 Qed.
 
-End cinde_diagonal_bound_sec.
+End cinde_diagonal_bound.
 
 
 (* ========================================================================== *)
@@ -693,7 +693,7 @@ End fdist_glue.
 (*                    Dropping an independent conditioner                      *)
 (* ========================================================================== *)
 
-Section cpr_eq_drop_indep_sec.
+Section cpr_eq_drop_indep.
 
 (* A conditioning coordinate independent of the numerator pair may be dropped
    from the conditioning view. *)
@@ -710,4 +710,4 @@ by rewrite (pfwd1_pairCA X W Y a w y) (Hindep w (a, y)) (HWY w y) invfM
            mulrACA (mulfV Hw) mul1r.
 Qed.
 
-End cpr_eq_drop_indep_sec.
+End cpr_eq_drop_indep.
