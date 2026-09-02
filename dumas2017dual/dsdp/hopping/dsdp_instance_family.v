@@ -504,9 +504,9 @@ Hypothesis charlie_reduction_admissible : forall k,
        (distinguisher_of_predictor (predict k))).
 
 (* Supplies the negligibility of f_size in the bound
-   Pr_k <= 1/(p k * q k) + 2 * eps k; assumption_epsilon_negligible
-   supplies f_adv.  Closure under addition twice makes f_bound negligible,
-   and the pointwise bound transfers negligibility to f_guess.
+   Pr_k <= 1/(p k * q k) + 2 * eps k; f_adv_negligible supplies f_adv.
+   Closure under addition twice makes f_bound negligible, and the
+   pointwise bound transfers negligibility to f_guess.
 
    The summand 1/(p k * q k) is the guessing probability the leaked
    output Sout concedes: at Paillier #|plain| is the modulus p k * q k,
@@ -515,11 +515,11 @@ Hypothesis charlie_reduction_admissible : forall k,
    analysis already treats this residue as the acceptable leak, and this
    hypothesis states that acceptability uniformly in k, the residue
    falling below every inverse polynomial. *)
-Hypothesis inv_pq_negligible : negligible_fun (f_inv_pq (R:=R) p q).
+Hypothesis f_pq_negligible : negligible_fun (f_pq (R:=R) p q).
 
 (* The advantage the assumption family assumes is negligible: the
    asymptotic IND-CPA reading of decisional composite residuosity. *)
-Hypothesis assumption_epsilon_negligible : negligible_fun f_adv.
+Hypothesis f_adv_negligible : negligible_fun f_adv.
 
 (* The conclusion is negligible_fun of the family k |-> Pr_k, where Pr_k
    is the probability that the k-th predictor guesses Bob's input V2 at
@@ -540,8 +540,8 @@ Corollary alice_trace_guess_V2_paillier_negligible : negligible_fun f_guess.
 Proof.
 apply: (alice_trace_guess_V2_negligible
           bob_reduction_admissible charlie_reduction_admissible _
-          assumption_epsilon_negligible).
-exact: f_size_paillier_negligible inv_pq_negligible.
+          f_adv_negligible).
+exact: f_size_paillier_negligible f_pq_negligible.
 Qed.
 
 End paillier_dsdp_instance_family.
@@ -673,8 +673,8 @@ Hypothesis charlie_reduction_admissible : forall k,
        (distinguisher_of_predictor (predict k))).
 
 (* Supplies the negligibility of f_size in the bound
-   Pr_k <= 1/(r k) + 2 * eps k; assumption_epsilon_negligible supplies
-   f_adv.  Closure under addition twice makes f_bound negligible, and the
+   Pr_k <= 1/(r k) + 2 * eps k; f_adv_negligible supplies f_adv.
+   Closure under addition twice makes f_bound negligible, and the
    pointwise bound transfers negligibility to f_guess.
 
    The summand 1/(r k) is the guessing probability the leaked output
@@ -684,11 +684,11 @@ Hypothesis charlie_reduction_admissible : forall k,
    already treats this residue as the acceptable leak, and this
    hypothesis states that acceptability uniformly in k, the residue
    falling below every inverse polynomial. *)
-Hypothesis inv_r_negligible : negligible_fun (f_inv_r (R:=R) r).
+Hypothesis f_r_negligible : negligible_fun (f_r (R:=R) r).
 
 (* The advantage the assumption family assumes is negligible: the
    asymptotic IND-CPA reading of r-th residuosity. *)
-Hypothesis assumption_epsilon_negligible : negligible_fun f_adv.
+Hypothesis f_adv_negligible : negligible_fun f_adv.
 
 (* The conclusion is negligible_fun of the family k |-> Pr_k, where Pr_k
    is the probability that the k-th predictor guesses Bob's input V2 at
@@ -710,8 +710,8 @@ Corollary alice_trace_guess_V2_benaloh_negligible : negligible_fun f_guess.
 Proof.
 apply: (alice_trace_guess_V2_negligible
           bob_reduction_admissible charlie_reduction_admissible _
-          assumption_epsilon_negligible).
-exact: f_size_benaloh_negligible inv_r_negligible.
+          f_adv_negligible).
+exact: f_size_benaloh_negligible f_r_negligible.
 Qed.
 
 End benaloh_dsdp_instance_family.

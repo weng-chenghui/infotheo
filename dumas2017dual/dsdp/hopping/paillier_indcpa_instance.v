@@ -24,12 +24,32 @@ Require Import indcpa_game.
 (* abstract development keeps the two apart because he_types.v gives rand as  *)
 (* a bare Type, over which no distribution is well-typed.                     *)
 (*                                                                            *)
-(* The game and the scheme meet at one constant.  The challenger's law        *)
-(* enc_fdist is, at this packaging, the pushforward of the uniform law on     *)
-(* the unit group along paillier_enc, the encryption of paillier_enc.v; the   *)
-(* two are one term, and enc_fdist_paillierE records it.  The homomorphic     *)
-(* operations of the packaging play no part in the game; they are what the    *)
-(* DSDP protocol runs on.                                                     *)
+(* ## How the scheme and the game are connected                               *)
+(*                                                                            *)
+(* Paillier_AHEnc packs the Paillier scheme as one structure.  It holds the   *)
+(* encryption function enc, the decryption function dec, the map from a       *)
+(* private key to its public key, and the homomorphic operations.  The DSDP   *)
+(* protocol runs on this structure.                                           *)
+(*                                                                            *)
+(* The IND-CPA game of indcpa_game.v is written for any such structure.  Its  *)
+(* challenger encrypts with the structure's own enc, and draws the coin       *)
+(* uniformly from the coin type.  At Paillier the coin type is the unit       *)
+(* group of Z/(pq)^2 Z and the coin map is the identity.  So the challenger   *)
+(* draws a uniform unit u and returns g^m * u^n mod (pq)^2.  That is the      *)
+(* Paillier encryption of paillier_enc.v.  enc_fdist_paillierE states this;   *)
+(* both sides unfold to the same term, so its proof is by [].                 *)
+(*                                                                            *)
+(* The IND-CPA assumption is a record indexed by that structure.  Its bound   *)
+(* is on indcpa_epsilon, which unfolds through the challenger to the same     *)
+(* enc.  So what this file assumes is a bound on the real Paillier            *)
+(* encryption and nothing else.  paillier_indcpa_epsilon_le writes that       *)
+(* bound out in full.                                                         *)
+(*                                                                            *)
+(* The connection stops there.  The assumption is a parameter: no proof from  *)
+(* decisional composite residuosity is given.  The key is any private key     *)
+(* record, quantified universally, not a sample from a key generation law.    *)
+(* The homomorphic operations are never read by the game; only the protocol   *)
+(* uses them.                                                                 *)
 (*                                                                            *)
 (* The advantage stays a parameter.  A record of type                         *)
 (* indcpa_epsilon_assumption carries an adversary class, one epsilon, and     *)
@@ -61,16 +81,16 @@ Require Import indcpa_game.
 (*                              experiment written out: acceptance of an      *)
 (*                              encryption of the chosen plaintext and of     *)
 (*                              zero differ by at most epsilon                *)
-(*                  f_inv_pq == the inverse modulus family 1/(p k * q k)      *)
+(*                      f_pq == the inverse modulus family 1/(p k * q k)      *)
 (*           f_size_paillier == the inverse plaintext-cardinality family at   *)
 (*                              Paillier                                      *)
 (*            f_adv_paillier == the assumed-advantage family                  *)
-(*          f_bound_paillier == f_inv_pq plus twice f_adv_paillier            *)
+(*          f_bound_paillier == f_pq plus twice f_adv_paillier                *)
 (* f_size_paillier_negligible ==                                              *)
 (*                             superpolynomial growth of p k * q k makes      *)
 (*                             f_size_paillier negligible                     *)
 (* f_bound_paillier_negligible ==                                             *)
-(*                             f_bound_paillier is negligible when f_inv_pq   *)
+(*                             f_bound_paillier is negligible when f_pq       *)
 (*                             and f_adv_paillier are                         *)
 (* ```                                                                        *)
 (*                                                                            *)
@@ -207,7 +227,7 @@ Variable A : forall k,
 
 (* The inverse modulus family 1/(p k * q k), the form a growth condition on
    the moduli is stated in. *)
-Definition f_inv_pq k : R := (((p k * q k)%N)%:R : R)^-1.
+Definition f_pq k : R := (((p k * q k)%N)%:R : R)^-1.
 
 (* The inverse plaintext-cardinality family at Paillier: the
    information-theoretic summand of every guessing bound read off along the
@@ -221,17 +241,17 @@ Definition f_adv_paillier k : R := indcpa_assumption_epsilon (A k).
 (* The bound family 1/(p k * q k) + 2 * eps k: the shape of the
    class-conditional guessing bound at each k, before any protocol is
    named. *)
-Definition f_bound_paillier k : R := f_inv_pq k + 2 * f_adv_paillier k.
+Definition f_bound_paillier k : R := f_pq k + 2 * f_adv_paillier k.
 
 (* The moduli outgrow every polynomial in k.  At Paillier the modulus is the
    plaintext cardinality, so this is the growth of the plaintext space, and
    negligible is the asymptotic acceptance criterion for the guessing
    residue an inverse plaintext cardinality concedes. *)
-Hypothesis inv_pq_negligible : negligible_fun f_inv_pq.
+Hypothesis f_pq_negligible : negligible_fun f_pq.
 
 (* The advantage the assumption family assumes is negligible: the
    asymptotic IND-CPA reading of decisional composite residuosity. *)
-Hypothesis assumption_epsilon_negligible : negligible_fun f_adv_paillier.
+Hypothesis f_adv_paillier_negligible : negligible_fun f_adv_paillier.
 
 (* The inverse plaintext cardinality along the family is negligible: the
    plaintext space at k is Z/(p k * q k)Z, so modulus growth is plaintext
@@ -241,7 +261,7 @@ Lemma f_size_paillier_negligible : negligible_fun f_size_paillier.
 Proof.
 rewrite /f_size_paillier.
 under eq_fun => k do rewrite (card_plain_paillier_pq (p_gt1 k) (q_gt1 k)).
-exact: inv_pq_negligible.
+exact: f_pq_negligible.
 Qed.
 
 (* The bound family is negligible.  This is the whole asymptotic content of
@@ -250,8 +270,8 @@ Qed.
    vanishes in the security parameter. *)
 Lemma f_bound_paillier_negligible : negligible_fun f_bound_paillier.
 Proof.
-exact: negligible_fun_predictor_bound inv_pq_negligible
-         assumption_epsilon_negligible.
+exact: negligible_fun_predictor_bound f_pq_negligible
+         f_adv_paillier_negligible.
 Qed.
 
 End paillier_indcpa_family.

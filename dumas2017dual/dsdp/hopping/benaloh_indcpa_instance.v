@@ -24,12 +24,32 @@ Require Import indcpa_game.
 (* abstract development keeps the two apart because he_types.v gives rand as  *)
 (* a bare Type, over which no distribution is well-typed.                     *)
 (*                                                                            *)
-(* The game and the scheme meet at one constant.  The challenger's law        *)
-(* enc_fdist is, at this packaging, the pushforward of the uniform law on     *)
-(* the unit group along benaloh_enc, the encryption of benaloh_enc.v; the     *)
-(* two are one term, and enc_fdist_benalohE records it.  The homomorphic      *)
-(* operations of the packaging play no part in the game; they are what the    *)
-(* DSDP protocol runs on.                                                     *)
+(* ## How the scheme and the game are connected                               *)
+(*                                                                            *)
+(* Benaloh_AHEnc packs the Benaloh scheme as one structure.  It holds the     *)
+(* encryption function enc, the decryption function dec, the map from a       *)
+(* private key to its public key, and the homomorphic operations.  The DSDP   *)
+(* protocol runs on this structure.                                           *)
+(*                                                                            *)
+(* The IND-CPA game of indcpa_game.v is written for any such structure.  Its  *)
+(* challenger encrypts with the structure's own enc, and draws the coin       *)
+(* uniformly from the coin type.  At Benaloh the coin type is the unit        *)
+(* group of Z/nZ and the coin map is the identity.  So the challenger draws   *)
+(* a uniform unit u and returns y^m * u^r mod n.  That is the Benaloh         *)
+(* encryption of benaloh_enc.v.  enc_fdist_benalohE states this; both sides   *)
+(* unfold to the same term, so its proof is by [].                            *)
+(*                                                                            *)
+(* The IND-CPA assumption is a record indexed by that structure.  Its bound   *)
+(* is on indcpa_epsilon, which unfolds through the challenger to the same     *)
+(* enc.  So what this file assumes is a bound on the real Benaloh             *)
+(* encryption and nothing else.  benaloh_indcpa_epsilon_le writes that        *)
+(* bound out in full.                                                         *)
+(*                                                                            *)
+(* The connection stops there.  The assumption is a parameter: no proof from  *)
+(* r-th residuosity is given.  The key is any private key record,             *)
+(* quantified universally, not a sample from a key generation law.  The       *)
+(* homomorphic operations are never read by the game; only the protocol       *)
+(* uses them.                                                                 *)
 (*                                                                            *)
 (* The advantage stays a parameter.  A record of type                         *)
 (* indcpa_epsilon_assumption carries an adversary class, one epsilon, and     *)
@@ -64,16 +84,16 @@ Require Import indcpa_game.
 (*                               experiment written out: acceptance of an     *)
 (*                               encryption of the chosen plaintext and of    *)
 (*                               zero differ by at most epsilon               *)
-(*                    f_inv_r == the inverse block-size family 1/(r k)        *)
+(*                        f_r == the inverse block-size family 1/(r k)        *)
 (*             f_size_benaloh == the inverse plaintext-cardinality family at  *)
 (*                               Benaloh                                      *)
 (*              f_adv_benaloh == the assumed-advantage family                 *)
-(*            f_bound_benaloh == f_inv_r plus twice f_adv_benaloh             *)
+(*            f_bound_benaloh == f_r plus twice f_adv_benaloh                 *)
 (* f_size_benaloh_negligible ==                                               *)
 (*                              superpolynomial growth of r k makes           *)
 (*                              f_size_benaloh negligible                     *)
 (* f_bound_benaloh_negligible ==                                              *)
-(*                              f_bound_benaloh is negligible when f_inv_r    *)
+(*                              f_bound_benaloh is negligible when f_r        *)
 (*                              and f_adv_benaloh are                         *)
 (* ```                                                                        *)
 (*                                                                            *)
@@ -217,7 +237,7 @@ Variable A : forall k,
 
 (* The inverse block-size family 1/(r k), the form a growth condition on
    the block sizes is stated in. *)
-Definition f_inv_r k : R := ((r k)%:R : R)^-1.
+Definition f_r k : R := ((r k)%:R : R)^-1.
 
 (* The inverse plaintext-cardinality family at Benaloh: the
    information-theoretic summand of every guessing bound read off along the
@@ -230,17 +250,17 @@ Definition f_adv_benaloh k : R := indcpa_assumption_epsilon (A k).
 
 (* The bound family 1/(r k) + 2 * eps k: the shape of the class-conditional
    guessing bound at each k, before any protocol is named. *)
-Definition f_bound_benaloh k : R := f_inv_r k + 2 * f_adv_benaloh k.
+Definition f_bound_benaloh k : R := f_r k + 2 * f_adv_benaloh k.
 
 (* The block sizes outgrow every polynomial in k.  At Benaloh the block size
    is the plaintext cardinality, so this is the growth of the plaintext
    space, and negligible is the asymptotic acceptance criterion for the
    guessing residue an inverse plaintext cardinality concedes. *)
-Hypothesis inv_r_negligible : negligible_fun f_inv_r.
+Hypothesis f_r_negligible : negligible_fun f_r.
 
 (* The advantage the assumption family assumes is negligible: the
    asymptotic IND-CPA reading of r-th residuosity. *)
-Hypothesis assumption_epsilon_negligible : negligible_fun f_adv_benaloh.
+Hypothesis f_adv_benaloh_negligible : negligible_fun f_adv_benaloh.
 
 (* The inverse plaintext cardinality along the family is negligible: the
    plaintext space at k is Z/(r k)Z, so block-size growth is plaintext
@@ -250,7 +270,7 @@ Lemma f_size_benaloh_negligible : negligible_fun f_size_benaloh.
 Proof.
 rewrite /f_size_benaloh.
 under eq_fun => k do rewrite card_ord (Zp_cast (r_gt1 k)).
-exact: inv_r_negligible.
+exact: f_r_negligible.
 Qed.
 
 (* The bound family is negligible.  This is the whole asymptotic content of
@@ -259,8 +279,8 @@ Qed.
    in the security parameter. *)
 Lemma f_bound_benaloh_negligible : negligible_fun f_bound_benaloh.
 Proof.
-exact: negligible_fun_predictor_bound inv_r_negligible
-         assumption_epsilon_negligible.
+exact: negligible_fun_predictor_bound f_r_negligible
+         f_adv_benaloh_negligible.
 Qed.
 
 End benaloh_indcpa_family.
