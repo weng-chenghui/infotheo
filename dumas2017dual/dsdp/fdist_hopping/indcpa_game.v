@@ -40,7 +40,7 @@ Require Import extra_proba.
 (* bob_challenge_adversary and charlie_challenge_adversary of                 *)
 (* dumas2017dual/dsdp/fdist_hopping/dsdp_alice_fdist_secrecy.v package a      *)
 (* distinguisher as an indcpa_adversary, and                                  *)
-(* challenge_joint_fdist is the law their challenge induces.                  *)
+(* indcpa_fdist is the law their challenge induces.                           *)
 (*                                                                            *)
 (* The reduction lemmas take one condition on the protocol they are applied   *)
 (* to: the encryption randomness of the challenged slot is uniform and        *)
@@ -127,20 +127,20 @@ Require Import extra_proba.
 (*         enc_slot_resampleE == fresh encryption randomness independent of   *)
 (*                               the state may be sampled after the state     *)
 (*                               without changing the joint distribution      *)
-(*      challenge_joint_fdist == samples a reduction state and challenge      *)
-(*                               ciphertext, then builds the complete value   *)
-(*                               given to the distinguisher                   *)
-(*      challenge_joint_fdistE == the protocol value and the value built      *)
-(*                               around the challenge have the same           *)
-(*                               distribution when the challenge randomness   *)
-(*                               is fresh                                     *)
-(*      challenge_joint_acceptE == a distinguisher has the same acceptance    *)
-(*                               probability on those two distributions       *)
-(*  challenge_joint_accept_bindE == the distinguisher's acceptance            *)
-(*                               probability on the complete value built      *)
-(*                               around a challenge is computed by sampling   *)
-(*                               the state and challenge, then running the    *)
-(*                               distinguisher                                *)
+(*                protocol_RV == the value a distinguisher is tested on in    *)
+(*                               one protocol run, with the challenged slot   *)
+(*                               holding the ciphertext the protocol's own    *)
+(*                               randomness produced                          *)
+(*               indcpa_fdist == the law of that same value inside the        *)
+(*                               IND-CPA experiment: sample the reduction     *)
+(*                               state, take the challenge ciphertext from    *)
+(*                               the challenger, then assemble                *)
+(*     protocol_indcpa_fdistE == the protocol law and the IND-CPA law of      *)
+(*                               that value agree, so the reduction           *)
+(*                               reproduces the hop with no error term        *)
+(*       indcpa_fdist_acceptE == acceptance under the IND-CPA law is          *)
+(*                               computed by sampling the state and the       *)
+(*                               challenge, then running the distinguisher    *)
 (* ```                                                                        *)
 (*                                                                            *)
 (******************************************************************************)
@@ -476,7 +476,7 @@ Variables (sampleT stateT : finType).
 Variable P : R.-fdist sampleT.
 Variable Q : R.-fdist stateT.
 Variables (State : {RV P -> stateT}) (Rho : {RV P -> Renc}).
-Variable k : stateT -> Renc -> cipher AHE.
+Variable enc_slot : stateT -> Renc -> cipher AHE.
 
 (* Rho is uniform on its coordinate and independent of State, and Q is State's
    own law: the pair can be produced by drawing State from Q and then drawing
@@ -499,13 +499,13 @@ Hypothesis state_rho_prodE :
    be re-read as sampling the reduction state first and drawing fresh uniform
    randomness afterwards, which is the order the challenger works in. *)
 Lemma enc_slot_resampleE :
-  `p_ [% State, (fun t => k (State t) (Rho t))
+  `p_ [% State, (fun t => enc_slot (State t) (Rho t))
         : {RV P -> cipher AHE}]
-  = Q `X (fun a => fdistmap (k a) (fdist_uniform card_renc)).
+  = Q `X (fun a => fdistmap (enc_slot a) (fdist_uniform card_renc)).
 Proof.
-have HL : `p_ [% State, (fun t => k (State t) (Rho t))
+have HL : `p_ [% State, (fun t => enc_slot (State t) (Rho t))
                 : {RV P -> cipher AHE}]
-        = fdistmap (fun p : (stateT * Renc)%type => (p.1, k p.1 p.2))
+        = fdistmap (fun p : (stateT * Renc)%type => (p.1, enc_slot p.1 p.2))
                    (`p_ [% State, Rho]).
   by rewrite /dist_of_RV fdistmap_comp.
 rewrite HL state_rho_prodE [in RHS]fdist_prod_bindE fdist_prod_bindE
@@ -517,88 +517,89 @@ Qed.
 
 End enc_slot_resample.
 
-Section challenge_joint.
+Section protocol_indcpa.
 
 Variables (sampleT stateT joint : finType).
 Variable P : R.-fdist sampleT.
 Variables (State : {RV P -> stateT}) (Rho : {RV P -> Renc}).
 Variable pk : pub_key AHE.
-Variable msg : stateT -> plain AHE.
+
+(* The plaintext the reduction submits to the challenger, read off its own
+   state.  It plays the role of the adv_plain field of indcpa_adversary. *)
+Variable challenge_plain : stateT -> plain AHE.
 
 (* [assemble c ch] reconstructs the complete joint value tested by a
    distinguisher from reduction state c and challenge ciphertext ch. *)
 Variable assemble : stateT -> cipher AHE -> joint.
 
-Variable X : {RV P -> joint}.
+(* The value a distinguisher is tested on in a protocol run.  Rho enters it at
+   one place only, the ciphertext of the plaintext that State selects, and
+   everything else is a function of State.  That confinement is what lets a
+   reduction hand Rho to the challenger and still rebuild the tested value
+   around the challenge ciphertext it gets back.  A protocol whose sample is
+   laid out differently reaches this section by proving its own tested value
+   equal to protocol_RV, which is where the confinement is checked. *)
+Definition protocol_RV : {RV P -> joint} :=
+  fun t => assemble (State t)
+             (enc pk (challenge_plain (State t)) (rand_of_renc (Rho t))).
 
 (* The freshness condition at the reduction's own state: the encryption
    randomness is uniform and independent of everything the reduction holds
-   before it queries the challenger. *)
+   before it queries the challenger.  Confinement says where Rho enters, and
+   this says that the coordinate the challenger takes over is a fresh one. *)
 Hypothesis state_rho_prodE :
   `p_ [% State, Rho] = (`p_ State) `x (fdist_uniform card_renc).
-
-(* Rho enters the tested value at one place only, the ciphertext of the
-   plaintext that State selects.  Everything else X reads is a function of
-   State, so a reduction that gives Rho to the challenger can still rebuild X
-   around the challenge ciphertext it gets back.  The two hypotheses divide the
-   work: state_rho_prodE makes Rho fresh, and this one confines where it
-   enters. *)
-Hypothesis X_assembleE : forall t,
-  X t = assemble (State t) (enc pk (msg (State t)) (rand_of_renc (Rho t))).
 
 (* The law of the value a distinguisher is handed inside the IND-CPA
    experiment: sample the reduction state, sample the challenge ciphertext for
    the plaintext that state selects, then assemble the tested value from the
    two. *)
-Definition challenge_joint_fdist : R.-fdist joint :=
+Definition indcpa_fdist : R.-fdist joint :=
   c  <- `p_ State ;
-  ch <- enc_fdist pk (msg c) ;
+  ch <- enc_fdist pk (challenge_plain c) ;
   ret (assemble c ch).
 
-(* The protocol-game law from one complete protocol sample equals the
-   reduction-game law obtained by separately sampling the reduction state and
-   fresh uniform encryption randomness, then applying the same deterministic
-   encryption and assembly functions.  The reduction therefore reproduces the
-   protocol hop for the distinguisher with no error term. *)
-Lemma challenge_joint_fdistE : `p_ X = challenge_joint_fdist.
+(* The law read off one complete protocol sample equals the law the IND-CPA
+   experiment produces, where the reduction state and the encryption randomness
+   are sampled separately and the same deterministic encryption and assembly
+   functions are applied.  The two sides differ only in who owns the challenged
+   coordinate: on the left it is the protocol's Rho, on the right it is the
+   challenger.  So the reduction reproduces the hop with no error term. *)
+Lemma protocol_indcpa_fdistE : `p_ protocol_RV = indcpa_fdist.
 Proof.
-have -> : `p_ X
+have -> : `p_ protocol_RV
         = fdistmap (fun q : stateT * cipher AHE => assemble q.1 q.2)
-            (`p_ [% State,
-                  (fun t => enc pk (msg (State t)) (rand_of_renc (Rho t)))
-                    : {RV P -> cipher AHE}]).
-  by rewrite /dist_of_RV fdistmap_comp; congr fdistmap; exact/boolp.funext.
-rewrite (enc_slot_resampleE (fun c r => enc pk (msg c) (rand_of_renc r))
+           (`p_ [% State,
+                (fun t => enc pk (challenge_plain (State t))
+                            (rand_of_renc (Rho t)))
+                  : {RV P -> cipher AHE}]).
+  by rewrite fdistmap_comp.
+rewrite (enc_slot_resampleE
+           (fun c r => enc pk (challenge_plain c) (rand_of_renc r))
            state_rho_prodE) fdist_prod_bindE fdistmap_bind.
 congr (_ >>= _); apply/boolp.funext => c.
-by rewrite -/(fdistmap (assemble c) (enc_fdist pk (msg c))) fdistmap_comp.
+by rewrite -/(fdistmap (assemble c) (enc_fdist pk (challenge_plain c)))
+           fdistmap_comp.
 Qed.
 
-(* A distinguisher accepts the protocol sample with the same probability as it
-   accepts the value assembled inside the IND-CPA experiment.  The reduction is
-   tight: the hop gap it hands to the challenger is the gap the distinguisher
-   had. *)
-Corollary challenge_joint_acceptE (D : distinguisher joint) :
-  Pr (`p_ X) [set x | D x]
-  = Pr challenge_joint_fdist [set x | D x].
-Proof. by rewrite challenge_joint_fdistE. Qed.
-
-(* The acceptance probability under challenge_joint_fdist, unfolded as the
-   state law bound with the pushforward of D along each challenge law.  Read
-   together with indcpa_success_realE and indcpa_success_zeroE it
-   identifies a hop success probability with an IND-CPA success probability. *)
-Lemma challenge_joint_accept_bindE (D : distinguisher joint) :
-  Pr challenge_joint_fdist [set x | D x]
+(* The acceptance probability under indcpa_fdist, unfolded as the state law
+   bound with the pushforward of D along each challenge law.  Read together
+   with indcpa_success_realE and indcpa_success_zeroE it identifies a hop
+   success probability with an IND-CPA success probability. *)
+Lemma indcpa_fdist_acceptE (D : distinguisher joint) :
+  Pr indcpa_fdist [set x | D x]
   = Pr (c <- `p_ State ;
-        fdistmap (fun ch => D (assemble c ch)) (enc_fdist pk (msg c)))
+        fdistmap (fun ch => D (assemble c ch))
+                 (enc_fdist pk (challenge_plain c)))
        [set true].
 Proof.
-rewrite -Pr_fdistmap_bool /challenge_joint_fdist fdistmap_bind.
+rewrite -Pr_fdistmap_bool /indcpa_fdist fdistmap_bind.
 congr (Pr _ _); congr (_ >>= _); apply/boolp.funext => c.
-by rewrite -/(fdistmap (assemble c) (enc_fdist pk (msg c))) fdistmap_comp.
+by rewrite -/(fdistmap (assemble c) (enc_fdist pk (challenge_plain c)))
+           fdistmap_comp.
 Qed.
 
-End challenge_joint.
+End protocol_indcpa.
 
 End indcpa_game.
 

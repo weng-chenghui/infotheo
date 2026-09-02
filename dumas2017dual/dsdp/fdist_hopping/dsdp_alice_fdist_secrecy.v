@@ -335,10 +335,8 @@ Local Notation indcpa_success_zero :=
   (indcpa_success_zero (R:=R) (AHE:=AHE) card_renc rand_of_renc).
 Local Notation indcpa_epsilon :=
   (indcpa_epsilon (R:=R) (AHE:=AHE) card_renc rand_of_renc).
-Local Notation challenge_joint_acceptE :=
-  (challenge_joint_acceptE (rand_of_renc := rand_of_renc)).
-Local Notation challenge_joint_accept_bindE :=
-  (challenge_joint_accept_bindE (R:=R) (AHE:=AHE) card_renc rand_of_renc).
+Local Notation indcpa_fdist_acceptE :=
+  (indcpa_fdist_acceptE (R:=R) (AHE:=AHE) card_renc rand_of_renc).
 Local Notation predictor := (predictor AHE).
 
 (* The sample space of the corrupted-Alice experiment: the two honest inputs,
@@ -491,7 +489,7 @@ by move=> [[[[[v2 v3] [r2 r3]] [ra1 ra2]] rho3] rho2].
 Qed.
 
 (* Bob's encryption randomness is uniform and independent of the hop-0 state.
-   The freshness condition challenge_joint_fdistE consumes, discharged here
+   The freshness condition protocol_indcpa_fdistE consumes, discharged here
    rather than assumed: Rho2 is a coordinate of the product sample space that
    the hop-0 state omits, so the pair is a re-indexing of the whole sample.
    Its protocol reading is that Bob draws the randomness of the ciphertext he
@@ -774,11 +772,13 @@ Lemma hop0_real_challengeE (D : distinguisher alice_hop_jointT) :
     = indcpa_success_real bob_pkey (bob_challenge_adversary D).
 Proof.
 rewrite alice_hop_game_successE.
-rewrite (challenge_joint_acceptE (pk := bob_pkey)
-    (msg := fun c : hop0_stateT => c.1.1.1.1)
-    (assemble := hop0_assemble) hop0_state_prodE); last first.
-  by move=> -[[[[v2 v3] [r2 r3]] [rho2 rho3]] [ra1 ra2]].
-by rewrite challenge_joint_accept_bindE indcpa_success_realE.
+have -> : alice_hop_joint_fdist 0
+        = `p_ (protocol_RV rand_of_renc Hop0State Rho2 bob_pkey
+                 (fun c : hop0_stateT => c.1.1.1.1) hop0_assemble).
+  rewrite /alice_hop_joint_fdist /dist_of_RV; congr fdistmap.
+  by apply/boolp.funext => -[[[[v2 v3] [r2 r3]] [rho2 rho3]] [ra1 ra2]].
+rewrite (protocol_indcpa_fdistE _ _ _ _ hop0_state_prodE).
+by rewrite indcpa_fdist_acceptE indcpa_success_realE.
 Qed.
 
 (* D's acceptance probability on the view whose Bob slot encrypts zero, hop 1,
@@ -789,11 +789,13 @@ Lemma hop0_zero_challengeE (D : distinguisher alice_hop_jointT) :
     = indcpa_success_zero bob_pkey (bob_challenge_adversary D).
 Proof.
 rewrite alice_hop_game_successE.
-rewrite (challenge_joint_acceptE (pk := bob_pkey)
-    (msg := fun _ : hop0_stateT => 0)
-    (assemble := hop0_assemble) hop0_state_prodE); last first.
-  by move=> -[[[[v2 v3] [r2 r3]] [rho2 rho3]] [ra1 ra2]].
-by rewrite challenge_joint_accept_bindE indcpa_success_zeroE.
+have -> : alice_hop_joint_fdist 1
+        = `p_ (protocol_RV rand_of_renc Hop0State Rho2 bob_pkey
+                 (fun _ : hop0_stateT => 0) hop0_assemble).
+  rewrite /alice_hop_joint_fdist /dist_of_RV; congr fdistmap.
+  by apply/boolp.funext => -[[[[v2 v3] [r2 r3]] [rho2 rho3]] [ra1 ra2]].
+rewrite (protocol_indcpa_fdistE _ _ _ _ hop0_state_prodE).
+by rewrite indcpa_fdist_acceptE indcpa_success_zeroE.
 Qed.
 
 (* The gap D shows between hop 0 and hop 1 equals the advantage of
@@ -815,11 +817,13 @@ Lemma hop1_real_challengeE (D : distinguisher alice_hop_jointT) :
     = indcpa_success_real charlie_pkey (charlie_challenge_adversary D).
 Proof.
 rewrite alice_hop_game_successE.
-rewrite (challenge_joint_acceptE (pk := charlie_pkey)
-    (msg := fun c : hop1_stateT => c.1.1.1.2)
-    (assemble := hop1_assemble) hop1_state_prodE); last first.
-  by move=> -[[[[v2 v3] [r2 r3]] [rho2 rho3]] [ra1 ra2]].
-by rewrite challenge_joint_accept_bindE indcpa_success_realE.
+have -> : alice_hop_joint_fdist 1
+        = `p_ (protocol_RV rand_of_renc Hop1State Rho3 charlie_pkey
+                 (fun c : hop1_stateT => c.1.1.1.2) hop1_assemble).
+  rewrite /alice_hop_joint_fdist /dist_of_RV; congr fdistmap.
+  by apply/boolp.funext => -[[[[v2 v3] [r2 r3]] [rho2 rho3]] [ra1 ra2]].
+rewrite (protocol_indcpa_fdistE _ _ _ _ hop1_state_prodE).
+by rewrite indcpa_fdist_acceptE indcpa_success_realE.
 Qed.
 
 (* D's acceptance probability on the all-zero view, hop 2, equals the zero-bit
@@ -830,11 +834,13 @@ Lemma hop1_zero_challengeE (D : distinguisher alice_hop_jointT) :
     = indcpa_success_zero charlie_pkey (charlie_challenge_adversary D).
 Proof.
 rewrite alice_hop_game_successE.
-rewrite (challenge_joint_acceptE (pk := charlie_pkey)
-    (msg := fun _ : hop1_stateT => 0)
-    (assemble := hop1_assemble) hop1_state_prodE); last first.
-  by move=> -[[[[v2 v3] [r2 r3]] [rho2 rho3]] [ra1 ra2]].
-by rewrite challenge_joint_accept_bindE indcpa_success_zeroE.
+have -> : alice_hop_joint_fdist 2
+        = `p_ (protocol_RV rand_of_renc Hop1State Rho3 charlie_pkey
+                 (fun _ : hop1_stateT => 0) hop1_assemble).
+  rewrite /alice_hop_joint_fdist /dist_of_RV; congr fdistmap.
+  by apply/boolp.funext => -[[[[v2 v3] [r2 r3]] [rho2 rho3]] [ra1 ra2]].
+rewrite (protocol_indcpa_fdistE _ _ _ _ hop1_state_prodE).
+by rewrite indcpa_fdist_acceptE indcpa_success_zeroE.
 Qed.
 
 (* The gap D shows between hop 1 and hop 2 equals the advantage of
