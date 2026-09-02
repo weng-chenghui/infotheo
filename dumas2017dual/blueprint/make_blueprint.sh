@@ -27,7 +27,7 @@ MODULES=(
   dumas2017dual/dsdp/hopping/dsdp_alice_trace_link.v
   # The plug point: the same bound read off at a concrete scheme, with the
   # cardinality side discharged and the advantage left a parameter.
-  dumas2017dual/dsdp/hopping/paillier_indcpa_instance.v
+  dumas2017dual/dsdp/hopping/paillier_indcpa_scheme.v
 )
 
 echo "[1/3] blueprint HTML + dependency graph (plastex)"

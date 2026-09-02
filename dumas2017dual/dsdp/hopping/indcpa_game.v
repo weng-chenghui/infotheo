@@ -32,7 +32,7 @@ Require Import extra_proba.
 (* | reduction     | bob_challenge_adversary, charlie_challenge_adversary   | *)
 (* | assumption    | indcpa_epsilon_assumption                              | *)
 (* | asymptotics   | negligible_fun                                         | *)
-(* | instance      | cipher_constant_assumption                             | *)
+(* | inhabitant    | cipher_constant_assumption                             | *)
 (*                                                                            *)
 (* A distinguisher here is a plain Boolean function, the counterpart of       *)
 (* the finfun tester of smc/security_models/statdist.v.  A concrete           *)
@@ -72,6 +72,9 @@ Require Import extra_proba.
 (*  negligible_fun_predictor_bound == an inverse plaintext cardinality plus   *)
 (*                               twice one advantage family is negligible     *)
 (*                               when both families are                       *)
+(*              indcpa_scheme == an encryption scheme, a finite coin space,   *)
+(*                               its nonemptiness, and the map from a coin    *)
+(*                               index to the randomness encryption consumes  *)
 (* indcpa_epsilon_assumption == a Boolean adversary class, one epsilon, and   *)
 (*                               the assumption that every classified         *)
 (*                               adversary stays below that epsilon at every  *)
@@ -253,6 +256,29 @@ by rewrite mulr_natl mulr2n addrA.
 Qed.
 
 End negligible_asymptotics.
+
+(* The four data the real-or-zero game quantifies over, packed so that a
+   scheme is one value: an additively homomorphic scheme, the finite type
+   indexing its encryption coins, the nonemptiness of that type, and the map
+   carrying a coin index to the randomness the encryption consumes.  The coin
+   index type is kept apart from the scheme's own randomness because
+   he_types.v gives rand as a bare Type, over which no distribution is
+   well-typed; at a concrete scheme the two coincide and the map is the
+   identity.
+   scheme_card_renc is the nonemptiness the uniform coin law needs, in the
+   successor form fdist_uniform takes.  Carrying it as a field pins one proof
+   term: a second proof of the same equation is propositionally equal to it
+   and not convertible with it, so bounds stated at the two would compose
+   only through a rewrite.
+   Every epsilon of this file is measured at these four data, so packing them
+   makes a scheme the thing an assumption is made about, and a sequence of
+   schemes indexed by a security parameter a function nat -> indcpa_scheme
+   rather than four parallel sequences whose types depend on one another. *)
+Record indcpa_scheme := {
+  scheme_AHE          : AHEncType ;
+  scheme_renc         : finType ;
+  scheme_card_renc    : #|scheme_renc| = #|scheme_renc|.-1.+1 ;
+  scheme_rand_of_renc : scheme_renc -> rand scheme_AHE }.
 
 Section indcpa_game.
 Context {R : realType}.

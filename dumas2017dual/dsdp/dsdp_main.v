@@ -103,7 +103,7 @@ Require Import dsdp_malicious_dotp.
 Require Import indcpa_game.
 Require Import dsdp_alice_hop_secrecy dsdp_alice_trace_link.
 Require Import dsdp_instance_family.
-Require Import paillier_indcpa_instance benaloh_indcpa_instance.
+Require Import paillier_indcpa_scheme benaloh_indcpa_scheme.
 
 Set Implicit Arguments.
 Unset Strict Implicit.

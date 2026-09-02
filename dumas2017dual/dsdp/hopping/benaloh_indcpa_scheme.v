@@ -8,18 +8,19 @@ Require Import benaloh_enc benaloh_ahe.
 Require Import indcpa_game.
 
 (**md**************************************************************************)
-(* # Benaloh as an IND-CPA instance                                           *)
+(* # Benaloh as an IND-CPA scheme                                             *)
 (*                                                                            *)
 (* The IND-CPA game of indcpa_game.v quantifies over an AHEncType, a finite   *)
 (* coin-index type, a proof that its cardinality is a successor, and a map    *)
 (* from coin indices to the scheme's randomness.  This file supplies all      *)
-(* four at the Benaloh packaging of benaloh_ahe.v, states the IND-CPA         *)
-(* assumption of Benaloh at that packaging, and indexes the whole instance    *)
-(* by a security parameter.  No protocol enters: the file is the scheme side  *)
-(* of every computational bound the DSDP files read off at Benaloh, and       *)
+(* four at the Benaloh packaging of benaloh_ahe.v, packs them as the          *)
+(* indcpa_scheme value benaloh_indcpa_scheme, states the IND-CPA assumption   *)
+(* of Benaloh at that packaging, and indexes the whole scheme by a security   *)
+(* parameter.  No protocol enters: the file is the scheme side of every       *)
+(* computational bound the DSDP files read off at Benaloh, and                *)
 (* dsdp_instance_family.v is where those bounds are read off.                 *)
 (*                                                                            *)
-(* At this instance the coin index type is the scheme's own randomness, the   *)
+(* At this scheme the coin index type is the scheme's own randomness, the     *)
 (* finite unit group of Z/nZ, and the coin map is the identity.  The          *)
 (* abstract development keeps the two apart because he_types.v gives rand as  *)
 (* a bare Type, over which no distribution is well-typed.                     *)
@@ -60,12 +61,12 @@ Require Import indcpa_game.
 (* file does not impose, r-th residuosity is the assumption a proof of one    *)
 (* would start from.                                                          *)
 (*                                                                            *)
-(* Along a family of parameters every datum above becomes a function of the   *)
-(* security parameter k, and two hypotheses give the family its asymptotic    *)
-(* content: the block sizes outgrow every polynomial, and the assumed         *)
-(* advantages fall below every inverse polynomial.  It is the block size r,   *)
-(* the plaintext space Z/rZ, that must grow, and not the modulus n, which     *)
-(* sizes the ciphertext space.                                                *)
+(* Along a sequence of parameters every datum above becomes a function of     *)
+(* the security parameter k, and two hypotheses give the sequence its         *)
+(* asymptotic content: the block sizes outgrow every polynomial, and the      *)
+(* assumed advantages fall below every inverse polynomial.  It is the block   *)
+(* size r, the plaintext space Z/rZ, that must grow, and not the modulus n,   *)
+(* which sizes the ciphertext space.                                          *)
 (*                                                                            *)
 (* ```                                                                        *)
 (*              Benaloh_AHEnc == the Benaloh AHEncType at modulus n and       *)
@@ -75,6 +76,8 @@ Require Import indcpa_game.
 (*       rand_of_renc_benaloh == the coin map, the identity                   *)
 (*          card_renc_benaloh == the successor form of that cardinality, in   *)
 (*                               one pinned proof term                        *)
+(*      benaloh_indcpa_scheme == the four data above as one indcpa_scheme     *)
+(*                               value, at modulus n and block size r         *)
 (*         enc_fdist_benalohE == the IND-CPA challenger at this packaging     *)
 (*                               encrypts with benaloh_enc under uniform      *)
 (*                               unit-group randomness                        *)
@@ -84,10 +87,10 @@ Require Import indcpa_game.
 (*                               experiment written out: acceptance of an     *)
 (*                               encryption of the chosen plaintext and of    *)
 (*                               zero differ by at most epsilon               *)
-(*                        f_r == the inverse block-size family 1/(r k)        *)
-(*             f_size_benaloh == the inverse plaintext-cardinality family at  *)
-(*                               Benaloh                                      *)
-(*              f_adv_benaloh == the assumed-advantage family                 *)
+(*                        f_r == the inverse block-size sequence 1/(r k)      *)
+(*             f_size_benaloh == the inverse plaintext-cardinality sequence   *)
+(*                               at Benaloh                                   *)
+(*              f_adv_benaloh == the assumed-advantage sequence               *)
 (*            f_bound_benaloh == f_r plus twice f_adv_benaloh                 *)
 (* f_size_benaloh_negligible ==                                               *)
 (*                              superpolynomial growth of r k makes           *)
@@ -110,7 +113,7 @@ Local Open Scope reals_ext_scope.
 Local Open Scope proba_scope.
 Local Open Scope fdist_scope.
 
-Section benaloh_indcpa_instance.
+Section benaloh_indcpa_scheme.
 Context {R : realType}.
 Variables n r : nat.
 Hypothesis n_gt1 : (1 < n)%N.
@@ -152,6 +155,17 @@ Definition rand_of_renc_benaloh : renc_benaloh -> rand AHE := idfun.
    through a rewrite. *)
 Lemma card_renc_benaloh : #|renc_benaloh| = #|renc_benaloh|.-1.+1.
 Proof. by rewrite prednK //; apply/card_gt0P; exists 1%g; rewrite inE. Qed.
+
+(* The Benaloh scheme as one value of the scheme record the IND-CPA game is
+   quantified over: the packaging at modulus n and block size r, its coin
+   index type, the pinned cardinality above, and the identity coin map.  The
+   DSDP files instantiate the game at this value, so every bound they read
+   off at Benaloh is a bound at the scheme record built here and at no other
+   proof of the coin-space cardinality. *)
+Definition benaloh_indcpa_scheme : indcpa_scheme :=
+  {| scheme_AHE := AHE ; scheme_renc := renc_benaloh ;
+     scheme_card_renc := card_renc_benaloh ;
+     scheme_rand_of_renc := rand_of_renc_benaloh |}.
 
 (* The IND-CPA challenger at this packaging is the Benaloh encryption of
    benaloh_enc.v under uniform unit-group randomness.  The game's enc is the
@@ -217,38 +231,38 @@ by rewrite /indcpa_epsilon indcpa_success_realE indcpa_success_zeroE
            !enc_fdist_benalohE.
 Qed.
 
-End benaloh_indcpa_instance.
+End benaloh_indcpa_scheme.
 
-Section benaloh_indcpa_family.
+Section benaloh_indcpa_scheme_sequence.
 Context {R : realType}.
 Variables n r : nat -> nat.
 Hypothesis n_gt1 : forall k, (1 < n k)%N.
 Hypothesis r_gt1 : forall k, (1 < r k)%N.
 
-(* The Benaloh IND-CPA instance at parameter k is the fixed instance above
-   taken at n k and r k: the packaging Benaloh_AHEnc (n k) (r_gt1 k), the
-   coin type renc_benaloh (n k), the pinned cardinality
-   card_renc_benaloh (n k), and the coin map rand_of_renc_benaloh (r_gt1 k).
-   A family of assumption records at those types is the per-k form of
-   benaloh_indcpa_assumption. *)
+(* The Benaloh IND-CPA scheme at parameter k is the fixed scheme above taken
+   at n k and r k: the packaging Benaloh_AHEnc (n k) (r_gt1 k), the coin type
+   renc_benaloh (n k), the pinned cardinality card_renc_benaloh (n k), and
+   the coin map rand_of_renc_benaloh (r_gt1 k), which is
+   benaloh_indcpa_scheme (n k) (r_gt1 k).  A sequence of assumption records
+   at those types is the per-k form of benaloh_indcpa_assumption. *)
 Variable A : forall k,
   indcpa_epsilon_assumption (R:=R) (card_renc_benaloh (n k))
     (rand_of_renc_benaloh (n:=n k) (r_gt1 k)).
 
-(* The inverse block-size family 1/(r k), the form a growth condition on
+(* The inverse block-size sequence 1/(r k), the form a growth condition on
    the block sizes is stated in. *)
 Definition f_r k : R := ((r k)%:R : R)^-1.
 
-(* The inverse plaintext-cardinality family at Benaloh: the
+(* The inverse plaintext-cardinality sequence at Benaloh: the
    information-theoretic summand of every guessing bound read off along the
-   family. *)
+   sequence. *)
 Definition f_size_benaloh k : R :=
   (#|plain (Benaloh_AHEnc (n k) (r_gt1 k))|%:R : R)^-1.
 
-(* The assumed-advantage family: the epsilon A k assumes at each k. *)
+(* The assumed-advantage sequence: the epsilon A k assumes at each k. *)
 Definition f_adv_benaloh k : R := indcpa_assumption_epsilon (A k).
 
-(* The bound family 1/(r k) + 2 * eps k: the shape of the class-conditional
+(* The bound sequence 1/(r k) + 2 * eps k: the shape of the class-conditional
    guessing bound at each k, before any protocol is named. *)
 Definition f_bound_benaloh k : R := f_r k + 2 * f_adv_benaloh k.
 
@@ -258,14 +272,14 @@ Definition f_bound_benaloh k : R := f_r k + 2 * f_adv_benaloh k.
    guessing residue an inverse plaintext cardinality concedes. *)
 Hypothesis f_r_negligible : negligible_fun f_r.
 
-(* The advantage the assumption family assumes is negligible: the
+(* The advantage the assumption sequence assumes is negligible: the
    asymptotic IND-CPA reading of r-th residuosity. *)
 Hypothesis f_adv_benaloh_negligible : negligible_fun f_adv_benaloh.
 
-(* The inverse plaintext cardinality along the family is negligible: the
+(* The inverse plaintext cardinality along the sequence is negligible: the
    plaintext space at k is Z/(r k)Z, so block-size growth is plaintext
    growth.  This is the scheme-side summand of every guessing bound of the
-   shape 1/#|plain| + 2 * eps read off along the family. *)
+   shape 1/#|plain| + 2 * eps read off along the sequence. *)
 Lemma f_size_benaloh_negligible : negligible_fun f_size_benaloh.
 Proof.
 rewrite /f_size_benaloh.
@@ -273,8 +287,8 @@ under eq_fun => k do rewrite card_ord (Zp_cast (r_gt1 k)).
 exact: f_r_negligible.
 Qed.
 
-(* The bound family is negligible.  This is the whole asymptotic content of
-   the Benaloh IND-CPA instance family, stated before any protocol is named:
+(* The bound sequence is negligible.  This is the whole asymptotic content of
+   the Benaloh IND-CPA scheme sequence, stated before any protocol is named:
    a bound of this shape at each k, whatever protocol produced it, vanishes
    in the security parameter. *)
 Lemma f_bound_benaloh_negligible : negligible_fun f_bound_benaloh.
@@ -283,4 +297,4 @@ exact: negligible_fun_predictor_bound f_r_negligible
          f_adv_benaloh_negligible.
 Qed.
 
-End benaloh_indcpa_family.
+End benaloh_indcpa_scheme_sequence.

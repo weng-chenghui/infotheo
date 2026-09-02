@@ -15,9 +15,10 @@ basename and resolve by suffix.
 
 - **hopping/** — the hopping secrecy result over Infotheo distributions.
   `indcpa_game` (the real-or-zero game, the advantage `indcpa_epsilon`, the adversary-class
-  assumption record, `negligible_fun`), `paillier_indcpa_instance` / `benaloh_indcpa_instance`
-  (the two schemes as IND-CPA instances, scheme side only, fixed and indexed by a security
-  parameter), `dsdp_alice_hop_secrecy` (the two hop reductions, the guess / unpredictability /
+  assumption record, the scheme record `indcpa_scheme`, `negligible_fun`),
+  `paillier_indcpa_scheme` / `benaloh_indcpa_scheme`
+  (the two concrete schemes as `indcpa_scheme` values, scheme side only, fixed and indexed
+  by a security parameter), `dsdp_alice_hop_secrecy` (the two hop reductions, the guess / unpredictability /
   simulator-closeness headlines), `dsdp_alice_trace_link` (the same bounds at the executed
   fifteen-round piSMC trace), `dsdp_instance_family` (the per-k DSDP instance record, the
   asymptotic headline, the identity-scheme witness, and the DSDP bounds read off at the

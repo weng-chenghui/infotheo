@@ -343,7 +343,7 @@ End enc_lemmas.
   challenge plaintext decrypts the challenge, so a class admitting every
   adversary is forced to assume an epsilon of at least 1 whenever the
   plaintext space has more than one element. The second is an instantiation of that record at a
-  scheme, which [dumas2017dual/dsdp/hopping/paillier_indcpa_instance.v]
+  scheme, which [dumas2017dual/dsdp/hopping/paillier_indcpa_scheme.v]
   does for Paillier, leaving the whole assumption a parameter that a proof
   from decisional composite residuosity would supply.
 

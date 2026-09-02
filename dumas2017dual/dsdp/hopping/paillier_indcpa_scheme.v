@@ -8,18 +8,19 @@ Require Import paillier_enc paillier_ahe paillier_fdist_instance.
 Require Import indcpa_game.
 
 (**md**************************************************************************)
-(* # Paillier as an IND-CPA instance                                          *)
+(* # Paillier as an IND-CPA scheme                                            *)
 (*                                                                            *)
 (* The IND-CPA game of indcpa_game.v quantifies over an AHEncType, a finite   *)
 (* coin-index type, a proof that its cardinality is a successor, and a map    *)
 (* from coin indices to the scheme's randomness.  This file supplies all      *)
-(* four at the Paillier packaging of paillier_fdist_instance.v, states the    *)
-(* IND-CPA assumption of Paillier at that packaging, and indexes the whole    *)
-(* instance by a security parameter.  No protocol enters: the file is the     *)
-(* scheme side of every computational bound the DSDP files read off at        *)
-(* Paillier, and dsdp_instance_family.v is where those bounds are read off.   *)
+(* four at the Paillier packaging of paillier_fdist_instance.v, packs them    *)
+(* as the indcpa_scheme value paillier_indcpa_scheme, states the IND-CPA      *)
+(* assumption of Paillier at that packaging, and indexes the whole scheme by  *)
+(* a security parameter.  No protocol enters: the file is the scheme side of  *)
+(* every computational bound the DSDP files read off at Paillier, and         *)
+(* dsdp_instance_family.v is where those bounds are read off.                 *)
 (*                                                                            *)
-(* At this instance the coin index type is the scheme's own randomness, the   *)
+(* At this scheme the coin index type is the scheme's own randomness, the     *)
 (* finite unit group of Z/(pq)^2 Z, and the coin map is the identity.  The    *)
 (* abstract development keeps the two apart because he_types.v gives rand as  *)
 (* a bare Type, over which no distribution is well-typed.                     *)
@@ -59,8 +60,8 @@ Require Import indcpa_game.
 (* condition this file does not impose, decisional composite residuosity is   *)
 (* the assumption a proof of one would start from.                            *)
 (*                                                                            *)
-(* Along a family of moduli every datum above becomes a function of the       *)
-(* security parameter k, and two hypotheses give the family its asymptotic    *)
+(* Along a sequence of moduli every datum above becomes a function of the     *)
+(* security parameter k, and two hypotheses give the sequence its asymptotic  *)
 (* content: the moduli outgrow every polynomial, and the assumed advantages   *)
 (* fall below every inverse polynomial.                                       *)
 (*                                                                            *)
@@ -71,6 +72,8 @@ Require Import indcpa_game.
 (*     rand_of_renc_paillier == the coin map, the identity                    *)
 (*        card_renc_paillier == the successor form of that cardinality, in    *)
 (*                              one pinned proof term                         *)
+(*    paillier_indcpa_scheme == the four data above as one indcpa_scheme      *)
+(*                              value, at modulus p q                         *)
 (*       enc_fdist_paillierE == the IND-CPA challenger at this packaging      *)
 (*                              encrypts with paillier_enc under uniform      *)
 (*                              unit-group randomness                         *)
@@ -81,10 +84,10 @@ Require Import indcpa_game.
 (*                              experiment written out: acceptance of an      *)
 (*                              encryption of the chosen plaintext and of     *)
 (*                              zero differ by at most epsilon                *)
-(*                      f_pq == the inverse modulus family 1/(p k * q k)      *)
-(*           f_size_paillier == the inverse plaintext-cardinality family at   *)
-(*                              Paillier                                      *)
-(*            f_adv_paillier == the assumed-advantage family                  *)
+(*                      f_pq == the inverse modulus sequence 1/(p k * q k)    *)
+(*           f_size_paillier == the inverse plaintext-cardinality sequence    *)
+(*                              at Paillier                                   *)
+(*            f_adv_paillier == the assumed-advantage sequence                *)
 (*          f_bound_paillier == f_pq plus twice f_adv_paillier                *)
 (* f_size_paillier_negligible ==                                              *)
 (*                             superpolynomial growth of p k * q k makes      *)
@@ -107,7 +110,7 @@ Local Open Scope reals_ext_scope.
 Local Open Scope proba_scope.
 Local Open Scope fdist_scope.
 
-Section paillier_indcpa_instance.
+Section paillier_indcpa_scheme.
 Context {R : realType}.
 Variables p q : nat.
 Hypothesis p_gt1 : (1 < p)%N.
@@ -144,6 +147,17 @@ Definition rand_of_renc_paillier : renc_paillier -> rand AHE := idfun.
    through a rewrite. *)
 Lemma card_renc_paillier : #|renc_paillier| = #|renc_paillier|.-1.+1.
 Proof. by rewrite prednK //; apply/card_gt0P; exists 1%g; rewrite inE. Qed.
+
+(* The Paillier scheme as one value of the scheme record the IND-CPA game is
+   quantified over: the packaging at modulus p q, its coin index type, the
+   pinned cardinality above, and the identity coin map.  The DSDP files
+   instantiate the game at this value, so every bound they read off at
+   Paillier is a bound at the scheme record built here and at no other
+   proof of the coin-space cardinality. *)
+Definition paillier_indcpa_scheme : indcpa_scheme :=
+  {| scheme_AHE := AHE ; scheme_renc := renc_paillier ;
+     scheme_card_renc := card_renc_paillier ;
+     scheme_rand_of_renc := rand_of_renc_paillier |}.
 
 (* The IND-CPA challenger at this packaging is the Paillier encryption of
    paillier_enc.v under uniform unit-group randomness.  The game's enc is
@@ -207,38 +221,39 @@ by rewrite /indcpa_epsilon indcpa_success_realE indcpa_success_zeroE
            !enc_fdist_paillierE.
 Qed.
 
-End paillier_indcpa_instance.
+End paillier_indcpa_scheme.
 
-Section paillier_indcpa_family.
+Section paillier_indcpa_scheme_sequence.
 Context {R : realType}.
 Variables p q : nat -> nat.
 Hypothesis p_gt1 : forall k, (1 < p k)%N.
 Hypothesis q_gt1 : forall k, (1 < q k)%N.
 
-(* The Paillier IND-CPA instance at parameter k is the fixed instance above
-   taken at p k and q k: the packaging Paillier_AHEnc (pq_gt1 (p_gt1 k)
-   (q_gt1 k)), the coin type renc_paillier (p k) (q k), the pinned
-   cardinality card_renc_paillier (p k) (q k), and the coin map
-   rand_of_renc_paillier (p_gt1 k) (q_gt1 k).  A family of assumption
+(* The Paillier IND-CPA scheme at parameter k is the fixed scheme above taken
+   at p k and q k: the packaging Paillier_AHEnc (pq_gt1 (p_gt1 k) (q_gt1 k)),
+   the coin type renc_paillier (p k) (q k), the pinned cardinality
+   card_renc_paillier (p k) (q k), and the coin map
+   rand_of_renc_paillier (p_gt1 k) (q_gt1 k), which is
+   paillier_indcpa_scheme (p_gt1 k) (q_gt1 k).  A sequence of assumption
    records at those types is the per-k form of paillier_indcpa_assumption. *)
 Variable A : forall k,
   indcpa_epsilon_assumption (R:=R) (card_renc_paillier (p k) (q k))
     (rand_of_renc_paillier (p_gt1 k) (q_gt1 k)).
 
-(* The inverse modulus family 1/(p k * q k), the form a growth condition on
+(* The inverse modulus sequence 1/(p k * q k), the form a growth condition on
    the moduli is stated in. *)
 Definition f_pq k : R := (((p k * q k)%N)%:R : R)^-1.
 
-(* The inverse plaintext-cardinality family at Paillier: the
+(* The inverse plaintext-cardinality sequence at Paillier: the
    information-theoretic summand of every guessing bound read off along the
-   family. *)
+   sequence. *)
 Definition f_size_paillier k : R :=
   (#|plain (Paillier_AHEnc (pq_gt1 (p_gt1 k) (q_gt1 k)))|%:R : R)^-1.
 
-(* The assumed-advantage family: the epsilon A k assumes at each k. *)
+(* The assumed-advantage sequence: the epsilon A k assumes at each k. *)
 Definition f_adv_paillier k : R := indcpa_assumption_epsilon (A k).
 
-(* The bound family 1/(p k * q k) + 2 * eps k: the shape of the
+(* The bound sequence 1/(p k * q k) + 2 * eps k: the shape of the
    class-conditional guessing bound at each k, before any protocol is
    named. *)
 Definition f_bound_paillier k : R := f_pq k + 2 * f_adv_paillier k.
@@ -249,14 +264,14 @@ Definition f_bound_paillier k : R := f_pq k + 2 * f_adv_paillier k.
    residue an inverse plaintext cardinality concedes. *)
 Hypothesis f_pq_negligible : negligible_fun f_pq.
 
-(* The advantage the assumption family assumes is negligible: the
+(* The advantage the assumption sequence assumes is negligible: the
    asymptotic IND-CPA reading of decisional composite residuosity. *)
 Hypothesis f_adv_paillier_negligible : negligible_fun f_adv_paillier.
 
-(* The inverse plaintext cardinality along the family is negligible: the
+(* The inverse plaintext cardinality along the sequence is negligible: the
    plaintext space at k is Z/(p k * q k)Z, so modulus growth is plaintext
    growth.  This is the scheme-side summand of every guessing bound of the
-   shape 1/#|plain| + 2 * eps read off along the family. *)
+   shape 1/#|plain| + 2 * eps read off along the sequence. *)
 Lemma f_size_paillier_negligible : negligible_fun f_size_paillier.
 Proof.
 rewrite /f_size_paillier.
@@ -264,8 +279,8 @@ under eq_fun => k do rewrite (card_plain_paillier_pq (p_gt1 k) (q_gt1 k)).
 exact: f_pq_negligible.
 Qed.
 
-(* The bound family is negligible.  This is the whole asymptotic content of
-   the Paillier IND-CPA instance family, stated before any protocol is
+(* The bound sequence is negligible.  This is the whole asymptotic content of
+   the Paillier IND-CPA scheme sequence, stated before any protocol is
    named: a bound of this shape at each k, whatever protocol produced it,
    vanishes in the security parameter. *)
 Lemma f_bound_paillier_negligible : negligible_fun f_bound_paillier.
@@ -274,4 +289,4 @@ exact: negligible_fun_predictor_bound f_pq_negligible
          f_adv_paillier_negligible.
 Qed.
 
-End paillier_indcpa_family.
+End paillier_indcpa_scheme_sequence.

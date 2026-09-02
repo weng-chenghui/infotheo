@@ -5,7 +5,7 @@ Require Import realType_ext ssr_ext ssralg_ext bigop_ext fdist.
 Require Import fdist_extra proba.
 Require Import homomorphic_encryption.
 Require Import idealized_ahe paillier_fdist_instance.
-Require Import indcpa_game paillier_indcpa_instance benaloh_indcpa_instance.
+Require Import indcpa_game paillier_indcpa_scheme benaloh_indcpa_scheme.
 Require Import dsdp_alice_hop_secrecy dsdp_alice_trace_link.
 
 (**md**************************************************************************)
@@ -29,8 +29,8 @@ Require Import dsdp_alice_hop_secrecy dsdp_alice_trace_link.
 (* on the identity scheme of idealized_ahe.v.                                 *)
 (*                                                                            *)
 (* The four scheme sections read the fixed and the asymptotic bound off at    *)
-(* the Paillier and Benaloh IND-CPA instances of paillier_indcpa_instance.v   *)
-(* and benaloh_indcpa_instance.v.  Those two files carry the scheme side      *)
+(* the Paillier and Benaloh IND-CPA schemes of paillier_indcpa_scheme.v and   *)
+(* benaloh_indcpa_scheme.v.  Those two files carry the scheme side            *)
 (* alone: the packaging, the coin type and coin map, the assumption record    *)
 (* and its family in k.  Everything DSDP, the four weights, the three keys,   *)
 (* the two hop coins and the two reduction adversaries, is declared here.     *)
@@ -391,7 +391,7 @@ Variables p q : nat.
 Hypothesis p_gt1 : (1 < p)%N.
 Hypothesis q_gt1 : (1 < q)%N.
 
-(* The Paillier IND-CPA instance of paillier_indcpa_instance.v at this
+(* The Paillier IND-CPA instance of paillier_indcpa_scheme.v at this
    modulus, pinned once under the names that file exports them by. *)
 Local Notation AHE := (Paillier_AHEnc (pq_gt1 p_gt1 q_gt1)).
 Local Notation card_renc_paillier := (card_renc_paillier p q).
@@ -414,7 +414,7 @@ Variables (dk_a dk_b dk_c : priv_key AHE).
 Variables (rb2 rc2 : renc_paillier p q).
 
 (* The IND-CPA assumption of Paillier at this modulus, the record
-   paillier_indcpa_instance.v leaves a parameter. *)
+   paillier_indcpa_scheme.v leaves a parameter. *)
 Variable paillier_indcpa_assumption :
   indcpa_epsilon_assumption (R:=R) card_renc_paillier rand_of_renc_paillier.
 
@@ -466,7 +466,7 @@ Variables (rb2 rc2 : forall k, renc_paillier (p k) (q k)).
 
 (* The DSDP instance at parameter k on the Paillier IND-CPA instance at k:
    the packaging, coin type, pinned cardinality, and coin map of
-   paillier_indcpa_instance.v, with the weights, keys, and coins supplied as
+   paillier_indcpa_scheme.v, with the weights, keys, and coins supplied as
    families.  Everything number-theoretic about the moduli beyond 1 < p, q
    stays assumed, as in the fixed-instance section above. *)
 Definition paillier_instance (k : nat) : dsdp_instance := {|
@@ -552,7 +552,7 @@ Variables n r : nat.
 Hypothesis n_gt1 : (1 < n)%N.
 Hypothesis r_gt1 : (1 < r)%N.
 
-(* The Benaloh IND-CPA instance of benaloh_indcpa_instance.v at these
+(* The Benaloh IND-CPA instance of benaloh_indcpa_scheme.v at these
    parameters, pinned once under the names that file exports them by. *)
 Local Notation AHE := (Benaloh_AHEnc n r_gt1).
 Local Notation card_renc_benaloh := (card_renc_benaloh n).
@@ -578,7 +578,7 @@ Variables (dk_a dk_b dk_c : priv_key AHE).
 Variables (rb2 rc2 : renc_benaloh n).
 
 (* The IND-CPA assumption of Benaloh at these parameters, the record
-   benaloh_indcpa_instance.v leaves a parameter. *)
+   benaloh_indcpa_scheme.v leaves a parameter. *)
 Variable benaloh_indcpa_assumption :
   indcpa_epsilon_assumption (R:=R) card_renc_benaloh rand_of_renc_benaloh.
 
@@ -634,7 +634,7 @@ Variables (rb2 rc2 : forall k, renc_benaloh (n k)).
 
 (* The DSDP instance at parameter k on the Benaloh IND-CPA instance at k:
    the packaging, coin type, pinned cardinality, and coin map of
-   benaloh_indcpa_instance.v, with the weights, keys, and coins supplied as
+   benaloh_indcpa_scheme.v, with the weights, keys, and coins supplied as
    families.  Everything number-theoretic about the modulus and the block
    size beyond 1 < n, r stays assumed, as in the fixed-instance section
    above. *)
