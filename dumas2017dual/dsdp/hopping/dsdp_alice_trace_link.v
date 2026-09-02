@@ -39,19 +39,6 @@ Require Import dsdp_alice_hop_secrecy.
 (* ```                                                                        *)
 (* Execution and trace construction                                           *)
 (*                                                                            *)
-(*             gdp, gde, gdk == place plaintexts, ciphertexts, and private    *)
-(*                              keys in the common data handled by the        *)
-(*                              interpreter                                   *)
-(*               gget_cipher == recognizes received ciphertexts               *)
-(*                 gRecv_dec == receives a ciphertext and gives its plaintext *)
-(*                              to the rest of the program                    *)
-(*                 gRecv_enc == receives a ciphertext and keeps it encrypted  *)
-(*     DSDP_Interface_of_ops == packages the operations needed to run DSDP    *)
-(*                              over an abstract encryption scheme            *)
-(*                    gprocs == the three party programs using those abstract *)
-(*                              operations                                    *)
-(* dsdp_run_traces_of_ops_ok == identifies the traces produced by the full    *)
-(*                              abstract DSDP execution                       *)
 (*                pkey_of_dk == associates each party with the public key of  *)
 (*                              its private key                               *)
 (*          dsdp_trace_dataT == the finite observation type for traces, which *)
@@ -61,9 +48,7 @@ Require Import dsdp_alice_hop_secrecy.
 (*                              observations                                  *)
 (*            dsdp_procs_std == the DSDP programs for an additively           *)
 (*                              homomorphic encryption scheme                 *)
-(*           dsdp_procs_stdE == connects the abstract programs with their     *)
-(*                              standard encryption-scheme instance           *)
-(*        dsdp_run_traces_ok == identifies the traces produced for Alice,     *)
+(*          dsdp_run_tracesE == identifies the traces produced for Alice,     *)
 (*                              Bob, and Charlie by the standard execution    *)
 (*      dsdp_run_traces_encE == rewrites each trace ciphertext as one         *)
 (*                              encryption, exposing the message and combined *)
@@ -295,146 +280,6 @@ Local Open Scope fdist_scope.
 Local Open Scope proc_scope.
 Local Open Scope sproc_scope.
 
-Section dsdp_run_traces_of_ops.
-
-Variables (gmsgT gcipherT grandT gprivT gpubT : Type).
-
-Local Notation gdata := ((gmsgT + gcipherT + gprivT + gpubT)%type).
-
-Variable genc : gpubT -> gmsgT -> grandT -> gcipherT.
-Variable gemul : gcipherT -> gcipherT -> gcipherT.
-Variable gepow : gcipherT -> gmsgT -> gcipherT.
-Variable gadd gsub gmul : gmsgT -> gmsgT -> gmsgT.
-Variable gdec : gprivT -> gcipherT -> option gmsgT.
-
-(* The injection of a plaintext into the generic data carrier, in the summand
-   order the interface fixes. *)
-Definition gdp (x : gmsgT) : gdata := inl (inl (inl x)).
-
-(* The injection of a ciphertext into the generic data carrier.               *)
-Definition gde (x : gcipherT) : gdata := inl (inl (inr x)).
-
-(* The injection of a private key into the generic data carrier.              *)
-Definition gdk (x : gprivT) : gdata := inl (inr x).
-
-(* The partial read of a ciphertext out of the generic data carrier, which is
-   the guard of the two cipher-carrying receives below. *)
-Definition gget_cipher (x : gdata) : option gcipherT :=
-  if x is inl (inl (inr v)) then Some v else None.
-
-(* A receive whose guard decrypts under a private key the ciphertext it reads,
-   so that the continuation is applied to a plaintext. *)
-Definition gRecv_dec (frm : nat) (dk : gprivT) (f : gmsgT -> proc gdata)
-    : proc gdata :=
-  Recv_param gdata (obind (gdec dk) \o gget_cipher) frm f.
-
-(* A receive whose guard keeps the ciphertext it reads, so that the
-   continuation is applied to a ciphertext. *)
-Definition gRecv_enc (frm : nat) (f : gcipherT -> proc gdata) : proc gdata :=
-  Recv_param gdata gget_cipher frm f.
-
-(* The DSDP interface assembled from abstract carriers and abstract
-   operations. The three protocol programs are written once against this
-   interface, and the evaluation lemma below holds at every instance of it,
-   the standard interface of an AHE scheme included.
-   Naming: the mixed form follows Standard_DSDP_Interface of
-   dsdp_interface.v. *)
-Definition DSDP_Interface_of_ops : DSDP_Interface := {|
-  di_msgT := gmsgT ;
-  di_cipherT := gcipherT ;
-  di_randT := grandT ;
-  di_priv_keyT := gprivT ;
-  di_pub_keyT := gpubT ;
-  di_data := gdata ;
-  di_data_of_plain := gdp ;
-  di_data_of_cipher := gde ;
-  di_data_of_priv_key := gdk ;
-  di_data_of_pub_key := fun x => inr x ;
-  di_get_cipher := gget_cipher ;
-  di_encrypt := genc ;
-  di_emul := gemul ;
-  di_epow := gepow ;
-  di_add := gadd ;
-  di_sub := gsub ;
-  di_mul := gmul ;
-  di_Recv_dec := gRecv_dec ;
-  di_Recv_enc := gRecv_enc |}.
-
-Variables (gdka gdkb gdkc : gprivT).
-Variable gek : party_id -> gpubT.
-Variables (gv1 gv2 gv3 gu1 gu2 gu3 gr2 gr3 : gmsgT).
-Variables (grb1 grb2 grc1 grc2 gra1 gra2 : grandT).
-Variables (gm1 gm2 gm3 : gmsgT).
-
-(* The four ciphertexts the run puts on the wire after the two openings. *)
-Local Notation gCb :=
-  (gemul (gepow (genc (gek Bob) gv2 grb1) gu2) (genc (gek Bob) gr2 gra1)).
-Local Notation gCc3 :=
-  (gemul (gepow (genc (gek Charlie) gv3 grc1) gu3)
-         (genc (gek Charlie) gr3 gra2)).
-Local Notation gCc := (gemul gCc3 (genc (gek Charlie) gm2 grb2)).
-Local Notation gCa := (genc (gek Alice) gm3 grc2).
-
-Hypothesis Hgb : gdec gdkb gCb = Some gm2.
-Hypothesis Hgc : gdec gdkc gCc = Some gm3.
-Hypothesis Hga : gdec gdka gCa = Some gm1.
-
-Let gpalice :=
-  @palice DSDP_Interface_of_ops gdec gek gdka gv1 gu1 gu2 gu3 gr2 gr3
-          gra1 gra2.
-Let gpbob := @pbob DSDP_Interface_of_ops gdec gek gdkb gv2 grb1 grb2.
-Let gpcharlie := @pcharlie DSDP_Interface_of_ops gdec gek gdkc gv3 grc1 grc2.
-
-Let gsaprocs : seq (aproc dsdp_dtype (di_data DSDP_Interface_of_ops)) :=
-  [aprocs gpalice ; gpbob ; gpcharlie].
-
-(* The three DSDP programs at that interface, with their session-type
-   annotations erased, in the party order the interpreter indexes by. *)
-Definition gprocs : seq (proc (di_data DSDP_Interface_of_ops)) :=
-  erase_aprocs gsaprocs.
-
-(* The raw traces of the fifteen-round run at abstract carriers and abstract
-   operations, under the three decryption equations the openings need.
-   Naming: the `of_ops` infix separates this abstract-operation statement from
-   `dsdp_run_traces_ok`, the same equation at the standard AHE interface. *)
-Lemma dsdp_run_traces_of_ops_ok :
-  (run_interp 15 gprocs).2 =
-  [:: [:: gdp (gadd (gsub (gsub gm1 gr2) gr3) (gmul gu1 gv1));
-          gde gCa;
-          gde (genc (gek Charlie) gv3 grc1);
-          gde (genc (gek Bob) gv2 grb1);
-          gdp gr3; gdp gr2; gdp gu3; gdp gu2; gdp gu1; gdp gv1; gdk gdka];
-      [:: gde gCc3; gde gCb; gdp gv2; gdk gdkb];
-      [:: gde gCc; gdp gv3; gdk gdkc]].
-Proof.
-rewrite /run_interp.
-have -> : (15 = 10 + 5)%N by [].
-rewrite interp_fuelD.
-move Ht: (interp 10 gprocs (nseq (size gprocs) [::])) => S.
-vm_compute in Ht.
-rewrite Hgb in Ht.
-have -> : (5 = 2 + 3)%N by [].
-rewrite interp_fuelD.
-move Ht2: (interp 2 S.1 S.2) => S2.
-rewrite -Ht in Ht2.
-vm_compute in Ht2.
-rewrite Hgc in Ht2.
-have -> : (3 = 1 + 2)%N by [].
-rewrite interp_fuelD.
-move Ht3: (interp 1 S2.1 S2.2) => S3.
-rewrite -Ht2 in Ht3.
-vm_compute in Ht3.
-rewrite Hga in Ht3.
-rewrite -Ht3.
-by vm_compute.
-Qed.
-
-End dsdp_run_traces_of_ops.
-
-(* Keep every parameter of the generic run explicit, so that instantiations
-   are positional and independent of implicit-argument inference. *)
-Arguments gprocs : clear implicits.
-
 Section dsdp_alice_trace_link.
 Variables (AHE : AHEncType) (Renc : finType).
 Variable rand_of_renc : Renc -> rand AHE.
@@ -511,23 +356,17 @@ Let pcharlie_inst :=
 Definition dsdp_procs_std : seq (proc (di_data DI)) :=
   erase_aprocs [aprocs palice_inst ; pbob_inst ; pcharlie_inst].
 
-Let procs_of_ops :=
-  gprocs (plain AHE) (cipher AHE) (rand AHE) (priv_key AHE) (pub_key AHE)
-         (@enc AHE) (@Emul AHE) (@Epow AHE)
-         +%R (fun a b : plain AHE => a - b) *%R (@dec AHE)
-         dk_a dk_b dk_c pkey_of_dk
-         v1 v2 v3 u1 u2 u3 r2 r3
-         rb1 (rand_of_renc w_rb2) rc1 (rand_of_renc w_rc2) ra1 ra2.
-
-(* The abstract instance at the standard interface is the standard instance,
-   which is what carries the generic evaluation lemma to this file. *)
-Lemma dsdp_procs_stdE : dsdp_procs_std = procs_of_ops.
-Proof. by []. Qed.
-
 (* The traces of the fifteen-round run at the standard interface: eleven
    entries for Alice, four for Bob and three for Charlie, each ciphertext in
-   the form the programs build it. *)
-Lemma dsdp_run_traces_ok :
+   the form the programs build it.
+   The evaluation is staged at fuel 10, 2 and 3, one opening per stage, and
+   runs under cbv with enc, Emul, Epow, dec and pub_of_priv kept folded.
+   vm_compute unfolds those five projections of the section variable AHE into
+   iota-blocked matches on which Epow_encE, Emul_encE and dec_correct no
+   longer fire; the delta blacklist is what keeps the three decryption steps
+   rewritable.  A further operation entering the programs has to be added to
+   that list. *)
+Lemma dsdp_run_tracesE :
   (run_interp 15 dsdp_procs_std).2 =
   [:: [:: d (v3 * u3 + r3 + (v2 * u2 + r2) - r2 - r3 + u1 * v1);
           e (enc (pkey_of_dk Alice)
@@ -546,10 +385,42 @@ Lemma dsdp_run_traces_ok :
                        (rand_of_renc w_rb2)));
           d v3; kd dk_c]].
 Proof.
-rewrite dsdp_procs_stdE /procs_of_ops; apply: dsdp_run_traces_of_ops_ok.
-- by rewrite Epow_encE Emul_encE dec_correct.
-- by rewrite Epow_encE !Emul_encE dec_correct.
-- exact: dec_correct.
+have bob_decE : dec dk_b (Emul (Epow (enc (pub_of_priv dk_b) v2 rb1) u2)
+                               (enc (pub_of_priv dk_b) r2 ra1))
+                = Some (v2 * u2 + r2).
+  by rewrite Epow_encE Emul_encE dec_correct.
+have charlie_decE : dec dk_c
+                      (Emul (Emul (Epow (enc (pub_of_priv dk_c) v3 rc1) u3)
+                                  (enc (pub_of_priv dk_c) r3 ra2))
+                            (enc (pub_of_priv dk_c) (v2 * u2 + r2)
+                                 (rand_of_renc w_rb2)))
+                    = Some (v3 * u3 + r3 + (v2 * u2 + r2)).
+  by rewrite Epow_encE !Emul_encE dec_correct.
+have alice_decE : dec dk_a (enc (pub_of_priv dk_a)
+                                (v3 * u3 + r3 + (v2 * u2 + r2))
+                                (rand_of_renc w_rc2))
+                  = Some (v3 * u3 + r3 + (v2 * u2 + r2)).
+  exact: dec_correct.
+rewrite /run_interp.
+have -> : (15 = 10 + 5)%N by [].
+rewrite interp_fuelD.
+move Ht: (interp 10 dsdp_procs_std (nseq (size dsdp_procs_std) [::])) => S.
+cbv -[enc Emul Epow dec pub_of_priv] in Ht.
+rewrite bob_decE in Ht.
+have -> : (5 = 2 + 3)%N by [].
+rewrite interp_fuelD.
+move Ht2: (interp 2 S.1 S.2) => S2.
+rewrite -Ht in Ht2.
+cbv -[enc Emul Epow dec pub_of_priv] in Ht2.
+rewrite charlie_decE in Ht2.
+have -> : (3 = 1 + 2)%N by [].
+rewrite interp_fuelD.
+move Ht3: (interp 1 S2.1 S2.2) => S3.
+rewrite -Ht2 in Ht3.
+cbv -[enc Emul Epow dec pub_of_priv] in Ht3.
+rewrite alice_decE in Ht3.
+rewrite -Ht3.
+by cbv -[enc Emul Epow dec pub_of_priv].
 Qed.
 
 (* The same traces with every ciphertext normalised to a single encryption:
@@ -572,7 +443,7 @@ Lemma dsdp_run_traces_encE :
                  (rand_mul (rand_mul (rand_pow rc1 u3) ra2)
                            (rand_of_renc w_rb2)));
           d v3; kd dk_c]].
-Proof. by rewrite dsdp_run_traces_ok !Epow_encE !Emul_encE. Qed.
+Proof. by rewrite dsdp_run_tracesE !Epow_encE !Emul_encE. Qed.
 
 End dsdp_alice_trace_link.
 
@@ -695,7 +566,7 @@ Lemma dsdp_trace_of_hop_tupleE :
 Proof.
 apply: boolp.funext => s; apply/val_inj.
 rewrite /AliceTrace; move: (size_alice_trace s).
-rewrite /dsdp_procs_of_sample dsdp_run_traces_ok.
+rewrite /dsdp_procs_of_sample dsdp_run_tracesE.
 by move=> ?; rewrite /= Sout_runE recrypt_plainE.
 Qed.
 
@@ -745,9 +616,6 @@ Qed.
    bounds, and it is the spelling the class-conditional bounds use, so that a
    reader can see at a glance that they bound the same number the
    unconditional bounds do.
-   The sections below keep a [Let trace_guess_V2_pr] for the same number where
-   they need it as a local abbreviation; those are local spellings of this
-   definition's value, not a second quantity.
    Naming: [_pr] marks the probability of the event just named, with the
    [alice_trace] stem naming whose observation the predictor reads. *)
 Definition alice_trace_guess_V2_pr (predict : predictor dsdp_traceT) : R :=
@@ -1642,11 +1510,9 @@ Local Notation alice_trace_predictor_unpredictability :=
   (alice_trace_predictor_unpredictability (R:=R) card_renc rand_of_renc
      v1 u1 u2 u3 dk_a dk_b dk_c w_rb2 w_rc2).
 
-(* The success probability of a trace predictor, the quantity the zero-safe
-   unpredictability reads. *)
-Let trace_guess_V2_pr (predict : predictor dsdp_traceT) : R :=
-  Pr (alice_sample_fdist (R:=R) AHE card_renc)
-     [set t | (predict `o AliceTrace) t == V2 t].
+Local Notation alice_trace_guess_V2_pr :=
+  (alice_trace_guess_V2_pr (R:=R) card_renc rand_of_renc
+     v1 u1 u2 u3 dk_a dk_b dk_c w_rb2 w_rc2).
 
 (* The zero-safe unpredictability of Bob's input at Alice's encoded trace:
    infinite at zero predictor success, the negative logarithm otherwise.
@@ -1654,13 +1520,13 @@ Let trace_guess_V2_pr (predict : predictor dsdp_traceT) : R :=
    [conv_erealE] of probability/convex.v. *)
 Definition alice_trace_predictor_unpredictability_ereal
     (predict : predictor dsdp_traceT) : \bar R :=
-  if trace_guess_V2_pr predict == 0 then @EPInf R
+  if alice_trace_guess_V2_pr predict == 0 then @EPInf R
   else EFin (alice_trace_predictor_unpredictability predict).
 
 (* Zero success is infinite unpredictability.
    Naming: the [E] suffix marks the branch equation. *)
 Lemma alice_trace_predictor_unpredictability_ereal_zeroE predict :
-  trace_guess_V2_pr predict = 0 ->
+  alice_trace_guess_V2_pr predict = 0 ->
   alice_trace_predictor_unpredictability_ereal predict = @EPInf R.
 Proof.
 by move=> H; rewrite /alice_trace_predictor_unpredictability_ereal H eqxx.
@@ -1670,9 +1536,9 @@ Qed.
    Naming: [_gt0] spells the positivity premise, after MathComp; the [E]
    suffix marks the branch equation. *)
 Lemma alice_trace_predictor_unpredictability_ereal_gt0E predict :
-  0 < trace_guess_V2_pr predict ->
+  0 < alice_trace_guess_V2_pr predict ->
   alice_trace_predictor_unpredictability_ereal predict
-  = EFin (- log (trace_guess_V2_pr predict)).
+  = EFin (- log (alice_trace_guess_V2_pr predict)).
 Proof.
 by move=> H; rewrite /alice_trace_predictor_unpredictability_ereal gt_eqF.
 Qed.
@@ -1681,7 +1547,7 @@ Qed.
    Naming: [_fin] marks the finite branch; the [E] suffix marks the branch
    equation. *)
 Lemma alice_trace_predictor_unpredictability_ereal_finE predict :
-  0 < trace_guess_V2_pr predict ->
+  0 < alice_trace_guess_V2_pr predict ->
   alice_trace_predictor_unpredictability_ereal predict
   = EFin (alice_trace_predictor_unpredictability predict).
 Proof.
@@ -1703,8 +1569,9 @@ Theorem dsdp_alice_trace_predictor_unpredictability_ereal_ge predict :
     (alice_trace_predictor_unpredictability_ereal predict).
 Proof.
 rewrite /alice_trace_predictor_unpredictability_ereal.
-case: (eqVneq (trace_guess_V2_pr predict) 0) => [_|Hneq]; first exact: leey.
-have Hpos : 0 < trace_guess_V2_pr predict
+case: (eqVneq (alice_trace_guess_V2_pr predict) 0) => [_|Hneq].
+  exact: leey.
+have Hpos : 0 < alice_trace_guess_V2_pr predict
   by rewrite lt0r Hneq /=; exact: Pr_ge0.
 rewrite lee_fin.
 exact: (alice_trace_predictor_unpredictability_ge u3_unit Hpos).
@@ -1785,7 +1652,7 @@ Lemma alice_raw_trace_decodeE (pk : pub_key AHE)
   map (di_data_of_trace_data dk_a pk) (AliceTrace s) = alice_raw_trace s.
 Proof.
 rewrite -map_comp /alice_raw_trace /dsdp_procs_of_sample.
-by rewrite dsdp_run_traces_ok.
+by rewrite dsdp_run_tracesE.
 Qed.
 
 (* The simulator-advantage bound for a Boolean test reading the raw
@@ -1997,10 +1864,9 @@ Local Notation charlie_trace_adversary :=
   (charlie_trace_adversary (R:=R) card_renc rand_of_renc
      v1 u1 u2 u3 dk_a dk_b dk_c w_rc2).
 
-(* The success probability of a trace predictor. *)
-Let trace_guess_V2_pr (predict : predictor dsdp_traceT) : R :=
-  Pr (alice_sample_fdist (R:=R) AHE card_renc)
-     [set t | (predict `o AliceTrace) t == V2 t].
+Local Notation alice_trace_guess_V2_pr :=
+  (alice_trace_guess_V2_pr (R:=R) card_renc rand_of_renc
+     v1 u1 u2 u3 dk_a dk_b dk_c w_rb2 w_rc2).
 
 (* The inverse plaintext cardinality at the composite modulus. *)
 Let inv_pq_cardE : ((p%:R : R) * q%:R)^-1 = (#|plain AHE|%:R : R)^-1.
@@ -2012,7 +1878,7 @@ Proof. by rewrite card_plain_pq natrM. Qed.
    variant token before [le]; kept long to preserve the family grouping. *)
 Corollary dsdp_alice_trace_guess_V2_pq_le
     (predict : predictor dsdp_traceT) :
-  trace_guess_V2_pr predict
+  alice_trace_guess_V2_pr predict
   <= ((p%:R : R) * q%:R)^-1 + bob_trace_predictor_epsilon predict
      + charlie_trace_predictor_epsilon predict.
 Proof.
@@ -2034,7 +1900,7 @@ Corollary alice_trace_guess_V2_admissible_pq_le
     (bob_trace_adversary (distinguisher_of_predictor predict)) ->
   indcpa_admissible A
     (charlie_trace_adversary (distinguisher_of_predictor predict)) ->
-  trace_guess_V2_pr predict
+  alice_trace_guess_V2_pr predict
     <= ((p%:R : R) * q%:R)^-1 + 2 * indcpa_assumption_epsilon A.
 Proof.
 rewrite inv_pq_cardE.
