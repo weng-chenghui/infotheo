@@ -1,135 +1,108 @@
-(* DSDP main results — the headline security theorems.
-
-   This file centralizes the headline theorems of the DSDP development. Each
-   theorem's full proof is presented here over a cloned copy of its source
-   section context; the supporting machinery stays in the axis files and is
-   referenced, not duplicated. The file mixes generic N-party results with
-   their 3-party DSDP instances; each theorem's comment states its party
-   scope.
-
-   The two axes price secrecy in different currencies, and the distinction is
-   load-bearing. The counting axis conditions on plaintexts and its bounds are
-   unconditional: they hold against an adversary of any running time. The
-   hopping axis conditions on the ciphertext-carrying view and its bounds
-   carry two IND-CPA advantage terms, one at Bob's key and one at Charlie's;
-   they say nothing until those advantages are argued small. A bound summing
-   an information-theoretic term with an assumption-conditional one is written
-   so the two summands stay distinguishable.
-
-   Every 3-party theorem and every hopping theorem below is stated over one
-   value X of dsdp_setting and one security parameter k: the counting
-   sections read the sample space, the eleven random inputs and the two
-   prime factors of the plaintext modulus off X at k, and the hopping
-   sections run at the k-th instance of X's sequence. What stays a
-   hypothesis is the adversary side and Alice's query: the two class
-   premises on the reduction adversaries a predictor induces, the IND-CPA
-   assumption carried inside the record's sequence, the honest range
-   0 < U3 < min(p, q) of the entropy equality, and the corrupted choice
-   U2 = 1, U3 = 0 of the leakage theorem. On the counting axis nothing else
-   is assumed.
-
-   The record's each-against-the-rest fields reach Alice's three weights, so
-   the counting bounds stated over X hold in the honest-sampling setting,
-   where her weights are independent of her input and of one another; the
-   form assuming nothing about their joint law is
-   dsdp_centropy_uniform_direct at counting/dsdp_entropy.v:335. card_plain
-   together with the sequence's sequence_size_negligible forces p k * q k to
-   grow superpolynomially, so no value of the record carries a fixed
-   modulus, although each counting equality is exact at its own k. The two
-   axes share one cardinality and not one execution: card_plain equates two
-   counts, nothing identifies the two message spaces, and the weights and
-   the keys occur twice as unrelated objects.
-
-   Information-theoretic (counting axis, unconditional)
-     dsdp_centropy_uniform : H(V2,V3 | view) = log m  [3-party]
-     dsdp_centropy_uniform_n : H(V | view) = log (m^n)  [N-party]
-     US_e1_centropy_VS0_eq0 : corrupted Alice leaks a relay's input,
-       H(VS_0 | View) = 0  [N-party]
-     US_e1_centropy_V2_eq0 : corrupted Alice leaks Bob's V2, H(V2 | View) = 0
-       [3-party instance of US_e1_centropy_VS0_eq0]
-     bob_privacy_V1 / charlie_privacy_V1 : H(V1 | RelayView) = log m > 0:
-       a corrupted relay learns nothing about Alice's input V1  [3-party]
-     bob_privacy_V3 : H(V3 | BobView) = log m > 0: a corrupted Bob learns
-       nothing about Charlie's input V3 (R3 one-time-pad masking)  [3-party]
-     charlie_privacy_V2 : H(V2 | CharlieView) = log m > 0: a corrupted Charlie
-       learns nothing about Bob's input V2 (R2 one-time-pad masking)  [3-party]
-
-   Corrupted Alice at her hopping tuple (hopping axis, IND-CPA-conditional)
-     alice_tuple_guess_V2_le : a predictor of Bob's input succeeds
-       with probability at most 1/#|plain| plus the two hop advantages
-     alice_unpredictability_ge /
-     alice_predictor_unpredictability_ge : the same bound in
-       negative-logarithm form, log #|plain| less a correction in the two
-       advantages
-     alice_sim_advantage_le : every Boolean test separates the real
-       joint law from the simulator's by at most the two hop advantages
-     alice_view_guess_V2_le : the guessing bound at Alice's whole
-       view, her two outgoing combines and her final decrypt included
-
-   The same bounds at the executed fifteen-round piSMC trace
-     alice_trace_guess_V2_le
-     alice_trace_unpredictability_ge
-     alice_trace_sim_advantage_le
-     centropy_V2_trace_tupleE /
-     centropy_V2_view_tupleE : conditioning on the trace, on the
-       view, or on the tuple leaves the same uncertainty about Bob's input,
-       so the hop ladder prices all three observations at once
-
-   The same bounds conditional on an adversary class
-     alice_trace_guess_V2_admissible_le /
-     alice_trace_guess_V2_admissible_pq_le : both hop advantages
-       charged to the single epsilon of an indcpa_epsilon_assumption, under
-       the assumed premise that the two reduction adversaries are in its
-       class
-     decrypt_epsilon_sum_ge /
-     decrypt_bob_epsilon_ge : an adversary holding Bob's private
-       key forces the two advantages to sum to at least 1 - 1/#|plain|, and
-       Bob's alone to reach it, which is why the class restriction cannot be
-       widened to every adversary
-
-   An inhabitant of the assumption those bounds are conditional on
-     cipher_constant_assumption : classifier computing and epsilon zero, so
-       the class the bounds above are conditional on has members
-
-   The same bound along a sequence of instances (asymptotic form)
-     f_size / f_adv / f_guess_V2 / f_bound : the inverse-cardinality,
-       assumed-advantage, guessing-probability, and combined-bound functions
-     alice_trace_guess_V2_negligible : along a security-parameter-indexed
-       sequence of DSDP instances carrying the two negligibility facts as
-       record fields, the trace guessing probabilities are a negligible
-       sequence once the two reduction adversaries at each k are admitted by
-       the class at that k
-     alice_trace_guess_V2_paillier_negligible /
-     alice_trace_guess_V2_benaloh_negligible : the same statement at a
-       sequence of Paillier moduli and at a sequence of Benaloh block sizes,
-       the inverse plaintext cardinality read off as 1/(p k * q k) and as
-       1/(r k)
-
-   Shannon uncertainty about Bob's input, by conditioner
-     centropy_V2_trace_eq0 : zero at her executed trace, which the trace
-       determines
-     centropy_V2_Sout_logm / centropy_V2_all_zero_logm : log #|plain| bits at
-       the leaked output and at the all-zero endpoint of the hop ladder *)
-
 From HB Require Import structures.
 From mathcomp Require Import all_boot all_order all_algebra fingroup finalg.
 From mathcomp Require Import matrix ring boolp finmap reals.
 
-From Stdlib Require Import Utf8.
-
 Require Import realType_ext realType_ln ssr_ext ssralg_ext bigop_ext fdist.
-Require Import fdist_extra.
-Require Import proba jfdist_cond entropy graphoid smc_interpreter spp_proba bayes.
-Require Import spp_entropy extra_proba extra_algebra extra_entropy rouche_capelli.
-Require Import entropy_fiber.
+Require Import proba entropy.
 Require Import homomorphic_encryption.
-Require Import dsdp_program dsdp_entropy dsdp_pismc.
-Require Import dsdp_malicious_dotp.
-Require Import indcpa_game.
-Require Import dsdp_alice_hop_secrecy dsdp_alice_trace_link.
+Require Import paillier_fdist_instance.
+Require Import indcpa_game paillier_indcpa_scheme benaloh_indcpa_scheme.
 Require Import dsdp_instance_sequence.
-Require Import dsdp_setting.
-Require Import paillier_indcpa_scheme benaloh_indcpa_scheme.
+Require Import dsdp_setting dsdp_security.
+
+(**md**************************************************************************)
+(* # Three DSDP settings and the twenty-six statements read off at each       *)
+(*                                                                            *)
+(* Three values of dsdp_setting of dsdp_setting.v with their parameters fed,  *)
+(* and the twenty-six fields of dsdp_security of dsdp_security.v projected at *)
+(* each: Paillier, Benaloh at block size p * q, and the idealized scheme.     *)
+(* Nothing is proved here.  The proofs are the theorems of the two axis       *)
+(* directions, counting/dsdp_entropy.v, counting/dsdp_relay_secrecy.v and     *)
+(* counting/dsdp_malicious_dotp.v on the counting side and                    *)
+(* hopping/dsdp_alice_hop_secrecy.v and hopping/dsdp_alice_trace_link.v on    *)
+(* the hopping side; dsdp_securityP applies them at the projections of a      *)
+(* setting, and every corollary below is one projection of that value, with   *)
+(* its statement written out at the instance rather than named.               *)
+(*                                                                            *)
+(* ## What each instance takes, and how each added premise is classified      *)
+(*                                                                            *)
+(* Paillier takes the plaintext modulus at k as its two factors, held as      *)
+(* p_minus_2 k and q_minus_2 k so that the modulus is a double successor in   *)
+(* both factors; Alice's four weights; the three private keys; the two        *)
+(* encryption coins; the sequence of IND-CPA assumptions; and two             *)
+(* negligibility facts.  Its added premises are prime (p k), prime (q k) and  *)
+(* p k != q k.  They are fundamental to the scheme: a Paillier modulus is a   *)
+(* product of two distinct primes, which paillier_indcpa_scheme.v leaves      *)
+(* unimposed and which decisional composite residuosity starts from.          *)
+(*                                                                            *)
+(* Benaloh takes its ciphertext modulus n k in addition, and its block size   *)
+(* is fixed to r k = p k * q k at two distinct primes.  That is fundamental   *)
+(* to the counting axis, whose fiber count is a CRT count over the two prime  *)
+(* factors, and at the same time a restriction on Benaloh, whose scheme,      *)
+(* correctness and game ask only 1 < r.                                       *)
+(*                                                                            *)
+(* At both schemes the three private keys are assumed values: no key record   *)
+(* is constructed anywhere, the divisibility and injectivity conditions a key *)
+(* carries being left to the instantiation.  At both, the sequence of IND-CPA *)
+(* assumptions and the two negligibility facts, one on the inverse modulus    *)
+(* and one on the assumed advantage, are assumed, and every epsilon in the    *)
+(* corollaries below is the advantage that sequence assumes at k.             *)
+(*                                                                            *)
+(* The counting side of both scheme instances is uniform_inputs at Alice's    *)
+(* own hopping weights: the three inputs and the two masks are five uniform   *)
+(* coordinates of the plaintext ring, and the three constant counting weights *)
+(* are the weights u1, u2, u3 the scheme instance carries.  No cast is        *)
+(* needed, the plaintext space of either scheme at a modulus written as       *)
+(* p_minus_2 k .+2 * q_minus_2 k .+2 being the counting side's own ring       *)
+(* 'Z_(p k * q k).  So the two axes read one query at every instance.         *)
+(*                                                                            *)
+(* The idealized instance takes no parameter: idealized_setting of            *)
+(* dsdp_setting.v carries the composite-modulus idealized sequence, whose     *)
+(* assumed advantage is zero at every k, so each hopping corollary there is   *)
+(* its unconditional term alone.  Its query corollaries are premise-free, the *)
+(* honest one at idealized_honest_query and the corrupted one at the sibling  *)
+(* value corrupted_setting; its class-conditional corollaries are at          *)
+(* idealized_admissible, the constant predictor, which is the only predictor  *)
+(* the cipher-constant class admits.                                          *)
+(*                                                                            *)
+(* Three restrictions hold at all three instances, and dsdp_setting.v's       *)
+(* header states them: the counting fields hold in the honest-sampling        *)
+(* setting, card_plain together with sequence_size_negligible forces the      *)
+(* modulus to grow superpolynomially, and the two axes share one cardinality  *)
+(* and not one execution.                                                     *)
+(*                                                                            *)
+(* ```                                                                        *)
+(*             paillier_dsdp == the Paillier instance, its parameters, its    *)
+(*                              setting and its twenty-six corollaries        *)
+(*          paillier_setting == the setting the Paillier parameters make      *)
+(*         paillier_security == the twenty-six statements at it               *)
+(*              benaloh_dsdp == the same at Benaloh with block size p * q     *)
+(*           benaloh_setting, benaloh_security == its two values              *)
+(*            idealized_dsdp == the same at the idealized scheme, where every *)
+(*                              corollary is premise-free                     *)
+(*        idealized_security == the twenty-six statements at it               *)
+(* ```                                                                        *)
+(*                                                                            *)
+(* The twenty-six corollary stems, carried by all three sections under the    *)
+(* prefixes paillier_, benaloh_ and idealized_, except that the corrupted     *)
+(* query is read at corrupted_setting and so is named                         *)
+(* corrupted_centropy_V2_dotp_eq0 there:                                      *)
+(*                                                                            *)
+(* ```                                                                        *)
+(* centropy_uniform, centropy_V2_dotp_eq0, bob_privacy_V1,                    *)
+(* charlie_privacy_V1, bob_privacy_V3, charlie_privacy_V2,                    *)
+(* tuple_guess_V2_le, unpredictability_ge, predictor_unpredictability_ge,     *)
+(* sim_advantage_le, view_guess_V2_le, centropy_V2_Sout_logm,                 *)
+(* centropy_V2_all_zero_logm, trace_guess_V2_le, trace_unpredictability_ge,   *)
+(* trace_sim_advantage_le, centropy_V2_trace_tupleE,                          *)
+(* centropy_V2_view_tupleE, centropy_V2_trace_eq0,                            *)
+(* trace_guess_V2_admissible_le, trace_guess_V2_admissible_pq_le,             *)
+(* decrypt_epsilon_sum_ge, decrypt_bob_epsilon_ge,                            *)
+(* decrypt_reduction_admissibleF, decrypt_guess_V2_premise_free_lt,           *)
+(* trace_guess_V2_negligible                                                  *)
+(* ```                                                                        *)
+(*                                                                            *)
+(******************************************************************************)
 
 Set Implicit Arguments.
 Unset Strict Implicit.
@@ -140,1663 +113,1118 @@ Set Default Goal Selector "!".
 Set Primitive Projections.
 
 Import GRing.Theory Num.Theory Order.POrderTheory.
-#[local] Open Scope ring_scope.
-#[local] Open Scope real_scope.
+Local Open Scope ring_scope.
+Local Open Scope proba_scope.
+Local Open Scope fdist_scope.
+Local Open Scope entropy_scope.
 
 (* =================================================================          *)
-(* Information-theoretic party privacy (counting axis)                        *)
+(* Paillier                                                                   *)
 (* =================================================================          *)
 
-Section dsdp_var_centropy.
-(* cloned context of Section dsdp_entropy *)
+Section paillier_dsdp.
 Local Set Default Goal Selector "1".
 Local Open Scope reals_ext_scope.
-Local Open Scope proba_scope.
-Local Open Scope fdist_scope.
-Local Open Scope entropy_scope.
-Context {R : realType}.
-Variable X : dsdp_setting R.
-Variable k : nat.
-Let p_minus_2 := p_minus_2 X k.
-Let q_minus_2 := q_minus_2 X k.
-Local Notation p := p_minus_2.+2.
-Local Notation q := q_minus_2.+2.
-Let prime_p : prime p := prime_p X k.
-Let prime_q : prime q := prime_q X k.
-Let coprime_pq : coprime p q := coprime_pq X k.
-Local Notation m := (p * q).
-Local Notation msg := 'Z_m.
-
-Let T := sampleT (inputs X k).
-Let P := sample_fdist (inputs X k).
-Let V1 := V1 (inputs X k).
-Let V2 := V2 (inputs X k).
-Let V3 := V3 (inputs X k).
-Let U1 := U1 (inputs X k).
-Let U2 := U2 (inputs X k).
-Let U3 := U3 (inputs X k).
-Let S := output X k.
-Let CondRV : {RV P -> (msg * msg * msg * msg * msg)} :=
-  [% V1, U1, U2, U3, S].
-Let VarRV : {RV P -> (msg * msg)} := [%V2, V3].
-
-Let card_msg : #|msg| = m := card_Zp_pq p_minus_2 q_minus_2.
-
-(* Match the proof term baked into the staying lemmas' fdist_uniform argument so
-   the cloned VarRV_uniform hypothesis unifies on application. *)
-Let card_msg_pair : #|((msg * msg)%type : finType)| = (m ^ 2)%N :=
-  dsdp_entropy.card_msg_pair_subproof p_minus_2 q_minus_2.
-
-Let constraint_holds : forall t, dsdp_constraint (CondRV t) (VarRV t) :=
-  dsdp_constraint_holds X k.
-
-Let VarRV_uniform : `p_ VarRV = fdist_uniform card_msg_pair :=
-  VarRV_uniform X k.
-Let VarRV_indep_inputs : P |= [%V1, U1, U2, U3] _|_ VarRV :=
-  VarRV_indep_inputs X k.
-
-Let InputRV : {RV P -> (msg * msg * msg * msg)} := [%V1, U1, U2, U3].
-
-(* dsdp_centropy_uniform — conditioning on Alice's inputs and the output
-   (V1, U1, U2, U3, S), the plaintext residual (not Alice's full view, which
-   also carries her key, masks, and the ciphertext hops), the relay private
-   inputs (V2, V3) retain log m bits of uncertainty. The counting axis
-   conditions on plaintexts only; the ciphertext-carrying view is the
-   hopping leg's business (the guessing triangle).  [3-party] *)
-Theorem dsdp_centropy_uniform :
-  (forall t, (0 < U3 t)%N) ->
-  (forall t, (U3 t < minn p q)%N) ->
-  `H(VarRV | CondRV) = log (m%:R : R).
-Proof.
-move=> HU3_pos HU3_lt.
-have Hm_pos : (0 < m)%N by rewrite muln_gt0 prime_gt0 // prime_gt0.
-apply: (@centropy_jcond_determined_fibers R T P
-          (msg * msg)%type (msg * msg * msg * msg)%type msg
-          VarRV InputRV S (@dsdp_g p_minus_2 q_minus_2)
-          (S_determined constraint_holds) _ m _ Hm_pos).
-- move=> [[[v1 u1] u2] u3] s [v2 v3] /= Hcond_pos Hin.
-  move/pfwd1_neq0: (Hcond_pos) => [t [Ht _]].
-  move: Ht; rewrite inE => /eqP Ht.
-  have HU3t : U3 t = u3 by case: Ht => _ _ _ ->.
-  have Hu3_pos : (0 < u3)%N by rewrite -HU3t; apply: HU3_pos.
-  have Hu3_lt : (u3 < minn p q)%N by rewrite -HU3t; apply: HU3_lt.
-  rewrite -dsdp_fiber_eq_abstract in Hin *.
-  rewrite (dsdp_fiber_card prime_p prime_q coprime_pq u1 u2 (u3 := u3) v1 s
-             Hu3_pos Hu3_lt).
-  exact: (Pr_dsdp_sol_uniform prime_p prime_q coprime_pq constraint_holds
-            VarRV_uniform VarRV_indep_inputs Hu3_pos Hu3_lt Hcond_pos Hin).
-- move=> [[[v1 u1] u2] u3] s Hcond_pos.
-  rewrite -dsdp_fiber_eq_abstract.
-  move/pfwd1_neq0: (Hcond_pos) => [t [Ht _]].
-  move: Ht; rewrite inE => /eqP Ht.
-  have HU3t : U3 t = u3 by case: Ht => _ _ _ ->.
-  apply: (dsdp_fiber_card prime_p prime_q coprime_pq).
-  + by rewrite -HU3t; apply: HU3_pos.
-  + by rewrite -HU3t; apply: HU3_lt.
-Qed.
-
-End dsdp_var_centropy.
-
-Section dsdp_var_centropy_n.
-(* cloned context of Section dsdp_entropy_n *)
-Local Set Default Goal Selector "1".
-Local Open Scope reals_ext_scope.
-Local Open Scope proba_scope.
-Local Open Scope fdist_scope.
-Local Open Scope entropy_scope.
-Context {R : realType}.
-Variables (p_minus_2 q_minus_2 : nat).
-Local Notation p := p_minus_2.+2.
-Local Notation q := q_minus_2.+2.
-Hypothesis prime_p : prime p.
-Hypothesis prime_q : prime q.
-Hypothesis coprime_pq : coprime p q.
-Local Notation m := (p * q).
-Local Notation msg := 'Z_m.
-
-Variable n_relay : nat.
-
-Variable T : finType.
-Variable P : R.-fdist T.
-
-Let m_gt0 : (0 < m)%N.
-Proof. by rewrite muln_gt0 prime_gt0 // prime_gt0. Qed.
-
-(* Match the proof term baked into dsdp_centropy1_uniform_n's fdist_uniform
-   argument so the cloned VarRV_uniform_n hypothesis unifies on application. *)
-Let card_ffun_msg : #|{ffun 'I_n_relay.+1 -> msg}| = (m ^ n_relay.+1).-1.+1 :=
-  dsdp_entropy.card_ffun_msg_subproof (p_minus_2 := p_minus_2) q_minus_2
-    prime_p n_relay.
-
-Let CondT_n := (msg * msg * {ffun 'I_n_relay.+1 -> msg} * msg)%type.
-Let InputT_n := (msg * msg * {ffun 'I_n_relay.+1 -> msg})%type.
-
-Variable VarRV : {RV P -> {ffun 'I_n_relay.+1 -> msg}}.
-Variable CondRV : {RV P -> CondT_n}.
-Variable InputRV : {RV P -> InputT_n}.
-
-Let dsdp_fiber_fn_n (cond : CondT_n) : {set {ffun 'I_n_relay.+1 -> msg}} :=
-  let '(v0, u0, u_rel, s) := cond in
-  dsdp_fiber_n u_rel (s - u0 * v0).
-
-Let dsdp_proj_input_n (cond : CondT_n) : InputT_n :=
-  let '(v0, u0, u_rel, _) := cond in (v0, u0, u_rel).
-
-Hypothesis constraint_fiber_n :
-  forall t, VarRV t \in dsdp_fiber_fn_n (CondRV t).
-
-Hypothesis InputRV_proj_n :
-  forall t, InputRV t = dsdp_proj_input_n (CondRV t).
-
-Hypothesis VarRV_uniform_n :
-  `p_ VarRV = fdist_uniform card_ffun_msg.
-
-Hypothesis VarRV_indep_inputs_n :
-  P |= InputRV _|_ VarRV.
-
-Hypothesis joint_eq_input_n :
-  forall (cond : CondT_n) (var : {ffun 'I_n_relay.+1 -> msg}),
-    var \in dsdp_fiber_fn_n cond ->
-    `Pr[[%VarRV, CondRV] = (var, cond)] =
-    `Pr[[%VarRV, InputRV] = (var, dsdp_proj_input_n cond)].
-
-(* The final relay's weight, read off the conditioning tuple.  The two
-   hypotheses of dsdp_centropy_uniform_n pin it strictly between zero and
-   min(p, q), which makes it invertible modulo m, and that invertibility is
-   what leaves the relay inputs uniform given the view. *)
-Definition last_relay_weight (c : CondT_n) : msg :=
-  (let '(_, _, u_rel, _) := c in u_rel) ord_max.
-
-(* dsdp_centropy_uniform_n — conditioning on the N-party view, the relay private
-   inputs retain log (m ^ n_relay) bits of uncertainty.  [N-party] *)
-Theorem dsdp_centropy_uniform_n :
-  (forall t, (0 < val (last_relay_weight (CondRV t)))%N) ->
-  (forall t, (val (last_relay_weight (CondRV t)) < minn p q)%N) ->
-  `H(VarRV | CondRV) = log ((m ^ n_relay)%:R : R).
-Proof.
-move=> HU_pos HU_lt.
-rewrite centropy_RVE' /=.
-transitivity (\sum_(a : CondT_n)
-               `Pr[ CondRV = a ] * log ((m ^ n_relay)%:R : R)).
-  apply: eq_bigr => [] [[[v0 u0] u_rel] s] _.
-  have [->|Hcond_pos] := eqVneq (`Pr[CondRV = (v0, u0, u_rel, s)]) 0.
-    by rewrite !mul0r.
-  have Hu_pos: (0 < val (u_rel ord_max))%N.
-    move/pfwd1_neq0: Hcond_pos => [t [Ht _]].
-    move: Ht; rewrite inE => /eqP Ht.
-    have := HU_pos t; rewrite Ht /=.
-    by [].
-  have Hu_lt: (val (u_rel ord_max) < minn p q)%N.
-    move/pfwd1_neq0: Hcond_pos => [t [Ht _]].
-    move: Ht; rewrite inE => /eqP Ht.
-    have := HU_lt t; rewrite Ht /=.
-    by [].
-  by rewrite (dsdp_centropy1_uniform_n prime_q constraint_fiber_n
-                InputRV_proj_n VarRV_uniform_n VarRV_indep_inputs_n
-                joint_eq_input_n Hu_pos Hu_lt Hcond_pos).
-under eq_bigr do rewrite mulrC.
-by rewrite -big_distrr /= sum_pfwd1 mulr1.
-Qed.
-
-End dsdp_var_centropy_n.
-
-Section dsdp_malicious_n.
-(* cloned context of Section malicious_n *)
-Local Set Default Goal Selector "1".
-Local Open Scope reals_ext_scope.
-Local Open Scope proba_scope.
-Local Open Scope fdist_scope.
-Local Open Scope entropy_scope.
-Context {R : realType}.
-Variable T : finType.
-Variable P : R.-fdist T.
-
-(* Z/pqZ parameters *)
-Variables (p_minus_2 q_minus_2 : nat).
-Local Notation p := p_minus_2.+2.
-Local Notation q := q_minus_2.+2.
-Local Notation m := (p * q).
-Local Notation msg := 'Z_m.
-
-Variable n_relay : nat.
-
-(* US_e1_centropy_VS0_eq0 — a corrupted Alice fixing her query to e_1
-   makes relay party 1's input VS_0 a function of her view: the protocol output
-   is in the view and equals VS_0, so its conditional entropy collapses to zero.
-   N-party generic; the 3-party result is the n_relay = 1 instance. *)
-Theorem US_e1_centropy_VS0_eq0 {A : finType}
-    (View : {RV P -> A}) (g : A -> msg)
-    (US VS : {RV P -> {ffun 'I_n_relay.+1 -> msg}})
-    (US_e1 : US = fun _ => @ConstUS_n p_minus_2 q_minus_2 n_relay)
-    (output_in_view :
-       @Dotp_n_rv R T P p_minus_2 q_minus_2 n_relay US VS = g `o View) :
-  `H( (fun t => VS t ord0) | View ) = 0.
-Proof.
-have disc : @Dotp_n_rv R T P p_minus_2 q_minus_2 n_relay US VS
-            = (fun t => VS t ord0).
-  rewrite US_e1 /Dotp_n_rv; apply: boolp.funext => t /=.
-  exact: dotp_n_e1.
-have key : (fun t => VS t ord0) = g `o View by rewrite -disc.
-rewrite key; exact: centropy_RV_comp0.
-Qed.
-
-End dsdp_malicious_n.
-
-Section dsdp_malicious_3party.
-(* 3-party instance of US_e1_centropy_VS0_eq0 at n_relay = 1 *)
-Local Set Default Goal Selector "1".
-Local Open Scope reals_ext_scope.
-Local Open Scope proba_scope.
-Local Open Scope fdist_scope.
-Local Open Scope entropy_scope.
-Context {R : realType}.
-Variable X : dsdp_setting R.
-Variable k : nat.
-Let T := sampleT (inputs X k).
-Let P := sample_fdist (inputs X k).
-Let p_minus_2 := p_minus_2 X k.
-Let q_minus_2 := q_minus_2 X k.
-Local Notation p := p_minus_2.+2.
-Local Notation q := q_minus_2.+2.
-Local Notation m := (p * q).
-Local Notation msg := 'Z_m.
-
-Let V1 := V1 (inputs X k).
-Let V2 := V2 (inputs X k).
-Let V3 := V3 (inputs X k).
-Let U1 := U1 (inputs X k).
-Let U2 := U2 (inputs X k).
-Let U3 := U3 (inputs X k).
-Let R2 := R2 (inputs X k).
-Let R3 := R3 (inputs X k).
-Let Dk_a := Dk_a (inputs X k).
-
-(* Bob's input under Alice's query weight U2 and her mask R2, the plaintext of
-   her first combine. *)
-Let D2 : {RV P -> msg} := V2 \* U2 \+ R2.
-
-(* The aggregate Charlie decrypts, both relay inputs under Alice's two
-   masks. *)
-Let D3 : {RV P -> msg} := V3 \* U3 \+ R3 \+ D2.
-
-(* The protocol output Alice computes: she strips both of her masks from the
-   aggregate and adds her own weighted input.  US_e1_centropy_V2_eq0 is the
-   statement that at the query e_1 this value is V2 itself. *)
-Let S  : {RV P -> msg} := D3 \- R2 \- R3 \+ U1 \* V1.
-
-(* The aggregate under Alice's key, Charlie's closing message to her.         *)
-Let E_alice_d3   : {RV P -> Alice.-enc msg}   := E' Alice `o D3.
-
-(* Charlie's input under his own key, his opening message to Alice. *)
-Let E_charlie_v3 : {RV P -> Charlie.-enc msg} := E' Charlie `o V3.
-
-(* Bob's input under his own key, his opening message to Alice. *)
-Let E_bob_v2     : {RV P -> Bob.-enc msg}     := E' Bob `o V2.
-
-(* Alice's full real view in the dot-product model: her key, the output S, her
-   own inputs and masks, and the three ciphertext hops. V2 appears only inside
-   S and the Bob hop.  The view is the honest one; what US_e1_centropy_V2_eq0
-   makes malicious is the query US, not this observation.
-   Naming: the [Dotp] token marks the algebraic model, after [Dotp_n_rv],
-   separating this view from the AliceView of the hopping axis. *)
-Definition AliceDotpView :=
-  [% Dk_a, S, V1, U1, U2, U3, R2, R3, E_alice_d3, E_charlie_v3, E_bob_v2].
-
-(* US_e1_centropy_V2_eq0 — a malicious Alice fixing her query to e_1
-   (U2 = 1, U3 = 0) reads Bob's private input V2 off her view, ciphertext hops
-   included; its conditional entropy collapses to zero. 3-party instance. *)
-Theorem US_e1_centropy_V2_eq0 :
-  U2 = (fun _ => 1) -> U3 = (fun _ => 0) ->
-  `H( V2 | AliceDotpView ) = 0.
-Proof.
-move=> HU2 HU3.
-pose VS : {RV P -> {ffun 'I_1.+1 -> msg}} :=
-  fun t => [ffun i => if i == ord0 then V2 t else V3 t].
-pose US : {RV P -> {ffun 'I_1.+1 -> msg}} :=
-  fun t => [ffun i => if i == ord0 then U2 t else U3 t].
-pose g := fun o : (Alice.-key Dec msg * msg * msg * msg * msg * msg * msg * msg
-                    * Alice.-enc msg * Charlie.-enc msg * Bob.-enc msg) =>
-  let '(_, s, _, u1, _, _, _, _, _, _, _) := o in
-  let '(_, _, v1, _, _, _, _, _, _, _, _) := o in
-  s - v1 * u1.
-have HVS0 : (fun t => VS t ord0) = V2.
-  by apply: boolp.funext => t; rewrite /VS ffunE eqxx.
-have HUS_e1 : US = fun _ => @ConstUS_n p_minus_2 q_minus_2 1.
-  rewrite /US /ConstUS_n; apply: boolp.funext => t; apply/ffunP => i.
-  by rewrite !ffunE HU2 HU3 /=; case: (i == ord0).
-have Hout : @Dotp_n_rv R T P p_minus_2 q_minus_2 1 US VS
-             = g `o AliceDotpView.
-  rewrite (_ : @Dotp_n_rv R T P p_minus_2 q_minus_2 1 US VS = (fun t => V2 t)).
-    rewrite /g /AliceDotpView /comp_RV /S /D3 /D2.
-    by apply: boolp.funext => t /=; rewrite HU2 HU3 /=; ring.
-  rewrite HUS_e1 /Dotp_n_rv.
-  by apply: boolp.funext => t /=; rewrite dotp_n_e1 /VS ffunE eqxx.
-have := US_e1_centropy_VS0_eq0 (View := AliceDotpView) (g := g)
-          (US := US) (VS := VS) HUS_e1 Hout.
-by rewrite HVS0.
-Qed.
-
-End dsdp_malicious_3party.
-
-(* =================================================================          *)
-(* Corrupted-relay secrecy of Alice's input (counting axis)                   *)
-(* =================================================================          *)
-
-Section dsdp_relay_secrecy_v1.
-(* Alice's input V1 occurs in no protocol message; each corrupted relay's full
-   real view is a deterministic function of inputs independent of V1, so its
-   conditional entropy about V1 stays at log m. *)
-Local Set Default Goal Selector "1".
-Local Open Scope reals_ext_scope.
-Local Open Scope proba_scope.
-Local Open Scope fdist_scope.
-Local Open Scope entropy_scope.
-Local Open Scope ring_scope.
-Context {R : realType}.
-Variable X : dsdp_setting R.
-Variable k : nat.
-Let T := sampleT (inputs X k).
-Let P := sample_fdist (inputs X k).
-Let p_minus_2 := p_minus_2 X k.
-Let q_minus_2 := q_minus_2 X k.
-Local Notation p := p_minus_2.+2.
-Local Notation q := q_minus_2.+2.
-Local Notation m := (p * q).
-Local Notation msg := 'Z_m.
-
-Let card_msg : #|msg| = m := card_Zp_pq p_minus_2 q_minus_2.
-
-Let V1 := V1 (inputs X k).
-Let V2 := V2 (inputs X k).
-Let V3 := V3 (inputs X k).
-Let U2 := U2 (inputs X k).
-Let U3 := U3 (inputs X k).
-Let R2 := R2 (inputs X k).
-Let R3 := R3 (inputs X k).
-Let Dk_b := Dk_b (inputs X k).
-Let Dk_c := Dk_c (inputs X k).
-
-(* Bob's input under Alice's query weight U2.  The weights U1, U2, U3 are
-   Alice's, so this is the one place Bob's secret meets a factor he does not
-   choose.  It reaches the aggregate only through D2. *)
-Let VU2 : {RV P -> msg} := V2 \* U2.
-
-(* Charlie's input under Alice's query weight U3, reaching the aggregate only
-   through VU3R. *)
-Let VU3 : {RV P -> msg} := V3 \* U3.
-
-(* Charlie's weighted input under Alice's mask R3, the plaintext of the second
-   combine Alice sends to Bob.  R3 is Alice's, drawn and stripped by palice of
-   dsdp_program.v, so it lies outside Bob's view.  That is what makes
-   bob_privacy_V3 unconditional: Bob's independence from V3 rests on a mask he
-   never sees, not on the encryption being hard to break. *)
-Let VU3R : {RV P -> msg} := VU3 \+ R3.
-
-(* Bob's weighted input under Alice's mask R2, the plaintext Bob decrypts from
-   Alice's first combine.  R2 lies outside Charlie's view, which is what makes
-   charlie_privacy_V2 unconditional in the same way. *)
-Let D2 : {RV P -> msg} := VU2 \+ R2.
-
-(* The aggregate Charlie decrypts, carrying both relay inputs under Alice's two
-   masks.  Alice recovers the output by stripping R2 and R3 from it. *)
-Let D3 : {RV P -> msg} := VU3R \+ D2.
-
-(* Alice's second combine, encrypted under Charlie's key and sent to Bob.  It
-   sits in Bob's view as opaque data, and the R3 mask inside it keeps V3
-   independent of that view on its own. *)
-Let E_charlie_vur3 : {RV P -> Charlie.-enc msg} := E' Charlie `o VU3R.
-
-(* Alice's first combine, encrypted under Bob's key.  Bob holds the matching
-   decryption key, and what he recovers is D2, already masked by R2. *)
-Let E_bob_d2 : {RV P -> Bob.-enc msg} := E' Bob `o D2.
-
-(* The aggregate Bob sends on to Charlie, encrypted under Charlie's key.  It
-   travels towards Charlie, not away from him: pcharlie of dsdp_program.v
-   decrypts it and answers Alice under Alice's key instead. *)
-Let E_charlie_d3 : {RV P -> Charlie.-enc msg} := E' Charlie `o D3.
-
-(* Bob's full real view: his key, his own input V2, the Charlie-key combine
-   Alice sends him and which he can only multiply into, and the Bob-key
-   combine he decrypts to D2. *)
-Definition BobView := [% Dk_b, V2, E_charlie_vur3, E_bob_d2].
-
-(* Charlie's full real view: his key, his own input V3, and the aggregate
-   ciphertext he receives from Bob. *)
-Definition CharlieView := [% Dk_c, V3, E_charlie_d3].
-
-Let pV1_unif : `p_ V1 = fdist_uniform card_msg := pV1_unif (inputs X k).
-Let bob_inputs_indep_V1 : P |= [% Dk_b, V2, VU3R, D2] _|_ V1 :=
-  bob_inputs_indep_V1 X k.
-Let charlie_inputs_indep_V1 : P |= [% Dk_c, V3, D3] _|_ V1 :=
-  charlie_inputs_indep_V1 X k.
-
-Let bob_view_of (w : (((Bob.-key Dec msg * msg) * msg) * msg)%type) :=
-  (((w.1.1.1, w.1.1.2), E' Charlie w.1.2), E' Bob w.2).
-Let charlie_view_of (w : ((Charlie.-key Dec msg * msg) * msg)%type) :=
-  ((w.1.1, w.1.2), E' Charlie w.2).
-
-(* BobView_indep_V1 — Bob's view is independent of Alice's input V1.          *)
-Lemma BobView_indep_V1 : P |= BobView _|_ V1.
-Proof.
-have H := inde_RV_comp bob_view_of idfun bob_inputs_indep_V1.
-by rewrite /comp_RV /= in H *.
-Qed.
-
-(* CharlieView_indep_V1 — Charlie's view is independent of Alice's input V1.  *)
-Lemma CharlieView_indep_V1 : P |= CharlieView _|_ V1.
-Proof.
-have H := inde_RV_comp charlie_view_of idfun charlie_inputs_indep_V1.
-by rewrite /comp_RV /= in H *.
-Qed.
-
-(* bob_privacy_V1 — Bob's view carries log m bits of uncertainty about Alice's
-   input V1, hence a corrupted Bob learns nothing about V1.  [3-party] *)
-Theorem bob_privacy_V1 :
-  `H(V1 | BobView) = log (m%:R : R) /\ `H(V1 | BobView) > 0.
-Proof.
-have H_logm : `H(V1 | BobView) = log (m%:R : R).
-  by rewrite (inde_cond_entropy BobView_indep_V1) pV1_unif entropy_uniform card_msg.
-split; first exact: H_logm.
-rewrite H_logm -log1; apply: ltr_log; first by [].
-by rewrite ltr1n.
-Qed.
-
-(* charlie_privacy_V1 — Charlie's view carries log m bits of uncertainty about
-   Alice's input V1, hence a corrupted Charlie learns nothing about V1.
-   [3-party] *)
-Theorem charlie_privacy_V1 :
-  `H(V1 | CharlieView) = log (m%:R : R) /\ `H(V1 | CharlieView) > 0.
-Proof.
-have H_logm : `H(V1 | CharlieView) = log (m%:R : R).
-  by rewrite (inde_cond_entropy CharlieView_indep_V1) pV1_unif entropy_uniform card_msg.
-split; first exact: H_logm.
-rewrite H_logm -log1; apply: ltr_log; first by [].
-by rewrite ltr1n.
-Qed.
-
-(* The Charlie-ciphertext Bob forwards carries plaintext V3 * U3 + R3, masked by
-   Alice's fresh one-time pad R3, so Bob's full view is independent of V3. *)
-Let pV3_unif : `p_ V3 = fdist_uniform card_msg := pV3_unif (inputs X k).
-Let pR3_unif : `p_ R3 = fdist_uniform card_msg := pR3_unif (inputs X k).
-Let R3_indep_VU3_V3 : P |= R3 _|_ [% VU3, V3] := R3_indep_VU3_V3 X k.
-Let bob_data_indep_charlie : P |= [% Dk_b, V2, D2] _|_ [% V3, VU3, R3] :=
-  bob_data_indep_charlie X k.
-
-(* The masked plaintext V3 * U3 + R3 is independent of V3 (one-time pad).     *)
-Let VU3R_indep_V3 : P |= VU3R _|_ V3.
-Proof.
-have card_TZ : #|msg| = (Zp_trunc m).+1.+1 by rewrite card_ord.
-have pR3_adj : `p_ R3 = fdist_uniform card_TZ.
-  by rewrite pR3_unif; congr fdist_uniform; exact: eq_irrelevance.
-exact: (@lemma_3_5' R T msg msg P VU3 R3 V3 R3_indep_VU3_V3
-        (Zp_trunc m).+1 card_TZ pR3_adj).
-Qed.
-
-(* Bob's clean data is independent of (V3, the masked term VU3R): push the clean
-   cross-party independence through (v3, vu3, r3) |-> (v3, vu3 + r3). *)
-Let clean_indep_V3_VU3R : P |= [% Dk_b, V2, D2] _|_ [% V3, VU3R].
-Proof.
-have H := @inde_RV_comp _ _ P _ _ _ _ [% Dk_b, V2, D2] [% V3, VU3, R3]
-            idfun (fun w => (w.1.1, w.1.2 + w.2)) bob_data_indep_charlie.
-by rewrite /comp_RV /VU3R /add_RV /= in H *.
-Qed.
-
-(* The joint masked-input independence, assembled by the graphoid mixing rule.*)
-Let bob_inputs_indep_V3 : P |= [% Dk_b, V2, D2, VU3R] _|_ V3.
-Proof.
-apply cinde_RV_unit.
-apply (mixing_rule (X := [% Dk_b, V2, D2]) (Y := V3) (Z := unit_RV P) (W := VU3R)).
-split.
-- by apply cinde_RV_unit; exact: clean_indep_V3_VU3R.
-- by apply cinde_RV_unit; rewrite inde_RV_sym; exact: VU3R_indep_V3.
-Qed.
-
-(* BobView_indep_V3 — Bob's full view is independent of Charlie's input V3.   *)
-Let BobView_indep_V3 : P |= BobView _|_ V3.
-Proof.
-have H := inde_RV_comp
-  (fun w : (((Bob.-key Dec msg * msg) * msg) * msg)%type =>
-     (((w.1.1.1, w.1.1.2), E' Charlie w.2), E' Bob w.1.2))
-  idfun bob_inputs_indep_V3.
-by rewrite /comp_RV /= in H *.
-Qed.
-
-(* bob_privacy_V3 — Bob's view carries log m bits of uncertainty about Charlie's
-   input V3, hence a corrupted Bob learns nothing about V3.  [3-party] *)
-Theorem bob_privacy_V3 :
-  `H(V3 | BobView) = log (m%:R : R) /\ `H(V3 | BobView) > 0.
-Proof.
-have H_logm : `H(V3 | BobView) = log (m%:R : R).
-  by rewrite (inde_cond_entropy BobView_indep_V3) pV3_unif entropy_uniform card_msg.
-split; first exact: H_logm.
-rewrite H_logm -log1; apply: ltr_log; first by [].
-by rewrite ltr1n.
-Qed.
-
-(* Charlie's decrypted aggregate D3 carries V2 * U2 masked by Alice's fresh pad
-   R2, so the ciphertext Charlie returns to Alice is independent of V2. *)
-Let pV2_unif : `p_ V2 = fdist_uniform card_msg := pV2_unif (inputs X k).
-Let pR2_unif : `p_ R2 = fdist_uniform card_msg := pR2_unif (inputs X k).
-Let R2_indep_VU2_V2 : P |= R2 _|_ [% VU2, V2] := R2_indep_VU2_V2 X k.
-Let R2_indep_VU2_VU3R_V2 : P |= R2 _|_ [% VU2, [%VU3R, V2]] :=
-  R2_indep_VU2_VU3R_V2 X k.
-Let Dk_c_V3_indep_V2_E : P |= [%Dk_c, V3] _|_ [%V2, E_charlie_d3] :=
-  Dk_c_V3_indep_V2_E_charlie_d3 X k.
-
-(* D2 = V2 * U2 + R2 is independent of (VU3R, V2) (one-time pad). *)
-Let D2_indep_VU3R_V2 : P |= D2 _|_ [%VU3R, V2].
-Proof.
-have card_TZ : #|msg| = (Zp_trunc m).+1.+1 by rewrite card_ord.
-have pR2_adj : `p_ R2 = fdist_uniform card_TZ.
-  by rewrite pR2_unif; congr fdist_uniform; exact: eq_irrelevance.
-exact: (@lemma_3_5' R T _ msg P VU2 R2 [%VU3R, V2] R2_indep_VU2_VU3R_V2
-        (Zp_trunc m).+1 card_TZ pR2_adj).
-Qed.
-
-(* D3 = VU3R + D2 is independent of V2: D2 is a uniform mask independent of
-   (VU3R, V2), so VU3R + D2 hides V2. *)
-Let D3_indep_V2 : P |= D3 _|_ V2.
-Proof.
-have card_TZ : #|msg| = (Zp_trunc m).+1.+1 by rewrite card_ord.
-have pR2_adj : `p_ R2 = fdist_uniform card_TZ.
-  by rewrite pR2_unif; congr fdist_uniform; exact: eq_irrelevance.
-have pD2_unif : `p_ D2 = fdist_uniform card_TZ.
-  have R2_VU2_indep : P |= R2 _|_ VU2.
-    exact/cinde_RV_unit/decomposition/cinde_RV_unit/R2_indep_VU2_V2.
-  have VU2_R2_indep : P |= VU2 _|_ R2 by rewrite inde_RV_sym.
-  exact: (add_RV_unif VU2 R2 card_TZ pR2_adj VU2_R2_indep).
-exact: (@lemma_3_5' R T msg msg P VU3R D2 V2 D2_indep_VU3R_V2
-        (Zp_trunc m).+1 card_TZ pD2_unif).
-Qed.
-
-(* The ciphertext E'(Charlie, D3) hides V2 (deterministic image of D3).       *)
-Let E_charlie_d3_indep_V2 : P |= E_charlie_d3 _|_ V2.
-Proof.
-have H := @inde_RV_comp _ _ P _ _ _ _ D3 V2 (E' Charlie) idfun D3_indep_V2.
-by rewrite /E_charlie_d3 /comp_RV.
-Qed.
-
-(* CharlieView_indep_V2 — Charlie's full view is independent of Bob's input V2. *)
-Let CharlieView_indep_V2 : P |= CharlieView _|_ V2.
-Proof.
-apply cinde_RV_unit.
-apply (mixing_rule (X := [%Dk_c, V3]) (Y := V2) (Z := unit_RV P) (W := E_charlie_d3)).
-split.
-- by apply cinde_RV_unit; exact: Dk_c_V3_indep_V2_E.
-- by apply cinde_RV_unit; rewrite inde_RV_sym; exact: E_charlie_d3_indep_V2.
-Qed.
-
-(* charlie_privacy_V2 — Charlie's view carries log m bits of uncertainty about
-   Bob's input V2, hence a corrupted Charlie learns nothing about V2.  [3-party] *)
-Theorem charlie_privacy_V2 :
-  `H(V2 | CharlieView) = log (m%:R : R) /\ `H(V2 | CharlieView) > 0.
-Proof.
-have H_logm : `H(V2 | CharlieView) = log (m%:R : R).
-  by rewrite (inde_cond_entropy CharlieView_indep_V2) pV2_unif entropy_uniform card_msg.
-split; first exact: H_logm.
-rewrite H_logm -log1; apply: ltr_log; first by [].
-by rewrite ltr1n.
-Qed.
-
-End dsdp_relay_secrecy_v1.
-
-(* =================================================================          *)
-(* Corrupted-Alice secrecy under IND-CPA hopping (hopping axis)               *)
-(* =================================================================          *)
-
-Section dsdp_alice_hop_secrecy.
-(* cloned context of Section dsdp_alice_hop_secrecy of
-   hopping/dsdp_alice_hop_secrecy.v; stated at the k-th instance of X's
-   sequence; the notations pin its projections under the names the axis
-   section uses, so the statements and proofs below are the axis text
-   verbatim. *)
-Local Set Default Goal Selector "1".
-Local Open Scope reals_ext_scope.
-Local Open Scope proba_scope.
-Local Open Scope fdist_scope.
-Local Open Scope entropy_scope.
-Local Open Scope ring_scope.
-Context {R : realType}.
-Variable X : dsdp_setting R.
-Variable k : nat.
-(* The instance whose scheme, weights and keys the hop ladder runs at. *)
-Local Notation S := (sequence_instance (instance_sequence X) k).
-Local Notation AHE := (inst_AHE S).
-Local Notation Renc := (inst_renc S).
-Local Notation card_renc := (inst_card_renc S).
-Local Notation rand_of_renc := (@inst_rand_of_renc S).
-Local Notation pkey_of_party := (inst_pkey_of_party S).
-Local Notation v1 := (inst_v1 S).
-Local Notation u1 := (inst_u1 S).
-Local Notation u2 := (inst_u2 S).
-Local Notation u3 := (inst_u3 S).
-Local Notation u3_unit := (inst_u3_unit S).
-
-Local Notation P := (alice_sample_fdist (R:=R) AHE card_renc).
-Local Notation V2 := (sample_V2 (R:=R) (AHE:=AHE) card_renc).
-Local Notation V3 := (sample_V3 (R:=R) (AHE:=AHE) card_renc).
-Local Notation hop_tupleT := (alice_hop_tupleT AHE Renc).
-Local Notation AliceHopTuple i :=
-  (AliceHopTuple (R:=R) (AHE:=AHE) card_renc rand_of_renc
-     pkey_of_party v1 u1 u2 u3 i).
-Local Notation AliceView :=
-  (AliceView (R:=R) (AHE:=AHE) card_renc rand_of_renc
-     pkey_of_party v1 u1 u2 u3).
-Local Notation alice_view_of_hop_tuple :=
-  (alice_view_of_hop_tuple (AHE:=AHE) rand_of_renc
-     pkey_of_party v1 u1 u2 u3).
-Local Notation alice_view_of_hop_tupleE :=
-  (alice_view_of_hop_tupleE (R:=R) (AHE:=AHE) card_renc rand_of_renc
-     pkey_of_party v1 u1 u2 u3).
-Local Notation indcpa_epsilon :=
-  (indcpa_epsilon (R:=R) (AHE:=AHE) card_renc rand_of_renc).
-Local Notation bob_pkey := (bob_pkey pkey_of_party).
-Local Notation charlie_pkey := (charlie_pkey pkey_of_party).
-Local Notation predictor := (predictor AHE).
-Local Notation alice_hop_jointT := (alice_hop_jointT AHE Renc).
-Local Notation alice_viewT := (alice_viewT AHE Renc).
-Local Notation AliceRealTuple :=
-  (AliceRealTuple (R:=R) (AHE:=AHE) card_renc rand_of_renc
-     pkey_of_party v1 u1 u2 u3).
-Local Notation bob_view_adversary :=
-  (bob_view_adversary (R:=R) (AHE:=AHE) card_renc rand_of_renc
-     pkey_of_party v1 u1 u2 u3).
-Local Notation charlie_view_adversary :=
-  (charlie_view_adversary (R:=R) (AHE:=AHE) card_renc rand_of_renc
-     pkey_of_party v1 u1 u2 u3).
-Local Notation bob_challenge_adversary :=
-  (bob_challenge_adversary (R:=R) (AHE:=AHE) card_renc rand_of_renc
-     pkey_of_party v1 u1 u2 u3).
-Local Notation charlie_challenge_adversary :=
-  (charlie_challenge_adversary (R:=R) (AHE:=AHE) card_renc rand_of_renc
-     pkey_of_party v1 u1 u2 u3).
-Local Notation hop0_advantageE :=
-  (hop0_advantageE (R:=R) (AHE:=AHE) card_renc rand_of_renc
-     pkey_of_party v1 u1 u2 u3).
-Local Notation hop1_advantageE :=
-  (hop1_advantageE (R:=R) (AHE:=AHE) card_renc rand_of_renc
-     pkey_of_party v1 u1 u2 u3).
-Local Notation alice_hop_game_successE :=
-  (alice_hop_game_successE (R:=R) (AHE:=AHE) card_renc rand_of_renc
-     pkey_of_party v1 u1 u2 u3).
-Local Notation guess_V2_jointE :=
-  (guess_V2_jointE (R:=R) (AHE:=AHE) card_renc rand_of_renc
-     pkey_of_party v1 u1 u2 u3).
-Local Notation Sout := (Sout (R:=R) (AHE:=AHE) card_renc v1 u1 u2 u3).
-Local Notation AliceSpectator :=
-  (AliceSpectator (R:=R) (AHE:=AHE) card_renc rand_of_renc pkey_of_party).
-Local Notation alice_spectator_cinde :=
-  (alice_spectator_cinde (R:=R) (AHE:=AHE) card_renc rand_of_renc
-     pkey_of_party v1 u1 u2 u3).
-Local Notation all_zero_guess_V2_le_invm :=
-  (all_zero_guess_V2_le_invm (R:=R) (AHE:=AHE) card_renc rand_of_renc
-     pkey_of_party v1 u1 u2 u3_unit).
-Local Notation alice_ideal_joint :=
-  (alice_ideal_joint (R:=R) (AHE:=AHE) card_renc rand_of_renc
-     pkey_of_party v1 u1 u2 u3).
-Local Notation alice_ideal_jointE :=
-  (alice_ideal_jointE (R:=R) (AHE:=AHE) card_renc rand_of_renc
-     pkey_of_party v1 u1 u2 u3).
-Local Notation alice_predictor_unpredictability :=
-  (alice_predictor_unpredictability (R:=R) (AHE:=AHE) card_renc rand_of_renc
-     pkey_of_party v1 u1 u2 u3).
-
-Let card_plain_gt0 : (0 < #|plain AHE|)%N.
-Proof. by apply/card_gt0P; exists 0; rewrite inE. Qed.
-
-(* A predictor reading Alice's real hopping tuple matches Bob's input with
-   probability at most uniform guessing over the plaintext space plus the
-   advantages of the two hop reductions.  The first summand is
-   information-theoretic and unconditional; the two others are
-   assumption-conditional, one against Bob's key and one against Charlie's. *)
-Theorem alice_tuple_guess_V2_le
-    (predict : predictor hop_tupleT) :
-  Pr P [set t | (predict `o AliceRealTuple) t == V2 t]
-    <= #|plain AHE|%:R^-1
-       + indcpa_epsilon bob_pkey
-           (bob_challenge_adversary (distinguisher_of_predictor predict))
-       + indcpa_epsilon charlie_pkey
-           (charlie_challenge_adversary (distinguisher_of_predictor predict)).
-Proof.
-rewrite /AliceRealTuple guess_V2_jointE -hop0_advantageE -hop1_advantageE.
-rewrite -addrA -lerBlDl.
-rewrite !alice_hop_game_successE.
-apply: le_trans (lerB (lexx _) _) _; last first.
-  exact: le_trans (ler_norm _) (ler_distD _ _ _).
-by rewrite -guess_V2_jointE; exact: all_zero_guess_V2_le_invm.
-Qed.
-
-Local Notation bob_predictor_epsilon :=
-  (bob_predictor_epsilon (R:=R) (AHE:=AHE) card_renc rand_of_renc
-     pkey_of_party v1 u1 u2 u3).
-Local Notation charlie_predictor_epsilon :=
-  (charlie_predictor_epsilon (R:=R) (AHE:=AHE) card_renc rand_of_renc
-     pkey_of_party v1 u1 u2 u3).
-
-(* The negative logarithm of a predictor's success probability on Alice's
-   real hopping tuple is at least the log of the plaintext-space cardinality
-   less a correction in the two hop advantages.  As the advantages go to
-   zero the correction vanishes and the bound becomes the value uniform
-   guessing would give. *)
-Theorem alice_unpredictability_ge (predict : predictor hop_tupleT)
-    (Hpos : 0 < Pr P [set t | (predict `o AliceRealTuple) t == V2 t]) :
-  log (#|plain AHE|%:R)
-    - log (1 + #|plain AHE|%:R
-               * (bob_predictor_epsilon predict
-                  + charlie_predictor_epsilon predict))
-  <= - log (Pr P [set t | (predict `o AliceRealTuple) t == V2 t]).
-Proof.
-have Hcard_pos : (0 < #|plain AHE|%:R :> R) by rewrite ltr0n card_plain_gt0.
-have Hnum_pos : (0 < 1 + #|plain AHE|%:R
-                        * (bob_predictor_epsilon predict
-                           + charlie_predictor_epsilon predict) :> R).
-  apply: ltr_pwDl ltr01 (mulr_ge0 (ler0n _ _) _).
-  by rewrite addr_ge0 // /bob_predictor_epsilon /charlie_predictor_epsilon
-             /indcpa_epsilon normr_ge0.
-rewrite lerNr opprB -logDiv // ler_log ?posrE ?divr_gt0 //.
-rewrite mulrDl mul1r mulrAC (divff (lt0r_neq0 Hcard_pos)) mul1r addrA.
-exact: alice_tuple_guess_V2_le.
-Qed.
-
-Local Notation "'`H_unp^{' g '}'" :=
-  (alice_predictor_unpredictability g)
-  (at level 0, g at level 200,
-   format "'`H_unp^{' g '}'").
-
-(* The same bound read through the named unpredictability quantity. *)
-Theorem alice_predictor_unpredictability_ge
-    (predict : predictor hop_tupleT)
-    (Hpos : 0 < Pr P [set t | (predict `o AliceRealTuple) t == V2 t]) :
-  log (#|plain AHE|%:R)
-    - log (1 + #|plain AHE|%:R
-               * (bob_predictor_epsilon predict
-                  + charlie_predictor_epsilon predict))
-  <= `H_unp^{predict}.
-Proof.
-exact: alice_unpredictability_ge.
-Qed.
-
-(* Any Boolean test separates the real joint law of the honest inputs and
-   Alice's hopping tuple from the ideal law built by the simulator by at most
-   the sum of the two IND-CPA advantages.  Real world is hop 0, ideal world
-   is hop 2, and the ladder prices the distance one hop at a time. *)
-Theorem alice_sim_advantage_le
-    (D : distinguisher alice_hop_jointT) :
-  `| Pr (`p_ [% V2, V3, AliceRealTuple]) [set x | D x]
-     - Pr alice_ideal_joint [set x | D x] |
-  <= indcpa_epsilon bob_pkey (bob_challenge_adversary D)
-     + indcpa_epsilon charlie_pkey (charlie_challenge_adversary D).
-Proof.
-rewrite /AliceRealTuple alice_ideal_jointE -hop0_advantageE -hop1_advantageE.
-rewrite !alice_hop_game_successE.
-exact: ler_distD.
-Qed.
-
-(* Alice's whole view obeys the hopping-tuple bound: her two outgoing
-   combines and the plaintext of her final decrypt-on-receive are
-   deterministic functions of the tuple, so reading them adds no term. *)
-Corollary alice_view_guess_V2_le
-    (predict : predictor alice_viewT) :
-  Pr P [set t | (predict `o AliceView) t == V2 t]
-    <= #|plain AHE|%:R^-1
-       + indcpa_epsilon bob_pkey (bob_view_adversary predict)
-       + indcpa_epsilon charlie_pkey (charlie_view_adversary predict).
-Proof.
-by rewrite alice_view_of_hop_tupleE; exact: alice_tuple_guess_V2_le.
-Qed.
-
-(* Conditioned on the leaked output alone, Bob's input still carries
-   log #|plain AHE| bits of uncertainty, which is what it carries with no
-   conditioning at all.  The leaked output is one affine equation in the two
-   secret inputs, so it cuts the sample space to a fiber on which Bob's input
-   is still uniform.
-   This and the 1/#|plain AHE| term of all_zero_guess_V2_le_invm descend from
-   one fact, alice_V2_cond_Sout: the conditional law of Bob's input given the
-   leaked output is exactly uniform.  Neither statement is derived from the
-   other, and this entropy reading holds at this conditioner alone; at
-   Alice's executed trace the same quantity is zero, as
-   centropy_V2_trace_eq0 below records.
-   Naming: [logm] names the value the quantity takes, the logarithm of the
-   plaintext-space cardinality, as [invm] names its reciprocal in
-   [all_zero_guess_V2_le_invm]. *)
-Lemma centropy_V2_Sout_logm :
-  `H( V2 | Sout ) = log (#|plain AHE|%:R : R).
-Proof.
-rewrite centropy_RVE'.
-transitivity (\sum_(s in plain AHE)
-                `Pr[ Sout = s ] * log (#|plain AHE|%:R : R)); last first.
-  by rewrite -big_distrl /= sum_pfwd1 mul1r.
-apply: eq_bigr => s _.
-have [->|Hs] := eqVneq `Pr[ Sout = s ] 0; first by rewrite !mul0r.
-congr (_ * _); rewrite -[in RHS](cardsT (plain AHE)).
-apply: centropy1_uniform_over_set => //.
-- by move=> a _; rewrite cardsT; exact: (alice_V2_cond_Sout u3_unit).
-- by move=> a; rewrite in_setT.
-Qed.
-
-(* Conditioned on Alice's all-zero view, Bob's input carries the same
-   log #|plain AHE| bits it carries given the leaked output alone.  The
-   all-zero endpoint of the hop ladder is where the non-degenerate Shannon
-   statement holds: both ciphertext slots encrypt zero, so the leaked output
-   is the only channel from V2 into the view, and adjoining the spectator
-   coordinates costs nothing.  At Alice's executed trace the same quantity is
-   zero instead, as centropy_V2_trace_eq0 below records.
-   The guessing-side fact at this same endpoint is all_zero_guess_V2_le_invm,
-   which bounds every predictor's success by 1/#|plain AHE|.  The two are
-   different quantities: this one averages the conditional entropy over the
-   conditioner, that one bounds a probability, and neither is derived from
-   the other.
-   Naming: [all_zero] names the endpoint, as in [all_zero_guess_V2_le_invm], and
-   [logm] the value, as in [centropy_V2_Sout_logm]. *)
-Lemma centropy_V2_all_zero_logm :
-  `H( V2 | AliceHopTuple 2 ) = log (#|plain AHE|%:R : R).
-Proof.
-have -> : AliceHopTuple 2
-        = @alice_hop_tuple_of_spectator AHE Renc `o [% AliceSpectator, Sout]
-  by [].
-rewrite (can_centropy_eq (@alice_hop_tuple_of_spectatorK AHE Renc)).
-by rewrite (cinde_centropy_eq alice_spectator_cinde) centropy_V2_Sout_logm.
-Qed.
-
-End dsdp_alice_hop_secrecy.
-
-(* =================================================================          *)
-(* The same bounds at Alice's executed piSMC trace                            *)
-(* =================================================================          *)
-
-Section dsdp_alice_trace_secrecy.
-(* cloned context of Section dsdp_alice_trace_rv; stated at the k-th
-   instance of X's sequence; the notations pin its projections under the
-   names the axis section uses, so the statements and proofs below are the
-   axis text verbatim. *)
-Local Set Default Goal Selector "1".
-Local Open Scope reals_ext_scope.
-Local Open Scope proba_scope.
-Local Open Scope fdist_scope.
-Local Open Scope entropy_scope.
-Local Open Scope ring_scope.
-Context {R : realType}.
-Variable X : dsdp_setting R.
-Variable k : nat.
-(* The instance whose keys and hop coins the executed trace carries. *)
-Local Notation S := (sequence_instance (instance_sequence X) k).
-Local Notation AHE := (inst_AHE S).
-Local Notation Renc := (inst_renc S).
-Local Notation card_renc := (inst_card_renc S).
-Local Notation rand_of_renc := (@inst_rand_of_renc S).
-Local Notation v1 := (inst_v1 S).
-Local Notation u1 := (inst_u1 S).
-Local Notation u2 := (inst_u2 S).
-Local Notation u3 := (inst_u3 S).
-Local Notation u3_unit := (inst_u3_unit S).
-Local Notation dk_a := (inst_dk_a S).
-Local Notation dk_b := (inst_dk_b S).
-Local Notation dk_c := (inst_dk_c S).
-(* Bob's and Charlie's second-hop coins, held as indices into Renc.  The
-   generic rand of he_types.v is a bare Type and carries no distribution, so
-   a uniformly sampled coin is quantified over the finType of indices, and
-   rand_of_renc carries an index to the randomness the protocol encrypts
-   with.  The w_ prefix marks the index side of that split. *)
-Local Notation w_rb2 := (inst_rb2 S).
-Local Notation w_rc2 := (inst_rc2 S).
-
-Local Notation P := (alice_sample_fdist (R:=R) AHE card_renc).
-Local Notation pkey_of_dk := (pkey_of_dk dk_a dk_b dk_c).
-Local Notation trace_dataT := (trace_dataT AHE).
-Local Notation hop_tupleT := (alice_hop_tupleT AHE Renc).
-Local Notation V2 := (sample_V2 (R:=R) (AHE:=AHE) card_renc).
-Local Notation V3 := (sample_V3 (R:=R) (AHE:=AHE) card_renc).
-Local Notation AliceHopTuple i :=
-  (AliceHopTuple (R:=R) (AHE:=AHE) card_renc rand_of_renc
-     pkey_of_dk v1 u1 u2 u3 i).
-Local Notation AliceTrace :=
-  (AliceTrace (R:=R) (AHE:=AHE) card_renc rand_of_renc
-     v1 u1 u2 u3 dk_a dk_b dk_c w_rb2 w_rc2).
-Local Notation alice_trace_of_hop_tuple :=
-  (alice_trace_of_hop_tuple rand_of_renc v1 u1 u2 u3 dk_a dk_b dk_c w_rc2).
-Local Notation alice_trace_of_hop_tupleE :=
-  (alice_trace_of_hop_tupleE (R:=R) (AHE:=AHE) card_renc rand_of_renc
-     v1 u1 u2 u3 dk_a dk_b dk_c w_rb2 w_rc2).
-Local Notation indcpa_epsilon :=
-  (indcpa_epsilon (R:=R) (AHE:=AHE) card_renc rand_of_renc).
-Local Notation bob_challenge_adversary :=
-  (bob_challenge_adversary (R:=R) (AHE:=AHE) card_renc rand_of_renc
-     pkey_of_dk v1 u1 u2 u3).
-Local Notation charlie_challenge_adversary :=
-  (charlie_challenge_adversary (R:=R) (AHE:=AHE) card_renc rand_of_renc
-     pkey_of_dk v1 u1 u2 u3).
-Local Notation predictor := (predictor AHE).
-Local Notation alice_traceT := (alice_traceT AHE).
-Local Notation trace_jointT := (trace_jointT AHE).
-Local Notation bob_trace_adversary :=
-  (bob_trace_adversary (R:=R) card_renc rand_of_renc
-     v1 u1 u2 u3 dk_a dk_b dk_c w_rc2).
-Local Notation charlie_trace_adversary :=
-  (charlie_trace_adversary (R:=R) card_renc rand_of_renc
-     v1 u1 u2 u3 dk_a dk_b dk_c w_rc2).
-Local Notation bob_trace_predictor_epsilon :=
-  (bob_trace_predictor_epsilon (R:=R) card_renc rand_of_renc
-     v1 u1 u2 u3 dk_a dk_b dk_c w_rc2).
-Local Notation charlie_trace_predictor_epsilon :=
-  (charlie_trace_predictor_epsilon (R:=R) card_renc rand_of_renc
-     v1 u1 u2 u3 dk_a dk_b dk_c w_rc2).
-Local Notation alice_ideal_joint :=
-  (alice_ideal_joint (R:=R) (AHE:=AHE) card_renc rand_of_renc
-     pkey_of_dk v1 u1 u2 u3).
-Local Notation alice_trace_ideal_joint :=
-  (alice_trace_ideal_joint (R:=R) card_renc rand_of_renc
-     v1 u1 u2 u3 dk_a dk_b dk_c w_rc2).
-Local Notation alice_trace_simulator :=
-  (alice_trace_simulator (R:=R) card_renc rand_of_renc
-     v1 u1 u2 u3 dk_a dk_b dk_c w_rc2).
-Local Notation alice_simulator :=
-  (alice_simulator (R:=R) (AHE:=AHE) card_renc rand_of_renc
-     pkey_of_dk).
-Local Notation alice_trace_unpredictability :=
-  (alice_trace_unpredictability (R:=R) card_renc rand_of_renc
-     v1 u1 u2 u3 dk_a dk_b dk_c w_rb2 w_rc2).
-Local Notation indcpa_epsilon_assumption :=
-  (indcpa_epsilon_assumption (R:=R) (AHE:=AHE) card_renc rand_of_renc).
-Local Notation alice_trace_guess_V2_pr :=
-  (alice_trace_guess_V2_pr (R:=R) card_renc rand_of_renc
-     v1 u1 u2 u3 dk_a dk_b dk_c w_rb2 w_rc2).
-Local Notation bob_decrypt_predictor :=
-  (bob_decrypt_predictor rand_of_renc dk_a dk_b dk_c w_rc2).
-Local Notation alice_trace_decode_V2E :=
-  (alice_trace_decode_V2E (R:=R) card_renc rand_of_renc
-     v1 u1 u2 u3 dk_a dk_b dk_c w_rb2 w_rc2).
-
-(* A predictor reading Alice's executed fifteen-round trace matches Bob's
-   input no better than one reading her hopping tuple: the trace is a
-   deterministic function of the tuple, so the tuple bound transfers with no
-   extra term. *)
-Theorem alice_trace_guess_V2_le
-    (predict : predictor alice_traceT) :
-  Pr P [set t | (predict `o AliceTrace) t == V2 t]
-    <= (#|plain AHE|%:R : R)^-1
-       + indcpa_epsilon (pkey_of_dk Bob)
-           (bob_trace_adversary (distinguisher_of_predictor predict))
-       + indcpa_epsilon (pkey_of_dk Charlie)
-           (charlie_trace_adversary (distinguisher_of_predictor predict)).
-Proof.
-rewrite alice_trace_of_hop_tupleE.
-exact: (alice_tuple_guess_V2_le (predict \o alice_trace_of_hop_tuple)).
-Qed.
-
-(* The trace guessing bound with both hop advantages replaced by the single
-   epsilon an adversary-class assumption carries.  The statement spends three
-   currencies.  The right-hand side sums two of them: one over the
-   plaintext-space cardinality, information-theoretic and unconditional; and
-   twice the assumption's epsilon, conditional on that assumption, pricing
-   the two ciphertext replacements at Bob's key and at Charlie's.  The third
-   is the two premises, conditional on the class and assumed rather than
-   proved.
-   decrypt_bob_epsilon_ge below shows that an assumption whose
-   classifier admits every adversary is forced to assume an epsilon of at
-   least 1 - 1/#|plain AHE|, which is why the class restriction is what makes
-   this bound satisfiable.
-   Naming: extends [alice_trace_guess_V2_le] with the
-   [admissible] variant token before [le]. *)
-Corollary alice_trace_guess_V2_admissible_le
-    (A : indcpa_epsilon_assumption) (predict : predictor alice_traceT) :
-  indcpa_admissible A
-    (bob_trace_adversary (distinguisher_of_predictor predict)) ->
-  indcpa_admissible A
-    (charlie_trace_adversary (distinguisher_of_predictor predict)) ->
-  alice_trace_guess_V2_pr predict
-    <= (#|plain AHE|%:R : R)^-1 + 2 * indcpa_assumption_epsilon A.
-Proof.
-move=> Hb Hc.
-apply: le_trans (alice_trace_guess_V2_le predict) _.
-rewrite mulr_natl mulr2n addrA.
-by rewrite lerD // ?lerD2l //; exact: indcpa_admissible_epsilon_le.
-Qed.
-
-(* The decryptor succeeds on every sample. *)
-Let decrypt_guess_prE :
-  Pr P [set t | (bob_decrypt_predictor `o AliceTrace) t == V2 t] = 1.
-Proof.
-rewrite -alice_trace_decode_V2E.
-rewrite (_ : finset _ = [set: alice_sampleT AHE Renc]) ?Pr_setT //.
-by apply/setP => t; rewrite !inE eqxx.
-Qed.
-
-(* The two hop advantages an adversary holding Bob's private key buys sum to
-   at least 1 - 1/#|plain AHE|: the hop ladder's epsilons cannot all be small
-   for every adversary, so the class restriction of the corollary above is
-   load-bearing rather than decoration.
-   Naming: [decrypt] names the predictor, [epsilon_sum] the summed
-   advantages, [ge] the direction of the inequality. *)
-Corollary decrypt_epsilon_sum_ge :
-  1 - (#|plain AHE|%:R : R)^-1
-  <= bob_trace_predictor_epsilon bob_decrypt_predictor
-     + charlie_trace_predictor_epsilon bob_decrypt_predictor.
-Proof.
-(* The rewrite is confined to the left-hand side: 1 also occurs inside
-   #|plain AHE|%:R on the right. *)
-rewrite lerBlDl addrA -[X in X <= _]decrypt_guess_prE.
-exact: alice_trace_guess_V2_le.
-Qed.
-
-(* Bob's key alone already carries that whole gap.  The decryptor separates
-   the two branches of the hop-0 challenge: at the real bit it reads Bob's
-   input off the challenge ciphertext and is right always, and at the zero
-   bit it reads zero and is right only on the fiber the leaked output leaves,
-   of mass at most 1/#|plain AHE|.  The Charlie-key term of the corollary
-   above is therefore not needed: this consumes the hop-0 half of the ladder
-   alone, never the composite two-hop bound
-   alice_trace_guess_V2_le.
-   Naming: as above, with [bob] naming the single epsilon the bound
-   charges. *)
-Corollary decrypt_bob_epsilon_ge :
-  1 - (#|plain AHE|%:R : R)^-1
-  <= bob_trace_predictor_epsilon bob_decrypt_predictor.
-Proof.
-pose lifted := bob_decrypt_predictor \o alice_trace_of_hop_tuple.
-have Hlift : `| Pr P [set t | (lifted `o AliceHopTuple 0) t == V2 t]
-              - Pr P [set t | (lifted `o AliceHopTuple 1) t == V2 t] |
-            = bob_trace_predictor_epsilon bob_decrypt_predictor.
-  by rewrite 2!guess_V2_jointE -2!alice_hop_game_successE hop0_advantageE.
-have HV2 : lifted `o AliceHopTuple 0 = V2.
-  by rewrite alice_trace_decode_V2E alice_trace_of_hop_tupleE.
-have H0 : Pr P [set t | (lifted `o AliceHopTuple 0) t == V2 t] = 1.
-  rewrite HV2 (_ : finset _ = [set: alice_sampleT AHE Renc]) ?Pr_setT //.
-  by apply/setP => t; rewrite !inE eqxx.
-(* all_zero_guess_V2_le_invm is stated at hop 2 and used here at hop 1.  Two
-   reductions carry it across: the encoded trace is a literal bseq, so nth 3
-   discards Charlie's slot, the only slot the two hops differ in; and
-   hop0_cipher reduces to enc bob_pkey 0 at both indices, since 0 < i holds
-   at 1 and at 2.  Renumbering the trace slots or making either function
-   opaque breaks this step. *)
-have H1 : Pr P [set t | (lifted `o AliceHopTuple 1) t == V2 t]
-          <= #|plain AHE|%:R^-1.
-  exact: (all_zero_guess_V2_le_invm card_renc rand_of_renc pkey_of_dk
-            v1 u1 u2 u3_unit lifted).
-rewrite -Hlift H0.
-exact: le_trans (lerB (lexx _) H1) (ler_norm _).
-Qed.
-
-(* An assumption that promises a small epsilon has no choice about the
-   decrypting predictor: its classifier must answer false on the reduction
-   that predictor induces at Bob's key, because that reduction holds Bob's
-   private key and its advantage is provably at least 1 - 1/#|plain AHE|.
-   Key-holding behavior sits outside the public-key-only attack model every
-   meaningful epsilon is measured in, so rejecting it is forced, not
-   bookkeeping.
-   Naming: the [F] suffix is MathComp's marker for a conclusion that is the
-   boolean false. *)
-Lemma decrypt_reduction_admissibleF (A : indcpa_epsilon_assumption) :
-  indcpa_assumption_epsilon A < 1 - (#|plain AHE|%:R : R)^-1 ->
-  indcpa_admissible A
-    (bob_trace_adversary
-       (distinguisher_of_predictor bob_decrypt_predictor)) = false.
-Proof.
-move=> Heps; apply/negbTE/negP => Hadm.
-have Hle := le_trans decrypt_bob_epsilon_ge
-              (indcpa_admissible_epsilon_le dk_b Hadm).
-by move: (lt_le_trans Heps Hle); rewrite ltxx.
-Qed.
-
-(* Dropping the membership premises of the class-conditional guessing bound outright
-   leaves a false statement: whenever the promised epsilon is meaningfully
-   small, the premise-free right-hand side sits strictly below what the decrypting
-   predictor achieves, for every such assumption, not a contrived one.
-   decrypt_reduction_admissibleF is the complementary half: it shows the
-   missing premises cannot be supplied for this predictor.  Together they
-   place the bound's truth in the class restriction.
-   Naming: the decrypting predictor is the subject, as in
-   decrypt_reduction_admissibleF; [premise_free] marks the bound with its two
-   class premises dropped. *)
-Lemma decrypt_guess_V2_premise_free_lt
-    (A : indcpa_epsilon_assumption) :
-  2 * indcpa_assumption_epsilon A < 1 - (#|plain AHE|%:R : R)^-1 ->
-  (#|plain AHE|%:R : R)^-1 + 2 * indcpa_assumption_epsilon A
-    < alice_trace_guess_V2_pr bob_decrypt_predictor.
-Proof.
-move=> Heps.
-have -> : alice_trace_guess_V2_pr bob_decrypt_predictor = 1
-  := decrypt_guess_prE.
-by rewrite -ltrBrDl.
-Qed.
-
-Local Notation "'`H_unp^{' g '}'" :=
-  (alice_trace_unpredictability g)
-  (at level 0, g at level 200,
-   format "'`H_unp^{' g '}'").
-
-(* The unpredictability of Bob's input at Alice's executed trace obeys the
-   same lower bound as at her hopping tuple.
-   Naming: after [alice_predictor_unpredictability_ge], with [trace] naming
-   the observation read. *)
-Theorem alice_trace_unpredictability_ge
-    (predict : predictor alice_traceT)
-    (Hpos : 0 < Pr P [set t | (predict `o AliceTrace) t == V2 t]) :
-  log (#|plain AHE|%:R)
-    - log (1 + #|plain AHE|%:R
-               * (bob_trace_predictor_epsilon predict
-                  + charlie_trace_predictor_epsilon predict))
-  <= `H_unp^{predict}.
-Proof.
-have Hcard_pos : (0 < #|plain AHE|%:R :> R).
-  by rewrite ltr0n; apply/card_gt0P; exists 0; rewrite inE.
-have Hnum_pos : (0 < 1 + #|plain AHE|%:R
-                        * (bob_trace_predictor_epsilon predict
-                           + charlie_trace_predictor_epsilon predict) :> R).
-  by rewrite ltr_pwDl // mulr_ge0 // addr_ge0 // normr_ge0.
-rewrite /alice_trace_unpredictability.
-rewrite lerNr opprB -logDiv // ler_log ?posrE ?divr_gt0 //.
-rewrite mulrDl mul1r mulrAC (divff (lt0r_neq0 Hcard_pos)) mul1r addrA.
-exact: alice_trace_guess_V2_le.
-Qed.
-
-(* The two honest inputs and Alice's encoded trace obtained from a joint
-   hopping-tuple value.
-   Naming: the [_of_] connective names the source the conversion reads,
-   here the joint carrier of [alice_hop_joint_fdist], not the bare tuple. *)
-Let alice_trace_joint_of_hop_joint
-    (x : plain AHE * plain AHE * hop_tupleT) : trace_jointT :=
-  (x.1.1, x.1.2, alice_trace_of_hop_tuple x.2).
-
-Let alice_trace_ideal_jointE :
-  alice_trace_ideal_joint
-  = fdistmap alice_trace_joint_of_hop_joint alice_ideal_joint.
-Proof.
-rewrite /alice_trace_ideal_joint /alice_ideal_joint fdistmap_bind.
-congr (_ >>= _); apply: boolp.funext => vv.
-by rewrite /alice_trace_simulator 2!fdistmap_comp.
-Qed.
-
-Let alice_trace_real_jointE :
-  `p_ [% V2, V3, AliceTrace]
-  = fdistmap alice_trace_joint_of_hop_joint
-      (`p_ [% V2, V3, AliceHopTuple 0]).
-Proof.
-by rewrite alice_trace_of_hop_tupleE /dist_of_RV fdistmap_comp.
-Qed.
-
-(* A Boolean test on Alice's executed trace separates the real trace law from
-   the simulated one by at most the two hop advantages of the hopping-tuple
-   test it lifts to.
-   Naming: after [alice_sim_advantage_le], with [alice_trace] as the object
-   stem. *)
-Theorem alice_trace_sim_advantage_le
-    (D : distinguisher trace_jointT) :
-  `| Pr (`p_ [% V2, V3, AliceTrace]) [set x | D x]
-     - Pr alice_trace_ideal_joint [set x | D x] |
-  <= indcpa_epsilon (pkey_of_dk Bob) (bob_trace_adversary D)
-     + indcpa_epsilon (pkey_of_dk Charlie) (charlie_trace_adversary D).
-Proof.
-rewrite alice_trace_real_jointE alice_trace_ideal_jointE.
-rewrite -2!(Pr_fdistmap_bool D) 2!(fdistmap_comp D) 2!Pr_fdistmap_bool.
-rewrite /bob_trace_adversary /charlie_trace_adversary.
-exact: (alice_sim_advantage_le (D \o alice_trace_joint_of_hop_joint)).
-Qed.
-
-End dsdp_alice_trace_secrecy.
-
-Section dsdp_alice_trace_uncertainty.
-(* cloned context of Section dsdp_alice_trace_centropy; stated at the k-th
-   instance of X's sequence; the notations pin its projections under the
-   names the axis section uses, so the statements and proofs below are the
-   axis text verbatim. *)
-Local Set Default Goal Selector "1".
-Local Open Scope reals_ext_scope.
-Local Open Scope proba_scope.
-Local Open Scope fdist_scope.
-Local Open Scope entropy_scope.
-Local Open Scope ring_scope.
-Context {R : realType}.
-Variable X : dsdp_setting R.
-Variable k : nat.
-(* The instance the three conditioning readings below are taken at. *)
-Local Notation S := (sequence_instance (instance_sequence X) k).
-Local Notation AHE := (inst_AHE S).
-Local Notation Renc := (inst_renc S).
-Local Notation card_renc := (inst_card_renc S).
-Local Notation rand_of_renc := (@inst_rand_of_renc S).
-Local Notation v1 := (inst_v1 S).
-Local Notation u1 := (inst_u1 S).
-Local Notation u2 := (inst_u2 S).
-Local Notation u3 := (inst_u3 S).
-Local Notation dk_a := (inst_dk_a S).
-Local Notation dk_b := (inst_dk_b S).
-Local Notation dk_c := (inst_dk_c S).
-Local Notation w_rb2 := (inst_rb2 S).
-Local Notation w_rc2 := (inst_rc2 S).
-
-Local Notation P := (alice_sample_fdist (R:=R) AHE card_renc).
-Local Notation pkey_of_dk := (pkey_of_dk dk_a dk_b dk_c).
-Local Notation V2 := (sample_V2 (R:=R) (AHE:=AHE) card_renc).
-Local Notation AliceHopTuple i :=
-  (AliceHopTuple (R:=R) (AHE:=AHE) card_renc rand_of_renc
-     pkey_of_dk v1 u1 u2 u3 i).
-Local Notation AliceRealTuple :=
-  (AliceRealTuple (R:=R) (AHE:=AHE) card_renc rand_of_renc
-     pkey_of_dk v1 u1 u2 u3).
-Local Notation AliceTrace :=
-  (AliceTrace (R:=R) (AHE:=AHE) card_renc rand_of_renc
-     v1 u1 u2 u3 dk_a dk_b dk_c w_rb2 w_rc2).
-Local Notation AliceView :=
-  (AliceView (R:=R) (AHE:=AHE) card_renc rand_of_renc
-     pkey_of_dk v1 u1 u2 u3).
-Local Notation alice_view_of_hop_tupleE :=
-  (alice_view_of_hop_tupleE (R:=R) (AHE:=AHE) card_renc rand_of_renc
-     pkey_of_dk v1 u1 u2 u3).
-Local Notation alice_trace_decode_V2E :=
-  (alice_trace_decode_V2E (R:=R) card_renc rand_of_renc
-     v1 u1 u2 u3 dk_a dk_b dk_c w_rb2 w_rc2).
-
-(* Conditioning on Alice's executed trace leaves the same uncertainty about
-   Bob's input as conditioning on her hopping tuple: the trace and the tuple
-   determine each other once the two combine coins, which are independent of
-   both, are set aside.  The trace is therefore no better an observation than
-   the tuple the hop ladder prices. *)
-Theorem centropy_V2_trace_tupleE :
-  `H( V2 | AliceTrace ) = `H( V2 | AliceRealTuple ).
-Proof.
-rewrite /AliceRealTuple alice_trace_tupleE
-        (can_centropy_eq (@trace_of_trace_tupleK AHE Renc rand_of_renc
-                            v1 u1 u2 u3 dk_a dk_b dk_c w_rc2)).
-rewrite alice_hop_tuple_rand_traceE
-        (can_centropy_eq (@hop_tuple_of_rand_traceK AHE Renc)).
-by rewrite (inde_centropy_eq
-              (combine_rand_trace_indep card_renc rand_of_renc v1 u1 u2 u3
-                 dk_a dk_b dk_c)).
-Qed.
-
-(* Conditioning on Alice's whole view leaves the same uncertainty about Bob's
-   input as conditioning on her hopping tuple: each is a deterministic
-   function of the other, so entropy contraction applies both ways. *)
-Corollary centropy_V2_view_tupleE :
-  `H( V2 | AliceView ) = `H( V2 | AliceRealTuple ).
-Proof.
-rewrite /AliceRealTuple.
-transitivity (`H( V2 | [% AliceView, AliceHopTuple 0] )).
-  by rewrite [in RHS]alice_hop_tuple_of_viewE centropy_RV_contraction.
-rewrite centropy_RV_fdistA.
-by rewrite [in LHS]alice_view_of_hop_tupleE centropy_RV_contraction.
-Qed.
-
-(* Conditioning on Alice's executed trace leaves no uncertainty about Bob's
-   input: her trace carries Bob's ciphertext, and a holder of dk_b reads the
-   plaintext off it.  The Shannon reading of the real trace is therefore
-   degenerate, and the two equalities above transport that degeneracy to her
-   hopping tuple and to her whole view.  The statements about the real trace
-   that carry content are the guessing bounds, which quantify over predictors
-   holding the public keys alone; conditional entropy quantifies over nothing
-   and so charges the decryptor as well. *)
-Corollary centropy_V2_trace_eq0 : `H( V2 | AliceTrace ) = 0.
-Proof. by rewrite {1}alice_trace_decode_V2E centropy_RV_comp0. Qed.
-
-End dsdp_alice_trace_uncertainty.
-
-Section dsdp_alice_trace_pq_secrecy.
-(* cloned context of Section dsdp_alice_trace_pq; stated at the k-th
-   instance of X's sequence; the notations pin its projections under the
-   names the axis section uses, so the statements and proofs below are the
-   axis text verbatim. *)
-Local Set Default Goal Selector "1".
-Local Open Scope reals_ext_scope.
-Local Open Scope proba_scope.
-Local Open Scope fdist_scope.
-Local Open Scope entropy_scope.
-Local Open Scope ring_scope.
-Context {R : realType}.
-Variable X : dsdp_setting R.
-Variable k : nat.
-(* The instance whose plaintext count the equation below writes as p * q. *)
-Local Notation S := (sequence_instance (instance_sequence X) k).
-Local Notation AHE := (inst_AHE S).
-Local Notation Renc := (inst_renc S).
-Local Notation card_renc := (inst_card_renc S).
-Local Notation rand_of_renc := (@inst_rand_of_renc S).
-Local Notation v1 := (inst_v1 S).
-Local Notation u1 := (inst_u1 S).
-Local Notation u2 := (inst_u2 S).
-Local Notation u3 := (inst_u3 S).
-Local Notation u3_unit := (inst_u3_unit S).
-Local Notation dk_a := (inst_dk_a S).
-Local Notation dk_b := (inst_dk_b S).
-Local Notation dk_c := (inst_dk_c S).
-Local Notation w_rb2 := (inst_rb2 S).
-Local Notation w_rc2 := (inst_rc2 S).
-Local Notation p := (p_minus_2 X k).+2.
-Local Notation q := (q_minus_2 X k).+2.
-(* The plaintext count at k, read off the record: the k-th scheme's
-   plaintext space and the counting axis's ring 'Z_(p * q) have the same
-   number of elements, which is what carries the bound below over to the
-   composite modulus. *)
-Let card_plain_pq : #|plain AHE| = (p * q)%N := card_plain X k.
-
-Local Notation pkey_of_dk := (pkey_of_dk dk_a dk_b dk_c).
-Local Notation alice_traceT := (alice_traceT AHE).
-Local Notation predictor := (predictor AHE).
-Local Notation indcpa_epsilon_assumption :=
-  (indcpa_epsilon_assumption (R:=R) (AHE:=AHE) card_renc rand_of_renc).
-Local Notation bob_trace_adversary :=
-  (bob_trace_adversary (R:=R) card_renc rand_of_renc
-     v1 u1 u2 u3 dk_a dk_b dk_c w_rc2).
-Local Notation charlie_trace_adversary :=
-  (charlie_trace_adversary (R:=R) card_renc rand_of_renc
-     v1 u1 u2 u3 dk_a dk_b dk_c w_rc2).
-Local Notation alice_trace_guess_V2_pr :=
-  (alice_trace_guess_V2_pr (R:=R) card_renc rand_of_renc
-     v1 u1 u2 u3 dk_a dk_b dk_c w_rb2 w_rc2).
-
-(* The inverse plaintext cardinality at the composite modulus. *)
-Let inv_pq_cardE : ((p%:R : R) * q%:R)^-1 = (#|plain AHE|%:R : R)^-1.
-Proof. by rewrite card_plain_pq natrM. Qed.
-
-(* The class-conditional trace guessing bound with its unconditional term
-   written at the composite modulus p * q, the modulus of the Paillier-style
-   instantiations.  The currencies are those of
-   alice_trace_guess_V2_admissible_le: the right-hand side sums
-   1/(p * q), which is unconditional, and twice the assumption's epsilon,
-   which is conditional on that assumption; the two premises are conditional
-   on its class and assumed rather than proved.
-   Naming: extends [alice_trace_guess_V2_admissible_le] with the
-   [pq] variant token before [le]. *)
-Corollary alice_trace_guess_V2_admissible_pq_le
-    (A : indcpa_epsilon_assumption) (predict : predictor alice_traceT) :
-  indcpa_admissible A
-    (bob_trace_adversary (distinguisher_of_predictor predict)) ->
-  indcpa_admissible A
-    (charlie_trace_adversary (distinguisher_of_predictor predict)) ->
-  alice_trace_guess_V2_pr predict
-    <= ((p%:R : R) * q%:R)^-1 + 2 * indcpa_assumption_epsilon A.
-Proof.
-rewrite inv_pq_cardE.
-exact: alice_trace_guess_V2_admissible_le.
-Qed.
-
-End dsdp_alice_trace_pq_secrecy.
-
-Section dsdp_indcpa_assumption_inhabitant.
-(* cloned context of Section indcpa_game; stated over one record variable;
-   the notations pin its projections under the names the axis section uses,
-   so the statements and proofs below are the axis text verbatim. *)
-Local Set Default Goal Selector "1".
-Local Open Scope reals_ext_scope.
-Local Open Scope proba_scope.
-Local Open Scope fdist_scope.
-Local Open Scope ring_scope.
-Context {R : realType}.
-(* The scheme the assumption below is made about. *)
-Variable S : indcpa_scheme.
-Local Notation AHE := (scheme_AHE S).
-Local Notation Renc := (scheme_renc S).
-Local Notation card_renc := (scheme_card_renc S).
-Local Notation rand_of_renc := (@scheme_rand_of_renc S).
-
-Local Notation indcpa_epsilon_assumption :=
-  (indcpa_epsilon_assumption (R:=R) (AHE:=AHE) card_renc rand_of_renc).
-Local Notation indcpa_epsilon :=
-  (indcpa_epsilon (R:=R) (AHE:=AHE) card_renc rand_of_renc).
-Local Notation adv_decide_cipher_constant :=
-  (adv_decide_cipher_constant (R:=R) (AHE:=AHE)).
-
-(* The class-conditional bound the instance below carries, discharged by
-   indcpa_epsilon_cipher_constant_eq0. *)
-Let cipher_constant_epsilon_le (dk : priv_key AHE)
-    (adv : indcpa_adversary AHE) :
-  adv_decide_cipher_constant adv ->
-  indcpa_epsilon (pub_of_priv dk) adv <= 0.
-Proof.
-move=> H.
-by rewrite (indcpa_epsilon_cipher_constant_eq0 card_renc rand_of_renc _ H).
-Qed.
-
-(* An assumption whose promise is proved rather than assumed.  Its classifier
-   computes, its epsilon is zero, and the bound it carries is the lemma above
-   instead of a hypothesis.  The class it admits is small, so the bounds
-   conditional on it are weak, but it settles that this record type has an
-   inhabitant with content, and it shows what one looks like. *)
-Definition cipher_constant_assumption : indcpa_epsilon_assumption :=
-  {| indcpa_admissible := adv_decide_cipher_constant ;
-     indcpa_assumption_epsilon := 0 ;
-     indcpa_admissible_epsilon_le := cipher_constant_epsilon_le |}.
-
-End dsdp_indcpa_assumption_inhabitant.
-
-Section dsdp_instance_sequence_secrecy.
-(* cloned context of Section dsdp_instance_sequence_bounds *)
-Local Set Default Goal Selector "1".
-Local Open Scope reals_ext_scope.
-Local Open Scope proba_scope.
-Local Open Scope fdist_scope.
-Local Open Scope entropy_scope.
-Local Open Scope ring_scope.
-Context {R : realType}.
-Variable X : dsdp_setting R.
-Local Notation Q := (instance_sequence X).
-Local Notation I := (sequence_instance Q).
-Local Notation A := (sequence_assumption Q).
-Variable predict : forall k,
-    predictor (inst_AHE (I k)) (alice_traceT (inst_AHE (I k))).
-Arguments predict : clear implicits.
-
-Local Notation bob_trace_adversary_at :=
-  (bob_trace_adversary_at (R:=R) (Q:=Q)).
-Local Notation charlie_trace_adversary_at :=
-  (charlie_trace_adversary_at (R:=R) (Q:=Q)).
-Local Notation alice_trace_guess_V2_pr_at :=
-  (alice_trace_guess_V2_pr_at (R:=R) (Q:=Q)).
-Local Notation f_size := (f_size (R:=R) Q).
-Local Notation f_adv := (f_adv (R:=R) Q).
-Local Notation f_guess_V2 := (f_guess_V2 (R:=R) (Q:=Q) predict).
-Local Notation f_bound := (f_bound (R:=R) Q).
-
-(* A sequence of predictors reading Alice's executed traces along a sequence
-   of DSDP instances matches Bob's input with negligible probability,
-   provided the two reduction adversaries at each k are admitted by the class
-   at that k.  The two negligibility facts the bound consumes, the inverse
-   plaintext cardinalities and the assumed advantages, are fields of Q and so
-   are read off the sequence; the two class premises stay premises of the
-   theorem, because they restrict the reduction adversaries a predictor
-   induces and so speak about the adversary rather than about the sequence.
-   That is also what separates this statement from the decrypting
-   counterexample: decrypt_guess_prE puts the guessing probability at 1 for
-   the predictor that decrypts Bob's ciphertext off the trace, and
-   decrypt_reduction_admissible_eventuallyF shows the same two negligibility
-   fields eventually force that predictor's reduction adversary out of the
-   class.  Every currency is hypothesis-conditional, priced at each k as in
-   the concrete bound. *)
-Theorem alice_trace_guess_V2_negligible :
-  (forall k, indcpa_admissible (A k)
-     (bob_trace_adversary_at (distinguisher_of_predictor (predict k)))) ->
-  (forall k, indcpa_admissible (A k)
-     (charlie_trace_adversary_at (distinguisher_of_predictor (predict k)))) ->
-  negligible_fun f_guess_V2.
-Proof.
-move=> HB HC.
-have size_negligible := sequence_size_negligible Q.
-have adv_negligible := sequence_adv_negligible Q.
-have Hbound : negligible_fun f_bound.
-  exact: negligible_fun_add (negligible_fun_add size_negligible adv_negligible)
-           adv_negligible.
-apply: negligible_fun_le Hbound => k.
-rewrite /f_guess_V2 /f_bound /f_size /f_adv.
-apply: le_trans (alice_trace_guess_V2_admissible_le (HB k) (HC k)) _.
-by rewrite mulr_natl mulr2n addrA.
-Qed.
-
-End dsdp_instance_sequence_secrecy.
-
-Section dsdp_paillier_sequence_secrecy.
-(* cloned context of Section paillier_dsdp_instance_sequence *)
-Local Set Default Goal Selector "1".
-Local Open Scope reals_ext_scope.
-Local Open Scope proba_scope.
-Local Open Scope fdist_scope.
-Local Open Scope ring_scope.
 Context {R : realType}.
 Local Notation Paillier_AHEnc := paillier_fdist_instance.Paillier_AHEnc.
-Variables p q : nat -> nat.
-Hypothesis p_gt1 : forall k, (1 < p k)%N.
-Hypothesis q_gt1 : forall k, (1 < q k)%N.
-Variables (v1 u1 u2 u3 :
-  forall k, plain (Paillier_AHEnc (pq_gt1 (p_gt1 k) (q_gt1 k)))).
+
+(* The plaintext modulus at k as the two factors whose product it is, each
+   held as a double successor so that the scheme's plaintext space and the
+   counting side's residue ring 'Z_(p k * q k) are one type. *)
+Variables p_minus_2 q_minus_2 : nat -> nat.
+
+Let p (k : nat) : nat := (p_minus_2 k).+2.
+Let q (k : nat) : nat := (q_minus_2 k).+2.
+
+(* The two factors are distinct primes.  Added premises, fundamental to the
+   scheme: a Paillier modulus is a product of two distinct primes, which
+   paillier_indcpa_scheme.v leaves unimposed and which decisional composite
+   residuosity starts from.  The counting axis spends them on its fiber
+   count; the hopping axis needs only 1 < p k, q k, which they give. *)
+Hypothesis p_prime : forall k, prime (p_minus_2 k).+2.
+Hypothesis q_prime : forall k, prime (q_minus_2 k).+2.
+Hypothesis pq_neq : forall k, (p_minus_2 k).+2 != (q_minus_2 k).+2.
+
+Let p_gt1 (k : nat) : (1 < p k)%N := isT.
+Let q_gt1 (k : nat) : (1 < q k)%N := isT.
+
+Local Notation AHE k := (Paillier_AHEnc (pq_gt1 (p_gt1 k) (q_gt1 k))).
+
+(* Alice's four query weights at k, in the scheme's plaintext space, her
+   weight on Charlie's input invertible.  That unit is what leaves the leaked
+   output a 1/(p k * q k) residue instead of a determination of Bob's
+   input. *)
+Variables (v1 u1 u2 u3 : forall k, plain (AHE k)).
 Hypothesis u3_unit : forall k, u3 k \is a GRing.unit.
-Variables (dk_a dk_b dk_c :
-  forall k, priv_key (Paillier_AHEnc (pq_gt1 (p_gt1 k) (q_gt1 k)))).
+
+(* The three private keys and the two encryption coins as assumed values: no
+   Paillier key is constructed anywhere, the conditions a key carries being
+   left to the instantiation. *)
+Variables (dk_a dk_b dk_c : forall k, priv_key (AHE k)).
 Variables (rb2 rc2 : forall k, renc_paillier (p k) (q k)).
 
-Local Notation paillier_instance :=
+Local Notation PI :=
   (paillier_instance v1 u1 u2 u3_unit dk_a dk_b dk_c rb2 rc2).
 
+(* The IND-CPA assumption made at the k-th Paillier instance, the section's
+   only computational hypothesis: every epsilon below is the advantage it
+   assumes at its own k. *)
 Variable A : forall k, indcpa_epsilon_assumption (R:=R)
-    (inst_card_renc (paillier_instance k))
-    (@inst_rand_of_renc (paillier_instance k)).
+    (inst_card_renc (PI k)) (inst_rand_of_renc (I:=PI k)).
 
-(* Supplies the unconditional summand of the bound
-   Pr_k <= 1/(p k * q k) + 2 * eps k, through f_size_paillier_negligible,
-   which reads the plaintext cardinality at k as the modulus p k * q k.
-
-   The summand 1/(p k * q k) is the guessing probability the leaked
-   output Sout concedes: at Paillier #|plain| is the modulus p k * q k,
-   and Sout confines the uniform V2 to a fiber of that size.  Negligible
-   is the acceptance criterion of the asymptotic reading: the concrete
-   analysis already treats this residue as the acceptable leak, and this
-   hypothesis states that acceptability uniformly in k, the residue
-   falling below every inverse polynomial. *)
+(* The inverse modulus falls below every inverse polynomial.  It is the
+   unconditional half of the asymptotic bound, the residue the leaked output
+   concedes at every k. *)
 Hypothesis f_pq_negligible : negligible_fun (f_pq (R:=R) p q).
 
-(* The advantage the assumption sequence assumes is negligible: the
-   asymptotic IND-CPA reading of decisional composite residuosity. *)
+(* The assumed advantage falls below every inverse polynomial: the asymptotic
+   IND-CPA reading of decisional composite residuosity. *)
 Hypothesis f_adv_negligible :
   negligible_fun (fun k => indcpa_assumption_epsilon (A k)).
 
-Local Notation paillier_instance_sequence :=
+Local Notation PQ :=
   (paillier_instance_sequence f_pq_negligible f_adv_negligible).
 
-Variable predict : forall k, predictor (inst_AHE (paillier_instance k))
-    (alice_traceT (inst_AHE (paillier_instance k))).
-Arguments predict : clear implicits.
-
-Local Notation f_guess_V2 :=
-  (f_guess_V2 (R:=R) (Q:=paillier_instance_sequence) predict).
-
-(* The class of the assumption sequence admits the Bob-side reduction
-   adversary induced by every predictor in the sequence. *)
-Hypothesis bob_reduction_admissible : forall k,
-  indcpa_admissible (A k)
-    (bob_trace_adversary_at (Q:=paillier_instance_sequence)
-       (distinguisher_of_predictor (predict k))).
-
-(* The Charlie-side twin of bob_reduction_admissible. *)
-Hypothesis charlie_reduction_admissible : forall k,
-  indcpa_admissible (A k)
-    (charlie_trace_adversary_at (Q:=paillier_instance_sequence)
-       (distinguisher_of_predictor (predict k))).
-
-(* The conclusion is negligible_fun of the sequence k |-> Pr_k, where Pr_k
-   is the probability that the k-th predictor guesses Bob's input V2 at
-   the k-th Paillier instance.
-
-   It follows in three steps.  At each k the two class premises yield the
-   bound of alice_trace_guess_V2_admissible_le, Pr_k <= 1/(p k * q k) +
-   2 * eps k, with eps k the advantage A k assumes.  The two negligibility
-   fields of paillier_instance_sequence make f_size and f_adv negligible,
-   f_size through the scheme-side reading of modulus growth as plaintext
-   growth.  Closure under addition twice makes f_bound negligible, and the
-   pointwise bound transfers negligibility from f_bound to f_guess_V2.
-
-   The assumption sequence is the per-k form of paillier_indcpa_assumption;
-   decisional composite residuosity remains the source a proved record
-   sequence would start from. *)
-Corollary alice_trace_guess_V2_paillier_negligible : negligible_fun f_guess_V2.
+(* Two distinct primes are coprime, which is what makes the solution fiber of
+   the DSDP constraint have exactly p k * q k points. *)
+Let paillier_coprime_pq k : coprime (p_minus_2 k).+2 (q_minus_2 k).+2.
 Proof.
-exact: (dsdp_instance_sequence.alice_trace_guess_V2_negligible
-          bob_reduction_admissible charlie_reduction_admissible).
+rewrite prime_coprime ?p_prime // dvdn_prime2 ?p_prime ?q_prime //.
 Qed.
 
-End dsdp_paillier_sequence_secrecy.
+(* The one number the two axes share: the k-th Paillier plaintext space is
+   counted by the composite modulus the counting side is carried at. *)
+Let paillier_card_plain k :
+  #|plain (inst_AHE (sequence_instance PQ k))|
+  = ((p_minus_2 k).+2 * (q_minus_2 k).+2)%N.
+Proof. exact: card_plain_paillier_pq. Qed.
 
-Section dsdp_benaloh_sequence_secrecy.
-(* cloned context of Section benaloh_dsdp_instance_sequence *)
+(* The setting those parameters make: the Paillier sequence on the hopping
+   side, and on the counting side the uniform five-coordinate law at Alice's
+   own weights, so that the two axes read one query at every k. *)
+Definition paillier_setting : dsdp_setting R := {|
+  instance_sequence := PQ ;
+  dsdp_setting.p_minus_2 := p_minus_2 ;
+  dsdp_setting.q_minus_2 := q_minus_2 ;
+  prime_p := p_prime ;
+  prime_q := q_prime ;
+  coprime_pq := paillier_coprime_pq ;
+  card_plain := paillier_card_plain ;
+  inputs := fun k =>
+    uniform_inputs (p_minus_2 k) (q_minus_2 k) (u1 k) (u2 k) (u3 k) |}.
+
+(* The twenty-six statements at that setting, each an axis theorem applied to
+   its projections by dsdp_securityP. *)
+Definition paillier_security : dsdp_security paillier_setting :=
+  dsdp_securityP paillier_setting.
+
+(* Alice's uncertainty about the relay pair, given her own inputs and the
+   output she computes, is exactly the logarithm of the Paillier modulus p
+   k * q k. *)
+Corollary paillier_centropy_uniform k
+    (h : dsdp_honest_query paillier_setting k) :
+  `H(VarRV paillier_setting k | CondRV paillier_setting k)
+    = log ((((p_minus_2 k).+2 * (q_minus_2 k).+2)%N)%:R : R).
+Proof. exact: (centropy_uniform paillier_security h). Qed.
+
+(* At Alice's corrupted query the output is Bob's input itself, so her whole
+   dot-product view determines it. *)
+Corollary paillier_centropy_V2_dotp_eq0 k
+    (h : dsdp_corrupted_query paillier_setting k) :
+  `H( V2 (inputs paillier_setting k) | AliceDotpView_at paillier_setting k )
+    = 0.
+Proof. exact: (centropy_V2_dotp_eq0 paillier_security h). Qed.
+
+(* Bob's whole view leaves the full logarithm of the Paillier modulus p
+   k * q k of uncertainty about Alice's input, and no assumption is spent. *)
+Corollary paillier_bob_privacy_V1 k :
+  `H(V1 (inputs paillier_setting k) | BobView_at paillier_setting k)
+    = log ((((p_minus_2 k).+2 * (q_minus_2 k).+2)%N)%:R : R)
+  /\ `H(V1 (inputs paillier_setting k) | BobView_at paillier_setting k) > 0.
+Proof. exact: (bob_privacy_V1 paillier_security k). Qed.
+
+(* The same for Charlie's whole view about Alice's input. *)
+Corollary paillier_charlie_privacy_V1 k :
+  `H(V1 (inputs paillier_setting k) | CharlieView_at paillier_setting k)
+    = log ((((p_minus_2 k).+2 * (q_minus_2 k).+2)%N)%:R : R)
+  /\ `H(V1 (inputs paillier_setting k)
+        | CharlieView_at paillier_setting k) > 0.
+Proof. exact: (charlie_privacy_V1 paillier_security k). Qed.
+
+(* Bob learns nothing about Charlie's input either. *)
+Corollary paillier_bob_privacy_V3 k :
+  `H(V3 (inputs paillier_setting k) | BobView_at paillier_setting k)
+    = log ((((p_minus_2 k).+2 * (q_minus_2 k).+2)%N)%:R : R)
+  /\ `H(V3 (inputs paillier_setting k) | BobView_at paillier_setting k) > 0.
+Proof. exact: (bob_privacy_V3 paillier_security k). Qed.
+
+(* And Charlie learns nothing about Bob's input, which is what makes the two
+   relays curious parties rather than a coalition. *)
+Corollary paillier_charlie_privacy_V2 k :
+  `H(V2 (inputs paillier_setting k) | CharlieView_at paillier_setting k)
+    = log ((((p_minus_2 k).+2 * (q_minus_2 k).+2)%N)%:R : R)
+  /\ `H(V2 (inputs paillier_setting k)
+        | CharlieView_at paillier_setting k) > 0.
+Proof. exact: (charlie_privacy_V2 paillier_security k). Qed.
+
+(* A corrupted Alice guessing Bob's input from her hopping tuple: the
+   unconditional residue is 1/(p k * q k) and each of the two summands after
+   it is a Paillier IND-CPA advantage at one key. *)
+Corollary paillier_tuple_guess_V2_le k
+    (predict : predictor (AHE_at paillier_setting k)
+                 (hop_tupleT_at paillier_setting k)) :
+  Pr (hop_fdist_at paillier_setting k)
+     [set t | (predict `o AliceRealTuple_at paillier_setting k) t
+              == hop_V2_at paillier_setting k t]
+  <= (#|plain (AHE_at paillier_setting k)|%:R : R)^-1
+     + indcpa_epsilon_at paillier_setting k (bob_pkey_at paillier_setting k)
+         (bob_challenge_adversary_at paillier_setting k
+            (distinguisher_of_predictor predict))
+     + indcpa_epsilon_at paillier_setting k
+         (charlie_pkey_at paillier_setting k)
+         (charlie_challenge_adversary_at paillier_setting k
+            (distinguisher_of_predictor predict)).
+Proof. exact: (tuple_guess_V2_le paillier_security predict). Qed.
+
+(* The same bound as a lower bound on minus the logarithm of her success
+   probability, under a positive success probability. *)
+Corollary paillier_unpredictability_ge k
+    (predict : predictor (AHE_at paillier_setting k)
+                 (hop_tupleT_at paillier_setting k)) :
+  0 < Pr (hop_fdist_at paillier_setting k)
+         [set t | (predict `o AliceRealTuple_at paillier_setting k) t
+                  == hop_V2_at paillier_setting k t] ->
+  log (#|plain (AHE_at paillier_setting k)|%:R : R)
+    - log (1 + #|plain (AHE_at paillier_setting k)|%:R
+               * (bob_predictor_epsilon_at paillier_setting k predict
+                  + charlie_predictor_epsilon_at paillier_setting k predict))
+  <= - log (Pr (hop_fdist_at paillier_setting k)
+               [set t | (predict `o AliceRealTuple_at paillier_setting k) t
+                        == hop_V2_at paillier_setting k t]).
+Proof. move=> hpos; exact: (unpredictability_ge paillier_security hpos). Qed.
+
+(* The same lower bound at the named unpredictability quantity. *)
+Corollary paillier_predictor_unpredictability_ge k
+    (predict : predictor (AHE_at paillier_setting k)
+                 (hop_tupleT_at paillier_setting k)) :
+  0 < Pr (hop_fdist_at paillier_setting k)
+         [set t | (predict `o AliceRealTuple_at paillier_setting k) t
+                  == hop_V2_at paillier_setting k t] ->
+  log (#|plain (AHE_at paillier_setting k)|%:R : R)
+    - log (1 + #|plain (AHE_at paillier_setting k)|%:R
+               * (bob_predictor_epsilon_at paillier_setting k predict
+                  + charlie_predictor_epsilon_at paillier_setting k predict))
+  <= alice_predictor_unpredictability_at paillier_setting k predict.
+Proof.
+move=> hpos; exact: (predictor_unpredictability_ge paillier_security hpos).
+Qed.
+
+(* Her tuple against the simulator's law, per distinguisher, at the two hop
+   advantages. *)
+Corollary paillier_sim_advantage_le k
+    (D : distinguisher (hop_jointT_at paillier_setting k)) :
+  `| Pr (`p_ [% hop_V2_at paillier_setting k, hop_V3_at paillier_setting k,
+                AliceRealTuple_at paillier_setting k]) [set x | D x]
+     - Pr (alice_ideal_joint_at paillier_setting k) [set x | D x] |
+  <= indcpa_epsilon_at paillier_setting k (bob_pkey_at paillier_setting k)
+       (bob_challenge_adversary_at paillier_setting k D)
+     + indcpa_epsilon_at paillier_setting k
+         (charlie_pkey_at paillier_setting k)
+         (charlie_challenge_adversary_at paillier_setting k D).
+Proof. exact: (sim_advantage_le paillier_security D). Qed.
+
+(* The tuple guessing bound carried to Alice's whole view. *)
+Corollary paillier_view_guess_V2_le k
+    (predict : predictor (AHE_at paillier_setting k)
+                 (viewT_at paillier_setting k)) :
+  Pr (hop_fdist_at paillier_setting k)
+     [set t | (predict `o AliceView_at paillier_setting k) t
+              == hop_V2_at paillier_setting k t]
+  <= (#|plain (AHE_at paillier_setting k)|%:R : R)^-1
+     + indcpa_epsilon_at paillier_setting k (bob_pkey_at paillier_setting k)
+         (bob_view_adversary_at paillier_setting k predict)
+     + indcpa_epsilon_at paillier_setting k
+         (charlie_pkey_at paillier_setting k)
+         (charlie_view_adversary_at paillier_setting k predict).
+Proof. exact: (view_guess_V2_le paillier_security predict). Qed.
+
+(* The protocol output alone leaves Bob's input with the whole logarithm of
+   the plaintext count of uncertainty. *)
+Corollary paillier_centropy_V2_Sout_logm k :
+  `H( hop_V2_at paillier_setting k | Sout_at paillier_setting k )
+    = log (#|plain (AHE_at paillier_setting k)|%:R : R).
+Proof. exact: (centropy_V2_Sout_logm paillier_security k). Qed.
+
+(* So does the all-zero endpoint of the hop ladder, the ideal side the two
+   advantages of the guessing bounds pay to reach. *)
+Corollary paillier_centropy_V2_all_zero_logm k :
+  `H( hop_V2_at paillier_setting k | AliceHopTuple_at paillier_setting k 2 )
+    = log (#|plain (AHE_at paillier_setting k)|%:R : R).
+Proof. exact: (centropy_V2_all_zero_logm paillier_security k). Qed.
+
+(* The tuple guessing bound at Alice's executed piSMC trace. *)
+Corollary paillier_trace_guess_V2_le k
+    (predict : predictor (AHE_at paillier_setting k)
+                 (traceT_at paillier_setting k)) :
+  Pr (hop_fdist_at paillier_setting k)
+     [set t | (predict `o AliceTrace_at paillier_setting k) t
+              == hop_V2_at paillier_setting k t]
+  <= (#|plain (AHE_at paillier_setting k)|%:R : R)^-1
+     + indcpa_epsilon_at paillier_setting k (bob_pkey_at paillier_setting k)
+         (bob_trace_adversary_at (R:=R) (Q:=PQ)
+            (distinguisher_of_predictor predict))
+     + indcpa_epsilon_at paillier_setting k
+         (charlie_pkey_at paillier_setting k)
+         (charlie_trace_adversary_at (R:=R) (Q:=PQ)
+            (distinguisher_of_predictor predict)).
+Proof. exact: (trace_guess_V2_le paillier_security predict). Qed.
+
+(* Its logarithmic form at the executed trace. *)
+Corollary paillier_trace_unpredictability_ge k
+    (predict : predictor (AHE_at paillier_setting k)
+                 (traceT_at paillier_setting k)) :
+  0 < Pr (hop_fdist_at paillier_setting k)
+         [set t | (predict `o AliceTrace_at paillier_setting k) t
+                  == hop_V2_at paillier_setting k t] ->
+  log (#|plain (AHE_at paillier_setting k)|%:R : R)
+    - log (1 + #|plain (AHE_at paillier_setting k)|%:R
+               * (bob_trace_predictor_epsilon_at paillier_setting k predict
+                  + charlie_trace_predictor_epsilon_at paillier_setting k
+                      predict))
+  <= alice_trace_unpredictability_at paillier_setting k predict.
+Proof.
+move=> hpos; exact: (trace_unpredictability_ge paillier_security hpos).
+Qed.
+
+(* Simulation security of the executed trace, per distinguisher. *)
+Corollary paillier_trace_sim_advantage_le k
+    (D : distinguisher (trace_jointT_at paillier_setting k)) :
+  `| Pr (`p_ [% hop_V2_at paillier_setting k, hop_V3_at paillier_setting k,
+                AliceTrace_at paillier_setting k]) [set x | D x]
+     - Pr (alice_trace_ideal_joint_at paillier_setting k) [set x | D x] |
+  <= indcpa_epsilon_at paillier_setting k (bob_pkey_at paillier_setting k)
+       (bob_trace_adversary_at (R:=R) (Q:=PQ) D)
+     + indcpa_epsilon_at paillier_setting k
+         (charlie_pkey_at paillier_setting k)
+         (charlie_trace_adversary_at (R:=R) (Q:=PQ) D).
+Proof. exact: (trace_sim_advantage_le paillier_security D). Qed.
+
+(* Her executed trace and her hopping tuple leave the same conditional
+   entropy about Bob's input. *)
+Corollary paillier_centropy_V2_trace_tupleE k :
+  `H( hop_V2_at paillier_setting k | AliceTrace_at paillier_setting k )
+    = `H( hop_V2_at paillier_setting k
+        | AliceRealTuple_at paillier_setting k ).
+Proof. exact: (centropy_V2_trace_tupleE paillier_security k). Qed.
+
+(* The same equality at her whole view. *)
+Corollary paillier_centropy_V2_view_tupleE k :
+  `H( hop_V2_at paillier_setting k | AliceView_at paillier_setting k )
+    = `H( hop_V2_at paillier_setting k
+        | AliceRealTuple_at paillier_setting k ).
+Proof. exact: (centropy_V2_view_tupleE paillier_security k). Qed.
+
+(* At the executed trace that entropy is zero: the trace carries Alice's own
+   key beside the aggregate ciphertext, so she recovers Bob's input.  This
+   is the leakage the class restriction answers. *)
+Corollary paillier_centropy_V2_trace_eq0 k :
+  `H( hop_V2_at paillier_setting k | AliceTrace_at paillier_setting k ) = 0.
+Proof. exact: (centropy_V2_trace_eq0 paillier_security k). Qed.
+
+(* Both ciphertext hops charged to the single epsilon the Paillier sequence
+   assumes at k, on the two class premises the admissible-predictor record
+   carries. *)
+Corollary paillier_trace_guess_V2_admissible_le k
+    (a : dsdp_admissible_predictor paillier_setting k) :
+  alice_trace_guess_V2_pr_at (R:=R) (Q:=PQ) (predict a)
+  <= (#|plain (AHE_at paillier_setting k)|%:R : R)^-1
+     + 2 * indcpa_assumption_epsilon (assumption_at paillier_setting k).
+Proof. exact: (trace_guess_V2_admissible_le paillier_security a). Qed.
+
+(* The same bound with its unconditional summand read as 1/(p k * q k), the
+   counting axis's reading of the shared cardinality. *)
+Corollary paillier_trace_guess_V2_admissible_pq_le k
+    (a : dsdp_admissible_predictor paillier_setting k) :
+  alice_trace_guess_V2_pr_at (R:=R) (Q:=PQ) (predict a)
+  <= (((p_minus_2 k).+2%:R : R) * (q_minus_2 k).+2%:R)^-1
+     + 2 * indcpa_assumption_epsilon (assumption_at paillier_setting k).
+Proof. exact: (trace_guess_V2_admissible_pq_le paillier_security a). Qed.
+
+(* The decrypting predictor drives the sum of its two reduction advantages
+   to at least 1 - 1/(p k * q k). *)
+Corollary paillier_decrypt_epsilon_sum_ge k :
+  1 - (#|plain (AHE_at paillier_setting k)|%:R : R)^-1
+  <= bob_trace_predictor_epsilon_at paillier_setting k
+       (bob_decrypt_predictor_at paillier_setting k)
+     + charlie_trace_predictor_epsilon_at paillier_setting k
+         (bob_decrypt_predictor_at paillier_setting k).
+Proof. exact: (decrypt_epsilon_sum_ge paillier_security k). Qed.
+
+(* The Bob-key half alone already reaches that value. *)
+Corollary paillier_decrypt_bob_epsilon_ge k :
+  1 - (#|plain (AHE_at paillier_setting k)|%:R : R)^-1
+  <= bob_trace_predictor_epsilon_at paillier_setting k
+       (bob_decrypt_predictor_at paillier_setting k).
+Proof. exact: (decrypt_bob_epsilon_ge paillier_security k). Qed.
+
+(* No assumption promising an epsilon below that value admits the Bob-key
+   reduction, at every assumption at k rather than at the one the Paillier
+   sequence makes. *)
+Corollary paillier_decrypt_reduction_admissibleF k :
+  forall A : indcpa_assumptionT_at paillier_setting k,
+  indcpa_assumption_epsilon A
+    < 1 - (#|plain (AHE_at paillier_setting k)|%:R : R)^-1 ->
+  indcpa_admissible A
+    (bob_trace_adversary_at (R:=R) (Q:=PQ)
+       (distinguisher_of_predictor
+          (bob_decrypt_predictor_at paillier_setting k)))
+  = false.
+Proof.
+move=> ? heps.
+exact: (decrypt_reduction_admissibleF paillier_security heps).
+Qed.
+
+(* Dropping the two class premises leaves the trace guessing bound false,
+   which places its truth in the class restriction rather than in the size
+   of the epsilon. *)
+Corollary paillier_decrypt_guess_V2_premise_free_lt k :
+  forall A : indcpa_assumptionT_at paillier_setting k,
+  2 * indcpa_assumption_epsilon A
+    < 1 - (#|plain (AHE_at paillier_setting k)|%:R : R)^-1 ->
+  (#|plain (AHE_at paillier_setting k)|%:R : R)^-1
+    + 2 * indcpa_assumption_epsilon A
+  < alice_trace_guess_V2_pr_at (R:=R) (Q:=PQ)
+      (bob_decrypt_predictor_at paillier_setting k).
+Proof.
+move=> ? heps.
+exact: (decrypt_guess_V2_premise_free_lt paillier_security heps).
+Qed.
+
+(* Along the Paillier sequence, an admissible predictor at every k makes the
+   trace guessing probability a negligible sequence. *)
+Corollary paillier_trace_guess_V2_negligible
+    (adv : forall k, dsdp_admissible_predictor paillier_setting k) :
+  negligible_fun
+    (f_guess_V2 (R:=R) (Q:=PQ) (fun k => predict (adv k))).
+Proof. exact: (trace_guess_V2_negligible paillier_security adv). Qed.
+End paillier_dsdp.
+
+(* =================================================================          *)
+(* Benaloh at block size p * q                                                *)
+(* =================================================================          *)
+
+Section benaloh_dsdp.
 Local Set Default Goal Selector "1".
 Local Open Scope reals_ext_scope.
-Local Open Scope proba_scope.
-Local Open Scope fdist_scope.
-Local Open Scope ring_scope.
 Context {R : realType}.
-Variables n r : nat -> nat.
-Hypothesis n_gt1 : forall k, (1 < n k)%N.
-Hypothesis r_gt1 : forall k, (1 < r k)%N.
-Variables (v1 u1 u2 u3 :
-  forall k, plain (Benaloh_AHEnc (n k) (r_gt1 k))).
+
+(* The Benaloh ciphertext modulus at k, which sizes the ciphertext space
+   alone and is unrelated to the block size below. *)
+Variable n : nat -> nat.
+
+(* The block size at k as the two factors whose product it is, each held as a
+   double successor so that the scheme's plaintext space and the counting
+   side's residue ring 'Z_(p k * q k) are one type. *)
+Variables p_minus_2 q_minus_2 : nat -> nat.
+
+Let r (k : nat) : nat := ((p_minus_2 k).+2 * (q_minus_2 k).+2)%N.
+
+(* The two factors of the block size are distinct primes.  Added premises,
+   fundamental to the counting axis, whose fiber count is a CRT count over
+   the two prime factors, and at the same time a restriction on Benaloh,
+   whose scheme, correctness and game ask only 1 < r k. *)
+Hypothesis p_prime : forall k, prime (p_minus_2 k).+2.
+Hypothesis q_prime : forall k, prime (q_minus_2 k).+2.
+Hypothesis pq_neq : forall k, (p_minus_2 k).+2 != (q_minus_2 k).+2.
+
+Let r_gt1 (k : nat) : (1 < r k)%N := isT.
+
+Local Notation AHE k := (Benaloh_AHEnc (n k) (r_gt1 k)).
+
+(* Alice's four query weights at k, in the scheme's plaintext space, her
+   weight on Charlie's input invertible.  That unit is what leaves the leaked
+   output a 1/(p k * q k) residue instead of a determination of Bob's
+   input. *)
+Variables (v1 u1 u2 u3 : forall k, plain (AHE k)).
 Hypothesis u3_unit : forall k, u3 k \is a GRing.unit.
-Variables (dk_a dk_b dk_c :
-  forall k, priv_key (Benaloh_AHEnc (n k) (r_gt1 k))).
+
+(* The three private keys and the two encryption coins as assumed values: no
+   Benaloh key is constructed anywhere, the divisibility and injectivity
+   conditions a key carries being left to the instantiation. *)
+Variables (dk_a dk_b dk_c : forall k, priv_key (AHE k)).
 Variables (rb2 rc2 : forall k, renc_benaloh (n k)).
 
-Local Notation benaloh_instance :=
+Local Notation BI :=
   (benaloh_instance v1 u1 u2 u3_unit dk_a dk_b dk_c rb2 rc2).
 
+(* The IND-CPA assumption made at the k-th Benaloh instance, the section's
+   only computational hypothesis: every epsilon below is the advantage it
+   assumes at its own k. *)
 Variable A : forall k, indcpa_epsilon_assumption (R:=R)
-    (inst_card_renc (benaloh_instance k))
-    (@inst_rand_of_renc (benaloh_instance k)).
+    (inst_card_renc (BI k)) (inst_rand_of_renc (I:=BI k)).
 
-(* Supplies the unconditional summand of the bound
-   Pr_k <= 1/(r k) + 2 * eps k, through f_size_benaloh_negligible, which
-   reads the plaintext cardinality at k as the block size r k.
-
-   The summand 1/(r k) is the guessing probability the leaked output
-   Sout concedes: at Benaloh #|plain| is the block size r k, and Sout
-   confines the uniform V2 to a fiber of that size.  Negligible is the
-   acceptance criterion of the asymptotic reading: the concrete analysis
-   already treats this residue as the acceptable leak, and this
-   hypothesis states that acceptability uniformly in k, the residue
-   falling below every inverse polynomial. *)
+(* The inverse block size falls below every inverse polynomial.  It is the
+   unconditional half of the asymptotic bound, the residue the leaked output
+   concedes at every k. *)
 Hypothesis f_r_negligible : negligible_fun (f_r (R:=R) r).
 
-(* The advantage the assumption sequence assumes is negligible: the
-   asymptotic IND-CPA reading of r-th residuosity. *)
+(* The assumed advantage falls below every inverse polynomial: the asymptotic
+   IND-CPA reading of r-th residuosity. *)
 Hypothesis f_adv_negligible :
   negligible_fun (fun k => indcpa_assumption_epsilon (A k)).
 
-Local Notation benaloh_instance_sequence :=
+Local Notation BQ :=
   (benaloh_instance_sequence f_r_negligible f_adv_negligible).
 
-Variable predict : forall k, predictor (inst_AHE (benaloh_instance k))
-    (alice_traceT (inst_AHE (benaloh_instance k))).
-Arguments predict : clear implicits.
-
-Local Notation f_guess_V2 :=
-  (f_guess_V2 (R:=R) (Q:=benaloh_instance_sequence) predict).
-
-(* The class of the assumption sequence admits the Bob-side reduction
-   adversary induced by every predictor in the sequence. *)
-Hypothesis bob_reduction_admissible : forall k,
-  indcpa_admissible (A k)
-    (bob_trace_adversary_at (Q:=benaloh_instance_sequence)
-       (distinguisher_of_predictor (predict k))).
-
-(* The Charlie-side twin of bob_reduction_admissible. *)
-Hypothesis charlie_reduction_admissible : forall k,
-  indcpa_admissible (A k)
-    (charlie_trace_adversary_at (Q:=benaloh_instance_sequence)
-       (distinguisher_of_predictor (predict k))).
-
-(* The conclusion is negligible_fun of the sequence k |-> Pr_k, where Pr_k
-   is the probability that the k-th predictor guesses Bob's input V2 at
-   the k-th Benaloh instance.
-
-   It follows in three steps.  At each k the two class premises yield the
-   bound of alice_trace_guess_V2_admissible_le, Pr_k <= 1/(r k) + 2 * eps k,
-   with eps k the advantage A k assumes.  The two negligibility fields of
-   benaloh_instance_sequence make f_size and f_adv negligible, f_size
-   through the scheme-side reading of block-size growth as plaintext growth.
-   Closure under addition twice makes f_bound negligible, and the pointwise
-   bound transfers negligibility from f_bound to f_guess_V2.
-
-   The assumption sequence is the per-k form of benaloh_indcpa_assumption;
-   r-th residuosity remains the source a proved record sequence would start
-   from. *)
-Corollary alice_trace_guess_V2_benaloh_negligible : negligible_fun f_guess_V2.
+(* Two distinct primes are coprime, which is what makes the solution fiber of
+   the DSDP constraint have exactly p k * q k points. *)
+Let benaloh_coprime_pq k : coprime (p_minus_2 k).+2 (q_minus_2 k).+2.
 Proof.
-exact: (dsdp_instance_sequence.alice_trace_guess_V2_negligible
-          bob_reduction_admissible charlie_reduction_admissible).
+rewrite prime_coprime ?p_prime // dvdn_prime2 ?p_prime ?q_prime //.
 Qed.
 
-End dsdp_benaloh_sequence_secrecy.
+(* The one number the two axes share: the k-th Benaloh plaintext space is the
+   block, counted by the composite modulus the counting side is carried at,
+   and not by the ciphertext modulus n k. *)
+Let benaloh_card_plain k :
+  #|plain (inst_AHE (sequence_instance BQ k))|
+  = ((p_minus_2 k).+2 * (q_minus_2 k).+2)%N.
+Proof. by rewrite card_ord (Zp_cast (r_gt1 k)). Qed.
+
+(* The setting those parameters make: the Benaloh sequence at block size
+   p k * q k on the hopping side, and on the counting side the uniform
+   five-coordinate law at Alice's own weights, so that the two axes read one
+   query at every k. *)
+Definition benaloh_setting : dsdp_setting R := {|
+  instance_sequence := BQ ;
+  dsdp_setting.p_minus_2 := p_minus_2 ;
+  dsdp_setting.q_minus_2 := q_minus_2 ;
+  prime_p := p_prime ;
+  prime_q := q_prime ;
+  coprime_pq := benaloh_coprime_pq ;
+  card_plain := benaloh_card_plain ;
+  inputs := fun k =>
+    uniform_inputs (p_minus_2 k) (q_minus_2 k) (u1 k) (u2 k) (u3 k) |}.
+
+(* The twenty-six statements at that setting, each an axis theorem applied to
+   its projections by dsdp_securityP. *)
+Definition benaloh_security : dsdp_security benaloh_setting :=
+  dsdp_securityP benaloh_setting.
+
+(* Alice's uncertainty about the relay pair, given her own inputs and the
+   output she computes, is exactly the logarithm of the Benaloh block size p
+   k * q k. *)
+Corollary benaloh_centropy_uniform k
+    (h : dsdp_honest_query benaloh_setting k) :
+  `H(VarRV benaloh_setting k | CondRV benaloh_setting k)
+    = log ((((p_minus_2 k).+2 * (q_minus_2 k).+2)%N)%:R : R).
+Proof. exact: (centropy_uniform benaloh_security h). Qed.
+
+(* At Alice's corrupted query the output is Bob's input itself, so her whole
+   dot-product view determines it. *)
+Corollary benaloh_centropy_V2_dotp_eq0 k
+    (h : dsdp_corrupted_query benaloh_setting k) :
+  `H( V2 (inputs benaloh_setting k) | AliceDotpView_at benaloh_setting k )
+    = 0.
+Proof. exact: (centropy_V2_dotp_eq0 benaloh_security h). Qed.
+
+(* Bob's whole view leaves the full logarithm of the Benaloh block size p
+   k * q k of uncertainty about Alice's input, and no assumption is spent. *)
+Corollary benaloh_bob_privacy_V1 k :
+  `H(V1 (inputs benaloh_setting k) | BobView_at benaloh_setting k)
+    = log ((((p_minus_2 k).+2 * (q_minus_2 k).+2)%N)%:R : R)
+  /\ `H(V1 (inputs benaloh_setting k) | BobView_at benaloh_setting k) > 0.
+Proof. exact: (bob_privacy_V1 benaloh_security k). Qed.
+
+(* The same for Charlie's whole view about Alice's input. *)
+Corollary benaloh_charlie_privacy_V1 k :
+  `H(V1 (inputs benaloh_setting k) | CharlieView_at benaloh_setting k)
+    = log ((((p_minus_2 k).+2 * (q_minus_2 k).+2)%N)%:R : R)
+  /\ `H(V1 (inputs benaloh_setting k)
+        | CharlieView_at benaloh_setting k) > 0.
+Proof. exact: (charlie_privacy_V1 benaloh_security k). Qed.
+
+(* Bob learns nothing about Charlie's input either. *)
+Corollary benaloh_bob_privacy_V3 k :
+  `H(V3 (inputs benaloh_setting k) | BobView_at benaloh_setting k)
+    = log ((((p_minus_2 k).+2 * (q_minus_2 k).+2)%N)%:R : R)
+  /\ `H(V3 (inputs benaloh_setting k) | BobView_at benaloh_setting k) > 0.
+Proof. exact: (bob_privacy_V3 benaloh_security k). Qed.
+
+(* And Charlie learns nothing about Bob's input, which is what makes the two
+   relays curious parties rather than a coalition. *)
+Corollary benaloh_charlie_privacy_V2 k :
+  `H(V2 (inputs benaloh_setting k) | CharlieView_at benaloh_setting k)
+    = log ((((p_minus_2 k).+2 * (q_minus_2 k).+2)%N)%:R : R)
+  /\ `H(V2 (inputs benaloh_setting k)
+        | CharlieView_at benaloh_setting k) > 0.
+Proof. exact: (charlie_privacy_V2 benaloh_security k). Qed.
+
+(* A corrupted Alice guessing Bob's input from her hopping tuple: the
+   unconditional residue is 1/(p k * q k), the block size and each of the
+   two summands after it is a Benaloh IND-CPA advantage at one key. *)
+Corollary benaloh_tuple_guess_V2_le k
+    (predict : predictor (AHE_at benaloh_setting k)
+                 (hop_tupleT_at benaloh_setting k)) :
+  Pr (hop_fdist_at benaloh_setting k)
+     [set t | (predict `o AliceRealTuple_at benaloh_setting k) t
+              == hop_V2_at benaloh_setting k t]
+  <= (#|plain (AHE_at benaloh_setting k)|%:R : R)^-1
+     + indcpa_epsilon_at benaloh_setting k (bob_pkey_at benaloh_setting k)
+         (bob_challenge_adversary_at benaloh_setting k
+            (distinguisher_of_predictor predict))
+     + indcpa_epsilon_at benaloh_setting k
+         (charlie_pkey_at benaloh_setting k)
+         (charlie_challenge_adversary_at benaloh_setting k
+            (distinguisher_of_predictor predict)).
+Proof. exact: (tuple_guess_V2_le benaloh_security predict). Qed.
+
+(* The same bound as a lower bound on minus the logarithm of her success
+   probability, under a positive success probability. *)
+Corollary benaloh_unpredictability_ge k
+    (predict : predictor (AHE_at benaloh_setting k)
+                 (hop_tupleT_at benaloh_setting k)) :
+  0 < Pr (hop_fdist_at benaloh_setting k)
+         [set t | (predict `o AliceRealTuple_at benaloh_setting k) t
+                  == hop_V2_at benaloh_setting k t] ->
+  log (#|plain (AHE_at benaloh_setting k)|%:R : R)
+    - log (1 + #|plain (AHE_at benaloh_setting k)|%:R
+               * (bob_predictor_epsilon_at benaloh_setting k predict
+                  + charlie_predictor_epsilon_at benaloh_setting k predict))
+  <= - log (Pr (hop_fdist_at benaloh_setting k)
+               [set t | (predict `o AliceRealTuple_at benaloh_setting k) t
+                        == hop_V2_at benaloh_setting k t]).
+Proof. move=> hpos; exact: (unpredictability_ge benaloh_security hpos). Qed.
+
+(* The same lower bound at the named unpredictability quantity. *)
+Corollary benaloh_predictor_unpredictability_ge k
+    (predict : predictor (AHE_at benaloh_setting k)
+                 (hop_tupleT_at benaloh_setting k)) :
+  0 < Pr (hop_fdist_at benaloh_setting k)
+         [set t | (predict `o AliceRealTuple_at benaloh_setting k) t
+                  == hop_V2_at benaloh_setting k t] ->
+  log (#|plain (AHE_at benaloh_setting k)|%:R : R)
+    - log (1 + #|plain (AHE_at benaloh_setting k)|%:R
+               * (bob_predictor_epsilon_at benaloh_setting k predict
+                  + charlie_predictor_epsilon_at benaloh_setting k predict))
+  <= alice_predictor_unpredictability_at benaloh_setting k predict.
+Proof.
+move=> hpos; exact: (predictor_unpredictability_ge benaloh_security hpos).
+Qed.
+
+(* Her tuple against the simulator's law, per distinguisher, at the two hop
+   advantages. *)
+Corollary benaloh_sim_advantage_le k
+    (D : distinguisher (hop_jointT_at benaloh_setting k)) :
+  `| Pr (`p_ [% hop_V2_at benaloh_setting k, hop_V3_at benaloh_setting k,
+                AliceRealTuple_at benaloh_setting k]) [set x | D x]
+     - Pr (alice_ideal_joint_at benaloh_setting k) [set x | D x] |
+  <= indcpa_epsilon_at benaloh_setting k (bob_pkey_at benaloh_setting k)
+       (bob_challenge_adversary_at benaloh_setting k D)
+     + indcpa_epsilon_at benaloh_setting k
+         (charlie_pkey_at benaloh_setting k)
+         (charlie_challenge_adversary_at benaloh_setting k D).
+Proof. exact: (sim_advantage_le benaloh_security D). Qed.
+
+(* The tuple guessing bound carried to Alice's whole view. *)
+Corollary benaloh_view_guess_V2_le k
+    (predict : predictor (AHE_at benaloh_setting k)
+                 (viewT_at benaloh_setting k)) :
+  Pr (hop_fdist_at benaloh_setting k)
+     [set t | (predict `o AliceView_at benaloh_setting k) t
+              == hop_V2_at benaloh_setting k t]
+  <= (#|plain (AHE_at benaloh_setting k)|%:R : R)^-1
+     + indcpa_epsilon_at benaloh_setting k (bob_pkey_at benaloh_setting k)
+         (bob_view_adversary_at benaloh_setting k predict)
+     + indcpa_epsilon_at benaloh_setting k
+         (charlie_pkey_at benaloh_setting k)
+         (charlie_view_adversary_at benaloh_setting k predict).
+Proof. exact: (view_guess_V2_le benaloh_security predict). Qed.
+
+(* The protocol output alone leaves Bob's input with the whole logarithm of
+   the plaintext count of uncertainty. *)
+Corollary benaloh_centropy_V2_Sout_logm k :
+  `H( hop_V2_at benaloh_setting k | Sout_at benaloh_setting k )
+    = log (#|plain (AHE_at benaloh_setting k)|%:R : R).
+Proof. exact: (centropy_V2_Sout_logm benaloh_security k). Qed.
+
+(* So does the all-zero endpoint of the hop ladder, the ideal side the two
+   advantages of the guessing bounds pay to reach. *)
+Corollary benaloh_centropy_V2_all_zero_logm k :
+  `H( hop_V2_at benaloh_setting k | AliceHopTuple_at benaloh_setting k 2 )
+    = log (#|plain (AHE_at benaloh_setting k)|%:R : R).
+Proof. exact: (centropy_V2_all_zero_logm benaloh_security k). Qed.
+
+(* The tuple guessing bound at Alice's executed piSMC trace. *)
+Corollary benaloh_trace_guess_V2_le k
+    (predict : predictor (AHE_at benaloh_setting k)
+                 (traceT_at benaloh_setting k)) :
+  Pr (hop_fdist_at benaloh_setting k)
+     [set t | (predict `o AliceTrace_at benaloh_setting k) t
+              == hop_V2_at benaloh_setting k t]
+  <= (#|plain (AHE_at benaloh_setting k)|%:R : R)^-1
+     + indcpa_epsilon_at benaloh_setting k (bob_pkey_at benaloh_setting k)
+         (bob_trace_adversary_at (R:=R) (Q:=BQ)
+            (distinguisher_of_predictor predict))
+     + indcpa_epsilon_at benaloh_setting k
+         (charlie_pkey_at benaloh_setting k)
+         (charlie_trace_adversary_at (R:=R) (Q:=BQ)
+            (distinguisher_of_predictor predict)).
+Proof. exact: (trace_guess_V2_le benaloh_security predict). Qed.
+
+(* Its logarithmic form at the executed trace. *)
+Corollary benaloh_trace_unpredictability_ge k
+    (predict : predictor (AHE_at benaloh_setting k)
+                 (traceT_at benaloh_setting k)) :
+  0 < Pr (hop_fdist_at benaloh_setting k)
+         [set t | (predict `o AliceTrace_at benaloh_setting k) t
+                  == hop_V2_at benaloh_setting k t] ->
+  log (#|plain (AHE_at benaloh_setting k)|%:R : R)
+    - log (1 + #|plain (AHE_at benaloh_setting k)|%:R
+               * (bob_trace_predictor_epsilon_at benaloh_setting k predict
+                  + charlie_trace_predictor_epsilon_at benaloh_setting k
+                      predict))
+  <= alice_trace_unpredictability_at benaloh_setting k predict.
+Proof.
+move=> hpos; exact: (trace_unpredictability_ge benaloh_security hpos).
+Qed.
+
+(* Simulation security of the executed trace, per distinguisher. *)
+Corollary benaloh_trace_sim_advantage_le k
+    (D : distinguisher (trace_jointT_at benaloh_setting k)) :
+  `| Pr (`p_ [% hop_V2_at benaloh_setting k, hop_V3_at benaloh_setting k,
+                AliceTrace_at benaloh_setting k]) [set x | D x]
+     - Pr (alice_trace_ideal_joint_at benaloh_setting k) [set x | D x] |
+  <= indcpa_epsilon_at benaloh_setting k (bob_pkey_at benaloh_setting k)
+       (bob_trace_adversary_at (R:=R) (Q:=BQ) D)
+     + indcpa_epsilon_at benaloh_setting k
+         (charlie_pkey_at benaloh_setting k)
+         (charlie_trace_adversary_at (R:=R) (Q:=BQ) D).
+Proof. exact: (trace_sim_advantage_le benaloh_security D). Qed.
+
+(* Her executed trace and her hopping tuple leave the same conditional
+   entropy about Bob's input. *)
+Corollary benaloh_centropy_V2_trace_tupleE k :
+  `H( hop_V2_at benaloh_setting k | AliceTrace_at benaloh_setting k )
+    = `H( hop_V2_at benaloh_setting k
+        | AliceRealTuple_at benaloh_setting k ).
+Proof. exact: (centropy_V2_trace_tupleE benaloh_security k). Qed.
+
+(* The same equality at her whole view. *)
+Corollary benaloh_centropy_V2_view_tupleE k :
+  `H( hop_V2_at benaloh_setting k | AliceView_at benaloh_setting k )
+    = `H( hop_V2_at benaloh_setting k
+        | AliceRealTuple_at benaloh_setting k ).
+Proof. exact: (centropy_V2_view_tupleE benaloh_security k). Qed.
+
+(* At the executed trace that entropy is zero: the trace carries Alice's own
+   key beside the aggregate ciphertext, so she recovers Bob's input.  This
+   is the leakage the class restriction answers. *)
+Corollary benaloh_centropy_V2_trace_eq0 k :
+  `H( hop_V2_at benaloh_setting k | AliceTrace_at benaloh_setting k ) = 0.
+Proof. exact: (centropy_V2_trace_eq0 benaloh_security k). Qed.
+
+(* Both ciphertext hops charged to the single epsilon the Benaloh sequence
+   assumes at k, on the two class premises the admissible-predictor record
+   carries. *)
+Corollary benaloh_trace_guess_V2_admissible_le k
+    (a : dsdp_admissible_predictor benaloh_setting k) :
+  alice_trace_guess_V2_pr_at (R:=R) (Q:=BQ) (predict a)
+  <= (#|plain (AHE_at benaloh_setting k)|%:R : R)^-1
+     + 2 * indcpa_assumption_epsilon (assumption_at benaloh_setting k).
+Proof. exact: (trace_guess_V2_admissible_le benaloh_security a). Qed.
+
+(* The same bound with its unconditional summand read as 1/(p k * q k), the
+   block size, the counting axis's reading of the shared cardinality. *)
+Corollary benaloh_trace_guess_V2_admissible_pq_le k
+    (a : dsdp_admissible_predictor benaloh_setting k) :
+  alice_trace_guess_V2_pr_at (R:=R) (Q:=BQ) (predict a)
+  <= (((p_minus_2 k).+2%:R : R) * (q_minus_2 k).+2%:R)^-1
+     + 2 * indcpa_assumption_epsilon (assumption_at benaloh_setting k).
+Proof. exact: (trace_guess_V2_admissible_pq_le benaloh_security a). Qed.
+
+(* The decrypting predictor drives the sum of its two reduction advantages
+   to at least 1 - 1/(p k * q k), the block size. *)
+Corollary benaloh_decrypt_epsilon_sum_ge k :
+  1 - (#|plain (AHE_at benaloh_setting k)|%:R : R)^-1
+  <= bob_trace_predictor_epsilon_at benaloh_setting k
+       (bob_decrypt_predictor_at benaloh_setting k)
+     + charlie_trace_predictor_epsilon_at benaloh_setting k
+         (bob_decrypt_predictor_at benaloh_setting k).
+Proof. exact: (decrypt_epsilon_sum_ge benaloh_security k). Qed.
+
+(* The Bob-key half alone already reaches that value. *)
+Corollary benaloh_decrypt_bob_epsilon_ge k :
+  1 - (#|plain (AHE_at benaloh_setting k)|%:R : R)^-1
+  <= bob_trace_predictor_epsilon_at benaloh_setting k
+       (bob_decrypt_predictor_at benaloh_setting k).
+Proof. exact: (decrypt_bob_epsilon_ge benaloh_security k). Qed.
+
+(* No assumption promising an epsilon below that value admits the Bob-key
+   reduction, at every assumption at k rather than at the one the Benaloh
+   sequence makes. *)
+Corollary benaloh_decrypt_reduction_admissibleF k :
+  forall A : indcpa_assumptionT_at benaloh_setting k,
+  indcpa_assumption_epsilon A
+    < 1 - (#|plain (AHE_at benaloh_setting k)|%:R : R)^-1 ->
+  indcpa_admissible A
+    (bob_trace_adversary_at (R:=R) (Q:=BQ)
+       (distinguisher_of_predictor
+          (bob_decrypt_predictor_at benaloh_setting k)))
+  = false.
+Proof.
+move=> ? heps.
+exact: (decrypt_reduction_admissibleF benaloh_security heps).
+Qed.
+
+(* Dropping the two class premises leaves the trace guessing bound false,
+   which places its truth in the class restriction rather than in the size
+   of the epsilon. *)
+Corollary benaloh_decrypt_guess_V2_premise_free_lt k :
+  forall A : indcpa_assumptionT_at benaloh_setting k,
+  2 * indcpa_assumption_epsilon A
+    < 1 - (#|plain (AHE_at benaloh_setting k)|%:R : R)^-1 ->
+  (#|plain (AHE_at benaloh_setting k)|%:R : R)^-1
+    + 2 * indcpa_assumption_epsilon A
+  < alice_trace_guess_V2_pr_at (R:=R) (Q:=BQ)
+      (bob_decrypt_predictor_at benaloh_setting k).
+Proof.
+move=> ? heps.
+exact: (decrypt_guess_V2_premise_free_lt benaloh_security heps).
+Qed.
+
+(* Along the Benaloh sequence, an admissible predictor at every k makes the
+   trace guessing probability a negligible sequence. *)
+Corollary benaloh_trace_guess_V2_negligible
+    (adv : forall k, dsdp_admissible_predictor benaloh_setting k) :
+  negligible_fun
+    (f_guess_V2 (R:=R) (Q:=BQ) (fun k => predict (adv k))).
+Proof. exact: (trace_guess_V2_negligible benaloh_security adv). Qed.
+End benaloh_dsdp.
+
+(* =================================================================          *)
+(* The idealized scheme, where every corollary is premise-free                *)
+(* =================================================================          *)
+
+Section idealized_dsdp.
+Local Set Default Goal Selector "1".
+Local Open Scope reals_ext_scope.
+Context {R : realType}.
+
+(* The setting of dsdp_setting.v at Alice's honest query e_3, and its sibling
+   at her corrupted query e_1.  Both carry the composite-modulus idealized
+   sequence, whose assumed advantage is zero at every k, so every hopping
+   bound below is its unconditional term alone. *)
+Local Notation IS := (idealized_setting : dsdp_setting R).
+Local Notation CS := (corrupted_setting : dsdp_setting R).
+
+(* The twenty-six statements at a setting that takes no parameter, so every
+   corollary below is premise-free. *)
+Definition idealized_security : dsdp_security IS := dsdp_securityP IS.
+
+(* Alice's honest query holds at the idealized setting at every k, her
+   weight on Charlie's input being the unit residue, so the equality is
+   stated with no premise. *)
+Corollary idealized_centropy_uniform k :
+  `H(VarRV IS k | CondRV IS k)
+    = log ((((idealized_p_minus_2 k).+2
+             * (idealized_q_minus_2 k).+2)%N)%:R : R).
+Proof.
+exact: (centropy_uniform idealized_security (idealized_honest_query k)).
+Qed.
+
+(* Read at corrupted_setting, the sibling value carrying Alice's corrupted
+   query e_1, since no value of dsdp_random_inputs satisfies both queries at
+   one k. *)
+Corollary corrupted_centropy_V2_dotp_eq0 k :
+  `H( V2 (inputs CS k) | AliceDotpView_at CS k ) = 0.
+Proof.
+exact: (centropy_V2_dotp_eq0 (dsdp_securityP CS) (corrupted_query k)).
+Qed.
+
+(* Bob's whole view leaves the full logarithm of the composite modulus of
+   the idealized sequence of uncertainty about Alice's input, and no
+   assumption is spent. *)
+Corollary idealized_bob_privacy_V1 k :
+  `H(V1 (inputs IS k) | BobView_at IS k)
+    = log ((((idealized_p_minus_2 k).+2
+             * (idealized_q_minus_2 k).+2)%N)%:R : R)
+  /\ `H(V1 (inputs IS k) | BobView_at IS k) > 0.
+Proof. exact: (bob_privacy_V1 idealized_security k). Qed.
+
+(* The same for Charlie's whole view about Alice's input. *)
+Corollary idealized_charlie_privacy_V1 k :
+  `H(V1 (inputs IS k) | CharlieView_at IS k)
+    = log ((((idealized_p_minus_2 k).+2
+             * (idealized_q_minus_2 k).+2)%N)%:R : R)
+  /\ `H(V1 (inputs IS k)
+        | CharlieView_at IS k) > 0.
+Proof. exact: (charlie_privacy_V1 idealized_security k). Qed.
+
+(* Bob learns nothing about Charlie's input either. *)
+Corollary idealized_bob_privacy_V3 k :
+  `H(V3 (inputs IS k) | BobView_at IS k)
+    = log ((((idealized_p_minus_2 k).+2
+             * (idealized_q_minus_2 k).+2)%N)%:R : R)
+  /\ `H(V3 (inputs IS k) | BobView_at IS k) > 0.
+Proof. exact: (bob_privacy_V3 idealized_security k). Qed.
+
+(* And Charlie learns nothing about Bob's input, which is what makes the two
+   relays curious parties rather than a coalition. *)
+Corollary idealized_charlie_privacy_V2 k :
+  `H(V2 (inputs IS k) | CharlieView_at IS k)
+    = log ((((idealized_p_minus_2 k).+2
+             * (idealized_q_minus_2 k).+2)%N)%:R : R)
+  /\ `H(V2 (inputs IS k)
+        | CharlieView_at IS k) > 0.
+Proof. exact: (charlie_privacy_V2 idealized_security k). Qed.
+
+(* A corrupted Alice guessing Bob's input from her hopping tuple: the
+   unconditional residue is 1/(p k * q k) and each of the two summands after
+   it is an advantage the idealized sequence assumes to be zero at one key. *)
+Corollary idealized_tuple_guess_V2_le k
+    (predict : predictor (AHE_at IS k)
+                 (hop_tupleT_at IS k)) :
+  Pr (hop_fdist_at IS k)
+     [set t | (predict `o AliceRealTuple_at IS k) t
+              == hop_V2_at IS k t]
+  <= (#|plain (AHE_at IS k)|%:R : R)^-1
+     + indcpa_epsilon_at IS k (bob_pkey_at IS k)
+         (bob_challenge_adversary_at IS k
+            (distinguisher_of_predictor predict))
+     + indcpa_epsilon_at IS k
+         (charlie_pkey_at IS k)
+         (charlie_challenge_adversary_at IS k
+            (distinguisher_of_predictor predict)).
+Proof. exact: (tuple_guess_V2_le idealized_security predict). Qed.
+
+(* The same bound as a lower bound on minus the logarithm of her success
+   probability, under a positive success probability. *)
+Corollary idealized_unpredictability_ge k
+    (predict : predictor (AHE_at IS k)
+                 (hop_tupleT_at IS k)) :
+  0 < Pr (hop_fdist_at IS k)
+         [set t | (predict `o AliceRealTuple_at IS k) t
+                  == hop_V2_at IS k t] ->
+  log (#|plain (AHE_at IS k)|%:R : R)
+    - log (1 + #|plain (AHE_at IS k)|%:R
+               * (bob_predictor_epsilon_at IS k predict
+                  + charlie_predictor_epsilon_at IS k predict))
+  <= - log (Pr (hop_fdist_at IS k)
+               [set t | (predict `o AliceRealTuple_at IS k) t
+                        == hop_V2_at IS k t]).
+Proof. move=> hpos; exact: (unpredictability_ge idealized_security hpos). Qed.
+
+(* The same lower bound at the named unpredictability quantity. *)
+Corollary idealized_predictor_unpredictability_ge k
+    (predict : predictor (AHE_at IS k)
+                 (hop_tupleT_at IS k)) :
+  0 < Pr (hop_fdist_at IS k)
+         [set t | (predict `o AliceRealTuple_at IS k) t
+                  == hop_V2_at IS k t] ->
+  log (#|plain (AHE_at IS k)|%:R : R)
+    - log (1 + #|plain (AHE_at IS k)|%:R
+               * (bob_predictor_epsilon_at IS k predict
+                  + charlie_predictor_epsilon_at IS k predict))
+  <= alice_predictor_unpredictability_at IS k predict.
+Proof.
+move=> hpos; exact: (predictor_unpredictability_ge idealized_security hpos).
+Qed.
+
+(* Her tuple against the simulator's law, per distinguisher, at the two hop
+   advantages. *)
+Corollary idealized_sim_advantage_le k
+    (D : distinguisher (hop_jointT_at IS k)) :
+  `| Pr (`p_ [% hop_V2_at IS k, hop_V3_at IS k,
+                AliceRealTuple_at IS k]) [set x | D x]
+     - Pr (alice_ideal_joint_at IS k) [set x | D x] |
+  <= indcpa_epsilon_at IS k (bob_pkey_at IS k)
+       (bob_challenge_adversary_at IS k D)
+     + indcpa_epsilon_at IS k
+         (charlie_pkey_at IS k)
+         (charlie_challenge_adversary_at IS k D).
+Proof. exact: (sim_advantage_le idealized_security D). Qed.
+
+(* The tuple guessing bound carried to Alice's whole view. *)
+Corollary idealized_view_guess_V2_le k
+    (predict : predictor (AHE_at IS k)
+                 (viewT_at IS k)) :
+  Pr (hop_fdist_at IS k)
+     [set t | (predict `o AliceView_at IS k) t
+              == hop_V2_at IS k t]
+  <= (#|plain (AHE_at IS k)|%:R : R)^-1
+     + indcpa_epsilon_at IS k (bob_pkey_at IS k)
+         (bob_view_adversary_at IS k predict)
+     + indcpa_epsilon_at IS k
+         (charlie_pkey_at IS k)
+         (charlie_view_adversary_at IS k predict).
+Proof. exact: (view_guess_V2_le idealized_security predict). Qed.
+
+(* The protocol output alone leaves Bob's input with the whole logarithm of
+   the plaintext count of uncertainty. *)
+Corollary idealized_centropy_V2_Sout_logm k :
+  `H( hop_V2_at IS k | Sout_at IS k )
+    = log (#|plain (AHE_at IS k)|%:R : R).
+Proof. exact: (centropy_V2_Sout_logm idealized_security k). Qed.
+
+(* So does the all-zero endpoint of the hop ladder, the ideal side the two
+   advantages of the guessing bounds pay to reach. *)
+Corollary idealized_centropy_V2_all_zero_logm k :
+  `H( hop_V2_at IS k | AliceHopTuple_at IS k 2 )
+    = log (#|plain (AHE_at IS k)|%:R : R).
+Proof. exact: (centropy_V2_all_zero_logm idealized_security k). Qed.
+
+(* The tuple guessing bound at Alice's executed piSMC trace. *)
+Corollary idealized_trace_guess_V2_le k
+    (predict : predictor (AHE_at IS k)
+                 (traceT_at IS k)) :
+  Pr (hop_fdist_at IS k)
+     [set t | (predict `o AliceTrace_at IS k) t
+              == hop_V2_at IS k t]
+  <= (#|plain (AHE_at IS k)|%:R : R)^-1
+     + indcpa_epsilon_at IS k (bob_pkey_at IS k)
+         (bob_trace_adversary_at (R:=R) (Q:=idealized_pq_sequence)
+            (distinguisher_of_predictor predict))
+     + indcpa_epsilon_at IS k
+         (charlie_pkey_at IS k)
+         (charlie_trace_adversary_at (R:=R) (Q:=idealized_pq_sequence)
+            (distinguisher_of_predictor predict)).
+Proof. exact: (trace_guess_V2_le idealized_security predict). Qed.
+
+(* Its logarithmic form at the executed trace. *)
+Corollary idealized_trace_unpredictability_ge k
+    (predict : predictor (AHE_at IS k)
+                 (traceT_at IS k)) :
+  0 < Pr (hop_fdist_at IS k)
+         [set t | (predict `o AliceTrace_at IS k) t
+                  == hop_V2_at IS k t] ->
+  log (#|plain (AHE_at IS k)|%:R : R)
+    - log (1 + #|plain (AHE_at IS k)|%:R
+               * (bob_trace_predictor_epsilon_at IS k predict
+                  + charlie_trace_predictor_epsilon_at IS k
+                      predict))
+  <= alice_trace_unpredictability_at IS k predict.
+Proof.
+move=> hpos; exact: (trace_unpredictability_ge idealized_security hpos).
+Qed.
+
+(* Simulation security of the executed trace, per distinguisher. *)
+Corollary idealized_trace_sim_advantage_le k
+    (D : distinguisher (trace_jointT_at IS k)) :
+  `| Pr (`p_ [% hop_V2_at IS k, hop_V3_at IS k,
+                AliceTrace_at IS k]) [set x | D x]
+     - Pr (alice_trace_ideal_joint_at IS k) [set x | D x] |
+  <= indcpa_epsilon_at IS k (bob_pkey_at IS k)
+       (bob_trace_adversary_at (R:=R) (Q:=idealized_pq_sequence) D)
+     + indcpa_epsilon_at IS k
+         (charlie_pkey_at IS k)
+         (charlie_trace_adversary_at (R:=R) (Q:=idealized_pq_sequence) D).
+Proof. exact: (trace_sim_advantage_le idealized_security D). Qed.
+
+(* Her executed trace and her hopping tuple leave the same conditional
+   entropy about Bob's input. *)
+Corollary idealized_centropy_V2_trace_tupleE k :
+  `H( hop_V2_at IS k | AliceTrace_at IS k )
+    = `H( hop_V2_at IS k
+        | AliceRealTuple_at IS k ).
+Proof. exact: (centropy_V2_trace_tupleE idealized_security k). Qed.
+
+(* The same equality at her whole view. *)
+Corollary idealized_centropy_V2_view_tupleE k :
+  `H( hop_V2_at IS k | AliceView_at IS k )
+    = `H( hop_V2_at IS k
+        | AliceRealTuple_at IS k ).
+Proof. exact: (centropy_V2_view_tupleE idealized_security k). Qed.
+
+(* At the executed trace that entropy is zero: the trace carries Alice's own
+   key beside the aggregate ciphertext, so she recovers Bob's input.  This
+   is the leakage the class restriction answers. *)
+Corollary idealized_centropy_V2_trace_eq0 k :
+  `H( hop_V2_at IS k | AliceTrace_at IS k ) = 0.
+Proof. exact: (centropy_V2_trace_eq0 idealized_security k). Qed.
+
+(* At idealized_admissible, the constant predictor, whose two reduction
+   adversaries the cipher-constant class admits; the idealized sequence's
+   epsilon is zero, so the bound is its residue alone. *)
+Corollary idealized_trace_guess_V2_admissible_le k :
+  alice_trace_guess_V2_pr_at (R:=R) (Q:=idealized_pq_sequence)
+    (predict (idealized_admissible k))
+  <= (#|plain (AHE_at IS k)|%:R : R)^-1
+     + 2 * indcpa_assumption_epsilon (assumption_at IS k).
+Proof.
+exact: (trace_guess_V2_admissible_le idealized_security
+          (idealized_admissible k)).
+Qed.
+
+(* The same at the composite modulus, again at the constant predictor. *)
+Corollary idealized_trace_guess_V2_admissible_pq_le k :
+  alice_trace_guess_V2_pr_at (R:=R) (Q:=idealized_pq_sequence)
+    (predict (idealized_admissible k))
+  <= (((idealized_p_minus_2 k).+2%:R : R)
+      * (idealized_q_minus_2 k).+2%:R)^-1
+     + 2 * indcpa_assumption_epsilon (assumption_at IS k).
+Proof.
+exact: (trace_guess_V2_admissible_pq_le idealized_security
+          (idealized_admissible k)).
+Qed.
+
+(* The decrypting predictor drives the sum of its two reduction advantages
+   to at least 1 - 1/(p k * q k). *)
+Corollary idealized_decrypt_epsilon_sum_ge k :
+  1 - (#|plain (AHE_at IS k)|%:R : R)^-1
+  <= bob_trace_predictor_epsilon_at IS k
+       (bob_decrypt_predictor_at IS k)
+     + charlie_trace_predictor_epsilon_at IS k
+         (bob_decrypt_predictor_at IS k).
+Proof. exact: (decrypt_epsilon_sum_ge idealized_security k). Qed.
+
+(* The Bob-key half alone already reaches that value. *)
+Corollary idealized_decrypt_bob_epsilon_ge k :
+  1 - (#|plain (AHE_at IS k)|%:R : R)^-1
+  <= bob_trace_predictor_epsilon_at IS k
+       (bob_decrypt_predictor_at IS k).
+Proof. exact: (decrypt_bob_epsilon_ge idealized_security k). Qed.
+
+(* No assumption promising an epsilon below that value admits the Bob-key
+   reduction, at every assumption at k rather than at the one the idealized
+   sequence makes. *)
+Corollary idealized_decrypt_reduction_admissibleF k :
+  forall A : indcpa_assumptionT_at IS k,
+  indcpa_assumption_epsilon A
+    < 1 - (#|plain (AHE_at IS k)|%:R : R)^-1 ->
+  indcpa_admissible A
+    (bob_trace_adversary_at (R:=R) (Q:=idealized_pq_sequence)
+       (distinguisher_of_predictor
+          (bob_decrypt_predictor_at IS k)))
+  = false.
+Proof.
+move=> ? heps.
+exact: (decrypt_reduction_admissibleF idealized_security heps).
+Qed.
+
+(* Dropping the two class premises leaves the trace guessing bound false,
+   which places its truth in the class restriction rather than in the size
+   of the epsilon. *)
+Corollary idealized_decrypt_guess_V2_premise_free_lt k :
+  forall A : indcpa_assumptionT_at IS k,
+  2 * indcpa_assumption_epsilon A
+    < 1 - (#|plain (AHE_at IS k)|%:R : R)^-1 ->
+  (#|plain (AHE_at IS k)|%:R : R)^-1
+    + 2 * indcpa_assumption_epsilon A
+  < alice_trace_guess_V2_pr_at (R:=R) (Q:=idealized_pq_sequence)
+      (bob_decrypt_predictor_at IS k).
+Proof.
+move=> ? heps.
+exact: (decrypt_guess_V2_premise_free_lt idealized_security heps).
+Qed.
+
+(* At the constant predictor, whose class premises are theorems here, so the
+   negligible sequence is asserted with nothing assumed. *)
+Corollary idealized_trace_guess_V2_negligible :
+  negligible_fun
+    (f_guess_V2 (R:=R) (Q:=idealized_pq_sequence)
+       (fun k => predict (idealized_admissible k))).
+Proof.
+exact: (trace_guess_V2_negligible idealized_security idealized_admissible).
+Qed.
+End idealized_dsdp.
