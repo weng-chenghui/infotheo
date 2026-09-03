@@ -207,35 +207,88 @@ indcpa_game:indcpa_scheme
 paillier_indcpa_scheme:paillier_indcpa_scheme
 benaloh_indcpa_scheme:benaloh_indcpa_scheme
 
-# The axis copies of the headlines relocated into dsdp_main.v. Each is
-# still the source the file's own downstream corollaries call; the \rocq node
-# now points at the dsdp_main.v copy, which carries the full proof text the
-# blueprint statement describes.
-dsdp_alice_hop_secrecy:alice_tuple_guess_V2_le
-dsdp_alice_hop_secrecy:alice_unpredictability_ge
-dsdp_alice_hop_secrecy:alice_predictor_unpredictability_ge
-dsdp_alice_hop_secrecy:alice_view_guess_V2_le
-dsdp_alice_hop_secrecy:alice_sim_advantage_le
-dsdp_alice_trace_link:alice_trace_guess_V2_le
-dsdp_alice_trace_link:alice_trace_unpredictability_ge
-dsdp_alice_trace_link:alice_trace_sim_advantage_le
-dsdp_alice_trace_link:centropy_V2_trace_tupleE
-dsdp_alice_trace_link:centropy_V2_view_tupleE
-dsdp_alice_hop_secrecy:centropy_V2_Sout_logm
-dsdp_alice_hop_secrecy:centropy_V2_all_zero_logm
-dsdp_alice_trace_link:alice_trace_guess_V2_admissible_le
-dsdp_alice_trace_link:alice_trace_guess_V2_admissible_pq_le
-dsdp_alice_trace_link:centropy_V2_trace_eq0
-dsdp_alice_trace_link:decrypt_reduction_admissibleF
-dsdp_alice_trace_link:decrypt_guess_V2_premise_free_lt
-
-# The dsdp_main.v display clones whose \rocq node stays on the axis file,
-# the reverse of the block above. Each clone carries the full text of its
-# source over a cloned copy of that source's section context, so the two
-# prove the same statement and one node describes both.
-dsdp_main:cipher_constant_assumption
-dsdp_main:alice_trace_guess_V2_paillier_negligible
-dsdp_main:alice_trace_guess_V2_benaloh_negligible
+# dsdp_main: the per-instance corollaries. Each is one field of the results
+# record projected at one of the three settings, with the field's statement
+# written out at that instance's modulus and scheme; the blueprint cites the
+# axis theorem the field applies, and the three settings at
+# def:paillier_setting, def:benaloh_setting and def:idealized_setting. The
+# three trace-negligibility corollaries and the five setting and results
+# values have nodes of their own and are absent here.
+dsdp_main:benaloh_bob_privacy_V1
+dsdp_main:benaloh_bob_privacy_V3
+dsdp_main:benaloh_centropy_V2_Sout_logm
+dsdp_main:benaloh_centropy_V2_all_zero_logm
+dsdp_main:benaloh_centropy_V2_dotp_eq0
+dsdp_main:benaloh_centropy_V2_trace_eq0
+dsdp_main:benaloh_centropy_V2_trace_tupleE
+dsdp_main:benaloh_centropy_V2_view_tupleE
+dsdp_main:benaloh_centropy_uniform
+dsdp_main:benaloh_charlie_privacy_V1
+dsdp_main:benaloh_charlie_privacy_V2
+dsdp_main:benaloh_decrypt_bob_epsilon_ge
+dsdp_main:benaloh_decrypt_epsilon_sum_ge
+dsdp_main:benaloh_decrypt_guess_V2_premise_free_lt
+dsdp_main:benaloh_decrypt_reduction_admissibleF
+dsdp_main:benaloh_predictor_unpredictability_ge
+dsdp_main:benaloh_sim_advantage_le
+dsdp_main:benaloh_trace_guess_V2_admissible_le
+dsdp_main:benaloh_trace_guess_V2_admissible_pq_le
+dsdp_main:benaloh_trace_guess_V2_le
+dsdp_main:benaloh_trace_sim_advantage_le
+dsdp_main:benaloh_trace_unpredictability_ge
+dsdp_main:benaloh_tuple_guess_V2_le
+dsdp_main:benaloh_unpredictability_ge
+dsdp_main:benaloh_view_guess_V2_le
+dsdp_main:corrupted_centropy_V2_dotp_eq0
+dsdp_main:idealized_bob_privacy_V1
+dsdp_main:idealized_bob_privacy_V3
+dsdp_main:idealized_centropy_V2_Sout_logm
+dsdp_main:idealized_centropy_V2_all_zero_logm
+dsdp_main:idealized_centropy_V2_trace_eq0
+dsdp_main:idealized_centropy_V2_trace_tupleE
+dsdp_main:idealized_centropy_V2_view_tupleE
+dsdp_main:idealized_centropy_uniform
+dsdp_main:idealized_charlie_privacy_V1
+dsdp_main:idealized_charlie_privacy_V2
+dsdp_main:idealized_decrypt_bob_epsilon_ge
+dsdp_main:idealized_decrypt_epsilon_sum_ge
+dsdp_main:idealized_decrypt_guess_V2_premise_free_lt
+dsdp_main:idealized_decrypt_reduction_admissibleF
+dsdp_main:idealized_predictor_unpredictability_ge
+dsdp_main:idealized_sim_advantage_le
+dsdp_main:idealized_trace_guess_V2_admissible_le
+dsdp_main:idealized_trace_guess_V2_admissible_pq_le
+dsdp_main:idealized_trace_guess_V2_le
+dsdp_main:idealized_trace_sim_advantage_le
+dsdp_main:idealized_trace_unpredictability_ge
+dsdp_main:idealized_tuple_guess_V2_le
+dsdp_main:idealized_unpredictability_ge
+dsdp_main:idealized_view_guess_V2_le
+dsdp_main:paillier_bob_privacy_V1
+dsdp_main:paillier_bob_privacy_V3
+dsdp_main:paillier_centropy_V2_Sout_logm
+dsdp_main:paillier_centropy_V2_all_zero_logm
+dsdp_main:paillier_centropy_V2_dotp_eq0
+dsdp_main:paillier_centropy_V2_trace_eq0
+dsdp_main:paillier_centropy_V2_trace_tupleE
+dsdp_main:paillier_centropy_V2_view_tupleE
+dsdp_main:paillier_centropy_uniform
+dsdp_main:paillier_charlie_privacy_V1
+dsdp_main:paillier_charlie_privacy_V2
+dsdp_main:paillier_decrypt_bob_epsilon_ge
+dsdp_main:paillier_decrypt_epsilon_sum_ge
+dsdp_main:paillier_decrypt_guess_V2_premise_free_lt
+dsdp_main:paillier_decrypt_reduction_admissibleF
+dsdp_main:paillier_predictor_unpredictability_ge
+dsdp_main:paillier_sim_advantage_le
+dsdp_main:paillier_trace_guess_V2_admissible_le
+dsdp_main:paillier_trace_guess_V2_admissible_pq_le
+dsdp_main:paillier_trace_guess_V2_le
+dsdp_main:paillier_trace_sim_advantage_le
+dsdp_main:paillier_trace_unpredictability_ge
+dsdp_main:paillier_tuple_guess_V2_le
+dsdp_main:paillier_unpredictability_ge
+dsdp_main:paillier_view_guess_V2_le
 
 # dsdp_setting: the derived data and laws of one setting at one security
 # parameter, and the pieces the idealized value is assembled from. The

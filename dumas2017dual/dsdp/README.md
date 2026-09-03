@@ -24,25 +24,39 @@ basename and resolve by suffix.
   sequence record over it, the asymptotic headline, the idealized-scheme witness, and the
   DSDP bounds read off at the Paillier and Benaloh instances).
 
-- **counting/** — the information-theoretic / solution-counting leg.
-  `dsdp_entropy` (fiber cardinality `dsdp_fiber_card`, conditional entropy `dsdp_centropy_uniform`),
-  `dsdp_entropy_trace` (trace-based entropy), `dsdp_malicious_dotp` (degenerate dot-product
-  queries and their leakage).
+- **counting/** holds the information-theoretic, solution-counting leg, listed in
+  `_CoqProject` load order.
+  `dsdp_entropy_trace` (trace-based entropy), `dsdp_entropy` (fiber cardinality
+  `dsdp_fiber_card`, the conditional entropy `dsdp_centropy_uniform` and its N-party form
+  `dsdp_centropy_uniform_n`), `dsdp_malicious_dotp` (the degenerate dot-product query,
+  Alice's view `AliceDotpView` at it, and the leakage theorems `US_e1_centropy_V2_eq0`
+  and its N-party form `US_e1_centropy_VS0_eq0`), `dsdp_relay_secrecy` (`BobView` and
+  `CharlieView`, their independence of `V1`, and the four relay privacy theorems
+  `bob_privacy_V1`, `charlie_privacy_V1`, `bob_privacy_V3`, `charlie_privacy_V2`).
+  The last two load after `hopping/`, whose game vocabulary they use.
 
 - **dsdp_setting.v** holds `dsdp_setting`, the data a 3-party DSDP security statement
   is made over at every security parameter: the hopping axis's instance sequence, the
-  plaintext modulus at `k` as its two primes, the sample space and its law, the eleven
-  random inputs with each one independent of the joint of the other ten, the five uniform
-  laws, and the one link field `card_plain` equating the k-th plaintext count with `p * q`.
-  A derived section gives Alice's output and the eleven laws one setting yields at one `k`,
-  and `idealized_setting` is a value of the record, at the idealized scheme over a
-  composite modulus and the uniform law on eight coordinates.
+  plaintext modulus at `k` as its two primes, and one `dsdp_random_inputs` per `k`,
+  which carries the sample space with its law, the eleven random inputs with each one
+  independent of the joint of the other ten, and the five uniform laws. The one link
+  field `card_plain` equates the k-th plaintext count with `p * q`. The file also holds
+  the two query records `dsdp_honest_query` and `dsdp_corrupted_query`, Alice's output
+  and each party's view at one setting and one `k`, the laws those fields imply, and
+  the values `uniform_inputs`, `idealized_setting` and `corrupted_setting` that show the
+  records inhabited.
 
-- **dsdp_main.v** — the headline theorems of both axes, each stated over one
-  `dsdp_setting` value and one security parameter, and proved over a cloned copy of its
-  source section context; supporting machinery stays in the axis files. The counting-axis
-  headlines are unconditional; the hopping headlines carry two IND-CPA advantage terms,
-  one at Bob's key and one at Charlie's.
+- **dsdp_security.v** holds `dsdp_admissible_predictor`, the trace predictor whose two
+  reduction adversaries the sequence's assumption admits, `dsdp_security`, the twenty-six
+  statements one setting proves, and `dsdp_securityP`, the value every setting has, whose
+  every field is an axis theorem applied to the projections of that setting. Everything
+  naming an adversary or stating a bound lives here, and everything that exists before an
+  adversary is named lives in `dsdp_setting.v`.
+
+- **dsdp_main.v** holds three values of `dsdp_setting` with their parameters fed, Paillier,
+  Benaloh at block size `p * q`, and the idealized scheme, and projects each of the
+  twenty-six fields at each of them as a corollary whose statement is written out at that
+  instance. Nothing is proved here.
 
 - **dsdp_main_ssprove.v** — rename-aside copy of the pre-deprecation SSProve development
   (games, IND-CPA hopping, simulator). Outside `_CoqProject`; kept for reference only.
