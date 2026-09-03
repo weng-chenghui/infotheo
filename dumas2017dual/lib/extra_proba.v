@@ -644,18 +644,6 @@ apply/fdist_ext => -[a b]; rewrite fdist_prodE !fdist_uniformE.
 by rewrite card_prod natrM invfM.
 Qed.
 
-(* The pushforward of a uniform along a bijection is uniform. *)
-Lemma fdistmap_bij_uniform (T1 T2 : finType) (n1 n2 : nat)
-    (c1 : #|T1| = n1.+1) (c2 : #|T2| = n2.+1) (g : T1 -> T2) :
-  bijective g ->
-  fdistmap g (fdist_uniform (R:=R) c1) = fdist_uniform c2.
-Proof.
-move=> bg; have [h ghK hgK] := bg; apply/fdist_ext => b.
-rewrite fdistmapE fdist_uniformE (big_pred1 (h b)); last first.
-  by move=> a; rewrite !inE /=; apply/eqP/eqP => [<-|->].
-by rewrite fdist_uniformE (bij_eq_card bg).
-Qed.
-
 (* The probability a bind assigns to an event: the mixture of the component
    probabilities. *)
 Lemma Pr_fdistbind (A B : finType) (m : R.-fdist A)
@@ -676,34 +664,6 @@ Proof.
 move=> He; rewrite !Pr_fdistbind -sumrB.
 apply: le_trans (ler_norm_sum _ _ _) _; apply: ler_sum => w _.
 by rewrite -mulrBr normrM ger0_norm //; exact: ler_wpM2l (He w).
-Qed.
-
-(* The pushforward of a uniform distribution along a map with equal fiber
-   cardinalities over its image is the uniform distribution on the image. *)
-Lemma fdistmap_uniform_supp_img (T U : finType) (n : nat)
-    (cardT : #|T| = n.+1) (f : T -> U)
-    (Himg : (0 < #|f @: [set: T]|)%N)
-    (Hfib : forall u u', u \in f @: [set: T] -> u' \in f @: [set: T] ->
-        #|[set t | f t == u]| = #|[set t | f t == u']|) :
-  fdistmap f (fdist_uniform (R:=R) cardT) = fdist_uniform_supp R Himg.
-Proof.
-apply/fdist_ext => u; rewrite fdistmapE.
-case/boolP : (u \in f @: [set: T]) => Hu; last first.
-  rewrite fdist_uniform_supp_notin // big_pred0 // => t.
-  by apply/negbTE; apply: contra Hu => /eqP <-; exact: imset_f.
-rewrite fdist_uniform_supp_in //.
-under eq_bigr do rewrite fdist_uniformE.
-rewrite sumr_const (_ : #|preim f (pred1 u)| = #|[set t | f t == u]|);
-  last by apply: eq_card => t; rewrite !inE.
-have Hpart : #|T| = (#|f @: [set: T]| * #|[set t | f t == u]|)%N.
-  rewrite -[LHS]sum1_card (partition_big_imset f) /= -sum_nat_const.
-  have -> : [set f x | x : T] = f @: [set: T].
-    by apply/setP => y; apply/imsetP/imsetP => -[t _ ->]; exists t;
-       rewrite ?inE.
-  by apply: eq_bigr => j Hj; rewrite sum1dep_card; exact: (Hfib _ _ Hj Hu).
-rewrite -[LHS]mulr_natr Hpart natrM invfM -mulrA mulVf ?mulr1 //.
-rewrite pnatr_eq0 -lt0n.
-by case/imsetP : Hu => r _ ->; apply/card_gt0P; exists r; rewrite inE.
 Qed.
 
 End fdist_glue.

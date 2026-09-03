@@ -1652,7 +1652,7 @@ Proof. by rewrite card_gt0 imset_eq0 -card_gt0 cardsT card_renc. Qed.
    of v under pk.  It is a property of the scheme's encryption map, standing on
    its own beside the hop correspondences.
    Naming: [img] marks the image the uniformity ranges over, after
-   [fdistmap_uniform_supp_img] of extra_proba.v. *)
+   [fdistmap_uniform_supp_img] of fdist_extra.v. *)
 Definition enc_fdist_uniform_img (pk : pub_key AHE) (v : plain AHE) : Prop :=
   enc_fdist card_renc rand_of_renc pk v
   = fdist_uniform_supp R (card_enc_img_gt0 pk v).

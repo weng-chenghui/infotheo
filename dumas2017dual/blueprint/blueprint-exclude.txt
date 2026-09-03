@@ -157,7 +157,6 @@ extra_proba:cond_prob_zero_outside_constraint
 extra_proba:cpr_eq_drop_indep
 extra_proba:fdist_prod_bindE
 extra_proba:fdist_uniform_prod
-extra_proba:fdistmap_bij_uniform
 extra_proba:inde_const_RV
 extra_proba:jfdist_cond_cPr_eq
 extra_proba:jproduct_ruleRV

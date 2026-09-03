@@ -23,12 +23,6 @@ Require Import fdist fdist_extra.
 (*              dirac_comp == dirac (g \o f) is stoch_comp (dirac g)          *)
 (*                            (dirac f)                                       *)
 (* stoch_comp_dirac_fdistmap == stoch_comp (dirac g) f a is fdistmap g (f a)  *)
-(*             eq_fdistmap == fdistmap is congruent in a pointwise-equal      *)
-(*                            transported map                                 *)
-(*            fdistmap_cst == the transport of a law along a constant map     *)
-(*                            with value b is fdist1 b                        *)
-(*         eq_fdistmap_cst == the transport of a law along a map pointwise    *)
-(*                            equal to a constant b is fdist1 b               *)
 (*              tensor p q == the product distribution of p and q on A * B    *)
 (*                 tensorE == tensor p q (a, b) is p a * q b                  *)
 (*           tensor_fdist1 == tensor (fdist1 a) q is the transport of q       *)
@@ -100,29 +94,6 @@ Proof. by move=> a; rewrite /stoch_comp /dirac fdist1bind. Qed.
 Lemma stoch_comp_dirac_fdistmap (A B C : finType) (g : B -> C) (f : stoch A B) :
   stoch_comp (dirac g) f =1 fun a => fdistmap g (f a).
 Proof. by move=> a; rewrite /stoch_comp /dirac /fdistmap. Qed.
-
-(* Pointwise equal maps transport a law to the same law. *)
-Lemma eq_fdistmap (A B : finType) (g h : A -> B) (p : R.-fdist A) :
-  g =1 h -> fdistmap g p = fdistmap h p.
-Proof.
-move=> gh; apply/fdist_ext => b; rewrite !fdistmapE.
-by apply: eq_bigl => a; rewrite !inE gh.
-Qed.
-
-(* The transport of a law along a constant map with value b is the point mass
-   at b. *)
-Lemma fdistmap_cst (A B : finType) (p : R.-fdist A) (b : B) :
-  fdistmap (fun=> b) p = fdist1 b.
-Proof.
-apply/fdist_ext => b'.
-by rewrite /fdistmap fdistbindE -big_distrl/= FDist.f1 mul1r.
-Qed.
-
-(* The transport of a law along a map pointwise equal to the constant b is the
-   point mass at b. *)
-Lemma eq_fdistmap_cst (A B : finType) (g : A -> B) (p : R.-fdist A) (b : B) :
-  g =1 (fun=> b) -> fdistmap g p = fdist1 b.
-Proof. by move=> gb; rewrite -(fdistmap_cst p b); apply: eq_fdistmap. Qed.
 
 (* def:smc:tensor *)
 (* The tensor of two laws is their product distribution on the product type. *)
