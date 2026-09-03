@@ -108,8 +108,6 @@ Set Implicit Arguments.
 Unset Strict Implicit.
 Import Prenex Implicits.
 
-Set Bullet Behavior "Strict Subproofs".
-Set Default Goal Selector "!".
 Set Primitive Projections.
 
 Import GRing.Theory Num.Theory Order.POrderTheory.
@@ -123,7 +121,6 @@ Local Open Scope entropy_scope.
 (* =================================================================          *)
 
 Section paillier_dsdp.
-Local Set Default Goal Selector "1".
 Local Open Scope reals_ext_scope.
 Context {R : realType}.
 Local Notation Paillier_AHEnc := paillier_fdist_instance.Paillier_AHEnc.
@@ -514,7 +511,6 @@ End paillier_dsdp.
 (* =================================================================          *)
 
 Section benaloh_dsdp.
-Local Set Default Goal Selector "1".
 Local Open Scope reals_ext_scope.
 Context {R : realType}.
 
@@ -907,7 +903,6 @@ End benaloh_dsdp.
 (* =================================================================          *)
 
 Section idealized_dsdp.
-Local Set Default Goal Selector "1".
 Local Open Scope reals_ext_scope.
 Context {R : realType}.
 

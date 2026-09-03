@@ -181,8 +181,6 @@ Set Implicit Arguments.
 Unset Strict Implicit.
 Import Prenex Implicits.
 
-Set Bullet Behavior "Strict Subproofs".
-Set Default Goal Selector "!".
 Set Primitive Projections.
 
 Import GRing.Theory Num.Theory Order.POrderTheory.
@@ -319,7 +317,6 @@ Record dsdp_setting (R : realType) := {
 (* =================================================================          *)
 
 Section dsdp_query_records.
-Local Set Default Goal Selector "1".
 Context {R : realType}.
 
 (* The condition on Alice's query weights at k under which her conditional
@@ -352,7 +349,6 @@ End dsdp_query_records.
 (* =================================================================          *)
 
 Section dsdp_setting_laws.
-Local Set Default Goal Selector "1".
 Local Open Scope reals_ext_scope.
 Context {R : realType}.
 Variable X : dsdp_setting R.
@@ -781,7 +777,6 @@ End dsdp_counting_views.
    the honest query asks for a weight invertible at every sample, so no
    setting whose weights are sampled satisfies either query record. *)
 Section dsdp_inputs_uniform.
-Local Set Default Goal Selector "1".
 Local Open Scope vec_ext_scope.
 Context {R : realType}.
 Local Unset Implicit Arguments.
@@ -1116,7 +1111,6 @@ End dsdp_inputs_uniform.
    idealized_instance_sequence of dsdp_instance_sequence.v; prime_minus2K and
    val_Zp_pq1 are general facts and keep their bare names. *)
 Section dsdp_setting_witness.
-Local Set Default Goal Selector "1".
 Context {R : realType}.
 
 (* Every k-indexed declaration below is meant to be applied to its security

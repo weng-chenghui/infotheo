@@ -134,8 +134,6 @@ Set Implicit Arguments.
 Unset Strict Implicit.
 Import Prenex Implicits.
 
-Set Bullet Behavior "Strict Subproofs".
-Set Default Goal Selector "!".
 Set Primitive Projections.
 
 Import GRing.Theory Num.Theory Order.POrderTheory.
@@ -267,7 +265,6 @@ Record dsdp_admissible_predictor (R : realType) (X : dsdp_setting R)
 (* =================================================================          *)
 
 Section dsdp_security_record.
-Local Set Default Goal Selector "1".
 Local Open Scope reals_ext_scope.
 Context {R : realType}.
 
@@ -539,7 +536,6 @@ End dsdp_security_record.
    to the axes and only fixes the setting they are read at.  Thirteen of the
    citations are qualified, the field having taken the short name. *)
 Section dsdp_securityP.
-Local Set Default Goal Selector "1".
 Local Open Scope reals_ext_scope.
 Context {R : realType}.
 Variable X : dsdp_setting R.
@@ -917,7 +913,6 @@ End dsdp_securityP.
    predictor induces is admitted by no assumption promising a small epsilon,
    so no value of dsdp_admissible_predictor exists at that predictor. *)
 Section dsdp_security_idealized.
-Local Set Default Goal Selector "1".
 Context {R : realType}.
 
 Local Notation IS := (idealized_setting : dsdp_setting R).
