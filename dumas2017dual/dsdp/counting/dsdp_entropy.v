@@ -325,10 +325,10 @@ Qed.
 
 (* Conditioned on Alice's inputs and the output (V1, U1, U2, U3, S), the relay
    private inputs (V2, V3) retain log m bits of uncertainty.  Same statement
-   and same hypotheses as dsdp_centropy_uniform of dsdp_main.v, reached by a
-   different route: here the conditional entropy is expanded into its
-   per-point sum and each term is closed by dsdp_centropy1_uniform, where the
-   dsdp_main.v proof instead factors through the generic fiber argument of
+   and same hypotheses as dsdp_centropy_uniform below, reached by a different
+   route: here the conditional entropy is expanded into its per-point sum and
+   each term is closed by dsdp_centropy1_uniform, where dsdp_centropy_uniform
+   instead factors through the generic fiber argument of
    centropy_jcond_determined_fibers.  The bound therefore has two independent
    derivations, one counting solutions point by point and one quotienting by
    the fibers of dsdp_g.  [3-party] *)
@@ -357,6 +357,44 @@ transitivity (\sum_(a : msg * msg * msg * msg * msg)
   by rewrite (dsdp_centropy1_uniform Hu3_pos Hu3_lt Hcond_pos).
 under eq_bigr do rewrite mulrC.
 by rewrite -big_distrr /= sum_pfwd1 mulr1.
+Qed.
+
+(* Conditioning on Alice's inputs and the output (V1, U1, U2, U3, S), the
+   plaintext part of her observation, the relay private inputs (V2, V3)
+   retain log m bits of uncertainty.  This is the fiber derivation of the
+   bound dsdp_centropy_uniform_direct reaches by summing point by point: S is
+   a function of (V2, V3) and the inputs through dsdp_g, so
+   centropy_jcond_determined_fibers quotients the conditional entropy by the
+   fibers of that function, and dsdp_fiber_card supplies the m solutions each
+   fiber holds.  The counting axis prices plaintexts; Alice's key, her masks
+   and the ciphertext hops are priced on the hopping axis.  [3-party] *)
+Theorem dsdp_centropy_uniform :
+  (forall t, (0 < U3 t)%N) ->
+  (forall t, (U3 t < minn p q)%N) ->
+  `H(VarRV | CondRV) = log (m%:R : R).
+Proof.
+move=> HU3_pos HU3_lt.
+have Hm_pos : (0 < m)%N by rewrite muln_gt0 prime_gt0 // prime_gt0.
+apply: (@centropy_jcond_determined_fibers R T P
+          (msg * msg)%type (msg * msg * msg * msg)%type msg
+          VarRV InputRV S dsdp_g S_determined _ m _ Hm_pos).
+  move=> [[[v1 u1] u2] u3] s [v2 v3] /= Hcond_pos Hin.
+  move/pfwd1_neq0: (Hcond_pos) => [t [Ht _]].
+  move: Ht; rewrite inE => /eqP Ht.
+  have HU3t : U3 t = u3 by case: Ht => _ _ _ ->.
+  have Hu3_pos : (0 < u3)%N by rewrite -HU3t; apply: HU3_pos.
+  have Hu3_lt : (u3 < minn p q)%N by rewrite -HU3t; apply: HU3_lt.
+  rewrite -dsdp_fiber_eq_abstract in Hin *.
+  rewrite (dsdp_fiber_card u1 u2 v1 s Hu3_pos Hu3_lt).
+  exact: (Pr_dsdp_sol_uniform Hu3_pos Hu3_lt Hcond_pos Hin).
+move=> [[[v1 u1] u2] u3] s Hcond_pos.
+rewrite -dsdp_fiber_eq_abstract.
+move/pfwd1_neq0: (Hcond_pos) => [t [Ht _]].
+move: Ht; rewrite inE => /eqP Ht.
+have HU3t : U3 t = u3 by case: Ht => _ _ _ ->.
+apply: dsdp_fiber_card.
+  by rewrite -HU3t; apply: HU3_pos.
+by rewrite -HU3t; apply: HU3_lt.
 Qed.
 
 Section dsdp_var_entropy.
@@ -691,6 +729,44 @@ Qed.
 (* Extract relay coefficient vector from condition tuple *)
 Let u_of_cond (c : CondT_n) : {ffun 'I_n_relay.+1 -> msg} :=
   let '(_, _, u_rel, _) := c in u_rel.
+
+(* The final relay's weight, read off the conditioning tuple.  The two
+   hypotheses of dsdp_centropy_uniform_n pin it strictly between zero and
+   min(p, q), which makes it invertible modulo m, and that invertibility is
+   what leaves the relay inputs uniform given the view. *)
+Definition last_relay_weight (c : CondT_n) : msg :=
+  (let '(_, _, u_rel, _) := c in u_rel) ord_max.
+
+(* Conditioning on the N-party view (Alice's input and weight, the relay
+   weight vector, and the output), the n_relay + 1 relay private inputs
+   retain log (m ^ n_relay) bits of uncertainty: the output spends exactly
+   one coordinate's worth of their joint entropy, whatever the number of
+   relays.  The 3-party dsdp_centropy_uniform is the same accounting at
+   n_relay = 1.  [N-party] *)
+Theorem dsdp_centropy_uniform_n :
+  (forall t, (0 < val (last_relay_weight (CondRV t)))%N) ->
+  (forall t, (val (last_relay_weight (CondRV t)) < minn p q)%N) ->
+  `H(VarRV | CondRV) = log ((m ^ n_relay)%:R : R).
+Proof.
+move=> HU_pos HU_lt.
+rewrite centropy_RVE' /=.
+transitivity (\sum_(a : CondT_n)
+               `Pr[ CondRV = a ] * log ((m ^ n_relay)%:R : R)).
+  apply: eq_bigr => [] [[[v0 u0] u_rel] s] _.
+  have [->|Hcond_pos] := eqVneq (`Pr[CondRV = (v0, u0, u_rel, s)]) 0.
+    by rewrite !mul0r.
+  have Hu_pos : (0 < val (u_rel ord_max))%N.
+    move/pfwd1_neq0: Hcond_pos => [t [Ht _]].
+    move: Ht; rewrite inE => /eqP Ht.
+    by have := HU_pos t; rewrite Ht.
+  have Hu_lt : (val (u_rel ord_max) < minn p q)%N.
+    move/pfwd1_neq0: Hcond_pos => [t [Ht _]].
+    move: Ht; rewrite inE => /eqP Ht.
+    by have := HU_lt t; rewrite Ht.
+  by rewrite (dsdp_centropy1_uniform_n Hu_pos Hu_lt Hcond_pos).
+under eq_bigr do rewrite mulrC.
+by rewrite -big_distrr /= sum_pfwd1 mulr1.
+Qed.
 
 End dsdp_entropy_n.
 

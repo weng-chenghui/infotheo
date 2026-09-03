@@ -147,6 +147,7 @@ dumas2017dual/dsdp/hopping/dsdp_alice_hop_secrecy.v
 dumas2017dual/dsdp/hopping/dsdp_alice_trace_link.v
 dumas2017dual/dsdp/hopping/dsdp_instance_sequence.v
 dumas2017dual/dsdp/counting/dsdp_malicious_dotp.v
+dumas2017dual/dsdp/counting/dsdp_relay_secrecy.v
 dumas2017dual/dsdp/dsdp_setting.v
 dumas2017dual/dsdp/dsdp_main.v
 
