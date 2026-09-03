@@ -17,7 +17,7 @@
    so the two summands stay distinguishable.
 
    Every 3-party theorem and every hopping theorem below is stated over one
-   value X of dsdp_security and one security parameter k: the counting
+   value X of dsdp_setting and one security parameter k: the counting
    sections read the sample space, the eleven random inputs and the two
    prime factors of the plaintext modulus off X at k, and the hopping
    sections run at the k-th instance of X's sequence. What stays a
@@ -128,7 +128,7 @@ Require Import dsdp_malicious_dotp.
 Require Import indcpa_game.
 Require Import dsdp_alice_hop_secrecy dsdp_alice_trace_link.
 Require Import dsdp_instance_sequence.
-Require Import dsdp_security.
+Require Import dsdp_setting.
 Require Import paillier_indcpa_scheme benaloh_indcpa_scheme.
 
 Set Implicit Arguments.
@@ -155,7 +155,7 @@ Local Open Scope proba_scope.
 Local Open Scope fdist_scope.
 Local Open Scope entropy_scope.
 Context {R : realType}.
-Variable X : dsdp_security R.
+Variable X : dsdp_setting R.
 Variable k : nat.
 Let p_minus_2 := p_minus_2 X k.
 Let q_minus_2 := q_minus_2 X k.
@@ -390,7 +390,7 @@ Local Open Scope proba_scope.
 Local Open Scope fdist_scope.
 Local Open Scope entropy_scope.
 Context {R : realType}.
-Variable X : dsdp_security R.
+Variable X : dsdp_setting R.
 Variable k : nat.
 Let T := sampleT X k.
 Let P := sample_fdist X k.
@@ -493,7 +493,7 @@ Local Open Scope fdist_scope.
 Local Open Scope entropy_scope.
 Local Open Scope ring_scope.
 Context {R : realType}.
-Variable X : dsdp_security R.
+Variable X : dsdp_setting R.
 Variable k : nat.
 Let T := sampleT X k.
 Let P := sample_fdist X k.
@@ -757,7 +757,7 @@ Local Open Scope fdist_scope.
 Local Open Scope entropy_scope.
 Local Open Scope ring_scope.
 Context {R : realType}.
-Variable X : dsdp_security R.
+Variable X : dsdp_setting R.
 Variable k : nat.
 (* The instance whose scheme, weights and keys the hop ladder runs at. *)
 Local Notation S := (sequence_instance (instance_sequence X) k).
@@ -1016,7 +1016,7 @@ Local Open Scope fdist_scope.
 Local Open Scope entropy_scope.
 Local Open Scope ring_scope.
 Context {R : realType}.
-Variable X : dsdp_security R.
+Variable X : dsdp_setting R.
 Variable k : nat.
 (* The instance whose keys and hop coins the executed trace carries. *)
 Local Notation S := (sequence_instance (instance_sequence X) k).
@@ -1346,7 +1346,7 @@ Local Open Scope fdist_scope.
 Local Open Scope entropy_scope.
 Local Open Scope ring_scope.
 Context {R : realType}.
-Variable X : dsdp_security R.
+Variable X : dsdp_setting R.
 Variable k : nat.
 (* The instance the three conditioning readings below are taken at. *)
 Local Notation S := (sequence_instance (instance_sequence X) k).
@@ -1442,7 +1442,7 @@ Local Open Scope fdist_scope.
 Local Open Scope entropy_scope.
 Local Open Scope ring_scope.
 Context {R : realType}.
-Variable X : dsdp_security R.
+Variable X : dsdp_setting R.
 Variable k : nat.
 (* The instance whose plaintext count the equation below writes as p * q. *)
 Local Notation S := (sequence_instance (instance_sequence X) k).
@@ -1567,7 +1567,7 @@ Local Open Scope fdist_scope.
 Local Open Scope entropy_scope.
 Local Open Scope ring_scope.
 Context {R : realType}.
-Variable X : dsdp_security R.
+Variable X : dsdp_setting R.
 Local Notation Q := (instance_sequence X).
 Local Notation I := (sequence_instance Q).
 Local Notation A := (sequence_assumption Q).

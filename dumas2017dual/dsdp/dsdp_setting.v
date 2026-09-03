@@ -14,8 +14,10 @@ Require Import dsdp_instance_sequence.
 (**md**************************************************************************)
 (* # The setting a DSDP security statement is made over                       *)
 (*                                                                            *)
-(* A value of dsdp_security R is a setting, not a proof: the data a 3-party   *)
-(* DSDP security statement is made over, at every security parameter at once. *)
+(* A value of dsdp_setting R is a setting, not a proof: the data a 3-party    *)
+(* DSDP security statement is made over, at every security parameter at once, *)
+(* with the security properties proved over it in the results file            *)
+(* dsdp_security.v.                                                           *)
 (* One sample space with one law per k, the eleven random inputs of a         *)
 (* 3-party run together with their independence and uniformity, the composite *)
 (* plaintext modulus held as two primes, and the sequence of IND-CPA scheme   *)
@@ -57,7 +59,7 @@ Require Import dsdp_instance_sequence.
 (* equality is exact at every fixed composite modulus.                        *)
 (*                                                                            *)
 (* ```                                                                        *)
-(*              dsdp_security == the data a 3-party DSDP security statement   *)
+(*               dsdp_setting == the data a 3-party DSDP security statement   *)
 (*                               is made over, at every security parameter    *)
 (*          instance_sequence == the sequence of IND-CPA scheme instances the *)
 (*                               hopping bounds are stated at                 *)
@@ -95,7 +97,7 @@ Require Import dsdp_instance_sequence.
 (* Dk_c_V3_indep_V2_E_charlie_d3 ==                                           *)
 (*                               Charlie's key and input are independent of   *)
 (*                               Bob's input with the aggregate ciphertext    *)
-(*         idealized_security == the value of dsdp_security the two sides     *)
+(*          idealized_setting == the value of dsdp_setting the two sides      *)
 (*                               below make together                          *)
 (*   idealized_p, idealized_q == the two prime factors of the witness         *)
 (*                               plaintext modulus at k                       *)
@@ -184,7 +186,7 @@ Set Strict Implicit.
    here and as values inside instance_sequence.
    The adversary and its class premises, Alice's query in both its honest and
    its corrupted form, and the output stay outside. *)
-Record dsdp_security (R : realType) := {
+Record dsdp_setting (R : realType) := {
   (* The sequence of scheme instances the hopping bounds are stated at,
      carrying the only computational hypothesis in the record; every other
      field is information-theoretic. *)
@@ -299,11 +301,11 @@ Unset Strict Implicit.
 (* The laws of one setting at one security parameter                          *)
 (* =================================================================          *)
 
-Section dsdp_security_laws.
+Section dsdp_setting_laws.
 Local Set Default Goal Selector "1".
 Local Open Scope reals_ext_scope.
 Context {R : realType}.
-Variable X : dsdp_security R.
+Variable X : dsdp_setting R.
 Variable k : nat.
 
 Local Notation p_minus_2 := (p_minus_2 X k).
@@ -558,7 +560,7 @@ have h := inde_RV_comp (fun w : rest10 => (w.2, w.1.1.1.1.1.1.1.1.2)) idfun
 by rewrite /comp_RV /= in h *.
 Qed.
 
-End dsdp_security_laws.
+End dsdp_setting_laws.
 
 (* Every declaration above has a discharged type that unfolds to a product
    whose binder mentions the setting and the security parameter: a random
@@ -597,7 +599,7 @@ Arguments Dk_c_V3_indep_V2_E_charlie_d3 {R} X k.
    on the two that would otherwise collide with idealized_instance and
    idealized_instance_sequence of dsdp_instance_sequence.v; prime_minus2K is
    a general fact about primes and keeps its bare name. *)
-Section dsdp_security_witness.
+Section dsdp_setting_witness.
 Local Set Default Goal Selector "1".
 Local Open Scope vec_ext_scope.
 Context {R : realType}.
@@ -1085,12 +1087,12 @@ Lemma idealized_pR3_unif (k : nat) :
 Proof. by have [_ _ unif] := idealized_split k (ord8 7). Qed.
 
 (* The setting the two sides make together, and the answer to whether
-   dsdp_security has any value at all: the composite-modulus idealized
+   dsdp_setting has any value at all: the composite-modulus idealized
    sequence on the hopping side, the uniform eight-coordinate law on the
    counting side, and card_plain joining them.  It is named for its hopping
    side, after idealized_instance_sequence of dsdp_instance_sequence.v, which
    it repeats at a plaintext ring the counting side can also be carried on. *)
-Definition idealized_security : dsdp_security R := {|
+Definition idealized_setting : dsdp_setting R := {|
   instance_sequence := idealized_pq_sequence ;
   p_minus_2 := idealized_p_minus_2 ;
   q_minus_2 := idealized_q_minus_2 ;
@@ -1128,4 +1130,4 @@ Definition idealized_security : dsdp_security R := {|
   pR2_unif := idealized_pR2_unif ;
   pR3_unif := idealized_pR3_unif |}.
 
-End dsdp_security_witness.
+End dsdp_setting_witness.

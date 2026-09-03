@@ -29,17 +29,17 @@ basename and resolve by suffix.
   `dsdp_entropy_trace` (trace-based entropy), `dsdp_malicious_dotp` (degenerate dot-product
   queries and their leakage).
 
-- **dsdp_security.v** holds `dsdp_security`, the data a 3-party DSDP security statement
+- **dsdp_setting.v** holds `dsdp_setting`, the data a 3-party DSDP security statement
   is made over at every security parameter: the hopping axis's instance sequence, the
   plaintext modulus at `k` as its two primes, the sample space and its law, the eleven
   random inputs with each one independent of the joint of the other ten, the five uniform
   laws, and the one link field `card_plain` equating the k-th plaintext count with `p * q`.
   A derived section gives Alice's output and the eleven laws one setting yields at one `k`,
-  and `idealized_security` is a value of the record, at the idealized scheme over a
+  and `idealized_setting` is a value of the record, at the idealized scheme over a
   composite modulus and the uniform law on eight coordinates.
 
 - **dsdp_main.v** — the headline theorems of both axes, each stated over one
-  `dsdp_security` value and one security parameter, and proved over a cloned copy of its
+  `dsdp_setting` value and one security parameter, and proved over a cloned copy of its
   source section context; supporting machinery stays in the axis files. The counting-axis
   headlines are unconditional; the hopping headlines carry two IND-CPA advantage terms,
   one at Bob's key and one at Charlie's.
