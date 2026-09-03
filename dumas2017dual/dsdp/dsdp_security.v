@@ -95,6 +95,57 @@ Require Import dsdp_instance_sequence.
 (* Dk_c_V3_indep_V2_E_charlie_d3 ==                                           *)
 (*                               Charlie's key and input are independent of   *)
 (*                               Bob's input with the aggregate ciphertext    *)
+(*         idealized_security == the value of dsdp_security the two sides     *)
+(*                               below make together                          *)
+(*   idealized_p, idealized_q == the two prime factors of the witness         *)
+(*                               plaintext modulus at k                       *)
+(* idealized_p_gt, idealized_q_gt ==                                          *)
+(*                               the smaller factor exceeds (k+2)^(k+2), the  *)
+(*                               larger exceeds it                            *)
+(*              prime_minus2K == a prime in the successor-of-successor form   *)
+(*                               the modulus fields take                      *)
+(* idealized_p_minus_2, idealized_q_minus_2 ==                                *)
+(*                               those two primes as the record's two modulus *)
+(*                               fields                                       *)
+(* idealized_pE, idealized_qE == the round trip from a modulus field back to  *)
+(*                               its prime                                    *)
+(* idealized_prime_p, idealized_prime_q, idealized_coprime_pq ==              *)
+(*                               primality and coprimality of the witness     *)
+(*                               modulus                                      *)
+(*      idealized_pq_instance == the idealized scheme at the composite        *)
+(*                               modulus, as one DSDP instance                *)
+(*       idealized_card_plain == that instance's plaintext count is p * q     *)
+(*  idealized_size_negligible == its inverse plaintext cardinalities are a    *)
+(*                               negligible sequence                          *)
+(*      idealized_pq_sequence == the sequence of those instances under the    *)
+(*                               cipher-constant assumption                   *)
+(* idealized_card_msg, idealized_card_sample, idealized_card_rest ==          *)
+(*                               the counts of the plaintext ring, of the     *)
+(*                               sample and of seven coordinates              *)
+(* idealized_sampleT, idealized_sample_fdist ==                               *)
+(*                               eight coordinates of the plaintext ring,     *)
+(*                               drawn uniformly                              *)
+(*    idealized_sample_fdistE == that law as a product of eight uniform       *)
+(*                               coordinate laws                              *)
+(* idealized_coord, idealized_rest ==                                         *)
+(*                               the letter at one coordinate and the seven   *)
+(*                               others                                       *)
+(*            idealized_split == one coordinate against the seven others,     *)
+(*                               with both marginals uniform                  *)
+(* idealized_view, idealized_rest_view ==                                     *)
+(*                               the seven other coordinates as one view of   *)
+(*                               ten, independent of the pivot                *)
+(* idealized_V1 .. idealized_R3 ==                                            *)
+(*                               the eight plaintext inputs as the eight      *)
+(*                               coordinates                                  *)
+(* idealized_Dk_a, idealized_Dk_b, idealized_Dk_c ==                          *)
+(*                               the three private keys as constants          *)
+(* idealized_V1_indep .. idealized_Dk_c_indep ==                              *)
+(*                               the eleven each-against-the-rest facts at    *)
+(*                               that law                                     *)
+(* idealized_pV1_unif .. idealized_pR3_unif ==                                *)
+(*                               uniformity of the three plaintext inputs and *)
+(*                               the two masks                                *)
 (* ```                                                                        *)
 (*                                                                            *)
 (******************************************************************************)
@@ -530,3 +581,551 @@ Arguments bob_data_indep_charlie {R} X k.
 Arguments R2_indep_VU2_V2 {R} X k.
 Arguments R2_indep_VU2_VU3R_V2 {R} X k.
 Arguments Dk_c_V3_indep_V2_E_charlie_d3 {R} X k.
+
+(* =================================================================          *)
+(* An inhabitant                                                              *)
+(* =================================================================          *)
+
+(* The record is inhabited.  On this value the hopping side is the idealized
+   scheme of idealized_ahe.v under the cipher-constant assumption, whose
+   assumed advantage is zero at every k, so every hopping bound stated over
+   it is its unconditional 1/#|plain| term alone; the counting side is the
+   uniform law on eight coordinates of the plaintext ring, on which every
+   counting bound is exact at log (p k * q k).
+   Every declaration carries the idealized_ stem of the value it builds,
+   since the record's own projections hold the bare names, with idealized_pq_
+   on the two that would otherwise collide with idealized_instance and
+   idealized_instance_sequence of dsdp_instance_sequence.v; prime_minus2K is
+   a general fact about primes and keeps its bare name. *)
+Section dsdp_security_witness.
+Local Set Default Goal Selector "1".
+Local Open Scope vec_ext_scope.
+Context {R : realType}.
+
+(* A k-indexed random variable's type unfolds to a function type whose domain
+   mentions k, so under the file's ambient Set Implicit Arguments the index
+   would be inferred implicit and idealized_V1 k would not typecheck. *)
+Local Unset Implicit Arguments.
+
+(* The smaller prime factor of the plaintext modulus at k, taken above
+   (k+2)^(k+2) so that the modulus grows fast enough for the inverse
+   plaintext cardinality to be negligible. *)
+Definition idealized_p (k : nat) : nat := s2val (prime_above (k.+2 ^ k.+2)).
+
+(* The larger prime factor, taken above the smaller one, which is what makes
+   the two distinct and hence coprime. *)
+Definition idealized_q (k : nat) : nat := s2val (prime_above (idealized_p k)).
+
+Lemma idealized_p_prime k : prime (idealized_p k).
+Proof. exact: (s2valP' (prime_above (k.+2 ^ k.+2))). Qed.
+
+Lemma idealized_q_prime k : prime (idealized_q k).
+Proof. exact: (s2valP' (prime_above (idealized_p k))). Qed.
+
+(* The growth the size negligibility field is read off: the modulus at k
+   already exceeds (k+2)^(k+2) through its smaller factor. *)
+Lemma idealized_p_gt k : (k.+2 ^ k.+2 < idealized_p k)%N.
+Proof. exact: (s2valP (prime_above (k.+2 ^ k.+2))). Qed.
+
+(* The two factors are ordered, which is what tells them apart. *)
+Lemma idealized_q_gt k : (idealized_p k < idealized_q k)%N.
+Proof. exact: (s2valP (prime_above (idealized_p k))). Qed.
+
+(* A prime in the successor-of-successor form the record's two modulus fields
+   take, the round trip that lets a prime be supplied to a field holding a
+   predecessor. *)
+Lemma prime_minus2K (n : nat) : prime n -> n.-2.+2 = n.
+Proof.
+move=> pn; have n_gt1 : (1 < n)%N := prime_gt1 pn.
+have n_gt0 : (0 < n.-1)%N by rewrite ltn_predRL.
+by rewrite (prednK n_gt0) (prednK (ltnW n_gt1)).
+Qed.
+
+Definition idealized_p_minus_2 (k : nat) : nat := (idealized_p k).-2.
+Definition idealized_q_minus_2 (k : nat) : nat := (idealized_q k).-2.
+
+Lemma idealized_pE k : (idealized_p_minus_2 k).+2 = idealized_p k.
+Proof. exact/prime_minus2K/idealized_p_prime. Qed.
+
+Lemma idealized_qE k : (idealized_q_minus_2 k).+2 = idealized_q k.
+Proof. exact/prime_minus2K/idealized_q_prime. Qed.
+
+Lemma idealized_prime_p k : prime (idealized_p_minus_2 k).+2.
+Proof. by rewrite idealized_pE idealized_p_prime. Qed.
+
+Lemma idealized_prime_q k : prime (idealized_q_minus_2 k).+2.
+Proof. by rewrite idealized_qE idealized_q_prime. Qed.
+
+Lemma idealized_coprime_pq k :
+  coprime (idealized_p_minus_2 k).+2 (idealized_q_minus_2 k).+2.
+Proof.
+rewrite idealized_pE idealized_qE prime_coprime ?idealized_p_prime //.
+rewrite dvdn_prime2 ?idealized_p_prime ?idealized_q_prime //.
+by apply/negP => /eqP pq_eq; move: (idealized_q_gt k); rewrite pq_eq ltnn.
+Qed.
+
+Local Notation pq k :=
+  ((idealized_p_minus_2 k).+2 * (idealized_q_minus_2 k).+2)%N.
+Local Notation msg k :=
+  ('Z_((idealized_p_minus_2 k).+2 * (idealized_q_minus_2 k).+2)).
+
+(* The instance at k: the idealized scheme over the composite modulus, the
+   first three weights zero, Charlie's weight one, zero keys and the single
+   coin.  It is idealized_instance again at a plaintext ring the counting
+   axis can also be carried on, which is what lets one value fill both
+   sides. *)
+Definition idealized_pq_instance (k : nat) : dsdp_instance := {|
+  inst_scheme       := idealized_indcpa_scheme (msg k) ;
+  inst_v1 := 0 ; inst_u1 := 0 ; inst_u2 := 0 ; inst_u3 := 1 ;
+  inst_u3_unit      := GRing.unitr1 _ ;
+  inst_dk_a := 0 ; inst_dk_b := 0 ; inst_dk_c := 0 ;
+  inst_rb2 := ord0 ; inst_rc2 := ord0 |}.
+
+(* The one number the two axes share: the k-th plaintext space is counted by
+   the counting axis's composite modulus. *)
+Lemma idealized_card_plain (k : nat) :
+  #|plain (inst_AHE (idealized_pq_instance k))| = pq k.
+Proof. by rewrite card_ord Zp_cast. Qed.
+
+(* The unconditional currency of the sequence: its plaintext spaces grow at
+   least as (k+2)^(k+2), so their inverse cardinalities fall below every
+   inverse polynomial. *)
+Lemma idealized_size_negligible :
+  negligible_fun (fun k =>
+    (#|plain (inst_AHE (idealized_pq_instance k))|%:R : R)^-1).
+Proof.
+have -> : (fun k => (#|plain (inst_AHE (idealized_pq_instance k))|%:R : R)^-1)
+        = (fun k => ((pq k)%:R : R)^-1).
+  by apply/funext => k; rewrite idealized_card_plain.
+apply: negligible_fun_inv_ge_expnn => k.
+rewrite idealized_pE idealized_qE.
+apply: leq_trans (ltnW (idealized_p_gt k)) _.
+by rewrite leq_pmulr // prime_gt0 // idealized_q_prime.
+Qed.
+
+(* The sequence: the composite-modulus idealized instances, the
+   cipher-constant assumption at each k, and the two negligibility facts
+   discharged rather than assumed.  Its advantage currency is zero at every
+   k, which is what leaves each hopping bound along it with only its
+   information-theoretic term. *)
+Definition idealized_pq_sequence : dsdp_instance_sequence R := {|
+  sequence_instance := idealized_pq_instance ;
+  sequence_assumption := fun k =>
+    cipher_constant_assumption (inst_card_renc (idealized_pq_instance k))
+      (@inst_rand_of_renc (idealized_pq_instance k)) ;
+  sequence_size_negligible := idealized_size_negligible ;
+  sequence_adv_negligible := negligible_fun_cst0 |}.
+
+Local Notation ord8 j := (@Ordinal 8 j erefl).
+Local Notation ord7 j := (@Ordinal 7 j erefl).
+
+(* The plaintext count at k in the form fdist_uniform takes its argument. *)
+Definition idealized_card_msg (k : nat) : #|msg k| = pq k :=
+  card_Zp_pq (idealized_p_minus_2 k) (idealized_q_minus_2 k).
+
+(* The counts of the whole sample and of the seven coordinates other than a
+   pivot, the two the split below reads its uniform laws at. *)
+Lemma idealized_card_sample (k : nat) :
+  #|'rV[msg k]_8| = (((pq k) ^ 8).-1).+1.
+Proof. by rewrite card_mx mul1n (idealized_card_msg k) prednK. Qed.
+
+Lemma idealized_card_rest (k : nat) :
+  #|'rV[msg k]_7| = (((pq k) ^ 7).-1).+1.
+Proof. by rewrite card_mx mul1n (idealized_card_msg k) prednK. Qed.
+
+(* The counting sample space at k: eight coordinates of the plaintext ring
+   drawn uniformly, so that the record's each-input-against-the-other-ten
+   fields are the coordinate-against-the-rest decomposition of one uniform
+   row vector. *)
+Definition idealized_sampleT (k : nat) : finType := 'rV[msg k]_8.
+
+Definition idealized_sample_fdist (k : nat) :
+    R.-fdist (idealized_sampleT k) :=
+  fdist_uniform (idealized_card_sample k).
+
+Local Notation P k := (idealized_sample_fdist k).
+
+(* The sample law as the product of eight uniform coordinate laws: drawing
+   the vector and drawing the eight plaintexts independently are the same
+   experiment. *)
+Lemma idealized_sample_fdistE (k : nat) :
+  P k = (fdist_uniform (idealized_card_msg k) : R.-fdist (msg k)) `^ 8.
+Proof.
+exact: esym (fdist_rV_uniform (idealized_card_msg k)
+               (idealized_card_sample k)).
+Qed.
+
+(* The letter at coordinate i and the seven letters other than it, the two
+   statistics of the sample every field below is read through. *)
+Definition idealized_coord (k : nat) (i : 'I_8) : {RV (P k) -> msg k} :=
+  fun v => v ``_ i.
+
+Definition idealized_rest (k : nat) (i : 'I_8) :
+    {RV (P k) -> 'rV[msg k]_7} :=
+  rV_drop i.
+
+(* One coordinate against the seven others, with both marginals uniform.
+   The whole counting side of the record is this one fact at eight pivots. *)
+Lemma idealized_split (k : nat) (i : 'I_8) :
+  [/\ P k |= idealized_rest k i _|_ idealized_coord k i,
+      `p_ (idealized_rest k i) = fdist_uniform (idealized_card_rest k)
+    & `p_ (idealized_coord k i) = fdist_uniform (idealized_card_msg k)].
+Proof.
+have bij_split : bijective (fun t => (idealized_rest k i t,
+                                      idealized_coord k i t)).
+  exact: (rV_split_bij (msg k) i).
+exact: (uniform_bij_indep (idealized_card_rest k) (idealized_card_msg k)
+          bij_split).
+Qed.
+
+(* The ten-component view of the seven coordinates other than a pivot: the
+   seven plaintexts in increasing coordinate order, then the three constant
+   private keys.  Reshaping the seven-vector this way is what turns one
+   coordinate split into one each-against-the-rest field. *)
+Definition idealized_view (k : nat) (w : 'rV[msg k]_7) :=
+  (w ``_ (ord7 0), w ``_ (ord7 1), w ``_ (ord7 2), w ``_ (ord7 3),
+   w ``_ (ord7 4), w ``_ (ord7 5), w ``_ (ord7 6),
+   @KeyOf Alice Dec (msg k) 0, @KeyOf Bob Dec (msg k) 0,
+   @KeyOf Charlie Dec (msg k) 0).
+
+(* The ten-component view of the seven other coordinates stays independent of
+   the pivot, the single fact the eight coordinate fields below reshape. *)
+Lemma idealized_rest_view (k : nat) (i : 'I_8) :
+  P k |= (idealized_view k `o idealized_rest k i) _|_ idealized_coord k i.
+Proof.
+have [ind _ _] := idealized_split k i.
+exact: inde_RV_comp (idealized_view k) idfun ind.
+Qed.
+
+(* The eight plaintext inputs of a run at k are the eight coordinates, in the
+   order the record lists them. *)
+Definition idealized_V1 (k : nat) : {RV (P k) -> msg k} :=
+  idealized_coord k (ord8 0).
+
+Definition idealized_V2 (k : nat) : {RV (P k) -> msg k} :=
+  idealized_coord k (ord8 1).
+
+Definition idealized_V3 (k : nat) : {RV (P k) -> msg k} :=
+  idealized_coord k (ord8 2).
+
+Definition idealized_U1 (k : nat) : {RV (P k) -> msg k} :=
+  idealized_coord k (ord8 3).
+
+Definition idealized_U2 (k : nat) : {RV (P k) -> msg k} :=
+  idealized_coord k (ord8 4).
+
+Definition idealized_U3 (k : nat) : {RV (P k) -> msg k} :=
+  idealized_coord k (ord8 5).
+
+Definition idealized_R2 (k : nat) : {RV (P k) -> msg k} :=
+  idealized_coord k (ord8 6).
+
+Definition idealized_R3 (k : nat) : {RV (P k) -> msg k} :=
+  idealized_coord k (ord8 7).
+
+(* The three private keys are constants, which is the weakest way to fill the
+   three key fields: a constant is independent of everything, so no key
+   correlates with any input. *)
+Definition idealized_Dk_a (k : nat) :
+    {RV (P k) -> (Alice.-key Dec (msg k))} :=
+  fun _ => @KeyOf Alice Dec _ 0.
+
+Definition idealized_Dk_b (k : nat) :
+    {RV (P k) -> (Bob.-key Dec (msg k))} :=
+  fun _ => @KeyOf Bob Dec _ 0.
+
+Definition idealized_Dk_c (k : nat) :
+    {RV (P k) -> (Charlie.-key Dec (msg k))} :=
+  fun _ => @KeyOf Charlie Dec _ 0.
+
+Lemma idealized_V1_indep (k : nat) :
+  P k |=
+    [% idealized_V2 k, idealized_V3 k, idealized_U1 k, idealized_U2 k,
+       idealized_U3 k, idealized_R2 k, idealized_R3 k,
+       idealized_Dk_a k, idealized_Dk_b k, idealized_Dk_c k]
+  _|_ idealized_V1 k.
+Proof.
+have e0 : lift (ord8 0) (ord7 0) = ord8 1 by apply/val_inj.
+have e1 : lift (ord8 0) (ord7 1) = ord8 2 by apply/val_inj.
+have e2 : lift (ord8 0) (ord7 2) = ord8 3 by apply/val_inj.
+have e3 : lift (ord8 0) (ord7 3) = ord8 4 by apply/val_inj.
+have e4 : lift (ord8 0) (ord7 4) = ord8 5 by apply/val_inj.
+have e5 : lift (ord8 0) (ord7 5) = ord8 6 by apply/val_inj.
+have e6 : lift (ord8 0) (ord7 6) = ord8 7 by apply/val_inj.
+have -> :
+  [% idealized_V2 k, idealized_V3 k, idealized_U1 k, idealized_U2 k,
+     idealized_U3 k, idealized_R2 k, idealized_R3 k,
+     idealized_Dk_a k, idealized_Dk_b k, idealized_Dk_c k]
+  = idealized_view k `o idealized_rest k (ord8 0).
+  apply/funext => v.
+  by rewrite /comp_RV /idealized_view /idealized_rest /rV_drop !mxE
+    e0 e1 e2 e3 e4 e5 e6.
+exact: idealized_rest_view.
+Qed.
+
+Lemma idealized_V2_indep (k : nat) :
+  P k |=
+    [% idealized_V1 k, idealized_V3 k, idealized_U1 k, idealized_U2 k,
+       idealized_U3 k, idealized_R2 k, idealized_R3 k,
+       idealized_Dk_a k, idealized_Dk_b k, idealized_Dk_c k]
+  _|_ idealized_V2 k.
+Proof.
+have e0 : lift (ord8 1) (ord7 0) = ord8 0 by apply/val_inj.
+have e1 : lift (ord8 1) (ord7 1) = ord8 2 by apply/val_inj.
+have e2 : lift (ord8 1) (ord7 2) = ord8 3 by apply/val_inj.
+have e3 : lift (ord8 1) (ord7 3) = ord8 4 by apply/val_inj.
+have e4 : lift (ord8 1) (ord7 4) = ord8 5 by apply/val_inj.
+have e5 : lift (ord8 1) (ord7 5) = ord8 6 by apply/val_inj.
+have e6 : lift (ord8 1) (ord7 6) = ord8 7 by apply/val_inj.
+have -> :
+  [% idealized_V1 k, idealized_V3 k, idealized_U1 k, idealized_U2 k,
+     idealized_U3 k, idealized_R2 k, idealized_R3 k,
+     idealized_Dk_a k, idealized_Dk_b k, idealized_Dk_c k]
+  = idealized_view k `o idealized_rest k (ord8 1).
+  apply/funext => v.
+  by rewrite /comp_RV /idealized_view /idealized_rest /rV_drop !mxE
+    e0 e1 e2 e3 e4 e5 e6.
+exact: idealized_rest_view.
+Qed.
+
+Lemma idealized_V3_indep (k : nat) :
+  P k |=
+    [% idealized_V1 k, idealized_V2 k, idealized_U1 k, idealized_U2 k,
+       idealized_U3 k, idealized_R2 k, idealized_R3 k,
+       idealized_Dk_a k, idealized_Dk_b k, idealized_Dk_c k]
+  _|_ idealized_V3 k.
+Proof.
+have e0 : lift (ord8 2) (ord7 0) = ord8 0 by apply/val_inj.
+have e1 : lift (ord8 2) (ord7 1) = ord8 1 by apply/val_inj.
+have e2 : lift (ord8 2) (ord7 2) = ord8 3 by apply/val_inj.
+have e3 : lift (ord8 2) (ord7 3) = ord8 4 by apply/val_inj.
+have e4 : lift (ord8 2) (ord7 4) = ord8 5 by apply/val_inj.
+have e5 : lift (ord8 2) (ord7 5) = ord8 6 by apply/val_inj.
+have e6 : lift (ord8 2) (ord7 6) = ord8 7 by apply/val_inj.
+have -> :
+  [% idealized_V1 k, idealized_V2 k, idealized_U1 k, idealized_U2 k,
+     idealized_U3 k, idealized_R2 k, idealized_R3 k,
+     idealized_Dk_a k, idealized_Dk_b k, idealized_Dk_c k]
+  = idealized_view k `o idealized_rest k (ord8 2).
+  apply/funext => v.
+  by rewrite /comp_RV /idealized_view /idealized_rest /rV_drop !mxE
+    e0 e1 e2 e3 e4 e5 e6.
+exact: idealized_rest_view.
+Qed.
+
+Lemma idealized_U1_indep (k : nat) :
+  P k |=
+    [% idealized_V1 k, idealized_V2 k, idealized_V3 k, idealized_U2 k,
+       idealized_U3 k, idealized_R2 k, idealized_R3 k,
+       idealized_Dk_a k, idealized_Dk_b k, idealized_Dk_c k]
+  _|_ idealized_U1 k.
+Proof.
+have e0 : lift (ord8 3) (ord7 0) = ord8 0 by apply/val_inj.
+have e1 : lift (ord8 3) (ord7 1) = ord8 1 by apply/val_inj.
+have e2 : lift (ord8 3) (ord7 2) = ord8 2 by apply/val_inj.
+have e3 : lift (ord8 3) (ord7 3) = ord8 4 by apply/val_inj.
+have e4 : lift (ord8 3) (ord7 4) = ord8 5 by apply/val_inj.
+have e5 : lift (ord8 3) (ord7 5) = ord8 6 by apply/val_inj.
+have e6 : lift (ord8 3) (ord7 6) = ord8 7 by apply/val_inj.
+have -> :
+  [% idealized_V1 k, idealized_V2 k, idealized_V3 k, idealized_U2 k,
+     idealized_U3 k, idealized_R2 k, idealized_R3 k,
+     idealized_Dk_a k, idealized_Dk_b k, idealized_Dk_c k]
+  = idealized_view k `o idealized_rest k (ord8 3).
+  apply/funext => v.
+  by rewrite /comp_RV /idealized_view /idealized_rest /rV_drop !mxE
+    e0 e1 e2 e3 e4 e5 e6.
+exact: idealized_rest_view.
+Qed.
+
+Lemma idealized_U2_indep (k : nat) :
+  P k |=
+    [% idealized_V1 k, idealized_V2 k, idealized_V3 k, idealized_U1 k,
+       idealized_U3 k, idealized_R2 k, idealized_R3 k,
+       idealized_Dk_a k, idealized_Dk_b k, idealized_Dk_c k]
+  _|_ idealized_U2 k.
+Proof.
+have e0 : lift (ord8 4) (ord7 0) = ord8 0 by apply/val_inj.
+have e1 : lift (ord8 4) (ord7 1) = ord8 1 by apply/val_inj.
+have e2 : lift (ord8 4) (ord7 2) = ord8 2 by apply/val_inj.
+have e3 : lift (ord8 4) (ord7 3) = ord8 3 by apply/val_inj.
+have e4 : lift (ord8 4) (ord7 4) = ord8 5 by apply/val_inj.
+have e5 : lift (ord8 4) (ord7 5) = ord8 6 by apply/val_inj.
+have e6 : lift (ord8 4) (ord7 6) = ord8 7 by apply/val_inj.
+have -> :
+  [% idealized_V1 k, idealized_V2 k, idealized_V3 k, idealized_U1 k,
+     idealized_U3 k, idealized_R2 k, idealized_R3 k,
+     idealized_Dk_a k, idealized_Dk_b k, idealized_Dk_c k]
+  = idealized_view k `o idealized_rest k (ord8 4).
+  apply/funext => v.
+  by rewrite /comp_RV /idealized_view /idealized_rest /rV_drop !mxE
+    e0 e1 e2 e3 e4 e5 e6.
+exact: idealized_rest_view.
+Qed.
+
+Lemma idealized_U3_indep (k : nat) :
+  P k |=
+    [% idealized_V1 k, idealized_V2 k, idealized_V3 k, idealized_U1 k,
+       idealized_U2 k, idealized_R2 k, idealized_R3 k,
+       idealized_Dk_a k, idealized_Dk_b k, idealized_Dk_c k]
+  _|_ idealized_U3 k.
+Proof.
+have e0 : lift (ord8 5) (ord7 0) = ord8 0 by apply/val_inj.
+have e1 : lift (ord8 5) (ord7 1) = ord8 1 by apply/val_inj.
+have e2 : lift (ord8 5) (ord7 2) = ord8 2 by apply/val_inj.
+have e3 : lift (ord8 5) (ord7 3) = ord8 3 by apply/val_inj.
+have e4 : lift (ord8 5) (ord7 4) = ord8 4 by apply/val_inj.
+have e5 : lift (ord8 5) (ord7 5) = ord8 6 by apply/val_inj.
+have e6 : lift (ord8 5) (ord7 6) = ord8 7 by apply/val_inj.
+have -> :
+  [% idealized_V1 k, idealized_V2 k, idealized_V3 k, idealized_U1 k,
+     idealized_U2 k, idealized_R2 k, idealized_R3 k,
+     idealized_Dk_a k, idealized_Dk_b k, idealized_Dk_c k]
+  = idealized_view k `o idealized_rest k (ord8 5).
+  apply/funext => v.
+  by rewrite /comp_RV /idealized_view /idealized_rest /rV_drop !mxE
+    e0 e1 e2 e3 e4 e5 e6.
+exact: idealized_rest_view.
+Qed.
+
+Lemma idealized_R2_indep (k : nat) :
+  P k |=
+    [% idealized_V1 k, idealized_V2 k, idealized_V3 k, idealized_U1 k,
+       idealized_U2 k, idealized_U3 k, idealized_R3 k,
+       idealized_Dk_a k, idealized_Dk_b k, idealized_Dk_c k]
+  _|_ idealized_R2 k.
+Proof.
+have e0 : lift (ord8 6) (ord7 0) = ord8 0 by apply/val_inj.
+have e1 : lift (ord8 6) (ord7 1) = ord8 1 by apply/val_inj.
+have e2 : lift (ord8 6) (ord7 2) = ord8 2 by apply/val_inj.
+have e3 : lift (ord8 6) (ord7 3) = ord8 3 by apply/val_inj.
+have e4 : lift (ord8 6) (ord7 4) = ord8 4 by apply/val_inj.
+have e5 : lift (ord8 6) (ord7 5) = ord8 5 by apply/val_inj.
+have e6 : lift (ord8 6) (ord7 6) = ord8 7 by apply/val_inj.
+have -> :
+  [% idealized_V1 k, idealized_V2 k, idealized_V3 k, idealized_U1 k,
+     idealized_U2 k, idealized_U3 k, idealized_R3 k,
+     idealized_Dk_a k, idealized_Dk_b k, idealized_Dk_c k]
+  = idealized_view k `o idealized_rest k (ord8 6).
+  apply/funext => v.
+  by rewrite /comp_RV /idealized_view /idealized_rest /rV_drop !mxE
+    e0 e1 e2 e3 e4 e5 e6.
+exact: idealized_rest_view.
+Qed.
+
+Lemma idealized_R3_indep (k : nat) :
+  P k |=
+    [% idealized_V1 k, idealized_V2 k, idealized_V3 k, idealized_U1 k,
+       idealized_U2 k, idealized_U3 k, idealized_R2 k,
+       idealized_Dk_a k, idealized_Dk_b k, idealized_Dk_c k]
+  _|_ idealized_R3 k.
+Proof.
+have e0 : lift (ord8 7) (ord7 0) = ord8 0 by apply/val_inj.
+have e1 : lift (ord8 7) (ord7 1) = ord8 1 by apply/val_inj.
+have e2 : lift (ord8 7) (ord7 2) = ord8 2 by apply/val_inj.
+have e3 : lift (ord8 7) (ord7 3) = ord8 3 by apply/val_inj.
+have e4 : lift (ord8 7) (ord7 4) = ord8 4 by apply/val_inj.
+have e5 : lift (ord8 7) (ord7 5) = ord8 5 by apply/val_inj.
+have e6 : lift (ord8 7) (ord7 6) = ord8 6 by apply/val_inj.
+have -> :
+  [% idealized_V1 k, idealized_V2 k, idealized_V3 k, idealized_U1 k,
+     idealized_U2 k, idealized_U3 k, idealized_R2 k,
+     idealized_Dk_a k, idealized_Dk_b k, idealized_Dk_c k]
+  = idealized_view k `o idealized_rest k (ord8 7).
+  apply/funext => v.
+  by rewrite /comp_RV /idealized_view /idealized_rest /rV_drop !mxE
+    e0 e1 e2 e3 e4 e5 e6.
+exact: idealized_rest_view.
+Qed.
+
+Lemma idealized_Dk_a_indep (k : nat) :
+  P k |=
+    [% idealized_V1 k, idealized_V2 k, idealized_V3 k, idealized_U1 k,
+       idealized_U2 k, idealized_U3 k, idealized_R2 k, idealized_R3 k,
+       idealized_Dk_b k, idealized_Dk_c k]
+  _|_ idealized_Dk_a k.
+Proof. by rewrite inde_RV_sym; exact: inde_const_RV. Qed.
+
+Lemma idealized_Dk_b_indep (k : nat) :
+  P k |=
+    [% idealized_V1 k, idealized_V2 k, idealized_V3 k, idealized_U1 k,
+       idealized_U2 k, idealized_U3 k, idealized_R2 k, idealized_R3 k,
+       idealized_Dk_a k, idealized_Dk_c k]
+  _|_ idealized_Dk_b k.
+Proof. by rewrite inde_RV_sym; exact: inde_const_RV. Qed.
+
+Lemma idealized_Dk_c_indep (k : nat) :
+  P k |=
+    [% idealized_V1 k, idealized_V2 k, idealized_V3 k, idealized_U1 k,
+       idealized_U2 k, idealized_U3 k, idealized_R2 k, idealized_R3 k,
+       idealized_Dk_a k, idealized_Dk_b k]
+  _|_ idealized_Dk_c k.
+Proof. by rewrite inde_RV_sym; exact: inde_const_RV. Qed.
+
+(* The three plaintext inputs and the two masks are uniform, each the third
+   component of its own coordinate split. *)
+Lemma idealized_pV1_unif (k : nat) :
+  `p_ (idealized_V1 k) = fdist_uniform (idealized_card_msg k).
+Proof. by have [_ _ unif] := idealized_split k (ord8 0). Qed.
+
+Lemma idealized_pV2_unif (k : nat) :
+  `p_ (idealized_V2 k) = fdist_uniform (idealized_card_msg k).
+Proof. by have [_ _ unif] := idealized_split k (ord8 1). Qed.
+
+Lemma idealized_pV3_unif (k : nat) :
+  `p_ (idealized_V3 k) = fdist_uniform (idealized_card_msg k).
+Proof. by have [_ _ unif] := idealized_split k (ord8 2). Qed.
+
+Lemma idealized_pR2_unif (k : nat) :
+  `p_ (idealized_R2 k) = fdist_uniform (idealized_card_msg k).
+Proof. by have [_ _ unif] := idealized_split k (ord8 6). Qed.
+
+Lemma idealized_pR3_unif (k : nat) :
+  `p_ (idealized_R3 k) = fdist_uniform (idealized_card_msg k).
+Proof. by have [_ _ unif] := idealized_split k (ord8 7). Qed.
+
+(* The setting the two sides make together, and the answer to whether
+   dsdp_security has any value at all: the composite-modulus idealized
+   sequence on the hopping side, the uniform eight-coordinate law on the
+   counting side, and card_plain joining them.  It is named for its hopping
+   side, after idealized_instance_sequence of dsdp_instance_sequence.v, which
+   it repeats at a plaintext ring the counting side can also be carried on. *)
+Definition idealized_security : dsdp_security R := {|
+  instance_sequence := idealized_pq_sequence ;
+  p_minus_2 := idealized_p_minus_2 ;
+  q_minus_2 := idealized_q_minus_2 ;
+  prime_p := idealized_prime_p ;
+  prime_q := idealized_prime_q ;
+  coprime_pq := idealized_coprime_pq ;
+  card_plain := idealized_card_plain ;
+  sampleT := idealized_sampleT ;
+  sample_fdist := idealized_sample_fdist ;
+  V1 := idealized_V1 ;
+  V2 := idealized_V2 ;
+  V3 := idealized_V3 ;
+  U1 := idealized_U1 ;
+  U2 := idealized_U2 ;
+  U3 := idealized_U3 ;
+  R2 := idealized_R2 ;
+  R3 := idealized_R3 ;
+  Dk_a := idealized_Dk_a ;
+  Dk_b := idealized_Dk_b ;
+  Dk_c := idealized_Dk_c ;
+  V1_indep := idealized_V1_indep ;
+  V2_indep := idealized_V2_indep ;
+  V3_indep := idealized_V3_indep ;
+  U1_indep := idealized_U1_indep ;
+  U2_indep := idealized_U2_indep ;
+  U3_indep := idealized_U3_indep ;
+  R2_indep := idealized_R2_indep ;
+  R3_indep := idealized_R3_indep ;
+  Dk_a_indep := idealized_Dk_a_indep ;
+  Dk_b_indep := idealized_Dk_b_indep ;
+  Dk_c_indep := idealized_Dk_c_indep ;
+  pV1_unif := idealized_pV1_unif ;
+  pV2_unif := idealized_pV2_unif ;
+  pV3_unif := idealized_pV3_unif ;
+  pR2_unif := idealized_pR2_unif ;
+  pR3_unif := idealized_pR3_unif |}.
+
+End dsdp_security_witness.
