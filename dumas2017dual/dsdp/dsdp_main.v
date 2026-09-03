@@ -16,13 +16,29 @@
    an information-theoretic term with an assumption-conditional one is written
    so the two summands stay distinguishable.
 
-   The hopping-axis headlines are stated over one dsdp_instance, a scheme
-   with its four weights, its three private keys and its two hop coins, or
-   over one dsdp_instance_sequence. What stays a hypothesis is the adversary
-   side and the arithmetic of the plaintext space: the two class premises on
-   the reduction adversaries a predictor induces, the IND-CPA assumption
-   record itself, the equation writing the plaintext count as a product
-   p * q, and, on the counting axis, that p and q are prime and coprime.
+   Every 3-party theorem and every hopping theorem below is stated over one
+   value X of dsdp_security and one security parameter k: the counting
+   sections read the sample space, the eleven random inputs and the two
+   prime factors of the plaintext modulus off X at k, and the hopping
+   sections run at the k-th instance of X's sequence. What stays a
+   hypothesis is the adversary side and Alice's query: the two class
+   premises on the reduction adversaries a predictor induces, the IND-CPA
+   assumption carried inside the record's sequence, the honest range
+   0 < U3 < min(p, q) of the entropy equality, and the corrupted choice
+   U2 = 1, U3 = 0 of the leakage theorem. On the counting axis nothing else
+   is assumed.
+
+   The record's each-against-the-rest fields reach Alice's three weights, so
+   the counting bounds stated over X hold in the honest-sampling setting,
+   where her weights are independent of her input and of one another; the
+   form assuming nothing about their joint law is
+   dsdp_centropy_uniform_direct at counting/dsdp_entropy.v:335. card_plain
+   together with the sequence's sequence_size_negligible forces p k * q k to
+   grow superpolynomially, so no value of the record carries a fixed
+   modulus, although each counting equality is exact at its own k. The two
+   axes share one cardinality and not one execution: card_plain equates two
+   counts, nothing identifies the two message spaces, and the weights and
+   the keys occur twice as unrelated objects.
 
    Information-theoretic (counting axis, unconditional)
      dsdp_centropy_uniform : H(V2,V3 | view) = log m  [3-party]
@@ -112,6 +128,7 @@ Require Import dsdp_malicious_dotp.
 Require Import indcpa_game.
 Require Import dsdp_alice_hop_secrecy dsdp_alice_trace_link.
 Require Import dsdp_instance_sequence.
+Require Import dsdp_security.
 Require Import paillier_indcpa_scheme benaloh_indcpa_scheme.
 
 Set Implicit Arguments.
@@ -138,35 +155,45 @@ Local Open Scope proba_scope.
 Local Open Scope fdist_scope.
 Local Open Scope entropy_scope.
 Context {R : realType}.
-Variables (p_minus_2 q_minus_2 : nat).
+Variable X : dsdp_security R.
+Variable k : nat.
+Let p_minus_2 := p_minus_2 X k.
+Let q_minus_2 := q_minus_2 X k.
 Local Notation p := p_minus_2.+2.
 Local Notation q := q_minus_2.+2.
-Hypothesis prime_p : prime p.
-Hypothesis prime_q : prime q.
-Hypothesis coprime_pq : coprime p q.
+Let prime_p : prime p := prime_p X k.
+Let prime_q : prime q := prime_q X k.
+Let coprime_pq : coprime p q := coprime_pq X k.
 Local Notation m := (p * q).
 Local Notation msg := 'Z_m.
 
-Variable T : finType.
-Variable P : R.-fdist T.
-Variables (V1 V2 V3 U1 U2 U3 S : {RV P -> msg}).
+Let T := sampleT X k.
+Let P := sample_fdist X k.
+Let V1 := V1 X k.
+Let V2 := V2 X k.
+Let V3 := V3 X k.
+Let U1 := U1 X k.
+Let U2 := U2 X k.
+Let U3 := U3 X k.
+Let S := output X k.
 Let CondRV : {RV P -> (msg * msg * msg * msg * msg)} :=
   [% V1, U1, U2, U3, S].
 Let VarRV : {RV P -> (msg * msg)} := [%V2, V3].
 
-Let card_msg : #|msg| = m.
-Proof. by rewrite card_ord Zp_cast. Qed.
+Let card_msg : #|msg| = m := card_Zp_pq p_minus_2 q_minus_2.
 
 (* Match the proof term baked into the staying lemmas' fdist_uniform argument so
    the cloned VarRV_uniform hypothesis unifies on application. *)
 Let card_msg_pair : #|((msg * msg)%type : finType)| = (m ^ 2)%N :=
   dsdp_entropy.card_msg_pair_subproof p_minus_2 q_minus_2.
 
-Hypothesis constraint_holds :
-  forall t, dsdp_constraint (CondRV t) (VarRV t).
+Let constraint_holds : forall t, dsdp_constraint (CondRV t) (VarRV t) :=
+  dsdp_constraint_holds X k.
 
-Hypothesis VarRV_uniform : `p_ VarRV = fdist_uniform card_msg_pair.
-Hypothesis VarRV_indep_inputs : P |= [%V1, U1, U2, U3] _|_ VarRV.
+Let VarRV_uniform : `p_ VarRV = fdist_uniform card_msg_pair :=
+  VarRV_uniform X k.
+Let VarRV_indep_inputs : P |= [%V1, U1, U2, U3] _|_ VarRV :=
+  VarRV_indep_inputs X k.
 
 Let InputRV : {RV P -> (msg * msg * msg * msg)} := [%V1, U1, U2, U3].
 
@@ -363,16 +390,26 @@ Local Open Scope proba_scope.
 Local Open Scope fdist_scope.
 Local Open Scope entropy_scope.
 Context {R : realType}.
-Variable T : finType.
-Variable P : R.-fdist T.
-Variables (p_minus_2 q_minus_2 : nat).
+Variable X : dsdp_security R.
+Variable k : nat.
+Let T := sampleT X k.
+Let P := sample_fdist X k.
+Let p_minus_2 := p_minus_2 X k.
+Let q_minus_2 := q_minus_2 X k.
 Local Notation p := p_minus_2.+2.
 Local Notation q := q_minus_2.+2.
 Local Notation m := (p * q).
 Local Notation msg := 'Z_m.
 
-Variables (V1 V2 V3 U1 U2 U3 R2 R3 : {RV P -> msg}).
-Variable Dk_a : {RV P -> Alice.-key Dec msg}.
+Let V1 := V1 X k.
+Let V2 := V2 X k.
+Let V3 := V3 X k.
+Let U1 := U1 X k.
+Let U2 := U2 X k.
+Let U3 := U3 X k.
+Let R2 := R2 X k.
+Let R3 := R3 X k.
+Let Dk_a := Dk_a X k.
 
 (* Bob's input under Alice's query weight U2 and her mask R2, the plaintext of
    her first combine. *)
@@ -456,20 +493,28 @@ Local Open Scope fdist_scope.
 Local Open Scope entropy_scope.
 Local Open Scope ring_scope.
 Context {R : realType}.
-Variable T : finType.
-Variable P : R.-fdist T.
-Variables (p_minus_2 q_minus_2 : nat).
+Variable X : dsdp_security R.
+Variable k : nat.
+Let T := sampleT X k.
+Let P := sample_fdist X k.
+Let p_minus_2 := p_minus_2 X k.
+Let q_minus_2 := q_minus_2 X k.
 Local Notation p := p_minus_2.+2.
 Local Notation q := q_minus_2.+2.
 Local Notation m := (p * q).
 Local Notation msg := 'Z_m.
 
-Let card_msg : #|msg| = m.
-Proof. by rewrite card_ord Zp_cast. Qed.
+Let card_msg : #|msg| = m := card_Zp_pq p_minus_2 q_minus_2.
 
-Variables (V1 V2 V3 U2 U3 R2 R3 : {RV P -> msg}).
-Variable Dk_b : {RV P -> Bob.-key Dec msg}.
-Variable Dk_c : {RV P -> Charlie.-key Dec msg}.
+Let V1 := V1 X k.
+Let V2 := V2 X k.
+Let V3 := V3 X k.
+Let U2 := U2 X k.
+Let U3 := U3 X k.
+Let R2 := R2 X k.
+Let R3 := R3 X k.
+Let Dk_b := Dk_b X k.
+Let Dk_c := Dk_c X k.
 
 (* Bob's input under Alice's query weight U2.  The weights U1, U2, U3 are
    Alice's, so this is the one place Bob's secret meets a factor he does not
@@ -519,9 +564,11 @@ Definition BobView := [% Dk_b, V2, E_charlie_vur3, E_bob_d2].
    ciphertext he receives from Bob. *)
 Definition CharlieView := [% Dk_c, V3, E_charlie_d3].
 
-Hypothesis pV1_unif : `p_ V1 = fdist_uniform card_msg.
-Hypothesis bob_inputs_indep_V1 : P |= [% Dk_b, V2, VU3R, D2] _|_ V1.
-Hypothesis charlie_inputs_indep_V1 : P |= [% Dk_c, V3, D3] _|_ V1.
+Let pV1_unif : `p_ V1 = fdist_uniform card_msg := pV1_unif X k.
+Let bob_inputs_indep_V1 : P |= [% Dk_b, V2, VU3R, D2] _|_ V1 :=
+  bob_inputs_indep_V1 X k.
+Let charlie_inputs_indep_V1 : P |= [% Dk_c, V3, D3] _|_ V1 :=
+  charlie_inputs_indep_V1 X k.
 
 Let bob_view_of (w : (((Bob.-key Dec msg * msg) * msg) * msg)%type) :=
   (((w.1.1.1, w.1.1.2), E' Charlie w.1.2), E' Bob w.2).
@@ -569,10 +616,11 @@ Qed.
 
 (* The Charlie-ciphertext Bob forwards carries plaintext V3 * U3 + R3, masked by
    Alice's fresh one-time pad R3, so Bob's full view is independent of V3. *)
-Hypothesis pV3_unif : `p_ V3 = fdist_uniform card_msg.
-Hypothesis pR3_unif : `p_ R3 = fdist_uniform card_msg.
-Hypothesis R3_indep_VU3_V3 : P |= R3 _|_ [% VU3, V3].
-Hypothesis bob_data_indep_charlie : P |= [% Dk_b, V2, D2] _|_ [% V3, VU3, R3].
+Let pV3_unif : `p_ V3 = fdist_uniform card_msg := pV3_unif X k.
+Let pR3_unif : `p_ R3 = fdist_uniform card_msg := pR3_unif X k.
+Let R3_indep_VU3_V3 : P |= R3 _|_ [% VU3, V3] := R3_indep_VU3_V3 X k.
+Let bob_data_indep_charlie : P |= [% Dk_b, V2, D2] _|_ [% V3, VU3, R3] :=
+  bob_data_indep_charlie X k.
 
 (* The masked plaintext V3 * U3 + R3 is independent of V3 (one-time pad).     *)
 Let VU3R_indep_V3 : P |= VU3R _|_ V3.
@@ -627,11 +675,13 @@ Qed.
 
 (* Charlie's decrypted aggregate D3 carries V2 * U2 masked by Alice's fresh pad
    R2, so the ciphertext Charlie returns to Alice is independent of V2. *)
-Hypothesis pV2_unif : `p_ V2 = fdist_uniform card_msg.
-Hypothesis pR2_unif : `p_ R2 = fdist_uniform card_msg.
-Hypothesis R2_indep_VU2_V2 : P |= R2 _|_ [% VU2, V2].
-Hypothesis R2_indep_VU2_VU3R_V2 : P |= R2 _|_ [% VU2, [%VU3R, V2]].
-Hypothesis Dk_c_V3_indep_V2_E : P |= [%Dk_c, V3] _|_ [%V2, E_charlie_d3].
+Let pV2_unif : `p_ V2 = fdist_uniform card_msg := pV2_unif X k.
+Let pR2_unif : `p_ R2 = fdist_uniform card_msg := pR2_unif X k.
+Let R2_indep_VU2_V2 : P |= R2 _|_ [% VU2, V2] := R2_indep_VU2_V2 X k.
+Let R2_indep_VU2_VU3R_V2 : P |= R2 _|_ [% VU2, [%VU3R, V2]] :=
+  R2_indep_VU2_VU3R_V2 X k.
+Let Dk_c_V3_indep_V2_E : P |= [%Dk_c, V3] _|_ [%V2, E_charlie_d3] :=
+  Dk_c_V3_indep_V2_E_charlie_d3 X k.
 
 (* D2 = V2 * U2 + R2 is independent of (VU3R, V2) (one-time pad). *)
 Let D2_indep_VU3R_V2 : P |= D2 _|_ [%VU3R, V2].
@@ -696,9 +746,10 @@ End dsdp_relay_secrecy_v1.
 
 Section dsdp_alice_hop_secrecy.
 (* cloned context of Section dsdp_alice_hop_secrecy of
-   hopping/dsdp_alice_hop_secrecy.v; stated over one record variable; the
-   notations pin its projections under the names the axis section uses, so
-   the statements and proofs below are the axis text verbatim. *)
+   hopping/dsdp_alice_hop_secrecy.v; stated at the k-th instance of X's
+   sequence; the notations pin its projections under the names the axis
+   section uses, so the statements and proofs below are the axis text
+   verbatim. *)
 Local Set Default Goal Selector "1".
 Local Open Scope reals_ext_scope.
 Local Open Scope proba_scope.
@@ -706,8 +757,10 @@ Local Open Scope fdist_scope.
 Local Open Scope entropy_scope.
 Local Open Scope ring_scope.
 Context {R : realType}.
+Variable X : dsdp_security R.
+Variable k : nat.
 (* The instance whose scheme, weights and keys the hop ladder runs at. *)
-Variable S : dsdp_instance.
+Local Notation S := (sequence_instance (instance_sequence X) k).
 Local Notation AHE := (inst_AHE S).
 Local Notation Renc := (inst_renc S).
 Local Notation card_renc := (inst_card_renc S).
@@ -952,10 +1005,10 @@ End dsdp_alice_hop_secrecy.
 (* =================================================================          *)
 
 Section dsdp_alice_trace_secrecy.
-(* cloned context of Section dsdp_alice_trace_rv; stated over one record
-   variable; the notations pin its projections under the names the axis
-   section uses, so the statements and proofs below are the axis text
-   verbatim. *)
+(* cloned context of Section dsdp_alice_trace_rv; stated at the k-th
+   instance of X's sequence; the notations pin its projections under the
+   names the axis section uses, so the statements and proofs below are the
+   axis text verbatim. *)
 Local Set Default Goal Selector "1".
 Local Open Scope reals_ext_scope.
 Local Open Scope proba_scope.
@@ -963,8 +1016,10 @@ Local Open Scope fdist_scope.
 Local Open Scope entropy_scope.
 Local Open Scope ring_scope.
 Context {R : realType}.
+Variable X : dsdp_security R.
+Variable k : nat.
 (* The instance whose keys and hop coins the executed trace carries. *)
-Variable S : dsdp_instance.
+Local Notation S := (sequence_instance (instance_sequence X) k).
 Local Notation AHE := (inst_AHE S).
 Local Notation Renc := (inst_renc S).
 Local Notation card_renc := (inst_card_renc S).
@@ -1280,10 +1335,10 @@ Qed.
 End dsdp_alice_trace_secrecy.
 
 Section dsdp_alice_trace_uncertainty.
-(* cloned context of Section dsdp_alice_trace_centropy; stated over one
-   record variable; the notations pin its projections under the names the
-   axis section uses, so the statements and proofs below are the axis text
-   verbatim. *)
+(* cloned context of Section dsdp_alice_trace_centropy; stated at the k-th
+   instance of X's sequence; the notations pin its projections under the
+   names the axis section uses, so the statements and proofs below are the
+   axis text verbatim. *)
 Local Set Default Goal Selector "1".
 Local Open Scope reals_ext_scope.
 Local Open Scope proba_scope.
@@ -1291,8 +1346,10 @@ Local Open Scope fdist_scope.
 Local Open Scope entropy_scope.
 Local Open Scope ring_scope.
 Context {R : realType}.
+Variable X : dsdp_security R.
+Variable k : nat.
 (* The instance the three conditioning readings below are taken at. *)
-Variable S : dsdp_instance.
+Local Notation S := (sequence_instance (instance_sequence X) k).
 Local Notation AHE := (inst_AHE S).
 Local Notation Renc := (inst_renc S).
 Local Notation card_renc := (inst_card_renc S).
@@ -1374,10 +1431,10 @@ Proof. by rewrite {1}alice_trace_decode_V2E centropy_RV_comp0. Qed.
 End dsdp_alice_trace_uncertainty.
 
 Section dsdp_alice_trace_pq_secrecy.
-(* cloned context of Section dsdp_alice_trace_pq; stated over one record
-   variable; the notations pin its projections under the names the axis
-   section uses, so the statements and proofs below are the axis text
-   verbatim. *)
+(* cloned context of Section dsdp_alice_trace_pq; stated at the k-th
+   instance of X's sequence; the notations pin its projections under the
+   names the axis section uses, so the statements and proofs below are the
+   axis text verbatim. *)
 Local Set Default Goal Selector "1".
 Local Open Scope reals_ext_scope.
 Local Open Scope proba_scope.
@@ -1385,8 +1442,10 @@ Local Open Scope fdist_scope.
 Local Open Scope entropy_scope.
 Local Open Scope ring_scope.
 Context {R : realType}.
+Variable X : dsdp_security R.
+Variable k : nat.
 (* The instance whose plaintext count the equation below writes as p * q. *)
-Variable S : dsdp_instance.
+Local Notation S := (sequence_instance (instance_sequence X) k).
 Local Notation AHE := (inst_AHE S).
 Local Notation Renc := (inst_renc S).
 Local Notation card_renc := (inst_card_renc S).
@@ -1401,10 +1460,13 @@ Local Notation dk_b := (inst_dk_b S).
 Local Notation dk_c := (inst_dk_c S).
 Local Notation w_rb2 := (inst_rb2 S).
 Local Notation w_rc2 := (inst_rc2 S).
-Variables (p q : nat).
-(* No positivity hypotheses: #|plain AHE| > 0 is a theorem, so the equation
-   already forces 0 < p and 0 < q. *)
-Hypothesis card_plain_pq : #|plain AHE| = (p * q)%N.
+Local Notation p := (p_minus_2 X k).+2.
+Local Notation q := (q_minus_2 X k).+2.
+(* The plaintext count at k, read off the record: the k-th scheme's
+   plaintext space and the counting axis's ring 'Z_(p * q) have the same
+   number of elements, which is what carries the bound below over to the
+   composite modulus. *)
+Let card_plain_pq : #|plain AHE| = (p * q)%N := card_plain X k.
 
 Local Notation pkey_of_dk := (pkey_of_dk dk_a dk_b dk_c).
 Local Notation alice_traceT := (alice_traceT AHE).
@@ -1505,7 +1567,8 @@ Local Open Scope fdist_scope.
 Local Open Scope entropy_scope.
 Local Open Scope ring_scope.
 Context {R : realType}.
-Variable Q : dsdp_instance_sequence R.
+Variable X : dsdp_security R.
+Local Notation Q := (instance_sequence X).
 Local Notation I := (sequence_instance Q).
 Local Notation A := (sequence_assumption Q).
 Variable predict : forall k,
@@ -1643,7 +1706,7 @@ Hypothesis charlie_reduction_admissible : forall k,
    sequence would start from. *)
 Corollary alice_trace_guess_V2_paillier_negligible : negligible_fun f_guess_V2.
 Proof.
-exact: (alice_trace_guess_V2_negligible
+exact: (dsdp_instance_sequence.alice_trace_guess_V2_negligible
           bob_reduction_admissible charlie_reduction_admissible).
 Qed.
 
@@ -1732,7 +1795,7 @@ Hypothesis charlie_reduction_admissible : forall k,
    from. *)
 Corollary alice_trace_guess_V2_benaloh_negligible : negligible_fun f_guess_V2.
 Proof.
-exact: (alice_trace_guess_V2_negligible
+exact: (dsdp_instance_sequence.alice_trace_guess_V2_negligible
           bob_reduction_admissible charlie_reduction_admissible).
 Qed.
 
