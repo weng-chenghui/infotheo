@@ -83,6 +83,9 @@ Require Export indcpa_game.
 (*                                                                            *)
 (* V2 is Bob's input, and V3 is Charlie's input.                              *)
 (* R2 and R3 are Alice's first and second mask plaintexts.                    *)
+(* Section dsdp_alice_hop_secrecy reads those four plaintext coordinates as   *)
+(* V2, V3, R2 and R3.  Their global names are sample_V2, sample_V3, sample_R2 *)
+(* and sample_R3.                                                             *)
 (* Rho2 and Rho3 are the randomnesses for the Bob and Charlie ciphertext      *)
 (* slots.  RA1 and RA2 are the randomnesses for Alice's two ciphertext        *)
 (* combinations.                                                              *)
@@ -124,10 +127,10 @@ Require Export indcpa_game.
 (*                              DSDP run                                      *)
 (*        alice_sample_fdist == samples those values uniformly and            *)
 (*                              independently                                 *)
-(*                    V2, V3 == Bob's and Charlie's honest inputs             *)
+(*      sample_V2, sample_V3 == Bob's and Charlie's honest inputs             *)
 (*    bob_pkey, charlie_pkey == the two relay public keys selected from the   *)
 (*                              party key table                               *)
-(*                    R2, R3 == the masks Alice adds to her two combines      *)
+(*      sample_R2, sample_R3 == the masks Alice adds to her two combines      *)
 (*                Rho2, Rho3 == the encryption coins for the ciphertexts      *)
 (*                              Alice receives from Bob and Charlie           *)
 (*                  RA1, RA2 == the encryption coins for Alice's two combines *)
@@ -350,14 +353,30 @@ Definition alice_sample_fdist : R.-fdist alice_sampleT :=
   (((fdist_uniform card_plain_pair) `x (fdist_uniform card_plain_pair))
      `x (fdist_uniform card_renc_pair)) `x (fdist_uniform card_renc_pair).
 
-(* Bob's honest input. *)
-Definition V2 : {RV alice_sample_fdist -> plain AHE} := fun t => t.1.1.1.1.
-(* Charlie's honest input. *)
-Definition V3 : {RV alice_sample_fdist -> plain AHE} := fun t => t.1.1.1.2.
-(* Alice's mask on the first combine. *)
-Definition R2 : {RV alice_sample_fdist -> plain AHE} := fun t => t.1.1.2.1.
-(* Alice's mask on the second combine. *)
-Definition R3 : {RV alice_sample_fdist -> plain AHE} := fun t => t.1.1.2.2.
+(* Bob's honest input, the first plaintext coordinate of the sample and the
+   secret every bound in this file is stated about. *)
+Definition sample_V2 : {RV alice_sample_fdist -> plain AHE} :=
+  fun t => t.1.1.1.1.
+(* Charlie's honest input, the second plaintext coordinate of the sample.  It
+   is the other unknown of the affine equation the leaked output reveals. *)
+Definition sample_V3 : {RV alice_sample_fdist -> plain AHE} :=
+  fun t => t.1.1.1.2.
+(* Alice's mask on the first combine, the third plaintext coordinate of the
+   sample. *)
+Definition sample_R2 : {RV alice_sample_fdist -> plain AHE} :=
+  fun t => t.1.1.2.1.
+(* Alice's mask on the second combine, the fourth plaintext coordinate of the
+   sample. *)
+Definition sample_R3 : {RV alice_sample_fdist -> plain AHE} :=
+  fun t => t.1.1.2.2.
+
+(* The four plaintext coordinates under their protocol names, for the rest of
+   this section. *)
+Local Notation V2 := sample_V2.
+Local Notation V3 := sample_V3.
+Local Notation R2 := sample_R2.
+Local Notation R3 := sample_R3.
+
 (* The randomness of the ciphertext Alice receives from Bob, and the randomness
    the hop-0 challenger takes over. *)
 Definition Rho2 : {RV alice_sample_fdist -> Renc} := fun t => t.1.2.1.

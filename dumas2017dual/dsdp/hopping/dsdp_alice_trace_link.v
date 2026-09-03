@@ -465,10 +465,10 @@ Variables (w_rb2 w_rc2 : Renc).
 Local Notation DI := (Standard_DSDP_Interface AHE).
 Local Notation pkey_of_dk := (pkey_of_dk dk_a dk_b dk_c).
 Local Notation trace_dataT := (trace_dataT AHE).
-Local Notation V2 := (V2 (R:=R) (AHE:=AHE) card_renc).
-Local Notation V3 := (V3 (R:=R) (AHE:=AHE) card_renc).
-Local Notation R2 := (R2 (R:=R) (AHE:=AHE) card_renc).
-Local Notation R3 := (R3 (R:=R) (AHE:=AHE) card_renc).
+Local Notation V2 := (sample_V2 (R:=R) (AHE:=AHE) card_renc).
+Local Notation V3 := (sample_V3 (R:=R) (AHE:=AHE) card_renc).
+Local Notation R2 := (sample_R2 (R:=R) (AHE:=AHE) card_renc).
+Local Notation R3 := (sample_R3 (R:=R) (AHE:=AHE) card_renc).
 Local Notation Rho2 := (Rho2 (R:=R) (AHE:=AHE) card_renc).
 Local Notation Rho3 := (Rho3 (R:=R) (AHE:=AHE) card_renc).
 Local Notation RA1 := (RA1 (R:=R) (AHE:=AHE) card_renc).
@@ -785,10 +785,10 @@ Variables (w_rb2 w_rc2 : Renc).
    since the right-hand side resolves against the constant. *)
 Local Notation P := (alice_sample_fdist (R:=R) AHE card_renc).
 Local Notation pkey_of_dk := (pkey_of_dk dk_a dk_b dk_c).
-Local Notation V2 := (V2 (R:=R) (AHE:=AHE) card_renc).
-Local Notation V3 := (V3 (R:=R) (AHE:=AHE) card_renc).
-Local Notation R2 := (R2 (R:=R) (AHE:=AHE) card_renc).
-Local Notation R3 := (R3 (R:=R) (AHE:=AHE) card_renc).
+Local Notation V2 := (sample_V2 (R:=R) (AHE:=AHE) card_renc).
+Local Notation V3 := (sample_V3 (R:=R) (AHE:=AHE) card_renc).
+Local Notation R2 := (sample_R2 (R:=R) (AHE:=AHE) card_renc).
+Local Notation R3 := (sample_R3 (R:=R) (AHE:=AHE) card_renc).
 Local Notation RA1 := (RA1 (R:=R) (AHE:=AHE) card_renc).
 Local Notation RA2 := (RA2 (R:=R) (AHE:=AHE) card_renc).
 Local Notation Sout :=
@@ -1106,7 +1106,7 @@ Variables (w_rb2 w_rc2 : Renc).
 
 Local Notation P := (alice_sample_fdist (R:=R) AHE card_renc).
 Local Notation pkey_of_dk := (pkey_of_dk dk_a dk_b dk_c).
-Local Notation V2 := (V2 (R:=R) (AHE:=AHE) card_renc).
+Local Notation V2 := (sample_V2 (R:=R) (AHE:=AHE) card_renc).
 Local Notation AliceHopTuple i :=
   (AliceHopTuple (R:=R) (AHE:=AHE) card_renc rand_of_renc
      pkey_of_dk v1 u1 u2 u3 i).
@@ -1262,8 +1262,8 @@ Variables (w_rb2 w_rc2 : Renc).
    does. *)
 Local Notation trace_dataT := (trace_dataT AHE).
 Local Notation pkey_of_dk := (pkey_of_dk dk_a dk_b dk_c).
-Local Notation V2 := (V2 (R:=R) (AHE:=AHE) card_renc).
-Local Notation V3 := (V3 (R:=R) (AHE:=AHE) card_renc).
+Local Notation V2 := (sample_V2 (R:=R) (AHE:=AHE) card_renc).
+Local Notation V3 := (sample_V3 (R:=R) (AHE:=AHE) card_renc).
 Local Notation AliceTrace :=
   (AliceTrace (R:=R) card_renc rand_of_renc v1 u1 u2 u3
      dk_a dk_b dk_c w_rb2 w_rc2).
@@ -1414,8 +1414,8 @@ Variable w_rb2 : Renc.
    coin, which this section samples. *)
 Local Notation trace_dataT := (trace_dataT AHE).
 Local Notation pkey_of_dk := (pkey_of_dk dk_a dk_b dk_c).
-Local Notation V2 := (V2 (R:=R) (AHE:=AHE) card_renc).
-Local Notation V3 := (V3 (R:=R) (AHE:=AHE) card_renc).
+Local Notation V2 := (sample_V2 (R:=R) (AHE:=AHE) card_renc).
+Local Notation V3 := (sample_V3 (R:=R) (AHE:=AHE) card_renc).
 Local Notation AliceTrace_coin w :=
   (AliceTrace (R:=R) card_renc rand_of_renc v1 u1 u2 u3
      dk_a dk_b dk_c w_rb2 w).
@@ -1491,7 +1491,7 @@ Variables (w_rb2 w_rc2 : Renc).
    file that imports the HE stack. *)
 Local Notation alice_traceT := (alice_traceT AHE).
 Local Notation predictor := (predictor AHE).
-Local Notation V2 := (V2 (R:=R) (AHE:=AHE) card_renc).
+Local Notation V2 := (sample_V2 (R:=R) (AHE:=AHE) card_renc).
 Local Notation AliceTrace :=
   (AliceTrace (R:=R) card_renc rand_of_renc v1 u1 u2 u3
      dk_a dk_b dk_c w_rb2 w_rc2).
@@ -1591,8 +1591,8 @@ Local Notation DI := (Standard_DSDP_Interface AHE).
 Local Notation trace_dataT := (trace_dataT AHE).
 Local Notation trace_jointT := (trace_jointT AHE).
 Local Notation pkey_of_dk := (pkey_of_dk dk_a dk_b dk_c).
-Local Notation V2 := (V2 (R:=R) (AHE:=AHE) card_renc).
-Local Notation V3 := (V3 (R:=R) (AHE:=AHE) card_renc).
+Local Notation V2 := (sample_V2 (R:=R) (AHE:=AHE) card_renc).
+Local Notation V3 := (sample_V3 (R:=R) (AHE:=AHE) card_renc).
 Local Notation AliceTrace :=
   (AliceTrace (R:=R) card_renc rand_of_renc v1 u1 u2 u3
      dk_a dk_b dk_c w_rb2 w_rc2).
@@ -1733,8 +1733,8 @@ Variable w_rb2 : Renc.
 Local Notation DI := (Standard_DSDP_Interface AHE).
 Local Notation trace_dataT := (trace_dataT AHE).
 Local Notation pkey_of_dk := (pkey_of_dk dk_a dk_b dk_c).
-Local Notation V2 := (V2 (R:=R) (AHE:=AHE) card_renc).
-Local Notation V3 := (V3 (R:=R) (AHE:=AHE) card_renc).
+Local Notation V2 := (sample_V2 (R:=R) (AHE:=AHE) card_renc).
+Local Notation V3 := (sample_V3 (R:=R) (AHE:=AHE) card_renc).
 Local Notation AliceRawTrace_coin w :=
   (alice_raw_trace (R:=R) card_renc rand_of_renc v1 u1 u2 u3
      dk_a dk_b dk_c w_rb2 w).
@@ -1835,7 +1835,7 @@ Hypothesis card_plain_pq : #|plain AHE| = (p * q)%N.
 
 Local Notation alice_traceT := (alice_traceT AHE).
 Local Notation predictor := (predictor AHE).
-Local Notation V2 := (V2 (R:=R) (AHE:=AHE) card_renc).
+Local Notation V2 := (sample_V2 (R:=R) (AHE:=AHE) card_renc).
 Local Notation AliceTrace :=
   (AliceTrace (R:=R) card_renc rand_of_renc v1 u1 u2 u3
      dk_a dk_b dk_c w_rb2 w_rc2).

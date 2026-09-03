@@ -720,8 +720,8 @@ Local Notation u3 := (inst_u3 S).
 Local Notation u3_unit := (inst_u3_unit S).
 
 Local Notation P := (alice_sample_fdist (R:=R) AHE card_renc).
-Local Notation V2 := (V2 (R:=R) (AHE:=AHE) card_renc).
-Local Notation V3 := (V3 (R:=R) (AHE:=AHE) card_renc).
+Local Notation V2 := (sample_V2 (R:=R) (AHE:=AHE) card_renc).
+Local Notation V3 := (sample_V3 (R:=R) (AHE:=AHE) card_renc).
 Local Notation hop_tupleT := (alice_hop_tupleT AHE Renc).
 Local Notation AliceHopTuple i :=
   (AliceHopTuple (R:=R) (AHE:=AHE) card_renc rand_of_renc
@@ -989,8 +989,8 @@ Local Notation P := (alice_sample_fdist (R:=R) AHE card_renc).
 Local Notation pkey_of_dk := (pkey_of_dk dk_a dk_b dk_c).
 Local Notation trace_dataT := (trace_dataT AHE).
 Local Notation hop_tupleT := (alice_hop_tupleT AHE Renc).
-Local Notation V2 := (V2 (R:=R) (AHE:=AHE) card_renc).
-Local Notation V3 := (V3 (R:=R) (AHE:=AHE) card_renc).
+Local Notation V2 := (sample_V2 (R:=R) (AHE:=AHE) card_renc).
+Local Notation V3 := (sample_V3 (R:=R) (AHE:=AHE) card_renc).
 Local Notation AliceHopTuple i :=
   (AliceHopTuple (R:=R) (AHE:=AHE) card_renc rand_of_renc
      pkey_of_dk v1 u1 u2 u3 i).
@@ -1309,7 +1309,7 @@ Local Notation w_rc2 := (inst_rc2 S).
 
 Local Notation P := (alice_sample_fdist (R:=R) AHE card_renc).
 Local Notation pkey_of_dk := (pkey_of_dk dk_a dk_b dk_c).
-Local Notation V2 := (V2 (R:=R) (AHE:=AHE) card_renc).
+Local Notation V2 := (sample_V2 (R:=R) (AHE:=AHE) card_renc).
 Local Notation AliceHopTuple i :=
   (AliceHopTuple (R:=R) (AHE:=AHE) card_renc rand_of_renc
      pkey_of_dk v1 u1 u2 u3 i).
