@@ -7,21 +7,23 @@ Require Import fdist_extra.
 Require Import proba jfdist_cond entropy graphoid spp_proba.
 Require Import extra_proba extra_algebra.
 Require Import homomorphic_encryption.
-Require Import dsdp_entropy.
+Require Import dsdp_entropy dsdp_relay_secrecy dsdp_malicious_dotp.
 Require Import indcpa_game.
+Require Import dsdp_alice_hop_secrecy dsdp_alice_trace_link.
 Require Import dsdp_instance_sequence.
 
 (**md**************************************************************************)
 (* # The setting a DSDP security statement is made over                       *)
 (*                                                                            *)
 (* A value of dsdp_setting R is a setting, not a proof: the data a 3-party    *)
-(* DSDP security statement is made over, at every security parameter at once, *)
-(* with the security properties proved over it in the results file            *)
-(* dsdp_security.v.                                                           *)
-(* One sample space with one law per k, the eleven random inputs of a         *)
-(* 3-party run together with their independence and uniformity, the composite *)
+(* DSDP security statement is made over, at every security parameter at once. *)
+(* One sample space with one law per k, the eleven random inputs of a 3-party *)
+(* run together with their independence and uniformity, the composite         *)
 (* plaintext modulus held as two primes, and the sequence of IND-CPA scheme   *)
-(* instances the hopping bounds are stated at.                                *)
+(* instances the hopping bounds are stated at.  The counting side at a fixed  *)
+(* modulus is the record dsdp_random_inputs, of which a setting carries one   *)
+(* per k.  The properties proved over a setting are the fields of the results *)
+(* record dsdp_security of dsdp_security.v.                                   *)
 (*                                                                            *)
 (* The two axes share one number, not one execution.  The counting side's     *)
 (* random variables land in 'Z_(p k * q k); the hopping side's data lands in  *)
@@ -33,121 +35,144 @@ Require Import dsdp_instance_sequence.
 (* variable U3 to the hopping side's fixed weight inst_u3.  The weights and   *)
 (* the keys therefore occur twice as unrelated objects, as random variables   *)
 (* on the counting side and as values on the hopping side, and the laws       *)
-(* sample_fdist X k at distinct k are unrelated laws on unrelated sample      *)
-(* spaces, as the instance sequence already says of its instances.            *)
+(* sample_fdist (inputs X k) at distinct k are unrelated laws on unrelated    *)
+(* sample spaces, as the instance sequence already says of its instances.     *)
 (*                                                                            *)
-(* Three things stay outside.  The adversary and its two class premises,      *)
-(* which restrict the reduction adversaries a predictor induces and so speak  *)
-(* about the adversary rather than about the setting.  Alice's query, in      *)
-(* both of its forms: the honest range 0 < U3 t < min p q of the log m        *)
-(* entropy theorem, and the corrupted choice U2 = 1, U3 = 0 of the leakage    *)
-(* theorem.  Those are opposite conditions on the same weight, so the         *)
-(* weight's condition cannot be a property of the setting: were the honest    *)
-(* range a field, the corrupted theorem would hold vacuously at every value   *)
-(* of the record.  And the output, which is a function of the inputs and so   *)
-(* enters below as a Definition with the linear constraint proved, rather     *)
-(* than as a field with the constraint assumed.                               *)
+(* Three things stay outside the record.  The adversary and its two class     *)
+(* premises, which restrict the reduction adversaries a predictor induces and *)
+(* so speak about the adversary rather than about the setting.  Alice's       *)
+(* query, in both of its forms: the honest range 0 < U3 t < min p q of the    *)
+(* log m entropy equality, and the corrupted choice U2 = 1, U3 = 0 of the     *)
+(* leakage theorem, which enter as the two records dsdp_honest_query and      *)
+(* dsdp_corrupted_query below.  Those are opposite conditions on the same     *)
+(* weight, so the weight's condition cannot be a field: were the honest range *)
+(* a field, the corrupted theorem would hold vacuously at every value of the  *)
+(* record.  And the output, which is a function of the inputs and so enters   *)
+(* below as a Definition with the linear constraint proved, rather than as a  *)
+(* field with the constraint assumed.                                         *)
 (*                                                                            *)
-(* Two consequences of the field set.  The each-against-the-rest fields       *)
-(* reach Alice's three weights, so over this record the log m entropy         *)
-(* equality covers the honest-sampling setting, where her weights are         *)
-(* independent of her input and of one another; the general form, assuming    *)
-(* nothing about their joint law, stays at dsdp_centropy_uniform_direct of    *)
+(* Two consequences of the field set.  The each-against-the-rest fields reach *)
+(* Alice's three weights, so over this record the log m entropy equality      *)
+(* covers the honest-sampling setting, where her weights are independent of   *)
+(* her input and of one another; the general form, assuming nothing about     *)
+(* their joint law, stays at dsdp_centropy_uniform_direct of                  *)
 (* counting/dsdp_entropy.v.  And card_plain together with the hopping side's  *)
 (* sequence_size_negligible forces p k * q k to grow superpolynomially, so no *)
 (* value of this record carries a fixed modulus, although each counting       *)
 (* equality is exact at every fixed composite modulus.                        *)
 (*                                                                            *)
 (* ```                                                                        *)
-(*               dsdp_setting == the data a 3-party DSDP security statement   *)
-(*                               is made over, at every security parameter    *)
-(*          instance_sequence == the sequence of IND-CPA scheme instances the *)
-(*                               hopping bounds are stated at                 *)
-(*        p_minus_2, q_minus_2 == the plaintext modulus at k as its two       *)
-(*                               primes, in successor form                    *)
-(*     prime_p, prime_q, coprime_pq == primality and coprimality of the two   *)
-(*                               factors                                      *)
-(*                 card_plain == the k-th scheme's plaintext count is p * q   *)
-(*      sampleT, sample_fdist == the sample space at k and the law on it      *)
+(*        dsdp_random_inputs == the counting side of a 3-party run at one     *)
+(*                              fixed plaintext modulus                       *)
+(*      sampleT, sample_fdist == the sample space and the law on it           *)
 (*   V1, V2, V3, U1, U2, U3, R2, R3 == the eight plaintext inputs of a run    *)
-(*        Dk_a, Dk_b, Dk_c == the three private keys as random variables      *)
-(*   V1_indep .. Dk_c_indep == each input independent of the joint of the     *)
-(*                               other ten                                    *)
+(*           Dk_a, Dk_b, Dk_c == the three private keys as random variables   *)
+(*     V1_indep .. Dk_c_indep == each input independent of the joint of the   *)
+(*                              other ten                                     *)
 (* pV1_unif, pV2_unif, pV3_unif, pR2_unif, pR3_unif == uniformity of the      *)
-(*                               three plaintext inputs and the two masks     *)
-(*                     output == the output Alice computes from the inputs    *)
-(*                     CondRV == her conditioner, inputs and output           *)
+(*                              three plaintext inputs and the two masks      *)
+(*              dsdp_setting == the data a 3-party DSDP security statement is *)
+(*                              made over, at every security parameter        *)
+(*         instance_sequence == the sequence of IND-CPA scheme instances the  *)
+(*                              hopping bounds are stated at                  *)
+(*      p_minus_2, q_minus_2 == the plaintext modulus at k as its two primes, *)
+(*                              in successor form                             *)
+(* prime_p, prime_q, coprime_pq == primality and coprimality of the two       *)
+(*                              factors                                       *)
+(*                card_plain == the k-th scheme's plaintext count is p * q    *)
+(*                    inputs == the counting side of the run at k             *)
+(*        dsdp_honest_query == Alice's weight on Charlie's input inside the   *)
+(*                              range the log m entropy equality reads        *)
+(*        U3_gt0, U3_lt_minn == the two ends of that range                    *)
+(*      dsdp_corrupted_query == Alice's query fixed to the basis vector e_1   *)
+(*            U2_eq1, U3_eq0 == the two weights that choice fixes             *)
+(*                    output == the output Alice computes from the inputs     *)
+(*                    CondRV == her conditioner, inputs and output            *)
 (*                     VarRV == the relay input pair                          *)
 (*                   InputRV == her inputs without the output                 *)
 (*      dsdp_constraint_holds == the linear DSDP relation at that output      *)
 (*               V2_indep_V3 == the two relay inputs are independent          *)
-(*              VarRV_uniform == the relay pair is uniform on the product     *)
+(*             VarRV_uniform == the relay pair is uniform on the product      *)
 (*        VarRV_indep_inputs == the relay pair is independent of Alice's      *)
-(*                               inputs                                       *)
-(*        bob_inputs_indep_V1 == Bob's clean data is independent of V1        *)
-(*    charlie_inputs_indep_V1 == Charlie's clean data is independent of V1    *)
+(*                              inputs                                        *)
+(*       bob_inputs_indep_V1 == Bob's clean data is independent of V1         *)
+(*   charlie_inputs_indep_V1 == Charlie's clean data is independent of V1     *)
 (*           R3_indep_VU3_V3 == the second mask is fresh against Charlie's    *)
-(*                               weighted input                               *)
-(*     bob_data_indep_charlie == Bob's clean data is independent of the       *)
-(*                               whole Charlie group                          *)
+(*                              weighted input                                *)
+(*    bob_data_indep_charlie == Bob's clean data is independent of the whole  *)
+(*                              Charlie group                                 *)
 (*           R2_indep_VU2_V2 == the first mask is fresh against Bob's         *)
-(*                               weighted input                               *)
+(*                              weighted input                                *)
 (*      R2_indep_VU2_VU3R_V2 == the same mask against the pair Alice's first  *)
-(*                               combine enters                               *)
-(* Dk_c_V3_indep_V2_E_charlie_d3 ==                                           *)
-(*                               Charlie's key and input are independent of   *)
-(*                               Bob's input with the aggregate ciphertext    *)
-(*          idealized_setting == the value of dsdp_setting the two sides      *)
-(*                               below make together                          *)
-(*   idealized_p, idealized_q == the two prime factors of the witness         *)
-(*                               plaintext modulus at k                       *)
-(* idealized_p_gt, idealized_q_gt ==                                          *)
-(*                               the smaller factor exceeds (k+2)^(k+2), the  *)
-(*                               larger exceeds it                            *)
-(*              prime_minus2K == a prime in the successor-of-successor form   *)
-(*                               the modulus fields take                      *)
-(* idealized_p_minus_2, idealized_q_minus_2 ==                                *)
-(*                               those two primes as the record's two modulus *)
-(*                               fields                                       *)
+(*                              combine enters                                *)
+(* Dk_c_V3_indep_V2_E_charlie_d3 == Charlie's key and input are independent   *)
+(*                              of Bob's input with the aggregate ciphertext  *)
+(*           AHE_at, Renc_at == the k-th scheme and its coin index type       *)
+(* hop_tupleT_at, hop_jointT_at, viewT_at, traceT_at, trace_jointT_at == the  *)
+(*                              five carriers the hopping bounds quantify     *)
+(*                              predictors over                               *)
+(* hop_fdist_at, hop_V2_at, hop_V3_at == the corrupted-Alice sample space and *)
+(*                              its two honest relay inputs                   *)
+(* AliceHopTuple_at, AliceRealTuple_at, AliceView_at, AliceTrace_at == the    *)
+(*                              conditioners of the hopping ladder            *)
+(*                   Sout_at == the output the hopping side leaks             *)
+(*  bob_pkey_at, charlie_pkey_at == the two public keys the ladder prices at  *)
+(* alice_ideal_joint_at, alice_trace_ideal_joint_at == the simulator's law at *)
+(*                              the tuple and at the executed trace           *)
+(* indcpa_assumptionT_at, assumption_at == the IND-CPA assumption type at k   *)
+(*                              and the assumption the sequence makes there   *)
+(* BobView_at, CharlieView_at, AliceDotpView_at == the three counting views   *)
+(*                              at the inputs of X at k                       *)
+(*            uniform_inputs == the counting side at any modulus, three       *)
+(*                              inputs and two masks uniform and the query    *)
+(*                              weights held at three constants               *)
+(*    uniform_card_msg, uniform_card_sample, uniform_card_rest == the counts  *)
+(*                              of the plaintext ring, of the sample and of   *)
+(*                              four coordinates                              *)
+(* uniform_sampleT, uniform_sample_fdist == five coordinates of the plaintext *)
+(*                              ring, drawn uniformly                         *)
+(* uniform_coord, uniform_rest == the letter at one coordinate and the four   *)
+(*                              others                                        *)
+(*             uniform_split == one coordinate against the four others, with  *)
+(*                              both marginals uniform                        *)
+(* uniform_view_input, uniform_view_mask == the four other coordinates as one *)
+(*                              view of ten, from an input and from a mask    *)
+(*    uniform_V1 .. uniform_R3 == the three inputs and the two masks as the   *)
+(*                              five coordinates                              *)
+(* uniform_U1, uniform_U2, uniform_U3 == Alice's three query weights as       *)
+(*                              constants of the sample space                 *)
+(* uniform_Dk_a, uniform_Dk_b, uniform_Dk_c == the three private keys as      *)
+(*                              constants                                     *)
+(* uniform_V1_indep .. uniform_Dk_c_indep == the eleven each-against-the-rest *)
+(*                              facts at that law                             *)
+(* uniform_pV1_unif .. uniform_pR3_unif == uniformity of the three plaintext  *)
+(*                              inputs and the two masks                      *)
+(*    idealized_p, idealized_q == the two prime factors of the witness        *)
+(*                              plaintext modulus at k                        *)
+(* idealized_p_gt, idealized_q_gt == the smaller factor exceeds (k+2)^(k+2),  *)
+(*                              the larger exceeds it                         *)
+(*             prime_minus2K == a prime in the successor-of-successor form    *)
+(*                              the modulus fields take                       *)
+(* idealized_p_minus_2, idealized_q_minus_2 == those two primes as the        *)
+(*                              record's two modulus fields                   *)
 (* idealized_pE, idealized_qE == the round trip from a modulus field back to  *)
-(*                               its prime                                    *)
-(* idealized_prime_p, idealized_prime_q, idealized_coprime_pq ==              *)
-(*                               primality and coprimality of the witness     *)
-(*                               modulus                                      *)
-(*      idealized_pq_instance == the idealized scheme at the composite        *)
-(*                               modulus, as one DSDP instance                *)
-(*       idealized_card_plain == that instance's plaintext count is p * q     *)
+(*                              its prime                                     *)
+(* idealized_prime_p, idealized_prime_q, idealized_coprime_pq == primality    *)
+(*                              and coprimality of the witness modulus        *)
+(*     idealized_pq_instance == the idealized scheme at the composite         *)
+(*                              modulus, as one DSDP instance                 *)
+(*      idealized_card_plain == that instance's plaintext count is p * q      *)
 (*  idealized_size_negligible == its inverse plaintext cardinalities are a    *)
-(*                               negligible sequence                          *)
-(*      idealized_pq_sequence == the sequence of those instances under the    *)
-(*                               cipher-constant assumption                   *)
-(* idealized_card_msg, idealized_card_sample, idealized_card_rest ==          *)
-(*                               the counts of the plaintext ring, of the     *)
-(*                               sample and of seven coordinates              *)
-(* idealized_sampleT, idealized_sample_fdist ==                               *)
-(*                               eight coordinates of the plaintext ring,     *)
-(*                               drawn uniformly                              *)
-(*    idealized_sample_fdistE == that law as a product of eight uniform       *)
-(*                               coordinate laws                              *)
-(* idealized_coord, idealized_rest ==                                         *)
-(*                               the letter at one coordinate and the seven   *)
-(*                               others                                       *)
-(*            idealized_split == one coordinate against the seven others,     *)
-(*                               with both marginals uniform                  *)
-(* idealized_view, idealized_rest_view ==                                     *)
-(*                               the seven other coordinates as one view of   *)
-(*                               ten, independent of the pivot                *)
-(* idealized_V1 .. idealized_R3 ==                                            *)
-(*                               the eight plaintext inputs as the eight      *)
-(*                               coordinates                                  *)
-(* idealized_Dk_a, idealized_Dk_b, idealized_Dk_c ==                          *)
-(*                               the three private keys as constants          *)
-(* idealized_V1_indep .. idealized_Dk_c_indep ==                              *)
-(*                               the eleven each-against-the-rest facts at    *)
-(*                               that law                                     *)
-(* idealized_pV1_unif .. idealized_pR3_unif ==                                *)
-(*                               uniformity of the three plaintext inputs and *)
-(*                               the two masks                                *)
+(*                              negligible sequence                           *)
+(*     idealized_pq_sequence == the sequence of those instances under the     *)
+(*                              cipher-constant assumption                    *)
+(*              val_Zp_pq1 == the unit residue of the composite modulus has   *)
+(*                              natural number value one                      *)
+(*         idealized_setting == the value of dsdp_setting the two sides below *)
+(*                              make together, at Alice's honest query        *)
+(*   idealized_honest_query == that query at every k                          *)
+(*         corrupted_setting == the same value at Alice's corrupted query     *)
+(*           corrupted_query == that query at every k                         *)
 (* ```                                                                        *)
 (*                                                                            *)
 (******************************************************************************)
@@ -166,24 +191,96 @@ Local Open Scope proba_scope.
 Local Open Scope fdist_scope.
 
 (* =================================================================          *)
-(* The setting                                                                *)
+(* The counting side of a run at one modulus                                  *)
 (* =================================================================          *)
 
 (* Set Strict Implicit brackets the record: {RV P -> A} unfolds to a function
-   type whose domain mentions k, so under the file's ambient Unset Strict
-   Implicit every k-indexed field would take the record value and k
-   implicitly and V1 X k would not typecheck. *)
+   type whose domain mentions the record, so under the file's ambient Unset
+   Strict Implicit every field would take the record value implicitly and
+   V1 I would not typecheck. *)
 Set Strict Implicit.
 
+(* The counting side of a 3-party run at the fixed plaintext modulus
+   a.+2 * b.+2, after du2002's scalar_product_random_inputs: one sample space
+   with one law on it, the eleven random inputs of the run, their
+   independence each against the joint of the other ten, and the uniformity
+   of the three plaintext inputs and the two masks.
+   The record is named for the counting side's reading of the eleven, where
+   the weights and the keys are drawn together with the inputs; the hopping
+   side of the same security parameter carries its own weights and keys as
+   fixed values inside its scheme instance, and nothing relates the two. *)
+Record dsdp_random_inputs (R : realType) (a b : nat) := {
+  (* The sample space and the law on it: every random variable below is a
+     function on this space and every bound is an average over this law. *)
+  sampleT : finType ;
+  sample_fdist : R.-fdist sampleT ;
+
+  (* The entire randomness of a 3-party run at this modulus.  Every message
+     and every party view is a deterministic function of these eleven, which
+     is what lets a bound proved at the inputs transfer to a view. *)
+  V1 : {RV (sample_fdist) -> ('Z_(a.+2 * b.+2))} ;
+  V2 : {RV (sample_fdist) -> ('Z_(a.+2 * b.+2))} ;
+  V3 : {RV (sample_fdist) -> ('Z_(a.+2 * b.+2))} ;
+  U1 : {RV (sample_fdist) -> ('Z_(a.+2 * b.+2))} ;
+  U2 : {RV (sample_fdist) -> ('Z_(a.+2 * b.+2))} ;
+  U3 : {RV (sample_fdist) -> ('Z_(a.+2 * b.+2))} ;
+  R2 : {RV (sample_fdist) -> ('Z_(a.+2 * b.+2))} ;
+  R3 : {RV (sample_fdist) -> ('Z_(a.+2 * b.+2))} ;
+  Dk_a : {RV (sample_fdist) -> (Alice.-key Dec 'Z_(a.+2 * b.+2))} ;
+  Dk_b : {RV (sample_fdist) -> (Bob.-key Dec 'Z_(a.+2 * b.+2))} ;
+  Dk_c : {RV (sample_fdist) -> (Charlie.-key Dec 'Z_(a.+2 * b.+2))} ;
+
+  (* Each input independent of the joint of the other ten, stated
+     each-against-the-rest because every derived fact below is one of these
+     pushed through inde_RV_comp. *)
+  V1_indep : sample_fdist |=
+    [% V2, V3, U1, U2, U3, R2, R3, Dk_a, Dk_b, Dk_c] _|_ V1 ;
+  V2_indep : sample_fdist |=
+    [% V1, V3, U1, U2, U3, R2, R3, Dk_a, Dk_b, Dk_c] _|_ V2 ;
+  V3_indep : sample_fdist |=
+    [% V1, V2, U1, U2, U3, R2, R3, Dk_a, Dk_b, Dk_c] _|_ V3 ;
+  U1_indep : sample_fdist |=
+    [% V1, V2, V3, U2, U3, R2, R3, Dk_a, Dk_b, Dk_c] _|_ U1 ;
+  U2_indep : sample_fdist |=
+    [% V1, V2, V3, U1, U3, R2, R3, Dk_a, Dk_b, Dk_c] _|_ U2 ;
+  U3_indep : sample_fdist |=
+    [% V1, V2, V3, U1, U2, R2, R3, Dk_a, Dk_b, Dk_c] _|_ U3 ;
+  R2_indep : sample_fdist |=
+    [% V1, V2, V3, U1, U2, U3, R3, Dk_a, Dk_b, Dk_c] _|_ R2 ;
+  R3_indep : sample_fdist |=
+    [% V1, V2, V3, U1, U2, U3, R2, Dk_a, Dk_b, Dk_c] _|_ R3 ;
+  Dk_a_indep : sample_fdist |=
+    [% V1, V2, V3, U1, U2, U3, R2, R3, Dk_b, Dk_c] _|_ Dk_a ;
+  Dk_b_indep : sample_fdist |=
+    [% V1, V2, V3, U1, U2, U3, R2, R3, Dk_a, Dk_c] _|_ Dk_b ;
+  Dk_c_indep : sample_fdist |=
+    [% V1, V2, V3, U1, U2, U3, R2, R3, Dk_a, Dk_b] _|_ Dk_c ;
+
+  (* Uniformity of R2 and R3 is what makes the relay bounds unconditional,
+     one-time-pad masking rather than encryption hardness hiding V2 and V3;
+     uniformity of V1, V2, V3 is what makes the conditional entropy equal
+     log m rather than merely positive.  Alice's three weights carry no law:
+     they are her chosen query, not a sample. *)
+  pV1_unif : `p_ V1 = fdist_uniform (card_Zp_pq a b) ;
+  pV2_unif : `p_ V2 = fdist_uniform (card_Zp_pq a b) ;
+  pV3_unif : `p_ V3 = fdist_uniform (card_Zp_pq a b) ;
+  pR2_unif : `p_ R2 = fdist_uniform (card_Zp_pq a b) ;
+  pR3_unif : `p_ R3 = fdist_uniform (card_Zp_pq a b) }.
+Unset Strict Implicit.
+
+(* =================================================================          *)
+(* The setting                                                                *)
+(* =================================================================          *)
+
 (* The data a 3-party DSDP security statement is made over, at every security
-   parameter at once: one sample space with one law per k, the eleven random
-   inputs of a run with their independence and uniformity, the plaintext
-   modulus as two primes, and the sequence of scheme instances the hopping
-   bounds are stated at.  A value of it is a setting, not a proof.
+   parameter at once: the plaintext modulus as two primes, one counting side
+   per security parameter at that modulus, and the sequence of scheme
+   instances the hopping bounds are stated at.  A value of it is a setting,
+   not a proof.
    The two axes share one number, not one execution: card_plain equates two
    cardinalities and nothing identifies the two message spaces, so the
    weights and the keys occur twice as unrelated objects, as random variables
-   here and as values inside instance_sequence.
+   inside inputs and as values inside instance_sequence.
    The adversary and its class premises, Alice's query in both its honest and
    its corrupted form, and the output stay outside. *)
 Record dsdp_setting (R : realType) := {
@@ -212,90 +309,43 @@ Record dsdp_setting (R : realType) := {
     #|plain (inst_AHE (sequence_instance instance_sequence k))|
       = ((p_minus_2 k).+2 * (q_minus_2 k).+2)%N ;
 
-  (* The sample space at k and the law on it: every random variable below is
-     a function on this space and every bound is an average over this law. *)
-  sampleT : nat -> finType ;
-  sample_fdist : forall k, R.-fdist (sampleT k) ;
+  (* The counting side of the run at k, at the modulus the two prime fields
+     give there.  The sample spaces at distinct k are unrelated, as the
+     scheme instances at distinct k already are. *)
+  inputs : forall k, dsdp_random_inputs R (p_minus_2 k) (q_minus_2 k) }.
 
-  (* The entire randomness of a 3-party run at k.  Every message and every
-     party view is a deterministic function of these eleven, which is what
-     lets a bound proved at the inputs transfer to a view. *)
-  V1 : forall k, {RV (sample_fdist k) ->
-    ('Z_((p_minus_2 k).+2 * (q_minus_2 k).+2))} ;
-  V2 : forall k, {RV (sample_fdist k) ->
-    ('Z_((p_minus_2 k).+2 * (q_minus_2 k).+2))} ;
-  V3 : forall k, {RV (sample_fdist k) ->
-    ('Z_((p_minus_2 k).+2 * (q_minus_2 k).+2))} ;
-  U1 : forall k, {RV (sample_fdist k) ->
-    ('Z_((p_minus_2 k).+2 * (q_minus_2 k).+2))} ;
-  U2 : forall k, {RV (sample_fdist k) ->
-    ('Z_((p_minus_2 k).+2 * (q_minus_2 k).+2))} ;
-  U3 : forall k, {RV (sample_fdist k) ->
-    ('Z_((p_minus_2 k).+2 * (q_minus_2 k).+2))} ;
-  R2 : forall k, {RV (sample_fdist k) ->
-    ('Z_((p_minus_2 k).+2 * (q_minus_2 k).+2))} ;
-  R3 : forall k, {RV (sample_fdist k) ->
-    ('Z_((p_minus_2 k).+2 * (q_minus_2 k).+2))} ;
-  Dk_a : forall k, {RV (sample_fdist k) -> (Alice.-key Dec
-    'Z_((p_minus_2 k).+2 * (q_minus_2 k).+2))} ;
-  Dk_b : forall k, {RV (sample_fdist k) -> (Bob.-key Dec
-    'Z_((p_minus_2 k).+2 * (q_minus_2 k).+2))} ;
-  Dk_c : forall k, {RV (sample_fdist k) -> (Charlie.-key Dec
-    'Z_((p_minus_2 k).+2 * (q_minus_2 k).+2))} ;
+(* =================================================================          *)
+(* Alice's query                                                              *)
+(* =================================================================          *)
 
-  (* Each input independent of the joint of the other ten, stated
-     each-against-the-rest because every derived fact below is one of these
-     pushed through inde_RV_comp. *)
-  V1_indep : forall k, sample_fdist k |=
-    [% V2 k, V3 k, U1 k, U2 k, U3 k, R2 k, R3 k,
-       Dk_a k, Dk_b k, Dk_c k] _|_ V1 k ;
-  V2_indep : forall k, sample_fdist k |=
-    [% V1 k, V3 k, U1 k, U2 k, U3 k, R2 k, R3 k,
-       Dk_a k, Dk_b k, Dk_c k] _|_ V2 k ;
-  V3_indep : forall k, sample_fdist k |=
-    [% V1 k, V2 k, U1 k, U2 k, U3 k, R2 k, R3 k,
-       Dk_a k, Dk_b k, Dk_c k] _|_ V3 k ;
-  U1_indep : forall k, sample_fdist k |=
-    [% V1 k, V2 k, V3 k, U2 k, U3 k, R2 k, R3 k,
-       Dk_a k, Dk_b k, Dk_c k] _|_ U1 k ;
-  U2_indep : forall k, sample_fdist k |=
-    [% V1 k, V2 k, V3 k, U1 k, U3 k, R2 k, R3 k,
-       Dk_a k, Dk_b k, Dk_c k] _|_ U2 k ;
-  U3_indep : forall k, sample_fdist k |=
-    [% V1 k, V2 k, V3 k, U1 k, U2 k, R2 k, R3 k,
-       Dk_a k, Dk_b k, Dk_c k] _|_ U3 k ;
-  R2_indep : forall k, sample_fdist k |=
-    [% V1 k, V2 k, V3 k, U1 k, U2 k, U3 k, R3 k,
-       Dk_a k, Dk_b k, Dk_c k] _|_ R2 k ;
-  R3_indep : forall k, sample_fdist k |=
-    [% V1 k, V2 k, V3 k, U1 k, U2 k, U3 k, R2 k,
-       Dk_a k, Dk_b k, Dk_c k] _|_ R3 k ;
-  Dk_a_indep : forall k, sample_fdist k |=
-    [% V1 k, V2 k, V3 k, U1 k, U2 k, U3 k, R2 k, R3 k,
-       Dk_b k, Dk_c k] _|_ Dk_a k ;
-  Dk_b_indep : forall k, sample_fdist k |=
-    [% V1 k, V2 k, V3 k, U1 k, U2 k, U3 k, R2 k, R3 k,
-       Dk_a k, Dk_c k] _|_ Dk_b k ;
-  Dk_c_indep : forall k, sample_fdist k |=
-    [% V1 k, V2 k, V3 k, U1 k, U2 k, U3 k, R2 k, R3 k,
-       Dk_a k, Dk_b k] _|_ Dk_c k ;
+Section dsdp_query_records.
+Local Set Default Goal Selector "1".
+Context {R : realType}.
 
-  (* Uniformity of R2 and R3 is what makes the relay bounds unconditional,
-     one-time-pad masking rather than encryption hardness hiding V2 and V3;
-     uniformity of V1, V2, V3 is what makes the conditional entropy equal
-     log m rather than merely positive.  Alice's three weights carry no law:
-     they are her chosen query, not a sample. *)
-  pV1_unif : forall k, `p_ (V1 k)
-    = fdist_uniform (card_Zp_pq (p_minus_2 k) (q_minus_2 k)) ;
-  pV2_unif : forall k, `p_ (V2 k)
-    = fdist_uniform (card_Zp_pq (p_minus_2 k) (q_minus_2 k)) ;
-  pV3_unif : forall k, `p_ (V3 k)
-    = fdist_uniform (card_Zp_pq (p_minus_2 k) (q_minus_2 k)) ;
-  pR2_unif : forall k, `p_ (R2 k)
-    = fdist_uniform (card_Zp_pq (p_minus_2 k) (q_minus_2 k)) ;
-  pR3_unif : forall k, `p_ (R3 k)
-    = fdist_uniform (card_Zp_pq (p_minus_2 k) (q_minus_2 k)) }.
-Unset Strict Implicit.
+(* The condition on Alice's query weights at k under which her conditional
+   entropy about the relay pair is exactly log m: her weight on Charlie's
+   input is a nonzero residue below both prime factors, hence invertible
+   modulo the composite modulus, which is what leaves the relay pair uniform
+   on the fiber her leaked output cuts. *)
+Record dsdp_honest_query (X : dsdp_setting R) (k : nat) := {
+  U3_gt0 : forall t, (0 < U3 (inputs X k) t)%N ;
+  U3_lt_minn : forall t,
+    (U3 (inputs X k) t < minn (p_minus_2 X k).+2 (q_minus_2 X k).+2)%N }.
+
+(* The choice of Alice's query weights at k under which the protocol output
+   is Bob's input itself, the basis vector e_1: the leakage theorem is stated
+   at this query, and it is what makes that theorem's zero conditional
+   entropy a statement about a query rather than about an encryption. *)
+Record dsdp_corrupted_query (X : dsdp_setting R) (k : nat) := {
+  U2_eq1 : U2 (inputs X k) = (fun _ => 1) ;
+  U3_eq0 : U3 (inputs X k) = (fun _ => 0) }.
+
+End dsdp_query_records.
+
+(* No value of dsdp_random_inputs satisfies both records at one k, since
+   U3 = 0 falls outside the honest range.  That is why the two conditions are
+   premises of two different results rather than fields of the setting: as a
+   field, either one would make the other result vacuous. *)
 
 (* =================================================================          *)
 (* The laws of one setting at one security parameter                          *)
@@ -314,18 +364,22 @@ Local Notation p := p_minus_2.+2.
 Local Notation q := q_minus_2.+2.
 Local Notation m := (p * q)%N.
 Local Notation msg := 'Z_m.
-Local Notation P := (sample_fdist X k).
-Local Notation V1 := (V1 X k).
-Local Notation V2 := (V2 X k).
-Local Notation V3 := (V3 X k).
-Local Notation U1 := (U1 X k).
-Local Notation U2 := (U2 X k).
-Local Notation U3 := (U3 X k).
-Local Notation R2 := (R2 X k).
-Local Notation R3 := (R3 X k).
-Local Notation Dk_a := (Dk_a X k).
-Local Notation Dk_b := (Dk_b X k).
-Local Notation Dk_c := (Dk_c X k).
+
+(* The counting side of the run at k, the record the eleven input names
+   below are read off. *)
+Local Notation I := (inputs X k).
+Local Notation P := (sample_fdist I).
+Local Notation V1 := (V1 I).
+Local Notation V2 := (V2 I).
+Local Notation V3 := (V3 I).
+Local Notation U1 := (U1 I).
+Local Notation U2 := (U2 I).
+Local Notation U3 := (U3 I).
+Local Notation R2 := (R2 I).
+Local Notation R3 := (R3 I).
+Local Notation Dk_a := (Dk_a I).
+Local Notation Dk_b := (Dk_b I).
+Local Notation Dk_c := (Dk_c I).
 
 (* The joint of the ten inputs other than one plaintext input: the domain
    every each-against-the-rest projection below reads from. *)
@@ -392,7 +446,7 @@ Qed.
 Lemma V2_indep_V3 : P |= V2 _|_ V3.
 Proof.
 have h := inde_RV_comp (fun w : rest10 => w.1.1.1.1.1.1.1.1.2) idfun
-  (V3_indep X k).
+  (V3_indep I).
 by rewrite /comp_RV /= in h *.
 Qed.
 
@@ -404,7 +458,7 @@ Lemma VarRV_uniform :
   `p_ VarRV
   = fdist_uniform (dsdp_entropy.card_msg_pair_subproof p_minus_2 q_minus_2).
 Proof.
-rewrite /VarRV (inde_dist_of_RV2 V2_indep_V3) (pV2_unif X k) (pV3_unif X k).
+rewrite /VarRV (inde_dist_of_RV2 V2_indep_V3) (pV2_unif I) (pV3_unif I).
 exact: esym (fdist_uniform_prod _ _ _).
 Qed.
 
@@ -417,13 +471,13 @@ rewrite /InputRV /VarRV; apply: inde_RV_contraction.
 - have h := inde_RV_comp
     (fun w : rest10 => (((w.1.1.1.1.1.1.1.1.1, w.1.1.1.1.1.1.1.2),
                          w.1.1.1.1.1.1.2), w.1.1.1.1.1.2)) idfun
-    (V2_indep X k).
+    (V2_indep I).
   by rewrite /comp_RV /= in h *.
 - have h := inde_RV_comp
     (fun w : rest10 => ((((w.1.1.1.1.1.1.1.1.1, w.1.1.1.1.1.1.1.2),
                           w.1.1.1.1.1.1.2), w.1.1.1.1.1.2),
                         w.1.1.1.1.1.1.1.1.2)) idfun
-    (V3_indep X k).
+    (V3_indep I).
   by rewrite /comp_RV /= in h *.
 Qed.
 
@@ -436,7 +490,7 @@ have h := inde_RV_comp
   (fun w : rest10 => (((w.1.2, w.1.1.1.1.1.1.1.1.1),
                        w.1.1.1.1.1.1.1.1.2 * w.1.1.1.1.1.2 + w.1.1.1.2),
                       w.1.1.1.1.1.1.1.1.1 * w.1.1.1.1.1.1.2 + w.1.1.1.1.2))
-  idfun (V1_indep X k).
+  idfun (V1_indep I).
 by rewrite /comp_RV /VU3R /VU3 /D2 /VU2 /= in h *.
 Qed.
 
@@ -449,7 +503,7 @@ have h := inde_RV_comp
                       w.1.1.1.1.1.1.1.1.2 * w.1.1.1.1.1.2 + w.1.1.1.2
                       + (w.1.1.1.1.1.1.1.1.1 * w.1.1.1.1.1.1.2
                          + w.1.1.1.1.2)))
-  idfun (V1_indep X k).
+  idfun (V1_indep I).
 by rewrite /comp_RV /D3 /VU3R /VU3 /D2 /VU2 /= in h *.
 Qed.
 
@@ -460,7 +514,7 @@ Lemma R3_indep_VU3_V3 : P |= R3 _|_ [% VU3, V3].
 Proof.
 have h := inde_RV_comp
   (fun w : rest10 => (w.1.1.1.1.1.1.1.2 * w.1.1.1.1.2,
-                      w.1.1.1.1.1.1.1.2)) idfun (R3_indep X k).
+                      w.1.1.1.1.1.1.1.2)) idfun (R3_indep I).
 rewrite /comp_RV /VU3 /= in h *.
 by rewrite inde_RV_sym.
 Qed.
@@ -476,14 +530,14 @@ have hv3 : P |= [% Dk_b, V2, D2] _|_ V3.
   have h := inde_RV_comp
     (fun w : rest10 => ((w.1.2, w.1.1.1.1.1.1.1.1.2),
                         w.1.1.1.1.1.1.1.1.2 * w.1.1.1.1.1.1.2
-                        + w.1.1.1.1.2)) idfun (V3_indep X k).
+                        + w.1.1.1.1.2)) idfun (V3_indep I).
   by rewrite /comp_RV /D2 /VU2 /= in h *.
 have hu3 : P |= [% [% Dk_b, V2, D2], V3] _|_ U3.
   have h := inde_RV_comp
     (fun w : rest10 => (((w.1.2, w.1.1.1.1.1.1.1.1.2),
                          w.1.1.1.1.1.1.1.1.2 * w.1.1.1.1.1.2
                          + w.1.1.1.1.2), w.1.1.1.1.1.1.1.2))
-    idfun (U3_indep X k).
+    idfun (U3_indep I).
   by rewrite /comp_RV /D2 /VU2 /= in h *.
 have hr3 : P |= [% [% Dk_b, V2, D2], [% V3, U3]] _|_ R3.
   have h := inde_RV_comp
@@ -491,7 +545,7 @@ have hr3 : P |= [% [% Dk_b, V2, D2], [% V3, U3]] _|_ R3.
                          w.1.1.1.1.1.1.1.1.2 * w.1.1.1.1.1.2
                          + w.1.1.1.2), (w.1.1.1.1.1.1.1.2,
                                         w.1.1.1.1.2)))
-    idfun (R3_indep X k).
+    idfun (R3_indep I).
   by rewrite /comp_RV /D2 /VU2 /= in h *.
 have hstep := inde_RV_contraction (inde_RV_contraction hv3 hu3) hr3.
 have h := inde_RV_comp idfun
@@ -506,7 +560,7 @@ Lemma R2_indep_VU2_V2 : P |= R2 _|_ [% VU2, V2].
 Proof.
 have h := inde_RV_comp
   (fun w : rest10 => (w.1.1.1.1.1.1.1.1.2 * w.1.1.1.1.1.2,
-                      w.1.1.1.1.1.1.1.1.2)) idfun (R2_indep X k).
+                      w.1.1.1.1.1.1.1.1.2)) idfun (R2_indep I).
 rewrite /comp_RV /VU2 /= in h *.
 by rewrite inde_RV_sym.
 Qed.
@@ -518,7 +572,7 @@ Proof.
 have h := inde_RV_comp
   (fun w : rest10 => (w.1.1.1.1.1.1.1.1.2 * w.1.1.1.1.1.2,
                       (w.1.1.1.1.1.1.1.2 * w.1.1.1.1.2 + w.1.1.1.2,
-                       w.1.1.1.1.1.1.1.1.2))) idfun (R2_indep X k).
+                       w.1.1.1.1.1.1.1.1.2))) idfun (R2_indep I).
 rewrite /comp_RV /VU2 /VU3R /VU3 /= in h *.
 by rewrite inde_RV_sym.
 Qed.
@@ -532,13 +586,13 @@ Lemma Dk_c_V3_indep_V2_E_charlie_d3 :
 Proof.
 have card_TZ : #|msg| = (Zp_trunc m).+1.+1 by rewrite card_ord.
 have pR2_adj : `p_ R2 = fdist_uniform card_TZ.
-  by rewrite (pR2_unif X k); congr fdist_uniform; exact: eq_irrelevance.
+  by rewrite (pR2_unif I); congr fdist_uniform; exact: eq_irrelevance.
 have r2_rest : P |= R2 _|_ [% VU2, [% VU3R, [% [% Dk_c, V3], V2]]].
   have h := inde_RV_comp
     (fun w : rest10 => (w.1.1.1.1.1.1.1.1.2 * w.1.1.1.1.1.2,
                         (w.1.1.1.1.1.1.1.2 * w.1.1.1.1.2 + w.1.1.1.2,
                          ((w.2, w.1.1.1.1.1.1.1.2),
-                          w.1.1.1.1.1.1.1.1.2)))) idfun (R2_indep X k).
+                          w.1.1.1.1.1.1.1.1.2)))) idfun (R2_indep I).
   rewrite /comp_RV /VU2 /VU3R /VU3 /= in h *.
   by rewrite inde_RV_sym.
 have d2_rest : P |= D2 _|_ [% VU3R, [% [% Dk_c, V3], V2]].
@@ -556,7 +610,7 @@ have he : P |= [% [% Dk_c, V3], V2] _|_ E_charlie_d3.
   by rewrite /E_charlie_d3 /comp_RV /= in h *.
 apply: inde_RV_contraction; last exact: he.
 have h := inde_RV_comp (fun w : rest10 => (w.2, w.1.1.1.1.1.1.1.1.2)) idfun
-  (V2_indep X k).
+  (V2_indep I).
 by rewrite /comp_RV /= in h *.
 Qed.
 
@@ -585,30 +639,490 @@ Arguments R2_indep_VU2_VU3R_V2 {R} X k.
 Arguments Dk_c_V3_indep_V2_E_charlie_d3 {R} X k.
 
 (* =================================================================          *)
-(* An inhabitant                                                              *)
+(* The hopping objects of one setting at one security parameter               *)
 (* =================================================================          *)
 
-(* The record is inhabited.  On this value the hopping side is the idealized
-   scheme of idealized_ahe.v under the cipher-constant assumption, whose
-   assumed advantage is zero at every k, so every hopping bound stated over
-   it is its unconditional 1/#|plain| term alone; the counting side is the
-   uniform law on eight coordinates of the plaintext ring, on which every
-   counting bound is exact at log (p k * q k).
-   Every declaration carries the idealized_ stem of the value it builds,
-   since the record's own projections hold the bare names, with idealized_pq_
-   on the two that would otherwise collide with idealized_instance and
-   idealized_instance_sequence of dsdp_instance_sequence.v; prime_minus2K is
-   a general fact about primes and keeps its bare name. *)
-Section dsdp_setting_witness.
+(* Each declaration below names an object of the hopping axis at the k-th
+   instance of the sequence X carries, so that a bound of dsdp_alice_hop_
+   secrecy.v or dsdp_alice_trace_link.v can be stated over a setting without
+   the instance's fifteen projections being written out at every use. *)
+Section dsdp_hopping_views.
+Local Unset Implicit Arguments.
+Context {R : realType}.
+Variable X : dsdp_setting R.
+Variable k : nat.
+
+Local Notation Inst := (sequence_instance (instance_sequence X) k).
+Local Notation AHE := (inst_AHE Inst).
+Local Notation Renc := (inst_renc Inst).
+Local Notation card_renc := (inst_card_renc Inst).
+Local Notation rand_of_renc := (@inst_rand_of_renc Inst).
+Local Notation pkey_of_party := (inst_pkey_of_party Inst).
+Local Notation v1 := (inst_v1 Inst).
+Local Notation u1 := (inst_u1 Inst).
+Local Notation u2 := (inst_u2 Inst).
+Local Notation u3 := (inst_u3 Inst).
+Local Notation dk_a := (inst_dk_a Inst).
+Local Notation dk_b := (inst_dk_b Inst).
+Local Notation dk_c := (inst_dk_c Inst).
+Local Notation rb2 := (inst_rb2 Inst).
+Local Notation rc2 := (inst_rc2 Inst).
+
+(* The scheme packaging at the k-th instance, and its coin index type. *)
+Definition AHE_at : AHEncType := AHE.
+Definition Renc_at : finType := Renc.
+
+(* The five carriers the hopping bounds quantify predictors over, at the k-th
+   instance. *)
+Definition hop_tupleT_at : finType := alice_hop_tupleT AHE Renc.
+Definition hop_jointT_at : finType := alice_hop_jointT AHE Renc.
+Definition viewT_at : finType := alice_viewT AHE Renc.
+Definition traceT_at : finType := alice_traceT AHE.
+Definition trace_jointT_at : finType := trace_jointT AHE.
+
+(* The corrupted-Alice sample space at the k-th instance, and the two honest
+   relay inputs on it. *)
+Definition hop_fdist_at : R.-fdist (alice_sampleT AHE Renc) :=
+  alice_sample_fdist (R:=R) AHE card_renc.
+Definition hop_V2_at : {RV hop_fdist_at -> plain AHE} :=
+  sample_V2 (R:=R) (AHE:=AHE) card_renc.
+Definition hop_V3_at : {RV hop_fdist_at -> plain AHE} :=
+  sample_V3 (R:=R) (AHE:=AHE) card_renc.
+
+(* The three conditioners of the hopping ladder at the k-th instance: the
+   i-th hop, its real endpoint, and Alice's whole view. *)
+Definition AliceHopTuple_at (i : nat) : {RV hop_fdist_at -> hop_tupleT_at} :=
+  AliceHopTuple (R:=R) (AHE:=AHE) card_renc rand_of_renc pkey_of_party
+    v1 u1 u2 u3 i.
+Definition AliceRealTuple_at : {RV hop_fdist_at -> hop_tupleT_at} :=
+  AliceRealTuple (R:=R) (AHE:=AHE) card_renc rand_of_renc pkey_of_party
+    v1 u1 u2 u3.
+Definition AliceView_at : {RV hop_fdist_at -> viewT_at} :=
+  AliceView (R:=R) (AHE:=AHE) card_renc rand_of_renc pkey_of_party
+    v1 u1 u2 u3.
+
+(* Alice's executed trace at the k-th instance, the conditioner the trace
+   bounds read, and the output she leaks there. *)
+Definition AliceTrace_at : {RV hop_fdist_at -> traceT_at} :=
+  AliceTrace (R:=R) (AHE:=AHE) card_renc rand_of_renc
+    v1 u1 u2 u3 dk_a dk_b dk_c rb2 rc2.
+Definition Sout_at : {RV hop_fdist_at -> plain AHE} :=
+  Sout (R:=R) (AHE:=AHE) card_renc v1 u1 u2 u3.
+
+(* The two public keys the ladder prices its hops at, at the k-th instance. *)
+Definition bob_pkey_at : pub_key AHE := bob_pkey pkey_of_party.
+Definition charlie_pkey_at : pub_key AHE := charlie_pkey pkey_of_party.
+
+(* The simulator's law at the k-th instance, at the hopping tuple and at the
+   executed trace. *)
+Definition alice_ideal_joint_at : R.-fdist hop_jointT_at :=
+  alice_ideal_joint (R:=R) (AHE:=AHE) card_renc rand_of_renc pkey_of_party
+    v1 u1 u2 u3.
+Definition alice_trace_ideal_joint_at : R.-fdist trace_jointT_at :=
+  alice_trace_ideal_joint (R:=R) card_renc rand_of_renc
+    v1 u1 u2 u3 dk_a dk_b dk_c rc2.
+
+(* The IND-CPA assumption type at the k-th instance, and the assumption the
+   sequence itself makes there. *)
+Definition indcpa_assumptionT_at : Type :=
+  indcpa_epsilon_assumption (R:=R) (AHE:=AHE) card_renc rand_of_renc.
+Definition assumption_at : indcpa_assumptionT_at :=
+  sequence_assumption (instance_sequence X) k.
+
+End dsdp_hopping_views.
+
+(* =================================================================          *)
+(* The counting views of one setting at one security parameter                *)
+(* =================================================================          *)
+
+(* The three views of the counting axis at the inputs X carries at k, each
+   the axis definition of its own file applied to those eleven inputs. *)
+Section dsdp_counting_views.
+Local Unset Implicit Arguments.
+Context {R : realType}.
+Variable X : dsdp_setting R.
+Variable k : nat.
+
+Local Notation I := (inputs X k).
+Local Notation V1 := (V1 I).
+Local Notation V2 := (V2 I).
+Local Notation V3 := (V3 I).
+Local Notation U1 := (U1 I).
+Local Notation U2 := (U2 I).
+Local Notation U3 := (U3 I).
+Local Notation R2 := (R2 I).
+Local Notation R3 := (R3 I).
+Local Notation Dk_a := (Dk_a I).
+Local Notation Dk_b := (Dk_b I).
+Local Notation Dk_c := (Dk_c I).
+
+(* Bob's full real view at the inputs of X at k. *)
+Definition BobView_at := BobView V2 V3 U2 U3 R2 R3 Dk_b.
+
+(* Charlie's full real view at the inputs of X at k. *)
+Definition CharlieView_at := CharlieView V2 V3 U2 U3 R2 R3 Dk_c.
+
+(* Alice's full real view in the dot-product model at the inputs of X at k. *)
+Definition AliceDotpView_at :=
+  AliceDotpView V1 V2 V3 U1 U2 U3 R2 R3 Dk_a.
+
+End dsdp_counting_views.
+
+(* =================================================================          *)
+(* The counting side is inhabited at every modulus                            *)
+(* =================================================================          *)
+
+(* The counting side at any modulus, with Alice's query weights held at three
+   values of her choosing: the three plaintext inputs and the two masks are
+   the five coordinates of a uniformly drawn row vector, and the three
+   weights and the three private keys are constants of the sample space.
+   Constant weights are what give the two query records values.  A weight
+   drawn uniformly takes the value zero somewhere on the sample space, and
+   the honest query asks for a weight invertible at every sample, so no
+   setting whose weights are sampled satisfies either query record. *)
+Section dsdp_inputs_uniform.
 Local Set Default Goal Selector "1".
 Local Open Scope vec_ext_scope.
 Context {R : realType}.
-
-(* A k-indexed random variable's type unfolds to a function type whose domain
-   mentions k, so under the file's ambient Set Implicit Arguments the index
-   would be inferred implicit and idealized_V1 k would not typecheck. *)
 Local Unset Implicit Arguments.
 
+Local Notation ord5 j := (@Ordinal 5 j erefl).
+Local Notation ord4 j := (@Ordinal 4 j erefl).
+Local Notation msg a b := ('Z_(a.+2 * b.+2)).
+
+(* The plaintext count at this modulus, in the form fdist_uniform takes its
+   argument. *)
+Definition uniform_card_msg (a b : nat) : #|msg a b| = (a.+2 * b.+2)%N :=
+  card_Zp_pq a b.
+
+Lemma uniform_card_sample (a b : nat) :
+  #|'rV[msg a b]_5| = (((a.+2 * b.+2) ^ 5).-1).+1.
+Proof. by rewrite card_mx mul1n (uniform_card_msg a b) prednK. Qed.
+
+Lemma uniform_card_rest (a b : nat) :
+  #|'rV[msg a b]_4| = (((a.+2 * b.+2) ^ 4).-1).+1.
+Proof. by rewrite card_mx mul1n (uniform_card_msg a b) prednK. Qed.
+
+Definition uniform_sampleT (a b : nat) : finType := 'rV[msg a b]_5.
+
+Definition uniform_sample_fdist (a b : nat) : R.-fdist (uniform_sampleT a b) :=
+  fdist_uniform (uniform_card_sample a b).
+
+Local Notation P a b := (uniform_sample_fdist a b).
+
+Definition uniform_coord (a b : nat) (i : 'I_5) : {RV (P a b) -> msg a b} :=
+  fun v => v ``_ i.
+
+Definition uniform_rest (a b : nat) (i : 'I_5) :
+    {RV (P a b) -> 'rV[msg a b]_4} :=
+  rV_drop i.
+
+Lemma uniform_split (a b : nat) (i : 'I_5) :
+  [/\ P a b |= uniform_rest a b i _|_ uniform_coord a b i,
+      `p_ (uniform_rest a b i) = fdist_uniform (uniform_card_rest a b)
+    & `p_ (uniform_coord a b i) = fdist_uniform (uniform_card_msg a b)].
+Proof.
+have bij_split : bijective (fun t => (uniform_rest a b i t,
+                                      uniform_coord a b i t)).
+  exact: (rV_split_bij (msg a b) i).
+exact: (uniform_bij_indep (uniform_card_rest a b) (uniform_card_msg a b)
+          bij_split).
+Qed.
+
+(* The rest-tuple seen from an input coordinate: the four remaining
+   coordinates in their original order with the three weights and the three
+   keys read off as constants. *)
+Definition uniform_view_input (a b : nat) (w1 w2 w3 : msg a b)
+    (w : 'rV[msg a b]_4) :=
+  (w ``_ (ord4 0), w ``_ (ord4 1), w1, w2, w3,
+   w ``_ (ord4 2), w ``_ (ord4 3),
+   @KeyOf Alice Dec (msg a b) 0, @KeyOf Bob Dec (msg a b) 0,
+   @KeyOf Charlie Dec (msg a b) 0).
+
+(* The same tuple seen from a mask coordinate, where the three weights sit
+   after the three inputs rather than after two of them. *)
+Definition uniform_view_mask (a b : nat) (w1 w2 w3 : msg a b)
+    (w : 'rV[msg a b]_4) :=
+  (w ``_ (ord4 0), w ``_ (ord4 1), w ``_ (ord4 2), w1, w2, w3,
+   w ``_ (ord4 3),
+   @KeyOf Alice Dec (msg a b) 0, @KeyOf Bob Dec (msg a b) 0,
+   @KeyOf Charlie Dec (msg a b) 0).
+
+Definition uniform_V1 (a b : nat) : {RV (P a b) -> msg a b} :=
+  uniform_coord a b (ord5 0).
+Definition uniform_V2 (a b : nat) : {RV (P a b) -> msg a b} :=
+  uniform_coord a b (ord5 1).
+Definition uniform_V3 (a b : nat) : {RV (P a b) -> msg a b} :=
+  uniform_coord a b (ord5 2).
+Definition uniform_R2 (a b : nat) : {RV (P a b) -> msg a b} :=
+  uniform_coord a b (ord5 3).
+Definition uniform_R3 (a b : nat) : {RV (P a b) -> msg a b} :=
+  uniform_coord a b (ord5 4).
+
+Definition uniform_U1 (a b : nat) (w1 : msg a b) : {RV (P a b) -> msg a b} :=
+  fun _ => w1.
+Definition uniform_U2 (a b : nat) (w2 : msg a b) : {RV (P a b) -> msg a b} :=
+  fun _ => w2.
+Definition uniform_U3 (a b : nat) (w3 : msg a b) : {RV (P a b) -> msg a b} :=
+  fun _ => w3.
+
+Definition uniform_Dk_a (a b : nat) :
+    {RV (P a b) -> (Alice.-key Dec (msg a b))} :=
+  fun _ => @KeyOf Alice Dec _ 0.
+Definition uniform_Dk_b (a b : nat) :
+    {RV (P a b) -> (Bob.-key Dec (msg a b))} :=
+  fun _ => @KeyOf Bob Dec _ 0.
+Definition uniform_Dk_c (a b : nat) :
+    {RV (P a b) -> (Charlie.-key Dec (msg a b))} :=
+  fun _ => @KeyOf Charlie Dec _ 0.
+
+Lemma uniform_V1_indep (a b : nat) (w1 w2 w3 : msg a b) :
+  P a b |=
+    [% uniform_V2 a b, uniform_V3 a b, uniform_U1 a b w1, uniform_U2 a b w2,
+       uniform_U3 a b w3, uniform_R2 a b, uniform_R3 a b,
+       uniform_Dk_a a b, uniform_Dk_b a b, uniform_Dk_c a b]
+  _|_ uniform_V1 a b.
+Proof.
+have e0 : lift (ord5 0) (ord4 0) = ord5 1 by apply/val_inj.
+have e1 : lift (ord5 0) (ord4 1) = ord5 2 by apply/val_inj.
+have e2 : lift (ord5 0) (ord4 2) = ord5 3 by apply/val_inj.
+have e3 : lift (ord5 0) (ord4 3) = ord5 4 by apply/val_inj.
+have -> :
+  [% uniform_V2 a b, uniform_V3 a b, uniform_U1 a b w1, uniform_U2 a b w2,
+     uniform_U3 a b w3, uniform_R2 a b, uniform_R3 a b,
+     uniform_Dk_a a b, uniform_Dk_b a b, uniform_Dk_c a b]
+  = uniform_view_input a b w1 w2 w3 `o uniform_rest a b (ord5 0).
+  apply/funext => v.
+  by rewrite /comp_RV /uniform_view_input /uniform_rest /rV_drop !mxE
+    e0 e1 e2 e3.
+have [ind _ _] := uniform_split a b (ord5 0).
+exact: inde_RV_comp (uniform_view_input a b w1 w2 w3) idfun ind.
+Qed.
+
+Lemma uniform_V2_indep (a b : nat) (w1 w2 w3 : msg a b) :
+  P a b |=
+    [% uniform_V1 a b, uniform_V3 a b, uniform_U1 a b w1, uniform_U2 a b w2,
+       uniform_U3 a b w3, uniform_R2 a b, uniform_R3 a b,
+       uniform_Dk_a a b, uniform_Dk_b a b, uniform_Dk_c a b]
+  _|_ uniform_V2 a b.
+Proof.
+have e0 : lift (ord5 1) (ord4 0) = ord5 0 by apply/val_inj.
+have e1 : lift (ord5 1) (ord4 1) = ord5 2 by apply/val_inj.
+have e2 : lift (ord5 1) (ord4 2) = ord5 3 by apply/val_inj.
+have e3 : lift (ord5 1) (ord4 3) = ord5 4 by apply/val_inj.
+have -> :
+  [% uniform_V1 a b, uniform_V3 a b, uniform_U1 a b w1, uniform_U2 a b w2,
+     uniform_U3 a b w3, uniform_R2 a b, uniform_R3 a b,
+     uniform_Dk_a a b, uniform_Dk_b a b, uniform_Dk_c a b]
+  = uniform_view_input a b w1 w2 w3 `o uniform_rest a b (ord5 1).
+  apply/funext => v.
+  by rewrite /comp_RV /uniform_view_input /uniform_rest /rV_drop !mxE
+    e0 e1 e2 e3.
+have [ind _ _] := uniform_split a b (ord5 1).
+exact: inde_RV_comp (uniform_view_input a b w1 w2 w3) idfun ind.
+Qed.
+
+Lemma uniform_V3_indep (a b : nat) (w1 w2 w3 : msg a b) :
+  P a b |=
+    [% uniform_V1 a b, uniform_V2 a b, uniform_U1 a b w1, uniform_U2 a b w2,
+       uniform_U3 a b w3, uniform_R2 a b, uniform_R3 a b,
+       uniform_Dk_a a b, uniform_Dk_b a b, uniform_Dk_c a b]
+  _|_ uniform_V3 a b.
+Proof.
+have e0 : lift (ord5 2) (ord4 0) = ord5 0 by apply/val_inj.
+have e1 : lift (ord5 2) (ord4 1) = ord5 1 by apply/val_inj.
+have e2 : lift (ord5 2) (ord4 2) = ord5 3 by apply/val_inj.
+have e3 : lift (ord5 2) (ord4 3) = ord5 4 by apply/val_inj.
+have -> :
+  [% uniform_V1 a b, uniform_V2 a b, uniform_U1 a b w1, uniform_U2 a b w2,
+     uniform_U3 a b w3, uniform_R2 a b, uniform_R3 a b,
+     uniform_Dk_a a b, uniform_Dk_b a b, uniform_Dk_c a b]
+  = uniform_view_input a b w1 w2 w3 `o uniform_rest a b (ord5 2).
+  apply/funext => v.
+  by rewrite /comp_RV /uniform_view_input /uniform_rest /rV_drop !mxE
+    e0 e1 e2 e3.
+have [ind _ _] := uniform_split a b (ord5 2).
+exact: inde_RV_comp (uniform_view_input a b w1 w2 w3) idfun ind.
+Qed.
+
+Lemma uniform_R2_indep (a b : nat) (w1 w2 w3 : msg a b) :
+  P a b |=
+    [% uniform_V1 a b, uniform_V2 a b, uniform_V3 a b, uniform_U1 a b w1,
+       uniform_U2 a b w2, uniform_U3 a b w3, uniform_R3 a b,
+       uniform_Dk_a a b, uniform_Dk_b a b, uniform_Dk_c a b]
+  _|_ uniform_R2 a b.
+Proof.
+have e0 : lift (ord5 3) (ord4 0) = ord5 0 by apply/val_inj.
+have e1 : lift (ord5 3) (ord4 1) = ord5 1 by apply/val_inj.
+have e2 : lift (ord5 3) (ord4 2) = ord5 2 by apply/val_inj.
+have e3 : lift (ord5 3) (ord4 3) = ord5 4 by apply/val_inj.
+have -> :
+  [% uniform_V1 a b, uniform_V2 a b, uniform_V3 a b, uniform_U1 a b w1,
+     uniform_U2 a b w2, uniform_U3 a b w3, uniform_R3 a b,
+     uniform_Dk_a a b, uniform_Dk_b a b, uniform_Dk_c a b]
+  = uniform_view_mask a b w1 w2 w3 `o uniform_rest a b (ord5 3).
+  apply/funext => v.
+  by rewrite /comp_RV /uniform_view_mask /uniform_rest /rV_drop !mxE
+    e0 e1 e2 e3.
+have [ind _ _] := uniform_split a b (ord5 3).
+exact: inde_RV_comp (uniform_view_mask a b w1 w2 w3) idfun ind.
+Qed.
+
+Lemma uniform_R3_indep (a b : nat) (w1 w2 w3 : msg a b) :
+  P a b |=
+    [% uniform_V1 a b, uniform_V2 a b, uniform_V3 a b, uniform_U1 a b w1,
+       uniform_U2 a b w2, uniform_U3 a b w3, uniform_R2 a b,
+       uniform_Dk_a a b, uniform_Dk_b a b, uniform_Dk_c a b]
+  _|_ uniform_R3 a b.
+Proof.
+have e0 : lift (ord5 4) (ord4 0) = ord5 0 by apply/val_inj.
+have e1 : lift (ord5 4) (ord4 1) = ord5 1 by apply/val_inj.
+have e2 : lift (ord5 4) (ord4 2) = ord5 2 by apply/val_inj.
+have e3 : lift (ord5 4) (ord4 3) = ord5 3 by apply/val_inj.
+have -> :
+  [% uniform_V1 a b, uniform_V2 a b, uniform_V3 a b, uniform_U1 a b w1,
+     uniform_U2 a b w2, uniform_U3 a b w3, uniform_R2 a b,
+     uniform_Dk_a a b, uniform_Dk_b a b, uniform_Dk_c a b]
+  = uniform_view_mask a b w1 w2 w3 `o uniform_rest a b (ord5 4).
+  apply/funext => v.
+  by rewrite /comp_RV /uniform_view_mask /uniform_rest /rV_drop !mxE
+    e0 e1 e2 e3.
+have [ind _ _] := uniform_split a b (ord5 4).
+exact: inde_RV_comp (uniform_view_mask a b w1 w2 w3) idfun ind.
+Qed.
+
+(* The three weights and the three keys are constants, and a constant is
+   independent of everything.  Six of the eleven each-against-the-rest fields
+   are therefore discharged without touching the sample space. *)
+Lemma uniform_U1_indep (a b : nat) (w1 w2 w3 : msg a b) :
+  P a b |=
+    [% uniform_V1 a b, uniform_V2 a b, uniform_V3 a b, uniform_U2 a b w2,
+       uniform_U3 a b w3, uniform_R2 a b, uniform_R3 a b,
+       uniform_Dk_a a b, uniform_Dk_b a b, uniform_Dk_c a b]
+  _|_ uniform_U1 a b w1.
+Proof. by rewrite inde_RV_sym; exact: inde_const_RV. Qed.
+
+Lemma uniform_U2_indep (a b : nat) (w1 w2 w3 : msg a b) :
+  P a b |=
+    [% uniform_V1 a b, uniform_V2 a b, uniform_V3 a b, uniform_U1 a b w1,
+       uniform_U3 a b w3, uniform_R2 a b, uniform_R3 a b,
+       uniform_Dk_a a b, uniform_Dk_b a b, uniform_Dk_c a b]
+  _|_ uniform_U2 a b w2.
+Proof. by rewrite inde_RV_sym; exact: inde_const_RV. Qed.
+
+Lemma uniform_U3_indep (a b : nat) (w1 w2 w3 : msg a b) :
+  P a b |=
+    [% uniform_V1 a b, uniform_V2 a b, uniform_V3 a b, uniform_U1 a b w1,
+       uniform_U2 a b w2, uniform_R2 a b, uniform_R3 a b,
+       uniform_Dk_a a b, uniform_Dk_b a b, uniform_Dk_c a b]
+  _|_ uniform_U3 a b w3.
+Proof. by rewrite inde_RV_sym; exact: inde_const_RV. Qed.
+
+Lemma uniform_Dk_a_indep (a b : nat) (w1 w2 w3 : msg a b) :
+  P a b |=
+    [% uniform_V1 a b, uniform_V2 a b, uniform_V3 a b, uniform_U1 a b w1,
+       uniform_U2 a b w2, uniform_U3 a b w3, uniform_R2 a b, uniform_R3 a b,
+       uniform_Dk_b a b, uniform_Dk_c a b]
+  _|_ uniform_Dk_a a b.
+Proof. by rewrite inde_RV_sym; exact: inde_const_RV. Qed.
+
+Lemma uniform_Dk_b_indep (a b : nat) (w1 w2 w3 : msg a b) :
+  P a b |=
+    [% uniform_V1 a b, uniform_V2 a b, uniform_V3 a b, uniform_U1 a b w1,
+       uniform_U2 a b w2, uniform_U3 a b w3, uniform_R2 a b, uniform_R3 a b,
+       uniform_Dk_a a b, uniform_Dk_c a b]
+  _|_ uniform_Dk_b a b.
+Proof. by rewrite inde_RV_sym; exact: inde_const_RV. Qed.
+
+Lemma uniform_Dk_c_indep (a b : nat) (w1 w2 w3 : msg a b) :
+  P a b |=
+    [% uniform_V1 a b, uniform_V2 a b, uniform_V3 a b, uniform_U1 a b w1,
+       uniform_U2 a b w2, uniform_U3 a b w3, uniform_R2 a b, uniform_R3 a b,
+       uniform_Dk_a a b, uniform_Dk_b a b]
+  _|_ uniform_Dk_c a b.
+Proof. by rewrite inde_RV_sym; exact: inde_const_RV. Qed.
+
+Lemma uniform_pV1_unif (a b : nat) :
+  `p_ (uniform_V1 a b) = fdist_uniform (uniform_card_msg a b).
+Proof. by have [_ _ unif] := uniform_split a b (ord5 0). Qed.
+
+Lemma uniform_pV2_unif (a b : nat) :
+  `p_ (uniform_V2 a b) = fdist_uniform (uniform_card_msg a b).
+Proof. by have [_ _ unif] := uniform_split a b (ord5 1). Qed.
+
+Lemma uniform_pV3_unif (a b : nat) :
+  `p_ (uniform_V3 a b) = fdist_uniform (uniform_card_msg a b).
+Proof. by have [_ _ unif] := uniform_split a b (ord5 2). Qed.
+
+Lemma uniform_pR2_unif (a b : nat) :
+  `p_ (uniform_R2 a b) = fdist_uniform (uniform_card_msg a b).
+Proof. by have [_ _ unif] := uniform_split a b (ord5 3). Qed.
+
+Lemma uniform_pR3_unif (a b : nat) :
+  `p_ (uniform_R3 a b) = fdist_uniform (uniform_card_msg a b).
+Proof. by have [_ _ unif] := uniform_split a b (ord5 4). Qed.
+
+(* The counting side at any modulus with the query held fixed: five
+   coordinates of the plaintext ring drawn uniformly for the three inputs and
+   the two masks, the three weights and the three keys constant. *)
+Definition uniform_inputs (a b : nat) (w1 w2 w3 : msg a b) :
+    dsdp_random_inputs R a b := {|
+  sampleT := uniform_sampleT a b ;
+  sample_fdist := uniform_sample_fdist a b ;
+  V1 := uniform_V1 a b ;
+  V2 := uniform_V2 a b ;
+  V3 := uniform_V3 a b ;
+  U1 := uniform_U1 a b w1 ;
+  U2 := uniform_U2 a b w2 ;
+  U3 := uniform_U3 a b w3 ;
+  R2 := uniform_R2 a b ;
+  R3 := uniform_R3 a b ;
+  Dk_a := uniform_Dk_a a b ;
+  Dk_b := uniform_Dk_b a b ;
+  Dk_c := uniform_Dk_c a b ;
+  V1_indep := uniform_V1_indep a b w1 w2 w3 ;
+  V2_indep := uniform_V2_indep a b w1 w2 w3 ;
+  V3_indep := uniform_V3_indep a b w1 w2 w3 ;
+  U1_indep := uniform_U1_indep a b w1 w2 w3 ;
+  U2_indep := uniform_U2_indep a b w1 w2 w3 ;
+  U3_indep := uniform_U3_indep a b w1 w2 w3 ;
+  R2_indep := uniform_R2_indep a b w1 w2 w3 ;
+  R3_indep := uniform_R3_indep a b w1 w2 w3 ;
+  Dk_a_indep := uniform_Dk_a_indep a b w1 w2 w3 ;
+  Dk_b_indep := uniform_Dk_b_indep a b w1 w2 w3 ;
+  Dk_c_indep := uniform_Dk_c_indep a b w1 w2 w3 ;
+  pV1_unif := uniform_pV1_unif a b ;
+  pV2_unif := uniform_pV2_unif a b ;
+  pV3_unif := uniform_pV3_unif a b ;
+  pR2_unif := uniform_pR2_unif a b ;
+  pR3_unif := uniform_pR3_unif a b |}.
+
+End dsdp_inputs_uniform.
+
+(* =================================================================          *)
+(* Two inhabitants, one per query                                             *)
+(* =================================================================          *)
+
+(* The setting record is inhabited, at each of Alice's two queries.  On both
+   values the hopping side is the idealized scheme of idealized_ahe.v under
+   the cipher-constant assumption, whose assumed advantage is zero at every
+   k, so every hopping bound stated over them is its unconditional
+   1/#|plain| term alone; the counting side is uniform_inputs at the two
+   query weight choices, on which every counting bound is exact at
+   log (p k * q k).
+   Every declaration carries the idealized_ stem of the value it builds,
+   since the record's own projections hold the bare names, with idealized_pq_
+   on the two that would otherwise collide with idealized_instance and
+   idealized_instance_sequence of dsdp_instance_sequence.v; prime_minus2K and
+   val_Zp_pq1 are general facts and keep their bare names. *)
+Section dsdp_setting_witness.
+Local Set Default Goal Selector "1".
+Context {R : realType}.
+
+(* Every k-indexed declaration below is meant to be applied to its security
+   parameter, so the index stays explicit rather than being inferred from a
+   later argument. *)
+Local Unset Implicit Arguments.
 (* The smaller prime factor of the plaintext modulus at k, taken above
    (k+2)^(k+2) so that the modulus grows fast enough for the inverse
    plaintext cardinality to be negligible. *)
@@ -718,380 +1232,23 @@ Definition idealized_pq_sequence : dsdp_instance_sequence R := {|
   sequence_size_negligible := idealized_size_negligible ;
   sequence_adv_negligible := negligible_fun_cst0 |}.
 
-Local Notation ord8 j := (@Ordinal 8 j erefl).
-Local Notation ord7 j := (@Ordinal 7 j erefl).
-
-(* The plaintext count at k in the form fdist_uniform takes its argument. *)
-Definition idealized_card_msg (k : nat) : #|msg k| = pq k :=
-  card_Zp_pq (idealized_p_minus_2 k) (idealized_q_minus_2 k).
-
-(* The counts of the whole sample and of the seven coordinates other than a
-   pivot, the two the split below reads its uniform laws at. *)
-Lemma idealized_card_sample (k : nat) :
-  #|'rV[msg k]_8| = (((pq k) ^ 8).-1).+1.
-Proof. by rewrite card_mx mul1n (idealized_card_msg k) prednK. Qed.
-
-Lemma idealized_card_rest (k : nat) :
-  #|'rV[msg k]_7| = (((pq k) ^ 7).-1).+1.
-Proof. by rewrite card_mx mul1n (idealized_card_msg k) prednK. Qed.
-
-(* The counting sample space at k: eight coordinates of the plaintext ring
-   drawn uniformly, so that the record's each-input-against-the-other-ten
-   fields are the coordinate-against-the-rest decomposition of one uniform
-   row vector. *)
-Definition idealized_sampleT (k : nat) : finType := 'rV[msg k]_8.
-
-Definition idealized_sample_fdist (k : nat) :
-    R.-fdist (idealized_sampleT k) :=
-  fdist_uniform (idealized_card_sample k).
-
-Local Notation P k := (idealized_sample_fdist k).
-
-(* The sample law as the product of eight uniform coordinate laws: drawing
-   the vector and drawing the eight plaintexts independently are the same
-   experiment. *)
-Lemma idealized_sample_fdistE (k : nat) :
-  P k = (fdist_uniform (idealized_card_msg k) : R.-fdist (msg k)) `^ 8.
+(* The unit residue of the composite modulus has natural number value one,
+   the modulus being written as a double successor in both factors.  It is
+   what lets the honest range be read off Alice's unit weight by
+   computation. *)
+Lemma val_Zp_pq1 (a b : nat) :
+  nat_of_ord (1%R : 'Z_(a.+2 * b.+2)) = 1%N.
 Proof.
-exact: esym (fdist_rV_uniform (idealized_card_msg k)
-               (idealized_card_sample k)).
+have m_gt1 : (1 < a.+2 * b.+2)%N by rewrite (leq_trans (ltnSn 1)) // leq_pmulr.
+by rewrite -[1%R]/(1%:R : 'Z_(a.+2 * b.+2)) (val_Zp_nat m_gt1) modn_small.
 Qed.
 
-(* The letter at coordinate i and the seven letters other than it, the two
-   statistics of the sample every field below is read through. *)
-Definition idealized_coord (k : nat) (i : 'I_8) : {RV (P k) -> msg k} :=
-  fun v => v ``_ i.
-
-Definition idealized_rest (k : nat) (i : 'I_8) :
-    {RV (P k) -> 'rV[msg k]_7} :=
-  rV_drop i.
-
-(* One coordinate against the seven others, with both marginals uniform.
-   The whole counting side of the record is this one fact at eight pivots. *)
-Lemma idealized_split (k : nat) (i : 'I_8) :
-  [/\ P k |= idealized_rest k i _|_ idealized_coord k i,
-      `p_ (idealized_rest k i) = fdist_uniform (idealized_card_rest k)
-    & `p_ (idealized_coord k i) = fdist_uniform (idealized_card_msg k)].
-Proof.
-have bij_split : bijective (fun t => (idealized_rest k i t,
-                                      idealized_coord k i t)).
-  exact: (rV_split_bij (msg k) i).
-exact: (uniform_bij_indep (idealized_card_rest k) (idealized_card_msg k)
-          bij_split).
-Qed.
-
-(* The ten-component view of the seven coordinates other than a pivot: the
-   seven plaintexts in increasing coordinate order, then the three constant
-   private keys.  Reshaping the seven-vector this way is what turns one
-   coordinate split into one each-against-the-rest field. *)
-Definition idealized_view (k : nat) (w : 'rV[msg k]_7) :=
-  (w ``_ (ord7 0), w ``_ (ord7 1), w ``_ (ord7 2), w ``_ (ord7 3),
-   w ``_ (ord7 4), w ``_ (ord7 5), w ``_ (ord7 6),
-   @KeyOf Alice Dec (msg k) 0, @KeyOf Bob Dec (msg k) 0,
-   @KeyOf Charlie Dec (msg k) 0).
-
-(* The ten-component view of the seven other coordinates stays independent of
-   the pivot, the single fact the eight coordinate fields below reshape. *)
-Lemma idealized_rest_view (k : nat) (i : 'I_8) :
-  P k |= (idealized_view k `o idealized_rest k i) _|_ idealized_coord k i.
-Proof.
-have [ind _ _] := idealized_split k i.
-exact: inde_RV_comp (idealized_view k) idfun ind.
-Qed.
-
-(* The eight plaintext inputs of a run at k are the eight coordinates, in the
-   order the record lists them. *)
-Definition idealized_V1 (k : nat) : {RV (P k) -> msg k} :=
-  idealized_coord k (ord8 0).
-
-Definition idealized_V2 (k : nat) : {RV (P k) -> msg k} :=
-  idealized_coord k (ord8 1).
-
-Definition idealized_V3 (k : nat) : {RV (P k) -> msg k} :=
-  idealized_coord k (ord8 2).
-
-Definition idealized_U1 (k : nat) : {RV (P k) -> msg k} :=
-  idealized_coord k (ord8 3).
-
-Definition idealized_U2 (k : nat) : {RV (P k) -> msg k} :=
-  idealized_coord k (ord8 4).
-
-Definition idealized_U3 (k : nat) : {RV (P k) -> msg k} :=
-  idealized_coord k (ord8 5).
-
-Definition idealized_R2 (k : nat) : {RV (P k) -> msg k} :=
-  idealized_coord k (ord8 6).
-
-Definition idealized_R3 (k : nat) : {RV (P k) -> msg k} :=
-  idealized_coord k (ord8 7).
-
-(* The three private keys are constants, which is the weakest way to fill the
-   three key fields: a constant is independent of everything, so no key
-   correlates with any input. *)
-Definition idealized_Dk_a (k : nat) :
-    {RV (P k) -> (Alice.-key Dec (msg k))} :=
-  fun _ => @KeyOf Alice Dec _ 0.
-
-Definition idealized_Dk_b (k : nat) :
-    {RV (P k) -> (Bob.-key Dec (msg k))} :=
-  fun _ => @KeyOf Bob Dec _ 0.
-
-Definition idealized_Dk_c (k : nat) :
-    {RV (P k) -> (Charlie.-key Dec (msg k))} :=
-  fun _ => @KeyOf Charlie Dec _ 0.
-
-Lemma idealized_V1_indep (k : nat) :
-  P k |=
-    [% idealized_V2 k, idealized_V3 k, idealized_U1 k, idealized_U2 k,
-       idealized_U3 k, idealized_R2 k, idealized_R3 k,
-       idealized_Dk_a k, idealized_Dk_b k, idealized_Dk_c k]
-  _|_ idealized_V1 k.
-Proof.
-have e0 : lift (ord8 0) (ord7 0) = ord8 1 by apply/val_inj.
-have e1 : lift (ord8 0) (ord7 1) = ord8 2 by apply/val_inj.
-have e2 : lift (ord8 0) (ord7 2) = ord8 3 by apply/val_inj.
-have e3 : lift (ord8 0) (ord7 3) = ord8 4 by apply/val_inj.
-have e4 : lift (ord8 0) (ord7 4) = ord8 5 by apply/val_inj.
-have e5 : lift (ord8 0) (ord7 5) = ord8 6 by apply/val_inj.
-have e6 : lift (ord8 0) (ord7 6) = ord8 7 by apply/val_inj.
-have -> :
-  [% idealized_V2 k, idealized_V3 k, idealized_U1 k, idealized_U2 k,
-     idealized_U3 k, idealized_R2 k, idealized_R3 k,
-     idealized_Dk_a k, idealized_Dk_b k, idealized_Dk_c k]
-  = idealized_view k `o idealized_rest k (ord8 0).
-  apply/funext => v.
-  by rewrite /comp_RV /idealized_view /idealized_rest /rV_drop !mxE
-    e0 e1 e2 e3 e4 e5 e6.
-exact: idealized_rest_view.
-Qed.
-
-Lemma idealized_V2_indep (k : nat) :
-  P k |=
-    [% idealized_V1 k, idealized_V3 k, idealized_U1 k, idealized_U2 k,
-       idealized_U3 k, idealized_R2 k, idealized_R3 k,
-       idealized_Dk_a k, idealized_Dk_b k, idealized_Dk_c k]
-  _|_ idealized_V2 k.
-Proof.
-have e0 : lift (ord8 1) (ord7 0) = ord8 0 by apply/val_inj.
-have e1 : lift (ord8 1) (ord7 1) = ord8 2 by apply/val_inj.
-have e2 : lift (ord8 1) (ord7 2) = ord8 3 by apply/val_inj.
-have e3 : lift (ord8 1) (ord7 3) = ord8 4 by apply/val_inj.
-have e4 : lift (ord8 1) (ord7 4) = ord8 5 by apply/val_inj.
-have e5 : lift (ord8 1) (ord7 5) = ord8 6 by apply/val_inj.
-have e6 : lift (ord8 1) (ord7 6) = ord8 7 by apply/val_inj.
-have -> :
-  [% idealized_V1 k, idealized_V3 k, idealized_U1 k, idealized_U2 k,
-     idealized_U3 k, idealized_R2 k, idealized_R3 k,
-     idealized_Dk_a k, idealized_Dk_b k, idealized_Dk_c k]
-  = idealized_view k `o idealized_rest k (ord8 1).
-  apply/funext => v.
-  by rewrite /comp_RV /idealized_view /idealized_rest /rV_drop !mxE
-    e0 e1 e2 e3 e4 e5 e6.
-exact: idealized_rest_view.
-Qed.
-
-Lemma idealized_V3_indep (k : nat) :
-  P k |=
-    [% idealized_V1 k, idealized_V2 k, idealized_U1 k, idealized_U2 k,
-       idealized_U3 k, idealized_R2 k, idealized_R3 k,
-       idealized_Dk_a k, idealized_Dk_b k, idealized_Dk_c k]
-  _|_ idealized_V3 k.
-Proof.
-have e0 : lift (ord8 2) (ord7 0) = ord8 0 by apply/val_inj.
-have e1 : lift (ord8 2) (ord7 1) = ord8 1 by apply/val_inj.
-have e2 : lift (ord8 2) (ord7 2) = ord8 3 by apply/val_inj.
-have e3 : lift (ord8 2) (ord7 3) = ord8 4 by apply/val_inj.
-have e4 : lift (ord8 2) (ord7 4) = ord8 5 by apply/val_inj.
-have e5 : lift (ord8 2) (ord7 5) = ord8 6 by apply/val_inj.
-have e6 : lift (ord8 2) (ord7 6) = ord8 7 by apply/val_inj.
-have -> :
-  [% idealized_V1 k, idealized_V2 k, idealized_U1 k, idealized_U2 k,
-     idealized_U3 k, idealized_R2 k, idealized_R3 k,
-     idealized_Dk_a k, idealized_Dk_b k, idealized_Dk_c k]
-  = idealized_view k `o idealized_rest k (ord8 2).
-  apply/funext => v.
-  by rewrite /comp_RV /idealized_view /idealized_rest /rV_drop !mxE
-    e0 e1 e2 e3 e4 e5 e6.
-exact: idealized_rest_view.
-Qed.
-
-Lemma idealized_U1_indep (k : nat) :
-  P k |=
-    [% idealized_V1 k, idealized_V2 k, idealized_V3 k, idealized_U2 k,
-       idealized_U3 k, idealized_R2 k, idealized_R3 k,
-       idealized_Dk_a k, idealized_Dk_b k, idealized_Dk_c k]
-  _|_ idealized_U1 k.
-Proof.
-have e0 : lift (ord8 3) (ord7 0) = ord8 0 by apply/val_inj.
-have e1 : lift (ord8 3) (ord7 1) = ord8 1 by apply/val_inj.
-have e2 : lift (ord8 3) (ord7 2) = ord8 2 by apply/val_inj.
-have e3 : lift (ord8 3) (ord7 3) = ord8 4 by apply/val_inj.
-have e4 : lift (ord8 3) (ord7 4) = ord8 5 by apply/val_inj.
-have e5 : lift (ord8 3) (ord7 5) = ord8 6 by apply/val_inj.
-have e6 : lift (ord8 3) (ord7 6) = ord8 7 by apply/val_inj.
-have -> :
-  [% idealized_V1 k, idealized_V2 k, idealized_V3 k, idealized_U2 k,
-     idealized_U3 k, idealized_R2 k, idealized_R3 k,
-     idealized_Dk_a k, idealized_Dk_b k, idealized_Dk_c k]
-  = idealized_view k `o idealized_rest k (ord8 3).
-  apply/funext => v.
-  by rewrite /comp_RV /idealized_view /idealized_rest /rV_drop !mxE
-    e0 e1 e2 e3 e4 e5 e6.
-exact: idealized_rest_view.
-Qed.
-
-Lemma idealized_U2_indep (k : nat) :
-  P k |=
-    [% idealized_V1 k, idealized_V2 k, idealized_V3 k, idealized_U1 k,
-       idealized_U3 k, idealized_R2 k, idealized_R3 k,
-       idealized_Dk_a k, idealized_Dk_b k, idealized_Dk_c k]
-  _|_ idealized_U2 k.
-Proof.
-have e0 : lift (ord8 4) (ord7 0) = ord8 0 by apply/val_inj.
-have e1 : lift (ord8 4) (ord7 1) = ord8 1 by apply/val_inj.
-have e2 : lift (ord8 4) (ord7 2) = ord8 2 by apply/val_inj.
-have e3 : lift (ord8 4) (ord7 3) = ord8 3 by apply/val_inj.
-have e4 : lift (ord8 4) (ord7 4) = ord8 5 by apply/val_inj.
-have e5 : lift (ord8 4) (ord7 5) = ord8 6 by apply/val_inj.
-have e6 : lift (ord8 4) (ord7 6) = ord8 7 by apply/val_inj.
-have -> :
-  [% idealized_V1 k, idealized_V2 k, idealized_V3 k, idealized_U1 k,
-     idealized_U3 k, idealized_R2 k, idealized_R3 k,
-     idealized_Dk_a k, idealized_Dk_b k, idealized_Dk_c k]
-  = idealized_view k `o idealized_rest k (ord8 4).
-  apply/funext => v.
-  by rewrite /comp_RV /idealized_view /idealized_rest /rV_drop !mxE
-    e0 e1 e2 e3 e4 e5 e6.
-exact: idealized_rest_view.
-Qed.
-
-Lemma idealized_U3_indep (k : nat) :
-  P k |=
-    [% idealized_V1 k, idealized_V2 k, idealized_V3 k, idealized_U1 k,
-       idealized_U2 k, idealized_R2 k, idealized_R3 k,
-       idealized_Dk_a k, idealized_Dk_b k, idealized_Dk_c k]
-  _|_ idealized_U3 k.
-Proof.
-have e0 : lift (ord8 5) (ord7 0) = ord8 0 by apply/val_inj.
-have e1 : lift (ord8 5) (ord7 1) = ord8 1 by apply/val_inj.
-have e2 : lift (ord8 5) (ord7 2) = ord8 2 by apply/val_inj.
-have e3 : lift (ord8 5) (ord7 3) = ord8 3 by apply/val_inj.
-have e4 : lift (ord8 5) (ord7 4) = ord8 4 by apply/val_inj.
-have e5 : lift (ord8 5) (ord7 5) = ord8 6 by apply/val_inj.
-have e6 : lift (ord8 5) (ord7 6) = ord8 7 by apply/val_inj.
-have -> :
-  [% idealized_V1 k, idealized_V2 k, idealized_V3 k, idealized_U1 k,
-     idealized_U2 k, idealized_R2 k, idealized_R3 k,
-     idealized_Dk_a k, idealized_Dk_b k, idealized_Dk_c k]
-  = idealized_view k `o idealized_rest k (ord8 5).
-  apply/funext => v.
-  by rewrite /comp_RV /idealized_view /idealized_rest /rV_drop !mxE
-    e0 e1 e2 e3 e4 e5 e6.
-exact: idealized_rest_view.
-Qed.
-
-Lemma idealized_R2_indep (k : nat) :
-  P k |=
-    [% idealized_V1 k, idealized_V2 k, idealized_V3 k, idealized_U1 k,
-       idealized_U2 k, idealized_U3 k, idealized_R3 k,
-       idealized_Dk_a k, idealized_Dk_b k, idealized_Dk_c k]
-  _|_ idealized_R2 k.
-Proof.
-have e0 : lift (ord8 6) (ord7 0) = ord8 0 by apply/val_inj.
-have e1 : lift (ord8 6) (ord7 1) = ord8 1 by apply/val_inj.
-have e2 : lift (ord8 6) (ord7 2) = ord8 2 by apply/val_inj.
-have e3 : lift (ord8 6) (ord7 3) = ord8 3 by apply/val_inj.
-have e4 : lift (ord8 6) (ord7 4) = ord8 4 by apply/val_inj.
-have e5 : lift (ord8 6) (ord7 5) = ord8 5 by apply/val_inj.
-have e6 : lift (ord8 6) (ord7 6) = ord8 7 by apply/val_inj.
-have -> :
-  [% idealized_V1 k, idealized_V2 k, idealized_V3 k, idealized_U1 k,
-     idealized_U2 k, idealized_U3 k, idealized_R3 k,
-     idealized_Dk_a k, idealized_Dk_b k, idealized_Dk_c k]
-  = idealized_view k `o idealized_rest k (ord8 6).
-  apply/funext => v.
-  by rewrite /comp_RV /idealized_view /idealized_rest /rV_drop !mxE
-    e0 e1 e2 e3 e4 e5 e6.
-exact: idealized_rest_view.
-Qed.
-
-Lemma idealized_R3_indep (k : nat) :
-  P k |=
-    [% idealized_V1 k, idealized_V2 k, idealized_V3 k, idealized_U1 k,
-       idealized_U2 k, idealized_U3 k, idealized_R2 k,
-       idealized_Dk_a k, idealized_Dk_b k, idealized_Dk_c k]
-  _|_ idealized_R3 k.
-Proof.
-have e0 : lift (ord8 7) (ord7 0) = ord8 0 by apply/val_inj.
-have e1 : lift (ord8 7) (ord7 1) = ord8 1 by apply/val_inj.
-have e2 : lift (ord8 7) (ord7 2) = ord8 2 by apply/val_inj.
-have e3 : lift (ord8 7) (ord7 3) = ord8 3 by apply/val_inj.
-have e4 : lift (ord8 7) (ord7 4) = ord8 4 by apply/val_inj.
-have e5 : lift (ord8 7) (ord7 5) = ord8 5 by apply/val_inj.
-have e6 : lift (ord8 7) (ord7 6) = ord8 6 by apply/val_inj.
-have -> :
-  [% idealized_V1 k, idealized_V2 k, idealized_V3 k, idealized_U1 k,
-     idealized_U2 k, idealized_U3 k, idealized_R2 k,
-     idealized_Dk_a k, idealized_Dk_b k, idealized_Dk_c k]
-  = idealized_view k `o idealized_rest k (ord8 7).
-  apply/funext => v.
-  by rewrite /comp_RV /idealized_view /idealized_rest /rV_drop !mxE
-    e0 e1 e2 e3 e4 e5 e6.
-exact: idealized_rest_view.
-Qed.
-
-Lemma idealized_Dk_a_indep (k : nat) :
-  P k |=
-    [% idealized_V1 k, idealized_V2 k, idealized_V3 k, idealized_U1 k,
-       idealized_U2 k, idealized_U3 k, idealized_R2 k, idealized_R3 k,
-       idealized_Dk_b k, idealized_Dk_c k]
-  _|_ idealized_Dk_a k.
-Proof. by rewrite inde_RV_sym; exact: inde_const_RV. Qed.
-
-Lemma idealized_Dk_b_indep (k : nat) :
-  P k |=
-    [% idealized_V1 k, idealized_V2 k, idealized_V3 k, idealized_U1 k,
-       idealized_U2 k, idealized_U3 k, idealized_R2 k, idealized_R3 k,
-       idealized_Dk_a k, idealized_Dk_c k]
-  _|_ idealized_Dk_b k.
-Proof. by rewrite inde_RV_sym; exact: inde_const_RV. Qed.
-
-Lemma idealized_Dk_c_indep (k : nat) :
-  P k |=
-    [% idealized_V1 k, idealized_V2 k, idealized_V3 k, idealized_U1 k,
-       idealized_U2 k, idealized_U3 k, idealized_R2 k, idealized_R3 k,
-       idealized_Dk_a k, idealized_Dk_b k]
-  _|_ idealized_Dk_c k.
-Proof. by rewrite inde_RV_sym; exact: inde_const_RV. Qed.
-
-(* The three plaintext inputs and the two masks are uniform, each the third
-   component of its own coordinate split. *)
-Lemma idealized_pV1_unif (k : nat) :
-  `p_ (idealized_V1 k) = fdist_uniform (idealized_card_msg k).
-Proof. by have [_ _ unif] := idealized_split k (ord8 0). Qed.
-
-Lemma idealized_pV2_unif (k : nat) :
-  `p_ (idealized_V2 k) = fdist_uniform (idealized_card_msg k).
-Proof. by have [_ _ unif] := idealized_split k (ord8 1). Qed.
-
-Lemma idealized_pV3_unif (k : nat) :
-  `p_ (idealized_V3 k) = fdist_uniform (idealized_card_msg k).
-Proof. by have [_ _ unif] := idealized_split k (ord8 2). Qed.
-
-Lemma idealized_pR2_unif (k : nat) :
-  `p_ (idealized_R2 k) = fdist_uniform (idealized_card_msg k).
-Proof. by have [_ _ unif] := idealized_split k (ord8 6). Qed.
-
-Lemma idealized_pR3_unif (k : nat) :
-  `p_ (idealized_R3 k) = fdist_uniform (idealized_card_msg k).
-Proof. by have [_ _ unif] := idealized_split k (ord8 7). Qed.
-
-(* The setting the two sides make together, and the answer to whether
-   dsdp_setting has any value at all: the composite-modulus idealized
-   sequence on the hopping side, the uniform eight-coordinate law on the
-   counting side, and card_plain joining them.  It is named for its hopping
-   side, after idealized_instance_sequence of dsdp_instance_sequence.v, which
-   it repeats at a plaintext ring the counting side can also be carried on. *)
+(* The setting the two sides make together at Alice's honest query e_3: the
+   composite-modulus idealized sequence on the hopping side, the uniform
+   five-coordinate law with weights 0, 0, 1 on the counting side, and
+   card_plain joining them.  It is named for its hopping side, after
+   idealized_instance_sequence of dsdp_instance_sequence.v, which it repeats
+   at a plaintext ring the counting side can also be carried on. *)
 Definition idealized_setting : dsdp_setting R := {|
   instance_sequence := idealized_pq_sequence ;
   p_minus_2 := idealized_p_minus_2 ;
@@ -1100,34 +1257,40 @@ Definition idealized_setting : dsdp_setting R := {|
   prime_q := idealized_prime_q ;
   coprime_pq := idealized_coprime_pq ;
   card_plain := idealized_card_plain ;
-  sampleT := idealized_sampleT ;
-  sample_fdist := idealized_sample_fdist ;
-  V1 := idealized_V1 ;
-  V2 := idealized_V2 ;
-  V3 := idealized_V3 ;
-  U1 := idealized_U1 ;
-  U2 := idealized_U2 ;
-  U3 := idealized_U3 ;
-  R2 := idealized_R2 ;
-  R3 := idealized_R3 ;
-  Dk_a := idealized_Dk_a ;
-  Dk_b := idealized_Dk_b ;
-  Dk_c := idealized_Dk_c ;
-  V1_indep := idealized_V1_indep ;
-  V2_indep := idealized_V2_indep ;
-  V3_indep := idealized_V3_indep ;
-  U1_indep := idealized_U1_indep ;
-  U2_indep := idealized_U2_indep ;
-  U3_indep := idealized_U3_indep ;
-  R2_indep := idealized_R2_indep ;
-  R3_indep := idealized_R3_indep ;
-  Dk_a_indep := idealized_Dk_a_indep ;
-  Dk_b_indep := idealized_Dk_b_indep ;
-  Dk_c_indep := idealized_Dk_c_indep ;
-  pV1_unif := idealized_pV1_unif ;
-  pV2_unif := idealized_pV2_unif ;
-  pV3_unif := idealized_pV3_unif ;
-  pR2_unif := idealized_pR2_unif ;
-  pR3_unif := idealized_pR3_unif |}.
+  inputs := fun k =>
+    uniform_inputs (idealized_p_minus_2 k) (idealized_q_minus_2 k) 0 0 1 |}.
+
+(* Alice's honest query holds at every k on that value: her weight on
+   Charlie's input is the unit residue, which is above zero and below both
+   prime factors since each is written as a double successor. *)
+Definition idealized_honest_query (k : nat) :
+    dsdp_honest_query idealized_setting k.
+Proof.
+split=> t.
+- by rewrite val_Zp_pq1.
+- by rewrite val_Zp_pq1 leq_min.
+Qed.
+
+(* The same value at Alice's corrupted query e_1: weights 0, 1, 0.  The
+   hopping side is unchanged, since the two axes share a cardinality and not
+   an execution, so nothing on the hopping side reads Alice's counting
+   weights.  The value exists so that the leakage result, which is stated
+   under dsdp_corrupted_query, has an instance where its premise holds. *)
+Definition corrupted_setting : dsdp_setting R := {|
+  instance_sequence := idealized_pq_sequence ;
+  p_minus_2 := idealized_p_minus_2 ;
+  q_minus_2 := idealized_q_minus_2 ;
+  prime_p := idealized_prime_p ;
+  prime_q := idealized_prime_q ;
+  coprime_pq := idealized_coprime_pq ;
+  card_plain := idealized_card_plain ;
+  inputs := fun k =>
+    uniform_inputs (idealized_p_minus_2 k) (idealized_q_minus_2 k) 0 1 0 |}.
+
+(* Alice's corrupted query holds at every k on that value, its two weights
+   being the two constants the record asks for. *)
+Definition corrupted_query (k : nat) :
+    dsdp_corrupted_query corrupted_setting k.
+Proof. by split. Qed.
 
 End dsdp_setting_witness.

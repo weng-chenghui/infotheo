@@ -167,14 +167,14 @@ Let coprime_pq : coprime p q := coprime_pq X k.
 Local Notation m := (p * q).
 Local Notation msg := 'Z_m.
 
-Let T := sampleT X k.
-Let P := sample_fdist X k.
-Let V1 := V1 X k.
-Let V2 := V2 X k.
-Let V3 := V3 X k.
-Let U1 := U1 X k.
-Let U2 := U2 X k.
-Let U3 := U3 X k.
+Let T := sampleT (inputs X k).
+Let P := sample_fdist (inputs X k).
+Let V1 := V1 (inputs X k).
+Let V2 := V2 (inputs X k).
+Let V3 := V3 (inputs X k).
+Let U1 := U1 (inputs X k).
+Let U2 := U2 (inputs X k).
+Let U3 := U3 (inputs X k).
 Let S := output X k.
 Let CondRV : {RV P -> (msg * msg * msg * msg * msg)} :=
   [% V1, U1, U2, U3, S].
@@ -392,8 +392,8 @@ Local Open Scope entropy_scope.
 Context {R : realType}.
 Variable X : dsdp_setting R.
 Variable k : nat.
-Let T := sampleT X k.
-Let P := sample_fdist X k.
+Let T := sampleT (inputs X k).
+Let P := sample_fdist (inputs X k).
 Let p_minus_2 := p_minus_2 X k.
 Let q_minus_2 := q_minus_2 X k.
 Local Notation p := p_minus_2.+2.
@@ -401,15 +401,15 @@ Local Notation q := q_minus_2.+2.
 Local Notation m := (p * q).
 Local Notation msg := 'Z_m.
 
-Let V1 := V1 X k.
-Let V2 := V2 X k.
-Let V3 := V3 X k.
-Let U1 := U1 X k.
-Let U2 := U2 X k.
-Let U3 := U3 X k.
-Let R2 := R2 X k.
-Let R3 := R3 X k.
-Let Dk_a := Dk_a X k.
+Let V1 := V1 (inputs X k).
+Let V2 := V2 (inputs X k).
+Let V3 := V3 (inputs X k).
+Let U1 := U1 (inputs X k).
+Let U2 := U2 (inputs X k).
+Let U3 := U3 (inputs X k).
+Let R2 := R2 (inputs X k).
+Let R3 := R3 (inputs X k).
+Let Dk_a := Dk_a (inputs X k).
 
 (* Bob's input under Alice's query weight U2 and her mask R2, the plaintext of
    her first combine. *)
@@ -495,8 +495,8 @@ Local Open Scope ring_scope.
 Context {R : realType}.
 Variable X : dsdp_setting R.
 Variable k : nat.
-Let T := sampleT X k.
-Let P := sample_fdist X k.
+Let T := sampleT (inputs X k).
+Let P := sample_fdist (inputs X k).
 Let p_minus_2 := p_minus_2 X k.
 Let q_minus_2 := q_minus_2 X k.
 Local Notation p := p_minus_2.+2.
@@ -506,15 +506,15 @@ Local Notation msg := 'Z_m.
 
 Let card_msg : #|msg| = m := card_Zp_pq p_minus_2 q_minus_2.
 
-Let V1 := V1 X k.
-Let V2 := V2 X k.
-Let V3 := V3 X k.
-Let U2 := U2 X k.
-Let U3 := U3 X k.
-Let R2 := R2 X k.
-Let R3 := R3 X k.
-Let Dk_b := Dk_b X k.
-Let Dk_c := Dk_c X k.
+Let V1 := V1 (inputs X k).
+Let V2 := V2 (inputs X k).
+Let V3 := V3 (inputs X k).
+Let U2 := U2 (inputs X k).
+Let U3 := U3 (inputs X k).
+Let R2 := R2 (inputs X k).
+Let R3 := R3 (inputs X k).
+Let Dk_b := Dk_b (inputs X k).
+Let Dk_c := Dk_c (inputs X k).
 
 (* Bob's input under Alice's query weight U2.  The weights U1, U2, U3 are
    Alice's, so this is the one place Bob's secret meets a factor he does not
@@ -564,7 +564,7 @@ Definition BobView := [% Dk_b, V2, E_charlie_vur3, E_bob_d2].
    ciphertext he receives from Bob. *)
 Definition CharlieView := [% Dk_c, V3, E_charlie_d3].
 
-Let pV1_unif : `p_ V1 = fdist_uniform card_msg := pV1_unif X k.
+Let pV1_unif : `p_ V1 = fdist_uniform card_msg := pV1_unif (inputs X k).
 Let bob_inputs_indep_V1 : P |= [% Dk_b, V2, VU3R, D2] _|_ V1 :=
   bob_inputs_indep_V1 X k.
 Let charlie_inputs_indep_V1 : P |= [% Dk_c, V3, D3] _|_ V1 :=
@@ -616,8 +616,8 @@ Qed.
 
 (* The Charlie-ciphertext Bob forwards carries plaintext V3 * U3 + R3, masked by
    Alice's fresh one-time pad R3, so Bob's full view is independent of V3. *)
-Let pV3_unif : `p_ V3 = fdist_uniform card_msg := pV3_unif X k.
-Let pR3_unif : `p_ R3 = fdist_uniform card_msg := pR3_unif X k.
+Let pV3_unif : `p_ V3 = fdist_uniform card_msg := pV3_unif (inputs X k).
+Let pR3_unif : `p_ R3 = fdist_uniform card_msg := pR3_unif (inputs X k).
 Let R3_indep_VU3_V3 : P |= R3 _|_ [% VU3, V3] := R3_indep_VU3_V3 X k.
 Let bob_data_indep_charlie : P |= [% Dk_b, V2, D2] _|_ [% V3, VU3, R3] :=
   bob_data_indep_charlie X k.
@@ -675,8 +675,8 @@ Qed.
 
 (* Charlie's decrypted aggregate D3 carries V2 * U2 masked by Alice's fresh pad
    R2, so the ciphertext Charlie returns to Alice is independent of V2. *)
-Let pV2_unif : `p_ V2 = fdist_uniform card_msg := pV2_unif X k.
-Let pR2_unif : `p_ R2 = fdist_uniform card_msg := pR2_unif X k.
+Let pV2_unif : `p_ V2 = fdist_uniform card_msg := pV2_unif (inputs X k).
+Let pR2_unif : `p_ R2 = fdist_uniform card_msg := pR2_unif (inputs X k).
 Let R2_indep_VU2_V2 : P |= R2 _|_ [% VU2, V2] := R2_indep_VU2_V2 X k.
 Let R2_indep_VU2_VU3R_V2 : P |= R2 _|_ [% VU2, [%VU3R, V2]] :=
   R2_indep_VU2_VU3R_V2 X k.
