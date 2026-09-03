@@ -139,6 +139,12 @@ Section Zp_Fp_equivalence.
 
 Context {R : realType}.
 
+(* The cardinality of 'Z_(a.+2 * b.+2) is the product itself.  Both factors
+   are at least two, so the product is a successor by conversion, which is the
+   shape fdist_uniform takes its cardinality argument in. *)
+Lemma card_Zp_pq (a b : nat) : #|'Z_(a.+2 * b.+2)| = (a.+2 * b.+2)%N.
+Proof. by rewrite card_ord Zp_cast. Qed.
+
 (* When m is prime, 'Z_m and 'F_m have the same cardinality *)
 Lemma Zp_Fp_card_eq (m_minus_2 : nat) :
   let m := m_minus_2.+2 in

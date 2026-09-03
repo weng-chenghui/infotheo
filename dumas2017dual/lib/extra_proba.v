@@ -503,6 +503,25 @@ Qed.
 
 End inde_const_RV.
 
+Section inde_RV_extra.
+Context {R : realType}.
+Variables (U : finType) (P : R.-fdist U) (A B C : finType).
+
+(* Contraction in the unconditional graphoid: an independence of X from Y
+   extends to the pair (Y, W) once the pair (X, Y) is independent of W.  This
+   is the step that assembles a two-sided independence out of
+   each-against-the-rest independences. *)
+Lemma inde_RV_contraction (X : {RV P -> A}) (Y : {RV P -> B})
+    (W : {RV P -> C}) :
+  P |= X _|_ Y -> P |= [% X, Y] _|_ W -> P |= X _|_ [% Y, W].
+Proof.
+move=> xy xyw; apply/cinde_RV_unit; apply: contraction.
+  by apply/symmetry/weak_union/symmetry/cinde_RV_unit.
+exact/cinde_RV_unit.
+Qed.
+
+End inde_RV_extra.
+
 Section cinde_diagonal_bound.
 Context {R : realType}.
 Variables (U : finType) (P : R.-fdist U) (A C : finType).
@@ -688,6 +707,93 @@ by case/imsetP : Hu => r _ ->; apply/card_gt0P; exists r; rewrite inE.
 Qed.
 
 End fdist_glue.
+
+(* ========================================================================== *)
+(*              Coordinate splitting and uniform row-vector laws              *)
+(* ========================================================================== *)
+
+Section rV_split.
+Local Open Scope vec_ext_scope.
+Variables (A : finType) (n : nat).
+
+(* The n coordinates of a row vector of length n.+1 other than the one at i,
+   kept in increasing order of their original index. *)
+Definition rV_drop (i : 'I_n.+1) (v : 'rV[A]_n.+1) : 'rV[A]_n :=
+  \row_(j < n) v ``_ (lift i j).
+
+(* rV_split i is the bijection 'rV[A]_n.+1 ~ 'rV[A]_n * A isolating
+   coordinate i: the other coordinates paired with the letter at i.  It is
+   the re-indexing under which one coordinate of a uniform vector and the
+   remaining ones become a pair of statistics of the whole sample. *)
+Definition rV_split (i : 'I_n.+1) (v : 'rV[A]_n.+1) : ('rV[A]_n * A)%type :=
+  (rV_drop i v, v ``_ i).
+
+(* The inverse of rV_split i: reinsert the isolated letter at position i. *)
+Definition rV_join (i : 'I_n.+1) (w : ('rV[A]_n * A)%type) : 'rV[A]_n.+1 :=
+  \row_(j < n.+1) (if unlift i j is Some j' then w.1 ``_ j' else w.2).
+
+(* Reinserting at i the letter that was removed at i rebuilds the vector. *)
+Lemma rV_splitK (i : 'I_n.+1) : cancel (rV_split i) (rV_join i).
+Proof.
+move=> v; apply/rowP => j; rewrite mxE.
+by case: (unliftP i j) => [j' ->|->] /=; rewrite ?liftK ?unlift_none //= mxE.
+Qed.
+
+(* Splitting at i a vector built by inserting at i returns the two pieces. *)
+Lemma rV_joinK (i : 'I_n.+1) : cancel (rV_join i) (rV_split i).
+Proof.
+move=> [w a]; congr (_, _); last by rewrite mxE unlift_none.
+by apply/rowP => j; rewrite !mxE liftK.
+Qed.
+
+(* Coordinate i and its complement re-index the space of row vectors. *)
+Lemma rV_split_bij (i : 'I_n.+1) : bijective (rV_split i).
+Proof. by exists (rV_join i); [exact: rV_splitK | exact: rV_joinK]. Qed.
+
+End rV_split.
+
+Section uniform_rV.
+Context {R : realType}.
+
+(* A product of uniform coordinate laws is the uniform law on row vectors:
+   drawing n letters independently and uniformly is drawing one vector
+   uniformly. *)
+Lemma fdist_rV_uniform (A : finType) nA (cA : #|A| = nA.+1) n nRV
+    (cRV : #|'rV[A]_n| = nRV.+1) :
+  (fdist_uniform cA : R.-fdist A) `^ n = fdist_uniform cRV.
+Proof.
+apply/fdist_ext => v; rewrite fdist_rVE fdist_uniformE.
+under eq_bigr do rewrite fdist_uniformE.
+by rewrite prodr_const card_ord card_mx mul1n natrX exprVn.
+Qed.
+
+(* Two statistics of a uniform sample that jointly re-index the sample space
+   are independent, and each is uniform on its own range.  Reading a uniform
+   sample through a bijection into a pair therefore leaves no correlation
+   between the two components for an observer of one of them to use. *)
+Lemma uniform_bij_indep (T A B : finType) nT nA nB
+    (cT : #|T| = nT.+1) (cA : #|A| = nA.+1) (cB : #|B| = nB.+1)
+    (X : {RV (fdist_uniform cT : R.-fdist T) -> A})
+    (Y : {RV (fdist_uniform cT : R.-fdist T) -> B}) :
+  bijective (fun t => (X t, Y t)) ->
+  [/\ (fdist_uniform cT : R.-fdist T) |= X _|_ Y,
+      `p_ X = fdist_uniform cA & `p_ Y = fdist_uniform cB].
+Proof.
+move=> bXY.
+have cAB : #|((A * B)%type : finType)| = (nA.+1 * nB.+1)%N.
+  by rewrite card_prod cA cB.
+have pXY : `p_ [% X, Y] = fdist_uniform cAB.
+  by rewrite /dist_of_RV; exact: fdistmap_bij_uniform.
+have unifAB := fdist_uniform_prod cA cB cAB.
+have pX : `p_ X = fdist_uniform cA.
+  by rewrite -(fst_RV2 X Y) pXY unifAB fdist_prod1.
+have pY : `p_ Y = fdist_uniform cB.
+  by rewrite -(snd_RV2 X Y) pXY unifAB fdist_prod2.
+split=> // a b.
+by rewrite -!dist_of_RVE pXY pX pY unifAB fdist_prodE.
+Qed.
+
+End uniform_rV.
 
 (* ========================================================================== *)
 (*                    Dropping an independent conditioner                      *)
