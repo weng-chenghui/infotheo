@@ -221,7 +221,7 @@ Require Import hop_chain.
 (*                              being equalities                              *)
 (*         alice_chain_bound == the chain read as a bound on its first game,  *)
 (*                              its endpoint charged the plaintext-space term *)
-(* alice_chain_bound_premise == the chain's own premise together with the     *)
+(*       alice_bound_premise == the chain's own premise together with the     *)
 (*                              bound on its endpoint                         *)
 (*         alice_chain_lossE == the numeric total of its loss, the right-hand *)
 (*                              side of alice_tuple_guess_V2_le               *)
@@ -1199,7 +1199,7 @@ Definition alice_chain_bound (predict : predictor alice_hop_tupleT) :
    second half is all_zero_guess_V2_le_invm read through the joint law of the
    honest inputs and Alice's tuple, and it is the only place the DSDP solution
    fiber enters. *)
-Lemma alice_chain_bound_premise (predict : predictor alice_hop_tupleT) :
+Lemma alice_bound_premise (predict : predictor alice_hop_tupleT) :
   bound_premise (alice_chain_bound predict).
 Proof.
 split; first exact: alice_chain_premise.
@@ -1243,7 +1243,7 @@ Theorem alice_tuple_guess_V2_le
 Proof.
 rewrite /AliceRealTuple guess_V2_jointE -alice_hop_game_successE.
 rewrite -alice_chain_lossE.
-exact: bound_sound (alice_chain_bound_premise predict).
+exact: bound_sound (alice_bound_premise predict).
 Qed.
 
 (* The IND-CPA advantage against Bob's key that one predictor buys: the
