@@ -40,7 +40,7 @@ Require Export indcpa_game.
 (* ## Game vocabulary                                                         *)
 (*                                                                            *)
 (* The real-or-zero game layer and the reduction wiring live in               *)
-(* dumas2017dual/dsdp/hopping/indcpa_game.v, whose header carries             *)
+(* computational_security/indcpa_game.v, whose header carries                 *)
 (* the full role map.  The names this file plays those roles with are         *)
 (*                                                                            *)
 (* | role          | identifier                                             | *)

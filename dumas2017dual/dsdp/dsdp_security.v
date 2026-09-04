@@ -8,7 +8,7 @@ Require Import proba jfdist_cond entropy graphoid spp_proba.
 Require Import extra_proba extra_algebra extra_entropy.
 Require Import homomorphic_encryption.
 Require Import dsdp_entropy dsdp_relay_secrecy dsdp_malicious_dotp.
-Require Import indcpa_game.
+Require Import negligible indcpa_game.
 Require Import dsdp_alice_hop_secrecy dsdp_alice_trace_link.
 Require Import dsdp_instance_sequence.
 Require Import dsdp_setting.

@@ -121,7 +121,7 @@ Notation "'n(' w ')' " := (party_id_to_nat w).
 (* This section provides the basic party-labeled encryption types and operations
    used by the DSDP protocol proofs. This is an idealized model where
    enc = (party * msg). Secrecy is justified computationally, through the
-   IND-CPA game of [dumas2017dual/dsdp/hopping/indcpa_game.v]. The
+   IND-CPA game of [computational_security/indcpa_game.v]. The
    IT-only hypotheses [E_enc_unif] and [E_enc_inde] are retired.
 
    For concrete encryption (Benaloh, Paillier), see sections below. *)
@@ -284,7 +284,7 @@ Variables (T : finType)(P : R.-fdist T).
    decryption relates a ciphertext to its plaintext, so both are retired.
    Secrecy of the
    DSDP protocol is justified computationally instead, through the IND-CPA
-   game of [dumas2017dual/dsdp/hopping/indcpa_game.v]. The contraction
+   game of [computational_security/indcpa_game.v]. The contraction
    lemma [E_enc_ce_contract] below takes an explicit independence hypothesis
    as input, so it remains usable wherever such an assumption is locally
    justified. *)
@@ -327,8 +327,8 @@ End enc_lemmas.
   scheme over more than one plaintext, since decryption relates the
   ciphertext to its plaintext, so this development states secrecy
   computationally instead. Each of the two hops of the DSDP corrupted-Alice
-  argument is priced by [indcpa_epsilon], the advantage defined in
-  [dumas2017dual/dsdp/hopping/indcpa_game.v], of a reduction adversary
+  argument is charged at [indcpa_epsilon], the advantage defined in
+  [computational_security/indcpa_game.v], of a reduction adversary
   built in [dumas2017dual/dsdp/hopping/dsdp_alice_hop_secrecy.v]. The
   contraction lemma [E_enc_ce_contract] above takes its independence
   hypothesis explicitly and is usable wherever that hypothesis is locally
@@ -343,7 +343,7 @@ End enc_lemmas.
   challenge plaintext decrypts the challenge, so a class admitting every
   adversary is forced to assume an epsilon of at least 1 whenever the
   plaintext space has more than one element. The second is an instantiation of that record at a
-  scheme, which [dumas2017dual/dsdp/hopping/paillier_indcpa_scheme.v]
+  scheme, which [computational_security/paillier_indcpa_scheme.v]
   does for Paillier, leaving the whole assumption a parameter that a proof
   from decisional composite residuosity would supply.
 

@@ -67,7 +67,7 @@ ROWS: dict[str, list[str]] = {
     "Information-theoretic security proofs": [
         "dumas2017dual/entropy_fiber/",
         "dumas2017dual/lib/",
-        "dumas2017dual/dsdp/hopping/indcpa_game.v",
+        "computational_security/indcpa_game.v",
     ],
     r"\dsdp{} protocol and its security proofs": [
         "dumas2017dual/dsdp/",

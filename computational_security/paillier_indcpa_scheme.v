@@ -5,7 +5,7 @@ Require Import realType_ext ssr_ext ssralg_ext bigop_ext fdist.
 Require Import fdist_extra proba.
 Require Import homomorphic_encryption residuosity_game.
 Require Import paillier_enc paillier_ahe paillier_fdist_instance.
-Require Import indcpa_game.
+Require Import negligible indcpa_game.
 
 (**md**************************************************************************)
 (* # Paillier as an IND-CPA scheme                                            *)

@@ -196,9 +196,11 @@ indcpa_game:challenge_joint_fdistE
 indcpa_game:distinguisher
 indcpa_game:enc_slot_resampleE
 indcpa_game:fdistbind_cst
-indcpa_game:negligible_fun_add
-indcpa_game:negligible_fun_double
-indcpa_game:negligible_fun_le
+# negligible: the three closure lemmas the blueprint folds into the
+# def:negligible node and into thm:negligible_fun_predictor_bound.
+negligible:negligible_fun_add
+negligible:negligible_fun_double
+negligible:negligible_fun_le
 # paillier_indcpa_scheme: the scheme side of the Paillier IND-CPA scheme, the
 # coin plumbing and the modulus bound the packaging is taken at, the challenger
 # identity, the two composite-residuosity reductions with their three

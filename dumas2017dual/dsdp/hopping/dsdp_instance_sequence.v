@@ -5,6 +5,7 @@ Require Import realType_ext ssr_ext ssralg_ext bigop_ext fdist.
 Require Import fdist_extra proba.
 Require Import homomorphic_encryption residuosity_game.
 Require Import idealized_ahe paillier_fdist_instance.
+Require Import negligible.
 Require Import indcpa_game paillier_indcpa_scheme benaloh_indcpa_scheme.
 Require Import dsdp_alice_hop_secrecy dsdp_alice_trace_link.
 

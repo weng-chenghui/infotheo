@@ -14,29 +14,39 @@ basename and resolve by suffix.
   correctness over idealized / Benaloh / Paillier AHE).
 
 - **hopping/** — the hopping secrecy result over Infotheo distributions.
-  `indcpa_game` (the real-or-zero game, the advantage `indcpa_epsilon`, the adversary-class
-  assumption record, the scheme record `indcpa_scheme`, `negligible_fun`),
+  `dsdp_alice_hop_secrecy` (the two hop reductions, the guess / unpredictability /
+  simulator-closeness headlines), `dsdp_alice_trace_link` (the same bounds at the executed
+  fifteen-round piSMC trace), `dsdp_instance_sequence` (the DSDP instance record, the
+  sequence record over it, the asymptotic headline, the idealized-scheme witness, and the
+  DSDP bounds read off at the Paillier and Benaloh instances, in residuosity currency).
+  The game vocabulary, the two schemes and the asymptotics these files use live outside
+  this tree, in `computational_security/`.
+
+- **computational_security/**, a sibling of `dumas2017dual/`, is the scheme-independent
+  computational layer that `dsdp/` consumes; its files depend on no DSDP file, and their
+  logical names are `infotheo.computational_security.<basename>`.
+  `negligible` (`negligible_fun` and its closure lemmas, the asymptotic reading every
+  concrete bound below is given), `indcpa_game` (the real-or-zero game, the advantage
+  `indcpa_epsilon`, the adversary-class assumption record, the scheme record
+  `indcpa_scheme`), `hop_chain` (a chain of hops whose accumulated loss is a list of
+  labelled terms, together with the soundness field a multi-hop bound is read off),
   `paillier_indcpa_scheme` / `benaloh_indcpa_scheme`
   (the two concrete schemes as `indcpa_scheme` values, scheme side only, fixed and indexed
   by a security parameter, each with the reduction that derives its IND-CPA assumption
   from a residuosity assumption: `dcr_of_adversary` / `dcr_of_adversary_zero` giving
   `paillier_indcpa_assumption`, and `residuosity_of_adversary` /
   `residuosity_of_adversary_zero` giving `benaloh_indcpa_assumption`, at twice the
-  residuosity epsilon per key), `dsdp_alice_hop_secrecy` (the two hop reductions, the guess / unpredictability /
-  simulator-closeness headlines), `dsdp_alice_trace_link` (the same bounds at the executed
-  fifteen-round piSMC trace), `dsdp_instance_sequence` (the DSDP instance record, the
-  sequence record over it, the asymptotic headline, the idealized-scheme witness, and the
-  DSDP bounds read off at the Paillier and Benaloh instances, in residuosity currency).
+  residuosity epsilon per key).
 
 - **Scheme assumptions** — `homomorphic_encryption/residuosity_game.v` states the e-th
   residuosity problem in a finite commutative unit ring: the two challenge laws
   `unit_fdist` and `residue_fdist`, the distinguisher record, `residuosity_advantage`,
   the assumption record `residuosity_assumption`, the translation-invariance fact
   `unit_fdist_translateE`, and the zero-epsilon witness `decide_constant_assumption`.
-  `hopping/paillier_indcpa_scheme.v` instantiates it as `dcr_assumption` at the ring
-  Z/(pq)^2 Z and exponent `p * q`, which is decisional composite residuosity, and
-  `hopping/benaloh_indcpa_scheme.v` as `benaloh_residuosity_assumption` at Z/nZ and
-  exponent `r`.
+  `computational_security/paillier_indcpa_scheme.v` instantiates it as `dcr_assumption`
+  at the ring Z/(pq)^2 Z and exponent `p * q`, which is decisional composite residuosity,
+  and `computational_security/benaloh_indcpa_scheme.v` as `benaloh_residuosity_assumption`
+  at Z/nZ and exponent `r`.
 
 - **counting/** holds the information-theoretic, solution-counting leg, listed in
   `_CoqProject` load order.
@@ -47,7 +57,7 @@ basename and resolve by suffix.
   and its N-party form `US_e1_centropy_VS0_eq0`), `dsdp_relay_secrecy` (`BobView` and
   `CharlieView`, their independence of `V1`, and the four relay privacy theorems
   `bob_privacy_V1`, `charlie_privacy_V1`, `bob_privacy_V3`, `charlie_privacy_V2`).
-  The last two load after `hopping/`, whose game vocabulary they use.
+  The last two load after `hopping/`.
 
 - **dsdp_setting.v** holds `dsdp_setting`, the data a 3-party DSDP security statement
   is made over at every security parameter: the hopping axis's instance sequence, the

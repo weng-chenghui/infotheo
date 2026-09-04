@@ -17,18 +17,26 @@ MODULES=(
   dumas2017dual/lib/extra_proba.v
   # The headline theorems of both axes, with their full proofs.
   dumas2017dual/dsdp/dsdp_main.v
+  # The asymptotic reading of every concrete epsilon below: negligibility of
+  # a family indexed by the security parameter, and its closure lemmas.
+  computational_security/negligible.v
   # The game layer the computational leg reduces to: the adversary record,
   # the hidden-bit challenger, the two experiment arms and the advantage.
-  dumas2017dual/dsdp/hopping/indcpa_game.v
+  computational_security/indcpa_game.v
+  # The chain a multi-hop bound is assembled in: the accumulated loss as a
+  # list of labelled terms, and the soundness the bound is read off.
+  computational_security/hop_chain.v
   # The computational leg: the two-hop ladder over the corrupted-Alice
   # experiment, its two reductions, the guessing / unpredictability / simulation
   # bounds, and their transfer to the executed piSMC trace.
   dumas2017dual/dsdp/hopping/dsdp_alice_hop_secrecy.v
   dumas2017dual/dsdp/hopping/dsdp_alice_trace_link.v
   # The scheme side: the same bound read off at a concrete scheme, with the
-  # cardinality side discharged and the advantage derived from decisional
-  # composite residuosity.
-  dumas2017dual/dsdp/hopping/paillier_indcpa_scheme.v
+  # cardinality side discharged and the advantage derived from a residuosity
+  # assumption, decisional composite residuosity at Paillier and r-th
+  # residuosity at Benaloh.
+  computational_security/paillier_indcpa_scheme.v
+  computational_security/benaloh_indcpa_scheme.v
 )
 
 echo "[1/3] blueprint HTML + dependency graph (plastex)"

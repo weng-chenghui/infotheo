@@ -19,9 +19,10 @@ corrupted-Alice case, a corrupted Alice who fixes her query to a coordinate
 vector and reads a relay's input directly.
 
 Every headline theorem is proved in one of the axis files under
-\texttt{dsdp/counting/} and \texttt{dsdp/hopping/}, collected as a field of the
-results record \texttt{dsdp\_security}, and read off at the three settings of
-\texttt{dsdp\_main.v}. Each chapter below takes one of them and chains it
+\texttt{dsdp/counting/} and \texttt{dsdp/hopping/}, over the scheme-independent
+game vocabulary of \texttt{computational\_security/}, collected as a field of
+the results record \texttt{dsdp\_security}, and read off at the three settings
+of \texttt{dsdp\_main.v}. Each chapter below takes one of them and chains it
 to its leaves, opening with the hypotheses the bound actually assumes so an
 over-hypothesised or vacuous bound is visible on the page. The two proof
 techniques are kept distinct: the corrupted-Alice ciphertext channel is bounded
@@ -275,16 +276,16 @@ finite commutative unit ring.
 
 \begin{definition}[Real-or-zero advantage of a single-query adversary]
   \label{def:indcpa_epsilon}
-  \rocq{infotheo.dumas2017dual.dsdp.hopping.indcpa_game.enc_fdist,
-       infotheo.dumas2017dual.dsdp.hopping.indcpa_game.indcpa_adversary,
-       infotheo.dumas2017dual.dsdp.hopping.indcpa_game.indcpa_challenger,
-       infotheo.dumas2017dual.dsdp.hopping.indcpa_game.indcpa_experiment,
-       infotheo.dumas2017dual.dsdp.hopping.indcpa_game.indcpa_accept,
-       infotheo.dumas2017dual.dsdp.hopping.indcpa_game.indcpa_success_real,
-       infotheo.dumas2017dual.dsdp.hopping.indcpa_game.indcpa_success_realE,
-       infotheo.dumas2017dual.dsdp.hopping.indcpa_game.indcpa_success_zero,
-       infotheo.dumas2017dual.dsdp.hopping.indcpa_game.indcpa_success_zeroE,
-       infotheo.dumas2017dual.dsdp.hopping.indcpa_game.indcpa_epsilon}
+  \rocq{infotheo.computational_security.indcpa_game.enc_fdist,
+       infotheo.computational_security.indcpa_game.indcpa_adversary,
+       infotheo.computational_security.indcpa_game.indcpa_challenger,
+       infotheo.computational_security.indcpa_game.indcpa_experiment,
+       infotheo.computational_security.indcpa_game.indcpa_accept,
+       infotheo.computational_security.indcpa_game.indcpa_success_real,
+       infotheo.computational_security.indcpa_game.indcpa_success_realE,
+       infotheo.computational_security.indcpa_game.indcpa_success_zero,
+       infotheo.computational_security.indcpa_game.indcpa_success_zeroE,
+       infotheo.computational_security.indcpa_game.indcpa_epsilon}
   \rocqok
   A single-query real-or-zero adversary $A$ is a finite state type, a law on it,
   a challenge plaintext $p_A$ read off the state, and a decision taken on the
@@ -381,7 +382,7 @@ $V_3$.
 
 \begin{definition}[The distinguisher of a predictor]
   \label{def:distinguisher_of_predictor}
-  \rocq{infotheo.dumas2017dual.dsdp.hopping.indcpa_game.distinguisher_of_predictor,
+  \rocq{infotheo.computational_security.indcpa_game.distinguisher_of_predictor,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.guess_V2_jointE}
   \rocqok
   \uses{def:alice_hop_ladder}
@@ -624,7 +625,7 @@ $e$-th residuosity assumption.
 
 \begin{definition}[Negligibility of a sequence]
   \label{def:negligible_fun}
-  \rocq{infotheo.dumas2017dual.dsdp.hopping.indcpa_game.negligible_fun}
+  \rocq{infotheo.computational_security.negligible.negligible_fun}
   \rocqok
   A sequence of reals indexed by the security parameter is negligible when it
   eventually falls below every inverse polynomial.
@@ -638,7 +639,7 @@ $e$-th residuosity assumption.
 
 \begin{definition}[An adversary class and the advantage it assumes]
   \label{def:indcpa_assumption}
-  \rocq{infotheo.dumas2017dual.dsdp.hopping.indcpa_game.indcpa_epsilon_assumption}
+  \rocq{infotheo.computational_security.indcpa_game.indcpa_epsilon_assumption}
   \rocqok
   \uses{def:indcpa_epsilon}
   An assumption $\mathcal{A}$ is a Boolean classifier on single-query
@@ -661,9 +662,9 @@ $e$-th residuosity assumption.
 
 \begin{definition}[An assumption with a computed class and a proved promise]
   \label{def:cipher_constant_assumption}
-  \rocq{infotheo.dumas2017dual.dsdp.hopping.indcpa_game.adv_decide_cipher_constant,
-       infotheo.dumas2017dual.dsdp.hopping.indcpa_game.indcpa_epsilon_cipher_constant_eq0,
-       infotheo.dumas2017dual.dsdp.hopping.indcpa_game.cipher_constant_assumption}
+  \rocq{infotheo.computational_security.indcpa_game.adv_decide_cipher_constant,
+       infotheo.computational_security.indcpa_game.indcpa_epsilon_cipher_constant_eq0,
+       infotheo.computational_security.indcpa_game.cipher_constant_assumption}
   \rocqok
   \uses{def:indcpa_assumption}
   The classifier that admits an adversary exactly when its verdict ignores the
@@ -772,8 +773,8 @@ $e$-th residuosity assumption.
 
 \begin{definition}[Decisional composite residuosity at modulus $pq$]
   \label{def:dcr_assumption}
-  \rocq{infotheo.dumas2017dual.dsdp.hopping.paillier_indcpa_scheme.dcr_assumption,
-       infotheo.dumas2017dual.dsdp.hopping.paillier_indcpa_scheme.dcr_epsilon}
+  \rocq{infotheo.computational_security.paillier_indcpa_scheme.dcr_assumption,
+       infotheo.computational_security.paillier_indcpa_scheme.dcr_epsilon}
   \rocqok
   \uses{def:residuosity_assumption}
   The assumption above read at the ring $\mathbb{Z}_{(pq)^2}$ and the exponent
@@ -793,8 +794,8 @@ $e$-th residuosity assumption.
 
 \begin{theorem}[Paillier's real-or-zero advantage under composite residuosity]
   \label{thm:paillier_dcr_epsilon_le}
-  \rocq{infotheo.dumas2017dual.dsdp.hopping.paillier_indcpa_scheme.paillier_dcr_epsilon_le,
-       infotheo.dumas2017dual.dsdp.hopping.paillier_indcpa_scheme.paillier_dcr_admissible_epsilon_le}
+  \rocq{infotheo.computational_security.paillier_indcpa_scheme.paillier_dcr_epsilon_le,
+       infotheo.computational_security.paillier_indcpa_scheme.paillier_dcr_admissible_epsilon_le}
   \rocqok
   \uses{def:dcr_assumption,def:residuosity_assumption,lem:unit_fdist_translateE,def:indcpa_epsilon}
   For every private key and every adversary whose two composite-residuosity
@@ -819,8 +820,8 @@ $e$-th residuosity assumption.
 
 \begin{definition}[The IND-CPA assumption of Paillier, derived]
   \label{def:paillier_indcpa_assumption}
-  \rocq{infotheo.dumas2017dual.dsdp.hopping.paillier_indcpa_scheme.paillier_indcpa_assumption,
-       infotheo.dumas2017dual.dsdp.hopping.paillier_indcpa_scheme.paillier_indcpa_epsilon_le}
+  \rocq{infotheo.computational_security.paillier_indcpa_scheme.paillier_indcpa_assumption,
+       infotheo.computational_security.paillier_indcpa_scheme.paillier_indcpa_epsilon_le}
   \rocqok
   \uses{thm:paillier_dcr_epsilon_le,def:dcr_assumption,def:indcpa_assumption}
   At Paillier the adversary-class assumption of
@@ -845,8 +846,8 @@ $e$-th residuosity assumption.
 
 \begin{definition}[Higher residuosity at modulus $n$ and exponent $r$]
   \label{def:benaloh_residuosity_assumption}
-  \rocq{infotheo.dumas2017dual.dsdp.hopping.benaloh_indcpa_scheme.benaloh_residuosity_assumption,
-       infotheo.dumas2017dual.dsdp.hopping.benaloh_indcpa_scheme.benaloh_residuosity_epsilon}
+  \rocq{infotheo.computational_security.benaloh_indcpa_scheme.benaloh_residuosity_assumption,
+       infotheo.computational_security.benaloh_indcpa_scheme.benaloh_residuosity_epsilon}
   \rocqok
   \uses{def:residuosity_assumption}
   The same assumption read at the ring $\mathbb{Z}_n$ and the exponent $r$: a
@@ -866,8 +867,8 @@ $e$-th residuosity assumption.
 
 \begin{theorem}[Benaloh's real-or-zero advantage under higher residuosity]
   \label{thm:benaloh_residuosity_epsilon_le}
-  \rocq{infotheo.dumas2017dual.dsdp.hopping.benaloh_indcpa_scheme.benaloh_residuosity_epsilon_le,
-       infotheo.dumas2017dual.dsdp.hopping.benaloh_indcpa_scheme.benaloh_residuosity_admissible_epsilon_le}
+  \rocq{infotheo.computational_security.benaloh_indcpa_scheme.benaloh_residuosity_epsilon_le,
+       infotheo.computational_security.benaloh_indcpa_scheme.benaloh_residuosity_admissible_epsilon_le}
   \rocqok
   \uses{def:benaloh_residuosity_assumption,def:residuosity_assumption,lem:unit_fdist_translateE,def:indcpa_epsilon}
   For every private key and every adversary whose two residuosity reductions
@@ -887,8 +888,8 @@ $e$-th residuosity assumption.
 
 \begin{definition}[The IND-CPA assumption of Benaloh, derived]
   \label{def:benaloh_indcpa_assumption}
-  \rocq{infotheo.dumas2017dual.dsdp.hopping.benaloh_indcpa_scheme.benaloh_indcpa_assumption,
-       infotheo.dumas2017dual.dsdp.hopping.benaloh_indcpa_scheme.benaloh_indcpa_epsilon_le}
+  \rocq{infotheo.computational_security.benaloh_indcpa_scheme.benaloh_indcpa_assumption,
+       infotheo.computational_security.benaloh_indcpa_scheme.benaloh_indcpa_epsilon_le}
   \rocqok
   \uses{thm:benaloh_residuosity_epsilon_le,def:benaloh_residuosity_assumption,def:indcpa_assumption}
   At Benaloh the adversary-class assumption is likewise a value built from a
@@ -930,7 +931,7 @@ $e$-th residuosity assumption.
 
 \begin{lemma}[The class-conditional bound is negligible as a sequence]
   \label{lem:negligible_predictor_bound}
-  \rocq{infotheo.dumas2017dual.dsdp.hopping.indcpa_game.negligible_fun_predictor_bound}
+  \rocq{infotheo.computational_security.negligible.negligible_fun_predictor_bound}
   \rocqok
   \uses{def:negligible_fun}
   The arithmetic shape of the class-conditional bound is negligible whenever both of its

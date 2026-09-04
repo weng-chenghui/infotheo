@@ -6,6 +6,7 @@ Require Import realType_ext realType_ln ssr_ext ssralg_ext bigop_ext fdist.
 Require Import proba entropy.
 Require Import homomorphic_encryption residuosity_game.
 Require Import paillier_fdist_instance.
+Require Import negligible.
 Require Import indcpa_game paillier_indcpa_scheme benaloh_indcpa_scheme.
 Require Import dsdp_instance_sequence.
 Require Import dsdp_setting dsdp_security.
