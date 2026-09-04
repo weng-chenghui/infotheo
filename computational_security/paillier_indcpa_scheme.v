@@ -388,10 +388,8 @@ Lemma paillier_chain_lossE (A : dcr_assumption) (dk : priv_key AHE)
     (adv : indcpa_adversary (R:=R) AHE) :
   loss_eval (chain_loss (paillier_chain A dk adv)) = 2 * dcr_epsilon A.
 Proof.
-have -> : chain_loss (paillier_chain A dk adv)
-    = [:: LossTerm paillier_multiplying_hop (dcr_epsilon A)]
-      ++ [:: LossTerm paillier_plain_hop (dcr_epsilon A)] by [].
-by rewrite loss_eval_cat !loss_eval1 mulr_natl mulr2n.
+rewrite /loss_eval /paillier_chain /= big_cons big_cons big_nil addr0.
+by rewrite mulr_natl mulr2n.
 Qed.
 
 (* The chain's premise is the two class memberships and nothing else: the
@@ -405,10 +403,10 @@ Lemma paillier_chain_premise (A : dcr_assumption) (dk : priv_key AHE)
   residuosity_admissible A (dcr_of_adversary_zero adv) ->
   chain_premise (paillier_chain A dk adv).
 Proof.
-move=> Hg Hz; split; first by [].
-split; first exact: residuosity_admissible_epsilon_le _ _ Hg.
-split; first exact: unit_accept_dcrE (priv_gen_order dk) adv.
-by rewrite /= distrC; exact: residuosity_admissible_epsilon_le _ _ Hz.
+move=> Hg Hz; do !split.
+- exact: residuosity_admissible_epsilon_le _ _ Hg.
+- exact: unit_accept_dcrE (priv_gen_order dk) adv.
+- by rewrite /= distrC; exact: residuosity_admissible_epsilon_le _ _ Hz.
 Qed.
 
 (* The reduction and its loss.  An adversary whose two residuosity reductions

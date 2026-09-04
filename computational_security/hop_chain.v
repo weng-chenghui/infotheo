@@ -236,10 +236,8 @@ Lemma eval_sound (m : chain) (l : L) (c : R) :
   chain_first m <= loss_eval (chain_loss m ++ [:: LossTerm l c]).
 Proof.
 case=> hm hc; rewrite loss_eval_cat loss_eval1.
-have h1 : chain_first m - chain_current m <= loss_eval (chain_loss m).
-  exact: (le_trans (ler_norm (chain_first m - chain_current m))
-                   (@chain_sound m hm)).
-by rewrite -(subrK (chain_current m) (chain_first m)); exact: lerD h1 hc.
+rewrite -(subrK (chain_current m) (chain_first m)); apply: lerD hc.
+exact: le_trans (ler_norm _) (chain_sound hm).
 Qed.
 
 Definition chain_eval (m : chain) (l : L) (c : R) : chain_bound :=
@@ -332,7 +330,7 @@ Lemma chain_observable_eq (c1 c2 : chain L R) :
   chain_loss c1 = chain_loss c2 -> chain_premise c1 = chain_premise c2 ->
   c1 = c2.
 Proof.
-case: c1 => a1 b1 l1 p1 s1; case: c2 => a2 b2 l2 p2 s2 /= Ha Hb Hl Hp.
+case: c1 c2 => a1 b1 l1 p1 s1 [a2 b2 l2 p2 s2] /= Ha Hb Hl Hp.
 move: s1 s2; rewrite Ha Hb Hl Hp => s1 s2.
 by congr Chain; exact: Prop_irrelevance.
 Qed.
@@ -358,23 +356,11 @@ Proof. by case=> _ _ ps _; exact: loss_eval_perm. Qed.
 Lemma left_unit_equiv (g : R) (f : R -> chain L R)
     (Hb : chain_first (f g) = g) :
   chain_equiv (chain_bind (chain_start g) f Hb) (f g).
-Proof.
-split=> /=.
-- by rewrite Hb.
-- by [].
-- exact: perm_refl.
-- by split=> [[]//|hf]; split.
-Qed.
+Proof. by split=> //=; split=> [[]//|]. Qed.
 
 (* The right unit law, in the same sense. *)
 Lemma right_unit_equiv (m : chain L R) :
   chain_equiv (chain_bind m (fun x => chain_start x) erefl) m.
-Proof.
-split=> /=.
-- by [].
-- by [].
-- by rewrite cats0 perm_refl.
-- by split=> [[]//|hm]; split.
-Qed.
+Proof. by split=> //=; [rewrite cats0|split=> [[]//|]]. Qed.
 
 End monad_laws.

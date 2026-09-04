@@ -419,11 +419,10 @@ Lemma benaloh_chain_premise (A : benaloh_residuosity_assumption)
   residuosity_admissible A (residuosity_of_adversary_zero adv) ->
   chain_premise (benaloh_chain A dk adv).
 Proof.
-move=> Hy H0.
-split; first by [].
-split; first exact: residuosity_admissible_epsilon_le _ _ Hy.
-split; first exact: unit_accept_residuosityE (priv_gen dk) adv.
-by rewrite /= distrC; exact: residuosity_admissible_epsilon_le _ _ H0.
+move=> Hy H0; do !split.
+- exact: residuosity_admissible_epsilon_le _ _ Hy.
+- exact: unit_accept_residuosityE (priv_gen dk) adv.
+- by rewrite /= distrC; exact: residuosity_admissible_epsilon_le _ _ H0.
 Qed.
 
 (* The reduction and its loss.  At every private key, an adversary whose two

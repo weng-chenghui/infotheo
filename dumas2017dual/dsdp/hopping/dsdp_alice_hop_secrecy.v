@@ -588,7 +588,8 @@ Qed.
 (* The hop-1 encryption randomness is uniform. *)
 Lemma rho3_uniformE : `p_ Rho3 = fdist_uniform card_renc.
 Proof.
-by rewrite -(snd_RV2 Hop1StatePre Rho3) hop1_state_pre_pair_uniformE fdist_prod2.
+by rewrite -(snd_RV2 Hop1StatePre Rho3) hop1_state_pre_pair_uniformE
+   fdist_prod2.
 Qed.
 
 (* A joint law that factors as the product of its marginals is the law of an
@@ -1180,8 +1181,8 @@ Definition alice_chain (predict : predictor alice_hop_tupleT) : chain nat R :=
 Lemma alice_chain_premise (predict : predictor alice_hop_tupleT) :
   chain_premise (alice_chain predict).
 Proof.
-rewrite /alice_chain /=; split=> //.
-by split; rewrite (hop0_advantageE, hop1_advantageE).
+by rewrite /alice_chain /=; do !split;
+   rewrite (hop0_advantageE, hop1_advantageE).
 Qed.
 
 (* Alice's chain read as a bound on the game it starts from, its all-zero
@@ -1218,8 +1219,8 @@ Lemma alice_chain_lossE (predict : predictor alice_hop_tupleT) :
     + indcpa_epsilon charlie_pkey
         (charlie_challenge_adversary (distinguisher_of_predictor predict)).
 Proof.
-rewrite !loss_eval_cat !loss_eval1 loss_eval_nil.
-by rewrite add0r addrAC [X in X + _]addrC.
+by rewrite !loss_eval_cat !loss_eval1 loss_eval_nil add0r addrAC
+   [X in X + _]addrC.
 Qed.
 
 (* A predictor reading Alice's real view returns Bob's input with probability at
