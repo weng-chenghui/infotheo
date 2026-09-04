@@ -197,10 +197,10 @@ Require Import hop_chain.
 (* alice_predictor_unpredictability predict == the negative logarithm of      *)
 (*                              the predictor's success probability           *)
 (*         bob_predictor_epsilon == the advantage against Bob's key that one  *)
-(*                              predictor buys, the price of the hop-0        *)
-(*                              replacement                                   *)
-(*     charlie_predictor_epsilon == the Charlie-key counterpart, the price    *)
-(*                              of the hop-1 replacement                      *)
+(*                              predictor buys, what the hop-0 replacement    *)
+(*                              costs                                         *)
+(*     charlie_predictor_epsilon == the Charlie-key counterpart, what the     *)
+(*                              hop-1 replacement costs                       *)
 (*             fdistmap_prod == applying separate functions to independent    *)
 (*                              factors preserves their product form          *)
 (*            fdistmap_prodr == changing only the second factor leaves the    *)
@@ -212,7 +212,7 @@ Require Import hop_chain.
 (*                              IND-CPA reduction at Bob's key                *)
 (*         alice_charlie_hop == the label of the second loss term, the        *)
 (*                              IND-CPA reduction at Charlie's key            *)
-(*          alice_plain_term == the label of the terminal loss term, the      *)
+(*          alice_plain_size == the label of the terminal loss term, the      *)
 (*                              plaintext-space bound at the all-zero         *)
 (*                              endpoint                                      *)
 (*               alice_chain == the three games and two hops of this file as  *)
@@ -223,7 +223,7 @@ Require Import hop_chain.
 (*                              its endpoint charged the plaintext-space term *)
 (* alice_chain_bound_premise == the chain's own premise together with the     *)
 (*                              bound on its endpoint                         *)
-(*          alice_chain_loss == the numeric total of its loss, the right-hand *)
+(*         alice_chain_lossE == the numeric total of its loss, the right-hand *)
 (*                              side of alice_tuple_guess_V2_le               *)
 (*                                                                            *)
 (* Simulation                                                                 *)
@@ -1142,8 +1142,8 @@ Local Open Scope chain_scope.
    labels are what let a reader of an accumulated loss tell which of its
    summands are conditional on a computational assumption, and at which key.
    Naming: [alice] names the axis and the remainder names what the term
-   measures, a ciphertext replacement for the two hops and the endpoint
-   evaluation for the third. *)
+   measures, a ciphertext replacement for the two hops and the plaintext-space
+   size for the third. *)
 Definition alice_bob_hop : nat := 0.
 
 (* The label of the second loss term, the IND-CPA reduction at Charlie's
@@ -1153,7 +1153,7 @@ Definition alice_charlie_hop : nat := 1.
 (* The label of the terminal loss term, the plaintext-space bound at the
    all-zero endpoint.  That summand rests on no computational assumption: it is
    the residue the leaked output leaves along the DSDP solution fiber. *)
-Definition alice_plain_term : nat := 2.
+Definition alice_plain_size : nat := 2.
 
 (* The computational-security argument of this file written as a chain: the
    acceptance probabilities of the predictor's distinguisher at hops 0, 1 and
@@ -1186,12 +1186,12 @@ Qed.
 
 (* Alice's chain read as a bound on the game it starts from, its all-zero
    endpoint charged the inverse plaintext-space cardinality under
-   alice_plain_term.  The chain compares two acceptance probabilities; charging
+   alice_plain_size.  The chain compares two acceptance probabilities; charging
    the endpoint is what turns that comparison into a bound on the real-view
    game, which is the shape a secrecy statement takes. *)
 Definition alice_chain_bound (predict : predictor alice_hop_tupleT) :
     chain_bound nat R :=
-  chain_eval (alice_chain predict) alice_plain_term #|plain AHE|%:R^-1.
+  chain_eval (alice_chain predict) alice_plain_size #|plain AHE|%:R^-1.
 
 (* The premise of that bound: the chain's own premise together with the
    all-zero endpoint lying below the inverse plaintext-space cardinality.  The
@@ -1210,7 +1210,7 @@ Qed.
    Bob-key advantage, then the Charlie-key advantage.  It is the right-hand
    side of alice_tuple_guess_V2_le, so what that statement asserts is the loss
    the chain accumulated and nothing besides. *)
-Lemma alice_chain_loss (predict : predictor alice_hop_tupleT) :
+Lemma alice_chain_lossE (predict : predictor alice_hop_tupleT) :
   loss_eval (bound_loss (alice_chain_bound predict))
   = #|plain AHE|%:R^-1
     + indcpa_epsilon bob_pkey
@@ -1227,8 +1227,8 @@ Qed.
    hop reductions.  The first term is the information-theoretic residue of the
    leaked output along the DSDP solution fiber; each of the two advantages is
    what zeroing one ciphertext slot costs, conditional on the IND-CPA
-   assumption at that slot's key.  The right-hand side is alice_chain_loss, the
-   loss the chain accumulated.
+   assumption at that slot's key.  The right-hand side is alice_chain_lossE,
+   the loss the chain accumulated.
    Naming: [tuple] names the hop-0 conditioner, [V2] the input bounded, and
    [le] the direction of the bound. *)
 Theorem alice_tuple_guess_V2_le
@@ -1241,21 +1241,21 @@ Theorem alice_tuple_guess_V2_le
            (charlie_challenge_adversary (distinguisher_of_predictor predict)).
 Proof.
 rewrite /AliceRealTuple guess_V2_jointE -alice_hop_game_successE.
-rewrite -alice_chain_loss.
+rewrite -alice_chain_lossE.
 exact: bound_sound (alice_chain_bound_premise predict).
 Qed.
 
 (* The IND-CPA advantage against Bob's key that one predictor buys: the
    predictor is scored by distinguisher_of_predictor and that test is
-   embedded in bob_challenge_adversary.  It is the price of the hop-0 ciphertext
-   replacement, and it is assumption-conditional at Bob's key. *)
+   embedded in bob_challenge_adversary.  It is what the hop-0 ciphertext
+   replacement costs, and it is assumption-conditional at Bob's key. *)
 Definition bob_predictor_epsilon
     (predict : predictor alice_hop_tupleT) : R :=
   indcpa_epsilon bob_pkey
     (bob_challenge_adversary (distinguisher_of_predictor predict)).
 
-(* The Charlie-key counterpart of bob_predictor_epsilon: the price of the hop-1
-   ciphertext replacement, assumption-conditional at Charlie's key. *)
+(* The Charlie-key counterpart of bob_predictor_epsilon: what the hop-1
+   ciphertext replacement costs, assumption-conditional at Charlie's key. *)
 Definition charlie_predictor_epsilon
     (predict : predictor alice_hop_tupleT) : R :=
   indcpa_epsilon charlie_pkey

@@ -304,8 +304,8 @@ Lemma indcpa_success_zeroE (pk : pub_key AHE)
 Proof. by []. Qed.
 
 (* The advantage of adv against pk: the absolute gap between its real and zero
-   success probabilities.  Every DSDP hop is priced by one such advantage, at a
-   fixed key and a single query. *)
+   success probabilities.  Every DSDP hop costs one such advantage, at a fixed
+   key and a single query. *)
 Definition indcpa_epsilon (pk : pub_key AHE)
     (adv : indcpa_adversary) : R :=
   `| indcpa_success_real pk adv - indcpa_success_zero pk adv |.

@@ -110,7 +110,7 @@ Require Import negligible indcpa_game hop_chain.
 (*                            every bound below is derived from               *)
 (* benaloh_residuosity_epsilon ==                                             *)
 (*                            the advantage that record assumes, the          *)
-(*                            currency the Benaloh bounds are priced in       *)
+(*                            currency the Benaloh bounds are stated in       *)
 (*   residuosity_of_adversary == the adversary read as a distinguisher        *)
 (*                               multiplying its challenge by the generator   *)
 (*                               power its plaintext names                    *)
@@ -129,7 +129,7 @@ Require Import negligible indcpa_game hop_chain.
 (*                               carries the zero arm back                    *)
 (*              benaloh_chain == the reduction as a chain of two hops         *)
 (*                               around one equality                          *)
-(*         benaloh_chain_loss == the loss of that chain totals twice the      *)
+(*        benaloh_chain_lossE == the loss of that chain totals twice the      *)
 (*                               residuosity epsilon                          *)
 (*      benaloh_chain_premise == the two admissibility hypotheses             *)
 (*                               discharge the chain premise                  *)
@@ -269,11 +269,11 @@ Definition benaloh_residuosity_assumption : Type :=
 
 (* The advantage an r-th residuosity record assumes of the distinguishers its
    class admits.  It is the currency every Benaloh IND-CPA bound of this file
-   is priced in: an IND-CPA epsilon at one key is twice it, one call per hop
+   is stated in: an IND-CPA epsilon at one key is twice it, one call per hop
    of the reduction below, and a trace bound that replaces a ciphertext at
    two keys spends it four times.
    Naming: [benaloh_residuosity] names the game the epsilon belongs to,
-   distinguishing it from the IND-CPA epsilon it prices. *)
+   distinguishing it from the IND-CPA epsilon derived from it. *)
 Definition benaloh_residuosity_epsilon (A : benaloh_residuosity_assumption)
     : R := residuosity_assumption_epsilon A.
 
@@ -399,7 +399,7 @@ Definition benaloh_chain (A : benaloh_residuosity_assumption)
 (* The chain totals two residuosity calls: each hop logs one term at the
    assumed epsilon and the middle equality logs nothing.  This is where the
    factor two in every Benaloh IND-CPA bound of this file comes from. *)
-Lemma benaloh_chain_loss (A : benaloh_residuosity_assumption)
+Lemma benaloh_chain_lossE (A : benaloh_residuosity_assumption)
     (dk : priv_key AHE) (adv : indcpa_adversary (R:=R) AHE) :
   loss_eval (chain_loss (benaloh_chain A dk adv))
   = 2 * benaloh_residuosity_epsilon A.
@@ -426,7 +426,7 @@ split; first exact: unit_accept_residuosityE (priv_gen dk) adv.
 by rewrite /= distrC; exact: residuosity_admissible_epsilon_le _ _ H0.
 Qed.
 
-(* The reduction, priced.  At every private key, an adversary whose two
+(* The reduction and its loss.  At every private key, an adversary whose two
    residuosity reductions the residuosity class admits has IND-CPA advantage
    at most twice the assumed residuosity epsilon: one residuosity call carries
    the real arm from the residue law to the unit law, the middle equality
@@ -444,7 +444,7 @@ Proof.
 move=> Hy H0.
 rewrite /indcpa_epsilon indcpa_success_realE indcpa_success_zeroE.
 rewrite !enc_fdist_benalohE /= real_accept_residuosityE.
-rewrite zero_accept_residuosityE -(benaloh_chain_loss A dk adv).
+rewrite zero_accept_residuosityE -(benaloh_chain_lossE A dk adv).
 exact: chain_sound (benaloh_chain_premise Hy H0).
 Qed.
 
@@ -477,7 +477,7 @@ Qed.
 (* The IND-CPA assumption of Benaloh, derived rather than assumed: the class
    above, twice the residuosity epsilon, and the lemma above as the record's
    proof field.  Every computational bound the DSDP files read off at Benaloh
-   passes through this record, so each of those bounds is priced in r-th
+   passes through this record, so each of those bounds is stated in r-th
    residuosity currency at two residuosity calls per key. *)
 Definition benaloh_indcpa_assumption (A : benaloh_residuosity_assumption) :
     indcpa_epsilon_assumption (R:=R) card_renc_benaloh
@@ -565,7 +565,7 @@ Definition f_size_benaloh k : R :=
   (#|plain (Benaloh_AHEnc (n k) (r_gt1 k))|%:R : R)^-1.
 
 (* The assumed residuosity-advantage sequence: the epsilon D k assumes at each
-   k, the currency every computational bound along the sequence is priced
+   k, the currency every computational bound along the sequence is stated
    in. *)
 Definition f_residuosity_benaloh k : R := benaloh_residuosity_epsilon (D k).
 
@@ -593,7 +593,7 @@ Hypothesis f_residuosity_benaloh_negligible :
 (* The derived IND-CPA advantage is negligible, twice a negligible family
    being negligible.  What a sequence of IND-CPA assumptions had to take as a
    hypothesis is here a consequence of the residuosity hypothesis, at the
-   price of the factor two the reduction spends. *)
+   cost of the factor two the reduction spends. *)
 Lemma f_adv_benaloh_negligible : negligible_fun f_adv_benaloh.
 Proof. exact: negligible_fun_double f_residuosity_benaloh_negligible. Qed.
 
