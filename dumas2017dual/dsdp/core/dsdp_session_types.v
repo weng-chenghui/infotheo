@@ -86,7 +86,7 @@ Definition DSend_iter {T} (party : nat) (dst : T -> nat) (payload : T -> data)
     (elems : seq T) {n} {env : senv dsdp_dtype}
     (cont : @sproc dsdp_dtype data party n env)
     : @sproc dsdp_dtype data party (iter (size elems) S n)
-        (fold_senv (fun f e => senv_send e (dst f) DT_Enc) elems env) :=
+        (foldr (fun f e => senv_send e (dst f) DT_Enc) env elems) :=
   sproc_iter party S
     (fun f e => senv_send e (dst f) DT_Enc)
     (fun f _ _ _ cont => SSend (dst f) DT_Enc (payload f) cont)
@@ -100,7 +100,7 @@ Definition DRecv_enc_iter {T} (party : nat) (src : T -> nat)
     (elems : seq T) {n} {env : senv dsdp_dtype}
     (cont : @sproc dsdp_dtype data party n env)
     : @sproc dsdp_dtype data party (iter (size elems) (fun k => k.+2) n)
-        (fold_senv (fun f e => senv_recv e (src f) DT_Enc) elems env) :=
+        (foldr (fun f e => senv_recv e (src f) DT_Enc) env elems) :=
   sproc_iter party (fun k => k.+2)
     (fun f e => senv_recv e (src f) DT_Enc)
     (fun f _ _ _ cont =>

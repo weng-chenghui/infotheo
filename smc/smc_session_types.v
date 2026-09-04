@@ -44,53 +44,23 @@ Variable dtype : eqType.
 
 (* Session type: parameterized by dtype to avoid combinatorial explosion *)
 Inductive stype : Type :=
-  | STSend : dtype -> stype -> stype   (* !d.S - send data of kind d *)
-  | STRecv : dtype -> stype -> stype   (* ?d.S - receive data of kind d *)
+  | STSend : nat -> dtype -> stype -> stype  (* !d.S - send data of kind d *)
+  | STRecv : nat -> dtype -> stype -> stype  (* ?d.S - receive data of kind d *)
   | STEnd : stype.                     (* end - session finished *)
 
 (* Session environment: maps party ID to session type with that party *)
-Definition senv : Type := nat -> stype.
+Definition senv : Type := stype.
 
 (* Empty environment: no communication with anyone *)
-Definition senv_end : senv := fun _ => STEnd.
+Definition senv_end : senv := STEnd.
 
 (* Prepend a Send to environment for specific party *)
 Definition senv_send (env : senv) (dst : nat) (d : dtype) : senv :=
-  fun p => if p == dst then STSend d (env p) else env p.
+  STSend dst d env.
 
 (* Prepend a Recv to environment for specific party *)
 Definition senv_recv (env : senv) (src : nat) (d : dtype) : senv :=
-  fun p => if p == src then STRecv d (env p) else env p.
-
-(* Fold over a list, applying element-dependent environment transformations.
-   Used with sproc_iter for protocol iteration over finType elements.
-   Applies the first element outermost (matching sproc_iter's left-to-right order). *)
-Fixpoint fold_senv {T} (step : T -> senv -> senv)
-    (elems : seq T) (env : senv) : senv :=
-  match elems with
-  | [::] => env
-  | x :: rest => step x (fold_senv step rest env)
-  end.
-
-(* Definitional unfolding: empty list is identity.
-   Holds by computation (fold_senv matches on [::]). *)
-Lemma fold_senv_nil {T} (step : T -> senv -> senv) (env : senv) :
-  fold_senv step [::] env = env.
-Proof. by []. Qed.
-
-(* Definitional unfolding: cons applies step outermost.
-   Holds by computation (fold_senv matches on x :: rest). *)
-Lemma fold_senv_cons {T} (step : T -> senv -> senv)
-    (x : T) (xs : seq T) (env : senv) :
-  fold_senv step (x :: xs) env = step x (fold_senv step xs env).
-Proof. by []. Qed.
-
-(* Concatenation splits into nested folds. *)
-Lemma fold_senv_cat {T} (step : T -> senv -> senv)
-    (xs ys : seq T) (env : senv) :
-  fold_senv step (xs ++ ys) env = fold_senv step xs (fold_senv step ys env).
-Proof. by elim: xs => //= x xs ->. Qed.
-
+  STRecv src d env.
 End stype_def.
 
 (* Make stype arguments explicit for clarity *)
@@ -110,113 +80,15 @@ Section stype_depth_def.
 Variable dtype : eqType.
 
 (* Depth of a single session type - counts number of send/recv operations *)
-Fixpoint stype_depth (s : stype dtype) : nat :=
+Fixpoint senv_depth (s : stype dtype) : nat :=
   match s with
   | STEnd => 0
-  | STSend _ k => (stype_depth k).+1
-  | STRecv _ k => (stype_depth k).+1
+  | STSend _ _ k => (senv_depth k).+1
+  | STRecv _ _ k => (senv_depth k).+1
   end.
-
-(* Depth of session environment - max over specified parties *)
-Definition senv_depth (env : senv dtype) (parties : seq nat) : nat :=
-  \max_(p <- parties) stype_depth (env p).
-
-(* Basic lemmas about stype_depth *)
-Lemma stype_depth_send (d : dtype) (k : stype dtype) :
-  stype_depth (STSend d k) = (stype_depth k).+1.
-Proof. by []. Qed.
-
-Lemma stype_depth_recv (d : dtype) (k : stype dtype) :
-  stype_depth (STRecv d k) = (stype_depth k).+1.
-Proof. by []. Qed.
-
-Lemma stype_depth_end : stype_depth (@STEnd dtype) = 0.
-Proof. by []. Qed.
-
-(* senv_end has depth 0 for any party set *)
-Lemma senv_depth_end (parties : seq nat) :
-  senv_depth (@senv_end dtype) parties = 0.
-Proof. by rewrite /senv_depth big1. Qed.
-
-(* Helper: F i0 <= bigmax over sequence when i0 is in the sequence *)
-Lemma leq_bigmax_seq_simple (F : nat -> nat) (r : seq nat) (i0 : nat) :
-  i0 \in r -> F i0 <= \max_(i <- r) F i.
-Proof.
-elim: r => [|h t IH] //=.
-rewrite in_cons big_cons => /orP[/eqP -> | Ht].
-  exact: leq_maxl.
-apply (leq_trans (IH Ht)).
-exact: leq_maxr.
-Qed.
-
-(* senv_send increases depth for the target party *)
-Lemma senv_depth_send (env : senv dtype) (dst : nat) (d : dtype) (parties : seq nat) :
-  dst \in parties ->
-  senv_depth (senv_send env dst d) parties >= (stype_depth (env dst)).+1.
-Proof.
-move=> Hdst.
-rewrite /senv_depth.
-apply (@leq_trans (stype_depth (senv_send env dst d dst))).
-  by rewrite /senv_send eqxx.
-exact: (leq_bigmax_seq_simple (fun p => stype_depth (senv_send env dst d p)) Hdst).
-Qed.
-
-(* senv_recv increases depth for the source party *)
-Lemma senv_depth_recv (env : senv dtype) (src : nat) (d : dtype) (parties : seq nat) :
-  src \in parties ->
-  senv_depth (senv_recv env src d) parties >= (stype_depth (env src)).+1.
-Proof.
-move=> Hsrc.
-rewrite /senv_depth.
-apply (@leq_trans (stype_depth (senv_recv env src d src))).
-  by rewrite /senv_recv eqxx.
-exact: (leq_bigmax_seq_simple (fun p => stype_depth (senv_recv env src d p)) Hsrc).
-Qed.
-
-(* Helper: monotonicity of bigmax over sequences *)
-Lemma big_max_mono (parties : seq nat) (F G : nat -> nat) :
-  (forall i, i \in parties -> F i <= G i) ->
-  \max_(i <- parties) F i <= \max_(i <- parties) G i.
-Proof.
-move=> Hleq.
-apply/bigmax_leqP_seq => i Hi _.
-apply: leq_trans (Hleq i Hi) _.
-by apply: (leq_bigmax_seq _ Hi).
-Qed.
-
-(* senv_send preserves or increases depth (no membership requirement) *)
-Lemma senv_depth_senv_send_geq (env : senv dtype) (dst : nat) (dt : dtype) (parties : seq nat) :
-  senv_depth env parties <= senv_depth (senv_send env dst dt) parties.
-Proof.
-rewrite /senv_depth.
-apply: big_max_mono => i Hi.
-rewrite /senv_send.
-case: (i == dst) => /=.
-- by rewrite leqnSn.
-- by [].
-Qed.
-
-(* senv_recv preserves or increases depth (no membership requirement) *)
-Lemma senv_depth_senv_recv_geq (env : senv dtype) (src : nat) (dt : dtype) (parties : seq nat) :
-  senv_depth env parties <= senv_depth (senv_recv env src dt) parties.
-Proof.
-rewrite /senv_depth.
-apply: big_max_mono => i Hi.
-rewrite /senv_recv.
-case: (i == src) => /=.
-- by rewrite leqnSn.
-- by [].
-Qed.
-
-Lemma senv_depth_fold_senv_mono {T} (step : T -> senv dtype -> senv dtype)
-    (elems : seq T) (env : senv dtype) (parties : seq nat) :
-  (forall x e, senv_depth e parties <= senv_depth (step x e) parties) ->
-  senv_depth env parties <= senv_depth (fold_senv step elems env) parties.
-Proof. by elim: elems => //= x xs IH Hmono; apply: (leq_trans (IH Hmono)). Qed.
 
 End stype_depth_def.
 
-Arguments stype_depth {dtype}.
 Arguments senv_depth {dtype}.
 
 (******************************************************************************)
@@ -234,10 +106,10 @@ Variable data : Type.
 Inductive sproc (party : nat) : nat -> senv dtype -> Type :=
 
   (* Finish: base case, fuel=1, empty session environment *)
-  | SFinish : sproc party 1 senv_end
+  | SFinish : sproc party 1 STEnd
   
   (* Ret: returns value, fuel=2, empty session environment *)
-  | SRet : data -> sproc party 2 senv_end
+  | SRet : data -> sproc party 2 STEnd
   
   (* Init: doesn't affect session types, increments fuel *)
   | SInit : forall n env,
@@ -295,12 +167,12 @@ Fixpoint sproc_iter {T} (party : nat)
     : forall (n : nat) (env : senv dtype),
         @sproc dtype data party n env ->
         @sproc dtype data party (iter (size elems) fuel_step n)
-                                (fold_senv env_step elems env) :=
+                                (foldr env_step env elems) :=
   match elems as l return
     forall (n : nat) (env : senv dtype),
       @sproc dtype data party n env ->
       @sproc dtype data party (iter (size l) fuel_step n)
-                              (fold_senv env_step l env)
+                              (foldr env_step env l)
   with
   | [::] => fun n env cont => cont
   | f :: rest => fun n env cont =>
@@ -337,6 +209,7 @@ Lemma sproc_iter_cons {dtype : eqType} {data : Type} {T}
   body f start_idx _ _
     (sproc_iter party fuel_step env_step body rest start_idx.+1 cont).
 Proof. by []. Qed.
+
 
 (******************************************************************************)
 (** * Phase 1 Test: Minimal Example to Verify Unification                     *)
@@ -400,7 +273,7 @@ Definition test7 : @sproc test_dtype test_data party0 _ _ :=
 Definition get_stype {dtype : eqType} {data : Type}
     {party : nat} {n : nat} {env : senv dtype} 
     (p : @sproc dtype data party n env) (them : nat) : stype dtype :=
-  env them.
+  env.
 
 (* Extract inferred fuel from sproc *)
 Definition get_fuel {dtype : eqType} {data : Type}
@@ -417,26 +290,34 @@ Section duality.
 
 Variable dtype : eqType.
 
-(* Duality: send becomes recv, recv becomes send *)
-Fixpoint dual (s : stype dtype) : stype dtype :=
-  match s with
-  | STSend d k => STRecv d (dual k)
-  | STRecv d k => STSend d (dual k)
-  | STEnd => STEnd
+Definition stype_step (ps : seq (stype dtype)) i :=
+  let p := nth STEnd ps i in
+  match p with
+  | STRecv j ti k =>
+      match nth STEnd ps j with
+      | STSend i' tj _ =>
+          if (i == i') && (ti == tj) then (k,true) else (p, false)
+      | _ => (p, false)
+      end
+  | STSend j ti k =>
+      match nth STEnd ps j with
+      | STRecv i' tj _ =>
+          if (i == i') && (ti == tj) then (k, true) else (p, false)
+      | _ => (p, false)
+      end
+  | STEnd => (p, false)
   end.
 
-(* Duality is involutive *)
-Lemma dual_involutive : forall s : stype dtype, dual (dual s) = s.
-Proof.
-move=> s.
-elim: s => //=.
-- move=> d s IH.
-  rewrite IH.
-  reflexivity.
-- move=> d s IH.
-  rewrite IH.
-  reflexivity.
-Qed.
+Fixpoint stypes_interp h (ps : seq (stype dtype)) :=
+  if h is h.+1 then
+    let ps_c := [seq stype_step ps i | i <- iota 0 (size ps)] in
+    if has snd ps_c then stypes_interp h (unzip1 ps_c) else ps
+  else [::].
+
+Definition isSTEnd (x : stype dtype) := if x is STEnd then true else false.
+
+Definition stypes_ok ps :=
+  all isSTEnd (stypes_interp (sumn (map senv_depth ps)) ps).
 
 End duality.
 
@@ -463,11 +344,7 @@ Definition aproc_fuel (ap : aproc) : nat := projT1 (projT2 ap).
 Definition aproc_env (ap : aproc) : senv dtype := projT1 (projT2 (projT2 ap)).
 Definition aproc_proc (ap : aproc) : @sproc dtype data (aproc_party ap) (aproc_fuel ap) (aproc_env ap) :=
   projT2 (projT2 (projT2 ap)).
-
-(* Get session type with specific party *)
-Definition aproc_stype (ap : aproc) (them : nat) : stype dtype :=
-  aproc_env ap them.
-
+Definition aprocs_compat (ps : seq aproc) := stypes_ok (map aproc_env ps).
 End aproc_def.
 
 Arguments mk_aproc {dtype data party n env}.
@@ -475,7 +352,6 @@ Arguments aproc_party {dtype data}.
 Arguments aproc_fuel {dtype data}.
 Arguments aproc_env {dtype data}.
 Arguments aproc_proc {dtype data}.
-Arguments aproc_stype {dtype data}.
 
 (* Compute sum of all fuels from aproc list - used as interpreter fuel *)
 Definition sum_fuel {dtype : eqType} {data : Type} (ps : seq (aproc dtype data)) : nat := 
@@ -496,51 +372,36 @@ Variable dtype : eqType.
 Fixpoint stype_eqb (s1 s2 : stype dtype) : bool :=
   match s1, s2 with
   | STEnd, STEnd => true
-  | STSend d1 k1, STSend d2 k2 => (d1 == d2) && stype_eqb k1 k2
-  | STRecv d1 k1, STRecv d2 k2 => (d1 == d2) && stype_eqb k1 k2
+  | STSend p1 d1 k1, STSend p2 d2 k2 =>
+      (p1 == p2) && (d1 == d2) && stype_eqb k1 k2
+  | STRecv p1 d1 k1, STRecv p2 d2 k2 =>
+      (p1 == p2) && (d1 == d2) && stype_eqb k1 k2
   | _, _ => false
   end.
 
 Lemma stype_eqP : Equality.axiom stype_eqb.
 Proof.
 move=> s1 s2.
-elim: s1 s2 => [d1 k1 IH|d1 k1 IH|] [d2 k2|d2 k2|] //=; try by constructor.
-- case: (d1 =P d2) => [<-|Hneq] /=.
-  + case: (IH k2) => [<-|Hneq]; first by constructor.
+elim: s1 s2 => [p1 d1 k1 IH|p1 d1 k1 IH|] [p2 d2 k2|p2 d2 k2|] //=;
+  try by constructor.
+- case: (p1 =P p2) => [<-|Hneq] /=.
+    case: (d1 =P d2) => [<-|Hneq] /=.
+    + case: (IH k2) => [<-|Hneq]; first by constructor.
     constructor. by case.
-  + constructor. by case.
-- case: (d1 =P d2) => [<-|Hneq] /=.
-  + case: (IH k2) => [<-|Hneq]; first by constructor.
+  constructor. by case.
+  constructor. by case.
+- case: (p1 =P p2) => [<-|Hneq] /=.
+    case: (d1 =P d2) => [<-|Hneq] /=.
+    + case: (IH k2) => [<-|Hneq]; first by constructor.
     constructor. by case.
-  + constructor. by case.
+  constructor. by case.
+  constructor. by case.
 Qed.
 
 HB.instance Definition _ := hasDecEq.Build (stype dtype) stype_eqP.
 
 End stype_eq.
 
-(******************************************************************************)
-(** * Duality Checking                                                        *)
-(******************************************************************************)
-
-Section duality_check.
-
-Variable dtype : eqType.
-
-(* Check if two session types are dual *)
-Definition are_dual (s1 s2 : stype dtype) : bool := s1 == dual s2.
-
-(* Check if two aprocs have dual session types for communication between them *)
-Definition channels_dual {data : Type} (ap1 ap2 : aproc dtype data) : bool :=
-  let p1 := aproc_party ap1 in
-  let p2 := aproc_party ap2 in
-  (* ap1's view of p2 should be dual to ap2's view of p1 *)
-  are_dual (aproc_stype ap1 p2) (aproc_stype ap2 p1).
-
-End duality_check.
-
-Arguments are_dual {dtype}.
-Arguments channels_dual {dtype data}.
 
 (******************************************************************************)
 (** * Phase 2 Tests                                                           *)
@@ -566,18 +427,18 @@ Definition aproc_p0 : aproc dtype data := mk_aproc proto_p0.
 Definition aproc_p1 : aproc dtype data := mk_aproc proto_p1.
 
 (* Test: Extract session types *)
-Eval compute in aproc_stype aproc_p0 1.  (* Should be: STSend DT_A STEnd *)
-Eval compute in aproc_stype aproc_p1 0.  (* Should be: STRecv DT_A STEnd *)
+Eval compute in aproc_env aproc_p0.  (* Should be: STSend 1 DT_A STEnd *)
+Eval compute in aproc_env aproc_p1.  (* Should be: STRecv 0 DT_A STEnd *)
 
 (* Test: Extract fuel *)
 Eval compute in aproc_fuel aproc_p0.  (* Should be: 2 *)
 Eval compute in aproc_fuel aproc_p1.  (* Should be: 2 *)
 
 (* Test: Check duality *)
-Eval compute in channels_dual aproc_p0 aproc_p1.  (* Should be: true *)
+Eval compute in aprocs_compat [:: aproc_p0; aproc_p1].  (* Should be: true *)
 
 (* Verify duality mathematically *)
-Lemma proto_dual_correct : channels_dual aproc_p0 aproc_p1 = true.
+Lemma proto_dual_correct : aprocs_compat [:: aproc_p0; aproc_p1].
 Proof. by native_compute. Qed.
 
 End test_phase2.
@@ -750,7 +611,7 @@ Lemma fuel_senv_decreases (ps : seq (aproc dtype data)) k tr (parties : seq nat)
   let res := step (erase_aprocs ps) (nth [::] tr k) k in
   { ap' | erase_aproc ap' = res.1.1 /\
       aproc_fuel ap' + res.2 <= aproc_fuel (nth aproc_default ps k) /\
-      senv_depth (aproc_env ap') parties <= senv_depth (aproc_env (nth aproc_default ps k)) parties }.
+      senv_depth (aproc_env ap') <= senv_depth (aproc_env (nth aproc_default ps k)) }.
 Proof.
 move => Hk /=.
 rewrite /step (nth_map aproc_default) //.
@@ -774,10 +635,7 @@ case Hn: n env / sp =>
   case: ifPn => [/eqP|] k'k.
   + (* Matched: env goes from senv_send env dst dt to env *)
     exists (mk_aproc (party:=p) s).
-    split; first by [].
-    split; first by rewrite addn1.
-    (* senv_depth env <= senv_depth (senv_send env dst dt) *)
-    exact: senv_depth_senv_send_geq.
+    by rewrite addn1.
   + (* Not matched: blocked, env unchanged *)
     by exists (mk_aproc (party:=p) (SSend dst dt d s)); rewrite addn0.
 - (* SRecv *)
@@ -787,17 +645,11 @@ case Hn: n env / sp =>
   case: ifPn => [/eqP|] k'k.
   + (* Matched: env goes from senv_recv env dst dt to env *)
     exists (mk_aproc (party:=p) (s d')).
-    split; first by [].
-    split; first by rewrite addn1.
-    (* senv_depth env <= senv_depth (senv_recv env dst dt) *)
-    exact: senv_depth_senv_recv_geq.
+    by rewrite addn1.
   + (* Not matched: blocked, env unchanged *)
     by exists (mk_aproc (party:=p) (SRecv dst d s)); rewrite addn0.
 - (* SFail: default process has senv_end *)
-  exists aproc_default.
-  split; first by [].
-  split; first by [].
-  by rewrite /aproc_env /aproc_default /= senv_depth_end.
+  by exists aproc_default.
 Qed.
 
 (* Termination guarantee: if fuel h >= sum of all process fuels ([> ps]),
@@ -955,7 +807,7 @@ Variable parties : seq nat.
 
 (* Maximum session environment depth across all annotated processes *)
 Definition aprocs_senv_depth (ps : seq (aproc dtype data)) : nat :=
-  \max_(ap <- ps) senv_depth (aproc_env ap) parties.
+  \max_(ap <- ps) senv_depth (aproc_env ap).
 
 (* General: non-failing terminal processes have empty session environment.
 
@@ -981,10 +833,6 @@ rewrite IH // maxn0.
 case: ap Hterm_ap Hnf_ap => party [n] [env] sp /=.
 rewrite /erase_aproc /aproc_proc /aproc_env /=.
 case: n env / sp => //=.
-(* SFinish: env = senv_end *)
-- move=> _ _. exact: senv_depth_end.
-(* SRet: env = senv_end *)
-- move=> d _ _. exact: senv_depth_end.
 Qed.
 
 (* senv_bounded: Session environment depth is bounded through interpretation.
@@ -1070,14 +918,14 @@ split.
   by rewrite nth_default // leqNgt.
 (* aprocs_senv_depth aps' <= aprocs_senv_depth ps *)
 rewrite /aprocs_senv_depth.
-rewrite (big_tuple 0 maxn aps' xpredT (fun ap => senv_depth (aproc_env ap) parties)).
+rewrite (big_tuple 0 maxn aps' xpredT (fun ap => senv_depth (aproc_env ap))).
 rewrite (big_nth aproc_default) /=.
 apply/bigmax_leqP => i _.
 have [_ [_ Hsenv_i]] := Haps' i.
 apply: leq_trans Hsenv_i _.
 rewrite big_mkord.
 have H := @leq_bigmax 'I_(size ps) 
-  (fun j : 'I_(size ps) => senv_depth (aproc_env (nth aproc_default ps j)) parties) i.
+  (fun j : 'I_(size ps) => senv_depth (aproc_env (nth aproc_default ps j))) i.
 exact H.
 Qed.
 
@@ -1171,19 +1019,15 @@ Variable parties : seq nat.
 (* Step down a single session type - pop outer Send/Recv constructor *)
 Definition stype_down (s : stype dtype) : stype dtype :=
   match s with
-  | STSend _ k => k
-  | STRecv _ k => k
+  | STSend _ _ k => k
+  | STRecv _ _ k => k
   | STEnd => STEnd
   end.
 
 (* stype_down reduces depth by 1, saturating at 0 *)
 Lemma stype_depth_down (s : stype dtype) :
-  stype_depth (stype_down s) = (stype_depth s).-1.
+  senv_depth (stype_down s) = (senv_depth s).-1.
 Proof. by case: s. Qed.
-
-(* Step down an entire session environment pointwise *)
-Definition senv_down (env : senv dtype) : senv dtype :=
-  fun p => stype_down (env p).
 
 (* Predecessor distributes over max *)
 Lemma predn_max a b : (maxn a b).-1 = maxn a.-1 b.-1.
@@ -1210,29 +1054,19 @@ elim: r => [|h t IH].
 by rewrite !bigmax_cons IH predn_max.
 Qed.
 
-(* senv_down reduces environment depth by 1 *)
-Lemma senv_depth_down (env : senv dtype) :
-  senv_depth (senv_down env) parties = (senv_depth env parties).-1.
-Proof.
-rewrite /senv_depth /senv_down.
-under eq_bigr do rewrite stype_depth_down.
-exact: bigmax_pred.
-Qed.
-
 (* Type family: senvs with depth exactly n *)
 Definition senv_family (n : nat) : Type :=
-  { env : senv dtype | senv_depth env parties = n }.
+  { env : senv dtype | senv_depth env = n }.
 
 (* Base case: senv_end has depth exactly 0 *)
 Definition senv_family_base : senv_family 0.
-exists senv_end.
-exact: senv_depth_end.
+by exists senv_end.
 Defined.
 
 (* Step down: apply senv_down, use depth lemma *)
 Definition senv_family_down (n : nat) (e : senv_family n.+1) : senv_family n.
-exists (senv_down (sval e)).
-abstract (rewrite senv_depth_down (svalP e); exact: succnK).
+exists (stype_down (sval e)).
+abstract (rewrite stype_depth_down (svalP e); exact: succnK).
 Defined.
 
 (* HB instance: senv_family is a NatGraded type family *)
@@ -1243,7 +1077,6 @@ HB.instance Definition _ := isNatGraded.Build senv_family
 End senv_graded.
 
 Arguments stype_down {dtype}.
-Arguments senv_down {dtype}.
 Arguments senv_family {dtype}.
 
 (******************************************************************************)
@@ -1393,46 +1226,27 @@ Variable parties : seq nat.
    SRecv) has the maximum depth. We use the simpler non-increasing form
    since it's sufficient for our purposes and avoids complex party tracking. *)
 Lemma senv_step_nonincreasing (ap : aproc dtype data) (ctx : aproc_ctx) :
-  senv_depth (aproc_env (aproc_step ap ctx).1) parties <= senv_depth (aproc_env ap) parties.
+  senv_depth (aproc_env (aproc_step ap ctx).1) <= senv_depth (aproc_env ap).
 Proof.
 case: ap => [party [n [env sp]]].
-case: sp => /=.
-- (* SFinish *) by [].
-- (* SRet *) move=> d.
-  rewrite /senv_depth big1 //.
-- (* SInit *) move=> n' env' d next; by [].
+case: sp => //=.
 - (* SSend *) move=> n' env' dst dt d next.
   rewrite /aproc_step /=.
   (* When blocked: output env = input env (same), use reflexivity
      When matched: output env = env' <= senv_send env' = input env *)
   case: (nth (default_proc data) (ctx_procs ctx) dst) =>
-      [d' p'|dst' d' p'|frm f|d'| |] /=.
-  + by [].  (* Init: blocked, same env *)
-  + by [].  (* Send: blocked, same env *)
-  + case: (frm == ctx_idx ctx) => /=.
-    * exact: senv_depth_senv_send_geq.  (* Recv matched: env' <= senv_send env' *)
-    * by [].  (* Recv not matched: blocked, same env *)
-  + by [].  (* Ret: blocked, same env *)
-  + by [].  (* Finish: blocked, same env *)
-  + by [].  (* Fail: blocked, same env *)
+      [d' p'|dst' d' p'|frm f|d'| |] //=.
+  by case: (frm == ctx_idx ctx).
 - (* SRecv *) move=> n' env' src dt cont.
   rewrite /aproc_step /=.
   case: (nth (default_proc data) (ctx_procs ctx) src) =>
-      [d' p'|dst' v p'|frm f|d'| |] /=.
-  + by [].  (* Init: blocked, same env *)
-  + case: (dst' == ctx_idx ctx) => /=.
-    * exact: senv_depth_senv_recv_geq.  (* Send matched: env' <= senv_recv env' *)
-    * by [].  (* Send not matched: blocked, same env *)
-  + by [].  (* Recv: blocked, same env *)
-  + by [].  (* Ret: blocked, same env *)
-  + by [].  (* Finish: blocked, same env *)
-  + by [].  (* Fail: blocked, same env *)
-- (* SFail *) move=> n' env'; by [].
+      [d' p'|dst' v p'|frm f|d'| |] //=.
+  by case: (dst' == ctx_idx ctx).
 Qed.
 
 End senv_step_decreasing.
 
-Arguments senv_step_nonincreasing {dtype data} parties.
+Arguments senv_step_nonincreasing {dtype data}.
 
 (******************************************************************************)
 (** * Notations for Session-Typed Process Lists                               *)

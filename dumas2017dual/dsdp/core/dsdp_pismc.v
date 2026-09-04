@@ -157,20 +157,8 @@ Definition aproc_bob := mk_aproc (pbob dk v2 rb1 rb2).
 Definition aproc_charlie := mk_aproc (pcharlie dk v3 rc1 rc2).
 
 (* Three-party duality verification *)
-Lemma alice_bob_dual : channels_dual aproc_alice aproc_bob.
-Proof.
-by native_compute.
-Qed.
-
-Lemma alice_charlie_dual : channels_dual aproc_alice aproc_charlie.
-Proof.
-by native_compute.
-Qed.
-
-Lemma bob_charlie_dual : channels_dual aproc_bob aproc_charlie.
-Proof.
-by native_compute.
-Qed.
+Lemma dsdp_compat : aprocs_compat [:: aproc_alice; aproc_bob; aproc_charlie].
+Proof. by []. Qed.
 
 (******************************************************************************)
 (** * N-Party Protocol Templates (from Algorithm 2)                           *)
@@ -225,14 +213,9 @@ Definition aproc_bob_tmpl :=
 Definition aproc_charlie_tmpl :=
   mk_aproc (DParty_last charlie_idx bob_idx dk v3 rc1 rc2).
 
-Lemma alice_bob_tmpl_dual : channels_dual aproc_alice aproc_bob_tmpl.
-Proof. by native_compute. Qed.
-
-Lemma alice_charlie_tmpl_dual : channels_dual aproc_alice aproc_charlie_tmpl.
-Proof. by native_compute. Qed.
-
-Lemma bob_charlie_tmpl_dual : channels_dual aproc_bob_tmpl aproc_charlie_tmpl.
-Proof. by native_compute. Qed.
+Lemma dsdp_compat_tmpl :
+  aprocs_compat [:: aproc_alice; aproc_bob_tmpl; aproc_charlie_tmpl].
+Proof. by []. Qed.
 
 (******************************************************************************)
 (** * N-Party Alice Protocol                                                  *)
@@ -513,7 +496,7 @@ Theorem dsdp_ideal_senv_zero traces :
   exists aps' : seq (aproc dsdp_dtype data),
     erase_aprocs aps' =
       (interp [> dsdp_ideal_saprocs] dsdp_ideal_procs traces).1 /\
-    aprocs_senv_depth [:: 0; 1; 2] aps' = 0.
+    aprocs_senv_depth aps' = 0.
 Proof.
 have [aps' [Hsz [Herase Hsenv]]] :=
   @senv_bounded _ _ [:: 0; 1; 2] [> dsdp_ideal_saprocs]
@@ -607,24 +590,10 @@ Definition ap_first_n4 := mk_aproc pfirst_4.
 Definition ap_inter_n4 := mk_aproc pinter_4.
 Definition ap_last_n4 := mk_aproc plast_4.
 
-(* 4-party duality verification: all 6 pairs *)
-Lemma alice_first_dual_n4 : channels_dual ap_alice_n4 ap_first_n4.
-Proof. by native_compute. Qed.
-
-Lemma alice_inter_dual_n4 : channels_dual ap_alice_n4 ap_inter_n4.
-Proof. by native_compute. Qed.
-
-Lemma alice_last_dual_n4 : channels_dual ap_alice_n4 ap_last_n4.
-Proof. by native_compute. Qed.
-
-Lemma first_inter_dual_n4 : channels_dual ap_first_n4 ap_inter_n4.
-Proof. by native_compute. Qed.
-
-Lemma first_last_dual_n4 : channels_dual ap_first_n4 ap_last_n4.
-Proof. by native_compute. Qed.
-
-Lemma inter_last_dual_n4 : channels_dual ap_inter_n4 ap_last_n4.
-Proof. by native_compute. Qed.
+(* 4-party compatibility verification *)
+Lemma dsdp_compat_n4 :
+  aprocs_compat [:: ap_alice_n4; ap_first_n4; ap_inter_n4; ap_last_n4].
+Proof. by []. Qed.
 
 (* Cross-check: generic builder produces same erased procs as hand-written *)
 Let dk_relay_4 : 'I_3 -> priv_key AHE := fun i =>
@@ -666,7 +635,7 @@ Theorem dsdp_n4_senv_zero traces :
   exists aps' : seq (aproc dsdp_dtype data),
     erase_aprocs aps' =
       (interp [> dsdp_n4_saprocs] dsdp_n4_procs traces).1 /\
-    aprocs_senv_depth [:: 0; 1; 2; 3] aps' = 0.
+    aprocs_senv_depth aps' = 0.
 Proof.
 have [aps' [Hsz [Herase Hsenv]]] :=
   @senv_bounded _ _ [:: 0; 1; 2; 3] [> dsdp_n4_saprocs]
@@ -751,36 +720,10 @@ Definition ap_inter2_n5 := mk_aproc pinter2_5.
 Definition ap_inter3_n5 := mk_aproc pinter3_5.
 Definition ap_last_n5 := mk_aproc plast_5.
 
-(* 5-party duality: all 10 pairs *)
-Lemma alice_first_dual_n5 : channels_dual ap_alice_n5 ap_first_n5.
-Proof. by native_compute. Qed.
-
-Lemma alice_inter2_dual_n5 : channels_dual ap_alice_n5 ap_inter2_n5.
-Proof. by native_compute. Qed.
-
-Lemma alice_inter3_dual_n5 : channels_dual ap_alice_n5 ap_inter3_n5.
-Proof. by native_compute. Qed.
-
-Lemma alice_last_dual_n5 : channels_dual ap_alice_n5 ap_last_n5.
-Proof. by native_compute. Qed.
-
-Lemma first_inter2_dual_n5 : channels_dual ap_first_n5 ap_inter2_n5.
-Proof. by native_compute. Qed.
-
-Lemma first_inter3_dual_n5 : channels_dual ap_first_n5 ap_inter3_n5.
-Proof. by native_compute. Qed.
-
-Lemma first_last_dual_n5 : channels_dual ap_first_n5 ap_last_n5.
-Proof. by native_compute. Qed.
-
-Lemma inter2_inter3_dual_n5 : channels_dual ap_inter2_n5 ap_inter3_n5.
-Proof. by native_compute. Qed.
-
-Lemma inter2_last_dual_n5 : channels_dual ap_inter2_n5 ap_last_n5.
-Proof. by native_compute. Qed.
-
-Lemma inter3_last_dual_n5 : channels_dual ap_inter3_n5 ap_last_n5.
-Proof. by native_compute. Qed.
+(* 5-party compatibility *)
+Lemma dsdp_compat_n5 : aprocs_compat
+    [:: ap_alice_n5; ap_first_n5; ap_inter2_n5; ap_inter3_n5; ap_last_n5].
+Proof. by []. Qed.
 
 (* 5-party saprocs and termination *)
 Definition dsdp_n5_saprocs : seq (aproc dsdp_dtype data) :=

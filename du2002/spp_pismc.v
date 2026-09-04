@@ -114,7 +114,7 @@ Lemma pbob_cross_eq xb yb :
 Proof. reflexivity. Qed.
 
 (******************************************************************************)
-(** * Session Type Duality Verification                                       *)
+(** * Session Type Compatibility Verification                                 *)
 (******************************************************************************)
 
 Variables (sa sb: VX) (ra yb: TX) (xa xb: VX).
@@ -124,15 +124,10 @@ Definition saproc_coserv := mk_aproc (pcoserv sa sb ra).
 Definition saproc_alice := mk_aproc (palice xa).
 Definition saproc_bob := mk_aproc (pbob xb yb).
 
-(* Duality proofs - verified by computation *)
-Lemma coserv_alice_dual : channels_dual saproc_coserv saproc_alice.
-Proof. by native_compute. Qed.
-
-Lemma coserv_bob_dual : channels_dual saproc_coserv saproc_bob.
-Proof. by native_compute. Qed.
-
-Lemma alice_bob_dual : channels_dual saproc_alice saproc_bob.
-Proof. by native_compute. Qed.
+(* Compatibiliity proof - verified by computation *)
+Lemma spp_compatible :
+  aprocs_compat [:: saproc_alice; saproc_bob; saproc_coserv].
+Proof. by []. Qed.
 
 (******************************************************************************)
 (** * Interpreter Integration                                                 *)
@@ -188,7 +183,7 @@ Proof. by native_compute. Qed.
 Theorem spp_senv_zero traces :
   exists aps' : seq (aproc sp_dtype data),
     erase_aprocs aps' = (interp [> spp_saprocs] spp_procs traces).1 /\
-    aprocs_senv_depth [:: 0; 1; 2] aps' = 0.
+    aprocs_senv_depth aps' = 0.
 Proof.
 (* Use senv_bounded to get annotated processes for the final state *)
 have [aps' [Hsz [Herase Hsenv]]] :=
