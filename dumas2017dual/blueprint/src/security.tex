@@ -642,12 +642,12 @@ $e$-th residuosity assumption.
   \rocqok
   \uses{def:indcpa_epsilon}
   An assumption $\mathcal{A}$ is a Boolean classifier on single-query
-  real-or-zero adversaries, one advantage $\varepsilon_{\mathcal{A}}$, and the
+  real-or-zero adversaries, one advantage $\varepsilon_{\mathrm{cpa}}$, and the
   assertion that every classified adversary stays below it at every key in the
   image of the public-key map.
-  \[ \mathcal{A} = \Big(\mathrm{adm},\ \varepsilon_{\mathcal{A}},\
+  \[ \mathcal{A} = \Big(\mathrm{adm},\ \varepsilon_{\mathrm{cpa}},\
        \forall dk,\ \forall D,\ \mathrm{adm}(D) \Rightarrow
-       \epsror{\pk(dk)}{D} \le \varepsilon_{\mathcal{A}}\Big) \]
+       \epsror{\pk(dk)}{D} \le \varepsilon_{\mathrm{cpa}}\Big) \]
   The classifier is extensional. Functional extensionality is in scope and an
   adversary is a record of functions, so two adversaries with the same state
   law, challenge plaintext and decision are one term and receive one Boolean.
@@ -655,7 +655,7 @@ $e$-th residuosity assumption.
   The advantage is a parameter at this generic level and derived at the two
   concrete schemes: Definitions~\ref{def:paillier_indcpa_assumption}
   and~\ref{def:benaloh_indcpa_assumption} build a value of this record from a
-  residuosity assumption, with $\varepsilon_{\mathcal{A}}$ twice the
+  residuosity assumption, with $\varepsilon_{\mathrm{cpa}}$ twice the
   residuosity advantage and the bound field proved.
 \end{definition}
 
@@ -672,7 +672,8 @@ $e$-th residuosity assumption.
   \[ \mathrm{adm}(D) \iff \forall c, ch_1, ch_2:\
        D_{\mathrm{dec}}(c, ch_1) = D_{\mathrm{dec}}(c, ch_2),
      \qquad \mathrm{adm}(D) \implies \epsror{\pk}{D} = 0 \]
-  Instantiating the record with that classifier and $\varepsilon = 0$
+  Instantiating the record with that classifier and
+  $\varepsilon_{\mathrm{cpa}} = 0$
   discharges its bound field by the equality rather than by hypothesis, so it
   is an inhabitant whose promise is proved. Its class is small and the bounds
   conditional on it are correspondingly weak; what it settles is that the record type
@@ -691,10 +692,10 @@ $e$-th residuosity assumption.
   input with probability at most $1/m$ plus twice the assumed advantage; the
   composite form writes $m$ as $pq$.
   \[ \Pr[\,g(\mathrm{AliceTrace}) = V_2\,]
-       \le \tfrac{1}{m} + 2\,\varepsilon_{\mathcal{A}} \]
+       \le \tfrac{1}{m} + 2\,\varepsilon_{\mathrm{cpa}} \]
   Three currencies meet here. The term $1/m$ is information-theoretic and
   unconditional, the residue of the leaked output along the solution fiber. The
-  term $2\varepsilon_{\mathcal{A}}$ is conditional on $\mathcal{A}$, and prices
+  term $2\varepsilon_{\mathrm{cpa}}$ is conditional on $\mathcal{A}$, and prices
   the two ciphertext replacements at the advantage $\mathcal{A}$ assumes rather
   than at their own values. The two admissibility premises are conditional on
   the class, and are assumed rather than proved.
@@ -725,13 +726,13 @@ $e$-th residuosity assumption.
   verdict read off the state and the challenge ring element, and its advantage
   is the absolute gap between its two acceptance probabilities. An assumption
   $\mathcal{B}$ is a Boolean class of distinguishers, one advantage
-  $\varepsilon_{\mathcal{B}}$, and the assertion that every classified
+  $\varepsilon_{\mathrm{res}}$, and the assertion that every classified
   distinguisher stays below it.
-  \[ \mathcal{B} = \Big(\mathrm{adm},\ \varepsilon_{\mathcal{B}},\
+  \[ \mathcal{B} = \Big(\mathrm{adm},\ \varepsilon_{\mathrm{res}},\
        \forall D,\ \mathrm{adm}(D) \Rightarrow
        \big\lvert \Pr[D \text{ accepts } \mathsf{res}_e]
          - \Pr[D \text{ accepts } \mathsf{unit}] \big\rvert
-       \le \varepsilon_{\mathcal{B}}\Big) \]
+       \le \varepsilon_{\mathrm{res}}\Big) \]
   The record has two readings. At $T = \mathbb{Z}_{n^2}$ and $e = n$ it is
   decisional composite residuosity, Paillier 1999, Conjecture 1; at
   $T = \mathbb{Z}_n$ and $e = r$ it is the higher residuosity problem of
@@ -740,7 +741,7 @@ $e$-th residuosity assumption.
   classifier is extensional for the reason given at
   Definition~\ref{def:indcpa_assumption}, so running time stays a property of a
   syntax the record does not carry. \texttt{decide\_constant\_assumption}
-  inhabits the record at $\varepsilon_{\mathcal{B}} = 0$, the class of
+  inhabits the record at $\varepsilon_{\mathrm{res}} = 0$, the class of
   distinguishers whose verdict ignores the challenge, whose bound is proved
   rather than assumed. What that settles is that a statement restricted to a
   residuosity class is not empty for want of a record to read it at.
@@ -771,16 +772,18 @@ $e$-th residuosity assumption.
 
 \begin{definition}[Decisional composite residuosity at modulus $pq$]
   \label{def:dcr_assumption}
-  \rocq{infotheo.dumas2017dual.dsdp.hopping.paillier_indcpa_scheme.dcr_assumption}
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.paillier_indcpa_scheme.dcr_assumption,
+       infotheo.dumas2017dual.dsdp.hopping.paillier_indcpa_scheme.dcr_epsilon}
   \rocqok
   \uses{def:residuosity_assumption}
   The assumption above read at the ring $\mathbb{Z}_{(pq)^2}$ and the exponent
   $pq$: a class of distinguishers of a uniform unit of $\mathbb{Z}_{(pq)^2}$
-  from a $pq$-th power of one, and one advantage they all stay below.
+  from a $pq$-th power of one, and one advantage $\varepsilon_{\mathrm{dcr}}$
+  they all stay below.
   \[ \mathrm{adm}(D) \Rightarrow \big\lvert
        \Pr[D \text{ accepts } \mathsf{res}_{pq}]
        - \Pr[D \text{ accepts } \mathsf{unit}] \big\rvert
-       \le \varepsilon_{\mathcal{B}},
+       \le \varepsilon_{\mathrm{dcr}},
      \qquad T = \mathbb{Z}_{(pq)^2} \]
   A $pq$-th power of a uniform unit is the law of a Paillier encryption of
   zero, so a record of this type is Paillier 1999, Conjecture 1 at the modulus
@@ -797,7 +800,7 @@ $e$-th residuosity assumption.
   For every private key and every adversary whose two composite-residuosity
   reductions $\mathcal{B}$ admits, the real-or-zero advantage at that key's
   public key is at most twice the advantage $\mathcal{B}$ assumes.
-  \[ \epsror{\pk(dk)}{A} \le 2\,\varepsilon_{\mathcal{B}} \]
+  \[ \epsror{\pk(dk)}{A} \le 2\,\varepsilon_{\mathrm{dcr}} \]
   The two reductions run $A$ against the residuosity challenge. One multiplies
   the challenge by $g^{p_A}$, the key's generator raised to $A$'s own challenge
   plaintext; the other passes the challenge through unchanged. Under
@@ -824,10 +827,10 @@ $e$-th residuosity assumption.
   Definition~\ref{def:indcpa_assumption} is a value built from a
   composite-residuosity record rather than a parameter: its class admits the
   adversaries whose two residuosity reductions $\mathcal{B}$ admits, its
-  advantage is $2\varepsilon_{\mathcal{B}}$, and its promise field is the
+  advantage is $2\varepsilon_{\mathrm{dcr}}$, and its promise field is the
   theorem above in place of a hypothesis.
   \[ \mathcal{A} = \big(\text{both reductions admitted by } \mathcal{B},\
-       2\,\varepsilon_{\mathcal{B}},\
+       2\,\varepsilon_{\mathrm{dcr}},\
        \text{Theorem~\ref{thm:paillier_dcr_epsilon_le}}\big) \]
   \texttt{paillier\_indcpa\_epsilon\_le} writes that promise out at the
   Paillier ciphertext itself, as the gap between accepting an encryption of the
@@ -836,22 +839,24 @@ $e$-th residuosity assumption.
   inhabited: \texttt{paillier\_dcr\_admissible\_cipher\_constant} admits every
   adversary whose verdict ignores the ciphertext, at the residuosity record of
   advantage zero. Every Paillier bound below reads its
-  $\varepsilon_{\mathcal{A}}$ off this value, so each is priced in
+  $\varepsilon_{\mathrm{cpa}}$ off this value, so each is priced in
   composite-residuosity currency at two residuosity calls per key.
 \end{definition}
 
 \begin{definition}[Higher residuosity at modulus $n$ and exponent $r$]
   \label{def:benaloh_residuosity_assumption}
-  \rocq{infotheo.dumas2017dual.dsdp.hopping.benaloh_indcpa_scheme.benaloh_residuosity_assumption}
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.benaloh_indcpa_scheme.benaloh_residuosity_assumption,
+       infotheo.dumas2017dual.dsdp.hopping.benaloh_indcpa_scheme.benaloh_residuosity_epsilon}
   \rocqok
   \uses{def:residuosity_assumption}
   The same assumption read at the ring $\mathbb{Z}_n$ and the exponent $r$: a
   class of distinguishers of a uniform unit of $\mathbb{Z}_n$ from an $r$-th
-  power of one, and one advantage they all stay below.
+  power of one, and one advantage $\varepsilon_{\mathrm{res}}$ they all stay
+  below.
   \[ \mathrm{adm}(D) \Rightarrow \big\lvert
        \Pr[D \text{ accepts } \mathsf{res}_r]
        - \Pr[D \text{ accepts } \mathsf{unit}] \big\rvert
-       \le \varepsilon_{\mathcal{B}},
+       \le \varepsilon_{\mathrm{res}},
      \qquad T = \mathbb{Z}_n \]
   This is Benaloh 1994's higher residuosity assumption, and an $r$-th power of
   a uniform unit is the law of a Benaloh encryption of zero. The ring is the
@@ -868,7 +873,7 @@ $e$-th residuosity assumption.
   For every private key and every adversary whose two residuosity reductions
   $\mathcal{B}$ admits, the real-or-zero advantage at that key's public key is
   at most twice the advantage $\mathcal{B}$ assumes.
-  \[ \epsror{\pk(dk)}{A} \le 2\,\varepsilon_{\mathcal{B}} \]
+  \[ \epsror{\pk(dk)}{A} \le 2\,\varepsilon_{\mathrm{res}} \]
   The hybrid is the one of Theorem~\ref{thm:paillier_dcr_epsilon_le} with two
   differences. The multiplier is $y^{p_A}$ at the key's generator $y$, a unit
   of $\mathbb{Z}_n$ by its type, so the order condition $y^r = 1$ the key
@@ -889,9 +894,9 @@ $e$-th residuosity assumption.
   At Benaloh the adversary-class assumption is likewise a value built from a
   residuosity record: its class admits the adversaries whose two residuosity
   reductions $\mathcal{B}$ admits, its advantage is
-  $2\varepsilon_{\mathcal{B}}$, and its promise field is the theorem above.
+  $2\varepsilon_{\mathrm{res}}$, and its promise field is the theorem above.
   \[ \mathcal{A} = \big(\text{both reductions admitted by } \mathcal{B},\
-       2\,\varepsilon_{\mathcal{B}},\
+       2\,\varepsilon_{\mathrm{res}},\
        \text{Theorem~\ref{thm:benaloh_residuosity_epsilon_le}}\big) \]
   \texttt{benaloh\_indcpa\_epsilon\_le} writes that promise out at the Benaloh
   ciphertext, and
@@ -909,7 +914,7 @@ $e$-th residuosity assumption.
   input with probability at most $1/(pq)$ plus four times the assumed
   residuosity advantage.
   \[ \Pr[\,g(\mathrm{AliceTrace}) = V_2\,]
-       \le \tfrac{1}{pq} + 4\,\varepsilon_{\mathcal{B}} \]
+       \le \tfrac{1}{pq} + 4\,\varepsilon_{\mathrm{dcr}} \]
   Both sides are discharged at this scheme. The information-theoretic side
   reads the plaintext count off the packaging, whose plaintext space has
   exactly $pq$ elements, and the coin plumbing the abstract bound quantifies
@@ -964,7 +969,7 @@ $e$-th residuosity assumption.
   is right always; at the zero bit it decrypts to zero and $\delta$ is right
   only on the fiber the leaked output leaves, of mass at most $1/m$. An
   assumption admitting every adversary is therefore forced to assume
-  $2\varepsilon_{\mathcal{A}} \ge 1 - 1/m$, so the premises of
+  $2\varepsilon_{\mathrm{cpa}} \ge 1 - 1/m$, so the premises of
   Theorem~\ref{thm:alice_guess_admissible} are what make that bound say
   anything.
   Proved in \texttt{dsdp\_alice\_trace\_link.v}, the two lower bounds are
@@ -981,7 +986,7 @@ $e$-th residuosity assumption.
   With $u_3$ a unit of the plaintext ring, if $\mathcal{A}$ assumes an advantage
   below $1 - 1/m$, its classifier answers false on the reduction adversary the
   decrypting predictor induces at Bob's key.
-  \[ \varepsilon_{\mathcal{A}} < 1 - \tfrac{1}{m} \implies
+  \[ \varepsilon_{\mathrm{cpa}} < 1 - \tfrac{1}{m} \implies
      \mathrm{adm}\big(\hopred{0}{D_\delta}\big) = \mathsf{false} \]
   Class membership is therefore not free bookkeeping. On this adversary the
   assumption's own bound decides membership, and decides against it.
@@ -996,10 +1001,10 @@ $e$-th residuosity assumption.
   \rocqok
   \uses{def:dsdp_setting,thm:alice_guess_admissible,def:trace_decryptor,def:indcpa_assumption}
   For every assumption whose promised advantage satisfies
-  $2\varepsilon_{\mathcal{A}} < 1 - 1/m$, the right-hand side of
+  $2\varepsilon_{\mathrm{cpa}} < 1 - 1/m$, the right-hand side of
   Theorem~\ref{thm:alice_guess_admissible} sits strictly below what the
   decrypting predictor achieves.
-  \[ \tfrac{1}{m} + 2\,\varepsilon_{\mathcal{A}}
+  \[ \tfrac{1}{m} + 2\,\varepsilon_{\mathrm{cpa}}
        < \Pr[\,\delta(\mathrm{AliceTrace}) = V_2\,] = 1 \]
   Reading that bound without its two membership premises therefore leaves a
   false statement, and for every such assumption rather than a contrived one.
@@ -1037,7 +1042,7 @@ $e$-th residuosity assumption.
   negligibility facts.
   \[ \mathcal{Q} = \Big(k \mapsto \mathcal{I}_k,\ k \mapsto \mathcal{A}_k,\
        \mathrm{negl}\big(k \mapsto \tfrac{1}{m_k}\big),\
-       \mathrm{negl}\big(k \mapsto \varepsilon_{\mathcal{A}_k}\big)\Big) \]
+       \mathrm{negl}\big(k \mapsto \varepsilon_{\mathrm{cpa},k}\big)\Big) \]
   The two facts are the two currencies of the class-conditional bound, and the
   record keeps them apart. The first is unconditional. The inverse plaintext
   cardinality $1/m_k$ is the guessing residue the leaked output concedes, it is
@@ -1064,7 +1069,7 @@ $e$-th residuosity assumption.
      \implies \mathrm{negl}\big(k \mapsto
        \Pr[\,g_k(\mathrm{AliceTrace}_k) = V_2\,]\big) \]
   The two negligibility facts the bound consumes, $\mathrm{negl}(k \mapsto
-  1/m_k)$ and $\mathrm{negl}(k \mapsto \varepsilon_{\mathcal{A}_k})$, are
+  1/m_k)$ and $\mathrm{negl}(k \mapsto \varepsilon_{\mathrm{cpa},k})$, are
   fields of $\mathcal{Q}$ and are read off the sequence. The two admissibility
   facts remain premises, because they restrict the reduction adversaries a
   predictor induces and so speak about the adversary rather than about the
@@ -1090,7 +1095,7 @@ $e$-th residuosity assumption.
   The statement carries no hypothesis beyond $\mathcal{Q}$, since the two
   negligibility fields supply what the argument needs. At $c = 1$ both fields
   put their sequences below $1/k$, and from $k \ge 2$ that leaves
-  $\varepsilon_{\mathcal{A}_k} < 1 - 1/m_k$, which is the premise of
+  $\varepsilon_{\mathrm{cpa},k} < 1 - 1/m_k$, which is the premise of
   Corollary~\ref{cor:decrypt_not_admissible}. The parallel-track reading of
   Theorem~\ref{thm:alice_guess_negligible} is therefore excluded by the very
   sequence that theorem is stated along.
@@ -1151,7 +1156,7 @@ $e$-th residuosity assumption.
   assumption. The counting side is the uniform law on eight coordinates of
   $\mathbb{Z}_{p_k q_k}$, the eight plaintext inputs being those coordinates
   and the three keys constants.
-  \[ \varepsilon_{\mathcal{A}_k} = 0, \qquad
+  \[ \varepsilon_{\mathrm{cpa},k} = 0, \qquad
      \#\lvert\mathrm{plain}(\mathcal{S}_k)\rvert = p_k q_k \]
   Every advantage the assumption assumes is zero here, so each bound of the
   computational side reduces at this value to its unconditional $1/m_k$ term,
@@ -1232,8 +1237,8 @@ $e$-th residuosity assumption.
   assumed on the computational side is the sequence $\mathcal{B}_k$ and the
   negligibility of its advantage; the IND-CPA assumption at $k$ is the value
   Definition~\ref{def:paillier_indcpa_assumption} builds from
-  $\mathcal{B}_k$, so every $\varepsilon$ read off at this setting is
-  $2\varepsilon_{\mathcal{B}_k}$.
+  $\mathcal{B}_k$, so every $\varepsilon_{\mathrm{cpa}}$ read off at this
+  setting is $2\varepsilon_{\mathrm{dcr},k}$.
 \end{definition}
 
 \begin{corollary}[The twenty-six at the Paillier setting]
@@ -1254,14 +1259,14 @@ $e$-th residuosity assumption.
   \[ \mathrm{negl}\big(k \mapsto
        \Pr[\,g_k(\mathrm{AliceTrace}_k) = V_2\,]\big), \qquad
      \Pr[\,g_k(\mathrm{AliceTrace}_k) = V_2\,]
-       \le \tfrac{1}{p_k q_k} + 4\,\varepsilon_{\mathcal{B}_k} \]
+       \le \tfrac{1}{p_k q_k} + 4\,\varepsilon_{\mathrm{dcr},k} \]
   Its unconditional half is discharged at the plaintext cardinality of the
   Paillier packaging, read at $k$ as $p_k q_k$, with no number theory beyond
   $1 < p_k, q_k$ entering. Its computational half is decisional composite
   residuosity: \texttt{paillier\_assumption\_at\_dcrE} and
   \texttt{paillier\_epsilon\_at\_dcrE} identify the record every
   assumption-conditional field is read at with the one derived from
-  $\mathcal{B}_k$, and its advantage with $2\varepsilon_{\mathcal{B}_k}$, both
+  $\mathcal{B}_k$, and its advantage with $2\varepsilon_{\mathrm{dcr},k}$, both
   by conversion rather than by a rewrite a later statement could route around.
   The two restated bounds carry that identification into the statement, the
   factor four being two keys times two residuosity calls per key.
@@ -1287,8 +1292,8 @@ $e$-th residuosity assumption.
   modulus $n_k$ and the exponent $r_k$, and the negligibility of its advantage;
   the IND-CPA assumption at $k$ is the value
   Definition~\ref{def:benaloh_indcpa_assumption} builds from $\mathcal{B}_k$,
-  so every $\varepsilon$ read off at this setting is
-  $2\varepsilon_{\mathcal{B}_k}$.
+  so every $\varepsilon_{\mathrm{cpa}}$ read off at this setting is
+  $2\varepsilon_{\mathrm{res},k}$.
 \end{definition}
 
 \begin{corollary}[The twenty-six at the Benaloh setting]
@@ -1307,13 +1312,13 @@ $e$-th residuosity assumption.
   \[ \mathrm{negl}\big(k \mapsto
        \Pr[\,g_k(\mathrm{AliceTrace}_k) = V_2\,]\big), \qquad
      \Pr[\,g_k(\mathrm{AliceTrace}_k) = V_2\,]
-       \le \tfrac{1}{r_k} + 4\,\varepsilon_{\mathcal{B}_k} \]
+       \le \tfrac{1}{r_k} + 4\,\varepsilon_{\mathrm{res},k} \]
   Its unconditional half is discharged at the block size $r_k$. Its
   computational half is $r$-th residuosity at the ciphertext modulus $n_k$:
   \texttt{benaloh\_assumption\_at\_residuosityE} and
   \texttt{benaloh\_epsilon\_at\_residuosityE} identify the record every
   assumption-conditional field is read at with the one derived from
-  $\mathcal{B}_k$, and its advantage with $2\varepsilon_{\mathcal{B}_k}$, both
+  $\mathcal{B}_k$, and its advantage with $2\varepsilon_{\mathrm{res},k}$, both
   by conversion. The two restated bounds carry that identification into the
   statement, the factor four being two keys times two residuosity calls per
   key, while the unconditional summand stays at the block size.

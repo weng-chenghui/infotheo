@@ -95,6 +95,9 @@ Require Import indcpa_game.
 (* benaloh_residuosity_assumption ==                                          *)
 (*                            r-th residuosity at modulus n, the assumption   *)
 (*                            every bound below is derived from               *)
+(* benaloh_residuosity_epsilon ==                                             *)
+(*                            the advantage that record assumes, the          *)
+(*                            currency the Benaloh bounds are priced in       *)
 (*   residuosity_of_adversary == the adversary read as a distinguisher        *)
 (*                               multiplying its challenge by the generator   *)
 (*                               power its plaintext names                    *)
@@ -241,6 +244,16 @@ Local Notation residue_fdist :=
 Definition benaloh_residuosity_assumption : Type :=
   residuosity_assumption (R:=R) 'Z_n r card_renc_benaloh.
 
+(* The advantage an r-th residuosity record assumes of the distinguishers its
+   class admits.  It is the currency every Benaloh IND-CPA bound of this file
+   is priced in: an IND-CPA epsilon at one key is twice it, one call per hop
+   of the reduction below, and a trace bound that replaces a ciphertext at
+   two keys spends it four times.
+   Naming: [benaloh_residuosity] names the game the epsilon belongs to,
+   distinguishing it from the IND-CPA epsilon it prices. *)
+Definition benaloh_residuosity_epsilon (A : benaloh_residuosity_assumption)
+    : R := residuosity_assumption_epsilon A.
+
 (* The first reduction: an IND-CPA adversary read as a residuosity
    distinguisher that multiplies its challenge by y ^+ m, the generator power
    its own plaintext names.  Under the residue law that multiplier turns the
@@ -272,7 +285,7 @@ Lemma real_accept_residuosityE (y : ring_units 'Z_n)
       fdistmap (adv_decide c)
         (fdistmap (benaloh_enc y (adv_plain c))
            (fdist_uniform card_renc_benaloh))) [set true]
-  = residuosity_accept _ (residuosity_of_adversary y adv) residue_fdist.
+  = residuosity_accept (residuosity_of_adversary y adv) residue_fdist.
 Proof.
 rewrite residuosity_acceptE /residue_fdist /=; congr (Pr _ _).
 by congr (_ >>= _); apply/funext => c; rewrite !fdistmap_comp.
@@ -289,7 +302,7 @@ Lemma zero_accept_residuosityE (y : ring_units 'Z_n)
       fdistmap (adv_decide c)
         (fdistmap (benaloh_enc y (0 : plain AHE))
            (fdist_uniform card_renc_benaloh))) [set true]
-  = residuosity_accept _ (residuosity_of_adversary_zero adv) residue_fdist.
+  = residuosity_accept (residuosity_of_adversary_zero adv) residue_fdist.
 Proof.
 rewrite residuosity_acceptE /residue_fdist /=; congr (Pr _ _).
 congr (_ >>= _); apply/funext => c; rewrite !fdistmap_comp.
@@ -304,8 +317,8 @@ Qed.
    are, which is why the reduction never reads the generator's order. *)
 Lemma unit_accept_residuosityE (y : ring_units 'Z_n)
     (adv : indcpa_adversary (R:=R) AHE) :
-  residuosity_accept _ (residuosity_of_adversary y adv) unit_fdist
-  = residuosity_accept _ (residuosity_of_adversary_zero adv) unit_fdist.
+  residuosity_accept (residuosity_of_adversary y adv) unit_fdist
+  = residuosity_accept (residuosity_of_adversary_zero adv) unit_fdist.
 Proof.
 (* Both sides draw the state c the same way; compare the inner laws at each
    fixed c, with the ring power rewritten as a group power. *)
@@ -330,27 +343,25 @@ Qed.
    information-theoretically. *)
 Lemma benaloh_residuosity_epsilon_le (A : benaloh_residuosity_assumption)
     (dk : priv_key AHE) (adv : indcpa_adversary (R:=R) AHE) :
-  residuosity_admissible _ _ _ A
-    (residuosity_of_adversary (priv_gen dk) adv) ->
-  residuosity_admissible _ _ _ A (residuosity_of_adversary_zero adv) ->
+  residuosity_admissible A (residuosity_of_adversary (priv_gen dk) adv) ->
+  residuosity_admissible A (residuosity_of_adversary_zero adv) ->
   indcpa_epsilon (R:=R) card_renc_benaloh rand_of_renc_benaloh
     (pub_of_priv dk) adv
-  <= 2 * residuosity_assumption_epsilon _ _ _ A.
+  <= 2 * benaloh_residuosity_epsilon A.
 Proof.
 move=> Hy H0.
 have Hmid := unit_accept_residuosityE (priv_gen dk) adv.
 rewrite /indcpa_epsilon indcpa_success_realE indcpa_success_zeroE.
 rewrite !enc_fdist_benalohE /= real_accept_residuosityE.
 rewrite zero_accept_residuosityE.
-have -> : 2 * residuosity_assumption_epsilon _ _ _ A
-        = residuosity_assumption_epsilon _ _ _ A
-          + residuosity_assumption_epsilon _ _ _ A.
+have -> : 2 * benaloh_residuosity_epsilon A
+        = benaloh_residuosity_epsilon A + benaloh_residuosity_epsilon A.
   by rewrite mulr_natl mulr2n.
-apply: le_trans (ler_distD (residuosity_accept _
+apply: le_trans (ler_distD (residuosity_accept
   (residuosity_of_adversary (priv_gen dk) adv) unit_fdist) _ _) _.
-apply: lerD; first exact: (residuosity_admissible_epsilon_le _ _ _ _ _ Hy).
+apply: lerD; first exact: (residuosity_admissible_epsilon_le _ _ Hy).
 rewrite Hmid distrC.
-exact: (residuosity_admissible_epsilon_le _ _ _ _ _ H0).
+exact: (residuosity_admissible_epsilon_le _ _ H0).
 Qed.
 
 (* The IND-CPA class the derived assumption carries: the adversaries whose two
@@ -361,8 +372,8 @@ Qed.
 Definition benaloh_residuosity_admissible (A : benaloh_residuosity_assumption)
     (adv : indcpa_adversary (R:=R) AHE) : bool :=
   [forall y : ring_units 'Z_n,
-     residuosity_admissible _ _ _ A (residuosity_of_adversary y adv)]
-  && residuosity_admissible _ _ _ A (residuosity_of_adversary_zero adv).
+     residuosity_admissible A (residuosity_of_adversary y adv)]
+  && residuosity_admissible A (residuosity_of_adversary_zero adv).
 
 (* The same bound under that Boolean class, the shape the third field of an
    IND-CPA assumption record takes.
@@ -374,7 +385,7 @@ Lemma benaloh_residuosity_admissible_epsilon_le
   benaloh_residuosity_admissible A adv ->
   indcpa_epsilon (R:=R) card_renc_benaloh rand_of_renc_benaloh
     (pub_of_priv dk) adv
-  <= 2 * residuosity_assumption_epsilon _ _ _ A.
+  <= 2 * benaloh_residuosity_epsilon A.
 Proof.
 by case/andP => /forallP Hy H0; apply: benaloh_residuosity_epsilon_le (Hy _) H0.
 Qed.
@@ -388,7 +399,7 @@ Definition benaloh_indcpa_assumption (A : benaloh_residuosity_assumption) :
     indcpa_epsilon_assumption (R:=R) card_renc_benaloh
       rand_of_renc_benaloh :=
   {| indcpa_admissible := benaloh_residuosity_admissible A ;
-     indcpa_assumption_epsilon := 2 * residuosity_assumption_epsilon _ _ _ A ;
+     indcpa_assumption_epsilon := 2 * benaloh_residuosity_epsilon A ;
      indcpa_admissible_epsilon_le :=
        @benaloh_residuosity_admissible_epsilon_le A |}.
 
@@ -434,7 +445,7 @@ Lemma benaloh_indcpa_epsilon_le (A : benaloh_residuosity_assumption)
          fdistmap (adv_decide c)
            (fdistmap (benaloh_enc (priv_gen dk) (0 : plain AHE))
               (fdist_uniform card_renc_benaloh))) [set true] |
-  <= 2 * residuosity_assumption_epsilon _ _ _ A.
+  <= 2 * benaloh_residuosity_epsilon A.
 Proof.
 move=> Hadm; have := benaloh_residuosity_admissible_epsilon_le dk Hadm.
 by rewrite /indcpa_epsilon indcpa_success_realE indcpa_success_zeroE
@@ -472,8 +483,7 @@ Definition f_size_benaloh k : R :=
 (* The assumed residuosity-advantage sequence: the epsilon D k assumes at each
    k, the currency every computational bound along the sequence is priced
    in. *)
-Definition f_residuosity_benaloh k : R :=
-  residuosity_assumption_epsilon _ _ _ (D k).
+Definition f_residuosity_benaloh k : R := benaloh_residuosity_epsilon (D k).
 
 (* The derived IND-CPA advantage sequence: twice the residuosity advantage at
    k, the two residuosity calls the reduction spends at one key. *)

@@ -583,8 +583,7 @@ Corollary alice_trace_guess_V2_paillier_le
   paillier_dcr_admissible A
     (charlie_trace_adversary (distinguisher_of_predictor predict)) ->
   alice_trace_guess_V2_pr predict
-    <= ((p%:R : R) * q%:R)^-1
-       + 4 * residuosity_assumption_epsilon _ _ _ A.
+    <= ((p%:R : R) * q%:R)^-1 + 4 * dcr_epsilon A.
 Proof.
 move=> Hb Hc.
 have := alice_trace_guess_V2_admissible_pq_le u3_unit rb2 card_plain_pq
@@ -808,7 +807,7 @@ Corollary alice_trace_guess_V2_benaloh_le
   benaloh_residuosity_admissible A
     (charlie_trace_adversary (distinguisher_of_predictor predict)) ->
   alice_trace_guess_V2_pr predict
-    <= (r%:R : R)^-1 + 4 * residuosity_assumption_epsilon _ _ _ A.
+    <= (r%:R : R)^-1 + 4 * benaloh_residuosity_epsilon A.
 Proof.
 move=> Hb Hc; rewrite inv_r_cardE.
 have := alice_trace_guess_V2_admissible_le u3_unit rb2

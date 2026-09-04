@@ -345,29 +345,34 @@ Definition decide_constant_assumption : residuosity_assumption :=
 End residuosity_game.
 
 (* Every declaration above discharges the section's Context {R} and its two
-   Variables.  Under the file's Set Implicit Arguments the ring T is inferable
-   from a later argument and is demoted to implicit, so a positional T is read
-   as the exponent e; the record argument of the two distinguisher projections
-   is demoted the same way, and [decide D c] stops elaborating.  Pinning T and
-   e explicit and R implicit keeps every use site free of @ and fixes one
-   spelling for the instance files: the ring, then the exponent, then the
-   cardinality proof. *)
+   Variables, and R is implicit throughout.  Where a record argument
+   determines the ring, the exponent and the cardinality proof, those three
+   are implicit and the use site carries no placeholder: a distinguisher
+   determines the ring, so the three distinguisher projections and the two
+   acceptance declarations read it off that record, and an assumption record
+   determines all three, so its three projections read all three off that
+   record.  Elsewhere they are written out, in one spelling for the instance
+   files: the ring, then the exponent, then the cardinality proof.  Under the
+   file's Set Implicit Arguments a positional T would otherwise be read as
+   the exponent e, and the record argument of the distinguisher projections
+   would be demoted with [decide D c] no longer elaborating, which is why
+   every line below is stated rather than left to the default. *)
 Arguments unit_fdist {R} T _.
 Arguments residue_fdist {R} T e%_nat_scope _.
 Arguments residuosity_distinguisher {R} T.
 Arguments Build_residuosity_distinguisher {R} T _ _ _%_function_scope.
-Arguments state {R} T _.
-Arguments state_fdist {R} T _.
-Arguments decide {R} T _ _ _.
-Arguments residuosity_accept {R} T _ _.
-Arguments residuosity_acceptE {R} T _ _.
+Arguments state {R T} r.
+Arguments state_fdist {R T} r.
+Arguments decide {R T} r _ _.
+Arguments residuosity_accept {R T} D law.
+Arguments residuosity_acceptE {R T} D law.
 Arguments residuosity_advantage {R} T e%_nat_scope _ _.
 Arguments residuosity_assumption {R} T e%_nat_scope _.
 Arguments Build_residuosity_assumption {R} T e%_nat_scope _
   _%_function_scope _ _.
-Arguments residuosity_admissible {R} T e%_nat_scope _ _ _.
-Arguments residuosity_assumption_epsilon {R} T e%_nat_scope _ _.
-Arguments residuosity_admissible_epsilon_le {R} T e%_nat_scope _ _ _ _.
+Arguments residuosity_admissible {R T e card_units} A D : rename.
+Arguments residuosity_assumption_epsilon {R T e card_units} A : rename.
+Arguments residuosity_admissible_epsilon_le {R T e card_units} A D _ : rename.
 Arguments unit_fdist_translateE {R} T _ _.
 Arguments unit_fdistmap_translateE {R} T _ _%_function_scope _.
 Arguments unit_set T : clear implicits.

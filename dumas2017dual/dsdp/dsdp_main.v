@@ -56,6 +56,21 @@ Require Import dsdp_setting dsdp_security.
 (* one arithmetic rewrite in the two admissible_le corollaries of each        *)
 (* scheme section, the only place a proof step is taken in this file.         *)
 (*                                                                            *)
+(* ## The three epsilons                                                      *)
+(*                                                                            *)
+(* ```                                                                        *)
+(*    indcpa_epsilon pk adv == the gap one adversary measures at one key      *)
+(* indcpa_assumption_epsilon A ==                                             *)
+(*                              the bound an IND-CPA record assumes of its    *)
+(*                              class, spent at one ciphertext hop and twice  *)
+(*                              in a trace bound                              *)
+(* dcr_epsilon A, benaloh_residuosity_epsilon A ==                            *)
+(*                              the bound a residuosity record assumes of     *)
+(*                              its class, each IND-CPA epsilon above being   *)
+(*                              twice one of them, so the trace bounds read   *)
+(*                              four of them                                  *)
+(* ```                                                                        *)
+(*                                                                            *)
 (* The counting side of both scheme instances is uniform_inputs at Alice's    *)
 (* own hopping weights: the three inputs and the two masks are five uniform   *)
 (* coordinates of the plaintext ring, and the three constant counting weights *)
@@ -242,7 +257,7 @@ Proof. by []. Qed.
    decisional composite residuosity currency. *)
 Lemma paillier_epsilon_at_dcrE k :
   indcpa_assumption_epsilon (assumption_at paillier_setting k)
-  = 2 * residuosity_assumption_epsilon _ _ _ (A k).
+  = 2 * dcr_epsilon (A k).
 Proof. by []. Qed.
 
 (* Alice's uncertainty about the relay pair, given her own inputs and the
@@ -469,7 +484,7 @@ Corollary paillier_trace_guess_V2_admissible_le k
     (a : dsdp_admissible_predictor paillier_setting k) :
   alice_trace_guess_V2_pr_at (R:=R) (Q:=PQ) (predict a)
   <= (#|plain (AHE_at paillier_setting k)|%:R : R)^-1
-     + 4 * residuosity_assumption_epsilon _ _ _ (A k).
+     + 4 * dcr_epsilon (A k).
 Proof.
 have := trace_guess_V2_admissible_le paillier_security a.
 by rewrite paillier_epsilon_at_dcrE mulrA -(natrM R 2 2).
@@ -481,7 +496,7 @@ Corollary paillier_trace_guess_V2_admissible_pq_le k
     (a : dsdp_admissible_predictor paillier_setting k) :
   alice_trace_guess_V2_pr_at (R:=R) (Q:=PQ) (predict a)
   <= (((p_minus_2 k).+2%:R : R) * (q_minus_2 k).+2%:R)^-1
-     + 4 * residuosity_assumption_epsilon _ _ _ (A k).
+     + 4 * dcr_epsilon (A k).
 Proof.
 have := trace_guess_V2_admissible_pq_le paillier_security a.
 by rewrite paillier_epsilon_at_dcrE mulrA -(natrM R 2 2).
@@ -664,7 +679,7 @@ Proof. by []. Qed.
    residuosity currency. *)
 Lemma benaloh_epsilon_at_residuosityE k :
   indcpa_assumption_epsilon (assumption_at benaloh_setting k)
-  = 2 * residuosity_assumption_epsilon _ _ _ (A k).
+  = 2 * benaloh_residuosity_epsilon (A k).
 Proof. by []. Qed.
 
 (* Alice's uncertainty about the relay pair, given her own inputs and the
@@ -891,7 +906,7 @@ Corollary benaloh_trace_guess_V2_admissible_le k
     (a : dsdp_admissible_predictor benaloh_setting k) :
   alice_trace_guess_V2_pr_at (R:=R) (Q:=BQ) (predict a)
   <= (#|plain (AHE_at benaloh_setting k)|%:R : R)^-1
-     + 4 * residuosity_assumption_epsilon _ _ _ (A k).
+     + 4 * benaloh_residuosity_epsilon (A k).
 Proof.
 have := trace_guess_V2_admissible_le benaloh_security a.
 by rewrite benaloh_epsilon_at_residuosityE mulrA -(natrM R 2 2).
@@ -903,7 +918,7 @@ Corollary benaloh_trace_guess_V2_admissible_pq_le k
     (a : dsdp_admissible_predictor benaloh_setting k) :
   alice_trace_guess_V2_pr_at (R:=R) (Q:=BQ) (predict a)
   <= (((p_minus_2 k).+2%:R : R) * (q_minus_2 k).+2%:R)^-1
-     + 4 * residuosity_assumption_epsilon _ _ _ (A k).
+     + 4 * benaloh_residuosity_epsilon (A k).
 Proof.
 have := trace_guess_V2_admissible_pq_le benaloh_security a.
 by rewrite benaloh_epsilon_at_residuosityE mulrA -(natrM R 2 2).

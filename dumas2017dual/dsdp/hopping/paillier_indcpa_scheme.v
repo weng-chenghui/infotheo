@@ -93,6 +93,8 @@ Require Import indcpa_game.
 (*                              unit-group randomness                         *)
 (*            dcr_assumption == decisional composite residuosity at           *)
 (*                              modulus p q                                   *)
+(*             dcr_epsilon A == the advantage that record assumes, the        *)
+(*                              currency the Paillier bounds are priced in    *)
 (*    dcr_of_adversary g adv == the residuosity distinguisher that hands      *)
 (*                              adv the challenge multiplied by g raised      *)
 (*                              to adv's plaintext                            *)
@@ -233,6 +235,16 @@ Definition dcr_assumption : Type :=
   residuosity_assumption (R:=R) 'Z_((p * q) * (p * q)) (p * q)
     card_renc_paillier.
 
+(* The advantage a decisional composite residuosity record assumes of the
+   distinguishers its class admits.  It is the currency every Paillier
+   IND-CPA bound of this file is priced in: an IND-CPA epsilon at one key is
+   twice it, one call per hop of the reduction below, and a trace bound that
+   replaces a ciphertext at two keys spends it four times.
+   Naming: [dcr] names the game the epsilon belongs to, distinguishing it
+   from the IND-CPA epsilon it prices. *)
+Definition dcr_epsilon (A : dcr_assumption) : R :=
+  residuosity_assumption_epsilon A.
+
 (* The first of the two reductions: an IND-CPA adversary run on the
    residuosity challenge multiplied by g raised to the adversary's own
    plaintext.  At the residue challenge the multiplied challenge is an
@@ -263,7 +275,7 @@ Lemma real_accept_dcrE (g : 'Z_((p * q) * (p * q)))
       fdistmap (adv_decide c)
         (fdistmap (paillier_enc g (adv_plain c))
            (fdist_uniform (R:=R) card_renc_paillier))) [set true]
-  = residuosity_accept _ (dcr_of_adversary g adv) residue_fdist.
+  = residuosity_accept (dcr_of_adversary g adv) residue_fdist.
 Proof.
 rewrite residuosity_acceptE /residue_fdist /=; congr (Pr _ _); congr (_ >>= _).
 by apply/funext => c; rewrite !fdistmap_comp.
@@ -278,7 +290,7 @@ Lemma zero_accept_dcrE (g : 'Z_((p * q) * (p * q)))
       fdistmap (adv_decide c)
         (fdistmap (paillier_enc g 0)
            (fdist_uniform (R:=R) card_renc_paillier))) [set true]
-  = residuosity_accept _ (dcr_of_adversary_zero adv) residue_fdist.
+  = residuosity_accept (dcr_of_adversary_zero adv) residue_fdist.
 Proof.
 rewrite residuosity_acceptE /residue_fdist /=; congr (Pr _ _); congr (_ >>= _).
 apply/funext => c; rewrite !fdistmap_comp; congr (fdistmap _ _).
@@ -291,8 +303,8 @@ Qed.
    state at the multiplier g ^+ (adv_plain c). *)
 Lemma unit_accept_dcrE (g : 'Z_((p * q) * (p * q))) (gn : g ^+ (p * q) = 1)
     (adv : indcpa_adversary (R:=R) AHE) :
-  residuosity_accept _ (dcr_of_adversary g adv) unit_fdist
-  = residuosity_accept _ (dcr_of_adversary_zero adv) unit_fdist.
+  residuosity_accept (dcr_of_adversary g adv) unit_fdist
+  = residuosity_accept (dcr_of_adversary_zero adv) unit_fdist.
 Proof.
 have pq_gt0 : (0 < p * q)%N := ltnW pq_gt1.
 (* Both sides draw the state c the same way; compare the inner laws at each
@@ -321,21 +333,21 @@ Qed.
    Theorem 13.13, read at any generator whose order divides p q. *)
 Lemma paillier_dcr_epsilon_le (A : dcr_assumption) (dk : priv_key AHE)
     (adv : indcpa_adversary (R:=R) AHE) :
-  residuosity_admissible _ _ _ A (dcr_of_adversary (priv_gen dk) adv) ->
-  residuosity_admissible _ _ _ A (dcr_of_adversary_zero adv) ->
+  residuosity_admissible A (dcr_of_adversary (priv_gen dk) adv) ->
+  residuosity_admissible A (dcr_of_adversary_zero adv) ->
   indcpa_epsilon (R:=R) card_renc_paillier rand_of_renc_paillier
     (pub_of_priv dk) adv
-  <= 2 * residuosity_assumption_epsilon _ _ _ A.
+  <= 2 * dcr_epsilon A.
 Proof.
 move=> Hg Hz.
 rewrite /indcpa_epsilon indcpa_success_realE indcpa_success_zeroE.
 rewrite !enc_fdist_paillierE /= real_accept_dcrE zero_accept_dcrE.
-rewrite mulr_natl mulr2n.
-apply: le_trans (ler_distD (residuosity_accept _
+rewrite /dcr_epsilon mulr_natl mulr2n.
+apply: le_trans (ler_distD (residuosity_accept
   (dcr_of_adversary (priv_gen dk) adv) unit_fdist) _ _) _.
-apply: lerD; first exact: residuosity_admissible_epsilon_le _ _ _ _ _ Hg.
+apply: lerD; first exact: residuosity_admissible_epsilon_le _ _ Hg.
 rewrite (unit_accept_dcrE (priv_gen_order dk) adv) distrC.
-exact: residuosity_admissible_epsilon_le _ _ _ _ _ Hz.
+exact: residuosity_admissible_epsilon_le _ _ Hz.
 Qed.
 
 (* The IND-CPA class a residuosity assumption induces: the adversaries whose
@@ -345,8 +357,8 @@ Qed.
    generator the class leaves free. *)
 Definition paillier_dcr_admissible (A : dcr_assumption)
     (adv : indcpa_adversary (R:=R) AHE) : bool :=
-  [forall g, residuosity_admissible _ _ _ A (dcr_of_adversary g adv)]
-  && residuosity_admissible _ _ _ A (dcr_of_adversary_zero adv).
+  [forall g, residuosity_admissible A (dcr_of_adversary g adv)]
+  && residuosity_admissible A (dcr_of_adversary_zero adv).
 
 (* The same 2 eps_DCR bound with the two premises read off that one Boolean,
    which is the shape the assumption record's proof field takes.
@@ -358,7 +370,7 @@ Lemma paillier_dcr_admissible_epsilon_le (A : dcr_assumption)
   paillier_dcr_admissible A adv ->
   indcpa_epsilon (R:=R) card_renc_paillier rand_of_renc_paillier
     (pub_of_priv dk) adv
-  <= 2 * residuosity_assumption_epsilon _ _ _ A.
+  <= 2 * dcr_epsilon A.
 Proof.
 by move=> /andP[/forallP Hg Hz]; apply: paillier_dcr_epsilon_le (Hg _) Hz.
 Qed.
@@ -372,8 +384,7 @@ Definition paillier_indcpa_assumption (A : dcr_assumption) :
     indcpa_epsilon_assumption (R:=R) card_renc_paillier
       rand_of_renc_paillier :=
   {| indcpa_admissible := paillier_dcr_admissible A ;
-     indcpa_assumption_epsilon :=
-       2 * residuosity_assumption_epsilon _ _ _ A ;
+     indcpa_assumption_epsilon := 2 * dcr_epsilon A ;
      indcpa_admissible_epsilon_le := @paillier_dcr_admissible_epsilon_le A |}.
 
 (* At the zero-epsilon residuosity witness the induced class admits every
@@ -416,7 +427,7 @@ Lemma paillier_indcpa_epsilon_le (A : dcr_assumption) (dk : priv_key AHE)
          fdistmap (adv_decide c)
            (fdistmap (paillier_enc (priv_gen dk) 0)
               (fdist_uniform card_renc_paillier))) [set true] |
-  <= 2 * residuosity_assumption_epsilon _ _ _ A.
+  <= 2 * dcr_epsilon A.
 Proof.
 move/(paillier_dcr_admissible_epsilon_le dk).
 by rewrite /indcpa_epsilon indcpa_success_realE indcpa_success_zeroE
@@ -454,8 +465,7 @@ Definition f_size_paillier k : R :=
 
 (* The assumed residuosity-advantage sequence: the epsilon D k assumes at
    each k, the asymptotic form of decisional composite residuosity. *)
-Definition f_dcr_paillier k : R :=
-  residuosity_assumption_epsilon _ _ _ (D k).
+Definition f_dcr_paillier k : R := dcr_epsilon (D k).
 
 (* The derived IND-CPA advantage sequence: twice f_dcr_paillier, the two hops
    of the reduction charged once each at the key of parameter k. *)
