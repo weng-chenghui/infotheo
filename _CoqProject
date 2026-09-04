@@ -119,6 +119,7 @@ homomorphic_encryption/he_types.v
 homomorphic_encryption/enc_dec.v
 homomorphic_encryption/ahe_enc.v
 homomorphic_encryption/ahe_monoid.v
+homomorphic_encryption/residuosity_game.v
 homomorphic_encryption/benaloh1994/benaloh_enc.v
 homomorphic_encryption/benaloh1994/benaloh_ahe.v
 homomorphic_encryption/paillier1999/paillier_enc.v

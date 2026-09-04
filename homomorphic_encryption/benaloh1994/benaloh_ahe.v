@@ -60,6 +60,18 @@ Record BenalohPrivKey := MkBenalohPrivKey {
 Definition pub_of_priv (priv_key : BenalohPrivKey) : BenalohPubKey :=
   MkBenalohPubKey (priv_gen_order priv_key).
 
+(* The Benaloh public key at the generator y = 1.  It inhabits the record and
+   says nothing else: at y = 1 every plaintext encrypts to u ^+ r, so the key
+   is degenerate and decryption fails, and the order condition y ^+ r = 1
+   holds for the trivial reason that \val 1%g is 1, which is also why expr1n
+   types as the field's proof with no rewriting.  A generator of exact order r
+   needs the structure of the unit group of Z/nZ, which mathcomp does not
+   carry; BenalohPrivKey, asking in addition for r %| phi(n) and for the
+   injectivity of m |-> y ^+ ((phi(n) %/ r) * m), stays uninhabited for the
+   same reason. *)
+Definition trivial_pub_key : BenalohPubKey :=
+  @MkBenalohPubKey 1%g (expr1n _ r).
+
 End benaloh_keys.
 
 Section benaloh_instance.

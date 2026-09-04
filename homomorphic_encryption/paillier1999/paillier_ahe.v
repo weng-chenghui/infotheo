@@ -38,6 +38,54 @@ Definition pub_of_priv (pk : PaillierPrivKey) : PaillierPubKey :=
 
 End paillier_keys.
 
+Section paillier_standard_key.
+
+Variable n : nat.
+Hypothesis n_gt1 : (1 < n)%N.
+
+(* The ciphertext modulus exceeds one whenever the plaintext modulus does. *)
+Let nn_gt1 : (1 < n * n)%N.
+Proof. by rewrite (leq_trans n_gt1)// leq_pmulr// (ltnW n_gt1). Qed.
+
+(* The plaintext modulus squares to zero in the ciphertext ring, its square
+   being that ring's own modulus. *)
+Let natr_sqr_eq0 : (n%:R : 'Z_(n * n)) ^+ 2 = 0.
+Proof. by rewrite -natrX -mulnn pchar_Zp. Qed.
+
+(* Hence every power of the plaintext modulus above the first vanishes
+   there. *)
+Let natr_exp_eq0 (i : nat) : (1 < i)%N -> (n%:R : 'Z_(n * n)) ^+ i = 0.
+Proof. by move=> i_gt1; rewrite -(subnK i_gt1) exprD natr_sqr_eq0 mulr0. Qed.
+
+(* The generator 1 + n has order dividing n in Z/n^2 Z.  Expanding
+   (1 + n) ^+ n by the binomial theorem leaves 1 from the zeroth term and
+   n * n from the first, which is the ring's modulus and so zero, while every
+   later term carries a square of n and vanishes for the same reason.
+   Position: this equation is the entire content the public-key record asks of
+   a generator, and it is the only number-theoretic input the Paillier
+   IND-CPA reduction takes, so primality of the factors of n plays no part
+   in it. *)
+Lemma paillier_gen_order : (1 + n%:R : 'Z_(n * n)) ^+ n = 1.
+Proof.
+rewrite exprDn big_ord_recl /= subn0 expr1n bin0 mulr1 mulr1n.
+rewrite big1 ?addr0// => -[[|i] Hi] _ /=.
+  by rewrite expr1n mul1r expr1 bin1 -mulr_natr -natrM mulnn pchar_Zp.
+by rewrite natr_exp_eq0// mulr0 mul0rn.
+Qed.
+
+(* The Paillier public key at the generator 1 + n, the one every Paillier text
+   uses.  It is the public-key record's first inhabitant that does not come
+   through pub_of_priv, so a statement quantified over public keys has a value
+   to be read at.  It says nothing about the quantification the IND-CPA
+   reduction makes, which is over private keys: PaillierPrivKey asks in
+   addition for the Carmichael function and for the injectivity of
+   m |-> g ^+ (lambda * m), which need the order of 1 + n and the structure of
+   the unit group of Z/n^2 Z, and no term in the development inhabits it. *)
+Definition standard_pub_key : PaillierPubKey n :=
+  MkPaillierPubKey paillier_gen_order.
+
+End paillier_standard_key.
+
 Section paillier_instance.
 
 Variable n : nat.

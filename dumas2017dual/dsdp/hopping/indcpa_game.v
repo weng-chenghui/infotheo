@@ -242,6 +242,17 @@ move=> Hfg Hg c; have [N HN] := Hg c.
 by exists N => n Hn; apply: le_lt_trans (Hfg n) (HN n Hn).
 Qed.
 
+(* Twice a negligible function is negligible.  A reduction that calls its
+   assumption once per experiment prices one key at twice the assumed
+   advantage, and the family of such bounds vanishes exactly when the assumed
+   family does. *)
+Lemma negligible_fun_double (f : nat -> R) :
+  negligible_fun f -> negligible_fun (fun k => 2 * f k).
+Proof.
+move=> Hf; apply: negligible_fun_le (negligible_fun_add Hf Hf) => k.
+by rewrite mulr_natl mulr2n.
+Qed.
+
 (* The arithmetic shape of the class-conditional DSDP trace guessing bound is
    negligible as a family: an inverse plaintext cardinality plus twice one
    advantage, evaluated at each security parameter, is negligible whenever
