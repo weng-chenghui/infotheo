@@ -37,6 +37,17 @@ basename and resolve by suffix.
   `paillier_indcpa_assumption`, and `residuosity_of_adversary` /
   `residuosity_of_adversary_zero` giving `benaloh_indcpa_assumption`, at twice the
   residuosity epsilon per key).
+  The three chain programs live in the files whose reductions they write.
+  `paillier_chain` in `paillier_indcpa_scheme.v` and `benaloh_chain` in
+  `benaloh_indcpa_scheme.v` each hop twice around one identity, logging one residuosity
+  call per hop, so each loss reads as twice the assumed residuosity epsilon;
+  `alice_chain` in `hopping/dsdp_alice_hop_secrecy.v` hops twice over the two received
+  ciphertexts, logging one IND-CPA reduction advantage per hop, and `alice_chain_bound`
+  evaluates it at the all-zero endpoint under a third label, so its loss reads as the
+  inverse plaintext count plus the two advantages. The three headline statements are
+  unchanged and are now closed by `chain_sound` or `bound_sound` at the chain's premise,
+  the one triangle inequality of the argument having been discharged once in
+  `hop_chain.v`.
 
 - **Scheme assumptions** — `homomorphic_encryption/residuosity_game.v` states the e-th
   residuosity problem in a finite commutative unit ring: the two challenge laws

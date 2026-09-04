@@ -186,6 +186,25 @@ extra_proba:pfwd1_pair4_swap34
 extra_proba:pr_eq_comp_constraint
 extra_proba:pr_eq_comp_constraint_tail
 extra_proba:sum_cPr_eq
+# hop_chain: the soundness obligation each chain statement supplies for its own
+# invariant field, the eqType coding of a loss term, and the field-by-field
+# halves of the two unit laws. The blueprint states the invariant once at
+# def:chain and def:chain_bound, where the endpoints, loss and premise of every
+# statement are written out, so the five *_sound lemmas add nothing a node of
+# their own would carry; and it states the unit laws at lem:chain_equiv, up to
+# the equivalence rather than one field at a time.
+hop_chain:bind_sound
+hop_chain:eq_sound
+hop_chain:eval_sound
+hop_chain:hop_sound
+hop_chain:left_unit_endpoints
+hop_chain:left_unit_loss
+hop_chain:left_unit_premise
+hop_chain:loss_term_code
+hop_chain:loss_term_codeK
+hop_chain:loss_term_decode
+hop_chain:right_unit_loss
+hop_chain:start_sound
 # indcpa_game: the role-type abbreviation, the two arm-selection equations of
 # the challenger, and the slot-resampling and challenge-joint plumbing the
 # two hop_advantageE nodes fold together.

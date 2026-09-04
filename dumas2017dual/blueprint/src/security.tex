@@ -617,7 +617,7 @@ carries the three bounds above to the executed protocol.
 \label{ch:adversary_class}
 
 The bounds above quantify over every predictor and every distinguisher, and
-price each hop by the advantage of one reduction. This chapter adds the two
+each hop costs the advantage of one reduction. This chapter adds the two
 notions a computational reading of such a bound needs, an asymptotic one and an
 adversary class, records what forces the class to leave something out, and
 derives the class and its advantage, at Paillier and at Benaloh, from the
@@ -696,9 +696,9 @@ $e$-th residuosity assumption.
        \le \tfrac{1}{m} + 2\,\varepsilon_{\mathrm{cpa}} \]
   Three currencies meet here. The term $1/m$ is information-theoretic and
   unconditional, the residue of the leaked output along the solution fiber. The
-  term $2\varepsilon_{\mathrm{cpa}}$ is conditional on $\mathcal{A}$, and prices
-  the two ciphertext replacements at the advantage $\mathcal{A}$ assumes rather
-  than at their own values. The two admissibility premises are conditional on
+  term $2\varepsilon_{\mathrm{cpa}}$ is conditional on $\mathcal{A}$, and
+  measures the two ciphertext replacements at the advantage $\mathcal{A}$
+  assumes rather than at their own values. The two admissibility premises are conditional on
   the class, and are assumed rather than proved.
   Proved in \texttt{dsdp\_alice\_trace\_link.v}, the two forms are fields
   \texttt{trace\_guess\_V2\_admissible\_le} and
@@ -807,7 +807,7 @@ $e$-th residuosity assumption.
   plaintext; the other passes the challenge through unchanged. Under
   $\mathsf{res}_{pq}$ they are the real and the zero arm of the IND-CPA
   experiment, by unfolding. The hybrid has three steps and the factor two is
-  its price: one call to $\mathcal{B}$ carries the real arm from
+  what they cost: one call to $\mathcal{B}$ carries the real arm from
   $\mathsf{res}_{pq}$ to $\mathsf{unit}$, the middle step is free by
   Lemma~\ref{lem:unit_fdist_translateE}, and a second call carries the zero arm
   back. Both summands are conditional on $\mathcal{B}$, so no part of this
@@ -840,7 +840,7 @@ $e$-th residuosity assumption.
   inhabited: \texttt{paillier\_dcr\_admissible\_cipher\_constant} admits every
   adversary whose verdict ignores the ciphertext, at the residuosity record of
   advantage zero. Every Paillier bound below reads its
-  $\varepsilon_{\mathrm{cpa}}$ off this value, so each is priced in
+  $\varepsilon_{\mathrm{cpa}}$ off this value, so each is measured in
   composite-residuosity currency at two residuosity calls per key.
 \end{definition}
 
@@ -920,12 +920,220 @@ $e$-th residuosity assumption.
   reads the plaintext count off the packaging, whose plaintext space has
   exactly $pq$ elements, and the coin plumbing the abstract bound quantifies
   over is supplied by the scheme's own randomness. The computational side is
-  decisional composite residuosity and nothing further, at the price
+  decisional composite residuosity and nothing further, at the cost
   Definition~\ref{def:paillier_indcpa_assumption} fixes: the factor four is two
   keys, Bob's and Charlie's, times two residuosity calls per key. What is
   assumed here is $\mathcal{B}$, and the class premises restrict which
   predictors the bound covers.
 \end{corollary}
+
+\section{The chain a multi-hop bound is assembled in}
+
+Each of the three reductions above is a hybrid: a sequence of games joined by
+steps, some of which spend an assumption and some of which are identities. This
+section states the layer they are written in. A chain is a morphism between
+acceptance probabilities graded by an accumulated loss, and that loss is a list
+of labelled terms rather than a single real, so a finished derivation carries
+the assumptions its bound rests on alongside their numeric total. The three
+programs at the end of the section are the Paillier hybrid, the Benaloh hybrid,
+and Alice's two-hop ladder, each written in this layer.
+
+\begin{definition}[A loss and the terms it is a list of]
+  \label{def:loss}
+  \rocq{infotheo.computational_security.hop_chain.loss_term,
+       infotheo.computational_security.hop_chain.loss_term_cost,
+       infotheo.computational_security.hop_chain.loss,
+       infotheo.computational_security.hop_chain.loss_eval,
+       infotheo.computational_security.hop_chain.loss_eval_nil,
+       infotheo.computational_security.hop_chain.loss_eval1,
+       infotheo.computational_security.hop_chain.loss_eval_cat}
+  \rocqok
+  A loss term is a label $l$, drawn from a type the client chooses, paired with
+  a real $e$. A loss is a list of loss terms, the free monoid on them, and its
+  total $\mathrm{ev}$ is the sum of the reals, a monoid morphism to the
+  additive reals.
+  \[ \mathrm{ev}(s) = \sum_{(l,\,e)\,\in\,s} e, \qquad
+     \mathrm{ev}[\,] = 0, \qquad \mathrm{ev}\big[(l, e)\big] = e, \qquad
+     \mathrm{ev}(s_1 \mathbin{+\!\!+} s_2)
+       = \mathrm{ev}(s_1) + \mathrm{ev}(s_2) \]
+  A label names the assumption and the reduction that one step invokes, and the
+  total forgets it. The two readings answer different questions about the same
+  bound: the list says of each summand whether it is information-theoretic or
+  conditional on a computational assumption and at which key, the total is the
+  number a theorem states. That $\mathrm{ev}$ is a morphism is what makes the
+  total of a composite the sum of the totals of its parts.
+\end{definition}
+
+\begin{definition}[A chain and the four statements that build one]
+  \label{def:chain}
+  \rocq{infotheo.computational_security.hop_chain.chain,
+       infotheo.computational_security.hop_chain.chain_start,
+       infotheo.computational_security.hop_chain.chain_hop,
+       infotheo.computational_security.hop_chain.chain_eq,
+       infotheo.computational_security.hop_chain.chain_bind}
+  \rocqok
+  \uses{def:loss}
+  A chain is a first endpoint $a$, a current endpoint $b$, a loss $s$, a
+  premise $P$, and a proof that $P$ bounds the distance between the endpoints
+  by the total of the loss. The endpoints are acceptance probabilities.
+  \[ P \Longrightarrow \lvert a - b \rvert \le \mathrm{ev}(s) \]
+  Four statements build one, each re-establishing that invariant, and are
+  written below as the four data $(a, b, s, P)$ they carry.
+  \[ \mathrm{start}(g) = \big(g,\; g,\; [\,],\; \mathrm{True}\big), \qquad
+     \mathrm{hop}(l, e, x, g')
+       = \big(x,\; g',\; [(l, e)],\; \lvert x - g'\rvert \le e\big) \]
+  \[ \mathrm{eq}(x, g') = \big(x,\; g',\; [\,],\; x = g'\big), \qquad
+     \mathrm{bind}(m, f) = \big(a_m,\; b_{f(b_m)},\;
+       s_m \mathbin{+\!\!+} s_{f(b_m)},\; P_m \wedge P_{f(b_m)}\big) \]
+  An assumption enters a derivation at $\mathrm{hop}$ and nowhere else, which
+  is why the loss of a finished chain is the complete list of what its bound
+  rests on. $\mathrm{eq}$ is the step an information-theoretic identity between
+  two games takes, and it leaves the loss as it stands. $\mathrm{bind}$ is
+  sound only under the side condition $a_{f(b_m)} = b_m$, that the continuation
+  starts where the previous fragment stopped, and it is where the one triangle
+  inequality of the development is discharged, once, so that a chain of any
+  length needs none. Without that side condition the concatenated loss would
+  bound nothing about the two outer endpoints. Composition has a notation of
+  its own, in a scope of its own, whose tokens differ from those of the
+  distribution bind of \texttt{indcpa\_game.v}, so both may be open at once.
+\end{definition}
+
+\begin{definition}[A bound read off a chain]
+  \label{def:chain_bound}
+  \rocq{infotheo.computational_security.hop_chain.chain_bound,
+       infotheo.computational_security.hop_chain.chain_eval}
+  \rocqok
+  \uses{def:chain}
+  A chain bound is a first endpoint $a$, a loss $s$, a premise $Q$, and a proof
+  that $Q$ bounds $a$ itself by the total of the loss.
+  \[ Q \Longrightarrow a \le \mathrm{ev}(s) \]
+  $\mathrm{eval}(m, l, c)$ builds one from a chain $m$ by charging its current
+  endpoint at $c$ under the label $l$.
+  \[ \mathrm{eval}(m, l, c) = \big(a_m,\;
+       s_m \mathbin{+\!\!+} [(l, c)],\; P_m \wedge b_m \le c\big) \]
+  This is where a statement changes sort, from a comparison of two acceptance
+  probabilities to a bound on one. A secrecy theorem has the second shape, so
+  a hybrid reaches its published form here, and the terminal term $(l, c)$ is
+  the one summand of such a bound that comes from the endpoint rather than from
+  a step.
+\end{definition}
+
+\begin{lemma}[The laws, up to an equivalence the total is invariant under]
+  \label{lem:chain_equiv}
+  \rocq{infotheo.computational_security.hop_chain.chain_equiv,
+       infotheo.computational_security.hop_chain.chain_equiv_loss_eval,
+       infotheo.computational_security.hop_chain.loss_eval_perm,
+       infotheo.computational_security.hop_chain.left_unit_equiv,
+       infotheo.computational_security.hop_chain.right_unit_equiv,
+       infotheo.computational_security.hop_chain.loss_catA,
+       infotheo.computational_security.hop_chain.chain_observable_eq}
+  \rocqok
+  \uses{def:chain}
+  Two chains are equivalent when their endpoints agree, their losses are
+  permutations of one another, and their premises are equivalent. The total is
+  an invariant of that relation, a sum over a list being invariant under
+  permutation of the list.
+  \[ c_1 \sim c_2 \;\Longrightarrow\;
+       \mathrm{ev}(s_{c_1}) = \mathrm{ev}(s_{c_2}) \]
+  The two unit laws hold up to $\sim$, and concatenation of losses is
+  associative.
+  \[ \mathrm{bind}(\mathrm{start}(g), f) \sim f(g), \qquad
+     \mathrm{bind}(m, \mathrm{start}) \sim m, \qquad
+     s_1 \mathbin{+\!\!+} (s_2 \mathbin{+\!\!+} s_3)
+       = (s_1 \mathbin{+\!\!+} s_2) \mathbin{+\!\!+} s_3 \]
+  Equality of records is the wrong relation to state the unit laws at. The left
+  unit replaces a premise $P$ by $\mathrm{True} \wedge P$, which is equivalent
+  to $P$ and not equal to it, and two chains that agree on their four
+  observable fields are equal only through proof irrelevance, which is
+  \texttt{chain\_observable\_eq} and costs one classical axiom. Stating the
+  laws at $\sim$ leaves that axiom unused, and it loses nothing a bound needs:
+  what a chain is read for is the total, and the total is what $\sim$ fixes.
+  So the regrouping and unit rearrangements the notation performs leave every
+  bound of the three programs below unchanged.
+\end{lemma}
+
+\begin{definition}[The Paillier hybrid as a chain]
+  \label{def:paillier_chain}
+  \rocq{infotheo.computational_security.paillier_indcpa_scheme.paillier_multiplying_hop,
+       infotheo.computational_security.paillier_indcpa_scheme.paillier_plain_hop,
+       infotheo.computational_security.paillier_indcpa_scheme.paillier_chain,
+       infotheo.computational_security.paillier_indcpa_scheme.paillier_chain_lossE,
+       infotheo.computational_security.paillier_indcpa_scheme.paillier_chain_premise}
+  \rocqok
+  \uses{def:chain,def:loss,def:dcr_assumption,thm:paillier_dcr_epsilon_le,lem:unit_fdist_translateE}
+  The three-step hybrid of Theorem~\ref{thm:paillier_dcr_epsilon_le} as a chain
+  over the four acceptance probabilities it passes through. It starts at the
+  multiplying reduction under $\mathsf{res}_{pq}$, which is the real arm of the
+  IND-CPA experiment; hops to that reduction under $\mathsf{unit}$; crosses to
+  the plain reduction under $\mathsf{unit}$ by
+  Lemma~\ref{lem:unit_fdist_translateE}, which is an identity and logs nothing;
+  and hops to the plain reduction under $\mathsf{res}_{pq}$, which is the zero
+  arm. Its loss is two terms, labelled $\mathsf{multiplying}$ and
+  $\mathsf{plain}$ after the reduction each hop runs, and its premise is the
+  two class memberships and nothing further.
+  \[ \mathrm{ev}(s) = 2\,\varepsilon_{\mathrm{dcr}}, \qquad
+     P = \mathrm{adm}\big(\mathcal{B}_{\mathrm{mul}}\big) \wedge
+         \mathrm{adm}\big(\mathcal{B}_{\mathrm{pl}}\big) \]
+  Both terms are conditional on $\mathcal{B}$, so this loss has one currency.
+  The number in Theorem~\ref{thm:paillier_dcr_epsilon_le} is $\mathrm{ev}(s)$
+  and its two hypotheses are $P$, so that theorem is the soundness field of
+  this chain read at those hypotheses rather than a triangle inequality of its
+  own.
+\end{definition}
+
+\begin{definition}[The Benaloh hybrid as a chain]
+  \label{def:benaloh_chain}
+  \rocq{infotheo.computational_security.benaloh_indcpa_scheme.benaloh_multiplying_hop,
+       infotheo.computational_security.benaloh_indcpa_scheme.benaloh_plain_hop,
+       infotheo.computational_security.benaloh_indcpa_scheme.benaloh_chain,
+       infotheo.computational_security.benaloh_indcpa_scheme.benaloh_chain_lossE,
+       infotheo.computational_security.benaloh_indcpa_scheme.benaloh_chain_premise}
+  \rocqok
+  \uses{def:chain,def:loss,def:benaloh_residuosity_assumption,thm:benaloh_residuosity_epsilon_le,lem:unit_fdist_translateE}
+  The same three steps at $T = \mathbb{Z}_n$ and the exponent $r$, with the
+  same two labels and the same two-term loss.
+  \[ \mathrm{ev}(s) = 2\,\varepsilon_{\mathrm{res}}, \qquad
+     P = \mathrm{adm}\big(\mathcal{B}_{\mathrm{mul}}\big) \wedge
+         \mathrm{adm}\big(\mathcal{B}_{\mathrm{pl}}\big) \]
+  One place separates it from the Paillier chain. Its middle identity takes no
+  order premise on the generator, the multiplier $y^{p_A}$ being a unit of
+  $\mathbb{Z}_n$ by its type, so the $\mathrm{eq}$ step there is discharged
+  without reading the key's order condition. Both terms are conditional on
+  $\mathcal{B}$, and Theorem~\ref{thm:benaloh_residuosity_epsilon_le} is again
+  the soundness field of this chain at $P$.
+\end{definition}
+
+\begin{definition}[Alice's ladder as a chain, and the bound read off it]
+  \label{def:alice_chain}
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_bob_hop,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_charlie_hop,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_plain_size,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_chain,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_chain_premise,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_chain_bound,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_bound_premise,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_chain_lossE}
+  \rocqok
+  \uses{def:chain,def:chain_bound,def:loss,lem:alice_view_advantage,lem:guess_all_zero,thm:alice_guess_real}
+  Alice's ladder as a chain over $\gamma_0(D_g), \gamma_1(D_g), \gamma_2(D_g)$,
+  the acceptance probabilities of a predictor's distinguisher at the three
+  hops, joined by the two ciphertext replacements. Each hop logs the advantage
+  of the reduction its label names, at Bob's key and then at Charlie's.
+  Evaluating the chain at the all-zero endpoint under a third label appends the
+  plaintext-space term and yields a chain bound on $\gamma_0(D_g)$.
+  \[ \mathrm{ev}(s) = \tfrac{1}{m} + \epshopsum{D_g} \]
+  This loss has two currencies and the labels separate them. The two hop terms
+  are the advantages of the reductions $\hopred{0}{D_g}$ and $\hopred{1}{D_g}$,
+  each of which becomes conditional on a computational assumption only where a
+  later statement requires it to be small. The terminal term
+  $\mathsf{plain\_size}$ is information-theoretic and unconditional, the
+  residue the leaked output leaves along the solution fiber. The chain's own
+  premise holds outright, Lemma~\ref{lem:alice_view_advantage} making each hop
+  gap exactly the term it logs, and the bound's premise adds only the endpoint
+  bound of Lemma~\ref{lem:guess_all_zero}, which is the one place the fiber
+  enters. Theorem~\ref{thm:alice_guess_real} states $\mathrm{ev}(s)$ and is the
+  soundness field of this bound at that premise.
+\end{definition}
 
 \section{What the class leaves out, and the three settings}
 
@@ -952,7 +1160,7 @@ $e$-th residuosity assumption.
   input a function of the trace.
   \[ \delta(t) = \Dec(dk_B,\, t_3),\qquad V_2 = \delta \circ \mathrm{AliceTrace} \]
   It holds a private key, so it lies outside the attack model the hop ladder
-  prices, which grants the public keys alone.
+  bounds, which grants the public keys alone.
 \end{definition}
 
 \begin{theorem}[The class cannot admit every adversary]
@@ -1047,7 +1255,7 @@ $e$-th residuosity assumption.
   The two facts are the two currencies of the class-conditional bound, and the
   record keeps them apart. The first is unconditional. The inverse plaintext
   cardinality $1/m_k$ is the guessing residue the leaked output concedes, it is
-  priced in the plaintext space alone, and it holds against an adversary of any
+  measured in the plaintext space alone, and it holds against an adversary of any
   running time. The second is conditional on the assumption. It is the
   advantage each $\mathcal{A}_k$ assumes, and it is the only place a
   computational hypothesis enters. The record fixes no relation between
@@ -1078,7 +1286,7 @@ $e$-th residuosity assumption.
   $\delta$, whose guessing probability is $1$ at every $k$, and
   Corollary~\ref{cor:decrypt_sequence_not_admissible} shows that the same two
   fields of $\mathcal{Q}$ eventually reject $\delta$'s reduction adversary.
-  Every currency is hypothesis-conditional, priced at each $k$ as in
+  Every currency is hypothesis-conditional, measured at each $k$ as in
   Theorem~\ref{thm:alice_guess_admissible}.
 \end{theorem}
 
@@ -1192,8 +1400,8 @@ $e$-th residuosity assumption.
   Bob and Charlie appear only as unconditional counting adversaries, whose
   views hold plaintexts and abstract ciphertexts, so the computational axis is
   Alice's alone. Every $\varepsilon$ is single-query and per-distinguisher, so a
-  value prices one execution against one named adversary and says nothing about
-  repeated queries or about a wider class.
+  value measures one execution against one named adversary and says nothing
+  about repeated queries or about a wider class.
 \end{definition}
 
 \begin{theorem}[Every setting proves them]
