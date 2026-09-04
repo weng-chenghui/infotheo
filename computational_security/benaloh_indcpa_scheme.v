@@ -56,7 +56,7 @@ Require Import negligible indcpa_game hop_chain.
 (* admits, and its epsilon is twice the residuosity epsilon: one residuosity  *)
 (* call carries the real arm of the experiment from the residue law to the    *)
 (* unit law, where the generator power the adversary chose cancels, and a     *)
-(* second call carries the zero arm back.  Both summands are                  *)
+(* second call carries the zero arm back.  Both terms are                     *)
 (* assumption-conditional, so the whole derived bound is computational.       *)
 (*                                                                            *)
 (* The reduction below is written as a chain of hops over acceptance          *)
@@ -123,10 +123,10 @@ Require Import negligible indcpa_game hop_chain.
 (*                               the residue law                              *)
 (*   unit_accept_residuosityE == under the unit law the two reductions accept *)
 (*                               with the same probability                    *)
-(*    benaloh_multiplying_hop == the label of the residuosity call that       *)
-(*                               carries the real arm to the unit law         *)
-(*          benaloh_plain_hop == the label of the residuosity call that       *)
-(*                               carries the zero arm back                    *)
+(*    benaloh_multiplying_hop == the label of the hop that carries the real   *)
+(*                               arm to the unit law                          *)
+(*          benaloh_plain_hop == the label of the hop that carries the zero   *)
+(*                               arm back                                     *)
 (*              benaloh_chain == the reduction as a chain of two hops         *)
 (*                               around one equality                          *)
 (*        benaloh_chain_lossE == the loss of that chain totals twice the      *)
@@ -357,17 +357,17 @@ exact: (unit_fdistmap_translateE 'Z_n card_renc_benaloh (adv_decide c)
           (y ^+ (adv_plain c))%g).
 Qed.
 
-(* The label of the first residuosity call, the one made against the reduction
-   that multiplies its challenge by the generator power the adversary's
-   plaintext names.  A label names the reduction whose residuosity call the hop
-   invokes, so the loss of a finished chain records which distinguisher each of
-   its summands was assumed of and not only their numeric total.
+(* The label of the first hop, whose residuosity call is made against the
+   reduction that multiplies its challenge by the generator power the
+   adversary's plaintext names.  A label names the reduction the hop invokes,
+   so the loss of a finished chain records which distinguisher each of its
+   terms was assumed of, alongside their numeric total.
    Naming: [multiplying] is that reduction's own token, from the multiplier
    val y ^+ m it applies. *)
 Definition benaloh_multiplying_hop : nat := 0%N.
 
-(* The label of the second residuosity call, the one made against the reduction
-   that hands its challenge to the adversary unchanged.
+(* The label of the second hop, whose residuosity call is made against the
+   reduction that hands its challenge to the adversary unchanged.
    Naming: [plain] is that reduction's token, the challenge reaching the
    adversary as it stands. *)
 Definition benaloh_plain_hop : nat := 1%N.
@@ -429,9 +429,8 @@ Qed.
    residuosity reductions the residuosity class admits has IND-CPA advantage
    at most twice the assumed residuosity epsilon: one residuosity call carries
    the real arm from the residue law to the unit law, the middle equality
-   above costs nothing, and a second call carries the zero arm back.  Both
-   summands are assumption-conditional, so no part of this bound holds
-   information-theoretically. *)
+   above logs nothing, and a second call carries the zero arm back.  Both
+   terms are assumption-conditional, so the whole bound is computational. *)
 Lemma benaloh_residuosity_epsilon_le (A : benaloh_residuosity_assumption)
     (dk : priv_key AHE) (adv : indcpa_adversary (R:=R) AHE) :
   residuosity_admissible A (residuosity_of_adversary (priv_gen dk) adv) ->

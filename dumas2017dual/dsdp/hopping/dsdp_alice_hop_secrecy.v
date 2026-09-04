@@ -1141,7 +1141,7 @@ Local Open Scope chain_scope.
 
 (* The label of the first loss term, the IND-CPA reduction at Bob's key.  The
    labels are what let a reader of an accumulated loss tell which of its
-   summands are conditional on a computational assumption, and at which key.
+   terms are conditional on a computational assumption, and at which key.
    Naming: [alice] names the axis and the remainder names what the term
    measures, a ciphertext replacement for the two hops and the plaintext-space
    size for the third. *)
@@ -1152,17 +1152,17 @@ Definition alice_bob_hop : nat := 0.
 Definition alice_charlie_hop : nat := 1.
 
 (* The label of the terminal loss term, the plaintext-space bound at the
-   all-zero endpoint.  That summand rests on no computational assumption: it is
-   the residue the leaked output leaves along the DSDP solution fiber. *)
+   all-zero endpoint.  That term is information-theoretic: it is the residue
+   the leaked output leaves along the DSDP solution fiber. *)
 Definition alice_plain_size : nat := 2.
 
 (* The computational-security argument of this file written as a chain: the
    acceptance probabilities of the predictor's distinguisher at hops 0, 1 and
-   2, joined by the two ciphertext replacements.  Each hop is charged the
-   advantage of the reduction its label names, and hop0_advantageE and
-   hop1_advantageE are equalities, so each charge is the gap itself and not an
-   over-estimate of it.  Composing the two hops is where the one triangle
-   inequality of the argument is spent. *)
+   2, joined by the two ciphertext replacements.  Each hop logs the advantage
+   of the reduction its label names, and hop0_advantageE and hop1_advantageE
+   are equalities, so each term is exactly the gap its hop spans.  Composing
+   the two hops is where the one triangle inequality of the argument is
+   spent. *)
 Definition alice_chain (predict : predictor alice_hop_tupleT) : chain nat R :=
   let D := distinguisher_of_predictor predict in
   x <-- chain_start (alice_hop_game_success 0 D) ;;
@@ -1174,10 +1174,10 @@ Definition alice_chain (predict : predictor alice_hop_tupleT) : chain nat R :=
     y (alice_hop_game_success 2 D).
 
 (* The premise of that chain holds outright.  A hop asks that the gap it spans
-   be at most what it charges, and the two hop equalities say the gap is
-   exactly that, so the assumptions the labels name are not spent here.  They
-   are spent only where the advantages measuring them are required to be
-   small. *)
+   be at most the term it logs, and the two hop equalities say the gap is
+   exactly that term, so each label here records an advantage that is defined
+   rather than assumed small.  The IND-CPA assumptions those labels name enter
+   only where the advantages are required to be small. *)
 Lemma alice_chain_premise (predict : predictor alice_hop_tupleT) :
   chain_premise (alice_chain predict).
 Proof.

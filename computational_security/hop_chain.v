@@ -19,8 +19,8 @@ From mathcomp Require Import boolp reals.
 (*                                                                            *)
 (* A loss term is a label paired with a real.  The label names, through its   *)
 (* own type, the assumption and the reduction a step invokes, so the loss of  *)
-(* a finished chain is the list of assumptions its bound rests on and not     *)
-(* only a numeric total.  The label type L is a parameter of the whole file,  *)
+(* a finished chain is the list of assumptions its bound rests on, alongside  *)
+(* their numeric total.  The label type L is a parameter of the whole file,   *)
 (* so a client names its steps in whatever eqType it prefers.                 *)
 (*                                                                            *)
 (* ## What each statement logs                                                *)
@@ -70,7 +70,7 @@ From mathcomp Require Import boolp reals.
 (*               loss_eval s == the numeric total of a list of loss terms     *)
 (*             loss_eval_nil == the empty loss costs zero                     *)
 (*             loss_eval_cat == concatenation of losses adds their costs      *)
-(*                loss_eval1 == a one term loss costs that term               *)
+(*                loss_eval1 == a one-term loss totals that term              *)
 (*                 chain L R == a first endpoint, a current endpoint, a loss, *)
 (*                              a premise, and the proof that the premise     *)
 (*                              bounds the distance between the endpoints by  *)
@@ -120,11 +120,12 @@ Section chain_dsl.
 Variable L : eqType.
 Variable R : realType.
 
-(* One summand of a security loss: the label naming the assumption and the
+(* One term of a security loss: the label naming the assumption and the
    reduction that a step invokes, and the real that step costs. *)
 Inductive loss_term := LossTerm of L & R.
 
-(* The real a loss term costs, its label discarded. *)
+(* The real a loss term contributes, its label discarded.  It is what
+   loss_eval adds, so the numeric total of a loss forgets every label. *)
 Definition loss_term_cost (a : loss_term) : R := let: LossTerm _ c := a in c.
 
 (* An accumulated security loss, the free monoid on loss terms.  A list
@@ -140,13 +141,15 @@ Definition loss_eval (s : loss) : R := \sum_(a <- s) loss_term_cost a.
 Lemma loss_eval_nil : loss_eval [::] = 0.
 Proof. by rewrite /loss_eval big_nil. Qed.
 
-(* loss_eval is a monoid morphism, which is why composing two fragments adds
-   their losses instead of relating them in some other way. *)
+(* loss_eval is a monoid morphism.  Composing two fragments therefore adds
+   their totals, which is what makes the total of a finished chain the sum of
+   the epsilons its steps assume. *)
 Lemma loss_eval_cat s1 s2 :
   loss_eval (s1 ++ s2) = loss_eval s1 + loss_eval s2.
 Proof. by rewrite /loss_eval big_cat. Qed.
 
-(* A single step costs exactly what its own term costs. *)
+(* A one-term loss totals that term.  It is where the bound of a single hop
+   is read as the epsilon its label names. *)
 Lemma loss_eval1 l c : loss_eval [:: LossTerm l c] = c.
 Proof. by rewrite /loss_eval big_cons big_nil addr0. Qed.
 
@@ -162,7 +165,9 @@ Record chain := Chain {
   chain_sound : chain_premise ->
     `| chain_first - chain_current | <= loss_eval chain_loss }.
 
-(* The identity morphism at g: it assumes nothing and costs nothing. *)
+(* The identity morphism at g: it assumes nothing and logs nothing.  It is
+   where a chain opens, at the acceptance probability of a hybrid's first
+   game. *)
 Lemma start_sound (g : R) : True -> `| g - g | <= loss_eval [::].
 Proof. by move=> _; rewrite subrr normr0 loss_eval_nil. Qed.
 
@@ -170,10 +175,12 @@ Definition chain_start (g : R) : chain :=
   {| chain_first := g ; chain_current := g ; chain_loss := [::] ;
      chain_premise := True ; chain_sound := @start_sound g |}.
 
-(* One hop, from x to g', charged at e under the label l.  The premise is
-   the numeric bound itself rather than a named hypothesis: a continuation of
-   a bind is elaborated at a generic starting point, so a hypothesis stated
-   at a specific starting value cannot be supplied there. *)
+(* One hop, from x to g' at e under the label l.  It is the step that spends
+   an assumption, the label naming which one, so every assumption-conditional
+   term of a bound enters here.  The premise is the numeric bound itself
+   rather than a named hypothesis: a continuation of a bind is elaborated at
+   a generic starting point, so a hypothesis stated at a specific starting
+   value cannot be supplied there. *)
 Lemma hop_sound (l : L) (e x g' : R) :
   `| x - g' | <= e -> `| x - g' | <= loss_eval [:: LossTerm l e].
 Proof. by rewrite loss_eval1. Qed.
@@ -184,9 +191,9 @@ Definition chain_hop (l : L) (e x g' : R) : chain :=
      chain_premise := `| x - g' | <= e ;
      chain_sound := @hop_sound l e x g' |}.
 
-(* An exact rewriting step, from x to g' at no cost.  It is the step an
-   information-theoretic identity between two games takes, as against a
-   hop, which spends an assumption. *)
+(* An exact step, from x to g', logging nothing.  It is the step an
+   information-theoretic identity between two games takes, so an
+   unconditional rewriting leaves the loss of a chain as it stands. *)
 Lemma eq_sound (x g' : R) : x = g' -> `| x - g' | <= loss_eval [::].
 Proof. by move=> ->; rewrite subrr normr0 loss_eval_nil. Qed.
 
@@ -218,10 +225,10 @@ Definition chain_bind (m : chain) (f : R -> chain)
      chain_premise := chain_premise m /\ chain_premise (f (chain_current m)) ;
      chain_sound := @bind_sound m f Hb |}.
 
-(* The terminal object of the grading, where the statement changes sort:
-   from a distance between two acceptance probabilities to a bound on one.
-   This is the shape a security theorem is stated in, the endpoint of the
-   chain having been bounded rather than compared. *)
+(* Where the statement changes sort: from a distance between two acceptance
+   probabilities to a bound on one.  This is the shape a security theorem is
+   stated in, the endpoint of the chain having been bounded rather than
+   compared. *)
 Record chain_bound := {
   bound_first : R ;
   bound_loss : loss ;
@@ -285,20 +292,23 @@ Section monad_laws.
 Variable L : eqType.
 Variable R : realType.
 
-(* The loss monoid is free commutative as far as loss_eval can tell, since a
-   sum over a list is invariant under permutation.  This is what lets the
-   laws below be stated up to a permutation of the logged terms. *)
+(* Permuting a loss leaves its total unchanged, a sum over a list being
+   invariant under permutation.  It is what lets the laws below hold up to a
+   permutation of the logged terms rather than up to equality of the two
+   lists. *)
 Lemma loss_eval_perm (s1 s2 : loss L R) :
   perm_eq s1 s2 -> loss_eval s1 = loss_eval s2.
 Proof. by move=> ps; rewrite /loss_eval (perm_big _ ps). Qed.
 
-(* Left unit on the loss: [::] ++ s reduces, so this is definitional. *)
+(* Left unit on the loss: [::] ++ s reduces, so this is definitional.  The
+   line that opens a chain adds no term to what follows it. *)
 Lemma left_unit_loss (g : R) (f : R -> chain L R)
     (Hb : chain_first (f g) = g) :
   chain_loss (chain_bind (chain_start g) f Hb) = chain_loss (f g).
 Proof. by []. Qed.
 
-(* Left unit on the endpoints: definitional as well. *)
+(* Left unit on the endpoints: definitional as well.  chain_start moves
+   nothing, so the fragment after it fixes where the chain now is. *)
 Lemma left_unit_endpoints (g : R) (f : R -> chain L R)
     (Hb : chain_first (f g) = g) :
   chain_current (chain_bind (chain_start g) f Hb) = chain_current (f g).
@@ -311,12 +321,14 @@ Lemma left_unit_premise (g : R) (f : R -> chain L R)
   chain_premise (chain_bind (chain_start g) f Hb) <-> chain_premise (f g).
 Proof. by split=> [[]|]. Qed.
 
-(* Right unit on the loss needs cats0, so it is propositional. *)
+(* Right unit on the loss needs cats0, so it is propositional.  Closing a
+   chain with chain_start leaves its loss, hence the bound read off it. *)
 Lemma right_unit_loss (m : chain L R) :
   chain_loss (chain_bind m (fun x => chain_start x) erefl) = chain_loss m.
 Proof. by rewrite /= cats0. Qed.
 
-(* Associativity of the loss is catA, again propositional. *)
+(* Associativity of the loss is catA, again propositional.  How the binds of
+   a chain are grouped leaves the loss it logs. *)
 Lemma loss_catA (s1 s2 s3 : loss L R) :
   s1 ++ (s2 ++ s3) = (s1 ++ s2) ++ s3.
 Proof. exact: catA. Qed.
@@ -352,13 +364,17 @@ Lemma chain_equiv_loss_eval (c1 c2 : chain L R) :
   loss_eval (chain_loss c1) = loss_eval (chain_loss c2).
 Proof. by case=> _ _ ps _; exact: loss_eval_perm. Qed.
 
-(* The left unit law, in the sense the premise field allows. *)
+(* chain_start g followed by f is equivalent to f at g: the same endpoints,
+   the same loss, and premises differing by the True that chain_start
+   logged. *)
 Lemma left_unit_equiv (g : R) (f : R -> chain L R)
     (Hb : chain_first (f g) = g) :
   chain_equiv (chain_bind (chain_start g) f Hb) (f g).
 Proof. by split=> //=; split=> [[]//|]. Qed.
 
-(* The right unit law, in the same sense. *)
+(* A chain followed by chain_start is equivalent to that chain: chain_start
+   appends the empty loss and the True premise, and neither moves the bound
+   read off it. *)
 Lemma right_unit_equiv (m : chain L R) :
   chain_equiv (chain_bind m (fun x => chain_start x) erefl) m.
 Proof. by split=> //=; [rewrite cats0|split=> [[]//|]]. Qed.

@@ -345,15 +345,21 @@ exact: unit_fdistmap_translateE 'Z_((p * q) * (p * q)) card_renc_paillier
   (adv_decide c) (FinRing.unit _ Ug).
 Qed.
 
-(* The labels the two hops of the reduction below log.  A loss term names,
-   through its label, the reduction whose residuosity call the hop invokes,
-   so that the loss of a finished chain reads as the list of assumption calls
-   the bound rests on and not as a number alone.  The multiplying hop invokes
-   dcr_of_adversary at the key's generator, the plain hop invokes
-   dcr_of_adversary_zero.
-   Naming: [hop] is the step of the hybrid the label belongs to, [multiplying]
-   and [plain] the two reductions above. *)
+(* The label of the first hop, whose residuosity call is made against
+   dcr_of_adversary at the key's generator.  A label names the reduction the
+   hop invokes, so the loss of a finished chain reads as the list of
+   assumption calls its bound rests on, each term traceable to the
+   distinguisher it was assumed of.
+   Naming: [hop] is the step of the hybrid the label belongs to,
+   [multiplying] that reduction's own token, from the generator power it
+   multiplies the challenge by. *)
 Definition paillier_multiplying_hop : nat := 0.
+
+(* The label of the second hop, whose residuosity call is made against
+   dcr_of_adversary_zero, the reduction that hands the challenge to the
+   adversary unchanged.
+   Naming: [plain] is that reduction's token, the challenge reaching the
+   adversary as it stands. *)
 Definition paillier_plain_hop : nat := 1.
 
 Local Open Scope chain_scope.
@@ -414,8 +420,10 @@ Qed.
    every key built from a private key, one eps_DCR per hop of the two-step
    hybrid: the first hop moves the real experiment from the residue challenge
    to the unit challenge, the second moves the zero experiment back, and the
-   middle equality between them is unit_accept_dcrE.  This is Katz and Lindell
-   2015 Theorem 13.13, read at any generator whose order divides p q. *)
+   middle equality between them is unit_accept_dcrE.  Both terms are
+   assumption-conditional, so the whole bound is computational.  This is Katz
+   and Lindell 2015 Theorem 13.13, read at any generator whose order divides
+   p q. *)
 Lemma paillier_dcr_epsilon_le (A : dcr_assumption) (dk : priv_key AHE)
     (adv : indcpa_adversary (R:=R) AHE) :
   residuosity_admissible A (dcr_of_adversary (priv_gen dk) adv) ->
