@@ -5,7 +5,7 @@ Require Import realType_ext ssr_ext ssralg_ext bigop_ext fdist.
 Require Import fdist_extra proba.
 Require Import homomorphic_encryption residuosity_game.
 Require Import benaloh_enc benaloh_ahe.
-Require Import negligible indcpa_game.
+Require Import negligible indcpa_game hop_chain.
 
 (**md**************************************************************************)
 (* # Benaloh as an IND-CPA scheme                                             *)
@@ -59,6 +59,19 @@ Require Import negligible indcpa_game.
 (* second call carries the zero arm back.  Both summands are                  *)
 (* assumption-conditional, so the whole derived bound is computational.       *)
 (*                                                                            *)
+(* The reduction below is written as a chain of hops over acceptance          *)
+(* probabilities, the graded morphisms of hop_chain.v.  Its objects are the   *)
+(* four acceptance probabilities the hybrid passes through, and its loss is   *)
+(* the two-term list whose entries are labelled benaloh_multiplying_hop and   *)
+(* benaloh_plain_hop, each carrying the r-th residuosity epsilon its call     *)
+(* assumes.  The bound of benaloh_residuosity_epsilon_le is loss_eval of      *)
+(* that list and its two hypotheses are the chain premise, so the bound is    *)
+(* read off the chain rather than reassembled from a triangle inequality of   *)
+(* its own.  The chain differs from the Paillier chain of                     *)
+(* paillier_indcpa_scheme.v in one place: its middle equality takes no order  *)
+(* premise on the generator, the multiplier val y ^+ m being a unit whatever  *)
+(* y and m are.                                                               *)
+(*                                                                            *)
 (* The reduction reads two number-theoretic facts, 1 < n and 1 < r.  It       *)
 (* multiplies by val y ^+ m, the value of a group power and hence a unit by   *)
 (* its type, so the order condition y ^+ r = 1 the key records carry stays    *)
@@ -110,6 +123,16 @@ Require Import negligible indcpa_game.
 (*                               the residue law                              *)
 (*   unit_accept_residuosityE == under the unit law the two reductions accept *)
 (*                               with the same probability                    *)
+(*    benaloh_multiplying_hop == the label of the residuosity call that       *)
+(*                               carries the real arm to the unit law         *)
+(*          benaloh_plain_hop == the label of the residuosity call that       *)
+(*                               carries the zero arm back                    *)
+(*              benaloh_chain == the reduction as a chain of two hops         *)
+(*                               around one equality                          *)
+(*         benaloh_chain_loss == the loss of that chain totals twice the      *)
+(*                               residuosity epsilon                          *)
+(*      benaloh_chain_premise == the two admissibility hypotheses             *)
+(*                               discharge the chain premise                  *)
 (* benaloh_residuosity_epsilon_le ==                                          *)
 (*                            an adversary whose two reductions are both      *)
 (*                            classified has IND-CPA advantage at most twice  *)
@@ -334,6 +357,75 @@ exact: (unit_fdistmap_translateE 'Z_n card_renc_benaloh (adv_decide c)
           (y ^+ (adv_plain c))%g).
 Qed.
 
+(* The label of the first residuosity call, the one made against the reduction
+   that multiplies its challenge by the generator power the adversary's
+   plaintext names.  A label names the reduction whose residuosity call the hop
+   invokes, so the loss of a finished chain records which distinguisher each of
+   its summands was assumed of and not only their numeric total.
+   Naming: [multiplying] is that reduction's own token, from the multiplier
+   val y ^+ m it applies. *)
+Definition benaloh_multiplying_hop : nat := 0%N.
+
+(* The label of the second residuosity call, the one made against the reduction
+   that hands its challenge to the adversary unchanged.
+   Naming: [plain] is that reduction's token, the challenge reaching the
+   adversary as it stands. *)
+Definition benaloh_plain_hop : nat := 1%N.
+
+Local Open Scope chain_scope.
+
+(* The reduction as a chain of hops over acceptance probabilities.  It starts
+   at the real arm, which is the multiplying reduction accepting under the
+   residue law; one residuosity call moves that reduction to the unit law,
+   where the generator power cancels; the middle equality replaces the
+   multiplying reduction by the plain one at no cost; and a second call moves
+   the plain reduction back to the residue law, where its acceptance is the
+   zero arm.  Each call logs its own labelled term, so what the chain carries
+   is the list of the two assumptions the derived bound rests on. *)
+Definition benaloh_chain (A : benaloh_residuosity_assumption)
+    (dk : priv_key AHE) (adv : indcpa_adversary (R:=R) AHE) : chain nat R :=
+  x <-- chain_start
+          (residuosity_accept (residuosity_of_adversary (priv_gen dk) adv)
+             residue_fdist) ;;
+  y <-- chain_hop benaloh_multiplying_hop (benaloh_residuosity_epsilon A) x
+          (residuosity_accept (residuosity_of_adversary (priv_gen dk) adv)
+             unit_fdist) ;;
+  z <-- chain_eq y
+          (residuosity_accept (residuosity_of_adversary_zero adv)
+             unit_fdist) ;;
+  chain_hop benaloh_plain_hop (benaloh_residuosity_epsilon A) z
+    (residuosity_accept (residuosity_of_adversary_zero adv) residue_fdist).
+
+(* The chain totals two residuosity calls: each hop logs one term at the
+   assumed epsilon and the middle equality logs nothing.  This is where the
+   factor two in every Benaloh IND-CPA bound of this file comes from. *)
+Lemma benaloh_chain_loss (A : benaloh_residuosity_assumption)
+    (dk : priv_key AHE) (adv : indcpa_adversary (R:=R) AHE) :
+  loss_eval (chain_loss (benaloh_chain A dk adv))
+  = 2 * benaloh_residuosity_epsilon A.
+Proof.
+rewrite /loss_eval /benaloh_chain /= big_cons big_cons big_nil addr0.
+by rewrite mulr_natl mulr2n.
+Qed.
+
+(* The chain premise is the two admissibility hypotheses and nothing else: the
+   start assumes nothing, each hop assumes that the residuosity class admits
+   its own reduction, and the middle equality is unit_accept_residuosityE,
+   which holds outright.  The adversary is therefore constrained only through
+   the class its two reductions must belong to. *)
+Lemma benaloh_chain_premise (A : benaloh_residuosity_assumption)
+    (dk : priv_key AHE) (adv : indcpa_adversary (R:=R) AHE) :
+  residuosity_admissible A (residuosity_of_adversary (priv_gen dk) adv) ->
+  residuosity_admissible A (residuosity_of_adversary_zero adv) ->
+  chain_premise (benaloh_chain A dk adv).
+Proof.
+move=> Hy H0.
+split; first by [].
+split; first exact: residuosity_admissible_epsilon_le _ _ Hy.
+split; first exact: unit_accept_residuosityE (priv_gen dk) adv.
+by rewrite /= distrC; exact: residuosity_admissible_epsilon_le _ _ H0.
+Qed.
+
 (* The reduction, priced.  At every private key, an adversary whose two
    residuosity reductions the residuosity class admits has IND-CPA advantage
    at most twice the assumed residuosity epsilon: one residuosity call carries
@@ -350,18 +442,10 @@ Lemma benaloh_residuosity_epsilon_le (A : benaloh_residuosity_assumption)
   <= 2 * benaloh_residuosity_epsilon A.
 Proof.
 move=> Hy H0.
-have Hmid := unit_accept_residuosityE (priv_gen dk) adv.
 rewrite /indcpa_epsilon indcpa_success_realE indcpa_success_zeroE.
 rewrite !enc_fdist_benalohE /= real_accept_residuosityE.
-rewrite zero_accept_residuosityE.
-have -> : 2 * benaloh_residuosity_epsilon A
-        = benaloh_residuosity_epsilon A + benaloh_residuosity_epsilon A.
-  by rewrite mulr_natl mulr2n.
-apply: le_trans (ler_distD (residuosity_accept
-  (residuosity_of_adversary (priv_gen dk) adv) unit_fdist) _ _) _.
-apply: lerD; first exact: (residuosity_admissible_epsilon_le _ _ Hy).
-rewrite Hmid distrC.
-exact: (residuosity_admissible_epsilon_le _ _ H0).
+rewrite zero_accept_residuosityE -(benaloh_chain_loss A dk adv).
+exact: chain_sound (benaloh_chain_premise Hy H0).
 Qed.
 
 (* The IND-CPA class the derived assumption carries: the adversaries whose two
