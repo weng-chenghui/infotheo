@@ -46,6 +46,13 @@ Require Import dsdp_setting.
 (* defines it, so the record prices one execution against one named           *)
 (* adversary.                                                                 *)
 (*                                                                            *)
+(* The assumption an epsilon is read at is whatever the setting's sequence    *)
+(* carries.  At the two scheme settings of dsdp_main.v it is derived from a   *)
+(* residuosity record, decisional composite residuosity at Paillier and r-th  *)
+(* residuosity at Benaloh, at twice the residuosity epsilon; so the three     *)
+(* fields that read the sequence's assumption are priced in residuosity       *)
+(* currency there.                                                            *)
+(*                                                                            *)
 (* Three restrictions come from the setting and are stated in dsdp_setting.v: *)
 (* the counting fields hold in the honest-sampling setting, the two axes      *)
 (* share one cardinality and not one execution, and card_plain together with  *)
@@ -216,10 +223,13 @@ Definition alice_predictor_unpredictability_at
     pkey_of_party v1 u1 u2 u3 predict.
 
 (* The same three quantities at Alice's executed trace. *)
+(* Naming: the [trace] variant of bob_predictor_epsilon_at, the same
+   advantage read at the adversary a trace predictor induces. *)
 Definition bob_trace_predictor_epsilon_at
     (predict : predictor AHE (traceT_at X k)) : R :=
   bob_trace_predictor_epsilon (R:=R) card_renc rand_of_renc
     v1 u1 u2 u3 dk_a dk_b dk_c rc2 predict.
+(* Naming: the Charlie-key spelling of bob_trace_predictor_epsilon_at. *)
 Definition charlie_trace_predictor_epsilon_at
     (predict : predictor AHE (traceT_at X k)) : R :=
   charlie_trace_predictor_epsilon (R:=R) card_renc rand_of_renc

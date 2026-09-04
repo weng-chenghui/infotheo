@@ -4,7 +4,7 @@ From mathcomp Require Import matrix ring boolp finmap reals.
 
 Require Import realType_ext realType_ln ssr_ext ssralg_ext bigop_ext fdist.
 Require Import proba entropy.
-Require Import homomorphic_encryption.
+Require Import homomorphic_encryption residuosity_game.
 Require Import paillier_fdist_instance.
 Require Import indcpa_game paillier_indcpa_scheme benaloh_indcpa_scheme.
 Require Import dsdp_instance_sequence.
@@ -16,7 +16,8 @@ Require Import dsdp_setting dsdp_security.
 (* Three values of dsdp_setting of dsdp_setting.v with their parameters fed,  *)
 (* and the twenty-six fields of dsdp_security of dsdp_security.v projected at *)
 (* each: Paillier, Benaloh at block size p * q, and the idealized scheme.     *)
-(* Nothing is proved here.  The proofs are the theorems of the two axis       *)
+(* Nothing is proved here beyond one arithmetic rewrite per scheme, named     *)
+(* below.  The proofs are the theorems of the two axis                        *)
 (* directions, counting/dsdp_entropy.v, counting/dsdp_relay_secrecy.v and     *)
 (* counting/dsdp_malicious_dotp.v on the counting side and                    *)
 (* hopping/dsdp_alice_hop_secrecy.v and hopping/dsdp_alice_trace_link.v on    *)
@@ -29,10 +30,10 @@ Require Import dsdp_setting dsdp_security.
 (* Paillier takes the plaintext modulus at k as its two factors, held as      *)
 (* p_minus_2 k and q_minus_2 k so that the modulus is a double successor in   *)
 (* both factors; Alice's four weights; the three private keys; the two        *)
-(* encryption coins; the sequence of IND-CPA assumptions; and two             *)
-(* negligibility facts.  Its added premises are prime (p k), prime (q k) and  *)
-(* p k != q k.  They are fundamental to the scheme: a Paillier modulus is a   *)
-(* product of two distinct primes, which paillier_indcpa_scheme.v leaves      *)
+(* encryption coins; a decisional composite residuosity record at each k; and *)
+(* two negligibility facts.  Its added premises are prime (p k), prime (q k)  *)
+(* and p k != q k.  They are fundamental to the scheme: a Paillier modulus is *)
+(* a product of two distinct primes, which paillier_indcpa_scheme.v leaves    *)
 (* unimposed and which decisional composite residuosity starts from.          *)
 (*                                                                            *)
 (* Benaloh takes its ciphertext modulus n k in addition, and its block size   *)
@@ -43,10 +44,17 @@ Require Import dsdp_setting dsdp_security.
 (*                                                                            *)
 (* At both schemes the three private keys are assumed values: no key record   *)
 (* is constructed anywhere, the divisibility and injectivity conditions a key *)
-(* carries being left to the instantiation.  At both, the sequence of IND-CPA *)
-(* assumptions and the two negligibility facts, one on the inverse modulus    *)
-(* and one on the assumed advantage, are assumed, and every epsilon in the    *)
-(* corollaries below is the advantage that sequence assumes at k.             *)
+(* carries being left to the instantiation.  At both, what is assumed is a    *)
+(* residuosity record per k and one negligibility fact on its epsilon, beside *)
+(* the negligibility of the inverse modulus; the IND-CPA assumption at k and  *)
+(* the negligibility of its advantage are derived from them by the scheme     *)
+(* files.  Every epsilon read off at these two settings is twice the          *)
+(* residuosity epsilon at k, which the two lemmas paillier_epsilon_at_dcrE    *)
+(* and benaloh_epsilon_at_residuosityE state as a conversion, beside the two  *)
+(* naming the record itself.  The trace bounds spend an IND-CPA epsilon at    *)
+(* Bob's key and at Charlie's, so they read 4 eps.  Carrying that factor is   *)
+(* one arithmetic rewrite in the two admissible_le corollaries of each        *)
+(* scheme section, the only place a proof step is taken in this file.         *)
 (*                                                                            *)
 (* The counting side of both scheme instances is uniform_inputs at Alice's    *)
 (* own hopping weights: the three inputs and the two masks are five uniform   *)
@@ -76,8 +84,15 @@ Require Import dsdp_setting dsdp_security.
 (*                              setting and its twenty-six corollaries        *)
 (*          paillier_setting == the setting the Paillier parameters make      *)
 (*         paillier_security == the twenty-six statements at it               *)
+(* paillier_assumption_at_dcrE ==                                             *)
+(*                              the assumption those statements are read at   *)
+(*                              is the record derived from A k                *)
+(*  paillier_epsilon_at_dcrE == its epsilon is twice the decisional           *)
+(*                              composite residuosity epsilon at k            *)
 (*              benaloh_dsdp == the same at Benaloh with block size p * q     *)
 (*           benaloh_setting, benaloh_security == its two values              *)
+(* benaloh_assumption_at_residuosityE, benaloh_epsilon_at_residuosityE ==     *)
+(*                              the same two conversions at r-th residuosity  *)
 (*            idealized_dsdp == the same at the idealized scheme, where every *)
 (*                              corollary is premise-free                     *)
 (*        idealized_security == the twenty-six statements at it               *)
@@ -160,27 +175,24 @@ Hypothesis u3_unit : forall k, u3 k \is a GRing.unit.
 Variables (dk_a dk_b dk_c : forall k, priv_key (AHE k)).
 Variables (rb2 rc2 : forall k, renc_paillier (p k) (q k)).
 
-Local Notation PI :=
-  (paillier_instance v1 u1 u2 u3_unit dk_a dk_b dk_c rb2 rc2).
-
-(* The IND-CPA assumption made at the k-th Paillier instance, the section's
-   only computational hypothesis: every epsilon below is the advantage it
-   assumes at its own k. *)
-Variable A : forall k, indcpa_epsilon_assumption (R:=R)
-    (inst_card_renc (PI k)) (inst_rand_of_renc (I:=PI k)).
+(* Decisional composite residuosity at the k-th modulus, the section's only
+   computational hypothesis: the IND-CPA assumption at k is derived from it,
+   and every epsilon below is twice the residuosity epsilon A k assumes. *)
+Variable A : forall k, dcr_assumption (R:=R) (p k) (q k).
 
 (* The inverse modulus falls below every inverse polynomial.  It is the
    unconditional half of the asymptotic bound, the residue the leaked output
    concedes at every k. *)
 Hypothesis f_pq_negligible : negligible_fun (f_pq (R:=R) p q).
 
-(* The assumed advantage falls below every inverse polynomial: the asymptotic
-   IND-CPA reading of decisional composite residuosity. *)
-Hypothesis f_adv_negligible :
-  negligible_fun (fun k => indcpa_assumption_epsilon (A k)).
+(* The assumed residuosity advantage falls below every inverse polynomial:
+   the asymptotic form of decisional composite residuosity along the moduli
+   p k q k. *)
+Hypothesis f_dcr_negligible : negligible_fun (f_dcr_paillier A).
 
 Local Notation PQ :=
-  (paillier_instance_sequence f_pq_negligible f_adv_negligible).
+  (paillier_instance_sequence v1 u1 u2 u3_unit dk_a dk_b dk_c rb2 rc2
+     f_pq_negligible f_dcr_negligible).
 
 (* Two distinct primes are coprime, which is what makes the solution fiber of
    the DSDP constraint have exactly p k * q k points. *)
@@ -214,6 +226,24 @@ Definition paillier_setting : dsdp_setting R := {|
    its projections by dsdp_securityP. *)
 Definition paillier_security : dsdp_security paillier_setting :=
   dsdp_securityP paillier_setting.
+
+(* The record every assumption-conditional field of paillier_security is read
+   at is the one paillier_indcpa_scheme.v derives from A k, and at no other
+   record.  The equation holds by unfolding, so the identification is a
+   conversion and not a rewrite a later statement could route around. *)
+Lemma paillier_assumption_at_dcrE k :
+  assumption_at paillier_setting k
+  = paillier_indcpa_assumption (p_gt1 k) (q_gt1 k) (A k).
+Proof. by []. Qed.
+
+(* The epsilon those fields are priced in is twice the residuosity epsilon at
+   k, one residuosity call per hop of the scheme reduction.  This is the
+   conversion a reader needs to price the twenty-six corollaries in
+   decisional composite residuosity currency. *)
+Lemma paillier_epsilon_at_dcrE k :
+  indcpa_assumption_epsilon (assumption_at paillier_setting k)
+  = 2 * residuosity_assumption_epsilon _ _ _ (A k).
+Proof. by []. Qed.
 
 (* Alice's uncertainty about the relay pair, given her own inputs and the
    output she computes, is exactly the logarithm of the Paillier modulus p
@@ -393,7 +423,9 @@ Proof.
 move=> hpos; exact: (trace_unpredictability_ge paillier_security hpos).
 Qed.
 
-(* Simulation security of the executed trace, per distinguisher. *)
+(* Simulation security of the executed trace, per distinguisher.
+   Naming: extends [sim_advantage_le] of the hopping tuple with the [trace]
+   token naming the observation the distinguisher reads. *)
 Corollary paillier_trace_sim_advantage_le k
     (D : distinguisher (trace_jointT_at paillier_setting k)) :
   `| Pr (`p_ [% hop_V2_at paillier_setting k, hop_V3_at paillier_setting k,
@@ -428,15 +460,20 @@ Corollary paillier_centropy_V2_trace_eq0 k :
   `H( hop_V2_at paillier_setting k | AliceTrace_at paillier_setting k ) = 0.
 Proof. exact: (centropy_V2_trace_eq0 paillier_security k). Qed.
 
-(* Both ciphertext hops charged to the single epsilon the Paillier sequence
-   assumes at k, on the two class premises the admissible-predictor record
-   carries. *)
+(* Both ciphertext hops charged in residuosity currency, on the two class
+   premises the admissible-predictor record carries: the trace bound spends
+   an IND-CPA epsilon at Bob's key and at Charlie's, and each costs two
+   residuosity calls, hence 4 eps.  The unconditional summand is the inverse
+   plaintext cardinality. *)
 Corollary paillier_trace_guess_V2_admissible_le k
     (a : dsdp_admissible_predictor paillier_setting k) :
   alice_trace_guess_V2_pr_at (R:=R) (Q:=PQ) (predict a)
   <= (#|plain (AHE_at paillier_setting k)|%:R : R)^-1
-     + 2 * indcpa_assumption_epsilon (assumption_at paillier_setting k).
-Proof. exact: (trace_guess_V2_admissible_le paillier_security a). Qed.
+     + 4 * residuosity_assumption_epsilon _ _ _ (A k).
+Proof.
+have := trace_guess_V2_admissible_le paillier_security a.
+by rewrite paillier_epsilon_at_dcrE mulrA -(natrM R 2 2).
+Qed.
 
 (* The same bound with its unconditional summand read as 1/(p k * q k), the
    counting axis's reading of the shared cardinality. *)
@@ -444,11 +481,16 @@ Corollary paillier_trace_guess_V2_admissible_pq_le k
     (a : dsdp_admissible_predictor paillier_setting k) :
   alice_trace_guess_V2_pr_at (R:=R) (Q:=PQ) (predict a)
   <= (((p_minus_2 k).+2%:R : R) * (q_minus_2 k).+2%:R)^-1
-     + 2 * indcpa_assumption_epsilon (assumption_at paillier_setting k).
-Proof. exact: (trace_guess_V2_admissible_pq_le paillier_security a). Qed.
+     + 4 * residuosity_assumption_epsilon _ _ _ (A k).
+Proof.
+have := trace_guess_V2_admissible_pq_le paillier_security a.
+by rewrite paillier_epsilon_at_dcrE mulrA -(natrM R 2 2).
+Qed.
 
 (* The decrypting predictor drives the sum of its two reduction advantages
-   to at least 1 - 1/(p k * q k). *)
+   to at least 1 - 1/(p k * q k).
+   Naming: [decrypt] is the predictor, [epsilon_sum] the sum of its two
+   reduction advantages, and [ge] the lower bound asserted of it. *)
 Corollary paillier_decrypt_epsilon_sum_ge k :
   1 - (#|plain (AHE_at paillier_setting k)|%:R : R)^-1
   <= bob_trace_predictor_epsilon_at paillier_setting k
@@ -457,7 +499,9 @@ Corollary paillier_decrypt_epsilon_sum_ge k :
          (bob_decrypt_predictor_at paillier_setting k).
 Proof. exact: (decrypt_epsilon_sum_ge paillier_security k). Qed.
 
-(* The Bob-key half alone already reaches that value. *)
+(* The Bob-key half alone already reaches that value.
+   Naming: restricts [decrypt_epsilon_sum_ge] to Bob's key, the [bob] token
+   marking which of the two summands is bounded. *)
 Corollary paillier_decrypt_bob_epsilon_ge k :
   1 - (#|plain (AHE_at paillier_setting k)|%:R : R)^-1
   <= bob_trace_predictor_epsilon_at paillier_setting k
@@ -550,27 +594,26 @@ Hypothesis u3_unit : forall k, u3 k \is a GRing.unit.
 Variables (dk_a dk_b dk_c : forall k, priv_key (AHE k)).
 Variables (rb2 rc2 : forall k, renc_benaloh (n k)).
 
-Local Notation BI :=
-  (benaloh_instance v1 u1 u2 u3_unit dk_a dk_b dk_c rb2 rc2).
-
-(* The IND-CPA assumption made at the k-th Benaloh instance, the section's
-   only computational hypothesis: every epsilon below is the advantage it
-   assumes at its own k. *)
-Variable A : forall k, indcpa_epsilon_assumption (R:=R)
-    (inst_card_renc (BI k)) (inst_rand_of_renc (I:=BI k)).
+(* r-th residuosity at the k-th ciphertext modulus n k and exponent r k, the
+   section's only computational hypothesis: the IND-CPA assumption at k is
+   derived from it, and every epsilon below is twice the residuosity epsilon
+   A k assumes.  The assumption is made at n k while the counting axis and
+   the 1/r term read the block size r k; the two numbers are unrelated. *)
+Variable A : forall k, benaloh_residuosity_assumption (R:=R) (n k) (r k).
 
 (* The inverse block size falls below every inverse polynomial.  It is the
    unconditional half of the asymptotic bound, the residue the leaked output
    concedes at every k. *)
 Hypothesis f_r_negligible : negligible_fun (f_r (R:=R) r).
 
-(* The assumed advantage falls below every inverse polynomial: the asymptotic
-   IND-CPA reading of r-th residuosity. *)
-Hypothesis f_adv_negligible :
-  negligible_fun (fun k => indcpa_assumption_epsilon (A k)).
+(* The assumed residuosity advantage falls below every inverse polynomial:
+   the asymptotic form of r-th residuosity along the moduli n k. *)
+Hypothesis f_residuosity_negligible :
+  negligible_fun (f_residuosity_benaloh A).
 
 Local Notation BQ :=
-  (benaloh_instance_sequence f_r_negligible f_adv_negligible).
+  (benaloh_instance_sequence v1 u1 u2 u3_unit dk_a dk_b dk_c rb2 rc2
+     f_r_negligible f_residuosity_negligible).
 
 (* Two distinct primes are coprime, which is what makes the solution fiber of
    the DSDP constraint have exactly p k * q k points. *)
@@ -606,6 +649,23 @@ Definition benaloh_setting : dsdp_setting R := {|
    its projections by dsdp_securityP. *)
 Definition benaloh_security : dsdp_security benaloh_setting :=
   dsdp_securityP benaloh_setting.
+
+(* The record every assumption-conditional field of benaloh_security is read
+   at is the one benaloh_indcpa_scheme.v derives from A k, and at no other
+   record.  The equation holds by unfolding, so the identification is a
+   conversion and not a rewrite a later statement could route around. *)
+Lemma benaloh_assumption_at_residuosityE k :
+  assumption_at benaloh_setting k = benaloh_indcpa_assumption (r_gt1 k) (A k).
+Proof. by []. Qed.
+
+(* The epsilon those fields are priced in is twice the residuosity epsilon at
+   k, one residuosity call per hop of the scheme reduction.  This is the
+   conversion a reader needs to price the twenty-six corollaries in r-th
+   residuosity currency. *)
+Lemma benaloh_epsilon_at_residuosityE k :
+  indcpa_assumption_epsilon (assumption_at benaloh_setting k)
+  = 2 * residuosity_assumption_epsilon _ _ _ (A k).
+Proof. by []. Qed.
 
 (* Alice's uncertainty about the relay pair, given her own inputs and the
    output she computes, is exactly the logarithm of the Benaloh block size p
@@ -785,7 +845,9 @@ Proof.
 move=> hpos; exact: (trace_unpredictability_ge benaloh_security hpos).
 Qed.
 
-(* Simulation security of the executed trace, per distinguisher. *)
+(* Simulation security of the executed trace, per distinguisher.
+   Naming: extends [sim_advantage_le] of the hopping tuple with the [trace]
+   token naming the observation the distinguisher reads. *)
 Corollary benaloh_trace_sim_advantage_le k
     (D : distinguisher (trace_jointT_at benaloh_setting k)) :
   `| Pr (`p_ [% hop_V2_at benaloh_setting k, hop_V3_at benaloh_setting k,
@@ -820,15 +882,20 @@ Corollary benaloh_centropy_V2_trace_eq0 k :
   `H( hop_V2_at benaloh_setting k | AliceTrace_at benaloh_setting k ) = 0.
 Proof. exact: (centropy_V2_trace_eq0 benaloh_security k). Qed.
 
-(* Both ciphertext hops charged to the single epsilon the Benaloh sequence
-   assumes at k, on the two class premises the admissible-predictor record
-   carries. *)
+(* Both ciphertext hops charged in residuosity currency, on the two class
+   premises the admissible-predictor record carries: the trace bound spends
+   an IND-CPA epsilon at Bob's key and at Charlie's, and each costs two
+   residuosity calls, hence 4 eps.  The unconditional summand is the inverse
+   plaintext cardinality. *)
 Corollary benaloh_trace_guess_V2_admissible_le k
     (a : dsdp_admissible_predictor benaloh_setting k) :
   alice_trace_guess_V2_pr_at (R:=R) (Q:=BQ) (predict a)
   <= (#|plain (AHE_at benaloh_setting k)|%:R : R)^-1
-     + 2 * indcpa_assumption_epsilon (assumption_at benaloh_setting k).
-Proof. exact: (trace_guess_V2_admissible_le benaloh_security a). Qed.
+     + 4 * residuosity_assumption_epsilon _ _ _ (A k).
+Proof.
+have := trace_guess_V2_admissible_le benaloh_security a.
+by rewrite benaloh_epsilon_at_residuosityE mulrA -(natrM R 2 2).
+Qed.
 
 (* The same bound with its unconditional summand read as 1/(p k * q k), the
    block size, the counting axis's reading of the shared cardinality. *)
@@ -836,11 +903,16 @@ Corollary benaloh_trace_guess_V2_admissible_pq_le k
     (a : dsdp_admissible_predictor benaloh_setting k) :
   alice_trace_guess_V2_pr_at (R:=R) (Q:=BQ) (predict a)
   <= (((p_minus_2 k).+2%:R : R) * (q_minus_2 k).+2%:R)^-1
-     + 2 * indcpa_assumption_epsilon (assumption_at benaloh_setting k).
-Proof. exact: (trace_guess_V2_admissible_pq_le benaloh_security a). Qed.
+     + 4 * residuosity_assumption_epsilon _ _ _ (A k).
+Proof.
+have := trace_guess_V2_admissible_pq_le benaloh_security a.
+by rewrite benaloh_epsilon_at_residuosityE mulrA -(natrM R 2 2).
+Qed.
 
 (* The decrypting predictor drives the sum of its two reduction advantages
-   to at least 1 - 1/(p k * q k), the block size. *)
+   to at least 1 - 1/(p k * q k), the block size.
+   Naming: [decrypt] is the predictor, [epsilon_sum] the sum of its two
+   reduction advantages, and [ge] the lower bound asserted of it. *)
 Corollary benaloh_decrypt_epsilon_sum_ge k :
   1 - (#|plain (AHE_at benaloh_setting k)|%:R : R)^-1
   <= bob_trace_predictor_epsilon_at benaloh_setting k
@@ -849,7 +921,9 @@ Corollary benaloh_decrypt_epsilon_sum_ge k :
          (bob_decrypt_predictor_at benaloh_setting k).
 Proof. exact: (decrypt_epsilon_sum_ge benaloh_security k). Qed.
 
-(* The Bob-key half alone already reaches that value. *)
+(* The Bob-key half alone already reaches that value.
+   Naming: restricts [decrypt_epsilon_sum_ge] to Bob's key, the [bob] token
+   marking which of the two summands is bounded. *)
 Corollary benaloh_decrypt_bob_epsilon_ge k :
   1 - (#|plain (AHE_at benaloh_setting k)|%:R : R)^-1
   <= bob_trace_predictor_epsilon_at benaloh_setting k
@@ -1103,7 +1177,9 @@ Proof.
 move=> hpos; exact: (trace_unpredictability_ge idealized_security hpos).
 Qed.
 
-(* Simulation security of the executed trace, per distinguisher. *)
+(* Simulation security of the executed trace, per distinguisher.
+   Naming: extends [sim_advantage_le] of the hopping tuple with the [trace]
+   token naming the observation the distinguisher reads. *)
 Corollary idealized_trace_sim_advantage_le k
     (D : distinguisher (trace_jointT_at IS k)) :
   `| Pr (`p_ [% hop_V2_at IS k, hop_V3_at IS k,
@@ -1164,7 +1240,9 @@ exact: (trace_guess_V2_admissible_pq_le idealized_security
 Qed.
 
 (* The decrypting predictor drives the sum of its two reduction advantages
-   to at least 1 - 1/(p k * q k). *)
+   to at least 1 - 1/(p k * q k).
+   Naming: [decrypt] is the predictor, [epsilon_sum] the sum of its two
+   reduction advantages, and [ge] the lower bound asserted of it. *)
 Corollary idealized_decrypt_epsilon_sum_ge k :
   1 - (#|plain (AHE_at IS k)|%:R : R)^-1
   <= bob_trace_predictor_epsilon_at IS k
@@ -1173,7 +1251,9 @@ Corollary idealized_decrypt_epsilon_sum_ge k :
          (bob_decrypt_predictor_at IS k).
 Proof. exact: (decrypt_epsilon_sum_ge idealized_security k). Qed.
 
-(* The Bob-key half alone already reaches that value. *)
+(* The Bob-key half alone already reaches that value.
+   Naming: restricts [decrypt_epsilon_sum_ge] to Bob's key, the [bob] token
+   marking which of the two summands is bounded. *)
 Corollary idealized_decrypt_bob_epsilon_ge k :
   1 - (#|plain (AHE_at IS k)|%:R : R)^-1
   <= bob_trace_predictor_epsilon_at IS k

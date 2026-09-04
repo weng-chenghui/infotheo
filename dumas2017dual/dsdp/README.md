@@ -18,11 +18,25 @@ basename and resolve by suffix.
   assumption record, the scheme record `indcpa_scheme`, `negligible_fun`),
   `paillier_indcpa_scheme` / `benaloh_indcpa_scheme`
   (the two concrete schemes as `indcpa_scheme` values, scheme side only, fixed and indexed
-  by a security parameter), `dsdp_alice_hop_secrecy` (the two hop reductions, the guess / unpredictability /
+  by a security parameter, each with the reduction that derives its IND-CPA assumption
+  from a residuosity assumption: `dcr_of_adversary` / `dcr_of_adversary_zero` giving
+  `paillier_indcpa_assumption`, and `residuosity_of_adversary` /
+  `residuosity_of_adversary_zero` giving `benaloh_indcpa_assumption`, at twice the
+  residuosity epsilon per key), `dsdp_alice_hop_secrecy` (the two hop reductions, the guess / unpredictability /
   simulator-closeness headlines), `dsdp_alice_trace_link` (the same bounds at the executed
   fifteen-round piSMC trace), `dsdp_instance_sequence` (the DSDP instance record, the
   sequence record over it, the asymptotic headline, the idealized-scheme witness, and the
-  DSDP bounds read off at the Paillier and Benaloh instances).
+  DSDP bounds read off at the Paillier and Benaloh instances, in residuosity currency).
+
+- **Scheme assumptions** — `homomorphic_encryption/residuosity_game.v` states the e-th
+  residuosity problem in a finite commutative unit ring: the two challenge laws
+  `unit_fdist` and `residue_fdist`, the distinguisher record, `residuosity_advantage`,
+  the assumption record `residuosity_assumption`, the translation-invariance fact
+  `unit_fdist_translateE`, and the zero-epsilon witness `decide_constant_assumption`.
+  `hopping/paillier_indcpa_scheme.v` instantiates it as `dcr_assumption` at the ring
+  Z/(pq)^2 Z and exponent `p * q`, which is decisional composite residuosity, and
+  `hopping/benaloh_indcpa_scheme.v` as `benaloh_residuosity_assumption` at Z/nZ and
+  exponent `r`.
 
 - **counting/** holds the information-theoretic, solution-counting leg, listed in
   `_CoqProject` load order.

@@ -25,6 +25,12 @@ Require Import dsdp_instance_sequence.
 (* per k.  The properties proved over a setting are the fields of the results *)
 (* record dsdp_security of dsdp_security.v.                                   *)
 (*                                                                            *)
+(* The sequence field carries an IND-CPA assumption at each k, whatever its   *)
+(* source.  At the two scheme settings of dsdp_main.v that assumption is      *)
+(* derived rather than assumed: paillier_setting reads it off a decisional    *)
+(* composite residuosity record at modulus p k q k and benaloh_setting off an *)
+(* r-th residuosity record at modulus n k, at twice the residuosity epsilon.  *)
+(*                                                                            *)
 (* The two axes share one number, not one execution.  The counting side's     *)
 (* random variables land in 'Z_(p k * q k); the hopping side's data lands in  *)
 (* plain (inst_AHE (sequence_instance instance_sequence k)), a different      *)
@@ -714,6 +720,8 @@ Definition charlie_pkey_at : pub_key AHE := charlie_pkey pkey_of_party.
 Definition alice_ideal_joint_at : R.-fdist hop_jointT_at :=
   alice_ideal_joint (R:=R) (AHE:=AHE) card_renc rand_of_renc pkey_of_party
     v1 u1 u2 u3.
+(* Naming: the [trace] variant of alice_ideal_joint_at, the same simulator
+   law read at the executed trace rather than at the hopping tuple. *)
 Definition alice_trace_ideal_joint_at : R.-fdist trace_jointT_at :=
   alice_trace_ideal_joint (R:=R) card_renc rand_of_renc
     v1 u1 u2 u3 dk_a dk_b dk_c rc2.
