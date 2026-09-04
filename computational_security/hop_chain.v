@@ -324,9 +324,9 @@ Lemma loss_catA (s1 s2 s3 : loss L R) :
 Proof. exact: catA. Qed.
 
 (* Two chains agreeing on the four observable fields are equal: the fifth
-   field is a proof of a Prop, and Prop_irrelevance identifies those.  This
-   is the price of stating any law as an equality of records rather than as
-   chain_equiv. *)
+   field is a proof of a Prop, and Prop_irrelevance identifies those.  A law
+   stated as an equality of records rather than as chain_equiv therefore
+   costs one classical axiom. *)
 Lemma chain_observable_eq (c1 c2 : chain L R) :
   chain_first c1 = chain_first c2 -> chain_current c1 = chain_current c2 ->
   chain_loss c1 = chain_loss c2 -> chain_premise c1 = chain_premise c2 ->
