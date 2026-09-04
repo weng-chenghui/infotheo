@@ -25,8 +25,9 @@ MODULES=(
   # bounds, and their transfer to the executed piSMC trace.
   dumas2017dual/dsdp/hopping/dsdp_alice_hop_secrecy.v
   dumas2017dual/dsdp/hopping/dsdp_alice_trace_link.v
-  # The plug point: the same bound read off at a concrete scheme, with the
-  # cardinality side discharged and the advantage left a parameter.
+  # The scheme side: the same bound read off at a concrete scheme, with the
+  # cardinality side discharged and the advantage derived from decisional
+  # composite residuosity.
   dumas2017dual/dsdp/hopping/paillier_indcpa_scheme.v
 )
 

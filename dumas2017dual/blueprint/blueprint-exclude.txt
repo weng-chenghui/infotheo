@@ -6,20 +6,31 @@
 #
 # Format: one `module_basename:identifier` per line. Auto-excluded kinds
 # (Variable/Hypothesis/Context/Let) are not listed.
-# benaloh_indcpa_scheme: the scheme side of the Benaloh IND-CPA scheme,
-# the coin plumbing, the challenger identity, the assumption spelled at the
-# scheme, and the two scheme-level negligible facts; the blueprint cites the
-# DSDP bound read off at that scheme in dsdp_instance_sequence.
+# benaloh_indcpa_scheme: the scheme side of the Benaloh IND-CPA scheme, the
+# coin plumbing, the challenger identity, the two residuosity reductions with
+# their three acceptance identities, the induced IND-CPA class, and the
+# scheme-level advantage families; the blueprint cites the derived assumption
+# at def:benaloh_indcpa_assumption, the reduction bound at
+# thm:benaloh_residuosity_epsilon_le, and the DSDP bound read off at that
+# scheme in dsdp_instance_sequence.
 benaloh_indcpa_scheme:Benaloh_AHEnc
 benaloh_indcpa_scheme:card_renc_benaloh
 benaloh_indcpa_scheme:rand_of_renc_benaloh
 benaloh_indcpa_scheme:renc_benaloh
 benaloh_indcpa_scheme:enc_fdist_benalohE
-benaloh_indcpa_scheme:benaloh_indcpa_epsilon_le
+benaloh_indcpa_scheme:residuosity_of_adversary
+benaloh_indcpa_scheme:residuosity_of_adversary_zero
+benaloh_indcpa_scheme:real_accept_residuosityE
+benaloh_indcpa_scheme:zero_accept_residuosityE
+benaloh_indcpa_scheme:unit_accept_residuosityE
+benaloh_indcpa_scheme:benaloh_residuosity_admissible
+benaloh_indcpa_scheme:benaloh_residuosity_admissible_cipher_constant
 benaloh_indcpa_scheme:f_size_benaloh_negligible
+benaloh_indcpa_scheme:f_adv_benaloh_negligible
 benaloh_indcpa_scheme:f_bound_benaloh_negligible
 benaloh_indcpa_scheme:f_r
 benaloh_indcpa_scheme:f_size_benaloh
+benaloh_indcpa_scheme:f_residuosity_benaloh
 benaloh_indcpa_scheme:f_adv_benaloh
 benaloh_indcpa_scheme:f_bound_benaloh
 # dsdp_instance_sequence: the two per-k scheme instance records and the three
@@ -109,11 +120,15 @@ dsdp_entropy:dsdp_fiber_ring
 dsdp_entropy:dsdp_g
 dsdp_entropy:dsdp_var_entropy
 # dsdp_instance_sequence: the per-k applications of the concrete constants, the
-# growth and zero facts under the negligibility fields, and the
-# idealized-scheme witness; the blueprint cites the sequence headline and its
-# companion, into which this plumbing is folded.
+# growth and zero facts under the negligibility fields, the idealized-scheme
+# witness, and the four lemmas putting the constant predictor's two trace
+# reduction adversaries in the derived class at the zero-advantage residuosity
+# record; the blueprint cites the sequence headline and its companion, into
+# which this plumbing is folded.
 dsdp_instance_sequence:alice_trace_guess_V2_idealized_negligible
 dsdp_instance_sequence:alice_trace_guess_V2_pr_at
+dsdp_instance_sequence:benaloh_bob_decide_constant_admissible
+dsdp_instance_sequence:benaloh_charlie_decide_constant_admissible
 dsdp_instance_sequence:bob_trace_adversary_at
 dsdp_instance_sequence:card_renc_ord1
 dsdp_instance_sequence:charlie_trace_adversary_at
@@ -125,6 +140,8 @@ dsdp_instance_sequence:idealized_instance
 dsdp_instance_sequence:negligible_fun_cst0
 dsdp_instance_sequence:negligible_fun_inv_expnn
 dsdp_instance_sequence:negligible_fun_inv_ge_expnn
+dsdp_instance_sequence:paillier_bob_decide_constant_admissible
+dsdp_instance_sequence:paillier_charlie_decide_constant_admissible
 # dsdp_instance_sequence: the thin projections of the scheme field, which the
 # def:dsdp_instance node describes as the record's scheme component.
 dsdp_instance_sequence:inst_AHE
@@ -180,22 +197,34 @@ indcpa_game:distinguisher
 indcpa_game:enc_slot_resampleE
 indcpa_game:fdistbind_cst
 indcpa_game:negligible_fun_add
+indcpa_game:negligible_fun_double
 indcpa_game:negligible_fun_le
-# paillier_indcpa_scheme: the scheme side of the Paillier IND-CPA scheme,
-# the coin plumbing and the modulus bound the packaging is taken at, the
-# challenger identity, the assumption spelled at the scheme, and the two
-# scheme-level negligible facts; the blueprint cites the DSDP bound read off
-# at that scheme in dsdp_instance_sequence.
+# paillier_indcpa_scheme: the scheme side of the Paillier IND-CPA scheme, the
+# coin plumbing and the modulus bound the packaging is taken at, the challenger
+# identity, the two composite-residuosity reductions with their three
+# acceptance identities, the induced IND-CPA class, and the scheme-level
+# advantage families; the blueprint cites the derived assumption at
+# def:paillier_indcpa_assumption, the reduction bound at
+# thm:paillier_dcr_epsilon_le, and the DSDP bound read off at that scheme in
+# dsdp_instance_sequence.
 paillier_indcpa_scheme:card_renc_paillier
 paillier_indcpa_scheme:pq_gt1
 paillier_indcpa_scheme:rand_of_renc_paillier
 paillier_indcpa_scheme:renc_paillier
 paillier_indcpa_scheme:enc_fdist_paillierE
-paillier_indcpa_scheme:paillier_indcpa_epsilon_le
+paillier_indcpa_scheme:dcr_of_adversary
+paillier_indcpa_scheme:dcr_of_adversary_zero
+paillier_indcpa_scheme:real_accept_dcrE
+paillier_indcpa_scheme:zero_accept_dcrE
+paillier_indcpa_scheme:unit_accept_dcrE
+paillier_indcpa_scheme:paillier_dcr_admissible
+paillier_indcpa_scheme:paillier_dcr_admissible_cipher_constant
 paillier_indcpa_scheme:f_size_paillier_negligible
+paillier_indcpa_scheme:f_adv_paillier_negligible
 paillier_indcpa_scheme:f_bound_paillier_negligible
 paillier_indcpa_scheme:f_pq
 paillier_indcpa_scheme:f_size_paillier
+paillier_indcpa_scheme:f_dcr_paillier
 paillier_indcpa_scheme:f_adv_paillier
 paillier_indcpa_scheme:f_bound_paillier
 
@@ -210,9 +239,14 @@ benaloh_indcpa_scheme:benaloh_indcpa_scheme
 # record projected at one of the three settings, with the field's statement
 # written out at that instance's modulus and scheme; the blueprint cites the
 # axis theorem the field applies, and the three settings at
-# def:paillier_setting, def:benaloh_setting and def:idealized_setting. The
-# three trace-negligibility corollaries and the five setting and results
+# def:paillier_setting, def:benaloh_setting and def:idealized_setting. The two
+# lemmas naming the derived assumption record are listed below; the two epsilon
+# conversions beside them carry the same identification in the currency a
+# reader prices a bound in, and those are cited. The three trace-negligibility
+# corollaries, the two epsilon conversions, the four Paillier and Benaloh
+# bounds restated in residuosity currency, and the five setting and results
 # values have nodes of their own and are absent here.
+dsdp_main:benaloh_assumption_at_residuosityE
 dsdp_main:benaloh_bob_privacy_V1
 dsdp_main:benaloh_bob_privacy_V3
 dsdp_main:benaloh_centropy_V2_Sout_logm
@@ -230,8 +264,6 @@ dsdp_main:benaloh_decrypt_guess_V2_premise_free_lt
 dsdp_main:benaloh_decrypt_reduction_admissibleF
 dsdp_main:benaloh_predictor_unpredictability_ge
 dsdp_main:benaloh_sim_advantage_le
-dsdp_main:benaloh_trace_guess_V2_admissible_le
-dsdp_main:benaloh_trace_guess_V2_admissible_pq_le
 dsdp_main:benaloh_trace_guess_V2_le
 dsdp_main:benaloh_trace_sim_advantage_le
 dsdp_main:benaloh_trace_unpredictability_ge
@@ -263,6 +295,7 @@ dsdp_main:idealized_trace_unpredictability_ge
 dsdp_main:idealized_tuple_guess_V2_le
 dsdp_main:idealized_unpredictability_ge
 dsdp_main:idealized_view_guess_V2_le
+dsdp_main:paillier_assumption_at_dcrE
 dsdp_main:paillier_bob_privacy_V1
 dsdp_main:paillier_bob_privacy_V3
 dsdp_main:paillier_centropy_V2_Sout_logm
@@ -280,8 +313,6 @@ dsdp_main:paillier_decrypt_guess_V2_premise_free_lt
 dsdp_main:paillier_decrypt_reduction_admissibleF
 dsdp_main:paillier_predictor_unpredictability_ge
 dsdp_main:paillier_sim_advantage_le
-dsdp_main:paillier_trace_guess_V2_admissible_le
-dsdp_main:paillier_trace_guess_V2_admissible_pq_le
 dsdp_main:paillier_trace_guess_V2_le
 dsdp_main:paillier_trace_sim_advantage_le
 dsdp_main:paillier_trace_unpredictability_ge
