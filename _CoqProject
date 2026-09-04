@@ -141,6 +141,8 @@ dumas2017dual/dsdp/core/dsdp_pismc.v
 dumas2017dual/dsdp/core/dsdp_correctness.v
 dumas2017dual/dsdp/counting/dsdp_entropy_trace.v
 dumas2017dual/dsdp/counting/dsdp_entropy.v
+# computational_security
+computational_security/hop_chain.v
 dumas2017dual/dsdp/hopping/indcpa_game.v
 dumas2017dual/dsdp/hopping/paillier_indcpa_scheme.v
 dumas2017dual/dsdp/hopping/benaloh_indcpa_scheme.v
