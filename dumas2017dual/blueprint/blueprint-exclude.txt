@@ -31,14 +31,6 @@ benaloh_indcpa_scheme:f_r
 benaloh_indcpa_scheme:f_size_benaloh
 benaloh_indcpa_scheme:f_residuosity_benaloh
 benaloh_indcpa_scheme:f_adv_benaloh
-# dsdp_instance_sequence: the two per-k scheme instance records and the three
-# sequence records built over them, from the scheme files' coin plumbing; the
-# blueprint cites the bounds read off along those sequences.
-dsdp_instance_sequence:benaloh_instance
-dsdp_instance_sequence:benaloh_instance_sequence
-dsdp_instance_sequence:idealized_instance_sequence
-dsdp_instance_sequence:paillier_instance
-dsdp_instance_sequence:paillier_instance_sequence
 # dsdp_alice_hop_secrecy: the uniformity, product-law and slot-resampling
 # plumbing under the hop ladder, the constant-weight random variables, and the
 # per-k challenge equalities the two hop_advantageE nodes fold together.
@@ -119,35 +111,6 @@ dsdp_entropy:dsdp_fiber_n
 dsdp_entropy:dsdp_fiber_ring
 dsdp_entropy:dsdp_g
 dsdp_entropy:dsdp_var_entropy
-# dsdp_instance_sequence: the per-k applications of the concrete constants, the
-# growth and zero facts under the negligibility fields, the idealized-scheme
-# witness, and the four lemmas putting the constant predictor's two trace
-# reduction adversaries in the derived class at the zero-advantage residuosity
-# record; the blueprint cites the sequence headline and its companion, into
-# which this plumbing is folded.
-dsdp_instance_sequence:alice_trace_guess_V2_idealized_negligible
-dsdp_instance_sequence:alice_trace_guess_V2_pr_at
-dsdp_instance_sequence:benaloh_bob_decide_constant_admissible
-dsdp_instance_sequence:benaloh_charlie_decide_constant_admissible
-dsdp_instance_sequence:bob_trace_adversary_at
-dsdp_instance_sequence:card_renc_ord1
-dsdp_instance_sequence:charlie_trace_adversary_at
-dsdp_instance_sequence:expnn_gt_monomial
-dsdp_instance_sequence:idealized_bob_cipher_constant
-dsdp_instance_sequence:idealized_charlie_cipher_constant
-dsdp_instance_sequence:idealized_indcpa_scheme
-dsdp_instance_sequence:idealized_instance
-dsdp_instance_sequence:negligible_fun_inv_expnn
-dsdp_instance_sequence:negligible_fun_inv_ge_expnn
-dsdp_instance_sequence:paillier_bob_decide_constant_admissible
-dsdp_instance_sequence:paillier_charlie_decide_constant_admissible
-# dsdp_instance_sequence: the thin projections of the scheme field, which the
-# def:dsdp_instance node describes as the record's scheme component.
-dsdp_instance_sequence:inst_AHE
-dsdp_instance_sequence:inst_card_renc
-dsdp_instance_sequence:inst_pkey_of_party
-dsdp_instance_sequence:inst_rand_of_renc
-dsdp_instance_sequence:inst_renc
 # entropy_fiber_zpq: the Z_pq-specialized fiber lemmas; the blueprint cites the
 # generic gen_cPr_uniform_fiber.
 entropy_fiber_zpq:Pr_cond_fiber_marginE
@@ -332,85 +295,3 @@ dsdp_main:paillier_trace_unpredictability_ge
 dsdp_main:paillier_tuple_guess_V2_le
 dsdp_main:paillier_unpredictability_ge
 dsdp_main:paillier_view_guess_V2_le
-
-# dsdp_setting: the derived data and laws of one setting at one security
-# parameter, and the pieces the idealized value is assembled from. The
-# blueprint cites the record at def:dsdp_setting and its inhabitant at
-# def:idealized_setting; the four derived Definitions restate data the record
-# node already lists, the eleven laws are its independence and uniformity
-# fields pushed through the deterministic maps a party view is built by, and
-# every idealized_ declaration is a component of the one value the inhabitant
-# node describes. prime_minus2K is a general fact about primes. This module is
-# outside the make_blueprint.sh MODULES scope, so these lines take effect only
-# once it is added there, as the dsdp_instance_sequence lines above did.
-dsdp_setting:CondRV
-dsdp_setting:Dk_c_V3_indep_V2_E_charlie_d3
-dsdp_setting:InputRV
-dsdp_setting:R2_indep_VU2_V2
-dsdp_setting:R2_indep_VU2_VU3R_V2
-dsdp_setting:R3_indep_VU3_V3
-dsdp_setting:V2_indep_V3
-dsdp_setting:VarRV
-dsdp_setting:VarRV_indep_inputs
-dsdp_setting:VarRV_uniform
-dsdp_setting:bob_data_indep_charlie
-dsdp_setting:bob_inputs_indep_V1
-dsdp_setting:charlie_inputs_indep_V1
-dsdp_setting:dsdp_constraint_holds
-dsdp_setting:idealized_Dk_a
-dsdp_setting:idealized_Dk_a_indep
-dsdp_setting:idealized_Dk_b
-dsdp_setting:idealized_Dk_b_indep
-dsdp_setting:idealized_Dk_c
-dsdp_setting:idealized_Dk_c_indep
-dsdp_setting:idealized_R2
-dsdp_setting:idealized_R2_indep
-dsdp_setting:idealized_R3
-dsdp_setting:idealized_R3_indep
-dsdp_setting:idealized_U1
-dsdp_setting:idealized_U1_indep
-dsdp_setting:idealized_U2
-dsdp_setting:idealized_U2_indep
-dsdp_setting:idealized_U3
-dsdp_setting:idealized_U3_indep
-dsdp_setting:idealized_V1
-dsdp_setting:idealized_V1_indep
-dsdp_setting:idealized_V2
-dsdp_setting:idealized_V2_indep
-dsdp_setting:idealized_V3
-dsdp_setting:idealized_V3_indep
-dsdp_setting:idealized_card_msg
-dsdp_setting:idealized_card_plain
-dsdp_setting:idealized_card_rest
-dsdp_setting:idealized_card_sample
-dsdp_setting:idealized_coord
-dsdp_setting:idealized_coprime_pq
-dsdp_setting:idealized_p
-dsdp_setting:idealized_pE
-dsdp_setting:idealized_pR2_unif
-dsdp_setting:idealized_pR3_unif
-dsdp_setting:idealized_pV1_unif
-dsdp_setting:idealized_pV2_unif
-dsdp_setting:idealized_pV3_unif
-dsdp_setting:idealized_p_gt
-dsdp_setting:idealized_p_minus_2
-dsdp_setting:idealized_p_prime
-dsdp_setting:idealized_pq_instance
-dsdp_setting:idealized_pq_sequence
-dsdp_setting:idealized_prime_p
-dsdp_setting:idealized_prime_q
-dsdp_setting:idealized_q
-dsdp_setting:idealized_qE
-dsdp_setting:idealized_q_gt
-dsdp_setting:idealized_q_minus_2
-dsdp_setting:idealized_q_prime
-dsdp_setting:idealized_rest
-dsdp_setting:idealized_rest_view
-dsdp_setting:idealized_sampleT
-dsdp_setting:idealized_sample_fdist
-dsdp_setting:idealized_sample_fdistE
-dsdp_setting:idealized_size_negligible
-dsdp_setting:idealized_split
-dsdp_setting:idealized_view
-dsdp_setting:output
-dsdp_setting:prime_minus2K

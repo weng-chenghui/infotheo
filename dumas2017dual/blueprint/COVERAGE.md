@@ -5,10 +5,26 @@ declaration in scope, and that no `\rocq{}` ref dangles.
 
 ## Scope
 
-The `.v` files listed in `make_blueprint.sh`'s `MODULES` array — the exact set
-the blueprint claims to document: the two `dsdp/hopping/` files of the
-computational leg, `dsdp/counting/dsdp_entropy.v`, `dsdp/dsdp_main.v`, and two
-files outside `dsdp/`, `entropy_fiber_zpq.v` and `extra_proba.v`.
+The `.v` files listed in `make_blueprint.sh`'s `MODULES` array, the exact set
+the blueprint claims to document. At this commit that is twelve files, in the
+order MODULES lists them:
+
+- `dumas2017dual/dsdp/counting/dsdp_entropy.v`
+- `dumas2017dual/entropy_fiber/entropy_fiber_zpq.v`
+- `dumas2017dual/lib/extra_proba.v`
+- `dumas2017dual/dsdp/dsdp_main.v`
+- `computational_security/negligible.v`
+- `computational_security/indcpa_game.v`
+- `computational_security/epshop.v`
+- `computational_security/epshop_family.v`
+- `dumas2017dual/dsdp/hopping/dsdp_alice_hop_secrecy.v`
+- `dumas2017dual/dsdp/hopping/dsdp_alice_trace_link.v`
+- `computational_security/paillier_indcpa_scheme.v`
+- `computational_security/benaloh_indcpa_scheme.v`
+
+`dumas2017dual/dsdp/dsdp_setting.v`, `dumas2017dual/dsdp/dsdp_security.v` and
+`dumas2017dual/dsdp/hopping/dsdp_instance_sequence.v` are not in MODULES, so
+the checker never scans them and reports nothing about their declarations.
 
 ## What it checks (hard-fail on either)
 
@@ -29,11 +45,25 @@ make dsdp-blueprint-coverage      # or: python3 dumas2017dual/blueprint/check_co
 
 ## Baseline ratchet
 
-`blueprint-exclude.txt` is seeded with the declarations that have no node today,
-so the checker passes immediately. Its standing value is anti-drift: a new
+`blueprint-exclude.txt` names the declarations in a scoped module that are
+deliberately left without a node. Its standing value is anti-drift. A new
 declaration must get a `\rocq{}` node or be added to the exclude-list, and a
 rename is caught the moment its `\rocq{}` target goes dangling. Shrink the
-exclude-list as blueprint prose grows (delete an entry once it gets a real node).
+exclude-list as blueprint prose grows. Delete an entry once it gets a real
+node.
+
+At this commit the checker exits 1. It reports 68 UNCOVERED declarations
+across the scoped modules and 0 DANGLING refs. The UNCOVERED list is known
+debt, not a regression to fix before the next commit.
+
+`dsdp_instance_sequence.v` holds one declaration per scheme for the same
+theorem, the per-instance trace-guessing bound. The Paillier one,
+`alice_trace_guess_V2_paillier_le`, has a node in security.tex around line
+945. Its Benaloh twin, `alice_trace_guess_V2_benaloh_le`, has none. Neither
+fact shows up in the checker's output, because `dsdp_instance_sequence.v` is
+not in MODULES: the checker never scans the file, so it neither counts the
+existing node as coverage nor flags the missing one as UNCOVERED. A node for
+the Benaloh twin becomes due once `dsdp_instance_sequence.v` enters MODULES.
 
 ## Pre-commit hook (optional, opt-in)
 
