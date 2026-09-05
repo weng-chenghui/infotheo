@@ -211,7 +211,7 @@ Definition enc_fdist (pk : pub_key AHE) (v : plain AHE) :
    is enough here because every bound below is stated for one fixed
    distinguisher, so an epsilon in this development is a per-distinguisher
    advantage rather than a supremum. *)
-Definition distinguisher (joint : finType) : Type := joint -> bool.
+Definition distinguisher (T : finType) : Type := T -> bool.
 
 (* A guessing strategy on an observation: a map from the observed value to a
    claimed plaintext.  The counterpart of [distinguisher] for guessing games:

@@ -188,12 +188,14 @@ Definition indcpa_epsilon_at (pk : pub_key AHE) (adv : indcpa_adversary AHE)
 
 (* The two reduction adversaries a distinguisher of Alice's hopping tuple
    induces, one at Bob's key and one at Charlie's. *)
-Definition bob_challenge_adversary_at (D : distinguisher (hop_jointT_at X k))
+Definition bob_challenge_adversary_at
+    (D : distinguisher (plain AHE * plain AHE * hop_tupleT_at X k)%type)
     : indcpa_adversary AHE :=
   bob_challenge_adversary (R:=R) (AHE:=AHE) card_renc rand_of_renc
     pkey_of_party v1 u1 u2 u3 D.
 Definition charlie_challenge_adversary_at
-    (D : distinguisher (hop_jointT_at X k)) : indcpa_adversary AHE :=
+    (D : distinguisher (plain AHE * plain AHE * hop_tupleT_at X k)%type)
+    : indcpa_adversary AHE :=
   charlie_challenge_adversary (R:=R) (AHE:=AHE) card_renc rand_of_renc
     pkey_of_party v1 u1 u2 u3 D.
 
@@ -373,10 +375,12 @@ Record dsdp_security (X : dsdp_setting R) := {
      with Alice's tuple from the simulator's law by more than the two hop
      advantages: simulation security of the tuple, per distinguisher, and
      conditional on nothing beyond the two epsilons it names. *)
-  sim_advantage_le : forall k (D : distinguisher (hop_jointT_at X k)),
+  sim_advantage_le : forall k
+      (D : distinguisher (plain (AHE_at X k) * plain (AHE_at X k)
+                          * hop_tupleT_at X k)%type),
     `| Pr (`p_ [% hop_V2_at X k, hop_V3_at X k, AliceRealTuple_at X k])
           [set x | D x]
-       - Pr (alice_ideal_joint_at X k) [set x | D x] |
+       - Pr (alice_ideal_at X k) [set x | D x] |
     <= indcpa_epsilon_at X k (bob_pkey_at X k)
          (bob_challenge_adversary_at X k D)
        + indcpa_epsilon_at X k (charlie_pkey_at X k)
@@ -436,10 +440,11 @@ Record dsdp_security (X : dsdp_setting R) := {
   (* Simulation security of the executed trace, per distinguisher, at the
      same two advantages. *)
   trace_sim_advantage_le : forall k
-      (D : distinguisher (trace_jointT_at X k)),
+      (D : distinguisher (plain (AHE_at X k) * plain (AHE_at X k)
+                          * traceT_at X k)%type),
     `| Pr (`p_ [% hop_V2_at X k, hop_V3_at X k, AliceTrace_at X k])
           [set x | D x]
-       - Pr (alice_trace_ideal_joint_at X k) [set x | D x] |
+       - Pr (alice_trace_ideal_at X k) [set x | D x] |
     <= indcpa_epsilon_at X k (bob_pkey_at X k)
          (bob_trace_adversary_at (R:=R) (Q:=instance_sequence X) D)
        + indcpa_epsilon_at X k (charlie_pkey_at X k)
@@ -673,10 +678,11 @@ exact: (alice_predictor_unpredictability_ge (u3_unit k) hpos).
 Qed.
 
 Let sim_advantage_le_holds : forall k
-    (D : distinguisher (hop_jointT_at X k)),
+    (D : distinguisher (plain (AHE_at X k) * plain (AHE_at X k)
+                        * hop_tupleT_at X k)%type),
   `| Pr (`p_ [% hop_V2_at X k, hop_V3_at X k, AliceRealTuple_at X k])
         [set x | D x]
-     - Pr (alice_ideal_joint_at X k) [set x | D x] |
+     - Pr (alice_ideal_at X k) [set x | D x] |
   <= indcpa_epsilon_at X k (bob_pkey_at X k)
        (bob_challenge_adversary_at X k D)
      + indcpa_epsilon_at X k (charlie_pkey_at X k)
@@ -753,10 +759,11 @@ exact: (alice_trace_unpredictability_ge (u3_unit k) hpos).
 Qed.
 
 Let trace_sim_advantage_le_holds : forall k
-    (D : distinguisher (trace_jointT_at X k)),
+    (D : distinguisher (plain (AHE_at X k) * plain (AHE_at X k)
+                        * traceT_at X k)%type),
   `| Pr (`p_ [% hop_V2_at X k, hop_V3_at X k, AliceTrace_at X k])
         [set x | D x]
-     - Pr (alice_trace_ideal_joint_at X k) [set x | D x] |
+     - Pr (alice_trace_ideal_at X k) [set x | D x] |
   <= indcpa_epsilon_at X k (bob_pkey_at X k)
        (bob_trace_adversary_at (R:=R) (Q:=instance_sequence X) D)
      + indcpa_epsilon_at X k (charlie_pkey_at X k)

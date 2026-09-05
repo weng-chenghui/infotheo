@@ -114,17 +114,16 @@ Require Import dsdp_instance_sequence.
 (* Dk_c_V3_indep_V2_E_charlie_d3 == Charlie's key and input are independent   *)
 (*                              of Bob's input with the aggregate ciphertext  *)
 (*           AHE_at, Renc_at == the k-th scheme and its coin index type       *)
-(* hop_tupleT_at, hop_jointT_at, viewT_at, traceT_at, trace_jointT_at == the  *)
-(*                              five carriers the hopping bounds quantify     *)
-(*                              predictors over                               *)
+(* hop_tupleT_at, viewT_at, traceT_at == the three carriers the hopping      *)
+(*                              bounds quantify predictors over               *)
 (* hop_fdist_at, hop_V2_at, hop_V3_at == the corrupted-Alice sample space and *)
 (*                              its two honest relay inputs                   *)
 (* AliceRealTuple_at, AliceAllZeroTuple_at, AliceView_at, AliceTrace_at ==    *)
 (*                              the conditioners of the hopping ladder        *)
 (*                   Sout_at == the output the hopping side leaks             *)
 (*  bob_pkey_at, charlie_pkey_at == the two public keys the ladder prices at  *)
-(* alice_ideal_joint_at, alice_trace_ideal_joint_at == the simulator's law at *)
-(*                              the tuple and at the executed trace           *)
+(* alice_ideal_at, alice_trace_ideal_at == the simulator's law at the tuple  *)
+(*                              and at the executed trace                     *)
 (* indcpa_assumptionT_at, assumption_at == the IND-CPA assumption type at k   *)
 (*                              and the assumption the sequence makes there   *)
 (* BobView_at, CharlieView_at, AliceDotpView_at == the three counting views   *)
@@ -674,13 +673,11 @@ Local Notation rc2 := (inst_rc2 Inst).
 Definition AHE_at : AHEncType := AHE.
 Definition Renc_at : finType := Renc.
 
-(* The five carriers the hopping bounds quantify predictors over, at the k-th
+(* The three carriers the hopping bounds quantify predictors over, at the k-th
    instance. *)
 Definition hop_tupleT_at : finType := alice_hop_tupleT AHE Renc.
-Definition hop_jointT_at : finType := alice_hop_jointT AHE Renc.
 Definition viewT_at : finType := alice_viewT AHE Renc.
 Definition traceT_at : finType := alice_traceT AHE.
-Definition trace_jointT_at : finType := trace_jointT AHE.
 
 (* The corrupted-Alice sample space at the k-th instance, and the two honest
    relay inputs on it. *)
@@ -717,13 +714,15 @@ Definition charlie_pkey_at : pub_key AHE := charlie_pkey pkey_of_party.
 
 (* The simulator's law at the k-th instance, at the hopping tuple and at the
    executed trace. *)
-Definition alice_ideal_joint_at : R.-fdist hop_jointT_at :=
-  alice_ideal_joint (R:=R) (AHE:=AHE) card_renc rand_of_renc pkey_of_party
+Definition alice_ideal_at :
+    R.-fdist (plain AHE * plain AHE * hop_tupleT_at) :=
+  alice_ideal (R:=R) (AHE:=AHE) card_renc rand_of_renc pkey_of_party
     v1 u1 u2 u3.
-(* Naming: the [trace] variant of alice_ideal_joint_at, the same simulator
-   law read at the executed trace rather than at the hopping tuple. *)
-Definition alice_trace_ideal_joint_at : R.-fdist trace_jointT_at :=
-  alice_trace_ideal_joint (R:=R) card_renc rand_of_renc
+(* Naming: the [trace] variant of alice_ideal_at, the same simulator law read
+   at the executed trace rather than at the hopping tuple. *)
+Definition alice_trace_ideal_at :
+    R.-fdist (plain AHE * plain AHE * traceT_at) :=
+  alice_trace_ideal (R:=R) card_renc rand_of_renc
     v1 u1 u2 u3 dk_a dk_b dk_c rc2.
 
 (* The IND-CPA assumption type at the k-th instance, and the assumption the

@@ -261,9 +261,6 @@ finite commutative unit ring.
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_tuple_real,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_tuple_bob_zero,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_tuple_all_zero,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_joint_real,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_joint_bob_zero,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_joint_all_zero,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_accept,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_acceptE}
   \rocqok
@@ -392,7 +389,7 @@ $V_3$.
 \begin{definition}[The distinguisher of a predictor]
   \label{def:distinguisher_of_predictor}
   \rocq{infotheo.computational_security.indcpa_game.distinguisher_of_predictor,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.guess_V2_jointE}
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.guess_V2_acceptE}
   \rocqok
   \uses{def:alice_hop_ladder}
   The distinguisher $D_g$ of a predictor $g$ accepts when $g$, applied to the
@@ -476,7 +473,7 @@ functionality on the other, rather than quantified over all input vectors.
 \begin{definition}[The simulator and the ideal-world law]
   \label{def:alice_simulator}
   \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_simulator,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_ideal_joint}
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_ideal}
   \rocqok
   \uses{def:alice_hop_ladder}
   From a value $s$ of the output, the simulator draws uniform masks, uniform
@@ -496,7 +493,7 @@ functionality on the other, rather than quantified over all input vectors.
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_hop_tuple_all_zero_pfwd1E,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.dsdp_alice_hop_tuple_cond_sim,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.dsdp_alice_hop_tuple_cond_sim_S,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_ideal_jointE}
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_idealE}
   \rocqok
   \uses{def:alice_simulator}
   Conditioned on any honest input pair of positive probability, Alice's all-zero
@@ -585,7 +582,7 @@ carries the three bounds above to the executed protocol.
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_trace_unpredictability,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_trace_unpredictability_ge,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_trace_simulator,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_trace_ideal_joint,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_trace_ideal,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_trace_sim_advantage_le}
   \rocqok
   \uses{def:dsdp_setting,lem:trace_of_hop_tuple,thm:alice_guess_real,thm:alice_unpredictability,thm:alice_simulation_secure}

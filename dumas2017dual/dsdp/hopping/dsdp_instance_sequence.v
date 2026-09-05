@@ -295,7 +295,8 @@ Arguments predict : clear implicits.
    at the record fields of I k.  Sequence plumbing; the mathematics is in the
    constant it applies. *)
 Definition bob_trace_adversary_at k
-    (D : distinguisher (trace_jointT (inst_AHE (I k)))) :=
+    (D : distinguisher (plain (inst_AHE (I k)) * plain (inst_AHE (I k))
+                        * alice_traceT (inst_AHE (I k)))%type) :=
   bob_trace_adversary (R:=R) (inst_card_renc (I k))
     (@inst_rand_of_renc (I k))
     (inst_v1 (I k)) (inst_u1 (I k)) (inst_u2 (I k)) (inst_u3 (I k))
@@ -304,7 +305,8 @@ Definition bob_trace_adversary_at k
 
 (* The Charlie-key counterpart of bob_trace_adversary_at. *)
 Definition charlie_trace_adversary_at k
-    (D : distinguisher (trace_jointT (inst_AHE (I k)))) :=
+    (D : distinguisher (plain (inst_AHE (I k)) * plain (inst_AHE (I k))
+                        * alice_traceT (inst_AHE (I k)))%type) :=
   charlie_trace_adversary (R:=R) (inst_card_renc (I k))
     (@inst_rand_of_renc (I k))
     (inst_v1 (I k)) (inst_u1 (I k)) (inst_u2 (I k)) (inst_u3 (I k))

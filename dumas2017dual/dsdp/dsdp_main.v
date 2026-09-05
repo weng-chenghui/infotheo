@@ -365,10 +365,12 @@ Qed.
 (* Her tuple against the simulator's law, per distinguisher, at the two hop
    advantages. *)
 Corollary paillier_sim_advantage_le k
-    (D : distinguisher (hop_jointT_at paillier_setting k)) :
+    (D : distinguisher (plain (AHE_at paillier_setting k)
+                        * plain (AHE_at paillier_setting k)
+                        * hop_tupleT_at paillier_setting k)%type) :
   `| Pr (`p_ [% hop_V2_at paillier_setting k, hop_V3_at paillier_setting k,
                 AliceRealTuple_at paillier_setting k]) [set x | D x]
-     - Pr (alice_ideal_joint_at paillier_setting k) [set x | D x] |
+     - Pr (alice_ideal_at paillier_setting k) [set x | D x] |
   <= indcpa_epsilon_at paillier_setting k (bob_pkey_at paillier_setting k)
        (bob_challenge_adversary_at paillier_setting k D)
      + indcpa_epsilon_at paillier_setting k
@@ -443,10 +445,12 @@ Qed.
    Naming: extends [sim_advantage_le] of the hopping tuple with the [trace]
    token naming the observation the distinguisher reads. *)
 Corollary paillier_trace_sim_advantage_le k
-    (D : distinguisher (trace_jointT_at paillier_setting k)) :
+    (D : distinguisher (plain (AHE_at paillier_setting k)
+                        * plain (AHE_at paillier_setting k)
+                        * traceT_at paillier_setting k)%type) :
   `| Pr (`p_ [% hop_V2_at paillier_setting k, hop_V3_at paillier_setting k,
                 AliceTrace_at paillier_setting k]) [set x | D x]
-     - Pr (alice_trace_ideal_joint_at paillier_setting k) [set x | D x] |
+     - Pr (alice_trace_ideal_at paillier_setting k) [set x | D x] |
   <= indcpa_epsilon_at paillier_setting k (bob_pkey_at paillier_setting k)
        (bob_trace_adversary_at (R:=R) (Q:=PQ) D)
      + indcpa_epsilon_at paillier_setting k
@@ -787,10 +791,12 @@ Qed.
 (* Her tuple against the simulator's law, per distinguisher, at the two hop
    advantages. *)
 Corollary benaloh_sim_advantage_le k
-    (D : distinguisher (hop_jointT_at benaloh_setting k)) :
+    (D : distinguisher (plain (AHE_at benaloh_setting k)
+                        * plain (AHE_at benaloh_setting k)
+                        * hop_tupleT_at benaloh_setting k)%type) :
   `| Pr (`p_ [% hop_V2_at benaloh_setting k, hop_V3_at benaloh_setting k,
                 AliceRealTuple_at benaloh_setting k]) [set x | D x]
-     - Pr (alice_ideal_joint_at benaloh_setting k) [set x | D x] |
+     - Pr (alice_ideal_at benaloh_setting k) [set x | D x] |
   <= indcpa_epsilon_at benaloh_setting k (bob_pkey_at benaloh_setting k)
        (bob_challenge_adversary_at benaloh_setting k D)
      + indcpa_epsilon_at benaloh_setting k
@@ -865,10 +871,12 @@ Qed.
    Naming: extends [sim_advantage_le] of the hopping tuple with the [trace]
    token naming the observation the distinguisher reads. *)
 Corollary benaloh_trace_sim_advantage_le k
-    (D : distinguisher (trace_jointT_at benaloh_setting k)) :
+    (D : distinguisher (plain (AHE_at benaloh_setting k)
+                        * plain (AHE_at benaloh_setting k)
+                        * traceT_at benaloh_setting k)%type) :
   `| Pr (`p_ [% hop_V2_at benaloh_setting k, hop_V3_at benaloh_setting k,
                 AliceTrace_at benaloh_setting k]) [set x | D x]
-     - Pr (alice_trace_ideal_joint_at benaloh_setting k) [set x | D x] |
+     - Pr (alice_trace_ideal_at benaloh_setting k) [set x | D x] |
   <= indcpa_epsilon_at benaloh_setting k (bob_pkey_at benaloh_setting k)
        (bob_trace_adversary_at (R:=R) (Q:=BQ) D)
      + indcpa_epsilon_at benaloh_setting k
@@ -1119,10 +1127,11 @@ Qed.
 (* Her tuple against the simulator's law, per distinguisher, at the two hop
    advantages. *)
 Corollary idealized_sim_advantage_le k
-    (D : distinguisher (hop_jointT_at IS k)) :
+    (D : distinguisher (plain (AHE_at IS k) * plain (AHE_at IS k)
+                        * hop_tupleT_at IS k)%type) :
   `| Pr (`p_ [% hop_V2_at IS k, hop_V3_at IS k,
                 AliceRealTuple_at IS k]) [set x | D x]
-     - Pr (alice_ideal_joint_at IS k) [set x | D x] |
+     - Pr (alice_ideal_at IS k) [set x | D x] |
   <= indcpa_epsilon_at IS k (bob_pkey_at IS k)
        (bob_challenge_adversary_at IS k D)
      + indcpa_epsilon_at IS k
@@ -1197,10 +1206,11 @@ Qed.
    Naming: extends [sim_advantage_le] of the hopping tuple with the [trace]
    token naming the observation the distinguisher reads. *)
 Corollary idealized_trace_sim_advantage_le k
-    (D : distinguisher (trace_jointT_at IS k)) :
+    (D : distinguisher (plain (AHE_at IS k) * plain (AHE_at IS k)
+                        * traceT_at IS k)%type) :
   `| Pr (`p_ [% hop_V2_at IS k, hop_V3_at IS k,
                 AliceTrace_at IS k]) [set x | D x]
-     - Pr (alice_trace_ideal_joint_at IS k) [set x | D x] |
+     - Pr (alice_trace_ideal_at IS k) [set x | D x] |
   <= indcpa_epsilon_at IS k (bob_pkey_at IS k)
        (bob_trace_adversary_at (R:=R) (Q:=idealized_pq_sequence) D)
      + indcpa_epsilon_at IS k

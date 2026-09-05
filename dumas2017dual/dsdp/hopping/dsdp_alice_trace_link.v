@@ -59,8 +59,6 @@ Require Import dsdp_alice_hop_secrecy.
 (*              alice_traceT == Alice's executed-trace carrier, the           *)
 (*                              fifteen-round bounded sequence of encoded     *)
 (*                              trace data                                    *)
-(*              trace_jointT == the carrier a trace test reads: the two       *)
-(*                              honest inputs beside Alice's executed trace   *)
 (*  alice_trace_of_hop_tuple == constructs Alice's trace from the hopping     *)
 (*                              tuple used in the secrecy proof               *)
 (*      dsdp_procs_of_sample == runs the three programs with the values from  *)
@@ -102,7 +100,7 @@ Require Import dsdp_alice_hop_secrecy.
 (*                              bound on that unpredictability                *)
 (*   alice_trace_simulator s == produces an ideal trace using only the leaked *)
 (*                              output                                        *)
-(*   alice_trace_ideal_joint == pairs the honest inputs with the ideal trace  *)
+(*         alice_trace_ideal == pairs the honest inputs with the ideal trace  *)
 (*                              generated from their leaked output            *)
 (* alice_trace_sim_advantage_le ==                                            *)
 (*                              bounds every Boolean test between the real    *)
@@ -194,11 +192,9 @@ Require Import dsdp_alice_hop_secrecy.
 (*                                                                            *)
 (* Averaging the re-encryption coin                                           *)
 (*                                                                            *)
-(* alice_trace_real_joint_avg ==                                              *)
-(*                              the real trace law after sampling the         *)
+(*     alice_trace_real_avg == the real trace law after sampling the          *)
 (*                              re-encryption coin                            *)
-(* alice_trace_ideal_joint_avg ==                                             *)
-(*                              the ideal trace law after sampling the        *)
+(*    alice_trace_ideal_avg == the ideal trace law after sampling the         *)
 (*                              re-encryption coin                            *)
 (* alice_trace_sim_advantage_avg_le ==                                        *)
 (*                              bounds the averaged real-to-ideal gap by the  *)
@@ -320,11 +316,6 @@ Definition trace_data_of_di_data (x : di_data DI) : trace_dataT :=
 (* Alice's executed-trace carrier: the fifteen-round bounded sequence of
    encoded trace data. *)
 Definition alice_traceT : finType := (15.-bseq trace_dataT)%type.
-
-(* The carrier a trace test reads: the two honest inputs beside Alice's
-   executed trace. *)
-Definition trace_jointT : finType :=
-  (plain AHE * plain AHE * alice_traceT)%type.
 
 (* The decryption the three programs perform on receive. *)
 Let decode : di_priv_keyT DI -> di_cipherT DI -> option (di_msgT DI) :=
@@ -489,13 +480,12 @@ Local Notation charlie_challenge_adversary :=
   (charlie_challenge_adversary (R:=R) (AHE:=AHE) card_renc rand_of_renc
      pkey_of_dk v1 u1 u2 u3).
 Local Notation alice_traceT := (alice_traceT AHE).
-Local Notation trace_jointT := (trace_jointT AHE).
 Local Notation predictor := (predictor AHE).
 Local Notation alice_simulator :=
   (alice_simulator (R:=R) (AHE:=AHE) card_renc rand_of_renc
      pkey_of_dk).
-Local Notation alice_ideal_joint :=
-  (alice_ideal_joint (R:=R) (AHE:=AHE) card_renc rand_of_renc
+Local Notation alice_ideal :=
+  (alice_ideal (R:=R) (AHE:=AHE) card_renc rand_of_renc
      pkey_of_dk v1 u1 u2 u3).
 
 (* Alice's executed trace read off a value of her hopping tuple: the leaked
@@ -563,24 +553,22 @@ rewrite /dsdp_procs_of_sample dsdp_run_tracesE.
 by move=> ?; rewrite /= Sout_runE reenc_plainE.
 Qed.
 
-(* The two honest inputs and Alice's encoded trace obtained from a joint
-   hopping-tuple value.
-   Naming: the [_of_] connective names the source the conversion reads,
-   here the joint carrier [alice_hop_jointT], not the bare tuple. *)
-Let alice_trace_joint_of_hop_joint
-    (x : plain AHE * plain AHE * alice_hop_tupleT AHE Renc) :
-    trace_jointT :=
-  (x.1.1, x.1.2, alice_trace_of_hop_tuple x.2).
-
 (* The IND-CPA adversary against Bob's key induced by a trace test D: it
    embeds the challenge in the ciphertext of Bob's input V2, rebuilds
-   Alice's executed trace around it, and decides with D. *)
-Definition bob_trace_adversary (D : distinguisher trace_jointT) :=
-  bob_challenge_adversary (D \o alice_trace_joint_of_hop_joint).
+   Alice's executed trace around it, and decides with D.  The lift keeps the
+   two honest inputs and replaces the hopping tuple by the trace read off
+   it, so the test D sees at the tuple level exactly what it sees at the
+   trace level. *)
+Definition bob_trace_adversary
+    (D : distinguisher (plain AHE * plain AHE * alice_traceT)%type) :=
+  bob_challenge_adversary
+    (D \o (fun x => (x.1.1, x.1.2, alice_trace_of_hop_tuple x.2))).
 
 (* The Charlie-key counterpart of bob_trace_adversary. *)
-Definition charlie_trace_adversary (D : distinguisher trace_jointT) :=
-  charlie_challenge_adversary (D \o alice_trace_joint_of_hop_joint).
+Definition charlie_trace_adversary
+    (D : distinguisher (plain AHE * plain AHE * alice_traceT)%type) :=
+  charlie_challenge_adversary
+    (D \o (fun x => (x.1.1, x.1.2, alice_trace_of_hop_tuple x.2))).
 
 (* Every predictor reading the trace the interpreter produces for Alice
    matches Bob's input with probability at most one over the plaintext-space
@@ -718,30 +706,31 @@ Definition alice_trace_simulator (s : plain AHE) :
 (* The joint law of the honest inputs and the simulated encoded trace: the
    honest input law bound to the trace simulator fed the leaked output
    computed from the sampled inputs.
-   Naming: after [alice_ideal_joint] of the hopping-tuple level. *)
-Definition alice_trace_ideal_joint :
+   Naming: after [alice_ideal] of the hopping-tuple level. *)
+Definition alice_trace_ideal :
     R.-fdist (plain AHE * plain AHE * 15.-bseq trace_dataT) :=
   `p_ [% V2, V3] >>= (fun vv =>
     fdistmap (fun tr => (vv.1, vv.2, tr))
       (alice_trace_simulator
         (dsdp_output v1 u1 u2 u3 vv.1 vv.2))).
 
-(* The trace-level ideal joint law is the deterministic image of the
-   hopping-tuple ideal joint law. *)
-Let alice_trace_ideal_jointE :
-  alice_trace_ideal_joint
-  = fdistmap alice_trace_joint_of_hop_joint alice_ideal_joint.
+(* The trace-level ideal law is the deterministic image of the hopping-tuple
+   ideal law. *)
+Let alice_trace_idealE :
+  alice_trace_ideal
+  = fdistmap (fun x => (x.1.1, x.1.2, alice_trace_of_hop_tuple x.2))
+      alice_ideal.
 Proof.
-rewrite /alice_trace_ideal_joint /alice_ideal_joint fdistmap_bind.
+rewrite /alice_trace_ideal /alice_ideal fdistmap_bind.
 congr (_ >>= _); apply: boolp.funext => vv.
 by rewrite /alice_trace_simulator 2!fdistmap_comp.
 Qed.
 
 (* The real executed-trace joint law is the deterministic image of the real
    hopping-tuple joint law. *)
-Let alice_trace_real_jointE :
+Let alice_trace_realE :
   `p_ [% V2, V3, AliceTrace]
-  = fdistmap alice_trace_joint_of_hop_joint
+  = fdistmap (fun x => (x.1.1, x.1.2, alice_trace_of_hop_tuple x.2))
       (`p_ [% V2, V3, alice_tuple_real]).
 Proof.
 by rewrite alice_trace_of_hop_tupleE /dist_of_RV fdistmap_comp.
@@ -756,17 +745,17 @@ Qed.
    [alice_trace_guess_V2_le] keep the guessing stem and name
    the observation read before [guess]. *)
 Theorem alice_trace_sim_advantage_le
-    (D : distinguisher trace_jointT) :
+    (D : distinguisher (plain AHE * plain AHE * alice_traceT)%type) :
   `| Pr (`p_ [% V2, V3, AliceTrace]) [set x | D x]
-     - Pr alice_trace_ideal_joint [set x | D x] |
+     - Pr alice_trace_ideal [set x | D x] |
   <= indcpa_epsilon (pkey_of_dk Bob) (bob_trace_adversary D)
      + indcpa_epsilon (pkey_of_dk Charlie) (charlie_trace_adversary D).
 Proof.
-rewrite alice_trace_real_jointE alice_trace_ideal_jointE.
+rewrite alice_trace_realE alice_trace_idealE.
 rewrite -2!(Pr_fdistmap_bool D) 2!(fdistmap_comp D) 2!Pr_fdistmap_bool.
 rewrite /bob_trace_adversary /charlie_trace_adversary.
-exact: (alice_sim_advantage_le card_renc rand_of_renc
-          pkey_of_dk v1 u1 u2 u3 (D \o alice_trace_joint_of_hop_joint)).
+exact: (alice_sim_advantage_le card_renc rand_of_renc pkey_of_dk v1 u1 u2 u3
+          (D \o (fun x => (x.1.1, x.1.2, alice_trace_of_hop_tuple x.2)))).
 Qed.
 
 End dsdp_alice_trace_rv.
@@ -1184,7 +1173,7 @@ pose lifted := bob_decrypt_predictor \o alice_trace_of_hop_tuple.
 have Hlift : `| Pr P [set t | (lifted `o alice_tuple_real) t == V2 t]
               - Pr P [set t | (lifted `o alice_tuple_bob_zero) t == V2 t] |
             = bob_trace_predictor_epsilon bob_decrypt_predictor.
-  by rewrite 2!guess_V2_jointE -2!alice_acceptE hop0_advantageE.
+  by rewrite 2!guess_V2_acceptE -2!alice_acceptE hop0_advantageE.
 have HV2 : lifted `o alice_tuple_real = V2.
   rewrite (alice_trace_decode_V2E card_renc rand_of_renc v1 u1 u2 u3
              dk_a dk_b dk_c w_rb2 w_rc2).
@@ -1274,8 +1263,8 @@ Local Notation AliceTrace :=
 Local Notation alice_trace_simulator :=
   (alice_trace_simulator (R:=R) card_renc rand_of_renc
      v1 u1 u2 u3 dk_a dk_b dk_c w_rc2).
-Local Notation alice_trace_ideal_joint :=
-  (alice_trace_ideal_joint (R:=R) card_renc rand_of_renc
+Local Notation alice_trace_ideal :=
+  (alice_trace_ideal (R:=R) card_renc rand_of_renc
      v1 u1 u2 u3 dk_a dk_b dk_c w_rc2).
 Local Notation alice_trace_of_hop_tuple :=
   (alice_trace_of_hop_tuple rand_of_renc v1 u1 u2 u3 dk_a dk_b dk_c w_rc2).
@@ -1287,7 +1276,7 @@ Local Notation bob_challenge_adversary :=
 Local Notation charlie_challenge_adversary :=
   (charlie_challenge_adversary (R:=R) (AHE:=AHE) card_renc rand_of_renc
      pkey_of_dk v1 u1 u2 u3).
-Local Notation trace_jointT := (trace_jointT AHE).
+Local Notation alice_traceT := (alice_traceT AHE).
 Local Notation bob_trace_adversary :=
   (bob_trace_adversary (R:=R) card_renc rand_of_renc
      v1 u1 u2 u3 dk_a dk_b dk_c w_rc2).
@@ -1297,7 +1286,7 @@ Local Notation charlie_trace_adversary :=
 
 (* The Boolean ideal trace experiment: sample the honest inputs, run the
    trace simulator on their leaked output, and apply the test.
-   Naming: after [alice_trace_ideal_joint], with [experiment] marking the
+   Naming: after [alice_trace_ideal], with [experiment] marking the
    Boolean run a distinguisher plays against that law. *)
 Definition alice_trace_ideal_experiment
     (D : plain AHE * plain AHE * 15.-bseq trace_dataT -> bool) :
@@ -1311,9 +1300,9 @@ Definition alice_trace_ideal_experiment
    Naming: the [E] suffix marks the equation, after [alice_trace_tupleE]. *)
 Lemma alice_trace_ideal_experimentE
     (D : plain AHE * plain AHE * 15.-bseq trace_dataT -> bool) :
-  alice_trace_ideal_experiment D = fdistmap D alice_trace_ideal_joint.
+  alice_trace_ideal_experiment D = fdistmap D alice_trace_ideal.
 Proof.
-rewrite /alice_trace_ideal_experiment /alice_trace_ideal_joint fdistmap_bind.
+rewrite /alice_trace_ideal_experiment /alice_trace_ideal fdistmap_bind.
 by congr (_ >>= _); apply/boolp.funext => vv; rewrite fdistmap_comp.
 Qed.
 
@@ -1322,7 +1311,7 @@ Qed.
    Naming: extends [alice_trace_sim_advantage_le] with the [experiment]
    variant token before [le]. *)
 Corollary alice_trace_sim_advantage_experiment_le
-    (D : distinguisher trace_jointT) :
+    (D : distinguisher (plain AHE * plain AHE * alice_traceT)%type) :
   `| Pr (`p_ [% V2, V3, AliceTrace]) [set x | D x]
      - Pr (alice_trace_ideal_experiment D) [set true] |
   <= indcpa_epsilon (pkey_of_dk Bob) (bob_trace_adversary D)
@@ -1423,8 +1412,8 @@ Local Notation V3 := (sample_V3 (R:=R) (AHE:=AHE) card_renc).
 Local Notation AliceTrace_coin w :=
   (AliceTrace (R:=R) card_renc rand_of_renc v1 u1 u2 u3
      dk_a dk_b dk_c w_rb2 w).
-Local Notation alice_trace_ideal_joint_coin w :=
-  (alice_trace_ideal_joint (R:=R) card_renc rand_of_renc
+Local Notation alice_trace_ideal_coin w :=
+  (alice_trace_ideal (R:=R) card_renc rand_of_renc
      v1 u1 u2 u3 dk_a dk_b dk_c w).
 Local Notation alice_trace_of_hop_tuple_coin w :=
   (alice_trace_of_hop_tuple rand_of_renc v1 u1 u2 u3 dk_a dk_b dk_c w).
@@ -1448,24 +1437,24 @@ Local Notation charlie_trace_adversary_coin w :=
    Naming: after the per-coin joint law of
    [alice_trace_sim_advantage_le], with [avg] marking the
    sampled coin. *)
-Definition alice_trace_real_joint_avg :
+Definition alice_trace_real_avg :
     R.-fdist (plain AHE * plain AHE * 15.-bseq trace_dataT) :=
   fdist_uniform card_renc >>= (fun w => `p_ [% V2, V3, AliceTrace_coin w]).
 
 (* The ideal trace joint law with a uniformly sampled re-encryption coin.
-   Naming: after [alice_trace_ideal_joint], with [avg] as above. *)
-Definition alice_trace_ideal_joint_avg :
+   Naming: after [alice_trace_ideal], with [avg] as above. *)
+Definition alice_trace_ideal_avg :
     R.-fdist (plain AHE * plain AHE * 15.-bseq trace_dataT) :=
-  fdist_uniform card_renc >>= (fun w => alice_trace_ideal_joint_coin w).
+  fdist_uniform card_renc >>= (fun w => alice_trace_ideal_coin w).
 
 (* The averaged real-versus-ideal gap is at most the average of the two
    per-coin hop advantages.
    Naming: extends [alice_trace_sim_advantage_le] with the [avg]
    variant token before [le]. *)
 Theorem alice_trace_sim_advantage_avg_le
-    (D : distinguisher (trace_jointT AHE)) :
-  `| Pr alice_trace_real_joint_avg [set x | D x]
-     - Pr alice_trace_ideal_joint_avg [set x | D x] |
+    (D : distinguisher (plain AHE * plain AHE * alice_traceT AHE)%type) :
+  `| Pr alice_trace_real_avg [set x | D x]
+     - Pr alice_trace_ideal_avg [set x | D x] |
   <= \sum_(w in Renc) (fdist_uniform card_renc : R.-fdist Renc) w
        * (indcpa_epsilon (pkey_of_dk Bob)
             (bob_trace_adversary_coin w D)
@@ -1593,15 +1582,15 @@ Variables (w_rb2 w_rc2 : Renc).
 
 Local Notation DI := (Standard_DSDP_Interface AHE).
 Local Notation trace_dataT := (trace_dataT AHE).
-Local Notation trace_jointT := (trace_jointT AHE).
+Local Notation alice_traceT := (alice_traceT AHE).
 Local Notation pkey_of_dk := (pkey_of_dk dk_a dk_b dk_c).
 Local Notation V2 := (sample_V2 (R:=R) (AHE:=AHE) card_renc).
 Local Notation V3 := (sample_V3 (R:=R) (AHE:=AHE) card_renc).
 Local Notation AliceTrace :=
   (AliceTrace (R:=R) card_renc rand_of_renc v1 u1 u2 u3
      dk_a dk_b dk_c w_rb2 w_rc2).
-Local Notation alice_trace_ideal_joint :=
-  (alice_trace_ideal_joint (R:=R) card_renc rand_of_renc
+Local Notation alice_trace_ideal :=
+  (alice_trace_ideal (R:=R) card_renc rand_of_renc
      v1 u1 u2 u3 dk_a dk_b dk_c w_rc2).
 Local Notation alice_trace_of_hop_tuple :=
   (alice_trace_of_hop_tuple rand_of_renc v1 u1 u2 u3 dk_a dk_b dk_c w_rc2).
@@ -1662,8 +1651,9 @@ Corollary alice_raw_trace_sim_advantage_le
     (D_raw : plain AHE * plain AHE * seq (di_data DI) -> bool) :
   `| Pr (alice_sample_fdist (R:=R) AHE card_renc)
         [set t | D_raw (V2 t, V3 t, alice_raw_trace t)]
-     - Pr alice_trace_ideal_joint
-          [set x : trace_jointT | D_raw (x.1.1, x.1.2, map decode_a x.2)] |
+     - Pr alice_trace_ideal
+          [set x : plain AHE * plain AHE * alice_traceT |
+             D_raw (x.1.1, x.1.2, map decode_a x.2)] |
   <= indcpa_epsilon (pkey_of_dk Bob)
        (bob_challenge_adversary
          (fun x => D_raw (x.1.1, x.1.2,
@@ -1673,7 +1663,8 @@ Corollary alice_raw_trace_sim_advantage_le
          (fun x => D_raw (x.1.1, x.1.2,
             map decode_a (alice_trace_of_hop_tuple x.2)))).
 Proof.
-set D := fun x : trace_jointT => D_raw (x.1.1, x.1.2, map decode_a x.2).
+set D := fun x : plain AHE * plain AHE * alice_traceT =>
+           D_raw (x.1.1, x.1.2, map decode_a x.2).
 have <- : Pr (`p_ [% V2, V3, AliceTrace]) [set x | D x]
         = Pr (alice_sample_fdist (R:=R) AHE card_renc)
              [set t | D_raw (V2 t, V3 t, alice_raw_trace t)].
@@ -1742,8 +1733,8 @@ Local Notation V3 := (sample_V3 (R:=R) (AHE:=AHE) card_renc).
 Local Notation AliceRawTrace_coin w :=
   (alice_raw_trace (R:=R) card_renc rand_of_renc v1 u1 u2 u3
      dk_a dk_b dk_c w_rb2 w).
-Local Notation ideal_joint_avg :=
-  (alice_trace_ideal_joint_avg (R:=R) card_renc rand_of_renc
+Local Notation ideal_avg :=
+  (alice_trace_ideal_avg (R:=R) card_renc rand_of_renc
      v1 u1 u2 u3 dk_a dk_b dk_c).
 Local Notation alice_trace_of_hop_tuple_coin w :=
   (alice_trace_of_hop_tuple rand_of_renc v1 u1 u2 u3 dk_a dk_b dk_c w).
@@ -1788,7 +1779,7 @@ Definition alice_raw_trace_real_experiment_avg
 Definition alice_raw_trace_ideal_experiment_avg
     (D_raw : plain AHE * plain AHE * seq (di_data DI) -> bool) :
     R.-fdist bool :=
-  fdistmap (encoded_distinguisher D_raw) ideal_joint_avg.
+  fdistmap (encoded_distinguisher D_raw) ideal_avg.
 
 (* The averaged gap a Boolean test reading Alice's raw interpreter trace
    sees between the real and the ideal experiment is at most the average of
@@ -1815,7 +1806,7 @@ Proof.
    alice_raw_trace_decodeE. *)
 rewrite /alice_raw_trace_real_experiment_avg
   /alice_raw_trace_ideal_experiment_avg.
-rewrite /alice_trace_ideal_joint_avg fdistmap_bind.
+rewrite /alice_trace_ideal_avg fdistmap_bind.
 apply: fdist_mixture_advantage_le => w; rewrite 2!Pr_fdistmap_bool.
 exact: (alice_raw_trace_sim_advantage_le card_renc rand_of_renc
           v1 u1 u2 u3 dk_a dk_b dk_c w_rb2 w D_raw).
