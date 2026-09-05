@@ -1198,9 +1198,9 @@ Definition alice_chain (predict : predictor alice_hop_tupleT) :
             (* Charlie's slot zeroed, at a second IND-CPA advantage *)
             hop cpa_charlie (eps_charlie D) to (game 2 D)
               by le_of_eq (hop1_advantageE D) ;;
-            (* the all-zero view, whose guessing residue is the solution
-               fiber's inverse plaintext-space cardinality *)
-            bound uniform_plain #|plain AHE|%:R^-1
+            (* the guessing residue of the all-zero view, a term outside the
+               hopping, added to the loss so the total bounds the real view *)
+            plus uniform_plain #|plain AHE|%:R^-1
               by all_zero_game_V2_le_invm predict }.
 
 (* The numeric total of that loss: the plaintext-space residue, then the

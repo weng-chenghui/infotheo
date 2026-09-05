@@ -36,11 +36,12 @@ From mathcomp Require Import boolp reals.
 (*                         game g', guaranteed by H : |current - g'| <= e.    *)
 (*   same to g' by H        the game is rewritten to g' at no loss,           *)
 (*                         guaranteed by H : current = g'.                    *)
-(*   s ;; bound l c by H    the chain is bounded: its last game is at most c, *)
-(*                         a term labelled l, guaranteed by H : current <= c, *)
-(*                         so the FIRST game is at most the total loss; the   *)
-(*                         statement changes from a gap between two games     *)
-(*                         to a bound on one.                                 *)
+(*   s ;; plus l c by H     an external term c, labelled l, is added to the   *)
+(*                         loss: the last game is at most c, guaranteed by    *)
+(*                         H : current <= c, so the FIRST game is at most the *)
+(*                         total, the hops' losses plus c.  The statement     *)
+(*                         changes from a gap between two games to a bound on *)
+(*                         one game.                                          *)
 (*                                                                            *)
 (* The label slot names the assumption invoked and where (dcr_g, cpa_bob),    *)
 (* the cost slot is that assumption's epsilon, and the proof slot says        *)
@@ -49,13 +50,17 @@ From mathcomp Require Import boolp reals.
 (*                                                                            *)
 (* ## What the syntax costs, and the levels it is built at                    *)
 (*                                                                            *)
-(* A token of a custom entry that is not already a keyword enters the global  *)
-(* lexer table, so the identifier it spells stops being readable as a term    *)
-(* anywhere below.  This file spends five such identifiers, start, hop, same, *)
-(* to and bound; by is already an ssreflect keyword and costs nothing.  A     *)
-(* grep of every .v file of the development, comments and notation strings    *)
-(* removed, finds bound at no site and to, start, hop and same only inside    *)
-(* the epsHop chains of notes/probes/epshop_20260905.                         *)
+(* A token of a custom entry that lifts identifiers, as this one does, enters *)
+(* the global lexer table, so the identifier it spells stops being readable   *)
+(* as a term anywhere below.  This file spends four such identifiers, start,  *)
+(* hop, same and to; by is already an ssreflect keyword and costs nothing,    *)
+(* and the terminal token, declared outside the entry, costs nothing either:  *)
+(* below this file Locate start is a syntax error where Locate plus is not.   *)
+(* A scan of every .v file of the development names to, start, hop and same   *)
+(* at no site outside an epsHop chain, and plus only as a bound variable of   *)
+(* lib/bigop_ext.v, which does not require this file.  The terminal statement *)
+(* is spelled plus rather than add to keep the word of a chain clear of       *)
+(* GRing.add, which benaloh_enc.v and paillier_enc.v unfold.                  *)
 (*                                                                            *)
 (* Three levels are forced.  The proof slot sits at level 10, an application  *)
 (* such as le_of_eq hop0_advantageE not parsing at level 0.  The label slot   *)
@@ -64,7 +69,7 @@ From mathcomp Require Import boolp reals.
 (* second closed notation on the same delimiter, separated by ;;, because it  *)
 (* returns a chain_bound where every other statement returns a chain: it      *)
 (* cannot be an operand of the level-90 separator, and that separator being   *)
-(* right associative would swallow a single ; before the bound keyword.       *)
+(* right associative would swallow a single ; before the plus token.          *)
 (*                                                                            *)
 (* ```                                                                        *)
 (*             loss_term L R == a label in L paired with a real cost          *)
@@ -89,8 +94,8 @@ From mathcomp Require Import boolp reals.
 (*                              concatenated loss                             *)
 (*               chain_bound == a first endpoint, a loss, and the proof that  *)
 (*                              the loss bounds that endpoint                 *)
-(*       chain_eval m l c Hc == the chain_bound obtained from m by charging   *)
-(*                              LossTerm l c for its current endpoint         *)
+(*       chain_plus m l c Hc == the chain_bound obtained from m by adding the *)
+(*                              external term c, labelled l, to its loss      *)
 (*            loss_term_code == a loss term read as a label and cost pair,    *)
 (*                              the coding its eqType is copied along         *)
 (*       chain_observable_eq == two chains agreeing on the three observable   *)
@@ -224,10 +229,11 @@ Record chain_bound := ChainBound {
   bound_loss : loss ;
   bound_sound : bound_first <= loss_eval bound_loss }.
 
-(* Charging the current endpoint at c under the label l turns a chain into
-   such a bound: the distance the chain proved plus the bound on where it
-   stopped is a bound on where it started. *)
-Lemma eval_sound (m : chain) (l : L) (c : R) (Hc : chain_current m <= c) :
+(* Adding an external term c, labelled l, to the loss turns a chain into such
+   a bound: the distance the chain proved plus that bound on where it stopped
+   is a bound on where it started.  The added term is the one summand of a
+   finished bound that comes from the endpoint rather than from a hop. *)
+Lemma plus_sound (m : chain) (l : L) (c : R) (Hc : chain_current m <= c) :
   chain_first m <= loss_eval (chain_loss m ++ [:: LossTerm l c]).
 Proof.
 rewrite loss_eval_cat loss_eval1.
@@ -235,11 +241,11 @@ rewrite -(subrK (chain_current m) (chain_first m)); apply: lerD Hc.
 exact: le_trans (ler_norm _) (chain_sound m).
 Qed.
 
-Definition chain_eval (m : chain) (l : L) (c : R)
+Definition chain_plus (m : chain) (l : L) (c : R)
     (Hc : chain_current m <= c) : chain_bound :=
   {| bound_first := chain_first m ;
      bound_loss := chain_loss m ++ [:: LossTerm l c] ;
-     bound_sound := @eval_sound m l c Hc |}.
+     bound_sound := @plus_sound m l c Hc |}.
 
 End epshop.
 
@@ -247,7 +253,7 @@ Arguments chain_start {L R} g.
 Arguments chain_hop {L R} l e {x} g' H.
 Arguments chain_same {L R} {x} g' H.
 Arguments chain_then {L R} m frag Hb.
-Arguments chain_eval {L R} m l c Hc.
+Arguments chain_plus {L R} m l c Hc.
 
 (* A loss term is a label and a cost, so its equality is that of the pair.
    The coding is what the eqType instance below is copied along. *)
@@ -344,6 +350,6 @@ Notation "s1 ';' s2" := (chain_then s1 s2 erefl)
   (in custom epshop at level 90, right associativity).
 
 (* The terminal, a second closed notation on the same delimiter. *)
-Notation "'\epsilon{' s ';;' 'bound' l c 'by' H '}'" := (chain_eval s l c H)
+Notation "'\epsilon{' s ';;' 'plus' l c 'by' H '}'" := (chain_plus s l c H)
   (s custom epshop at level 99, l constr at level 0, c constr at level 0,
    H constr at level 10) : epshop_scope.

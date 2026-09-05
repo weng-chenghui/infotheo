@@ -954,9 +954,10 @@ are separated by a semicolon and read as follows.
     $H : \lvert \mathrm{current} - g' \rvert \le e$.
   \item \texttt{same to g' by H} rewrites the game to $g'$ at no loss,
     guaranteed by $H : \mathrm{current} = g'$.
-  \item \texttt{s ;; bound l c by H} bounds the chain: its last game is at
-    most $c$, a term labelled $l$, guaranteed by
-    $H : \mathrm{current} \le c$, so the first game is at most the total loss.
+  \item \texttt{s ;; plus l c by H} adds an external term to the loss: the
+    last game is at most $c$, a term labelled $l$, guaranteed by
+    $H : \mathrm{current} \le c$, so the first game is at most the total, the
+    hops' losses plus $c$.
 \end{itemize}
 The label slot names the assumption invoked and where, the cost slot is that
 assumption's advantage, and the proof slot says whether the term is assumed or
@@ -1036,21 +1037,21 @@ pending obligation, and a bound is read off it by projection.
 \begin{definition}[A bound read off a chain]
   \label{def:chain_bound}
   \rocq{infotheo.computational_security.epshop.chain_bound,
-       infotheo.computational_security.epshop.chain_eval}
+       infotheo.computational_security.epshop.chain_plus}
   \rocqok
   \uses{def:chain}
   A chain bound is a first endpoint $a$, a loss $s$, and a proof that the total
   of the loss bounds $a$ itself.
   \[ a \le \mathrm{ev}(s) \]
-  $\mathrm{eval}(m, l, c, H_c)$ builds one from a chain $m$ by charging its
-  current endpoint at $c$ under the label $l$, for $H_c : b_m \le c$.
-  \[ \mathrm{eval}(m, l, c, H_c) = \big(a_m,\;
+  $\mathrm{plus}(m, l, c, H_c)$ builds one from a chain $m$ by adding the
+  external term $c$, labelled $l$, to its loss, for $H_c : b_m \le c$.
+  \[ \mathrm{plus}(m, l, c, H_c) = \big(a_m,\;
        s_m \mathbin{+\!\!+} [(l, c)]\big) \]
   This is where a statement changes sort, from a comparison of two acceptance
   probabilities to a bound on one. A secrecy theorem has the second shape, so
   a hybrid reaches its published form here, and the terminal term $(l, c)$ is
   the one summand of such a bound that comes from the endpoint rather than from
-  a step. It is the \texttt{bound} statement of a program, written after the
+  a step. It is the \texttt{plus} statement of a program, written after the
   double semicolon because it returns a chain bound where every other statement
   returns a chain.
 \end{definition}
