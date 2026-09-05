@@ -70,10 +70,11 @@ Require Import negligible indcpa_game epshop.
 (* at no cost, and hops back to the zero experiment.  Its loss is the list    *)
 (* of the two labels the bound rests on, one per residuosity call, and        *)
 (* paillier_claim fixes for each label the two experiments its call moves     *)
-(* between and the epsilon it assumes, so the number in                       *)
-(* paillier_dcr_epsilon_le is read off the chain by paillier_chain_lossE.     *)
-(* The two class memberships are parameters of the chain, so                  *)
-(* paillier_dcr_epsilon_le assumes exactly what building the chain spends.    *)
+(* between and the epsilon it assumes.  The chain returns twice the           *)
+(* residuosity epsilon as its bound, which is the number in                   *)
+(* paillier_dcr_epsilon_le.  The two class memberships are parameters of the  *)
+(* chain, so paillier_dcr_epsilon_le assumes exactly what building the chain  *)
+(* spends.                                                                    *)
 (*                                                                            *)
 (* The one number-theoretic input is g ^+ (p q) = 1, the order condition the  *)
 (* private key record already carries.  The statement proved here is          *)
@@ -123,12 +124,13 @@ Require Import negligible indcpa_game epshop.
 (*   paillier_claim A dk adv == what each label claims: the two acceptance    *)
 (*                              probabilities its residuosity call moves      *)
 (*                              between, and the epsilon it assumes           *)
+(*              dcr_totalE A == the closed form of the two-call loss, twice   *)
+(*                              the residuosity epsilon                       *)
 (*      paillier_chain Hg Hz == the two hops and the identity between them    *)
 (*                              as one chain over acceptance probabilities,   *)
-(*                              at the two class memberships it spends        *)
-(*      paillier_chain_lossE == that chain logs one residuosity call per      *)
-(*                              hop, so its loss totals twice the             *)
-(*                              residuosity epsilon                           *)
+(*                              at the two class memberships it spends,       *)
+(*                              returning twice the residuosity epsilon as    *)
+(*                              its bound                                     *)
 (*   paillier_dcr_epsilon_le == the IND-CPA advantage of an adversary whose   *)
 (*                              two reductions are classified is at most      *)
 (*                              twice the residuosity epsilon                 *)
@@ -384,6 +386,14 @@ Definition paillier_claim (A : dcr_assumption) (dk : priv_key AHE)
 
 Local Open Scope epshop_scope.
 
+(* The closed form of the loss the chain below accumulates: one residuosity
+   epsilon per hop, twice the assumed epsilon.  It is the identity the return
+   statement of that chain is proved by, and the factor two in every Paillier
+   IND-CPA bound of this file comes from here. *)
+Lemma dcr_totalE (A : dcr_assumption) :
+  dcr_epsilon A + dcr_epsilon A = 2 * dcr_epsilon A.
+Proof. by rewrite mulr_natl mulr2n. Qed.
+
 (* The two-step hybrid as one chain over acceptance probabilities.  It starts
    at the real experiment, which is the multiplying reduction at the residue
    challenge; hops to that reduction at the unit challenge, where the
@@ -399,7 +409,7 @@ Definition paillier_chain (A : dcr_assumption) (dk : priv_key AHE)
     (adv : indcpa_adversary (R:=R) AHE)
     (Hg : residuosity_admissible A (dcr_of_adversary (priv_gen dk) adv))
     (Hz : residuosity_admissible A (dcr_of_adversary_zero adv))
-  : chain (paillier_claim A dk adv) :=
+  : chain_result (paillier_claim A dk adv) :=
   let D_g := dcr_of_adversary (priv_gen dk) adv in
   let D_0 := dcr_of_adversary_zero adv in
   let eps_dcr := dcr_epsilon A in
@@ -415,22 +425,10 @@ Definition paillier_chain (A : dcr_assumption) (dk : priv_key AHE)
             (* the second residuosity call, through D_0 run backwards, and
                the zero experiment *)
             hop dcr_0 eps_dcr to (accept D_0 residue_fdist)
-              by residuosity_admissible_epsilon_leC _ _ Hz }.
-
-(* The chain logs one residuosity call at each hop and nothing at the
-   identity between them, so its loss totals twice the residuosity epsilon.
-   This equation is where the formal list of assumption calls becomes the
-   number the theorem below states. *)
-Lemma paillier_chain_lossE (A : dcr_assumption) (dk : priv_key AHE)
-    (adv : indcpa_adversary (R:=R) AHE)
-    (Hg : residuosity_admissible A (dcr_of_adversary (priv_gen dk) adv))
-    (Hz : residuosity_admissible A (dcr_of_adversary_zero adv)) :
-  loss_eval (paillier_claim A dk adv) (chain_loss (paillier_chain Hg Hz))
-  = 2 * dcr_epsilon A.
-Proof.
-rewrite /loss_eval /paillier_chain /= big_cons big_cons big_nil addr0.
-by rewrite mulr_natl mulr2n.
-Qed.
+              by residuosity_admissible_epsilon_leC _ _ Hz ;;
+            (* the gap between the two experiments, at the two calls it
+               spent *)
+            bound (2 * dcr_epsilon A) by dcr_totalE A }.
 
 (* The reduction and its loss.  An adversary whose two residuosity reductions
    the residuosity class admits has IND-CPA advantage at most 2 eps_DCR at
@@ -452,8 +450,7 @@ Proof.
 move=> Hg Hz.
 rewrite /indcpa_epsilon indcpa_success_realE indcpa_success_zeroE.
 rewrite !enc_fdist_paillierE /= real_accept_dcrE zero_accept_dcrE.
-rewrite -(paillier_chain_lossE Hg Hz).
-exact: chain_sound (paillier_chain Hg Hz).
+exact: result_sound (paillier_chain Hg Hz).
 Qed.
 
 (* The IND-CPA class a residuosity assumption induces: the adversaries whose

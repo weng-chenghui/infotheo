@@ -218,11 +218,12 @@ Require Import epshop.
 (*           alice_claim D l == what each label claims: the games a hop       *)
 (*                              label joins and the advantage it costs, and   *)
 (*                              the all-zero game uniform_plain bounds        *)
+(*             alice_totalE == the closed form of that loss, in the order     *)
+(*                              alice_tuple_guess_V2_le states it             *)
 (*               alice_chain == the three games and two hops of this file,    *)
 (*                              bounded at the all-zero endpoint, as one      *)
-(*                              chain bound on the real-view game             *)
-(*         alice_chain_lossE == the numeric total of its loss, the right-hand *)
-(*                              side of alice_tuple_guess_V2_le               *)
+(*                              chain returning its bound on the real-view    *)
+(*                              game                                          *)
 (*                                                                            *)
 (* Simulation                                                                 *)
 (*                                                                            *)
@@ -1198,8 +1199,18 @@ Definition alice_claim (D : distinguisher alice_hop_jointT)
    triangle inequality of the argument is spent, and the terminal statement is
    what turns the comparison of two acceptance probabilities into a bound on
    the real-view game, which is the shape a secrecy statement takes. *)
+(* The closed form of the loss the chain below accumulates, written in the
+   order alice_tuple_guess_V2_le states: the plaintext-space residue first,
+   then the Bob-key advantage, then the Charlie-key advantage.  The chain
+   accumulates them in the order it spends them, the two hops before the
+   endpoint, so the return statement reorders. *)
+Lemma alice_totalE (D : distinguisher alice_hop_jointT) :
+  eps_bob D + eps_charlie D + #|plain AHE|%:R^-1
+  = #|plain AHE|%:R^-1 + eps_bob D + eps_charlie D.
+Proof. by rewrite addrAC [X in X + _]addrC. Qed.
+
 Definition alice_chain (predict : predictor alice_hop_tupleT) :
-    chain_bound (alice_claim (distinguisher_of_predictor predict)) :=
+    chain_result (alice_claim (distinguisher_of_predictor predict)) :=
   let D := distinguisher_of_predictor predict in
   (* the real view, both ciphertext slots carrying their plaintexts *)
   \epsilon{ start (game 0 D) ;
@@ -1212,32 +1223,18 @@ Definition alice_chain (predict : predictor alice_hop_tupleT) :
             (* the guessing residue of the all-zero view, a term outside the
                hopping, added to the loss so the total bounds the real view *)
             plus uniform_plain #|plain AHE|%:R^-1
-              by all_zero_game_V2_le_invm predict }.
-
-(* The numeric total of that loss: the plaintext-space residue, then the
-   Bob-key advantage, then the Charlie-key advantage.  It is the right-hand
-   side of alice_tuple_guess_V2_le, so what that statement asserts is the loss
-   the chain accumulated and nothing besides. *)
-Lemma alice_chain_lossE (predict : predictor alice_hop_tupleT) :
-  loss_eval (alice_claim (distinguisher_of_predictor predict))
-    (bound_loss (alice_chain predict))
-  = #|plain AHE|%:R^-1
-    + indcpa_epsilon bob_pkey
-        (bob_challenge_adversary (distinguisher_of_predictor predict))
-    + indcpa_epsilon charlie_pkey
-        (charlie_challenge_adversary (distinguisher_of_predictor predict)).
-Proof.
-by rewrite !loss_eval_cat !loss_eval1 loss_eval_nil add0r addrAC
-   [X in X + _]addrC.
-Qed.
+              by all_zero_game_V2_le_invm predict ;;
+            (* the real-view game, at the residue and the two advantages *)
+            bound (#|plain AHE|%:R^-1 + eps_bob D + eps_charlie D)
+              by alice_totalE D }.
 
 (* A predictor reading Alice's real view returns Bob's input with probability at
    most the inverse plaintext-space cardinality plus the advantages of the two
    hop reductions.  The first term is the information-theoretic residue of the
    leaked output along the DSDP solution fiber; each of the two advantages is
    what zeroing one ciphertext slot costs, conditional on the IND-CPA
-   assumption at that slot's key.  The right-hand side is alice_chain_lossE,
-   the loss the chain accumulated.
+   assumption at that slot's key.  The right-hand side is the bound the chain
+   returns, the loss it accumulated in the order this statement reads it.
    Naming: [tuple] names the hop-0 conditioner, [V2] the input bounded, and
    [le] the direction of the bound. *)
 Theorem alice_tuple_guess_V2_le
@@ -1250,8 +1247,7 @@ Theorem alice_tuple_guess_V2_le
            (charlie_challenge_adversary (distinguisher_of_predictor predict)).
 Proof.
 rewrite /AliceRealTuple guess_V2_jointE -alice_hop_game_successE.
-rewrite -alice_chain_lossE.
-exact: bound_sound (alice_chain predict).
+exact: result_sound (alice_chain predict).
 Qed.
 
 (* The IND-CPA advantage against Bob's key that one predictor buys: the

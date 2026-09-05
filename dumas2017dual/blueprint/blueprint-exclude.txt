@@ -187,9 +187,13 @@ extra_proba:pr_eq_comp_constraint
 extra_proba:pr_eq_comp_constraint_tail
 extra_proba:sum_cPr_eq
 # epshop: the soundness obligation each statement supplies for its own
-# invariant field. The blueprint states the invariant once at def:chain and
-# def:chain_bound, where the endpoints and loss of every statement are written
-# out, so the five *_sound lemmas add nothing a node of their own would carry.
+# invariant field, and the fold lemma loss_evalE is proved from. The blueprint
+# states the invariant once at def:chain and def:chain_result, where the
+# endpoints, loss and bound of every statement are written out, so the *_sound
+# lemmas add nothing a node of their own would carry.
+epshop:bound_sound
+epshop:chain_result_sound
+epshop:foldl_lossE
 epshop:hop_sound
 epshop:plus_sound
 epshop:same_sound

@@ -64,7 +64,7 @@ Require Import negligible indcpa_game epshop.
 (* probabilities the hybrid passes through, and its loss is the two-label     *)
 (* list residuosity_y and residuosity_0, whose claims benaloh_claim fixes,    *)
 (* each carrying the r-th residuosity epsilon its call assumes.  The bound of *)
-(* benaloh_residuosity_epsilon_le is loss_eval of that list and its two       *)
+(* benaloh_residuosity_epsilon_le is the bound that chain returns and its two *)
 (* hypotheses are the two class memberships the chain is built at, so the     *)
 (* bound is read off the chain rather than reassembled from a triangle        *)
 (* inequality of its own.  The chain differs from the Paillier chain of       *)
@@ -130,11 +130,12 @@ Require Import negligible indcpa_game epshop.
 (*     benaloh_claim A dk adv == what each label claims: the two acceptance   *)
 (*                               probabilities its residuosity call moves     *)
 (*                               between, and the epsilon it assumes          *)
+(*      residuosity_totalE A == the closed form of the two-call loss, twice   *)
+(*                               the residuosity epsilon                      *)
 (*        benaloh_chain Hy H0 == the reduction as a chain of two hops         *)
 (*                               around one equality, at the two class        *)
-(*                               memberships it spends                        *)
-(*        benaloh_chain_lossE == the loss of that chain totals twice the      *)
-(*                               residuosity epsilon                          *)
+(*                               memberships it spends, returning twice the   *)
+(*                               residuosity epsilon as its bound             *)
 (* benaloh_residuosity_epsilon_le ==                                          *)
 (*                            an adversary whose two reductions are both      *)
 (*                            classified has IND-CPA advantage at most twice  *)
@@ -397,6 +398,15 @@ Definition benaloh_claim (A : benaloh_residuosity_assumption)
 
 Local Open Scope epshop_scope.
 
+(* The closed form of the loss the chain below accumulates: one residuosity
+   epsilon per hop, twice the assumed epsilon.  It is the identity the return
+   statement of that chain is proved by, and the factor two in every Benaloh
+   IND-CPA bound of this file comes from here. *)
+Lemma residuosity_totalE (A : benaloh_residuosity_assumption) :
+  benaloh_residuosity_epsilon A + benaloh_residuosity_epsilon A
+  = 2 * benaloh_residuosity_epsilon A.
+Proof. by rewrite mulr_natl mulr2n. Qed.
+
 (* The reduction as a chain of hops over acceptance probabilities.  It starts
    at the real arm, which is the multiplying reduction accepting under the
    residue law; one residuosity call moves that reduction to the unit law,
@@ -411,7 +421,7 @@ Definition benaloh_chain (A : benaloh_residuosity_assumption)
     (dk : priv_key AHE) (adv : indcpa_adversary (R:=R) AHE)
     (Hy : residuosity_admissible A (residuosity_of_adversary (priv_gen dk) adv))
     (H0 : residuosity_admissible A (residuosity_of_adversary_zero adv))
-    : chain (benaloh_claim A dk adv) :=
+    : chain_result (benaloh_claim A dk adv) :=
   let D_y := residuosity_of_adversary (priv_gen dk) adv in
   let D_0 := residuosity_of_adversary_zero adv in
   let eps_residuosity := benaloh_residuosity_epsilon A in
@@ -427,21 +437,10 @@ Definition benaloh_chain (A : benaloh_residuosity_assumption)
             (* the second residuosity call, through D_0 run backwards, and
                the zero arm *)
             hop residuosity_0 eps_residuosity to (accept D_0 residue_fdist)
-              by residuosity_admissible_epsilon_leC _ _ H0 }.
-
-(* The chain totals two residuosity calls: each hop logs one term at the
-   assumed epsilon and the middle equality logs nothing.  This is where the
-   factor two in every Benaloh IND-CPA bound of this file comes from. *)
-Lemma benaloh_chain_lossE (A : benaloh_residuosity_assumption)
-    (dk : priv_key AHE) (adv : indcpa_adversary (R:=R) AHE)
-    (Hy : residuosity_admissible A (residuosity_of_adversary (priv_gen dk) adv))
-    (H0 : residuosity_admissible A (residuosity_of_adversary_zero adv)) :
-  loss_eval (benaloh_claim A dk adv) (chain_loss (benaloh_chain Hy H0))
-  = 2 * benaloh_residuosity_epsilon A.
-Proof.
-rewrite /loss_eval /benaloh_chain /= big_cons big_cons big_nil addr0.
-by rewrite mulr_natl mulr2n.
-Qed.
+              by residuosity_admissible_epsilon_leC _ _ H0 ;;
+            (* the gap between the two arms, at the two calls it spent *)
+            bound (2 * benaloh_residuosity_epsilon A)
+              by residuosity_totalE A }.
 
 (* The reduction and its loss.  At every private key, an adversary whose two
    residuosity reductions the residuosity class admits has IND-CPA advantage
@@ -460,8 +459,8 @@ Proof.
 move=> Hy H0.
 rewrite /indcpa_epsilon indcpa_success_realE indcpa_success_zeroE.
 rewrite !enc_fdist_benalohE /= real_accept_residuosityE.
-rewrite zero_accept_residuosityE -(benaloh_chain_lossE Hy H0).
-exact: chain_sound (benaloh_chain Hy H0).
+rewrite zero_accept_residuosityE.
+exact: result_sound (benaloh_chain Hy H0).
 Qed.
 
 (* The IND-CPA class the derived assumption carries: the adversaries whose two

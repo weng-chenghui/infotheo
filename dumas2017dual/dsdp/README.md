@@ -48,10 +48,11 @@ basename and resolve by suffix.
   `alice_chain` in `hopping/dsdp_alice_hop_secrecy.v` hops twice over the two received
   ciphertexts, logging one IND-CPA reduction advantage per hop, and ends in the terminal
   statement that bounds the all-zero endpoint under a third label, so its loss reads as
-  the inverse plaintext count plus the two advantages. The three headline statements are
-  unchanged and are now closed by `chain_sound` or `bound_sound` at the chain itself,
-  the one triangle inequality of the argument having been discharged once in
-  `epshop.v`.
+  the inverse plaintext count plus the two advantages. Each program then returns its
+  bound in closed form through a `bound` statement, proved by the algebraic identity
+  `dcr_totalE`, `residuosity_totalE` or `alice_totalE`. The three headline statements are
+  unchanged and are now closed by `result_sound` at the program itself, the one triangle
+  inequality of the argument having been discharged once in `epshop.v`.
 
 - **Scheme assumptions** — `homomorphic_encryption/residuosity_game.v` states the e-th
   residuosity problem in a finite commutative unit ring: the two challenge laws
