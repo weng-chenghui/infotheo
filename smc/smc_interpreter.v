@@ -212,6 +212,175 @@ case: Hred2 Hpsl2 => [i' j' pi' | i' x' | i' j' x' pi' pj'] /(congr1 val) /=[];
   + by rewrite ij -Hpi' in Hpj.
 Qed.
 
+Lemma extract_inject_disj n m m' A
+      (l : lens n m) (l' : lens n m') (ps : n.-tuple A) ps' :
+  {in l & l', forall a b : 'I_n, a != b} ->
+  extract l' (inject l ps ps') = extract l' ps.
+Proof.
+move=> Hdisj.
+apply: eq_from_tnth => i.
+rewrite !(tnth_mktuple,tnth_map) nth_default //.
+rewrite leqNgt size_tuple -{2}(size_tuple l) index_mem.
+apply/negP => Hi.
+move: (Hdisj (l' !_ i) (l' !_ i)) => /=.
+by rewrite Hi mem_tnth eqxx => /(_ isT isT).
+Qed.
+
+Lemma injectC_disj n m m' A
+      (l : lens n m) (l' : lens n m') (ps : n.-tuple A) ps1 ps2 :
+  {in l & l', forall a b : 'I_n, a != b} ->
+  inject l' (inject l ps ps1) ps2 = inject l (inject l' ps ps2) ps1.
+Proof.
+move=> Hdisj.
+apply: eq_from_tnth => i.
+rewrite !(tnth_mktuple,tnth_map).
+case/boolP: (i \in l') => il'.
+  have Hps1 : (size ps1 <= index i l)%N.
+    rewrite size_tuple -{1}(size_tuple l) leqNgt index_mem.
+    apply/negP => il.
+    by move: (Hdisj i i); rewrite il il' eqxx => /(_ isT isT).
+  by rewrite !(nth_default _ (n:=index i l)).
+have Hps2 : (size ps2 <= index i l')%N.
+  by rewrite size_tuple -{1}(size_tuple l') leqNgt index_mem.
+by rewrite !(nth_default _ (n:=index i l')).
+Qed.
+
+Definition concat_traces n (tr1 tr2 : n.-tuple (seq data)) :=
+  [tuple tr1 !_ i ++ tr2 !_ i | i < n].
+Definition empty_traces {n} := [tuple (@nil data) | _ < n].
+
+(* Alternative definition of reduction, better for induction *)
+Inductive rstepl {n} :
+      n.-tuple proc -> n.-tuple proc -> n.-tuple (seq data) -> Prop :=
+  | rnil ps : rstepl ps ps [tuple nil | _ < n]
+  | rcons m (l : lens n m) ps ps1 ps2 tr1 tr2 tr3 :
+    rstep l (extract l ps) ps1 tr1 ->
+    rstepl (inject l ps ps1) ps2 tr2 ->
+    tr3 = concat_traces tr2 (inject l empty_traces tr1) ->
+    rstepl ps ps2 tr3.
+
+Lemma rconcat n (ps ps1 ps2 : n.-tuple proc) tr1 tr2 :
+  rstepl ps ps1 tr1 -> rstepl ps1 ps2 tr2 ->
+  rstepl ps ps2 (concat_traces tr2 tr1).
+Proof.
+elim: ps ps1 tr1 / => [ps Hr|].
+  rewrite (_ : concat_traces _ _ = tr2) //.
+  by apply: eq_from_tnth => i; rewrite !tnth_mktuple cats0.
+move=> m l ps ps1 ps3 tr3 tr4 tr' Hr Hrl1 IH Htr' Hrl2.
+apply: (rcons Hr).
+  exact: (IH Hrl2).
+by apply: eq_from_tnth => i; rewrite Htr' !tnth_mktuple catA.
+Qed.
+
+(* Equiavalence of of rsteps and rstepl *)
+Lemma rstepsP n (ps1 ps2 : n.-tuple proc) tr :
+  rsteps ps1 ps2 tr <-> rstepl ps1 ps2 tr.
+Proof.
+split.
+- elim: ps1 ps2 tr/ =>
+    [m l ps ps1 tr1 Hr | ps | ps ps1 ps3 tr1 tr3 tr4 Hr1 IH1 Hr2 IH2 ->].
+  + apply: (rcons Hr).
+      exact: rnil.
+    apply: eq_from_tnth => i.
+    by rewrite !tnth_mktuple.
+  + exact: rnil.
+  + exact: (rconcat IH1 IH2).
+elim: ps1 ps2 tr / => [ps |].
+  exact: rrefl.
+move=> m l ps ps1 ps2 tr1 tr2 tr' Hr Hrl1 IH ->.
+exact: (rtrans (rone Hr) IH).
+Qed.
+
+Lemma cat_inj_right A (s : seq A) : injective (cat s).
+Proof. by move=> s1 s2; elim: s => //= a s IH []. Qed.
+
+Lemma cat_inj_left A (s : seq A) : injective (cat ^~ s).
+Proof.
+move=> s1 s2 /(f_equal rev).
+rewrite !rev_cat => /cat_inj_right /(f_equal rev).
+by rewrite !revK.
+Qed.
+
+(* Uniqueness of normal forms *)
+(* Note that alone, this gives neither confluence nor termination.
+   However, as sound as we have termination, we get confluence,
+   and we also proved that the pismc sublanguage is terminating. *)
+Lemma rstepl_normalisation n (ps ps1 ps2 : n.-tuple proc) tr1 tr2 :
+  rstepl ps ps1 tr1 ->
+  (forall m (l : lens n m) ps' tr', ~ rstep l (extract l ps1) ps' tr') ->
+  rstepl ps ps2 tr2 ->
+  exists tr3, rstepl ps2 ps1 tr3 /\ tr1 = concat_traces tr3 tr2.
+Proof.
+move=> Hr1 Hterm.
+pose tr0 := @empty_traces n.
+elim: ps ps1 tr1 / Hr1 ps2 tr2 Hterm =>
+  [ps | m l ps ps1 ps3 tr1 tr3 tr4 Hr Hrl1 IH ->] /= ps2 tr2 Hterm Hr2.
+  exists tr2.
+  case: ps ps2 tr2 / Hr2 Hterm => [ps Hterm |].
+    do! split => //.
+      exact: rnil.
+    by apply eq_from_tnth => i; rewrite !tnth_mktuple.
+  move=> m l ps ps1 ps2 t1 tr2 tr3 Hr _ _ Hterm.
+  elim: (Hterm _ _ _ _ Hr).
+elim: ps ps2 tr2 / Hr2 ps1 ps3 tr1 tr3 Hr Hrl1 IH Hterm =>
+    [ps | m' l' ps ps2 ps3' tr2 tr3' tr4' Hr' Hrl2 IH' ->]
+    /= ps1 ps3 tr1 tr3 Hr1 Hrl1 IH Hterm.
+  pose tr3' := concat_traces tr3 (inject l empty_traces tr1).
+  exists tr3'.
+  do! split => //.
+  - exact: (rcons Hr1 Hrl1).
+  - by apply: eq_from_tnth => i; rewrite !tnth_mktuple cats0.
+case:(rstep_disjoint (erefl (extract l ps)) (erefl (extract l' ps)) Hr1 Hr').
+  case => /eqP ll'.
+  have mm' : m = m'.
+    by rewrite -(size_tuple l) -(size_tuple l') -ll'.
+  case: m' / mm' l' ps2 tr2 ll' Hr' Hrl2 IH' => l' ps2 tr2 ll' Hr' Hrl2 IH'.
+  have {}ll' : l = l' by apply: val_inj.
+  rewrite -ll' in Hr' *.
+  case => ps12 tr12.
+  have {}ps12 : ps1 = ps2 by apply: val_inj.
+  have {}tr12 : tr1 = tr2 by apply: val_inj.
+  subst l' ps2 tr2.
+  case: (IH _ _ Hterm Hrl2) => tr1' [Hrl3] Htr3.
+  exists tr1'.
+  do! split => //.
+  by apply: eq_from_tnth => i; rewrite !(tnth_mktuple,catA,Htr3).
+move=> /= ll'.
+rewrite extract_inject_disj in IH'; last first.
+  by move=> a b Ha Hb; rewrite eq_sym; apply: ll'.
+pose tr2' := inject l' tr0 tr2.
+have Hrll' : rstepl (inject l ps ps1) (inject l' (inject l ps ps1) ps2) tr2'.
+  apply: (rcons (l:=l')).
+      rewrite extract_inject_disj //.
+      exact: Hr'.
+    exact: rnil.
+  by apply: eq_from_tnth => i; rewrite !tnth_mktuple.
+case: (IH _ _ Hterm Hrll').
+move => tr3a [Hrl3] Htr3.
+rewrite injectC_disj // in Hrl3.
+have [] // := IH' _ _ _ _ Hr1 Hrl3.
+- move=> ps5 tr5 Hterm' Hrl5.
+  rewrite injectC_disj // in Hrl5.
+  have Hrl5' := rconcat Hrll' Hrl5.
+  case: (IH _ _ Hterm Hrl5') => tr6 [Hrl53] Htr6.
+  exists tr6; split => //.
+  move: Htr6; rewrite Htr3 => H.
+  apply: eq_from_tnth => i; move/(f_equal (fun t => tnth t i)): H.
+  by rewrite !tnth_mktuple catA => /cat_inj_left.
+- by move=> a b Ha Hb; rewrite eq_sym; apply: ll'.
+move=> tr3b [Hrl3'] Htr3b.
+exists tr3b; split => //.
+apply: eq_from_tnth => i.
+move/(f_equal (fun t => tnth t i)): Htr3b.
+rewrite Htr3 !tnth_mktuple catA => <-.
+case/boolP: (i \in l) => il.
+  rewrite nth_default ?cats0 //.
+  rewrite size_tuple -{1}(size_tuple l') leqNgt index_mem.
+  apply/negP => il'.
+  by move: (ll' i i); rewrite il il' eqxx => /(_ isT isT).
+symmetry; rewrite nth_default ?cats0 //.
+by rewrite size_tuple -{1}(size_tuple l) leqNgt index_mem.
+Qed.
 End interp.
 
 Arguments Finish {data}.
