@@ -23,9 +23,9 @@ MODULES=(
   # The game layer the computational leg reduces to: the adversary record,
   # the hidden-bit challenger, the two experiment arms and the advantage.
   computational_security/indcpa_game.v
-  # The chain a multi-hop bound is assembled in: the accumulated loss as a
-  # list of labelled terms, and the soundness the bound is read off.
-  computational_security/hop_chain.v
+  # The epsHop language a multi-hop bound is written in: the accumulated loss
+  # as a list of labelled terms, and the soundness the bound is read off.
+  computational_security/epshop.v
   # The computational leg: the two-hop ladder over the corrupted-Alice
   # experiment, its two reductions, the guessing / unpredictability / simulation
   # bounds, and their transfer to the executed piSMC trace.

@@ -28,8 +28,9 @@ basename and resolve by suffix.
   `negligible` (`negligible_fun` and its closure lemmas, the asymptotic reading every
   concrete bound below is given), `indcpa_game` (the real-or-zero game, the advantage
   `indcpa_epsilon`, the adversary-class assumption record, the scheme record
-  `indcpa_scheme`), `hop_chain` (a chain of hops whose accumulated loss is a list of
-  labelled terms, together with the soundness field a multi-hop bound is read off),
+  `indcpa_scheme`), `epshop` (the epsHop language, in which a chain of hops carries an
+  accumulated loss as a list of labelled terms together with the soundness field a
+  multi-hop bound is read off),
   `paillier_indcpa_scheme` / `benaloh_indcpa_scheme`
   (the two concrete schemes as `indcpa_scheme` values, scheme side only, fixed and indexed
   by a security parameter, each with the reduction that derives its IND-CPA assumption
@@ -37,17 +38,18 @@ basename and resolve by suffix.
   `paillier_indcpa_assumption`, and `residuosity_of_adversary` /
   `residuosity_of_adversary_zero` giving `benaloh_indcpa_assumption`, at twice the
   residuosity epsilon per key).
-  The three chain programs live in the files whose reductions they write.
+  The three epsHop programs live in the files whose reductions they write.
   `paillier_chain` in `paillier_indcpa_scheme.v` and `benaloh_chain` in
   `benaloh_indcpa_scheme.v` each hop twice around one identity, logging one residuosity
-  call per hop, so each loss reads as twice the assumed residuosity epsilon;
+  call per hop, so each loss reads as twice the assumed residuosity epsilon, and each
+  takes its two class memberships as parameters;
   `alice_chain` in `hopping/dsdp_alice_hop_secrecy.v` hops twice over the two received
-  ciphertexts, logging one IND-CPA reduction advantage per hop, and `alice_chain_bound`
-  evaluates it at the all-zero endpoint under a third label, so its loss reads as the
-  inverse plaintext count plus the two advantages. The three headline statements are
-  unchanged and are now closed by `chain_sound` or `bound_sound` at the chain's premise,
+  ciphertexts, logging one IND-CPA reduction advantage per hop, and ends in the terminal
+  statement that bounds the all-zero endpoint under a third label, so its loss reads as
+  the inverse plaintext count plus the two advantages. The three headline statements are
+  unchanged and are now closed by `chain_sound` or `bound_sound` at the chain itself,
   the one triangle inequality of the argument having been discharged once in
-  `hop_chain.v`.
+  `epshop.v`.
 
 - **Scheme assumptions** — `homomorphic_encryption/residuosity_game.v` states the e-th
   residuosity problem in a finite commutative unit ring: the two challenge laws
