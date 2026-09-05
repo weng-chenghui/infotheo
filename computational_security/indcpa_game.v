@@ -473,7 +473,9 @@ End enc_slot_resample.
 
 Section protocol_indcpa.
 
-Variables (sampleT stateT joint : finType).
+Variables (sampleT stateT : finType).
+(* The carrier a distinguisher reads, as in distinguisher and accept above. *)
+Variable T : finType.
 Variable P : R.-fdist sampleT.
 Variables (State : {RV P -> stateT}) (Rho : {RV P -> Renc}).
 Variable pk : pub_key AHE.
@@ -482,9 +484,9 @@ Variable pk : pub_key AHE.
    state.  It plays the role of the adv_plain field of indcpa_adversary. *)
 Variable challenge_plain : stateT -> plain AHE.
 
-(* [assemble c ch] reconstructs the complete joint value tested by a
-   distinguisher from reduction state c and challenge ciphertext ch. *)
-Variable assemble : stateT -> cipher AHE -> joint.
+(* [assemble c ch] reconstructs the complete value a distinguisher is tested
+   on from reduction state c and challenge ciphertext ch. *)
+Variable assemble : stateT -> cipher AHE -> T.
 
 (* The value a distinguisher is tested on in a protocol run.  Rho enters it at
    one place only, the ciphertext of the plaintext that State selects, and
@@ -493,7 +495,7 @@ Variable assemble : stateT -> cipher AHE -> joint.
    around the challenge ciphertext it gets back.  A protocol whose sample is
    laid out differently reaches this section by proving its own tested value
    equal to protocol_RV, which is where the confinement is checked. *)
-Definition protocol_RV : {RV P -> joint} :=
+Definition protocol_RV : {RV P -> T} :=
   fun t => assemble (State t)
              (enc pk (challenge_plain (State t)) (rand_of_renc (Rho t))).
 
@@ -508,7 +510,7 @@ Hypothesis state_rho_prodE :
    experiment: sample the reduction state, sample the challenge ciphertext for
    the plaintext that state selects, then assemble the tested value from the
    two. *)
-Definition indcpa_fdist : R.-fdist joint :=
+Definition indcpa_fdist : R.-fdist T :=
   c  <- `p_ State ;
   ch <- enc_fdist pk (challenge_plain c) ;
   ret (assemble c ch).
@@ -540,7 +542,7 @@ Qed.
    bound with the pushforward of D along each challenge law.  Read together
    with indcpa_success_realE and indcpa_success_zeroE it identifies a hop
    success probability with an IND-CPA success probability. *)
-Lemma indcpa_fdist_acceptE (D : distinguisher joint) :
+Lemma indcpa_fdist_acceptE (D : distinguisher T) :
   Pr indcpa_fdist [set x | D x]
   = Pr (c <- `p_ State ;
         fdistmap (fun ch => D (assemble c ch))

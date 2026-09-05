@@ -113,7 +113,7 @@ Require Import dsdp_instance_sequence.
 (*                              combine enters                                *)
 (* Dk_c_V3_indep_V2_E_charlie_d3 == Charlie's key and input are independent   *)
 (*                              of Bob's input with the aggregate ciphertext  *)
-(*           AHE_at, Renc_at == the k-th scheme and its coin index type       *)
+(*                    AHE_at == the k-th scheme                               *)
 (* hop_tupleT_at, viewT_at, traceT_at == the three carriers the hopping      *)
 (*                              bounds quantify predictors over               *)
 (* hop_fdist_at, hop_V2_at, hop_V3_at == the corrupted-Alice sample space and *)
@@ -669,9 +669,8 @@ Local Notation dk_c := (inst_dk_c Inst).
 Local Notation rb2 := (inst_rb2 Inst).
 Local Notation rc2 := (inst_rc2 Inst).
 
-(* The scheme packaging at the k-th instance, and its coin index type. *)
+(* The scheme packaging at the k-th instance. *)
 Definition AHE_at : AHEncType := AHE.
-Definition Renc_at : finType := Renc.
 
 (* The three carriers the hopping bounds quantify predictors over, at the k-th
    instance. *)
