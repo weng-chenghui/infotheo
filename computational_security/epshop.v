@@ -28,8 +28,9 @@ From mathcomp Require Import boolp reals.
 (*                                                                            *)
 (* ## The surface syntax                                                      *)
 (*                                                                            *)
-(* A chain is written in a custom entry, delimited by \epsilon{ }, whose four *)
-(* statements are the four constructors.  The syntax is dual to piSMC of      *)
+(* A chain is written in a custom entry, delimited by \epsilon[ C ]{ }, whose *)
+(* four statements are the four constructors and whose bracket carries the    *)
+(* dictionary the program is read at.  The syntax is dual to piSMC of         *)
 (* smc/pismc.v: piSMC writes what the parties do, epsHop writes what the      *)
 (* security argument about them costs.                                        *)
 (*                                                                            *)
@@ -59,7 +60,9 @@ From mathcomp Require Import boolp reals.
 (*                                                                            *)
 (*   \epsilon[ C ]{ s }     the program s is read at the dictionary C, the    *)
 (*                         claim function saying what each of its labels      *)
-(*                         asserts.                                           *)
+(*                         asserts.  A program with no terminal is a chain,   *)
+(*                         and a chain named by a let enters a longer         *)
+(*                         program as a statement.                            *)
 (*                                                                            *)
 (* The label slot names the assumption invoked and where (dcr_g, cpa_bob),    *)
 (* the cost slot is that assumption's epsilon, and the proof slot says        *)
@@ -81,8 +84,13 @@ From mathcomp Require Import boolp reals.
 (* bound variable of lib/bigop_ext.v, which does not require this file.  The  *)
 (* first terminal statement is spelled plus rather than add to keep the word  *)
 (* of a chain clear of GRing.add, which benaloh_enc.v and paillier_enc.v      *)
-(* unfold.  The two delimiters \epsilon{ and \epsilon[ are each one lexer     *)
-(* token, so neither of them spends an identifier.                            *)
+(* unfold.  The delimiter \epsilon[ is one lexer token, so it spends no       *)
+(* identifier.  A named fragment enters a program as a statement through a    *)
+(* let-bound identifier, as in let hops := alice_hops D in \epsilon[ C ]{     *)
+(* hops ;; plus ... }, the entry lifting an identifier and not an             *)
+(* application.  A frag statement rule taking a constr fragment would         *)
+(* remove the let at the cost of one more global identifier, which is why     *)
+(* there is none.                                                             *)
 (*                                                                            *)
 (* Three levels are forced.  The proof slot sits at level 10, an application  *)
 (* such as le_of_eq hop0_advantageE not parsing at level 0.  The label slot   *)
@@ -145,7 +153,9 @@ From mathcomp Require Import boolp reals.
 (*                              its label list                                *)
 (*  chain_result_of_chain m == the result a chain returns on its own, the     *)
 (*                              gap between its endpoints bounded by the      *)
-(*                              total of its loss                             *)
+(*                              total of its loss, a coercion inserted where  *)
+(*                              a result is asked for of a program with no    *)
+(*                              terminal                                      *)
 (*  chain_plus m l c H Hc Hm == the result obtained from m by adding the      *)
 (*                              external term c under the label l, where Hc   *)
 (*                              and Hm check c and where m stopped against    *)
@@ -418,9 +428,8 @@ Coercion chain_result_of_chain : chain >-> chain_result.
 (* The claim function is solved from the expected type of a statement before
    its explicit arguments are elaborated, which is what the & records.  A
    client therefore names the claim function of its program once, in the
-   bracket of \epsilon[ C ]{ } or in a return-type ascription for the
-   unbracketed form, and every label inside the program is read at that
-   claim function. *)
+   bracket of \epsilon[ C ]{ }, and every label inside the program is read at
+   that claim function. *)
 Arguments chain_start {L R claim_of} & g.
 Arguments chain_hop {L R claim_of} & l e g' H He Hg.
 Arguments chain_same {L R claim_of} & {x} g' H.
@@ -485,10 +494,6 @@ Declare Scope epshop_scope.
 Delimit Scope epshop_scope with eps.
 Declare Custom Entry epshop.
 
-(* The delimiter.  As in smc/pismc.v the brace form is prefixed, {| e |}
-   being taken by the record syntax, and \epsilon{ is one lexer token. *)
-Notation "'\epsilon{' e '}'" := e (e custom epshop at level 99) : epshop_scope.
-
 (* Identifiers lift into the entry, so a named chain may stand as a
    statement. *)
 Notation "x" := x (in custom epshop at level 0, x ident).
@@ -511,39 +516,24 @@ Notation "'same' 'to' g' 'by' H" := (chain_same g' H)
 Notation "s1 ';' s2" := (chain_then s1 s2 erefl)
   (in custom epshop at level 90, right associativity).
 
+(* The delimiter.  As in smc/pismc.v the brace form is prefixed, {| e |}
+   being taken by the record syntax, and \epsilon[ is one lexer token.  The
+   bracket carries the dictionary, the claim function saying what each label
+   of the program asserts: a label is a bare constructor and names its claim
+   through the dictionary alone, so the ascription the delimiter inserts is
+   what lets the labels inside elaborate and a program needs no return type
+   on its Definition.  A program with no terminal is a chain, composable as a
+   fragment of a longer program, and where a result is asked for the coercion
+   chain_result_of_chain reads off its gap result. *)
+Notation "'\epsilon[' C ']{' e '}'" := (e : chain C)
+  (C constr at level 0, e custom epshop at level 99) : epshop_scope.
+
 (* The terminals, closed notations on the same delimiter.  The two erefl of
    plus check the term written against the label's claim and the game the
    chain stopped at against the game that claim bounds; bound republishes the
    result at the explicit c its proof says the loss totals.  A chain reaching
    bound without a plus is coerced to the result on the gap between its first
    and its last game. *)
-Notation "'\epsilon{' s ';;' 'plus' l c 'by' H '}'" :=
-  (chain_plus s l c H erefl erefl)
-  (s custom epshop at level 99, l constr at level 0, c constr at level 0,
-   H constr at level 10) : epshop_scope.
-
-Notation "'\epsilon{' s ';;' 'bound' c 'by' H '}'" := (chain_bound s c H)
-  (s custom epshop at level 99, c constr at level 0, H constr at level 10)
-  : epshop_scope.
-
-Notation "'\epsilon{' s ';;' 'plus' l c 'by' H ';;' 'bound' c' 'by' H' '}'" :=
-  (chain_bound (chain_plus s l c H erefl erefl) c' H')
-  (s custom epshop at level 99, l constr at level 0, c constr at level 0,
-   H constr at level 10, c' constr at level 0, H' constr at level 10)
-  : epshop_scope.
-
-(* The same four statements on a delimiter carrying the dictionary, the claim
-   function saying what each label of the program asserts.  The dictionary is
-   written on the delimiter because a label is a bare constructor and names
-   its claim through the dictionary alone: the ascription the delimiter
-   inserts is what lets the labels inside elaborate, so a program written
-   this way needs no return type on its Definition.  The interior is
-   untouched, the statements and the separator being the ones declared
-   above. *)
-Notation "'\epsilon[' C ']{' e '}'" :=
-  (chain_result_of_chain (e : chain C))
-  (C constr at level 0, e custom epshop at level 99) : epshop_scope.
-
 Notation "'\epsilon[' C ']{' s ';;' 'plus' l c 'by' H '}'" :=
   ((chain_plus s l c H erefl erefl : chain_result C))
   (C constr at level 0, s custom epshop at level 99, l constr at level 0,

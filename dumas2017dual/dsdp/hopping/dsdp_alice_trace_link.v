@@ -77,6 +77,11 @@ Require Import dsdp_alice_hop_secrecy.
 (*       accept_trace_tupleE == a Boolean test accepts Alice's executed       *)
 (*                              trace as often as its lift accepts her        *)
 (*                              hopping tuple                                 *)
+(* alice_hops_assumed A D HB HC ==                                            *)
+(*                              the two ciphertext replacements as one        *)
+(*                              fragment, both charged at the epsilon A       *)
+(*                              assumes, the two class memberships spent in   *)
+(*                              the hop justifications                        *)
 (* alice_trace_chain predict == Alice's trace secrecy as one epsHop           *)
 (*                              program, opening at the trace of a run of the *)
 (*                              protocol by the interpreter                   *)
@@ -654,34 +659,60 @@ Local Notation eps_charlie D :=
 
 Local Open Scope epshop_scope.
 
+(* The fragment alice_hops charged at the epsilon an adversary-class
+   assumption promises rather than at the advantage each reduction shows.
+   The two class memberships are parameters and are spent inside the
+   fragment, one in the justification of each hop, so a fragment that exists
+   has already spent them.  It stands here rather than beside alice_hops
+   because the class-conditional bound of a reduction is read at a private
+   key, and the private keys are variables of this section.
+   Naming: extends [alice_hops] with the [assumed] token naming the quantity
+   its two hops are charged at. *)
+Definition alice_hops_assumed (A : indcpa_epsilon_assumption)
+    (D : distinguisher (plain AHE * plain AHE * alice_hop_tupleT AHE Renc)%type)
+    (HB : indcpa_admissible A (bob_challenge_adversary D))
+    (HC : indcpa_admissible A (charlie_challenge_adversary D)) :=
+  \epsilon[ alice_claim_assumed pkey_of_dk v1 u1 u2 u3 A D ]{
+    (* the real hopping tuple, both ciphertext slots carrying their
+       plaintexts *)
+    start (accept D G0) ;
+    (* Bob's ciphertext slot zeroed, at the epsilon A assumes, which the
+       class membership of the Bob-key reduction licenses *)
+    hop cpa_bob (indcpa_assumption_epsilon A) to (accept D G1)
+      by le_trans (le_of_eq (hop0_advantageE card_renc rand_of_renc
+                               pkey_of_dk v1 u1 u2 u3 D))
+                  (indcpa_admissible_epsilon_le dk_b HB) ;
+    (* Charlie's slot zeroed, at the same epsilon, licensed by the class
+       membership of the Charlie-key reduction *)
+    hop cpa_charlie (indcpa_assumption_epsilon A) to (accept D G2)
+      by le_trans (le_of_eq (hop1_advantageE card_renc rand_of_renc
+                               pkey_of_dk v1 u1 u2 u3 D))
+                  (indcpa_admissible_epsilon_le dk_c HC) }.
+
 (* Alice's trace secrecy as one program.  Its first game is the trace the
    interpreter hands Alice when it runs the DSDP protocol at the sampled
    inputs, so the object the argument starts from is the executed protocol
    itself rather than a tuple of values assumed to stand for it.  The trace
    is a deterministic image of the hopping tuple, so the step to G0 costs
-   nothing; the two hops then cost the advantages the two reductions
-   actually show, each assumption-conditional at one key; and the residue at
-   the all-zero endpoint is information-theoretic, the mass the leaked output
-   leaves along the DSDP solution fiber.  The bound the program returns is
-   the total of those three terms. *)
+   nothing; the two ciphertext replacements then enter as the fragment
+   alice_hops, at the advantages the two reductions actually show, each
+   assumption-conditional at one key; and the residue at the all-zero
+   endpoint is information-theoretic, the mass the leaked output leaves
+   along the DSDP solution fiber.  The bound the program returns is the
+   total of those three terms. *)
 Definition alice_trace_chain (predict : predictor alice_traceT) :=
   let D_trace := distinguisher_of_predictor predict in
   let D := D_trace \o (fun x => (x.1.1, x.1.2,
                                  alice_trace_of_hop_tuple x.2)) in
+  let hops := alice_hops card_renc rand_of_renc pkey_of_dk v1 u1 u2 u3 D in
   \epsilon[ alice_claim card_renc rand_of_renc pkey_of_dk v1 u1 u2 u3 D ]{
     (* the trace of a run of the protocol by the interpreter *)
     start (accept D_trace
              (`p_ [% V2, V3, trace_of_run dsdp_protocol Alice])) ;
     (* her trace is a deterministic image of her hopping tuple *)
     same to (accept D G0) by accept_trace_tupleE D_trace ;
-    (* Bob's ciphertext slot zeroed, at one IND-CPA advantage *)
-    hop cpa_bob (eps_bob D) to (accept D G1)
-      by le_of_eq (hop0_advantageE card_renc rand_of_renc pkey_of_dk
-                     v1 u1 u2 u3 D) ;
-    (* Charlie's slot zeroed, at a second IND-CPA advantage *)
-    hop cpa_charlie (eps_charlie D) to (accept D G2)
-      by le_of_eq (hop1_advantageE card_renc rand_of_renc pkey_of_dk
-                     v1 u1 u2 u3 D) ;;
+    (* both ciphertext slots zeroed, at the two IND-CPA advantages *)
+    hops ;;
     (* the guessing residue of the all-zero view, a term outside the
        hopping, added to the loss so the total bounds the trace game *)
     plus uniform_plain #|plain AHE|%:R^-1
@@ -691,11 +722,12 @@ Definition alice_trace_chain (predict : predictor alice_traceT) :=
     bound (#|plain AHE|%:R^-1 + eps_bob D + eps_charlie D)
       by alice_totalE card_renc rand_of_renc pkey_of_dk v1 u1 u2 u3 D }.
 
-(* The same argument over the same games and the same three labels, with each
-   ciphertext replacement charged at the epsilon an adversary-class assumption
-   promises rather than at the advantage its own reduction shows.  The two
-   class memberships are parameters of the program and are spent inside it, in
-   the justification of the hop each one licenses, which is the shape
+(* The same argument over the same games and the same three labels, with the
+   two ciphertext replacements entering as the fragment alice_hops_assumed,
+   each charged at the epsilon an adversary-class assumption promises rather
+   than at the advantage its own reduction shows.  The two class memberships
+   are parameters of the program and are spent inside the fragment, in the
+   justification of the hop each one licenses, which is the shape
    paillier_chain has; a chain that exists has therefore already spent them,
    and the bound read off it leaves nothing to discharge.  The residue at the
    all-zero endpoint is the same information-theoretic term as in
@@ -712,24 +744,15 @@ Definition alice_trace_chain_assumed (A : indcpa_epsilon_assumption)
   let D_trace := distinguisher_of_predictor predict in
   let D := D_trace \o (fun x => (x.1.1, x.1.2,
                                  alice_trace_of_hop_tuple x.2)) in
+  let hops := alice_hops_assumed HB HC in
   \epsilon[ alice_claim_assumed pkey_of_dk v1 u1 u2 u3 A D ]{
     (* the trace of a run of the protocol by the interpreter *)
     start (accept D_trace
              (`p_ [% V2, V3, trace_of_run dsdp_protocol Alice])) ;
     (* her trace is a deterministic image of her hopping tuple *)
     same to (accept D G0) by accept_trace_tupleE D_trace ;
-    (* Bob's ciphertext slot zeroed, at the epsilon A assumes, which the
-       class membership of the Bob-key reduction licenses *)
-    hop cpa_bob (indcpa_assumption_epsilon A) to (accept D G1)
-      by le_trans (le_of_eq (hop0_advantageE card_renc rand_of_renc
-                               pkey_of_dk v1 u1 u2 u3 D))
-                  (indcpa_admissible_epsilon_le dk_b HB) ;
-    (* Charlie's slot zeroed, at the same epsilon, licensed by the class
-       membership of the Charlie-key reduction *)
-    hop cpa_charlie (indcpa_assumption_epsilon A) to (accept D G2)
-      by le_trans (le_of_eq (hop1_advantageE card_renc rand_of_renc
-                               pkey_of_dk v1 u1 u2 u3 D))
-                  (indcpa_admissible_epsilon_le dk_c HC) ;;
+    (* both ciphertext slots zeroed, at twice the epsilon A assumes *)
+    hops ;;
     (* the guessing residue of the all-zero view, a term outside the
        hopping, added to the loss so the total bounds the trace game *)
     plus uniform_plain #|plain AHE|%:R^-1

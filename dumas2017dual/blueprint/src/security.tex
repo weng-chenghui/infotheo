@@ -1227,6 +1227,30 @@ pending obligation, and a bound is read off it by projection.
   the soundness field of this result at its two class memberships.
 \end{definition}
 
+\begin{definition}[The two ciphertext replacements as one fragment]
+  \label{def:alice_hops}
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_hops,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_hops_assumed}
+  \rocqok
+  \uses{def:chain,def:claim,def:loss,lem:alice_view_advantage,def:indcpa_assumption}
+  The two ciphertext replacements as one chain over $\gamma_0(D)$,
+  $\gamma_1(D)$ and $\gamma_2(D)$, carrying no terminal statement. Its loss is
+  the two labels $\mathsf{cpa\_bob}$ and $\mathsf{cpa\_charlie}$, and the gap
+  result it returns on its own bounds the distance between the real hopping
+  tuple and the all-zero one, which is the simulation bound.
+  \[ \mathrm{tot}(s) = \epshopsum{D} \]
+  Each hop is justified by Lemma~\ref{lem:alice_view_advantage}, which makes
+  its gap exactly the advantage it logs, read as an inequality through
+  \texttt{le\_of\_eq}. \texttt{alice\_hops\_assumed} is the same fragment over
+  the dictionary $C^{\mathcal{A}}$ that charges each hop the advantage
+  $\mathcal{A}$ of Definition~\ref{def:indcpa_assumption} assumes, justified
+  by the class membership of that hop's reduction, so its two memberships are
+  parameters spent inside the fragment.
+  \[ \mathrm{tot}(s) = 2\,\varepsilon_{\mathrm{cpa}} \]
+  Both fragments enter a longer program through a let-bound name, an
+  application not being a statement of the entry.
+\end{definition}
+
 \begin{definition}[Alice's ladder as a chain, and the bound read off it]
   \label{def:alice_chain}
   \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_label,
@@ -1235,10 +1259,11 @@ pending obligation, and a bound is read off it by projection.
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_chain,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_totalE}
   \rocqok
-  \uses{def:chain,def:chain_result,def:claim,def:loss,lem:alice_view_advantage,lem:guess_all_zero,thm:alice_guess_real}
+  \uses{def:chain,def:chain_result,def:claim,def:loss,def:alice_hops,lem:alice_view_advantage,lem:guess_all_zero,thm:alice_guess_real}
   Alice's ladder as a chain over $\gamma_0(D_g), \gamma_1(D_g), \gamma_2(D_g)$,
   the acceptance probabilities of a predictor's distinguisher at the three
-  hops, joined by the two ciphertext replacements. Each hop logs the advantage
+  hops, joined by the fragment of Definition~\ref{def:alice_hops}, which enters
+  the program through a let-bound name. Each hop logs the advantage
   of the reduction its label names, at Bob's key and then at Charlie's, and the
   terminal statement bounds the all-zero endpoint under a third label, so the
   program is a chain bound on $\gamma_0(D_g)$. \texttt{alice\_claim} fixes what
@@ -1253,7 +1278,8 @@ pending obligation, and a bound is read off it by projection.
   later statement requires it to be small. The terminal term
   $\mathsf{uniform\_plain}$ is information-theoretic and unconditional, the
   residue the leaked output leaves along the solution fiber. The two hops are
-  justified by Lemma~\ref{lem:alice_view_advantage}, which makes each gap
+  those of Definition~\ref{def:alice_hops}, justified by
+  Lemma~\ref{lem:alice_view_advantage}, which makes each gap
   exactly the term it logs, read as an inequality through
   \texttt{le\_of\_eq}; the terminal statement is justified by
   \texttt{all\_zero\_game\_V2\_le\_invm}, which is
@@ -1267,7 +1293,7 @@ pending obligation, and a bound is read off it by projection.
   \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.accept_trace_tupleE,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_trace_chain}
   \rocqok
-  \uses{def:alice_chain,def:alice_trace,lem:trace_of_hop_tuple}
+  \uses{def:alice_chain,def:alice_hops,def:alice_trace,lem:trace_of_hop_tuple}
   The chain of Definition~\ref{def:alice_chain} preceded by one further game.
   $G_\tau$ is the law of the honest input pair beside the trace the interpreter
   returns for Alice when it runs $\mathrm{dsdp\_protocol}$ at a sample, and
@@ -1280,8 +1306,9 @@ pending obligation, and a bound is read off it by projection.
   The step to $\gamma_0$ carries no label and adds nothing to the loss: by
   Lemma~\ref{lem:trace_of_hop_tuple} the trace is the image of the tuple under
   $\tau$, so a test on the trace accepts as often as its lift on the tuple.
-  The two hops and the terminal statement are those of
-  Definition~\ref{def:alice_chain} at the lifted test $D_{g \circ \tau}$, so
+  The two hops are the fragment of Definition~\ref{def:alice_hops} at the
+  lifted test $D_{g \circ \tau}$, entering through a let-bound name, and the
+  terminal statement is that of Definition~\ref{def:alice_chain}, so
   the loss and the bound are the same three terms.
   \[ \mathrm{tot}(s) = \tfrac{1}{m} + \epshopsum{D_{g \circ \tau}} \]
   The trace bound of Theorem~\ref{thm:alice_trace_bounds} is the soundness
@@ -1294,7 +1321,7 @@ pending obligation, and a bound is read off it by projection.
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_assumed_totalE,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_trace_chain_assumed}
   \rocqok
-  \uses{def:alice_trace_chain,def:indcpa_assumption,def:claim,def:loss}
+  \uses{def:alice_trace_chain,def:alice_hops,def:indcpa_assumption,def:claim,def:loss}
   The program of Definition~\ref{def:alice_trace_chain} over the dictionary
   $C^{\mathcal{A}}$ that charges each hop the advantage $\mathcal{A}$ assumes
   in place of the advantage its own reduction shows. The three games and the
@@ -1305,8 +1332,9 @@ pending obligation, and a bound is read off it by projection.
      C^{\mathcal{A}}(\mathsf{cpa\_charlie})
        = \big(\gamma_1(D),\ \gamma_2(D),\ \varepsilon_{\mathrm{cpa}}\big) \]
   The two class memberships are parameters of the program and are spent inside
-  it, one in the justification of each hop, which is the shape
-  Definition~\ref{def:paillier_chain} has. The terminal label costs the same
+  the fragment \texttt{alice\_hops\_assumed} of
+  Definition~\ref{def:alice_hops}, one in the justification of each hop, which
+  is the shape Definition~\ref{def:paillier_chain} has. The terminal label costs the same
   unconditional residue as in Definition~\ref{def:alice_trace_chain}, so the
   total adds one unconditional term to two assumption-conditional ones, and
   \texttt{alice\_assumed\_totalE} is the reordering that states it.

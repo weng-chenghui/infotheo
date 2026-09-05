@@ -69,12 +69,12 @@ Require Import negligible indcpa_game epshop.
 (* real experiment, hops to the unit challenge, crosses the middle identity   *)
 (* at no cost, and hops back to the zero experiment.  Its loss is the list    *)
 (* of the two labels the bound rests on, one per residuosity call, and        *)
-(* paillier_claim fixes for each label the two experiments its call moves     *)
-(* between and the epsilon it assumes.  The chain returns twice the           *)
-(* residuosity epsilon as its bound, which is the number in                   *)
-(* paillier_dcr_epsilon_le.  The two class memberships are parameters of the  *)
-(* chain, so paillier_dcr_epsilon_le assumes exactly what building the chain  *)
-(* spends.                                                                    *)
+(* paillier_claim, the dictionary written on the program's delimiter, fixes   *)
+(* for each label the two experiments its call moves between and the epsilon  *)
+(* it assumes.  The chain returns twice the residuosity epsilon as its        *)
+(* bound, which is the number in paillier_dcr_epsilon_le.  The two class      *)
+(* memberships are parameters of the chain, so paillier_dcr_epsilon_le        *)
+(* assumes exactly what building the chain spends.                            *)
 (*                                                                            *)
 (* The one number-theoretic input is g ^+ (p q) = 1, the order condition the  *)
 (* private key record already carries.  The statement proved here is          *)
@@ -404,13 +404,13 @@ Proof. by rewrite mulr_natl mulr2n. Qed.
 Definition paillier_chain (A : dcr_assumption) (dk : priv_key AHE)
     (adv : indcpa_adversary (R:=R) AHE)
     (Hg : residuosity_admissible A (dcr_of_adversary (priv_gen dk) adv))
-    (Hz : residuosity_admissible A (dcr_of_adversary_zero adv))
-  : chain_result (paillier_claim A dk adv) :=
+    (Hz : residuosity_admissible A (dcr_of_adversary_zero adv)) :=
   let D_g := dcr_of_adversary (priv_gen dk) adv in
   let D_0 := dcr_of_adversary_zero adv in
   let eps_dcr := dcr_epsilon A in
-  (* the real experiment *)
-  \epsilon{ start (accept D_g residue_fdist) ;
+  \epsilon[ paillier_claim A dk adv ]{
+            (* the real experiment *)
+            start (accept D_g residue_fdist) ;
             (* the first residuosity call, through D_g *)
             hop dcr_g eps_dcr to (accept D_g unit_fdist)
               by residuosity_admissible_epsilon_le _ _ Hg ;

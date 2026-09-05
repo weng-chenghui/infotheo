@@ -222,10 +222,13 @@ Require Import epshop.
 (*      alice_assumed_totalE == the closed form of the loss of a chain over   *)
 (*                              alice_claim_assumed, the residue plus twice   *)
 (*                              the assumed epsilon                           *)
-(*               alice_chain == the three games and two hops of this file,    *)
-(*                              bounded at the all-zero endpoint, as one      *)
-(*                              chain returning its bound on the real-view    *)
-(*                              game                                          *)
+(*              alice_hops D == the two ciphertext replacements as one        *)
+(*                              fragment, a chain from the real tuple game to *)
+(*                              the all-zero one at the two advantages the    *)
+(*                              reductions show                               *)
+(*               alice_chain == alice_hops bounded at the all-zero endpoint,  *)
+(*                              as one chain returning its bound on the       *)
+(*                              real-view game                                *)
 (*                                                                            *)
 (* Simulation                                                                 *)
 (*                                                                            *)
@@ -1226,15 +1229,6 @@ Definition alice_claim_assumed (A : indcpa_epsilon_assumption)
   | uniform_plain => PlusClaim (accept D G2) #|plain AHE|%:R^-1
   end.
 
-(* The computational-security argument of this file written as a chain: the
-   acceptance probabilities of the predictor's distinguisher on G0, G1 and
-   G2, joined by the two ciphertext replacements, and then bounded at the
-   all-zero endpoint.  Each hop logs the advantage of the reduction its label
-   names, and hop0_advantageE and hop1_advantageE are equalities, so each term
-   is exactly the gap its hop spans.  Composing the two hops is where the one
-   triangle inequality of the argument is spent, and the terminal statement is
-   what turns the comparison of two acceptance probabilities into a bound on
-   the real-view game, which is the shape a secrecy statement takes. *)
 (* The closed form of the loss the chain below accumulates, written in the
    order alice_tuple_guess_V2_le states: the plaintext-space residue first,
    then the Bob-key advantage, then the Charlie-key advantage.  The chain
@@ -1259,17 +1253,46 @@ Lemma alice_assumed_totalE (A : indcpa_epsilon_assumption) :
   = (#|plain AHE|%:R : R)^-1 + 2 * indcpa_assumption_epsilon A.
 Proof. by rewrite mulr_natl mulr2n addrC. Qed.
 
-Definition alice_chain (predict : predictor alice_hop_tupleT) :
-    chain_result (alice_claim (distinguisher_of_predictor predict)) :=
-  let D := distinguisher_of_predictor predict in
-  (* the real view, both ciphertext slots carrying their plaintexts *)
-  \epsilon{ start (accept D G0) ;
+(* The two ciphertext replacements as one fragment: from the real hopping
+   tuple to the tuple whose two ciphertext slots both carry zero, at the two
+   advantages the reductions at Bob's key and at Charlie's actually show.
+   hop0_advantageE and hop1_advantageE are equalities, so each term is
+   exactly the gap its hop spans, and composing the two is where the one
+   triangle inequality of the argument is spent.  The fragment carries no
+   terminal, so it is a chain, and the gap result it returns on its own is
+   the bound on the distance between Alice's real view and her all-zero
+   view, which is the simulation bound of alice_sim_advantage_le.  It is the
+   middle of every Alice program: alice_chain below and the two trace
+   programs of dsdp_alice_trace_link.v each take it in through a let-bound
+   name.
+   Naming: [hops] names the two hop steps the fragment is made of. *)
+Definition alice_hops
+    (D : distinguisher (plain AHE * plain AHE * alice_hop_tupleT)%type) :=
+  \epsilon[ alice_claim D ]{
+            (* the real view, both ciphertext slots carrying their
+               plaintexts *)
+            start (accept D G0) ;
             (* Bob's ciphertext slot zeroed, at one IND-CPA advantage *)
             hop cpa_bob (eps_bob D) to (accept D G1)
               by le_of_eq (hop0_advantageE D) ;
             (* Charlie's slot zeroed, at a second IND-CPA advantage *)
             hop cpa_charlie (eps_charlie D) to (accept D G2)
-              by le_of_eq (hop1_advantageE D) ;;
+              by le_of_eq (hop1_advantageE D) }.
+
+(* The computational-security argument of this file written as a chain: the
+   two ciphertext replacements of alice_hops, and then the all-zero endpoint
+   bounded.  The fragment enters as a let-bound name, so the two hops, their
+   labels and their proofs are the ones alice_hops already checked against
+   the dictionary; what this program adds is the terminal statement, which
+   turns the comparison of two acceptance probabilities into a bound on the
+   real-view game, the shape a secrecy statement takes. *)
+Definition alice_chain (predict : predictor alice_hop_tupleT) :=
+  let D := distinguisher_of_predictor predict in
+  let hops := alice_hops D in
+  \epsilon[ alice_claim D ]{
+            (* the two ciphertext replacements, from the real view to the
+               view whose two slots both encrypt zero *)
+            hops ;;
             (* the guessing residue of the all-zero view, a term outside the
                hopping, added to the loss so the total bounds the real view *)
             plus uniform_plain #|plain AHE|%:R^-1

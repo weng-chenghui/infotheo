@@ -63,7 +63,8 @@ Require Import negligible indcpa_game epshop.
 (* computational_security/epshop.v.  Its objects are the four acceptance      *)
 (* probabilities the hybrid passes through, and its loss is the two-label     *)
 (* list residuosity_y and residuosity_0, whose claims benaloh_claim fixes,    *)
-(* each carrying the r-th residuosity epsilon its call assumes.  The bound of *)
+(* the dictionary written on the program's delimiter, each label carrying     *)
+(* the r-th residuosity epsilon its call assumes.  The bound of               *)
 (* benaloh_residuosity_epsilon_le is the bound that chain returns and its two *)
 (* hypotheses are the two class memberships the chain is built at, so the     *)
 (* bound is read off the chain rather than reassembled from a triangle        *)
@@ -417,13 +418,13 @@ Proof. by rewrite mulr_natl mulr2n. Qed.
 Definition benaloh_chain (A : benaloh_residuosity_assumption)
     (dk : priv_key AHE) (adv : indcpa_adversary (R:=R) AHE)
     (Hy : residuosity_admissible A (residuosity_of_adversary (priv_gen dk) adv))
-    (H0 : residuosity_admissible A (residuosity_of_adversary_zero adv))
-    : chain_result (benaloh_claim A dk adv) :=
+    (H0 : residuosity_admissible A (residuosity_of_adversary_zero adv)) :=
   let D_y := residuosity_of_adversary (priv_gen dk) adv in
   let D_0 := residuosity_of_adversary_zero adv in
   let eps_residuosity := benaloh_residuosity_epsilon A in
-  (* the real arm *)
-  \epsilon{ start (accept D_y residue_fdist) ;
+  \epsilon[ benaloh_claim A dk adv ]{
+            (* the real arm *)
+            start (accept D_y residue_fdist) ;
             (* the first residuosity call, through D_y *)
             hop residuosity_y eps_residuosity to (accept D_y unit_fdist)
               by residuosity_admissible_epsilon_le _ _ Hy ;
