@@ -27,12 +27,10 @@ benaloh_indcpa_scheme:benaloh_residuosity_admissible
 benaloh_indcpa_scheme:benaloh_residuosity_admissible_cipher_constant
 benaloh_indcpa_scheme:f_size_benaloh_negligible
 benaloh_indcpa_scheme:f_adv_benaloh_negligible
-benaloh_indcpa_scheme:f_bound_benaloh_negligible
 benaloh_indcpa_scheme:f_r
 benaloh_indcpa_scheme:f_size_benaloh
 benaloh_indcpa_scheme:f_residuosity_benaloh
 benaloh_indcpa_scheme:f_adv_benaloh
-benaloh_indcpa_scheme:f_bound_benaloh
 # dsdp_instance_sequence: the two per-k scheme instance records and the three
 # sequence records built over them, from the scheme files' coin plumbing; the
 # blueprint cites the bounds read off along those sequences.
@@ -137,7 +135,6 @@ dsdp_instance_sequence:idealized_bob_cipher_constant
 dsdp_instance_sequence:idealized_charlie_cipher_constant
 dsdp_instance_sequence:idealized_indcpa_scheme
 dsdp_instance_sequence:idealized_instance
-dsdp_instance_sequence:negligible_fun_cst0
 dsdp_instance_sequence:negligible_fun_inv_expnn
 dsdp_instance_sequence:negligible_fun_inv_ge_expnn
 dsdp_instance_sequence:paillier_bob_decide_constant_admissible
@@ -209,9 +206,10 @@ indcpa_game:challenge_joint_fdistE
 indcpa_game:distinguisher
 indcpa_game:enc_slot_resampleE
 indcpa_game:fdistbind_cst
-# negligible: the three closure lemmas the blueprint folds into the
-# def:negligible node and into thm:negligible_fun_predictor_bound.
+# negligible: the closure lemmas the blueprint folds into the def:negligible
+# node and into lem:negligible_fun_sum.
 negligible:negligible_fun_add
+negligible:negligible_fun_cst0
 negligible:negligible_fun_double
 negligible:negligible_fun_le
 # paillier_indcpa_scheme: the scheme side of the Paillier IND-CPA scheme, the
@@ -236,12 +234,10 @@ paillier_indcpa_scheme:paillier_dcr_admissible
 paillier_indcpa_scheme:paillier_dcr_admissible_cipher_constant
 paillier_indcpa_scheme:f_size_paillier_negligible
 paillier_indcpa_scheme:f_adv_paillier_negligible
-paillier_indcpa_scheme:f_bound_paillier_negligible
 paillier_indcpa_scheme:f_pq
 paillier_indcpa_scheme:f_size_paillier
 paillier_indcpa_scheme:f_dcr_paillier
 paillier_indcpa_scheme:f_adv_paillier
-paillier_indcpa_scheme:f_bound_paillier
 
 # The scheme record the IND-CPA game is quantified over and its two
 # inhabitants: plumbing the blueprint cites through the DSDP bounds read off

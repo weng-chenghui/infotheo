@@ -643,6 +643,21 @@ $e$-th residuosity assumption.
   inverse polynomial.
 \end{definition}
 
+\begin{lemma}[A finite sum of negligible sequences is negligible]
+  \label{lem:negligible_fun_sum}
+  \rocq{infotheo.computational_security.negligible.negligible_fun_sum}
+  \rocqok
+  \uses{def:negligible_fun}
+  Summing finitely many negligible sequences, indexed by a list, leaves a
+  negligible sequence.
+  \[ \big(\forall i,\ \mathrm{negl}(F_i)\big) \implies
+     \mathrm{negl}\Big(k \mapsto \sum_{i \in s} F_i(k)\Big) \]
+  The negligible sequences are an additive submonoid of the sequences of
+  reals, and a sum over a list lands in it as soon as each entry does. A
+  chain totals one cost per label of its loss, so a bound read off such a
+  total is negligible as soon as each label's cost sequence is.
+\end{lemma}
+
 \begin{definition}[An adversary class and the advantage it assumes]
   \label{def:indcpa_assumption}
   \rocq{infotheo.computational_security.indcpa_game.indcpa_epsilon_assumption}
@@ -1233,18 +1248,6 @@ pending obligation, and a bound is read off it by projection.
 
 \section{What the class leaves out, and the three settings}
 
-\begin{lemma}[The class-conditional bound is negligible as a sequence]
-  \label{lem:negligible_predictor_bound}
-  \rocq{infotheo.computational_security.negligible.negligible_fun_predictor_bound}
-  \rocqok
-  \uses{def:negligible_fun}
-  The arithmetic shape of the class-conditional bound is negligible whenever both of its
-  summand sequences are.
-  \[ \mathrm{negl}(k \mapsto \iota_k) \wedge \mathrm{negl}(k \mapsto \eta_k)
-     \implies \mathrm{negl}\big(k \mapsto \iota_k + 2\,\eta_k\big) \]
-  Both arguments are sequences of reals.
-\end{lemma}
-
 \begin{definition}[The decrypting predictor]
   \label{def:trace_decryptor}
   \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.bob_decrypt_predictor,
@@ -1364,7 +1367,7 @@ pending obligation, and a bound is read off it by projection.
   \label{thm:alice_guess_negligible}
   \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_instance_sequence.alice_trace_guess_V2_negligible}
   \rocqok
-  \uses{def:negligible_fun,def:dsdp_instance,def:dsdp_instance_sequence,lem:negligible_predictor_bound,thm:alice_guess_admissible}
+  \uses{def:negligible_fun,def:dsdp_instance,def:dsdp_instance_sequence,thm:alice_guess_admissible}
   Along a sequence $\mathcal{Q}$ of DSDP instances and a sequence of predictors
   $g_k$, if both reduction adversaries of $g_k$ are admissible for
   $\mathcal{A}_k$ at every $k$, then the guessing probabilities are negligible.

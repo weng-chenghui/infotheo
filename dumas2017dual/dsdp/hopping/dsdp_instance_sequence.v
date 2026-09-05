@@ -79,7 +79,6 @@ Require Import dsdp_alice_hop_secrecy dsdp_alice_trace_link.
 (*   negligible_fun_inv_expnn == the inverse of (k+2)^(k+2) is negligible     *)
 (* negligible_fun_inv_ge_expnn == a sequence dominating (k+2)^(k+2) has a     *)
 (*                               negligible inverse                           *)
-(*        negligible_fun_cst0 == the zero sequence is negligible              *)
 (*     bob_trace_adversary_at == the Bob-key reduction adversary at k         *)
 (* charlie_trace_adversary_at == the Charlie-key reduction adversary at k     *)
 (* alice_trace_guess_V2_pr_at == the trace guessing probability at k          *)
@@ -274,11 +273,6 @@ rewrite lef_pV2 ?ler_nat //.
   by rewrite posrE ltr0n (leq_trans _ (Hf k)) // expn_gt0.
 by rewrite posrE ltr0n expn_gt0.
 Qed.
-
-(* The zero sequence is negligible: what the cipher-constant assumption
-   sequence contributes to the witness. *)
-Lemma negligible_fun_cst0 : negligible_fun (fun _ : nat => 0 : R).
-Proof. by move=> c; exists 0 => n Hn; rewrite invr_gt0 exprn_gt0 // ltr0n. Qed.
 
 End negligible_helpers.
 

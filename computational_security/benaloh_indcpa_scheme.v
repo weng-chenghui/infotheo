@@ -162,14 +162,11 @@ Require Import negligible indcpa_game epshop.
 (*      f_residuosity_benaloh == the assumed residuosity-advantage sequence   *)
 (*              f_adv_benaloh == the derived advantage sequence, twice        *)
 (*                               f_residuosity_benaloh                        *)
-(*            f_bound_benaloh == f_r plus twice f_adv_benaloh                 *)
 (* f_size_benaloh_negligible ==                                               *)
 (*                              superpolynomial growth of r k makes           *)
 (*                              f_size_benaloh negligible                     *)
 (*   f_adv_benaloh_negligible == f_adv_benaloh is negligible when             *)
 (*                               f_residuosity_benaloh is                     *)
-(* f_bound_benaloh_negligible == f_bound_benaloh is negligible when f_r and   *)
-(*                               f_residuosity_benaloh are                    *)
 (* ```                                                                        *)
 (*                                                                            *)
 (******************************************************************************)
@@ -589,10 +586,6 @@ Definition f_residuosity_benaloh k : R := benaloh_residuosity_epsilon (D k).
 Definition f_adv_benaloh k : R :=
   indcpa_assumption_epsilon (benaloh_indcpa_assumption (r_gt1 k) (D k)).
 
-(* The bound sequence 1/(r k) + 2 * eps k: the shape of the class-conditional
-   guessing bound at each k, before any protocol is named. *)
-Definition f_bound_benaloh k : R := f_r k + 2 * f_adv_benaloh k.
-
 (* The block sizes outgrow every polynomial in k.  At Benaloh the block size
    is the plaintext cardinality, so this is the growth of the plaintext
    space, and negligible is the asymptotic acceptance criterion for the
@@ -621,16 +614,6 @@ Proof.
 rewrite /f_size_benaloh.
 under eq_fun => k do rewrite card_ord (Zp_cast (r_gt1 k)).
 exact: f_r_negligible.
-Qed.
-
-(* The bound sequence is negligible.  This is the whole asymptotic content of
-   the Benaloh IND-CPA scheme sequence, stated before any protocol is named:
-   a bound of this shape at each k, whatever protocol produced it, vanishes
-   in the security parameter. *)
-Lemma f_bound_benaloh_negligible : negligible_fun f_bound_benaloh.
-Proof.
-exact: negligible_fun_predictor_bound f_r_negligible
-         f_adv_benaloh_negligible.
 Qed.
 
 End benaloh_indcpa_scheme_sequence.

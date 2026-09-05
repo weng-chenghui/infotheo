@@ -155,16 +155,12 @@ Require Import negligible indcpa_game epshop.
 (*            f_dcr_paillier == the assumed residuosity-advantage sequence    *)
 (*            f_adv_paillier == the derived IND-CPA advantage sequence,       *)
 (*                              twice f_dcr_paillier                          *)
-(*          f_bound_paillier == f_pq plus twice f_adv_paillier                *)
 (* f_size_paillier_negligible ==                                              *)
 (*                             superpolynomial growth of p k * q k makes      *)
 (*                             f_size_paillier negligible                     *)
 (* f_adv_paillier_negligible ==                                               *)
 (*                             f_adv_paillier is negligible when              *)
 (*                             f_dcr_paillier is                              *)
-(* f_bound_paillier_negligible ==                                             *)
-(*                             f_bound_paillier is negligible when f_pq       *)
-(*                             and f_dcr_paillier are                         *)
 (* ```                                                                        *)
 (*                                                                            *)
 (******************************************************************************)
@@ -576,14 +572,6 @@ Definition f_adv_paillier k : R :=
   indcpa_assumption_epsilon
     (paillier_indcpa_assumption (p_gt1 k) (q_gt1 k) (D k)).
 
-(* The bound sequence 1/(p k * q k) + 2 * eps k, at the derived IND-CPA
-   advantage eps k: the shape of the class-conditional guessing bound at each
-   k, before any protocol is named.  In residuosity currency it reads
-   1/(p k * q k) + 4 eps_DCR, the factor two here being the two keys a trace
-   bound spends an IND-CPA epsilon at, and the factor two inside
-   f_adv_paillier being the two hops of the reduction at one key. *)
-Definition f_bound_paillier k : R := f_pq k + 2 * f_adv_paillier k.
-
 (* The moduli outgrow every polynomial in k.  At Paillier the modulus is the
    plaintext cardinality, so this is the growth of the plaintext space, and
    negligible is the asymptotic acceptance criterion for the guessing
@@ -613,15 +601,5 @@ Qed.
    asymptotic content of Paillier IND-CPA. *)
 Lemma f_adv_paillier_negligible : negligible_fun f_adv_paillier.
 Proof. exact: negligible_fun_double f_dcr_paillier_negligible. Qed.
-
-(* The bound sequence is negligible.  This is the whole asymptotic content of
-   the Paillier IND-CPA scheme sequence, stated before any protocol is
-   named: a bound of this shape at each k, whatever protocol produced it,
-   vanishes in the security parameter. *)
-Lemma f_bound_paillier_negligible : negligible_fun f_bound_paillier.
-Proof.
-exact: negligible_fun_predictor_bound f_pq_negligible
-         f_adv_paillier_negligible.
-Qed.
 
 End paillier_indcpa_scheme_sequence.

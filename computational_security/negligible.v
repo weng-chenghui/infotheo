@@ -12,13 +12,12 @@ From mathcomp Require Import reals.
 (* negligible_fun states what a family of such instances must satisfy for a   *)
 (* bound of that shape to vanish in the security parameter.                   *)
 (*                                                                            *)
-(* The closure lemmas are the arithmetic a hopping argument needs.  A sum of  *)
-(* negligible families is negligible, so a chain of hops is bounded one hop   *)
-(* at a time.  A family dominated pointwise by a negligible one is            *)
-(* negligible, which is the direction a security claim is read in.  And       *)
-(* negligible_fun_predictor_bound is the arithmetic shape a DSDP trace        *)
-(* guessing bound takes, an inverse plaintext cardinality plus twice one      *)
-(* advantage family.                                                          *)
+(* The negligible families form an additive submonoid of the families of      *)
+(* reals: closed under addition, containing the zero family, and closed       *)
+(* under a finite sum indexed by a list, which is the form a total over a     *)
+(* list of hop labels takes.  That submonoid is downward closed, a family     *)
+(* dominated pointwise by a negligible one being negligible, and that is the  *)
+(* direction a security claim is read in.                                     *)
 (*                                                                            *)
 (* ```                                                                        *)
 (*          negligible_fun f == f eventually falls below every inverse        *)
@@ -27,10 +26,9 @@ From mathcomp Require Import reals.
 (*         negligible_fun_le == a family dominated pointwise by a negligible  *)
 (*                              one is negligible                             *)
 (*     negligible_fun_double == twice a negligible family is negligible       *)
-(* negligible_fun_predictor_bound ==                                          *)
-(*                              an inverse plaintext cardinality plus twice   *)
-(*                              one advantage family is negligible when both  *)
-(*                              families are                                  *)
+(*       negligible_fun_cst0 == the zero family is negligible                 *)
+(*        negligible_fun_sum == a finite sum of negligible families is        *)
+(*                              negligible                                    *)
 (* ```                                                                        *)
 (*                                                                            *)
 (******************************************************************************)
@@ -127,17 +125,22 @@ move=> Hf; apply: negligible_fun_le (negligible_fun_add Hf Hf) => k.
 by rewrite mulr_natl mulr2n.
 Qed.
 
-(* The arithmetic shape of the class-conditional DSDP trace guessing bound is
-   negligible as a family: an inverse plaintext cardinality plus twice one
-   advantage, evaluated at each security parameter, is negligible whenever
-   both families are. *)
-Corollary negligible_fun_predictor_bound (inv_pq eps : nat -> R) :
-  negligible_fun inv_pq -> negligible_fun eps ->
-  negligible_fun (fun k => inv_pq k + 2 * eps k).
+(* The zero family is negligible: the unit of the additive submonoid the
+   negligible families form, and so the value a total over no labels takes. *)
+Lemma negligible_fun_cst0 : negligible_fun (fun _ : nat => 0 : R).
+Proof. by move=> c; exists 0 => n Hn; rewrite invr_gt0 exprn_gt0 // ltr0n. Qed.
+
+(* A finite sum of negligible families is negligible.  A total over a list of
+   hop labels sums the cost family of each label, so this is the closure the
+   asymptotic reading of such a total needs, one summand per label. *)
+Lemma negligible_fun_sum (I : Type) (s : seq I) (F : I -> nat -> R) :
+  (forall i, negligible_fun (F i)) ->
+  negligible_fun (fun k => \sum_(i <- s) F i k).
 Proof.
-move=> Hi He; apply: negligible_fun_le (negligible_fun_add Hi
-  (negligible_fun_add He He)) => n.
-by rewrite mulr_natl mulr2n addrA.
+move=> HF; elim: s => [|i s IH].
+  by apply: negligible_fun_le negligible_fun_cst0 => k; rewrite big_nil lexx.
+apply: negligible_fun_le (negligible_fun_add (HF i) IH) => k.
+by rewrite big_cons lexx.
 Qed.
 
 End negligible_asymptotics.
