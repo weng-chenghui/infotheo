@@ -963,8 +963,9 @@ a list of labels rather than a single real, so a finished derivation carries the
 assumptions its bound rests on alongside their numeric total. epsHop
 is the dual of the piSMC language of \texttt{smc/pismc.v}: piSMC writes what the
 parties of a protocol do, epsHop writes what a security argument about them
-costs. The three programs at the end of the section are the Paillier hybrid, the
-Benaloh hybrid, and Alice's two-hop ladder, each written in it.
+costs. The three programs of the section are the Paillier hybrid, the Benaloh
+hybrid, and Alice's two-hop ladder, each written in it, and the section closes
+with the reading of such a program along a sequence of security parameters.
 
 A program is one delimited block, $\varepsilon\{\;\cdots\;\}$, whose statements
 are separated by a semicolon and read as follows.
@@ -1107,9 +1108,9 @@ pending obligation, and a bound is read off it by projection.
        infotheo.computational_security.epshop.chain_bound}
   \rocqok
   \uses{def:chain}
-  A result is a quantity $a$, a loss $s$, a bound $c$, and a proof that $c$
-  bounds $a$.
-  \[ a \le c \]
+  A result is a quantity $a$, a loss $s$, a bound $c$, a proof that $c$ bounds
+  $a$, and a proof that $c$ is the total of $s$.
+  \[ a \le c, \qquad \mathrm{tot}(s) = c \]
   A chain returns one on its own, on the gap between its endpoints, at the
   total of its loss; $\mathrm{plus}$ returns one on the first endpoint, having
   added the external term $c$ under the label $l$ for
@@ -1133,7 +1134,13 @@ pending obligation, and a bound is read off it by projection.
   labels, $H$ is an algebraic identity between that sum and the number the
   client's theorem states, and no vocabulary of the language appears in it.
   Both are written after the double semicolon because they return a result
-  where every other statement returns a chain.
+  where every other statement returns a chain. The last field is what keeps
+  the label list, rather than the number written at $\mathrm{bound}$, the
+  source of a published bound: republishing composes $H$ with the identity
+  the result already carried, so the bound of a program is the total of its
+  labels however often it has been rewritten. A reading of a bound along a
+  sequence of security parameters is a reading of that list, and it is sound
+  only because of this field.
 \end{definition}
 
 \begin{lemma}[The category laws, as equalities of records]
@@ -1245,6 +1252,66 @@ pending obligation, and a bound is read off it by projection.
   the fiber enters. Theorem~\ref{thm:alice_guess_real} states the bound this
   program returns and is its soundness field.
 \end{definition}
+
+Each of the three programs states a bound at one security parameter, where an
+asymptotic notion has nothing to measure. The three statements that close this
+section read a program along a sequence of parameters instead, which is the
+form a computational claim finally takes. A program indexed by the parameter is
+a sequence of results, and negligibility is a property of that sequence that no
+single member of it can carry.
+
+\begin{definition}[A dictionary all of whose labels cost a negligible sequence]
+  \label{def:negligible_claims}
+  \rocq{infotheo.computational_security.epshop_family.negligibleClaims}
+  \rocqok
+  \uses{def:claim,def:negligible_fun}
+  A sequence of dictionaries $C_k$ indexed by the security parameter, together
+  with the negligibility of the cost of every label of the label type, read
+  along that parameter.
+  \[ \forall l,\ \mathrm{negl}\big(k \mapsto \mathrm{cost}(C_k(l))\big) \]
+  The condition quantifies over the label type and not over the labels one
+  program spends, so whatever a chain over $C$ names is covered by it. It is
+  attached to the dictionary once, and a theorem about any program written at
+  that dictionary then names no label: the dictionary carries the per-label
+  statements the theorem would otherwise have to list. Recovering the
+  statements from a program is by the name of its dictionary, so a dictionary
+  written as an anonymous function can be given this data and never found
+  again.
+\end{definition}
+
+\begin{lemma}[The total of a label list along the security parameter]
+  \label{lem:loss_eval_negligible}
+  \rocq{infotheo.computational_security.epshop_family.loss_eval_negligible}
+  \rocqok
+  \uses{def:negligible_claims,def:loss,lem:negligible_fun_sum}
+  The total of any list of labels of such a dictionary is a negligible
+  sequence.
+  \[ \mathrm{negl}\big(k \mapsto \mathrm{ev}_{C_k}(s)\big) \]
+  $\mathrm{ev}$ is a monoid morphism out of the free monoid on labels and the
+  negligible sequences are a submonoid of the sequences of reals, so a total
+  lands in that submonoid exactly when each of its generators does. Nothing
+  about membership in $s$ is required, the dictionary covering the whole label
+  type.
+\end{lemma}
+
+\begin{theorem}[A sequence of programs opens at a negligible quantity]
+  \label{thm:first_negligible}
+  \rocq{infotheo.computational_security.epshop_family.first_negligible}
+  \rocqok
+  \uses{def:negligible_claims,def:chain_result,def:negligible_fun,lem:loss_eval_negligible}
+  Let $P$ be a program at every security parameter, over a dictionary all of
+  whose labels are negligible, and let its loss be the same at every parameter.
+  Then any $f$ identified with the game $P$ opens at is negligible.
+  \[ \big(\forall k,\ s_{P_k} = s_{P_0}\big) \implies
+     \big(\forall k,\ f(k) = a_{P_k}\big) \implies \mathrm{negl}(f) \]
+  The program supplies the two facts the argument runs on: its first game is
+  below its published bound, and that bound is the total of its labels. So the
+  asymptotic reading of a multi-hop bound is a reading of the label list, and
+  the hypothesis that the loss does not vary with the parameter is what makes
+  it one list. A bound stated at a fixed instance cannot state this, and the
+  step from a theorem of the previous sections to its asymptotic form is
+  exactly this statement.
+\end{theorem}
 
 \section{What the class leaves out, and the three settings}
 

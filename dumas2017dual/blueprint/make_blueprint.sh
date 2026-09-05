@@ -26,6 +26,10 @@ MODULES=(
   # The epsHop language a multi-hop bound is written in: the accumulated loss
   # as a list of labelled terms, and the soundness the bound is read off.
   computational_security/epshop.v
+  # The family layer over the security parameter: a dictionary whose labels
+  # all cost a negligible sequence, and the terminal that reads a program's
+  # first game off as negligible.
+  computational_security/epshop_family.v
   # The computational leg: the two-hop ladder over the corrupted-Alice
   # experiment, its two reductions, the guessing / unpredictability / simulation
   # bounds, and their transfer to the executed piSMC trace.

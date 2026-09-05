@@ -26,8 +26,8 @@ SRC_DIR = os.path.join(HERE, "src")
 # Declaration keywords whose name we require a blueprint node for.
 DECL_KW = (
     "Theorem|Lemma|Corollary|Proposition|Fact|Remark|Example|"
-    "Definition|Fixpoint|CoFixpoint|Record|Inductive|Variant|Instance|Axiom|"
-    "Parameter"
+    "Definition|Fixpoint|CoFixpoint|Record|Structure|Inductive|Variant|"
+    "Instance|Axiom|Parameter"
 )
 _MODIFIERS = r"(?:(?:Local|Global|Program|Polymorphic|Monomorphic|Private|Export)[ \t]+)*"
 DECL_RE = re.compile(
