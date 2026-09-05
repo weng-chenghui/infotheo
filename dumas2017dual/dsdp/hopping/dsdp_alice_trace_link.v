@@ -80,6 +80,10 @@ Require Import dsdp_alice_hop_secrecy.
 (* alice_trace_chain predict == Alice's trace secrecy as one epsHop           *)
 (*                              program, opening at the trace of a run of the *)
 (*                              protocol by the interpreter                   *)
+(* alice_trace_chain_assumed A predict HB HC ==                               *)
+(*                              the same program with both hops charged at    *)
+(*                              the epsilon A assumes, the two class          *)
+(*                              memberships spent in the hop justifications   *)
 (*     bob_trace_adversary D == embeds Bob's challenge in the ciphertext of   *)
 (*                              V2, rebuilds Alice's trace around it, and     *)
 (*                              decides with D                                *)
@@ -687,6 +691,54 @@ Definition alice_trace_chain (predict : predictor alice_traceT) :=
     bound (#|plain AHE|%:R^-1 + eps_bob D + eps_charlie D)
       by alice_totalE card_renc rand_of_renc pkey_of_dk v1 u1 u2 u3 D }.
 
+(* The same argument over the same games and the same three labels, with each
+   ciphertext replacement charged at the epsilon an adversary-class assumption
+   promises rather than at the advantage its own reduction shows.  The two
+   class memberships are parameters of the program and are spent inside it, in
+   the justification of the hop each one licenses, which is the shape
+   paillier_chain has; a chain that exists has therefore already spent them,
+   and the bound read off it leaves nothing to discharge.  The residue at the
+   all-zero endpoint is the same information-theoretic term as in
+   alice_trace_chain, so the total the program returns adds one unconditional
+   term to two assumption-conditional ones.
+   Naming: extends [alice_trace_chain] with the [assumed] token naming the
+   quantity its hops are charged at. *)
+Definition alice_trace_chain_assumed (A : indcpa_epsilon_assumption)
+    (predict : predictor alice_traceT)
+    (HB : indcpa_admissible A
+            (bob_trace_adversary (distinguisher_of_predictor predict)))
+    (HC : indcpa_admissible A
+            (charlie_trace_adversary (distinguisher_of_predictor predict))) :=
+  let D_trace := distinguisher_of_predictor predict in
+  let D := D_trace \o (fun x => (x.1.1, x.1.2,
+                                 alice_trace_of_hop_tuple x.2)) in
+  \epsilon[ alice_claim_assumed pkey_of_dk v1 u1 u2 u3 A D ]{
+    (* the trace of a run of the protocol by the interpreter *)
+    start (accept D_trace
+             (`p_ [% V2, V3, trace_of_run dsdp_protocol Alice])) ;
+    (* her trace is a deterministic image of her hopping tuple *)
+    same to (accept D G0) by accept_trace_tupleE D_trace ;
+    (* Bob's ciphertext slot zeroed, at the epsilon A assumes, which the
+       class membership of the Bob-key reduction licenses *)
+    hop cpa_bob (indcpa_assumption_epsilon A) to (accept D G1)
+      by le_trans (le_of_eq (hop0_advantageE card_renc rand_of_renc
+                               pkey_of_dk v1 u1 u2 u3 D))
+                  (indcpa_admissible_epsilon_le dk_b HB) ;
+    (* Charlie's slot zeroed, at the same epsilon, licensed by the class
+       membership of the Charlie-key reduction *)
+    hop cpa_charlie (indcpa_assumption_epsilon A) to (accept D G2)
+      by le_trans (le_of_eq (hop1_advantageE card_renc rand_of_renc
+                               pkey_of_dk v1 u1 u2 u3 D))
+                  (indcpa_admissible_epsilon_le dk_c HC) ;;
+    (* the guessing residue of the all-zero view, a term outside the
+       hopping, added to the loss so the total bounds the trace game *)
+    plus uniform_plain #|plain AHE|%:R^-1
+      by all_zero_game_V2_le_invm card_renc rand_of_renc pkey_of_dk
+           v1 u1 u2 u3_unit (predict \o alice_trace_of_hop_tuple) ;;
+    (* the trace game, at the residue and twice the assumed epsilon *)
+    bound ((#|plain AHE|%:R : R)^-1 + 2 * indcpa_assumption_epsilon A)
+      by alice_assumed_totalE A }.
+
 (* Every predictor reading the trace the interpreter produces for Alice
    matches Bob's input with probability at most one over the plaintext-space
    cardinality plus the real-or-zero advantages of the two per-hop
@@ -749,10 +801,8 @@ Corollary alice_trace_guess_V2_admissible_le
   alice_trace_guess_V2_pr predict
     <= (#|plain AHE|%:R : R)^-1 + 2 * indcpa_assumption_epsilon A.
 Proof.
-move=> Hb Hc; rewrite /alice_trace_guess_V2_pr.
-apply: le_trans (alice_trace_guess_V2_le predict) _.
-rewrite mulr_natl mulr2n addrA.
-by rewrite lerD // ?lerD2l //; exact: indcpa_admissible_epsilon_le.
+move=> Hb Hc; rewrite /alice_trace_guess_V2_pr guess_V2_acceptE.
+exact: result_sound (alice_trace_chain_assumed Hb Hc).
 Qed.
 
 (* The advantage against Bob's key of the adversary a trace predictor

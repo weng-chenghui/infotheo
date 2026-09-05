@@ -713,7 +713,7 @@ $e$-th residuosity assumption.
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_trace_guess_V2_admissible_le,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_trace_guess_V2_admissible_pq_le}
   \rocqok
-  \uses{def:dsdp_setting,thm:alice_trace_bounds,def:indcpa_assumption}
+  \uses{def:dsdp_setting,thm:alice_trace_bounds,def:indcpa_assumption,def:alice_trace_chain_assumed}
   When both reduction adversaries of a trace predictor $g$ are admissible for
   $\mathcal{A}$, and $u_3$ is a unit of the plaintext ring, $g$ matches Bob's
   input with probability at most $1/m$ plus twice the assumed advantage; the
@@ -726,6 +726,9 @@ $e$-th residuosity assumption.
   measures the two ciphertext replacements at the advantage $\mathcal{A}$
   assumes rather than at their own values. The two admissibility premises are conditional on
   the class, and are assumed rather than proved.
+  The bound is the soundness field of the program of
+  Definition~\ref{def:alice_trace_chain_assumed}, which spends the two
+  premises at its two hops, so no triangle inequality is taken here.
   Proved in \texttt{dsdp\_alice\_trace\_link.v}, the two forms are fields
   \texttt{trace\_guess\_V2\_admissible\_le} and
   \texttt{trace\_guess\_V2\_admissible\_pq\_le} of \texttt{dsdp\_security}, read
@@ -1284,6 +1287,33 @@ pending obligation, and a bound is read off it by projection.
   field of this result.
 \end{definition}
 
+\begin{definition}[Alice's trace argument at the assumed advantage]
+  \label{def:alice_trace_chain_assumed}
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_claim_assumed,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_assumed_totalE,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_trace_chain_assumed}
+  \rocqok
+  \uses{def:alice_trace_chain,def:indcpa_assumption,def:claim,def:loss}
+  The program of Definition~\ref{def:alice_trace_chain} over the dictionary
+  $C^{\mathcal{A}}$ that charges each hop the advantage $\mathcal{A}$ assumes
+  in place of the advantage its own reduction shows. The three games and the
+  three labels are those of \texttt{alice\_claim}.
+  \[ C^{\mathcal{A}}(\mathsf{cpa\_bob})
+       = \big(\gamma_0(D),\ \gamma_1(D),\ \varepsilon_{\mathrm{cpa}}\big),
+     \qquad
+     C^{\mathcal{A}}(\mathsf{cpa\_charlie})
+       = \big(\gamma_1(D),\ \gamma_2(D),\ \varepsilon_{\mathrm{cpa}}\big) \]
+  The two class memberships are parameters of the program and are spent inside
+  it, one in the justification of each hop, which is the shape
+  Definition~\ref{def:paillier_chain} has. The terminal label costs the same
+  unconditional residue as in Definition~\ref{def:alice_trace_chain}, so the
+  total adds one unconditional term to two assumption-conditional ones, and
+  \texttt{alice\_assumed\_totalE} is the reordering that states it.
+  \[ \mathrm{tot}(s) = \tfrac{1}{m} + 2\,\varepsilon_{\mathrm{cpa}} \]
+  Theorem~\ref{thm:alice_guess_admissible} is the soundness field of this
+  result at its two class memberships.
+\end{definition}
+
 Each of the three programs states a bound at one security parameter, where an
 asymptotic notion has nothing to measure. The three statements that close this
 section read a program along a sequence of parameters instead, which is the
@@ -1465,7 +1495,7 @@ single member of it can carry.
   \label{thm:alice_guess_negligible}
   \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_instance_sequence.alice_trace_guess_V2_negligible}
   \rocqok
-  \uses{def:negligible_fun,def:dsdp_instance,def:dsdp_instance_sequence,thm:alice_guess_admissible}
+  \uses{def:negligible_fun,def:dsdp_instance,def:dsdp_instance_sequence,thm:alice_guess_admissible,def:alice_trace_chain_assumed,def:negligible_claims,thm:first_negligible}
   Along a sequence $\mathcal{Q}$ of DSDP instances and a sequence of predictors
   $g_k$, if both reduction adversaries of $g_k$ are admissible for
   $\mathcal{A}_k$ at every $k$, then the guessing probabilities are negligible.
@@ -1474,17 +1504,22 @@ single member of it can carry.
      \big(\forall k,\ \mathrm{adm}_{\mathcal{A}_k}(\hopred{1}{D_{g_k}})\big)
      \implies \mathrm{negl}\big(k \mapsto
        \Pr[\,g_k(\mathrm{AliceTrace}_k) = V_2\,]\big) \]
-  The two negligibility facts the bound consumes, $\mathrm{negl}(k \mapsto
-  1/m_k)$ and $\mathrm{negl}(k \mapsto \varepsilon_{\mathrm{cpa},k})$, are
-  fields of $\mathcal{Q}$ and are read off the sequence. The two admissibility
-  facts remain premises, because they restrict the reduction adversaries a
-  predictor induces and so speak about the adversary rather than about the
-  sequence. That is what separates this statement from the decrypting predictor
-  $\delta$, whose guessing probability is $1$ at every $k$, and
-  Corollary~\ref{cor:decrypt_sequence_not_admissible} shows that the same two
-  fields of $\mathcal{Q}$ eventually reject $\delta$'s reduction adversary.
-  Every currency is hypothesis-conditional, measured at each $k$ as in
-  Theorem~\ref{thm:alice_guess_admissible}.
+  It is Theorem~\ref{thm:first_negligible} read over the program of
+  Definition~\ref{def:alice_trace_chain_assumed} at the $k$-th instance. That
+  program spends the same three labels at every $k$, and the cost of each of
+  them along the sequence is one of the two negligibility fields of
+  $\mathcal{Q}$: both hop labels cost $\mathrm{negl}(k \mapsto
+  \varepsilon_{\mathrm{cpa},k})$ and the terminal label costs
+  $\mathrm{negl}(k \mapsto 1/m_k)$. Those two facts are attached to the
+  dictionary once, as the negligibleClaims of
+  Definition~\ref{def:negligible_claims}, and the theorem names no label.
+  The two admissibility facts remain premises, because they restrict the
+  reduction adversaries a predictor induces and so speak about the adversary
+  rather than about the sequence. That is what separates this statement from
+  the decrypting predictor $\delta$, whose guessing probability is $1$ at every
+  $k$, and Corollary~\ref{cor:decrypt_sequence_not_admissible} shows that the
+  same two fields of $\mathcal{Q}$ eventually reject $\delta$'s reduction
+  adversary.
 \end{theorem}
 
 \begin{corollary}[The sequence eventually rejects the decrypting predictor]

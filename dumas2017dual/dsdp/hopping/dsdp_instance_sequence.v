@@ -5,7 +5,7 @@ Require Import realType_ext ssr_ext ssralg_ext bigop_ext fdist.
 Require Import fdist_extra proba.
 Require Import homomorphic_encryption residuosity_game.
 Require Import idealized_ahe paillier_fdist_instance.
-Require Import negligible.
+Require Import negligible epshop epshop_family.
 Require Import indcpa_game paillier_indcpa_scheme benaloh_indcpa_scheme.
 Require Import dsdp_alice_hop_secrecy dsdp_alice_trace_link.
 
@@ -85,7 +85,18 @@ Require Import dsdp_alice_hop_secrecy dsdp_alice_trace_link.
 (*                     f_size == the inverse plaintext-cardinality sequence   *)
 (*                      f_adv == the assumed-advantage sequence               *)
 (*                 f_guess_V2 == the trace guessing-probability sequence      *)
-(*                    f_bound == f_size plus two copies of f_adv              *)
+(*   alice_claims_assumed_at k == the dictionary of the class-conditional     *)
+(*                               argument at the k-th instance                *)
+(* alice_label_negligible_at == every label of that dictionary costs a        *)
+(*                               negligible family along the sequence         *)
+(* alice_claims_assumed_negligible ==                                         *)
+(*                               that dictionary registered as a              *)
+(*                               negligibleClaims                             *)
+(* alice_trace_chain_assumed_at k ==                                          *)
+(*                               the class-conditional program at the k-th    *)
+(*                               instance                                     *)
+(*              alice_first_at == the guessing sequence is the game that      *)
+(*                               program opens at                             *)
 (* alice_trace_guess_V2_negligible ==                                         *)
 (*                               the trace guessing sequence is negligible    *)
 (*                               under the two class premises                 *)
@@ -307,6 +318,18 @@ Definition charlie_trace_adversary_at k
     (inst_dk_a (I k)) (inst_dk_b (I k)) (inst_dk_c (I k))
     (inst_rc2 (I k)) D.
 
+(* The two class premises of the whole section: at every security parameter
+   the class of the assumption made there admits the two reduction adversaries
+   the k-th predictor induces.  They restrict the adversaries a predictor
+   induces and so speak about the adversary rather than about the sequence,
+   which is why they stay premises and are not fields of Q. *)
+Hypothesis HB : forall k,
+  indcpa_admissible (A k)
+    (bob_trace_adversary_at (distinguisher_of_predictor (predict k))).
+Hypothesis HC : forall k,
+  indcpa_admissible (A k)
+    (charlie_trace_adversary_at (distinguisher_of_predictor (predict k))).
+
 (* The probability that a predictor reading Alice's executed trace at k
    returns Bob's input.  The two hop coins enter here and not in the two
    reduction adversaries, which fix Bob's coin by the challenge. *)
@@ -326,42 +349,79 @@ Definition f_adv k : R := indcpa_assumption_epsilon (A k).
 (* The trace guessing-probability function used in the sequence theorem. *)
 Definition f_guess_V2 k : R := alice_trace_guess_V2_pr_at (predict k).
 
-(* The pointwise upper-bound function used in the sequence theorem. *)
-Definition f_bound k : R := f_size k + f_adv k + f_adv k.
+(* The dictionary of the class-conditional argument at the k-th instance, as
+   a family indexed by the security parameter.  It is a named constant rather
+   than a lambda because canonical inference keys on the head constant of the
+   family, and an application of a lambda has none. *)
+Definition alice_claims_assumed_at (k : nat) : alice_label -> claim R :=
+  alice_claim_assumed (inst_pkey_of_party (I k)) (inst_v1 (I k))
+    (inst_u1 (I k)) (inst_u2 (I k)) (inst_u3 (I k)) (A k)
+    (distinguisher_of_predictor (predict k)
+     \o (fun x => (x.1.1, x.1.2,
+                   alice_trace_of_hop_tuple (@inst_rand_of_renc (I k))
+                     (inst_v1 (I k)) (inst_u1 (I k)) (inst_u2 (I k))
+                     (inst_u3 (I k)) (inst_dk_a (I k)) (inst_dk_b (I k))
+                     (inst_dk_c (I k)) (inst_rc2 (I k)) x.2))).
+
+(* Every label of that dictionary costs a negligible family along the
+   sequence: both hop labels cost the epsilon the assumption at k assumes,
+   which is the sequence's assumed-advantage field read directly, and the
+   terminal label costs the inverse plaintext cardinality, its unconditional
+   field.  This is the whole asymptotic content of the argument, stated once
+   for the dictionary rather than once per statement proved over it. *)
+Lemma alice_label_negligible_at (l : alice_label) :
+  negligible_fun (fun k => claim_cost (alice_claims_assumed_at k l)).
+Proof.
+case: l.
+- exact: sequence_adv_negligible Q.
+- exact: sequence_adv_negligible Q.
+- exact: sequence_size_negligible Q.
+Qed.
+
+Canonical alice_claims_assumed_negligible :=
+  NegligibleClaims alice_claims_assumed_at alice_label_negligible_at.
+
+(* The class-conditional program at the k-th instance, the value of the
+   family monad the terminal below reads.  The return type names the
+   dictionary, which is what lets canonical inference find the negligibility
+   of the labels the program spends. *)
+Definition alice_trace_chain_assumed_at (k : nat)
+    : chain_result (alice_claims_assumed_at k) :=
+  alice_trace_chain_assumed (inst_u3_unit (I k)) (inst_rb2 (I k))
+    (HB k) (HC k).
+
+(* The quantity the theorem below is about is the game that program opens
+   at. *)
+Lemma alice_first_at k :
+  f_guess_V2 k = result_first (alice_trace_chain_assumed_at k).
+Proof.
+by rewrite /f_guess_V2 /alice_trace_guess_V2_pr_at /alice_trace_guess_V2_pr
+   guess_V2_acceptE.
+Qed.
+
+Local Open Scope epshop_scope.
 
 (* A sequence of predictors reading Alice's executed traces along a sequence
-   of DSDP instances matches Bob's input with negligible probability,
-   provided the two reduction adversaries at each k are admitted by the class
-   at that k.  The two negligibility facts the bound consumes, the inverse
-   plaintext cardinalities and the assumed advantages, are fields of Q and so
-   are read off the sequence; the two class premises stay premises of the
-   theorem, because they restrict the reduction adversaries a predictor
-   induces and so speak about the adversary rather than about the sequence.
+   of DSDP instances matches Bob's input with negligible probability, under
+   the two class premises of this section.  It is the terminal of the family
+   monad read over the class-conditional program: the program spends the same
+   three labels at every security parameter, and the cost of each of them
+   along the sequence is one of the two negligibility fields of Q, supplied
+   once through the registered instance rather than summed by hand at each
+   statement.  Two of the three summands are assumption-conditional, the
+   assumed advantage at Bob's key and at Charlie's, and the third is
+   unconditional, the residue the leaked output leaves along the DSDP
+   solution fiber.
    That is also what separates this statement from the decrypting
    counterexample: decrypt_guess_prE puts the guessing probability at 1 for
    the predictor that decrypts Bob's ciphertext off the trace, and
    decrypt_reduction_admissible_eventuallyF below shows the same two
    negligibility fields eventually force that predictor's reduction adversary
-   out of the class.  Every currency is hypothesis-conditional, priced at
-   each k as in the concrete bound. *)
-Theorem alice_trace_guess_V2_negligible :
-  (forall k, indcpa_admissible (A k)
-     (bob_trace_adversary_at (distinguisher_of_predictor (predict k)))) ->
-  (forall k, indcpa_admissible (A k)
-     (charlie_trace_adversary_at (distinguisher_of_predictor (predict k)))) ->
-  negligible_fun f_guess_V2.
+   out of the class. *)
+Theorem alice_trace_guess_V2_negligible : negligible_fun f_guess_V2.
 Proof.
-move=> HB HC.
-have size_negligible := sequence_size_negligible Q.
-have adv_negligible := sequence_adv_negligible Q.
-have Hbound : negligible_fun f_bound.
-  exact: negligible_fun_add (negligible_fun_add size_negligible adv_negligible)
-           adv_negligible.
-apply: negligible_fun_le Hbound => k.
-rewrite /f_guess_V2 /f_bound /f_size /f_adv.
-apply: le_trans (alice_trace_guess_V2_admissible_le
-  (inst_u3_unit (I k)) (inst_rb2 (I k)) (HB k) (HC k)) _.
-by rewrite mulr_natl mulr2n addrA.
+exact: (\negligible[ f_guess_V2 by alice_first_at ]
+          alice_trace_chain_assumed_at).
 Qed.
 
 (* Under the two negligibility fields Q carries, the decrypting predictor's
@@ -721,8 +781,9 @@ Hypothesis charlie_reduction_admissible : forall k,
    2 * eps k, with eps k the advantage A k assumes.  The two negligibility
    fields of paillier_instance_sequence make f_size and f_adv negligible,
    f_size through the scheme-side reading of modulus growth as plaintext
-   growth.  Closure under addition twice makes f_bound negligible, and the
-   pointwise bound transfers negligibility from f_bound to f_guess_V2.
+   growth.  Those two are the costs the three labels of the program carry, so
+   the terminal of the family monad reads the bound off the label list and
+   transfers negligibility to f_guess_V2.
 
    The assumption sequence is derived: eps k is twice the residuosity
    epsilon D k assumes, so the whole computational content of the conclusion
@@ -944,8 +1005,9 @@ Hypothesis charlie_reduction_admissible : forall k,
    with eps k the advantage A k assumes.  The two negligibility fields of
    benaloh_instance_sequence make f_size and f_adv negligible, f_size
    through the scheme-side reading of block-size growth as plaintext growth.
-   Closure under addition twice makes f_bound negligible, and the pointwise
-   bound transfers negligibility from f_bound to f_guess_V2.
+   Those two are the costs the three labels of the program carry, so the
+   terminal of the family monad reads the bound off the label list and
+   transfers negligibility to f_guess_V2.
 
    The assumption sequence is derived: eps k is twice the residuosity epsilon
    D k assumes, so the whole computational content of the conclusion is r-th

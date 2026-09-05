@@ -35,8 +35,10 @@ Require Import negligible epshop.
 (* ## What the syntax costs                                                   *)
 (*                                                                            *)
 (* \negligible[ and ]{ are new symbol tokens, and fun, => and by are          *)
-(* keywords already.  This file declares no custom entry, so no identifier    *)
-(* stops being readable as a term below it.                                   *)
+(* keywords already.  The second surface, the one taking a named family       *)
+(* program, closes on the token ] alone and adds nothing further.  This file  *)
+(* declares no custom entry, so no identifier stops being readable as a term  *)
+(* below it.                                                                  *)
 (*                                                                            *)
 (* ```                                                                        *)
 (*      negligibleClaims L R == a family of dictionaries indexed by the       *)
@@ -131,3 +133,12 @@ Notation "'\negligible[' f 'by' Hf ']{' 'fun' k '=>' e '}'" :=
   (first_negligible _ f (fun k => e) (fun _ => erefl) Hf)
   (f constr at level 10, Hf constr at level 10, k ident,
    e constr at level 200) : epshop_scope.
+
+(* The same terminal over a family program that already has a name.  The
+   dictionary is read off the program's type rather than written in the
+   block, so a program declared at a named family dictionary carries its own
+   labels into the terminal and the client names none of them. *)
+Notation "'\negligible[' f 'by' Hf ']' P" :=
+  (first_negligible _ f P (fun _ => erefl) Hf)
+  (f constr at level 10, Hf constr at level 10, P constr at level 10)
+  : epshop_scope.

@@ -213,8 +213,15 @@ Require Import epshop.
 (*           alice_claim D l == what each label claims: the games a hop       *)
 (*                              label joins and the advantage it costs, and   *)
 (*                              the all-zero game uniform_plain bounds        *)
+(*  alice_claim_assumed A D l == what each label claims once the two hop      *)
+(*                              labels are charged at the epsilon the         *)
+(*                              assumption A promises, over the games         *)
+(*                              alice_claim names                             *)
 (*             alice_totalE == the closed form of that loss, in the order     *)
 (*                              alice_tuple_guess_V2_le states it             *)
+(*      alice_assumed_totalE == the closed form of the loss of a chain over   *)
+(*                              alice_claim_assumed, the residue plus twice   *)
+(*                              the assumed epsilon                           *)
 (*               alice_chain == the three games and two hops of this file,    *)
 (*                              bounded at the all-zero endpoint, as one      *)
 (*                              chain returning its bound on the real-view    *)
@@ -355,6 +362,8 @@ Local Notation indcpa_success_zero :=
   (indcpa_success_zero (R:=R) (AHE:=AHE) card_renc rand_of_renc).
 Local Notation indcpa_epsilon :=
   (indcpa_epsilon (R:=R) (AHE:=AHE) card_renc rand_of_renc).
+Local Notation indcpa_epsilon_assumption :=
+  (indcpa_epsilon_assumption (R:=R) (AHE:=AHE) card_renc rand_of_renc).
 Local Notation indcpa_fdist_acceptE :=
   (indcpa_fdist_acceptE (R:=R) (AHE:=AHE) card_renc rand_of_renc).
 Local Notation predictor := (predictor AHE).
@@ -1196,6 +1205,27 @@ Definition alice_claim
   | uniform_plain => PlusClaim (accept D G2) #|plain AHE|%:R^-1
   end.
 
+(* The dictionary of the class-conditional reading of the same argument: the
+   three games are those of alice_claim, and the two hop labels cost the
+   epsilon an adversary-class assumption promises rather than the advantage
+   the reduction at that key actually shows.  A hop under this dictionary is
+   therefore conditional on the class admitting its reduction adversary, and
+   the justification it demands is that class membership rather than an
+   equality of advantages; the terminal label costs the same
+   information-theoretic residue under both dictionaries.
+   Naming: extends [alice_claim] with the [assumed] variant token naming the
+   quantity the hop labels are charged at. *)
+Definition alice_claim_assumed (A : indcpa_epsilon_assumption)
+    (D : distinguisher (plain AHE * plain AHE * alice_hop_tupleT)%type)
+    (l : alice_label) : claim R :=
+  match l with
+  | cpa_bob =>
+      HopClaim (accept D G0) (accept D G1) (indcpa_assumption_epsilon A)
+  | cpa_charlie =>
+      HopClaim (accept D G1) (accept D G2) (indcpa_assumption_epsilon A)
+  | uniform_plain => PlusClaim (accept D G2) #|plain AHE|%:R^-1
+  end.
+
 (* The computational-security argument of this file written as a chain: the
    acceptance probabilities of the predictor's distinguisher on G0, G1 and
    G2, joined by the two ciphertext replacements, and then bounded at the
@@ -1215,6 +1245,19 @@ Lemma alice_totalE
   eps_bob D + eps_charlie D + #|plain AHE|%:R^-1
   = #|plain AHE|%:R^-1 + eps_bob D + eps_charlie D.
 Proof. by rewrite addrAC [X in X + _]addrC. Qed.
+
+(* The closed form of the loss a chain over alice_claim_assumed accumulates,
+   written in the order alice_trace_guess_V2_admissible_le states it: the
+   plaintext-space residue first, then the two hops, both charged at one and
+   the same assumed epsilon, which is where the factor two of that statement
+   comes from.
+   Naming: extends [alice_totalE] with the [assumed] token naming the
+   dictionary whose loss is totalled. *)
+Lemma alice_assumed_totalE (A : indcpa_epsilon_assumption) :
+  indcpa_assumption_epsilon A + indcpa_assumption_epsilon A
+  + (#|plain AHE|%:R : R)^-1
+  = (#|plain AHE|%:R : R)^-1 + 2 * indcpa_assumption_epsilon A.
+Proof. by rewrite mulr_natl mulr2n addrC. Qed.
 
 Definition alice_chain (predict : predictor alice_hop_tupleT) :
     chain_result (alice_claim (distinguisher_of_predictor predict)) :=
