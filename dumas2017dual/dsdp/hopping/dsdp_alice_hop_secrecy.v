@@ -1668,7 +1668,9 @@ Qed.
    advantages of the two hop reductions.  This is the simulation-based reading
    of the same two hops: the real world is the real experiment, the ideal world
    the all-zero one, and the distance between them is the sum of the two
-   IND-CPA advantages.
+   IND-CPA advantages.  The bound is the gap result of the fragment
+   alice_hops, so the one triangle inequality the two hops need is spent
+   inside the language and not again here.
    Naming: [sim_advantage] rather than [advantage_sim] because the statement
    bounds a distinguishing gap between two laws rather than instantiating a
    simulation-advantage predicate. *)
@@ -1679,9 +1681,8 @@ Theorem alice_sim_advantage_le
   <= indcpa_epsilon bob_pkey (bob_challenge_adversary D)
      + indcpa_epsilon charlie_pkey (charlie_challenge_adversary D).
 Proof.
-rewrite alice_idealE -hop0_advantageE -hop1_advantageE.
-rewrite !acceptE.
-exact: ler_distD.
+rewrite alice_idealE -!acceptE.
+exact: result_sound (alice_hops D).
 Qed.
 
 (* Alice's view rebuilt from a value of her hopping tuple: that

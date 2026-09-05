@@ -520,11 +520,12 @@ functionality on the other, rather than quantified over all input vectors.
   supplies there.
 \end{theorem}
 \begin{proof}
-  \uses{lem:simulator_factorization,lem:alice_view_advantage}
+  \uses{lem:simulator_factorization,def:alice_hops}
   \rocqok
-  The ideal-world law is the hop-$2$ joint law, so the gap is
-  $\lvert \gamma_0(D) - \gamma_2(D) \rvert$, which the triangle inequality
-  splits into the two hop equalities.
+  The ideal-world law is the hop-$2$ law, so the gap is
+  $\lvert \gamma_0(D) - \gamma_2(D) \rvert$, which is the gap result of the
+  fragment of Definition~\ref{def:alice_hops}. The triangle inequality that
+  composes the two hop equalities is the one the fragment already carries.
 \end{proof}
 
 \begin{remark}[Worst-case simulation: open]
@@ -590,13 +591,16 @@ carries the three bounds above to the executed protocol.
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_trace_ideal,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_trace_sim_advantage_le}
   \rocqok
-  \uses{def:dsdp_setting,lem:trace_of_hop_tuple,def:alice_trace_chain,thm:alice_guess_real,thm:alice_unpredictability,thm:alice_simulation_secure}
+  \uses{def:dsdp_setting,lem:trace_of_hop_tuple,def:alice_trace_chain,def:alice_trace_sim_chain,thm:alice_guess_real,thm:alice_unpredictability,thm:alice_simulation_secure}
   With $u_3$ a unit of the plaintext ring, every predictor reading Alice's
   executed trace obeys the guessing bound and its negative-logarithm form at
   $g \circ \tau$. For all weights, every distinguisher separates the real trace
   law from the trace-level ideal law by at most the two hop advantages.
   \[ \Pr[\,g(\mathrm{AliceTrace}) = V_2\,]
        \le \tfrac{1}{m} + \epshopsum{D_{g \circ \tau}} \]
+  The guessing bound is the soundness field of
+  Definition~\ref{def:alice_trace_chain} and the simulation bound the gap
+  result of Definition~\ref{def:alice_trace_sim_chain}.
   Proved in \texttt{dsdp\_alice\_trace\_link.v}, the three bounds are fields
   \texttt{trace\_guess\_V2\_le}, \texttt{trace\_unpredictability\_ge} and
   \texttt{trace\_sim\_advantage\_le} of \texttt{dsdp\_security}, read off at
@@ -1313,6 +1317,34 @@ pending obligation, and a bound is read off it by projection.
   \[ \mathrm{tot}(s) = \tfrac{1}{m} + \epshopsum{D_{g \circ \tau}} \]
   The trace bound of Theorem~\ref{thm:alice_trace_bounds} is the soundness
   field of this result.
+\end{definition}
+
+\begin{definition}[Alice's trace against the simulation as one chain]
+  \label{def:alice_trace_sim_chain}
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.accept_trace_ideal_tupleE,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_trace_sim_chain}
+  \rocqok
+  \uses{def:alice_hops,def:alice_trace_chain,def:alice_trace,lem:trace_of_hop_tuple,lem:simulator_factorization}
+  The fragment of Definition~\ref{def:alice_hops} with one step at each end
+  that adds nothing to the loss. The chain opens at $\gamma_\tau(D)$, runs the
+  two ciphertext replacements at the lifted test $D \circ \tau$, and closes at
+  $\Pr_{\Ideal^\tau}[D]$, the probability that the same test accepts the
+  trace-level ideal law.
+  \[ \mathrm{same\ to}\ \gamma_0(D \circ \tau)\ \mathrm{by}\
+       \texttt{accept\_trace\_tupleE},
+     \qquad
+     \mathrm{same\ to}\ \Pr_{\Ideal^\tau}[D]\ \mathrm{by}\
+       \texttt{accept\_trace\_ideal\_tupleE} \]
+  The first step is Lemma~\ref{lem:trace_of_hop_tuple} read at acceptance
+  probabilities. The second holds because $\Ideal^\tau$ is the image under
+  $\tau$ of $\Ideal$, which Lemma~\ref{lem:simulator_factorization} identifies
+  with the law of the honest inputs beside $\hoptuple{2}$.
+  \[ \mathrm{loss}(s) = [\mathsf{cpa\_bob},\ \mathsf{cpa\_charlie}],
+     \qquad \mathrm{tot}(s) = \epshopsum{D \circ \tau} \]
+  The chain carries no terminal statement, so the gap result it returns is the
+  trace-level simulation bound of Theorem~\ref{thm:alice_trace_bounds}.
+  \[ \big\lvert \gamma_\tau(D) - \Pr_{\Ideal^\tau}[D] \big\rvert
+       \le \epshopsum{D \circ \tau} \]
 \end{definition}
 
 \begin{definition}[Alice's trace argument at the assumed advantage]

@@ -28,6 +28,11 @@ Require Import dsdp_alice_hop_secrecy.
 (* Bob's and Charlie's ciphertexts. A Boolean test sees at most the same two  *)
 (* advantages between the real trace and a simulated trace.                   *)
 (*                                                                            *)
+(* Both bounds are read off epsHop programs. The simulation bound is the gap  *)
+(* result of a chain that opens at the executed trace, steps to the hopping   *)
+(* tuple at no loss, runs the two ciphertext replacements, and steps to the   *)
+(* simulated trace at no loss, so its whole loss is the two hop advantages.   *)
+(*                                                                            *)
 (* The honest inputs are sampled uniformly and the public keys are fixed.     *)
 (* Some encryption coins are fixed parameters in the pointwise results.       *)
 (* Later results also average over the re-encryption coin. Adversaries are    *)
@@ -121,6 +126,12 @@ Require Import dsdp_alice_hop_secrecy.
 (*                              output                                        *)
 (*         alice_trace_ideal == pairs the honest inputs with the ideal trace  *)
 (*                              generated from their leaked output            *)
+(* accept_trace_ideal_tupleE == a Boolean test accepts the ideal trace law as *)
+(*                              often as its lift accepts the all-zero tuple  *)
+(*   alice_trace_sim_chain D == Alice's executed trace against the ideal      *)
+(*                              trace as one epsHop program, opening at the   *)
+(*                              trace of a run and closing at the ideal       *)
+(*                              trace, both end steps costing nothing         *)
 (* alice_trace_sim_advantage_le ==                                            *)
 (*                              bounds every Boolean test between the real    *)
 (*                              and ideal trace laws by the costs of the two  *)
@@ -915,8 +926,54 @@ congr (_ >>= _); apply: boolp.funext => vv.
 by rewrite /alice_trace_simulator 2!fdistmap_comp.
 Qed.
 
+(* A Boolean trace test accepts the simulated trace law as often as its lift
+   accepts the all-zero hopping tuple beside the two honest inputs.  The
+   simulated trace law is the image of the tuple-level simulator law under
+   the trace map, and that tuple-level law is the all-zero experiment itself
+   by alice_idealE, so the test reads the same number at either level.  This
+   is the step that costs nothing at the simulator end of a trace-level
+   argument, as accept_trace_tupleE is the step that costs nothing at the
+   executed-protocol end.
+   Naming: extends [accept_trace_tupleE] with [ideal] naming the law the
+   test reads. *)
+Lemma accept_trace_ideal_tupleE
+    (D : distinguisher (plain AHE * plain AHE * alice_traceT)%type) :
+  accept D alice_trace_ideal
+  = accept (D \o (fun x => (x.1.1, x.1.2, alice_trace_of_hop_tuple x.2)))
+      (`p_ [% V2, V3, alice_tuple_all_zero]).
+Proof. by rewrite /accept alice_trace_idealE fdistmap_comp alice_idealE. Qed.
+
+(* Alice's executed trace against the simulated trace as one chain.  It opens
+   at the trace the interpreter hands Alice when it runs the DSDP protocol at
+   a sample, steps to her hopping tuple at no loss, replaces the two
+   ciphertext slots by the fragment alice_hops, and steps to the simulated
+   trace at no loss.  The two steps that cost nothing are accept_trace_tupleE
+   and its simulator-side twin, so the loss is the two hop labels and nothing
+   else, and the gap result the chain returns on its own is the trace-level
+   simulation bound: a test told the executed protocol apart from the
+   simulation only as often as its lift tells the two ciphertext slots apart.
+   Naming: extends [alice_trace_chain] with [sim] naming the statement its
+   gap result carries, as [alice_sim_advantage_le] does at the tuple. *)
+Definition alice_trace_sim_chain
+    (D : distinguisher (plain AHE * plain AHE * alice_traceT)%type) :=
+  let Dt := D \o (fun x => (x.1.1, x.1.2, alice_trace_of_hop_tuple x.2)) in
+  let hops := alice_hops card_renc rand_of_renc pkey_of_dk v1 u1 u2 u3 Dt in
+  \epsilon[ alice_claim card_renc rand_of_renc pkey_of_dk v1 u1 u2 u3 Dt ]{
+    (* the trace of a run of the protocol by the interpreter *)
+    start (accept D (`p_ [% V2, V3, trace_of_run dsdp_protocol Alice])) ;
+    (* her trace is a deterministic image of her hopping tuple *)
+    same to (accept Dt G0) by accept_trace_tupleE D ;
+    (* both ciphertext slots zeroed, at the two IND-CPA advantages *)
+    hops ;
+    (* the simulated trace is that same image of the all-zero tuple *)
+    same to (accept D alice_trace_ideal)
+      by esym (accept_trace_ideal_tupleE D) }.
+
 (* A Boolean trace test separates the real and simulated joint laws by at most
-   the two hop advantages of its lifted hopping-tuple test.
+   the two hop advantages of its lifted hopping-tuple test.  The bound is the
+   gap result of alice_trace_sim_chain, whose two zero-loss steps carry the
+   test between the executed trace and the hopping tuple at either end, so
+   nothing outside the two ciphertext replacements enters the total.
    Naming: after [alice_sim_advantage_le] with [alice_trace] as
    the object stem, as in
    [alice_trace_unpredictability_ge]; the transfer
@@ -930,11 +987,8 @@ Theorem alice_trace_sim_advantage_le
   <= indcpa_epsilon (pkey_of_dk Bob) (bob_trace_adversary D)
      + indcpa_epsilon (pkey_of_dk Charlie) (charlie_trace_adversary D).
 Proof.
-rewrite alice_trace_realE alice_trace_idealE.
-rewrite -2!(Pr_fdistmap_bool D) 2!(fdistmap_comp D) 2!Pr_fdistmap_bool.
-rewrite /bob_trace_adversary /charlie_trace_adversary.
-exact: (alice_sim_advantage_le card_renc rand_of_renc pkey_of_dk v1 u1 u2 u3
-          (D \o (fun x => (x.1.1, x.1.2, alice_trace_of_hop_tuple x.2)))).
+rewrite -!acceptE.
+exact: result_sound (alice_trace_sim_chain D).
 Qed.
 
 End dsdp_alice_trace_rv.
