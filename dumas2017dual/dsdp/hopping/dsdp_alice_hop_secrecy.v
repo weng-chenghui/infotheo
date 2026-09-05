@@ -8,7 +8,7 @@ Require Import spp_proba homomorphic_encryption entropy_fiber.
 Require Import extra_algebra extra_proba extra_entropy.
 Require Import dsdp_program dsdp_entropy.
 Require Export indcpa_game.
-Require Import hop_chain.
+Require Import epshop.
 
 (**md**************************************************************************)
 (* # DSDP corrupted-Alice secrecy, hopping axis                               *)
@@ -27,10 +27,10 @@ Require Import hop_chain.
 (* real-or-zero advantage of a reduction constructed here, and the all-zero   *)
 (* endpoint is bounded by the one-degree-of-freedom solution fiber of the     *)
 (* DSDP linear constraint. Every epsilon in this file is therefore the        *)
-(* defined advantage of an explicit reduction. The three games and the two    *)
-(* steps between them are assembled as one chain of                           *)
-(* computational_security/hop_chain.v, whose accumulated loss is the list of  *)
-(* terms alice_tuple_guess_V2_le sums.                                        *)
+(* defined advantage of an explicit reduction. The three games, the two       *)
+(* steps between them and the endpoint bound are written in the epsHop        *)
+(* language of computational_security/epshop.v, whose accumulated loss is     *)
+(* the list of terms alice_tuple_guess_V2_le sums.                            *)
 (*                                                                            *)
 (* Headline results: alice_tuple_guess_V2_le bounds the probability that a    *)
 (* predictor reading Alice's real view returns Bob's input;                   *)
@@ -208,21 +208,18 @@ Require Import hop_chain.
 (*                                                                            *)
 (* The argument as a chain                                                    *)
 (*                                                                            *)
-(*             alice_bob_hop == the label of the first loss term, the         *)
+(*  all_zero_game_V2_le_invm == the all-zero game lies below the inverse      *)
+(*                              plaintext-space cardinality                   *)
+(*                   cpa_bob == the label of the first loss term, the         *)
 (*                              IND-CPA reduction at Bob's key                *)
-(*         alice_charlie_hop == the label of the second loss term, the        *)
+(*               cpa_charlie == the label of the second loss term, the        *)
 (*                              IND-CPA reduction at Charlie's key            *)
-(*          alice_plain_size == the label of the terminal loss term, the      *)
+(*             uniform_plain == the label of the terminal loss term, the      *)
 (*                              plaintext-space bound at the all-zero         *)
 (*                              endpoint                                      *)
-(*               alice_chain == the three games and two hops of this file as  *)
-(*                              one chain                                     *)
-(*       alice_chain_premise == that chain assumes nothing, its two hops      *)
-(*                              being equalities                              *)
-(*         alice_chain_bound == the chain read as a bound on its first game,  *)
-(*                              its endpoint charged the plaintext-space term *)
-(*       alice_bound_premise == the chain's own premise together with the     *)
-(*                              bound on its endpoint                         *)
+(*               alice_chain == the three games and two hops of this file,    *)
+(*                              bounded at the all-zero endpoint, as one      *)
+(*                              chain bound on the real-view game             *)
 (*         alice_chain_lossE == the numeric total of its loss, the right-hand *)
 (*                              side of alice_tuple_guess_V2_le               *)
 (*                                                                            *)
@@ -1135,84 +1132,83 @@ Proof.
 by rewrite /dist_of_RV Pr_fdistmap_preim; apply: eq_bigl => t; rewrite !inE.
 Qed.
 
-(* The sequencing notation of computational_security/hop_chain.v, for the
-   chain built below. *)
-Local Open Scope chain_scope.
+(* The all-zero game read as a bound on the inverse plaintext-space
+   cardinality: all_zero_guess_V2_le_invm carried through the joint law of the
+   honest inputs and Alice's tuple, which is the form the terminal statement
+   of the chain below takes.  It is the only place the DSDP solution fiber
+   enters the chain.
+   Naming: [game] names the acceptance probability being bounded, as [guess]
+   names the success probability in all_zero_guess_V2_le_invm, [all_zero] the
+   view it reads, and [invm] the inverse plaintext-space cardinality bounding
+   it. *)
+Lemma all_zero_game_V2_le_invm (predict : predictor alice_hop_tupleT) :
+  alice_hop_game_success 2 (distinguisher_of_predictor predict)
+    <= #|plain AHE|%:R^-1.
+Proof.
+rewrite alice_hop_game_successE -guess_V2_jointE.
+exact: all_zero_guess_V2_le_invm.
+Qed.
+
+(* The acceptance probability of a distinguisher at hop i, and the two
+   IND-CPA advantages a hop of the chain below logs, under the short names
+   that chain reads at. *)
+Local Notation game i D := (alice_hop_game_success i D).
+Local Notation eps_bob D :=
+  (indcpa_epsilon bob_pkey (bob_challenge_adversary D)).
+Local Notation eps_charlie D :=
+  (indcpa_epsilon charlie_pkey (charlie_challenge_adversary D)).
+
+Local Open Scope epshop_scope.
 
 (* The label of the first loss term, the IND-CPA reduction at Bob's key.  The
    labels are what let a reader of an accumulated loss tell which of its
    terms are conditional on a computational assumption, and at which key.
-   Naming: [alice] names the axis and the remainder names what the term
-   measures, a ciphertext replacement for the two hops and the plaintext-space
-   size for the third. *)
-Definition alice_bob_hop : nat := 0.
+   Naming: [cpa] is the game the advantage belongs to and [bob] the key it is
+   read at. *)
+Definition cpa_bob : nat := 0.
 
 (* The label of the second loss term, the IND-CPA reduction at Charlie's
    key. *)
-Definition alice_charlie_hop : nat := 1.
+Definition cpa_charlie : nat := 1.
 
 (* The label of the terminal loss term, the plaintext-space bound at the
    all-zero endpoint.  That term is information-theoretic: it is the residue
-   the leaked output leaves along the DSDP solution fiber. *)
-Definition alice_plain_size : nat := 2.
+   the leaked output leaves along the DSDP solution fiber.
+   Naming: [uniform] is the law the residue is measured against and [plain]
+   the space that law is carried on. *)
+Definition uniform_plain : nat := 2.
 
 (* The computational-security argument of this file written as a chain: the
    acceptance probabilities of the predictor's distinguisher at hops 0, 1 and
-   2, joined by the two ciphertext replacements.  Each hop logs the advantage
-   of the reduction its label names, and hop0_advantageE and hop1_advantageE
-   are equalities, so each term is exactly the gap its hop spans.  Composing
-   the two hops is where the one triangle inequality of the argument is
-   spent. *)
-Definition alice_chain (predict : predictor alice_hop_tupleT) : chain nat R :=
-  let D := distinguisher_of_predictor predict in
-  x <-- chain_start (alice_hop_game_success 0 D) ;;
-  y <-- chain_hop alice_bob_hop
-          (indcpa_epsilon bob_pkey (bob_challenge_adversary D))
-          x (alice_hop_game_success 1 D) ;;
-  chain_hop alice_charlie_hop
-    (indcpa_epsilon charlie_pkey (charlie_challenge_adversary D))
-    y (alice_hop_game_success 2 D).
-
-(* The premise of that chain holds outright.  A hop asks that the gap it spans
-   be at most the term it logs, and the two hop equalities say the gap is
-   exactly that term, so each label here records an advantage that is defined
-   rather than assumed small.  The IND-CPA assumptions those labels name enter
-   only where the advantages are required to be small. *)
-Lemma alice_chain_premise (predict : predictor alice_hop_tupleT) :
-  chain_premise (alice_chain predict).
-Proof.
-by rewrite /alice_chain /=; do !split;
-   rewrite (hop0_advantageE, hop1_advantageE).
-Qed.
-
-(* Alice's chain read as a bound on the game it starts from, its all-zero
-   endpoint charged the inverse plaintext-space cardinality under
-   alice_plain_size.  The chain compares two acceptance probabilities; charging
-   the endpoint is what turns that comparison into a bound on the real-view
-   game, which is the shape a secrecy statement takes. *)
-Definition alice_chain_bound (predict : predictor alice_hop_tupleT) :
+   2, joined by the two ciphertext replacements, and then bounded at the
+   all-zero endpoint.  Each hop logs the advantage of the reduction its label
+   names, and hop0_advantageE and hop1_advantageE are equalities, so each term
+   is exactly the gap its hop spans.  Composing the two hops is where the one
+   triangle inequality of the argument is spent, and the terminal statement is
+   what turns the comparison of two acceptance probabilities into a bound on
+   the real-view game, which is the shape a secrecy statement takes. *)
+Definition alice_chain (predict : predictor alice_hop_tupleT) :
     chain_bound nat R :=
-  chain_eval (alice_chain predict) alice_plain_size #|plain AHE|%:R^-1.
-
-(* The premise of that bound: the chain's own premise together with the
-   all-zero endpoint lying below the inverse plaintext-space cardinality.  The
-   second half is all_zero_guess_V2_le_invm read through the joint law of the
-   honest inputs and Alice's tuple, and it is the only place the DSDP solution
-   fiber enters. *)
-Lemma alice_bound_premise (predict : predictor alice_hop_tupleT) :
-  bound_premise (alice_chain_bound predict).
-Proof.
-split; first exact: alice_chain_premise.
-rewrite /alice_chain /= alice_hop_game_successE -guess_V2_jointE.
-exact: all_zero_guess_V2_le_invm.
-Qed.
+  let D := distinguisher_of_predictor predict in
+  (* the real view, both ciphertext slots carrying their plaintexts *)
+  \epsilon{ start (game 0 D) ;
+            (* Bob's ciphertext slot zeroed, at one IND-CPA advantage *)
+            hop cpa_bob (eps_bob D) to (game 1 D)
+              by le_of_eq (hop0_advantageE D) ;
+            (* Charlie's slot zeroed, at a second IND-CPA advantage *)
+            hop cpa_charlie (eps_charlie D) to (game 2 D)
+              by le_of_eq (hop1_advantageE D) ;;
+            (* the all-zero view, whose guessing residue is the solution
+               fiber's inverse plaintext-space cardinality *)
+            bound uniform_plain #|plain AHE|%:R^-1
+              by all_zero_game_V2_le_invm predict }.
 
 (* The numeric total of that loss: the plaintext-space residue, then the
    Bob-key advantage, then the Charlie-key advantage.  It is the right-hand
    side of alice_tuple_guess_V2_le, so what that statement asserts is the loss
    the chain accumulated and nothing besides. *)
 Lemma alice_chain_lossE (predict : predictor alice_hop_tupleT) :
-  loss_eval (bound_loss (alice_chain_bound predict))
+  loss_eval (bound_loss (alice_chain predict))
   = #|plain AHE|%:R^-1
     + indcpa_epsilon bob_pkey
         (bob_challenge_adversary (distinguisher_of_predictor predict))
@@ -1243,7 +1239,7 @@ Theorem alice_tuple_guess_V2_le
 Proof.
 rewrite /AliceRealTuple guess_V2_jointE -alice_hop_game_successE.
 rewrite -alice_chain_lossE.
-exact: bound_sound (alice_bound_premise predict).
+exact: bound_sound (alice_chain predict).
 Qed.
 
 (* The IND-CPA advantage against Bob's key that one predictor buys: the

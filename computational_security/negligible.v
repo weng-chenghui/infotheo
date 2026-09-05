@@ -7,7 +7,7 @@ From mathcomp Require Import reals.
 (* A family of reals indexed by a security parameter is negligible when it    *)
 (* eventually falls below every inverse monomial in that parameter.  This is  *)
 (* the asymptotic reading of every concrete quantity of this directory: each  *)
-(* epsilon of indcpa_game.v and each loss of hop_chain.v is measured at one   *)
+(* epsilon of indcpa_game.v and each loss of epshop.v is measured at one      *)
 (* fixed instance, where an asymptotic notion has nothing to measure, and     *)
 (* negligible_fun states what a family of such instances must satisfy for a   *)
 (* bound of that shape to vanish in the security parameter.                   *)

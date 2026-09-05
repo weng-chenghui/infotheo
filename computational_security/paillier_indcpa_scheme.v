@@ -5,7 +5,7 @@ Require Import realType_ext ssr_ext ssralg_ext bigop_ext fdist.
 Require Import fdist_extra proba.
 Require Import homomorphic_encryption residuosity_game.
 Require Import paillier_enc paillier_ahe paillier_fdist_instance.
-Require Import negligible indcpa_game hop_chain.
+Require Import negligible indcpa_game epshop.
 
 (**md**************************************************************************)
 (* # Paillier as an IND-CPA scheme                                            *)
@@ -64,15 +64,15 @@ Require Import negligible indcpa_game hop_chain.
 (* back.  Between them the multiplier erases the plaintext, so the middle     *)
 (* step is an identity and costs nothing.                                     *)
 (*                                                                            *)
-(* The two hops and the identity between them are written as a chain of       *)
-(* computational_security/hop_chain.v: paillier_chain starts at the real      *)
-(* experiment, hops to the unit challenge, crosses the middle identity at     *)
-(* no cost, and hops back to the zero experiment.  Its loss is the list of    *)
-(* the two residuosity calls the bound rests on, one loss term per hop and    *)
-(* each under its own label, so the number in paillier_dcr_epsilon_le is      *)
-(* read off the chain by paillier_chain_lossE, and the two class              *)
-(* memberships that theorem assumes are the chain's premise, discharged by    *)
-(* paillier_chain_premise.                                                    *)
+(* The two hops and the identity between them are written in the epsHop       *)
+(* language of computational_security/epshop.v: paillier_chain starts at the  *)
+(* real experiment, hops to the unit challenge, crosses the middle identity   *)
+(* at no cost, and hops back to the zero experiment.  Its loss is the list    *)
+(* of the two residuosity calls the bound rests on, one loss term per hop     *)
+(* and each under its own label, so the number in paillier_dcr_epsilon_le is  *)
+(* read off the chain by paillier_chain_lossE.  The two class memberships     *)
+(* are parameters of the chain, so paillier_dcr_epsilon_le assumes exactly    *)
+(* what building the chain spends.                                            *)
 (*                                                                            *)
 (* The one number-theoretic input is g ^+ (p q) = 1, the order condition the  *)
 (* private key record already carries.  The statement proved here is          *)
@@ -116,17 +116,16 @@ Require Import negligible indcpa_game hop_chain.
 (*                              distinguisher at the residue challenge        *)
 (*          unit_accept_dcrE == at the unit challenge the two                 *)
 (*                              distinguishers accept equally                 *)
-(*  paillier_multiplying_hop == the label of the hop that runs the            *)
+(*                     dcr_g == the label of the hop that runs the            *)
 (*                              multiplying reduction                         *)
-(*        paillier_plain_hop == the label of the hop that runs the plain      *)
+(*                     dcr_0 == the label of the hop that runs the plain      *)
 (*                              reduction                                     *)
-(*   paillier_chain A dk adv == the two hops and the identity between them    *)
-(*                              as one chain over acceptance probabilities    *)
+(*      paillier_chain Hg Hz == the two hops and the identity between them    *)
+(*                              as one chain over acceptance probabilities,   *)
+(*                              at the two class memberships it spends        *)
 (*      paillier_chain_lossE == that chain logs one residuosity call per      *)
 (*                              hop, so its loss totals twice the             *)
 (*                              residuosity epsilon                           *)
-(*    paillier_chain_premise == the two class memberships discharge that      *)
-(*                              chain's premise                               *)
 (*   paillier_dcr_epsilon_le == the IND-CPA advantage of an adversary whose   *)
 (*                              two reductions are classified is at most      *)
 (*                              twice the residuosity epsilon                 *)
@@ -345,24 +344,27 @@ exact: unit_fdistmap_translateE 'Z_((p * q) * (p * q)) card_renc_paillier
   (adv_decide c) (FinRing.unit _ Ug).
 Qed.
 
-(* The label of the first hop, whose residuosity call is made against
+(* The acceptance probability of a residuosity distinguisher, under the short
+   name the chain below reads at. *)
+Local Notation accept := (residuosity_accept (R:=R)).
+
+(* The label of the first hop, whose residuosity call is made through
    dcr_of_adversary at the key's generator.  A label names the reduction the
    hop invokes, so the loss of a finished chain reads as the list of
    assumption calls its bound rests on, each term traceable to the
    distinguisher it was assumed of.
-   Naming: [hop] is the step of the hybrid the label belongs to,
-   [multiplying] that reduction's own token, from the generator power it
-   multiplies the challenge by. *)
-Definition paillier_multiplying_hop : nat := 0.
+   Naming: [dcr] is the assumption invoked and [g] the generator the
+   reduction multiplies the challenge by. *)
+Definition dcr_g : nat := 0.
 
-(* The label of the second hop, whose residuosity call is made against
+(* The label of the second hop, whose residuosity call is made through
    dcr_of_adversary_zero, the reduction that hands the challenge to the
    adversary unchanged.
-   Naming: [plain] is that reduction's token, the challenge reaching the
-   adversary as it stands. *)
-Definition paillier_plain_hop : nat := 1.
+   Naming: [0] is the plaintext that reduction encrypts, the zero arm of the
+   IND-CPA experiment. *)
+Definition dcr_0 : nat := 1.
 
-Local Open Scope chain_scope.
+Local Open Scope epshop_scope.
 
 (* The two-step hybrid as one chain over acceptance probabilities.  It starts
    at the real experiment, which is the multiplying reduction at the residue
@@ -372,47 +374,42 @@ Local Open Scope chain_scope.
    is an identity; and hops to the plain reduction at the residue challenge,
    which is the zero experiment.  Its two endpoints are the acceptance
    probabilities the IND-CPA advantage compares, and its loss names the two
-   residuosity calls that comparison spends. *)
+   residuosity calls that comparison spends.  The two class memberships are
+   parameters of the chain, so a chain that exists has already spent them and
+   leaves nothing to discharge. *)
 Definition paillier_chain (A : dcr_assumption) (dk : priv_key AHE)
-    (adv : indcpa_adversary (R:=R) AHE) : chain nat R :=
-  x <-- chain_start
-          (residuosity_accept (dcr_of_adversary (priv_gen dk) adv)
-             residue_fdist) ;;
-  y <-- chain_hop paillier_multiplying_hop (dcr_epsilon A) x
-          (residuosity_accept (dcr_of_adversary (priv_gen dk) adv)
-             unit_fdist) ;;
-  z <-- chain_eq y
-          (residuosity_accept (dcr_of_adversary_zero adv) unit_fdist) ;;
-  chain_hop paillier_plain_hop (dcr_epsilon A) z
-    (residuosity_accept (dcr_of_adversary_zero adv) residue_fdist).
+    (adv : indcpa_adversary (R:=R) AHE)
+    (Hg : residuosity_admissible A (dcr_of_adversary (priv_gen dk) adv))
+    (Hz : residuosity_admissible A (dcr_of_adversary_zero adv)) : chain nat R :=
+  let D_g := dcr_of_adversary (priv_gen dk) adv in
+  let D_0 := dcr_of_adversary_zero adv in
+  let eps_dcr := dcr_epsilon A in
+  (* the real experiment *)
+  \epsilon{ start (accept D_g residue_fdist) ;
+            (* the first residuosity call, through D_g *)
+            hop dcr_g eps_dcr to (accept D_g unit_fdist)
+              by residuosity_admissible_epsilon_le _ _ Hg ;
+            (* the free step: at the unit challenge the multiplier erases the
+               plaintext, Katz and Lindell 2015 Lemma 11.15 *)
+            same to (accept D_0 unit_fdist)
+              by unit_accept_dcrE (priv_gen_order dk) adv ;
+            (* the second residuosity call, through D_0 run backwards, and
+               the zero experiment *)
+            hop dcr_0 eps_dcr to (accept D_0 residue_fdist)
+              by residuosity_admissible_epsilon_leC _ _ Hz }.
 
 (* The chain logs one residuosity call at each hop and nothing at the
    identity between them, so its loss totals twice the residuosity epsilon.
    This equation is where the formal list of assumption calls becomes the
    number the theorem below states. *)
 Lemma paillier_chain_lossE (A : dcr_assumption) (dk : priv_key AHE)
-    (adv : indcpa_adversary (R:=R) AHE) :
-  loss_eval (chain_loss (paillier_chain A dk adv)) = 2 * dcr_epsilon A.
+    (adv : indcpa_adversary (R:=R) AHE)
+    (Hg : residuosity_admissible A (dcr_of_adversary (priv_gen dk) adv))
+    (Hz : residuosity_admissible A (dcr_of_adversary_zero adv)) :
+  loss_eval (chain_loss (paillier_chain Hg Hz)) = 2 * dcr_epsilon A.
 Proof.
 rewrite /loss_eval /paillier_chain /= big_cons big_cons big_nil addr0.
 by rewrite mulr_natl mulr2n.
-Qed.
-
-(* The chain's premise is the two class memberships and nothing else: the
-   residuosity bound holds at each hop because the reduction that hop runs is
-   classified, and the identity between them is unit_accept_dcrE at the key's
-   generator.  So a chain built here assumes exactly what the theorem below
-   assumes. *)
-Lemma paillier_chain_premise (A : dcr_assumption) (dk : priv_key AHE)
-    (adv : indcpa_adversary (R:=R) AHE) :
-  residuosity_admissible A (dcr_of_adversary (priv_gen dk) adv) ->
-  residuosity_admissible A (dcr_of_adversary_zero adv) ->
-  chain_premise (paillier_chain A dk adv).
-Proof.
-move=> Hg Hz; do !split.
-- exact: residuosity_admissible_epsilon_le _ _ Hg.
-- exact: unit_accept_dcrE (priv_gen_order dk) adv.
-- by rewrite /= distrC; exact: residuosity_admissible_epsilon_le _ _ Hz.
 Qed.
 
 (* The reduction and its loss.  An adversary whose two residuosity reductions
@@ -435,8 +432,8 @@ Proof.
 move=> Hg Hz.
 rewrite /indcpa_epsilon indcpa_success_realE indcpa_success_zeroE.
 rewrite !enc_fdist_paillierE /= real_accept_dcrE zero_accept_dcrE.
-rewrite -(paillier_chain_lossE A dk adv).
-exact: chain_sound (paillier_chain_premise Hg Hz).
+rewrite -(paillier_chain_lossE Hg Hz).
+exact: chain_sound (paillier_chain Hg Hz).
 Qed.
 
 (* The IND-CPA class a residuosity assumption induces: the adversaries whose

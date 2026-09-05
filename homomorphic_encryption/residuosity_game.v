@@ -202,6 +202,17 @@ Record residuosity_assumption := {
     residuosity_admissible D ->
     residuosity_advantage D <= residuosity_assumption_epsilon }.
 
+(* The same bound with the two challenge laws exchanged.  A hybrid that
+   returns from the unit law to the residue law spans the gap in this
+   direction, and the absolute value is symmetric, so the reverse step of a
+   reduction costs the one assumption its forward step costs and no more. *)
+Lemma residuosity_admissible_epsilon_leC (A : residuosity_assumption)
+    (D : residuosity_distinguisher) :
+  residuosity_admissible A D ->
+  `| residuosity_accept D unit_fdist - residuosity_accept D residue_fdist |
+  <= residuosity_assumption_epsilon A.
+Proof. by rewrite distrC; exact: residuosity_admissible_epsilon_le. Qed.
+
 (* The key fact of a reduction.  Multiplication by a unit is a bijection of
    the unit group, and a bijection fixes the uniform law: pushing unit_fdist
    along x |-> val a * x gives unit_fdist back.  This is Katz and Lindell
@@ -373,6 +384,7 @@ Arguments Build_residuosity_assumption {R} T e%_nat_scope _
 Arguments residuosity_admissible {R T e card_units} A D : rename.
 Arguments residuosity_assumption_epsilon {R T e card_units} A : rename.
 Arguments residuosity_admissible_epsilon_le {R T e card_units} A D _ : rename.
+Arguments residuosity_admissible_epsilon_leC {R T e card_units} A D _.
 Arguments unit_fdist_translateE {R} T _ _.
 Arguments unit_fdistmap_translateE {R} T _ _%_function_scope _.
 Arguments unit_set T : clear implicits.
