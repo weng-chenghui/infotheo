@@ -261,8 +261,8 @@ finite commutative unit ring.
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_tuple_real,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_tuple_bob_zero,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_tuple_all_zero,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_accept,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_acceptE}
+       infotheo.computational_security.indcpa_game.accept,
+       infotheo.computational_security.indcpa_game.acceptE}
   \rocqok
   \uses{def:alice_experiment}
   Alice's tuple carries her two masks, her two combine randomnesses, the
@@ -552,15 +552,20 @@ carries the three bounds above to the executed protocol.
   \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.trace_dataT,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.trace_data_of_di_data,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.dsdp_procs_std,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.dsdp_procs_of_sample,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.dsdp_protocol,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.trace_of_run,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.AliceTrace,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_trace_of_hop_tuple}
   \rocqok
   \uses{def:protocol_flow,def:alice_hop_ladder}
-  Alice's trace is the message log the interpreter returns for her when it runs
-  the three party programs on a sample of the experiment, encoded as a bounded
-  sequence of at most fifteen entries, each a plaintext, a ciphertext, or a
-  private key.
+  The DSDP protocol is the triple of party programs at the coordinates of one
+  sample of the experiment, and $\mathrm{trace\_of\_run}(\mathit{ps}, i)$ is the
+  message log the interpreter returns for party $i$ when it runs the process
+  list $\mathit{ps}$ at a sample, encoded as a bounded sequence of at most
+  fifteen entries, each a plaintext, a ciphertext, or a private key. Alice's
+  trace is that reader at the DSDP protocol and at Alice.
+  \[ \mathrm{AliceTrace} = \mathrm{trace\_of\_run}(\mathrm{dsdp\_protocol},
+       \mathrm{Alice}) \]
 \end{definition}
 
 \begin{lemma}[The trace is a function of the tuple]
@@ -585,7 +590,7 @@ carries the three bounds above to the executed protocol.
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_trace_ideal,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_trace_sim_advantage_le}
   \rocqok
-  \uses{def:dsdp_setting,lem:trace_of_hop_tuple,thm:alice_guess_real,thm:alice_unpredictability,thm:alice_simulation_secure}
+  \uses{def:dsdp_setting,lem:trace_of_hop_tuple,def:alice_trace_chain,thm:alice_guess_real,thm:alice_unpredictability,thm:alice_simulation_secure}
   With $u_3$ a unit of the plaintext ring, every predictor reading Alice's
   executed trace obeys the guessing bound and its negative-logarithm form at
   $g \circ \tau$. For all weights, every distinguisher separates the real trace
@@ -1251,6 +1256,32 @@ pending obligation, and a bound is read off it by projection.
   Lemma~\ref{lem:guess_all_zero} carried to the game form and is the one place
   the fiber enters. Theorem~\ref{thm:alice_guess_real} states the bound this
   program returns and is its soundness field.
+\end{definition}
+
+\begin{definition}[Alice's trace argument as a chain opening at the protocol]
+  \label{def:alice_trace_chain}
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.accept_trace_tupleE,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_trace_chain}
+  \rocqok
+  \uses{def:alice_chain,def:alice_trace,lem:trace_of_hop_tuple}
+  The chain of Definition~\ref{def:alice_chain} preceded by one further game.
+  $G_\tau$ is the law of the honest input pair beside the trace the interpreter
+  returns for Alice when it runs $\mathrm{dsdp\_protocol}$ at a sample, and
+  $\gamma_\tau(D)$ the probability that $D$ accepts a value sampled from it, so
+  the object the argument starts from is the executed protocol and not the
+  tuple $\hoptuple{0}$.
+  \[ \mathrm{start}\ \gamma_\tau(D_g) \]
+  \[ \mathrm{same\ to}\ \gamma_0(D_{g \circ \tau})\ \mathrm{by}\
+       \texttt{accept\_trace\_tupleE} \]
+  The step to $\gamma_0$ carries no label and adds nothing to the loss: by
+  Lemma~\ref{lem:trace_of_hop_tuple} the trace is the image of the tuple under
+  $\tau$, so a test on the trace accepts as often as its lift on the tuple.
+  The two hops and the terminal statement are those of
+  Definition~\ref{def:alice_chain} at the lifted test $D_{g \circ \tau}$, so
+  the loss and the bound are the same three terms.
+  \[ \mathrm{tot}(s) = \tfrac{1}{m} + \epshopsum{D_{g \circ \tau}} \]
+  The trace bound of Theorem~\ref{thm:alice_trace_bounds} is the soundness
+  field of this result.
 \end{definition}
 
 Each of the three programs states a bound at one security parameter, where an

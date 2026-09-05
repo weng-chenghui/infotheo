@@ -77,7 +77,8 @@ dsdp_alice_hop_secrecy:spectator_pre_indep
 dsdp_alice_hop_secrecy:spectator_pre_pair_uniformE
 dsdp_alice_hop_secrecy:spectator_pre_uniformE
 # dsdp_alice_trace_link: the operation-generic interpreter shim, the trace/tuple
-# encodings and their round-trips, and the sample-splitting uniformity lemmas
+# encodings and their round-trips, the fuel bound packaging an interpreter
+# trace as a bounded sequence, and the sample-splitting uniformity lemmas
 # under the two conditional-entropy transfers.
 dsdp_alice_trace_link:AliceCombineRand
 dsdp_alice_trace_link:AliceSampleRest
@@ -95,6 +96,7 @@ dsdp_alice_trace_link:rand_trace_of_hop_tuple
 dsdp_alice_trace_link:sample_rest_uniformE
 dsdp_alice_trace_link:trace_data_cipher
 dsdp_alice_trace_link:trace_data_plain
+dsdp_alice_trace_link:trace_of_run_size
 dsdp_alice_trace_link:trace_of_trace_tuple
 dsdp_alice_trace_link:trace_of_trace_tupleK
 dsdp_alice_trace_link:trace_tuple_of_trace

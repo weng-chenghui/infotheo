@@ -95,6 +95,10 @@ Require Import extra_proba.
 (*                      ret a == returns a without sampling anything else     *)
 (*            distinguisher B == a Boolean test on the game output, where     *)
 (*                               true means that the test accepts             *)
+(*                 accept D G == the probability that D accepts a value       *)
+(*                               sampled from G, at any finite carrier        *)
+(*                    acceptE == expresses that probability as the event that *)
+(*                               the sampled value is accepted                *)
 (*      predictor observation == a guessing strategy: a map from an           *)
 (*                               observation to a claimed plaintext           *)
 (* distinguisher_of_predictor predict ==                                      *)
@@ -212,6 +216,22 @@ Definition enc_fdist (pk : pub_key AHE) (v : plain AHE) :
    distinguisher, so an epsilon in this development is a per-distinguisher
    advantage rather than a supremum. *)
 Definition distinguisher (T : finType) : Type := T -> bool.
+
+(* The probability that D accepts a value sampled from G.  This is the number
+   a game of a hopping argument is: an experiment of such an argument is one
+   law on one carrier, and a step between two experiments compares one test's
+   two acceptance probabilities.  The carrier is a parameter, so the games of
+   an argument that changes what an adversary reads, a protocol trace at one
+   end and a tuple of protocol values at the other, are all the same kind of
+   object. *)
+Definition accept (T : finType) (D : T -> bool) (G : R.-fdist T) : R :=
+  Pr (fdistmap D G) [set true].
+
+(* The pushforward form of that acceptance probability agrees with the event
+   form, which is the shape a reduction correspondence is stated in. *)
+Lemma acceptE (T : finType) (D : T -> bool) (G : R.-fdist T) :
+  accept D G = Pr G [set x | D x].
+Proof. exact: Pr_fdistmap_bool. Qed.
 
 (* A guessing strategy on an observation: a map from the observed value to a
    claimed plaintext.  The counterpart of [distinguisher] for guessing games:

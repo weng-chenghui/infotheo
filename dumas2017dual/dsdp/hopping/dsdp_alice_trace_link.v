@@ -9,6 +9,7 @@ Require Import spp_proba.
 Require Import extra_proba extra_entropy.
 Require Import smc_interpreter smc_session_types.
 Require Import homomorphic_encryption dsdp_interface dsdp_program dsdp_pismc.
+Require Import epshop.
 Require Import dsdp_alice_hop_secrecy.
 
 (**md**************************************************************************)
@@ -61,8 +62,11 @@ Require Import dsdp_alice_hop_secrecy.
 (*                              trace data                                    *)
 (*  alice_trace_of_hop_tuple == constructs Alice's trace from the hopping     *)
 (*                              tuple used in the secrecy proof               *)
-(*      dsdp_procs_of_sample == runs the three programs with the values from  *)
+(*             dsdp_protocol == runs the three programs with the values from  *)
 (*                              one experiment sample                         *)
+(*         trace_of_run ps i == the encoded trace party i sees in a run of    *)
+(*                              the process list ps by the interpreter, as a  *)
+(*                              random variable on the sample space           *)
 (*                AliceTrace == Alice's encoded interpreter trace as a random *)
 (*                              observation                                   *)
 (* alice_trace_of_hop_tupleE == proves that the executed trace is exactly the *)
@@ -70,6 +74,12 @@ Require Import dsdp_alice_hop_secrecy.
 (*                                                                            *)
 (* Primary trace-security statements                                          *)
 (*                                                                            *)
+(*       accept_trace_tupleE == a Boolean test accepts Alice's executed       *)
+(*                              trace as often as its lift accepts her        *)
+(*                              hopping tuple                                 *)
+(* alice_trace_chain predict == Alice's trace secrecy as one epsHop           *)
+(*                              program, opening at the trace of a run of the *)
+(*                              protocol by the interpreter                   *)
 (*     bob_trace_adversary D == embeds Bob's challenge in the ciphertext of   *)
 (*                              V2, rebuilds Alice's trace around it, and     *)
 (*                              decides with D                                *)
@@ -469,6 +479,12 @@ Local Notation Sout :=
 Local Notation alice_tuple_real :=
   (alice_tuple_real (R:=R) (AHE:=AHE) card_renc rand_of_renc
      pkey_of_dk v1 u1 u2 u3).
+Local Notation alice_tuple_bob_zero :=
+  (alice_tuple_bob_zero (R:=R) (AHE:=AHE) card_renc rand_of_renc
+     pkey_of_dk v1 u1 u2 u3).
+Local Notation alice_tuple_all_zero :=
+  (alice_tuple_all_zero (R:=R) (AHE:=AHE) card_renc rand_of_renc
+     pkey_of_dk v1 u1 u2 u3).
 Local Notation indcpa_epsilon :=
   (indcpa_epsilon (R:=R) (AHE:=AHE) card_renc rand_of_renc).
 Local Notation indcpa_epsilon_assumption :=
@@ -509,25 +525,46 @@ Definition alice_trace_of_hop_tuple
         inl (inl (inl u1)); inl (inl (inl v1));
         inl (inr tt)].
 
-(* The three piSMC programs at the coordinates of one sample. *)
-Definition dsdp_procs_of_sample (s : alice_sampleT AHE Renc) :
+(* The DSDP protocol: the three piSMC programs at the coordinates of one
+   sample.  The name says which protocol the process list is, so that a
+   security statement can open at the protocol itself rather than at a random
+   variable derived from it. *)
+Definition dsdp_protocol (s : alice_sampleT AHE Renc) :
     seq (proc (di_data DI)) :=
   dsdp_procs_std AHE Renc rand_of_renc v1 u1 u2 u3 dk_a dk_b dk_c
     w_rb2 w_rc2 (V2 s) (V3 s) (R2 s) (R3 s) (rand_of_renc (Rho2 s))
     (rand_of_renc (Rho3 s)) (rand_of_renc (RA1 s)) (rand_of_renc (RA2 s)).
 
-(* Fuel bounds the encoded trace, since encoding preserves length. *)
-Let size_alice_trace (s : alice_sampleT AHE Renc) :
+(* Fuel bounds the encoded trace of any party in any sample-indexed process
+   list, since encoding preserves length. *)
+Lemma trace_of_run_size
+    (procs : alice_sampleT AHE Renc -> seq (proc (di_data DI)))
+    (i : party_id) (s : alice_sampleT AHE Renc) :
   (size (map (@trace_data_of_di_data AHE)
-           (nth [::] (run_interp 15 (dsdp_procs_of_sample s)).2 0)) <= 15)%N.
+           (nth [::] (run_interp 15 (procs s)).2 n( i ))) <= 15)%N.
 Proof. by rewrite size_map; exact: size_traces_nth. Qed.
 
-(* Alice's encoded executed trace as a random variable on the sample
-   space. *)
+(* The encoded trace party i sees in a run of the process list procs by the
+   interpreter, as a random variable on the sample space: the observation an
+   adversary sitting at that party collects when the protocol is executed at
+   the sampled inputs.  This is what makes a protocol a game of a hopping
+   argument, the interpreter's run entering the argument as its first game
+   rather than beside it.
+   Naming: the [_of_] connective names the source the observation is read
+   from, after the repository's total-conversion family. *)
+Definition trace_of_run
+    (procs : alice_sampleT AHE Renc -> seq (proc (di_data DI)))
+    (i : party_id) :
+    {RV (alice_sample_fdist (R:=R) AHE card_renc) ->
+     15.-bseq trace_dataT} :=
+  fun s => Bseq (trace_of_run_size procs i s).
+
+(* Alice's encoded executed trace as a random variable on the sample space:
+   what the interpreter hands her in a run of the DSDP protocol. *)
 Definition AliceTrace :
     {RV (alice_sample_fdist (R:=R) AHE card_renc) ->
      15.-bseq trace_dataT} :=
-  fun s => Bseq (size_alice_trace s).
+  trace_of_run dsdp_protocol Alice.
 
 (* The leaked output the run computes is Alice's hopping tuple slot. *)
 Let Sout_runE (s : alice_sampleT AHE Renc) :
@@ -548,8 +585,9 @@ Lemma alice_trace_of_hop_tupleE :
   AliceTrace = alice_trace_of_hop_tuple `o alice_tuple_real.
 Proof.
 apply: boolp.funext => s; apply/val_inj.
-rewrite /AliceTrace; move: (size_alice_trace s).
-rewrite /dsdp_procs_of_sample dsdp_run_tracesE.
+rewrite /AliceTrace /trace_of_run.
+move: (trace_of_run_size dsdp_protocol Alice s).
+rewrite /dsdp_protocol dsdp_run_tracesE.
 by move=> ?; rewrite /= Sout_runE reenc_plainE.
 Qed.
 
@@ -570,12 +608,92 @@ Definition charlie_trace_adversary
   charlie_challenge_adversary
     (D \o (fun x => (x.1.1, x.1.2, alice_trace_of_hop_tuple x.2))).
 
+(* The real executed-trace law is the deterministic image of the real
+   hopping-tuple law: Alice's trace holds no coordinate her hopping tuple
+   does not determine. *)
+Let alice_trace_realE :
+  `p_ [% V2, V3, AliceTrace]
+  = fdistmap (fun x => (x.1.1, x.1.2, alice_trace_of_hop_tuple x.2))
+      (`p_ [% V2, V3, alice_tuple_real]).
+Proof.
+by rewrite alice_trace_of_hop_tupleE /dist_of_RV fdistmap_comp.
+Qed.
+
+(* A Boolean test reading Alice's executed trace beside the two honest inputs
+   accepts as often as its lift reading her hopping tuple there, the trace
+   being a deterministic image of the tuple.  This is the step at which the
+   protocol costs nothing: it lets the run of the interpreter stand as the
+   first game of an argument whose remaining games live at the hopping tuple,
+   so that what an adversary is shown is the executed protocol rather than a
+   tuple assumed to summarise it.
+   Naming: after [centropy_V2_trace_tupleE], with [accept] naming the
+   quantity the two levels agree on. *)
+Lemma accept_trace_tupleE
+    (D : distinguisher (plain AHE * plain AHE * alice_traceT)%type) :
+  accept D (`p_ [% V2, V3, AliceTrace])
+  = accept (D \o (fun x => (x.1.1, x.1.2, alice_trace_of_hop_tuple x.2)))
+      (`p_ [% V2, V3, alice_tuple_real]).
+Proof. by rewrite /accept alice_trace_realE fdistmap_comp. Qed.
+
+(* The three hopping-tuple experiments the chain below visits after leaving
+   the trace, and the two IND-CPA advantages it logs, under the short names
+   that chain reads at.  G0 is the law Alice's executed trace is the image
+   of, G1 and G2 the same law with Bob's and with both ciphertext slots
+   carrying zero. *)
+Local Notation G0 := (`p_ [% V2, V3, alice_tuple_real]).
+Local Notation G1 := (`p_ [% V2, V3, alice_tuple_bob_zero]).
+Local Notation G2 := (`p_ [% V2, V3, alice_tuple_all_zero]).
+Local Notation eps_bob D :=
+  (indcpa_epsilon (pkey_of_dk Bob) (bob_challenge_adversary D)).
+Local Notation eps_charlie D :=
+  (indcpa_epsilon (pkey_of_dk Charlie) (charlie_challenge_adversary D)).
+
+Local Open Scope epshop_scope.
+
+(* Alice's trace secrecy as one program.  Its first game is the trace the
+   interpreter hands Alice when it runs the DSDP protocol at the sampled
+   inputs, so the object the argument starts from is the executed protocol
+   itself rather than a tuple of values assumed to stand for it.  The trace
+   is a deterministic image of the hopping tuple, so the step to G0 costs
+   nothing; the two hops then cost the advantages the two reductions
+   actually show, each assumption-conditional at one key; and the residue at
+   the all-zero endpoint is information-theoretic, the mass the leaked output
+   leaves along the DSDP solution fiber.  The bound the program returns is
+   the total of those three terms. *)
+Definition alice_trace_chain (predict : predictor alice_traceT) :=
+  let D_trace := distinguisher_of_predictor predict in
+  let D := D_trace \o (fun x => (x.1.1, x.1.2,
+                                 alice_trace_of_hop_tuple x.2)) in
+  \epsilon[ alice_claim card_renc rand_of_renc pkey_of_dk v1 u1 u2 u3 D ]{
+    (* the trace of a run of the protocol by the interpreter *)
+    start (accept D_trace
+             (`p_ [% V2, V3, trace_of_run dsdp_protocol Alice])) ;
+    (* her trace is a deterministic image of her hopping tuple *)
+    same to (accept D G0) by accept_trace_tupleE D_trace ;
+    (* Bob's ciphertext slot zeroed, at one IND-CPA advantage *)
+    hop cpa_bob (eps_bob D) to (accept D G1)
+      by le_of_eq (hop0_advantageE card_renc rand_of_renc pkey_of_dk
+                     v1 u1 u2 u3 D) ;
+    (* Charlie's slot zeroed, at a second IND-CPA advantage *)
+    hop cpa_charlie (eps_charlie D) to (accept D G2)
+      by le_of_eq (hop1_advantageE card_renc rand_of_renc pkey_of_dk
+                     v1 u1 u2 u3 D) ;;
+    (* the guessing residue of the all-zero view, a term outside the
+       hopping, added to the loss so the total bounds the trace game *)
+    plus uniform_plain #|plain AHE|%:R^-1
+      by all_zero_game_V2_le_invm card_renc rand_of_renc pkey_of_dk
+           v1 u1 u2 u3_unit (predict \o alice_trace_of_hop_tuple) ;;
+    (* the trace game, at the residue and the two advantages *)
+    bound (#|plain AHE|%:R^-1 + eps_bob D + eps_charlie D)
+      by alice_totalE card_renc rand_of_renc pkey_of_dk v1 u1 u2 u3 D }.
+
 (* Every predictor reading the trace the interpreter produces for Alice
    matches Bob's input with probability at most one over the plaintext-space
    cardinality plus the real-or-zero advantages of the two per-hop
    reductions.  The cardinality term is information-theoretic and the two
-   advantages are the price of the two ciphertext replacements, one at Bob's
-   key and one at Charlie's. *)
+   advantages are what the two ciphertext replacements cost, one at Bob's
+   key and one at Charlie's.  The right-hand side is the bound
+   alice_trace_chain returns. *)
 Theorem alice_trace_guess_V2_le
     (predict : predictor alice_traceT) :
   Pr (alice_sample_fdist (R:=R) AHE card_renc)
@@ -586,10 +704,8 @@ Theorem alice_trace_guess_V2_le
        + indcpa_epsilon (pkey_of_dk Charlie)
            (charlie_trace_adversary (distinguisher_of_predictor predict)).
 Proof.
-rewrite alice_trace_of_hop_tupleE.
-exact: (alice_tuple_guess_V2_le card_renc rand_of_renc
-          pkey_of_dk v1 u1 u2 u3_unit
-          (predict \o alice_trace_of_hop_tuple)).
+rewrite guess_V2_acceptE.
+exact: result_sound (alice_trace_chain predict).
 Qed.
 
 (* The probability that a predictor reading Alice's executed trace returns
@@ -724,16 +840,6 @@ Proof.
 rewrite /alice_trace_ideal /alice_ideal fdistmap_bind.
 congr (_ >>= _); apply: boolp.funext => vv.
 by rewrite /alice_trace_simulator 2!fdistmap_comp.
-Qed.
-
-(* The real executed-trace joint law is the deterministic image of the real
-   hopping-tuple joint law. *)
-Let alice_trace_realE :
-  `p_ [% V2, V3, AliceTrace]
-  = fdistmap (fun x => (x.1.1, x.1.2, alice_trace_of_hop_tuple x.2))
-      (`p_ [% V2, V3, alice_tuple_real]).
-Proof.
-by rewrite alice_trace_of_hop_tupleE /dist_of_RV fdistmap_comp.
 Qed.
 
 (* A Boolean trace test separates the real and simulated joint laws by at most
@@ -1173,7 +1279,7 @@ pose lifted := bob_decrypt_predictor \o alice_trace_of_hop_tuple.
 have Hlift : `| Pr P [set t | (lifted `o alice_tuple_real) t == V2 t]
               - Pr P [set t | (lifted `o alice_tuple_bob_zero) t == V2 t] |
             = bob_trace_predictor_epsilon bob_decrypt_predictor.
-  by rewrite 2!guess_V2_acceptE -2!alice_acceptE hop0_advantageE.
+  by rewrite 2!guess_V2_acceptE hop0_advantageE.
 have HV2 : lifted `o alice_tuple_real = V2.
   rewrite (alice_trace_decode_V2E card_renc rand_of_renc v1 u1 u2 u3
              dk_a dk_b dk_c w_rb2 w_rc2).
@@ -1628,7 +1734,7 @@ Local Notation decode_a := (di_data_of_trace_data dk_a (pub_of_priv dk_a)).
 Definition alice_raw_trace (s : alice_sampleT AHE Renc) :
     seq (di_data DI) :=
   nth [::]
-      (run_interp 15 (dsdp_procs_of_sample (R:=R) card_renc rand_of_renc
+      (run_interp 15 (dsdp_protocol (R:=R) card_renc rand_of_renc
                         v1 u1 u2 u3 dk_a dk_b dk_c w_rb2 w_rc2 s)).2 0.
 
 (* The round trip on Alice's actual generated trace: decoding with her
@@ -1639,7 +1745,7 @@ Lemma alice_raw_trace_decodeE (pk : pub_key AHE)
     (s : alice_sampleT AHE Renc) :
   map (di_data_of_trace_data dk_a pk) (AliceTrace s) = alice_raw_trace s.
 Proof.
-rewrite -map_comp /alice_raw_trace /dsdp_procs_of_sample.
+rewrite -map_comp /alice_raw_trace /dsdp_protocol.
 by rewrite dsdp_run_tracesE.
 Qed.
 
