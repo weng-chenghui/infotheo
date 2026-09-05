@@ -29,8 +29,10 @@ basename and resolve by suffix.
   concrete bound below is given), `indcpa_game` (the real-or-zero game, the advantage
   `indcpa_epsilon`, the adversary-class assumption record, the scheme record
   `indcpa_scheme`), `epshop` (the epsHop language, in which a chain of hops carries an
-  accumulated loss as a list of labelled terms together with the soundness field a
-  multi-hop bound is read off),
+  accumulated loss as a list of labels together with the soundness field a
+  multi-hop bound is read off, each label claiming through `claim_of` the source game,
+  the target game and the cost of the step it names, against which that step's cost,
+  target and justification are checked),
   `paillier_indcpa_scheme` / `benaloh_indcpa_scheme`
   (the two concrete schemes as `indcpa_scheme` values, scheme side only, fixed and indexed
   by a security parameter, each with the reduction that derives its IND-CPA assumption

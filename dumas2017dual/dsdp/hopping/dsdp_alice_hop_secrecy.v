@@ -30,7 +30,7 @@ Require Import epshop.
 (* defined advantage of an explicit reduction. The three games, the two       *)
 (* steps between them and the endpoint bound are written in the epsHop        *)
 (* language of computational_security/epshop.v, whose accumulated loss is     *)
-(* the list of terms alice_tuple_guess_V2_le sums.                            *)
+(* the list of labels whose costs alice_tuple_guess_V2_le sums.               *)
 (*                                                                            *)
 (* Headline results: alice_tuple_guess_V2_le bounds the probability that a    *)
 (* predictor reading Alice's real view returns Bob's input;                   *)
@@ -210,13 +210,14 @@ Require Import epshop.
 (*                                                                            *)
 (*  all_zero_game_V2_le_invm == the all-zero game lies below the inverse      *)
 (*                              plaintext-space cardinality                   *)
-(*                   cpa_bob == the label of the first loss term, the         *)
-(*                              IND-CPA reduction at Bob's key                *)
-(*               cpa_charlie == the label of the second loss term, the        *)
-(*                              IND-CPA reduction at Charlie's key            *)
-(*             uniform_plain == the label of the terminal loss term, the      *)
-(*                              plaintext-space bound at the all-zero         *)
+(*               alice_label == the three labels of the argument, cpa_bob and *)
+(*                              cpa_charlie for the IND-CPA reductions at     *)
+(*                              Bob's and Charlie's keys and uniform_plain    *)
+(*                              for the plaintext-space bound at the all-zero *)
 (*                              endpoint                                      *)
+(*           alice_claim D l == what each label claims: the games a hop       *)
+(*                              label joins and the advantage it costs, and   *)
+(*                              the all-zero game uniform_plain bounds        *)
 (*               alice_chain == the three games and two hops of this file,    *)
 (*                              bounded at the all-zero endpoint, as one      *)
 (*                              chain bound on the real-view game             *)
@@ -1160,23 +1161,33 @@ Local Notation eps_charlie D :=
 
 Local Open Scope epshop_scope.
 
-(* The label of the first loss term, the IND-CPA reduction at Bob's key.  The
-   labels are what let a reader of an accumulated loss tell which of its
-   terms are conditional on a computational assumption, and at which key.
-   Naming: [cpa] is the game the advantage belongs to and [bob] the key it is
-   read at. *)
-Definition cpa_bob : nat := 0.
+(* The three labels of the argument: cpa_bob and cpa_charlie for the two
+   IND-CPA reductions, at Bob's key and at Charlie's, and uniform_plain for
+   the plaintext-space bound at the all-zero endpoint.  The labels are what
+   let a reader of an accumulated loss tell which of its terms are
+   conditional on a computational assumption, and at which key: the two hop
+   labels are, and the terminal label is not, its term being the residue the
+   leaked output leaves along the DSDP solution fiber.
+   Naming: [cpa] is the game an advantage belongs to and [bob], [charlie] the
+   key it is read at; [uniform] is the law the residue is measured against
+   and [plain] the space that law is carried on. *)
+Variant alice_label := cpa_bob | cpa_charlie | uniform_plain.
 
-(* The label of the second loss term, the IND-CPA reduction at Charlie's
-   key. *)
-Definition cpa_charlie : nat := 1.
-
-(* The label of the terminal loss term, the plaintext-space bound at the
-   all-zero endpoint.  That term is information-theoretic: it is the residue
-   the leaked output leaves along the DSDP solution fiber.
-   Naming: [uniform] is the law the residue is measured against and [plain]
-   the space that law is carried on. *)
-Definition uniform_plain : nat := 2.
+(* What each label claims: for a hop label the two acceptance probabilities
+   its ciphertext replacement moves between and the advantage that
+   replacement costs, and for uniform_plain the all-zero game together with
+   the inverse plaintext-space cardinality bounding it.  The claims are
+   written here rather than at the steps of the chain, and that is what makes
+   a step check: the cost, the target and the justification of a step are
+   each compared with the claim of the label it stands under, so an advantage
+   cannot be charged to a key whose reduction it does not come from. *)
+Definition alice_claim (D : distinguisher alice_hop_jointT)
+    (l : alice_label) : claim R :=
+  match l with
+  | cpa_bob => HopClaim (game 0 D) (game 1 D) (eps_bob D)
+  | cpa_charlie => HopClaim (game 1 D) (game 2 D) (eps_charlie D)
+  | uniform_plain => PlusClaim (game 2 D) #|plain AHE|%:R^-1
+  end.
 
 (* The computational-security argument of this file written as a chain: the
    acceptance probabilities of the predictor's distinguisher at hops 0, 1 and
@@ -1188,7 +1199,7 @@ Definition uniform_plain : nat := 2.
    what turns the comparison of two acceptance probabilities into a bound on
    the real-view game, which is the shape a secrecy statement takes. *)
 Definition alice_chain (predict : predictor alice_hop_tupleT) :
-    chain_bound nat R :=
+    chain_bound (alice_claim (distinguisher_of_predictor predict)) :=
   let D := distinguisher_of_predictor predict in
   (* the real view, both ciphertext slots carrying their plaintexts *)
   \epsilon{ start (game 0 D) ;
@@ -1208,7 +1219,8 @@ Definition alice_chain (predict : predictor alice_hop_tupleT) :
    side of alice_tuple_guess_V2_le, so what that statement asserts is the loss
    the chain accumulated and nothing besides. *)
 Lemma alice_chain_lossE (predict : predictor alice_hop_tupleT) :
-  loss_eval (bound_loss (alice_chain predict))
+  loss_eval (alice_claim (distinguisher_of_predictor predict))
+    (bound_loss (alice_chain predict))
   = #|plain AHE|%:R^-1
     + indcpa_epsilon bob_pkey
         (bob_challenge_adversary (distinguisher_of_predictor predict))

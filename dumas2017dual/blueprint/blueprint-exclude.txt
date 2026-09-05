@@ -187,14 +187,10 @@ extra_proba:pr_eq_comp_constraint
 extra_proba:pr_eq_comp_constraint_tail
 extra_proba:sum_cPr_eq
 # epshop: the soundness obligation each statement supplies for its own
-# invariant field, and the eqType coding of a loss term. The blueprint states
-# the invariant once at def:chain and def:chain_bound, where the endpoints and
-# loss of every statement are written out, so the five *_sound lemmas add
-# nothing a node of their own would carry.
+# invariant field. The blueprint states the invariant once at def:chain and
+# def:chain_bound, where the endpoints and loss of every statement are written
+# out, so the five *_sound lemmas add nothing a node of their own would carry.
 epshop:hop_sound
-epshop:loss_term_code
-epshop:loss_term_codeK
-epshop:loss_term_decode
 epshop:plus_sound
 epshop:same_sound
 epshop:start_sound

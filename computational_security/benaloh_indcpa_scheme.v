@@ -61,9 +61,9 @@ Require Import negligible indcpa_game epshop.
 (*                                                                            *)
 (* The reduction below is written in the epsHop language of                   *)
 (* computational_security/epshop.v.  Its objects are the four acceptance      *)
-(* probabilities the hybrid passes through, and its loss is the two-term      *)
-(* list whose entries are labelled residuosity_y and residuosity_0, each      *)
-(* carrying the r-th residuosity epsilon its call assumes.  The bound of      *)
+(* probabilities the hybrid passes through, and its loss is the two-label     *)
+(* list residuosity_y and residuosity_0, whose claims benaloh_claim fixes,    *)
+(* each carrying the r-th residuosity epsilon its call assumes.  The bound of *)
 (* benaloh_residuosity_epsilon_le is loss_eval of that list and its two       *)
 (* hypotheses are the two class memberships the chain is built at, so the     *)
 (* bound is read off the chain rather than reassembled from a triangle        *)
@@ -123,10 +123,13 @@ Require Import negligible indcpa_game epshop.
 (*                               the residue law                              *)
 (*   unit_accept_residuosityE == under the unit law the two reductions accept *)
 (*                               with the same probability                    *)
-(*              residuosity_y == the label of the hop that carries the real   *)
-(*                               arm to the unit law                          *)
-(*              residuosity_0 == the label of the hop that carries the zero   *)
-(*                               arm back                                     *)
+(*              benaloh_label == the two labels of the reduction,             *)
+(*                               residuosity_y for the hop that carries the   *)
+(*                               real arm to the unit law and residuosity_0   *)
+(*                               for the hop that carries the zero arm back   *)
+(*     benaloh_claim A dk adv == what each label claims: the two acceptance   *)
+(*                               probabilities its residuosity call moves     *)
+(*                               between, and the epsilon it assumes          *)
 (*        benaloh_chain Hy H0 == the reduction as a chain of two hops         *)
 (*                               around one equality, at the two class        *)
 (*                               memberships it spends                        *)
@@ -360,20 +363,37 @@ Qed.
    name the chain below reads at. *)
 Local Notation accept := (residuosity_accept (R:=R)).
 
-(* The label of the first hop, whose residuosity call is made through the
-   reduction that multiplies its challenge by the generator power the
-   adversary's plaintext names.  A label names the reduction the hop invokes,
-   so the loss of a finished chain records which distinguisher each of its
-   terms was assumed of, alongside their numeric total.
-   Naming: [residuosity] is the assumption invoked and [y] the generator that
-   reduction multiplies the challenge by. *)
-Definition residuosity_y : nat := 0%N.
+(* The two labels of the Benaloh reduction, one per residuosity call:
+   residuosity_y for the call made through the reduction that multiplies its
+   challenge by the generator power the adversary's plaintext names,
+   residuosity_0 for the call made through the reduction that hands its
+   challenge to the adversary unchanged.  A label names the reduction the hop
+   invokes, so the loss of a finished chain records which distinguisher each
+   of its terms was assumed of, alongside their numeric total.
+   Naming: [residuosity] is the assumption invoked, [y] the generator the
+   first reduction multiplies the challenge by, and [0] the plaintext the
+   second encrypts, the zero arm of the IND-CPA experiment. *)
+Variant benaloh_label := residuosity_y | residuosity_0.
 
-(* The label of the second hop, whose residuosity call is made through the
-   reduction that hands its challenge to the adversary unchanged.
-   Naming: [0] is the plaintext that reduction encrypts, the zero arm of the
-   IND-CPA experiment. *)
-Definition residuosity_0 : nat := 1%N.
+(* What each label claims: the two acceptance probabilities its residuosity
+   call moves between, and the epsilon that call assumes.  The claims are
+   written here rather than at the steps of the chain, and that is what makes
+   a step check: the cost, the target and the justification of a hop are each
+   compared with the claim of the label the hop stands under, so no step can
+   record a residuosity call it did not make. *)
+Definition benaloh_claim (A : benaloh_residuosity_assumption)
+    (dk : priv_key AHE) (adv : indcpa_adversary (R:=R) AHE)
+    (l : benaloh_label) : claim R :=
+  let D_y := residuosity_of_adversary (priv_gen dk) adv in
+  let D_0 := residuosity_of_adversary_zero adv in
+  match l with
+  | residuosity_y =>
+      HopClaim (accept D_y residue_fdist) (accept D_y unit_fdist)
+        (benaloh_residuosity_epsilon A)
+  | residuosity_0 =>
+      HopClaim (accept D_0 unit_fdist) (accept D_0 residue_fdist)
+        (benaloh_residuosity_epsilon A)
+  end.
 
 Local Open Scope epshop_scope.
 
@@ -391,7 +411,7 @@ Definition benaloh_chain (A : benaloh_residuosity_assumption)
     (dk : priv_key AHE) (adv : indcpa_adversary (R:=R) AHE)
     (Hy : residuosity_admissible A (residuosity_of_adversary (priv_gen dk) adv))
     (H0 : residuosity_admissible A (residuosity_of_adversary_zero adv))
-    : chain nat R :=
+    : chain (benaloh_claim A dk adv) :=
   let D_y := residuosity_of_adversary (priv_gen dk) adv in
   let D_0 := residuosity_of_adversary_zero adv in
   let eps_residuosity := benaloh_residuosity_epsilon A in
@@ -416,7 +436,7 @@ Lemma benaloh_chain_lossE (A : benaloh_residuosity_assumption)
     (dk : priv_key AHE) (adv : indcpa_adversary (R:=R) AHE)
     (Hy : residuosity_admissible A (residuosity_of_adversary (priv_gen dk) adv))
     (H0 : residuosity_admissible A (residuosity_of_adversary_zero adv)) :
-  loss_eval (chain_loss (benaloh_chain Hy H0))
+  loss_eval (benaloh_claim A dk adv) (chain_loss (benaloh_chain Hy H0))
   = 2 * benaloh_residuosity_epsilon A.
 Proof.
 rewrite /loss_eval /benaloh_chain /= big_cons big_cons big_nil addr0.

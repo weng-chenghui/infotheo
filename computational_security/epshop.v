@@ -1,4 +1,3 @@
-From HB Require Import structures.
 From mathcomp Require Import all_boot all_order all_algebra.
 From mathcomp Require Import boolp reals.
 
@@ -7,19 +6,25 @@ From mathcomp Require Import boolp reals.
 (*                                                                            *)
 (* A chain is a morphism of a category whose objects are acceptance           *)
 (* probabilities, elements of an abstract real type, and whose morphisms are  *)
-(* graded by the loss monoid: a morphism from a to b carries a list of loss   *)
-(* terms together with a proof that `| a - b | is at most the total of that   *)
+(* graded by the loss monoid: a morphism from a to b carries a list of        *)
+(* labels together with a proof that `| a - b | is at most the total of that  *)
 (* list.  Composition concatenates the two lists and is partial, its side     *)
 (* condition being that the second fragment starts where the first stopped,   *)
 (* and the identity carries the empty list.  Every fragment carries its own   *)
 (* proof, so a finished chain has no pending obligation and a client reads a  *)
 (* bound off it without restating a triangle inequality.                      *)
 (*                                                                            *)
-(* A loss term is a label paired with a real.  The label names, through its   *)
-(* own type, the assumption and the reduction a step invokes, so the loss of  *)
-(* a finished chain is the list of assumptions its bound rests on, alongside  *)
-(* their numeric total.  The label type L is a parameter of the whole file,   *)
-(* so a client names its steps in whatever eqType it prefers.                 *)
+(* A label is an element of the parameter type L, and claim_of sends it to    *)
+(* the claim it stands for.  A hop label claims a source game, a target game  *)
+(* and a cost, and asserts that the two games lie within that cost of each    *)
+(* other; a terminal label claims a game and a cost, and asserts that the     *)
+(* game lies below the cost.  The loss of a chain is the list of the labels   *)
+(* its steps invoked, so a finished chain names the assumptions its bound     *)
+(* rests on and evaluates to their total.  A label fixing the data of the     *)
+(* step it names is what makes the loss an assumption trail rather than a     *)
+(* comment: the cost, the target and the justification written at a step are  *)
+(* each checked against the label, and a step naming one assumption while     *)
+(* proving another does not type-check.                                       *)
 (*                                                                            *)
 (* ## The surface syntax                                                      *)
 (*                                                                            *)
@@ -34,6 +39,9 @@ From mathcomp Require Import boolp reals.
 (*   start g                the chain opens at game g, with no loss yet.      *)
 (*   hop l e to g' by H     this hop invokes assumption l, loses e, reaches   *)
 (*                         game g', guaranteed by H : |current - g'| <= e.    *)
+(*                         Through claim_of, l fixes the source game, the     *)
+(*                         target and the cost, and e, g' and H are each      *)
+(*                         checked against it.                                *)
 (*   same to g' by H        the game is rewritten to g' at no loss,           *)
 (*                         guaranteed by H : current = g'.                    *)
 (*   s ;; plus l c by H     an external term c, labelled l, is added to the   *)
@@ -45,7 +53,9 @@ From mathcomp Require Import boolp reals.
 (*                                                                            *)
 (* The label slot names the assumption invoked and where (dcr_g, cpa_bob),    *)
 (* the cost slot is that assumption's epsilon, and the proof slot says        *)
-(* whether the term is assumed (a class bound) or exact (an equality).        *)
+(* whether the term is assumed (a class bound) or exact (an equality).  All   *)
+(* three are read back from the label's claim and compared with what was      *)
+(* written.                                                                   *)
 (* ```                                                                        *)
 (*                                                                            *)
 (* ## What the syntax costs, and the levels it is built at                    *)
@@ -65,28 +75,44 @@ From mathcomp Require Import boolp reals.
 (* Three levels are forced.  The proof slot sits at level 10, an application  *)
 (* such as le_of_eq hop0_advantageE not parsing at level 0.  The label slot   *)
 (* sits at level 0, where 0%N does not parse, so a client names its labels by *)
-(* Definitions rather than writing numerals in the chain.  The terminal is a  *)
-(* second closed notation on the same delimiter, separated by ;;, because it  *)
-(* returns a chain_bound where every other statement returns a chain: it      *)
-(* cannot be an operand of the level-90 separator, and that separator being   *)
-(* right associative would swallow a single ; before the plus token.          *)
+(* the constructors of a label type rather than writing numerals in the       *)
+(* chain.  The terminal is a second closed notation on the same delimiter,    *)
+(* separated by ;;, because it returns a chain_bound where every other        *)
+(* statement returns a chain: it cannot be an operand of the level-90         *)
+(* separator, and that separator being right associative would swallow a      *)
+(* single ; before the plus token.                                            *)
 (*                                                                            *)
 (* ```                                                                        *)
-(*             loss_term L R == a label in L paired with a real cost          *)
-(*          loss_term_cost a == the real cost of one loss term                *)
-(*                  loss L R == a list of loss terms, the free monoid the     *)
+(*                   claim R == what a label asserts, either the hop claim    *)
+(*                              HopClaim s t e, that s and t lie within e of  *)
+(*                              each other, or the terminal claim             *)
+(*                              PlusClaim g e, that g lies below e            *)
+(*              claim_cost c == the cost either claim names                   *)
+(*                 hop_src c == the source game of a hop claim, zero on a     *)
+(*                              terminal claim                                *)
+(*                 hop_tgt c == the target game of a hop claim, zero on a     *)
+(*                              terminal claim                                *)
+(*               plus_game c == the game of a terminal claim, zero on a hop   *)
+(*                              claim                                         *)
+(*          hop_obligation c == the proposition a hop claim asserts, and      *)
+(*                              False on a terminal claim                     *)
+(*         plus_obligation c == the proposition a terminal claim asserts, and *)
+(*                              False on a hop claim                          *)
+(*                    loss L == a list of labels, the free monoid the         *)
 (*                              category is graded by                         *)
-(*               loss_eval s == the numeric total of a list of loss terms     *)
+(*               loss_eval s == the numeric total of a list of labels, each   *)
+(*                              label costing what its claim names            *)
 (*             loss_eval_nil == the empty loss costs zero                     *)
 (*             loss_eval_cat == concatenation of losses adds their costs      *)
-(*                loss_eval1 == a one-term loss totals that term              *)
-(*                 chain L R == a first endpoint, a current endpoint, a loss, *)
-(*                              and the proof that the loss bounds the        *)
+(*                loss_eval1 == a one-label loss totals that label's cost     *)
+(*             chain claim_of == a first endpoint, a current endpoint, a      *)
+(*                              loss, and the proof that the loss bounds the  *)
 (*                              distance between the endpoints                *)
 (*             chain_start g == the identity at g, logging nothing            *)
-(*        chain_hop l e g' H == the step to g' at cost e under the label l,   *)
-(*                              justified by H, whose source endpoint is read *)
-(*                              off H                                         *)
+(*  chain_hop l e g' H He Hg == the step under the label l, whose source      *)
+(*                              endpoint is the source of l's claim, at the   *)
+(*                              cost e and to the target g' that He and Hg    *)
+(*                              check against that claim, justified by H      *)
 (*           chain_same g' H == the step to g' justified by an equality,      *)
 (*                              logging nothing                               *)
 (*      chain_then m frag Hb == m followed by frag, where Hb says frag        *)
@@ -94,10 +120,10 @@ From mathcomp Require Import boolp reals.
 (*                              concatenated loss                             *)
 (*               chain_bound == a first endpoint, a loss, and the proof that  *)
 (*                              the loss bounds that endpoint                 *)
-(*       chain_plus m l c Hc == the chain_bound obtained from m by adding the *)
-(*                              external term c, labelled l, to its loss      *)
-(*            loss_term_code == a loss term read as a label and cost pair,    *)
-(*                              the coding its eqType is copied along         *)
+(*  chain_plus m l c H Hc Hm == the chain_bound obtained from m by adding the *)
+(*                              external term c under the label l, where Hc   *)
+(*                              and Hm check c and where m stopped against    *)
+(*                              l's claim                                     *)
 (*       chain_observable_eq == two chains agreeing on the three observable   *)
 (*                              fields are equal                              *)
 (*           chain_left_unit == composing a fragment after chain_start        *)
@@ -119,26 +145,60 @@ Import Prenex Implicits.
 
 Local Open Scope ring_scope.
 
+(* What a label asserts.  A hop label claims that its source game s and its
+   target game t lie within e of each other; a terminal label claims that its
+   game g lies below e.  The claim is the whole content of a label: it is
+   what a step written under that label is checked against, so an
+   assumption-conditional term of a bound cannot enter a chain under the name
+   of a different assumption. *)
+Variant claim (R : realType) := HopClaim of R & R & R | PlusClaim of R & R.
+
+(* The cost either claim names, the summand the label contributes to a loss. *)
+Definition claim_cost (R : realType) (c : claim R) : R :=
+  match c with HopClaim _ _ e => e | PlusClaim _ e => e end.
+
+(* The source game of a hop claim.  A chain reads its first endpoint here
+   rather than from the text of the program, which is why a hop leaves its
+   source unwritten. *)
+Definition hop_src (R : realType) (c : claim R) : R :=
+  match c with HopClaim s _ _ => s | PlusClaim _ _ => 0 end.
+
+(* The target game of a hop claim, against which the game a hop writes is
+   checked. *)
+Definition hop_tgt (R : realType) (c : claim R) : R :=
+  match c with HopClaim _ t _ => t | PlusClaim _ _ => 0 end.
+
+(* The game a terminal claim bounds, against which the game a chain stopped
+   at is checked. *)
+Definition plus_game (R : realType) (c : claim R) : R :=
+  match c with HopClaim _ _ _ => 0 | PlusClaim g _ => g end.
+
+(* The proposition a hop claim asserts, and the type of the justification a
+   hop supplies.  It is False on a terminal claim, so a label meant for the
+   terminal statement cannot be spent on a hop. *)
+Definition hop_obligation (R : realType) (c : claim R) : Prop :=
+  match c with HopClaim s t e => `| s - t | <= e | PlusClaim _ _ => False end.
+
+(* The proposition a terminal claim asserts, and the type of the
+   justification the terminal statement supplies.  It is False on a hop
+   claim, so a label meant for a hop cannot be spent on the terminal. *)
+Definition plus_obligation (R : realType) (c : claim R) : Prop :=
+  match c with HopClaim _ _ _ => False | PlusClaim g e => g <= e end.
+
 Section epshop.
-Variable L : eqType.
+Variable L : Type.
 Variable R : realType.
+Variable claim_of : L -> claim R.
 
-(* One term of a security loss: the label naming the assumption and the
-   reduction that a step invokes, and the real that step costs. *)
-Inductive loss_term := LossTerm of L & R.
-
-(* The real a loss term contributes, its label discarded.  It is what
-   loss_eval adds, so the numeric total of a loss forgets every label. *)
-Definition loss_term_cost (a : loss_term) : R := let: LossTerm _ c := a in c.
-
-(* An accumulated security loss, the free monoid on loss terms.  A list
-   rather than a real so that a finished chain still names the assumptions
-   its bound rests on. *)
-Definition loss := seq loss_term.
+(* An accumulated security loss, the free monoid on labels.  A list of labels
+   rather than a real so that a finished chain still names the assumptions its
+   bound rests on. *)
+Definition loss := seq L.
 
 (* The numeric total of a loss, the monoid map to the additive reals along
-   which every bound of this file is finally read. *)
-Definition loss_eval (s : loss) : R := \sum_(a <- s) loss_term_cost a.
+   which every bound of this file is finally read.  A label costs what its
+   claim names. *)
+Definition loss_eval (s : loss) : R := \sum_(l <- s) claim_cost (claim_of l).
 
 (* The empty loss is the unit: a step that assumes nothing costs nothing. *)
 Lemma loss_eval_nil : loss_eval [::] = 0.
@@ -151,9 +211,9 @@ Lemma loss_eval_cat s1 s2 :
   loss_eval (s1 ++ s2) = loss_eval s1 + loss_eval s2.
 Proof. by rewrite /loss_eval big_cat. Qed.
 
-(* A one-term loss totals that term.  It is where the bound of a single hop
-   is read as the epsilon its label names. *)
-Lemma loss_eval1 l c : loss_eval [:: LossTerm l c] = c.
+(* A one-label loss totals that label's cost.  It is where the bound of a
+   single hop is read as the epsilon its label names. *)
+Lemma loss_eval1 l : loss_eval [:: l] = claim_cost (claim_of l).
 Proof. by rewrite /loss_eval big_cons big_nil addr0. Qed.
 
 (* A chain fragment: where it starts, where it now is, what it logged, and
@@ -176,19 +236,21 @@ Definition chain_start (g : R) : chain :=
   {| chain_first := g ; chain_current := g ; chain_loss := [::] ;
      chain_sound := start_sound g |}.
 
-(* One hop, from x to g' at e under the label l, justified by H.  It is the
-   step that spends an assumption, the label naming which one, so every
-   assumption-conditional term of a bound enters here.  The source endpoint x
-   is determined by the type of H, which is what lets a chain leave it
-   unwritten. *)
-Lemma hop_sound (l : L) (e x g' : R) (H : `| x - g' | <= e) :
-  `| x - g' | <= loss_eval [:: LossTerm l e].
-Proof. by rewrite loss_eval1. Qed.
+(* One hop under the label l, justified by H.  It is the step that spends an
+   assumption, the label naming which one, so every assumption-conditional
+   term of a bound enters here.  The source endpoint is the source of l's
+   claim, and the target g' is checked against that claim by Hg, so the games
+   a hop joins are the games the assumption is about. *)
+Lemma hop_sound (l : L) (g' : R) (H : hop_obligation (claim_of l))
+    (Hg : g' = hop_tgt (claim_of l)) :
+  `| hop_src (claim_of l) - g' | <= loss_eval [:: l].
+Proof. by rewrite loss_eval1 Hg; move: H; case: (claim_of l). Qed.
 
-Definition chain_hop (l : L) (e x g' : R) (H : `| x - g' | <= e) : chain :=
-  {| chain_first := x ; chain_current := g' ;
-     chain_loss := [:: LossTerm l e] ;
-     chain_sound := @hop_sound l e x g' H |}.
+Definition chain_hop (l : L) (e g' : R) (H : hop_obligation (claim_of l))
+    (He : e = claim_cost (claim_of l)) (Hg : g' = hop_tgt (claim_of l))
+  : chain :=
+  {| chain_first := hop_src (claim_of l) ; chain_current := g' ;
+     chain_loss := [:: l] ; chain_sound := @hop_sound l g' H Hg |}.
 
 (* An exact step, from x to g', logging nothing.  It is the step an
    information-theoretic identity between two games takes, so an
@@ -229,57 +291,51 @@ Record chain_bound := ChainBound {
   bound_loss : loss ;
   bound_sound : bound_first <= loss_eval bound_loss }.
 
-(* Adding an external term c, labelled l, to the loss turns a chain into such
-   a bound: the distance the chain proved plus that bound on where it stopped
-   is a bound on where it started.  The added term is the one summand of a
-   finished bound that comes from the endpoint rather than from a hop. *)
-Lemma plus_sound (m : chain) (l : L) (c : R) (Hc : chain_current m <= c) :
-  chain_first m <= loss_eval (chain_loss m ++ [:: LossTerm l c]).
+(* Adding an external term under the label l to the loss turns a chain into
+   such a bound: the distance the chain proved plus that bound on where it
+   stopped is a bound on where it started.  The added term is the one summand
+   of a finished bound that comes from the endpoint rather than from a hop,
+   and Hm checks that the endpoint is the game l's claim bounds. *)
+Lemma plus_sound (m : chain) (l : L) (H : plus_obligation (claim_of l))
+    (Hm : plus_game (claim_of l) = chain_current m) :
+  chain_first m <= loss_eval (chain_loss m ++ [:: l]).
 Proof.
+have Hc : chain_current m <= claim_cost (claim_of l).
+  by rewrite -Hm; move: H; case: (claim_of l).
 rewrite loss_eval_cat loss_eval1.
 rewrite -(subrK (chain_current m) (chain_first m)); apply: lerD Hc.
 exact: le_trans (ler_norm _) (chain_sound m).
 Qed.
 
 Definition chain_plus (m : chain) (l : L) (c : R)
-    (Hc : chain_current m <= c) : chain_bound :=
-  {| bound_first := chain_first m ;
-     bound_loss := chain_loss m ++ [:: LossTerm l c] ;
-     bound_sound := @plus_sound m l c Hc |}.
+    (H : plus_obligation (claim_of l)) (Hc : c = claim_cost (claim_of l))
+    (Hm : plus_game (claim_of l) = chain_current m) : chain_bound :=
+  {| bound_first := chain_first m ; bound_loss := chain_loss m ++ [:: l] ;
+     bound_sound := @plus_sound m l H Hm |}.
 
 End epshop.
 
-Arguments chain_start {L R} g.
-Arguments chain_hop {L R} l e {x} g' H.
-Arguments chain_same {L R} {x} g' H.
-Arguments chain_then {L R} m frag Hb.
-Arguments chain_plus {L R} m l c Hc.
-
-(* A loss term is a label and a cost, so its equality is that of the pair.
-   The coding is what the eqType instance below is copied along. *)
-Definition loss_term_code (L : eqType) (R : realType) (a : loss_term L R)
-  : L * R := let: LossTerm l c := a in (l, c).
-
-Definition loss_term_decode (L : eqType) (R : realType) (x : L * R)
-  : loss_term L R := LossTerm x.1 x.2.
-
-Lemma loss_term_codeK (L : eqType) (R : realType) :
-  cancel (@loss_term_code L R) (@loss_term_decode L R).
-Proof. by case. Qed.
-
-HB.instance Definition _ (L : eqType) (R : realType) :=
-  Equality.copy (loss_term L R) (can_type (@loss_term_codeK L R)).
+(* The claim function is solved from the expected type of a statement before
+   its explicit arguments are elaborated, which is what the & records.  A
+   client therefore ascribes the type of its program once, at the Definition,
+   and every label inside it is read at that program's claim function. *)
+Arguments chain_start {L R claim_of} & g.
+Arguments chain_hop {L R claim_of} & l e g' H He Hg.
+Arguments chain_same {L R claim_of} & {x} g' H.
+Arguments chain_then {L R claim_of} & m frag Hb.
+Arguments chain_plus {L R claim_of} & m l c H Hc Hm.
 
 Section chain_laws.
-Variable L : eqType.
+Variable L : Type.
 Variable R : realType.
+Variable claim_of : L -> claim R.
 
 (* Two chains agreeing on their three observable fields are equal.  The
    fourth field is a proof of a Boolean, whose uniqueness is bool_irrelevance,
    a lemma of mathcomp's eqtype; no proof irrelevance on Prop is needed, and
    the three laws below are therefore equalities of records rather than
    statements up to an equivalence. *)
-Lemma chain_observable_eq (c1 c2 : chain L R) :
+Lemma chain_observable_eq (c1 c2 : chain claim_of) :
   chain_first c1 = chain_first c2 -> chain_current c1 = chain_current c2 ->
   chain_loss c1 = chain_loss c2 -> c1 = c2.
 Proof.
@@ -290,7 +346,7 @@ Qed.
 
 (* Left unit: composing a fragment after chain_start returns that fragment.
    The line that opens a chain therefore adds nothing to what follows it. *)
-Lemma chain_left_unit (g : R) (frag : chain L R)
+Lemma chain_left_unit (g : R) (frag : chain claim_of)
     (Hb : chain_first frag = g) :
   chain_then (chain_start g) frag Hb = frag.
 Proof. by apply: chain_observable_eq; rewrite //= Hb. Qed.
@@ -298,7 +354,7 @@ Proof. by apply: chain_observable_eq; rewrite //= Hb. Qed.
 (* Right unit: composing chain_start after a chain returns that chain, the
    loss half by cats0.  Closing a chain at the game it already stands at
    leaves the bound read off it. *)
-Lemma chain_right_unit (m : chain L R) :
+Lemma chain_right_unit (m : chain claim_of) :
   chain_then m (chain_start (chain_current m)) erefl = m.
 Proof. by apply: chain_observable_eq; rewrite //= cats0. Qed.
 
@@ -306,7 +362,7 @@ Proof. by apply: chain_observable_eq; rewrite //= cats0. Qed.
    loss half by catA and the two side conditions the same two proofs on both
    sides.  How the separators of a chain are grouped therefore leaves the
    assumptions it names and their total. *)
-Lemma chain_assoc (m1 m2 m3 : chain L R)
+Lemma chain_assoc (m1 m2 m3 : chain claim_of)
     (H12 : chain_first m2 = chain_current m1)
     (H23 : chain_first m3 = chain_current m2) :
   chain_then (chain_then m1 m2 H12) m3 H23
@@ -336,7 +392,9 @@ Notation "x" := x (in custom epshop at level 0, x ident).
 Notation "'start' g" := (chain_start g)
   (in custom epshop at level 80, g constr at level 0).
 
-Notation "'hop' l e 'to' g' 'by' H" := (chain_hop l e g' H)
+(* The two erefl are the checks that the cost and the target written here are
+   the cost and the target the label's claim names. *)
+Notation "'hop' l e 'to' g' 'by' H" := (chain_hop l e g' H erefl erefl)
   (in custom epshop at level 80, l constr at level 0, e constr at level 0,
    g' constr at level 0, H constr at level 10).
 
@@ -349,7 +407,10 @@ Notation "'same' 'to' g' 'by' H" := (chain_same g' H)
 Notation "s1 ';' s2" := (chain_then s1 s2 erefl)
   (in custom epshop at level 90, right associativity).
 
-(* The terminal, a second closed notation on the same delimiter. *)
-Notation "'\epsilon{' s ';;' 'plus' l c 'by' H '}'" := (chain_plus s l c H)
+(* The terminal, a second closed notation on the same delimiter.  Its two
+   erefl check the term written against the label's claim and the game the
+   chain stopped at against the game that claim bounds. *)
+Notation "'\epsilon{' s ';;' 'plus' l c 'by' H '}'" :=
+  (chain_plus s l c H erefl erefl)
   (s custom epshop at level 99, l constr at level 0, c constr at level 0,
    H constr at level 10) : epshop_scope.
