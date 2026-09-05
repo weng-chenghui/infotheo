@@ -136,6 +136,17 @@ Require Import dsdp_alice_hop_secrecy.
 (*                              bounds every Boolean test between the real    *)
 (*                              and ideal trace laws by the costs of the two  *)
 (*                              ciphertext hops                               *)
+(* alice_trace_sim_advantage D ==                                             *)
+(*                              the distance a Boolean trace test sees        *)
+(*                              between Alice's executed trace and the        *)
+(*                              simulated one                                 *)
+(* alice_trace_sim_chain_assumed A D HB HC ==                                 *)
+(*                              the same program with both hops charged at    *)
+(*                              the epsilon A assumes, the two class          *)
+(*                              memberships spent in the hop justifications   *)
+(* alice_trace_sim_advantage_firstE ==                                        *)
+(*                              that distance is the game the assumed         *)
+(*                              program opens at                              *)
 (*                                                                            *)
 (* Why the trace preserves the relevant information                           *)
 (*                                                                            *)
@@ -990,6 +1001,68 @@ Proof.
 rewrite -!acceptE.
 exact: result_sound (alice_trace_sim_chain D).
 Qed.
+
+(* The distance a Boolean trace test sees between the law of Alice's executed
+   trace beside the two honest inputs and the law the simulator produces from
+   the leaked output alone.  This is the quantity every trace simulation bound
+   of this file bounds, and the one the sequence statement of
+   dsdp_instance_sequence.v reads along the security parameter, so that the
+   bound at a fixed instance and its asymptotic form are visibly about the
+   same number.
+   Naming: the subject of [alice_trace_sim_advantage_le] under its own name,
+   as [alice_trace_guess_V2_pr] is the subject of
+   [alice_trace_guess_V2_le]. *)
+Definition alice_trace_sim_advantage
+    (D : distinguisher (plain AHE * plain AHE * alice_traceT)%type) : R :=
+  `| Pr (`p_ [% V2, V3, AliceTrace]) [set x | D x]
+     - Pr alice_trace_ideal [set x | D x] |.
+
+(* The same argument as alice_trace_sim_chain over the same four games, with
+   the two ciphertext replacements entering as the fragment
+   alice_hops_assumed, each charged at the epsilon an adversary-class
+   assumption promises rather than at the advantage its own reduction shows.
+   The two class memberships are parameters of the program and are spent
+   inside the fragment, in the justification of the hop each one licenses, so
+   a chain that exists has already spent them.  The program carries no
+   terminal statement, so what it returns on its own is the class-conditional
+   trace simulation bound: a test tells Alice's executed trace from the
+   simulation only as often as twice the assumed epsilon allows, and the two
+   steps at the ends carry the test between the trace and the hopping tuple at
+   no loss.  It is the program the sequence statement reads.
+   Naming: extends [alice_trace_sim_chain] with the [assumed] token naming the
+   quantity its hops are charged at, as [alice_trace_chain_assumed] extends
+   [alice_trace_chain]. *)
+Definition alice_trace_sim_chain_assumed (A : indcpa_epsilon_assumption)
+    (D : distinguisher (plain AHE * plain AHE * alice_traceT)%type)
+    (HB : indcpa_admissible A (bob_trace_adversary D))
+    (HC : indcpa_admissible A (charlie_trace_adversary D)) :=
+  let Dt := D \o (fun x => (x.1.1, x.1.2, alice_trace_of_hop_tuple x.2)) in
+  let hops := alice_hops_assumed HB HC in
+  \epsilon[ alice_claim_assumed pkey_of_dk v1 u1 u2 u3 A Dt ]{
+    (* the trace of a run of the protocol by the interpreter *)
+    start (accept D (`p_ [% V2, V3, trace_of_run dsdp_protocol Alice])) ;
+    (* her trace is a deterministic image of her hopping tuple *)
+    same to (accept Dt G0) by accept_trace_tupleE D ;
+    (* both ciphertext slots zeroed, at twice the epsilon A assumes *)
+    hops ;
+    (* the simulated trace is that same image of the all-zero tuple *)
+    same to (accept D alice_trace_ideal)
+      by esym (accept_trace_ideal_tupleE D) }.
+
+(* The distance a trace test sees is the game the class-conditional program
+   opens at.  That identification is what lets a statement about the program,
+   such as the negligibility of its first game along a sequence of security
+   parameters, be read as a statement about the distance between the executed
+   trace and the simulation.
+   Naming: [_firstE] marks the identification of the named quantity with the
+   first game of a program, as [alice_first_at] does at the sequence. *)
+Lemma alice_trace_sim_advantage_firstE (A : indcpa_epsilon_assumption)
+    (D : distinguisher (plain AHE * plain AHE * alice_traceT)%type)
+    (HB : indcpa_admissible A (bob_trace_adversary D))
+    (HC : indcpa_admissible A (charlie_trace_adversary D)) :
+  alice_trace_sim_advantage D
+  = result_first (alice_trace_sim_chain_assumed HB HC).
+Proof. by rewrite /alice_trace_sim_advantage -!acceptE. Qed.
 
 End dsdp_alice_trace_rv.
 

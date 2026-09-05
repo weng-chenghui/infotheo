@@ -20,7 +20,9 @@ Require Import dsdp_alice_hop_secrecy dsdp_alice_trace_link.
 (* variables of that development, and a record packing a sequence of those    *)
 (* with the assumption made at each k and the two negligibility facts, and    *)
 (* reads the concrete class-conditional guessing bound off along such a       *)
-(* sequence.                                                                  *)
+(* sequence.  A second statement is read off the same way, the distance a     *)
+(* test sees between Alice's executed trace and the simulation, which is      *)
+(* computational indistinguishability of her view from the simulation.        *)
 (*                                                                            *)
 (* The class restriction lands on the two reduction adversaries a predictor   *)
 (* induces, never on the predictor itself.  That is what separates the        *)
@@ -104,6 +106,26 @@ Require Import dsdp_alice_hop_secrecy dsdp_alice_trace_link.
 (*                               the sequence's own negligibility fields      *)
 (*                               eventually reject the decrypting             *)
 (*                               predictor's reduction adversary              *)
+(*      alice_sim_claims_at k == the dictionary of the trace simulation       *)
+(*                               argument at the k-th instance                *)
+(* alice_sim_label_negligible_at ==                                           *)
+(*                               every label of that dictionary costs a       *)
+(*                               negligible family along the sequence         *)
+(* alice_sim_claims_negligible ==                                             *)
+(*                               that dictionary registered as a              *)
+(*                               negligibleClaims                             *)
+(* alice_trace_sim_chain_assumed_at k ==                                      *)
+(*                               the class-conditional trace simulation       *)
+(*                               program at the k-th instance                 *)
+(* alice_trace_sim_advantage_at ==                                            *)
+(*                               the trace simulation distance at k           *)
+(*            f_sim_advantage == the trace simulation distance sequence       *)
+(*         alice_sim_first_at == the distance sequence is the game that       *)
+(*                               program opens at                             *)
+(* alice_trace_sim_advantage_negligible ==                                    *)
+(*                               the trace simulation distance sequence       *)
+(*                               is negligible under the two class            *)
+(*                               premises                                     *)
 (*             card_renc_ord1 == the one-element coin space, in successor     *)
 (*                               form                                         *)
 (*    idealized_indcpa_scheme == the idealized scheme of idealized_ahe.v as   *)
@@ -452,6 +474,115 @@ apply: (decrypt_reduction_admissibleF (inst_v1 (I k)) (inst_u1 (I k))
           (inst_rc2 (I k))).
 apply: lt_le_trans Heps' _; apply: le_trans Hhalf _.
 by rewrite lerD2l lerN2 ltW.
+Qed.
+
+(* A family of Boolean tests of Alice's executed trace, one at each security
+   parameter.  A test is what an indistinguishability statement quantifies
+   over, where the predictor family above is what a guessing statement
+   quantifies over, so the family declared here is a second observer of the
+   same sequence and not a specialisation of the first.  The [clear implicits]
+   directive keeps the security parameter an explicit argument, which is what
+   makes Dfam k the test at k rather than Dfam read at an input. *)
+Variable Dfam : forall k,
+  distinguisher (plain (inst_AHE (I k)) * plain (inst_AHE (I k))
+                 * alice_traceT (inst_AHE (I k)))%type.
+Arguments Dfam : clear implicits.
+
+(* The two class premises of the statement below: at every security parameter
+   the class of the assumption made there admits the two reduction adversaries
+   the k-th test induces.  They are to the indistinguishability statement what
+   HB and HC are to the guessing statement, and they are premises for the same
+   reason, restricting the adversaries a test induces rather than the
+   sequence. *)
+Hypothesis HBD : forall k,
+  indcpa_admissible (A k) (bob_trace_adversary_at (Dfam k)).
+Hypothesis HCD : forall k,
+  indcpa_admissible (A k) (charlie_trace_adversary_at (Dfam k)).
+
+(* The dictionary of the trace simulation argument at the k-th instance.  It
+   is a second dictionary rather than alice_claims_assumed_at because that one
+   is pinned to the test a predictor induces, and a statement made at the
+   predictor's own test would be strictly weaker than indistinguishability,
+   which quantifies over every test.  It is a named constant for the same
+   reason as the other, canonical inference keying on the head constant of the
+   family. *)
+Definition alice_sim_claims_at (k : nat) : alice_label -> claim R :=
+  alice_claim_assumed (inst_pkey_of_party (I k)) (inst_v1 (I k))
+    (inst_u1 (I k)) (inst_u2 (I k)) (inst_u3 (I k)) (A k)
+    (Dfam k
+     \o (fun x => (x.1.1, x.1.2,
+                   alice_trace_of_hop_tuple (@inst_rand_of_renc (I k))
+                     (inst_v1 (I k)) (inst_u1 (I k)) (inst_u2 (I k))
+                     (inst_u3 (I k)) (inst_dk_a (I k)) (inst_dk_b (I k))
+                     (inst_dk_c (I k)) (inst_rc2 (I k)) x.2))).
+
+(* Every label of that dictionary costs a negligible family along the
+   sequence, the two hop labels the assumed advantage and the terminal label
+   the inverse plaintext cardinality.  The terminal branch is owed although
+   the program below never spends that label, the condition quantifying over
+   the whole label type rather than over the labels one program names. *)
+Lemma alice_sim_label_negligible_at (l : alice_label) :
+  negligible_fun (fun k => claim_cost (alice_sim_claims_at k l)).
+Proof.
+case: l.
+- exact: sequence_adv_negligible Q.
+- exact: sequence_adv_negligible Q.
+- exact: sequence_size_negligible Q.
+Qed.
+
+Canonical alice_sim_claims_negligible :=
+  NegligibleClaims alice_sim_claims_at alice_sim_label_negligible_at.
+
+(* The trace simulation program at the k-th instance, the value of the family
+   monad the terminal below reads.  The return type names the dictionary,
+   which is what lets canonical inference find the negligibility of the two
+   labels the program spends. *)
+Definition alice_trace_sim_chain_assumed_at (k : nat)
+    : chain_result (alice_sim_claims_at k) :=
+  alice_trace_sim_chain_assumed (inst_rb2 (I k)) (HBD k) (HCD k).
+
+(* The distance a Boolean trace test sees at k between Alice's executed trace
+   and the simulation.  The two hop coins enter here and not in the two
+   reduction adversaries, which fix Bob's coin by the challenge. *)
+Definition alice_trace_sim_advantage_at k
+    (D : distinguisher (plain (inst_AHE (I k)) * plain (inst_AHE (I k))
+                        * alice_traceT (inst_AHE (I k)))%type) : R :=
+  alice_trace_sim_advantage (inst_card_renc (I k)) (@inst_rand_of_renc (I k))
+    (inst_v1 (I k)) (inst_u1 (I k)) (inst_u2 (I k)) (inst_u3 (I k))
+    (inst_dk_a (I k)) (inst_dk_b (I k)) (inst_dk_c (I k))
+    (inst_rb2 (I k)) (inst_rc2 (I k)) D.
+
+(* The trace simulation distance function used in the sequence theorem. *)
+Definition f_sim_advantage k : R := alice_trace_sim_advantage_at (Dfam k).
+
+(* The quantity the theorem below is about is the game that program opens
+   at. *)
+Lemma alice_sim_first_at k :
+  f_sim_advantage k = result_first (alice_trace_sim_chain_assumed_at k).
+Proof.
+rewrite /f_sim_advantage /alice_trace_sim_advantage_at
+        /alice_trace_sim_chain_assumed_at.
+exact: (alice_trace_sim_advantage_firstE (inst_rb2 (I k)) (HBD k) (HCD k)).
+Qed.
+
+(* Along a sequence of DSDP instances, every family of Boolean tests of
+   Alice's executed trace whose two induced reduction adversaries the
+   assumption at k admits separates that trace from the simulation by a
+   negligible amount.  This is computational indistinguishability of Alice's
+   view from the simulation, the form a simulation-based secrecy claim takes
+   once the parameter is free to grow, and the guessing statement above is a
+   claim about one predictor where this one is a claim about every test.
+   It is the second reading of alice_trace_sim_chain_assumed: that program
+   spends the two hop labels and nothing else, so the whole distance is the
+   assumed advantage family and no plaintext-size term enters, which is what
+   separates this bound from the guessing bound.  The results record
+   dsdp_security carries no field for this statement, the peer-facing record
+   holding the guessing sequence alone. *)
+Theorem alice_trace_sim_advantage_negligible :
+  negligible_fun f_sim_advantage.
+Proof.
+exact: (\negligible[ f_sim_advantage by alice_sim_first_at ]
+          alice_trace_sim_chain_assumed_at).
 Qed.
 
 End dsdp_instance_sequence_bounds.

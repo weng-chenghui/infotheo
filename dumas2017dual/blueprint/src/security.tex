@@ -1375,6 +1375,32 @@ pending obligation, and a bound is read off it by projection.
   result at its two class memberships.
 \end{definition}
 
+\begin{definition}[Alice's trace against the simulation at the assumed advantage]
+  \label{def:alice_trace_sim_chain_assumed}
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_trace_sim_advantage,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_trace_sim_chain_assumed,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_trace_sim_advantage_firstE}
+  \rocqok
+  \uses{def:alice_trace_sim_chain,def:alice_trace_chain_assumed}
+  The chain of Definition~\ref{def:alice_trace_sim_chain} over the dictionary
+  $C^{\mathcal{A}}$ of Definition~\ref{def:alice_trace_chain_assumed}, which
+  charges each of the two hops the advantage $\mathcal{A}$ assumes in place of
+  the advantage its own reduction shows. The two class memberships are
+  parameters of the program and are spent inside the fragment
+  \texttt{alice\_hops\_assumed}, one in the justification of each hop.
+  \[ \mathrm{loss}(s) = [\mathsf{cpa\_bob},\ \mathsf{cpa\_charlie}],
+     \qquad \mathrm{tot}(s) = 2\,\varepsilon_{\mathrm{cpa}} \]
+  The two steps at the ends carry the test between the executed trace and the
+  hopping tuple at no loss, and the chain carries no terminal statement, so
+  the quantity it opens at is the distance a trace test sees between the
+  executed trace and the simulation, and the gap result it returns bounds that
+  distance by two assumption-conditional terms and nothing else.
+  \[ \mathrm{adv}^\tau(D)
+       = \big\lvert \gamma_\tau(D) - \Pr_{\Ideal^\tau}[D] \big\rvert
+       = a_s, \qquad
+     \mathrm{adv}^\tau(D) \le 2\,\varepsilon_{\mathrm{cpa}} \]
+\end{definition}
+
 Each of the three programs states a bound at one security parameter, where an
 asymptotic notion has nothing to measure. The three statements that close this
 section read a program along a sequence of parameters instead, which is the
@@ -1602,6 +1628,33 @@ single member of it can carry.
   Theorem~\ref{thm:alice_guess_negligible} is therefore excluded by the very
   sequence that theorem is stated along.
 \end{corollary}
+
+\begin{theorem}[The trace simulation distance sequence is negligible]
+  \label{thm:alice_trace_sim_advantage_negligible}
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_instance_sequence.alice_trace_sim_advantage_negligible}
+  \rocqok
+  \uses{def:alice_trace_sim_chain_assumed,def:negligible_claims,thm:first_negligible}
+  Along a sequence $\mathcal{Q}$ of DSDP instances and a family $D_k$ of tests
+  of Alice's executed trace, if both reduction adversaries of $D_k$ are
+  admissible for $\mathcal{A}_k$ at every $k$, then the distances between that
+  trace and the simulation are negligible.
+  \[ \big(\forall k,\ \mathrm{adm}_{\mathcal{A}_k}(\hopred{0}{D_k})\big)
+     \wedge
+     \big(\forall k,\ \mathrm{adm}_{\mathcal{A}_k}(\hopred{1}{D_k})\big)
+     \implies \mathrm{negl}\big(k \mapsto \mathrm{adv}^\tau_k(D_k)\big) \]
+  This is computational indistinguishability of Alice's view from the
+  simulation, the form a simulation-based secrecy claim takes once the
+  parameter is free to grow. It is Theorem~\ref{thm:first_negligible} read
+  over the program of Definition~\ref{def:alice_trace_sim_chain_assumed} at
+  the $k$-th instance, the second statement that program carries. That program
+  spends the two hop labels alone, so the whole distance is
+  $\mathrm{negl}(k \mapsto \varepsilon_{\mathrm{cpa},k})$ and no
+  plaintext-size term enters, which is what separates it from
+  Theorem~\ref{thm:alice_guess_negligible}. The dictionary is registered a
+  second time, at the family of tests rather than at the test a predictor
+  induces, because a statement made at the predictor's own test would be
+  weaker than a statement quantified over every test.
+\end{theorem}
 
 \begin{definition}[The setting a DSDP security statement is made over]
   \label{def:dsdp_setting}
