@@ -119,8 +119,8 @@ Require Import dsdp_instance_sequence.
 (*                              predictors over                               *)
 (* hop_fdist_at, hop_V2_at, hop_V3_at == the corrupted-Alice sample space and *)
 (*                              its two honest relay inputs                   *)
-(* AliceHopTuple_at, AliceRealTuple_at, AliceView_at, AliceTrace_at == the    *)
-(*                              conditioners of the hopping ladder            *)
+(* AliceRealTuple_at, AliceAllZeroTuple_at, AliceView_at, AliceTrace_at ==    *)
+(*                              the conditioners of the hopping ladder        *)
 (*                   Sout_at == the output the hopping side leaks             *)
 (*  bob_pkey_at, charlie_pkey_at == the two public keys the ladder prices at  *)
 (* alice_ideal_joint_at, alice_trace_ideal_joint_at == the simulator's law at *)
@@ -691,13 +691,13 @@ Definition hop_V2_at : {RV hop_fdist_at -> plain AHE} :=
 Definition hop_V3_at : {RV hop_fdist_at -> plain AHE} :=
   sample_V3 (R:=R) (AHE:=AHE) card_renc.
 
-(* The three conditioners of the hopping ladder at the k-th instance: the
-   i-th hop, its real endpoint, and Alice's whole view. *)
-Definition AliceHopTuple_at (i : nat) : {RV hop_fdist_at -> hop_tupleT_at} :=
-  AliceHopTuple (R:=R) (AHE:=AHE) card_renc rand_of_renc pkey_of_party
-    v1 u1 u2 u3 i.
+(* The three conditioners of the hopping ladder at the k-th instance: its
+   real endpoint, its all-zero endpoint, and Alice's whole view. *)
 Definition AliceRealTuple_at : {RV hop_fdist_at -> hop_tupleT_at} :=
-  AliceRealTuple (R:=R) (AHE:=AHE) card_renc rand_of_renc pkey_of_party
+  alice_tuple_real (R:=R) (AHE:=AHE) card_renc rand_of_renc pkey_of_party
+    v1 u1 u2 u3.
+Definition AliceAllZeroTuple_at : {RV hop_fdist_at -> hop_tupleT_at} :=
+  alice_tuple_all_zero (R:=R) (AHE:=AHE) card_renc rand_of_renc pkey_of_party
     v1 u1 u2 u3.
 Definition AliceView_at : {RV hop_fdist_at -> viewT_at} :=
   AliceView (R:=R) (AHE:=AHE) card_renc rand_of_renc pkey_of_party

@@ -404,7 +404,7 @@ Record dsdp_security (X : dsdp_setting R) := {
      the hybrid in which both ciphertexts carry zero.  This is the ideal side
      the two epsilons of the guessing bounds pay to reach. *)
   centropy_V2_all_zero_logm : forall k,
-    `H( hop_V2_at X k | AliceHopTuple_at X k 2 )
+    `H( hop_V2_at X k | AliceAllZeroTuple_at X k )
       = log (#|plain (AHE_at X k)|%:R : R) ;
 
   (* The tuple guessing bound at Alice's executed piSMC trace, at the two
@@ -711,7 +711,7 @@ exact: (dsdp_alice_hop_secrecy.centropy_V2_Sout_logm (card_renc k) (v1 k)
 Qed.
 
 Let centropy_V2_all_zero_logm_holds : forall k,
-  `H( hop_V2_at X k | AliceHopTuple_at X k 2 )
+  `H( hop_V2_at X k | AliceAllZeroTuple_at X k )
     = log (#|plain (AHE_at X k)|%:R : R).
 Proof.
 move=> k.

@@ -401,7 +401,7 @@ Proof. exact: (centropy_V2_Sout_logm paillier_security k). Qed.
 (* So does the all-zero endpoint of the hop ladder, the ideal side the two
    advantages of the guessing bounds pay to reach. *)
 Corollary paillier_centropy_V2_all_zero_logm k :
-  `H( hop_V2_at paillier_setting k | AliceHopTuple_at paillier_setting k 2 )
+  `H( hop_V2_at paillier_setting k | AliceAllZeroTuple_at paillier_setting k )
     = log (#|plain (AHE_at paillier_setting k)|%:R : R).
 Proof. exact: (centropy_V2_all_zero_logm paillier_security k). Qed.
 
@@ -823,7 +823,7 @@ Proof. exact: (centropy_V2_Sout_logm benaloh_security k). Qed.
 (* So does the all-zero endpoint of the hop ladder, the ideal side the two
    advantages of the guessing bounds pay to reach. *)
 Corollary benaloh_centropy_V2_all_zero_logm k :
-  `H( hop_V2_at benaloh_setting k | AliceHopTuple_at benaloh_setting k 2 )
+  `H( hop_V2_at benaloh_setting k | AliceAllZeroTuple_at benaloh_setting k )
     = log (#|plain (AHE_at benaloh_setting k)|%:R : R).
 Proof. exact: (centropy_V2_all_zero_logm benaloh_security k). Qed.
 
@@ -1155,7 +1155,7 @@ Proof. exact: (centropy_V2_Sout_logm idealized_security k). Qed.
 (* So does the all-zero endpoint of the hop ladder, the ideal side the two
    advantages of the guessing bounds pay to reach. *)
 Corollary idealized_centropy_V2_all_zero_logm k :
-  `H( hop_V2_at IS k | AliceHopTuple_at IS k 2 )
+  `H( hop_V2_at IS k | AliceAllZeroTuple_at IS k )
     = log (#|plain (AHE_at IS k)|%:R : R).
 Proof. exact: (centropy_V2_all_zero_logm idealized_security k). Qed.
 

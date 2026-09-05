@@ -475,9 +475,9 @@ Local Notation RA1 := (RA1 (R:=R) (AHE:=AHE) card_renc).
 Local Notation RA2 := (RA2 (R:=R) (AHE:=AHE) card_renc).
 Local Notation Sout :=
   (Sout (R:=R) (AHE:=AHE) card_renc v1 u1 u2 u3).
-Local Notation AliceHopTuple i :=
-  (AliceHopTuple (R:=R) (AHE:=AHE) card_renc rand_of_renc
-     pkey_of_dk v1 u1 u2 u3 i).
+Local Notation alice_tuple_real :=
+  (alice_tuple_real (R:=R) (AHE:=AHE) card_renc rand_of_renc
+     pkey_of_dk v1 u1 u2 u3).
 Local Notation indcpa_epsilon :=
   (indcpa_epsilon (R:=R) (AHE:=AHE) card_renc rand_of_renc).
 Local Notation indcpa_epsilon_assumption :=
@@ -555,7 +555,7 @@ Proof. by rewrite SoutE; ring. Qed.
 (* The trace the interpreter produces for Alice is the deterministic image of
    her hopping tuple. *)
 Lemma alice_trace_of_hop_tupleE :
-  AliceTrace = alice_trace_of_hop_tuple `o (AliceHopTuple 0).
+  AliceTrace = alice_trace_of_hop_tuple `o alice_tuple_real.
 Proof.
 apply: boolp.funext => s; apply/val_inj.
 rewrite /AliceTrace; move: (size_alice_trace s).
@@ -566,7 +566,7 @@ Qed.
 (* The two honest inputs and Alice's encoded trace obtained from a joint
    hopping-tuple value.
    Naming: the [_of_] connective names the source the conversion reads,
-   here the joint carrier of [alice_hop_joint_fdist], not the bare tuple. *)
+   here the joint carrier [alice_hop_jointT], not the bare tuple. *)
 Let alice_trace_joint_of_hop_joint
     (x : plain AHE * plain AHE * alice_hop_tupleT AHE Renc) :
     trace_jointT :=
@@ -742,7 +742,7 @@ Qed.
 Let alice_trace_real_jointE :
   `p_ [% V2, V3, AliceTrace]
   = fdistmap alice_trace_joint_of_hop_joint
-      (`p_ [% V2, V3, AliceHopTuple 0]).
+      (`p_ [% V2, V3, alice_tuple_real]).
 Proof.
 by rewrite alice_trace_of_hop_tupleE /dist_of_RV fdistmap_comp.
 Qed.
@@ -793,13 +793,13 @@ Local Notation RA1 := (RA1 (R:=R) (AHE:=AHE) card_renc).
 Local Notation RA2 := (RA2 (R:=R) (AHE:=AHE) card_renc).
 Local Notation Sout :=
   (Sout (R:=R) (AHE:=AHE) card_renc v1 u1 u2 u3).
-Local Notation hop0_cipher i :=
-  (hop0_cipher (R:=R) (AHE:=AHE) card_renc rand_of_renc pkey_of_dk i).
-Local Notation hop1_cipher i :=
-  (hop1_cipher (R:=R) (AHE:=AHE) card_renc rand_of_renc pkey_of_dk i).
-Local Notation AliceHopTuple i :=
-  (AliceHopTuple (R:=R) (AHE:=AHE) card_renc rand_of_renc
-     pkey_of_dk v1 u1 u2 u3 i).
+Local Notation bob_real_cipher :=
+  (bob_real_cipher (R:=R) (AHE:=AHE) card_renc rand_of_renc pkey_of_dk).
+Local Notation charlie_real_cipher :=
+  (charlie_real_cipher (R:=R) (AHE:=AHE) card_renc rand_of_renc pkey_of_dk).
+Local Notation alice_tuple_real :=
+  (alice_tuple_real (R:=R) (AHE:=AHE) card_renc rand_of_renc
+     pkey_of_dk v1 u1 u2 u3).
 Local Notation AliceTrace :=
   (AliceTrace (R:=R) (AHE:=AHE) card_renc rand_of_renc
      v1 u1 u2 u3 dk_a dk_b dk_c w_rb2 w_rc2).
@@ -811,9 +811,10 @@ Definition alice_trace_tupleT : finType :=
 
 (* The trace-visible part of Alice's hopping tuple as a random variable on the
    sample space: the two masks, the leaked output, and the two received
-   ciphertexts at hop index 0, where both slots are the real encryptions. *)
+   ciphertexts of the real experiment, both slots carrying real
+   encryptions. *)
 Definition AliceTraceTuple : {RV P -> alice_trace_tupleT} :=
-  [% [% R2, R3], Sout, hop0_cipher 0, hop1_cipher 0].
+  [% [% R2, R3], Sout, bob_real_cipher, charlie_real_cipher].
 
 (* The sample coordinates other than Alice's two combine randomnesses: the two
    honest inputs, the two masks and the two hop encryption randomnesses. *)
@@ -939,7 +940,7 @@ Proof. by case=> ra [[[m s] c0] c1]. Qed.
    trace-visible tuple.
    Naming: the [E] suffix marks an equation, after [SoutE]. *)
 Lemma alice_hop_tuple_rand_traceE :
-  AliceHopTuple 0
+  alice_tuple_real
   = hop_tuple_of_rand_trace `o [% [% RA1, RA2], AliceTraceTuple].
 Proof.
 (* The combine randomnesses stay eta-expanded as [% RA1, RA2]: [prod] has no
@@ -1006,7 +1007,7 @@ Proof. by rewrite alice_trace_of_hop_tupleE. Qed.
 (* Conditioning on Alice's executed trace leaves the same uncertainty about
    Bob's input as conditioning on her hopping tuple. *)
 Theorem centropy_V2_trace_tupleE :
-  `H( V2 | AliceTrace ) = `H( V2 | AliceHopTuple 0 ).
+  `H( V2 | AliceTrace ) = `H( V2 | alice_tuple_real ).
 Proof.
 rewrite alice_trace_tupleE (can_centropy_eq trace_of_trace_tupleK).
 rewrite alice_hop_tuple_rand_traceE
@@ -1027,17 +1028,17 @@ Local Notation alice_view_of_hop_tupleE :=
    Naming: [_of_] names the source the conversion reads, after
    [hop_tuple_of_rand_trace]; the [E] suffix marks the equation. *)
 Lemma alice_hop_tuple_of_viewE :
-  AliceHopTuple 0 = (fun q => q.1.1.1) `o AliceView.
+  alice_tuple_real = (fun q => q.1.1.1) `o AliceView.
 Proof. by []. Qed.
 
 (* Conditioning on Alice's view leaves the same uncertainty about Bob's input
    as conditioning on her hopping tuple. *)
 Corollary centropy_V2_view_tupleE :
-  `H( V2 | AliceView ) = `H( V2 | AliceHopTuple 0 ).
+  `H( V2 | AliceView ) = `H( V2 | alice_tuple_real ).
 Proof.
 (* Each of the two is a deterministic function of the other, so the
    contraction of entropy.v applies in both directions. *)
-transitivity (`H( V2 | [% AliceView, AliceHopTuple 0] )).
+transitivity (`H( V2 | [% AliceView, alice_tuple_real] )).
   by rewrite [in RHS]alice_hop_tuple_of_viewE centropy_RV_contraction.
 rewrite centropy_RV_fdistA.
 by rewrite [in LHS]alice_view_of_hop_tupleE centropy_RV_contraction.
@@ -1107,9 +1108,12 @@ Variables (w_rb2 w_rc2 : Renc).
 Local Notation P := (alice_sample_fdist (R:=R) AHE card_renc).
 Local Notation pkey_of_dk := (pkey_of_dk dk_a dk_b dk_c).
 Local Notation V2 := (sample_V2 (R:=R) (AHE:=AHE) card_renc).
-Local Notation AliceHopTuple i :=
-  (AliceHopTuple (R:=R) (AHE:=AHE) card_renc rand_of_renc
-     pkey_of_dk v1 u1 u2 u3 i).
+Local Notation alice_tuple_real :=
+  (alice_tuple_real (R:=R) (AHE:=AHE) card_renc rand_of_renc
+     pkey_of_dk v1 u1 u2 u3).
+Local Notation alice_tuple_bob_zero :=
+  (alice_tuple_bob_zero (R:=R) (AHE:=AHE) card_renc rand_of_renc
+     pkey_of_dk v1 u1 u2 u3).
 Local Notation AliceTrace :=
   (AliceTrace (R:=R) card_renc rand_of_renc v1 u1 u2 u3
      dk_a dk_b dk_c w_rb2 w_rc2).
@@ -1177,25 +1181,25 @@ Corollary decrypt_bob_epsilon_ge :
   <= bob_trace_predictor_epsilon bob_decrypt_predictor.
 Proof.
 pose lifted := bob_decrypt_predictor \o alice_trace_of_hop_tuple.
-have Hlift : `| Pr P [set t | (lifted `o AliceHopTuple 0) t == V2 t]
-              - Pr P [set t | (lifted `o AliceHopTuple 1) t == V2 t] |
+have Hlift : `| Pr P [set t | (lifted `o alice_tuple_real) t == V2 t]
+              - Pr P [set t | (lifted `o alice_tuple_bob_zero) t == V2 t] |
             = bob_trace_predictor_epsilon bob_decrypt_predictor.
-  by rewrite 2!guess_V2_jointE -2!alice_hop_game_successE hop0_advantageE.
-have HV2 : lifted `o AliceHopTuple 0 = V2.
+  by rewrite 2!guess_V2_jointE -2!alice_acceptE hop0_advantageE.
+have HV2 : lifted `o alice_tuple_real = V2.
   rewrite (alice_trace_decode_V2E card_renc rand_of_renc v1 u1 u2 u3
              dk_a dk_b dk_c w_rb2 w_rc2).
   by rewrite (alice_trace_of_hop_tupleE card_renc rand_of_renc v1 u1 u2 u3
                 dk_a dk_b dk_c w_rb2 w_rc2).
-have H0 : Pr P [set t | (lifted `o AliceHopTuple 0) t == V2 t] = 1.
+have H0 : Pr P [set t | (lifted `o alice_tuple_real) t == V2 t] = 1.
   rewrite HV2 (_ : finset _ = [set: alice_sampleT AHE Renc]) ?Pr_setT //.
   by apply/setP => t; rewrite !inE eqxx.
-(* all_zero_guess_V2_le_invm is stated at AliceHopTuple 2 and used here at
-   AliceHopTuple 1.  Two reductions carry it across: trace_of_trace_tuple is
-   a literal bseq, so nth 3 discards Charlie's slot, which is the only slot
-   the two hops differ in; and hop0_cipher reduces to enc bob_pkey 0 at both
-   indices, since 0 < i holds at 1 and at 2.  Renumbering the trace slots or
-   making either function opaque breaks this step. *)
-have H1 : Pr P [set t | (lifted `o AliceHopTuple 1) t == V2 t]
+(* all_zero_guess_V2_le_invm is stated at alice_tuple_all_zero and used here
+   at alice_tuple_bob_zero.  The reduction that carries it across is that
+   trace_of_trace_tuple is a literal bseq, so nth 3 discards Charlie's slot,
+   the only slot the two tuples differ in; Bob's slot is bob_zero_cipher in
+   both.  Renumbering the trace slots or making trace_of_trace_tuple opaque
+   breaks this step. *)
+have H1 : Pr P [set t | (lifted `o alice_tuple_bob_zero) t == V2 t]
           <= #|plain AHE|%:R^-1.
   exact: (all_zero_guess_V2_le_invm card_renc rand_of_renc pkey_of_dk
             v1 u1 u2 u3_unit lifted).

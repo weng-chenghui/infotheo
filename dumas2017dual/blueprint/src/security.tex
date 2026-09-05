@@ -253,25 +253,34 @@ finite commutative unit ring.
 
 \begin{definition}[The hop ladder]
   \label{def:alice_hop_ladder}
-  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.hop0_cipher,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.hop1_cipher,
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.bob_real_cipher,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.bob_zero_cipher,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.charlie_real_cipher,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.charlie_zero_cipher,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_hop_tupleT,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.AliceHopTuple,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_hop_joint_fdist,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_hop_game_success,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_hop_game_successE}
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_tuple_real,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_tuple_bob_zero,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_tuple_all_zero,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_joint_real,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_joint_bob_zero,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_joint_all_zero,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_accept,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_acceptE}
   \rocqok
   \uses{def:alice_experiment}
-  Alice's tuple at hop $i$ carries her two masks, her two combine randomnesses,
-  the output $S$, and the two ciphertexts she receives, of which the first $i$
-  encrypt zero.
-  \[ \hoptuple{i} = \big(R_2, R_3, \alpha_1, \alpha_2, S,\;
-       \Enc(\pk_B, b^i_0, \rho_2),\; \Enc(\pk_C, b^i_1, \rho_3)\big),\qquad
-     b^i_0 = \begin{cases} V_2 & i = 0\\ 0 & i > 0\end{cases},\quad
-     b^i_1 = \begin{cases} V_3 & i \le 1\\ 0 & i > 1\end{cases} \]
-  Hop $0$ is Alice's real tuple and hop $2$ the all-zero endpoint. A
-  distinguisher reads the honest input pair together with the tuple; write
-  $\gamma_i(D)$ for the probability that $D$ accepts at hop $i$.
+  Alice's tuple carries her two masks, her two combine randomnesses, the
+  output $S$, and the two ciphertexts she receives. Three tuples differ only
+  in the plaintexts of those two ciphertexts.
+  \[ \hoptuple{0} = \big(R_2, R_3, \alpha_1, \alpha_2, S,\;
+       \Enc(\pk_B, V_2, \rho_2),\; \Enc(\pk_C, V_3, \rho_3)\big) \]
+  \[ \hoptuple{1} = \big(R_2, R_3, \alpha_1, \alpha_2, S,\;
+       \Enc(\pk_B, 0, \rho_2),\; \Enc(\pk_C, V_3, \rho_3)\big) \]
+  \[ \hoptuple{2} = \big(R_2, R_3, \alpha_1, \alpha_2, S,\;
+       \Enc(\pk_B, 0, \rho_2),\; \Enc(\pk_C, 0, \rho_3)\big) \]
+  $\hoptuple{0}$ is Alice's real tuple and $\hoptuple{2}$ the all-zero
+  endpoint. $G_i$ is the joint law of the honest input pair beside
+  $\hoptuple{i}$, and $\gamma_i(D)$ the probability that a distinguisher $D$
+  accepts a value sampled from $G_i$.
 \end{definition}
 
 \begin{definition}[Real-or-zero advantage of a single-query adversary]
