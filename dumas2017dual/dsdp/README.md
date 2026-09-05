@@ -18,7 +18,7 @@ basename and resolve by suffix.
   simulator-closeness headlines), `dsdp_alice_trace_link` (the same bounds at the executed
   fifteen-round piSMC trace), `dsdp_instance_sequence` (the DSDP instance record, the
   sequence record over it, the asymptotic headline, the idealized-scheme witness, and the
-  DSDP bounds read off at the Paillier and Benaloh instances, in residuosity currency).
+  DSDP bounds read off at the Paillier and Benaloh instances, in residuosity epsilons).
   The game vocabulary, the two schemes and the asymptotics these files use live outside
   this tree, in `computational_security/`.
 

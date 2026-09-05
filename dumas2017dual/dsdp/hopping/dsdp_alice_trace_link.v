@@ -772,13 +772,13 @@ Definition alice_trace_guess_V2_pr (predict : predictor alice_traceT) : R :=
      [set t | (predict `o AliceTrace) t == V2 t].
 
 (* The trace guessing bound with both hop advantages replaced by the single
-   epsilon an adversary-class assumption carries.  The right-hand side sums
-   three currencies.  One over the plaintext-space cardinality is
+   epsilon an adversary-class assumption carries.  The bound has three
+   levels of conditionality.  One over the plaintext-space cardinality is
    information-theoretic and unconditional, the residue of the leaked output
    along the DSDP solution fiber.  Twice the assumption's epsilon is
-   assumption-conditional: it is the price of the two ciphertext
-   replacements, one at Bob's key and one at Charlie's, each charged at the
-   advantage the assumption promises rather than at its own value.  The two
+   assumption-conditional: it measures the two ciphertext replacements, one
+   at Bob's key and one at Charlie's, each at the advantage the assumption
+   promises rather than at its own value.  The two
    premises are class-conditional, since an assumption covers only the
    adversaries its classifier admits.
    Those premises are assumed rather than proved.  Nothing here shows that
@@ -1193,9 +1193,9 @@ Qed.
    private key: the predictor an adversary holding dk_b runs.  Slot 3 is
    where trace_of_trace_tuple writes the ciphertext Alice receives from Bob,
    and dec_correct inverts it, so this predictor names Bob's input on every
-   sample.  It sits outside the attack model the hop ladder prices, which
-   grants the public keys alone, and it is the witness that the ladder's
-   bounds cannot be widened to every adversary.
+   sample.  It sits outside the attack model the hop ladder's bounds are
+   stated in, which grants the public keys alone, and it is the witness that
+   the ladder's bounds cannot be widened to every adversary.
    Both default branches are unreachable on the traces this predictor is run
    against.  Every trace in the image of trace_of_trace_tuple carries a
    ciphertext at slot 3, so the fixed zero encryption trace_data_cipher
@@ -2034,7 +2034,7 @@ Qed.
 
 (* The class-conditional trace guessing bound with its unconditional term
    written at the composite modulus p * q, the modulus of the Paillier-style
-   instantiations.  The three currencies are the ones of
+   instantiations.  The three levels of conditionality are the ones of
    alice_trace_guess_V2_admissible_le, with 1/(p * q) naming the
    information-theoretic term at the instance a concrete scheme supplies.
    Naming: extends [alice_trace_guess_V2_admissible_le] with the

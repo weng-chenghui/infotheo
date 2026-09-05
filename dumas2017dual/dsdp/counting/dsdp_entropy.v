@@ -366,8 +366,9 @@ Qed.
    a function of (V2, V3) and the inputs through dsdp_g, so
    centropy_jcond_determined_fibers quotients the conditional entropy by the
    fibers of that function, and dsdp_fiber_card supplies the m solutions each
-   fiber holds.  The counting axis prices plaintexts; Alice's key, her masks
-   and the ciphertext hops are priced on the hopping axis.  [3-party] *)
+   fiber holds.  The counting axis bounds the plaintexts, and Alice's key,
+   her masks and the ciphertext hops are bounded on the hopping axis.
+   [3-party] *)
 Theorem dsdp_centropy_uniform :
   (forall t, (0 < U3 t)%N) ->
   (forall t, (U3 t < minn p q)%N) ->
@@ -415,8 +416,8 @@ Qed.
    dsdp_centropy_uniform, which gives H(V2,V3 | view) = log m, it says the
    protocol spends exactly half of that entropy: log m bits reach Alice's
    plaintext residual and log m bits stay hidden.  This is the numerator of
-   the leakage fraction the counting axis reports; the ciphertext-carrying
-   view is priced separately on the hopping axis. *)
+   the leakage fraction the counting axis reports.  The ciphertext-carrying
+   view is bounded separately on the hopping axis. *)
 Lemma dsdp_var_entropy :
   `p_VarRV = fdist_uniform card_msg_pair ->
   `H `p_VarRV = log (m%:R * m%:R : R).

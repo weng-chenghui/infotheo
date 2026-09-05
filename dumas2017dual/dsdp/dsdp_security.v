@@ -43,15 +43,15 @@ Require Import dsdp_setting.
 (* Alice's alone.                                                             *)
 (*                                                                            *)
 (* Every epsilon is single-query and per-distinguisher, as indcpa_game.v      *)
-(* defines it, so the record prices one execution against one named           *)
-(* adversary.                                                                 *)
+(* defines it, so each field of the record is about one execution and one     *)
+(* named adversary.                                                           *)
 (*                                                                            *)
 (* The assumption an epsilon is read at is whatever the setting's sequence    *)
 (* carries.  At the two scheme settings of dsdp_main.v it is derived from a   *)
 (* residuosity record, decisional composite residuosity at Paillier and r-th  *)
 (* residuosity at Benaloh, at twice the residuosity epsilon; so the three     *)
-(* fields that read the sequence's assumption are priced in residuosity       *)
-(* currency there.                                                            *)
+(* fields that read the sequence's assumption are stated in residuosity       *)
+(* epsilons there.                                                            *)
 (*                                                                            *)
 (* Three restrictions come from the setting and are stated in dsdp_setting.v: *)
 (* the counting fields hold in the honest-sampling setting, the two axes      *)
@@ -103,7 +103,7 @@ Require Import dsdp_setting.
 (* bob_privacy_V3, charlie_privacy_V2 == neither relay learns the other's     *)
 (*                              input                                         *)
 (*         tuple_guess_V2_le == guessing Bob's input from Alice's hopping     *)
-(*                              tuple, priced at two hop advantages           *)
+(*                              tuple, bounded by two hop advantages          *)
 (* unpredictability_ge, predictor_unpredictability_ge == the same bound as a  *)
 (*                              logarithmic lower bound                       *)
 (*          sim_advantage_le == the tuple against the simulator's law         *)
@@ -181,7 +181,7 @@ Local Notation rb2 := (inst_rb2 Inst).
 Local Notation rc2 := (inst_rc2 Inst).
 
 (* The IND-CPA advantage of one adversary at one public key of the k-th
-   instance, the unit every hopping bound is priced in. *)
+   instance, the term every hopping bound sums. *)
 Definition indcpa_epsilon_at (pk : pub_key AHE) (adv : indcpa_adversary AHE)
     : R :=
   indcpa_epsilon (R:=R) (AHE:=AHE) card_renc rand_of_renc pk adv.
@@ -386,8 +386,8 @@ Record dsdp_security (X : dsdp_setting R) := {
        + indcpa_epsilon_at X k (charlie_pkey_at X k)
            (charlie_challenge_adversary_at X k D) ;
 
-  (* The tuple guessing bound carried to Alice's whole view, priced at the
-     two advantages her view adversaries buy. *)
+  (* The tuple guessing bound carried to Alice's whole view, bounded by the
+     two advantages of her view adversaries. *)
   view_guess_V2_le : forall k
       (predict : predictor (AHE_at X k) (viewT_at X k)),
     Pr (hop_fdist_at X k)

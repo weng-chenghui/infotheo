@@ -252,10 +252,10 @@ Lemma paillier_assumption_at_dcrE k :
   = paillier_indcpa_assumption (p_gt1 k) (q_gt1 k) (A k).
 Proof. by []. Qed.
 
-(* The epsilon those fields are priced in is twice the residuosity epsilon at
+(* The epsilon those fields are stated at is twice the residuosity epsilon at
    k, one residuosity call per hop of the scheme reduction.  This is the
-   conversion a reader needs to price the twenty-six corollaries in
-   decisional composite residuosity currency. *)
+   conversion a reader needs to restate the twenty-six corollaries in
+   decisional composite residuosity epsilons. *)
 Lemma paillier_epsilon_at_dcrE k :
   indcpa_assumption_epsilon (assumption_at paillier_setting k)
   = 2 * dcr_epsilon (A k).
@@ -480,8 +480,8 @@ Corollary paillier_centropy_V2_trace_eq0 k :
   `H( hop_V2_at paillier_setting k | AliceTrace_at paillier_setting k ) = 0.
 Proof. exact: (centropy_V2_trace_eq0 paillier_security k). Qed.
 
-(* Both ciphertext hops charged in residuosity currency, on the two class
-   premises the admissible-predictor record carries: the trace bound spends
+(* Both ciphertext hops stated in residuosity epsilons, on the two class
+   premises the admissible-predictor record carries: the trace bound sums
    an IND-CPA epsilon at Bob's key and at Charlie's, and each costs two
    residuosity calls, hence 4 eps.  The unconditional summand is the inverse
    plaintext cardinality. *)
@@ -678,10 +678,10 @@ Lemma benaloh_assumption_at_residuosityE k :
   assumption_at benaloh_setting k = benaloh_indcpa_assumption (r_gt1 k) (A k).
 Proof. by []. Qed.
 
-(* The epsilon those fields are priced in is twice the residuosity epsilon at
+(* The epsilon those fields are stated at is twice the residuosity epsilon at
    k, one residuosity call per hop of the scheme reduction.  This is the
-   conversion a reader needs to price the twenty-six corollaries in r-th
-   residuosity currency. *)
+   conversion a reader needs to restate the twenty-six corollaries in r-th
+   residuosity epsilons. *)
 Lemma benaloh_epsilon_at_residuosityE k :
   indcpa_assumption_epsilon (assumption_at benaloh_setting k)
   = 2 * benaloh_residuosity_epsilon (A k).
@@ -906,8 +906,8 @@ Corollary benaloh_centropy_V2_trace_eq0 k :
   `H( hop_V2_at benaloh_setting k | AliceTrace_at benaloh_setting k ) = 0.
 Proof. exact: (centropy_V2_trace_eq0 benaloh_security k). Qed.
 
-(* Both ciphertext hops charged in residuosity currency, on the two class
-   premises the admissible-predictor record carries: the trace bound spends
+(* Both ciphertext hops stated in residuosity epsilons, on the two class
+   premises the admissible-predictor record carries: the trace bound sums
    an IND-CPA epsilon at Bob's key and at Charlie's, and each costs two
    residuosity calls, hence 4 eps.  The unconditional summand is the inverse
    plaintext cardinality. *)

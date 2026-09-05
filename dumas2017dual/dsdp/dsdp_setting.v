@@ -121,7 +121,7 @@ Require Import dsdp_instance_sequence.
 (* AliceRealTuple_at, AliceAllZeroTuple_at, AliceView_at, AliceTrace_at ==    *)
 (*                              the conditioners of the hopping ladder        *)
 (*                   Sout_at == the output the hopping side leaks             *)
-(*  bob_pkey_at, charlie_pkey_at == the two public keys the ladder prices at  *)
+(*  bob_pkey_at, charlie_pkey_at == the two public keys the hops are taken at *)
 (* alice_ideal_at, alice_trace_ideal_at == the simulator's law at the tuple  *)
 (*                              and at the executed trace                     *)
 (* indcpa_assumptionT_at, assumption_at == the IND-CPA assumption type at k   *)
@@ -708,7 +708,8 @@ Definition AliceTrace_at : {RV hop_fdist_at -> traceT_at} :=
 Definition Sout_at : {RV hop_fdist_at -> plain AHE} :=
   Sout (R:=R) (AHE:=AHE) card_renc v1 u1 u2 u3.
 
-(* The two public keys the ladder prices its hops at, at the k-th instance. *)
+(* The two public keys the ladder's two hops are taken at, at the k-th
+   instance. *)
 Definition bob_pkey_at : pub_key AHE := bob_pkey pkey_of_party.
 Definition charlie_pkey_at : pub_key AHE := charlie_pkey pkey_of_party.
 
@@ -1204,9 +1205,9 @@ Lemma idealized_card_plain (k : nat) :
   #|plain (inst_AHE (idealized_pq_instance k))| = pq k.
 Proof. by rewrite card_ord Zp_cast. Qed.
 
-(* The unconditional currency of the sequence: its plaintext spaces grow at
-   least as (k+2)^(k+2), so their inverse cardinalities fall below every
-   inverse polynomial. *)
+(* The unconditional term of every bound along the sequence: its plaintext
+   spaces grow at least as (k+2)^(k+2), so their inverse cardinalities fall
+   below every inverse polynomial. *)
 Lemma idealized_size_negligible :
   negligible_fun (fun k =>
     (#|plain (inst_AHE (idealized_pq_instance k))|%:R : R)^-1).
@@ -1222,7 +1223,7 @@ Qed.
 
 (* The sequence: the composite-modulus idealized instances, the
    cipher-constant assumption at each k, and the two negligibility facts
-   discharged rather than assumed.  Its advantage currency is zero at every
+   discharged rather than assumed.  Its assumed advantage is zero at every
    k, which is what leaves each hopping bound along it with only its
    information-theoretic term. *)
 Definition idealized_pq_sequence : dsdp_instance_sequence R := {|

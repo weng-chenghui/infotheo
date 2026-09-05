@@ -254,10 +254,10 @@ benaloh_indcpa_scheme:benaloh_indcpa_scheme
 # axis theorem the field applies, and the three settings at
 # def:paillier_setting, def:benaloh_setting and def:idealized_setting. The two
 # lemmas naming the derived assumption record are listed below; the two epsilon
-# conversions beside them carry the same identification in the currency a
-# reader prices a bound in, and those are cited. The three trace-negligibility
+# conversions beside them carry the same identification in the epsilon a
+# bound is stated at, and those are cited. The three trace-negligibility
 # corollaries, the two epsilon conversions, the four Paillier and Benaloh
-# bounds restated in residuosity currency, and the five setting and results
+# bounds restated in residuosity epsilons, and the five setting and results
 # values have nodes of their own and are absent here.
 dsdp_main:benaloh_assumption_at_residuosityE
 dsdp_main:benaloh_bob_privacy_V1

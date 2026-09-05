@@ -106,7 +106,7 @@ Require Import negligible indcpa_game epshop.
 (*            dcr_assumption == decisional composite residuosity at           *)
 (*                              modulus p q                                   *)
 (*             dcr_epsilon A == the advantage that record assumes, the        *)
-(*                              currency the Paillier bounds are stated in    *)
+(*                              epsilon every Paillier bound is a multiple of *)
 (*    dcr_of_adversary g adv == the residuosity distinguisher that hands      *)
 (*                              adv the challenge multiplied by g raised      *)
 (*                              to adv's plaintext                            *)
@@ -257,10 +257,10 @@ Definition dcr_assumption : Type :=
     card_renc_paillier.
 
 (* The advantage a decisional composite residuosity record assumes of the
-   distinguishers its class admits.  It is the currency every Paillier
-   IND-CPA bound of this file is stated in: an IND-CPA epsilon at one key is
-   twice it, one call per hop of the reduction below, and a trace bound that
-   replaces a ciphertext at two keys spends it four times.
+   distinguishers its class admits.  Every Paillier IND-CPA bound of this
+   file is a multiple of it: an IND-CPA epsilon at one key is twice it, one
+   call per hop of the reduction below, and a trace bound that replaces a
+   ciphertext at two keys is four times it.
    Naming: [dcr] names the game the epsilon belongs to, distinguishing it
    from the IND-CPA epsilon derived from it. *)
 Definition dcr_epsilon (A : dcr_assumption) : R :=

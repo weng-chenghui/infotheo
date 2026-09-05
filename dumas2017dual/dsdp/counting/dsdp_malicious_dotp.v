@@ -25,7 +25,7 @@ Import Num.Theory.
 (*                                                                            *)
 (* malicious_n : Alice querying with US = e_1 obtains relay party 1's input   *)
 (*   from the dot product, dotp_n ConstUS_n v = v ord0.                       *)
-(* US_e1_centropy_VS0_eq0 : that extraction priced as a conditional entropy,  *)
+(* US_e1_centropy_VS0_eq0 : that extraction stated as a conditional entropy,  *)
 (*   H(VS_0 | View) = 0 whenever the output is a function of the view.        *)
 (* US_e1_centropy_V2_eq0 : its 3-party instance at Alice's dot-product view,  *)
 (*   ciphertext hops included.                                                *)

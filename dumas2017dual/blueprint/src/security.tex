@@ -720,7 +720,8 @@ $e$-th residuosity assumption.
   composite form writes $m$ as $pq$.
   \[ \Pr[\,g(\mathrm{AliceTrace}) = V_2\,]
        \le \tfrac{1}{m} + 2\,\varepsilon_{\mathrm{cpa}} \]
-  Three currencies meet here. The term $1/m$ is information-theoretic and
+  Three levels of conditionality meet here. The term $1/m$ is
+  information-theoretic and
   unconditional, the residue of the leaked output along the solution fiber. The
   term $2\varepsilon_{\mathrm{cpa}}$ is conditional on $\mathcal{A}$, and
   measures the two ciphertext replacements at the advantage $\mathcal{A}$
@@ -874,8 +875,8 @@ $e$-th residuosity assumption.
   inhabited: \texttt{paillier\_dcr\_admissible\_cipher\_constant} admits every
   adversary whose verdict ignores the ciphertext, at the residuosity record of
   advantage zero. Every Paillier bound below reads its
-  $\varepsilon_{\mathrm{cpa}}$ off this value, so each is measured in
-  composite-residuosity currency at two residuosity calls per key.
+  $\varepsilon_{\mathrm{cpa}}$ off this value, so each is a multiple of the
+  composite-residuosity epsilon, at two residuosity calls per key.
 \end{definition}
 
 \begin{definition}[Higher residuosity at modulus $n$ and exponent $r$]
@@ -1199,7 +1200,7 @@ pending obligation, and a bound is read off it by projection.
   The two class memberships $\mathrm{adm}(\mathcal{B}_{\mathrm{mul}})$ and
   $\mathrm{adm}(\mathcal{B}_{\mathrm{pl}})$ are parameters of the chain, spent
   at the two hops as they are built. Both terms are conditional on
-  $\mathcal{B}$, so this loss has one currency. The number in
+  $\mathcal{B}$, so this loss has one kind of term. The number in
   Theorem~\ref{thm:paillier_dcr_epsilon_le} is the bound this program returns
   and its two hypotheses are those two memberships, so that theorem is the
   soundness field of this result rather than a triangle inequality of its own.
@@ -1246,7 +1247,7 @@ pending obligation, and a bound is read off it by projection.
   \[ \mathrm{tot}(s) = \tfrac{1}{m} + \epshopsum{D_g} \]
   The chain accumulates the two hop terms before the endpoint term, so the
   return statement reorders, which is what \texttt{alice\_totalE} proves.
-  This loss has two currencies and the labels separate them. The two hop terms
+  This loss has two kinds of term and the labels separate them. The two hop terms
   are the advantages of the reductions $\hopred{0}{D_g}$ and $\hopred{1}{D_g}$,
   each of which becomes conditional on a computational assumption only where a
   later statement requires it to be small. The terminal term
@@ -1479,7 +1480,7 @@ single member of it can carry.
   \[ \mathcal{Q} = \Big(k \mapsto \mathcal{I}_k,\ k \mapsto \mathcal{A}_k,\
        \mathrm{negl}\big(k \mapsto \tfrac{1}{m_k}\big),\
        \mathrm{negl}\big(k \mapsto \varepsilon_{\mathrm{cpa},k}\big)\Big) \]
-  The two facts are the two currencies of the class-conditional bound, and the
+  The two facts are the two terms of the class-conditional bound, and the
   record keeps them apart. The first is unconditional. The inverse plaintext
   cardinality $1/m_k$ is the guessing residue the leaked output concedes, it is
   measured in the plaintext space alone, and it holds against an adversary of any
@@ -1696,7 +1697,7 @@ single member of it can carry.
   the instance and proved by projecting the value that every setting has. The
   asymptotic one reads: along the Paillier sequence, a predictor admissible at
   every $k$ makes the trace guessing probability negligible. The two
-  class-conditional trace bounds are restated in residuosity currency.
+  class-conditional trace bounds are restated in residuosity epsilons.
   \[ \mathrm{negl}\big(k \mapsto
        \Pr[\,g_k(\mathrm{AliceTrace}_k) = V_2\,]\big), \qquad
      \Pr[\,g_k(\mathrm{AliceTrace}_k) = V_2\,]
@@ -1749,7 +1750,7 @@ single member of it can carry.
   \uses{def:benaloh_setting,thm:dsdp_securityP,thm:alice_guess_negligible,def:benaloh_residuosity_assumption,def:benaloh_indcpa_assumption}
   All twenty-six statements hold at the Benaloh setting, and the asymptotic one
   reads along the Benaloh sequence. The two class-conditional trace bounds are
-  restated in residuosity currency.
+  restated in residuosity epsilons.
   \[ \mathrm{negl}\big(k \mapsto
        \Pr[\,g_k(\mathrm{AliceTrace}_k) = V_2\,]\big), \qquad
      \Pr[\,g_k(\mathrm{AliceTrace}_k) = V_2\,]

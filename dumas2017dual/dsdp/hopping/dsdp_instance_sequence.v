@@ -70,10 +70,10 @@ Require Import dsdp_alice_hop_secrecy dsdp_alice_trace_link.
 (*        sequence_assumption == the IND-CPA assumption made at k             *)
 (*   sequence_size_negligible == the inverse plaintext cardinalities are a    *)
 (*                               negligible sequence, the unconditional       *)
-(*                               currency                                     *)
+(*                               term of every bound along it                 *)
 (*    sequence_adv_negligible == the assumed advantages are a negligible      *)
 (*                               sequence, the assumption-conditional         *)
-(*                               currency                                     *)
+(*                               term of every bound along it                 *)
 (*          expnn_gt_monomial == (k+2)^(k+2) exceeds every monomial k^c past  *)
 (*                               c                                            *)
 (*   negligible_fun_inv_expnn == the inverse of (k+2)^(k+2) is negligible     *)
@@ -222,10 +222,10 @@ Definition inst_pkey_of_party (I : dsdp_instance) :=
 (* A sequence of DSDP instances indexed by the security parameter, the
    IND-CPA assumption made at each k, and the two facts that give the
    sequence its asymptotic content.
-   The two facts are the two currencies of the bound, and the record keeps
+   The two facts are the two terms of the bound, and the record keeps
    them apart.  sequence_size_negligible is the unconditional one: the
    inverse plaintext cardinality is the guessing residue the leaked output
-   concedes, it is priced in the plaintext space alone, and it holds against
+   concedes, it is measured in the plaintext space alone, and it holds against
    an adversary of any running time.  sequence_adv_negligible is the
    assumption-conditional one: it is the advantage each assumption record
    assumes, and it is the only place a computational hypothesis enters.
@@ -496,9 +496,9 @@ Let card_plain_idealized (k : nat) :
   #|plain (inst_AHE (idealized_instance k))| = ((k.+2) ^ k.+2)%N.
 Proof. by rewrite card_ord Zp_cast // -{1}(expn0 k.+2) ltn_exp2l. Qed.
 
-(* The unconditional currency of the witness sequence: its plaintext spaces
-   grow as (k+2)^(k+2), so their inverse cardinalities fall below every
-   inverse polynomial. *)
+(* The unconditional term of every bound along the witness sequence: its
+   plaintext spaces grow as (k+2)^(k+2), so their inverse cardinalities fall
+   below every inverse polynomial. *)
 Let idealized_size_negligible :
   negligible_fun (fun k =>
     (#|plain (inst_AHE (idealized_instance k))|%:R : R)^-1).
@@ -509,7 +509,7 @@ Qed.
 
 (* The witness sequence: the idealized instances above, the cipher-constant
    assumption of indcpa_game.v at each k, and the two negligibility facts
-   discharged rather than assumed.  Its advantage currency is zero at every
+   discharged rather than assumed.  Its assumed advantage is zero at every
    k, so the whole content of the bound along it is the unconditional
    1/#|plain| term. *)
 Definition idealized_instance_sequence : dsdp_instance_sequence R := {|
@@ -609,8 +609,8 @@ Variables (rb2 rc2 : renc_paillier p q).
 (* Decisional composite residuosity at modulus p q, the only computational
    premise the Paillier bounds of this section are read at.  The IND-CPA
    assumption they consume is derived from it by paillier_indcpa_assumption
-   of paillier_indcpa_scheme.v, so a reader prices those bounds in
-   residuosity currency rather than in an advantage left free. *)
+   of paillier_indcpa_scheme.v, so those bounds are stated in residuosity
+   epsilons rather than in an advantage left free. *)
 Variable A : dcr_assumption (R:=R) p q.
 
 Local Notation bob_trace_adversary :=
@@ -830,8 +830,8 @@ Variables (rb2 rc2 : renc_benaloh n).
 (* r-th residuosity at modulus n, the only computational premise the Benaloh
    bounds of this section are read at.  The IND-CPA assumption they consume
    is derived from it by benaloh_indcpa_assumption of
-   benaloh_indcpa_scheme.v, so a reader prices those bounds in residuosity
-   currency rather than in an advantage left free. *)
+   benaloh_indcpa_scheme.v, so those bounds are stated in residuosity
+   epsilons rather than in an advantage left free. *)
 Variable A : benaloh_residuosity_assumption (R:=R) n r.
 
 Local Notation bob_trace_adversary :=
