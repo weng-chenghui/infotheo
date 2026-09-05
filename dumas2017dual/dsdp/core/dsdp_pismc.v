@@ -160,6 +160,21 @@ Definition aproc_charlie := mk_aproc (pcharlie dk v3 rc1 rc2).
 Lemma dsdp_compat : aprocs_compat [:: aproc_alice; aproc_bob; aproc_charlie].
 Proof. by []. Qed.
 
+Lemma alice_bob_dual : channels_dual aproc_alice aproc_bob.
+Proof.
+by [].
+Qed.
+
+Lemma alice_charlie_dual : channels_dual aproc_alice aproc_charlie.
+Proof.
+by [].
+Qed.
+
+Lemma bob_charlie_dual : channels_dual aproc_bob aproc_charlie.
+Proof.
+by [].
+Qed.
+
 (******************************************************************************)
 (** * N-Party Protocol Templates (from Algorithm 2)                           *)
 (******************************************************************************)
