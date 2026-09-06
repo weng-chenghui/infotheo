@@ -15,8 +15,6 @@ MODULES=(
   dumas2017dual/dsdp/counting/dsdp_entropy.v
   dumas2017dual/entropy_fiber/entropy_fiber_zpq.v
   dumas2017dual/lib/extra_proba.v
-  # The headline theorems of both axes, with their full proofs.
-  dumas2017dual/dsdp/dsdp_main.v
   # The asymptotic reading of every concrete epsilon below: negligibility of
   # a family indexed by the security parameter, and its closure lemmas.
   computational_security/negligible.v

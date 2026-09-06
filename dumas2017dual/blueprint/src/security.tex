@@ -20,9 +20,10 @@ vector and reads a relay's input directly.
 
 Every headline theorem is proved in one of the axis files under
 \texttt{dsdp/counting/} and \texttt{dsdp/hopping/}, over the scheme-independent
-game vocabulary of \texttt{computational\_security/}, collected as a field of
-the results record \texttt{dsdp\_security}, and read off at the three settings
-of \texttt{dsdp\_main.v}. Each chapter below takes one of them and chains it
+game vocabulary of \texttt{computational\_security/}, and read at the three
+instance sequences of \texttt{dsdp\_instance\_sequence.v} and at the uniform
+counting witness of \texttt{dsdp\_random\_inputs.v}. Each chapter below takes
+one of them and chains it
 to its leaves, opening with the hypotheses the bound actually assumes so an
 over-hypothesised or vacuous bound is visible on the page. The two proof
 techniques are kept distinct: the corrupted-Alice ciphertext channel is bounded
@@ -103,25 +104,25 @@ degenerate query that violates it lets Alice read a relay's input outright.
   \label{thm:dsdp_centropy_uniform}
   \rocq{infotheo.dumas2017dual.dsdp.counting.dsdp_entropy.dsdp_centropy_uniform}
   \rocqok
-  \uses{def:dsdp_setting,def:party_views,lem:dsdp_is_correct}
+  \uses{def:party_views,lem:dsdp_is_correct}
   Conditioned on Alice's inputs and the decrypted output $(V_1,U_1,U_2,U_3,S)$ ---
   the plaintext residual, not her full ciphertext-carrying view --- and assuming
   the relay pair $(V_2,V_3)$ is a priori uniform and independent of the inputs, the
   relay inputs retain $\log m$ bits of uncertainty, provided Alice's third weight
   satisfies $0 < U_3 < \min(p,q)$.
   \[ \HH(V_2, V_3 \mid V_1,U_1,U_2,U_3,S) = \log m \]
-  Proved in \texttt{dsdp\_entropy.v}, the theorem is field
-  \texttt{centropy\_uniform} of \texttt{dsdp\_security}, read off at each
-  instance of \texttt{dsdp\_main.v}. Over a setting the two primes, the sample
-  law, the eleven inputs, their uniformity and their independence come off the
-  record, and the conditioner's $S$ is the output computed from the inputs
-  rather than a free variable. Because the record's
-  each-against-the-rest fields reach Alice's three weights, the equality as
-  stated over a setting covers honest sampling, where her weights are
-  independent of her input and of one another. The form that assumes nothing
-  about their joint law is \texttt{dsdp\_centropy\_uniform\_direct} of
-  \texttt{dsdp\_entropy.v}. At every $k$ the equality is exact and holds
-  against an adversary of any running time.
+  Proved in \texttt{dsdp\_entropy.v} over the two primes, the sample law and
+  the eleven random inputs, with their uniformity and their independence
+  assumed and the conditioner's $S$ computed from the inputs rather than left
+  free. Those hypotheses are exactly the fields of the record
+  \texttt{dsdp\_random\_inputs}, which \texttt{uniform\_inputs} inhabits at
+  every modulus. Because the each-against-the-rest independence reaches
+  Alice's three weights, the equality covers honest sampling, where her
+  weights are independent of her input and of one another. The form that
+  assumes nothing about their joint law is
+  \texttt{dsdp\_centropy\_uniform\_direct} of \texttt{dsdp\_entropy.v}. At
+  every modulus the equality is exact and holds against an adversary of any
+  running time.
 \end{theorem}
 \begin{proof}
   \uses{lem:dsdp_fiber_uniform}
@@ -403,7 +404,7 @@ $V_3$.
   \label{thm:alice_guess_real}
   \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_tuple_guess_V2_le}
   \rocqok
-  \uses{def:dsdp_setting,thm:alice_simulation_secure,lem:simulator_factorization,lem:guess_all_zero,def:distinguisher_of_predictor}
+  \uses{thm:alice_simulation_secure,lem:simulator_factorization,lem:guess_all_zero,def:distinguisher_of_predictor}
   When $u_3$ is a unit of the plaintext ring, every predictor reading Alice's
   real tuple matches Bob's input with probability at most $1/m$ plus the
   advantages of the two hop reductions of its distinguisher.
@@ -417,10 +418,9 @@ $V_3$.
   (Lemma~\ref{lem:guess_all_zero}), and the real law is within the two hop
   advantages of it. The epsHop program \texttt{alice\_chain} returns the same
   bound, its last line adding that fiber term to the two hops.
-  Proved in \texttt{dsdp\_alice\_hop\_secrecy.v}, the bound is field
-  \texttt{tuple\_guess\_V2\_le} of \texttt{dsdp\_security}, read off at each
-  instance of \texttt{dsdp\_main.v}, at the scheme that setting's sequence
-  supplies at $k$ rather than at an instance supplied on its own.
+  Proved in \texttt{dsdp\_alice\_hop\_secrecy.v} as
+  \texttt{alice\_tuple\_guess\_V2\_le}, over the data of one DSDP scheme, so a
+  reading at a concrete scheme supplies that data and proves nothing further.
 \end{theorem}
 \begin{proof}
   \uses{thm:alice_simulation_secure,lem:simulator_factorization,lem:guess_all_zero}
@@ -476,16 +476,14 @@ functionality on the other, rather than quantified over all input vectors.
   \label{thm:alice_simulation_secure}
   \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.alice_sim_advantage_le}
   \rocqok
-  \uses{def:dsdp_setting,def:party_views,lem:alice_view_advantage,lem:simulator_factorization}
+  \uses{def:party_views,lem:alice_view_advantage,lem:simulator_factorization}
   For all weights $u_1, u_2, u_3$, every distinguisher separates the real joint
   law of the honest inputs and Alice's tuple from the ideal-world law by at most
   the sum of the advantages of its two hop reductions.
   \[ \big\lvert \Pr_{\mathrm{law}(V_2,V_3,\hoptuple{0})}[D]
        - \Pr_{\Ideal}[D] \big\rvert \le \epshopsum{D} \]
-  Proved in \texttt{dsdp\_alice\_hop\_secrecy.v}, the bound is field
-  \texttt{sim\_advantage\_le} of \texttt{dsdp\_security}, read off at each
-  instance of \texttt{dsdp\_main.v}, at the scheme that setting's sequence
-  supplies there.
+  Proved in \texttt{dsdp\_alice\_hop\_secrecy.v} as
+  \texttt{alice\_sim\_advantage\_le}, over the data of one DSDP scheme.
 \end{theorem}
 \begin{proof}
   \uses{lem:simulator_factorization,def:alice_hops}
@@ -557,7 +555,7 @@ carries the three bounds above to the executed protocol.
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_trace_ideal,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_trace_sim_advantage_le}
   \rocqok
-  \uses{def:dsdp_setting,lem:trace_of_hop_tuple,def:alice_trace_chain,def:alice_trace_sim_chain,thm:alice_guess_real,thm:alice_simulation_secure}
+  \uses{lem:trace_of_hop_tuple,def:alice_trace_chain,def:alice_trace_sim_chain,thm:alice_guess_real,thm:alice_simulation_secure}
   With $u_3$ a unit of the plaintext ring, every predictor reading Alice's
   executed trace obeys the guessing bound at $g \circ \tau$. For all weights,
   every distinguisher separates the real trace law from the trace-level ideal
@@ -569,10 +567,10 @@ carries the three bounds above to the executed protocol.
   simulation bound at the predictor's distinguisher plus the fiber term of the
   ideal trace, as at the tuple; the program of
   Definition~\ref{def:alice_trace_chain} returns the same bound.
-  Proved in \texttt{dsdp\_alice\_trace\_link.v}. The record
-  \texttt{dsdp\_security} carries both bounds at the raw trace,
-  Theorems~\ref{thm:raw_trace_guess} and~\ref{thm:raw_trace_simulation}, the
-  two bounds read through the decoding of Lemma~\ref{lem:raw_trace_decode}.
+  Proved in \texttt{dsdp\_alice\_trace\_link.v}. Both bounds at the raw
+  trace, Theorems~\ref{thm:raw_trace_guess}
+  and~\ref{thm:raw_trace_simulation}, are read through the decoding of
+  Lemma~\ref{lem:raw_trace_decode}.
 \end{theorem}
 
 \begin{lemma}[Decoding Alice's trace at her own key]
@@ -599,7 +597,7 @@ carries the three bounds above to the executed protocol.
   \label{thm:raw_trace_guess}
   \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_raw_trace_guess_V2_le}
   \rocqok
-  \uses{def:dsdp_setting,thm:alice_trace_bounds,lem:raw_trace_decode}
+  \uses{thm:alice_trace_bounds,lem:raw_trace_decode}
   With $u_3$ a unit of the plaintext ring, every predictor reading the raw
   trace the interpreter records for Alice when it runs the protocol returns
   Bob's input with probability at most the uniform residue plus the two hop
@@ -610,16 +608,15 @@ carries the three bounds above to the executed protocol.
   IND-CPA assumption at one key. This is the guessing bound at the observation
   a corrupted Alice actually holds, the encoded trace being an intermediate of
   the interpreter rather than something the protocol emits.
-  Proved in \texttt{dsdp\_alice\_trace\_link.v}, the bound is field
-  \texttt{raw\_trace\_guess\_V2\_le} of \texttt{dsdp\_security}, read off at
-  each instance of \texttt{dsdp\_main.v}.
+  Proved in \texttt{dsdp\_alice\_trace\_link.v} as
+  \texttt{alice\_raw\_trace\_guess\_V2\_le}.
 \end{theorem}
 
 \begin{theorem}[Simulation at the raw trace, averaged over the coin]
   \label{thm:raw_trace_simulation}
   \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_raw_trace_sim_advantage_avg_le}
   \rocqok
-  \uses{def:dsdp_setting,thm:alice_trace_bounds,lem:raw_trace_decode}
+  \uses{thm:alice_trace_bounds,lem:raw_trace_decode}
   With the re-encryption coin drawn uniformly, a Boolean test tells the real
   raw trace from the simulated one, on average over that coin, no more often
   than the average of the two per-coin hop advantages of its decoded lift.
@@ -629,9 +626,8 @@ carries the three bounds above to the executed protocol.
   Drawing the coin makes the statement one about the protocol rather than about
   one of its executions, and both terms of the bound are conditional on the
   IND-CPA assumption, one at Bob's key and one at Charlie's.
-  Proved in \texttt{dsdp\_alice\_trace\_link.v}, the bound is field
-  \texttt{raw\_trace\_sim\_advantage\_avg\_le} of \texttt{dsdp\_security}, read
-  off at each instance of \texttt{dsdp\_main.v}.
+  Proved in \texttt{dsdp\_alice\_trace\_link.v} as
+  \texttt{alice\_raw\_trace\_sim\_advantage\_avg\_le}.
 \end{theorem}
 
 \begin{theorem}[Trace and tuple leave the same uncertainty]
@@ -641,7 +637,7 @@ carries the three bounds above to the executed protocol.
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_trace_tupleE,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.centropy_V2_trace_tupleE}
   \rocqok
-  \uses{def:dsdp_setting,lem:trace_of_hop_tuple}
+  \uses{lem:trace_of_hop_tuple}
   Conditioning on Alice's executed trace leaves the same uncertainty about
   Bob's input as conditioning on her hop-$0$ tuple. The equality holds for all
   weights.
@@ -739,7 +735,7 @@ $e$-th residuosity assumption.
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_trace_guess_V2_admissible_le,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.alice_trace_guess_V2_admissible_pq_le}
   \rocqok
-  \uses{def:dsdp_setting,thm:alice_trace_bounds,def:indcpa_assumption,def:alice_trace_chain_admissible}
+  \uses{thm:alice_trace_bounds,def:indcpa_assumption,def:alice_trace_chain_admissible}
   When both reduction adversaries of a trace predictor $g$ are admissible for
   $\mathcal{A}$, and $u_3$ is a unit of the plaintext ring, $g$ matches Bob's
   input with probability at most $1/m$ plus twice the assumed advantage; the
@@ -756,12 +752,12 @@ $e$-th residuosity assumption.
   The bound is the soundness field of the program of
   Definition~\ref{def:alice_trace_chain_admissible}, which spends the two
   premises at its two hops, so no triangle inequality is taken here.
-  Proved in \texttt{dsdp\_alice\_trace\_link.v}, the two forms are fields
-  \texttt{trace\_guess\_V2\_admissible\_le} and
-  \texttt{trace\_guess\_V2\_admissible\_pq\_le} of \texttt{dsdp\_security}, read
-  off at each instance of \texttt{dsdp\_main.v}. The composite form reads its
-  two primes and the plaintext count off the setting's link field instead of
-  assuming them.
+  Proved in \texttt{dsdp\_alice\_trace\_link.v} as
+  \texttt{alice\_trace\_guess\_V2\_admissible\_le} and
+  \texttt{alice\_trace\_guess\_V2\_admissible\_pq\_le}, and read at each
+  scheme in \texttt{dsdp\_instance\_sequence.v}. The composite form takes its
+  two primes and the plaintext count from the scheme's own plaintext space
+  instead of assuming them.
 \end{theorem}
 
 \section{The residuosity assumption and the IND-CPA bound it yields}
@@ -966,47 +962,50 @@ $e$-th residuosity assumption.
   class at the residuosity record of advantage zero.
 \end{definition}
 
-\begin{corollary}[The bound at the Paillier setting]
+\begin{corollary}[The bound at a Paillier instance]
   \label{cor:alice_guess_paillier}
-  \rocq{infotheo.dumas2017dual.dsdp.dsdp_main.paillier_trace_guess_V2_admissible_pq_le,
-       infotheo.dumas2017dual.dsdp.dsdp_main.paillier_epsilon_at_dcrE}
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_instance_sequence.paillier_trace_guess_V2_admissible_pq_le,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_instance_sequence.paillier_epsilon_dcrE}
   \rocqok
   \uses{thm:alice_guess_admissible,def:paillier_setting,def:dcr_assumption,def:paillier_indcpa_assumption}
-  At the $k$-th instance of the Paillier setting, with modulus $p_k q_k$, a
-  trace predictor whose two reduction adversaries the class induced by
-  $\mathcal{B}_k$ admits matches Bob's input with probability at most
-  $1/(p_k q_k)$ plus four times the assumed residuosity advantage.
-  \[ \Pr[\,g(\mathrm{AliceTrace}_k) = V_2\,]
-       \le \tfrac{1}{p_k q_k} + 4\,\varepsilon_{\mathrm{dcr},k} \]
+  At one Paillier instance of modulus $p q$, a trace predictor whose two
+  reduction adversaries the class induced by $\mathcal{B}$ admits matches
+  Bob's input with probability at most $1/(p q)$ plus four times the assumed
+  residuosity advantage.
+  \[ \Pr[\,g(\mathrm{AliceTrace}) = V_2\,]
+       \le \tfrac{1}{p q} + 4\,\varepsilon_{\mathrm{dcr}} \]
   Both sides are discharged at this scheme. The information-theoretic side
   reads the plaintext count off the packaging, whose plaintext space has
-  exactly $p_k q_k$ elements, and the coin plumbing the abstract bound
-  quantifies over is supplied by the scheme's own randomness. The
-  computational side is decisional composite residuosity and nothing further,
-  at the cost Definition~\ref{def:paillier_indcpa_assumption} fixes: the
-  factor four is two keys, Bob's and Charlie's, times two residuosity calls
-  per key, the identity \texttt{paillier\_epsilon\_at\_dcrE}. What is assumed
-  here is $\mathcal{B}_k$, and the class premises restrict which predictors
-  the bound covers.
+  exactly $p q$ elements, and the coin plumbing the abstract bound quantifies
+  over is supplied by the scheme's own randomness. The computational side is
+  decisional composite residuosity and nothing further, at the cost
+  Definition~\ref{def:paillier_indcpa_assumption} fixes: the factor four is
+  two keys, Bob's and Charlie's, times two residuosity calls per key, the
+  identity \texttt{paillier\_epsilon\_dcrE}. What is assumed here is
+  $\mathcal{B}$, and the class premises restrict which predictors the bound
+  covers. The bound holds at each fixed modulus on its own, with no growth
+  condition on $p$ and $q$. The sequence statements below read it along a
+  sequence of such instances.
 \end{corollary}
 
-\begin{corollary}[The bound at the Benaloh setting]
+\begin{corollary}[The bound at a Benaloh instance]
   \label{cor:alice_guess_benaloh}
-  \rocq{infotheo.dumas2017dual.dsdp.dsdp_main.benaloh_trace_guess_V2_admissible_pq_le,
-       infotheo.dumas2017dual.dsdp.dsdp_main.benaloh_epsilon_at_residuosityE}
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_instance_sequence.benaloh_trace_guess_V2_admissible_pq_le,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_instance_sequence.benaloh_epsilon_residuosityE}
   \rocqok
   \uses{thm:alice_guess_admissible,def:benaloh_setting,def:benaloh_residuosity_assumption,def:benaloh_indcpa_assumption}
-  At the $k$-th instance of the Benaloh setting, whose plaintext space has
-  $r_k = p_k q_k$ elements, a trace predictor whose two reduction adversaries
-  the class induced by $\mathcal{B}_k$ admits matches Bob's input with
-  probability at most $1/(p_k q_k)$ plus four times the assumed residuosity
-  advantage.
-  \[ \Pr[\,g(\mathrm{AliceTrace}_k) = V_2\,]
-       \le \tfrac{1}{p_k q_k} + 4\,\varepsilon_{\mathrm{res},k} \]
-  The computational side is $r$-th residuosity at the cost
-  Definition~\ref{def:benaloh_indcpa_assumption} fixes, the factor four again
-  two keys times two residuosity calls per key, the identity
-  \texttt{benaloh\_epsilon\_at\_residuosityE}.
+  At one Benaloh instance whose plaintext space has $r = p q$ elements, a
+  trace predictor whose two reduction adversaries the class induced by
+  $\mathcal{B}$ admits matches Bob's input with probability at most
+  $1/(p q)$ plus four times the assumed residuosity advantage.
+  \[ \Pr[\,g(\mathrm{AliceTrace}) = V_2\,]
+       \le \tfrac{1}{p q} + 4\,\varepsilon_{\mathrm{res}} \]
+  The block size is where the unconditional term is read, so the factored
+  form $r = p q$ enters as a premise of this reading and not of the scheme,
+  which asks only $1 < r$. The computational side is $r$-th residuosity at
+  the cost Definition~\ref{def:benaloh_indcpa_assumption} fixes, the factor
+  four again two keys times two residuosity calls per key, the identity
+  \texttt{benaloh\_epsilon\_residuosityE}.
 \end{corollary}
 
 \section{epsHop, the language a multi-hop bound is written in}
@@ -1488,7 +1487,7 @@ single member of it can carry.
   exactly this statement.
 \end{theorem}
 
-\section{What the class leaves out, and the three settings}
+\section{What the class leaves out, and the three instance sequences}
 
 \begin{definition}[The decrypting predictor]
   \label{def:trace_decryptor}
@@ -1508,7 +1507,7 @@ single member of it can carry.
   \label{thm:decrypt_lower_bound}
   \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.decrypt_bob_epsilon_ge}
   \rocqok
-  \uses{def:dsdp_setting,def:trace_decryptor,thm:alice_guess_real,lem:guess_all_zero}
+  \uses{def:trace_decryptor,thm:alice_guess_real,lem:guess_all_zero}
   With $u_3$ a unit of the plaintext ring, the hop-$0$ advantage the decrypting
   predictor buys is at least $1 - 1/m$.
   \[ 1 - \tfrac{1}{m} \le \epsror{\pk_B}{\hopred{0}{D_\delta}} \]
@@ -1519,16 +1518,15 @@ single member of it can carry.
   $2\varepsilon_{\mathrm{cpa}} \ge 1 - 1/m$, so the premises of
   Theorem~\ref{thm:alice_guess_admissible} are what make that bound say
   anything.
-  Proved in \texttt{dsdp\_alice\_trace\_link.v}, the lower bound is field
-  \texttt{decrypt\_bob\_epsilon\_ge} of \texttt{dsdp\_security}, read off at
-  each instance of \texttt{dsdp\_main.v}.
+  Proved in \texttt{dsdp\_alice\_trace\_link.v} as
+  \texttt{decrypt\_bob\_epsilon\_ge}.
 \end{theorem}
 
 \begin{corollary}[A small-epsilon assumption must reject the decryptor]
   \label{cor:decrypt_not_admissible}
   \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.decrypt_reduction_admissibleF}
   \rocqok
-  \uses{def:dsdp_setting,thm:decrypt_lower_bound,def:indcpa_assumption}
+  \uses{thm:decrypt_lower_bound,def:indcpa_assumption}
   With $u_3$ a unit of the plaintext ring, if $\mathcal{A}$ assumes an advantage
   below $1 - 1/m$, its classifier answers false on the reduction adversary the
   decrypting predictor induces at Bob's key.
@@ -1536,16 +1534,15 @@ single member of it can carry.
      \mathrm{adm}\big(\hopred{0}{D_\delta}\big) = \mathsf{false} \]
   Class membership is therefore not free bookkeeping. On this adversary the
   assumption's own bound decides membership, and decides against it.
-  Proved in \texttt{dsdp\_alice\_trace\_link.v}, the corollary is field
-  \texttt{decrypt\_reduction\_admissibleF} of \texttt{dsdp\_security}, read off
-  at each instance of \texttt{dsdp\_main.v}.
+  Proved in \texttt{dsdp\_alice\_trace\_link.v} as
+  \texttt{decrypt\_reduction\_admissibleF}.
 \end{corollary}
 
 \begin{corollary}[The premise-free bound is false]
   \label{cor:admissible_premise_free}
   \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.decrypt_guess_V2_premise_free_lt}
   \rocqok
-  \uses{def:dsdp_setting,thm:alice_guess_admissible,def:trace_decryptor,def:indcpa_assumption}
+  \uses{thm:alice_guess_admissible,def:trace_decryptor,def:indcpa_assumption}
   For every assumption whose promised advantage satisfies
   $2\varepsilon_{\mathrm{cpa}} < 1 - 1/m$, the right-hand side of
   Theorem~\ref{thm:alice_guess_admissible} sits strictly below what the
@@ -1556,9 +1553,8 @@ single member of it can carry.
   false statement, and for every such assumption rather than a contrived one.
   Corollary~\ref{cor:decrypt_not_admissible} is the complementary half: the
   missing premises cannot be supplied for this predictor.
-  Proved in \texttt{dsdp\_alice\_trace\_link.v}, the corollary is field
-  \texttt{decrypt\_guess\_V2\_premise\_free\_lt} of \texttt{dsdp\_security}, read
-  off at each instance of \texttt{dsdp\_main.v}.
+  Proved in \texttt{dsdp\_alice\_trace\_link.v} as
+  \texttt{decrypt\_guess\_V2\_premise\_free\_lt}.
 \end{corollary}
 
 \begin{definition}[One DSDP instance]
@@ -1694,268 +1690,162 @@ single member of it can carry.
   weaker than a statement quantified over every test.
 \end{theorem}
 
-\begin{definition}[The setting a DSDP security statement is made over]
-  \label{def:dsdp_setting}
-  \rocq{infotheo.dumas2017dual.dsdp.dsdp_setting.dsdp_setting}
-  \rocqok
-  \uses{def:dsdp_instance,def:dsdp_instance_sequence,def:party_views}
-  A setting $\mathcal{X}$ is the data a 3-party DSDP security statement is made
-  over, at every security parameter at once: a sequence $\mathcal{Q}$ of DSDP
-  instances, the plaintext modulus at $k$ held as the two primes $p_k$ and
-  $q_k$ whose product $m_k$ it is, one sample space with one law $P_k$ on it
-  per $k$, the eleven random inputs of a run, each of those eleven independent
-  of the joint of the other ten, and five uniform laws.
-  \[ \mathcal{X} = \big(\mathcal{Q},\ p_k, q_k,\ P_k,\
-       V_1,V_2,V_3,U_1,U_2,U_3,R_2,R_3,\ DK_A,DK_B,DK_C\big) \]
-  Primality and coprimality of $p_k$ and $q_k$ are what give the solution fiber
-  of the DSDP constraint exactly $m_k$ points. The five uniform laws are those
-  of the three plaintext inputs $V_1, V_2, V_3$ and of the two masks $R_2,
-  R_3$: the first three are what make a conditional entropy equal $\log m_k$
-  rather than merely positive, and the last two are what make a relay bound
-  information-theoretic rather than assumption-conditional. Alice's three
-  weights carry no law, being her chosen query and not a sample.
-  One field joins the two axes, and it equates two cardinalities rather than
-  two spaces. Writing $\mathcal{S}_k$ for the scheme of $\mathcal{Q}$'s $k$-th
-  instance,
-  \[ \#\lvert\mathrm{plain}(\mathcal{S}_k)\rvert = p_k q_k = m_k \]
-  so the entropy $\log m_k$ of the counting side and the guessing residue
-  $1/\#\lvert\mathrm{plain}\rvert$ of the computational side are measured on
-  spaces of one size. Nothing identifies the two message spaces, so the weights
-  and the keys occur twice as unrelated objects, as random variables here and
-  as values inside $\mathcal{Q}$.
-  Three things stay outside. The adversary and its two class premises, which
-  restrict the reduction adversaries a predictor induces and so speak about the
-  adversary rather than about the setting. Alice's query in both of its forms,
-  the honest range $0 < U_3 < \min(p_k,q_k)$ and the corrupted choice $U_2 = 1,
-  U_3 = 0$, which are opposite conditions on the same weight: were the honest
-  range a field, the corrupted statement would hold vacuously at every value of
-  the record. And the output $S$, which is a function of the inputs and so
-  enters as a definition with the linear DSDP relation proved, rather than as a
-  field with that relation assumed.
-  Read with the unconditional field of an asymptotic value for $\mathcal{Q}$,
-  the link field
-  forces $m_k$ to grow faster than every polynomial, so no value of this record
-  carries a fixed modulus, although each counting equality is exact at every
-  fixed composite modulus.
-\end{definition}
-
-\begin{definition}[The idealized setting]
+\begin{definition}[The idealized witnesses]
   \label{def:idealized_setting}
-  \rocq{infotheo.dumas2017dual.dsdp.dsdp_setting.idealized_setting}
+  \rocq{infotheo.dumas2017dual.dsdp.counting.dsdp_random_inputs.uniform_inputs}
   \rocqok
-  \uses{def:dsdp_setting,def:cipher_constant_assumption,def:negligible_fun}
-  The record is inhabited. On this value the computational side is the
-  idealized scheme at the composite modulus $p_k q_k$, with $p_k$ a prime above
+  \uses{def:cipher_constant_assumption,def:negligible_fun}
+  Both axes are inhabited at every modulus. The counting witness is the
+  uniform law on the five coordinates of $\mathbb{Z}_{pq}$ carrying the three
+  plaintext inputs and the two masks, with Alice's three weights held at the
+  constants $0$, $0$, $1$ and the three keys constant as well. A weight drawn
+  uniformly takes the value $0$ at some sample, and Charlie's weight has to be
+  invertible at every sample, which is why the weights stay outside the sample
+  space. The hopping witness is \texttt{idealized\_instance\_sequence}, the
+  idealized scheme at the composite modulus $p_k q_k$ with $p_k$ a prime above
   $(k+2)^{k+2}$ and $q_k$ a prime above $p_k$, under the cipher-constant
-  assumption. The counting side is the uniform law on eight coordinates of
-  $\mathbb{Z}_{p_k q_k}$, the eight plaintext inputs being those coordinates
-  and the three keys constants.
+  assumption.
   \[ \varepsilon_{\mathrm{cpa},k} = 0, \qquad
      \#\lvert\mathrm{plain}(\mathcal{S}_k)\rvert = p_k q_k \]
-  Every advantage the assumption assumes is zero here, so each bound of the
-  computational side reduces at this value to its unconditional $1/m_k$ term,
-  and each counting equality is exact at $\log m_k$. The two factors are taken
-  above $(k+2)^{k+2}$ because the modulus growth the link field forces has to
-  be met by an actual sequence of moduli.
+  Every advantage that assumption assumes is zero, so each hopping bound
+  reduces at this witness to its unconditional $1/m_k$ term, and each counting
+  equality is exact at $\log m_k$. The two factors are taken above
+  $(k+2)^{k+2}$ because the modulus growth negligibility asks for has to be
+  met by an actual sequence of moduli.
 \end{definition}
 
-\begin{definition}[What a setting proves]
-  \label{def:dsdp_security}
-  \rocq{infotheo.dumas2017dual.dsdp.dsdp_security.dsdp_security}
-  \rocqok
-  \uses{def:dsdp_setting,def:indcpa_assumption,def:dsdp_asymptotic,def:negligible_fun}
-  A value of the results record at a setting $\mathcal{X}$ is the twenty-one
-  statements of the two axes read at $\mathcal{X}$, each with one proof, and
-  they are the results the paper presents and no others. Six are counting
-  statements about the relay pair and the two relay views. Three are at
-  Alice's hopping tuple: the guessing bound, the simulation bound, and the
-  residue a predictor is left with at the all-zero endpoint. Two are the
-  entropy equalities at the leaked output and at that endpoint. Three are at
-  Alice's trace: the guessing bound and the coin-averaged simulation bound at
-  the raw interpreter trace, and the zero conditional entropy the encoded
-  trace leaves. Two are the class-conditional trace bound at the two
-  spellings of its unconditional term. Four are the obstructions that force
-  that class restriction, the last of them along the whole sequence. One is
-  negligibility along $\mathcal{X}$'s sequence, read at an asymptotic value
-  supplied with that statement rather than carried by $\mathcal{X}$: the
-  nineteen before the two asymptotic ones are made at one security parameter
-  and do not read it.
-  A value asserts nothing wider than those twenty-one. Six of them are
-  leakage or obstruction results rather than secrecy, and each is read at the
-  conditioner that makes it one: Alice's corrupted-query view and her executed
-  trace each determine Bob's input, and the four decrypting-predictor
-  statements show that the class restriction cannot be widened. Next to the
-  field reading $\HH(V_2 \mid \hoptuple{2}) = \log m_k$ this looks
-  contradictory until the conditioner of each is named, the all-zero endpoint
-  of the hop ladder on one side and the executed trace on the other.
-  \[ \HH(V_2 \mid \mathrm{AliceTrace}) = 0, \qquad
-     \HH(V_2 \mid \hoptuple{2}) = \log m_k \]
-  The two trace-axis bounds are read at the raw trace the run of the protocol
-  produces rather than at the encoded trace it is carried through to reach a
-  finite carrier. Decoding at Alice's own key inverts that encoding, so the
-  two levels are one observation and the same two advantages pay for both.
-  Bob and Charlie appear only as unconditional counting adversaries, whose
-  views hold plaintexts and abstract ciphertexts, so the computational axis is
-  Alice's alone. Every $\varepsilon$ is single-query and per-distinguisher, so a
-  value measures one execution against one named adversary and says nothing
-  about repeated queries or about a wider class.
-\end{definition}
-
-\begin{theorem}[Every setting proves them]
-  \label{thm:dsdp_securityP}
-  \rocq{infotheo.dumas2017dual.dsdp.dsdp_security.dsdp_securityP}
-  \rocqok
-  \uses{def:dsdp_security,def:dsdp_setting,thm:dsdp_centropy_uniform,thm:US_e1_centropy_V2_eq0,thm:bob_privacy_V1,thm:bob_privacy_V3,thm:charlie_privacy_V2,thm:alice_guess_real,thm:alice_simulation_secure,thm:centropy_endpoints,thm:alice_trace_bounds,thm:raw_trace_guess,thm:raw_trace_simulation,lem:guess_all_zero,thm:centropy_trace_tuple,thm:centropy_trace_eq0,thm:alice_guess_admissible,thm:decrypt_lower_bound,cor:decrypt_not_admissible,cor:admissible_premise_free,cor:decrypt_sequence_not_admissible,thm:alice_guess_negligible}
-  Every setting proves the twenty-one, after du2002's pair
-  \texttt{scalar\_product\_is\_leakage\_free} and
-  \texttt{scalar\_product\_is\_leakage\_freeP}.
-  \[ \forall \mathcal{X},\ \text{the twenty-one statements hold at }
-     \mathcal{X} \]
-  Each field is the theorem of its own axis file applied to the projections of
-  $\mathcal{X}$, so the value carries no mathematics the two axes do not
-  already carry and only fixes the setting they are read at. That is what makes
-  every statement at a concrete instance a projection rather than a proof: an
-  instance supplies parameters, and no field can be discharged at one instance
-  and left open at another.
-\end{theorem}
-
-\begin{definition}[The Paillier setting]
+\begin{definition}[The Paillier instance sequence]
   \label{def:paillier_setting}
-  \rocq{infotheo.dumas2017dual.dsdp.dsdp_main.paillier_setting}
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_instance_sequence.paillier_instance_sequence}
   \rocqok
-  \uses{def:dsdp_setting,def:dsdp_instance_sequence,def:dcr_assumption,def:paillier_indcpa_assumption}
-  The parameters fed are the plaintext modulus at $k$ as its two factors $p_k$
-  and $q_k$, Alice's four query weights with $u_3$ a unit of the plaintext
-  ring, the three private keys, the two encryption coins, and one decisional
-  composite residuosity record $\mathcal{B}_k$ at each $k$. The two
-  negligibility facts stay outside the setting and enter with the one
-  asymptotic statement read at it. The counting side is the uniform law on five
-  coordinates of $\mathbb{Z}_{p_k q_k}$ at Alice's own weights, so the two axes
-  read one query at every $k$.
-  \[ \#\lvert\mathrm{plain}(\mathcal{S}_k)\rvert = p_k q_k \]
-  Three premises are added beyond what the sequence record asks, and they are
-  fundamental to the scheme rather than conveniences of the proof: $p_k$ and
-  $q_k$ are prime and distinct, which is what a Paillier modulus is, which
-  \texttt{paillier\_indcpa\_scheme.v} leaves unimposed, and which decisional
-  composite residuosity starts from. The counting axis spends them on its fiber
-  count, and the hopping axis needs only $1 < p_k, q_k$. The three private keys
-  are assumed values, no Paillier key being constructed anywhere. What is
-  assumed on the computational side is the sequence $\mathcal{B}_k$; the
-  IND-CPA assumption at $k$ is the value
-  Definition~\ref{def:paillier_indcpa_assumption} builds from
-  $\mathcal{B}_k$, so every $\varepsilon_{\mathrm{cpa}}$ read off at this
-  setting is $2\varepsilon_{\mathrm{dcr},k}$.
+  \uses{def:dsdp_instance_sequence,def:dcr_assumption,def:paillier_indcpa_assumption}
+  The sequence whose $k$-th instance is the Paillier scheme at the modulus
+  $p_k q_k$ carrying Alice's plaintext input, her three query weights with
+  $u_3$ a unit of the plaintext ring, the three private keys and the two
+  encryption coins, and whose assumption at $k$ is the IND-CPA record
+  Definition~\ref{def:paillier_indcpa_assumption} derives from one decisional
+  composite residuosity record $\mathcal{B}_k$.
+  \[ \#\lvert\mathrm{plain}(\mathcal{S}_k)\rvert = p_k q_k, \qquad
+     \varepsilon_{\mathrm{cpa},k} = 2\,\varepsilon_{\mathrm{dcr},k} \]
+  Nothing number-theoretic beyond $1 < p_k, q_k$ enters the sequence itself.
+  Primality and distinctness of the two factors are what a Paillier modulus
+  is, what decisional composite residuosity starts from, and what the counting
+  axis spends on its fiber count, and they are premises of the statements read
+  along this sequence rather than fields of it. The three private keys are
+  assumed values, no Paillier key being constructed anywhere. What is assumed
+  on the computational side is the sequence $\mathcal{B}_k$, so every
+  $\varepsilon_{\mathrm{cpa}}$ read off along this sequence is
+  $2\varepsilon_{\mathrm{dcr},k}$. The two negligibility facts stay outside and
+  enter with the asymptotic value read at it.
 \end{definition}
 
-\begin{corollary}[The twenty-one at the Paillier setting]
+\begin{corollary}[The Paillier readings]
   \label{cor:paillier_security}
-  \rocq{infotheo.dumas2017dual.dsdp.dsdp_main.paillier_security,
-       infotheo.dumas2017dual.dsdp.dsdp_main.paillier_trace_guess_V2_negligible,
-       infotheo.dumas2017dual.dsdp.dsdp_main.paillier_epsilon_at_dcrE,
-       infotheo.dumas2017dual.dsdp.dsdp_main.paillier_trace_guess_V2_admissible_le,
-       infotheo.dumas2017dual.dsdp.dsdp_main.paillier_trace_guess_V2_admissible_pq_le,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_instance_sequence.alice_trace_guess_V2_paillier_negligible}
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_instance_sequence.paillier_trace_guess_V2_negligible,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_instance_sequence.paillier_epsilon_at_dcrE,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_instance_sequence.paillier_trace_guess_V2_admissible_le,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_instance_sequence.paillier_trace_guess_V2_admissible_pq_le}
   \rocqok
-  \uses{def:paillier_setting,thm:dsdp_securityP,cor:alice_guess_paillier,thm:alice_guess_negligible,def:dsdp_asymptotic,def:dcr_assumption,def:paillier_indcpa_assumption}
-  All twenty-one statements hold at the Paillier setting, each written out at
-  the instance and proved by projecting the value that every setting has. The
-  asymptotic one reads: along the Paillier sequence, a predictor admissible at
-  every $k$ makes the trace guessing probability negligible. The two
-  class-conditional trace bounds are restated in residuosity epsilons.
+  \uses{def:paillier_setting,cor:alice_guess_paillier,thm:alice_guess_negligible,def:dsdp_asymptotic,def:dcr_assumption,def:paillier_indcpa_assumption}
+  Along the Paillier sequence a predictor family admissible at every $k$
+  matches Bob's input with negligible probability, and at one fixed instance
+  the class-conditional trace bound is written in residuosity epsilons, at
+  the two spellings of its unconditional term.
   \[ \mathrm{negl}\big(k \mapsto
        \Pr[\,g_k(\mathrm{AliceTrace}_k) = V_2\,]\big), \qquad
-     \Pr[\,g_k(\mathrm{AliceTrace}_k) = V_2\,]
-       \le \tfrac{1}{p_k q_k} + 4\,\varepsilon_{\mathrm{dcr},k} \]
-  Its unconditional half is discharged at the plaintext cardinality of the
-  Paillier packaging, read at $k$ as $p_k q_k$, with no number theory beyond
-  $1 < p_k, q_k$ entering. Its computational half is decisional composite
-  residuosity: \texttt{paillier\_assumption\_at\_dcrE} and
+     \Pr[\,g(\mathrm{AliceTrace}) = V_2\,]
+       \le \tfrac{1}{p q} + 4\,\varepsilon_{\mathrm{dcr}} \]
+  The unconditional term is discharged at the plaintext cardinality of the
+  Paillier packaging, read as $p q$, with no number theory beyond $1 < p, q$
+  entering. The computational term is decisional composite residuosity:
+  \texttt{paillier\_assumption\_at\_dcrE} and
   \texttt{paillier\_epsilon\_at\_dcrE} identify the record every
-  assumption-conditional field is read at with the one derived from
-  $\mathcal{B}_k$, and its advantage with $2\varepsilon_{\mathrm{dcr},k}$, both
-  by conversion rather than by a rewrite a later statement could route around.
-  The two restated bounds carry that identification into the statement, the
-  factor four being two keys times two residuosity calls per key.
+  assumption-conditional bound along the sequence is read at with the one
+  derived from $\mathcal{B}_k$, and its advantage with
+  $2\varepsilon_{\mathrm{dcr},k}$, both by conversion rather than by a rewrite
+  a later statement could route around. The two written-out bounds carry that
+  identification into the statement, the factor four being two keys times two
+  residuosity calls per key. The negligible statement leaves no
+  plaintext-size term visible: that residue enters it as the size half of the
+  asymptotic value, one of the two negligible families
+  Theorem~\ref{thm:alice_guess_negligible} consumes.
 \end{corollary}
 
-\begin{definition}[The Benaloh setting]
+\begin{definition}[The Benaloh instance sequence]
   \label{def:benaloh_setting}
-  \rocq{infotheo.dumas2017dual.dsdp.dsdp_main.benaloh_setting}
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_instance_sequence.benaloh_instance_sequence}
   \rocqok
-  \uses{def:dsdp_setting,def:dsdp_instance_sequence,def:benaloh_residuosity_assumption,def:benaloh_indcpa_assumption}
-  The parameters fed are those of the Paillier setting together with the
-  ciphertext modulus $n_k$, and the block size is fixed to $r_k = p_k q_k$ at
-  two distinct primes.
-  \[ r_k = p_k q_k, \qquad
-     \#\lvert\mathrm{plain}(\mathcal{S}_k)\rvert = r_k \]
-  Primality and distinctness of the two factors are fundamental to the counting
-  axis, whose fiber count is a CRT count over them, and at the same time a
-  restriction on Benaloh, whose scheme, correctness and game ask only
-  $1 < r_k$. Every count is read at the block size $r_k$, which is the
-  plaintext space, and not at $n_k$, which sizes the ciphertext space. Keys are
-  assumed as at Paillier. What is assumed on the computational side is one
-  higher residuosity record $\mathcal{B}_k$ at each $k$, made at the ciphertext
-  modulus $n_k$ and the exponent $r_k$; the two negligibility facts stay
-  outside the setting, as at Paillier, and
-  the IND-CPA assumption at $k$ is the value
-  Definition~\ref{def:benaloh_indcpa_assumption} builds from $\mathcal{B}_k$,
-  so every $\varepsilon_{\mathrm{cpa}}$ read off at this setting is
-  $2\varepsilon_{\mathrm{res},k}$.
+  \uses{def:dsdp_instance_sequence,def:benaloh_residuosity_assumption,def:benaloh_indcpa_assumption}
+  The sequence whose $k$-th instance is the Benaloh scheme at ciphertext
+  modulus $n_k$ and block size $r_k$, carrying the same weights, keys and
+  coins as the Paillier sequence, and whose assumption at $k$ is the IND-CPA
+  record Definition~\ref{def:benaloh_indcpa_assumption} derives from one
+  higher residuosity record $\mathcal{B}_k$ at modulus $n_k$ and exponent
+  $r_k$.
+  \[ \#\lvert\mathrm{plain}(\mathcal{S}_k)\rvert = r_k, \qquad
+     \varepsilon_{\mathrm{cpa},k} = 2\,\varepsilon_{\mathrm{res},k} \]
+  Every count is read at the block size $r_k$, which is the plaintext space,
+  and not at $n_k$, which sizes the ciphertext space. The sequence asks only
+  $1 < r_k$, as the Benaloh scheme, its correctness and its game do. Writing
+  $r_k$ as a product of two distinct primes is what the counting axis needs
+  for its CRT fiber count, and it enters as a premise of the readings below
+  rather than as a field here. Keys are assumed as at Paillier, and the two
+  negligibility facts stay outside and enter with the asymptotic value.
 \end{definition}
 
-\begin{corollary}[The twenty-one at the Benaloh setting]
+\begin{corollary}[The Benaloh readings]
   \label{cor:benaloh_security}
-  \rocq{infotheo.dumas2017dual.dsdp.dsdp_main.benaloh_security,
-       infotheo.dumas2017dual.dsdp.dsdp_main.benaloh_trace_guess_V2_negligible,
-       infotheo.dumas2017dual.dsdp.dsdp_main.benaloh_epsilon_at_residuosityE,
-       infotheo.dumas2017dual.dsdp.dsdp_main.benaloh_trace_guess_V2_admissible_le,
-       infotheo.dumas2017dual.dsdp.dsdp_main.benaloh_trace_guess_V2_admissible_pq_le,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_instance_sequence.alice_trace_guess_V2_benaloh_negligible}
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_instance_sequence.benaloh_trace_guess_V2_negligible,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_instance_sequence.benaloh_epsilon_at_residuosityE,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_instance_sequence.benaloh_trace_guess_V2_admissible_le,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_instance_sequence.benaloh_trace_guess_V2_admissible_pq_le}
   \rocqok
-  \uses{def:benaloh_setting,thm:dsdp_securityP,thm:alice_guess_negligible,def:dsdp_asymptotic,def:benaloh_residuosity_assumption,def:benaloh_indcpa_assumption}
-  All twenty-one statements hold at the Benaloh setting, and the asymptotic one
-  reads along the Benaloh sequence. The two class-conditional trace bounds are
-  restated in residuosity epsilons.
+  \uses{def:benaloh_setting,cor:alice_guess_benaloh,thm:alice_guess_negligible,def:dsdp_asymptotic,def:benaloh_residuosity_assumption,def:benaloh_indcpa_assumption}
+  Along the Benaloh sequence a predictor family admissible at every $k$
+  matches Bob's input with negligible probability, and at one fixed instance
+  the class-conditional trace bound is written in residuosity epsilons, at
+  the two spellings of its unconditional term.
   \[ \mathrm{negl}\big(k \mapsto
        \Pr[\,g_k(\mathrm{AliceTrace}_k) = V_2\,]\big), \qquad
-     \Pr[\,g_k(\mathrm{AliceTrace}_k) = V_2\,]
-       \le \tfrac{1}{r_k} + 4\,\varepsilon_{\mathrm{res},k} \]
-  Its unconditional half is discharged at the block size $r_k$. Its
-  computational half is $r$-th residuosity at the ciphertext modulus $n_k$:
+     \Pr[\,g(\mathrm{AliceTrace}) = V_2\,]
+       \le \tfrac{1}{r} + 4\,\varepsilon_{\mathrm{res}} \]
+  The unconditional term is discharged at the block size $r$, and the second
+  spelling reads that block size as $p q$, which is what makes it the same
+  number the counting axis measures. The computational term is $r$-th
+  residuosity at the ciphertext modulus $n_k$:
   \texttt{benaloh\_assumption\_at\_residuosityE} and
   \texttt{benaloh\_epsilon\_at\_residuosityE} identify the record every
-  assumption-conditional field is read at with the one derived from
-  $\mathcal{B}_k$, and its advantage with $2\varepsilon_{\mathrm{res},k}$, both
-  by conversion. The two restated bounds carry that identification into the
-  statement, the factor four being two keys times two residuosity calls per
-  key, while the unconditional summand stays at the block size.
+  assumption-conditional bound along the sequence is read at with the one
+  derived from $\mathcal{B}_k$, and its advantage with
+  $2\varepsilon_{\mathrm{res},k}$, both by conversion. The factor four is two
+  keys times two residuosity calls per key, and the unconditional summand
+  stays at the block size.
 \end{corollary}
 
-\begin{corollary}[The twenty-one at the idealized setting]
+\begin{corollary}[The bound is negligible at the idealized witness]
   \label{cor:idealized_security}
-  \rocq{infotheo.dumas2017dual.dsdp.dsdp_main.idealized_security,
-       infotheo.dumas2017dual.dsdp.dsdp_main.idealized_trace_guess_V2_negligible}
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_instance_sequence.alice_trace_guess_V2_idealized_negligible}
   \rocqok
-  \uses{def:idealized_setting,thm:dsdp_securityP,def:cipher_constant_assumption}
-  All twenty-one statements hold at the idealized setting, which takes no
-  parameter, so each is read with no premise beyond the one the field itself
-  carries. Every advantage the cipher-constant assumption assumes is zero, so
-  each hopping bound is its unconditional term alone and each counting equality
-  is exact at $\log m_k$.
-  \[ \Pr[\,g_k(\mathrm{AliceTrace}_k) = V_2\,] \le \tfrac{1}{m_k} \]
-  The class-conditional statements are read at the constant predictor, the only
-  predictor the cipher-constant class admits, since that class keeps the
-  reduction adversaries whose verdict ignores the challenge ciphertext and the
-  decrypting predictor is a counterexample. The corrupted-query statement is
-  read at the sibling value carrying Alice's query $U_2 = 1$, $U_3 = 0$, no
-  counting law satisfying both queries at one $k$.
+  \uses{def:idealized_setting,thm:alice_guess_negligible,def:cipher_constant_assumption}
+  Along the idealized sequence the constant predictor matches Bob's input with
+  negligible probability, so the hypotheses of
+  Theorem~\ref{thm:alice_guess_negligible} hold together at least once and the
+  statement is not empty for want of a sequence and a predictor to read it at.
+  \[ \mathrm{negl}\big(k \mapsto
+       \Pr[\,0 = V_2\,]\big) \]
+  Every advantage the cipher-constant assumption assumes is zero, so the whole
+  bound is its unconditional $1/m_k$ term, which is negligible because the
+  moduli grow faster than every polynomial. The constant predictor is what the
+  cipher-constant class admits: that class keeps the reduction adversaries
+  whose verdict ignores the challenge ciphertext, and the decrypting predictor
+  is outside it.
 \end{corollary}
 
 \begin{theorem}[The trace determines Bob's input]
   \label{thm:centropy_trace_eq0}
   \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_trace_link.centropy_V2_trace_eq0}
   \rocqok
-  \uses{def:dsdp_setting,def:trace_decryptor,thm:centropy_trace_tuple}
+  \uses{def:trace_decryptor,thm:centropy_trace_tuple}
   Conditioning on Alice's executed trace leaves no uncertainty about Bob's
   input.
   \[ \HH(V_2 \mid \mathrm{AliceTrace}) = 0 \]
@@ -1965,9 +1855,8 @@ single member of it can carry.
   guessing bounds, which quantify over predictors holding the public keys
   alone; conditional entropy quantifies over nothing and so charges $\delta$ as
   well.
-  Proved in \texttt{dsdp\_alice\_trace\_link.v}, the equality is field
-  \texttt{centropy\_V2\_trace\_eq0} of \texttt{dsdp\_security}, read off at each
-  instance of \texttt{dsdp\_main.v}.
+  Proved in \texttt{dsdp\_alice\_trace\_link.v} as
+  \texttt{centropy\_V2\_trace\_eq0}.
 \end{theorem}
 
 \begin{theorem}[Where the Shannon statement is not degenerate]
@@ -1975,7 +1864,7 @@ single member of it can carry.
   \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.centropy_V2_Sout_logm,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_hop_secrecy.centropy_V2_all_zero_logm}
   \rocqok
-  \uses{def:dsdp_setting,thm:dsdp_centropy_uniform,def:alice_hop_ladder}
+  \uses{thm:dsdp_centropy_uniform,def:alice_hop_ladder}
   With $u_3$ a unit of the plaintext ring, conditioning on the leaked output
   alone and conditioning on Alice's all-zero tuple each leave $\log m$ bits of
   uncertainty about Bob's input, which is what it carries unconditioned.
@@ -1984,10 +1873,9 @@ single member of it can carry.
   output is the only channel from $V_2$ into the tuple. This and the $1/m$ term
   of Lemma~\ref{lem:guess_all_zero} descend from one fact, the conditional
   uniformity of $V_2$ given the output; neither is derived from the other.
-  Proved in \texttt{dsdp\_alice\_hop\_secrecy.v}, the two equalities are fields
-  \texttt{centropy\_V2\_Sout\_logm} and \texttt{centropy\_V2\_all\_zero\_logm} of
-  \texttt{dsdp\_security}, read off at each instance of \texttt{dsdp\_main.v}, at
-  the scheme that setting's sequence supplies there.
+  Proved in \texttt{dsdp\_alice\_hop\_secrecy.v} as
+  \texttt{centropy\_V2\_Sout\_logm} and
+  \texttt{centropy\_V2\_all\_zero\_logm}, over the data of one DSDP scheme.
 \end{theorem}
 
 \chapter{Tightness: the degenerate query}
@@ -2002,17 +1890,16 @@ corrupted-Alice case, not a separate malicious threat model.
   \label{thm:US_e1_centropy_V2_eq0}
   \rocq{infotheo.dumas2017dual.dsdp.counting.dsdp_malicious_dotp.US_e1_centropy_V2_eq0}
   \rocqok
-  \uses{def:dsdp_setting,def:party_views,thm:dsdp_centropy_uniform}
+  \uses{def:party_views,thm:dsdp_centropy_uniform}
   Fixing her query to the first coordinate ($U_2 = 1$, $U_3 = 0$), Alice reads
   Bob's private input $V_2$ off her view: the protocol output lies in her view and
   equals $V_2$, so its conditional entropy collapses to zero. This is exactly the
   case the fiber bound's injectivity hypothesis excludes, where $1/m$ is false.
   \[ U_2 = 1,\ U_3 = 0 \;\Longrightarrow\; \HH(V_2 \mid \mathrm{AliceView}) = 0 \]
-  Proved in \texttt{dsdp\_malicious\_dotp.v}, the theorem is field
-  \texttt{centropy\_V2\_dotp\_eq0} of \texttt{dsdp\_security}, read off at each
-  instance of \texttt{dsdp\_main.v}. The query $U_2 = 1$, $U_3 = 0$ stays a
-  premise, being the corrupted Alice's choice and not a property of the
-  setting.
+  Proved in \texttt{dsdp\_malicious\_dotp.v} as
+  \texttt{US\_e1\_centropy\_V2\_eq0}. The query $U_2 = 1$, $U_3 = 0$ stays a
+  premise, being the corrupted Alice's choice and not a property of the sample
+  space.
 \end{theorem}
 \begin{proof}
   \uses{thm:US_e1_centropy_VS0_eq0}
@@ -2049,18 +1936,17 @@ no cryptographic assumption.
   \rocq{infotheo.dumas2017dual.dsdp.counting.dsdp_relay_secrecy.bob_privacy_V1,
        infotheo.dumas2017dual.dsdp.counting.dsdp_relay_secrecy.charlie_privacy_V1}
   \rocqok
-  \uses{def:dsdp_setting,def:party_views}
+  \uses{def:party_views}
   Assuming Alice's input $V_1$ is a priori uniform and each relay's data is
   independent of $V_1$, the relay's view carries the full $\log m$ bits of
   uncertainty about $V_1$, which is positive. Alice's input enters no message a
   relay sees, so a corrupted relay learns nothing about it.
   \[ \HH(V_1 \mid \mathrm{RelayView}) = \log m > 0 \]
-  Proved in \texttt{dsdp\_relay\_secrecy.v}, the two statements are fields
-  \texttt{bob\_privacy\_V1} and \texttt{charlie\_privacy\_V1} of
-  \texttt{dsdp\_security}, read off at each instance of \texttt{dsdp\_main.v}.
-  Over a setting the uniformity of $V_1$ is a field of the record, and the
-  independence of each relay's data from $V_1$ is derived from its
-  each-against-the-rest fields.
+  Proved in \texttt{dsdp\_relay\_secrecy.v} as \texttt{bob\_privacy\_V1}
+  and \texttt{charlie\_privacy\_V1}. The uniformity of $V_1$ is a field of the
+  inputs record \texttt{dsdp\_random\_inputs}, and the independence of each
+  relay's data from $V_1$ is derived there from its each-against-the-rest
+  fields.
 \end{theorem}
 \begin{proof}
   \uses{lem:relay_view_indep_V1}
@@ -2091,17 +1977,16 @@ no cryptographic assumption.
   \label{thm:bob_privacy_V3}
   \rocq{infotheo.dumas2017dual.dsdp.counting.dsdp_relay_secrecy.bob_privacy_V3}
   \rocqok
-  \uses{def:dsdp_setting,def:party_views}
+  \uses{def:party_views}
   With $V_3$ and the mask $R_3$ a priori uniform and independent as stated, Bob's
   view carries the full $\log m$ bits of uncertainty about Charlie's input $V_3$.
   The Charlie-ciphertext Bob forwards carries $V_3 U_3 + R_3$, masked by Alice's
   fresh one-time pad $R_3$, so Bob's view is independent of $V_3$.
   \[ \HH(V_3 \mid \mathrm{BobView}) = \log m > 0 \]
-  Proved in \texttt{dsdp\_relay\_secrecy.v}, the theorem is field
-  \texttt{bob\_privacy\_V3} of \texttt{dsdp\_security}, read off at each instance
-  of \texttt{dsdp\_main.v}. Over a setting the uniformity of $V_3$ and of $R_3$
-  are fields of the record, and the freshness of $R_3$ against Charlie's
-  weighted input is derived from its each-against-the-rest fields.
+  Proved in \texttt{dsdp\_relay\_secrecy.v} as \texttt{bob\_privacy\_V3}.
+  The uniformity of $V_3$ and of $R_3$ are fields of the inputs record
+  \texttt{dsdp\_random\_inputs}, and the freshness of $R_3$ against Charlie's
+  weighted input is derived there from its each-against-the-rest fields.
 \end{theorem}
 \begin{proof}
   \uses{lem:one_time_pad}
@@ -2118,18 +2003,18 @@ no cryptographic assumption.
   \label{thm:charlie_privacy_V2}
   \rocq{infotheo.dumas2017dual.dsdp.counting.dsdp_relay_secrecy.charlie_privacy_V2}
   \rocqok
-  \uses{def:dsdp_setting,def:party_views}
+  \uses{def:party_views}
   With $V_2$ and the mask $R_2$ a priori uniform and independent as stated,
   Charlie's view carries the full $\log m$ bits of uncertainty about Bob's input
   $V_2$. Charlie's decrypted aggregate $D_3$ carries $V_2 U_2$ masked by Alice's
   fresh pad $R_2$, so the ciphertext Charlie returns to Alice is independent of
   $V_2$.
   \[ \HH(V_2 \mid \mathrm{CharlieView}) = \log m > 0 \]
-  Proved in \texttt{dsdp\_relay\_secrecy.v}, the theorem is field
-  \texttt{charlie\_privacy\_V2} of \texttt{dsdp\_security}, read off at each
-  instance of \texttt{dsdp\_main.v}. Over a setting the uniformity of $V_2$ and
-  of $R_2$ are fields of the record, and the freshness of $R_2$ against Bob's
-  weighted input is derived from its each-against-the-rest fields.
+  Proved in \texttt{dsdp\_relay\_secrecy.v} as
+  \texttt{charlie\_privacy\_V2}. The uniformity of $V_2$ and of $R_2$ are
+  fields of the inputs record \texttt{dsdp\_random\_inputs}, and the freshness
+  of $R_2$ against Bob's weighted input is derived there from its
+  each-against-the-rest fields.
 \end{theorem}
 \begin{proof}
   \uses{lem:one_time_pad}
