@@ -109,14 +109,16 @@ dsdp_entropy:dsdp_fiber_n
 dsdp_entropy:dsdp_fiber_ring
 dsdp_entropy:dsdp_g
 dsdp_entropy:dsdp_var_entropy
-# dsdp_instance: the key table read off three private keys, the two summand
-# sequences a bound along an instance sequence is written from, and the
+# dsdp_instance: the key table read off three private keys, the coin-replacing
+# instance the averaging statements are read at, the two summand sequences a
+# bound along an instance sequence is written from, and the
 # superpolynomial-growth helpers the witness sequence discharges its
 # negligibility field with; the blueprint cites the three records.
 dsdp_instance:expnn_gt_monomial
 dsdp_instance:f_adv
 dsdp_instance:f_size
 dsdp_instance:inst_pkey_of_party
+dsdp_instance:inst_with_rc2
 dsdp_instance:negligible_fun_inv_expnn
 dsdp_instance:negligible_fun_inv_ge_expnn
 dsdp_instance:pkey_of_dk

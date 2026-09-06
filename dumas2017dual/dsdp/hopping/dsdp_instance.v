@@ -40,6 +40,9 @@ Require Import negligible indcpa_game.
 (*                               coercion                                     *)
 (*         inst_pkey_of_party == the public-key table of its three private    *)
 (*                               keys                                         *)
+(*              inst_with_rc2 == the instance with Charlie's second-hop coin  *)
+(*                               replaced, the one field a statement that     *)
+(*                               samples that coin leaves free                *)
 (*     dsdp_instance_sequence == a sequence of instances indexed by the       *)
 (*                               security parameter, with the assumption      *)
 (*                               made at each k                               *)
@@ -119,6 +122,25 @@ Record dsdp_instance := {
    are then the same term by delta alone. *)
 Definition inst_pkey_of_party (I : dsdp_instance) :=
   pkey_of_dk (inst_dk_a I) (inst_dk_b I) (inst_dk_c I).
+
+(* The instance with Charlie's second-hop coin replaced.  A statement that
+   samples that coin rather than reading it off the instance is a statement
+   about the protocol rather than about one of its executions, and this is
+   the one field such a statement leaves free; every other field is the one
+   the argument is made at. *)
+Definition inst_with_rc2 (I : dsdp_instance) (w : scheme_renc I)
+    : dsdp_instance :=
+  {| inst_scheme := inst_scheme I ;
+     inst_v1 := inst_v1 I ; inst_u1 := inst_u1 I ;
+     inst_u2 := inst_u2 I ; inst_u3 := inst_u3 I ;
+     inst_u3_unit := inst_u3_unit I ;
+     inst_dk_a := inst_dk_a I ; inst_dk_b := inst_dk_b I ;
+     inst_dk_c := inst_dk_c I ;
+     inst_rb2 := inst_rb2 I ; inst_rc2 := w |}.
+
+(* The instance stays an explicit argument: a call site names the instance it
+   replaces the coin of, and the coin alone would leave it implicit. *)
+Arguments inst_with_rc2 : clear implicits.
 
 (* A sequence of DSDP instances indexed by the security parameter, with the
    IND-CPA assumption made at each k.

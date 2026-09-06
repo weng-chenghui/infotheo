@@ -8,6 +8,7 @@ Require Import spp_proba homomorphic_encryption entropy_fiber.
 Require Import extra_algebra extra_proba extra_entropy.
 Require Import dsdp_program dsdp_entropy.
 Require Export indcpa_game.
+Require Import dsdp_instance.
 Require Import epshop.
 
 (**md**************************************************************************)
@@ -18,8 +19,11 @@ Require Import epshop.
 (* the two honest inputs, Alice's two mask plaintexts, the randomness of the  *)
 (* two hop encryptions and the randomness of Alice's two combines; uniformity *)
 (* and independence of the coordinates are theorems of the product            *)
-(* construction rather than hypotheses. The one algebraic assumption is       *)
-(* [u3_unit]: Charlie's weight u3 is a unit of the plaintext ring.            *)
+(* construction rather than hypotheses.  The section runs over one instance   *)
+(* of dsdp_instance.v, whose fields are the scheme, Alice's input, the three  *)
+(* protocol weights, the three private keys and the two second-hop coins; the *)
+(* one algebraic assumption, that Charlie's weight is a unit of the plaintext *)
+(* ring, is the field inst_u3_unit.                                           *)
 (*                                                                            *)
 (* Three experiments run from Alice's real view to the view whose two         *)
 (* ciphertext slots both encrypt zero, one slot replaced at each step. Each   *)
@@ -286,15 +290,23 @@ Local Open Scope fdist_scope.
 
 Section dsdp_alice_hop_secrecy.
 Context {R : realType}.
-Variables (AHE : AHEncType) (Renc : finType) (index_renc : nat).
-Hypothesis card_renc : #|Renc| = index_renc.+1.
-Variable rand_of_renc : Renc -> rand AHE.
-Variable pkey_of_party : party_id -> pub_key AHE.
-
-Variables (v1 u1 u2 u3 : plain AHE).
-(* Naming: [u3_unit] reads "u3 is a unit", the subject_property hypothesis
-   pattern. *)
-Hypothesis u3_unit : u3 \is a GRing.unit.
+Variable I : dsdp_instance.
+(* The scheme the instance runs on, its coin space, the pinned coin-space
+   cardinality and the coin decoding, read off the instance through the
+   coercion. *)
+Local Notation AHE := (scheme_AHE I).
+Local Notation Renc := (scheme_renc I).
+Local Notation card_renc := (scheme_card_renc I).
+Local Notation rand_of_renc := (@scheme_rand_of_renc I).
+Local Notation pkey_of_party := (inst_pkey_of_party I).
+(* Alice's input and the three protocol weights, with Charlie's weight
+   invertible: the instance's fields, under the names the DSDP protocol
+   gives them. *)
+Local Notation v1 := (inst_v1 I).
+Local Notation u1 := (inst_u1 I).
+Local Notation u2 := (inst_u2 I).
+Local Notation u3 := (inst_u3 I).
+Local Notation u3_unit := (inst_u3_unit I).
 
 Let u3_inj : injective (fun v : plain AHE => u3 * v) := mulrI u3_unit.
 
@@ -306,10 +318,12 @@ Let card_plain_pair :
   #|((plain AHE * plain AHE)%type : finType)|
     = (#|plain AHE| * #|plain AHE|)%N.-1.+1.
 Proof. by rewrite card_prod prednK // muln_gt0 card_plain_gt0. Qed.
+Let card_renc_gt0 : (0 < #|Renc|)%N.
+Proof. by rewrite card_renc. Qed.
 Let card_renc_pair :
   #|((Renc * Renc)%type : finType)|
-    = (index_renc.+1 * index_renc.+1)%N.-1.+1.
-Proof. by rewrite card_prod card_renc. Qed.
+    = (#|Renc| * #|Renc|)%N.-1.+1.
+Proof. by rewrite card_prod prednK // muln_gt0 card_renc_gt0. Qed.
 
 (* The key hop 0 challenges at.  Selecting the party once, here, keeps one hop
    tied to one key, which is what lets the ladder's two advantage terms be

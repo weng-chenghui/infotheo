@@ -55,9 +55,6 @@ Require Import dsdp_alice_hop_secrecy dsdp_alice_trace_link.
 (* residuosity record of residuosity_game.v.                                  *)
 (*                                                                            *)
 (* ```                                                                        *)
-(*     bob_trace_adversary_at == the Bob-key reduction adversary at k         *)
-(* charlie_trace_adversary_at == the Charlie-key reduction adversary at k     *)
-(* alice_trace_guess_V2_pr_at == the trace guessing probability at k          *)
 (*                 f_guess_V2 == the trace guessing-probability sequence      *)
 (* alice_claims_admissible_at k ==                                            *)
 (*                               the dictionary of the class-conditional      *)
@@ -90,8 +87,6 @@ Require Import dsdp_alice_hop_secrecy dsdp_alice_trace_link.
 (* alice_trace_sim_chain_admissible_at k ==                                   *)
 (*                               the class-conditional trace simulation       *)
 (*                               program at the k-th instance                 *)
-(* alice_trace_sim_advantage_at ==                                            *)
-(*                               the trace simulation distance at k           *)
 (*            f_sim_advantage == the trace simulation distance sequence       *)
 (*            f_sim_advantageE == the distance sequence is the advantage      *)
 (*                               that program bounds                          *)
@@ -132,6 +127,8 @@ Require Import dsdp_alice_hop_secrecy dsdp_alice_trace_link.
 (*                               reduction adversary is in the derived class  *)
 (* paillier_charlie_decide_constant_admissible ==                             *)
 (*                               its Charlie-key counterpart                  *)
+(*   paillier_fixed_instance == the DSDP instance at one modulus, the value   *)
+(*                               the fixed Paillier bounds are read at        *)
 (*          paillier_instance == the DSDP instance at k carried by a          *)
 (*                               sequence of Paillier moduli                  *)
 (* paillier_instance_sequence == that instance sequence with the IND-CPA      *)
@@ -170,6 +167,9 @@ Require Import dsdp_alice_hop_secrecy dsdp_alice_trace_link.
 (*                               reduction adversary is in the derived class  *)
 (* benaloh_charlie_decide_constant_admissible ==                              *)
 (*                               its Charlie-key counterpart                  *)
+(*    benaloh_fixed_instance == the DSDP instance at one modulus and block    *)
+(*                               size, the value the fixed Benaloh bounds     *)
+(*                               are read at                                  *)
 (*           benaloh_instance == the DSDP instance at k carried by a          *)
 (*                               sequence of Benaloh block sizes              *)
 (*  benaloh_instance_sequence == that instance sequence with the IND-CPA      *)
@@ -219,30 +219,8 @@ Variable N : dsdp_asymptotic Q.
 Local Notation I := (sequence_instance Q).
 Local Notation assumption := (sequence_assumption Q).
 Variable predict : forall k,
-    predictor (scheme_AHE (I k)) (alice_traceT (scheme_AHE (I k))).
+    predictor (scheme_AHE (I k)) (alice_traceT (I k)).
 Arguments predict : clear implicits.
-
-(* The Bob-key reduction adversary at k: the concrete constant applied
-   at the record fields of I k.  Sequence plumbing; the mathematics is in the
-   constant it applies. *)
-Definition bob_trace_adversary_at k
-    (D : distinguisher (plain (scheme_AHE (I k)) * plain (scheme_AHE (I k))
-                        * alice_traceT (scheme_AHE (I k)))%type) :=
-  bob_trace_adversary (R:=R) (scheme_card_renc (I k))
-    (@scheme_rand_of_renc (I k))
-    (inst_v1 (I k)) (inst_u1 (I k)) (inst_u2 (I k)) (inst_u3 (I k))
-    (inst_dk_a (I k)) (inst_dk_b (I k)) (inst_dk_c (I k))
-    (inst_rc2 (I k)) D.
-
-(* The Charlie-key counterpart of bob_trace_adversary_at. *)
-Definition charlie_trace_adversary_at k
-    (D : distinguisher (plain (scheme_AHE (I k)) * plain (scheme_AHE (I k))
-                        * alice_traceT (scheme_AHE (I k)))%type) :=
-  charlie_trace_adversary (R:=R) (scheme_card_renc (I k))
-    (@scheme_rand_of_renc (I k))
-    (inst_v1 (I k)) (inst_u1 (I k)) (inst_u2 (I k)) (inst_u3 (I k))
-    (inst_dk_a (I k)) (inst_dk_b (I k)) (inst_dk_c (I k))
-    (inst_rc2 (I k)) D.
 
 (* The two class premises of the whole section: at every security parameter
    the class of the assumption made there admits the two reduction adversaries
@@ -251,23 +229,15 @@ Definition charlie_trace_adversary_at k
    which is why they stay premises and are not fields of Q. *)
 Hypothesis bob_admissible : forall k,
   indcpa_admissible (assumption k)
-    (bob_trace_adversary_at (distinguisher_of_predictor (predict k))).
+    (bob_trace_adversary (distinguisher_of_predictor (predict k))).
 Hypothesis charlie_admissible : forall k,
   indcpa_admissible (assumption k)
-    (charlie_trace_adversary_at (distinguisher_of_predictor (predict k))).
+    (charlie_trace_adversary (distinguisher_of_predictor (predict k))).
 
-(* The probability that a predictor reading Alice's executed trace at k
-   returns Bob's input.  The two hop coins enter here and not in the two
-   reduction adversaries, which fix Bob's coin by the challenge. *)
-Definition alice_trace_guess_V2_pr_at k
-    (p : predictor (scheme_AHE (I k)) (alice_traceT (scheme_AHE (I k)))) : R :=
-  alice_trace_guess_V2_pr (scheme_card_renc (I k)) (@scheme_rand_of_renc (I k))
-    (inst_v1 (I k)) (inst_u1 (I k)) (inst_u2 (I k)) (inst_u3 (I k))
-    (inst_dk_a (I k)) (inst_dk_b (I k)) (inst_dk_c (I k))
-    (inst_rb2 (I k)) (inst_rc2 (I k)) p.
-
-(* The trace guessing-probability function used in the sequence theorem. *)
-Definition f_guess_V2 k : R := alice_trace_guess_V2_pr_at (predict k).
+(* The trace guessing-probability function used in the sequence theorem: the
+   probability that the k-th predictor, reading Alice's executed trace at the
+   k-th instance, returns Bob's input. *)
+Definition f_guess_V2 k : R := alice_trace_guess_V2_pr (predict k).
 
 (* The dictionary of the class-conditional argument at the k-th instance, as
    a family indexed by the security parameter.  It is a named constant rather
@@ -276,12 +246,8 @@ Definition f_guess_V2 k : R := alice_trace_guess_V2_pr_at (predict k).
    Naming: extends [alice_claim_admissible] with the [_at] token naming the
    instance the dictionary is read at, the plural marking the family. *)
 Definition alice_claims_admissible_at (k : nat) : alice_label -> claim R :=
-  alice_claim_admissible (inst_pkey_of_party (I k)) (inst_v1 (I k))
-    (inst_u1 (I k)) (inst_u2 (I k)) (inst_u3 (I k)) (assumption k)
-    (hop_tuple_distinguisher (@scheme_rand_of_renc (I k))
-       (inst_v1 (I k)) (inst_u1 (I k)) (inst_u2 (I k)) (inst_u3 (I k))
-       (inst_dk_a (I k)) (inst_dk_b (I k)) (inst_dk_c (I k)) (inst_rc2 (I k))
-       (distinguisher_of_predictor (predict k))).
+  alice_claim_admissible (assumption k)
+    (hop_tuple_distinguisher (distinguisher_of_predictor (predict k))).
 
 (* Every label of that dictionary costs a negligible family along the
    sequence: both hop labels cost the epsilon the assumption at k assumes,
@@ -312,16 +278,15 @@ Canonical alice_claims_admissible_negligible :=
    the instance the program is read at. *)
 Definition alice_trace_chain_admissible_at (k : nat)
     : chain_result (alice_claims_admissible_at k) :=
-  alice_trace_chain_admissible (inst_u3_unit (I k)) (inst_rb2 (I k))
-    (bob_admissible k) (charlie_admissible k).
+  alice_trace_chain_admissible (bob_admissible k) (charlie_admissible k).
 
 (* The quantity the theorem below is about is the advantage that program
    bounds, its guessing probability being its distance from the zero game. *)
 Lemma f_guess_V2_advantageE k :
   f_guess_V2 k = result_advantage (alice_trace_chain_admissible_at k).
 Proof.
-by rewrite /f_guess_V2 /alice_trace_guess_V2_pr_at /alice_trace_guess_V2_pr
-   guess_V2_acceptE -(advantage0 (accept_ge0 _ _)).
+by rewrite /f_guess_V2 /alice_trace_guess_V2_pr guess_V2_acceptE
+   -(advantage0 (accept_ge0 _ _)).
 Qed.
 
 Local Open Scope epshop_scope.
@@ -356,10 +321,8 @@ Qed.
 Corollary decrypt_reduction_admissible_eventuallyF :
   exists K, forall k, (K < k)%N ->
     indcpa_admissible (assumption k)
-      (bob_trace_adversary_at (distinguisher_of_predictor
-         (bob_decrypt_predictor (@scheme_rand_of_renc (I k))
-            (inst_dk_a (I k)) (inst_dk_b (I k)) (inst_dk_c (I k))
-            (inst_rc2 (I k))))) = false.
+      (bob_trace_adversary (distinguisher_of_predictor
+         (bob_decrypt_predictor (I:=I k)))) = false.
 Proof.
 have [N1 HN1] := size_negligible N 1%N; have [N2 HN2] := adv_negligible N 1%N.
 exists (maxn (maxn N1 N2) 1) => k.
@@ -369,10 +332,7 @@ move: (HN1 k Hk1) (HN2 k Hk2); rewrite !expr1 => Hinv' Heps'.
 have Hhalf : (k%:R : R)^-1 <= 1 - (k%:R : R)^-1.
   rewrite lerBrDr -div1r -mulrDl ler_pdivrMr // mul1r -(natrD R 1 1).
   by rewrite ler_nat.
-apply: (decrypt_reduction_admissibleF (inst_v1 (I k)) (inst_u1 (I k))
-          (inst_u2 (I k)) (inst_u3_unit (I k)) (inst_dk_a (I k))
-          (inst_dk_b (I k)) (inst_dk_c (I k)) (inst_rb2 (I k))
-          (inst_rc2 (I k))).
+apply: (decrypt_reduction_admissibleF (I:=I k)).
 apply: lt_le_trans Heps' _; apply: le_trans Hhalf _.
 by rewrite lerD2l lerN2 ltW.
 Qed.
@@ -387,7 +347,7 @@ Qed.
    an input. *)
 Variable trace_distinguishers : forall k,
   distinguisher (plain (scheme_AHE (I k)) * plain (scheme_AHE (I k))
-                 * alice_traceT (scheme_AHE (I k)))%type.
+                 * alice_traceT (I k))%type.
 Arguments trace_distinguishers : clear implicits.
 
 (* The two class premises of the statement below: at every security parameter
@@ -398,10 +358,10 @@ Arguments trace_distinguishers : clear implicits.
    induces rather than the sequence. *)
 Hypothesis bob_admissible_distinguisher : forall k,
   indcpa_admissible (assumption k)
-    (bob_trace_adversary_at (trace_distinguishers k)).
+    (bob_trace_adversary (trace_distinguishers k)).
 Hypothesis charlie_admissible_distinguisher : forall k,
   indcpa_admissible (assumption k)
-    (charlie_trace_adversary_at (trace_distinguishers k)).
+    (charlie_trace_adversary (trace_distinguishers k)).
 
 (* The dictionary of the trace simulation argument at the k-th instance.  It
    is a second dictionary rather than alice_claims_admissible_at because that
@@ -414,12 +374,8 @@ Hypothesis charlie_admissible_distinguisher : forall k,
    Naming: parallels [alice_claims_admissible_at] with [sim] naming the
    argument the dictionary is read for. *)
 Definition alice_sim_claims_at (k : nat) : alice_label -> claim R :=
-  alice_claim_admissible (inst_pkey_of_party (I k)) (inst_v1 (I k))
-    (inst_u1 (I k)) (inst_u2 (I k)) (inst_u3 (I k)) (assumption k)
-    (hop_tuple_distinguisher (@scheme_rand_of_renc (I k))
-       (inst_v1 (I k)) (inst_u1 (I k)) (inst_u2 (I k)) (inst_u3 (I k))
-       (inst_dk_a (I k)) (inst_dk_b (I k)) (inst_dk_c (I k)) (inst_rc2 (I k))
-       (trace_distinguishers k)).
+  alice_claim_admissible (assumption k)
+    (hop_tuple_distinguisher (trace_distinguishers k)).
 
 (* Every label of that dictionary costs a negligible family along the
    sequence, the two hop labels the class epsilon and the terminal label
@@ -448,26 +404,14 @@ Canonical alice_sim_claims_negligible :=
    naming the instance the program is read at. *)
 Definition alice_trace_sim_chain_admissible_at (k : nat)
     : chain_result (alice_sim_claims_at k) :=
-  alice_trace_sim_chain_admissible (inst_rb2 (I k))
+  alice_trace_sim_chain_admissible
     (bob_admissible_distinguisher k) (charlie_admissible_distinguisher k).
 
-(* The distance a Boolean trace test sees at k between Alice's executed trace
-   and the simulation.  The two hop coins enter here and not in the two
-   reduction adversaries, which fix Bob's coin by the challenge.
-   Naming: extends [alice_trace_sim_advantage] with the [at] token naming the
-   instance the family is read at, as [alice_sim_claims_at] does. *)
-Definition alice_trace_sim_advantage_at k
-    (D : distinguisher (plain (scheme_AHE (I k)) * plain (scheme_AHE (I k))
-                        * alice_traceT (scheme_AHE (I k)))%type) : R :=
-  alice_trace_sim_advantage (scheme_card_renc (I k))
-    (@scheme_rand_of_renc (I k))
-    (inst_v1 (I k)) (inst_u1 (I k)) (inst_u2 (I k)) (inst_u3 (I k))
-    (inst_dk_a (I k)) (inst_dk_b (I k)) (inst_dk_c (I k))
-    (inst_rb2 (I k)) (inst_rc2 (I k)) D.
-
-(* The trace simulation distance function used in the sequence theorem. *)
+(* The trace simulation distance function used in the sequence theorem: the
+   distance the k-th Boolean test sees at the k-th instance between Alice's
+   executed trace and the simulation. *)
 Definition f_sim_advantage k : R :=
-  alice_trace_sim_advantage_at (trace_distinguishers k).
+  alice_trace_sim_advantage (trace_distinguishers k).
 
 (* The quantity the theorem below is about is the advantage that program
    bounds, the two games it joins being the executed trace and the
@@ -475,9 +419,8 @@ Definition f_sim_advantage k : R :=
 Lemma f_sim_advantageE k :
   f_sim_advantage k = result_advantage (alice_trace_sim_chain_admissible_at k).
 Proof.
-rewrite /f_sim_advantage /alice_trace_sim_advantage_at
-        /alice_trace_sim_chain_admissible_at.
-exact: (alice_trace_sim_advantageE (inst_rb2 (I k))
+rewrite /f_sim_advantage /alice_trace_sim_chain_admissible_at.
+exact: (alice_trace_sim_advantageE
           (bob_admissible_distinguisher k)
           (charlie_admissible_distinguisher k)).
 Qed.
@@ -579,12 +522,7 @@ Lemma idealized_bob_cipher_constant (k : nat) :
   indcpa_admissible
     (cipher_constant_assumption (R:=R) (scheme_card_renc (idealized_instance k))
        (@scheme_rand_of_renc (idealized_instance k)))
-    (bob_trace_adversary (R:=R) (scheme_card_renc (idealized_instance k))
-       (@scheme_rand_of_renc (idealized_instance k))
-       (inst_v1 (idealized_instance k)) (inst_u1 (idealized_instance k))
-       (inst_u2 (idealized_instance k)) (inst_u3 (idealized_instance k))
-       (inst_dk_a (idealized_instance k)) (inst_dk_b (idealized_instance k))
-       (inst_dk_c (idealized_instance k)) (inst_rc2 (idealized_instance k))
+    (bob_trace_adversary (R:=R) (I:=idealized_instance k)
        (distinguisher_of_predictor (fun _ => 0))).
 Proof.
 apply/forallP => c; apply/forallP => ch1; apply/forallP => ch2.
@@ -596,12 +534,7 @@ Lemma idealized_charlie_cipher_constant (k : nat) :
   indcpa_admissible
     (cipher_constant_assumption (R:=R) (scheme_card_renc (idealized_instance k))
        (@scheme_rand_of_renc (idealized_instance k)))
-    (charlie_trace_adversary (R:=R) (scheme_card_renc (idealized_instance k))
-       (@scheme_rand_of_renc (idealized_instance k))
-       (inst_v1 (idealized_instance k)) (inst_u1 (idealized_instance k))
-       (inst_u2 (idealized_instance k)) (inst_u3 (idealized_instance k))
-       (inst_dk_a (idealized_instance k)) (inst_dk_b (idealized_instance k))
-       (inst_dk_c (idealized_instance k)) (inst_rc2 (idealized_instance k))
+    (charlie_trace_adversary (R:=R) (I:=idealized_instance k)
        (distinguisher_of_predictor (fun _ => 0))).
 Proof.
 apply/forallP => c; apply/forallP => ch1; apply/forallP => ch2.
@@ -613,13 +546,7 @@ Qed.
    reduction adversaries are in the cipher-constant class at every k. *)
 Corollary alice_trace_guess_V2_idealized_negligible :
   negligible_fun (fun k =>
-    alice_trace_guess_V2_pr (R:=R) (scheme_card_renc (idealized_instance k))
-      (@scheme_rand_of_renc (idealized_instance k))
-      (inst_v1 (idealized_instance k)) (inst_u1 (idealized_instance k))
-      (inst_u2 (idealized_instance k)) (inst_u3 (idealized_instance k))
-      (inst_dk_a (idealized_instance k)) (inst_dk_b (idealized_instance k))
-      (inst_dk_c (idealized_instance k)) (inst_rb2 (idealized_instance k))
-      (inst_rc2 (idealized_instance k)) (fun _ => 0)).
+    alice_trace_guess_V2_pr (R:=R) (I:=idealized_instance k) (fun _ => 0)).
 Proof.
 apply: (alice_trace_guess_V2_negligible idealized_asymptotic
           (predict := fun k => fun _ => 0)).
@@ -661,6 +588,17 @@ Hypothesis u3_unit : u3 \is a GRing.unit.
 Variables (dk_a dk_b dk_c : priv_key AHE).
 Variables (rb2 rc2 : renc_paillier p q).
 
+(* The DSDP instance this section's bounds are read at: the Paillier IND-CPA
+   scheme at this modulus carrying the weights, keys and coins above.  It is
+   the value that lets a source theorem stated over one instance be read
+   here without restating it. *)
+Definition paillier_fixed_instance : dsdp_instance := {|
+  inst_scheme       := paillier_indcpa_scheme p_gt1 q_gt1 ;
+  inst_v1 := v1 ; inst_u1 := u1 ; inst_u2 := u2 ;
+  inst_u3 := u3 ; inst_u3_unit := u3_unit ;
+  inst_dk_a := dk_a ; inst_dk_b := dk_b ; inst_dk_c := dk_c ;
+  inst_rb2 := rb2 ; inst_rc2 := rc2 |}.
+
 (* Decisional composite residuosity at modulus p q, the only computational
    premise the Paillier bounds of this section are read at.  The IND-CPA
    assumption they consume is derived from it by paillier_indcpa_assumption
@@ -668,29 +606,21 @@ Variables (rb2 rc2 : renc_paillier p q).
    epsilons rather than in an advantage left free. *)
 Variable dcr : dcr_assumption (R:=R) p q.
 
-Local Notation bob_trace_adversary :=
-  (bob_trace_adversary (R:=R) card_renc_paillier rand_of_renc_paillier
-     v1 u1 u2 u3 dk_a dk_b dk_c rc2).
-Local Notation charlie_trace_adversary :=
-  (charlie_trace_adversary (R:=R) card_renc_paillier rand_of_renc_paillier
-     v1 u1 u2 u3 dk_a dk_b dk_c rc2).
-Local Notation alice_trace_guess_V2_pr :=
-  (alice_trace_guess_V2_pr (R:=R) card_renc_paillier rand_of_renc_paillier
-     v1 u1 u2 u3 dk_a dk_b dk_c rb2 rc2).
-
 (* A predictor of Bob's input reading Alice's executed trace at this
    instance, with the two class premises the trace bound below is conditional
    on: the class the residuosity record induces admits the two reduction
    adversaries that predictor induces.  The restriction lands on those two
    adversaries and never on the predictor itself, which is what leaves the
    trace-decrypting predictor outside the bound rather than inside it. *)
-Variable predict : predictor AHE (alice_traceT AHE).
+Variable predict : predictor AHE (alice_traceT paillier_fixed_instance).
 Hypothesis bob_admissible :
   indcpa_admissible (paillier_indcpa_assumption p_gt1 q_gt1 dcr)
-    (bob_trace_adversary (distinguisher_of_predictor predict)).
+    (bob_trace_adversary (I:=paillier_fixed_instance)
+       (distinguisher_of_predictor predict)).
 Hypothesis charlie_admissible :
   indcpa_admissible (paillier_indcpa_assumption p_gt1 q_gt1 dcr)
-    (charlie_trace_adversary (distinguisher_of_predictor predict)).
+    (charlie_trace_adversary (I:=paillier_fixed_instance)
+       (distinguisher_of_predictor predict)).
 
 (* The epsilon the derived IND-CPA assumption is stated at is twice the
    residuosity epsilon, one residuosity call per hop of the scheme reduction.
@@ -708,18 +638,18 @@ Proof. by []. Qed.
    leaked output concedes along the DSDP solution fiber; the second is
    conditional on the residuosity record. *)
 Corollary paillier_trace_guess_V2_admissible_le :
-  alice_trace_guess_V2_pr predict
+  alice_trace_guess_V2_pr (I:=paillier_fixed_instance) predict
   <= (#|plain AHE|%:R : R)^-1 + 4 * dcr_epsilon dcr.
 Proof.
-have := alice_trace_guess_V2_admissible_le u3_unit rb2 bob_admissible
-          charlie_admissible.
+have := alice_trace_guess_V2_admissible_le (I:=paillier_fixed_instance)
+          bob_admissible charlie_admissible.
 by rewrite paillier_epsilon_dcrE mulrA -(natrM R 2 2).
 Qed.
 
 (* The same bound with its unconditional summand read as 1/(p * q), the
    counting axis's reading of the cardinality the two axes share. *)
 Corollary paillier_trace_guess_V2_admissible_pq_le :
-  alice_trace_guess_V2_pr predict
+  alice_trace_guess_V2_pr (I:=paillier_fixed_instance) predict
   <= ((p * q)%N%:R : R)^-1 + 4 * dcr_epsilon dcr.
 Proof.
 rewrite inv_pq_cardE; exact: paillier_trace_guess_V2_admissible_le.
@@ -740,7 +670,8 @@ Lemma paillier_bob_decide_constant_admissible :
   paillier_dcr_admissible
     (decide_constant_assumption (R:=R) 'Z_((p * q) * (p * q)) (p * q)
        card_renc_paillier)
-    (bob_trace_adversary (distinguisher_of_predictor (fun _ => 0))).
+    (bob_trace_adversary (I:=paillier_fixed_instance)
+       (distinguisher_of_predictor (fun _ => 0))).
 Proof.
 apply: paillier_dcr_admissible_cipher_constant.
 apply/forallP => c; apply/forallP => ch1; apply/forallP => ch2.
@@ -756,7 +687,8 @@ Lemma paillier_charlie_decide_constant_admissible :
   paillier_dcr_admissible
     (decide_constant_assumption (R:=R) 'Z_((p * q) * (p * q)) (p * q)
        card_renc_paillier)
-    (charlie_trace_adversary (distinguisher_of_predictor (fun _ => 0))).
+    (charlie_trace_adversary (I:=paillier_fixed_instance)
+       (distinguisher_of_predictor (fun _ => 0))).
 Proof.
 apply: paillier_dcr_admissible_cipher_constant.
 apply/forallP => c; apply/forallP => ch1; apply/forallP => ch2.
@@ -853,20 +785,16 @@ Definition paillier_asymptotic :
 Corollary paillier_decrypt_reduction_admissible_eventuallyF :
   exists K, forall k, (K < k)%N ->
     indcpa_admissible (sequence_assumption paillier_instance_sequence k)
-      (bob_trace_adversary_at (Q:=paillier_instance_sequence)
+      (bob_trace_adversary (I:=paillier_instance k)
          (distinguisher_of_predictor
-            (bob_decrypt_predictor (@scheme_rand_of_renc (paillier_instance k))
-               (inst_dk_a (paillier_instance k))
-               (inst_dk_b (paillier_instance k))
-               (inst_dk_c (paillier_instance k))
-               (inst_rc2 (paillier_instance k)))))
+            (bob_decrypt_predictor (I:=paillier_instance k))))
     = false.
 Proof.
 exact: (decrypt_reduction_admissible_eventuallyF paillier_asymptotic).
 Qed.
 
 Variable predict : forall k, predictor (scheme_AHE (paillier_instance k))
-    (alice_traceT (scheme_AHE (paillier_instance k))).
+    (alice_traceT (paillier_instance k)).
 Arguments predict : clear implicits.
 
 Local Notation f_guess_V2 :=
@@ -878,13 +806,13 @@ Local Notation f_guess_V2 :=
    adversary's two residuosity reductions are classified at k. *)
 Hypothesis bob_reduction_admissible : forall k,
   indcpa_admissible (paillier_indcpa_assumption (p_gt1 k) (q_gt1 k) (dcr k))
-    (bob_trace_adversary_at (Q:=paillier_instance_sequence)
+    (bob_trace_adversary (I:=paillier_instance k)
        (distinguisher_of_predictor (predict k))).
 
 (* The Charlie-side twin of bob_reduction_admissible. *)
 Hypothesis charlie_reduction_admissible : forall k,
   indcpa_admissible (paillier_indcpa_assumption (p_gt1 k) (q_gt1 k) (dcr k))
-    (charlie_trace_adversary_at (Q:=paillier_instance_sequence)
+    (charlie_trace_adversary (I:=paillier_instance k)
        (distinguisher_of_predictor (predict k))).
 
 (* The conclusion is negligible_fun of the sequence k |-> Pr_k, where Pr_k
@@ -942,22 +870,23 @@ Hypothesis u3_unit : u3 \is a GRing.unit.
 Variables (dk_a dk_b dk_c : priv_key AHE).
 Variables (rb2 rc2 : renc_benaloh n).
 
+(* The DSDP instance this section's bounds are read at: the Benaloh IND-CPA
+   scheme at this modulus and block size carrying the weights, keys and coins
+   above.  It is the value that lets a source theorem stated over one
+   instance be read here without restating it. *)
+Definition benaloh_fixed_instance : dsdp_instance := {|
+  inst_scheme       := benaloh_indcpa_scheme n r_gt1 ;
+  inst_v1 := v1 ; inst_u1 := u1 ; inst_u2 := u2 ;
+  inst_u3 := u3 ; inst_u3_unit := u3_unit ;
+  inst_dk_a := dk_a ; inst_dk_b := dk_b ; inst_dk_c := dk_c ;
+  inst_rb2 := rb2 ; inst_rc2 := rc2 |}.
+
 (* r-th residuosity at modulus n, the only computational premise the Benaloh
    bounds of this section are read at.  The IND-CPA assumption they consume
    is derived from it by benaloh_indcpa_assumption of
    benaloh_indcpa_scheme.v, so those bounds are stated in residuosity
    epsilons rather than in an advantage left free. *)
 Variable residuosity : benaloh_residuosity_assumption (R:=R) n r.
-
-Local Notation bob_trace_adversary :=
-  (bob_trace_adversary (R:=R) card_renc_benaloh rand_of_renc_benaloh
-     v1 u1 u2 u3 dk_a dk_b dk_c rc2).
-Local Notation charlie_trace_adversary :=
-  (charlie_trace_adversary (R:=R) card_renc_benaloh rand_of_renc_benaloh
-     v1 u1 u2 u3 dk_a dk_b dk_c rc2).
-Local Notation alice_trace_guess_V2_pr :=
-  (alice_trace_guess_V2_pr (R:=R) card_renc_benaloh rand_of_renc_benaloh
-     v1 u1 u2 u3 dk_a dk_b dk_c rb2 rc2).
 
 (* The inverse plaintext cardinality at the Benaloh block size. *)
 Let inv_r_cardE : (r%:R : R)^-1 = (#|plain AHE|%:R : R)^-1.
@@ -969,13 +898,15 @@ Proof. by rewrite card_plain_r. Qed.
    adversaries that predictor induces.  The restriction lands on those two
    adversaries and never on the predictor itself, which is what leaves the
    trace-decrypting predictor outside the bound rather than inside it. *)
-Variable predict : predictor AHE (alice_traceT AHE).
+Variable predict : predictor AHE (alice_traceT benaloh_fixed_instance).
 Hypothesis bob_admissible :
   indcpa_admissible (benaloh_indcpa_assumption r_gt1 residuosity)
-    (bob_trace_adversary (distinguisher_of_predictor predict)).
+    (bob_trace_adversary (I:=benaloh_fixed_instance)
+       (distinguisher_of_predictor predict)).
 Hypothesis charlie_admissible :
   indcpa_admissible (benaloh_indcpa_assumption r_gt1 residuosity)
-    (charlie_trace_adversary (distinguisher_of_predictor predict)).
+    (charlie_trace_adversary (I:=benaloh_fixed_instance)
+       (distinguisher_of_predictor predict)).
 
 (* The epsilon the derived IND-CPA assumption is stated at is twice the
    residuosity epsilon, one residuosity call per hop of the scheme reduction.
@@ -993,11 +924,11 @@ Proof. by []. Qed.
    leaked output concedes along the DSDP solution fiber; the second is
    conditional on the residuosity record. *)
 Corollary benaloh_trace_guess_V2_admissible_le :
-  alice_trace_guess_V2_pr predict
+  alice_trace_guess_V2_pr (I:=benaloh_fixed_instance) predict
   <= (#|plain AHE|%:R : R)^-1 + 4 * benaloh_residuosity_epsilon residuosity.
 Proof.
-have := alice_trace_guess_V2_admissible_le u3_unit rb2 bob_admissible
-          charlie_admissible.
+have := alice_trace_guess_V2_admissible_le (I:=benaloh_fixed_instance)
+          bob_admissible charlie_admissible.
 by rewrite benaloh_epsilon_residuosityE mulrA -(natrM R 2 2).
 Qed.
 
@@ -1010,7 +941,7 @@ Hypothesis r_pq : r = (p_minus_2.+2 * q_minus_2.+2)%N.
    block size, the counting axis's reading of the cardinality the two axes
    share. *)
 Corollary benaloh_trace_guess_V2_admissible_pq_le :
-  alice_trace_guess_V2_pr predict
+  alice_trace_guess_V2_pr (I:=benaloh_fixed_instance) predict
   <= ((p_minus_2.+2 * q_minus_2.+2)%N%:R : R)^-1
      + 4 * benaloh_residuosity_epsilon residuosity.
 Proof.
@@ -1031,7 +962,8 @@ Qed.
 Lemma benaloh_bob_decide_constant_admissible :
   benaloh_residuosity_admissible
     (decide_constant_assumption (R:=R) 'Z_n r card_renc_benaloh)
-    (bob_trace_adversary (distinguisher_of_predictor (fun _ => 0))).
+    (bob_trace_adversary (I:=benaloh_fixed_instance)
+       (distinguisher_of_predictor (fun _ => 0))).
 Proof.
 apply: benaloh_residuosity_admissible_cipher_constant.
 apply/forallP => c; apply/forallP => ch1; apply/forallP => ch2.
@@ -1046,7 +978,8 @@ Qed.
 Lemma benaloh_charlie_decide_constant_admissible :
   benaloh_residuosity_admissible
     (decide_constant_assumption (R:=R) 'Z_n r card_renc_benaloh)
-    (charlie_trace_adversary (distinguisher_of_predictor (fun _ => 0))).
+    (charlie_trace_adversary (I:=benaloh_fixed_instance)
+       (distinguisher_of_predictor (fun _ => 0))).
 Proof.
 apply: benaloh_residuosity_admissible_cipher_constant.
 apply/forallP => c; apply/forallP => ch1; apply/forallP => ch2.
@@ -1146,20 +1079,16 @@ Definition benaloh_asymptotic :
 Corollary benaloh_decrypt_reduction_admissible_eventuallyF :
   exists K, forall k, (K < k)%N ->
     indcpa_admissible (sequence_assumption benaloh_instance_sequence k)
-      (bob_trace_adversary_at (Q:=benaloh_instance_sequence)
+      (bob_trace_adversary (I:=benaloh_instance k)
          (distinguisher_of_predictor
-            (bob_decrypt_predictor (@scheme_rand_of_renc (benaloh_instance k))
-               (inst_dk_a (benaloh_instance k))
-               (inst_dk_b (benaloh_instance k))
-               (inst_dk_c (benaloh_instance k))
-               (inst_rc2 (benaloh_instance k)))))
+            (bob_decrypt_predictor (I:=benaloh_instance k))))
     = false.
 Proof.
 exact: (decrypt_reduction_admissible_eventuallyF benaloh_asymptotic).
 Qed.
 
 Variable predict : forall k, predictor (scheme_AHE (benaloh_instance k))
-    (alice_traceT (scheme_AHE (benaloh_instance k))).
+    (alice_traceT (benaloh_instance k)).
 Arguments predict : clear implicits.
 
 Local Notation f_guess_V2 :=
@@ -1171,13 +1100,13 @@ Local Notation f_guess_V2 :=
    delta: the adversary's two residuosity reductions are classified at k. *)
 Hypothesis bob_reduction_admissible : forall k,
   indcpa_admissible (benaloh_indcpa_assumption (r_gt1 k) (residuosity k))
-    (bob_trace_adversary_at (Q:=benaloh_instance_sequence)
+    (bob_trace_adversary (I:=benaloh_instance k)
        (distinguisher_of_predictor (predict k))).
 
 (* The Charlie-side twin of bob_reduction_admissible. *)
 Hypothesis charlie_reduction_admissible : forall k,
   indcpa_admissible (benaloh_indcpa_assumption (r_gt1 k) (residuosity k))
-    (charlie_trace_adversary_at (Q:=benaloh_instance_sequence)
+    (charlie_trace_adversary (I:=benaloh_instance k)
        (distinguisher_of_predictor (predict k))).
 
 (* The conclusion is negligible_fun of the sequence k |-> Pr_k, where Pr_k

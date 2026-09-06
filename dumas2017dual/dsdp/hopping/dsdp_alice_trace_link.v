@@ -34,9 +34,11 @@ Require Import dsdp_alice_hop_secrecy.
 (* simulated trace at no loss, so its whole loss is the two hop advantages.   *)
 (*                                                                            *)
 (* The honest inputs are sampled uniformly and the public keys are fixed.     *)
-(* Some encryption coins are fixed parameters in the pointwise results.       *)
-(* Later results also average over the re-encryption coin. Adversaries are    *)
-(* modeled as functions, without a formal running-time bound.                 *)
+(* Every section runs over one instance of dsdp_instance.v, whose fields are  *)
+(* the scheme, the weights, the three private keys and the two second-hop     *)
+(* coins. The averaging results read the same instance with its              *)
+(* re-encryption coin replaced, so that coin is sampled rather than fixed.    *)
+(* Adversaries are modeled as functions, without a running-time bound.        *)
 (*                                                                            *)
 (* The file also proves that Alice's trace, view, and hopping tuple leave the *)
 (* same conditional entropy about Bob's input. This entropy result is         *)
@@ -244,22 +246,34 @@ Local Open Scope proc_scope.
 Local Open Scope sproc_scope.
 
 Section dsdp_alice_trace_link.
-Variables (AHE : AHEncType) (Renc : finType).
-Variable rand_of_renc : Renc -> rand AHE.
-Variables (v1 u1 u2 u3 : plain AHE).
-Variables (dk_a dk_b dk_c : priv_key AHE).
+Variable I : dsdp_instance.
+(* The scheme the instance runs on, its coin space and its coin decoding,
+   read off the instance through the coercion. *)
+Local Notation AHE := (scheme_AHE I).
+Local Notation Renc := (scheme_renc I).
+Local Notation rand_of_renc := (@scheme_rand_of_renc I).
+(* Alice's input, the three protocol weights with Charlie's weight
+   invertible, and the three private keys: the instance's fields, under the
+   names the DSDP protocol gives them. *)
+Local Notation v1 := (inst_v1 I).
+Local Notation u1 := (inst_u1 I).
+Local Notation u2 := (inst_u2 I).
+Local Notation u3 := (inst_u3 I).
+Local Notation dk_a := (inst_dk_a I).
+Local Notation dk_b := (inst_dk_b I).
+Local Notation dk_c := (inst_dk_c I).
 (* Bob's and Charlie's second-hop coins, held as indices into Renc.  The
    generic rand of he_types.v is a bare Type and carries no distribution, so
    a uniformly sampled coin is quantified over the finType of indices, and
    rand_of_renc carries an index to the randomness the protocol encrypts
    with.  The w_ prefix marks the index side of that split: rb1, rc1, ra1
    and ra2 below are rand AHE values, these two are indices. *)
-Variables (w_rb2 w_rc2 : Renc).
+Local Notation w_rb2 := (inst_rb2 I).
+Local Notation w_rc2 := (inst_rc2 I).
 
-(* The key table of dsdp_instance.v pinned at this section's three keys,
-   under the name it abbreviates; the shadowing is not recursive, since the
-   right-hand side resolves against the constant. *)
-Local Notation pkey_of_dk := (pkey_of_dk dk_a dk_b dk_c).
+(* The key table of the instance's three private keys, under the name the
+   protocol programs read it by. *)
+Local Notation pkey_of_dk := (inst_pkey_of_party I).
 
 Let DI := Standard_DSDP_Interface AHE.
 
@@ -407,15 +421,22 @@ Arguments dsdp_procs_std : clear implicits.
 
 Section dsdp_alice_trace_rv.
 Context {R : realType}.
-Variables (AHE : AHEncType) (Renc : finType) (index_renc : nat).
-Hypothesis card_renc : #|Renc| = index_renc.+1.
-Variable rand_of_renc : Renc -> rand AHE.
-Variables (v1 u1 u2 u3 : plain AHE).
-(* Naming: [u3_unit] reads "u3 is a unit", the subject_property hypothesis
-   pattern; same premise as in dsdp_alice_hop_secrecy.v. *)
-Hypothesis u3_unit : u3 \is a GRing.unit.
-Variables (dk_a dk_b dk_c : priv_key AHE).
-Variables (w_rb2 w_rc2 : Renc).
+Variable I : dsdp_instance.
+(* The instance's fields under the names the corrupted-Alice development
+   gives them: the scheme data through the coercion, Alice's input and the
+   three protocol weights, the three private keys, and Bob's and Charlie's
+   second-hop coins as indices into the coin space. *)
+Local Notation AHE := (scheme_AHE I).
+Local Notation Renc := (scheme_renc I).
+Local Notation card_renc := (scheme_card_renc I).
+Local Notation rand_of_renc := (@scheme_rand_of_renc I).
+Local Notation v1 := (inst_v1 I).
+Local Notation u1 := (inst_u1 I).
+Local Notation u2 := (inst_u2 I).
+Local Notation u3 := (inst_u3 I).
+Local Notation dk_b := (inst_dk_b I).
+Local Notation dk_c := (inst_dk_c I).
+Local Notation w_rc2 := (inst_rc2 I).
 
 (* The declarations discharged by the preceding section and by
    dsdp_alice_hop_secrecy.v take these parameters explicitly. Each
@@ -423,45 +444,32 @@ Variables (w_rb2 w_rc2 : Renc).
    is not recursive, since the right-hand side resolves against the
    constant. *)
 Local Notation DI := (Standard_DSDP_Interface AHE).
-Local Notation pkey_of_dk := (pkey_of_dk dk_a dk_b dk_c).
-Local Notation trace_dataT := (trace_dataT AHE).
-Local Notation V2 := (sample_V2 (R:=R) (AHE:=AHE) card_renc).
-Local Notation V3 := (sample_V3 (R:=R) (AHE:=AHE) card_renc).
-Local Notation R2 := (sample_R2 (R:=R) (AHE:=AHE) card_renc).
-Local Notation R3 := (sample_R3 (R:=R) (AHE:=AHE) card_renc).
-Local Notation Rho2 := (Rho2 (R:=R) (AHE:=AHE) card_renc).
-Local Notation Rho3 := (Rho3 (R:=R) (AHE:=AHE) card_renc).
-Local Notation RA1 := (RA1 (R:=R) (AHE:=AHE) card_renc).
-Local Notation RA2 := (RA2 (R:=R) (AHE:=AHE) card_renc).
-Local Notation Sout :=
-  (Sout (R:=R) (AHE:=AHE) card_renc v1 u1 u2 u3).
-Local Notation alice_tuple_real :=
-  (alice_tuple_real (R:=R) (AHE:=AHE) card_renc rand_of_renc
-     pkey_of_dk v1 u1 u2 u3).
-Local Notation alice_tuple_bob_zero :=
-  (alice_tuple_bob_zero (R:=R) (AHE:=AHE) card_renc rand_of_renc
-     pkey_of_dk v1 u1 u2 u3).
-Local Notation alice_tuple_all_zero :=
-  (alice_tuple_all_zero (R:=R) (AHE:=AHE) card_renc rand_of_renc
-     pkey_of_dk v1 u1 u2 u3).
+Local Notation pkey_of_dk := (inst_pkey_of_party I).
+Local Notation trace_dataT := (trace_dataT I).
+Local Notation V2 := (sample_V2 (R:=R) (I:=I)).
+Local Notation V3 := (sample_V3 (R:=R) (I:=I)).
+Local Notation R2 := (sample_R2 (R:=R) (I:=I)).
+Local Notation R3 := (sample_R3 (R:=R) (I:=I)).
+Local Notation Rho2 := (Rho2 (R:=R) (I:=I)).
+Local Notation Rho3 := (Rho3 (R:=R) (I:=I)).
+Local Notation RA1 := (RA1 (R:=R) (I:=I)).
+Local Notation RA2 := (RA2 (R:=R) (I:=I)).
+Local Notation Sout := (Sout (R:=R) (I:=I)).
+Local Notation alice_tuple_real := (alice_tuple_real (R:=R) (I:=I)).
+Local Notation alice_tuple_bob_zero := (alice_tuple_bob_zero (R:=R) (I:=I)).
+Local Notation alice_tuple_all_zero := (alice_tuple_all_zero (R:=R) (I:=I)).
 Local Notation indcpa_epsilon :=
-  (indcpa_epsilon (R:=R) (AHE:=AHE) card_renc rand_of_renc).
+  (indcpa_epsilon (R:=R) card_renc rand_of_renc).
 Local Notation indcpa_epsilon_assumption :=
-  (indcpa_epsilon_assumption (R:=R) (AHE:=AHE) card_renc rand_of_renc).
+  (indcpa_epsilon_assumption (R:=R) card_renc rand_of_renc).
 Local Notation bob_challenge_adversary :=
-  (bob_challenge_adversary (R:=R) (AHE:=AHE) card_renc rand_of_renc
-     pkey_of_dk v1 u1 u2 u3).
+  (bob_challenge_adversary (R:=R) (I:=I)).
 Local Notation charlie_challenge_adversary :=
-  (charlie_challenge_adversary (R:=R) (AHE:=AHE) card_renc rand_of_renc
-     pkey_of_dk v1 u1 u2 u3).
-Local Notation alice_traceT := (alice_traceT AHE).
+  (charlie_challenge_adversary (R:=R) (I:=I)).
+Local Notation alice_traceT := (alice_traceT I).
 Local Notation predictor := (predictor AHE).
-Local Notation alice_simulator :=
-  (alice_simulator (R:=R) (AHE:=AHE) card_renc rand_of_renc
-     pkey_of_dk).
-Local Notation alice_ideal :=
-  (alice_ideal (R:=R) (AHE:=AHE) card_renc rand_of_renc
-     pkey_of_dk v1 u1 u2 u3).
+Local Notation alice_simulator := (alice_simulator (R:=R) (I:=I)).
+Local Notation alice_ideal := (alice_ideal (R:=R) I).
 
 (* Alice's executed trace read off a value of her hopping tuple: the leaked
    output, Charlie's re-encryption of it, the two received ciphertexts, the
@@ -469,7 +477,7 @@ Local Notation alice_ideal :=
    Naming: the [_of_] connective names the source the conversion reads, after
    the repository's total-conversion family. *)
 Definition alice_trace_of_hop_tuple
-    (v : alice_hop_tupleT AHE Renc) :
+    (v : alice_hop_tupleT I) :
     15.-bseq trace_dataT :=
   [bseq inl (inl (inl v.1.1.2));
         inl (inl (inr
@@ -488,18 +496,17 @@ Definition alice_trace_of_hop_tuple
    sample.  The name says which protocol the process list is, so that a
    security statement can open at the protocol itself rather than at a random
    variable derived from it. *)
-Definition dsdp_protocol (s : alice_sampleT AHE Renc) :
+Definition dsdp_protocol (s : alice_sampleT I) :
     seq (proc (di_data DI)) :=
-  dsdp_procs_std AHE Renc rand_of_renc v1 u1 u2 u3 dk_a dk_b dk_c
-    w_rb2 w_rc2 (V2 s) (V3 s) (R2 s) (R3 s) (rand_of_renc (Rho2 s))
+  dsdp_procs_std I (V2 s) (V3 s) (R2 s) (R3 s) (rand_of_renc (Rho2 s))
     (rand_of_renc (Rho3 s)) (rand_of_renc (RA1 s)) (rand_of_renc (RA2 s)).
 
 (* Fuel bounds the encoded trace of any party in any sample-indexed process
    list, since encoding preserves length. *)
 Lemma trace_of_run_size
-    (procs : alice_sampleT AHE Renc -> seq (proc (di_data DI)))
-    (i : party_id) (s : alice_sampleT AHE Renc) :
-  (size (map (@trace_data_of_di_data AHE)
+    (procs : alice_sampleT I -> seq (proc (di_data DI)))
+    (i : party_id) (s : alice_sampleT I) :
+  (size (map (@trace_data_of_di_data I)
            (nth [::] (run_interp 15 (procs s)).2 n( i ))) <= 15)%N.
 Proof. by rewrite size_map; exact: size_traces_nth. Qed.
 
@@ -512,28 +519,28 @@ Proof. by rewrite size_map; exact: size_traces_nth. Qed.
    Naming: the [_of_] connective names the source the observation is read
    from, after the repository's total-conversion family. *)
 Definition trace_of_run
-    (procs : alice_sampleT AHE Renc -> seq (proc (di_data DI)))
+    (procs : alice_sampleT I -> seq (proc (di_data DI)))
     (i : party_id) :
-    {RV (alice_sample_fdist (R:=R) AHE card_renc) ->
+    {RV (alice_sample_fdist (R:=R) I) ->
      15.-bseq trace_dataT} :=
   fun s => Bseq (trace_of_run_size procs i s).
 
 (* Alice's encoded executed trace as a random variable on the sample space:
    what the interpreter hands her in a run of the DSDP protocol. *)
 Definition AliceTrace :
-    {RV (alice_sample_fdist (R:=R) AHE card_renc) ->
+    {RV (alice_sample_fdist (R:=R) I) ->
      15.-bseq trace_dataT} :=
   trace_of_run dsdp_protocol Alice.
 
 (* The leaked output the run computes is Alice's hopping tuple slot. *)
-Let Sout_runE (s : alice_sampleT AHE Renc) :
+Let Sout_runE (s : alice_sampleT I) :
   V3 s * u3 + R3 s + (V2 s * u2 + R2 s) - R2 s - R3 s + u1 * v1
   = Sout s.
 Proof. by rewrite SoutE; ring. Qed.
 
 (* The plaintext Charlie re-encrypts is the leaked output net of Alice's own
    term and masks. *)
-Let reenc_plainE (s : alice_sampleT AHE Renc) :
+Let reenc_plainE (s : alice_sampleT I) :
   V3 s * u3 + R3 s + (V2 s * u2 + R2 s)
   = Sout s - u1 * v1 + R2 s + R3 s.
 Proof. by rewrite SoutE; ring. Qed.
@@ -677,8 +684,7 @@ Local Notation tuple_distinguisher :=
   (hop_tuple_distinguisher (distinguisher_of_predictor predict)).
 
 Definition alice_trace_chain :=
-  \epsilon[ alice_claim card_renc rand_of_renc pkey_of_dk v1 u1 u2 u3
-              tuple_distinguisher ]{
+  \epsilon[ alice_claim tuple_distinguisher ]{
     (* the trace of a run of the protocol by the interpreter *)
     start (accept (distinguisher_of_predictor predict)
              (`p_ [% V2, V3, trace_of_run dsdp_protocol Alice])) ;
@@ -687,24 +693,21 @@ Definition alice_trace_chain :=
     (* Bob's ciphertext slot zeroed, at one IND-CPA advantage *)
     hop cpa_bob (eps_bob tuple_distinguisher)
       to (accept tuple_distinguisher G1)
-      by le_of_eq (hop0_advantageE card_renc rand_of_renc pkey_of_dk
-                     v1 u1 u2 u3 tuple_distinguisher) ;
+      by le_of_eq (hop0_advantageE tuple_distinguisher) ;
     (* Charlie's slot zeroed, at a second IND-CPA advantage *)
     hop cpa_charlie (eps_charlie tuple_distinguisher)
       to (accept tuple_distinguisher G2)
-      by le_of_eq (hop1_advantageE card_renc rand_of_renc pkey_of_dk
-                     v1 u1 u2 u3 tuple_distinguisher) ;
+      by le_of_eq (hop1_advantageE tuple_distinguisher) ;
     (* the guessing residue of the all-zero view, a term outside the
        hopping, added to the loss so the total bounds the trace game *)
     plus uniform_fiber #|plain AHE|%:R^-1
       by plus_le (accept_ge0 _ _)
-           (all_zero_game_V2_le_invm card_renc rand_of_renc pkey_of_dk
-              v1 u1 u2 u3_unit (predict \o alice_trace_of_hop_tuple)) ;;
+           (all_zero_game_V2_le_invm
+              (predict \o alice_trace_of_hop_tuple)) ;;
     (* the trace game, at the residue and the two advantages *)
     bound (#|plain AHE|%:R^-1 + eps_bob tuple_distinguisher
            + eps_charlie tuple_distinguisher)
-      by alice_totalE card_renc rand_of_renc pkey_of_dk v1 u1 u2 u3
-           tuple_distinguisher }.
+      by alice_totalE tuple_distinguisher }.
 
 End alice_trace_chain.
 
@@ -716,7 +719,7 @@ End alice_trace_chain.
    Naming: [_pr] marks the probability of the event just named, with the
    [alice_trace] stem naming whose observation the predictor reads. *)
 Definition alice_trace_guess_V2_pr (predict : predictor alice_traceT) : R :=
-  Pr (alice_sample_fdist (R:=R) AHE card_renc)
+  Pr (alice_sample_fdist (R:=R) I)
      [set t | (predict `o AliceTrace) t == V2 t].
 
 (* The same argument over the same games and the same three labels, with the
@@ -749,8 +752,7 @@ Local Notation eps := (indcpa_assumption_epsilon assumption).
 (* Naming: extends [alice_trace_chain] with the [admissible] token naming the
    quantity its hops are charged at, as the section header states. *)
 Definition alice_trace_chain_admissible :=
-  \epsilon[ alice_claim_admissible pkey_of_dk v1 u1 u2 u3 assumption
-              tuple_distinguisher ]{
+  \epsilon[ alice_claim_admissible assumption tuple_distinguisher ]{
     (* the trace of a run of the protocol by the interpreter *)
     start (accept (distinguisher_of_predictor predict)
              (`p_ [% V2, V3, trace_of_run dsdp_protocol Alice])) ;
@@ -759,21 +761,19 @@ Definition alice_trace_chain_admissible :=
     (* Bob's ciphertext slot zeroed, at the epsilon the assumption promises,
        which the class membership of the Bob-key reduction licenses *)
     hop cpa_bob eps to (accept tuple_distinguisher G1)
-      by le_trans (le_of_eq (hop0_advantageE card_renc rand_of_renc
-                               pkey_of_dk v1 u1 u2 u3 tuple_distinguisher))
+      by le_trans (le_of_eq (hop0_advantageE tuple_distinguisher))
                   (indcpa_admissible_epsilon_le dk_b bob_admissible) ;
     (* Charlie's slot zeroed, at the same epsilon, licensed by the class
        membership of the Charlie-key reduction *)
     hop cpa_charlie eps to (accept tuple_distinguisher G2)
-      by le_trans (le_of_eq (hop1_advantageE card_renc rand_of_renc
-                               pkey_of_dk v1 u1 u2 u3 tuple_distinguisher))
+      by le_trans (le_of_eq (hop1_advantageE tuple_distinguisher))
                   (indcpa_admissible_epsilon_le dk_c charlie_admissible) ;
     (* the guessing residue of the all-zero view, a term outside the
        hopping, added to the loss so the total bounds the trace game *)
     plus uniform_fiber #|plain AHE|%:R^-1
       by plus_le (accept_ge0 _ _)
-           (all_zero_game_V2_le_invm card_renc rand_of_renc pkey_of_dk
-              v1 u1 u2 u3_unit (predict \o alice_trace_of_hop_tuple)) ;;
+           (all_zero_game_V2_le_invm
+              (predict \o alice_trace_of_hop_tuple)) ;;
     (* the trace game, at the residue and twice the class epsilon *)
     bound ((#|plain AHE|%:R : R)^-1 + 2 * eps)
       by alice_admissible_totalE assumption }.
@@ -902,8 +902,7 @@ Variable D : distinguisher (plain AHE * plain AHE * alice_traceT)%type.
 Local Notation tuple_distinguisher := (hop_tuple_distinguisher D).
 
 Definition alice_trace_sim_chain :=
-  \epsilon[ alice_claim card_renc rand_of_renc pkey_of_dk v1 u1 u2 u3
-              tuple_distinguisher ]{
+  \epsilon[ alice_claim tuple_distinguisher ]{
     (* the trace of a run of the protocol by the interpreter *)
     start (accept D (`p_ [% V2, V3, trace_of_run dsdp_protocol Alice])) ;
     (* her trace is a deterministic image of her hopping tuple *)
@@ -911,13 +910,11 @@ Definition alice_trace_sim_chain :=
     (* Bob's ciphertext slot zeroed, at one IND-CPA advantage *)
     hop cpa_bob (eps_bob tuple_distinguisher)
       to (accept tuple_distinguisher G1)
-      by le_of_eq (hop0_advantageE card_renc rand_of_renc pkey_of_dk
-                     v1 u1 u2 u3 tuple_distinguisher) ;
+      by le_of_eq (hop0_advantageE tuple_distinguisher) ;
     (* Charlie's slot zeroed, at a second IND-CPA advantage *)
     hop cpa_charlie (eps_charlie tuple_distinguisher)
       to (accept tuple_distinguisher G2)
-      by le_of_eq (hop1_advantageE card_renc rand_of_renc pkey_of_dk
-                     v1 u1 u2 u3 tuple_distinguisher) ;
+      by le_of_eq (hop1_advantageE tuple_distinguisher) ;
     (* the simulated trace is that same image of the all-zero tuple *)
     same to (accept D alice_trace_ideal)
       by esym (accept_trace_ideal_tupleE D) }.
@@ -972,7 +969,7 @@ Variable predict : predictor alice_traceT.
    replacements cost, one at Bob's key and one at Charlie's.  The right-hand
    side is the bound alice_trace_chain returns. *)
 Theorem alice_trace_guess_V2_le :
-  Pr (alice_sample_fdist (R:=R) AHE card_renc)
+  Pr (alice_sample_fdist (R:=R) I)
      [set t | (predict `o AliceTrace) t == V2 t]
     <= (#|plain AHE|%:R : R)^-1
        + indcpa_epsilon (pkey_of_dk Bob)
@@ -1000,8 +997,7 @@ rewrite guess_V2_acceptE -addrA.
 apply: (step _ (accept (distinguisher_of_predictor predict)
                   alice_trace_ideal)).
   rewrite accept_trace_ideal_tupleE.
-  exact: (all_zero_game_V2_le_invm card_renc rand_of_renc pkey_of_dk
-            v1 u1 u2 u3_unit (predict \o alice_trace_of_hop_tuple)).
+  exact: (all_zero_game_V2_le_invm (predict \o alice_trace_of_hop_tuple)).
 exact: Hsim.
 Qed.
 
@@ -1037,8 +1033,7 @@ Local Notation eps := (indcpa_assumption_epsilon assumption).
 (* Naming: extends [alice_trace_sim_chain] with the [admissible] token naming
    the quantity its hops are charged at, as the section header states. *)
 Definition alice_trace_sim_chain_admissible :=
-  \epsilon[ alice_claim_admissible pkey_of_dk v1 u1 u2 u3 assumption
-              tuple_distinguisher ]{
+  \epsilon[ alice_claim_admissible assumption tuple_distinguisher ]{
     (* the trace of a run of the protocol by the interpreter *)
     start (accept D (`p_ [% V2, V3, trace_of_run dsdp_protocol Alice])) ;
     (* her trace is a deterministic image of her hopping tuple *)
@@ -1046,14 +1041,12 @@ Definition alice_trace_sim_chain_admissible :=
     (* Bob's ciphertext slot zeroed, at the epsilon the assumption promises,
        which the class membership of the Bob-key reduction licenses *)
     hop cpa_bob eps to (accept tuple_distinguisher G1)
-      by le_trans (le_of_eq (hop0_advantageE card_renc rand_of_renc
-                               pkey_of_dk v1 u1 u2 u3 tuple_distinguisher))
+      by le_trans (le_of_eq (hop0_advantageE tuple_distinguisher))
                   (indcpa_admissible_epsilon_le dk_b bob_admissible) ;
     (* Charlie's slot zeroed, at the same epsilon, licensed by the class
        membership of the Charlie-key reduction *)
     hop cpa_charlie eps to (accept tuple_distinguisher G2)
-      by le_trans (le_of_eq (hop1_advantageE card_renc rand_of_renc
-                               pkey_of_dk v1 u1 u2 u3 tuple_distinguisher))
+      by le_trans (le_of_eq (hop1_advantageE tuple_distinguisher))
                   (indcpa_admissible_epsilon_le dk_c charlie_admissible) ;
     (* the simulated trace is that same image of the all-zero tuple *)
     same to (accept D alice_trace_ideal)
@@ -1078,36 +1071,37 @@ End dsdp_alice_trace_rv.
 
 Section dsdp_alice_trace_centropy.
 Context {R : realType}.
-Variables (AHE : AHEncType) (Renc : finType) (index_renc : nat).
-Hypothesis card_renc : #|Renc| = index_renc.+1.
-Variable rand_of_renc : Renc -> rand AHE.
-Variables (v1 u1 u2 u3 : plain AHE).
-Variables (dk_a dk_b dk_c : priv_key AHE).
-Variables (w_rb2 w_rc2 : Renc).
+Variable I : dsdp_instance.
+(* The instance's fields under the names the corrupted-Alice development
+   gives them: the scheme data through the coercion, Alice's input and the
+   three protocol weights, the three private keys, and Bob's and Charlie's
+   second-hop coins as indices into the coin space. *)
+Local Notation AHE := (scheme_AHE I).
+Local Notation Renc := (scheme_renc I).
+Local Notation rand_of_renc := (@scheme_rand_of_renc I).
+Local Notation v1 := (inst_v1 I).
+Local Notation u1 := (inst_u1 I).
+Local Notation u2 := (inst_u2 I).
+Local Notation u3 := (inst_u3 I).
+Local Notation dk_b := (inst_dk_b I).
+Local Notation w_rc2 := (inst_rc2 I).
 
 (* Each abbreviation pins, under the name it abbreviates, the parameters that
    dsdp_alice_hop_secrecy.v discharges; the shadowing is not recursive,
    since the right-hand side resolves against the constant. *)
-Local Notation P := (alice_sample_fdist (R:=R) AHE card_renc).
-Local Notation pkey_of_dk := (pkey_of_dk dk_a dk_b dk_c).
-Local Notation V2 := (sample_V2 (R:=R) (AHE:=AHE) card_renc).
-Local Notation V3 := (sample_V3 (R:=R) (AHE:=AHE) card_renc).
-Local Notation R2 := (sample_R2 (R:=R) (AHE:=AHE) card_renc).
-Local Notation R3 := (sample_R3 (R:=R) (AHE:=AHE) card_renc).
-Local Notation RA1 := (RA1 (R:=R) (AHE:=AHE) card_renc).
-Local Notation RA2 := (RA2 (R:=R) (AHE:=AHE) card_renc).
-Local Notation Sout :=
-  (Sout (R:=R) (AHE:=AHE) card_renc v1 u1 u2 u3).
-Local Notation bob_real_cipher :=
-  (bob_real_cipher (R:=R) (AHE:=AHE) card_renc rand_of_renc pkey_of_dk).
-Local Notation charlie_real_cipher :=
-  (charlie_real_cipher (R:=R) (AHE:=AHE) card_renc rand_of_renc pkey_of_dk).
-Local Notation alice_tuple_real :=
-  (alice_tuple_real (R:=R) (AHE:=AHE) card_renc rand_of_renc
-     pkey_of_dk v1 u1 u2 u3).
-Local Notation AliceTrace :=
-  (AliceTrace (R:=R) (AHE:=AHE) card_renc rand_of_renc
-     v1 u1 u2 u3 dk_a dk_b dk_c w_rb2 w_rc2).
+Local Notation P := (alice_sample_fdist (R:=R) I).
+Local Notation pkey_of_dk := (inst_pkey_of_party I).
+Local Notation V2 := (sample_V2 (R:=R) (I:=I)).
+Local Notation V3 := (sample_V3 (R:=R) (I:=I)).
+Local Notation R2 := (sample_R2 (R:=R) (I:=I)).
+Local Notation R3 := (sample_R3 (R:=R) (I:=I)).
+Local Notation RA1 := (RA1 (R:=R) (I:=I)).
+Local Notation RA2 := (RA2 (R:=R) (I:=I)).
+Local Notation Sout := (Sout (R:=R) (I:=I)).
+Local Notation bob_real_cipher := (bob_real_cipher (R:=R) (I:=I)).
+Local Notation charlie_real_cipher := (charlie_real_cipher (R:=R) (I:=I)).
+Local Notation alice_tuple_real := (alice_tuple_real (R:=R) (I:=I)).
+Local Notation AliceTrace := (AliceTrace (R:=R) (I:=I)).
 
 (* The part of Alice's hopping tuple her executed trace shows: the two masks,
    the leaked output and the two received ciphertexts. *)
@@ -1223,7 +1217,7 @@ Qed.
    repository's total-conversion family. *)
 Definition hop_tuple_of_rand_trace
     (p : ((Renc * Renc) * alice_trace_tupleT)) :
-    alice_hop_tupleT AHE Renc :=
+    alice_hop_tupleT I :=
   (p.2.1.1.1, p.1, p.2.1.1.2, p.2.1.2, p.2.2).
 
 (* The combine randomnesses and the trace-visible tuple read back off a
@@ -1231,7 +1225,7 @@ Definition hop_tuple_of_rand_trace
    Naming: [_of_] as in [hop_tuple_of_rand_trace], in the opposite
    direction. *)
 Definition rand_trace_of_hop_tuple
-    (v : alice_hop_tupleT AHE Renc) :
+    (v : alice_hop_tupleT I) :
     ((Renc * Renc) * alice_trace_tupleT) :=
   (v.1.1.1.2, (v.1.1.1.1, v.1.1.2, v.1.2, v.2)).
 
@@ -1259,7 +1253,7 @@ Qed.
    two masks, the four weights, and the erased key mark.
    Naming: [_of_] as in [hop_tuple_of_rand_trace]. *)
 Definition trace_of_trace_tuple (q : alice_trace_tupleT) :
-    15.-bseq (trace_dataT AHE) :=
+    15.-bseq (trace_dataT I) :=
   [bseq inl (inl (inl q.1.1.2));
         inl (inl (inr
           (enc (pkey_of_dk Alice)
@@ -1274,13 +1268,13 @@ Definition trace_of_trace_tuple (q : alice_trace_tupleT) :
         inl (inr tt)].
 
 (* The plaintext carried by a trace entry, zero at any other sort. *)
-Definition trace_data_plain (x : trace_dataT AHE) :
+Definition trace_data_plain (x : trace_dataT I) :
     plain AHE :=
   if x is inl (inl (inl m)) then m else 0.
 
 (* The ciphertext carried by a trace entry, a fixed encryption of zero at any
    other sort. *)
-Definition trace_data_cipher (x : trace_dataT AHE) :
+Definition trace_data_cipher (x : trace_dataT I) :
     cipher AHE :=
   if x is inl (inl (inr c)) then c
   else enc (pkey_of_dk Alice) 0 (rand_of_renc w_rc2).
@@ -1289,7 +1283,7 @@ Definition trace_data_cipher (x : trace_dataT AHE) :
    positions the encoding writes it to.
    Naming: [_of_] as in [hop_tuple_of_rand_trace]. *)
 Definition trace_tuple_of_trace
-    (b : 15.-bseq (trace_dataT AHE)) :
+    (b : 15.-bseq (trace_dataT I)) :
     alice_trace_tupleT :=
   let s := bseqval b in
   ((trace_data_plain (nth (inr tt) s 5),
@@ -1336,7 +1330,7 @@ Qed.
    Naming: the party owning the key comes first, as in
    [bob_trace_predictor_epsilon]; [decrypt] names what the predictor does with
    the slot it reads. *)
-Definition bob_decrypt_predictor : predictor AHE (alice_traceT AHE) :=
+Definition bob_decrypt_predictor : predictor AHE (alice_traceT I) :=
   fun b => if dec dk_b (trace_data_cipher (nth (inr tt) (bseqval b) 3))
            is Some m then m else 0.
 
@@ -1373,52 +1367,38 @@ End dsdp_alice_trace_centropy.
    dsdp_alice_trace_pq plays no part in either. *)
 Section dsdp_alice_trace_decrypt.
 Context {R : realType}.
-Variables (AHE : AHEncType) (Renc : finType) (index_renc : nat).
-Hypothesis card_renc : #|Renc| = index_renc.+1.
-Variable rand_of_renc : Renc -> rand AHE.
-Variables (v1 u1 u2 u3 : plain AHE).
-Hypothesis u3_unit : u3 \is a GRing.unit.
-Variables (dk_a dk_b dk_c : priv_key AHE).
-Variables (w_rb2 w_rc2 : Renc).
+Variable I : dsdp_instance.
+(* The instance's fields under the names the corrupted-Alice development
+   gives them: the scheme data through the coercion, Alice's input and the
+   three protocol weights, the three private keys, and Bob's and Charlie's
+   second-hop coins as indices into the coin space. *)
+Local Notation AHE := (scheme_AHE I).
+Local Notation Renc := (scheme_renc I).
+Local Notation card_renc := (scheme_card_renc I).
+Local Notation rand_of_renc := (@scheme_rand_of_renc I).
+Local Notation dk_b := (inst_dk_b I).
 
-Local Notation P := (alice_sample_fdist (R:=R) AHE card_renc).
-Local Notation pkey_of_dk := (pkey_of_dk dk_a dk_b dk_c).
-Local Notation V2 := (sample_V2 (R:=R) (AHE:=AHE) card_renc).
-Local Notation alice_tuple_real :=
-  (alice_tuple_real (R:=R) (AHE:=AHE) card_renc rand_of_renc
-     pkey_of_dk v1 u1 u2 u3).
-Local Notation alice_tuple_bob_zero :=
-  (alice_tuple_bob_zero (R:=R) (AHE:=AHE) card_renc rand_of_renc
-     pkey_of_dk v1 u1 u2 u3).
-Local Notation AliceTrace :=
-  (AliceTrace (R:=R) card_renc rand_of_renc v1 u1 u2 u3
-     dk_a dk_b dk_c w_rb2 w_rc2).
-Local Notation alice_trace_of_hop_tuple :=
-  (alice_trace_of_hop_tuple rand_of_renc v1 u1 u2 u3 dk_a dk_b dk_c w_rc2).
-Local Notation bob_decrypt_predictor :=
-  (bob_decrypt_predictor rand_of_renc dk_a dk_b dk_c w_rc2).
+Local Notation P := (alice_sample_fdist (R:=R) I).
+Local Notation V2 := (sample_V2 (R:=R) (I:=I)).
+Local Notation alice_tuple_real := (alice_tuple_real (R:=R) (I:=I)).
+Local Notation alice_tuple_bob_zero := (alice_tuple_bob_zero (R:=R) (I:=I)).
+Local Notation AliceTrace := (AliceTrace (R:=R) (I:=I)).
+Local Notation alice_trace_of_hop_tuple := (alice_trace_of_hop_tuple (I:=I)).
+Local Notation bob_decrypt_predictor := (bob_decrypt_predictor (I:=I)).
 Local Notation bob_trace_predictor_epsilon :=
-  (bob_trace_predictor_epsilon (R:=R) card_renc rand_of_renc
-     v1 u1 u2 u3 dk_a dk_b dk_c w_rc2).
-Local Notation charlie_trace_predictor_epsilon :=
-  (charlie_trace_predictor_epsilon (R:=R) card_renc rand_of_renc
-     v1 u1 u2 u3 dk_a dk_b dk_c w_rc2).
+  (bob_trace_predictor_epsilon (R:=R) (I:=I)).
 Local Notation indcpa_epsilon_assumption :=
-  (indcpa_epsilon_assumption (R:=R) (AHE:=AHE) card_renc rand_of_renc).
-Local Notation bob_trace_adversary :=
-  (bob_trace_adversary (R:=R) card_renc rand_of_renc
-     v1 u1 u2 u3 dk_a dk_b dk_c w_rc2).
+  (indcpa_epsilon_assumption (R:=R) card_renc rand_of_renc).
+Local Notation bob_trace_adversary := (bob_trace_adversary (R:=R) (I:=I)).
 Local Notation alice_trace_guess_V2_pr :=
-  (alice_trace_guess_V2_pr (R:=R) card_renc rand_of_renc
-     v1 u1 u2 u3 dk_a dk_b dk_c w_rb2 w_rc2).
+  (alice_trace_guess_V2_pr (R:=R) (I:=I)).
 
 (* The decryptor succeeds on every sample. *)
 Let decrypt_guess_prE :
   Pr P [set t | (bob_decrypt_predictor `o AliceTrace) t == V2 t] = 1.
 Proof.
-rewrite -(alice_trace_decode_V2E card_renc rand_of_renc v1 u1 u2 u3
-            dk_a dk_b dk_c w_rb2 w_rc2).
-rewrite (_ : finset _ = [set: alice_sampleT AHE Renc]) ?Pr_setT //.
+rewrite -alice_trace_decode_V2E.
+rewrite (_ : finset _ = [set: alice_sampleT I]) ?Pr_setT //.
 by apply/setP => t; rewrite !inE eqxx.
 Qed.
 
@@ -1442,12 +1422,10 @@ have Hlift : `| Pr P [set t | (lifted `o alice_tuple_real) t == V2 t]
             = bob_trace_predictor_epsilon bob_decrypt_predictor.
   by rewrite 2!guess_V2_acceptE hop0_advantageE.
 have HV2 : lifted `o alice_tuple_real = V2.
-  rewrite (alice_trace_decode_V2E card_renc rand_of_renc v1 u1 u2 u3
-             dk_a dk_b dk_c w_rb2 w_rc2).
-  by rewrite (alice_trace_of_hop_tupleE card_renc rand_of_renc v1 u1 u2 u3
-                dk_a dk_b dk_c w_rb2 w_rc2).
+  rewrite alice_trace_decode_V2E.
+  by rewrite alice_trace_of_hop_tupleE.
 have H0 : Pr P [set t | (lifted `o alice_tuple_real) t == V2 t] = 1.
-  rewrite HV2 (_ : finset _ = [set: alice_sampleT AHE Renc]) ?Pr_setT //.
+  rewrite HV2 (_ : finset _ = [set: alice_sampleT I]) ?Pr_setT //.
   by apply/setP => t; rewrite !inE eqxx.
 (* all_zero_guess_V2_le_invm is stated at alice_tuple_all_zero and used here
    at alice_tuple_bob_zero.  The reduction that carries it across is that
@@ -1457,8 +1435,7 @@ have H0 : Pr P [set t | (lifted `o alice_tuple_real) t == V2 t] = 1.
    breaks this step. *)
 have H1 : Pr P [set t | (lifted `o alice_tuple_bob_zero) t == V2 t]
           <= #|plain AHE|%:R^-1.
-  exact: (all_zero_guess_V2_le_invm card_renc rand_of_renc pkey_of_dk
-            v1 u1 u2 u3_unit lifted).
+  exact: (all_zero_guess_V2_le_invm lifted).
 rewrite -Hlift H0.
 exact: le_trans (lerB (lexx _) H1) (ler_norm _).
 Qed.
@@ -1510,18 +1487,19 @@ End dsdp_alice_trace_decrypt.
 
 Section dsdp_alice_trace_avg.
 Context {R : realType}.
-Variables (AHE : AHEncType) (Renc : finType) (index_renc : nat).
-Hypothesis card_renc : #|Renc| = index_renc.+1.
-Variable rand_of_renc : Renc -> rand AHE.
-Variables (v1 u1 u2 u3 : plain AHE).
-Variables (dk_a dk_b dk_c : priv_key AHE).
+Variable I : dsdp_instance.
+(* The instance's fields under the names the corrupted-Alice development
+   gives them: the scheme data through the coercion, Alice's input and the
+   three protocol weights, the three private keys, and Bob's and Charlie's
+   second-hop coins as indices into the coin space. *)
+Local Notation AHE := (scheme_AHE I).
+Local Notation card_renc := (scheme_card_renc I).
 
-(* Each parameterized abbreviation pins everything but the re-encryption
-   coin, which this section samples. *)
-Local Notation trace_dataT := (trace_dataT AHE).
+(* Each abbreviation reads the instance, except the per-coin one, which reads
+   the instance with Charlie's second-hop coin replaced by w. *)
+Local Notation trace_dataT := (trace_dataT I).
 Local Notation alice_trace_ideal_coin w :=
-  (alice_trace_ideal (R:=R) card_renc rand_of_renc
-     v1 u1 u2 u3 dk_a dk_b dk_c w).
+  (alice_trace_ideal (R:=R) (inst_with_rc2 I w)).
 
 (* The ideal trace joint law with a uniformly sampled re-encryption coin.
    The coin the simulator re-encrypts with is drawn rather than fixed, which
@@ -1530,45 +1508,41 @@ Local Notation alice_trace_ideal_coin w :=
    Naming: after [alice_trace_ideal], with [avg] marking the sampled coin. *)
 Definition alice_trace_ideal_avg :
     R.-fdist (plain AHE * plain AHE * 15.-bseq trace_dataT) :=
-  fdist_uniform card_renc >>= (fun w => alice_trace_ideal_coin w).
+  fdist_uniform card_renc >>= (fun w =>
+    (alice_trace_ideal_coin w
+       : R.-fdist (plain AHE * plain AHE * 15.-bseq trace_dataT))).
 
 End dsdp_alice_trace_avg.
 
 Section dsdp_alice_raw_trace.
 Context {R : realType}.
-Variables (AHE : AHEncType) (Renc : finType) (index_renc : nat).
-Hypothesis card_renc : #|Renc| = index_renc.+1.
-Variable rand_of_renc : Renc -> rand AHE.
-Variables (v1 u1 u2 u3 : plain AHE).
-(* Invertibility of the weight u3 is what stops the leaked output from
-   pinning Bob's input down on its own, so the guessing bound is conditional
-   on it while the simulation bound is not. *)
-Hypothesis u3_unit : u3 \is a GRing.unit.
-Variables (dk_a dk_b dk_c : priv_key AHE).
-Variables (w_rb2 w_rc2 : Renc).
+Variable I : dsdp_instance.
+(* The instance's fields under the names the corrupted-Alice development
+   gives them: the scheme data through the coercion, Alice's input and the
+   three protocol weights, the three private keys, and Bob's and Charlie's
+   second-hop coins as indices into the coin space. *)
+Local Notation AHE := (scheme_AHE I).
+Local Notation Renc := (scheme_renc I).
+Local Notation card_renc := (scheme_card_renc I).
+Local Notation rand_of_renc := (@scheme_rand_of_renc I).
+Local Notation u3 := (inst_u3 I).
+Local Notation dk_a := (inst_dk_a I).
 
 Local Notation DI := (Standard_DSDP_Interface AHE).
-Local Notation trace_dataT := (trace_dataT AHE).
-Local Notation alice_traceT := (alice_traceT AHE).
-Local Notation pkey_of_dk := (pkey_of_dk dk_a dk_b dk_c).
-Local Notation V2 := (sample_V2 (R:=R) (AHE:=AHE) card_renc).
-Local Notation V3 := (sample_V3 (R:=R) (AHE:=AHE) card_renc).
-Local Notation AliceTrace :=
-  (AliceTrace (R:=R) card_renc rand_of_renc v1 u1 u2 u3
-     dk_a dk_b dk_c w_rb2 w_rc2).
-Local Notation alice_trace_ideal :=
-  (alice_trace_ideal (R:=R) card_renc rand_of_renc
-     v1 u1 u2 u3 dk_a dk_b dk_c w_rc2).
-Local Notation alice_trace_of_hop_tuple :=
-  (alice_trace_of_hop_tuple rand_of_renc v1 u1 u2 u3 dk_a dk_b dk_c w_rc2).
+Local Notation trace_dataT := (trace_dataT I).
+Local Notation alice_traceT := (alice_traceT I).
+Local Notation pkey_of_dk := (inst_pkey_of_party I).
+Local Notation V2 := (sample_V2 (R:=R) (I:=I)).
+Local Notation V3 := (sample_V3 (R:=R) (I:=I)).
+Local Notation AliceTrace := (AliceTrace (R:=R) (I:=I)).
+Local Notation alice_trace_ideal := (alice_trace_ideal (R:=R) I).
+Local Notation alice_trace_of_hop_tuple := (alice_trace_of_hop_tuple (I:=I)).
 Local Notation indcpa_epsilon :=
-  (indcpa_epsilon (R:=R) (AHE:=AHE) card_renc rand_of_renc).
+  (indcpa_epsilon (R:=R) card_renc rand_of_renc).
 Local Notation bob_challenge_adversary :=
-  (bob_challenge_adversary (R:=R) (AHE:=AHE) card_renc rand_of_renc
-     pkey_of_dk v1 u1 u2 u3).
+  (bob_challenge_adversary (R:=R) (I:=I)).
 Local Notation charlie_challenge_adversary :=
-  (charlie_challenge_adversary (R:=R) (AHE:=AHE) card_renc rand_of_renc
-     pkey_of_dk v1 u1 u2 u3).
+  (charlie_challenge_adversary (R:=R) (I:=I)).
 
 (* The fixed-key decoding of one encoded trace datum: plaintexts and
    ciphertexts restored as themselves, the private-key mark restored as dk,
@@ -1592,18 +1566,17 @@ Local Notation decode_a := (di_data_of_trace_data dk_a (pub_of_priv dk_a)).
 
 (* Alice's raw interpreter trace at one sample.  A plain function: di_data
    DI is not a finType and no distribution on it is ever formed. *)
-Definition alice_raw_trace (s : alice_sampleT AHE Renc) :
+Definition alice_raw_trace (s : alice_sampleT I) :
     seq (di_data DI) :=
   nth [::]
-      (run_interp 15 (dsdp_protocol (R:=R) card_renc rand_of_renc
-                        v1 u1 u2 u3 dk_a dk_b dk_c w_rb2 w_rc2 s)).2 0.
+      (run_interp 15 (dsdp_protocol (R:=R) s)).2 0.
 
 (* The round trip on Alice's actual generated trace: decoding with her
    private key restores the raw interpreter trace.  The public key pk is
    universally quantified because her trace contains no public-key mark.
    Naming: the [E] suffix marks the round-trip equation. *)
 Lemma alice_raw_trace_decodeE (pk : pub_key AHE)
-    (s : alice_sampleT AHE Renc) :
+    (s : alice_sampleT I) :
   map (di_data_of_trace_data dk_a pk) (AliceTrace s) = alice_raw_trace s.
 Proof.
 rewrite -map_comp /alice_raw_trace /dsdp_protocol.
@@ -1616,7 +1589,7 @@ Qed.
    marking the observation read. *)
 Corollary alice_raw_trace_sim_advantage_le
     (D_raw : plain AHE * plain AHE * seq (di_data DI) -> bool) :
-  `| Pr (alice_sample_fdist (R:=R) AHE card_renc)
+  `| Pr (alice_sample_fdist (R:=R) I)
         [set t | D_raw (V2 t, V3 t, alice_raw_trace t)]
      - Pr alice_trace_ideal
           [set x : plain AHE * plain AHE * alice_traceT |
@@ -1633,12 +1606,11 @@ Proof.
 set D := fun x : plain AHE * plain AHE * alice_traceT =>
            D_raw (x.1.1, x.1.2, map decode_a x.2).
 have <- : Pr (`p_ [% V2, V3, AliceTrace]) [set x | D x]
-        = Pr (alice_sample_fdist (R:=R) AHE card_renc)
+        = Pr (alice_sample_fdist (R:=R) I)
              [set t | D_raw (V2 t, V3 t, alice_raw_trace t)].
   rewrite /dist_of_RV Pr_fdistmap_preim; apply: eq_bigl => t; rewrite !inE.
   by rewrite -(alice_raw_trace_decodeE (pub_of_priv dk_a)).
-exact: (alice_trace_sim_advantage_le card_renc rand_of_renc
-          v1 u1 u2 u3 dk_a dk_b dk_c w_rb2 w_rc2 D).
+exact: (alice_trace_sim_advantage_le D).
 Qed.
 
 (* The encoded-trace predictor a raw-trace predictor induces, decoding with
@@ -1659,7 +1631,7 @@ Local Notation encoded_predictor g_raw :=
    marking the observation read. *)
 Corollary alice_raw_trace_guess_V2_le
     (g_raw : seq (di_data DI) -> plain AHE) :
-  Pr (alice_sample_fdist (R:=R) AHE card_renc)
+  Pr (alice_sample_fdist (R:=R) I)
      [set t | g_raw (alice_raw_trace t) == V2 t]
   <= (#|plain AHE|%:R : R)^-1
      + indcpa_epsilon (pkey_of_dk Bob)
@@ -1674,45 +1646,45 @@ Proof.
 have -> : [set t | g_raw (alice_raw_trace t) == V2 t]
         = [set t | (encoded_predictor g_raw `o AliceTrace) t == V2 t].
   by apply/setP => t; rewrite !inE /comp_RV alice_raw_trace_decodeE.
-exact: (alice_trace_guess_V2_le card_renc rand_of_renc
-          v1 u1 u2 u3_unit dk_a dk_b dk_c w_rb2 w_rc2
-          (encoded_predictor g_raw)).
+exact: (alice_trace_guess_V2_le (encoded_predictor g_raw)).
 Qed.
 
 End dsdp_alice_raw_trace.
 
 Section dsdp_alice_raw_trace_avg.
 Context {R : realType}.
-Variables (AHE : AHEncType) (Renc : finType) (index_renc : nat).
-Hypothesis card_renc : #|Renc| = index_renc.+1.
-Variable rand_of_renc : Renc -> rand AHE.
-Variables (v1 u1 u2 u3 : plain AHE).
-Variables (dk_a dk_b dk_c : priv_key AHE).
-Variable w_rb2 : Renc.
+Variable I : dsdp_instance.
+(* The instance's fields under the names the corrupted-Alice development
+   gives them: the scheme data through the coercion, Alice's input and the
+   three protocol weights, the three private keys, and Bob's and Charlie's
+   second-hop coins as indices into the coin space. *)
+Local Notation AHE := (scheme_AHE I).
+Local Notation Renc := (scheme_renc I).
+Local Notation card_renc := (scheme_card_renc I).
+Local Notation rand_of_renc := (@scheme_rand_of_renc I).
+Local Notation dk_a := (inst_dk_a I).
 
-(* Each parameterized abbreviation pins everything but the re-encryption
-   coin, which this section samples. *)
+(* Each abbreviation reads the instance, except the per-coin ones, which read
+   the instance with Charlie's second-hop coin replaced by w.  The two
+   reduction adversaries are among them: their state distribution is built
+   from the sample space of that instance, so the summand at w names them
+   there. *)
 Local Notation DI := (Standard_DSDP_Interface AHE).
-Local Notation trace_dataT := (trace_dataT AHE).
-Local Notation pkey_of_dk := (pkey_of_dk dk_a dk_b dk_c).
-Local Notation V2 := (sample_V2 (R:=R) (AHE:=AHE) card_renc).
-Local Notation V3 := (sample_V3 (R:=R) (AHE:=AHE) card_renc).
+Local Notation trace_dataT := (trace_dataT I).
+Local Notation pkey_of_dk := (inst_pkey_of_party I).
+Local Notation V2 := (sample_V2 (R:=R) (I:=I)).
+Local Notation V3 := (sample_V3 (R:=R) (I:=I)).
 Local Notation AliceRawTrace_coin w :=
-  (alice_raw_trace (R:=R) card_renc rand_of_renc v1 u1 u2 u3
-     dk_a dk_b dk_c w_rb2 w).
-Local Notation ideal_avg :=
-  (alice_trace_ideal_avg (R:=R) card_renc rand_of_renc
-     v1 u1 u2 u3 dk_a dk_b dk_c).
+  (alice_raw_trace (R:=R) (I:=inst_with_rc2 I w)).
+Local Notation ideal_avg := (alice_trace_ideal_avg (R:=R) I).
 Local Notation alice_trace_of_hop_tuple_coin w :=
-  (alice_trace_of_hop_tuple rand_of_renc v1 u1 u2 u3 dk_a dk_b dk_c w).
+  (alice_trace_of_hop_tuple (I:=inst_with_rc2 I w)).
 Local Notation indcpa_epsilon :=
-  (indcpa_epsilon (R:=R) (AHE:=AHE) card_renc rand_of_renc).
-Local Notation bob_challenge_adversary :=
-  (bob_challenge_adversary (R:=R) (AHE:=AHE) card_renc rand_of_renc
-     pkey_of_dk v1 u1 u2 u3).
-Local Notation charlie_challenge_adversary :=
-  (charlie_challenge_adversary (R:=R) (AHE:=AHE) card_renc rand_of_renc
-     pkey_of_dk v1 u1 u2 u3).
+  (indcpa_epsilon (R:=R) card_renc rand_of_renc).
+Local Notation bob_challenge_adversary_coin w :=
+  (bob_challenge_adversary (R:=R) (I:=inst_with_rc2 I w)).
+Local Notation charlie_challenge_adversary_coin w :=
+  (charlie_challenge_adversary (R:=R) (I:=inst_with_rc2 I w)).
 
 (* Decoding at Alice's own key pair, the only setting in which the encoding
    is inverted.  [alice_raw_trace_decodeE] keeps the general two-key form
@@ -1737,7 +1709,7 @@ Definition alice_raw_trace_real_experiment_avg
     R.-fdist bool :=
   fdist_uniform card_renc >>= (fun w =>
     fdistmap (fun t => D_raw (V2 t, V3 t, AliceRawTrace_coin w t))
-      (alice_sample_fdist (R:=R) AHE card_renc)).
+      (alice_sample_fdist (R:=R) (inst_with_rc2 I w))).
 
 (* The Boolean ideal raw-trace experiment: the image of the averaged ideal
    trace joint law under the test composed with the fixed-key decoder.
@@ -1760,11 +1732,11 @@ Theorem alice_raw_trace_sim_advantage_avg_le
   <= \sum_(w in Renc)
        (fdist_uniform card_renc : R.-fdist Renc) w
        * (indcpa_epsilon (pkey_of_dk Bob)
-            (bob_challenge_adversary (fun x =>
+            (bob_challenge_adversary_coin w (fun x =>
                D_raw (x.1.1, x.1.2,
                       map decode_a (alice_trace_of_hop_tuple_coin w x.2))))
           + indcpa_epsilon (pkey_of_dk Charlie)
-            (charlie_challenge_adversary (fun x =>
+            (charlie_challenge_adversary_coin w (fun x =>
                D_raw (x.1.1, x.1.2,
                       map decode_a (alice_trace_of_hop_tuple_coin w x.2))))).
 Proof.
@@ -1775,51 +1747,37 @@ rewrite /alice_raw_trace_real_experiment_avg
   /alice_raw_trace_ideal_experiment_avg.
 rewrite /alice_trace_ideal_avg fdistmap_bind.
 apply: fdist_mixture_advantage_le => w; rewrite 2!Pr_fdistmap_bool.
-exact: (alice_raw_trace_sim_advantage_le card_renc rand_of_renc
-          v1 u1 u2 u3 dk_a dk_b dk_c w_rb2 w D_raw).
+exact: (alice_raw_trace_sim_advantage_le (I:=inst_with_rc2 I w) D_raw).
 Qed.
 
 End dsdp_alice_raw_trace_avg.
 
 Section dsdp_alice_trace_pq.
 Context {R : realType}.
-Variables (AHE : AHEncType) (Renc : finType) (index_renc : nat).
-Hypothesis card_renc : #|Renc| = index_renc.+1.
-Variable rand_of_renc : Renc -> rand AHE.
-Variables (v1 u1 u2 u3 : plain AHE).
-Hypothesis u3_unit : u3 \is a GRing.unit.
-Variables (dk_a dk_b dk_c : priv_key AHE).
-Variables (w_rb2 w_rc2 : Renc).
+Variable I : dsdp_instance.
+(* The instance's fields under the names the corrupted-Alice development
+   gives them: the scheme data through the coercion, Alice's input and the
+   three protocol weights, the three private keys, and Bob's and Charlie's
+   second-hop coins as indices into the coin space. *)
+Local Notation AHE := (scheme_AHE I).
+Local Notation Renc := (scheme_renc I).
+Local Notation card_renc := (scheme_card_renc I).
+Local Notation rand_of_renc := (@scheme_rand_of_renc I).
 Variables (p q : nat).
 (* No positivity hypotheses: #|plain AHE| > 0 is a theorem, so the equation
    already forces 0 < p and 0 < q. *)
 Hypothesis card_plain_pq : #|plain AHE| = (p * q)%N.
 
-Local Notation alice_traceT := (alice_traceT AHE).
+Local Notation alice_traceT := (alice_traceT I).
 Local Notation predictor := (predictor AHE).
-Local Notation V2 := (sample_V2 (R:=R) (AHE:=AHE) card_renc).
-Local Notation AliceTrace :=
-  (AliceTrace (R:=R) card_renc rand_of_renc v1 u1 u2 u3
-     dk_a dk_b dk_c w_rb2 w_rc2).
-Local Notation bob_trace_predictor_epsilon :=
-  (bob_trace_predictor_epsilon (R:=R) card_renc rand_of_renc
-     v1 u1 u2 u3 dk_a dk_b dk_c w_rc2).
-Local Notation charlie_trace_predictor_epsilon :=
-  (charlie_trace_predictor_epsilon (R:=R) card_renc rand_of_renc
-     v1 u1 u2 u3 dk_a dk_b dk_c w_rc2).
 Local Notation indcpa_epsilon_assumption :=
-  (indcpa_epsilon_assumption (R:=R) (AHE:=AHE) card_renc rand_of_renc).
-Local Notation pkey_of_dk := (pkey_of_dk dk_a dk_b dk_c).
-Local Notation bob_trace_adversary :=
-  (bob_trace_adversary (R:=R) card_renc rand_of_renc
-     v1 u1 u2 u3 dk_a dk_b dk_c w_rc2).
+  (indcpa_epsilon_assumption (R:=R) card_renc rand_of_renc).
+Local Notation bob_trace_adversary := (bob_trace_adversary (R:=R) (I:=I)).
 Local Notation charlie_trace_adversary :=
-  (charlie_trace_adversary (R:=R) card_renc rand_of_renc
-     v1 u1 u2 u3 dk_a dk_b dk_c w_rc2).
+  (charlie_trace_adversary (R:=R) (I:=I)).
 
 Local Notation alice_trace_guess_V2_pr :=
-  (alice_trace_guess_V2_pr (R:=R) card_renc rand_of_renc
-     v1 u1 u2 u3 dk_a dk_b dk_c w_rb2 w_rc2).
+  (alice_trace_guess_V2_pr (R:=R) (I:=I)).
 
 (* The inverse plaintext cardinality at the composite modulus. *)
 Let inv_pq_cardE : ((p%:R : R) * q%:R)^-1 = (#|plain AHE|%:R : R)^-1.
@@ -1843,7 +1801,7 @@ Corollary alice_trace_guess_V2_admissible_pq_le
     <= ((p%:R : R) * q%:R)^-1 + 2 * indcpa_assumption_epsilon assumption.
 Proof.
 rewrite inv_pq_cardE.
-exact: (alice_trace_guess_V2_admissible_le u3_unit w_rb2).
+exact: alice_trace_guess_V2_admissible_le.
 Qed.
 
 End dsdp_alice_trace_pq.
