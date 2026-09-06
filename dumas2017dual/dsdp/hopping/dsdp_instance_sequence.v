@@ -14,26 +14,16 @@ Require Import dsdp_alice_main.
 (**md**************************************************************************)
 (* # A security-parameter-indexed sequence of DSDP executions                 *)
 (*                                                                            *)
-(* Every corrupted-Alice bound of dsdp_alice_trace_link.v is stated at one    *)
-(* fixed instance: one IND-CPA scheme, three private keys, four weights, one  *)
-(* real epsilon.  negligible_fun of indcpa_game.v speaks about sequences      *)
-(* indexed by a security parameter.  The three records that join them, an     *)
+(* The corrupted-Alice bounds along a sequence of instances are stated in     *)
+(* dsdp_alice_main.v, over the three records of dsdp_instance.v: an           *)
 (* instance, a sequence of instances with the assumption made at each k, and  *)
-(* the two negligibility facts about such a sequence, are the data of         *)
-(* dsdp_instance.v.  This file reads the concrete class-conditional guessing  *)
-(* bound off along a sequence and an asymptotic value for it.  A second       *)
-(* statement is read off the same way, the distance a test sees between       *)
-(* Alice's executed trace and the simulation, which is computational          *)
-(* indistinguishability of her view from the simulation.                      *)
+(* the two negligibility facts about such a sequence.  This file supplies     *)
+(* values for those records.                                                  *)
 (*                                                                            *)
-(* The class restriction lands on the two reduction adversaries a predictor   *)
-(* induces, never on the predictor itself.  That is what separates the        *)
-(* headline from the predictor that decrypts Bob's ciphertext off the trace,  *)
-(* whose guessing probability is 1: the companion corollary shows that the    *)
-(* same asymptotic value eventually rejects that predictor's reduction        *)
-(* adversary.  The witness section answers the vacuity question from the      *)
-(* other side, discharging every hypothesis of the headline at once on the    *)
-(* idealized scheme of idealized_ahe.v.                                       *)
+(* The witness section answers the vacuity question, discharging every        *)
+(* hypothesis of the guessing headline at once on the idealized scheme of     *)
+(* idealized_ahe.v, where the assumed advantage is zero at every k and the    *)
+(* whole content of the bound is its information-theoretic term.              *)
 (*                                                                            *)
 (* The four scheme sections read the fixed and the asymptotic bound off at    *)
 (* the Paillier and Benaloh IND-CPA schemes of paillier_indcpa_scheme.v and   *)
@@ -56,45 +46,6 @@ Require Import dsdp_alice_main.
 (* residuosity record of residuosity_game.v.                                  *)
 (*                                                                            *)
 (* ```                                                                        *)
-(*                 f_guess_V2 == the trace guessing-probability sequence      *)
-(* alice_claims_admissible_at k ==                                            *)
-(*                               the dictionary of the class-conditional      *)
-(*                               argument at the k-th instance                *)
-(* alice_label_negligible_at == every label of that dictionary costs a        *)
-(*                               negligible family along the sequence         *)
-(* alice_claims_admissible_negligible ==                                      *)
-(*                               that dictionary registered as a              *)
-(*                               negligibleClaims                             *)
-(* alice_trace_chain_admissible_at k ==                                       *)
-(*                               the class-conditional program at the k-th    *)
-(*                               instance                                     *)
-(*       f_guess_V2_advantageE == the guessing sequence is the advantage      *)
-(*                               that program bounds                          *)
-(* alice_trace_guess_V2_negligible ==                                         *)
-(*                               the trace guessing sequence is negligible    *)
-(*                               under the two class premises                 *)
-(* decrypt_reduction_admissible_eventuallyF ==                                *)
-(*                               an asymptotic value for the sequence         *)
-(*                               eventually rejects the decrypting            *)
-(*                               predictor's reduction adversary              *)
-(*      alice_sim_claims_at k == the dictionary of the trace simulation       *)
-(*                               argument at the k-th instance                *)
-(* alice_sim_label_negligible_at ==                                           *)
-(*                               every label of that dictionary costs a       *)
-(*                               negligible family along the sequence         *)
-(* alice_sim_claims_negligible ==                                             *)
-(*                               that dictionary registered as a              *)
-(*                               negligibleClaims                             *)
-(* alice_trace_sim_chain_admissible_at k ==                                   *)
-(*                               the class-conditional trace simulation       *)
-(*                               program at the k-th instance                 *)
-(*            f_sim_advantage == the trace simulation distance sequence       *)
-(*            f_sim_advantageE == the distance sequence is the advantage      *)
-(*                               that program bounds                          *)
-(* alice_trace_sim_advantage_negligible ==                                    *)
-(*                               the trace simulation distance sequence       *)
-(*                               is negligible under the two class            *)
-(*                               premises                                     *)
 (*             card_renc_ord1 == the one-element coin space, in successor     *)
 (*                               form                                         *)
 (*    idealized_indcpa_scheme == the idealized scheme of idealized_ahe.v as   *)
@@ -209,246 +160,6 @@ Local Open Scope reals_ext_scope.
 Local Open Scope proba_scope.
 Local Open Scope fdist_scope.
 
-Section dsdp_instance_sequence_bounds.
-Context {R : realType}.
-Variable Q : dsdp_instance_sequence R.
-
-(* The asymptotic content the negligibility statements of this section spend;
-   the per-k bounds below hold without it. *)
-Variable N : dsdp_asymptotic Q.
-
-Local Notation I := (sequence_instance Q).
-Local Notation assumption := (sequence_assumption Q).
-Variable predict : forall k,
-    predictor (I k) (alice_traceT (I k)).
-Arguments predict : clear implicits.
-
-(* The two class premises of the whole section: at every security parameter
-   the class of the assumption made there admits the two reduction adversaries
-   the k-th predictor induces.  They restrict the adversaries a predictor
-   induces and so speak about the adversary rather than about the sequence,
-   which is why they stay premises and are not fields of Q. *)
-Hypothesis bob_admissible : forall k,
-  indcpa_admissible (assumption k)
-    (bob_trace_adversary (distinguisher_of_predictor (predict k))).
-Hypothesis charlie_admissible : forall k,
-  indcpa_admissible (assumption k)
-    (charlie_trace_adversary (distinguisher_of_predictor (predict k))).
-
-(* The trace guessing-probability function used in the sequence theorem: the
-   probability that the k-th predictor, reading Alice's executed trace at the
-   k-th instance, returns Bob's input. *)
-Definition f_guess_V2 k : R := alice_trace_guess_V2_pr (predict k).
-
-(* The dictionary of the class-conditional argument at the k-th instance, as
-   a family indexed by the security parameter.  It is a named constant rather
-   than a lambda because canonical inference keys on the head constant of the
-   family, and an application of a lambda has none.
-   Naming: extends [alice_claim_admissible] with the [_at] token naming the
-   instance the dictionary is read at, the plural marking the family. *)
-Definition alice_claims_admissible_at (k : nat) : alice_label -> claim R :=
-  alice_claim_admissible (assumption k)
-    (hop_tuple_distinguisher (distinguisher_of_predictor (predict k))).
-
-(* Every label of that dictionary costs a negligible family along the
-   sequence: both hop labels cost the epsilon the assumption at k assumes,
-   which is the assumption-conditional field of N read directly, and the
-   terminal label costs the inverse plaintext cardinality, its unconditional
-   field.  This is the whole asymptotic content of the argument, stated once
-   for the dictionary rather than once per statement proved over it.
-   Naming: intentional; [_negligible] is this development's suffix for a
-   negligible_fun conclusion, and [_at] names the instance the family is read
-   at, as at [alice_claims_admissible_at]. *)
-Lemma alice_label_negligible_at (l : alice_label) :
-  negligible_fun (fun k => claim_cost (alice_claims_admissible_at k l)).
-Proof.
-case: l.
-- exact: adv_negligible N.
-- exact: adv_negligible N.
-- exact: size_negligible N.
-Qed.
-
-Canonical alice_claims_admissible_negligible :=
-  NegligibleClaims alice_claims_admissible_at alice_label_negligible_at.
-
-(* The class-conditional program at the k-th instance, the value of the
-   family monad the terminal below reads.  The return type names the
-   dictionary, which is what lets canonical inference find the negligibility
-   of the labels the program spends.
-   Naming: extends [alice_trace_chain_admissible] with the [_at] token naming
-   the instance the program is read at. *)
-Definition alice_trace_chain_admissible_at (k : nat)
-    : chain_result (alice_claims_admissible_at k) :=
-  alice_trace_chain_admissible (bob_admissible k) (charlie_admissible k).
-
-(* The quantity the theorem below is about is the advantage that program
-   bounds, its guessing probability being its distance from the zero game. *)
-Lemma f_guess_V2_advantageE k :
-  f_guess_V2 k = result_advantage (alice_trace_chain_admissible_at k).
-Proof.
-by rewrite /f_guess_V2 /alice_trace_guess_V2_pr guess_V2_acceptE
-   -(advantage0 (accept_ge0 _ _)).
-Qed.
-
-Local Open Scope epshop_scope.
-
-(* A sequence of predictors reading Alice's executed traces along a sequence
-   of DSDP instances matches Bob's input with negligible probability, under
-   the two class premises of this section.  It is the terminal of the family
-   monad read over the class-conditional program: the program spends the same
-   three labels at every security parameter, and the cost of each of them
-   along the sequence is one of the two fields of N, supplied once through
-   the registered instance rather than summed by hand at each
-   statement.  Two of the three summands are assumption-conditional, the
-   class epsilon at Bob's key and at Charlie's, and the third is
-   unconditional, the residue the leaked output leaves along the DSDP
-   solution fiber.
-   That is also what separates this statement from the decrypting
-   counterexample: decrypt_guess_prE puts the guessing probability at 1 for
-   the predictor that decrypts Bob's ciphertext off the trace, and
-   decrypt_reduction_admissible_eventuallyF below shows the same two fields
-   of N eventually force that predictor's reduction adversary out of the
-   class. *)
-Theorem alice_trace_guess_V2_negligible : negligible_fun f_guess_V2.
-Proof.
-exact: (\negligible[ f_guess_V2 by f_guess_V2_advantageE ]
-          alice_trace_chain_admissible_at).
-Qed.
-
-(* Under the two fields of N, the decrypting predictor's Bob-side reduction
-   adversary is eventually outside the class: the parallel-track
-   counterexample is excluded by the asymptotic value the headline is stated
-   at, not by the information-theoretic term. *)
-Corollary decrypt_reduction_admissible_eventuallyF :
-  exists K, forall k, (K < k)%N ->
-    indcpa_admissible (assumption k)
-      (bob_trace_adversary (distinguisher_of_predictor
-         (bob_decrypt_predictor (I:=I k)))) = false.
-Proof.
-have [N1 HN1] := size_negligible N 1%N; have [N2 HN2] := adv_negligible N 1%N.
-exists (maxn (maxn N1 N2) 1) => k.
-rewrite !gtn_max => /andP[/andP[Hk1 Hk2] Hk3].
-have Hk0 : (0 < k%:R :> R) by rewrite ltr0n ltnW.
-move: (HN1 k Hk1) (HN2 k Hk2); rewrite !expr1 => Hinv' Heps'.
-have Hhalf : (k%:R : R)^-1 <= 1 - (k%:R : R)^-1.
-  rewrite lerBrDr -div1r -mulrDl ler_pdivrMr // mul1r -(natrD R 1 1).
-  by rewrite ler_nat.
-apply: (decrypt_reduction_admissibleF (I:=I k)).
-apply: lt_le_trans Heps' _; apply: le_trans Hhalf _.
-by rewrite lerD2l lerN2 ltW.
-Qed.
-
-(* A family of Boolean tests of Alice's executed trace, one at each security
-   parameter.  A test is what an indistinguishability statement quantifies
-   over, where the predictor family above is what a guessing statement
-   quantifies over, so the family declared here is a second observer of the
-   same sequence and not a specialisation of the first.  The [clear implicits]
-   directive keeps the security parameter an explicit argument, which is what
-   makes trace_distinguishers k the test at k rather than the family read at
-   an input. *)
-Variable trace_distinguishers : forall k,
-  distinguisher (plain (scheme_AHE (I k)) * plain (scheme_AHE (I k))
-                 * alice_traceT (I k))%type.
-Arguments trace_distinguishers : clear implicits.
-
-(* The two class premises of the statement below: at every security parameter
-   the class of the assumption made there admits the two reduction adversaries
-   the k-th test induces.  They are to the indistinguishability statement what
-   bob_admissible and charlie_admissible are to the guessing statement, and
-   they are premises for the same reason, restricting the adversaries a test
-   induces rather than the sequence. *)
-Hypothesis bob_admissible_distinguisher : forall k,
-  indcpa_admissible (assumption k)
-    (bob_trace_adversary (trace_distinguishers k)).
-Hypothesis charlie_admissible_distinguisher : forall k,
-  indcpa_admissible (assumption k)
-    (charlie_trace_adversary (trace_distinguishers k)).
-
-(* The dictionary of the trace simulation argument at the k-th instance.  It
-   is a second dictionary rather than alice_claims_admissible_at because that
-   one
-   is pinned to the test a predictor induces, and a statement made at the
-   predictor's own test would be strictly weaker than indistinguishability,
-   which quantifies over every test.  It is a named constant for the same
-   reason as the other, canonical inference keying on the head constant of the
-   family.
-   Naming: parallels [alice_claims_admissible_at] with [sim] naming the
-   argument the dictionary is read for. *)
-Definition alice_sim_claims_at (k : nat) : alice_label -> claim R :=
-  alice_claim_admissible (assumption k)
-    (hop_tuple_distinguisher (trace_distinguishers k)).
-
-(* Every label of that dictionary costs a negligible family along the
-   sequence, the two hop labels the class epsilon and the terminal label
-   the inverse plaintext cardinality.  The terminal branch is owed although
-   the program below never spends that label, the condition quantifying over
-   the whole label type rather than over the labels one program names.
-   Naming: intentional; mirrors [alice_label_negligible_at], with [sim] naming
-   the argument the dictionary is read for. *)
-Lemma alice_sim_label_negligible_at (l : alice_label) :
-  negligible_fun (fun k => claim_cost (alice_sim_claims_at k l)).
-Proof.
-case: l.
-- exact: adv_negligible N.
-- exact: adv_negligible N.
-- exact: size_negligible N.
-Qed.
-
-Canonical alice_sim_claims_negligible :=
-  NegligibleClaims alice_sim_claims_at alice_sim_label_negligible_at.
-
-(* The trace simulation program at the k-th instance, the value of the family
-   monad the terminal below reads.  The return type names the dictionary,
-   which is what lets canonical inference find the negligibility of the two
-   labels the program spends.
-   Naming: extends [alice_trace_sim_chain_admissible] with the [_at] token
-   naming the instance the program is read at. *)
-Definition alice_trace_sim_chain_admissible_at (k : nat)
-    : chain_result (alice_sim_claims_at k) :=
-  alice_trace_sim_chain_admissible
-    (bob_admissible_distinguisher k) (charlie_admissible_distinguisher k).
-
-(* The trace simulation distance function used in the sequence theorem: the
-   distance the k-th Boolean test sees at the k-th instance between Alice's
-   executed trace and the simulation. *)
-Definition f_sim_advantage k : R :=
-  alice_trace_sim_advantage (trace_distinguishers k).
-
-(* The quantity the theorem below is about is the advantage that program
-   bounds, the two games it joins being the executed trace and the
-   simulation. *)
-Lemma f_sim_advantageE k :
-  f_sim_advantage k = result_advantage (alice_trace_sim_chain_admissible_at k).
-Proof.
-rewrite /f_sim_advantage /alice_trace_sim_chain_admissible_at.
-exact: (alice_trace_sim_advantageE
-          (bob_admissible_distinguisher k)
-          (charlie_admissible_distinguisher k)).
-Qed.
-
-(* Along a sequence of DSDP instances, every family of Boolean tests of
-   Alice's executed trace whose two induced reduction adversaries the
-   assumption at k admits separates that trace from the simulation by a
-   negligible amount.  This is computational indistinguishability of Alice's
-   view from the simulation, the form a simulation-based secrecy claim takes
-   once the parameter is free to grow, and the guessing statement above is a
-   claim about one predictor where this one is a claim about every test.
-   It is the second reading of alice_trace_sim_chain_admissible: that program
-   spends the two hop labels and nothing else, so the whole distance is the
-   class-epsilon family and no plaintext-size term enters, which is what
-   separates this bound from the guessing bound.
-   Naming: [_negligible] marks a negligible_fun theorem over the named
-   quantity family, paired with that family's [_advantageE] identification
-   lemma, as at [alice_trace_guess_V2_negligible]. *)
-Theorem alice_trace_sim_advantage_negligible :
-  negligible_fun f_sim_advantage.
-Proof.
-exact: (\negligible[ f_sim_advantage by f_sim_advantageE ]
-          alice_trace_sim_chain_admissible_at).
-Qed.
-
-End dsdp_instance_sequence_bounds.
-
 Section idealized_witness.
 Context {R : realType}.
 
@@ -546,8 +257,8 @@ Corollary alice_trace_guess_V2_idealized_negligible :
   negligible_fun (fun k =>
     alice_trace_guess_V2_pr (R:=R) (I:=idealized_instance k) (fun _ => 0)).
 Proof.
-apply: (alice_trace_guess_V2_negligible idealized_asymptotic
-          (predict := fun k => fun _ => 0)).
+apply: (alice_trace_guess_V2_negligible (Q := idealized_instance_sequence)
+          (predict := fun k => fun _ => 0) _ _ idealized_asymptotic).
 - exact: idealized_bob_cipher_constant.
 - exact: idealized_charlie_cipher_constant.
 Qed.
@@ -832,8 +543,9 @@ Hypothesis charlie_reduction_admissible : forall k,
    is decisional composite residuosity along the moduli p k q k. *)
 Corollary paillier_trace_guess_V2_negligible : negligible_fun f_guess_V2.
 Proof.
-exact: (alice_trace_guess_V2_negligible paillier_asymptotic
-          bob_reduction_admissible charlie_reduction_admissible).
+exact: (alice_trace_guess_V2_negligible (Q := paillier_instance_sequence)
+          bob_reduction_admissible charlie_reduction_admissible
+          paillier_asymptotic).
 Qed.
 
 End paillier_dsdp_instance_sequence.
@@ -1127,8 +839,9 @@ Hypothesis charlie_reduction_admissible : forall k,
    is r-th residuosity along the moduli n k. *)
 Corollary benaloh_trace_guess_V2_negligible : negligible_fun f_guess_V2.
 Proof.
-exact: (alice_trace_guess_V2_negligible benaloh_asymptotic
-          bob_reduction_admissible charlie_reduction_admissible).
+exact: (alice_trace_guess_V2_negligible (Q := benaloh_instance_sequence)
+          bob_reduction_admissible charlie_reduction_admissible
+          benaloh_asymptotic).
 Qed.
 
 End benaloh_dsdp_instance_sequence.

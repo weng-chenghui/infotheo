@@ -752,7 +752,7 @@ $e$-th residuosity assumption.
   The bound is the soundness field of the program of
   Definition~\ref{def:alice_trace_chain_admissible}, which spends the two
   premises at its two hops, so no triangle inequality is taken here.
-  Proved in \texttt{dsdp\_alice\_trace\_link.v} as
+  Proved in \texttt{dsdp\_alice\_main.v} as
   \texttt{alice\_trace\_guess\_V2\_admissible\_le} and
   \texttt{alice\_trace\_guess\_V2\_admissible\_pq\_le}, and read at each
   scheme in \texttt{dsdp\_instance\_sequence.v}. The composite form takes its
@@ -1378,7 +1378,7 @@ pending obligation, and a bound is read off it by projection.
   \label{def:alice_trace_chain_admissible}
   \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.alice_claim_admissible,
        infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.alice_admissible_totalE,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.alice_trace_chain_admissible}
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.f_guess_V2_le}
   \rocqok
   \uses{def:alice_trace_chain,def:alice_hops,def:indcpa_assumption,def:claim,def:loss}
   The program of Definition~\ref{def:alice_trace_chain} over the dictionary
@@ -1390,30 +1390,32 @@ pending obligation, and a bound is read off it by projection.
      \qquad
      C^{\mathcal{A}}(\mathsf{cpa\_charlie})
        = \big(\gamma_1(D),\ \gamma_2(D),\ \varepsilon_{\mathrm{cpa}}\big) \]
-  The two class memberships are variables of the program's section and are
-  spent in the justification of the hop each one licenses, which is the shape
-  Definition~\ref{def:paillier_chain} has. The zero-game label costs the same
+  The two class memberships are premises of the statements the program is
+  written under, and are spent in the justification of the hop each one
+  licenses, which is the shape Definition~\ref{def:paillier_chain} has. The zero-game label costs the same
   unconditional residue as in Definition~\ref{def:alice_trace_chain}, so the
   total adds one unconditional term to two class-conditional ones, and
   \texttt{alice\_admissible\_totalE} is the reordering that states it.
   \[ \mathrm{tot}(s) = \tfrac{1}{m} + 2\,\varepsilon_{\mathrm{cpa}} \]
-  Theorem~\ref{thm:alice_guess_admissible} is the soundness field of this
-  result at its two class memberships.
+  The program is written along a sequence of instances, under
+  Theorem~\ref{thm:alice_guess_negligible} and again under the bound it
+  returns at each parameter, and Theorem~\ref{thm:alice_guess_admissible} is
+  that bound read at the sequence which repeats one instance.
 \end{definition}
 
 \begin{definition}[Alice's trace against the simulation at the class epsilon]
   \label{def:alice_trace_sim_chain_admissible}
   \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.alice_trace_sim_advantage,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.alice_trace_sim_chain_admissible,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.alice_trace_sim_advantageE}
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.f_sim_advantage,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.f_sim_advantageE}
   \rocqok
   \uses{def:alice_trace_sim_chain,def:alice_trace_chain_admissible}
   The chain of Definition~\ref{def:alice_trace_sim_chain} over the dictionary
   $C^{\mathcal{A}}$ of Definition~\ref{def:alice_trace_chain_admissible}, which
   charges each of the two hops the advantage $\mathcal{A}$ assumes in place of
   the advantage its own reduction shows. The two class memberships are
-  variables of the program's section and are spent in the justification of the
-  hop each one licenses.
+  premises of the statement the program is written under, and are spent in the
+  justification of the hop each one licenses.
   \[ \mathrm{loss}(s) = [\mathsf{cpa\_bob},\ \mathsf{cpa\_charlie}],
      \qquad \mathrm{tot}(s) = 2\,\varepsilon_{\mathrm{cpa}} \]
   The two steps at the ends carry the test between the executed trace and the
@@ -1611,7 +1613,11 @@ single member of it can carry.
 
 \begin{theorem}[The trace guessing sequence is negligible]
   \label{thm:alice_guess_negligible}
-  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_instance_sequence.alice_trace_guess_V2_negligible}
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.alice_trace_guess_V2_negligible,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.f_guess_V2,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.f_guess_V2_advantageE,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.alice_claims_admissible_at,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.alice_label_negligible_at}
   \rocqok
   \uses{def:negligible_fun,def:dsdp_instance,def:dsdp_instance_sequence,def:dsdp_asymptotic,thm:alice_guess_admissible,def:alice_trace_chain_admissible,def:negligible_claims,thm:advantage_negligible}
   Along a sequence $\mathcal{Q}$ of DSDP instances, an asymptotic value
@@ -1643,7 +1649,7 @@ single member of it can carry.
 
 \begin{corollary}[The sequence eventually rejects the decrypting predictor]
   \label{cor:decrypt_sequence_not_admissible}
-  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_instance_sequence.decrypt_reduction_admissible_eventuallyF}
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.decrypt_reduction_admissible_eventuallyF}
   \rocqok
   \uses{def:dsdp_instance_sequence,def:dsdp_asymptotic,def:negligible_fun,cor:decrypt_not_admissible}
   Along a sequence $\mathcal{Q}$ with an asymptotic value $\mathcal{N}$ there is
@@ -1664,7 +1670,9 @@ single member of it can carry.
 
 \begin{theorem}[The trace simulation distance sequence is negligible]
   \label{thm:alice_trace_sim_advantage_negligible}
-  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_instance_sequence.alice_trace_sim_advantage_negligible}
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.alice_trace_sim_advantage_negligible,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.alice_sim_claims_at,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.alice_sim_label_negligible_at}
   \rocqok
   \uses{def:alice_trace_sim_chain_admissible,def:dsdp_asymptotic,def:negligible_claims,thm:advantage_negligible}
   Along a sequence $\mathcal{Q}$ of DSDP instances with an asymptotic value
