@@ -6,8 +6,8 @@ declaration in scope, and that no `\rocq{}` ref dangles.
 ## Scope
 
 The `.v` files listed in `make_blueprint.sh`'s `MODULES` array, the exact set
-the blueprint claims to document. At this commit that is twelve files, in the
-order MODULES lists them:
+the blueprint claims to document. At this commit that is thirteen files, in
+the order MODULES lists them:
 
 - `dumas2017dual/dsdp/counting/dsdp_entropy.v`
 - `dumas2017dual/entropy_fiber/entropy_fiber_zpq.v`
@@ -19,13 +19,13 @@ order MODULES lists them:
 - `dumas2017dual/dsdp/hopping/dsdp_instance.v`
 - `dumas2017dual/dsdp/hopping/dsdp_alice_hop_secrecy.v`
 - `dumas2017dual/dsdp/hopping/dsdp_alice_trace_link.v`
+- `dumas2017dual/dsdp/hopping/dsdp_alice_main.v`
 - `computational_security/paillier_indcpa_scheme.v`
 - `computational_security/benaloh_indcpa_scheme.v`
 
-`dumas2017dual/dsdp/hopping/dsdp_instance_sequence.v` and
-`dumas2017dual/dsdp/counting/dsdp_random_inputs.v` are not in MODULES, so the
-checker never scans them and reports nothing about their declarations. A
-`\rocq{}` ref into either is ignored rather than resolved, so such a ref can
+`dumas2017dual/dsdp/counting/dsdp_random_inputs.v` is not in MODULES, so the
+checker never scans it and reports nothing about its declarations. A
+`\rocq{}` ref into it is ignored rather than resolved, so such a ref can
 neither cover a declaration nor be reported dangling.
 
 ## What it checks (hard-fail on either)
@@ -58,15 +58,17 @@ At this commit the checker exits 1. It reports 40 UNCOVERED declarations
 across the scoped modules and 0 DANGLING refs. The UNCOVERED list is known
 debt, not a regression to fix before the next commit.
 
-The per-instance scheme bounds are stated once, in
-`dsdp_instance_sequence.v`: the fixed-instance sections hold
-`paillier_trace_guess_V2_admissible_le`, `_admissible_pq_le` and
-`paillier_epsilon_dcrE` with the Benaloh triple, and the sequence sections
-hold `paillier_epsilon_at_dcrE`, `paillier_trace_guess_V2_negligible` and
-their Benaloh counterparts. The nodes `cor:alice_guess_paillier`,
-`cor:alice_guess_benaloh`, `cor:paillier_security` and `cor:benaloh_security`
-point at them. That module is outside MODULES, so those refs are not counted
-in `blueprint=M`.
+The per-instance scheme bounds are stated once, in the tail sections of
+`dsdp_alice_main.v`. `Section paillier` carries the instance and the instance
+sequence, `paillier_assumption_at_dcrE` and `paillier_epsilon_at_dcrE`,
+`paillier_trace_guess_V2_admissible_le` and `_admissible_pq_le` at the
+section's own k, and `paillier_trace_guess_V2_negligible`; `Section benaloh`
+carries the Benaloh counterparts, its `_admissible_pq_le` taking the block
+size as a product of two numbers; `Section idealized` carries the witness
+sequence and `alice_trace_guess_V2_idealized_negligible`. The nodes
+`cor:alice_guess_paillier`, `cor:alice_guess_benaloh`, `def:idealized_setting`,
+`def:paillier_setting`, `def:benaloh_setting`, `cor:paillier_security`,
+`cor:benaloh_security` and `cor:idealized_security` point at them.
 
 ## Pre-commit hook (optional, opt-in)
 

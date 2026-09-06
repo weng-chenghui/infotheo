@@ -964,8 +964,8 @@ $e$-th residuosity assumption.
 
 \begin{corollary}[The bound at a Paillier instance]
   \label{cor:alice_guess_paillier}
-  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_instance_sequence.paillier_trace_guess_V2_admissible_pq_le,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_instance_sequence.paillier_epsilon_dcrE}
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.paillier_trace_guess_V2_admissible_pq_le,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.paillier_epsilon_at_dcrE}
   \rocqok
   \uses{thm:alice_guess_admissible,def:paillier_setting,def:dcr_assumption,def:paillier_indcpa_assumption}
   At one Paillier instance of modulus $p q$, a trace predictor whose two
@@ -981,7 +981,7 @@ $e$-th residuosity assumption.
   decisional composite residuosity and nothing further, at the cost
   Definition~\ref{def:paillier_indcpa_assumption} fixes: the factor four is
   two keys, Bob's and Charlie's, times two residuosity calls per key, the
-  identity \texttt{paillier\_epsilon\_dcrE}. What is assumed here is
+  identity \texttt{paillier\_epsilon\_at\_dcrE}. What is assumed here is
   $\mathcal{B}$, and the class premises restrict which predictors the bound
   covers. The bound holds at each fixed modulus on its own, with no growth
   condition on $p$ and $q$. The sequence statements below read it along a
@@ -990,8 +990,8 @@ $e$-th residuosity assumption.
 
 \begin{corollary}[The bound at a Benaloh instance]
   \label{cor:alice_guess_benaloh}
-  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_instance_sequence.benaloh_trace_guess_V2_admissible_pq_le,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_instance_sequence.benaloh_epsilon_residuosityE}
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.benaloh_trace_guess_V2_admissible_pq_le,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.benaloh_epsilon_at_residuosityE}
   \rocqok
   \uses{thm:alice_guess_admissible,def:benaloh_setting,def:benaloh_residuosity_assumption,def:benaloh_indcpa_assumption}
   At one Benaloh instance whose plaintext space has $r = p q$ elements, a
@@ -1005,7 +1005,7 @@ $e$-th residuosity assumption.
   which asks only $1 < r$. The computational side is $r$-th residuosity at
   the cost Definition~\ref{def:benaloh_indcpa_assumption} fixes, the factor
   four again two keys times two residuosity calls per key, the identity
-  \texttt{benaloh\_epsilon\_residuosityE}.
+  \texttt{benaloh\_epsilon\_at\_residuosityE}.
 \end{corollary}
 
 \section{epsHop, the language a multi-hop bound is written in}
@@ -1700,7 +1700,10 @@ single member of it can carry.
 
 \begin{definition}[The idealized witnesses]
   \label{def:idealized_setting}
-  \rocq{infotheo.dumas2017dual.dsdp.counting.dsdp_random_inputs.uniform_inputs}
+  \rocq{infotheo.dumas2017dual.dsdp.counting.dsdp_random_inputs.uniform_inputs,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.idealized_indcpa_scheme,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.idealized_instance,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.idealized_instance_sequence}
   \rocqok
   \uses{def:cipher_constant_assumption,def:negligible_fun}
   Both axes are inhabited at every modulus. The counting witness is the
@@ -1724,7 +1727,8 @@ single member of it can carry.
 
 \begin{definition}[The Paillier instance sequence]
   \label{def:paillier_setting}
-  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_instance_sequence.paillier_instance_sequence}
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.paillier_instance,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.paillier_instance_sequence}
   \rocqok
   \uses{def:dsdp_instance_sequence,def:dcr_assumption,def:paillier_indcpa_assumption}
   The sequence whose $k$-th instance is the Paillier scheme at the modulus
@@ -1749,10 +1753,11 @@ single member of it can carry.
 
 \begin{corollary}[The Paillier readings]
   \label{cor:paillier_security}
-  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_instance_sequence.paillier_trace_guess_V2_negligible,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_instance_sequence.paillier_epsilon_at_dcrE,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_instance_sequence.paillier_trace_guess_V2_admissible_le,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_instance_sequence.paillier_trace_guess_V2_admissible_pq_le}
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.paillier_trace_guess_V2_negligible,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.paillier_assumption_at_dcrE,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.paillier_epsilon_at_dcrE,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.paillier_trace_guess_V2_admissible_le,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.paillier_trace_guess_V2_admissible_pq_le}
   \rocqok
   \uses{def:paillier_setting,cor:alice_guess_paillier,thm:alice_guess_negligible,def:dsdp_asymptotic,def:dcr_assumption,def:paillier_indcpa_assumption}
   Along the Paillier sequence a predictor family admissible at every $k$
@@ -1781,7 +1786,8 @@ single member of it can carry.
 
 \begin{definition}[The Benaloh instance sequence]
   \label{def:benaloh_setting}
-  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_instance_sequence.benaloh_instance_sequence}
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.benaloh_instance,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.benaloh_instance_sequence}
   \rocqok
   \uses{def:dsdp_instance_sequence,def:benaloh_residuosity_assumption,def:benaloh_indcpa_assumption}
   The sequence whose $k$-th instance is the Benaloh scheme at ciphertext
@@ -1803,10 +1809,11 @@ single member of it can carry.
 
 \begin{corollary}[The Benaloh readings]
   \label{cor:benaloh_security}
-  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_instance_sequence.benaloh_trace_guess_V2_negligible,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_instance_sequence.benaloh_epsilon_at_residuosityE,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_instance_sequence.benaloh_trace_guess_V2_admissible_le,
-       infotheo.dumas2017dual.dsdp.hopping.dsdp_instance_sequence.benaloh_trace_guess_V2_admissible_pq_le}
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.benaloh_trace_guess_V2_negligible,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.benaloh_assumption_at_residuosityE,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.benaloh_epsilon_at_residuosityE,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.benaloh_trace_guess_V2_admissible_le,
+       infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.benaloh_trace_guess_V2_admissible_pq_le}
   \rocqok
   \uses{def:benaloh_setting,cor:alice_guess_benaloh,thm:alice_guess_negligible,def:dsdp_asymptotic,def:benaloh_residuosity_assumption,def:benaloh_indcpa_assumption}
   Along the Benaloh sequence a predictor family admissible at every $k$
@@ -1832,7 +1839,7 @@ single member of it can carry.
 
 \begin{corollary}[The bound is negligible at the idealized witness]
   \label{cor:idealized_security}
-  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_instance_sequence.alice_trace_guess_V2_idealized_negligible}
+  \rocq{infotheo.dumas2017dual.dsdp.hopping.dsdp_alice_main.alice_trace_guess_V2_idealized_negligible}
   \rocqok
   \uses{def:idealized_setting,thm:alice_guess_negligible,def:cipher_constant_assumption}
   Along the idealized sequence the constant predictor matches Bob's input with
